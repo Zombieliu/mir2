@@ -3,9 +3,10 @@ use std::io;
 use std::path::PathBuf;
 
 use mir2_gateway::tcp::chat_broadcast::ChatBroadcastHub;
-use mir2_gateway::tcp::run_tcp_gateway;
-use mir2_gateway::web::run_web_gateway;
+use mir2_gateway::tcp::run_tcp_gateway_with_zone_registry;
+use mir2_gateway::web::run_web_gateway_with_zone_registry;
 use mir2_gateway::GatewayConfig;
+use std::sync::Arc;
 
 const DEFAULT_TCP_ADDR: &str = "127.0.0.1:7000";
 const DEFAULT_WEB_ADDR: &str = "127.0.0.1:7010";
@@ -21,6 +22,13 @@ fn main() -> std::io::Result<()> {
 }
 
 async fn async_main() -> std::io::Result<()> {
+    // Complete the synchronous read-only audit before competing routing modes
+    // initialize or any player is admitted.
+    let stable_owner_runtime = tokio::task::spawn_blocking(
+        mir2_gateway::zone_owner_resolver::runtime::init_global_from_env,
+    ).await
+        .map_err(|_| io::Error::other("zone owner resolver startup task failed"))?
+        .map_err(|error| io::Error::new(io::ErrorKind::InvalidInput, error))?;
     mir2_gateway::gate15::initialize_from_env()
         .map_err(|error| io::Error::new(io::ErrorKind::Other, error))?;
     let tcp_addr =
@@ -35,6 +43,7 @@ async fn async_main() -> std::io::Result<()> {
         .as_str()
     {
         "platinum_176" => config.with_platinum_176_profile(),
+        "platinum_fiveclass" => config.with_platinum_fiveclass_profile(),
         "crystal_full" => config,
         profile => {
             return Err(io::Error::new(
@@ -78,15 +87,136 @@ async fn async_main() -> std::io::Result<()> {
     };
     let config = configure_save_recovery_mac_key(config, encoded_recovery_key.as_deref())
         .map_err(|error| io::Error::new(io::ErrorKind::InvalidInput, error))?;
+    let policy = mir2_simulation::monthly_card::MonthlyCardPolicy::from_env()
+        .map_err(|error| io::Error::new(io::ErrorKind::InvalidInput, error))?;
+    if policy.required
+        && config.account_store_path.is_none()
+        && config.account_store_database_url.is_none()
+    {
+        return Err(io::Error::new(
+            io::ErrorKind::InvalidInput,
+            "monthly access requires durable account storage",
+        ));
+    }
+    let activity_policy = mir2_simulation::activities::ActivityPolicy::from_env()
+        .map_err(|error| io::Error::new(io::ErrorKind::InvalidInput, error))?;
+    let mut config = config.with_monthly_card_policy(policy);
+    config.activity_policy = activity_policy;
+    // Parse explicitly: a malformed procurement domain must not silently fall
+    // back to disabled defaults while old custody still requires recovery.
+    config.procurement_config = mir2_simulation::procurement::ProcurementConfig::from_env()
+        .map_err(|error| io::Error::new(io::ErrorKind::InvalidInput, error))?;
+    // Recovery preflight reads PostgreSQL even when new sales are disabled.
+    // Keep synchronous postgres connect/query/drop outside the async runtime;
+    // the returned worker guards contain only their stop signals.
+    let recovery_config = config.clone();
+    let (_procurement_worker, _usdc_worker) = tokio::task::spawn_blocking(move || {
+        let procurement =
+            mir2_gateway::procurement_worker::ProcurementWorker::start(recovery_config.clone())?;
+        let usdc = mir2_gateway::sui_usdc_billing::SuiUsdcWorker::start(recovery_config)?;
+        Ok::<_, String>((procurement, usdc))
+    })
+    .await
+    .map_err(|error| {
+        io::Error::new(
+            io::ErrorKind::Other,
+            format!("recovery worker startup task failed: {error}"),
+        )
+    })?
+    .map_err(|error| io::Error::new(io::ErrorKind::InvalidInput, error))?;
+    let _guild_clock = mir2_gateway::guild_clock::GuildClockService::start(config.clone())?;
+    let topology = mir2_gateway::ZoneTopology::from_env()
+        .map_err(|error| io::Error::new(io::ErrorKind::InvalidInput, error))?;
+    let owner_authority = match &stable_owner_runtime {
+        Some(runtime) => runtime.owner_lease_authority(),
+        None => mir2_gateway::zone_lease::default_zone_owner_lease_authority_from_env(),
+    };
+    let local_factory = topology.runtime_factory();
+    let factory: mir2_gateway::SharedZoneRuntimeFactory = match &stable_owner_runtime {
+        Some(runtime) => runtime.session_runtime_factory(),
+        None => local_factory.clone(),
+    };
+    let registry = Arc::new(
+        mir2_gateway::ZoneRegistry::with_router_and_owner_lease_authority(
+            topology.default_zone_id().clone(),
+            factory.clone(),
+            topology.router(),
+            owner_authority,
+        ),
+    );
+    // Stable mode has no authoritative Gateway Zone. Its world clocks must be
+    // hosted and verified on the owner topology before this opt-in is released.
+    let _conquest_clock = if stable_owner_runtime.is_some() {
+        None
+    } else {
+        Some(mir2_gateway::conquest_clock::ConquestClockService::start(config.clone(), local_factory)?)
+    };
     let chat_hub = ChatBroadcastHub::from_env()?;
     let _chat_broadcast_task = chat_hub.spawn();
 
-    tokio::try_join!(
-        run_tcp_gateway(&tcp_addr, config.clone(), chat_hub.clone()),
-        run_web_gateway(&web_addr, config, chat_hub),
-    )?;
+    tokio::select! {
+        result = async {
+            tokio::try_join!(
+                run_tcp_gateway_with_zone_registry(&tcp_addr, config.clone(), chat_hub.clone(),registry.clone()),
+                run_web_gateway_with_zone_registry(&web_addr, config, chat_hub,registry),
+            )
+        } => { result?; }
+        signal = gateway_shutdown_signal() => {
+            signal?;
+            eprintln!("gateway shutdown received; settling the server-owned guild and conquest clocks");
+        }
+        _ = operator_stdin_shutdown() => {
+            eprintln!("gateway operator shutdown received; settling the server-owned guild clock");
+        }
+    }
+    // Operators should disconnect players before stopping the local server.
+    // Joining the clock completes any in-flight File publication before exit.
+    drop(_guild_clock);
+    drop(_conquest_clock);
 
     Ok(())
+}
+
+// systemd uses SIGTERM for normal stops. Let the durable clocks finish their
+// final admitted samples and relinquish their grants before the runtime exits.
+async fn gateway_shutdown_signal() -> io::Result<()> {
+    #[cfg(unix)]
+    {
+        let mut terminate =
+            tokio::signal::unix::signal(tokio::signal::unix::SignalKind::terminate())?;
+        tokio::select! {
+            result = tokio::signal::ctrl_c() => result,
+            _ = terminate.recv() => Ok(()),
+        }
+    }
+    #[cfg(not(unix))]
+    tokio::signal::ctrl_c().await
+}
+
+// Opt-in local console control for hosts whose PTY cancellation kills the
+// process instead of delivering Ctrl+C. Disconnect players before using it.
+async fn operator_stdin_shutdown() {
+    if env::var("MIR2_GATEWAY_STDIN_SHUTDOWN").as_deref() != Ok("1") {
+        std::future::pending::<()>().await;
+    }
+    let (sender, receiver) = tokio::sync::oneshot::channel();
+    let reader = std::thread::Builder::new()
+        .name("gateway-operator-console".into())
+        .spawn(move || {
+            use std::io::BufRead;
+            for line in std::io::stdin().lock().lines() {
+                let Ok(line) = line else { break };
+                if line.trim() == "shutdown" {
+                    let _ = sender.send(());
+                    return;
+                }
+            }
+        });
+    if reader.is_ok() && receiver.await.is_ok() {
+        return;
+    }
+    // EOF or an unavailable console must never stop the server.
+    std::future::pending::<()>().await;
 }
 
 fn configure_save_recovery_mac_key(

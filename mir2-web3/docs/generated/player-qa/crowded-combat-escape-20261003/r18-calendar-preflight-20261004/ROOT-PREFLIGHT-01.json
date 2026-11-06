@@ -1,0 +1,48 @@
+{
+  "schema": "mir2-root-r18-calendar-preflight-v1",
+  "source_attempt": "51e8e49132bfb6fbce7582a9d1c21d8f685d09c9",
+  "failed_ci_run": 37198506131,
+  "overall_ci_accepted": false,
+  "linux_package_job_succeeded": true,
+  "native_build_succeeded": true,
+  "native_attempt_sha256": "23997e53deb33d29283dff576a9e2753a87b7e25a8dca672a917ca70773feecb",
+  "native_attempt_bytes": 111012352,
+  "same_r17_clock_sources": {
+    "apps/gateway/tests/shared_conquest_transport.rs": "be878358934f22183fe0d235b8835876d5538ef3aff95e9d15705c38993e84b5",
+    "apps/simulation/src/runtime/zone/runtime/conquest.rs": "f15d598a68dbb08da36395ae43f7c6d9005de4c29803cc31813abf12d98a4896",
+    "apps/gateway/src/routing/shared_conquest.rs": "64f70f60fa600e3528aaee023e6fdc1a35d2d4fc7e4174f06501102feb7318ea",
+    "apps/simulation/src/conquest/mod.rs": "62eee8ae252498f1a1691a3d9ee25e72acd708ff049cf6b4609269bd31005b99",
+    "apps/simulation/src/conquest/types.rs": "ed22c8619acc107edcc675979e993dcd045cf1306401acb81977f6d75cc18327"
+  },
+  "root_red_passed": 0,
+  "root_red_failed": 1,
+  "root_green_passed": 1,
+  "root_green_failed": 0,
+  "only_changed_runtime_behavior": false,
+  "fixture_patch_sha256": "d56cf2d4b6d0c42665a3de3b2fb9a83407ebe3a4e820b427d9107823f6f5f987",
+  "next_calendar_day_preserves_monotonic_guard": true,
+  "files": {
+    "ci-failed-01.log": {
+      "bytes": 574519,
+      "sha256": "dde5596f074920d6e7ee25671623fb63d42c547a1aab717669d0dd3896de8a88"
+    },
+    "root-conquest-transport-01.log": {
+      "bytes": 33340,
+      "sha256": "a946cc21dc0e4708acedbbf518f243bd24b62dcf6c764ab2593e897910dce714"
+    },
+    "root-conquest-transport-02.log": {
+      "bytes": 32136,
+      "sha256": "ad19a62b82ddd234c1a0156a556785869f1fcd3596541b18d1d82d2b0d85e518"
+    },
+    "build-native-r18-01.log": {
+      "bytes": 57126,
+      "sha256": "528bae2a42ec843df46861d50c35cc13a2fec66ce5f1d4775b651dd6f767d514"
+    },
+    "BUILD-ATTESTATION-ATTEMPT-01.json": {
+      "bytes": 1493,
+      "sha256": "067d6121ce6a45b04bd4aa3d4c1cfb8aeaf62cadfa6c7ba81133196e572d5ce4"
+    }
+  },
+  "published": false,
+  "protected_installation_changed": false
+}

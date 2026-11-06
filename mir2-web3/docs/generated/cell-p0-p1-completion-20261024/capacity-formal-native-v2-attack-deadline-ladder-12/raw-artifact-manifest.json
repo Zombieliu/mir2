@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "files": [
+    {
+      "kind": "capacity-samples-jsonl",
+      "runId": "1792951023370-34757a8d",
+      "report": "capacity-formal-native-v2-attack-deadline-ladder-12/release-native-v2-attack-deadline-ladder-12/reports/1792951023370-34757a8d.report.json",
+      "path": "release-native-v2-attack-deadline-ladder-12/reports/1792951023370-34757a8d.samples.jsonl",
+      "bytes": 2054564,
+      "sha256": "6e9a23aab7d71faee1b2e109aba076da722efcf3785f71a079137b0bbf9b1619",
+      "projection": "capacity-formal-native-v2-attack-deadline-ladder-12/release-native-v2-attack-deadline-ladder-12/reports/1792951023370-34757a8d.raw-projection.json"
+    }
+  ]
+}

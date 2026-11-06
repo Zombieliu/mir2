@@ -1,0 +1,20 @@
+{
+  "schema": "mir2.windows.robocopy-help-readonly-observation.v1",
+  "capturedAtUtc": "2026-10-29T10:24:59.7641369+00:00",
+  "projectRevision": "11d8a75ba72e626a287630c3a8a4b6c6278d0647",
+  "uiCulture": "zh-CN",
+  "culture": "zh-CN",
+  "executable": "C:\\Windows\\system32\\Robocopy.exe",
+  "copyFlagHelpMatch": true,
+  "directoryCopyFlagHelpMatch": true,
+  "englishSkipAdsOccurrences": 2,
+  "originalSupportPredicate": true,
+  "helpActuallyEnglish": true,
+  "helpUtf8Sha256": "e2c9562950614dc6595237cfd3969ab99a9d48539cd754b8e07714a3cd86df70",
+  "packageScriptRawSha256": "29d656330c372f4c45d48c94e6a71376fb959e4c63f32a5d8b1fa8dd31cf7aed",
+  "scopedPackageStatus": [],
+  "sourceDeltaWritten": false,
+  "newCapabilityProbeExecuted": false,
+  "newCapabilityTestsExecuted": false,
+  "claimBoundary": "The suspected localized-help false-negative was NOT reproduced in this session: all original conditions are true. No conclusion about the current v5 copy bottleneck follows from observing no robocopy process in occasional snapshots."
+}

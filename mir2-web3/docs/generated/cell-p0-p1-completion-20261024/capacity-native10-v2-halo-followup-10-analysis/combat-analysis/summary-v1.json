@@ -1,0 +1,548 @@
+{
+  "schemaVersion": 1,
+  "runId": "1792898022018-efb7a76a",
+  "scope": "Immutable public-only post-run diagnosis of the preserved failed probe. No private/store/recording payload, product edits, scene changes, tests, new realms or acceptance promotion.",
+  "outcome": {
+    "ok": false,
+    "error": "Stage 10 did not satisfy the fixed activity, latency or coverage gates",
+    "highestMeasuredStage": 10,
+    "highestPassedStage": 2,
+    "stages": [
+      {
+        "name": "stage-2",
+        "completed": true,
+        "passed": true,
+        "configuredSeconds": 300,
+        "measuredSeconds": 300.224,
+        "windows": 5
+      },
+      {
+        "name": "stage-10",
+        "completed": true,
+        "passed": false,
+        "configuredSeconds": 300,
+        "measuredSeconds": 300.342,
+        "windows": 5
+      }
+    ],
+    "continuousFailureCount": 0,
+    "safetyStopped": false,
+    "cleanupErrors": [],
+    "capacityAccepted": false,
+    "soakExecuted": false
+  },
+  "pins": {
+    "raw": {
+      "file": "C:/mir2-build/p01-completion-20261024/release-native-10-v2-halo-feasibility-10/reports/1792898022018-efb7a76a.samples.jsonl",
+      "bytes": 13028051,
+      "sha256": "79510b349b2f1c70092fcad4bbc5ed79b76f14a4ceb3811b02704ff11e786b68",
+      "rows": 21101
+    },
+    "report": {
+      "file": "C:/mir2-build/p01-completion-20261024/release-native-10-v2-halo-feasibility-10/reports/1792898022018-efb7a76a.report.json",
+      "bytes": 189046,
+      "sha256": "cf8b864372f5c402aea8544c8a3987ffbcdca876b7ad978d47ab8d91ee56a48c"
+    },
+    "sourcePins": {
+      "file": "C:/mir2-build/p01-completion-20261024/release-native-10-v2-halo-feasibility-10/source-pins.json",
+      "bytes": 40923,
+      "sha256": "f43e5327e06b5d5fd45bd4ff6354fe72cda0a5427f25ab09729b84c12dd6c7c4"
+    },
+    "scene": {
+      "file": "C:/mir2-build/p01-completion-20261024/release-native-10-v2-halo-feasibility-10/scenario.json",
+      "bytes": 804,
+      "sha256": "539c8abab8a3930a33a5a130601591c3bfdaede166e5b93cec995479df1c745c"
+    },
+    "historicalDriver": {
+      "commit": "6e05932000740abc88997db9496c57b301e0a4a9",
+      "file": "apps/web/scripts/playtest-capacity-soak.mjs",
+      "bytes": 143423,
+      "sha256": "01db0e25728208d17468f708819cd4d1f134a81c97884614da06d06525929f6d"
+    },
+    "backendSourceCommit": "46880bd1ef415131c4cf85aeb4dd2fa4f6fd4f9b",
+    "driverAggregate": "c7928e91e0528132c470ad1d87ffd63656eb59b2ce35b602b5e84f4603434298"
+  },
+  "fiveStage10Windows": [
+    {
+      "window": 1,
+      "rawLine": 8211,
+      "seconds": 60.032,
+      "passed": true,
+      "timeoutRatio": 0,
+      "correctionRatio": 0,
+      "movementActorsPassed": 9,
+      "combat": [
+        {
+          "actor": "L25081f05",
+          "attacks": 24,
+          "hits": 24,
+          "damage": 67,
+          "moves": 30,
+          "runs": 9,
+          "nativeOpportunities": 58,
+          "nativeCompleted": 58,
+          "passed": true,
+          "hp": {
+            "count": 24,
+            "min": 16,
+            "max": 24,
+            "minimumFraction": 0.8888888888888888,
+            "maxima": [
+              18,
+              24
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "window": 2,
+      "rawLine": 11404,
+      "seconds": 60.088,
+      "passed": false,
+      "timeoutRatio": 0,
+      "correctionRatio": 0.002688172043010753,
+      "movementActorsPassed": 9,
+      "combat": [
+        {
+          "actor": "L25081f05",
+          "attacks": 14,
+          "hits": 14,
+          "damage": 45,
+          "moves": 50,
+          "runs": 15,
+          "nativeOpportunities": 67,
+          "nativeCompleted": 67,
+          "passed": false,
+          "hp": {
+            "count": 14,
+            "min": 21,
+            "max": 24,
+            "minimumFraction": 0.875,
+            "maxima": [
+              24
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "window": 3,
+      "rawLine": 14618,
+      "seconds": 60.096,
+      "passed": true,
+      "timeoutRatio": 0,
+      "correctionRatio": 0,
+      "movementActorsPassed": 9,
+      "combat": [
+        {
+          "actor": "L25081f05",
+          "attacks": 28,
+          "hits": 28,
+          "damage": 86,
+          "moves": 22,
+          "runs": 12,
+          "nativeOpportunities": 54,
+          "nativeCompleted": 54,
+          "passed": true,
+          "hp": {
+            "count": 28,
+            "min": 23,
+            "max": 24,
+            "minimumFraction": 0.9583333333333334,
+            "maxima": [
+              24
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "window": 4,
+      "rawLine": 17911,
+      "seconds": 60.093,
+      "passed": false,
+      "timeoutRatio": 0,
+      "correctionRatio": 0,
+      "movementActorsPassed": 9,
+      "combat": [
+        {
+          "actor": "L25081f05",
+          "attacks": 7,
+          "hits": 7,
+          "damage": 20,
+          "moves": 65,
+          "runs": 32,
+          "nativeOpportunities": 74,
+          "nativeCompleted": 74,
+          "passed": false,
+          "hp": {
+            "count": 7,
+            "min": 30,
+            "max": 30,
+            "minimumFraction": 1,
+            "maxima": [
+              30
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "window": 5,
+      "rawLine": 21046,
+      "seconds": 60.033,
+      "passed": false,
+      "timeoutRatio": 0,
+      "correctionRatio": 0,
+      "movementActorsPassed": 9,
+      "combat": [
+        {
+          "actor": "L25081f05",
+          "attacks": 15,
+          "hits": 15,
+          "damage": 40,
+          "moves": 50,
+          "runs": 27,
+          "nativeOpportunities": 67,
+          "nativeCompleted": 67,
+          "passed": false,
+          "hp": {
+            "count": 15,
+            "min": 28,
+            "max": 30,
+            "minimumFraction": 0.9333333333333333,
+            "maxima": [
+              30
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "liveCorrection": {
+    "earlierBoundedMessageCalledSevenAttackWindowNumber": 3,
+    "completeRawWindowNumber": 4,
+    "reason": "The preceding third cohort window was outside the earlier live tail and actually passed with28 attacks/28hits. Full original raw indices supersede that provisional label."
+  },
+  "wholeRunHpMaintenance": {
+    "nativeHpRecoveryRows": 0,
+    "attempted": false,
+    "verified": false,
+    "source": "Complete original JSONL type census; no nativeHpRecovery row exists in21101 records.",
+    "ownerAttackAtSendSampleCount": 97,
+    "minHp": 16,
+    "maxHp": 30,
+    "minimumHpFraction": 0.875,
+    "observedMaxima": [
+      18,
+      24,
+      30
+    ],
+    "continuousHpMinimumKnown": false,
+    "deathOccurred": false,
+    "limits": "97 at-send snapshots do not cover all intervening health changes. No maintenance row is not a two-hour supply or death-safety guarantee."
+  },
+  "longestAttackInterval": {
+    "fromRequest": "82",
+    "toRequest": "83",
+    "gapMs": 49427.721699999995,
+    "fromSentAtWallMs": 1792898606451,
+    "toSentAtWallMs": 1792898655879,
+    "fromRawLine": 15236,
+    "toRawLine": 17955,
+    "fromTarget": {
+      "objectId": 206624,
+      "x": 254,
+      "y": 671,
+      "dead": false,
+      "hp": 6,
+      "maxHp": 20
+    },
+    "toTarget": {
+      "objectId": 206645,
+      "x": 270,
+      "y": 671,
+      "dead": false
+    },
+    "request82TargetDeathObserved": true,
+    "request82DeathProof": "The preserved req82 pending trace records both-end ObjectDied206624; the gap is after an actual killed target, not unbounded retention of the old struck target.",
+    "successfulMovementCount": 62,
+    "scoutMovementCount": 15,
+    "chaseMovementCount": 47,
+    "allMovesSucceeded": true,
+    "reportedAttackWaitRowsInGap": 0,
+    "geometryDeferrals": [
+      {
+        "rawLine": 16677,
+        "at": 1792898631905,
+        "targetId": 206513,
+        "owner": {
+          "x": 274,
+          "y": 661
+        },
+        "target": {
+          "x": 274,
+          "y": 662
+        },
+        "reason": "route-loop",
+        "confirmedMoves": 8,
+        "pursuitMs": 5269,
+        "eligibleActualPeerCount": 0,
+        "closestActualPeers": [
+          {
+            "actor": "L25081f06",
+            "ownerReceipt": {
+              "x": 265,
+              "y": 654,
+              "map": "0",
+              "at": 1792898631567,
+              "sequence": 6097,
+              "source": "UserLocation",
+              "rawLine": 16657
+            },
+            "ageMs": 338,
+            "distanceOwner": 9,
+            "distanceTarget": 9,
+            "maxSeparation": 9,
+            "passesSixCellGeometry": false
+          },
+          {
+            "actor": "L25081f07",
+            "ownerReceipt": {
+              "x": 273,
+              "y": 672,
+              "map": "0",
+              "at": 1792898631351,
+              "sequence": 4645,
+              "source": "UserLocation",
+              "rawLine": 16647
+            },
+            "ageMs": 554,
+            "distanceOwner": 11,
+            "distanceTarget": 10,
+            "maxSeparation": 11,
+            "passesSixCellGeometry": false
+          }
+        ]
+      },
+      {
+        "rawLine": 17103,
+        "at": 1792898640153,
+        "targetId": 206704,
+        "owner": {
+          "x": 282,
+          "y": 663
+        },
+        "target": {
+          "x": 282,
+          "y": 662
+        },
+        "reason": "route-loop",
+        "confirmedMoves": 11,
+        "pursuitMs": 7530,
+        "eligibleActualPeerCount": 0,
+        "closestActualPeers": [
+          {
+            "actor": "L25081f07",
+            "ownerReceipt": {
+              "x": 273,
+              "y": 670,
+              "map": "0",
+              "at": 1792898639595,
+              "sequence": 4758,
+              "source": "UserLocation",
+              "rawLine": 17070
+            },
+            "ageMs": 558,
+            "distanceOwner": 9,
+            "distanceTarget": 9,
+            "maxSeparation": 9,
+            "passesSixCellGeometry": false
+          },
+          {
+            "actor": "L25081f08",
+            "ownerReceipt": {
+              "x": 276,
+              "y": 671,
+              "map": "0",
+              "at": 1792898640004,
+              "sequence": 3356,
+              "source": "UserLocation",
+              "rawLine": 17095
+            },
+            "ageMs": 149,
+            "distanceOwner": 8,
+            "distanceTarget": 9,
+            "maxSeparation": 9,
+            "passesSixCellGeometry": false
+          }
+        ]
+      },
+      {
+        "rawLine": 17346,
+        "at": 1792898644648,
+        "targetId": 206507,
+        "owner": {
+          "x": 283,
+          "y": 665
+        },
+        "target": {
+          "x": 283,
+          "y": 666
+        },
+        "reason": "route-loop",
+        "confirmedMoves": 6,
+        "pursuitMs": 3772,
+        "eligibleActualPeerCount": 0,
+        "closestActualPeers": [
+          {
+            "actor": "L25081f08",
+            "ownerReceipt": {
+              "x": 278,
+              "y": 673,
+              "map": "0",
+              "at": 1792898644525,
+              "sequence": 3396,
+              "source": "UserLocation",
+              "rawLine": 17331
+            },
+            "ageMs": 123,
+            "distanceOwner": 8,
+            "distanceTarget": 7,
+            "maxSeparation": 8,
+            "passesSixCellGeometry": false
+          },
+          {
+            "actor": "L25081f07",
+            "ownerReceipt": {
+              "x": 273,
+              "y": 670,
+              "map": "0",
+              "at": 1792898644117,
+              "sequence": 4814,
+              "source": "UserLocation",
+              "rawLine": 17303
+            },
+            "ageMs": 531,
+            "distanceOwner": 10,
+            "distanceTarget": 10,
+            "maxSeparation": 10,
+            "passesSixCellGeometry": false
+          }
+        ]
+      },
+      {
+        "rawLine": 17534,
+        "at": 1792898648392,
+        "targetId": 206715,
+        "owner": {
+          "x": 285,
+          "y": 665
+        },
+        "target": {
+          "x": 284,
+          "y": 665
+        },
+        "reason": "no-progress",
+        "confirmedMoves": 5,
+        "pursuitMs": 3026,
+        "eligibleActualPeerCount": 0,
+        "closestActualPeers": [
+          {
+            "actor": "L25081f08",
+            "ownerReceipt": {
+              "x": 276,
+              "y": 671,
+              "map": "0",
+              "at": 1792898648268,
+              "sequence": 3431,
+              "source": "UserLocation",
+              "rawLine": 17525
+            },
+            "ageMs": 124,
+            "distanceOwner": 9,
+            "distanceTarget": 8,
+            "maxSeparation": 9,
+            "passesSixCellGeometry": false
+          },
+          {
+            "actor": "L25081f07",
+            "ownerReceipt": {
+              "x": 273,
+              "y": 672,
+              "map": "0",
+              "at": 1792898647864,
+              "sequence": 4863,
+              "source": "UserLocation",
+              "rawLine": 17504
+            },
+            "ageMs": 528,
+            "distanceOwner": 12,
+            "distanceTarget": 11,
+            "maxSeparation": 12,
+            "passesSixCellGeometry": false
+          }
+        ]
+      }
+    ]
+  },
+  "firstProvablePlanningRestriction": {
+    "finding": "At four observed chase-deferral instants, the target was one cell from the real fighter, but every actual controlled observer owner receipt failed the required six-cell geometry. Nevertheless the original approach loop had sent successful adjacent-tile movements until its unchanged finite chase guard deferred the target.",
+    "sourceBasis": "Original6e combatPlan allows14-cell declared footprint coverage for approach, but stable six-cell witness is only required for attack. Its eight-neighbor approach tiles are selected by owner distance and A* reachability without a prospective witness check.",
+    "sourceSections": [
+      {
+        "commit": "6e05932000740abc88997db9496c57b301e0a4a9",
+        "file": "apps/web/scripts/playtest-capacity-soak.mjs",
+        "fromLine": 1028,
+        "toLine": 1039,
+        "text": "function nativeAttackWitness(client, context, target) {\n  const owner = self(client), range = stableFanoutRange('attack', context.policy);\n  return combatObservers(client, context).map(observer => {\n    const peer = activeGameplayOwner(observer, client.snapshot.mapFileName);\n    const attackerId = observedPlayerId(observer, client.label);\n    const attacker = observer.snapshot.entities.find(entity => entity.objectId === attackerId && entity.name === client.label && entity.dead !== true);\n    const observedTarget = observer.snapshot.entities.find(entity => entity.objectId === target.objectId &&\n      entity.name === target.name && ordinaryCombatMonster(entity, context));\n    const separation = peer ? Math.max(distance(peer, owner), distance(peer, target)) : Infinity;\n    return peer && attacker && observedTarget && Number.isInteger(attackerId) && separation <= range\n      ? { observer, separation } : null;\n  }).filter(Boolean).sort((a, b) => a.separation - b.separation)[0]?.observer ?? null;"
+      },
+      {
+        "commit": "6e05932000740abc88997db9496c57b301e0a4a9",
+        "file": "apps/web/scripts/playtest-capacity-soak.mjs",
+        "fromLine": 1055,
+        "toLine": 1097,
+        "text": "  const witness = target => native ? nativeAttackWitness(client, context, target) :\n    observers.find(other => other.snapshot.entities.some(entity => entity.objectId === target.objectId));\n  if (native) {\n    const pursuit = client.combatPursuit;\n    const selected = pursuit?.mapFileName === String(client.snapshot.mapFileName)\n      ? candidates.find(target => target.objectId === pursuit.objectId && target.name === pursuit.name) : null;\n    if (!selected && !livePursuitTarget(client, context, pursuit)) client.combatPursuit = null;\n    const adjacent = candidates.filter(target => distance(owner, target) === 1 && witness(target));\n    candidates = [...new Set([...(selected && adjacent.includes(selected) ? [selected] : []), ...adjacent,\n      ...(selected ? [selected] : []), ...candidates])];\n  }\n  for (const target of candidates.slice(0, 4)) {\n    const observer = witness(target);\n    if (distance(owner, target) === 1 && observer) {\n      if (native && !client.pending) rememberCombatTarget(client, target);\n      const facing = directionOf(owner, target);\n      if (owner.direction !== facing) return { command: { type: 'turn', direction: facing }, hunting: target.name };\n      return { command: { type: 'attack', objectId: target.objectId }, targetEntity: target, observer, hunting: target.name,\n        peerAttackerId: observedPlayerId(observer, client.label) };\n    }\n    const adjacent = STEPS.map(([dx, dy]) => ({ x: target.x + dx, y: target.y + dy }))\n      .sort((a, b) => distance(a, owner) - distance(b, owner));\n    for (const destination of adjacent) {\n      if (!insideCombatCoverage(coverage, destination)) continue;\n      const plan = movement(client, destination, context.map, point => insideCombatCoverage(coverage, point) &&\n        !(client.snapshot.mapTransfers ?? []).some(transfer => inside(point, transfer.bounds)));\n      if (plan && insideCombatCoverage(coverage, plan.first) && insideCombatCoverage(coverage, plan.target)) {\n        if (native && !client.pending) rememberCombatTarget(client, target);\n        return { ...plan, hunting: target.name, ...(native ? { chaseTargetId: target.objectId, chaseTargetPoint: lifecyclePoint(target) } : {}) };\n      }\n    }\n    // A temporarily unavailable path must not erase real chase ACKs. Otherwise\n    // chase / fallback-patrol / chase can revisit one cell forever while each\n    // replan resets the loop and finite pursuit budgets.\n    if (native && !client.pending && client.combatPursuit?.objectId === target.objectId &&\n        client.combatPursuit.confirmedMoves === 0) client.combatPursuit = null;\n  }\n  return (native ? scoutCombatCoverage(client, context, Date.now(), coverage) : null) ?? returnToCombatCoverage(client, context, coverage);\n}\n\nfunction recordCombatArrival(client, context) {\n  const owner = self(client);\n  if (context.policy?.activityMode !== 'native' || client.role !== 'combat' || client.combatArrival ||"
+      }
+    ],
+    "noServerFailureInference": true,
+    "terrainObstructionRequiredToExplainTheseFourInstants": false,
+    "remainingUnknown": "The raw does not preserve every decision full AOI, A* frontier, target movement packet or obstacle union. These receipt geometry observations do not reconstruct exact server processing order or prove all earlier gaps have the same cause."
+  },
+  "whyCompletionAndThroughputDiverge": "Real collision-aware successful Walk/Run and other native actions correctly complete ordinary opportunities. Those movements do not count as launched attacks or dual-end damage. Repeated approach/scout activity can reach100% completion while still failing the independent18 attacks/12positivehits per minute gate.",
+  "minimalNextStepOnly": "In a separately frozen native harness revision, prefilter candidate/adjacent attack tiles by an actual active observer with both real objects and prospective owner+target distances<=6, then retain original bounded A*, other candidates/scout and final send-time witness recheck. Do not change the scene, counters,18/12,95%,900ms,AOI16 or deferral guards.",
+  "artifacts": [
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/probe10-combat-analysis-v1/raw-selected-v1.json",
+      "bytes": 1212291,
+      "sha256": "6f9a54abc74fc732867ebd4bb80f4045755d84c27f077dcd86b7c36a6bc01bfb"
+    },
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/probe10-combat-analysis-v1/gap82-to83-moves-v1.json",
+      "bytes": 68203,
+      "sha256": "bf2ca3edb798b94991c16771b949cc91f4c306f3d1bbcbeb079ac54d1a00eb0d"
+    },
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/probe10-combat-analysis-v1/gap-deferral-observer-geometry-v1.json",
+      "bytes": 18586,
+      "sha256": "2d251b1da5cc4626bc87541cf2ca277d86520181eab09c704ed5f2223941bbf5"
+    },
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/probe10-combat-analysis-v1/stage10-window-actor-matrix-v1.json",
+      "bytes": 73037,
+      "sha256": "10e3fe1e0e8e7d8710d0118ed77b21d4f4e8ce2086edd80be4b8c91631ffb06c"
+    },
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/probe10-combat-analysis-v1/gap-movement-origin-projection-v1.json",
+      "bytes": 44057,
+      "sha256": "2a581d7082682a8c193cc292d000066608e6859819c35bb4c4109e8415393931"
+    }
+  ],
+  "limits": [
+    "Public server recording payload was not read because original own-receipt geometry already proves the relevant witness exclusion; no merged self1000 alias is used as actual owner truth.",
+    "The movement-origin projection infers the first straight step from actual successful movement; it is explicitly not a recorded A* first expansion or complete path.",
+    "Per-actor timeout/correction classifications in the window matrix use original action rows and the reported cohort aggregate; no missing source is reconstructed.",
+    "No claim of server capacity ceiling or a valid formal capacity acceptance is made."
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "projectedReport": {
+    "actualFullVerification": true,
+    "catalogSha256": "708511179A1A5EBF64326C029ABEF8DB728E9DA0E95366DBF914300C723F476F",
+    "logicalBytes": 1086897789,
+    "metadataOnly": false,
+    "packBytes": 1069012997,
+    "packCount": 33,
+    "passed": true,
+    "resourceCount": 255057,
+    "schema": "mir2.native.resource-pack-verification.v1",
+    "uniquePayloadBytes": 1053173797,
+    "uniquePayloads": 247471
+  },
+  "projectionBoundary": "Explicit fields only; raw log/body/attempt/env/argv/private config excluded.",
+  "role": "full-resource-read",
+  "schema": "mir2.evidence.public-projection.v1",
+  "sourceSha256": "6652EE3F8F11082E373757ABA3B3EC1848E4F7E55A554045C2DE593A77EBE10C",
+  "sourceSize": 391
+}

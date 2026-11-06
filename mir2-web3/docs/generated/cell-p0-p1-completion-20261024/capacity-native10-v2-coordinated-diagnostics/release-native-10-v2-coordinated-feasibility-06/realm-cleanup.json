@@ -1,0 +1,57 @@
+{
+  "schemaVersion": 1,
+  "scope": "Owned processes only. Original probe verdict is retained; no capacity acceptance or forced normal-exit claim.",
+  "sourceCommit": "461f1d85eed6309a55a88bd79a0022f7b97febe4",
+  "backendSourceCommit": "461f1d85eed6309a55a88bd79a0022f7b97febe4",
+  "driverSourceCommit": "c42f860e0544f0687a5ccf5ddaccad4daecc8acc",
+  "sha256": "855b4ba3c80ccb99b4128a9ee1170bc56ad51fcbaf022d5269f0b6662986c61f",
+  "capacityAccepted": false,
+  "formalStarted": false,
+  "checks": {
+    "sixCountersZero": true,
+    "monitorTerminalPreserved": true,
+    "monitorStoppedBeforeGateway": true,
+    "monitorExitZero": true,
+    "normalOwnedShutdown": true,
+    "processAbsent": true,
+    "portsFree": true
+  },
+  "pid": 49852,
+  "ownedExe": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-coordinated-feasibility-06\\bin\\mir2-gateway.exe",
+  "processIdentityBefore": {
+    "created": "10/25/2026 03:36:25",
+    "pid": 49852,
+    "exe": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-coordinated-feasibility-06\\bin\\mir2-gateway.exe"
+  },
+  "report": {
+    "reportPath": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-coordinated-feasibility-06\\reports\\1792870589933-af9ef086.report.json",
+    "runId": "1792870589933-af9ef086",
+    "backendSourceCommit": "461f1d85eed6309a55a88bd79a0022f7b97febe4",
+    "driverSourceCommit": "c42f860e0544f0687a5ccf5ddaccad4daecc8acc",
+    "ok": true,
+    "playableCapacityAccepted": false
+  },
+  "preStopCapacity": {
+    "currentWsConnections": 0,
+    "currentActiveSessions": 0,
+    "currentReconnectLeases": 0,
+    "currentLoginInFlight": 0,
+    "currentNewCharacterInFlight": 0,
+    "currentStartGameInFlight": 0
+  },
+  "monitorExit": {
+    "code": 0,
+    "signal": null
+  },
+  "monitorTerminal": {
+    "sampledAt": 1792871063384,
+    "stop": true,
+    "reason": "Operator requested load drain"
+  },
+  "gatewayExit": {
+    "code": 0,
+    "signal": null
+  },
+  "remainingOwnedPortListeners": [],
+  "stoppedAtUtc": "2026-10-24T19:44:27.935Z"
+}

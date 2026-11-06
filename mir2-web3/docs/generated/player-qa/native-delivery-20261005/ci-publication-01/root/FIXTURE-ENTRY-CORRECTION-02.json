@@ -1,0 +1,8 @@
+{
+  "productionSha256Unchanged": "8fcb1f581fafe0cf254b256e66394397be436facec03d53d6fdb8d7bf83c601f",
+  "originalFrozenTestSha256": "a6617cfb25309cf6df78cbb8a28bf6c1259ec744a127b4e67f2b9b41fc11a046",
+  "afterSingleFixtureParentFixTestSha256": "a820e757325bfc81e0a45971cba33151c81181964d962208a74411609a377714",
+  "assertionsChanged": false,
+  "windowsChecksAfterFix": 46,
+  "linuxRetryPending": true
+}

@@ -1,0 +1,4899 @@
+{
+  "schemaVersion": 1,
+  "scope": "Actual W13 continuation of complete W12 cold bank/latest W12 ledger, original false retained. Twenty-nine normally prepared actors are not100 or measured CCU. All scalars extracted only from actual W13 public evidence.",
+  "driverSourceCommit": "767cfa1535100cf38bf97cfe6d2402b5fd305c22",
+  "executionSourceCommit": "767cfa1535100cf38bf97cfe6d2402b5fd305c22",
+  "backendSourceCommit": "ee06c05f3813a1e627c8756d1f5fe8e2e0fbf856",
+  "actualRootFreshSelectedJsTestsPassed": 724,
+  "actualRootCheckCounts": [
+    {
+      "name": "complete-preparation-and-protected-navigation",
+      "tests": 332,
+      "pass": 332,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0
+    },
+    {
+      "name": "ordinary-economy-and-navigation-dependencies",
+      "tests": 337,
+      "pass": 337,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0
+    },
+    {
+      "name": "ordinary-full-lifecycle-driver-units",
+      "tests": 55,
+      "pass": 55,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0
+    }
+  ],
+  "rootNamedValidationSourceCount": 42,
+  "runtimeStaticLocalJsSourceCount": 32,
+  "backendInputs": 55,
+  "reusedRustTestsPassed": 32,
+  "newRustBuildPerformed": false,
+  "freshRustTestsPerformed": false,
+  "immutableExecutableRecordOnly": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-hp-wake-release-v6\\bin\\mir2-gateway.exe",
+    "bytes": 87456256,
+    "sha256": "ad13d15a6fd294cae0beda04d8f91b7773a9b8390cc9c85e5a84d3e72c2567f6"
+  },
+  "immutableExecutableReadOrCopied": false,
+  "full16": {
+    "all16ReusedAfterCompleteDependencyEquality": true,
+    "completeLocalSources": 14,
+    "originalActualExecution": "d9ec9d2094ee058bfa909b05bbcf45dcf4a28b39",
+    "newHEAD": "767cfa1535100cf38bf97cfe6d2402b5fd305c22",
+    "freshFull16Performed": false,
+    "v5Proof": {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-full16-reuse-proof-v13.json",
+      "file": "full16-reuse/ordinary-full16-reuse-proof-v13.json",
+      "bytes": 71969,
+      "sha256": "0edef6a512f51fbb358f0d305bbdc12b870f1be47a4434f1c3a79578bbcfb669"
+    },
+    "preexecutionToolReview": {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v13\\root-full16-reuse-tools-review-v1.json",
+      "file": "root-full16-reuse-tools-review-v1.json",
+      "bytes": 588,
+      "sha256": "3b54b17ff32715ab66e94cc762999f62f3b6c39e47498017d0a17178d4023321"
+    },
+    "priorVerifierHistoryReference": "../bank-prepare-v10/README.md"
+  },
+  "originalRunPassed": false,
+  "originalError": "Navigation successful step budget exceeded (222)",
+  "preparedCount": 29,
+  "targetPrepared": 100,
+  "sourceFirst4InventoryReuse": true,
+  "sourceFirst4Scope": "Dedicated first4 raw no-economic reuse, not all29. All completed actors separately retain their actual report/readiness/normal-save records.",
+  "preparedActors": [
+    {
+      "name": "L370e2a00",
+      "characterIndex": 1,
+      "before": {
+        "sequence": 717,
+        "monotonicMs": 2363.9132,
+        "ownerId": 1000,
+        "ownerName": "L370e2a00",
+        "map": "0",
+        "x": 288,
+        "y": 615,
+        "hp": 24,
+        "maxHp": 24,
+        "hpStock": 12,
+        "gold": 75,
+        "venison": 1,
+        "inSafeZone": true,
+        "nearbyHostileCount": 3,
+        "playerPoison": null,
+        "ownerPoison": null,
+        "dazed": false
+      },
+      "after": {
+        "sequence": 720,
+        "monotonicMs": 2398.9007,
+        "ownerId": 1000,
+        "ownerName": "L370e2a00",
+        "map": "0",
+        "x": 288,
+        "y": 615,
+        "hp": 24,
+        "maxHp": 24,
+        "hpStock": 12,
+        "gold": 75,
+        "venison": 1,
+        "inSafeZone": true,
+        "nearbyHostileCount": 3,
+        "currentNearbyHostileCount": 3,
+        "playerPoison": null,
+        "ownerPoison": null,
+        "dazed": false,
+        "actualStagingReached": true,
+        "stagingProtection": "authoritative-safe-zone-normal-monsters"
+      },
+      "purchased": 0,
+      "soldVenison": 0,
+      "funding": null,
+      "commands": 2,
+      "movementCommands": 0,
+      "normalLogout": true,
+      "finalNormalDrainPositionMatched": true
+    },
+    {
+      "name": "L370e2a01",
+      "characterIndex": 2,
+      "before": {
+        "sequence": 682,
+        "monotonicMs": 5841.6524,
+        "ownerId": 1000,
+        "ownerName": "L370e2a01",
+        "map": "0",
+        "x": 289,
+        "y": 616,
+        "hp": 24,
+        "maxHp": 24,
+        "hpStock": 12,
+        "gold": 1,
+        "venison": 1,
+        "inSafeZone": true,
+        "nearbyHostileCount": 3,
+        "playerPoison": null,
+        "ownerPoison": null,
+        "dazed": false
+      },
+      "after": {
+        "sequence": 685,
+        "monotonicMs": 5873.2305,
+        "ownerId": 1000,
+        "ownerName": "L370e2a01",
+        "map": "0",
+        "x": 289,
+        "y": 616,
+        "hp": 24,
+        "maxHp": 24,
+        "hpStock": 12,
+        "gold": 1,
+        "venison": 1,
+        "inSafeZone": true,
+        "nearbyHostileCount": 3,
+        "currentNearbyHostileCount": 3,
+        "playerPoison": null,
+        "ownerPoison": null,
+        "dazed": false,
+        "actualStagingReached": true,
+        "stagingProtection": "authoritative-safe-zone-normal-monsters"
+      },
+      "purchased": 0,
+      "soldVenison": 0,
+      "funding": null,
+      "commands": 2,
+      "movementCommands": 0,
+      "normalLogout": true,
+      "finalNormalDrainPositionMatched": true
+    },
+    {
+      "name": "L370e2a02",
+      "characterIndex": 3,
+      "before": {
+        "sequence": 674,
+        "monotonicMs": 9324.1055,
+        "ownerId": 1000,
+        "ownerName": "L370e2a02",
+        "map": "0",
+        "x": 288,
+        "y": 617,
+        "hp": 24,
+        "maxHp": 24,
+        "hpStock": 12,
+        "gold": 98,
+        "venison": 1,
+        "inSafeZone": true,
+        "nearbyHostileCount": 3,
+        "playerPoison": null,
+        "ownerPoison": null,
+        "dazed": false
+      },
+      "after": {
+        "sequence": 677,
+        "monotonicMs": 9356.4261,
+        "ownerId": 1000,
+        "ownerName": "L370e2a02",
+        "map": "0",
+        "x": 288,
+        "y": 617,
+        "hp": 24,
+        "maxHp": 24,
+        "hpStock": 12,
+        "gold": 98,
+        "venison": 1,
+        "inSafeZone": true,
+        "nearbyHostileCount": 3,
+        "currentNearbyHostileCount": 3,
+        "playerPoison": null,
+        "ownerPoison": null,
+        "dazed": false,
+        "actualStagingReached": true,
+        "stagingProtection": "authoritative-safe-zone-normal-monsters"
+      },
+      "purchased": 0,
+      "soldVenison": 0,
+      "funding": null,
+      "commands": 2,
+      "movementCommands": 0,
+      "normalLogout": true,
+      "finalNormalDrainPositionMatched": true
+    },
+    {
+      "name": "L370e2a03",
+      "characterIndex": 4,
+      "before": {
+        "sequence": 681,
+        "monotonicMs": 12786.474,
+        "ownerId": 1000,
+        "ownerName": "L370e2a03",
+        "map": "0",
+        "x": 289,
+        "y": 615,
+        "hp": 24,
+        "maxHp": 24,
+        "hpStock": 12,
+        "gold": 200,
+        "venison": 0,
+        "inSafeZone": true,
+        "nearbyHostileCount": 3,
+        "playerPoison": null,
+        "ownerPoison": null,
+        "dazed": false
+      },
+      "after": {
+        "sequence": 684,
+        "monotonicMs": 12817.8366,
+        "ownerId": 1000,
+        "ownerName": "L370e2a03",
+        "map": "0",
+        "x": 289,
+        "y": 615,
+        "hp": 24,
+        "maxHp": 24,
+        "hpStock": 12,
+        "gold": 200,
+        "venison": 0,
+        "inSafeZone": true,
+        "nearbyHostileCount": 3,
+        "currentNearbyHostileCount": 3,
+        "playerPoison": null,
+        "ownerPoison": null,
+        "dazed": false,
+        "actualStagingReached": true,
+        "stagingProtection": "authoritative-safe-zone-normal-monsters"
+      },
+      "purchased": 0,
+      "soldVenison": 0,
+      "funding": null,
+      "commands": 2,
+      "movementCommands": 0,
+      "normalLogout": true,
+      "finalNormalDrainPositionMatched": true
+    },
+    {
+      "name": "L370e2a04",
+      "characterIndex": 5,
+      "before": {
+        "sequence": 672,
+        "monotonicMs": 16259.4599,
+        "ownerId": 1000,
+        "ownerName": "L370e2a04",
+        "map": "0",
+        "x": 287,
+        "y": 617,
+        "hp": 18,
+        "maxHp": 18,
+        "hpStock": 12,
+        "gold": 15,
+        "venison": 0,
+        "inSafeZone": true,
+        "nearbyHostileCount": 3,
+        "playerPoison": null,
+        "ownerPoison": null,
+        "dazed": false
+      },
+      "after": {
+        "sequence": 675,
+        "monotonicMs": 16291.9703,
+        "ownerId": 1000,
+        "ownerName": "L370e2a04",
+        "map": "0",
+        "x": 287,
+        "y": 617,
+        "hp": 18,
+        "maxHp": 18,
+        "hpStock": 12,
+        "gold": 15,
+        "venison": 0,
+        "inSafeZone": true,
+        "nearbyHostileCount": 3,
+        "currentNearbyHostileCount": 3,
+        "playerPoison": null,
+        "ownerPoison": null,
+        "dazed": false,
+        "actualStagingReached": true,
+        "stagingProtection": "authoritative-safe-zone-normal-monsters"
+      },
+      "purchased": 0,
+      "soldVenison": 0,
+      "funding": null,
+      "commands": 2,
+      "movementCommands": 0,
+      "normalLogout": true,
+      "finalNormalDrainPositionMatched": true
+    },
+    {
+      "name": "L370e2a05",
+      "characterIndex": 6,
+      "before": {
+        "sequence": 677,
+        "monotonicMs": 19722.8909,
+        "ownerId": 1000,
+        "ownerName": "L370e2a05",
+        "map": "0",
+        "x": 289,
+        "y": 617,
+        "hp": 24,
+        "maxHp": 24,
+        "hpStock": 12,
+        "gold": 75,
+        "venison": 1,
+        "inSafeZone": true,
+        "nearbyHostileCount": 3,
+        "playerPoison": null,
+        "ownerPoison": null,
+        "dazed": false
+      },
+      "after": {
+        "sequence": 680,
+        "monotonicMs": 19755.1576,
+        "ownerId": 1000,
+        "ownerName": "L370e2a05",
+        "map": "0",
+        "x": 289,
+        "y": 617,
+        "hp": 24,
+        "maxHp": 24,
+        "hpStock": 12,
+        "gold": 75,
+        "venison": 1,
+        "inSafeZone": true,
+        "nearbyHostileCount": 3,
+        "currentNearbyHostileCount": 3,
+        "playerPoison": null,
+        "ownerPoison": null,
+        "dazed": false,
+        "actualStagingReached": true,
+        "stagingProtection": "authoritative-safe-zone-normal-monsters"
+      },
+      "purchased": 0,
+      "soldVenison": 0,
+      "funding": null,
+      "commands": 2,
+      "movementCommands": 0,
+      "normalLogout": true,
+      "finalNormalDrainPositionMatched": true
+    },
+    {
+      "name": "L370e2a06",
+      "characterIndex": 7,
+      "before": {
+        "sequence": 679,
+        "monotonicMs": 23172.7967,
+        "ownerId": 1000,
+        "ownerName": "L370e2a06",
+        "map": "0",
+        "x": 288,
+        "y": 614,
+        "hp": 24,
+        "maxHp": 24,
+        "hpStock": 12,
+        "gold": 55,
+        "venison": 1,
+        "inSafeZone": true,
+        "nearbyHostileCount": 2,
+        "playerPoison": null,
+        "ownerPoison": null,
+        "dazed": false
+      },
+      "after": {
+        "sequence": 682,
+        "monotonicMs": 23203.4391,
+        "ownerId": 1000,
+        "ownerName": "L370e2a06",
+        "map": "0",
+        "x": 288,
+        "y": 614,
+        "hp": 24,
+        "maxHp": 24,
+        "hpStock": 12,
+        "gold": 55,
+        "venison": 1,
+        "inSafeZone": true,
+        "nearbyHostileCount": 2,
+        "currentNearbyHostileCount": 2,
+        "playerPoison": null,
+        "ownerPoison": null,
+        "dazed": false,
+        "actualStagingReached": true,
+        "stagingProtection": "authoritative-safe-zone-normal-monsters"
+      },
+      "purchased": 0,
+      "soldVenison": 0,
+      "funding": null,
+      "commands": 2,
+      "movementCommands": 0,
+      "normalLogout": true,
+      "finalNormalDrainPositionMatched": true
+    },
+    {
+      "name": "L370e2a07",
+      "characterIndex": 8,
+      "before": {
+        "sequence": 678,
+        "monotonicMs": 26645.7351,
+        "ownerId": 1000,
+        "ownerName": "L370e2a07",
+        "map": "0",
+        "x": 286,
+        "y": 616,
+        "hp": 18,
+        "maxHp": 18,
+        "hpStock": 12,
+        "gold": 81,
+        "venison": 0,
+        "inSafeZone": true,
+        "nearbyHostileCount": 3,
+        "playerPoison": null,
+        "ownerPoison": null,
+        "dazed": false
+      },
+      "after": {
+        "sequence": 681,
+        "monotonicMs": 26678.006,
+        "ownerId": 1000,
+        "ownerName": "L370e2a07",
+        "map": "0",
+        "x": 286,
+        "y": 616,
+        "hp": 18,
+        "maxHp": 18,
+        "hpStock": 12,
+        "gold": 81,
+        "venison": 0,
+        "inSafeZone": true,
+        "nearbyHostileCount": 3,
+        "currentNearbyHostileCount": 3,
+        "playerPoison": null,
+        "ownerPoison": null,
+        "dazed": false,
+        "actualStagingReached": true,
+        "stagingProtection": "authoritative-safe-zone-normal-monsters"
+      },
+      "purchased": 0,
+      "soldVenison": 0,
+      "funding": null,
+      "commands": 2,
+      "movementCommands": 0,
+      "normalLogout": true,
+      "finalNormalDrainPositionMatched": true
+    },
+    {
+      "name": "L370e2a08",
+      "characterIndex": 9,
+      "before": {
+        "sequence": 681,
+        "monotonicMs": 30087.8218,
+        "ownerId": 1000,
+        "ownerName": "L370e2a08",
+        "map": "0",
+        "x": 290,
+        "y": 616,
+        "hp": 18,
+        "maxHp": 18,
+        "hpStock": 12,
+        "gold": 23,
+        "venison": 0,
+        "inSafeZone": true,
+        "nearbyHostileCount": 3,
+        "playerPoison": null,
+        "ownerPoison": null,
+        "dazed": false
+      },
+      "after": {
+        "sequence": 684,
+        "monotonicMs": 30118.955,
+        "ownerId": 1000,
+        "ownerName": "L370e2a08",
+        "map": "0",
+        "x": 290,
+        "y": 616,
+        "hp": 18,
+        "maxHp": 18,
+        "hpStock": 12,
+        "gold": 23,
+        "venison": 0,
+        "inSafeZone": true,
+        "nearbyHostileCount": 3,
+        "currentNearbyHostileCount": 3,
+        "playerPoison": null,
+        "ownerPoison": null,
+        "dazed": false,
+        "actualStagingReached": true,
+        "stagingProtection": "authoritative-safe-zone-normal-monsters"
+      },
+      "purchased": 0,
+      "soldVenison": 0,
+      "funding": null,
+      "commands": 2,
+      "movementCommands": 0,
+      "normalLogout": true,
+      "finalNormalDrainPositionMatched": true
+    },
+    {
+      "name": "L370e2a09",
+      "characterIndex": 10,
+      "before": {
+        "sequence": 673,
+        "monotonicMs": 33546.4364,
+        "ownerId": 1000,
+        "ownerName": "L370e2a09",
+        "map": "0",
+        "x": 288,
+        "y": 618,
+        "hp": 18,
+        "maxHp": 18,
+        "hpStock": 12,
+        "gold": 83,
+        "venison": 0,
+        "inSafeZone": true,
+        "nearbyHostileCount": 3,
+        "playerPoison": null,
+        "ownerPoison": null,
+        "dazed": false
+      },
+      "after": {
+        "sequence": 676,
+        "monotonicMs": 33577.7504,
+        "ownerId": 1000,
+        "ownerName": "L370e2a09",
+        "map": "0",
+        "x": 288,
+        "y": 618,
+        "hp": 18,
+        "maxHp": 18,
+        "hpStock": 12,
+        "gold": 83,
+        "venison": 0,
+        "inSafeZone": true,
+        "nearbyHostileCount": 3,
+        "currentNearbyHostileCount": 3,
+        "playerPoison": null,
+        "ownerPoison": null,
+        "dazed": false,
+        "actualStagingReached": true,
+        "stagingProtection": "authoritative-safe-zone-normal-monsters"
+      },
+      "purchased": 0,
+      "soldVenison": 0,
+      "funding": null,
+      "commands": 2,
+      "movementCommands": 0,
+      "normalLogout": true,
+      "finalNormalDrainPositionMatched": true
+    },
+    {
+      "name": "L370e2a0a",
+      "characterIndex": 11,
+      "before": {
+        "sequence": 678,
+        "monotonicMs": 37022.5227,
+        "ownerId": 1000,
+        "ownerName": "L370e2a0a",
+        "map": "0",
+        "x": 287,
+        "y": 614,
+        "hp": 18,
+        "maxHp": 18,
+        "hpStock": 12,
+        "gold": 80,
+        "venison": 0,
+        "inSafeZone": true,
+        "nearbyHostileCount": 2,
+        "playerPoison": null,
+        "ownerPoison": null,
+        "dazed": false
+      },
+      "after": {
+        "sequence": 681,
+        "monotonicMs": 37053.904,
+        "ownerId": 1000,
+        "ownerName": "L370e2a0a",
+        "map": "0",
+        "x": 287,
+        "y": 614,
+        "hp": 18,
+        "maxHp": 18,
+        "hpStock": 12,
+        "gold": 80,
+        "venison": 0,
+        "inSafeZone": true,
+        "nearbyHostileCount": 2,
+        "currentNearbyHostileCount": 2,
+        "playerPoison": null,
+        "ownerPoison": null,
+        "dazed": false,
+        "actualStagingReached": true,
+        "stagingProtection": "authoritative-safe-zone-normal-monsters"
+      },
+      "purchased": 0,
+      "soldVenison": 0,
+      "funding": null,
+      "commands": 2,
+      "movementCommands": 0,
+      "normalLogout": true,
+      "finalNormalDrainPositionMatched": true
+    },
+    {
+      "name": "L370e2a0b",
+      "characterIndex": 12,
+      "before": {
+        "sequence": 681,
+        "monotonicMs": 42089.8571,
+        "ownerId": 1000,
+        "ownerName": "L370e2a0b",
+        "map": "0",
+        "x": 289,
+        "y": 614,
+        "hp": 18,
+        "maxHp": 18,
+        "hpStock": 12,
+        "gold": 86,
+        "venison": 0,
+        "inSafeZone": true,
+        "nearbyHostileCount": 2,
+        "playerPoison": null,
+        "ownerPoison": null,
+        "dazed": false
+      },
+      "after": {
+        "sequence": 684,
+        "monotonicMs": 42120.3955,
+        "ownerId": 1000,
+        "ownerName": "L370e2a0b",
+        "map": "0",
+        "x": 289,
+        "y": 614,
+        "hp": 18,
+        "maxHp": 18,
+        "hpStock": 12,
+        "gold": 86,
+        "venison": 0,
+        "inSafeZone": true,
+        "nearbyHostileCount": 2,
+        "currentNearbyHostileCount": 2,
+        "playerPoison": null,
+        "ownerPoison": null,
+        "dazed": false,
+        "actualStagingReached": true,
+        "stagingProtection": "authoritative-safe-zone-normal-monsters"
+      },
+      "purchased": 0,
+      "soldVenison": 0,
+      "funding": null,
+      "commands": 2,
+      "movementCommands": 0,
+      "normalLogout": true,
+      "finalNormalDrainPositionMatched": true
+    },
+    {
+      "name": "L370e2a0c",
+      "characterIndex": 13,
+      "before": {
+        "sequence": 680,
+        "monotonicMs": 46751.3831,
+        "ownerId": 1000,
+        "ownerName": "L370e2a0c",
+        "map": "0",
+        "x": 286,
+        "y": 615,
+        "hp": 18,
+        "maxHp": 18,
+        "hpStock": 12,
+        "gold": 36,
+        "venison": 0,
+        "inSafeZone": true,
+        "nearbyHostileCount": 3,
+        "playerPoison": null,
+        "ownerPoison": null,
+        "dazed": false
+      },
+      "after": {
+        "sequence": 683,
+        "monotonicMs": 46782.7577,
+        "ownerId": 1000,
+        "ownerName": "L370e2a0c",
+        "map": "0",
+        "x": 286,
+        "y": 615,
+        "hp": 18,
+        "maxHp": 18,
+        "hpStock": 12,
+        "gold": 36,
+        "venison": 0,
+        "inSafeZone": true,
+        "nearbyHostileCount": 3,
+        "currentNearbyHostileCount": 3,
+        "playerPoison": null,
+        "ownerPoison": null,
+        "dazed": false,
+        "actualStagingReached": true,
+        "stagingProtection": "authoritative-safe-zone-normal-monsters"
+      },
+      "purchased": 0,
+      "soldVenison": 0,
+      "funding": null,
+      "commands": 2,
+      "movementCommands": 0,
+      "normalLogout": true,
+      "finalNormalDrainPositionMatched": true
+    },
+    {
+      "name": "L370e2a0d",
+      "characterIndex": 14,
+      "before": {
+        "sequence": 681,
+        "monotonicMs": 50210.6997,
+        "ownerId": 1000,
+        "ownerName": "L370e2a0d",
+        "map": "0",
+        "x": 290,
+        "y": 615,
+        "hp": 18,
+        "maxHp": 18,
+        "hpStock": 12,
+        "gold": 39,
+        "venison": 0,
+        "inSafeZone": true,
+        "nearbyHostileCount": 3,
+        "playerPoison": null,
+        "ownerPoison": null,
+        "dazed": false
+      },
+      "after": {
+        "sequence": 684,
+        "monotonicMs": 50242.2565,
+        "ownerId": 1000,
+        "ownerName": "L370e2a0d",
+        "map": "0",
+        "x": 290,
+        "y": 615,
+        "hp": 18,
+        "maxHp": 18,
+        "hpStock": 12,
+        "gold": 39,
+        "venison": 0,
+        "inSafeZone": true,
+        "nearbyHostileCount": 3,
+        "currentNearbyHostileCount": 3,
+        "playerPoison": null,
+        "ownerPoison": null,
+        "dazed": false,
+        "actualStagingReached": true,
+        "stagingProtection": "authoritative-safe-zone-normal-monsters"
+      },
+      "purchased": 0,
+      "soldVenison": 0,
+      "funding": null,
+      "commands": 2,
+      "movementCommands": 0,
+      "normalLogout": true,
+      "finalNormalDrainPositionMatched": true
+    },
+    {
+      "name": "L370e2a0e",
+      "characterIndex": 15,
+      "before": {
+        "sequence": 673,
+        "monotonicMs": 53686.6176,
+        "ownerId": 1000,
+        "ownerName": "L370e2a0e",
+        "map": "0",
+        "x": 286,
+        "y": 617,
+        "hp": 18,
+        "maxHp": 18,
+        "hpStock": 12,
+        "gold": 13,
+        "venison": 0,
+        "inSafeZone": true,
+        "nearbyHostileCount": 3,
+        "playerPoison": null,
+        "ownerPoison": null,
+        "dazed": false
+      },
+      "after": {
+        "sequence": 676,
+        "monotonicMs": 53717.9144,
+        "ownerId": 1000,
+        "ownerName": "L370e2a0e",
+        "map": "0",
+        "x": 286,
+        "y": 617,
+        "hp": 18,
+        "maxHp": 18,
+        "hpStock": 12,
+        "gold": 13,
+        "venison": 0,
+        "inSafeZone": true,
+        "nearbyHostileCount": 3,
+        "currentNearbyHostileCount": 3,
+        "playerPoison": null,
+        "ownerPoison": null,
+        "dazed": false,
+        "actualStagingReached": true,
+        "stagingProtection": "authoritative-safe-zone-normal-monsters"
+      },
+      "purchased": 0,
+      "soldVenison": 0,
+      "funding": null,
+      "commands": 2,
+      "movementCommands": 0,
+      "normalLogout": true,
+      "finalNormalDrainPositionMatched": true
+    },
+    {
+      "name": "L370e2a0f",
+      "characterIndex": 16,
+      "before": {
+        "sequence": 676,
+        "monotonicMs": 57145.5695,
+        "ownerId": 1000,
+        "ownerName": "L370e2a0f",
+        "map": "0",
+        "x": 290,
+        "y": 617,
+        "hp": 18,
+        "maxHp": 18,
+        "hpStock": 12,
+        "gold": 19,
+        "venison": 0,
+        "inSafeZone": true,
+        "nearbyHostileCount": 3,
+        "playerPoison": null,
+        "ownerPoison": null,
+        "dazed": false
+      },
+      "after": {
+        "sequence": 679,
+        "monotonicMs": 57176.2076,
+        "ownerId": 1000,
+        "ownerName": "L370e2a0f",
+        "map": "0",
+        "x": 290,
+        "y": 617,
+        "hp": 18,
+        "maxHp": 18,
+        "hpStock": 12,
+        "gold": 19,
+        "venison": 0,
+        "inSafeZone": true,
+        "nearbyHostileCount": 3,
+        "currentNearbyHostileCount": 3,
+        "playerPoison": null,
+        "ownerPoison": null,
+        "dazed": false,
+        "actualStagingReached": true,
+        "stagingProtection": "authoritative-safe-zone-normal-monsters"
+      },
+      "purchased": 0,
+      "soldVenison": 0,
+      "funding": null,
+      "commands": 2,
+      "movementCommands": 0,
+      "normalLogout": true,
+      "finalNormalDrainPositionMatched": true
+    },
+    {
+      "name": "L370e2a0g",
+      "characterIndex": 17,
+      "before": {
+        "sequence": 681,
+        "monotonicMs": 60607.0371,
+        "ownerId": 1000,
+        "ownerName": "L370e2a0g",
+        "map": "0",
+        "x": 290,
+        "y": 614,
+        "hp": 18,
+        "maxHp": 18,
+        "hpStock": 12,
+        "gold": 51,
+        "venison": 0,
+        "inSafeZone": true,
+        "nearbyHostileCount": 2,
+        "playerPoison": null,
+        "ownerPoison": null,
+        "dazed": false
+      },
+      "after": {
+        "sequence": 694,
+        "monotonicMs": 62237.6542,
+        "ownerId": 1000,
+        "ownerName": "L370e2a0g",
+        "map": "0",
+        "x": 287,
+        "y": 618,
+        "hp": 18,
+        "maxHp": 18,
+        "hpStock": 12,
+        "gold": 51,
+        "venison": 0,
+        "inSafeZone": true,
+        "nearbyHostileCount": 3,
+        "currentNearbyHostileCount": 3,
+        "playerPoison": null,
+        "ownerPoison": null,
+        "dazed": false,
+        "actualStagingReached": true,
+        "stagingProtection": "authoritative-safe-zone-normal-monsters"
+      },
+      "purchased": 0,
+      "soldVenison": 0,
+      "funding": null,
+      "commands": 5,
+      "movementCommands": 3,
+      "normalLogout": true,
+      "finalNormalDrainPositionMatched": true
+    },
+    {
+      "name": "L370e2a0h",
+      "characterIndex": 18,
+      "before": {
+        "sequence": 673,
+        "monotonicMs": 65682.7217,
+        "ownerId": 1000,
+        "ownerName": "L370e2a0h",
+        "map": "0",
+        "x": 287,
+        "y": 618,
+        "hp": 18,
+        "maxHp": 18,
+        "hpStock": 12,
+        "gold": 70,
+        "venison": 0,
+        "inSafeZone": true,
+        "nearbyHostileCount": 3,
+        "playerPoison": null,
+        "ownerPoison": null,
+        "dazed": false
+      },
+      "after": {
+        "sequence": 682,
+        "monotonicMs": 66706.3044,
+        "ownerId": 1000,
+        "ownerName": "L370e2a0h",
+        "map": "0",
+        "x": 289,
+        "y": 618,
+        "hp": 18,
+        "maxHp": 18,
+        "hpStock": 12,
+        "gold": 70,
+        "venison": 0,
+        "inSafeZone": true,
+        "nearbyHostileCount": 3,
+        "currentNearbyHostileCount": 3,
+        "playerPoison": null,
+        "ownerPoison": null,
+        "dazed": false,
+        "actualStagingReached": true,
+        "stagingProtection": "authoritative-safe-zone-normal-monsters"
+      },
+      "purchased": 0,
+      "soldVenison": 0,
+      "funding": null,
+      "commands": 4,
+      "movementCommands": 2,
+      "normalLogout": true,
+      "finalNormalDrainPositionMatched": true
+    },
+    {
+      "name": "L370e2a0i",
+      "characterIndex": 19,
+      "before": {
+        "sequence": 676,
+        "monotonicMs": 70156.76,
+        "ownerId": 1000,
+        "ownerName": "L370e2a0i",
+        "map": "0",
+        "x": 289,
+        "y": 618,
+        "hp": 18,
+        "maxHp": 18,
+        "hpStock": 12,
+        "gold": 73,
+        "venison": 0,
+        "inSafeZone": true,
+        "nearbyHostileCount": 3,
+        "playerPoison": null,
+        "ownerPoison": null,
+        "dazed": false
+      },
+      "after": {
+        "sequence": 689,
+        "monotonicMs": 71760.0887,
+        "ownerId": 1000,
+        "ownerName": "L370e2a0i",
+        "map": "0",
+        "x": 290,
+        "y": 614,
+        "hp": 18,
+        "maxHp": 18,
+        "hpStock": 12,
+        "gold": 73,
+        "venison": 0,
+        "inSafeZone": true,
+        "nearbyHostileCount": 2,
+        "currentNearbyHostileCount": 2,
+        "playerPoison": null,
+        "ownerPoison": null,
+        "dazed": false,
+        "actualStagingReached": true,
+        "stagingProtection": "authoritative-safe-zone-normal-monsters"
+      },
+      "purchased": 0,
+      "soldVenison": 0,
+      "funding": null,
+      "commands": 5,
+      "movementCommands": 3,
+      "normalLogout": true,
+      "finalNormalDrainPositionMatched": true
+    },
+    {
+      "name": "L370e2a0j",
+      "characterIndex": 20,
+      "before": {
+        "sequence": 673,
+        "monotonicMs": 75178.9367,
+        "ownerId": 1000,
+        "ownerName": "L370e2a0j",
+        "map": "0",
+        "x": 286,
+        "y": 618,
+        "hp": 18,
+        "maxHp": 18,
+        "hpStock": 12,
+        "gold": 42,
+        "venison": 0,
+        "inSafeZone": true,
+        "nearbyHostileCount": 3,
+        "playerPoison": null,
+        "ownerPoison": null,
+        "dazed": false
+      },
+      "after": {
+        "sequence": 676,
+        "monotonicMs": 75213.8022,
+        "ownerId": 1000,
+        "ownerName": "L370e2a0j",
+        "map": "0",
+        "x": 286,
+        "y": 618,
+        "hp": 18,
+        "maxHp": 18,
+        "hpStock": 12,
+        "gold": 42,
+        "venison": 0,
+        "inSafeZone": true,
+        "nearbyHostileCount": 3,
+        "currentNearbyHostileCount": 3,
+        "playerPoison": null,
+        "ownerPoison": null,
+        "dazed": false,
+        "actualStagingReached": true,
+        "stagingProtection": "authoritative-safe-zone-normal-monsters"
+      },
+      "purchased": 0,
+      "soldVenison": 0,
+      "funding": null,
+      "commands": 2,
+      "movementCommands": 0,
+      "normalLogout": true,
+      "finalNormalDrainPositionMatched": true
+    },
+    {
+      "name": "L370e2a0k",
+      "characterIndex": 21,
+      "before": {
+        "sequence": 676,
+        "monotonicMs": 78637.7106,
+        "ownerId": 1000,
+        "ownerName": "L370e2a0k",
+        "map": "0",
+        "x": 290,
+        "y": 618,
+        "hp": 18,
+        "maxHp": 18,
+        "hpStock": 12,
+        "gold": 24,
+        "venison": 0,
+        "inSafeZone": true,
+        "nearbyHostileCount": 3,
+        "playerPoison": null,
+        "ownerPoison": null,
+        "dazed": false
+      },
+      "after": {
+        "sequence": 679,
+        "monotonicMs": 78670.9133,
+        "ownerId": 1000,
+        "ownerName": "L370e2a0k",
+        "map": "0",
+        "x": 290,
+        "y": 618,
+        "hp": 18,
+        "maxHp": 18,
+        "hpStock": 12,
+        "gold": 24,
+        "venison": 0,
+        "inSafeZone": true,
+        "nearbyHostileCount": 3,
+        "currentNearbyHostileCount": 3,
+        "playerPoison": null,
+        "ownerPoison": null,
+        "dazed": false,
+        "actualStagingReached": true,
+        "stagingProtection": "authoritative-safe-zone-normal-monsters"
+      },
+      "purchased": 0,
+      "soldVenison": 0,
+      "funding": null,
+      "commands": 2,
+      "movementCommands": 0,
+      "normalLogout": true,
+      "finalNormalDrainPositionMatched": true
+    },
+    {
+      "name": "L370e2a0l",
+      "characterIndex": 22,
+      "before": {
+        "sequence": 664,
+        "monotonicMs": 82106.4353,
+        "ownerId": 1000,
+        "ownerName": "L370e2a0l",
+        "map": "0",
+        "x": 288,
+        "y": 605,
+        "hp": 18,
+        "maxHp": 18,
+        "hpStock": 1,
+        "gold": 0,
+        "venison": 1,
+        "inSafeZone": false,
+        "nearbyHostileCount": 0,
+        "playerPoison": null,
+        "ownerPoison": null,
+        "dazed": false
+      },
+      "after": {
+        "sequence": 918,
+        "monotonicMs": 135784.3461,
+        "ownerId": 1000,
+        "ownerName": "L370e2a0l",
+        "map": "0",
+        "x": 288,
+        "y": 613,
+        "hp": 18,
+        "maxHp": 18,
+        "hpStock": 12,
+        "gold": 13,
+        "venison": 0,
+        "inSafeZone": true,
+        "nearbyHostileCount": 2,
+        "currentNearbyHostileCount": 2,
+        "playerPoison": null,
+        "ownerPoison": null,
+        "dazed": false,
+        "actualStagingReached": true,
+        "stagingProtection": "authoritative-safe-zone-normal-monsters"
+      },
+      "purchased": 11,
+      "soldVenison": 2,
+      "funding": {
+        "method": "DeerVenison",
+        "collected": 1,
+        "hunts": 1
+      },
+      "commands": 38,
+      "movementCommands": 6,
+      "normalLogout": true,
+      "finalNormalDrainPositionMatched": true
+    },
+    {
+      "name": "L370e2a0m",
+      "characterIndex": 23,
+      "before": {
+        "sequence": 688,
+        "monotonicMs": 141861.8137,
+        "ownerId": 1000,
+        "ownerName": "L370e2a0m",
+        "map": "0",
+        "x": 288,
+        "y": 616,
+        "hp": 18,
+        "maxHp": 18,
+        "hpStock": 1,
+        "gold": 0,
+        "venison": 0,
+        "inSafeZone": true,
+        "nearbyHostileCount": 3,
+        "playerPoison": null,
+        "ownerPoison": null,
+        "dazed": false
+      },
+      "after": {
+        "sequence": 1627,
+        "monotonicMs": 337865.5265,
+        "ownerId": 1000,
+        "ownerName": "L370e2a0m",
+        "map": "0",
+        "x": 285,
+        "y": 616,
+        "hp": 24,
+        "maxHp": 24,
+        "hpStock": 12,
+        "gold": 221,
+        "venison": 0,
+        "inSafeZone": true,
+        "nearbyHostileCount": 3,
+        "currentNearbyHostileCount": 3,
+        "playerPoison": null,
+        "ownerPoison": null,
+        "dazed": false,
+        "actualStagingReached": true,
+        "stagingProtection": "authoritative-safe-zone-normal-monsters"
+      },
+      "purchased": 11,
+      "soldVenison": 3,
+      "funding": {
+        "method": "DeerVenison",
+        "collected": 3,
+        "hunts": 3
+      },
+      "commands": 158,
+      "movementCommands": 86,
+      "normalLogout": true,
+      "finalNormalDrainPositionMatched": true
+    },
+    {
+      "name": "L370e2a0n",
+      "characterIndex": 24,
+      "before": {
+        "sequence": 690,
+        "monotonicMs": 342588.2124,
+        "ownerId": 1000,
+        "ownerName": "L370e2a0n",
+        "map": "0",
+        "x": 288,
+        "y": 616,
+        "hp": 18,
+        "maxHp": 18,
+        "hpStock": 1,
+        "gold": 0,
+        "venison": 0,
+        "inSafeZone": true,
+        "nearbyHostileCount": 3,
+        "playerPoison": null,
+        "ownerPoison": null,
+        "dazed": false
+      },
+      "after": {
+        "sequence": 1073,
+        "monotonicMs": 442710.4832,
+        "ownerId": 1000,
+        "ownerName": "L370e2a0n",
+        "map": "0",
+        "x": 287,
+        "y": 613,
+        "hp": 18,
+        "maxHp": 18,
+        "hpStock": 12,
+        "gold": 33,
+        "venison": 0,
+        "inSafeZone": true,
+        "nearbyHostileCount": 2,
+        "currentNearbyHostileCount": 2,
+        "playerPoison": null,
+        "ownerPoison": null,
+        "dazed": false,
+        "actualStagingReached": true,
+        "stagingProtection": "authoritative-safe-zone-normal-monsters"
+      },
+      "purchased": 11,
+      "soldVenison": 2,
+      "funding": {
+        "method": "DeerVenison",
+        "collected": 2,
+        "hunts": 2
+      },
+      "commands": 65,
+      "movementCommands": 20,
+      "normalLogout": true,
+      "finalNormalDrainPositionMatched": true
+    },
+    {
+      "name": "L370e2a0o",
+      "characterIndex": 25,
+      "before": {
+        "sequence": 689,
+        "monotonicMs": 447421.0135,
+        "ownerId": 1000,
+        "ownerName": "L370e2a0o",
+        "map": "0",
+        "x": 288,
+        "y": 616,
+        "hp": 18,
+        "maxHp": 18,
+        "hpStock": 1,
+        "gold": 0,
+        "venison": 0,
+        "inSafeZone": true,
+        "nearbyHostileCount": 3,
+        "playerPoison": null,
+        "ownerPoison": null,
+        "dazed": false
+      },
+      "after": {
+        "sequence": 1057,
+        "monotonicMs": 546306.6353,
+        "ownerId": 1000,
+        "ownerName": "L370e2a0o",
+        "map": "0",
+        "x": 288,
+        "y": 619,
+        "hp": 18,
+        "maxHp": 18,
+        "hpStock": 12,
+        "gold": 26,
+        "venison": 0,
+        "inSafeZone": true,
+        "nearbyHostileCount": 3,
+        "currentNearbyHostileCount": 3,
+        "playerPoison": null,
+        "ownerPoison": null,
+        "dazed": false,
+        "actualStagingReached": true,
+        "stagingProtection": "authoritative-safe-zone-normal-monsters"
+      },
+      "purchased": 11,
+      "soldVenison": 2,
+      "funding": {
+        "method": "DeerVenison",
+        "collected": 2,
+        "hunts": 2
+      },
+      "commands": 63,
+      "movementCommands": 17,
+      "normalLogout": true,
+      "finalNormalDrainPositionMatched": true
+    },
+    {
+      "name": "L370e2a0p",
+      "characterIndex": 26,
+      "before": {
+        "sequence": 689,
+        "monotonicMs": 904523.1314,
+        "ownerId": 1000,
+        "ownerName": "L370e2a0p",
+        "map": "0",
+        "x": 288,
+        "y": 616,
+        "hp": 18,
+        "maxHp": 18,
+        "hpStock": 1,
+        "gold": 0,
+        "venison": 0,
+        "inSafeZone": true,
+        "nearbyHostileCount": 3,
+        "playerPoison": null,
+        "ownerPoison": null,
+        "dazed": false
+      },
+      "after": {
+        "sequence": 1075,
+        "monotonicMs": 1007296.6614,
+        "ownerId": 1000,
+        "ownerName": "L370e2a0p",
+        "map": "0",
+        "x": 289,
+        "y": 613,
+        "hp": 18,
+        "maxHp": 18,
+        "hpStock": 12,
+        "gold": 57,
+        "venison": 0,
+        "inSafeZone": true,
+        "nearbyHostileCount": 2,
+        "currentNearbyHostileCount": 2,
+        "playerPoison": null,
+        "ownerPoison": null,
+        "dazed": false,
+        "actualStagingReached": true,
+        "stagingProtection": "authoritative-safe-zone-normal-monsters"
+      },
+      "purchased": 11,
+      "soldVenison": 2,
+      "funding": {
+        "method": "DeerVenison",
+        "collected": 2,
+        "hunts": 2
+      },
+      "commands": 67,
+      "movementCommands": 18,
+      "normalLogout": true,
+      "finalNormalDrainPositionMatched": true
+    },
+    {
+      "name": "L370e2a0q",
+      "characterIndex": 27,
+      "before": {
+        "sequence": 689,
+        "monotonicMs": 1012031.5577,
+        "ownerId": 1000,
+        "ownerName": "L370e2a0q",
+        "map": "0",
+        "x": 288,
+        "y": 616,
+        "hp": 18,
+        "maxHp": 18,
+        "hpStock": 1,
+        "gold": 0,
+        "venison": 0,
+        "inSafeZone": true,
+        "nearbyHostileCount": 3,
+        "playerPoison": null,
+        "ownerPoison": null,
+        "dazed": false
+      },
+      "after": {
+        "sequence": 1064,
+        "monotonicMs": 1112794.3434,
+        "ownerId": 1000,
+        "ownerName": "L370e2a0q",
+        "map": "0",
+        "x": 285,
+        "y": 615,
+        "hp": 18,
+        "maxHp": 18,
+        "hpStock": 12,
+        "gold": 21,
+        "venison": 0,
+        "inSafeZone": true,
+        "nearbyHostileCount": 3,
+        "currentNearbyHostileCount": 3,
+        "playerPoison": null,
+        "ownerPoison": null,
+        "dazed": false,
+        "actualStagingReached": true,
+        "stagingProtection": "authoritative-safe-zone-normal-monsters"
+      },
+      "purchased": 11,
+      "soldVenison": 2,
+      "funding": {
+        "method": "DeerVenison",
+        "collected": 2,
+        "hunts": 2
+      },
+      "commands": 66,
+      "movementCommands": 21,
+      "normalLogout": true,
+      "finalNormalDrainPositionMatched": true
+    },
+    {
+      "name": "L370e2a0r",
+      "characterIndex": 28,
+      "before": {
+        "sequence": 690,
+        "monotonicMs": 1117529.7577,
+        "ownerId": 1000,
+        "ownerName": "L370e2a0r",
+        "map": "0",
+        "x": 288,
+        "y": 616,
+        "hp": 18,
+        "maxHp": 18,
+        "hpStock": 1,
+        "gold": 0,
+        "venison": 0,
+        "inSafeZone": true,
+        "nearbyHostileCount": 3,
+        "playerPoison": null,
+        "ownerPoison": null,
+        "dazed": false
+      },
+      "after": {
+        "sequence": 1522,
+        "monotonicMs": 1273359.2693,
+        "ownerId": 1000,
+        "ownerName": "L370e2a0r",
+        "map": "0",
+        "x": 291,
+        "y": 615,
+        "hp": 18,
+        "maxHp": 18,
+        "hpStock": 12,
+        "gold": 44,
+        "venison": 0,
+        "inSafeZone": true,
+        "nearbyHostileCount": 3,
+        "currentNearbyHostileCount": 3,
+        "playerPoison": null,
+        "ownerPoison": null,
+        "dazed": false,
+        "actualStagingReached": true,
+        "stagingProtection": "authoritative-safe-zone-normal-monsters"
+      },
+      "purchased": 11,
+      "soldVenison": 2,
+      "funding": {
+        "method": "DeerVenison",
+        "collected": 2,
+        "hunts": 2
+      },
+      "commands": 148,
+      "movementCommands": 94,
+      "normalLogout": true,
+      "finalNormalDrainPositionMatched": true
+    },
+    {
+      "name": "L370e2a0s",
+      "characterIndex": 29,
+      "before": {
+        "sequence": 688,
+        "monotonicMs": 1278091.8631,
+        "ownerId": 1000,
+        "ownerName": "L370e2a0s",
+        "map": "0",
+        "x": 288,
+        "y": 616,
+        "hp": 18,
+        "maxHp": 18,
+        "hpStock": 1,
+        "gold": 0,
+        "venison": 0,
+        "inSafeZone": true,
+        "nearbyHostileCount": 3,
+        "playerPoison": null,
+        "ownerPoison": null,
+        "dazed": false
+      },
+      "after": {
+        "sequence": 1083,
+        "monotonicMs": 1379595.8207,
+        "ownerId": 1000,
+        "ownerName": "L370e2a0s",
+        "map": "0",
+        "x": 285,
+        "y": 617,
+        "hp": 18,
+        "maxHp": 18,
+        "hpStock": 12,
+        "gold": 58,
+        "venison": 0,
+        "inSafeZone": true,
+        "nearbyHostileCount": 3,
+        "currentNearbyHostileCount": 3,
+        "playerPoison": null,
+        "ownerPoison": null,
+        "dazed": false,
+        "actualStagingReached": true,
+        "stagingProtection": "authoritative-safe-zone-normal-monsters"
+      },
+      "purchased": 11,
+      "soldVenison": 2,
+      "funding": {
+        "method": "DeerVenison",
+        "collected": 2,
+        "hunts": 2
+      },
+      "commands": 67,
+      "movementCommands": 21,
+      "normalLogout": true,
+      "finalNormalDrainPositionMatched": true
+    }
+  ],
+  "actualOrdinaryEconomyActors": [
+    {
+      "name": "L370e2a0l",
+      "characterIndex": 22,
+      "before": {
+        "sequence": 664,
+        "monotonicMs": 82106.4353,
+        "ownerId": 1000,
+        "ownerName": "L370e2a0l",
+        "map": "0",
+        "x": 288,
+        "y": 605,
+        "hp": 18,
+        "maxHp": 18,
+        "inSafeZone": false,
+        "nearbyHostileCount": 0,
+        "playerPoison": null,
+        "ownerPoison": null,
+        "dazed": false,
+        "gold": 0,
+        "hpStock": 1,
+        "venison": 1,
+        "saleRemaining": null,
+        "npcId": null,
+        "buyLink": false,
+        "sellLink": false
+      },
+      "after": {
+        "ownerId": 1000,
+        "ownerName": "L370e2a0l",
+        "map": "0",
+        "x": 288,
+        "y": 613,
+        "hp": 18,
+        "maxHp": 18,
+        "inSafeZone": true,
+        "nearbyHostileCount": 2,
+        "playerPoison": null,
+        "ownerPoison": null,
+        "dazed": false,
+        "gold": 13,
+        "hpStock": 12,
+        "venison": 0,
+        "saleRemaining": null,
+        "npcId": null,
+        "buyLink": false,
+        "sellLink": false,
+        "currentNearbyHostileCount": 2,
+        "sequence": 918,
+        "monotonicMs": 135784.3461,
+        "actualStagingReached": true,
+        "stagingProtection": "authoritative-safe-zone-normal-monsters"
+      },
+      "funding": {
+        "method": "DeerVenison",
+        "collected": 1,
+        "hunts": 1,
+        "beforeCount": 0,
+        "afterCount": 1,
+        "completionMode": "actual-capital",
+        "estimatedRequiredCount": 2,
+        "huntAttempts": 1,
+        "budgetSatisfied": true
+      },
+      "fundingCapitalProofs": [
+        {
+          "sequence": 690,
+          "monotonicMs": 84140.0946,
+          "gold": 207,
+          "hpStock": 1,
+          "items": [],
+          "venisonItemCount": 0,
+          "itemsTruncated": false,
+          "capital": 207,
+          "initialHpPrice": 40,
+          "initialHpQuote": {
+            "sequence": 670,
+            "monotonicMs": 83106.3628,
+            "price": 40
+          },
+          "quoteAgeMs": 1033.731799999994,
+          "requiredGold": 440,
+          "satisfied": false,
+          "planningOnly": true,
+          "preparationOnly": true,
+          "measurementCredit": false
+        },
+        {
+          "sequence": 857,
+          "monotonicMs": 128825.7803,
+          "gold": 207,
+          "hpStock": 1,
+          "items": [
+            {
+              "uniqueId": 4,
+              "quantity": 1,
+              "sellValue": 246,
+              "value": 246
+            }
+          ],
+          "venisonItemCount": 1,
+          "itemsTruncated": false,
+          "capital": 453,
+          "initialHpPrice": 40,
+          "initialHpQuote": {
+            "sequence": 670,
+            "monotonicMs": 83106.3628,
+            "price": 40
+          },
+          "quoteAgeMs": 45719.417499999996,
+          "requiredGold": 440,
+          "satisfied": true,
+          "planningOnly": true,
+          "preparationOnly": true,
+          "measurementCredit": false
+        }
+      ],
+      "fundingCapitalProofCount": 2,
+      "fundingCapitalProofsTruncated": false,
+      "actualDirectApproaches": [
+        {
+          "objectId": 206324,
+          "sequence": 690,
+          "observedSnapshotSequence": 690,
+          "monotonicMs": 84166.7268,
+          "from": {
+            "x": 288,
+            "y": 605
+          },
+          "target": {
+            "x": 289,
+            "y": 604
+          },
+          "ownerId": 1000,
+          "ownerName": "L370e2a0l",
+          "map": "0",
+          "navigationCalls": 9,
+          "status": "completed",
+          "reason": null,
+          "endedSequence": 787,
+          "elapsedMs": 8516.390599999999
+        }
+      ],
+      "proofs": [
+        {
+          "kind": "sale",
+          "sequence": 687,
+          "monotonicMs": 84115.3509,
+          "ackSequence": 685,
+          "quantity": 1,
+          "gold": 207
+        },
+        {
+          "kind": "sale",
+          "sequence": 872,
+          "monotonicMs": 129850.2296,
+          "ackSequence": 870,
+          "quantity": 1,
+          "gold": 246
+        },
+        {
+          "kind": "purchase",
+          "sequence": 885,
+          "monotonicMs": 132436.7898,
+          "quantity": 11,
+          "gold": 440
+        }
+      ],
+      "commandCounts": {
+        "clientVersion": 5,
+        "interact": 4,
+        "selectNpcDialog": 4,
+        "sellItem": 2,
+        "attackV2": 9,
+        "harvest": 7,
+        "buyItem": 1,
+        "walk": 4,
+        "run": 2
+      }
+    },
+    {
+      "name": "L370e2a0m",
+      "characterIndex": 23,
+      "before": {
+        "sequence": 688,
+        "monotonicMs": 141861.8137,
+        "ownerId": 1000,
+        "ownerName": "L370e2a0m",
+        "map": "0",
+        "x": 288,
+        "y": 616,
+        "hp": 18,
+        "maxHp": 18,
+        "inSafeZone": true,
+        "nearbyHostileCount": 3,
+        "playerPoison": null,
+        "ownerPoison": null,
+        "dazed": false,
+        "gold": 0,
+        "hpStock": 1,
+        "venison": 0,
+        "saleRemaining": null,
+        "npcId": null,
+        "buyLink": false,
+        "sellLink": false
+      },
+      "after": {
+        "ownerId": 1000,
+        "ownerName": "L370e2a0m",
+        "map": "0",
+        "x": 285,
+        "y": 616,
+        "hp": 24,
+        "maxHp": 24,
+        "inSafeZone": true,
+        "nearbyHostileCount": 3,
+        "playerPoison": null,
+        "ownerPoison": null,
+        "dazed": false,
+        "gold": 221,
+        "hpStock": 12,
+        "venison": 0,
+        "saleRemaining": null,
+        "npcId": null,
+        "buyLink": false,
+        "sellLink": false,
+        "currentNearbyHostileCount": 3,
+        "sequence": 1627,
+        "monotonicMs": 337865.5265,
+        "actualStagingReached": true,
+        "stagingProtection": "authoritative-safe-zone-normal-monsters"
+      },
+      "funding": {
+        "method": "DeerVenison",
+        "collected": 3,
+        "hunts": 3,
+        "beforeCount": 0,
+        "afterCount": 3,
+        "completionMode": "actual-capital",
+        "estimatedRequiredCount": 3,
+        "huntAttempts": 7,
+        "budgetSatisfied": true
+      },
+      "fundingCapitalProofs": [
+        {
+          "sequence": 700,
+          "monotonicMs": 142875.4807,
+          "gold": 0,
+          "hpStock": 1,
+          "items": [],
+          "venisonItemCount": 0,
+          "itemsTruncated": false,
+          "capital": 0,
+          "initialHpPrice": 40,
+          "initialHpQuote": {
+            "sequence": 694,
+            "monotonicMs": 142850.4344,
+            "price": 40
+          },
+          "quoteAgeMs": 25.04629999998724,
+          "requiredGold": 440,
+          "satisfied": false,
+          "planningOnly": true,
+          "preparationOnly": true,
+          "measurementCredit": false
+        },
+        {
+          "sequence": 828,
+          "monotonicMs": 188525.8037,
+          "gold": 0,
+          "hpStock": 1,
+          "items": [
+            {
+              "uniqueId": 4,
+              "quantity": 1,
+              "sellValue": 219,
+              "value": 219
+            }
+          ],
+          "venisonItemCount": 1,
+          "itemsTruncated": false,
+          "capital": 219,
+          "initialHpPrice": 40,
+          "initialHpQuote": {
+            "sequence": 694,
+            "monotonicMs": 142850.4344,
+            "price": 40
+          },
+          "quoteAgeMs": 45675.36929999999,
+          "requiredGold": 440,
+          "satisfied": false,
+          "planningOnly": true,
+          "preparationOnly": true,
+          "measurementCredit": false
+        },
+        {
+          "sequence": 1005,
+          "monotonicMs": 229405.5933,
+          "gold": 0,
+          "hpStock": 1,
+          "items": [
+            {
+              "uniqueId": 4,
+              "quantity": 1,
+              "sellValue": 219,
+              "value": 219
+            },
+            {
+              "uniqueId": 5,
+              "quantity": 1,
+              "sellValue": 218,
+              "value": 218
+            }
+          ],
+          "venisonItemCount": 2,
+          "itemsTruncated": false,
+          "capital": 437,
+          "initialHpPrice": 40,
+          "initialHpQuote": {
+            "sequence": 694,
+            "monotonicMs": 142850.4344,
+            "price": 40
+          },
+          "quoteAgeMs": 86555.15890000001,
+          "requiredGold": 440,
+          "satisfied": false,
+          "planningOnly": true,
+          "preparationOnly": true,
+          "measurementCredit": false
+        },
+        {
+          "sequence": 1144,
+          "monotonicMs": 251060.3447,
+          "gold": 0,
+          "hpStock": 1,
+          "items": [
+            {
+              "uniqueId": 4,
+              "quantity": 1,
+              "sellValue": 219,
+              "value": 219
+            },
+            {
+              "uniqueId": 5,
+              "quantity": 1,
+              "sellValue": 218,
+              "value": 218
+            }
+          ],
+          "venisonItemCount": 2,
+          "itemsTruncated": false,
+          "capital": 437,
+          "initialHpPrice": 40,
+          "initialHpQuote": {
+            "sequence": 694,
+            "monotonicMs": 142850.4344,
+            "price": 40
+          },
+          "quoteAgeMs": 108209.91029999999,
+          "requiredGold": 440,
+          "satisfied": false,
+          "planningOnly": true,
+          "preparationOnly": true,
+          "measurementCredit": false
+        },
+        {
+          "sequence": 1177,
+          "monotonicMs": 253104.2605,
+          "gold": 0,
+          "hpStock": 1,
+          "items": [
+            {
+              "uniqueId": 4,
+              "quantity": 1,
+              "sellValue": 219,
+              "value": 219
+            },
+            {
+              "uniqueId": 5,
+              "quantity": 1,
+              "sellValue": 218,
+              "value": 218
+            }
+          ],
+          "venisonItemCount": 2,
+          "itemsTruncated": false,
+          "capital": 437,
+          "initialHpPrice": 40,
+          "initialHpQuote": {
+            "sequence": 694,
+            "monotonicMs": 142850.4344,
+            "price": 40
+          },
+          "quoteAgeMs": 110253.8261,
+          "requiredGold": 440,
+          "satisfied": false,
+          "planningOnly": true,
+          "preparationOnly": true,
+          "measurementCredit": false
+        },
+        {
+          "sequence": 1180,
+          "monotonicMs": 253434.5641,
+          "gold": 0,
+          "hpStock": 1,
+          "items": [
+            {
+              "uniqueId": 4,
+              "quantity": 1,
+              "sellValue": 219,
+              "value": 219
+            },
+            {
+              "uniqueId": 5,
+              "quantity": 1,
+              "sellValue": 218,
+              "value": 218
+            }
+          ],
+          "venisonItemCount": 2,
+          "itemsTruncated": false,
+          "capital": 437,
+          "initialHpPrice": 40,
+          "initialHpQuote": {
+            "sequence": 694,
+            "monotonicMs": 142850.4344,
+            "price": 40
+          },
+          "quoteAgeMs": 110584.12969999999,
+          "requiredGold": 440,
+          "satisfied": false,
+          "planningOnly": true,
+          "preparationOnly": true,
+          "measurementCredit": false
+        },
+        {
+          "sequence": 1183,
+          "monotonicMs": 254079.7174,
+          "gold": 0,
+          "hpStock": 1,
+          "items": [
+            {
+              "uniqueId": 4,
+              "quantity": 1,
+              "sellValue": 219,
+              "value": 219
+            },
+            {
+              "uniqueId": 5,
+              "quantity": 1,
+              "sellValue": 218,
+              "value": 218
+            }
+          ],
+          "venisonItemCount": 2,
+          "itemsTruncated": false,
+          "capital": 437,
+          "initialHpPrice": 40,
+          "initialHpQuote": {
+            "sequence": 694,
+            "monotonicMs": 142850.4344,
+            "price": 40
+          },
+          "quoteAgeMs": 111229.283,
+          "requiredGold": 440,
+          "satisfied": false,
+          "planningOnly": true,
+          "preparationOnly": true,
+          "measurementCredit": false
+        },
+        {
+          "sequence": 1532,
+          "monotonicMs": 328208.06,
+          "gold": 0,
+          "hpStock": 1,
+          "items": [
+            {
+              "uniqueId": 4,
+              "quantity": 1,
+              "sellValue": 219,
+              "value": 219
+            },
+            {
+              "uniqueId": 5,
+              "quantity": 1,
+              "sellValue": 218,
+              "value": 218
+            },
+            {
+              "uniqueId": 6,
+              "quantity": 1,
+              "sellValue": 224,
+              "value": 224
+            }
+          ],
+          "venisonItemCount": 3,
+          "itemsTruncated": false,
+          "capital": 661,
+          "initialHpPrice": 40,
+          "initialHpQuote": {
+            "sequence": 694,
+            "monotonicMs": 142850.4344,
+            "price": 40
+          },
+          "quoteAgeMs": 185357.6256,
+          "requiredGold": 440,
+          "satisfied": true,
+          "planningOnly": true,
+          "preparationOnly": true,
+          "measurementCredit": false
+        }
+      ],
+      "fundingCapitalProofCount": 8,
+      "fundingCapitalProofsTruncated": false,
+      "actualDirectApproaches": [
+        {
+          "objectId": 206339,
+          "sequence": 700,
+          "observedSnapshotSequence": 700,
+          "monotonicMs": 142895.0672,
+          "from": {
+            "x": 288,
+            "y": 616
+          },
+          "target": {
+            "x": 280,
+            "y": 609
+          },
+          "ownerId": 1000,
+          "ownerName": "L370e2a0m",
+          "map": "0",
+          "navigationCalls": 9,
+          "status": "completed",
+          "reason": null,
+          "endedSequence": 796,
+          "elapsedMs": 15507.345000000001
+        },
+        {
+          "objectId": 206714,
+          "sequence": 828,
+          "observedSnapshotSequence": 828,
+          "monotonicMs": 188551.3392,
+          "from": {
+            "x": 281,
+            "y": 610
+          },
+          "target": {
+            "x": 275,
+            "y": 611
+          },
+          "ownerId": 1000,
+          "ownerName": "L370e2a0m",
+          "map": "0",
+          "navigationCalls": 9,
+          "status": "completed",
+          "reason": null,
+          "endedSequence": 941,
+          "elapsedMs": 10722.74060000002
+        },
+        {
+          "objectId": 206515,
+          "sequence": 1005,
+          "observedSnapshotSequence": 1005,
+          "monotonicMs": 229406.0156,
+          "from": {
+            "x": 276,
+            "y": 611
+          },
+          "target": {
+            "x": 267,
+            "y": 624
+          },
+          "ownerId": 1000,
+          "ownerName": "L370e2a0m",
+          "map": "0",
+          "navigationCalls": 3,
+          "status": "terminal",
+          "reason": "ordinary-operation-failed",
+          "endedSequence": 1141,
+          "elapsedMs": 21650.655699999974
+        },
+        {
+          "objectId": 206706,
+          "sequence": 1145,
+          "observedSnapshotSequence": 1144,
+          "monotonicMs": 251088.0416,
+          "from": {
+            "x": 273,
+            "y": 630
+          },
+          "target": {
+            "x": 261,
+            "y": 615
+          },
+          "ownerId": 1000,
+          "ownerName": "L370e2a0m",
+          "map": "0",
+          "navigationCalls": 1,
+          "status": "target-lost",
+          "reason": "missing",
+          "endedSequence": 1173,
+          "elapsedMs": 2011.7061000000103
+        },
+        {
+          "objectId": 206717,
+          "sequence": 1177,
+          "observedSnapshotSequence": 1177,
+          "monotonicMs": 253129.8683,
+          "from": {
+            "x": 278,
+            "y": 626
+          },
+          "target": {
+            "x": 288,
+            "y": 624
+          },
+          "ownerId": 1000,
+          "ownerName": "L370e2a0m",
+          "map": "0",
+          "navigationCalls": 0,
+          "status": "target-lost",
+          "reason": "hostile-near-deer",
+          "endedSequence": 1177,
+          "elapsedMs": 0.14710000000195578
+        },
+        {
+          "objectId": 206302,
+          "sequence": 1180,
+          "observedSnapshotSequence": 1180,
+          "monotonicMs": 253461.361,
+          "from": {
+            "x": 278,
+            "y": 626
+          },
+          "target": {
+            "x": 287,
+            "y": 611
+          },
+          "ownerId": 1000,
+          "ownerName": "L370e2a0m",
+          "map": "0",
+          "navigationCalls": 0,
+          "status": "target-lost",
+          "reason": "hostile-near-deer",
+          "endedSequence": 1180,
+          "elapsedMs": 0.05580000000190921
+        },
+        {
+          "objectId": 206524,
+          "sequence": 1373,
+          "observedSnapshotSequence": 1373,
+          "monotonicMs": 279209.7671,
+          "from": {
+            "x": 291,
+            "y": 604
+          },
+          "target": {
+            "x": 294,
+            "y": 606
+          },
+          "ownerId": 1000,
+          "ownerName": "L370e2a0m",
+          "map": "0",
+          "navigationCalls": 10,
+          "status": "completed",
+          "reason": null,
+          "endedSequence": 1480,
+          "elapsedMs": 12877.176099999982
+        }
+      ],
+      "proofs": [
+        {
+          "kind": "sale",
+          "sequence": 1547,
+          "monotonicMs": 329234.5564,
+          "ackSequence": 1545,
+          "quantity": 1,
+          "gold": 219
+        },
+        {
+          "kind": "sale",
+          "sequence": 1551,
+          "monotonicMs": 330200.7452,
+          "ackSequence": 1549,
+          "quantity": 1,
+          "gold": 218
+        },
+        {
+          "kind": "sale",
+          "sequence": 1555,
+          "monotonicMs": 330235.1912,
+          "ackSequence": 1553,
+          "quantity": 1,
+          "gold": 224
+        },
+        {
+          "kind": "purchase",
+          "sequence": 1568,
+          "monotonicMs": 331239.1321,
+          "quantity": 11,
+          "gold": 440
+        }
+      ],
+      "commandCounts": {
+        "clientVersion": 12,
+        "interact": 3,
+        "selectNpcDialog": 3,
+        "run": 37,
+        "walk": 49,
+        "attackV2": 31,
+        "harvest": 19,
+        "sellItem": 3,
+        "buyItem": 1
+      }
+    },
+    {
+      "name": "L370e2a0n",
+      "characterIndex": 24,
+      "before": {
+        "sequence": 690,
+        "monotonicMs": 342588.2124,
+        "ownerId": 1000,
+        "ownerName": "L370e2a0n",
+        "map": "0",
+        "x": 288,
+        "y": 616,
+        "hp": 18,
+        "maxHp": 18,
+        "inSafeZone": true,
+        "nearbyHostileCount": 3,
+        "playerPoison": null,
+        "ownerPoison": null,
+        "dazed": false,
+        "gold": 0,
+        "hpStock": 1,
+        "venison": 0,
+        "saleRemaining": null,
+        "npcId": null,
+        "buyLink": false,
+        "sellLink": false
+      },
+      "after": {
+        "ownerId": 1000,
+        "ownerName": "L370e2a0n",
+        "map": "0",
+        "x": 287,
+        "y": 613,
+        "hp": 18,
+        "maxHp": 18,
+        "inSafeZone": true,
+        "nearbyHostileCount": 2,
+        "playerPoison": null,
+        "ownerPoison": null,
+        "dazed": false,
+        "gold": 33,
+        "hpStock": 12,
+        "venison": 0,
+        "saleRemaining": null,
+        "npcId": null,
+        "buyLink": false,
+        "sellLink": false,
+        "currentNearbyHostileCount": 2,
+        "sequence": 1073,
+        "monotonicMs": 442710.4832,
+        "actualStagingReached": true,
+        "stagingProtection": "authoritative-safe-zone-normal-monsters"
+      },
+      "funding": {
+        "method": "DeerVenison",
+        "collected": 2,
+        "hunts": 2,
+        "beforeCount": 0,
+        "afterCount": 2,
+        "completionMode": "actual-capital",
+        "estimatedRequiredCount": 3,
+        "huntAttempts": 2,
+        "budgetSatisfied": true
+      },
+      "fundingCapitalProofs": [
+        {
+          "sequence": 702,
+          "monotonicMs": 343601.105,
+          "gold": 0,
+          "hpStock": 1,
+          "items": [],
+          "venisonItemCount": 0,
+          "itemsTruncated": false,
+          "capital": 0,
+          "initialHpPrice": 40,
+          "initialHpQuote": {
+            "sequence": 696,
+            "monotonicMs": 343576.1089,
+            "price": 40
+          },
+          "quoteAgeMs": 24.996099999989383,
+          "requiredGold": 440,
+          "satisfied": false,
+          "planningOnly": true,
+          "preparationOnly": true,
+          "measurementCredit": false
+        },
+        {
+          "sequence": 852,
+          "monotonicMs": 390537.2505,
+          "gold": 0,
+          "hpStock": 1,
+          "items": [
+            {
+              "uniqueId": 4,
+              "quantity": 1,
+              "sellValue": 219,
+              "value": 219
+            }
+          ],
+          "venisonItemCount": 1,
+          "itemsTruncated": false,
+          "capital": 219,
+          "initialHpPrice": 40,
+          "initialHpQuote": {
+            "sequence": 696,
+            "monotonicMs": 343576.1089,
+            "price": 40
+          },
+          "quoteAgeMs": 46961.14160000003,
+          "requiredGold": 440,
+          "satisfied": false,
+          "planningOnly": true,
+          "preparationOnly": true,
+          "measurementCredit": false
+        },
+        {
+          "sequence": 989,
+          "monotonicMs": 434415.5712,
+          "gold": 0,
+          "hpStock": 1,
+          "items": [
+            {
+              "uniqueId": 4,
+              "quantity": 1,
+              "sellValue": 219,
+              "value": 219
+            },
+            {
+              "uniqueId": 5,
+              "quantity": 1,
+              "sellValue": 254,
+              "value": 254
+            }
+          ],
+          "venisonItemCount": 2,
+          "itemsTruncated": false,
+          "capital": 473,
+          "initialHpPrice": 40,
+          "initialHpQuote": {
+            "sequence": 696,
+            "monotonicMs": 343576.1089,
+            "price": 40
+          },
+          "quoteAgeMs": 90839.46230000001,
+          "requiredGold": 440,
+          "satisfied": true,
+          "planningOnly": true,
+          "preparationOnly": true,
+          "measurementCredit": false
+        }
+      ],
+      "fundingCapitalProofCount": 3,
+      "fundingCapitalProofsTruncated": false,
+      "actualDirectApproaches": [
+        {
+          "objectId": 206324,
+          "sequence": 702,
+          "observedSnapshotSequence": 702,
+          "monotonicMs": 343618.8027,
+          "from": {
+            "x": 288,
+            "y": 616
+          },
+          "target": {
+            "x": 289,
+            "y": 604
+          },
+          "ownerId": 1000,
+          "ownerName": "L370e2a0n",
+          "map": "0",
+          "navigationCalls": 9,
+          "status": "completed",
+          "reason": null,
+          "endedSequence": 816,
+          "elapsedMs": 16762.383099999977
+        },
+        {
+          "objectId": 206536,
+          "sequence": 852,
+          "observedSnapshotSequence": 852,
+          "monotonicMs": 390537.7804,
+          "from": {
+            "x": 288,
+            "y": 605
+          },
+          "target": {
+            "x": 291,
+            "y": 600
+          },
+          "ownerId": 1000,
+          "ownerName": "L370e2a0n",
+          "map": "0",
+          "navigationCalls": 9,
+          "status": "completed",
+          "reason": null,
+          "endedSequence": 955,
+          "elapsedMs": 13767.555099999998
+        }
+      ],
+      "proofs": [
+        {
+          "kind": "sale",
+          "sequence": 1004,
+          "monotonicMs": 435430.7022,
+          "ackSequence": 1002,
+          "quantity": 1,
+          "gold": 219
+        },
+        {
+          "kind": "sale",
+          "sequence": 1008,
+          "monotonicMs": 436395.6254,
+          "ackSequence": 1006,
+          "quantity": 1,
+          "gold": 254
+        },
+        {
+          "kind": "purchase",
+          "sequence": 1021,
+          "monotonicMs": 437408.5627,
+          "quantity": 11,
+          "gold": 440
+        }
+      ],
+      "commandCounts": {
+        "clientVersion": 6,
+        "interact": 3,
+        "selectNpcDialog": 3,
+        "run": 10,
+        "walk": 10,
+        "attackV2": 18,
+        "harvest": 12,
+        "sellItem": 2,
+        "buyItem": 1
+      }
+    },
+    {
+      "name": "L370e2a0o",
+      "characterIndex": 25,
+      "before": {
+        "sequence": 689,
+        "monotonicMs": 447421.0135,
+        "ownerId": 1000,
+        "ownerName": "L370e2a0o",
+        "map": "0",
+        "x": 288,
+        "y": 616,
+        "hp": 18,
+        "maxHp": 18,
+        "inSafeZone": true,
+        "nearbyHostileCount": 3,
+        "playerPoison": null,
+        "ownerPoison": null,
+        "dazed": false,
+        "gold": 0,
+        "hpStock": 1,
+        "venison": 0,
+        "saleRemaining": null,
+        "npcId": null,
+        "buyLink": false,
+        "sellLink": false
+      },
+      "after": {
+        "ownerId": 1000,
+        "ownerName": "L370e2a0o",
+        "map": "0",
+        "x": 288,
+        "y": 619,
+        "hp": 18,
+        "maxHp": 18,
+        "inSafeZone": true,
+        "nearbyHostileCount": 3,
+        "playerPoison": null,
+        "ownerPoison": null,
+        "dazed": false,
+        "gold": 26,
+        "hpStock": 12,
+        "venison": 0,
+        "saleRemaining": null,
+        "npcId": null,
+        "buyLink": false,
+        "sellLink": false,
+        "currentNearbyHostileCount": 3,
+        "sequence": 1057,
+        "monotonicMs": 546306.6353,
+        "actualStagingReached": true,
+        "stagingProtection": "authoritative-safe-zone-normal-monsters"
+      },
+      "funding": {
+        "method": "DeerVenison",
+        "collected": 2,
+        "hunts": 2,
+        "beforeCount": 0,
+        "afterCount": 2,
+        "completionMode": "actual-capital",
+        "estimatedRequiredCount": 3,
+        "huntAttempts": 2,
+        "budgetSatisfied": true
+      },
+      "fundingCapitalProofs": [
+        {
+          "sequence": 701,
+          "monotonicMs": 448438.2236,
+          "gold": 0,
+          "hpStock": 1,
+          "items": [],
+          "venisonItemCount": 0,
+          "itemsTruncated": false,
+          "capital": 0,
+          "initialHpPrice": 40,
+          "initialHpQuote": {
+            "sequence": 695,
+            "monotonicMs": 448414.0119,
+            "price": 40
+          },
+          "quoteAgeMs": 24.211700000043493,
+          "requiredGold": 440,
+          "satisfied": false,
+          "planningOnly": true,
+          "preparationOnly": true,
+          "measurementCredit": false
+        },
+        {
+          "sequence": 830,
+          "monotonicMs": 494137.6861,
+          "gold": 0,
+          "hpStock": 1,
+          "items": [
+            {
+              "uniqueId": 4,
+              "quantity": 1,
+              "sellValue": 219,
+              "value": 219
+            }
+          ],
+          "venisonItemCount": 1,
+          "itemsTruncated": false,
+          "capital": 219,
+          "initialHpPrice": 40,
+          "initialHpQuote": {
+            "sequence": 695,
+            "monotonicMs": 448414.0119,
+            "price": 40
+          },
+          "quoteAgeMs": 45723.67420000001,
+          "requiredGold": 440,
+          "satisfied": false,
+          "planningOnly": true,
+          "preparationOnly": true,
+          "measurementCredit": false
+        },
+        {
+          "sequence": 982,
+          "monotonicMs": 538673.84,
+          "gold": 0,
+          "hpStock": 1,
+          "items": [
+            {
+              "uniqueId": 4,
+              "quantity": 1,
+              "sellValue": 219,
+              "value": 219
+            },
+            {
+              "uniqueId": 5,
+              "quantity": 1,
+              "sellValue": 247,
+              "value": 247
+            }
+          ],
+          "venisonItemCount": 2,
+          "itemsTruncated": false,
+          "capital": 466,
+          "initialHpPrice": 40,
+          "initialHpQuote": {
+            "sequence": 695,
+            "monotonicMs": 448414.0119,
+            "price": 40
+          },
+          "quoteAgeMs": 90259.82809999998,
+          "requiredGold": 440,
+          "satisfied": true,
+          "planningOnly": true,
+          "preparationOnly": true,
+          "measurementCredit": false
+        }
+      ],
+      "fundingCapitalProofCount": 3,
+      "fundingCapitalProofsTruncated": false,
+      "actualDirectApproaches": [
+        {
+          "objectId": 206339,
+          "sequence": 701,
+          "observedSnapshotSequence": 701,
+          "monotonicMs": 448438.4581,
+          "from": {
+            "x": 288,
+            "y": 616
+          },
+          "target": {
+            "x": 280,
+            "y": 609
+          },
+          "ownerId": 1000,
+          "ownerName": "L370e2a0o",
+          "map": "0",
+          "navigationCalls": 9,
+          "status": "completed",
+          "reason": null,
+          "endedSequence": 797,
+          "elapsedMs": 15605.430099999998
+        },
+        {
+          "objectId": 206714,
+          "sequence": 830,
+          "observedSnapshotSequence": 830,
+          "monotonicMs": 494137.8812,
+          "from": {
+            "x": 281,
+            "y": 610
+          },
+          "target": {
+            "x": 275,
+            "y": 611
+          },
+          "ownerId": 1000,
+          "ownerName": "L370e2a0o",
+          "map": "0",
+          "navigationCalls": 10,
+          "status": "completed",
+          "reason": null,
+          "endedSequence": 945,
+          "elapsedMs": 14418.565799999982
+        }
+      ],
+      "proofs": [
+        {
+          "kind": "sale",
+          "sequence": 997,
+          "monotonicMs": 539708.1366,
+          "ackSequence": 995,
+          "quantity": 1,
+          "gold": 219
+        },
+        {
+          "kind": "sale",
+          "sequence": 1002,
+          "monotonicMs": 540644.2647,
+          "ackSequence": 1000,
+          "quantity": 1,
+          "gold": 247
+        },
+        {
+          "kind": "purchase",
+          "sequence": 1015,
+          "monotonicMs": 541648.6964,
+          "quantity": 11,
+          "gold": 440
+        }
+      ],
+      "commandCounts": {
+        "clientVersion": 6,
+        "interact": 3,
+        "selectNpcDialog": 3,
+        "run": 11,
+        "walk": 6,
+        "attackV2": 19,
+        "harvest": 12,
+        "sellItem": 2,
+        "buyItem": 1
+      }
+    },
+    {
+      "name": "L370e2a0p",
+      "characterIndex": 26,
+      "before": {
+        "sequence": 689,
+        "monotonicMs": 904523.1314,
+        "ownerId": 1000,
+        "ownerName": "L370e2a0p",
+        "map": "0",
+        "x": 288,
+        "y": 616,
+        "hp": 18,
+        "maxHp": 18,
+        "inSafeZone": true,
+        "nearbyHostileCount": 3,
+        "playerPoison": null,
+        "ownerPoison": null,
+        "dazed": false,
+        "gold": 0,
+        "hpStock": 1,
+        "venison": 0,
+        "saleRemaining": null,
+        "npcId": null,
+        "buyLink": false,
+        "sellLink": false
+      },
+      "after": {
+        "ownerId": 1000,
+        "ownerName": "L370e2a0p",
+        "map": "0",
+        "x": 289,
+        "y": 613,
+        "hp": 18,
+        "maxHp": 18,
+        "inSafeZone": true,
+        "nearbyHostileCount": 2,
+        "playerPoison": null,
+        "ownerPoison": null,
+        "dazed": false,
+        "gold": 57,
+        "hpStock": 12,
+        "venison": 0,
+        "saleRemaining": null,
+        "npcId": null,
+        "buyLink": false,
+        "sellLink": false,
+        "currentNearbyHostileCount": 2,
+        "sequence": 1075,
+        "monotonicMs": 1007296.6614,
+        "actualStagingReached": true,
+        "stagingProtection": "authoritative-safe-zone-normal-monsters"
+      },
+      "funding": {
+        "method": "DeerVenison",
+        "collected": 2,
+        "hunts": 2,
+        "beforeCount": 0,
+        "afterCount": 2,
+        "completionMode": "actual-capital",
+        "estimatedRequiredCount": 3,
+        "huntAttempts": 2,
+        "budgetSatisfied": true
+      },
+      "fundingCapitalProofs": [
+        {
+          "sequence": 698,
+          "monotonicMs": 905525.5328,
+          "gold": 0,
+          "hpStock": 1,
+          "items": [],
+          "venisonItemCount": 0,
+          "itemsTruncated": false,
+          "capital": 0,
+          "initialHpPrice": 40,
+          "initialHpQuote": {
+            "sequence": 695,
+            "monotonicMs": 905521.8761,
+            "price": 40
+          },
+          "quoteAgeMs": 3.6567000000504777,
+          "requiredGold": 440,
+          "satisfied": false,
+          "planningOnly": true,
+          "preparationOnly": true,
+          "measurementCredit": false
+        },
+        {
+          "sequence": 845,
+          "monotonicMs": 952658.8588,
+          "gold": 0,
+          "hpStock": 1,
+          "items": [
+            {
+              "uniqueId": 4,
+              "quantity": 1,
+              "sellValue": 260,
+              "value": 260
+            }
+          ],
+          "venisonItemCount": 1,
+          "itemsTruncated": false,
+          "capital": 260,
+          "initialHpPrice": 40,
+          "initialHpQuote": {
+            "sequence": 695,
+            "monotonicMs": 905521.8761,
+            "price": 40
+          },
+          "quoteAgeMs": 47136.98270000005,
+          "requiredGold": 440,
+          "satisfied": false,
+          "planningOnly": true,
+          "preparationOnly": true,
+          "measurementCredit": false
+        },
+        {
+          "sequence": 1005,
+          "monotonicMs": 1000296.2972,
+          "gold": 0,
+          "hpStock": 1,
+          "items": [
+            {
+              "uniqueId": 4,
+              "quantity": 1,
+              "sellValue": 260,
+              "value": 260
+            },
+            {
+              "uniqueId": 5,
+              "quantity": 1,
+              "sellValue": 237,
+              "value": 237
+            }
+          ],
+          "venisonItemCount": 2,
+          "itemsTruncated": false,
+          "capital": 497,
+          "initialHpPrice": 40,
+          "initialHpQuote": {
+            "sequence": 695,
+            "monotonicMs": 905521.8761,
+            "price": 40
+          },
+          "quoteAgeMs": 94774.42110000004,
+          "requiredGold": 440,
+          "satisfied": true,
+          "planningOnly": true,
+          "preparationOnly": true,
+          "measurementCredit": false
+        }
+      ],
+      "fundingCapitalProofCount": 3,
+      "fundingCapitalProofsTruncated": false,
+      "actualDirectApproaches": [
+        {
+          "objectId": 206339,
+          "sequence": 699,
+          "observedSnapshotSequence": 698,
+          "monotonicMs": 905542.2424,
+          "from": {
+            "x": 288,
+            "y": 616
+          },
+          "target": {
+            "x": 280,
+            "y": 609
+          },
+          "ownerId": 1000,
+          "ownerName": "L370e2a0p",
+          "map": "0",
+          "navigationCalls": 11,
+          "status": "completed",
+          "reason": null,
+          "endedSequence": 813,
+          "elapsedMs": 16957.010699999984
+        },
+        {
+          "objectId": 206714,
+          "sequence": 845,
+          "observedSnapshotSequence": 845,
+          "monotonicMs": 952684.1961,
+          "from": {
+            "x": 281,
+            "y": 610
+          },
+          "target": {
+            "x": 275,
+            "y": 611
+          },
+          "ownerId": 1000,
+          "ownerName": "L370e2a0p",
+          "map": "0",
+          "navigationCalls": 11,
+          "status": "completed",
+          "reason": null,
+          "endedSequence": 973,
+          "elapsedMs": 17459.07500000007
+        }
+      ],
+      "proofs": [
+        {
+          "kind": "sale",
+          "sequence": 1020,
+          "monotonicMs": 1001313.2609,
+          "ackSequence": 1018,
+          "quantity": 1,
+          "gold": 260
+        },
+        {
+          "kind": "sale",
+          "sequence": 1024,
+          "monotonicMs": 1002264.5448,
+          "ackSequence": 1022,
+          "quantity": 1,
+          "gold": 237
+        },
+        {
+          "kind": "purchase",
+          "sequence": 1037,
+          "monotonicMs": 1003273.4382,
+          "quantity": 11,
+          "gold": 440
+        }
+      ],
+      "commandCounts": {
+        "clientVersion": 6,
+        "interact": 3,
+        "selectNpcDialog": 3,
+        "run": 12,
+        "walk": 6,
+        "attackV2": 22,
+        "harvest": 12,
+        "sellItem": 2,
+        "buyItem": 1
+      }
+    },
+    {
+      "name": "L370e2a0q",
+      "characterIndex": 27,
+      "before": {
+        "sequence": 689,
+        "monotonicMs": 1012031.5577,
+        "ownerId": 1000,
+        "ownerName": "L370e2a0q",
+        "map": "0",
+        "x": 288,
+        "y": 616,
+        "hp": 18,
+        "maxHp": 18,
+        "inSafeZone": true,
+        "nearbyHostileCount": 3,
+        "playerPoison": null,
+        "ownerPoison": null,
+        "dazed": false,
+        "gold": 0,
+        "hpStock": 1,
+        "venison": 0,
+        "saleRemaining": null,
+        "npcId": null,
+        "buyLink": false,
+        "sellLink": false
+      },
+      "after": {
+        "ownerId": 1000,
+        "ownerName": "L370e2a0q",
+        "map": "0",
+        "x": 285,
+        "y": 615,
+        "hp": 18,
+        "maxHp": 18,
+        "inSafeZone": true,
+        "nearbyHostileCount": 3,
+        "playerPoison": null,
+        "ownerPoison": null,
+        "dazed": false,
+        "gold": 21,
+        "hpStock": 12,
+        "venison": 0,
+        "saleRemaining": null,
+        "npcId": null,
+        "buyLink": false,
+        "sellLink": false,
+        "currentNearbyHostileCount": 3,
+        "sequence": 1064,
+        "monotonicMs": 1112794.3434,
+        "actualStagingReached": true,
+        "stagingProtection": "authoritative-safe-zone-normal-monsters"
+      },
+      "funding": {
+        "method": "DeerVenison",
+        "collected": 2,
+        "hunts": 2,
+        "beforeCount": 0,
+        "afterCount": 2,
+        "completionMode": "actual-capital",
+        "estimatedRequiredCount": 3,
+        "huntAttempts": 2,
+        "budgetSatisfied": true
+      },
+      "fundingCapitalProofs": [
+        {
+          "sequence": 701,
+          "monotonicMs": 1013041.898,
+          "gold": 0,
+          "hpStock": 1,
+          "items": [],
+          "venisonItemCount": 0,
+          "itemsTruncated": false,
+          "capital": 0,
+          "initialHpPrice": 40,
+          "initialHpQuote": {
+            "sequence": 695,
+            "monotonicMs": 1013016.0793,
+            "price": 40
+          },
+          "quoteAgeMs": 25.818700000061654,
+          "requiredGold": 440,
+          "satisfied": false,
+          "planningOnly": true,
+          "preparationOnly": true,
+          "measurementCredit": false
+        },
+        {
+          "sequence": 833,
+          "monotonicMs": 1059292.4625,
+          "gold": 0,
+          "hpStock": 1,
+          "items": [
+            {
+              "uniqueId": 4,
+              "quantity": 1,
+              "sellValue": 248,
+              "value": 248
+            }
+          ],
+          "venisonItemCount": 1,
+          "itemsTruncated": false,
+          "capital": 248,
+          "initialHpPrice": 40,
+          "initialHpQuote": {
+            "sequence": 695,
+            "monotonicMs": 1013016.0793,
+            "price": 40
+          },
+          "quoteAgeMs": 46276.383199999924,
+          "requiredGold": 440,
+          "satisfied": false,
+          "planningOnly": true,
+          "preparationOnly": true,
+          "measurementCredit": false
+        },
+        {
+          "sequence": 976,
+          "monotonicMs": 1103190.6589,
+          "gold": 0,
+          "hpStock": 1,
+          "items": [
+            {
+              "uniqueId": 4,
+              "quantity": 1,
+              "sellValue": 248,
+              "value": 248
+            },
+            {
+              "uniqueId": 5,
+              "quantity": 1,
+              "sellValue": 213,
+              "value": 213
+            }
+          ],
+          "venisonItemCount": 2,
+          "itemsTruncated": false,
+          "capital": 461,
+          "initialHpPrice": 40,
+          "initialHpQuote": {
+            "sequence": 695,
+            "monotonicMs": 1013016.0793,
+            "price": 40
+          },
+          "quoteAgeMs": 90174.57959999994,
+          "requiredGold": 440,
+          "satisfied": true,
+          "planningOnly": true,
+          "preparationOnly": true,
+          "measurementCredit": false
+        }
+      ],
+      "fundingCapitalProofCount": 3,
+      "fundingCapitalProofsTruncated": false,
+      "actualDirectApproaches": [
+        {
+          "objectId": 206524,
+          "sequence": 701,
+          "observedSnapshotSequence": 701,
+          "monotonicMs": 1013058.0923,
+          "from": {
+            "x": 288,
+            "y": 616
+          },
+          "target": {
+            "x": 294,
+            "y": 606
+          },
+          "ownerId": 1000,
+          "ownerName": "L370e2a0q",
+          "map": "0",
+          "navigationCalls": 9,
+          "status": "completed",
+          "reason": null,
+          "endedSequence": 801,
+          "elapsedMs": 16130.28059999994
+        },
+        {
+          "objectId": 206324,
+          "sequence": 833,
+          "observedSnapshotSequence": 833,
+          "monotonicMs": 1059317.7121,
+          "from": {
+            "x": 294,
+            "y": 607
+          },
+          "target": {
+            "x": 289,
+            "y": 604
+          },
+          "ownerId": 1000,
+          "ownerName": "L370e2a0q",
+          "map": "0",
+          "navigationCalls": 9,
+          "status": "completed",
+          "reason": null,
+          "endedSequence": 939,
+          "elapsedMs": 13745.536600000225
+        }
+      ],
+      "proofs": [
+        {
+          "kind": "sale",
+          "sequence": 991,
+          "monotonicMs": 1104231.7781,
+          "ackSequence": 989,
+          "quantity": 1,
+          "gold": 248
+        },
+        {
+          "kind": "sale",
+          "sequence": 995,
+          "monotonicMs": 1105158.932,
+          "ackSequence": 993,
+          "quantity": 1,
+          "gold": 213
+        },
+        {
+          "kind": "purchase",
+          "sequence": 1008,
+          "monotonicMs": 1106165.4863,
+          "quantity": 11,
+          "gold": 440
+        }
+      ],
+      "commandCounts": {
+        "clientVersion": 6,
+        "interact": 3,
+        "selectNpcDialog": 3,
+        "walk": 11,
+        "run": 10,
+        "attackV2": 18,
+        "harvest": 12,
+        "sellItem": 2,
+        "buyItem": 1
+      }
+    },
+    {
+      "name": "L370e2a0r",
+      "characterIndex": 28,
+      "before": {
+        "sequence": 690,
+        "monotonicMs": 1117529.7577,
+        "ownerId": 1000,
+        "ownerName": "L370e2a0r",
+        "map": "0",
+        "x": 288,
+        "y": 616,
+        "hp": 18,
+        "maxHp": 18,
+        "inSafeZone": true,
+        "nearbyHostileCount": 3,
+        "playerPoison": null,
+        "ownerPoison": null,
+        "dazed": false,
+        "gold": 0,
+        "hpStock": 1,
+        "venison": 0,
+        "saleRemaining": null,
+        "npcId": null,
+        "buyLink": false,
+        "sellLink": false
+      },
+      "after": {
+        "ownerId": 1000,
+        "ownerName": "L370e2a0r",
+        "map": "0",
+        "x": 291,
+        "y": 615,
+        "hp": 18,
+        "maxHp": 18,
+        "inSafeZone": true,
+        "nearbyHostileCount": 3,
+        "playerPoison": null,
+        "ownerPoison": null,
+        "dazed": false,
+        "gold": 44,
+        "hpStock": 12,
+        "venison": 0,
+        "saleRemaining": null,
+        "npcId": null,
+        "buyLink": false,
+        "sellLink": false,
+        "currentNearbyHostileCount": 3,
+        "sequence": 1522,
+        "monotonicMs": 1273359.2693,
+        "actualStagingReached": true,
+        "stagingProtection": "authoritative-safe-zone-normal-monsters"
+      },
+      "funding": {
+        "method": "DeerVenison",
+        "collected": 2,
+        "hunts": 2,
+        "beforeCount": 0,
+        "afterCount": 2,
+        "completionMode": "actual-capital",
+        "estimatedRequiredCount": 3,
+        "huntAttempts": 7,
+        "budgetSatisfied": true
+      },
+      "fundingCapitalProofs": [
+        {
+          "sequence": 702,
+          "monotonicMs": 1118545.5978,
+          "gold": 0,
+          "hpStock": 1,
+          "items": [],
+          "venisonItemCount": 0,
+          "itemsTruncated": false,
+          "capital": 0,
+          "initialHpPrice": 40,
+          "initialHpQuote": {
+            "sequence": 696,
+            "monotonicMs": 1118519.9428,
+            "price": 40
+          },
+          "quoteAgeMs": 25.65500000002794,
+          "requiredGold": 440,
+          "satisfied": false,
+          "planningOnly": true,
+          "preparationOnly": true,
+          "measurementCredit": false
+        },
+        {
+          "sequence": 817,
+          "monotonicMs": 1136295.7512,
+          "gold": 0,
+          "hpStock": 1,
+          "items": [],
+          "venisonItemCount": 0,
+          "itemsTruncated": false,
+          "capital": 0,
+          "initialHpPrice": 40,
+          "initialHpQuote": {
+            "sequence": 696,
+            "monotonicMs": 1118519.9428,
+            "price": 40
+          },
+          "quoteAgeMs": 17775.80839999998,
+          "requiredGold": 440,
+          "satisfied": false,
+          "planningOnly": true,
+          "preparationOnly": true,
+          "measurementCredit": false
+        },
+        {
+          "sequence": 841,
+          "monotonicMs": 1137688.571,
+          "gold": 0,
+          "hpStock": 1,
+          "items": [],
+          "venisonItemCount": 0,
+          "itemsTruncated": false,
+          "capital": 0,
+          "initialHpPrice": 40,
+          "initialHpQuote": {
+            "sequence": 696,
+            "monotonicMs": 1118519.9428,
+            "price": 40
+          },
+          "quoteAgeMs": 19168.62819999992,
+          "requiredGold": 440,
+          "satisfied": false,
+          "planningOnly": true,
+          "preparationOnly": true,
+          "measurementCredit": false
+        },
+        {
+          "sequence": 869,
+          "monotonicMs": 1139644.4198,
+          "gold": 0,
+          "hpStock": 1,
+          "items": [],
+          "venisonItemCount": 0,
+          "itemsTruncated": false,
+          "capital": 0,
+          "initialHpPrice": 40,
+          "initialHpQuote": {
+            "sequence": 696,
+            "monotonicMs": 1118519.9428,
+            "price": 40
+          },
+          "quoteAgeMs": 21124.476999999955,
+          "requiredGold": 440,
+          "satisfied": false,
+          "planningOnly": true,
+          "preparationOnly": true,
+          "measurementCredit": false
+        },
+        {
+          "sequence": 872,
+          "monotonicMs": 1139969.1278,
+          "gold": 0,
+          "hpStock": 1,
+          "items": [],
+          "venisonItemCount": 0,
+          "itemsTruncated": false,
+          "capital": 0,
+          "initialHpPrice": 40,
+          "initialHpQuote": {
+            "sequence": 696,
+            "monotonicMs": 1118519.9428,
+            "price": 40
+          },
+          "quoteAgeMs": 21449.184999999823,
+          "requiredGold": 440,
+          "satisfied": false,
+          "planningOnly": true,
+          "preparationOnly": true,
+          "measurementCredit": false
+        },
+        {
+          "sequence": 875,
+          "monotonicMs": 1140615.1416,
+          "gold": 0,
+          "hpStock": 1,
+          "items": [],
+          "venisonItemCount": 0,
+          "itemsTruncated": false,
+          "capital": 0,
+          "initialHpPrice": 40,
+          "initialHpQuote": {
+            "sequence": 696,
+            "monotonicMs": 1118519.9428,
+            "price": 40
+          },
+          "quoteAgeMs": 22095.198799999896,
+          "requiredGold": 440,
+          "satisfied": false,
+          "planningOnly": true,
+          "preparationOnly": true,
+          "measurementCredit": false
+        },
+        {
+          "sequence": 1204,
+          "monotonicMs": 1209407.6373,
+          "gold": 0,
+          "hpStock": 1,
+          "items": [
+            {
+              "uniqueId": 4,
+              "quantity": 1,
+              "sellValue": 230,
+              "value": 230
+            }
+          ],
+          "venisonItemCount": 1,
+          "itemsTruncated": false,
+          "capital": 230,
+          "initialHpPrice": 40,
+          "initialHpQuote": {
+            "sequence": 696,
+            "monotonicMs": 1118519.9428,
+            "price": 40
+          },
+          "quoteAgeMs": 90887.69449999998,
+          "requiredGold": 440,
+          "satisfied": false,
+          "planningOnly": true,
+          "preparationOnly": true,
+          "measurementCredit": false
+        },
+        {
+          "sequence": 1437,
+          "monotonicMs": 1264404.88,
+          "gold": 0,
+          "hpStock": 1,
+          "items": [
+            {
+              "uniqueId": 4,
+              "quantity": 1,
+              "sellValue": 230,
+              "value": 230
+            },
+            {
+              "uniqueId": 5,
+              "quantity": 1,
+              "sellValue": 254,
+              "value": 254
+            }
+          ],
+          "venisonItemCount": 2,
+          "itemsTruncated": false,
+          "capital": 484,
+          "initialHpPrice": 40,
+          "initialHpQuote": {
+            "sequence": 696,
+            "monotonicMs": 1118519.9428,
+            "price": 40
+          },
+          "quoteAgeMs": 145884.9371999998,
+          "requiredGold": 440,
+          "satisfied": true,
+          "planningOnly": true,
+          "preparationOnly": true,
+          "measurementCredit": false
+        }
+      ],
+      "fundingCapitalProofCount": 8,
+      "fundingCapitalProofsTruncated": false,
+      "actualDirectApproaches": [
+        {
+          "objectId": 206515,
+          "sequence": 702,
+          "observedSnapshotSequence": 702,
+          "monotonicMs": 1118545.7987,
+          "from": {
+            "x": 288,
+            "y": 616
+          },
+          "target": {
+            "x": 276,
+            "y": 629
+          },
+          "ownerId": 1000,
+          "ownerName": "L370e2a0r",
+          "map": "0",
+          "navigationCalls": 1,
+          "status": "target-lost",
+          "reason": "hostile-near-deer",
+          "endedSequence": 814,
+          "elapsedMs": 17746.08260000008
+        },
+        {
+          "objectId": 206500,
+          "sequence": 817,
+          "observedSnapshotSequence": 817,
+          "monotonicMs": 1136322.6215,
+          "from": {
+            "x": 270,
+            "y": 635
+          },
+          "target": {
+            "x": 256,
+            "y": 621
+          },
+          "ownerId": 1000,
+          "ownerName": "L370e2a0r",
+          "map": "0",
+          "navigationCalls": 1,
+          "status": "target-lost",
+          "reason": "missing",
+          "endedSequence": 838,
+          "elapsedMs": 1362.3657000001986
+        },
+        {
+          "objectId": 206706,
+          "sequence": 841,
+          "observedSnapshotSequence": 841,
+          "monotonicMs": 1137715.0917,
+          "from": {
+            "x": 274,
+            "y": 629
+          },
+          "target": {
+            "x": 261,
+            "y": 615
+          },
+          "ownerId": 1000,
+          "ownerName": "L370e2a0r",
+          "map": "0",
+          "navigationCalls": 1,
+          "status": "target-lost",
+          "reason": "missing",
+          "endedSequence": 865,
+          "elapsedMs": 1925.4420000000391
+        },
+        {
+          "objectId": 206717,
+          "sequence": 869,
+          "observedSnapshotSequence": 869,
+          "monotonicMs": 1139670.8877,
+          "from": {
+            "x": 278,
+            "y": 626
+          },
+          "target": {
+            "x": 288,
+            "y": 624
+          },
+          "ownerId": 1000,
+          "ownerName": "L370e2a0r",
+          "map": "0",
+          "navigationCalls": 0,
+          "status": "target-lost",
+          "reason": "hostile-near-deer",
+          "endedSequence": 869,
+          "elapsedMs": 0.0655999998562038
+        },
+        {
+          "objectId": 206302,
+          "sequence": 872,
+          "observedSnapshotSequence": 872,
+          "monotonicMs": 1139996.493,
+          "from": {
+            "x": 278,
+            "y": 626
+          },
+          "target": {
+            "x": 287,
+            "y": 611
+          },
+          "ownerId": 1000,
+          "ownerName": "L370e2a0r",
+          "map": "0",
+          "navigationCalls": 0,
+          "status": "target-lost",
+          "reason": "hostile-near-deer",
+          "endedSequence": 872,
+          "elapsedMs": 0.060800000093877316
+        },
+        {
+          "objectId": 206536,
+          "sequence": 1062,
+          "observedSnapshotSequence": 1061,
+          "monotonicMs": 1165799.4643,
+          "from": {
+            "x": 291,
+            "y": 604
+          },
+          "target": {
+            "x": 291,
+            "y": 600
+          },
+          "ownerId": 1000,
+          "ownerName": "L370e2a0r",
+          "map": "0",
+          "navigationCalls": 9,
+          "status": "completed",
+          "reason": null,
+          "endedSequence": 1167,
+          "elapsedMs": 13495.482799999882
+        },
+        {
+          "objectId": 206714,
+          "sequence": 1204,
+          "observedSnapshotSequence": 1204,
+          "monotonicMs": 1209433.5293,
+          "from": {
+            "x": 290,
+            "y": 601
+          },
+          "target": {
+            "x": 275,
+            "y": 611
+          },
+          "ownerId": 1000,
+          "ownerName": "L370e2a0r",
+          "map": "0",
+          "navigationCalls": 11,
+          "status": "completed",
+          "reason": null,
+          "endedSequence": 1380,
+          "elapsedMs": 18848.44530000002
+        }
+      ],
+      "proofs": [
+        {
+          "kind": "sale",
+          "sequence": 1452,
+          "monotonicMs": 1265457.693,
+          "ackSequence": 1450,
+          "quantity": 1,
+          "gold": 230
+        },
+        {
+          "kind": "sale",
+          "sequence": 1456,
+          "monotonicMs": 1266386.5721,
+          "ackSequence": 1454,
+          "quantity": 1,
+          "gold": 254
+        },
+        {
+          "kind": "purchase",
+          "sequence": 1469,
+          "monotonicMs": 1267394.3911,
+          "quantity": 11,
+          "gold": 440
+        }
+      ],
+      "commandCounts": {
+        "clientVersion": 12,
+        "interact": 3,
+        "selectNpcDialog": 3,
+        "walk": 57,
+        "run": 37,
+        "attackV2": 20,
+        "harvest": 13,
+        "sellItem": 2,
+        "buyItem": 1
+      }
+    },
+    {
+      "name": "L370e2a0s",
+      "characterIndex": 29,
+      "before": {
+        "sequence": 688,
+        "monotonicMs": 1278091.8631,
+        "ownerId": 1000,
+        "ownerName": "L370e2a0s",
+        "map": "0",
+        "x": 288,
+        "y": 616,
+        "hp": 18,
+        "maxHp": 18,
+        "inSafeZone": true,
+        "nearbyHostileCount": 3,
+        "playerPoison": null,
+        "ownerPoison": null,
+        "dazed": false,
+        "gold": 0,
+        "hpStock": 1,
+        "venison": 0,
+        "saleRemaining": null,
+        "npcId": null,
+        "buyLink": false,
+        "sellLink": false
+      },
+      "after": {
+        "ownerId": 1000,
+        "ownerName": "L370e2a0s",
+        "map": "0",
+        "x": 285,
+        "y": 617,
+        "hp": 18,
+        "maxHp": 18,
+        "inSafeZone": true,
+        "nearbyHostileCount": 3,
+        "playerPoison": null,
+        "ownerPoison": null,
+        "dazed": false,
+        "gold": 58,
+        "hpStock": 12,
+        "venison": 0,
+        "saleRemaining": null,
+        "npcId": null,
+        "buyLink": false,
+        "sellLink": false,
+        "currentNearbyHostileCount": 3,
+        "sequence": 1083,
+        "monotonicMs": 1379595.8207,
+        "actualStagingReached": true,
+        "stagingProtection": "authoritative-safe-zone-normal-monsters"
+      },
+      "funding": {
+        "method": "DeerVenison",
+        "collected": 2,
+        "hunts": 2,
+        "beforeCount": 0,
+        "afterCount": 2,
+        "completionMode": "actual-capital",
+        "estimatedRequiredCount": 3,
+        "huntAttempts": 2,
+        "budgetSatisfied": true
+      },
+      "fundingCapitalProofs": [
+        {
+          "sequence": 697,
+          "monotonicMs": 1279104.5163,
+          "gold": 0,
+          "hpStock": 1,
+          "items": [],
+          "venisonItemCount": 0,
+          "itemsTruncated": false,
+          "capital": 0,
+          "initialHpPrice": 40,
+          "initialHpQuote": {
+            "sequence": 694,
+            "monotonicMs": 1279083.7094,
+            "price": 40
+          },
+          "quoteAgeMs": 20.806899999966845,
+          "requiredGold": 440,
+          "satisfied": false,
+          "planningOnly": true,
+          "preparationOnly": true,
+          "measurementCredit": false
+        },
+        {
+          "sequence": 834,
+          "monotonicMs": 1325435.2559,
+          "gold": 0,
+          "hpStock": 1,
+          "items": [
+            {
+              "uniqueId": 4,
+              "quantity": 1,
+              "sellValue": 246,
+              "value": 246
+            }
+          ],
+          "venisonItemCount": 1,
+          "itemsTruncated": false,
+          "capital": 246,
+          "initialHpPrice": 40,
+          "initialHpQuote": {
+            "sequence": 694,
+            "monotonicMs": 1279083.7094,
+            "price": 40
+          },
+          "quoteAgeMs": 46351.54649999994,
+          "requiredGold": 440,
+          "satisfied": false,
+          "planningOnly": true,
+          "preparationOnly": true,
+          "measurementCredit": false
+        },
+        {
+          "sequence": 995,
+          "monotonicMs": 1369968.7027,
+          "gold": 0,
+          "hpStock": 1,
+          "items": [
+            {
+              "uniqueId": 4,
+              "quantity": 1,
+              "sellValue": 246,
+              "value": 246
+            },
+            {
+              "uniqueId": 5,
+              "quantity": 1,
+              "sellValue": 252,
+              "value": 252
+            }
+          ],
+          "venisonItemCount": 2,
+          "itemsTruncated": false,
+          "capital": 498,
+          "initialHpPrice": 40,
+          "initialHpQuote": {
+            "sequence": 694,
+            "monotonicMs": 1279083.7094,
+            "price": 40
+          },
+          "quoteAgeMs": 90884.99329999997,
+          "requiredGold": 440,
+          "satisfied": true,
+          "planningOnly": true,
+          "preparationOnly": true,
+          "measurementCredit": false
+        }
+      ],
+      "fundingCapitalProofCount": 3,
+      "fundingCapitalProofsTruncated": false,
+      "actualDirectApproaches": [
+        {
+          "objectId": 206524,
+          "sequence": 700,
+          "observedSnapshotSequence": 700,
+          "monotonicMs": 1279125.2503,
+          "from": {
+            "x": 288,
+            "y": 616
+          },
+          "target": {
+            "x": 294,
+            "y": 606
+          },
+          "ownerId": 1000,
+          "ownerName": "L370e2a0s",
+          "map": "0",
+          "navigationCalls": 9,
+          "status": "completed",
+          "reason": null,
+          "endedSequence": 800,
+          "elapsedMs": 16168.709100000095
+        },
+        {
+          "objectId": 206324,
+          "sequence": 834,
+          "observedSnapshotSequence": 834,
+          "monotonicMs": 1325435.643,
+          "from": {
+            "x": 294,
+            "y": 607
+          },
+          "target": {
+            "x": 289,
+            "y": 604
+          },
+          "ownerId": 1000,
+          "ownerName": "L370e2a0s",
+          "map": "0",
+          "navigationCalls": 10,
+          "status": "completed",
+          "reason": null,
+          "endedSequence": 956,
+          "elapsedMs": 14456.213300000178
+        }
+      ],
+      "proofs": [
+        {
+          "kind": "sale",
+          "sequence": 1010,
+          "monotonicMs": 1371018.8843,
+          "ackSequence": 1008,
+          "quantity": 1,
+          "gold": 246
+        },
+        {
+          "kind": "sale",
+          "sequence": 1014,
+          "monotonicMs": 1371940.2033,
+          "ackSequence": 1012,
+          "quantity": 1,
+          "gold": 252
+        },
+        {
+          "kind": "purchase",
+          "sequence": 1027,
+          "monotonicMs": 1372956.0855,
+          "quantity": 11,
+          "gold": 440
+        }
+      ],
+      "commandCounts": {
+        "clientVersion": 6,
+        "interact": 3,
+        "selectNpcDialog": 3,
+        "walk": 12,
+        "run": 9,
+        "attackV2": 19,
+        "harvest": 12,
+        "sellItem": 2,
+        "buyItem": 1
+      }
+    }
+  ],
+  "actualApproachLosses": [
+    {
+      "actor": "L370e2a0m",
+      "characterIndex": 23,
+      "objectId": 206706,
+      "sequence": 1145,
+      "observedSnapshotSequence": 1144,
+      "monotonicMs": 251088.0416,
+      "from": {
+        "x": 273,
+        "y": 630
+      },
+      "target": {
+        "x": 261,
+        "y": 615
+      },
+      "ownerId": 1000,
+      "ownerName": "L370e2a0m",
+      "map": "0",
+      "navigationCalls": 1,
+      "status": "target-lost",
+      "reason": "missing",
+      "endedSequence": 1173,
+      "elapsedMs": 2011.7061000000103
+    },
+    {
+      "actor": "L370e2a0r",
+      "characterIndex": 28,
+      "objectId": 206515,
+      "sequence": 702,
+      "observedSnapshotSequence": 702,
+      "monotonicMs": 1118545.7987,
+      "from": {
+        "x": 288,
+        "y": 616
+      },
+      "target": {
+        "x": 276,
+        "y": 629
+      },
+      "ownerId": 1000,
+      "ownerName": "L370e2a0r",
+      "map": "0",
+      "navigationCalls": 1,
+      "status": "target-lost",
+      "reason": "hostile-near-deer",
+      "endedSequence": 814,
+      "elapsedMs": 17746.08260000008
+    },
+    {
+      "actor": "L370e2a0r",
+      "characterIndex": 28,
+      "objectId": 206500,
+      "sequence": 817,
+      "observedSnapshotSequence": 817,
+      "monotonicMs": 1136322.6215,
+      "from": {
+        "x": 270,
+        "y": 635
+      },
+      "target": {
+        "x": 256,
+        "y": 621
+      },
+      "ownerId": 1000,
+      "ownerName": "L370e2a0r",
+      "map": "0",
+      "navigationCalls": 1,
+      "status": "target-lost",
+      "reason": "missing",
+      "endedSequence": 838,
+      "elapsedMs": 1362.3657000001986
+    },
+    {
+      "actor": "L370e2a0r",
+      "characterIndex": 28,
+      "objectId": 206706,
+      "sequence": 841,
+      "observedSnapshotSequence": 841,
+      "monotonicMs": 1137715.0917,
+      "from": {
+        "x": 274,
+        "y": 629
+      },
+      "target": {
+        "x": 261,
+        "y": 615
+      },
+      "ownerId": 1000,
+      "ownerName": "L370e2a0r",
+      "map": "0",
+      "navigationCalls": 1,
+      "status": "target-lost",
+      "reason": "missing",
+      "endedSequence": 865,
+      "elapsedMs": 1925.4420000000391
+    }
+  ],
+  "approachScope": "Only status target-lost with navigationCalls>0 is called direct approach loss. Selection hostile-near-deer zero-navigation rejections remain distinct; no blanket AOI-loss causation claim.",
+  "failed30": {
+    "name": "L370e2a0t",
+    "characterIndex": 30,
+    "before": {
+      "sequence": 688,
+      "monotonicMs": 1384329.499,
+      "ownerId": 1000,
+      "ownerName": "L370e2a0t",
+      "map": "0",
+      "x": 288,
+      "y": 616,
+      "hp": 18,
+      "maxHp": 18,
+      "hpStock": 1,
+      "gold": 0,
+      "venison": 0,
+      "inSafeZone": true,
+      "nearbyHostileCount": 3,
+      "playerPoison": null,
+      "ownerPoison": null,
+      "dazed": false
+    },
+    "after": null,
+    "freshReadiness": null,
+    "originalFailedSummaryNormalLogout": false,
+    "commands": 172,
+    "movementCommands": 161,
+    "commandCounts": {
+      "clientVersion": 9,
+      "interact": 1,
+      "selectNpcDialog": 1,
+      "walk": 48,
+      "run": 113
+    },
+    "reportElapsedMs": 108244.99369999999,
+    "moduleElapsedMs": 108243.90230000019,
+    "purchased": 0,
+    "soldVenison": 0,
+    "funding": null,
+    "proofs": [],
+    "fundingCapitalProofs": [
+      {
+        "sequence": 700,
+        "monotonicMs": 1385348.1951,
+        "gold": 0,
+        "hpStock": 1,
+        "items": [],
+        "venisonItemCount": 0,
+        "itemsTruncated": false,
+        "capital": 0,
+        "initialHpPrice": 40,
+        "initialHpQuote": {
+          "sequence": 694,
+          "monotonicMs": 1385323.2224,
+          "price": 40
+        },
+        "quoteAgeMs": 24.972699999809265,
+        "requiredGold": 440,
+        "satisfied": false,
+        "planningOnly": true,
+        "preparationOnly": true,
+        "measurementCredit": false
+      },
+      {
+        "sequence": 703,
+        "monotonicMs": 1385371.0339,
+        "gold": 0,
+        "hpStock": 1,
+        "items": [],
+        "venisonItemCount": 0,
+        "itemsTruncated": false,
+        "capital": 0,
+        "initialHpPrice": 40,
+        "initialHpQuote": {
+          "sequence": 694,
+          "monotonicMs": 1385323.2224,
+          "price": 40
+        },
+        "quoteAgeMs": 47.81149999983609,
+        "requiredGold": 440,
+        "satisfied": false,
+        "planningOnly": true,
+        "preparationOnly": true,
+        "measurementCredit": false
+      },
+      {
+        "sequence": 706,
+        "monotonicMs": 1386320.5551,
+        "gold": 0,
+        "hpStock": 1,
+        "items": [],
+        "venisonItemCount": 0,
+        "itemsTruncated": false,
+        "capital": 0,
+        "initialHpPrice": 40,
+        "initialHpQuote": {
+          "sequence": 694,
+          "monotonicMs": 1385323.2224,
+          "price": 40
+        },
+        "quoteAgeMs": 997.3326999999117,
+        "requiredGold": 440,
+        "satisfied": false,
+        "planningOnly": true,
+        "preparationOnly": true,
+        "measurementCredit": false
+      },
+      {
+        "sequence": 709,
+        "monotonicMs": 1386351.8708,
+        "gold": 0,
+        "hpStock": 1,
+        "items": [],
+        "venisonItemCount": 0,
+        "itemsTruncated": false,
+        "capital": 0,
+        "initialHpPrice": 40,
+        "initialHpQuote": {
+          "sequence": 694,
+          "monotonicMs": 1385323.2224,
+          "price": 40
+        },
+        "quoteAgeMs": 1028.6483999998309,
+        "requiredGold": 440,
+        "satisfied": false,
+        "planningOnly": true,
+        "preparationOnly": true,
+        "measurementCredit": false
+      },
+      {
+        "sequence": 830,
+        "monotonicMs": 1407559.2612,
+        "gold": 0,
+        "hpStock": 1,
+        "items": [],
+        "venisonItemCount": 0,
+        "itemsTruncated": false,
+        "capital": 0,
+        "initialHpPrice": 40,
+        "initialHpQuote": {
+          "sequence": 694,
+          "monotonicMs": 1385323.2224,
+          "price": 40
+        },
+        "quoteAgeMs": 22236.03879999998,
+        "requiredGold": 440,
+        "satisfied": false,
+        "planningOnly": true,
+        "preparationOnly": true,
+        "measurementCredit": false
+      },
+      {
+        "sequence": 833,
+        "monotonicMs": 1407590.6985,
+        "gold": 0,
+        "hpStock": 1,
+        "items": [],
+        "venisonItemCount": 0,
+        "itemsTruncated": false,
+        "capital": 0,
+        "initialHpPrice": 40,
+        "initialHpQuote": {
+          "sequence": 694,
+          "monotonicMs": 1385323.2224,
+          "price": 40
+        },
+        "quoteAgeMs": 22267.476099999854,
+        "requiredGold": 440,
+        "satisfied": false,
+        "planningOnly": true,
+        "preparationOnly": true,
+        "measurementCredit": false
+      },
+      {
+        "sequence": 836,
+        "monotonicMs": 1407777.1251,
+        "gold": 0,
+        "hpStock": 1,
+        "items": [],
+        "venisonItemCount": 0,
+        "itemsTruncated": false,
+        "capital": 0,
+        "initialHpPrice": 40,
+        "initialHpQuote": {
+          "sequence": 694,
+          "monotonicMs": 1385323.2224,
+          "price": 40
+        },
+        "quoteAgeMs": 22453.902699999977,
+        "requiredGold": 440,
+        "satisfied": false,
+        "planningOnly": true,
+        "preparationOnly": true,
+        "measurementCredit": false
+      }
+    ],
+    "fundingCapitalProofCount": 7,
+    "fundingTargetRejectionCount": 6,
+    "fundingTargetRejections": [
+      {
+        "action": "attack",
+        "targetId": 206302,
+        "phase": "selection",
+        "reason": "hostile-near-deer",
+        "targetKind": "monster",
+        "targetName": "Deer",
+        "targetDead": false,
+        "targetHp": 25,
+        "targetIdType": "number",
+        "matches": 1,
+        "blocker": {
+          "objectId": 206641,
+          "name": "Scarecrow",
+          "x": 287,
+          "y": 616,
+          "hp": 20,
+          "ai": 0
+        },
+        "snapshotSequence": 700,
+        "observedSnapshotSequence": 700,
+        "observedSnapshotMonotonicMs": 1385348.1951,
+        "ownerId": 1000,
+        "ownerName": "L370e2a0t",
+        "map": "0"
+      },
+      {
+        "action": "attack",
+        "targetId": 206717,
+        "phase": "selection",
+        "reason": "hostile-near-deer",
+        "targetKind": "monster",
+        "targetName": "Deer",
+        "targetDead": false,
+        "targetHp": 25,
+        "targetIdType": "number",
+        "matches": 1,
+        "blocker": {
+          "objectId": 206626,
+          "name": "Scarecrow",
+          "x": 286,
+          "y": 628,
+          "hp": 20,
+          "ai": 0
+        },
+        "snapshotSequence": 703,
+        "observedSnapshotSequence": 703,
+        "observedSnapshotMonotonicMs": 1385371.0339,
+        "ownerId": 1000,
+        "ownerName": "L370e2a0t",
+        "map": "0"
+      },
+      {
+        "action": "attack",
+        "targetId": 206711,
+        "phase": "selection",
+        "reason": "hostile-near-deer",
+        "targetKind": "monster",
+        "targetName": "Deer",
+        "targetDead": false,
+        "targetHp": 25,
+        "targetIdType": "number",
+        "matches": 1,
+        "blocker": {
+          "objectId": 206604,
+          "name": "Scarecrow",
+          "x": 275,
+          "y": 600,
+          "hp": 20,
+          "ai": 0
+        },
+        "snapshotSequence": 706,
+        "observedSnapshotSequence": 706,
+        "observedSnapshotMonotonicMs": 1386320.5551,
+        "ownerId": 1000,
+        "ownerName": "L370e2a0t",
+        "map": "0"
+      },
+      {
+        "action": "attack",
+        "targetId": 206320,
+        "phase": "selection",
+        "reason": "hostile-near-deer",
+        "targetKind": "monster",
+        "targetName": "Deer",
+        "targetDead": false,
+        "targetHp": 25,
+        "targetIdType": "number",
+        "matches": 1,
+        "blocker": {
+          "objectId": 206604,
+          "name": "Scarecrow",
+          "x": 275,
+          "y": 600,
+          "hp": 20,
+          "ai": 0
+        },
+        "snapshotSequence": 827,
+        "observedSnapshotSequence": 827,
+        "observedSnapshotMonotonicMs": 1406768.5945,
+        "ownerId": 1000,
+        "ownerName": "L370e2a0t",
+        "map": "0"
+      },
+      {
+        "action": "attack",
+        "targetId": 206545,
+        "phase": "selection",
+        "reason": "hostile-near-deer",
+        "targetKind": "monster",
+        "targetName": "Deer",
+        "targetDead": false,
+        "targetHp": 25,
+        "targetIdType": "number",
+        "matches": 1,
+        "blocker": {
+          "objectId": 206604,
+          "name": "Scarecrow",
+          "x": 275,
+          "y": 600,
+          "hp": 20,
+          "ai": 0
+        },
+        "snapshotSequence": 830,
+        "observedSnapshotSequence": 830,
+        "observedSnapshotMonotonicMs": 1407559.2612,
+        "ownerId": 1000,
+        "ownerName": "L370e2a0t",
+        "map": "0"
+      },
+      {
+        "action": "attack",
+        "targetId": 206700,
+        "phase": "selection",
+        "reason": "hostile-near-deer",
+        "targetKind": "monster",
+        "targetName": "Deer",
+        "targetDead": false,
+        "targetHp": 25,
+        "targetIdType": "number",
+        "matches": 1,
+        "blocker": {
+          "objectId": 206604,
+          "name": "Scarecrow",
+          "x": 275,
+          "y": 600,
+          "hp": 20,
+          "ai": 0
+        },
+        "snapshotSequence": 833,
+        "observedSnapshotSequence": 833,
+        "observedSnapshotMonotonicMs": 1407590.6985,
+        "ownerId": 1000,
+        "ownerName": "L370e2a0t",
+        "map": "0"
+      }
+    ],
+    "actualDirectApproaches": [
+      {
+        "objectId": 206302,
+        "sequence": 700,
+        "observedSnapshotSequence": 700,
+        "monotonicMs": 1385348.408,
+        "from": {
+          "x": 288,
+          "y": 616
+        },
+        "target": {
+          "x": 287,
+          "y": 611
+        },
+        "ownerId": 1000,
+        "ownerName": "L370e2a0t",
+        "map": "0",
+        "navigationCalls": 0,
+        "status": "target-lost",
+        "reason": "hostile-near-deer",
+        "endedSequence": 700,
+        "elapsedMs": 0.08019999996758997
+      },
+      {
+        "objectId": 206717,
+        "sequence": 703,
+        "observedSnapshotSequence": 703,
+        "monotonicMs": 1385396.6046,
+        "from": {
+          "x": 288,
+          "y": 616
+        },
+        "target": {
+          "x": 288,
+          "y": 624
+        },
+        "ownerId": 1000,
+        "ownerName": "L370e2a0t",
+        "map": "0",
+        "navigationCalls": 0,
+        "status": "target-lost",
+        "reason": "hostile-near-deer",
+        "endedSequence": 703,
+        "elapsedMs": 0.07710000011138618
+      },
+      {
+        "objectId": 206711,
+        "sequence": 706,
+        "observedSnapshotSequence": 706,
+        "monotonicMs": 1386346.3509,
+        "from": {
+          "x": 288,
+          "y": 616
+        },
+        "target": {
+          "x": 275,
+          "y": 602
+        },
+        "ownerId": 1000,
+        "ownerName": "L370e2a0t",
+        "map": "0",
+        "navigationCalls": 0,
+        "status": "target-lost",
+        "reason": "hostile-near-deer",
+        "endedSequence": 706,
+        "elapsedMs": 0.05630000005476177
+      },
+      {
+        "objectId": 206320,
+        "sequence": 827,
+        "observedSnapshotSequence": 827,
+        "monotonicMs": 1407553.2062,
+        "from": {
+          "x": 283,
+          "y": 609
+        },
+        "target": {
+          "x": 281,
+          "y": 596
+        },
+        "ownerId": 1000,
+        "ownerName": "L370e2a0t",
+        "map": "0",
+        "navigationCalls": 0,
+        "status": "target-lost",
+        "reason": "hostile-near-deer",
+        "endedSequence": 827,
+        "elapsedMs": 0.09550000005401671
+      },
+      {
+        "objectId": 206545,
+        "sequence": 830,
+        "observedSnapshotSequence": 830,
+        "monotonicMs": 1407585.208,
+        "from": {
+          "x": 283,
+          "y": 609
+        },
+        "target": {
+          "x": 271,
+          "y": 596
+        },
+        "ownerId": 1000,
+        "ownerName": "L370e2a0t",
+        "map": "0",
+        "navigationCalls": 0,
+        "status": "target-lost",
+        "reason": "hostile-near-deer",
+        "endedSequence": 830,
+        "elapsedMs": 0.07299999985843897
+      },
+      {
+        "objectId": 206700,
+        "sequence": 833,
+        "observedSnapshotSequence": 833,
+        "monotonicMs": 1407616.2565,
+        "from": {
+          "x": 283,
+          "y": 609
+        },
+        "target": {
+          "x": 270,
+          "y": 599
+        },
+        "ownerId": 1000,
+        "ownerName": "L370e2a0t",
+        "map": "0",
+        "navigationCalls": 0,
+        "status": "target-lost",
+        "reason": "hostile-near-deer",
+        "endedSequence": 833,
+        "elapsedMs": 0.10790000017732382
+      }
+    ],
+    "pathHazardCount": 1,
+    "pathHazards": [
+      {
+        "reason": "hostile-clearance",
+        "action": "run",
+        "phase": "before-movement",
+        "radius": 8,
+        "from": {
+          "x": 283,
+          "y": 609
+        },
+        "physicalCells": [
+          {
+            "x": 284,
+            "y": 608
+          },
+          {
+            "x": 285,
+            "y": 607
+          }
+        ],
+        "blocker": {
+          "objectId": 206644,
+          "name": "Scarecrow",
+          "x": 293,
+          "y": 614,
+          "hp": 20,
+          "ai": 0
+        },
+        "snapshotSequence": 824,
+        "observedSnapshotSequence": 709,
+        "ownerId": 1000,
+        "ownerName": "L370e2a0t",
+        "map": "0"
+      }
+    ],
+    "pathReplanCount": 0,
+    "finalPublicTransform": {
+      "objectId": 1000,
+      "name": "L370e2a0t",
+      "x": 296,
+      "y": 616
+    },
+    "ordinaryLogoutAction": {
+      "type": "preparationAction",
+      "phase": "preparation",
+      "at": 1793077803829,
+      "actor": "L370e2a0t",
+      "kind": "logOut",
+      "status": "success",
+      "latencyMs": 314.9057999998331
+    },
+    "limits": "After/readiness remain null. Final exact cold Store HP/stock not extracted. Navigation successful-step limit222 and module161 movement commands are different counters. The single recorded hazard is not proven to cause the terminal navigation-budget failure; original false retained."
+  },
+  "normalCleanupComplete": true,
+  "ownedCleanupChecks": {
+    "sixCountersZero": true,
+    "monitorStoppedBeforeGateway": true,
+    "monitorExitZero": true,
+    "monitorTerminalPreserved": true,
+    "monitorSamplerAbsent": true,
+    "normalOwnedShutdown": true,
+    "gatewayProcessAbsent": true,
+    "driverProcessAbsent": true,
+    "monitorProcessAbsent": true,
+    "portsFree": true,
+    "postSourceUnchanged": true
+  },
+  "ownedExitCodes": {
+    "driver": 1,
+    "gateway": 0,
+    "monitor": 0
+  },
+  "rootIndependentCleanup": {
+    "checkedAt": "2026-10-27T05:12:01.2355256Z",
+    "gatewayPid": 62924,
+    "gatewayPidAbsent": true,
+    "portsFree": true,
+    "listeners": []
+  },
+  "coldBankEligible": false,
+  "measurementPerformed": false,
+  "measuredCcuAcceptancePerformed": false,
+  "sustainableTwoHourSupplyProven": false,
+  "capacityAccepted": false,
+  "p0Accepted": false,
+  "futureTargetScope": "User future target is500online/500continuously fighting; this is not a measured result or a change to the original100 P0 profile.",
+  "privacy": "41 explicit current public text originals only; no Store/pool/ledger/secrets bodies, recovery journals, raw Gateway logs, full recordings or EXE. Current cold private bank remains untouched externally.",
+  "rawByteVerification": {
+    "destinationExact": true,
+    "sourcesUnchangedDuringCopy": true,
+    "actualRootRawLogPinsMatched": true
+  },
+  "copies": [
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v13\\source-lib-v1.mjs",
+      "file": "source-lib-v1.mjs",
+      "bytes": 18471,
+      "sha256": "bdbcb65eb6027f8d0c0812ab6975b5d53beee28d133be36d8cdf75593f57ca16"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v13\\copy-source-bank-v1.mjs",
+      "file": "copy-source-bank-v1.mjs",
+      "bytes": 11186,
+      "sha256": "2d916bdf2c38cadab2e97ca11c3bad49fa25240c4106c46bf3cf9de0b4c9561b"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v13\\freeze-prepare-v1.mjs",
+      "file": "freeze-prepare-v1.mjs",
+      "bytes": 8149,
+      "sha256": "7b03fa2f9c921297ddc5d5a5f03ca26e59bc6bf298e2abea5baa33a5d2d33812"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v13\\run-owned-prepare-v1.mjs",
+      "file": "run-owned-prepare-v1.mjs",
+      "bytes": 25150,
+      "sha256": "e4c993319608189858cd50bb90a59583f2b7905da004d8c53c6433129007fa93"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v13\\owned-child-v1.mjs",
+      "file": "owned-child-v1.mjs",
+      "bytes": 2201,
+      "sha256": "7845fc2e212bb15b0e036e33753c9e155a9d2152c15098f9ab001dd1f9b74375"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v13\\prepare-config-pending-v1.json",
+      "file": "prepare-config-pending-v1.json",
+      "bytes": 7130,
+      "sha256": "65654735e85e966e03d6b9497179fe556eba3c09a477005672458b0951c8c303"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v13\\source-bank-plan-pending-v1.json",
+      "file": "source-bank-plan-pending-v1.json",
+      "bytes": 15000,
+      "sha256": "4f2954a95869fdc7d6f727f39a8457839a2b85f303928de2b7fd87fbfb498dd5"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v13\\backend-release-binding-pending-v1.json",
+      "file": "backend-release-binding-pending-v1.json",
+      "bytes": 1513,
+      "sha256": "37604e54374fe03f1ca7c9191a890e0791ebb148b167deca27b335afd1979173"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v13\\root-final-binding-receipt-v1.json",
+      "file": "root-final-binding-receipt-v1.json",
+      "bytes": 2350,
+      "sha256": "af5580d14ead2288d4cfc6fd77cf22746d691c3aff53a251535c6b9fbb7bb1ba"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v13\\frozen-source-v1.json",
+      "file": "frozen-source-v1.json",
+      "bytes": 100377,
+      "sha256": "fb4afeef26907e69c8854b7680bc0a3e3e258f326b652dafe8cf8895ea9116c2"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v13\\derivation-v1.json",
+      "file": "derivation-v1.json",
+      "bytes": 38590,
+      "sha256": "254667506123ea5dc4d2a235417b211c36453929206ec85770e6f7926bda2e3c"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v13\\syntax-checks-v1.json",
+      "file": "syntax-checks-v1.json",
+      "bytes": 2737,
+      "sha256": "1513e93c7b61ca6d6b278364a16deabfae779c52afcb6caf08a1f573737a46ee"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v13\\preparation-v1.json",
+      "file": "preparation-v1.json",
+      "bytes": 6613,
+      "sha256": "78c9a8a9cdc4d5f016755ceda5168421ea3b9e71ff8d73b9fdf00f43e810ff8e"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v13\\prepare-config-before-root-final-v1.json",
+      "file": "prepare-config-before-root-final-v1.json",
+      "bytes": 6805,
+      "sha256": "96216e9690b19aa9c8829e1f67d6fca4bc0318e1b845e0b500b190069a9b2bbf"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v13\\backend-release-binding-before-root-final-v1.json",
+      "file": "backend-release-binding-before-root-final-v1.json",
+      "bytes": 1216,
+      "sha256": "0e68b64abdf8d4b579c42295d956117099b41be7730fd3fdfedf0c9908e64ef7"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v13\\root-pending-tools-review-v1.json",
+      "file": "root-pending-tools-review-v1.json",
+      "bytes": 3641,
+      "sha256": "87de25011396e97673ea78afa4fd7cea93271c9a947a9c1edfc63d384a130834"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v13\\root-full16-reuse-tools-review-v1.json",
+      "file": "root-full16-reuse-tools-review-v1.json",
+      "bytes": 588,
+      "sha256": "3b54b17ff32715ab66e94cc762999f62f3b6c39e47498017d0a17178d4023321"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v13\\episode\\source-bank-copy-receipt-v1.json",
+      "file": "source-bank-copy-receipt-v1.json",
+      "bytes": 11184,
+      "sha256": "2028d1c757eefa2b3d72add58366efacbaf5c99495c0de6cf855c59fc00a1c88"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v13\\episode\\preparation-episode-receipt-v1.json",
+      "file": "preparation-episode-receipt-v1.json",
+      "bytes": 6109,
+      "sha256": "66d10134c6bc6749e810eca3ba4e9de6e692eae6f409027b0f818bf57ed834c9"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v13\\episode\\prepared-index-v1.json",
+      "file": "prepared-index-v1.json",
+      "bytes": 8417,
+      "sha256": "3f5b8b62308e82a1198c57ebb8f31ae60e819487afd495114cc18252bd18c47c"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v13\\episode\\cleanup-v1.json",
+      "file": "cleanup-v1.json",
+      "bytes": 1037,
+      "sha256": "6170691f81afb7e52414d37164200d9f5fa59579f80b7c5742d30d365bc6f37c"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v13\\episode\\owned-process-v1.json",
+      "file": "owned-process-v1.json",
+      "bytes": 742,
+      "sha256": "97cd1ce0827d660e711337711438b6f40dd916c7aa1134b09827680b44cc81a1"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v13\\episode\\health-before-v1.json",
+      "file": "health-before-v1.json",
+      "bytes": 1122,
+      "sha256": "90febb39f3f3a5f851bc4fd81a61da764c3a6cf7a3c5d84fbd1e3c2763b41dee"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v13\\episode\\health-after-v1.json",
+      "file": "health-after-v1.json",
+      "bytes": 476,
+      "sha256": "db0ccafbaa0764878c6f15fe9c0a377fbe14fbe7701c55a4a5a2b1f48f56cd58"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v13\\episode\\run-intent-v1.json",
+      "file": "run-intent-v1.json",
+      "bytes": 1977,
+      "sha256": "cadf0facd5fbaea70d479877922cbbfd9e6120dd211932f819b17746dc071c2f"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v13\\episode\\root-independent-cleanup-v1.json",
+      "file": "root-independent-cleanup-v1.json",
+      "bytes": 203,
+      "sha256": "6e425b2706a77722a16e7bd6634cdb6ac40e3734a301e45a9149c4303b2d6dd7"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v13\\episode\\reports\\1793076310690-5c1690ab.preparation-report.json",
+      "file": "1793076310690-5c1690ab.preparation-report.json",
+      "bytes": 103227,
+      "sha256": "2aa500a5b57ca6500b9baf44bd66b5078fa9b5bdf7cc784e41703b510713077e"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v13\\episode\\reports\\1793076310690-5c1690ab.preparation.jsonl",
+      "file": "1793076310690-5c1690ab.preparation.jsonl",
+      "bytes": 7560795,
+      "sha256": "5e7c7438aae57970d5af6bff3715bb09bf551515fd3bfbb41d16db555519dc61"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\root-capacity-preparation-validation-v13\\root-focused-receipt-v1.json",
+      "file": "node-v13/root-focused-receipt-v1.json",
+      "bytes": 20865,
+      "sha256": "294c4d3ac24d8dcf843504764e7b4e0ed9268551c836e53d6ef1ee25f79f4118"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\root-capacity-preparation-validation-v13\\complete-preparation-and-protected-navigation.stdout.log",
+      "file": "node-v13/complete-preparation-and-protected-navigation.stdout.log",
+      "bytes": 63072,
+      "sha256": "fd9640bb9d70f66a2f2036035331132d0055b2d6f1c7628524ad866e57efa36f"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\root-capacity-preparation-validation-v13\\complete-preparation-and-protected-navigation.stderr.log",
+      "file": "node-v13/complete-preparation-and-protected-navigation.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\root-capacity-preparation-validation-v13\\ordinary-economy-and-navigation-dependencies.stdout.log",
+      "file": "node-v13/ordinary-economy-and-navigation-dependencies.stdout.log",
+      "bytes": 77740,
+      "sha256": "87eca892da3efb5462c29105f87198301bb24bd13a821e5a5ac20173e63efbf5"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\root-capacity-preparation-validation-v13\\ordinary-economy-and-navigation-dependencies.stderr.log",
+      "file": "node-v13/ordinary-economy-and-navigation-dependencies.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\root-capacity-preparation-validation-v13\\ordinary-full-lifecycle-driver-units.stdout.log",
+      "file": "node-v13/ordinary-full-lifecycle-driver-units.stdout.log",
+      "bytes": 13221,
+      "sha256": "dffc83a3237a96b5d8b0074f183bf2de39acfaa5403fa4a3de9caf0eb7c6634e"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\root-capacity-preparation-validation-v13\\ordinary-full-lifecycle-driver-units.stderr.log",
+      "file": "node-v13/ordinary-full-lifecycle-driver-units.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\root-capacity-preparation-validation-runner-v13.mjs",
+      "file": "node-v13/root-validation-runner-v13.mjs",
+      "bytes": 6328,
+      "sha256": "7fe86be6b3afa2ba5639591c9c224bc1145ac7f899af01fea73073792a2a0962"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\finalize-ordinary-bank-binding-v9.mjs",
+      "file": "root-finalizers/finalize-ordinary-bank-binding-v9.mjs",
+      "bytes": 4541,
+      "sha256": "94fa8e75a50c92c2fec95d62b2a6cdfd8bce6f19ba227c27464f384925a26500"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-full16-reuse-proof-v13.json",
+      "file": "full16-reuse/ordinary-full16-reuse-proof-v13.json",
+      "bytes": 71969,
+      "sha256": "0edef6a512f51fbb358f0d305bbdc12b870f1be47a4434f1c3a79578bbcfb669"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\verify-full16-reuse-v5.mjs",
+      "file": "full16-reuse/verify-full16-reuse-v5.mjs",
+      "bytes": 15209,
+      "sha256": "6f20c8f0d4802ff05916798d2d3f85287e533734ffabefc2b809fa12b2370e3f"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\verify-full16-reuse-v5.syntax-v1.json",
+      "file": "full16-reuse/verify-full16-reuse-v5.syntax-v1.json",
+      "bytes": 8218,
+      "sha256": "9cfb880392e70a1ca09e4d091ab648b19c491000dfe69de4018ff87c467cc01f"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\archive-ordinary-capacity-bank-prepare-v13.mjs",
+      "file": "archive-evidence-v13.mjs",
+      "bytes": 17359,
+      "sha256": "1ebc0b8687b3985b069dc80796e82cc9379435943db7e4b74d4fac71feda4d30"
+    }
+  ]
+}

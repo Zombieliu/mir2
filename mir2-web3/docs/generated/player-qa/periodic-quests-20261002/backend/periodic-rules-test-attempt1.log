@@ -1,0 +1,239 @@
+   Compiling cfg-if v1.0.4
+   Compiling windows-link v0.2.1
+   Compiling equivalent v1.0.2
+   Compiling pin-project-lite v0.2.17
+   Compiling scopeguard v1.2.0
+   Compiling futures-core v0.3.32
+   Compiling hashbrown v0.17.0
+   Compiling cmov v0.5.3
+   Compiling const-oid v0.10.2
+   Compiling parking v2.2.1
+   Compiling rand_core v0.10.1
+   Compiling tinyvec_macros v0.1.1
+   Compiling smallvec v1.15.1
+   Compiling cpufeatures v0.3.0
+   Compiling memchr v2.8.0
+   Compiling spin v0.10.0
+   Compiling foldhash v0.2.0
+   Compiling bytes v1.11.1
+   Compiling typenum v1.19.0
+   Compiling serde_core v1.0.228
+   Compiling crossbeam-utils v0.8.21
+   Compiling zmij v1.0.21
+   Compiling fastrand v2.4.1
+   Compiling unicode-bidi v0.3.18
+   Compiling futures-io v0.3.32
+   Compiling unicode-properties v0.1.4
+   Compiling futures-sink v0.3.32
+   Compiling itoa v1.0.18
+   Compiling typeid v1.0.3
+   Compiling derive_more v2.1.1
+   Compiling subtle v2.6.1
+   Compiling base64 v0.22.1
+   Compiling windows-sys v0.61.2
+   Compiling parking_lot_core v0.9.12
+   Compiling thread_local v1.1.9
+   Compiling lock_api v0.4.14
+   Compiling slab v0.4.12
+   Compiling tinyvec v1.11.0
+   Compiling byteorder v1.5.0
+   Compiling disqualified v1.0.0
+   Compiling getrandom v0.4.2
+   Compiling chacha20 v0.10.0
+   Compiling ctutils v0.4.2
+   Compiling log v0.4.29
+   Compiling fallible-iterator v0.2.0
+   Compiling siphasher v1.0.2
+   Compiling futures-lite v2.6.1
+   Compiling async-task v4.7.1
+   Compiling getrandom v0.2.17
+   Compiling thiserror v2.0.18
+   Compiling futures-task v0.3.32
+   Compiling atomic-waker v1.1.2
+   Compiling concurrent-queue v2.5.0
+   Compiling crossbeam-queue v0.3.12
+   Compiling parking_lot v0.12.5
+   Compiling downcast-rs v2.0.2
+   Compiling bevy_ptr v0.17.3
+   Compiling futures-util v0.3.32
+   Compiling rand_core v0.6.4
+   Compiling phf_shared v0.13.1
+   Compiling rand v0.10.1
+   Compiling slotmap v1.1.1
+   Compiling futures-channel v0.3.32
+   Compiling unicode-normalization v0.1.25
+   Compiling event-listener v5.4.1
+   Compiling indexmap v2.14.0
+   Compiling whoami v2.1.1
+   Compiling base64ct v1.8.3
+   Compiling adler2 v2.0.1
+   Compiling nonmax v0.5.5
+   Compiling simd-adler32 v0.3.9
+   Compiling fixedbitset v0.5.7
+   Compiling percent-encoding v2.3.2
+   Compiling bumpalo v3.20.2
+   Compiling bitflags v2.11.1
+   Compiling crc32fast v1.5.0
+   Compiling cpufeatures v0.2.17
+   Compiling libc v0.2.185
+   Compiling hybrid-array v0.4.10
+   Compiling generic-array v0.14.7
+   Compiling async-executor v1.14.0
+   Compiling phf v0.13.1
+   Compiling event-listener-strategy v0.5.4
+   Compiling miniz_oxide v0.8.9
+   Compiling password-hash v0.5.0
+   Compiling async-channel v2.5.0
+   Compiling stringprep v0.1.5
+   Compiling block-buffer v0.12.0
+   Compiling crypto-common v0.2.1
+   Compiling toml_edit v0.23.10+spec-1.0.0
+   Compiling flate2 v1.1.9
+   Compiling block-buffer v0.10.4
+   Compiling crypto-common v0.1.7
+   Compiling digest v0.10.7
+   Compiling blake2 v0.10.6
+   Compiling argon2 v0.5.3
+   Compiling bevy_macro_utils v0.17.3
+   Compiling digest v0.11.2
+   Compiling serde v1.0.228
+   Compiling hashbrown v0.16.1
+   Compiling serde_json v1.0.149
+   Compiling erased-serde v0.4.10
+   Compiling md-5 v0.11.0
+   Compiling sha2 v0.11.0
+   Compiling hmac v0.13.0
+   Compiling bevy_reflect_derive v0.17.3
+   Compiling bevy_ecs_macros v0.17.3
+   Compiling bevy_derive v0.17.3
+   Compiling mio v1.2.0
+   Compiling socket2 v0.6.3
+   Compiling ctrlc v3.5.2
+   Compiling mir2-protocol v0.1.0 (C:\Users\Administrator\.codex\worktrees\capacity-transport\mir2-player-journey\mir2-web3\packages\protocol)
+   Compiling tokio v1.52.0
+   Compiling bevy_platform v0.17.3
+   Compiling bevy_utils v0.17.3
+   Compiling bevy_tasks v0.17.3
+   Compiling postgres-protocol v0.6.11
+   Compiling postgres-types v0.2.13
+   Compiling bevy_reflect v0.17.3
+   Compiling tokio-util v0.7.18
+   Compiling tokio-postgres v0.7.17
+   Compiling bevy_ecs v0.17.3
+   Compiling mir2-game-data v0.1.0 (C:\Users\Administrator\.codex\worktrees\capacity-transport\mir2-player-journey\mir2-web3\packages\game-data)
+   Compiling postgres v0.19.13
+   Compiling bevy_app v0.17.3
+   Compiling mir2-simulation v0.1.0 (C:\Users\Administrator\.codex\worktrees\capacity-transport\mir2-player-journey\mir2-web3\apps\simulation)
+warning: unused import: `super::skills::crystal_magic_damage`
+  --> apps\simulation\src\runtime\hero_ai.rs:53:5
+   |
+53 | use super::skills::crystal_magic_damage;
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused import: `hero_registry_scan::validate_shared_hero_physical_custody`
+  --> apps\simulation\src\runtime\mod.rs:22:16
+   |
+22 | pub(crate) use hero_registry_scan::validate_shared_hero_physical_custody;
+   |                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: unused import: `HeroInventoryResource`
+  --> apps\simulation\src\runtime\items.rs:58:19
+   |
+58 |     BuffResource, HeroInventoryResource, InventoryResource, PlayerPermissionResource,
+   |                   ^^^^^^^^^^^^^^^^^^^^^
+
+warning: unused import: `merged_user_item_stats`
+  --> apps\simulation\src\runtime\npc.rs:35:72
+   |
+35 |     crystal_item_key_for_template, crystal_item_template_for_item_key, merged_user_item_stats,
+   |                                                                        ^^^^^^^^^^^^^^^^^^^^^^
+
+warning: unused import: `hero_inventory_crystal_stat_total`
+  --> apps\simulation\src\runtime\packets.rs:72:22
+   |
+72 | use super::hero_ai::{hero_inventory_crystal_stat_total, hero_inventory_equipment_slots};
+   |                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: unused import: `crystal_quest_info_by_id`
+   --> apps\simulation\src\runtime\packets.rs:108:5
+    |
+108 |     crystal_quest_info_by_id, crystal_quest_reward_selection_missing,
+    |     ^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: unused import: `intelligent_creature_default_rules`
+   --> apps\simulation\src\runtime\packets.rs:125:5
+    |
+125 |     intelligent_creature_default_rules, is_in_world, mark_crystal_packet_action,
+    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: unused import: `ZoneExperienceProfile`
+ --> apps\simulation\src\runtime\zone\mod.rs:6:22
+  |
+6 | pub use experience::{ZoneExperienceProfile,ZoneExperienceSelection,ZoneGuildExperienceMembership};
+  |                      ^^^^^^^^^^^^^^^^^^^^^
+
+warning: use of deprecated method `bevy_ecs::world::World::iter_entities`: use world.query::<EntityRef>()` instead
+  --> apps\simulation\src\runtime\hero_cast.rs:61:22
+   |
+61 |     let target=world.iter_entities().find_map(|entry| {
+   |                      ^^^^^^^^^^^^^
+   |
+   = note: `#[warn(deprecated)]` on by default
+
+warning: use of deprecated method `bevy_ecs::world::World::iter_entities`: use world.query::<EntityRef>()` instead
+  --> apps\simulation\src\runtime\hero_cast.rs:99:27
+   |
+99 |         let monster=world.iter_entities().find(|e|e.get::<Monster>().is_some()).unwrap().id();
+   |                           ^^^^^^^^^^^^^
+
+warning: use of deprecated method `bevy_ecs::world::World::iter_entities`: use world.query::<EntityRef>()` instead
+   --> apps\simulation\src\runtime\monster_ai\great_fox_spirit.rs:163:28
+    |
+163 |     for candidate in world.iter_entities() {
+    |                            ^^^^^^^^^^^^^
+
+warning: use of deprecated method `bevy_ecs::world::World::iter_entities`: use world.query::<EntityRef>()` instead
+    --> apps\simulation\src\runtime\packets.rs:7894:25
+     |
+7894 |     for entity in world.iter_entities() {
+     |                         ^^^^^^^^^^^^^
+
+warning: use of deprecated method `bevy_ecs::world::World::iter_entities`: use world.query::<EntityRef>()` instead
+   --> apps\simulation\src\runtime\session.rs:757:14
+    |
+757 |             .iter_entities()
+    |              ^^^^^^^^^^^^^
+
+warning: use of deprecated method `bevy_ecs::world::World::iter_entities`: use world.query::<EntityRef>()` instead
+    --> apps\simulation\src\runtime\skills.rs:5016:10
+     |
+5016 |         .iter_entities()
+     |          ^^^^^^^^^^^^^
+
+warning: use of deprecated method `bevy_ecs::world::World::iter_entities`: use world.query::<EntityRef>()` instead
+    --> apps\simulation\src\runtime\skills.rs:5099:10
+     |
+5099 |         .iter_entities()
+     |          ^^^^^^^^^^^^^
+
+error[E0716]: temporary value dropped while borrowed
+  --> apps\simulation\src\runtime\periodic_quest_rules_tests.rs:14:19
+   |
+14 |     let character=session.app.world_mut().resource_mut::<SessionResource>().selected_character.as_mut().unwrap();
+   |                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^                                     - temporary value is freed at the end of this statement
+   |                   |
+   |                   creates a temporary value which is freed while still in use
+15 |     character.level=level; character.class=class;
+   |     --------------------- borrow later used here
+   |
+help: consider using a `let` binding to create a longer lived value
+   |
+14 ~     let mut binding = session.app.world_mut().resource_mut::<SessionResource>();
+15 ~     let character=binding.selected_character.as_mut().unwrap();
+   |
+
+For more information about this error, try `rustc --explain E0716`.
+warning: `mir2-simulation` (lib test) generated 15 warnings
+error: could not compile `mir2-simulation` (lib test) due to 1 previous error; 15 warnings emitted

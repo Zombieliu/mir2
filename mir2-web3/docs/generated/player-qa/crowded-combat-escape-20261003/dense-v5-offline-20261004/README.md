@@ -1,0 +1,5 @@
+# R17 actual dead-cast failure and offline v5 review
+
+The exact published R17 ordinary learned caster inputs spend 3 MP after owner Death/HP0. Both are failed even without cast ACKs. The original incorrect caster flags and Taoist class pass remain in ORIGINAL-V4-DEATH-REPORT.json. Real dead save/relogin, explicit revive and quiet receipts are separate. All 29 v5 fixture sources and pure69 tests are preserved byte-exact; root reverified all44 original public files. Large redacted trace files remain at the recorded external directory with public export/archive hashes. This Git copy is offline evidence, not a new server run.
+
+The frozen classifier is sufficient to reject the two actual MP failures, but victim-only damage and positive HP during a source dead level-up need separate attribution/life review before a future fixed-ELF acceptance run. No seven-attacker, native, human, capacity or complete P1 claim follows. Reclassification expects the immutable external v4 sibling directory; do not rerun the write-once command over its existing output. See root-review.json and the scope document for identities and boundaries.

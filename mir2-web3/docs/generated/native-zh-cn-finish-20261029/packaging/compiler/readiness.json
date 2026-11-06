@@ -1,0 +1,120 @@
+{
+  "passed": true,
+  "kind": "trusted-inno-compiler-and-recipe-readiness-only",
+  "sourcePhase": "r9 recipe at source commit 24216899acd4301d8c3b1eff08b825f4896cc410; before actual release/Candidate/updater/installer verification",
+  "download": {
+    "file": "C:/mir2-build/native-zh-cn-finish-20261029/tools/downloads/innosetup-7.1.1-x64.exe",
+    "bytes": 14336568,
+    "sha256": "8A5A6711C3766A6E5FB74F280BA0E3551E719CE94538D901FDBD1F8F9920B3F0",
+    "status": "Valid",
+    "publisher": "CN=Pyrsys B.V., O=Pyrsys B.V., S=Noord-Holland, C=NL",
+    "thumbprint": "E0AB19C8D38CBF9C44709925122A7A02F8C70CB7"
+  },
+  "compiler": {
+    "passed": true,
+    "compiler": "C:/mir2-build/native-zh-cn-finish-20261029/tools/InnoSetup7/ISCC.exe",
+    "version": "0.0.0.0",
+    "sha256": "E0F9F1DC32032650C6629F6DEE41EB6D20BA140E4E3C07C25D8A24F9BA781644",
+    "signature": "Valid",
+    "publisher": "CN=Pyrsys B.V., O=Pyrsys B.V., S=Noord-Holland, C=NL",
+    "installedForCurrentUser": true,
+    "trustStoreChanged": false
+  },
+  "curatorAuthenticodeRecheck": {
+    "download": "Valid",
+    "compiler": "Valid",
+    "publisher": "Pyrsys B.V.",
+    "performed": true
+  },
+  "engineVersion": "7.1.1",
+  "engineVersionReceipt": {
+    "filename": "inno-engine-version.txt",
+    "bytes": 7,
+    "sha256": "4a0613c323679b3da0d1896411951513e0c9ef017b0de2a1ff449005f0ad2b29",
+    "included": false
+  },
+  "versionResourceCaveat": "ISCC Windows file version reports 0.0.0.0; the engine --version output is separately pinned as 7.1.1.",
+  "translationClosure": {
+    "passed": true,
+    "locales": 10,
+    "messagesPerLocale": 281,
+    "customMessagesPerLocale": 15,
+    "report": "recipe-trusted-compiler-final.json",
+    "receipt": {
+      "filename": "recipe-trusted-compiler-final.json",
+      "bytes": 3728,
+      "sha256": "636b23728f44d3dd994fde8aa96e057690ea2ca92e0b2b6031c6e91309ee614d",
+      "included": false
+    }
+  },
+  "syntaxFixtures": {
+    "coordinatorReportedSuccessfulCompilations": [
+      "normal",
+      "isolated-validation"
+    ],
+    "outputFilesIndependentlyHashed": [
+      {
+        "filename": "Numeron-Legend-of-Rebirth-20261029-r9-LocalValidation-Setup.exe",
+        "bytes": 2920755,
+        "sha256": "86b551837e7c4cae2a4b1baaf08ace6c4ec0db45c893ab74bc6323183b033eba",
+        "binaryIncluded": false,
+        "payloadKind": "dummy syntax fixture, not actual Candidate"
+      },
+      {
+        "filename": "Numeron-Legend-of-Rebirth-20261029-r9-Setup.exe",
+        "bytes": 2920757,
+        "sha256": "4626118fa71ebf48da538f01322376ad181fa8311412a355e6021b84860f2428",
+        "binaryIncluded": false,
+        "payloadKind": "dummy syntax fixture, not actual Candidate"
+      }
+    ],
+    "logs": [
+      {
+        "filename": "compiler-fixture-normal.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "included": false
+      },
+      {
+        "filename": "compiler-fixture-validation.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "included": false
+      }
+    ],
+    "emptyQuietLogsAreNotStandaloneSuccessEvidence": true,
+    "actualGamePayload": false,
+    "actualInstallerAcceptance": false
+  },
+  "initialPathCorrection": "An earlier argument/path mismatch installed the trusted compiler in its default current-user location; the resolved task-local compiler now exists and has a Valid publisher signature. This is not compilerUnavailable.",
+  "snapshotSourcePins": [
+    {
+      "path": "apps/game-client/platform-windows/scripts/invited-installer/Mir2-Invite.iss",
+      "sha256Raw": "49f087bef9c21ba5be66b72c03221d5b5503b6ac340ac04bf286dde55f747f31",
+      "sha256Utf8Lf": "54bec8a85c8da00efb76341c807558e43cba271eb3b8553b228eea52b49b02b0",
+      "bytesRaw": 37809
+    },
+    {
+      "path": "apps/game-client/platform-windows/scripts/invited-installer/prepare-installer-input.py",
+      "sha256Raw": "418b11d86118c691be19970045921d6609907fa121a895758a9f8cb397941ecb",
+      "sha256Utf8Lf": "a1375673a8cc4d8167b1d6c3fcc4a9999b6be4ec47fef6c3b85a771ef3577127",
+      "bytesRaw": 8225
+    },
+    {
+      "path": "apps/game-client/platform-windows/scripts/invited-installer/validate-recipe.py",
+      "sha256Raw": "c9f81e6473d9a8fc0cd6cdbd255bd8ea5d6b2fe5989fb2d6fb5c6d6b81810b1e",
+      "sha256Utf8Lf": "23ce2a3def29ba1797b41e7aed82aab623e5f98305cdab31646875e5dfe8eba1",
+      "bytesRaw": 7088
+    },
+    {
+      "path": "apps/game-client/platform-windows/scripts/invited-installer/README.md",
+      "sha256Raw": "2509c625dcdcec24c0d0f67c6f01a06406fcb51eaf01b1802828762615de70a3",
+      "sha256Utf8Lf": "2509c625dcdcec24c0d0f67c6f01a06406fcb51eaf01b1802828762615de70a3",
+      "bytesRaw": 6955
+    }
+  ],
+  "productionKeysGenerated": false,
+  "trustStoreChanged": false,
+  "binariesIncluded": false,
+  "actualReleaseAndInstallationsPending": true
+}

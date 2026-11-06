@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "ownedExecutable": "C:\\mir2-build\\p01-completion-20261024\\online-presence-reuse-release-v5\\bin\\mir2-gateway.exe",
+  "sourceExecutable": "C:\\mir2-build\\p01-completion-20261024\\online-presence-reuse-release-v5\\bin\\mir2-gateway.exe",
+  "sha256": "4fb233a2e47ed19aadfce75a209d0e32a559a2dd402f26e109f1a7678e1fec04",
+  "bytes": 87455744,
+  "sourceCommit": "7b43caa41ee12f2e6b41d0a5df7e9ab45a32580d",
+  "backendSourceCommit": "7b43caa41ee12f2e6b41d0a5df7e9ab45a32580d",
+  "executionSourceCommit": "7b43caa41ee12f2e6b41d0a5df7e9ab45a32580d",
+  "driverSourceCommit": "657b7528f03f3c8f824fcadcabcdcc64e73b4745",
+  "sourceManifest": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\online-presence-reuse-release-v5\\backend-source-v5.json",
+    "bytes": 66046,
+    "sha256": "cf2c8e39096e5133dc8cf95045e957b8f81a4e04f626444b5d25c1a015d3f0f7"
+  },
+  "releaseRecord": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\online-presence-reuse-release-v5\\release-v5.json",
+    "bytes": 2275,
+    "sha256": "8272b00152df3bd96902fa7fbaa6a0bb365ca50abd0b9b25ef5fa0d570a1d65c"
+  },
+  "reusedImmutableExecutable": true,
+  "binaryCopied": false,
+  "capacityAccepted": false
+}

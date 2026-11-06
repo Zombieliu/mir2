@@ -1,0 +1,15 @@
+{
+  "purpose": "Installed Simplified Chinese fiat recharge entry; configured provider status only, no purchase",
+  "observedAtUtc": "2026-10-29T11:31:24.612Z",
+  "window": {
+    "app": "process:F:\\mir2-build\\native-zh-cn-finish-20261029\\installed-validation\\game\\mir2-platform-windows.exe",
+    "id": 27919476,
+    "title": "numeron-legend of rebirth"
+  },
+  "screenshotId": "screenshot-0",
+  "width": 1026,
+  "height": 800,
+  "gameSourceRevision": "24216899acd4301d8c3b1eff08b825f4896cc410",
+  "gameExeSha256": "6B657F869AFC2BAA8A086BAF9BD39CE77B5011247D8B12A8F92EAEEBE3CF2E9D",
+  "rawCapture": true
+}

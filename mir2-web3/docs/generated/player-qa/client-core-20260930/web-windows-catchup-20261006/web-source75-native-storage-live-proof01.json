@@ -1,0 +1,134 @@
+{
+  "owner": "Root",
+  "accepted": true,
+  "scope": "Source75 desktop storage cold prepare paint, native cancellation and normal persistence only",
+  "publicObservationsPin": {
+    "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\web-source75-public-ui-observations01.json",
+    "bytes": 5039,
+    "sha256": "b9ee7302aa09e0f9a3a2ec4e2c9efcba33c5c547f35466c32a0e15f736404cde"
+  },
+  "actualRuntimeProofPin": {
+    "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\web-source75-runtime-actual01.json",
+    "bytes": 1823,
+    "sha256": "b1199aa4162f0a82184ba04f0f3172b3e222d35e0ff55efff5845b2a8bd94705"
+  },
+  "ordinaryLoginStartGameAnthonyAccessCount": 3,
+  "ordinarySaveLogoutCacheRetainingReloginCount": 2,
+  "firstAccessAlreadyBevyActive": true,
+  "actualReloginPrepareObservations": [
+    {
+      "stage": "stored-relogin-fast-Access",
+      "owner": "react",
+      "phase": "prepare",
+      "reason": "statusUnavailable",
+      "maskApplied": true
+    },
+    {
+      "stage": "restored-relogin-fast-Access",
+      "owner": "react",
+      "phase": "prepare",
+      "reason": "controlsNotReady",
+      "maskApplied": true
+    }
+  ],
+  "actualPrepareScreenshot": "web-source75-native-stored-relogin-prepare01.png",
+  "desktopPrepareNoIncompleteStoragePaintVisibleInCapturedScreenshot": true,
+  "hudAndMinimapRemainVisibleInCapturedScreenshot": true,
+  "sharedCanvasDimensionsUnchanged": {
+    "width": 644,
+    "height": 483,
+    "x": 1,
+    "y": 173
+  },
+  "stableNativeOwner": "bevy",
+  "stableNativePhase": "active",
+  "stableNativeReason": null,
+  "stableMaskImage": "none",
+  "stablePointerEvents": "auto",
+  "stableReactCancelAndTakeBackTextButtonCounts": 0,
+  "normalNativeCancel": {
+    "bag": 5,
+    "storage": 0,
+    "gold": 180,
+    "emptyDestinationDidNotStore": true
+  },
+  "normalNativeStore": {
+    "bag": 4,
+    "storage": 1,
+    "gold": 180
+  },
+  "storedRelogin": {
+    "bag": 4,
+    "storage": 1,
+    "gold": 180,
+    "nativeOwner": "bevy"
+  },
+  "normalNativeTakeBack": {
+    "bag": 5,
+    "storage": 0,
+    "gold": 180
+  },
+  "restoredRelogin": {
+    "bag": 5,
+    "storage": 0,
+    "gold": 180,
+    "nativeOwner": "bevy"
+  },
+  "countsVerifiedFromRealScreenshots": true,
+  "screenshots": [
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\web-source75-native-first-active01.png",
+      "bytes": 59259,
+      "sha256": "5696432d056e4abec77e49cbf7be842a77e88d6f274fc15d547e235940222317"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\web-source75-native-cancel01.png",
+      "bytes": 59251,
+      "sha256": "763ee4188434b4a76000d74df4baca8f50760ff79f87e962b595e7f0f4ac9028"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\web-source75-native-stored01.png",
+      "bytes": 59206,
+      "sha256": "0af618fc5e259d44cb523219cf3261860ee895bf7d2a48f308e00ab55d122c6f"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\web-source75-native-stored-relogin-prepare01.png",
+      "bytes": 62463,
+      "sha256": "97efac25984ed89f7e4dc35efbb838bee1f7e1370a84c51955c8ca3259da7246"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\web-source75-native-stored-relogin01.png",
+      "bytes": 58078,
+      "sha256": "8ec0f1338ef9a1ee6d3911366e09d997f0925cd42b984d6c2fc09cbeed3f43aa"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\web-source75-native-restored01.png",
+      "bytes": 58077,
+      "sha256": "d923c1cf99aafde7c48df8dc6ec141f5d4d49b79623c1a6c27d9f4ab751abba9"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\web-source75-native-restored-relogin01.png",
+      "bytes": 59185,
+      "sha256": "6f85721123d403c179716702e484280f81d94c1a076b30bb790bac76203e4a15"
+    }
+  ],
+  "ordinaryNpcSelectorOneDeadlineResolvedByFreshState": true,
+  "compatibilityStorageActionsClicked": false,
+  "qaAdminCommands": false,
+  "teleport": false,
+  "cacheCleared": false,
+  "forcedFocus": false,
+  "viewportOverride": false,
+  "productOrWasmGlobalsRead": false,
+  "privateGatewayConfigRead": false,
+  "loginScreenshotsSavedAsEvidence": false,
+  "privateCredentialsCapturedInEvidence": false,
+  "mobilePrepareAccepted": false,
+  "touchPrepareMaskEnabled": false,
+  "unlockedBag2Accepted": false,
+  "otherSharedPanelsAccepted": false,
+  "finalHumanAcceptance": false,
+  "wholeParityPercentage": null,
+  "candidateAccepted": false,
+  "goalComplete": false
+}

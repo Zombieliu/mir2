@@ -1,0 +1,137 @@
+{
+  "schemaVersion": 1,
+  "scope": "Independent read-only bounded final-source review. No tests, product imports, services, loads, source edits, recordings or further raw scans were executed by this reviewer.",
+  "reviewer": "capacity_baseline",
+  "result": "no-blocking-findings",
+  "baselineCommit": "30ba328ad3d1b1eb46e51540cb1880d66eba3ee1",
+  "sourceFiles": [
+    {
+      "file": "apps/web/scripts/playtest-capacity-soak-core.mjs",
+      "bytes": 37930,
+      "sha256": "40ccd36ee84265a29bd509ca9a7bb360691f2be002411c8cab5f64a3e254cacc",
+      "unchangedFromTimingFreeze": true
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-soak.mjs",
+      "bytes": 143634,
+      "sha256": "bf09e909102776d3911b9fa581f38f2817bff7214c47e388132f539eb8a91229",
+      "unchangedFromTimingFreeze": false
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-soak.test.mjs",
+      "bytes": 214369,
+      "sha256": "560d44791a8d4e33bd149c06c3ccabe4ea7820768c328593effa1227ad1a11ed",
+      "unchangedFromTimingFreeze": false
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-observability.mjs",
+      "bytes": 4447,
+      "sha256": "19edb25f68fdd18567391e52a247964bd689346b58535871ce17051f53af9af7",
+      "unchangedFromTimingFreeze": true
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-observability.test.mjs",
+      "bytes": 5228,
+      "sha256": "00ff902194f805eb3433b192b2838b6eea6cd80860052860b825ab34f58a626d",
+      "unchangedFromTimingFreeze": true
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-monitor.mjs",
+      "bytes": 21246,
+      "sha256": "e585081835d9232b58d91bb0f717a796b483a818ed5c6fd943abf93350d74e7f",
+      "unchangedFromTimingFreeze": true
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-monitor.test.mjs",
+      "bytes": 10882,
+      "sha256": "0e60e4636ea5e384e6455fe9d474d56a760881505e765ccfc82eec490d8d92f8",
+      "unchangedFromTimingFreeze": true
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-telemetry.mjs",
+      "bytes": 6548,
+      "sha256": "d3b74c3b8e0401530e787f6b35bd9a578de4f455b3f7817b6230df41c5871964",
+      "unchangedFromTimingFreeze": true
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-telemetry.test.mjs",
+      "bytes": 6277,
+      "sha256": "f5efe4aa510f67eb10ebba26a5de9cb5402f061de07900998a77a191a749f974",
+      "unchangedFromTimingFreeze": true
+    }
+  ],
+  "baselineManifest": {
+    "file": "C:/mir2-build/p01-completion-20261024/capacity-phase-window-timing-driver-frozen-v1.json",
+    "bytes": 15970,
+    "sha256": "39c163a36a713f8c2bbf500eeaff0fe095a1b3848726345745a6f26372a177c3"
+  },
+  "sourceScope": {
+    "changedInputs": 2,
+    "unchangedInputs": 7,
+    "removedOriginalTestLines": [
+      "-import { CapacityClient, FixedPlan, chooseHomes, validateNativeExplicitHomes, validateNativeCombatClusters, insideCombatCoverage, activeCombatCoverage, beginPendingAttackEvidence, recordPendingAttackPacket, finishPendingAttackEvidence, PENDING_ATTACK_PACKET_LIMIT, attackResultsMode, matchAttackResultV2, ATTACK_OUTCOME_CAPABILITY, loadStationaryNpcObstacles, spacingFourScenario, selectNativeAction, offerNativeAction, combatCandidates, recordCombatPursuitMovement, recordCombatScoutMovement, restoreCombatPursuit, stableFanoutRange, matchesFanoutReceipt, actionFailureStatus, awaitPendingActions, actorsReachedScenario, measure, runCapacity, parseArguments, patrol, action, navigationObstacles, navigationPlanIsClear, movementHintCells, claimNavigationHint, releaseNavigationHint, NAVIGATION_HINT_MAX_CELLS } from './playtest-capacity-soak.mjs';"
+    ],
+    "existingTestAssertionsRemoved": false
+  },
+  "findings": [
+    {
+      "area": "held HP ordinary auxiliary maintenance",
+      "decision": "pass bounded static review",
+      "evidence": [
+        "Actual matching UseItem UID/grid success plus complete fresh inventory decrease or exact HP increase is required within the original 2000ms monotonic receipt boundary.",
+        "Consumption and healing are separate flags; no consumed dose is falsely claimed to have already raised HP.",
+        "Single independent HP promise, same per-account three-command send budget and 6000ms performance.now reuse stamp shared across same-process resume; no native opportunity is completed or paused by maintenance.",
+        "Owner identity/map/death, rejection, missing or late proof, and send failures remain fail-closed.",
+        "No purchase, grant, MP, revival, server rule or production behavior changed."
+      ]
+    },
+    {
+      "area": "post-strike same-target pursuit segment",
+      "decision": "pass bounded static review",
+      "evidence": [
+        "A new segment is prepared only for a valid same-target/map nonzero Walk/Run after the prior attackSent state.",
+        "Only actual successful send commits the segment; plan selection, pending work, budget rejection, navigation rejection and synchronous send failure do not reset it.",
+        "Original fresh successful nonzero UserLocation progress remains the only movement accounting input; original 40 movements, 30000ms, three visits and nonprogress rules are retained.",
+        "The segment is not repeatedly rebuilt during subsequent replans; resume accounting code is unchanged."
+      ]
+    },
+    {
+      "area": "new native stable attack witness",
+      "decision": "pass bounded static review",
+      "evidence": [
+        "Only active living same-map declared observers whose actual snapshot contains both attacker and valid target may qualify.",
+        "The actual observer owner must be within six Chebyshev cells of both attacker and target; minimum maximum-separation wins with stable original peer order for ties.",
+        "Immediately before send the target, observer, receiver attacker ID and observer sequence are re-resolved.",
+        "No eligible witness leaves an evidence-wait native opportunity incomplete; attacks/hits are not fabricated and the opportunity denominator remains.",
+        "Original full AOI sixteen-cell coverage, V2 results, original dual-end positive damage/health proof, 900ms deadline and ambiguous-target quarantine remain."
+      ]
+    }
+  ],
+  "testReview": {
+    "newFixturesInspected": true,
+    "existingAssertionsWeakened": false,
+    "writerReportedFocused": 21,
+    "writerReportedAdjacent": 51,
+    "independentlyExecutedTests": false,
+    "fullRegressionNotCertifiedHere": true
+  },
+  "evidenceAddenda": [
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/probe09-death-analysis/request49-observer-geometry-v1.json",
+      "bytes": 10065,
+      "sha256": "3799b3d9adbdf644fd1d3da9a885136103efcfbdaaa9dafcbed536d5b1ecdc1d"
+    },
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/probe09-death-analysis/poststrike-pursuit-budget-gap-v1.json",
+      "bytes": 28223,
+      "sha256": "b92b5432ded9e034e1403871f09e3097c520b461fc2b7117ddfde08990743a0f"
+    }
+  ],
+  "limitations": [
+    "Static source and fixture review does not prove a new live gameplay load or capacity pass.",
+    "The original08/09 failures remain failures; no historical attack result is reclassified.",
+    "Six-cell witness geometry reduces boundary exposure but cannot guarantee delivery or keep a moving target inside AOI for the whole damage window.",
+    "The monotonic reuse stamp is shared across resume within this driver process, not a persistent across-process clock."
+  ],
+  "reviewCorrection": "An earlier draft-based message described Date.now reuse; final bf09 source was rechecked and actually uses performance.now. This final review reflects the final source."
+}

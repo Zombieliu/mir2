@@ -1,0 +1,15 @@
+{
+  "goToEnabled": true,
+  "height": 768,
+  "kind": "offscreen_production_renderer_fixture",
+  "liveAcceptance": false,
+  "paidTeleportEligible": false,
+  "selectedNpc": "Blacksmith_Smith",
+  "shopGold": 874,
+  "shopGoods": "synthetic 19-item renderer fixture",
+  "shopLastItem": "PickAxe",
+  "shopPrice": 2500,
+  "shopStartIndex": 11,
+  "width": 1024,
+  "windowInput": false
+}

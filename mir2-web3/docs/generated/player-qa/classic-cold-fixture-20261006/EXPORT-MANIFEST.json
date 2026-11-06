@@ -1,0 +1,179 @@
+{
+  "files": [
+    {
+      "relativePath": "classic-resume-cold-fixture-01.log",
+      "bytes": 39466,
+      "sha256": "4918fccaf6de8da3ef493c876abe1f566f31f5d7d94d2a2117f8252300191d1d"
+    },
+    {
+      "relativePath": "classic-resume-cold-fixture-02.log",
+      "bytes": 38287,
+      "sha256": "d5fa86b00483a2ac0f1ce2c9890ee8501b355ed60898d71a280170002ae4516f"
+    },
+    {
+      "relativePath": "classic-resume-crowded-regression-01.log",
+      "bytes": 687,
+      "sha256": "75f3c4bafd307c0e9a2f322899cf2b0e6d63c4a9eab52cd4c957a3750e3a2778"
+    },
+    {
+      "relativePath": "classic-resume-default-build-check-01.log",
+      "bytes": 40550,
+      "sha256": "1be27d418f3380bfcf924903763687991f6394b89d393000d5f8c8c84de73f38"
+    },
+    {
+      "relativePath": "classic-resume-shared-escape-regression-02.log",
+      "bytes": 30918,
+      "sha256": "4e4c7cd8b744f6fcc3d5bce92bd27529c318999e98cb909ce9523ef53edde0d8"
+    },
+    {
+      "relativePath": "network-05/BUILD-INPUTS.json",
+      "bytes": 1802,
+      "sha256": "949c454bbb994f05311c6eb3b992f8916a4208016e00e918fe9e8d001baefefc"
+    },
+    {
+      "relativePath": "network-05/network-05.log",
+      "bytes": 993,
+      "sha256": "0f83fa965fbadac90774a4686d6e66100854be073db47f54cf44ea9411ea8ed8"
+    },
+    {
+      "relativePath": "network-05/Warrior/admitted.json",
+      "bytes": 51,
+      "sha256": "898e984e69caf062766e77affbb6ac5415ad3ff90121709dab420082d17aabfe"
+    },
+    {
+      "relativePath": "network-05/Warrior/cleanup.json",
+      "bytes": 264,
+      "sha256": "549c4b0d53b2ae94fdb048eb24a19466b62fe5f86f0bee74eda9968af42b07bd"
+    },
+    {
+      "relativePath": "network-05/Warrior/preparation.json",
+      "bytes": 4607,
+      "sha256": "dd9eccc67a24c993d7c71e70593d48bca5b529776bf7e122a188e9abeed93c30"
+    },
+    {
+      "relativePath": "network-05/Warrior/report.json",
+      "bytes": 414201,
+      "sha256": "4e26fbf8e938653f05eb9c58e25237289283ac0094afce685c9ec24c3300f2e1"
+    },
+    {
+      "relativePath": "network-05/Warrior/trace.jsonl.gz",
+      "bytes": 1297249,
+      "sha256": "2d34f42cb26c8eac4deb593c65d4f515bfa9ad72e43d801418125d9e1cee24ab"
+    },
+    {
+      "relativePath": "network-05/Wizard/admitted.json",
+      "bytes": 51,
+      "sha256": "25f3fc4e34a696f07c6def0d1be909192908ccfa154ff67cf70192916180b332"
+    },
+    {
+      "relativePath": "network-05/Wizard/preparation.json",
+      "bytes": 4607,
+      "sha256": "d976fc43732235d4113d0d616cbba7ddaa1e2adf083ec9d1253fa06efae7b8b4"
+    },
+    {
+      "relativePath": "network-05/Wizard/report.json",
+      "bytes": 41984,
+      "sha256": "2703407d2e56d0a6915130ff671427646b35c367acd09234a6b829687c97801a"
+    },
+    {
+      "relativePath": "network-05/Wizard/trace.jsonl.gz",
+      "bytes": 263656,
+      "sha256": "313b9fc61109cf449b966a8f1c135bd43a3ffe6d824815f06733e5ece3995ef6"
+    },
+    {
+      "relativePath": "network-06/BUILD-INPUTS.json",
+      "bytes": 2095,
+      "sha256": "c64ecf26dd2099a5e40d5a75bc73a6b273d09b572c53a9cb17aca612cbfeff5d"
+    },
+    {
+      "relativePath": "network-06/network-06.log",
+      "bytes": 887,
+      "sha256": "ec95db346e5a74b8b30d7042e15ef418d1879f4786c835fe6d018d2c5976a0be"
+    },
+    {
+      "relativePath": "network-06/Taoist/admitted.json",
+      "bytes": 51,
+      "sha256": "3e295986694c3981e4aed9cb9474af21b165483fceea074c9b671521e6a7c481"
+    },
+    {
+      "relativePath": "network-06/Taoist/cleanup.json",
+      "bytes": 296,
+      "sha256": "7c609d6d92964c8f0653e01195c3013362a8b1d2bc6c0c26bbc8b112d028262a"
+    },
+    {
+      "relativePath": "network-06/Taoist/preparation.json",
+      "bytes": 4607,
+      "sha256": "efb9c36f1b59fc55451e27957372245a509f76c55cdeeb0b5865f9d5205d1e9b"
+    },
+    {
+      "relativePath": "network-06/Taoist/report.json",
+      "bytes": 185709,
+      "sha256": "e75abb76b6e9bbb7c2a45d2ec6e17e0397e78abcb9e8da57f0b3ffc74a7a2e7d"
+    },
+    {
+      "relativePath": "network-06/Taoist/trace.jsonl.gz",
+      "bytes": 610107,
+      "sha256": "e31aa70c1e87c2f57f29857687da034f5a938b14e90f7e3f748012df23a2317d"
+    },
+    {
+      "relativePath": "network-06/Warrior/admitted.json",
+      "bytes": 51,
+      "sha256": "88a08116902e07689532fcba83bc589ded5cfef29f3f61137f163c8620b5f7c0"
+    },
+    {
+      "relativePath": "network-06/Warrior/cleanup.json",
+      "bytes": 297,
+      "sha256": "09dda507a3555d29ae7341b6d67e3e2396365451dda266b18696153d8c54bdee"
+    },
+    {
+      "relativePath": "network-06/Warrior/preparation.json",
+      "bytes": 4607,
+      "sha256": "dd9eccc67a24c993d7c71e70593d48bca5b529776bf7e122a188e9abeed93c30"
+    },
+    {
+      "relativePath": "network-06/Warrior/report.json",
+      "bytes": 379498,
+      "sha256": "76cbfb0385ee3ecc007b1543b671a50589e5e9943984c560b88c2c87f615415f"
+    },
+    {
+      "relativePath": "network-06/Warrior/trace.jsonl.gz",
+      "bytes": 1109690,
+      "sha256": "4691cae74abad4ea201031e585c4291c5b7f060216b9fb5d313476983e48083f"
+    },
+    {
+      "relativePath": "network-06/Wizard/admitted.json",
+      "bytes": 51,
+      "sha256": "675b395354043ba14d4db3a3abdbf99d6f7396f4f689c4fda3532b6bfff6df19"
+    },
+    {
+      "relativePath": "network-06/Wizard/cleanup.json",
+      "bytes": 296,
+      "sha256": "93c08ee1c3c992c9bd068635744db82754d4a8588bec16fbaee95ea3d7196e57"
+    },
+    {
+      "relativePath": "network-06/Wizard/preparation.json",
+      "bytes": 4607,
+      "sha256": "d976fc43732235d4113d0d616cbba7ddaa1e2adf083ec9d1253fa06efae7b8b4"
+    },
+    {
+      "relativePath": "network-06/Wizard/report.json",
+      "bytes": 182577,
+      "sha256": "ea12118fae167087e80c86035c39ee59572a0f89531a54e37883fbe243b95919"
+    },
+    {
+      "relativePath": "network-06/Wizard/trace.jsonl.gz",
+      "bytes": 620252,
+      "sha256": "dc8aca677ce1fb312713a344ed60e0f2ba1dab3d1626bdebc477d275dd9d920c"
+    },
+    {
+      "relativePath": "SHARED-ESCAPE-RED-01.json",
+      "bytes": 1770,
+      "sha256": "3d4aa5a546d5db23a60a963d2e931f4117780169eebb621144a0a02cbdbbf970"
+    },
+    {
+      "relativePath": "SUMMARY.json",
+      "bytes": 4188,
+      "sha256": "f3233e93259aaff81a049cf6da0c31cbb08ba2cb7b2d4eeddc1033621a838e8f"
+    }
+  ]
+}

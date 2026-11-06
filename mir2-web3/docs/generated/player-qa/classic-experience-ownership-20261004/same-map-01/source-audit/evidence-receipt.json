@@ -1,0 +1,23 @@
+{
+  "kind": "source-evidence-capture",
+  "source_file_count": 29,
+  "source_span_count": 97,
+  "outputs": {
+    "README.md": {
+      "sha256": "e9cc9f0be315fe0aac165bc968e7c228d9ffec256614de51b3e31c2b4ccd0fda",
+      "bytes": 22225
+    },
+    "build_source_evidence.py": {
+      "sha256": "4a9fab4d532f15f735e60b43985a88fad5426d494b34c0842f8cec337ac0943e",
+      "bytes": 6124
+    },
+    "source-index.json": {
+      "sha256": "93320751419f1aa9ed177960b2fe3722e2671fc83ccb3c54ec1e73c591239db0",
+      "bytes": 22511
+    },
+    "source-excerpts.txt": {
+      "sha256": "02bcc3a3a2d884cbd2af3d7ad3ea30c630c0b23c8d75834c0c8ae3354ceab663",
+      "bytes": 180182
+    }
+  }
+}

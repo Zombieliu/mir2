@@ -1,0 +1,301 @@
+{
+  "backend": [
+    {
+      "file": "mir2-web3/.cargo/config.toml",
+      "bytes": 30,
+      "sha256": "17d6d9fdca4859d571020695c0af7fefd2589200d6277be62762605c0d78bdab"
+    },
+    {
+      "file": "mir2-web3/Cargo.lock",
+      "bytes": 250739,
+      "sha256": "1b5b2a34fb5d6c055c089d17ca6ce15ffd2a9f363504b9390d648c0be9831a98"
+    },
+    {
+      "file": "mir2-web3/Cargo.toml",
+      "bytes": 365,
+      "sha256": "6de1c26df325285aa51515e99abe32677775b3396aa6e8a83a0983deee3500ac"
+    },
+    {
+      "file": "mir2-web3/apps/gateway/Cargo.toml",
+      "bytes": 3230,
+      "sha256": "00f0762eb427f84d0963951ddc8cef332a3ed6c8f0209b47bd7bfa2f0235cf40"
+    },
+    {
+      "file": "mir2-web3/apps/gateway/src/attack_protocol.rs",
+      "bytes": 11818,
+      "sha256": "6d230edd0fd1903b411cb05ffb2cef8d0c2852fafc3ae3b0a568a6745923a7f6"
+    },
+    {
+      "file": "mir2-web3/apps/gateway/src/bin/seed_capacity_accounts.rs",
+      "bytes": 20499,
+      "sha256": "898d3af764856e6a304a263b2737671e24baa1306bcf5d93789d5db95102c085"
+    },
+    {
+      "file": "mir2-web3/apps/gateway/src/lib.rs",
+      "bytes": 11322,
+      "sha256": "c4c7350abe5225c1dbc1d92c91dcdc894bac9adc44cc14c8398cc8c905768ce7"
+    },
+    {
+      "file": "mir2-web3/apps/gateway/src/routing.rs",
+      "bytes": 1389827,
+      "sha256": "9135f2f3a019b04c1bb6ffe3717f730c65632df4e642702057bfbf7a699564de"
+    },
+    {
+      "file": "mir2-web3/apps/gateway/src/routing/partition_binding.rs",
+      "bytes": 25213,
+      "sha256": "bd38a834e6855082ee4ae694d16f8113e91057d2904ecb99020b15500b7a2654"
+    },
+    {
+      "file": "mir2-web3/apps/gateway/src/routing/partition_directory.rs",
+      "bytes": 11932,
+      "sha256": "cd6483ba6159a35f807ff3f90821617988e4a784159249e5c40be78313d0193e"
+    },
+    {
+      "file": "mir2-web3/apps/gateway/src/routing/tests/live_aoi_order_tests.rs",
+      "bytes": 28187,
+      "sha256": "0f21bfd95760a94f189c6b95567b0e65f1a0018cf88e90b2342ff753010a7279"
+    },
+    {
+      "file": "mir2-web3/apps/gateway/src/routing/tests/mining_tests.rs",
+      "bytes": 41476,
+      "sha256": "00e63dc060d585c27cfa032a6ac71254e1e6fb5dc564df0fc46072e6f5737121"
+    },
+    {
+      "file": "mir2-web3/apps/gateway/src/routing/tests/native_attack_outcome_tests.rs",
+      "bytes": 17228,
+      "sha256": "642924834f1db4dbaa7d8a7ca7670b1ee2bc13e340b65eaac0ee0a0dd7c730f6"
+    },
+    {
+      "file": "mir2-web3/apps/gateway/src/routing/tests/pending_zone_aoi_tests.rs",
+      "bytes": 13491,
+      "sha256": "01a11394c304296aefc450eb128a18a358c3e854c25e6627a2b3ff4484d14716"
+    },
+    {
+      "file": "mir2-web3/apps/gateway/src/routing/tests/personal_monster_projection_tests.rs",
+      "bytes": 30917,
+      "sha256": "7d474f50150108175bd96268c2f22270f916bbfdefc8a47e5f4fd0c249ffc0fc"
+    },
+    {
+      "file": "mir2-web3/apps/gateway/src/session.rs",
+      "bytes": 112616,
+      "sha256": "ef6bcedb2bee850de6461f0352c930f4be9f50197cae088d6d64286b3bd2fb6c"
+    },
+    {
+      "file": "mir2-web3/apps/gateway/src/spectator.rs",
+      "bytes": 58692,
+      "sha256": "3aa1ea329da20cb827440a67329d5af77251b666fff9e135125d9742ae9f0a6f"
+    },
+    {
+      "file": "mir2-web3/apps/gateway/src/web.rs",
+      "bytes": 857503,
+      "sha256": "41d81bf7cdc6c0aaacbbd11aee12425b27b8a4c27a02b5a0d0915351fb811e40"
+    },
+    {
+      "file": "mir2-web3/apps/gateway/src/web_live_overflow_tests.rs",
+      "bytes": 29131,
+      "sha256": "d0dabc744d4001163cd3f57443bbf0fa22cd279ad8e1d66d5b37840ee132a2fa"
+    },
+    {
+      "file": "mir2-web3/apps/gateway/src/web_transport_close_tests.rs",
+      "bytes": 5814,
+      "sha256": "11d946af65af9a4bad38d3879348c48a87bbf4b3d8abae15a8bb50f18e9425e5"
+    },
+    {
+      "file": "mir2-web3/apps/gateway/src/zone_metrics.rs",
+      "bytes": 18356,
+      "sha256": "37ac259c5ef95948299b16887db435f04869ab9e6ecd569d7c478df230d1e3a8"
+    },
+    {
+      "file": "mir2-web3/apps/gateway/src/zone_rpc.rs",
+      "bytes": 367763,
+      "sha256": "f284a38c43131c823626633ba463feb9f6e44fc67a3c233acf0a98f77bbcad37"
+    },
+    {
+      "file": "mir2-web3/apps/gateway/src/zone_rpc/native_attack_tests.rs",
+      "bytes": 18382,
+      "sha256": "d4bd13def0f8d046cc1bb485ae59dc275a6e680688df2afc225ceec3138f4bb7"
+    },
+    {
+      "file": "mir2-web3/apps/simulation/Cargo.toml",
+      "bytes": 812,
+      "sha256": "5903a066b9838cde6d52ba654a04587c9b2149f2b944bb897337ca2127b64942"
+    },
+    {
+      "file": "mir2-web3/apps/simulation/src/config.rs",
+      "bytes": 347044,
+      "sha256": "df3eceebeb434b817e32ebc9bb4c2901257f5e4199901252ec18234a5260b07d"
+    },
+    {
+      "file": "mir2-web3/apps/simulation/src/config_account_store_diagnostics.rs",
+      "bytes": 10863,
+      "sha256": "bdd0805104f396d924a6663be46166a9b2bb759c580efcb6e07b6fbf0cb970e4"
+    },
+    {
+      "file": "mir2-web3/apps/simulation/src/config_file_authority.rs",
+      "bytes": 24828,
+      "sha256": "ba3d5318241173429abe5b73c836e1a2a8082fef11a1d42c768f1438ea73deff"
+    },
+    {
+      "file": "mir2-web3/apps/simulation/src/config_guild_clock_driver.rs",
+      "bytes": 22968,
+      "sha256": "5b5e41dde7a38eb8f1eae3893dc54c085aa13716fd6624cad5738d3c5016b8b8"
+    },
+    {
+      "file": "mir2-web3/apps/simulation/src/config_shared_guilds.rs",
+      "bytes": 53319,
+      "sha256": "e73b5c6b095f84447f99d41d0cc5f2952d208655dd81c9555cee49e2ebe36bd0"
+    },
+    {
+      "file": "mir2-web3/apps/simulation/src/lib.rs",
+      "bytes": 7191,
+      "sha256": "0724307baaf0ca81c7a55e3ab0300e28b40f2fb376f06a389a84548f7fa910c3"
+    },
+    {
+      "file": "mir2-web3/apps/simulation/src/runtime/shared_experience_profile.rs",
+      "bytes": 94044,
+      "sha256": "d04cc6158bcf12a1b6b5f665b7680aeb8a91d09bc0e59c1b65cb747fe23112cf"
+    },
+    {
+      "file": "mir2-web3/apps/simulation/src/runtime/zone/contract.rs",
+      "bytes": 20853,
+      "sha256": "47b979f5532c6e7183fb814614de393a6e9662d0cca55a57bb276d6b6e532c9a"
+    },
+    {
+      "file": "mir2-web3/apps/simulation/src/runtime/zone/manager.rs",
+      "bytes": 63790,
+      "sha256": "0b9336668ecfd6958fac641060cb8b0a030fb12cee57aabb4656411b2f0dbd30"
+    },
+    {
+      "file": "mir2-web3/apps/simulation/src/runtime/zone/manager_admission.rs",
+      "bytes": 14691,
+      "sha256": "04d678c450f508e8c1cec30b6880660a3d6556cbf0f28d278e20136960b4fe6a"
+    },
+    {
+      "file": "mir2-web3/apps/simulation/src/runtime/zone/mod.rs",
+      "bytes": 2486,
+      "sha256": "f85dfd8eb808d360a37d5394e0829a85783c3b2265754acd21da4101ccddbd17"
+    },
+    {
+      "file": "mir2-web3/apps/simulation/src/runtime/zone/runtime.rs",
+      "bytes": 749298,
+      "sha256": "d19840e87e6b2e718303d90d02a03e8c1c4941e069f0b168d9d253644950f3b6"
+    },
+    {
+      "file": "mir2-web3/apps/simulation/src/runtime/zone/runtime/checkpoint.rs",
+      "bytes": 95833,
+      "sha256": "401acaf3f91d83ec50e7e14689aeda0dbd348f4423ebee6bf02ac0576e270276"
+    },
+    {
+      "file": "mir2-web3/apps/simulation/src/runtime/zone/runtime/combat_random.rs",
+      "bytes": 3229,
+      "sha256": "f9e431d281c16af0961f8d254d8215908fa02813d9e589ff29a7f03c2be49066"
+    },
+    {
+      "file": "mir2-web3/apps/simulation/src/runtime/zone/runtime/combat_random_checkpoint_tests.rs",
+      "bytes": 4781,
+      "sha256": "a8c97bac5497fd66235109251c32b151b417ae008395241a6aea97b9f503be00"
+    },
+    {
+      "file": "mir2-web3/apps/simulation/src/runtime/zone/runtime/combat_random_tests.rs",
+      "bytes": 3307,
+      "sha256": "ac4d8ff54145782ca96683e637bcf3f8bcdd780b259d4f2898f6d5dac0edf6f6"
+    },
+    {
+      "file": "mir2-web3/apps/simulation/src/runtime/zone/runtime/experience_ownership.rs",
+      "bytes": 26376,
+      "sha256": "e1a178d316dccb794cf6d36ce72e802fd5ecd372c0f929425b42f7192a0c6137"
+    },
+    {
+      "file": "mir2-web3/apps/simulation/src/runtime/zone/runtime/mining.rs",
+      "bytes": 12551,
+      "sha256": "e1bf408ff0125021928a13e678aae65ef6413b6c57ab5460ec7d2ee6d98d98ce"
+    },
+    {
+      "file": "mir2-web3/apps/simulation/src/runtime/zone/runtime/owned_pet_combat.rs",
+      "bytes": 207260,
+      "sha256": "3fcbff68a7dfafb54620992fd5d7c339f403bfb603ee6cc45fb6ee8f221d49bc"
+    },
+    {
+      "file": "mir2-web3/apps/simulation/src/runtime/zone/runtime/owned_pet_combat_tests.rs",
+      "bytes": 80522,
+      "sha256": "edbb31213088ca8e0b59b804e57a3f5ac1319e29e957eac5332e9509d891e22f"
+    },
+    {
+      "file": "mir2-web3/apps/simulation/src/runtime/zone/runtime/owned_pet_random_tests.rs",
+      "bytes": 8041,
+      "sha256": "75e72b073849d14f52f86126c7b66a1d0180d1e69830db4e491ac8d46fec9af7"
+    },
+    {
+      "file": "mir2-web3/apps/simulation/src/runtime/zone/types.rs",
+      "bytes": 64392,
+      "sha256": "681de43d73cee93ad246c65dd2cc5963fe45475f76f348c4146edd51cb6c7488"
+    },
+    {
+      "file": "mir2-web3/apps/simulation/src/world_runtime.rs",
+      "bytes": 81407,
+      "sha256": "c190ffecd81d6fc3f5918b3524bc19e13abe770f9844a095caf105cad64734bc"
+    },
+    {
+      "file": "mir2-web3/apps/simulation/tests/zone_manager_admission_contract.rs",
+      "bytes": 19135,
+      "sha256": "7f16d2302ce57e32aa21eaeec64406baa0f5af9b5074e9f69e8d824b76463dfe"
+    },
+    {
+      "file": "mir2-web3/apps/simulation/tests/zone_partition_contract.rs",
+      "bytes": 14196,
+      "sha256": "710049134fa4924508a2480bd0ac040e303f8eee9a97b6a092292889a7f97ec9"
+    },
+    {
+      "file": "mir2-web3/apps/simulation/tests/zone_partition_identity_contract.rs",
+      "bytes": 11438,
+      "sha256": "88b391a9ed19c2daf261f6a9372a90154d8e3f2b93adf24639d2e81ddc6aef24"
+    }
+  ],
+  "driver": [
+    {
+      "file": "apps/web/scripts/playtest-capacity-soak-core.mjs",
+      "bytes": 39617,
+      "sha256": "c59977540640efe0a2a5f9b05e81d3ce6c526ecc3c498fbb077f886e35605ebf"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-soak.mjs",
+      "bytes": 157490,
+      "sha256": "fe5c255f45b1010e63f98d6670307b365cc60c9cfb948e1ae6b676604500ddb6"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-soak.test.mjs",
+      "bytes": 292873,
+      "sha256": "6365f8cb988d0b36a3a6b4964b4bb66603bf1e28b13d731b2d842f22d041b1cf"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-observability.mjs",
+      "bytes": 4447,
+      "sha256": "19edb25f68fdd18567391e52a247964bd689346b58535871ce17051f53af9af7"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-observability.test.mjs",
+      "bytes": 5228,
+      "sha256": "00ff902194f805eb3433b192b2838b6eea6cd80860052860b825ab34f58a626d"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-monitor.mjs",
+      "bytes": 21246,
+      "sha256": "e585081835d9232b58d91bb0f717a796b483a818ed5c6fd943abf93350d74e7f"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-monitor.test.mjs",
+      "bytes": 10882,
+      "sha256": "0e60e4636ea5e384e6455fe9d474d56a760881505e765ccfc82eec490d8d92f8"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-telemetry.mjs",
+      "bytes": 6548,
+      "sha256": "d3b74c3b8e0401530e787f6b35bd9a578de4f455b3f7817b6230df41c5871964"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-telemetry.test.mjs",
+      "bytes": 6277,
+      "sha256": "f5efe4aa510f67eb10ebba26a5de9cb5402f061de07900998a77a191a749f974"
+    }
+  ]
+}

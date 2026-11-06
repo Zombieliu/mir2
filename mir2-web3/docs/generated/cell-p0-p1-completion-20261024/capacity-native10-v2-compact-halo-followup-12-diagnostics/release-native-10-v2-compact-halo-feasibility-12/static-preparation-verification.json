@@ -1,0 +1,37 @@
+{
+  "schemaVersion": 1,
+  "frozenAt": "2026-10-25T06:05:01.382Z",
+  "state": "final-source-bound-not-executed",
+  "backendSourceCommit": "46880bd1ef415131c4cf85aeb4dd2fa4f6fd4f9b",
+  "backendInputCount": 41,
+  "backendRebuilt": false,
+  "sceneProfile": "ordinary-native-span2-five-by-five-static-halo-v1",
+  "patrolSpan": 2,
+  "rootApprovedFreshProbeOnly": true,
+  "formalCapacityApproved": false,
+  "driverSourceCommit": "6d70d02d0bc390156b77a3e48acee714fc87cda3",
+  "driverSourceSha256": "05c07c2e487e4b65c5068f8803f96bdc6a66a342c5fc44c21f3a64b6b8581073",
+  "driverFrozenManifest": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\capacity-native-witness-approach-driver-frozen-v1.json",
+    "bytes": 41896,
+    "sha256": "5cd1dafffa530e145828183e8b9089c6900b67760d79c3fe225f2399d904cada"
+  },
+  "actualAdmissionCaps": [
+    24,
+    10,
+    10,
+    4,
+    1,
+    2
+  ],
+  "sourceConfigNotYet": true,
+  "accountsProvisioned": false,
+  "realmStarted": false,
+  "capacityAccepted": false,
+  "independentReview": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\compact-probe12-preseal-independent-review-v1.json",
+    "bytes": 5012,
+    "sha256": "931350be7231692a824f4fa2dd8db2cd584663464a6c5364b7edfdb27bd55136"
+  },
+  "reviewedSourceSha256": "8edaf888ad4303094ecc2d6bc38ac9dfc9aad48804511b5381c78db1e4de3e6a"
+}

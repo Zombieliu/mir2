@@ -1,0 +1,95 @@
+{
+  "schemaVersion": 1,
+  "verifiedAt": "2026-10-25T15:30:39.090Z",
+  "passed": true,
+  "runId": "1792934546937-58ce6147",
+  "realmStamp": "1792934538996-4d1caf58",
+  "backendSourceCommit": "5c2e713863d3e9556a92f856b11df2396c73b137",
+  "backendInputCount": 44,
+  "backendSourceAggregate": "6276d11a740e956cf8e3d316362a49900f1c761d9ffcdfd462cb7394056f7828",
+  "binarySha256": "d8791cceeed00fdb7019d1201aad19f06005790162df1b459a8cacac96f68756",
+  "slowStageThresholdMs": 50,
+  "files": [
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-personal-monster-projection-v1\\public\\1792934538996-4d1caf58.audit-source.mjs",
+      "bytes": 9066,
+      "sha256": "c694d39f4d4c6c7d388d7a66c10018c339bc529326510e7b7049cf3d0f222d37"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-personal-monster-projection-v1\\public\\1792934538996-4d1caf58.backend-source.json",
+      "bytes": 32926,
+      "sha256": "151869b76d13202e3c6557f908b5adc5643d1b0579cd7d4961cf0458c71cec52"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-personal-monster-projection-v1\\public\\1792934538996-4d1caf58.independent-audit.json",
+      "bytes": 1747,
+      "sha256": "e2b563e24484dcc2d16d14c2c20b5a84bc5921e5bc957a7dd305e070ec429265"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-personal-monster-projection-v1\\public\\1792934538996-4d1caf58.prepared-profile.json",
+      "bytes": 4369,
+      "sha256": "07893f55fa42af368da82061df2be5456bd6b7dc05394d9cd25a30b91d76d593"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-personal-monster-projection-v1\\public\\1792934538996-4d1caf58.realm-evidence.json",
+      "bytes": 34976,
+      "sha256": "3763e933415e23d66b8594610829990e7cddfbc69ef3316d7a5a8d3fad9e97b2"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-personal-monster-projection-v1\\public\\1792934538996-4d1caf58.release-input.json",
+      "bytes": 2376,
+      "sha256": "613b82935c45e476ad1ba32e2592e562e14ea6997062fc9f12b9de02bb770121"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-personal-monster-projection-v1\\public\\1792934538996-4d1caf58.runner-source.mjs",
+      "bytes": 14389,
+      "sha256": "b7ad0b746575b01a4dd0133694e07799e435859241e6d845c9aa2c66ab25e45e"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-personal-monster-projection-v1\\public\\1792934538996-4d1caf58.source-manifest-verification.json",
+      "bytes": 572,
+      "sha256": "d4af84222c7309c7eeadf7ce185bc8b7c6452bb48bb610bcb199d43f8f59a356"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-personal-monster-projection-v1\\public\\1792934538996-4d1caf58.zone-metrics.json",
+      "bytes": 23598,
+      "sha256": "a56aae33c58dd4e27db9e6b482082b557ec20a6af465ed8ef3d01ee73533af5f"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-personal-monster-projection-v1\\public\\1792934546937-58ce6147-a.trace.jsonl",
+      "bytes": 982658,
+      "sha256": "ad78db0397399d88cf5a7c937dcc0664f7a22eadb7a8877a58e2759c985b49f7"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-personal-monster-projection-v1\\public\\1792934546937-58ce6147-b.trace.jsonl",
+      "bytes": 907904,
+      "sha256": "88841b520336c2485062d816af16cec8d324a07319283396373a845fa85beb86"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-personal-monster-projection-v1\\public\\1792934546937-58ce6147-guard-newCharacter.trace.jsonl",
+      "bytes": 3479,
+      "sha256": "c964e3a263f3a0c86b2fbe88dc6f91a2141633df772413ef24e68e594567ec2a"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-personal-monster-projection-v1\\public\\1792934546937-58ce6147-guard-startGame.trace.jsonl",
+      "bytes": 3442,
+      "sha256": "cff0fa5526d83d5085d0614e63fda36ffecc0594f781475a5f8d5fed71ee5863"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-personal-monster-projection-v1\\public\\1792934546937-58ce6147-relogin-0.trace.jsonl",
+      "bytes": 684246,
+      "sha256": "0cb1b176f30a26ef02955918209d3b131acc82d7deed321feddddeb2996c3fb6"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-personal-monster-projection-v1\\public\\1792934546937-58ce6147-relogin-1.trace.jsonl",
+      "bytes": 680201,
+      "sha256": "b0b292717a319e003b01afff97b21baaa9d0216421880487f8353c2540017bef"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-personal-monster-projection-v1\\public\\1792934546937-58ce6147.report.json",
+      "bytes": 109568,
+      "sha256": "bb848946258bde31f7fe05158fc5cfa0427e7b693c0335d280d61c0c95ad947e"
+    }
+  ],
+  "capacityAccepted": false
+}

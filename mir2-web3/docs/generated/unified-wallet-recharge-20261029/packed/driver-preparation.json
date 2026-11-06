@@ -1,0 +1,139 @@
+{
+  "schema": "mir2.unified.evidence.phase.v1",
+  "passed": true,
+  "curatedAtUtc": "2026-10-29T17:39:26.624589+00:00",
+  "producerReceipt": {
+    "filename": "packed-fixture-driver-preparation.json",
+    "bytes": 5857,
+    "sha256": "b3b23a484bb336fed15888399dd1a3a7c510b4a6e6b13526b30b98c288ede56e"
+  },
+  "producerReport": {
+    "schema": "mir2.unified.packed-local-fixture-preparation.v1",
+    "recordedAtUtc": "2026-10-29T17:07:37.2734700Z",
+    "preparationPassed": true,
+    "actualApplyPerformed": false,
+    "actualGameLaunched": false,
+    "rootRunApprovalPending": true,
+    "externalOnly": true,
+    "repositorySourceModified": false,
+    "publicFeedModified": false,
+    "signingPerformed": false,
+    "compiledHostOverride": false,
+    "productionDependency": {
+      "gitRoot": "F:/uu",
+      "projectRoot": "F:/uu/mir2-web3",
+      "revision": "77a2007a449d1f437a8d411bfa41f105be992fcf",
+      "gitClean": true,
+      "canonicalSourceReceipt": {
+        "path": "C:/mir2-build/unified-20261029/unified-engine-sparse-final-source.json",
+        "bytes": 350641,
+        "sha256": "C1F01F9BD0935090866CD29052AC0A7477B930B2B33928232C06A4D12A110A62"
+      }
+    },
+    "compilation": {
+      "rustToolchain": "1.95.0",
+      "target": "x86_64-pc-windows-msvc",
+      "profile": "dev",
+      "jobs": 2,
+      "locked": true,
+      "offline": true,
+      "binary": {
+        "path": "F:/mir2-build/unified-20261029/fixture-target/x86_64-pc-windows-msvc/debug/mir2-unified-packed-local-fixture.exe",
+        "bytes": 3043840,
+        "sha256": "1F788338B04A81B535B166F7752617D0942BABD37BBCCA2955220029B5365FB0"
+      },
+      "buildLog": {
+        "path": "C:/mir2-build/unified-20261029/packed-fixture-driver-build-v3.log",
+        "bytes": 183,
+        "sha256": "3955EDD1E82E61D66A89D304D82BF6ACEADD95F78213AE1EA26113A395668067"
+      }
+    },
+    "externalSources": [
+      {
+        "path": "C:/mir2-build/unified-20261029/packed-fixture-driver/Cargo.toml",
+        "bytes": 318,
+        "sha256": "8FD34BE544BA82A9B3BDFCE65D9B597F1C60BFD5BD638680F44A7730940D6E37"
+      },
+      {
+        "path": "C:/mir2-build/unified-20261029/packed-fixture-driver/Cargo.lock",
+        "bytes": 20249,
+        "sha256": "7B5A22B2CE57EA2D22A7B57FD6782EBAF0E9DDB74698F44C8699665F253E26E8"
+      },
+      {
+        "path": "C:/mir2-build/unified-20261029/packed-fixture-driver/src/main.rs",
+        "bytes": 22469,
+        "sha256": "637C34C98B865C03AD9A5A43EDAF74DB178B33EB14588F85184E42827C85F7E7"
+      }
+    ],
+    "focusedTests": {
+      "passed": 3,
+      "failed": 0,
+      "ignored": 0,
+      "scope": "External adapter digest/review/canonical-isolation guards only; not packed apply or frontend acceptance",
+      "log": {
+        "path": "C:/mir2-build/unified-20261029/packed-fixture-driver-tests-v3.log",
+        "bytes": 664,
+        "sha256": "8082D1F7D9F7437BB7F0CC1EAD0393B5308B843CB81CD43CE240FA46FF47F03B"
+      }
+    },
+    "executableNoOp": {
+      "path": "C:/mir2-build/unified-20261029/packed-fixture-driver-describe-v3.json",
+      "bytes": 416,
+      "sha256": "E80626EE78514A8C83F626761CDF8404BE515F206B5FAF2F01ECF7F63D6D3F69"
+    },
+    "unreviewedControlFailedClosed": {
+      "path": "C:/mir2-build/unified-20261029/packed-fixture-driver-unreviewed-draft-v3.json",
+      "bytes": 345,
+      "sha256": "A50E12F7141FE6ED2FA1C09EB83FBE4E75D6B5F12A27A9A7AACA01CB3229F0D5"
+    },
+    "frozenSignedRelease": {
+      "root": "C:/mir2-build/unified-20261029/unified-packed-s2026102912/release",
+      "verification": {
+        "path": "C:/mir2-build/unified-20261029/unified-packed-s2026102912/release/VERIFY-PACKED-GENERATION.json",
+        "bytes": 1104,
+        "sha256": "E84CF702C757BD565220C2A9B38A7992579751C233F2B86277CFAD2CC169A2E3"
+      },
+      "manifestSha256": "9DFBD083B6B92972539BC01816645ED6131297BB7CA4DEDEC659438987A74186",
+      "sequence": 2026102912,
+      "gameSourceRevision": "1875c6c20e1285ffefc45ef6c21eab33e26fc536",
+      "engineSourceRevision": "77a2007a449d1f437a8d411bfa41f105be992fcf",
+      "packCount": 33,
+      "resourceCount": 255063,
+      "published": false
+    },
+    "controlDraft": {
+      "path": "C:/mir2-build/unified-20261029/packed-local-fixture-control.draft.json",
+      "bytes": 1255,
+      "sha256": "DB8E522BE6224950F0FB7134D0556D8FC04C6135D34955AA75EA18A8A1497AD9"
+    },
+    "productionEntryPoints": [
+      "generation::check_update",
+      "update::active_engine",
+      "update::verify_launch",
+      "platform::verify_cms_at",
+      "fs_safe::FileLease::verified",
+      "generation::verify_generation_for_launch",
+      "generation::begin_launch",
+      "generation_runtime::ReadyServer::poll(actual child PID)",
+      "generation::accept",
+      "generation::verify_current_selection",
+      "generation::rollback (failure only)"
+    ],
+    "expectedFutureEvidence": [
+      "Real production Pending -> actual ready nonce/PID -> alive >=10 sec -> production Healthy",
+      "No simulated ready message or accepted marker",
+      "Actual game exit captured; healthy child not killed by driver"
+    ],
+    "constraints": [
+      "Root must replace the two explicit path placeholders and review exact resulting control bytes and binary hash before any real run.",
+      "Requires a fresh task-owned real Unified11 installer root and an existing disjoint isolated APPDATA under this BASE.",
+      "Rejects every existing selector: one-shot fresh installation fixture, not a retry/recovery harness.",
+      "LocalFiles transport uses only this signed release object inventory; no arbitrary HTTPS/feed/compiled-host override.",
+      "No MIR2_* environment variables reach Game; APPDATA/LOCALAPPDATA are set only for this child. Updater local transport has zero network requests; Game may use its unchanged signed configuration.",
+      "At success the driver remains running until the actual healthy Game exits normally. It does not automate GUI actions.",
+      "This local fixture cannot prove public channel migration, legacy rollback game execution, or human frontend acceptance.",
+      "Initial private PackFeed parse compiler failure preserved in v1 build log; final implementation uses typed pre-read solely for local inventory, with private production CMS/schema/expiry/engine admission still inside check_update."
+    ]
+  },
+  "phase": "Earlier external adapter preparation only; false apply/launch/pending fields retained; later actual local-application is separate"
+}

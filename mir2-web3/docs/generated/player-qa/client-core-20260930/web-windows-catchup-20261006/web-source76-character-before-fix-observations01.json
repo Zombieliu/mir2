@@ -1,0 +1,48 @@
+{
+  "kind": "source76-ordinary-character-stats1-spells-before-fix",
+  "initial": {
+    "canvas": {
+      "interactive": "true",
+      "pointerEvents": "auto",
+      "rect": {
+        "height": 483,
+        "width": 644,
+        "x": 1,
+        "y": 173
+      }
+    },
+    "characterCompatCount": 1,
+    "characterTabs": [
+      {
+        "className": "character-tab char",
+        "text": ""
+      },
+      {
+        "className": "character-tab stats1",
+        "text": ""
+      },
+      {
+        "className": "character-tab stats2",
+        "text": ""
+      },
+      {
+        "className": "character-tab spells",
+        "text": ""
+      }
+    ],
+    "layoutProfile": "desktop",
+    "screen": "game"
+  },
+  "stats1": {
+    "canvasInteractive": "true",
+    "characterCompatCount": 0
+  },
+  "characterReturnedCompatibilityAfterNativeTabClick": true,
+  "spells": {
+    "canvasInteractive": "true",
+    "characterCompatCount": 1,
+    "spellsCompatCount": 1
+  },
+  "equipmentMutation": false,
+  "ownershipDiagnosticsUnavailable": true
+}

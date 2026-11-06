@@ -1,0 +1,19 @@
+{
+  "passed": true,
+  "curatedAtUtc": "2026-10-29T17:39:26.624589+00:00",
+  "producerReceipt": {
+    "filename": "packed-local-health-evidence-run1/REAL-GAME-READY.json",
+    "bytes": 248,
+    "sha256": "b660b5ca8bf7678038c80f31ef43e8f72276c07358948e952a67061393956529"
+  },
+  "sanitizedProducerFields": {
+    "actualKernelPid": 76824,
+    "attemptSha256": "0686cd2c123c73be0a66cf13d201a99c3e655f7f1db38debe9055c55c1b72ed3",
+    "elapsedMs": 5229,
+    "manifestSha256": "9DFBD083B6B92972539BC01816645ED6131297BB7CA4DEDEC659438987A74186",
+    "readySimulated": false
+  },
+  "attemptNonceRawValuesOmitted": true,
+  "rawGameStdoutStderrNeverCopied": true,
+  "phase": "Actual production-library local apply/real child proof; not a synthetic ready fixture"
+}

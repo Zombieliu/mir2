@@ -1,0 +1,150 @@
+{
+  "schemaVersion": 1,
+  "reviewedAt": "2026-10-25T16:15:07.916Z",
+  "scope": "Read-only source and appended deterministic test review; no test execution by this reviewer.",
+  "source": {
+    "beforePins": {
+      "file": "C:/mir2-build/p01-completion-20261024/attack-deadline-poll-fix-v1/before-source-pins-v1.json",
+      "bytes": 637,
+      "sha256": "e2a0eb379a52c86af7d371a510cc5a80e93bd52f135a79ce6109545f00d93280"
+    },
+    "beforeMain": {
+      "file": "C:/mir2-build/p01-completion-20261024/attack-deadline-poll-fix-v1/playtest-capacity-soak.mjs.before.txt",
+      "bytes": 148409,
+      "sha256": "1cf9da1746db1b23d00b13cf9dd65c14ac72c155bd558621bf7767d4e6376f3f"
+    },
+    "beforeTest": {
+      "file": "C:/mir2-build/p01-completion-20261024/attack-deadline-poll-fix-v1/playtest-capacity-soak.test.mjs.before.txt",
+      "bytes": 238892,
+      "sha256": "5c6efc9a49a45550d4c4aed25a5083dc1afaf3e146da33ffd9c372f8902d66db"
+    },
+    "currentMain": {
+      "file": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/apps/web/scripts/playtest-capacity-soak.mjs",
+      "bytes": 149057,
+      "sha256": "bd731443c41d54a237fc0a6d83f2619d049c0226cbd7f154f67717e8fb0dcea5"
+    },
+    "currentTest": {
+      "file": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/apps/web/scripts/playtest-capacity-soak.test.mjs",
+      "bytes": 243920,
+      "sha256": "ec388119871058883781e2cf422a417c3fb319c25d344fd3092f18da9b354966"
+    },
+    "focusedRed": {
+      "file": "C:/mir2-build/p01-completion-20261024/attack-deadline-poll-fix-v1/deadline-regression-before-fix-v1.log",
+      "bytes": 8417,
+      "sha256": "bb3e184c31a892c169ded0624042c8dabe07b62762aeca0c63f99caf9811e96b"
+    },
+    "focusedGreen": {
+      "file": "C:/mir2-build/p01-completion-20261024/attack-deadline-poll-fix-v1/deadline-regression-after-fix-v1.log",
+      "bytes": 2685,
+      "sha256": "9360c7cc4ae662080e4a5a90f0f29234c83e4cb60917f9bc417858a2edd29c5e"
+    },
+    "historicalDriverFreeze": {
+      "file": "C:/mir2-build/p01-completion-20261024/capacity-native-chase-preference-driver-frozen-v1.json",
+      "bytes": 19099,
+      "sha256": "20fd347d029d9a912514e400bc74b0d08ec940bd90af20ff2f91bd64dba08bef"
+    }
+  },
+  "currentNineInputs": [
+    {
+      "file": "apps/web/scripts/playtest-capacity-soak-core.mjs",
+      "bytes": 37930,
+      "sha256": "40ccd36ee84265a29bd509ca9a7bb360691f2be002411c8cab5f64a3e254cacc",
+      "equalsPriorFrozenInput": true
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-soak.mjs",
+      "bytes": 149057,
+      "sha256": "bd731443c41d54a237fc0a6d83f2619d049c0226cbd7f154f67717e8fb0dcea5",
+      "equalsPriorFrozenInput": false
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-soak.test.mjs",
+      "bytes": 243920,
+      "sha256": "ec388119871058883781e2cf422a417c3fb319c25d344fd3092f18da9b354966",
+      "equalsPriorFrozenInput": false
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-observability.mjs",
+      "bytes": 4447,
+      "sha256": "19edb25f68fdd18567391e52a247964bd689346b58535871ce17051f53af9af7",
+      "equalsPriorFrozenInput": true
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-observability.test.mjs",
+      "bytes": 5228,
+      "sha256": "00ff902194f805eb3433b192b2838b6eea6cd80860052860b825ab34f58a626d",
+      "equalsPriorFrozenInput": true
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-monitor.mjs",
+      "bytes": 21246,
+      "sha256": "e585081835d9232b58d91bb0f717a796b483a818ed5c6fd943abf93350d74e7f",
+      "equalsPriorFrozenInput": true
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-monitor.test.mjs",
+      "bytes": 10882,
+      "sha256": "0e60e4636ea5e384e6455fe9d474d56a760881505e765ccfc82eec490d8d92f8",
+      "equalsPriorFrozenInput": true
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-telemetry.mjs",
+      "bytes": 6548,
+      "sha256": "d3b74c3b8e0401530e787f6b35bd9a578de4f455b3f7817b6230df41c5871964",
+      "equalsPriorFrozenInput": true
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-telemetry.test.mjs",
+      "bytes": 6277,
+      "sha256": "f5efe4aa510f67eb10ebba26a5de9cb5402f061de07900998a77a191a749f974",
+      "equalsPriorFrozenInput": true
+    }
+  ],
+  "inverseProof": {
+    "mainExactPriorRaw": true,
+    "rules": [
+      "Restore wait signature without optional deadlinePredicate",
+      "Remove only final opt-in bounded read block",
+      "Restore original inline acknowledgement closure opener",
+      "Restore original wait call closure terminator"
+    ],
+    "priorMainRawSha256": "1cf9da1746db1b23d00b13cf9dd65c14ac72c155bd558621bf7767d4e6376f3f",
+    "oldTwoHundredTestRawPrefixExact": true,
+    "oldTestPrefixBytes": 238892,
+    "newTestSuffixBytes": 5028,
+    "otherSevenInputsRawUnchanged": true
+  },
+  "findings": [],
+  "review": {
+    "deadlineRead": "Only attackV2 supplies the same existing complete acknowledgement predicate. The ordinary wait loop and default timeout path are unchanged.",
+    "safetyPrecedence": "Only the opt-in final path checks non-draining safety guard, socket failure, then closure before one synchronous predicate read; no extra sleep or send.",
+    "evidenceDeadline": "The existing fresh sequence/cursor/lower monotonic bound and both endpoints monotonicMs <= sentAt + 900 filters remain unchanged. matchAttackResultV2 still requires exact request ID/object/protocol/result and conflicts still throw.",
+    "damageProof": "The original verifiedCombatHit double endpoint strike/damage/health requirements remain. Launched alone does not credit damage; a missing endpoint remains miss, absent exact typed result remains timeout, and native ambiguity quarantine remains.",
+    "testQuality": "Six actual action fixtures cover evidence at 888 and inclusive 900, typed/owner/observer at 901, wrong request ID; four wait fixtures cover ordinary default timeout and guard/failure/closed precedence. Fake clock advances from a prior poll at 880 through recorded evidence to final resumption at 903. Existing 200-test raw prefix is preserved.",
+    "focusedLogs": {
+      "oldImplementation": {
+        "tests": 10,
+        "passed": 3,
+        "failed": 7
+      },
+      "newImplementation": {
+        "tests": 10,
+        "passed": 10,
+        "failed": 0
+      },
+      "independentlyExecutedByReviewer": false
+    },
+    "fullSuite": "Root full 210 suite was still running when this receipt was written; no full result is certified here.",
+    "originalFormal11": "Original run1792942371568-1e322224 remains failed with 2/75 timeouts. A prospective correction to polling does not reclassify raw history, and one remaining timeout would still be 1/75 > 1%."
+  },
+  "verdict": {
+    "sourceContractPassed": true,
+    "appendedTestsReviewed": true,
+    "blockingFindingIds": [],
+    "eligibleToContinueCurrentRootFullRegression": true,
+    "fullRegressionCertifiedByThisReceipt": false,
+    "capacityAccepted": false,
+    "p0Passed": false,
+    "p2ImplementationPermitted": false
+  }
+}

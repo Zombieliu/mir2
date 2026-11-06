@@ -1,0 +1,41 @@
+
+running 36 tests
+test config::config_refresh_fail_closed_tests::account_delete_cas_rejects_account_and_save_conflicts ... ok
+test config::config_refresh_fail_closed_tests::account_scope_guard_skips_repository_probe_and_canonical_commit_writes_once ... ok
+test config::config_refresh_fail_closed_tests::account_scoped_commit_rejects_scope_escape_before_any_file_write ... ok
+test config::config_refresh_fail_closed_tests::backup_restore_respects_authoritative_and_file_fixture_seed_rules ... ok
+test config::config_refresh_fail_closed_tests::ban_persist_fault_missing_account_and_alias_never_mutate_or_create ... ok
+test config::config_refresh_fail_closed_tests::character_save_cas_has_all_four_presence_states ... ok
+test config::config_refresh_fail_closed_tests::development_file_fixture_still_supplies_demo_account ... ok
+test config::config_refresh_fail_closed_tests::environment_entry_propagates_injected_loader_errors_without_global_env ... ok
+test config::config_refresh_fail_closed_tests::explicit_global_commit_allows_global_but_rejects_other_accounts_and_metadata ... ok
+test config::config_refresh_fail_closed_tests::full_restore_plan_emits_account_save_tombstones_and_global_reset ... ok
+test config::config_refresh_fail_closed_tests::full_restore_uses_live_versions_for_replacement_and_ignores_backup_metadata ... ok
+test config::config_refresh_fail_closed_tests::global_scope_guard_skips_repository_probe_and_canonical_commit_writes_once ... ok
+test config::config_refresh_fail_closed_tests::global_stock_restore_cas_supports_some_none_and_explicit_reset ... ok
+test config::config_refresh_fail_closed_tests::legacy_account_save_publishes_save_tombstone_and_preserves_untouched_metadata ... ok
+test config::config_refresh_fail_closed_tests::legacy_full_save_publishes_account_tombstone_then_recreates_with_expected_none ... ok
+test config::config_refresh_fail_closed_tests::multi_account_mid_fault_rolls_back_fake_repository_and_live_store ... ok
+test config::config_refresh_fail_closed_tests::normal_scoped_create_keeps_expected_none_insert_semantics ... ok
+test config::config_refresh_fail_closed_tests::ordinary_account_scope_never_turns_into_full_store_deletion ... ok
+test config::config_refresh_fail_closed_tests::postgres_deleted_account_cannot_be_recreated_by_stale_save ... ok
+test config::config_refresh_fail_closed_tests::postgres_row_assembler_keeps_zero_rows_empty ... ok
+test config::config_refresh_fail_closed_tests::postgres_row_assembler_preserves_real_demo_and_versions ... ok
+test config::config_refresh_fail_closed_tests::postgres_row_assembler_rejects_bad_account_raw_json ... ok
+test config::config_refresh_fail_closed_tests::postgres_startup_empty_authoritative_store_remains_empty ... ok
+test config::config_refresh_fail_closed_tests::postgres_startup_loader_failure_is_propagated_without_default_fallback ... ok
+test config::config_refresh_fail_closed_tests::postgres_startup_preserves_real_authoritative_demo_account ... ok
+test config::config_refresh_fail_closed_tests::postgres_url_matrix_accepts_supported_forms_and_never_loads_invalid_inputs ... ok
+test config::config_refresh_fail_closed_tests::retained_account_save_delete_is_a_versioned_tombstone ... ok
+test config::config_refresh_fail_closed_tests::source_account_cas_allows_only_matching_update_or_absent_new_insert ... ok
+test config::config_refresh_fail_closed_tests::source_backup_restore_preserves_real_demo_and_faults_before_live_publish ... ok
+test config::config_refresh_fail_closed_tests::source_full_restore_nonempty_to_empty_clears_live_and_all_source_metadata ... ok
+test config::config_refresh_fail_closed_tests::source_of_truth_mail_on_empty_store_never_creates_demo ... ok
+test config::config_refresh_fail_closed_tests::source_refresh_holds_persist_lock_until_cache_replacement_finishes ... ok
+test config::config_refresh_fail_closed_tests::source_refresh_missing_removes_cached_account_and_versions ... ok
+test config::config_refresh_fail_closed_tests::source_refresh_unavailable_preserves_cache_but_returns_error ... ok
+test config::config_refresh_fail_closed_tests::system_mail_persist_fault_keeps_live_store_bytes_unchanged ... ok
+test config::config_refresh_fail_closed_tests::system_mail_unknown_file_publication_freezes_writes_without_live_publish ... ok
+
+test result: ok. 36 passed; 0 failed; 0 ignored; 0 measured; 2920 filtered out; finished in 0.77s
+

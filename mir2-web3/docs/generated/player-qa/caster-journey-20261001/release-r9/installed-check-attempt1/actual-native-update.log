@@ -1,0 +1,21 @@
+Traceback (most recent call last):
+  File "C:\mir2-playtest-releases\20261001-native-r9\native-installed-update-r9.py", line 129, in <module>
+    main()
+    ~~~~^^
+  File "C:\mir2-playtest-releases\20261001-native-r9\native-installed-update-r9.py", line 89, in main
+    hidden_run(scratch, '--check-only', 900)
+    ~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\mir2-playtest-releases\20261001-native-r9\native-installed-update-r9.py", line 38, in hidden_run
+    result = subprocess.run([str(exe), arg], cwd=INSTALL, timeout=timeout,
+                            creationflags=subprocess.CREATE_NO_WINDOW, startupinfo=startup)
+  File "C:\Python313\Lib\subprocess.py", line 556, in run
+    stdout, stderr = process.communicate(input, timeout=timeout)
+                     ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python313\Lib\subprocess.py", line 1241, in communicate
+    sts = self.wait(timeout=self._remaining_time(endtime))
+  File "C:\Python313\Lib\subprocess.py", line 1280, in wait
+    return self._wait(timeout=timeout)
+           ~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Python313\Lib\subprocess.py", line 1609, in _wait
+    raise TimeoutExpired(self.args, timeout)
+subprocess.TimeoutExpired: Command '['F:\\mir2\\Mir2Invite\\.update\\engine-61BEDB22789626F08DE6826D4F46F128AE284661B877A0B7988E3F6E0E83D5C4.exe', '--check-only']' timed out after 900 seconds

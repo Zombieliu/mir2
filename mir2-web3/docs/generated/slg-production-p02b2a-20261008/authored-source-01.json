@@ -1,0 +1,52 @@
+{
+  "schema": "mir2.production-authored-source.v1",
+  "parent": "4644753b78c201cfa7dccc6cf6d694ce10021235",
+  "createdUtc": "2026-10-08T15:32:28.7695304Z",
+  "files": [
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/mod.rs",
+      "sha256": "0abbb1b9da51b1acb44dff751475691cbb28610567680d3f37fff142c123d500",
+      "length": 7238
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/item_grants.rs",
+      "sha256": "0460cfe6f3978408295b85a9640830e506ad37e5cda2c10decd93eb25dee92a0",
+      "length": 7873
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/item_grants_tests.rs",
+      "sha256": "680df4410a37ef30080c9cc41d27139a7970270ea025a7466b9e0a088cc5e3fa",
+      "length": 7951
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/quests.rs",
+      "sha256": "58f118967a154b7573ffa78073e4275db0c9dfbc29c99993ce2cdcef5a14d0ce",
+      "length": 80871
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/quest_uid_tests.rs",
+      "sha256": "39c74c80356b79f5cea312e91352b834ae5e1613355b189d26a6938199e89060",
+      "length": 4344
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/mining.rs",
+      "sha256": "b8ad73bd55654b8626b9c7c20a2808845f04386f001aaf46aed08efc4d314308",
+      "length": 15146
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/mining_uid_tests.rs",
+      "sha256": "3a2d4193e18e9be3533c2cf3ac17b34d0eaa84c42c0ea28befc7be577579c9ec",
+      "length": 2887
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/fishing.rs",
+      "sha256": "736d34b844f75df67abbef3ed1156397ce433f79483d3eaa3e3f6c34d7db789f",
+      "length": 31933
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/fishing_uid_tests.rs",
+      "sha256": "090f4ada97070c0a4027a8942608c102e5b768c8309350a0412c08ff812be2c7",
+      "length": 2401
+    }
+  ]
+}

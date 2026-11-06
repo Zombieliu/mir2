@@ -1,0 +1,11 @@
+{
+  "schema": "mir2.production-protected-parent.v1",
+  "createdUtc": "2026-10-08T22:40:59.7502205Z",
+  "parent": "488ec6f034182977fec03ad2952cccfd76b06eb2",
+  "declaredInputs": 461,
+  "authoredInputs": 2,
+  "declaredProtectedInputs": 459,
+  "mismatchCount": 0,
+  "mismatches": [],
+  "method": "Current canonical Git-clean file blobs compared to parent ls-tree; batched stdin-paths"
+}

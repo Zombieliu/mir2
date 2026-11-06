@@ -1,0 +1,10 @@
+Read-only final report received from /root/health_zero_review_01.
+Root-recorded transcript of the collaboration final answer, not a reviewer-authored file.
+
+root-05 只读复核未发现新增阻断。
+
+Session 现在完全忽略 `ObjectHealth`，真实 `ObjectDied`、typed HP0 和显式复活路径保留。死亡镜像不发放奖励；Harvest 的 `harvested`、剩余次数和 pending drops 清理，以及 gateway 奖励去重守卫均未改动。f32 百分比和 expiry 的字节转换顺序符合所核对的 Crystal 表达式。
+
+日志确认：Session 3/0、Source wrappers 5/0、party 8/0、gateway health-zero 7/0、projection 2/0。邻接测试仍为 6/2、2/2、10/1，同五个失败在 clean 937ac636 复现，测试文件未放宽；不能称整轮全绿或失败日志完全相同。
+
+结论仅覆盖本轮数值和生命周期边界。完整 dispatcher/顺序、Hero identity、Web 0%→HP0，以及完整 Harvest 奖励端到端验证仍未关闭；不代表 P3 完成或 R22 已包含。

@@ -1,0 +1,43 @@
+{
+  "schemaVersion": 1,
+  "state": "DRAFT_PENDING_NOT_FINALIZED_NOT_SEALED",
+  "basis": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-personal-projection-feasibility-15",
+  "sourceReferencesOnly": [
+    {
+      "path": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-personal-projection-feasibility-15\\passed-probe-window-contract.mjs",
+      "bytes": 3040,
+      "sha256": "3a238991e9ee9b81b93cdcb282cdd7c718afa076ec5eb1db11ef96cbe4b15cdb"
+    },
+    {
+      "path": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-personal-projection-feasibility-15\\driver-report-contract.mjs",
+      "bytes": 9598,
+      "sha256": "fe239fbe349511f717dbe476b6c3a2e53c62bfcb7da5a71d0d7bfe3be3014d08"
+    },
+    {
+      "path": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-personal-projection-feasibility-15\\native-chase-report-contract.mjs",
+      "bytes": 2266,
+      "sha256": "66b9ce1a39a1cfbe610d3f1a98559c67d178667319718f8baaa748a5d7d102c0"
+    },
+    {
+      "path": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-personal-projection-feasibility-15\\wire-diagnostics-contract.mjs",
+      "bytes": 15767,
+      "sha256": "8d2c06f251a3b623d4ff135211046b9d039b31e9bfdad799c0cb1fd3ddfda13a"
+    },
+    {
+      "path": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-personal-projection-feasibility-15\\slow-stage-row-contract.mjs",
+      "bytes": 1553,
+      "sha256": "cc860f6578109f0a615ae83d9675c1f099f4814109f0fd95fcf475a7632d6db8"
+    }
+  ],
+  "mechanicalChangesStillRequired": [
+    "New identity/catalog/raw-public names and relative pin paths",
+    "New44 source library based on current44 baseline, not old fixed-five-delta collector",
+    "Final actual driver evidence and report declaration contract",
+    "Future slow helper allowlist for source-scoped stages",
+    "Actual full16 and future probe16 complete toolseal/executor closure consumers",
+    "New Root finalize/seal/readonlyguard handoff only after actual bindings and final QA"
+  ],
+  "runtimeScriptsCopied": false,
+  "commandsReady": false,
+  "originalSourcesModified": false
+}

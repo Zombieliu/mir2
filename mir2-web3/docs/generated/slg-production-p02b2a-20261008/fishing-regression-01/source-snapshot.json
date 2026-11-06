@@ -1,0 +1,2307 @@
+{
+  "schema": "mir2.production-source.v1",
+  "scope": "fishing-regression",
+  "createdUtc": "2026-10-08T16:38:46.0822384Z",
+  "files": [
+    {
+      "path": "mir2-web3/.cargo/config.toml",
+      "sha256": "17d6d9fdca4859d571020695c0af7fefd2589200d6277be62762605c0d78bdab",
+      "length": 30
+    },
+    {
+      "path": "mir2-web3/apps/simulation/Cargo.toml",
+      "sha256": "08b31c58ae6a8fd3fdfd1770f9ab5ea0f79737558ee01c49ade5af9d5c803a99",
+      "length": 798
+    },
+    {
+      "path": "mir2-web3/apps/simulation/examples/zone_load.rs",
+      "sha256": "5714291c02588f9759efa755f050b817b256876ccc7b43b0d3f58fdc3b58cf32",
+      "length": 22369
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/bin/zone_replay.rs",
+      "sha256": "6d900fe0963b61591b583d1d1176116cd169d22514829d96cab2c3f97316348b",
+      "length": 2457
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/config_account_store_durability_tests.rs",
+      "sha256": "195a76501d192738f983ded1809e71c2e2c08f8a95e3e4a19c8645f9bda3dec0",
+      "length": 5489
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/config_file_authority.rs",
+      "sha256": "2b05ffa956ebbf198997357c3b90c02a2f8b0b465ae486014f6d2d1d2ccbffb0",
+      "length": 23658
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/config_guild_clock_driver.rs",
+      "sha256": "a80fc6c512951f9d23828041407a6d028a1a755313fab566660f144718c957f4",
+      "length": 21723
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/config_guild_clock_late_pg_tests.rs",
+      "sha256": "557df713670c992045e0e7a213240af7cda6126652e751007728ad907c5cc700",
+      "length": 5293
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/config_guild_clock_pg_tests.rs",
+      "sha256": "3e54ff2a8afea7916f5dba14c8aba0079fa2a0e08f0796494d669c235ddf8908",
+      "length": 21887
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/config_guild_clock_schema_tests.rs",
+      "sha256": "a6142629ec28dd137e8d6827e9a0e109d1d2d4f78070581061f7eaa6740a63bc",
+      "length": 8139
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/config_guild_clock_transactions.rs",
+      "sha256": "4e8ab8b4530c961606fffeb058edeeb404e8f06e7ecccd080747bcf337bfbef3",
+      "length": 9377
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/config_guild_clock.rs",
+      "sha256": "2a26860fd7fb34208d8b94943b6f727899ee54f63b3ea50439c19a374850b4f9",
+      "length": 18643
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/config_guild_experience_capture_tests.rs",
+      "sha256": "91f9a09464c68de9aecde699af2074bca75c6413b86189eeb667adba8b3a3593",
+      "length": 6892
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/config_guild_experience_commit.rs",
+      "sha256": "b29fafb9aa597db7be714d53ad4714d915407501cf5f3192604f93ab512c18ed",
+      "length": 13060
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/config_guild_experience_permit.rs",
+      "sha256": "57663fb5603e77e6e3b06a522ba2a0b3ab0e71b722eb9d797e0cdf9006ef9bd6",
+      "length": 3400
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/config_guild_experience_tests.rs",
+      "sha256": "42795fce20740a79c8de7f3c9ea39b90a012d7dddeb4e782683684046a2eeddd",
+      "length": 8303
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/config_guild_experience.rs",
+      "sha256": "95508910039346218a2d1104181f2b298fc986b4478e386e1dcc16695d7db2d3",
+      "length": 8162
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/config_guild_xp_pg_tests.rs",
+      "sha256": "7b897031c4783fbc19a549aafaa35d92380cff6daf87ec104287e158696827ca",
+      "length": 4898
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/config_hero_authority.rs",
+      "sha256": "77c781fd809b78d94b4b2fcdb999dd0832d8525dcc615be3041f448b1491e61e",
+      "length": 1654
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/config_hero_compensation.rs",
+      "sha256": "f1979bd2684a800f811e7477a1b126ff11232b9283b9f462b8837f2fe32d1624",
+      "length": 1933
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/config_hero_map.rs",
+      "sha256": "580895e2f687645f50ad1e578f9f8a6b4cbc43a4b5291332d1c46dccd3d2d1a8",
+      "length": 1054
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/config_hero_postgres_tests.rs",
+      "sha256": "299acc316d75a1f76c7889dc2f549d842f35fa79cd8656acbe9394cc3050fb8b",
+      "length": 10922
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/config_hero_postgres.rs",
+      "sha256": "cc61e027e7ed449179d58a145e9984ace44b30878c70e52957b35b8872f45726",
+      "length": 7954
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/config_hero_registry.rs",
+      "sha256": "cd9afcebb5ed61beb4d1f69cff6ce61cd53503ad18644bb326885a6d36d0203b",
+      "length": 13380
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/config_hero_scope.rs",
+      "sha256": "b82af653acb3414f4cfda1fef375d791c07683e24474b33581a8281f7917a969",
+      "length": 5897
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/config_hero_transaction_tests.rs",
+      "sha256": "11849dde582e7c587564cc5197b52ab60b834989b19748ecd2ea2f6c963dfa32",
+      "length": 7310
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/config_item_identity_tests.rs",
+      "sha256": "7ff630d64ddef0ce611a7c76e393de5f31858b44307aef3f4b7bef4e9311222b",
+      "length": 6448
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/config_item_identity.rs",
+      "sha256": "33bf6ac2d1806aea75e97598e608e3a3faed9b03c90776f8dbe90ef2081a244c",
+      "length": 11014
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/config_prepared_kill.rs",
+      "sha256": "774eaea5e9c18f9e0a98223cfb48b17610d965782de6e84f3b14fead24615152",
+      "length": 15432
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/config_refresh_fail_closed_tests.rs",
+      "sha256": "5b31fabd2899857cc98b15e2f4fe0ac2cdb6f3965b8f3f624eec902ce8bdebf3",
+      "length": 66276
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/config_shared_guild_pg_tests.rs",
+      "sha256": "aa499589fac01f04fef0c7855ecc27c08f5c8180160222150cd6791c4bad6570",
+      "length": 6437
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/config_shared_guilds.rs",
+      "sha256": "6d4b233c6adcef4028e222eb0392c08b9f8d6f84faa074b62d1dd25eb0515edd",
+      "length": 46478
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/config.rs",
+      "sha256": "f9f7ca7fbb54d01f0edb29f9e1cb02ae3de4219448660c3ffed0c5853477e894",
+      "length": 300129
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/db_projection.rs",
+      "sha256": "d3d289d57e3e38eb2b5d25d4d4781583db88c12ef0562cb90f40e42684bcf554",
+      "length": 32981
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/item_identity_postgres_tests.rs",
+      "sha256": "f97cc69712b975919364d7ae0f4f7acd86116847cbe7dee282349778d1d33ebd",
+      "length": 6951
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/item_identity_postgres.rs",
+      "sha256": "81ab8a2563160346e68a111aef91106fdf38eb476c2d071034ad839f341c7113",
+      "length": 6878
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/item_identity_reservation.rs",
+      "sha256": "0b6af5e7d3ed7f3171d05d4fda82f46b83bf29ac5d84a079283542d0e9824a38",
+      "length": 6321
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/lib.rs",
+      "sha256": "63b4b7d06f36c8df6f61ed47185b9fbb9aef8518bdfe69e7c6a2cb8d31daef35",
+      "length": 5664
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/npc_purchase_journal.rs",
+      "sha256": "e823494a615353310329d8ee0faec6ab8288dbca6da72bbf1138caf76aa76580",
+      "length": 33037
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/npc_purchase_owner.rs",
+      "sha256": "bec552c731b00a5eb0a0cb8102306377d2f8635c14910edbf2371b1c67baa4db",
+      "length": 21830
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/big_map/mod.rs",
+      "sha256": "06c423d98c652f7ebb7bde6a97732d4d58839ec9c1d0688beafdbb61d35771c8",
+      "length": 24773
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/buff_duration.rs",
+      "sha256": "01050e2c0274342082a246ccd49502aad0e574bed7028167fe56d643663df921",
+      "length": 2863
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/buffs.rs",
+      "sha256": "4f9e9347fdda70d9a0eb6666557ec5b86da4cbec547f9cae77115fabe8df1e7d",
+      "length": 22087
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/combat.rs",
+      "sha256": "64d4a2cb4facfd16cce451ec370c41b5ec333ace6de6a22570bf5504b7c2be65",
+      "length": 142417
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/components.rs",
+      "sha256": "2a0476d302bd7dee542e7bc70dda720b72d67752cd68ba2b8e74fdfafe10da42",
+      "length": 8626
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/crystal_compat.rs",
+      "sha256": "0bef0f11e4c61cd5e52a57175a4cb54978564f45ad4ffb96f76143ec011eacb7",
+      "length": 19231
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/door.rs",
+      "sha256": "01e0e313e26966bd9f9ad879a7009081532dbfc5a2f28f5a1e8aecf6dc4bf451",
+      "length": 3300
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/drops.rs",
+      "sha256": "9b47435fc671c0c60467ff53d4d6518fb9d243ad056612a1e05eb038ac0c6be5",
+      "length": 173251
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/drops/zone_harvest_drop_tests.rs",
+      "sha256": "a25534bfe2c1a3117c3e20f9fe4460d46937683951a404ae650973a714bf4fc0",
+      "length": 2182
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/equipment_storage_merge_tests.rs",
+      "sha256": "ce191845687c9c03995b82b9bb6aae707077fd4c23c14e26efc3eb5716a87f03",
+      "length": 20097
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/equipment.rs",
+      "sha256": "5dff2b5879a7aff4fbf11de0c9376dd1819fe5649194121726920a62ca998589",
+      "length": 109597
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/experience_rates.rs",
+      "sha256": "0c1ecb8b34697b5e0e24d209b10acbc44343d0526bf2b086c0a2e46cefb015cd",
+      "length": 1389
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/fishing_equipment_tests.rs",
+      "sha256": "77fab0af804cd96dae97d3a31ca2181b652e7cd43cbd3f55cad12dc23d1b47ec",
+      "length": 8953
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/fishing_uid_tests.rs",
+      "sha256": "090f4ada97070c0a4027a8942608c102e5b768c8309350a0412c08ff812be2c7",
+      "length": 2401
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/fishing.rs",
+      "sha256": "736d34b844f75df67abbef3ed1156397ce433f79483d3eaa3e3f6c34d7db789f",
+      "length": 31933
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/fixtures/d401.map.gz",
+      "sha256": "734f2c5ce06defd46ebb3fc9a7d02a38c00ac7b070be03b317b0e6fa9aa78a71",
+      "length": 22951
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/gm_commands.rs",
+      "sha256": "855ad6f85cfc82f2f20b24dbd8504acd60d11bfc7158111370df9802c56610a7",
+      "length": 64858
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/hazard.rs",
+      "sha256": "ed19dc0fca477ff637e82e12f77225966cc0fc3cfc703cf22a102441377aa4b1",
+      "length": 6820
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/hero_ai.rs",
+      "sha256": "776768e0ce53ce14f2730de26d7ad198190ca81bbef2d3531a4693ce6fed681c",
+      "length": 57005
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/hero_buffs.rs",
+      "sha256": "45cecbeb718a86fc3d0c16dd9cc95db376305d8fb36285809fd7a59c44d23ce6",
+      "length": 8260
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/hero_cadence.rs",
+      "sha256": "bf78c1e38ff993604b47e5d912562623b5d0ea5d29d0cb6643be1339bb53fbad",
+      "length": 3256
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/hero_cast.rs",
+      "sha256": "155f60c243bdca6c7652fcca07f53c9279813a89daadec4f3828f0ae6c044e47",
+      "length": 9729
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/hero_combat_math.rs",
+      "sha256": "0ead5c2e98e84421f719fe76950815e55506f2b2c5319d0f07a4a617c7052911",
+      "length": 3518
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/hero_delayed_actions.rs",
+      "sha256": "16fac37898fa1039c8e6d0ebeb58c72b62c7d06ad3fb5a2e856395f04d782f8d",
+      "length": 6470
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/hero_hit_dispatch.rs",
+      "sha256": "a9ca334d94d4c5a85485e6b5fa0b87913fbbae8def1f44b984276e6898f7e907",
+      "length": 2723
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/hero_hit_math.rs",
+      "sha256": "d78df03731e00d2782352dbfa661a7cb2dce0480276c81a5ae20e7f84e50802c",
+      "length": 3788
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/hero_inventory.rs",
+      "sha256": "51cb2df88d438e09e506162f7ae3fb3183d62d9fbb06d040e2b58bbd00ab594f",
+      "length": 38638
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/hero_legacy_migration_tests.rs",
+      "sha256": "d074c04a999c7958c349841d9e86a592177a146fe14473d429565927c4c87f4d",
+      "length": 4484
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/hero_merge.rs",
+      "sha256": "8ab4c0d52396eb476597d572ce8cb3b8346beb7311777aaff1c36ab782f38f6f",
+      "length": 11874
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/hero_mount.rs",
+      "sha256": "82ee9de8deb3072f7a6fc3848ea0a6831020f488d42a64734fe08ef26558268a",
+      "length": 10327
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/hero_registry_carriers.rs",
+      "sha256": "7519ad8ad4ff02050b15f31eda8e0182ee4c0cff9928b887f09d3942dc8632a4",
+      "length": 9932
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/hero_registry_scan_tests.rs",
+      "sha256": "04b921af2ac563b24c8e71d46074d30c553459d32f4d28177542eef2f78b638d",
+      "length": 5685
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/hero_registry_scan.rs",
+      "sha256": "f530670cac4d0c2266413c8dbc21318669d79603535ae3ffe210c2c9ae463d44",
+      "length": 8532
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/hero_registry_validation.rs",
+      "sha256": "079f87e0350e7ff7630de198386c8ca9b722730e821a1412c09d9cdb7804d33a",
+      "length": 946
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/hero_stats_rod_tests.rs",
+      "sha256": "8d857c7e93aa7ad7a6d1e74aa247cf96945feff4e06e2a3f497878193bbaa99d",
+      "length": 1937
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/hero_stats.rs",
+      "sha256": "b4c6a3712820593c38105caccb64df365c806cfd4c81a1a2846c52bf42567021",
+      "length": 10622
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/hero_transient.rs",
+      "sha256": "08c7465c1635ab1d20f0b2bdaaedc0d61fd309014e761b8b70faf792f08d3304",
+      "length": 3284
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/intelligent_creature_item_tests.rs",
+      "sha256": "b2e7b333941ab449019c3e350ac40dc64fa8d185c7dd3f8e84986e3aa3105616",
+      "length": 31087
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/intelligent_creatures.rs",
+      "sha256": "07a00b3214b0801ac36c3c7f3eb00e161d18525a7dfd91f2273418c1a68d392d",
+      "length": 22960
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/inventory.rs",
+      "sha256": "3ff20a99220bad7b586313ff1aa9cd00c478c28323ac2ff65023225006122ce8",
+      "length": 183632
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/item_custody_tests.rs",
+      "sha256": "6f5d536cf1149a138018d6feb78318ba0e0b2e37f2b87c254e39f42c278b287f",
+      "length": 5681
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/item_custody.rs",
+      "sha256": "19f571b6165ea632dd8807bac53c5c52469f24b871279d05a31225b640c443f7",
+      "length": 7836
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/item_grants_tests.rs",
+      "sha256": "f449333555dbeb1420ebd367d00a7dae0c3a50ca4cdeff24787d8285febb4e7a",
+      "length": 7941
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/item_grants.rs",
+      "sha256": "c1d8522d7dc848cdc3b63eb6ef93b8a81050ee4974b5194bb2f431ba56394a1a",
+      "length": 7905
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/item_sets.rs",
+      "sha256": "2180da4e9710e7c0fa040b0cac523e19f38ade6b9fea699667d57cb1680dc3f8",
+      "length": 4875
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/item_uid_issuance_tests.rs",
+      "sha256": "8dc67d4f993e0c66c7993a02e4c884c72179bc1eae814fa865ce72b40fb46bd7",
+      "length": 14424
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/item_uid_issuance.rs",
+      "sha256": "a214bbbd4aea29904d7d47de065b8ff5576ce7548bff134078f2f46e61f0cee4",
+      "length": 8418
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/items.rs",
+      "sha256": "8c375841f8e49ac970fafc4c3fbf93443a4c39872955165eeb46e0b0509ac1e6",
+      "length": 166139
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/leveling.rs",
+      "sha256": "6760018dc57f9663b3f5ea48272750600f3af2c3ae3348e4026bd142ca1b4d3a",
+      "length": 14467
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/magic_key_preflight_tests.rs",
+      "sha256": "0c84bfd33aa8cb6fe4072b91e85ddfc88c58ba730c52b9aee6120b2fc6bec177",
+      "length": 3575
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/mail_body_validation_tests.rs",
+      "sha256": "8f7f649d296701892ad4f2ea38899b28db133ec6b95532df3d940111f044e05d",
+      "length": 1263
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/mail_parcel_tests.rs",
+      "sha256": "060c7ecf1739745d33367f963fc62a829fe461e6ef6d3236dbfb984109c61fbf",
+      "length": 8761
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/map_collision_source_tests.rs",
+      "sha256": "d4cc2dc9c3f29abc8535f7fad2ae57fee2d939a8fe66d7d3b6ae60f384214de7",
+      "length": 23486
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/map_events.rs",
+      "sha256": "6dc066136cbcd32ae1bd205c8619532aa7f96f8632f2047ca1dd691a6d14a128",
+      "length": 9732
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/map_transfer_metadata_tests.rs",
+      "sha256": "1028310e84631d0f293324d78f19b7ca1d94dcf873e42244af1503fee7b11722",
+      "length": 3499
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/map.rs",
+      "sha256": "033dc58683075939152fa4134cc89c3b12a22c706cf731767baa4cdf1a3bb72b",
+      "length": 81371
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/mentor_reward_tests.rs",
+      "sha256": "9a9256cff05f72ff84e81b2dd36df55480d8d22962e700762a3dccaca3f3ce3b",
+      "length": 7222
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/mining_uid_tests.rs",
+      "sha256": "3a2d4193e18e9be3533c2cf3ac17b34d0eaa84c42c0ea28befc7be577579c9ec",
+      "length": 2887
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/mining.rs",
+      "sha256": "b8ad73bd55654b8626b9c7c20a2808845f04386f001aaf46aed08efc4d314308",
+      "length": 15146
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/mod.rs",
+      "sha256": "0abbb1b9da51b1acb44dff751475691cbb28610567680d3f37fff142c123d500",
+      "length": 7238
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/monster_ai/armadillo.rs",
+      "sha256": "639ab9871db19fb68a5226f209b089d154e87ebf9fbf0a71a2bf6db39257f45e",
+      "length": 3697
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/monster_ai/axe_skeleton_fear.rs",
+      "sha256": "0de0bd96032fbd2715f20abc04f47d5576bf19f2f6fcf23f7620e1595809f080",
+      "length": 2535
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/monster_ai/bomb_spider.rs",
+      "sha256": "87cd50a55a00de48b4601e83dec73ea0fbefc17b4c61646aeec45698e5823baf",
+      "length": 933
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/monster_ai/bone_lord.rs",
+      "sha256": "e4d6df13f705f2ce5389bbaa9811496117ecb7f7f73592b3792348baa6dac7be",
+      "length": 2432
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/monster_ai/boulder_spirit.rs",
+      "sha256": "4cf124041f0448a680ce442b9fc1dcf2c59586838a7d1507140776ee50668af8",
+      "length": 14767
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/monster_ai/cannibal_plant.rs",
+      "sha256": "af08123c51a2691012667248c656ba3dcb1b388e601408c4e05ae8eab257057f",
+      "length": 1823
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/monster_ai/common.rs",
+      "sha256": "ed5f258530ca1e889ddcfb013b5a4005c16fcf95cfe9679bf28630848d149f93",
+      "length": 20496
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/monster_ai/deer_run_away.rs",
+      "sha256": "cca567a9b141d39158b3a7703a1104edd48fa8d9b34e343b3bf133c4422f533d",
+      "length": 2099
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/monster_ai/dig_out_zombie.rs",
+      "sha256": "18a7fa57bdcd84df6a97b37f8384c1897683bed9d8d8c609df1aa98538e56fdc",
+      "length": 1109
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/monster_ai/dragon_statue_sleep.rs",
+      "sha256": "d8b2d7747eddbabaf8b68c42cdde3fdebee9aaef77409be1a2846eb9e23496af",
+      "length": 1209
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/monster_ai/evil_centipede.rs",
+      "sha256": "1435637092433bba657985c4ab8524abb400ddd1964acdcd5c871f7ebdb4d44f",
+      "length": 1936
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/monster_ai/evil_mir.rs",
+      "sha256": "6501bcf4cd9a1aa29d41deb6b4d7c5211e35c7877ab16f1b9d43f27963588557",
+      "length": 24229
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/monster_ai/football.rs",
+      "sha256": "e02f7cd8fc6036f8aaddeeb5b2032667bb6b797c562c9af1b6c5c8b111f42228",
+      "length": 8316
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/monster_ai/foxman_fear.rs",
+      "sha256": "0c1f3c1501cf84964ec34040d2d0205464e2fc11353a165c671f8c0d4349f4d2",
+      "length": 5013
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/monster_ai/frost_tiger_sitting.rs",
+      "sha256": "7f69ff5c125eef6a687847ee0274d4e0d66c1ed4d9fb9c548b7445af5e99ff37",
+      "length": 1510
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/monster_ai/gate.rs",
+      "sha256": "456f68578b15639265cd21c5ede8ee74f555d5cfdbc6420f15f8e0b791c2d6a4",
+      "length": 11886
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/monster_ai/general_meow_meow.rs",
+      "sha256": "4ece265827196493bfb7c8f4538ca3c7b15fc065f61df614829d4305e17f96e1",
+      "length": 6474
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/monster_ai/great_fox_spirit.rs",
+      "sha256": "28e4bf2003444d2e2d931cadbb836ea2d4a99099f05b62a36daabb1c637c4913",
+      "length": 11691
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/monster_ai/hell_bomb.rs",
+      "sha256": "de10255a71a755a1f0b43eb29869d99d94e4e2e5095381d8a41d0e4c971692a6",
+      "length": 2016
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/monster_ai/hell_lord.rs",
+      "sha256": "febbb1583275f87ec7ad6603eb943947f62807c180c37525dbedf2fe5e77848c",
+      "length": 5058
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/monster_ai/holy_deva_fear.rs",
+      "sha256": "6bdc829381729270f8fdfa7e9a91a1c56990f78cd0af2d09fe46d820838a80d6",
+      "length": 2309
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/monster_ai/horned_archer.rs",
+      "sha256": "89253283148c2b14dbdab1e3d047631bc49e5d1d479d06e43dbf56074e543ee6",
+      "length": 9973
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/monster_ai/horned_commander.rs",
+      "sha256": "c041c3666d6afd9423025067642b7b525a6e0c278280a6f82563514db9a2115c",
+      "length": 33485
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/monster_ai/horned_mage.rs",
+      "sha256": "21d4ad791ce61fefa912e3458fb85ee494142b23b450ad35e6c2b8885d669701",
+      "length": 19484
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/monster_ai/horned_sorceror.rs",
+      "sha256": "292151b63f1ceb2af19c9c47ee681463a521f7eb8511d16c1dbb13dcb73104b0",
+      "length": 38263
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/monster_ai/horned_warrior.rs",
+      "sha256": "4fbc0ca1d9438a59990dbbe97cb610149d5b8360a017cabf38b0af773788ca92",
+      "length": 22629
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/monster_ai/hugger.rs",
+      "sha256": "6429730a034e7fac5cfbc93e0672713ae23b309fb132acffa024c7b3ffbe5a58",
+      "length": 13653
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/monster_ai/kirin_ice_thrust.rs",
+      "sha256": "51b711681e87903441e913d350f7b19535e7b432b62f76712786f59425e48017",
+      "length": 2970
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/monster_ai/mod.rs",
+      "sha256": "47aff00da1116f5a266d5adeaebd35890b4c5e303d98617d3a595eb31fcf3982",
+      "length": 123239
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/monster_ai/mud_zombie.rs",
+      "sha256": "a58dd3ae19e40d0fc3439027563249ff374e8ad07b13425c8926eadb329b13d8",
+      "length": 21559
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/monster_ai/poison_hugger.rs",
+      "sha256": "5d886076b6eaa9fc7d5ee57a849a9b689bd1d13d6f07d9262c941c64548db727",
+      "length": 20855
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/monster_ai/reviving_zombie.rs",
+      "sha256": "64aadbe1f12c2609cc2782603661053528debce2a56394d0d88b2a158c24ef38",
+      "length": 1591
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/monster_ai/shinsu.rs",
+      "sha256": "0c3241467edeff46537ca3cd499795fdad3813dfc5f6084a3f0bc004696f87d3",
+      "length": 1988
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/monster_ai/snake_totem.rs",
+      "sha256": "3f9b728c0ba4b01b1ebd5de5b6d3a85ade73cabe894022da0c52ad2f171d45e7",
+      "length": 5144
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/monster_ai/snow_wolf_king.rs",
+      "sha256": "88a9860d22cea6e58e00a7ffe1545419062e97a1b0041b9897e75b1f68055f1e",
+      "length": 3935
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/monster_ai/spitting_toad.rs",
+      "sha256": "d5faeffc3463713a68a55c23f309905ed86d3bb1dbb418f8fd1eb6f56e329953",
+      "length": 532
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/monster_ai/stone_trap.rs",
+      "sha256": "d2aae9821b3e975513103a6eedc0522123e0beb870155c2beb65a1c20daa361a",
+      "length": 1882
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/monster_ai/summoned_monster.rs",
+      "sha256": "46793edf62dea626c127f8251406ffd5b4a3c835a995b8337a4f3d57772df608",
+      "length": 3270
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/monster_ai/thunder_element.rs",
+      "sha256": "2883e9b155ffd3ec40b2177bc0f7d4b18d13f02006a1497e16993eef89f3ae51",
+      "length": 4221
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/monster_ai/town_archer.rs",
+      "sha256": "a78138310bd4b954538fbf71b9ababcc74d4a949f0cdcf3dcb7133c7745cb65d",
+      "length": 3054
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/monster_ai/trap_rock.rs",
+      "sha256": "53c58c2ad24836c0d171c69e1b3854a60cbe2cdb8f123899b64e64c6b356bae1",
+      "length": 7601
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/monster_ai/tree_queen.rs",
+      "sha256": "fb54bda02701bdfe38bd8822570be61ef783df79843b960fea508291a7c9cd00",
+      "length": 26672
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/monster_ai/tucson_general.rs",
+      "sha256": "c94ab8e96f1827a1fd7e480c73c7c96fb724fa4cb7e2f5ace217b86be8beae8d",
+      "length": 8029
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/monster_ai/vampire_spider.rs",
+      "sha256": "89e0a45474ee69eb28024668f0ad5df122e2cfa6b4cd373aebbe2522ba46eee1",
+      "length": 939
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/monster_ai/wooma_taurus.rs",
+      "sha256": "46c1fc4c458823d2543cdb699f88e6389747e08cfb3d90b0a6392cf3ef23304a",
+      "length": 5520
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/monster_ai/yimoogi.rs",
+      "sha256": "ff02e0af5175e2fc74b5adf7a8bbff433662a4d1f047c051f325ec6547a87c56",
+      "length": 9001
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/monster_ai/yin_devil_node.rs",
+      "sha256": "dfa2c1b84bf8bff329bf5e3464697e86844aa80254d3fd397dfdd9e618766d96",
+      "length": 6525
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/monster_ai/zuma_monster.rs",
+      "sha256": "0b3513fdf7a521dc91e70f4acdab0a33e7090f50de5748d35425a9cc9f573181",
+      "length": 2566
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/monster_ai/zuma_taurus_stage.rs",
+      "sha256": "24f9a3691dbe514cdd639f4408eaad27000ac13e46d9d2bc9fd01271984a1e95",
+      "length": 1878
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/monsters.rs",
+      "sha256": "73c0899977fc06963466eca9991d939e391933b7dfa88bf32c93c13019b884ba",
+      "length": 104131
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/movement.rs",
+      "sha256": "d5336b4ff122e9f4cdf005350fcaeef2a49ab6687cbb3bc4fb5b3bd09ec01ca7",
+      "length": 36326
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/newcomer_journey_tests.rs",
+      "sha256": "ce44d4db719dd7c6a8b88bae2878a1fcc6892ac7fa7969383f1d1e0182db1d71",
+      "length": 20299
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/newcomer_npc_visibility_tests.rs",
+      "sha256": "f359b16c84e2b150ccea0ece9e889c4b113dd1043af875e5f0599072061b73bc",
+      "length": 1450
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/newcomer_progression_tests.rs",
+      "sha256": "1be3c17b402e5a14b3663b0b54ce17964ac1221d710adf384854bd421f5a7201",
+      "length": 31659
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/newcomer_progression.rs",
+      "sha256": "621be98d0887d837a6be2d43d226bbee494462713fd364033c7c974c0f77a944",
+      "length": 20768
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/newcomer_v2_event_tests.rs",
+      "sha256": "eef5009245f5884b61f21126978b207446e93562b3b4d148843242a680cebfdc",
+      "length": 23241
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/newcomer_v2_events.rs",
+      "sha256": "c4f3b5342af58d3692212b15fdeec21c124336a51c9fa1ed2030037be63de1d2",
+      "length": 18652
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/newcomer_v2_tests.rs",
+      "sha256": "2d47911cb48b0ce762602bb7b81c1bb93c524e67b88344c515317986ce373fae",
+      "length": 5184
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/newcomer_v2.rs",
+      "sha256": "b5aea984220a5a841c4bfa7607b369c9a1a0d0a76601341300bf1b65e9e2a80d",
+      "length": 20374
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/npc_gold_buy_outcome_tests.rs",
+      "sha256": "c5adf2f95960ab79b9919875584e3703e692729fbef6f68ceae8fb22e956d431",
+      "length": 17751
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/npc_gold_buy_outcome.rs",
+      "sha256": "3d250c5cf021588b5d1a32a7ece79dbd7c70a2c41b84c5d02af2314400464b20",
+      "length": 2577
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/npc_gold_trade_capacity_tests.rs",
+      "sha256": "42cc763a537b7ddeb0f03a9451d5499da3a28729764d7c5950480e6733c4dba2",
+      "length": 27872
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/npc_gold_trade_evidence_tests.rs",
+      "sha256": "2683b4703f25b40692cbbd427a151786681eb314a25da206022ce99dd628dc9f",
+      "length": 13922
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/npc_gold_trade_expiry_tests.rs",
+      "sha256": "778a084605e390aa48a5dcd2671d420c6697ce192c3a2c8cd7498bcbaa3b8029",
+      "length": 11695
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/npc_gold_trade_expiry.rs",
+      "sha256": "2700aab9de243b4596e92ff0a8bb045b3b81e90b87e941c96780f80ceee9dcc5",
+      "length": 8688
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/npc_item_price_tests.rs",
+      "sha256": "1df18d1dddf588597a3e5bbbf376747509c8fe1da3e143e3bd07bbab496cdde8",
+      "length": 3052
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/npc_parcel_tests.rs",
+      "sha256": "e4d727777a8af06284368fe06fe0fa0f128629415eff3051cf7a971c1d41f0f8",
+      "length": 2159
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/npc_pearl_tests.rs",
+      "sha256": "f46f21f3d3aed9a70c858471a449e92cc1347fcaa0fc41e3f1f2431baf96e6d3",
+      "length": 13486
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/npc_purchase_outcome_tests.rs",
+      "sha256": "7dc5817e482628624734e0d9794c5939cfd20db2aef1591c04a4bc77511f37ef",
+      "length": 17858
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/npc_purchase_outcome.rs",
+      "sha256": "00e8a7917dad13477e572d99945261faa1558be4abc4c40807647e9ba162a79f",
+      "length": 4786
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/npc_purchase_owner_tests.rs",
+      "sha256": "0af7f301c44d9d9c51de85c6db96ccddc3a8081ce48ce0236008a5029bdaef0d",
+      "length": 34132
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/npc_purchase_snapshot.rs",
+      "sha256": "946c4fcbb8ce955919ffb70d81a6dfa943b2b7494f685a5906035db3985a0073",
+      "length": 12597
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/npc_purchase_transaction_tests.rs",
+      "sha256": "1ddfc16001f1516011809ba1ac583c092f9db5932ebc1fb575c269077581915e",
+      "length": 41045
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/npc_purchase_transaction.rs",
+      "sha256": "bd8c0355e9a38862ce591c8a001b8fb50f2ac91c3d6afe84663bad9a11c8601f",
+      "length": 38761
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/npc_purchase_uid_tests.rs",
+      "sha256": "47550355d37288acd7ce27be8751a7d98d114c04b6ec912f1a7a53105da8a215",
+      "length": 7347
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/npc_script.rs",
+      "sha256": "c98feebeec8f80f059608d7ee0dfc5c6f23e611270c0c96e904812e76dc1358e",
+      "length": 125816
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/npc.rs",
+      "sha256": "1f704851da549d099684152ca87520b237790eca0a7799858f26b84f2bf46cba",
+      "length": 51869
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/onchain.rs",
+      "sha256": "2f9fbc67ff170c0ea17d2a3f97dee282a4d4922c0bd8ad6062cbe6b9924e62bd",
+      "length": 9748
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/packets_diary_quest_tests.rs",
+      "sha256": "b6fdc745704377bb9c94c5aa01b94f4226b46392527b6f936ddd16448d5d1914",
+      "length": 9050
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/packets.rs",
+      "sha256": "069fbfbd47ad4cb99e2866cb543cae6c44657b54be2b3820ecd4238f09a3bedf",
+      "length": 400120
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/pathfind.rs",
+      "sha256": "1aaa0e81c731256fa2dcf571dade45f7c61288200b1695a3c664c763cfa942a9",
+      "length": 13929
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/player_weights.rs",
+      "sha256": "e93384181e5fa3a0cef52373d812a28b230b1009f165b75eb9651c90ecac57d7",
+      "length": 5470
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/prepared_kill_experience.rs",
+      "sha256": "de218dd898b15011ce561d81e191b3ceb2fb2598d13986174972fc96965bf805",
+      "length": 10361
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/production_tests.rs",
+      "sha256": "7071b84ec558a2f31c48455d144cf350a4dda03a658a954e9c5ce1b342800ae5",
+      "length": 30083
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/production.rs",
+      "sha256": "590a3d27166a4139b7bfb0e9efb2920d722bd16c723e2e6d55661415fb30a21a",
+      "length": 32768
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/quest_endpoint_identity_tests.rs",
+      "sha256": "36a14adc60e380830202523286514a077db7dcde1c3dc094a188e79b8c74568e",
+      "length": 1451
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/quest_level15_tests.rs",
+      "sha256": "2b69e332e8bb53281341292580b9299f80549cada1679ee5af33fec48628e604",
+      "length": 2340
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/quest_reconcile_tests.rs",
+      "sha256": "424934cd6c325a097c222b433f5b40780145f3d9cecb73408cad50c8bdb5055d",
+      "length": 3325
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/quest_recurrence_tests.rs",
+      "sha256": "08ceddc0b483afe167b0f6a8c4334155ae369720b9ef62a7b5e5c79fcb7c7da4",
+      "length": 10743
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/quest_recurrence.rs",
+      "sha256": "c98625794540ed8115fa2a5657ffe8108ded20e5b62b5fdc3ede3c9311febdf9",
+      "length": 9054
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/quest_uid_tests.rs",
+      "sha256": "39c74c80356b79f5cea312e91352b834ae5e1613355b189d26a6938199e89060",
+      "length": 4344
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/quests.rs",
+      "sha256": "58f118967a154b7573ffa78073e4275db0c9dfbc29c99993ce2cdcef5a14d0ce",
+      "length": 80871
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/ranking_inspect.rs",
+      "sha256": "94ff5fa5337e3c9d792a4ac84062f9ac7c4db52ad0eb5891f63aece171a89677",
+      "length": 55407
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/refine_oven.rs",
+      "sha256": "0a48100fffc7737e2bc0c955cb7eb968c544c9a443b9e7e6777fd6f12e2736b8",
+      "length": 15082
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/rental.rs",
+      "sha256": "6b8520706c7db5d74257064ae4c0ab84cef6f4f9390e60a6bd7325c08d8f0936",
+      "length": 26116
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/resources.rs",
+      "sha256": "13a0bbec2221ff8717d3d314deba7ab015056fa34b6e99fefa07bf839228f90d",
+      "length": 39340
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/save_fail_closed_tests.rs",
+      "sha256": "08ff0eed15853a653af202f6ec17013103e8d5f63422a42d209b5845228329a3",
+      "length": 87234
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/save.rs",
+      "sha256": "342fdc12cba69a42236bde6b8fdaf168e17a41d075526e0876c6ef7a47abfb45",
+      "length": 165805
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/session_active_monster_ids_tests.rs",
+      "sha256": "a277daa4cca08f57279019643dc45033a7cf46856328ea7b95632b5d8578617f",
+      "length": 15263
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/session_lightweight_snapshot_tests.rs",
+      "sha256": "93e45e8c737ec07423fe3fe29c9b9b19eda11e05e1f39dbd0e1eab189d692a9a",
+      "length": 7471
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/session.rs",
+      "sha256": "b6651bd7cb9a094a2c1dc526b24f7dcb763c47108fe292e4dca058466e261eae",
+      "length": 90281
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/shared_guild_bank_tests.rs",
+      "sha256": "f7e9d778d6bb610ad851d00a4bcc06beb11b37222ca2f533e1f5300beb1ef4f2",
+      "length": 4724
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/shared_guild_bank.rs",
+      "sha256": "c417ac65112c0903dc603218ae858ff7fd4b6a5dd2d151d99a631c8892e65ba2",
+      "length": 13748
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/shared_guild_buff_tests.rs",
+      "sha256": "c5394d4a8762c838eb45df1f703db72abf2b5a6d4862b605b9e1abf9479dfdb5",
+      "length": 6351
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/shared_guild_buffs.rs",
+      "sha256": "ee7b0d308913103e5fba0251a6b45ea93d568c0a9440c071e1f93b83b58e2848",
+      "length": 7694
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/shared_guild_experience_tests.rs",
+      "sha256": "94ce33eac85eba58dd517f3a757421c5b1fa560b52a99e3120397029b650585b",
+      "length": 13179
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/shared_guild_experience.rs",
+      "sha256": "c24dc1489ddf4e6b4509fac1fcd1ed2241264908bd7efbd5a1790e65565bf84a",
+      "length": 13175
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/shared_guild_item_tests.rs",
+      "sha256": "43475eae6ba203fd0548715a1387fa560763992bfdb0df0f320435183a920754",
+      "length": 6647
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/shared_guilds.rs",
+      "sha256": "42e6a59f71f41cbb5792754735fa77e2fc055d25b5ecff7277fe26d70994bfda",
+      "length": 36532
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/shared_kill_experience.rs",
+      "sha256": "42c0c507c37969b0321391d32313913ba5895130124fcd7a642a8e0b1e8f9e8c",
+      "length": 6421
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/shared_marriage.rs",
+      "sha256": "096539ceecf236f3b2c56d1d34deaee0deee4dedde57784a78de34a1a9ff3969",
+      "length": 12402
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/shared_mentor_rewards.rs",
+      "sha256": "efd7446ea6bfc1c25a1915e062402a81e5c1d28f4806a34fcbc5fa2cbd4c709d",
+      "length": 9656
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/shared_relationships.rs",
+      "sha256": "8c70353282a6bdded68823bd527e82ab63631fc8bd529979aed469d505ece1fb",
+      "length": 13507
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/shared_social_buffs.rs",
+      "sha256": "d2f4ea5926ba99f02dd511e5613303313505ee11d3d70200e9857f37314919c7",
+      "length": 9772
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/skill_cooldown_restore_tests.rs",
+      "sha256": "53c93efb6c9afb60d065dac752fad6e75b320bb8132f78966bf394bb3c79112d",
+      "length": 5677
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/skills.rs",
+      "sha256": "74432f52560f1ef5955ceb5f09faa8cbccc2395168b3cbfc7004bd5124e4bae9",
+      "length": 299799
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/slaying_passive_tests.rs",
+      "sha256": "6aac5ee3e3707e30dde2a8207af4ab56159fad622061f5f3f6320fb977504c34",
+      "length": 3057
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/social_economy.rs",
+      "sha256": "2aa05c85e4f49ad3798840da6ecdc7e400217570f1d51b8385d25b01d5dd72eb",
+      "length": 3288
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/social_experience.rs",
+      "sha256": "45a7f1d5e1bb1539af1d947f0e3452a2f7ea4a30e13f8c734d5c79eba8483460",
+      "length": 4943
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/special_monster_sprite_tests.rs",
+      "sha256": "f53b7a3bee2f5a3b7011b97022ff2061fff6aa3579299afeb78508f7487b2984",
+      "length": 676
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/stage5.rs",
+      "sha256": "bf2556bb355e0afff5a996c684d72737a49489a430f66e5b82cd51ce6a4212e2",
+      "length": 225843
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/stats.rs",
+      "sha256": "ec2ef7fddc47f57c87e23e621198c30e9de80cd97eff21803a17926036fc9752",
+      "length": 29086
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/storage_rental_tests.rs",
+      "sha256": "524d44bd9f35a78d5fd729b4f5f3adaccc27a10edcfb0b2fe657d53b5a78c16d",
+      "length": 8210
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/tests.rs",
+      "sha256": "4e2f941822068c6a4108a1e7b57378b220b94433ad0d72e4a648f3896a5dea56",
+      "length": 2431698
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/warrior_preparation_tests.rs",
+      "sha256": "1c883d97a25d938052af6274dc566d811782973f6c163ebcbc54075cc2931ca8",
+      "length": 5576
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/zone_melee_passive_progression_tests.rs",
+      "sha256": "7707f56a93c9e416dfadbb69acec9b5970f1b2a91c7337c780653b829add30fc",
+      "length": 3997
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/zone/aoi_grid.rs",
+      "sha256": "7df99f8b71a303ff13c2aed8b598f7c58442b1f3fdc3dcd7210ed149564d0344",
+      "length": 10290
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/zone/aoi.rs",
+      "sha256": "efd99aca9b94490df20f6fff4da4b3614f0a936f48af7426858185a398baf32f",
+      "length": 486
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/zone/collision.rs",
+      "sha256": "7ba3ef1c37ba45c75cbb4107b5cbbfe41f751ce66dbe067a1daa43e9d95b430e",
+      "length": 4497
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/zone/ecs.rs",
+      "sha256": "d1f094c3f37fa77e0797bc4f6df18bc27f716184aac1ec8b3c8307a960f93265",
+      "length": 7498
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/zone/experience.rs",
+      "sha256": "8697585b481d09aad2df42c3b84e9fe9e8da7ef918adba3aabe71717ce04e755",
+      "length": 4623
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/zone/intelligent_creature_host.rs",
+      "sha256": "45214bbeed948732ea47f70cff3363a4915bab2c17e38a5221ce06d3d6a2235e",
+      "length": 41611
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/zone/intelligent_creatures_tests.rs",
+      "sha256": "41d5d59285d3ad93127fd8d878fadd0eb2487a56ac3a0f450d1e405495a1524b",
+      "length": 14084
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/zone/intelligent_creatures.rs",
+      "sha256": "30302a9cbd99efd997d8b959007b27d69fd64f2d4b8df61ed535f5d8cd360964",
+      "length": 20576
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/zone/manager.rs",
+      "sha256": "e956f72f961ea7f45cf888567f95b56a24d4744ad8850fce9222c725439875f2",
+      "length": 27961
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/zone/mod.rs",
+      "sha256": "2893588003d00798da1a5272c6070be00172027356821e1b83b3d9d705432b92",
+      "length": 1306
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/zone/movement_deadline_tests.rs",
+      "sha256": "35991cd2e8f89efaa2ed9b448d0cb889f317f379d5401ad4e515ac389ae55cba",
+      "length": 3372
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/zone/movement.rs",
+      "sha256": "994d82a13b5a304ef85535d9755a6ae5c0e5eaf4336cd0111d59fee6aae9b393",
+      "length": 934
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/zone/packets.rs",
+      "sha256": "7dde306dec5a6fe288f7b96d6dc60bf8ed371cbdc704c4a373368dadf1eade76",
+      "length": 50490
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/zone/replay.rs",
+      "sha256": "eaa9ff590815d04723920a567ec2b125dc4a1889253cd524ae8c150d267a2a4a",
+      "length": 23650
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/zone/replication.rs",
+      "sha256": "9e3806372fedd8aef59e8682f6639ed9835d518a8213353b40f9ed3336b84e6a",
+      "length": 7520
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/zone/runtime.rs",
+      "sha256": "c5f356c4e8153255ffafcd3ee7f8cd4c9a3cf7c6e4cc9c73b45fc3206f66df43",
+      "length": 649363
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/zone/runtime/armadillo_ai.rs",
+      "sha256": "ed4276db1e18dffe704d02d9e6612659feb5f66a476a3cf4dc3671f08e679e7e",
+      "length": 22067
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/zone/runtime/checkpoint.rs",
+      "sha256": "4a9fec360bfc3ac29e1e339045d7224d0f945c651b7f5b4ba9d62beab1d05dd9",
+      "length": 77000
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/zone/runtime/entity_combat.rs",
+      "sha256": "30501abac1c0f2c617813964f424efa7464d3ae39fd0b52b0847628702062561",
+      "length": 104492
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/zone/runtime/evil_mir_ai.rs",
+      "sha256": "fe0355c1bbcb3a6ad9d3772bcb66eff625bfa122d14b1822a4beeea451bbdb38",
+      "length": 15701
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/zone/runtime/football_ai.rs",
+      "sha256": "bb320b3d8ab676088c0a72aa7cc6b3d5b1feb07c6aba914497dc15e2877dc92f",
+      "length": 3901
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/zone/runtime/gate_ai.rs",
+      "sha256": "ab78b66d769c9fa6d41401b474e19caf20771d42541922bab5eb7ae6ebdbff8d",
+      "length": 3391
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/zone/runtime/great_fox_ai.rs",
+      "sha256": "788e63f6371aec6bcda09fa0404da9e658b0a2aa5f667ba5272d08abd6eb4d1f",
+      "length": 42551
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/zone/runtime/hell_ai.rs",
+      "sha256": "2b59dd5f7e0659e5392b9eacd6bc3cd2fab7c210bbe3cc8117092986ea3f3352",
+      "length": 30891
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/zone/runtime/horned_ai.rs",
+      "sha256": "12486989589da72da789180886dcf532962d2217c4fb419a7de42bc96c380f44",
+      "length": 36305
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/zone/runtime/horned_encounter_ai.rs",
+      "sha256": "e12145c6d371fb9f8c01cbc7ae2a9e8018318dd7e420c536af28e9a4195782c0",
+      "length": 61887
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/zone/runtime/hugger_ai.rs",
+      "sha256": "24355425bec3be142f0f69fded67f23a1334658128a2969c21a10f9ddd81807b",
+      "length": 30776
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/zone/runtime/journey_events.rs",
+      "sha256": "761e382d6d026faa016c3a3419edaec0f7961ea850564f8e379d892873587a63",
+      "length": 17975
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/zone/runtime/kirin_snow_ai.rs",
+      "sha256": "f43d7a532a1d4b6e7f3b5f16aa4c870bfe26fa0b348cc2f9cdbfbd4dd03c4b70",
+      "length": 39105
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/zone/runtime/meow_ai.rs",
+      "sha256": "d078e6ac6be7f2a59201be6bc62d62ce301acb8bf1f4cce1c355f2b4cd859d0f",
+      "length": 17949
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/zone/runtime/mud_boulder_ai.rs",
+      "sha256": "0ac9aa8f8d599797da078ab5097343efc0e491f18896127a1d3fc93ad04f7d82",
+      "length": 34228
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/zone/runtime/node_ai.rs",
+      "sha256": "047b05dadbc1e9f4ea21aa89179198620d79f401ae91cabcc3f0b68feb9601c7",
+      "length": 7684
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/zone/runtime/passive_ai.rs",
+      "sha256": "505434b94e7163cb4546cb7bbb518336d6cecaefcc1b54f2085ec720c0a4e145",
+      "length": 7779
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/zone/runtime/periodic_poison.rs",
+      "sha256": "6f45c370ee36a7fdc80eee7b2bf13c7ae61c7ad2b4f5c89ff37224d28ff142a5",
+      "length": 8194
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/zone/runtime/pet_special_ai.rs",
+      "sha256": "aa8730cd61f52a31d3effe0956fd040f523ed98fcc6d11251bb397843cb97498",
+      "length": 11463
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/zone/runtime/player_magic_cooldown_tests.rs",
+      "sha256": "c1938539621deb890eb445172f6f20f9324c4239a807ad9bab0edab5db33e8b1",
+      "length": 7260
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/zone/runtime/reactive_ai.rs",
+      "sha256": "a765a4906b638dcc53af3089acd2b84c6f7eaff960e4e708116ba7417fb55ba7",
+      "length": 15145
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/zone/runtime/revival_ai.rs",
+      "sha256": "35943499b020141181529898d7291622c78a4d04b4b05ea8352618fe87d88e08",
+      "length": 15833
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/zone/runtime/reward_rate_tests.rs",
+      "sha256": "48e6e52922717c8876beb1b8a26f2056ec95ba3243294fcd643869e564e521db",
+      "length": 3170
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/zone/runtime/safe_zone_profile_tests.rs",
+      "sha256": "25dbd35fc07377857d40d7d30c4e0d3e4ffd40a31df793eb4a67fb24838991a1",
+      "length": 6341
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/zone/runtime/shared_harvest_tests.rs",
+      "sha256": "c20bd9c4f0570ba62061d32df9414f2a66c0d68a68dad8678456a3e7a40a8ddb",
+      "length": 5773
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/zone/runtime/shinsu_ai.rs",
+      "sha256": "0549b8594285df09a5692399abc3ae1845b6eecf7320f57e7baa3164702da4d2",
+      "length": 17685
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/zone/runtime/sleep_ai.rs",
+      "sha256": "1e4008eb5d357358f87bb2cc14fce959bc7143ab33dd958aaf7c2860fb0a6dc4",
+      "length": 9752
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/zone/runtime/snake_totem_ai.rs",
+      "sha256": "be491656c3bd91a1e49ea2a16e272d5cf29f7d535146fbe00299299a4cca2023",
+      "length": 13870
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/zone/runtime/soulfire_practice_tests.rs",
+      "sha256": "0529d74b49e6a4167cc1c695b96e2df195b4f010b7a36845eb97e2ed5a43ef45",
+      "length": 10763
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/zone/runtime/special_ai.rs",
+      "sha256": "270273b4b6f032d647827f0e758333e3bbb914433b29e1679cf5f21b278dd2e7",
+      "length": 13390
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/zone/runtime/spider_ai.rs",
+      "sha256": "e9f7fa16beb5a068cbe345e4901b319f656f6e22f38201d788f8f12a0aedf9a8",
+      "length": 33847
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/zone/runtime/stage_summons.rs",
+      "sha256": "8226075d45f0edcb179b87b92d4bd3978f089510e002df0a1f87296560bedb99",
+      "length": 17382
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/zone/runtime/statue_centipede_ai.rs",
+      "sha256": "96260c9910c0fa88688fe4a8978e554b636050e197900524095fb17d33de8233",
+      "length": 12352
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/zone/runtime/status_poison.rs",
+      "sha256": "2ca1e0ab5d75b4c5e2c124e0cc2591623603d4b8417471f8d9e1a309c9b2a025",
+      "length": 14535
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/zone/runtime/stone_trap_ai.rs",
+      "sha256": "d6090b129c760b6b0bdab688761ef2c37d2eeca3e8f85014598472f3d1c373f2",
+      "length": 13740
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/zone/runtime/thunder_ai.rs",
+      "sha256": "3cafab5a6fe71c2b034ce0ae75d4a0647d51eca7592b1cd84e60e65c37018977",
+      "length": 18130
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/zone/runtime/town_archer_ai.rs",
+      "sha256": "eb9b45eb532af7a36e81d79198b9b19060aea1533afa024447a0865e9eadb2b7",
+      "length": 8477
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/zone/runtime/trap_rock_ai.rs",
+      "sha256": "be71fcc136f9524b024ea44db58045608e912547ae67ac4f610272f259b88c4f",
+      "length": 15789
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/zone/runtime/tree_queen_ai.rs",
+      "sha256": "e2d7fbdef4ed22645fe837a80c1d7ca8643700507263fc0e56ca22c29c6c9195",
+      "length": 29582
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/zone/runtime/tucson_ai.rs",
+      "sha256": "626f1f02bc66ecc6dac64346349474473c38dea3cb2e1fe6a7375f92ad6deabe",
+      "length": 20058
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/zone/runtime/vampire_ai.rs",
+      "sha256": "9a1fd8c45eeb1b0418ef45f543965b6eeda74554b1cd39e82f7a753c35062835",
+      "length": 19323
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/zone/runtime/visibility_ai.rs",
+      "sha256": "92dd817ffe8798ea2998bf5417ba037c8478b222d7c318950ec5a1b58c4bf7ea",
+      "length": 12443
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/zone/runtime/yimoogi_ai.rs",
+      "sha256": "d13ef0705478e535987aa0bc30b4f508fc1309994b2b86eafe830ce4de9e4e01",
+      "length": 26658
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/zone/types.rs",
+      "sha256": "c41433b761de53816a4682400a9a3505c6bfb50350dd3f59174e8fc3d5c07725",
+      "length": 47980
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/user_item_uid.rs",
+      "sha256": "9b641a438dfd5155a1f9d7d5619d3c02f5eeedfc7f3c2b5a4d4b4e3f40829d83",
+      "length": 43379
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/world_runtime.rs",
+      "sha256": "d7bfcf3cddda49b26e56121eee78ca7d25b8c875a2ba66969746ba2279dd9dd2",
+      "length": 61873
+    },
+    {
+      "path": "mir2-web3/apps/simulation/tests/big_map.rs",
+      "sha256": "e04abca780acd81c88036bc905d17313649c7538a8069dcaa8590332289486c8",
+      "length": 5845
+    },
+    {
+      "path": "mir2-web3/apps/simulation/tests/character_wings.rs",
+      "sha256": "ef9f84f11e923c4032be7cf219e8e1c081fd0db9116af39519732c7efe9ead64",
+      "length": 8916
+    },
+    {
+      "path": "mir2-web3/apps/simulation/tests/crystal_map_events.rs",
+      "sha256": "81436fc7935fd029adce0d9993751296c0475a4f2af4c7c3b38cbd0cd93f22d7",
+      "length": 2296
+    },
+    {
+      "path": "mir2-web3/apps/simulation/tests/crystal_map_hazards.rs",
+      "sha256": "2d2746440acc1a5334379ac25e6308f8a99b62cc3b93cf549058307c66d0a0f7",
+      "length": 2267
+    },
+    {
+      "path": "mir2-web3/apps/simulation/tests/crystal_scroll_teleport.rs",
+      "sha256": "f749247e25ff761cfe43fee0488d1e90fc498444b5915306353410caa710d3a7",
+      "length": 10875
+    },
+    {
+      "path": "mir2-web3/apps/simulation/tests/fishing_transform.rs",
+      "sha256": "690782db8caac6b31efaafddecce1cd8df5e33cd3f3389f421aef1f338880e3c",
+      "length": 5581
+    },
+    {
+      "path": "mir2-web3/apps/simulation/tests/friends_authority.rs",
+      "sha256": "aacf3f38d75148dad96d3ffa940420e12d5df4e2c3e5eee9118c8e42ce4abd04",
+      "length": 7998
+    },
+    {
+      "path": "mir2-web3/apps/simulation/tests/great_fox_spirit_recall.rs",
+      "sha256": "749ed4054f9554024deda5ca55fa49091799c388dfa9176801244e3ca341c41e",
+      "length": 7665
+    },
+    {
+      "path": "mir2-web3/apps/simulation/tests/hero_ai.rs",
+      "sha256": "6b5c6cb8a4a4f36dba745e5f28186666a40ddeda479fe48623a08949ffcbad0a",
+      "length": 57603
+    },
+    {
+      "path": "mir2-web3/apps/simulation/tests/intelligent_creature_authority.rs",
+      "sha256": "7c639900a9f575734efb1237ff9377770f17e5cbddcd02a4e0c28dc7ff002eab",
+      "length": 11735
+    },
+    {
+      "path": "mir2-web3/apps/simulation/tests/item_stack_images.rs",
+      "sha256": "c7d06473e60ca4cec3a36a9433f592c605d96862cf6e04081e3cd208b26e5793",
+      "length": 11054
+    },
+    {
+      "path": "mir2-web3/apps/simulation/tests/login_notice.rs",
+      "sha256": "396679ba83747d461d9131f5ec27fa01a8eee936ece4ad5c5b38a25f05d9b66a",
+      "length": 3180
+    },
+    {
+      "path": "mir2-web3/apps/simulation/tests/mail_status_transactions.rs",
+      "sha256": "70c8d1ea8017dc80a1aee016ccf401cc0bcd8f09156f69f245183450ddf9ac63",
+      "length": 7392
+    },
+    {
+      "path": "mir2-web3/apps/simulation/tests/map_coordinate_events.rs",
+      "sha256": "2cdc9b7d3704d3fe6eb4956b4151204d58030f1f68a93b3580981447e44bb09a",
+      "length": 11961
+    },
+    {
+      "path": "mir2-web3/apps/simulation/tests/map_event_binding_e1.rs",
+      "sha256": "596ad59b0e6e257bd601a02d285fd5001be6232d6d254942f5e8a2711645fca3",
+      "length": 11652
+    },
+    {
+      "path": "mir2-web3/apps/simulation/tests/market_refine_custody.rs",
+      "sha256": "b3f221209bca4cf80a8aeea979cd78ae9fa9e35eff047ff57747d6e38104f178",
+      "length": 15961
+    },
+    {
+      "path": "mir2-web3/apps/simulation/tests/marriage_authority.rs",
+      "sha256": "e2c4007d4c60968bc65b479b10070c7a88a0d8954f85acb5cb60ebd7e26d5e48",
+      "length": 6416
+    },
+    {
+      "path": "mir2-web3/apps/simulation/tests/mentor_authority.rs",
+      "sha256": "98874cce270f411d8054fcf4c95edd13b3d77a30141b0cfaf9c6749d2041ec03",
+      "length": 9717
+    },
+    {
+      "path": "mir2-web3/apps/simulation/tests/native_startup_contract.rs",
+      "sha256": "a7f7514838da6355e84eadb8318f4d16e6fb934aeadf6032daa66dda753a1ca0",
+      "length": 1700
+    },
+    {
+      "path": "mir2-web3/apps/simulation/tests/newcomer_progression_persistence.rs",
+      "sha256": "d682daceda1aab9dfb867806bdd68613d55c57eeb1b4d437bd958a7eea128c67",
+      "length": 7113
+    },
+    {
+      "path": "mir2-web3/apps/simulation/tests/newcomer_v2_training_spawns.rs",
+      "sha256": "e996e28a5cc1dd9c915d98db03a99a4c0688643ab19a73aed1d13653fd979f4e",
+      "length": 3514
+    },
+    {
+      "path": "mir2-web3/apps/simulation/tests/ordinary_candidate_loop.rs",
+      "sha256": "8ca5844886dcc350323f0fb9142bf1b72dcc3c116d98474b3460b059bbf75990",
+      "length": 26010
+    },
+    {
+      "path": "mir2-web3/apps/simulation/tests/platinum_176_combat_milestones.rs",
+      "sha256": "4e8a77377207b33ccc474d0f531d9964937a4dd55d69e25287dcd8bf0c71fcad",
+      "length": 24177
+    },
+    {
+      "path": "mir2-web3/apps/simulation/tests/platinum_176_party_boss.rs",
+      "sha256": "e69595d2240e92aab508444df6b0008b784cd335d388f09ff0be630cb9f2a595",
+      "length": 17928
+    },
+    {
+      "path": "mir2-web3/apps/simulation/tests/platinum_176_progression.rs",
+      "sha256": "252a48bc90ed2a621b3589dea9e75afe16df82cbf3e1708aba3f88fae73cafb0",
+      "length": 38980
+    },
+    {
+      "path": "mir2-web3/apps/simulation/tests/quest_agent_respawns.rs",
+      "sha256": "dc0732af97c5d80bfcba447d53c8659bc7aba1e8a36718a50eb73e7aaf1b935d",
+      "length": 4424
+    },
+    {
+      "path": "mir2-web3/apps/simulation/tests/quest_agent_special_scripts.rs",
+      "sha256": "64fd292e6764719a79322c7b73d2d2a9f371c9bb12dd79215ea8cbc1b7ef309a",
+      "length": 2998
+    },
+    {
+      "path": "mir2-web3/apps/simulation/tests/quest_icons.rs",
+      "sha256": "dd0d89fce7c9caefc1f3873720e09336f35f3eb43c835c18ba058357c0b8672b",
+      "length": 4212
+    },
+    {
+      "path": "mir2-web3/apps/simulation/tests/quest_recurrence_persistence.rs",
+      "sha256": "3dc105e011635c2a54fd03a975be7429adb3729aab34bc0a59a84f4be063007b",
+      "length": 5434
+    },
+    {
+      "path": "mir2-web3/apps/simulation/tests/ranking_shared_presence.rs",
+      "sha256": "60292d7f0658f0c608fa518312e33bc7cc779cd6f0f021e5489dec1070cf2b83",
+      "length": 18832
+    },
+    {
+      "path": "mir2-web3/apps/simulation/tests/ranking.rs",
+      "sha256": "ecde747dc4c9e969fb96a82a54c5d728f3ec47a1205aa365d9b8ba0925de6fdf",
+      "length": 15875
+    },
+    {
+      "path": "mir2-web3/apps/simulation/tests/refine_oven_custody.rs",
+      "sha256": "9e04f7d8eebfd7d3438a694bdf1376a2df63cb3aa6f4dd2ed0d801ff97d3ef34",
+      "length": 17375
+    },
+    {
+      "path": "mir2-web3/apps/simulation/tests/replica_recovery_config.rs",
+      "sha256": "95abd748d1b6c81a536c543f18334e31a9f85350ab2051380b6625128df615e9",
+      "length": 1172
+    },
+    {
+      "path": "mir2-web3/apps/simulation/tests/retained_bootstrap.rs",
+      "sha256": "5d465fbd1534fe7ad984bd0090436c8959a80ef0edd74ba3fa0b368b6a9850f6",
+      "length": 3609
+    },
+    {
+      "path": "mir2-web3/apps/simulation/tests/save_failure_propagation.rs",
+      "sha256": "16efa946e175374e26135a3049f10ed472d536d6c2a2eb413a235423e72d6e8d",
+      "length": 2948
+    },
+    {
+      "path": "mir2-web3/apps/simulation/tests/security_lifecycle.rs",
+      "sha256": "645142945ea96bacd8ac0ca7a72e9be160fce666df4e5b5d45875ccc5a3faebb",
+      "length": 22337
+    },
+    {
+      "path": "mir2-web3/apps/simulation/tests/shared_entity_combat.rs",
+      "sha256": "a9e4685674a96452073bbc87ac60399c0e3f4641c491647ebd999b592cbf7d26",
+      "length": 8791
+    },
+    {
+      "path": "mir2-web3/apps/simulation/tests/shared_monster_armadillo_ai.rs",
+      "sha256": "1dcd91305d8b781b8703d765d75b07894279b4ae7945885aae9d74bfa61f0c7e",
+      "length": 19358
+    },
+    {
+      "path": "mir2-web3/apps/simulation/tests/shared_monster_evil_mir_ai.rs",
+      "sha256": "f85156ee97fc55c43c980b533f485b46174f73c3e6735d7532eb6235baf6bdb4",
+      "length": 12299
+    },
+    {
+      "path": "mir2-web3/apps/simulation/tests/shared_monster_football_ai.rs",
+      "sha256": "0d2d323347e1a2918e6a7144ca3116ae7cebcf897b51e37600e1eb958d1e1aa9",
+      "length": 7452
+    },
+    {
+      "path": "mir2-web3/apps/simulation/tests/shared_monster_gate_ai.rs",
+      "sha256": "52a6fe94353da030548d0143db4a530f6a1a808c5c7c29fda2740cf8e236a994",
+      "length": 3867
+    },
+    {
+      "path": "mir2-web3/apps/simulation/tests/shared_monster_great_fox_ai.rs",
+      "sha256": "b959e56302d8e4db6b530ed2218b87041219a36b93b454a5c28663b3e8276f6e",
+      "length": 27672
+    },
+    {
+      "path": "mir2-web3/apps/simulation/tests/shared_monster_hell_ai.rs",
+      "sha256": "cee4615015fdc6711ff435bdefd839440d5d6557811f3ffcd815a731c1154070",
+      "length": 29879
+    },
+    {
+      "path": "mir2-web3/apps/simulation/tests/shared_monster_horned_ai.rs",
+      "sha256": "df46125ba928af45e8683e97c17a76217a7d30ddde2aac7157fdbb462024044f",
+      "length": 17504
+    },
+    {
+      "path": "mir2-web3/apps/simulation/tests/shared_monster_horned_encounter_ai.rs",
+      "sha256": "61c431746c706a22085ac58e2eb2ef64a4d81e352f86b9d38b1c0fd8e89c0ca9",
+      "length": 16966
+    },
+    {
+      "path": "mir2-web3/apps/simulation/tests/shared_monster_hugger_ai.rs",
+      "sha256": "0999b0dd0d3a32fdfc63d50087ec58b556b22e7df140a816749465ce070526b9",
+      "length": 20988
+    },
+    {
+      "path": "mir2-web3/apps/simulation/tests/shared_monster_kirin_snow_ai.rs",
+      "sha256": "4b3769abc7736f87bfc21815aae21d192c9d01ef1ccf2a2c3f63515d6f009192",
+      "length": 14371
+    },
+    {
+      "path": "mir2-web3/apps/simulation/tests/shared_monster_meow_ai.rs",
+      "sha256": "3c393afd3c16c0f78d8941f4a91f2c057e72575afdf86aaa68828bb8baf12421",
+      "length": 16789
+    },
+    {
+      "path": "mir2-web3/apps/simulation/tests/shared_monster_mud_boulder_ai.rs",
+      "sha256": "f98c8767cbc9649a6961158b1fa3bc9d1537afa02bbde3758fbb04c7bd37a221",
+      "length": 23688
+    },
+    {
+      "path": "mir2-web3/apps/simulation/tests/shared_monster_node_ai.rs",
+      "sha256": "f4202b425ae3da3c9a86b66e8d518d30c411ddc7b9ebba6566baae10cd4128e5",
+      "length": 7033
+    },
+    {
+      "path": "mir2-web3/apps/simulation/tests/shared_monster_passive_ai.rs",
+      "sha256": "99cb3fa9b58ff518ed86cf48dd24b34accdb7a99630ce833917512e2dbacd999",
+      "length": 5938
+    },
+    {
+      "path": "mir2-web3/apps/simulation/tests/shared_monster_pet_special_ai.rs",
+      "sha256": "c6cad831d163875355b1f8a3ba07d5cd2f2fb22d2c7fed40d93e302ae8c81af2",
+      "length": 8119
+    },
+    {
+      "path": "mir2-web3/apps/simulation/tests/shared_monster_reactive_ai.rs",
+      "sha256": "cb04b6aa64e5054cf79c0dea3f4b818a6aacaf5b946d11f29b39f4c0852d37c8",
+      "length": 16455
+    },
+    {
+      "path": "mir2-web3/apps/simulation/tests/shared_monster_revival_ai.rs",
+      "sha256": "f111f5831bced18aec53011499f6144c01e52c2a271551904f5696a49d85fb04",
+      "length": 18391
+    },
+    {
+      "path": "mir2-web3/apps/simulation/tests/shared_monster_shinsu_ai.rs",
+      "sha256": "04232ec62fdc555c5d1e4a7423ad9d8de38676a059fc00b6701b5584b703756e",
+      "length": 9902
+    },
+    {
+      "path": "mir2-web3/apps/simulation/tests/shared_monster_sleep_ai.rs",
+      "sha256": "54b30751f35b75e05e3fb10559de5cd7f68cef7a46a6f8989a3e20c10f3acb5a",
+      "length": 8700
+    },
+    {
+      "path": "mir2-web3/apps/simulation/tests/shared_monster_snake_totem_ai.rs",
+      "sha256": "2c3644adcbdfa0683b65bf4fad51ab58cb0b9dd6fe173ffc37ce9be01962cf9b",
+      "length": 7445
+    },
+    {
+      "path": "mir2-web3/apps/simulation/tests/shared_monster_special_ai.rs",
+      "sha256": "7007af7773f0d34e77331d42cd0858b6bb7e252841d24dd5eb5b2dfa9156ed09",
+      "length": 12111
+    },
+    {
+      "path": "mir2-web3/apps/simulation/tests/shared_monster_spider_ai.rs",
+      "sha256": "5d666cd1cbd761f650450add486667737fa34296e32531b494aee3f84ceabc02",
+      "length": 34865
+    },
+    {
+      "path": "mir2-web3/apps/simulation/tests/shared_monster_stage_summons.rs",
+      "sha256": "d18c35e971a9d70a95e6bcb2ddb3bc86028ccbe28cbc245c69b215ea8ad4a5f1",
+      "length": 9237
+    },
+    {
+      "path": "mir2-web3/apps/simulation/tests/shared_monster_statue_centipede_ai.rs",
+      "sha256": "3e8b8017620fe4a8e1b86ed4b27f0dde9d591db29995e912cd25020ab8292586",
+      "length": 8722
+    },
+    {
+      "path": "mir2-web3/apps/simulation/tests/shared_monster_stone_trap_ai.rs",
+      "sha256": "7aca46a1c6861075d44615c3f3b5a8904c3547e3fa730ad02e4b0fe229241cbd",
+      "length": 8867
+    },
+    {
+      "path": "mir2-web3/apps/simulation/tests/shared_monster_thunder_ai.rs",
+      "sha256": "a9d480e3c32473438f30069e6b1f93220c7563e9007d741ffac91628551a7acd",
+      "length": 10578
+    },
+    {
+      "path": "mir2-web3/apps/simulation/tests/shared_monster_town_archer_ai.rs",
+      "sha256": "1639ea1db703503ebaa245b1d48f931b9ccffc8d57a6a5b6c3ddab0dd6da73dd",
+      "length": 7878
+    },
+    {
+      "path": "mir2-web3/apps/simulation/tests/shared_monster_trap_rock_ai.rs",
+      "sha256": "0e1059a84df39d677f74579f3778e674500de09f0568888a6f615efeaa7b76d8",
+      "length": 6320
+    },
+    {
+      "path": "mir2-web3/apps/simulation/tests/shared_monster_tree_queen_ai.rs",
+      "sha256": "f4e43cde7b52cc2f8d2b2f15e476c8b17c353e00cb6d1863dba71641d5cc8230",
+      "length": 12489
+    },
+    {
+      "path": "mir2-web3/apps/simulation/tests/shared_monster_tucson_ai.rs",
+      "sha256": "4dd8720edf96030c5327426093fb70c9a9cada1cba39bbb55b31ac03ffd9a468",
+      "length": 13121
+    },
+    {
+      "path": "mir2-web3/apps/simulation/tests/shared_monster_vampire_ai.rs",
+      "sha256": "2d1fd0085bfad05857531e8997d43760a4faed59b5a9764943aa4ed365e17acb",
+      "length": 5584
+    },
+    {
+      "path": "mir2-web3/apps/simulation/tests/shared_monster_visibility_ai.rs",
+      "sha256": "a662903694cf01c73e22421d94e766224bdcf2577fe4a0048456fd4091fc05f4",
+      "length": 16977
+    },
+    {
+      "path": "mir2-web3/apps/simulation/tests/shared_monster_yimoogi_ai.rs",
+      "sha256": "b261fdc49ef178bd399f8c6cf816a696994079f37cad21fb3745ef8aec142def",
+      "length": 17070
+    },
+    {
+      "path": "mir2-web3/apps/simulation/tests/shared_player_damage_settlement.rs",
+      "sha256": "86ed7f59d3c6ec516f9b2ca9789e394453688229bd0a4698cb34b204ef15b25a",
+      "length": 17075
+    },
+    {
+      "path": "mir2-web3/apps/simulation/tests/shared_player_death_zone.rs",
+      "sha256": "a50a75679961efa38703ab539f5a8cbd72f8eb8fba09f3ec43d64bc73b47e6a8",
+      "length": 10581
+    },
+    {
+      "path": "mir2-web3/apps/simulation/tests/shared_player_vital_transfer.rs",
+      "sha256": "468c553f4ce83f618406e08aa1f849b7f474375469641823db457dcf144b8bab",
+      "length": 7839
+    },
+    {
+      "path": "mir2-web3/apps/simulation/tests/shared_trade_completion.rs",
+      "sha256": "2c1a46ca58da56d66f9c559b7c91069cd5a89c43feda68acde253a9ef22e8581",
+      "length": 14184
+    },
+    {
+      "path": "mir2-web3/apps/simulation/tests/shared_trade_gold.rs",
+      "sha256": "139e1b09b83afc18f45226d8467b5fcbb72d086221bf76e40d78978cb6b0aefe",
+      "length": 13529
+    },
+    {
+      "path": "mir2-web3/apps/simulation/tests/shared_zone_melee_mana.rs",
+      "sha256": "449656c3fccba701d371da32ebe54966c878847054561152372d33d0433bc142",
+      "length": 3354
+    },
+    {
+      "path": "mir2-web3/apps/simulation/tests/shared_zone_self_magic.rs",
+      "sha256": "a5765190206b0455e45d1f46a17418990b839c9b0140590aa599197002b8296f",
+      "length": 7145
+    },
+    {
+      "path": "mir2-web3/apps/simulation/tests/shared_zone_thrusting.rs",
+      "sha256": "6682a2d14d46f432703b8ef7ba925173ca5ecc7f2a4f176566105cbcafa4c80c",
+      "length": 14475
+    },
+    {
+      "path": "mir2-web3/apps/simulation/tests/shared_zone.rs",
+      "sha256": "c39b155461cc9e1236e76296a889bc846aee4fb0a784ebe1934fec3f87225583",
+      "length": 469443
+    },
+    {
+      "path": "mir2-web3/apps/simulation/tests/social_economy_integration.rs",
+      "sha256": "5b924ecec3d70ffdf2af3dfa16752fb6483a7ad236e599b80a95c419d79f3db6",
+      "length": 8815
+    },
+    {
+      "path": "mir2-web3/apps/simulation/tests/storage_request_id.rs",
+      "sha256": "fba185060549b52434b2169f66cfb6b1fa3c5e312be7022f4b8cfe57957f05f6",
+      "length": 3045
+    },
+    {
+      "path": "mir2-web3/apps/simulation/tests/trade_item_destinations.rs",
+      "sha256": "c82d4c3e8cdd420c5b5c2a77993e0f6c7490c86bee402338fce40266ef68782d",
+      "length": 11330
+    },
+    {
+      "path": "mir2-web3/apps/simulation/tests/trade_item_merges.rs",
+      "sha256": "7d94952a406f099d5557df17033f41506b49b2c5e6cf569469799514ebc2a9d8",
+      "length": 8700
+    },
+    {
+      "path": "mir2-web3/apps/simulation/tests/user_item_uid_file.rs",
+      "sha256": "610fa687bf8671d0b6c37af953fcd82d5e351d5dc493066cbe58cf81e4126cf5",
+      "length": 20368
+    },
+    {
+      "path": "mir2-web3/apps/simulation/tests/vertical_slice.rs",
+      "sha256": "70029efbd18943e72f9b427e2205f218621325ad7a12ad827f328e41416a51df",
+      "length": 131087
+    },
+    {
+      "path": "mir2-web3/apps/simulation/tests/yin_devil_node.rs",
+      "sha256": "d4535638bedfa2351338e3d7a9e6fc6a9fcae7c8aeea8c795c3e02d0578e79e0",
+      "length": 3523
+    },
+    {
+      "path": "mir2-web3/apps/simulation/tests/zone_replay.rs",
+      "sha256": "8f2e56153fd37289d6335ae0036b5c0d1a1e89943b3cbe4f47aca7276bf700b4",
+      "length": 8858
+    },
+    {
+      "path": "mir2-web3/Cargo.lock",
+      "sha256": "54f4c64476586de50687a24c145581c12b86dd0d5a545fd627ef7b56e03ddbe2",
+      "length": 240650
+    },
+    {
+      "path": "mir2-web3/Cargo.toml",
+      "sha256": "6de1c26df325285aa51515e99abe32677775b3396aa6e8a83a0983deee3500ac",
+      "length": 365
+    },
+    {
+      "path": "mir2-web3/config/quest-guidance/newcomer-journey-v1.json",
+      "sha256": "6952068b9827aa90f44a0b58296637cf83b298d57483912ca274fdfba3c0822e",
+      "length": 41856
+    },
+    {
+      "path": "mir2-web3/config/quest-guidance/newcomer-journey-v2-ui.json",
+      "sha256": "e52630f84ee09e3e2d3abd821db00dde01b62e7d803d18972c8fd906db38c747",
+      "length": 5436
+    },
+    {
+      "path": "mir2-web3/config/quest-guidance/newcomer-journey-v2.json",
+      "sha256": "e72e9ac2131af268f637097e3472618b93c539a1b59a5a168a31b875c13efd11",
+      "length": 28606
+    },
+    {
+      "path": "mir2-web3/config/quest-guidance/newcomer-supplies.json",
+      "sha256": "313de1d7e0faf0cc70ab62e8a5079ea8d211fd75d06479d290621fd0aa5fa1f2",
+      "length": 1152
+    },
+    {
+      "path": "mir2-web3/config/quest-guidance/newcomer-v1.json",
+      "sha256": "49c1ba49d4c3af4fadf3a53ea2618ba5d998ec829fd72f45349498e246e941b3",
+      "length": 28662
+    },
+    {
+      "path": "mir2-web3/config/quest-guidance/newcomer-v2-graduation.json",
+      "sha256": "4e3b37f8ac9969219e1e03b566c391f59860f083e1156b7cf88d5f433ccb5655",
+      "length": 2664
+    },
+    {
+      "path": "mir2-web3/config/quest-guidance/newcomer-v2.json",
+      "sha256": "381be9f89f92f81bfae2fe34f310aa48410875129581049204bd5c34c4821819",
+      "length": 4624
+    },
+    {
+      "path": "mir2-web3/config/quest-guidance/README.md",
+      "sha256": "471315bb433c589836ac41d351958453d73b8b5d3105f330b61fa95062dd07de",
+      "length": 3674
+    },
+    {
+      "path": "mir2-web3/docs/SLG-PRODUCTION-CATALOG.v0.2.json",
+      "sha256": "55b94756f535a50b1cf6031cb6f88ae1c6aa03741acb911d436cafe8d042d1a8",
+      "length": 6619
+    },
+    {
+      "path": "mir2-web3/infra/postgres/migrations/0001_core.sql",
+      "sha256": "ff8bcd1a7f9622d5f2ad9e8a3f396b1f06169a2355826693cefc6b3ff8966ab5",
+      "length": 11513
+    },
+    {
+      "path": "mir2-web3/infra/postgres/migrations/0002_normalized_projections.sql",
+      "sha256": "baba05dba3003b5304e3aa42fdab328d24ad0b8fb80b88d7fff5f59482a37a65",
+      "length": 6405
+    },
+    {
+      "path": "mir2-web3/infra/postgres/migrations/0003_zone_owner_leases.sql",
+      "sha256": "71db28dd5266c65e8707c08de11347afbf0b67f4facf736f1378927904049701",
+      "length": 1259
+    },
+    {
+      "path": "mir2-web3/infra/postgres/migrations/0004_city_currencies.sql",
+      "sha256": "50bab7a2af67203c2396fede441e3f97089a32b45a336cdff74b146a9595d80d",
+      "length": 806
+    },
+    {
+      "path": "mir2-web3/infra/postgres/migrations/0005_game_economy_outbox.sql",
+      "sha256": "cbd39219803f894d627e50d806df3179125f3ce4164f34dbb03c2a842c3077c4",
+      "length": 2351
+    },
+    {
+      "path": "mir2-web3/infra/postgres/migrations/0006_game_economy_bootstrap.sql",
+      "sha256": "f126e33bb5cbe9c0c5edec60bb1fb725038c8e5975fba44dcf4db8eb8c742321",
+      "length": 1002
+    },
+    {
+      "path": "mir2-web3/infra/postgres/migrations/0007_admin_read_audits.sql",
+      "sha256": "194b85230db671b63ac8da4e2d02df903a4d4084f0d8cd8f49266102ae7a4e0b",
+      "length": 296
+    },
+    {
+      "path": "mir2-web3/infra/postgres/migrations/0008_ai_daily_reports.sql",
+      "sha256": "69f9cc152f059b1091841e5a222e358124f0321622952066ed81df6ff679bd66",
+      "length": 3033
+    },
+    {
+      "path": "mir2-web3/infra/postgres/migrations/0009_world_director_approval.sql",
+      "sha256": "e746ded0a561aa086052e72e986d14f8b6da5a4802ff31c35bd2f7dcf8d4d2bd",
+      "length": 1103
+    },
+    {
+      "path": "mir2-web3/infra/postgres/migrations/0010_commercial_identity.sql",
+      "sha256": "3745a1f1ac34fa2b7e2a26ee3d38959131464a0d922eb0d1f1ea47e2f57c86c9",
+      "length": 4233
+    },
+    {
+      "path": "mir2-web3/infra/postgres/migrations/0011_game_economy_trade_projections.sql",
+      "sha256": "9dfcf2b5fee50f67710342eb929571ba84fe709fa0be99148d6847e4298d3499",
+      "length": 2124
+    },
+    {
+      "path": "mir2-web3/infra/postgres/migrations/0012_shared_guild_authority.sql",
+      "sha256": "f22b56a3b8da24cb65e5bee552b2e28018c10614833635bab26b585b4910a79d",
+      "length": 1103
+    },
+    {
+      "path": "mir2-web3/infra/postgres/migrations/0013_shared_guild_clock.sql",
+      "sha256": "69020f2ae1503f4ab73ce4129b95ceeccc487d189327d6b7c580d5ff2d90a355",
+      "length": 959
+    },
+    {
+      "path": "mir2-web3/infra/postgres/migrations/0014_shared_hero_authority.sql",
+      "sha256": "37cadf609973dc542c5a09ab4e4e60bfa77ec10f424617703c6b460825990cbd",
+      "length": 2620
+    },
+    {
+      "path": "mir2-web3/infra/postgres/migrations/0015_shared_item_identity.sql",
+      "sha256": "4870f4f07eb2a9c921a3c96e523edc0c7a871127ce99a6b83e824d2ff11f95f2",
+      "length": 790
+    },
+    {
+      "path": "mir2-web3/packages/game-data/Cargo.toml",
+      "sha256": "e69823755b2f5f4818f76754a47db6e6911180463d0e20ba26dc2ccacc7b1091",
+      "length": 327
+    },
+    {
+      "path": "mir2-web3/packages/game-data/data/content_profiles/platinum_176.json",
+      "sha256": "328ecec1474f9bde809b6a57508cb9dd9d3b0be82c136fb4dabcd8bba85b66cd",
+      "length": 42725
+    },
+    {
+      "path": "mir2-web3/packages/game-data/data/generated/crystal_base_stats_packet_manifest.json",
+      "sha256": "6edbf2e942e8742914c79d7aa05e4adb840c61dc83e3591714a4db32fd0293c4",
+      "length": 3449
+    },
+    {
+      "path": "mir2-web3/packages/game-data/data/generated/crystal_buff_manifest.json",
+      "sha256": "3d59abc5c4cccb2323d66113fd9550e770a3257ea5ce4d7e7a8889757674162b",
+      "length": 10919
+    },
+    {
+      "path": "mir2-web3/packages/game-data/data/generated/crystal_creature_settings.json",
+      "sha256": "cf098d6df97e50217f212fc13873964a096c156611835f2d5654668db8da7297",
+      "length": 166
+    },
+    {
+      "path": "mir2-web3/packages/game-data/data/generated/crystal_drop_manifest.json",
+      "sha256": "c10f5b1ac39cefe1c5b7c0ec5779547cf5b0901eaece680b7049d9dda56c1cf7",
+      "length": 24076631
+    },
+    {
+      "path": "mir2-web3/packages/game-data/data/generated/crystal_game_shop_packet_manifest.json",
+      "sha256": "ff5bce2f32b0013f3ccd2705fdf7e4a93de89e1c8a6ea1ee58050e52f4124571",
+      "length": 96259
+    },
+    {
+      "path": "mir2-web3/packages/game-data/data/generated/crystal_guild_buff_packet_manifest.json",
+      "sha256": "21a00a9feabb53542cee7f05fe65f93463eede949c56cf6e4feffea8464dd94b",
+      "length": 1492
+    },
+    {
+      "path": "mir2-web3/packages/game-data/data/generated/crystal_guild_settings.json",
+      "sha256": "e1a16a6b08ba033fb8cfdf91a1e175e15b6d4ae8223baca06e7b90a112e2c1d4",
+      "length": 1015
+    },
+    {
+      "path": "mir2-web3/packages/game-data/data/generated/crystal_hero_settings.json",
+      "sha256": "1cd6aea695708bca17dd66e535477854fb332a744155ea472919dffc1e964754",
+      "length": 23460
+    },
+    {
+      "path": "mir2-web3/packages/game-data/data/generated/crystal_item_manifest.json",
+      "sha256": "b0d48ada978d8a062e993fe0425b6a724672aeea354a3b7b4508fb4c161658b7",
+      "length": 1589543
+    },
+    {
+      "path": "mir2-web3/packages/game-data/data/generated/crystal_magic_manifest.json",
+      "sha256": "ccbb31513c006860790a4c374b3f788665902cfa3fffe810695199882860153d",
+      "length": 51696
+    },
+    {
+      "path": "mir2-web3/packages/game-data/data/generated/crystal_map_event_manifest.json",
+      "sha256": "d68823dfff2a1cfc00afc7bf4d369bb20a025ad9af5acb89a75d571f4709ba29",
+      "length": 50155
+    },
+    {
+      "path": "mir2-web3/packages/game-data/data/generated/crystal_monster_ai_summary.json",
+      "sha256": "12e82908bdf696b49e7193cfb1288ccf63663e8269c4e3a59b57c31648530e79",
+      "length": 134815
+    },
+    {
+      "path": "mir2-web3/packages/game-data/data/generated/crystal_monster_manifest.json",
+      "sha256": "5961fe9f220cb8440833af746f4c53fd1c728803979b19dbd867f10fc3027cec",
+      "length": 397117
+    },
+    {
+      "path": "mir2-web3/packages/game-data/data/generated/crystal_npc_command_summary.json",
+      "sha256": "49ebaa25650a2e2088693d4200ebac0f7ed9a9b81a6cd6246cdd75375ea73414",
+      "length": 59118
+    },
+    {
+      "path": "mir2-web3/packages/game-data/data/generated/crystal_npc_info_manifest.json",
+      "sha256": "dcc31e181b1f329c6da3658846ff18adb13731b18d899f8914b7628d54074105",
+      "length": 313945
+    },
+    {
+      "path": "mir2-web3/packages/game-data/data/generated/crystal_npc_manifest.json",
+      "sha256": "7ff29f221c39e5d16b7ebdc7efcde5090daf7ff3daacf6b2b1552b5b36429e93",
+      "length": 5244108
+    },
+    {
+      "path": "mir2-web3/packages/game-data/data/generated/crystal_quest_packet_manifest.json",
+      "sha256": "13d6f3fd94fd9e865ab60c9f2ea50585053bd2050bff021a0379f1ed0948e0d6",
+      "length": 189239
+    },
+    {
+      "path": "mir2-web3/packages/game-data/data/generated/crystal_random_item_stats_manifest.json",
+      "sha256": "74ecdd5c5d3df8f04c34f9f4df3d3a9171ef85002ba395535b4fbe948dcaa449",
+      "length": 25753
+    },
+    {
+      "path": "mir2-web3/packages/game-data/data/generated/crystal_recipe_packet_manifest.json",
+      "sha256": "53699a4fc96fd9df015e4e5a4d72fcea644a59ccb8643d32604726ea678019e5",
+      "length": 64271
+    },
+    {
+      "path": "mir2-web3/packages/game-data/data/generated/crystal_respawn_manifest.json",
+      "sha256": "5303f8093be7f15ddd9f860e6db1787ac96606508db3086bab38bdc4c6353dd3",
+      "length": 6741323
+    },
+    {
+      "path": "mir2-web3/packages/game-data/data/generated/crystal_starter_map_collision.json",
+      "sha256": "38ac56c53ce6c9ba0e1849e7750fd48636754f4e33113c63b19b6a61d8f3f690",
+      "length": 57421
+    },
+    {
+      "path": "mir2-web3/packages/game-data/data/generated/crystal_starter_map_region.json",
+      "sha256": "bae0c90db111891cea45abb8cc27b33eb77899811e04f486569bdb681c7c8a25",
+      "length": 211755
+    },
+    {
+      "path": "mir2-web3/packages/game-data/data/generated/localization_bundle.json",
+      "sha256": "60b425e830bdbd538c2257b8cba4ca8eb2a3f0331b5db4eecbd3403ac1d6b6f8",
+      "length": 737385
+    },
+    {
+      "path": "mir2-web3/packages/game-data/data/generated/platinum_176_bundle.json",
+      "sha256": "6ab5d376e3f43f540329e776fa3a971aedd0ebe78cefc0d36b10508adfa47c59",
+      "length": 3361
+    },
+    {
+      "path": "mir2-web3/packages/game-data/data/generated/quest_presentation_text.rs",
+      "sha256": "2b7bf21b2518dadb6ff92603021885453e9e5e85ccc898df2fbd220dabe68e03",
+      "length": 2168
+    },
+    {
+      "path": "mir2-web3/packages/game-data/data/i18n-overrides.json",
+      "sha256": "9e57e1b4a4dac063601e2d3ed36f2ebf8601de83c0b40f59e77e234324d189a1",
+      "length": 328063
+    },
+    {
+      "path": "mir2-web3/packages/game-data/data/starter_scene.json",
+      "sha256": "f06c92e72843f7c8bfd8f78aeb1714098107a184f4012a3f86649620ab5451f7",
+      "length": 2893
+    },
+    {
+      "path": "mir2-web3/packages/game-data/data/starter_server_data.json",
+      "sha256": "d4349ff4e2d2753d0be95de27341a8a9bb59ea04d3062868b03c7e1d80f72e4d",
+      "length": 8207
+    },
+    {
+      "path": "mir2-web3/packages/game-data/src/crystal_creature_settings.rs",
+      "sha256": "6ead34f9056a38921d6397048f85ed1f3ffdc31f7b8ab5e9e28b8ee466928c95",
+      "length": 2162
+    },
+    {
+      "path": "mir2-web3/packages/game-data/src/crystal_guild_settings.rs",
+      "sha256": "19bbf36fb8812162a7853b66f4efb2dbe747394eac39aa5df4c8dd019585cd38",
+      "length": 4046
+    },
+    {
+      "path": "mir2-web3/packages/game-data/src/crystal_hero_settings.rs",
+      "sha256": "58a19687be4d6794dfed69f6a16608f76adb82722b9cf000eaca2f6b73daaf27",
+      "length": 7918
+    },
+    {
+      "path": "mir2-web3/packages/game-data/src/crystal_item_image.rs",
+      "sha256": "b57acb109955d4157ec352fa8b0ec4f5de083e9021828a67e1e54501cc23993e",
+      "length": 2932
+    },
+    {
+      "path": "mir2-web3/packages/game-data/src/crystal_map_events.rs",
+      "sha256": "6a627807f49eafda4e44a3b53541e48131bec13046ae60a0079ae353ba1754b8",
+      "length": 6669
+    },
+    {
+      "path": "mir2-web3/packages/game-data/src/crystal_npc_goods.rs",
+      "sha256": "4144f851d4d6b98e06989e294c1c6e5f5b6ca831459fcd49d5539982b67ada21",
+      "length": 5045
+    },
+    {
+      "path": "mir2-web3/packages/game-data/src/lib.rs",
+      "sha256": "035c3a4f23c2ae5a0665c2bb857e4bd66c8f783f5bedbe99d4c8de55576fc987",
+      "length": 167372
+    },
+    {
+      "path": "mir2-web3/packages/game-data/tests/platinum_176_content_loop.rs",
+      "sha256": "e2a293de0d2547efd7d430c4221aa0b3596cb7567d84191e5ba3b432e018315a",
+      "length": 13538
+    },
+    {
+      "path": "mir2-web3/packages/production/Cargo.toml",
+      "sha256": "2aa3f4cef57e4ea73a3f15afa602b89cdbc97f03f485902a02d44d2e875e109a",
+      "length": 264
+    },
+    {
+      "path": "mir2-web3/packages/production/README.md",
+      "sha256": "f5500db5c44b4b3de881814e4f3db1455f713a12ed7ca7ad1ffe0b7710f49189",
+      "length": 3793
+    },
+    {
+      "path": "mir2-web3/packages/production/src/catalog.rs",
+      "sha256": "b5781ee8a285714c605c91dbf40b79820fb405c93f2bcaa84f1e3bbe9672c0f8",
+      "length": 9901
+    },
+    {
+      "path": "mir2-web3/packages/production/src/jobs.rs",
+      "sha256": "fd1ed35fc43e24f530e39bfcdc3b53886563f850483751e97925ecc7b4a17ed4",
+      "length": 22932
+    },
+    {
+      "path": "mir2-web3/packages/production/src/lib.rs",
+      "sha256": "df271e2021ccf7dac5aaf9e5e1b019c198d44103c9e67d40ad62128b5575fc6f",
+      "length": 1784
+    },
+    {
+      "path": "mir2-web3/packages/production/src/planning.rs",
+      "sha256": "fcc97c5867c0dff917548218b4df20a34ce74c6c95fdd3f314ea8177322f8f35",
+      "length": 6325
+    },
+    {
+      "path": "mir2-web3/packages/production/tests/production.rs",
+      "sha256": "3a766cede2b0ee4c2d3869f2f6212e19bccf86e25919ef08fc5db58a1469cdb5",
+      "length": 23231
+    },
+    {
+      "path": "mir2-web3/packages/protocol/Cargo.toml",
+      "sha256": "245b0e2cb7c34270f9f5dc2aa96572d19699d5ff208f3f796add42b0a953aab3",
+      "length": 378
+    },
+    {
+      "path": "mir2-web3/packages/protocol/crystal-mvp-v1.json",
+      "sha256": "6dbb3af8f20dd13a7812fce28be77ae7d877f6aa5c74e30ddf61bd9a78a610c0",
+      "length": 10992
+    },
+    {
+      "path": "mir2-web3/packages/protocol/src/catalog_transport.rs",
+      "sha256": "cd6f73582d2774805e66ca9898a8f2b96e829d8bce648e6ddf983d13f485689d",
+      "length": 11788
+    },
+    {
+      "path": "mir2-web3/packages/protocol/src/error.rs",
+      "sha256": "a7e13c9abbdf35f98e830a62355f9dd082e6c95a66a887f4e7c4d3d90bf9a6ba",
+      "length": 3373
+    },
+    {
+      "path": "mir2-web3/packages/protocol/src/frame.rs",
+      "sha256": "ba0ac651251624b4595711dc3d0fbc70ab57428b21d0997bd418a0fc1d49c7ad",
+      "length": 1275
+    },
+    {
+      "path": "mir2-web3/packages/protocol/src/ids.rs",
+      "sha256": "930259a2f29d2dd7c09f77d861ab5db1477629d75b31b2ca59d2479dd8efb126",
+      "length": 30620
+    },
+    {
+      "path": "mir2-web3/packages/protocol/src/io.rs",
+      "sha256": "e80ef0c9a01c5c185469cab988ef7e257a5de6638fe5326360d36fe1ca766046",
+      "length": 5117
+    },
+    {
+      "path": "mir2-web3/packages/protocol/src/item_image.rs",
+      "sha256": "09fc26d058b62409a1ca99acdbd717b59a8ab21f956244fa60e82a7fa51b7a72",
+      "length": 1218
+    },
+    {
+      "path": "mir2-web3/packages/protocol/src/lib.rs",
+      "sha256": "b5fc91187079005e0b19945c3c43e68736bb1786f7098e83134dead5e302766d",
+      "length": 1969
+    },
+    {
+      "path": "mir2-web3/packages/protocol/src/packets.rs",
+      "sha256": "6397a43b3a4c2376cfcf8b6a7d0811d2ff9dd6e3da9ca84dc07d8854675beec7",
+      "length": 307016
+    },
+    {
+      "path": "mir2-web3/packages/protocol/src/trace.rs",
+      "sha256": "1d2fcb0f5eaff134e5693e9497461587de8dfd9e0aa893184f5ca156541f3c89",
+      "length": 29621
+    },
+    {
+      "path": "mir2-web3/packages/protocol/src/types.rs",
+      "sha256": "c25a956e371aee4e1b56276c3203c541473d04235cb52feaf391480662a1a7d6",
+      "length": 120048
+    },
+    {
+      "path": "mir2-web3/packages/protocol/tests/codec.rs",
+      "sha256": "82b4121dddce796729baa6aed3de0b925c1ab1eb8735d9e641e9f0e86e581443",
+      "length": 39828
+    },
+    {
+      "path": "mir2-web3/rust-toolchain.toml",
+      "sha256": "667a93776d9bb1bb4a17b8839e365d26ed380807de5b44f664c87af73bb0bd87",
+      "length": 113
+    }
+  ]
+}

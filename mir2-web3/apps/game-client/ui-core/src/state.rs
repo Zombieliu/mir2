@@ -83,6 +83,14 @@ pub struct UiOptions {
     pub skill_mode: bool,
     #[serde(default = "default_true")]
     pub skill_bar: bool,
+    #[serde(default = "default_skill_bar_positions")]
+    pub skill_bar_positions: [[i32; 2]; 2],
+    #[serde(default)]
+    pub dura_view: bool,
+    #[serde(default = "default_true")]
+    pub expanded_buff_window: bool,
+    #[serde(default = "default_true")]
+    pub expanded_hero_buff_window: bool,
     #[serde(default = "default_true")]
     pub effect: bool,
     #[serde(default = "default_true")]
@@ -183,6 +191,10 @@ impl Default for UiOptions {
         Self {
             skill_mode: false,
             skill_bar: true,
+            skill_bar_positions: default_skill_bar_positions(),
+            dura_view: false,
+            expanded_buff_window: true,
+            expanded_hero_buff_window: true,
             effect: true,
             drop_view: true,
             name_view: true,
@@ -334,6 +346,34 @@ impl Default for UiChatSettings {
 }
 
 impl UiChatSettings {
+    /// Exact data projection for the shared Core chat reducer; bit8 remains Trade.
+    pub fn to_mask(self) -> u16 {
+        (self.filter_normal as u16)
+            | ((self.filter_whisper as u16) << 1)
+            | ((self.filter_shout as u16) << 2)
+            | ((self.filter_system as u16) << 3)
+            | ((self.filter_lover as u16) << 4)
+            | ((self.filter_mentor as u16) << 5)
+            | ((self.filter_group as u16) << 6)
+            | ((self.filter_guild as u16) << 7)
+            | ((self.filter_trade as u16) << 8)
+            | ((self.transparent as u16) << 9)
+    }
+    pub fn from_mask(mask: u16) -> Self {
+        Self {
+            filter_normal: mask & 1 != 0,
+            filter_whisper: mask & 2 != 0,
+            filter_shout: mask & 4 != 0,
+            filter_system: mask & 8 != 0,
+            filter_lover: mask & 16 != 0,
+            filter_mentor: mask & 32 != 0,
+            filter_group: mask & 64 != 0,
+            filter_guild: mask & 128 != 0,
+            filter_trade: mask & 256 != 0,
+            transparent: mask & 512 != 0,
+        }
+    }
+
     pub fn is_filter_hidden(self, channel: UiChatChannel) -> bool {
         match channel {
             UiChatChannel::Normal => self.filter_normal,
@@ -483,6 +523,28 @@ impl Default for UiState {
 }
 
 impl UiState {
+    pub fn begin_game_shop_gift(
+        &mut self,
+        g_index: i32,
+        quantity: u8,
+        recipient_name: String,
+    ) -> Option<GameShopRequest> {
+        if self.game_shop_pending.is_some() || self.game_shop_next_request_id == 0 {
+            return None;
+        }
+        let request = GameShopRequest::new_gift(
+            crate::game_shop::request_id_for_sequence(self.game_shop_next_request_id),
+            g_index,
+            quantity,
+            recipient_name,
+        )?;
+        self.game_shop_next_request_id =
+            crate::game_shop::next_request_sequence(self.game_shop_next_request_id);
+        self.game_shop_pending = Some(request.clone());
+        self.game_shop_unknown = false;
+        Some(request)
+    }
+
     pub fn begin_game_shop_purchase(
         &mut self,
         g_index: i32,
@@ -544,17 +606,12 @@ impl UiState {
 
     /// Prepare this UI owner to consume an exact receipt across a terminal
     /// session reset. Other UI/session state is reset by the host adapter; this
-    /// method retains only the receipt's exact request four-tuple.
+    /// method retains the exact operation, request tuple and recipient.
     pub fn preserve_exact_game_shop_receipt_boundary(&mut self, receipt: &GameShopReceipt) -> bool {
         if !receipt.is_valid() {
             return false;
         }
-        let Some(request) = GameShopRequest::new(
-            receipt.request_id.clone(),
-            receipt.g_index,
-            receipt.quantity,
-            receipt.price_type,
-        ) else {
+        let Some(request) = GameShopRequest::from_receipt(receipt) else {
             return false;
         };
         self.game_shop_next_request_id = 1;
@@ -735,4 +792,8 @@ impl UiState {
     pub fn safe_key_open(&self) -> bool {
         self.security.panel == UiSecurityPanel::SafeKey
     }
+}
+
+pub fn default_skill_bar_positions() -> [[i32; 2]; 2] {
+    [[0, 0], [216, 0]]
 }

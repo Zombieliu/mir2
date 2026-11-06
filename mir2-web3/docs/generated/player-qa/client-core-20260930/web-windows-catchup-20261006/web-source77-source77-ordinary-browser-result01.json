@@ -1,0 +1,121 @@
+{
+  "schema": "source77-ordinary-browser-result-v1",
+  "source": "Source77 public catalog and starter art",
+  "origin": "http://127.0.0.1:19205/",
+  "viewport": {
+    "width": 460,
+    "height": 780,
+    "explicitOverrideUsed": false
+  },
+  "gameCanvasRect": {
+    "x": 0,
+    "y": 216,
+    "width": 460,
+    "height": 345
+  },
+  "ordinaryLogin": {
+    "usedExistingAuthorizedCredentials": true,
+    "credentialsRecorded": false,
+    "loginScreenshotRecorded": false,
+    "cacheCleared": false
+  },
+  "shop": {
+    "merchant": "Merchant_Scott",
+    "sharedHost": {
+      "active": true,
+      "transitioning": false,
+      "blocksInput": true,
+      "errorPresent": false
+    },
+    "compatBuyButtonCount": 0,
+    "visibleGenuineItemIcons": 7,
+    "buy": {
+      "item": "Candle",
+      "quantity": 1,
+      "method": "one ordinary native Buy button click",
+      "click": {
+        "x": 151,
+        "y": 456
+      },
+      "goldBefore": 180,
+      "goldAfter": 170,
+      "visibleReceipt": "You gained an item.",
+      "inventoryBaselineCountNotAsserted": true
+    },
+    "earlierFooterAttempt": {
+      "click": {
+        "x": 116,
+        "y": 455
+      },
+      "target": "QtyDec at quantity 1",
+      "purchaseVerifiedAtThatPoint": false
+    },
+    "screenshots": [
+      "source77-scott-shop-first01.png",
+      "source77-scott-candle-selected01.png",
+      "source77-scott-candle-buy-first01.png",
+      "source77-scott-candle-buy-result01.png",
+      "source77-bag-after-candle-buy01.png"
+    ]
+  },
+  "character": {
+    "sharedNativeChar": true,
+    "starterBodyAndEquippedArtVisible": true,
+    "sharedNativeStats1": true,
+    "sharedNativeStats2": true,
+    "minimapHiddenDuringNativeCharacter": true,
+    "nativeClose": {
+      "click": {
+        "x": 455,
+        "y": 222
+      },
+      "closed": true,
+      "minimapRestored": true
+    },
+    "spells": {
+      "emptyPageObserved": true,
+      "sharedNativeAccepted": false,
+      "compatFallbackObserved": true,
+      "stableCompatNamePointerEvents": "none",
+      "ordinaryCompatClose": {
+        "click": {
+          "x": 446,
+          "y": 230
+        },
+        "closed": true,
+        "minimapRestored": true
+      },
+      "refusalCause": "not established; retained as open gap"
+    },
+    "rareGearAndNonemptySkillsAccepted": false
+  },
+  "saveRelogin": {
+    "logoutMethod": "ordinary Alt+x",
+    "ordinaryCacheRetainingReload": true,
+    "ordinaryLoginAndStartGame": true,
+    "gold": 170,
+    "map": "Bichon Province",
+    "position": {
+      "x": 290,
+      "y": 611
+    },
+    "sameVisiblePostPurchaseInventoryIcons": true,
+    "itemCountDeltaNotInvented": true,
+    "screenshots": [
+      "source77-game-after-save-relogin01.png",
+      "source77-bag-after-save-relogin01.png"
+    ]
+  },
+  "restrictions": {
+    "privateProductApiUsed": false,
+    "coreOrWasmGlobalRead": false,
+    "adminCommandsUsed": false,
+    "teleportUsed": false,
+    "cdpUsed": false,
+    "forcedFocusUsed": false,
+    "viewportOverrideUsed": false,
+    "gatewayChanged": false
+  },
+  "overallCandidateAccepted": false,
+  "mobileAccepted": false
+}

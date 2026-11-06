@@ -1,0 +1,8 @@
+Full retained log: C:/mir2-build/crowded-personal-status-green-final-20261003.log
+SHA256: fb0d116046cbdb530af446a0284b0405aa8311c8800dd1062edae228cff2d704
+
+running 3 tests
+test runtime::combat::player_status_admission_tests::crowded_personal_dazed_permits_escape_but_blocks_attack_and_cast ... ok
+test runtime::combat::player_status_admission_tests::crowded_personal_real_control_is_finite_and_still_blocks_escape ... ok
+test runtime::combat::player_status_admission_tests::crowded_personal_stun_permits_escape_and_melee_but_blocks_cast ... ok
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 2036 filtered out; finished in 0.00s

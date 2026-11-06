@@ -1,0 +1,14 @@
+// Explicit ended-only entrypoint; verifies this tool's sealed inputs before any run access.
+import fs from 'node:fs';
+import crypto from 'node:crypto';
+import path from 'node:path';
+import {spawnSync} from 'node:child_process';
+import assert from 'node:assert/strict';
+const ROOT=import.meta.dirname,args=process.argv.slice(2),hash=b=>crypto.createHash('sha256').update(b).digest('hex');
+assert.ok(args.length===3&&/^--seal-sha256=[a-f0-9]{64}$/.test(args[0])&&args[1]==='--verify-ended-formal10'&&/^--run=[0-9]{13}-[a-f0-9]{8}$/.test(args[2]),'Ended-only explicit seal SHA and originalrunID required');
+const sealBytes=fs.readFileSync(ROOT+'/tool-source-frozen-v2.json');assert.equal(hash(sealBytes),args[0].slice(14));const seal=JSON.parse(sealBytes);
+function check(){for(const p of seal.files){assert.ok(typeof p.path==='string'&&!path.isAbsolute(p.path)&&!p.path.split(/[\\/]/).some(s=>s==='..'||s==='private'));const file=ROOT+'/'+p.path,stat=fs.lstatSync(file);assert.ok(stat.isFile()&&!stat.isSymbolicLink());assert.equal(fs.realpathSync(file).toLowerCase(),path.resolve(file).toLowerCase());const b=fs.readFileSync(file);assert.equal(b.length,p.bytes);assert.equal(hash(b),p.sha256);}return seal.files.length;}
+const checkedInputs=check(),startedAt=new Date().toISOString(),r=spawnSync(process.execPath,[ROOT+'/verify-ended-formal10-v3.mjs',...args.slice(1)],{encoding:'utf8',timeout:3600000,maxBuffer:1024*1024});
+const log=(r.stdout??'')+(r.stderr??'');fs.writeFileSync(ROOT+'/actual-verification.log',log,{flag:'wx'});check();const final=ROOT+'/final-verification.json',exists=fs.existsSync(final),finalBytes=exists?fs.readFileSync(final):null;
+const receipt={schemaVersion:1,startedAt,endedAt:new Date().toISOString(),runId:args[2].slice(6),exitCode:r.status,signal:r.signal??null,checkedInputs,sourceBeforeAfterIdentical:true,seal:{path:'tool-source-frozen-v2.json',bytes:sealBytes.length,sha256:hash(sealBytes)},log:{path:'actual-verification.log',bytes:Buffer.byteLength(log),sha256:hash(log)},finalVerification:exists?{path:'final-verification.json',bytes:finalBytes.length,sha256:hash(finalBytes)}:null,actualVerificationExitedSuccessfully:r.status===0,originalGameVerdictChanged:false};
+fs.writeFileSync(ROOT+'/actual-verification-execution-receipt-v1.json',JSON.stringify(receipt,null,2)+'\n',{flag:'wx'});console.log(JSON.stringify(receipt));if(r.status!==0)process.exitCode=r.status??1;

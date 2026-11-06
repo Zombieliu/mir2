@@ -5,13 +5,60 @@
 //! bind the exact executable bytes. Development builds deliberately return an
 //! empty provenance record and therefore stay on the draft sidecar schema.
 
-use super::{is_sha256_hex, sha256_hex, NativeCaptureBuild};
+use super::{is_sha256_hex, sha256_hex, NativeCaptureBuild, VerifiedPackedProvenance};
 use serde_json::Value;
 use std::{env, fs, sync::OnceLock};
 
 static TRUSTED_BUILD: OnceLock<NativeCaptureBuild> = OnceLock::new();
+static PACKED_BUILD: OnceLock<VerifiedPackedProvenance> = OnceLock::new();
+
+pub(super) fn install_verified_packed(mut value: VerifiedPackedProvenance) -> Result<(), String> {
+    validate_packed(&value)?;
+    value.generation_manifest_sha256.make_ascii_lowercase();
+    value.catalog_sha256.make_ascii_lowercase();
+    value.executable_sha256.make_ascii_lowercase();
+    for hash in &mut value.pack_sha256 {
+        hash.make_ascii_lowercase();
+    }
+    value.pack_sha256.sort();
+    PACKED_BUILD
+        .set(value)
+        .map_err(|_| "packed capture provenance is already installed".to_owned())
+}
+
+fn validate_packed(value: &VerifiedPackedProvenance) -> Result<(), String> {
+    let unique = value
+        .pack_sha256
+        .iter()
+        .map(|hash| hash.to_ascii_lowercase())
+        .collect::<std::collections::BTreeSet<_>>();
+    if !is_sha256_hex(&value.generation_manifest_sha256)
+        || !is_sha256_hex(&value.catalog_sha256)
+        || !is_sha256_hex(&value.executable_sha256)
+        || !valid_revision(&value.game_source_revision)
+        || value.content_profile.is_empty()
+        || value.content_profile.len() > 128
+        || !value
+            .content_profile
+            .bytes()
+            .all(|b| b.is_ascii_alphanumeric() || b"-_.".contains(&b))
+        || value.pack_sha256.is_empty()
+        || value.pack_sha256.len() > mir2_resource_pack::MAX_PACKS
+        || unique.len() != value.pack_sha256.len()
+        || value.pack_sha256.iter().any(|hash| !is_sha256_hex(hash))
+    {
+        return Err("invalid authenticated packed provenance".to_owned());
+    }
+    Ok(())
+}
 
 pub(super) fn trusted_build_provenance() -> NativeCaptureBuild {
+    if let Some(value) = PACKED_BUILD.get() {
+        return NativeCaptureBuild {
+            packed_generation: Some(value.clone()),
+            ..Default::default()
+        };
+    }
     TRUSTED_BUILD
         .get_or_init(load_trusted_build_provenance)
         .clone()
@@ -96,6 +143,7 @@ fn parse_trusted_build_provenance(
         // `mir2-assets`. Its own digest is the reproducible asset-pack binding
         // used by the visual-capture v1 contract.
         asset_manifest_sha256: Some(sha256_hex(package_manifest_bytes)),
+        packed_generation: None,
     })
 }
 
@@ -106,6 +154,24 @@ fn valid_revision(value: &str) -> bool {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn packed_bindings_validate_independently_of_legacy_v4_manifest() {
+        let mut value = VerifiedPackedProvenance {
+            generation_manifest_sha256: "a".repeat(64),
+            catalog_sha256: "b".repeat(64),
+            game_source_revision: "c".repeat(40),
+            content_profile: "classic176".into(),
+            executable_sha256: "d".repeat(64),
+            pack_sha256: vec!["e".repeat(64)],
+        };
+        assert!(validate_packed(&value).is_ok());
+        value.pack_sha256.push("E".repeat(64));
+        assert!(validate_packed(&value).is_err());
+        value.pack_sha256.pop();
+        value.catalog_sha256 = "not authenticated".into();
+        assert!(validate_packed(&value).is_err());
+    }
 
     fn fixture(executable_hash: &str) -> (Vec<u8>, Vec<u8>) {
         let version = serde_json::json!({

@@ -1,0 +1,31 @@
+{
+  "source": "Source61",
+  "normalUiOnly": true,
+  "ordinaryNpc": "Merchant_Scott",
+  "selectedItem": "Candle",
+  "quantity": 1,
+  "displayedGold": 200,
+  "displayedTotal": "—",
+  "diagnostics": {
+    "source": null,
+    "preview": null,
+    "renderServiceCurrent": true,
+    "plannerPresent": true,
+    "corePresent": true,
+    "host": {
+      "active": false,
+      "transitioning": false,
+      "blocksInput": false,
+      "errorPresent": true
+    }
+  },
+  "buyQuoteReason": "invalidInput",
+  "buyTitle": "不可用",
+  "buyEnabled": false,
+  "purchaseSent": false,
+  "purchaseVerified": false,
+  "worldFramesObserved": 0,
+  "networkTruncated": true,
+  "networkHasMore": false,
+  "goalComplete": false
+}

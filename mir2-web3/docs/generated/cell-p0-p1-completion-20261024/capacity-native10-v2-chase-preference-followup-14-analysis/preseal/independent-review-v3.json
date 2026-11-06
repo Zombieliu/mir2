@@ -1,0 +1,206 @@
+{
+  "schemaVersion": 1,
+  "reviewedAt": "2026-10-25T10:12:20.5090573Z",
+  "scope": "Independent read-only preseal review of finalized probe14 revision3. No import or execution of game, gate, sourceguard, sealer, provisioner, tests, realm, collector or verifier.",
+  "preseal": {
+    "file": "C:/mir2-build/p01-completion-20261024/release-native-10-v2-chase-preference-feasibility-14/preseal-inputs-finalized-v3.json",
+    "bytes": 28492,
+    "sha256": "565fe291e06beb93f43a3780228070984d8737c8e394890e27c8c9b73d1888ba"
+  },
+  "identity": {
+    "root": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-chase-preference-feasibility-14",
+    "publicChild": "capacity-native10-v2-chase-preference-followup-14-diagnostics",
+    "currentHeadObserved": "b84d5d02a8299b6ac36c5e56cb7006f6bc80d3bd",
+    "driverSourceCommit": "b84d5d02a8299b6ac36c5e56cb7006f6bc80d3bd",
+    "driverSourceSha256": "db4e22c69b4f1365d8135023e158f4de00ff35d58330cf7eca98801780e674e7",
+    "backendSourceCommit": "46880bd1ef415131c4cf85aeb4dd2fa4f6fd4f9b",
+    "backendInputCount": 41,
+    "releaseBytes": 87370240,
+    "releaseSha256": "a43078b05e70b480f948fee505e23d2757ce1ae20fdc1f22b2348df46ee7125d",
+    "driverBinding": {
+      "file": "C:/mir2-build/p01-completion-20261024/release-native-10-v2-chase-preference-feasibility-14/current-driver-binding.json",
+      "bytes": 2411,
+      "sha256": "5f739447200e348bfe131f26b0a1ea606345756d83980b33ad45bd82f1da5121"
+    },
+    "driverFreeze": {
+      "file": "C:/mir2-build/p01-completion-20261024/capacity-native-chase-preference-driver-frozen-v1.json",
+      "bytes": 19099,
+      "sha256": "20fd347d029d9a912514e400bc74b0d08ec940bd90af20ff2f91bd64dba08bef"
+    }
+  },
+  "sourceClosure": {
+    "currentAndHistoricalLocalFiles": 70,
+    "totalRawBytes": 738520,
+    "allCurrentRawSizeAndSha256Match": true,
+    "orderedSourceAggregateRecomputed": "c3c2e32ad88ebb0b0bd0d75c1571fe0c46bf86fdcf541e1d18cdf7b0df99307c",
+    "orderedSourceAggregateMatches": true,
+    "sourcePinsMissingOrChanged": [],
+    "recordedSyntaxChecks": 26,
+    "recordedSyntaxExitCodesAllZero": true,
+    "syntaxRerunByReviewer": false,
+    "changedSinceV1": [
+      "collect-public.mjs",
+      "driver-evidence-contract.mjs"
+    ],
+    "addedSinceV1": [
+      "finalization-preimages-v1/collect-before-frozen-closure.mjs.txt",
+      "finalization-preimages-v1/collect-public.mjs-before-freeze-builder-source.txt",
+      "finalization-preimages-v1/driver-evidence-contract.mjs-before-freeze-builder-source.txt",
+      "preseal-inputs-finalized-v1.json",
+      "preseal-inputs-finalized-v2.json"
+    ]
+  },
+  "sourceFindings": [
+    {
+      "id": "P1",
+      "result": "pass",
+      "evidence": "All entry points bind current-driver-binding state/newb84d commit/db4e source aggregate and exact19099/20fd manifest. Actual nested sourceBefore/sourceAfter arrays and hashes are compared to the nine freeze records; focused refers to redGreen.green13, original4pass9fail is retained, and full refers to actual200 counts/TAP with no signal/error/skips/cancels."
+    },
+    {
+      "id": "P2",
+      "result": "pass",
+      "evidence": "The prior prepare synthetic wrong-key and missing runtime sidecar field are fixed. nativeChasePreference has a strict exact source literal/freeze/report comparison and is propagated to sidecar/catalog/public verifier. Five previous metadata objects are independently equal to the prior05c freeze."
+    },
+    {
+      "id": "P3",
+      "result": "pass",
+      "evidence": "The existing whole-main8-hunk inverse is preserved and pinned. Independent static text extraction confirms validateNativeExplicitHomes, validateNativeCombatClusters and insideCombatCoverage old/new bodies and recorded hashes exactly equal. Scene contract only substitutes historical-main/current-main compatibility for the old main source pin; all original data/map/validation/100 and exact10 pins remain unchanged. No A* or static safety search is claimed rerun."
+    },
+    {
+      "id": "P4",
+      "result": "pass",
+      "evidence": "Actual launcher env and expected admission limits remain24/10/10/4/1/2, literal loopback17500/17510,Tokio4,slow50,File/platinum_176/single. Policy JSON equals actual13 original2/10 stages300s and360s soak, wall3600, native18launched/12positive,Run50%,80cells,750ms cadence and fullAcceptanceEligible=false. Resource profile bytes equal original06."
+    },
+    {
+      "id": "P5",
+      "result": "pass",
+      "evidence": "Collector and verifier use their own bounded16 minute-row counter inside the raw pass: actual contiguous clocks, each>=60000ms, exact original report assessment and exact5/5/6 counts. They do not retrieve windows from the generic selected projection. Completed whole phases preserve measuredSeconds and original configured duration. Failed/partial runs retain verdict and never become capacityAccepted."
+    },
+    {
+      "id": "P6",
+      "result": "pass",
+      "evidence": "Actual current run/process/sidecar coreCodeEvidenceCommit comes from new driver binding b84d. Historical wire identity retains4cab documentation/6d core/05c evidence separately. The original wire contract, adapter, test,8-test receipt and log were independently raw-hash equal to13;200 current core tests do not claim28 wrapper or8 adapter coverage."
+    },
+    {
+      "id": "P7",
+      "result": "pass",
+      "evidence": "Existing path safety/exclusive public collection guard is retained. The new actual launcher.files loop is capped128, validates safeRelative, uses rawDigest(realPublicFile) with realpath/lstat containment before read, verifies bytes/SHA, and deduplicates public paths. It includes the whole actual sealed local source inventory rather than only the old fixed names."
+    },
+    {
+      "id": "P8",
+      "result": "pass",
+      "evidence": "Exactly the two freezeBuilder.script and freezeBuilder.mutationProof fields are added to the guarded external evidence pins and explicit public allowlist. These correspond to the actually pinned revision2 source; they do not permit arbitrary private/store/bin/recording paths."
+    }
+  ],
+  "independentDeltaChecks": {
+    "collectorFinal": {
+      "file": "C:/mir2-build/p01-completion-20261024/release-native-10-v2-chase-preference-feasibility-14/collect-public.mjs",
+      "bytes": 43524,
+      "sha256": "227d1576b48b434d97ba40b078bac6523d1023bb02a2ab8bdb450d012b3e76a5"
+    },
+    "driverEvidenceFinal": {
+      "file": "C:/mir2-build/p01-completion-20261024/release-native-10-v2-chase-preference-feasibility-14/driver-evidence-contract.mjs",
+      "bytes": 3674,
+      "sha256": "e1477ca5c83eacb2406cb3a523eef48be7c7d630f5afde7a5eb2f9a7d510ec3d"
+    },
+    "collectorV3ToV2RawSha256": "8d85d33c4dd45796109122bcd3f8b5ad7752533b1855be267b46758f90352307",
+    "collectorV3ToV1RawSha256": "893c7535bc7573f5b8f4d1989d58b645fc3fedcdd7bb4df7aa0286dbf79f0eac",
+    "evidenceV3ToV1RawSha256": "fceb72b7b5c288292bdc0c25c8e70db9e85b059281c9434faf80ddd9e74fddd9",
+    "restoredHashesMatchPreservedPreimages": true,
+    "normalizationForDeltaInversePerformed": false
+  },
+  "criticalExternalPins": [
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/capacity-native-chase-preference-driver-frozen-v1.json",
+      "bytes": 19099,
+      "sha256": "20fd347d029d9a912514e400bc74b0d08ec940bd90af20ff2f91bd64dba08bef"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-chase-preference-verification-v1\\red-green-receipt-v1.json",
+      "bytes": 5650,
+      "sha256": "395e3285af4b73f95efd1c4bc1ac185bd968315587c5b7978508a6cc3b4b4fef"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-chase-preference-verification-v1\\current-green-v1.log",
+      "bytes": 3691,
+      "sha256": "eb89dda9485646b250fdfeee3f08d8374af0f90498c4f1d435e74853a312c853"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-chase-preference-verification-v1\\full-current-receipt-v1.json",
+      "bytes": 4682,
+      "sha256": "5e71b6dbf69c9ed79e085c41a61946d2dcaed7d0b81cb6060123b46d4a8a1b7a"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-chase-preference-verification-v1\\full-current-v1.log",
+      "bytes": 53991,
+      "sha256": "702c6c80eb52ec008dbdd3c18a8a578749d99ffd84e4163b7b527ed6de36554e"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-chase-preference-evidence-v1\\freeze-driver-v2.mjs",
+      "bytes": 10309,
+      "sha256": "89e2c2973debdaa38e66644d467e06796155258baec65e1253af00497009d0da"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-chase-preference-evidence-v1\\freeze-driver-v2-mutation-proof-v1.json",
+      "bytes": 3551,
+      "sha256": "912d2fe27e9b149fcdd6d13cf80746439b6566064d1b19b1d0d6457d575ba59c"
+    }
+  ],
+  "criticalExternalPinsIndependentlyChecked": 7,
+  "criticalExternalRawPinsMatch": true,
+  "scene": {
+    "profile": "ordinary-native-span2-five-by-five-static-halo-v1",
+    "ten": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\candidate-10-repaired-v4.json",
+      "bytes": 804,
+      "sha256": "a42a26a195dd5ac25135bff57e73f7f21b71f97b5cc1814351920ece621362ba"
+    },
+    "hundred": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\candidate-100-repaired-v4.json",
+      "bytes": 5844,
+      "sha256": "f87aae78a2d68d8daa63916a93580c33f4ef974da4769bd3531a62aafcf0f205"
+    },
+    "sourceSha256": "17183144a708188fe24a138e7a7c9b79f7382f0c6a8e985d765c3798a9da44bb",
+    "historicalStaticCodeCommit": "6d70d02d0bc390156b77a3e48acee714fc87cda3",
+    "compatibilityProof": {
+      "file": "C:/mir2-build/p01-completion-20261024/release-native-10-v2-chase-preference-feasibility-14/scene-driver-compatibility-proof-v1.json",
+      "bytes": 1936,
+      "sha256": "de4e8d981233d0fb5422a7d5469ed6c905d3632f5161a19b5b74384d3eb21059"
+    },
+    "geometryFunctionsChecked": 3,
+    "geometryBodiesAndHashesEqual": true,
+    "oldAStarReexecuted": false,
+    "liveSupplyProven": false
+  },
+  "observedAbsentRuntimeState": [
+    "private",
+    "bin",
+    "reports",
+    "recordings",
+    "preparation.lock",
+    "execution.lock",
+    "source-pins.json",
+    "launcher-source-frozen-v1.json",
+    "source-guard-readonly-verification.json"
+  ],
+  "verdict": {
+    "presealContractPassed": true,
+    "eligibleForSealNow": true,
+    "blockingFindingIds": [],
+    "eligibleForPrepareWithoutActualSealAndSourceGuard": false,
+    "actualFullBackendSourceGuardExecutedByReviewer": false,
+    "testsExecutedByReviewer": false,
+    "realmStartedByReviewer": false,
+    "capacityAccepted": false,
+    "p0Accepted": false,
+    "p2ImplementationPermitted": false,
+    "productionOrFrontendAccepted": false
+  },
+  "limitations": [
+    "This review authorizes no automatic realm start. Coordinator must seal this exact revision and run its actual readonly full backend/driver source guard before ordinary fresh account preparation and explicit execution. The backend41/current executable were not independently scanned or executed by this static review.",
+    "A2/10 probe has only one fighter; it cannot itself demonstrate that duplicate pursuit between two live fighters has been eliminated. The200 tool tests and any future10-player pass cannot replace full25/50/100 and7200-second capacity evidence.",
+    "The copied wire terminal driverSourceCommit/core fields intentionally describe historical wrapper evidence. Current capacity source identity is separately bound in actual process/sidecar/catalog fields; no new wrapper unit coverage is claimed.",
+    "The existing compact scene remains the explicit historical paired scene. Stable6/density/tour risks,886-step100 circuit,24ACK/20s waypoint cap, natural supply/progression and the earlier formal25 failure remain unaccepted.",
+    "The collector success path has only been statically reviewed here. No future raw run, complete16 windows, terminal counters, normal cleanup or public collection result is fabricated."
+  ]
+}

@@ -1,0 +1,9 @@
+{
+  "passed": true,
+  "host": "7.6.5",
+  "maximumRepresentativePath": 236,
+  "normalFileAccepted": true,
+  "namedStreamRejected": true,
+  "productionHelperUnmodified": true,
+  "sourceRevision": "24216899acd4301d8c3b1eff08b825f4896cc410"
+}

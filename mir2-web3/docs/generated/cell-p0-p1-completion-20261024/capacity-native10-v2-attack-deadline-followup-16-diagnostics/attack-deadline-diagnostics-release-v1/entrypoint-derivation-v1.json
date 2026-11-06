@@ -1,0 +1,112 @@
+{
+  "schemaVersion": 1,
+  "state": "PREPARED_ONLY_NO_CAPTURE_BUILD_RUN",
+  "proofs": [
+    {
+      "source": {
+        "path": "C:\\mir2-build\\p01-completion-20261024\\personal-monster-projection-release-v1\\pin-build-source-v3.mjs",
+        "bytes": 997,
+        "sha256": "40c56afaaf0ff528d5c7300c93b7aa0167672ed561ef914a4bd211300e5d3538"
+      },
+      "destination": {
+        "path": "C:\\mir2-build\\p01-completion-20261024\\attack-deadline-diagnostics-release-v1\\pin-build-source-v1.mjs",
+        "bytes": 906,
+        "sha256": "9c2bb5502f3f9d6eadd7146daf670c5a2d88372da6518e198a82e8abaac385cc"
+      },
+      "replacements": [
+        {
+          "from": "./source-lib-v3.mjs",
+          "to": "./source-lib-v1.mjs",
+          "count": 1
+        },
+        {
+          "from": "Fresh personal/shared-monster projection backend candidate: preserved468/41 certificate plus only routing.rs, the existing personal-monster-projection, live-AOI-order and pending-zone-AOI tests, and the readonly Zone ownership API delta. Forty-four explicit inputs, all39 other original raw/Git inputs unchanged, the original four-None fixture inverse retained. No build or gameplay acceptance is implied.",
+          "to": "Fresh attack deadline diagnostic backend candidate: exact direct5c2/44 baseline with only web.rs changed; all other43 raw/GitLF source entries and original four-None fixture proofs retained. New Node9 and actual8Rust/fmt/210Node receipts are separately bound. No build, lifecycle or capacity acceptance is implied.",
+          "count": 1
+        }
+      ],
+      "inverseRestoresOldSourceExactly": true
+    },
+    {
+      "source": {
+        "path": "C:\\mir2-build\\p01-completion-20261024\\personal-monster-projection-release-v1\\build-release-v3.mjs",
+        "bytes": 4895,
+        "sha256": "055254f856a71d1ffc7d0e98fc4657bc29782a7b78c534bcf31f6d58726f6642"
+      },
+      "destination": {
+        "path": "C:\\mir2-build\\p01-completion-20261024\\attack-deadline-diagnostics-release-v1\\build-release-v1.mjs",
+        "bytes": 4904,
+        "sha256": "864ab65942cebd22edab689bab3eb46222fb38e42e0ec5124d4c22d3c3cbdbf1"
+      },
+      "replacements": [
+        {
+          "from": "./source-lib-v3.mjs",
+          "to": "./source-lib-v1.mjs",
+          "count": 1
+        },
+        {
+          "from": "personal-monster-projection-v1-owned-cargo-build",
+          "to": "attack-deadline-diagnostics-v1-owned-cargo-build",
+          "count": 1
+        },
+        {
+          "from": "fresh non-855b/non-a430 Release executable",
+          "to": "fresh non-d879/non-855b/non-a430 Release executable",
+          "count": 1
+        }
+      ],
+      "inverseRestoresOldSourceExactly": true
+    },
+    {
+      "source": {
+        "path": "C:\\mir2-build\\p01-completion-20261024\\personal-monster-projection-release-v1\\capture-release-v3.mjs",
+        "bytes": 3379,
+        "sha256": "ae76760c0d328982e1d52858e1fae408835188419522dd0881ddb681c74920b4"
+      },
+      "destination": {
+        "path": "C:\\mir2-build\\p01-completion-20261024\\attack-deadline-diagnostics-release-v1\\capture-release-v1.mjs",
+        "bytes": 3492,
+        "sha256": "7e6f40d82f785a397ef24022cccb53f92e30eac1ddc18f1d5296afbb598e545f"
+      },
+      "replacements": [
+        {
+          "from": "./source-lib-v3.mjs",
+          "to": "./source-lib-v1.mjs",
+          "count": 1
+        },
+        {
+          "from": "personal-monster-projection-v1-owned-cargo-build",
+          "to": "attack-deadline-diagnostics-v1-owned-cargo-build",
+          "count": 1
+        },
+        {
+          "from": "Fresh personal/shared-monster projection Release candidate; readonly Zone ownership API and focused projection tests are explicitly source-bound. Fresh immutable executable, complete Cargo log/actual exit, explicit committed44-input source before/after binding including the three additional existing projection/AOI test files and preserved original four-None fixture proof; preserves468/a430 and older461f/855b evidence. Build success is not lifecycle or capacity acceptance.",
+          "to": "Fresh attack deadline diagnostic Release candidate: direct5c2/44 source with web.rs-only delta and43 unchanged raw/GitLF entries. Fresh immutable non-d879/non-a430/non-855b binary, exact full Cargo log/actual exit, source before/after and original four-None proof are bound. Node9 evidence is independent; build success is not lifecycle or capacity acceptance.",
+          "count": 1
+        },
+        {
+          "from": "sourceVerifiedBeforeAndAfterBuild:true,ignoredInclusiveUntrackedBackendCount:0,",
+          "to": "sourceVerifiedBeforeAndAfterBuild:true,ignoredInclusiveUntrackedBackendCount:0,\n  driverFrozenManifest:manifest.driverFrozenManifest,driverSourceSha256:manifest.driverSourceSha256,rootFunctionalValidation:manifest.rootFunctionalValidation,previousBackendSourceManifest:manifest.previousBackendSourceManifest,",
+          "count": 1
+        }
+      ],
+      "inverseRestoresOldSourceExactly": true
+    }
+  ],
+  "unchangedBoundaries": [
+    "VS amd64/MSVC and installed1.95.0 verification",
+    "locked/offline/release/jobs4 command",
+    "complete merged stdout/stderr and actual process exit",
+    "source requireFrozen before and after build",
+    "manifest before/after byte identity",
+    "fresh nonhistorical binary mtime window",
+    "COPYFILE_EXCL immutable binary",
+    "capture rechecks exact build/log/immutable/source identity"
+  ],
+  "newLibraryScope": "New direct5c2/44 web-only source comparator; no path expansion or old manifest relabeling.",
+  "generator": {
+    "path": "C:\\mir2-build\\p01-completion-20261024\\attack-deadline-diagnostics-release-v1\\prepare-entrypoints-v1.mjs",
+    "bytes": 4717,
+    "sha256": "2939c504f293248e8320e0acca7bc403e2cd4dcc52e91d3499b5b93003aa6243"
+  }
+}

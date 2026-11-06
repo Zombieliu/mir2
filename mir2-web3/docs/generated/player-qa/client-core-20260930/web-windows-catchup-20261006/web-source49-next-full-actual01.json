@@ -1,0 +1,106 @@
+{
+  "owner": "Root",
+  "kind": "Source49 actual original full Next production build; source/metadata gates preserved",
+  "observedAtUtc": "2026-10-09T00:03:08.819Z",
+  "config": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-build-source49-next-full-config01.json",
+    "bytes": 4533,
+    "sha256": "22b2308a78dd21e63b45dd35548dbe967e93dd6be08098f0a9d72dd3a406a530"
+  },
+  "sourceSnapshot": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-build-source49-next-full-snapshot01.json",
+    "bytes": 6760281,
+    "sha256": "0f44904ecb7197ebda8197ada8a875e0562b8e411be6e364653ea2b32335c9eb"
+  },
+  "independentSourceReview": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\web-source49-next-dependency-migration-source-review01.json",
+    "bytes": 7583442,
+    "sha256": "e8d644996a50e6f93604874843af739acead4b9ad504c2ea7ba033850dbe9843"
+  },
+  "originalCallerBytes": 4569,
+  "originalCallerSha256": "497a5b184074ca9591cb666b0124097f7fe4e4a5fae28dbd9f54807b423e8383",
+  "parent": {
+    "owner": "Root",
+    "exitCode": 0,
+    "builderPid": 189700,
+    "kind": "Source49 original full Next static production build with current complete inputs and preseeded owned TypeScript config",
+    "exited": true,
+    "disposed": true,
+    "elapsedMs": 162013,
+    "configPath": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-build-source49-next-full-config01.json",
+    "uiOperated": false,
+    "runtimeLaunched": false,
+    "networkUsed": false,
+    "productionBuildAccepted": false,
+    "candidateAccepted": false,
+    "goalComplete": false
+  },
+  "streams": [
+    {
+      "path": "C:/mir2-cross-platform-storage-20261002/web-next-source49-full01-2545497cd65d422bb9acd2fc707468d4/stdout.log",
+      "bytes": 2028,
+      "sha256": "98fae48823193c63fea87ffc55c506e0d2ae4a4f513f22f05654371358c9e437"
+    },
+    {
+      "path": "C:/mir2-cross-platform-storage-20261002/web-next-source49-full01-2545497cd65d422bb9acd2fc707468d4/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "C:/mir2-cross-platform-storage-20261002/web-next-source49-full01-2545497cd65d422bb9acd2fc707468d4/outer.json",
+      "bytes": 582,
+      "sha256": "44b8b1393cc04a8ab6b8787cba50ced778d2b59460567e79c8b067f84b858f14"
+    }
+  ],
+  "sourceCount": 19556,
+  "originalBeforeAfterActualInputHashesAccepted": true,
+  "stableTypeInputs": [
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\tsconfig.json",
+      "bytes": 4932,
+      "sha256": "08fed5308fee3466445cad5b0f4c0cc0f8e00f4fa53823999ff1bed0bcde3182"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\tsconfig.source49-build01.json",
+      "bytes": 5071,
+      "sha256": "12fb04389f33bf0698d84b6eb73259a9f621c45b34ff8ae4e2a6889c8682250a"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\next-env.d.ts",
+      "bytes": 294,
+      "sha256": "0286538eca3e3c35a4c58c9f12d9fe05f58edfd401d7cb547ed4f798e126890d"
+    }
+  ],
+  "outputRoot": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\.next-web-windows-catchup-source49-20261009-01",
+  "regularOutputFiles": 19007,
+  "outputBytes": 616581225,
+  "declaredLinks": [
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\.next-web-windows-catchup-source49-20261009-01\\standalone\\mir2-web3\\apps\\web\\node_modules",
+      "target": "E:\\mir2\\mir2-web3\\apps\\web\\node_modules",
+      "traversed": false
+    }
+  ],
+  "compiled": true,
+  "typeScriptPassed": true,
+  "staticPagesGenerated": 13,
+  "currentCoreManifest": {
+    "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\lib\\generated\\client_core_runtime.json",
+    "bytes": 1580,
+    "sha256": "f554e4aeac098b899b0283ec2b7297c105a33752330fe1555d84ca7a48cfc8fa"
+  },
+  "currentRendererManifest": {
+    "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\lib\\generated\\bevy_runtime_version.json",
+    "bytes": 1711,
+    "sha256": "1a21c2aed464d8d643101ace9ccb435ff682577aa0a59f2df5cce634ad2d372b"
+  },
+  "completeOriginalNextBuildAccepted": true,
+  "thinBuilt": false,
+  "uiOperated": false,
+  "runtimeLaunched": false,
+  "networkUsed": false,
+  "wasmInstantiated": false,
+  "playableAccepted": false,
+  "candidateAccepted": false,
+  "goalComplete": false
+}

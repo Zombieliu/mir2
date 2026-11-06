@@ -1,0 +1,239 @@
+{
+  "schemaVersion": 1,
+  "copies": [
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\root-snapshot-reuse-validation-v1\\root-focused-receipt-v1.json",
+      "file": "root-focused-receipt-v1.json",
+      "bytes": 45742,
+      "sha256": "a83a9eb82c4bd442912d97b6ccd1f1be4fd393fc8832c7a97e8e7222189696f3"
+    },
+    {
+      "source": "C:/mir2-build/p01-completion-20261024/root-snapshot-reuse-validation-config-v1.json",
+      "file": "root-snapshot-reuse-validation-config-v1.json",
+      "bytes": 7796,
+      "sha256": "2b8b1f55a5f0d139dd755fa5a249916849a76b5e35da876d45d24c33b77b32be"
+    },
+    {
+      "source": "file:///C:/mir2-build/p01-completion-20261024/root-presence-publication-validation-runner-v1.mjs",
+      "file": "root-presence-publication-validation-runner-v1.mjs",
+      "bytes": 3915,
+      "sha256": "85dad6770f6595ea09dfd570178cc6051a38d9ca7ff03230fe5fc6f26cce68c3"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\root-snapshot-reuse-validation-v1\\format-stdout-v1.log",
+      "file": "format-stdout-v1.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\root-snapshot-reuse-validation-v1\\format-stderr-v1.log",
+      "file": "format-stderr-v1.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\root-snapshot-reuse-validation-v1\\manager-and-presence-stdout-v1.log",
+      "file": "manager-and-presence-stdout-v1.log",
+      "bytes": 3404,
+      "sha256": "f4bed587dc106f5c0367aeecd1c329d5270d7812aad46250f50fbc7c6b386133"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\root-snapshot-reuse-validation-v1\\manager-and-presence-stderr-v1.log",
+      "file": "manager-and-presence-stderr-v1.log",
+      "bytes": 43251,
+      "sha256": "60bbf7d160043efdd45de5c49c62e8b5d274112ad04d63f9bf8ea11ae754dad0"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\root-snapshot-reuse-validation-v1\\zone_partition_contract-stdout-v1.log",
+      "file": "zone_partition_contract-stdout-v1.log",
+      "bytes": 595,
+      "sha256": "e21dc1cabc50a8547e7278910a041f14d5e12b436fe2ebad56166b7bf8a14008"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\root-snapshot-reuse-validation-v1\\zone_partition_contract-stderr-v1.log",
+      "file": "zone_partition_contract-stderr-v1.log",
+      "bytes": 50825,
+      "sha256": "20865a27954dd6d1db7d9503166169bf1a665b6b18ff45f941d3b16071fca232"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\root-snapshot-reuse-validation-v1\\zone_partition_identity_contract-stdout-v1.log",
+      "file": "zone_partition_identity_contract-stdout-v1.log",
+      "bytes": 726,
+      "sha256": "39631f063b5d1768f1f2d4ff846d28df524777f231576e52fcec444e9070b401"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\root-snapshot-reuse-validation-v1\\zone_partition_identity_contract-stderr-v1.log",
+      "file": "zone_partition_identity_contract-stderr-v1.log",
+      "bytes": 50325,
+      "sha256": "169bebb7548a1383e1cb8ab35252b36775fee4835178febfbf1aa9ae1b87427c"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\root-snapshot-reuse-validation-v1\\zone_manager_admission_contract-stdout-v1.log",
+      "file": "zone_manager_admission_contract-stdout-v1.log",
+      "bytes": 860,
+      "sha256": "db9ef951c368d2d9231035f6c97a85b1da01d78b65b9584ad0e7ac41100e3ad5"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\root-snapshot-reuse-validation-v1\\zone_manager_admission_contract-stderr-v1.log",
+      "file": "zone_manager_admission_contract-stderr-v1.log",
+      "bytes": 50323,
+      "sha256": "bb0e56ad15840ccce482ad8c3ba0e31208ac1178b0ee9bfd65a07c3e2e828e7d"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\root-snapshot-reuse-validation-v1\\experience-profile-stdout-v1.log",
+      "file": "experience-profile-stdout-v1.log",
+      "bytes": 2798,
+      "sha256": "426afa70fddbaefba4b85be3788abc48972a1d29b06e8727193c6793c5f9c5f4"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\root-snapshot-reuse-validation-v1\\experience-profile-stderr-v1.log",
+      "file": "experience-profile-stderr-v1.log",
+      "bytes": 43459,
+      "sha256": "6d0e18c6167b8412988e26b590d685a5e1a4be7ab245f0036391435fda5009c5"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\root-snapshot-reuse-validation-v1\\owner-health-live-fork-stdout-v1.log",
+      "file": "owner-health-live-fork-stdout-v1.log",
+      "bytes": 246,
+      "sha256": "3cb716c470b8f752d514331c5af3e16a135df36943e3431f42aaeea1b9975e0a"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\root-snapshot-reuse-validation-v1\\owner-health-live-fork-stderr-v1.log",
+      "file": "owner-health-live-fork-stderr-v1.log",
+      "bytes": 43101,
+      "sha256": "e4d9e0d18496cb5184bf9686e4ce6246fc10b00a90d83cb56953b4b652def6da"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\root-snapshot-reuse-validation-v1\\owned-pet-modes-stdout-v1.log",
+      "file": "owned-pet-modes-stdout-v1.log",
+      "bytes": 248,
+      "sha256": "cb5296f3109ad723bc3eece757951ec7843bd8b664402abe427c7a871d0c54be"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\root-snapshot-reuse-validation-v1\\owned-pet-modes-stderr-v1.log",
+      "file": "owned-pet-modes-stderr-v1.log",
+      "bytes": 43101,
+      "sha256": "7a2ca59942737ca0c12988b7184289dea241c1d9d34d94c2b5f4dde7026f722e"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\root-snapshot-reuse-validation-v1\\owned-pet-brown-clock-stdout-v1.log",
+      "file": "owned-pet-brown-clock-stdout-v1.log",
+      "bytes": 239,
+      "sha256": "e72e4dc519717f704a6bd3d7eb143bd06267740967ab91f052ae9c5e2ea8292b"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\root-snapshot-reuse-validation-v1\\owned-pet-brown-clock-stderr-v1.log",
+      "file": "owned-pet-brown-clock-stderr-v1.log",
+      "bytes": 43101,
+      "sha256": "e4d9e0d18496cb5184bf9686e4ce6246fc10b00a90d83cb56953b4b652def6da"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\root-snapshot-reuse-validation-v1\\owned-pet-owner-death-stdout-v1.log",
+      "file": "owned-pet-owner-death-stdout-v1.log",
+      "bytes": 243,
+      "sha256": "e6c434507f1a871758cfcd15e9303ba5ce192a2557a660061716210bed4e12fc"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\root-snapshot-reuse-validation-v1\\owned-pet-owner-death-stderr-v1.log",
+      "file": "owned-pet-owner-death-stderr-v1.log",
+      "bytes": 43101,
+      "sha256": "bc3db98f513089721f0e6cd2ca295f74f48b768f447218ec01c416b43ef0d6a6"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\root-snapshot-reuse-validation-v1\\vampire-death-stdout-v1.log",
+      "file": "vampire-death-stdout-v1.log",
+      "bytes": 914,
+      "sha256": "3bd646a4e8620d06541a3a4b2857ae3062254726d015bb1306aac2ed99c56bb7"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\root-snapshot-reuse-validation-v1\\vampire-death-stderr-v1.log",
+      "file": "vampire-death-stderr-v1.log",
+      "bytes": 43101,
+      "sha256": "e4d9e0d18496cb5184bf9686e4ce6246fc10b00a90d83cb56953b4b652def6da"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\root-snapshot-reuse-validation-v1\\web-live-overflow-stdout-v1.log",
+      "file": "web-live-overflow-stdout-v1.log",
+      "bytes": 2907,
+      "sha256": "a530f1a36ebf60a4a35b602a710c7cd785d592f3eba2565166f736aed30347a6"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\root-snapshot-reuse-validation-v1\\web-live-overflow-stderr-v1.log",
+      "file": "web-live-overflow-stderr-v1.log",
+      "bytes": 63970,
+      "sha256": "74cb9a4452be50ae0eafdb7e581e3d7c01a1d267cba0df27eba9240e3de18b64"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\root-snapshot-reuse-validation-v1\\web-transport-close-stdout-v1.log",
+      "file": "web-transport-close-stdout-v1.log",
+      "bytes": 531,
+      "sha256": "a56156b8c1dfaa36ebec71bbf5e81cfe2d302665e9145e7fc08f0fc8928ea580"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\root-snapshot-reuse-validation-v1\\web-transport-close-stderr-v1.log",
+      "file": "web-transport-close-stderr-v1.log",
+      "bytes": 53409,
+      "sha256": "3311b257595cf98402794f7eb745fb9d6937609c430f934fb1ee93fb531a7165"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\root-snapshot-reuse-validation-v1\\store-durability-stdout-v1.log",
+      "file": "store-durability-stdout-v1.log",
+      "bytes": 368,
+      "sha256": "12b4a52631343b15bdaa40906ddcbf24a8cd0880063a751b9b334c20d3080d1d"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\root-snapshot-reuse-validation-v1\\store-durability-stderr-v1.log",
+      "file": "store-durability-stderr-v1.log",
+      "bytes": 43101,
+      "sha256": "f77324c005858228901d991d70a2ed190a35671cbe3839791a7d6a6742e24663"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\root-snapshot-reuse-validation-v1\\guild-clock-store-stdout-v1.log",
+      "file": "guild-clock-store-stdout-v1.log",
+      "bytes": 218,
+      "sha256": "657ac7bd4e4584655a9d1ef0118e670b49dbad85bee0c6030896efde251564d1"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\root-snapshot-reuse-validation-v1\\guild-clock-store-stderr-v1.log",
+      "file": "guild-clock-store-stderr-v1.log",
+      "bytes": 43101,
+      "sha256": "e4d9e0d18496cb5184bf9686e4ce6246fc10b00a90d83cb56953b4b652def6da"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\root-snapshot-reuse-validation-v1\\admission-lock-order-stdout-v1.log",
+      "file": "admission-lock-order-stdout-v1.log",
+      "bytes": 253,
+      "sha256": "239ee64cc20316d10a533755b1ed095a47af9eeedb11155885aee3627c88a5dd"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\root-snapshot-reuse-validation-v1\\admission-lock-order-stderr-v1.log",
+      "file": "admission-lock-order-stderr-v1.log",
+      "bytes": 53576,
+      "sha256": "52f0fb4e55ce584b2b4e3e9b908cff337419dadca14f36e01ad30aa8a133b986"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\root-snapshot-reuse-validation-v1\\kill-award-commit-stdout-v1.log",
+      "file": "kill-award-commit-stdout-v1.log",
+      "bytes": 215,
+      "sha256": "1e6b3e4ff4e591d16d9f85586363aea12209e17f6d9d8e6aa974706667e79c5b"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\root-snapshot-reuse-validation-v1\\kill-award-commit-stderr-v1.log",
+      "file": "kill-award-commit-stderr-v1.log",
+      "bytes": 53409,
+      "sha256": "eaf453d26d61452cf83bb1f46267978c7c2d5ef1d4229233f44e84ce1fb44d0c"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\root-snapshot-reuse-validation-v1\\guild-kill-source-stdout-v1.log",
+      "file": "guild-kill-source-stdout-v1.log",
+      "bytes": 394,
+      "sha256": "c44ce87fbfe7842247c3a556c93732fa442d15795e8efd5755a93ff69b1df534"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\root-snapshot-reuse-validation-v1\\guild-kill-source-stderr-v1.log",
+      "file": "guild-kill-source-stderr-v1.log",
+      "bytes": 53409,
+      "sha256": "bcc9be1c088e27675c29460d7dcbc46776513d74b9bd58d083b15eb94886869d"
+    }
+  ]
+}

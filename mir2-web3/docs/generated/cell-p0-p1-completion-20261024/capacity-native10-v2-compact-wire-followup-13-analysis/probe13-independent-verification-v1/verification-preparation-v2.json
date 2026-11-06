@@ -1,0 +1,79 @@
+{
+  "schemaVersion": 2,
+  "preparedAt": "2026-10-25T07:37:19.935Z",
+  "state": "prepared-and-pure-selfchecked-only-not-run-on13raw",
+  "runId": "1792912711217-e7ea81f2",
+  "script": {
+    "file": "C:/mir2-build/p01-completion-20261024/probe13-independent-verification-v1/verify-ended-probe13-v2.mjs",
+    "bytes": 22979,
+    "sha256": "803ecb952cc18854dda6c39726a5aa0401f956e878d878fc50b5c5bb207c3575"
+  },
+  "additionalSource": {
+    "file": "C:/mir2-build/p01-completion-20261024/probe13-independent-verification-v1/hp-proof-contract-v2.mjs",
+    "bytes": 4644,
+    "sha256": "cbf67686e1fa385404782c27548dbe3fbaa10f55a5d97c3379d5a41ed01cf285"
+  },
+  "selfcheck": {
+    "source": {
+      "file": "C:/mir2-build/p01-completion-20261024/probe13-independent-verification-v1/hp-proof-v2-selfcheck.mjs",
+      "bytes": 3490,
+      "sha256": "b12118b6490e356a61fbaebbf05a66e9889e49f9708685eedbde1298791c7a06"
+    },
+    "receipt": {
+      "file": "C:/mir2-build/p01-completion-20261024/probe13-independent-verification-v1/hp-proof-v2-selfcheck-receipt.json",
+      "bytes": 3595,
+      "sha256": "10c80885160b9d5b1d46e21fa038dc2bd9acd0b9197e7ba61985a190baa73b78"
+    },
+    "log": {
+      "file": "C:/mir2-build/p01-completion-20261024/probe13-independent-verification-v1/hp-proof-v2-selfcheck.log",
+      "bytes": 1184,
+      "sha256": "5e31f16a8330e2087de26c60f6d1d853fd4023ecb66713abe6c7df376263608f"
+    },
+    "passed": 13,
+    "failed": 0
+  },
+  "preimages": {
+    "file": "C:/mir2-build/p01-completion-20261024/probe13-independent-verification-v1/preimages-v1/manifest.json",
+    "bytes": 1279,
+    "sha256": "d52c8938619a7a7f34fc2fa98d195379f6d536a6ac527059349e6fdebdb84363"
+  },
+  "previousPreparation": {
+    "file": "C:/mir2-build/p01-completion-20261024/probe13-independent-verification-v1/verification-preparation-v1.json",
+    "bytes": 3616,
+    "sha256": "684551892ee71850759d53521ff44e9fe4d11ca16d71031db03e71d43c5e7b9c"
+  },
+  "delta": "OnlyindependentverifierHP counter/schema/proof semantic correction plusrevision2. Originalwindow/game/wire checks unchanged; actualproducer verified status replacesincorrectsuccess branch.",
+  "allowedHpStatuses": [
+    "not-sent",
+    "sent",
+    "send-failed",
+    "verified",
+    "cancelled",
+    "owner-changed",
+    "owner-dead",
+    "public-error",
+    "rejected",
+    "timeout"
+  ],
+  "hpSchema": {
+    "observedStatuses": "dictionary fixedstatus→nonnegative safeinteger; empty{}legal",
+    "verifiedEventsChecked": "actualstructuredverified rows checked",
+    "successProofChecked": "verifiedEventsChecked>0",
+    "noVerifiedDoseObserved": "verifiedEventsChecked===0",
+    "statusValidationChecked": "allactualHProws passedschema",
+    "notContinuousHpCoverage": true,
+    "zeroEventsIsNoNewGameFailure": true
+  },
+  "proofChecks": [
+    "Actuallyrecorded matching sent UID/grid/HPbefore/max.",
+    "Freshnesssource fields acknowledgement,consumption/HPincrease structure withpositive sequence/finite mono andeffectbooleans matchingnullableproofs.",
+    "Consumptionquantitynonnegativeinteger; HPincrease strictlygreaterthanHPbefore; at leastoneeffect.",
+    "Necessaryproofspan<=2000ms only; no independentfullsenddeadlineorinventorydeltaclaim becauseoriginalrawomitssendMono/cursor/quantityBefore."
+  ],
+  "execution": "Onlyafterrootcleanup+publiccollection: node verify-ended-probe13-v2.mjs --verify-ended-probe13",
+  "finalArtifact": "final-verification.json (v1hasneverrunandnofinalartifactyet)",
+  "syntaxChecksPassed": true,
+  "actualRunDataRead": false,
+  "productOrLauncherOrCoreChanged": false,
+  "capacityAccepted": false
+}

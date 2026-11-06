@@ -1,0 +1,124 @@
+TAP version 13
+# Subtest: equipment item types/shapes derive libraries, and gender selects complete action blocks
+ok 1 - equipment item types/shapes derive libraries, and gender selects complete action blocks
+  ---
+  duration_ms: 7.5489
+  type: 'test'
+  ...
+# Subtest: normal Crystal export configuration includes every required natural-equipment action frame
+ok 2 - normal Crystal export configuration includes every required natural-equipment action frame
+  ---
+  duration_ms: 6.5104
+  type: 'test'
+  ...
+# Subtest: the former hair-only package fails both library closure and the verify CLI
+ok 3 - the former hair-only package fails both library closure and the verify CLI
+  ---
+  duration_ms: 115.7025
+  type: 'test'
+  ...
+# Subtest: verified standalone body and weapon close an existing hair atlas without rebuilding it
+ok 4 - verified standalone body and weapon close an existing hair atlas without rebuilding it
+  ---
+  duration_ms: 962.9682
+  type: 'test'
+  ...
+# Subtest: removing a movement frame cannot shrink the equipment denominator
+ok 5 - removing a movement frame cannot shrink the equipment denominator
+  ---
+  duration_ms: 515.8396
+  type: 'test'
+  ...
+# Subtest: same-sized pixel substitutions and invalid original offsets fail integrity
+ok 6 - same-sized pixel substitutions and invalid original offsets fail integrity
+  ---
+  duration_ms: 515.7372
+  type: 'test'
+  ...
+# Subtest: source identity changes and a corrupt atlas page fail closed
+ok 7 - source identity changes and a corrupt atlas page fail closed
+  ---
+  duration_ms: 424.8061
+  type: 'test'
+  ...
+# Subtest: a standalone first build emits a hash-bound atlas with exact source offsets that passes closure
+ok 8 - a standalone first build emits a hash-bound atlas with exact source offsets that passes closure
+  ---
+  duration_ms: 2215.3799
+  type: 'test'
+  ...
+# Subtest: all catalogue variants use Image, never item index or a name guess
+ok 9 - all catalogue variants use Image, never item index or a name guess
+  ---
+  duration_ms: 1.3357
+  type: 'test'
+  ...
+# Subtest: UserItem.Image includes every Amulet and Poison count threshold without name guesses
+ok 10 - UserItem.Image includes every Amulet and Poison count threshold without name guesses
+  ---
+  duration_ms: 0.2467
+  type: 'test'
+  ...
+# Subtest: missing, duplicate or invalid catalogue fields fail closed
+ok 11 - missing, duplicate or invalid catalogue fields fail closed
+  ---
+  duration_ms: 0.2866
+  type: 'test'
+  ...
+# Subtest: closure validates all images, metadata, decoded pixels and both identities
+ok 12 - closure validates all images, metadata, decoded pixels and both identities
+  ---
+  duration_ms: 9.3264
+  type: 'test'
+  ...
+# Subtest: dropping both file and meta cannot shrink the catalogue denominator
+ok 13 - dropping both file and meta cannot shrink the catalogue denominator
+  ---
+  duration_ms: 4.6779
+  type: 'test'
+  ...
+# Subtest: renamed, duplicate and wrong-sized metadata is rejected
+ok 14 - renamed, duplicate and wrong-sized metadata is rejected
+  ---
+  duration_ms: 3.5091
+  type: 'test'
+  ...
+# Subtest: a same-sized substitute image and corrupt PNG both fail
+ok 15 - a same-sized substitute image and corrupt PNG both fail
+  ---
+  duration_ms: 9.7912
+  type: 'test'
+  ...
+# Subtest: source fingerprints and exact catalogue identity cannot silently disappear
+ok 16 - source fingerprints and exact catalogue identity cannot silently disappear
+  ---
+  duration_ms: 3.2966
+  type: 'test'
+  ...
+# Subtest: a new catalogue image requires a new export
+ok 17 - a new catalogue image requires a new export
+  ---
+  duration_ms: 3.2986
+  type: 'test'
+  ...
+# Subtest: count-derived images cannot disappear just because every base image exists
+ok 18 - count-derived images cannot disappear just because every base image exists
+  ---
+  duration_ms: 4.6425
+  type: 'test'
+  ...
+# Subtest: checked-in catalogue has complete source-fingerprinted icon coverage
+ok 19 - checked-in catalogue has complete source-fingerprinted icon coverage
+  ---
+  duration_ms: 209.5003
+  type: 'test'
+  ...
+1..19
+# tests 19
+# suites 0
+# pass 19
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 4848.546

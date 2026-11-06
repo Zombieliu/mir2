@@ -1,0 +1,83 @@
+{
+  "schema": "mir2.recharge.deploy-offline-regression.v1",
+  "owner": "Root",
+  "dateBeijing": "2026-10-14",
+  "recordedUtc": "2026-10-14 05:24:30 UTC",
+  "parentCommit": "bad3737f265b0547d838382c2bb3592caa5dcb31",
+  "source": [
+    {
+      "path": ".github/workflows/activities-acceptance.yml",
+      "bytes": 5164,
+      "sha256": "f4457aed988e00ea3e0ed9a8bc01e1c3a2c92e81b5ad204d1e0befb3c5f1e680"
+    },
+    {
+      "path": "mir2-web3/apps/recharge-web/server/deploy.py",
+      "bytes": 12627,
+      "sha256": "a1dbab371187395979d1cf34e73e696c73a855203d9cae2f9c6cb9c457c33e2d"
+    },
+    {
+      "path": "mir2-web3/apps/recharge-web/tests/test_deploy.py",
+      "bytes": 10349,
+      "sha256": "e085699efb15bfa17c295cea6bca643397865fcad4f607b8de21c93ff5f576fe"
+    },
+    {
+      "path": "mir2-web3/apps/recharge-web/README.md",
+      "bytes": 5680,
+      "sha256": "452acaa29b2b91bbe0ec54bacba04735a288900b27777c33d2634f33eeed456f"
+    },
+    {
+      "path": "mir2-web3/docs/RECHARGE-DEPLOYMENT-REGRESSION-20261014.md",
+      "bytes": 2686,
+      "sha256": "5468eea57123020385aa3b1f98a07d7501e15561926b2e5c7cb3b0ddd6c3ce4a"
+    }
+  ],
+  "checks": [
+    {
+      "name": "final offline operator regression",
+      "command": "python -B -m unittest discover -s apps/recharge-web/tests -p test_deploy.py -v",
+      "exitCode": 0,
+      "passed": 20,
+      "failed": 0,
+      "skipped": 0,
+      "toolChunkId": "29265c",
+      "stdoutExcerpt": "Ran 20 tests in 0.083s\n\nOK\n"
+    },
+    {
+      "name": "recharge and activity web regression",
+      "command": "node --test apps/recharge-web/tests/core.test.mjs apps/recharge-web/tests/activity-core.test.mjs apps/recharge-web/tests/activities.test.mjs",
+      "chunk_id": "8ba857",
+      "wall_time_seconds": 0.4486437,
+      "exit_code": 0,
+      "original_token_count": 1743,
+      "output": "TAP version 13\n# Subtest: navigation hashes select views only and never treat payment or script input as state\nok 1 - navigation hashes select views only and never treat payment or script input as state\n  ---\n  duration_ms: 1.3265\n  type: 'test'\n  ...\n# Subtest: public activity authentication and ban errors end the portal session with the correct notice\nok 2 - public activity authentication and ban errors end the portal session with the correct notice\n  ---\n  duration_ms: 0.1604\n  type: 'test'\n  ...\n# Subtest: revocation clears personal snapshots immediately and rejects results from an earlier login\nok 3 - revocation clears personal snapshots immediately and rejects results from an earlier login\n  ---\n  duration_ms: 0.2335\n  type: 'test'\n  ...\n# Subtest: client level alone cannot enable registration without server eligibility and an owned character\nok 4 - client level alone cannot enable registration without server eligibility and an owned character\n  ---\n  duration_ms: 0.152\n  type: 'test'\n  ...\n# Subtest: past, future, public and disabled phases remain locked even if a stale payload says eligible\nok 5 - past, future, public and disabled phases remain locked even if a stale payload says eligible\n  ---\n  duration_ms: 0.12\n  type: 'test'\n  ...\n# Subtest: registered entitlement always presents public-launch reservation and cannot be registered again\nok 6 - registered entitlement always presents public-launch reservation and cannot be registered again\n  ---\n  duration_ms: 0.4619\n  type: 'test'\n  ...\n# Subtest: claim history includes only server-confirmed registrations and preserves stable reward order\nok 7 - claim history includes only server-confirmed registrations and preserves stable reward order\n  ---\n  duration_ms: 0.1567\n  type: 'test'\n  ...\n# Subtest: every new HTML label and activity key is translated in all nine existing languages\nok 8 - every new HTML label and activity key is translated in all nine existing languages\n  ---\n  duration_ms: 5.2333\n  type: 'test'\n  ...\n# Subtest: logged-out campaign rules contain no fabricated level, progress bar, eligibility or claim action\nok 9 - logged-out campaign rules contain no fabricated level, progress bar, eligibility or claim action\n  ---\n  duration_ms: 12.5504\n  type: 'test'\n  ...\n# Subtest: registered titles and outfits render as reservations rather than immediate delivery\nok 10 - registered titles and outfits render as reservations rather than immediate delivery\n  ---\n  duration_ms: 3.4499\n  type: 'test'\n  ...\n# Subtest: personal rendering uses exact server values, excludes test orders and treats remote names as text\nok 11 - personal rendering uses exact server values, excludes test orders and treats remote names as text\n  ---\n  duration_ms: 0.8892\n  type: 'test'\n  ...\n# Subtest: activity failure never promotes saved registration buttons while history remains visible\nok 12 - activity failure never promotes saved registration buttons while history remains visible\n  ---\n  duration_ms: 0.2417\n  type: 'test'\n  ...\n# Subtest: carryover records do not imply a settled return or replace the actual character wallet\nok 13 - carryover records do not imply a settled return or replace the actual character wallet\n  ---\n  duration_ms: 0.902\n  type: 'test'\n  ...\n# Subtest: campaign replies cannot invent reward IDs, amounts, received mail or cash provenance\nok 14 - campaign replies cannot invent reward IDs, amounts, received mail or cash provenance\n  ---\n  duration_ms: 1.5715\n  type: 'test'\n  ...\n# Subtest: campaign claim binds current memory session and sends no amount, level, account or launch date\nok 15 - campaign claim binds current memory session and sends no amount, level, account or launch date\n  ---\n  duration_ms: 13.6314\n  type: 'test'\n  ...\n# Subtest: account status works without a selected character and cannot send a bearer to another origin\nok 16 - account status works without a selected character and cannot send a bearer to another origin\n  ---\n  duration_ms: 0.3809\n  type: 'test'\n  ...\n# Subtest: campaign response after sign-out cannot restore the previous player's reservations\nok 17 - campaign response after sign-out cannot restore the previous player's reservations\n  ---\n  duration_ms: 0.2032\n  type: 'test'\n  ...\n# Subtest: payment links cannot change provider, protocol, port or authority\nok 18 - payment links cannot change provider, protocol, port or authority\n  ---\n  duration_ms: 0.9463\n  type: 'test'\n  ...\n# Subtest: catalogue rejects mixed order states, duplicate offers and invalid balances\nok 19 - catalogue rejects mixed order states, duplicate offers and invalid balances\n  ---\n  duration_ms: 0.3825\n  type: 'test'\n  ...\n# Subtest: only the current authenticated character can become an order recipient\nok 20 - only the current authenticated character can become an order recipient\n  ---\n  duration_ms: 12.8958\n  type: 'test'\n  ...\n# Subtest: checkout sends identifiers only, never client price, identity or paid claims\nok 21 - checkout sends identifiers only, never client price, identity or paid claims\n  ---\n  duration_ms: 0.7229\n  type: 'test'\n  ...\n# Subtest: lost reply and reload keep the same nonce and isolate accounts, characters and offers\nok 22 - lost reply and reload keep the same nonce and isolate accounts, characters and offers\n  ---\n  duration_ms: 4.4256\n  type: 'test'\n  ...\n# Subtest: unavailable or corrupt storage stops financial requests\nok 23 - unavailable or corrupt storage stops financial requests\n  ---\n  duration_ms: 0.2475\n  type: 'test'\n  ...\n# Subtest: HTTP billing uses a memory bearer, no cookies, redirects or cached personal data\nok 24 - HTTP billing uses a memory bearer, no cookies, redirects or cached personal data\n  ---\n  duration_ms: 0.4932\n  type: 'test'\n  ...\n# Subtest: a reply received after sign-out cannot revive the old account\nok 25 - a reply received after sign-out cannot revive the old account\n  ---\n  duration_ms: 0.2613\n  type: 'test'\n  ...\n# Subtest: native browser fetch keeps its Window receiver when called through the session\nok 26 - native browser fetch keeps its Window receiver when called through the session\n  ---\n  duration_ms: 0.3265\n  type: 'test'\n  ...\n# Subtest: website sign-out clears memory immediately and revokes only its own grant before closing\nok 27 - website sign-out clears memory immediately and revokes only its own grant before closing\n  ---\n  duration_ms: 0.412\n  type: 'test'\n  ...\n# Subtest: nine languages cover every visible text and include RTL and locale normalization\nok 28 - nine languages cover every visible text and include RTL and locale normalization\n  ---\n  duration_ms: 3.3485\n  type: 'test'\n  ...\n# Subtest: the page never treats a return query as payment authority or renders remote HTML\nok 29 - the page never treats a return query as payment authority or renders remote HTML\n  ---\n  duration_ms: 0.758\n  type: 'test'\n  ...\n1..29\n# tests 29\n# suites 0\n# pass 29\n# fail 0\n# cancelled 0\n# skipped 0\n# todo 0\n# duration_ms 97.6923\n"
+    },
+    {
+      "name": "first operator regression before review repair",
+      "command": "python -B -m unittest discover -s apps/recharge-web/tests -p test_deploy.py -v",
+      "chunk_id": "401f10",
+      "wall_time_seconds": 0.4144371,
+      "exit_code": 0,
+      "original_token_count": 664,
+      "output": "test_ambiguous_route_upgrade_remains_rejected (test_deploy.ProxyCandidateTests.test_ambiguous_route_upgrade_remains_rejected) ... ok\r\ntest_crlf_activity_upgrade_preserves_all_existing_bytes_except_exact_routes (test_deploy.ProxyCandidateTests.test_crlf_activity_upgrade_preserves_all_existing_bytes_except_exact_routes) ... ok\r\ntest_duplicate_authenticated_route_remains_rejected (test_deploy.ProxyCandidateTests.test_duplicate_authenticated_route_remains_rejected) ... ok\r\ntest_duplicate_site_snippets_remain_rejected (test_deploy.ProxyCandidateTests.test_duplicate_site_snippets_remain_rejected) ... ok\r\ntest_existing_site_is_not_admitted_as_a_first_install (test_deploy.ProxyCandidateTests.test_existing_site_is_not_admitted_as_a_first_install) ... ok\r\ntest_initial_crlf_and_lf_installations_have_identical_output (test_deploy.ProxyCandidateTests.test_initial_crlf_and_lf_installations_have_identical_output) ... ok\r\ntest_logout_upgrade_retains_all_unrelated_bytes (test_deploy.ProxyCandidateTests.test_logout_upgrade_retains_all_unrelated_bytes) ... ok\r\ntest_modified_site_snippet_remains_rejected (test_deploy.ProxyCandidateTests.test_modified_site_snippet_remains_rejected) ... ok\r\ntest_static_update_does_not_rewrite_existing_configuration (test_deploy.ProxyCandidateTests.test_static_update_does_not_rewrite_existing_configuration) ... ok\r\ntest_wrong_authenticated_route_remains_rejected (test_deploy.ProxyCandidateTests.test_wrong_authenticated_route_remains_rejected) ... ok\r\ntest_existing_release_files_are_never_overwritten (test_deploy.VerifiedReleaseTests.test_existing_release_files_are_never_overwritten) ... ok\r\ntest_manifest_hash_mismatch_is_rejected (test_deploy.VerifiedReleaseTests.test_manifest_hash_mismatch_is_rejected) ... ok\r\ntest_missing_public_file_is_rejected (test_deploy.VerifiedReleaseTests.test_missing_public_file_is_rejected) ... ok\r\ntest_missing_staging_after_validation_does_not_require_reread (test_deploy.VerifiedReleaseTests.test_missing_staging_after_validation_does_not_require_reread) ... ok\r\ntest_non_allowlisted_file_is_rejected_even_with_matching_manifest_hash (test_deploy.VerifiedReleaseTests.test_non_allowlisted_file_is_rejected_even_with_matching_manifest_hash) ... ok\r\ntest_staging_replacement_after_validation_cannot_change_release (test_deploy.VerifiedReleaseTests.test_staging_replacement_after_validation_cannot_change_release) ... ok\r\ntest_tampered_public_file_is_rejected_before_publication (test_deploy.VerifiedReleaseTests.test_tampered_public_file_is_rejected_before_publication) ... ok\r\n\r\n----------------------------------------------------------------------\r\nRan 17 tests in 0.086s\r\n\r\nOK\r\n"
+    }
+  ],
+  "review": {
+    "initialFindings": [
+      {
+        "priority": "P2",
+        "finding": "Old verbatim CRLF snippet updates rejected by LF-only matching",
+        "resolution": "Unique count across uploaded, LF and CRLF variants; three new regressions passed"
+      }
+    ],
+    "finalRemainingP0P1P2": 0,
+    "reviewReadOnly": true
+  },
+  "ciPythonGateAdded": true,
+  "originalCiCommandsPreserved": true,
+  "servicesContacted": false,
+  "productionApplied": false,
+  "paymentCreated": false,
+  "accountMutated": false,
+  "fullRustOrNativeRerun": false,
+  "candidate100": false
+}

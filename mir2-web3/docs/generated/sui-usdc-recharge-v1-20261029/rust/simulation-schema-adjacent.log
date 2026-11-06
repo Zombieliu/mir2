@@ -1,0 +1,8 @@
+
+running 3 tests
+test config::config_schema_integration_tests::legacy_store_without_schema_or_stone_fields_still_loads_without_account_loss ... ok
+test config::config_schema_integration_tests::schema9_migration_preserves_existing_billing_activities_and_monthly_card ... ok
+test config::config_schema_integration_tests::schema9_sealed_stone_authority_is_rejected_on_load_and_restore ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 3028 filtered out; finished in 0.09s
+

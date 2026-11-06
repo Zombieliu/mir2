@@ -9,5 +9,10 @@ license = "MIT"
 name = "mir2_protocol"
 path = "src/lib.rs"
 
+[features]
+default = []
+catalog-gzip = ["dep:flate2"]
+
 [dependencies]
 serde = { version = "1", features = ["derive"] }
+flate2 = { version = "1", optional = true }

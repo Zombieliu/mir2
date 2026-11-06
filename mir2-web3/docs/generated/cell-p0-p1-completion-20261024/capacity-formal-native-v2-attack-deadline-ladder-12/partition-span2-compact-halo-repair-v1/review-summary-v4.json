@@ -1,0 +1,623 @@
+{
+  "schemaVersion": 1,
+  "createdAt": "2026-10-25T05:44:11.194Z",
+  "scope": "Bounded external layoutrepair staticreview package. No product edits, threshold change, scene-name addition, grant, realm or capacity run.",
+  "source": {
+    "driverCommit": "6d70d02d0bc390156b77a3e48acee714fc87cda3",
+    "backendCommit": "46880bd1ef415131c4cf85aeb4dd2fa4f6fd4f9b",
+    "driver9Aggregate": "05c07c2e487e4b65c5068f8803f96bdc6a66a342c5fc44c21f3a64b6b8581073",
+    "actualNineRawFilesVerified": true,
+    "trackedClean": true,
+    "sealedPriorFilesUnchanged": 80,
+    "priorCollection": {
+      "path": "C:/mir2-build/p01-completion-20261024/partition-span2-compact-halo-scene-v1/collection-manifest-v1.json",
+      "bytes": 13470,
+      "sha256": "43462960912e21b74cd0cc45d79c78676df1b4d5efedefce8795c27dad468a16"
+    }
+  },
+  "scene": {
+    "full": {
+      "path": "C:/mir2-build/p01-completion-20261024/partition-span2-compact-halo-repair-v1/candidate-100-repaired-v4.json",
+      "bytes": 5844,
+      "sha256": "f87aae78a2d68d8daa63916a93580c33f4ef974da4769bd3531a62aafcf0f205"
+    },
+    "ten": {
+      "path": "C:/mir2-build/p01-completion-20261024/partition-span2-compact-halo-repair-v1/candidate-10-repaired-v4.json",
+      "bytes": 804,
+      "sha256": "a42a26a195dd5ac25135bff57e73f7f21b71f97b5cc1814351920ece621362ba"
+    },
+    "originalNearest": {
+      "path": "C:/mir2-build/p01-completion-20261024/partition-span2-compact-halo-scene-v1/candidate-100-nearest-ordered-final-v3.json",
+      "bytes": 5844,
+      "sha256": "ed268ed3b81f06d1894a2ad60689a70dbabfced752042a773551e77d8483d436"
+    },
+    "firstTenRawByteExact": true,
+    "monsterNames": [
+      "Deer",
+      "Scarecrow"
+    ],
+    "patrolSpan": 2,
+    "changedCoordinates": [
+      {
+        "actorIndex": 92,
+        "before": {
+          "x": 227,
+          "y": 531
+        },
+        "after": {
+          "x": 229,
+          "y": 534
+        },
+        "displacement": 3
+      }
+    ],
+    "combatIndices": [
+      5,
+      15,
+      25,
+      35,
+      45,
+      55,
+      65,
+      75,
+      85,
+      95
+    ]
+  },
+  "boundedWork": {
+    "limits": {
+      "actors": 4,
+      "rankedCandidatesPerActor": 16,
+      "maximumOriginalDisplacement": 6
+    },
+    "actual": {
+      "changedActors": 1,
+      "rankedCandidatesForActor92": 16,
+      "actualTrialResults": 2
+    },
+    "correction": {
+      "path": "C:/mir2-build/p01-completion-20261024/partition-span2-compact-halo-repair-v1/attempt-count-correction-v1.json",
+      "bytes": 987,
+      "sha256": "6072db3eac7c26b7d67928ac4455d649c6cbdd12d3e20d80209a10078f46b7e8"
+    },
+    "allTrialPins": [
+      {
+        "path": "C:/mir2-build/p01-completion-20261024/partition-span2-compact-halo-repair-v1/trial-actor-92-01-v1.json",
+        "bytes": 19398,
+        "sha256": "5688dd3e4a324789db00a6aba644965bfc70f6d0a7770d9a6dd0d02f195a0f2c"
+      },
+      {
+        "path": "C:/mir2-build/p01-completion-20261024/partition-span2-compact-halo-repair-v1/trial-actor-92-02-v1.json",
+        "bytes": 37886,
+        "sha256": "c3139f6f2b6f3b9a45eb085b8a83f6d50f5a5ad826516009b4b37d6a0430c9c9"
+      }
+    ],
+    "failedFirstTrialPreserved": true,
+    "initialDiagnosis": {
+      "path": "C:/mir2-build/p01-completion-20261024/partition-span2-compact-halo-repair-v1/original-failure-diagnosis-v1.json",
+      "bytes": 20418,
+      "sha256": "b974d00a999c0a92642de89bb2d2c78ba7cd5c16a0afc6517902d682ea101a67"
+    },
+    "repairedLegProof": {
+      "path": "C:/mir2-build/p01-completion-20261024/partition-span2-compact-halo-repair-v1/repaired-leg-proof-v4.json",
+      "bytes": 19105,
+      "sha256": "5b52ae5354a304db24ca09d402d8ceeb6040225836418befed63ebdf839b0759"
+    },
+    "explanation": "Original fourpaths were found in453..528nodes but crossed3uncovered cells; after home92shift, firstgoal230535 takes332nodes/53steps, allcells also lie withinOLDcoverage. The route destination changed; no coverage/path algorithm or node budget was widened."
+  },
+  "staticContracts": {
+    "validation": {
+      "path": "C:/mir2-build/p01-completion-20261024/partition-span2-compact-halo-repair-v1/validation-repaired-v4.json",
+      "bytes": 7220826,
+      "sha256": "25f4d6261eff656654d3ed9cbc97c49355440fd6deb3ced3cd5e1dc2b97ea9aa"
+    },
+    "actualOriginalPrefixValidators": {
+      "path": "C:/mir2-build/p01-completion-20261024/partition-span2-compact-halo-repair-v1/original-prefix-contracts-v4.json",
+      "bytes": 19490,
+      "sha256": "39dcc8ec245cf784370f956f84f655aed9b350b59f13f07deb52d2b9cb562836"
+    },
+    "bodyChecked": 900,
+    "haloChecks": 2500,
+    "wholeBfs": true,
+    "originalClustersPassedFor": [
+      10,
+      25,
+      50,
+      100
+    ],
+    "prefix2ClusterNotApplicableBecauseNoFighter": true,
+    "activeOnlyCoverageAndOriginal4000TargetPaths": true,
+    "acceptedPathCount": 1548,
+    "acceptedGoalEqualsOtherRepresentativeHome": 0,
+    "fixedOrderScout": {
+      "path": "C:/mir2-build/p01-completion-20261024/partition-span2-compact-halo-repair-v1/prefix-scout-cost-repaired-v4.json",
+      "bytes": 80434,
+      "sha256": "83a0430b4ea1c399897cf0ffadff4b4bc693c4d46cc4162a5f1048be4e33468d"
+    },
+    "allRepresentativeScoutsPassed": true,
+    "scoutRows": [
+      {
+        "count": 10,
+        "passed": true,
+        "firstCircuit": null,
+        "secondCircuit": 97,
+        "maxLegUnitWalkSteps": 22,
+        "legsOver48UnitSteps": []
+      },
+      {
+        "count": 25,
+        "passed": true,
+        "firstCircuit": null,
+        "secondCircuit": 172,
+        "maxLegUnitWalkSteps": 27,
+        "legsOver48UnitSteps": []
+      },
+      {
+        "count": 50,
+        "passed": true,
+        "firstCircuit": null,
+        "secondCircuit": 372,
+        "maxLegUnitWalkSteps": 55,
+        "legsOver48UnitSteps": [
+          {
+            "observerIndex": 0,
+            "from": {
+              "x": 263,
+              "y": 652
+            },
+            "goal": {
+              "x": 243,
+              "y": 597
+            },
+            "steps": 55
+          }
+        ]
+      },
+      {
+        "count": 100,
+        "passed": true,
+        "firstCircuit": null,
+        "secondCircuit": 886,
+        "maxLegUnitWalkSteps": 65,
+        "legsOver48UnitSteps": [
+          {
+            "observerIndex": 64,
+            "from": {
+              "x": 219,
+              "y": 667
+            },
+            "goal": {
+              "x": 259,
+              "y": 616
+            },
+            "steps": 61
+          },
+          {
+            "observerIndex": 92,
+            "from": {
+              "x": 283,
+              "y": 542
+            },
+            "goal": {
+              "x": 230,
+              "y": 535
+            },
+            "steps": 53
+          },
+          {
+            "observerIndex": 96,
+            "from": {
+              "x": 225,
+              "y": 549
+            },
+            "goal": {
+              "x": 281,
+              "y": 610
+            },
+            "steps": 65
+          },
+          {
+            "observerIndex": 0,
+            "from": {
+              "x": 299,
+              "y": 632
+            },
+            "goal": {
+              "x": 243,
+              "y": 595
+            },
+            "steps": 63
+          },
+          {
+            "observerIndex": 64,
+            "from": {
+              "x": 219,
+              "y": 667
+            },
+            "goal": {
+              "x": 259,
+              "y": 616
+            },
+            "steps": 61
+          },
+          {
+            "observerIndex": 92,
+            "from": {
+              "x": 283,
+              "y": 542
+            },
+            "goal": {
+              "x": 230,
+              "y": 535
+            },
+            "steps": 53
+          },
+          {
+            "observerIndex": 96,
+            "from": {
+              "x": 225,
+              "y": 549
+            },
+            "goal": {
+              "x": 281,
+              "y": 610
+            },
+            "steps": 65
+          }
+        ]
+      }
+    ],
+    "scoutBudgetBoundary": "Static representative originalfirst4/4000A*pass is not an online24ACK/20s waypoint simulation. At50/100some53..65unitstep legs can be advanced before reachingthegoal, even with fastRun. No actual complete886step tour,50%Run,95%completion or supply guarantee follows."
+  },
+  "conditionalSupply": {
+    "model": {
+      "path": "C:/mir2-build/p01-completion-20261024/partition-span2-compact-halo-repair-v1/conditional-level-supply-repaired-v4.json",
+      "bytes": 48359,
+      "sha256": "503c9ce74452bd65fc5c30e1bfbfbd5ef419e7652be99914f99d139ab275ab8a"
+    },
+    "actualLaunchModelPerformed": false,
+    "stages": [
+      {
+        "actors": 2,
+        "fighters": 0,
+        "canonicalStableTargets": 0,
+        "counts": {
+          "Deer": 0,
+          "Scarecrow": 0
+        },
+        "requiredLaunchedPerMinute": 0,
+        "requiredPositiveHitsPerMinute": 0,
+        "levels": [
+          {
+            "level": 1,
+            "starterDc": [
+              2,
+              4
+            ],
+            "idealExpectedPositiveHitsPerMinute": 0,
+            "conditionalAllLaunchesPositiveMarginOverLaunchedRequirement": 0,
+            "proofOfLaunchedRate": false,
+            "proofOfAny60sWindow": false
+          },
+          {
+            "level": 5,
+            "starterDc": [
+              3,
+              5
+            ],
+            "idealExpectedPositiveHitsPerMinute": 0,
+            "conditionalAllLaunchesPositiveMarginOverLaunchedRequirement": 0,
+            "proofOfLaunchedRate": false,
+            "proofOfAny60sWindow": false
+          },
+          {
+            "level": 10,
+            "starterDc": [
+              4,
+              6
+            ],
+            "idealExpectedPositiveHitsPerMinute": 0,
+            "conditionalAllLaunchesPositiveMarginOverLaunchedRequirement": 0,
+            "proofOfLaunchedRate": false,
+            "proofOfAny60sWindow": false
+          },
+          {
+            "level": 15,
+            "starterDc": [
+              5,
+              7
+            ],
+            "idealExpectedPositiveHitsPerMinute": 0,
+            "conditionalAllLaunchesPositiveMarginOverLaunchedRequirement": 0,
+            "proofOfLaunchedRate": false,
+            "proofOfAny60sWindow": false
+          }
+        ]
+      },
+      {
+        "actors": 10,
+        "fighters": 1,
+        "canonicalStableTargets": 28,
+        "counts": {
+          "Deer": 21,
+          "Scarecrow": 7
+        },
+        "requiredLaunchedPerMinute": 18,
+        "requiredPositiveHitsPerMinute": 12,
+        "levels": [
+          {
+            "level": 1,
+            "starterDc": [
+              2,
+              4
+            ],
+            "idealExpectedPositiveHitsPerMinute": 57.722063220564486,
+            "conditionalAllLaunchesPositiveMarginOverLaunchedRequirement": 39.722063220564486,
+            "proofOfLaunchedRate": false,
+            "proofOfAny60sWindow": false
+          },
+          {
+            "level": 5,
+            "starterDc": [
+              3,
+              5
+            ],
+            "idealExpectedPositiveHitsPerMinute": 44.09352232891327,
+            "conditionalAllLaunchesPositiveMarginOverLaunchedRequirement": 26.093522328913267,
+            "proofOfLaunchedRate": false,
+            "proofOfAny60sWindow": false
+          },
+          {
+            "level": 10,
+            "starterDc": [
+              4,
+              6
+            ],
+            "idealExpectedPositiveHitsPerMinute": 35.816186556927306,
+            "conditionalAllLaunchesPositiveMarginOverLaunchedRequirement": 17.816186556927306,
+            "proofOfLaunchedRate": false,
+            "proofOfAny60sWindow": false
+          },
+          {
+            "level": 15,
+            "starterDc": [
+              5,
+              7
+            ],
+            "idealExpectedPositiveHitsPerMinute": 30.787654320987638,
+            "conditionalAllLaunchesPositiveMarginOverLaunchedRequirement": 12.787654320987638,
+            "proofOfLaunchedRate": false,
+            "proofOfAny60sWindow": false
+          }
+        ]
+      },
+      {
+        "actors": 25,
+        "fighters": 2,
+        "canonicalStableTargets": 33,
+        "counts": {
+          "Deer": 24,
+          "Scarecrow": 9
+        },
+        "requiredLaunchedPerMinute": 36,
+        "requiredPositiveHitsPerMinute": 24,
+        "levels": [
+          {
+            "level": 1,
+            "starterDc": [
+              2,
+              4
+            ],
+            "idealExpectedPositiveHitsPerMinute": 67.06458101651927,
+            "conditionalAllLaunchesPositiveMarginOverLaunchedRequirement": 31.06458101651927,
+            "proofOfLaunchedRate": false,
+            "proofOfAny60sWindow": false
+          },
+          {
+            "level": 5,
+            "starterDc": [
+              3,
+              5
+            ],
+            "idealExpectedPositiveHitsPerMinute": 51.23376009754608,
+            "conditionalAllLaunchesPositiveMarginOverLaunchedRequirement": 15.233760097546082,
+            "proofOfLaunchedRate": false,
+            "proofOfAny60sWindow": false
+          },
+          {
+            "level": 10,
+            "starterDc": [
+              4,
+              6
+            ],
+            "idealExpectedPositiveHitsPerMinute": 41.61659807956105,
+            "conditionalAllLaunchesPositiveMarginOverLaunchedRequirement": 5.616598079561051,
+            "proofOfLaunchedRate": false,
+            "proofOfAny60sWindow": false
+          },
+          {
+            "level": 15,
+            "starterDc": [
+              5,
+              7
+            ],
+            "idealExpectedPositiveHitsPerMinute": 35.791358024691334,
+            "conditionalAllLaunchesPositiveMarginOverLaunchedRequirement": -0.2086419753086659,
+            "proofOfLaunchedRate": false,
+            "proofOfAny60sWindow": false
+          }
+        ]
+      },
+      {
+        "actors": 50,
+        "fighters": 5,
+        "canonicalStableTargets": 62,
+        "counts": {
+          "Deer": 40,
+          "Scarecrow": 22
+        },
+        "requiredLaunchedPerMinute": 90,
+        "requiredPositiveHitsPerMinute": 60,
+        "levels": [
+          {
+            "level": 1,
+            "starterDc": [
+              2,
+              4
+            ],
+            "idealExpectedPositiveHitsPerMinute": 122.35110953050285,
+            "conditionalAllLaunchesPositiveMarginOverLaunchedRequirement": 32.35110953050285,
+            "proofOfLaunchedRate": false,
+            "proofOfAny60sWindow": false
+          },
+          {
+            "level": 5,
+            "starterDc": [
+              3,
+              5
+            ],
+            "idealExpectedPositiveHitsPerMinute": 93.49254686785541,
+            "conditionalAllLaunchesPositiveMarginOverLaunchedRequirement": 3.4925468678554097,
+            "proofOfLaunchedRate": false,
+            "proofOfAny60sWindow": false
+          },
+          {
+            "level": 10,
+            "starterDc": [
+              4,
+              6
+            ],
+            "idealExpectedPositiveHitsPerMinute": 75.94650205761319,
+            "conditionalAllLaunchesPositiveMarginOverLaunchedRequirement": -14.053497942386812,
+            "proofOfLaunchedRate": false,
+            "proofOfAny60sWindow": false
+          },
+          {
+            "level": 15,
+            "starterDc": [
+              5,
+              7
+            ],
+            "idealExpectedPositiveHitsPerMinute": 65.42962962962966,
+            "conditionalAllLaunchesPositiveMarginOverLaunchedRequirement": -24.57037037037034,
+            "proofOfLaunchedRate": false,
+            "proofOfAny60sWindow": false
+          }
+        ]
+      },
+      {
+        "actors": 100,
+        "fighters": 10,
+        "canonicalStableTargets": 123,
+        "counts": {
+          "Deer": 80,
+          "Scarecrow": 43
+        },
+        "requiredLaunchedPerMinute": 180,
+        "requiredPositiveHitsPerMinute": 120,
+        "levels": [
+          {
+            "level": 1,
+            "starterDc": [
+              2,
+              4
+            ],
+            "idealExpectedPositiveHitsPerMinute": 244.02017408015809,
+            "conditionalAllLaunchesPositiveMarginOverLaunchedRequirement": 64.02017408015809,
+            "proofOfLaunchedRate": false,
+            "proofOfAny60sWindow": false
+          },
+          {
+            "level": 5,
+            "starterDc": [
+              3,
+              5
+            ],
+            "idealExpectedPositiveHitsPerMinute": 186.46033125031784,
+            "conditionalAllLaunchesPositiveMarginOverLaunchedRequirement": 6.460331250317836,
+            "proofOfLaunchedRate": false,
+            "proofOfAny60sWindow": false
+          },
+          {
+            "level": 10,
+            "starterDc": [
+              4,
+              6
+            ],
+            "idealExpectedPositiveHitsPerMinute": 151.46616369455873,
+            "conditionalAllLaunchesPositiveMarginOverLaunchedRequirement": -28.53383630544127,
+            "proofOfLaunchedRate": false,
+            "proofOfAny60sWindow": false
+          },
+          {
+            "level": 15,
+            "starterDc": [
+              5,
+              7
+            ],
+            "idealExpectedPositiveHitsPerMinute": 130.4736625514403,
+            "conditionalAllLaunchesPositiveMarginOverLaunchedRequirement": -49.5263374485597,
+            "proofOfLaunchedRate": false,
+            "proofOfAny60sWindow": false
+          }
+        ]
+      }
+    ],
+    "closedPoolProgression": {
+      "canonicalSlots": 123,
+      "scope": "Conditional closed observed canonical-slot pool only, no external wandering-in targets/quest/other XP/positive bonuses, every slot killed immediately after due refresh; all rewards assigned to ONE actor at tier2 for the whole bound. Level penalties, shared allocation, travel and kill time omitted, so deliberately overgenerous.",
+      "twoHours": {
+        "minutes": 120,
+        "idealKillsIncludingInitial": 3685,
+        "deliberatelyOvergenerousTier2XpAssignedAllToOneFreshActor": 126210
+      },
+      "entire18000SecondBudget": {
+        "minutes": 300,
+        "idealKillsIncludingInitial": 9028,
+        "deliberatelyOvergenerousTier2XpAssignedAllToOneFreshActor": 309270
+      },
+      "requiredXpLevel20": 456900,
+      "requiredXpLevel25": 1896900,
+      "level20NotReachedEvenByThisOvergenerousClosedFiveHourModel": true
+    },
+    "distinction": "DP estimates positivehits to consumeHP. It does not estimate legitimate launched attacks/misses or actualallocation. N100requires180launched AND120positive/min;130.474ideal level15positive/min alone does not prove180launched. No syntheticmiss/padding/quarantine/denominator change is allowed. These are conditional sensitivities, not an unconditionalfresh2hfailure."
+  },
+  "independentFirstTenReview": {
+    "path": "C:/mir2-build/p01-completion-20261024/compact-halo-scene-independent-review-v1.json",
+    "bytes": 11639,
+    "sha256": "6edf7561725c020f321bb06cdfc83043de7c0aa88735aa57c7a1c3aeaa3b85d6"
+  },
+  "independent100ReviewPending": true,
+  "proofAdapters": {
+    "path": "C:/mir2-build/p01-completion-20261024/partition-span2-compact-halo-repair-v1/validation-adapter-provenance-v2.json",
+    "bytes": 5649,
+    "sha256": "5106653752e12466e88de26e5f38fdb28956ed25d7853532d979f97541d1ac8b"
+  },
+  "syntaxVerification": {
+    "path": "C:/mir2-build/p01-completion-20261024/partition-span2-compact-halo-repair-v1/syntax-verification-v4.json",
+    "bytes": 3328,
+    "sha256": "9247be56b96304eab9f1dd9c3e1541dcaa1c74a1da45800a32b5ff99bd26a870"
+  },
+  "externalSetupFailuresPreserved": [
+    "diagnose-failure-setup-preimage-v1.mjs.txt",
+    "diagnose-failure-setup-preimage-v2.mjs.txt",
+    "diagnostic-adapter-setup-failure-v1.json",
+    "diagnose-original-run-v2.log",
+    "full-static-validation-v4.log"
+  ],
+  "rootDecision": {
+    "pairedStaticInputsHavePassedSpecifiedSafetyAndRepresentativePathCriteria": true,
+    "newProbeOrLauncherStarted": false,
+    "rootRealRunApproval": false,
+    "formalCapacityReady": false,
+    "P0Accepted": false,
+    "P2Started": false,
+    "next": "Independent100review then root decision; retain original2/10/25/50/100300s,7200ssoak,5resume5savepost60 and everyoriginalthreshold."
+  },
+  "reproduction": {
+    "validator": "node \"C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1/validate-repaired.mjs\" candidate-100-repaired-v4.json validation-independent-repaired-v4.json",
+    "caution": "wxoutputs require new outputnames; any full reauthoring uses a new externaldirectory. Do not modify source, sealed80items or launchservices."
+  },
+  "accepted": false,
+  "capacityAccepted": false
+}

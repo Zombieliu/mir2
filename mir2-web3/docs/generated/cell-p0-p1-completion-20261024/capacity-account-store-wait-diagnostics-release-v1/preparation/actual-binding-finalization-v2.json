@@ -1,0 +1,89 @@
+{
+  "schemaVersion": 1,
+  "state": "ACTUAL_METADATA_BOUND_NOT_CAPTURED_OR_BUILT",
+  "createdAt": "2026-10-25T18:55:54.561Z",
+  "priorPrepared": {
+    "path": "C:/mir2-build/p01-completion-20261024/account-store-wait-diagnostics-release-v1/prepared-v1.json",
+    "bytes": 4381,
+    "sha256": "b34689e8d2196899b0382e4336baa0ffededd6444cebec3c73eafcbac9f9601c"
+  },
+  "newBackendCommit": "c743122af05faca43d9535d8c6c2a4bfb01b924f",
+  "currentGitHeadRead": "c743122af05faca43d9535d8c6c2a4bfb01b924f",
+  "trackedTreeCleanAtCheck": true,
+  "driverSourceCommit": "d2407fb84055e2088e3ca6ccdb4f8b80d15a9d16",
+  "nodeEvidenceHistoricalNotRerun": true,
+  "actualFunctionalValidation": {
+    "path": "C:/mir2-build/p01-completion-20261024/root-account-store-wait-diagnostics-functional-validation-v1.json",
+    "bytes": 12175,
+    "sha256": "1ad0420e74d363088b20dca95cebbb7c84b035e1edf5d0472a185d8bd81dea57"
+  },
+  "preservedPending": [
+    {
+      "currentPath": "C:/mir2-build/p01-completion-20261024/account-store-wait-diagnostics-release-v1/final-source-binding-v1.json",
+      "preserved": {
+        "path": "C:/mir2-build/p01-completion-20261024/account-store-wait-diagnostics-release-v1/final-source-binding-v1.json.before-actual-v2.txt",
+        "bytes": 2105,
+        "sha256": "dec3448773688cbcb3f15f23c2fff94caa0c45ab2ed477ea3404c9e0ed92813a"
+      }
+    },
+    {
+      "currentPath": "C:/mir2-build/p01-completion-20261024/account-store-wait-diagnostics-release-v1/required-root-binding-fields-v1.json",
+      "preserved": {
+        "path": "C:/mir2-build/p01-completion-20261024/account-store-wait-diagnostics-release-v1/required-root-binding-fields-v1.json.before-actual-v2.txt",
+        "bytes": 1091,
+        "sha256": "b953cd1bcf560e50160f36ecb1996a0a601c48c2e0774b85846721f0522025c9"
+      }
+    },
+    {
+      "currentPath": "C:/mir2-build/p01-completion-20261024/account-store-wait-diagnostics-release-v1/README.md",
+      "preserved": {
+        "path": "C:/mir2-build/p01-completion-20261024/account-store-wait-diagnostics-release-v1/README.md.before-actual-v2.txt",
+        "bytes": 2799,
+        "sha256": "8b0595b53d1861dbb66c95c9bcfe661151718dec6da960fb1c6cc6e330c3d3fd"
+      }
+    }
+  ],
+  "changes": [
+    {
+      "path": "C:/mir2-build/p01-completion-20261024/account-store-wait-diagnostics-release-v1/final-source-binding-v1.json",
+      "description": "Only state, sourceCommit and rootFunctionalValidation bind actual values"
+    },
+    {
+      "path": "C:/mir2-build/p01-completion-20261024/account-store-wait-diagnostics-release-v1/required-root-binding-fields-v1.json",
+      "description": "Only state and sourceCommit become actual"
+    },
+    {
+      "path": "C:/mir2-build/p01-completion-20261024/account-store-wait-diagnostics-release-v1/README.md",
+      "description": "Only pending/next-execution prose updated; no game or build result claimed"
+    }
+  ],
+  "unchangedFourExecutionScriptPins": [
+    {
+      "path": "source-lib-v1.mjs",
+      "bytes": 23031,
+      "sha256": "831a38ce052b11258d48a5946d95173cb299304ec7d7e210e7eb9bec050b57ef"
+    },
+    {
+      "path": "pin-build-source-v1.mjs",
+      "bytes": 981,
+      "sha256": "cbae8b80108e56e9549d771e9d29aaaa9012f845946a16a33c12ca5ccdc04a9f"
+    },
+    {
+      "path": "build-release-v1.mjs",
+      "bytes": 4969,
+      "sha256": "258cd1db150e433c7d6be30335d514509272400c047bb6edd632aa9c7d26b14f"
+    },
+    {
+      "path": "capture-release-v1.mjs",
+      "bytes": 3693,
+      "sha256": "948fd449ca36a48d4d88aa11ecc0ecc0e3622bdcab5808b4c7ef17f0a14bcfa7"
+    }
+  ],
+  "currentSevenRawPinsMatch": true,
+  "currentNodeNineRawPinsMatchHistoricalFreeze": true,
+  "targetModulesImported": false,
+  "sourceCaptureExecuted": false,
+  "cargoOrBuildExecuted": false,
+  "releaseCaptured": false,
+  "gameOrCapacityAccepted": false
+}

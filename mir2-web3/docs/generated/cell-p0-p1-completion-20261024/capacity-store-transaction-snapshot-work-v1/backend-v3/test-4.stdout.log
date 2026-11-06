@@ -1,0 +1,6 @@
+
+running 1 test
+test config::guild_clock::postgres_tests::guild_clock_postgres_full_restore_file_failure_persists_fenced_compensation ... ignored, requires dedicated MIR2_GUILD_TEST_DATABASE_URL; full File+PostgreSQL restore compensation
+
+test result: ok. 0 passed; 0 failed; 1 ignored; 0 measured; 2955 filtered out; finished in 0.00s
+

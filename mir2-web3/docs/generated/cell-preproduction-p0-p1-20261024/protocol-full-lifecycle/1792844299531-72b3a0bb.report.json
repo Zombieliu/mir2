@@ -1,0 +1,452 @@
+{
+  "schemaVersion": 1,
+  "runId": "1792844299531-72b3a0bb",
+  "endpoint": "ws://127.0.0.1:17410/ws",
+  "profile": "full-lifecycle",
+  "startedAt": "2026-10-24T12:18:19.577Z",
+  "scope": "ordinary-public-protocol-two-independent-sockets",
+  "privateCredentialsPath": "C:\\mir2-build\\cell-preproduction-p0-p1-20261024\\realm-private\\credentials\\1792844299531-72b3a0bb\\accounts.json",
+  "checks": {
+    "authGuards": {
+      "status": "passed",
+      "evidence": [
+        {
+          "command": "startGame",
+          "receipt": 8,
+          "code": "commandRejected",
+          "message": "The session command could not be completed."
+        },
+        {
+          "command": "newCharacter",
+          "receipt": 8,
+          "code": "commandRejected",
+          "message": "The session command could not be completed."
+        }
+      ]
+    },
+    "twoAccounts": {
+      "status": "passed",
+      "evidence": [
+        {
+          "name": "A614f2e49",
+          "characterIndex": 1,
+          "objectId": 1000,
+          "mapFileName": "0",
+          "x": 288,
+          "y": 616,
+          "direction": "Down"
+        },
+        {
+          "name": "B614f2e49",
+          "characterIndex": 2,
+          "objectId": 1000,
+          "mapFileName": "0",
+          "x": 288,
+          "y": 616,
+          "direction": "Down"
+        }
+      ]
+    },
+    "mutualVisibility": {
+      "status": "passed",
+      "names": [
+        "A614f2e49",
+        "B614f2e49"
+      ],
+      "observerObjectIds": [
+        50000,
+        50001
+      ]
+    },
+    "movement": {
+      "status": "passed",
+      "from": {
+        "mapFileName": "0",
+        "x": 285,
+        "y": 616,
+        "direction": "UpLeft"
+      },
+      "to": {
+        "mapFileName": "0",
+        "x": 282,
+        "y": 616,
+        "direction": "Left"
+      },
+      "observerReceipt": 686
+    },
+    "turn": {
+      "status": "passed",
+      "direction": "Up",
+      "observerReceipt": 689
+    },
+    "chat": {
+      "status": "passed",
+      "observerReceipt": 761,
+      "observerLatencyMs": 2
+    },
+    "chatLatency": {
+      "status": "passed",
+      "observerLatencyMs": 2,
+      "maximumMs": 1000,
+      "scope": "two sockets measured by the same monotonic host clock; excludes human and visual latency"
+    },
+    "sharedCombat": {
+      "status": "passed",
+      "evidence": {
+        "targetId": 206302,
+        "target": "Deer",
+        "hits": [
+          {
+            "targetId": 206302,
+            "attackerIds": [
+              1000,
+              50000
+            ],
+            "healthPercent": 88,
+            "died": false,
+            "receipts": [
+              {
+                "struck": 818,
+                "health": 820,
+                "damage": 819
+              },
+              {
+                "struck": 727,
+                "health": 729,
+                "damage": 728
+              }
+            ],
+            "attackerName": "A614f2e49"
+          },
+          {
+            "targetId": 206302,
+            "attackerIds": [
+              50001,
+              1000
+            ],
+            "healthPercent": 80,
+            "died": false,
+            "receipts": [
+              {
+                "struck": 824,
+                "health": 826,
+                "damage": 825
+              },
+              {
+                "struck": 742,
+                "health": 744,
+                "damage": 743
+              }
+            ],
+            "attackerName": "B614f2e49"
+          }
+        ],
+        "lifecycleStart": {
+          "cursors": [
+            777,
+            707
+          ],
+          "baselineDropIds": [],
+          "mapFileName": "0"
+        }
+      }
+    },
+    "sharedKill": {
+      "status": "passed",
+      "evidence": {
+        "targetId": 206302,
+        "target": "Deer",
+        "mapFileName": "0",
+        "location": {
+          "x": 287,
+          "y": 611
+        },
+        "attackerNames": [
+          "A614f2e49",
+          "B614f2e49"
+        ],
+        "deathReceipts": [
+          866,
+          782
+        ],
+        "hits": [
+          {
+            "targetId": 206302,
+            "attackerIds": [
+              1000,
+              50000
+            ],
+            "healthPercent": 88,
+            "died": false,
+            "receipts": [
+              {
+                "struck": 818,
+                "health": 820,
+                "damage": 819
+              },
+              {
+                "struck": 727,
+                "health": 729,
+                "damage": 728
+              }
+            ],
+            "attackerName": "A614f2e49"
+          },
+          {
+            "targetId": 206302,
+            "attackerIds": [
+              50001,
+              1000
+            ],
+            "healthPercent": 80,
+            "died": false,
+            "receipts": [
+              {
+                "struck": 824,
+                "health": 826,
+                "damage": 825
+              },
+              {
+                "struck": 742,
+                "health": 744,
+                "damage": 743
+              }
+            ],
+            "attackerName": "B614f2e49"
+          }
+        ]
+      }
+    },
+    "sharedDrop": {
+      "status": "failed",
+      "reason": "No fresh source-name/location-correlated drop visible with matching spawn packets on both clients"
+    },
+    "uniquePickup": {
+      "status": "not_run",
+      "reason": "Shared drop did not pass"
+    },
+    "playerDeath": {
+      "status": "failed",
+      "reason": "a timed out waiting for owner Death and the same observer ObjectDied during ordinary monster exposure"
+    },
+    "townRevive": {
+      "status": "not_run",
+      "reason": "No passed player death evidence; townRevive is never sent to a living actor"
+    },
+    "mapRoundTrip": {
+      "status": "passed",
+      "evidence": [
+        {
+          "actor": "a",
+          "outbound": {
+            "from": {
+              "mapFileName": "0",
+              "x": 299,
+              "y": 600,
+              "direction": "Up"
+            },
+            "to": {
+              "mapFileName": "0121",
+              "x": 3,
+              "y": 16,
+              "direction": "Down"
+            },
+            "transferKey": "crystal-move:0:315:613:24:3:16",
+            "packetSequence": 1363
+          },
+          "return": {
+            "from": {
+              "mapFileName": "0121",
+              "x": 3,
+              "y": 13,
+              "direction": "Up"
+            },
+            "to": {
+              "mapFileName": "0",
+              "x": 316,
+              "y": 613,
+              "direction": "Down"
+            },
+            "transferKey": "crystal-move:0121:2:16:1:316:613",
+            "packetSequence": 1438
+          }
+        },
+        {
+          "actor": "b",
+          "outbound": {
+            "from": {
+              "mapFileName": "0",
+              "x": 297,
+              "y": 600,
+              "direction": "Up"
+            },
+            "to": {
+              "mapFileName": "0121",
+              "x": 3,
+              "y": 16,
+              "direction": "Down"
+            },
+            "transferKey": "crystal-move:0:315:613:24:3:16",
+            "packetSequence": 1267
+          },
+          "return": {
+            "from": {
+              "mapFileName": "0121",
+              "x": 1,
+              "y": 14,
+              "direction": "Left"
+            },
+            "to": {
+              "mapFileName": "0",
+              "x": 316,
+              "y": 613,
+              "direction": "Down"
+            },
+            "transferKey": "crystal-move:0121:2:16:1:316:613",
+            "packetSequence": 1333
+          }
+        }
+      ]
+    },
+    "logout": {
+      "status": "passed",
+      "evidence": [
+        {
+          "actor": "a",
+          "sequence": 1479
+        },
+        {
+          "actor": "b",
+          "sequence": 1386
+        }
+      ]
+    },
+    "reloginPersistence": {
+      "status": "passed",
+      "evidence": [
+        {
+          "actor": 0,
+          "saved": {
+            "transform": {
+              "mapFileName": "0",
+              "x": 319,
+              "y": 613,
+              "direction": "Right"
+            },
+            "inventory": {
+              "gold": 0,
+              "inventory": [],
+              "equipment": [
+                {
+                  "uniqueId": "0",
+                  "itemIndex": 0,
+                  "name": "WoodenSword",
+                  "count": 1,
+                  "slot": "weapon"
+                },
+                {
+                  "uniqueId": "1",
+                  "itemIndex": 0,
+                  "name": "BaseDress(M)",
+                  "count": 1,
+                  "slot": "armour"
+                },
+                {
+                  "uniqueId": "3",
+                  "itemIndex": 0,
+                  "name": "Candle",
+                  "count": 1,
+                  "slot": "torch"
+                }
+              ]
+            }
+          },
+          "logoutReceipt": 578
+        },
+        {
+          "actor": 1,
+          "saved": {
+            "transform": {
+              "mapFileName": "0",
+              "x": 316,
+              "y": 616,
+              "direction": "Down"
+            },
+            "inventory": {
+              "gold": 0,
+              "inventory": [
+                {
+                  "uniqueId": "2",
+                  "itemIndex": 0,
+                  "name": "(HP)DrugSmall",
+                  "count": 1,
+                  "slot": "2"
+                }
+              ],
+              "equipment": [
+                {
+                  "uniqueId": "0",
+                  "itemIndex": 0,
+                  "name": "WoodenSword",
+                  "count": 1,
+                  "slot": "weapon"
+                },
+                {
+                  "uniqueId": "1",
+                  "itemIndex": 0,
+                  "name": "BaseDress(M)",
+                  "count": 1,
+                  "slot": "armour"
+                },
+                {
+                  "uniqueId": "3",
+                  "itemIndex": 0,
+                  "name": "Candle",
+                  "count": 1,
+                  "slot": "torch"
+                }
+              ]
+            }
+          },
+          "logoutReceipt": 575
+        }
+      ]
+    }
+  },
+  "accounts": [
+    {
+      "accountId": "pta614f2e49",
+      "name": "A614f2e49"
+    },
+    {
+      "accountId": "ptb614f2e49",
+      "name": "B614f2e49"
+    }
+  ],
+  "registrationMode": "two-fresh-ordinary-registrations",
+  "requiredChecks": [
+    "authGuards",
+    "twoAccounts",
+    "mutualVisibility",
+    "movement",
+    "turn",
+    "chat",
+    "chatLatency",
+    "sharedCombat",
+    "mapRoundTrip",
+    "logout",
+    "reloginPersistence",
+    "sharedKill",
+    "sharedDrop",
+    "uniquePickup",
+    "playerDeath",
+    "townRevive"
+  ],
+  "ok": false,
+  "fullLifecyclePassed": false,
+  "status": "incomplete",
+  "finishedAt": "2026-10-24T12:22:02.157Z",
+  "visualAccepted": false,
+  "twoPhysicalComputersTested": false,
+  "loadAccepted": false
+}

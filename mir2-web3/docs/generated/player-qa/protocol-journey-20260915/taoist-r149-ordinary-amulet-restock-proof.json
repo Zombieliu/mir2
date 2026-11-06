@@ -1,0 +1,446 @@
+{
+  "trace": "C:/mir2-protocol-journey-20260911/Taoist.2026-09-17T10-40-38-425Z.trace.jsonl",
+  "sha256": "7a2619f6e136e6a29a2ff38954137b446e265604fe9b6adb263569ac2ccac7b0",
+  "stocks": [
+    {
+      "sequence": 6,
+      "at": "2026-09-17T10:40:39.398Z",
+      "map": null,
+      "gold": 0,
+      "stock": 0
+    },
+    {
+      "sequence": 574,
+      "at": "2026-09-17T10:40:41.680Z",
+      "map": "0",
+      "gold": 33,
+      "stock": 4
+    },
+    {
+      "sequence": 939,
+      "at": "2026-09-17T10:41:12.125Z",
+      "map": "0",
+      "gold": 13,
+      "stock": 33
+    },
+    {
+      "sequence": 3435,
+      "at": "2026-09-17T10:49:23.761Z",
+      "map": "0",
+      "gold": 281,
+      "stock": 100
+    },
+    {
+      "sequence": 5185,
+      "at": "2026-09-17T10:54:34.205Z",
+      "map": "2",
+      "gold": 281,
+      "stock": 99
+    },
+    {
+      "sequence": 5217,
+      "at": "2026-09-17T10:54:36.022Z",
+      "map": "2",
+      "gold": 281,
+      "stock": 98
+    },
+    {
+      "sequence": 5252,
+      "at": "2026-09-17T10:54:39.269Z",
+      "map": "2",
+      "gold": 281,
+      "stock": 97
+    },
+    {
+      "sequence": 5286,
+      "at": "2026-09-17T10:54:42.644Z",
+      "map": "2",
+      "gold": 281,
+      "stock": 96
+    },
+    {
+      "sequence": 5335,
+      "at": "2026-09-17T10:54:48.000Z",
+      "map": "2",
+      "gold": 281,
+      "stock": 95
+    },
+    {
+      "sequence": 5387,
+      "at": "2026-09-17T10:54:51.257Z",
+      "map": "2",
+      "gold": 281,
+      "stock": 94
+    }
+  ],
+  "publicReceipts": [
+    {
+      "sequence": 844,
+      "at": "2026-09-17T10:41:04.129Z",
+      "direction": "sent",
+      "type": "sellItem",
+      "count": 1,
+      "uniqueId": 11
+    },
+    {
+      "sequence": 847,
+      "at": "2026-09-17T10:41:04.736Z",
+      "direction": "received",
+      "type": "packet",
+      "packet": "SellItem",
+      "payload": {
+        "count": 1,
+        "success": true,
+        "uniqueId": 11
+      }
+    },
+    {
+      "sequence": 848,
+      "at": "2026-09-17T10:41:04.737Z",
+      "direction": "received",
+      "type": "packet",
+      "packet": "GainedGold",
+      "payload": {
+        "gold": 257
+      }
+    },
+    {
+      "sequence": 850,
+      "at": "2026-09-17T10:41:04.875Z",
+      "direction": "sent",
+      "type": "sellItem",
+      "count": 1,
+      "uniqueId": 12
+    },
+    {
+      "sequence": 855,
+      "at": "2026-09-17T10:41:05.348Z",
+      "direction": "received",
+      "type": "packet",
+      "packet": "SellItem",
+      "payload": {
+        "count": 1,
+        "success": true,
+        "uniqueId": 12
+      }
+    },
+    {
+      "sequence": 856,
+      "at": "2026-09-17T10:41:05.349Z",
+      "direction": "received",
+      "type": "packet",
+      "packet": "GainedGold",
+      "payload": {
+        "gold": 213
+      }
+    },
+    {
+      "sequence": 858,
+      "at": "2026-09-17T10:41:05.430Z",
+      "direction": "sent",
+      "type": "sellItem",
+      "count": 1,
+      "uniqueId": 13
+    },
+    {
+      "sequence": 860,
+      "at": "2026-09-17T10:41:05.952Z",
+      "direction": "received",
+      "type": "packet",
+      "packet": "SellItem",
+      "payload": {
+        "count": 1,
+        "success": true,
+        "uniqueId": 13
+      }
+    },
+    {
+      "sequence": 861,
+      "at": "2026-09-17T10:41:05.952Z",
+      "direction": "received",
+      "type": "packet",
+      "packet": "GainedGold",
+      "payload": {
+        "gold": 235
+      }
+    },
+    {
+      "sequence": 935,
+      "at": "2026-09-17T10:41:11.480Z",
+      "direction": "sent",
+      "type": "buyItem",
+      "itemIndex": 46661648,
+      "count": 29
+    },
+    {
+      "sequence": 937,
+      "at": "2026-09-17T10:41:12.052Z",
+      "direction": "received",
+      "type": "packet",
+      "packet": "LoseGold",
+      "payload": {
+        "gold": 725
+      }
+    },
+    {
+      "sequence": 3309,
+      "at": "2026-09-17T10:49:11.914Z",
+      "direction": "sent",
+      "type": "sellItem",
+      "count": 1,
+      "uniqueId": 187
+    },
+    {
+      "sequence": 3313,
+      "at": "2026-09-17T10:49:12.561Z",
+      "direction": "received",
+      "type": "packet",
+      "packet": "SellItem",
+      "payload": {
+        "count": 1,
+        "success": true,
+        "uniqueId": 187
+      }
+    },
+    {
+      "sequence": 3314,
+      "at": "2026-09-17T10:49:12.561Z",
+      "direction": "received",
+      "type": "packet",
+      "packet": "GainedGold",
+      "payload": {
+        "gold": 236
+      }
+    },
+    {
+      "sequence": 3316,
+      "at": "2026-09-17T10:49:12.664Z",
+      "direction": "sent",
+      "type": "sellItem",
+      "count": 1,
+      "uniqueId": 11
+    },
+    {
+      "sequence": 3320,
+      "at": "2026-09-17T10:49:13.237Z",
+      "direction": "received",
+      "type": "packet",
+      "packet": "SellItem",
+      "payload": {
+        "count": 1,
+        "success": true,
+        "uniqueId": 11
+      }
+    },
+    {
+      "sequence": 3321,
+      "at": "2026-09-17T10:49:13.237Z",
+      "direction": "received",
+      "type": "packet",
+      "packet": "GainedGold",
+      "payload": {
+        "gold": 205
+      }
+    },
+    {
+      "sequence": 3323,
+      "at": "2026-09-17T10:49:13.366Z",
+      "direction": "sent",
+      "type": "sellItem",
+      "count": 1,
+      "uniqueId": 12
+    },
+    {
+      "sequence": 3325,
+      "at": "2026-09-17T10:49:13.899Z",
+      "direction": "received",
+      "type": "packet",
+      "packet": "SellItem",
+      "payload": {
+        "count": 1,
+        "success": true,
+        "uniqueId": 12
+      }
+    },
+    {
+      "sequence": 3326,
+      "at": "2026-09-17T10:49:13.899Z",
+      "direction": "received",
+      "type": "packet",
+      "packet": "GainedGold",
+      "payload": {
+        "gold": 221
+      }
+    },
+    {
+      "sequence": 3328,
+      "at": "2026-09-17T10:49:14.020Z",
+      "direction": "sent",
+      "type": "sellItem",
+      "count": 1,
+      "uniqueId": 13
+    },
+    {
+      "sequence": 3330,
+      "at": "2026-09-17T10:49:14.555Z",
+      "direction": "received",
+      "type": "packet",
+      "packet": "SellItem",
+      "payload": {
+        "count": 1,
+        "success": true,
+        "uniqueId": 13
+      }
+    },
+    {
+      "sequence": 3331,
+      "at": "2026-09-17T10:49:14.555Z",
+      "direction": "received",
+      "type": "packet",
+      "packet": "GainedGold",
+      "payload": {
+        "gold": 236
+      }
+    },
+    {
+      "sequence": 3333,
+      "at": "2026-09-17T10:49:14.671Z",
+      "direction": "sent",
+      "type": "sellItem",
+      "count": 1,
+      "uniqueId": 14
+    },
+    {
+      "sequence": 3338,
+      "at": "2026-09-17T10:49:15.192Z",
+      "direction": "received",
+      "type": "packet",
+      "packet": "SellItem",
+      "payload": {
+        "count": 1,
+        "success": true,
+        "uniqueId": 14
+      }
+    },
+    {
+      "sequence": 3339,
+      "at": "2026-09-17T10:49:15.192Z",
+      "direction": "received",
+      "type": "packet",
+      "packet": "GainedGold",
+      "payload": {
+        "gold": 212
+      }
+    },
+    {
+      "sequence": 3341,
+      "at": "2026-09-17T10:49:15.284Z",
+      "direction": "sent",
+      "type": "sellItem",
+      "count": 1,
+      "uniqueId": 15
+    },
+    {
+      "sequence": 3343,
+      "at": "2026-09-17T10:49:15.823Z",
+      "direction": "received",
+      "type": "packet",
+      "packet": "SellItem",
+      "payload": {
+        "count": 1,
+        "success": true,
+        "uniqueId": 15
+      }
+    },
+    {
+      "sequence": 3344,
+      "at": "2026-09-17T10:49:15.823Z",
+      "direction": "received",
+      "type": "packet",
+      "packet": "GainedGold",
+      "payload": {
+        "gold": 275
+      }
+    },
+    {
+      "sequence": 3346,
+      "at": "2026-09-17T10:49:15.939Z",
+      "direction": "sent",
+      "type": "sellItem",
+      "count": 1,
+      "uniqueId": 16
+    },
+    {
+      "sequence": 3348,
+      "at": "2026-09-17T10:49:16.780Z",
+      "direction": "received",
+      "type": "packet",
+      "packet": "SellItem",
+      "payload": {
+        "count": 1,
+        "success": true,
+        "uniqueId": 16
+      }
+    },
+    {
+      "sequence": 3349,
+      "at": "2026-09-17T10:49:16.780Z",
+      "direction": "received",
+      "type": "packet",
+      "packet": "GainedGold",
+      "payload": {
+        "gold": 236
+      }
+    },
+    {
+      "sequence": 3351,
+      "at": "2026-09-17T10:49:16.873Z",
+      "direction": "sent",
+      "type": "sellItem",
+      "count": 1,
+      "uniqueId": 17
+    },
+    {
+      "sequence": 3355,
+      "at": "2026-09-17T10:49:17.424Z",
+      "direction": "received",
+      "type": "packet",
+      "packet": "SellItem",
+      "payload": {
+        "count": 1,
+        "success": true,
+        "uniqueId": 17
+      }
+    },
+    {
+      "sequence": 3356,
+      "at": "2026-09-17T10:49:17.424Z",
+      "direction": "received",
+      "type": "packet",
+      "packet": "GainedGold",
+      "payload": {
+        "gold": 322
+      }
+    },
+    {
+      "sequence": 3431,
+      "at": "2026-09-17T10:49:23.100Z",
+      "direction": "sent",
+      "type": "buyItem",
+      "itemIndex": 46661648,
+      "count": 67
+    },
+    {
+      "sequence": 3433,
+      "at": "2026-09-17T10:49:23.684Z",
+      "direction": "received",
+      "type": "packet",
+      "packet": "LoseGold",
+      "payload": {
+        "gold": 1675
+      }
+    }
+  ],
+  "routeCompleted": false,
+  "visualAccepted": false
+}

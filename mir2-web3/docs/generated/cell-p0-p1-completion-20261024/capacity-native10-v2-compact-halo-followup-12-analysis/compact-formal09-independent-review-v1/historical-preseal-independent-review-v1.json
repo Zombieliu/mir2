@@ -1,0 +1,145 @@
+{
+  "schemaVersion": 1,
+  "reviewedAt": "2026-10-25T06:28:55.372Z",
+  "reviewer": "/root/fixed_cell_gate_audit",
+  "state": "historical-formal09-source-reviewed-execution-permanently-blocked-by-failed12",
+  "scope": "Read-only final preseal raw hashes and source-text contracts. No template/product imports, sourceguard/gate/test/prepare/account/realm execution by reviewer.",
+  "preseal": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\compact-formal09-preseal-input-check-v1.json",
+    "bytes": 14613,
+    "sha256": "fe5a93d33cda10cbeb3a739ba085f64abb4e9676bd0f1470a7de9802aa2b79bc"
+  },
+  "rawCheck": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\compact-formal09-independent-review-v1\\preseal-raw-check-v1.json",
+    "bytes": 890,
+    "sha256": "beb8909735cbf0ef0528c0e7527127227551f14bb4e645b672d072a5e625e8a4"
+  },
+  "reviewedFileCount": 34,
+  "reviewedSourceSha256": "705c6d2b2b51804eccd9a9acfede1a56e42381e1dd4643db6f955805b1f17c6b",
+  "allLocalRawPinsMatched": true,
+  "writerSyntaxDeclaredScripts": 21,
+  "writerDriverClosurePinCount": 124,
+  "identity": {
+    "backendSourceCommit": "46880bd1ef415131c4cf85aeb4dd2fa4f6fd4f9b",
+    "driverSourceCommit": "6d70d02d0bc390156b77a3e48acee714fc87cda3",
+    "driverSourceSha256": "05c07c2e487e4b65c5068f8803f96bdc6a66a342c5fc44c21f3a64b6b8581073",
+    "sceneSourceSha256": "4854eb58f6468ad4f8092dd375dc5363f42071470f92be4219a14df1321b163f"
+  },
+  "configuration": {
+    "policyJsonExactOriginalFormal08": true,
+    "resourceRawExactOriginalFormal08": true,
+    "scenario": {
+      "bytes": 5844,
+      "sha256": "f87aae78a2d68d8daa63916a93580c33f4ef974da4769bd3531a62aafcf0f205"
+    },
+    "probePrefix": {
+      "bytes": 804,
+      "sha256": "a42a26a195dd5ac25135bff57e73f7f21b71f97b5cc1814351920ece621362ba"
+    },
+    "actualCaps": [
+      128,
+      100,
+      100,
+      4,
+      1,
+      2
+    ],
+    "tokioWorkers": 4,
+    "slowStageThresholdMs": 50,
+    "softMaxCpuLogical": 24,
+    "softPrivateGiB": 32,
+    "softWorkingSetGiB": 40,
+    "configuredStages": [
+      2,
+      10,
+      25,
+      50,
+      100
+    ],
+    "stageSeconds": 300,
+    "soakSeconds": 7200,
+    "resumeSamples": 5,
+    "saveSamples": 5,
+    "postResumeObservationSeconds": 60,
+    "wallSeconds": 18000
+  },
+  "executionBarrier": {
+    "source": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-compact-halo-ladder-09\\input-lib.mjs",
+      "bytes": 14875,
+      "sha256": "597d48f7cadbaf1e44612dc98cd3c6513d4e68dcd5df1938ce9de0e03b599b73"
+    },
+    "unconditionalHistoricalFailed12Throw": true,
+    "laterProbeSubstitutionForbidden": true,
+    "requiredProbeRunId": "1792908575146-40a66fff",
+    "requiredProbeActualOutcome": "FAILED continuous movement during incomplete stage-2, before stage-10/soak. Three complete stage-2 report windows cannot substitute for required5/5/6.",
+    "prepareReachesBarrierBeforePreparationLockSecretsAccountsBinOrRealm": true,
+    "runReachesBarrierBeforeSpawn": true,
+    "barrierExecutedByReviewer": false,
+    "actualRejectionReceiptPendingWriter": true
+  },
+  "gateSourceReview": {
+    "source": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-compact-halo-ladder-09\\verify-feasibility-gate.mjs",
+      "bytes": 18868,
+      "sha256": "0ab03879f5aee813fcacdea6b649563a0fedfd6f605cdce29910ccaef252f095"
+    },
+    "collectionContract": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-compact-halo-ladder-09\\verify-probe12-collected-evidence.mjs",
+      "bytes": 9501,
+      "sha256": "39bb17239df585f65579822bdc1e0114461aef0ff2a727658b4a6fb3e82185da"
+    },
+    "requiresExactFresh12": true,
+    "requiresOrdinaryReportOkAndContinuousPassed": true,
+    "requiresActual300300360And5_5_6PassingWindowsAtLeast60Seconds": true,
+    "requiresMeasuredSecondsAndAuthenticRawMonitorBrackets": true,
+    "requiresNormalOwnedCleanupAndCompleteSlowCapture": true,
+    "requiresSame41Backend9DriverSceneAndRawReportProvenance": true,
+    "collectionAndSeparateIndependentReceiptRequiredOnSuccessPath": true,
+    "requiresProbeCapacityAcceptedFalse": true,
+    "failed12RejectedBeforeSuccessOnlyCollectionContract": true,
+    "successPathValidationPerformed": false,
+    "successPathLimit": "The success-only independent receipt contract is based on an explicitly proposed schema. No actual successful12 exists, so compatibility with a passing independent receipt and all success-path runtime behavior is unproved. This historical blocked template must not be reused or re-enabled as a new formal launcher."
+  },
+  "archiveSourceReview": {
+    "child": "capacity-formal-native-v2-compact-halo-ladder-09",
+    "explicitPublicWhitelistAndContainmentInherited": true,
+    "originalPartialOrFailedReportBytesAndVerdictsPreserved": true,
+    "rawArchivesExternal": true,
+    "formalAcceptanceRequiresRawAcceptedAndNormalCleanupAndDiagnosticsComplete": true,
+    "publicScenarioSourceList": "repair40 plus separately pinned independent summary addendum",
+    "rootIndexOrOtherTopicsModified": false
+  },
+  "liveRisksRetained": [
+    "100representative tour886unitsteps is not an actual complete online tour.",
+    "53..65unitstep legs can exceed the original24ACK/20s waypoint advance boundary; no budget is changed.",
+    "Conditional positive-hit supply does not prove180 launched attacks/120 positive hits per minute or2h progression.",
+    "The historical stage25 server/fanout stall remains unresolved; a new static scene does not clear that failure.",
+    "The compact layout has not passed the actual two-person measurement."
+  ],
+  "limitations": [
+    "No fresh sourceguard, syntax/test suite, model/geometry/search or game load was performed by this reviewer. Writer preseal syntax and124closure results are attributed, not independently rerun.",
+    "Actual12 remains failed; normal cleanup and consistent evidence do not turn partial activity into a passing feasibility certificate.",
+    "Original25-actor stall,100-actor180launch/120positivehit supply,886-step/24ACK20s scout route and fresh two-hour progression remain unresolved."
+  ],
+  "provisioningState": {
+    "private": false,
+    "bin": false,
+    "accounts": false,
+    "preparationLock": false,
+    "executionLock": false,
+    "realm": false
+  },
+  "verdict": {
+    "blockingForHistoricalArchive": false,
+    "historicalSourceReviewComplete": true,
+    "permanentlyUnsealedHistoricalTemplate": true,
+    "suitableToPrepare": false,
+    "suitableToRun": false,
+    "suitableToPromote": false,
+    "actualFailed12GateMustReject": true,
+    "capacityAccepted": false,
+    "p0Accepted": false,
+    "p2Authorized": false
+  }
+}

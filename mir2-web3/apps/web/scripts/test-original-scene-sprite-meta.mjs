@@ -29,11 +29,11 @@ function loadSpriteMetaModule(assetBaseUrl) {
     module.exports,
     module,
     (request) => {
-      if (request.endsWith("manifest.generated.json")) {
+      if (request.endsWith("original_scene_sprite_library_keys.json")) {
         return {
-          libraries: {
-            "Title/000": {},
-          },
+          schemaVersion: 1,
+          sourceSha256: "a".repeat(64),
+          keys: ["Title/000", "Map/exported"],
         };
       }
       if (request.endsWith("source-libraries.generated.json")) {
@@ -55,11 +55,23 @@ const localOnlyModule = loadSpriteMetaModule(undefined);
 assert.equal(localOnlyModule.originalSceneSpriteLibraryExists("Monster/000"), true);
 assert.equal(localOnlyModule.originalSceneSpriteLibraryExists("Monster\\139"), true);
 assert.equal(localOnlyModule.originalSceneSpriteLibraryExists("Map/2"), false);
+assert.equal(localOnlyModule.originalSceneSpriteLibraryExists("Map/exported"), true);
+assert.equal(localOnlyModule.originalSceneSpriteLibraryExists("Title\\000"), true);
+assert.equal(localOnlyModule.originalSceneSpriteLibraryExists("Unknown/1"), false);
 
 const { fetchOriginalSceneSpriteMeta } = loadSpriteMetaModule("https://assets.example.test");
 const originalFetch = globalThis.fetch;
 
 try {
+  const localTruncatedRequests = [];
+  globalThis.fetch = async (url) => {
+    localTruncatedRequests.push(String(url));
+    return Response.json({ count: 2, frames: [{ index: 0 }] });
+  };
+  const localTruncated = await localOnlyModule.fetchOriginalSceneSpriteMeta("Monster/000");
+  assert.equal((await localTruncated.json()).frames.length, 1);
+  assert.deepEqual(localTruncatedRequests, ["/original-ui/Monster/000/meta.json"]);
+
   const bundledRequests = [];
   globalThis.fetch = async (url) => {
     bundledRequests.push(String(url));
@@ -103,6 +115,24 @@ try {
   const exportedOnlyResponse = await fetchOriginalSceneSpriteMeta("Title/000");
   assert.equal(exportedOnlyResponse.status, 404);
   assert.deepEqual(exportedOnlyRequests, ["/original-ui/Title/000/meta.json"]);
+
+  const cachedModule = loadSpriteMetaModule(undefined);
+  let loadedCount = 0;
+  globalThis.fetch = async (url) => {
+    loadedCount += 1;
+    assert.equal(String(url), "/original-ui/Monster/000/meta.json");
+    return Response.json({ count: 1, frames: [{ index: 7 }],
+      frameSet: { actions: [{ actionId: 1, start: 7, count: 1 }] } });
+  };
+  const [first, second] = await Promise.all([
+    cachedModule.loadOriginalSceneSpriteLibrary("Monster/000"),
+    cachedModule.loadOriginalSceneSpriteLibrary("Monster\\000"),
+  ]);
+  assert.equal(first, second);
+  assert.equal(loadedCount, 1);
+  assert.equal(cachedModule.frameMetaForIndex(first, 7)?.index, 7);
+  assert.equal(first.frameSet.actions[0].actionId, 1);
+  assert.equal(cachedModule.originalSceneSpriteLibraryCacheStats().cachedLibraryCount, 1);
 } finally {
   globalThis.fetch = originalFetch;
   if (originalAssetBaseUrl === undefined) {

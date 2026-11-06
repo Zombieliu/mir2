@@ -1,0 +1,86 @@
+{
+  "schemaVersion": 1,
+  "performedAt": "2026-10-27T09:18:58.416Z",
+  "scope": "Pure read-only production-validator preflight over actual W15 original42 plus W16 new16; no auth/current Store qualification or ordinary fresh relogin claimed.",
+  "tool": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v16\\history-supplement-v1\\validate-actual-two-group-history.mjs",
+    "bytes": 3282,
+    "sha256": "caff343b92f6427ab043462ebd298305ea397309d4c94d05e9d35441c3915f0b"
+  },
+  "evidence": [
+    {
+      "report": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v15\\episode\\reports\\1793084170216-93e9fe64.preparation-report.json",
+        "bytes": 145422,
+        "sha256": "a9afe8b257cc0af793a532a7e9b96ae59d374e391d3123d2cc8445608b2b39df"
+      },
+      "preparedIndex": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v15\\episode\\prepared-index-v1.json",
+        "bytes": 11953,
+        "sha256": "922fd2339adea01799c35e0ef99fa511266666ad1168eb332aeab06392cb3bab"
+      },
+      "cleanup": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v15\\episode\\cleanup-v1.json",
+        "bytes": 1037,
+        "sha256": "19ad8a7a3f017563c283cccfa152828cff4afb847ae5da996d480fa41eff2970"
+      },
+      "receipt": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v15\\episode\\preparation-episode-receipt-v1.json",
+        "bytes": 6144,
+        "sha256": "6e9505f8812fc3eb53fdd69fa2bacb4b780ba7684680be0d99d9f937142d1b67"
+      }
+    },
+    {
+      "report": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v16\\episode\\reports\\1793090167771-5bd2d680.preparation-report.json",
+        "bytes": 92721,
+        "sha256": "c4adc922a7cd57a26f8d7824717db1c0c06cd55feb25ca886d9d3ccca0369df2"
+      },
+      "preparedIndex": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v16\\episode\\prepared-index-v1.json",
+        "bytes": 6439,
+        "sha256": "e515646b164eefea54ef546ced556b5a71f4c688f551d9f3e3c2cf470f110601"
+      },
+      "cleanup": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v16\\episode\\cleanup-v1.json",
+        "bytes": 1037,
+        "sha256": "c49b2b6e87f110873065df41b3dd178525a208c7e8c88d7902ff10e5ef33479a"
+      },
+      "receipt": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v16\\episode\\preparation-episode-receipt-v1.json",
+        "bytes": 5773,
+        "sha256": "e0acda44da49d64c125b46552163039a91917cd58e9719449fdf4eb14aa5dc46"
+      }
+    }
+  ],
+  "historicalPreparedCount": 58,
+  "expectedThisRun": 42,
+  "firstRemainingOriginalIndex1Based": 59,
+  "lastRemainingOriginalIndex1Based": 100,
+  "historicalNotFresh": true,
+  "originalFalseVerdictsRetained": true,
+  "negative": [
+    {
+      "label": "missing-first42",
+      "rejected": true
+    },
+    {
+      "label": "reversed-groups",
+      "rejected": true
+    },
+    {
+      "label": "duplicate-first-group",
+      "rejected": true
+    },
+    {
+      "label": "combined-index-instead-of-current16",
+      "rejected": true
+    }
+  ],
+  "authPerformed": false,
+  "bankCopyPerformed": false,
+  "ownedExecutionPerformed": false,
+  "all100Fresh": false,
+  "capacityAccepted": false,
+  "p0Accepted": false
+}

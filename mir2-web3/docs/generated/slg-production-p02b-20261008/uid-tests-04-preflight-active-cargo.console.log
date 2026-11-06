@@ -1,0 +1,5 @@
+Exception: E:\mir2-player-journey\work\slg-production-p02b-20261008\run-check.ps1:18
+Line |
+  18 |  … ount -gt 0){throw 'Another Cargo/rustc invocation is active; keep Car …
+     |                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     | Another Cargo/rustc invocation is active; keep Cargo serial.

@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "state": "final-41-input-release-bound-not-executed",
+  "boundAt": "2026-10-24T23:26:07.405Z",
+  "expectedSourceCommit": "46880bd1ef415131c4cf85aeb4dd2fa4f6fd4f9b",
+  "backendInputCount": 41,
+  "profile": {
+    "path": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-socket-diagnostics-v2\\full-lifecycle-profile.json",
+    "bytes": 4094,
+    "sha256": "74d0c18ee922c333765ef618bf456f4621123a70b7b541410bb26b91f08dcdcd"
+  },
+  "releaseRecord": {
+    "path": "C:\\mir2-build\\p01-completion-20261024\\release-socket-diagnostics-v1.json",
+    "bytes": 1920,
+    "sha256": "cdcf7ec17ffbdb7ef1a8c529deaf8d8dd957d16a8129315390760e910a4b9c3f"
+  },
+  "backendSourceManifest": {
+    "path": "C:\\mir2-build\\p01-completion-20261024\\backend-source-socket-diagnostics-v1.json",
+    "bytes": 14000,
+    "sha256": "4da9d4dac73773bae041c98b641874a9ad4427217c1b36bb453f1a014ad7b058"
+  },
+  "binary": {
+    "path": "C:\\mir2-build\\p01-completion-20261024\\socket-diagnostics-v1\\bin\\mir2-gateway.exe",
+    "bytes": 87370240,
+    "sha256": "a43078b05e70b480f948fee505e23d2757ce1ae20fdc1f22b2348df46ee7125d"
+  },
+  "realmStarted": false,
+  "accountsCreated": 0,
+  "capacityAccepted": false,
+  "scope": "Explicit final new41-source/Release and unchanged6-driver full16 functional launcher binding; no account, service or test execution."
+}

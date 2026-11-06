@@ -1,0 +1,67 @@
+{
+  "schemaVersion": 1,
+  "frozenAt": "2026-10-24T16:32:08.406Z",
+  "scope": "Only probe actor ceiling5-to10 plus one invariance fixture after final native/scout/density/phase freeze. No production server change. All workspace tool sources frozen pending root checkpoint commit before sole actual native10 feasibility run.",
+  "focused": {
+    "passed": 2,
+    "failed": 0,
+    "log": "C:/mir2-build/p01-completion-20261024/capacity-probe10-boundary-focused-tests.log"
+  },
+  "adjacentComplete": {
+    "passed": 111,
+    "failed": 0,
+    "skipped": 0,
+    "durationMs": 257857.1597,
+    "log": "C:/mir2-build/p01-completion-20261024/capacity-probe10-boundary-complete-tests.log"
+  },
+  "diffCheckPassed": true,
+  "allOwnedRealmsStopped": true,
+  "files": [
+    {
+      "file": "apps/web/scripts/playtest-capacity-soak-core.mjs",
+      "bytes": 36588,
+      "sha256": "1e067f87fd9cbb2a2c370823ccca1d3c6046b23e45e7c5e6108d5d883f347bcc"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-soak.mjs",
+      "bytes": 108464,
+      "sha256": "c76c4d756a4316c0e7c1d847c03f2dc621d957f03f108192ea78397bf0d1b530"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-soak.test.mjs",
+      "bytes": 142291,
+      "sha256": "8dec91f745072d2c5265a04363c480041cd2d0a37e3c07925ce34ab58db78a1f"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-observability.mjs",
+      "bytes": 4447,
+      "sha256": "19edb25f68fdd18567391e52a247964bd689346b58535871ce17051f53af9af7"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-observability.test.mjs",
+      "bytes": 5228,
+      "sha256": "00ff902194f805eb3433b192b2838b6eea6cd80860052860b825ab34f58a626d"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-monitor.mjs",
+      "bytes": 21246,
+      "sha256": "e585081835d9232b58d91bb0f717a796b483a818ed5c6fd943abf93350d74e7f"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-monitor.test.mjs",
+      "bytes": 10882,
+      "sha256": "0e60e4636ea5e384e6455fe9d474d56a760881505e765ccfc82eec490d8d92f8"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-telemetry.mjs",
+      "bytes": 6548,
+      "sha256": "d3b74c3b8e0401530e787f6b35bd9a578de4f455b3f7817b6230df41c5871964"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-telemetry.test.mjs",
+      "bytes": 6277,
+      "sha256": "f5efe4aa510f67eb10ebba26a5de9cb5402f061de07900998a77a191a749f974"
+    }
+  ],
+  "sourceSha256": "cfb5d0edb4699c18c9b943e85003424aaa85140d551074d9fc517077ec2eec1b"
+}

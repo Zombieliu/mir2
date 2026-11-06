@@ -1,0 +1,883 @@
+{
+  "schemaVersion": 1,
+  "copiedAt": "2026-10-25T06:16:16.306Z",
+  "scope": "Exact immutable static scene packages, including rejected candidates, two repair trials, original failures and independent reviews. Static feasibility only; no capacity acceptance.",
+  "copies": [
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-scene-v1\\author-candidates.mjs",
+      "relative": "original-candidates/author-candidates.mjs",
+      "bytes": 11154,
+      "sha256": "995cfb9b003030447f0df64c06de284cd1b04cbc147ec304afbc96a663e1d447",
+      "target": "capacity-native-compact-halo-scene-v1/original-candidates/author-candidates.mjs"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-scene-v1\\author-result-v1.json",
+      "relative": "original-candidates/author-result-v1.json",
+      "bytes": 61269,
+      "sha256": "a6624c4d964a0580b1295733526b72ec17a48a20d22d8402d19efd294f482d76",
+      "target": "capacity-native-compact-halo-scene-v1/original-candidates/author-result-v1.json"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-scene-v1\\author-run-v1.log",
+      "relative": "original-candidates/author-run-v1.log",
+      "bytes": 1701,
+      "sha256": "6b75fad72e031580e38ffb62756429a2ef20d310cd42a4bf78ecfa1bf08c483b",
+      "target": "capacity-native-compact-halo-scene-v1/original-candidates/author-run-v1.log"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-scene-v1\\candidate-10-compact-v2.json",
+      "relative": "original-candidates/candidate-10-compact-v2.json",
+      "bytes": 804,
+      "sha256": "a42a26a195dd5ac25135bff57e73f7f21b71f97b5cc1814351920ece621362ba",
+      "target": "capacity-native-compact-halo-scene-v1/original-candidates/candidate-10-compact-v2.json"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-scene-v1\\candidate-10-compact-v3.json",
+      "relative": "original-candidates/candidate-10-compact-v3.json",
+      "bytes": 804,
+      "sha256": "6c1c918dd41fc8614a2489b9bf951c53c7c8b83cb5d42a5328e33f1150a85e46",
+      "target": "capacity-native-compact-halo-scene-v1/original-candidates/candidate-10-compact-v3.json"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-scene-v1\\candidate-10-continuous-ordered-final-v3.json",
+      "relative": "original-candidates/candidate-10-continuous-ordered-final-v3.json",
+      "bytes": 804,
+      "sha256": "a42a26a195dd5ac25135bff57e73f7f21b71f97b5cc1814351920ece621362ba",
+      "target": "capacity-native-compact-halo-scene-v1/original-candidates/candidate-10-continuous-ordered-final-v3.json"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-scene-v1\\candidate-10-nearest-ordered-final-v3.json",
+      "relative": "original-candidates/candidate-10-nearest-ordered-final-v3.json",
+      "bytes": 804,
+      "sha256": "a42a26a195dd5ac25135bff57e73f7f21b71f97b5cc1814351920ece621362ba",
+      "target": "capacity-native-compact-halo-scene-v1/original-candidates/candidate-10-nearest-ordered-final-v3.json"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-scene-v1\\candidate-10-v1.json",
+      "relative": "original-candidates/candidate-10-v1.json",
+      "bytes": 804,
+      "sha256": "ec95cf290915d87b1d8cbfdda7985fa78b2632ddff637323bd0176d900757d95",
+      "target": "capacity-native-compact-halo-scene-v1/original-candidates/candidate-10-v1.json"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-scene-v1\\candidate-100-compact-v2.json",
+      "relative": "original-candidates/candidate-100-compact-v2.json",
+      "bytes": 5844,
+      "sha256": "db9031fa25c4d6666dd11911792bbefd8652fe5ff30e3b5c21c692a0e6c1a299",
+      "target": "capacity-native-compact-halo-scene-v1/original-candidates/candidate-100-compact-v2.json"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-scene-v1\\candidate-100-compact-v3.json",
+      "relative": "original-candidates/candidate-100-compact-v3.json",
+      "bytes": 5844,
+      "sha256": "dbfb55ea2a349d574443af56980c715ba4dd1753705b7dc85d5a0cd6ed2d2655",
+      "target": "capacity-native-compact-halo-scene-v1/original-candidates/candidate-100-compact-v3.json"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-scene-v1\\candidate-100-continuous-ordered-final-v3.json",
+      "relative": "original-candidates/candidate-100-continuous-ordered-final-v3.json",
+      "bytes": 5844,
+      "sha256": "c28d66ef7f7de6a4855dfe416bce799b495a08cdfe73330612ab68b16c77e672",
+      "target": "capacity-native-compact-halo-scene-v1/original-candidates/candidate-100-continuous-ordered-final-v3.json"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-scene-v1\\candidate-100-nearest-ordered-final-v3.json",
+      "relative": "original-candidates/candidate-100-nearest-ordered-final-v3.json",
+      "bytes": 5844,
+      "sha256": "ed268ed3b81f06d1894a2ad60689a70dbabfced752042a773551e77d8483d436",
+      "target": "capacity-native-compact-halo-scene-v1/original-candidates/candidate-100-nearest-ordered-final-v3.json"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-scene-v1\\candidate-100-v1.json",
+      "relative": "original-candidates/candidate-100-v1.json",
+      "bytes": 5844,
+      "sha256": "e9d32adc434bbb81f5c7259dfd708e882add099c33442aa3305a638863856990",
+      "target": "capacity-native-compact-halo-scene-v1/original-candidates/candidate-100-v1.json"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-scene-v1\\candidate-inventory-v1.json",
+      "relative": "original-candidates/candidate-inventory-v1.json",
+      "bytes": 80949,
+      "sha256": "6af03d76e6e018f4d6a9e95ca8789b84296c7ed3a42cafbc927f6211e33ccca7",
+      "target": "capacity-native-compact-halo-scene-v1/original-candidates/candidate-inventory-v1.json"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-scene-v1\\compact-author-result-v2.json",
+      "relative": "original-candidates/compact-author-result-v2.json",
+      "bytes": 12090,
+      "sha256": "62e1503547242dcd31e6100c84645f4d5b48b32e2635e435e99a3e83fdc9fc6c",
+      "target": "capacity-native-compact-halo-scene-v1/original-candidates/compact-author-result-v2.json"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-scene-v1\\compact-author-result-v3.json",
+      "relative": "original-candidates/compact-author-result-v3.json",
+      "bytes": 12093,
+      "sha256": "73050b8ae9d59c11b003a626aa7df628b23336be79ac9f79a5e6b97da8de4b0c",
+      "target": "capacity-native-compact-halo-scene-v1/original-candidates/compact-author-result-v3.json"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-scene-v1\\compact-author-run-v2.log",
+      "relative": "original-candidates/compact-author-run-v2.log",
+      "bytes": 641,
+      "sha256": "8c863a2a7f30db57c355c24b18fe522b2833eed8f707720a621e7c0be8d31362",
+      "target": "capacity-native-compact-halo-scene-v1/original-candidates/compact-author-run-v2.log"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-scene-v1\\compact-author-run-v3.log",
+      "relative": "original-candidates/compact-author-run-v3.log",
+      "bytes": 641,
+      "sha256": "e990d0c0274f3f77e693e229d5c2e9a0fdd416dc26957edfa01219fa2b07abea",
+      "target": "capacity-native-compact-halo-scene-v1/original-candidates/compact-author-run-v3.log"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-scene-v1\\compare-scenes.mjs",
+      "relative": "original-candidates/compare-scenes.mjs",
+      "bytes": 6486,
+      "sha256": "dda6d755f52373854256d4e563bd39f235a65569ba659d38d32947adbbe8b353",
+      "target": "capacity-native-compact-halo-scene-v1/original-candidates/compare-scenes.mjs"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-scene-v1\\comparison-run-v1.log",
+      "relative": "original-candidates/comparison-run-v1.log",
+      "bytes": 654,
+      "sha256": "ab7fcdbbcb9bb97741d6db0d4dea9b231bb9067c6042b0231d3410dcc90a7d20",
+      "target": "capacity-native-compact-halo-scene-v1/original-candidates/comparison-run-v1.log"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-scene-v1\\complete-suffix-permutations-v3.mjs",
+      "relative": "original-candidates/complete-suffix-permutations-v3.mjs",
+      "bytes": 2787,
+      "sha256": "404ed58c095843c8262eb1ecefb612ddf783a0b9a14943bc732d51775625d9ae",
+      "target": "capacity-native-compact-halo-scene-v1/original-candidates/complete-suffix-permutations-v3.mjs"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-scene-v1\\conditional-level-final-v2.log",
+      "relative": "original-candidates/conditional-level-final-v2.log",
+      "bytes": 4756,
+      "sha256": "9dc1d10d5c4f4ebc4fc9cbe4604017f0f1f0387a21eb6ec61d44d01f09116513",
+      "target": "capacity-native-compact-halo-scene-v1/original-candidates/conditional-level-final-v2.log"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-scene-v1\\conditional-level-nearest-final-v3.log",
+      "relative": "original-candidates/conditional-level-nearest-final-v3.log",
+      "bytes": 4760,
+      "sha256": "197055ee8be349a9e388ea4f69f7714e75012775bcd48c775604214f9368e197",
+      "target": "capacity-native-compact-halo-scene-v1/original-candidates/conditional-level-nearest-final-v3.log"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-scene-v1\\conditional-level-run-v1.log",
+      "relative": "original-candidates/conditional-level-run-v1.log",
+      "bytes": 4750,
+      "sha256": "8f6131f734e32d469a27629557ed782c46ac7037df6d9aff500899d6fd9a97dd",
+      "target": "capacity-native-compact-halo-scene-v1/original-candidates/conditional-level-run-v1.log"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-scene-v1\\conditional-level-supply-final-v2.json",
+      "relative": "original-candidates/conditional-level-supply-final-v2.json",
+      "bytes": 50855,
+      "sha256": "464506dbfd043d46588cd2e34ca3b0687dbc0db4b2fb710fca4b5be3ae568f7c",
+      "target": "capacity-native-compact-halo-scene-v1/original-candidates/conditional-level-supply-final-v2.json"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-scene-v1\\conditional-level-supply-final-v2.mjs",
+      "relative": "original-candidates/conditional-level-supply-final-v2.mjs",
+      "bytes": 8380,
+      "sha256": "3bbd555c1f2a5ae49383b7f5a63a9e202bb28267e0b8becc990f0e7cbf7f836c",
+      "target": "capacity-native-compact-halo-scene-v1/original-candidates/conditional-level-supply-final-v2.mjs"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-scene-v1\\conditional-level-supply-nearest-final-v3.json",
+      "relative": "original-candidates/conditional-level-supply-nearest-final-v3.json",
+      "bytes": 48409,
+      "sha256": "974c824a8b5fc99a4b9ac6212571f0c0679f6ff74f6e4d5a0553c2aae72e3ab1",
+      "target": "capacity-native-compact-halo-scene-v1/original-candidates/conditional-level-supply-nearest-final-v3.json"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-scene-v1\\conditional-level-supply-nearest-final-v3.mjs",
+      "relative": "original-candidates/conditional-level-supply-nearest-final-v3.mjs",
+      "bytes": 8407,
+      "sha256": "ace668519d08c3ed6323a2ebeb01fa47cdb0919db283c25d79dd924611d46cf1",
+      "target": "capacity-native-compact-halo-scene-v1/original-candidates/conditional-level-supply-nearest-final-v3.mjs"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-scene-v1\\conditional-level-supply-v1.json",
+      "relative": "original-candidates/conditional-level-supply-v1.json",
+      "bytes": 50572,
+      "sha256": "283f1f1c0038f6284d8095ebb4e1f7996e7741d05ca203d9647e15f2615e46eb",
+      "target": "capacity-native-compact-halo-scene-v1/original-candidates/conditional-level-supply-v1.json"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-scene-v1\\conditional-level-supply.mjs",
+      "relative": "original-candidates/conditional-level-supply.mjs",
+      "bytes": 8110,
+      "sha256": "cbf1844f6cf4859049646ab82f831867a15438dcd01157cd5c1990f171ec9fa9",
+      "target": "capacity-native-compact-halo-scene-v1/original-candidates/conditional-level-supply.mjs"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-scene-v1\\decision-summary-v1.json",
+      "relative": "original-candidates/decision-summary-v1.json",
+      "bytes": 11810,
+      "sha256": "34a2f11d33a930e3faeed9f1f7e10638970dfbe159f3128eea4f5867f45269e8",
+      "target": "capacity-native-compact-halo-scene-v1/original-candidates/decision-summary-v1.json"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-scene-v1\\draft-01.json",
+      "relative": "original-candidates/draft-01.json",
+      "bytes": 21845,
+      "sha256": "587e8a93cd33cf7ff165a6bfb643327453891b51017632998460925ed3c3464d",
+      "target": "capacity-native-compact-halo-scene-v1/original-candidates/draft-01.json"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-scene-v1\\draft-02.json",
+      "relative": "original-candidates/draft-02.json",
+      "bytes": 20152,
+      "sha256": "cda936ebe991e65d4a2735e79265aef35f0bde60e62284359d30900446ce9887",
+      "target": "capacity-native-compact-halo-scene-v1/original-candidates/draft-02.json"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-scene-v1\\draft-03.json",
+      "relative": "original-candidates/draft-03.json",
+      "bytes": 16982,
+      "sha256": "06becf4fccecb47847ec50a6a27c24e7d8c4c7d12a317ba677647073435839d9",
+      "target": "capacity-native-compact-halo-scene-v1/original-candidates/draft-03.json"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-scene-v1\\draft-04.json",
+      "relative": "original-candidates/draft-04.json",
+      "bytes": 22973,
+      "sha256": "7577d4f02ce20e9d47d289f3cb5d207ef780e1ef9e1b9c2bd652db35bfc4f883",
+      "target": "capacity-native-compact-halo-scene-v1/original-candidates/draft-04.json"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-scene-v1\\draft-05.json",
+      "relative": "original-candidates/draft-05.json",
+      "bytes": 19786,
+      "sha256": "6084f39f5ca16b2b8f12418a9beb6b92b54d49f7ff70aa69da54153193744e43",
+      "target": "capacity-native-compact-halo-scene-v1/original-candidates/draft-05.json"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-scene-v1\\draft-06.json",
+      "relative": "original-candidates/draft-06.json",
+      "bytes": 15541,
+      "sha256": "2b6adc8acedcfa7dd0fed82743dbbf82a5f9774d15bdccbcf61edaf974b8f2a9",
+      "target": "capacity-native-compact-halo-scene-v1/original-candidates/draft-06.json"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-scene-v1\\draft-07.json",
+      "relative": "original-candidates/draft-07.json",
+      "bytes": 17356,
+      "sha256": "5e9a3a8d58df43b1f3228ea33f7af5926ef3da79a7109bfe159cbb6bf14090c8",
+      "target": "capacity-native-compact-halo-scene-v1/original-candidates/draft-07.json"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-scene-v1\\draft-08.json",
+      "relative": "original-candidates/draft-08.json",
+      "bytes": 20616,
+      "sha256": "fff257083b634beff5e9a41aaa40fb3ed7a561a33f49b26704529f9e4b948361",
+      "target": "capacity-native-compact-halo-scene-v1/original-candidates/draft-08.json"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-scene-v1\\draft-09.json",
+      "relative": "original-candidates/draft-09.json",
+      "bytes": 15051,
+      "sha256": "5a612579055861e87ba3094a5403e3f86dca32bf64af8adb833179a1baea88b8",
+      "target": "capacity-native-compact-halo-scene-v1/original-candidates/draft-09.json"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-scene-v1\\draft-10.json",
+      "relative": "original-candidates/draft-10.json",
+      "bytes": 17640,
+      "sha256": "597a675308d0312c6ba99abbb02180b7bae6e521d5e879be038fd151b28263fd",
+      "target": "capacity-native-compact-halo-scene-v1/original-candidates/draft-10.json"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-scene-v1\\extend-compact-draft.mjs",
+      "relative": "original-candidates/extend-compact-draft.mjs",
+      "bytes": 3037,
+      "sha256": "8f66b1750ca8fd5f2c02c061428b5c965e102c8377745a3c9172d41a832394e5",
+      "target": "capacity-native-compact-halo-scene-v1/original-candidates/extend-compact-draft.mjs"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-scene-v1\\extend-short-tour-draft.mjs",
+      "relative": "original-candidates/extend-short-tour-draft.mjs",
+      "bytes": 3033,
+      "sha256": "9f604b6dc3ccb6f006fba38c919febcc4e3d58d8767c94c19715848b8324a250",
+      "target": "capacity-native-compact-halo-scene-v1/original-candidates/extend-short-tour-draft.mjs"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-scene-v1\\inspect-candidates.mjs",
+      "relative": "original-candidates/inspect-candidates.mjs",
+      "bytes": 1832,
+      "sha256": "d17e2ed511dc98640151509a13762bf248c3f81e20302a431fc5b6e74be7b0f8",
+      "target": "capacity-native-compact-halo-scene-v1/original-candidates/inspect-candidates.mjs"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-scene-v1\\make-review-proposal.mjs",
+      "relative": "original-candidates/make-review-proposal.mjs",
+      "bytes": 11247,
+      "sha256": "978a9bb32aa1fcb06b62c1b659313325f037ce169f7b47a964d50cb3f68f8686",
+      "target": "capacity-native-compact-halo-scene-v1/original-candidates/make-review-proposal.mjs"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-scene-v1\\prefix-scout-cost-compact-final-v2.json",
+      "relative": "original-candidates/prefix-scout-cost-compact-final-v2.json",
+      "bytes": 50131,
+      "sha256": "0746f4901f3cbadb47b74e4ba1386c3e7bfffe24025ab278856685462509112f",
+      "target": "capacity-native-compact-halo-scene-v1/original-candidates/prefix-scout-cost-compact-final-v2.json"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-scene-v1\\prefix-scout-cost-compact-final-v2.mjs",
+      "relative": "original-candidates/prefix-scout-cost-compact-final-v2.mjs",
+      "bytes": 2548,
+      "sha256": "ac30da68c8c15f64a999d9cc6a6aa5f020c89e5865a418162e34d810a3d38ae8",
+      "target": "capacity-native-compact-halo-scene-v1/original-candidates/prefix-scout-cost-compact-final-v2.mjs"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-scene-v1\\prefix-scout-cost-compact-v2.json",
+      "relative": "original-candidates/prefix-scout-cost-compact-v2.json",
+      "bytes": 50125,
+      "sha256": "c3ebf125f897253c41bec51c0c6fab737e0ff60345141c61ffa3ffe635487c55",
+      "target": "capacity-native-compact-halo-scene-v1/original-candidates/prefix-scout-cost-compact-v2.json"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-scene-v1\\prefix-scout-cost-compact-v2.mjs",
+      "relative": "original-candidates/prefix-scout-cost-compact-v2.mjs",
+      "bytes": 2542,
+      "sha256": "c3f26a5961b9e0bbe266bb7aad50627a95a7c16114672614bc888f3b5da89ba9",
+      "target": "capacity-native-compact-halo-scene-v1/original-candidates/prefix-scout-cost-compact-v2.mjs"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-scene-v1\\prefix-scout-cost-nearest-final-v3.json",
+      "relative": "original-candidates/prefix-scout-cost-nearest-final-v3.json",
+      "bytes": 58602,
+      "sha256": "d997af8375ba508f9b87ec833da239a542681ca0cc32ea3342d666df599ca1d0",
+      "target": "capacity-native-compact-halo-scene-v1/original-candidates/prefix-scout-cost-nearest-final-v3.json"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-scene-v1\\prefix-scout-cost-nearest-final-v3.mjs",
+      "relative": "original-candidates/prefix-scout-cost-nearest-final-v3.mjs",
+      "bytes": 2562,
+      "sha256": "8bfec072bcce1d734615bf74dd0c1068029144b181311bbaeb7044711ea3017a",
+      "target": "capacity-native-compact-halo-scene-v1/original-candidates/prefix-scout-cost-nearest-final-v3.mjs"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-scene-v1\\prefix-scout-cost-v3.json",
+      "relative": "original-candidates/prefix-scout-cost-v3.json",
+      "bytes": 46031,
+      "sha256": "b9ddfa584b9f264bfdf72b0187bcddd6db3deddd855fe7d5e7a22f9c32a3bbe0",
+      "target": "capacity-native-compact-halo-scene-v1/original-candidates/prefix-scout-cost-v3.json"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-scene-v1\\prefix-scout-cost.mjs",
+      "relative": "original-candidates/prefix-scout-cost.mjs",
+      "bytes": 2534,
+      "sha256": "23edb62f24801d53d501d503f94dffdd3a5f9a46b0a5c6097543a2ff764a3c46",
+      "target": "capacity-native-compact-halo-scene-v1/original-candidates/prefix-scout-cost.mjs"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-scene-v1\\prefix-scout-final-v2.log",
+      "relative": "original-candidates/prefix-scout-final-v2.log",
+      "bytes": 1315,
+      "sha256": "33b40269886b171ac5ddfa66e2f009346700344f3d52d372a4e2a4c91bf23e98",
+      "target": "capacity-native-compact-halo-scene-v1/original-candidates/prefix-scout-final-v2.log"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-scene-v1\\prefix-scout-nearest-final-v3.log",
+      "relative": "original-candidates/prefix-scout-nearest-final-v3.log",
+      "bytes": 1312,
+      "sha256": "13daf44fee7879064dd3da4698ab9bf5cdbe394f65d5c0fa90f2eeab061057cf",
+      "target": "capacity-native-compact-halo-scene-v1/original-candidates/prefix-scout-nearest-final-v3.log"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-scene-v1\\prefix-scout-run-compact-v2.log",
+      "relative": "original-candidates/prefix-scout-run-compact-v2.log",
+      "bytes": 1309,
+      "sha256": "ce0b021e85afb40689cb10e1b14f5192517812f8dc3520f82785168ac9928bb2",
+      "target": "capacity-native-compact-halo-scene-v1/original-candidates/prefix-scout-run-compact-v2.log"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-scene-v1\\prefix-scout-run-v3.log",
+      "relative": "original-candidates/prefix-scout-run-v3.log",
+      "bytes": 1302,
+      "sha256": "a802bd053a91c364749c19db1d84fd6a3efa5c0578086c86f66188147e741df1",
+      "target": "capacity-native-compact-halo-scene-v1/original-candidates/prefix-scout-run-v3.log"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-scene-v1\\reorder-suffix-v3.mjs",
+      "relative": "original-candidates/reorder-suffix-v3.mjs",
+      "bytes": 4011,
+      "sha256": "d73cd6fa82e0d28bbe21084b8f924b33c895afe27c51b66753cfafc76aaa4f76",
+      "target": "capacity-native-compact-halo-scene-v1/original-candidates/reorder-suffix-v3.mjs"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-scene-v1\\review-proposal-v1.json",
+      "relative": "original-candidates/review-proposal-v1.json",
+      "bytes": 188641,
+      "sha256": "31f59618df57aec60811a32c39c0cf76a5244d8cc4af844a017bff6220cdfb54",
+      "target": "capacity-native-compact-halo-scene-v1/original-candidates/review-proposal-v1.json"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-scene-v1\\scene-comparison-v1.json",
+      "relative": "original-candidates/scene-comparison-v1.json",
+      "bytes": 52624,
+      "sha256": "70a235e6ebf994f75e1466339913645ad98c48e3eafbd9755fd262a9d3fd53c1",
+      "target": "capacity-native-compact-halo-scene-v1/original-candidates/scene-comparison-v1.json"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-scene-v1\\static-lib-preimage-v1.mjs.txt",
+      "relative": "original-candidates/static-lib-preimage-v1.mjs.txt",
+      "bytes": 11361,
+      "sha256": "3f559db681d0c606dae4db5bdbdd4474a21ff7f8ded128ba684fcaca9bf40df6",
+      "target": "capacity-native-compact-halo-scene-v1/original-candidates/static-lib-preimage-v1.mjs.txt"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-scene-v1\\static-lib.mjs",
+      "relative": "original-candidates/static-lib.mjs",
+      "bytes": 11368,
+      "sha256": "2cf4c12d8aaead978a569db223e1c4527a594fa1f07e535601803e447f74df19",
+      "target": "capacity-native-compact-halo-scene-v1/original-candidates/static-lib.mjs"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-scene-v1\\suffix-continuous-completion-v3.json",
+      "relative": "original-candidates/suffix-continuous-completion-v3.json",
+      "bytes": 5622,
+      "sha256": "8e34f25ce54da51e4b71e1daf69f3e3adba038e5a7c589952ba28a51c3c99c5d",
+      "target": "capacity-native-compact-halo-scene-v1/original-candidates/suffix-continuous-completion-v3.json"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-scene-v1\\suffix-continuous-order-v3.json",
+      "relative": "original-candidates/suffix-continuous-order-v3.json",
+      "bytes": 28905,
+      "sha256": "5ce6abd57024887dad2aaaaca3493d26b12c49484703eec503ff3960f12f60f8",
+      "target": "capacity-native-compact-halo-scene-v1/original-candidates/suffix-continuous-order-v3.json"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-scene-v1\\suffix-nearest-completion-v3.json",
+      "relative": "original-candidates/suffix-nearest-completion-v3.json",
+      "bytes": 5952,
+      "sha256": "5361e827e0af5b9d17646f29b0e09d0e7cf77265f819f2d9eb958138a1bbdfc9",
+      "target": "capacity-native-compact-halo-scene-v1/original-candidates/suffix-nearest-completion-v3.json"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-scene-v1\\suffix-nearest-order-v3.json",
+      "relative": "original-candidates/suffix-nearest-order-v3.json",
+      "bytes": 28271,
+      "sha256": "b9bca8145db3550407323aef8f8d7ca9168d25ad958855b27d73f9f6ebd7de29",
+      "target": "capacity-native-compact-halo-scene-v1/original-candidates/suffix-nearest-order-v3.json"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-scene-v1\\suffix-order-run-v3.log",
+      "relative": "original-candidates/suffix-order-run-v3.log",
+      "bytes": 449,
+      "sha256": "c6d72060ee869352a94047de6dbebbec4ed38406078d7e179bc56dffcbfb79f5",
+      "target": "capacity-native-compact-halo-scene-v1/original-candidates/suffix-order-run-v3.log"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-scene-v1\\syntax-verification-v1.json",
+      "relative": "original-candidates/syntax-verification-v1.json",
+      "bytes": 3844,
+      "sha256": "0afbaeec83645a2a055a536f33a6cdc3d83e1903d525383e4eb5cdaca7005dd8",
+      "target": "capacity-native-compact-halo-scene-v1/original-candidates/syntax-verification-v1.json"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-scene-v1\\validate-candidate.mjs",
+      "relative": "original-candidates/validate-candidate.mjs",
+      "bytes": 11177,
+      "sha256": "29a256fca718bfcc39987c68b37a0cf613f7adc98e2223bd48b9904777bc944b",
+      "target": "capacity-native-compact-halo-scene-v1/original-candidates/validate-candidate.mjs"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-scene-v1\\validation-compact-v2-final-v2.json",
+      "relative": "original-candidates/validation-compact-v2-final-v2.json",
+      "bytes": 9263181,
+      "sha256": "38e2dcd3516fde45b299a6a63df58ccfb42ed5bafcb1b0e64471c4616b7a7d4a",
+      "target": "capacity-native-compact-halo-scene-v1/original-candidates/validation-compact-v2-final-v2.json"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-scene-v1\\validation-compact-v2.json",
+      "relative": "original-candidates/validation-compact-v2.json",
+      "bytes": 9263174,
+      "sha256": "cd81faab2b1d4492cd5419f65eca8757ca452ff715e423fd94d72f9d30b17d14",
+      "target": "capacity-native-compact-halo-scene-v1/original-candidates/validation-compact-v2.json"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-scene-v1\\validation-compact-v3.json",
+      "relative": "original-candidates/validation-compact-v3.json",
+      "bytes": 9391653,
+      "sha256": "c71038397cc5d8d112a3c1bbf577d84dd7f302b4de2b0933ae91f97d889cc5fa",
+      "target": "capacity-native-compact-halo-scene-v1/original-candidates/validation-compact-v3.json"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-scene-v1\\validation-continuous-ordered-final-v3.log",
+      "relative": "original-candidates/validation-continuous-ordered-final-v3.log",
+      "bytes": 993,
+      "sha256": "0e9c3bc7ffab7be5ac1e6756433d84bcb39d7e5b850b8326a0c086d101e5f2be",
+      "target": "capacity-native-compact-halo-scene-v1/original-candidates/validation-continuous-ordered-final-v3.log"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-scene-v1\\validation-nearest-ordered-final-v3.json",
+      "relative": "original-candidates/validation-nearest-ordered-final-v3.json",
+      "bytes": 7233814,
+      "sha256": "358e1eb027306424d82324147374e9eb9d11d190a98cc86b9934ac536869a8de",
+      "target": "capacity-native-compact-halo-scene-v1/original-candidates/validation-nearest-ordered-final-v3.json"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-scene-v1\\validation-nearest-ordered-final-v3.log",
+      "relative": "original-candidates/validation-nearest-ordered-final-v3.log",
+      "bytes": 1401,
+      "sha256": "11405bad093c790fa6f2e28effcb1758e7e79d753105e02df7233c636bf04f01",
+      "target": "capacity-native-compact-halo-scene-v1/original-candidates/validation-nearest-ordered-final-v3.log"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-scene-v1\\validation-run-compact-final-v2.log",
+      "relative": "original-candidates/validation-run-compact-final-v2.log",
+      "bytes": 1431,
+      "sha256": "563132ad930e37ab7ae18846de90e556917f0a26176bd795f7885a16463bb1fb",
+      "target": "capacity-native-compact-halo-scene-v1/original-candidates/validation-run-compact-final-v2.log"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-scene-v1\\validation-run-compact-v2.log",
+      "relative": "original-candidates/validation-run-compact-v2.log",
+      "bytes": 1422,
+      "sha256": "94b5dddbe18813d50692010129cb09b417dd5f947b6c387984a7b3d3c3081c91",
+      "target": "capacity-native-compact-halo-scene-v1/original-candidates/validation-run-compact-v2.log"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-scene-v1\\validation-run-compact-v3.log",
+      "relative": "original-candidates/validation-run-compact-v3.log",
+      "bytes": 1461,
+      "sha256": "6ce36faedd513e6f90c02f17f162a1b2e5339871beeec1ab961c00b8a1f85524",
+      "target": "capacity-native-compact-halo-scene-v1/original-candidates/validation-run-compact-v3.log"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-scene-v1\\validation-run-v1.log",
+      "relative": "original-candidates/validation-run-v1.log",
+      "bytes": 1448,
+      "sha256": "82cf46d5856f25ccd23764a1baf8300f9d05f2f3848a7b407ea5bfefaa395871",
+      "target": "capacity-native-compact-halo-scene-v1/original-candidates/validation-run-v1.log"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-scene-v1\\validation-v1.json",
+      "relative": "original-candidates/validation-v1.json",
+      "bytes": 9397970,
+      "sha256": "d22bb54720ca984c236ddb6662dcb26b61b98a74da0211b2ed113e937b5de66e",
+      "target": "capacity-native-compact-halo-scene-v1/original-candidates/validation-v1.json"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-scene-v1\\collection-manifest-v1.json",
+      "relative": "original-candidates/collection-manifest-v1.json",
+      "bytes": 13470,
+      "sha256": "43462960912e21b74cd0cc45d79c78676df1b4d5efedefce8795c27dad468a16",
+      "target": "capacity-native-compact-halo-scene-v1/original-candidates/collection-manifest-v1.json"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\actor-92-candidate-list-v1.json",
+      "relative": "bounded-suffix-repair/actor-92-candidate-list-v1.json",
+      "bytes": 11865,
+      "sha256": "0fbdc1f7a7dd1cb0e2836ff2ef2cf2d2f23637e1075ba3573bb82a49f903d863",
+      "target": "capacity-native-compact-halo-scene-v1/bounded-suffix-repair/actor-92-candidate-list-v1.json"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\attempt-count-correction-v1.json",
+      "relative": "bounded-suffix-repair/attempt-count-correction-v1.json",
+      "bytes": 987,
+      "sha256": "6072db3eac7c26b7d67928ac4455d649c6cbdd12d3e20d80209a10078f46b7e8",
+      "target": "capacity-native-compact-halo-scene-v1/bounded-suffix-repair/attempt-count-correction-v1.json"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\build-validation-adapters.mjs",
+      "relative": "bounded-suffix-repair/build-validation-adapters.mjs",
+      "bytes": 3222,
+      "sha256": "8e7fde40929dc1d9fec006a6040ed00d81ba67ae56fafa45f7e5d1ee53324a78",
+      "target": "capacity-native-compact-halo-scene-v1/bounded-suffix-repair/build-validation-adapters.mjs"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\candidate-10-repaired-v4.json",
+      "relative": "bounded-suffix-repair/candidate-10-repaired-v4.json",
+      "bytes": 804,
+      "sha256": "a42a26a195dd5ac25135bff57e73f7f21b71f97b5cc1814351920ece621362ba",
+      "target": "capacity-native-compact-halo-scene-v1/bounded-suffix-repair/candidate-10-repaired-v4.json"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\candidate-100-repaired-v4.json",
+      "relative": "bounded-suffix-repair/candidate-100-repaired-v4.json",
+      "bytes": 5844,
+      "sha256": "f87aae78a2d68d8daa63916a93580c33f4ef974da4769bd3531a62aafcf0f205",
+      "target": "capacity-native-compact-halo-scene-v1/bounded-suffix-repair/candidate-100-repaired-v4.json"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\conditional-level-supply-repaired-v4.json",
+      "relative": "bounded-suffix-repair/conditional-level-supply-repaired-v4.json",
+      "bytes": 48359,
+      "sha256": "503c9ce74452bd65fc5c30e1bfbfbd5ef419e7652be99914f99d139ab275ab8a",
+      "target": "capacity-native-compact-halo-scene-v1/bounded-suffix-repair/conditional-level-supply-repaired-v4.json"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\conditional-level-supply-repaired-v4.mjs",
+      "relative": "bounded-suffix-repair/conditional-level-supply-repaired-v4.mjs",
+      "bytes": 8728,
+      "sha256": "edf736ebffa3636d3ef15099c0999d76c18721c5f90dd1a779022b943cbf15aa",
+      "target": "capacity-native-compact-halo-scene-v1/bounded-suffix-repair/conditional-level-supply-repaired-v4.mjs"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\conditional-level-validation-v4.log",
+      "relative": "bounded-suffix-repair/conditional-level-validation-v4.log",
+      "bytes": 4757,
+      "sha256": "a5f99254e3a5c745b89a34f54f3506acd795d8e89d0ac2a961458e0a9b3aa501",
+      "target": "capacity-native-compact-halo-scene-v1/bounded-suffix-repair/conditional-level-validation-v4.log"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\diagnose-failure-setup-preimage-v1.mjs.txt",
+      "relative": "bounded-suffix-repair/diagnose-failure-setup-preimage-v1.mjs.txt",
+      "bytes": 4731,
+      "sha256": "a46e45348b490742757b4bb3c1a17294194fbc918620baac0e3d4b4caa840b07",
+      "target": "capacity-native-compact-halo-scene-v1/bounded-suffix-repair/diagnose-failure-setup-preimage-v1.mjs.txt"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\diagnose-failure-setup-preimage-v2.mjs.txt",
+      "relative": "bounded-suffix-repair/diagnose-failure-setup-preimage-v2.mjs.txt",
+      "bytes": 4709,
+      "sha256": "ad7b353af37e03fcf0bb8a2a829ea908b2c35ffe89b52cb684881936bda65cc9",
+      "target": "capacity-native-compact-halo-scene-v1/bounded-suffix-repair/diagnose-failure-setup-preimage-v2.mjs.txt"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\diagnose-failure.mjs",
+      "relative": "bounded-suffix-repair/diagnose-failure.mjs",
+      "bytes": 4795,
+      "sha256": "06360009df1b441d5555e367d7f73258e10cca7c4496abdf4eb1ead60df0961c",
+      "target": "capacity-native-compact-halo-scene-v1/bounded-suffix-repair/diagnose-failure.mjs"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\diagnose-original-run-v2.log",
+      "relative": "bounded-suffix-repair/diagnose-original-run-v2.log",
+      "bytes": 817,
+      "sha256": "9c13066c8bccd17626d0f233b0e7b0313e8c4649b57baf98fb2a8f449fa93243",
+      "target": "capacity-native-compact-halo-scene-v1/bounded-suffix-repair/diagnose-original-run-v2.log"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\diagnose-original-run-v3.log",
+      "relative": "bounded-suffix-repair/diagnose-original-run-v3.log",
+      "bytes": 1620,
+      "sha256": "2415609f238bf44af74bbc102f2586c33fe9e5f5f73c7f881f7d2b718ec67e55",
+      "target": "capacity-native-compact-halo-scene-v1/bounded-suffix-repair/diagnose-original-run-v3.log"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\diagnostic-adapter-setup-failure-v1.json",
+      "relative": "bounded-suffix-repair/diagnostic-adapter-setup-failure-v1.json",
+      "bytes": 344,
+      "sha256": "41064e86ccfeed611faaf654c19574e8b555a686add0d09e9c3926eacb470723",
+      "target": "capacity-native-compact-halo-scene-v1/bounded-suffix-repair/diagnostic-adapter-setup-failure-v1.json"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\final-independent-review-binding-v4.json",
+      "relative": "bounded-suffix-repair/final-independent-review-binding-v4.json",
+      "bytes": 2272,
+      "sha256": "0317e14bc05559c610ff89620eff96cca477925c56059d0ced2effbe91c80056",
+      "target": "capacity-native-compact-halo-scene-v1/bounded-suffix-repair/final-independent-review-binding-v4.json"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\full-static-validation-v4.log",
+      "relative": "bounded-suffix-repair/full-static-validation-v4.log",
+      "bytes": 821,
+      "sha256": "78942d30c23f4d5958b621ab0ae7c44c01f6a5d6da6c72e492b9080bdccf2dc6",
+      "target": "capacity-native-compact-halo-scene-v1/bounded-suffix-repair/full-static-validation-v4.log"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\full-static-validation-v5.log",
+      "relative": "bounded-suffix-repair/full-static-validation-v5.log",
+      "bytes": 1377,
+      "sha256": "d0d9e8e2c40929523a0ac0f47c202763a2f0131bec0b3febf73d268cb08d679c",
+      "target": "capacity-native-compact-halo-scene-v1/bounded-suffix-repair/full-static-validation-v5.log"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\independent-first10-review-v1.json",
+      "relative": "bounded-suffix-repair/independent-first10-review-v1.json",
+      "bytes": 11639,
+      "sha256": "6edf7561725c020f321bb06cdfc83043de7c0aa88735aa57c7a1c3aeaa3b85d6",
+      "target": "capacity-native-compact-halo-scene-v1/bounded-suffix-repair/independent-first10-review-v1.json"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\independent-repair-review-v1.json",
+      "relative": "bounded-suffix-repair/independent-repair-review-v1.json",
+      "bytes": 13583,
+      "sha256": "793e2334baf32a2c1963cf32f45ee4781bdb1dcc7fa486809b1b54b0f0b9f76e",
+      "target": "capacity-native-compact-halo-scene-v1/bounded-suffix-repair/independent-repair-review-v1.json"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\original-failure-diagnosis-v1.json",
+      "relative": "bounded-suffix-repair/original-failure-diagnosis-v1.json",
+      "bytes": 20418,
+      "sha256": "b974d00a999c0a92642de89bb2d2c78ba7cd5c16a0afc6517902d682ea101a67",
+      "target": "capacity-native-compact-halo-scene-v1/bounded-suffix-repair/original-failure-diagnosis-v1.json"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\original-prefix-contracts-v4.json",
+      "relative": "bounded-suffix-repair/original-prefix-contracts-v4.json",
+      "bytes": 19490,
+      "sha256": "39dcc8ec245cf784370f956f84f655aed9b350b59f13f07deb52d2b9cb562836",
+      "target": "capacity-native-compact-halo-scene-v1/bounded-suffix-repair/original-prefix-contracts-v4.json"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\prefix-scout-cost-repaired-v4.json",
+      "relative": "bounded-suffix-repair/prefix-scout-cost-repaired-v4.json",
+      "bytes": 80434,
+      "sha256": "83a0430b4ea1c399897cf0ffadff4b4bc693c4d46cc4162a5f1048be4e33468d",
+      "target": "capacity-native-compact-halo-scene-v1/bounded-suffix-repair/prefix-scout-cost-repaired-v4.json"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\prefix-scout-cost-repaired-v4.mjs",
+      "relative": "bounded-suffix-repair/prefix-scout-cost-repaired-v4.mjs",
+      "bytes": 2887,
+      "sha256": "2fa36a3c9fbf439147ac6030292680feb10dc834d729ec75ced5e29b3e7ba653",
+      "target": "capacity-native-compact-halo-scene-v1/bounded-suffix-repair/prefix-scout-cost-repaired-v4.mjs"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\prefix-scout-validation-v4.log",
+      "relative": "bounded-suffix-repair/prefix-scout-validation-v4.log",
+      "bytes": 1308,
+      "sha256": "6c36694e71d6dcf789edcac4aee56182eea5ad7e19fd196912b0c21d35033544",
+      "target": "capacity-native-compact-halo-scene-v1/bounded-suffix-repair/prefix-scout-validation-v4.log"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\protocol-navigation-counted.mjs",
+      "relative": "bounded-suffix-repair/protocol-navigation-counted.mjs",
+      "bytes": 18581,
+      "sha256": "9dd96b3b02ec142f4e0304b65fb1311105099679dd7707fb1610b0415ccd2304",
+      "target": "capacity-native-compact-halo-scene-v1/bounded-suffix-repair/protocol-navigation-counted.mjs"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\prove-repaired-leg-v4.mjs",
+      "relative": "bounded-suffix-repair/prove-repaired-leg-v4.mjs",
+      "bytes": 3000,
+      "sha256": "02edd4c73fe68c738c93cd7a5783d0ad4a90d85d0e6cf95f9f13cc416c408284",
+      "target": "capacity-native-compact-halo-scene-v1/bounded-suffix-repair/prove-repaired-leg-v4.mjs"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\repair-layout.mjs",
+      "relative": "bounded-suffix-repair/repair-layout.mjs",
+      "bytes": 8094,
+      "sha256": "90f28ee99b7a8e4a1205f912046ef7a8fd792f38035fc330ab159a15127844d1",
+      "target": "capacity-native-compact-halo-scene-v1/bounded-suffix-repair/repair-layout.mjs"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\repair-result-v1.json",
+      "relative": "bounded-suffix-repair/repair-result-v1.json",
+      "bytes": 82947,
+      "sha256": "79a52f8ac854eb9d03c987f8f2a7a15c1ddded8d0751ebab9a8de58c75da748b",
+      "target": "capacity-native-compact-halo-scene-v1/bounded-suffix-repair/repair-result-v1.json"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\repair-run-v1.log",
+      "relative": "bounded-suffix-repair/repair-run-v1.log",
+      "bytes": 1776,
+      "sha256": "02091a9c9b5a200a9f3e778b7f74878aae22a9164d32cb788d63839a2779df82",
+      "target": "capacity-native-compact-halo-scene-v1/bounded-suffix-repair/repair-run-v1.log"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\repaired-leg-proof-v4.json",
+      "relative": "bounded-suffix-repair/repaired-leg-proof-v4.json",
+      "bytes": 19105,
+      "sha256": "5b52ae5354a304db24ca09d402d8ceeb6040225836418befed63ebdf839b0759",
+      "target": "capacity-native-compact-halo-scene-v1/bounded-suffix-repair/repaired-leg-proof-v4.json"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\review-summary-v4.json",
+      "relative": "bounded-suffix-repair/review-summary-v4.json",
+      "bytes": 20628,
+      "sha256": "1669a862e5281a7623e0ba112471282556804df1c6eac24ea2d2cd78c5e43fd5",
+      "target": "capacity-native-compact-halo-scene-v1/bounded-suffix-repair/review-summary-v4.json"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\seal-review-summary-v4.mjs",
+      "relative": "bounded-suffix-repair/seal-review-summary-v4.mjs",
+      "bytes": 9199,
+      "sha256": "9d16605e5f0e69d2949c802097f930a793d467a0b2f7e047ce6aa27cd481d9f0",
+      "target": "capacity-native-compact-halo-scene-v1/bounded-suffix-repair/seal-review-summary-v4.mjs"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\syntax-verification-v4.json",
+      "relative": "bounded-suffix-repair/syntax-verification-v4.json",
+      "bytes": 3328,
+      "sha256": "9247be56b96304eab9f1dd9c3e1541dcaa1c74a1da45800a32b5ff99bd26a870",
+      "target": "capacity-native-compact-halo-scene-v1/bounded-suffix-repair/syntax-verification-v4.json"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\trial-actor-92-01-v1.json",
+      "relative": "bounded-suffix-repair/trial-actor-92-01-v1.json",
+      "bytes": 19398,
+      "sha256": "5688dd3e4a324789db00a6aba644965bfc70f6d0a7770d9a6dd0d02f195a0f2c",
+      "target": "capacity-native-compact-halo-scene-v1/bounded-suffix-repair/trial-actor-92-01-v1.json"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\trial-actor-92-02-v1.json",
+      "relative": "bounded-suffix-repair/trial-actor-92-02-v1.json",
+      "bytes": 37886,
+      "sha256": "c3139f6f2b6f3b9a45eb085b8a83f6d50f5a5ad826516009b4b37d6a0430c9c9",
+      "target": "capacity-native-compact-halo-scene-v1/bounded-suffix-repair/trial-actor-92-02-v1.json"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\validate-prefix-contracts-v4.mjs",
+      "relative": "bounded-suffix-repair/validate-prefix-contracts-v4.mjs",
+      "bytes": 2240,
+      "sha256": "9a9c81fc4b7a6b19ec0fce72d5c4f2363128e32d7e626348e728bf87e94037cf",
+      "target": "capacity-native-compact-halo-scene-v1/bounded-suffix-repair/validate-prefix-contracts-v4.mjs"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\validate-repaired.mjs",
+      "relative": "bounded-suffix-repair/validate-repaired.mjs",
+      "bytes": 11508,
+      "sha256": "e73e073ba446334ce836a31a2374f31700a618be947ea1bea57bc870c3de672b",
+      "target": "capacity-native-compact-halo-scene-v1/bounded-suffix-repair/validate-repaired.mjs"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\validation-adapter-provenance-v2.json",
+      "relative": "bounded-suffix-repair/validation-adapter-provenance-v2.json",
+      "bytes": 5649,
+      "sha256": "5106653752e12466e88de26e5f38fdb28956ed25d7853532d979f97541d1ac8b",
+      "target": "capacity-native-compact-halo-scene-v1/bounded-suffix-repair/validation-adapter-provenance-v2.json"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\validation-repaired-v4.json",
+      "relative": "bounded-suffix-repair/validation-repaired-v4.json",
+      "bytes": 7220826,
+      "sha256": "25f4d6261eff656654d3ed9cbc97c49355440fd6deb3ced3cd5e1dc2b97ea9aa",
+      "target": "capacity-native-compact-halo-scene-v1/bounded-suffix-repair/validation-repaired-v4.json"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\collection-manifest-v4.json",
+      "relative": "bounded-suffix-repair/collection-manifest-v4.json",
+      "bytes": 7084,
+      "sha256": "7409b23e47db0c10c8000d8e0b5bab193c9283a8f9f72deb7d8acf5ca39fd9e1",
+      "target": "capacity-native-compact-halo-scene-v1/bounded-suffix-repair/collection-manifest-v4.json"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\compact-halo-scene-independent-review-v1.json",
+      "relative": "compact-halo-scene-independent-review-v1.json",
+      "bytes": 11639,
+      "sha256": "6edf7561725c020f321bb06cdfc83043de7c0aa88735aa57c7a1c3aeaa3b85d6",
+      "target": "capacity-native-compact-halo-scene-v1/compact-halo-scene-independent-review-v1.json"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\compact-halo-repair-independent-review-v1.json",
+      "relative": "compact-halo-repair-independent-review-v1.json",
+      "bytes": 13583,
+      "sha256": "793e2334baf32a2c1963cf32f45ee4781bdb1dcc7fa486809b1b54b0f0b9f76e",
+      "target": "capacity-native-compact-halo-scene-v1/compact-halo-repair-independent-review-v1.json"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\compact-halo-repair-summary-review-addendum-v1.json",
+      "relative": "compact-halo-repair-summary-review-addendum-v1.json",
+      "bytes": 3473,
+      "sha256": "b37ff2ae3443b7fb1f10c6a9b217beff3d2c1a239851548975daff43660347aa",
+      "target": "capacity-native-compact-halo-scene-v1/compact-halo-repair-summary-review-addendum-v1.json"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\compact-halo-weak-five-supply-addendum-v1.json",
+      "relative": "compact-halo-weak-five-supply-addendum-v1.json",
+      "bytes": 21330,
+      "sha256": "588cd3ad129abc7d605b9b72c6ffaaf9a86a6f24e4a8b3869fc50c788ae0a270",
+      "target": "capacity-native-compact-halo-scene-v1/compact-halo-weak-five-supply-addendum-v1.json"
+    }
+  ],
+  "capacityAccepted": false
+}

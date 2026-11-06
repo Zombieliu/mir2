@@ -1,0 +1,29 @@
+
+running 24 tests
+test config::config_schema_integration_tests::schema9_migration_preserves_existing_billing_activities_and_monthly_card ... ok
+test procurement::tests::procurement_old_schema10_and11_billing_fence_predicate_rejects_new_store ... ok
+test runtime::billing_monthly_card::tests::ordinary_allocation_and_mail_normalization_skip_permanent_card_namespace ... ok
+test sui_usdc_billing::tests::usdc_and_stripe_share_one_atomic_wallet_application_without_receipt_relabeling ... ok
+test sui_usdc_billing::tests::usdc_candidates_keep_expired_issued_transactions_but_skip_unissued_and_confirmed_orders ... ok
+test sui_usdc_billing::tests::usdc_capability_is_scoped_expiring_and_payer_is_immutable ... ok
+test sui_usdc_billing::tests::usdc_chain_success_database_failure_can_retry_without_double_credit ... ok
+test sui_usdc_billing::tests::usdc_confirmed_invoice_or_finalized_creation_failure_releases_sponsor_fence ... ok
+test sui_usdc_billing::tests::usdc_duplicate_callback_parallel_confirmation_and_apply_credit_once ... ok
+test sui_usdc_billing::tests::usdc_existing_usd_offer_has_exact_six_decimal_price_and_test_provenance ... ok
+test sui_usdc_billing::tests::usdc_expired_capability_does_not_stop_reconciliation_or_delayed_credit ... ok
+test sui_usdc_billing::tests::usdc_invoice_mismatch_review_does_not_claim_final_creation_failure ... ok
+test sui_usdc_billing::tests::usdc_invoice_requires_persisted_creation_digest_and_final_checkpoint ... ok
+test sui_usdc_billing::tests::usdc_lease_takeover_keeps_exact_prepared_bytes_and_rejects_old_worker ... ok
+test sui_usdc_billing::tests::usdc_only_one_sponsor_creation_persists_and_unknown_or_expired_lease_cannot_release_it ... ok
+test sui_usdc_billing::tests::usdc_overflow_retains_paid_receipt_until_wallet_has_room ... ok
+test sui_usdc_billing::tests::usdc_payment_every_frozen_binding_and_finality_is_checked ... ok
+test sui_usdc_billing::tests::usdc_receipt_cannot_be_replayed_into_a_different_account_or_order ... ok
+test sui_usdc_billing::tests::usdc_reconcile_cursor_reaches_later_orders_and_accounts_beyond_first_page ... ok
+test sui_usdc_billing::tests::usdc_rejects_mainnet_wrapped_coin_and_price_overflow ... ok
+test sui_usdc_billing::tests::usdc_review_rejects_unknown_and_never_clears_prepared_transaction ... ok
+test sui_usdc_billing::tests::usdc_schema12_cannot_claim_new_authority_and_legacy_clean_store_upgrades ... ok
+test sui_usdc_billing::tests::usdc_submitted_digest_is_never_payment_authority ... ok
+test sui_usdc_billing::tests::usdc_unknown_commit_restart_recovers_durable_payment_without_resubmission ... ok
+
+test result: ok. 24 passed; 0 failed; 0 ignored; 0 measured; 3007 filtered out; finished in 0.42s
+

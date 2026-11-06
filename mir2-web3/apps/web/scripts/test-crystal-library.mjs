@@ -8,6 +8,7 @@ import { gzipSync } from "node:zlib";
 import {
   decodeFrame,
   decodeFrameRgba,
+  encodePng,
   parseLibrary,
 } from "./crystal-library.mjs";
 import {
@@ -266,14 +267,72 @@ function testUiExporterCarriesFrameSetAndMergesSelections() {
   }
 }
 
-function runUiExport(dataDir, outputDir, libraryName) {
+function runUiExport(dataDir, outputDir, libraryName, extraArgs = []) {
   const exporterPath = path.join(import.meta.dirname, "export-crystal-ui.mjs");
   const result = spawnSync(
     process.execPath,
-    [exporterPath, "--dataDir", dataDir, "--outputDir", outputDir, "--libraries", libraryName],
+    [exporterPath, "--dataDir", dataDir, "--outputDir", outputDir, "--libraries", libraryName, ...extraArgs],
     { encoding: "utf8" },
   );
   assert.equal(result.status, 0, `UI export failed:\n${result.stdout}\n${result.stderr}`);
+}
+
+function testUiExporterUsesCompleteCatalogueAndVerifiesReusedPixels() {
+  const root = mkdtempSync(path.join(tmpdir(), "mir2-ui-catalogue-export-"));
+  const dataDir = path.join(root, "Data");
+  const outputDir = path.join(root, "original-ui");
+  const itemManifest = path.join(root, "items.json");
+  mkdirSync(dataDir);
+  writeFileSync(path.join(dataDir, "Items.Lib"), buildSyntheticLibrary({
+    version: 2, count: 901, frameIndices: [0, 595, 605, 900],
+  }));
+  writeFileSync(itemManifest, JSON.stringify({ items: [
+    { item_index: 45, name: "same-name", image: 595, item_type: 2, shape: 10, stack_size: 1 },
+    { item_index: 51, name: "same-name", image: 605, item_type: 2, shape: 10, stack_size: 1 },
+    { item_index: 52, name: "variant", image: 595, item_type: 2, shape: 10, stack_size: 1 },
+  ] }));
+  try {
+    runUiExport(dataDir, outputDir, "Items", ["--itemManifest", itemManifest]);
+    const meta = JSON.parse(readFileSync(path.join(outputDir, "Items/meta.json"), "utf8"));
+    assert.deepEqual(meta.frames.map((frame) => frame.index), [0, 595, 605]);
+    assert.equal(meta.itemCatalogue.itemCount, 3);
+    assert.equal(meta.itemCatalogue.uniqueImageCount, 2);
+    assert.equal(meta.sourceLibrary.path, "Items.Lib");
+    assert.equal(meta.frames[1].x, -2);
+    assert.equal(meta.frames[1].y, -3);
+    assert.match(meta.frames[1].rgbaSha256, /^[a-f0-9]{64}$/);
+    runUiExport(dataDir, outputDir, "Items", ["--itemManifest", itemManifest, "--skipExisting", "true"]);
+
+    const expandedCatalogue = JSON.parse(readFileSync(itemManifest, "utf8"));
+    expandedCatalogue.items.push({ item_index: 53, image: 900, item_type: 8, shape: 0, stack_size: 500 });
+    writeFileSync(itemManifest, JSON.stringify(expandedCatalogue));
+    writeFileSync(path.join(dataDir, "Items.Lib"), buildSyntheticLibrary({
+      version: 2, count: 3663, frameIndices: [0, 595, 605, 900, 3660, 3661, 3662],
+    }));
+    runUiExport(dataDir, outputDir, "Items", ["--itemManifest", itemManifest, "--skipExisting", "true"]);
+    const stackMeta = JSON.parse(readFileSync(path.join(outputDir, "Items/meta.json"), "utf8"));
+    assert.deepEqual(stackMeta.frames.map((frame) => frame.index), [0, 595, 605, 900, 3660, 3661, 3662]);
+    assert.equal(stackMeta.itemCatalogue.catalogueImageCount, 3);
+    assert.equal(stackMeta.itemCatalogue.stackImageCount, 3);
+    assert.equal(stackMeta.itemCatalogue.uniqueImageCount, 6);
+
+    const badPng = encodePng(2, 2, Buffer.alloc(16));
+    writeFileSync(path.join(outputDir, "Items/605.png"), badPng);
+    const args = [path.join(import.meta.dirname, "export-crystal-ui.mjs"), "--dataDir", dataDir,
+      "--outputDir", outputDir, "--libraries", "Items", "--itemManifest", itemManifest, "--skipExisting", "true"];
+    const mismatched = spawnSync(process.execPath, args, { encoding: "utf8" });
+    assert.notEqual(mismatched.status, 0);
+    assert.match(mismatched.stderr, /does not match exact Crystal source pixels/);
+    assert.deepEqual(readFileSync(path.join(outputDir, "Items/605.png")), badPng,
+      "a failed reuse check must not overwrite the existing image");
+
+    writeFileSync(itemManifest, JSON.stringify({ items: [{ item_index: 55, image: 899, item_type: 2, shape: 0, stack_size: 1 }] }));
+    const absent = spawnSync(process.execPath, args, { encoding: "utf8" });
+    assert.notEqual(absent.status, 0);
+    assert.match(absent.stderr, /899 has no drawable source/);
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
 }
 
 async function main() {
@@ -283,6 +342,7 @@ async function main() {
   testCorruptInputs();
   await testDeterministicSourceSnapshot();
   testUiExporterCarriesFrameSetAndMergesSelections();
+  testUiExporterUsesCompleteCatalogueAndVerifiesReusedPixels();
   console.log("Crystal library FrameSet and source snapshot tests passed");
 }
 

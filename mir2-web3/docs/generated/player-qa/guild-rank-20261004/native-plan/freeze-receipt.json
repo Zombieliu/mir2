@@ -1,0 +1,36 @@
+{
+  "frozen_at_utc": "2026-10-04T15:32:48.540926+00:00",
+  "external_directory": "C:/mir2-playtest-releases/20261004-native-r18/guild-rank-native-plan-01",
+  "status": "FROZEN_READ_ONLY_PLAN_NOT_IMPLEMENTATION_OR_ACCEPTANCE",
+  "root_revision": "321316b791120a6fe549e4006623e63333a5543f",
+  "revision_read_from_files_only_no_git_process": true,
+  "observed_files_unchanged_at_freeze": 36,
+  "frozen_candidate_six_files_unchanged": true,
+  "sha256": {
+    "PLAN.md": "a9e9536f61de36939ba8cb8ba8f36e96e09d4969044551a3649a9a1bcae44bac",
+    "source-index.json": "9b69627b1086f869ab2479e22f60727de1b8264e8bb670da8e08fefc5a6f0d15",
+    "source-excerpts.txt": "3e8608a0a599befa726c989989cc1b93f4697db2160417d53c92c2a971159e4a",
+    "freeze-manifest.json": "97d19931404bf6639f2b4258541aee513ee48e70334763e7674d202eac0bd6af"
+  },
+  "failed_capture_range_preflight_retained": "capture-preflight-failure-01.txt",
+  "executed": {
+    "local_source_reads_and_hash_checks": true,
+    "new_external_plan_writes": true,
+    "runtime_edits": false,
+    "old_evidence_edits": false,
+    "git_process_or_mutation": false,
+    "cargo_or_build": false,
+    "tests_or_native_interactions": false,
+    "network_or_service": false,
+    "player_stores_or_installation": false
+  },
+  "open_gates": [
+    "Parent approval and P3 routing handoff before any implementation.",
+    "Composed authority-plus-root baseline, source-bound RED/GREEN.",
+    "Own UiReadModel character rank presentation.",
+    "Affected-member public rank BroadcastInfo, AOI re-entry and NoNames.",
+    "General critical-queue backpressure and no-nonce reply ambiguity.",
+    "Exact paired build, ordinary network/native and human acceptance.",
+    "Kick/leave/options/war/Guild kill EXP and SQL remain independently scoped."
+  ]
+}

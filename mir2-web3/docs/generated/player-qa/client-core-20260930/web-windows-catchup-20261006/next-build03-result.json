@@ -1,0 +1,72 @@
+{
+  "kind": "actual-existing-production-next03-build-only",
+  "actualToolChunk": "1823ad",
+  "config": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w5-next-build03.config.json",
+    "bytes": 3454,
+    "sha256": "aed0b79fb248c07c47f36ba5e068eb3d77fa557f5f9856f1e63640e45c1dc5ee"
+  },
+  "snapshot": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w5-next-build03-source-snapshot.json",
+    "bytes": 9755679,
+    "sha256": "3fb2a27459567bd528b3182eef007ff17f4bfd3237c8338a155df99351809445"
+  },
+  "outer": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w5-next-build03.outer.json",
+    "bytes": 503,
+    "sha256": "5b514011a8bcef4b2312c5a0453c783f6226ed8d2bd845964495f39c98dba248",
+    "value": {
+      "owner": "Root",
+      "exitCode": 0,
+      "builderPid": 83588,
+      "kind": "existing-production-next-webpack-standalone-build03-spouse",
+      "exited": true,
+      "disposed": true,
+      "elapsedMs": 69888,
+      "configPath": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w5-next-build03.config.json",
+      "uiOperated": false,
+      "runtimeLaunched": false,
+      "networkUsed": false,
+      "productionBuildAccepted": false,
+      "candidateAccepted": false,
+      "goalComplete": false
+    }
+  },
+  "stdout": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w5-next-build03.stdout.log",
+    "bytes": 2256,
+    "sha256": "936ea7bbe07c911ed6cd6bd696e0c1f67a1d88896e7c7aac93a7affd2c5a34b1"
+  },
+  "stderr": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w5-next-build03.stderr.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "generatedMetadata": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w5-next-build03-generated-metadata-review.json",
+    "bytes": 14899,
+    "sha256": "9cd5fc18650c11e09357f4b2e985b3096184b6a5c6c43d371197da58928e64a2"
+  },
+  "output": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w5-next-build03-output-hashes.json",
+    "bytes": 7819809,
+    "sha256": "8a0ad94819f8f75fa6d815cd547a9fb0d90ac90fcf040cc56ad03e669e7ab08b"
+  },
+  "nftClosure": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w5-next-build03-nft-closure.json",
+    "bytes": 81334536,
+    "sha256": "c4f8da00b9ff71524e93624fdcf496bfa45e49bde558da74ddf00318821deac3"
+  },
+  "fileCount": 19006,
+  "bytes": 589986418,
+  "strictTypeScript": true,
+  "staticPages": 13,
+  "core": "Source09 c4952ff unchanged",
+  "renderer": "Source09 bevy-e31f4cb651a7b4ef unchanged",
+  "uiOperated": false,
+  "runtimeLaunched": false,
+  "networkUsed": false,
+  "wasmInstantiated": false,
+  "candidateAccepted": false,
+  "goalComplete": false
+}

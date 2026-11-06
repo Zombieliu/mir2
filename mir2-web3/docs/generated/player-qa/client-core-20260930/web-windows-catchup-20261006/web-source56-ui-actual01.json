@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "owner": "Root",
+  "observedAtUtc": "2026-10-11T02:47:57.237Z",
+  "kind": "Source56 normal local browser login/StartGame cached DOM diagnostic actual read",
+  "url": "http://127.0.0.1:19205/",
+  "normalRefresh": true,
+  "actualLogin": true,
+  "actualStartGame": true,
+  "mapEntered": true,
+  "combatPassed": false,
+  "quest2RewardPassed": false,
+  "normalLogoutReloginThisRoundPassed": false,
+  "combatDiagnostic": {
+    "attached": true,
+    "owns": true,
+    "rawPresent": false,
+    "snapshotPresent": false,
+    "input": {
+      "factsPresent": true,
+      "enabled": true,
+      "ownerMatched": false
+    },
+    "baselineObservation": null
+  },
+  "currentNewConsoleErrors": 0,
+  "reason": "Page guarded cached baseline unavailable; no observation reached CombatHost despite enabled input. Source57 separates authenticated physical source from late UI owner revision.",
+  "buildSuccessDoesNotProveGameplay": true,
+  "overallPercentage": null,
+  "candidate100": false,
+  "goalComplete": false
+}

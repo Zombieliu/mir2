@@ -1,0 +1,413 @@
+{
+  "schemaVersion": 1,
+  "preparedAt": "2026-10-25T13:54:18.413Z",
+  "state": "FINAL_BINDINGS_PENDING_INDEPENDENT_REVIEW_AND_ROOT_SEAL",
+  "root": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-personal-projection-feasibility-15",
+  "publicChild": "capacity-native10-v2-personal-projection-followup-15-diagnostics",
+  "backendSourceCommit": "5c2e713863d3e9556a92f856b11df2396c73b137",
+  "driverSourceCommit": "5c2e713863d3e9556a92f856b11df2396c73b137",
+  "actualNodeCodeEvidenceCommit": "b84d5d02a8299b6ac36c5e56cb7006f6bc80d3bd",
+  "driverSourceSha256": "db4e22c69b4f1365d8135023e158f4de00ff35d58330cf7eca98801780e674e7",
+  "backendInputCount": 44,
+  "backendSourceAggregate": "6276d11a740e956cf8e3d316362a49900f1c761d9ffcdfd462cb7394056f7828",
+  "binarySha256": "d8791cceeed00fdb7019d1201aad19f06005790162df1b459a8cacac96f68756",
+  "full16RunId": "1792934546937-58ce6147",
+  "full16RealmStamp": "1792934538996-4d1caf58",
+  "files": [
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-personal-projection-feasibility-15\\DIAGNOSTICS-PREPARED.md",
+      "bytes": 691,
+      "sha256": "cd70796c89d6bc87ec29d9c00fce27fd398a4cf610927b13de5344ac5dce24d8"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-personal-projection-feasibility-15\\TEMPLATE-PREPARED-v1.json",
+      "bytes": 19737,
+      "sha256": "c0adff3c365d9d5754055c59c872c9cc91bb0d092971cbac5e38b6ba22e7df01"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-personal-projection-feasibility-15\\TEMPLATE-PREPARED-v2.json",
+      "bytes": 21685,
+      "sha256": "15d4a6e8a748c01f6d99e477fda4c07ddec8e22f9d37466e7e1a587a9ea97148"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-personal-projection-feasibility-15\\TEMPLATE-README.md",
+      "bytes": 2158,
+      "sha256": "8c2a58c36e6026699f70c65dd211bd3f791eb3dd273c4c369453c0c1abbaa264"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-personal-projection-feasibility-15\\actual-binding-preimages-v1\\candidate-release-binding.json.pending.txt",
+      "bytes": 1105,
+      "sha256": "f6efb9908fe31fffca62feb8c6d8b75ebbe765839df9fbe48f2d6ffb73c4c28b"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-personal-projection-feasibility-15\\actual-binding-preimages-v1\\current-driver-binding.json.pending.txt",
+      "bytes": 2623,
+      "sha256": "835298a1a2b36824b7a9df0749986e4524873c73352da34e8eaa39d2038a8f49"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-personal-projection-feasibility-15\\actual-binding-preimages-v1\\preparation-plan.json.pending.txt",
+      "bytes": 2214,
+      "sha256": "258c53ea7102cad8ced1091a8659b816e56c7a3f796b11fd1bf1f3602e31cfd4"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-personal-projection-feasibility-15\\actual-binding-preimages-v1\\scene-binding.json.pending.txt",
+      "bytes": 6627,
+      "sha256": "3050bcbb16388dda6efe98f805f7f289647c41140c1dcee94322b0c3ad3ccd40"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-personal-projection-feasibility-15\\actual-binding-proof-v1.json",
+      "bytes": 42659,
+      "sha256": "32b40ff986b011892dae5d3abb32128dbea723f1fdbc729c517ae3d7531a0a79"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-personal-projection-feasibility-15\\backend-driver-source-guard.mjs",
+      "bytes": 1811,
+      "sha256": "a0dac6a361d34684052787814bc6e38f2f4d3622759b34b75ece9baebcd639d1"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-personal-projection-feasibility-15\\backend-library-binding.json",
+      "bytes": 343,
+      "sha256": "4afc49bde39dc133ac2773e8ca5b9bda076cf01572c80faebf5c4e2dd82acd94"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-personal-projection-feasibility-15\\candidate-release-binding.json",
+      "bytes": 7642,
+      "sha256": "a05d0eb72534699f88a23c1f65dab768efc96c6ba33f47b6d44b07cdd4b45164"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-personal-projection-feasibility-15\\collect-public.mjs",
+      "bytes": 43619,
+      "sha256": "002dd233a5e6c3a6188d32db1f317d09519d537dc1b8bb6f28acad692bad144e"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-personal-projection-feasibility-15\\copied-baseline-current-addendum-v1.json",
+      "bytes": 3344,
+      "sha256": "4ca001d1a120bf0564b6db1319dee348d491f45a6f2094b9687d94baa4060294"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-personal-projection-feasibility-15\\copied-baseline-inputs.json",
+      "bytes": 29710,
+      "sha256": "3008b4fb3b133d2226ac3385742e5911ffd26b620c25fa95ff160c977cf56ad5"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-personal-projection-feasibility-15\\current-driver-binding.json",
+      "bytes": 2764,
+      "sha256": "770981cd2f4e277370167de0d62ab26cfd8656745209a8ae00484bdbcfe30184"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-personal-projection-feasibility-15\\driver-binding-contract.mjs",
+      "bytes": 1164,
+      "sha256": "0227181e85c179dc4ec1d666c67a369c2918d90ecf80a83c107a852a6c96d07b"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-personal-projection-feasibility-15\\driver-evidence-contract.mjs",
+      "bytes": 3682,
+      "sha256": "d455811ed1692fc25ff2950085360691fc212129eda0836055ef6f51e028c57e"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-personal-projection-feasibility-15\\driver-report-contract.mjs",
+      "bytes": 9598,
+      "sha256": "fe239fbe349511f717dbe476b6c3a2e53c62bfcb7da5a71d0d7bfe3be3014d08"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-personal-projection-feasibility-15\\final-inputs-approved.json",
+      "bytes": 991,
+      "sha256": "5cb5bd5fa84bb78f78151a058187c4c1fead17b8e91baeb3d25f9822cbce37ed"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-personal-projection-feasibility-15\\historical-scene-contract.mjs.txt",
+      "bytes": 10033,
+      "sha256": "2baa5ee428dfb3b95acb664993988977a570ac7c93c8bf28d8b0f70d859909ad"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-personal-projection-feasibility-15\\identity-derivation-proof-v1.json",
+      "bytes": 6955,
+      "sha256": "03a1f7c525baa8db870958dd4eb8b125ea7b8134e49ab34c2367bcd5d8e44ef6"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-personal-projection-feasibility-15\\initialize-private.ps1",
+      "bytes": 1941,
+      "sha256": "4deff086a5f53aaad191bcfd7e99de8e23c297fc6e1a121852a3fc13c1cf390e"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-personal-projection-feasibility-15\\input-lib.mjs",
+      "bytes": 16507,
+      "sha256": "ee7bce0d1734c12fa6413f04d065fa7aed8595eb3359372a66260754ed427d24"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-personal-projection-feasibility-15\\launcher-source-prepared-v1.json",
+      "bytes": 1197,
+      "sha256": "75b04e04443a2f465847e576e9e9d18937db217d6a6a6a4abdf4c8ff733b48ae"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-personal-projection-feasibility-15\\launcher-syntax-check.log",
+      "bytes": 3258,
+      "sha256": "a941e3992e40980bd4a646775a6007b8435a786738b6fc2ec43a3d98618e1d03"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-personal-projection-feasibility-15\\legacy14-original.mjs.txt",
+      "bytes": 10310,
+      "sha256": "d6d2bc6954d546cccc0d3273fbe9e236f381a10963a0a1d039087e74ae46e7ee"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-personal-projection-feasibility-15\\measured-phase-contract.mjs",
+      "bytes": 772,
+      "sha256": "b0977c31d9ee2345977e6af85f79beabc369d4c3e5c9448a50fa39133e0e2b39"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-personal-projection-feasibility-15\\metadata-snapshot-preimages-v1\\candidate-release-binding.json.before-role.txt",
+      "bytes": 920,
+      "sha256": "023875f05c5d4fe94ba777b562b016bfae79eb97af3c84f50ad88d8246cf1cb5"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-personal-projection-feasibility-15\\metadata-snapshot-preimages-v1\\current-driver-binding.json.before-role.txt",
+      "bytes": 2438,
+      "sha256": "5e6a020a5b4fd9e71be39baa7b208aed1ca01c389614eead64bfc4ffb3006cc9"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-personal-projection-feasibility-15\\monitor-owned.mjs",
+      "bytes": 1082,
+      "sha256": "f2d56c3eb26182251b6c8cc69c2274e5708d4e633c17bc4abb1414ed81c66c47"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-personal-projection-feasibility-15\\native-chase-report-contract.mjs",
+      "bytes": 2266,
+      "sha256": "66b9ce1a39a1cfbe610d3f1a98559c67d178667319718f8baaa748a5d7d102c0"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-personal-projection-feasibility-15\\passed-probe-window-contract.mjs",
+      "bytes": 3040,
+      "sha256": "3a238991e9ee9b81b93cdcb282cdd7c718afa076ec5eb1db11ef96cbe4b15cdb"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-personal-projection-feasibility-15\\passed-probe-window-contract.test.mjs",
+      "bytes": 3366,
+      "sha256": "7ab914ff3e0ed491b8b897b3099efd3ab4ad6613d452ec0e70351b092a8ceb58"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-personal-projection-feasibility-15\\pending-driver-binding.json",
+      "bytes": 378,
+      "sha256": "c7c1142ba65a7e7cf28ca94008e5579550f52b561300ca9508e8ec7a15732a00"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-personal-projection-feasibility-15\\preparation-plan.json",
+      "bytes": 3741,
+      "sha256": "74de1cc14a7b637c9745eb11322ae3ced3b6d4d088049ad265324c5e89d20d9f"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-personal-projection-feasibility-15\\prepare-inputs.mjs",
+      "bytes": 11638,
+      "sha256": "537984744fa34a108a90d817f935f8ad9915bd7e60da08bd86db6ea685da5364"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-personal-projection-feasibility-15\\projection-build-source-lib.mjs",
+      "bytes": 153,
+      "sha256": "ac0398e614b965e9390bf3a8cabd3f8b34c6a7c119c2945facbcc0b52464701d"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-personal-projection-feasibility-15\\recover-drained-owned.ps1",
+      "bytes": 2910,
+      "sha256": "443b47eb1988c982ffafb3b228e0aafff06734e1542d8219054d5c35ce408735"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-personal-projection-feasibility-15\\request-stop.mjs",
+      "bytes": 815,
+      "sha256": "13c6a9aee3cc0845344ebd0ebb5aa43a62da8b1629daf0fd77e7bb6d9b89d639"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-personal-projection-feasibility-15\\resource-profile.json",
+      "bytes": 1194,
+      "sha256": "a5e9012823bd816dedc3c40b13988618f3a18e69b3dd19edc4534a199a778ac3"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-personal-projection-feasibility-15\\run-adapter-synthetics.mjs",
+      "bytes": 2034,
+      "sha256": "09b381ec6fcfc99628666e2a2d1107f1a271bcff2685bb6045a9d1e83dd7510f"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-personal-projection-feasibility-15\\run-options.json",
+      "bytes": 2838,
+      "sha256": "f59f1a0763ae5c164f605ed5c5704ed1af4e8f3c6fc8419c7e0bb72835b4edff"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-personal-projection-feasibility-15\\run-owned.mjs",
+      "bytes": 19733,
+      "sha256": "0863cd82a5f4d791ba90926be7157eae02e78ba0e06282a5dd6aa9bb13b9a3a6"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-personal-projection-feasibility-15\\scenario-prefix-readiness.json",
+      "bytes": 2279,
+      "sha256": "7029269c6148b39f9c3def94d5d5313102b7e57e4df1d792e0343a98f9ee88ba"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-personal-projection-feasibility-15\\scenario.json",
+      "bytes": 804,
+      "sha256": "a42a26a195dd5ac25135bff57e73f7f21b71f97b5cc1814351920ece621362ba"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-personal-projection-feasibility-15\\scene-binding.json",
+      "bytes": 6703,
+      "sha256": "495d81afa7d827a2e78c586ac1aac42c80eb935a3a23fb2c574efb1085dedfd6"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-personal-projection-feasibility-15\\scene-contract.mjs",
+      "bytes": 10796,
+      "sha256": "6f91a930d2c1d05a7ca813aaff0c1e44d29289303913d470ac2a72c4211b207f"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-personal-projection-feasibility-15\\scene-driver-compatibility-proof-v1.json",
+      "bytes": 1936,
+      "sha256": "de4e8d981233d0fb5422a7d5469ed6c905d3632f5161a19b5b74384d3eb21059"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-personal-projection-feasibility-15\\scene-driver-compatibility.mjs",
+      "bytes": 1472,
+      "sha256": "2aa24f721bf4a3a545cb1a440f122d384b299ddc67925ddb240d2442e9f81193"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-personal-projection-feasibility-15\\slow-stage-diagnostics-config.json",
+      "bytes": 3963,
+      "sha256": "0e6b211a78c02fdf94a415a5a3ea7ecd8b7cdc9fdf0a6e25a746a75a59f2d885"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-personal-projection-feasibility-15\\slow-stage-helper-freeze-v1.json",
+      "bytes": 4235,
+      "sha256": "875ecbb07a386d339fc2e5f78f62dd9804dde7a5ad93a6114c01c34a3fd2b29d"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-personal-projection-feasibility-15\\slow-stage-public.mjs",
+      "bytes": 10186,
+      "sha256": "c2a137084f2166cbae603f721c6dde7322790c8dc2e05c2b8d59b79d7a58619f"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-personal-projection-feasibility-15\\slow-stage-public.test.mjs",
+      "bytes": 20681,
+      "sha256": "3315da0fe78985e95fc5b68f0f61689bee4bfc7c7108ebe6de8d8fcb5a1e0309"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-personal-projection-feasibility-15\\slow-stage-row-contract.mjs",
+      "bytes": 1553,
+      "sha256": "cc860f6578109f0a615ae83d9675c1f099f4814109f0fd95fcf475a7632d6db8"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-personal-projection-feasibility-15\\slow-stage-schema-contract.json",
+      "bytes": 7923,
+      "sha256": "a566d2357976ce4ec0a14c92da2e8f1490e724c527dcb757be46e3c6642ea6f6"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-personal-projection-feasibility-15\\source-closure-adjustment-v1.json",
+      "bytes": 2055,
+      "sha256": "23f97c58e5a0e6495a5cd66bd9e34048283f363bc54aa16506ba2581160adc7c"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-personal-projection-feasibility-15\\static-preparation-verification.json",
+      "bytes": 1358,
+      "sha256": "5893cd6d433cb573f0a168fc33b2cf99bb80cd351e74012ff6b0df4a31e5a541"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-personal-projection-feasibility-15\\synthetic-tests-v1.log",
+      "bytes": 6131,
+      "sha256": "f9a3757f968410a1e60ce48abcc9296c5a4014407e418608974034db1c67449b"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-personal-projection-feasibility-15\\template-adjustment-preimages-v1\\collect-public.mjs.before-library-pin.txt",
+      "bytes": 43587,
+      "sha256": "1e5aeec56a8c82fec4d8b7ebae09e4d4c3d6b4ef469322bb0f17b0618640e5f9"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-personal-projection-feasibility-15\\template-adjustment-preimages-v1\\prepare-inputs.mjs.before-library-pin.txt",
+      "bytes": 11514,
+      "sha256": "dab6308f8fe083411742e6edb66dddde0d540f94c01799c0e22afbba7824976e"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-personal-projection-feasibility-15\\template-syntax-v1.json",
+      "bytes": 359,
+      "sha256": "a2fa5342d1524981441b8f8ab05bef83fa62af3648796ee4a85aa984370e131e"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-personal-projection-feasibility-15\\verify-full16-gate.mjs",
+      "bytes": 4679,
+      "sha256": "cc9bed869452261362b93941da11afd1e7e22702616ff9823cda9122669cf31f"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-personal-projection-feasibility-15\\verify-public.mjs",
+      "bytes": 19241,
+      "sha256": "c4680a6c665b2e109b40532ea12dbbf1c37333978aaff01bddb63d8f827ea3bf"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-personal-projection-feasibility-15\\wire-adapter-synthetic-tests.json",
+      "bytes": 2413,
+      "sha256": "5a6905e7ad356e1c41266d92332b1694a2f9a16a80b26b4c4951a40a8ecc9d5a"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-personal-projection-feasibility-15\\wire-adapter-synthetic-tests.log",
+      "bytes": 2205,
+      "sha256": "910421ec8ebcd51e3caee4cc7a936ba2e61b71f90a81ae3ea0217ac692c4f633"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-personal-projection-feasibility-15\\wire-diagnostics-adapter.mjs",
+      "bytes": 2514,
+      "sha256": "82c5ae7432cb7b69e576e7c283e4a4ca6afe074b692342ea5a82516dd3fef164"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-personal-projection-feasibility-15\\wire-diagnostics-adapter.test.mjs",
+      "bytes": 7373,
+      "sha256": "8ffa525f9df27dae593faeb355f4a82d227ae0576af4afc2b5f807cb8baab3c5"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-personal-projection-feasibility-15\\wire-diagnostics-contract.mjs",
+      "bytes": 15767,
+      "sha256": "8d2c06f251a3b623d4ff135211046b9d039b31e9bfdad799c0cb1fd3ddfda13a"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\personal-monster-projection-release-v1\\source-lib-v3.mjs",
+      "bytes": 15618,
+      "sha256": "ffd87a222e5f04d1f61c29ee71bc69144cc90f696decf5c5aacc821817ba80fb"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\personal-monster-projection-release-v1\\final-source-binding-v3.json",
+      "bytes": 1383,
+      "sha256": "91e3fbbeff30a19d414de3abfc9ddfbedc91d6bc74c2d4ec667ba630023ce893"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\root-personal-projection-functional-validation-v1.json",
+      "bytes": 13454,
+      "sha256": "94d58944d2a441bd1c3358a11a356fca9323f8aa88027af4cb988bf58ccc72b8"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-personal-monster-projection-v1.json",
+      "bytes": 2376,
+      "sha256": "613b82935c45e476ad1ba32e2592e562e14ea6997062fc9f12b9de02bb770121"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\backend-source-personal-monster-projection-v1.json",
+      "bytes": 32926,
+      "sha256": "151869b76d13202e3c6557f908b5adc5643d1b0579cd7d4961cf0458c71cec52"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\personal-monster-projection-v1-build-receipt.json",
+      "bytes": 2373,
+      "sha256": "80e8f27189012cff6d4d594fc0f9af9dd4e194a6145559d3856e0e7f397d1f05"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\personal-projection-full16-root-independent-cleanup-v1.json",
+      "bytes": 288,
+      "sha256": "4b9f2783404dfb04b3765022bc3a54eaec128a767118ccfdb27d60d2223fc777"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\probe15-prepared-independent-review-v1.json",
+      "bytes": 7029,
+      "sha256": "bd95e500d5ddc83beb11e9efa61ec2c84b25c50fdc4efd873d1e8714525c12f5"
+    }
+  ],
+  "sourceSha256": "423beb15c1387b7e09146985f8fba5aec345433d0f8d21e629dacefb3838dffb",
+  "nodeSyntaxChecks": 26,
+  "nodeSyntaxAllZero": true,
+  "powerShellAstChecks": 2,
+  "accountPrepared": false,
+  "binaryCopied": false,
+  "realmStarted": false,
+  "sealed": false,
+  "sourceGuardExecuted": false,
+  "capacityAccepted": false
+}

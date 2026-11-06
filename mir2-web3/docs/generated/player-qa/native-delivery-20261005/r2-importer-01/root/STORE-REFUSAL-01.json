@@ -1,0 +1,9 @@
+{
+  "schema": "mir2.importer-proof-pin-correction.v1",
+  "firstAttemptExitCode": 1,
+  "reason": "mistyped_inventory_expected_hash",
+  "firstAttemptWrites": false,
+  "actualInventorySha256": "fa91df5a463fc02896a1a855b991227fce5fda11d4c43b08cdf36a3e1bd8cb40",
+  "originalSourcesAndProofUnchanged": true,
+  "firstScriptSha256": "a3f8edd783671f5643981143d63885ae8768e0a16431d270909b59c97f0d71fb"
+}

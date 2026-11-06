@@ -1,0 +1,61 @@
+{
+  "owner": "Root",
+  "kind": "Source73 actual final portable25 on strict03 after default root repair",
+  "config": {
+    "path": "C:/mir2-cross-platform-storage-20261002/web-source73-warehouse-local-skins-20261012-01/root-approved01/portable-tests03-config.json",
+    "bytes": 4156,
+    "sha256": "a43f31d71174ff87494b05f551fdd411659a66774c606daffbf749bbe2dbaff9"
+  },
+  "snapshot": {
+    "path": "C:/mir2-cross-platform-storage-20261002/web-source73-warehouse-local-skins-20261012-01/standalone-preparation03/full-source-snapshot01.json",
+    "bytes": 75824066,
+    "sha256": "3e51721c2b684acbb4cfb6a608f135b997ba51094c1adaf77c6ac4cfc4806b52"
+  },
+  "sourceReview": {
+    "path": "C:/mir2-cross-platform-storage-20261002/web-source73-warehouse-local-skins-20261012-01/root-approved01/portable-final-source-review01.json",
+    "bytes": 3004,
+    "sha256": "7887d40caddbc529bd1949d296deaeb47dd1a3106a9913552330ecad86970e6f"
+  },
+  "outer": {
+    "owner": "Root",
+    "exitCode": 0,
+    "builderPid": 81636,
+    "kind": "Source73 final portable25 after portable default root repair",
+    "exited": true,
+    "disposed": true,
+    "elapsedMs": 2281,
+    "configPath": "C:/mir2-cross-platform-storage-20261002/web-source73-warehouse-local-skins-20261012-01/root-approved01/portable-tests03-config.json",
+    "uiOperated": false,
+    "runtimeLaunched": false,
+    "networkUsed": false,
+    "productionBuildAccepted": false,
+    "candidateAccepted": false,
+    "goalComplete": false
+  },
+  "stdout": {
+    "path": "C:/mir2-cross-platform-storage-20261002/web-source73-warehouse-local-skins-20261012-01/portable-tests03/stdout.log",
+    "bytes": 6437,
+    "sha256": "ad5635f80d78d58404c0d8b367f26192c5086bb0a1f53e0ceb5a0b6093757895"
+  },
+  "stderr": {
+    "path": "C:/mir2-cross-platform-storage-20261002/web-source73-warehouse-local-skins-20261012-01/portable-tests03/stderr.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "counts": {
+    "tests": 25,
+    "pass": 25,
+    "fail": 0,
+    "cancelled": 0,
+    "skipped": 0,
+    "todo": 0
+  },
+  "unchangedOriginalCaller": true,
+  "originalCallerPostguardCompleted": true,
+  "sourceInputs": 71034,
+  "actualNodeAccepted": true,
+  "packageAccepted": false,
+  "uiTested": false,
+  "candidateAccepted": false,
+  "goalComplete": false
+}

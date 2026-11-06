@@ -1,0 +1,110 @@
+{
+  "schema": "mir2.unified.evidence.phase.v1",
+  "passed": true,
+  "curatedAtUtc": "2026-10-29T15:53:22.464335+00:00",
+  "producerReceipt": {
+    "filename": "web-typecheck-validation.json",
+    "bytes": 4295,
+    "sha256": "86de6e62e8505ef53b6a3b54297458ee2e61e89b56e03f12cfdb3ab008683ef8"
+  },
+  "producerReport": {
+    "recordedAt": "2026-10-29T14:39:40.898Z",
+    "project": "C:/Users/Administrator/.codex/worktrees/unified-wallet-recharge-20261029/mir2-player-journey/mir2-web3/apps/web",
+    "nodeVersion": "v22.18.0",
+    "passed": true,
+    "sourceUnchanged": true,
+    "sourcePinsBefore": {
+      "package.json": "d8895e48a866e8227b071e66c0a2150696a7440715a617a6b68f7f64a15d7a94",
+      "package-lock.json": "c4211041caeaaae3203415df7334c661d2a8dfd54c1e235a531eb6e68f6c4e74",
+      "tsconfig.json": "1e28cc1fce301246162974a5935e133cd7a89d1cd056dc1d422d2f15c5bfde07",
+      "next.config.ts": "60913badba69ca04427e975199fe0a3614f94b49c4a8bbd800e8407888bfdaab"
+    },
+    "sourcePinsAfter": {
+      "package.json": "d8895e48a866e8227b071e66c0a2150696a7440715a617a6b68f7f64a15d7a94",
+      "package-lock.json": "c4211041caeaaae3203415df7334c661d2a8dfd54c1e235a531eb6e68f6c4e74",
+      "tsconfig.json": "1e28cc1fce301246162974a5935e133cd7a89d1cd056dc1d422d2f15c5bfde07",
+      "next.config.ts": "60913badba69ca04427e975199fe0a3614f94b49c4a8bbd800e8407888bfdaab"
+    },
+    "originalTypecheckScript": "node ./scripts/test-crystal-respawn-manifest-sync.mjs && next typegen && tsc --noEmit --pretty false",
+    "steps": [
+      {
+        "name": "respawn-manifest-sync",
+        "exitCode": 0,
+        "signal": null,
+        "durationMs": 68
+      },
+      {
+        "name": "next-typegen",
+        "exitCode": 0,
+        "signal": null,
+        "durationMs": 3553
+      },
+      {
+        "name": "typescript-no-emit",
+        "exitCode": 0,
+        "signal": null,
+        "durationMs": 9628
+      }
+    ],
+    "dependencyOverlay": {
+      "path": "C:\\mir2-build\\unified-20261029\\web-dependency-overlay",
+      "primary": "F:/m9/mir2-web3/apps/web/node_modules",
+      "supplement": "E:/mir2-player-journey/mir2-web3/apps/web/node_modules",
+      "versions": {
+        "next": {
+          "version": "16.4.1",
+          "packagePath": "F:\\m9\\mir2-web3\\apps\\web\\node_modules\\next\\package.json",
+          "packageJsonSha256": "546222266ef4402af870e96f03964570038e8498f4a4f7cb6dcf591f08cb07ec"
+        },
+        "typescript": {
+          "version": "5.9.3",
+          "packagePath": "F:\\m9\\mir2-web3\\apps\\web\\node_modules\\typescript\\package.json",
+          "packageJsonSha256": "822ef7ca6452205657b6288b066481ecf508bfbf43455d715cf7d3ec457561e6"
+        },
+        "@mysten/sui": {
+          "version": "2.16.2",
+          "packagePath": "F:\\m9\\mir2-web3\\apps\\web\\node_modules\\@mysten\\sui\\package.json",
+          "packageJsonSha256": "4bb52ca832818557891b5b9c018031e637aec7abccd495ceaffae15517d75372"
+        },
+        "@mysten/wallet-standard": {
+          "version": "0.20.3",
+          "packagePath": "F:\\m9\\mir2-web3\\apps\\web\\node_modules\\@mysten\\wallet-standard\\package.json",
+          "packageJsonSha256": "127bbb6b891fe92b3addc1b4a835eadb43f3061ea6ada6203eb93e5a6efdc28d"
+        },
+        "qrcode": {
+          "version": "1.5.4",
+          "packagePath": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\node_modules\\qrcode\\package.json",
+          "packageJsonSha256": "cbe26d7282c802f4ab9c1f790c5d8450d2b5c82e8bb5f67e3a5c2641ea347d1d"
+        },
+        "@types/qrcode": {
+          "version": "1.5.6",
+          "packagePath": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\node_modules\\@types\\qrcode\\package.json",
+          "packageJsonSha256": "38799c32980971911961a03b1b0b35d7c6c67e073c7ad9ba8c610dc5db5ab5e8"
+        }
+      },
+      "installed": false,
+      "dependencyMutation": false
+    },
+    "generatedIgnoredPaths": [
+      "C:\\Users\\Administrator\\.codex\\worktrees\\unified-wallet-recharge-20261029\\mir2-player-journey\\mir2-web3\\apps\\web\\node_modules",
+      "C:\\Users\\Administrator\\.codex\\worktrees\\unified-wallet-recharge-20261029\\mir2-player-journey\\mir2-web3\\apps\\web\\.next",
+      "C:\\Users\\Administrator\\.codex\\worktrees\\unified-wallet-recharge-20261029\\mir2-player-journey\\mir2-web3\\apps\\web\\next-env.d.ts"
+    ],
+    "incrementalOutputDirectory": "C:/mir2-build/unified-20261029",
+    "boundaries": {
+      "rustRerun": false,
+      "sourceEdits": false,
+      "serviceStarted": false,
+      "nextBuild": false,
+      "nextTypegen": true,
+      "docker": false,
+      "networkInstall": false,
+      "lockEdits": false
+    },
+    "log": {
+      "path": "C:\\mir2-build\\unified-20261029\\web-typecheck.log",
+      "sha256": "6ebcdba9a51812e4c2cbc7b29316ebefbaa011b35ea67826b44ccc01f5011de8"
+    }
+  },
+  "phase": "three equivalent script steps; no browser, service or chain transaction"
+}

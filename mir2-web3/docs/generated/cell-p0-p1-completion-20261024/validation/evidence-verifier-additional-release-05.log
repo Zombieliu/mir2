@@ -1,0 +1,101 @@
+TAP version 13
+# Subtest: fresh full 16 passes only with the matching raw paired death, revival, kill, drop and pickup receipts
+ok 1 - fresh full 16 passes only with the matching raw paired death, revival, kill, drop and pickup receipts
+  ---
+  duration_ms: 69.5958
+  type: 'test'
+  ...
+# Subtest: old 14/2 cannot be promoted by flipping its summary flags
+ok 2 - old 14/2 cannot be promoted by flipping its summary flags
+  ---
+  duration_ms: 1.0157
+  type: 'test'
+  ...
+# Subtest: raw traces reject omitted receipts, privileged commands and unredacted credential fields
+ok 3 - raw traces reject omitted receipts, privileged commands and unredacted credential fields
+  ---
+  duration_ms: 11.8944
+  type: 'test'
+  ...
+# Subtest: owned realm cleanup proves only the recorded loopback PID and six zero connection counters
+ok 4 - owned realm cleanup proves only the recorded loopback PID and six zero connection counters
+  ---
+  duration_ms: 2.5128
+  type: 'test'
+  ...
+# Subtest: histograms independently recompute quantiles and reject saturation, missing buckets and forged totals
+ok 5 - histograms independently recompute quantiles and reject saturation, missing buckets and forged totals
+  ---
+  duration_ms: 0.386
+  type: 'test'
+  ...
+# Subtest: raw artifact inventory rejects byte changes, missing and extra files without normalizing evidence
+ok 6 - raw artifact inventory rejects byte changes, missing and extra files without normalizing evidence
+  ---
+  duration_ms: 22.8092
+  type: 'test'
+  ...
+# Subtest: failed capacity diagnostics remain failed and forged passing summaries are rejected
+ok 7 - failed capacity diagnostics remain failed and forged passing summaries are rejected
+  ---
+  duration_ms: 0.4951
+  type: 'test'
+  ...
+# Subtest: capacity acceptance requires matching raw stages, fixed normal policy and complete continuous telemetry
+ok 8 - capacity acceptance requires matching raw stages, fixed normal policy and complete continuous telemetry
+  ---
+  duration_ms: 537.0767
+  type: 'test'
+  ...
+# Subtest: explicit historical Git blobs preserve the 32 frozen code inputs after workspace changes, using only declared code LF normalization
+ok 9 - explicit historical Git blobs preserve the 32 frozen code inputs after workspace changes, using only declared code LF normalization
+  ---
+  duration_ms: 3015.8681
+  type: 'test'
+  ...
+# Subtest: a later release binds its own Git inputs and binary without replacing the old lifecycle source proof
+ok 10 - a later release binds its own Git inputs and binary without replacing the old lifecycle source proof
+  ---
+  duration_ms: 683.9135
+  type: 'test'
+  ...
+# Subtest: archive streaming hashes raw bytes and parses cross-chunk Unicode/escaped large lines without retaining gameplay payloads
+ok 11 - archive streaming hashes raw bytes and parses cross-chunk Unicode/escaped large lines without retaining gameplay payloads
+  ---
+  duration_ms: 66.4639
+  type: 'test'
+  ...
+# Subtest: archive reads require an explicit root and reject missing, absolute, traversal, private and linked paths
+ok 12 - archive reads require an explicit root and reject missing, absolute, traversal, private and linked paths
+  ---
+  duration_ms: 4.9347
+  type: 'test'
+  ...
+# Subtest: archive streaming rejects malformed UTF-8/JSON and excessive selected rows rather than dropping evidence
+ok 13 - archive streaming rejects malformed UTF-8/JSON and excessive selected rows rather than dropping evidence
+  ---
+  duration_ms: 4.5911
+  type: 'test'
+  ...
+# Subtest: 10001 real-shape monitor rows stream beyond the former 64MiB limit with bounded phase snapshots
+ok 14 - 10001 real-shape monitor rows stream beyond the former 64MiB limit with bounded phase snapshots
+  ---
+  duration_ms: 1632.782
+  type: 'test'
+  ...
+# {"rawBytes":88898819,"rawRows":10002,"monitorRows":10001,"retainedUniqueSnapshots":66,"phaseWindows":32,"retainedNonMonitorRows":1,"projectionBytes":712697,"processPeakRssKiB":156920}
+# Subtest: discarded intermediate monitors still detect stop, process switches and cumulative resets
+ok 15 - discarded intermediate monitors still detect stop, process switches and cumulative resets
+  ---
+  duration_ms: 9.642
+  type: 'test'
+  ...
+1..15
+# tests 15
+# suites 0
+# pass 15
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 6143.5777

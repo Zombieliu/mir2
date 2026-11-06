@@ -1,0 +1,79 @@
+{
+  "reloadAt": "2026-10-11T04:21:53.229Z",
+  "normalLogin": true,
+  "startGame": true,
+  "position": [
+    292,
+    614
+  ],
+  "gold": 200,
+  "sharedBagReady": true,
+  "bagX": {
+    "passed": true,
+    "point": [
+      824,
+      94
+    ],
+    "observedAt": "2026-10-11T04:23:00.673Z",
+    "screenshot": "web-source59-bag-x-closed01.png"
+  },
+  "bagToBag": {
+    "passed": false,
+    "item": "Candle",
+    "from": [
+      674,
+      131
+    ],
+    "to": [
+      570,
+      162
+    ],
+    "attemptAt": "2026-10-11T04:23:10.825Z",
+    "sourceIconRetained": true,
+    "destinationEmpty": true,
+    "screenshot": "web-source59-bag-drag-blocked01.png",
+    "itemTooltipConfirmed": {
+      "name": "Candle",
+      "kind": "Torch",
+      "durability": "8/8"
+    }
+  },
+  "qaAdminUsed": false,
+  "directGameApiUsed": false,
+  "beltUse": {
+    "normalClick": true,
+    "passed": true,
+    "before": 2,
+    "after": 1,
+    "usedAt": "2026-10-11T04:24:30.218Z",
+    "hp": [
+      18,
+      18
+    ],
+    "healingProven": false,
+    "screenshot": "web-source59-belt-use01.png"
+  },
+  "consoleErrorsSinceReload": 0,
+  "inventoryNames": {
+    "bagPotion": "(HP)DrugSmall",
+    "bagPotionCount": 2,
+    "beltPotion": "SunPotion",
+    "beltPotionCount": 1
+  },
+  "saveReload": {
+    "passed": true,
+    "normalAltX": true,
+    "returnedToLogin": true,
+    "normalRelogin": true,
+    "startGame": true,
+    "position": [
+      292,
+      614
+    ],
+    "gold": 200,
+    "beltSunPotionCount": 1,
+    "rewardIconsRetained": true,
+    "sharedBagReady": true,
+    "screenshot": "web-source59-relogin-inventory01.png"
+  }
+}

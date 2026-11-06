@@ -1,0 +1,16 @@
+{
+  "path": "E:/mir2-player-journey/work/native-play-acceptance-20261010/screenshots/007-r23-language-options.jpg",
+  "purpose": "Actual non-authentication locale menu shows nine requested locales.",
+  "observedWindow": {
+    "app": "process:D:\\Mir2Invite\\game\\mir2-platform-windows.exe",
+    "id": 18419886,
+    "title": "numeron-legend of rebirth"
+  },
+  "screenshotId": "screenshot-0",
+  "width": 1026,
+  "height": 800,
+  "mime": "image/jpeg",
+  "bytes": 303857,
+  "sha256": "e37db2e8e68615536632af68e49dfe1d11d7529ec9451b4a465a4b576ae1699c",
+  "recordedUtc": "2026-10-09T18:27:20.992Z"
+}

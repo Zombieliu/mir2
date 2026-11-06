@@ -1,0 +1,62 @@
+{
+  "schemaVersion": 1,
+  "sourceGeneration": "Source67 generation02",
+  "kind": "actual original strict Next build",
+  "capturedAt": "2026-10-11T11:28:21.700Z",
+  "execution": {
+    "owner": "Root",
+    "builderPid": 52396,
+    "exitCode": 0,
+    "exited": true,
+    "disposed": true,
+    "elapsedMs": 42337
+  },
+  "configuration": {
+    "path": "C:/mir2-cross-platform-storage-20261002/web-source67-storage-ownership-20261011-01/root-approved01/next-build03-config.json",
+    "bytes": 5418,
+    "sha256": "c7b4c689340cf1eaebc3a6f83a0ed8b46a974adefc16552a59df3253adb8865b"
+  },
+  "inputReview": {
+    "path": "C:/mir2-cross-platform-storage-20261002/web-source67-storage-ownership-20261011-01/root-approved01/next-source-review03.json",
+    "bytes": 8683,
+    "sha256": "caec98166fc6e19f4d0dfaffc7d142bc7638200f24b4b9234098bf56ec427ece"
+  },
+  "nodeRegression": {
+    "file": "web-source67-node-actual02.json",
+    "path": "E:/mir2-player-journey/mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source67-node-actual02.json",
+    "bytes": 3585,
+    "sha256": "d39408c57044bbf7ad9b647e0b099595a91f5dc65500b594acc91fcf5265079c"
+  },
+  "logs": [
+    {
+      "path": "C:/mir2-cross-platform-storage-20261002/web-source67-storage-ownership-20261011-01/next-build02/outer.json",
+      "bytes": 516,
+      "sha256": "6f219404b2465d9e5981dac3e0d166d1fc7a29eef8ba4de542d30c951379037c"
+    },
+    {
+      "path": "C:/mir2-cross-platform-storage-20261002/web-source67-storage-ownership-20261011-01/next-build02/stdout.log",
+      "bytes": 2026,
+      "sha256": "a090e39676f13a22b3cb17f2c9b12dbba574f43c6c1d1c0b2d82d8dd716a876f"
+    },
+    {
+      "path": "C:/mir2-cross-platform-storage-20261002/web-source67-storage-ownership-20261011-01/next-build02/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "validation": {
+    "compiled": true,
+    "strictTypeScriptComplete": true,
+    "staticPagesGenerated": 13,
+    "stderrBytes": 0,
+    "mainTsconfigUnchanged": true
+  },
+  "scope": {
+    "thinBuildAccepted": false,
+    "runtimeStarted": false,
+    "storageUiAccepted": false,
+    "candidateAccepted": false,
+    "humanFrontendAccepted": false,
+    "goalComplete": false
+  }
+}

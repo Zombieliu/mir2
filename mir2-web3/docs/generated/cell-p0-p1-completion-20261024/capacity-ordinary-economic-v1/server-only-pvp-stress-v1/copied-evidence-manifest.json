@@ -1,0 +1,220 @@
+{
+  "schemaVersion": 1,
+  "scope": "Explicit public server-only PvP stress originals; no ordinary/P0 qualification.",
+  "sourceDirectory": "C:/mir2-build/p01-completion-20261024/server-only-pvp-capacity-v1",
+  "createdAt": "2026-10-27T19:05:47.551Z",
+  "files": [
+    {
+      "source": {
+        "file": "C:/mir2-build/p01-completion-20261024/server-only-pvp-capacity-v1/reports/1793124648375-f15d2de5.pvp-stress-report.json",
+        "bytes": 97033,
+        "sha256": "fdfa0b17ab57bc64e3191effdd6691ffb4220f61f7f77fe0f2518e1029fb9153"
+      },
+      "destination": "reports/1793124648375-f15d2de5.pvp-stress-report.json",
+      "pinBasis": "original canonical ended report"
+    },
+    {
+      "source": {
+        "file": "C:/mir2-build/p01-completion-20261024/server-only-pvp-capacity-v1/reports/1793124648375-f15d2de5.pvp-stress-samples.jsonl",
+        "bytes": 2961079,
+        "sha256": "c65c4b90cc71badacc4f291db7825f7c91982021f55e3b555af7732b2ebc4c82"
+      },
+      "destination": "reports/1793124648375-f15d2de5.pvp-stress-samples.jsonl",
+      "pinBasis": "original public samples"
+    },
+    {
+      "source": {
+        "file": "C:/mir2-build/p01-completion-20261024/server-only-pvp-capacity-v1/run-intent-v1.json",
+        "bytes": 1278,
+        "sha256": "550a0dd253163e0dba6fc5e2431772a8840bc4adee516ff51d5773ad27092554"
+      },
+      "destination": "run-intent-v1.json",
+      "pinBasis": "actual public episode original"
+    },
+    {
+      "source": {
+        "file": "C:/mir2-build/p01-completion-20261024/server-only-pvp-capacity-v1/resource-profile-v1.json",
+        "bytes": 1938,
+        "sha256": "586e76aa4de9c884b3a1bf9be08c0e27fafc19245e8b808945c1e74d42983798"
+      },
+      "destination": "resource-profile-v1.json",
+      "pinBasis": "actual public episode original"
+    },
+    {
+      "source": {
+        "file": "C:/mir2-build/p01-completion-20261024/server-only-pvp-capacity-v1/health-before-v1.json",
+        "bytes": 13516,
+        "sha256": "1e1b27cc1cdc1182714caea88b08d13c1a9c4b9955104aef5521168f54c78713"
+      },
+      "destination": "health-before-v1.json",
+      "pinBasis": "actual public episode original"
+    },
+    {
+      "source": {
+        "file": "C:/mir2-build/p01-completion-20261024/server-only-pvp-capacity-v1/health-after-v1.json",
+        "bytes": 13670,
+        "sha256": "b6a4fec07511097680aecc3fd83978e0d79c4e07cb020263f8c2a981b743f11e"
+      },
+      "destination": "health-after-v1.json",
+      "pinBasis": "actual public episode original"
+    },
+    {
+      "source": {
+        "file": "C:/mir2-build/p01-completion-20261024/server-only-pvp-capacity-v1/cleanup-v1.json",
+        "bytes": 341,
+        "sha256": "8995cb8e3ca69ae1a0c745085b7b7fd8b756a607e3c5fd5a4a43da2569d92fa8"
+      },
+      "destination": "cleanup-v1.json",
+      "pinBasis": "actual public episode original"
+    },
+    {
+      "source": {
+        "file": "C:/mir2-build/p01-completion-20261024/server-only-pvp-capacity-v1/monitor-current.json",
+        "bytes": 9153,
+        "sha256": "e385a734b7a00d8296102478df95b1996896509f81be2e71edf95c9b2e0ef574"
+      },
+      "destination": "monitor-current.json",
+      "pinBasis": "actual public episode original"
+    },
+    {
+      "source": {
+        "file": "C:/mir2-build/p01-completion-20261024/server-only-pvp-capacity-v1/monitor-history.jsonl",
+        "bytes": 2868871,
+        "sha256": "454303fe5628452e7c953314fe7d550daf75f414786b8e223f9e7babcbdf40a8"
+      },
+      "destination": "monitor-history.jsonl",
+      "pinBasis": "actual public episode original"
+    },
+    {
+      "source": {
+        "file": "C:/mir2-build/p01-completion-20261024/server-only-pvp-capacity-v1/owned-process-v1.json",
+        "bytes": 158,
+        "sha256": "b23b97c68e8bd35979a1583b7d3a662e36e248ccfe2fdd5f98956d63f7acd4e7"
+      },
+      "destination": "owned-process-v1.json",
+      "pinBasis": "actual public episode original"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\server-only-pvp-capacity-v1\\fixture\\public\\fixture-manifest-v1.json",
+        "bytes": 135980,
+        "sha256": "e696ec260581097255f0c48c156a559cf0db005d46625db325b0e900e9ba009a"
+      },
+      "destination": "fixture/fixture-manifest-v1.json",
+      "pinBasis": "run intent fixture pin"
+    },
+    {
+      "source": {
+        "file": "C:/mir2-build/p01-completion-20261024/server-stress-backend-v2/validation-v1.json",
+        "bytes": 4051,
+        "sha256": "a8a41c0e41befb6a1ffbf9f3252c05e8c7dd9197e9e003d795d008b7838eeb99"
+      },
+      "destination": "backend-v2/validation-v1.json",
+      "pinBasis": "actual validation and embedded release-build receipt"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\server-stress-backend-v2\\load-test-login-policy.stdout.log",
+        "bytes": 915,
+        "sha256": "41d864bc6f89724e3a7f2ca135ae0a2fa1b954c585a25066b9a96c9516b92dcf"
+      },
+      "destination": "backend-v2/load-test-login-policy.stdout.log",
+      "pinBasis": "actual load-test-login-policy test stdout"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\server-stress-backend-v2\\adjacent-auth.stdout.log",
+        "bytes": 1334,
+        "sha256": "985fa1083e65d3d0d32bcc6b08013d114dcbfb82881d0da5f8f938b168ef7f6e"
+      },
+      "destination": "backend-v2/adjacent-auth.stdout.log",
+      "pinBasis": "actual adjacent-auth test stdout"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\server-stress-backend-v2\\gateway-release.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "destination": "backend-v2/gateway-release.stdout.log",
+      "pinBasis": "actual release build stdout"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\server-stress-backend-v2\\gateway-release.stderr.log",
+        "bytes": 55884,
+        "sha256": "395016760a0348046b6f4de8f5b7466e4605acac67d5dc2285fb2d9530055ff0"
+      },
+      "destination": "backend-v2/gateway-release.stderr.log",
+      "pinBasis": "actual release build stderr"
+    }
+  ],
+  "totalOriginalFiles": 16,
+  "totalOriginalBytes": 6165201,
+  "allCopiesRawExact": true,
+  "preparationPublicReceipt": {
+    "found": false,
+    "basis": "fixture/public contains only fixture-manifest-v1.json; no separate public preparation receipt exists"
+  },
+  "releaseBuildReceipt": {
+    "file": "backend-v2/validation-v1.json",
+    "resultName": "gateway-release",
+    "code": 0,
+    "separateReceiptInvented": false
+  },
+  "actual": {
+    "runId": "1793124648375-f15d2de5",
+    "stage2": {
+      "fighters": 2,
+      "measuredSeconds": 300.096,
+      "passed": true,
+      "launched": 429,
+      "positive": 254
+    },
+    "stage10": {
+      "fighters": 10,
+      "measuredSeconds": 300.102,
+      "passed": false,
+      "launched": 2216,
+      "positive": 1404,
+      "onlyFailedWindow": 2,
+      "failedActorIndex": 5,
+      "positiveHitP95Ms": 1683,
+      "positiveHitLimitMs": 1000,
+      "attackAckP95Ms": 422,
+      "windowLaunched": 44,
+      "windowPositive": 29,
+      "frequencyFailure": false,
+      "timeouts": 0,
+      "witnessFailures": 0
+    },
+    "unmeasured": [
+      25,
+      50,
+      100,
+      250,
+      500
+    ],
+    "resourceMonitorStopped": false,
+    "sixHealthCountersZero": true,
+    "gatewayExitZero": true,
+    "portsFree": true
+  },
+  "limitations": [
+    "Latency origin (server versus collector) remains under independent review.",
+    "A stage10 failure does not establish that the machine supports only two players.",
+    "Stationary dispersed offline-preseeded PvP is not ordinary economy, original P0, moving combat, hotspot or two-hour acceptance."
+  ],
+  "excluded": [
+    "private Store",
+    "pool",
+    "auth ledger",
+    "keys/tokens/credentials",
+    "complete recording",
+    "private Gateway log",
+    "EXE"
+  ],
+  "capacityAccepted": false,
+  "p0Accepted": false,
+  "ordinaryEvidence": false
+}

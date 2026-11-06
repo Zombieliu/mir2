@@ -1,0 +1,264 @@
+{
+  "schemaVersion": 1,
+  "createdAt": "2026-10-24T20:07:05.890Z",
+  "scope": "Read-only static review of current spectator capture path and shared-owner/async execution boundaries. No live samples, private files, recordings, tests, builds, service or load were read or run.",
+  "workspaceHead": "c42f860e0544f0687a5ccf5ddaccad4daecc8acc",
+  "backendSourceCommit": "461f1d85eed6309a55a88bd79a0022f7b97febe4",
+  "sourcePins": [
+    {
+      "file": "apps/gateway/src/spectator.rs",
+      "bytes": 58692,
+      "sha256": "3aa1ea329da20cb827440a67329d5af77251b666fff9e135125d9742ae9f0a6f"
+    },
+    {
+      "file": "apps/gateway/src/web.rs",
+      "bytes": 831008,
+      "sha256": "d57c26684127a765da7e007eace9d0cb3a8d4bb3245b740deae5ad9f8be5c7ed"
+    },
+    {
+      "file": "apps/gateway/src/routing.rs",
+      "bytes": 1388304,
+      "sha256": "a0e3a19ad1184efd87a632118a98a65c975ca12d2adfda95b2f9e4a6138eff49"
+    },
+    {
+      "file": "apps/gateway/src/session.rs",
+      "bytes": 112616,
+      "sha256": "ef6bcedb2bee850de6461f0352c930f4be9f50197cae088d6d64286b3bd2fb6c"
+    },
+    {
+      "file": "apps/gateway/src/zone_metrics.rs",
+      "bytes": 18356,
+      "sha256": "37ac259c5ef95948299b16887db435f04869ab9e6ecd569d7c478df230d1e3a8"
+    },
+    {
+      "file": "apps/gateway/src/main.rs",
+      "bytes": 11227,
+      "sha256": "0bc3cecd3f92fd982e526314f39332b70e6c12028f08fdcca0826d9dfd299aa0"
+    },
+    {
+      "file": "apps/simulation/src/config.rs",
+      "bytes": 342825,
+      "sha256": "9f1315fb16d48e4b19cdfd1d9c1e8c2acab9fb9458eb0ce96e5fa5674261dde5"
+    },
+    {
+      "file": "apps/simulation/src/runtime/session.rs",
+      "bytes": 99414,
+      "sha256": "215ed254a39b89f3ac7188bedc0cdd4bf131384147869d636d735afe80a2dbd8"
+    }
+  ],
+  "sourceAggregate": "81e5432d3312d880a9e1d845c943dde76640d50371deff32c92530efdd8ff3e2",
+  "rootCauseDetermined": false,
+  "p0Accepted": false,
+  "p2Implemented": false,
+  "facts": [
+    {
+      "id": "capture-boundary",
+      "source": "apps/gateway/src/web.rs",
+      "lines": [
+        5615,
+        5618,
+        6868,
+        6876
+      ],
+      "claim": "Each active WebSocket owns a capture interval (default250ms, missed ticks delayed). Snapshot construction and SpectatorHub.publish execute synchronously inside tokio::task::block_in_place. The same socket session select task waits for this call; independently spawned reader/outbound tasks can continue. This is not a bare unmarked blocking publish on a Tokio worker."
+    },
+    {
+      "id": "snapshot-writer-contention",
+      "source": "apps/gateway/src/routing.rs",
+      "lines": [
+        18550,
+        18567,
+        18648,
+        18710,
+        18714
+      ],
+      "claim": "Personal snapshot is built first. Shared world_snapshot then locks the same shared Zone state mutex used by movement/owner transactions, overlays visible map entities, vitals and cooldowns, and clones all other same-map player entities before dropping that lock. Final AOI retain and sort run after unlock. Subsequent spectator JSON and disk work do not retain this Zone mutex."
+    },
+    {
+      "id": "overlay-cost",
+      "source": "apps/gateway/src/routing.rs",
+      "lines": [
+        3400,
+        3428,
+        3436,
+        3444,
+        6075,
+        6092
+      ],
+      "claim": "The snapshot overlay scans shared map entity/drop maps, filters before cloning visible map objects, and scans/clones all same-map other players. Work under Zone lock therefore grows with shared map object count plus same-map players and cloned visible payload, rather than solely this client's final AOI count."
+    },
+    {
+      "id": "sanitize-before-hub",
+      "source": "apps/gateway/src/spectator.rs",
+      "lines": [
+        437,
+        687,
+        688,
+        693,
+        696,
+        700,
+        732,
+        747
+      ],
+      "claim": "sanitize_world executes before hub mutex. It converts the full client view to serde_json::Value, clones the source entity array before take(max_entities), and clones terrain/decor/scene/map-transfer values into the spectator value. max_entities is a per-input truncation after initial serialization/array clone, not an upfront bound on all allocation work."
+    },
+    {
+      "id": "client-view-intermediate",
+      "source": "apps/simulation/src/config.rs",
+      "lines": [
+        8610,
+        8615,
+        8620,
+        8662
+      ],
+      "claim": "WorldSnapshotClientView::serialize itself first builds a full serde_json::Value from the lossless snapshot, removes private fields, then serializes that value. The outer spectator to_value traverses this result again; snapshot inventory/system data may be materialized before spectator sanitization discards those fields."
+    },
+    {
+      "id": "throttle-after-heavy-work",
+      "source": "apps/gateway/src/spectator.rs",
+      "lines": [
+        438,
+        455,
+        456,
+        475,
+        483
+      ],
+      "claim": "The global spectator std::Mutex covers latest-world clone, merge, stale pruning and event diff before checking the per-map capture interval. An Ok(None) suppressed emission still performed snapshot construction, sanitization, world merge and event work. At25 ready sockets, nominal input attempts can approach25x4=100/s although a same-map emitted recording remains at most about4/s; actual rates require measurement."
+    },
+    {
+      "id": "merge-allocation",
+      "source": "apps/gateway/src/spectator.rs",
+      "lines": [
+        760,
+        770,
+        775,
+        786,
+        800,
+        805,
+        843,
+        858,
+        861
+      ],
+      "claim": "Merge clones previous and next entity/drop payloads into BTreeMaps and replaces old arrays, with duplicate-ID replacement dropping prior clones. Event diff builds ID indexes. For U unique union objects, work includes O((old+new) log U) indexing and O(payload bytes/nodes) cloning and destruction. Merged entity union is not capped again by max_entities; stale pruning limits unseen retention by time, not a fixed map-wide object count."
+    },
+    {
+      "id": "emit-encode",
+      "source": "apps/gateway/src/spectator.rs",
+      "lines": [
+        489,
+        500,
+        505,
+        512,
+        524
+      ],
+      "claim": "For emitted frames, world is cloned again, JSON world/events value plus Vec encoding is produced, the2MiB encoded-payload limit is checked after allocation/encoding, SHA256 is computed, and frame.clone is retained in ring. These execute under hub mutex. The2MiB limit is not a direct in-memory Value allocation cap."
+    },
+    {
+      "id": "ring-drop",
+      "source": "apps/gateway/src/spectator.rs",
+      "lines": [
+        25,
+        524,
+        525,
+        526
+      ],
+      "claim": "Default ring is2400 frames per map. Stable config means a new emitted frame removes at most one oldest frame after the ring fills; there is no2400-frame sweep. VecDeque removal metadata is constant-time, but discarded Frame owns a Value tree/events/strings, so its destructor frees work proportional to that frame's allocations while hub mutex remains held. Ideal4Hz needs at least about600s for2400 emits; elapsed time alone cannot prove fullness or a stall cause."
+    },
+    {
+      "id": "recording-sync",
+      "source": "apps/gateway/src/spectator.rs",
+      "lines": [
+        530,
+        1017,
+        1018,
+        1021,
+        1024,
+        1049,
+        1050,
+        1055,
+        1061
+      ],
+      "claim": "Each emitted recording synchronously create_dir_all/open(append)/JSON encode via64KiB BufWriter/newline/explicit flush/close while hub mutex remains held, inside caller's block_in_place. The buffer reduces tiny write calls but does not make file access asynchronous or add fsync/atomic-append guarantees; file/device delays remain possible and unmeasured here."
+    },
+    {
+      "id": "returned-frame-drop",
+      "source": "apps/gateway/src/web.rs",
+      "lines": [
+        6869,
+        6870,
+        6874,
+        6876
+      ],
+      "claim": "The Ok(Some(Frame)) returned by block_in_place is ignored by the caller's if-let Err branch. That returned frame's owned tree is destroyed in the outer async-task scope after the blocking closure returns. Ring-retained and returned frames are separate deep clones; this is a candidate for synchronous allocator/destructor cost outside the marked blocking closure, not evidence of actual stall duration."
+    },
+    {
+      "id": "health-hub-wait",
+      "source": "apps/gateway/src/web.rs",
+      "lines": [
+        2943
+      ],
+      "otherSource": "apps/gateway/src/spectator.rs",
+      "otherLines": [
+        671,
+        672
+      ],
+      "claim": "Public health directly calls spectator.metrics(), which synchronously locks the global hub mutex in an async handler. A long publish/append can therefore delay health and occupy that polling thread; this is distinct from the marked publish block_in_place path."
+    },
+    {
+      "id": "optional-viewer-work",
+      "source": "apps/gateway/src/spectator.rs",
+      "lines": [
+        570,
+        576,
+        584,
+        207
+      ],
+      "otherSource": "apps/gateway/src/web.rs",
+      "otherLines": [
+        4516,
+        4518,
+        4553,
+        4558
+      ],
+      "claim": "A spectator viewer frame_at locks hub and deep-clones a frame; view transformation and JSON string generation then run in the async viewer path. This is conditional on actual viewers; no viewer presence is established by this source review. AI live defaults disabled (ai_live.rs61) and must not be blamed without runtime enablement evidence."
+    },
+    {
+      "id": "telemetry-scope",
+      "source": "apps/gateway/src/routing.rs",
+      "lines": [
+        10183,
+        10199,
+        10207,
+        10225,
+        10239,
+        10241
+      ],
+      "otherSource": "apps/gateway/src/zone_metrics.rs",
+      "otherLines": [
+        15,
+        24,
+        26
+      ],
+      "claim": "zone work timers start after Zone mutex acquisition and exclude snapshot read/overlay work and lock waiting. Owner/pending movement deadline lag is observed after acquiring the lock and can expose delayed scheduling/lock access. Request timing includes admitted request execution/queueing boundaries, but MovementAdmission may finish before a queued movement deadline/owner ACK. None measures network fanout delivery or pins a1.4s symptom to spectator work."
+    }
+  ],
+  "complexity": {
+    "notation": "B=current serialized/tree payload; U=merged unique entities+drops; P=same-map players; N=active publisher sockets",
+    "perPublisher": "full personal/shared snapshot + sanitization + merge/event diff even when no frame emitted; O(B) allocation/destruction plus O(U log U) indexes, shared-map scan and O(P) remote-player clone",
+    "perMapEmit": "extra O(B) deep clones/encoding/hash and synchronous append; once ring full one old-frame O(B_old allocations) destruction",
+    "memory": "2400 deep-owned frame trees per map plus latest world, clones, JSON Value/encoded Vec and pending events; serialized payload cap is not a heap byte cap",
+    "noFullRingSweep": true
+  },
+  "proofLimits": [
+    "Source establishes possible contention and allocation/I/O boundaries only; it cannot prove the observed1.4s/fanout failure root cause.",
+    "Low average CPU or low process byte throughput does not rule out brief mutex contention, allocator latency, synchronous I/O or scheduling delays; it also does not establish them.",
+    "Need actual emit/sequence timeline to associate the first ring eviction with the failure. No live raw, large recording or private log was read for this review.",
+    "Existing failed formal02 result must remain failed; no threshold, denominator, workload or acceptance reinterpretation is made."
+  ],
+  "nextObservation": [
+    "Use already-owned public failure timestamps and cumulative monitor bucket differences for the exact phase/window; do not use lifetime p99 or infer disk saturation from process Other I/O.",
+    "If separately authorized, add bounded duration/size/count observations for snapshot Zone-lock wait/hold, sanitize, hub wait/hold, merge/events, encode/hash, ring eviction destructor, append open/write/flush and returned-frame destruction. Do not expose snapshot payloads or account/secret labels.",
+    "Correlate emitted sequence/ring depth and frame encoded bytes with each slow path; an isolated PID-filtered short trace/stack sample can distinguish allocator versus file/device wait if counters still cannot.",
+    "Retain production recording, original normal read/replay semantics and all existing acceptance gates for any later fix; no Cell P2 work is authorized by this analysis."
+  ]
+}

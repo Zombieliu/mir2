@@ -1,0 +1,14 @@
+{
+  "commit": "a246c240e",
+  "exe": "C:/mir2-newcomer-v2-20260918/mir2-gateway-a246c240e.exe",
+  "sha256": "F887188E3A4395D6044DC958F96593957432C1411890FE3585F11BBC4113B4C7",
+  "build": "Rust 1.95.0 release, locked offline, one job, BelowNormal",
+  "cadence": "newcomer-v2",
+  "contentProfile": "platinum_176",
+  "ports": [
+    18800,
+    18810
+  ],
+  "accountStore": "isolated new file store",
+  "visualAccepted": false
+}

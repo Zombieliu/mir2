@@ -1,0 +1,5543 @@
+{
+  "schemaVersion": 1,
+  "runId": "1792942371568-1e322224",
+  "input": {
+    "path": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-personal-projection-ladder-11\\slow-stage-public.jsonl",
+    "bytes": 1693666,
+    "sha256": "6f90bf5e3927e35ff47ad5585b12ba8b31dbff7bd1615ea5966f94cf304d17c0",
+    "rows": 18766
+  },
+  "intervals": [
+    {
+      "requestId": "366",
+      "receivedRangeStart": 1792943616060,
+      "receivedRangeEnd": 1792943616912,
+      "connection": 6,
+      "inputSpanMs": 852,
+      "rows": [
+        {
+          "line": 13937,
+          "lineSha256": "cf390ed1cb6bd5e8b95c64c1d3660190d0432adbad5cabc5f847902194ba735e",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943616060,
+            "stage": "shared_session.predrain",
+            "durationMs": 110
+          }
+        },
+        {
+          "line": 13938,
+          "lineSha256": "b0d72459c1cd885696fd186665ba7565d4ee84bd22c9665338aa06f9ecd16426",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943616060,
+            "stage": "zone_owner.in_process.execute_request",
+            "durationMs": 305
+          }
+        },
+        {
+          "line": 13939,
+          "lineSha256": "eaa7dd98af1d7b5e59e721cd36d5958581208f587be3a6a230ddccc66fbb8f29",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943616060,
+            "stage": "zone_owner.in_process.execute_request",
+            "durationMs": 179
+          }
+        },
+        {
+          "line": 13944,
+          "lineSha256": "db1683cad9391a558d0c52f0aaa90eba8e5abd305e89c648301e3ee82884d144",
+          "scope": "other-connection",
+          "row": {
+            "observedAtMs": 1792943616060,
+            "stage": "socket_input.queue_residence",
+            "durationMs": 145,
+            "connection": 1,
+            "queuedPhase": "runtime_tick",
+            "phaseElapsedMs": 33,
+            "inputClass": "move"
+          }
+        },
+        {
+          "line": 13945,
+          "lineSha256": "248ce5c9f40b6ec8294fbdeb1d9932470f958a6de7fb5439de4acdf2061f82d8",
+          "scope": "connection6",
+          "row": {
+            "observedAtMs": 1792943616060,
+            "stage": "serial_gate.zone_outbound_wait",
+            "durationMs": 286,
+            "connection": 6
+          }
+        },
+        {
+          "line": 13946,
+          "lineSha256": "404e54f037772c0732a33e91935bc227e36b1e43c67894c31c6404ae633153b3",
+          "scope": "other-connection",
+          "row": {
+            "observedAtMs": 1792943616060,
+            "stage": "serial_gate.zone_outbound_wait",
+            "durationMs": 169,
+            "connection": 1
+          }
+        },
+        {
+          "line": 13947,
+          "lineSha256": "b64476246754d090cf2b1aa2ab665b45f34ba5ead5855c0354591af668788ece",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943616062,
+            "stage": "snapshot.build_and_send",
+            "durationMs": 111
+          }
+        },
+        {
+          "line": 13948,
+          "lineSha256": "bfc63690a3d5264f8c48c316612663f6884df673565361d5498c94ebba08ff30",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943616062,
+            "stage": "shared_session.predrain",
+            "durationMs": 170
+          }
+        },
+        {
+          "line": 13949,
+          "lineSha256": "452112d143e4ef6b15e7a7d49b016838070e302d0418da9e49cf896358b56c4c",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943616062,
+            "stage": "zone_owner.in_process.execute_request",
+            "durationMs": 212
+          }
+        },
+        {
+          "line": 13952,
+          "lineSha256": "a29f24448d9451dac501c4914c394c7f10a456881026ae58b732fb46331a8a58",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943616062,
+            "stage": "shared_session.predrain",
+            "durationMs": 92
+          }
+        },
+        {
+          "line": 13953,
+          "lineSha256": "2be892e22c784cc9022dcac91766ab5dd74680b5584c86132ba18e8c4b21e7f7",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943616062,
+            "stage": "zone_owner.in_process.execute_request",
+            "durationMs": 180
+          }
+        },
+        {
+          "line": 13956,
+          "lineSha256": "83946f335d2ae89be887d40c55ab292c352b09099ae86f97b186f8d5c856373c",
+          "scope": "other-connection",
+          "row": {
+            "observedAtMs": 1792943616062,
+            "stage": "serial_gate.zone_outbound_wait",
+            "durationMs": 170,
+            "connection": 4
+          }
+        },
+        {
+          "line": 13959,
+          "lineSha256": "4e3eca6d8f29a7e3282cbbff62fb212a65a44651a511b3dfc6651fbcfb81d0a1",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943616076,
+            "stage": "shared_session.predrain",
+            "durationMs": 79
+          }
+        },
+        {
+          "line": 13960,
+          "lineSha256": "a8cf916b995e10dc5eae1f2ade9874ff162a45419e2ddc86ce9fb9418da77fa7",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943616076,
+            "stage": "zone_owner.in_process.execute_request",
+            "durationMs": 107
+          }
+        },
+        {
+          "line": 13963,
+          "lineSha256": "48e84c081f35d116f0be124c97ce6dd80c789814d4fdff822e1273b61338db39",
+          "scope": "other-connection",
+          "row": {
+            "observedAtMs": 1792943616077,
+            "stage": "serial_gate.zone_outbound_wait",
+            "durationMs": 80,
+            "connection": 18
+          }
+        },
+        {
+          "line": 13964,
+          "lineSha256": "01c4d0fd5f6b232a4f222e8daccdcb279a13858daf9a5bd5ef4f97b0af65adf5",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943616077,
+            "stage": "shared_session.reconcile",
+            "durationMs": 146
+          }
+        },
+        {
+          "line": 13966,
+          "lineSha256": "f4a396ec4638447d33ede58de0478b7d29676585251bef78800e1c0354be3e58",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943616078,
+            "stage": "session_action.execute",
+            "durationMs": 304
+          }
+        },
+        {
+          "line": 13967,
+          "lineSha256": "cdb19728f1b7079e52b87efe9a2658faef3c5976a41dcaf6b320a871e9833b91",
+          "scope": "other-connection",
+          "row": {
+            "observedAtMs": 1792943616078,
+            "stage": "socket_turn.input",
+            "durationMs": 304,
+            "connection": 15
+          }
+        },
+        {
+          "line": 13968,
+          "lineSha256": "80dfca3e220ab73198613b4e1b3dc756563b96ff832c397676031dd0b30d60b0",
+          "scope": "other-connection",
+          "row": {
+            "observedAtMs": 1792943616078,
+            "stage": "serial_gate.zone_outbound_wait",
+            "durationMs": 293,
+            "connection": 15
+          }
+        },
+        {
+          "line": 13969,
+          "lineSha256": "cf8945cf4aa2a2ee27c08f992937b693669cb116ada634aea516f5f6f134fead",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943616078,
+            "stage": "session_action.flush",
+            "durationMs": 150
+          }
+        },
+        {
+          "line": 13971,
+          "lineSha256": "31a87937d3200d5acfdf12d4082e83bf61166d2a12451d75962f12f4c78654f3",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943616079,
+            "stage": "zone_owner.in_process.execute_request",
+            "durationMs": 346
+          }
+        },
+        {
+          "line": 13972,
+          "lineSha256": "0363a35c4082cc0f80f82510d7b03e9da8b4f9693bb0a3b2e8bb35ab8ba60a71",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943616079,
+            "stage": "session_action.execute",
+            "durationMs": 346
+          }
+        },
+        {
+          "line": 13977,
+          "lineSha256": "870faed55a1bd433725ce7005a622db21571d7f0b91cc84b5474a7c0c922054e",
+          "scope": "other-connection",
+          "row": {
+            "observedAtMs": 1792943616096,
+            "stage": "socket_turn.input",
+            "durationMs": 600,
+            "connection": 14
+          }
+        },
+        {
+          "line": 13978,
+          "lineSha256": "07dae74ece94f0d6b006d8151b2d2b40eb5fd1a9578c06aafa12d34f3d1dc4d7",
+          "scope": "other-connection",
+          "row": {
+            "observedAtMs": 1792943616096,
+            "stage": "socket_input.queue_residence",
+            "durationMs": 215,
+            "connection": 14,
+            "queuedPhase": "input",
+            "phaseElapsedMs": 384,
+            "inputClass": "move"
+          }
+        },
+        {
+          "line": 13979,
+          "lineSha256": "d4a476a96e7e4920047448ea78ab4a9140119bdadcb9643c2ab90d8b2781bb4c",
+          "scope": "other-connection",
+          "row": {
+            "observedAtMs": 1792943616096,
+            "stage": "serial_gate.zone_outbound_wait",
+            "durationMs": 568,
+            "connection": 14
+          }
+        },
+        {
+          "line": 13980,
+          "lineSha256": "ca4879012fe6d7a556a66862a4efb4730f1235bf0905dcac2f9498599b10d7ca",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943616103,
+            "stage": "shared_session.predrain",
+            "durationMs": 69
+          }
+        },
+        {
+          "line": 13981,
+          "lineSha256": "f708ad83ae66476ece4ffcc3df012965152b91bd33bc6f15a66630e771695c15",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943616103,
+            "stage": "zone_owner.in_process.execute_request",
+            "durationMs": 72
+          }
+        },
+        {
+          "line": 13984,
+          "lineSha256": "5342500e050c7c4d38b5e3d2cbf9eb99ebf0412fbeb2239554fb1b00577cde54",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943616124,
+            "stage": "zone_owner.in_process.execute_request",
+            "durationMs": 61
+          }
+        },
+        {
+          "line": 13987,
+          "lineSha256": "f7f31bf5898b47d530e1e96c8cc80d01c194bda24a6d3404416d6a651bc49461",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943616125,
+            "stage": "session_action.execute",
+            "durationMs": 148
+          }
+        },
+        {
+          "line": 13988,
+          "lineSha256": "84681a91832ba45859a10e17e8c62fa65ccc0d6c6f59dc255175c168d2ac3d9b",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943616125,
+            "stage": "session_action.execute",
+            "durationMs": 121
+          }
+        },
+        {
+          "line": 13989,
+          "lineSha256": "0b68fe8e8b6f3c78b75b1322551eb802324faea0361a119818a7b875ce1ee7e0",
+          "scope": "other-connection",
+          "row": {
+            "observedAtMs": 1792943616125,
+            "stage": "socket_turn.input",
+            "durationMs": 148,
+            "connection": 22
+          }
+        },
+        {
+          "line": 13990,
+          "lineSha256": "ecb8f6ffdbc56fb34a322fa031b4d0aa6f400cd7b635422422ec130cc3108779",
+          "scope": "other-connection",
+          "row": {
+            "observedAtMs": 1792943616125,
+            "stage": "serial_gate.zone_outbound_wait",
+            "durationMs": 148,
+            "connection": 22
+          }
+        },
+        {
+          "line": 13991,
+          "lineSha256": "562755c2cd072070f94fdd3edba1d06258d2017f26c3c49382deb81042bff585",
+          "scope": "other-connection",
+          "row": {
+            "observedAtMs": 1792943616125,
+            "stage": "socket_turn.input",
+            "durationMs": 121,
+            "connection": 7
+          }
+        },
+        {
+          "line": 13992,
+          "lineSha256": "107ae8447352ba2b35ac1cc65d466ceee5088546c937b97835496492b40a511b",
+          "scope": "other-connection",
+          "row": {
+            "observedAtMs": 1792943616125,
+            "stage": "serial_gate.zone_outbound_wait",
+            "durationMs": 121,
+            "connection": 7
+          }
+        },
+        {
+          "line": 13993,
+          "lineSha256": "3a6c5a0f7a90c4fed2d510dd6dad42d33ca2bb524a9ff98b2ae8b09b6c95c487",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943616136,
+            "stage": "session_action.execute",
+            "durationMs": 133
+          }
+        },
+        {
+          "line": 13994,
+          "lineSha256": "11bc5974f7e3435d437a9fd751abe3ac507c99639e69ce098dc63cf28379e4ef",
+          "scope": "other-connection",
+          "row": {
+            "observedAtMs": 1792943616137,
+            "stage": "socket_turn.input",
+            "durationMs": 134,
+            "connection": 23
+          }
+        },
+        {
+          "line": 13995,
+          "lineSha256": "3346989d73d8adc30ac43ac95c3c7c408fe3c54ec0fcedab932ab7f5a946628b",
+          "scope": "other-connection",
+          "row": {
+            "observedAtMs": 1792943616137,
+            "stage": "serial_gate.zone_outbound_wait",
+            "durationMs": 134,
+            "connection": 23
+          }
+        },
+        {
+          "line": 13996,
+          "lineSha256": "2fe1833ce9c5d820df44de699cce009323e51be5120e0fef30d746ffffd4038d",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943616149,
+            "stage": "zone_owner.in_process.execute_request",
+            "durationMs": 69
+          }
+        },
+        {
+          "line": 13997,
+          "lineSha256": "f9352043887d100075be5116cb1e7b4d4463c8b7a36d859228ed337799cb9f0f",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943616149,
+            "stage": "shared_session.predrain",
+            "durationMs": 74
+          }
+        },
+        {
+          "line": 13998,
+          "lineSha256": "6528e548b2ca7103c557420f24e93eb842e4d626a191de65123104230ecc4478",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943616149,
+            "stage": "zone_owner.in_process.execute_request",
+            "durationMs": 87
+          }
+        },
+        {
+          "line": 14001,
+          "lineSha256": "b5bf9af73550f33d054d071ede10a615ae847f9b41832e48c76a4089672c0f44",
+          "scope": "other-connection",
+          "row": {
+            "observedAtMs": 1792943616149,
+            "stage": "serial_gate.zone_outbound_wait",
+            "durationMs": 70,
+            "connection": 19
+          }
+        },
+        {
+          "line": 14002,
+          "lineSha256": "5ef6e4f780f75043536af7e3b2a3ea79ee5c583f5202c37288fb543e759454a4",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943616174,
+            "stage": "shared_session.predrain",
+            "durationMs": 64
+          }
+        },
+        {
+          "line": 14003,
+          "lineSha256": "56418ea1d3bd9ce70b20980d2a722c56848d3db60aadf44eb7f84bfb3ac1c14d",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943616174,
+            "stage": "zone_owner.in_process.execute_request",
+            "durationMs": 77
+          }
+        },
+        {
+          "line": 14006,
+          "lineSha256": "69670e7b9700f407dc8fcf4a4678ded3920f716d146d60f80393784eb3fc2723",
+          "scope": "other-connection",
+          "row": {
+            "observedAtMs": 1792943616174,
+            "stage": "serial_gate.zone_outbound_wait",
+            "durationMs": 77,
+            "connection": 8
+          }
+        },
+        {
+          "line": 14007,
+          "lineSha256": "35587360f7695f2b01e0b0b41947971c7a6a33202f5dfdffe16b96e5e07e3ca7",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943616180,
+            "stage": "shared_session.predrain",
+            "durationMs": 69
+          }
+        },
+        {
+          "line": 14008,
+          "lineSha256": "cc0aeb249426efb00f03f3cafece7b29b8501b4b2e4d1867aafa584fa40c3497",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943616180,
+            "stage": "zone_owner.in_process.execute_request",
+            "durationMs": 98
+          }
+        },
+        {
+          "line": 14011,
+          "lineSha256": "30624f2e8838202d7314d9e0486fc2eefd388a236ac0bc0657a2102cd05d9477",
+          "scope": "other-connection",
+          "row": {
+            "observedAtMs": 1792943616180,
+            "stage": "serial_gate.zone_outbound_wait",
+            "durationMs": 98,
+            "connection": 25
+          }
+        },
+        {
+          "line": 14012,
+          "lineSha256": "35587360f7695f2b01e0b0b41947971c7a6a33202f5dfdffe16b96e5e07e3ca7",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943616180,
+            "stage": "shared_session.predrain",
+            "durationMs": 69
+          }
+        },
+        {
+          "line": 14013,
+          "lineSha256": "2bd3a3c6eff71d0fa46b83bfcb2e06c574d4a6f71cb628fd5f5c14791362960b",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943616181,
+            "stage": "shared_session.predrain",
+            "durationMs": 57
+          }
+        },
+        {
+          "line": 14014,
+          "lineSha256": "0f1eae3761d0776af6c4fbb60ac1bacfb32b959482e31134760259dc445af85c",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943616181,
+            "stage": "zone_owner.in_process.execute_request",
+            "durationMs": 84
+          }
+        },
+        {
+          "line": 14017,
+          "lineSha256": "f3658b0650f54b8fa6950cde41ed3154f9c278d40cc0de93264551481752f577",
+          "scope": "other-connection",
+          "row": {
+            "observedAtMs": 1792943616181,
+            "stage": "serial_gate.zone_outbound_wait",
+            "durationMs": 83,
+            "connection": 20
+          }
+        },
+        {
+          "line": 14018,
+          "lineSha256": "7b454d4dd8dbc3d1f0c755920bbc2e81e7ba250b88b6055e1b6bcdf4a1418539",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943616182,
+            "stage": "shared_session.predrain",
+            "durationMs": 72
+          }
+        },
+        {
+          "line": 14019,
+          "lineSha256": "76e92655c31362b90c06903270292ee609c63f7de675aca4e84288592e781c8b",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943616182,
+            "stage": "zone_owner.in_process.execute_request",
+            "durationMs": 102
+          }
+        },
+        {
+          "line": 14021,
+          "lineSha256": "872f6d8111ffec64175df32206997827c88f7ad008b6537c15bee6a0faef9f01",
+          "scope": "other-connection",
+          "row": {
+            "observedAtMs": 1792943616182,
+            "stage": "serial_gate.zone_outbound_wait",
+            "durationMs": 100,
+            "connection": 17
+          }
+        },
+        {
+          "line": 14022,
+          "lineSha256": "98510be087da85b4a5657b6f9a134e3c23b5ccda3f17e68d5b2569081f299f11",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943616182,
+            "stage": "shared_session.predrain",
+            "durationMs": 71
+          }
+        },
+        {
+          "line": 14023,
+          "lineSha256": "e669d4a48b8989b9f645ae74f7a4fa0356695275094afd0505dd37c1faad0cf7",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943616182,
+            "stage": "zone_owner.in_process.execute_request",
+            "durationMs": 94
+          }
+        },
+        {
+          "line": 14029,
+          "lineSha256": "7a345819bba306c820cffd1ce7dd248cdcaacf06436f30df872887d4d663fc40",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943616188,
+            "stage": "session_action.execute",
+            "durationMs": 141
+          }
+        },
+        {
+          "line": 14030,
+          "lineSha256": "7cd4140f4970bf8b3a56aff7902e3ee831fc7e11af49c0f87b3467a8efc5504c",
+          "scope": "other-connection",
+          "row": {
+            "observedAtMs": 1792943616188,
+            "stage": "socket_turn.input",
+            "durationMs": 141,
+            "connection": 12
+          }
+        },
+        {
+          "line": 14031,
+          "lineSha256": "4602b2ccbadf5d5e2fb7039ce621248a9a4c75afffc37d980b39af65a19af763",
+          "scope": "other-connection",
+          "row": {
+            "observedAtMs": 1792943616188,
+            "stage": "serial_gate.zone_outbound_wait",
+            "durationMs": 110,
+            "connection": 12
+          }
+        },
+        {
+          "line": 14032,
+          "lineSha256": "3631893f0c2b0ca588b042a89404e18083be4e803270fc287004703ce76d5320",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943616189,
+            "stage": "session_action.execute",
+            "durationMs": 186
+          }
+        },
+        {
+          "line": 14033,
+          "lineSha256": "435b10543ce7f574680238f0766d8598cef3ca2865665e393474538028275916",
+          "scope": "other-connection",
+          "row": {
+            "observedAtMs": 1792943616189,
+            "stage": "socket_turn.input",
+            "durationMs": 186,
+            "connection": 27
+          }
+        },
+        {
+          "line": 14034,
+          "lineSha256": "9f074f568e8d34d66162c2c4dcad2b55c759e6135b2c5feac642f2ea01f0bcca",
+          "scope": "other-connection",
+          "row": {
+            "observedAtMs": 1792943616189,
+            "stage": "serial_gate.zone_outbound_wait",
+            "durationMs": 109,
+            "connection": 27
+          }
+        },
+        {
+          "line": 14035,
+          "lineSha256": "551dea3dd2620b2a6c5f3a8b21af1ead86f6ed16c29d2d91434aeb8231b0c13c",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943616194,
+            "stage": "session_action.execute",
+            "durationMs": 98
+          }
+        },
+        {
+          "line": 14036,
+          "lineSha256": "49361c28d0ebd0f292d118bd871374714ecbd2553ac83da274d82ef33cd08474",
+          "scope": "other-connection",
+          "row": {
+            "observedAtMs": 1792943616195,
+            "stage": "socket_turn.input",
+            "durationMs": 98,
+            "connection": 14
+          }
+        },
+        {
+          "line": 14037,
+          "lineSha256": "7148d353475763a1fb6d25cbc2d3a2af8f5b3c6dc1706463fb82c2c94548b911",
+          "scope": "other-connection",
+          "row": {
+            "observedAtMs": 1792943616195,
+            "stage": "serial_gate.zone_outbound_wait",
+            "durationMs": 98,
+            "connection": 14
+          }
+        },
+        {
+          "line": 14039,
+          "lineSha256": "e32524ca11536cafb7c47e1b3bd0c6fe654803c86776a921c0da05f04b4f5471",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943616200,
+            "stage": "session_action.execute",
+            "durationMs": 140
+          }
+        },
+        {
+          "line": 14040,
+          "lineSha256": "b31804adf9279fe3c99c5377f5d0d6d2cee86763192d24edf7eeeef77620d2cf",
+          "scope": "other-connection",
+          "row": {
+            "observedAtMs": 1792943616200,
+            "stage": "socket_turn.input",
+            "durationMs": 140,
+            "connection": 1
+          }
+        },
+        {
+          "line": 14041,
+          "lineSha256": "48d1704f23147ae5ce4a1284e1d560a44b539b36f84666f2b98c1586e814c7b2",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943616200,
+            "stage": "shared_session.predrain",
+            "durationMs": 122
+          }
+        },
+        {
+          "line": 14042,
+          "lineSha256": "ed583cc1fde0e68eea7afb56692109c25942fb63f0e679b194beb2988b643d44",
+          "scope": "other-connection",
+          "row": {
+            "observedAtMs": 1792943616200,
+            "stage": "serial_gate.zone_outbound_wait",
+            "durationMs": 140,
+            "connection": 1
+          }
+        },
+        {
+          "line": 14043,
+          "lineSha256": "094d9a74acd8608bd6daed2306fd99375f21d865499fc1b5d9d4628048623737",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943616203,
+            "stage": "session_action.flush",
+            "durationMs": 121
+          }
+        },
+        {
+          "line": 14044,
+          "lineSha256": "6beb500c360cbdcd226599fc6d4d012c98cd4b287a6b0ab11839286ac012d03e",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943616203,
+            "stage": "zone_owner.in_process.execute_request",
+            "durationMs": 58
+          }
+        },
+        {
+          "line": 14045,
+          "lineSha256": "ddb1fb7dd69a36a46bc7ec65d231283dab1c09d1c1c3497dafda6d3b2ca33dce",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943616203,
+            "stage": "zone_owner.in_process.execute_request",
+            "durationMs": 112
+          }
+        },
+        {
+          "line": 14050,
+          "lineSha256": "4cca61e0a448580af850267ca595409e6c752d63ff959c4f35cde38529b5bde4",
+          "scope": "other-connection",
+          "row": {
+            "observedAtMs": 1792943616203,
+            "stage": "serial_gate.zone_outbound_wait",
+            "durationMs": 104,
+            "connection": 26
+          }
+        },
+        {
+          "line": 14051,
+          "lineSha256": "a26a5251ca916730841756cb6085315b5f621b939e280de097f359acb4abd007",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943616237,
+            "stage": "shared_session.predrain",
+            "durationMs": 55
+          }
+        },
+        {
+          "line": 14052,
+          "lineSha256": "ea15169dff5c01735de64f08cea58c020b7d27d516f6a13c5e6c0c87064c5947",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943616237,
+            "stage": "zone_owner.in_process.execute_request",
+            "durationMs": 75
+          }
+        },
+        {
+          "line": 14056,
+          "lineSha256": "df731e627c7f591903a0574133b5efb1da63e0fb35535ecd54e86a482ac3a641",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943616266,
+            "stage": "session_action.execute",
+            "durationMs": 64
+          }
+        },
+        {
+          "line": 14057,
+          "lineSha256": "df4c2acdff81409f4e33acf7c701a5a60a58a1255974bbbc156809e6335a19c1",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943616279,
+            "stage": "shared_session.predrain",
+            "durationMs": 97
+          }
+        },
+        {
+          "line": 14058,
+          "lineSha256": "edf2c6dce00c3bc9a14f74a11246278e0ab4bf0e0387ba22b49951cb8d6f413f",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943616279,
+            "stage": "zone_owner.in_process.execute_request",
+            "durationMs": 117
+          }
+        },
+        {
+          "line": 14061,
+          "lineSha256": "dbe9483439f8142a08b0862f2affc84dc29fdb2149e60e70b7de5a3ac2740a8e",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943616291,
+            "stage": "shared_session.predrain",
+            "durationMs": 77
+          }
+        },
+        {
+          "line": 14062,
+          "lineSha256": "0d25e9fc5444f090af28940b82d905bd1ae93017a0517a8fc7cfba9ece439c2c",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943616291,
+            "stage": "zone_owner.in_process.execute_request",
+            "durationMs": 89
+          }
+        },
+        {
+          "line": 14065,
+          "lineSha256": "aa7c749ef2a8517960a2359e68b378cfda3c1d701029f8387a8aa4dc2c7ca0a3",
+          "scope": "other-connection",
+          "row": {
+            "observedAtMs": 1792943616291,
+            "stage": "socket_turn.input",
+            "durationMs": 89,
+            "connection": 30
+          }
+        },
+        {
+          "line": 14066,
+          "lineSha256": "cf2d4625e17ca4efc5d14eef5f37fc08d949b838628f55b9bf85f2514654a91d",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943616296,
+            "stage": "shared_session.predrain",
+            "durationMs": 54
+          }
+        },
+        {
+          "line": 14067,
+          "lineSha256": "08c5d3f1d4b9a2ba63c13dce31a8151061fc43e6ddbec59300c3d3aad0a731cd",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943616296,
+            "stage": "zone_owner.in_process.execute_request",
+            "durationMs": 73
+          }
+        },
+        {
+          "line": 14073,
+          "lineSha256": "61f18f222f42c4502ffb15d245c2e9bd7dd199133b405cde10f8b68995248585",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943616319,
+            "stage": "shared_session.predrain",
+            "durationMs": 82
+          }
+        },
+        {
+          "line": 14074,
+          "lineSha256": "896e6ff3f109d6830d4f81b7edaeacf1bb6f4a805b039b4b98af358c9b929d3e",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943616319,
+            "stage": "zone_owner.in_process.execute_request",
+            "durationMs": 107
+          }
+        },
+        {
+          "line": 14078,
+          "lineSha256": "c18f717ddde1637723ee336364d54cf05570b5cfefad4b0ba27ca3212bd2e472",
+          "scope": "other-connection",
+          "row": {
+            "observedAtMs": 1792943616319,
+            "stage": "socket_turn.input",
+            "durationMs": 575,
+            "connection": 5
+          }
+        },
+        {
+          "line": 14079,
+          "lineSha256": "13729c105c0bd44898ccf0e0c629926e0bd0d57b11a54ae715f7b83373952bec",
+          "scope": "other-connection",
+          "row": {
+            "observedAtMs": 1792943616319,
+            "stage": "socket_input.queue_residence",
+            "durationMs": 146,
+            "connection": 5,
+            "queuedPhase": "input",
+            "phaseElapsedMs": 429,
+            "inputClass": "move"
+          }
+        },
+        {
+          "line": 14080,
+          "lineSha256": "ac1089bc65d7298daf4ca3d15e6a61e758fac83e5a454d34d0a94a8e07b9c347",
+          "scope": "other-connection",
+          "row": {
+            "observedAtMs": 1792943616319,
+            "stage": "serial_gate.zone_outbound_wait",
+            "durationMs": 575,
+            "connection": 5
+          }
+        },
+        {
+          "line": 14081,
+          "lineSha256": "a3b1bcf76a57cc0024733115f2000dd19442bd61ac168b0ac68e21d519391dd7",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943616330,
+            "stage": "shared_session.inner_execute",
+            "durationMs": 129
+          }
+        },
+        {
+          "line": 14083,
+          "lineSha256": "271411aa659dcceb1394a965daf64b1778eb190e8c93364bc7d59b63239f1bf8",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943616355,
+            "stage": "shared_session.predrain",
+            "durationMs": 64
+          }
+        },
+        {
+          "line": 14084,
+          "lineSha256": "bad94c4b7f5ad9664881fbc7469906ee800ee3f4e8eb2ccc629fc26e1f149ae7",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943616355,
+            "stage": "zone_owner.in_process.execute_request",
+            "durationMs": 70
+          }
+        },
+        {
+          "line": 14087,
+          "lineSha256": "e869f547f17d7cd0e20c9ff1577ffa3910ffc6fc5accdb233d5bb1c00e573266",
+          "scope": "other-connection",
+          "row": {
+            "observedAtMs": 1792943616356,
+            "stage": "serial_gate.zone_outbound_wait",
+            "durationMs": 70,
+            "connection": 1
+          }
+        },
+        {
+          "line": 14088,
+          "lineSha256": "98f729148d5788f1c1e8032eee0db707c7719855e529eff92cc65949b3813066",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943616363,
+            "stage": "shared_session.predrain",
+            "durationMs": 70
+          }
+        },
+        {
+          "line": 14089,
+          "lineSha256": "4495c82e39e1bb737fe9e74ed39355021b7332216c20bcff2ff40211af60e204",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943616363,
+            "stage": "zone_owner.in_process.execute_request",
+            "durationMs": 92
+          }
+        },
+        {
+          "line": 14092,
+          "lineSha256": "a9f6fe258057d6cc143593ca982b80f48fca438e103ab046b5e83490af07b9da",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943616363,
+            "stage": "session_action.execute",
+            "durationMs": 366
+          }
+        },
+        {
+          "line": 14093,
+          "lineSha256": "55cec42e838194d6318feff9af656cecb59a4dd8a23f428de6e229153c2bb848",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943616363,
+            "stage": "shared_session.predrain",
+            "durationMs": 161
+          }
+        },
+        {
+          "line": 14094,
+          "lineSha256": "70283be8efa944a665781e56162497bfec80a355fbc5f9b53d486d81cb04ea3e",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943616363,
+            "stage": "shared_session.predrain",
+            "durationMs": 59
+          }
+        },
+        {
+          "line": 14095,
+          "lineSha256": "e998c14590be55357cc3b7d31192d04d9edc2f6f6aa92284754ecf65a99d2401",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943616363,
+            "stage": "zone_owner.in_process.execute_request",
+            "durationMs": 77
+          }
+        },
+        {
+          "line": 14098,
+          "lineSha256": "68fe7f4a4f2a06dbb417cf87862b384bf77ab434cca3c43b37d018b401baec29",
+          "scope": "other-connection",
+          "row": {
+            "observedAtMs": 1792943616363,
+            "stage": "serial_gate.zone_outbound_wait",
+            "durationMs": 77,
+            "connection": 14
+          }
+        },
+        {
+          "line": 14099,
+          "lineSha256": "b7b4e54f085d814478fb92ec606ee7752af39c16385e21928296022501baeb9a",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943616363,
+            "stage": "shared_session.predrain",
+            "durationMs": 95
+          }
+        },
+        {
+          "line": 14100,
+          "lineSha256": "e59de174b056a4d5df69c1743a5ac9411ccaeccc2cdf3ac2b75a4ca5c06ff6ac",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943616363,
+            "stage": "zone_owner.in_process.execute_request",
+            "durationMs": 123
+          }
+        },
+        {
+          "line": 14103,
+          "lineSha256": "73a8f63e96de413cc83e2e73dc3c42ea3c8dc47824487a7a31cdef995db9ccf6",
+          "scope": "other-connection",
+          "row": {
+            "observedAtMs": 1792943616363,
+            "stage": "socket_input.queue_residence",
+            "durationMs": 51,
+            "connection": 24,
+            "queuedPhase": "runtime_tick",
+            "phaseElapsedMs": 72,
+            "inputClass": "move"
+          }
+        },
+        {
+          "line": 14107,
+          "lineSha256": "addc6d0fee98bc331f7316b488534615582d7bd5bb386f0cc659105e5ca41004",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943616369,
+            "stage": "shared_session.predrain",
+            "durationMs": 72
+          }
+        },
+        {
+          "line": 14108,
+          "lineSha256": "580358b8fa91cc518d4cace611f6811594f410714722ad9ccffd1ae83e942c71",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943616369,
+            "stage": "zone_owner.in_process.execute_request",
+            "durationMs": 100
+          }
+        },
+        {
+          "line": 14111,
+          "lineSha256": "a7ae3657ef75527e1964186973175e7ec61733853a19390738b08eda4cc80b8e",
+          "scope": "other-connection",
+          "row": {
+            "observedAtMs": 1792943616369,
+            "stage": "serial_gate.zone_outbound_wait",
+            "durationMs": 84,
+            "connection": 18
+          }
+        },
+        {
+          "line": 14112,
+          "lineSha256": "47462f234032c805abb4bc99e206d6319af8d36e462bf8df377ef6c45b150f15",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943616369,
+            "stage": "shared_session.predrain",
+            "durationMs": 78
+          }
+        },
+        {
+          "line": 14113,
+          "lineSha256": "580358b8fa91cc518d4cace611f6811594f410714722ad9ccffd1ae83e942c71",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943616369,
+            "stage": "zone_owner.in_process.execute_request",
+            "durationMs": 100
+          }
+        },
+        {
+          "line": 14116,
+          "lineSha256": "223e744142d477e69a135c25cc04bd0eba943b62ceef2afd33778d65093ed094",
+          "scope": "other-connection",
+          "row": {
+            "observedAtMs": 1792943616369,
+            "stage": "serial_gate.zone_outbound_wait",
+            "durationMs": 84,
+            "connection": 12
+          }
+        },
+        {
+          "line": 14117,
+          "lineSha256": "4d6a24977b06a3bd8381c54593d53100312e2032ab638efa7b4b34148f227973",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943616369,
+            "stage": "shared_session.predrain",
+            "durationMs": 102
+          }
+        },
+        {
+          "line": 14118,
+          "lineSha256": "69a9bf7df9dfe27077a9132d7fc00f0934bf97fa7e5aa41095a8ac52bfc8d48d",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943616369,
+            "stage": "zone_owner.in_process.execute_request",
+            "durationMs": 131
+          }
+        },
+        {
+          "line": 14121,
+          "lineSha256": "b7e46078348d3e6986388a191016df1dbb153a35033a9fb072b33c38cacb1c9c",
+          "scope": "other-connection",
+          "row": {
+            "observedAtMs": 1792943616369,
+            "stage": "serial_gate.zone_outbound_wait",
+            "durationMs": 84,
+            "connection": 10
+          }
+        },
+        {
+          "line": 14124,
+          "lineSha256": "b530ab4067246bfeea1e46c10b6686e1ed175c2e0fae0403d4b1e5efee12085f",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943616444,
+            "stage": "shared_session.inner_execute",
+            "durationMs": 82
+          }
+        },
+        {
+          "line": 14125,
+          "lineSha256": "02a49c83490194cdf804ae5f49b7cd433ee140693fc69bc6ca63fa03dbd344db",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943616444,
+            "stage": "shared_session.predrain",
+            "durationMs": 67
+          }
+        },
+        {
+          "line": 14126,
+          "lineSha256": "f949cf6ff69a778a0fb37b8f692a6fe6bfe533d1780dd09c35abeae10f243b18",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943616444,
+            "stage": "zone_owner.in_process.execute_request",
+            "durationMs": 81
+          }
+        },
+        {
+          "line": 14129,
+          "lineSha256": "5fe7e41f0e1c217aeac120310fd4ee3f6b7cb53ebdd0d6cd2ec088a1ce498b53",
+          "scope": "other-connection",
+          "row": {
+            "observedAtMs": 1792943616444,
+            "stage": "serial_gate.zone_outbound_wait",
+            "durationMs": 75,
+            "connection": 13
+          }
+        },
+        {
+          "line": 14130,
+          "lineSha256": "5dacb6c467d5d34fb4929bbaf0967aaf680818bf45563d619f9fc6be359d2516",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943616444,
+            "stage": "shared_session.predrain",
+            "durationMs": 74
+          }
+        },
+        {
+          "line": 14131,
+          "lineSha256": "06005e49056242c9422fc6f266ee2510dc579a14e5c5358a85ac8d2530493142",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943616444,
+            "stage": "zone_owner.in_process.execute_request",
+            "durationMs": 78
+          }
+        },
+        {
+          "line": 14134,
+          "lineSha256": "0d94487db6f497efb30b73f7179bc3ab75e6330bc276e007a8670ff33313c0d4",
+          "scope": "other-connection",
+          "row": {
+            "observedAtMs": 1792943616444,
+            "stage": "serial_gate.zone_outbound_wait",
+            "durationMs": 57,
+            "connection": 3
+          }
+        },
+        {
+          "line": 14135,
+          "lineSha256": "a1b3bd40ff084d2ed7c534c21e0e2d1198d1267b64039a93f835081f6d7795fc",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943616445,
+            "stage": "shared_session.predrain",
+            "durationMs": 75
+          }
+        },
+        {
+          "line": 14136,
+          "lineSha256": "a8f811370f63ba53b0e904a47f33cf067e5f0189f6d345e25feda044c80658d0",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943616445,
+            "stage": "zone_owner.in_process.execute_request",
+            "durationMs": 82
+          }
+        },
+        {
+          "line": 14139,
+          "lineSha256": "304c508ae5a40a2afaa538d0cb0ad02e3c89d7807e7023860356c88813458fd6",
+          "scope": "other-connection",
+          "row": {
+            "observedAtMs": 1792943616445,
+            "stage": "serial_gate.zone_outbound_wait",
+            "durationMs": 74,
+            "connection": 19
+          }
+        },
+        {
+          "line": 14140,
+          "lineSha256": "15914b92203d03f177fe4dc1cbd366cce3b1a8a99e5a9f4f3cd0915545811891",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943616446,
+            "stage": "session_action.execute",
+            "durationMs": 137
+          }
+        },
+        {
+          "line": 14141,
+          "lineSha256": "28d8c7b999f58f66ca4714c25a317a4a72c54276b646a21748c2d4b0b8d9b9e6",
+          "scope": "other-connection",
+          "row": {
+            "observedAtMs": 1792943616446,
+            "stage": "socket_turn.input",
+            "durationMs": 137,
+            "connection": 5
+          }
+        },
+        {
+          "line": 14142,
+          "lineSha256": "cf382c80f8f58559dd72874f185a7ceb4915c4e2f6a58a01af97b0f381ee33dd",
+          "scope": "other-connection",
+          "row": {
+            "observedAtMs": 1792943616446,
+            "stage": "serial_gate.zone_outbound_wait",
+            "durationMs": 137,
+            "connection": 5
+          }
+        },
+        {
+          "line": 14144,
+          "lineSha256": "32cc60446f1da402cf7fc2a31123782f8e8612ba63dcd469dd09f37aa55a344b",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943616455,
+            "stage": "flush.save",
+            "durationMs": 84
+          }
+        },
+        {
+          "line": 14145,
+          "lineSha256": "4fccba4df1a9a19e6e291d392282461bac2d107a8efcbce791a9738d20263b8a",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943616455,
+            "stage": "session_action.flush",
+            "durationMs": 93
+          }
+        },
+        {
+          "line": 14146,
+          "lineSha256": "0f50fd9967b52f7f6ce37a4cd7eee6729040bdc0f0b15479f7a7b47639ad0c04",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943616488,
+            "stage": "shared_session.predrain",
+            "durationMs": 63
+          }
+        },
+        {
+          "line": 14147,
+          "lineSha256": "605a29c845a9ee5f18271442a062e18974cbbf1f9560df41ac4360aaa97d0406",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943616488,
+            "stage": "zone_owner.in_process.execute_request",
+            "durationMs": 100
+          }
+        },
+        {
+          "line": 14150,
+          "lineSha256": "18652f937dfd7945afaf53733311d758caf67299a54fdcbe7be3dbe2f2a427f8",
+          "scope": "other-connection",
+          "row": {
+            "observedAtMs": 1792943616488,
+            "stage": "serial_gate.zone_outbound_wait",
+            "durationMs": 100,
+            "connection": 25
+          }
+        },
+        {
+          "line": 14151,
+          "lineSha256": "abe92947e417af76aa0b4aa58685c4698d76d00a824a7122ded6a01a731f6c44",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943616494,
+            "stage": "shared_session.reconcile",
+            "durationMs": 50
+          }
+        },
+        {
+          "line": 14152,
+          "lineSha256": "e69eabca4a93c4db42f4171131dfbfc48bfcdf5fdd4a9fcbfe823d0ea029627d",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943616502,
+            "stage": "shared_session.predrain",
+            "durationMs": 58
+          }
+        },
+        {
+          "line": 14153,
+          "lineSha256": "56c2ae21c69bcdfe47113eff072a0458e8b70cdf3297666498973ede3dafc1bf",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943616502,
+            "stage": "shared_session.predrain",
+            "durationMs": 77
+          }
+        },
+        {
+          "line": 14155,
+          "lineSha256": "e7ebd07cf7a7a14e1d8a639e8dd25158bce139d521816acc6164a64050642e34",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943616509,
+            "stage": "session_action.execute",
+            "durationMs": 147
+          }
+        },
+        {
+          "line": 14156,
+          "lineSha256": "f4ca245c6c9db7a6f2fd5ed93cb3d2eb80839dfe8e3309a275dc70ae6fe0e22d",
+          "scope": "other-connection",
+          "row": {
+            "observedAtMs": 1792943616510,
+            "stage": "socket_turn.input",
+            "durationMs": 147,
+            "connection": 24
+          }
+        },
+        {
+          "line": 14157,
+          "lineSha256": "2e3bf767d67ee3af56d4905d95dda536baf99edba63c118e4da38b615767de9c",
+          "scope": "other-connection",
+          "row": {
+            "observedAtMs": 1792943616510,
+            "stage": "serial_gate.zone_outbound_wait",
+            "durationMs": 139,
+            "connection": 24
+          }
+        },
+        {
+          "line": 14160,
+          "lineSha256": "5e6fea968f582c8febc4a6525c856349e738406f830ad0a643eae401a945ec10",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943616522,
+            "stage": "session_action.execute",
+            "durationMs": 462
+          }
+        },
+        {
+          "line": 14161,
+          "lineSha256": "6fa062071f40597e5dacbf3c78ee0857e45f033cced267f05f93d1b06e583d14",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943616522,
+            "stage": "shared_session.predrain",
+            "durationMs": 78
+          }
+        },
+        {
+          "line": 14162,
+          "lineSha256": "62aa0e3bf6780c0bb5d9199e2746cb974d1cad24aec9259d3aaffb85b6e9acd2",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943616522,
+            "stage": "zone_owner.in_process.execute_request",
+            "durationMs": 113
+          }
+        },
+        {
+          "line": 14165,
+          "lineSha256": "56e3d4b48842e53e23e3bbd232389726d787fed83019ef2bcdc84324a4a9c515",
+          "scope": "other-connection",
+          "row": {
+            "observedAtMs": 1792943616522,
+            "stage": "serial_gate.zone_outbound_wait",
+            "durationMs": 110,
+            "connection": 20
+          }
+        },
+        {
+          "line": 14166,
+          "lineSha256": "29fc62a5da6930bafa4bf6ac2c7a58de92635ae2f2a86fc8aa98e237d3377c87",
+          "scope": "other-connection",
+          "row": {
+            "observedAtMs": 1792943616538,
+            "stage": "socket_turn.input",
+            "durationMs": 541,
+            "connection": 16
+          }
+        },
+        {
+          "line": 14167,
+          "lineSha256": "536e02564656dd51b00d0e00ba4aa8c907ebecb84e9b60bd349751483606a39c",
+          "scope": "other-connection",
+          "row": {
+            "observedAtMs": 1792943616538,
+            "stage": "serial_gate.zone_outbound_wait",
+            "durationMs": 220,
+            "connection": 16
+          }
+        },
+        {
+          "line": 14170,
+          "lineSha256": "78632ac4d417448766338f15f201660c777ef73a005820e1410587d97248239f",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943616550,
+            "stage": "shared_session.predrain",
+            "durationMs": 68
+          }
+        },
+        {
+          "line": 14171,
+          "lineSha256": "8dd31c60b128e1d7e82d4437483d8a08e685abf615c60c518698496dcf1c9f8f",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943616550,
+            "stage": "zone_owner.in_process.execute_request",
+            "durationMs": 79
+          }
+        },
+        {
+          "line": 14174,
+          "lineSha256": "b404daebb4b2b09655861d974005708f4adf979b41e3f85e28d61adb6b916304",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943616556,
+            "stage": "shared_session.predrain",
+            "durationMs": 120
+          }
+        },
+        {
+          "line": 14175,
+          "lineSha256": "74a1488586dc4332c710d7422dda73fd6857f520d61cff718e11c81da229dffd",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943616556,
+            "stage": "zone_owner.in_process.execute_request",
+            "durationMs": 169
+          }
+        },
+        {
+          "line": 14178,
+          "lineSha256": "69c79ae1be08a845fdd4ea29475fe3274e901cac4c699bb63a2f34b660613e99",
+          "scope": "other-connection",
+          "row": {
+            "observedAtMs": 1792943616559,
+            "stage": "serial_gate.zone_outbound_wait",
+            "durationMs": 168,
+            "connection": 17
+          }
+        },
+        {
+          "line": 14179,
+          "lineSha256": "ece4824471a09c55edaba5e6bc42a21c58f1d16131625a8e98cecbc45eb2717e",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943616563,
+            "stage": "shared_session.predrain",
+            "durationMs": 119
+          }
+        },
+        {
+          "line": 14180,
+          "lineSha256": "10ff255296cdd4f7c4567b841995979296f930c2ef6cb2ea4d36d76024893437",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943616563,
+            "stage": "zone_owner.in_process.execute_request",
+            "durationMs": 154
+          }
+        },
+        {
+          "line": 14183,
+          "lineSha256": "7cdfa83b285adb2d5723d8482134d3686e668437776c34ec2906ae7f6febb5c3",
+          "scope": "other-connection",
+          "row": {
+            "observedAtMs": 1792943616563,
+            "stage": "serial_gate.zone_outbound_wait",
+            "durationMs": 61,
+            "connection": 8
+          }
+        },
+        {
+          "line": 14184,
+          "lineSha256": "3acdf7b0f8792c59ec0ede3ab7ced754d3e423808484660d32ca96e09d1e38f5",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943616564,
+            "stage": "shared_session.predrain",
+            "durationMs": 75
+          }
+        },
+        {
+          "line": 14185,
+          "lineSha256": "a4443d7c9dd46bcb6218cd808e46b9f85c6a743d53e66669f186223f03877a09",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943616564,
+            "stage": "zone_owner.in_process.execute_request",
+            "durationMs": 108
+          }
+        },
+        {
+          "line": 14187,
+          "lineSha256": "d51a947bc743a54788683b8cda68fd95558f8151087f62b5e4ff80ffaa171f33",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943616564,
+            "stage": "shared_session.predrain",
+            "durationMs": 82
+          }
+        },
+        {
+          "line": 14189,
+          "lineSha256": "94a65cfd256bcccbce9c2548317dc5dd2534201f7b0e1d8046dc5bc7d31e27f6",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943616564,
+            "stage": "zone_owner.in_process.execute_request",
+            "durationMs": 93
+          }
+        },
+        {
+          "line": 14191,
+          "lineSha256": "14e5021cace626aa33f19d7d02d5e11cff66c1c0d16d2ba9f975c5f4a0d6c0a1",
+          "scope": "other-connection",
+          "row": {
+            "observedAtMs": 1792943616564,
+            "stage": "serial_gate.zone_outbound_wait",
+            "durationMs": 62,
+            "connection": 4
+          }
+        },
+        {
+          "line": 14193,
+          "lineSha256": "36b8a192e43b940221b5fe2e03a343dafe89e8079a1d671a7ca3236801b38321",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943616564,
+            "stage": "shared_session.predrain",
+            "durationMs": 61
+          }
+        },
+        {
+          "line": 14194,
+          "lineSha256": "94a65cfd256bcccbce9c2548317dc5dd2534201f7b0e1d8046dc5bc7d31e27f6",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943616564,
+            "stage": "zone_owner.in_process.execute_request",
+            "durationMs": 93
+          }
+        },
+        {
+          "line": 14197,
+          "lineSha256": "504ec72accef04c7c62fb07a7f2885f3963121ea9cd725f851fe9db4412472aa",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943616564,
+            "stage": "shared_session.inner_execute",
+            "durationMs": 62
+          }
+        },
+        {
+          "line": 14200,
+          "lineSha256": "08f9a2645c8b3e40ec7600e9847197e8369e76ad57f8264830437a260f3f6e9e",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943616579,
+            "stage": "zone_owner.in_process.execute_request",
+            "durationMs": 186
+          }
+        },
+        {
+          "line": 14203,
+          "lineSha256": "f1ca77f4ec76ee4bd4eb8d70f5cc8f7cdceff64e634600976368daef8d54944c",
+          "scope": "other-connection",
+          "row": {
+            "observedAtMs": 1792943616579,
+            "stage": "serial_gate.zone_outbound_wait",
+            "durationMs": 166,
+            "connection": 26
+          }
+        },
+        {
+          "line": 14204,
+          "lineSha256": "8fb9ca301d61261a25adfc6305439a814674e26aa27022461a2fe9f2a521e345",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943616579,
+            "stage": "shared_session.predrain",
+            "durationMs": 77
+          }
+        },
+        {
+          "line": 14205,
+          "lineSha256": "cef21f1b4b8b3c01b64d9b56ac5f311114e98aecca0787e6c592832ab30643b0",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943616579,
+            "stage": "zone_owner.in_process.execute_request",
+            "durationMs": 77
+          }
+        },
+        {
+          "line": 14209,
+          "lineSha256": "7b7556730fcedb93065afaa54cca2e60dde09ce2332066abc2b7605bc7e88468",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943616588,
+            "stage": "zone_owner.in_process.execute_request",
+            "durationMs": 59
+          }
+        },
+        {
+          "line": 14212,
+          "lineSha256": "10ec743c3bf9dcfe3cd047d8f1b67f8735cd716516ac94d4d65917513cf880a0",
+          "scope": "other-connection",
+          "row": {
+            "observedAtMs": 1792943616588,
+            "stage": "serial_gate.zone_outbound_wait",
+            "durationMs": 51,
+            "connection": 23
+          }
+        },
+        {
+          "line": 14213,
+          "lineSha256": "b94e59715822a60431f12832755b4450ed5576e421d7252e1b8c81a1d3b71a84",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943616589,
+            "stage": "shared_session.predrain",
+            "durationMs": 59
+          }
+        },
+        {
+          "line": 14214,
+          "lineSha256": "8d1f1ca8cdcfaa5659e79f2f74d30a0fbf7dff2998e6b8f3dfb08e8401400427",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943616589,
+            "stage": "zone_owner.in_process.execute_request",
+            "durationMs": 87
+          }
+        },
+        {
+          "line": 14216,
+          "lineSha256": "009abe4c899af3a3163c84e8973158d745a78d2b81379755d311dac21d0c2abb",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943616589,
+            "stage": "shared_session.reconcile",
+            "durationMs": 79
+          }
+        },
+        {
+          "line": 14218,
+          "lineSha256": "1be5ec6ea99c90612f36c6680276604fc33a790d42b95699912c5aa841e8129a",
+          "scope": "other-connection",
+          "row": {
+            "observedAtMs": 1792943616589,
+            "stage": "serial_gate.zone_outbound_wait",
+            "durationMs": 52,
+            "connection": 7
+          }
+        },
+        {
+          "line": 14220,
+          "lineSha256": "15a9e2860c439805c33254589052a10f2d43aa8d9b058fe9eef0c2b8f8da5695",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943616597,
+            "stage": "zone_owner.in_process.execute_request",
+            "durationMs": 204
+          }
+        },
+        {
+          "line": 14223,
+          "lineSha256": "85b06a335221aea8130b47943528d48c6c2f41b22056d4e44b43dc083b117777",
+          "scope": "other-connection",
+          "row": {
+            "observedAtMs": 1792943616597,
+            "stage": "socket_input.queue_residence",
+            "durationMs": 94,
+            "connection": 21,
+            "queuedPhase": "runtime_tick",
+            "phaseElapsedMs": 109,
+            "inputClass": "move"
+          }
+        },
+        {
+          "line": 14224,
+          "lineSha256": "d4788120ff9e326a23194b464d5eecab9044570abd42c6d33198ccf0b0e0b786",
+          "scope": "other-connection",
+          "row": {
+            "observedAtMs": 1792943616597,
+            "stage": "serial_gate.zone_outbound_wait",
+            "durationMs": 184,
+            "connection": 21
+          }
+        },
+        {
+          "line": 14225,
+          "lineSha256": "04a044c6ffba6a10499cb7f8d63f816f4bdf67a65a806b5c429bab25a7222981",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943616648,
+            "stage": "shared_session.predrain",
+            "durationMs": 50
+          }
+        },
+        {
+          "line": 14226,
+          "lineSha256": "6d84ca4dbb20c09882652e46280c794516684846fd9879b71ab6e5a0ec009d4f",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943616648,
+            "stage": "zone_owner.in_process.execute_request",
+            "durationMs": 59
+          }
+        },
+        {
+          "line": 14229,
+          "lineSha256": "48c6951a0349854183476dfcc4223ea4d648a0422704c3fd497ef49ccfe08e77",
+          "scope": "other-connection",
+          "row": {
+            "observedAtMs": 1792943616648,
+            "stage": "serial_gate.zone_outbound_wait",
+            "durationMs": 51,
+            "connection": 24
+          }
+        },
+        {
+          "line": 14230,
+          "lineSha256": "7e730ecc2903b3ee81ec773207cfdca37dd9bab70659bd907fd3dd9b05b62354",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943616648,
+            "stage": "shared_session.predrain",
+            "durationMs": 69
+          }
+        },
+        {
+          "line": 14231,
+          "lineSha256": "2f1b27d97b0d177db7478bff90528a9ce0832c78a5bf3c70bbed9ab0ddee3d8d",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943616648,
+            "stage": "zone_owner.in_process.execute_request",
+            "durationMs": 73
+          }
+        },
+        {
+          "line": 14234,
+          "lineSha256": "3d5174cf273b5f6f50200572caaf580462311e1e446aab40c5b15ac91424e5e1",
+          "scope": "other-connection",
+          "row": {
+            "observedAtMs": 1792943616648,
+            "stage": "serial_gate.zone_outbound_wait",
+            "durationMs": 59,
+            "connection": 12
+          }
+        },
+        {
+          "line": 14235,
+          "lineSha256": "db323c9c5968e30aee98722b1bf35408ec8f53f80da28f8a58ec2abe4667fba0",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943616677,
+            "stage": "shared_session.predrain",
+            "durationMs": 89
+          }
+        },
+        {
+          "line": 14236,
+          "lineSha256": "93d6ff9654e1fc2ad047af3c1f57039b1c9386b15b5775dbbd7932f6c4a5c4ab",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943616677,
+            "stage": "zone_owner.in_process.execute_request",
+            "durationMs": 102
+          }
+        },
+        {
+          "line": 14239,
+          "lineSha256": "7347d92cd301be0d0faa48ab62a92a9753b8a8db3db70dbae55dbc8889d41315",
+          "scope": "other-connection",
+          "row": {
+            "observedAtMs": 1792943616677,
+            "stage": "serial_gate.zone_outbound_wait",
+            "durationMs": 81,
+            "connection": 18
+          }
+        },
+        {
+          "line": 14240,
+          "lineSha256": "9731281bd5ba73ebf9e4ac1b1a8b86fcd239e89a2c6c92c768fd8c091f8417d9",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943616679,
+            "stage": "shared_session.predrain",
+            "durationMs": 89
+          }
+        },
+        {
+          "line": 14241,
+          "lineSha256": "73f55f976594b8268394718a1cebd7c6f2d8d75c09b90c3263d6b93256fae131",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943616679,
+            "stage": "zone_owner.in_process.execute_request",
+            "durationMs": 103
+          }
+        },
+        {
+          "line": 14244,
+          "lineSha256": "d46e850f04846250db689d46f130de8d711efd956a9f62c0987683ed960e52a0",
+          "scope": "other-connection",
+          "row": {
+            "observedAtMs": 1792943616679,
+            "stage": "serial_gate.zone_outbound_wait",
+            "durationMs": 82,
+            "connection": 27
+          }
+        },
+        {
+          "line": 14245,
+          "lineSha256": "bcef44fdc905d2b8b6caecff8095ade5a320a6a83432f4f0a19be6c7dea47e33",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943616679,
+            "stage": "shared_session.predrain",
+            "durationMs": 75
+          }
+        },
+        {
+          "line": 14246,
+          "lineSha256": "add9eb064c696acfbccc1ec85d38470839dc846f8532da91389b5f612aa586ae",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943616679,
+            "stage": "zone_owner.in_process.execute_request",
+            "durationMs": 90
+          }
+        },
+        {
+          "line": 14249,
+          "lineSha256": "de7deb4ff3282b87c20492b63be50c48664fdd3381a720d7430401afe13a9f3b",
+          "scope": "other-connection",
+          "row": {
+            "observedAtMs": 1792943616679,
+            "stage": "serial_gate.zone_outbound_wait",
+            "durationMs": 90,
+            "connection": 1
+          }
+        },
+        {
+          "line": 14250,
+          "lineSha256": "f564857b9ee88d41267927587488bdd41846d1f3c96ef2d8abc07a134aa756d9",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943616679,
+            "stage": "session_action.execute",
+            "durationMs": 115
+          }
+        },
+        {
+          "line": 14251,
+          "lineSha256": "6371587182a0469c240473062c586e8ee58fec99a9dc5828e17df360b8fe2348",
+          "scope": "other-connection",
+          "row": {
+            "observedAtMs": 1792943616679,
+            "stage": "socket_turn.input",
+            "durationMs": 115,
+            "connection": 9
+          }
+        },
+        {
+          "line": 14252,
+          "lineSha256": "322d5d64114953879921d723a4acca881513e755dff02bf397549ae8f090f49b",
+          "scope": "other-connection",
+          "row": {
+            "observedAtMs": 1792943616679,
+            "stage": "serial_gate.zone_outbound_wait",
+            "durationMs": 90,
+            "connection": 9
+          }
+        },
+        {
+          "line": 14253,
+          "lineSha256": "f564857b9ee88d41267927587488bdd41846d1f3c96ef2d8abc07a134aa756d9",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943616679,
+            "stage": "session_action.execute",
+            "durationMs": 115
+          }
+        },
+        {
+          "line": 14254,
+          "lineSha256": "22cd73417b669432511b9d23e4788b46fb4447a8bd7089182301101c3fa2dec6",
+          "scope": "other-connection",
+          "row": {
+            "observedAtMs": 1792943616679,
+            "stage": "socket_turn.input",
+            "durationMs": 115,
+            "connection": 11
+          }
+        },
+        {
+          "line": 14255,
+          "lineSha256": "028e67d2bdf3ae695776348d83eed9f92e0723d96dfd20242924deb831a74b65",
+          "scope": "other-connection",
+          "row": {
+            "observedAtMs": 1792943616679,
+            "stage": "serial_gate.zone_outbound_wait",
+            "durationMs": 115,
+            "connection": 11
+          }
+        },
+        {
+          "line": 14256,
+          "lineSha256": "233fbb3a86bcce662898186de3cecace87233d14aef9f7c31f44833c56d38b41",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943616680,
+            "stage": "session_action.execute",
+            "durationMs": 191
+          }
+        },
+        {
+          "line": 14257,
+          "lineSha256": "c857c5b05855a8420fd1159ecf39bc075bfc44ec99ba79043dd89955f9337a21",
+          "scope": "other-connection",
+          "row": {
+            "observedAtMs": 1792943616680,
+            "stage": "socket_turn.input",
+            "durationMs": 191,
+            "connection": 25
+          }
+        },
+        {
+          "line": 14258,
+          "lineSha256": "2949f9b3dda867afaba98c77f510168371fed0b9efb44b846116ff1ff18c561e",
+          "scope": "other-connection",
+          "row": {
+            "observedAtMs": 1792943616680,
+            "stage": "serial_gate.zone_outbound_wait",
+            "durationMs": 191,
+            "connection": 25
+          }
+        },
+        {
+          "line": 14261,
+          "lineSha256": "fd787d616f0d9a09ce13188226b790376289f606874286ef90ae3e9ba3f5f336",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943616704,
+            "stage": "shared_session.predrain",
+            "durationMs": 105
+          }
+        },
+        {
+          "line": 14262,
+          "lineSha256": "27710521936af5bb6aa21c8c03b4431f5c67f522aa8b9c89531c4a6f475c4d74",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943616704,
+            "stage": "zone_owner.in_process.execute_request",
+            "durationMs": 122
+          }
+        },
+        {
+          "line": 14265,
+          "lineSha256": "ca50744b1edfa28c50c59a7fcd5ac78ff6a8141f5e05167bfd4d0ae1925c77dd",
+          "scope": "other-connection",
+          "row": {
+            "observedAtMs": 1792943616704,
+            "stage": "serial_gate.zone_outbound_wait",
+            "durationMs": 113,
+            "connection": 5
+          }
+        },
+        {
+          "line": 14266,
+          "lineSha256": "08f8761eac88d6668766bbe31c5ce7f51fc4b58cbcec8bb5d97bfbaf8ad6b4b4",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943616718,
+            "stage": "zone_owner.in_process.execute_request",
+            "durationMs": 78
+          }
+        },
+        {
+          "line": 14269,
+          "lineSha256": "2ab40c2b285d5c4f288db84977b04207a0ae73817eab47ed8e414ef6aa64b671",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943616725,
+            "stage": "shared_session.inner_execute",
+            "durationMs": 66
+          }
+        },
+        {
+          "line": 14270,
+          "lineSha256": "2972d22b10d8a785fc24683c1c246a5625a0647fc0373f9cd5d15434fe87ea62",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943616725,
+            "stage": "zone_owner.in_process.execute_request",
+            "durationMs": 54
+          }
+        },
+        {
+          "line": 14273,
+          "lineSha256": "d2bf664e5e17e8fb25458df678b4dde1d876c78b6e3c99e6fbfe38c2a9b2ee0e",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943616725,
+            "stage": "zone_owner.in_process.execute_request",
+            "durationMs": 66
+          }
+        },
+        {
+          "line": 14274,
+          "lineSha256": "8d66c2dd93fbdadaf5e0eae4da44aba2b78b6c81d90f760eca670a405516bbce",
+          "scope": "other-connection",
+          "row": {
+            "observedAtMs": 1792943616725,
+            "stage": "serial_gate.zone_outbound_wait",
+            "durationMs": 54,
+            "connection": 19
+          }
+        },
+        {
+          "line": 14275,
+          "lineSha256": "a904f2dec7cd6e0d9018eac4f9b0901ff713a96cf380a232ef12f886f5dbdbc1",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943616731,
+            "stage": "shared_session.predrain",
+            "durationMs": 83
+          }
+        },
+        {
+          "line": 14276,
+          "lineSha256": "db984cc05ae1d8baf8840d8b0a27c30531cc4503b32e4d3efc62b67ea8223c98",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943616731,
+            "stage": "zone_owner.in_process.execute_request",
+            "durationMs": 91
+          }
+        },
+        {
+          "line": 14279,
+          "lineSha256": "94c916fa869d7cb54ccb314bbede58e799862556f2367bc1483ee0d82c5b8465",
+          "scope": "other-connection",
+          "row": {
+            "observedAtMs": 1792943616732,
+            "stage": "serial_gate.zone_outbound_wait",
+            "durationMs": 50,
+            "connection": 2
+          }
+        },
+        {
+          "line": 14280,
+          "lineSha256": "46a244f63fd668dab4ec0096ae9927e79687b37d5c5ee4a2ad838ab215f4f6d2",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943616732,
+            "stage": "shared_session.predrain",
+            "durationMs": 83
+          }
+        },
+        {
+          "line": 14281,
+          "lineSha256": "7edb4a98a88b35583565f2924d187c9f6c17afed30e23d3abaa8eb0402a71984",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943616733,
+            "stage": "shared_session.predrain",
+            "durationMs": 128
+          }
+        },
+        {
+          "line": 14282,
+          "lineSha256": "233055dd758203dceb7b7953c98838f24cb0c2cd4b8fc234e461ab353353beda",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943616733,
+            "stage": "zone_owner.in_process.execute_request",
+            "durationMs": 144
+          }
+        },
+        {
+          "line": 14285,
+          "lineSha256": "821906a835dbe206476ad4201653e9271aa715842d1be0651c69a0d5910c5d8f",
+          "scope": "other-connection",
+          "row": {
+            "observedAtMs": 1792943616733,
+            "stage": "socket_input.queue_residence",
+            "durationMs": 107,
+            "connection": 14,
+            "queuedPhase": "runtime_tick",
+            "phaseElapsedMs": 36,
+            "inputClass": "move"
+          }
+        },
+        {
+          "line": 14286,
+          "lineSha256": "fc6b5f9f9aa72374794ceca5885049085ed871308455eb512049ee6ef5bcb43d",
+          "scope": "other-connection",
+          "row": {
+            "observedAtMs": 1792943616733,
+            "stage": "serial_gate.zone_outbound_wait",
+            "durationMs": 144,
+            "connection": 14
+          }
+        },
+        {
+          "line": 14291,
+          "lineSha256": "1dc5a504f87108f77c9314c2ee7d0284ae7b8e07b2eed28e590d89b1248bd4ef",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943616749,
+            "stage": "shared_session.predrain",
+            "durationMs": 68
+          }
+        },
+        {
+          "line": 14292,
+          "lineSha256": "c7562882ab3247008c9cf088e2549325d66c64cc3a595e9531374f744f227432",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943616749,
+            "stage": "zone_owner.in_process.execute_request",
+            "durationMs": 78
+          }
+        },
+        {
+          "line": 14295,
+          "lineSha256": "8f3bd1edf540a85b4e5aaba29c21bb14ca04b215656f1ed545bffab76a051886",
+          "scope": "other-connection",
+          "row": {
+            "observedAtMs": 1792943616749,
+            "stage": "serial_gate.zone_outbound_wait",
+            "durationMs": 78,
+            "connection": 13
+          }
+        },
+        {
+          "line": 14296,
+          "lineSha256": "f48a8bf70299784249198a8637dc2834f919bcaee2cb79b43c4ba399efcaff2c",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943616749,
+            "stage": "session_action.execute",
+            "durationMs": 152
+          }
+        },
+        {
+          "line": 14297,
+          "lineSha256": "82dfd0d5ab365ef5fd451fff3aa53ef57ef0c90c05fd78358fc63bf030a1abdc",
+          "scope": "other-connection",
+          "row": {
+            "observedAtMs": 1792943616749,
+            "stage": "socket_turn.input",
+            "durationMs": 152,
+            "connection": 21
+          }
+        },
+        {
+          "line": 14298,
+          "lineSha256": "50bda88f70ca8080c312ec4fdab1aa91f59aadbc566548802f4f4736baa19d54",
+          "scope": "other-connection",
+          "row": {
+            "observedAtMs": 1792943616749,
+            "stage": "serial_gate.zone_outbound_wait",
+            "durationMs": 152,
+            "connection": 21
+          }
+        },
+        {
+          "line": 14301,
+          "lineSha256": "686146a41a7dbbab62d329651adf69c8a1453ec41b329b90eaa7d291dfe85505",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943616794,
+            "stage": "zone_owner.in_process.execute_request",
+            "durationMs": 60
+          }
+        },
+        {
+          "line": 14302,
+          "lineSha256": "4566af19d36153232bb50662ec0bb345b64082d19a91cd9e37794946410dcd51",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943616802,
+            "stage": "flush.save",
+            "durationMs": 222
+          }
+        },
+        {
+          "line": 14303,
+          "lineSha256": "23442f828c172308607d67180d6e2c81dfb14350f28b0172f2d5d183ae8fb787",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943616809,
+            "stage": "shared_session.predrain",
+            "durationMs": 98
+          }
+        },
+        {
+          "line": 14304,
+          "lineSha256": "79e4694fad204a99421fc48777ba3f77bd3034002b3e4634631021f5c008e2a8",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943616809,
+            "stage": "shared_session.inner_execute",
+            "durationMs": 61
+          }
+        },
+        {
+          "line": 14305,
+          "lineSha256": "1a326a4011f35377cd7d9c2a3c42fd277845d8fcdddcc7596b022ce5fb17656a",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943616809,
+            "stage": "zone_owner.in_process.execute_request",
+            "durationMs": 138
+          }
+        },
+        {
+          "line": 14308,
+          "lineSha256": "f62d75894bb91aa1b9c686f4599a8e58bcc114e109526d09290128a12a8bb3a0",
+          "scope": "other-connection",
+          "row": {
+            "observedAtMs": 1792943616809,
+            "stage": "serial_gate.zone_outbound_wait",
+            "durationMs": 58,
+            "connection": 3
+          }
+        },
+        {
+          "line": 14309,
+          "lineSha256": "844b24a13572544cfa205b407cb25f5ee4c8fd0e7f303fa7dc60e385cb5a1539",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943616809,
+            "stage": "zone_owner.in_process.execute_request",
+            "durationMs": 67
+          }
+        },
+        {
+          "line": 14310,
+          "lineSha256": "b33a796e6a0f580a01b5d7bddefb3f6189e26c270f3291403b76bd668359daf9",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943616812,
+            "stage": "shared_session.predrain",
+            "durationMs": 79
+          }
+        },
+        {
+          "line": 14311,
+          "lineSha256": "670ceeeb91cc1d0eb76f49961f184da759ba2dcfc21dfac911e0473b29cf45be",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943616812,
+            "stage": "zone_owner.in_process.execute_request",
+            "durationMs": 94
+          }
+        },
+        {
+          "line": 14313,
+          "lineSha256": "b33a796e6a0f580a01b5d7bddefb3f6189e26c270f3291403b76bd668359daf9",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943616812,
+            "stage": "shared_session.predrain",
+            "durationMs": 79
+          }
+        },
+        {
+          "line": 14314,
+          "lineSha256": "3e496ba6712d3ca8e3f06605d3f4f51291ba9467d1670e96b29dbe62a4878f86",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943616812,
+            "stage": "zone_owner.in_process.execute_request",
+            "durationMs": 93
+          }
+        },
+        {
+          "line": 14316,
+          "lineSha256": "3792f7ab121b57001af9ce287182a85a38989c24f6d96c43f98abbfc6254e6b1",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943616812,
+            "stage": "shared_session.reconcile",
+            "durationMs": 62
+          }
+        },
+        {
+          "line": 14319,
+          "lineSha256": "894a153e7c569c0160b9858e2458dfb1b229509029ef27f2ce72baf26f922d96",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943616812,
+            "stage": "zone_owner.in_process.execute_request",
+            "durationMs": 187
+          }
+        },
+        {
+          "line": 14322,
+          "lineSha256": "b65e0fbab9568d83bfd35edb368f0da28a9f1933aafb77807e580e95c94b600b",
+          "scope": "other-connection",
+          "row": {
+            "observedAtMs": 1792943616812,
+            "stage": "serial_gate.zone_outbound_wait",
+            "durationMs": 63,
+            "connection": 8
+          }
+        },
+        {
+          "line": 14323,
+          "lineSha256": "585bd940ab06d03559863e7af95b6d052717fc80f5cbfaf06360160bb670c7fd",
+          "scope": "other-connection",
+          "row": {
+            "observedAtMs": 1792943616812,
+            "stage": "serial_gate.zone_outbound_wait",
+            "durationMs": 77,
+            "connection": 20
+          }
+        },
+        {
+          "line": 14324,
+          "lineSha256": "93e787316141a86f1af9287df51ccb8003f48b5bf6629971e6873780f6f02656",
+          "scope": "other-connection",
+          "row": {
+            "observedAtMs": 1792943616812,
+            "stage": "serial_gate.zone_outbound_wait",
+            "durationMs": 134,
+            "connection": 16
+          }
+        },
+        {
+          "line": 14325,
+          "lineSha256": "e7500d43c6114d46336a4cdc96275bc5c03a14d1295c0a89eed90d241698c3dc",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943616813,
+            "stage": "session_action.execute",
+            "durationMs": 135
+          }
+        },
+        {
+          "line": 14326,
+          "lineSha256": "975345a3f8000f68f1fce364b93c7c97a7b71567fc0566a904749c3196ae0525",
+          "scope": "other-connection",
+          "row": {
+            "observedAtMs": 1792943616813,
+            "stage": "socket_turn.input",
+            "durationMs": 135,
+            "connection": 18
+          }
+        },
+        {
+          "line": 14327,
+          "lineSha256": "f675ff6f3c4e420cbb39eeb35e2dae5374d8d5e24fe746134c2be32362561121",
+          "scope": "other-connection",
+          "row": {
+            "observedAtMs": 1792943616813,
+            "stage": "serial_gate.zone_outbound_wait",
+            "durationMs": 135,
+            "connection": 18
+          }
+        },
+        {
+          "line": 14329,
+          "lineSha256": "8f13fb4cc48ac285b1b6cc102ba1f3e80b3f91cbc6c816241d5c5e1dfd8934ea",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943616814,
+            "stage": "shared_session.predrain",
+            "durationMs": 89
+          }
+        },
+        {
+          "line": 14330,
+          "lineSha256": "9b36375fadccb7fbb25752fa07fd97b369efec341fbb61f3397f9d494baaa09f",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943616814,
+            "stage": "session_action.execute",
+            "durationMs": 134
+          }
+        },
+        {
+          "line": 14331,
+          "lineSha256": "8742213201ef6f2056f6a6929d7205c09072b64909b6448333c1d77044330e5f",
+          "scope": "other-connection",
+          "row": {
+            "observedAtMs": 1792943616814,
+            "stage": "socket_turn.input",
+            "durationMs": 134,
+            "connection": 1
+          }
+        },
+        {
+          "line": 14332,
+          "lineSha256": "7aa8fd0726c7332b4a22129591aa9b0f3ebeee7f0d3ad4a5aa36bc89f3b7abfd",
+          "scope": "other-connection",
+          "row": {
+            "observedAtMs": 1792943616814,
+            "stage": "serial_gate.zone_outbound_wait",
+            "durationMs": 134,
+            "connection": 1
+          }
+        },
+        {
+          "line": 14334,
+          "lineSha256": "6fcf0bef7e5c62aed90e88052096eb8339df359f460481655e66a7dd96de926a",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943616876,
+            "stage": "shared_session.inner_execute",
+            "durationMs": 54
+          }
+        },
+        {
+          "line": 14335,
+          "lineSha256": "2f95e3f4a4580da75338053a32a3e55c06da1858efffe7cba0df0a1fb6b7cbcc",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943616876,
+            "stage": "zone_owner.in_process.execute_request",
+            "durationMs": 62
+          }
+        },
+        {
+          "line": 14336,
+          "lineSha256": "afc564aacdba7d137213db8134363962b5419bad59debdadfedbd22454891fa8",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943616876,
+            "stage": "shared_session.predrain",
+            "durationMs": 66
+          }
+        },
+        {
+          "line": 14337,
+          "lineSha256": "ccdae69d125c613d6ee47736872933ccf18d94ce032deff3c2c24b0599ce754c",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943616876,
+            "stage": "zone_owner.in_process.execute_request",
+            "durationMs": 110
+          }
+        },
+        {
+          "line": 14340,
+          "lineSha256": "9468b001b3981b577636efa1cb7f23d643c1d3226dfadb455feebe4106b200c4",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943616876,
+            "stage": "session_action.flush",
+            "durationMs": 353
+          }
+        },
+        {
+          "line": 14342,
+          "lineSha256": "cd915bec3981330a4e6d22a50dadcf2e40167292f431c8f03789d8ff214151a9",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943616883,
+            "stage": "shared_session.predrain",
+            "durationMs": 71
+          }
+        },
+        {
+          "line": 14343,
+          "lineSha256": "19ebfb09a18f292ac6c2db7776a07435a4c408ac379657319f68ef1cfdf78a86",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943616883,
+            "stage": "zone_owner.in_process.execute_request",
+            "durationMs": 117
+          }
+        },
+        {
+          "line": 14346,
+          "lineSha256": "44954d0d7dd517e2ec72aaf6f1e79c13ef39199dc9bf77ebcb0fb7b52d38f819",
+          "scope": "other-connection",
+          "row": {
+            "observedAtMs": 1792943616883,
+            "stage": "serial_gate.zone_outbound_wait",
+            "durationMs": 54,
+            "connection": 9
+          }
+        },
+        {
+          "line": 14347,
+          "lineSha256": "79287b7e7ae38e8610adb8036eb711f7f4d558c9f1a556bf7bf3454db57bd3fa",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943616904,
+            "stage": "shared_session.predrain",
+            "durationMs": 92
+          }
+        },
+        {
+          "line": 14348,
+          "lineSha256": "955f30b6715e779e7a791fd9cae368ec69b19c58f4bd9e11ec7fc3c19fe4f70c",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943616904,
+            "stage": "zone_owner.in_process.execute_request",
+            "durationMs": 138
+          }
+        },
+        {
+          "line": 14351,
+          "lineSha256": "bccd51601a246072b8f150d87574446e4cc6b3a6b29230b5733ef02a560adc07",
+          "scope": "other-connection",
+          "row": {
+            "observedAtMs": 1792943616905,
+            "stage": "serial_gate.zone_outbound_wait",
+            "durationMs": 110,
+            "connection": 25
+          }
+        },
+        {
+          "line": 14352,
+          "lineSha256": "97fce6a7c3f4b74cc74b1a3c84ed2ba0804f2a66483665e2b252c50e6d4f7aef",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943616905,
+            "stage": "session_action.execute",
+            "durationMs": 170
+          }
+        },
+        {
+          "line": 14353,
+          "lineSha256": "b9b8f5427d3b7c511429244af276937b73a49745152b8ef56852a3706c39bddf",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943616905,
+            "stage": "shared_session.predrain",
+            "durationMs": 93
+          }
+        },
+        {
+          "line": 14354,
+          "lineSha256": "17a987e97a9add70fec544ed7064520f6e10ab5a024576037151047334efadab",
+          "scope": "other-connection",
+          "row": {
+            "observedAtMs": 1792943616905,
+            "stage": "socket_turn.input",
+            "durationMs": 170,
+            "connection": 14
+          }
+        },
+        {
+          "line": 14355,
+          "lineSha256": "694e130f3a5adc3bbc0ee4a6186c412d6bcd74586f2380bc277ccc599d34b235",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943616905,
+            "stage": "zone_owner.in_process.execute_request",
+            "durationMs": 138
+          }
+        },
+        {
+          "line": 14358,
+          "lineSha256": "6b101659e8d483ad8d13775641e9eb3201221009854dc116a146f8c07ae44a4d",
+          "scope": "other-connection",
+          "row": {
+            "observedAtMs": 1792943616905,
+            "stage": "serial_gate.zone_outbound_wait",
+            "durationMs": 170,
+            "connection": 14
+          }
+        },
+        {
+          "line": 14359,
+          "lineSha256": "4b60b60d913935c7226221c48e5b06fbfa2e597775e421733c084edcdfe052e9",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943616905,
+            "stage": "shared_session.predrain",
+            "durationMs": 91
+          }
+        },
+        {
+          "line": 14360,
+          "lineSha256": "bc2e96a5749ed867e7024a61261e09794f17506fdc0d83df42e53d2178c1eac6",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943616905,
+            "stage": "zone_owner.in_process.execute_request",
+            "durationMs": 95
+          }
+        },
+        {
+          "line": 14362,
+          "lineSha256": "6190c90435dc0b5640941e775ffccfff042d68b683159fdfcf3eae61c94fcd71",
+          "scope": "other-connection",
+          "row": {
+            "observedAtMs": 1792943616905,
+            "stage": "serial_gate.zone_outbound_wait",
+            "durationMs": 110,
+            "connection": 4
+          }
+        },
+        {
+          "line": 14364,
+          "lineSha256": "6823b3c72c127185db6befe77acd9f9c5605ec499fa8e6a779ad9f6f4558ad84",
+          "scope": "other-connection",
+          "row": {
+            "observedAtMs": 1792943616905,
+            "stage": "serial_gate.zone_outbound_wait",
+            "durationMs": 75,
+            "connection": 22
+          }
+        },
+        {
+          "line": 14370,
+          "lineSha256": "447db10e50c495fc00bb95f9d7d5dc82111d1888d5f63d4686db4ae86e598d0a",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943616912,
+            "stage": "shared_session.predrain",
+            "durationMs": 100
+          }
+        },
+        {
+          "line": 14371,
+          "lineSha256": "d087b38e1000f0465580d712f4018ea89856bbab2ff63ef21e25af6271a0738a",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943616912,
+            "stage": "shared_session.predrain",
+            "durationMs": 98
+          }
+        },
+        {
+          "line": 14372,
+          "lineSha256": "58f03445d4664a44a26c063580a0b16a13a38ddf80e58a4fc170de32b6aaa38b",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943616912,
+            "stage": "zone_owner.in_process.execute_request",
+            "durationMs": 102
+          }
+        },
+        {
+          "line": 14375,
+          "lineSha256": "820bb23b440c50c73288b1cd01e683c4eb716a37d48a7d181b003ac95821fb45",
+          "scope": "other-connection",
+          "row": {
+            "observedAtMs": 1792943616912,
+            "stage": "serial_gate.zone_outbound_wait",
+            "durationMs": 83,
+            "connection": 7
+          }
+        },
+        {
+          "line": 14376,
+          "lineSha256": "ca05c42db4ceea7284bc4ba5bd3ebcc198cb932c7c745ea6ad98a4e6fc632cc0",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943616912,
+            "stage": "zone_owner.in_process.execute_request",
+            "durationMs": 130
+          }
+        },
+        {
+          "line": 14379,
+          "lineSha256": "68accf9e4515bfd71a83e9cfd5877d10e31d92350e72fb5f1a95da4e1bb5c4ce",
+          "scope": "other-connection",
+          "row": {
+            "observedAtMs": 1792943616912,
+            "stage": "serial_gate.zone_outbound_wait",
+            "durationMs": 83,
+            "connection": 15
+          }
+        },
+        {
+          "line": 14380,
+          "lineSha256": "5685f360278e8cb972e97297ddab1bbf3771eba6ce3a951e43f0a534e35e097f",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943616912,
+            "stage": "shared_session.predrain",
+            "durationMs": 50
+          }
+        },
+        {
+          "line": 14381,
+          "lineSha256": "0dc4473fb334a491ab683abd2e45cc7c6e3f38aba8db34e05ab5f1c2c0aa434a",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943616912,
+            "stage": "zone_owner.in_process.execute_request",
+            "durationMs": 81
+          }
+        },
+        {
+          "line": 14384,
+          "lineSha256": "c91bf0be1e6e5403bff15787459c43551c3d52cd6ef57efa50b574466f7317bc",
+          "scope": "connection6",
+          "row": {
+            "observedAtMs": 1792943616912,
+            "stage": "socket_turn.input",
+            "durationMs": 852,
+            "connection": 6
+          }
+        },
+        {
+          "line": 14385,
+          "lineSha256": "28b6d0098fc4aa94ca837c371a21c0a9141ab3dfed6195b4497a44cb5f6b0df3",
+          "scope": "connection6",
+          "row": {
+            "observedAtMs": 1792943616912,
+            "stage": "serial_gate.zone_outbound_wait",
+            "durationMs": 852,
+            "connection": 6
+          }
+        }
+      ],
+      "stageCounts": {
+        "shared_session.predrain": 63,
+        "zone_owner.in_process.execute_request": 72,
+        "runtime_tick.execute": 66,
+        "runtime_tick.total": 66,
+        "socket_input.queue_residence": 6,
+        "serial_gate.zone_outbound_wait": 68,
+        "snapshot.build_and_send": 1,
+        "socket_turn.spectator": 48,
+        "shared_session.reconcile": 4,
+        "session_action.execute": 21,
+        "socket_turn.input": 22,
+        "session_action.flush": 4,
+        "shared_session.inner_execute": 6,
+        "flush.save": 2
+      }
+    },
+    {
+      "requestId": "367",
+      "receivedRangeStart": 1792943623637,
+      "receivedRangeEnd": 1792943624376,
+      "connection": 6,
+      "inputSpanMs": 739,
+      "rows": [
+        {
+          "line": 17138,
+          "lineSha256": "9bbd33b3418a3a9ef0242f61a9f8e0d2c1546fa37007d8b7cf973f36b05955f8",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943623637,
+            "stage": "shared_session.predrain",
+            "durationMs": 121
+          }
+        },
+        {
+          "line": 17139,
+          "lineSha256": "a50e7eaa27c249d16adab71b95a89b07b35a4fd5f44ff6b3a1e9848251d0fcc8",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943623637,
+            "stage": "zone_owner.in_process.execute_request",
+            "durationMs": 375
+          }
+        },
+        {
+          "line": 17142,
+          "lineSha256": "941c9c3ef97d453888bf9572e2d09dec3becd150c4fc553bc98cbc8be8e244b1",
+          "scope": "other-connection",
+          "row": {
+            "observedAtMs": 1792943623638,
+            "stage": "socket_input.queue_residence",
+            "durationMs": 218,
+            "connection": 1,
+            "queuedPhase": "runtime_tick",
+            "phaseElapsedMs": 156,
+            "inputClass": "move"
+          }
+        },
+        {
+          "line": 17143,
+          "lineSha256": "60985cf8c30584da2b864f226dd2d53979a253a3ec4c37f351ebec070d0389c0",
+          "scope": "other-connection",
+          "row": {
+            "observedAtMs": 1792943623638,
+            "stage": "serial_gate.zone_outbound_wait",
+            "durationMs": 361,
+            "connection": 1
+          }
+        },
+        {
+          "line": 17144,
+          "lineSha256": "c9e5c7f362e354a9868237fa1560b5f3e06245f72b83b469d9828d7ca148ce2a",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943623638,
+            "stage": "shared_session.predrain",
+            "durationMs": 122
+          }
+        },
+        {
+          "line": 17145,
+          "lineSha256": "d3d28b8a9b9e6318447d22b06fbd53d45a1ab0e9579f8e1b397de6389db46988",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943623638,
+            "stage": "zone_owner.in_process.execute_request",
+            "durationMs": 344
+          }
+        },
+        {
+          "line": 17147,
+          "lineSha256": "09593f6de945a7596b57fe82f5e6c888db1002e3cf8068bb94c5ef469f34191a",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943623638,
+            "stage": "shared_session.predrain",
+            "durationMs": 114
+          }
+        },
+        {
+          "line": 17148,
+          "lineSha256": "6605e5901d2a1fbd258f17f6452a98a7dc613a01e91b77c79cb236a41a42410e",
+          "scope": "connection6",
+          "row": {
+            "observedAtMs": 1792943623638,
+            "stage": "serial_gate.zone_outbound_wait",
+            "durationMs": 114,
+            "connection": 6
+          }
+        },
+        {
+          "line": 17149,
+          "lineSha256": "8cca29b11d702e7d244c6783844899bd10707acd53a1b3ce85b3786edc0a5f60",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943623638,
+            "stage": "zone_owner.in_process.execute_request",
+            "durationMs": 386
+          }
+        },
+        {
+          "line": 17152,
+          "lineSha256": "dba29307566522c95a3335875d6825e681b8c6d6dee4c1940fcb26299ed72766",
+          "scope": "connection6",
+          "row": {
+            "observedAtMs": 1792943623638,
+            "stage": "socket_input.queue_residence",
+            "durationMs": 250,
+            "connection": 6,
+            "queuedPhase": "runtime_tick",
+            "phaseElapsedMs": 94,
+            "inputClass": "attack_v2"
+          }
+        },
+        {
+          "line": 17154,
+          "lineSha256": "a03d5fd8d2fba52e5bd490103b7feaee3d035b953ebf8266040250a1d597f55d",
+          "scope": "other-connection",
+          "row": {
+            "observedAtMs": 1792943623638,
+            "stage": "socket_input.queue_residence",
+            "durationMs": 344,
+            "connection": 9,
+            "queuedPhase": "runtime_tick",
+            "phaseElapsedMs": 42,
+            "inputClass": "move"
+          }
+        },
+        {
+          "line": 17155,
+          "lineSha256": "89e2cfe4bbc610a1ae55c4a49892451b6079612d89425401dd360ab9bc81d363",
+          "scope": "other-connection",
+          "row": {
+            "observedAtMs": 1792943623638,
+            "stage": "serial_gate.zone_outbound_wait",
+            "durationMs": 257,
+            "connection": 9
+          }
+        },
+        {
+          "line": 17156,
+          "lineSha256": "7988362ed4ba490ce91ffdf4959a761b61586ed9faeb7b8fd4cba4be7595a39e",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943623638,
+            "stage": "shared_session.inner_execute",
+            "durationMs": 98
+          }
+        },
+        {
+          "line": 17157,
+          "lineSha256": "ca6f4c84c1710c2c5d84cdc515568df6f88957262dd6f9819da7352cde842aed",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943623646,
+            "stage": "shared_session.predrain",
+            "durationMs": 400
+          }
+        },
+        {
+          "line": 17158,
+          "lineSha256": "bbbe071ce4faa02d03ef37e7dc52cf13f7e878f44bb2b0dd17c4fe72f0d9dd56",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943623646,
+            "stage": "zone_owner.in_process.execute_request",
+            "durationMs": 478
+          }
+        },
+        {
+          "line": 17161,
+          "lineSha256": "021602a7d4de7962a0bbdbdf3be9fae7cf276000212bdb57bf6dd137f2afd0b4",
+          "scope": "other-connection",
+          "row": {
+            "observedAtMs": 1792943623646,
+            "stage": "serial_gate.zone_outbound_wait",
+            "durationMs": 477,
+            "connection": 24
+          }
+        },
+        {
+          "line": 17162,
+          "lineSha256": "8d291fac26499aafd40d08953e0b4db11ffb32b099812703c117958a10ae5ca0",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943623647,
+            "stage": "shared_session.predrain",
+            "durationMs": 115
+          }
+        },
+        {
+          "line": 17163,
+          "lineSha256": "3d84d23b063f02e400017d74aee6d6b047e9a66bc045ce028e1dc5a6b0106286",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943623647,
+            "stage": "zone_owner.in_process.execute_request",
+            "durationMs": 385
+          }
+        },
+        {
+          "line": 17166,
+          "lineSha256": "898b7fa01925e8550ce7add3587d707ced896361462a22281b8b473175e2928c",
+          "scope": "other-connection",
+          "row": {
+            "observedAtMs": 1792943623647,
+            "stage": "serial_gate.zone_outbound_wait",
+            "durationMs": 370,
+            "connection": 17
+          }
+        },
+        {
+          "line": 17167,
+          "lineSha256": "b79ce2bed1b401be4fc8ce480e966349e7cdd23c7fa6bc13abf09c4aacdad345",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943623668,
+            "stage": "shared_session.reconcile",
+            "durationMs": 52
+          }
+        },
+        {
+          "line": 17168,
+          "lineSha256": "87b8dcb60a2825ccf5b4952900156dfc1f5ab1ab5f32013b78bc82bcae64d79c",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943623668,
+            "stage": "snapshot.build_and_send",
+            "durationMs": 176
+          }
+        },
+        {
+          "line": 17169,
+          "lineSha256": "4c931ed8f8635102abc821880674ae702e7185fdf2ce744f38a6409c93da04e9",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943623668,
+            "stage": "session_action.flush",
+            "durationMs": 198
+          }
+        },
+        {
+          "line": 17170,
+          "lineSha256": "d597af2064d34d478f680cc97d0bcb83d7d79c462c66eff7b641ba13b631ddeb",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943623668,
+            "stage": "session_action.execute",
+            "durationMs": 198
+          }
+        },
+        {
+          "line": 17171,
+          "lineSha256": "7c3593d3df178054f9da5d67617e65c379d06cf020e97da77ba9068dc1a09a7e",
+          "scope": "other-connection",
+          "row": {
+            "observedAtMs": 1792943623668,
+            "stage": "socket_turn.input",
+            "durationMs": 199,
+            "connection": 18
+          }
+        },
+        {
+          "line": 17172,
+          "lineSha256": "0b6d6d787eefc4ac464d77938ea2499b8837325558e9e447d677cefccf232109",
+          "scope": "other-connection",
+          "row": {
+            "observedAtMs": 1792943623668,
+            "stage": "serial_gate.zone_outbound_wait",
+            "durationMs": 198,
+            "connection": 18
+          }
+        },
+        {
+          "line": 17182,
+          "lineSha256": "4b7e0c2d3b3abcc811700368de4f06a64a9c01d590361ee1fb4ba5b363967e4d",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943623721,
+            "stage": "zone_owner.in_process.execute_request",
+            "durationMs": 54
+          }
+        },
+        {
+          "line": 17183,
+          "lineSha256": "27870f94a1cc7bd3b2555b1f76088aa468ef5d7668514b2491f410cfa51a385b",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943623721,
+            "stage": "shared_session.inner_execute",
+            "durationMs": 52
+          }
+        },
+        {
+          "line": 17184,
+          "lineSha256": "fbb020c6c90dacf059778cf99944f072c84e6efc5c4b8aeea268e07661b0f720",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943623722,
+            "stage": "zone_owner.in_process.execute_request",
+            "durationMs": 52
+          }
+        },
+        {
+          "line": 17185,
+          "lineSha256": "d8395f921560440efeff073f326478b571b601fbe2b29ae93255d734b3c8ddd4",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943623727,
+            "stage": "zone_owner.in_process.execute_request",
+            "durationMs": 59
+          }
+        },
+        {
+          "line": 17186,
+          "lineSha256": "7eb0f2aba41063b600964baa37d3c35c09f2b3fe836ec4a3e6268189aa746716",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943623733,
+            "stage": "shared_session.predrain",
+            "durationMs": 159
+          }
+        },
+        {
+          "line": 17187,
+          "lineSha256": "3d4e5b61b2c7e472ba6d6d2ceaa36bab5a78660f75bd08483a7476fee16a1be5",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943623733,
+            "stage": "zone_owner.in_process.execute_request",
+            "durationMs": 239
+          }
+        },
+        {
+          "line": 17190,
+          "lineSha256": "5ede0dfeaf63612158acebcc4d6c090bae518d5a2bc9f50e73f07f3911cda586",
+          "scope": "other-connection",
+          "row": {
+            "observedAtMs": 1792943623735,
+            "stage": "serial_gate.zone_outbound_wait",
+            "durationMs": 202,
+            "connection": 7
+          }
+        },
+        {
+          "line": 17191,
+          "lineSha256": "f28919020f4c527935465a1db08a6372d6aaf1af2153f00cb30d4ef19e79c152",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943623735,
+            "stage": "shared_session.inner_execute",
+            "durationMs": 63
+          }
+        },
+        {
+          "line": 17192,
+          "lineSha256": "4c39c0a77a26014512606daf05539d22c418010076cce87acd793b44d75c92b5",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943623735,
+            "stage": "shared_session.inner_execute",
+            "durationMs": 51
+          }
+        },
+        {
+          "line": 17193,
+          "lineSha256": "60dd0ad9ed4a6f3ffa4a8a0c04c845d409a26d465c778f2972b62ca7b558120e",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943623735,
+            "stage": "zone_owner.in_process.execute_request",
+            "durationMs": 67
+          }
+        },
+        {
+          "line": 17194,
+          "lineSha256": "4a16ea1b9290dbaaec7e7c7e2c93f141ebd76251a7241656097e9108a8065459",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943623735,
+            "stage": "shared_session.predrain",
+            "durationMs": 467
+          }
+        },
+        {
+          "line": 17195,
+          "lineSha256": "00a6984647604c350905f1ef3693351e79b22a81aabac3bd2890640dac315cdb",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943623735,
+            "stage": "zone_owner.in_process.execute_request",
+            "durationMs": 563
+          }
+        },
+        {
+          "line": 17198,
+          "lineSha256": "b8d5871a6a63ecced774f8ad3212c4185e381f509728af597c0501b7a9363a54",
+          "scope": "other-connection",
+          "row": {
+            "observedAtMs": 1792943623735,
+            "stage": "serial_gate.zone_outbound_wait",
+            "durationMs": 532,
+            "connection": 8
+          }
+        },
+        {
+          "line": 17199,
+          "lineSha256": "8ca196c37cf1c45a068970ea758282524658a2d7372850aa786c5a5fedd26289",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943623747,
+            "stage": "zone_owner.in_process.execute_request",
+            "durationMs": 78
+          }
+        },
+        {
+          "line": 17200,
+          "lineSha256": "45a4ea1114af8c88db10fa8f7075abf97dd2b56fd81bf388b525414ad2720225",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943623748,
+            "stage": "session_action.execute",
+            "durationMs": 110
+          }
+        },
+        {
+          "line": 17201,
+          "lineSha256": "9dacb3fbb1a58f033c8d3634acb4d4874a39638358c17a6c495baf66d5750436",
+          "scope": "other-connection",
+          "row": {
+            "observedAtMs": 1792943623751,
+            "stage": "socket_turn.input",
+            "durationMs": 111,
+            "connection": 9
+          }
+        },
+        {
+          "line": 17202,
+          "lineSha256": "7dd0c3ca2656589a6815f94d6de70780f37ef72d6b902416e321d7a2c78b41f2",
+          "scope": "other-connection",
+          "row": {
+            "observedAtMs": 1792943623751,
+            "stage": "serial_gate.zone_outbound_wait",
+            "durationMs": 78,
+            "connection": 9
+          }
+        },
+        {
+          "line": 17203,
+          "lineSha256": "2ad9cb400ca78595b447e158eac852a7d2ff3064c65eb623a5e1616314acd423",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943623751,
+            "stage": "shared_session.predrain",
+            "durationMs": 145
+          }
+        },
+        {
+          "line": 17204,
+          "lineSha256": "c33ebe8a0a98ca191f576999f5225848402d0af47d770a402fd121d8bb4cd72b",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943623751,
+            "stage": "zone_owner.in_process.execute_request",
+            "durationMs": 456
+          }
+        },
+        {
+          "line": 17207,
+          "lineSha256": "4771dc79b8808ae6694ee4cb0d30dbca3f3dee65181bebdf44f7b018ab4ac8b1",
+          "scope": "other-connection",
+          "row": {
+            "observedAtMs": 1792943623751,
+            "stage": "serial_gate.zone_outbound_wait",
+            "durationMs": 428,
+            "connection": 21
+          }
+        },
+        {
+          "line": 17208,
+          "lineSha256": "c2d65675c5e68845507a2b7835a98f09c501bf6d1ab0c66e93f349edd1eb79b5",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943623751,
+            "stage": "session_action.execute",
+            "durationMs": 327
+          }
+        },
+        {
+          "line": 17209,
+          "lineSha256": "0c77222579f4a8798932eda9b180b154343e12df3b0155ffca7bd5fb7ed75874",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943623751,
+            "stage": "session_action.execute",
+            "durationMs": 225
+          }
+        },
+        {
+          "line": 17210,
+          "lineSha256": "1e66e1976e2ac28f210f1165394fd3e724d4fda2845a2d634983711023ae2468",
+          "scope": "other-connection",
+          "row": {
+            "observedAtMs": 1792943623751,
+            "stage": "serial_gate.zone_outbound_wait",
+            "durationMs": 327,
+            "connection": 14
+          }
+        },
+        {
+          "line": 17211,
+          "lineSha256": "5bc9a62605188de058c29042918ef055e54f506d57bf01f238326cd1b6206a64",
+          "scope": "other-connection",
+          "row": {
+            "observedAtMs": 1792943623751,
+            "stage": "socket_turn.input",
+            "durationMs": 327,
+            "connection": 14
+          }
+        },
+        {
+          "line": 17212,
+          "lineSha256": "df359e34d101377f12268c376729f04efd3e02a257a5dea146e0ea0d65846b85",
+          "scope": "other-connection",
+          "row": {
+            "observedAtMs": 1792943623751,
+            "stage": "socket_turn.input",
+            "durationMs": 225,
+            "connection": 12
+          }
+        },
+        {
+          "line": 17213,
+          "lineSha256": "00f17d2bde166629b9ad05363ee6ba71447c5a20a83a41eb1e3cc0ca134da6a7",
+          "scope": "other-connection",
+          "row": {
+            "observedAtMs": 1792943623751,
+            "stage": "serial_gate.zone_outbound_wait",
+            "durationMs": 225,
+            "connection": 12
+          }
+        },
+        {
+          "line": 17215,
+          "lineSha256": "5d44b3082bee5b50b99b0bed738e3542096a945db0405611f19bed18204557b8",
+          "scope": "other-connection",
+          "row": {
+            "observedAtMs": 1792943623755,
+            "stage": "socket_turn.input",
+            "durationMs": 689,
+            "connection": 16
+          }
+        },
+        {
+          "line": 17216,
+          "lineSha256": "5aad1c5c76412f01197903af20d70324f85c61830d73f45d9014bc12e0e6b7c7",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943623755,
+            "stage": "session_action.execute",
+            "durationMs": 216
+          }
+        },
+        {
+          "line": 17217,
+          "lineSha256": "578ad490e52e98f28bbb85cacc73ea193165d4708922a32c831fc5bd75ddaeb3",
+          "scope": "other-connection",
+          "row": {
+            "observedAtMs": 1792943623757,
+            "stage": "serial_gate.zone_outbound_wait",
+            "durationMs": 643,
+            "connection": 16
+          }
+        },
+        {
+          "line": 17218,
+          "lineSha256": "9c0a90715ab8b5a18aa8d0fb32e2c4a9aa7488ee501fafba17dd423f92cf242a",
+          "scope": "other-connection",
+          "row": {
+            "observedAtMs": 1792943623757,
+            "stage": "socket_turn.input",
+            "durationMs": 216,
+            "connection": 22
+          }
+        },
+        {
+          "line": 17219,
+          "lineSha256": "6c1e2f84c15b6574188ccf173170cb96be942745706e142ab514dfdd289d491d",
+          "scope": "other-connection",
+          "row": {
+            "observedAtMs": 1792943623757,
+            "stage": "serial_gate.zone_outbound_wait",
+            "durationMs": 216,
+            "connection": 22
+          }
+        },
+        {
+          "line": 17220,
+          "lineSha256": "952b027fdb40690180ab981f60a34966e207aa9ee82d95a83625a4bf339ed5cc",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943623757,
+            "stage": "session_action.execute",
+            "durationMs": 141
+          }
+        },
+        {
+          "line": 17221,
+          "lineSha256": "2921c991404f04d27ace9e6a3d10ccdd36e00964eebcf6a9a602b9f1cb8df4e8",
+          "scope": "other-connection",
+          "row": {
+            "observedAtMs": 1792943623757,
+            "stage": "socket_turn.input",
+            "durationMs": 141,
+            "connection": 4
+          }
+        },
+        {
+          "line": 17222,
+          "lineSha256": "b3f2c1e72d6c9c628f71559fcb03f310a598b3424ed8b78be16e868bffb73ee2",
+          "scope": "other-connection",
+          "row": {
+            "observedAtMs": 1792943623757,
+            "stage": "serial_gate.zone_outbound_wait",
+            "durationMs": 141,
+            "connection": 4
+          }
+        },
+        {
+          "line": 17224,
+          "lineSha256": "8fae0b3cf51fb9ccb9b5995268346b54bae365e556cd1f14adf9602ca823a7e9",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943623761,
+            "stage": "shared_session.reconcile",
+            "durationMs": 212
+          }
+        },
+        {
+          "line": 17225,
+          "lineSha256": "4aaf89f6efa5b99881ce9948f0c981bc33a2540bf3afd27865030d4217d667d4",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943623784,
+            "stage": "shared_session.predrain",
+            "durationMs": 50
+          }
+        },
+        {
+          "line": 17226,
+          "lineSha256": "e93bf74e6b02f6a5b817fd94ef54e051b305600758e49132706ecbb617a00488",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943623784,
+            "stage": "zone_owner.in_process.execute_request",
+            "durationMs": 105
+          }
+        },
+        {
+          "line": 17229,
+          "lineSha256": "0c365a11e1d068c8187201bc6ae90810931267cfad605a6e2570489287214b58",
+          "scope": "other-connection",
+          "row": {
+            "observedAtMs": 1792943623784,
+            "stage": "socket_input.queue_residence",
+            "durationMs": 61,
+            "connection": 19,
+            "queuedPhase": "runtime_tick",
+            "phaseElapsedMs": 44,
+            "inputClass": "move"
+          }
+        },
+        {
+          "line": 17230,
+          "lineSha256": "326a43f407373c68eaf2e3886e92d6c1e052c58bba64de5dfb8266e31083df35",
+          "scope": "other-connection",
+          "row": {
+            "observedAtMs": 1792943623786,
+            "stage": "serial_gate.zone_outbound_wait",
+            "durationMs": 101,
+            "connection": 19
+          }
+        },
+        {
+          "line": 17231,
+          "lineSha256": "d58156d2686b48687f23180cfb8a3bf44bbddfa9ff2f42da58f6a309e16f9548",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943623786,
+            "stage": "shared_session.predrain",
+            "durationMs": 62
+          }
+        },
+        {
+          "line": 17232,
+          "lineSha256": "de49b4b4d3a142c850535a8cf0a5b699fba947439e7ed5ee42dd7e2169f00cd0",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943623786,
+            "stage": "zone_owner.in_process.execute_request",
+            "durationMs": 97
+          }
+        },
+        {
+          "line": 17235,
+          "lineSha256": "c4958127db9e67a00ba792c0e0e290a640d221bc9d4e547e28b7bc5ef976eff0",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943623792,
+            "stage": "shared_session.predrain",
+            "durationMs": 96
+          }
+        },
+        {
+          "line": 17236,
+          "lineSha256": "5d69640e3886c81f3767bf97b27ad9ea94fc5f76e98db878d1c639f1a40b30c8",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943623792,
+            "stage": "zone_owner.in_process.execute_request",
+            "durationMs": 484
+          }
+        },
+        {
+          "line": 17239,
+          "lineSha256": "50e06aa058a43031cbf6a71b5d4c28cec23f5ac5b463c84089e71d0ccadeb866",
+          "scope": "other-connection",
+          "row": {
+            "observedAtMs": 1792943623792,
+            "stage": "socket_input.queue_residence",
+            "durationMs": 157,
+            "connection": 10,
+            "queuedPhase": "runtime_tick",
+            "phaseElapsedMs": 326,
+            "inputClass": "move"
+          }
+        },
+        {
+          "line": 17240,
+          "lineSha256": "6b3b47e63863892e1029b7998aa800d8d0811f6d513e57520871038713542b3f",
+          "scope": "other-connection",
+          "row": {
+            "observedAtMs": 1792943623792,
+            "stage": "serial_gate.zone_outbound_wait",
+            "durationMs": 399,
+            "connection": 10
+          }
+        },
+        {
+          "line": 17241,
+          "lineSha256": "c4958127db9e67a00ba792c0e0e290a640d221bc9d4e547e28b7bc5ef976eff0",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943623792,
+            "stage": "shared_session.predrain",
+            "durationMs": 96
+          }
+        },
+        {
+          "line": 17242,
+          "lineSha256": "be99ec72dcdf7eb713337e207caacd86cb353897eb200bf9f01518ef4d5fd68a",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943623792,
+            "stage": "zone_owner.in_process.execute_request",
+            "durationMs": 444
+          }
+        },
+        {
+          "line": 17245,
+          "lineSha256": "88436c0be3448fcdceca4a228be5c5d65b0cd6b83a90f39da2ad4fd23aea2ca1",
+          "scope": "other-connection",
+          "row": {
+            "observedAtMs": 1792943623792,
+            "stage": "socket_input.queue_residence",
+            "durationMs": 314,
+            "connection": 23,
+            "queuedPhase": "runtime_tick",
+            "phaseElapsedMs": 130,
+            "inputClass": "move"
+          }
+        },
+        {
+          "line": 17246,
+          "lineSha256": "adfe9f1eb8673b51115da3faf7affb2b425136e6342c01c588b457601c646c40",
+          "scope": "other-connection",
+          "row": {
+            "observedAtMs": 1792943623792,
+            "stage": "serial_gate.zone_outbound_wait",
+            "durationMs": 261,
+            "connection": 23
+          }
+        },
+        {
+          "line": 17247,
+          "lineSha256": "a970ceb7ad528fd918cae06d3e209c7663316c17003dfda98791177cf03defc2",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943623798,
+            "stage": "shared_session.predrain",
+            "durationMs": 71
+          }
+        },
+        {
+          "line": 17248,
+          "lineSha256": "a0fab6240e1cee7f766a3cd46267919e3bc22c10e786243f8bda27f030515de7",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943623798,
+            "stage": "zone_owner.in_process.execute_request",
+            "durationMs": 122
+          }
+        },
+        {
+          "line": 17251,
+          "lineSha256": "ba97266d8ea6f8e7fb7115b26ee17575d676b1bcfda61a0d86c603fbbfbd9a9f",
+          "scope": "other-connection",
+          "row": {
+            "observedAtMs": 1792943623798,
+            "stage": "serial_gate.zone_outbound_wait",
+            "durationMs": 115,
+            "connection": 5
+          }
+        },
+        {
+          "line": 17255,
+          "lineSha256": "b0177271df47977e50f6db0c7bbdb69fd6985f01c47da0118e26b0826db45f96",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943623834,
+            "stage": "shared_session.predrain",
+            "durationMs": 100
+          }
+        },
+        {
+          "line": 17256,
+          "lineSha256": "7b1f06a6b92c04fac6e2e826a6d2b76eaa6b37c6b6d4187c80ae02dce24aede9",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943623834,
+            "stage": "shared_session.tail",
+            "durationMs": 73
+          }
+        },
+        {
+          "line": 17257,
+          "lineSha256": "fd77db29b5f8e07896bcedf2b2bffe3e093821896547b8147978f1c1a08b0690",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943623834,
+            "stage": "zone_owner.in_process.execute_request",
+            "durationMs": 150
+          }
+        },
+        {
+          "line": 17258,
+          "lineSha256": "f2bc38f8b52c9f142cfd5dbe2801df6943b8d9f622d5a6436cb1d2d0f509d64c",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943623834,
+            "stage": "zone_owner.in_process.execute_request",
+            "durationMs": 760
+          }
+        },
+        {
+          "line": 17262,
+          "lineSha256": "6c725410c03a958b729945ed745a5e9866fb434d7b7dfe012643e858b1f5619f",
+          "scope": "other-connection",
+          "row": {
+            "observedAtMs": 1792943623837,
+            "stage": "serial_gate.zone_outbound_wait",
+            "durationMs": 149,
+            "connection": 13
+          }
+        },
+        {
+          "line": 17264,
+          "lineSha256": "1425da357b16beff80239920d30f659b93603ba652beed10e8875633247367cd",
+          "scope": "other-connection",
+          "row": {
+            "observedAtMs": 1792943623837,
+            "stage": "serial_gate.zone_outbound_wait",
+            "durationMs": 722,
+            "connection": 20
+          }
+        },
+        {
+          "line": 17265,
+          "lineSha256": "dd0576d32af79a75b33c779ca8ff2bd3d6cf9f183061d5f7f81987fe59656542",
+          "scope": "other-connection",
+          "row": {
+            "observedAtMs": 1792943623837,
+            "stage": "socket_input.queue_residence",
+            "durationMs": 573,
+            "connection": 20,
+            "queuedPhase": "runtime_tick",
+            "phaseElapsedMs": 187,
+            "inputClass": "move"
+          }
+        },
+        {
+          "line": 17266,
+          "lineSha256": "823b203691c0e561ebcbbcbf5950f58367ed78924458e0b03987e09f771a5262",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943623837,
+            "stage": "shared_session.predrain",
+            "durationMs": 95
+          }
+        },
+        {
+          "line": 17267,
+          "lineSha256": "07ae3dd66c0e37a6295f625c5bf8f8b749ff2da76d3c6b0503ff9fe080cfe53e",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943623837,
+            "stage": "zone_owner.in_process.execute_request",
+            "durationMs": 138
+          }
+        },
+        {
+          "line": 17270,
+          "lineSha256": "ecf3d67070f2b0ad246d73cc3c622e54b9945628d4de92afde60ad593fff9b8a",
+          "scope": "other-connection",
+          "row": {
+            "observedAtMs": 1792943623837,
+            "stage": "socket_input.queue_residence",
+            "durationMs": 84,
+            "connection": 26,
+            "queuedPhase": "runtime_tick",
+            "phaseElapsedMs": 54,
+            "inputClass": "move"
+          }
+        },
+        {
+          "line": 17271,
+          "lineSha256": "ab4dfab4920480315ad5c88e43468ce731ad8efe1e8b7f7316181834111902c5",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943623837,
+            "stage": "shared_session.predrain",
+            "durationMs": 86
+          }
+        },
+        {
+          "line": 17272,
+          "lineSha256": "692ad9f69c29776ec27faf00e10ef68983cb3d5a674886b1cf9ad958a4a018c8",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943623837,
+            "stage": "zone_owner.in_process.execute_request",
+            "durationMs": 102
+          }
+        },
+        {
+          "line": 17273,
+          "lineSha256": "11b0e7778c716d784c0a2af430e5a0817e1f967e1eb325117a9108fc1e73e4fc",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943623837,
+            "stage": "shared_session.predrain",
+            "durationMs": 88
+          }
+        },
+        {
+          "line": 17274,
+          "lineSha256": "06b6a2fc05e5caea0c63987ad4f4be409c92a4a977b4f472ac9b0a9bdf033e63",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943623837,
+            "stage": "zone_owner.in_process.execute_request",
+            "durationMs": 147
+          }
+        },
+        {
+          "line": 17279,
+          "lineSha256": "3564e699f59668b3e8dcbef05b104d166f10f0a385bb042eef65506eba8a96ef",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943623844,
+            "stage": "shared_session.predrain",
+            "durationMs": 117
+          }
+        },
+        {
+          "line": 17280,
+          "lineSha256": "3564e699f59668b3e8dcbef05b104d166f10f0a385bb042eef65506eba8a96ef",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943623844,
+            "stage": "shared_session.predrain",
+            "durationMs": 117
+          }
+        },
+        {
+          "line": 17281,
+          "lineSha256": "29f01329f52666ed2d83168dfa07da7a6e3ed7a1420ea747adfba08d6e4355d7",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943623844,
+            "stage": "shared_session.reconcile",
+            "durationMs": 207
+          }
+        },
+        {
+          "line": 17282,
+          "lineSha256": "e7477ab1ff48ba4d4ef8787286d5a373a51f298df7e186ab480489b93de86890",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943623844,
+            "stage": "zone_owner.in_process.execute_request",
+            "durationMs": 163
+          }
+        },
+        {
+          "line": 17283,
+          "lineSha256": "857d2b16b5e90b47e34f27785be46df82d2072c15faa379910598156efbe9de9",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943623844,
+            "stage": "zone_owner.in_process.execute_request",
+            "durationMs": 169
+          }
+        },
+        {
+          "line": 17287,
+          "lineSha256": "579b333adf24867d2fd8b1cc69e355a20b6b095f494e82ef14a805ed6d9f815c",
+          "scope": "other-connection",
+          "row": {
+            "observedAtMs": 1792943623844,
+            "stage": "serial_gate.zone_outbound_wait",
+            "durationMs": 160,
+            "connection": 3
+          }
+        },
+        {
+          "line": 17289,
+          "lineSha256": "236c0acc847de849537c2a17a0719388b35acda47c935218e15f9f1c21a89941",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943623844,
+            "stage": "shared_session.predrain",
+            "durationMs": 162
+          }
+        },
+        {
+          "line": 17290,
+          "lineSha256": "54bd8ef975ab7a5c35cd0640957b542c3c8f7470e641efce80f453b2009a3f02",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943623845,
+            "stage": "session_action.execute",
+            "durationMs": 207
+          }
+        },
+        {
+          "line": 17291,
+          "lineSha256": "0f3952d3830635508873f8121ae97a7bddd57a27dbf9b4bc675e94fc5fd4c0f6",
+          "scope": "other-connection",
+          "row": {
+            "observedAtMs": 1792943623845,
+            "stage": "socket_turn.input",
+            "durationMs": 207,
+            "connection": 1
+          }
+        },
+        {
+          "line": 17292,
+          "lineSha256": "aab81beae22cf50522b3cd1836423d4cff7815d61758c0a7f7f38a241c1497bc",
+          "scope": "other-connection",
+          "row": {
+            "observedAtMs": 1792943623845,
+            "stage": "serial_gate.zone_outbound_wait",
+            "durationMs": 207,
+            "connection": 1
+          }
+        },
+        {
+          "line": 17298,
+          "lineSha256": "55ed9f543d5f0aadee1d20580126ec0b42c374200919a446740e0058567c6c12",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943623863,
+            "stage": "zone_owner.in_process.execute_request",
+            "durationMs": 773
+          }
+        },
+        {
+          "line": 17301,
+          "lineSha256": "b9e15521904cb7a6b363e7d1a724c682219d4c08cb7d5a04ee7e96384c43d2f3",
+          "scope": "other-connection",
+          "row": {
+            "observedAtMs": 1792943623865,
+            "stage": "socket_input.queue_residence",
+            "durationMs": 542,
+            "connection": 11,
+            "queuedPhase": "runtime_tick",
+            "phaseElapsedMs": 231,
+            "inputClass": "move"
+          }
+        },
+        {
+          "line": 17302,
+          "lineSha256": "49117f265b5a08ed20eb20faa099f8e1b56ccee6104bf4859970cc36f2b5a519",
+          "scope": "other-connection",
+          "row": {
+            "observedAtMs": 1792943623865,
+            "stage": "serial_gate.zone_outbound_wait",
+            "durationMs": 751,
+            "connection": 11
+          }
+        },
+        {
+          "line": 17303,
+          "lineSha256": "119e1c5dbe15519f87da30aa96dfc37817a2a9e742782518407bc1c2d998db1a",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943623881,
+            "stage": "zone_owner.in_process.execute_request",
+            "durationMs": 71
+          }
+        },
+        {
+          "line": 17306,
+          "lineSha256": "119e1c5dbe15519f87da30aa96dfc37817a2a9e742782518407bc1c2d998db1a",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943623881,
+            "stage": "zone_owner.in_process.execute_request",
+            "durationMs": 71
+          }
+        },
+        {
+          "line": 17309,
+          "lineSha256": "1abaec21c8d6d13d366f714108ae9dbef6f20171640b2e7eda9a106aad3e9542",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943623894,
+            "stage": "shared_session.predrain",
+            "durationMs": 101
+          }
+        },
+        {
+          "line": 17310,
+          "lineSha256": "cbc065728885d3060a47893c2999a2bb330dacf4a1b76f68f232405ecdb061d6",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943623894,
+            "stage": "zone_owner.in_process.execute_request",
+            "durationMs": 142
+          }
+        },
+        {
+          "line": 17313,
+          "lineSha256": "9fd9675ee00ca6b7b91317cfbd35c638d2db78e978d527f8424374f05c6fc1ee",
+          "scope": "other-connection",
+          "row": {
+            "observedAtMs": 1792943623894,
+            "stage": "serial_gate.zone_outbound_wait",
+            "durationMs": 83,
+            "connection": 18
+          }
+        },
+        {
+          "line": 17314,
+          "lineSha256": "a18e08c427766c3b33e870a71cd261bc9377460796a19d0776e4bea5db7761aa",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943623905,
+            "stage": "zone_owner.in_process.execute_request",
+            "durationMs": 60
+          }
+        },
+        {
+          "line": 17315,
+          "lineSha256": "d5bd3632a4f0bcba4a8e83bcef52b25bb896e4ea6c377523eb36ea8ee61b33fb",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943623906,
+            "stage": "shared_session.predrain",
+            "durationMs": 70
+          }
+        },
+        {
+          "line": 17316,
+          "lineSha256": "deef3f0ba36442f3f0b063ed4efb2dad68b87fd66bd018e87e7c47787b124d0c",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943623906,
+            "stage": "zone_owner.in_process.execute_request",
+            "durationMs": 161
+          }
+        },
+        {
+          "line": 17319,
+          "lineSha256": "5143addee3024ee7d2c9b4dcc31d8c8eb45155d971eb28de81d52b849549a340",
+          "scope": "other-connection",
+          "row": {
+            "observedAtMs": 1792943623906,
+            "stage": "serial_gate.zone_outbound_wait",
+            "durationMs": 94,
+            "connection": 25
+          }
+        },
+        {
+          "line": 17320,
+          "lineSha256": "d5bd3632a4f0bcba4a8e83bcef52b25bb896e4ea6c377523eb36ea8ee61b33fb",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943623906,
+            "stage": "shared_session.predrain",
+            "durationMs": 70
+          }
+        },
+        {
+          "line": 17321,
+          "lineSha256": "7c96d6fdee394cfd20a289124c1c32e6a1a731382dfff943528e366eb11e2978",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943623906,
+            "stage": "zone_owner.in_process.execute_request",
+            "durationMs": 98
+          }
+        },
+        {
+          "line": 17324,
+          "lineSha256": "0a7391bd181f84f654a35a2062dee5a33bb49389c1d2c79763221fb3ab431737",
+          "scope": "other-connection",
+          "row": {
+            "observedAtMs": 1792943623906,
+            "stage": "serial_gate.zone_outbound_wait",
+            "durationMs": 95,
+            "connection": 21
+          }
+        },
+        {
+          "line": 17326,
+          "lineSha256": "be308bb206cf463f008e84f03fefb78bea08313745a870c5829a6c4cff40969b",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943623911,
+            "stage": "shared_session.predrain",
+            "durationMs": 67
+          }
+        },
+        {
+          "line": 17327,
+          "lineSha256": "2f070a2ef267e1dc04f9edf68161a8a879adac4802bd120c22aca88c3fd7fe13",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943623911,
+            "stage": "zone_owner.in_process.execute_request",
+            "durationMs": 76
+          }
+        },
+        {
+          "line": 17330,
+          "lineSha256": "92818c65fa0a9e85ee6b124445d9fe8c6fe6b3319f170d63f2aa33140f36075f",
+          "scope": "other-connection",
+          "row": {
+            "observedAtMs": 1792943623913,
+            "stage": "serial_gate.zone_outbound_wait",
+            "durationMs": 68,
+            "connection": 12
+          }
+        },
+        {
+          "line": 17331,
+          "lineSha256": "467ef716007e4d14bdbbc5db1b0dfaaeba8ca00d03224f49b41371c90d1d60ab",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943623913,
+            "stage": "shared_session.predrain",
+            "durationMs": 68
+          }
+        },
+        {
+          "line": 17332,
+          "lineSha256": "bc5fbfb86d985334cf17a51e7976bd74367ae16bded4d57904a342411c51cedd",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943623913,
+            "stage": "zone_owner.in_process.execute_request",
+            "durationMs": 77
+          }
+        },
+        {
+          "line": 17335,
+          "lineSha256": "5fc68dc8c3d99e4ae0dcec79d04034cb2d783ef2d331161dbb9742576f33f6fe",
+          "scope": "other-connection",
+          "row": {
+            "observedAtMs": 1792943623913,
+            "stage": "serial_gate.zone_outbound_wait",
+            "durationMs": 69,
+            "connection": 14
+          }
+        },
+        {
+          "line": 17338,
+          "lineSha256": "571375ee205e619d164a1e4c326d74b15aca701b9e96dab3c6bf1d9aa2cc5ec6",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943623935,
+            "stage": "zone_owner.in_process.execute_request",
+            "durationMs": 54
+          }
+        },
+        {
+          "line": 17339,
+          "lineSha256": "4597dde8fe7d99ffd4b45acf265e1f261cffd68288df8659133a52a8e44db659",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943623941,
+            "stage": "shared_session.predrain",
+            "durationMs": 71
+          }
+        },
+        {
+          "line": 17340,
+          "lineSha256": "29b8bddcbc402abcb99158ba66c36c410037b8c9179ddd2fd7ce36f0187971e7",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943623941,
+            "stage": "zone_owner.in_process.execute_request",
+            "durationMs": 95
+          }
+        },
+        {
+          "line": 17343,
+          "lineSha256": "490a059d3682e0840e301f6d35878a2afcf418cb2efb86e08f17978b81497428",
+          "scope": "other-connection",
+          "row": {
+            "observedAtMs": 1792943623941,
+            "stage": "serial_gate.zone_outbound_wait",
+            "durationMs": 83,
+            "connection": 9
+          }
+        },
+        {
+          "line": 17344,
+          "lineSha256": "16b2130f6f2a95971bd11a5b712d11a13723b6341fea959598fc5d80a577188f",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943623952,
+            "stage": "shared_session.predrain",
+            "durationMs": 82
+          }
+        },
+        {
+          "line": 17345,
+          "lineSha256": "24666257ef4cdc9df260a481b5a5055adbfea0dba3a4047d51d0e3c21131cab2",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943623952,
+            "stage": "session_action.execute",
+            "durationMs": 167
+          }
+        },
+        {
+          "line": 17346,
+          "lineSha256": "585529c06dcb080825fd9d32993cb8d223a6610da532d3dc23522167d7cf79c8",
+          "scope": "other-connection",
+          "row": {
+            "observedAtMs": 1792943623952,
+            "stage": "socket_turn.input",
+            "durationMs": 168,
+            "connection": 19
+          }
+        },
+        {
+          "line": 17347,
+          "lineSha256": "7da9cc5523e17e8e7194f2a6b06b4730fd4c70d5b4f045e4a7326bf65e5531c1",
+          "scope": "other-connection",
+          "row": {
+            "observedAtMs": 1792943623952,
+            "stage": "serial_gate.zone_outbound_wait",
+            "durationMs": 141,
+            "connection": 19
+          }
+        },
+        {
+          "line": 17348,
+          "lineSha256": "f5f1b8ff7b49c0780bcb87c50461f3a2d9243ce122d774d6ac284bc4fe19efc1",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943623958,
+            "stage": "shared_session.predrain",
+            "durationMs": 88
+          }
+        },
+        {
+          "line": 17349,
+          "lineSha256": "8db8a04e7097abf53587680e36e5dc16abdb54870ca86994f5539fe04e310d04",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943623958,
+            "stage": "zone_owner.in_process.execute_request",
+            "durationMs": 110
+          }
+        },
+        {
+          "line": 17352,
+          "lineSha256": "fef5b2669d57fe8ab40b0ca4d763c103758c8a688a0258e812ff3b495056b031",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943623958,
+            "stage": "session_action.execute",
+            "durationMs": 123
+          }
+        },
+        {
+          "line": 17353,
+          "lineSha256": "f56af20f896cd13138ef49404980f980b59b2d629509c47df40e2fde99effa8e",
+          "scope": "other-connection",
+          "row": {
+            "observedAtMs": 1792943623958,
+            "stage": "serial_gate.zone_outbound_wait",
+            "durationMs": 101,
+            "connection": 4
+          }
+        },
+        {
+          "line": 17354,
+          "lineSha256": "a9f4f22e1f3e016eacbf99b4d73b89f156ecb095b82ef091f67fadc11064f956",
+          "scope": "other-connection",
+          "row": {
+            "observedAtMs": 1792943623958,
+            "stage": "socket_turn.input",
+            "durationMs": 123,
+            "connection": 13
+          }
+        },
+        {
+          "line": 17355,
+          "lineSha256": "427887c3b21ef08c4a5d382cf4fb6796b26194d5dfead485fe09e5feca5a6cfc",
+          "scope": "other-connection",
+          "row": {
+            "observedAtMs": 1792943623958,
+            "stage": "serial_gate.zone_outbound_wait",
+            "durationMs": 123,
+            "connection": 13
+          }
+        },
+        {
+          "line": 17356,
+          "lineSha256": "2a59b246677fd620eefa5a6438edee69efb0354c97cf64f6d09a9961f6b4e306",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943623966,
+            "stage": "zone_owner.in_process.execute_request",
+            "durationMs": 54
+          }
+        },
+        {
+          "line": 17357,
+          "lineSha256": "cb04d21ec9088d5c2357248228bb9fae39d424b44d5c9d537ce755e99c5a028b",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943623981,
+            "stage": "shared_session.inner_execute",
+            "durationMs": 135
+          }
+        },
+        {
+          "line": 17358,
+          "lineSha256": "9d3d449a703c72f366f6e6e4e9e55b799c78f40b9a72cfadd428b50365a9f9d2",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943623986,
+            "stage": "shared_session.predrain",
+            "durationMs": 116
+          }
+        },
+        {
+          "line": 17359,
+          "lineSha256": "5533396f1086bb37f7a8582e6dba626f96b653429d9230d2e0102c3187407ca8",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943623986,
+            "stage": "zone_owner.in_process.execute_request",
+            "durationMs": 137
+          }
+        },
+        {
+          "line": 17362,
+          "lineSha256": "3fa717ec448b8f1f0789466138caccd88ae6ce163784d10d96d8ff84507fe45c",
+          "scope": "other-connection",
+          "row": {
+            "observedAtMs": 1792943623986,
+            "stage": "serial_gate.zone_outbound_wait",
+            "durationMs": 129,
+            "connection": 22
+          }
+        },
+        {
+          "line": 17363,
+          "lineSha256": "887ce6ccfa6aa2813e9830a6e165535f0bda919dfa26f81565e49ae8257ddfbd",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943623994,
+            "stage": "shared_session.tail",
+            "durationMs": 328
+          }
+        },
+        {
+          "line": 17364,
+          "lineSha256": "9153e77766a5d55a57445917a09a3a7e5c2c53474169a3ef7de2528192392d95",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943623994,
+            "stage": "zone_owner.in_process.execute_request",
+            "durationMs": 574
+          }
+        },
+        {
+          "line": 17365,
+          "lineSha256": "fc466fbd7449891ab58f42b5294a27d7eddd0ab5d10d360eb6b4716a5fad048b",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943623994,
+            "stage": "session_action.execute",
+            "durationMs": 574
+          }
+        },
+        {
+          "line": 17366,
+          "lineSha256": "636276ef5ec21db94ea2c0e7c0abc5fbff2c9924db08bb86d82f0d4fd184f433",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943624001,
+            "stage": "shared_session.predrain",
+            "durationMs": 59
+          }
+        },
+        {
+          "line": 17367,
+          "lineSha256": "91a6a075aaccbd5a8ae5f1938947627d96353dee930cdea3a6652ada25f6c829",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943624001,
+            "stage": "zone_owner.in_process.execute_request",
+            "durationMs": 72
+          }
+        },
+        {
+          "line": 17370,
+          "lineSha256": "b2f3bb81a7efa50202a7ee49a0715d69a541a69e9e7c9a87727a95f95ead0132",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943624002,
+            "stage": "shared_session.predrain",
+            "durationMs": 95
+          }
+        },
+        {
+          "line": 17371,
+          "lineSha256": "f64d9392bf9b30d99394310173b34e5d7e6ff3691b4a166ab97a6655c88075c6",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943624002,
+            "stage": "zone_owner.in_process.execute_request",
+            "durationMs": 615
+          }
+        },
+        {
+          "line": 17374,
+          "lineSha256": "7f5dbb96b8cc6ab6b8d6cf57e38feab60e7216bf83792fe69fa56aca49534418",
+          "scope": "other-connection",
+          "row": {
+            "observedAtMs": 1792943624002,
+            "stage": "socket_input.queue_residence",
+            "durationMs": 252,
+            "connection": 2,
+            "queuedPhase": "runtime_tick",
+            "phaseElapsedMs": 363,
+            "inputClass": "move"
+          }
+        },
+        {
+          "line": 17375,
+          "lineSha256": "64ffe957d712f2b9d1435fa3152d0d46eb231872d23603ec72a516a168ca8ed4",
+          "scope": "other-connection",
+          "row": {
+            "observedAtMs": 1792943624002,
+            "stage": "serial_gate.zone_outbound_wait",
+            "durationMs": 470,
+            "connection": 2
+          }
+        },
+        {
+          "line": 17376,
+          "lineSha256": "34e736f1c00fad5f0951178c8ddc93de9cd626d21208ad985669969da047d1e4",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943624002,
+            "stage": "session_action.execute",
+            "durationMs": 208
+          }
+        },
+        {
+          "line": 17377,
+          "lineSha256": "3d4440a6fc4b80de4bb2d0834463764481bdc58f5386efb39a61429434bd359a",
+          "scope": "other-connection",
+          "row": {
+            "observedAtMs": 1792943624002,
+            "stage": "socket_turn.input",
+            "durationMs": 208,
+            "connection": 10
+          }
+        },
+        {
+          "line": 17378,
+          "lineSha256": "5c68499a40560264cdf97ce4885b94111331dfd95b093fc7347395f02d163587",
+          "scope": "other-connection",
+          "row": {
+            "observedAtMs": 1792943624002,
+            "stage": "serial_gate.zone_outbound_wait",
+            "durationMs": 208,
+            "connection": 10
+          }
+        },
+        {
+          "line": 17379,
+          "lineSha256": "ab6ff54f9225369dd2bd9156c3ef642342b3ef30ac37bc2adbb871f2e75e591c",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943624002,
+            "stage": "shared_session.predrain",
+            "durationMs": 65
+          }
+        },
+        {
+          "line": 17380,
+          "lineSha256": "cd7581ce543acc6b4e72781ecd349b29cb96229aaf15dfba40be45b29ebda545",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943624002,
+            "stage": "zone_owner.in_process.execute_request",
+            "durationMs": 72
+          }
+        },
+        {
+          "line": 17383,
+          "lineSha256": "6291601f7c6bc1bf026454cacbfb61206034a4ef4b76b40532024606caca1efc",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943624003,
+            "stage": "shared_session.inner_execute",
+            "durationMs": 51
+          }
+        },
+        {
+          "line": 17388,
+          "lineSha256": "c13173a8a54b7a2460de936fa7bb659c48c06d70fbbfec0609b5d8c402523d8f",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943624012,
+            "stage": "session_action.execute",
+            "durationMs": 177
+          }
+        },
+        {
+          "line": 17389,
+          "lineSha256": "9c243ffe52eb32dbbb130319720e57676e04ddf65c7e645dcca4267db25f8465",
+          "scope": "other-connection",
+          "row": {
+            "observedAtMs": 1792943624015,
+            "stage": "socket_turn.input",
+            "durationMs": 177,
+            "connection": 20
+          }
+        },
+        {
+          "line": 17390,
+          "lineSha256": "6da89afe5817394872599330e05ec36cca99f309813497c3b18d8e0495a39e62",
+          "scope": "other-connection",
+          "row": {
+            "observedAtMs": 1792943624015,
+            "stage": "serial_gate.zone_outbound_wait",
+            "durationMs": 177,
+            "connection": 20
+          }
+        },
+        {
+          "line": 17391,
+          "lineSha256": "938374248910fbfedfc8a06e4f24a12fb7c46b0627b84ab81c9277c043e70551",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943624015,
+            "stage": "session_action.execute",
+            "durationMs": 176
+          }
+        },
+        {
+          "line": 17392,
+          "lineSha256": "d05863847bb8e54a4ea9a6fbb7aa21098a79232e4f66bba8d99d5f6a860a9f1d",
+          "scope": "other-connection",
+          "row": {
+            "observedAtMs": 1792943624015,
+            "stage": "socket_turn.input",
+            "durationMs": 176,
+            "connection": 17
+          }
+        },
+        {
+          "line": 17393,
+          "lineSha256": "5b3137852fdde742d02257527918cd573b4cec4b8b24b0524cfff4977b856f65",
+          "scope": "other-connection",
+          "row": {
+            "observedAtMs": 1792943624015,
+            "stage": "serial_gate.zone_outbound_wait",
+            "durationMs": 169,
+            "connection": 17
+          }
+        },
+        {
+          "line": 17394,
+          "lineSha256": "6489f6efca14f9d5d680f099c401d56c54bf81155edf1fa731cc4eeec2e3bc0f",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943624015,
+            "stage": "session_action.execute",
+            "durationMs": 219
+          }
+        },
+        {
+          "line": 17395,
+          "lineSha256": "790664e84878ab61e644807a686d598f3399cdf2c9cb377e37282777214d7767",
+          "scope": "other-connection",
+          "row": {
+            "observedAtMs": 1792943624015,
+            "stage": "socket_turn.input",
+            "durationMs": 219,
+            "connection": 23
+          }
+        },
+        {
+          "line": 17396,
+          "lineSha256": "c7c57904378c72f0db85950297dec725a71bed3147b4e4101deb544acc3b8af6",
+          "scope": "other-connection",
+          "row": {
+            "observedAtMs": 1792943624015,
+            "stage": "serial_gate.zone_outbound_wait",
+            "durationMs": 219,
+            "connection": 23
+          }
+        },
+        {
+          "line": 17401,
+          "lineSha256": "adbcd4f18640beacd4033dc1b864b6a82f6301e718378f38ca153f3c0c10aa1e",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943624026,
+            "stage": "session_action.execute",
+            "durationMs": 161
+          }
+        },
+        {
+          "line": 17402,
+          "lineSha256": "2aeda845075a0a41f5ddc4741503f35245bc4bc7f6cb470c37c65a0320854bae",
+          "scope": "other-connection",
+          "row": {
+            "observedAtMs": 1792943624026,
+            "stage": "socket_turn.input",
+            "durationMs": 161,
+            "connection": 11
+          }
+        },
+        {
+          "line": 17403,
+          "lineSha256": "8c692261f31ce824211ef74d995616a64a22ed3ed648f515ca1d57bd386cef26",
+          "scope": "other-connection",
+          "row": {
+            "observedAtMs": 1792943624026,
+            "stage": "serial_gate.zone_outbound_wait",
+            "durationMs": 161,
+            "connection": 11
+          }
+        },
+        {
+          "line": 17404,
+          "lineSha256": "2b3dfdf4fc0597113397794f374e39c490935f80282841a3e8788ef760790f37",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943624027,
+            "stage": "session_action.execute",
+            "durationMs": 190
+          }
+        },
+        {
+          "line": 17405,
+          "lineSha256": "9c100370e9319cf35eac4466c69bcef0868d93caa6b2dc4766d48300210c96bf",
+          "scope": "other-connection",
+          "row": {
+            "observedAtMs": 1792943624027,
+            "stage": "socket_turn.input",
+            "durationMs": 190,
+            "connection": 26
+          }
+        },
+        {
+          "line": 17406,
+          "lineSha256": "36de34e2943ef00e85b0e5a27b128df5204341f54201dcf113e583896bc55062",
+          "scope": "other-connection",
+          "row": {
+            "observedAtMs": 1792943624027,
+            "stage": "serial_gate.zone_outbound_wait",
+            "durationMs": 183,
+            "connection": 26
+          }
+        },
+        {
+          "line": 17408,
+          "lineSha256": "e64ee01dd1009452e96ef52d3ee3aea27ceda05e42ba42cead533186eb01edeb",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943624037,
+            "stage": "session_action.execute",
+            "durationMs": 155
+          }
+        },
+        {
+          "line": 17409,
+          "lineSha256": "795f9c58a9eab47fbbe43c2e588527fcd335b5a499d82b3fea4414f7b676e26b",
+          "scope": "other-connection",
+          "row": {
+            "observedAtMs": 1792943624037,
+            "stage": "socket_turn.input",
+            "durationMs": 155,
+            "connection": 8
+          }
+        },
+        {
+          "line": 17410,
+          "lineSha256": "bbb36c33bd8182209f4bc6ac10d944c788915a401d8bb496cd858a73c682bd7c",
+          "scope": "other-connection",
+          "row": {
+            "observedAtMs": 1792943624037,
+            "stage": "serial_gate.zone_outbound_wait",
+            "durationMs": 155,
+            "connection": 8
+          }
+        },
+        {
+          "line": 17411,
+          "lineSha256": "7b5c15801cfa48621f72bb68bf2de105ed9c7c37d2366cad0d9d96d54bade890",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943624047,
+            "stage": "shared_session.reconcile",
+            "durationMs": 67
+          }
+        },
+        {
+          "line": 17412,
+          "lineSha256": "9d7df74e2de1b006cbe1fc64d0b84d72ff864ae0e5ae4224d885977add98bbc2",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943624054,
+            "stage": "zone_owner.in_process.execute_request",
+            "durationMs": 207
+          }
+        },
+        {
+          "line": 17415,
+          "lineSha256": "cfaaf79762d066259c1df40dcd571f1e1752a191c8b544ac9ab5ef90df3d0170",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943624072,
+            "stage": "shared_session.predrain",
+            "durationMs": 81
+          }
+        },
+        {
+          "line": 17416,
+          "lineSha256": "75e22d3a88835024c538c6d7e94dcc1201ea566b1b7bf2476ab9ed92e20eabf0",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943624072,
+            "stage": "zone_owner.in_process.execute_request",
+            "durationMs": 88
+          }
+        },
+        {
+          "line": 17419,
+          "lineSha256": "0dcd741a20cb8d85061d4ad09672b39a66fa9215d283a10b821abe5f6d28967b",
+          "scope": "other-connection",
+          "row": {
+            "observedAtMs": 1792943624072,
+            "stage": "socket_turn.input",
+            "durationMs": 648,
+            "connection": 31
+          }
+        },
+        {
+          "line": 17420,
+          "lineSha256": "5c4d48c6b1bff7de90e778dae4150b340ee80666931252b7692d5c0a0db45320",
+          "scope": "other-connection",
+          "row": {
+            "observedAtMs": 1792943624072,
+            "stage": "serial_gate.zone_outbound_wait",
+            "durationMs": 648,
+            "connection": 31
+          }
+        },
+        {
+          "line": 17421,
+          "lineSha256": "419402eb72084c5334a9e12a9ee2efcd658c06bb40c45f0edea77436ffb64e7d",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943624072,
+            "stage": "shared_session.predrain",
+            "durationMs": 65
+          }
+        },
+        {
+          "line": 17422,
+          "lineSha256": "29ebbae91c0a9eeb9624e921ee8cfe87bd151a36ba388951556259727410d0eb",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943624072,
+            "stage": "zone_owner.in_process.execute_request",
+            "durationMs": 78
+          }
+        },
+        {
+          "line": 17425,
+          "lineSha256": "d99ec54df52ccfec8d4123fe89a06d113db62b2611a88fbcb4604e6dc114894e",
+          "scope": "other-connection",
+          "row": {
+            "observedAtMs": 1792943624072,
+            "stage": "serial_gate.zone_outbound_wait",
+            "durationMs": 55,
+            "connection": 3
+          }
+        },
+        {
+          "line": 17426,
+          "lineSha256": "75bfeef8bda226a732eaa21f014b23ee73f4e9d319f600412a89d75b009ed30e",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943624072,
+            "stage": "session_action.execute",
+            "durationMs": 431
+          }
+        },
+        {
+          "line": 17427,
+          "lineSha256": "c6aa111ecd7e2f677352b53c49da3ab541ff73f3f98529a2b30f8564f2a3f3f8",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943624072,
+            "stage": "session_action.execute",
+            "durationMs": 67
+          }
+        },
+        {
+          "line": 17428,
+          "lineSha256": "18303b508bcd4222e2ad17f6fa0dd8ab0549e283069ed7c4cc0182024a0916b1",
+          "scope": "other-connection",
+          "row": {
+            "observedAtMs": 1792943624072,
+            "stage": "socket_turn.input",
+            "durationMs": 68,
+            "connection": 2
+          }
+        },
+        {
+          "line": 17429,
+          "lineSha256": "f1498e6c960fc00a732aec6087523466d56ec8e14196b0bfab44795c7a560fed",
+          "scope": "other-connection",
+          "row": {
+            "observedAtMs": 1792943624072,
+            "stage": "serial_gate.zone_outbound_wait",
+            "durationMs": 68,
+            "connection": 2
+          }
+        },
+        {
+          "line": 17430,
+          "lineSha256": "4a26b097b4cd3e2bed6e6281488f7e1db037131e6d4242db50aa445cb259661e",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943624100,
+            "stage": "zone_owner.in_process.execute_request",
+            "durationMs": 64
+          }
+        },
+        {
+          "line": 17433,
+          "lineSha256": "5588918ab924585faeeedb6ba87e4f5f248c6552f97df11aa31021793a9fc813",
+          "scope": "other-connection",
+          "row": {
+            "observedAtMs": 1792943624101,
+            "stage": "serial_gate.zone_outbound_wait",
+            "durationMs": 64,
+            "connection": 19
+          }
+        },
+        {
+          "line": 17434,
+          "lineSha256": "e71584b62b3635b4f31867b33c9b31357c98584df48673be64f061813de9e205",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943624117,
+            "stage": "zone_owner.in_process.execute_request",
+            "durationMs": 81
+          }
+        },
+        {
+          "line": 17437,
+          "lineSha256": "374ecede5468810e730dfdfbcdb19a33cbd0c97cf7e2a88180853cc8f1cf6b74",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943624118,
+            "stage": "shared_session.predrain",
+            "durationMs": 81
+          }
+        },
+        {
+          "line": 17438,
+          "lineSha256": "58b2d8584ff20e84d99f7e5efb5bbe4f64252b551abb317d6bf82c2460c542b6",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943624118,
+            "stage": "zone_owner.in_process.execute_request",
+            "durationMs": 82
+          }
+        },
+        {
+          "line": 17439,
+          "lineSha256": "d771c0af0c796b722d464d0cb1fec89b5ff174c8ba2826a8294b13f41f0d6c10",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943624118,
+            "stage": "zone_owner.in_process.execute_request",
+            "durationMs": 110
+          }
+        },
+        {
+          "line": 17443,
+          "lineSha256": "62bfd951441057d566b346918a47a96e748b3296cf526451703b5e5d092efa02",
+          "scope": "other-connection",
+          "row": {
+            "observedAtMs": 1792943624118,
+            "stage": "serial_gate.zone_outbound_wait",
+            "durationMs": 82,
+            "connection": 13
+          }
+        },
+        {
+          "line": 17445,
+          "lineSha256": "af8a718b265e99d6dbf53838c81b54526d00e49716bbf7ac3a3bca54df37c66b",
+          "scope": "other-connection",
+          "row": {
+            "observedAtMs": 1792943624118,
+            "stage": "serial_gate.zone_outbound_wait",
+            "durationMs": 82,
+            "connection": 24
+          }
+        },
+        {
+          "line": 17448,
+          "lineSha256": "8b555827a539503d8741caa8f67ffeef5174d6d4b33743f9dcc5e1c0ca6dbc66",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943624161,
+            "stage": "shared_session.predrain",
+            "durationMs": 60
+          }
+        },
+        {
+          "line": 17449,
+          "lineSha256": "8b555827a539503d8741caa8f67ffeef5174d6d4b33743f9dcc5e1c0ca6dbc66",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943624161,
+            "stage": "shared_session.predrain",
+            "durationMs": 60
+          }
+        },
+        {
+          "line": 17450,
+          "lineSha256": "b7d15c98cb2701f3a15eaa28034b81c61e29ea77389fe045c4707f7b95441fe1",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943624161,
+            "stage": "shared_session.predrain",
+            "durationMs": 91
+          }
+        },
+        {
+          "line": 17451,
+          "lineSha256": "aea3e211dd261570d09607830af1f925b37f7bdd1c6d87cd48ec019dd440d7af",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943624161,
+            "stage": "zone_owner.in_process.execute_request",
+            "durationMs": 83
+          }
+        },
+        {
+          "line": 17452,
+          "lineSha256": "278570f9ac8d4b88a5b93f03309e9315ffe1ef4ed4c1b2dd5de7a8e873767672",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943624161,
+            "stage": "zone_owner.in_process.execute_request",
+            "durationMs": 107
+          }
+        },
+        {
+          "line": 17457,
+          "lineSha256": "4d69f1404409ddc916be9abec3dc988408b26dfa1359a8ee969ec1549aeb397b",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943624215,
+            "stage": "shared_session.predrain",
+            "durationMs": 97
+          }
+        },
+        {
+          "line": 17458,
+          "lineSha256": "f706158056445b489006c871d2a09fd5ea3648231a6215e4fed69bced56bc838",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943624215,
+            "stage": "zone_owner.in_process.execute_request",
+            "durationMs": 114
+          }
+        },
+        {
+          "line": 17461,
+          "lineSha256": "a6aa663dfe4b57a1d6a2081822fbc5e02d737e380201056ff4ac30163ed873f9",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943624216,
+            "stage": "shared_session.inner_execute",
+            "durationMs": 55
+          }
+        },
+        {
+          "line": 17462,
+          "lineSha256": "451ad4169fceb07bc7913e81f0999ac9ad04c2f399b3281d9185e86cb6fbc8fb",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943624216,
+            "stage": "shared_session.predrain",
+            "durationMs": 98
+          }
+        },
+        {
+          "line": 17463,
+          "lineSha256": "9461e6dac2509f55085eaf04d79b9d003a27c4f23eb2459af5a2666ccdab285d",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943624216,
+            "stage": "zone_owner.in_process.execute_request",
+            "durationMs": 117
+          }
+        },
+        {
+          "line": 17466,
+          "lineSha256": "f2460f35f9f006cabd24a1c3a4f13009040830b48f6abc9fc2ea107a3bfc055d",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943624217,
+            "stage": "shared_session.predrain",
+            "durationMs": 107
+          }
+        },
+        {
+          "line": 17467,
+          "lineSha256": "573374539d28a9134265607f33c21ba24545e8c306872ca61f34df47e2290804",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943624217,
+            "stage": "shared_session.predrain",
+            "durationMs": 98
+          }
+        },
+        {
+          "line": 17468,
+          "lineSha256": "264e70d43509e7d5f5cb774ebb2dadb27c0f9fe0e56b9f7c9aa5250c3305f27a",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943624217,
+            "stage": "zone_owner.in_process.execute_request",
+            "durationMs": 118
+          }
+        },
+        {
+          "line": 17469,
+          "lineSha256": "14d7f1b254da83112841e3e431369010bc515eb69654b75780df94f5978d4233",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943624217,
+            "stage": "shared_session.predrain",
+            "durationMs": 76
+          }
+        },
+        {
+          "line": 17471,
+          "lineSha256": "d452d1470461ba80bb3726eda1facc7db641a9dcb86018a5da5a4d53189ca896",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943624217,
+            "stage": "zone_owner.in_process.execute_request",
+            "durationMs": 102
+          }
+        },
+        {
+          "line": 17475,
+          "lineSha256": "264e70d43509e7d5f5cb774ebb2dadb27c0f9fe0e56b9f7c9aa5250c3305f27a",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943624217,
+            "stage": "zone_owner.in_process.execute_request",
+            "durationMs": 118
+          }
+        },
+        {
+          "line": 17478,
+          "lineSha256": "10624a7669237baa0e22dbc180d7f0fc5a237445c3df5086705004d399fe5ddf",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943624223,
+            "stage": "shared_session.predrain",
+            "durationMs": 155
+          }
+        },
+        {
+          "line": 17479,
+          "lineSha256": "ae38b893df2415cdc0476fffcdc4e37b4be8e4485a0027e8223e324d2479410d",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943624223,
+            "stage": "zone_owner.in_process.execute_request",
+            "durationMs": 181
+          }
+        },
+        {
+          "line": 17482,
+          "lineSha256": "a3d9ebc12148e285ea7cb36cbec49028823e7232ddfb6287c61b5f1099acce8c",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943624223,
+            "stage": "shared_session.predrain",
+            "durationMs": 83
+          }
+        },
+        {
+          "line": 17483,
+          "lineSha256": "44d74fafeb0aa376fc551440048a7c198ff7bdb0a43fe5577720a7a97df44376",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943624223,
+            "stage": "zone_owner.in_process.execute_request",
+            "durationMs": 109
+          }
+        },
+        {
+          "line": 17486,
+          "lineSha256": "a3d9ebc12148e285ea7cb36cbec49028823e7232ddfb6287c61b5f1099acce8c",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943624223,
+            "stage": "shared_session.predrain",
+            "durationMs": 83
+          }
+        },
+        {
+          "line": 17487,
+          "lineSha256": "f12054280f4d8277a55ead7bcae430517882ca929de9488a6b1967be6b7a1082",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943624223,
+            "stage": "zone_owner.in_process.execute_request",
+            "durationMs": 84
+          }
+        },
+        {
+          "line": 17490,
+          "lineSha256": "a3d9ebc12148e285ea7cb36cbec49028823e7232ddfb6287c61b5f1099acce8c",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943624223,
+            "stage": "shared_session.predrain",
+            "durationMs": 83
+          }
+        },
+        {
+          "line": 17491,
+          "lineSha256": "f12054280f4d8277a55ead7bcae430517882ca929de9488a6b1967be6b7a1082",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943624223,
+            "stage": "zone_owner.in_process.execute_request",
+            "durationMs": 84
+          }
+        },
+        {
+          "line": 17496,
+          "lineSha256": "ecf82a9a67f23824df2619f08e6300c8994316fcd0a03c9412c8b601e7ec9642",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943624244,
+            "stage": "shared_session.predrain",
+            "durationMs": 82
+          }
+        },
+        {
+          "line": 17497,
+          "lineSha256": "2036342104a157ad8c73e178bd174568b527ff07eb6f640ebae43119ef718ad6",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943624244,
+            "stage": "zone_owner.in_process.execute_request",
+            "durationMs": 98
+          }
+        },
+        {
+          "line": 17499,
+          "lineSha256": "7ad98a4eb3fec6f9e11b945bce15d5272b2c784beb836acdb6424278cb12ca06",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943624244,
+            "stage": "shared_session.predrain",
+            "durationMs": 104
+          }
+        },
+        {
+          "line": 17500,
+          "lineSha256": "3ed6ab323d8c2a2f12e59732eb7451e1a09c2b586573684f31a5755a9f4d86ac",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943624244,
+            "stage": "zone_owner.in_process.execute_request",
+            "durationMs": 130
+          }
+        },
+        {
+          "line": 17503,
+          "lineSha256": "32a86cd32395410506786ad221a74e3b015e1ee3acc351d37e371f73d8dceaa2",
+          "scope": "other-connection",
+          "row": {
+            "observedAtMs": 1792943624244,
+            "stage": "socket_input.queue_residence",
+            "durationMs": 82,
+            "connection": 7,
+            "queuedPhase": "runtime_tick",
+            "phaseElapsedMs": 47,
+            "inputClass": "move"
+          }
+        },
+        {
+          "line": 17505,
+          "lineSha256": "5898d54d22433362106a742f9cb90d585e4d47c1691f5f887001ed395fa8b349",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943624251,
+            "stage": "shared_session.predrain",
+            "durationMs": 110
+          }
+        },
+        {
+          "line": 17506,
+          "lineSha256": "2e7133c328794cdef1f021b062dcc1950ab7cd3ccae45f17ff46e2b3046573d6",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943624251,
+            "stage": "zone_owner.in_process.execute_request",
+            "durationMs": 137
+          }
+        },
+        {
+          "line": 17509,
+          "lineSha256": "cd4b97cc48dc74472a49c3a6d724ce93533451655cfb304592f181ee4a7a2b2a",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943624266,
+            "stage": "shared_session.predrain",
+            "durationMs": 50
+          }
+        },
+        {
+          "line": 17510,
+          "lineSha256": "6d4d571db0e5c268bd8b189bca75c5623ebb1f17b00b06ab051611fba5040dff",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943624266,
+            "stage": "zone_owner.in_process.execute_request",
+            "durationMs": 105
+          }
+        },
+        {
+          "line": 17513,
+          "lineSha256": "f80be8ccb8ad3beb5cfdff074c36e0e21ad5c993ec48933f2a59a8087629fbd0",
+          "scope": "other-connection",
+          "row": {
+            "observedAtMs": 1792943624267,
+            "stage": "socket_input.queue_residence",
+            "durationMs": 71,
+            "connection": 22,
+            "queuedPhase": "runtime_tick",
+            "phaseElapsedMs": 33,
+            "inputClass": "move"
+          }
+        },
+        {
+          "line": 17514,
+          "lineSha256": "e84408ff74b128bba527ebaa5ab43b4c1d6a90516decb3f220b4d3490c940005",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943624284,
+            "stage": "shared_session.predrain",
+            "durationMs": 66
+          }
+        },
+        {
+          "line": 17515,
+          "lineSha256": "f82d6f07e119319df792be7efb45c8c433c0972294ed8c433887c76663f4e042",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943624284,
+            "stage": "zone_owner.in_process.execute_request",
+            "durationMs": 121
+          }
+        },
+        {
+          "line": 17519,
+          "lineSha256": "db0b205de0096c0df85fd945b9137cddbb9d11f7a8ec59048ee6b389afaf9c58",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943624298,
+            "stage": "shared_session.predrain",
+            "durationMs": 81
+          }
+        },
+        {
+          "line": 17520,
+          "lineSha256": "e68e45981f197c7c349dc0bcc282e932af1b89d8053589ca84a9f82105f93a4b",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943624298,
+            "stage": "zone_owner.in_process.execute_request",
+            "durationMs": 137
+          }
+        },
+        {
+          "line": 17523,
+          "lineSha256": "22a05aade88ca7a75a6b9c5fc5bdbe01eb822228e254dd1fc59a266b3e4bfa9d",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943624298,
+            "stage": "zone_owner.in_process.execute_request",
+            "durationMs": 59
+          }
+        },
+        {
+          "line": 17526,
+          "lineSha256": "bc4bfa3e06ca1c8d0c021052ae2e8b6cfc4cde030a38b8ae664ec15b4e8c00aa",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943624310,
+            "stage": "flush.save",
+            "durationMs": 191
+          }
+        },
+        {
+          "line": 17527,
+          "lineSha256": "b7a7e5542e7a94a43de69036d2776b1706c52f4409ead43735a2aaf34b822d7d",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943624337,
+            "stage": "zone_owner.in_process.execute_request",
+            "durationMs": 54
+          }
+        },
+        {
+          "line": 17530,
+          "lineSha256": "f2bceb317f7a157e9193f71584a4976731fc3c0e3266a73e99d786ffed866f4d",
+          "scope": "other-connection",
+          "row": {
+            "observedAtMs": 1792943624338,
+            "stage": "serial_gate.zone_outbound_wait",
+            "durationMs": 54,
+            "connection": 5
+          }
+        },
+        {
+          "line": 17531,
+          "lineSha256": "64eda4cc87226ba84b68b45b8187d2d9f5429ec92281f981d4dce678d10a45fb",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943624339,
+            "stage": "zone_owner.in_process.execute_request",
+            "durationMs": 177
+          }
+        },
+        {
+          "line": 17534,
+          "lineSha256": "156a8c07de12906ae8ff0e0f5ac397269bd7bb6bbc9659723293280c40ad613d",
+          "scope": "other-connection",
+          "row": {
+            "observedAtMs": 1792943624339,
+            "stage": "socket_input.queue_residence",
+            "durationMs": 144,
+            "connection": 16,
+            "queuedPhase": "runtime_tick",
+            "phaseElapsedMs": 33,
+            "inputClass": "attack_v2"
+          }
+        },
+        {
+          "line": 17535,
+          "lineSha256": "65233b76303ba94c4300bb9cc021085c8e2e35a5666401934b23e4568e280b38",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943624339,
+            "stage": "session_action.execute",
+            "durationMs": 177
+          }
+        },
+        {
+          "line": 17536,
+          "lineSha256": "643b05c79d7ccf44b55c12c7ca78b86932dab0c04c4f37b853f5c3e226de340d",
+          "scope": "other-connection",
+          "row": {
+            "observedAtMs": 1792943624339,
+            "stage": "socket_turn.input",
+            "durationMs": 177,
+            "connection": 18
+          }
+        },
+        {
+          "line": 17537,
+          "lineSha256": "9a65aed70c1c489a93ab6e5349278ade91437a9c996dffe2924bb71c70822103",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943624339,
+            "stage": "session_action.flush",
+            "durationMs": 270
+          }
+        },
+        {
+          "line": 17538,
+          "lineSha256": "66928f04885ce0f40f0289d9ee4a7fb9a5dfc00ca10cab980667ef5e4d550d86",
+          "scope": "other-connection",
+          "row": {
+            "observedAtMs": 1792943624339,
+            "stage": "serial_gate.zone_outbound_wait",
+            "durationMs": 80,
+            "connection": 18
+          }
+        },
+        {
+          "line": 17539,
+          "lineSha256": "071648c586acd1f0af19ee3752e9bb1c79bbd5867cfef334fc451c5cef202314",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943624339,
+            "stage": "session_action.execute",
+            "durationMs": 73
+          }
+        },
+        {
+          "line": 17540,
+          "lineSha256": "1670d9e45ada1d9f3bc0c48874158dea7796e6718032d2766c06e9a73451bdac",
+          "scope": "other-connection",
+          "row": {
+            "observedAtMs": 1792943624339,
+            "stage": "socket_turn.input",
+            "durationMs": 73,
+            "connection": 22
+          }
+        },
+        {
+          "line": 17541,
+          "lineSha256": "9da87cb88fcef6dd132b75628d56ac25d259d5c1f548cf525526bb1d7d38890f",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943624339,
+            "stage": "shared_session.tail",
+            "durationMs": 95
+          }
+        },
+        {
+          "line": 17542,
+          "lineSha256": "f6f50d172756ffcde63b7dcb7a0c820a458429f2ddf6d3b6dbac611070ae2151",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943624339,
+            "stage": "zone_owner.in_process.execute_request",
+            "durationMs": 271
+          }
+        },
+        {
+          "line": 17543,
+          "lineSha256": "63e0e60a78fb462f6ded6f405d9ebfb873d6b04368e7bd3e2b088f0aaa0994cf",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943624339,
+            "stage": "session_action.execute",
+            "durationMs": 271
+          }
+        },
+        {
+          "line": 17544,
+          "lineSha256": "c8f16c9574f2c5a2e383383ed6ac60a46c25dc962e9b97a794a55d91f70d7986",
+          "scope": "process-global-unassigned",
+          "row": {
+            "observedAtMs": 1792943624340,
+            "stage": "session_action.execute",
+            "durationMs": 115
+          }
+        },
+        {
+          "line": 17545,
+          "lineSha256": "edf34f9429823d19dc27907fc3254922d66226d46b9ce435c0cc1fcd7d25338b",
+          "scope": "other-connection",
+          "row": {
+            "observedAtMs": 1792943624340,
+            "stage": "socket_turn.input",
+            "durationMs": 116,
+            "connection": 12
+          }
+        },
+        {
+          "line": 17546,
+          "lineSha256": "cd17e4bb729cf06ae32625023188d2137b8a8080341fd37d098a255a689994fc",
+          "scope": "other-connection",
+          "row": {
+            "observedAtMs": 1792943624340,
+            "stage": "serial_gate.zone_outbound_wait",
+            "durationMs": 64,
+            "connection": 22
+          }
+        },
+        {
+          "line": 17547,
+          "lineSha256": "34a03029defdfc5b45b79cffe1090bbf0d2094cc7f53b6cd224bc1e1ce46b0e0",
+          "scope": "other-connection",
+          "row": {
+            "observedAtMs": 1792943624340,
+            "stage": "serial_gate.zone_outbound_wait",
+            "durationMs": 80,
+            "connection": 12
+          }
+        },
+        {
+          "line": 17548,
+          "lineSha256": "7ebefbfcaff6f94cd719fc2be14c30152ecf62cf2abe43833d06c236b5a106b3",
+          "scope": "connection6",
+          "row": {
+            "observedAtMs": 1792943624376,
+            "stage": "socket_turn.input",
+            "durationMs": 739,
+            "connection": 6
+          }
+        },
+        {
+          "line": 17549,
+          "lineSha256": "e896fc8ec91042e23342493ccc225a9d7593349740543e9843db4f48ebf0743b",
+          "scope": "connection6",
+          "row": {
+            "observedAtMs": 1792943624376,
+            "stage": "serial_gate.zone_outbound_wait",
+            "durationMs": 739,
+            "connection": 6
+          }
+        }
+      ],
+      "stageCounts": {
+        "shared_session.predrain": 53,
+        "zone_owner.in_process.execute_request": 71,
+        "runtime_tick.execute": 61,
+        "runtime_tick.total": 61,
+        "socket_input.queue_residence": 13,
+        "serial_gate.zone_outbound_wait": 53,
+        "shared_session.inner_execute": 7,
+        "shared_session.reconcile": 4,
+        "snapshot.build_and_send": 1,
+        "session_action.flush": 2,
+        "session_action.execute": 23,
+        "socket_turn.input": 23,
+        "socket_turn.spectator": 36,
+        "shared_session.tail": 3,
+        "flush.save": 1
+      }
+    }
+  ],
+  "scope": "Fixed receiver-time ranges ending at the connection6 input spans; global rows are not assigned to either attack without a request/connection identifier.",
+  "limitations": [
+    "Range starts are observedEnd-duration arithmetic, not authoritative operation-start timestamps.",
+    "Observed timestamps are collection/receive timestamps, and nested spans overlap; durations must not be added.",
+    "Unscoped session/flush/save rows cannot be uniquely assigned to connection6.",
+    "Only >=50ms emitted stages exist; absence cannot exclude a shorter stage or uninstrumented work."
+  ],
+  "originalVerdictPreserved": true
+}

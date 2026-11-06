@@ -1,0 +1,510 @@
+{
+  "schemaVersion": 1,
+  "scope": "Actual V4 isolated V2 game-snapshot replay/latest V3 traffic; no-path failure retained. Current ee06 JS828 and actual V6 Rust32/build separately qualified. Historical V1 gateway-bin0/allSelected=false retained.",
+  "driverSourceCommit": "ee06c05f3813a1e627c8756d1f5fe8e2e0fbf856",
+  "backendSourceCommit": "ee06c05f3813a1e627c8756d1f5fe8e2e0fbf856",
+  "freshCapacityToolTestsPassed": 527,
+  "freshOrdinaryDependencyTestsPassed": 301,
+  "actualRootJsTestsPassed": 828,
+  "actualRootRustTestsPassed": 32,
+  "originalRustV1AllSelectedTestsPassed": false,
+  "originalRustV1GatewayTestsPassed": 0,
+  "backendInputs": 55,
+  "immutableExecutableRecordOnly": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-hp-wake-release-v6\\bin\\mir2-gateway.exe",
+    "bytes": 87456256,
+    "sha256": "ad13d15a6fd294cae0beda04d8f91b7773a9b8390cc9c85e5a84d3e72c2567f6"
+  },
+  "immutableExecutableReadOrCopied": false,
+  "sourceFirst4InventoryReuse": true,
+  "preparedCount": 4,
+  "targetPrepared": 100,
+  "originalRunPassed": false,
+  "originalError": "No walk path on 0 from 304,613 to 289,617",
+  "recovery": {
+    "verified": true,
+    "elapsedMs": 190.54420000000027,
+    "beforeHp": 12,
+    "afterHp": 18,
+    "maximumHp": 18,
+    "consumedQuantity": 1
+  },
+  "economy": {
+    "soldVenison": 2,
+    "goldEarned": 495,
+    "purchasedHp": 12,
+    "goldSpent": 480
+  },
+  "normalCleanupComplete": true,
+  "coldBankEligible": false,
+  "formalOrdinaryRelogin100Verified": false,
+  "measurementPerformed": false,
+  "measuredCcuAcceptancePerformed": false,
+  "sustainableTwoHourSupplyProven": false,
+  "capacityAccepted": false,
+  "p0Accepted": false,
+  "privacy": "Explicit public text allowlist; no Store/pool/ledger/secrets contents, recovery payloads, raw Gateway logs, complete recordings or executable copied.",
+  "rawByteVerification": {
+    "destinationExact": true,
+    "sourcesUnchangedDuringCopy": true,
+    "actualRootRawLogPinsMatched": true
+  },
+  "copies": [
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v4\\source-lib-v1.mjs",
+      "file": "source-lib-v1.mjs",
+      "bytes": 15318,
+      "sha256": "984720998050a3da2f73a49a82cc71a49e9fb57e2819e0c55c732816b2f322a1"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v4\\copy-source-bank-v1.mjs",
+      "file": "copy-source-bank-v1.mjs",
+      "bytes": 14001,
+      "sha256": "ec54cc8661ffe1edd8c5f0afbce4acc4603c3ecc0cc5459116cab4de38409d79"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v4\\freeze-prepare-v1.mjs",
+      "file": "freeze-prepare-v1.mjs",
+      "bytes": 8207,
+      "sha256": "2eb86755f281a8914ba68f2a54c38c2fe9b860e3bf92892123294f897690e00f"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v4\\run-owned-prepare-v1.mjs",
+      "file": "run-owned-prepare-v1.mjs",
+      "bytes": 25076,
+      "sha256": "ca6dd1a7df72ffeec2cb4f94595ce184d95968d79a3875e5d21bbd63cfbe5d33"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v4\\owned-child-v1.mjs",
+      "file": "owned-child-v1.mjs",
+      "bytes": 2201,
+      "sha256": "7845fc2e212bb15b0e036e33753c9e155a9d2152c15098f9ab001dd1f9b74375"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v4\\prepare-config-pending-v1.json",
+      "file": "prepare-config-pending-v1.json",
+      "bytes": 6759,
+      "sha256": "ecc3df0515b7a4f4236aa9072b40157e320709d6b137a2e9a42bd8dabe303080"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v4\\source-bank-plan-pending-v1.json",
+      "file": "source-bank-plan-pending-v1.json",
+      "bytes": 12528,
+      "sha256": "f752a5d0ff09bf3068d4bae29379cb276e1228c08ac2860e1c8934b58c6478fb"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v4\\backend-release-binding-pending-v1.json",
+      "file": "backend-release-binding-pending-v1.json",
+      "bytes": 1376,
+      "sha256": "16e27c4496723ef6c7e43f72f816cbb6e0081d6de5fbca38fc44911c4dd6d979"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v4\\root-final-binding-receipt-v1.json",
+      "file": "root-final-binding-receipt-v1.json",
+      "bytes": 2157,
+      "sha256": "3d0231843ab70cd192d66ed2b654e6b999dee58de3ab2baacaeaa15dc716322e"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v4\\frozen-source-v1.json",
+      "file": "frozen-source-v1.json",
+      "bytes": 85716,
+      "sha256": "e3613a784209db9f13999cdafa86fe66a47c4667ba064da026c4b8f587deca0a"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v4\\root-independent-cleanup-v1.json",
+      "file": "root-independent-cleanup-v1.json",
+      "bytes": 225,
+      "sha256": "1026eba9ce43ab87e45cfb3a93461474e8dbb8f70d8619ede0cab65e79455898"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v4\\public-return-path-geometry-v1.json",
+      "file": "public-return-path-geometry-v1.json",
+      "bytes": 50958,
+      "sha256": "e84731fd7112238c5d6fbebb79e381214112f0ea36d1b7747940f2adfe766c47"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v4\\derivation-proof-v1.json",
+      "file": "derivation-proof-v1.json",
+      "bytes": 45922,
+      "sha256": "525f16d0a0c637cac803a119f1414a9a91ad54995c36715334433b96ae26b431"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v4\\auth-ledger-scope-correction-v2.json",
+      "file": "auth-ledger-scope-correction-v2.json",
+      "bytes": 2204,
+      "sha256": "b38ad9c7c1b6351bd4bd2ca5b4d478ba0826e91685c37949b2df8e99f5060a31"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v4\\prepare-config-before-root-final-v1.json",
+      "file": "prepare-config-before-root-final-v1.json",
+      "bytes": 6017,
+      "sha256": "f89e962d58568355c5805861fe93018c91d1226606c53fa141682dbe2f3fe964"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v4\\backend-release-binding-before-root-final-v1.json",
+      "file": "backend-release-binding-before-root-final-v1.json",
+      "bytes": 412,
+      "sha256": "f6f74de34ccba0d7fe32664bb2fefaea1585afdd2b2d6aa354dd3919c79be75a"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v4\\episode\\source-bank-copy-receipt-v1.json",
+      "file": "source-bank-copy-receipt-v1.json",
+      "bytes": 8820,
+      "sha256": "d17b7e6a9534bda4349030b38777e4d8a56bc877ce6a9bdba05b74488cae6b1d"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v4\\episode\\preparation-episode-receipt-v1.json",
+      "file": "preparation-episode-receipt-v1.json",
+      "bytes": 5806,
+      "sha256": "0e1f1a303433ce19a5ae3498ea7ece630c5464e9073e0dc00bb2e6737830ca85"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v4\\episode\\prepared-index-v1.json",
+      "file": "prepared-index-v1.json",
+      "bytes": 1603,
+      "sha256": "8c3ac2b658f44f0ee6bc42c7ebe0b9921a600c6bb35e9ba3179962d18c22bb03"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v4\\episode\\cleanup-v1.json",
+      "file": "cleanup-v1.json",
+      "bytes": 1036,
+      "sha256": "ef140703a94a2f0b50c322bea0e8d241c905655d8d6e2ede4fca314d8c6326d0"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v4\\episode\\owned-process-v1.json",
+      "file": "owned-process-v1.json",
+      "bytes": 671,
+      "sha256": "f5f7e28aaf4594c50b99ebd5c9fd92a0eca2eeab0e30dd6210c087cf75fd8f13"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v4\\episode\\health-before-v1.json",
+      "file": "health-before-v1.json",
+      "bytes": 1121,
+      "sha256": "dbdf428399f5895e22914da02010acc233546c71dd07f9c1dad6701b680ae9a2"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v4\\episode\\health-after-v1.json",
+      "file": "health-after-v1.json",
+      "bytes": 476,
+      "sha256": "74d2389476a4a0604a08a09ec0ca6b66f2faab728718fc111180b1bc7a8338a5"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v4\\episode\\run-intent-v1.json",
+      "file": "run-intent-v1.json",
+      "bytes": 1895,
+      "sha256": "f967b7afa2b1b41b430198b5f14ee43a94f73c96bcaef80b950edf975855472c"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v4\\episode\\reports\\1793052124616-e760d348.preparation-report.json",
+      "file": "1793052124616-e760d348.preparation-report.json",
+      "bytes": 18120,
+      "sha256": "d39fa7b6dba73518b7e9d0d1dddca48742d045b47911ef8d4f657d07d1839a62"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v4\\episode\\reports\\1793052124616-e760d348.preparation.jsonl",
+      "file": "1793052124616-e760d348.preparation.jsonl",
+      "bytes": 238039,
+      "sha256": "5f0daee2c8a45004e91534f277fda2b7f7afe5afcc2c3d1650177288bc71fb4a"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\root-ordinary-hp-wake-validation-v2\\root-focused-receipt-v1.json",
+      "file": "rust-v2/root-focused-receipt-v1.json",
+      "bytes": 28585,
+      "sha256": "b11edacef0931e437503df444d87c16c4d95b98d6b026a242e5eb1cf3861783d"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\root-ordinary-hp-wake-validation-v2\\format.stdout.log",
+      "file": "rust-v2/format.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\root-ordinary-hp-wake-validation-v2\\format.stderr.log",
+      "file": "rust-v2/format.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\root-ordinary-hp-wake-validation-v2\\gateway-owner-health-routing.stdout.log",
+      "file": "rust-v2/gateway-owner-health-routing.stdout.log",
+      "bytes": 3375,
+      "sha256": "4945b835b4041147d83beb75b9ccdeb08043aefe4dafe49fe72af848edcbf1da"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\root-ordinary-hp-wake-validation-v2\\gateway-owner-health-routing.stderr.log",
+      "file": "rust-v2/gateway-owner-health-routing.stderr.log",
+      "bytes": 58563,
+      "sha256": "fb613c1da2ee01ed8c4d320fcf4ae39b516e38aa2982a38db520d4011db3c423"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\root-ordinary-hp-wake-validation-v2\\gateway-runtime-tick.stdout.log",
+      "file": "rust-v2/gateway-runtime-tick.stdout.log",
+      "bytes": 393,
+      "sha256": "5cdd1a782d0e97879c2ab81a61673b52bd06a9f43fea1ed8aa0ea2b48cffce3c"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\root-ordinary-hp-wake-validation-v2\\gateway-runtime-tick.stderr.log",
+      "file": "rust-v2/gateway-runtime-tick.stderr.log",
+      "bytes": 53409,
+      "sha256": "89abf75307690732c6ddc14dfd66ba83fe2ea7d347c609921b3d7e755ed8be1a"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\root-ordinary-hp-wake-validation-v2\\gateway-use-item-routing.stdout.log",
+      "file": "rust-v2/gateway-use-item-routing.stdout.log",
+      "bytes": 238,
+      "sha256": "0fe95009ad0c00bf798e7828cfb1b6ff1f1a93056c934cf2f2c8e6bb41ac745c"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\root-ordinary-hp-wake-validation-v2\\gateway-use-item-routing.stderr.log",
+      "file": "rust-v2/gateway-use-item-routing.stderr.log",
+      "bytes": 53409,
+      "sha256": "07ba914d618fcca25bdea996d0ac8b03bd06eb8827aef60cd81fc12334718cb4"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\root-ordinary-hp-wake-validation-v2\\simulation-dead.stdout.log",
+      "file": "rust-v2/simulation-dead.stdout.log",
+      "bytes": 224,
+      "sha256": "c200c026dab1953a52c13706d0aa896f164f9161ed413083c2969097db627454"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\root-ordinary-hp-wake-validation-v2\\simulation-dead.stderr.log",
+      "file": "rust-v2/simulation-dead.stderr.log",
+      "bytes": 43101,
+      "sha256": "26d80ff1967e9810aeb33070825a51168b4c5c471931daecb2fa23adbb90b703"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\root-ordinary-hp-wake-validation-v2\\simulation-potion.stdout.log",
+      "file": "rust-v2/simulation-potion.stdout.log",
+      "bytes": 219,
+      "sha256": "6ca2da05fc60c6ee3f5a6448397b813cd9c44522f5cbbcce336f16a0666d294a"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\root-ordinary-hp-wake-validation-v2\\simulation-potion.stderr.log",
+      "file": "rust-v2/simulation-potion.stderr.log",
+      "bytes": 43101,
+      "sha256": "a3125e02f7bcb61805a729ed6e5c5e79ed022c5b1c87916f18df1813ece5f085"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\root-ordinary-hp-wake-validation-v1\\root-focused-receipt-v1.json",
+      "file": "rust-v1-failed/root-focused-receipt-v1.json",
+      "bytes": 28647,
+      "sha256": "5b36527fe32a9bcfb5c93aa14dae636b7ae0db916219762764c6693803525844"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\root-ordinary-hp-wake-validation-v1\\format.stdout.log",
+      "file": "rust-v1-failed/format.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\root-ordinary-hp-wake-validation-v1\\format.stderr.log",
+      "file": "rust-v1-failed/format.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\root-ordinary-hp-wake-validation-v1\\gateway-owner-health-routing.stdout.log",
+      "file": "rust-v1-failed/gateway-owner-health-routing.stdout.log",
+      "bytes": 113,
+      "sha256": "03f6ee30e11e3b40e343bbad95a35965d6df716f325951757df575086a7d7588"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\root-ordinary-hp-wake-validation-v1\\gateway-owner-health-routing.stderr.log",
+      "file": "rust-v1-failed/gateway-owner-health-routing.stderr.log",
+      "bytes": 56032,
+      "sha256": "6cdc049c6c7f67fe6132433c96ec3f8de5ced32861cb6b12a96df59ae0414cd8"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\root-ordinary-hp-wake-validation-v1\\gateway-runtime-tick.stdout.log",
+      "file": "rust-v1-failed/gateway-runtime-tick.stdout.log",
+      "bytes": 113,
+      "sha256": "03f6ee30e11e3b40e343bbad95a35965d6df716f325951757df575086a7d7588"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\root-ordinary-hp-wake-validation-v1\\gateway-runtime-tick.stderr.log",
+      "file": "rust-v1-failed/gateway-runtime-tick.stderr.log",
+      "bytes": 55888,
+      "sha256": "aa5f9b959517c7faea6c78b1df10fbb6704aa77c8f16166c3c563470f765f065"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\root-ordinary-hp-wake-validation-v1\\gateway-use-item-routing.stdout.log",
+      "file": "rust-v1-failed/gateway-use-item-routing.stdout.log",
+      "bytes": 113,
+      "sha256": "03f6ee30e11e3b40e343bbad95a35965d6df716f325951757df575086a7d7588"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\root-ordinary-hp-wake-validation-v1\\gateway-use-item-routing.stderr.log",
+      "file": "rust-v1-failed/gateway-use-item-routing.stderr.log",
+      "bytes": 55888,
+      "sha256": "874ac1b72a11a9595d62e374956dcfb02093885e33669c1ad24709f19373196f"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\root-ordinary-hp-wake-validation-v1\\simulation-dead.stdout.log",
+      "file": "rust-v1-failed/simulation-dead.stdout.log",
+      "bytes": 224,
+      "sha256": "04aa7c176a786318ed2a5f609cbd4bb7bc448427c27f8054e669a060af2d4977"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\root-ordinary-hp-wake-validation-v1\\simulation-dead.stderr.log",
+      "file": "rust-v1-failed/simulation-dead.stderr.log",
+      "bytes": 43101,
+      "sha256": "26d80ff1967e9810aeb33070825a51168b4c5c471931daecb2fa23adbb90b703"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\root-ordinary-hp-wake-validation-v1\\simulation-potion.stdout.log",
+      "file": "rust-v1-failed/simulation-potion.stdout.log",
+      "bytes": 219,
+      "sha256": "bfedddd658640c7e1028bcef6f92e0ff960e26be3d0ebcdbf017c23842ad9f62"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\root-ordinary-hp-wake-validation-v1\\simulation-potion.stderr.log",
+      "file": "rust-v1-failed/simulation-potion.stderr.log",
+      "bytes": 43101,
+      "sha256": "26d80ff1967e9810aeb33070825a51168b4c5c471931daecb2fa23adbb90b703"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\root-ordinary-hp-wake-validation-runner-v2.mjs",
+      "file": "rust-v2/root-validation-runner-v2.mjs",
+      "bytes": 5248,
+      "sha256": "274851d35cce71ba108f00aaf0e5ee563e44d951a74c04bb45e48b3651c18290"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\root-ordinary-hp-wake-validation-runner-v1.mjs",
+      "file": "rust-v1-failed/root-validation-runner-v1.mjs",
+      "bytes": 5293,
+      "sha256": "d640fe866a0d84a74e2745d822e7da1ef62c8275a7617addb5f4234b3d866ead"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\root-capacity-preparation-validation-v4\\root-focused-receipt-v1.json",
+      "file": "node-v4/root-focused-receipt-v1.json",
+      "bytes": 15375,
+      "sha256": "41c5fcc6b5355f3347ab36a8a29791d739080f969db9d8c4caf1a7cdf4eababa"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\root-capacity-preparation-validation-v4\\complete-capacity-driver.stdout.log",
+      "file": "node-v4/complete-capacity-driver.stdout.log",
+      "bytes": 124961,
+      "sha256": "93a76e4e5f2d9cc196a031875b3384bb4a1431e33f1d88d435346660305ea028"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\root-capacity-preparation-validation-v4\\complete-capacity-driver.stderr.log",
+      "file": "node-v4/complete-capacity-driver.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\root-capacity-preparation-validation-v4\\ordinary-economy-and-navigation-dependencies.stdout.log",
+      "file": "node-v4/ordinary-economy-and-navigation-dependencies.stdout.log",
+      "bytes": 69483,
+      "sha256": "d94c8d5d6c8a08581058971ae4d597567a019c192e37e2d224f74276777c741d"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\root-capacity-preparation-validation-v4\\ordinary-economy-and-navigation-dependencies.stderr.log",
+      "file": "node-v4/ordinary-economy-and-navigation-dependencies.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\root-capacity-preparation-validation-runner-v4.mjs",
+      "file": "node-v4/root-validation-runner-v4.mjs",
+      "bytes": 5437,
+      "sha256": "cd8b5cea334476e236cb40f7c923d4bec43ee5489331de4a33f71d629dc5c69f"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-hp-wake-release-v6\\source-lib-v6.mjs",
+      "file": "release-v6/source-lib-v6.mjs",
+      "bytes": 22267,
+      "sha256": "ed10735da3b15b1cb201e7d691f33de7dbc7d24d89296a51e67c655bb36f630b"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-hp-wake-release-v6\\build-release-v6.mjs",
+      "file": "release-v6/build-release-v6.mjs",
+      "bytes": 7075,
+      "sha256": "ec3b2f989481135f71475be2d13fdcd17c8d312ecaba4a72af7b1e69f6bc7c6a"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-hp-wake-release-v6\\root-final-config-v6.json",
+      "file": "release-v6/root-final-config-v6.json",
+      "bytes": 11485,
+      "sha256": "fc7dca18b93d42180e96e89be6a46f1ea94d108077bbd4382f75aab8e52722c0"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-hp-wake-release-v6\\root-qualified-config-v1.json",
+      "file": "release-v6/root-qualified-config-v1.json",
+      "bytes": 11485,
+      "sha256": "fc7dca18b93d42180e96e89be6a46f1ea94d108077bbd4382f75aab8e52722c0"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-hp-wake-release-v6\\root-qualified-config-v2.json",
+      "file": "release-v6/root-qualified-config-v2.json",
+      "bytes": 11485,
+      "sha256": "fc7dca18b93d42180e96e89be6a46f1ea94d108077bbd4382f75aab8e52722c0"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-hp-wake-release-v6\\source-before-v6.json",
+      "file": "release-v6/source-before-v6.json",
+      "bytes": 39576,
+      "sha256": "3c261ab1743ad288c031b3822be1a5b85d519e061d2de9932a7b02f303b5b20e"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-hp-wake-release-v6\\source-after-v6.json",
+      "file": "release-v6/source-after-v6.json",
+      "bytes": 39576,
+      "sha256": "3c261ab1743ad288c031b3822be1a5b85d519e061d2de9932a7b02f303b5b20e"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-hp-wake-release-v6\\build-stdout-v6.log",
+      "file": "release-v6/build-stdout-v6.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-hp-wake-release-v6\\build-stderr-v6.log",
+      "file": "release-v6/build-stderr-v6.log",
+      "bytes": 55884,
+      "sha256": "6a24907ee7bfe06b5ed0b2f2be1779d9918214ce9895414067fbbfceacad28b6"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-hp-wake-release-v6\\build-receipt-v6.json",
+      "file": "release-v6/build-receipt-v6.json",
+      "bytes": 2241,
+      "sha256": "c82d4812b8c4fe8a1b2fa887d6694cf59b29b281c404eeb88ddd771ad02c5b59"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-hp-wake-release-v6\\backend-source-v6.json",
+      "file": "release-v6/backend-source-v6.json",
+      "bytes": 50669,
+      "sha256": "c0f4465432f2effbb7de5a0e430a4b6049b42464bcf1824f879783f4a4441970"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-hp-wake-release-v6\\release-v6.json",
+      "file": "release-v6/release-v6.json",
+      "bytes": 2257,
+      "sha256": "5e6326b1994cb771fefbcd8187de0d9dedaa47d1fe3fa68f136ddc58fb08cc8d"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-hp-wake-release-v6\\root-receipt-path-correction-v1.json",
+      "file": "release-v6/root-receipt-path-correction-v1.json",
+      "bytes": 1121,
+      "sha256": "73784a1dcfab5c0576f119c45274cf320488758043f548977e3a1ddd7f4ac6ef"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-hp-wake-release-v6\\source-lib-before-root-receipt-v2.mjs",
+      "file": "release-v6/source-lib-before-root-receipt-v2.mjs",
+      "bytes": 22267,
+      "sha256": "0816b2714b25a2571f7f06fb56479abbbb031c00bf86e13cd3fa889813949685"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\run-ordinary-hp-wake-release-v6-build-v1.cmd",
+      "file": "release-v6/root-build-command-v1.cmd",
+      "bytes": 782,
+      "sha256": "95d32a3edc30fdd26e456124e0ec4ec47e6d0a93b5da20ae13e3f4c9cd4ddab6"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\archive-ordinary-capacity-bank-prepare-v4.mjs",
+      "file": "archive-evidence-v4.mjs",
+      "bytes": 13279,
+      "sha256": "e69ddf96c0da8e79d15c137bd267ddc51d1beb459bb3e87d766520b9a7a59990"
+    }
+  ]
+}

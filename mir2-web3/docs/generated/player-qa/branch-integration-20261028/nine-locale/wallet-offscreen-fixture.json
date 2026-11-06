@@ -1,0 +1,179 @@
+{
+  "height": 768,
+  "kind": "offscreen native UI fixture",
+  "languages": [
+    "en",
+    "zh-TW"
+  ],
+  "liveAcceptance": false,
+  "nineLanguageSmoke": [
+    {
+      "file": "05-wallet-pending-zh-TW-nine-language-offscreen-fixture.png",
+      "language": "zh-TW",
+      "qrRect": {
+        "max": [
+          632.0,
+          475.0
+        ],
+        "min": [
+          392.0,
+          235.0
+        ]
+      },
+      "walletAuthenticated": false,
+      "windowCount": 0
+    },
+    {
+      "file": "06-wallet-pending-en-nine-language-offscreen-fixture.png",
+      "language": "en",
+      "qrRect": {
+        "max": [
+          632.0,
+          475.0
+        ],
+        "min": [
+          392.0,
+          235.0
+        ]
+      },
+      "walletAuthenticated": false,
+      "windowCount": 0
+    },
+    {
+      "file": "07-wallet-pending-pt-BR-nine-language-offscreen-fixture.png",
+      "language": "pt-BR",
+      "qrRect": {
+        "max": [
+          632.0,
+          475.0
+        ],
+        "min": [
+          392.0,
+          235.0
+        ]
+      },
+      "walletAuthenticated": false,
+      "windowCount": 0
+    },
+    {
+      "file": "08-wallet-pending-ru-nine-language-offscreen-fixture.png",
+      "language": "ru",
+      "qrRect": {
+        "max": [
+          632.0,
+          475.0
+        ],
+        "min": [
+          392.0,
+          235.0
+        ]
+      },
+      "walletAuthenticated": false,
+      "windowCount": 0
+    },
+    {
+      "file": "09-wallet-pending-hi-nine-language-offscreen-fixture.png",
+      "language": "hi",
+      "qrRect": {
+        "max": [
+          632.0,
+          475.0
+        ],
+        "min": [
+          392.0,
+          235.0
+        ]
+      },
+      "walletAuthenticated": false,
+      "windowCount": 0
+    },
+    {
+      "file": "10-wallet-pending-id-nine-language-offscreen-fixture.png",
+      "language": "id",
+      "qrRect": {
+        "max": [
+          632.0,
+          475.0
+        ],
+        "min": [
+          392.0,
+          235.0
+        ]
+      },
+      "walletAuthenticated": false,
+      "windowCount": 0
+    },
+    {
+      "file": "11-wallet-pending-vi-nine-language-offscreen-fixture.png",
+      "language": "vi",
+      "qrRect": {
+        "max": [
+          632.0,
+          475.0
+        ],
+        "min": [
+          392.0,
+          235.0
+        ]
+      },
+      "walletAuthenticated": false,
+      "windowCount": 0
+    },
+    {
+      "file": "12-wallet-pending-th-nine-language-offscreen-fixture.png",
+      "language": "th",
+      "qrRect": {
+        "max": [
+          632.0,
+          461.0
+        ],
+        "min": [
+          392.0,
+          221.0
+        ]
+      },
+      "walletAuthenticated": false,
+      "windowCount": 0
+    },
+    {
+      "file": "13-wallet-pending-ar-nine-language-offscreen-fixture.png",
+      "language": "ar",
+      "qrRect": {
+        "max": [
+          632.0,
+          475.0
+        ],
+        "min": [
+          392.0,
+          235.0
+        ]
+      },
+      "walletAuthenticated": false,
+      "windowCount": 0
+    }
+  ],
+  "qrPayload": "https://wallet.invalid/approve?fixture=mir2-native-ui",
+  "qrRect": {
+    "max": [
+      632.0,
+      475.0
+    ],
+    "min": [
+      392.0,
+      235.0
+    ]
+  },
+  "verified": [
+    "native entry button in English and Chinese",
+    "pending modal in English and Chinese",
+    "countdown",
+    "cancel label",
+    "locale switch preserves pending state and QR handle",
+    "English/Traditional Chinese locale switch preserves QR bounds and pixels",
+    "nine-language pending text glyphs and layout",
+    "nine-language GPU readback"
+  ],
+  "walletAuthenticated": false,
+  "width": 1024,
+  "windowCount": 0
+}

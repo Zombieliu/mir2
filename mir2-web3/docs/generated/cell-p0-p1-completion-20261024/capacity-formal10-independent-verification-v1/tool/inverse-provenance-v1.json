@@ -1,0 +1,129 @@
+{
+  "schemaVersion": 1,
+  "createdAt": "2026-10-25T08:09:24.171Z",
+  "scope": "Exact indexed externalverifier derivation fromcorrected13v2. Onlynewexternalfileswritten; original13/runtime/formal51inputs unchanged.",
+  "original": {
+    "file": "C:/mir2-build/p01-completion-20261024/probe13-independent-verification-v1/verify-ended-probe13-v2.mjs",
+    "bytes": 22979,
+    "sha256": "803ecb952cc18854dda6c39726a5aa0401f956e878d878fc50b5c5bb207c3575"
+  },
+  "copy": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\formal10-independent-verification-v1/preimages/probe13-corrected-v2.mjs.txt",
+    "bytes": 22979,
+    "sha256": "803ecb952cc18854dda6c39726a5aa0401f956e878d878fc50b5c5bb207c3575"
+  },
+  "derived": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\formal10-independent-verification-v1/verify-ended-formal10-v1.mjs",
+    "bytes": 25419,
+    "sha256": "841f4abe47c9616a5aed9b1f37cdf59eb205c8e5c02c1fc7061d39d55cde58f2"
+  },
+  "edits": [
+    {
+      "before": "import {createHpProofCounter} from './hp-proof-contract-v2.mjs';",
+      "after": "import {createHpProofCounter} from './hp-proof-contract-v2.mjs';\nimport {EXPECTED_POLICY,FORMAL_PHASES,BOUNDS,assertPolicy,assertCompletedFormalShape,memoryTrend,phaseTelemetryDeltas,parseFormalInvocation} from './formal-contract-v1.mjs';"
+    },
+    {
+      "before": "const REALM='release-native-10-v2-compact-wire-feasibility-13';",
+      "after": "const REALM='formal-native-v2-compact-wire-ladder-10';"
+    },
+    {
+      "before": "const RUN='1792912711217-e7ea81f2';",
+      "after": "let RUN=null;"
+    },
+    {
+      "before": "const CHILD='capacity-native10-v2-compact-wire-followup-13-diagnostics';",
+      "after": "const CHILD='capacity-formal-native-v2-compact-wire-ladder-10';"
+    },
+    {
+      "before": "const OUT=path.join(BASE,'probe13-independent-verification-v1');",
+      "after": "const OUT=path.join(BASE,'formal10-independent-verification-v1');"
+    },
+    {
+      "before": "const MAX_LINE=1024*1024,MAX_ROWS=2000000,MAX_BYTES=2*1024*1024*1024;",
+      "after": "const MAX_LINE=BOUNDS.lineBytes,MAX_ROWS=BOUNDS.rawRows,MAX_BYTES=BOUNDS.archiveBytes;"
+    },
+    {
+      "before": "s.size<=16*1024*1024",
+      "after": "s.size<=BOUNDS.jsonBytes"
+    },
+    {
+      "before": " assert.equal(report.runId,RUN);assert.equal(report.policy.profile,'probe');assert.equal(report.policy.activityMode,'native');assert.deepEqual(report.policy.stages,[2,10]);assert.equal(report.policy.stageSeconds,300);assert.equal(report.policy.soakSeconds,360);assert.equal(report.policy.fullAcceptanceEligible,false);assert.equal(report.attackResults.mode,'v2');assert.equal(report.policy.minimumCombatAttacksPerMinute,18);assert.equal(report.policy.minimumCombatHitsPerMinute,12);assert.equal(report.policy.minimumNativeRunRatio,.5);assert.equal(report.policy.maximumCorrectionRatio,.05);assert.equal(report.policy.timeoutExclusive,.01);",
+      "after": " assert.equal(report.runId,RUN);assertPolicy(report.policy);assert.equal(report.attackResults.mode,'v2');"
+    },
+    {
+      "before": "pin(BASE,'probe13-root-independent-cleanup-v1.json')",
+      "after": "pin(BASE,'formal10-root-independent-cleanup-v1.json')"
+    },
+    {
+      "before": "assert.equal(rawVerifierAccepted,false);assert.deepEqual(await read(TOPIC,entry.projection),api.makeCapacityProjection(RUN,streamed));assert.equal(publicVerification.rawVerifierAccepted,false);assert.equal(catalog.run.capacityAccepted,false);assert.equal(report.playableCapacityAccepted,false);",
+      "after": "assert.deepEqual(await read(TOPIC,entry.projection),api.makeCapacityProjection(RUN,streamed));assert.equal(publicVerification.rawVerifierAccepted,rawVerifierAccepted);assert.equal(report.playableCapacityAccepted,rawVerifierAccepted);assert.equal(catalog.run.capacityAccepted,rawVerifierAccepted&&catalog.run.normalOwnedCleanup);"
+    },
+    {
+      "before": "const expectedPhases=[['stage-2',300,5],['stage-10',300,5],['soak',360,6]],",
+      "after": "const expectedPhases=FORMAL_PHASES.map(([name,actors,seconds,required])=>[name,seconds,required]),"
+    },
+    {
+      "before": "let continuousFailureCount=0,stops=0,finished=null;",
+      "after": "let continuousFailureCount=0,stops=0,finished=null,correctionTotal=0,soakMemorySnapshot=null;const rawResumes=[],memoryRing=[];"
+    },
+    {
+      "before": "typeCounts[r.type]=(typeCounts[r.type]??0)+1;",
+      "after": "typeCounts[r.type]=(typeCounts[r.type]??0)+1;\n  if(r.type==='nativeResume'){assert.ok(rawResumes.length<5);rawResumes.push(r.result);}\n  if(r.type==='monitor'){const sample=r.sample,last=memoryRing.at(-1);if(last&&Math.floor(last.sampledAtMs/3000)===Math.floor(sample.sampledAtMs/3000))memoryRing[memoryRing.length-1]=sample;else memoryRing.push(sample);if(memoryRing.length>1201)memoryRing.shift();}\n  if(r.type==='phaseEnded'&&r.kind==='measurement'&&r.name==='soak')soakMemorySnapshot=memoryRing.slice();"
+    },
+    {
+      "before": "if(r.status==='corrected'&&['walk','run'].includes(r.kind))corrections.push(",
+      "after": "if(r.status==='corrected'&&['walk','run'].includes(r.kind)){correctionTotal++;if(corrections.length<256)corrections.push("
+    },
+    {
+      "before": "actual:r.actual,latencyMs:r.latencyMs});",
+      "after": "actual:r.actual,latencyMs:r.latencyMs});}"
+    },
+    {
+      "before": "rawWindows.push({...r,line});",
+      "after": "assert.ok(rawWindows.length<146);const reported=report.stages.find(s=>s.name===r.phase),index=rawWindows.filter(w=>w.phase===r.phase).length;if(reported){const {elapsedSeconds,startedAtMs,endedAtMs,...assessment}=reported.rollingWindows[index];assert.deepEqual(r.assessment,assessment);}rawWindows.push({type:r.type,phase:r.phase,startedAtMs:r.startedAtMs,endedAtMs:r.endedAtMs,assessment:{seconds:r.assessment.seconds,passed:r.assessment.passed},line});"
+    },
+    {
+      "before": "continuousChecks.push({line,",
+      "after": "assert.ok(continuousChecks.length<40000);continuousChecks.push({line,"
+    },
+    {
+      "before": "assert.equal(finished?.playableCapacityAccepted,false);",
+      "after": "assert.equal(finished?.playableCapacityAccepted,rawVerifierAccepted);assert.deepEqual(rawResumes,report.nativeResume);"
+    },
+    {
+      "before": "const monitorRecords=[];await stream(await safeFile(BASE,monitorEntry.path),r=>{if(['monitor','monitorStopped'].includes(r.type))monitorRecords.push({type:r.type,sample:r.sample});});assert.equal(monitorRecords.filter(r=>r.type==='monitorStopped').length,1);assert.equal(monitorRecords.at(-1).sample.stop,true);",
+      "after": "let monitorTerminals=0,lastMonitor=null,independentMonitorRows=0;await stream(await safeFile(BASE,monitorEntry.path),r=>{if(['monitor','monitorStopped'].includes(r.type)){lastMonitor=r.sample;independentMonitorRows++;if(r.type==='monitorStopped')monitorTerminals++;}});assert.equal(monitorTerminals,1);assert.equal(lastMonitor.stop,true);"
+    },
+    {
+      "before": "const source=await read(dir,`${REALM}/source-pins.json`);assert.equal(source.sourceConfigSha256,'f80a5894c1d47ad02016ab8116bfb2404ba99398f5b4f667b3981a8066486cbb');",
+      "after": "const source=await read(dir,`${REALM}/source-pins.json`);assert.equal(crypto.createHash('sha256').update(JSON.stringify(source.files)).digest('hex'),source.sourceConfigSha256);\n const admitted=await read(dir,`${REALM}/source-pins-admitted-v2.json`);assert.equal(crypto.createHash('sha256').update(JSON.stringify(admitted.files)).digest('hex'),admitted.sourceConfigSha256);\n const launcher=await read(dir,`${REALM}/launcher-source-frozen-v1.json`);assert.equal(launcher.files.length,51);assert.equal(crypto.createHash('sha256').update(JSON.stringify(launcher.files)).digest('hex'),launcher.sourceSha256);assert.equal(launcher.sourceSha256,'377b206576d506dfd396f718030b833c78398a2f827792225e5f334d58992972');\n let replayedMemory=null;if(report.memoryTrend&&soakMemorySnapshot){const soak=report.stages.find(s=>s.name==='soak');replayedMemory=memoryTrend(soakMemorySnapshot.filter(s=>s.sampledAtMs>=soak.startedAtMs+300000));assert.deepEqual(replayedMemory,report.memoryTrend);}\n if(report.ok){assertCompletedFormalShape(report);assert.equal(rawWindows.length,146);assert.equal(stops,0);assert.equal(continuousFailureCount,0);assert.equal(rawResumes.length,5);const loginMetric=report.metrics?.login?.status?.success??0;assert.ok(loginMetric>=105);}\n const formalPassed=report.ok===true&&phaseChecks.every(p=>p.strictGatesPassed)&&continuousFailureCount===0&&stops===0;\n const capacityAccepted=rawVerifierAccepted&&formalPassed&&catalog.run.normalOwnedCleanup===true;\n const telemetryDeltas=phaseTelemetryDeltas(streamed.monitorSummary.phaseBrackets);"
+    },
+    {
+      "before": "probePassed:report.ok===true&&phaseChecks.every(p=>p.strictGatesPassed)&&continuousFailureCount===0&&stops===0,capacityAccepted:false,rawVerifierAccepted:false,formalPreconditionOnly:true,",
+      "after": "formalRunPassed:formalPassed,capacityAccepted,rawVerifierAccepted,formalPreconditionOnly:false,rootP0AcceptanceAdjudicated:false,productionAccepted:false,"
+    },
+    {
+      "before": "phaseChecks,wireDiagnostics,continuous:",
+      "after": "phaseChecks,wireDiagnostics,telemetryDeltas,replayedMemory,memoryReplayRule:\"Original bounded1201x3s monitor history atsoakend, afterwarmup300; originalminimum1800s and32MiB/hr retained.\",rawResumeReportExact:true,continuous:"
+    },
+    {
+      "before": "wholeRunCorrectedMovementActions:corrections.length,correctedActions:corrections",
+      "after": "wholeRunCorrectedMovementActions:correctionTotal,correctedActions:corrections,correctedActionsTruncated:correctionTotal>corrections.length"
+    },
+    {
+      "before": "probePassed:result.probePassed,capacityAccepted:false",
+      "after": "formalRunPassed:result.formalRunPassed,capacityAccepted:result.capacityAccepted"
+    },
+    {
+      "before": "'This real probe has no formal capacity acceptance and can only become a precondition to a separately frozen formal run.'",
+      "after": "'This independent result applies only to the original formal profile and its actual pass/failure. Root separately adjudicates P0, proposedserverSLOs andproductionacceptance; no automaticP2authorization.'"
+    },
+    {
+      "before": "if(process.argv[1]&&samePath(process.argv[1],new URL(import.meta.url).pathname.replace(/^\\/(.:\\/)/,'$1'))){const args=process.argv.slice(2);if(args.join(' ')==='--self-check')console.log(JSON.stringify(selfCheck()));else if(args.join(' ')==='--verify-ended-probe13')console.log(JSON.stringify(await verify()));else throw Error('Explicit --self-check or --verify-ended-probe13 required');}",
+      "after": "if(process.argv[1]&&samePath(process.argv[1],new URL(import.meta.url).pathname.replace(/^\\/(.:\\/)/,'$1'))){const invocation=parseFormalInvocation(process.argv.slice(2));if(invocation.selfCheck)console.log(JSON.stringify(selfCheck()));else{RUN=invocation.runId;console.log(JSON.stringify(await verify()));}}"
+    }
+  ],
+  "inverseRawExact": true,
+  "actualGameVerifierExecuted": false,
+  "capacityAccepted": false
+}

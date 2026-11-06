@@ -1,0 +1,223 @@
+{
+  "schemaVersion": 1,
+  "state": "PENDING_AUTHORING_ONLY",
+  "parentAuthoringReceipt": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-v6-full-lifecycle-v1\\authoring-receipt-v1.json",
+    "bytes": 4463,
+    "sha256": "4d33c101cbde4ff94b6a49810116caa5be0132698c2f89d0242b4a8045d4f8dd"
+  },
+  "authoringTool": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\author-ordinary-v6-full-lifecycle-v2.mjs",
+    "bytes": 8067,
+    "sha256": "621006805c28408702b8a50f3cf0aa9d92cab80c597cf35c19e73d80be68e89d"
+  },
+  "literalRules": [
+    {
+      "from": "ordinary-v6-full-lifecycle-v1",
+      "to": "ordinary-v6-full-lifecycle-v2",
+      "actualOccurrences": 2,
+      "sites": [
+        "fixed new external directory basename",
+        "README independent review packageId"
+      ]
+    }
+  ],
+  "inverseRestoresOriginalAuthorRaw": true,
+  "parentAuthor": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-v6-full-lifecycle-v1\\author-pending-v1.mjs",
+    "bytes": 16759,
+    "sha256": "03b3e11e5784575c5d2f3b2b96491a0390a348a5371e960bdb927d9eb49c26a7"
+  },
+  "currentAuthor": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-v6-full-lifecycle-v2\\author-pending-v1.mjs",
+    "bytes": 16759,
+    "sha256": "44edfc1ba8dc6088b1e4923ed050daefe118dbb4877122aa46e1aa65fce49497"
+  },
+  "allOtherNineToolsRawExactToParent": true,
+  "tools": [
+    {
+      "name": "source-lib-v1.mjs",
+      "parent": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-v6-full-lifecycle-v1\\source-lib-v1.mjs",
+        "bytes": 13053,
+        "sha256": "9758402317d730431fd698a1f121fb3668c455489a4708d29f69a0dc26c8c80a"
+      },
+      "current": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-v6-full-lifecycle-v2\\source-lib-v1.mjs",
+        "bytes": 13053,
+        "sha256": "9758402317d730431fd698a1f121fb3668c455489a4708d29f69a0dc26c8c80a"
+      },
+      "rawExactExceptDeclaredAuthorLiterals": true
+    },
+    {
+      "name": "backend-source-lib-v1.mjs",
+      "parent": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-v6-full-lifecycle-v1\\backend-source-lib-v1.mjs",
+        "bytes": 9374,
+        "sha256": "f75b6eeddbe1246f4941ff1f293786e68b5d17617a15f0938e0c194597ce04ed"
+      },
+      "current": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-v6-full-lifecycle-v2\\backend-source-lib-v1.mjs",
+        "bytes": 9374,
+        "sha256": "f75b6eeddbe1246f4941ff1f293786e68b5d17617a15f0938e0c194597ce04ed"
+      },
+      "rawExactExceptDeclaredAuthorLiterals": true
+    },
+    {
+      "name": "verify-inputs.mjs",
+      "parent": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-v6-full-lifecycle-v1\\verify-inputs.mjs",
+        "bytes": 1397,
+        "sha256": "c6e6a9a4c0b1365ea627acce6a14a3cfe975fa86b4a83cef60fc62ab86e3f3a0"
+      },
+      "current": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-v6-full-lifecycle-v2\\verify-inputs.mjs",
+        "bytes": 1397,
+        "sha256": "c6e6a9a4c0b1365ea627acce6a14a3cfe975fa86b4a83cef60fc62ab86e3f3a0"
+      },
+      "rawExactExceptDeclaredAuthorLiterals": true
+    },
+    {
+      "name": "finalize-inputs-v1.mjs",
+      "parent": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-v6-full-lifecycle-v1\\finalize-inputs-v1.mjs",
+        "bytes": 2989,
+        "sha256": "05c3942b45bcf69cdd8f598784806eba57b48e20425c1e44479d857eb9d3903d"
+      },
+      "current": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-v6-full-lifecycle-v2\\finalize-inputs-v1.mjs",
+        "bytes": 2989,
+        "sha256": "05c3942b45bcf69cdd8f598784806eba57b48e20425c1e44479d857eb9d3903d"
+      },
+      "rawExactExceptDeclaredAuthorLiterals": true
+    },
+    {
+      "name": "freeze-inputs-v1.mjs",
+      "parent": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-v6-full-lifecycle-v1\\freeze-inputs-v1.mjs",
+        "bytes": 1893,
+        "sha256": "6f4c896f30297448a396b03ce4f3abd06ef5247f2cf6c4e4903110b6cd97d56c"
+      },
+      "current": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-v6-full-lifecycle-v2\\freeze-inputs-v1.mjs",
+        "bytes": 1893,
+        "sha256": "6f4c896f30297448a396b03ce4f3abd06ef5247f2cf6c4e4903110b6cd97d56c"
+      },
+      "rawExactExceptDeclaredAuthorLiterals": true
+    },
+    {
+      "name": "run-owned-full.mjs",
+      "parent": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-v6-full-lifecycle-v1\\run-owned-full.mjs",
+        "bytes": 14907,
+        "sha256": "5db1fb4d8b94996aef8e8d1de26f9a3ffa56b83b42fa24b1c1ff03d2402465fe"
+      },
+      "current": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-v6-full-lifecycle-v2\\run-owned-full.mjs",
+        "bytes": 14907,
+        "sha256": "5db1fb4d8b94996aef8e8d1de26f9a3ffa56b83b42fa24b1c1ff03d2402465fe"
+      },
+      "rawExactExceptDeclaredAuthorLiterals": true
+    },
+    {
+      "name": "audit-owned-full.mjs",
+      "parent": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-v6-full-lifecycle-v1\\audit-owned-full.mjs",
+        "bytes": 9736,
+        "sha256": "0e8cdd9f7471778beea2f19bca7d7a5c63d57a647da56bee7fd2dd74e041b696"
+      },
+      "current": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-v6-full-lifecycle-v2\\audit-owned-full.mjs",
+        "bytes": 9736,
+        "sha256": "0e8cdd9f7471778beea2f19bca7d7a5c63d57a647da56bee7fd2dd74e041b696"
+      },
+      "rawExactExceptDeclaredAuthorLiterals": true
+    },
+    {
+      "name": "frozen-audit-support.mjs",
+      "parent": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-v6-full-lifecycle-v1\\frozen-audit-support.mjs",
+        "bytes": 46572,
+        "sha256": "3988052a4ba9de791dbdb887b267eced6ca8bc915fa5676228f6d70c0761f4d5"
+      },
+      "current": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-v6-full-lifecycle-v2\\frozen-audit-support.mjs",
+        "bytes": 46572,
+        "sha256": "3988052a4ba9de791dbdb887b267eced6ca8bc915fa5676228f6d70c0761f4d5"
+      },
+      "rawExactExceptDeclaredAuthorLiterals": true
+    },
+    {
+      "name": "initialize-fresh-private.ps1",
+      "parent": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-v6-full-lifecycle-v1\\initialize-fresh-private.ps1",
+        "bytes": 1643,
+        "sha256": "c3a8ddecafe8c82752d963ee3237b55b25841d9674af83ea791e67ef8a82fd77"
+      },
+      "current": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-v6-full-lifecycle-v2\\initialize-fresh-private.ps1",
+        "bytes": 1643,
+        "sha256": "c3a8ddecafe8c82752d963ee3237b55b25841d9674af83ea791e67ef8a82fd77"
+      },
+      "rawExactExceptDeclaredAuthorLiterals": true
+    },
+    {
+      "name": "author-pending-v1.mjs",
+      "parent": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-v6-full-lifecycle-v1\\author-pending-v1.mjs",
+        "bytes": 16759,
+        "sha256": "03b3e11e5784575c5d2f3b2b96491a0390a348a5371e960bdb927d9eb49c26a7"
+      },
+      "current": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-v6-full-lifecycle-v2\\author-pending-v1.mjs",
+        "bytes": 16759,
+        "sha256": "44edfc1ba8dc6088b1e4923ed050daefe118dbb4877122aa46e1aa65fce49497"
+      },
+      "rawExactExceptDeclaredAuthorLiterals": false
+    }
+  ],
+  "authorExecution": {
+    "command": [
+      "C:\\Program Files\\nodejs\\node.exe",
+      "C:\\mir2-build\\p01-completion-20261024\\ordinary-v6-full-lifecycle-v2\\author-pending-v1.mjs"
+    ],
+    "exitCode": 0,
+    "signal": null,
+    "error": null,
+    "stdout": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-v6-full-lifecycle-v2\\author-execution.stdout.log",
+      "bytes": 203,
+      "sha256": "daf25ec586c81a013b77d9a9c6cb7edeae17a41cc6db95086b10ec8ac3c951e4"
+    },
+    "stderr": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-v6-full-lifecycle-v2\\author-execution.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  },
+  "sourcePreviewIsNotFrozen": true,
+  "sourcePreviewLocalFiles": 14,
+  "entryRoots": 6,
+  "nodeParserTransportAndPackageMetadataCaptured": true,
+  "dataPins": [
+    {
+      "path": "mir2-web3/apps/web/lib/generated/crystal-map-pack/0.map.gz",
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\lib\\generated\\crystal-map-pack\\0.map.gz",
+      "bytes": 512762,
+      "sha256": "bbd02c7d0125fe78983e2dea5f4aecc73b53d4b91517bde6fdbee9853bb183a5"
+    }
+  ],
+  "backendOriginalV6Ee06Reused": true,
+  "backendInputs": 55,
+  "historicalRustTests": 32,
+  "newRustBuildPerformed": false,
+  "freshRustTestsPerformed": false,
+  "fullLifecycleRerunRequiredAfterNavigationChange": true,
+  "actualFull16Passed": false,
+  "finalizePerformed": false,
+  "freezePerformed": false,
+  "realmStarted": false,
+  "accountsCreated": 0,
+  "capacityAccepted": false,
+  "p0Accepted": false
+}

@@ -1,0 +1,9 @@
+{
+  "scope": "Third and final ordinary real run: fresh accounts, non-harvest loot targets, at most three actual kills, standard armour removal for encounter exposure. No server source or numeric policy change.",
+  "sha256": {
+    "mir2-web3\\apps\\web\\scripts\\playtest-multiplayer-smoke.mjs": "a3ce02d111925c41e25b32a5522f0d17243cd78fab8142e92bca5eb1c45915ea",
+    "mir2-web3\\apps\\web\\scripts\\playtest-multiplayer-smoke.test.mjs": "30126c0f5b048c8b8fbc394bc240eecdc6cd421a5b3ada0708c173128ed1a470",
+    "mir2-web3\\apps\\web\\scripts\\playtest-lifecycle.mjs": "5fa33727a3807043782d9864717f08e0e99a3374d7a7ae992f961a48171c41d4",
+    "mir2-web3\\apps\\web\\scripts\\playtest-lifecycle.test.mjs": "3d4f41a62fec0f066d7eda8cfbc3a0b9d7ee9bfbb6b2b50ae4c8ae2a13ab8045"
+  }
+}

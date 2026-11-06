@@ -1,0 +1,33 @@
+{
+  "fixtureOnly": true,
+  "naturalStoreChangedForShop": false,
+  "revision": 7464,
+  "gold": 170000,
+  "credit": 340,
+  "mail": [
+    {
+      "id": 1,
+      "opened": true,
+      "claimed": true,
+      "attachmentCount": 0
+    },
+    {
+      "id": 3,
+      "opened": false,
+      "claimed": false,
+      "attachmentCount": 1
+    }
+  ],
+  "accuracyPotions": [
+    {
+      "unique_id": 63,
+      "slot": 1,
+      "quantity": 1
+    },
+    {
+      "unique_id": 64,
+      "slot": 3,
+      "quantity": 1
+    }
+  ]
+}

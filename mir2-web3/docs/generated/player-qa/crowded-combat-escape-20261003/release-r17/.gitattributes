@@ -1,0 +1,2 @@
+# Preserve indexed source-proof byte hashes across Windows and Linux checkouts.
+*.json -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol

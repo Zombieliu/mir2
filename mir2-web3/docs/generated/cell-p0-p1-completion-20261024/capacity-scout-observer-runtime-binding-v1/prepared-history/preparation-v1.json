@@ -1,0 +1,63 @@
+{
+  "schemaVersion": 1,
+  "state": "PENDING_REVIEW_AND_ACTUAL_COMMITTED_H_DRIVER_FREEZE",
+  "root": "C:\\mir2-build\\p01-completion-20261024\\scout-observer-preference-runtime-v1",
+  "files": [
+    {
+      "path": "C:\\mir2-build\\p01-completion-20261024\\scout-observer-preference-runtime-v1\\source-lib-v1.mjs",
+      "bytes": 33531,
+      "sha256": "9b12d67e7e31eb0ada4550c9aceb8dd9c0e64e74892007b4ffc8d0fa710b366f"
+    },
+    {
+      "path": "C:\\mir2-build\\p01-completion-20261024\\scout-observer-preference-runtime-v1\\readonly-source-guard-v1.mjs",
+      "bytes": 724,
+      "sha256": "0969b4edc588e96c147fdaa86b6c8347636134b6ce27fa855eb029f99bff2490"
+    },
+    {
+      "path": "C:\\mir2-build\\p01-completion-20261024\\scout-observer-preference-runtime-v1\\current-execution-binding-v1.json",
+      "bytes": 1271,
+      "sha256": "2faf380631c621e142086cae45e2d46cc83241f02e2848d6c3211e7c741ab696"
+    },
+    {
+      "path": "C:\\mir2-build\\p01-completion-20261024\\scout-observer-preference-runtime-v1\\source-derivation-proof-v1.json",
+      "bytes": 20845,
+      "sha256": "48c45d5dda1f94c3366ca47cfe63affb4702e9191d7fd4f7b2aebc2fe3dbecbf"
+    },
+    {
+      "path": "C:\\mir2-build\\p01-completion-20261024\\scout-observer-preference-runtime-v1\\node-syntax-check-v1.json",
+      "bytes": 595,
+      "sha256": "9e755402c45af10439bdae13ceadc9bc7874c6ef712f6fddea057b5bf9e4ab25"
+    },
+    {
+      "path": "C:\\mir2-build\\p01-completion-20261024\\scout-observer-preference-runtime-v1\\README.md",
+      "bytes": 1413,
+      "sha256": "671d011bec33759c0814ea1bfac49cf45f462eb9f9dc162524ed8cc704f9399f"
+    }
+  ],
+  "sourceSha256": "405cf6762590919e2e4ef679adc45bfde42637f93293a70306d5b55a016b3550",
+  "syntax": {
+    "passed": true,
+    "scripts": 2,
+    "receipt": {
+      "path": "C:\\mir2-build\\p01-completion-20261024\\scout-observer-preference-runtime-v1\\node-syntax-check-v1.json",
+      "bytes": 595,
+      "sha256": "9e755402c45af10439bdae13ceadc9bc7874c6ef712f6fddea057b5bf9e4ab25"
+    }
+  },
+  "backendBuildCommit": "c743122af05faca43d9535d8c6c2a4bfb01b924f",
+  "currentExecutionHead": null,
+  "driverSourceCommit": null,
+  "currentNodeSourceSha256": "445325ec1b052cffffb07437c38ec0a4688741a0b9207e7895e514e8e4a7f634",
+  "actualRoot219Receipt": {
+    "path": "C:\\mir2-build\\p01-completion-20261024\\scout-observer-preference-root-full-driver-receipt-v1.json",
+    "bytes": 5378,
+    "sha256": "00dbc4862d8919a6ce52a45de66cb7e46434b66715ee08d63b0117cf253a78e1"
+  },
+  "oldPackagesChanged": false,
+  "modulesImported": false,
+  "guardExecuted": false,
+  "sourceCapturePerformed": false,
+  "buildPerformed": false,
+  "realmStarted": false,
+  "capacityAccepted": false
+}

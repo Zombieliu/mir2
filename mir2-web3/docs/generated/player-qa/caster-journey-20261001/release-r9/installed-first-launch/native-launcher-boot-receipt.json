@@ -1,0 +1,39 @@
+{
+  "schema": 1,
+  "recordedAtUtc": "2026-10-01T22:23:09.3767919+00:00",
+  "installRoot": "F:/mir2/Mir2Invite",
+  "candidate": "WN-CANDIDATE-20261001-invited-09",
+  "sourceRevision": "180b01d46f35a5e97f4c60ee2ae033c7b53717e5",
+  "exeSha256": "09E186B9F13F7F1E10D4857EFAE52EF940B4F43E2D7CE955F4FE1627C433A488",
+  "activeEngine": "00A898666E57DC0457968BEB667902C8CD3A4FCEFA74EB9BA2336A28BE21B902",
+  "transactionPhase": "accepted",
+  "lastNativeRun": {
+    "detail": {
+      "activated": true,
+      "candidate": "WN-CANDIDATE-20261001-invited-09",
+      "changedGameFiles": 0,
+      "downloadedBytes": 0,
+      "downloadedFiles": 0,
+      "sequence": 5
+    },
+    "event": "update",
+    "time": 1790889984
+  },
+  "normalLauncherBootObserved": true,
+  "loginScreenObserved": true,
+  "authenticatedGameplay": false,
+  "userSaveEdits": false,
+  "processId": 46816,
+  "launcherParentProcessId": 46588,
+  "windowTitle": "numeron-legend of rebirth",
+  "shortcut": {
+    "path": "C:/Users/Administrator/AppData/Roaming/Microsoft/Windows/Start Menu/Programs/Mir2 联网试玩版/Mir2 联网试玩版.lnk",
+    "before": "F:\\mir2\\Mir2Invite\\game\\mir2-platform-windows.exe",
+    "after": "F:\\mir2\\Mir2Invite\\Mir2Launcher.exe",
+    "backupSha256": "D72CE99E0E9AF6A0C6E8E9CC464BF57BC1C3E65B70A75A69590D03D721133386"
+  },
+  "limits": [
+    "Login screen and accepted first-launch health only",
+    "No login, mouse shop purchase or laptop acceptance claimed"
+  ]
+}

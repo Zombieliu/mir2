@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "verifiedAt": "2026-10-25T16:53:17.064Z",
+  "copyReceipt": {
+    "file": "C:/mir2-build/p01-completion-20261024/attack-deadline-release-full16-public-archive-v1/public-copy-receipt-v1.json",
+    "bytes": 51103,
+    "sha256": "50e50a7221e316b7aee7c624243f405c590d47ce9aa4d2717b885311b69083fa"
+  },
+  "sourceCount": 62,
+  "copiedBytes": 3836305,
+  "releaseChild": "release-attack-deadline-diagnostics-v1",
+  "full16Child": "full-lifecycle-attack-deadline-diagnostics-v1",
+  "rootProductCount": 2,
+  "publicRunFiles": 16,
+  "allCopiesByteExact": true,
+  "linksValid": 27,
+  "rootHEAD": "d2407fb84055e2088e3ca6ccdb4f8b80d15a9d16",
+  "trackedTreeClean": true,
+  "pendingOriginalsPreserved": true,
+  "capacityAccepted": false,
+  "p0Passed": false,
+  "p2ImplementationPermitted": false
+}

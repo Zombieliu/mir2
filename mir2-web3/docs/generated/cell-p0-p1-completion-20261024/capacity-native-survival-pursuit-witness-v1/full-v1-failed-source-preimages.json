@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "createdAt": "2026-10-25T02:44:20.370Z",
+  "sourceSha256": "e26e612b9e6493d5dc7d8340c5aa5ae4a3af507bbe812303bbdaa918d1dcf000",
+  "fullResult": {
+    "tests": 175,
+    "pass": 173,
+    "fail": 2
+  },
+  "reason": "Preserve exact full-v1 failed version before two root-authorized local ready fixture additions; assertions and product stay fixed",
+  "files": [
+    {
+      "source": "apps/web/scripts/playtest-capacity-soak.mjs",
+      "target": "C:/mir2-build/p01-completion-20261024/native-hp-pursuit-maintenance-v1/full-v1-failed-playtest-capacity-soak.mjs.txt",
+      "bytes": 143423,
+      "sha256": "01db0e25728208d17468f708819cd4d1f134a81c97884614da06d06525929f6d"
+    },
+    {
+      "source": "apps/web/scripts/playtest-capacity-soak.test.mjs",
+      "target": "C:/mir2-build/p01-completion-20261024/native-hp-pursuit-maintenance-v1/full-v1-failed-playtest-capacity-soak.test.mjs.txt",
+      "bytes": 216821,
+      "sha256": "dbf345725668b465fd2c94472f25a224d3f0b381e6684241579026e41077950f"
+    }
+  ]
+}

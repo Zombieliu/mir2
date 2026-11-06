@@ -1,0 +1,35 @@
+安装后无法启动：Windows 错误 4551
+
+这个错误表示 Windows 应用控制策略阻止了程序启动。
+安装文件可能已复制成功，但游戏进程尚未启动。
+单凭这个弹窗，不能确定是智能应用控制还是其他组织策略。
+
+旧 r4 安装包和游戏 EXE 尚无受信任的发行者签名。
+项目的内部完整性签名不能代替 Windows 程序签名。
+新版友好提示和诊断工具不会自行解除拦截。
+
+先在发生问题的笔记本查看：
+Windows 安全中心 → 应用和浏览器控制 → 智能应用控制。
+记录它显示“开启 / 评估 / 关闭”中的哪一个；只查看即可。
+
+还可以在普通 PowerShell 中运行下面两条只读命令：
+
+Get-AuthenticodeSignature -LiteralPath 'D:\Mir2Invite\game\mir2-platform-windows.exe' | Select-Object Status, SignatureType
+Get-FileHash -LiteralPath 'D:\Mir2Invite\game\mir2-platform-windows.exe' -Algorithm SHA256
+
+路径按截图填写；如果实际安装位置不同，请换成实际完整路径。
+将状态、SHA256 和安装包文件名提供给开发者，以确认具体版本。
+
+需要更完整的记录时，把同目录 diagnose-launch-block.ps1 放在笔记本上，
+在普通 PowerShell 中切换到该目录后执行：
+
+.\diagnose-launch-block.ps1 -GameExePath 'D:\Mir2Invite\game\mir2-platform-windows.exe' -OutputPath "$env:USERPROFILE\Desktop\mir2-launch-block.json"
+
+脚本只读取目标 EXE 的签名/哈希、Windows 版本、相关应用控制日志，
+并写入明确指定的新报告文件；不上传、不启动游戏、不修改策略或存档。
+如果同名报告已存在，换一个新文件名；脚本不会覆盖旧报告。
+如果系统不允许运行诊断脚本，保留提示，使用上面的内置只读命令即可。
+日志没有匹配事件或读取权限不足时，报告会说明证据不足。
+
+后续修复需要开发者为游戏、安装程序和卸载程序做正式发行者签名，
+再在这台笔记本的实际策略下验证；企业管理策略可能还要求管理员批准。

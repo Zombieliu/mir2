@@ -1,0 +1,217 @@
+{
+  "schemaVersion": 1,
+  "preparedAt": "2026-10-26T02:21:27.981Z",
+  "runId": "1792979329578-cf62e25d",
+  "scope": "Closed actual metadata summary only; no raw, trace, monitor or recording scan and no verifier rerun.",
+  "actualIndependentFinal": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\probe20-independent-verification-v1\\final-verification.json",
+    "bytes": 442311,
+    "sha256": "bd4897fb45dc67d1d65e2fe488021081bcf599e745febb9d66b83659cd4b5df0"
+  },
+  "actualExecution": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\probe20-independent-verification-v1\\actual-verification-execution-receipt-v1.json",
+    "bytes": 813,
+    "sha256": "1337e647fc24034d55670eae39d2946385cfefe8263ee48773c39484d070f68d"
+  },
+  "actualToolSeal": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\probe20-independent-verification-v1\\tool-source-frozen-v1.json",
+    "bytes": 2290,
+    "sha256": "6f8f20969d6c5915edb60672b83556bd36a356e06c7249ddcb247890aec65a19"
+  },
+  "completion": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\probe20-actual-independent-completion-v1.json",
+    "bytes": 3783,
+    "sha256": "d61feacbb33e31403d37c2286ea32274fbfff6c29e6277f5685ceec6402d665e"
+  },
+  "independentVerificationPassed": true,
+  "probePassed": true,
+  "capacityAccepted": false,
+  "rawVerifierAccepted": false,
+  "productionAccepted": false,
+  "phaseChecks": [
+    {
+      "name": "stage-2",
+      "configuredSeconds": 300,
+      "measuredSeconds": 300.134,
+      "completed": true,
+      "completeWindowCount": 5,
+      "requiredCompleteWindows": 5,
+      "rawReportWindowsEqual": true,
+      "activityCounterReplayEqual": true,
+      "strictGatesPassed": true
+    },
+    {
+      "name": "stage-10",
+      "configuredSeconds": 300,
+      "measuredSeconds": 300.299,
+      "completed": true,
+      "completeWindowCount": 5,
+      "requiredCompleteWindows": 5,
+      "rawReportWindowsEqual": true,
+      "activityCounterReplayEqual": true,
+      "strictGatesPassed": true
+    },
+    {
+      "name": "soak",
+      "configuredSeconds": 360,
+      "measuredSeconds": 360.197,
+      "completed": true,
+      "completeWindowCount": 6,
+      "requiredCompleteWindows": 6,
+      "rawReportWindowsEqual": true,
+      "activityCounterReplayEqual": true,
+      "strictGatesPassed": true
+    }
+  ],
+  "continuous": {
+    "assessed": 132,
+    "completeAtLeast60Seconds": 122,
+    "finalPartial": 10,
+    "failed": 0
+  },
+  "attackMetadata": {
+    "whole": 350,
+    "measuredPhaseCounts": [
+      0,
+      167,
+      176
+    ],
+    "measuredTotal": 343,
+    "outsideMeasured": 7,
+    "outsideClassification": "Not classified; no ramp/settle attribution.",
+    "notLaunched": 0,
+    "source": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\probe20-independent-verification-v1\\root-actual-terminal-and-consumer-facts-v1.json",
+      "bytes": 10706,
+      "sha256": "d280ca72e1bacc7147eac04867d28b8c68665155a61963a184739c429cb64a6b"
+    },
+    "independentCountersAndWindowsReplayedByActualTool": true,
+    "noNewPacketLevel900Replay": true,
+    "separateFreshFull16OrdinarySentCommands": 343,
+    "separateDenominator": true
+  },
+  "scoutSelectionDiagnostics": {
+    "rows": 3,
+    "detailedRows": 3,
+    "truncationSentinels": 0,
+    "missingFieldRows": 0,
+    "invalidTypeRows": 0,
+    "unknownReasonRows": 0,
+    "reasonCounts": {
+      "no-active-other-waypoints": 3
+    },
+    "fieldPresence": {
+      "hintCount": 3,
+      "activeOtherWaypointCount": 3,
+      "sharedHintCount": 3,
+      "unsharedHintCount": 3,
+      "hintPreferenceReason": 3
+    },
+    "selected": [
+      {
+        "line": 13913,
+        "actor": "Lc149b005",
+        "phase": "stage-10",
+        "truncated": false,
+        "hintCount": 4,
+        "activeOtherWaypointCount": 0,
+        "sharedHintCount": 0,
+        "unsharedHintCount": 4,
+        "hintPreferenceReason": "no-active-other-waypoints"
+      },
+      {
+        "line": 28951,
+        "actor": "Lc149b005",
+        "phase": "soak",
+        "truncated": false,
+        "hintCount": 3,
+        "activeOtherWaypointCount": 0,
+        "sharedHintCount": 0,
+        "unsharedHintCount": 3,
+        "hintPreferenceReason": "no-active-other-waypoints"
+      },
+      {
+        "line": 41191,
+        "actor": "Lc149b005",
+        "phase": "soak",
+        "truncated": false,
+        "hintCount": 2,
+        "activeOtherWaypointCount": 0,
+        "sharedHintCount": 0,
+        "unsharedHintCount": 2,
+        "hintPreferenceReason": "no-active-other-waypoints"
+      }
+    ],
+    "selectedTruncated": false,
+    "observed": true,
+    "contributesToGameAcceptance": false,
+    "fieldContractObserved": true,
+    "observationScope": "Only bounded scalar selection diagnostics were observed; no planning success, ACK, hit, throughput or causal-improvement credit.",
+    "notIndependentlyReplayedTyped900msPackets": true
+  },
+  "storeDiagnostics": {
+    "rows": 20,
+    "bytes": 4371,
+    "sha256": "a5808e969c22ef3eb28abf64d7d49ccfa37c30f96d1b799a3822c416eff71aa9",
+    "complete": true,
+    "sourceValid": true,
+    "countsMatch": true,
+    "contributesToGameAcceptance": false,
+    "completedOnlyCannotProveMissingHolder": true
+  },
+  "wireRows": 5637,
+  "hp": {
+    "observedStatuses": {},
+    "statusValidationChecked": true,
+    "totalRows": 0,
+    "verifiedEventsChecked": 0,
+    "successProofChecked": false,
+    "noVerifiedDoseObserved": true,
+    "pendingSentWithoutTerminal": 0,
+    "notContinuousHpCoverage": true,
+    "claim": "Only actual verified rows with matching sent/acknowledgement and effect proof are checked. Zero verified events claim neither a real dose nor survival.",
+    "proofLimitations": [
+      "The raw producer does not persist send monotonic time, receipt cursor or quantityBefore. This verifier cannot independently reconstruct the original freshness deadline or the numeric inventory decrease.",
+      "Consumed and increased HP remain distinct observations. A consumption proof alone does not claim healing.",
+      "No HP event or diagnostic proof contributes to native opportunity, launched attack, dual hit, ACK or original gameplay acceptance."
+    ]
+  },
+  "rootPreparationHistory": {
+    "firstSealFailed": true,
+    "previousReviewerMissedActiveSceneLeaves": true,
+    "firstFailureFacts": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\probe20-root-preseal-failure-v1.json",
+      "bytes": 2419,
+      "sha256": "d412ca63843194a5e95efc037d6b0a97096aa626114ae0cd996b837b839d44ee"
+    },
+    "threeActiveSceneLeavesRepaired": true,
+    "laterActualSealExit0": true,
+    "sourceSealInputs122": true,
+    "preparedConfig": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-selection-diagnostics-feasibility-20\\source-pins.json",
+      "bytes": 56758,
+      "sha256": "8177b9b108dea8177f5b1fe7cf87327a93c1ba703d60a4b8aeb044327c8daf99",
+      "sourceConfigSha256": "03658a95d3f1c3863daad3d1878185030580b31e99a92f38afef501a12a30db8"
+    },
+    "admittedConfig": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-selection-diagnostics-feasibility-20\\source-pins-admitted-v2.json",
+      "bytes": 56009,
+      "sha256": "29424765ce723588e3328b1db6fbd8cc2fe494fb7bb30841dd2209dfc6af7946",
+      "sourceConfigSha256": "150116912a98b3040f8852fd6b965ab9f8da57fc7952ab105f8cd9b88b319e54"
+    },
+    "ordinaryAccounts": 100,
+    "characters": 0,
+    "alreadyPublicSource122ReusedByReference": true
+  },
+  "originalPendingFactsPreserved": true,
+  "rootFactsPendingIsHistorical": true,
+  "unexecutedOrUnproven": [
+    "No25-player diagnosis or supply improvement proven by this2/10 probe.",
+    "No independent per-request typed-result/dual-positive900ms packet replay.",
+    "No2h memory/survival or100-player production guarantee.",
+    "P0 remains false; P2 has not started."
+  ],
+  "privateDataRead": false,
+  "rawOrLargePayloadCopied": false,
+  "copyExecuted": false
+}

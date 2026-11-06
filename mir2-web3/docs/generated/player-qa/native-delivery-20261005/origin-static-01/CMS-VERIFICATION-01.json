@@ -1,0 +1,33 @@
+{
+  "schema": "mir2.origin.public-cms-verification.v1",
+  "passed": true,
+  "cmsVerified": true,
+  "createdUnix": 1791145088,
+  "candidate": "WN-CANDIDATE-20261004-invited-17",
+  "gameSourceRevision": "6032ef8b3e27dd97bad0b20c8676ef9f185db64b",
+  "manifestSha256": "ceae366bebca1c19c3f529eb22f016ccc80dff5b8655694e76682e31ab12cb18",
+  "versionSha256": "1409e21c9f1ae7a04b71603ce1220fe38c37f222d54859af2592cdd72ce99b16",
+  "feed": {
+    "payloadSha256": "7efdddf34fbf58ffa0bf8c4f7fcb1a9ad2bac869cb3f003cea0a0c9c53356c88",
+    "signatureSha256": "7dd131dddcef9107ea0c80363cc9ca44746603c586a1e23e00ff6aa178006916",
+    "verifiedAtUnix": 1791080305,
+    "pinnedPublicKeySha256": "6c70c777b27d50949370d494b4b25798200fbdd5c171baeeaa94d7e289900f3e",
+    "privateKeyUsed": false
+  },
+  "statement": {
+    "payloadSha256": "e64a8ef4fc62e6e9f6fe16625321fc8a88a0c8c29a661aeda46025b08015da82",
+    "signatureSha256": "bee84b574f43f6411eb1bc3ab23a3ce0c389b853fb0f8b63f6ad9bdb1287856e",
+    "verifiedAtUnix": 1791145088,
+    "pinnedPublicKeySha256": "6c70c777b27d50949370d494b4b25798200fbdd5c171baeeaa94d7e289900f3e",
+    "privateKeyUsed": false
+  },
+  "delivery": {
+    "payloadSha256": "a72b61448b342656dda4310ceb7ba5aff6608439025775fde2a8303f6ad62de8",
+    "signatureSha256": "c3f245cbff7a2e4545d1723cf56d0498b58d7af6360312d53253d255d60eeb93",
+    "verifiedAtUnix": 1791127496,
+    "pinnedPublicKeySha256": "6c70c777b27d50949370d494b4b25798200fbdd5c171baeeaa94d7e289900f3e",
+    "privateKeyUsed": false
+  },
+  "privateKeyUsed": false,
+  "published": false
+}

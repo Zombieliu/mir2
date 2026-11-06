@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "state": "ACTUAL_BOUND_UNSEALED_NOT_EXECUTED",
+  "document": "launcher-source-prepared-v1.json",
+  "backendSourceCommit": "c743122af05faca43d9535d8c6c2a4bfb01b924f",
+  "backendBuildCommit": "c743122af05faca43d9535d8c6c2a4bfb01b924f",
+  "driverSourceCommit": "3a6d8c862d03ded3133605472a8f38bc6258af52",
+  "executionSourceCommit": "3a6d8c862d03ded3133605472a8f38bc6258af52",
+  "driverSourceSha256": "445325ec1b052cffffb07437c38ec0a4688741a0b9207e7895e514e8e4a7f634",
+  "sourceFreezeReviewedButNotSealed": true,
+  "rootExecutionRequired": true,
+  "full16": {
+    "audit": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-observer-preference-v1\\public\\1792963900426-f1496383.independent-audit.json",
+      "bytes": 1907,
+      "sha256": "92a72770bab2e302537eda593baf72a8cb5438a0d6956fa171e2f7e80128533f"
+    },
+    "prerequisite": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\scout-observer-full16-public-archive-v1\\full16-actual-prerequisite-v1.json",
+      "bytes": 4922,
+      "sha256": "2fd5bb822e631128ff483528ea09b74cd2e4db1316107ffb5c57b579bf8d2157"
+    },
+    "independentFacts": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\scout-observer-full16-actual-independent-review-v1.json",
+      "bytes": 4775,
+      "sha256": "5a504f85a598fe3c67f971ce8960b90f5a8b1ded1a863a2c88b6cde071e1ae9d"
+    }
+  },
+  "accountsCreated": 0,
+  "realmStarted": false,
+  "capacityAccepted": false
+}

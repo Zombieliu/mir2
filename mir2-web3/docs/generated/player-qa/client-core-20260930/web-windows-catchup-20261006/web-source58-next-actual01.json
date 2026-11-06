@@ -1,0 +1,38 @@
+{
+  "schemaVersion": 1,
+  "owner": "Root",
+  "kind": "Source58 actual strict original Next build",
+  "outer": {
+    "owner": "Root",
+    "exitCode": 0,
+    "builderPid": 58016,
+    "kind": "Source58 original strict Next build with clock renderer and capture shortcuts",
+    "exited": true,
+    "disposed": true,
+    "elapsedMs": 97727,
+    "configPath": "C:/mir2-cross-platform-storage-20261002/web-source58-combat-clock-20261011-01/next-build01/config.json",
+    "uiOperated": false,
+    "runtimeLaunched": false,
+    "networkUsed": false,
+    "productionBuildAccepted": false,
+    "candidateAccepted": false,
+    "goalComplete": false
+  },
+  "inputCount": 19578,
+  "snapshot": {
+    "path": "C:/mir2-cross-platform-storage-20261002/web-source58-combat-clock-20261011-01/next-build01/source-snapshot.json",
+    "bytes": 6601489,
+    "sha256": "d906ac20ac750087fe4bc3a4872242842b746a9718dfd13ec8e2cba55fc7925f"
+  },
+  "strict": true,
+  "typeScriptElapsed": "12.5s",
+  "pagesGenerated": 13,
+  "rendererVersion": "bevy-cbaf32383ce0ff77",
+  "nodeTests": 54,
+  "mainTsconfigPreserved": {
+    "bytes": 4932,
+    "sha256": "08fed5308fee3466445cad5b0f4c0cc0f8e00f4fa53823999ff1bed0bcde3182"
+  },
+  "candidate100": false,
+  "goalComplete": false
+}

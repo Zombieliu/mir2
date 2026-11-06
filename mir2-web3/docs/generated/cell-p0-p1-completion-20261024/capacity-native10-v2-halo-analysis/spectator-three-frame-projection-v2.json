@@ -1,0 +1,696 @@
+{
+  "schemaVersion": 1,
+  "runId": "1792891029840-02155527",
+  "actor": "L26466205",
+  "guardAtMs": 1792891599013,
+  "scope": "Exactly3 public spectator JSON frame projections within guard±2s; header-only scan+SHA for other lines, no video or privatepayload.",
+  "recording": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-halo-feasibility-09\\recordings\\0-498025.jsonl",
+    "bytes": 78611960,
+    "sha256": "1971ee61eba79d5a5345e5685d3fbeb9d35005751da7562bc546ca7c3b722070",
+    "rows": 2111
+  },
+  "frames": [
+    {
+      "selection": "last-before-guard",
+      "sourceLineOrdinal": 2107,
+      "sourceByteOffset": 78386439,
+      "sourceLineBytes": 45497,
+      "sourceLineSha256": "265b957e58e0685fa39cb7b68d1e0f5f71b1d2c809ef36d2ac8aeab23e6e86d1",
+      "header": {
+        "schema": "obelisk.mir2.spectator.v1",
+        "recordingId": "0-498025",
+        "sequence": 2107,
+        "capturedAtMs": 1792891598842,
+        "mapFileName": "0",
+        "digest": "c467b0fadee92b66a92e7cd349805a787df2a7ae392d585df016d0f08da334b7"
+      },
+      "actorEntities": [
+        {
+          "objectId": 50005,
+          "name": "L26466205",
+          "kind": "player",
+          "x": 265,
+          "y": 649,
+          "dead": false,
+          "hp": null,
+          "maxHp": null,
+          "level": 1,
+          "ai": null,
+          "disposition": "friendly"
+        }
+      ],
+      "actorNameMatches": 1,
+      "localCenter": {
+        "x": 265,
+        "y": 649
+      },
+      "centerScope": "Matching actor public spectator entity",
+      "nearbyMonsterCount": 8,
+      "nearbyMonsters": [
+        {
+          "objectId": 206525,
+          "name": "Deer",
+          "kind": "monster",
+          "x": 259,
+          "y": 655,
+          "dead": false,
+          "hp": 25,
+          "maxHp": 25,
+          "level": null,
+          "ai": 2,
+          "disposition": "neutral"
+        },
+        {
+          "objectId": 206528,
+          "name": "Deer",
+          "kind": "monster",
+          "x": 266,
+          "y": 649,
+          "dead": false,
+          "hp": 2,
+          "maxHp": 25,
+          "level": null,
+          "ai": 2,
+          "disposition": "neutral"
+        },
+        {
+          "objectId": 206534,
+          "name": "Deer",
+          "kind": "monster",
+          "x": 264,
+          "y": 649,
+          "dead": true,
+          "hp": 0,
+          "maxHp": 25,
+          "level": null,
+          "ai": 2,
+          "disposition": "neutral"
+        },
+        {
+          "objectId": 206608,
+          "name": "Scarecrow",
+          "kind": "monster",
+          "x": 266,
+          "y": 651,
+          "dead": true,
+          "hp": 0,
+          "maxHp": 20,
+          "level": null,
+          "ai": 0,
+          "disposition": "hostile"
+        },
+        {
+          "objectId": 206701,
+          "name": "Deer",
+          "kind": "monster",
+          "x": 261,
+          "y": 649,
+          "dead": false,
+          "hp": 25,
+          "maxHp": 25,
+          "level": null,
+          "ai": 2,
+          "disposition": "neutral"
+        },
+        {
+          "objectId": 206704,
+          "name": "Deer",
+          "kind": "monster",
+          "x": 266,
+          "y": 650,
+          "dead": false,
+          "hp": 10,
+          "maxHp": 25,
+          "level": null,
+          "ai": 2,
+          "disposition": "neutral"
+        },
+        {
+          "objectId": 206712,
+          "name": "Deer",
+          "kind": "monster",
+          "x": 261,
+          "y": 657,
+          "dead": false,
+          "hp": 25,
+          "maxHp": 25,
+          "level": null,
+          "ai": 2,
+          "disposition": "neutral"
+        },
+        {
+          "objectId": 271803,
+          "name": "Hen",
+          "kind": "monster",
+          "x": 258,
+          "y": 649,
+          "dead": false,
+          "hp": 5,
+          "maxHp": 5,
+          "level": null,
+          "ai": 1,
+          "disposition": "neutral"
+        }
+      ],
+      "nearbyTruncated": false,
+      "actorDerivedFrameEvents": [
+        {
+          "kind": "move",
+          "atMs": 1792891598826,
+          "objectId": 1000,
+          "name": "L26466205",
+          "payload": {
+            "from": {
+              "x": 279,
+              "y": 673
+            },
+            "to": {
+              "x": 264,
+              "y": 649
+            }
+          }
+        },
+        {
+          "kind": "health",
+          "atMs": 1792891598826,
+          "objectId": 1000,
+          "name": "L26466205",
+          "payload": {
+            "from": 18,
+            "to": 2
+          }
+        }
+      ],
+      "eventScope": "Spectator world_events differences are derived snapshots, not original protocol packets and do not identify an attacker.",
+      "mergedWorldSharedSelfSlot1000": {
+        "objectId": 1000,
+        "name": "L26466207",
+        "kind": "selfPlayer",
+        "x": 272,
+        "y": 670,
+        "dead": false,
+        "hp": 18,
+        "maxHp": 18,
+        "level": 1
+      },
+      "sharedSelfSlotMatchesActor": false,
+      "matchingActorOwnerStateDeltas": [
+        {
+          "kind": "health",
+          "atMs": 1792891598826,
+          "objectId": 1000,
+          "name": "L26466205",
+          "payload": {
+            "from": 18,
+            "to": 2
+          }
+        }
+      ]
+    },
+    {
+      "selection": "first-after-guard",
+      "sourceLineOrdinal": 2108,
+      "sourceByteOffset": 78431937,
+      "sourceLineBytes": 45963,
+      "sourceLineSha256": "70e1b46cbdf498e81ad4df78ce33b63ae533dc687c9552a824a706b5253475e7",
+      "header": {
+        "schema": "obelisk.mir2.spectator.v1",
+        "recordingId": "0-498025",
+        "sequence": 2108,
+        "capturedAtMs": 1792891599094,
+        "mapFileName": "0",
+        "digest": "92f552f289ff0ba319cea220f1ee9b06ddfc2aca009747340c63c283040fe4f7"
+      },
+      "actorEntities": [
+        {
+          "objectId": 50005,
+          "name": "L26466205",
+          "kind": "player",
+          "x": 264,
+          "y": 649,
+          "dead": false,
+          "hp": null,
+          "maxHp": null,
+          "level": 1,
+          "ai": null,
+          "disposition": "friendly"
+        }
+      ],
+      "actorNameMatches": 1,
+      "localCenter": {
+        "x": 264,
+        "y": 649
+      },
+      "centerScope": "Matching actor public spectator entity",
+      "nearbyMonsterCount": 9,
+      "nearbyMonsters": [
+        {
+          "objectId": 206525,
+          "name": "Deer",
+          "kind": "monster",
+          "x": 259,
+          "y": 655,
+          "dead": false,
+          "hp": 25,
+          "maxHp": 25,
+          "level": null,
+          "ai": 2,
+          "disposition": "neutral"
+        },
+        {
+          "objectId": 206528,
+          "name": "Deer",
+          "kind": "monster",
+          "x": 266,
+          "y": 649,
+          "dead": false,
+          "hp": 2,
+          "maxHp": 25,
+          "level": null,
+          "ai": 2,
+          "disposition": "neutral"
+        },
+        {
+          "objectId": 206534,
+          "name": "Deer",
+          "kind": "monster",
+          "x": 264,
+          "y": 649,
+          "dead": true,
+          "hp": 0,
+          "maxHp": 25,
+          "level": null,
+          "ai": 2,
+          "disposition": "neutral"
+        },
+        {
+          "objectId": 206608,
+          "name": "Scarecrow",
+          "kind": "monster",
+          "x": 266,
+          "y": 651,
+          "dead": true,
+          "hp": 0,
+          "maxHp": 20,
+          "level": null,
+          "ai": 0,
+          "disposition": "hostile"
+        },
+        {
+          "objectId": 206701,
+          "name": "Deer",
+          "kind": "monster",
+          "x": 261,
+          "y": 649,
+          "dead": false,
+          "hp": 25,
+          "maxHp": 25,
+          "level": null,
+          "ai": 2,
+          "disposition": "neutral"
+        },
+        {
+          "objectId": 206704,
+          "name": "Deer",
+          "kind": "monster",
+          "x": 266,
+          "y": 650,
+          "dead": false,
+          "hp": 10,
+          "maxHp": 25,
+          "level": null,
+          "ai": 2,
+          "disposition": "neutral"
+        },
+        {
+          "objectId": 206712,
+          "name": "Deer",
+          "kind": "monster",
+          "x": 261,
+          "y": 657,
+          "dead": false,
+          "hp": 25,
+          "maxHp": 25,
+          "level": null,
+          "ai": 2,
+          "disposition": "neutral"
+        },
+        {
+          "objectId": 271803,
+          "name": "Hen",
+          "kind": "monster",
+          "x": 258,
+          "y": 649,
+          "dead": false,
+          "hp": 5,
+          "maxHp": 5,
+          "level": null,
+          "ai": 1,
+          "disposition": "neutral"
+        },
+        {
+          "objectId": 271808,
+          "name": "Hen",
+          "kind": "monster",
+          "x": 256,
+          "y": 644,
+          "dead": false,
+          "hp": 5,
+          "maxHp": 5,
+          "level": null,
+          "ai": 1,
+          "disposition": "neutral"
+        }
+      ],
+      "nearbyTruncated": false,
+      "actorDerivedFrameEvents": [
+        {
+          "kind": "move",
+          "atMs": 1792891598842,
+          "objectId": 50005,
+          "name": "L26466205",
+          "payload": {
+            "from": {
+              "x": 265,
+              "y": 649
+            },
+            "to": {
+              "x": 264,
+              "y": 649
+            }
+          }
+        },
+        {
+          "kind": "move",
+          "atMs": 1792891599088,
+          "objectId": 1000,
+          "name": "L26466205",
+          "payload": {
+            "from": {
+              "x": 279,
+              "y": 671
+            },
+            "to": {
+              "x": 264,
+              "y": 649
+            }
+          }
+        },
+        {
+          "kind": "health",
+          "atMs": 1792891599088,
+          "objectId": 1000,
+          "name": "L26466205",
+          "payload": {
+            "from": 18,
+            "to": 0
+          }
+        },
+        {
+          "kind": "death",
+          "atMs": 1792891599088,
+          "objectId": 1000,
+          "name": "L26466205",
+          "payload": {
+            "dead": true
+          }
+        }
+      ],
+      "eventScope": "Spectator world_events differences are derived snapshots, not original protocol packets and do not identify an attacker.",
+      "mergedWorldSharedSelfSlot1000": {
+        "objectId": 1000,
+        "name": "L26466207",
+        "kind": "selfPlayer",
+        "x": 272,
+        "y": 670,
+        "dead": false,
+        "hp": 18,
+        "maxHp": 18,
+        "level": 1
+      },
+      "sharedSelfSlotMatchesActor": false,
+      "matchingActorOwnerStateDeltas": [
+        {
+          "kind": "health",
+          "atMs": 1792891599088,
+          "objectId": 1000,
+          "name": "L26466205",
+          "payload": {
+            "from": 18,
+            "to": 0
+          }
+        },
+        {
+          "kind": "death",
+          "atMs": 1792891599088,
+          "objectId": 1000,
+          "name": "L26466205",
+          "payload": {
+            "dead": true
+          }
+        }
+      ]
+    },
+    {
+      "selection": "first-after-guard-plus500ms",
+      "sourceLineOrdinal": 2110,
+      "sourceByteOffset": 78523209,
+      "sourceLineBytes": 44775,
+      "sourceLineSha256": "7a475bd1c946c10c229189b801569296f744ac43b388d87961c736f8c9c872c7",
+      "header": {
+        "schema": "obelisk.mir2.spectator.v1",
+        "recordingId": "0-498025",
+        "sequence": 2110,
+        "capturedAtMs": 1792891599608,
+        "mapFileName": "0",
+        "digest": "1e263346b87311fda35bff998b6436b2f6d3d2789cb0006efd2b10bf07ae5c17"
+      },
+      "actorEntities": [
+        {
+          "objectId": 50005,
+          "name": "L26466205",
+          "kind": "player",
+          "x": 264,
+          "y": 649,
+          "dead": false,
+          "hp": null,
+          "maxHp": null,
+          "level": 1,
+          "ai": null,
+          "disposition": "friendly"
+        }
+      ],
+      "actorNameMatches": 1,
+      "localCenter": {
+        "x": 264,
+        "y": 649
+      },
+      "centerScope": "Matching actor public spectator entity",
+      "nearbyMonsterCount": 9,
+      "nearbyMonsters": [
+        {
+          "objectId": 206525,
+          "name": "Deer",
+          "kind": "monster",
+          "x": 259,
+          "y": 655,
+          "dead": false,
+          "hp": 25,
+          "maxHp": 25,
+          "level": null,
+          "ai": 2,
+          "disposition": "neutral"
+        },
+        {
+          "objectId": 206528,
+          "name": "Deer",
+          "kind": "monster",
+          "x": 266,
+          "y": 649,
+          "dead": false,
+          "hp": 2,
+          "maxHp": 25,
+          "level": null,
+          "ai": 2,
+          "disposition": "neutral"
+        },
+        {
+          "objectId": 206534,
+          "name": "Deer",
+          "kind": "monster",
+          "x": 264,
+          "y": 649,
+          "dead": true,
+          "hp": 0,
+          "maxHp": 25,
+          "level": null,
+          "ai": 2,
+          "disposition": "neutral"
+        },
+        {
+          "objectId": 206608,
+          "name": "Scarecrow",
+          "kind": "monster",
+          "x": 266,
+          "y": 651,
+          "dead": true,
+          "hp": 0,
+          "maxHp": 20,
+          "level": null,
+          "ai": 0,
+          "disposition": "hostile"
+        },
+        {
+          "objectId": 206701,
+          "name": "Deer",
+          "kind": "monster",
+          "x": 261,
+          "y": 649,
+          "dead": false,
+          "hp": 25,
+          "maxHp": 25,
+          "level": null,
+          "ai": 2,
+          "disposition": "neutral"
+        },
+        {
+          "objectId": 206704,
+          "name": "Deer",
+          "kind": "monster",
+          "x": 266,
+          "y": 650,
+          "dead": false,
+          "hp": 10,
+          "maxHp": 25,
+          "level": null,
+          "ai": 2,
+          "disposition": "neutral"
+        },
+        {
+          "objectId": 206712,
+          "name": "Deer",
+          "kind": "monster",
+          "x": 261,
+          "y": 657,
+          "dead": false,
+          "hp": 25,
+          "maxHp": 25,
+          "level": null,
+          "ai": 2,
+          "disposition": "neutral"
+        },
+        {
+          "objectId": 271803,
+          "name": "Hen",
+          "kind": "monster",
+          "x": 258,
+          "y": 649,
+          "dead": false,
+          "hp": 5,
+          "maxHp": 5,
+          "level": null,
+          "ai": 1,
+          "disposition": "neutral"
+        },
+        {
+          "objectId": 271808,
+          "name": "Hen",
+          "kind": "monster",
+          "x": 256,
+          "y": 644,
+          "dead": false,
+          "hp": 5,
+          "maxHp": 5,
+          "level": null,
+          "ai": 1,
+          "disposition": "neutral"
+        }
+      ],
+      "nearbyTruncated": false,
+      "actorDerivedFrameEvents": [
+        {
+          "kind": "move",
+          "atMs": 1792891599594,
+          "objectId": 1000,
+          "name": "L26466205",
+          "payload": {
+            "from": {
+              "x": 279,
+              "y": 671
+            },
+            "to": {
+              "x": 264,
+              "y": 649
+            }
+          }
+        },
+        {
+          "kind": "health",
+          "atMs": 1792891599594,
+          "objectId": 1000,
+          "name": "L26466205",
+          "payload": {
+            "from": 18,
+            "to": 0
+          }
+        },
+        {
+          "kind": "death",
+          "atMs": 1792891599594,
+          "objectId": 1000,
+          "name": "L26466205",
+          "payload": {
+            "dead": true
+          }
+        }
+      ],
+      "eventScope": "Spectator world_events differences are derived snapshots, not original protocol packets and do not identify an attacker.",
+      "mergedWorldSharedSelfSlot1000": {
+        "objectId": 1000,
+        "name": "L26466207",
+        "kind": "selfPlayer",
+        "x": 272,
+        "y": 670,
+        "dead": false,
+        "hp": 18,
+        "maxHp": 18,
+        "level": 1
+      },
+      "sharedSelfSlotMatchesActor": false,
+      "matchingActorOwnerStateDeltas": [
+        {
+          "kind": "health",
+          "atMs": 1792891599594,
+          "objectId": 1000,
+          "name": "L26466205",
+          "payload": {
+            "from": 18,
+            "to": 0
+          }
+        },
+        {
+          "kind": "death",
+          "atMs": 1792891599594,
+          "objectId": 1000,
+          "name": "L26466205",
+          "payload": {
+            "dead": true
+          }
+        }
+      ]
+    }
+  ],
+  "limits": [
+    "Merged spectator world may retain prior per-object observations; selected snapshots do not prove exact owner wire-packet order.",
+    "world.playerHp/playerObjectId/equipment belong a chosen merged base owner and were deliberately not treated as thisactorHP/gear.",
+    "Nearby monsters and positions do not by themselves prove who caused any hit; no attacker is inferred from proximity.",
+    "ObjectId1000 is a shared personal-self slot across capturedclients. Its previoushealth fromvalue can belong to a different owner; matchingcurrent eventname and to/dead fields are required. Repeated death deltas after interleaved selfsnapshots do not mean repeated deaths or revival. Remote50005 hpnull/deadfalse/level1 is incomplete and cannot refute ownHP0/deadtrue updates."
+  ],
+  "originalProjection": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\probe09-death-analysis\\spectator-three-frame-projection-v1.json",
+    "bytes": 14926,
+    "sha256": "07f231626e3683f3b98b058b1f374efd75465d4fce0552943b8094a62d728163"
+  },
+  "sameThreeFrameReReadOnly": true
+}

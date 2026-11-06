@@ -1,0 +1,139 @@
+{
+  "schemaVersion": 1,
+  "files": [
+    {
+      "original": "C:\\mir2-build\\p01-completion-20261024\\native-steady-single-stage-diagnostic-v10\\episode-50\\reports\\1793026504545-0f00d2eb.report.json",
+      "archived": "v10-original-report.json",
+      "bytes": 60767,
+      "sha256": "b0a3f8fc1ac0fbb0831e6f735ca80e2504980a4cca0fb9a97ca30ef9fdd9ad4f"
+    },
+    {
+      "original": "C:\\mir2-build\\p01-completion-20261024\\native-steady-single-stage-diagnostic-v10\\episode-50\\realm-cleanup.json",
+      "archived": "v10-original-cleanup.json",
+      "bytes": 6536,
+      "sha256": "f9a45e010f341e7a129f0e18ce85a8555d64ead92078c6a69557e2187974ed40"
+    },
+    {
+      "original": "C:\\mir2-build\\p01-completion-20261024\\zone-outbound-slow-span-v10-stage50-root-independent-cleanup-v1.json",
+      "archived": "v10-root-independent-cleanup.json",
+      "bytes": 7605,
+      "sha256": "31de1829f08caf649fe66340f2cfd96906d6b4256763dbb1a894c8631aeae92f"
+    },
+    {
+      "original": "C:\\mir2-build\\p01-completion-20261024\\steady-zone-outbound-slow-span-v10-analysis-v1\\findings-v1.json",
+      "archived": "v10-findings.json",
+      "bytes": 358476,
+      "sha256": "4d3f2a690aa62a4b57a134d85a334da421a6a8496b03eff89fe1333781a40c1b"
+    },
+    {
+      "original": "C:\\mir2-build\\p01-completion-20261024\\steady-zone-outbound-slow-span-v10-analysis-v1\\selected-anonymous.jsonl",
+      "archived": "v10-selected-anonymous.jsonl",
+      "bytes": 73884,
+      "sha256": "a1ba4bbb4b37ed389004fe622d93cd7dbd6041a689fa331365c1e668b0c3b110"
+    },
+    {
+      "original": "C:\\mir2-build\\p01-completion-20261024\\steady-zone-outbound-slow-span-v10-analysis-v1\\v10-gate-holder-audit-v1.json",
+      "archived": "v10-gate-holder-audit.json",
+      "bytes": 37312,
+      "sha256": "7c6f829d1a3f2afdc37690794958f286709f31a81982a3416761f2876968b325"
+    },
+    {
+      "original": "C:\\mir2-build\\p01-completion-20261024\\v10-own-pose-source-targeted-tail-v1.json",
+      "archived": "v10-exact-own-attack-source.json",
+      "bytes": 974,
+      "sha256": "e490a75f3548df02bdc69a7932f3552c256d041a0a91be8ae876ac430a315871"
+    },
+    {
+      "original": "C:\\mir2-build\\p01-completion-20261024\\root-owner-action-pose-validation-v1\\full-driver-receipt-v1.json",
+      "archived": "full-driver-receipt.json",
+      "bytes": 6449,
+      "sha256": "714a32dad7c2db920db7ecb938b0d0f438d4ffea32ec09b6157c5f5866381eb8"
+    },
+    {
+      "original": "C:\\mir2-build\\p01-completion-20261024\\root-owner-action-pose-validation-v2\\focused-observation-web-receipt-v1.json",
+      "archived": "focused-receipt.json",
+      "bytes": 7372,
+      "sha256": "552c91e2bd67232bf3ba17e06d18698d6ae98bb57197ff6da4cf08c9e2455169"
+    },
+    {
+      "original": "C:\\mir2-build\\p01-completion-20261024\\root-owner-action-pose-validation-v2\\typecheck-receipt-v1.json",
+      "archived": "typecheck-receipt.json",
+      "bytes": 7108,
+      "sha256": "666662841a185b690908750cd73f216ab91469d5e4f9209deaafc87f80329cb1"
+    },
+    {
+      "original": "C:\\mir2-build\\p01-completion-20261024\\root-owner-action-pose-validation-v1\\focused-observation-web-receipt-v1.json",
+      "archived": "initial-focused-failure-receipt.json",
+      "bytes": 7384,
+      "sha256": "db8cba7e592ccd0c763ad6654e9c846461df1724736b68a6a2f7d21544a9b5a3"
+    },
+    {
+      "original": "C:\\mir2-build\\p01-completion-20261024\\owner-action-pose-scene-baseline-control-v1\\receipt-v1.json",
+      "archived": "original-scene-baseline-receipt.json",
+      "bytes": 1367,
+      "sha256": "54c2c2691ec6addf4501d8b58797476c5caaf9df06446fabd4eb144d4b775fda"
+    },
+    {
+      "original": "C:\\mir2-build\\p01-completion-20261024\\root-owner-action-pose-validation-v1\\full-driver-stdout-v1.log",
+      "archived": "full-driver-stdout.log",
+      "bytes": 65261,
+      "sha256": "bc642fdc2391da64ea29d5cc5bd10c38f07ece625b08d9a86ff24e5a5b28bb19"
+    },
+    {
+      "original": "C:\\mir2-build\\p01-completion-20261024\\root-owner-action-pose-validation-v1\\full-driver-stderr-v1.log",
+      "archived": "full-driver-stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "original": "C:\\mir2-build\\p01-completion-20261024\\root-owner-action-pose-validation-v2\\focused-observation-web-stdout-v1.log",
+      "archived": "focused-stdout.log",
+      "bytes": 8360,
+      "sha256": "5086ba7d8288fa086d0955e155b7938faf3d1ad437c7cb833dbde72adc2c22f7"
+    },
+    {
+      "original": "C:\\mir2-build\\p01-completion-20261024\\root-owner-action-pose-validation-v2\\focused-observation-web-stderr-v1.log",
+      "archived": "focused-stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "original": "C:\\mir2-build\\p01-completion-20261024\\root-owner-action-pose-validation-v2\\typecheck-stdout-v1.log",
+      "archived": "typecheck-stdout.log",
+      "bytes": 265,
+      "sha256": "6c39edda24bb15155abef1f38fcc1d13dd257d4e36164329bc87e376af3ef6bf"
+    },
+    {
+      "original": "C:\\mir2-build\\p01-completion-20261024\\root-owner-action-pose-validation-v2\\typecheck-stderr-v1.log",
+      "archived": "typecheck-stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "original": "C:\\mir2-build\\p01-completion-20261024\\root-owner-action-pose-validation-v1\\focused-observation-web-stdout-v1.log",
+      "archived": "initial-focused-failure-stdout.log",
+      "bytes": 6506,
+      "sha256": "754c385ec5799bda3d669bc79954cbb0a3060e34aa59a6011e65767f97ae0050"
+    },
+    {
+      "original": "C:\\mir2-build\\p01-completion-20261024\\root-owner-action-pose-validation-v1\\focused-observation-web-stderr-v1.log",
+      "archived": "initial-focused-failure-stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "original": "C:\\mir2-build\\p01-completion-20261024\\owner-action-pose-scene-baseline-control-v1\\stdout-v1.log",
+      "archived": "original-scene-baseline-stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "original": "C:\\mir2-build\\p01-completion-20261024\\owner-action-pose-scene-baseline-control-v1\\stderr-v1.log",
+      "archived": "original-scene-baseline-stderr.log",
+      "bytes": 746,
+      "sha256": "2e875508f78af9916e6813924506c4e595556e92315fb1e4795967049a3c7c28"
+    }
+  ],
+  "privateStderrPublished": false,
+  "capacityAccepted": false
+}

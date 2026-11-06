@@ -1,0 +1,13 @@
+{
+  "schema": "mir2.r22.public-smoke-harness-preparation.v1",
+  "priorHarnessSha256": "4a0838919a196c16b050cf9f1f5682ee0bf805aeaeb46affd9005859f0d40d75",
+  "harnessSha256": "e2d05ffbb0e830e4049526225dc703149ff84d4553a2139b7be180f3e7a733db",
+  "sourceRevision": "a41dfe72d7e5858f11169adf88673dc44ed24200",
+  "normalTlsAndOriginPreserved": true,
+  "existingFiveOwnedAccountsAndSixCharactersOnly": true,
+  "noNewRegistrationsOrCharacterCreations": true,
+  "passwordCopiesCreated": false,
+  "comparisonAssertionsRelaxed": false,
+  "expectedChecks": 44,
+  "naturalCombatMiningOrNativeUiAcceptance": false
+}

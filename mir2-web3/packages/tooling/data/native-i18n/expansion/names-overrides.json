@@ -1,0 +1,1322 @@
+{
+  "content.npcDialog.villageGuide.inProgress.body.1": {
+    "ar": "التقدم: هُزم {0}/{1} من الأهداف."
+  },
+  "content.quest.assistantRequest.rewardPreview": {
+    "ar": "10 EXP، دواء HP صغير x1"
+  },
+  "content.quest.craftLadyRequest.rewardPreview": {
+    "ar": "30 EXP، 200 ذهب، قلادة ذهبية x1، خاتم نحاسي x1"
+  },
+  "content.quest.forestYetiThreat.rewardPreview": {
+    "ar": "50 EXP، 200 ذهب، قلادة الدقة x1"
+  },
+  "content.quest.forestYetiThreat.stage.inProgress.progressLabel": {
+    "ar": "يتي الغابة {0}/{1}"
+  },
+  "content.quest.huntForButcher.rewardPreview": {
+    "ar": "80 EXP، 20 ذهب، خاتم نحاسي قديم x1"
+  },
+  "content.quest.meetWarriorInstructor.rewardPreview": {
+    "ar": "48 EXP، 60 ذهب"
+  },
+  "content.quest.smithFirstTest.rewardPreview": {
+    "ar": "120 EXP، 30 ذهب، سوار حديدي بالٍ x1"
+  },
+  "content.quest.toBichon.rewardPreview": {
+    "ar": "48 EXP، 60 ذهب"
+  },
+  "content.item.1159.name": {
+    "ar": "حكايات بيشون (1)"
+  },
+  "content.item.1160.name": {
+    "ar": "حكايات بيشون (2)"
+  },
+  "content.item.1161.name": {
+    "ar": "حكايات بيشون (3)"
+  },
+  "content.item.1188.name": {
+    "ar": "قلادة الأبنوس"
+  },
+  "content.item.1210.name": {
+    "ar": "سوار الأبنوس"
+  },
+  "content.item.1223.name": {
+    "ar": "رداء سحر النار (M)"
+  },
+  "content.item.1224.name": {
+    "ar": "رداء سحر النار (F)"
+  },
+  "content.item.1225.name": {
+    "ar": "درع الطاو (M)"
+  },
+  "content.item.1226.name": {
+    "ar": "درع الطاو (F)"
+  },
+  "content.item.1227.name": {
+    "ar": "رداء الروح (M)"
+  },
+  "content.item.1228.name": {
+    "ar": "رداء الروح (F)"
+  },
+  "content.item.1229.name": {
+    "ar": "درع جلدي (M)"
+  },
+  "content.item.1230.name": {
+    "ar": "درع جلدي (F)"
+  },
+  "content.item.1340.name": {
+    "ar": "إكسير الجنسنغ [1d]"
+  },
+  "content.item.1368.name": {
+    "ar": "دعوة GT"
+  },
+  "content.item.1400.name": {
+    "ar": "فولاذ هيونتشون سوهو (كنز)"
+  },
+  "content.item.1402.name": {
+    "ar": "فولاذ هيونتشون سوهو (إلهي)"
+  },
+  "content.item.1403.name": {
+    "ar": "هيونتشون ماسوك"
+  },
+  "content.item.1451.name": {
+    "ar": "غونريون هي بابليكيشن (كنز)"
+  },
+  "content.item.1453.name": {
+    "ar": "غونريون هي بابليكيشن (إلهي)"
+  },
+  "content.item.1460.name": {
+    "ar": "غونريون يوسونرو (كنز)"
+  },
+  "content.item.1463.name": {
+    "ar": "غونريون هي بابليكيشن (أثر مقدس) 1"
+  },
+  "content.item.1464.name": {
+    "ar": "غونريون هي بابليكيشن (أثر مقدس) 2"
+  },
+  "content.item.1465.name": {
+    "ar": "غونريون هي بابليكيشن (أثر مقدس) 3"
+  },
+  "content.item.1466.name": {
+    "ar": "غونريون هي بابليكيشن (أثر مقدس) 5"
+  },
+  "content.item.1467.name": {
+    "ar": "غونريون هي بابليكيشن (أثر مقدس) 4"
+  },
+  "content.item.1468.name": {
+    "ar": "غونريون هي بابليكيشن (كنز) 1"
+  },
+  "content.item.1469.name": {
+    "ar": "غونريون هي بابليكيشن (كنز) 2"
+  },
+  "content.item.1470.name": {
+    "ar": "غونريون هي بابليكيشن (كنز) 3"
+  },
+  "content.item.1471.name": {
+    "ar": "غونريون هي بابليكيشن (كنز) 5"
+  },
+  "content.item.1472.name": {
+    "ar": "غونريون هي بابليكيشن (كنز) 4"
+  },
+  "content.item.1473.name": {
+    "ar": "غونريون هي بابليكيشن (أثر إلهي) 1"
+  },
+  "content.item.1474.name": {
+    "ar": "غونريون هي بابليكيشن (أثر إلهي) 2"
+  },
+  "content.item.1475.name": {
+    "ar": "غونريون هي بابليكيشن (أثر إلهي) 3"
+  },
+  "content.item.1476.name": {
+    "ar": "غونريون هي بابليكيشن (أثر إلهي) 5"
+  },
+  "content.item.1477.name": {
+    "ar": "غونريون هي بابليكيشن (أثر إلهي) 4"
+  },
+  "content.item.1478.name": {
+    "ar": "غونريون يوسونرو (كنز) 1"
+  },
+  "content.item.1479.name": {
+    "ar": "غونريون يوسونرو (كنز) 2"
+  },
+  "content.item.1480.name": {
+    "ar": "غونريون يوسونرو (كنز) 3"
+  },
+  "content.item.1481.name": {
+    "ar": "غونريون يوسونرو (كنز) 5"
+  },
+  "content.item.1482.name": {
+    "ar": "غونريون يوسونرو (كنز) 4"
+  },
+  "content.item.152.name": {
+    "ar": "درع المغيرين (M)"
+  },
+  "content.item.1523.name": {
+    "ar": "غونريون باساكل (كنز)"
+  },
+  "content.item.1524.name": {
+    "ar": "غونريون باساكل (كنز) 1"
+  },
+  "content.item.1525.name": {
+    "ar": "غونريون باساكل (كنز) 2"
+  },
+  "content.item.1526.name": {
+    "ar": "غونريون باساكل (كنز) 3"
+  },
+  "content.item.1527.name": {
+    "ar": "غونريون باساكل (كنز) 4"
+  },
+  "content.item.1528.name": {
+    "ar": "غونريون باساكل (كنز) 5"
+  },
+  "content.item.1529.name": {
+    "ar": "غونريون باساكل (مقدس)"
+  },
+  "content.item.153.name": {
+    "ar": "درع المغيرين (M) 1"
+  },
+  "content.item.1530.name": {
+    "ar": "غونريون باساكل (مقدس) 1"
+  },
+  "content.item.1531.name": {
+    "ar": "غونريون باساكل (مقدس) 2"
+  },
+  "content.item.1532.name": {
+    "ar": "غونريون باساكل (مقدس) 3"
+  },
+  "content.item.1533.name": {
+    "ar": "غونريون باساكل (مقدس) 4"
+  },
+  "content.item.1534.name": {
+    "ar": "غونريون باساكل (مقدس) 5"
+  },
+  "content.item.1535.name": {
+    "ar": "غونريون باساكل (إلهي)"
+  },
+  "content.item.1536.name": {
+    "ar": "غونريون باساكل (إلهي) 1"
+  },
+  "content.item.1537.name": {
+    "ar": "غونريون باساكل (إلهي) 2"
+  },
+  "content.item.1538.name": {
+    "ar": "غونريون باساكل (إلهي) 3"
+  },
+  "content.item.1539.name": {
+    "ar": "غونريون باساكل (إلهي) 4"
+  },
+  "content.item.154.name": {
+    "ar": "درع المغيرين (M) 2"
+  },
+  "content.item.1540.name": {
+    "ar": "غونريون باساكل (إلهي) 5"
+  },
+  "content.item.155.name": {
+    "ar": "درع المغيرين (M) 3"
+  },
+  "content.item.156.name": {
+    "ar": "درع المغيرين (M) 4"
+  },
+  "content.item.157.name": {
+    "ar": "درع المغيرين (M) 5"
+  },
+  "content.item.1575.name": {
+    "ar": "غونريون يونغدراما (كنز) (F)"
+  },
+  "content.item.1576.name": {
+    "ar": "غونريون يونغدراما (كنز) (F) 1"
+  },
+  "content.item.1577.name": {
+    "ar": "غونريون يونغدراما (كنز) (F) 2"
+  },
+  "content.item.1578.name": {
+    "ar": "غونريون يونغدراما (كنز) (F) 3"
+  },
+  "content.item.1579.name": {
+    "ar": "غونريون يونغدراما (كنز) (F) 4"
+  },
+  "content.item.158.name": {
+    "ar": "درع المغيرين (F)"
+  },
+  "content.item.1580.name": {
+    "ar": "غونريون يونغدراما (كنز) (F) 5"
+  },
+  "content.item.1581.name": {
+    "ar": "غونريون يونغدراما (كنز) (M)"
+  },
+  "content.item.1582.name": {
+    "ar": "غونريون يونغدراما (كنز) (M) 1"
+  },
+  "content.item.1583.name": {
+    "ar": "غونريون يونغدراما (كنز) (M) 2"
+  },
+  "content.item.1584.name": {
+    "ar": "غونريون يونغدراما (كنز) (M) 3"
+  },
+  "content.item.1585.name": {
+    "ar": "غونريون يونغدراما (كنز) (M) 4"
+  },
+  "content.item.1586.name": {
+    "ar": "غونريون يونغدراما (كنز) (M) 5"
+  },
+  "content.item.159.name": {
+    "ar": "درع المغيرين (F) 1"
+  },
+  "content.item.160.name": {
+    "ar": "درع المغيرين (F) 2"
+  },
+  "content.item.1600.name": {
+    "ar": "غونريون يونغدراما (مقدس) (F)"
+  },
+  "content.item.1601.name": {
+    "ar": "غونريون يونغدراما (مقدس) (F) 1"
+  },
+  "content.item.1602.name": {
+    "ar": "غونريون يونغدراما (مقدس) (F) 2"
+  },
+  "content.item.1603.name": {
+    "ar": "غونريون يونغدراما (مقدس) (F) 3"
+  },
+  "content.item.1604.name": {
+    "ar": "غونريون يونغدراما (مقدس) (F) 4"
+  },
+  "content.item.1605.name": {
+    "ar": "غونريون يونغدراما (مقدس) (F) 5"
+  },
+  "content.item.1606.name": {
+    "ar": "غونريون يونغدراما (مقدس) (M)"
+  },
+  "content.item.1607.name": {
+    "ar": "غونريون يونغدراما (مقدس) (M) 1"
+  },
+  "content.item.1608.name": {
+    "ar": "غونريون يونغدراما (مقدس) (M) 2"
+  },
+  "content.item.1609.name": {
+    "ar": "غونريون يونغدراما (مقدس) (M) 3"
+  },
+  "content.item.161.name": {
+    "ar": "درع المغيرين (F) 3"
+  },
+  "content.item.1610.name": {
+    "ar": "غونريون يونغدراما (مقدس) (M) 4"
+  },
+  "content.item.1611.name": {
+    "ar": "غونريون يونغدراما (مقدس) (M) 5"
+  },
+  "content.item.162.name": {
+    "ar": "درع المغيرين (F) 4"
+  },
+  "content.item.163.name": {
+    "ar": "درع المغيرين (F) 5"
+  },
+  "content.item.206.name": {
+    "ar": "خوذة تشيونغبو (WAR)"
+  },
+  "content.item.207.name": {
+    "ar": "حزام تشيونغبو (WAR)"
+  },
+  "content.item.208.name": {
+    "ar": "أحذية تشيونغبو (WAR)"
+  },
+  "content.item.209.name": {
+    "ar": "خوذة تشيونغبو (WIZ)"
+  },
+  "content.item.210.name": {
+    "ar": "حزام تشيونغبو (WIZ)"
+  },
+  "content.item.211.name": {
+    "ar": "أحذية تشيونغبو (WIZ)"
+  },
+  "content.item.212.name": {
+    "ar": "خوذة تشيونغبو (TAO)"
+  },
+  "content.item.213.name": {
+    "ar": "حزام تشيونغبو (TAO)"
+  },
+  "content.item.214.name": {
+    "ar": "أحذية تشيونغبو (TAO)"
+  },
+  "content.item.215.name": {
+    "ar": "خوذة تشيونغبو (ASSA)"
+  },
+  "content.item.216.name": {
+    "ar": "حزام تشيونغبو (ASSA)"
+  },
+  "content.item.217.name": {
+    "ar": "أحذية تشيونغبو (ASSA)"
+  },
+  "content.item.218.name": {
+    "ar": "خوذة تشيونغبو (ARCH)"
+  },
+  "content.item.219.name": {
+    "ar": "حزام تشيونغبو (ARCH)"
+  },
+  "content.item.220.name": {
+    "ar": "أحذية تشيونغبو (ARCH)"
+  },
+  "content.item.254.name": {
+    "ar": "رمح ثلاثي الشعب"
+  },
+  "content.item.268.name": {
+    "ar": "سيف معقوف",
+    "id": "Pedang Lengkung"
+  },
+  "content.item.293.name": {
+    "ar": "خنجر رفيع",
+    "id": "Belati Ramping"
+  },
+  "content.item.294.name": {
+    "ar": "نصال الزنك"
+  },
+  "content.item.335.name": {
+    "ar": "رداء الساحر (M)"
+  },
+  "content.item.343.name": {
+    "ar": "درع فولاذي (M)"
+  },
+  "content.item.344.name": {
+    "ar": "درع فولاذي (F)"
+  },
+  "content.item.347.name": {
+    "ar": "درع العملاق (M)"
+  },
+  "content.item.348.name": {
+    "ar": "درع العملاق (F)"
+  },
+  "content.item.369.name": {
+    "ar": "درع الظلام الذهبي (M)"
+  },
+  "content.item.370.name": {
+    "ar": "درع الظلام الذهبي (F)"
+  },
+  "content.item.384.name": {
+    "ar": "رداء ملك أوما (M) 1"
+  },
+  "content.item.385.name": {
+    "ar": "رداء ملك أوما (M) 2"
+  },
+  "content.item.386.name": {
+    "ar": "رداء ملك أوما (M) 3"
+  },
+  "content.item.387.name": {
+    "ar": "رداء ملك أوما (M) 4"
+  },
+  "content.item.388.name": {
+    "ar": "رداء ملك أوما (M) 5"
+  },
+  "content.item.390.name": {
+    "ar": "رداء ملك أوما (F) 1"
+  },
+  "content.item.391.name": {
+    "ar": "رداء ملك أوما (F) 2"
+  },
+  "content.item.392.name": {
+    "ar": "رداء ملك أوما (F) 3"
+  },
+  "content.item.393.name": {
+    "ar": "رداء ملك أوما (F) 4"
+  },
+  "content.item.394.name": {
+    "ar": "رداء ملك أوما (F) 5"
+  },
+  "content.item.551.name": {
+    "ar": "عدسة محدبة"
+  },
+  "content.item.606.name": {
+    "ar": "تاج الطاو"
+  },
+  "content.item.637.name": {
+    "ar": "حجر القوة (S)"
+  },
+  "content.item.638.name": {
+    "ar": "حجر القوة (M)"
+  },
+  "content.item.639.name": {
+    "ar": "حجر القوة (L)"
+  },
+  "content.item.640.name": {
+    "ar": "حجر القوة (XL)"
+  },
+  "content.item.641.name": {
+    "ar": "حجر القوة"
+  },
+  "content.item.672.name": {
+    "ar": "جنسنغ",
+    "id": "Ginseng"
+  },
+  "content.item.681.name": {
+    "ar": "دواء الطاوي (S)"
+  },
+  "content.item.682.name": {
+    "ar": "دواء الطاوي (M)"
+  },
+  "content.item.683.name": {
+    "ar": "دواء الطاوي (L)"
+  },
+  "content.item.687.name": {
+    "ar": "مقوّي التحمل (S)"
+  },
+  "content.item.688.name": {
+    "ar": "مقوّي التحمل (M)"
+  },
+  "content.item.689.name": {
+    "ar": "مقوّي التحمل (L)"
+  },
+  "content.item.733.name": {
+    "ar": "فانوس"
+  },
+  "content.item.804.name": {
+    "ar": "سمك الوولاي",
+    "id": "Ikan Walleye"
+  },
+  "content.item.808.name": {
+    "ar": "سمك التنش",
+    "id": "Ikan Tench"
+  },
+  "content.item.810.name": {
+    "ar": "إسقمري"
+  },
+  "content.item.811.name": {
+    "ar": "غوبي"
+  },
+  "content.item.812.name": {
+    "ar": "كتاب الدروع(DC)"
+  },
+  "content.item.813.name": {
+    "ar": "كتاب الدروع(MC)"
+  },
+  "content.item.814.name": {
+    "ar": "كتاب الدروع(SC)"
+  },
+  "content.item.815.name": {
+    "ar": "كتاب الدروع(ACC)"
+  },
+  "content.item.831.name": {
+    "ar": "بلاتين",
+    "id": "Platina"
+  },
+  "content.item.832.name": {
+    "ar": "نفريت"
+  },
+  "content.item.853.name": {
+    "ar": "لحم الغزال"
+  },
+  "content.item.854.name": {
+    "ar": "لحم الضأن"
+  },
+  "content.item.921.name": {
+    "ar": "نقش الروح 0",
+    "id": "Aksara Jiwa 0"
+  },
+  "content.item.922.name": {
+    "ar": "نقش الروح 1",
+    "id": "Aksara Jiwa 1"
+  },
+  "content.item.923.name": {
+    "ar": "نقش الروح 2",
+    "id": "Aksara Jiwa 2"
+  },
+  "content.item.924.name": {
+    "ar": "نقش الروح 3",
+    "id": "Aksara Jiwa 3"
+  },
+  "content.item.957.name": {
+    "ar": "إسقمري"
+  },
+  "content.item.970.name": {
+    "ar": "حقيبة ظهر (S)"
+  },
+  "content.item.971.name": {
+    "ar": "حقيبة ظهر (M)"
+  },
+  "content.item.972.name": {
+    "ar": "حقيبة ظهر (L)"
+  },
+  "content.map.110.name": {
+    "ar": "مكتب كاهن الطاو"
+  },
+  "content.map.189.name": {
+    "ar": "غرفة الجمشت"
+  },
+  "content.map.238.name": {
+    "ar": "المقبرة القديمة S 1F"
+  },
+  "content.map.239.name": {
+    "ar": "المقبرة القديمة S 2F"
+  },
+  "content.map.240.name": {
+    "ar": "المقبرة القديمة S 3F"
+  },
+  "content.map.295.name": {
+    "ar": "مزار"
+  },
+  "content.map.322.name": {
+    "ar": "غرب وادي أوما"
+  },
+  "content.map.339.name": {
+    "ar": "معبد الجحيم الجليدي (S)"
+  },
+  "content.map.341.name": {
+    "ar": "معبد الجحيم الجليدي (N)"
+  },
+  "content.map.443.name": {
+    "ar": "ورشة DY"
+  },
+  "content.map.444.name": {
+    "ar": "ورشة DY"
+  },
+  "content.map.445.name": {
+    "ar": "مقر DY"
+  },
+  "content.map.446.name": {
+    "ar": "مقر DY"
+  },
+  "content.map.447.name": {
+    "ar": "مخزن أدوية DY"
+  },
+  "content.map.450.name": {
+    "ar": "مستودع DY"
+  },
+  "content.map.455.name": {
+    "ar": "منجم DY 11"
+  },
+  "content.map.456.name": {
+    "ar": "منجم DY 12"
+  },
+  "content.map.457.name": {
+    "ar": "منجم DY 13"
+  },
+  "content.map.458.name": {
+    "ar": "منجم DY 14"
+  },
+  "content.map.459.name": {
+    "ar": "منجم DY 15"
+  },
+  "content.map.460.name": {
+    "ar": "منجم DY 21"
+  },
+  "content.map.461.name": {
+    "ar": "منجم DY 22"
+  },
+  "content.map.462.name": {
+    "ar": "منجم DY 23"
+  },
+  "content.map.463.name": {
+    "ar": "منجم DY 24"
+  },
+  "content.map.464.name": {
+    "ar": "منجم DY 25"
+  },
+  "content.map.465.name": {
+    "ar": "منجم DY 31"
+  },
+  "content.map.466.name": {
+    "ar": "منجم DY 32"
+  },
+  "content.map.467.name": {
+    "ar": "منجم DY 33"
+  },
+  "content.map.468.name": {
+    "ar": "منجم DY 34"
+  },
+  "content.map.469.name": {
+    "ar": "منجم DY 35"
+  },
+  "content.map.470.name": {
+    "ar": "منجم DY 41"
+  },
+  "content.map.471.name": {
+    "ar": "منجم DY 42"
+  },
+  "content.map.472.name": {
+    "ar": "منجم DY 43"
+  },
+  "content.map.473.name": {
+    "ar": "منجم DY 44"
+  },
+  "content.map.474.name": {
+    "ar": "منجم DY 45"
+  },
+  "content.monster.124.name": {
+    "ar": "زومبي Cl",
+    "id": "Zombi Cl"
+  },
+  "content.monster.125.name": {
+    "ar": "زومبي Cl 0",
+    "id": "Zombi Cl 0"
+  },
+  "content.monster.126.name": {
+    "ar": "زومبي Nd"
+  },
+  "content.monster.127.name": {
+    "ar": "زومبي Nd 0"
+  },
+  "content.monster.158.name": {
+    "ar": "تونغز"
+  },
+  "content.monster.159.name": {
+    "ar": "تونغز 0"
+  },
+  "content.monster.165.name": {
+    "ar": "عثة الوتد"
+  },
+  "content.monster.296.name": {
+    "ar": "زومبي شي",
+    "id": "Zombi Shi"
+  },
+  "content.monster.297.name": {
+    "ar": "زومبي شي 0",
+    "id": "Zombi Shi 0"
+  },
+  "content.monster.330.name": {
+    "ar": "النسّاج"
+  },
+  "content.monster.361.name": {
+    "ar": "مينوتور",
+    "id": "Minotaur"
+  },
+  "content.monster.37.name": {
+    "ar": "يوب",
+    "id": "Yob"
+  },
+  "content.monster.376.name": {
+    "ar": "أوما الفأس"
+  },
+  "content.monster.377.name": {
+    "ar": "أوما الفأس 0"
+  },
+  "content.monster.38.name": {
+    "ar": "يوب 0",
+    "id": "Yob 0"
+  },
+  "content.monster.384.name": {
+    "ar": "أوما المدراس",
+    "id": "Oma Bandul Pukul"
+  },
+  "content.monster.385.name": {
+    "ar": "أوما المدراس 0",
+    "id": "Oma Bandul Pukul 0"
+  },
+  "content.monster.394.name": {
+    "ar": "تمثال مير"
+  },
+  "content.monster.434.name": {
+    "ar": "مانتيكور",
+    "id": "Mantikora"
+  },
+  "content.monster.436.name": {
+    "ar": "رامي عظام التنين"
+  },
+  "content.monster.438.name": {
+    "ar": "لاميا",
+    "id": "Lamia"
+  },
+  "content.monster.449.name": {
+    "ar": "زعيم المشعوذين"
+  },
+  "content.monster.468.name": {
+    "ar": "مدرّع",
+    "id": "Armadilo"
+  },
+  "content.monster.475.name": {
+    "ar": "ساحر توكسون"
+  },
+  "content.monster.553.name": {
+    "ar": "عثة الوتد 22"
+  },
+  "content.monster.69.name": {
+    "ar": "أفعى النمر"
+  },
+  "content.monster.70.name": {
+    "ar": "كيراتُويد",
+    "id": "Keratoid"
+  },
+  "content.monster.71.name": {
+    "ar": "كيراتُويد 0",
+    "id": "Keratoid 0"
+  },
+  "content.npc.230.name": {
+    "ar": "المنقّب Stuart"
+  },
+  "content.npc.273.name": {
+    "ar": "مهام GM"
+  },
+  "content.npc.307.name": {
+    "ar": "متجر GT Mira"
+  },
+  "content.npc.314.name": {
+    "ar": "متجر GT Mira"
+  },
+  "content.npc.321.name": {
+    "ar": "متجر GT Mira"
+  },
+  "content.npc.328.name": {
+    "ar": "متجر GT Mira"
+  },
+  "content.npc.335.name": {
+    "ar": "متجر GT Mira"
+  },
+  "content.npc.342.name": {
+    "ar": "متجر GT Mira"
+  },
+  "content.npc.349.name": {
+    "ar": "متجر GT Mira"
+  },
+  "content.npc.356.name": {
+    "ar": "متجر GT Mira"
+  },
+  "content.npc.363.name": {
+    "ar": "متجر GT Mira"
+  },
+  "content.npc.370.name": {
+    "ar": "متجر GT Mira"
+  },
+  "content.quest.132.name": {
+    "ar": "وحوش براجنا"
+  },
+  "content.item.1079.name": {
+    "id": "Jantung Wooma"
+  },
+  "content.item.1081.name": {
+    "id": "Jantung Prajna"
+  },
+  "content.item.1085.name": {
+    "id": "Ninja (M)"
+  },
+  "content.item.1086.name": {
+    "id": "Ninja (F)"
+  },
+  "content.item.1087.name": {
+    "id": "Santa"
+  },
+  "content.item.1088.name": {
+    "id": "Rudolph"
+  },
+  "content.item.1093.name": {
+    "id": "Busana Resmi (M)"
+  },
+  "content.item.1094.name": {
+    "id": "Busana Resmi (F)"
+  },
+  "content.item.1095.name": {
+    "id": "Busana Resmi 1 (M)"
+  },
+  "content.item.1096.name": {
+    "id": "Busana Resmi 1 (F)"
+  },
+  "content.item.1099.name": {
+    "id": "Busana Resmi 2 (F)"
+  },
+  "content.item.1100.name": {
+    "id": "Busana Resmi 2 (M)"
+  },
+  "content.item.1109.name": {
+    "id": "Domba Jantan"
+  },
+  "content.item.1110.name": {
+    "id": "Busana Resmi 2 (M)"
+  },
+  "content.item.1116.name": {
+    "id": "Jaring"
+  },
+  "content.item.1166.name": {
+    "id": "Alga"
+  },
+  "content.item.1205.name": {
+    "id": "Manik Feniks Usang"
+  },
+  "content.item.1214.name": {
+    "id": "Mata Ular Emas"
+  },
+  "content.item.1274.name": {
+    "id": "Arak Jiwa 1"
+  },
+  "content.item.1275.name": {
+    "id": "Arak Jiwa 3"
+  },
+  "content.item.1276.name": {
+    "id": "Arak Jiwa 5"
+  },
+  "content.item.1280.name": {
+    "id": "Arak Sihir 1"
+  },
+  "content.item.1281.name": {
+    "id": "Arak Sihir 3"
+  },
+  "content.item.1282.name": {
+    "id": "Arak Sihir 5"
+  },
+  "content.item.1325.name": {
+    "id": "Arak Jiwa"
+  },
+  "content.item.1334.name": {
+    "id": "Arak Mongchon"
+  },
+  "content.item.1353.description": {
+    "id": "Busana Pemimpin (F)"
+  },
+  "content.item.1353.name": {
+    "id": "Busana Pemimpin (F)"
+  },
+  "content.item.1354.description": {
+    "id": "Busana Pemimpin (M)"
+  },
+  "content.item.1354.name": {
+    "id": "Busana Pemimpin (M)"
+  },
+  "content.item.1373.name": {
+    "id": "Busur Retsuen"
+  },
+  "content.item.1374.name": {
+    "id": "Busur Naga Kuning (Naga Emas)"
+  },
+  "content.item.1399.name": {
+    "id": "Busur Cahaya Suci Gon Ryun (Ilahi)"
+  },
+  "content.item.1401.name": {
+    "id": "Baja Hyeoncheon Suho (Suci)"
+  },
+  "content.item.1406.name": {
+    "id": "Bilah Cahaya Suci Gon Ryun (Ilahi)"
+  },
+  "content.item.1442.name": {
+    "id": "Kelinci (F)"
+  },
+  "content.item.1443.name": {
+    "id": "Kelinci (M)"
+  },
+  "content.item.1559.name": {
+    "id": "Bunga Ganda"
+  },
+  "content.item.1560.name": {
+    "id": "Bunga Ganda 1"
+  },
+  "content.item.1561.name": {
+    "id": "Bunga Ganda 2"
+  },
+  "content.item.1562.name": {
+    "id": "Bunga Ganda 3"
+  },
+  "content.item.1563.name": {
+    "id": "Bunga Ganda 4"
+  },
+  "content.item.1564.name": {
+    "id": "Bunga Ganda 5"
+  },
+  "content.item.1566.name": {
+    "id": "Air Pemulihan Biru"
+  },
+  "content.item.176.name": {
+    "id": "Sepatu Bot Penyerbu"
+  },
+  "content.item.177.name": {
+    "id": "Sepatu Bot Penyerbu 1"
+  },
+  "content.item.178.name": {
+    "id": "Sepatu Bot Penyerbu 2"
+  },
+  "content.item.179.name": {
+    "id": "Sepatu Bot Penyerbu 3"
+  },
+  "content.item.180.name": {
+    "id": "Sepatu Bot Penyerbu 4"
+  },
+  "content.item.181.name": {
+    "id": "Sepatu Bot Penyerbu 5"
+  },
+  "content.item.204.name": {
+    "id": "Sabuk Kegelapan"
+  },
+  "content.item.232.name": {
+    "id": "Bilah Yama Neraka"
+  },
+  "content.item.233.name": {
+    "id": "Bilah Yama Neraka 1"
+  },
+  "content.item.234.name": {
+    "id": "Bilah Yama Neraka 2"
+  },
+  "content.item.235.name": {
+    "id": "Bilah Yama Neraka 3"
+  },
+  "content.item.236.name": {
+    "id": "Bilah Yama Neraka 4"
+  },
+  "content.item.237.name": {
+    "id": "Bilah Yama Neraka 5"
+  },
+  "content.item.302.name": {
+    "id": "Busur Majemuk"
+  },
+  "content.item.303.name": {
+    "id": "Busur Panjang"
+  },
+  "content.item.305.name": {
+    "id": "Busur Iblis Zuma"
+  },
+  "content.item.312.name": {
+    "id": "Busur Kelam"
+  },
+  "content.item.314.name": {
+    "id": "Busur Apus"
+  },
+  "content.item.36.name": {
+    "id": "Cincin Nok Chi"
+  },
+  "content.item.39.name": {
+    "id": "Pedang Mir"
+  },
+  "content.item.40.name": {
+    "id": "Pedang Mir 1"
+  },
+  "content.item.41.name": {
+    "id": "Pedang Mir 2"
+  },
+  "content.item.42.name": {
+    "id": "Pedang Mir 3"
+  },
+  "content.item.43.name": {
+    "id": "Pedang Mir 4"
+  },
+  "content.item.44.name": {
+    "id": "Pedang Mir 5"
+  },
+  "content.item.443.name": {
+    "id": "Cincin Rubah Merah"
+  },
+  "content.item.444.name": {
+    "id": "Cincin Rubah Biru"
+  },
+  "content.item.445.name": {
+    "id": "Cincin Rubah Ungu Agung"
+  },
+  "content.item.446.name": {
+    "id": "Cincin Rubah Merah Agung"
+  },
+  "content.item.447.name": {
+    "id": "Cincin Rubah Biru Agung"
+  },
+  "content.item.451.name": {
+    "id": "Cincin Kerajinan 1"
+  },
+  "content.item.452.name": {
+    "id": "Cincin Kerajinan 2"
+  },
+  "content.item.453.name": {
+    "id": "Cincin Kerajinan 3"
+  },
+  "content.item.454.name": {
+    "id": "Cincin Kerajinan 4"
+  },
+  "content.item.455.name": {
+    "id": "Cincin Kerajinan 5"
+  },
+  "content.item.456.name": {
+    "id": "Cincin Kerajinan 6"
+  },
+  "content.item.457.name": {
+    "id": "Cincin Kerajinan 7"
+  },
+  "content.item.458.name": {
+    "id": "Cincin Kerajinan 8"
+  },
+  "content.item.459.name": {
+    "id": "Cincin Kerajinan 9"
+  },
+  "content.item.460.name": {
+    "id": "Cincin Kerajinan 10"
+  },
+  "content.item.464.name": {
+    "id": "Cincin Naga Jahat"
+  },
+  "content.item.465.name": {
+    "id": "Cincin Naga Jahat 1"
+  },
+  "content.item.466.name": {
+    "id": "Cincin Naga Jahat 2"
+  },
+  "content.item.467.name": {
+    "id": "Cincin Naga Jahat 3"
+  },
+  "content.item.468.name": {
+    "id": "Cincin Naga Jahat 4"
+  },
+  "content.item.469.name": {
+    "id": "Cincin Naga Jahat 5"
+  },
+  "content.item.503.name": {
+    "id": "Roda Hang Ma"
+  },
+  "content.item.504.name": {
+    "id": "Roda Bok Ma"
+  },
+  "content.item.505.name": {
+    "id": "Sarung Tangan Baek Ta"
+  },
+  "content.item.519.name": {
+    "id": "Gelang Rubah Biru Agung"
+  },
+  "content.item.545.name": {
+    "id": "Manik Feniks"
+  },
+  "content.item.690.name": {
+    "id": "Penunjang Sihir (S)"
+  },
+  "content.item.691.name": {
+    "id": "Penunjang Sihir (M)"
+  },
+  "content.item.692.name": {
+    "id": "Penunjang Sihir (L)"
+  },
+  "content.item.738.name": {
+    "id": "Permata Pembasmi Kejahatan"
+  },
+  "content.item.75.name": {
+    "id": "Cincin Mir"
+  },
+  "content.item.76.name": {
+    "id": "Cincin Mir 1"
+  },
+  "content.item.764.name": {
+    "id": "Harimau Benggala"
+  },
+  "content.item.765.name": {
+    "id": "Harimau Biru"
+  },
+  "content.item.77.name": {
+    "id": "Cincin Mir 2"
+  },
+  "content.item.773.name": {
+    "id": "Serigala Biru"
+  },
+  "content.item.78.name": {
+    "id": "Cincin Mir 3"
+  },
+  "content.item.784.name": {
+    "id": "Pita Biru"
+  },
+  "content.item.79.name": {
+    "id": "Cincin Mir 4"
+  },
+  "content.item.80.name": {
+    "id": "Cincin Mir 5"
+  },
+  "content.item.807.name": {
+    "id": "Ikan Trout"
+  },
+  "content.item.817.name": {
+    "id": "Kristal Tembus Cahaya"
+  },
+  "content.item.82.name": {
+    "id": "Sepatu Bot Mir"
+  },
+  "content.item.829.name": {
+    "id": "Kecubung"
+  },
+  "content.item.830.name": {
+    "id": "Rubi"
+  },
+  "content.item.862.name": {
+    "id": "Ceri"
+  },
+  "content.item.877.name": {
+    "id": "Rahang Bawah"
+  },
+  "content.item.884.name": {
+    "id": "Tengkorak Mata Merah"
+  },
+  "content.item.893.name": {
+    "id": "Tali"
+  },
+  "content.item.953.name": {
+    "id": "Batu Makhluk Hitam"
+  },
+  "content.map.120.name": {
+    "id": "Jalur Pepohonan"
+  },
+  "content.map.323.name": {
+    "id": "Lembah Oma"
+  },
+  "content.map.343.name": {
+    "id": "Kuil Neraka Es KR"
+  },
+  "content.map.439.name": {
+    "id": "Arena Dog Yo"
+  },
+  "content.map.441.name": {
+    "id": "Lobi Tambang Dog Yo"
+  },
+  "content.map.451.name": {
+    "id": "Lobi Tambang Dog Yo 1"
+  },
+  "content.map.452.name": {
+    "id": "Lobi Tambang Dog Yo 2"
+  },
+  "content.map.453.name": {
+    "id": "Lobi Tambang Dog Yo 3"
+  },
+  "content.map.454.name": {
+    "id": "Lobi Tambang Dog Yo 4"
+  },
+  "content.map.91.name": {
+    "id": "Hwan Ma Jin"
+  },
+  "content.map.94.name": {
+    "id": "Hwan Ma Jin"
+  },
+  "content.monster.107.name": {
+    "id": "Pemimpin Tengkorak"
+  },
+  "content.monster.166.name": {
+    "id": "Kelelawar Serangga"
+  },
+  "content.monster.217.name": {
+    "id": "Manusia Rubah Hitam"
+  },
+  "content.monster.224.name": {
+    "id": "Kek Tal Semak"
+  },
+  "content.monster.225.name": {
+    "id": "Kek Tal Semak Besar"
+  },
+  "content.monster.229.name": {
+    "id": "Katak Laba-laba"
+  },
+  "content.monster.230.name": {
+    "id": "Katak Laba-laba 0"
+  },
+  "content.monster.231.name": {
+    "id": "Penembak Horo"
+  },
+  "content.monster.232.name": {
+    "id": "Penembak Horo 0"
+  },
+  "content.monster.233.name": {
+    "id": "Penembak Horo Biru"
+  },
+  "content.monster.234.name": {
+    "id": "Penembak Horo Biru 0"
+  },
+  "content.monster.324.name": {
+    "id": "Iblis Bulan Merah"
+  },
+  "content.monster.325.name": {
+    "id": "Iblis Bulan Merah 1"
+  },
+  "content.monster.33.name": {
+    "id": "Banteng"
+  },
+  "content.monster.345.name": {
+    "id": "Pemanah Tulang"
+  },
+  "content.monster.346.name": {
+    "id": "Pemanah Tulang 0"
+  },
+  "content.monster.351.name": {
+    "id": "Kapten Tulang"
+  },
+  "content.monster.352.name": {
+    "id": "Kapten Tulang 0"
+  },
+  "content.monster.36.name": {
+    "id": "Anjing Ganas"
+  },
+  "content.monster.363.name": {
+    "id": "Minotaur Es"
+  },
+  "content.monster.364.name": {
+    "id": "Minotaur Es 0"
+  },
+  "content.monster.387.name": {
+    "id": "Penjaga Oma 0"
+  },
+  "content.monster.397.name": {
+    "id": "Manectric Cakar"
+  },
+  "content.monster.402.name": {
+    "id": "Manectric Terberkati"
+  },
+  "content.monster.411.name": {
+    "id": "Pemangsa Kegelapan"
+  },
+  "content.monster.427.name": {
+    "id": "Badak Berkulit Keras"
+  },
+  "content.monster.430.name": {
+    "id": "Utusan Purba"
+  },
+  "content.monster.432.name": {
+    "id": "Hidra"
+  },
+  "content.monster.444.name": {
+    "id": "Minion Prajurit"
+  },
+  "content.monster.447.name": {
+    "id": "Minion Penyamun"
+  },
+  "content.monster.454.name": {
+    "id": "Tempayan 1"
+  },
+  "content.monster.455.name": {
+    "id": "Tempayan 2"
+  },
+  "content.monster.456.name": {
+    "id": "Kucing Petarung"
+  },
+  "content.monster.458.name": {
+    "id": "Janda Kucing"
+  },
+  "content.monster.493.name": {
+    "id": "Penambang Sinseok"
+  },
+  "content.monster.545.name": {
+    "id": "Roh Batu Besar"
+  },
+  "content.monster.559.name": {
+    "id": "Pemanah Tulang 22"
+  },
+  "content.monster.560.name": {
+    "id": "Kapten Tulang 22"
+  },
+  "content.monster.562.name": {
+    "id": "Ratu Pohon"
+  },
+  "content.monster.64.name": {
+    "id": "Ular Merah"
+  },
+  "content.monster.65.name": {
+    "id": "Ular Merah 0"
+  },
+  "content.monster.67.name": {
+    "id": "Ular Harimau"
+  },
+  "content.monster.68.name": {
+    "id": "Ular Harimau 0"
+  },
+  "content.monster.72.name": {
+    "id": "Pencapit Bercangkang"
+  },
+  "content.monster.73.name": {
+    "id": "Pencapit Bercangkang 0"
+  },
+  "content.monster.74.name": {
+    "id": "Penyengat Langit"
+  },
+  "content.monster.75.name": {
+    "id": "Penyengat Langit 0"
+  },
+  "content.npc.164.name": {
+    "id": "Utusan Mongchon Michael"
+  },
+  "content.npc.227.name": {
+    "id": "Prajurit Bichon Frank"
+  },
+  "content.quest.113.name": {
+    "id": "Insomnia"
+  },
+  "content.quest.42.name": {
+    "id": "Jalan ke Mongchon"
+  }
+}

@@ -1,0 +1,145 @@
+{
+  "schemaVersion": 1,
+  "verifiedAt": "2026-10-25T16:27:22.072Z",
+  "scope": "Independent raw-copy/structural/README verification for this new public child only.",
+  "copiedFiles": 10,
+  "copiedBytes": 1798475,
+  "allCopiedSourceAndTargetRawBytesMatched": true,
+  "externalAndPublicReceiptBytesMatched": true,
+  "copyReceipt": {
+    "file": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/docs/generated/cell-p0-p1-completion-20261024/capacity-correlated-slow-stage-validation-v1/public-copy-receipt-v1.json",
+    "bytes": 4116,
+    "sha256": "ec4965987b40b6b2855c1cd841a74fc7b4138122574f4f635f2c185f24ba689b"
+  },
+  "inventoryBeforeThisVerification": [
+    {
+      "path": "archive-tools/archive-correlated-slow-stage-validation-v1.mjs",
+      "bytes": 5480,
+      "sha256": "c886e8e7cc5be1ed929565723ab810587f2a07a404b7d042dd85a520c39d237a"
+    },
+    {
+      "path": "archive-tools/public-whitelist-v1.json",
+      "bytes": 2931,
+      "sha256": "c463570da1fd822d7201df0706fd654bc633cd20586b3bb3a6ebd87cc19ae12e"
+    },
+    {
+      "path": "public-copy-receipt-v1.json",
+      "bytes": 4116,
+      "sha256": "ec4965987b40b6b2855c1cd841a74fc7b4138122574f4f635f2c185f24ba689b"
+    },
+    {
+      "path": "README.md",
+      "bytes": 2001,
+      "sha256": "e82838c9aff5af319323daa553d9d348544b766d58471c7acb4871dd477830d9"
+    },
+    {
+      "path": "review/independent-review-v1.json",
+      "bytes": 2799,
+      "sha256": "e10e660b755819e68daebea33d75b18df8e2c269be0697402c16d2560f03595b"
+    },
+    {
+      "path": "source/web-after-v1.rs.txt",
+      "bytes": 857503,
+      "sha256": "41d81bf7cdc6c0aaacbbd11aee12425b27b8a4c27a02b5a0d0915351fb811e40"
+    },
+    {
+      "path": "source/web-before-v1.rs.txt",
+      "bytes": 855687,
+      "sha256": "769186e87e166a7ba0fbb971463c8e0ae2b4dd119292798badee3b8e28522dd6"
+    },
+    {
+      "path": "validation/focused-execution-v1.json",
+      "bytes": 1744,
+      "sha256": "1874a8243344494a7a65ceef06a263a3cf1b7eacd898010636caae510cda91c6"
+    },
+    {
+      "path": "validation/focused-v1.log",
+      "bytes": 64266,
+      "sha256": "43ab5289f35aeea4e9ad34e89321409695662c450441fec06259e86127c0e2a6"
+    },
+    {
+      "path": "validation/mutation-v1.json",
+      "bytes": 3929,
+      "sha256": "d7d30e40bd93bb683b9c9cb9988796e346d5f9f259c93e3c983ed11127b53ddb"
+    },
+    {
+      "path": "validation/rustfmt-command-record-v1.json",
+      "bytes": 1409,
+      "sha256": "d2f091427f1ffaaa2b0e0c232f963df5404ab0fbc7a08ecb06c4f1912f2e4648"
+    },
+    {
+      "path": "validation/validation-receipt-v1.json",
+      "bytes": 2727,
+      "sha256": "34db4d83270771906b3860f1af476ad13a775c25041234b81c692f2e982537f1"
+    }
+  ],
+  "finalFileCount": 13,
+  "finalBytesBeforeThisVerification": 1804592,
+  "jsonSensitiveKeyFindings": 0,
+  "noRealRustPathsUnderDocs": true,
+  "sourceAfter": {
+    "bytes": 857503,
+    "sha256": "41d81bf7cdc6c0aaacbbd11aee12425b27b8a4c27a02b5a0d0915351fb811e40"
+  },
+  "readmeLinks": [
+    {
+      "target": "source/web-before-v1.rs.txt",
+      "exists": true
+    },
+    {
+      "target": "source/web-after-v1.rs.txt",
+      "exists": true
+    },
+    {
+      "target": "validation/mutation-v1.json",
+      "exists": true
+    },
+    {
+      "target": "validation/focused-v1.log",
+      "exists": true
+    },
+    {
+      "target": "validation/focused-execution-v1.json",
+      "exists": true
+    },
+    {
+      "target": "validation/validation-receipt-v1.json",
+      "exists": true
+    },
+    {
+      "target": "review/independent-review-v1.json",
+      "exists": true
+    },
+    {
+      "target": "validation/rustfmt-command-record-v1.json",
+      "exists": true
+    },
+    {
+      "target": "archive-tools/public-whitelist-v1.json",
+      "exists": true
+    },
+    {
+      "target": "archive-tools/archive-correlated-slow-stage-validation-v1.mjs",
+      "exists": true
+    },
+    {
+      "target": "../capacity-attack-deadline-poll-fix-v1/README.md",
+      "exists": false
+    }
+  ],
+  "localLinksPassed": false,
+  "pendingRootIntegrationLinks": [
+    {
+      "target": "../capacity-attack-deadline-poll-fix-v1/README.md",
+      "exists": false
+    }
+  ],
+  "testsActuallyPassed": 8,
+  "newTests": 1,
+  "originalTests": 7,
+  "extraTestsClaimed": false,
+  "newReleaseBuilt": false,
+  "newLoadPerformed": false,
+  "capacityAccepted": false,
+  "sourceWrittenByArchive": false
+}

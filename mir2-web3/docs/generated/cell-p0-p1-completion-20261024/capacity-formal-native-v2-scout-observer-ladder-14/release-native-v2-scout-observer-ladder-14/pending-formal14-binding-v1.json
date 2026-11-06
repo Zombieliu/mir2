@@ -1,0 +1,39 @@
+{
+  "schemaVersion": 1,
+  "state": "PENDING_FRESH_PROBE18_COLLECTED_AND_INDEPENDENT_BINDING",
+  "finalized": false,
+  "backendSourceCommit": "c743122af05faca43d9535d8c6c2a4bfb01b924f",
+  "driverSourceCommit": "3a6d8c862d03ded3133605472a8f38bc6258af52",
+  "backendInputCount": 50,
+  "capacityAccepted": false,
+  "sealed": false,
+  "accountPrepared": false,
+  "realmStarted": false,
+  "executionSourceCommit": "3a6d8c862d03ded3133605472a8f38bc6258af52",
+  "probe18": {
+    "runId": null,
+    "report": null,
+    "raw": null,
+    "collectedEvidence": null,
+    "independentVerification": null,
+    "independentVerifierSources": null,
+    "independentSourceClosureManifest": null,
+    "actualExecutionReceipt": null,
+    "preparedSourceConfigSha256": null,
+    "completePhaseSeconds": [
+      300,
+      300,
+      360
+    ],
+    "completePhaseWindows": [
+      5,
+      5,
+      6
+    ],
+    "capacityAccepted": false,
+    "independentVerifierRevision": null,
+    "actualExecutionLog": null,
+    "rootIndependentCleanup": null,
+    "storeDiagnostics": null
+  }
+}

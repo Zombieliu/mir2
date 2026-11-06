@@ -5,6 +5,12 @@ import { createHmac, timingSafeEqual } from "node:crypto";
 export const PASSKEY_CHALLENGE_AUTH = "mir2-login-challenge-v1";
 export const PASSKEY_GATEWAY_TOKEN_AUTH = "sui-passkey-v2";
 
+/** Server-created dependency only; never populated from a request body/header. */
+export type PasskeyAuthContext = Readonly<{
+  secret: string;
+  allowedOrigins: readonly string[];
+}>;
+
 export type PasskeyChallengePayload = {
   auth: typeof PASSKEY_CHALLENGE_AUTH;
   jti: string;
@@ -15,12 +21,12 @@ export type PasskeyChallengePayload = {
   authMethod: "passkey" | "wallet";
 };
 
-export function signPasskeyChallenge(payload: PasskeyChallengePayload) {
-  return signPayload(payload);
+export function signPasskeyChallenge(payload: PasskeyChallengePayload, context?: PasskeyAuthContext) {
+  return signPayload(payload, context);
 }
 
-export function verifyPasskeyChallenge(token: string): PasskeyChallengePayload {
-  const payload = verifySignedPayload(token) as Partial<PasskeyChallengePayload>;
+export function verifyPasskeyChallenge(token: string, context?: PasskeyAuthContext): PasskeyChallengePayload {
+  const payload = verifySignedPayload(token, context) as Partial<PasskeyChallengePayload>;
   if (
     payload.auth !== PASSKEY_CHALLENGE_AUTH ||
     typeof payload.jti !== "string" ||
@@ -40,6 +46,7 @@ export function issueGatewayPasskeyToken(
   jti: string,
   expiresAt: number,
   authMethod: "passkey" | "wallet",
+  context?: PasskeyAuthContext,
 ) {
   return signPayload({
     auth: PASSKEY_GATEWAY_TOKEN_AUTH,
@@ -47,10 +54,10 @@ export function issueGatewayPasskeyToken(
     jti,
     expMs: expiresAt,
     authMethod,
-  });
+  }, context);
 }
 
-export function passkeyRequestOriginAllowed(origin: string | null, requestUrl: string) {
+export function passkeyRequestOriginAllowed(origin: string | null, requestUrl: string, context?: PasskeyAuthContext) {
   if (!origin) return false;
   let normalizedOrigin: string;
   let requestOrigin: string;
@@ -61,6 +68,7 @@ export function passkeyRequestOriginAllowed(origin: string | null, requestUrl: s
     return false;
   }
   if (normalizedOrigin !== origin) return false;
+  if (context) return context.allowedOrigins.includes(normalizedOrigin);
 
   const configured = (
     process.env.MIR2_PASSKEY_ALLOWED_ORIGINS ?? process.env.MIR2_ALLOWED_WEB_ORIGINS ?? ""
@@ -80,17 +88,17 @@ export function passkeyRequestOriginAllowed(origin: string | null, requestUrl: s
   return normalizedOrigin === requestOrigin;
 }
 
-function signPayload(payload: object) {
+function signPayload(payload: object, context?: PasskeyAuthContext) {
   const encoded = Buffer.from(JSON.stringify(payload)).toString("base64url");
-  const signature = createHmac("sha256", passkeyGatewaySecret()).update(encoded).digest("base64url");
+  const signature = createHmac("sha256", passkeyGatewaySecret(context)).update(encoded).digest("base64url");
   return `${encoded}.${signature}`;
 }
 
-function verifySignedPayload(token: string): unknown {
+function verifySignedPayload(token: string, context?: PasskeyAuthContext): unknown {
   const [payload, signature, extra] = token.split(".");
   if (!payload || !signature || extra) throw new Error("invalid passkey challenge");
   const actual = Buffer.from(signature, "base64url");
-  const expected = createHmac("sha256", passkeyGatewaySecret()).update(payload).digest();
+  const expected = createHmac("sha256", passkeyGatewaySecret(context)).update(payload).digest();
   if (actual.length !== expected.length || !timingSafeEqual(actual, expected)) {
     throw new Error("invalid passkey challenge signature");
   }
@@ -101,7 +109,11 @@ function verifySignedPayload(token: string): unknown {
   }
 }
 
-function passkeyGatewaySecret() {
+export function passkeyGatewaySecret(context?: PasskeyAuthContext) {
+  if (context) {
+    if (typeof context.secret !== "string" || context.secret.length < 32) throw new Error("invalid server wallet auth context");
+    return context.secret;
+  }
   const secret = process.env.MIR2_PASSKEY_AUTH_SECRET;
   if (secret && secret.length >= 32) return secret;
   if (passkeySecretRequiredFromEnv()) {

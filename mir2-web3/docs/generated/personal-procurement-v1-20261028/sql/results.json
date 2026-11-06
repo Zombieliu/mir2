@@ -1,0 +1,251 @@
+{
+  "startedAt": "2026-10-28T14:45:37.081Z",
+  "finishedAt": "2026-10-28T14:45:38.118Z",
+  "executionKind": "Embedded PostgreSQL WASM SQL/PLpgSQL execution; not native/server PostgreSQL or Rust/libpq integration",
+  "pglite": {
+    "package": "@electric-sql/pglite",
+    "version": "0.5.13",
+    "wasm": true,
+    "dataDir": "memory://",
+    "engine": {
+      "version": "PostgreSQL 18.6 (PGlite 0.5.13) on wasm32-unknown-emscripten, compiled by emcc (Emscripten gcc/clang-like replacement + linker emulating GNU ld) 6.0.5 (1db513782be24469589d7cb8a1f1834e9a33f271), 32-bit",
+      "server_version": "18.6"
+    }
+  },
+  "dependenciesInstalledWithIgnoreScripts": true,
+  "migration": {
+    "sourcePath": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\infra\\postgres\\migrations\\0018_procurement_authority_guard.sql",
+    "sha256": "53b63e26318a345c9fc7dc571e6f6a50c9b4534829130a2ea4519446a7f03ac4"
+  },
+  "officialReferences": [
+    "https://pglite.dev/docs/about",
+    "https://pglite.dev/docs/api"
+  ],
+  "scope": "Temporary minimal accounts(raw_json JSONB) table; exact unmodified migration 0018; no game runtime, native libpq, daemon, Docker, production database, or network database access",
+  "totals": {
+    "passed": 44,
+    "failed": 0
+  },
+  "tests": [
+    {
+      "name": "migration creates PL/pgSQL function and trigger",
+      "passed": true,
+      "elapsedMs": 6
+    },
+    {
+      "name": "migration reapplication is idempotent",
+      "passed": true,
+      "elapsedMs": 3
+    },
+    {
+      "name": "plain account update is allowed",
+      "passed": true,
+      "elapsedMs": 4
+    },
+    {
+      "name": "plain account deletion is allowed",
+      "passed": true,
+      "elapsedMs": 1
+    },
+    {
+      "name": "legacy procurement:null account update and deletion are allowed",
+      "passed": true,
+      "elapsedMs": 1
+    },
+    {
+      "name": "procurement account deletion is blocked",
+      "passed": true,
+      "elapsedMs": 2
+    },
+    {
+      "name": "procurement:null downgrade is blocked",
+      "passed": true,
+      "elapsedMs": 1
+    },
+    {
+      "name": "omitted procurement downgrade is blocked",
+      "passed": true,
+      "elapsedMs": 1
+    },
+    {
+      "name": "empty procurement authority is blocked",
+      "passed": true,
+      "elapsedMs": 2
+    },
+    {
+      "name": "orders: removing the history collection is blocked",
+      "passed": true,
+      "elapsedMs": 1
+    },
+    {
+      "name": "orders: clearing existing history is blocked",
+      "passed": true,
+      "elapsedMs": 1
+    },
+    {
+      "name": "orders: replacing an existing key is blocked",
+      "passed": true,
+      "elapsedMs": 1
+    },
+    {
+      "name": "locks: removing the history collection is blocked",
+      "passed": true,
+      "elapsedMs": 2
+    },
+    {
+      "name": "locks: clearing existing history is blocked",
+      "passed": true,
+      "elapsedMs": 2
+    },
+    {
+      "name": "locks: replacing an existing key is blocked",
+      "passed": true,
+      "elapsedMs": 1
+    },
+    {
+      "name": "credits: removing the history collection is blocked",
+      "passed": true,
+      "elapsedMs": 1
+    },
+    {
+      "name": "credits: clearing existing history is blocked",
+      "passed": true,
+      "elapsedMs": 1
+    },
+    {
+      "name": "credits: replacing an existing key is blocked",
+      "passed": true,
+      "elapsedMs": 1
+    },
+    {
+      "name": "outbox: removing the history collection is blocked",
+      "passed": true,
+      "elapsedMs": 1
+    },
+    {
+      "name": "outbox: clearing existing history is blocked",
+      "passed": true,
+      "elapsedMs": 1
+    },
+    {
+      "name": "outbox: replacing an existing key is blocked",
+      "passed": true,
+      "elapsedMs": 1
+    },
+    {
+      "name": "deliveries: removing the history collection is blocked",
+      "passed": true,
+      "elapsedMs": 1
+    },
+    {
+      "name": "deliveries: clearing existing history is blocked",
+      "passed": true,
+      "elapsedMs": 1
+    },
+    {
+      "name": "deliveries: replacing an existing key is blocked",
+      "passed": true,
+      "elapsedMs": 1
+    },
+    {
+      "name": "chain_inbox: removing the history collection is blocked",
+      "passed": true,
+      "elapsedMs": 1
+    },
+    {
+      "name": "chain_inbox: clearing existing history is blocked",
+      "passed": true,
+      "elapsedMs": 1
+    },
+    {
+      "name": "chain_inbox: replacing an existing key is blocked",
+      "passed": true,
+      "elapsedMs": 1
+    },
+    {
+      "name": "absence_inbox: removing the history collection is blocked",
+      "passed": true,
+      "elapsedMs": 1
+    },
+    {
+      "name": "absence_inbox: clearing existing history is blocked",
+      "passed": true,
+      "elapsedMs": 1
+    },
+    {
+      "name": "absence_inbox: replacing an existing key is blocked",
+      "passed": true,
+      "elapsedMs": 1
+    },
+    {
+      "name": "requests: removing the history collection is blocked",
+      "passed": true,
+      "elapsedMs": 2
+    },
+    {
+      "name": "requests: clearing existing history is blocked",
+      "passed": true,
+      "elapsedMs": 2
+    },
+    {
+      "name": "requests: replacing an existing key is blocked",
+      "passed": true,
+      "elapsedMs": 2
+    },
+    {
+      "name": "quota_quotes: removing the history collection is blocked",
+      "passed": true,
+      "elapsedMs": 2
+    },
+    {
+      "name": "quota_quotes: clearing existing history is blocked",
+      "passed": true,
+      "elapsedMs": 2
+    },
+    {
+      "name": "quota_quotes: replacing an existing key is blocked",
+      "passed": true,
+      "elapsedMs": 1
+    },
+    {
+      "name": "quota_purchases: removing the history collection is blocked",
+      "passed": true,
+      "elapsedMs": 1
+    },
+    {
+      "name": "quota_purchases: clearing existing history is blocked",
+      "passed": true,
+      "elapsedMs": 1
+    },
+    {
+      "name": "quota_purchases: replacing an existing key is blocked",
+      "passed": true,
+      "elapsedMs": 1
+    },
+    {
+      "name": "old schema11 writer cannot omit the new quota quote and purchase receipts",
+      "passed": true,
+      "elapsedMs": 1
+    },
+    {
+      "name": "normal state progression and appended history are allowed",
+      "passed": true,
+      "elapsedMs": 1
+    },
+    {
+      "name": "transaction trigger rejection rolls back prior account debit and appended history",
+      "passed": true,
+      "elapsedMs": 3
+    },
+    {
+      "name": "application error rolls back an otherwise allowed authority transition",
+      "passed": true,
+      "elapsedMs": 1
+    },
+    {
+      "name": "a first procurement ledger can be created but cannot later be dropped",
+      "passed": true,
+      "elapsedMs": 2
+    }
+  ]
+}

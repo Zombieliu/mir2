@@ -1,0 +1,18 @@
+{
+  "projectedReport": {
+    "builtUnix": 1793256068,
+    "engineSha256": "343C5E52355E012A6E4CDABD81289A52C9D893114F378CD875AE3AF70AC2BBE3",
+    "gameCandidate": "WN-CANDIDATE-20261029-wallet-28",
+    "gameSourceRevision": "33f0b8c252f65cc4a24b133292cd1f9eba122dae",
+    "launcherSha256": "831F4805423188391AEEF6391EB00675F3DB4E30897A9A4DC47DCFCACF09D49C",
+    "schema": "mir2.windows.updater-build.v1",
+    "sequence": 30,
+    "sourceClean": true,
+    "sourceRevision": "ba79cc90b47fa2fe017f977c29ea2c987342bcfe"
+  },
+  "projectionBoundary": "Explicit fields only; raw log/body/attempt/env/argv/private config excluded.",
+  "role": "engine-build",
+  "schema": "mir2.evidence.public-projection.v1",
+  "sourceSha256": "2BBCC93415FB027491BB9CED1343CA1C18643DC080E0CAD9E8EEA5AA9D55D88A",
+  "sourceSize": 616
+}

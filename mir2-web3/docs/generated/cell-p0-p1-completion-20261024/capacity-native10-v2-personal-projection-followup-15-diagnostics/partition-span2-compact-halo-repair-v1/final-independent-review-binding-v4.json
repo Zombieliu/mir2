@@ -1,0 +1,54 @@
+{
+  "schemaVersion": 1,
+  "createdAt": "2026-10-25T05:45:35.586Z",
+  "scope": "Final independent-review binding only, no run authorization or accepted capacity",
+  "summary": {
+    "path": "C:/mir2-build/p01-completion-20261024/partition-span2-compact-halo-repair-v1/review-summary-v4.json",
+    "bytes": 20628,
+    "sha256": "1669a862e5281a7623e0ba112471282556804df1c6eac24ea2d2cd78c5e43fd5"
+  },
+  "scene100": {
+    "path": "C:/mir2-build/p01-completion-20261024/partition-span2-compact-halo-repair-v1/candidate-100-repaired-v4.json",
+    "bytes": 5844,
+    "sha256": "f87aae78a2d68d8daa63916a93580c33f4ef974da4769bd3531a62aafcf0f205"
+  },
+  "scene10": {
+    "path": "C:/mir2-build/p01-completion-20261024/partition-span2-compact-halo-repair-v1/candidate-10-repaired-v4.json",
+    "bytes": 804,
+    "sha256": "a42a26a195dd5ac25135bff57e73f7f21b71f97b5cc1814351920ece621362ba"
+  },
+  "reviewCopies": [
+    {
+      "source": {
+        "path": "C:/mir2-build/p01-completion-20261024/compact-halo-scene-independent-review-v1.json",
+        "bytes": 11639,
+        "sha256": "6edf7561725c020f321bb06cdfc83043de7c0aa88735aa57c7a1c3aeaa3b85d6"
+      },
+      "target": {
+        "path": "C:/mir2-build/p01-completion-20261024/partition-span2-compact-halo-repair-v1/independent-first10-review-v1.json",
+        "bytes": 11639,
+        "sha256": "6edf7561725c020f321bb06cdfc83043de7c0aa88735aa57c7a1c3aeaa3b85d6"
+      }
+    },
+    {
+      "source": {
+        "path": "C:/mir2-build/p01-completion-20261024/compact-halo-repair-independent-review-v1.json",
+        "bytes": 13583,
+        "sha256": "793e2334baf32a2c1963cf32f45ee4781bdb1dcc7fa486809b1b54b0f0b9f76e"
+      },
+      "target": {
+        "path": "C:/mir2-build/p01-completion-20261024/partition-span2-compact-halo-repair-v1/independent-repair-review-v1.json",
+        "bytes": 13583,
+        "sha256": "793e2334baf32a2c1963cf32f45ee4781bdb1dcc7fa486809b1b54b0f0b9f76e"
+      }
+    }
+  ],
+  "independentStaticReviewComplete": true,
+  "independentRepairStaticBlockingFound": false,
+  "pairedStaticInputsSuitableForRootFreshProbeDecision": true,
+  "supersedesOnlyEarlierPendingIndependent100ReviewFlag": true,
+  "authorizesRun": false,
+  "formalCapacityPassed": false,
+  "capacityAccepted": false,
+  "accepted": false
+}

@@ -1,0 +1,96 @@
+{
+  "schema": "mir2.source62.gateway-build.actual.v1",
+  "owner": "Root",
+  "accepted": true,
+  "outer": {
+    "owner": "Root",
+    "exitCode": 0,
+    "builderPid": 56348,
+    "kind": "gateway-build03 Root accepted actual922 Source62 generation03",
+    "exited": true,
+    "disposed": true,
+    "elapsedMs": 131972,
+    "configPath": "C:/mir2-cross-platform-storage-20261002/web-source62-tooltip-wire-20261011-01/root-approved01/gateway-build03-config03.json",
+    "uiOperated": false,
+    "runtimeLaunched": false,
+    "networkUsed": false,
+    "productionBuildAccepted": false,
+    "candidateAccepted": false,
+    "goalComplete": false
+  },
+  "guardBefore": {
+    "schemaVersion": 1,
+    "mode": "real-cargo",
+    "nonce": "f3dafce570714d2989c4a84fedf0e10b",
+    "policyPath": "C:/mir2-cross-platform-storage-20261002/web-source62-tooltip-wire-20261011-01/root-approved01/gateway-build03-policy03.json",
+    "policySha": "7ee77ff7ea6bdb3913763ab05837e47cd8b7ec7b2a546134cf0cf9e97abcaf27",
+    "args": [
+      "+1.95.0",
+      "build",
+      "--manifest-path",
+      "apps/gateway/Cargo.toml",
+      "--locked",
+      "--offline",
+      "--jobs",
+      "1",
+      "--bin",
+      "mir2-gateway"
+    ],
+    "cwd": "C:\\mir2-cross-platform-storage-20261002\\web-source62-tooltip-wire-20261011-01\\preparation03\\mir2-web3",
+    "calleePath": "C:/Users/Administrator/.cargo/bin/cargo.exe",
+    "calleeSha": "86478e53f769379d7f0ebfa7c9aa97cb76ca92233f79aa2cc0dbee2efaac73c7",
+    "sample": {
+      "schemaVersion": "1",
+      "driveLetter": "C",
+      "sampleBeginUtc": "2026-10-11T06:27:15.6976761Z",
+      "sampleEndUtc": "2026-10-11T06:27:16.3314051Z",
+      "remainingBytes": "169600978944",
+      "requiredBytes": "53687091200"
+    },
+    "probePid": 55496,
+    "probeLaunchMs": 86.7198,
+    "probeEndMs": 914.6188000000001,
+    "decision": "FORWARD",
+    "thresholdBytes": "53687091200",
+    "sampleProof": "actualGetVolumeC"
+  },
+  "guardAfter": {
+    "childPid": 51020,
+    "childStartedUtc": "/Date(1791700036396)/",
+    "childStartMs": 936.0407,
+    "completed": true,
+    "exited": true,
+    "disposed": true,
+    "exitCode": 0,
+    "exitBits": "0",
+    "completedUtc": "/Date(1791700167348)/",
+    "completionMs": 131888.92010000002,
+    "postChildPolicy": "B",
+    "lifecycle": ".NET Start/Exited/WaitForExit/Dispose; not Node close"
+  },
+  "sourceSnapshot": {
+    "path": "C:/mir2-cross-platform-storage-20261002/web-source62-tooltip-wire-20261011-01/preparation03/source62-isolated-snapshot03.json",
+    "bytes": 513681,
+    "sha256": "6a2166a192bc9f721b29992a33ed5c5657c937065d6743152e4fc34b48419e50"
+  },
+  "declaredInputs": 922,
+  "artifact": {
+    "path": "C:/mir2-cross-platform-storage-20261002/rust-target/windows/debug/mir2-gateway.exe",
+    "bytes": 109072896,
+    "sha256": "cd7d50b61f7dc16978f5ce28e8bc56df5dfbfd51c21925337403faee15ab3d48"
+  },
+  "runtimeCopy": {
+    "path": "C:/mir2-cross-platform-storage-20261002/web-source62-tooltip-wire-20261011-01/gateway-runtime01/mir2-gateway.exe",
+    "bytes": 109072896,
+    "sha256": "cd7d50b61f7dc16978f5ce28e8bc56df5dfbfd51c21925337403faee15ab3d48"
+  },
+  "runtimeCopyDifferences": 0,
+  "scope": "accepted frozen Rust baseline plus only two socket Vec serde attribute changes, separate wire regression test, three unchanged committed workspace entry files and one exact unchanged public compile catalog; not full current dirty backend",
+  "originalCallerBytes": 4569,
+  "originalCallerSha256": "497a5b184074ca9591cb666b0124097f7fe4e4a5fae28dbd9f54807b423e8383",
+  "privateConfigurationRead": false,
+  "ordinaryPurchaseVerified": false,
+  "candidate100": false,
+  "overallPercentage": null,
+  "goalComplete": false
+}

@@ -1,0 +1,17 @@
+{
+  "schema": "mir2.windows.vc-runtime-cache-validation.v1",
+  "capturedAtUtc": "2026-10-29T08:13:18.1287984+00:00",
+  "sourcePath": "C:/mir2-playtest-releases/20261007-mining-r19/bootstrap-03/installer/tools/vc_redist.x64.exe",
+  "bytes": 18731856,
+  "sha256": "843068991DAAA1F73AD9F6239BCE4D0F6A07A51F18C37EA2A867E9BECA71295C",
+  "fileVersion": "14.51.36247.0",
+  "expectedVersion": "14.51.36247.0",
+  "expectedSha256": "843068991DAAA1F73AD9F6239BCE4D0F6A07A51F18C37EA2A867E9BECA71295C",
+  "authenticodeStatus": "Valid",
+  "signerSubject": "CN=Microsoft Corporation, O=Microsoft Corporation, L=Redmond, S=Washington, C=US",
+  "signerThumbprint": "1D77A9B9E8FE2075D9AD15123257FB90DB0DA4A1",
+  "timestampSubject": "CN=Microsoft Time-Stamp Service, OU=nShield TSS ESN:6B05-05E0-D947, OU=Microsoft Ireland Operations Limited, O=Microsoft Corporation, L=Redmond, S=Washington, C=US",
+  "executed": false,
+  "copiedByThisWorker": false,
+  "trustStoreChanged": false
+}

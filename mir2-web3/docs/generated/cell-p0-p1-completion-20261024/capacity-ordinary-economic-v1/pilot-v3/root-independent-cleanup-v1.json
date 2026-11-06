@@ -1,0 +1,35 @@
+{
+  "schemaVersion": 1,
+  "kind": "ROOT_INDEPENDENT_READ_ONLY_OS_CLEANUP_RECHECK",
+  "startedAt": "2026-10-26T19:06:04.682Z",
+  "finishedAt": "2026-10-26T19:06:05.763Z",
+  "gatewayPid": 57964,
+  "expectedPorts": [
+    17500,
+    17510
+  ],
+  "command": [
+    "powershell.exe",
+    "-NoProfile",
+    "-NonInteractive",
+    "-Command",
+    "$ErrorActionPreference='Stop';Get-Command Get-NetTCPConnection -ErrorAction Stop|Out-Null;$p=Get-CimInstance Win32_Process -Filter 'ProcessId=57964';$rows=@(Get-NetTCPConnection -State Listen -ErrorAction Stop|Where-Object {$_.LocalPort -in @(17500,17510)}|Select-Object @{n='address';e={$_.LocalAddress}},@{n='port';e={$_.LocalPort}},@{n='pid';e={[int]$_.OwningProcess}});[pscustomobject]@{checkedAtUtc=(Get-Date).ToUniversalTime().ToString('o');pid=57964;processAbsent=($null -eq $p);process=if($null -eq $p){$null}else{[pscustomobject]@{pid=[int]$p.ProcessId;exe=$p.ExecutablePath;creationTime=$p.CreationDate.ToUniversalTime().ToString('o')}};listeners=$rows;portsFree=($rows.Count -eq 0)}|ConvertTo-Json -Depth 5 -Compress"
+  ],
+  "exitCode": 0,
+  "signal": null,
+  "error": null,
+  "actual": {
+    "checkedAtUtc": "2026-10-26T19:06:05.7155994Z",
+    "pid": 57964,
+    "processAbsent": true,
+    "process": null,
+    "listeners": [],
+    "portsFree": true
+  },
+  "independentCleanupConfirmed": true,
+  "servicesStarted": false,
+  "testsPerformed": false,
+  "sourceChanged": false,
+  "capacityAccepted": false,
+  "p0Accepted": false
+}

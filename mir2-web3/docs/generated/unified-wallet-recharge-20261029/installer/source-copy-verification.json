@@ -1,0 +1,139 @@
+{
+  "schema": "mir2.unified.evidence.phase.v1",
+  "passed": true,
+  "curatedAtUtc": "2026-10-29T17:03:58.610351+00:00",
+  "producerReceipt": {
+    "filename": "unified-installer-source-copy-verification.json",
+    "bytes": 7418,
+    "sha256": "0e6c19b280f43ded545a57ed0ed3ba90559b9a9a4057bcfd2f74dc3deeac2cb6"
+  },
+  "producerReport": {
+    "passed": true,
+    "sourceRevision": "1875c6c20e1285ffefc45ef6c21eab33e26fc536",
+    "filesCompared": 23,
+    "rawBytesIdentical": true,
+    "sourceRecipeIdentityPatched": false,
+    "finalRecheckPending": true,
+    "installOrPublishAllowed": false,
+    "files": [
+      {
+        "source": "F:\\mu\\mir2-web3\\apps\\game-client\\platform-windows\\scripts\\invited-installer\\Mir2-Invite.iss",
+        "copy": "F:\\mir2-build\\unified-20261029\\installer-r11\\Mir2-Invite.iss",
+        "sha256": "CE9FFFE7F203DD7DB97F95AE6D37D27D386B365014DA7F3C1D0E01EC3B5BAE91"
+      },
+      {
+        "source": "F:\\mu\\mir2-web3\\apps\\game-client\\platform-windows\\scripts\\invited-installer\\prepare-installer-input.py",
+        "copy": "F:\\mir2-build\\unified-20261029\\installer-r11\\prepare-installer-input.py",
+        "sha256": "7F21F9B31180A39BCA68B0C393AF432B937D641B4EC408B5F956659EF07CC945"
+      },
+      {
+        "source": "F:\\mu\\mir2-web3\\apps\\game-client\\platform-windows\\scripts\\invited-installer\\validate-recipe.py",
+        "copy": "F:\\mir2-build\\unified-20261029\\installer-r11\\validate-recipe.py",
+        "sha256": "C9F81E6473D9A8FC0CD6CDBD255BD8EA5D6B2FE5989FB2D6FB5C6D6B81810B1E"
+      },
+      {
+        "source": "F:\\mu\\mir2-web3\\apps\\game-client\\platform-windows\\scripts\\invited-installer\\languages\\.gitattributes",
+        "copy": "F:\\mir2-build\\unified-20261029\\installer-r11\\languages\\.gitattributes",
+        "sha256": "5887CB4FADED6CE97D391F2BF2EBF08E50C3681A39ACE90F2142CFCB02EAC19F"
+      },
+      {
+        "source": "F:\\mu\\mir2-web3\\apps\\game-client\\platform-windows\\scripts\\invited-installer\\languages\\HINDI-UPDATE.json",
+        "copy": "F:\\mir2-build\\unified-20261029\\installer-r11\\languages\\HINDI-UPDATE.json",
+        "sha256": "6093882810E631363AB51A4A90989748ABD6247C11031259A5474F4915D4A59D"
+      },
+      {
+        "source": "F:\\mu\\mir2-web3\\apps\\game-client\\platform-windows\\scripts\\invited-installer\\languages\\Hindi.isl",
+        "copy": "F:\\mir2-build\\unified-20261029\\installer-r11\\languages\\Hindi.isl",
+        "sha256": "D61D0938ACB6D5191B26A01E3CAB63A16115E8ADDA17FF0FFE19D4A95F7D7AB2"
+      },
+      {
+        "source": "F:\\mu\\mir2-web3\\apps\\game-client\\platform-windows\\scripts\\invited-installer\\languages\\Hindi.islu",
+        "copy": "F:\\mir2-build\\unified-20261029\\installer-r11\\languages\\Hindi.islu",
+        "sha256": "FBB1045F3B25842BB926BDD5400D07875F4C8572B04FFAB14BB7ADD9882CC19B"
+      },
+      {
+        "source": "F:\\mu\\mir2-web3\\apps\\game-client\\platform-windows\\scripts\\invited-installer\\languages\\Indonesian.isl",
+        "copy": "F:\\mir2-build\\unified-20261029\\installer-r11\\languages\\Indonesian.isl",
+        "sha256": "06232EFFF765902DDF7BE78E39F1C5471B7E35F4C7C537DEEB76692F3B5E208D"
+      },
+      {
+        "source": "F:\\mu\\mir2-web3\\apps\\game-client\\platform-windows\\scripts\\invited-installer\\languages\\Inno-Setup-LICENSE.txt",
+        "copy": "F:\\mir2-build\\unified-20261029\\installer-r11\\languages\\Inno-Setup-LICENSE.txt",
+        "sha256": "2E5346868C2A18434489824E11D65C3031620F792FEFC415D05F19CD441ABF5C"
+      },
+      {
+        "source": "F:\\mu\\mir2-web3\\apps\\game-client\\platform-windows\\scripts\\invited-installer\\languages\\SOURCES.json",
+        "copy": "F:\\mir2-build\\unified-20261029\\installer-r11\\languages\\SOURCES.json",
+        "sha256": "D983B2D8681414EA126F55100033F6EAD80E5245425A2F6A0C304CD13F0548F5"
+      },
+      {
+        "source": "F:\\mu\\mir2-web3\\apps\\game-client\\platform-windows\\scripts\\invited-installer\\languages\\VIETNAMESE-UPDATE.json",
+        "copy": "F:\\mir2-build\\unified-20261029\\installer-r11\\languages\\VIETNAMESE-UPDATE.json",
+        "sha256": "E4D61EF27E530DF7952DFA10E1453D4B16E33FE1554088AC5050554DE81F40F3"
+      },
+      {
+        "source": "F:\\mu\\mir2-web3\\apps\\game-client\\platform-windows\\scripts\\invited-installer\\languages\\Vietnamese.isl",
+        "copy": "F:\\mir2-build\\unified-20261029\\installer-r11\\languages\\Vietnamese.isl",
+        "sha256": "AAE1FADDEE261F5ED57CE9A3EB5DEB5A042F3FCA6DFB7A1E8FA83502380FE741"
+      },
+      {
+        "source": "F:\\mu\\mir2-web3\\apps\\game-client\\platform-windows\\scripts\\invited-installer\\languages\\Vietnamese.upstream.isl",
+        "copy": "F:\\mir2-build\\unified-20261029\\installer-r11\\languages\\Vietnamese.upstream.isl",
+        "sha256": "1ED7F5580DF3A302A6955C72DDBFA8E3C3E24D5ED22EA85F55BAD548859B3A19"
+      },
+      {
+        "source": "F:\\mu\\mir2-web3\\apps\\game-client\\platform-windows\\scripts\\player-readme\\README.en.txt",
+        "copy": "F:\\mir2-build\\unified-20261029\\installer-r11\\README.en.txt",
+        "sha256": "C6369151097A238A8C0EA5D36604DA8C5AEADE3A3E1E21DC795D36C0F6F6BC7B"
+      },
+      {
+        "source": "F:\\mu\\mir2-web3\\apps\\game-client\\platform-windows\\scripts\\player-readme\\README.zh-CN.txt",
+        "copy": "F:\\mir2-build\\unified-20261029\\installer-r11\\README.zh-CN.txt",
+        "sha256": "0B8368B05343843B2272E9FB19F3200EA2205C3D830FCA09C9032C8CBEE3BDAA"
+      },
+      {
+        "source": "F:\\mu\\mir2-web3\\apps\\game-client\\platform-windows\\scripts\\player-readme\\README.zh-TW.txt",
+        "copy": "F:\\mir2-build\\unified-20261029\\installer-r11\\README.zh-TW.txt",
+        "sha256": "50B552C34448151CE0090DEA956454E21EF79C706DDE769CA0FB8A57FD741176"
+      },
+      {
+        "source": "F:\\mu\\mir2-web3\\apps\\game-client\\platform-windows\\scripts\\player-readme\\README.pt-BR.txt",
+        "copy": "F:\\mir2-build\\unified-20261029\\installer-r11\\README.pt-BR.txt",
+        "sha256": "05B67058F04BB91D69B528531A3F55AF863367234DB96DD8FB46ED06F3FA2DD0"
+      },
+      {
+        "source": "F:\\mu\\mir2-web3\\apps\\game-client\\platform-windows\\scripts\\player-readme\\README.ru.txt",
+        "copy": "F:\\mir2-build\\unified-20261029\\installer-r11\\README.ru.txt",
+        "sha256": "9339578C8311AE7403B8DB9211A8AA15AF3351D98C46C3967EC157A42D8668EC"
+      },
+      {
+        "source": "F:\\mu\\mir2-web3\\apps\\game-client\\platform-windows\\scripts\\player-readme\\README.hi.txt",
+        "copy": "F:\\mir2-build\\unified-20261029\\installer-r11\\README.hi.txt",
+        "sha256": "569422857C87F30DD6AFA736DAE13DABCD8EC4942FCD3C31F1CF6DF71B239E3D"
+      },
+      {
+        "source": "F:\\mu\\mir2-web3\\apps\\game-client\\platform-windows\\scripts\\player-readme\\README.id.txt",
+        "copy": "F:\\mir2-build\\unified-20261029\\installer-r11\\README.id.txt",
+        "sha256": "9A14690D1D65F0A8ED4736CE445E3BC973E7D2FC96D5356B77FA20B15345B032"
+      },
+      {
+        "source": "F:\\mu\\mir2-web3\\apps\\game-client\\platform-windows\\scripts\\player-readme\\README.vi.txt",
+        "copy": "F:\\mir2-build\\unified-20261029\\installer-r11\\README.vi.txt",
+        "sha256": "A5D7873E09C20DBBAB18E100E0F0888EE78B1967FF3A9FC8452190A219CFFD67"
+      },
+      {
+        "source": "F:\\mu\\mir2-web3\\apps\\game-client\\platform-windows\\scripts\\player-readme\\README.th.txt",
+        "copy": "F:\\mir2-build\\unified-20261029\\installer-r11\\README.th.txt",
+        "sha256": "144EFB528134C47B21E50C499083E6092B6CAA3478646BDCC1EB967EB7B8B6A8"
+      },
+      {
+        "source": "F:\\mu\\mir2-web3\\apps\\game-client\\platform-windows\\scripts\\player-readme\\README.ar.txt",
+        "copy": "F:\\mir2-build\\unified-20261029\\installer-r11\\README.ar.txt",
+        "sha256": "ED84D4360EC11222C89D11A2BAC94135FA664E833B5BDB8A6F3B5050D5BD5C4C"
+      }
+    ]
+  },
+  "phase": "Actual normal/isolated full Inno compile admitted after final Candidate proof; original historical pending receipts preserved",
+  "installationByThisPhase": false,
+  "guiByThisPhase": false
+}

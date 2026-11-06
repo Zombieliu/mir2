@@ -1,0 +1,23 @@
+{
+  "schema": "mir2.worker.r22.deployment.v1",
+  "success": true,
+  "status": 200,
+  "errors": [],
+  "messages": [],
+  "script": "mir2-r2-bulk-upload",
+  "previousSha256": "a93b2722fd5ce5138be04b9b4076238084ef84bd837268ba3fc5f5f96e77cc6b",
+  "uploadedSha256": "7a82fc2cb251e726923fb8cb2eb392d199f368586e1cfd8f3acb3d32f15e9a74",
+  "uploadedBytes": 508704,
+  "publicationSource": "c53895bcadfb7fa653b7985cc5f6f28c71710b0a",
+  "gameSource": "7fea5cdba8cd160d4f2c5536f14fb7ce98c6bfbc",
+  "settingsPreserved": true,
+  "secretInherited": true,
+  "secretValueRead": false,
+  "publicFeedPromoted": false,
+  "result": {
+    "id": "mir2-r2-bulk-upload",
+    "etag": "43293741a698b685e53a120cf87177e2dcdbf39ea16841c6d11a17347ec00b35",
+    "modified_on": "2026-10-08T06:16:54.677994Z",
+    "deployment_id": "74a2c358543b442e8fe946532447a558"
+  }
+}

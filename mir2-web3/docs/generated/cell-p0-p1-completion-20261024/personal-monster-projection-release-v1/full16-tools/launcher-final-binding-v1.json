@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "state": "final-44-input-release-bound-not-executed",
+  "boundAt": "2026-10-25T13:21:10.458Z",
+  "expectedSourceCommit": "5c2e713863d3e9556a92f856b11df2396c73b137",
+  "backendInputCount": 44,
+  "profile": {
+    "path": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-personal-monster-projection-v1\\full-lifecycle-profile.json",
+    "bytes": 4369,
+    "sha256": "07893f55fa42af368da82061df2be5456bd6b7dc05394d9cd25a30b91d76d593"
+  },
+  "candidateReleaseBinding": {
+    "path": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-personal-monster-projection-v1\\candidate-release-binding-v1.json",
+    "bytes": 1594,
+    "sha256": "8888917e353f0484779f21039d04d6747df99f8aa1f706f01e309652a59f6cfe"
+  },
+  "releaseRecord": {
+    "path": "C:\\mir2-build\\p01-completion-20261024\\release-personal-monster-projection-v1.json",
+    "bytes": 2376,
+    "sha256": "613b82935c45e476ad1ba32e2592e562e14ea6997062fc9f12b9de02bb770121"
+  },
+  "backendSourceManifest": {
+    "path": "C:\\mir2-build\\p01-completion-20261024\\backend-source-personal-monster-projection-v1.json",
+    "bytes": 32926,
+    "sha256": "151869b76d13202e3c6557f908b5adc5643d1b0579cd7d4961cf0458c71cec52"
+  },
+  "binary": {
+    "path": "C:\\mir2-build\\p01-completion-20261024\\personal-monster-projection-release-v1\\bin\\mir2-gateway.exe",
+    "bytes": 87363072,
+    "sha256": "d8791cceeed00fdb7019d1201aad19f06005790162df1b459a8cacac96f68756"
+  },
+  "realmStarted": false,
+  "accountsCreated": 0,
+  "capacityAccepted": false,
+  "scope": "Explicit actual44-source/fresh Release and unchanged six-driver full16 launcher binding only; no account, service or gameplay execution."
+}

@@ -1,0 +1,22 @@
+{
+  "schema": "mir2.stone-rules-authored-source.v1",
+  "createdUtc": "2026-10-09T11:54:37.7640834+00:00",
+  "scope": "pure mir2-production stones rules only",
+  "files": [
+    {
+      "path": "mir2-web3/packages/production/src/lib.rs",
+      "sha256": "a54d9cf7bf37ee70eb78b2b63fe1f7cc8dff4591757977e67fcc929cdb29cb9a",
+      "length": 1815
+    },
+    {
+      "path": "mir2-web3/packages/production/src/stones.rs",
+      "sha256": "321b1b600491dc80a3929292ee38f6ef46b5d40847ef4c5cb7939e9afa4ee16d",
+      "length": 40474
+    },
+    {
+      "path": "mir2-web3/packages/production/src/stones_tests.rs",
+      "sha256": "5c042a8f58ed1c39d508c380b5af3b2720e442a20876367104c4cdc7c829616c",
+      "length": 35603
+    }
+  ]
+}

@@ -1,0 +1,126 @@
+{
+  "schemaVersion": 1,
+  "state": "External helper tested; not a runtime launcher or new backend release.",
+  "wire": {
+    "prefix": "[gateway-slow-stage]",
+    "exactKeyOrder": [
+      "stage",
+      "duration_ms",
+      "operation",
+      "trace_id",
+      "started_unix_ms",
+      "max_start_us",
+      "max_end_us",
+      "samples",
+      "total_us"
+    ],
+    "keys": 9,
+    "stages": [
+      "account_store.writable_wait",
+      "account_store.persist_wait",
+      "account_store.store_wait",
+      "account_store.store_held",
+      "account_store.file_writer_wait",
+      "account_store.serialize",
+      "account_store.temp_write_sync",
+      "account_store.atomic_replace",
+      "account_store.marker_wait",
+      "account_store.marker_state_wait",
+      "account_store.marker_begin_sync",
+      "account_store.marker_settle_sync",
+      "account_store.driver_wait",
+      "account_store.driver_held"
+    ],
+    "operations": [
+      "experience_admission",
+      "guild_lookup",
+      "save",
+      "transaction",
+      "guild_clock"
+    ],
+    "canonicalUnsignedInteger": "0 or a nonzero ASCII digit followed by ASCII digits; all values must fit JavaScript safe integers. trace_id and samples are strictly positive.",
+    "extraOrPartialFieldsAccepted": false,
+    "mixedConnectionOrQueuedFieldsAccepted": false
+  },
+  "public": {
+    "exactKeyOrder": [
+      "observedAtMs",
+      "stage",
+      "durationMs",
+      "operation",
+      "traceId",
+      "startedUnixMs",
+      "maxStartUs",
+      "maxEndUs",
+      "samples",
+      "totalUs"
+    ],
+    "keys": 10,
+    "receiveClock": "observedAtMs is launcher receive time, separately from producer started_unix_ms.",
+    "traceMeaning": "Opaque process-local diagnostic Record counter, never an account/request/action identifier. Equal trace IDs do not correlate across process instances.",
+    "rangeValidation": "Let q=maxEndUs-maxStartUs. Require durationMs*1000 <= q <= durationMs*1000+1000 (upper inclusive), totalUs >= durationMs*1000, and totalUs+1 >= q. BigInt is used only after every numeric value is a safe nonnegative integer.",
+    "maxAndAggregation": "durationMs is the floored maximum completed single occurrence of that stage, not its sum; samples and totalUs aggregate completed occurrences of that same stage. Nested stages can overlap and must not be added.",
+    "endpointRounding": "Separate floor-to-microsecond endpoints may differ by one microsecond more than floor(max elapsed microseconds); totalUs may be q-1.",
+    "completedOnly": "Record emits only completed spans when the record drops after original business guards. A stuck/ongoing holder, subthreshold span, or disabled producer can have no rows. No row is not proof of no stall."
+  },
+  "capture": {
+    "entry": "createSlowStagePublicCapture({input,outputFile,requestStop,storeOnly:true})",
+    "defaultStoreOnly": false,
+    "storeOnlyMustBeBoolean": true,
+    "legacyCompatibility": "Default false accepts original 3/4/7 Gateway formats plus Store10. Root integration uses original803387 base capture unchanged and new storeOnly:true second dataset. Legacy30 tests remain raw exact.",
+    "targetedMalformedPolicy": "Any line beginning with [gateway-slow-stage] and containing account_store is treated as targeted; malformed, unknown, unsafe or extra-field Store lines stop the capture once, publish no such line and mark incomplete. Unrelated stderr and unsupported legacy formats retain old filtering.",
+    "limits": {
+      "lineBytes": 8192,
+      "prewriteQueueBytes": 1048576,
+      "publicBytes": 33554432,
+      "finishWaitMs": 15000
+    },
+    "boundsArePerCapture": "Two parallel captures have separate bounds; new Store capture has allocation/format/write overhead. No zero-overhead claim.",
+    "stopOnce": true,
+    "requiresActualStderrEOFAndWriterFinish": true,
+    "countsAreQueuedNotDurable": true
+  },
+  "validator": {
+    "file": "account-store-public-validator.mjs",
+    "entry": "validateAccountStorePublicDataset({input,status})",
+    "datasetRequired": "account-store",
+    "streamingOnly": true,
+    "input": "Ended independent Store JSONL as Buffer chunks; never original game raw or private data.",
+    "sourceBindingRequiredByCaller": "Pin helper, validator, terminal/status and ended Store file before/after; readEnded must be true for returned SHA to cover complete input.",
+    "countProof": "Compare actual ended rows and bytes with queued counters; do not call queued counts durable. Status/source validity remains separately bound by runtime integration.",
+    "incompleteCaptureAllowedForArchival": true,
+    "incompleteNeverBecomesComplete": true,
+    "gameAcceptanceOrAckContribution": false
+  },
+  "integration": {
+    "implementedOldConsumersModified": false,
+    "implementedNewLauncher": false,
+    "rootWillUseIndependentSecondDataset": true,
+    "requiresNewBackendReleaseAndFreshSourceBinding": true,
+    "historical16And12Untouched": true,
+    "node9And210Untouched": true
+  },
+  "observedProducerNotFinalBackendFreeze": {
+    "file": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/apps/simulation/src/config_account_store_diagnostics.rs",
+    "bytes": 10863,
+    "sha256": "bdd0805104f396d924a6663be46166a9b2bb759c580efcb6e07b6fbf0cb970e4"
+  },
+  "actualSynthetic": {
+    "log": {
+      "file": "C:/mir2-build/p01-completion-20261024/account-store-slow-stage-diagnostics-v1/synthetic-tests-v2.log",
+      "bytes": 12763,
+      "sha256": "2db1b159a75358f0e54909c0fe9b4ef08a4247fa1847350527b03f915d260a09"
+    },
+    "receipt": {
+      "file": "C:/mir2-build/p01-completion-20261024/account-store-slow-stage-diagnostics-v1/synthetic-execution-v2.json",
+      "bytes": 4453,
+      "sha256": "16246e4ae2b4a8b33a0c3019eb84550eb24b77e2e01be19d5b65dc375e45a674"
+    },
+    "passed": 51,
+    "failed": 0,
+    "originalTests": 30,
+    "newGrammarTests": 15,
+    "newStoreOnlyAndValidatorTests": 6,
+    "noCargoOrRealm": true
+  }
+}

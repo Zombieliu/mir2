@@ -1,0 +1,6 @@
+
+running 1 test
+test runtime::session::tests::use_item_packet_dynamic_crystal_normal_potion_queues_timed_restore ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 2955 filtered out; finished in 0.79s
+

@@ -1,0 +1,142 @@
+{
+  "schemaVersion": 1,
+  "method": "Syntax parsing only; no target module imported or operational mode executed",
+  "checks": [
+    {
+      "file": "backend-driver-source-guard.mjs",
+      "kind": "node--check",
+      "exitCode": 0
+    },
+    {
+      "file": "collect-public.mjs",
+      "kind": "node--check",
+      "exitCode": 0
+    },
+    {
+      "file": "collect-store-public.mjs",
+      "kind": "node--check",
+      "exitCode": 0
+    },
+    {
+      "file": "driver-binding-contract.mjs",
+      "kind": "node--check",
+      "exitCode": 0
+    },
+    {
+      "file": "driver-evidence-contract.mjs",
+      "kind": "node--check",
+      "exitCode": 0
+    },
+    {
+      "file": "driver-report-contract.mjs",
+      "kind": "node--check",
+      "exitCode": 0
+    },
+    {
+      "file": "input-lib.mjs",
+      "kind": "node--check",
+      "exitCode": 0
+    },
+    {
+      "file": "measured-phase-contract.mjs",
+      "kind": "node--check",
+      "exitCode": 0
+    },
+    {
+      "file": "monitor-owned.mjs",
+      "kind": "node--check",
+      "exitCode": 0
+    },
+    {
+      "file": "native-chase-report-contract.mjs",
+      "kind": "node--check",
+      "exitCode": 0
+    },
+    {
+      "file": "passed-probe-window-contract.mjs",
+      "kind": "node--check",
+      "exitCode": 0
+    },
+    {
+      "file": "prepare-inputs.mjs",
+      "kind": "node--check",
+      "exitCode": 0
+    },
+    {
+      "file": "projection-build-source-lib.mjs",
+      "kind": "node--check",
+      "exitCode": 0
+    },
+    {
+      "file": "request-stop.mjs",
+      "kind": "node--check",
+      "exitCode": 0
+    },
+    {
+      "file": "run-owned.mjs",
+      "kind": "node--check",
+      "exitCode": 0
+    },
+    {
+      "file": "scene-contract.mjs",
+      "kind": "node--check",
+      "exitCode": 0
+    },
+    {
+      "file": "scene-driver-compatibility.mjs",
+      "kind": "node--check",
+      "exitCode": 0
+    },
+    {
+      "file": "slow-stage-public.mjs",
+      "kind": "node--check",
+      "exitCode": 0
+    },
+    {
+      "file": "slow-stage-row-contract.mjs",
+      "kind": "node--check",
+      "exitCode": 0
+    },
+    {
+      "file": "store-diagnostics-contract.mjs",
+      "kind": "node--check",
+      "exitCode": 0
+    },
+    {
+      "file": "verify-full16-gate.mjs",
+      "kind": "node--check",
+      "exitCode": 0
+    },
+    {
+      "file": "verify-public.mjs",
+      "kind": "node--check",
+      "exitCode": 0
+    },
+    {
+      "file": "verify-store-public.mjs",
+      "kind": "node--check",
+      "exitCode": 0
+    },
+    {
+      "file": "wire-diagnostics-adapter.mjs",
+      "kind": "node--check",
+      "exitCode": 0
+    },
+    {
+      "file": "wire-diagnostics-contract.mjs",
+      "kind": "node--check",
+      "exitCode": 0
+    },
+    {
+      "file": "initialize-private.ps1",
+      "kind": "PowerShell-AST-only",
+      "exitCode": 0
+    },
+    {
+      "file": "recover-drained-owned.ps1",
+      "kind": "PowerShell-AST-only",
+      "exitCode": 0
+    }
+  ],
+  "allPassed": true
+}

@@ -1,0 +1,134 @@
+{
+  "schema": "mir2.download.bounded-origin-parallel-probe.v1",
+  "createdUtc": "2026-10-04T19:11:04.334950+00:00",
+  "url": "https://165.154.65.136.sslip.io/client-updates/releases/bootstrap-WN-CANDIDATE-20261003-invited-16/Numeron-Legend-of-Rebirth-20261003-r16-Bootstrap.exe",
+  "host": "current development Windows host; not the other user laptop",
+  "transport": "direct HTTP/1.1 HTTPS with verified TLS, no environment proxy",
+  "requestedPayloadBytesMaximum": 7340032,
+  "maximumConnections": 4,
+  "attempts": [
+    {
+      "connections": 1,
+      "pass": true,
+      "parts": [
+        {
+          "index": 0,
+          "range": "bytes 0-1048575/27481889",
+          "status": 206,
+          "bytes": 1048576,
+          "headersSeconds": 0.20556159998523071,
+          "elapsedSeconds": 8.970544499985408,
+          "mibPerSecond": 0.11147595332720624,
+          "sha256": "64841ec86740255a525c2c93efcdfdda6beef8d9682dbdb233c09d17caebcb39",
+          "etag": "\"tmboyjgd15t\"",
+          "lastModified": "Sat, 03 Oct 2026 08:30:19 GMT",
+          "server": "Caddy"
+        }
+      ],
+      "elapsedSeconds": 8.972941399988486,
+      "payloadBytes": 1048576,
+      "aggregateMiBPerSecond": 0.11144617527551036
+    },
+    {
+      "connections": 2,
+      "pass": true,
+      "parts": [
+        {
+          "index": 0,
+          "range": "bytes 0-1048575/27481889",
+          "status": 206,
+          "bytes": 1048576,
+          "headersSeconds": 0.19728529997519217,
+          "elapsedSeconds": 11.965561399993021,
+          "mibPerSecond": 0.08357317860577634,
+          "sha256": "64841ec86740255a525c2c93efcdfdda6beef8d9682dbdb233c09d17caebcb39",
+          "etag": "\"tmboyjgd15t\"",
+          "lastModified": "Sat, 03 Oct 2026 08:30:19 GMT",
+          "server": "Caddy"
+        },
+        {
+          "index": 1,
+          "range": "bytes 1048576-2097151/27481889",
+          "status": 206,
+          "bytes": 1048576,
+          "headersSeconds": 0.19641500001307577,
+          "elapsedSeconds": 20.288199200003874,
+          "mibPerSecond": 0.04928973686337864,
+          "sha256": "4ac8a7e839eaf7c653006cc0ebcf818f2468be9a4b8ca8967132f4bc6377807a",
+          "etag": "\"tmboyjgd15t\"",
+          "lastModified": "Sat, 03 Oct 2026 08:30:19 GMT",
+          "server": "Caddy"
+        }
+      ],
+      "elapsedSeconds": 20.28931300001568,
+      "payloadBytes": 2097152,
+      "aggregateMiBPerSecond": 0.09857406211824196
+    },
+    {
+      "connections": 4,
+      "pass": true,
+      "parts": [
+        {
+          "index": 0,
+          "range": "bytes 0-1048575/27481889",
+          "status": 206,
+          "bytes": 1048576,
+          "headersSeconds": 0.19446130000869744,
+          "elapsedSeconds": 17.959777100011706,
+          "mibPerSecond": 0.05567997834446109,
+          "sha256": "64841ec86740255a525c2c93efcdfdda6beef8d9682dbdb233c09d17caebcb39",
+          "etag": "\"tmboyjgd15t\"",
+          "lastModified": "Sat, 03 Oct 2026 08:30:19 GMT",
+          "server": "Caddy"
+        },
+        {
+          "index": 1,
+          "range": "bytes 1048576-2097151/27481889",
+          "status": 206,
+          "bytes": 1048576,
+          "headersSeconds": 0.19320049998350441,
+          "elapsedSeconds": 19.5701790000021,
+          "mibPerSecond": 0.051098152960169285,
+          "sha256": "4ac8a7e839eaf7c653006cc0ebcf818f2468be9a4b8ca8967132f4bc6377807a",
+          "etag": "\"tmboyjgd15t\"",
+          "lastModified": "Sat, 03 Oct 2026 08:30:19 GMT",
+          "server": "Caddy"
+        },
+        {
+          "index": 2,
+          "range": "bytes 2097152-3145727/27481889",
+          "status": 206,
+          "bytes": 1048576,
+          "headersSeconds": 0.2016138999897521,
+          "elapsedSeconds": 12.602311399998143,
+          "mibPerSecond": 0.07935052295249166,
+          "sha256": "cc7289cf495c9c16c6670277780fb270e4604dabb66bac37a0f50835b47ac13b",
+          "etag": "\"tmboyjgd15t\"",
+          "lastModified": "Sat, 03 Oct 2026 08:30:19 GMT",
+          "server": "Caddy"
+        },
+        {
+          "index": 3,
+          "range": "bytes 3145728-4194303/27481889",
+          "status": 206,
+          "bytes": 1048576,
+          "headersSeconds": 0.18168360000709072,
+          "elapsedSeconds": 13.47111300000688,
+          "mibPerSecond": 0.07423291601811144,
+          "sha256": "1659e1926b7ee878d30b4351a4138bca58714232bd7a58ca5eabf16984ca65ff",
+          "etag": "\"tmboyjgd15t\"",
+          "lastModified": "Sat, 03 Oct 2026 08:30:19 GMT",
+          "server": "Caddy"
+        }
+      ],
+      "elapsedSeconds": 19.571162700012792,
+      "payloadBytes": 4194304,
+      "aggregateMiBPerSecond": 0.2043823385105978
+    }
+  ],
+  "fullInstallerDownload": false,
+  "updaterSpeedAcceptance": false,
+  "r2SpeedAcceptance": false,
+  "serverMutations": false,
+  "servicesOrSavesChanged": false
+}

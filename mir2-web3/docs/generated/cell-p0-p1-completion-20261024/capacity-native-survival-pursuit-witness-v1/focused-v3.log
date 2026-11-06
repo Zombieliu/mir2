@@ -1,0 +1,148 @@
+TAP version 13
+# Subtest: native HP maintenance verifies ordinary inventory UID consumption without inventing healing or activity
+ok 1 - native HP maintenance verifies ordinary inventory UID consumption without inventing healing or activity
+  ---
+  duration_ms: 4.8518
+  type: 'test'
+  ...
+# Subtest: native HP maintenance verifies ordinary belt UID consumption without inventing healing or activity
+ok 2 - native HP maintenance verifies ordinary belt UID consumption without inventing healing or activity
+  ---
+  duration_ms: 0.48
+  type: 'test'
+  ...
+# Subtest: native HP maintenance requires the matching successful ACK as well as a fresh exact HP increase
+ok 3 - native HP maintenance requires the matching successful ACK as well as a fresh exact HP increase
+  ---
+  duration_ms: 0.4701
+  type: 'test'
+  ...
+# Subtest: native HP maintenance rejected cannot credit recovery and fails closed
+ok 4 - native HP maintenance rejected cannot credit recovery and fails closed
+  ---
+  duration_ms: 0.6418
+  type: 'test'
+  ...
+# Subtest: native HP maintenance wrong-uid cannot credit recovery and fails closed
+ok 5 - native HP maintenance wrong-uid cannot credit recovery and fails closed
+  ---
+  duration_ms: 0.395
+  type: 'test'
+  ...
+# Subtest: native HP maintenance wrong-grid cannot credit recovery and fails closed
+ok 6 - native HP maintenance wrong-grid cannot credit recovery and fails closed
+  ---
+  duration_ms: 0.2358
+  type: 'test'
+  ...
+# Subtest: native HP maintenance ack-only cannot credit recovery and fails closed
+ok 7 - native HP maintenance ack-only cannot credit recovery and fails closed
+  ---
+  duration_ms: 0.3131
+  type: 'test'
+  ...
+# Subtest: native HP maintenance effect-only cannot credit recovery and fails closed
+ok 8 - native HP maintenance effect-only cannot credit recovery and fails closed
+  ---
+  duration_ms: 0.288
+  type: 'test'
+  ...
+# Subtest: native HP maintenance incomplete-inventory cannot credit recovery and fails closed
+ok 9 - native HP maintenance incomplete-inventory cannot credit recovery and fails closed
+  ---
+  duration_ms: 0.6323
+  type: 'test'
+  ...
+# Subtest: native HP maintenance late-proof cannot credit recovery and fails closed
+ok 10 - native HP maintenance late-proof cannot credit recovery and fails closed
+  ---
+  duration_ms: 0.4647
+  type: 'test'
+  ...
+# Subtest: native HP maintenance keeps unknown health, missing supplies and exhausted command budget bounded and never sends MP
+ok 11 - native HP maintenance keeps unknown health, missing supplies and exhausted command budget bounded and never sends MP
+  ---
+  duration_ms: 0.9294
+  type: 'test'
+  ...
+# Subtest: native HP pending evidence does not pause native movement and drain captures the existing dose
+ok 12 - native HP pending evidence does not pause native movement and drain captures the existing dose
+  ---
+  duration_ms: 24.0129
+  type: 'test'
+  ...
+# Subtest: native post-strike same-target chase starts once at a real send and again obeys nonprogress limits
+ok 13 - native post-strike same-target chase starts once at a real send and again obeys nonprogress limits
+  ---
+  duration_ms: 3.7081
+  type: 'test'
+  ...
+# Subtest: native post-strike segment retains the original movement-budget boundary
+ok 14 - native post-strike segment retains the original movement-budget boundary
+  ---
+  duration_ms: 0.6483
+  type: 'test'
+  ...
+# Subtest: native post-strike segment retains the original time-budget boundary
+ok 15 - native post-strike segment retains the original time-budget boundary
+  ---
+  duration_ms: 0.759
+  type: 'test'
+  ...
+# Subtest: native post-strike segment retains the original route-loop boundary
+ok 16 - native post-strike segment retains the original route-loop boundary
+  ---
+  duration_ms: 0.5023
+  type: 'test'
+  ...
+# Subtest: native post-strike planning, pending work, budget gaps, navigation rejection and failed sends never reset a chase
+ok 17 - native post-strike planning, pending work, budget gaps, navigation rejection and failed sends never reset a chase
+  ---
+  duration_ms: 2.1519
+  type: 'test'
+  ...
+# Subtest: native attack witness skips the first AOI-edge peer and requires both real objects on a nearby living connection
+ok 18 - native attack witness skips the first AOI-edge peer and requires both real objects on a nearby living connection
+  ---
+  duration_ms: 0.9554
+  type: 'test'
+  ...
+# Subtest: native attack witness uses nearest eligible peer with original order on equal separation
+ok 19 - native attack witness uses nearest eligible peer with original order on equal separation
+  ---
+  duration_ms: 0.2021
+  type: 'test'
+  ...
+# Subtest: native attack witness is reselected with its current namespace and cursor immediately before the real send
+ok 20 - native attack witness is reselected with its current namespace and cursor immediately before the real send
+  ---
+  duration_ms: 1.097
+  type: 'test'
+  ...
+# Subtest: native attack witness loss before send retains the original incomplete opportunity without a fake attack
+ok 21 - native attack witness loss before send retains the original incomplete opportunity without a fake attack
+  ---
+  duration_ms: 21.1478
+  type: 'test'
+  ...
+# Subtest: native initial no-witness selection can use another genuinely witnessed adjacent target
+ok 22 - native initial no-witness selection can use another genuinely witnessed adjacent target
+  ---
+  duration_ms: 0.3314
+  type: 'test'
+  ...
+# Subtest: native initial no-witness target with no approach route retains the original bounded scout fallback
+ok 23 - native initial no-witness target with no approach route retains the original bounded scout fallback
+  ---
+  duration_ms: 29.014
+  type: 'test'
+  ...
+1..23
+# tests 23
+# suites 0
+# pass 23
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 173.4528

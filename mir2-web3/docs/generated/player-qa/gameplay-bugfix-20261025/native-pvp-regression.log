@@ -1,0 +1,173 @@
+
+running 6 tests
+test gameplay_bridge::tests::object_magic_projects_archer_range_two_into_the_native_player_action ... ok
+test input::tests::native_player_attack_input_tests::native_player_pursuit_stops_on_shift_release_without_revoking_an_accepted_move ... ok
+test input::tests::native_player_attack_input_tests::native_player_click_keeps_modal_and_dead_target_gates ... ok
+test input::tests::native_player_attack_input_tests::native_player_pursuit_stops_when_focus_is_lost_or_escape_cancels ... ok
+test input::tests::native_player_attack_input_tests::native_player_intent_cannot_bypass_shift_with_a_queued_ui_action_or_alt ... ok
+test input::tests::native_player_attack_input_tests::native_player_click_requires_shift_and_uses_shared_melee_or_range_resolution ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 906 filtered out; finished in 0.01s
+
+
+running 138 tests
+test input::tests::attack_request_cadence_uses_crystal_stats_and_floor ... ok
+test input::tests::correction_clears_the_entire_speculative_movement_window ... ok
+test input::tests::crystal_auto_path_prefers_the_direct_open_route ... ok
+test input::tests::crystal_pointer_plan_degrades_run_then_steers_around_occupied_first_tile ... ok
+test input::tests::crystal_primary_skill_bar_uses_unmodified_function_keys ... ok
+test input::tests::disabling_new_move_cancels_released_pointer_path_but_preserves_other_navigation ... ok
+[movement] awaiting_authoritative_ack age_ms=4200.0 pending=1; additional movement paused
+test input::tests::big_map_input_tests::map_image_coordinates_follow_stage_fit_and_exclude_panel_controls ... ok
+test input::tests::big_map_input_tests::small_map_click_geometry_tracks_centered_image_at_each_window_scale ... ok
+test input::tests::crystal_bound_d_does_not_emit_prototype_walk_or_prediction ... ok
+test input::tests::distant_npc_click_queues_interaction_immediately_without_movement ... ok
+test input::tests::closing_a_panel_restores_input_and_emits_only_once ... ok
+test input::tests::e_rotates_current_facing_right_by_one_crystal_direction ... ok
+test input::tests::active_auto_path_survives_cursor_crossing_an_actor ... ok
+test input::tests::alt_left_on_empty_world_harvests_cardinal_tile_and_repeats_until_release ... ok
+test input::tests::authoritative_snapshot_progress_advances_auto_path_without_packet_ack ... ok
+test input::tests::archer_target_outside_range_does_not_walk_but_attacks_when_target_enters_range ... ok
+test input::tests::alt_npc_click_keeps_immediate_call_and_existing_five_second_guard ... ok
+test input::tests::later_authoritative_snapshot_can_confirm_the_whole_buffered_prefix ... ok
+test input::tests::digit1_uses_occupied_belt_slot ... ok
+test input::tests::empty_ground_harvest_hold_does_not_leak_when_cursor_moves_onto_actor ... ok
+test input::tests::delayed_movement_ack_does_not_queue_or_retry_after_timeout ... ok
+test input::tests::configured_direct_mode_uses_ordinary_wire_and_modal_blocks_it ... ok
+test input::tests::late_ack_does_not_renew_expired_run_eligibility ... ok
+test input::tests::escape_cancels_a_queued_quest_route_before_it_can_start ... ok
+test input::tests::movement_deadlines_use_real_time_after_frame_stall ... ok
+test input::tests::f2_prefers_explicit_server_hotkey_over_learned_order ... ok
+test input::tests::native_hud_pointer_geometry_uses_source_button_rectangles_and_leaves_empty_world_open ... ok
+test input::tests::autorun_moves_without_mouse_hold_and_stays_ack_bounded ... ok
+test input::tests::name_only_skill_f1_does_not_emit_magic ... ok
+test input::tests::native_hud_menu_pointer_press_with_closed_panels_does_not_arm_world_walk ... ok
+test input::tests::native_hud_pointer_guard_does_not_block_keyboard_d ... ok
+test input::tests::held_quest_route_button_never_clicks_through_and_releases_to_the_bridge ... ok
+test input::tests::left_hold_on_empty_world_walks_only_after_authoritative_progress ... ok
+test input::tests::held_alt_left_repeats_harvest_at_crystal_action_interval_and_release_stops ... ok
+test input::tests::keyboard_prediction_is_retired_by_the_shared_authoritative_ack_controller ... ok
+test input::tests::missing_self_entity_clears_pending_movement_controller ... ok
+test input::tests::left_hold_picks_up_after_authoritative_arrival_on_cursor_tile ... ok
+test input::tests::alt_left_on_same_empty_tile_uses_crystal_up_fallback_and_respects_gates ... ok
+test input::tests::native_player_attack_input_tests::native_player_click_keeps_modal_and_dead_target_gates ... ok
+test input::big_map_input::tests::long_route_passes_gap_and_does_not_use_twenty_tile_click_limit ... ok
+test input::tests::native_ordered_press_from_diary_cannot_reuse_an_old_harvest_hold ... ok
+test input::tests::monster_click_chases_moving_target_then_attacks_after_ack_and_stops_on_death ... ok
+test input::tests::hero_manual_cast_stays_closed_until_shared_actor_authority_is_verified ... ok
+test input::tests::native_osk_alt_click_routes_live_and_dead_monsters_without_arming_auto_attack ... ok
+test input::tests::native_ordered_press_from_world_keeps_hold_ack_and_release_semantics ... ok
+test input::tests::native_player_attack_input_tests::native_player_pursuit_stops_on_shift_release_without_revoking_an_accepted_move ... ok
+test input::big_map_input::tests::hunt_navigation_region_search_avoids_occupied_goal_tiles_and_reports_unreachable_areas ... ok
+test input::tests::native_player_attack_input_tests::native_player_pursuit_stops_when_focus_is_lost_or_escape_cancels ... ok
+test input::tests::native_ordered_press_from_diary_cannot_call_npc_attack_or_pick_up ... ok
+test input::tests::native_quest_pointer_independent_detail_consumes_press_without_diary ... ok
+test input::tests::native_player_attack_input_tests::native_player_click_requires_shift_and_uses_shared_melee_or_range_resolution ... ok
+test input::tests::native_player_attack_input_tests::native_player_intent_cannot_bypass_shift_with_a_queued_ui_action_or_alt ... ok
+test input::tests::native_ordered_press_with_unknown_origin_cannot_start_a_hold ... ok
+test input::tests::native_quest_pointer_diary_outside_and_hidden_tracker_leave_world_available ... ok
+test input::tests::native_quest_pointer_tracker_text_and_button_capture_without_card ... ok
+test input::tests::native_release_without_new_down_does_not_add_a_movement_pulse ... ok
+test input::tests::new_player_identity_cannot_inherit_old_pursuit ... ok
+test input::tests::native_ordered_press_from_diary_cannot_start_world_hold_before_next_frame_release ... ok
+test input::tests::native_same_frame_new_move_click_retains_only_its_existing_route ... ok
+test input::tests::ordered_movement_acks_retire_only_the_confirmed_fifo_prefix ... ok
+test input::tests::native_same_frame_unknown_press_origin_is_not_invented_from_final_cursor ... ok
+test input::tests::native_same_frame_world_down_then_ui_release_keeps_current_pointer_shield ... ok
+test input::tests::osk_modifier_snapshot_restores_on_focus_and_never_sticks_after_loss ... ok
+test input::tests::native_quest_pointer_tracker_card_consumes_press_but_transparent_margin_walks ... ok
+test input::tests::harvest_hold_clears_on_alt_loss_focus_ui_or_hover_target_change ... ok
+test input::tests::npc_click_beyond_data_range_still_defers_rejection_to_the_server ... ok
+test input::tests::q_is_reserved_for_quest_log_and_never_emits_a_world_turn ... ok
+test input::tests::native_quest_pointer_visible_windows_capture_panel_backgrounds ... ok
+test input::tests::passive_skill_f1_does_not_emit_magic_or_toggle ... ok
+test input::tests::new_world_press_discards_old_queued_attack_without_releasing_pending_move ... ok
+test input::tests::native_same_frame_world_click_sends_once_without_retaining_a_hold ... ok
+test input::tests::open_inventory_only_blocks_movement_over_its_own_surface ... ok
+test input::tests::native_same_frame_pulse_respects_ack_cadence_correction_and_collision ... ok
+test input::tests::pursuit_cancels_on_escape_focus_loss_modal_and_target_removal ... ok
+test input::tests::quest_route_input_tests::quest_route_rejects_stale_map_with_visible_feedback_and_no_movement ... ok
+test input::tests::original_hero_belt_keys_never_alias_player_belt_slots ... ok
+[frame-sets] loaded 697 Crystal library catalogs from "E:\\mir2-player-journey\\mir2-web3\\apps/web/public\\original-ui/frame-sets.generated.json"
+test input::tests::attack_waits_for_visible_self_motion_but_not_delayed_ack ... ok
+test input::tests::classic_right_hold_tracks_cursor_without_path_and_stops_on_release ... ok
+test input::tests::native_same_frame_ui_down_then_world_release_never_gains_a_pulse ... ok
+test input::tests::native_quest_pointer_hover_does_not_cancel_established_route ... ok
+test input::tests::quest_route_navigation_accepts_only_the_current_authoritative_map_epoch ... ok
+test input::tests::quest_target_action_arms_the_normal_moving_target_pursuit ... ok
+test input::tests::queued_route_survives_button_press_until_pointer_release ... ok
+test input::tests::real_left_click_on_self_tile_queues_crystal_tile_pickup ... ok
+test input::tests::player_magic_uses_current_actor_and_rejects_placeholder_identities ... ok
+test input::tests::real_right_click_on_empty_world_sends_authoritative_run_intent ... ok
+test input::tests::real_left_click_queues_hovered_npc_or_monster_but_modal_blocks_click_through ... ok
+test input::tests::gameplay_gate_matrix_blocks_every_registered_world_action ... ok
+test input::tests::rendered_hover_identity_maps_only_authoritative_npcs_and_monsters ... ok
+test input::tests::remapped_primary_skill_preserves_server_target_and_direction ... ok
+test input::tests::repeated_npc_click_uses_crystal_five_second_same_object_guard ... ok
+test input::tests::remapped_second_bar_skill16_preserves_server_target_and_direction ... ok
+test input::tests::right_click_auto_path_continues_after_mouse_release_and_authoritative_progress ... ok
+test input::tests::right_hold_started_outside_world_does_not_arm_on_entering_world ... ok
+test input::tests::right_click_run_is_blocked_by_modal_or_hovered_actor ... ok
+test input::tests::right_hold_refreshes_cursor_target_across_multiple_acknowledged_steps ... ok
+[movement] awaiting_authoritative_ack age_ms=3400.0 pending=1; additional movement paused
+test input::tests::session_transition_to_login_suppresses_live_d_movement_intent ... ok
+test input::tests::selected_monster_keeps_attacking_through_passive_hud_hover_and_delayed_walk_ack ... ok
+test input::tests::shift_direction_starts_with_one_matching_walk ... ok
+test input::tests::quest_route_input_tests::completed_hunt_arrival_feedback_expires_when_area_map_or_primary_quest_changes ... ok
+test input::tests::skill_bar_click_casts_second_bank_with_cursor_and_obeys_modal ... ok
+test input::tests::stale_hud_press_is_cleared_on_keyboard_frame_but_real_mouse_edge_is_preserved ... ok
+test input::tests::skill_input_suppressed_when_dead_or_not_ingame ... ok
+test input::tests::big_map_input_tests::imported_oma_entrance_source_tile_is_statically_walkable ... ok
+test input::tests::big_map_input_tests::authored_shop_door_still_rejects_occupancy_and_neighboring_walls ... ok
+test input::tests::big_map_input_tests::occupied_entrance_reports_a_retryable_dynamic_blocker ... ok
+test input::tests::quest_route_input_tests::hunt_navigation_already_in_region_stops_without_attacking_or_claiming_progress ... ok
+test input::tests::quest_route_input_tests::supply_navigation_already_beside_travis_neither_attacks_nor_opens_a_shop_remotely ... ok
+test input::tests::quest_route_input_tests::supply_navigation_reselects_a_free_npc_neighbor_when_its_endpoint_becomes_occupied ... ok
+test input::tests::quest_route_input_tests::quest_route_uses_current_identity_even_when_a_remote_map_was_browsed ... ok
+test input::tests::quest_route_input_tests::supply_navigation_rejects_forged_room_and_npc_coordinates ... ok
+test input::tests::stale_snapshot_cannot_rewind_packet_authority_after_250ms ... ok
+test input::tests::unchanged_user_location_blocks_immediate_resend_then_steers_around_rejection ... ok
+test input::tests::big_map_input_tests::travis_supply_route_walks_bichon_and_both_ordinary_shop_rooms ... ok
+test input::tests::quest_route_input_tests::quest_route_card_without_diary_or_big_map_cache_reaches_d401_exit ... ok
+test input::tests::v_key_never_triggers_town_revive_when_alive_or_unknown ... ok
+test input::tests::minimap_input_tests::minimap_occupied_destination_gives_feedback_without_world_click_fallback ... ok
+test input::tests::v_key_only_triggers_town_revive_when_dead_with_positive_max_hp ... ok
+test input::tests::big_map_input_tests::remote_map_and_modal_clicks_never_fall_through_to_world_input ... ok
+D001 hunting route: 18 acknowledged ordinary moves; dynamic goal occupancy avoided; no attack or quest progress inferred
+test input::tests::toggle_skill_f1_emits_the_next_authoritative_state ... ok
+test input::tests::quest_route_input_tests::hunt_navigation_d001_route_avoids_new_occupancy_and_stops_on_authoritative_arrival ... ok
+test input::tests::quest_route_input_tests::active_supply_navigation_cancels_on_same_map_reset_map_change_or_escape ... ok
+test input::tests::unknown_cooldown_mp_and_unlearned_skill_never_emit_magic ... ok
+test input::tests::world_and_pointer_gates_cover_modal_dialog_dead_and_capture_states ... ok
+test input::tests::minimap_input_tests::minimap_can_replace_a_route_while_big_map_is_open_without_clicking_world ... ok
+test input::tests::big_map_input_tests::big_map_close_controls_do_not_click_through_and_cancel_a_running_route ... ok
+test input::tests::quest_route_input_tests::hunt_navigation_host_rechecks_completion_primary_and_region_before_pointer_release ... ok
+test input::tests::quest_route_input_tests::supply_navigation_reaches_both_poison_shop_entrances_and_a_free_npc_neighbor ... ok
+test input::tests::big_map_input_tests::left_and_right_map_clicks_send_ack_bounded_movement_and_survive_mouse_up_without_new_move ... ok
+test input::tests::minimap_input_tests::minimap_both_buttons_route_without_bigmap_metadata_or_new_move_at_all_stage_scales ... ok
+test input::tests::quest_route_input_tests::supply_navigation_revalidates_open_card_vendor_and_map_after_pointer_release ... ok
+test input::tests::minimap_input_tests::minimap_click_respects_modals_dead_player_focus_and_overlapping_inventory ... ok
+test input::tests::minimap_input_tests::minimap_stale_or_loading_image_is_consumed_without_world_actions ... ok
+Bichon (205,62) -> Oma entrance (147,33): 58 acknowledged steps, static collision and new entity avoided
+test input::tests::quest_route_input_tests::bichon_route_reaches_oma_entrance_around_static_and_new_entity_obstacles ... ok
+test input::tests::minimap_input_tests::minimap_frame_and_collapsed_buttons_consume_press_at_displayed_positions ... ok
+test input::tests::native_quest_pointer_hover_producer_and_sender_agree_on_diary_bounds ... ok
+test input::tests::quest_route_input_tests::bichon_route_survives_passive_ui_hover_without_sending_extra_moves ... ok
+test input::tests::quest_route_input_tests::bichon_route_keeps_modal_drag_and_manual_cancel_guards ... ok
+
+test result: ok. 138 passed; 0 failed; 0 ignored; 0 measured; 774 filtered out; finished in 0.32s
+
+
+running 2 tests
+test gameplay_bridge::tests::attack_target_forwarding_accepts_native_osk_alt_snapshot ... ok
+test gameplay_bridge::tests::attack_target_forwarding_applies_crystal_alt_shift_and_normal_click_order ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 910 filtered out; finished in 0.02s
+
+
+running 2 tests
+test gameplay_bridge::tests::crystal_click_keeps_modal_dead_and_non_ingame_gates ... ok
+test gameplay_bridge::tests::crystal_click_semantics_match_shift_and_normal_archer_range_branches ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 910 filtered out; finished in 0.00s
+

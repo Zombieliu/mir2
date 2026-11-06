@@ -1,0 +1,35 @@
+{
+  "owner": "Root",
+  "kind": "actual original Source78 accepted Thin03 runtime02 owned local service start identity; original caller remains open",
+  "config": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source78-spells-readiness-20261012-01\\root-approved01\\web-start02-config.json",
+    "bytes": 3752,
+    "sha256": "cfa61c79c51b62a20423889a2daf2a2416334baf17ad431c05d043b3ca5dd020"
+  },
+  "snapshot": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source78-spells-readiness-20261012-01\\root-approved01\\source78-runtime-snapshot02.json",
+    "bytes": 2274564,
+    "sha256": "5b1d542d0991c0477c8866a5d5e4eb5e6004d2f660869940ce5ceb1e0a00473f"
+  },
+  "actualThin": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source78-spells-readiness-20261012-01\\root-approved01\\source78-thin-actual03.json",
+    "bytes": 5110,
+    "sha256": "8f8ad67d9d635575c725d80df302c60fc4353fbadd4f37f0c25b72fc8440fa29"
+  },
+  "identity": {
+    "owner": "Root",
+    "childPid": 104312,
+    "parentPid": 104420,
+    "localAddress": "127.0.0.1",
+    "localPort": 19205,
+    "uniqueListener": true,
+    "exactNodeAndSource78Runtime02Verified": true,
+    "originalCallerParentVerified": true,
+    "prohibitedPidsUntouched": true,
+    "activeLogsAndOuterUnread": true
+  },
+  "originalCallerSession": 66859,
+  "activeStdoutStderrOuterRead": false,
+  "source65GatewayChanged": false,
+  "goalComplete": false
+}

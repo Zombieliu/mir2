@@ -1,0 +1,58 @@
+{
+  "schemaVersion": 1,
+  "offlineOnly": true,
+  "actualMap": {
+    "width": 700,
+    "height": 700
+  },
+  "origin": {
+    "x": 286,
+    "y": 613
+  },
+  "target": {
+    "x": 287,
+    "y": 614
+  },
+  "rootRawBlockingFact": {
+    "frame": 689,
+    "plannerRead": 686,
+    "objectId": 206515,
+    "name": "Deer",
+    "hp": 25,
+    "source": "Root bounded raw projection, not reread by replay"
+  },
+  "baselineSource": {
+    "bytes": 19998,
+    "sha256": "896323515674920237ecbf62829ac5354a9ca01d49d10f5968d57499f42a61f2"
+  },
+  "candidateSource": {
+    "bytes": 20548,
+    "sha256": "f4296f07112265e39b3b6072d089a1e27574820ba5b22adad1f075f5c7513645"
+  },
+  "currentSourceMatchesCandidate": true,
+  "timing": [
+    {
+      "iteration": 1,
+      "baselineMs": 270.758,
+      "guardedMs": 0.40739999999999554,
+      "result": "null"
+    },
+    {
+      "iteration": 2,
+      "baselineMs": 258.3646,
+      "guardedMs": 0.04200000000003001,
+      "result": "null"
+    },
+    {
+      "iteration": 3,
+      "baselineMs": 254.6857,
+      "guardedMs": 0.10930000000007567,
+      "result": "null"
+    }
+  ],
+  "differentialComparisons": 603,
+  "allRouteAndNullResultsExact": true,
+  "maxExpandedAndAccessorErrorsPreserved": true,
+  "loadStarted": false,
+  "thresholdsChanged": false
+}

@@ -1,0 +1,11 @@
+{
+  "gatewayPid": 70676,
+  "gatewayExe": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-observer-feasibility-18\\bin\\mir2-gateway.exe",
+  "expectedSha256": "dae1f873878ee5212e8d84cd57cb9cc737104aaec8a644c4aeb33a49980d82cc",
+  "healthUrl": "http://127.0.0.1:17510/health",
+  "output": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-observer-feasibility-18\\monitor-current.json",
+  "history": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-observer-feasibility-18\\monitor-history.jsonl",
+  "resourceProfile": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-observer-feasibility-18\\resource-profile.json",
+  "intervalMs": 1000,
+  "wallSeconds": 3600
+}

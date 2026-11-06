@@ -1,0 +1,219 @@
+{
+  "schemaVersion": 1,
+  "createdAt": "2026-10-25T20:03:22.481Z",
+  "purpose": "Minimal ended16 to ended17 source derivation; no actual verifier execution or raw replay",
+  "files": [
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\probe16-independent-verification-v1\\hp-proof-contract-v2.mjs",
+        "bytes": 4644,
+        "sha256": "cbf67686e1fa385404782c27548dbe3fbaa10f55a5d97c3379d5a41ed01cf285"
+      },
+      "target": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\probe17-independent-verification-v1\\hp-proof-contract-v2.mjs",
+        "bytes": 4644,
+        "sha256": "cbf67686e1fa385404782c27548dbe3fbaa10f55a5d97c3379d5a41ed01cf285"
+      },
+      "changes": [],
+      "rawExact": true
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\probe16-independent-verification-v1\\expected-probe-policy-v1.json",
+        "bytes": 1008,
+        "sha256": "e3bc309c4830ffed84c924c5d71dda6fa44e90bcbe552fd3a969dc9760edb242"
+      },
+      "target": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\probe17-independent-verification-v1\\expected-probe-policy-v1.json",
+        "bytes": 1008,
+        "sha256": "e3bc309c4830ffed84c924c5d71dda6fa44e90bcbe552fd3a969dc9760edb242"
+      },
+      "changes": [],
+      "rawExact": true
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\probe16-independent-verification-v1\\seal-tool-source-v1.mjs",
+        "bytes": 3011,
+        "sha256": "cc646ed39d511137b83655ec7abe215091dca4e81ac5e10b24c93af2a4f7b499"
+      },
+      "target": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\probe17-independent-verification-v1\\seal-tool-source-v1.mjs",
+        "bytes": 3011,
+        "sha256": "cc646ed39d511137b83655ec7abe215091dca4e81ac5e10b24c93af2a4f7b499"
+      },
+      "changes": [],
+      "rawExact": true
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\probe16-independent-verification-v1\\probe-contract-v1.mjs",
+        "bytes": 5820,
+        "sha256": "f31dbde547f7e725d9ea209cc3e160f36c442891729dccba675db0b59eee927d"
+      },
+      "target": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\probe17-independent-verification-v1\\probe-contract-v1.mjs",
+        "bytes": 5820,
+        "sha256": "b80bedae18b07659fb77fa02f2e581bc2879b3274245e0f27cc7a0f3e00452d4"
+      },
+      "changes": [
+        {
+          "offset": 750,
+          "before": "probe16",
+          "after": "probe17"
+        },
+        {
+          "offset": 678,
+          "before": "probe16",
+          "after": "probe17"
+        },
+        {
+          "offset": 5433,
+          "before": "65608",
+          "after": "62088"
+        },
+        {
+          "offset": 5470,
+          "before": "70448",
+          "after": "61104"
+        }
+      ],
+      "inverseRawExact": true
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\probe16-independent-verification-v1\\run-ended-probe16-v1.mjs",
+        "bytes": 2257,
+        "sha256": "944ef34333131c729d3accf43451dbe22962dbab040ec7b66f9b7a1fb3b0f546"
+      },
+      "target": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\probe17-independent-verification-v1\\run-ended-probe17-v1.mjs",
+        "bytes": 2257,
+        "sha256": "433169eb07d542f5afff0dc77727545c60e8c6b770bd64b109ca1d190d10eb07"
+      },
+      "changes": [
+        {
+          "offset": 1215,
+          "before": "probe16",
+          "after": "probe17"
+        },
+        {
+          "offset": 455,
+          "before": "probe16",
+          "after": "probe17"
+        }
+      ],
+      "inverseRawExact": true
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\probe16-independent-verification-v1\\verify-ended-probe16-v1.mjs",
+        "bytes": 30334,
+        "sha256": "9c25c810fcb979c649ed108f53e7a1ea2ec6f463dc68a627712766ee017ce8a4"
+      },
+      "target": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\probe17-independent-verification-v1\\verify-ended-probe17-v1.mjs",
+        "bytes": 34205,
+        "sha256": "91e33b39a79ba686d6fdadeacfa7d0a774eba791804dddad606e6a40fa6179f6"
+      },
+      "changes": [
+        {
+          "offset": 690,
+          "before": "release-native-10-v2-attack-deadline-feasibility-16",
+          "after": "release-native-10-v2-account-store-wait-feasibility-17"
+        },
+        {
+          "offset": 930,
+          "before": "capacity-native10-v2-attack-deadline-followup-16-diagnostics",
+          "after": "capacity-native10-v2-account-store-wait-followup-17-diagnostics"
+        },
+        {
+          "offset": 14151,
+          "before": "probe16",
+          "after": "probe17"
+        },
+        {
+          "offset": 10529,
+          "before": "probe16",
+          "after": "probe17"
+        },
+        {
+          "offset": 1022,
+          "before": "probe16",
+          "after": "probe17"
+        },
+        {
+          "offset": 10438,
+          "before": "1792949214664-bea1433d",
+          "after": "1792956759820-08151b82"
+        },
+        {
+          "offset": 14739,
+          "before": "assert.equal(catalog.run.backendSourceCommit,'d2407fb84055e2088e3ca6ccdb4f8b80d15a9d16')",
+          "after": "assert.equal(catalog.run.backendSourceCommit,'c743122af05faca43d9535d8c6c2a4bfb01b924f')"
+        },
+        {
+          "offset": 15160,
+          "before": "1980b7bed58499977eb6443aa3f1bf0fabcb9e8262b490f2bc6fb74cf6f7b318",
+          "after": "dae1f873878ee5212e8d84cd57cb9cc737104aaec8a644c4aeb33a49980d82cc"
+        },
+        {
+          "offset": 15227,
+          "before": "assert.equal(catalog.run.backendInputCount,44)",
+          "after": "assert.equal(catalog.run.backendInputCount,50)"
+        },
+        {
+          "offset": 26850,
+          "before": "backendInputs:44",
+          "after": "backendInputs:50"
+        },
+        {
+          "offset": 25157,
+          "before": "5cc5e733fb47b05694e53de6caace2cff4c519eacbbd8feae3d6dfe2f12239d2",
+          "after": "ad1b57c6cad02f36ddc8640f58d5e3ce4a3dc322b492a81eea0d4b2ac1f7c00c"
+        },
+        {
+          "offset": 25495,
+          "before": "assert.equal(launcher.files.length,99)",
+          "after": "assert.equal(launcher.files.length,69)"
+        },
+        {
+          "offset": 25656,
+          "before": "bytes:40976,sha256:'a22ff77e310680b4f95d0daf5cc630bdc9c899032a265eefa890212ba39e356c'",
+          "after": "bytes:33193,sha256:'6c5610464c3ddf69c607ad882b36e42b316fbe1f8dab17c38c0457b591db5b16'"
+        },
+        {
+          "offset": 29467,
+          "before": "original fresh16 probe",
+          "after": "original fresh17 probe"
+        },
+        {
+          "offset": 9853,
+          "before": "async function verify(){",
+          "after": "async function verifyStoreCompanion(catalog,pins,reportOk){\n const child=CHILD.replace(/-diagnostics$/,'-store-diagnostics'),dir=path.join(TOPIC,child);\n const api=await import(pathToFileURL(await safeFile(BASE,REALM+'/store-diagnostics-contract.mjs')));\n const source=await api.verifyStoreDiagnosticSource(),identity=api.storeDiagnosticIdentity(source),catalogValue=await read(dir,'store-artifact-catalog.json'),verification=await read(dir,'store-public-verification.json'),status=await read(dir,'store-stage-public-status.json');\n assert.equal(catalogValue.runId,RUN);assert.equal(verification.runId,RUN);assert.deepEqual(catalogValue.sourceIdentity,identity);assert.deepEqual(verification.sourceIdentity,identity);assert.deepEqual(status.sourceIdentity,identity);assert.deepEqual((await read(BASE,REALM+'/report-provenance.json')).storeDiagnostics,identity);\n for(const k of ['backendSourceCommit','driverSourceCommit','backendInputCount','gatewaySha256'])assert.equal(catalogValue[k],catalog.run[k]);\n assert.equal(catalogValue.originalReportOk,reportOk);assert.equal(verification.originalReportOk,reportOk);assert.equal(catalogValue.originalCapacityAccepted,false);assert.equal(catalogValue.gameplayVerdictModified,false);assert.equal(catalogValue.contributesToGameAcceptance,false);assert.equal(verification.originalGameVerdictPreserved,true);assert.equal(verification.capacityAccepted,false);assert.equal(verification.contributesToGameAcceptance,false);\n const bound=(value,expectedFile,p)=>{assert.ok(samePath(value.file,expectedFile));assert.equal(value.bytes,p.bytes);assert.equal(value.sha256,p.sha256);};\n bound(catalogValue.baseCatalog,path.join(TOPIC,CHILD,pins.catalog.path),pins.catalog);bound(catalogValue.baseVerification,path.join(TOPIC,CHILD,pins.publicVerification.path),pins.publicVerification);\n assert.equal(catalogValue.copies.length,2);const names=new Set();for(const row of catalogValue.copies){const name=path.basename(row.destination.file);assert.ok(['store-stage-public-status.json','store-stage-public.jsonl'].includes(name)&&!names.has(name));names.add(name);const original=await pin(BASE,REALM+'/'+name),copied=await pin(TOPIC,child+'/'+name);bound(row.source,path.join(BASE,REALM,name),original);bound(row.destination,path.join(TOPIC,child,name),copied);assert.equal(original.bytes,copied.bytes);assert.equal(original.sha256,copied.sha256);}\n assert.equal(status.thresholdMs,50);const checked=await api.validateAccountStorePublicDataset({input:createReadStream(await safeFile(dir,'store-stage-public.jsonl')),status});assert.deepEqual(checked,catalogValue.validation);assert.equal(checked.complete,catalogValue.diagnosticComplete);assert.equal(checked.countsMatch,true);assert.equal(checked.formatValid,true);assert.equal(checked.readEnded,true);assert.equal(verification.rows,checked.rows);assert.equal(verification.bytes,checked.bytes);assert.equal(verification.sha256,checked.sha256);assert.equal(verification.diagnosticComplete,checked.complete);\n return{sourceValid:true,countsMatch:true,complete:checked.complete,reasons:checked.reasons,rows:checked.rows,bytes:checked.bytes,sha256:checked.sha256,sourceIdentity:identity,pins:{catalog:await pin(TOPIC,child+'/store-artifact-catalog.json'),publicVerification:await pin(TOPIC,child+'/store-public-verification.json'),status:await pin(TOPIC,child+'/store-stage-public-status.json'),data:await pin(TOPIC,child+'/store-stage-public.jsonl')},diagnosticsDoNotChangeOriginalGameVerdict:true,contributesToGameAcceptance:false,completedOnlyCannotProveMissingHolder:true};\n}\nasync function verify(){"
+        },
+        {
+          "offset": 29416,
+          "before": " const replayedMemory=null;",
+          "after": " const storeDiagnostics=await verifyStoreCompanion(catalog,pins,report.ok);\n const replayedMemory=null;"
+        },
+        {
+          "offset": 31114,
+          "before": "},wireDiagnostics,telemetryDeltas",
+          "after": "},wireDiagnostics,storeDiagnostics,telemetryDeltas"
+        },
+        {
+          "offset": 32785,
+          "before": "'The packettrace is diagnostic and not a new source of damage credit. A future positive probe still needs every original driver two-endpoint900ms evidence gate.'",
+          "after": "'The packettrace is diagnostic and not a new source of damage credit. This tool does not independently replay per-request typed-result/dual-positive packet matching within900ms; those original gates remain in frozen Node d240/210 source and original report. Independent replay here covers action counters, actual-duration windows, continuous activity counters and HP proof rows.'"
+        }
+      ],
+      "inverseRawExact": true
+    }
+  ],
+  "gameThresholdsChanged": false,
+  "actualElapsedAndPartialBodiesPreserved": true,
+  "typedPacket900ReplayAdded": false,
+  "storeDiagnosticsDoesNotChangeGameVerdict": true,
+  "privateRead": false
+}

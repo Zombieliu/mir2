@@ -1,0 +1,44 @@
+{
+  "schemaVersion": 1,
+  "state": "PENDING_FRESH_PROBE15_COMPLETE_PASS_NOT_FINALIZED_NOT_SEALED",
+  "rootIdentity": "release-native-v2-personal-projection-ladder-11",
+  "publicChild": "capacity-formal-native-v2-personal-projection-ladder-11",
+  "executionSourceCommit": "5c2e713863d3e9556a92f856b11df2396c73b137",
+  "backendSourceCommit": "5c2e713863d3e9556a92f856b11df2396c73b137",
+  "backendInputCount": 44,
+  "driverCodeEvidenceCommit": "b84d5d02a8299b6ac36c5e56cb7006f6bc80d3bd",
+  "driverSourceSha256": "db4e22c69b4f1365d8135023e158f4de00ff35d58330cf7eca98801780e674e7",
+  "actualRelease": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-personal-monster-projection-v1.json",
+    "bytes": 2376,
+    "sha256": "613b82935c45e476ad1ba32e2592e562e14ea6997062fc9f12b9de02bb770121"
+  },
+  "freshFull16Gate": null,
+  "probe15": {
+    "root": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-personal-projection-feasibility-15",
+    "publicChild": "capacity-native10-v2-personal-projection-followup-15-diagnostics",
+    "runId": null,
+    "report": null,
+    "raw": null,
+    "collectedEvidence": null,
+    "independentVerification": null,
+    "completePhaseSeconds": [
+      300,
+      300,
+      360
+    ],
+    "completePhaseWindows": [
+      5,
+      5,
+      6
+    ],
+    "capacityAccepted": false,
+    "independentVerifierSources": null,
+    "independentVerifierRevision": null
+  },
+  "finalized": false,
+  "sealed": false,
+  "provisioned": false,
+  "formalRunStarted": false,
+  "capacityAccepted": false
+}

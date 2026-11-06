@@ -1,0 +1,817 @@
+{
+  "schema": "mir2.p3a.root-durable-evidence.v1",
+  "files": [
+    {
+      "file": "original/adjacent-same-map-attempt-01.log",
+      "bytes": 32059,
+      "sha256": "991b940642138734f3db0cfc95bab747764cf592e40d9fef2353cdea363ee1fd"
+    },
+    {
+      "file": "original/adjacent-same-map-attempt-02.log",
+      "bytes": 31163,
+      "sha256": "c8d6413fee4798176acbbca89a869f836b23a505eae21e83c85ab0dc3eb14541"
+    },
+    {
+      "file": "original/adjacent-same-map-attempt-02.log.json",
+      "bytes": 256,
+      "sha256": "f1e0578ac1be3513285d667bd1cbcc54bbd0b06dc4235f2a1b5c6fe91eb0ab56"
+    },
+    {
+      "file": "original/approved-adjacent-fixture-adaptations.patch",
+      "bytes": 8437,
+      "sha256": "3c24dfdf5cebf6509fab378aaee8296685bfe4675ad1b0ecf63a823cb48e5abe"
+    },
+    {
+      "file": "original/baseline/apps/gateway/src/routing.rs",
+      "bytes": 1203142,
+      "sha256": "938bb54d16ce8c6028eeb1164dd2509c5f3887a49c3bd9e262ceab8b67fa949f"
+    },
+    {
+      "file": "original/baseline/apps/simulation/src/runtime/drops.rs",
+      "bytes": 173251,
+      "sha256": "9b47435fc671c0c60467ff53d4d6518fb9d243ad056612a1e05eb038ac0c6be5"
+    },
+    {
+      "file": "original/baseline/apps/simulation/src/runtime/zone/manager.rs",
+      "bytes": 31808,
+      "sha256": "523fea1cdcaaa720c4bd6c2adad0b4a386e0e5b8b3f2ee4d8452b48790c677a3"
+    },
+    {
+      "file": "original/baseline/apps/simulation/src/runtime/zone/mod.rs",
+      "bytes": 1412,
+      "sha256": "13dd169ffcb2144b07e41957e066926beacfa93ceb717888199ded7686677916"
+    },
+    {
+      "file": "original/baseline/apps/simulation/src/runtime/zone/runtime/checkpoint.rs",
+      "bytes": 77688,
+      "sha256": "c8991352d5efbb536e2d0373e1d044f92daffe783cf1ea6135c52bc2e7a8269f"
+    },
+    {
+      "file": "original/baseline/apps/simulation/src/runtime/zone/runtime/experience_ownership.rs",
+      "bytes": 17639,
+      "sha256": "f6f010a983e80f86b52bc67843c1b9fa06380ceaa158a9dcf6db4690669530b0"
+    },
+    {
+      "file": "original/baseline/apps/simulation/src/runtime/zone/runtime.rs",
+      "bytes": 670420,
+      "sha256": "d0598c4ce418a26f696ec4efc07dfd1d0db3f1e5a6202f86cdbcc73a703390c3"
+    },
+    {
+      "file": "original/baseline/apps/simulation/src/runtime/zone/types.rs",
+      "bytes": 49833,
+      "sha256": "3c16e1a6b7aa191735cf5b7da0398f154c52599e4ce7df0639465669f25a4e39"
+    },
+    {
+      "file": "original/baseline.json",
+      "bytes": 1653,
+      "sha256": "488eb58a14c1b74edc519f34f61818eb74692290cbdaa1ce1d66579786dc0155"
+    },
+    {
+      "file": "original/case-results.json",
+      "bytes": 20068,
+      "sha256": "553f509a920ccca48c8b7d860ad739cc0b99d934bbd9b5535c1249be0410a8ef"
+    },
+    {
+      "file": "original/death18-source-unchanged.json",
+      "bytes": 210,
+      "sha256": "8b18bad4ac1e6edde1e757556cf0ab3e0fd4e703c71b43154e9e18e12d8f1ebe"
+    },
+    {
+      "file": "original/failure-history.json",
+      "bytes": 3324,
+      "sha256": "9f222f4bf6efb0a17234d130ed7fe0ca4cc75da9910cdec9efd75b370ef357e3"
+    },
+    {
+      "file": "original/fault-fixtures/unknown-34376-1791126481539512700/accounts.json",
+      "bytes": 11038,
+      "sha256": "3b024bcd491af8ae65d5d6e2764d3f8038122d40403589cb64e43b283bd355e0"
+    },
+    {
+      "file": "original/fault-fixtures/unknown-34376-1791126481539512700/accounts.json.writer.lock",
+      "bytes": 364,
+      "sha256": "8bdfc25e2646afca60845fb68ec782f532ff72a6d53ed430a3f547920bb6c57a"
+    },
+    {
+      "file": "original/fault-fixtures/unknown-53752-1791126756900926000/accounts.json",
+      "bytes": 11038,
+      "sha256": "a937ccbc0f419aef42f9aa3f477b401f61f5056170e3ba0397c351521384645e"
+    },
+    {
+      "file": "original/fault-fixtures/unknown-53752-1791126756900926000/accounts.json.writer.lock",
+      "bytes": 364,
+      "sha256": "b90130c184396d35887e6165d9b5e76ec2f1d8e395fdce85601960efa6e7f98d"
+    },
+    {
+      "file": "original/fault-fixtures/unknown-56324-1791125753990525400/accounts.json",
+      "bytes": 11038,
+      "sha256": "58789209507936bba6366775974167a28474aa8b3bdc6dd49f3090cdb58c5bb3"
+    },
+    {
+      "file": "original/fault-fixtures/unknown-56324-1791125753990525400/accounts.json.writer.lock",
+      "bytes": 364,
+      "sha256": "220cc1cb82b84d8fb65321ae373130bf9e0e796b9d72d54b12a57f464102c1e1"
+    },
+    {
+      "file": "original/fault-fixtures/unknown-61052-1791130049412185800/accounts.json",
+      "bytes": 11038,
+      "sha256": "59e2223d4d6649259a2f12865ca1704faae944eb4a8857aec672d8799ab0b475"
+    },
+    {
+      "file": "original/fault-fixtures/unknown-61052-1791130049412185800/accounts.json.writer.lock",
+      "bytes": 364,
+      "sha256": "a90312625710316bb3159ba611ef6992b2946566ca67b162f3f60cafc8440185"
+    },
+    {
+      "file": "original/final-receipt.json",
+      "bytes": 1924,
+      "sha256": "0d7c0ca77518b82075a5ee8d9182e68727fc94c199de59237e32de2c26cde84f"
+    },
+    {
+      "file": "original/finalize_receipt.py",
+      "bytes": 23919,
+      "sha256": "b8dba49e09bafdfff87b8a3d1ae8de48ee64fbc1aaf02f06bb1116955e2e0ee1"
+    },
+    {
+      "file": "original/finalize_receipt_v2.py",
+      "bytes": 24608,
+      "sha256": "7f621c6859a05b3e267a6ad963fb5302e90f207ad41afd2b1c9137323c7da92c"
+    },
+    {
+      "file": "original/fixture-adaptation-before/apps/simulation/src/runtime/zone/runtime/checkpoint.rs",
+      "bytes": 85562,
+      "sha256": "6a9bae840c653b149a22267a506a102b1fd8263b6aaae9a983e452e172602733"
+    },
+    {
+      "file": "original/fixture-adaptation-before/apps/simulation/tests/shared_monster_ownership.rs",
+      "bytes": 22786,
+      "sha256": "57e4149452d05527475b452b9f2ee510a2d13cb62f4d20915474f406952fae4e"
+    },
+    {
+      "file": "original/fixture-adaptation-before/source-before.json",
+      "bytes": 630,
+      "sha256": "a3e4c00b8387c80f17f5dea51f3eb51c199acc7a2e3a6fd10b0557c7b530ae9a"
+    },
+    {
+      "file": "original/fixture-adaptations.json",
+      "bytes": 1476,
+      "sha256": "289d64483b43fc0731632fd9546dda7b15d3a45770f25b3e0771e70825aac9b2"
+    },
+    {
+      "file": "original/focused-tests.json",
+      "bytes": 11185,
+      "sha256": "0eb8142c1457a4a6903ac1cdab1bd04238686e84d1a3765cbf56e1f50228c8d9"
+    },
+    {
+      "file": "original/freeze-verification.json",
+      "bytes": 2895,
+      "sha256": "af16020ed37a200ca7bfa0aed04e01515a89022aa9bcc9678a7c7fae5a7dfaca"
+    },
+    {
+      "file": "original/frozen-source/apps/gateway/src/routing/tests/cross_map_drop_lifecycle_tests.rs",
+      "bytes": 38114,
+      "sha256": "31cf61152aa5835255332fd979c2490cdbbd4d671935cc65e46ddb50dbb30a7b"
+    },
+    {
+      "file": "original/frozen-source/apps/gateway/src/routing.rs",
+      "bytes": 1240679,
+      "sha256": "bb838c99429da46e9bd4e051bd86daaeb0e88bb385cc67fe0c9875c9e631d931"
+    },
+    {
+      "file": "original/frozen-source/apps/simulation/src/runtime/drops.rs",
+      "bytes": 173405,
+      "sha256": "8c1adf2f6956376e407ed2f09a917bfcba0108cc97d7f7c02671499c26524851"
+    },
+    {
+      "file": "original/frozen-source/apps/simulation/src/runtime/zone/manager.rs",
+      "bytes": 37240,
+      "sha256": "887b6d75e4ea513828075693e32f11c5f9c34adeb9311cf61880dd052ed56e70"
+    },
+    {
+      "file": "original/frozen-source/apps/simulation/src/runtime/zone/mod.rs",
+      "bytes": 1433,
+      "sha256": "f0a639fa95bdcf11a0b45c8b08abfcc5e38029a62da8c50e62f95d0e193b5118"
+    },
+    {
+      "file": "original/frozen-source/apps/simulation/src/runtime/zone/online_identity.rs",
+      "bytes": 4684,
+      "sha256": "8fc962e0c7d270081576b37477619596efedc1b7663730c9620c79b389c54e03"
+    },
+    {
+      "file": "original/frozen-source/apps/simulation/src/runtime/zone/runtime/checkpoint.rs",
+      "bytes": 86552,
+      "sha256": "5c3cdd2f93b10c6052a157da2354a14e3e1f49388cf6310d0e8690d642f512f4"
+    },
+    {
+      "file": "original/frozen-source/apps/simulation/src/runtime/zone/runtime/experience_ownership.rs",
+      "bytes": 21889,
+      "sha256": "c3b12a1a0685266554b911727b9c1d7c9dbc0ba1ded4818c667951f530ed5ec5"
+    },
+    {
+      "file": "original/frozen-source/apps/simulation/src/runtime/zone/runtime/ground_ownership.rs",
+      "bytes": 6875,
+      "sha256": "ba03d424261d54c132bf8a097e46a1b0f556c69ec572cdc2997ad3c520aa0ef8"
+    },
+    {
+      "file": "original/frozen-source/apps/simulation/src/runtime/zone/runtime.rs",
+      "bytes": 673600,
+      "sha256": "9ab2f4cb3d138be9347b17efafe7bde654f66ab4eff95e4ea2181a7f67712fb3"
+    },
+    {
+      "file": "original/frozen-source/apps/simulation/src/runtime/zone/types.rs",
+      "bytes": 51349,
+      "sha256": "3d0cb53c0da4144da4e7b6969a7442c6934ef0e5833646ea8c0f95407bfb3bd6"
+    },
+    {
+      "file": "original/frozen-source/apps/simulation/tests/shared_cross_map_drop_lifecycle.rs",
+      "bytes": 21191,
+      "sha256": "40b35a2b11141247d49062d770c809143afc8baf9eab7f187ad210941cafe0cf"
+    },
+    {
+      "file": "original/frozen-source/apps/simulation/tests/shared_monster_ownership.rs",
+      "bytes": 27240,
+      "sha256": "7571f60473f04fdbf247364613df4ef18e6071ca8f6389ce012589c204564c33"
+    },
+    {
+      "file": "original/frozen-source/docs/CROSS-MAP-DROP-LIFECYCLE-20261004.md",
+      "bytes": 11433,
+      "sha256": "cc0404b896f020a3055d627945a3f0abd94ea1f62192831dbad25c40ca74f5c5"
+    },
+    {
+      "file": "original/gateway-adjacent-01-attempt-01.log",
+      "bytes": 30339,
+      "sha256": "5401644c15f74c2cff33aa025050c5c478820288d99947881315b5ce2c7a71de"
+    },
+    {
+      "file": "original/gateway-adjacent-01-attempt-01.log.json",
+      "bytes": 286,
+      "sha256": "8d65fc6717c78a1874cf0f3a8ca0382cb6ddc4149168fbc3a2f749cc3a66726d"
+    },
+    {
+      "file": "original/gateway-adjacent-02-attempt-01.log",
+      "bytes": 30082,
+      "sha256": "841051ad4b18d9430cbf49681d97b1668918f620a53c5c6ea653a89ceefef49f"
+    },
+    {
+      "file": "original/gateway-adjacent-02-attempt-01.log.json",
+      "bytes": 280,
+      "sha256": "45de752994bf74bf6b04ab8d25abd73dbc32f57fe64981dd2ed0ce557a1d3e64"
+    },
+    {
+      "file": "original/gateway-adjacent-03-attempt-01.log",
+      "bytes": 30077,
+      "sha256": "bb18b3114711060fe36831243d20d5ed277fa8bc2629b855a97cd716a9ff8002"
+    },
+    {
+      "file": "original/gateway-adjacent-03-attempt-01.log.json",
+      "bytes": 275,
+      "sha256": "e97f58a4b35b5dcb003d6d38502a57cd23f9bd224b639f022f710c65cc44baf0"
+    },
+    {
+      "file": "original/gateway-adjacent-04-attempt-01.log",
+      "bytes": 30077,
+      "sha256": "c25b55d309435cbf2fa405467d77098430eccde9b39233c4439bedd90b88cdb8"
+    },
+    {
+      "file": "original/gateway-adjacent-04-attempt-01.log.json",
+      "bytes": 275,
+      "sha256": "5a4f697e647024732a5e01973004a116e2ce18813f69c00a03c91fb70cbe82f2"
+    },
+    {
+      "file": "original/gateway-adjacent-05-attempt-01.log",
+      "bytes": 31670,
+      "sha256": "3939b6c5de0cee650ff3dc6c42e89345fcd6a44c63b08c7bb827ed83c59491d0"
+    },
+    {
+      "file": "original/gateway-adjacent-05-attempt-01.log.json",
+      "bytes": 242,
+      "sha256": "929ca79296da73c02f63414d953961651191ecf8f2320946b4326d9b7983f480"
+    },
+    {
+      "file": "original/gateway-bag-custody-attempt-01.log",
+      "bytes": 30619,
+      "sha256": "2ab59eb302e034317ba844f1047ec485c36f3b5075c418008faa0d8756e80e90"
+    },
+    {
+      "file": "original/gateway-compile-attempt-01.log",
+      "bytes": 36856,
+      "sha256": "fb960db0a0a00f98b3339942543db5b71543b960b7e89981c5bfb20b98ee50f0"
+    },
+    {
+      "file": "original/gateway-tests-attempt-01.log",
+      "bytes": 32871,
+      "sha256": "2f967b8d1cdfd068d7354564715e69cb37c860dc35438b181f90fb63cf6a06a5"
+    },
+    {
+      "file": "original/gateway-tests-attempt-02.log",
+      "bytes": 42637,
+      "sha256": "2e0e672931f24c5e07490c3c55548c60f4bf796208fbde19fb9aeac8e9d483ce"
+    },
+    {
+      "file": "original/gateway-tests-attempt-03.log",
+      "bytes": 32720,
+      "sha256": "a9e427fbcda637959a39cb042c009b19d9da4035eb9a2a1da7b8259724bc5b20"
+    },
+    {
+      "file": "original/gateway-tests-attempt-04.log",
+      "bytes": 32284,
+      "sha256": "35354e2f301ba964982545786fae49f074dc6b3b44b8b8de656da9738e0ecd10"
+    },
+    {
+      "file": "original/gateway-tests-attempt-05.log",
+      "bytes": 31442,
+      "sha256": "0580eb71a7a342dff0b70cafcf84ee2d89fe5825699ac36eb310ec2228f993cf"
+    },
+    {
+      "file": "original/gateway-tests-attempt-06.log",
+      "bytes": 39324,
+      "sha256": "afca2b79cdf892b68040ccdf0812f025a09bbd45d6953e5c2c3f32a994a68683"
+    },
+    {
+      "file": "original/gateway-tests-attempt-07.log",
+      "bytes": 33093,
+      "sha256": "ff3765eea504ee79749ac76351b07b9e5b2abce7023e4caf7f6156da2d19a74a"
+    },
+    {
+      "file": "original/gateway-tests-attempt-08.log",
+      "bytes": 33479,
+      "sha256": "ca636466643516d562bb8e1e1390b4de3484d08bd5b0d63ebee96a4f066ddd44"
+    },
+    {
+      "file": "original/gateway-tests-attempt-08.log.json",
+      "bytes": 258,
+      "sha256": "8a36d8159b1f8491a5e6497f6460faa4e5db8e80dcbd7545d4c2d8708d5ae1e5"
+    },
+    {
+      "file": "original/green-simulation-attempt-01.log",
+      "bytes": 5336,
+      "sha256": "7fe2213fd456fda33b335f6d7aef80082d142dd8c9f387a6cfdbcedfbdd8adff"
+    },
+    {
+      "file": "original/green-simulation-attempt-02.log",
+      "bytes": 30306,
+      "sha256": "120c36eb01273553b4fe77d0d5c9cc20e77f6cc1ac6d274fce5530feb2b7bec4"
+    },
+    {
+      "file": "original/green-simulation-attempt-03.log",
+      "bytes": 4724,
+      "sha256": "3962b08e4e63907acd60fd80e4a245c1566db29999a93bd1f6a1bb47ec3ad296"
+    },
+    {
+      "file": "original/green-simulation-attempt-04.log",
+      "bytes": 31552,
+      "sha256": "f16974c7194b2ccad2b552c2682517576340fe904b1955c830bb3132a3396e94"
+    },
+    {
+      "file": "original/green-simulation-attempt-05.log",
+      "bytes": 31075,
+      "sha256": "ceef24363c8ad6365a5b82b4cc15ce06808366055a0f7c6cbb50271ea18b0285"
+    },
+    {
+      "file": "original/green-simulation-attempt-06.log",
+      "bytes": 31075,
+      "sha256": "6b134ae03ff5c3c704c1d8ccc207a03056ea846ed40db5bb61e427186c1fd91e"
+    },
+    {
+      "file": "original/green-simulation-attempt-06.log.json",
+      "bytes": 266,
+      "sha256": "271cf0d8479adf68d16b65f53e971a53c47f41591b794cca12f535f088b94b66"
+    },
+    {
+      "file": "original/original-source-recheck.json",
+      "bytes": 3387,
+      "sha256": "bfcbd370ecbeb437e28408ce67d48aa1dc4dde351462bb85365301eff6607613"
+    },
+    {
+      "file": "original/p3a-complete.patch",
+      "bytes": 178696,
+      "sha256": "57b26653d284164c7122baa4f7de72fb441b08eeb394d473c57df238db9f7ded"
+    },
+    {
+      "file": "original/patch-forward-check/mir2-web3/apps/gateway/src/routing.rs",
+      "bytes": 1203142,
+      "sha256": "938bb54d16ce8c6028eeb1164dd2509c5f3887a49c3bd9e262ceab8b67fa949f"
+    },
+    {
+      "file": "original/patch-forward-check/mir2-web3/apps/simulation/src/runtime/drops.rs",
+      "bytes": 173251,
+      "sha256": "9b47435fc671c0c60467ff53d4d6518fb9d243ad056612a1e05eb038ac0c6be5"
+    },
+    {
+      "file": "original/patch-forward-check/mir2-web3/apps/simulation/src/runtime/zone/manager.rs",
+      "bytes": 31808,
+      "sha256": "523fea1cdcaaa720c4bd6c2adad0b4a386e0e5b8b3f2ee4d8452b48790c677a3"
+    },
+    {
+      "file": "original/patch-forward-check/mir2-web3/apps/simulation/src/runtime/zone/mod.rs",
+      "bytes": 1412,
+      "sha256": "13dd169ffcb2144b07e41957e066926beacfa93ceb717888199ded7686677916"
+    },
+    {
+      "file": "original/patch-forward-check/mir2-web3/apps/simulation/src/runtime/zone/runtime/checkpoint.rs",
+      "bytes": 77688,
+      "sha256": "c8991352d5efbb536e2d0373e1d044f92daffe783cf1ea6135c52bc2e7a8269f"
+    },
+    {
+      "file": "original/patch-forward-check/mir2-web3/apps/simulation/src/runtime/zone/runtime/experience_ownership.rs",
+      "bytes": 17639,
+      "sha256": "f6f010a983e80f86b52bc67843c1b9fa06380ceaa158a9dcf6db4690669530b0"
+    },
+    {
+      "file": "original/patch-forward-check/mir2-web3/apps/simulation/src/runtime/zone/runtime.rs",
+      "bytes": 670420,
+      "sha256": "d0598c4ce418a26f696ec4efc07dfd1d0db3f1e5a6202f86cdbcc73a703390c3"
+    },
+    {
+      "file": "original/patch-forward-check/mir2-web3/apps/simulation/src/runtime/zone/types.rs",
+      "bytes": 49833,
+      "sha256": "3c16e1a6b7aa191735cf5b7da0398f154c52599e4ce7df0639465669f25a4e39"
+    },
+    {
+      "file": "original/patch-forward-check/mir2-web3/apps/simulation/tests/shared_monster_ownership.rs",
+      "bytes": 22786,
+      "sha256": "57e4149452d05527475b452b9f2ee510a2d13cb62f4d20915474f406952fae4e"
+    },
+    {
+      "file": "original/patch-forward-check-attempt-02.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": "original/patch-verification.json",
+      "bytes": 426,
+      "sha256": "3f53b86737b1a0adf81c9bd87c21d8e488f22b7b5bc61e0f0f7965f07a38a5a6"
+    },
+    {
+      "file": "original/receipt-finalizer-attempt-01.log",
+      "bytes": 2321,
+      "sha256": "5a9b1afb1a24ec32a5f21e00a3db6cb49778729d6649a717ac1fb8e453c77c4c"
+    },
+    {
+      "file": "original/receipt-finalizer-attempt-02.log",
+      "bytes": 179,
+      "sha256": "f6135c7bf531672504bd0ac39d30e2fa5e7d295ca681ea58534c7921db5a63ac"
+    },
+    {
+      "file": "original/red-simulation-01.json",
+      "bytes": 224,
+      "sha256": "e04e7485808be94443ed8d70a0c998c6d707fdaaf42848ca0d163cb1dea95728"
+    },
+    {
+      "file": "original/red-simulation-01.log",
+      "bytes": 37715,
+      "sha256": "0d8ebf5f3bd120d013255b2257ca46690896f4c369ec6cda3cace909cb8b3245"
+    },
+    {
+      "file": "original/simulation-checkpoint-attempt-01.log",
+      "bytes": 40331,
+      "sha256": "543d626fd97e33457b1dee6ee31ba22be9fa5df8da9ddd7d22015dff66df9827"
+    },
+    {
+      "file": "original/simulation-checkpoint-attempt-02.log",
+      "bytes": 39652,
+      "sha256": "9cb051712f615643f48983564b5ba03c30b0b64678af28b30ae692797bbaf225"
+    },
+    {
+      "file": "original/simulation-checkpoint-attempt-02.log.json",
+      "bytes": 276,
+      "sha256": "de60e4215e45bb46e1544d067069eaa45ad961f648d307d05c7708e93489a4b9"
+    },
+    {
+      "file": "original/simulation-experience-owner-attempt-01.log",
+      "bytes": 38115,
+      "sha256": "fe9e0b1957bf4b2220b8ce0ebcfacbbdf16d81c2b0a31bd9d5a21f153dd04d7d"
+    },
+    {
+      "file": "original/simulation-experience-owner-attempt-01.log.json",
+      "bytes": 274,
+      "sha256": "a1780ba2333f7f5b666efc320f55c1312cedcfa10b66eb2a0938d37623ce873f"
+    },
+    {
+      "file": "original/simulation-online-identity-attempt-01.log",
+      "bytes": 37646,
+      "sha256": "563227d2673642b65252dc9b9a10818de973a54f4dd8bfc5c1b225a2637c2c7b"
+    },
+    {
+      "file": "original/simulation-online-identity-attempt-01.log.json",
+      "bytes": 259,
+      "sha256": "d7b1ed821ba8a96e5735b8721e7adbc0913a65179f0b5d3113e1f88e2e1e2a96"
+    },
+    {
+      "file": "original/source-manifest.json",
+      "bytes": 2937,
+      "sha256": "587373e643b9585e17e17d95400eeca24ccb28cfd923a729daf459178c72fff9"
+    },
+    {
+      "file": "original/artifact-inventory.json",
+      "bytes": 18614,
+      "sha256": "7a22bc310d7137ae43523bcd4d3d184d45fb6f2c45ec475e34d4504636d7ef3c"
+    },
+    {
+      "file": "local-life/baseline-14-source-verification.json",
+      "bytes": 3711,
+      "sha256": "0e297cd9c2e3ad202e3900ab0bef8440c8c3bcb2f53283e8d7ae3da73b22e93b"
+    },
+    {
+      "file": "local-life/experience_ownership.frozen.rs",
+      "bytes": 21889,
+      "sha256": "c3b12a1a0685266554b911727b9c1d7c9dbc0ba1ded4818c667951f530ed5ec5"
+    },
+    {
+      "file": "local-life/final-receipt.json",
+      "bytes": 1523,
+      "sha256": "421efaa789f0ace6c0b7e8c47c5cf363e5ecf722585118e1fa9f1dc416642077"
+    },
+    {
+      "file": "local-life/final-source/apps/simulation/src/runtime/zone/runtime/experience_ownership.rs",
+      "bytes": 22736,
+      "sha256": "e8602ca303ea9b8a963602cd4a53901e323106b9f3c8f1068879f1d28c330f14"
+    },
+    {
+      "file": "local-life/final-source/apps/simulation/tests/shared_experience_owner_tick_life.rs",
+      "bytes": 11352,
+      "sha256": "afdaa83267f217a65ddd45060bf2a0b1cb74a66df621b15fa902216ef5bff208"
+    },
+    {
+      "file": "local-life/finalize-phase.py",
+      "bytes": 15737,
+      "sha256": "82cbf3d9a08ca16f02c523c3bc7b1ab149f8653f07cbe3bc0aa86efabc0197ca"
+    },
+    {
+      "file": "local-life/focused-tests.json",
+      "bytes": 1098,
+      "sha256": "3e19b33c88e463e7ab630992a03cb32bbbfc69792c6e523766ec7ae2d0151478"
+    },
+    {
+      "file": "local-life/frozen-artifact-inventory.json",
+      "bytes": 18614,
+      "sha256": "7a22bc310d7137ae43523bcd4d3d184d45fb6f2c45ec475e34d4504636d7ef3c"
+    },
+    {
+      "file": "local-life/frozen-source-manifest.json",
+      "bytes": 2937,
+      "sha256": "587373e643b9585e17e17d95400eeca24ccb28cfd923a729daf459178c72fff9"
+    },
+    {
+      "file": "local-life/green-and-owner-adjacent-attempt-01-result.json",
+      "bytes": 335,
+      "sha256": "29a11c659ac907f02df027c59c1fcbadd385c007b8ea1043a35a59a0572fcc7d"
+    },
+    {
+      "file": "local-life/green-and-owner-adjacent-attempt-01.log",
+      "bytes": 33087,
+      "sha256": "9e562d04014d151acafab0b058ca476cda2e9064690a7cb40cc19731469903fe"
+    },
+    {
+      "file": "local-life/object-id-collision-readonly.json",
+      "bytes": 4359,
+      "sha256": "f726a22f933d00498a99fb2b34d63505549de632fea21fad3ded53f5d6efcdd6"
+    },
+    {
+      "file": "local-life/original-nine-source-unchanged.json",
+      "bytes": 1649,
+      "sha256": "e73b88f747edeebb19d8b15da673c07cc911813c5585ef620473126cc7c02a9d"
+    },
+    {
+      "file": "local-life/p3-local-life-follow-up.patch",
+      "bytes": 13756,
+      "sha256": "0639884c3952a5df5e51efa68d679a883893fb16bff1e4c089a935035799a888"
+    },
+    {
+      "file": "local-life/patch-applied-byte-verification.json",
+      "bytes": 387,
+      "sha256": "61e72bdbf514b394e167d1dd26d0cf324a7a7a3ad75eb16ad104a5a00f25ed7d"
+    },
+    {
+      "file": "local-life/patch-check-forward-01/mir2-web3/apps/simulation/src/runtime/zone/runtime/experience_ownership.rs",
+      "bytes": 22736,
+      "sha256": "e8602ca303ea9b8a963602cd4a53901e323106b9f3c8f1068879f1d28c330f14"
+    },
+    {
+      "file": "local-life/patch-check-forward-01/mir2-web3/apps/simulation/tests/shared_experience_owner_tick_life.rs",
+      "bytes": 11352,
+      "sha256": "afdaa83267f217a65ddd45060bf2a0b1cb74a66df621b15fa902216ef5bff208"
+    },
+    {
+      "file": "local-life/patch-forward-apply-attempt-01.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": "local-life/patch-forward-check-attempt-01.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": "local-life/patch-reverse-check-attempt-01.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": "local-life/patch-verification.json",
+      "bytes": 620,
+      "sha256": "50a20966dc00c52aba0276fad167acb582a8c4df539c527ae16c372b4a6ac1ed"
+    },
+    {
+      "file": "local-life/prior-100-artifacts-unchanged.json",
+      "bytes": 18272,
+      "sha256": "d53e2dcde592e2ac01fdfc7286a4c360f42c4f543f4c43a7b04b064010a3d26d"
+    },
+    {
+      "file": "local-life/prior-13-source-unchanged.json",
+      "bytes": 4355,
+      "sha256": "278351506c03dcad76ba17ea231ec01d0bed425d815a346389806c91e6c0b62e"
+    },
+    {
+      "file": "local-life/red-attempt-01-result.json",
+      "bytes": 201,
+      "sha256": "926a808adb9ebde3323d8fcf88b0bb0e852454dfa181a5187fdd6527bcc32a59"
+    },
+    {
+      "file": "local-life/red-attempt-01.log",
+      "bytes": 35142,
+      "sha256": "b4e5102dc8d4c9d9acc3ed7b08779972bd4f9bd9f16ef8e590edd4bb8e0f04a7"
+    },
+    {
+      "file": "local-life/REVIEW.md",
+      "bytes": 3447,
+      "sha256": "e5f551926f14394301ac6f15d50c526144b11aa19ec428abc715cdfcb8131948"
+    },
+    {
+      "file": "local-life/scope.json",
+      "bytes": 608,
+      "sha256": "ec28e46fd8e65c9edab356f88c834edd8a81a760d54bf6e486835dc0414738ef"
+    },
+    {
+      "file": "local-life/shared_experience_owner_tick_life.red.rs",
+      "bytes": 9854,
+      "sha256": "7650cf6a6c57b8f52cf638eb6563cab24d1d5be4b32ee799241e9826175f462b"
+    },
+    {
+      "file": "local-life/source-manifest.json",
+      "bytes": 531,
+      "sha256": "e4c03fe2f0575fbd814d301a87b4cb067cc2ca04fd030a0777b87c4b76805e84"
+    },
+    {
+      "file": "local-life/artifact-inventory.json",
+      "bytes": 5179,
+      "sha256": "094b6a0e8aa2387e36066b8eebdd94aafb688433e28f57ba6318e733c63ec689"
+    },
+    {
+      "file": "root-original/ROOT-PREFLIGHT-01.json",
+      "bytes": 4633,
+      "sha256": "419b1cef31a0c55d7a27e62c8e9aa7e03750cd3eac45d9b07008e2cfd8dc5fcc"
+    },
+    {
+      "file": "root-original/ROOT-INTEGRATION-01.json",
+      "bytes": 386,
+      "sha256": "21c1e9a08a51e2d33be3889212ca3aa462d11e61ec61fdded3da6cdb7e1ca83a"
+    },
+    {
+      "file": "root-original/apply-check.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": "root-original/integrated-diff-check.log",
+      "bytes": 130,
+      "sha256": "aad3a494528c2b820c7fa35eb79d8d678f79878c06e829c19300dc4b3633d4c0"
+    },
+    {
+      "file": "root-original/verify_frozen_p3.py",
+      "bytes": 3955,
+      "sha256": "506c98df94acc9b1a6a85b87ccf3240130fdefc39c43eb929ea5f99b39e2a33f"
+    },
+    {
+      "file": "root-original/apply_frozen_p3.py",
+      "bytes": 1535,
+      "sha256": "4304c00e57e21e99b0b487984cb57e247b06dad6145f16c174bccc51735a4c5e"
+    },
+    {
+      "file": "root-original/run_selected_root.py",
+      "bytes": 2025,
+      "sha256": "0023246495169aff9efa46c7c98b899fb1ecda2d686f820b4f36b44256e3aeeb"
+    },
+    {
+      "file": "root-original/run_selected_root_v2.py",
+      "bytes": 2195,
+      "sha256": "2632569ea033714b63183c844507d85127c4580709770f880982e1cf5a223b45"
+    },
+    {
+      "file": "root-original/root-gateway-cross-map-01.log",
+      "bytes": 31504,
+      "sha256": "3a772079a42ec6710cc30b20668093a7d480d8673141f26b2f690bfc39d696f0"
+    },
+    {
+      "file": "root-original/root-gateway-cross-map-01.json",
+      "bytes": 650,
+      "sha256": "bbdf46a92f693bf72efc0922ba2bcaa3592aed79b6c67c9413544dbcb1c610f4"
+    },
+    {
+      "file": "root-original/root-gateway-cross-map-02.log",
+      "bytes": 30517,
+      "sha256": "3fa27459c801f3fa4a0c5a5c2360a88a58e765e114b5c6a68fa7aee5fd7a0d70"
+    },
+    {
+      "file": "root-original/root-gateway-cross-map-02.json",
+      "bytes": 793,
+      "sha256": "e8d581bc6ae53048c23878d8bc82aef2625ab6d738afe384f01248c12ccd89bf"
+    },
+    {
+      "file": "root-original/root-gateway-death18-01.log",
+      "bytes": 30818,
+      "sha256": "c0aeb1299c7b8725f12935d474d1dcadb8d1af2f40c09a56f15c6fc8257f1e5a"
+    },
+    {
+      "file": "root-original/root-gateway-death18-01.json",
+      "bytes": 790,
+      "sha256": "73320787ac0afaa17e6e7ffcb0a8b258121c7ab4f1d9a804ba5dfcf4145d4492"
+    },
+    {
+      "file": "root-original/root-simulation-cross-map-01.log",
+      "bytes": 30428,
+      "sha256": "40738a2046f1ba05368f6d23a8dd93c653742908938dcadb8dd794f7a18b06c6"
+    },
+    {
+      "file": "root-original/root-simulation-cross-map-01.json",
+      "bytes": 798,
+      "sha256": "67286a8f9653107d1843fa27ba75d303fc930e664764f96e0453a40a567d4a7b"
+    },
+    {
+      "file": "root-original/root-simulation-checkpoint-01.log",
+      "bytes": 38788,
+      "sha256": "7e7b096b715e1274db1e098495e7153602139f62ba50e634b7d004afdfafa1e6"
+    },
+    {
+      "file": "root-original/root-simulation-checkpoint-01.json",
+      "bytes": 806,
+      "sha256": "f8129b51a1605af72d5581819afd0245fba37c116be350486215f18681ec7266"
+    },
+    {
+      "file": "root-local-life/ROOT-LOCAL-LIFE-INTEGRATION-01.json",
+      "bytes": 1116,
+      "sha256": "4823bb9c3a42d3eef7e416b494ceba9dd025190b08a845af9c1eeae04b268cc5"
+    },
+    {
+      "file": "root-local-life/ROOT-FINAL-SOURCE-01.json",
+      "bytes": 3837,
+      "sha256": "96ddae986b2c587c8c0d68e8cc86b1bc5a4c6bdf0d3aafce38392c3f0828ffcd"
+    },
+    {
+      "file": "root-local-life/forward-check.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": "root-local-life/reverse-check.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": "root-local-life/diff-check.log",
+      "bytes": 130,
+      "sha256": "aad3a494528c2b820c7fa35eb79d8d678f79878c06e829c19300dc4b3633d4c0"
+    },
+    {
+      "file": "root-local-life/integrate_local_life.py",
+      "bytes": 4042,
+      "sha256": "3967834b2bef2bbeadbe21865ad2ceea37a8931a4ba2025f00fe47b86c495b75"
+    },
+    {
+      "file": "root-local-life/run_root_life.py",
+      "bytes": 2049,
+      "sha256": "2711f2f105f6f71851ba4c00280a97780c3a4b6979fb87c693d841c538318d1a"
+    },
+    {
+      "file": "root-local-life/store_p3_evidence.py",
+      "bytes": 11339,
+      "sha256": "1ba4e7d572468eb530d96576b366391782c638b38cdaf108bb347edaeec00ed4"
+    },
+    {
+      "file": "root-local-life/root-local-life-and-owner-01.log",
+      "bytes": 32666,
+      "sha256": "1f66fdbd3625423fb8fcc2176ecaabd054f0b2af70259bfadb4c1cc9b0e2ed54"
+    },
+    {
+      "file": "root-local-life/root-local-life-and-owner-01.json",
+      "bytes": 916,
+      "sha256": "5cc16a1b419d39690727f222803ebee55a9192d4b359a8af1fb0708348d74256"
+    },
+    {
+      "file": "root-local-life/root-cross-map-award-after-life-01.log",
+      "bytes": 30806,
+      "sha256": "d71bbe35fbcffc4413321028ac249bf5a1c17365ea49f7552b408826b866a798"
+    },
+    {
+      "file": "root-local-life/root-cross-map-award-after-life-01.json",
+      "bytes": 805,
+      "sha256": "7792de0bbb747e39a578c9249e4bd190c6dcb5040d5feea8c653a57a285ba2d4"
+    }
+  ],
+  "allRawByteExact": true,
+  "privateFixtureStoresOrKeysIncluded": false,
+  "boundedDistinctWorkerChecks": 92,
+  "rootChecksOverlapWorker": true,
+  "crossZoneSameBatchLife": "OPEN",
+  "objectIdAdmissionCollision": "OPEN",
+  "networkOrNativeOrHumanAcceptance": false
+}

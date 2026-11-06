@@ -1,0 +1,67 @@
+{
+  "schema": "mir2.source62.gateway-switch.actual.v1",
+  "owner": "Root",
+  "oldGateway": {
+    "pid": 49212,
+    "parentPid": 42072,
+    "binary": {
+      "path": "C:/mir2-cross-platform-storage-20261002/web-source51-local-play-20261010-01/mir2-gateway.exe",
+      "relativePath": "mir2-gateway.exe",
+      "sha256": "a536ddc827aa0945ab759e12fd65c956585961d334f7434eb4efcca249a523da",
+      "bytes": 108321280
+    },
+    "stoppedAfterSavedLogout": true,
+    "exactCommandRevalidated": true,
+    "outer": {
+      "owner": "Root",
+      "exitCode": -1,
+      "builderPid": 49212,
+      "kind": "Authorized local gateway resume on 2026-10-11 with same test-only account store, keys and exact loopback origins",
+      "exited": true,
+      "disposed": true,
+      "elapsedMs": 19516466,
+      "configPath": "C:/mir2-cross-platform-storage-20261002/web-source51-local-play-20261010-01/gateway-start06-config.private.json",
+      "uiOperated": false,
+      "runtimeLaunched": false,
+      "networkUsed": false,
+      "productionBuildAccepted": false,
+      "candidateAccepted": false,
+      "goalComplete": false
+    }
+  },
+  "newGateway": {
+    "pid": 58656,
+    "parentPid": 56376,
+    "binary": {
+      "path": "C:/mir2-cross-platform-storage-20261002/web-source62-tooltip-wire-20261011-01/gateway-runtime01/mir2-gateway.exe",
+      "bytes": 109072896,
+      "sha256": "cd7d50b61f7dc16978f5ce28e8bc56df5dfbfd51c21925337403faee15ab3d48"
+    },
+    "port": 19110,
+    "argumentsEmpty": true
+  },
+  "web": {
+    "package": "Source61",
+    "port": 19205
+  },
+  "privateConfigurationReusedFromExistingMemory": true,
+  "privateFilesRead": false,
+  "secretValuesPrinted": false,
+  "protectedIdsQueried": false,
+  "normalLoginPassed": true,
+  "normalStartGamePassed": true,
+  "shopQuote": {
+    "item": "Candle",
+    "quantity": 1,
+    "totalGold": 10,
+    "walletGold": 200,
+    "buyEnabled": true
+  },
+  "ordinaryPurchaseVerified": false,
+  "ordinaryPurchaseResult": "no deduction or item admission confirmed; further action diagnosis required",
+  "normalAltXLogoutReturnedToLogin": true,
+  "consoleErrorsInFreshPage": 0,
+  "overallPercentage": null,
+  "candidate100": false,
+  "goalComplete": false
+}

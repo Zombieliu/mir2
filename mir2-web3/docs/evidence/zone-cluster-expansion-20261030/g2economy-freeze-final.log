@@ -1,0 +1,10 @@
+    Finished `test` profile [unoptimized] target(s) in 0.38s
+
+running 4 tests
+     Running unittests src\lib.rs (E:\mir2-capacity-goal-20261030/target\debug\deps\mir2_gateway-2a9a3f29c94c0482.exe)
+test zone_rpc::unknown_economy_freeze_tests::checkpoint_and_replica_replacement_cannot_export_or_erase_unknown_authority ... ok
+test zone_rpc::unknown_economy_freeze_tests::health_and_receipt_query_remain_readonly_before_unknown_mutation_admission ... ok
+test zone_rpc::unknown_economy_freeze_tests::readiness_assessment_resume_and_promotion_cannot_admit_an_unknown_zone ... ok
+test zone_rpc::unknown_economy_freeze_tests::subsequent_real_envelope_prunes_readiness_without_clearing_unknown_commit ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 1475 filtered out; finished in 0.09s

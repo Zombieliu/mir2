@@ -1,0 +1,58 @@
+{
+  "schema": "mir2.invited-installer.handoff.v1",
+  "status": "internal-installer-built",
+  "candidate": "WN-CANDIDATE-20260930-invited-05",
+  "sourceRevision": "c7eacee12599a535065ddfe81c0539450f65a5bb",
+  "languages": [
+    "en",
+    "zh-TW",
+    "pt-BR",
+    "ru",
+    "hi",
+    "id",
+    "vi",
+    "th",
+    "ar"
+  ],
+  "gameExe": {
+    "bytes": 110323200,
+    "sha256": "37DDEC37222B29DF588A3903D30D9155869E7BB878D4ECB316126656FA40BFEE",
+    "authenticode": "NotSigned"
+  },
+  "publicReleaseAccepted": false,
+  "cleanLaptopLaunchAccepted": false,
+  "error4551Resolved": false,
+  "translationNativeSpeakerAccepted": false,
+  "checks": {
+    "sharedClientPassed": 1153,
+    "windowsHostPassed": 784,
+    "nodeToolingPassed": 14,
+    "offscreenCaptures": 148
+  },
+  "notes": [
+    "Setup compiled successfully without installing or launching it.",
+    "Neither setup nor game EXE has an Authenticode publisher signature.",
+    "The internal detached CMS signature verifies package integrity and does not establish Windows publisher trust.",
+    "The other laptop's application-control policy has not been identified; error 4551 remains unresolved.",
+    "No server deploy, active-client replacement, account or save mutation.",
+    "Remaining offline-drafted content requires linguistic review."
+  ],
+  "installer": {
+    "file": "Numeron-Legend-of-Rebirth-20260930-r5-Setup.exe",
+    "version": "2026.9.30.5",
+    "bytes": 602942741,
+    "sha256": "BC48A3952F38A345653C67C90CACA86C585B8C5756F476B3C3F6A8D4F581B988",
+    "authenticode": "NotSigned",
+    "compilerExitCode": 0
+  },
+  "package": {
+    "files": 123035,
+    "bytes": 774061001,
+    "manifestSha256": "0B22F46E1244ECF8DA388DA18653DD4B97F4296738C3896BC22C266EA6D8AFBE",
+    "manifestAggregateSha256": "44A2DFE906B41E61BEA91E5D86F27D5EE8D6536E4751655AF759571A442950BA",
+    "strictVerificationPassed": true,
+    "sourceRepoCheck": "checked",
+    "detachedCmsSignatureValid": true,
+    "independentInstallerInputVerificationPassed": true
+  }
+}

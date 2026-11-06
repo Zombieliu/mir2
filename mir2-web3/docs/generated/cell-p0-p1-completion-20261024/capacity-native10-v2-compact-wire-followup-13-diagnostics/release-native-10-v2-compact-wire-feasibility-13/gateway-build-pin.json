@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "sourceExecutable": "C:\\mir2-build\\p01-completion-20261024\\socket-diagnostics-v1\\bin\\mir2-gateway.exe",
+  "ownedExecutable": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-compact-wire-feasibility-13\\bin\\mir2-gateway.exe",
+  "sha256": "a43078b05e70b480f948fee505e23d2757ce1ae20fdc1f22b2348df46ee7125d",
+  "bytes": 87370240,
+  "sourceCommit": "46880bd1ef415131c4cf85aeb4dd2fa4f6fd4f9b",
+  "backendSourceCommit": "46880bd1ef415131c4cf85aeb4dd2fa4f6fd4f9b",
+  "driverSourceCommit": "4cab00893b861395b63906b1b8183a021d397cdb",
+  "baseCommit": "68f810b442321ae66360a2be18e31dc309efdaf7",
+  "sourceManifest": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\backend-source-socket-diagnostics-v1.json",
+    "bytes": 14000,
+    "sha256": "4da9d4dac73773bae041c98b641874a9ad4427217c1b36bb453f1a014ad7b058",
+    "sourceManifestSha256": "57ea1cde0ab22a03a50d1e9c7e20fdcd8a2060d1cb7922a2ad2cee91e55f5d96",
+    "inputs": 41
+  },
+  "releaseRecord": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-socket-diagnostics-v1.json",
+    "bytes": 1920,
+    "sha256": "cdcf7ec17ffbdb7ef1a8c529deaf8d8dd957d16a8129315390760e910a4b9c3f"
+  },
+  "copiedAtUtc": "2026-10-25T07:18:09.462Z",
+  "sourceInputsVerifiedBeforeLaunch": true,
+  "capacityAccepted": false,
+  "formalRunStarted": false
+}

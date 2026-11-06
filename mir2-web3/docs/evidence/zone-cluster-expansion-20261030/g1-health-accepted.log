@@ -1,0 +1,162 @@
+    Finished `test` profile [unoptimized] target(s) in 0.34s
+     Running unittests src\lib.rs (E:\mir2-capacity-goal-20261030/target\debug\deps\mir2_gateway-2a9a3f29c94c0482.exe)
+
+running 7 tests
+gateway transport_registration registration_id=1 stage=unregister phase=begin
+gateway transport_registration registration_id=1 stage=unregister phase=end elapsed_ms=0
+gateway transport_registration registration_id=2 stage=unregister phase=begin
+gateway transport_registration registration_id=2 stage=unregister phase=end elapsed_ms=0
+test zone_rpc::owner_health_sync_tests::owner_health_rpc_changed_map_rebuilds_host_registration_and_new_drug_still_arrives ... ok
+gateway transport_registration registration_id=1 stage=unregister phase=begin
+gateway transport_registration registration_id=1 stage=unregister phase=end elapsed_ms=0
+gateway transport_registration registration_id=2 stage=unregister phase=begin
+gateway transport_registration registration_id=2 stage=unregister phase=end elapsed_ms=0
+gateway transport_registration registration_id=3 stage=unregister phase=begin
+gateway transport_registration registration_id=3 stage=unregister phase=end elapsed_ms=0
+gateway transport_registration registration_id=4 stage=unregister phase=begin
+gateway transport_registration registration_id=4 stage=unregister phase=end elapsed_ms=0
+gateway transport_registration registration_id=5 stage=unregister phase=begin
+gateway transport_registration registration_id=5 stage=unregister phase=end elapsed_ms=0
+gateway transport_registration registration_id=6 stage=unregister phase=begin
+gateway transport_registration registration_id=6 stage=unregister phase=end elapsed_ms=0
+gateway transport_registration registration_id=7 stage=unregister phase=begin
+gateway transport_registration registration_id=7 stage=unregister phase=end elapsed_ms=0
+gateway transport_registration registration_id=8 stage=unregister phase=begin
+gateway transport_registration registration_id=8 stage=unregister phase=end elapsed_ms=0
+gateway transport_registration registration_id=9 stage=unregister phase=begin
+gateway transport_registration registration_id=9 stage=unregister phase=end elapsed_ms=0
+gateway transport_registration registration_id=10 stage=unregister phase=begin
+gateway transport_registration registration_id=10 stage=unregister phase=end elapsed_ms=0
+gateway transport_registration registration_id=11 stage=unregister phase=begin
+gateway transport_registration registration_id=11 stage=unregister phase=end elapsed_ms=0
+gateway transport_registration registration_id=12 stage=unregister phase=begin
+gateway transport_registration registration_id=12 stage=unregister phase=end elapsed_ms=0
+gateway transport_registration registration_id=13 stage=unregister phase=begin
+gateway transport_registration registration_id=13 stage=unregister phase=end elapsed_ms=0
+gateway transport_registration registration_id=14 stage=unregister phase=begin
+gateway transport_registration registration_id=14 stage=unregister phase=end elapsed_ms=0
+gateway transport_registration registration_id=15 stage=unregister phase=begin
+gateway transport_registration registration_id=15 stage=unregister phase=end elapsed_ms=0
+gateway transport_registration registration_id=16 stage=unregister phase=begin
+gateway transport_registration registration_id=16 stage=unregister phase=end elapsed_ms=0
+gateway transport_registration registration_id=17 stage=unregister phase=begin
+gateway transport_registration registration_id=17 stage=unregister phase=end elapsed_ms=0
+gateway transport_registration registration_id=18 stage=unregister phase=begin
+gateway transport_registration registration_id=18 stage=unregister phase=end elapsed_ms=0
+gateway transport_registration registration_id=19 stage=unregister phase=begin
+gateway transport_registration registration_id=19 stage=unregister phase=end elapsed_ms=0
+gateway transport_registration registration_id=20 stage=unregister phase=begin
+gateway transport_registration registration_id=20 stage=unregister phase=end elapsed_ms=0
+gateway transport_registration registration_id=21 stage=unregister phase=begin
+gateway transport_registration registration_id=21 stage=unregister phase=end elapsed_ms=0
+gateway transport_registration registration_id=22 stage=unregister phase=begin
+gateway transport_registration registration_id=22 stage=unregister phase=end elapsed_ms=0
+gateway transport_registration registration_id=23 stage=unregister phase=begin
+gateway transport_registration registration_id=23 stage=unregister phase=end elapsed_ms=0
+gateway transport_registration registration_id=24 stage=unregister phase=begin
+gateway transport_registration registration_id=24 stage=unregister phase=end elapsed_ms=0
+gateway transport_registration registration_id=25 stage=unregister phase=begin
+gateway transport_registration registration_id=25 stage=unregister phase=end elapsed_ms=0
+gateway transport_registration registration_id=26 stage=unregister phase=begin
+gateway transport_registration registration_id=26 stage=unregister phase=end elapsed_ms=0
+gateway transport_registration registration_id=27 stage=unregister phase=begin
+gateway transport_registration registration_id=27 stage=unregister phase=end elapsed_ms=0
+gateway transport_registration registration_id=28 stage=unregister phase=begin
+gateway transport_registration registration_id=28 stage=unregister phase=end elapsed_ms=0
+gateway transport_registration registration_id=29 stage=unregister phase=begin
+gateway transport_registration registration_id=29 stage=unregister phase=end elapsed_ms=0
+gateway transport_registration registration_id=30 stage=unregister phase=begin
+gateway transport_registration registration_id=30 stage=unregister phase=end elapsed_ms=0
+gateway transport_registration registration_id=31 stage=unregister phase=begin
+gateway transport_registration registration_id=31 stage=unregister phase=end elapsed_ms=0
+gateway transport_registration registration_id=32 stage=unregister phase=begin
+gateway transport_registration registration_id=32 stage=unregister phase=end elapsed_ms=0
+gateway transport_registration registration_id=33 stage=unregister phase=begin
+gateway transport_registration registration_id=33 stage=unregister phase=end elapsed_ms=0
+gateway transport_registration registration_id=34 stage=unregister phase=begin
+gateway transport_registration registration_id=34 stage=unregister phase=end elapsed_ms=0
+gateway transport_registration registration_id=35 stage=unregister phase=begin
+gateway transport_registration registration_id=35 stage=unregister phase=end elapsed_ms=0
+gateway transport_registration registration_id=36 stage=unregister phase=begin
+gateway transport_registration registration_id=36 stage=unregister phase=end elapsed_ms=0
+gateway transport_registration registration_id=37 stage=unregister phase=begin
+gateway transport_registration registration_id=37 stage=unregister phase=end elapsed_ms=0
+gateway transport_registration registration_id=38 stage=unregister phase=begin
+gateway transport_registration registration_id=38 stage=unregister phase=end elapsed_ms=0
+gateway transport_registration registration_id=39 stage=unregister phase=begin
+gateway transport_registration registration_id=39 stage=unregister phase=end elapsed_ms=0
+gateway transport_registration registration_id=40 stage=unregister phase=begin
+gateway transport_registration registration_id=40 stage=unregister phase=end elapsed_ms=0
+gateway transport_registration registration_id=41 stage=unregister phase=begin
+gateway transport_registration registration_id=41 stage=unregister phase=end elapsed_ms=0
+gateway transport_registration registration_id=42 stage=unregister phase=begin
+gateway transport_registration registration_id=42 stage=unregister phase=end elapsed_ms=0
+gateway transport_registration registration_id=43 stage=unregister phase=begin
+gateway transport_registration registration_id=43 stage=unregister phase=end elapsed_ms=0
+gateway transport_registration registration_id=44 stage=unregister phase=begin
+gateway transport_registration registration_id=44 stage=unregister phase=end elapsed_ms=0
+gateway transport_registration registration_id=45 stage=unregister phase=begin
+gateway transport_registration registration_id=45 stage=unregister phase=end elapsed_ms=0
+gateway transport_registration registration_id=46 stage=unregister phase=begin
+gateway transport_registration registration_id=46 stage=unregister phase=end elapsed_ms=0
+gateway transport_registration registration_id=47 stage=unregister phase=begin
+gateway transport_registration registration_id=47 stage=unregister phase=end elapsed_ms=0
+gateway transport_registration registration_id=48 stage=unregister phase=begin
+gateway transport_registration registration_id=48 stage=unregister phase=end elapsed_ms=0
+gateway transport_registration registration_id=49 stage=unregister phase=begin
+gateway transport_registration registration_id=49 stage=unregister phase=end elapsed_ms=0
+gateway transport_registration registration_id=50 stage=unregister phase=begin
+gateway transport_registration registration_id=50 stage=unregister phase=end elapsed_ms=0
+gateway transport_registration registration_id=51 stage=unregister phase=begin
+gateway transport_registration registration_id=51 stage=unregister phase=end elapsed_ms=0
+gateway transport_registration registration_id=52 stage=unregister phase=begin
+gateway transport_registration registration_id=52 stage=unregister phase=end elapsed_ms=0
+gateway transport_registration registration_id=53 stage=unregister phase=begin
+gateway transport_registration registration_id=53 stage=unregister phase=end elapsed_ms=0
+gateway transport_registration registration_id=54 stage=unregister phase=begin
+gateway transport_registration registration_id=54 stage=unregister phase=end elapsed_ms=0
+gateway transport_registration registration_id=55 stage=unregister phase=begin
+gateway transport_registration registration_id=55 stage=unregister phase=end elapsed_ms=0
+gateway transport_registration registration_id=56 stage=unregister phase=begin
+gateway transport_registration registration_id=56 stage=unregister phase=end elapsed_ms=0
+gateway transport_registration registration_id=57 stage=unregister phase=begin
+gateway transport_registration registration_id=57 stage=unregister phase=end elapsed_ms=0
+gateway transport_registration registration_id=58 stage=unregister phase=begin
+gateway transport_registration registration_id=58 stage=unregister phase=end elapsed_ms=0
+gateway transport_registration registration_id=59 stage=unregister phase=begin
+gateway transport_registration registration_id=59 stage=unregister phase=end elapsed_ms=0
+gateway transport_registration registration_id=60 stage=unregister phase=begin
+gateway transport_registration registration_id=60 stage=unregister phase=end elapsed_ms=0
+gateway transport_registration registration_id=61 stage=unregister phase=begin
+gateway transport_registration registration_id=61 stage=unregister phase=end elapsed_ms=0
+gateway transport_registration registration_id=62 stage=unregister phase=begin
+gateway transport_registration registration_id=62 stage=unregister phase=end elapsed_ms=0
+gateway transport_registration registration_id=63 stage=unregister phase=begin
+gateway transport_registration registration_id=63 stage=unregister phase=end elapsed_ms=0
+gateway transport_registration registration_id=64 stage=unregister phase=begin
+gateway transport_registration registration_id=64 stage=unregister phase=end elapsed_ms=0
+gateway transport_registration registration_id=65 stage=unregister phase=begin
+gateway transport_registration registration_id=65 stage=unregister phase=end elapsed_ms=0
+test zone_rpc::owner_health_sync_tests::owner_health_rpc_concurrent_refresh_keeps_the_installed_registration_current ... ok
+gateway transport_registration registration_id=1 stage=unregister phase=begin
+test zone_rpc::owner_health_sync_tests::owner_health_rpc_drain_never_serializes_a_private_cancellation_sentinel ... ok
+gateway transport_registration registration_id=1 stage=unregister phase=end elapsed_ms=0
+gateway transport_registration registration_id=1 stage=unregister phase=begin
+gateway transport_registration registration_id=1 stage=unregister phase=end elapsed_ms=0
+gateway transport_registration registration_id=2 stage=unregister phase=begin
+gateway transport_registration registration_id=2 stage=unregister phase=end elapsed_ms=0
+test zone_rpc::owner_health_sync_tests::owner_health_rpc_old_viewport_is_skipped_without_renumbering_or_losing_social_receipts ... ok
+gateway transport_registration registration_id=1 stage=unregister phase=begin
+gateway transport_registration registration_id=1 stage=unregister phase=end elapsed_ms=0
+test zone_rpc::owner_health_sync_tests::owner_health_rpc_retained_expired_frame_keeps_sequence_until_normal_ack ... ok
+zone RPC live outbound requires snapshot resync: zone RPC outbound_gap: zone host presentation overflow requires snapshot resync
+gateway transport_registration registration_id=1 stage=unregister phase=begin
+gateway transport_registration registration_id=1 stage=unregister phase=end elapsed_ms=0
+gateway transport_registration registration_id=2 stage=unregister phase=begin
+gateway transport_registration registration_id=2 stage=unregister phase=end elapsed_ms=0
+test zone_rpc::owner_health_sync_tests::owner_health_rpc_source_overflow_requires_resync_and_cancels_remote_transport ... ok
+gateway transport_registration registration_id=1 stage=unregister phase=begin
+gateway transport_registration registration_id=1 stage=unregister phase=end elapsed_ms=0
+test zone_rpc::owner_health_sync_tests::owner_health_rpc_validation_is_authenticated_read_only_and_rejects_wrong_source ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 1418 filtered out; finished in 11.70s

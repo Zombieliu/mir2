@@ -1,0 +1,5 @@
+.legal-page .legal-source-notice { margin: 0 0 36px; padding: 22px; border-left: 0; border-inline-start: 2px solid var(--gold); background: #11100d; color: var(--muted); font-size: 14px; line-height: 1.8; overflow-wrap: anywhere; }
+.legal-page .legal-source-notice a { display: inline-block; margin-top: 12px; color: var(--gold-bright); text-decoration: underline; text-underline-offset: 4px; }
+.legal-page .legal-source-notice p { margin: 0; }
+.legal-page .legal-source-actions { display: flex; flex-wrap: wrap; gap: 12px 28px; }
+.legal-page .legal-shell header { overflow-wrap: anywhere; }

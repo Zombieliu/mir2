@@ -1,0 +1,63 @@
+{
+  "schemaVersion": 1,
+  "createdAt": "2026-10-26T01:17:52.699233+00:00",
+  "scope": "Only five pending-to-actual metadata leaves changed. Original raw PENDING binding retained; no source module, historical receipt, policy or Rust byte changed. Root executed actual freeze builder, this binder only consumes closed evidence.",
+  "before": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\scout-selection-diagnostics-runtime-v1\\current-execution-binding-before-K-v1.json",
+    "bytes": 1291,
+    "sha256": "0d1c3c7322166eb6ce8371689f2f258e29b53d6e93ff2609e1b072d95a20d365"
+  },
+  "after": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\scout-selection-diagnostics-runtime-v1\\current-execution-binding-v1.json",
+    "bytes": 1429,
+    "sha256": "1886e56e3e3846000932d053c727c21c893393cb6be35e844ee880a2a711b506"
+  },
+  "actualDriverFreeze": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\capacity-scout-selection-diagnostics-driver-frozen-v1.json",
+    "bytes": 12423,
+    "sha256": "e3300e34d060fb23638bdc690726b6f4376f7fdeb1049aa8871ebdb4bfd628f8"
+  },
+  "changes": [
+    {
+      "pointer": "/state",
+      "before": "PENDING_ACTUAL_COMMITTED_K_AND_DRIVER_FREEZE",
+      "after": "FINAL_REUSED_C743_RELEASE_AND_CURRENT_NODE9"
+    },
+    {
+      "pointer": "/currentExecutionHead",
+      "before": null,
+      "after": "b5374083d257d375437af3de42bead159cd2b917"
+    },
+    {
+      "pointer": "/driverSourceCommit",
+      "before": null,
+      "after": "b5374083d257d375437af3de42bead159cd2b917"
+    },
+    {
+      "pointer": "/driverFrozenManifest/bytes",
+      "before": null,
+      "after": 12423
+    },
+    {
+      "pointer": "/driverFrozenManifest/sha256",
+      "before": null,
+      "after": "e3300e34d060fb23638bdc690726b6f4376f7fdeb1049aa8871ebdb4bfd628f8"
+    }
+  ],
+  "inverseSemanticJSONExact": true,
+  "rawBeforeImagePreserved": true,
+  "sourceLibraryUnchanged": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\scout-selection-diagnostics-runtime-v1\\source-lib-v1.mjs",
+    "bytes": 57227,
+    "sha256": "c94effada25cba3664c9920412d833b2356d98f503e36f8521e7d958e591f48d"
+  },
+  "readonlyGuardUnchanged": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\scout-selection-diagnostics-runtime-v1\\readonly-source-guard-v1.mjs",
+    "bytes": 724,
+    "sha256": "0969b4edc588e96c147fdaa86b6c8347636134b6ce27fa855eb029f99bff2490"
+  },
+  "moduleImported": false,
+  "guardExecuted": false,
+  "realmStarted": false,
+  "capacityAccepted": false
+}

@@ -125,6 +125,7 @@ use super::monsters::*;
 use super::movement::*;
 use super::npc::process_crystal_npc_goods_expiry;
 use super::packets::*;
+use super::quests::quest_recurrence::refresh_quest_recurrence;
 use super::rental::{process_expired_rental_items, return_rented_items_on_player_death};
 use super::resources::{
     advance_runtime_tick, crystal_movement_retry_pending, crystal_packet_move_delay_ticks,
@@ -599,8 +600,8 @@ fn advance_world_tick_prelude(
         return None;
     }
 
+    let mut packets = refresh_quest_recurrence(world);
     let tick = advance_runtime_tick(world);
-    let mut packets = Vec::new();
     tick_player_pk_decay(world, &mut packets);
     process_crystal_npc_goods_expiry(world);
     process_expired_rental_items(world, &mut packets);
@@ -2784,8 +2785,7 @@ impl SimulationSession {
                 PlayerActionKind::Move,
                 crystal_packet_move_delay_ticks(command.running),
             );
-            let packets = self.move_player_by_direction(command.direction, command.running);
-            return self.finalize_packets(packets);
+            return self.move_player_by_direction(command.direction, command.running);
         }
         if crystal_movement_retry_pending(self.app.world()) {
             advance_runtime_tick(self.app.world_mut());
@@ -2795,21 +2795,37 @@ impl SimulationSession {
                     PlayerActionKind::Move,
                     crystal_packet_move_delay_ticks(command.running),
                 );
-                let packets = self.move_player_by_direction(command.direction, command.running);
-                return self.finalize_packets(packets);
+                return self.move_player_by_direction(command.direction, command.running);
             }
-            return self.finalize_packets(Vec::new());
+            return Vec::new();
         }
-        let packets = advance(self.app.world_mut());
-        self.finalize_packets(packets)
+        advance(self.app.world_mut())
     }
 
     pub fn tick(&mut self) -> Vec<ServerPacket> {
-        self.tick_with_world_advance(advance_world)
+        let before = match self.begin_default_npc_source_command() {
+            Ok(before) => before,
+            Err(_) => return Vec::new(),
+        };
+        let mut packets = self.tick_with_world_advance(advance_world);
+        super::default_npc_events::dispatch_source_packets(self.app.world_mut(), &mut packets);
+        let packets = self.finalize_packets(packets);
+        self.finish_guild_experience_command(before, packets)
+            .unwrap_or_default()
     }
 
     pub(crate) fn tick_shared_zone_personal_state(&mut self) -> Vec<ServerPacket> {
-        let packets = advance_shared_zone_personal_world(self.app.world_mut());
-        self.finalize_packets(packets)
+        self.try_tick_shared_zone_personal_state()
+            .unwrap_or_default()
+    }
+
+    pub(crate) fn try_tick_shared_zone_personal_state(
+        &mut self,
+    ) -> Result<Vec<ServerPacket>, String> {
+        let before = self.begin_default_npc_source_command()?;
+        let mut packets = advance_shared_zone_personal_world(self.app.world_mut());
+        super::default_npc_events::dispatch_source_packets(self.app.world_mut(), &mut packets);
+        let packets = self.finalize_packets(packets);
+        self.finish_guild_experience_command(before, packets)
     }
 }

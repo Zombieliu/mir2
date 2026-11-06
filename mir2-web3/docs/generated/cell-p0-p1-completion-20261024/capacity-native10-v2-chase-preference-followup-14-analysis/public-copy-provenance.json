@@ -1,0 +1,228 @@
+{
+  "schemaVersion": 1,
+  "createdAt": "2026-10-25T10:38:57.144Z",
+  "runId": "1792923531277-bc2bda2e",
+  "destination": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-native10-v2-chase-preference-followup-14-analysis",
+  "originalCopies": 25,
+  "originalCopyBytes": 353515,
+  "files": [
+    {
+      "source": "release-native-10-v2-chase-preference-feasibility-14/preseal-inputs-finalized-v3.json",
+      "destination": "preseal/preseal-inputs-finalized-v3.json",
+      "bytes": 28492,
+      "sha256": "565fe291e06beb93f43a3780228070984d8737c8e394890e27c8c9b73d1888ba",
+      "path": "capacity-native10-v2-chase-preference-followup-14-analysis/preseal/preseal-inputs-finalized-v3.json",
+      "sourceBytesUnchangedAfterCopy": true
+    },
+    {
+      "source": "probe14-preseal-independent-review-v1/review-v3.json",
+      "destination": "preseal/independent-review-v3.json",
+      "bytes": 12243,
+      "sha256": "6c74fce12255419c952d9f8d1af2dec92527d89e648157a761017c85a7093398",
+      "path": "capacity-native10-v2-chase-preference-followup-14-analysis/preseal/independent-review-v3.json",
+      "sourceBytesUnchangedAfterCopy": true
+    },
+    {
+      "source": "probe14-root-seal-source-control-v1.mjs",
+      "destination": "control/probe14-root-seal-source-control-v1.mjs.txt",
+      "bytes": 4719,
+      "sha256": "8d44586be59e251ec0fd99babca15132bad7cd2fb6efe34ccc009d564ebeada8",
+      "path": "capacity-native10-v2-chase-preference-followup-14-analysis/control/probe14-root-seal-source-control-v1.mjs.txt",
+      "sourceBytesUnchangedAfterCopy": true
+    },
+    {
+      "source": "release-native-10-v2-chase-preference-feasibility-14/launcher-source-frozen-v1.json",
+      "destination": "actual/launcher-source-frozen-v1.json",
+      "bytes": 19769,
+      "sha256": "0d994e2c1d097de3b732543f06c3cf9787dcc56b1c3b74fa497b4b2c2cca65d7",
+      "path": "capacity-native10-v2-chase-preference-followup-14-analysis/actual/launcher-source-frozen-v1.json",
+      "sourceBytesUnchangedAfterCopy": true
+    },
+    {
+      "source": "release-native-10-v2-chase-preference-feasibility-14/source-guard-readonly-verification.json",
+      "destination": "actual/source-guard-readonly-verification.json",
+      "bytes": 1230,
+      "sha256": "d6d42d7c68757d4f881d11c4215865e44572c92625a0ca1cf2ab58cd71330db3",
+      "path": "capacity-native10-v2-chase-preference-followup-14-analysis/actual/source-guard-readonly-verification.json",
+      "sourceBytesUnchangedAfterCopy": true
+    },
+    {
+      "source": "probe14-actual-inputs-independent-review-v1/review-v1.json",
+      "destination": "actual/inputs-independent-review-v1.json",
+      "bytes": 6800,
+      "sha256": "affedb3f6ba93b83b333ede750dcdd610dbacfadacb9516fe4425b55e72c1ad8",
+      "path": "capacity-native10-v2-chase-preference-followup-14-analysis/actual/inputs-independent-review-v1.json",
+      "sourceBytesUnchangedAfterCopy": true
+    },
+    {
+      "source": "release-native-10-v2-chase-preference-feasibility-14/current-driver-binding.json",
+      "destination": "actual/current-driver-binding.json",
+      "bytes": 2411,
+      "sha256": "5f739447200e348bfe131f26b0a1ea606345756d83980b33ad45bd82f1da5121",
+      "path": "capacity-native10-v2-chase-preference-followup-14-analysis/actual/current-driver-binding.json",
+      "sourceBytesUnchangedAfterCopy": true
+    },
+    {
+      "source": "release-native-10-v2-chase-preference-feasibility-14/scene-driver-compatibility-proof-v1.json",
+      "destination": "actual/scene-driver-compatibility-proof-v1.json",
+      "bytes": 1936,
+      "sha256": "de4e8d981233d0fb5422a7d5469ed6c905d3632f5161a19b5b74384d3eb21059",
+      "path": "capacity-native10-v2-chase-preference-followup-14-analysis/actual/scene-driver-compatibility-proof-v1.json",
+      "sourceBytesUnchangedAfterCopy": true
+    },
+    {
+      "source": "capacity-native-chase-preference-driver-frozen-v1.json",
+      "destination": "actual/capacity-native-chase-preference-driver-frozen-v1.json",
+      "bytes": 19099,
+      "sha256": "20fd347d029d9a912514e400bc74b0d08ec940bd90af20ff2f91bd64dba08bef",
+      "path": "capacity-native10-v2-chase-preference-followup-14-analysis/actual/capacity-native-chase-preference-driver-frozen-v1.json",
+      "sourceBytesUnchangedAfterCopy": true
+    },
+    {
+      "source": "probe14-independent-verification-v1/prepare-verifier-v1.mjs",
+      "destination": "ended-tool/prepare-verifier-v1.mjs.txt",
+      "bytes": 16778,
+      "sha256": "faf8ec3c3ebb7e61fbc5f80a475c9a06f4f11812ba0982504a2c928c7fa96d35",
+      "path": "capacity-native10-v2-chase-preference-followup-14-analysis/ended-tool/prepare-verifier-v1.mjs.txt",
+      "sourceBytesUnchangedAfterCopy": true
+    },
+    {
+      "source": "probe14-independent-verification-v1/verify-ended-probe14-v1.mjs",
+      "destination": "ended-tool/verify-ended-probe14-v1.mjs.txt",
+      "bytes": 27982,
+      "sha256": "66486662f9be4eccccc0015ddbd3040ae5dc4b44125d1b4fe99c3a70e5222d29",
+      "path": "capacity-native10-v2-chase-preference-followup-14-analysis/ended-tool/verify-ended-probe14-v1.mjs.txt",
+      "sourceBytesUnchangedAfterCopy": true
+    },
+    {
+      "source": "probe14-independent-verification-v1/probe-contract-v1.mjs",
+      "destination": "ended-tool/probe-contract-v1.mjs.txt",
+      "bytes": 5820,
+      "sha256": "55dab5ae7ea97da1e26514dc4d8e730b53a92945e76a409a1ff4d67489fe4ae4",
+      "path": "capacity-native10-v2-chase-preference-followup-14-analysis/ended-tool/probe-contract-v1.mjs.txt",
+      "sourceBytesUnchangedAfterCopy": true
+    },
+    {
+      "source": "probe14-independent-verification-v1/hp-proof-contract-v2.mjs",
+      "destination": "ended-tool/hp-proof-contract-v2.mjs.txt",
+      "bytes": 4644,
+      "sha256": "cbf67686e1fa385404782c27548dbe3fbaa10f55a5d97c3379d5a41ed01cf285",
+      "path": "capacity-native10-v2-chase-preference-followup-14-analysis/ended-tool/hp-proof-contract-v2.mjs.txt",
+      "sourceBytesUnchangedAfterCopy": true
+    },
+    {
+      "source": "probe14-independent-verification-v1/expected-probe-policy-v1.json",
+      "destination": "ended-tool/expected-probe-policy-v1.json",
+      "bytes": 1008,
+      "sha256": "e3bc309c4830ffed84c924c5d71dda6fa44e90bcbe552fd3a969dc9760edb242",
+      "path": "capacity-native10-v2-chase-preference-followup-14-analysis/ended-tool/expected-probe-policy-v1.json",
+      "sourceBytesUnchangedAfterCopy": true
+    },
+    {
+      "source": "probe14-independent-verification-v1/run-ended-probe14-v1.mjs",
+      "destination": "ended-tool/run-ended-probe14-v1.mjs.txt",
+      "bytes": 2257,
+      "sha256": "d5624b5ca5cbe4a5cd9497bab379716027576567a5a7b78d453ac3feb7e5fe8a",
+      "path": "capacity-native10-v2-chase-preference-followup-14-analysis/ended-tool/run-ended-probe14-v1.mjs.txt",
+      "sourceBytesUnchangedAfterCopy": true
+    },
+    {
+      "source": "probe14-independent-verification-v1/preparation-v1.json",
+      "destination": "ended-tool/preparation-v1.json",
+      "bytes": 3972,
+      "sha256": "83e8a47211173749dab46f49a21a4280eca13f4d0e7215728bfd9e81837ba1bb",
+      "path": "capacity-native10-v2-chase-preference-followup-14-analysis/ended-tool/preparation-v1.json",
+      "sourceBytesUnchangedAfterCopy": true
+    },
+    {
+      "source": "probe14-independent-verification-v1/tool-source-frozen-v1.json",
+      "destination": "ended-tool/tool-source-frozen-v1.json",
+      "bytes": 1417,
+      "sha256": "3c493322b1296f43d7bd2f9b570f5719cafae928e3a8228e82c06f52820ea6b1",
+      "path": "capacity-native10-v2-chase-preference-followup-14-analysis/ended-tool/tool-source-frozen-v1.json",
+      "sourceBytesUnchangedAfterCopy": true
+    },
+    {
+      "source": "probe14-ended-verifier-independent-review-v1/review-v1.json",
+      "destination": "ended-tool/independent-review-v1.json",
+      "bytes": 7718,
+      "sha256": "a951510efff00f84719e224ef509a004c69da5e60f2f5d3d7309246d51af39e6",
+      "path": "capacity-native10-v2-chase-preference-followup-14-analysis/ended-tool/independent-review-v1.json",
+      "sourceBytesUnchangedAfterCopy": true
+    },
+    {
+      "source": "probe14-independent-verification-v1/actual-verification.log",
+      "destination": "actual/actual-verification.log",
+      "bytes": 881,
+      "sha256": "0d243317099bdb98aa7d17fbaaa6325a2feb1856d1d8a42264db75bb3ad73219",
+      "path": "capacity-native10-v2-chase-preference-followup-14-analysis/actual/actual-verification.log",
+      "sourceBytesUnchangedAfterCopy": true
+    },
+    {
+      "source": "probe14-independent-verification-v1/actual-verification-execution-receipt-v1.json",
+      "destination": "actual/actual-verification-execution-receipt-v1.json",
+      "bytes": 812,
+      "sha256": "fd1132ce46e894e12c34ebf3cd3707e54cc174524a33511fdb8cbfdbeba1b2a4",
+      "path": "capacity-native10-v2-chase-preference-followup-14-analysis/actual/actual-verification-execution-receipt-v1.json",
+      "sourceBytesUnchangedAfterCopy": true
+    },
+    {
+      "source": "probe14-independent-verification-v1/final-verification.json",
+      "destination": "actual/final-verification.json",
+      "bytes": 160745,
+      "sha256": "51767fdb36d7d8f146b7bb366f7bd58fdcbff3c92e19b318f72673fa613139a7",
+      "path": "capacity-native10-v2-chase-preference-followup-14-analysis/actual/final-verification.json",
+      "sourceBytesUnchangedAfterCopy": true
+    },
+    {
+      "source": "release-native-10-v2-chase-preference-feasibility-14/probe14-root-independent-cleanup-v1.json",
+      "destination": "actual/probe14-root-independent-cleanup-v1.json",
+      "bytes": 325,
+      "sha256": "7c015e708800d9a8a5dae86f55575252ce6d4239a42fe485550829ed1a408c4b",
+      "path": "capacity-native10-v2-chase-preference-followup-14-analysis/actual/probe14-root-independent-cleanup-v1.json",
+      "sourceBytesUnchangedAfterCopy": true
+    },
+    {
+      "source": "probe14-public-verifier-execution-v1.log",
+      "destination": "actual/public-verifier-execution-v1.log",
+      "bytes": 5006,
+      "sha256": "45513e5e9f2a02c67234be36f3fde490c6cba770e9cff083cb03d90409901d54",
+      "path": "capacity-native10-v2-chase-preference-followup-14-analysis/actual/public-verifier-execution-v1.log",
+      "sourceBytesUnchangedAfterCopy": true
+    },
+    {
+      "source": "archive-probe14-independent-evidence-v1.mjs",
+      "destination": "archive-builder.mjs.txt",
+      "bytes": 10336,
+      "sha256": "aaa26bf773a75432e2ca6ea2ce97719194fbe7cebd8d8f98118c5dd745f2fe65",
+      "path": "capacity-native10-v2-chase-preference-followup-14-analysis/archive-builder.mjs.txt",
+      "sourceBytesUnchangedAfterCopy": true
+    },
+    {
+      "source": "probe14-independent-public-whitelist-v1.json",
+      "destination": "public-whitelist-v1.json",
+      "bytes": 7115,
+      "sha256": "658ede4ff409d131c803de1e5886d472bb657e7340a7e25f9dcb7db52168e22d",
+      "path": "capacity-native10-v2-chase-preference-followup-14-analysis/public-whitelist-v1.json",
+      "sourceBytesUnchangedAfterCopy": true
+    }
+  ],
+  "authoredReadme": {
+    "path": "capacity-native10-v2-chase-preference-followup-14-analysis/README.md",
+    "bytes": 2913,
+    "sha256": "167aab9415f3cd208383baa85967d94235ed929fc684eb3ba67e1cfbeb5a108b"
+  },
+  "relativeLinksChecked": 10,
+  "allCopiedBytesReadBackMatched": true,
+  "sourceBytesUnchanged": true,
+  "privateDataRead": false,
+  "rawOrRecordingPayloadRead": false,
+  "testsOrRealmRun": false,
+  "originalVerdictPreserved": true,
+  "independentVerificationPassed": true,
+  "probePassed": false,
+  "capacityAccepted": false,
+  "p0Accepted": false,
+  "p2Started": false,
+  "previousArchivesModified": false
+}

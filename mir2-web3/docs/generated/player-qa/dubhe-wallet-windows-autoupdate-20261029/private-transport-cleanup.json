@@ -1,0 +1,25 @@
+{
+  "schema": "mir2.wallet.private-transport-cleanup.v1",
+  "passed": true,
+  "checkedUtc": "2026-10-28T21:29:10.8399755Z",
+  "temporaryWorkerAbsentBeforeLocalDeletion": true,
+  "deletedFileCount": 3,
+  "files": [
+    {
+      "path": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\mir2-wallet-windows-release-20261029\\publisher\\private\\transport-private.json",
+      "absent": true,
+      "recursive": false
+    },
+    {
+      "path": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\mir2-wallet-windows-release-20261029\\publisher\\private-assets\\transport-private.json",
+      "absent": true,
+      "recursive": false
+    },
+    {
+      "path": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\mir2-wallet-windows-release-20261029\\publisher\\private-assets-s24\\transport-private.json",
+      "absent": true,
+      "recursive": false
+    }
+  ],
+  "secretValuesRecorded": false
+}

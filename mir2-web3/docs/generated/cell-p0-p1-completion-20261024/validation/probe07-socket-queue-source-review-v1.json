@@ -1,0 +1,467 @@
+{
+  "schemaVersion": 1,
+  "reviewedAt": "2026-10-24T22:24:36.145Z",
+  "reviewer": "/root/fixed_cell_gate_audit",
+  "runId": "1792878747018-da931241",
+  "pid": 59292,
+  "scope": "Bounded read-only source review plus already-public128 slow-stage rows and compact selected-event projection. No private data, recording payload, complete raw rescan, source edit, test, build or service.",
+  "sources": [
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\gateway\\src\\web.rs",
+      "bytes": 831008,
+      "sha256": "d57c26684127a765da7e007eace9d0cb3a8d4bb3245b740deae5ad9f8be5c7ed"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\gateway\\src\\web_transport.rs",
+      "bytes": 15354,
+      "sha256": "dc8c7ac981d937e252b9d9f9b0ab3f4563215deb652a4c15444bf96df536d496"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\gateway\\src\\session.rs",
+      "bytes": 112616,
+      "sha256": "ef6bcedb2bee850de6461f0352c930f4be9f50197cae088d6d64286b3bd2fb6c"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\gateway\\src\\routing.rs",
+      "bytes": 1388304,
+      "sha256": "a0e3a19ad1184efd87a632118a98a65c975ca12d2adfda95b2f9e4a6138eff49"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\gateway\\src\\zone_metrics.rs",
+      "bytes": 18356,
+      "sha256": "37ac259c5ef95948299b16887db435f04869ab9e6ecd569d7c478df230d1e3a8"
+    }
+  ],
+  "publicInputs": [
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/release-native-10-v2-patrol-feasibility-07/slow-stage-public.jsonl",
+      "bytes": 11008,
+      "sha256": "edc4f485d7c892ab404d1a7b49edd718fcd1c00733e42e8279ec95c3b867437c"
+    },
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/probe07-analysis/selected-events-v1.json",
+      "bytes": 138849,
+      "sha256": "24ee5947910b0a30fecca32248a2977ca4f8250bb224af131570988c92975d8b"
+    },
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/probe07-analysis/summary-v1.json",
+      "bytes": 51350,
+      "sha256": "7557fbd569fa58787ec0b2928d6e042d82474d28c3037caa0d92bb21130256e3"
+    }
+  ],
+  "slowStage": {
+    "rows": 128,
+    "byLabel": {
+      "snapshot.build_and_send": {
+        "count": 1,
+        "maxMs": 61
+      },
+      "shared_session.inner_execute": {
+        "count": 22,
+        "maxMs": 1927
+      },
+      "zone_owner.in_process.execute_request": {
+        "count": 32,
+        "maxMs": 2023
+      },
+      "session_action.execute": {
+        "count": 29,
+        "maxMs": 2026
+      },
+      "shared_session.tail": {
+        "count": 1,
+        "maxMs": 94
+      },
+      "session_action.flush": {
+        "count": 6,
+        "maxMs": 181
+      },
+      "serial_gate.zone_outbound_wait": {
+        "count": 12,
+        "maxMs": 209
+      },
+      "shared_session.predrain": {
+        "count": 1,
+        "maxMs": 83
+      },
+      "runtime_tick.execute": {
+        "count": 10,
+        "maxMs": 148
+      },
+      "flush.save": {
+        "count": 4,
+        "maxMs": 178
+      },
+      "socket_input.queue_residence": {
+        "count": 6,
+        "maxMs": 3356
+      },
+      "zone_cadence.total": {
+        "count": 4,
+        "maxMs": 139
+      }
+    },
+    "criticalWindow": [
+      {
+        "observedAtMs": 1792879781142,
+        "stage": "socket_input.queue_residence",
+        "durationMs": 3356,
+        "approxObservedMinusDurationMs": 1792879777786
+      },
+      {
+        "observedAtMs": 1792879781143,
+        "stage": "socket_input.queue_residence",
+        "durationMs": 229,
+        "approxObservedMinusDurationMs": 1792879780914
+      },
+      {
+        "observedAtMs": 1792879781309,
+        "stage": "flush.save",
+        "durationMs": 151,
+        "approxObservedMinusDurationMs": 1792879781158
+      },
+      {
+        "observedAtMs": 1792879781309,
+        "stage": "zone_cadence.total",
+        "durationMs": 116,
+        "approxObservedMinusDurationMs": 1792879781193
+      },
+      {
+        "observedAtMs": 1792879781313,
+        "stage": "session_action.flush",
+        "durationMs": 158,
+        "approxObservedMinusDurationMs": 1792879781155
+      },
+      {
+        "observedAtMs": 1792879781315,
+        "stage": "socket_input.queue_residence",
+        "durationMs": 2132,
+        "approxObservedMinusDurationMs": 1792879779183
+      },
+      {
+        "observedAtMs": 1792879781315,
+        "stage": "serial_gate.zone_outbound_wait",
+        "durationMs": 161,
+        "approxObservedMinusDurationMs": 1792879781154
+      },
+      {
+        "observedAtMs": 1792879782330,
+        "stage": "zone_cadence.total",
+        "durationMs": 139,
+        "approxObservedMinusDurationMs": 1792879782191
+      },
+      {
+        "observedAtMs": 1792879782332,
+        "stage": "zone_owner.in_process.execute_request",
+        "durationMs": 81,
+        "approxObservedMinusDurationMs": 1792879782251
+      },
+      {
+        "observedAtMs": 1792879782332,
+        "stage": "runtime_tick.execute",
+        "durationMs": 81,
+        "approxObservedMinusDurationMs": 1792879782251
+      },
+      {
+        "observedAtMs": 1792879782332,
+        "stage": "socket_input.queue_residence",
+        "durationMs": 80,
+        "approxObservedMinusDurationMs": 1792879782252
+      },
+      {
+        "observedAtMs": 1792879782333,
+        "stage": "zone_owner.in_process.execute_request",
+        "durationMs": 112,
+        "approxObservedMinusDurationMs": 1792879782221
+      },
+      {
+        "observedAtMs": 1792879782333,
+        "stage": "runtime_tick.execute",
+        "durationMs": 113,
+        "approxObservedMinusDurationMs": 1792879782220
+      }
+    ],
+    "timeMeaning": "observedAtMs is launcher Node stderr-receive wall time. Instant durations are real span durations; subtracting them does not recover a precise server event timestamp or connection identity."
+  },
+  "selectedActorActions": [
+    {
+      "wallAtMs": 1792879771021,
+      "kind": "attack",
+      "status": "success",
+      "requestId": "295",
+      "sentMonotonicMs": 1033972.3655,
+      "latencyMs": 97.2567000000272,
+      "phase": "soak"
+    },
+    {
+      "wallAtMs": 1792879772438,
+      "kind": "attack",
+      "status": "success",
+      "requestId": "296",
+      "sentMonotonicMs": 1035360.5607,
+      "latencyMs": 122.7147999999579,
+      "phase": "soak"
+    },
+    {
+      "wallAtMs": 1792879772689,
+      "kind": "rtt",
+      "status": "success",
+      "latencyMs": 0.31669999996665865,
+      "phase": "soak"
+    },
+    {
+      "wallAtMs": 1792879773703,
+      "kind": "attack",
+      "status": "success",
+      "requestId": "297",
+      "sentMonotonicMs": 1036718.1071,
+      "latencyMs": 47.00599999993574,
+      "phase": "soak"
+    },
+    {
+      "wallAtMs": 1792879775096,
+      "kind": "attack",
+      "status": "success",
+      "requestId": "298",
+      "sentMonotonicMs": 1038110.0915,
+      "latencyMs": 48.302200000034645,
+      "phase": "soak"
+    },
+    {
+      "wallAtMs": 1792879776487,
+      "kind": "attack",
+      "status": "success",
+      "requestId": "299",
+      "sentMonotonicMs": 1039495.4303,
+      "latencyMs": 63.881700000027195,
+      "phase": "soak"
+    },
+    {
+      "wallAtMs": 1792879778687,
+      "kind": "attack",
+      "status": "timeout",
+      "requestId": "300",
+      "sentMonotonicMs": 1040861.9001,
+      "latencyMs": 901.5223000000697,
+      "phase": "soak"
+    },
+    {
+      "wallAtMs": 1792879779928,
+      "kind": "walk",
+      "status": "owner-ack-wait",
+      "phase": "soak"
+    },
+    {
+      "wallAtMs": 1792879780667,
+      "kind": "walk",
+      "status": "owner-ack-wait",
+      "phase": "soak"
+    },
+    {
+      "wallAtMs": 1792879781209,
+      "kind": "walk",
+      "status": "timeout",
+      "sentMonotonicMs": 1042259.9186,
+      "latencyMs": 2025.4475000000093,
+      "phase": "soak"
+    },
+    {
+      "wallAtMs": 1792879781724,
+      "kind": "walk",
+      "status": "success",
+      "sentMonotonicMs": 1044489.3796,
+      "latencyMs": 295.45940000005066,
+      "phase": "soak"
+    },
+    {
+      "wallAtMs": 1792879782334,
+      "kind": "run",
+      "status": "success",
+      "sentMonotonicMs": 1045237.6956,
+      "latencyMs": 169.1132000000216,
+      "phase": "soak"
+    },
+    {
+      "wallAtMs": 1792879782715,
+      "kind": "rtt",
+      "status": "success",
+      "latencyMs": 0.6145000000251457,
+      "phase": "soak"
+    },
+    {
+      "wallAtMs": 1792879782961,
+      "kind": "run",
+      "status": "success",
+      "sentMonotonicMs": 1046007.733,
+      "latencyMs": 0.6768000000156462,
+      "phase": "soak"
+    },
+    {
+      "wallAtMs": 1792879783703,
+      "kind": "turn",
+      "status": "success",
+      "sentMonotonicMs": 1046749.6728,
+      "latencyMs": 0.400800000061281,
+      "phase": "soak"
+    },
+    {
+      "wallAtMs": 1792879784446,
+      "kind": "chat",
+      "status": "success",
+      "sentMonotonicMs": 1047493.2556,
+      "latencyMs": 0.9745000000111759,
+      "phase": "soak"
+    },
+    {
+      "wallAtMs": 1792879784446,
+      "kind": "peerChat",
+      "status": "success",
+      "latencyMs": 0.9745000000111759,
+      "phase": "soak"
+    }
+  ],
+  "findings": [
+    {
+      "status": "confirmed-source-and-process-duration",
+      "name": "queue timing ends before the current input gate wait",
+      "anchors": [
+        "web.rs:202-227",
+        "web.rs:5713-5728"
+      ],
+      "detail": "QueuedSocketInput.new sets queued_at=Instant.now separately from the earlier received_at. The queue timer covers construction/send-to-channel-capacity wait/channel residence/consumer scheduling until recv returns. It ends before serial_execution_gate.write.await and before current business execution. It excludes prior parsing, byte permit acquisition and any failed fast-path attempt. The3356ms is therefore not the current command serial_gate.input_wait, Zone work or outgoing-send duration."
+    },
+    {
+      "status": "confirmed-source",
+      "name": "one queued serial input forces subsequent movement behind it",
+      "anchors": [
+        "web.rs:185-199",
+        "web.rs:4950-4964",
+        "web.rs:5251-5265",
+        "web.rs:5402-5417"
+      ],
+      "detail": "Constructing a queued input increments pending_count, and its RAII guard remains alive until the consumer branch ends. AttackV2 always queues. The reader fast movement path refuses when pending_serial_actions!=0, so a still-pending attack can force a subsequent Walk into the same serial queue. Removing this test would permit command overtaking and is not a justified fix."
+    },
+    {
+      "status": "confirmed-source",
+      "name": "the main task cannot take the next input until the current selected branch returns",
+      "anchors": [
+        "web.rs:5710-5728",
+        "web.rs:6773-6792",
+        "web.rs:6868-6996"
+      ],
+      "detail": "The main tokio.select is biased with socket input first. When control returns to the select and the channel is ready, timers do not repeatedly win priority. Long pre-dequeue residence is compatible with an already-running branch, channel-send capacity wait, or the task not being polled; the current logs do not choose among these."
+    },
+    {
+      "status": "confirmed-source",
+      "name": "actual reader fast movement has no hidden post-ACK save or snapshot",
+      "anchors": [
+        "web.rs:4949-5017",
+        "session.rs:103-127",
+        "routing.rs:9850-9885"
+      ],
+      "detail": "The reader awaits spawn_blocking ingress.try_execute, records admission, sends returned packets and returns Ok(true) to its receive loop. It does not call flush_session_updates, save, external-state refresh or world_snapshot afterward. Its read gate does remain held through its send await. Serial movement is a different path."
+    },
+    {
+      "status": "confirmed-source; critical-time association only",
+      "name": "serial postwork can delay live outbound and later queued commands",
+      "anchors": [
+        "web.rs:5727",
+        "web.rs:6335-6383",
+        "web.rs:6678-6773",
+        "web.rs:5048-5051",
+        "web.rs:7198-7259",
+        "web.rs:9225-9237"
+      ],
+      "detail": "The input branch holds its write gate through execute, response/snapshot/save/refresh and final V2 receipt. Live outbound needs a read gate. Attack is not a low_latency_action, and V2 receipt is deliberately completed after its normal flush; successful authority execution metrics are recorded before the flush. The nearby151ms flush.save,158ms session_action.flush and161ms outbound-gate wait are compatible with a post-business tail but cannot uniquely be assigned to actor605 without connection/request metadata. They do not explain the preceding3356ms."
+    },
+    {
+      "status": "confirmed-source",
+      "name": "transport has an independent longer deadline",
+      "anchors": [
+        "web_transport.rs:10",
+        "web_transport.rs:134-160",
+        "web_transport.rs:182-234"
+      ],
+      "detail": "SocketSender serializes its sink and applies one10s deadline across lock and send/flush. A client900ms attack or2s movement timeout can happen before that server terminal timeout. This does not show a network stall caused the pre-dequeue queue delay."
+    },
+    {
+      "status": "confirmed-source",
+      "name": "ZoneWork is not all Zone locking or all gateway work",
+      "anchors": [
+        "routing.rs:10174-10220",
+        "routing.rs:12826-12835",
+        "zone_metrics.rs:16",
+        "web.rs:6335-6383"
+      ],
+      "detail": "The only gateway record_zone_work call is the RAII timer for shared-owner ticks, started after its Zone lock is acquired. Serial player-command dispatch and world_snapshot have other Zone lock regions not covered by this timer. Immediate/movement admission timers finish on handler completion before transport/flush. Thus a19.765ms ZoneWork maximum cannot rule out every Zone lock wait/hold, snapshot or main-task branch."
+    }
+  ],
+  "unresolved": {
+    "rootCauseIdentified": false,
+    "actorToSlowRowUniquelyCorrelated": false,
+    "whatIsEstablished": "At least one connection input spent3356ms before current gate/execution. Its approximate time and a later2132ms queue span are compatible with the two actor605 failures; original failures remain failures.",
+    "criticalSpanCoverage": "The public128-row stream contains no serial_gate.input_wait row and no multi-second execute/flush/snapshot span finishing in the critical interval. This limits attribution; it does not prove no uninstrumented wait or scheduling delay.",
+    "sourceCandidates": [
+      {
+        "branch": "spectator snapshot/publish",
+        "anchors": [
+          "web.rs:6868-6876"
+        ],
+        "boundary": "Same main connection task block_in_place; no enclosing slow-stage label; no serial write gate in this branch. Candidate only, not proved causal."
+      },
+      {
+        "branch": "runtime tick prelude",
+        "anchors": [
+          "web.rs:6920-6996",
+          "web.rs:10165-10218"
+        ],
+        "boundary": "Identity revocation/database check, resume credential issuance/send and owner lease renewal occur before the tick execution span and before acquiring the tick write gate. Independent narrow lock review requested from partition worker."
+      },
+      {
+        "branch": "direct main-task sends and tail synchronization",
+        "anchors": [
+          "web.rs:6776-6787",
+          "web.rs:6878-6912",
+          "web.rs:6756-6768",
+          "web.rs:7255-7259"
+        ],
+        "boundary": "Chat/AI direct send, selected tail state/identity calls and route refresh synchronization have incomplete substage attribution. Existing full flush spans would capture a long ordinary flush body, but logging itself and unspanned tails remain separate."
+      }
+    ]
+  },
+  "minimumNextDiagnostic": {
+    "purpose": "Distinguish main-task branch work from scheduler delay, channel capacity wait, gate wait and socket send; correlate a single actual slow input without changing authoritative behavior.",
+    "sourceScope": [
+      "web.rs connection-local ephemeral diagnostic state and QueuedSocketInput metadata",
+      "web_transport.rs optional lock-vs-I/O duration split",
+      "Versioned strict public slow-stage capture/parser allowlist with bounded fields and limits"
+    ],
+    "fields": [
+      "Process-local opaque connection ordinal, never a security nonce/account/name/token",
+      "Input class and existing validated V2 requestId when present",
+      "received-to-queued, channel-send wait, queued-to-dequeued and current serial-gate wait",
+      "Main phase and phase entry time sampled when the reader enqueues the same input",
+      "Last main-turn completion/select-wait state to distinguish already-busy work from an unpolled ready task",
+      "Complete static-label spans around spectator turn, runtime prelude/resume/identity, whole input turn and direct sends",
+      "Sink lock wait and socket feed/flush duration separately"
+    ],
+    "bounds": "Opt-in only; fixed enum labels and bounded numeric/log records; no gameplay payloads, snapshots or credentials; preserve line/total/backpressure limits and explicit incomplete status.",
+    "validation": "Deterministic small queue fixture can hold a known main phase and prove the same input reports pre-dequeue wait with that phase; existing fake Sink fixtures can separate lock wait from flush delay. A subsequent fresh diagnostic realm must retain original900ms/2s/18/12/.5 gates and cannot relabel this run."
+  },
+  "fixDisposition": {
+    "specificCausalPatchJustified": false,
+    "doNotChange": [
+      "900ms attack and2s movement/fanout deadlines or opportunity denominators",
+      "Pending serial ordering guard",
+      "Bootstrap/epoch/live-ACK write-gate ordering",
+      "V2 receipt placement after existing flush/save",
+      "Recording enabled or original gameplay/storage semantics"
+    ],
+    "conditionalOnly": "After an identified span/lock explains the wait, isolate only that non-authoritative work with bounded ownership/order semantics and prove packet/receipt/recording behavior. No spectator, OS or hardware root cause is asserted now."
+  },
+  "reviewOnly": true,
+  "sourceEdited": false,
+  "testsRun": false,
+  "realmStarted": false,
+  "capacityAccepted": false
+}

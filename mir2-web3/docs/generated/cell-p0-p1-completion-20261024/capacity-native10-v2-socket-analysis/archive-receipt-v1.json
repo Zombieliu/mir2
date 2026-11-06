@@ -1,0 +1,46 @@
+{
+  "schemaVersion": 1,
+  "archivedAt": "2026-10-25T00:24:45.800Z",
+  "scope": "Post-run public analysis archive; original failed report and source freeze are unchanged.",
+  "copied": [
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\probe08-analysis\\summary-v1.json",
+      "target": "capacity-native10-v2-socket-analysis/summary-v1.json",
+      "bytes": 17003,
+      "sha256": "f54c49ad36bd0d0f9641e101cff871daabd6882d61e2604d66caf72afed35599"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\probe08-analysis\\selected-events-v1.json",
+      "target": "capacity-native10-v2-socket-analysis/selected-events-v1.json",
+      "bytes": 398829,
+      "sha256": "cbd703e524e6de00ad75dfc0422dc61d3d466169a0aaf18334c3dd5afc774734"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\probe08-analysis\\analyze-v1.mjs",
+      "target": "capacity-native10-v2-socket-analysis/analyze-v1.mjs",
+      "bytes": 13308,
+      "sha256": "ef830be17711c9df5cead63998f2e54548ecc334e4a825ebd7ee8b806e61377b"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\probe08-root-independent-cleanup-v1.json",
+      "target": "capacity-native10-v2-socket-analysis/root-independent-cleanup-v1.json",
+      "bytes": 124,
+      "sha256": "ba51408a95a7833b91890b739ada3dbefc4decb9fe474ce72d62a0c342d0e2d1"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\probe08-root-cleanup-archive-binding-v1.json",
+      "target": "capacity-native10-v2-socket-analysis/root-cleanup-archive-binding-v1.json",
+      "bytes": 4884,
+      "sha256": "1e5beee7b18156a51a163a6ef3e15e2eb4ed08c4f9c83ed4792b3629494b754b"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\root-socket-release-binding-readonly-v1.json",
+      "target": "capacity-native10-v2-socket-analysis/root-socket-release-binding-readonly-v1.json",
+      "bytes": 671,
+      "sha256": "f33134b3c31b0a78e7993c2e96c17b3118fe2e6b57feae6a95de76c7ef306fab"
+    }
+  ],
+  "capacityAccepted": false,
+  "realmStarted": false,
+  "sourceTrackedFilesModified": false
+}

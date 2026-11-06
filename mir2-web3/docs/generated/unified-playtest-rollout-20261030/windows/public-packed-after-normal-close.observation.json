@@ -1,0 +1,50 @@
+{
+  "schema": "mir2.unified.wallet28-public-migration-observation.v1",
+  "recordedAtUtc": "2026-10-29T19:52:44.716Z",
+  "phase": "public-packed-after-normal-close",
+  "expected": "packed-healthy",
+  "engineSha256": "C7B2A2091222563780C11DBF31544FD889491F5E15DD0C702820BCECBEE7CEDB",
+  "legacyFloor": 32,
+  "highestFeedSha256": "7C3468924DAC9477A013BDB90E2688E5F88DD1977770CB3607BB8F4F2EC69E07",
+  "selector": {
+    "schema": "mir2.windows.active-generation.v1",
+    "active": {
+      "kind": "generation",
+      "manifestSha256": "9DFBD083B6B92972539BC01816645ED6131297BB7CA4DEDEC659438987A74186",
+      "sequence": 2026102912
+    },
+    "previous": {
+      "kind": "legacyV4",
+      "candidate": "WN-CANDIDATE-20261029-wallet-28",
+      "versionSha256": "C54DC2C9D8301E1793B8316AFE6CAB554DF19FC62468D6005F41C7897DBC802F",
+      "exeSha256": "CE8A604A5A2F0A1185FA279E0299232DAB0E09F6498FBA9BE959F9D6A1F75440"
+    },
+    "health": "healthy",
+    "attempt": "DEE690374E49ACEB6CD37EC3F0C7C71FF10CB79BF4E7C1BF7F6C5FDCDA2FFA27",
+    "launchStarted": false
+  },
+  "transactionPhase": "accepted",
+  "retainedLegacyExeSha256": "CE8A604A5A2F0A1185FA279E0299232DAB0E09F6498FBA9BE959F9D6A1F75440",
+  "globalPreferences": [
+    {
+      "file": "C:\\Users\\Administrator\\AppData\\Roaming\\mir2-web3\\locale.json",
+      "exists": true,
+      "sha256": "192A60E8DCDBE02BF6123B549804DBD8A78294F4B0B56185E8009DC29E50504D"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\AppData\\Roaming\\mir2-web3\\locale-seed.json",
+      "exists": true,
+      "sha256": "DC84556B72DACD74DE10C7668CB25AD039C537E0AC407A9D2878F49CD0C2C2DF"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\AppData\\Roaming\\mir2-web3\\display.json",
+      "exists": true,
+      "sha256": "3F0C7040D5EB8A0AB028ED2F417821E35320E20B3F07FDB309C14F5B40B8196D"
+    }
+  ],
+  "readyHandshakeDirectlyCaptured": false,
+  "readyTimingMeasured": false,
+  "phoneSigningPerformed": false,
+  "paymentsAttempted": false,
+  "authenticatedReadyAndTenSecondsAliveInferredFromExactProductionEngine": true
+}

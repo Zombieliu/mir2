@@ -1,0 +1,431 @@
+TAP version 13
+# Subtest: no observed other skill is not positive owner attribution for a victim-only target hit
+not ok 1 - no observed other skill is not positive owner attribution for a victim-only target hit
+  ---
+  duration_ms: 2.26
+  type: 'test'
+  location: 'C:\\mir2-playtest-releases\\20261004-native-r17\\dense-network-qa-v6\\[eval1]:59:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    + actual - expected
+    
+    + 'failed'
+    - 'inconclusive'
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 'inconclusive'
+  actual: 'failed'
+  operator: 'strictEqual'
+  stack: |-
+    expectUnattributed (file:///C:/mir2-playtest-releases/20261004-native-r17/dense-network-qa-v6/[eval1]:44:10)
+    TestContext.<anonymous> (file:///C:/mir2-playtest-releases/20261004-native-r17/dense-network-qa-v6/[eval1]:60:52)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.start (node:internal/test_runner/test:944:17)
+    startSubtestAfterBootstrap (node:internal/test_runner/harness:296:17)
+    process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+  ...
+# Subtest: a different player physical attack needs no ObjectMagic and cannot be turned into this owner Magic
+not ok 2 - a different player physical attack needs no ObjectMagic and cannot be turned into this owner Magic
+  ---
+  duration_ms: 0.4977
+  type: 'test'
+  location: 'C:\\mir2-playtest-releases\\20261004-native-r17\\dense-network-qa-v6\\[eval1]:63:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    + actual - expected
+    
+    + 'failed'
+    - 'inconclusive'
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 'inconclusive'
+  actual: 'failed'
+  operator: 'strictEqual'
+  stack: |-
+    expectUnattributed (file:///C:/mir2-playtest-releases/20261004-native-r17/dense-network-qa-v6/[eval1]:44:10)
+    TestContext.<anonymous> (file:///C:/mir2-playtest-releases/20261004-native-r17/dense-network-qa-v6/[eval1]:67:11)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+    process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    async startSubtestAfterBootstrap (node:internal/test_runner/harness:296:3)
+  ...
+# Subtest: periodic poison, environment and unobserved projectile sources are observationally indistinguishable in victim-only packets
+not ok 3 - periodic poison, environment and unobserved projectile sources are observationally indistinguishable in victim-only packets
+  ---
+  duration_ms: 0.3269
+  type: 'test'
+  location: 'C:\\mir2-playtest-releases\\20261004-native-r17\\dense-network-qa-v6\\[eval1]:69:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    + actual - expected
+    
+    + 'failed'
+    - 'inconclusive'
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 'inconclusive'
+  actual: 'failed'
+  operator: 'strictEqual'
+  stack: |-
+    expectUnattributed (file:///C:/mir2-playtest-releases/20261004-native-r17/dense-network-qa-v6/[eval1]:44:10)
+    TestContext.<anonymous> (file:///C:/mir2-playtest-releases/20261004-native-r17/dense-network-qa-v6/[eval1]:72:72)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+    process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: actual v4-style dead Attack then dead Magic at one target cannot attribute its single hit to either input
+not ok 4 - actual v4-style dead Attack then dead Magic at one target cannot attribute its single hit to either input
+  ---
+  duration_ms: 0.2139
+  type: 'test'
+  location: 'C:\\mir2-playtest-releases\\20261004-native-r17\\dense-network-qa-v6\\[eval1]:76:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    + actual - expected
+    
+    + 'failed'
+    - 'inconclusive'
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 'inconclusive'
+  actual: 'failed'
+  operator: 'strictEqual'
+  stack: |-
+    expectUnattributed (file:///C:/mir2-playtest-releases/20261004-native-r17/dense-network-qa-v6/[eval1]:44:10)
+    TestContext.<anonymous> (file:///C:/mir2-playtest-releases/20261004-native-r17/dense-network-qa-v6/[eval1]:77:52)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+    process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: observed prior projectile and foreign magic contexts remain raw attribution candidates, never rejection proof
+not ok 5 - observed prior projectile and foreign magic contexts remain raw attribution candidates, never rejection proof
+  ---
+  duration_ms: 0.5845
+  type: 'test'
+  location: 'C:\\mir2-playtest-releases\\20261004-native-r17\\dense-network-qa-v6\\[eval1]:81:1'
+  failureType: 'testCodeFailure'
+  error: 'false == true'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: true
+  actual: false
+  operator: '=='
+  stack: |-
+    expectUnattributed (file:///C:/mir2-playtest-releases/20261004-native-r17/dense-network-qa-v6/[eval1]:45:58)
+    TestContext.<anonymous> (file:///C:/mir2-playtest-releases/20261004-native-r17/dense-network-qa-v6/[eval1]:89:33)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+    process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: incoming damage to the Healing self-target is not proof of forbidden self Healing
+not ok 6 - incoming damage to the Healing self-target is not proof of forbidden self Healing
+  ---
+  duration_ms: 0.2596
+  type: 'test'
+  location: 'C:\\mir2-playtest-releases\\20261004-native-r17\\dense-network-qa-v6\\[eval1]:93:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    + actual - expected
+    
+    + 'failed'
+    - 'inconclusive'
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 'inconclusive'
+  actual: 'failed'
+  operator: 'strictEqual'
+  stack: |-
+    expectUnattributed (file:///C:/mir2-playtest-releases/20261004-native-r17/dense-network-qa-v6/[eval1]:44:10)
+    TestContext.<anonymous> (file:///C:/mir2-playtest-releases/20261004-native-r17/dense-network-qa-v6/[eval1]:94:53)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+    process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: actual absolute owner MP debit still fails despite target attribution uncertainty or foreign cast context
+not ok 7 - actual absolute owner MP debit still fails despite target attribution uncertainty or foreign cast context
+  ---
+  duration_ms: 0.3336
+  type: 'test'
+  location: 'C:\\mir2-playtest-releases\\20261004-native-r17\\dense-network-qa-v6\\[eval1]:96:1'
+  failureType: 'testCodeFailure'
+  error: "Cannot read properties of undefined (reading 'sequence')"
+  code: 'ERR_TEST_FAILURE'
+  name: 'TypeError'
+  stack: |-
+    TestContext.<anonymous> (file:///C:/mir2-playtest-releases/20261004-native-r17/dense-network-qa-v6/[eval1]:103:56)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+    process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: independent material debit or a real matching true cast still fails with victim-only target effects
+not ok 8 - independent material debit or a real matching true cast still fails with victim-only target effects
+  ---
+  duration_ms: 0.292
+  type: 'test'
+  location: 'C:\\mir2-playtest-releases\\20261004-native-r17\\dense-network-qa-v6\\[eval1]:106:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    
+    0 !== 1
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 1
+  actual: 0
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///C:/mir2-playtest-releases/20261004-native-r17/dense-network-qa-v6/[eval1]:113:56)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+    process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: source LevelUp HealthChanged before LevelChanged with Dead=true is a possible refill, not alive or a rejection pass
+not ok 9 - source LevelUp HealthChanged before LevelChanged with Dead=true is a possible refill, not alive or a rejection pass
+  ---
+  duration_ms: 0.5004
+  type: 'test'
+  location: 'C:\\mir2-playtest-releases\\20261004-native-r17\\dense-network-qa-v6\\[eval1]:116:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    + actual - expected
+    
+    + 'failed'
+    - 'inconclusive'
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 'inconclusive'
+  actual: 'failed'
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///C:/mir2-playtest-releases/20261004-native-r17/dense-network-qa-v6/[eval1]:118:10)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+    process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: LevelChanged before refill has the same conservative conclusion without an invented packet-order gate
+not ok 10 - LevelChanged before refill has the same conservative conclusion without an invented packet-order gate
+  ---
+  duration_ms: 0.4443
+  type: 'test'
+  location: 'C:\\mir2-playtest-releases\\20261004-native-r17\\dense-network-qa-v6\\[eval1]:124:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    + actual - expected
+    
+    + 'failed'
+    - 'inconclusive'
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 'inconclusive'
+  actual: 'failed'
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///C:/mir2-playtest-releases/20261004-native-r17/dense-network-qa-v6/[eval1]:126:10)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+    process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: HP rise alone with Dead=true or unknown life state cannot identify Healing or revival
+not ok 11 - HP rise alone with Dead=true or unknown life state cannot identify Healing or revival
+  ---
+  duration_ms: 0.2998
+  type: 'test'
+  location: 'C:\\mir2-playtest-releases\\20261004-native-r17\\dense-network-qa-v6\\[eval1]:129:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    dead
+    + actual - expected
+    
+    + 'failed'
+    - 'inconclusive'
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 'inconclusive'
+  actual: 'failed'
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///C:/mir2-playtest-releases/20261004-native-r17/dense-network-qa-v6/[eval1]:137:32)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+    process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: future, stale and foreign LevelChanged cannot supply an owner refill exception or acceptance
+not ok 12 - future, stale and foreign LevelChanged cannot supply an owner refill exception or acceptance
+  ---
+  duration_ms: 0.3525
+  type: 'test'
+  location: 'C:\\mir2-playtest-releases\\20261004-native-r17\\dense-network-qa-v6\\[eval1]:141:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    + actual - expected
+    
+    + 'failed'
+    - 'inconclusive'
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 'inconclusive'
+  actual: 'failed'
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///C:/mir2-playtest-releases/20261004-native-r17/dense-network-qa-v6/[eval1]:148:30)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+    process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: level refill cannot erase a later real absolute MP debit after an observed MP increase
+ok 13 - level refill cannot erase a later real absolute MP debit after an observed MP increase
+  ---
+  duration_ms: 0.2441
+  type: 'test'
+  ...
+# Subtest: LevelChanged does not excuse actual Dead=false, Revived or authoritative movement/facing
+ok 14 - LevelChanged does not excuse actual Dead=false, Revived or authoritative movement/facing
+  ---
+  duration_ms: 0.8243
+  type: 'test'
+  ...
+# Subtest: foreign HealthChanged objectId must not borrow an owner cached absolute MP provenance
+not ok 15 - foreign HealthChanged objectId must not borrow an owner cached absolute MP provenance
+  ---
+  duration_ms: 0.5812
+  type: 'test'
+  location: 'C:\\mir2-playtest-releases\\20261004-native-r17\\dense-network-qa-v6\\[eval1]:169:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    
+    'failed' !== 'passed'
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 'passed'
+  actual: 'failed'
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///C:/mir2-playtest-releases/20261004-native-r17/dense-network-qa-v6/[eval1]:171:30)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+    process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: foreign HealthChanged cannot supply missing owner MP coverage or invent a mana failure
+not ok 16 - foreign HealthChanged cannot supply missing owner MP coverage or invent a mana failure
+  ---
+  duration_ms: 0.2065
+  type: 'test'
+  location: 'C:\\mir2-playtest-releases\\20261004-native-r17\\dense-network-qa-v6\\[eval1]:174:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    + actual - expected
+    
+    + 'failed'
+    - 'inconclusive'
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 'inconclusive'
+  actual: 'failed'
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///C:/mir2-playtest-releases/20261004-native-r17/dense-network-qa-v6/[eval1]:177:30)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+    process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: normal owned HealthChanged with no objectId or exact current owner still proves a real forbidden debit
+ok 17 - normal owned HealthChanged with no objectId or exact current owner still proves a real forbidden debit
+  ---
+  duration_ms: 0.2016
+  type: 'test'
+  ...
+# Subtest: missing or invalid actual learned Magic prerequisites cannot turn ambiguous HP/damage into a caster result
+ok 18 - missing or invalid actual learned Magic prerequisites cannot turn ambiguous HP/damage into a caster result
+  ---
+  duration_ms: 0.251
+  type: 'test'
+  ...
+# Subtest: uncertain attribution, source refill or independent failures never change global acceptance flags
+ok 19 - uncertain attribution, source refill or independent failures never change global acceptance flags
+  ---
+  duration_ms: 0.5117
+  type: 'test'
+  ...
+1..19
+# tests 19
+# suites 0
+# pass 5
+# fail 14
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 17.3444

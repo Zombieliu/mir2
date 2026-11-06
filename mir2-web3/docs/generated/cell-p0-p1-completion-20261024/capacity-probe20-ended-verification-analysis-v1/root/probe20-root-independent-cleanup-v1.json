@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1,
+  "observedAt": "2026-10-26T02:07:28.3644680Z",
+  "runId": "1792979329578-cf62e25d",
+  "ownedPids": [
+    66264,
+    64532
+  ],
+  "remainingOwnedProcesses": [],
+  "checkedPorts": [
+    17500,
+    17510
+  ],
+  "remainingOwnedPortListeners": [],
+  "scope": "Fresh Root OS checks after actual Probe20 runner exit0; owned gateway and monitor absent, actual17500/17510 checked; game/capacity acceptance separate"
+}

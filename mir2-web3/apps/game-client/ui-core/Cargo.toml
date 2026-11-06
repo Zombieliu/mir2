@@ -6,6 +6,7 @@ description = "Platform-agnostic UI state and action core for Mir2 Windows/Andro
 license = "MIT"
 
 [dependencies]
+mir2-client-core = { path = "../client-core" }
 bevy = { version = "0.19.0", default-features = false, features = ["bevy_asset", "multi_threaded"] }
 serde = { version = "1", features = ["derive"] }
 

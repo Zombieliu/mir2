@@ -1,0 +1,870 @@
+{
+  "schemaVersion": 1,
+  "createdAt": "2026-10-27T07:31:04.144Z",
+  "offlineOnly": true,
+  "commandsSent": 0,
+  "productionSourceModified": false,
+  "inputPin": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-funding-aoi-feasibility-v1\\geometry-result-v1.json",
+    "bytes": 206696,
+    "sha256": "76788189f25be3227e5ee09f9136736dfbcb3444782d07d4e45419801fd3eea7"
+  },
+  "sourcePin": {
+    "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\quest-agent\\protocol-navigation.mjs",
+    "bytes": 19998,
+    "sha256": "896323515674920237ecbf62829ac5354a9ca01d49d10f5968d57499f42a61f2"
+  },
+  "mapPin": {
+    "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\lib\\generated\\crystal-map-pack\\0.map.gz",
+    "bytes": 512762,
+    "sha256": "bbd02c7d0125fe78983e2dea5f4aecc73b53d4b91517bde6fdbee9853bb183a5"
+  },
+  "scriptPin": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-funding-aoi-feasibility-v1\\static-connectivity-v1.mjs",
+    "bytes": 4482,
+    "sha256": "09104e1960bcd8f6a47af313c43184397dcd74a70caccb686c9b60372c71b8ba"
+  },
+  "cases": [
+    {
+      "objectId": 206500,
+      "start": {
+        "x": 270,
+        "y": 635
+      },
+      "target": {
+        "x": 256,
+        "y": 621
+      },
+      "range": 1,
+      "staticGlobalSteps": 57,
+      "staticGlobalMaxTargetDistance": 23,
+      "originalActualLastDistance": 17,
+      "checkedRadii": [
+        {
+          "radius": 16,
+          "found": false,
+          "steps": null
+        },
+        {
+          "radius": 17,
+          "found": false,
+          "steps": null
+        },
+        {
+          "radius": 18,
+          "found": false,
+          "steps": null
+        },
+        {
+          "radius": 19,
+          "found": false,
+          "steps": null
+        },
+        {
+          "radius": 20,
+          "found": false,
+          "steps": null
+        },
+        {
+          "radius": 21,
+          "found": false,
+          "steps": null
+        },
+        {
+          "radius": 22,
+          "found": false,
+          "steps": null
+        },
+        {
+          "radius": 23,
+          "found": true,
+          "steps": 57
+        }
+      ],
+      "minimumStaticRouteRadius": 23,
+      "firstFeasibleStaticRoute": {
+        "radius": 23,
+        "steps": 57,
+        "path": [
+          {
+            "x": 270,
+            "y": 635
+          },
+          {
+            "x": 270,
+            "y": 634
+          },
+          {
+            "x": 270,
+            "y": 633
+          },
+          {
+            "x": 270,
+            "y": 632
+          },
+          {
+            "x": 270,
+            "y": 631
+          },
+          {
+            "x": 270,
+            "y": 630
+          },
+          {
+            "x": 270,
+            "y": 629
+          },
+          {
+            "x": 270,
+            "y": 628
+          },
+          {
+            "x": 270,
+            "y": 627
+          },
+          {
+            "x": 270,
+            "y": 626
+          },
+          {
+            "x": 270,
+            "y": 625
+          },
+          {
+            "x": 270,
+            "y": 624
+          },
+          {
+            "x": 270,
+            "y": 623
+          },
+          {
+            "x": 270,
+            "y": 622
+          },
+          {
+            "x": 270,
+            "y": 621
+          },
+          {
+            "x": 270,
+            "y": 620
+          },
+          {
+            "x": 269,
+            "y": 620
+          },
+          {
+            "x": 269,
+            "y": 619
+          },
+          {
+            "x": 269,
+            "y": 618
+          },
+          {
+            "x": 269,
+            "y": 617
+          },
+          {
+            "x": 270,
+            "y": 617
+          },
+          {
+            "x": 271,
+            "y": 617
+          },
+          {
+            "x": 271,
+            "y": 616
+          },
+          {
+            "x": 272,
+            "y": 616
+          },
+          {
+            "x": 272,
+            "y": 615
+          },
+          {
+            "x": 273,
+            "y": 614
+          },
+          {
+            "x": 274,
+            "y": 614
+          },
+          {
+            "x": 274,
+            "y": 613
+          },
+          {
+            "x": 275,
+            "y": 612
+          },
+          {
+            "x": 276,
+            "y": 611
+          },
+          {
+            "x": 277,
+            "y": 610
+          },
+          {
+            "x": 278,
+            "y": 609
+          },
+          {
+            "x": 279,
+            "y": 609
+          },
+          {
+            "x": 279,
+            "y": 608
+          },
+          {
+            "x": 279,
+            "y": 607
+          },
+          {
+            "x": 279,
+            "y": 606
+          },
+          {
+            "x": 278,
+            "y": 605
+          },
+          {
+            "x": 277,
+            "y": 605
+          },
+          {
+            "x": 276,
+            "y": 605
+          },
+          {
+            "x": 275,
+            "y": 605
+          },
+          {
+            "x": 274,
+            "y": 605
+          },
+          {
+            "x": 273,
+            "y": 605
+          },
+          {
+            "x": 272,
+            "y": 605
+          },
+          {
+            "x": 271,
+            "y": 606
+          },
+          {
+            "x": 270,
+            "y": 607
+          },
+          {
+            "x": 269,
+            "y": 608
+          },
+          {
+            "x": 268,
+            "y": 609
+          },
+          {
+            "x": 267,
+            "y": 610
+          },
+          {
+            "x": 266,
+            "y": 611
+          },
+          {
+            "x": 265,
+            "y": 612
+          },
+          {
+            "x": 264,
+            "y": 613
+          },
+          {
+            "x": 263,
+            "y": 614
+          },
+          {
+            "x": 262,
+            "y": 615
+          },
+          {
+            "x": 261,
+            "y": 616
+          },
+          {
+            "x": 260,
+            "y": 617
+          },
+          {
+            "x": 259,
+            "y": 618
+          },
+          {
+            "x": 258,
+            "y": 619
+          },
+          {
+            "x": 257,
+            "y": 620
+          }
+        ],
+        "maxTargetDistance": 23
+      },
+      "interpretation": "With the pinned closed-door static map and all authored transfers blocked, no range1 route exists inside target AOI16. A larger-radius static route exists; it is not authorized movement and not live safety evidence."
+    },
+    {
+      "objectId": 206521,
+      "start": {
+        "x": 273,
+        "y": 614
+      },
+      "target": {
+        "x": 261,
+        "y": 608
+      },
+      "range": 1,
+      "staticGlobalSteps": 27,
+      "staticGlobalMaxTargetDistance": 18,
+      "originalActualLastDistance": 17,
+      "checkedRadii": [
+        {
+          "radius": 16,
+          "found": false,
+          "steps": null
+        },
+        {
+          "radius": 17,
+          "found": false,
+          "steps": null
+        },
+        {
+          "radius": 18,
+          "found": true,
+          "steps": 27
+        }
+      ],
+      "minimumStaticRouteRadius": 18,
+      "firstFeasibleStaticRoute": {
+        "radius": 18,
+        "steps": 27,
+        "path": [
+          {
+            "x": 273,
+            "y": 614
+          },
+          {
+            "x": 274,
+            "y": 614
+          },
+          {
+            "x": 274,
+            "y": 613
+          },
+          {
+            "x": 275,
+            "y": 612
+          },
+          {
+            "x": 276,
+            "y": 611
+          },
+          {
+            "x": 277,
+            "y": 610
+          },
+          {
+            "x": 278,
+            "y": 609
+          },
+          {
+            "x": 279,
+            "y": 609
+          },
+          {
+            "x": 279,
+            "y": 608
+          },
+          {
+            "x": 279,
+            "y": 607
+          },
+          {
+            "x": 279,
+            "y": 606
+          },
+          {
+            "x": 278,
+            "y": 605
+          },
+          {
+            "x": 277,
+            "y": 605
+          },
+          {
+            "x": 276,
+            "y": 605
+          },
+          {
+            "x": 275,
+            "y": 605
+          },
+          {
+            "x": 274,
+            "y": 605
+          },
+          {
+            "x": 273,
+            "y": 605
+          },
+          {
+            "x": 272,
+            "y": 605
+          },
+          {
+            "x": 271,
+            "y": 605
+          },
+          {
+            "x": 270,
+            "y": 605
+          },
+          {
+            "x": 269,
+            "y": 605
+          },
+          {
+            "x": 268,
+            "y": 605
+          },
+          {
+            "x": 267,
+            "y": 605
+          },
+          {
+            "x": 266,
+            "y": 605
+          },
+          {
+            "x": 265,
+            "y": 605
+          },
+          {
+            "x": 264,
+            "y": 605
+          },
+          {
+            "x": 263,
+            "y": 606
+          },
+          {
+            "x": 262,
+            "y": 607
+          }
+        ],
+        "maxTargetDistance": 18
+      },
+      "interpretation": "With the pinned closed-door static map and all authored transfers blocked, no range1 route exists inside target AOI16. A larger-radius static route exists; it is not authorized movement and not live safety evidence."
+    },
+    {
+      "objectId": 206708,
+      "start": {
+        "x": 275,
+        "y": 612
+      },
+      "target": {
+        "x": 259,
+        "y": 596
+      },
+      "range": 1,
+      "staticGlobalSteps": 26,
+      "staticGlobalMaxTargetDistance": 20,
+      "originalActualLastDistance": 18,
+      "checkedRadii": [
+        {
+          "radius": 16,
+          "found": false,
+          "steps": null
+        },
+        {
+          "radius": 17,
+          "found": false,
+          "steps": null
+        },
+        {
+          "radius": 18,
+          "found": false,
+          "steps": null
+        },
+        {
+          "radius": 19,
+          "found": false,
+          "steps": null
+        },
+        {
+          "radius": 20,
+          "found": true,
+          "steps": 26
+        }
+      ],
+      "minimumStaticRouteRadius": 20,
+      "firstFeasibleStaticRoute": {
+        "radius": 20,
+        "steps": 26,
+        "path": [
+          {
+            "x": 275,
+            "y": 612
+          },
+          {
+            "x": 276,
+            "y": 611
+          },
+          {
+            "x": 277,
+            "y": 610
+          },
+          {
+            "x": 278,
+            "y": 609
+          },
+          {
+            "x": 279,
+            "y": 609
+          },
+          {
+            "x": 279,
+            "y": 608
+          },
+          {
+            "x": 279,
+            "y": 607
+          },
+          {
+            "x": 279,
+            "y": 606
+          },
+          {
+            "x": 278,
+            "y": 605
+          },
+          {
+            "x": 277,
+            "y": 605
+          },
+          {
+            "x": 276,
+            "y": 605
+          },
+          {
+            "x": 275,
+            "y": 605
+          },
+          {
+            "x": 274,
+            "y": 605
+          },
+          {
+            "x": 273,
+            "y": 605
+          },
+          {
+            "x": 272,
+            "y": 605
+          },
+          {
+            "x": 271,
+            "y": 605
+          },
+          {
+            "x": 270,
+            "y": 605
+          },
+          {
+            "x": 269,
+            "y": 605
+          },
+          {
+            "x": 268,
+            "y": 605
+          },
+          {
+            "x": 267,
+            "y": 604
+          },
+          {
+            "x": 266,
+            "y": 603
+          },
+          {
+            "x": 265,
+            "y": 602
+          },
+          {
+            "x": 264,
+            "y": 601
+          },
+          {
+            "x": 263,
+            "y": 600
+          },
+          {
+            "x": 262,
+            "y": 599
+          },
+          {
+            "x": 261,
+            "y": 598
+          },
+          {
+            "x": 260,
+            "y": 597
+          }
+        ],
+        "maxTargetDistance": 20
+      },
+      "interpretation": "With the pinned closed-door static map and all authored transfers blocked, no range1 route exists inside target AOI16. A larger-radius static route exists; it is not authorized movement and not live safety evidence."
+    },
+    {
+      "objectId": 206706,
+      "start": {
+        "x": 271,
+        "y": 616
+      },
+      "target": {
+        "x": 255,
+        "y": 609
+      },
+      "range": 1,
+      "staticGlobalSteps": 36,
+      "staticGlobalMaxTargetDistance": 24,
+      "originalActualLastDistance": 17,
+      "checkedRadii": [
+        {
+          "radius": 16,
+          "found": false,
+          "steps": null
+        },
+        {
+          "radius": 17,
+          "found": false,
+          "steps": null
+        },
+        {
+          "radius": 18,
+          "found": false,
+          "steps": null
+        },
+        {
+          "radius": 19,
+          "found": false,
+          "steps": null
+        },
+        {
+          "radius": 20,
+          "found": false,
+          "steps": null
+        },
+        {
+          "radius": 21,
+          "found": false,
+          "steps": null
+        },
+        {
+          "radius": 22,
+          "found": false,
+          "steps": null
+        },
+        {
+          "radius": 23,
+          "found": false,
+          "steps": null
+        },
+        {
+          "radius": 24,
+          "found": true,
+          "steps": 36
+        }
+      ],
+      "minimumStaticRouteRadius": 24,
+      "firstFeasibleStaticRoute": {
+        "radius": 24,
+        "steps": 36,
+        "path": [
+          {
+            "x": 271,
+            "y": 616
+          },
+          {
+            "x": 272,
+            "y": 616
+          },
+          {
+            "x": 272,
+            "y": 615
+          },
+          {
+            "x": 273,
+            "y": 614
+          },
+          {
+            "x": 274,
+            "y": 614
+          },
+          {
+            "x": 274,
+            "y": 613
+          },
+          {
+            "x": 275,
+            "y": 612
+          },
+          {
+            "x": 276,
+            "y": 611
+          },
+          {
+            "x": 277,
+            "y": 610
+          },
+          {
+            "x": 278,
+            "y": 609
+          },
+          {
+            "x": 279,
+            "y": 609
+          },
+          {
+            "x": 279,
+            "y": 608
+          },
+          {
+            "x": 279,
+            "y": 607
+          },
+          {
+            "x": 279,
+            "y": 606
+          },
+          {
+            "x": 278,
+            "y": 605
+          },
+          {
+            "x": 277,
+            "y": 605
+          },
+          {
+            "x": 276,
+            "y": 605
+          },
+          {
+            "x": 275,
+            "y": 605
+          },
+          {
+            "x": 274,
+            "y": 605
+          },
+          {
+            "x": 273,
+            "y": 605
+          },
+          {
+            "x": 272,
+            "y": 605
+          },
+          {
+            "x": 271,
+            "y": 605
+          },
+          {
+            "x": 270,
+            "y": 605
+          },
+          {
+            "x": 269,
+            "y": 605
+          },
+          {
+            "x": 268,
+            "y": 605
+          },
+          {
+            "x": 267,
+            "y": 605
+          },
+          {
+            "x": 266,
+            "y": 605
+          },
+          {
+            "x": 265,
+            "y": 605
+          },
+          {
+            "x": 264,
+            "y": 605
+          },
+          {
+            "x": 263,
+            "y": 605
+          },
+          {
+            "x": 262,
+            "y": 605
+          },
+          {
+            "x": 261,
+            "y": 605
+          },
+          {
+            "x": 260,
+            "y": 605
+          },
+          {
+            "x": 259,
+            "y": 605
+          },
+          {
+            "x": 258,
+            "y": 606
+          },
+          {
+            "x": 257,
+            "y": 607
+          },
+          {
+            "x": 256,
+            "y": 608
+          }
+        ],
+        "maxTargetDistance": 24
+      },
+      "interpretation": "With the pinned closed-door static map and all authored transfers blocked, no range1 route exists inside target AOI16. A larger-radius static route exists; it is not authorized movement and not live safety evidence."
+    }
+  ],
+  "conclusion": {
+    "aoi16BoundaryAloneIsNotASolution": true,
+    "allFourStaticTargetNeighborhoodsDisconnectedAt16": true,
+    "candidateQueryNeedsStaticLocalFeasibilityRatherThanRefundedRetries": true,
+    "candidateQueryMayRejectOnlyAndMustNotGrantHealthOrCombatReadiness": true,
+    "dynamicAndHistoricalPlannerEqualityStillRequiredForClaimsBeyondStaticImpossibility": true
+  },
+  "limitations": [
+    "No earlier complete dynamic planning view exists for these four attempts.",
+    "Static impossibility applies to the same closed-door collision model used by the ordinary navigator; no unobserved live door overrides are invented.",
+    "Larger-radius routes are explanatory geometry only. Following them would violate the present selected-target visibility guard and is not proposed."
+  ]
+}

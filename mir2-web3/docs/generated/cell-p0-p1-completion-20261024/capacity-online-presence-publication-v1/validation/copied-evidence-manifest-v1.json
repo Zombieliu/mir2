@@ -1,0 +1,239 @@
+{
+  "schemaVersion": 1,
+  "copies": [
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\root-presence-publication-validation-v1\\root-focused-receipt-v1.json",
+      "file": "root-focused-receipt-v1.json",
+      "bytes": 45890,
+      "sha256": "5ab9ec343004c176868c98d906d7d96fa91149680ace4e1f9c3636aa7c6a57b5"
+    },
+    {
+      "source": "C:/mir2-build/p01-completion-20261024/root-presence-publication-validation-config-v1.json",
+      "file": "root-presence-publication-validation-config-v1.json",
+      "bytes": 7724,
+      "sha256": "3e22c8866957e48ca686c7098fb0547c7ae6b21c6e54db6b2421a0b3e3d92012"
+    },
+    {
+      "source": "file:///C:/mir2-build/p01-completion-20261024/root-presence-publication-validation-runner-v1.mjs",
+      "file": "root-presence-publication-validation-runner-v1.mjs",
+      "bytes": 3915,
+      "sha256": "85dad6770f6595ea09dfd570178cc6051a38d9ca7ff03230fe5fc6f26cce68c3"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\root-presence-publication-validation-v1\\format-stdout-v1.log",
+      "file": "format-stdout-v1.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\root-presence-publication-validation-v1\\format-stderr-v1.log",
+      "file": "format-stderr-v1.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\root-presence-publication-validation-v1\\manager-and-presence-stdout-v1.log",
+      "file": "manager-and-presence-stdout-v1.log",
+      "bytes": 2709,
+      "sha256": "d1212f29065891fd8ff584f1de8c3a28ab174ef040f459462853af14652f23d9"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\root-presence-publication-validation-v1\\manager-and-presence-stderr-v1.log",
+      "file": "manager-and-presence-stderr-v1.log",
+      "bytes": 43251,
+      "sha256": "80442da0a20b2f9949d535a1303599727d94b75f6363946876848d2f86f99f8c"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\root-presence-publication-validation-v1\\zone_partition_contract-stdout-v1.log",
+      "file": "zone_partition_contract-stdout-v1.log",
+      "bytes": 595,
+      "sha256": "e21dc1cabc50a8547e7278910a041f14d5e12b436fe2ebad56166b7bf8a14008"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\root-presence-publication-validation-v1\\zone_partition_contract-stderr-v1.log",
+      "file": "zone_partition_contract-stderr-v1.log",
+      "bytes": 50825,
+      "sha256": "d9c1b9ee8bb59926a810636e15fad937ecff1a820bfc0056f7b36b04a03eb31b"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\root-presence-publication-validation-v1\\zone_partition_identity_contract-stdout-v1.log",
+      "file": "zone_partition_identity_contract-stdout-v1.log",
+      "bytes": 726,
+      "sha256": "78f5ba4ffee7c2593b40428cbc0bb78a8638ec404635a5009936a76eac511995"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\root-presence-publication-validation-v1\\zone_partition_identity_contract-stderr-v1.log",
+      "file": "zone_partition_identity_contract-stderr-v1.log",
+      "bytes": 50325,
+      "sha256": "191d984cc72a0c0159bd7291bd05dea83dfa712246b10ec2db6a54602b09dbb6"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\root-presence-publication-validation-v1\\zone_manager_admission_contract-stdout-v1.log",
+      "file": "zone_manager_admission_contract-stdout-v1.log",
+      "bytes": 860,
+      "sha256": "d7c3e4e9245b3b3ea5e92964cb06d9caa5fda8b45d7f9093a88a86e309d861fb"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\root-presence-publication-validation-v1\\zone_manager_admission_contract-stderr-v1.log",
+      "file": "zone_manager_admission_contract-stderr-v1.log",
+      "bytes": 50323,
+      "sha256": "bc53a2cabcc03c0a60213b16aab5366345d6106897d508c7024db57899adfb1b"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\root-presence-publication-validation-v1\\experience-profile-stdout-v1.log",
+      "file": "experience-profile-stdout-v1.log",
+      "bytes": 2798,
+      "sha256": "159ad39f489d8a344f8abc3ce99dc651ba79f60e3af3446d8846b51b9651579c"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\root-presence-publication-validation-v1\\experience-profile-stderr-v1.log",
+      "file": "experience-profile-stderr-v1.log",
+      "bytes": 43459,
+      "sha256": "80f28cddda61c9015420bff9cd6c86f697b5e4995a15b0e49534a19217b270ab"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\root-presence-publication-validation-v1\\owner-health-live-fork-stdout-v1.log",
+      "file": "owner-health-live-fork-stdout-v1.log",
+      "bytes": 246,
+      "sha256": "b0ec4c315886a859b44094a5472b6485ee253f52299db98db9863fb001556278"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\root-presence-publication-validation-v1\\owner-health-live-fork-stderr-v1.log",
+      "file": "owner-health-live-fork-stderr-v1.log",
+      "bytes": 43101,
+      "sha256": "e4d9e0d18496cb5184bf9686e4ce6246fc10b00a90d83cb56953b4b652def6da"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\root-presence-publication-validation-v1\\owned-pet-modes-stdout-v1.log",
+      "file": "owned-pet-modes-stdout-v1.log",
+      "bytes": 248,
+      "sha256": "1b45eb02c72c16fea9ddc40bf9f1dfc4364cd183b2cc69ce4220e0732f137174"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\root-presence-publication-validation-v1\\owned-pet-modes-stderr-v1.log",
+      "file": "owned-pet-modes-stderr-v1.log",
+      "bytes": 43101,
+      "sha256": "e4d9e0d18496cb5184bf9686e4ce6246fc10b00a90d83cb56953b4b652def6da"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\root-presence-publication-validation-v1\\owned-pet-brown-clock-stdout-v1.log",
+      "file": "owned-pet-brown-clock-stdout-v1.log",
+      "bytes": 239,
+      "sha256": "c2f9f3b34b12153ed947ddca2368bfb8d9fc533be41042bde67d5a2fb55c6ec7"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\root-presence-publication-validation-v1\\owned-pet-brown-clock-stderr-v1.log",
+      "file": "owned-pet-brown-clock-stderr-v1.log",
+      "bytes": 43101,
+      "sha256": "f77324c005858228901d991d70a2ed190a35671cbe3839791a7d6a6742e24663"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\root-presence-publication-validation-v1\\owned-pet-owner-death-stdout-v1.log",
+      "file": "owned-pet-owner-death-stdout-v1.log",
+      "bytes": 243,
+      "sha256": "7a691c46c72c53beb733d1d1233310286dbaaa40500e96704bb0c98b21006442"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\root-presence-publication-validation-v1\\owned-pet-owner-death-stderr-v1.log",
+      "file": "owned-pet-owner-death-stderr-v1.log",
+      "bytes": 43101,
+      "sha256": "f77324c005858228901d991d70a2ed190a35671cbe3839791a7d6a6742e24663"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\root-presence-publication-validation-v1\\vampire-death-stdout-v1.log",
+      "file": "vampire-death-stdout-v1.log",
+      "bytes": 914,
+      "sha256": "9aafd92d35e60ec51d153de7b7b53d64ea97b70a786746ff20174e4513b15f8d"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\root-presence-publication-validation-v1\\vampire-death-stderr-v1.log",
+      "file": "vampire-death-stderr-v1.log",
+      "bytes": 43101,
+      "sha256": "f77324c005858228901d991d70a2ed190a35671cbe3839791a7d6a6742e24663"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\root-presence-publication-validation-v1\\web-live-overflow-stdout-v1.log",
+      "file": "web-live-overflow-stdout-v1.log",
+      "bytes": 2907,
+      "sha256": "df8ba1f085ded24861871b0b481f5ca53f908249428b05e0d85e8248aeaa2658"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\root-presence-publication-validation-v1\\web-live-overflow-stderr-v1.log",
+      "file": "web-live-overflow-stderr-v1.log",
+      "bytes": 63970,
+      "sha256": "53db79c1d946c6c57dc60c898736c781059c1a4d89d21b623a2b6f7591c5a5e3"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\root-presence-publication-validation-v1\\web-transport-close-stdout-v1.log",
+      "file": "web-transport-close-stdout-v1.log",
+      "bytes": 531,
+      "sha256": "a56156b8c1dfaa36ebec71bbf5e81cfe2d302665e9145e7fc08f0fc8928ea580"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\root-presence-publication-validation-v1\\web-transport-close-stderr-v1.log",
+      "file": "web-transport-close-stderr-v1.log",
+      "bytes": 53409,
+      "sha256": "3311b257595cf98402794f7eb745fb9d6937609c430f934fb1ee93fb531a7165"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\root-presence-publication-validation-v1\\store-durability-stdout-v1.log",
+      "file": "store-durability-stdout-v1.log",
+      "bytes": 368,
+      "sha256": "a455f9039a05a53443d51f053ff83dfacf5b8c7cfa046f404138aea42d3f92be"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\root-presence-publication-validation-v1\\store-durability-stderr-v1.log",
+      "file": "store-durability-stderr-v1.log",
+      "bytes": 43101,
+      "sha256": "f77324c005858228901d991d70a2ed190a35671cbe3839791a7d6a6742e24663"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\root-presence-publication-validation-v1\\guild-clock-store-stdout-v1.log",
+      "file": "guild-clock-store-stdout-v1.log",
+      "bytes": 218,
+      "sha256": "6a8384ff4e2d16d86f7fc8904d6ccdcb0202468a2028308982287905b7704b1a"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\root-presence-publication-validation-v1\\guild-clock-store-stderr-v1.log",
+      "file": "guild-clock-store-stderr-v1.log",
+      "bytes": 43101,
+      "sha256": "f77324c005858228901d991d70a2ed190a35671cbe3839791a7d6a6742e24663"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\root-presence-publication-validation-v1\\admission-lock-order-stdout-v1.log",
+      "file": "admission-lock-order-stdout-v1.log",
+      "bytes": 253,
+      "sha256": "239ee64cc20316d10a533755b1ed095a47af9eeedb11155885aee3627c88a5dd"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\root-presence-publication-validation-v1\\admission-lock-order-stderr-v1.log",
+      "file": "admission-lock-order-stderr-v1.log",
+      "bytes": 53576,
+      "sha256": "cdf7ea07c257c1269badb888285dc03bf36a62fbd86f31e6563af805f9e2a31d"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\root-presence-publication-validation-v1\\kill-award-commit-stdout-v1.log",
+      "file": "kill-award-commit-stdout-v1.log",
+      "bytes": 215,
+      "sha256": "e7440edffb647763336877002af3b59e1cdbc074c2b52d0e82404ba296c3f417"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\root-presence-publication-validation-v1\\kill-award-commit-stderr-v1.log",
+      "file": "kill-award-commit-stderr-v1.log",
+      "bytes": 53409,
+      "sha256": "3311b257595cf98402794f7eb745fb9d6937609c430f934fb1ee93fb531a7165"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\root-presence-publication-validation-v1\\guild-kill-source-stdout-v1.log",
+      "file": "guild-kill-source-stdout-v1.log",
+      "bytes": 394,
+      "sha256": "3bb9fa09f5121269677fce5a8856eeb6e5d019a9f47b10bfc6abc1a639a9b3db"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\root-presence-publication-validation-v1\\guild-kill-source-stderr-v1.log",
+      "file": "guild-kill-source-stderr-v1.log",
+      "bytes": 53409,
+      "sha256": "3311b257595cf98402794f7eb745fb9d6937609c430f934fb1ee93fb531a7165"
+    }
+  ]
+}

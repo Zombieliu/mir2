@@ -1,0 +1,27 @@
+{
+  "schema": "mir2.native-linux-ci-mechanical-failure.v1",
+  "runId": 37250860949,
+  "head": "8e1acedbb2926ca395750d2b34d641627c24642a",
+  "failed": true,
+  "testsAttempted": 46,
+  "passedMethods": 37,
+  "harnessErrors": 9,
+  "productAssertionFailures": 0,
+  "cause": "test fixture mkdir did not create its evidence parent on a clean checkout",
+  "stagePromoteAndWebAndCredentialJobsSkipped": true,
+  "missingRawTestReceiptAndArtifactDueSameParentError": true,
+  "repair": "one test-factory mkdir parents=True; no assertions or production source changed",
+  "logs": [
+    {
+      "path": "failed-log.log",
+      "bytes": 44570,
+      "sha256": "63eeea55aad04dbbb0204b9ad96777a6a8edeab6e8f35a2bfe3788d2cf805a0a"
+    },
+    {
+      "path": "run.json",
+      "bytes": 3273,
+      "sha256": "51b0347c6e4d6dddf34f2c676712bed09130a69e3be5155f86163b3cf0f19875"
+    }
+  ],
+  "createdUtc": "2026-10-05T01:23:00.080950+00:00"
+}

@@ -147,7 +147,7 @@
 | 屏幕 | Gemini 基线 | Same scene | 主要阻断 |
 |---|---:|---:|---|
 | 登录 | 100/100（Accepted） | true | WN-VIS-004 已关闭；结构化审阅零可见问题，窗口装饰/debug watermark 属允许差异 |
-| 选角 | 100/100（Accepted） | true | WN-VIS-005 已关闭；空角色同场景零问题，另有占用角色动画/StartGame 证据 |
+| 选角 | 100/100（历史）；当前回归待人工复验 | 历史 true；当前 false | 2026-09-01 已修 UTC Last Online 数据、21px `VerticalCenter` UI 与占用角色预览闪烁；分层共享时钟，本地 Debug 完整周期非空，用户验收仍开放 |
 | 游戏内 HUD | 88/100（Accepted） | true | WN-VIS-006 首个 Candidate ≥85 已关闭；权威 EXP/负重、位图名字字体和最终 ≥92 仍开放 |
 | 游戏内场景 | 12/100 旧基线 | false | 需用新 HUD 重做同坐标整屏证据；地图/实体动作/灯光和效果仍开放 |
 
@@ -167,7 +167,7 @@ Gemini 是视觉缺陷分类器，不是唯一裁判。所有建议必须回到 
 - WN-VIS-002 已生成自包含 native keyed pack：7,149 个引用中输出 4,650 keyed、5 additive；2,494 个缺失源帧安全跳过并作为后续覆盖缺口保留。
 - WN-VIS-004 已用 Crystal 登录框、Title 按钮、字段、Tab/Enter、密码掩码和闪烁 caret 替换登录占位布局；Gateway 权威流程不变。
 - 首轮审阅 92/100，修正黄色焦点边框和 caret 后，最终审阅 Accepted 100/100。
-- WN-VIS-005 已迁移 Crystal 专用选角背景、四槽、选中态、16 帧职业/性别预览、Last Online 行和底部五按钮；空角色审阅 Accepted 100/100，占用角色实窗可见动画并从原生 Start 进入权威比奇。
+- WN-VIS-005 已迁移 Crystal 专用选角背景、四槽、选中态、16 帧职业/性别预览、Last Online 行和底部五按钮；空角色审阅的历史 Accepted 100/100 仍保留。2026-09-01 用户占用角色实窗发现 Last Online 与闪烁回归，本轮已完成跨层修复和本地 Debug 完整周期验证，但在用户复验前不恢复当前 Accepted 状态。
 - WN-VIS-006 已迁移 Crystal MainDialog、HP/MP orb、横向 belt、ChatDialog 控制/四行框、主按钮和 Bichon 小地图；旧固定目标面板已隐藏，任务跟踪改为透明左上角文本。HUD-only 审阅 Accepted 88/100、`sameScene=true`、无 P0/P1。
 - V6 已接入 697 个逐库 Crystal frameSet，并实现基础 body/hair/前后武器/mount 复合、骑乘武器抑制、原生名字/死亡行与自体血条；实窗移动证据证明图层和名牌跟随权威坐标。
 - 当前自动门：Windows 98/98、共享 runtime 133/133、Release build 和 Web typecheck 通过；登录/选角既有资源与发布门保持不变。
@@ -659,7 +659,7 @@ manifest 即接受；缺包的 Release 必须明确失败，不能打开缺图�
 
 ### WN-VIS-005：选角屏迁移
 
-状态：完成；空角色同场景结构化审阅 Accepted 100/100，`sameScene=true`，零可见问题；占用角色动画和原生 StartGame 已另行实窗验证。
+状态：历史空角色同场景结构化审阅 Accepted 100/100，`sameScene=true`；2026-09-01 占用角色 Last Online/预览闪烁回归已实现修复并通过本地 Debug 完整周期验证，当前仍等待用户人工复验，`visualAccepted=false`。
 
 依赖 WN-VIS-004。继续由同一 shell owner 或在清晰 handoff 后换 worker。
 输出：专用背景、四槽、16 帧 source-offset 预览、Last Online、底部五按钮、空/占用角色截图门和可复用空角色夹具。

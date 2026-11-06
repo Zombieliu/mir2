@@ -6,7 +6,9 @@ members = [
     "apps/simulation",
     "apps/game-client/ui-core",
     "packages/game-data",
+    "packages/production",
     "packages/protocol",
     "vendor/dubhe-network-core",
 ]
+exclude = ["apps/game-client/client-core", "apps/game-client/client-wire"]
 resolver = "2"

@@ -1,0 +1,11 @@
+{"phase":"owned-formal-release-v2-ready","pid":55940,"monitorPid":53684,"sha256":"855b4ba3c80ccb99b4128a9ee1170bc56ad51fcbaf022d5269f0b6662986c61f","sourceCommit":"461f1d85eed6309a55a88bd79a0022f7b97febe4","backendSourceCommit":"461f1d85eed6309a55a88bd79a0022f7b97febe4","driverSourceCommit":"c42f860e0544f0687a5ccf5ddaccad4daecc8acc","explicitAttackResults":"v2","endpoint":"ws://127.0.0.1:17510/ws"}
+{"stage":"admitted","controlledActors":1,"target":2}
+{"stage":"admitted","controlledActors":2,"target":2}
+{"stage":"stage-2","passed":true}
+{"stage":"admitted","controlledActors":3,"target":10}
+{"stage":"admitted","controlledActors":4,"target":10}
+{"stage":"admitted","controlledActors":5,"target":10}
+{"stage":"admitted","controlledActors":6,"target":10}
+{"stage":"admitted","controlledActors":7,"target":10}
+{"stage":"admitted","controlledActors":8,"target":10}
+{"phase":"finished","root":"C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-ladder-03\\","report":{"reportPath":"C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-ladder-03\\reports\\1792873511986-56c2dbe6.report.json","runId":"1792873511986-56c2dbe6","backendSourceCommit":"461f1d85eed6309a55a88bd79a0022f7b97febe4","driverSourceCommit":"c42f860e0544f0687a5ccf5ddaccad4daecc8acc","ok":false,"playableCapacityAccepted":false,"error":"Continuous activity window failed, regardless of the measured stage"},"cleanupComplete":true,"checks":{"sixCountersZero":true,"monitorTerminalPreserved":true,"monitorStoppedBeforeGateway":true,"monitorExitZero":true,"normalOwnedShutdown":true,"processAbsent":true,"portsFree":true},"capacityAccepted":null,"capacityAcceptanceAdjudicated":false,"formalStarted":true}

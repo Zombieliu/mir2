@@ -42,8 +42,9 @@ hmac = "0.13"
 jsonwebtoken = "9.3"
 keyring = { version = "3.6.3", features = ["apple-native", "windows-native", "sync-secret-service", "vendored"] }
 mir2-game-data = { path = "../../packages/game-data" }
-mir2-protocol = { path = "../../packages/protocol" }
+mir2-protocol = { path = "../../packages/protocol", features = ["catalog-gzip"] }
 mir2-simulation = { path = "../simulation" }
+mir2-client-wire = { path = "../game-client/client-wire" }
 postgres = { version = "0.19", features = ["with-serde_json-1"] }
 r2d2 = "0.8"
 r2d2_postgres = "0.18"
@@ -70,4 +71,5 @@ windows-sys = { version = "0.61", features = ["Win32_Foundation"] }
 
 [dev-dependencies]
 mir2-simulation = { path = "../simulation", features = ["test-support"] }
+tokio-rustls = { version = "0.26", default-features = false, features = ["ring", "tls12"] }
 tokio-tungstenite = "0.29"

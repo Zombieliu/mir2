@@ -1,0 +1,194 @@
+{
+  "schemaVersion": 1,
+  "copiedAt": "2026-10-25T07:02:08.560Z",
+  "scope": "Original bounded diagnostic wrapper versions, frozen real synthetic results and independent reviews. Blocked v1 remains immutable. This is neither gameplay regression nor a capacity run.",
+  "copies": [
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\compact-navigation-wire-diagnostics-v1\\source-frozen-v1.json",
+      "target": "blocked-v1/source-frozen-v1.json",
+      "bytes": 11470,
+      "sha256": "9b6fe294b6941ee8c751d9c4491809c41e9296b04c8a084d294ffc28bf09e06c"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\compact-navigation-wire-diagnostics-v1\\README.md",
+      "target": "blocked-v1/README.md",
+      "bytes": 6294,
+      "sha256": "83aa7996dd717c2d13baa787ccbc3057f30190b344beb6191ff93a9364e9d912"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\compact-navigation-wire-diagnostics-v1\\freeze.mjs",
+      "target": "blocked-v1/freeze.mjs",
+      "bytes": 6152,
+      "sha256": "d2b8fe6d3039ad7e80224fb5daefa31bf383aa492ab73e61d97ee9048181b399"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\compact-navigation-wire-diagnostics-v1\\run-synthetic-tests.mjs",
+      "target": "blocked-v1/run-synthetic-tests.mjs",
+      "bytes": 1982,
+      "sha256": "7a89a295e77db9149147fe015dcf09f59fd9cd1f2af4ecd91cb047035262cb33"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\compact-navigation-wire-diagnostics-v1\\tests-v1-failed.json",
+      "target": "blocked-v1/tests-v1-failed.json",
+      "bytes": 1718,
+      "sha256": "4a3a4d6f60e737ff8b2d7a79205c9ab26569e69fa07b49538676a54e8a203a1b"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\compact-navigation-wire-diagnostics-v1\\tests-v1-failed.log",
+      "target": "blocked-v1/tests-v1-failed.log",
+      "bytes": 8662,
+      "sha256": "39719013b693f3926891538157dcdd3ed63440c5131f6d28acb02ac9594423d6"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\compact-navigation-wire-diagnostics-v1\\tests-v2.json",
+      "target": "blocked-v1/tests-v2.json",
+      "bytes": 1711,
+      "sha256": "456e90b242a22a55a0a9a9a482e96bfd7abb5ad22819eb5e112d3e15435f7eaf"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\compact-navigation-wire-diagnostics-v1\\tests-v2.log",
+      "target": "blocked-v1/tests-v2.log",
+      "bytes": 5533,
+      "sha256": "b4c17318d41071e40cb655051142ffffa764cb25b15c46ad22ea302eb34b3f03"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\compact-navigation-wire-diagnostics-v1\\tests-v3.json",
+      "target": "blocked-v1/tests-v3.json",
+      "bytes": 1711,
+      "sha256": "f2bb663261719c714401d53d770d9f901c7075c73c062e588af8b36bd2ba8f05"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\compact-navigation-wire-diagnostics-v1\\tests-v3.log",
+      "target": "blocked-v1/tests-v3.log",
+      "bytes": 5975,
+      "sha256": "15fda763877cd0d5a9ce875f07a3ba33ed96e63a414f705c425421080f2a23e4"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\compact-navigation-wire-diagnostics-v1\\tests-v4.json",
+      "target": "blocked-v1/tests-v4.json",
+      "bytes": 1711,
+      "sha256": "679db57641b7c768eb8281c882556a9fcdd9ee80b80a4df374eb65e95a5e6fab"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\compact-navigation-wire-diagnostics-v1\\tests-v4.log",
+      "target": "blocked-v1/tests-v4.log",
+      "bytes": 6269,
+      "sha256": "81ad87fa18874dbef02dd6885e2c8667d8e6f9939228ba547701551d2a31fb6f"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\compact-navigation-wire-diagnostics-v1\\tests-v5.json",
+      "target": "blocked-v1/tests-v5.json",
+      "bytes": 1711,
+      "sha256": "e6b2f65d15c112a080e9f3546a91b978cbdb3b7c5220e16b97bb6303f5ae249f"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\compact-navigation-wire-diagnostics-v1\\tests-v5.log",
+      "target": "blocked-v1/tests-v5.log",
+      "bytes": 6321,
+      "sha256": "e7339502f5710b08b49cdac8f92d18d118c6ff83261ff3cb8b4f5f44559c7459"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\compact-navigation-wire-diagnostics-v1\\wrapper.mjs",
+      "target": "blocked-v1/wrapper.mjs",
+      "bytes": 14587,
+      "sha256": "c062c325f657c5cc753342749131b0897859ad73cb1f7202b28ffd59d0957112"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\compact-navigation-wire-diagnostics-v1\\wrapper.pre-final-v1.mjs.txt",
+      "target": "blocked-v1/wrapper.pre-final-v1.mjs.txt",
+      "bytes": 13744,
+      "sha256": "74d975c40f24d947ea7e8643d19f56d695d02262335a371e851ecc8028693783"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\compact-navigation-wire-diagnostics-v1\\wrapper.test.mjs",
+      "target": "blocked-v1/wrapper.test.mjs",
+      "bytes": 19272,
+      "sha256": "3bc4f96e4a0bc9e916e2ea7fb4b58f6a17b70f13f1d3c35806d1c173fd85df0c"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\compact-navigation-wire-diagnostics-v1\\wrapper.test.pre-final-v1.mjs.txt",
+      "target": "blocked-v1/wrapper.test.pre-final-v1.mjs.txt",
+      "bytes": 16074,
+      "sha256": "ae5578e972f9ac3293cf8b161dc465a736664fa0c874622332b66d927a26d9df"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\compact-navigation-wire-diagnostics-v2\\source-frozen-v2.json",
+      "target": "reviewed-v2/source-frozen-v2.json",
+      "bytes": 10830,
+      "sha256": "4ca6eee4f0ef9b2046bb5f56531ceec6eb2e1958141d0b7325cdb47de28e8ce3"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\compact-navigation-wire-diagnostics-v2\\README.md",
+      "target": "reviewed-v2/README.md",
+      "bytes": 7876,
+      "sha256": "6ad7017bb924f9f9e5dde7822f796103fb32b921e01db907daeb15ccbe6fbfa6"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\compact-navigation-wire-diagnostics-v2\\create-from-v1.mjs",
+      "target": "reviewed-v2/create-from-v1.mjs",
+      "bytes": 5182,
+      "sha256": "dc675829fa7e6bb11fb2e9767a7daba83f75cb20979f80afb93dd17a3a03d4ba"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\compact-navigation-wire-diagnostics-v2\\freeze.mjs",
+      "target": "reviewed-v2/freeze.mjs",
+      "bytes": 6062,
+      "sha256": "a34e328a606e86a2523d3c9920702883d7633d4610e370c6ada549fa519af973"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\compact-navigation-wire-diagnostics-v2\\run-synthetic-tests.mjs",
+      "target": "reviewed-v2/run-synthetic-tests.mjs",
+      "bytes": 1982,
+      "sha256": "7a89a295e77db9149147fe015dcf09f59fd9cd1f2af4ecd91cb047035262cb33"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\compact-navigation-wire-diagnostics-v2\\tests-v1.json",
+      "target": "reviewed-v2/tests-v1.json",
+      "bytes": 1711,
+      "sha256": "b4786feaae7542f73cb7f6c5a6a75cdc45df592e51a3457b2a5f4c862ec93ab9"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\compact-navigation-wire-diagnostics-v2\\tests-v1.log",
+      "target": "reviewed-v2/tests-v1.log",
+      "bytes": 7111,
+      "sha256": "1a2b03fb727ec2e1249ab18e3307fa7736b04b93b27311622afd450098e77a3b"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\compact-navigation-wire-diagnostics-v2\\v1-baseline-binding.json",
+      "target": "reviewed-v2/v1-baseline-binding.json",
+      "bytes": 2021,
+      "sha256": "be83f33aefb41306d3b950810950d71e6b2ee43f72ab814be5348f856e753ccf"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\compact-navigation-wire-diagnostics-v2\\wrapper.mjs",
+      "target": "reviewed-v2/wrapper.mjs",
+      "bytes": 14598,
+      "sha256": "169da7ebf4d9e7227494ece8413998baee0694519011b5528f2bae250b9fe98f"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\compact-navigation-wire-diagnostics-v2\\wrapper.test.mjs",
+      "target": "reviewed-v2/wrapper.test.mjs",
+      "bytes": 21656,
+      "sha256": "216fb7fce356fbba4ee73124014270d3e968f3c68b9cd49e6c5e6c7f297abac3"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\compact-wire-wrapper-independent-review-v1\\review-v1.json",
+      "target": "independent-review/review-v1.json",
+      "bytes": 10774,
+      "sha256": "46f1e40b899ae5973750bdc4ec1a18e53cbbd62f5bef092e9d46462af325fc23"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\compact-wire-wrapper-independent-review-v1\\review-v2.json",
+      "target": "independent-review/review-v2.json",
+      "bytes": 6809,
+      "sha256": "4cda8f7ec69f710090cc3c4999cb847a8bf620bba6f2573978fe9245ddc50603"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\compact12-evidence-checkpoint-push-verification-v1.json",
+      "target": "compact12-evidence-checkpoint-push-verification-v1.json",
+      "bytes": 916,
+      "sha256": "5ff1927ed3f6810b1fabf3c891c8a294699eddada5cd5cc0426b220d5cde54df"
+    }
+  ],
+  "capacityAccepted": false
+}

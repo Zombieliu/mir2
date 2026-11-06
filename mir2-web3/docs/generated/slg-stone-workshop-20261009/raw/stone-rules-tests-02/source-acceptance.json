@@ -1,0 +1,12 @@
+{
+  "sourceAccepted": true,
+  "independentReviewAccepted": true,
+  "sourceSnapshot": {
+    "sha256": "0d9cc4325c35b4996aa8517232a4e24bbb15ec8e11fbc38fe92ed114adf6fda3"
+  },
+  "independentSourceReview": {
+    "sha256": "4dcc034f97be67e6f563cca44c371c62c394e2f7ea269988e2f6bacdf979d10c",
+    "path": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\independent-stone-rules-source-review-01.json"
+  },
+  "scope": "Pure sealed-stone rules only. Focused compile and tests do not accept account/NPC/client/PG integration or public playability."
+}

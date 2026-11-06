@@ -1,0 +1,2691 @@
+{
+  "kind": "incremental-debug-native-input-ledger",
+  "cleanReleaseAttestation": false,
+  "head": "758cd76b07bb4a5feace9b9cc01a80c808542b2d",
+  "localCrateManifests": [
+    "apps/game-client/client-bevy/Cargo.toml",
+    "apps/game-client/client-core/Cargo.toml",
+    "apps/game-client/client-wire/Cargo.toml",
+    "apps/game-client/crystal-gdi-text/Cargo.toml",
+    "apps/game-client/platform-windows/Cargo.toml",
+    "apps/game-client/runtime/Cargo.toml",
+    "apps/game-client/ui-core/Cargo.toml",
+    "packages/game-data/Cargo.toml",
+    "packages/protocol/Cargo.toml"
+  ],
+  "fileCount": 534,
+  "ledgerSha256": "aed1739e0a0490febca13e900e0d541027b91b353b76eb44e5a2f4641f8c717e",
+  "scope": "local dependency Rust/manifests/locks, literal compile-time includes, bundled fonts/licenses, all native locale catalogs and editorial generator inputs",
+  "files": [
+    {
+      "path": ".cargo/config.toml",
+      "bytes": 30,
+      "sha256Raw": "17d6d9fdca4859d571020695c0af7fefd2589200d6277be62762605c0d78bdab"
+    },
+    {
+      "path": "apps/game-client/client-bevy/Cargo.lock",
+      "bytes": 127952,
+      "sha256Raw": "d2054e187c8af34028a88c4650b4da646451931a15a01e83ea405b3204ed88a8"
+    },
+    {
+      "path": "apps/game-client/client-bevy/Cargo.toml",
+      "bytes": 1725,
+      "sha256Raw": "377510326b9fa3ca356f1c1cb57f44b061179cdda6807934bad5ec645cd3596c"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/audio.rs",
+      "bytes": 72085,
+      "sha256Raw": "28d679cc491a228a94e27fbc707817013764df33e0be133e8fd9a463a52ff14c"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/bag_ui.rs",
+      "bytes": 13198,
+      "sha256Raw": "c9b79aa02c0fd943955e58fcd8cb0558fd47fd129f30619dcf516ec77ca29ee0"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/big_map.rs",
+      "bytes": 49629,
+      "sha256Raw": "cbeb7885b150a287e55e7b13f483bb83b6505863cb860883af5d416cffe98a20"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/big_map_geometry.rs",
+      "bytes": 4157,
+      "sha256Raw": "e34f4900608a157441ff9ba3760c689fa617a42e8e10007c0e37876598afe2dc"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/character.rs",
+      "bytes": 3525,
+      "sha256Raw": "a88338e21f6f26c59f5f91c5501eda3a7740d646159f221745b9ab74d241fb50"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/chat.rs",
+      "bytes": 9148,
+      "sha256Raw": "42cad272298ee37a5605c0d582bc299317762e76ce9d6e40c98f39029d58dc7f"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/chat_settings_effects.rs",
+      "bytes": 10554,
+      "sha256Raw": "04357156a342fef53328b49e72e18c860c64f400f8ba498fabc77d5ad6f4ad8b"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/combat_input.rs",
+      "bytes": 38414,
+      "sha256Raw": "5a4bf89f4e5ae86af2b6b311d33e9c3ab7b993de1864c1cbabdb00cc65339742"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/combat_input_tests.rs",
+      "bytes": 28587,
+      "sha256Raw": "dd215f108653287a7293f285989b5eb9c8dbbf2abba6ef4957b4ebed1059de25"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/amount_input.rs",
+      "bytes": 4167,
+      "sha256Raw": "2446d51f4340280ed7c7534290b230b2de7a71a7ea33ac185cb6693a78f03172"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/assets.rs",
+      "bytes": 5081,
+      "sha256Raw": "dce72c5010735d60c531250bb3f20534b26651ea2a4698d94187b7105fcf8b64"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/bag_paint.rs",
+      "bytes": 27522,
+      "sha256Raw": "cf58947f87f977eaab18c29268fb78f315fd829c9ed366dba89e1079795ef6b3"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/big_map_coordinates.rs",
+      "bytes": 5565,
+      "sha256Raw": "a3e951f895b500d876ce15a1b75bde026f0454837faeb7835ec532e28add50b6"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/big_map_coordinates_tests.rs",
+      "bytes": 12593,
+      "sha256Raw": "1b71977b7c33c5b3ba5e969f21413cd3cc929e4c9608872db33d60b03e8b9eaf"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/big_map_npc_navigation_tests.rs",
+      "bytes": 13859,
+      "sha256Raw": "9ac429fa5f8444105e59fd7e5e4b2c57ea8557cc63c84cc900e250f84ff43458"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/change_password.rs",
+      "bytes": 7425,
+      "sha256Raw": "c8f223ed07ad7a58f01116ff696282f802650934370031a1182808c56c3c434f"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/character_materials.rs",
+      "bytes": 3399,
+      "sha256Raw": "67f377a018cf795c5e9051d7ffd155d3d3b5a1e2d03700cf39c47b861b7a3f91"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/character_page.rs",
+      "bytes": 10327,
+      "sha256Raw": "295eeb5b95da2a4c2f39a577072097d5c238a4ac5e0de2e933b47ee6d004aaf2"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/character_page_tests.rs",
+      "bytes": 3723,
+      "sha256Raw": "70fa9085774fdd40dc1fca51021680f208f57200d471fa3292d30373a99ed5f0"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/character_stats.rs",
+      "bytes": 8611,
+      "sha256Raw": "8563b962df0f9f8d6b2f4c4a44e68d7bfe8b6f9204d722b24f6f6e80fdb59ddf"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/character_stats_portable.rs",
+      "bytes": 10337,
+      "sha256Raw": "61d320eb6f47abf321577488bd7cccc45bc36c332a5aa6b6c1747d04a003d469"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/chat.rs",
+      "bytes": 103269,
+      "sha256Raw": "023b1d19a04914dde6ebbf9d32b1fd15d338aea23914de93b859bac403ec479e"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/combat_mode_keys.rs",
+      "bytes": 4945,
+      "sha256Raw": "aa767df49c6f7cfc38e6e5557f9a3ef8d5e1efeecf1d079437a713fcf3e2fd93"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/creature_dialog.rs",
+      "bytes": 17156,
+      "sha256Raw": "e5ebfda4f3e01fd414f1736bf19225f1ab4b994678150f418adbd8e6e37a7e86"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/creature_dialog_render.rs",
+      "bytes": 26565,
+      "sha256Raw": "295a5cf8f7c7d4a476afc5f5f570777762808383b15cc9a8f9a7c9aa0c9868eb"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/creature_dialog_tests.rs",
+      "bytes": 6764,
+      "sha256Raw": "27583b21b786a7ee8f85ee1a3161bb894e4f109456c1d2d82a898771029cec38"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/equipment_creature_frames.json",
+      "bytes": 42219,
+      "sha256Raw": "85f11ac54f47fd5a2fb9d036d5abfa3696b028335e70a214fe54907ebf1d6087"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/equipment_creature_host.rs",
+      "bytes": 25057,
+      "sha256Raw": "94a905bb9bfd24f08d97c1bd56a0a36313f83deffdcc01c4054176f42b3feed1"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/equipment_storage_tests.rs",
+      "bytes": 12537,
+      "sha256Raw": "a760e200a0a6024764c07ec8a13dadd95cd90aa67494a2779de86c5a5f628e77"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/friend_dialog.rs",
+      "bytes": 13089,
+      "sha256Raw": "77c0432500a103547d0d2034efd90b096cd0a160a10ca7725f6c86ced4e6f0e8"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/friend_dialog_host.rs",
+      "bytes": 26968,
+      "sha256Raw": "344502384864da33c8e29b022f1f7e0a59cfe0e022b660a2306a3f5541b5c05e"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/friend_dialog_render.rs",
+      "bytes": 18011,
+      "sha256Raw": "2733c461c37776fad8e802e41b351a8caa504a109283b05ddc0fc72c62b1266b"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/friend_dialog_tests.rs",
+      "bytes": 5785,
+      "sha256Raw": "079c90665f29881c932261d569f23daef7e96654473a818178fa2843fb34d015"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/friend_text_editor.rs",
+      "bytes": 10750,
+      "sha256Raw": "d883fb09df661f9ab197f6c444821d6ed5df88bd5be4e1530a4a69685dbfb28d"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/friend_text_editor_tests.rs",
+      "bytes": 4710,
+      "sha256Raw": "c8d037635dab159243428f95b1f6a5e7fc5b3d50e5d8443cc751ef80f0101c0d"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/game_shop_dialog.rs",
+      "bytes": 108493,
+      "sha256Raw": "346c4fdd9c5d2c56699cba2de4491ca98fc7e234a34f89bd00e9f27e610f1037"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/group_dialog.rs",
+      "bytes": 20025,
+      "sha256Raw": "b1f4e80020ff83ae59a24e658d3feda21ae8f52047a0f92f3f04251946f0e09f"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/guild_buff_dialog.rs",
+      "bytes": 7599,
+      "sha256Raw": "99525afbafb8affd057dc9752763386f7238895a0839de4f3ae6ed3bf8911a65"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/guild_buff_dialog_tests.rs",
+      "bytes": 5742,
+      "sha256Raw": "94198f0805ef0d67155ec489fc7aa7488987cfb9f730226b29fcfa2350d77e98"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/guild_panel.rs",
+      "bytes": 47440,
+      "sha256Raw": "21fa08d54452bdb2fbce25811e6c39c99adfbb8f9e3f9b0abc1d9ffa1acff7ca"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/guild_pixel_text.rs",
+      "bytes": 321,
+      "sha256Raw": "dd29832e9918e6ce9ba26f4e04443c134b54aa6bef009addee6509c9f3f1ab3d"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/guild_pixel_text_view.rs",
+      "bytes": 11512,
+      "sha256Raw": "0d5d809f5e426660f4a74aaed5594682e3404e4d30d644a7137a9625452d076f"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/guild_rank_flow_tests.rs",
+      "bytes": 12496,
+      "sha256Raw": "ddf3caec9e508ab80baa39f677d97a7ac6a1970dc667023728252fae3e5d7e2e"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/guild_storage.rs",
+      "bytes": 12243,
+      "sha256Raw": "2b9b27155a33db4e8058fa2e0b94d8caa5dadc815357ff9af9fc02cd5f3ec6a4"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/guild_storage_tests.rs",
+      "bytes": 41551,
+      "sha256Raw": "b76c722fa58f4bedf0cd57cb46bd09a1d6665686e8790bb5210617c6c8e4edce"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/hero_assign_dialog.rs",
+      "bytes": 9046,
+      "sha256Raw": "b4935dc36d12f48b563457149db579c668fde070e84e262c204b05556ea401d6"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/hero_buff_hud.rs",
+      "bytes": 9944,
+      "sha256Raw": "1bc4ad1314ccfecc06cce93142391d05d1449713020bcb37ec4e071b54361606"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/hero_buff_hud_tests.rs",
+      "bytes": 3994,
+      "sha256Raw": "501b39d47e14d8bad22f9442889a94e0b4ccb30f16930573b3af42683b367a66"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/hero_cross_inventory.rs",
+      "bytes": 10687,
+      "sha256Raw": "097c70a23a681f732ebd2ee21e9e697729b493d3c08f514b61e45524577e959f"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/hero_cross_inventory_tests.rs",
+      "bytes": 8158,
+      "sha256Raw": "2b0634dcd27a4a428fc250138a12c1d69b94a7a03a26638dfc76dc8a42339117"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/hero_dialog.rs",
+      "bytes": 17476,
+      "sha256Raw": "181713ba533c4eb92bb3be983a67b550e03236073f665143db18fcd64f72026b"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/hero_dialog_geometry.rs",
+      "bytes": 9172,
+      "sha256Raw": "0d16e2066edc2edaf633cfd10c9d7f46f50986125b1f31bb1419e5066fb3b0d6"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/hero_dialog_host.rs",
+      "bytes": 27238,
+      "sha256Raw": "ec972c2f53f6b4d4f690a3e39de954a91fdfdab8ea7fada95f3d9e8ce10ca9e0"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/hero_dialog_render.rs",
+      "bytes": 49289,
+      "sha256Raw": "c4c2a3d683553b2bd024bbf03ff0c58755808fed20f28be9609eb2666b8bfa3a"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/hero_item_use.rs",
+      "bytes": 7082,
+      "sha256Raw": "d42d750b7e7955cd0d3878cfad2824ae7cd3821753b6ce008760d3e0f096b31f"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/hero_item_use_tests.rs",
+      "bytes": 4446,
+      "sha256Raw": "466ed3dfa5176a5cda58dfa3fc7fad9f7da5a5f4ca2444eb311f9a9f82c92117"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/hero_pointer_settings.rs",
+      "bytes": 340,
+      "sha256Raw": "c1ff409f274b58ab5c80b93a5772f2f14fbd47cc83ef4770be9cb9d77193b3db"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/hud.rs",
+      "bytes": 80687,
+      "sha256Raw": "50492c2521f4ad63fe983e6228cc6e070e9b9932e2a64678145e8d09ee7727a3"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/hud_bar.rs",
+      "bytes": 1288,
+      "sha256Raw": "18850cad9b755d21a8805f3bde1c19938031053c1329795f6229cad6ba36a3c3"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/hud_item_image_tests.rs",
+      "bytes": 6725,
+      "sha256Raw": "be8f0f978d6d33f95ab1c7c98e0223d04047c488d0a7e565766daa5843f26293"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/hud_orb.rs",
+      "bytes": 8631,
+      "sha256Raw": "a1a05bede2bbffc408be649bd8b6ab7ab90cca3864b0cadca12c927142078703"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/hud_portable.rs",
+      "bytes": 7839,
+      "sha256Raw": "a2ba43a9c1a2a42a2967acff346049e742802bb7472824ed90faac4f6270cb46"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/item_image.rs",
+      "bytes": 13228,
+      "sha256Raw": "862fe97112959676346d06bfea9ae3f67e0ab451b619f81a5cd344490c630512"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/item_tooltip.rs",
+      "bytes": 21620,
+      "sha256Raw": "fbf1b5efab583c84e40f42d1f8ccef324dd80ba5a8a45945d9adce930cb7f6e1"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/keyboard_defaults.json",
+      "bytes": 17332,
+      "sha256Raw": "ebfd4f283523f658d33793f604e697a5c4e4b0430fc5d63586ec8597bf31d208"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/keyboard_dialog.rs",
+      "bytes": 14280,
+      "sha256Raw": "b1dc4b27efa32781eb47f0436691cac2824959038e01ee5923195cad9909c153"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/keyboard_dialog_host.rs",
+      "bytes": 31669,
+      "sha256Raw": "46f85f80a5303b50ed48fcf89aaa0cd5526cbe178aece1c262b56d9e92823bc9"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/keyboard_dialog_render.rs",
+      "bytes": 10199,
+      "sha256Raw": "454325de28cc47301c8e4fbd2e247d5e6ea7a354a699f1b1cebeac2f0e2cef05"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/keyboard_dialog_tests.rs",
+      "bytes": 7609,
+      "sha256Raw": "b2eba78cc674f4a039606bc1551d22ba20d895b73cd8a2aa571ffbf25edf3ebf"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/leave_game_dialog.rs",
+      "bytes": 6479,
+      "sha256Raw": "7e1d2d74ed1e53dc4636f125cff77ea908a7a76f28957feb2b5fe1d2ae41cead"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/leave_game_input_tests.rs",
+      "bytes": 2722,
+      "sha256Raw": "d43815d47d9c73bd678852e80f3be0ff828834648ac8c6fefcbf9d72761d1339"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/local_keyboard_ui.rs",
+      "bytes": 1936,
+      "sha256Raw": "f235a96e71ee6a873703e33879bd51c7cb7b35280f29d0ea9a132ed53da9e07e"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/localized_help.rs",
+      "bytes": 17246,
+      "sha256Raw": "1ddb8b3d1d4824631ac1b6caf2758e5e77baf407899469930b24f6d757adcc52"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/login.rs",
+      "bytes": 10806,
+      "sha256Raw": "aae7f2052cf6b1102b10f8a28d40ec27335ef8d0ba7f164dad37d9eb68b26235"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/mail_compose_drag.rs",
+      "bytes": 10036,
+      "sha256Raw": "d290c785f44667f361b60381e3d9c69bd94f298d42ad7448fb27392b343fe050"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/mail_compose_input_tests.rs",
+      "bytes": 4357,
+      "sha256Raw": "28a0295ff81adca550b2d5524df02e3deb94e79e9efcba70568138ccd9e8c6de"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/mail_compose_shared.rs",
+      "bytes": 50473,
+      "sha256Raw": "bf64bc8984f5b40f06861db6e769a733af5ca7ce8f8324add0189366c8d3154d"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/mail_compose_tests.rs",
+      "bytes": 31105,
+      "sha256Raw": "9382c8f1f37aec6ad3253f11b383d3a4b1630f8c0237e6e81ad190c2d15154f1"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/mail_delete_tests.rs",
+      "bytes": 14547,
+      "sha256Raw": "c257aba303f38700235fe4d07dd0aea94b2b3f37ba17e2e5d170d8d538f78a2d"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/mail_editor.rs",
+      "bytes": 40659,
+      "sha256Raw": "ad1052374004e28b344241c70610d3e087e442dca29cb2b325aaf4f70200381d"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/mail_editor_tests.rs",
+      "bytes": 80723,
+      "sha256Raw": "cfefe8e2d882982ceaea0326c6235ca8febf81d7ef3901d11ce3f8f632e5f64f"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/mail_feedback_tests.rs",
+      "bytes": 32759,
+      "sha256Raw": "c134b544b27abde4b7d4d154b2931fd9d169ec55bf5fd97c91110cf77ab1d586"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/mail_list.rs",
+      "bytes": 2647,
+      "sha256Raw": "8698469c3c7007438af3554e21defc9a6d3737790b2ffaf75aba8716048018f8"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/mail_page_shared.rs",
+      "bytes": 35779,
+      "sha256Raw": "f5654e67fd7a5da1d722ea8078789b5a604402d7fa7a222aca5c45386ddd7922"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/mail_parcel.rs",
+      "bytes": 24267,
+      "sha256Raw": "8c67c2b337d7b0d2dde8f895fe554c2dc63943a0ee9cf6da8c9044b5ce7ed7f2"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/mail_parcel_tests.rs",
+      "bytes": 43267,
+      "sha256Raw": "988b9672faa5d8609c8e1eee0faf57dd66a3c527c7eaa8c41b0dcbd0e558b667"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/mail_reader_drag.rs",
+      "bytes": 10205,
+      "sha256Raw": "97461fd55a379060f339acba8564e4075650623626a90612e74d0dead663ad3d"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/mail_reader_tests.rs",
+      "bytes": 19153,
+      "sha256Raw": "2793ce741de49f276294516ade0e06aca3a4678adfdbf5d2bf6f88811157fae6"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/mail_text_adapter.rs",
+      "bytes": 2564,
+      "sha256Raw": "fb497377a303ae874e64680ae1823b6077188992aec430dcdc4b1e09c2e97c85"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/mail_text_adapter_tests.rs",
+      "bytes": 3048,
+      "sha256Raw": "082000adf8d7d7ab762d1d3b8a85aa57cdee6371f79dc4420defcfdd64e5ff43"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/metrics.rs",
+      "bytes": 12932,
+      "sha256Raw": "257bed6875d9767837e344923a7d21faa956823dfbbe6b4a9ce08f13d01f9fe7"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/minimap.rs",
+      "bytes": 18097,
+      "sha256Raw": "ac54aee1debc3370d47498c6eb0748c4924a2f444e06a9662251f0c28561da14"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/mod.rs",
+      "bytes": 2739,
+      "sha256Raw": "3531c39cabbcb9d08d9f32a094f854934105e322e07d107171504842f0cf53a4"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/mount_fishing_dialog.rs",
+      "bytes": 16498,
+      "sha256Raw": "1147479afb553a8becd7f7f234e99e501cecb8ab23478abe80ed588fdaf9e6ef"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/mount_fishing_render.rs",
+      "bytes": 20511,
+      "sha256Raw": "28cec2945eaf0c166398f94ad74fb7235112af9898d64b9478c2f2374e91ad06"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/mount_fishing_tests.rs",
+      "bytes": 8152,
+      "sha256Raw": "57689fef43667dd00e2eb04a11309cde539a87d7182845dfb4fb57f316800016"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/native_i18n_game_visual_tests.rs",
+      "bytes": 28717,
+      "sha256Raw": "dc66fd18496f52bcbc413ec514826aee310160fe5c406bbd3a51f77743512170"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/nonmodal_input_tests.rs",
+      "bytes": 3585,
+      "sha256Raw": "7c287db57d50f8c0237bfe14192c6eebca809474de842314305d09acf19d64b1"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/notice.rs",
+      "bytes": 26053,
+      "sha256Raw": "63aa5f1398ffd1044197a346e8b21be471956d3ff7f2744353a9a444cc01e30c"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/npc_item_quote.rs",
+      "bytes": 10567,
+      "sha256Raw": "2db26253870a7ccf9a68a1faaf1e2276a8ceae3be4e10d658137372e03ad3c58"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/npc_item_service.rs",
+      "bytes": 42293,
+      "sha256Raw": "e34b95362a18b833e889c07bb0817794fd9bf28c0cb0a8e30590bc72a3f65d6e"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/npc_shop_layout_tests.rs",
+      "bytes": 32970,
+      "sha256Raw": "6e509446d6065678fe52bf4b67e54ce991f6316d9e855ddcf7da44a0f825153d"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/npc_shop_scroll.rs",
+      "bytes": 5470,
+      "sha256Raw": "b82866388894296627445cf881eff169c423ba9fde7f85b18140c8b7748a7fe5"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/npc_shop_scroll_tests.rs",
+      "bytes": 11766,
+      "sha256Raw": "3137061bf4ef23d5a9c4e5a10a78ae790ce21da7d5bb3ba9a39625764e9de09b"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/options_volume.rs",
+      "bytes": 7166,
+      "sha256Raw": "f094a7d5dc436b5340b4a635e819799f5c2d72da3a110f185713d8d862fbc2b8"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/options_volume_tests.rs",
+      "bytes": 14497,
+      "sha256Raw": "b9f62345e1b945d31c457bb71e6cb7f1272fd0afee937244a6f302ab09b9eec7"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/overlays.rs",
+      "bytes": 941812,
+      "sha256Raw": "a729be318799ded8ae4c08e222a77b350a15ed444ae1d46ebf36fea9a1064e25"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/overlays_portable.rs",
+      "bytes": 2079,
+      "sha256Raw": "d1ba70ba2b6ad8a4c7ff13f43ae516d2dea271c35aa6f03f89c1aa2066b75ca4"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/panel_layouts.rs",
+      "bytes": 67126,
+      "sha256Raw": "d6436a807c81b42525aa7e74b6bb6288819ed8bf4db9cdda914e2ad58a264fd8"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/panel_navigation.rs",
+      "bytes": 2772,
+      "sha256Raw": "6e003eba04b7f2b24639b20f1e2731f8d7b6658f25071235b7d1df1f9a7e7a2a"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/player_inspect.rs",
+      "bytes": 15329,
+      "sha256Raw": "c2c56972872c9d1b9ec1dc1daec2c01138c2a3d02fce7c2565cf25b5b8e1f068"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/preview_data.rs",
+      "bytes": 13051,
+      "sha256Raw": "12a98e580bfbd8cf6ad47f083ad7c5977f857a6d71e0d82e238780c833560a05"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/primary_item_image_tests.rs",
+      "bytes": 17405,
+      "sha256Raw": "f4d289d829c81d30d111ba739e1898c60c8bdfa8f1bd957a01b5de31adc2fe29"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/quest_targets.rs",
+      "bytes": 10456,
+      "sha256Raw": "d88f3537ac65f3326f8d0dc139ce792f61196cb2f8b88e79e86d254c1192286a"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/ranking_dialog.rs",
+      "bytes": 25421,
+      "sha256Raw": "5ed3faf76346d436fc3c19332cf85e26cc90d8a4885be20167d190b912c067c2"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/ranking_dialog_tests.rs",
+      "bytes": 8271,
+      "sha256Raw": "a42c830afd707be17129704d822c75efeb5c30d1b8ac414b0db12e3ee4a97f52"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/refine_dialog.rs",
+      "bytes": 25704,
+      "sha256Raw": "e8957cb457eaa81f6298e4af1bdb9291ecb04467d7b66b7d37a5e71e2de93701"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/refine_dialog_host.rs",
+      "bytes": 18385,
+      "sha256Raw": "e77b5fcb1f896db363547ae13d06ca0dbd67ba898a4eee64acbc5a4ae9e6279c"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/refine_dialog_render.rs",
+      "bytes": 9047,
+      "sha256Raw": "f04807acc2f8561c3018afd699a3523d4ca58883a546c88b5ceeeed119a174f8"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/refine_dialog_tests.rs",
+      "bytes": 20187,
+      "sha256Raw": "8494d04b0649ccf6b5783a64c8ba33a808a7200ecda66a542c704d76ebea2a7b"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/select.rs",
+      "bytes": 31119,
+      "sha256Raw": "04de010a5c45c3979b7f8a2c6933bab1517ae19d92abb2d28da4fd5d2b8cee58"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/shared_hud.rs",
+      "bytes": 16596,
+      "sha256Raw": "3e6fcdc241efdec0f8c1bdae402957b036e2651a30415fe496ccdd605217dee5"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/shop_paint.rs",
+      "bytes": 19984,
+      "sha256Raw": "b7279b5d15b7c27960afeddf8ece13b37cb58c795817f74edeec3170b63c85d6"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/shop_paint_tests.rs",
+      "bytes": 20132,
+      "sha256Raw": "f7fa79ca12c24e60caf46d75f07b5dcc9a3c084ca7dfa2c373021d11ae4f059c"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/skill_assign_dialog.rs",
+      "bytes": 12882,
+      "sha256Raw": "45fd18a4889b65aa3c23981857e06310fb28a632c489d7b85ec1b4e41dc8cff6"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/skill_bars.rs",
+      "bytes": 12301,
+      "sha256Raw": "fd7f640af6bbdf24b1d803998de73fcbd7b8a1b625ab788457450de76de569c8"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/skill_bars_host.rs",
+      "bytes": 11928,
+      "sha256Raw": "d912d6f010be68dcc94cc88186199b03610db3125d20d341323168989753c242"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/skill_page.rs",
+      "bytes": 5794,
+      "sha256Raw": "83ccd86855a2295db400773516b9cc18568bf64794178b5c1206b8f0f82987b5"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/skill_page_shared.rs",
+      "bytes": 13960,
+      "sha256Raw": "eb12640795fdd126ab5a2f86ae9fdf4bc1dbf2ab435cf3b1d7314fdf95502c71"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/skill_page_shared_tests.rs",
+      "bytes": 3894,
+      "sha256Raw": "d4557b8a4f360a891251fcd32f0cbe6bafd2951494345abfd0781213edab086d"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/social_bond_dialog.rs",
+      "bytes": 27025,
+      "sha256Raw": "bd558f66051fca453081e37f1e806f9f5a910e0cf658b63854bfd9f22e533e15"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/social_bond_dialog_host.rs",
+      "bytes": 14671,
+      "sha256Raw": "bf8bd1a8d9074c9fb480b81227762d257dfaf73cc271526b9a1b42bb7caed23b"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/social_bond_dialog_render.rs",
+      "bytes": 12560,
+      "sha256Raw": "4d05faf4fd648cf266a8acd4d07e931f5816f3e5600b22f1c2330f0972ee48ec"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/social_bond_dialog_tests.rs",
+      "bytes": 15049,
+      "sha256Raw": "90bc64734e7c75dcce9b6a59962b80a7938cf188a604d5bf1932d8bcf8fedff0"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/spec.rs",
+      "bytes": 17307,
+      "sha256Raw": "f82abfcc3f4b222224027c4004b0441273caf771f150ea8002e57f8bfc336b55"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/status_hud.rs",
+      "bytes": 27576,
+      "sha256Raw": "f2821907c77c95818a89d854a40bcf373b64bbb4a5a1333f079a7fb24e5ca712"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/status_hud_source.json",
+      "bytes": 30967,
+      "sha256Raw": "474897b243e24fe81762af9cb208fa131f4f2a1f4741028f7c7063c2a7fbb0c3"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/status_hud_tests.rs",
+      "bytes": 8556,
+      "sha256Raw": "98c4ddd5528254bdbb78f396b0614b68090382812cf108548d345d1e7536b148"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/storage_drag_tests.rs",
+      "bytes": 21739,
+      "sha256Raw": "0f23cc4588fd8f25a60055cb5e27edc8670b4d463ee76bfc7531abae2852e695"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/storage_paint.rs",
+      "bytes": 19305,
+      "sha256Raw": "7dd88df1cc9ac8a3b62dbbee34a1eff5540378e1015d0353137f5a1528819b72"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/storage_paint_tests.rs",
+      "bytes": 13844,
+      "sha256Raw": "b8d0241d2767f6b249da8304d06dc948c82b2c8d4860e4a07ec0d03996ded788"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/storage_password.rs",
+      "bytes": 5393,
+      "sha256Raw": "e0988f17e76dd152696f95a6b37802d61ae3225dd4e192fba4de2cebc2a1e6ac"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/storage_password_tests.rs",
+      "bytes": 13096,
+      "sha256Raw": "8ee77fe06ff6035d54fe86a914588291a520daa814b7a19a282ebbc27063a516"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/storage_rental_tests.rs",
+      "bytes": 9425,
+      "sha256Raw": "1ea8bd836c3a45a67a009022bc6b616fa2a01d43f3694a754e975b96c6957855"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/text_input.rs",
+      "bytes": 15925,
+      "sha256Raw": "121465dc0fba7e27fe75bfa5dc1abb54b356c910774d9d1190116cf6bf950393"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/text_input_tests.rs",
+      "bytes": 14224,
+      "sha256Raw": "0d41b9e146db66d37a4147348873a2833b763f4d396f1f4805e0e5de91712335"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/trade_dialog.rs",
+      "bytes": 26798,
+      "sha256Raw": "d2e9fab18f2c07d848b6fba0cd2ea2b7216f7e3734d2ddc512af9452feec2a3d"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/trade_dialog_tests.rs",
+      "bytes": 33158,
+      "sha256Raw": "57088e60edf1c18a24b44b6c4b683f11302f30e5eb70ddb253653b909e0de5f7"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/trade_item_input.rs",
+      "bytes": 17157,
+      "sha256Raw": "d3022d83e31e199decccabc24db4601cf4560c8276663dc92a54a1e3a3326d98"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/trade_item_tests.rs",
+      "bytes": 28376,
+      "sha256Raw": "093ec8546f3d4a7a531811648725ac3ab2d8cba696964fb69f3d5515220b35a1"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/typography.rs",
+      "bytes": 1705,
+      "sha256Raw": "012f631ab075ba0889cfec059076025c797935882fd1332a83cfaa5f8cc6aa1d"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/widget.rs",
+      "bytes": 81120,
+      "sha256Raw": "89ec9c6f5f622ee5586e1c2084e85c3e6d3d41f5e5c111ef751f8f369deca8aa"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/entities.rs",
+      "bytes": 9192,
+      "sha256Raw": "da2c85d305d97ad03dadef22f7eb4211ec69ec4948abe4a43d91a079e694cd2c"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/game_shop.rs",
+      "bytes": 28797,
+      "sha256Raw": "83eec3c71d0cb53de483deacb42af69ba00e352f53cf8ae901055ca0dc94a03a"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/graduation_tests.rs",
+      "bytes": 3493,
+      "sha256Raw": "90ed22b17ffef2a68099cda3b0985e369984a31c4dd69701547c486f046d7a5c"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/hero_action_basis.rs",
+      "bytes": 42327,
+      "sha256Raw": "01e7d466de1c6cb32467cfe8405254e9df6a71371ee5222191a1db7592b2481b"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/hero_ingress.rs",
+      "bytes": 94874,
+      "sha256Raw": "64a6c051e8643af6122804138dcf91c2b588ecd1b4fdafcfbda2638ac0bdf45e"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/hero_model.rs",
+      "bytes": 63462,
+      "sha256Raw": "6548c6363a33cc56e9b4bd49f852ec016fcc4ae98a0b71b0e640fee8ba725b1b"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/hero_source_witness.rs",
+      "bytes": 26034,
+      "sha256Raw": "b049b2532fad43150fc6d96804247700ff6102dc45d008ef7ced9eb2aae9cae8"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/hud.rs",
+      "bytes": 6225,
+      "sha256Raw": "b23c5f5b19b4b02b5aec27cb8f4b1440d8a9822748a69e91500933cab41704a9"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/inventory.rs",
+      "bytes": 32305,
+      "sha256Raw": "80becbf9826855c02c6f39a0b289b87ba37c3112a498b3908d750ae8a065e62a"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/lib.rs",
+      "bytes": 5495,
+      "sha256Raw": "d140d25426d427feb20b9221ea40b5242f2fecd5003f218fcb1082c76733977d"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/mail.rs",
+      "bytes": 39789,
+      "sha256Raw": "92a1fc76d42d57b961a670482d58d7495b41f7fba7129b1efd409f0523c047e9"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/mail_service.rs",
+      "bytes": 24889,
+      "sha256Raw": "175df3b99471b7925709c1bfe9bca1120ecce029998478e31a11b840efd06e2d"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/map.rs",
+      "bytes": 10934,
+      "sha256Raw": "7613359832b2cb3985d58528ac97599112ed6891e51435f13defda8678a0eb51"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/native_billing.rs",
+      "bytes": 94334,
+      "sha256Raw": "ba31b81b092cf01e6c57b50231e268b6b3490d14933aa9db2945d5f3561cf4b9"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/native_display.rs",
+      "bytes": 42665,
+      "sha256Raw": "46631d5454a6e90a7a974c7a7fe94823a50f39af7245b84d00554b2312573641"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/native_i18n.rs",
+      "bytes": 104034,
+      "sha256Raw": "40f3f61411f7fc6c7c7bda6c95d4d7b6758fb51296e7c8a25badca12bef0b3bd"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/native_i18n_visual_tests.rs",
+      "bytes": 77371,
+      "sha256Raw": "0997239a945b8b2c67011320f5d3f0d1418667a9ccbe99e8bd1bce94e4f19b32"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/native_monthly_card.rs",
+      "bytes": 7961,
+      "sha256Raw": "801752573883f21348b6a4ac4585d3a8413a07989ee154b2d5a4b1191a4097b2"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/native_procurement.rs",
+      "bytes": 77918,
+      "sha256Raw": "da7f74d62ba2076f4de4dd89d8ec6246972ea664b65b90a6d4b713af7456e63c"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/native_shell.rs",
+      "bytes": 91185,
+      "sha256Raw": "29e53b8bca747e9af53a146d5ef040ea59b13ec1edd2940e892ce50f5ef09ae8"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/native_shell_preview_visual_tests.rs",
+      "bytes": 22855,
+      "sha256Raw": "bdc2b4b6ad85ab55bd09a351f15bc7919995d549acc3a98d059d883ca36782fa"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/native_shell_ui.rs",
+      "bytes": 140967,
+      "sha256Raw": "40408db14a24f58179fea420ec8805a388e29c7f9a30e0d72ed8a4d4f3d46126"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/newcomer_v2_guidance_tests.rs",
+      "bytes": 5508,
+      "sha256Raw": "d770d6ef22ef0af72df9c8a6dc093c991f1be3e69926a177c753d9befacfe1ea"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/npc_gold_buy_attempt.rs",
+      "bytes": 25208,
+      "sha256Raw": "5c569f253d105855abbcfd0a3090731cd61619bfd185280144387293be812505"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/npc_shop_buy.rs",
+      "bytes": 21052,
+      "sha256Raw": "d5a2282bda80cb464d9e2581429578c7f32154b2909a868cd8e7b7f4899b1605"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/npc_shop_buy_tests.rs",
+      "bytes": 33552,
+      "sha256Raw": "a2caee299b79e563c804eedc4f383d62cb3fa9232ce6420b707fa9404bb231e4"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/npc_shop_ui.rs",
+      "bytes": 21896,
+      "sha256Raw": "e1f6d14f632699a45a0a12a8e6105843ea159b37f0103ed91e260b416d3b0bd5"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/npc_shop_ui_tests.rs",
+      "bytes": 22767,
+      "sha256Raw": "cc59fcd3a0c8ea4a19ba17ad6c80350bc02931398dfe21162a8d8a8365d0746e"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/options_effects.rs",
+      "bytes": 28290,
+      "sha256Raw": "d086e5faa0c6e20a659da1fe5b35636a374021135d97ea84300b9279a8901a7a"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/pending_operations.rs",
+      "bytes": 128759,
+      "sha256Raw": "b5c387017ba34ec2a1c291c9306d9f4eeb6836f3c171a96b7bc03cc3e721bfbb"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/periodic_quest_ui_tests.rs",
+      "bytes": 50289,
+      "sha256Raw": "18d5ef6b60c464c7f571fe5f13abadedc4aa437706ce743c666ca55927458b85"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/player_text.rs",
+      "bytes": 40697,
+      "sha256Raw": "0c34c9c9cdc1522c6a763fe1b2ab41ef801c531b0b3821bbcc6310f0c585874c"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/portable_bag_ui.rs",
+      "bytes": 160675,
+      "sha256Raw": "2a1ebdc268ec1f74d3ef0ab0d5fc66e64782dd62dc3e2320e9a6cb2f4591675a"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/portable_character_ui.rs",
+      "bytes": 19402,
+      "sha256Raw": "ff1dff6df4cb8d624b0c82817f89fabac9965bdac2f54a6616cce8181af6b62f"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/portable_character_ui_tests.rs",
+      "bytes": 6521,
+      "sha256Raw": "e02a7386e939a1196224848dc69cde6bbbdf50532a3346867f1f702639c607fe"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/portable_experience_bar_ui.rs",
+      "bytes": 18563,
+      "sha256Raw": "6e835c5d6bcb62db12204888014dfcdfa55db2687825f28e23386fe06ebe6796"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/portable_hero_ui.rs",
+      "bytes": 69892,
+      "sha256Raw": "75ed32984741c914d4ad62f81fbfe2663346846803719471f0332e3dae3423b3"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/portable_hp_orb_ui.rs",
+      "bytes": 60674,
+      "sha256Raw": "322e9c46e31108cd588f525a218ec2251a7cae347a6faebc85409cbe1c1f9c04"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/portable_hud_bar_draw_plan.rs",
+      "bytes": 12781,
+      "sha256Raw": "8f7ef2a307289e479a3696e79e25c05ce6022e44be4da075fff54f6d7d893d2a"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/portable_mail_ui.rs",
+      "bytes": 44407,
+      "sha256Raw": "1b86007446fe9268b1e38050af39572cba864c0ce7a443e877a4c40fd3266b28"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/portable_npc_shop_ui.rs",
+      "bytes": 49522,
+      "sha256Raw": "6112790ba0b9a57fb529fbbf85d25dd20c3d8b98a63884a9098267badb42c5a1"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/portable_npc_shop_ui_tests.rs",
+      "bytes": 40594,
+      "sha256Raw": "15e83bc402a5a359116f283c48d1d4f7220ed6f916cd7b6249215f264356b09b"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/portable_quest_ui.rs",
+      "bytes": 52202,
+      "sha256Raw": "7de7b68db57bc9863c62ef65ab6e1b31bb931fe2cbb5a8df15169845c023eee3"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/portable_spells_ui.rs",
+      "bytes": 15429,
+      "sha256Raw": "c858933be07fe1f994d2248ed3a5cf642ea421bae167efa67c51e484d172673a"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/portable_spells_ui_tests.rs",
+      "bytes": 8110,
+      "sha256Raw": "f470b9a430d1ad1e25c960bf6ad958c0cad09ccd56705111138b74983501af0b"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/portable_storage_ui.rs",
+      "bytes": 82948,
+      "sha256Raw": "534d968d44541499d3abbe706d36b6bdfe9b54a6027817d6795ad0dd8d6d29bd"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/portable_weight_bar_ui.rs",
+      "bytes": 17598,
+      "sha256Raw": "700a492ee2e8de661aa2026f66a71fe19a8d1973db396b75e79f10c7f7444c02"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/quest_destination.rs",
+      "bytes": 5337,
+      "sha256Raw": "4022b78804cbcb65793879e423049fb26634df00008811b3e96019fd4443d08d"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/quest_guidance.rs",
+      "bytes": 5675,
+      "sha256Raw": "202a7faa12f0d2e635512570fb05616ee29900275f0d0f9341e758745b787c2c"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/quest_hunt_regions.rs",
+      "bytes": 12090,
+      "sha256Raw": "8858e395268dd5cdf70655984ae44c164ac16a637d9b9e87efc9bff2d962e161"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/quest_intents.rs",
+      "bytes": 7511,
+      "sha256Raw": "ed0efd24c4202aa12d34a7ba9d7a75fe354e3c69311398ef859cc58a3741d57f"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/quest_journey.rs",
+      "bytes": 37931,
+      "sha256Raw": "d02a13f5e0d9d1e452dabb71fa24d77a0f7a26193648d29c0fb729ba5b917d6f"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/quest_model.rs",
+      "bytes": 32330,
+      "sha256Raw": "3d99a0b1d67615d08c0281e5eca180eee9e16462fc368d77a0996e44511b0798"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/quest_multi_guidance.rs",
+      "bytes": 71260,
+      "sha256Raw": "e821795297de0ed6cce3eeae9c4e15bf162c8e0942253552582bd60912550c97"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/quest_multilingual_visual_tests.rs",
+      "bytes": 26828,
+      "sha256Raw": "5b0e4dad5b079f72b3f153e33b1c17405f5aa856c933d0cba81304433d2aee0b"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/quest_nonmodal_input_tests.rs",
+      "bytes": 10293,
+      "sha256Raw": "d2ad9c40d84983faddee466363b1670255d0a7d2f84634e3df2c2860db345f25"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/quest_practice.rs",
+      "bytes": 26356,
+      "sha256Raw": "79d084e604e3ab9aa2bf86f6d1ccd5a52c1e9b6dfc3bcfc4229e0c03ca09157f"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/quest_presentation_text.rs",
+      "bytes": 4753,
+      "sha256Raw": "a4173aceda4c23a25284480e90901ad48f48d832aed01f6e63bc52a28c1e1f49"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/quest_route.rs",
+      "bytes": 6565,
+      "sha256Raw": "b4876ec4b953d9e899ad45626585d37f2e3cb6242ef939c8fa9ccf484f30fb39"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/quest_route_search.rs",
+      "bytes": 292,
+      "sha256Raw": "879b0634c0a76d4f88a0dff03da3103f81e556b49b8a06c28ff8a9e9a58dca45"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/quest_supplies.rs",
+      "bytes": 36692,
+      "sha256Raw": "38281dc11669fedef7904d08c6057a64b7f2bfce429e6e1a9f27652b32ecabaf"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/quest_supplies_fiveclass_tests.rs",
+      "bytes": 17282,
+      "sha256Raw": "60d55027337424f1ca81ce3ca27cfad7a032cbf108df393e1623f51dfa856aa3"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/quest_supply_visual_tests.rs",
+      "bytes": 19286,
+      "sha256Raw": "345fde2e267f781f8a16f063150d38544711783e43a252a038fa221d7fb2a659"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/quest_turn_in.rs",
+      "bytes": 22953,
+      "sha256Raw": "bcccb7f6b4e1148cb7199d12cdc18eccd44f64d9ac3a31f892e29046cdb45f02"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/quest_ui.rs",
+      "bytes": 609490,
+      "sha256Raw": "dfd90e23e60e0d99a69e981e5497fa56464026cf1f7fd5a39c2ce13c7d66933a"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/read_model.rs",
+      "bytes": 11721,
+      "sha256Raw": "f570ee71ed883051062e385a745eb6b00dfc6973136878cc50c2b519af7a1373"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/shop.rs",
+      "bytes": 23584,
+      "sha256Raw": "4766ee8c2b7afc4abe18cd80c7b5b0928c90559179984c1e57db331b180731e8"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/skill_binding_persistence.rs",
+      "bytes": 16414,
+      "sha256Raw": "ee7edd097d1f2208a6a746a1d1c84bcaa096d02a5008411734dd3122bba27357"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/skill_binding_ui.rs",
+      "bytes": 21495,
+      "sha256Raw": "5d73ec6765b3df04ad357686d6abe2d10910e0e3cad628d5dd7ce4156322bbd5"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/skill_model.rs",
+      "bytes": 33184,
+      "sha256Raw": "5fa5f240863db2cc5664ffd0907f652c82eebf0d9277319c6f93f16cf0439c02"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/skill_page_state.rs",
+      "bytes": 15771,
+      "sha256Raw": "e3b8de1d31507bb34e6bf37d3765d8a778f33980956e2dcd7bd59f3f0e142b3a"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/skill_page_state_tests.rs",
+      "bytes": 10024,
+      "sha256Raw": "68b5ec253f88d5d4deac53c7c3e43a94a60f661bff1267921a8af6f3b0991548"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/social.rs",
+      "bytes": 85598,
+      "sha256Raw": "f2770f4e3fe99fe64ca3d2dc98b8372dbc6ae51f5c88844b4d6f220d2d25566a"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/social_guild_rank_tests.rs",
+      "bytes": 7237,
+      "sha256Raw": "72ebf67e41020b1f9a8800fe4e36a036f939762d3835ddbf46d32c77c4f8bbdd"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/social_trade_tests.rs",
+      "bytes": 10477,
+      "sha256Raw": "5ad3148fda7f25ea47b1754ebcbfdad9c8fb5b54ba7106bd550ecf2fc6b832c6"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/stone_workshop_ui.rs",
+      "bytes": 11240,
+      "sha256Raw": "2efbfb76ff0eab1feabbc75cf29ecc5d040c6ba1f9af2dd68b8a4eeaef9c498d"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/storage.rs",
+      "bytes": 22005,
+      "sha256Raw": "927c0771967aab045b87242e02af13c6683feeff5582c397f413c0b227effc9b"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/storage_interaction.rs",
+      "bytes": 22116,
+      "sha256Raw": "7980643295198bfa1ff356a42b8a999ceaa2faadf0b8823c367a1390ed2cfc8e"
+    },
+    {
+      "path": "apps/game-client/client-bevy/test-fixtures/original-item-true-sizes.json",
+      "bytes": 24107,
+      "sha256Raw": "a36ff048c8cd50628f40c9f7613ea63c3a65b59a58c6eec894ba7d0925df70e2"
+    },
+    {
+      "path": "apps/game-client/client-core/Cargo.lock",
+      "bytes": 167,
+      "sha256Raw": "55d34e3a9050a26360e9fb635a52c248752efc9557b1339bf9ce9afc94e6d8a8"
+    },
+    {
+      "path": "apps/game-client/client-core/Cargo.toml",
+      "bytes": 390,
+      "sha256Raw": "ecc48174c912f769b5974fe27e428de84e730d489129c2f5fdc27ea38800eb4a"
+    },
+    {
+      "path": "apps/game-client/client-core/src/auth_ui.rs",
+      "bytes": 16086,
+      "sha256Raw": "9d7f29434331114d65327b3e363a7fa6722a35a4f9842c860dfee59b68946d69"
+    },
+    {
+      "path": "apps/game-client/client-core/src/cash_preview.rs",
+      "bytes": 6740,
+      "sha256Raw": "5e5d07ccf650f92413379d68536670280cda32e1ed04b6f141ec05ef6bd6e8fd"
+    },
+    {
+      "path": "apps/game-client/client-core/src/chat_ui.rs",
+      "bytes": 13191,
+      "sha256Raw": "5fc58219341418a8c663497a4a1a0441163a130214f06fd3792b9bf1b6307168"
+    },
+    {
+      "path": "apps/game-client/client-core/src/clock.rs",
+      "bytes": 1543,
+      "sha256Raw": "5a972dba7de1aab6092cedb654939c54f5a5a7493e99809057ad93995c1eabd5"
+    },
+    {
+      "path": "apps/game-client/client-core/src/entity_animation.rs",
+      "bytes": 81097,
+      "sha256Raw": "997036024ff06ab5ff4510a94952c54cf7218657ec13053bd4ada386a6f4328f"
+    },
+    {
+      "path": "apps/game-client/client-core/src/equipment_pending.rs",
+      "bytes": 13569,
+      "sha256Raw": "b7bbaeb24d61a1b74973f77b91f5240e38555291cdc5aee717272355cfff2b3a"
+    },
+    {
+      "path": "apps/game-client/client-core/src/fishing_click.rs",
+      "bytes": 17227,
+      "sha256Raw": "479c34270b538e773b31ebacf71d81d950211435ab3fd779c63daa0a4c08ccd7"
+    },
+    {
+      "path": "apps/game-client/client-core/src/intent.rs",
+      "bytes": 8213,
+      "sha256Raw": "b2d24c18624cf6359eac00387805d99fd75d75ea45ba759ff2f07b2b95fcfdd2"
+    },
+    {
+      "path": "apps/game-client/client-core/src/interpolation.rs",
+      "bytes": 3723,
+      "sha256Raw": "919b78ff7663066713c74c53af5be2483a8c06660c1fe8d45ab4fd9500ac7753"
+    },
+    {
+      "path": "apps/game-client/client-core/src/item_names.rs",
+      "bytes": 11191,
+      "sha256Raw": "43e8479124e6ab6adfbaada3b214a088710de7b2f49d8d369a8b2e2eda2ad330"
+    },
+    {
+      "path": "apps/game-client/client-core/src/item_tooltip.rs",
+      "bytes": 81121,
+      "sha256Raw": "0496131e32d2536b7330bf487dd4f68f7a4af10b8f1107161e27356dc81a9a04"
+    },
+    {
+      "path": "apps/game-client/client-core/src/item_tooltip_types.rs",
+      "bytes": 5441,
+      "sha256Raw": "046a7d721dda11ed62c0ac579a9772ad37732e510c3131cb333e5581833b1963"
+    },
+    {
+      "path": "apps/game-client/client-core/src/lib.rs",
+      "bytes": 871,
+      "sha256Raw": "10202f0bd4db1008ff07cc86c06e2c1cc96d07acc4b86fea5c54d778c31ebdd3"
+    },
+    {
+      "path": "apps/game-client/client-core/src/mail_compose.rs",
+      "bytes": 12287,
+      "sha256Raw": "ca4cd917da422f623132d261384cca07a48ab046ec3c321021d339a1fce9cc31"
+    },
+    {
+      "path": "apps/game-client/client-core/src/mail_parcel.rs",
+      "bytes": 23865,
+      "sha256Raw": "5e40c7c2ed652c5dbf8d5bee79cd3fa10ceefe2282187d6a7eb76d0f7f1c4d25"
+    },
+    {
+      "path": "apps/game-client/client-core/src/map_route.rs",
+      "bytes": 7444,
+      "sha256Raw": "96654530f2d8e76ad654ff582cc96d9ee915a5399e26a6312c5a33cda8f3a6b6"
+    },
+    {
+      "path": "apps/game-client/client-core/src/motion.rs",
+      "bytes": 2181,
+      "sha256Raw": "ad5d6bef1ef144ea6173f36ef5d89ea54c51954c00629fec46e7e1450d7c9d66"
+    },
+    {
+      "path": "apps/game-client/client-core/src/npc_gold_buy_attempt.rs",
+      "bytes": 15443,
+      "sha256Raw": "6edd4bd07153a940f68bdb465eb0ee923e5216908506437b22ccf4df64d74025"
+    },
+    {
+      "path": "apps/game-client/client-core/src/npc_gold_buy_attempt_tests.rs",
+      "bytes": 18978,
+      "sha256Raw": "906ebdbc2aca2520a5524f4207c679ef6a0f8343a9315e587222b78cff7db173"
+    },
+    {
+      "path": "apps/game-client/client-core/src/npc_pearl_buy.rs",
+      "bytes": 9165,
+      "sha256Raw": "26df6d94035049ded08ddac24b224938da614f23457fb961cb404a7ea88c92a7"
+    },
+    {
+      "path": "apps/game-client/client-core/src/npc_purchase_host.rs",
+      "bytes": 30993,
+      "sha256Raw": "18fe6cc5266ab9ed0c5b1a6820dd045209b2db7ca4a4ff991ae4966d16a3f4dc"
+    },
+    {
+      "path": "apps/game-client/client-core/src/npc_purchase_receipt.rs",
+      "bytes": 44207,
+      "sha256Raw": "90a81047017581290ca23d0c6bd42264b59461954052f133f394d86a22c59dee"
+    },
+    {
+      "path": "apps/game-client/client-core/src/npc_repair_quote.rs",
+      "bytes": 8805,
+      "sha256Raw": "18bc85d3ffece369c8bb1a84ff9b76234b5246806108b390bf9d8487d0715f10"
+    },
+    {
+      "path": "apps/game-client/client-core/src/ordered_map.rs",
+      "bytes": 11975,
+      "sha256Raw": "a8d80e3a02cc43748565749fbf604baf8b3475780b2aa96ad745151534786732"
+    },
+    {
+      "path": "apps/game-client/client-core/src/quest.rs",
+      "bytes": 11249,
+      "sha256Raw": "99d9edff9b59c644e83d822945d7c3c577786397e738172a50246f10baca42c6"
+    },
+    {
+      "path": "apps/game-client/client-core/src/ranking_inspect.rs",
+      "bytes": 5242,
+      "sha256Raw": "21d25b988e34ddb4cf2e5d4dba405cc8474dcc2a0ce0471609667e8758c77cd6"
+    },
+    {
+      "path": "apps/game-client/client-core/src/reconciliation.rs",
+      "bytes": 3579,
+      "sha256Raw": "f91301ab67276f825d684a95d51a7031799b597a2e1a2a71c455104e6bb37867"
+    },
+    {
+      "path": "apps/game-client/client-wire/Cargo.lock",
+      "bytes": 2786,
+      "sha256Raw": "f1ea96a1afa008b565a1ee481ed4caa2c396b73bac80d68015dbe0fc7802d750"
+    },
+    {
+      "path": "apps/game-client/client-wire/Cargo.toml",
+      "bytes": 364,
+      "sha256Raw": "38a3ac4cc26de4d18c51c36026e84383c1c4ccc88dd31b725385cebd5651588e"
+    },
+    {
+      "path": "apps/game-client/client-wire/src/lib.rs",
+      "bytes": 129819,
+      "sha256Raw": "a15864a99067b15e0d3cdf507120e22ac9153da8e20adbf88506a67d8a38a19c"
+    },
+    {
+      "path": "apps/game-client/crystal-gdi-text/Cargo.toml",
+      "bytes": 222,
+      "sha256Raw": "930a5f79d2775411ca615959bd19a078c1ea4cd615c1004e21f578ad13c4a4f1"
+    },
+    {
+      "path": "apps/game-client/crystal-gdi-text/src/lib.rs",
+      "bytes": 19976,
+      "sha256Raw": "2a81b5043c88caf991fcda131a2906ee325441a26059973ae1ee350addb18710"
+    },
+    {
+      "path": "apps/game-client/platform-windows/assets/fonts/.gitattributes",
+      "bytes": 273,
+      "sha256Raw": "38e0c15773e39288906749fed93e1664144478701b71f6031795f04374379314"
+    },
+    {
+      "path": "apps/game-client/platform-windows/assets/fonts/billing-han-source/METADATA.pb",
+      "bytes": 1296,
+      "sha256Raw": "c6c4bdb785793b2de1da177caeeffcd0c90d7680bdab2de8f88ab45007bc59bc"
+    },
+    {
+      "path": "apps/game-client/platform-windows/assets/fonts/billing-han-source/NotoSansSC-Text400.eot",
+      "bytes": 2660,
+      "sha256Raw": "0ca2976cbf7b560ca3a5f565b40b9f17fa648b0966cece2b08a1e39cad4b9917"
+    },
+    {
+      "path": "apps/game-client/platform-windows/assets/fonts/BILLING-HAN-SOURCE.json",
+      "bytes": 3786,
+      "sha256Raw": "d3cd4b2451d73890d465009e0ea7b27940e7c5f285355bdfd48da131de6dec7d"
+    },
+    {
+      "path": "apps/game-client/platform-windows/assets/fonts/generate-billing-han.py",
+      "bytes": 4464,
+      "sha256Raw": "fb3801d4748d15d81826b4db87287deb9d16a408fbe76c0f296785e12221edce"
+    },
+    {
+      "path": "apps/game-client/platform-windows/assets/fonts/MIR2BillingHan-Regular.ttf",
+      "bytes": 2532,
+      "sha256Raw": "7cc4d33730ae409a198cae325f57db54730f94b193f5d604375701890bb762ce"
+    },
+    {
+      "path": "apps/game-client/platform-windows/assets/fonts/MULTILINGUAL-SOURCES.json",
+      "bytes": 8618,
+      "sha256Raw": "1528b614dedb07860e22ac2e1cf62528b0ed126230657dc008fb88d2f01f6d11"
+    },
+    {
+      "path": "apps/game-client/platform-windows/assets/fonts/NotoSans-Bold.ttf",
+      "bytes": 631484,
+      "sha256Raw": "1df075a380fc7cb898acf64c1f7b3b4dd780de3caa860178bf929de35817a913"
+    },
+    {
+      "path": "apps/game-client/platform-windows/assets/fonts/NotoSans-Regular.ttf",
+      "bytes": 621572,
+      "sha256Raw": "478c558ea716033cd60c03438f628dfa75694dcf6b5f6d505a2f05fd2b4f3823"
+    },
+    {
+      "path": "apps/game-client/platform-windows/assets/fonts/NotoSansArabic-Bold.ttf",
+      "bytes": 261460,
+      "sha256Raw": "4e5462d2e8be880317b9f49b5b2da109ddb6a3563d91cc604b67f3535832a555"
+    },
+    {
+      "path": "apps/game-client/platform-windows/assets/fonts/NotoSansArabic-Regular.ttf",
+      "bytes": 234892,
+      "sha256Raw": "bdff3e5659d67e67def05b33f749683b9376ae819d65d3dd62ac4640b3aaef48"
+    },
+    {
+      "path": "apps/game-client/platform-windows/assets/fonts/NotoSansCJKsc-Regular.otf",
+      "bytes": 16437364,
+      "sha256Raw": "2c76254f6fc379fddfce0a7e84fb5385bb135d3e399294f6eeb6680d0365b74b"
+    },
+    {
+      "path": "apps/game-client/platform-windows/assets/fonts/NotoSansDevanagari-Bold.ttf",
+      "bytes": 250176,
+      "sha256Raw": "6a09c8d797cfc803d32cdc731e809424d74cbaff59f503de34ade421a08e5bc2"
+    },
+    {
+      "path": "apps/game-client/platform-windows/assets/fonts/NotoSansDevanagari-Regular.ttf",
+      "bytes": 243520,
+      "sha256Raw": "4e3c66638958c3e2ab5d37f47a8deb89fffeb7be9985c665a519bbc7ba762313"
+    },
+    {
+      "path": "apps/game-client/platform-windows/assets/fonts/NotoSansTC.ttf",
+      "bytes": 11941968,
+      "sha256Raw": "864727d210d54f2537bbe23b3a839436c3992af72de9322af5270897246bd44f"
+    },
+    {
+      "path": "apps/game-client/platform-windows/assets/fonts/NotoSansThai-Bold.ttf",
+      "bytes": 37824,
+      "sha256Raw": "2ac6c6e8a478e23b15f76e4894af1fa2210f8f350e4e6e54aad530bec03efbfb"
+    },
+    {
+      "path": "apps/game-client/platform-windows/assets/fonts/NotoSansThai-Regular.ttf",
+      "bytes": 37780,
+      "sha256Raw": "61cf814eec46b294d6ea4401ac295d0cecd5207bd2331dcc5a15e7301d30ee44"
+    },
+    {
+      "path": "apps/game-client/platform-windows/assets/fonts/OFL-NotoSans.txt",
+      "bytes": 4396,
+      "sha256Raw": "cee9892f9f0cc8fe882c9e9537ee6a89621d86ee7ceaf70b02e2b2b1c25c061a"
+    },
+    {
+      "path": "apps/game-client/platform-windows/assets/fonts/OFL-NotoSansArabic.txt",
+      "bytes": 4382,
+      "sha256Raw": "a7a5a25eb188bf1cd96982030d53e23c33485c69b1044a562254226857ee13af"
+    },
+    {
+      "path": "apps/game-client/platform-windows/assets/fonts/OFL-NotoSansCJKsc.txt",
+      "bytes": 4301,
+      "sha256Raw": "6a73f9541c2de74158c0e7cf6b0a58ef774f5a780bf191f2d7ec9cc53efe2bf2"
+    },
+    {
+      "path": "apps/game-client/platform-windows/assets/fonts/OFL-NotoSansDevanagari.txt",
+      "bytes": 4386,
+      "sha256Raw": "a216f6f8d85c7228093e0ee5e258d9d377e6671f68acb4db1930b29583d0f331"
+    },
+    {
+      "path": "apps/game-client/platform-windows/assets/fonts/OFL-NotoSansSC-BillingHan.txt",
+      "bytes": 4388,
+      "sha256Raw": "1c05c68c34f9708415aada51f17e1b0092d2cea709bf4a94cd38114f9e73d7d9"
+    },
+    {
+      "path": "apps/game-client/platform-windows/assets/fonts/OFL-NotoSansThai.txt",
+      "bytes": 4380,
+      "sha256Raw": "dad6e6abc2bf3fc37cc698af7607c3f4d4235039695713b222e5a034fb5b9b1c"
+    },
+    {
+      "path": "apps/game-client/platform-windows/assets/fonts/OFL.txt",
+      "bytes": 4481,
+      "sha256Raw": "e35ffdebb2225b49814c31889cbb3ce69cb3509e6a9f431edaba5e1a6de8cd15"
+    },
+    {
+      "path": "apps/game-client/platform-windows/assets/fonts/SIMPLIFIED-SOURCE.json",
+      "bytes": 1568,
+      "sha256Raw": "60f3d56e71d21aabc9a6a7c9453c752e89d3de9d30d96b900ee9e9e4d9c8d250"
+    },
+    {
+      "path": "apps/game-client/platform-windows/assets/fonts/SOURCE.json",
+      "bytes": 1302,
+      "sha256Raw": "75f59b710e9f647d21819302aa3a29cf93fdabe39a3e1a4eda269d74643978de"
+    },
+    {
+      "path": "apps/game-client/platform-windows/assets/fonts/verify-simplified-font.py",
+      "bytes": 2515,
+      "sha256Raw": "3773d232b420ca1b0ffe6293182aab8821624f5a4cbf9afaa876a6937abe4c39"
+    },
+    {
+      "path": "apps/game-client/platform-windows/build.rs",
+      "bytes": 400,
+      "sha256Raw": "9063303d223f5bc7476f63f39e14d22e242ee6073ca6fb5ee90d2fc3027b4c6a"
+    },
+    {
+      "path": "apps/game-client/platform-windows/Cargo.lock",
+      "bytes": 151310,
+      "sha256Raw": "a7c7b2b2029be2242073cc24193cd7fc47bc480700a868710901a94a379166dd"
+    },
+    {
+      "path": "apps/game-client/platform-windows/Cargo.toml",
+      "bytes": 2207,
+      "sha256Raw": "4348223e5a3ec60d9ac921433e8ada3bb4ba7a1a211022c9f4e98bb93fee4a36"
+    },
+    {
+      "path": "apps/game-client/platform-windows/resources/numeron.png",
+      "bytes": 7853,
+      "sha256Raw": "e463f7b3326c1147ec707ddaa40e5f225b0b33ed75f90bedef4f24ac55f1222b"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/assets.rs",
+      "bytes": 35827,
+      "sha256Raw": "e77018ae0451159388e99ee46ef83480a4b69b7a2026809c8350780f0b297478"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/atlas.rs",
+      "bytes": 150599,
+      "sha256Raw": "7678b6f23c8e6dac5b4d775119fcb4dd6811c87601c71c4e2a9c0e8c5e165bcf"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/big_map_input.rs",
+      "bytes": 10397,
+      "sha256Raw": "d741ad38a7508903e633df56eb15dbf96636d9e47f3edf96c2fe6df35c0a53f5"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/big_map_input_tests.rs",
+      "bytes": 18024,
+      "sha256Raw": "1b9ebe9488207e04955d692e2b1c631bdfb29625c4ee05281b40923dce14cf02"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/big_map_npc_input_tests.rs",
+      "bytes": 9654,
+      "sha256Raw": "dea62cb2caafb1fa6025b3104e94f306301fe7c1ae9954960c1e91e3cfbef872"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/billing_browser.rs",
+      "bytes": 8502,
+      "sha256Raw": "4020e4ebae1c8c447f8d782c885752c406485577bbeb8dbeb1462101beaf18fb"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/branding.rs",
+      "bytes": 2012,
+      "sha256Raw": "999dcde18d74c5161e9c02453a3034ed00ce5f42e63d7df73976399c321edea1"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/buried_monster_replay_tests.rs",
+      "bytes": 11185,
+      "sha256Raw": "9871cc97f4d7af02d07d6c67f3c39558f40fc59ad59d616fa063251f2549f5da"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/capture/provenance.rs",
+      "bytes": 6284,
+      "sha256Raw": "a4396ffecdbaf1d17b50fc41e5b161c68f6a36937bdd53d0ca1c56243c86c8f5"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/capture.rs",
+      "bytes": 69513,
+      "sha256Raw": "877b3a96c1e484abfc688499c0939e1a1f1a0ea0b20f4a570f23f2b7c1dc4ca3"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/clipboard.rs",
+      "bytes": 30256,
+      "sha256Raw": "0d705572ac08ad1cdc49473faf4d569b209ce715d238ab27bae644db994e5b4c"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/cursor.rs",
+      "bytes": 7177,
+      "sha256Raw": "188d6e258e791248db851a5f19835f7a7568884a70691c2240ec0870d1639cba"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/effects.rs",
+      "bytes": 555487,
+      "sha256Raw": "5a1e69a7c58f0ffc37953a6ee6d0f5f088e5852d0bce93e22da632849152d465"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/entity_health.rs",
+      "bytes": 16819,
+      "sha256Raw": "4e7569c699271c694ac6727ab27bcf92b6fee6cfae698596c42b9e1a395bf2ce"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/entity_overlays.rs",
+      "bytes": 92027,
+      "sha256Raw": "4ee7ac78f5b7ac845561bbbe17f7d04fd2e33ea4507e44029166fd55b2e82e6c"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/entity_presentation.rs",
+      "bytes": 228168,
+      "sha256Raw": "15cc2bd3ae30fc7e5c4f756a6e61c214baf34a6440712ac59cef54fea7e96353"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/equipment_creature_wire.rs",
+      "bytes": 9696,
+      "sha256Raw": "537602df77c31189ffee93dbbbe775b35905abb54f58d668fdf16d18e3c22d97"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/five_class_bridge_tests.rs",
+      "bytes": 15877,
+      "sha256Raw": "7c4421c613985c820ee0c61456c430cbd8d953e9e5ba5861a2e1dcae8a52771a"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/frame_sets.rs",
+      "bytes": 19090,
+      "sha256Raw": "553d216ee3d93f00433b2691aa01124cf86f3ac9b05e1dca4078589bdee35206"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/gameplay_bridge.rs",
+      "bytes": 416802,
+      "sha256Raw": "e82808b5fd6ef2a582ff5bef483ffe7baba704d5106680c8aaa2084ba3711d7d"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/gateway.rs",
+      "bytes": 792084,
+      "sha256Raw": "c45c8eef9ef53bf99ef739e0b53b2bfe0b60b06df1c7e262ab39ded67c11bb0a"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/gateway_account_feedback.rs",
+      "bytes": 3916,
+      "sha256Raw": "2dc06913529f8df491890b25df4723326a6f98ac41d519e602ca790bb7e418d9"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/gateway_catalog_transport.rs",
+      "bytes": 12055,
+      "sha256Raw": "2391e1a68b6c282a940f5211a3efa4641ea7f719a832b59b23584fb65ab5455e"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/gateway_handshake_tests.rs",
+      "bytes": 6652,
+      "sha256Raw": "00adc0100280164dac2c980bb5957443d340ad95d86a66120c1e883906ae8123"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/gateway_map_identity_tests.rs",
+      "bytes": 11990,
+      "sha256Raw": "da5f19a2a47b745444c3fa12bed6af64d9baee1fd2039f3795c10c7b3e7bc258"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/gateway_movement_barrier_tests.rs",
+      "bytes": 10382,
+      "sha256Raw": "5628b7c4d45c8e6c29a9026646e5234da6a260353d795e8da4c4b4adca834689"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/gateway_quest_tooltip_tests.rs",
+      "bytes": 4739,
+      "sha256Raw": "9ac2640dd4f2a6ec240510186fe5fbea4984c74f5d42661ba52f4dab1f671be5"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/gateway_target_lifecycle_network_tests.rs",
+      "bytes": 22825,
+      "sha256Raw": "1495fd09a95321277ef1b4e703d3ec141c5132c6a06410ab6ade62fd55b50020"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/guild_creation_tests.rs",
+      "bytes": 9831,
+      "sha256Raw": "eaabf7f34670d489c55c97a40fad71ea46be5195f88be04f1dc9e6ef80743057"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/guild_rank_wire_tests.rs",
+      "bytes": 7400,
+      "sha256Raw": "b102b69c9eae26d1c294f3dd74c1ab42645721319c31a90ff95f8a3bd378beca"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/health_zero_authority_tests.rs",
+      "bytes": 15568,
+      "sha256Raw": "611e1412eb3c235c85b77b48fa65cbfacdf0bfc637c3f5e42210bd7243324f9e"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/health_zero_display_tests.rs",
+      "bytes": 3900,
+      "sha256Raw": "06b1e3f42a033e4ad2783c757436537fc73baa04dad9e7ff4addb271615e6098"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/hero_pointer_settings.rs",
+      "bytes": 599,
+      "sha256Raw": "811e218f65588532fe23e9d4f81596f48ff8b6fae62ce02ea418061a0b217e1b"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/hero_wire.rs",
+      "bytes": 3584,
+      "sha256Raw": "2c42694b507d0787d3aa8adf7d99c264703cfe5670e59cbd41781596738365b5"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/hotkey_intent_tests.rs",
+      "bytes": 22145,
+      "sha256Raw": "3460c8ee8266bb8cd308b6201b1914fdefe17cbb6dc6b0a62745bfeefb2a8e28"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/input.rs",
+      "bytes": 475743,
+      "sha256Raw": "19756b5937253352a2b4ee81eefb84208ac5e396a168d4e552a623f38ae50f62"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/keyboard_world_actions.rs",
+      "bytes": 9674,
+      "sha256Raw": "d65a9d0a6dcdbeed767548db0b27ab4a763c6a754925b08ee80f21b14d72ce85"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/lifecycle.rs",
+      "bytes": 3028,
+      "sha256Raw": "3b9d9fbb2ceb251fb06f1a3edae0b7983a2e0f7d08680267d228032a4f28e4df"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/lighting.rs",
+      "bytes": 46034,
+      "sha256Raw": "39f104cedc654a9d9eca8522082af8baa5a3b4873237a588bccea26d093f2a8c"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/main.rs",
+      "bytes": 21519,
+      "sha256Raw": "c2a5bce5ea53762cfa8cbaafec903d1a3bc303fbbc7099366fbd83da8838af4b"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/map_parser.rs",
+      "bytes": 105644,
+      "sha256Raw": "927b908a2dc1c9cfbc1c339e1136f42b665873dedceec9d942bb489bc7b64503"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/map_player_movement_tests.rs",
+      "bytes": 4208,
+      "sha256Raw": "89620d464fc6a51a925096bb5bbb47792fe9302214c91ffc334ded5ca86f0585"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/minimap_input.rs",
+      "bytes": 2415,
+      "sha256Raw": "ad14be32a64588c726918b4df80d6ac82a8105a57b785ccf4ead70dc7ceb6878"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/minimap_input_tests.rs",
+      "bytes": 11412,
+      "sha256Raw": "ec852356b9d68af66afb7d4838eb80c58d7cce58853da1c760d27813ca0f5fd4"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/mining_input.rs",
+      "bytes": 20347,
+      "sha256Raw": "37657759f1cd1420b6796c4eb786a99c04ff77a869705dcfce82e6e6700e9dec"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/mining_input_tests.rs",
+      "bytes": 8914,
+      "sha256Raw": "7b5c5f756537718825aa0f51360728ea52ac8705537f1d12d734b1dbb0e24edf"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/mining_visual_tests.rs",
+      "bytes": 19252,
+      "sha256Raw": "df2d6d29a87ac103e342f44ffcf06b1a9ab9d0310f5b8cd41d22d83e0456be38"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/movement_trace.rs",
+      "bytes": 6217,
+      "sha256Raw": "3791e450cdfe0d60dfb5ca8aea9b9195af2a9952e31e06f96b71b50abd321b77"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/native_display.rs",
+      "bytes": 13714,
+      "sha256Raw": "62111f80c89b07532510c8d30219906a16a7ed3b9e3c9fbc2d9acb62069a1354"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/native_fonts.rs",
+      "bytes": 24561,
+      "sha256Raw": "f2af7f962d5a7c3e1b654d7e123d6d57d86f4573c64da9da0786f3d34ffe9712"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/native_fonts_gpu_tests.rs",
+      "bytes": 14894,
+      "sha256Raw": "263aaa462b39a7889ceb989050338c4828d2b9b1373ee87aa013c216da9ec890"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/native_fonts_soak_tests.rs",
+      "bytes": 21235,
+      "sha256Raw": "30fd0cdbe48068ee65f80d571d35e98cf4970dde5b664ffdc50217e9dfaeffd2"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/native_locale.rs",
+      "bytes": 13717,
+      "sha256Raw": "3192a50c57a6ab1eba5e793975e90f7aae19dc68e0afe27e82ee68ceef998546"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/native_protocol.rs",
+      "bytes": 95388,
+      "sha256Raw": "ecdd99bc05e535729f6f052cb379382df9528fe33a905578a7aa5d59ac36e4d2"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/nonmodal_panel_input_tests.rs",
+      "bytes": 17926,
+      "sha256Raw": "ec31cf2177e8a5b40b12be8a70e8ce74dc2130d59351860334377888d3e7a493"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/npc_gold_buy_transport_tests.rs",
+      "bytes": 59905,
+      "sha256Raw": "945fb122c587e4e75ea3623c755cf4b6ff6bebdfb988db0265a70fe2a8aea53c"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/npc_purchase_client.rs",
+      "bytes": 49189,
+      "sha256Raw": "506af56f83eca9fb9c2a0019bc06a2411db5fc12c2cb25ee9b4a0822658e0510"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/npc_purchase_gateway.rs",
+      "bytes": 97676,
+      "sha256Raw": "3d3f7d619c8ce8c505bd570d3463a959b38f0cb2108fbb9d77dedf417b0feaf1"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/npc_purchase_projection.rs",
+      "bytes": 15673,
+      "sha256Raw": "2ccec0932f2b619cf14f2c6e2b18c53d6b8676408095e6531e140eb3790d804c"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/pet_effects.rs",
+      "bytes": 9972,
+      "sha256Raw": "77e5a8f705d65269250062df46a592ea0c11b287cbd4fd0f7c50e75846086a55"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/quest_route_input_tests.rs",
+      "bytes": 58574,
+      "sha256Raw": "fdee3201fc39b3e8179fd4fb899d72285f91b8af4dacefc073ce4c2f35dbdd5b"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/refine_wire.rs",
+      "bytes": 9412,
+      "sha256Raw": "bef444696b4b64f8c4dee81dac0ffeefd1724ad8fdd96a9a54a165ea7b8440c1"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/self_occlusion_redraw_tests.rs",
+      "bytes": 4349,
+      "sha256Raw": "180e96e5a5066a459cc06a3ad3f4d06bdde575d5d580a2ee92282fdfb684dc04"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/session_config.rs",
+      "bytes": 27087,
+      "sha256Raw": "be1a774f8d42061db808a7b53b89f6bb6ca9ab051f4cf98267c209784c2b253d"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/shell_bridge.rs",
+      "bytes": 40085,
+      "sha256Raw": "c00d2c00d7a1f0e78deb612f2d4fa07e6dab03c7c1fe984eeca51f23ee54b3b5"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/social_bond_wire.rs",
+      "bytes": 4944,
+      "sha256Raw": "2ee8fc75579283fc7a3c7091027fa512548202b21d4c20a9431efd19032416b1"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/spell_targeting.rs",
+      "bytes": 6636,
+      "sha256Raw": "e809a9d431fb6b2d7e7d95397ed9d8f5ef2c04ffbeb4f0ab2b1bf034663c5c5a"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/startup_diagnostics.rs",
+      "bytes": 18183,
+      "sha256Raw": "b0b9841e35abae01befef03a25a207b59c563e47bf7a46782b27c84d8063abd6"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/struck_run_guard.rs",
+      "bytes": 21528,
+      "sha256Raw": "6d8f7e161b59c9cfe6b8ebd1f5cd56496994f7afe4b74b7c8898809db2928313"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/timing.rs",
+      "bytes": 3565,
+      "sha256Raw": "52e73b0f86f3dd8a485592509dd7acda4c3c65042bb5561673b6f50d59f4a968"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/trade_projection.rs",
+      "bytes": 12404,
+      "sha256Raw": "24ee8e1b34c06dcf1d29a9d4105a6109e11f7e585376952f7a9d55251245183d"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/window_sizing.rs",
+      "bytes": 40446,
+      "sha256Raw": "70ac5f3bc983596b4840babecdde600346b29fe99f248cdee40c70634ed03649"
+    },
+    {
+      "path": "apps/game-client/platform-windows/tests/fixtures/vis01-bichon-actors-v1.json",
+      "bytes": 18685,
+      "sha256Raw": "3af36b70fea734ecc8fffd6e596b09d46dddb27dc717067b143d1d2622927024"
+    },
+    {
+      "path": "apps/game-client/platform-windows/tests/fixtures/vis02-bichon-fire-bounce-v1.json",
+      "bytes": 3174,
+      "sha256Raw": "3773ec43949b58b3064acc51ed06c9eeda9efaa300a33162313dd6b3fe2b8b87"
+    },
+    {
+      "path": "apps/game-client/platform-windows/tests/fixtures/vis02-bichon-fireball-v1.json",
+      "bytes": 2394,
+      "sha256Raw": "276bbd2da6a36c5b8368012f879563b4b6951914264043a5042ee1b27262bea1"
+    },
+    {
+      "path": "apps/game-client/platform-windows/tests/fixtures/vis02-bichon-firewall-v1.json",
+      "bytes": 3571,
+      "sha256Raw": "e7fd25706055bfe6caced3e0471f851c609a724a1160cbec1174c357afa7862a"
+    },
+    {
+      "path": "apps/game-client/platform-windows/tests/fixtures/vis02-bichon-flaming-sword-v1.json",
+      "bytes": 3757,
+      "sha256Raw": "ab59cab7f399fdf2878a4250c70dda76874fe3e7dd24fac802ffcf284cc57164"
+    },
+    {
+      "path": "apps/game-client/platform-windows/tests/fixtures/vis02-bichon-great-fireball-v1.json",
+      "bytes": 2471,
+      "sha256Raw": "08c811636ec5f8026941a8f067f32ea63254f549190a9af73f44e1f1caca01de"
+    },
+    {
+      "path": "apps/game-client/platform-windows/tests/fixtures/vis02-bichon-hallucination-v1.json",
+      "bytes": 2056,
+      "sha256Raw": "3e59ec9c02c333a67a0b3674347730a98acceee5f6d4a843c3ece0e37dfa87c2"
+    },
+    {
+      "path": "apps/game-client/platform-windows/tests/fixtures/vis02-bichon-healing-v1.json",
+      "bytes": 2627,
+      "sha256Raw": "16f3869d7bc8cb2558c50dfd077af0f9d77e041dc206ec18e0eb84dba5cba603"
+    },
+    {
+      "path": "apps/game-client/platform-windows/tests/fixtures/vis02-bichon-lightning-v1.json",
+      "bytes": 2714,
+      "sha256Raw": "693d3379a55e05130373effbc0f7b2e07dc0db66f393abaa8bb0b26f1bba6ed5"
+    },
+    {
+      "path": "apps/game-client/platform-windows/tests/fixtures/vis02-bichon-soul-fireball-v1.json",
+      "bytes": 2451,
+      "sha256Raw": "62724598397ab854133603010401bf1ad36be6a249b2b2933ad600e442ec7827"
+    },
+    {
+      "path": "apps/game-client/platform-windows/tests/fixtures/vis03-buried-zombie2-wizard-20261001.json",
+      "bytes": 17248,
+      "sha256Raw": "a7296ab7179edb6d42d77caea1e9aa0bef17fe01c410768ffd6c9e73d89a4fbe"
+    },
+    {
+      "path": "apps/game-client/runtime/Cargo.lock",
+      "bytes": 131232,
+      "sha256Raw": "6a7ed4ea789743298a6c9f25bd4464f1a06a34e9039ca2690933ec1be46b62fd"
+    },
+    {
+      "path": "apps/game-client/runtime/Cargo.toml",
+      "bytes": 1447,
+      "sha256Raw": "a4ca9a1ae0890ede3214ee5196dad415414f815dc47d0c6abcef2a3b25436c26"
+    },
+    {
+      "path": "apps/game-client/runtime/src/additive_material.rs",
+      "bytes": 13668,
+      "sha256Raw": "478ebde3f15e1d1cfda49f32a18e1cbda6a6da87de183c0e085057939708e464"
+    },
+    {
+      "path": "apps/game-client/runtime/src/additive_material_gpu_tests.rs",
+      "bytes": 12441,
+      "sha256Raw": "79ccebe5d0dd38a515795dcf13e9eec1b4393c8d9584b1853b58841045d13af9"
+    },
+    {
+      "path": "apps/game-client/runtime/src/bag_ui_host.rs",
+      "bytes": 56320,
+      "sha256Raw": "667c174ca2a06ffe9b43473a94f68ae277c2f3af8c9090e1bc3f84a6d62baf8e"
+    },
+    {
+      "path": "apps/game-client/runtime/src/capture_context.rs",
+      "bytes": 7956,
+      "sha256Raw": "00754168779eda8591989226d9985c0fc2ce5b02a687dbd19b7aeccba7604ab5"
+    },
+    {
+      "path": "apps/game-client/runtime/src/character_ui_host.rs",
+      "bytes": 18887,
+      "sha256Raw": "35c8c2294de5301e68be961cc0a9fad747005df56cf3688c46e9b0db866e8070"
+    },
+    {
+      "path": "apps/game-client/runtime/src/character_ui_host_tests.rs",
+      "bytes": 3682,
+      "sha256Raw": "07011de04cdb4e1ae0b93f66b8d6d02729f39e2d62b8ba4c9204633ddc82221b"
+    },
+    {
+      "path": "apps/game-client/runtime/src/combat_input_host.rs",
+      "bytes": 6992,
+      "sha256Raw": "25d97dad44a9c9d90681f87caf96adbe6f4c0e441d61cdac3ae397d6aa76a14c"
+    },
+    {
+      "path": "apps/game-client/runtime/src/combat_input_host_tests.rs",
+      "bytes": 8917,
+      "sha256Raw": "47b4602797376f16832dff7a6b4164ec76bc7c3095a38515f968d3bfea694c91"
+    },
+    {
+      "path": "apps/game-client/runtime/src/combat_modes_host.rs",
+      "bytes": 27361,
+      "sha256Raw": "0456b7121187ac17145cc10173726ba46f0921bdea2bc7b1697bc934e72aeaa3"
+    },
+    {
+      "path": "apps/game-client/runtime/src/crystal_additive_material.wgsl",
+      "bytes": 1118,
+      "sha256Raw": "bf65c023b73f01a3544674aa023f7bb8b6e52e19dba78e5f2dbb55c8e99fb969"
+    },
+    {
+      "path": "apps/game-client/runtime/src/crystal_multiply_material.wgsl",
+      "bytes": 1627,
+      "sha256Raw": "e350e3712c1e767ae6e0b33690db497f516ba97fa7a73021297344ca3d9c58a7"
+    },
+    {
+      "path": "apps/game-client/runtime/src/entity_animation.rs",
+      "bytes": 203,
+      "sha256Raw": "380d310bf2d761159915dd820142a671cfd460f45bed4ee5e33f305c68ffb9e4"
+    },
+    {
+      "path": "apps/game-client/runtime/src/entity_animation_bridge.rs",
+      "bytes": 236,
+      "sha256Raw": "74b7fc12e7354bfdfef49f0ce7bd100e01de259e57d2e39af208e25cd3b106e0"
+    },
+    {
+      "path": "apps/game-client/runtime/src/fallback_hierarchy_tests.rs",
+      "bytes": 4326,
+      "sha256Raw": "754e5fd395941d82f98402483f05092dd7e87b0d3a657ebfa850b3352ad99316"
+    },
+    {
+      "path": "apps/game-client/runtime/src/hero_ui_host.rs",
+      "bytes": 119216,
+      "sha256Raw": "3fe28472573370422519a694754f562ac60ae1344e90cbab7cb000495046e366"
+    },
+    {
+      "path": "apps/game-client/runtime/src/hud_ui_host.rs",
+      "bytes": 21166,
+      "sha256Raw": "ac1f343f7d34f0bc66a8e953339f0dc337451d0ab71c72a132b6e9acaa315177"
+    },
+    {
+      "path": "apps/game-client/runtime/src/interpolation.rs",
+      "bytes": 8462,
+      "sha256Raw": "d31c211204e35750913bb2c252f60af30edb6227fac4d9e59e6f2b9ced41abb6"
+    },
+    {
+      "path": "apps/game-client/runtime/src/item_tooltip_query.rs",
+      "bytes": 73414,
+      "sha256Raw": "87c64581ef533d6977a4aee25782ae8e61e66afeede0a5b63990dfc1aefe939c"
+    },
+    {
+      "path": "apps/game-client/runtime/src/lib.rs",
+      "bytes": 439846,
+      "sha256Raw": "8b7454626080d3545a958a7e25c5df40ba94e2452466ff827081b6cc761a93df"
+    },
+    {
+      "path": "apps/game-client/runtime/src/lighting.rs",
+      "bytes": 21670,
+      "sha256Raw": "537a9316c5f63e82b623cff8fbc0bd6c67df24e07cc614c0b52ac2ffcbf1fc33"
+    },
+    {
+      "path": "apps/game-client/runtime/src/local_motion.rs",
+      "bytes": 67768,
+      "sha256Raw": "1a65024ad71611068dd574e767b592eb6dd499ccfa0324926294565c23fc8b32"
+    },
+    {
+      "path": "apps/game-client/runtime/src/mail_service_runtime_tests.rs",
+      "bytes": 18663,
+      "sha256Raw": "952787c9cdd94645fd2bdab4a23d3246e47871e156adbe8cf6d6dc1ab360aeb3"
+    },
+    {
+      "path": "apps/game-client/runtime/src/mail_ui_host.rs",
+      "bytes": 68168,
+      "sha256Raw": "0a012d978b69e22e9d590a76bcb3fd0fa3f228c4e88fc49873bcc9cdf347fc22"
+    },
+    {
+      "path": "apps/game-client/runtime/src/mail_ui_host_tests.rs",
+      "bytes": 69957,
+      "sha256Raw": "bcf7add8d6fb2cad05d9fdb9e74f34d72efce1e7e18af369d5e49f4eedd999b5"
+    },
+    {
+      "path": "apps/game-client/runtime/src/motion.rs",
+      "bytes": 42774,
+      "sha256Raw": "dbd6051812a14738e356eac9a151cdb5dfab760da0bb4dd12da7857032948e52"
+    },
+    {
+      "path": "apps/game-client/runtime/src/movement_shadow.rs",
+      "bytes": 53217,
+      "sha256Raw": "ca24171396c5566ce0a4ce510763590a3fbf680d3811bc512e8f8e961521a369"
+    },
+    {
+      "path": "apps/game-client/runtime/src/native_data_path_tests/guild_rank_ingest_tests.rs",
+      "bytes": 5687,
+      "sha256Raw": "8a7ad5b18e45c1130309922177e340b972418e3a9537cc07921d92ff26c71375"
+    },
+    {
+      "path": "apps/game-client/runtime/src/native_ingest.rs",
+      "bytes": 152619,
+      "sha256Raw": "948153a29b4bdd83400605d412c79f4f80a703f44b5a76cba9e14edcc9618694"
+    },
+    {
+      "path": "apps/game-client/runtime/src/native_ingest_wasm.rs",
+      "bytes": 2403,
+      "sha256Raw": "1c051d3073474730c28d5cbea6bba04253ef4ab7b09b4269a037809b7068711b"
+    },
+    {
+      "path": "apps/game-client/runtime/src/npc_purchase_economy.rs",
+      "bytes": 151273,
+      "sha256Raw": "7acca0c567537ca7ae2a071fc332f2d8432b28d84e3ac971ae938e59fed88426"
+    },
+    {
+      "path": "apps/game-client/runtime/src/npc_shop_ui_host.rs",
+      "bytes": 38136,
+      "sha256Raw": "e60f90e6d2d92d15b66b7ae6ef04872508a9bf4c01d37eae09141c41df48fb6a"
+    },
+    {
+      "path": "apps/game-client/runtime/src/npc_shop_ui_host_tests.rs",
+      "bytes": 31728,
+      "sha256Raw": "820214c3e6301d3adc943a8d575ac1b9aabf28cc2760fd6af39e14a539941f68"
+    },
+    {
+      "path": "apps/game-client/runtime/src/presentation_pose.rs",
+      "bytes": 26877,
+      "sha256Raw": "9d28250412fabd3890626d58cc2492982a21fdbc4fa988222e27198786ac984b"
+    },
+    {
+      "path": "apps/game-client/runtime/src/quest_route_plan.rs",
+      "bytes": 17896,
+      "sha256Raw": "abc72b163154a3f49150ac1e1558ee74a5053ce81441a789103a10df0610220c"
+    },
+    {
+      "path": "apps/game-client/runtime/src/quest_ui_host.rs",
+      "bytes": 133903,
+      "sha256Raw": "54306beb7a62057df4b864ecfd8e67a823112dfb190c109c4de0c0d69cea9f41"
+    },
+    {
+      "path": "apps/game-client/runtime/src/remote_motion.rs",
+      "bytes": 29251,
+      "sha256Raw": "7c29f8b13ee55dd5d0ee4c90b23c955e388a335ef5552792813ae692196b9458"
+    },
+    {
+      "path": "apps/game-client/runtime/src/render_diagnostics.rs",
+      "bytes": 27863,
+      "sha256Raw": "645245e4474dc4ad4cb171cb7840008476cdc5a32ffe8e6671581f43185d48e4"
+    },
+    {
+      "path": "apps/game-client/runtime/src/runtime_ui_capabilities.rs",
+      "bytes": 13088,
+      "sha256Raw": "4c0e0db030507ebd8103792a6aade175b450842ed4d2cacf1d41c7080389c4e2"
+    },
+    {
+      "path": "apps/game-client/runtime/src/skill_bar_query.rs",
+      "bytes": 13470,
+      "sha256Raw": "b5fed74cb7781006f50d6aef2ae5875b8808554bb013bbb9a1bd07640fc13506"
+    },
+    {
+      "path": "apps/game-client/runtime/src/spells_ui_host.rs",
+      "bytes": 24563,
+      "sha256Raw": "953618b188eea3bade8fc387d3a30eb7b95e7ee8f5a51cede2a703263b190c9d"
+    },
+    {
+      "path": "apps/game-client/runtime/src/spells_ui_host_tests.rs",
+      "bytes": 3410,
+      "sha256Raw": "48c3dd5c785c5e0e1e4c3849713fba63b85b2138091f5b73d4d36d817e4789cc"
+    },
+    {
+      "path": "apps/game-client/runtime/src/storage_ui_host.rs",
+      "bytes": 29475,
+      "sha256Raw": "77f8c82f28f21a6df29ccb9d03e3ca908f7cf062e2dc158c76fc86823d585e56"
+    },
+    {
+      "path": "apps/game-client/runtime/src/storage_ui_host_tests.rs",
+      "bytes": 17897,
+      "sha256Raw": "9591091d6e0a2076eaae2e7b47ed1b0f0f00ce233d40343dc06f3da3d718935d"
+    },
+    {
+      "path": "apps/game-client/runtime/src/webgl2_shared_ui.rs",
+      "bytes": 12978,
+      "sha256Raw": "c7f19a68d7a4c5253daead98d853ebc1803e45ea2f58db96a73875c5b8eea1a7"
+    },
+    {
+      "path": "apps/game-client/ui-core/Cargo.toml",
+      "bytes": 421,
+      "sha256Raw": "781a69888a9a50d5d2b1a8a490871c53076cb1269fcf57265f47992574a08a30"
+    },
+    {
+      "path": "apps/game-client/ui-core/src/action.rs",
+      "bytes": 6755,
+      "sha256Raw": "6f50588618eedc8d4e029886774a32495095f4ad70ff2adfb3b0156e5432d698"
+    },
+    {
+      "path": "apps/game-client/ui-core/src/effect.rs",
+      "bytes": 7524,
+      "sha256Raw": "10398598e768a6d21d79e11c3ab6c9db4e8394bedf8af3803dbfdfd503f34944"
+    },
+    {
+      "path": "apps/game-client/ui-core/src/game_shop.rs",
+      "bytes": 16578,
+      "sha256Raw": "90bd7b60a361c4183aac0bbc6dcaf3e63ceec333ff6e7ad8fd608529358ec8b6"
+    },
+    {
+      "path": "apps/game-client/ui-core/src/lib.rs",
+      "bytes": 443,
+      "sha256Raw": "fa2548bb42f386f8b01084f143d8865d2ad61a09696cb965a7345106f326093b"
+    },
+    {
+      "path": "apps/game-client/ui-core/src/reducer.rs",
+      "bytes": 73182,
+      "sha256Raw": "25773a6de0912db3305785b23ae9f5651539d2ddaec14cec2d49d31a21b00d6b"
+    },
+    {
+      "path": "apps/game-client/ui-core/src/registry.rs",
+      "bytes": 88557,
+      "sha256Raw": "ba3d290ba5897b20b4e10c249fb5ddb9843df5283c517a62a2a88937dcfaeae8"
+    },
+    {
+      "path": "apps/game-client/ui-core/src/state.rs",
+      "bytes": 25240,
+      "sha256Raw": "6e1d670f34a9c6f4a7840a8bbe66057a729441b85bd846578a7017db57217096"
+    },
+    {
+      "path": "apps/game-client/ui-core/src/storage.rs",
+      "bytes": 4363,
+      "sha256Raw": "8b080cde6b3321d77b2d0f0865c6b196d0241ee4a546ca50e6f6a7edb9fafce0"
+    },
+    {
+      "path": "apps/web/lib/generated/crystal-map-pack/0.map.gz",
+      "bytes": 512762,
+      "sha256Raw": "bbd02c7d0125fe78983e2dea5f4aecc73b53d4b91517bde6fdbee9853bb183a5"
+    },
+    {
+      "path": "apps/web/public/original-ui/frame-sets.generated.json",
+      "bytes": 1375659,
+      "sha256Raw": "280d4fee9de0864218611f54014b4bf3487c4478a39133c25ebe211d223e62e9"
+    },
+    {
+      "path": "apps/web/public/original-ui/Items/meta.json",
+      "bytes": 459663,
+      "sha256Raw": "ec0eca414ac6c34e17a218f0ed4396f30607c2485482f8760af7706acddcedfe"
+    },
+    {
+      "path": "apps/web/public/original-ui/MagIcon/meta.json",
+      "bytes": 102939,
+      "sha256Raw": "40c8a1d8d1674b031538754ff0b63abdf9f3d16dbe8bff34aec50e0749a66952"
+    },
+    {
+      "path": "apps/web/public/original-ui/MMap/meta.json",
+      "bytes": 64066,
+      "sha256Raw": "13229d5a9f2864b777d4fef754c75d6037e420620b95a6fd8770c859e6e7d2e2"
+    },
+    {
+      "path": "apps/web/public/original-ui/Prguse2/meta.json",
+      "bytes": 177013,
+      "sha256Raw": "52ff33c696a8b04d576bddcc7b8f14d94aa5b3b35cd8e0d31f379295e9a635cd"
+    },
+    {
+      "path": "Cargo.lock",
+      "bytes": 240688,
+      "sha256Raw": "c9a29ce120c99e6b865c4be3c0c13491284f72849a16a7050283372453085d9e"
+    },
+    {
+      "path": "Cargo.toml",
+      "bytes": 365,
+      "sha256Raw": "6de1c26df325285aa51515e99abe32677775b3396aa6e8a83a0983deee3500ac"
+    },
+    {
+      "path": "config/quest-guidance/daily-weekly-v1.json",
+      "bytes": 9945,
+      "sha256Raw": "39bf59c5e0a4a2d014a74ab8c70c18af26055b6e446c100710afe12831e8c01e"
+    },
+    {
+      "path": "config/quest-guidance/newcomer-journey-v1.json",
+      "bytes": 41856,
+      "sha256Raw": "6952068b9827aa90f44a0b58296637cf83b298d57483912ca274fdfba3c0822e"
+    },
+    {
+      "path": "config/quest-guidance/newcomer-journey-v2-ui.json",
+      "bytes": 5436,
+      "sha256Raw": "e52630f84ee09e3e2d3abd821db00dde01b62e7d803d18972c8fd906db38c747"
+    },
+    {
+      "path": "config/quest-guidance/newcomer-journey-v2.json",
+      "bytes": 35329,
+      "sha256Raw": "fd35732d9356fcf5aeb4c06d639261a816626a54ccaf33f8cc6d461e98c93182"
+    },
+    {
+      "path": "config/quest-guidance/newcomer-supplies.json",
+      "bytes": 1152,
+      "sha256Raw": "313de1d7e0faf0cc70ab62e8a5079ea8d211fd75d06479d290621fd0aa5fa1f2"
+    },
+    {
+      "path": "config/quest-guidance/newcomer-v1.json",
+      "bytes": 28662,
+      "sha256Raw": "49c1ba49d4c3af4fadf3a53ea2618ba5d998ec829fd72f45349498e246e941b3"
+    },
+    {
+      "path": "config/quest-guidance/newcomer-v2-graduation.json",
+      "bytes": 2664,
+      "sha256Raw": "4e3b37f8ac9969219e1e03b566c391f59860f083e1156b7cf88d5f433ccb5655"
+    },
+    {
+      "path": "config/quest-guidance/newcomer-v2.json",
+      "bytes": 4624,
+      "sha256Raw": "381be9f89f92f81bfae2fe34f310aa48410875129581049204bd5c34c4821819"
+    },
+    {
+      "path": "onchain/procurement/fixtures/intent-v1.json",
+      "bytes": 3418,
+      "sha256Raw": "9b76eab5853a715b745cb3facfefb1849774f3c20c10969ebbc0fc2c2682ace9"
+    },
+    {
+      "path": "packages/game-data/Cargo.toml",
+      "bytes": 327,
+      "sha256Raw": "e69823755b2f5f4818f76754a47db6e6911180463d0e20ba26dc2ccacc7b1091"
+    },
+    {
+      "path": "packages/game-data/data/content_profiles/platinum_176.json",
+      "bytes": 47571,
+      "sha256Raw": "7ee7a6de1c253e8ba3831e3455d6ba0c59bc9dc00ef90841947d5ec58989395d"
+    },
+    {
+      "path": "packages/game-data/data/content_profiles/platinum_fiveclass.json",
+      "bytes": 66727,
+      "sha256Raw": "9fc2d6875c78691f7e34650eae8e8df868690a1ee6e5960becc113cae0e9d4ac"
+    },
+    {
+      "path": "packages/game-data/data/generated/crystal_base_stats_packet_manifest.json",
+      "bytes": 3449,
+      "sha256Raw": "6edbf2e942e8742914c79d7aa05e4adb840c61dc83e3591714a4db32fd0293c4"
+    },
+    {
+      "path": "packages/game-data/data/generated/crystal_buff_manifest.json",
+      "bytes": 10919,
+      "sha256Raw": "3d59abc5c4cccb2323d66113fd9550e770a3257ea5ce4d7e7a8889757674162b"
+    },
+    {
+      "path": "packages/game-data/data/generated/crystal_creature_settings.json",
+      "bytes": 166,
+      "sha256Raw": "cf098d6df97e50217f212fc13873964a096c156611835f2d5654668db8da7297"
+    },
+    {
+      "path": "packages/game-data/data/generated/crystal_drop_manifest.json",
+      "bytes": 24076631,
+      "sha256Raw": "c10f5b1ac39cefe1c5b7c0ec5779547cf5b0901eaece680b7049d9dda56c1cf7"
+    },
+    {
+      "path": "packages/game-data/data/generated/crystal_game_shop_packet_manifest.json",
+      "bytes": 96259,
+      "sha256Raw": "ff5bce2f32b0013f3ccd2705fdf7e4a93de89e1c8a6ea1ee58050e52f4124571"
+    },
+    {
+      "path": "packages/game-data/data/generated/crystal_guild_buff_packet_manifest.json",
+      "bytes": 1492,
+      "sha256Raw": "21a00a9feabb53542cee7f05fe65f93463eede949c56cf6e4feffea8464dd94b"
+    },
+    {
+      "path": "packages/game-data/data/generated/crystal_guild_settings.json",
+      "bytes": 1015,
+      "sha256Raw": "e1a16a6b08ba033fb8cfdf91a1e175e15b6d4ae8223baca06e7b90a112e2c1d4"
+    },
+    {
+      "path": "packages/game-data/data/generated/crystal_hero_settings.json",
+      "bytes": 23460,
+      "sha256Raw": "1cd6aea695708bca17dd66e535477854fb332a744155ea472919dffc1e964754"
+    },
+    {
+      "path": "packages/game-data/data/generated/crystal_item_manifest.json",
+      "bytes": 1589543,
+      "sha256Raw": "b0d48ada978d8a062e993fe0425b6a724672aeea354a3b7b4508fb4c161658b7"
+    },
+    {
+      "path": "packages/game-data/data/generated/crystal_magic_manifest.json",
+      "bytes": 51696,
+      "sha256Raw": "ccbb31513c006860790a4c374b3f788665902cfa3fffe810695199882860153d"
+    },
+    {
+      "path": "packages/game-data/data/generated/crystal_map_event_manifest.json",
+      "bytes": 50155,
+      "sha256Raw": "d68823dfff2a1cfc00afc7bf4d369bb20a025ad9af5acb89a75d571f4709ba29"
+    },
+    {
+      "path": "packages/game-data/data/generated/crystal_mining_manifest.json",
+      "bytes": 5976,
+      "sha256Raw": "e0b316ed8172ac1f0d3f1577fc06df126682563ff019612e7cd4663eccff3c28"
+    },
+    {
+      "path": "packages/game-data/data/generated/crystal_monster_ai_summary.json",
+      "bytes": 134815,
+      "sha256Raw": "12e82908bdf696b49e7193cfb1288ccf63663e8269c4e3a59b57c31648530e79"
+    },
+    {
+      "path": "packages/game-data/data/generated/crystal_monster_manifest.json",
+      "bytes": 397117,
+      "sha256Raw": "5961fe9f220cb8440833af746f4c53fd1c728803979b19dbd867f10fc3027cec"
+    },
+    {
+      "path": "packages/game-data/data/generated/crystal_npc_command_summary.json",
+      "bytes": 59118,
+      "sha256Raw": "49ebaa25650a2e2088693d4200ebac0f7ed9a9b81a6cd6246cdd75375ea73414"
+    },
+    {
+      "path": "packages/game-data/data/generated/crystal_npc_info_manifest.json",
+      "bytes": 313945,
+      "sha256Raw": "dcc31e181b1f329c6da3658846ff18adb13731b18d899f8914b7628d54074105"
+    },
+    {
+      "path": "packages/game-data/data/generated/crystal_npc_manifest.json",
+      "bytes": 5244108,
+      "sha256Raw": "7ff29f221c39e5d16b7ebdc7efcde5090daf7ff3daacf6b2b1552b5b36429e93"
+    },
+    {
+      "path": "packages/game-data/data/generated/crystal_quest_packet_manifest.json",
+      "bytes": 189239,
+      "sha256Raw": "13d6f3fd94fd9e865ab60c9f2ea50585053bd2050bff021a0379f1ed0948e0d6"
+    },
+    {
+      "path": "packages/game-data/data/generated/crystal_random_item_stats_manifest.json",
+      "bytes": 25753,
+      "sha256Raw": "74ecdd5c5d3df8f04c34f9f4df3d3a9171ef85002ba395535b4fbe948dcaa449"
+    },
+    {
+      "path": "packages/game-data/data/generated/crystal_recipe_packet_manifest.json",
+      "bytes": 64271,
+      "sha256Raw": "53699a4fc96fd9df015e4e5a4d72fcea644a59ccb8643d32604726ea678019e5"
+    },
+    {
+      "path": "packages/game-data/data/generated/crystal_respawn_manifest.json",
+      "bytes": 6799671,
+      "sha256Raw": "907db052030a97036e404429373dd3ad3e0e838e279613080e92c3be28bf3ff2"
+    },
+    {
+      "path": "packages/game-data/data/generated/crystal_starter_map_collision.json",
+      "bytes": 57421,
+      "sha256Raw": "38ac56c53ce6c9ba0e1849e7750fd48636754f4e33113c63b19b6a61d8f3f690"
+    },
+    {
+      "path": "packages/game-data/data/generated/localization_bundle.json",
+      "bytes": 916875,
+      "sha256Raw": "cca64cebcb5566cb777ac56fa32e3a471020b78a3db64da017a23324c87efec6"
+    },
+    {
+      "path": "packages/game-data/data/generated/platinum_176_bundle.json",
+      "bytes": 3614,
+      "sha256Raw": "69d8ee8d6b3875da92f4e2787c4d0fa50184639c6de2d312fdaa0db18d936ea6"
+    },
+    {
+      "path": "packages/game-data/data/generated/platinum_fiveclass_bundle.json",
+      "bytes": 3888,
+      "sha256Raw": "3c12e13860161be681fd70f672c1a40b54d85f721cf50c5b1d1c68c15bf5e6a2"
+    },
+    {
+      "path": "packages/game-data/data/generated/quest_presentation_text.rs",
+      "bytes": 2212,
+      "sha256Raw": "9105cfb8e464aed1572f85b24bfc37e55b3ac33379c548827b25279b62428ac2"
+    },
+    {
+      "path": "packages/game-data/data/native-i18n/common.json",
+      "bytes": 822142,
+      "sha256Raw": "9bcf22b9f4ea1b6f7f514a7b0176cb6ab896d98c9e6ce75aba0d4d3c93d2d19d"
+    },
+    {
+      "path": "packages/game-data/data/native-i18n/conquest.json",
+      "bytes": 31304,
+      "sha256Raw": "1006ae4929e762440828d0b447defe3d763ff0436bb186ed540c5d6bf9f2549c"
+    },
+    {
+      "path": "packages/game-data/data/native-i18n/content-coverage.json",
+      "bytes": 9935,
+      "sha256Raw": "97bce38a6c089cd4aebcc6f41aa4164f72f67eff905ee6cec72f26da9805076a"
+    },
+    {
+      "path": "packages/game-data/data/native-i18n/content.json",
+      "bytes": 1052918,
+      "sha256Raw": "142e05e9e628be47c45eec257c8616f6e7f5c485588de8a0b25f36fc406222d1"
+    },
+    {
+      "path": "packages/game-data/data/native-i18n/extra/ar.json",
+      "bytes": 774552,
+      "sha256Raw": "4dc325cbc3698791dd33e0d5c6a25a5dd2cc07caa41706f5c23ce6b0c775bd39"
+    },
+    {
+      "path": "packages/game-data/data/native-i18n/extra/hi.json",
+      "bytes": 1066908,
+      "sha256Raw": "37f44d1746942c3fcae28810b7b6291d5de17d02767850acd0fb37b4baa7360f"
+    },
+    {
+      "path": "packages/game-data/data/native-i18n/extra/id.json",
+      "bytes": 652403,
+      "sha256Raw": "af8e138801c84cde116627d6e6f57eb52c510e5f36e4657478ca323765c96aa4"
+    },
+    {
+      "path": "packages/game-data/data/native-i18n/extra/provenance.json",
+      "bytes": 71369,
+      "sha256Raw": "a54f72bd81e65573e23ceaf6072305d8c2f59632d1342ba0210f4bd0a0c43169"
+    },
+    {
+      "path": "packages/game-data/data/native-i18n/extra/ru.json",
+      "bytes": 895476,
+      "sha256Raw": "c88e7b28d8690aa4e6fa789cfebfed3ea4fe48aa698e7df39da81e3514bfdb44"
+    },
+    {
+      "path": "packages/game-data/data/native-i18n/extra/th.json",
+      "bytes": 1041281,
+      "sha256Raw": "60ca5db30a16fce9cf6b4a65ba5d2789ba8d474ae348ad80254e3f5165102b0c"
+    },
+    {
+      "path": "packages/game-data/data/native-i18n/extra/vi.json",
+      "bytes": 729021,
+      "sha256Raw": "b53bc32c4cd78f56ed470d47ecff8fb5c32dd49fdf3650324b6279f02115e43c"
+    },
+    {
+      "path": "packages/game-data/data/native-i18n/extra/zh-CN-editorial-overrides.json",
+      "bytes": 379069,
+      "sha256Raw": "cd0ee06a4ecf7cda2c8c93c55b54b8d608c118f0f39b5f26e270a2ff294c7633"
+    },
+    {
+      "path": "packages/game-data/data/native-i18n/extra/zh-CN-provenance.json",
+      "bytes": 11924,
+      "sha256Raw": "ae04a32c4315e5625e081f322e397925bdb47544bef24e6841accb58ac78090e"
+    },
+    {
+      "path": "packages/game-data/data/native-i18n/extra/zh-CN.json",
+      "bytes": 621287,
+      "sha256Raw": "89f6cd57e61e8bc957bb6b5ff10b317ab2948291287f5a01cffd8bb97a89d36f"
+    },
+    {
+      "path": "packages/game-data/data/native-i18n/game.json",
+      "bytes": 43682,
+      "sha256Raw": "cc70dfd7457968867e3690b6e0712bc0e2dcf44763ab161e36bffe87224c1557"
+    },
+    {
+      "path": "packages/game-data/data/native-i18n/help.json",
+      "bytes": 72192,
+      "sha256Raw": "5ce6fa52b935f528424c3963dc16c5e430387d3be2dac6d70d0701cf834b3b9e"
+    },
+    {
+      "path": "packages/game-data/data/native-i18n/npc-menu-coverage.json",
+      "bytes": 336,
+      "sha256Raw": "5d611484cab36b02b4ec9ddd307dc9a4cc8c114e99a01dab8ffcde00f0be77f3"
+    },
+    {
+      "path": "packages/game-data/data/native-i18n/npc-menus.json",
+      "bytes": 125054,
+      "sha256Raw": "fa9de6316a85177479bddf4f01c4010524f172f542df336b379548dd8f62f0d3"
+    },
+    {
+      "path": "packages/game-data/data/native-i18n/npc-prose.json",
+      "bytes": 457753,
+      "sha256Raw": "f54665c416efe58b6dd40b7a657b0522da07b52ba0c208f2783b98c1a22a6bb0"
+    },
+    {
+      "path": "packages/game-data/data/native-i18n/periodic.json",
+      "bytes": 250662,
+      "sha256Raw": "a6ade91e8ae348ed47336c851faa0e9ec41900178f779572f22c6ef5a6c76757"
+    },
+    {
+      "path": "packages/game-data/data/native-i18n/quest.json",
+      "bytes": 137085,
+      "sha256Raw": "47a5beaa6feb4277b33a8617b55966a56eec2856b80000d34083ee6e23f9a5d1"
+    },
+    {
+      "path": "packages/game-data/data/native-i18n/shell.json",
+      "bytes": 43041,
+      "sha256Raw": "52ace631cb335840532fcfec6a37b144b829950e25bd5e909e69b1ec5af6d3b1"
+    },
+    {
+      "path": "packages/game-data/data/native-i18n/validation-report.json",
+      "bytes": 973835,
+      "sha256Raw": "3e7dbf83cc7453326cb89fb4bba9cfddac42147fccb77ad52eae1fd67e7fe794"
+    },
+    {
+      "path": "packages/game-data/data/starter_scene.json",
+      "bytes": 2893,
+      "sha256Raw": "f06c92e72843f7c8bfd8f78aeb1714098107a184f4012a3f86649620ab5451f7"
+    },
+    {
+      "path": "packages/game-data/data/starter_server_data.json",
+      "bytes": 8207,
+      "sha256Raw": "d4349ff4e2d2753d0be95de27341a8a9bb59ea04d3062868b03c7e1d80f72e4d"
+    },
+    {
+      "path": "packages/game-data/src/crystal_creature_settings.rs",
+      "bytes": 2162,
+      "sha256Raw": "6ead34f9056a38921d6397048f85ed1f3ffdc31f7b8ab5e9e28b8ee466928c95"
+    },
+    {
+      "path": "packages/game-data/src/crystal_guild_settings.rs",
+      "bytes": 4046,
+      "sha256Raw": "19bbf36fb8812162a7853b66f4efb2dbe747394eac39aa5df4c8dd019585cd38"
+    },
+    {
+      "path": "packages/game-data/src/crystal_hero_settings.rs",
+      "bytes": 8195,
+      "sha256Raw": "011c406f296ddbb53b0e777bfaa34122a3686583cf7180b70e0a2c784eb244a2"
+    },
+    {
+      "path": "packages/game-data/src/crystal_item_image.rs",
+      "bytes": 2932,
+      "sha256Raw": "b57acb109955d4157ec352fa8b0ec4f5de083e9021828a67e1e54501cc23993e"
+    },
+    {
+      "path": "packages/game-data/src/crystal_map_events.rs",
+      "bytes": 6669,
+      "sha256Raw": "6a627807f49eafda4e44a3b53541e48131bec13046ae60a0079ae353ba1754b8"
+    },
+    {
+      "path": "packages/game-data/src/crystal_mining.rs",
+      "bytes": 7387,
+      "sha256Raw": "25dd31d764a38332d0748f881dadc85f44f5160e68a27108cd0bd6ce5d9f8057"
+    },
+    {
+      "path": "packages/game-data/src/crystal_npc_goods.rs",
+      "bytes": 5808,
+      "sha256Raw": "c123145dc0c0558045876c079f0ea76a66492080a51e07e6967b1222504c67d9"
+    },
+    {
+      "path": "packages/game-data/src/fiveclass_tests.rs",
+      "bytes": 11802,
+      "sha256Raw": "316f81295c60ba30b543a0060e398b76549e59f7f722dd38a46c9e7bebdbe854"
+    },
+    {
+      "path": "packages/game-data/src/lib.rs",
+      "bytes": 176397,
+      "sha256Raw": "d720b7b86396a109ca77f358c54a6e9517b25cbd0c8ab1ce6458d9179eb2aa99"
+    },
+    {
+      "path": "packages/game-data/src/periodic_quests.rs",
+      "bytes": 14155,
+      "sha256Raw": "fe4715f86ec6a18fa11b70c72a6067740b9b90ad3c65b97cca411b06162aa50f"
+    },
+    {
+      "path": "packages/game-data/src/stone_items.rs",
+      "bytes": 1411,
+      "sha256Raw": "bc1df14c421be8305651733529da726f7a497f18695cc8b39018abbca8c26ecf"
+    },
+    {
+      "path": "packages/protocol/Cargo.toml",
+      "bytes": 378,
+      "sha256Raw": "245b0e2cb7c34270f9f5dc2aa96572d19699d5ff208f3f796add42b0a953aab3"
+    },
+    {
+      "path": "packages/protocol/src/catalog_transport.rs",
+      "bytes": 11788,
+      "sha256Raw": "cd6f73582d2774805e66ca9898a8f2b96e829d8bce648e6ddf983d13f485689d"
+    },
+    {
+      "path": "packages/protocol/src/error.rs",
+      "bytes": 3373,
+      "sha256Raw": "a7e13c9abbdf35f98e830a62355f9dd082e6c95a66a887f4e7c4d3d90bf9a6ba"
+    },
+    {
+      "path": "packages/protocol/src/frame.rs",
+      "bytes": 1275,
+      "sha256Raw": "ba0ac651251624b4595711dc3d0fbc70ab57428b21d0997bd418a0fc1d49c7ad"
+    },
+    {
+      "path": "packages/protocol/src/ids.rs",
+      "bytes": 30620,
+      "sha256Raw": "930259a2f29d2dd7c09f77d861ab5db1477629d75b31b2ca59d2479dd8efb126"
+    },
+    {
+      "path": "packages/protocol/src/io.rs",
+      "bytes": 5117,
+      "sha256Raw": "e80ef0c9a01c5c185469cab988ef7e257a5de6638fe5326360d36fe1ca766046"
+    },
+    {
+      "path": "packages/protocol/src/item_image.rs",
+      "bytes": 1218,
+      "sha256Raw": "09fc26d058b62409a1ca99acdbd717b59a8ab21f956244fa60e82a7fa51b7a72"
+    },
+    {
+      "path": "packages/protocol/src/lib.rs",
+      "bytes": 1990,
+      "sha256Raw": "4aff98f8f201cf6117d7e46d6b192b8da898958a389d955905e3c37673b3ef0d"
+    },
+    {
+      "path": "packages/protocol/src/packets.rs",
+      "bytes": 307016,
+      "sha256Raw": "6397a43b3a4c2376cfcf8b6a7d0811d2ff9dd6e3da9ca84dc07d8854675beec7"
+    },
+    {
+      "path": "packages/protocol/src/procurement.rs",
+      "bytes": 11040,
+      "sha256Raw": "685cd01dae73439069cf54e0ebd7df7059ceb97a9106872b001a8ce727ce1e08"
+    },
+    {
+      "path": "packages/protocol/src/trace.rs",
+      "bytes": 29621,
+      "sha256Raw": "1d2fcb0f5eaff134e5693e9497461587de8dfd9e0aa893184f5ca156541f3c89"
+    },
+    {
+      "path": "packages/protocol/src/types.rs",
+      "bytes": 120092,
+      "sha256Raw": "cf18d6c3c7066acb9d82edc35ad49548adb858d925c489410c614efc0882d0fb"
+    },
+    {
+      "path": "packages/tooling/data/native-i18n/npc-menu-source.json",
+      "bytes": 756430,
+      "sha256Raw": "eeb79ae5addccdd552b0d9893a4aebd4b5df5d5a90a1bb8fd6ba8515049e93f2"
+    },
+    {
+      "path": "packages/tooling/data/native-i18n/npc-prose-source.json",
+      "bytes": 1138897,
+      "sha256Raw": "445c682383aabce7d8965aa8aa0dd9e6ca5551d80e926bffc31dc16c18fb2ae2"
+    },
+    {
+      "path": "packages/tooling/scripts/generate-native-i18n-simplified.py",
+      "bytes": 17874,
+      "sha256Raw": "58ce20cf96c64c33f85f48da1b85d85ed38f5c7127f47c0c19a4c90dccb7085c"
+    }
+  ]
+}

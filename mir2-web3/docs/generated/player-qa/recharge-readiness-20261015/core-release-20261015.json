@@ -1,0 +1,664 @@
+{
+  "schema": 1,
+  "checkedAtUtc": "2026-10-15T14:45:03.058Z",
+  "sourceBaseCommit": "2bd5e57b392d7938a8615384a53273479bfcd4b2",
+  "sourceBinding": "sourceSha256 binds the complete current Core/Wire/platform-web and builder/optimizer/release-helper inputs; source base commit alone is not a claim that these edits were committed then",
+  "sourceSha256": "46569ff649e96bdea15c81080f05144c3031606d618becc9066800acd1edd620",
+  "tools": {
+    "rust": "1.95.0",
+    "wasmBindgen": "0.2.118",
+    "binaryen": "131",
+    "binaryenExecutableSha256": "a3e857e565f18773e24cb3d81d00baa70cee9be24efe775e1960565fea5e65b3",
+    "officialBinaryenArchiveSha256": "2f4edac1703a2f695254d6ff52ede03481e67db1f094915763d863158c17d9bc"
+  },
+  "optimizationArgs": [
+    "-Oz",
+    "--flatten",
+    "--rereloop",
+    "-Oz",
+    "--converge",
+    "--strip-debug"
+  ],
+  "limits": {
+    "wasmBytesExclusive": 262144,
+    "jsBytes": 204800
+  },
+  "bundles": [
+    {
+      "label": "core",
+      "abiVersion": 1,
+      "version": "aaa71a815a0dac1f5809586cab98286dc8a9af333500c612d212068cb55a3091",
+      "sourceSha256": "46569ff649e96bdea15c81080f05144c3031606d618becc9066800acd1edd620",
+      "files": {
+        "mir2_platform_web.js": {
+          "bytes": 24393,
+          "sha256": "875090fd42d891cb003f63e46aaed848ead048f322e86ad5338db9a088fa01e7"
+        },
+        "mir2_platform_web_bg.wasm": {
+          "bytes": 250070,
+          "sha256": "87e88fbfcd6136a7f941a448691e48f6ff57d0273863f915aaba2f046a1e10cf"
+        }
+      },
+      "presentation": {
+        "abiVersion": 1,
+        "version": "b166ab3fa16c5b0cdc57da0d7c88042a0ca83be8459a7716b88fdbcaf07f149e",
+        "sourceSha256": "46569ff649e96bdea15c81080f05144c3031606d618becc9066800acd1edd620",
+        "files": {
+          "mir2_platform_web.js": {
+            "bytes": 24721,
+            "sha256": "8bbff9179937703b7fff70bbf3ea8136b46da027470427036a9bee11605c810c"
+          },
+          "mir2_platform_web_bg.wasm": {
+            "bytes": 262089,
+            "sha256": "2113ddf7bf1e2127495436ffe74b699c081bde81e0960a5a5e690d64fd912935"
+          }
+        }
+      },
+      "npcPurchase": {
+        "abiVersion": 1,
+        "version": "87086c5b9349deb15c0af54495b91e91b163b758e05c62cfedbe57f052827e57",
+        "sourceSha256": "46569ff649e96bdea15c81080f05144c3031606d618becc9066800acd1edd620",
+        "files": {
+          "mir2_platform_web.js": {
+            "bytes": 8332,
+            "sha256": "b6a3e9848e46934dd5187120ea543da5d174bf97f1a34d63ca9be714e0b18218"
+          },
+          "mir2_platform_web_bg.wasm": {
+            "bytes": 165835,
+            "sha256": "64ead432045ccc4d7d1719329c75eaab36f2889f0e24d1a3986cfbd397fb12e3"
+          }
+        }
+      },
+      "actualInstantiation": true,
+      "abi": {
+        "auth_ui_abi_version": 1,
+        "client_core_abi_version": 1,
+        "equipment_pending_abi_version": 1,
+        "mail_compose_abi_version": 1,
+        "mail_parcel_abi_version": 1,
+        "mail_send_slot_abi_version": 1,
+        "npc_gold_buy_attempt_abi_version": 1
+      },
+      "imports": [
+        {
+          "module": "./mir2_platform_web_bg.js",
+          "name": "__wbg___wbindgen_throw_6b64449b9b9ed33c",
+          "kind": "function"
+        },
+        {
+          "module": "./mir2_platform_web_bg.js",
+          "name": "__wbindgen_init_externref_table",
+          "kind": "function"
+        }
+      ],
+      "exports": [
+        {
+          "name": "memory",
+          "kind": "memory"
+        },
+        {
+          "name": "__wbg_authuibridge_free",
+          "kind": "function"
+        },
+        {
+          "name": "__wbg_equipmentpendingbridge_free",
+          "kind": "function"
+        },
+        {
+          "name": "__wbg_mailparcelbridge_free",
+          "kind": "function"
+        },
+        {
+          "name": "__wbg_mailsendslotbridge_free",
+          "kind": "function"
+        },
+        {
+          "name": "__wbg_npcgoldbuyattemptbridge_free",
+          "kind": "function"
+        },
+        {
+          "name": "auth_ui_validate_password",
+          "kind": "function"
+        },
+        {
+          "name": "auth_ui_validate_registration",
+          "kind": "function"
+        },
+        {
+          "name": "authuibridge_edit",
+          "kind": "function"
+        },
+        {
+          "name": "authuibridge_keys",
+          "kind": "function"
+        },
+        {
+          "name": "authuibridge_new",
+          "kind": "function"
+        },
+        {
+          "name": "authuibridge_reshuffle",
+          "kind": "function"
+        },
+        {
+          "name": "equipmentpendingbridge_acknowledge",
+          "kind": "function"
+        },
+        {
+          "name": "equipmentpendingbridge_contains",
+          "kind": "function"
+        },
+        {
+          "name": "equipmentpendingbridge_has_instance",
+          "kind": "function"
+        },
+        {
+          "name": "equipmentpendingbridge_new",
+          "kind": "function"
+        },
+        {
+          "name": "equipmentpendingbridge_release_unsent",
+          "kind": "function"
+        },
+        {
+          "name": "equipmentpendingbridge_replace_snapshot",
+          "kind": "function"
+        },
+        {
+          "name": "equipmentpendingbridge_reserve",
+          "kind": "function"
+        },
+        {
+          "name": "equipmentpendingbridge_status",
+          "kind": "function"
+        },
+        {
+          "name": "mailparcelbridge_new",
+          "kind": "function"
+        },
+        {
+          "name": "mailparcelbridge_transact",
+          "kind": "function"
+        },
+        {
+          "name": "mailsendslotbridge_draft_gold",
+          "kind": "function"
+        },
+        {
+          "name": "mailsendslotbridge_new",
+          "kind": "function"
+        },
+        {
+          "name": "mailsendslotbridge_transact",
+          "kind": "function"
+        },
+        {
+          "name": "normalize_mail_message",
+          "kind": "function"
+        },
+        {
+          "name": "npcgoldbuyattemptbridge_new",
+          "kind": "function"
+        },
+        {
+          "name": "npcgoldbuyattemptbridge_transact",
+          "kind": "function"
+        },
+        {
+          "name": "prepare_mail_send",
+          "kind": "function"
+        },
+        {
+          "name": "resolve_quest_action",
+          "kind": "function"
+        },
+        {
+          "name": "auth_ui_abi_version",
+          "kind": "function"
+        },
+        {
+          "name": "client_core_abi_version",
+          "kind": "function"
+        },
+        {
+          "name": "equipment_pending_abi_version",
+          "kind": "function"
+        },
+        {
+          "name": "mail_compose_abi_version",
+          "kind": "function"
+        },
+        {
+          "name": "mail_parcel_abi_version",
+          "kind": "function"
+        },
+        {
+          "name": "mail_send_slot_abi_version",
+          "kind": "function"
+        },
+        {
+          "name": "npc_gold_buy_attempt_abi_version",
+          "kind": "function"
+        },
+        {
+          "name": "__wbindgen_externrefs",
+          "kind": "table"
+        },
+        {
+          "name": "__wbindgen_malloc",
+          "kind": "function"
+        },
+        {
+          "name": "__wbindgen_realloc",
+          "kind": "function"
+        },
+        {
+          "name": "__wbindgen_free",
+          "kind": "function"
+        },
+        {
+          "name": "__wbindgen_start",
+          "kind": "function"
+        }
+      ]
+    },
+    {
+      "label": "presentation",
+      "abiVersion": 1,
+      "version": "b166ab3fa16c5b0cdc57da0d7c88042a0ca83be8459a7716b88fdbcaf07f149e",
+      "sourceSha256": "46569ff649e96bdea15c81080f05144c3031606d618becc9066800acd1edd620",
+      "files": {
+        "mir2_platform_web.js": {
+          "bytes": 24721,
+          "sha256": "8bbff9179937703b7fff70bbf3ea8136b46da027470427036a9bee11605c810c"
+        },
+        "mir2_platform_web_bg.wasm": {
+          "bytes": 262089,
+          "sha256": "2113ddf7bf1e2127495436ffe74b699c081bde81e0960a5a5e690d64fd912935"
+        }
+      },
+      "actualInstantiation": true,
+      "abi": {
+        "bag_to_belt_move_abi_version": 1,
+        "cash_preview_abi_version": 1,
+        "chat_ui_abi_version": 1,
+        "client_presentation_abi_version": 1,
+        "entity_animation_abi_version": 1,
+        "fishing_click_abi_version": 1,
+        "item_tooltip_abi_version": 1,
+        "npc_pearl_buy_abi_version": 2,
+        "npc_repair_quote_abi_version": 1,
+        "ranking_inspect_abi_version": 1
+      },
+      "imports": [
+        {
+          "module": "./mir2_platform_web_bg.js",
+          "name": "__wbg___wbindgen_throw_6b64449b9b9ed33c",
+          "kind": "function"
+        },
+        {
+          "module": "./mir2_platform_web_bg.js",
+          "name": "__wbindgen_init_externref_table",
+          "kind": "function"
+        },
+        {
+          "module": "./mir2_platform_web_bg.js",
+          "name": "__wbindgen_cast_0000000000000001",
+          "kind": "function"
+        }
+      ],
+      "exports": [
+        {
+          "name": "memory",
+          "kind": "memory"
+        },
+        {
+          "name": "__wbg_chatuibridge_free",
+          "kind": "function"
+        },
+        {
+          "name": "__wbg_entityanimationbridge_free",
+          "kind": "function"
+        },
+        {
+          "name": "bag_to_belt_move_plan",
+          "kind": "function"
+        },
+        {
+          "name": "cash_preview_layers",
+          "kind": "function"
+        },
+        {
+          "name": "cash_preview_turn",
+          "kind": "function"
+        },
+        {
+          "name": "chatuibridge_apply",
+          "kind": "function"
+        },
+        {
+          "name": "chatuibridge_cancel",
+          "kind": "function"
+        },
+        {
+          "name": "chatuibridge_defaults",
+          "kind": "function"
+        },
+        {
+          "name": "chatuibridge_document",
+          "kind": "function"
+        },
+        {
+          "name": "chatuibridge_drag",
+          "kind": "function"
+        },
+        {
+          "name": "chatuibridge_edit_all",
+          "kind": "function"
+        },
+        {
+          "name": "chatuibridge_edit_filter",
+          "kind": "function"
+        },
+        {
+          "name": "chatuibridge_edit_transparent",
+          "kind": "function"
+        },
+        {
+          "name": "chatuibridge_new",
+          "kind": "function"
+        },
+        {
+          "name": "chatuibridge_observe",
+          "kind": "function"
+        },
+        {
+          "name": "chatuibridge_open",
+          "kind": "function"
+        },
+        {
+          "name": "chatuibridge_resize",
+          "kind": "function"
+        },
+        {
+          "name": "chatuibridge_restore",
+          "kind": "function"
+        },
+        {
+          "name": "chatuibridge_retire",
+          "kind": "function"
+        },
+        {
+          "name": "chatuibridge_scroll",
+          "kind": "function"
+        },
+        {
+          "name": "entityanimationbridge_getMir2EntityActionPose",
+          "kind": "function"
+        },
+        {
+          "name": "entityanimationbridge_new",
+          "kind": "function"
+        },
+        {
+          "name": "entityanimationbridge_resetMir2EntityAnimations",
+          "kind": "function"
+        },
+        {
+          "name": "entityanimationbridge_resolveMir2EntityAnimationPoses",
+          "kind": "function"
+        },
+        {
+          "name": "fishing_click_decision",
+          "kind": "function"
+        },
+        {
+          "name": "fishing_click_targets",
+          "kind": "function"
+        },
+        {
+          "name": "getMir2MapRoutePlan",
+          "kind": "function"
+        },
+        {
+          "name": "item_tooltip_document",
+          "kind": "function"
+        },
+        {
+          "name": "npc_pearl_buy_plan",
+          "kind": "function"
+        },
+        {
+          "name": "npc_repair_quote",
+          "kind": "function"
+        },
+        {
+          "name": "ranking_inspect_admission",
+          "kind": "function"
+        },
+        {
+          "name": "bag_to_belt_move_abi_version",
+          "kind": "function"
+        },
+        {
+          "name": "cash_preview_abi_version",
+          "kind": "function"
+        },
+        {
+          "name": "chat_ui_abi_version",
+          "kind": "function"
+        },
+        {
+          "name": "client_presentation_abi_version",
+          "kind": "function"
+        },
+        {
+          "name": "entity_animation_abi_version",
+          "kind": "function"
+        },
+        {
+          "name": "fishing_click_abi_version",
+          "kind": "function"
+        },
+        {
+          "name": "getMir2MapRouteVersion",
+          "kind": "function"
+        },
+        {
+          "name": "item_tooltip_abi_version",
+          "kind": "function"
+        },
+        {
+          "name": "npc_pearl_buy_abi_version",
+          "kind": "function"
+        },
+        {
+          "name": "npc_repair_quote_abi_version",
+          "kind": "function"
+        },
+        {
+          "name": "ranking_inspect_abi_version",
+          "kind": "function"
+        },
+        {
+          "name": "__wbindgen_externrefs",
+          "kind": "table"
+        },
+        {
+          "name": "__wbindgen_malloc",
+          "kind": "function"
+        },
+        {
+          "name": "__wbindgen_realloc",
+          "kind": "function"
+        },
+        {
+          "name": "__wbindgen_free",
+          "kind": "function"
+        },
+        {
+          "name": "__externref_table_dealloc",
+          "kind": "function"
+        },
+        {
+          "name": "__wbindgen_start",
+          "kind": "function"
+        }
+      ]
+    },
+    {
+      "label": "npcPurchase",
+      "abiVersion": 1,
+      "version": "87086c5b9349deb15c0af54495b91e91b163b758e05c62cfedbe57f052827e57",
+      "sourceSha256": "46569ff649e96bdea15c81080f05144c3031606d618becc9066800acd1edd620",
+      "files": {
+        "mir2_platform_web.js": {
+          "bytes": 8332,
+          "sha256": "b6a3e9848e46934dd5187120ea543da5d174bf97f1a34d63ca9be714e0b18218"
+        },
+        "mir2_platform_web_bg.wasm": {
+          "bytes": 165835,
+          "sha256": "64ead432045ccc4d7d1719329c75eaab36f2889f0e24d1a3986cfbd397fb12e3"
+        }
+      },
+      "actualInstantiation": true,
+      "abi": {
+        "npc_purchase_receipt_abi_version": 1
+      },
+      "imports": [
+        {
+          "module": "./mir2_platform_web_bg.js",
+          "name": "__wbg___wbindgen_throw_6b64449b9b9ed33c",
+          "kind": "function"
+        },
+        {
+          "module": "./mir2_platform_web_bg.js",
+          "name": "__wbindgen_init_externref_table",
+          "kind": "function"
+        },
+        {
+          "module": "./mir2_platform_web_bg.js",
+          "name": "__wbindgen_cast_0000000000000001",
+          "kind": "function"
+        }
+      ],
+      "exports": [
+        {
+          "name": "memory",
+          "kind": "memory"
+        },
+        {
+          "name": "__wbg_npcpurchasereceiptbridge_free",
+          "kind": "function"
+        },
+        {
+          "name": "npcpurchasereceiptbridge_new",
+          "kind": "function"
+        },
+        {
+          "name": "npcpurchasereceiptbridge_transact",
+          "kind": "function"
+        },
+        {
+          "name": "npc_purchase_receipt_abi_version",
+          "kind": "function"
+        },
+        {
+          "name": "__wbindgen_externrefs",
+          "kind": "table"
+        },
+        {
+          "name": "__externref_table_dealloc",
+          "kind": "function"
+        },
+        {
+          "name": "__wbindgen_malloc",
+          "kind": "function"
+        },
+        {
+          "name": "__wbindgen_realloc",
+          "kind": "function"
+        },
+        {
+          "name": "__wbindgen_free",
+          "kind": "function"
+        },
+        {
+          "name": "__wbindgen_start",
+          "kind": "function"
+        }
+      ]
+    }
+  ],
+  "checks": {
+    "releaseGuards": {
+      "passed": 72,
+      "failed": 0,
+      "skipped": 0
+    },
+    "coreRust": {
+      "passed": 197,
+      "failed": 0,
+      "ignored": 0
+    },
+    "presentationRust": {
+      "passed": 92,
+      "failed": 0,
+      "ignored": 0
+    },
+    "nativeWindowsDefaultParallel": {
+      "passed": 1138,
+      "failed": 0,
+      "ignored": 7
+    },
+    "gatewaySharedRegistry": {
+      "passed": 45,
+      "failed": 0,
+      "ignored": 0
+    },
+    "browserCore": {
+      "passed": 186,
+      "failed": 0,
+      "skipped": 0
+    },
+    "standaloneWeb": {
+      "strictTypeScript": true,
+      "pages": 13,
+      "standaloneManuallySupplemented": false,
+      "sourceFingerprintMatches": true
+    },
+    "packaging": {
+      "passed": 59,
+      "failed": 0,
+      "skipped": 0
+    },
+    "tracing": {
+      "passed": 8,
+      "failed": 0,
+      "skipped": 0
+    },
+    "assetReleaseSafety": {
+      "passed": 19,
+      "failed": 0
+    }
+  },
+  "limitsOfEvidence": {
+    "guiAcceptance": false,
+    "productionDeployment": false,
+    "candidate100": false
+  },
+  "evidenceLogDirectory": ".mir2-player-qa/followups-20261015 (ignored local logs, separate from this durable source/hash receipt)",
+  "evidenceLogs": [
+    "client-core-source-build05.txt",
+    "client-core-release-guards05.tap",
+    "client-core-browser-regression07.txt",
+    "client-core-native-final04.txt",
+    "platform-web-presentation-final04.txt",
+    "windows-host-parallel07.txt",
+    "gateway-registry-regression07.txt",
+    "dependency-web-standalone-final04-build.txt",
+    "dependency-web-final04-package02.tap",
+    "dependency-web-final04-tracing.tap",
+    "dependency-web-final04-integrity.json"
+  ]
+}

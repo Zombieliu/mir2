@@ -1,0 +1,12 @@
+
+running 7 tests
+test web::tests::native_game_shop_capability_and_request_id_are_independent_and_strict ... ok
+test web::tests::native_game_shop_handler_failures_are_exact_and_atomic ... ok
+test web::tests::native_game_shop_ordinary_buy_mail_collect_and_reload_is_exactly_once ... ok
+test web::tests::native_game_shop_pending_rejects_second_request_without_replacing_first ... ok
+test web::tests::native_game_shop_pre_execution_failures_are_definite_and_exact ... ok
+test web::tests::native_game_shop_pre_execution_send_failure_keeps_pending_unknown ... ok
+test web::tests::native_game_shop_receipt_is_exact_and_maps_stable_failure_codes ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 1273 filtered out; finished in 5.74s
+

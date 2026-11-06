@@ -1,0 +1,73 @@
+{
+  "owner": "Root",
+  "kind": "Final actual existing filesystem generation03 and independent complete indexed-file gate",
+  "originalCaller": "unchanged4569B",
+  "firstFailedAndGeneration02Proof": {
+    "path": "C:/mir2-cross-platform-storage-20261002/web-source77-public-catalog-starter-20261012-01/root-approved01/source77-manifest-generation-actual01.json",
+    "bytes": 3366,
+    "sha256": "fbb53de06347a8cda086dd0a70da8956a9da6fc9e49135e61514f5b32cbff736"
+  },
+  "config": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source77-public-catalog-starter-20261012-01\\root-approved01\\manifest-generation03-config.json",
+    "bytes": 4795,
+    "sha256": "6e445e235cbdfe8120a5a48b8b7fdd3b10c727fea93970654c2ede3e7856b66d"
+  },
+  "inputSnapshot": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source77-public-catalog-starter-20261012-01\\root-approved01\\source77-manifest-generation-input-snapshot03.json",
+    "bytes": 21880549,
+    "sha256": "6ecefe996d33a30d26659ee06d5f7be884c12d1adc8f1350c21801d7d2da3069"
+  },
+  "actualOuter": {
+    "owner": "Root",
+    "exitCode": 0,
+    "builderPid": 95636,
+    "kind": "Root approved original Source77 final real filesystem manifest03 including isolated negative test neighbor",
+    "exited": true,
+    "disposed": true,
+    "elapsedMs": 552,
+    "configPath": "C:/mir2-cross-platform-storage-20261002/web-source77-public-catalog-starter-20261012-01/root-approved01/manifest-generation03-config.json",
+    "uiOperated": false,
+    "runtimeLaunched": false,
+    "networkUsed": false,
+    "productionBuildAccepted": false,
+    "candidateAccepted": false,
+    "goalComplete": false
+  },
+  "output": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source77-public-catalog-starter-20261012-01\\manifest-generation03\\original-asset-manifest.generated.json",
+    "bytes": 3424612,
+    "sha256": "d0e17d83fd91f5781f63895cc21bb294efdd102ba2f0044069d05950135d84cb"
+  },
+  "copiedInputManifest": {
+    "path": "C:/mir2-cross-platform-storage-20261002/web-source77-public-catalog-starter-20261012-01/prepared-input01/mir2-web3/apps/web/public/original-asset-manifest.generated.json",
+    "bytes": 3424612,
+    "sha256": "d0e17d83fd91f5781f63895cc21bb294efdd102ba2f0044069d05950135d84cb"
+  },
+  "stats": {
+    "assetCount": 17674,
+    "originalMapPngCount": 16816,
+    "originalUiPngCount": 858,
+    "totalBytes": 90296710
+  },
+  "assetHash": "25bad8b7d3ef5a77ad201341decaac6c3c0f652c372c13a7fd9cdd3b78463c68",
+  "indexed17674Differences": 0,
+  "approved709IndexDifferences": 0,
+  "approved709": {
+    "path": "C:/mir2-cross-platform-storage-20261002/web-source77-public-catalog-starter-20261012-01/root-approved01/source77-finite-png-approval01.json",
+    "bytes": 290283,
+    "sha256": "405106eaeca858f7612574a1b1c7008f39f45c7b707a880650c43220d458d61a"
+  },
+  "negativeTestNeighbor": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source77-public-catalog-starter-20261012-01\\prepared-input01\\mir2-web3\\apps\\web\\public\\original-ui\\Items\\2.png",
+    "bytes": 364,
+    "sha256": "512c1232870cbb2dab808bd504827386a6245b4a6f6a79fad371ce3b367aebc0",
+    "relativePath": "apps/web/public/original-ui/Items/2.png",
+    "internal": true,
+    "sourceRole": "genuine public neighbor only portable negative-copy test; excluded from finite709 and Thin selection",
+    "selectedForThin": false,
+    "indexedForHonestFilesystemInventory": true
+  },
+  "handwrittenManifest": false,
+  "remoteFullInventoryAccepted": false,
+  "goalComplete": false
+}

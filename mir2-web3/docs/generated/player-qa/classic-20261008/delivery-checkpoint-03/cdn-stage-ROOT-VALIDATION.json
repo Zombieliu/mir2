@@ -1,0 +1,11 @@
+{
+  "schema": "mir2.r22.original-stage-receipt-root-check.v1",
+  "passed": true,
+  "sourceSha256": "5026c3820c79734c696372433532ff7fcc84d0678b047ddff8e332c0b1c402e7",
+  "receiptSha256": "0a8b88330fd302af8a9cff7d0fe98234c35993e9188e7ad14405f1e7fcc7d73f",
+  "verifiedObjects": 40,
+  "verifiedPublicBytes": 1052247716,
+  "pointerChanged": false,
+  "localCMSNotReverified": true,
+  "mutations": false
+}

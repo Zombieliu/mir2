@@ -1,0 +1,156 @@
+{
+  "projectedReport": {
+    "concurrent": true,
+    "curlPerRequestMaximumSeconds": 18,
+    "fullCatalogRequested": false,
+    "hardWallBudgetSeconds": 20,
+    "installationModified": false,
+    "maximumTotalApplicationBodyBytes": 2097152,
+    "networkWallSeconds": 18.023598,
+    "parentKillDeadlineSeconds": 19.5,
+    "perHostRequests": 1,
+    "proxyEnabled": false,
+    "redirectsFollowed": false,
+    "requests": 2,
+    "results": [
+      {
+        "actualBodyBytes": 1048576,
+        "actualBodySha256": "DA40C2308B24053EACFA07767822E7227989F9423747A2D8EB110D48672ECE9F",
+        "bodyLimitBytes": 1048576,
+        "expectedRangeSatisfied": true,
+        "forcedDeadlineKill": false,
+        "method": "GET",
+        "metrics": {
+          "http_code": 206,
+          "http_version": "1.1",
+          "num_connects": 1,
+          "num_redirects": 0,
+          "remote_port": 443,
+          "size_download": 1048576,
+          "speed_download": 127214,
+          "ssl_verify_result": 0,
+          "time_appconnect": 0.178795,
+          "time_connect": 0.112387,
+          "time_namelookup": 0.0,
+          "time_starttransfer": 0.235392,
+          "time_total": 8.242588
+        },
+        "processExitCode": 0,
+        "proxyEnabled": false,
+        "redirectsFollowed": false,
+        "requestHeaders": [
+          [
+            "range",
+            "bytes=0-1048575"
+          ],
+          [
+            "accept-encoding",
+            "identity"
+          ]
+        ],
+        "responseHeaders": [
+          [
+            "accept-ranges",
+            "bytes"
+          ],
+          [
+            "cache-control",
+            "public, max-age=31536000, immutable"
+          ],
+          [
+            "content-length",
+            "1048576"
+          ],
+          [
+            "content-range",
+            "bytes 0-1048575/68664916"
+          ],
+          [
+            "etag-sha256",
+            "8856F28677E4B38D7B6EF7FFE13E9CC11F9FE2E17E252F915711B839A59551F8"
+          ],
+          [
+            "x-content-type-options",
+            "nosniff"
+          ]
+        ],
+        "tlsVerificationDisabled": false,
+        "url": "https://165.154.65.136.sslip.io/client-updates/packed/generations/1e35573b0c0e5986501f646ef5552a9578dfde59f67be7f8687e012e7cb9f861/catalog.json"
+      },
+      {
+        "actualBodyBytes": 475136,
+        "actualBodySha256": "81944C914FEE5037291855F486D144963398A80DFDEAA895490182E532CCA70E",
+        "bodyLimitBytes": 1048576,
+        "expectedRangeSatisfied": false,
+        "forcedDeadlineKill": false,
+        "method": "GET",
+        "metrics": {
+          "http_code": 206,
+          "http_version": "1.1",
+          "num_connects": 1,
+          "num_redirects": 0,
+          "remote_port": 443,
+          "size_download": 475136,
+          "speed_download": 26395,
+          "ssl_verify_result": 0,
+          "time_appconnect": 1.488132,
+          "time_connect": 0.384521,
+          "time_namelookup": 0.126086,
+          "time_starttransfer": 2.170851,
+          "time_total": 18.001048
+        },
+        "processExitCode": 28,
+        "proxyEnabled": false,
+        "redirectsFollowed": false,
+        "requestHeaders": [
+          [
+            "range",
+            "bytes=0-1048575"
+          ],
+          [
+            "accept-encoding",
+            "identity"
+          ]
+        ],
+        "responseHeaders": [
+          [
+            "content-length",
+            "1048576"
+          ],
+          [
+            "content-range",
+            "bytes 0-1048575/68664916"
+          ],
+          [
+            "accept-ranges",
+            "bytes"
+          ],
+          [
+            "cache-control",
+            "public, max-age=31536000, immutable"
+          ],
+          [
+            "etag-sha256",
+            "B2948D30F7842A82B1340DD8604F2F6483E4541816C11068DBD4510853988D01"
+          ],
+          [
+            "x-content-type-options",
+            "nosniff"
+          ]
+        ],
+        "tlsVerificationDisabled": false,
+        "url": "https://assets.mir2.obelisk.build/client-updates/packed/generations/1e35573b0c0e5986501f646ef5552a9578dfde59f67be7f8687e012e7cb9f861/catalog.json"
+      }
+    ],
+    "schema": "mir2.packed.catalog-bounded-range-diagnostic.v1",
+    "secretValuesRecorded": false,
+    "serverOrCloudflareMutation": false,
+    "startedUtc": "2026-10-29T08:40:38.865305+00:00",
+    "totalActualBodyBytes": 1523712
+  },
+  "projectionBoundary": "Explicit fields only; raw log/body/attempt/env/argv/private config excluded.",
+  "role": "bounded-network-diag",
+  "schema": "mir2.evidence.public-projection.v1",
+  "sourceSha256": "1C6BC72DB71D5BCC92D2A451180918E7A04247BB10D06E4E166D66EEF082F105",
+  "sourceSize": 5543
+}

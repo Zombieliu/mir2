@@ -1,0 +1,43 @@
+{
+  "schemaVersion": 1,
+  "createdAt": "2026-10-25T08:19:21.361Z",
+  "cause": "Root independent cleanup was previously SHA-bound without independently checking its actual identity/outcome schema.",
+  "original": {
+    "path": "verify-ended-formal10-v3.mjs",
+    "bytes": 27968,
+    "sha256": "3c689714ec1c9849b87e9730eb99ac192847f94250b7d805af890305373da6fc"
+  },
+  "derived": {
+    "path": "verify-ended-formal10-v4.mjs",
+    "bytes": 28111,
+    "sha256": "f5cc63dc6587e50673ac984c541390f0a415f4fb19e7371d957c43dbac0747c7"
+  },
+  "oldContract": {
+    "path": "formal-contract-v1.mjs",
+    "bytes": 5570,
+    "sha256": "300441547632ecba0c132204352b02153edee96d1e0ce5e9e361d3c724a7363b"
+  },
+  "newContract": {
+    "path": "formal-contract-v2.mjs",
+    "bytes": 6103,
+    "sha256": "5aa9f0057bacf899270b14619d0168148c07323f97065aff8c56bf14cf227b4c"
+  },
+  "contractAppendExact": "\nexport function assertRootCleanup(value,runId){assert.equal(value.schemaVersion,1);assert.equal(value.runId,runId);assert.equal(value.gatewayPid,70212);assert.equal(value.monitorPid,68764);assert.equal(value.processesAbsent,true);assert.equal(value.portsFree,true);assert.equal(value.readOnlyIndependentCheck,true);assert.equal(value.capacityAccepted,false);assert.deepEqual(value.processes,[]);assert.deepEqual(value.listeningPorts,[]);assert.ok(typeof value.verifiedAt==='string'&&Number.isFinite(Date.parse(value.verifiedAt)));}\n",
+  "edits": [
+    {
+      "before": "phaseTelemetryDeltas,parseFormalInvocation} from './formal-contract-v1.mjs';",
+      "after": "phaseTelemetryDeltas,parseFormalInvocation,assertRootCleanup} from './formal-contract-v2.mjs';"
+    },
+    {
+      "before": "assert.equal(report.runId,RUN);assertPolicy(report.policy);",
+      "after": "assert.equal(report.runId,RUN);assertRootCleanup(await read(BASE,'formal10-root-independent-cleanup-v1.json'),RUN);assertPolicy(report.policy);"
+    },
+    {
+      "before": "cleanup:{allSevenTrue:true,gatewayExit0:true,monitorExit0:true,rootCleanupSha256:",
+      "after": "cleanup:{allSevenTrue:true,gatewayExit0:true,monitorExit0:true,rootIndependentCleanupSchemaChecked:true,rootCleanupSha256:"
+    }
+  ],
+  "inverseRawExact": true,
+  "actualRunRead": false,
+  "productSourceChanged": false
+}

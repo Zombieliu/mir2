@@ -1,0 +1,35 @@
+{
+  "owner": "Root",
+  "before": [
+    {
+      "bytes": 73249,
+      "sha256": "c1fa2e0add6425ab6c3ddf23f23ecd54cede18fbff86eefcea732b56d6dc8bc9"
+    },
+    {
+      "bytes": 13165,
+      "sha256": "ad3a52e03a8addc04ec8d8f39de58606c351f23087e65161b821e3d81e5a38bc"
+    }
+  ],
+  "after": [
+    {
+      "path": "E:/mir2-player-journey/mir2-web3/apps/web/lib/crystal-map-loader.ts",
+      "bytes": 73092,
+      "sha256": "5b2baf06c032bc873e40b3b59fdf87327561e2575c8879dfbebac33c1d0410cd"
+    },
+    {
+      "path": "E:/mir2-player-journey/mir2-web3/apps/web/lib/original-ui-export-server.ts",
+      "bytes": 13004,
+      "sha256": "0d18d569009a15ee1c960401d6bd6bcc9aaa2c2621120bf7299ac95d6d50c720"
+    }
+  ],
+  "unrelatedByteChanges": 0,
+  "removedHardcodedDriveDefaults": true,
+  "explicitConfiguredRootBranchUnchanged": true,
+  "generatedMapAndLibraryMetaFallbackUnchanged": true,
+  "productionMetaBranchUnchanged": true,
+  "mainTsconfigUnchanged": true,
+  "oldStrictNext02Preserved": true,
+  "nextStrictAndPortableClosureVerificationPending": true,
+  "noPrivateReads": true,
+  "noProductExecution": true
+}

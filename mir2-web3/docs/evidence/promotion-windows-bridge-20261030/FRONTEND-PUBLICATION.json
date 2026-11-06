@@ -1,0 +1,34 @@
+{
+  "workflowRunId": "41071419623",
+  "workflowUrl": "https://github.com/Zombieliu/mir2/actions/runs/41071419623",
+  "conclusion": "success",
+  "sourceSha": "806e8be6d7da536184413856573965d0113e97ab",
+  "deploymentId": "dpl_2ekBnauSAihEAWLFguLcHKrs7kx3",
+  "publicChecksAtUtc": "2026-10-30T14:27:31.3793012Z",
+  "campaignId": "numeron-windows-playtest-20261030",
+  "commissionEnabled": true,
+  "payoutEnabled": false,
+  "protectedCandidateHttpChecks": "passed",
+  "publicProductionHttpChecks": "passed",
+  "realtimeBundleChecks": "passed",
+  "promotionAssetCount": 13,
+  "aliases": [
+    {
+      "alias": "mir2.obelisk.build",
+      "id": "dpl_2ekBnauSAihEAWLFguLcHKrs7kx3",
+      "readyState": "READY",
+      "sourceSha": "806e8be6d7da536184413856573965d0113e97ab"
+    },
+    {
+      "alias": "mir2-web3-web.vercel.app",
+      "id": "dpl_2ekBnauSAihEAWLFguLcHKrs7kx3",
+      "readyState": "READY",
+      "sourceSha": "806e8be6d7da536184413856573965d0113e97ab"
+    }
+  ],
+  "marketingUnchanged": "dpl_7krVTQSx5Wj9Ht8Sd5KF5o9d3F97",
+  "realMobileSignature": false,
+  "realRecharge": false,
+  "chainPayout": false,
+  "postDeployVisualAcceptance": "pending; browser automation connection timed out"
+}

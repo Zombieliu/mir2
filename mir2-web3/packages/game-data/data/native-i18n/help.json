@@ -1,0 +1,950 @@
+{
+  "entries": [
+    {
+      "key": "help.page.00.title",
+      "en": "Walking & Running",
+      "zh-TW": "行走與奔跑",
+      "pt-BR": "Caminhar e correr",
+      "aliases": []
+    },
+    {
+      "key": "help.page.00.body",
+      "en": "Left-click clear ground to walk to it. Clicking a monster or another player can select an attack instead, so choose the ground carefully.\n\nHold the right mouse button to run toward the cursor. Obstacles can block the route. Watch your HP while travelling; the original guide also warns that running can consume health.",
+      "zh-TW": "在空地上按一下滑鼠左鍵，角色便會朝該處行走。點到怪物或其他玩家可能選中攻擊目標，請留意點擊位置。\n\n按住滑鼠右鍵，朝游標方向奔跑；障礙物可能擋住路線。移動途中請留意生命值。原版說明另提醒奔跑可能消耗生命值，實際變化以目前角色狀態為準。",
+      "pt-BR": "Clique com o botão esquerdo em um ponto livre do chão para caminhar até ele. Clicar em um monstro ou jogador pode selecionar um alvo de ataque; escolha o chão com cuidado.\n\nSegure o botão direito para correr na direção do cursor. Obstáculos podem bloquear o caminho. Observe seu HP durante o trajeto. O guia original também alerta que correr pode consumir vida; acompanhe o estado atual do personagem.",
+      "aliases": []
+    },
+    {
+      "key": "help.page.01.title",
+      "en": "Attacking & Attack Modes",
+      "zh-TW": "攻擊與攻擊模式",
+      "pt-BR": "Ataques e modos de ataque",
+      "aliases": []
+    },
+    {
+      "key": "help.page.01.body",
+      "en": "Left-click a monster to approach and attack it. To attack another player, select that player and hold Shift. Your attack mode determines which targets may be hit; check the mode below the minimap.\n\nThe default Ctrl + H shortcut cycles attack modes:\n• Peace: attacks do not harm players.\n• Group: protects members of your group.\n• Guild: protects your guild and allied guilds.\n• Red/Brown: targets players with red or brown names.\n• All: can harm everyone except yourself.",
+      "zh-TW": "以滑鼠左鍵點選怪物，角色會接近並攻擊。要攻擊其他玩家，先選中該玩家，再按住 Shift。能否命中仍受攻擊模式限制，可在小地圖下方查看目前模式。\n\n預設以 Ctrl + H 切換模式：\n• 和平：不傷害其他玩家。\n• 組隊：保護自己的隊友。\n• 公會：保護本公會與同盟公會成員。\n• 紅／棕名：以紅名或棕名玩家為攻擊對象。\n• 全體：除自己外，其他對象都可能受傷。",
+      "pt-BR": "Clique em um monstro com o botão esquerdo para se aproximar e atacar. Para atacar outro jogador, selecione-o e mantenha Shift pressionado. O modo de ataque limita quem pode ser atingido; confira-o abaixo do minimapa.\n\nCtrl + H alterna os modos por padrão:\n• Pacífico: não causa dano a jogadores.\n• Grupo: protege os membros do seu grupo.\n• Guilda: protege sua guilda e as aliadas.\n• Vermelho/Marrom: ataca jogadores com nomes dessas cores.\n• Total: pode atingir todos, exceto você.",
+      "aliases": []
+    },
+    {
+      "key": "help.page.02.title",
+      "en": "Picking Up Items & Harvesting",
+      "zh-TW": "拾取物品與採集屍體",
+      "pt-BR": "Pegar itens e colher de cadáveres",
+      "aliases": []
+    },
+    {
+      "key": "help.page.02.body",
+      "en": "Monsters may leave items or gold on the ground. Stand on an item and left-click it, or use the pickup shortcut (Tab by default).\n\nSome dead monsters can also be harvested for meat or other items. Kill the monster, stand beside the corpse, hold Alt and press the left mouse button over it. Continue harvesting until the corpse becomes a skeleton. Collected meat goes into your bag.",
+      "zh-TW": "怪物死亡後可能掉落物品或金幣。走到物品所在位置，以滑鼠左鍵拾取，或使用拾取快捷鍵（預設為 Tab）。\n\n部分怪物的屍體還可採集肉類或其他物品。先擊殺怪物，再站在屍體旁，按住 Alt 並以滑鼠左鍵點擊屍體。持續採集，直到屍體變成骨骸；取得的肉會放入背包。",
+      "pt-BR": "Monstros podem deixar itens ou ouro no chão. Fique sobre o item e clique nele com o botão esquerdo, ou use o atalho de coleta (Tab por padrão).\n\nAlguns cadáveres também fornecem carne ou outros itens. Derrote o monstro, fique ao lado do corpo, segure Alt e clique nele com o botão esquerdo. Continue até restar um esqueleto. A carne recolhida vai para o inventário.",
+      "aliases": []
+    },
+    {
+      "key": "help.page.03.title",
+      "en": "Health & Healing Potions",
+      "zh-TW": "生命值與生命藥水",
+      "pt-BR": "Vida e poções de HP",
+      "aliases": []
+    },
+    {
+      "key": "help.page.03.body",
+      "en": "Taking damage lowers your health. The red part of the lower-left orb shows HP; current HP and maximum HP are displayed together. Its display style can be changed in Options. At 0 HP, your character dies.\n\nHP recovers over time while resting, but potions are useful during battle. Right-click an HP potion in your bag to drink it. You can also place a potion on the quick belt and press its number key.",
+      "zh-TW": "受到傷害會減少生命值。左下角球形狀態區的紅色部分代表 HP，並顯示目前值與上限；可在選項中切換顯示方式。HP 降到 0 時，角色死亡。\n\n休息時生命值會逐漸恢復，戰鬥中則可使用生命藥水。在背包中以滑鼠右鍵點擊藥水即可飲用；也可把藥水放入快捷欄，按對應數字鍵使用。",
+      "pt-BR": "Receber dano reduz sua vida. A parte vermelha do indicador no canto inferior esquerdo mostra o HP atual e o máximo. O estilo dessa indicação pode ser alterado nas opções. Ao chegar a 0 HP, o personagem morre.\n\nO HP se recupera com o tempo em repouso, mas poções ajudam durante o combate. Clique com o botão direito em uma poção de HP no inventário, ou coloque-a no cinto rápido e pressione a tecla numérica correspondente.",
+      "aliases": []
+    },
+    {
+      "key": "help.page.04.title",
+      "en": "Learning & Assigning Skills",
+      "zh-TW": "學習技能與設定快捷鍵",
+      "pt-BR": "Aprender habilidades e definir atalhos",
+      "aliases": []
+    },
+    {
+      "key": "help.page.04.body",
+      "en": "Learn a skill from its skill book. Books can come from NPC shops, other players or monster drops. Right-click the book in your bag when you meet its class and level requirements.\n\nOpen the skill window (F11 by default), select a learned skill, choose a function key in the assignment window, then save. The skill bar shows the assigned skill and key.",
+      "zh-TW": "技能需要使用相應的技能書學習。技能書可由商店、其他玩家或怪物掉落取得；符合職業與等級條件後，在背包中以滑鼠右鍵點擊技能書。\n\n開啟技能視窗（預設 F11），選擇已學會的技能，在設定視窗選取功能鍵，再儲存設定。技能欄會顯示該技能及其快捷鍵。",
+      "pt-BR": "Aprenda uma habilidade usando o livro correspondente. Livros podem vir de lojas de NPCs, de outros jogadores ou de monstros. Ao cumprir os requisitos de classe e nível, clique com o botão direito no livro no inventário.\n\nAbra a janela de habilidades (F11 por padrão), escolha uma habilidade aprendida, selecione uma tecla de função e salve. A barra de habilidades passa a mostrar a habilidade e seu atalho.",
+      "aliases": []
+    },
+    {
+      "key": "help.page.05.title",
+      "en": "Using & Training Skills",
+      "zh-TW": "施放技能與提升熟練度",
+      "pt-BR": "Usar e treinar habilidades",
+      "aliases": []
+    },
+    {
+      "key": "help.page.05.body",
+      "en": "After assigning a skill to a function key, point at the intended monster or player and press that key. Casting consumes the MP required by that skill.\n\nSkills gain practice experience as they are used. Open the skill window to see current practice, the amount needed for the next skill level and level requirements. Higher skill levels can improve damage or healing.",
+      "zh-TW": "替技能設定快捷鍵後，將游標移到目標怪物或玩家上，再按該快捷鍵施放。施放時會消耗技能所需的魔力。\n\n使用技能可累積熟練度。開啟技能視窗，可查看目前熟練度、下一級所需數值與等級條件。提升技能等級可增強相應的傷害或治療效果。",
+      "pt-BR": "Depois de atribuir uma tecla à habilidade, aponte para o monstro ou jogador desejado e pressione o atalho. A habilidade consome a quantidade de MP exigida.\n\nAs habilidades acumulam experiência de prática com o uso. Na janela de habilidades, veja a prática atual, o valor necessário para avançar e o requisito de nível. Níveis maiores podem melhorar o dano ou a cura.",
+      "aliases": []
+    },
+    {
+      "key": "help.page.06.title",
+      "en": "Mana & MP Potions",
+      "zh-TW": "魔力與魔力藥水",
+      "pt-BR": "Mana e poções de MP",
+      "aliases": []
+    },
+    {
+      "key": "help.page.06.body",
+      "en": "Skills and spells consume mana. You cannot cast a skill without enough MP. The blue part of the lower-left orb shows current and maximum MP; its display style can be changed in Options.\n\nMP recovers over time while resting. During combat, right-click an MP potion in your bag or use its assigned quick-belt number key to restore mana.",
+      "zh-TW": "技能與法術會消耗魔力；MP 不足時，無法施放需要魔力的技能。左下角球形狀態區的藍色部分顯示目前 MP 與上限，可在選項中切換顯示方式。\n\n休息時魔力會逐漸恢復。戰鬥中可在背包以滑鼠右鍵飲用魔力藥水，或把藥水放入快捷欄，再按對應數字鍵恢復魔力。",
+      "pt-BR": "Habilidades e magias consomem mana. Sem MP suficiente, não é possível usar uma habilidade que exija mana. A parte azul do indicador inferior esquerdo mostra o MP atual e o máximo; o estilo pode ser alterado nas opções.\n\nO MP se recupera com o tempo em repouso. Em combate, clique com o botão direito em uma poção de MP no inventário, ou use a tecla numérica dela no cinto rápido.",
+      "aliases": []
+    },
+    {
+      "key": "help.page.07.title",
+      "en": "Chat Channels",
+      "zh-TW": "聊天與頻道",
+      "pt-BR": "Canais de conversa",
+      "aliases": []
+    },
+    {
+      "key": "help.page.07.body",
+      "en": "Press Enter, type your message, then press Enter again to send it. Select a channel before speaking.\n\nThe channel buttons are Normal, Shout, Whisper, Lover, Mentor, Group and Guild. Normal reaches nearby players; Shout reaches a larger surrounding area. Whisper is private between you and its recipient. Lover and Mentor address the corresponding partner. Group and Guild chat reach members of those groups regardless of their location.",
+      "zh-TW": "按 Enter 開始輸入，輸入訊息後再按 Enter 送出。發話前可先選擇頻道。\n\n頻道依序為一般、喊話、私聊、伴侶、師徒、隊伍與公會。一般訊息傳給附近玩家；喊話的範圍較大。私聊只傳給指定對象，伴侶與師徒頻道則傳給對應關係人。隊伍與公會訊息可傳給所屬成員，不受彼此所在地限制。",
+      "pt-BR": "Pressione Enter, escreva e pressione Enter novamente para enviar. Escolha o canal antes de falar.\n\nOs canais são Normal, Grito, Sussurro, Cônjuge, Mentor, Grupo e Guilda. Normal alcança jogadores próximos; Grito abrange uma área maior. Sussurro é privado com o destinatário. Cônjuge e Mentor falam com o respectivo parceiro. Grupo e Guilda alcançam seus membros independentemente da localização.",
+      "aliases": []
+    },
+    {
+      "key": "help.page.08.title",
+      "en": "Creating & Managing a Group",
+      "zh-TW": "建立與管理隊伍",
+      "pt-BR": "Criar e administrar um grupo",
+      "aliases": []
+    },
+    {
+      "key": "help.page.08.body",
+      "en": "Open the group window (P by default). Enable group invitations by changing the red hand button to green.\n\nClick Create and enter the name of the player you wish to invite. When that player accepts, the group is formed. The creator is the leader and can add or remove members.\n\nGrouped players can share monster experience and the kill progress required by quests.",
+      "zh-TW": "開啟隊伍視窗（預設 P），點擊左下角的紅色手掌，切換為綠色以允許組隊。\n\n按建立，輸入要邀請的玩家名稱。對方接受後便會組成隊伍。建立者擔任隊長，可新增或移除隊員。\n\n隊員可共享擊殺怪物的經驗值，以及任務所需的擊殺進度。",
+      "pt-BR": "Abra a janela de grupo (P por padrão). Ative os convites mudando o botão da mão vermelha para verde.\n\nClique em Criar e digite o nome de quem deseja convidar. O grupo se forma quando o jogador aceita. Quem o criou é o líder e pode adicionar ou remover membros.\n\nJogadores em grupo podem compartilhar experiência de monstros e progresso de abates exigidos por missões.",
+      "aliases": []
+    },
+    {
+      "key": "help.page.09.title",
+      "en": "Durability & Equipment Condition",
+      "zh-TW": "耐久度與裝備狀態",
+      "pt-BR": "Durabilidade e estado do equipamento",
+      "aliases": []
+    },
+    {
+      "key": "help.page.09.body",
+      "en": "Attacking wears down weapons; being hit wears down armor and accessories. At 0 durability, an item stops providing its attributes. Find the appropriate NPC to repair it.\n\nThe circular sword button below the minimap opens the equipment-condition display. Unequipped items and items at 0 durability are not shown. Yellow marks equipment below 50% durability; red marks equipment below 20%.",
+      "zh-TW": "攻擊會消耗武器耐久度，受到攻擊則會磨損防具與飾品。耐久度降到 0 時，該裝備的屬性不再生效，需找相應的 NPC 修理。\n\n點擊小地圖下方的圓形劍圖示，可查看裝備狀態。未穿戴或耐久度為 0 的物品不會顯示。耐久度低於 50% 時顯示黃色，低於 20% 時顯示紅色。",
+      "pt-BR": "Atacar desgasta a arma; receber golpes desgasta armaduras e acessórios. Com 0 de durabilidade, o item deixa de fornecer seus atributos. Procure o NPC apropriado para repará-lo.\n\nO botão circular com uma espada, abaixo do minimapa, abre o estado do equipamento. Itens não equipados ou com durabilidade 0 não aparecem. Amarelo indica menos de 50% de durabilidade; vermelho, menos de 20%.",
+      "aliases": []
+    },
+    {
+      "key": "help.page.10.title",
+      "en": "Buying Items",
+      "zh-TW": "購買物品",
+      "pt-BR": "Comprar itens",
+      "aliases": []
+    },
+    {
+      "key": "help.page.10.body",
+      "en": "Speak to a merchant who sells the item and choose Buy. Select the item from the list, click Buy, enter the quantity and confirm.\n\nThe purchase requires enough gold and free bag space. Potions and scrolls can be assigned automatically to an empty quick-belt slot.",
+      "zh-TW": "與販售所需物品的商人交談，選擇購買。從清單點選物品，按購買，再輸入數量並確認。\n\n購買前請備妥金幣，並確保背包有足夠空間。若快捷欄有空格，買入的藥水與卷軸可自動配置到快捷欄。",
+      "pt-BR": "Fale com um comerciante que venda o item e escolha Comprar. Selecione o item na lista, clique em Comprar, informe a quantidade e confirme.\n\nÉ preciso ter ouro e espaço suficientes no inventário. Poções e pergaminhos podem ser colocados automaticamente em um espaço livre do cinto rápido.",
+      "aliases": []
+    },
+    {
+      "key": "help.page.11.title",
+      "en": "Selling Items",
+      "zh-TW": "出售物品",
+      "pt-BR": "Vender itens",
+      "aliases": []
+    },
+    {
+      "key": "help.page.11.body",
+      "en": "Sell each kind of item to an appropriate merchant; for example, a weapon shop buys weapons. Choose Sell, then place an item from your bag into the sale slot. Review the offered price and confirm.\n\nThe Hold option lets you sell consecutive items without confirming each one. After enabling it, placing a valid item in the sale slot sells it immediately.",
+      "zh-TW": "不同商人收購不同類型的物品，例如武器店收購武器。選擇出售後，把背包中的物品放入出售欄，確認報價，再按確認。\n\n啟用連續操作功能後，可不必逐次按確認。此時將符合條件的物品放入出售欄，便會立即出售；操作前請確認選中的物品。",
+      "pt-BR": "Cada comerciante compra tipos específicos de itens; uma loja de armas, por exemplo, compra armas. Escolha Vender e coloque o item do inventário no espaço de venda. Confira o preço oferecido e confirme.\n\nA opção de operação contínua permite vender vários itens sem confirmar um por um. Com ela ativada, um item válido colocado no espaço de venda é vendido imediatamente.",
+      "aliases": []
+    },
+    {
+      "key": "help.page.12.title",
+      "en": "Repairing Items",
+      "zh-TW": "修理裝備",
+      "pt-BR": "Reparar itens",
+      "aliases": []
+    },
+    {
+      "key": "help.page.12.body",
+      "en": "Find a merchant who repairs that type of equipment, choose Repair, then put the item in the repair slot. Review the price and confirm.\n\nNormal repairs can reduce maximum durability. The item must be in your bag before repair.\n\nThe Hold option repairs consecutive items without a separate confirmation. With it enabled, a valid item placed in the repair slot is repaired immediately.",
+      "zh-TW": "找可修理該類裝備的商人，選擇修理，把物品放入修理欄。查看費用後再確認。\n\n一般修理有可能降低裝備的耐久度上限。要修理的物品必須先放在背包內。\n\n連續操作功能可省略逐件確認。啟用後，將符合條件的物品放入修理欄，便會立即修理。",
+      "pt-BR": "Procure um comerciante que repare esse tipo de equipamento, escolha Reparar e coloque o item no espaço de reparo. Confira o custo e confirme.\n\nReparos comuns podem reduzir a durabilidade máxima. O item precisa estar no inventário para ser reparado.\n\nA operação contínua dispensa a confirmação de cada item. Quando ativada, repara imediatamente um item válido colocado no espaço de reparo.",
+      "aliases": []
+    },
+    {
+      "key": "help.page.13.title",
+      "en": "Trading with Another Player",
+      "zh-TW": "與其他玩家交易",
+      "pt-BR": "Trocar com outro jogador",
+      "aliases": []
+    },
+    {
+      "key": "help.page.13.body",
+      "en": "Allow trading before starting. The @allowtrade chat command toggles permission and reports the new state. Face the other player and open trade (T by default). The trade window appears after the other player accepts.\n\nMove items from your bag into the trade window; the original trade grid has up to 10 item slots. Click the gold amount to enter an offer. Check both offers before both players confirm. The exchange completes only after acceptance.",
+      "zh-TW": "交易前須先允許交易。在聊天欄輸入 @allowtrade 可切換允許狀態，系統會提示結果。與對方面對面，再開啟交易（預設 T）；對方接受後，交易視窗便會開啟。\n\n把背包物品放入交易欄；原版交易欄最多可放 10 件物品。點擊金幣數字可輸入交易金額。雙方核對物品與金額後各自確認，交易才會完成。",
+      "pt-BR": "Ative a permissão de troca antes de começar. O comando de chat @allowtrade alterna essa permissão e informa o resultado. Fique de frente para o outro jogador e abra a troca (T por padrão). A janela aparece quando ele aceita.\n\nMova itens do inventário para a troca; a grade original tem até 10 espaços. Clique no valor em ouro para definir sua oferta. Confira as duas ofertas antes de ambos confirmarem. A troca só termina após a aceitação.",
+      "aliases": []
+    },
+    {
+      "key": "help.page.14.title",
+      "en": "Inspecting a Player",
+      "zh-TW": "查看其他玩家",
+      "pt-BR": "Inspecionar outro jogador",
+      "aliases": []
+    },
+    {
+      "key": "help.page.14.body",
+      "en": "Place the cursor over a player, hold Ctrl and right-click to inspect their equipment.\n\nFrom the inspection window you can view equipment, invite the player to your group, add them as a friend or send in-game mail. Click their name to begin a private message. The bottom buttons are group invitation, friend request and mail, from left to right.",
+      "zh-TW": "把游標移到其他玩家身上，按住 Ctrl 並按滑鼠右鍵，可查看對方裝備。\n\n查看視窗亦提供邀請組隊、加入好友及寄送遊戲郵件等功能。點擊對方名稱可開始私聊。下方按鈕由左至右依序為邀請組隊、加入好友及郵件。",
+      "pt-BR": "Aponte para um jogador, segure Ctrl e clique com o botão direito para inspecionar o equipamento dele.\n\nA janela permite ver o equipamento, convidar o jogador para o grupo, adicioná-lo como amigo ou enviar correio do jogo. Clique no nome para iniciar uma mensagem privada. Os botões inferiores são, da esquerda para a direita: convite de grupo, amizade e correio.",
+      "aliases": []
+    },
+    {
+      "key": "help.page.15.title",
+      "en": "Physical & Magical Defense",
+      "zh-TW": "物理防禦與魔法防禦",
+      "pt-BR": "Defesa física e mágica",
+      "aliases": []
+    },
+    {
+      "key": "help.page.15.body",
+      "en": "AC is physical armor and MAC is magical armor. Open your character attributes to see both ranges.\n\nAC reduces damage from physical attacks; MAC reduces magical damage. Armor and accessories can raise these defenses. Compare the actual item attributes as well as its level requirement.",
+      "zh-TW": "AC 代表物理防禦，MAC 代表魔法防禦；可在角色屬性中查看各自的數值範圍。\n\n受到物理攻擊時，由 AC 抵擋相應傷害；受到魔法攻擊時，由 MAC 抵擋相應傷害。防具與飾品可提高防禦，選擇裝備時請比較實際屬性及等級需求。",
+      "pt-BR": "AC é a defesa física e MAC é a defesa mágica. Abra os atributos do personagem para consultar seus intervalos.\n\nAC reduz dano de ataques físicos; MAC reduz dano mágico. Armaduras e acessórios podem aumentar essas defesas. Compare os atributos reais do equipamento, além do requisito de nível.",
+      "aliases": []
+    },
+    {
+      "key": "help.page.16.title",
+      "en": "Physical Attack (DC)",
+      "zh-TW": "物理攻擊（DC）",
+      "pt-BR": "Ataque físico (DC)",
+      "aliases": []
+    },
+    {
+      "key": "help.page.16.body",
+      "en": "DC represents physical attack power. Check its range in your character attributes. Higher DC increases the damage of physical attacks.\n\nWeapons, armor and accessories may add DC. Compare their attack attributes and equip items suitable for your class and level.",
+      "zh-TW": "DC 代表物理攻擊力，可在角色屬性中查看其數值範圍。DC 越高，物理攻擊可造成的傷害越高。\n\n武器、防具與飾品都可能附帶 DC。選擇裝備時，請比較攻擊屬性，並確認符合職業與等級需求。",
+      "pt-BR": "DC representa o poder de ataque físico. Consulte seu intervalo nos atributos do personagem. Um DC maior aumenta o dano dos ataques físicos.\n\nArmas, armaduras e acessórios podem fornecer DC. Compare os atributos de ataque e equipe itens adequados à sua classe e nível.",
+      "aliases": []
+    },
+    {
+      "key": "help.page.17.title",
+      "en": "Magic Attack (MC)",
+      "zh-TW": "魔法攻擊（MC）",
+      "pt-BR": "Ataque mágico (MC)",
+      "aliases": []
+    },
+    {
+      "key": "help.page.17.body",
+      "en": "MC represents magical attack power. Check its range in your character attributes. Higher MC improves the damage of skills and spells that use magic attack.\n\nWeapons, armor and accessories can add MC. Equipping suitable items increases this attribute and the power of the relevant magic.",
+      "zh-TW": "MC 代表魔法攻擊力，可在角色屬性中查看其數值範圍。MC 越高，依魔法攻擊力計算的技能與法術傷害越高。\n\n武器、防具與飾品可能附帶 MC。穿戴合適裝備，可提高此屬性及相關法術的威力。",
+      "pt-BR": "MC representa o poder de ataque mágico. Consulte seu intervalo nos atributos do personagem. MC maior melhora o dano das habilidades e magias que usam esse atributo.\n\nArmas, armaduras e acessórios podem fornecer MC. Equipar itens adequados aumenta esse atributo e o poder das magias correspondentes.",
+      "aliases": []
+    },
+    {
+      "key": "help.page.18.title",
+      "en": "Spirit Attack (SC)",
+      "zh-TW": "道術（SC）",
+      "pt-BR": "Poder espiritual (SC)",
+      "aliases": []
+    },
+    {
+      "key": "help.page.18.body",
+      "en": "SC represents spirit attack power, the attribute used by the Taoist's corresponding skills. View it in your character attributes. Higher SC improves the effects of skills that scale with spirit power.\n\nWeapons, armor and accessories may add SC. Choose equipment that strengthens the attributes used by your class.",
+      "zh-TW": "SC 代表道術，是道士相關技能使用的屬性，可在角色屬性中查看。SC 越高，依道術計算的技能效果越強。\n\n武器、防具與飾品可能附帶 SC。選擇裝備時，應優先考慮本職業技能所使用的屬性。",
+      "pt-BR": "SC representa o poder espiritual usado pelas habilidades correspondentes do Taoísta. Consulte-o nos atributos do personagem. SC maior melhora os efeitos que dependem de poder espiritual.\n\nArmas, armaduras e acessórios podem fornecer SC. Escolha equipamento que fortaleça os atributos usados pela sua classe.",
+      "aliases": []
+    },
+    {
+      "key": "help.page.19.title",
+      "en": "Accuracy",
+      "zh-TW": "準確",
+      "pt-BR": "Precisão",
+      "aliases": []
+    },
+    {
+      "key": "help.page.19.body",
+      "en": "Accuracy is your chance to hit and is checked against the target's Agility. If attacks repeatedly miss, your Accuracy may be too low for that target.\n\nItems can add Accuracy. The original class examples are Fencing for Warriors, SpiritSword for Taoists, Proficiency for Assassins and Focus for Archers; their practice levels improve accuracy.",
+      "zh-TW": "準確影響命中機率，會與目標的敏捷相互比較。若攻擊經常揮空，可能是準確不足。\n\n部分裝備可增加準確。原版列出的職業技能包括戰士的基本劍術、道士的精神力戰法、刺客的熟練及弓箭手的聚焦；提升相關技能的熟練等級可提高準確。",
+      "pt-BR": "Precisão influencia a chance de acertar e é comparada à Agilidade do alvo. Se seus golpes erram com frequência, a Precisão pode estar baixa para aquele inimigo.\n\nItens podem aumentar a Precisão. Os exemplos originais são Esgrima do Guerreiro, Técnica Espiritual da Espada do Taoísta, Proficiência do Assassino e Concentração do Arqueiro. A prática dessas habilidades melhora a precisão.",
+      "aliases": []
+    },
+    {
+      "key": "help.page.20.title",
+      "en": "Agility",
+      "zh-TW": "敏捷",
+      "pt-BR": "Agilidade",
+      "aliases": []
+    },
+    {
+      "key": "help.page.20.body",
+      "en": "Agility is your ability to evade attacks. It is checked against the attacker's Accuracy.\n\nSome equipment adds Agility. Increasing it can help physical attacks miss you. Compare the Agility bonuses of accessories along with their other attributes.",
+      "zh-TW": "敏捷影響閃避攻擊的能力，會與攻擊者的準確相互比較。\n\n部分裝備可增加敏捷。提高敏捷可增加閃避物理攻擊的機會。選擇飾品時，可一併比較敏捷加成與其他屬性。",
+      "pt-BR": "Agilidade influencia sua capacidade de esquivar de ataques e é comparada à Precisão do atacante.\n\nAlguns equipamentos aumentam a Agilidade. Elevá-la pode fazer ataques físicos errarem você. Ao escolher acessórios, compare o bônus de Agilidade junto dos demais atributos.",
+      "aliases": []
+    },
+    {
+      "key": "help.page.21.title",
+      "en": "Finding & Accepting Quests",
+      "zh-TW": "尋找與接受任務",
+      "pt-BR": "Encontrar e aceitar missões",
+      "aliases": []
+    },
+    {
+      "key": "help.page.21.body",
+      "en": "An NPC with a quest is marked by an exclamation point on the minimap and a speech marker above the NPC. Talk to them and choose Quests.\n\nSelect a quest to review its objectives, experience, gold and item rewards. Some quests let you choose one of several rewards when turning in.\n\nChoose Accept to begin. Accepted quests can be tracked in the on-screen quest panel.",
+      "zh-TW": "可提供任務的 NPC 會在小地圖顯示驚嘆號，頭上亦有對話標記。與 NPC 交談後選擇任務。\n\n點選任務，可查看目標、經驗值、金幣及物品獎勵。部分任務在交付時需從多個獎勵中選擇一項。\n\n按接受後開始任務。已接受的任務可在畫面上的任務面板追蹤。",
+      "pt-BR": "NPCs que oferecem missões têm um ponto de exclamação no minimapa e um marcador acima da cabeça. Fale com o NPC e escolha Missões.\n\nSelecione uma missão para ver os objetivos e recompensas de experiência, ouro e itens. Algumas permitem escolher entre várias recompensas na entrega.\n\nClique em Aceitar para começar. Missões aceitas podem ser acompanhadas no painel da tela.",
+      "aliases": []
+    },
+    {
+      "key": "help.page.22.title",
+      "en": "Tracking Quests & Quest Items",
+      "zh-TW": "追蹤任務與任務物品",
+      "pt-BR": "Acompanhar missões e itens de missão",
+      "aliases": []
+    },
+    {
+      "key": "help.page.22.body",
+      "en": "Open the quest journal (Q by default, or its interface button) to review objectives and rewards. It groups quests by area and marks tracked quests with a green check. Right-click a tracked quest to stop tracking it. Up to 5 quests can be tracked.\n\nQuest items occupy a separate quest-items tab in the bag. Completing objectives does not itself claim a reward: return to the indicated quest giver or turn-in destination.",
+      "zh-TW": "開啟任務日誌（預設 Q，或點擊介面按鈕），可查看目標與獎勵。任務依地區排列，追蹤中的任務有綠色勾號；以滑鼠右鍵點擊可停止追蹤。最多可同時追蹤 5 個任務。\n\n任務物品收在背包的獨立任務物品分頁。達成目標不等於已領取獎勵，還需返回任務指定的 NPC 或交付地點。",
+      "pt-BR": "Abra o diário de missões (Q por padrão ou pelo botão da interface) para revisar objetivos e recompensas. As missões são agrupadas por região; uma marca verde indica acompanhamento. Clique com o botão direito para deixar de acompanhar uma missão. É possível acompanhar até 5.\n\nItens de missão ficam em uma aba própria do inventário. Cumprir os objetivos não entrega a recompensa automaticamente: volte ao NPC ou local de entrega indicado.",
+      "aliases": []
+    },
+    {
+      "key": "help.page.23.title",
+      "en": "Quest Markers & Journal Colors",
+      "zh-TW": "任務標記與日誌顏色",
+      "pt-BR": "Marcadores e cores das missões",
+      "aliases": []
+    },
+    {
+      "key": "help.page.23.body",
+      "en": "Quest markers on NPCs and the minimap indicate progress:\n• Yellow !: a new quest is available.\n• White ?: a quest is in progress.\n• Yellow ?: a quest is ready to turn in.\n• Blue !: a daily quest.\n\nThe original journal colors also show age and level: yellow titles were accepted within 24 hours; white titles are older. Grey means the character is more than 10 levels above the suggested quest level.",
+      "zh-TW": "NPC 與小地圖上的標記可提示任務進度：\n• 黃色驚嘆號：有新任務可接。\n• 白色問號：任務進行中。\n• 黃色問號：已達成目標，可交付。\n• 藍色驚嘆號：每日任務。\n\n原版日誌亦以文字顏色區分任務：黃色表示接受未滿 24 小時，白色表示已超過 24 小時；灰色表示角色等級比任務建議等級高出 10 級以上。",
+      "pt-BR": "Marcadores nos NPCs e no minimapa indicam o progresso:\n• ! amarelo: nova missão disponível.\n• ? branco: missão em andamento.\n• ? amarelo: pronta para entregar.\n• ! azul: missão diária.\n\nAs cores do diário original também indicam tempo e nível: títulos amarelos foram aceitos há menos de 24 horas; brancos são mais antigos. Cinza indica que o personagem está mais de 10 níveis acima do recomendado.",
+      "aliases": []
+    },
+    {
+      "key": "help.page.24.title",
+      "en": "Turning In a Quest",
+      "zh-TW": "交付任務與領取獎勵",
+      "pt-BR": "Entregar uma missão e receber a recompensa",
+      "aliases": []
+    },
+    {
+      "key": "help.page.24.body",
+      "en": "After meeting the objectives, turn in the quest to receive its reward. Return to the quest giver or the destination named by the quest and open the quest dialogue.\n\nSelect the completed quest, inspect the rewards and choose an item if the quest requires a choice. Then click Finish. Keep enough bag space for the rewards; a full bag can prevent completion.",
+      "zh-TW": "完成目標後，還需交付任務才能領取獎勵。返回任務 NPC 或任務指定的交付地點，開啟任務對話。\n\n選中已完成的任務，查看獎勵；若有自選物品，先選好一項，再按完成。背包須保留足夠空間，否則可能無法完成交付。",
+      "pt-BR": "Depois de cumprir os objetivos, entregue a missão para receber a recompensa. Volte ao NPC ou ao destino indicado pela missão e abra o diálogo de missões.\n\nSelecione a missão concluída e confira as recompensas. Se houver escolha de item, selecione-o antes de clicar em Concluir. Deixe espaço suficiente no inventário; uma bolsa cheia pode impedir a entrega.",
+      "aliases": []
+    },
+    {
+      "key": "help.page.25.title",
+      "en": "Mount Equipment",
+      "zh-TW": "坐騎裝備",
+      "pt-BR": "Equipamento de montaria",
+      "aliases": []
+    },
+    {
+      "key": "help.page.25.body",
+      "en": "Equip a mount on your character, then open the mount screen from the extended menu.\n\nA saddle is needed to ride; the default mount/dismount key is M. Reins permit riding in certain caves. A ribbon slows the loss of loyalty while riding. Place mount accessories in the matching slots.",
+      "zh-TW": "先在角色身上裝備坐騎，再由展開選單開啟坐騎視窗。\n\n騎乘需要馬鞍，預設以 M 鍵上馬或下馬。韁繩可讓坐騎在指定洞穴中騎乘；緞帶可減緩騎乘時的忠誠度消耗。坐騎配件須放在相應的裝備欄位。",
+      "pt-BR": "Equipe a montaria no personagem e abra a janela de montaria pelo menu expandido.\n\nÉ preciso ter uma sela para montar; M é o atalho padrão para montar ou desmontar. Rédeas permitem montar em certas cavernas. Uma fita reduz a perda de lealdade ao cavalgar. Coloque cada acessório no espaço correspondente.",
+      "aliases": []
+    },
+    {
+      "key": "help.page.26.title",
+      "en": "Mounted Combat & Loyalty",
+      "zh-TW": "騎乘戰鬥與忠誠度",
+      "pt-BR": "Combate montado e lealdade",
+      "aliases": []
+    },
+    {
+      "key": "help.page.26.body",
+      "en": "Bells permit melee attacks while mounted. The original mounted-combat rule does not allow skills or spells while riding.\n\nWalking, running and attacking reduce mount loyalty. At 0 loyalty, the mount cannot be ridden. Feed it to restore loyalty; the amount depends on the food's nutrition. Some foods can reduce maximum loyalty.",
+      "zh-TW": "裝備鈴鐺後，可在騎乘狀態下進行近戰攻擊。原版騎乘戰鬥規則不允許在坐騎上施放技能或法術。\n\n行走、奔跑及攻擊都會消耗坐騎忠誠度；降到 0 時便無法騎乘。餵食可恢復忠誠度，恢復量依食物營養值而定。部分食物可能降低忠誠度上限。",
+      "pt-BR": "Sinos permitem ataques corpo a corpo enquanto você está montado. A regra original de combate montado não permite lançar habilidades ou magias nessa condição.\n\nCaminhar, correr e atacar reduzem a lealdade. Com lealdade 0, não é possível montar. Alimente a montaria para recuperá-la; a quantidade depende da nutrição do alimento. Alguns alimentos podem reduzir a lealdade máxima.",
+      "aliases": []
+    },
+    {
+      "key": "help.page.27.title",
+      "en": "Fishing",
+      "zh-TW": "釣魚",
+      "pt-BR": "Pesca",
+      "aliases": []
+    },
+    {
+      "key": "help.page.27.body",
+      "en": "Equip a fishing rod and open the fishing-equipment screen. A hook and bait are the minimum equipment; other fishing accessories can improve success.\n\nFind water and left-click to cast. A float and the fishing guide appear. The yellow bar shows the catch chance; the red bar fills during the attempt. When it fills, the attempt ends and bait is consumed.\n\nWatch the float and progress bar. When the float goes under, use the fishing button to reel in.",
+      "zh-TW": "先裝備釣竿，再開啟釣魚裝備視窗。至少需要魚鉤與魚餌，其他配件可提高成功機會。\n\n找到水面後按滑鼠左鍵拋竿，水面會出現浮標，並開啟釣魚提示。黃色條表示捕獲機率；紅色條會逐漸填滿，填滿後本次嘗試結束並消耗魚餌。\n\n留意浮標與進度條。浮標沉入水中時，按釣魚按鈕收竿。",
+      "pt-BR": "Equipe uma vara e abra a janela de equipamento de pesca. Anzol e isca são o mínimo necessário; outros acessórios podem aumentar o sucesso.\n\nEncontre água e clique com o botão esquerdo para lançar a linha. Aparecem a boia e a janela de pesca. A barra amarela indica a chance de captura; a vermelha se enche durante a tentativa. Quando enche, a tentativa termina e a isca é consumida.\n\nObserve a boia e a barra. Quando a boia afundar, use o botão de pesca para recolher a linha.",
+      "aliases": []
+    },
+    {
+      "key": "help.page.28.title",
+      "en": "Gems & Orbs",
+      "zh-TW": "寶石與寶珠",
+      "pt-BR": "Gemas e orbes",
+      "aliases": []
+    },
+    {
+      "key": "help.page.28.body",
+      "en": "Gems and orbs add attributes to items; different types add different stats. For example, a BraveryGem adds DC. The original upgrade limit is 7 uses; stats already present on a dropped item do not use this limit.\n\nKeep the target item in your bag. Select the gem or orb, hold it over the item, hold Ctrl and left-click. Read the result in chat.\n\nA gem may upgrade the item, have no effect or destroy it. An orb may upgrade it or fail without that gem destruction outcome.",
+      "zh-TW": "寶石與寶珠可替物品增加屬性，不同種類提供不同加成，例如勇氣寶石增加 DC。原版升級次數上限為 7 次，掉落物原有的附加屬性不占此上限。\n\n把目標物品放在背包內，選取寶石或寶珠後移到該物品上，按住 Ctrl 再按滑鼠左鍵。結果會顯示在聊天訊息中。\n\n寶石可能成功、無效，或摧毀物品；寶珠可能成功或無效，不會產生寶石的摧毀結果。",
+      "pt-BR": "Gemas e orbes acrescentam atributos aos itens; cada tipo melhora um atributo diferente. Uma gema de bravura, por exemplo, acrescenta DC. O limite original é de 7 usos; bônus que já vieram no item não gastam esse limite.\n\nMantenha o equipamento no inventário. Selecione a gema ou o orbe, leve-o sobre o item, segure Ctrl e clique com o botão esquerdo. Confira o resultado no chat.\n\nUma gema pode melhorar, não ter efeito ou destruir o item. Um orbe pode melhorar ou falhar, sem o resultado destrutivo da gema.",
+      "aliases": []
+    },
+    {
+      "key": "help.page.29.title",
+      "en": "Creating & Summoning a Hero",
+      "zh-TW": "建立與召喚英雄",
+      "pt-BR": "Criar e invocar um herói",
+      "aliases": []
+    },
+    {
+      "key": "help.page.29.body",
+      "en": "At the required level, visit the Old General NPC to create a hero. Choose a class, gender and unique name. The original system supports up to 9 heroes, with only one active at a time.\n\nCreation grants a Sealed Hero item. Right-click it to release that hero and select them as your current companion. When a hero is active, the hero summon button becomes available.",
+      "zh-TW": "達到所需等級後，可找老將軍 NPC 建立英雄。建立時須選擇職業、性別及不重複的名稱。原版最多可擁有 9 名英雄，但同一時間只能啟用 1 名。\n\n建立後會取得封印的英雄物品。以滑鼠右鍵使用，可解除封印並選為目前同伴。已有啟用中的英雄時，便可使用英雄召喚按鈕。",
+      "pt-BR": "Ao atingir o nível necessário, procure o NPC Velho General para criar um herói. Escolha classe, gênero e um nome único. O sistema original permite até 9 heróis, mas apenas um ativo por vez.\n\nA criação fornece um item de Herói selado. Use-o com o botão direito para libertar esse herói e selecioná-lo como companheiro atual. Com um herói ativo, o botão de invocação fica disponível.",
+      "aliases": []
+    },
+    {
+      "key": "help.page.30.title",
+      "en": "Hero Equipment & Skills",
+      "zh-TW": "英雄裝備與技能",
+      "pt-BR": "Equipamento e habilidades do herói",
+      "aliases": []
+    },
+    {
+      "key": "help.page.30.body",
+      "en": "Heroes equip suitable items to improve their attributes, but not every player item is usable by a hero. Move an item into the hero's inventory, open the hero character window and equip it in the corresponding slot.\n\nHeroes learn class-specific skills, though not every skill is available to them. Put a skill book in the hero's inventory and right-click it to learn. Use the hero's skill window to assign the learned skill to a shortcut.",
+      "zh-TW": "英雄可穿戴適用的裝備來提高屬性，但不是每件玩家裝備都適用於英雄。先把物品移入英雄背包，再開啟英雄角色視窗，放入相應裝備欄位。\n\n英雄可學習符合職業的技能，但並非所有技能都對英雄開放。把技能書放入英雄背包後，以滑鼠右鍵學習，再於英雄技能視窗設定快捷鍵。",
+      "pt-BR": "Heróis podem equipar itens adequados para melhorar seus atributos, mas nem todo item do jogador pode ser usado por eles. Mova o item para o inventário do herói, abra a janela do personagem dele e coloque-o no espaço correto.\n\nHeróis aprendem habilidades de sua classe, mas nem todas estão disponíveis para eles. Coloque o livro no inventário do herói e use o botão direito para aprender. Depois, atribua um atalho na janela de habilidades do herói.",
+      "aliases": []
+    },
+    {
+      "key": "help.page.31.title",
+      "en": "Deleting & Reviving a Hero",
+      "zh-TW": "刪除與復活英雄",
+      "pt-BR": "Excluir e reviver um herói",
+      "aliases": []
+    },
+    {
+      "key": "help.page.31.body",
+      "en": "To delete the selected hero, visit the Old General and choose the hero deletion option. Deletion is permanent and frees that storage slot; a deleted hero cannot be restored.\n\nA dead hero shows a skull on the portrait. Their inventory and equipment are locked until revival. The Old General can revive the hero for a fee. A suitable revival scroll can also revive a hero away from that NPC.",
+      "zh-TW": "要刪除目前選中的英雄，可找老將軍選擇刪除英雄。刪除會永久移除該英雄並騰出儲存欄位，已刪除的英雄無法恢復。\n\n英雄死亡時，頭像會顯示骷髏標記，背包與裝備會暫時鎖定。可付費請老將軍復活英雄；合適的復活卷軸亦可在其他地點使用。",
+      "pt-BR": "Para excluir o herói selecionado, visite o Velho General e escolha a opção de exclusão. A exclusão é permanente e libera o espaço de armazenamento; o herói excluído não pode ser recuperado.\n\nUm herói morto exibe uma caveira no retrato. Seu inventário e equipamento ficam bloqueados até a ressurreição. O Velho General pode revivê-lo mediante pagamento. Um pergaminho apropriado também pode reviver o herói longe desse NPC.",
+      "aliases": []
+    },
+    {
+      "key": "help.page.32.title",
+      "en": "Hero Recovery & Storage",
+      "zh-TW": "英雄恢復與存放",
+      "pt-BR": "Recuperação e armazenamento de heróis",
+      "aliases": []
+    },
+    {
+      "key": "help.page.32.body",
+      "en": "Heroes can use many of the same recovery items as players. Put HP and MP potions in the hero's inventory. The hero belt uses slots 7 and 8 and appears while the hero is summoned. A Hero Auto-Potion Scroll unlocks automatic potion use.\n\nOnly one hero is active, with up to 8 others in storage. Use the Old General's management interface to select a companion. Unsealing another hero while one is active places the new hero in storage if there is room. Quests or items can unlock more storage slots.",
+      "zh-TW": "英雄可使用多種玩家用的恢復物品。生命與魔力藥水須放在英雄背包內；英雄召喚後會顯示第 7、8 格英雄快捷欄。使用英雄自動喝藥卷軸可解鎖自動喝藥。\n\n同一時間只能啟用 1 名英雄，其餘最多 8 名可存放。向老將軍開啟管理介面，便可更換目前同伴。已有啟用英雄時，再解除其他英雄的封印，會在有空位時將其存入儲存欄。額外欄位可透過任務或物品解鎖。",
+      "pt-BR": "Heróis usam vários dos mesmos itens de recuperação que os jogadores. Coloque poções de HP e MP no inventário do herói. O cinto do herói usa os espaços 7 e 8 e aparece quando ele é invocado. Um pergaminho de poção automática desbloqueia o uso automático.\n\nSó um herói fica ativo; até 8 podem ser armazenados. Use a administração do Velho General para trocar de companheiro. Ao abrir outro selo com um herói ativo, o novo herói vai para o armazenamento, se houver espaço. Missões ou itens desbloqueiam mais espaços.",
+      "aliases": []
+    },
+    {
+      "key": "help.page.33.title",
+      "en": "Controlling Hero Behavior",
+      "zh-TW": "控制英雄行為",
+      "pt-BR": "Controlar o comportamento do herói",
+      "aliases": []
+    },
+    {
+      "key": "help.page.33.body",
+      "en": "A hero acts according to their behavior setting and pet attack mode. Skills can also be activated or toggled manually with Shift plus their assigned function key.\n\nThe three behavior modes are:\n• Aggressive: attack enemies within attack range.\n• Counterattack: attack when the player is targeted or attacked.\n• Follow: prioritize following the player and ignore targets.\n\nChoose a behavior suited to the situation rather than expecting every mode to attack automatically.",
+      "zh-TW": "英雄會依目前的行為設定與寵物攻擊模式行動。需要指定技能時，可按住 Shift，再按英雄技能所設定的功能鍵來施放或切換。\n\n三種主要行為為：\n• 主動攻擊：攻擊範圍內的敵人。\n• 反擊：玩家被鎖定或受攻擊時才出手。\n• 跟隨：優先跟隨玩家，不理會攻擊目標。\n\n請依情況選擇行為；並非每種模式都會自動攻擊。",
+      "pt-BR": "O herói age conforme o comportamento escolhido e o modo de ataque do mascote. Você também pode ativar ou alternar habilidades manualmente com Shift e a tecla de função atribuída.\n\nOs três comportamentos principais são:\n• Agressivo: ataca inimigos ao alcance.\n• Contra-ataque: reage quando o jogador é alvo ou sofre um ataque.\n• Seguir: prioriza acompanhar o jogador e ignora alvos.\n\nEscolha o modo adequado à situação; nem todos atacam automaticamente.",
+      "aliases": []
+    },
+    {
+      "key": "help.page.34.title",
+      "en": "Guild Growth & Buff Points",
+      "zh-TW": "公會成長與增益點數",
+      "pt-BR": "Crescimento da guilda e pontos de bônus",
+      "aliases": []
+    },
+    {
+      "key": "help.page.34.body",
+      "en": "After joining or creating a guild, hunting monsters and completing quests can earn guild experience alongside personal experience. Members contribute to the guild experience bar. Leveling the guild allows it to recruit more members.\n\nEach guild level awards a buff point. Allocate these points to unlock guild buffs for combat, sieges, gathering and training. Some buffs require a guild level or a prerequisite buff.",
+      "zh-TW": "加入或建立公會後，擊殺怪物與完成任務可在取得個人經驗的同時累積公會經驗。成員共同推進公會經驗條；公會升級後可招收更多成員。\n\n每次公會升級可取得增益點數，用來解鎖戰鬥、攻城、採集或訓練相關的公會增益。部分增益需要指定公會等級或前置增益。",
+      "pt-BR": "Depois de entrar em uma guilda ou criá-la, caçar monstros e concluir missões pode gerar experiência de guilda junto da experiência pessoal. Os membros contribuem para a barra coletiva. Subir o nível da guilda permite recrutar mais membros.\n\nCada nível concede um ponto de bônus. Distribua esses pontos para desbloquear melhorias de combate, cerco, coleta e treinamento. Algumas exigem um nível de guilda ou um bônus anterior.",
+      "aliases": []
+    },
+    {
+      "key": "help.page.35.title",
+      "en": "Guild Buffs: Gathering & Training",
+      "zh-TW": "公會增益：採集與訓練",
+      "pt-BR": "Bônus de guilda: coleta e treinamento",
+      "aliases": []
+    },
+    {
+      "key": "help.page.35.body",
+      "en": "This branch focuses on gathering and progression. Unlocks may require guild levels or earlier buffs.\n\n• Fame: lower NPC shop prices.\n• Craftsmanship: higher crafting success.\n• Excavation: higher mining success.\n• Luck: higher monster drop rate.\n• Angling: higher fishing success.\n• Training: faster skill practice.\n• Perception: more experience for members.\n• Mentorship: more experience for heroes.",
+      "zh-TW": "這一類增益著重資源取得與成長，解鎖時可能需要指定公會等級或前置增益。\n\n• 聲望：降低 NPC 商店價格。\n• 工藝：提高製作成功率。\n• 採掘：提高採礦成功率。\n• 幸運：提高怪物掉落率。\n• 垂釣：提高釣魚成功率。\n• 訓練：加快技能熟練度成長。\n• 洞察：提高成員經驗取得量。\n• 指導：提高英雄經驗取得量。",
+      "pt-BR": "Esta linha favorece a obtenção de recursos e a progressão. Os desbloqueios podem exigir níveis de guilda ou bônus anteriores.\n\n• Fama: reduz preços nas lojas de NPCs.\n• Artesanato: aumenta o sucesso de fabricação.\n• Escavação: aumenta o sucesso da mineração.\n• Sorte: aumenta a chance de itens de monstros.\n• Pesca: aumenta o sucesso na pesca.\n• Treinamento: acelera a prática de habilidades.\n• Percepção: aumenta a experiência dos membros.\n• Mentoria: aumenta a experiência dos heróis.",
+      "aliases": []
+    },
+    {
+      "key": "help.page.36.title",
+      "en": "Guild Buffs: Attributes",
+      "zh-TW": "公會增益：角色屬性",
+      "pt-BR": "Bônus de guilda: atributos",
+      "aliases": []
+    },
+    {
+      "key": "help.page.36.body",
+      "en": "This branch improves members' attributes. Unlocks may require guild levels or earlier buffs.\n\n• Constitution: higher maximum HP.\n• Knowledge: higher maximum MP.\n• Vitality: faster HP recovery.\n• Intelligence: faster MP recovery.\n• Fortitude: higher physical defense.\n• Endurance: higher magical defense.\n• Strength: higher attack power.\n• Wealth: higher tax income.",
+      "zh-TW": "這一類增益提高成員屬性，解鎖時可能需要指定公會等級或前置增益。\n\n• 體質：提高生命值上限。\n• 知識：提高魔力值上限。\n• 活力：提高生命恢復能力。\n• 智慧：提高魔力恢復能力。\n• 堅韌：提高物理防禦。\n• 耐力：提高魔法防禦。\n• 力量：提高攻擊力。\n• 財富：提高稅收收入。",
+      "pt-BR": "Esta linha melhora os atributos dos membros. Os desbloqueios podem exigir níveis de guilda ou bônus anteriores.\n\n• Constituição: aumenta o HP máximo.\n• Conhecimento: aumenta o MP máximo.\n• Vitalidade: melhora a recuperação de HP.\n• Inteligência: melhora a recuperação de MP.\n• Fortitude: aumenta a defesa física.\n• Resistência: aumenta a defesa mágica.\n• Força: aumenta o poder de ataque.\n• Riqueza: aumenta a receita de impostos.",
+      "aliases": []
+    },
+    {
+      "key": "help.page.37.title",
+      "en": "Awakening: Equipment & Materials",
+      "zh-TW": "覺醒：裝備與材料",
+      "pt-BR": "Despertar: equipamento e materiais",
+      "aliases": []
+    },
+    {
+      "key": "help.page.37.body",
+      "en": "Original Crystal reference: awakening, disassembly, downgrade and restoration are not available through normal client requests in this playtest.\n\nThe original process starts with the craftsman in Bichon Province. Put equipment in the anvil and select the attribute to awaken; the required materials and price are displayed. Only one attribute is awakened, up to 5 levels.\n\nPut the required materials into the furnace and choose Awaken. Only the required quantity is consumed; spare materials return to the bag. Movement and attacks are blocked during the process.",
+      "zh-TW": "原版規則參考：目前內測尚未開放一般客戶端的覺醒、分解、降級及還原操作。\n\n原版需找比奇工匠，把裝備放入鐵砧，再選擇要覺醒的屬性；視窗會列出材料與費用。同一件裝備只能覺醒一種屬性，最高 5 級。\n\n把所需材料放進熔爐後按覺醒。只會消耗所需數量，多餘材料退回背包；過程中不能移動或攻擊。",
+      "pt-BR": "Referência do Crystal original: despertar, desmontar, rebaixar e restaurar ainda não estão disponíveis pelo cliente comum neste teste.\n\nNo original, procure o artesão de Bichon, coloque o equipamento na bigorna e escolha o atributo. A janela informa materiais e custo. Só um atributo pode ser despertado, até 5 níveis.\n\nColoque os materiais na fornalha e escolha Despertar. Apenas a quantidade necessária é consumida; o restante volta ao inventário. Durante o processo não é possível mover-se nem atacar.",
+      "aliases": []
+    },
+    {
+      "key": "help.page.38.title",
+      "en": "Awakening: Common, Uncommon & Rare",
+      "zh-TW": "覺醒：普通、非凡與稀有",
+      "pt-BR": "Despertar: comum, incomum e raro",
+      "aliases": []
+    },
+    {
+      "key": "help.page.38.body",
+      "en": "Original rules only; awakening is not available in this playtest. A successful awakening grants the base increase. Rarity determines the possible extra increase. An item can be awakened up to 5 times.\n\nCommon and uncommon items gain only the base amount each time: weapon DC/MC/SC +1–1; accessory AC/MAC +1–1; armor HP/MP +5. At 5 levels: +5–5, +5–5 and +25 respectively.\n\nRare items can gain up to +2–2 on a weapon or accessory, or +10 HP/MP on armor per level. At 5 levels the maxima are +10–10, +10–10 and +50.",
+      "zh-TW": "僅供原版規則參考，目前內測未開放覺醒。成功時會取得基本加成，稀有度決定額外加成上限；一件裝備最多覺醒 5 次。\n\n普通與非凡物品每次只有基本值：武器 DC／MC／SC +1–1，飾品 AC／MAC +1–1，防具 HP／MP +5。五級累計上限依序為 +5–5、+5–5、+25。\n\n稀有物品每級最高可得：武器或飾品 +2–2、防具 HP／MP +10。五級累計上限依序為 +10–10、+10–10、+50。",
+      "pt-BR": "Regras originais; o despertar ainda não está disponível neste teste. Cada sucesso concede o aumento básico, e a raridade define o bônus extra possível. O limite é de 5 despertares.\n\nItens comuns e incomuns recebem apenas o valor básico: arma DC/MC/SC +1–1; acessório AC/MAC +1–1; armadura HP/MP +5 por nível. Em 5 níveis: +5–5, +5–5 e +25, respectivamente.\n\nItens raros chegam a +2–2 em arma ou acessório, ou +10 HP/MP em armadura por nível. Em 5 níveis, os máximos são +10–10, +10–10 e +50.",
+      "aliases": []
+    },
+    {
+      "key": "help.page.39.title",
+      "en": "Awakening: Legendary & Mythical",
+      "zh-TW": "覺醒：傳說與神話",
+      "pt-BR": "Despertar: lendário e mítico",
+      "aliases": []
+    },
+    {
+      "key": "help.page.39.body",
+      "en": "Original rules only; awakening is not available in this playtest. Successful awakening always grants the base increase, with rarity allowing an extra bonus. The limit is 5 levels.\n\nLegendary: at most DC/MC/SC +3–3 on weapons, AC/MAC +3–3 on accessories, or HP/MP +15 on armor per level. At 5 levels: +15–15, +15–15 and +75.\n\nMythical: at most +4–4 on weapons or accessories, or +20 HP/MP on armor per level. At 5 levels: +20–20, +20–20 and +100.",
+      "zh-TW": "僅供原版規則參考，目前內測未開放覺醒。成功時一定取得基本加成，稀有度可帶來額外加成，最高 5 級。\n\n傳說物品每級上限：武器 DC／MC／SC +3–3、飾品 AC／MAC +3–3、防具 HP／MP +15。五級累計上限為 +15–15、+15–15、+75。\n\n神話物品每級上限：武器或飾品 +4–4、防具 HP／MP +20。五級累計上限為 +20–20、+20–20、+100。",
+      "pt-BR": "Regras originais; o despertar ainda não está disponível neste teste. O sucesso sempre concede o aumento básico, e a raridade permite um bônus extra. O limite é de 5 níveis.\n\nLendário: até DC/MC/SC +3–3 em armas, AC/MAC +3–3 em acessórios ou HP/MP +15 em armaduras por nível. Em 5 níveis: +15–15, +15–15 e +75.\n\nMítico: até +4–4 em armas ou acessórios, ou +20 HP/MP em armaduras por nível. Em 5 níveis: +20–20, +20–20 e +100.",
+      "aliases": []
+    },
+    {
+      "key": "help.page.40.title",
+      "en": "Awakening: Hammering & Disassembly",
+      "zh-TW": "覺醒：鍛打與裝備分解",
+      "pt-BR": "Despertar: marteladas e desmontagem",
+      "aliases": []
+    },
+    {
+      "key": "help.page.40.body",
+      "en": "Original rules only; these operations are not available in this playtest.\n\nAwakening includes 5 hammering attempts. Failed hammering can reduce durability and lowers the chance of gaining a maximum bonus, but does not by itself guarantee that awakening will fail. Final awakening failure destroys the item.\n\nThe original Awakening Master in Bichon can disassemble equipment into materials. Material quality depends on item level, with a chance of higher-grade materials. Poor durability can instead yield lower-grade materials, even from high-level equipment.",
+      "zh-TW": "僅供原版規則參考，目前內測未開放這些操作。\n\n覺醒包含 5 次鍛打判定。鍛打失敗可能降低耐久度，也會降低取得最高額外加成的機會，但不代表最終覺醒一定失敗。若最終覺醒失敗，物品會被摧毀。\n\n原版可找比奇的覺醒大師分解裝備以取得材料。材料品質與裝備等級有關，也有機會取得更高級材料；但耐久度過低時，即使高等裝備也可能只產出低級材料。",
+      "pt-BR": "Regras originais; estas operações ainda não estão disponíveis neste teste.\n\nO despertar inclui 5 tentativas de martelada. Uma falha pode reduzir a durabilidade e a chance de obter o bônus máximo, mas não garante a falha final do despertar. A falha final destrói o item.\n\nNo original, o Mestre do Despertar de Bichon desmonta equipamentos para obter materiais. A qualidade depende do nível do item, com chance de materiais superiores. Durabilidade baixa pode gerar materiais inferiores, mesmo de equipamentos de nível alto.",
+      "aliases": []
+    },
+    {
+      "key": "help.page.41.title",
+      "en": "Awakening: Downgrade & Restoration",
+      "zh-TW": "覺醒：降級與裝備還原",
+      "pt-BR": "Despertar: rebaixamento e restauração",
+      "aliases": []
+    },
+    {
+      "key": "help.page.41.body",
+      "en": "Original rules only; these operations are not available in this playtest.\n\nThe Awakening Disciple in Bichon removes one awakening level at a time. The fee depends on the item level and awakening level. Downgrading has a chance to reduce item durability by 1.\n\nThe Awakening Priest restores an item's attributes to their default state when you no longer want its added stats. This does not restore maximum durability and does not remove a curse.",
+      "zh-TW": "僅供原版規則參考，目前內測未開放這些操作。\n\n原版可找比奇的覺醒學徒，每次移除一級覺醒。費用依物品等級及覺醒等級而定；降級時有機會使耐久度減少 1。\n\n若不想保留物品的附加屬性，可找覺醒祭司將其還原為預設狀態。還原不會恢復耐久度上限，也不會移除詛咒。",
+      "pt-BR": "Regras originais; estas operações ainda não estão disponíveis neste teste.\n\nO Discípulo do Despertar de Bichon remove um nível de despertar por vez. A taxa depende do nível do item e do despertar. O rebaixamento pode reduzir a durabilidade em 1.\n\nO Sacerdote do Despertar restaura os atributos padrão quando você não quer mais os atributos acrescentados. Isso não recupera a durabilidade máxima nem remove uma maldição.",
+      "aliases": []
+    },
+    {
+      "key": "help.scroll_hint",
+      "en": "Mouse wheel: scroll this page.",
+      "zh-TW": "將滑鼠移到說明上，滾動滾輪可捲動內容。",
+      "pt-BR": "Use a roda do mouse sobre o texto para rolar a página.",
+      "aliases": []
+    },
+    {
+      "key": "help.shortcut.00",
+      "en": "Exit the game",
+      "zh-TW": "退出遊戲",
+      "pt-BR": "Sair do jogo",
+      "aliases": [
+        "Exit the game"
+      ]
+    },
+    {
+      "key": "help.shortcut.01",
+      "en": "Log out",
+      "zh-TW": "登出",
+      "pt-BR": "Sair",
+      "aliases": [
+        "Log out"
+      ]
+    },
+    {
+      "key": "help.shortcut.02",
+      "en": "Skill buttons",
+      "zh-TW": "技能按鈕",
+      "pt-BR": "Botões de habilidade",
+      "aliases": [
+        "Skill buttons"
+      ]
+    },
+    {
+      "key": "help.shortcut.03",
+      "en": "Inventory window (open / close)",
+      "zh-TW": "背包（開啟/關閉）",
+      "pt-BR": "Janela de inventário (abrir / fechar)",
+      "aliases": [
+        "Inventory window (open / close)"
+      ]
+    },
+    {
+      "key": "help.shortcut.04",
+      "en": "Status window (open / close)",
+      "zh-TW": "狀態（開啟/關閉）",
+      "pt-BR": "Janela de status (abrir / fechar)",
+      "aliases": [
+        "Status window (open / close)"
+      ]
+    },
+    {
+      "key": "help.shortcut.05",
+      "en": "Skill window (open / close)",
+      "zh-TW": "技能（開啟/關閉）",
+      "pt-BR": "Janela de habilidades (abrir / fechar)",
+      "aliases": [
+        "Skill window (open / close)"
+      ]
+    },
+    {
+      "key": "help.shortcut.06",
+      "en": "Group window (open / close)",
+      "zh-TW": "隊伍（開啟/關閉）",
+      "pt-BR": "Janela de grupo (abrir / fechar)",
+      "aliases": [
+        "Group window (open / close)"
+      ]
+    },
+    {
+      "key": "help.shortcut.07",
+      "en": "Trade window (open / close)",
+      "zh-TW": "交易（開啟/關閉）",
+      "pt-BR": "Janela de troca (abrir / fechar)",
+      "aliases": [
+        "Trade window (open / close)"
+      ]
+    },
+    {
+      "key": "help.shortcut.08",
+      "en": "Friend window (open / close)",
+      "zh-TW": "好友（開啟/關閉）",
+      "pt-BR": "Janela de amigos (abrir / fechar)",
+      "aliases": [
+        "Friend window (open / close)"
+      ]
+    },
+    {
+      "key": "help.shortcut.09",
+      "en": "Minimap window (open / close)",
+      "zh-TW": "小地圖（開啟/關閉）",
+      "pt-BR": "Janela do minimapa (abrir / fechar)",
+      "aliases": [
+        "Minimap window (open / close)"
+      ]
+    },
+    {
+      "key": "help.shortcut.10",
+      "en": "Guild window (open / close)",
+      "zh-TW": "公會（開啟/關閉）",
+      "pt-BR": "Janela de guilda (abrir / fechar)",
+      "aliases": [
+        "Guild window (open / close)"
+      ]
+    },
+    {
+      "key": "help.shortcut.11",
+      "en": "Gameshop window (open / close)",
+      "zh-TW": "商城（開啟/關閉）",
+      "pt-BR": "Janela da loja (abrir / fechar)",
+      "aliases": [
+        "Gameshop window (open / close)"
+      ]
+    },
+    {
+      "key": "help.shortcut.12",
+      "en": "Engagement window (open / close)",
+      "zh-TW": "婚姻（開啟/關閉）",
+      "pt-BR": "Janela de noivado (abrir/fechar)",
+      "aliases": [
+        "Engagement window (open / close)"
+      ]
+    },
+    {
+      "key": "help.shortcut.13",
+      "en": "Belt window (open / close)",
+      "zh-TW": "快捷欄（開啟/關閉）",
+      "pt-BR": "Janela do cinto (abrir / fechar)",
+      "aliases": [
+        "Belt window (open / close)"
+      ]
+    },
+    {
+      "key": "help.shortcut.14",
+      "en": "Option window (open / close)",
+      "zh-TW": "選項（開啟 / 關閉）",
+      "pt-BR": "Janela de opções (abrir / fechar)",
+      "aliases": [
+        "Option window (open / close)"
+      ]
+    },
+    {
+      "key": "help.shortcut.15",
+      "en": "Help window (open / close)",
+      "zh-TW": "幫助（開啟 / 關閉）",
+      "pt-BR": "Janela de ajuda (abrir / fechar)",
+      "aliases": [
+        "Help window (open / close)"
+      ]
+    },
+    {
+      "key": "help.shortcut.16",
+      "en": "Mount / Dismount ride",
+      "zh-TW": "騎乘 / 下馬",
+      "pt-BR": "Montar / Desmontar montaria",
+      "aliases": [
+        "Mount / Dismount ride"
+      ]
+    },
+    {
+      "key": "help.shortcut.17",
+      "en": "Lock spell onto target not cursor location",
+      "zh-TW": "將法術鎖定在目標而非游標位置",
+      "pt-BR": "Travar a magia no alvo em vez da posição do cursor",
+      "aliases": [
+        "Lock spell onto target not cursor location"
+      ]
+    },
+    {
+      "key": "help.shortcut.18",
+      "en": "Toggle pet attack pet",
+      "zh-TW": "切換寵物攻擊模式",
+      "pt-BR": "Alternar modo de ataque do mascote",
+      "aliases": [
+        "Toggle pet attack pet"
+      ]
+    },
+    {
+      "key": "help.shortcut.19",
+      "en": "Toggle player attack mode",
+      "zh-TW": "切換玩家攻擊模式",
+      "pt-BR": "Alternar modo de ataque a jogadores",
+      "aliases": [
+        "Toggle player attack mode"
+      ]
+    },
+    {
+      "key": "help.shortcut.20",
+      "en": "Peace Mode - Attack monsters only",
+      "zh-TW": "和平模式 - 僅攻擊怪物",
+      "pt-BR": "Modo Pacífico - Atacar apenas monstros",
+      "aliases": [
+        "Peace Mode - Attack monsters only"
+      ]
+    },
+    {
+      "key": "help.shortcut.21",
+      "en": "Group Mode - Attack all subjects except your group members",
+      "zh-TW": "組隊模式 - 攻擊除隊員外的所有物件",
+      "pt-BR": "Modo Grupo: ataca todos, exceto os membros do seu grupo",
+      "aliases": [
+        "Group Mode - Attack all subjects except your group members"
+      ]
+    },
+    {
+      "key": "help.shortcut.22",
+      "en": "Guild Mode - Attack all subjects except your guild members",
+      "zh-TW": "公會模式 - 攻擊除公會成員外的所有物件",
+      "pt-BR": "Modo Guilda: ataca todos, exceto os membros da sua guilda",
+      "aliases": [
+        "Guild Mode - Attack all subjects except your guild members"
+      ]
+    },
+    {
+      "key": "help.shortcut.23",
+      "en": "Good/Evil Mode - Attack PK players and monsters only",
+      "zh-TW": "善惡模式 - 僅攻擊紅名玩家和怪物",
+      "pt-BR": "Modo Bem/Mal: ataca apenas jogadores PK e monstros",
+      "aliases": [
+        "Good/Evil Mode - Attack PK players and monsters only"
+      ]
+    },
+    {
+      "key": "help.shortcut.24",
+      "en": "All Attack Mode - Attack all subjects",
+      "zh-TW": "全體攻擊模式 - 攻擊所有物件",
+      "pt-BR": "Modo de ataque total - Atacar todos os alvos",
+      "aliases": [
+        "All Attack Mode - Attack all subjects"
+      ]
+    },
+    {
+      "key": "help.shortcut.25",
+      "en": "Show the field map",
+      "zh-TW": "顯示區域地圖",
+      "pt-BR": "Mostrar o mapa da região",
+      "aliases": [
+        "Show the field map"
+      ]
+    },
+    {
+      "key": "help.shortcut.26",
+      "en": "Show the skill bar",
+      "zh-TW": "顯示技能欄",
+      "pt-BR": "Mostrar a barra de habilidades",
+      "aliases": [
+        "Show the skill bar"
+      ]
+    },
+    {
+      "key": "help.shortcut.27",
+      "en": "Auto run on / off",
+      "zh-TW": "自動奔跑 開啟/關閉",
+      "pt-BR": "Ligar/desligar autocorrida",
+      "aliases": [
+        "Auto run on / off"
+      ]
+    },
+    {
+      "key": "help.shortcut.28",
+      "en": "Show / Hide interface",
+      "zh-TW": "顯示 / 隱藏介面",
+      "pt-BR": "Mostrar / Ocultar interface",
+      "aliases": [
+        "Show / Hide interface"
+      ]
+    },
+    {
+      "key": "help.shortcut.29",
+      "en": "Highlight / Pickup Items",
+      "zh-TW": "高亮 / 撿取物品",
+      "pt-BR": "Destacar / pegar itens",
+      "aliases": [
+        "Highlight / Pickup Items"
+      ]
+    },
+    {
+      "key": "help.shortcut.30",
+      "en": "Show other players kits",
+      "zh-TW": "顯示其他玩家的裝備",
+      "pt-BR": "Mostrar o equipamento de outros jogadores",
+      "aliases": [
+        "Show other players kits"
+      ]
+    },
+    {
+      "key": "help.shortcut.31",
+      "en": "Screen Capture",
+      "zh-TW": "螢幕截圖",
+      "pt-BR": "Captura de tela",
+      "aliases": [
+        "Screen Capture"
+      ]
+    },
+    {
+      "key": "help.shortcut.32",
+      "en": "Open / Close fishing window",
+      "zh-TW": "釣魚（開啟 / 關閉）",
+      "pt-BR": "Abrir / Fechar janela de pesca",
+      "aliases": [
+        "Open / Close fishing window"
+      ]
+    },
+    {
+      "key": "help.shortcut.33",
+      "en": "Mentor window (open / close)",
+      "zh-TW": "師徒（開啟 / 關閉）",
+      "pt-BR": "Janela de Mentor (abrir / fechar)",
+      "aliases": [
+        "Mentor window (open / close)"
+      ]
+    },
+    {
+      "key": "help.shortcut.34",
+      "en": "Creature Pickup (Multi Mouse Target)",
+      "zh-TW": "寵物拾取（多滑鼠目標）",
+      "pt-BR": "Coleta da criatura (vários alvos com o mouse)",
+      "aliases": [
+        "Creature Pickup (Multi Mouse Target)"
+      ]
+    },
+    {
+      "key": "help.shortcut.35",
+      "en": "Creature Pickup (Single Mouse Target)",
+      "zh-TW": "寵物拾取（單滑鼠目標）",
+      "pt-BR": "Coleta da criatura (alvo único com o mouse)",
+      "aliases": [
+        "Creature Pickup (Single Mouse Target)"
+      ]
+    },
+    {
+      "key": "help.shortcut.36",
+      "en": "Command to whisper to others",
+      "zh-TW": "私聊命令",
+      "pt-BR": "Comando para sussurrar para outros",
+      "aliases": [
+        "Command to whisper to others"
+      ]
+    },
+    {
+      "key": "help.shortcut.37",
+      "en": "Command to shout to others nearby",
+      "zh-TW": "附近喊話命令",
+      "pt-BR": "Comando para gritar para quem está por perto",
+      "aliases": [
+        "Command to shout to others nearby"
+      ]
+    },
+    {
+      "key": "help.shortcut.38",
+      "en": "Command to guild chat",
+      "zh-TW": "公會聊天命令",
+      "pt-BR": "Comando para o chat da guilda",
+      "aliases": [
+        "Command to guild chat"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "schema": "mir2.periodic.pg-root-review.v1",
+  "reviewedAtUtc": "2026-10-02T01:15:39.392616+00:00",
+  "sourceSha256TestedWorkingBytes": "3a7072f2125351c6485d9574450b47a8a02ecc678cdfcd989ce890bab80f7fe6",
+  "sourceSha256GitNormalizedLf": "3a7072f2125351c6485d9574450b47a8a02ecc678cdfcd989ce890bab80f7fe6",
+  "workingVsGitOnlyLineEndingNormalization": true,
+  "testBinarySha256": "f71c895abb22c5bb5d524f163469072ce75b04c9621ec90a3c73fa28935d3ec1",
+  "exactDailyAndWeeklyCases": true,
+  "noResultBeforeDatabaseCommitObserved": true,
+  "fullSaveAccountJsonAndProjectionCompared": true,
+  "independentConfigCasAndReloginRetryVerified": true,
+  "testChangesOnlyNewOptInIgnoredPgModule": true,
+  "dedicatedLimitedRoleAndFreshSchema": true,
+  "transport": "pinned encrypted SSH loopback; Windows compiled caller, same server PostgreSQL16.13",
+  "humanDatabaseChanges": false,
+  "r1Interruption": "cold compiler stopped by root after host available memory114511872 bytes; pre-stop receipt separately shows306253824 bytes; no assertions executed",
+  "naturalKills": false,
+  "dailyDurationAccepted": false,
+  "publicGatewayRolloutAccepted": false
+}

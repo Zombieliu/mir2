@@ -1,0 +1,111 @@
+{
+  "schemaVersion": 1,
+  "createdAt": "2026-10-25T02:46:02.420Z",
+  "baselineCommit": "30ba328ad3d1b1eb46e51540cb1880d66eba3ee1",
+  "scope": "Final source preservation proof; two explicitly authorized old fixture initializations changed, all existing assertions and control flow retained",
+  "codeOnlyLfNormalization": true,
+  "rawEvidenceNormalized": false,
+  "oldTestBodiesCompletelyUnmodified": false,
+  "inverseTransform": {
+    "newFixtureBlockRemoved": true,
+    "onlyNewImportRemoved": "offerNativeHpRecovery",
+    "authorizedOldFixtureAdditions": [
+      {
+        "test": "native combat walks the real village-to-forest route before hunting, without requiring an observer to arrive",
+        "fields": {
+          "ready": true,
+          "role": "movement",
+          "home": {
+            "x": 279,
+            "y": 557
+          }
+        },
+        "basis": "Actual observer self is279,557; same map with attacker+target at distances1/2; ready actors also require a coherent movement home for the original settle assertion"
+      },
+      {
+        "test": "native pending evidence is recorded separately and never sends another attack into an ambiguous hit window",
+        "fields": {
+          "ready": true
+        },
+        "basis": "Actual self5,5, attacker5,5 and target6,5; same map and both objects already present"
+      }
+    ],
+    "exactlyRestores30baTestCode": true,
+    "allOldAssertionsAndControlFlowUnchanged": true,
+    "restoredLfSha256": "2235d9e7d55f0bfa1b78bce3b6ad493cd6cfba2fbe329e551502d2a53ab367cf",
+    "originalGitBlobSha256": "2235d9e7d55f0bfa1b78bce3b6ad493cd6cfba2fbe329e551502d2a53ab367cf"
+  },
+  "finalFiles": [
+    {
+      "file": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/apps/web/scripts/playtest-capacity-soak.mjs",
+      "bytes": 143423,
+      "sha256": "01db0e25728208d17468f708819cd4d1f134a81c97884614da06d06525929f6d"
+    },
+    {
+      "file": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/apps/web/scripts/playtest-capacity-soak.test.mjs",
+      "bytes": 216899,
+      "sha256": "4280e97d90981f75d37ed15c5d395d3d0129f3d5d213310ad7fc134429e25097"
+    }
+  ],
+  "productMainUnchangedFromFullV1": true,
+  "otherSevenRawInputsUnchanged": [
+    {
+      "file": "apps/web/scripts/playtest-capacity-soak-core.mjs",
+      "bytes": 37930,
+      "sha256": "40ccd36ee84265a29bd509ca9a7bb360691f2be002411c8cab5f64a3e254cacc"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-observability.mjs",
+      "bytes": 4447,
+      "sha256": "19edb25f68fdd18567391e52a247964bd689346b58535871ce17051f53af9af7"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-observability.test.mjs",
+      "bytes": 5228,
+      "sha256": "00ff902194f805eb3433b192b2838b6eea6cd80860052860b825ab34f58a626d"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-monitor.mjs",
+      "bytes": 21246,
+      "sha256": "e585081835d9232b58d91bb0f717a796b483a818ed5c6fd943abf93350d74e7f"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-monitor.test.mjs",
+      "bytes": 10882,
+      "sha256": "0e60e4636ea5e384e6455fe9d474d56a760881505e765ccfc82eec490d8d92f8"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-telemetry.mjs",
+      "bytes": 6548,
+      "sha256": "d3b74c3b8e0401530e787f6b35bd9a578de4f455b3f7817b6230df41c5871964"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-telemetry.test.mjs",
+      "bytes": 6277,
+      "sha256": "f5efe4aa510f67eb10ebba26a5de9cb5402f061de07900998a77a191a749f974"
+    }
+  ],
+  "failedHistory": [
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/native-hp-pursuit-maintenance-v1/full-v1-receipt.json",
+      "bytes": 1419,
+      "sha256": "292e1c5572eab393df6dacd1610a2ba8a56506b5feddbe40f39749dd6f43a507"
+    },
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/native-hp-pursuit-maintenance-v1/full-v1-failed-source-preimages.json",
+      "bytes": 1034,
+      "sha256": "7f1160682d25d1d3d1f9e4e749dd5ed5263c4853e01a879182a6ed75ab54a652"
+    },
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/native-hp-pursuit-maintenance-v1/focused-v4-receipt.json",
+      "bytes": 969,
+      "sha256": "527f426cbf80d1c168288cb855e23f5ef16f272cfa36935c690ece7767bf2d95"
+    },
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/native-hp-pursuit-maintenance-v1/focused-v4-failed-test-source.mjs.txt",
+      "bytes": 216855,
+      "sha256": "a3a6ce1729800ddd6553ddc475afba20c75cf733080a49bfec31c8acc2275c87"
+    }
+  ],
+  "diffCheckPassed": true
+}

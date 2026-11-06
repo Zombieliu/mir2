@@ -1,0 +1,62 @@
+{
+  "createdAt": "2026-10-24T12:32:58.544520+00:00",
+  "runs": [
+    {
+      "runId": "1792844890863-cf239893",
+      "report": "1792844890863-cf239893.report.json",
+      "ok": false,
+      "startedAt": "2026-10-24T12:28:10.863Z",
+      "finishedAt": "2026-10-24T12:28:27.472Z",
+      "checks": {
+        "ordinaryLogin": "passed",
+        "stepBeforeDrop": "passed",
+        "uncleanTransportLoss": "passed",
+        "nativeResume": "failed",
+        "sameState": "skipped",
+        "rotatedTicket": "skipped",
+        "replayRejected": "skipped",
+        "resumedOwnerLive": "skipped",
+        "logout": "skipped"
+      },
+      "error": "Native resume rejected by the real gateway",
+      "readinessElapsedMs": null
+    },
+    {
+      "runId": "1792845120462-edfccab1",
+      "report": "1792845120462-edfccab1.report.json",
+      "ok": true,
+      "startedAt": "2026-10-24T12:32:00.462Z",
+      "finishedAt": "2026-10-24T12:32:26.786Z",
+      "checks": {
+        "ordinaryLogin": "passed",
+        "stepBeforeDrop": "passed",
+        "uncleanTransportLoss": "passed",
+        "nativeResume": "passed",
+        "sameState": "passed",
+        "rotatedTicket": "passed",
+        "replayRejected": "passed",
+        "resumedOwnerLive": "passed",
+        "logout": "passed"
+      },
+      "error": null,
+      "readinessElapsedMs": 5027
+    }
+  ],
+  "originalFailureRetained": true,
+  "repairScope": "Public health state polling on an initially drained isolated realm, at most ten seconds. No resume rejection, invalid/expired/used credential or authentication error is retried; gateway save/lease semantics unchanged.",
+  "sourceProvenance": "Core-only projection of original third full run eleven true core receipts. Original full remains fourteen passed plus two not_run, incomplete.",
+  "fullLifecycleAccepted": false,
+  "nativeClientUiAccepted": false,
+  "serverRestartResumeTested": false,
+  "nodeRegression": {
+    "passed": 76,
+    "failed": 0,
+    "skipped": 0,
+    "scope": "Runner tests and local WebSocket fixtures, separate from these live protocol runs."
+  },
+  "originalFailureObservation": {
+    "filePersistSaveElapsedMs": 5070,
+    "oldRunnerFixedWaitMs": 1000,
+    "resumeUnavailableArrivedBeforeRetain": true
+  }
+}

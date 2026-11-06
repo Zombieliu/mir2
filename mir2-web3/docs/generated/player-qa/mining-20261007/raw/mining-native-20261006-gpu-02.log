@@ -1,0 +1,16 @@
+
+running 1 test
+[frame-sets] loaded 697 Crystal library catalogs from "C:/mir2-build/r10-src/mir2-web3/apps/web/public\\original-ui/frame-sets.generated.json"
+[native-fonts] pinned Arial from C:\Windows\Fonts\arial.ttf
+[native-fonts] pinned Arial from C:\Windows\Fonts\arialbd.ttf
+[native-fonts] pinned Arial from C:\Windows\Fonts\ariali.ttf
+[native-fonts] pinned Arial from C:\Windows\Fonts\arialbi.ttf
+[native-fonts] pinned Microsoft YaHei from C:\Windows\Fonts\msyh.ttc
+[native-fonts] pinned Microsoft YaHei from C:\Windows\Fonts\msyhbd.ttc
+[native-fonts] pinned Microsoft YaHei from C:\Windows\Fonts\msyhl.ttc
+[native-fonts] retained 7 installed font asset(s); system discovery and fallback remain enabled
+[client-bevy/audio] background music muted by development policy; sound effects remain enabled
+test entity_presentation::mining_visual_tests::mining_source_pose_and_original_ore_icons_offscreen_gpu ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 878 filtered out; finished in 2.81s
+

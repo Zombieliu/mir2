@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "releases": [
+    {
+      "manifest": "backend-source-spectator-buffer-827d4c8.json",
+      "build": "release-spectator-buffer-827d4c8.json"
+    },
+    {
+      "manifest": "backend-source-native-attack-v2.json",
+      "build": "release-native-attack-v2.json"
+    },
+    {
+      "manifest": "backend-source-socket-diagnostics-v1.json",
+      "build": "release-socket-diagnostics-v1.json"
+    },
+    {
+      "manifest": "backend-source-personal-monster-projection-v1.json",
+      "build": "release-personal-monster-projection-v1.json"
+    },
+    {
+      "manifest": "backend-source-attack-deadline-diagnostics-v1.json",
+      "build": "release-attack-deadline-diagnostics-v1.json"
+    },
+    {
+      "manifest": "capacity-account-store-wait-diagnostics-release-v1/backend-source-account-store-wait-diagnostics-v1.json",
+      "build": "capacity-account-store-wait-diagnostics-release-v1/release-account-store-wait-diagnostics-v1.json"
+    }
+  ]
+}

@@ -1,0 +1,2067 @@
+{
+  "schemaVersion": 1,
+  "packageId": "ordinary-capacity-bank-prepare-v17",
+  "mode": "historical-prepared-index-v1",
+  "historicalPreparedCount": 58,
+  "newPreparedCount": 42,
+  "expectedThisRun": 42,
+  "historicalNotFresh": true,
+  "records": [
+    {
+      "name": "L370e2a00",
+      "characterIndex": 1,
+      "map": "0",
+      "x": 288,
+      "y": 615,
+      "sequence": 723,
+      "monotonicMs": 3346.646,
+      "inSafeZone": true,
+      "normalLogout": true,
+      "originalPoolIndex": 0,
+      "origin": "historical",
+      "freshThisRun": false,
+      "sourceReportPin": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v15\\episode\\reports\\1793084170216-93e9fe64.preparation-report.json",
+        "bytes": 145422,
+        "sha256": "a9afe8b257cc0af793a532a7e9b96ae59d374e391d3123d2cc8445608b2b39df"
+      },
+      "durableReloginReadbackPending": true
+    },
+    {
+      "name": "L370e2a01",
+      "characterIndex": 2,
+      "map": "0",
+      "x": 289,
+      "y": 616,
+      "sequence": 688,
+      "monotonicMs": 6824.6856,
+      "inSafeZone": true,
+      "normalLogout": true,
+      "originalPoolIndex": 1,
+      "origin": "historical",
+      "freshThisRun": false,
+      "sourceReportPin": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v15\\episode\\reports\\1793084170216-93e9fe64.preparation-report.json",
+        "bytes": 145422,
+        "sha256": "a9afe8b257cc0af793a532a7e9b96ae59d374e391d3123d2cc8445608b2b39df"
+      },
+      "durableReloginReadbackPending": true
+    },
+    {
+      "name": "L370e2a02",
+      "characterIndex": 3,
+      "map": "0",
+      "x": 288,
+      "y": 617,
+      "sequence": 680,
+      "monotonicMs": 10328.9125,
+      "inSafeZone": true,
+      "normalLogout": true,
+      "originalPoolIndex": 2,
+      "origin": "historical",
+      "freshThisRun": false,
+      "sourceReportPin": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v15\\episode\\reports\\1793084170216-93e9fe64.preparation-report.json",
+        "bytes": 145422,
+        "sha256": "a9afe8b257cc0af793a532a7e9b96ae59d374e391d3123d2cc8445608b2b39df"
+      },
+      "durableReloginReadbackPending": true
+    },
+    {
+      "name": "L370e2a03",
+      "characterIndex": 4,
+      "map": "0",
+      "x": 289,
+      "y": 615,
+      "sequence": 687,
+      "monotonicMs": 13801.2257,
+      "inSafeZone": true,
+      "normalLogout": true,
+      "originalPoolIndex": 3,
+      "origin": "historical",
+      "freshThisRun": false,
+      "sourceReportPin": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v15\\episode\\reports\\1793084170216-93e9fe64.preparation-report.json",
+        "bytes": 145422,
+        "sha256": "a9afe8b257cc0af793a532a7e9b96ae59d374e391d3123d2cc8445608b2b39df"
+      },
+      "durableReloginReadbackPending": true
+    },
+    {
+      "name": "L370e2a04",
+      "characterIndex": 5,
+      "map": "0",
+      "x": 287,
+      "y": 617,
+      "sequence": 678,
+      "monotonicMs": 17288.5566,
+      "inSafeZone": true,
+      "normalLogout": true,
+      "originalPoolIndex": 4,
+      "origin": "historical",
+      "freshThisRun": false,
+      "sourceReportPin": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v15\\episode\\reports\\1793084170216-93e9fe64.preparation-report.json",
+        "bytes": 145422,
+        "sha256": "a9afe8b257cc0af793a532a7e9b96ae59d374e391d3123d2cc8445608b2b39df"
+      },
+      "durableReloginReadbackPending": true
+    },
+    {
+      "name": "L370e2a05",
+      "characterIndex": 6,
+      "map": "0",
+      "x": 289,
+      "y": 617,
+      "sequence": 683,
+      "monotonicMs": 20781.3301,
+      "inSafeZone": true,
+      "normalLogout": true,
+      "originalPoolIndex": 5,
+      "origin": "historical",
+      "freshThisRun": false,
+      "sourceReportPin": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v15\\episode\\reports\\1793084170216-93e9fe64.preparation-report.json",
+        "bytes": 145422,
+        "sha256": "a9afe8b257cc0af793a532a7e9b96ae59d374e391d3123d2cc8445608b2b39df"
+      },
+      "durableReloginReadbackPending": true
+    },
+    {
+      "name": "L370e2a06",
+      "characterIndex": 7,
+      "map": "0",
+      "x": 288,
+      "y": 614,
+      "sequence": 685,
+      "monotonicMs": 24272.8519,
+      "inSafeZone": true,
+      "normalLogout": true,
+      "originalPoolIndex": 6,
+      "origin": "historical",
+      "freshThisRun": false,
+      "sourceReportPin": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v15\\episode\\reports\\1793084170216-93e9fe64.preparation-report.json",
+        "bytes": 145422,
+        "sha256": "a9afe8b257cc0af793a532a7e9b96ae59d374e391d3123d2cc8445608b2b39df"
+      },
+      "durableReloginReadbackPending": true
+    },
+    {
+      "name": "L370e2a07",
+      "characterIndex": 8,
+      "map": "0",
+      "x": 286,
+      "y": 616,
+      "sequence": 684,
+      "monotonicMs": 27731.938,
+      "inSafeZone": true,
+      "normalLogout": true,
+      "originalPoolIndex": 7,
+      "origin": "historical",
+      "freshThisRun": false,
+      "sourceReportPin": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v15\\episode\\reports\\1793084170216-93e9fe64.preparation-report.json",
+        "bytes": 145422,
+        "sha256": "a9afe8b257cc0af793a532a7e9b96ae59d374e391d3123d2cc8445608b2b39df"
+      },
+      "durableReloginReadbackPending": true
+    },
+    {
+      "name": "L370e2a08",
+      "characterIndex": 9,
+      "map": "0",
+      "x": 290,
+      "y": 616,
+      "sequence": 687,
+      "monotonicMs": 31197.2434,
+      "inSafeZone": true,
+      "normalLogout": true,
+      "originalPoolIndex": 8,
+      "origin": "historical",
+      "freshThisRun": false,
+      "sourceReportPin": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v15\\episode\\reports\\1793084170216-93e9fe64.preparation-report.json",
+        "bytes": 145422,
+        "sha256": "a9afe8b257cc0af793a532a7e9b96ae59d374e391d3123d2cc8445608b2b39df"
+      },
+      "durableReloginReadbackPending": true
+    },
+    {
+      "name": "L370e2a09",
+      "characterIndex": 10,
+      "map": "0",
+      "x": 288,
+      "y": 618,
+      "sequence": 679,
+      "monotonicMs": 34670.8599,
+      "inSafeZone": true,
+      "normalLogout": true,
+      "originalPoolIndex": 9,
+      "origin": "historical",
+      "freshThisRun": false,
+      "sourceReportPin": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v15\\episode\\reports\\1793084170216-93e9fe64.preparation-report.json",
+        "bytes": 145422,
+        "sha256": "a9afe8b257cc0af793a532a7e9b96ae59d374e391d3123d2cc8445608b2b39df"
+      },
+      "durableReloginReadbackPending": true
+    },
+    {
+      "name": "L370e2a0a",
+      "characterIndex": 11,
+      "map": "0",
+      "x": 287,
+      "y": 614,
+      "sequence": 684,
+      "monotonicMs": 38147.2793,
+      "inSafeZone": true,
+      "normalLogout": true,
+      "originalPoolIndex": 10,
+      "origin": "historical",
+      "freshThisRun": false,
+      "sourceReportPin": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v15\\episode\\reports\\1793084170216-93e9fe64.preparation-report.json",
+        "bytes": 145422,
+        "sha256": "a9afe8b257cc0af793a532a7e9b96ae59d374e391d3123d2cc8445608b2b39df"
+      },
+      "durableReloginReadbackPending": true
+    },
+    {
+      "name": "L370e2a0b",
+      "characterIndex": 12,
+      "map": "0",
+      "x": 289,
+      "y": 614,
+      "sequence": 687,
+      "monotonicMs": 41609.0935,
+      "inSafeZone": true,
+      "normalLogout": true,
+      "originalPoolIndex": 11,
+      "origin": "historical",
+      "freshThisRun": false,
+      "sourceReportPin": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v15\\episode\\reports\\1793084170216-93e9fe64.preparation-report.json",
+        "bytes": 145422,
+        "sha256": "a9afe8b257cc0af793a532a7e9b96ae59d374e391d3123d2cc8445608b2b39df"
+      },
+      "durableReloginReadbackPending": true
+    },
+    {
+      "name": "L370e2a0c",
+      "characterIndex": 13,
+      "map": "0",
+      "x": 286,
+      "y": 615,
+      "sequence": 686,
+      "monotonicMs": 45085.2174,
+      "inSafeZone": true,
+      "normalLogout": true,
+      "originalPoolIndex": 12,
+      "origin": "historical",
+      "freshThisRun": false,
+      "sourceReportPin": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v15\\episode\\reports\\1793084170216-93e9fe64.preparation-report.json",
+        "bytes": 145422,
+        "sha256": "a9afe8b257cc0af793a532a7e9b96ae59d374e391d3123d2cc8445608b2b39df"
+      },
+      "durableReloginReadbackPending": true
+    },
+    {
+      "name": "L370e2a0d",
+      "characterIndex": 14,
+      "map": "0",
+      "x": 290,
+      "y": 615,
+      "sequence": 687,
+      "monotonicMs": 48549.4682,
+      "inSafeZone": true,
+      "normalLogout": true,
+      "originalPoolIndex": 13,
+      "origin": "historical",
+      "freshThisRun": false,
+      "sourceReportPin": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v15\\episode\\reports\\1793084170216-93e9fe64.preparation-report.json",
+        "bytes": 145422,
+        "sha256": "a9afe8b257cc0af793a532a7e9b96ae59d374e391d3123d2cc8445608b2b39df"
+      },
+      "durableReloginReadbackPending": true
+    },
+    {
+      "name": "L370e2a0e",
+      "characterIndex": 15,
+      "map": "0",
+      "x": 286,
+      "y": 617,
+      "sequence": 679,
+      "monotonicMs": 52027.4966,
+      "inSafeZone": true,
+      "normalLogout": true,
+      "originalPoolIndex": 14,
+      "origin": "historical",
+      "freshThisRun": false,
+      "sourceReportPin": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v15\\episode\\reports\\1793084170216-93e9fe64.preparation-report.json",
+        "bytes": 145422,
+        "sha256": "a9afe8b257cc0af793a532a7e9b96ae59d374e391d3123d2cc8445608b2b39df"
+      },
+      "durableReloginReadbackPending": true
+    },
+    {
+      "name": "L370e2a0f",
+      "characterIndex": 16,
+      "map": "0",
+      "x": 290,
+      "y": 617,
+      "sequence": 682,
+      "monotonicMs": 55485.6691,
+      "inSafeZone": true,
+      "normalLogout": true,
+      "originalPoolIndex": 15,
+      "origin": "historical",
+      "freshThisRun": false,
+      "sourceReportPin": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v15\\episode\\reports\\1793084170216-93e9fe64.preparation-report.json",
+        "bytes": 145422,
+        "sha256": "a9afe8b257cc0af793a532a7e9b96ae59d374e391d3123d2cc8445608b2b39df"
+      },
+      "durableReloginReadbackPending": true
+    },
+    {
+      "name": "L370e2a0g",
+      "characterIndex": 17,
+      "map": "0",
+      "x": 287,
+      "y": 618,
+      "sequence": 679,
+      "monotonicMs": 58975.3718,
+      "inSafeZone": true,
+      "normalLogout": true,
+      "originalPoolIndex": 16,
+      "origin": "historical",
+      "freshThisRun": false,
+      "sourceReportPin": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v15\\episode\\reports\\1793084170216-93e9fe64.preparation-report.json",
+        "bytes": 145422,
+        "sha256": "a9afe8b257cc0af793a532a7e9b96ae59d374e391d3123d2cc8445608b2b39df"
+      },
+      "durableReloginReadbackPending": true
+    },
+    {
+      "name": "L370e2a0h",
+      "characterIndex": 18,
+      "map": "0",
+      "x": 289,
+      "y": 618,
+      "sequence": 682,
+      "monotonicMs": 62438.8145,
+      "inSafeZone": true,
+      "normalLogout": true,
+      "originalPoolIndex": 17,
+      "origin": "historical",
+      "freshThisRun": false,
+      "sourceReportPin": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v15\\episode\\reports\\1793084170216-93e9fe64.preparation-report.json",
+        "bytes": 145422,
+        "sha256": "a9afe8b257cc0af793a532a7e9b96ae59d374e391d3123d2cc8445608b2b39df"
+      },
+      "durableReloginReadbackPending": true
+    },
+    {
+      "name": "L370e2a0i",
+      "characterIndex": 19,
+      "map": "0",
+      "x": 290,
+      "y": 614,
+      "sequence": 687,
+      "monotonicMs": 65917.8742,
+      "inSafeZone": true,
+      "normalLogout": true,
+      "originalPoolIndex": 18,
+      "origin": "historical",
+      "freshThisRun": false,
+      "sourceReportPin": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v15\\episode\\reports\\1793084170216-93e9fe64.preparation-report.json",
+        "bytes": 145422,
+        "sha256": "a9afe8b257cc0af793a532a7e9b96ae59d374e391d3123d2cc8445608b2b39df"
+      },
+      "durableReloginReadbackPending": true
+    },
+    {
+      "name": "L370e2a0j",
+      "characterIndex": 20,
+      "map": "0",
+      "x": 286,
+      "y": 618,
+      "sequence": 679,
+      "monotonicMs": 69407.7631,
+      "inSafeZone": true,
+      "normalLogout": true,
+      "originalPoolIndex": 19,
+      "origin": "historical",
+      "freshThisRun": false,
+      "sourceReportPin": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v15\\episode\\reports\\1793084170216-93e9fe64.preparation-report.json",
+        "bytes": 145422,
+        "sha256": "a9afe8b257cc0af793a532a7e9b96ae59d374e391d3123d2cc8445608b2b39df"
+      },
+      "durableReloginReadbackPending": true
+    },
+    {
+      "name": "L370e2a0k",
+      "characterIndex": 21,
+      "map": "0",
+      "x": 290,
+      "y": 618,
+      "sequence": 682,
+      "monotonicMs": 72897.1021,
+      "inSafeZone": true,
+      "normalLogout": true,
+      "originalPoolIndex": 20,
+      "origin": "historical",
+      "freshThisRun": false,
+      "sourceReportPin": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v15\\episode\\reports\\1793084170216-93e9fe64.preparation-report.json",
+        "bytes": 145422,
+        "sha256": "a9afe8b257cc0af793a532a7e9b96ae59d374e391d3123d2cc8445608b2b39df"
+      },
+      "durableReloginReadbackPending": true
+    },
+    {
+      "name": "L370e2a0l",
+      "characterIndex": 22,
+      "map": "0",
+      "x": 288,
+      "y": 613,
+      "sequence": 686,
+      "monotonicMs": 76384.2322,
+      "inSafeZone": true,
+      "normalLogout": true,
+      "originalPoolIndex": 21,
+      "origin": "historical",
+      "freshThisRun": false,
+      "sourceReportPin": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v15\\episode\\reports\\1793084170216-93e9fe64.preparation-report.json",
+        "bytes": 145422,
+        "sha256": "a9afe8b257cc0af793a532a7e9b96ae59d374e391d3123d2cc8445608b2b39df"
+      },
+      "durableReloginReadbackPending": true
+    },
+    {
+      "name": "L370e2a0m",
+      "characterIndex": 23,
+      "map": "0",
+      "x": 285,
+      "y": 616,
+      "sequence": 684,
+      "monotonicMs": 79864.1076,
+      "inSafeZone": true,
+      "normalLogout": true,
+      "originalPoolIndex": 22,
+      "origin": "historical",
+      "freshThisRun": false,
+      "sourceReportPin": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v15\\episode\\reports\\1793084170216-93e9fe64.preparation-report.json",
+        "bytes": 145422,
+        "sha256": "a9afe8b257cc0af793a532a7e9b96ae59d374e391d3123d2cc8445608b2b39df"
+      },
+      "durableReloginReadbackPending": true
+    },
+    {
+      "name": "L370e2a0n",
+      "characterIndex": 24,
+      "map": "0",
+      "x": 288,
+      "y": 619,
+      "sequence": 679,
+      "monotonicMs": 83322.9173,
+      "inSafeZone": true,
+      "normalLogout": true,
+      "originalPoolIndex": 23,
+      "origin": "historical",
+      "freshThisRun": false,
+      "sourceReportPin": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v15\\episode\\reports\\1793084170216-93e9fe64.preparation-report.json",
+        "bytes": 145422,
+        "sha256": "a9afe8b257cc0af793a532a7e9b96ae59d374e391d3123d2cc8445608b2b39df"
+      },
+      "durableReloginReadbackPending": true
+    },
+    {
+      "name": "L370e2a0o",
+      "characterIndex": 25,
+      "map": "0",
+      "x": 287,
+      "y": 613,
+      "sequence": 686,
+      "monotonicMs": 86799.0511,
+      "inSafeZone": true,
+      "normalLogout": true,
+      "originalPoolIndex": 24,
+      "origin": "historical",
+      "freshThisRun": false,
+      "sourceReportPin": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v15\\episode\\reports\\1793084170216-93e9fe64.preparation-report.json",
+        "bytes": 145422,
+        "sha256": "a9afe8b257cc0af793a532a7e9b96ae59d374e391d3123d2cc8445608b2b39df"
+      },
+      "durableReloginReadbackPending": true
+    },
+    {
+      "name": "L370e2a0p",
+      "characterIndex": 26,
+      "map": "0",
+      "x": 289,
+      "y": 613,
+      "sequence": 689,
+      "monotonicMs": 904227.2361,
+      "inSafeZone": true,
+      "normalLogout": true,
+      "originalPoolIndex": 25,
+      "origin": "historical",
+      "freshThisRun": false,
+      "sourceReportPin": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v15\\episode\\reports\\1793084170216-93e9fe64.preparation-report.json",
+        "bytes": 145422,
+        "sha256": "a9afe8b257cc0af793a532a7e9b96ae59d374e391d3123d2cc8445608b2b39df"
+      },
+      "durableReloginReadbackPending": true
+    },
+    {
+      "name": "L370e2a0q",
+      "characterIndex": 27,
+      "map": "0",
+      "x": 285,
+      "y": 615,
+      "sequence": 686,
+      "monotonicMs": 907813.8898,
+      "inSafeZone": true,
+      "normalLogout": true,
+      "originalPoolIndex": 26,
+      "origin": "historical",
+      "freshThisRun": false,
+      "sourceReportPin": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v15\\episode\\reports\\1793084170216-93e9fe64.preparation-report.json",
+        "bytes": 145422,
+        "sha256": "a9afe8b257cc0af793a532a7e9b96ae59d374e391d3123d2cc8445608b2b39df"
+      },
+      "durableReloginReadbackPending": true
+    },
+    {
+      "name": "L370e2a0r",
+      "characterIndex": 28,
+      "map": "0",
+      "x": 291,
+      "y": 615,
+      "sequence": 687,
+      "monotonicMs": 911308.7471,
+      "inSafeZone": true,
+      "normalLogout": true,
+      "originalPoolIndex": 27,
+      "origin": "historical",
+      "freshThisRun": false,
+      "sourceReportPin": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v15\\episode\\reports\\1793084170216-93e9fe64.preparation-report.json",
+        "bytes": 145422,
+        "sha256": "a9afe8b257cc0af793a532a7e9b96ae59d374e391d3123d2cc8445608b2b39df"
+      },
+      "durableReloginReadbackPending": true
+    },
+    {
+      "name": "L370e2a0s",
+      "characterIndex": 29,
+      "map": "0",
+      "x": 285,
+      "y": 617,
+      "sequence": 679,
+      "monotonicMs": 914801.9946,
+      "inSafeZone": true,
+      "normalLogout": true,
+      "originalPoolIndex": 28,
+      "origin": "historical",
+      "freshThisRun": false,
+      "sourceReportPin": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v15\\episode\\reports\\1793084170216-93e9fe64.preparation-report.json",
+        "bytes": 145422,
+        "sha256": "a9afe8b257cc0af793a532a7e9b96ae59d374e391d3123d2cc8445608b2b39df"
+      },
+      "durableReloginReadbackPending": true
+    },
+    {
+      "name": "L370e2a0t",
+      "characterIndex": 30,
+      "map": "0",
+      "x": 291,
+      "y": 617,
+      "sequence": 682,
+      "monotonicMs": 918289.0911,
+      "inSafeZone": true,
+      "normalLogout": true,
+      "originalPoolIndex": 29,
+      "origin": "historical",
+      "freshThisRun": false,
+      "sourceReportPin": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v15\\episode\\reports\\1793084170216-93e9fe64.preparation-report.json",
+        "bytes": 145422,
+        "sha256": "a9afe8b257cc0af793a532a7e9b96ae59d374e391d3123d2cc8445608b2b39df"
+      },
+      "durableReloginReadbackPending": true
+    },
+    {
+      "name": "L370e2a0u",
+      "characterIndex": 31,
+      "map": "0",
+      "x": 287,
+      "y": 619,
+      "sequence": 679,
+      "monotonicMs": 921777.9966,
+      "inSafeZone": true,
+      "normalLogout": true,
+      "originalPoolIndex": 30,
+      "origin": "historical",
+      "freshThisRun": false,
+      "sourceReportPin": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v15\\episode\\reports\\1793084170216-93e9fe64.preparation-report.json",
+        "bytes": 145422,
+        "sha256": "a9afe8b257cc0af793a532a7e9b96ae59d374e391d3123d2cc8445608b2b39df"
+      },
+      "durableReloginReadbackPending": true
+    },
+    {
+      "name": "L370e2a0v",
+      "characterIndex": 32,
+      "map": "0",
+      "x": 289,
+      "y": 619,
+      "sequence": 682,
+      "monotonicMs": 925269.5776,
+      "inSafeZone": true,
+      "normalLogout": true,
+      "originalPoolIndex": 31,
+      "origin": "historical",
+      "freshThisRun": false,
+      "sourceReportPin": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v15\\episode\\reports\\1793084170216-93e9fe64.preparation-report.json",
+        "bytes": 145422,
+        "sha256": "a9afe8b257cc0af793a532a7e9b96ae59d374e391d3123d2cc8445608b2b39df"
+      },
+      "durableReloginReadbackPending": true
+    },
+    {
+      "name": "L370e2a0w",
+      "characterIndex": 33,
+      "map": "0",
+      "x": 286,
+      "y": 613,
+      "sequence": 688,
+      "monotonicMs": 928741.9199,
+      "inSafeZone": true,
+      "normalLogout": true,
+      "originalPoolIndex": 32,
+      "origin": "historical",
+      "freshThisRun": false,
+      "sourceReportPin": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v15\\episode\\reports\\1793084170216-93e9fe64.preparation-report.json",
+        "bytes": 145422,
+        "sha256": "a9afe8b257cc0af793a532a7e9b96ae59d374e391d3123d2cc8445608b2b39df"
+      },
+      "durableReloginReadbackPending": true
+    },
+    {
+      "name": "L370e2a0x",
+      "characterIndex": 34,
+      "map": "0",
+      "x": 290,
+      "y": 613,
+      "sequence": 689,
+      "monotonicMs": 932217.3118,
+      "inSafeZone": true,
+      "normalLogout": true,
+      "originalPoolIndex": 33,
+      "origin": "historical",
+      "freshThisRun": false,
+      "sourceReportPin": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v15\\episode\\reports\\1793084170216-93e9fe64.preparation-report.json",
+        "bytes": 145422,
+        "sha256": "a9afe8b257cc0af793a532a7e9b96ae59d374e391d3123d2cc8445608b2b39df"
+      },
+      "durableReloginReadbackPending": true
+    },
+    {
+      "name": "L370e2a0y",
+      "characterIndex": 35,
+      "map": "0",
+      "x": 291,
+      "y": 614,
+      "sequence": 687,
+      "monotonicMs": 935675.6088,
+      "inSafeZone": true,
+      "normalLogout": true,
+      "originalPoolIndex": 34,
+      "origin": "historical",
+      "freshThisRun": false,
+      "sourceReportPin": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v15\\episode\\reports\\1793084170216-93e9fe64.preparation-report.json",
+        "bytes": 145422,
+        "sha256": "a9afe8b257cc0af793a532a7e9b96ae59d374e391d3123d2cc8445608b2b39df"
+      },
+      "durableReloginReadbackPending": true
+    },
+    {
+      "name": "L370e2a0z",
+      "characterIndex": 36,
+      "map": "0",
+      "x": 285,
+      "y": 618,
+      "sequence": 704,
+      "monotonicMs": 941179.7125,
+      "inSafeZone": true,
+      "normalLogout": true,
+      "originalPoolIndex": 35,
+      "origin": "historical",
+      "freshThisRun": false,
+      "sourceReportPin": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v15\\episode\\reports\\1793084170216-93e9fe64.preparation-report.json",
+        "bytes": 145422,
+        "sha256": "a9afe8b257cc0af793a532a7e9b96ae59d374e391d3123d2cc8445608b2b39df"
+      },
+      "durableReloginReadbackPending": true
+    },
+    {
+      "name": "L370e2a10",
+      "characterIndex": 37,
+      "map": "0",
+      "x": 291,
+      "y": 618,
+      "sequence": 689,
+      "monotonicMs": 946814.6432,
+      "inSafeZone": true,
+      "normalLogout": true,
+      "originalPoolIndex": 36,
+      "origin": "historical",
+      "freshThisRun": false,
+      "sourceReportPin": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v15\\episode\\reports\\1793084170216-93e9fe64.preparation-report.json",
+        "bytes": 145422,
+        "sha256": "a9afe8b257cc0af793a532a7e9b96ae59d374e391d3123d2cc8445608b2b39df"
+      },
+      "durableReloginReadbackPending": true
+    },
+    {
+      "name": "L370e2a11",
+      "characterIndex": 38,
+      "map": "0",
+      "x": 286,
+      "y": 619,
+      "sequence": 692,
+      "monotonicMs": 952478.9365,
+      "inSafeZone": true,
+      "normalLogout": true,
+      "originalPoolIndex": 37,
+      "origin": "historical",
+      "freshThisRun": false,
+      "sourceReportPin": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v15\\episode\\reports\\1793084170216-93e9fe64.preparation-report.json",
+        "bytes": 145422,
+        "sha256": "a9afe8b257cc0af793a532a7e9b96ae59d374e391d3123d2cc8445608b2b39df"
+      },
+      "durableReloginReadbackPending": true
+    },
+    {
+      "name": "L370e2a12",
+      "characterIndex": 39,
+      "map": "0",
+      "x": 290,
+      "y": 619,
+      "sequence": 687,
+      "monotonicMs": 957747.3201,
+      "inSafeZone": true,
+      "normalLogout": true,
+      "originalPoolIndex": 38,
+      "origin": "historical",
+      "freshThisRun": false,
+      "sourceReportPin": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v15\\episode\\reports\\1793084170216-93e9fe64.preparation-report.json",
+        "bytes": 145422,
+        "sha256": "a9afe8b257cc0af793a532a7e9b96ae59d374e391d3123d2cc8445608b2b39df"
+      },
+      "durableReloginReadbackPending": true
+    },
+    {
+      "name": "L370e2a13",
+      "characterIndex": 40,
+      "map": "0",
+      "x": 291,
+      "y": 613,
+      "sequence": 696,
+      "monotonicMs": 963178.634,
+      "inSafeZone": true,
+      "normalLogout": true,
+      "originalPoolIndex": 39,
+      "origin": "historical",
+      "freshThisRun": false,
+      "sourceReportPin": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v15\\episode\\reports\\1793084170216-93e9fe64.preparation-report.json",
+        "bytes": 145422,
+        "sha256": "a9afe8b257cc0af793a532a7e9b96ae59d374e391d3123d2cc8445608b2b39df"
+      },
+      "durableReloginReadbackPending": true
+    },
+    {
+      "name": "L370e2a14",
+      "characterIndex": 41,
+      "map": "0",
+      "x": 285,
+      "y": 619,
+      "sequence": 679,
+      "monotonicMs": 967421.8745,
+      "inSafeZone": true,
+      "normalLogout": true,
+      "originalPoolIndex": 40,
+      "origin": "historical",
+      "freshThisRun": false,
+      "sourceReportPin": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v15\\episode\\reports\\1793084170216-93e9fe64.preparation-report.json",
+        "bytes": 145422,
+        "sha256": "a9afe8b257cc0af793a532a7e9b96ae59d374e391d3123d2cc8445608b2b39df"
+      },
+      "durableReloginReadbackPending": true
+    },
+    {
+      "name": "L370e2a15",
+      "characterIndex": 42,
+      "map": "0",
+      "x": 288,
+      "y": 612,
+      "sequence": 1187,
+      "monotonicMs": 1084846.1771,
+      "inSafeZone": true,
+      "normalLogout": true,
+      "originalPoolIndex": 41,
+      "origin": "historical",
+      "freshThisRun": false,
+      "sourceReportPin": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v15\\episode\\reports\\1793084170216-93e9fe64.preparation-report.json",
+        "bytes": 145422,
+        "sha256": "a9afe8b257cc0af793a532a7e9b96ae59d374e391d3123d2cc8445608b2b39df"
+      },
+      "durableReloginReadbackPending": true
+    },
+    {
+      "name": "L370e2a16",
+      "characterIndex": 43,
+      "map": "0",
+      "x": 291,
+      "y": 619,
+      "sequence": 929,
+      "monotonicMs": 56232.5551,
+      "inSafeZone": true,
+      "normalLogout": true,
+      "originalPoolIndex": 42,
+      "origin": "historical",
+      "freshThisRun": false,
+      "sourceReportPin": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v16\\episode\\reports\\1793090167771-5bd2d680.preparation-report.json",
+        "bytes": 92721,
+        "sha256": "c4adc922a7cd57a26f8d7824717db1c0c06cd55feb25ca886d9d3ccca0369df2"
+      },
+      "durableReloginReadbackPending": true
+    },
+    {
+      "name": "L370e2a17",
+      "characterIndex": 44,
+      "map": "0",
+      "x": 284,
+      "y": 616,
+      "sequence": 1246,
+      "monotonicMs": 212469.5774,
+      "inSafeZone": true,
+      "normalLogout": true,
+      "originalPoolIndex": 43,
+      "origin": "historical",
+      "freshThisRun": false,
+      "sourceReportPin": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v16\\episode\\reports\\1793090167771-5bd2d680.preparation-report.json",
+        "bytes": 92721,
+        "sha256": "c4adc922a7cd57a26f8d7824717db1c0c06cd55feb25ca886d9d3ccca0369df2"
+      },
+      "durableReloginReadbackPending": true
+    },
+    {
+      "name": "L370e2a18",
+      "characterIndex": 45,
+      "map": "0",
+      "x": 292,
+      "y": 616,
+      "sequence": 1106,
+      "monotonicMs": 325391.0406,
+      "inSafeZone": true,
+      "normalLogout": true,
+      "originalPoolIndex": 44,
+      "origin": "historical",
+      "freshThisRun": false,
+      "sourceReportPin": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v16\\episode\\reports\\1793090167771-5bd2d680.preparation-report.json",
+        "bytes": 92721,
+        "sha256": "c4adc922a7cd57a26f8d7824717db1c0c06cd55feb25ca886d9d3ccca0369df2"
+      },
+      "durableReloginReadbackPending": true
+    },
+    {
+      "name": "L370e2a19",
+      "characterIndex": 46,
+      "map": "0",
+      "x": 288,
+      "y": 620,
+      "sequence": 1068,
+      "monotonicMs": 429642.0308,
+      "inSafeZone": true,
+      "normalLogout": true,
+      "originalPoolIndex": 45,
+      "origin": "historical",
+      "freshThisRun": false,
+      "sourceReportPin": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v16\\episode\\reports\\1793090167771-5bd2d680.preparation-report.json",
+        "bytes": 92721,
+        "sha256": "c4adc922a7cd57a26f8d7824717db1c0c06cd55feb25ca886d9d3ccca0369df2"
+      },
+      "durableReloginReadbackPending": true
+    },
+    {
+      "name": "L370e2a1a",
+      "characterIndex": 47,
+      "map": "0",
+      "x": 287,
+      "y": 612,
+      "sequence": 1139,
+      "monotonicMs": 546004.2345,
+      "inSafeZone": true,
+      "normalLogout": true,
+      "originalPoolIndex": 46,
+      "origin": "historical",
+      "freshThisRun": false,
+      "sourceReportPin": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v16\\episode\\reports\\1793090167771-5bd2d680.preparation-report.json",
+        "bytes": 92721,
+        "sha256": "c4adc922a7cd57a26f8d7824717db1c0c06cd55feb25ca886d9d3ccca0369df2"
+      },
+      "durableReloginReadbackPending": true
+    },
+    {
+      "name": "L370e2a1b",
+      "characterIndex": 48,
+      "map": "0",
+      "x": 289,
+      "y": 612,
+      "sequence": 1108,
+      "monotonicMs": 653998.4279,
+      "inSafeZone": true,
+      "normalLogout": true,
+      "originalPoolIndex": 47,
+      "origin": "historical",
+      "freshThisRun": false,
+      "sourceReportPin": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v16\\episode\\reports\\1793090167771-5bd2d680.preparation-report.json",
+        "bytes": 92721,
+        "sha256": "c4adc922a7cd57a26f8d7824717db1c0c06cd55feb25ca886d9d3ccca0369df2"
+      },
+      "durableReloginReadbackPending": true
+    },
+    {
+      "name": "L370e2a1c",
+      "characterIndex": 49,
+      "map": "0",
+      "x": 284,
+      "y": 617,
+      "sequence": 1429,
+      "monotonicMs": 803944.8447,
+      "inSafeZone": true,
+      "normalLogout": true,
+      "originalPoolIndex": 48,
+      "origin": "historical",
+      "freshThisRun": false,
+      "sourceReportPin": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v16\\episode\\reports\\1793090167771-5bd2d680.preparation-report.json",
+        "bytes": 92721,
+        "sha256": "c4adc922a7cd57a26f8d7824717db1c0c06cd55feb25ca886d9d3ccca0369df2"
+      },
+      "durableReloginReadbackPending": true
+    },
+    {
+      "name": "L370e2a1d",
+      "characterIndex": 50,
+      "map": "0",
+      "x": 292,
+      "y": 617,
+      "sequence": 1146,
+      "monotonicMs": 918655.4626,
+      "inSafeZone": true,
+      "normalLogout": true,
+      "originalPoolIndex": 49,
+      "origin": "historical",
+      "freshThisRun": false,
+      "sourceReportPin": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v16\\episode\\reports\\1793090167771-5bd2d680.preparation-report.json",
+        "bytes": 92721,
+        "sha256": "c4adc922a7cd57a26f8d7824717db1c0c06cd55feb25ca886d9d3ccca0369df2"
+      },
+      "durableReloginReadbackPending": true
+    },
+    {
+      "name": "L370e2a1e",
+      "characterIndex": 51,
+      "map": "0",
+      "x": 287,
+      "y": 620,
+      "sequence": 1709,
+      "monotonicMs": 1099741.5559,
+      "inSafeZone": true,
+      "normalLogout": true,
+      "originalPoolIndex": 50,
+      "origin": "historical",
+      "freshThisRun": false,
+      "sourceReportPin": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v16\\episode\\reports\\1793090167771-5bd2d680.preparation-report.json",
+        "bytes": 92721,
+        "sha256": "c4adc922a7cd57a26f8d7824717db1c0c06cd55feb25ca886d9d3ccca0369df2"
+      },
+      "durableReloginReadbackPending": true
+    },
+    {
+      "name": "L370e2a1f",
+      "characterIndex": 52,
+      "map": "0",
+      "x": 286,
+      "y": 612,
+      "sequence": 1096,
+      "monotonicMs": 1204100.0732,
+      "inSafeZone": true,
+      "normalLogout": true,
+      "originalPoolIndex": 51,
+      "origin": "historical",
+      "freshThisRun": false,
+      "sourceReportPin": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v16\\episode\\reports\\1793090167771-5bd2d680.preparation-report.json",
+        "bytes": 92721,
+        "sha256": "c4adc922a7cd57a26f8d7824717db1c0c06cd55feb25ca886d9d3ccca0369df2"
+      },
+      "durableReloginReadbackPending": true
+    },
+    {
+      "name": "L370e2a1g",
+      "characterIndex": 53,
+      "map": "0",
+      "x": 289,
+      "y": 620,
+      "sequence": 1216,
+      "monotonicMs": 1329505.3038,
+      "inSafeZone": true,
+      "normalLogout": true,
+      "originalPoolIndex": 52,
+      "origin": "historical",
+      "freshThisRun": false,
+      "sourceReportPin": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v16\\episode\\reports\\1793090167771-5bd2d680.preparation-report.json",
+        "bytes": 92721,
+        "sha256": "c4adc922a7cd57a26f8d7824717db1c0c06cd55feb25ca886d9d3ccca0369df2"
+      },
+      "durableReloginReadbackPending": true
+    },
+    {
+      "name": "L370e2a1h",
+      "characterIndex": 54,
+      "map": "0",
+      "x": 290,
+      "y": 612,
+      "sequence": 1648,
+      "monotonicMs": 1543863.1678,
+      "inSafeZone": true,
+      "normalLogout": true,
+      "originalPoolIndex": 53,
+      "origin": "historical",
+      "freshThisRun": false,
+      "sourceReportPin": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v16\\episode\\reports\\1793090167771-5bd2d680.preparation-report.json",
+        "bytes": 92721,
+        "sha256": "c4adc922a7cd57a26f8d7824717db1c0c06cd55feb25ca886d9d3ccca0369df2"
+      },
+      "durableReloginReadbackPending": true
+    },
+    {
+      "name": "L370e2a1i",
+      "characterIndex": 55,
+      "map": "0",
+      "x": 284,
+      "y": 614,
+      "sequence": 1242,
+      "monotonicMs": 1660791.0523,
+      "inSafeZone": true,
+      "normalLogout": true,
+      "originalPoolIndex": 54,
+      "origin": "historical",
+      "freshThisRun": false,
+      "sourceReportPin": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v16\\episode\\reports\\1793090167771-5bd2d680.preparation-report.json",
+        "bytes": 92721,
+        "sha256": "c4adc922a7cd57a26f8d7824717db1c0c06cd55feb25ca886d9d3ccca0369df2"
+      },
+      "durableReloginReadbackPending": true
+    },
+    {
+      "name": "L370e2a1j",
+      "characterIndex": 56,
+      "map": "0",
+      "x": 292,
+      "y": 614,
+      "sequence": 1379,
+      "monotonicMs": 1812048.0689,
+      "inSafeZone": true,
+      "normalLogout": true,
+      "originalPoolIndex": 55,
+      "origin": "historical",
+      "freshThisRun": false,
+      "sourceReportPin": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v16\\episode\\reports\\1793090167771-5bd2d680.preparation-report.json",
+        "bytes": 92721,
+        "sha256": "c4adc922a7cd57a26f8d7824717db1c0c06cd55feb25ca886d9d3ccca0369df2"
+      },
+      "durableReloginReadbackPending": true
+    },
+    {
+      "name": "L370e2a1k",
+      "characterIndex": 57,
+      "map": "0",
+      "x": 284,
+      "y": 618,
+      "sequence": 1648,
+      "monotonicMs": 1984095.6508,
+      "inSafeZone": true,
+      "normalLogout": true,
+      "originalPoolIndex": 56,
+      "origin": "historical",
+      "freshThisRun": false,
+      "sourceReportPin": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v16\\episode\\reports\\1793090167771-5bd2d680.preparation-report.json",
+        "bytes": 92721,
+        "sha256": "c4adc922a7cd57a26f8d7824717db1c0c06cd55feb25ca886d9d3ccca0369df2"
+      },
+      "durableReloginReadbackPending": true
+    },
+    {
+      "name": "L370e2a1l",
+      "characterIndex": 58,
+      "map": "0",
+      "x": 292,
+      "y": 618,
+      "sequence": 1125,
+      "monotonicMs": 2095344.5054,
+      "inSafeZone": true,
+      "normalLogout": true,
+      "originalPoolIndex": 57,
+      "origin": "historical",
+      "freshThisRun": false,
+      "sourceReportPin": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v16\\episode\\reports\\1793090167771-5bd2d680.preparation-report.json",
+        "bytes": 92721,
+        "sha256": "c4adc922a7cd57a26f8d7824717db1c0c06cd55feb25ca886d9d3ccca0369df2"
+      },
+      "durableReloginReadbackPending": true
+    },
+    {
+      "name": "L370e2a1m",
+      "characterIndex": 59,
+      "map": "0",
+      "x": 286,
+      "y": 620,
+      "sequence": 862,
+      "monotonicMs": 24564.1869,
+      "inSafeZone": true,
+      "normalLogout": true,
+      "durableReloginReadbackPending": true,
+      "originalPoolIndex": 58,
+      "origin": "current-run",
+      "freshThisRun": true,
+      "sourceReportPin": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v17\\episode\\reports\\1793093626787-c4c3629f.preparation-report.json",
+        "bytes": 198516,
+        "sha256": "1a3215dfb207f1cf0ff944d5d666be1f87874538239db6d4590d47ae3d2cf84a"
+      }
+    },
+    {
+      "name": "L370e2a1n",
+      "characterIndex": 60,
+      "map": "0",
+      "x": 290,
+      "y": 620,
+      "sequence": 1059,
+      "monotonicMs": 128856.4727,
+      "inSafeZone": true,
+      "normalLogout": true,
+      "durableReloginReadbackPending": true,
+      "originalPoolIndex": 59,
+      "origin": "current-run",
+      "freshThisRun": true,
+      "sourceReportPin": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v17\\episode\\reports\\1793093626787-c4c3629f.preparation-report.json",
+        "bytes": 198516,
+        "sha256": "1a3215dfb207f1cf0ff944d5d666be1f87874538239db6d4590d47ae3d2cf84a"
+      }
+    },
+    {
+      "name": "L370e2a1o",
+      "characterIndex": 61,
+      "map": "0",
+      "x": 285,
+      "y": 612,
+      "sequence": 1090,
+      "monotonicMs": 230442.4922,
+      "inSafeZone": true,
+      "normalLogout": true,
+      "durableReloginReadbackPending": true,
+      "originalPoolIndex": 60,
+      "origin": "current-run",
+      "freshThisRun": true,
+      "sourceReportPin": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v17\\episode\\reports\\1793093626787-c4c3629f.preparation-report.json",
+        "bytes": 198516,
+        "sha256": "1a3215dfb207f1cf0ff944d5d666be1f87874538239db6d4590d47ae3d2cf84a"
+      }
+    },
+    {
+      "name": "L370e2a1p",
+      "characterIndex": 62,
+      "map": "0",
+      "x": 291,
+      "y": 612,
+      "sequence": 1106,
+      "monotonicMs": 334696.1027,
+      "inSafeZone": true,
+      "normalLogout": true,
+      "durableReloginReadbackPending": true,
+      "originalPoolIndex": 61,
+      "origin": "current-run",
+      "freshThisRun": true,
+      "sourceReportPin": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v17\\episode\\reports\\1793093626787-c4c3629f.preparation-report.json",
+        "bytes": 198516,
+        "sha256": "1a3215dfb207f1cf0ff944d5d666be1f87874538239db6d4590d47ae3d2cf84a"
+      }
+    },
+    {
+      "name": "L370e2a1q",
+      "characterIndex": 63,
+      "map": "0",
+      "x": 284,
+      "y": 613,
+      "sequence": 1055,
+      "monotonicMs": 437074.4208,
+      "inSafeZone": true,
+      "normalLogout": true,
+      "durableReloginReadbackPending": true,
+      "originalPoolIndex": 62,
+      "origin": "current-run",
+      "freshThisRun": true,
+      "sourceReportPin": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v17\\episode\\reports\\1793093626787-c4c3629f.preparation-report.json",
+        "bytes": 198516,
+        "sha256": "1a3215dfb207f1cf0ff944d5d666be1f87874538239db6d4590d47ae3d2cf84a"
+      }
+    },
+    {
+      "name": "L370e2a1r",
+      "characterIndex": 64,
+      "map": "0",
+      "x": 284,
+      "y": 619,
+      "sequence": 1097,
+      "monotonicMs": 548655.695,
+      "inSafeZone": true,
+      "normalLogout": true,
+      "durableReloginReadbackPending": true,
+      "originalPoolIndex": 63,
+      "origin": "current-run",
+      "freshThisRun": true,
+      "sourceReportPin": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v17\\episode\\reports\\1793093626787-c4c3629f.preparation-report.json",
+        "bytes": 198516,
+        "sha256": "1a3215dfb207f1cf0ff944d5d666be1f87874538239db6d4590d47ae3d2cf84a"
+      }
+    },
+    {
+      "name": "L370e2a1s",
+      "characterIndex": 65,
+      "map": "0",
+      "x": 284,
+      "y": 612,
+      "sequence": 1094,
+      "monotonicMs": 652324.0864,
+      "inSafeZone": true,
+      "normalLogout": true,
+      "durableReloginReadbackPending": true,
+      "originalPoolIndex": 64,
+      "origin": "current-run",
+      "freshThisRun": true,
+      "sourceReportPin": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v17\\episode\\reports\\1793093626787-c4c3629f.preparation-report.json",
+        "bytes": 198516,
+        "sha256": "1a3215dfb207f1cf0ff944d5d666be1f87874538239db6d4590d47ae3d2cf84a"
+      }
+    },
+    {
+      "name": "L370e2a1t",
+      "characterIndex": 66,
+      "map": "0",
+      "x": 292,
+      "y": 619,
+      "sequence": 1270,
+      "monotonicMs": 809111.2872,
+      "inSafeZone": true,
+      "normalLogout": true,
+      "durableReloginReadbackPending": true,
+      "originalPoolIndex": 65,
+      "origin": "current-run",
+      "freshThisRun": true,
+      "sourceReportPin": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v17\\episode\\reports\\1793093626787-c4c3629f.preparation-report.json",
+        "bytes": 198516,
+        "sha256": "1a3215dfb207f1cf0ff944d5d666be1f87874538239db6d4590d47ae3d2cf84a"
+      }
+    },
+    {
+      "name": "L370e2a1u",
+      "characterIndex": 67,
+      "map": "0",
+      "x": 285,
+      "y": 620,
+      "sequence": 1114,
+      "monotonicMs": 916758.5796,
+      "inSafeZone": true,
+      "normalLogout": true,
+      "durableReloginReadbackPending": true,
+      "originalPoolIndex": 66,
+      "origin": "current-run",
+      "freshThisRun": true,
+      "sourceReportPin": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v17\\episode\\reports\\1793093626787-c4c3629f.preparation-report.json",
+        "bytes": 198516,
+        "sha256": "1a3215dfb207f1cf0ff944d5d666be1f87874538239db6d4590d47ae3d2cf84a"
+      }
+    },
+    {
+      "name": "L370e2a1v",
+      "characterIndex": 68,
+      "map": "0",
+      "x": 292,
+      "y": 612,
+      "sequence": 1064,
+      "monotonicMs": 1021730.7205,
+      "inSafeZone": true,
+      "normalLogout": true,
+      "durableReloginReadbackPending": true,
+      "originalPoolIndex": 67,
+      "origin": "current-run",
+      "freshThisRun": true,
+      "sourceReportPin": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v17\\episode\\reports\\1793093626787-c4c3629f.preparation-report.json",
+        "bytes": 198516,
+        "sha256": "1a3215dfb207f1cf0ff944d5d666be1f87874538239db6d4590d47ae3d2cf84a"
+      }
+    },
+    {
+      "name": "L370e2a1w",
+      "characterIndex": 69,
+      "map": "0",
+      "x": 284,
+      "y": 620,
+      "sequence": 2136,
+      "monotonicMs": 1276743.8105,
+      "inSafeZone": true,
+      "normalLogout": true,
+      "durableReloginReadbackPending": true,
+      "originalPoolIndex": 68,
+      "origin": "current-run",
+      "freshThisRun": true,
+      "sourceReportPin": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v17\\episode\\reports\\1793093626787-c4c3629f.preparation-report.json",
+        "bytes": 198516,
+        "sha256": "1a3215dfb207f1cf0ff944d5d666be1f87874538239db6d4590d47ae3d2cf84a"
+      }
+    },
+    {
+      "name": "L370e2a1x",
+      "characterIndex": 70,
+      "map": "0",
+      "x": 292,
+      "y": 620,
+      "sequence": 1083,
+      "monotonicMs": 1384422.1539,
+      "inSafeZone": true,
+      "normalLogout": true,
+      "durableReloginReadbackPending": true,
+      "originalPoolIndex": 69,
+      "origin": "current-run",
+      "freshThisRun": true,
+      "sourceReportPin": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v17\\episode\\reports\\1793093626787-c4c3629f.preparation-report.json",
+        "bytes": 198516,
+        "sha256": "1a3215dfb207f1cf0ff944d5d666be1f87874538239db6d4590d47ae3d2cf84a"
+      }
+    },
+    {
+      "name": "L370e2a1y",
+      "characterIndex": 71,
+      "map": "0",
+      "x": 288,
+      "y": 611,
+      "sequence": 1347,
+      "monotonicMs": 1520510.4997,
+      "inSafeZone": true,
+      "normalLogout": true,
+      "durableReloginReadbackPending": true,
+      "originalPoolIndex": 70,
+      "origin": "current-run",
+      "freshThisRun": true,
+      "sourceReportPin": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v17\\episode\\reports\\1793093626787-c4c3629f.preparation-report.json",
+        "bytes": 198516,
+        "sha256": "1a3215dfb207f1cf0ff944d5d666be1f87874538239db6d4590d47ae3d2cf84a"
+      }
+    },
+    {
+      "name": "L370e2a1z",
+      "characterIndex": 72,
+      "map": "0",
+      "x": 283,
+      "y": 616,
+      "sequence": 1073,
+      "monotonicMs": 1625949.3082,
+      "inSafeZone": true,
+      "normalLogout": true,
+      "durableReloginReadbackPending": true,
+      "originalPoolIndex": 71,
+      "origin": "current-run",
+      "freshThisRun": true,
+      "sourceReportPin": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v17\\episode\\reports\\1793093626787-c4c3629f.preparation-report.json",
+        "bytes": 198516,
+        "sha256": "1a3215dfb207f1cf0ff944d5d666be1f87874538239db6d4590d47ae3d2cf84a"
+      }
+    },
+    {
+      "name": "L370e2a20",
+      "characterIndex": 73,
+      "map": "0",
+      "x": 293,
+      "y": 616,
+      "sequence": 1109,
+      "monotonicMs": 1733269.0024,
+      "inSafeZone": true,
+      "normalLogout": true,
+      "durableReloginReadbackPending": true,
+      "originalPoolIndex": 72,
+      "origin": "current-run",
+      "freshThisRun": true,
+      "sourceReportPin": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v17\\episode\\reports\\1793093626787-c4c3629f.preparation-report.json",
+        "bytes": 198516,
+        "sha256": "1a3215dfb207f1cf0ff944d5d666be1f87874538239db6d4590d47ae3d2cf84a"
+      }
+    },
+    {
+      "name": "L370e2a21",
+      "characterIndex": 74,
+      "map": "0",
+      "x": 288,
+      "y": 621,
+      "sequence": 1317,
+      "monotonicMs": 1872740.0621,
+      "inSafeZone": true,
+      "normalLogout": true,
+      "durableReloginReadbackPending": true,
+      "originalPoolIndex": 73,
+      "origin": "current-run",
+      "freshThisRun": true,
+      "sourceReportPin": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v17\\episode\\reports\\1793093626787-c4c3629f.preparation-report.json",
+        "bytes": 198516,
+        "sha256": "1a3215dfb207f1cf0ff944d5d666be1f87874538239db6d4590d47ae3d2cf84a"
+      }
+    },
+    {
+      "name": "L370e2a22",
+      "characterIndex": 75,
+      "map": "0",
+      "x": 287,
+      "y": 611,
+      "sequence": 1042,
+      "monotonicMs": 1974370.3026,
+      "inSafeZone": true,
+      "normalLogout": true,
+      "durableReloginReadbackPending": true,
+      "originalPoolIndex": 74,
+      "origin": "current-run",
+      "freshThisRun": true,
+      "sourceReportPin": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v17\\episode\\reports\\1793093626787-c4c3629f.preparation-report.json",
+        "bytes": 198516,
+        "sha256": "1a3215dfb207f1cf0ff944d5d666be1f87874538239db6d4590d47ae3d2cf84a"
+      }
+    },
+    {
+      "name": "L370e2a23",
+      "characterIndex": 76,
+      "map": "0",
+      "x": 289,
+      "y": 611,
+      "sequence": 1060,
+      "monotonicMs": 2078320.4419,
+      "inSafeZone": true,
+      "normalLogout": true,
+      "durableReloginReadbackPending": true,
+      "originalPoolIndex": 75,
+      "origin": "current-run",
+      "freshThisRun": true,
+      "sourceReportPin": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v17\\episode\\reports\\1793093626787-c4c3629f.preparation-report.json",
+        "bytes": 198516,
+        "sha256": "1a3215dfb207f1cf0ff944d5d666be1f87874538239db6d4590d47ae3d2cf84a"
+      }
+    },
+    {
+      "name": "L370e2a24",
+      "characterIndex": 77,
+      "map": "0",
+      "x": 283,
+      "y": 615,
+      "sequence": 1351,
+      "monotonicMs": 2227306.5539,
+      "inSafeZone": true,
+      "normalLogout": true,
+      "durableReloginReadbackPending": true,
+      "originalPoolIndex": 76,
+      "origin": "current-run",
+      "freshThisRun": true,
+      "sourceReportPin": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v17\\episode\\reports\\1793093626787-c4c3629f.preparation-report.json",
+        "bytes": 198516,
+        "sha256": "1a3215dfb207f1cf0ff944d5d666be1f87874538239db6d4590d47ae3d2cf84a"
+      }
+    },
+    {
+      "name": "L370e2a25",
+      "characterIndex": 78,
+      "map": "0",
+      "x": 283,
+      "y": 617,
+      "sequence": 1049,
+      "monotonicMs": 2328386.1181,
+      "inSafeZone": true,
+      "normalLogout": true,
+      "durableReloginReadbackPending": true,
+      "originalPoolIndex": 77,
+      "origin": "current-run",
+      "freshThisRun": true,
+      "sourceReportPin": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v17\\episode\\reports\\1793093626787-c4c3629f.preparation-report.json",
+        "bytes": 198516,
+        "sha256": "1a3215dfb207f1cf0ff944d5d666be1f87874538239db6d4590d47ae3d2cf84a"
+      }
+    },
+    {
+      "name": "L370e2a26",
+      "characterIndex": 79,
+      "map": "0",
+      "x": 293,
+      "y": 617,
+      "sequence": 1064,
+      "monotonicMs": 2435735.4754,
+      "inSafeZone": true,
+      "normalLogout": true,
+      "durableReloginReadbackPending": true,
+      "originalPoolIndex": 78,
+      "origin": "current-run",
+      "freshThisRun": true,
+      "sourceReportPin": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v17\\episode\\reports\\1793093626787-c4c3629f.preparation-report.json",
+        "bytes": 198516,
+        "sha256": "1a3215dfb207f1cf0ff944d5d666be1f87874538239db6d4590d47ae3d2cf84a"
+      }
+    },
+    {
+      "name": "L370e2a27",
+      "characterIndex": 80,
+      "map": "0",
+      "x": 287,
+      "y": 621,
+      "sequence": 1357,
+      "monotonicMs": 2585437.1337,
+      "inSafeZone": true,
+      "normalLogout": true,
+      "durableReloginReadbackPending": true,
+      "originalPoolIndex": 79,
+      "origin": "current-run",
+      "freshThisRun": true,
+      "sourceReportPin": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v17\\episode\\reports\\1793093626787-c4c3629f.preparation-report.json",
+        "bytes": 198516,
+        "sha256": "1a3215dfb207f1cf0ff944d5d666be1f87874538239db6d4590d47ae3d2cf84a"
+      }
+    },
+    {
+      "name": "L370e2a28",
+      "characterIndex": 81,
+      "map": "0",
+      "x": 286,
+      "y": 611,
+      "sequence": 1405,
+      "monotonicMs": 2732741.9008,
+      "inSafeZone": true,
+      "normalLogout": true,
+      "durableReloginReadbackPending": true,
+      "originalPoolIndex": 80,
+      "origin": "current-run",
+      "freshThisRun": true,
+      "sourceReportPin": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v17\\episode\\reports\\1793093626787-c4c3629f.preparation-report.json",
+        "bytes": 198516,
+        "sha256": "1a3215dfb207f1cf0ff944d5d666be1f87874538239db6d4590d47ae3d2cf84a"
+      }
+    },
+    {
+      "name": "L370e2a29",
+      "characterIndex": 82,
+      "map": "0",
+      "x": 289,
+      "y": 621,
+      "sequence": 1312,
+      "monotonicMs": 2872127.7825,
+      "inSafeZone": true,
+      "normalLogout": true,
+      "durableReloginReadbackPending": true,
+      "originalPoolIndex": 81,
+      "origin": "current-run",
+      "freshThisRun": true,
+      "sourceReportPin": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v17\\episode\\reports\\1793093626787-c4c3629f.preparation-report.json",
+        "bytes": 198516,
+        "sha256": "1a3215dfb207f1cf0ff944d5d666be1f87874538239db6d4590d47ae3d2cf84a"
+      }
+    },
+    {
+      "name": "L370e2a2a",
+      "characterIndex": 83,
+      "map": "0",
+      "x": 290,
+      "y": 611,
+      "sequence": 1311,
+      "monotonicMs": 3006728.8746,
+      "inSafeZone": true,
+      "normalLogout": true,
+      "durableReloginReadbackPending": true,
+      "originalPoolIndex": 82,
+      "origin": "current-run",
+      "freshThisRun": true,
+      "sourceReportPin": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v17\\episode\\reports\\1793093626787-c4c3629f.preparation-report.json",
+        "bytes": 198516,
+        "sha256": "1a3215dfb207f1cf0ff944d5d666be1f87874538239db6d4590d47ae3d2cf84a"
+      }
+    },
+    {
+      "name": "L370e2a2b",
+      "characterIndex": 84,
+      "map": "0",
+      "x": 283,
+      "y": 614,
+      "sequence": 1316,
+      "monotonicMs": 3141469.9949,
+      "inSafeZone": true,
+      "normalLogout": true,
+      "durableReloginReadbackPending": true,
+      "originalPoolIndex": 83,
+      "origin": "current-run",
+      "freshThisRun": true,
+      "sourceReportPin": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v17\\episode\\reports\\1793093626787-c4c3629f.preparation-report.json",
+        "bytes": 198516,
+        "sha256": "1a3215dfb207f1cf0ff944d5d666be1f87874538239db6d4590d47ae3d2cf84a"
+      }
+    },
+    {
+      "name": "L370e2a2c",
+      "characterIndex": 85,
+      "map": "0",
+      "x": 283,
+      "y": 618,
+      "sequence": 1179,
+      "monotonicMs": 3258144.0737,
+      "inSafeZone": true,
+      "normalLogout": true,
+      "durableReloginReadbackPending": true,
+      "originalPoolIndex": 84,
+      "origin": "current-run",
+      "freshThisRun": true,
+      "sourceReportPin": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v17\\episode\\reports\\1793093626787-c4c3629f.preparation-report.json",
+        "bytes": 198516,
+        "sha256": "1a3215dfb207f1cf0ff944d5d666be1f87874538239db6d4590d47ae3d2cf84a"
+      }
+    },
+    {
+      "name": "L370e2a2d",
+      "characterIndex": 86,
+      "map": "0",
+      "x": 293,
+      "y": 614,
+      "sequence": 1092,
+      "monotonicMs": 3359631.2153,
+      "inSafeZone": true,
+      "normalLogout": true,
+      "durableReloginReadbackPending": true,
+      "originalPoolIndex": 85,
+      "origin": "current-run",
+      "freshThisRun": true,
+      "sourceReportPin": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v17\\episode\\reports\\1793093626787-c4c3629f.preparation-report.json",
+        "bytes": 198516,
+        "sha256": "1a3215dfb207f1cf0ff944d5d666be1f87874538239db6d4590d47ae3d2cf84a"
+      }
+    },
+    {
+      "name": "L370e2a2e",
+      "characterIndex": 87,
+      "map": "0",
+      "x": 293,
+      "y": 618,
+      "sequence": 1324,
+      "monotonicMs": 3505279.3458,
+      "inSafeZone": true,
+      "normalLogout": true,
+      "durableReloginReadbackPending": true,
+      "originalPoolIndex": 86,
+      "origin": "current-run",
+      "freshThisRun": true,
+      "sourceReportPin": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v17\\episode\\reports\\1793093626787-c4c3629f.preparation-report.json",
+        "bytes": 198516,
+        "sha256": "1a3215dfb207f1cf0ff944d5d666be1f87874538239db6d4590d47ae3d2cf84a"
+      }
+    },
+    {
+      "name": "L370e2a2f",
+      "characterIndex": 88,
+      "map": "0",
+      "x": 286,
+      "y": 621,
+      "sequence": 1047,
+      "monotonicMs": 3607751.0262,
+      "inSafeZone": true,
+      "normalLogout": true,
+      "durableReloginReadbackPending": true,
+      "originalPoolIndex": 87,
+      "origin": "current-run",
+      "freshThisRun": true,
+      "sourceReportPin": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v17\\episode\\reports\\1793093626787-c4c3629f.preparation-report.json",
+        "bytes": 198516,
+        "sha256": "1a3215dfb207f1cf0ff944d5d666be1f87874538239db6d4590d47ae3d2cf84a"
+      }
+    },
+    {
+      "name": "L370e2a2g",
+      "characterIndex": 89,
+      "map": "0",
+      "x": 290,
+      "y": 621,
+      "sequence": 1368,
+      "monotonicMs": 3747799.7305,
+      "inSafeZone": true,
+      "normalLogout": true,
+      "durableReloginReadbackPending": true,
+      "originalPoolIndex": 88,
+      "origin": "current-run",
+      "freshThisRun": true,
+      "sourceReportPin": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v17\\episode\\reports\\1793093626787-c4c3629f.preparation-report.json",
+        "bytes": 198516,
+        "sha256": "1a3215dfb207f1cf0ff944d5d666be1f87874538239db6d4590d47ae3d2cf84a"
+      }
+    },
+    {
+      "name": "L370e2a2h",
+      "characterIndex": 90,
+      "map": "0",
+      "x": 285,
+      "y": 611,
+      "sequence": 1061,
+      "monotonicMs": 3851311.8642,
+      "inSafeZone": true,
+      "normalLogout": true,
+      "durableReloginReadbackPending": true,
+      "originalPoolIndex": 89,
+      "origin": "current-run",
+      "freshThisRun": true,
+      "sourceReportPin": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v17\\episode\\reports\\1793093626787-c4c3629f.preparation-report.json",
+        "bytes": 198516,
+        "sha256": "1a3215dfb207f1cf0ff944d5d666be1f87874538239db6d4590d47ae3d2cf84a"
+      }
+    },
+    {
+      "name": "L370e2a2i",
+      "characterIndex": 91,
+      "map": "0",
+      "x": 291,
+      "y": 611,
+      "sequence": 1462,
+      "monotonicMs": 4008105.7016,
+      "inSafeZone": true,
+      "normalLogout": true,
+      "durableReloginReadbackPending": true,
+      "originalPoolIndex": 90,
+      "origin": "current-run",
+      "freshThisRun": true,
+      "sourceReportPin": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v17\\episode\\reports\\1793093626787-c4c3629f.preparation-report.json",
+        "bytes": 198516,
+        "sha256": "1a3215dfb207f1cf0ff944d5d666be1f87874538239db6d4590d47ae3d2cf84a"
+      }
+    },
+    {
+      "name": "L370e2a2j",
+      "characterIndex": 92,
+      "map": "0",
+      "x": 283,
+      "y": 613,
+      "sequence": 1096,
+      "monotonicMs": 4114293.9496,
+      "inSafeZone": true,
+      "normalLogout": true,
+      "durableReloginReadbackPending": true,
+      "originalPoolIndex": 91,
+      "origin": "current-run",
+      "freshThisRun": true,
+      "sourceReportPin": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v17\\episode\\reports\\1793093626787-c4c3629f.preparation-report.json",
+        "bytes": 198516,
+        "sha256": "1a3215dfb207f1cf0ff944d5d666be1f87874538239db6d4590d47ae3d2cf84a"
+      }
+    },
+    {
+      "name": "L370e2a2k",
+      "characterIndex": 93,
+      "map": "0",
+      "x": 293,
+      "y": 613,
+      "sequence": 1414,
+      "monotonicMs": 4267162.906,
+      "inSafeZone": true,
+      "normalLogout": true,
+      "durableReloginReadbackPending": true,
+      "originalPoolIndex": 92,
+      "origin": "current-run",
+      "freshThisRun": true,
+      "sourceReportPin": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v17\\episode\\reports\\1793093626787-c4c3629f.preparation-report.json",
+        "bytes": 198516,
+        "sha256": "1a3215dfb207f1cf0ff944d5d666be1f87874538239db6d4590d47ae3d2cf84a"
+      }
+    },
+    {
+      "name": "L370e2a2l",
+      "characterIndex": 94,
+      "map": "0",
+      "x": 283,
+      "y": 619,
+      "sequence": 1067,
+      "monotonicMs": 4372717.0616,
+      "inSafeZone": true,
+      "normalLogout": true,
+      "durableReloginReadbackPending": true,
+      "originalPoolIndex": 93,
+      "origin": "current-run",
+      "freshThisRun": true,
+      "sourceReportPin": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v17\\episode\\reports\\1793093626787-c4c3629f.preparation-report.json",
+        "bytes": 198516,
+        "sha256": "1a3215dfb207f1cf0ff944d5d666be1f87874538239db6d4590d47ae3d2cf84a"
+      }
+    },
+    {
+      "name": "L370e2a2m",
+      "characterIndex": 95,
+      "map": "0",
+      "x": 293,
+      "y": 619,
+      "sequence": 1369,
+      "monotonicMs": 4518213.3531,
+      "inSafeZone": true,
+      "normalLogout": true,
+      "durableReloginReadbackPending": true,
+      "originalPoolIndex": 94,
+      "origin": "current-run",
+      "freshThisRun": true,
+      "sourceReportPin": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v17\\episode\\reports\\1793093626787-c4c3629f.preparation-report.json",
+        "bytes": 198516,
+        "sha256": "1a3215dfb207f1cf0ff944d5d666be1f87874538239db6d4590d47ae3d2cf84a"
+      }
+    },
+    {
+      "name": "L370e2a2n",
+      "characterIndex": 96,
+      "map": "0",
+      "x": 285,
+      "y": 621,
+      "sequence": 1076,
+      "monotonicMs": 4629114.6101,
+      "inSafeZone": true,
+      "normalLogout": true,
+      "durableReloginReadbackPending": true,
+      "originalPoolIndex": 95,
+      "origin": "current-run",
+      "freshThisRun": true,
+      "sourceReportPin": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v17\\episode\\reports\\1793093626787-c4c3629f.preparation-report.json",
+        "bytes": 198516,
+        "sha256": "1a3215dfb207f1cf0ff944d5d666be1f87874538239db6d4590d47ae3d2cf84a"
+      }
+    },
+    {
+      "name": "L370e2a2o",
+      "characterIndex": 97,
+      "map": "0",
+      "x": 291,
+      "y": 621,
+      "sequence": 1392,
+      "monotonicMs": 4777901.0664,
+      "inSafeZone": true,
+      "normalLogout": true,
+      "durableReloginReadbackPending": true,
+      "originalPoolIndex": 96,
+      "origin": "current-run",
+      "freshThisRun": true,
+      "sourceReportPin": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v17\\episode\\reports\\1793093626787-c4c3629f.preparation-report.json",
+        "bytes": 198516,
+        "sha256": "1a3215dfb207f1cf0ff944d5d666be1f87874538239db6d4590d47ae3d2cf84a"
+      }
+    },
+    {
+      "name": "L370e2a2p",
+      "characterIndex": 98,
+      "map": "0",
+      "x": 284,
+      "y": 611,
+      "sequence": 1044,
+      "monotonicMs": 4880822.4278,
+      "inSafeZone": true,
+      "normalLogout": true,
+      "durableReloginReadbackPending": true,
+      "originalPoolIndex": 97,
+      "origin": "current-run",
+      "freshThisRun": true,
+      "sourceReportPin": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v17\\episode\\reports\\1793093626787-c4c3629f.preparation-report.json",
+        "bytes": 198516,
+        "sha256": "1a3215dfb207f1cf0ff944d5d666be1f87874538239db6d4590d47ae3d2cf84a"
+      }
+    },
+    {
+      "name": "L370e2a2q",
+      "characterIndex": 99,
+      "map": "0",
+      "x": 292,
+      "y": 611,
+      "sequence": 1469,
+      "monotonicMs": 5036454.076,
+      "inSafeZone": true,
+      "normalLogout": true,
+      "durableReloginReadbackPending": true,
+      "originalPoolIndex": 98,
+      "origin": "current-run",
+      "freshThisRun": true,
+      "sourceReportPin": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v17\\episode\\reports\\1793093626787-c4c3629f.preparation-report.json",
+        "bytes": 198516,
+        "sha256": "1a3215dfb207f1cf0ff944d5d666be1f87874538239db6d4590d47ae3d2cf84a"
+      }
+    },
+    {
+      "name": "L370e2a2r",
+      "characterIndex": 100,
+      "map": "0",
+      "x": 283,
+      "y": 612,
+      "sequence": 1083,
+      "monotonicMs": 5143127.7213,
+      "inSafeZone": true,
+      "normalLogout": true,
+      "durableReloginReadbackPending": true,
+      "originalPoolIndex": 99,
+      "origin": "current-run",
+      "freshThisRun": true,
+      "sourceReportPin": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v17\\episode\\reports\\1793093626787-c4c3629f.preparation-report.json",
+        "bytes": 198516,
+        "sha256": "1a3215dfb207f1cf0ff944d5d666be1f87874538239db6d4590d47ae3d2cf84a"
+      }
+    }
+  ],
+  "completeDistinctOriginal100Saved": true,
+  "sourceCurrentReport": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v17\\episode\\reports\\1793093626787-c4c3629f.preparation-report.json",
+    "bytes": 198516,
+    "sha256": "1a3215dfb207f1cf0ff944d5d666be1f87874538239db6d4590d47ae3d2cf84a"
+  },
+  "historicalEvidence": [
+    {
+      "report": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v15\\episode\\reports\\1793084170216-93e9fe64.preparation-report.json",
+        "bytes": 145422,
+        "sha256": "a9afe8b257cc0af793a532a7e9b96ae59d374e391d3123d2cc8445608b2b39df"
+      },
+      "preparedIndex": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v15\\episode\\prepared-index-v1.json",
+        "bytes": 11953,
+        "sha256": "922fd2339adea01799c35e0ef99fa511266666ad1168eb332aeab06392cb3bab"
+      },
+      "cleanup": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v15\\episode\\cleanup-v1.json",
+        "bytes": 1037,
+        "sha256": "19ad8a7a3f017563c283cccfa152828cff4afb847ae5da996d480fa41eff2970"
+      },
+      "receipt": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v15\\episode\\preparation-episode-receipt-v1.json",
+        "bytes": 6144,
+        "sha256": "6e9505f8812fc3eb53fdd69fa2bacb4b780ba7684680be0d99d9f937142d1b67"
+      }
+    },
+    {
+      "report": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v16\\episode\\reports\\1793090167771-5bd2d680.preparation-report.json",
+        "bytes": 92721,
+        "sha256": "c4adc922a7cd57a26f8d7824717db1c0c06cd55feb25ca886d9d3ccca0369df2"
+      },
+      "preparedIndex": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v16\\episode\\prepared-index-v1.json",
+        "bytes": 6439,
+        "sha256": "e515646b164eefea54ef546ced556b5a71f4c688f551d9f3e3c2cf470f110601"
+      },
+      "cleanup": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v16\\episode\\cleanup-v1.json",
+        "bytes": 1037,
+        "sha256": "c49b2b6e87f110873065df41b3dd178525a208c7e8c88d7902ff10e5ef33479a"
+      },
+      "receipt": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v16\\episode\\preparation-episode-receipt-v1.json",
+        "bytes": 5773,
+        "sha256": "e0acda44da49d64c125b46552163039a91917cd58e9719449fdf4eb14aa5dc46"
+      }
+    }
+  ],
+  "all100FreshPreparedThisRun": false,
+  "formalOrdinaryRelogin100Verified": false,
+  "capacityAccepted": false,
+  "p0Accepted": false
+}

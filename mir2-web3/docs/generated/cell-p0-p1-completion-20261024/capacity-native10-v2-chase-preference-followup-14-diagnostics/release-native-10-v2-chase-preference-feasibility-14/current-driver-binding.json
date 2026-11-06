@@ -1,0 +1,57 @@
+{
+  "schemaVersion": 1,
+  "state": "FINAL_COMMITTED_CURRENT_DRIVER_FULL200",
+  "driverSourceCommit": "b84d5d02a8299b6ac36c5e56cb7006f6bc80d3bd",
+  "coreCodeEvidenceCommit": "b84d5d02a8299b6ac36c5e56cb7006f6bc80d3bd",
+  "driverSourceSha256": "db4e22c69b4f1365d8135023e158f4de00ff35d58330cf7eca98801780e674e7",
+  "driverFrozenFile": "C:/mir2-build/p01-completion-20261024/capacity-native-chase-preference-driver-frozen-v1.json",
+  "driverManifestBytes": 19099,
+  "driverManifestSha256": "20fd347d029d9a912514e400bc74b0d08ec940bd90af20ff2f91bd64dba08bef",
+  "currentEvidence": [
+    {
+      "tests": 13,
+      "receipt": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\native-chase-preference-verification-v1\\red-green-receipt-v1.json",
+        "bytes": 5650,
+        "sha256": "395e3285af4b73f95efd1c4bc1ac185bd968315587c5b7978508a6cc3b4b4fef"
+      },
+      "log": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\native-chase-preference-verification-v1\\current-green-v1.log",
+        "bytes": 3691,
+        "sha256": "eb89dda9485646b250fdfeee3f08d8374af0f90498c4f1d435e74853a312c853"
+      }
+    },
+    {
+      "tests": 200,
+      "receipt": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\native-chase-preference-verification-v1\\full-current-receipt-v1.json",
+        "bytes": 4682,
+        "sha256": "5e71b6dbf69c9ed79e085c41a61946d2dcaed7d0b81cb6060123b46d4a8a1b7a"
+      },
+      "log": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\native-chase-preference-verification-v1\\full-current-v1.log",
+        "bytes": 53991,
+        "sha256": "702c6c80eb52ec008dbdd3c18a8a578749d99ffd84e4163b7b527ed6de36554e"
+      }
+    }
+  ],
+  "staticGeometryCompatibilityProof": {
+    "file": "C:/mir2-build/p01-completion-20261024/release-native-10-v2-chase-preference-feasibility-14/scene-driver-compatibility-proof-v1.json",
+    "bytes": 1936,
+    "sha256": "de4e8d981233d0fb5422a7d5469ed6c905d3632f5161a19b5b74384d3eb21059"
+  },
+  "historicalWrapperEvidence": {
+    "coreCommit": "6d70d02d0bc390156b77a3e48acee714fc87cda3",
+    "documentationCommit": "4cab00893b861395b63906b1b8183a021d397cdb",
+    "coreFullTests": 187,
+    "wrapperTests": 28,
+    "adapterTests": 8,
+    "notCurrent200Coverage": true
+  },
+  "rootExecutionApproval": false,
+  "accountPrepared": false,
+  "binaryCopied": false,
+  "realmStarted": false,
+  "sealed": false,
+  "capacityAccepted": false
+}

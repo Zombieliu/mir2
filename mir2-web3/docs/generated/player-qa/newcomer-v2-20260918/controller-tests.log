@@ -1,0 +1,124 @@
+TAP version 13
+# Subtest: V2 route factory produces all 22 main and 4 growth nodes from manifests
+ok 1 - V2 route factory produces all 22 main and 4 growth nodes from manifests
+  ---
+  duration_ms: 2.3759
+  type: 'test'
+  ...
+# Subtest: V2 kill routes expose the manifest source contract consumed by ordinary multi-objective combat
+ok 2 - V2 kill routes expose the manifest source contract consumed by ordinary multi-objective combat
+  ---
+  duration_ms: 0.8807
+  type: 'test'
+  ...
+# Subtest: missing manifest respawns fail closed instead of inventing a monster location
+ok 3 - missing manifest respawns fail closed instead of inventing a monster location
+  ---
+  duration_ms: 0.3624
+  type: 'test'
+  ...
+# Subtest: disabled zero-count respawns are not promoted into an objective source
+ok 4 - disabled zero-count respawns are not promoted into an objective source
+  ---
+  duration_ms: 0.1177
+  type: 'test'
+  ...
+# Subtest: Board keeps runtime object ID 24 even though Crystal stores it as npc index 35
+ok 5 - Board keeps runtime object ID 24 even though Crystal stores it as npc index 35
+  ---
+  duration_ms: 0.3099
+  type: 'test'
+  ...
+# Subtest: reward verification selects only the current class and resolves real item indexes
+ok 6 - reward verification selects only the current class and resolves real item indexes
+  ---
+  duration_ms: 0.1912
+  type: 'test'
+  ...
+# Subtest: server flag projection cannot be replaced by a local completion boolean
+ok 7 - server flag projection cannot be replaced by a local completion boolean
+  ---
+  duration_ms: 0.3716
+  type: 'test'
+  ...
+# Subtest: growth claims require a server Available quest and never infer readiness from level
+ok 8 - growth claims require a server Available quest and never infer readiness from level
+  ---
+  duration_ms: 0.5039
+  type: 'test'
+  ...
+# Subtest: final V2 completion requires every one of 26 server Completed rows and authoritative level 30
+ok 9 - final V2 completion requires every one of 26 server Completed rows and authoritative level 30
+  ---
+  duration_ms: 0.7939
+  type: 'test'
+  ...
+# Subtest: completed-node checkpoint retains the ordinary start and server receipt in the local QA report
+ok 10 - completed-node checkpoint retains the ordinary start and server receipt in the local QA report
+  ---
+  duration_ms: 0.4465
+  type: 'test'
+  ...
+# Subtest: practice plans execute every q21 class action rather than one priority spell
+ok 11 - practice plans execute every q21 class action rather than one priority spell
+  ---
+  duration_ms: 0.9666
+  type: 'test'
+  ...
+# Subtest: N18 loadout-only SummonSkeleton requirement learns the skill without entering owned-pet combat
+ok 12 - N18 loadout-only SummonSkeleton requirement learns the skill without entering owned-pet combat
+  ---
+  duration_ms: 0.1031
+  type: 'test'
+  ...
+# Subtest: mixed map-entry flag waits for a fresh map-and-position receipt, not its unprepared AND group
+ok 13 - mixed map-entry flag waits for a fresh map-and-position receipt, not its unprepared AND group
+  ---
+  duration_ms: 0.1224
+  type: 'test'
+  ...
+# Subtest: Healing executes against self at full HP only after a server objective receipt
+ok 14 - Healing executes against self at full HP only after a server objective receipt
+  ---
+  duration_ms: 0.7456
+  type: 'test'
+  ...
+# Subtest: Fencing and SpiritSword practice use normal attacks, never magic packets
+ok 15 - Fencing and SpiritSword practice use normal attacks, never magic packets
+  ---
+  duration_ms: 0.5391
+  type: 'test'
+  ...
+# Subtest: HalfMoon uses the ordinary attack-direction technique packet and Lightning self-routes toward its current target
+ok 16 - HalfMoon uses the ordinary attack-direction technique packet and Lightning self-routes toward its current target
+  ---
+  duration_ms: 0.378
+  type: 'test'
+  ...
+# Subtest: Poisoning equips bag poison before its public magic packet and waits for server progress
+ok 17 - Poisoning equips bag poison before its public magic packet and waits for server progress
+  ---
+  duration_ms: 0.7335
+  type: 'test'
+  ...
+# Subtest: three independently receipted practice actions do not wait for an AND-group before its final action
+ok 18 - three independently receipted practice actions do not wait for an AND-group before its final action
+  ---
+  duration_ms: 0.4845
+  type: 'test'
+  ...
+# Subtest: safe-arrival uses a Bichon city safe-area coordinate and potion aliases count by item template
+ok 19 - safe-arrival uses a Bichon city safe-area coordinate and potion aliases count by item template
+  ---
+  duration_ms: 0.2896
+  type: 'test'
+  ...
+1..19
+# tests 19
+# suites 0
+# pass 19
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 241.5687

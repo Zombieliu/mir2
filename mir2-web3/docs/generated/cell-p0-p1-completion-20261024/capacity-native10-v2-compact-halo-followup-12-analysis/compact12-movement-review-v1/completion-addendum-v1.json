@@ -1,0 +1,65 @@
+{
+  "schemaVersion": 1,
+  "completedAt": "2026-10-25T06:33:58.676Z",
+  "state": "bounded-probe12-forensics-complete-failure-and-formal-rejection-preserved",
+  "scope": "Close-out addendum for this agent owned read-only source/correction/three-public-frame investigation. No source, fixture, scene or acceptance changes.",
+  "actualFailed12": {
+    "runId": "1792908575146-40a66fff",
+    "raw": {
+      "bytes": 1997617,
+      "rows": 1891,
+      "sha256": "2c0e74dfb7c3ec6a074c8620dc91a41d0f0656cc6f06f2c4779bce582f516804"
+    },
+    "report": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-compact-halo-feasibility-12\\reports\\1792908575146-40a66fff.report.json",
+      "bytes": 25325,
+      "sha256": "7325e575a4a0d219ffb7b24729509e90b14aba3b578942336135be6d8be889c8"
+    },
+    "reason": "Actor00 continuous movement correction4/77=.051948>0.05; incomplete stage2, before10/soak. Three complete phase windows do not meet formal admission5/5/6."
+  },
+  "independentConsistencyReceipt": {
+    "path": "probe12-independent-verification-v1/final-verification.json",
+    "bytes": 124145,
+    "sha256": "acbc8d169409420fece19f5376037ea6b61405a249f5e63434803dcae364755e"
+  },
+  "interpretation": "Independent consistency/integrity passed while probePassed=false. Consistent evidence and normal cleanup cannot promote failed workload acceptance.",
+  "formal09ActualRejection": {
+    "receipt": {
+      "path": "compact-formal09-expected12-rejection-v1.json",
+      "bytes": 4790,
+      "sha256": "d7e27d665471d06bc41a58bb92f865b017aa9a63506b69ad98853b8330dc46b1"
+    },
+    "readOnlyReceiptCheckedByThisAgent": true,
+    "rejectionExecutedByThisAgent": false,
+    "expectedFailedReportRejection": true,
+    "rejectedBecauseFailedProbeNotSourceSchema": true,
+    "historicalBarrierChecked": true,
+    "allEightStateTargetsAbsentBeforeAfter": true,
+    "unsealedHistoricalTemplate": true,
+    "formalPrepared": false,
+    "realmStarted": false,
+    "successOnlyCollectedContractExecuted": false
+  },
+  "crossWorkerReadonlyFinding": {
+    "source": "Message from /root/capacity_baseline after its single parsed/raw pass and source review; attributed, not independently rerun here.",
+    "finding": "206613 appears zero times in1891retained raw rows, which does not prove the wire never delivered it. Movement diagnostics omit full per-packet nonplayer membership history; CapacityClient preserves only bounded in-memory events and attack traces. Source protocol fold replaces worldSnapshot, upserts fullObjectMonster, updates existing-ID motion only, removes ObjectRemove/TeleportOut; no extra CapacityClient monster deletion was proved."
+  },
+  "finalCausalBoundary": {
+    "futureTileReservationFound": false,
+    "actualServerCorrectionReasonKnown": false,
+    "global206613Observed": true,
+    "global206613IsProvedAuthoritativeBlocker": false,
+    "globalMergedSnapshotCanBeStale": true,
+    "driverOrBackendBugProven": false,
+    "fixImplemented": false,
+    "recommendedNextBoundary": "Read-only independent review of separate external bounded ordinary navigation-wire diagnostics, if root authorizes. Core nine inputs/187 historical regression remain unchanged; a new wrapper requires its own true unit evidence."
+  },
+  "privacy": {
+    "onlyThreeLocalPublicFramesProjected": true,
+    "publicCohortNamesOnlyAsRootAuthorized": true,
+    "noPrivateStderrCredentialsAccountStoreRawVideoOrFullRecordingCopied": true
+  },
+  "capacityAccepted": false,
+  "p0Accepted": false,
+  "p2Authorized": false
+}

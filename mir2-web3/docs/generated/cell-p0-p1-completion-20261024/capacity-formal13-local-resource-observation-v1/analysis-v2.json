@@ -1,0 +1,411 @@
+{
+  "schemaVersion": 1,
+  "analyzedAtUtc": "2026-10-25T20:55:06.323Z",
+  "runId": "1792959622496-365f0175",
+  "scope": "Ended Formal13 sampled resource observations, including a failed combat-supply phase. No capacity acceptance or hardware ceiling inferred.",
+  "method": "Stream original ended monitor JSONL; select measurement samples by sampledAt >= phase start and < phase end. Percentiles use nearest rank. Rate intervals may straddle a phase boundary; observed maxima omit between-sample spikes. Cumulative owner maxima include preceding phases.",
+  "sources": {
+    "analyzer": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal13-local-resource-observation-v1\\analyze-v2.mjs",
+      "bytes": 8016,
+      "sha256": "5a7787f5fef6ca2e8a11ec16ef94caa0b2ba74aef6cc938c06dc5e251b73212b"
+    },
+    "report": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-account-store-wait-ladder-13\\reports\\1792959622496-365f0175.report.json",
+      "bytes": 423293,
+      "sha256": "3f167a5fde64e43a0a64a77b41fea9651edaa4deb6a585128065b5626f13be26"
+    },
+    "monitorHistory": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-account-store-wait-ladder-13\\monitor-history.jsonl",
+      "bytes": 4931726,
+      "sha256": "8ca7040d7d0643002132e91eff8b66dbab272923e071129417af7f5fdee6556b",
+      "rows": 544,
+      "sampleRows": 542,
+      "nonSampleRows": 2,
+      "startedRows": 1,
+      "stoppedRows": 1
+    },
+    "profile": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-account-store-wait-ladder-13\\resource-profile.json",
+      "bytes": 1630,
+      "sha256": "9c5825d9a0c1a002081e439151d9d158dcbd78af64347f339f83b8e690924a88"
+    }
+  },
+  "environment": {
+    "cpuLimit": "SOFT stop=24 logical CPU equivalents (75% of32 logical CPUs; host has24 physical cores), with4 Tokio workers; no hard quota/affinity; OS anddriver reserve, not hardware maximum",
+    "memoryLimit": "SOFT private32GiB/working set40GiB stop; minOSfree8GiB; installed64GiB differs from actual OSusable68463349760bytes; no hard quota, not hardware maximum",
+    "storage": "Local Windows scratch File store; unthrottled disk; process IO includes file/device IO",
+    "database": "Dedicated fresh File backend; PostgreSQL not exercised",
+    "network": "Literal loopback; no external NIC throughput, PPS, retransmission or cloud bandwidth certificate",
+    "tls": "Plain WS/HTTP on loopback only; TLS not exercised",
+    "failureDomain": "One development host; no failover, N+1, power/disk failure scope"
+  },
+  "allMonitorSamples": {
+    "sampleCount": 542,
+    "firstSampledAtMs": 1792959622302,
+    "lastSampledAtMs": 1792960697503,
+    "maximumSampleGapMs": 7377,
+    "gatewayLogicalCpuEquivalents": {
+      "samples": 541,
+      "minimum": 0,
+      "p50": 0.17959770114942528,
+      "p95": 1.0171875,
+      "p99": 1.198889449772842,
+      "maximum": 3.806468440271257
+    },
+    "gatewayPrivateBytes": {
+      "samples": 542,
+      "minimum": 5767168,
+      "p50": 1098674176,
+      "p95": 1942183936,
+      "p99": 1960558592,
+      "maximum": 1967308800
+    },
+    "gatewayWorkingSetBytes": {
+      "samples": 542,
+      "minimum": 22044672,
+      "p50": 1137807360,
+      "p95": 1968291840,
+      "p99": 1986404352,
+      "maximum": 1993859072
+    },
+    "hostFreeBytes": {
+      "samples": 542,
+      "minimum": 43426197504,
+      "p50": 44482719744,
+      "p95": 45429137408,
+      "p99": 45494923264,
+      "maximum": 45518319616
+    },
+    "hostBusiestLogicalCorePercent": {
+      "samples": 542,
+      "minimum": 16,
+      "p50": 75,
+      "p95": 100,
+      "p99": 100,
+      "maximum": 100
+    },
+    "gatewayProcessReadBytesPerSecond": {
+      "samples": 541,
+      "minimum": 0,
+      "p50": 0,
+      "p95": 0,
+      "p99": 2311.715481171548,
+      "maximum": 18010234.06478579
+    },
+    "gatewayProcessWriteBytesPerSecond": {
+      "samples": 541,
+      "minimum": 67211.0762800418,
+      "p50": 310811.520970187,
+      "p95": 818780.3145611364,
+      "p99": 1077562.5610948193,
+      "maximum": 4307252.679938744
+    },
+    "gatewayProcessOtherIoBytesPerSecond": {
+      "samples": 541,
+      "minimum": 838.5389094759132,
+      "p50": 2354.821523708045,
+      "p95": 6997.421351211965,
+      "p99": 34301.27226463104,
+      "maximum": 37780.18575851393
+    },
+    "hostNicBytesPerSecond": {
+      "samples": 541,
+      "minimum": 33.6562978072412,
+      "p50": 10008.686765457333,
+      "p95": 500987.7991553262,
+      "p99": 807993.2170542636,
+      "maximum": 982595.3654188948
+    },
+    "ownerWorkObservedMaxUs": 5265,
+    "ownerDeadlineLagObservedMaxUs": 223991
+  },
+  "phases": [
+    {
+      "name": "stage-2",
+      "targetActors": 2,
+      "startedAtMs": 1792959653921,
+      "endedAtMs": 1792959954180,
+      "measuredSeconds": 300.259,
+      "sampleCount": 153,
+      "firstSampledAtMs": 1792959654924,
+      "lastSampledAtMs": 1792959954057,
+      "maximumSampleGapMs": 2221,
+      "gatewayLogicalCpuEquivalents": {
+        "samples": 153,
+        "minimum": 0,
+        "p50": 0.030882352941176472,
+        "p95": 0.0789873417721519,
+        "p99": 0.09975429975429974,
+        "maximum": 0.1104944500504541
+      },
+      "gatewayPrivateBytes": {
+        "samples": 153,
+        "minimum": 137396224,
+        "p50": 361590784,
+        "p95": 553562112,
+        "p99": 571207680,
+        "maximum": 574222336
+      },
+      "gatewayWorkingSetBytes": {
+        "samples": 153,
+        "minimum": 190066688,
+        "p50": 410513408,
+        "p95": 599556096,
+        "p99": 617144320,
+        "maximum": 620032000
+      },
+      "hostFreeBytes": {
+        "samples": 153,
+        "minimum": 44583620608,
+        "p50": 45223481344,
+        "p95": 45453594624,
+        "p99": 45468868608,
+        "maximum": 45494464512
+      },
+      "hostBusiestLogicalCorePercent": {
+        "samples": 153,
+        "minimum": 25,
+        "p50": 88,
+        "p95": 100,
+        "p99": 100,
+        "maximum": 100
+      },
+      "gatewayProcessReadBytesPerSecond": {
+        "samples": 153,
+        "minimum": 0,
+        "p50": 0,
+        "p95": 0,
+        "p99": 0,
+        "maximum": 0
+      },
+      "gatewayProcessWriteBytesPerSecond": {
+        "samples": 153,
+        "minimum": 110125.60620756548,
+        "p50": 149453.91476709614,
+        "p95": 232459.2703648176,
+        "p99": 247413.83219954648,
+        "maximum": 294122.98071912455
+      },
+      "gatewayProcessOtherIoBytesPerSecond": {
+        "samples": 153,
+        "minimum": 838.5389094759132,
+        "p50": 1055.2659019812304,
+        "p95": 1584.1995841995843,
+        "p99": 1932.8,
+        "maximum": 2366.598778004073
+      },
+      "hostNicBytesPerSecond": {
+        "samples": 153,
+        "minimum": 250.68119891008172,
+        "p50": 51088.698784331384,
+        "p95": 740424.736337488,
+        "p99": 893203.3175355451,
+        "maximum": 982595.3654188948
+      },
+      "ownerWorkObservedMaxUs": 1322,
+      "ownerDeadlineLagObservedMaxUs": 21903
+    },
+    {
+      "name": "stage-10",
+      "targetActors": 10,
+      "startedAtMs": 1792960009375,
+      "endedAtMs": 1792960309636,
+      "measuredSeconds": 300.261,
+      "sampleCount": 152,
+      "firstSampledAtMs": 1792960009889,
+      "lastSampledAtMs": 1792960307687,
+      "maximumSampleGapMs": 2175,
+      "gatewayLogicalCpuEquivalents": {
+        "samples": 152,
+        "minimum": 0.00737100737100737,
+        "p50": 0.15114503816793892,
+        "p95": 0.3587827015483182,
+        "p99": 0.39830108541764986,
+        "maximum": 0.5725606736007924
+      },
+      "gatewayPrivateBytes": {
+        "samples": 152,
+        "minimum": 760561664,
+        "p50": 1108332544,
+        "p95": 1362288640,
+        "p99": 1370935296,
+        "maximum": 1370935296
+      },
+      "gatewayWorkingSetBytes": {
+        "samples": 152,
+        "minimum": 804528128,
+        "p50": 1147338752,
+        "p95": 1397145600,
+        "p99": 1405353984,
+        "maximum": 1405534208
+      },
+      "hostFreeBytes": {
+        "samples": 152,
+        "minimum": 44132470784,
+        "p50": 44475801600,
+        "p95": 44897370112,
+        "p99": 44932395008,
+        "maximum": 44938289152
+      },
+      "hostBusiestLogicalCorePercent": {
+        "samples": 152,
+        "minimum": 16,
+        "p50": 76,
+        "p95": 100,
+        "p99": 100,
+        "maximum": 100
+      },
+      "gatewayProcessReadBytesPerSecond": {
+        "samples": 152,
+        "minimum": 0,
+        "p50": 0,
+        "p95": 0,
+        "p99": 0,
+        "maximum": 0
+      },
+      "gatewayProcessWriteBytesPerSecond": {
+        "samples": 152,
+        "minimum": 180615.26794742164,
+        "p50": 316460.7415485278,
+        "p95": 474572.9499467519,
+        "p99": 511426.02308499475,
+        "maximum": 564931.934493347
+      },
+      "gatewayProcessOtherIoBytesPerSecond": {
+        "samples": 152,
+        "minimum": 1739.1304347826087,
+        "p50": 2232.511323603422,
+        "p95": 3164.5947289905516,
+        "p99": 4070.8312838170195,
+        "maximum": 4206.723532363271
+      },
+      "hostNicBytesPerSecond": {
+        "samples": 152,
+        "minimum": 72.44785949506037,
+        "p50": 6174.8288572933125,
+        "p95": 225061.44697720517,
+        "p99": 733896.7679691269,
+        "maximum": 750614.4393241168
+      },
+      "ownerWorkObservedMaxUs": 2264,
+      "ownerDeadlineLagObservedMaxUs": 53611
+    },
+    {
+      "name": "stage-25",
+      "targetActors": 25,
+      "startedAtMs": 1792960394310,
+      "endedAtMs": 1792960694564,
+      "measuredSeconds": 300.254,
+      "sampleCount": 148,
+      "firstSampledAtMs": 1792960395526,
+      "lastSampledAtMs": 1792960693422,
+      "maximumSampleGapMs": 7377,
+      "gatewayLogicalCpuEquivalents": {
+        "samples": 148,
+        "minimum": 0.14398047722342733,
+        "p50": 0.7762676424464192,
+        "p95": 1.112895132965379,
+        "p99": 1.2854311199207138,
+        "maximum": 3.806468440271257
+      },
+      "gatewayPrivateBytes": {
+        "samples": 148,
+        "minimum": 1620402176,
+        "p50": 1851318272,
+        "p95": 1954926592,
+        "p99": 1962020864,
+        "maximum": 1962692608
+      },
+      "gatewayWorkingSetBytes": {
+        "samples": 148,
+        "minimum": 1651322880,
+        "p50": 1878818816,
+        "p95": 1981136896,
+        "p99": 1988128768,
+        "maximum": 1988784128
+      },
+      "hostFreeBytes": {
+        "samples": 148,
+        "minimum": 43426197504,
+        "p50": 43680329728,
+        "p95": 43972849664,
+        "p99": 44002455552,
+        "maximum": 44010053632
+      },
+      "hostBusiestLogicalCorePercent": {
+        "samples": 148,
+        "minimum": 25,
+        "p50": 69,
+        "p95": 100,
+        "p99": 100,
+        "maximum": 100
+      },
+      "gatewayProcessReadBytesPerSecond": {
+        "samples": 148,
+        "minimum": 0,
+        "p50": 0,
+        "p95": 0,
+        "p99": 0,
+        "maximum": 0
+      },
+      "gatewayProcessWriteBytesPerSecond": {
+        "samples": 148,
+        "minimum": 128423.67136659435,
+        "p50": 471396.32277834526,
+        "p95": 910906.5326633166,
+        "p99": 952646.7251160392,
+        "maximum": 2123067.814293166
+      },
+      "gatewayProcessOtherIoBytesPerSecond": {
+        "samples": 148,
+        "minimum": 1056.9414316702819,
+        "p50": 4125.385405960946,
+        "p95": 5441.564792176039,
+        "p99": 6997.421351211965,
+        "maximum": 15897.75691184142
+      },
+      "hostNicBytesPerSecond": {
+        "samples": 148,
+        "minimum": 33.6562978072412,
+        "p50": 4982.647496281606,
+        "p95": 163682.12967843964,
+        "p99": 242369.96336996337,
+        "maximum": 294453.1328320802
+      },
+      "ownerWorkObservedMaxUs": 5265,
+      "ownerDeadlineLagObservedMaxUs": 223991
+    }
+  ],
+  "wholeDriverPayload": {
+    "startedAt": "2026-10-25T20:20:22.496Z",
+    "finishedAt": "2026-10-25T20:38:17.234Z",
+    "durationSeconds": 1074.738,
+    "sentBytes": 668629,
+    "receivedBytes": 102888130,
+    "definition": "Physical WebSocket payload bytes, including catalog batch/gzip headers and excluding WebSocket/TLS framing",
+    "averageCombinedPayloadMbitPerSecond": 0.770842821227127,
+    "scope": "Whole driver run, including bootstrap/ramp and stages; not a stage25 bandwidth measurement, wire framing, TLS or physical NIC ceiling."
+  },
+  "priorInvalidAnalysis": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\formal13-local-resource-observation-v1\\analysis-v1.json",
+    "reason": "v1 failed to unwrap monitor history envelopes; zero metric samples are invalid, not a zero resource measurement. Original v1 source/output preserved externally.",
+    "pin": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal13-local-resource-observation-v1\\analysis-v1.json",
+      "bytes": 10799,
+      "sha256": "075716b6d8f86a7908dbee736fccf690fff92196d2764d0c0d9cbbf8e1168871"
+    }
+  },
+  "originalReportOk": false,
+  "capacityAccepted": false,
+  "p0Passed": false,
+  "p2Started": false,
+  "limits": [
+    "Host logical-core samples include the load clients and unrelated host processes.",
+    "Gateway process IO counters include file/device IO; they do not establish pure disk throughput, latency, fsync p99 or storage capacity.",
+    "Host NIC counters may omit loopback traffic and do not measure this gateway alone.",
+    "No stage50, stage100, two-hour soak, production database, TLS/WAN, browser, hard cloud quota or N+1 result exists here.",
+    "Memory grows during this short mixed-cohort run; this does not establish a two-hour plateau or a leak.",
+    "Stage25 failed the original combat-supply windows despite successful issued attacks; sampled low CPU is not a passing capacity result."
+  ]
+}

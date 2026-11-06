@@ -1,0 +1,71 @@
+{
+  "schemaVersion": 1,
+  "verifiedAt": "2026-10-24T16:21:38.723Z",
+  "scope": "File-only collection validation; no service, load, tests, builds or broad scans. The coordinator accepted an external API preview instead of a temporary repository-root artifact index.",
+  "copiedOriginalPublicFiles": 48,
+  "copiedOriginalPublicBytes": 1919831,
+  "allOriginalCopiesByteEqual": true,
+  "preservedFailedReports": 7,
+  "archivedRawFiles": 7,
+  "archivedRawBytes": 14613638,
+  "archivedRawRows": 24449,
+  "archivedMonitorRows": 818,
+  "currentV2InvalidMonitorRows": 422,
+  "capacityAccepted": 0,
+  "rootIndexCreated": false,
+  "diagnosticFilesBeforeThisRecord": 58,
+  "diagnosticFilesIncludingThisRecord": 59,
+  "evidenceHashes": {
+    "publicCopyProvenanceSha256": "5222e5ad10504a0c3c5e53468c34100bd192ea0008fc099e21dd4ba275b68a70",
+    "rawArtifactManifestSha256": "858325151847a5fd6d9a8f676d3e0956d350b78f30e70a8cf1586d29b4a2e7bd",
+    "diagnosticSummarySha256": "3ee056e14a59076c4fff9b2eef8710dca39bbbd725d2de2131cd5c6f42631691",
+    "frozenVerifierSha256": "a61e828c659a5466430aace50a41162b3c8039392de374dccd7afd07f803d9e5"
+  },
+  "preview": {
+    "method": "Node CLI importing the frozen inventory/verifyTopic APIs with an explicit external preview index and archiveRoot.",
+    "externalPreviewIndex": "C:/mir2-build/p01-completion-20261024/evidence-preview-diagnostics-index.json",
+    "indexScope": "Snapshot before this verification record was added; final coordinator-owned index must include this record and any later authorized evidence.",
+    "result": {
+      "files": 89,
+      "frozenBackendFiles": 32,
+      "historicalBackendPins": 0,
+      "fullRuns": 1,
+      "failedReportsPreserved": 0,
+      "capacityReports": 7,
+      "capacityAccepted": 0,
+      "archivedFiles": 7,
+      "archivedRows": 24449,
+      "archivedMonitorRows": 818,
+      "invalidMonitorRows": 422
+    },
+    "requireCapacity": {
+      "rejected": true,
+      "error": "No accepted standard/native capacity report; P0 capacity remains pending"
+    }
+  },
+  "defaultCli": {
+    "command": "node docs/generated/cell-p0-p1-completion-20261024/evidence-tools/verify-evidence.mjs --archive-root C:/mir2-build/p01-completion-20261024",
+    "exitCode": 1,
+    "result": {
+      "verified": false,
+      "error": "ENOENT"
+    },
+    "interpretation": "Expected because the coordinator has not created the final root artifact-index.json. This default CLI result is not represented as passing."
+  },
+  "cleanup": [
+    {
+      "path": "capacity-diagnostics/probe-natural-5/cleanup.json",
+      "originalSummaryAllSixCountersZero": true,
+      "originalSummaryGatewayStopped": true
+    },
+    {
+      "path": "capacity-diagnostics/probe-natural-5-02/realm-cleanup.json",
+      "allSixRecordedPreStopCountersZero": true
+    },
+    {
+      "path": "capacity-diagnostics/release-accessibility-5-01/realm-cleanup.json",
+      "allSixRecordedPreStopCountersZero": true
+    }
+  ],
+  "cleanupLimit": "These are original recorded connection/process cleanup scopes, not fresh process queries or proof of a globally ghost-free world."
+}

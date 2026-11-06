@@ -1,0 +1,19 @@
+
+running 14 tests
+test npc_purchase_client::tests::native_actor_capacity_refusal_retains_original_operation_and_all_history ... ok
+test npc_purchase_client::tests::native_begin_pair_is_not_complete_application_and_exact_quote_is_required ... ok
+test npc_purchase_client::tests::native_begin_requires_same_turn_pair_and_superseded_begin_cannot_select ... ok
+test npc_purchase_client::tests::native_control_capacity_and_exhaustion_withdraw_before_refusal_without_eviction ... ok
+test npc_purchase_client::tests::native_currencies_sources_and_zero_selector_roundtrip_without_local_pricing ... ok
+test npc_purchase_client::tests::native_failure_unknown_and_before_execution_preserve_entered_barrier ... ok
+test npc_purchase_client::tests::native_foreign_actor_selection_retains_original_and_retired_producer_is_refused ... ok
+test npc_purchase_client::tests::native_quote_supersession_and_new_begin_revoke_exact_quote ... ok
+test npc_purchase_client::tests::native_raw_invalid_or_wrong_operation_reply_never_consumes_saved_control ... ok
+test npc_purchase_client::tests::native_receipt_and_complete_witness_settle_in_both_orders_preserving_uid_zero ... ok
+test npc_purchase_client::tests::native_reconnect_same_or_new_producer_queries_original_operation_only ... ok
+test npc_purchase_client::tests::native_replacement_connection_and_foreign_host_tokens_cannot_rebind_or_consume ... ok
+test npc_purchase_client::tests::native_terminal_rejection_and_post_commit_receipt_still_need_complete_witness ... ok
+test npc_purchase_client::tests::native_unsent_feedback_requires_original_custody_and_entered_never_cancels ... ok
+
+test result: ok. 14 passed; 0 failed; 0 ignored; 0 measured; 858 filtered out; finished in 0.00s
+

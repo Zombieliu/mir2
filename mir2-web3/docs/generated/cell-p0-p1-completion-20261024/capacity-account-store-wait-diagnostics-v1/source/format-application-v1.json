@@ -1,0 +1,86 @@
+{
+  "schemaVersion": 1,
+  "formatter": "rustfmt +1.95.0 --edition 2021 --config skip_children=true --emit stdout via stdin",
+  "testsExecuted": false,
+  "otherSourceWritten": false,
+  "baselineExistingSixAlreadyFormatted": true,
+  "files": [
+    {
+      "path": "apps/simulation/src/config_account_store_diagnostics.rs",
+      "before": {
+        "bytes": 10297,
+        "sha256": "2716cb344371d5a3da8776b2cecae184f7ae0fde7a000dc9af439f15735ea83c"
+      },
+      "after": {
+        "bytes": 10863,
+        "sha256": "bdd0805104f396d924a6663be46166a9b2bb759c580efcb6e07b6fbf0cb970e4"
+      }
+    },
+    {
+      "path": "apps/simulation/src/lib.rs",
+      "before": {
+        "bytes": 7191,
+        "sha256": "0724307baaf0ca81c7a55e3ab0300e28b40f2fb376f06a389a84548f7fa910c3"
+      },
+      "after": {
+        "bytes": 7191,
+        "sha256": "0724307baaf0ca81c7a55e3ab0300e28b40f2fb376f06a389a84548f7fa910c3"
+      }
+    },
+    {
+      "path": "apps/simulation/src/config.rs",
+      "before": {
+        "bytes": 346659,
+        "sha256": "360cd112dd40fe96111f5501ed05ed3c496c86451bcfb859a5a8118a7da1c492"
+      },
+      "after": {
+        "bytes": 347044,
+        "sha256": "df3eceebeb434b817e32ebc9bb4c2901257f5e4199901252ec18234a5260b07d"
+      }
+    },
+    {
+      "path": "apps/simulation/src/config_file_authority.rs",
+      "before": {
+        "bytes": 24794,
+        "sha256": "858e21dee18c19fa5a4c5fa538a9928ed969f65ed436cc3e4997a8ee4c3be562"
+      },
+      "after": {
+        "bytes": 24828,
+        "sha256": "ba3d5318241173429abe5b73c836e1a2a8082fef11a1d42c768f1438ea73deff"
+      }
+    },
+    {
+      "path": "apps/simulation/src/config_shared_guilds.rs",
+      "before": {
+        "bytes": 53319,
+        "sha256": "e73b5c6b095f84447f99d41d0cc5f2952d208655dd81c9555cee49e2ebe36bd0"
+      },
+      "after": {
+        "bytes": 53319,
+        "sha256": "e73b5c6b095f84447f99d41d0cc5f2952d208655dd81c9555cee49e2ebe36bd0"
+      }
+    },
+    {
+      "path": "apps/simulation/src/config_guild_clock_driver.rs",
+      "before": {
+        "bytes": 22777,
+        "sha256": "edc5daf087653bd08c7fdc3dd9f0e1213a09a40046f10f62b0dc7aa2dbcc7c6a"
+      },
+      "after": {
+        "bytes": 22968,
+        "sha256": "5b5e41dde7a38eb8f1eae3893dc54c085aa13716fd6624cad5738d3c5016b8b8"
+      }
+    },
+    {
+      "path": "apps/simulation/src/runtime/shared_experience_profile.rs",
+      "before": {
+        "bytes": 76309,
+        "sha256": "0487f7fd7a9ce7ac2c6adddebc0b02b870fa1aaa559f2fee7145e3aceb393ef4"
+      },
+      "after": {
+        "bytes": 76309,
+        "sha256": "8a6cbcb3cb1177111e8700c279583f730f8d26d475b121a316e270b7a1a8ceab"
+      }
+    }
+  ]
+}

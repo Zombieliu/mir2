@@ -1,0 +1,235 @@
+{
+  "schemaVersion": 1,
+  "state": "FINAL_FRESH_PROBE18_AND_NEW50_BOUND_NOT_EXECUTED",
+  "finalized": true,
+  "backendSourceCommit": "c743122af05faca43d9535d8c6c2a4bfb01b924f",
+  "driverSourceCommit": "3a6d8c862d03ded3133605472a8f38bc6258af52",
+  "backendInputCount": 50,
+  "capacityAccepted": false,
+  "sealed": false,
+  "accountPrepared": false,
+  "realmStarted": false,
+  "executionSourceCommit": "3a6d8c862d03ded3133605472a8f38bc6258af52",
+  "probe18": {
+    "runId": "1792965008290-fc5e2eed",
+    "report": {
+      "path": "release-native-10-v2-scout-observer-feasibility-18/reports/1792965008290-fc5e2eed.report.json",
+      "bytes": 324303,
+      "sha256": "c9fe969068b30727250c94f67149b8d938abb493b93200041d0e94ee8abca4c7"
+    },
+    "raw": {
+      "path": "release-native-10-v2-scout-observer-feasibility-18/reports/1792965008290-fc5e2eed.samples.jsonl",
+      "bytes": 29612729,
+      "sha256": "ab31e2b81cf6e1fd89fabc9c9d25699c742f724fda2570140feb629ddb56444e"
+    },
+    "collectedEvidence": {
+      "publicChild": "capacity-native10-v2-scout-observer-followup-18-diagnostics",
+      "catalog": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-native10-v2-scout-observer-followup-18-diagnostics\\collect-release-native-10-v2-scout-observer-feasibility-18-public-artifact-catalog.json",
+        "bytes": 72158,
+        "sha256": "80a5baa03493b2f8d137303a28ae1f348109053881130e5de9ab6a04dcfb1cbf"
+      },
+      "publicCopy": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-native10-v2-scout-observer-followup-18-diagnostics\\public-copy-provenance.json",
+        "bytes": 74700,
+        "sha256": "3d94fb3db21cf1a82a8fd9dfdeede001104b7fe895b57ea03ceb0e20a5f373e2"
+      },
+      "publicVerification": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-native10-v2-scout-observer-followup-18-diagnostics\\public-verification.json",
+        "bytes": 7108,
+        "sha256": "cf38707c66c491d0ac1db30f3176d5412f480e3d20587699b6e8e1381730cb73"
+      },
+      "collectionVerification": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-native10-v2-scout-observer-followup-18-diagnostics\\collection-verification.json",
+        "bytes": 332549,
+        "sha256": "f9916c1808b9108297fd395d7265a88fcda8cbed797f481bef54dc8c8b94ff26"
+      },
+      "rawArtifactManifest": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-native10-v2-scout-observer-followup-18-diagnostics\\raw-artifact-manifest.json",
+        "bytes": 715,
+        "sha256": "218546fc957043b6b77cd5daf1c81bb153d3db44824c736c71122fe02a3dc176"
+      }
+    },
+    "independentVerification": {
+      "path": "probe18-independent-verification-v1/final-verification.json",
+      "bytes": 437094,
+      "sha256": "d8558cb32ec366f21d744c132f30e64cb1923e3d73d60427d0edd21c9935c9e4"
+    },
+    "independentVerifierSources": [
+      {
+        "path": "probe18-independent-verification-v1/verify-ended-probe18-v1.mjs",
+        "bytes": 36368,
+        "sha256": "92acea1f0fa6bfadea32a62ea0e35ea53327bef7e5c797cf65f1ada0ea71e5a1"
+      },
+      {
+        "path": "probe18-independent-verification-v1/probe-contract-v1.mjs",
+        "bytes": 5695,
+        "sha256": "c40b20f789f72ff34a264d8b3fc4509829d834bf9999caf4e706befbeab6e06a"
+      },
+      {
+        "path": "probe18-independent-verification-v1/hp-proof-contract-v2.mjs",
+        "bytes": 4644,
+        "sha256": "cbf67686e1fa385404782c27548dbe3fbaa10f55a5d97c3379d5a41ed01cf285"
+      },
+      {
+        "path": "probe18-independent-verification-v1/expected-probe-policy-v1.json",
+        "bytes": 1008,
+        "sha256": "e3bc309c4830ffed84c924c5d71dda6fa44e90bcbe552fd3a969dc9760edb242"
+      },
+      {
+        "path": "probe18-independent-verification-v1/run-ended-probe18-v1.mjs",
+        "bytes": 2257,
+        "sha256": "b26816d6ed4694e21ef1443c12b6df9f6834cea5d6d8c4dadbb7b07921d2ab45"
+      },
+      {
+        "path": "probe18-independent-verification-v1/seal-tool-source-v1.mjs",
+        "bytes": 3011,
+        "sha256": "cc646ed39d511137b83655ec7abe215091dca4e81ac5e10b24c93af2a4f7b499"
+      },
+      {
+        "path": "probe18-independent-verification-v1/derivation-v1.json",
+        "bytes": 15779,
+        "sha256": "ea5509d304431d0e7c4033e712d760f08b16bcb8ee822c74456cc2f9f17fe2ff"
+      },
+      {
+        "path": "probe18-independent-verification-v1/derive-verifier-v1.mjs",
+        "bytes": 9843,
+        "sha256": "ca6816fe56b271aa9b2dcbeac64440f4edc2e4189be518ada4f8a48fa24bb9ba"
+      },
+      {
+        "path": "probe18-independent-verification-v1/preparation-v1.json",
+        "bytes": 4186,
+        "sha256": "6714b4206d762cc25676357267eea107e0a3ebd479dbec4927043fc79219547b"
+      },
+      {
+        "path": "probe18-independent-verification-v1/independent-review-v1.json",
+        "bytes": 8417,
+        "sha256": "e029e2e080204aeb38a87c963d2ac1b01e50b33cb92f41b3d2c4c09b50d03b10"
+      }
+    ],
+    "independentSourceClosureManifest": {
+      "path": "probe18-independent-verification-v1/tool-source-frozen-v1.json",
+      "bytes": 2111,
+      "sha256": "4a1d392606edeb54700a7d49e5e620dcd17c35d9466c5c019788945bb722a5aa"
+    },
+    "actualExecutionReceipt": {
+      "path": "probe18-independent-verification-v1/actual-verification-execution-receipt-v1.json",
+      "bytes": 813,
+      "sha256": "e9841d7cf9355ec66a980ea2056fba49de870c645b830bb2fbfceb91c0fc9257"
+    },
+    "preparedSourceConfigSha256": "ce15097005c6a7abd3e861b3f4b8fd1708f95d1145096d58e747462e57c87f07",
+    "completePhaseSeconds": [
+      300,
+      300,
+      360
+    ],
+    "completePhaseWindows": [
+      5,
+      5,
+      6
+    ],
+    "capacityAccepted": false,
+    "independentVerifierRevision": 2,
+    "actualExecutionLog": {
+      "path": "probe18-independent-verification-v1/actual-verification.log",
+      "bytes": 877,
+      "sha256": "500791ad3545dbfdea51ee379a4d98a2cad0f6adbc133ad68a4985711f02a9b9"
+    },
+    "rootIndependentCleanup": {
+      "path": "probe18-root-independent-cleanup-v1.json",
+      "bytes": 371,
+      "sha256": "1ad90c3a6ab3f6e802e90135bf6838f4befd6e7841e6d9f582aa3d9ab8e7e1af"
+    },
+    "storeDiagnostics": {
+      "summary": {
+        "sourceValid": true,
+        "countsMatch": true,
+        "complete": true,
+        "reasons": [],
+        "rows": 21,
+        "bytes": 4571,
+        "sha256": "1844e2991d25f74dbcbb511455df7e576af405ce999ddfc1a20da5375a43f377",
+        "sourceIdentity": {
+          "schemaVersion": 1,
+          "dataset": "account-store",
+          "storeOnly": true,
+          "manifest": {
+            "file": "C:\\mir2-build\\p01-completion-20261024\\account-store-slow-stage-diagnostics-v1\\source-freeze-v1.json",
+            "bytes": 4628,
+            "sha256": "632e875bd2d56299009411d6d22ee8912eed3f15c3d26f8b95466be2bd22f9cb"
+          },
+          "review": {
+            "file": "C:\\mir2-build\\p01-completion-20261024\\account-store-slow-stage-independent-review-v1\\review-v1.json",
+            "bytes": 6459,
+            "sha256": "54a9c1a27336537d0232b6f8b76ac18f92ef76f8064899b2a253f78d68eefb68"
+          },
+          "sourceSha256": "8db992f5b7246f585d0158a914e616bbf9397421b66d92f27b350444b1939c8c",
+          "helperSha256": "6cde67571184692d7b89da32adb21fb2f8a228db5e0865cb9cc96bf3a34925c7",
+          "validatorSha256": "d71add02703a84acc2d870d5c7daf96dd17e0533b2d49af0480e55dea7aea262",
+          "separateFromBaseThreeFourSeven": true,
+          "contributesToGameAcceptance": false
+        },
+        "pins": {
+          "catalog": {
+            "path": "capacity-native10-v2-scout-observer-followup-18-store-diagnostics/store-artifact-catalog.json",
+            "bytes": 5158,
+            "sha256": "172ced353393f1204823c7892a8aab3244157e30abf215ec912e669538ad0315"
+          },
+          "publicVerification": {
+            "path": "capacity-native10-v2-scout-observer-followup-18-store-diagnostics/store-public-verification.json",
+            "bytes": 1423,
+            "sha256": "38bc6317d0a9e9b1637ab3bdbfa0e36228a7529850256e007c318eb604db840f"
+          },
+          "status": {
+            "path": "capacity-native10-v2-scout-observer-followup-18-store-diagnostics/store-stage-public-status.json",
+            "bytes": 2590,
+            "sha256": "d3c5259beaba9632fc21cdb2173c986cdb064f1cb452848d519b55c93a57ae3e"
+          },
+          "data": {
+            "path": "capacity-native10-v2-scout-observer-followup-18-store-diagnostics/store-stage-public.jsonl",
+            "bytes": 4571,
+            "sha256": "1844e2991d25f74dbcbb511455df7e576af405ce999ddfc1a20da5375a43f377"
+          }
+        },
+        "diagnosticsDoNotChangeOriginalGameVerdict": true,
+        "contributesToGameAcceptance": false,
+        "completedOnlyCannotProveMissingHolder": true
+      },
+      "pins": {
+        "catalog": {
+          "path": "capacity-native10-v2-scout-observer-followup-18-store-diagnostics/store-artifact-catalog.json",
+          "bytes": 5158,
+          "sha256": "172ced353393f1204823c7892a8aab3244157e30abf215ec912e669538ad0315"
+        },
+        "publicVerification": {
+          "path": "capacity-native10-v2-scout-observer-followup-18-store-diagnostics/store-public-verification.json",
+          "bytes": 1423,
+          "sha256": "38bc6317d0a9e9b1637ab3bdbfa0e36228a7529850256e007c318eb604db840f"
+        },
+        "status": {
+          "path": "capacity-native10-v2-scout-observer-followup-18-store-diagnostics/store-stage-public-status.json",
+          "bytes": 2590,
+          "sha256": "d3c5259beaba9632fc21cdb2173c986cdb064f1cb452848d519b55c93a57ae3e"
+        },
+        "data": {
+          "path": "capacity-native10-v2-scout-observer-followup-18-store-diagnostics/store-stage-public.jsonl",
+          "bytes": 4571,
+          "sha256": "1844e2991d25f74dbcbb511455df7e576af405ce999ddfc1a20da5375a43f377"
+        }
+      }
+    },
+    "rootActualExecutionFacts": {
+      "path": "probe18-root-actual-terminal-and-consumer-facts-v1.json",
+      "bytes": 8568,
+      "sha256": "2ba0c6750a0f02533e141554ca639ad611a215e722236e732946d9648d2db106"
+    },
+    "independentActualTerminalFacts": {
+      "path": "probe18-actual-terminal-independent-facts-v1.json",
+      "bytes": 10133,
+      "sha256": "ef3a0ec4f8f5cf69e2bcfa0e73bfc96041074de60d3383852527d676eec6cdf3"
+    }
+  },
+  "backendRebuilt": false,
+  "rootExecutionRequired": true,
+  "formalStarted": false
+}

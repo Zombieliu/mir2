@@ -1,0 +1,48 @@
+{
+  "schemaVersion": 1,
+  "expectedHead": "ee06c05f3813a1e627c8756d1f5fe8e2e0fbf856",
+  "reason": "Root binds actual new V6 Release and successful fresh32 Rust and828 Node checks. This finalizes qualification metadata only; freeze and ordinary preparation remain not run.",
+  "before": {
+    "binding": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v4\\backend-release-binding-pending-v1.json",
+      "bytes": 412,
+      "sha256": "f6f74de34ccba0d7fe32664bb2fefaea1585afdd2b2d6aa354dd3919c79be75a"
+    },
+    "config": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v4\\prepare-config-pending-v1.json",
+      "bytes": 6017,
+      "sha256": "f89e962d58568355c5805861fe93018c91d1226606c53fa141682dbe2f3fe964"
+    }
+  },
+  "after": {
+    "binding": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v4\\backend-release-binding-pending-v1.json",
+      "bytes": 1376,
+      "sha256": "16e27c4496723ef6c7e43f72f816cbb6e0081d6de5fbca38fc44911c4dd6d979"
+    },
+    "config": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v4\\prepare-config-pending-v1.json",
+      "bytes": 6759,
+      "sha256": "ecc3df0515b7a4f4236aa9072b40157e320709d6b137a2e9a42bd8dabe303080"
+    }
+  },
+  "release": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-hp-wake-release-v6\\release-v6.json",
+    "bytes": 2257,
+    "sha256": "5e6326b1994cb771fefbcd8187de0d9dedaa47d1fe3fa68f136ddc58fb08cc8d"
+  },
+  "rust": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\root-ordinary-hp-wake-validation-v2\\root-focused-receipt-v1.json",
+    "bytes": 28585,
+    "sha256": "b11edacef0931e437503df444d87c16c4d95b98d6b026a242e5eb1cf3861783d"
+  },
+  "node": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\root-capacity-preparation-validation-v4\\root-focused-receipt-v1.json",
+    "bytes": 15375,
+    "sha256": "41c5fcc6b5355f3347ab36a8a29791d739080f969db9d8c4caf1a7cdf4eababa"
+  },
+  "selectedRustTestsPassed": 32,
+  "selectedNodeTestsPassed": 828,
+  "capacityAccepted": false,
+  "p0Accepted": false
+}

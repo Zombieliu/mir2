@@ -1,0 +1,85 @@
+{
+  "schemaVersion": 1,
+  "kind": "auth-source12-checkpoint-current-code-compile-static-package-only",
+  "parentCommit": "80c8e1d80dc17c269991f61c992bb75b36c49d98",
+  "baselineWindows": "f72e36fb84c3574fff0aeb2abed856454b14289d",
+  "matrix": {
+    "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\feature-matrix03.json",
+    "bytes": 2667133,
+    "sha256": "0678aed73242bc6566cf79d3df00b20972172bf610c93a371bcc768e13cc8c32",
+    "relativePath": "docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/feature-matrix03.json"
+  },
+  "matrixMarkdown": {
+    "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\feature-matrix03.md",
+    "bytes": 29968,
+    "sha256": "25f2006f4839248c24426617775a8533a21a1aeaff36a2b35a500f71b98cd88e"
+  },
+  "finiteResult": {
+    "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\auth-source12-finite-result01.json",
+    "bytes": 8652,
+    "sha256": "ce7ea1a4807a7339c9f7a1841a1abccb750fd20eb3e5a7e6f5cb1d43cbeced3a"
+  },
+  "combinedBuildResult": {
+    "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\auth-source12-combined-build-result01.json",
+    "bytes": 8778,
+    "sha256": "01bb90946656b7a64feada6137f83d9b42bb078e6291375e6d7ce34f2e5e6408",
+    "relativePath": "docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/auth-source12-combined-build-result01.json"
+  },
+  "qaReadme": {
+    "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\README.md",
+    "bytes": 8650,
+    "sha256": "cbd169d0e55f05551fc9b04cbd3f53646822ea40cabaf0ef3f2a73a6f7e162f7"
+  },
+  "currentDocs": [
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\AGENT-ORCHESTRATION.md",
+      "bytes": 213815,
+      "sha256": "6444504a8724d69694f0eeb83287af03bfb6babfa5b23d53a9e6c930f380a419",
+      "relativePath": "docs/AGENT-ORCHESTRATION.md"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\AGENT-TASK-QUEUE.md",
+      "bytes": 825130,
+      "sha256": "b082d5684a74f72d63ac913a32c7e1b7d3f7ef1eda2e20e294af31066b909a40",
+      "relativePath": "docs/AGENT-TASK-QUEUE.md"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\CRYSTAL-1TO1-ROADMAP.md",
+      "bytes": 943154,
+      "sha256": "6b822b2d9dc1a435b59e627f3a0fe2dea3ebe4ffab54365165d758fb060fe509",
+      "relativePath": "docs/CRYSTAL-1TO1-ROADMAP.md"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\CROSS-PLATFORM-CLIENT-GOAL.md",
+      "bytes": 151206,
+      "sha256": "a28690432c82c228d6a29a360b05ed444ddc7f3bb002f7d0d0bac39b027ebf76",
+      "relativePath": "docs/CROSS-PLATFORM-CLIENT-GOAL.md"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\FRONTEND-1TO1-GAPS.md",
+      "bytes": 567085,
+      "sha256": "900855888773a747f86160bce2e65ce695ba685499499335381acb8d78492b43",
+      "relativePath": "docs/FRONTEND-1TO1-GAPS.md"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\WEB-WINDOWS-CATCHUP-GOAL-20261006.md",
+      "bytes": 24804,
+      "sha256": "ba05a99cd7554da87625be7a74d474b29a7ba991745a625d2704a8fa8206bfc0",
+      "relativePath": "docs/WEB-WINDOWS-CATCHUP-GOAL-20261006.md"
+    }
+  ],
+  "priorEvidence": {
+    "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\current-evidence02.json",
+    "bytes": 11600,
+    "sha256": "4935e47959645fb506b7ed1c8c648a0bf8d8096560dd255d78e648a5a51993c5"
+  },
+  "knownRemainingGapCount": 18,
+  "completeDenominatorFrozen": false,
+  "uiOperated": false,
+  "runtimeLaunched": false,
+  "networkUsed": false,
+  "wasmInstantiated": false,
+  "playerAcceptance": false,
+  "candidateAccepted": false,
+  "goalComplete": false
+}

@@ -1,0 +1,43 @@
+{
+  "schemaVersion": 1,
+  "checkedAtUtc": "2026-10-26T16:37:34.7347039Z",
+  "gatewayPid": 62296,
+  "ownedPidAbsent": true,
+  "listeners": [],
+  "portsFree": true,
+  "cleanupComplete": true,
+  "eligibleForNextIndependentEpisode": false,
+  "originalReport": {
+    "runId": "1793032111555-953c3a1b",
+    "ok": false,
+    "error": "Actor L3571cf19 died or lost presence; no automatic resurrection",
+    "stages": [],
+    "phaseWindows": [
+      {
+        "name": "bootstrap-50",
+        "kind": "bootstrap",
+        "targetActors": 50,
+        "startedAtMs": 1793032111597,
+        "endedAtMs": 1793032479034,
+        "completed": true
+      },
+      {
+        "name": "stage-50",
+        "kind": "measurement",
+        "targetActors": 50,
+        "startedAtMs": 1793032479040,
+        "endedAtMs": 1793032493788,
+        "completed": false
+      }
+    ],
+    "playableCapacityAccepted": false
+  },
+  "diagnosticSteadyOnline": {
+    "samples": 15,
+    "declaredActors": 50,
+    "minimumOnlineActors": 50,
+    "maximumOnlineActors": 50,
+    "lastOnlineActors": 50
+  },
+  "capacityAccepted": false
+}

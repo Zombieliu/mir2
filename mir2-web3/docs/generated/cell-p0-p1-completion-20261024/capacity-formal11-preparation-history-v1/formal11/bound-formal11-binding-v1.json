@@ -1,0 +1,314 @@
+{
+  "schemaVersion": 1,
+  "state": "FINAL_FRESH_PROBE15_AND_NEW44_BOUND_NOT_EXECUTED",
+  "rootIdentity": "release-native-v2-personal-projection-ladder-11",
+  "publicChild": "capacity-formal-native-v2-personal-projection-ladder-11",
+  "executionSourceCommit": "5c2e713863d3e9556a92f856b11df2396c73b137",
+  "backendSourceCommit": "5c2e713863d3e9556a92f856b11df2396c73b137",
+  "backendInputCount": 44,
+  "driverCodeEvidenceCommit": "b84d5d02a8299b6ac36c5e56cb7006f6bc80d3bd",
+  "driverSourceSha256": "db4e22c69b4f1365d8135023e158f4de00ff35d58330cf7eca98801780e674e7",
+  "actualRelease": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-personal-monster-projection-v1.json",
+    "bytes": 2376,
+    "sha256": "613b82935c45e476ad1ba32e2592e562e14ea6997062fc9f12b9de02bb770121"
+  },
+  "freshFull16Gate": {
+    "state": "passed",
+    "audit": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-personal-monster-projection-v1\\public\\1792934538996-4d1caf58.independent-audit.json",
+      "bytes": 1747,
+      "sha256": "e2b563e24484dcc2d16d14c2c20b5a84bc5921e5bc957a7dd305e070ec429265"
+    },
+    "files": [
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-personal-monster-projection-v1\\public\\1792934538996-4d1caf58.audit-source.mjs",
+        "bytes": 9066,
+        "sha256": "c694d39f4d4c6c7d388d7a66c10018c339bc529326510e7b7049cf3d0f222d37"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-personal-monster-projection-v1\\public\\1792934538996-4d1caf58.backend-source.json",
+        "bytes": 32926,
+        "sha256": "151869b76d13202e3c6557f908b5adc5643d1b0579cd7d4961cf0458c71cec52"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-personal-monster-projection-v1\\public\\1792934538996-4d1caf58.independent-audit.json",
+        "bytes": 1747,
+        "sha256": "e2b563e24484dcc2d16d14c2c20b5a84bc5921e5bc957a7dd305e070ec429265"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-personal-monster-projection-v1\\public\\1792934538996-4d1caf58.prepared-profile.json",
+        "bytes": 4369,
+        "sha256": "07893f55fa42af368da82061df2be5456bd6b7dc05394d9cd25a30b91d76d593"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-personal-monster-projection-v1\\public\\1792934538996-4d1caf58.realm-evidence.json",
+        "bytes": 34976,
+        "sha256": "3763e933415e23d66b8594610829990e7cddfbc69ef3316d7a5a8d3fad9e97b2"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-personal-monster-projection-v1\\public\\1792934538996-4d1caf58.release-input.json",
+        "bytes": 2376,
+        "sha256": "613b82935c45e476ad1ba32e2592e562e14ea6997062fc9f12b9de02bb770121"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-personal-monster-projection-v1\\public\\1792934538996-4d1caf58.runner-source.mjs",
+        "bytes": 14389,
+        "sha256": "b7ad0b746575b01a4dd0133694e07799e435859241e6d845c9aa2c66ab25e45e"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-personal-monster-projection-v1\\public\\1792934538996-4d1caf58.source-manifest-verification.json",
+        "bytes": 572,
+        "sha256": "d4af84222c7309c7eeadf7ce185bc8b7c6452bb48bb610bcb199d43f8f59a356"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-personal-monster-projection-v1\\public\\1792934538996-4d1caf58.zone-metrics.json",
+        "bytes": 23598,
+        "sha256": "a56aae33c58dd4e27db9e6b482082b557ec20a6af465ed8ef3d01ee73533af5f"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-personal-monster-projection-v1\\public\\1792934546937-58ce6147-a.trace.jsonl",
+        "bytes": 982658,
+        "sha256": "ad78db0397399d88cf5a7c937dcc0664f7a22eadb7a8877a58e2759c985b49f7"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-personal-monster-projection-v1\\public\\1792934546937-58ce6147-b.trace.jsonl",
+        "bytes": 907904,
+        "sha256": "88841b520336c2485062d816af16cec8d324a07319283396373a845fa85beb86"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-personal-monster-projection-v1\\public\\1792934546937-58ce6147-guard-newCharacter.trace.jsonl",
+        "bytes": 3479,
+        "sha256": "c964e3a263f3a0c86b2fbe88dc6f91a2141633df772413ef24e68e594567ec2a"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-personal-monster-projection-v1\\public\\1792934546937-58ce6147-guard-startGame.trace.jsonl",
+        "bytes": 3442,
+        "sha256": "cff0fa5526d83d5085d0614e63fda36ffecc0594f781475a5f8d5fed71ee5863"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-personal-monster-projection-v1\\public\\1792934546937-58ce6147-relogin-0.trace.jsonl",
+        "bytes": 684246,
+        "sha256": "0cb1b176f30a26ef02955918209d3b131acc82d7deed321feddddeb2996c3fb6"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-personal-monster-projection-v1\\public\\1792934546937-58ce6147-relogin-1.trace.jsonl",
+        "bytes": 680201,
+        "sha256": "b0b292717a319e003b01afff97b21baaa9d0216421880487f8353c2540017bef"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-personal-monster-projection-v1\\public\\1792934546937-58ce6147.report.json",
+        "bytes": 109568,
+        "sha256": "bb848946258bde31f7fe05158fc5cfa0427e7b693c0335d280d61c0c95ad947e"
+      }
+    ],
+    "rootIndependentCleanup": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\personal-projection-full16-root-independent-cleanup-v1.json",
+      "bytes": 288,
+      "sha256": "4b9f2783404dfb04b3765022bc3a54eaec128a767118ccfdb27d60d2223fc777"
+    }
+  },
+  "probe15": {
+    "root": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-personal-projection-feasibility-15",
+    "publicChild": "capacity-native10-v2-personal-projection-followup-15-diagnostics",
+    "runId": "1792937158876-b61ec943",
+    "report": {
+      "key": "report",
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-personal-projection-feasibility-15\\reports\\1792937158876-b61ec943.report.json",
+      "bytes": 324947,
+      "sha256": "14dc94b768c52135c506f1df0621ca1ea358320d8d1140d245d0aec143ec860e"
+    },
+    "raw": {
+      "key": "raw",
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-personal-projection-feasibility-15\\reports\\1792937158876-b61ec943.samples.jsonl",
+      "bytes": 29881742,
+      "sha256": "ee1c2288dcff01bce9a36e1ebaa44f4ce7efeecdb05a84ee3e631a79c859b300"
+    },
+    "collectedEvidence": [
+      {
+        "key": "catalog",
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-native10-v2-personal-projection-followup-15-diagnostics\\collect-release-native-10-v2-personal-projection-feasibility-15-public-artifact-catalog.json",
+        "bytes": 62482,
+        "sha256": "ebae3c513018449d0ad5cf783287b0c87cd44a62de6f16564ea016964a170f46"
+      },
+      {
+        "key": "publicCopy",
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-native10-v2-personal-projection-followup-15-diagnostics\\public-copy-provenance.json",
+        "bytes": 62797,
+        "sha256": "b97775460060384aa86a9d478c34e46a2ea00c6d4f07608bccd5bd7de730e201"
+      },
+      {
+        "key": "publicVerification",
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-native10-v2-personal-projection-followup-15-diagnostics\\public-verification.json",
+        "bytes": 7112,
+        "sha256": "c89c028fbafacf81b24b57ac365a4a9b2221dc7687e5ea838c37536fe5d95538"
+      },
+      {
+        "key": "collectionVerification",
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-native10-v2-personal-projection-followup-15-diagnostics\\collection-verification.json",
+        "bytes": 348583,
+        "sha256": "d6abcc64bd3abd100c142a42345cbab30ba895a1f95173205724401814b17a87"
+      },
+      {
+        "key": "projection",
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-native10-v2-personal-projection-followup-15-diagnostics\\release-native-10-v2-personal-projection-feasibility-15\\reports\\1792937158876-b61ec943.raw-projection.json",
+        "bytes": 353596,
+        "sha256": "4770965f685347a6b1073559ae3ff8bcf652976f05e5c14bc7143318ba0b354a"
+      }
+    ],
+    "independentVerification": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\probe15-independent-verification-v1\\final-verification.json",
+      "bytes": 448826,
+      "sha256": "2c9b79b7073eefac5094211fc78effee51f567dd21dbdf57223701860983878b"
+    },
+    "completePhaseSeconds": [
+      300,
+      300,
+      360
+    ],
+    "completePhaseWindows": [
+      5,
+      5,
+      6
+    ],
+    "capacityAccepted": false,
+    "independentVerifierSources": [
+      {
+        "path": "probe15-independent-verification-v1/verify-ended-probe15-v1.mjs",
+        "bytes": 28031,
+        "sha256": "eedc2a98058cfca8ffaf1120d8e8f5b8518ff595e1ef250309845475f0063704"
+      },
+      {
+        "path": "probe15-independent-verification-v1/probe-contract-v1.mjs",
+        "bytes": 5820,
+        "sha256": "9a1843d910cbe4503859bd00d7c9fec77217d2229db9e31d0c9fe5ef005f278b"
+      },
+      {
+        "path": "probe15-independent-verification-v1/hp-proof-contract-v2.mjs",
+        "bytes": 4644,
+        "sha256": "cbf67686e1fa385404782c27548dbe3fbaa10f55a5d97c3379d5a41ed01cf285"
+      },
+      {
+        "path": "probe15-independent-verification-v1/expected-probe-policy-v1.json",
+        "bytes": 1008,
+        "sha256": "e3bc309c4830ffed84c924c5d71dda6fa44e90bcbe552fd3a969dc9760edb242"
+      },
+      {
+        "path": "probe15-independent-verification-v1/run-ended-probe15-v1.mjs",
+        "bytes": 2257,
+        "sha256": "3c5731662e415db08e7a97add7f2bef7b98dd5ce317a41ce488d3f87a12827b7"
+      },
+      {
+        "path": "probe15-independent-verification-v1/seal-tool-source-v1.mjs",
+        "bytes": 3011,
+        "sha256": "cc646ed39d511137b83655ec7abe215091dca4e81ac5e10b24c93af2a4f7b499"
+      },
+      {
+        "path": "probe15-independent-verification-v1/derivation-proof-v1.json",
+        "bytes": 7237,
+        "sha256": "3f8235de28d3ecf988a061e98e506d117858a81dd68d29e415fc7a8147d5435c"
+      },
+      {
+        "path": "probe15-independent-verification-v1/preparation-v1.json",
+        "bytes": 4243,
+        "sha256": "84ea2c9cce40bb392cffc8b60e007c61d4c797ff4d7f59719b7745d0de497a5a"
+      },
+      {
+        "path": "probe15-independent-verification-v1/independent-review-v1.json",
+        "bytes": 7436,
+        "sha256": "b7f466113755240130abb2fc2cc357fce114882951b66fb689504790de515151"
+      }
+    ],
+    "independentVerifierRevision": 2,
+    "independentSourceClosureManifest": {
+      "path": "probe15-independent-verification-v1/tool-source-frozen-v1.json",
+      "bytes": 1949,
+      "sha256": "7a90c16b13593dcc6c6e62d2b8abf98e4e4fcaeb312a308074f28968d0aec1aa"
+    },
+    "actualExecutionReceipt": {
+      "path": "probe15-independent-verification-v1/actual-verification-execution-receipt-v1.json",
+      "bytes": 812,
+      "sha256": "1822d860e1d7d2fe7cba56d28ff4137d5530a2b9571f36ab9e912af88623ba96"
+    },
+    "sourceSealInputCount": 9
+  },
+  "finalized": true,
+  "sealed": false,
+  "provisioned": false,
+  "formalRunStarted": false,
+  "capacityAccepted": false,
+  "actual15EvidencePins": [
+    {
+      "key": "report",
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-personal-projection-feasibility-15\\reports\\1792937158876-b61ec943.report.json",
+      "bytes": 324947,
+      "sha256": "14dc94b768c52135c506f1df0621ca1ea358320d8d1140d245d0aec143ec860e"
+    },
+    {
+      "key": "realmCleanup",
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-personal-projection-feasibility-15\\realm-cleanup.json",
+      "bytes": 4820,
+      "sha256": "2f05df0f7f2b19d5a31e20a0cf1a7c1a9ad55de9cf78633d03f475b40da105ce"
+    },
+    {
+      "key": "rootCleanup",
+      "file": "C:\\mir2-build\\p01-completion-20261024\\probe15-root-independent-cleanup-v1.json",
+      "bytes": 324,
+      "sha256": "eaf8ad2feede5ff55855097d9659a4ac9a22f08ce2a224dcfd75ff5c04a5dc00"
+    },
+    {
+      "key": "reportProvenance",
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-personal-projection-feasibility-15\\report-provenance.json",
+      "bytes": 6614,
+      "sha256": "b913f17f0f377e5a8131099a962e99bc159d6a36f2f0febd090bc45e39ba361e"
+    },
+    {
+      "key": "catalog",
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-native10-v2-personal-projection-followup-15-diagnostics\\collect-release-native-10-v2-personal-projection-feasibility-15-public-artifact-catalog.json",
+      "bytes": 62482,
+      "sha256": "ebae3c513018449d0ad5cf783287b0c87cd44a62de6f16564ea016964a170f46"
+    },
+    {
+      "key": "publicCopy",
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-native10-v2-personal-projection-followup-15-diagnostics\\public-copy-provenance.json",
+      "bytes": 62797,
+      "sha256": "b97775460060384aa86a9d478c34e46a2ea00c6d4f07608bccd5bd7de730e201"
+    },
+    {
+      "key": "publicVerification",
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-native10-v2-personal-projection-followup-15-diagnostics\\public-verification.json",
+      "bytes": 7112,
+      "sha256": "c89c028fbafacf81b24b57ac365a4a9b2221dc7687e5ea838c37536fe5d95538"
+    },
+    {
+      "key": "collectionVerification",
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-native10-v2-personal-projection-followup-15-diagnostics\\collection-verification.json",
+      "bytes": 348583,
+      "sha256": "d6abcc64bd3abd100c142a42345cbab30ba895a1f95173205724401814b17a87"
+    },
+    {
+      "key": "raw",
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-personal-projection-feasibility-15\\reports\\1792937158876-b61ec943.samples.jsonl",
+      "bytes": 29881742,
+      "sha256": "ee1c2288dcff01bce9a36e1ebaa44f4ce7efeecdb05a84ee3e631a79c859b300"
+    },
+    {
+      "key": "projection",
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-native10-v2-personal-projection-followup-15-diagnostics\\release-native-10-v2-personal-projection-feasibility-15\\reports\\1792937158876-b61ec943.raw-projection.json",
+      "bytes": 353596,
+      "sha256": "4770965f685347a6b1073559ae3ff8bcf652976f05e5c14bc7143318ba0b354a"
+    },
+    {
+      "key": "monitor",
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-personal-projection-feasibility-15\\monitor-history.jsonl",
+      "bytes": 4606731,
+      "sha256": "6df6247003f8a5f041bc69f208f7b05d1a9bbaea0ab0ab85ccbbd28058bdf991"
+    }
+  ],
+  "actual15ExecutionLog": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\probe15-independent-verification-v1\\actual-verification.log",
+    "bytes": 878,
+    "sha256": "24914cae556e9042f848f3a08ff2fa1264ada6698feaf6c3e58b91203d334505"
+  },
+  "finalizedAt": "2026-10-25T15:25:33.110Z"
+}

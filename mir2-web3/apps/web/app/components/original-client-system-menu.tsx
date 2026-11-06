@@ -22,6 +22,7 @@ type TranslateFn = (
 
 type EquipmentItemLike = {
   slot: string;
+  authoritativeUniqueId?: number;
   name: string;
   durabilityCurrent: number;
   durabilityMax: number;
@@ -491,7 +492,10 @@ function MountSystemPanel({
   onSendClientCommand: (command: Record<string, unknown>) => void;
 }) {
   const slots = ["Reins", "Bells", "Saddle", "Ribbon", "Mask"];
-  const mountItem = world.equipmentItems.find((item) => item.slot === "mount");
+  const mountItems = world.equipmentItems.filter((item) => item.slot === "mount");
+  const mountItem = mountItems.length === 1 ? mountItems[0] : undefined;
+  const mountUniqueId = mountItem?.authoritativeUniqueId;
+  const canRide = typeof mountUniqueId === "number" && Number.isSafeInteger(mountUniqueId) && mountUniqueId >= 0;
   return (
     <>
       <div className="system-feature-title">{t("ui.mount", [], "Mount")}</div>
@@ -503,7 +507,10 @@ function MountSystemPanel({
       <button
         type="button"
         className="mount-feature-ride"
-        onClick={() => onSendClientCommand({ type: "useItem", slot: 13, grid: "equipment" })}
+        disabled={!canRide}
+        onClick={() => {
+          if (canRide) onSendClientCommand({ type: "useItem", equipmentInstanceId: mountUniqueId, slot: 13, grid: "equipment" });
+        }}
       >
         {t("ui.mount", [], "Mount")}
       </button>

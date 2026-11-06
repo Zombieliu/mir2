@@ -1,0 +1,350 @@
+{
+  "schema": "mir2.local-install.benchmark-proof.v1",
+  "baselineRevision": "ae0eec42959f4267ebc42f2a3f3a9ca14129bd8c",
+  "candidateInputs": {
+    "launcher.rs": "035f334548562c27ef46ffd8c6d6fa78990b9d58d81a9c41e34efb223b94532d",
+    "updater.rs": "c53eaa57ac0dc96b2ad4e921375e35d4d7e01f1f5f86f84d3f4f553f4f16b7e4",
+    "delivery.rs": "04448b944e0d01b85b229a11741d24600c1f3260fdefce57e7ec52560173e57a",
+    "delivery_tests.rs": "01cf15ecc9e5931c6b528b46bc4dd59af874f04cf98187cb0bbbffe596ad44da",
+    "download.rs": "5539e85f0c141904ee3df2b379379db307099190ab4fba89bd744cd11433e8c7",
+    "fs_safe.rs": "ecfe5ca1f6747c5b555d7c53382dcb3d83017a76891d3cb293b4811c7911d610",
+    "lib.rs": "cd85591323cd75d53b7b125f51eb762135a0329232c93be219de59b62bbcd616",
+    "local_io.rs": "b9c13c71526b41602dac0203b78f1fceaed64ece8512bc0b566463fc6d4a37ef",
+    "model.rs": "a7f8ae7ad38e5c2a2e1cae769514729b675f4a8310e1ce0336333cf642c5cd66",
+    "model_regression.rs": "73948ef628469709c2871637f53e53752606fc0a327277057393e13341e516cb",
+    "platform.rs": "e54ea1aea46a0776d6094dd9440c1328889657762df8ad4785028b3a87ea7bbb",
+    "progress_trace_tests.rs": "11038cf935b05888f01dd40c528663619926b35dd5d7516c799c73622bcebadd",
+    "resume_tests.rs": "6a5be7d0c2682545b077d6d77b9f6baaf2066b32d5e7d2d4976a00e8058d7ae9",
+    "transaction.rs": "3dc0b040ee5fd34596c5dbe27c5db93b0959b92bd0940e554ca292ad5eff4e68",
+    "ui.rs": "1d7dab248d4d84f3ae8935e16ac503604073c3984ba33f7068a198d9bb7684ad",
+    "update.rs": "11b1fd0635156c8d6b0c50472ca62ebd60af002444d99a994f030a53730ad9c9",
+    "update_receipt_tests.rs": "e1f0b38ad46299a3185b5df717d702549677eda605e1e7e434fe79b09752ba74"
+  },
+  "order": [
+    "baseline-01",
+    "candidate-01",
+    "candidate-02",
+    "baseline-02"
+  ],
+  "actualRealSignedArchiveRuns": [
+    {
+      "allOutputHashesVerified": true,
+      "archive": {
+        "path": "delivery/ac4d15842886a496f093d585e02f9adcc6c3cf3cc3c763a3021b0c56e01431e3.m2b.gz",
+        "sha256": "AC4D15842886A496F093D585E02F9ADCC6C3CF3CC3C763A3021B0C56E01431E3",
+        "size": 49934822
+      },
+      "cmsVerified": true,
+      "expandedBytes": 64032485,
+      "extractMs": 77166,
+      "fileCount": 33996,
+      "independentVerifyMs": 11910,
+      "manifestSha256": "CEAE366BEBCA1C19C3F529EB22F016CCC80DFF5B8655694E76682E31AB12CB18",
+      "root": "C:/mir2-playtest-releases/20261006-local-install-perf-01/bundle-baseline-01",
+      "schema": "mir2.local-install.real-bundle.v1",
+      "transport": "local signed archive; network time excluded",
+      "userInstallMutated": false
+    },
+    {
+      "allOutputHashesVerified": true,
+      "archive": {
+        "path": "delivery/ac4d15842886a496f093d585e02f9adcc6c3cf3cc3c763a3021b0c56e01431e3.m2b.gz",
+        "sha256": "AC4D15842886A496F093D585E02F9ADCC6C3CF3CC3C763A3021B0C56E01431E3",
+        "size": 49934822
+      },
+      "cmsVerified": true,
+      "expandedBytes": 64032485,
+      "extractMs": 34271,
+      "fileCount": 33996,
+      "independentVerifyMs": 13354,
+      "manifestSha256": "CEAE366BEBCA1C19C3F529EB22F016CCC80DFF5B8655694E76682E31AB12CB18",
+      "root": "C:/mir2-playtest-releases/20261006-local-install-perf-01/bundle-candidate-01",
+      "schema": "mir2.local-install.real-bundle.v1",
+      "transport": "local signed archive; network time excluded",
+      "userInstallMutated": false
+    },
+    {
+      "allOutputHashesVerified": true,
+      "archive": {
+        "path": "delivery/ac4d15842886a496f093d585e02f9adcc6c3cf3cc3c763a3021b0c56e01431e3.m2b.gz",
+        "sha256": "AC4D15842886A496F093D585E02F9ADCC6C3CF3CC3C763A3021B0C56E01431E3",
+        "size": 49934822
+      },
+      "cmsVerified": true,
+      "expandedBytes": 64032485,
+      "extractMs": 37707,
+      "fileCount": 33996,
+      "independentVerifyMs": 14171,
+      "manifestSha256": "CEAE366BEBCA1C19C3F529EB22F016CCC80DFF5B8655694E76682E31AB12CB18",
+      "root": "C:/mir2-playtest-releases/20261006-local-install-perf-01/bundle-candidate-02",
+      "schema": "mir2.local-install.real-bundle.v1",
+      "transport": "local signed archive; network time excluded",
+      "userInstallMutated": false
+    },
+    {
+      "allOutputHashesVerified": true,
+      "archive": {
+        "path": "delivery/ac4d15842886a496f093d585e02f9adcc6c3cf3cc3c763a3021b0c56e01431e3.m2b.gz",
+        "sha256": "AC4D15842886A496F093D585E02F9ADCC6C3CF3CC3C763A3021B0C56E01431E3",
+        "size": 49934822
+      },
+      "cmsVerified": true,
+      "expandedBytes": 64032485,
+      "extractMs": 68980,
+      "fileCount": 33996,
+      "independentVerifyMs": 9740,
+      "manifestSha256": "CEAE366BEBCA1C19C3F529EB22F016CCC80DFF5B8655694E76682E31AB12CB18",
+      "root": "C:/mir2-playtest-releases/20261006-local-install-perf-01/bundle-baseline-02",
+      "schema": "mir2.local-install.real-bundle.v1",
+      "transport": "local signed archive; network time excluded",
+      "userInstallMutated": false
+    }
+  ],
+  "archive": {
+    "path": "RAW-BENCHMARK.zip",
+    "size": 121907,
+    "sha256": "3baa0b9dd8eaf9a057a08d3df18c9fb20752200699a94c52d64869b108c2881d"
+  },
+  "rawFiles": [
+    {
+      "path": "archive_benchmark.py",
+      "size": 2932,
+      "sha256": "06c4462f93fa982a4964c693332d15f6afcff7cfda2cf3f1e4bf7aaadd8c609e"
+    },
+    {
+      "path": "baseline-pipeline.exe.identity.json",
+      "size": 199,
+      "sha256": "fbc755a0fc212977c6097dd23a82938780df99ab627da0f20b6e116f3a06f394"
+    },
+    {
+      "path": "baseline-probe.exe.identity.json",
+      "size": 196,
+      "sha256": "44fc16738aa80b5fb36aa779c0413641bead32b1974f7da152913a8061f21cba"
+    },
+    {
+      "path": "bundle-baseline-01/RESULT.json",
+      "size": 703,
+      "sha256": "9167090d8de31d9c8b8133a810d81b0b83bb6891c08da4b55e016ce31dc0e887"
+    },
+    {
+      "path": "bundle-baseline-02/RESULT.json",
+      "size": 702,
+      "sha256": "38b89f09ea50d663e116cb9e400098ac17aed9c6e86ac2247734db824ef3f663"
+    },
+    {
+      "path": "bundle-candidate-01/RESULT.json",
+      "size": 704,
+      "sha256": "b43339424b12091e54cad98028404166e715ddc5c4f35767c3916c6c8a3346b8"
+    },
+    {
+      "path": "bundle-candidate-02/RESULT.json",
+      "size": 704,
+      "sha256": "3dc8b58317f5eda081c88af9147d0effe079782712a131006838111bac3047df"
+    },
+    {
+      "path": "candidate-pipeline.exe.identity.json",
+      "size": 200,
+      "sha256": "9106f4e60f4e5cce3c44eac67f6868e08248a16cb09f3e8a77d506bbcce6bb33"
+    },
+    {
+      "path": "commands/baseline-build.log",
+      "size": 175,
+      "sha256": "836a849d69d5c96bf2ac6c041e5f1fbb072ca2476de98b866a00cddc5e9965c0"
+    },
+    {
+      "path": "commands/bundle-baseline-01.log",
+      "size": 635,
+      "sha256": "c11638256a21df57403ae95ca2310a2828cf68aabc2a46014741dd839d4bd8a3"
+    },
+    {
+      "path": "commands/bundle-baseline-02.log",
+      "size": 634,
+      "sha256": "025aee3fc92e34da8352cf05ff52838265ed3e36c6ca8ee03e3deae5c8b05f2d"
+    },
+    {
+      "path": "commands/bundle-candidate-01.log",
+      "size": 636,
+      "sha256": "97586925379d925e60b9d395290d5f1659289fda58babb4ff3869ce4a7fc8674"
+    },
+    {
+      "path": "commands/bundle-candidate-02.log",
+      "size": 636,
+      "sha256": "6e307a7c7b75026f1d50b34f3c8f0a9ff8ecc9e4f19f3a0d425e28d9260690d2"
+    },
+    {
+      "path": "commands/candidate-build.log",
+      "size": 346,
+      "sha256": "7f4c4631b30db8562da7690b5fd38c1fb7a8f86f57f6174b150e91d2866f79d9"
+    },
+    {
+      "path": "commands/final-library-01.log",
+      "size": 9544,
+      "sha256": "22df2e5a9b6b151f6278816b434bce2ddcc8ef7cf8b5958ebdc39c71719e2cda"
+    },
+    {
+      "path": "commands/final-library-02.log",
+      "size": 8753,
+      "sha256": "b0e46445775bf46bccec618589ced199f2d730c0c44758d4b8cf1e7e592e1918"
+    },
+    {
+      "path": "commands/genuine-cms-01.log",
+      "size": 425,
+      "sha256": "23ae865cb6ee21d26e22855c68d97be8315f406e1fc8bfc87ebbb5f80d257d0a"
+    },
+    {
+      "path": "commands/pipeline-focused-03.log",
+      "size": 642,
+      "sha256": "d8acd4243058ff7176e42295586ed60ea12881cd0ae347d4b9b31769d84be072"
+    },
+    {
+      "path": "commands/pipeline-unit-01.log",
+      "size": 8520,
+      "sha256": "14a27d9717267d0cfce9c0f5d53d847bd1716f3be4ef3046982e1722aed903eb"
+    },
+    {
+      "path": "commands/pipeline-unit-02.log",
+      "size": 9305,
+      "sha256": "3310967184e24ecaef9b59e09fc8f17aad112794c43fed0ebb628d0e3d42b719"
+    },
+    {
+      "path": "commands/pool-unit-01.log",
+      "size": 8520,
+      "sha256": "ba3968a93eb1b98984ba3b277799f776ac150d33123657296b43a669be9e36e2"
+    },
+    {
+      "path": "commands/pool-unit-02.log",
+      "size": 8521,
+      "sha256": "e19f333855734b2f2d32a7b473a3c21191fc6d3f4f8a49c4199ae4c1bf33296d"
+    },
+    {
+      "path": "commands/resume-unchanged-recheck-01.log",
+      "size": 446,
+      "sha256": "ec238e40b6f70a5b434568c2e199682f59f044927881c0926b226ff03fb63e11"
+    },
+    {
+      "path": "harness/Cargo.lock",
+      "size": 20060,
+      "sha256": "15fbda8e8d15f716d159d6f1f834df1a003be5f57125153f627d1026fe8b1172"
+    },
+    {
+      "path": "harness/Cargo.toml",
+      "size": 406,
+      "sha256": "72182c9d99c2cb6f980326bbca7c0075ca4736f98596a1ef0506ae734327e6a0"
+    },
+    {
+      "path": "harness/src/main.rs",
+      "size": 5186,
+      "sha256": "cfeab3fbf7ee5e17cfdb04cf4e220fca6475adf2ce9dfc5155a7f0f1ac665068"
+    },
+    {
+      "path": "probe-baseline-01/RESULT.json",
+      "size": 325,
+      "sha256": "1dd8fd4cfbe6c1e8f8dcb74a8893b6fb14910f1bb9f52846eef3bf022228501f"
+    },
+    {
+      "path": "probe-candidate-01/RESULT.json",
+      "size": 322,
+      "sha256": "b9b9e9ee91b2452ff2664467d92e5475c4c2ae2a365555006d47989fad351c7f"
+    },
+    {
+      "path": "source-baseline/Cargo.lock",
+      "size": 21776,
+      "sha256": "9c21e4d1edf0915ab46f1c3673ab3a2355f1f3be1406d5eff0fd6e054882a70a"
+    },
+    {
+      "path": "source-baseline/Cargo.toml",
+      "size": 1074,
+      "sha256": "3b48def4e3976149ce3977fc9a818effe67cfc4a534b5a963bc2479c28a4b355"
+    },
+    {
+      "path": "source-baseline/src/bin/launcher.rs",
+      "size": 2567,
+      "sha256": "035f334548562c27ef46ffd8c6d6fa78990b9d58d81a9c41e34efb223b94532d"
+    },
+    {
+      "path": "source-baseline/src/bin/updater.rs",
+      "size": 4587,
+      "sha256": "c53eaa57ac0dc96b2ad4e921375e35d4d7e01f1f5f86f84d3f4f553f4f16b7e4"
+    },
+    {
+      "path": "source-baseline/src/delivery.rs",
+      "size": 24256,
+      "sha256": "644330f79af7e8a49bdb923f4273b479cebe74937156c71223057247551b40b2"
+    },
+    {
+      "path": "source-baseline/src/delivery_tests.rs",
+      "size": 53101,
+      "sha256": "02cb5d77ea1ae8d6dc206374665b8daf95f2d0b60e1d557a239bc247b5091482"
+    },
+    {
+      "path": "source-baseline/src/download.rs",
+      "size": 9157,
+      "sha256": "5539e85f0c141904ee3df2b379379db307099190ab4fba89bd744cd11433e8c7"
+    },
+    {
+      "path": "source-baseline/src/fs_safe.rs",
+      "size": 9421,
+      "sha256": "ecfe5ca1f6747c5b555d7c53382dcb3d83017a76891d3cb293b4811c7911d610"
+    },
+    {
+      "path": "source-baseline/src/lib.rs",
+      "size": 3571,
+      "sha256": "348b24aeb2398870960665cc65edac5e9dd32412c4554a4f7fe2ad706788d5d7"
+    },
+    {
+      "path": "source-baseline/src/model.rs",
+      "size": 14369,
+      "sha256": "a7f8ae7ad38e5c2a2e1cae769514729b675f4a8310e1ce0336333cf642c5cd66"
+    },
+    {
+      "path": "source-baseline/src/model_regression.rs",
+      "size": 4039,
+      "sha256": "73948ef628469709c2871637f53e53752606fc0a327277057393e13341e516cb"
+    },
+    {
+      "path": "source-baseline/src/platform.rs",
+      "size": 31000,
+      "sha256": "8cfda6e5afa1d0b793416aab1cd9a1b352f871a5631fe56fc9f81fc73af2ca77"
+    },
+    {
+      "path": "source-baseline/src/progress_trace_tests.rs",
+      "size": 18241,
+      "sha256": "11038cf935b05888f01dd40c528663619926b35dd5d7516c799c73622bcebadd"
+    },
+    {
+      "path": "source-baseline/src/resume_tests.rs",
+      "size": 26663,
+      "sha256": "9916d3165ae9af2d2ca495794fcbdd58c8bcfb0196e7e1e725d6d87ac73dc8e2"
+    },
+    {
+      "path": "source-baseline/src/transaction.rs",
+      "size": 15515,
+      "sha256": "f5aac1d71dddb28b05de874b46142493f15b7d87d3cfb689e65cca8b04076c3c"
+    },
+    {
+      "path": "source-baseline/src/ui.rs",
+      "size": 35439,
+      "sha256": "1d7dab248d4d84f3ae8935e16ac503604073c3984ba33f7068a198d9bb7684ad"
+    },
+    {
+      "path": "source-baseline/src/update.rs",
+      "size": 44294,
+      "sha256": "af016af792a3fc2bdf809ae6199ef410ca651a339236db73aa7c509f301b3fcb"
+    },
+    {
+      "path": "source-baseline/src/update_receipt_tests.rs",
+      "size": 4802,
+      "sha256": "e1f0b38ad46299a3185b5df717d702549677eda605e1e7e434fe79b09752ba74"
+    },
+    {
+      "path": "user-install-original-13-completed.jsonl",
+      "size": 5645,
+      "sha256": "e186a890c7e50b99f13bb47a7e331508d7f8064cf9084c9c1d979f8e4f9cda62"
+    }
+  ],
+  "fullCandidateFirstInstall": false,
+  "publicCandidatePublished": false,
+  "networkSpeedMeasured": false,
+  "affectedLaptopMeasured": false,
+  "originalFailuresRetained": true
+}

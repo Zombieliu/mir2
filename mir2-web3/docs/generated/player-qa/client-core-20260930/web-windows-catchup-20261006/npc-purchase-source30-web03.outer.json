@@ -1,0 +1,16 @@
+{
+  "owner": "Root",
+  "exitCode": 0,
+  "builderPid": 149752,
+  "kind": "Source30 finite web03; repaired prepared configuration references corrected snapshot03 explicitly",
+  "exited": true,
+  "disposed": true,
+  "elapsedMs": 4227,
+  "configPath": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source30-web03.config.json",
+  "uiOperated": false,
+  "runtimeLaunched": false,
+  "networkUsed": false,
+  "productionBuildAccepted": false,
+  "candidateAccepted": false,
+  "goalComplete": false
+}

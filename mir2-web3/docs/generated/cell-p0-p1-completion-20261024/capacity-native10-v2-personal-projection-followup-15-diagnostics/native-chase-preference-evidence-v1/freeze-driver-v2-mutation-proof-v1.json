@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "createdAt": "2026-10-25T09:54:07.931Z",
+  "scope": "A post-commit external freeze-tool correction only; original committed builder and validation archive are unchanged.",
+  "before": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\native-chase-preference-evidence-v1\\freeze-driver.mjs",
+    "bytes": 8948,
+    "sha256": "6583fce431cf069c7833e78df1bc83981c115ffe961a7f110acfb4d3bd3a4ea7"
+  },
+  "after": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\native-chase-preference-evidence-v1\\freeze-driver-v2.mjs",
+    "bytes": 10309,
+    "sha256": "89e2c2973debdaa38e66644d467e06796155258baec65e1253af00497009d0da"
+  },
+  "rules": [
+    {
+      "before": "const backend = await jsonUnder(BASE, 'backend-source-socket-diagnostics-v1.json'); assert.equal(backend.files.length, 41);\nfor (const file of backend.files) { assertPin(await pinUnder(repository, file.path), file); assert.ok(git('show', commit + ':' + file.path).equals(git('show', BACKEND_COMMIT + ':' + file.path)), 'Backend changed after its immutable build'); }",
+      "after": "assertPin(await pinUnder(BASE, 'backend-source-socket-diagnostics-v1.json'), { bytes: 14000, sha256: '4da9d4dac73773bae041c98b641874a9ad4427217c1b36bb453f1a014ad7b058' });\nconst backend = await jsonUnder(BASE, 'backend-source-socket-diagnostics-v1.json'); assert.equal(backend.files.length, 41);\nasync function pinManifestBackendSource(file) {\n  // This exact reviewed Rust source path is not an executable binary. The\n  // generic public-copy guard still rejects every arbitrary bin/private path.\n  if (file !== 'mir2-web3/apps/gateway/src/bin/seed_capacity_accounts.rs') return pinUnder(repository, file);\n  const candidate = path.join(repository, file), stat = await fs.lstat(candidate), root = await fs.realpath(repository), real = await fs.realpath(candidate), relative = path.relative(root, real);\n  assert.ok(stat.isFile() && !stat.isSymbolicLink());\n  assert.ok(relative && !path.isAbsolute(relative) && relative !== '..' && !relative.startsWith('..' + path.sep), 'Exact Rust source must resolve within the repository');\n  const bytes = await fs.readFile(real); return { file, bytes: bytes.length, sha256: sha(bytes) };\n}\nfor (const file of backend.files) { assertPin(await pinManifestBackendSource(file.path), file); assert.ok(git('show', commit + ':' + file.path).equals(git('show', BACKEND_COMMIT + ':' + file.path)), 'Backend changed after its immutable build'); }"
+    },
+    {
+      "before": "  repositoryBaselineCommit: CODE_BEFORE, actualCodeCommit: commit, driverSourceCommit: commit, backendSourceCommit: BACKEND_COMMIT, rustBackendModified: false,",
+      "after": "  repositoryBaselineCommit: CODE_BEFORE, actualCodeCommit: commit, driverSourceCommit: commit, backendSourceCommit: BACKEND_COMMIT, rustBackendModified: false,\n  freezeBuilder: { revision: 2, script: { ...(await pinUnder(DIRECTORY, 'freeze-driver-v2.mjs')), file: path.join(DIRECTORY, 'freeze-driver-v2.mjs') }, mutationProof: { ...(await pinUnder(DIRECTORY, 'freeze-driver-v2-mutation-proof-v1.json')), file: path.join(DIRECTORY, 'freeze-driver-v2-mutation-proof-v1.json') }, originalBuilderUnchanged: true },"
+    }
+  ],
+  "exactInverseToCommittedBuilder": true,
+  "allowedSourceException": "mir2-web3/apps/gateway/src/bin/seed_capacity_accounts.rs",
+  "immutableBackendManifestRawPinRequired": true,
+  "genericPublicCopyPrivateBinRulesUnchanged": true,
+  "noGameOrThresholdOrTestSourceChange": true,
+  "testsRerun": false,
+  "freezeCreatedByThisPreparation": false
+}

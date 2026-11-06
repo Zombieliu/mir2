@@ -1,0 +1,292 @@
+{
+  "owner": "Root",
+  "actualToolChunk": "87c5d3",
+  "requests": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-combined-baseline-object-requests01.json",
+    "bytes": 7407,
+    "sha256": "ca2bc0b1fb6c5ca75d5e78ac692f8469f92ec745a43b8acaf6e1e4d3413195e8"
+  },
+  "baseline": "f72e36fb84c3574fff0aeb2abed856454b14289d",
+  "checks": [
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/chat.rs",
+      "expected": "032bc81457a50bb148d572b82f80f20030fc6197",
+      "actual": "032bc81457a50bb148d572b82f80f20030fc6197",
+      "matched": true
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/creature_dialog.rs",
+      "expected": "7199f76d83635650a71fb7f0f26a64832b367f80",
+      "actual": "7199f76d83635650a71fb7f0f26a64832b367f80",
+      "matched": true
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/friend_dialog_host.rs",
+      "expected": "c0acc92459b6436e9019b563e7fd11d190479a93",
+      "actual": "c0acc92459b6436e9019b563e7fd11d190479a93",
+      "matched": true
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/friend_dialog.rs",
+      "expected": "26b6abbde0a2eec1e9e70b06cd11e03bec272de0",
+      "actual": "26b6abbde0a2eec1e9e70b06cd11e03bec272de0",
+      "matched": true
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/game_shop_dialog.rs",
+      "expected": "1865f32931ea062a8f06c6d118c63ba2912e28d3",
+      "actual": "1865f32931ea062a8f06c6d118c63ba2912e28d3",
+      "matched": true
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/group_dialog.rs",
+      "expected": "a8dd4858e569544ac41466d8482919e7fae7d6fc",
+      "actual": "a8dd4858e569544ac41466d8482919e7fae7d6fc",
+      "matched": true
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/guild_buff_dialog.rs",
+      "expected": "d703374d43e6945fe2ee7bfe05870cde2868431c",
+      "actual": "d703374d43e6945fe2ee7bfe05870cde2868431c",
+      "matched": true
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/guild_panel.rs",
+      "expected": "440c4e195c20f4871d57db49bd3a859481b7c0c4",
+      "actual": "440c4e195c20f4871d57db49bd3a859481b7c0c4",
+      "matched": true
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/guild_storage.rs",
+      "expected": "c17e5d948711ee8d495cdca4f5a9ea91a2d0e639",
+      "actual": "c17e5d948711ee8d495cdca4f5a9ea91a2d0e639",
+      "matched": true
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/hero_cross_inventory.rs",
+      "expected": "59dfc3e53bd65e02fa11509ad97c2850a1203d92",
+      "actual": "59dfc3e53bd65e02fa11509ad97c2850a1203d92",
+      "matched": true
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/hero_dialog_host.rs",
+      "expected": "3627a31ec4982221ed44c83bc45621a55057fcf9",
+      "actual": "3627a31ec4982221ed44c83bc45621a55057fcf9",
+      "matched": true
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/hero_dialog.rs",
+      "expected": "b35117c72f19643e716a6c466aa2dce348f3a98f",
+      "actual": "b35117c72f19643e716a6c466aa2dce348f3a98f",
+      "matched": true
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/hero_item_use.rs",
+      "expected": "e82ef4006f18004f91ccb91d7de94c63d6fec7b0",
+      "actual": "e82ef4006f18004f91ccb91d7de94c63d6fec7b0",
+      "matched": true
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/hud.rs",
+      "expected": "2fe37a933b807d77fda78d3878107330115e9a5b",
+      "actual": "2fe37a933b807d77fda78d3878107330115e9a5b",
+      "matched": true
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/keyboard_dialog_host.rs",
+      "expected": "fd140cc912cce16e6e4fed5fa106ca492f149713",
+      "actual": "fd140cc912cce16e6e4fed5fa106ca492f149713",
+      "matched": true
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/mail_compose_shared.rs",
+      "expected": "16a37bddd69c7e2f6cd56d5fc0f41ed6e89f864f",
+      "actual": "16a37bddd69c7e2f6cd56d5fc0f41ed6e89f864f",
+      "matched": true
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/minimap.rs",
+      "expected": "7bc4f8fd19921c4e97e341f9fbce34a17108f340",
+      "actual": "7bc4f8fd19921c4e97e341f9fbce34a17108f340",
+      "matched": true
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/mod.rs",
+      "expected": "e7857d0cb37f12e12255cf9bf7e26abaf0a88c4c",
+      "actual": "e7857d0cb37f12e12255cf9bf7e26abaf0a88c4c",
+      "matched": true
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/overlays.rs",
+      "expected": "37f340a576f31370d1ad9ecad374425cf5d2ec22",
+      "actual": "37f340a576f31370d1ad9ecad374425cf5d2ec22",
+      "matched": true
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/ranking_dialog.rs",
+      "expected": "9dd47580b6b7b0d45f97eb07c25da6029d1b1d01",
+      "actual": "9dd47580b6b7b0d45f97eb07c25da6029d1b1d01",
+      "matched": true
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/shared_hud.rs",
+      "expected": "f0dcb20dede19ec78f9e05d46ece04f425920eac",
+      "actual": "f0dcb20dede19ec78f9e05d46ece04f425920eac",
+      "matched": true
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/skill_assign_dialog.rs",
+      "expected": "36d548f7c71e496b0de4d3408d16154390e9398a",
+      "actual": "36d548f7c71e496b0de4d3408d16154390e9398a",
+      "matched": true
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/skill_bars_host.rs",
+      "expected": "5e9f84f179a20151835274c31486ecf1751d67e6",
+      "actual": "5e9f84f179a20151835274c31486ecf1751d67e6",
+      "matched": true
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/skill_bars.rs",
+      "expected": "7f10d15c91b685a54a5fad546341fc1a89f6e0ce",
+      "actual": "7f10d15c91b685a54a5fad546341fc1a89f6e0ce",
+      "matched": true
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/social_bond_dialog.rs",
+      "expected": "8bbe90aa33761676417e3901ca00810fb6257623",
+      "actual": "8bbe90aa33761676417e3901ca00810fb6257623",
+      "matched": true
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/trade_dialog.rs",
+      "expected": "6775779c2384f70d993e0f2b7e9444c4def8b8b4",
+      "actual": "6775779c2384f70d993e0f2b7e9444c4def8b8b4",
+      "matched": true
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/lib.rs",
+      "expected": "61e9b05cfdbdbd8c3db745d23edf9a28b5e63cae",
+      "actual": "61e9b05cfdbdbd8c3db745d23edf9a28b5e63cae",
+      "matched": true
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/native_shell_ui.rs",
+      "expected": "cf72b886feb6d6b49e9b708fef22c3307c5566e6",
+      "actual": "cf72b886feb6d6b49e9b708fef22c3307c5566e6",
+      "matched": true
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/native_shell.rs",
+      "expected": "4016e47b9861333b6a37cf0ee3858bc9f67d86a7",
+      "actual": "4016e47b9861333b6a37cf0ee3858bc9f67d86a7",
+      "matched": true
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/quest_multi_guidance.rs",
+      "expected": "9c0905ff926cd936a5b201d1a06e3bbe0a714e75",
+      "actual": "9c0905ff926cd936a5b201d1a06e3bbe0a714e75",
+      "matched": true
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/quest_ui.rs",
+      "expected": "77109f4c6affdfef9a7ad4de94e27465c28875f1",
+      "actual": "77109f4c6affdfef9a7ad4de94e27465c28875f1",
+      "matched": true
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/big_map_input.rs",
+      "expected": "da1fa6dcac2f9101b7e5d8c94aeab32fd5d83628",
+      "actual": "da1fa6dcac2f9101b7e5d8c94aeab32fd5d83628",
+      "matched": true
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/entity_health.rs",
+      "expected": "6a0d373c7d5c53f0cd92e027ac662f4cc65c4aa1",
+      "actual": "6a0d373c7d5c53f0cd92e027ac662f4cc65c4aa1",
+      "matched": true
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/entity_overlays.rs",
+      "expected": "08c362fea873f2963769d3b5f25916fb963c8632",
+      "actual": "08c362fea873f2963769d3b5f25916fb963c8632",
+      "matched": true
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/equipment_creature_wire.rs",
+      "expected": "ea6fe4e57fc515872ded172baaa98ec1b27844f4",
+      "actual": "ea6fe4e57fc515872ded172baaa98ec1b27844f4",
+      "matched": true
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/gameplay_bridge.rs",
+      "expected": "8a7fc1687243808da0ab13fed4267859db70345f",
+      "actual": "8a7fc1687243808da0ab13fed4267859db70345f",
+      "matched": true
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/gateway.rs",
+      "expected": "7cb66dbfbe481aea1dbd77f1f399da242f656d05",
+      "actual": "7cb66dbfbe481aea1dbd77f1f399da242f656d05",
+      "matched": true
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/hero_wire.rs",
+      "expected": "5c3fde8518ace4dca31607b1021c442a9eb58ddf",
+      "actual": "5c3fde8518ace4dca31607b1021c442a9eb58ddf",
+      "matched": true
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/input.rs",
+      "expected": "a8c6b1c295c8ffaaa4729c26c05e8bf465c2975a",
+      "actual": "a8c6b1c295c8ffaaa4729c26c05e8bf465c2975a",
+      "matched": true
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/main.rs",
+      "expected": "9ec148839200df8c8e853758d46329c691c75152",
+      "actual": "9ec148839200df8c8e853758d46329c691c75152",
+      "matched": true
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/minimap_input.rs",
+      "expected": "37aac7f3545dfba96c68163f7cbddd9132260ecf",
+      "actual": "37aac7f3545dfba96c68163f7cbddd9132260ecf",
+      "matched": true
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/native_protocol.rs",
+      "expected": "5c55e2a5ea5d49f7697c19e65c655229178a0e19",
+      "actual": "5c55e2a5ea5d49f7697c19e65c655229178a0e19",
+      "matched": true
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/shell_bridge.rs",
+      "expected": "08ee61a382f2441c8f2a721b3d6ee5c1e1b0143a",
+      "actual": "08ee61a382f2441c8f2a721b3d6ee5c1e1b0143a",
+      "matched": true
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/social_bond_wire.rs",
+      "expected": "867b9519ed366376c020f065f7fd7f265a04ddb3",
+      "actual": "867b9519ed366376c020f065f7fd7f265a04ddb3",
+      "matched": true
+    },
+    {
+      "path": "apps/game-client/ui-core/src/action.rs",
+      "expected": "346731a4d594b05f765d50824c36e958cb54d90b",
+      "actual": "346731a4d594b05f765d50824c36e958cb54d90b",
+      "matched": true
+    },
+    {
+      "path": "apps/game-client/ui-core/src/registry.rs",
+      "expected": "45381d44176eaf624a12f01076259a25bd2e7fe2",
+      "actual": "45381d44176eaf624a12f01076259a25bd2e7fe2",
+      "matched": true
+    }
+  ],
+  "allMatched": true,
+  "uiOperated": false,
+  "runtimeLaunched": false,
+  "networkUsed": false
+}

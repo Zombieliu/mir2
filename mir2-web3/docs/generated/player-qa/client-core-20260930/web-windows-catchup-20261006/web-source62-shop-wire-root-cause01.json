@@ -1,0 +1,51 @@
+{
+  "schema": "mir2.source62.shop-wire-cause.v1",
+  "owner": "Root",
+  "observedInOrdinaryUI": true,
+  "webPackage": "Source61",
+  "gatewayBeforeFix": "Source51",
+  "visibleGold": 200,
+  "visibleBuyEnabled": false,
+  "visibleQuoteReason": "invalidInput",
+  "diagnostics": {
+    "source": null,
+    "preview": null,
+    "renderServiceCurrent": true,
+    "plannerPresent": true,
+    "corePresent": true,
+    "host": {
+      "active": false,
+      "transitioning": false,
+      "blocksInput": false,
+      "errorPresent": true
+    }
+  },
+  "observedInventory": {
+    "tooltipSources": 7,
+    "allSocketInfosAbsent": true,
+    "allRealSocketInfosAbsent": true,
+    "allUserItemSlotsEmpty": true
+  },
+  "observedShopGoods": {
+    "tooltipSources": 7,
+    "explicitSocketArraysPresent": true
+  },
+  "cause": {
+    "server": "apps/simulation/src/config.rs WorldItemTooltipSource skips empty socket_infos and real_socket_infos during serialization",
+    "consumer": "shared Rust full_source requires socketInfos and realSocketInfos arrays for carried items"
+  },
+  "repair": {
+    "emitExplicitArrays": true,
+    "keepLegacyDeserializationDefaults": true,
+    "preservePositionalSocketTemplates": true,
+    "plannerChecksWeakened": false,
+    "optionalRealInfoUserItemSemanticsUnchanged": true
+  },
+  "rawWorldFixtureRetainedOutsideGit": true,
+  "ordinaryPurchaseBeforeFixVerified": false,
+  "testsPassed": 3,
+  "frontendRegressionPassed": 194,
+  "actualPurchaseAfterFix": "pending",
+  "candidate100": false,
+  "overallPercentage": null
+}

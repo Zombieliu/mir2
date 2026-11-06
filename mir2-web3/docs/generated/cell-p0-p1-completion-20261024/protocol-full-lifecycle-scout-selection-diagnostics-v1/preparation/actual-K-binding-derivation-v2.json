@@ -1,0 +1,114 @@
+{
+  "schemaVersion": 1,
+  "createdAt": "2026-10-26T01:22:04.031692+00:00",
+  "scope": "Actual metadata binding only; no launcher tool or ordinary driver code change, no import/finalizer/realm. Exact raw PENDING beforeimages are preserved; semantic allowlisted metadata changes do not claim JSON reserialization raw inverse.",
+  "basisPreparation": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-selection-diagnostics-v1\\template-prepared-v1.json",
+    "bytes": 6585,
+    "sha256": "80635584ba7d62c693c5b6d8b569bbd1bb47c81d8f1b774d353de03bd454a0f6"
+  },
+  "metadataChanges": [
+    {
+      "file": "full-lifecycle-profile.json",
+      "before": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-selection-diagnostics-v1\\full-lifecycle-profile-before-actual-K-v1.json",
+        "bytes": 4602,
+        "sha256": "ff44e901506e6404b3dd6f48f681a5ab0cb0619138dd823a6810182013e19205"
+      },
+      "after": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-selection-diagnostics-v1\\full-lifecycle-profile.json",
+        "bytes": 4838,
+        "sha256": "1ca0cb2ef77f73dbc0b6e2743d77796119702d651f9cc740fbd84622995e6477"
+      },
+      "changedTopLevelFields": [
+        "externalSourceLibrary",
+        "intendedDriverSourceCommit",
+        "intendedExecutionSourceCommit",
+        "preparedAt",
+        "scope",
+        "templateOnly"
+      ],
+      "otherFieldsSemanticExact": true,
+      "rawBeforeImagePreserved": true
+    },
+    {
+      "file": "candidate-release-binding-v1.json",
+      "before": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-selection-diagnostics-v1\\candidate-release-binding-before-actual-K-v1.json",
+        "bytes": 2979,
+        "sha256": "2d67e191294bcccf4b51ef291a1e6c957c53f8176d9db8e9b331e76f2e5c0f11"
+      },
+      "after": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-selection-diagnostics-v1\\candidate-release-binding-v1.json",
+        "bytes": 3297,
+        "sha256": "90014c778f572443ae39209a3fe5d32d57c9efd66f74dba2d22f5aa48d36f27c"
+      },
+      "changedTopLevelFields": [
+        "currentDriverFrozen",
+        "driverSourceCommit",
+        "executionSourceCommit",
+        "readonlyRuntimeGuard",
+        "reason",
+        "runtimeBinding"
+      ],
+      "otherFieldsSemanticExact": true,
+      "rawBeforeImagePreserved": true
+    }
+  ],
+  "readmeBefore": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-selection-diagnostics-v1\\README-before-actual-K-v1.md",
+    "bytes": 1599,
+    "sha256": "db21e29b184b84b875b2eaa91b8d485763792ade0ba314b5564cbba797c6659d"
+  },
+  "readmeAfter": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-selection-diagnostics-v1\\README.md",
+    "bytes": 1613,
+    "sha256": "ca9afdfd96d2b269b1455ddf5878da9fcf9e5a91ce89a8a9fc1fe77056f57e21"
+  },
+  "actualCommit": "b5374083d257d375437af3de42bead159cd2b917",
+  "actualFreeze": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\capacity-scout-selection-diagnostics-driver-frozen-v1.json",
+    "bytes": 12423,
+    "sha256": "e3300e34d060fb23638bdc690726b6f4376f7fdeb1049aa8871ebdb4bfd628f8"
+  },
+  "actualRuntimeSourceLibrary": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\scout-selection-diagnostics-runtime-v1\\source-lib-v1.mjs",
+    "bytes": 57227,
+    "sha256": "c94effada25cba3664c9920412d833b2356d98f503e36f8521e7d958e591f48d"
+  },
+  "actualRuntimeBinding": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\scout-selection-diagnostics-runtime-v1\\current-execution-binding-v1.json",
+    "bytes": 1429,
+    "sha256": "1886e56e3e3846000932d053c727c21c893393cb6be35e844ee880a2a711b506"
+  },
+  "actualRuntimeReview": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\scout-selection-diagnostics-runtime-independent-review-v1\\final-binding-review-v2.json",
+    "bytes": 4774,
+    "sha256": "bb8fa1794aae6a06ad7a6b8b24b62ea54a830d9a0a2e732298d943bbef8e4117"
+  },
+  "actualRuntimeGuardStdout": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\scout-selection-diagnostics-runtime-readonly-guard-stdout-v1.log",
+    "bytes": 513,
+    "sha256": "d124d042a9c6385f29d649fa0d5d4c60a95a4ba731e89858effebc86e0fddd75"
+  },
+  "actualRuntimeGuardExecution": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\scout-selection-diagnostics-runtime-readonly-guard-execution-v1.json",
+    "bytes": 2980,
+    "sha256": "e8023368558947d24b4940349d8e2e07fdf33f757707738f6a9d3f8e25326bd8"
+  },
+  "actualGuardExit": {
+    "code": 0,
+    "signal": null
+  },
+  "actualGuardSourceBeforeAfterIdentical": true,
+  "actualCurrentNodeFullRegression": {
+    "path": "C:\\mir2-build\\p01-completion-20261024\\root-scout-selection-diagnostics-validation-v1\\root-full-driver-receipt-v1.json",
+    "bytes": 5162,
+    "sha256": "733754ea1cade189fa92c29d5a808f7b940315909605cf636d2d3bf7b51a8446"
+  },
+  "sevenToolSourcesRawUnchanged": true,
+  "sixOrdinaryDriversUnchanged": true,
+  "newOrdinaryFull16Passed": null,
+  "modeExecutedHere": false,
+  "capacityAccepted": false
+}

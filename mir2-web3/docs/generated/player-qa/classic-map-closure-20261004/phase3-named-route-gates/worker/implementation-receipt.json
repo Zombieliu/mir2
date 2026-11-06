@@ -1,0 +1,906 @@
+{
+  "schema": "mir2.classic-late-route-implementation-receipt.v1",
+  "createdAt": "2026-10-04T09:34:58.505Z",
+  "projectRoot": "C:/Users/Administrator/.codex/worktrees/maps/mir2-player-journey/mir2-web3",
+  "branch": "codex/classic-map-closure-20261004",
+  "sourceHead": "38a64de2985c82008a596a34768f36185980f62e",
+  "rootReportedIntegrationHead": "17b44e08f4253bfc0905dfb951e978d82bf78ada",
+  "sourceCommittedByThisAgent": false,
+  "phase": "bounded-source-bound-named-npc-repair-and-ordinary-route-controller",
+  "writeSet": [
+    {
+      "path": "C:/Users/Administrator/.codex/worktrees/maps/mir2-player-journey/mir2-web3/apps/simulation/src/runtime/npc_script.rs",
+      "bytes": 137918,
+      "sha256": "a99c170c8a73c3a34d6800b4902d6b782f41ae3eb469cb21e34c828eb9090a8e",
+      "relative": "apps/simulation/src/runtime/npc_script.rs",
+      "kind": "modified"
+    },
+    {
+      "path": "C:/Users/Administrator/.codex/worktrees/maps/mir2-player-journey/mir2-web3/apps/simulation/tests/classic_late_route_gates.rs",
+      "bytes": 17468,
+      "sha256": "36709597bddb08add8963cabec2b5118be4bf350bb39fb571d00af11cfd24e70",
+      "relative": "apps/simulation/tests/classic_late_route_gates.rs",
+      "kind": "new"
+    },
+    {
+      "path": "C:/Users/Administrator/.codex/worktrees/maps/mir2-player-journey/mir2-web3/apps/web/scripts/quest-agent/classic-late-route-policy.mjs",
+      "bytes": 13700,
+      "sha256": "78616bc62ac448c883be5085f36b0cddb83ed517279eaf9174e7b94dca014349",
+      "relative": "apps/web/scripts/quest-agent/classic-late-route-policy.mjs",
+      "kind": "new"
+    },
+    {
+      "path": "C:/Users/Administrator/.codex/worktrees/maps/mir2-player-journey/mir2-web3/apps/web/scripts/quest-agent/run-classic-late-route.mjs",
+      "bytes": 28820,
+      "sha256": "420c44f60d606513083822176b9d082b02ad2a1fe3232a2d62888e7727165d60",
+      "relative": "apps/web/scripts/quest-agent/run-classic-late-route.mjs",
+      "kind": "new"
+    },
+    {
+      "path": "C:/Users/Administrator/.codex/worktrees/maps/mir2-player-journey/mir2-web3/apps/web/scripts/quest-agent/test-classic-late-route.mjs",
+      "bytes": 23607,
+      "sha256": "9c4141e17a94859aa5c84034479c0dc8d0fdbf13e7f7844d72a276db70fdf75b",
+      "relative": "apps/web/scripts/quest-agent/test-classic-late-route.mjs",
+      "kind": "new"
+    },
+    {
+      "path": "C:/Users/Administrator/.codex/worktrees/maps/mir2-player-journey/mir2-web3/apps/web/scripts/quest-agent/verify-classic-late-route-evidence.mjs",
+      "bytes": 25772,
+      "sha256": "ba93419273199836e26a257091c0e51a49c157b6bd2f2eee4dc145708c73d1e1",
+      "relative": "apps/web/scripts/quest-agent/verify-classic-late-route-evidence.mjs",
+      "kind": "new"
+    }
+  ],
+  "sourceDiff": {
+    "path": "C:/mir2-playtest-releases/20261004-native-r17/classic-late-route-implementation-01/source-diff.patch",
+    "bytes": 122056,
+    "sha256": "3deb445fe0080f74ec6153060f61d1334c2e5e55ce55a221701080746dcb0272",
+    "fileCount": 6,
+    "numstat": [
+      "126\t1\tmir2-web3/apps/simulation/src/runtime/npc_script.rs",
+      "296\t0\tmir2-web3/apps/simulation/tests/classic_late_route_gates.rs",
+      "174\t0\tmir2-web3/apps/web/scripts/quest-agent/classic-late-route-policy.mjs",
+      "335\t0\tmir2-web3/apps/web/scripts/quest-agent/run-classic-late-route.mjs",
+      "250\t0\tmir2-web3/apps/web/scripts/quest-agent/test-classic-late-route.mjs",
+      "262\t0\tmir2-web3/apps/web/scripts/quest-agent/verify-classic-late-route-evidence.mjs"
+    ],
+    "reverseApplyCheckPassed": true,
+    "whitespaceErrorAllPassed": true
+  },
+  "originalSourceProofs": [
+    {
+      "key": "MongchonProvince/StoneTemple/Stone",
+      "path": "MongchonProvince/StoneTemple/Stone.txt",
+      "rawSha256": "249ff6c6810c7f06cd52f551c2534a2e24e7cead835d6948b72101146cf154c2",
+      "executionSha256": "f86465391544e7633c1999aea856636266456d650bbd0d56af5d66322dc39d0d",
+      "conditions": [
+        {
+          "section": "@MAIN",
+          "line": 4,
+          "raw": "CHECKQUEST 135 0",
+          "intent": "currentAccepted"
+        },
+        {
+          "section": "@Check2",
+          "line": 15,
+          "raw": "CHECKQUEST 153 1",
+          "intent": "completed"
+        },
+        {
+          "section": "@stonetomba",
+          "line": 39,
+          "raw": "CHECKITEM StoneHeart 1",
+          "intent": "canonicalItem1080"
+        },
+        {
+          "section": "@stonetomba",
+          "line": 41,
+          "raw": "TAKEITEM StoneHeart 1",
+          "intent": "canonicalDebit1080"
+        }
+      ]
+    },
+    {
+      "key": "WoomyonWoods/TaoistVillage/BigTaoist",
+      "path": "WoomyonWoods/TaoistVillage/BigTaoist.txt",
+      "rawSha256": "911a5edd4dc638eedf54819d0314cbcf2b438f32ba02d6d951091146ece02ebd",
+      "executionSha256": "e186e61b616cfb28f48611eeca19aba568cf9d9c6f39362ed932b133bcef3111",
+      "conditions": [
+        {
+          "section": "@Next1",
+          "line": 15,
+          "raw": "CHECKQUEST 146 1",
+          "intent": "completed"
+        }
+      ]
+    }
+  ],
+  "actualSourceInputs": {
+    "profile": {
+      "path": "C:/Users/Administrator/.codex/worktrees/maps/mir2-player-journey/mir2-web3/packages/game-data/data/content_profiles/platinum_176.json",
+      "bytes": 47442,
+      "sha256": "f50ef1b78e2544df4fd3a65902f6e72f4ec3cbc7693e0ee373d6ee899581e7a9"
+    },
+    "npcScripts": {
+      "path": "C:/Users/Administrator/.codex/worktrees/maps/mir2-player-journey/mir2-web3/packages/game-data/data/generated/crystal_npc_manifest.json",
+      "bytes": 5244108,
+      "sha256": "7ff29f221c39e5d16b7ebdc7efcde5090daf7ff3daacf6b2b1552b5b36429e93"
+    },
+    "npcs": {
+      "path": "C:/Users/Administrator/.codex/worktrees/maps/mir2-player-journey/mir2-web3/packages/game-data/data/generated/crystal_npc_info_manifest.json",
+      "bytes": 313945,
+      "sha256": "dcc31e181b1f329c6da3658846ff18adb13731b18d899f8914b7628d54074105"
+    },
+    "maps": {
+      "path": "C:/Users/Administrator/.codex/worktrees/maps/mir2-player-journey/mir2-web3/packages/game-data/data/generated/crystal_respawn_manifest.json",
+      "bytes": 6741323,
+      "sha256": "5303f8093be7f15ddd9f860e6db1787ac96606508db3086bab38bdc4c6353dd3"
+    },
+    "mapEvents": {
+      "path": "C:/Users/Administrator/.codex/worktrees/maps/mir2-player-journey/mir2-web3/packages/game-data/data/generated/crystal_map_event_manifest.json",
+      "bytes": 50155,
+      "sha256": "d68823dfff2a1cfc00afc7bf4d369bb20a025ad9af5acb89a75d571f4709ba29"
+    },
+    "monsters": {
+      "path": "C:/Users/Administrator/.codex/worktrees/maps/mir2-player-journey/mir2-web3/packages/game-data/data/generated/crystal_monster_manifest.json",
+      "bytes": 397117,
+      "sha256": "5961fe9f220cb8440833af746f4c53fd1c728803979b19dbd867f10fc3027cec"
+    },
+    "drops": {
+      "path": "C:/Users/Administrator/.codex/worktrees/maps/mir2-player-journey/mir2-web3/packages/game-data/data/generated/crystal_drop_manifest.json",
+      "bytes": 24076631,
+      "sha256": "c10f5b1ac39cefe1c5b7c0ec5779547cf5b0901eaece680b7049d9dda56c1cf7"
+    },
+    "items": {
+      "path": "C:/Users/Administrator/.codex/worktrees/maps/mir2-player-journey/mir2-web3/packages/game-data/data/generated/crystal_item_manifest.json",
+      "bytes": 1589543,
+      "sha256": "b0d48ada978d8a062e993fe0425b6a724672aeea354a3b7b4508fb4c161658b7"
+    },
+    "quests": {
+      "path": "C:/Users/Administrator/.codex/worktrees/maps/mir2-player-journey/mir2-web3/packages/game-data/data/generated/crystal_quest_packet_manifest.json",
+      "bytes": 189239,
+      "sha256": "13d6f3fd94fd9e865ab60c9f2ea50585053bd2050bff021a0379f1ed0948e0d6"
+    },
+    "magics": {
+      "path": "C:/Users/Administrator/.codex/worktrees/maps/mir2-player-journey/mir2-web3/packages/game-data/data/generated/crystal_magic_manifest.json",
+      "bytes": 51696,
+      "sha256": "ccbb31513c006860790a4c374b3f788665902cfa3fffe810695199882860153d"
+    }
+  },
+  "preserved": {
+    "phase2Receipt": {
+      "path": "C:/mir2-playtest-releases/20261004-native-r17/map-implementation/phase2-208-runtime-209-resources/implementation-receipt.json",
+      "bytes": 33852,
+      "sha256": "c2480d665e90499f3cbbdd2bd4b96a308c5b58c5bf3a1f6fb73d24aeaa8d1f02"
+    },
+    "frozenV27Files": [
+      {
+        "path": "C:/Users/Administrator/.codex/worktrees/maps/mir2-player-journey/mir2-web3/apps/game-client/platform-windows/scripts/audit-candidate-map-coverage.mjs",
+        "bytes": 25611,
+        "sha256": "d547295c914f68558bbba26291d3b19a06df9c58b6e4cff3066ef0fe2de5be77",
+        "relative": "apps/game-client/platform-windows/scripts/audit-candidate-map-coverage.mjs",
+        "unchanged": true
+      },
+      {
+        "path": "C:/Users/Administrator/.codex/worktrees/maps/mir2-player-journey/mir2-web3/apps/game-client/platform-windows/scripts/candidate-release-profile.ps1",
+        "bytes": 36103,
+        "sha256": "8d506187b6c869e84ce6868b57ee456f23c3ccbed01e1082b352fe225200c0b7",
+        "relative": "apps/game-client/platform-windows/scripts/candidate-release-profile.ps1",
+        "unchanged": true
+      },
+      {
+        "path": "C:/Users/Administrator/.codex/worktrees/maps/mir2-player-journey/mir2-web3/apps/game-client/platform-windows/scripts/test-candidate-map-coverage.mjs",
+        "bytes": 10306,
+        "sha256": "dafdd340e664e8ec0217a6d694df24c7e0d7d9a5c9b9a5bd0c7d4b781fd0f369",
+        "relative": "apps/game-client/platform-windows/scripts/test-candidate-map-coverage.mjs",
+        "unchanged": true
+      },
+      {
+        "path": "C:/Users/Administrator/.codex/worktrees/maps/mir2-player-journey/mir2-web3/apps/game-client/platform-windows/scripts/test-candidate-map-scope.ps1",
+        "bytes": 10510,
+        "sha256": "a0a0edfae603a4e8e6337de5e9bcec294c732e64423d09d5c4a8d64ac601134c",
+        "relative": "apps/game-client/platform-windows/scripts/test-candidate-map-scope.ps1",
+        "unchanged": true
+      },
+      {
+        "path": "C:/Users/Administrator/.codex/worktrees/maps/mir2-player-journey/mir2-web3/apps/web/scripts/quest-agent/test-route-manifest.mjs",
+        "bytes": 13091,
+        "sha256": "a8b551ed009a661250155da997f679c3e106d0523ffaf2d3f7ae3f2479ec6939",
+        "relative": "apps/web/scripts/quest-agent/test-route-manifest.mjs",
+        "unchanged": true
+      },
+      {
+        "path": "C:/Users/Administrator/.codex/worktrees/maps/mir2-player-journey/mir2-web3/docs/CLASSIC-MAP-CLOSURE-PHASE2-20261004.md",
+        "bytes": 9683,
+        "sha256": "4d76d2bb7d408094629edd94273461a25c00ad55087419d41a42b5a6060f2db1",
+        "relative": "docs/CLASSIC-MAP-CLOSURE-PHASE2-20261004.md",
+        "unchanged": true
+      },
+      {
+        "path": "C:/Users/Administrator/.codex/worktrees/maps/mir2-player-journey/mir2-web3/packages/game-data/data/content_profiles/platinum_176.json",
+        "bytes": 47442,
+        "sha256": "f50ef1b78e2544df4fd3a65902f6e72f4ec3cbc7693e0ee373d6ee899581e7a9",
+        "relative": "packages/game-data/data/content_profiles/platinum_176.json",
+        "unchanged": true
+      },
+      {
+        "path": "C:/Users/Administrator/.codex/worktrees/maps/mir2-player-journey/mir2-web3/packages/game-data/data/generated/platinum_176_bundle.json",
+        "bytes": 3417,
+        "sha256": "a797faeab556d1160d32f772ed3fbfb56a8e1d2de82c35163ceff76dcf87d32e",
+        "relative": "packages/game-data/data/generated/platinum_176_bundle.json",
+        "unchanged": true
+      },
+      {
+        "path": "C:/Users/Administrator/.codex/worktrees/maps/mir2-player-journey/mir2-web3/packages/game-data/src/lib.rs",
+        "bytes": 170658,
+        "sha256": "5f9f5e97412e73c73a8218e84dd22ed50e24a1193f8883e747565fcd50b20f08",
+        "relative": "packages/game-data/src/lib.rs",
+        "unchanged": true
+      },
+      {
+        "path": "C:/Users/Administrator/.codex/worktrees/maps/mir2-player-journey/mir2-web3/packages/game-data/tests/classic_native_resource_scope.rs",
+        "bytes": 4488,
+        "sha256": "ab0ee96815f13c5bf4c02a14320e29b12d16bc26df316b51ffcc5861ed492f95",
+        "relative": "packages/game-data/tests/classic_native_resource_scope.rs",
+        "unchanged": true
+      },
+      {
+        "path": "C:/Users/Administrator/.codex/worktrees/maps/mir2-player-journey/mir2-web3/scripts/build-platinum-176-profile-bundle.mjs",
+        "bytes": 4641,
+        "sha256": "48823366426a671976a7bd4e51c12e8e8e56747af3e9ed886de8ac6e6371523e",
+        "relative": "scripts/build-platinum-176-profile-bundle.mjs",
+        "unchanged": true
+      }
+    ],
+    "frozenReceiptBoundFiles": [
+      {
+        "path": "C:/Users/Administrator/.codex/worktrees/maps/mir2-player-journey/mir2-web3/apps/game-client/platform-windows/scripts/audit-candidate-map-coverage.mjs",
+        "bytes": 25611,
+        "sha256": "d547295c914f68558bbba26291d3b19a06df9c58b6e4cff3066ef0fe2de5be77",
+        "unchanged": true
+      },
+      {
+        "path": "C:/Users/Administrator/.codex/worktrees/maps/mir2-player-journey/mir2-web3/apps/game-client/platform-windows/scripts/candidate-release-profile.ps1",
+        "bytes": 36103,
+        "sha256": "8d506187b6c869e84ce6868b57ee456f23c3ccbed01e1082b352fe225200c0b7",
+        "unchanged": true
+      },
+      {
+        "path": "C:/Users/Administrator/.codex/worktrees/maps/mir2-player-journey/mir2-web3/apps/game-client/platform-windows/scripts/test-candidate-map-coverage.mjs",
+        "bytes": 10306,
+        "sha256": "dafdd340e664e8ec0217a6d694df24c7e0d7d9a5c9b9a5bd0c7d4b781fd0f369",
+        "unchanged": true
+      },
+      {
+        "path": "C:/Users/Administrator/.codex/worktrees/maps/mir2-player-journey/mir2-web3/apps/game-client/platform-windows/scripts/test-candidate-map-scope.ps1",
+        "bytes": 10510,
+        "sha256": "a0a0edfae603a4e8e6337de5e9bcec294c732e64423d09d5c4a8d64ac601134c",
+        "unchanged": true
+      },
+      {
+        "path": "C:/Users/Administrator/.codex/worktrees/maps/mir2-player-journey/mir2-web3/apps/web/scripts/quest-agent/test-route-manifest.mjs",
+        "bytes": 13091,
+        "sha256": "a8b551ed009a661250155da997f679c3e106d0523ffaf2d3f7ae3f2479ec6939",
+        "unchanged": true
+      },
+      {
+        "path": "C:/Users/Administrator/.codex/worktrees/maps/mir2-player-journey/mir2-web3/docs/CLASSIC-MAP-CLOSURE-PHASE2-20261004.md",
+        "bytes": 9683,
+        "sha256": "4d76d2bb7d408094629edd94273461a25c00ad55087419d41a42b5a6060f2db1",
+        "unchanged": true
+      },
+      {
+        "path": "C:/Users/Administrator/.codex/worktrees/maps/mir2-player-journey/mir2-web3/packages/game-data/data/content_profiles/platinum_176.json",
+        "bytes": 47442,
+        "sha256": "f50ef1b78e2544df4fd3a65902f6e72f4ec3cbc7693e0ee373d6ee899581e7a9",
+        "unchanged": true
+      },
+      {
+        "path": "C:/Users/Administrator/.codex/worktrees/maps/mir2-player-journey/mir2-web3/packages/game-data/data/generated/platinum_176_bundle.json",
+        "bytes": 3417,
+        "sha256": "a797faeab556d1160d32f772ed3fbfb56a8e1d2de82c35163ceff76dcf87d32e",
+        "unchanged": true
+      },
+      {
+        "path": "C:/Users/Administrator/.codex/worktrees/maps/mir2-player-journey/mir2-web3/packages/game-data/src/lib.rs",
+        "bytes": 170658,
+        "sha256": "5f9f5e97412e73c73a8218e84dd22ed50e24a1193f8883e747565fcd50b20f08",
+        "unchanged": true
+      },
+      {
+        "path": "C:/Users/Administrator/.codex/worktrees/maps/mir2-player-journey/mir2-web3/packages/game-data/tests/classic_native_resource_scope.rs",
+        "bytes": 4488,
+        "sha256": "ab0ee96815f13c5bf4c02a14320e29b12d16bc26df316b51ffcc5861ed492f95",
+        "unchanged": true
+      },
+      {
+        "path": "C:/Users/Administrator/.codex/worktrees/maps/mir2-player-journey/mir2-web3/scripts/build-platinum-176-profile-bundle.mjs",
+        "bytes": 4641,
+        "sha256": "48823366426a671976a7bd4e51c12e8e8e56747af3e9ed886de8ac6e6371523e",
+        "unchanged": true
+      },
+      {
+        "path": "C:/mir2-playtest-releases/20261004-native-r17/map-implementation/phase2-208-runtime-209-resources/source-diff.patch",
+        "bytes": 74779,
+        "sha256": "58addd5cae73b1e8737702c91295c62ce5161514647e7297054371e78ae21228",
+        "unchanged": true
+      },
+      {
+        "path": "C:/mir2-playtest-releases/20261004-native-r17/map-implementation/native-keyed-map-profile-164/manifest.json",
+        "bytes": 11293865,
+        "sha256": "cabe0b8789be7b9fe8791c1abbe7361807fa7d4654e9b3d8dea6ad149072ce74",
+        "unchanged": true
+      },
+      {
+        "path": "C:/mir2-playtest-releases/20261004-native-r17/map-implementation/native-keyed-map-atlas-profile-164/manifest.json",
+        "bytes": 411350,
+        "sha256": "4d21069b64cd6c6cbb67c9aa6fec1387944bd4cd73e7c96f9467ea6c0821d511",
+        "unchanged": true
+      },
+      {
+        "path": "C:/mir2-playtest-releases/20261004-native-r17/map-implementation/implementation-receipt.json",
+        "bytes": 20458,
+        "sha256": "951bd405d2f57977fe90be24b8e39137514d934ce345668b3960cf9aa6c5305f",
+        "unchanged": true
+      },
+      {
+        "path": "packages/game-data/data/generated/crystal_respawn_manifest.json",
+        "bytes": 6741323,
+        "sha256": "5303f8093be7f15ddd9f860e6db1787ac96606508db3086bab38bdc4c6353dd3",
+        "unchanged": true
+      },
+      {
+        "path": "packages/game-data/data/generated/crystal_npc_manifest.json",
+        "bytes": 5244108,
+        "sha256": "7ff29f221c39e5d16b7ebdc7efcde5090daf7ff3daacf6b2b1552b5b36429e93",
+        "unchanged": true
+      },
+      {
+        "path": "packages/game-data/data/generated/crystal_map_event_manifest.json",
+        "bytes": 50155,
+        "sha256": "d68823dfff2a1cfc00afc7bf4d369bb20a025ad9af5acb89a75d571f4709ba29",
+        "unchanged": true
+      },
+      {
+        "path": "C:/mir2-playtest-releases/20261004-native-r17/map-implementation/phase2-208-runtime-209-resources/native-keyed-map-profile-209/manifest.json",
+        "bytes": 11320827,
+        "sha256": "42cc002dd0f7c211916a976fadcc91af5c16cf2aa851200e464ac80aeeccb5b9",
+        "unchanged": true
+      },
+      {
+        "path": "C:/mir2-playtest-releases/20261004-native-r17/map-implementation/phase2-208-runtime-209-resources/native-keyed-map-atlas-profile-209/manifest.json",
+        "bytes": 419097,
+        "sha256": "32aa4e7e56550b1067a880bc29ca279f13a699aac6c71e8917154676f0092288",
+        "unchanged": true
+      },
+      {
+        "path": "C:/mir2-playtest-releases/20261004-native-r17/map-implementation/phase2-208-runtime-209-resources/native-keyed-map-profile-209/coverage-audit.json",
+        "bytes": 723520,
+        "sha256": "d28e2e9413ad25f13050166e1f587b3ca1d1fb729f15c51a81ac4a2e65631b05",
+        "unchanged": true
+      },
+      {
+        "path": "E:/mir2/Crystal/Build/Client/Debug/Data/Monster/049.Lib",
+        "bytes": 1137879,
+        "sha256": "b52c0eadaf06a015360fbf9d9e68e877b8ca912fbdea6d99d9b1c7785497c4e3",
+        "unchanged": true
+      },
+      {
+        "path": "C:/mir2-playtest-releases/20261004-native-r17/map-implementation/phase2-208-runtime-209-resources/actor-input/original-ui/Monster/049/meta.json",
+        "bytes": 107294,
+        "sha256": "6173faeac54c9708d791c1546c0566e97af70a86c12497f7b08b63eb6a961b63",
+        "unchanged": true
+      },
+      {
+        "path": "C:/mir2-playtest-releases/20261004-native-r17/map-implementation/phase2-208-runtime-209-resources/actor-input/original-ui/frame-sets.generated.json",
+        "bytes": 1375659,
+        "sha256": "280d4fee9de0864218611f54014b4bf3487c4478a39133c25ebe211d223e62e9",
+        "unchanged": true
+      },
+      {
+        "path": "C:/mir2-playtest-releases/20261004-native-r17/map-implementation/phase2-208-runtime-209-resources/focused-node-first.log",
+        "bytes": 3000,
+        "sha256": "42e61d2ff853e9d554d29485569b72b4f914622abae7ff22eabe9560b840a46f",
+        "unchanged": true
+      },
+      {
+        "path": "C:/mir2-playtest-releases/20261004-native-r17/map-implementation/phase2-208-runtime-209-resources/focused-and-adjacent-first.log",
+        "bytes": 13659,
+        "sha256": "f32783b7dc500f46cf77fb464cb8b093ad0675715a37bae37a76eddc22e6f466",
+        "unchanged": true
+      },
+      {
+        "path": "C:/mir2-playtest-releases/20261004-native-r17/map-implementation/phase2-208-runtime-209-resources/focused-powershell-first.log",
+        "bytes": 612,
+        "sha256": "4ba20dff8c123a60f50be73fdcfff347da577bde79ed495f98f39527acf17794",
+        "unchanged": true
+      },
+      {
+        "path": "C:/mir2-playtest-releases/20261004-native-r17/map-implementation/phase2-208-runtime-209-resources/focused-powershell-second.log",
+        "bytes": 407,
+        "sha256": "3ac390a642e1fcf80a1fc16ae8578171116379c96c1bf6906aa436169a7ac1d1",
+        "unchanged": true
+      },
+      {
+        "path": "C:/mir2-playtest-releases/20261004-native-r17/map-implementation/phase2-208-runtime-209-resources/focused-rust-first.log",
+        "bytes": 1975,
+        "sha256": "9b975bc251340e586e37a7df7b5bed130871727299fa30eda0f49e6274576df3",
+        "unchanged": true
+      },
+      {
+        "path": "C:/mir2-playtest-releases/20261004-native-r17/map-implementation/phase2-208-runtime-209-resources/profile-unit-tests.log",
+        "bytes": 871,
+        "sha256": "825113fb762cd7f2f4ad16db12ef36619ccd9435313c81b07de57d851051bd32",
+        "unchanged": true
+      },
+      {
+        "path": "C:/mir2-playtest-releases/20261004-native-r17/map-implementation/phase2-208-runtime-209-resources/generation-input.json",
+        "bytes": 11570,
+        "sha256": "9544011b80569c6fffa73a46eb602630e884104f8e28c3e77b26a989d9711f63",
+        "unchanged": true
+      },
+      {
+        "path": "C:/mir2-playtest-releases/20261004-native-r17/map-implementation/phase2-208-runtime-209-resources/generation-pipeline.log",
+        "bytes": 423,
+        "sha256": "fe71f30fd3d11cdba60e981f3bea5813d28be5cce5ee1d972b4db90f2f76e648",
+        "unchanged": true
+      },
+      {
+        "path": "C:/mir2-playtest-releases/20261004-native-r17/map-implementation/phase2-208-runtime-209-resources/generate.log",
+        "bytes": 789,
+        "sha256": "2606bafcb185b3e53bc1078413a9e84ce73b4f7a7e25eb839a13b3dda08d4bf5",
+        "unchanged": true
+      },
+      {
+        "path": "C:/mir2-playtest-releases/20261004-native-r17/map-implementation/phase2-208-runtime-209-resources/complete-floors.log",
+        "bytes": 20414,
+        "sha256": "55dc84c258f6497d032131986c02e66303aaa166d986898e9a7f622f04158e1d",
+        "unchanged": true
+      },
+      {
+        "path": "C:/mir2-playtest-releases/20261004-native-r17/map-implementation/phase2-208-runtime-209-resources/audit.log",
+        "bytes": 20032,
+        "sha256": "eb532a06f20520dcad5f500796897d772e2e63326b868d20e67b9b2dcb647228",
+        "unchanged": true
+      },
+      {
+        "path": "C:/mir2-playtest-releases/20261004-native-r17/map-implementation/phase2-208-runtime-209-resources/actor-049-export.log",
+        "bytes": 258,
+        "sha256": "d60d68ed6fdef0e2522308320bf16469ca13e1f5cac232d84fe6c7a711405821",
+        "unchanged": true
+      },
+      {
+        "path": "C:/mir2-playtest-releases/20261004-native-r17/map-implementation/phase2-208-runtime-209-resources/actor-source-verify-first.log",
+        "bytes": 25971,
+        "sha256": "79095f3c49b783a8d45e7d438aa6ab82bf29f097e65556b18d63976ce4b056d8",
+        "unchanged": true
+      },
+      {
+        "path": "C:/mir2-playtest-releases/20261004-native-r17/map-implementation/phase2-208-runtime-209-resources/actor-closure-verified.json",
+        "bytes": 1151628,
+        "sha256": "908918fc7e7e59505b11ddd060bee79e3510218cc0acc9a1ecba874f9315357a",
+        "unchanged": true
+      },
+      {
+        "path": "C:/mir2-playtest-releases/20261004-native-r17/map-implementation/phase2-208-runtime-209-resources/actor-input-receipt.json",
+        "bytes": 3435,
+        "sha256": "6c7f41a687a72800b83dc3313f79cb530c4c673bfd7f27e0cde0c2db5eec8c74",
+        "unchanged": true
+      },
+      {
+        "path": "C:/mir2-playtest-releases/20261004-native-r17/map-implementation/phase2-208-runtime-209-resources/powershell-generated-guards.json",
+        "bytes": 8178,
+        "sha256": "4422d316dc2562c7b51fea48f237989b59e5b30a09a46e3d0a799778b85f7873",
+        "unchanged": true
+      },
+      {
+        "path": "C:/mir2-playtest-releases/20261004-native-r17/map-implementation/phase2-208-runtime-209-resources/final-source-checks.json",
+        "bytes": 1203,
+        "sha256": "ee6ac04b3f2d28cda5b62df4bd5f5ca5ea97c3e8c6be001be2aa8e58d3c19acc",
+        "unchanged": true
+      }
+    ],
+    "readOnlyPlanReceipt": {
+      "path": "C:/mir2-playtest-releases/20261004-native-r17/classic-late-route-plan-01/readonly-plan-receipt.json",
+      "bytes": 4662,
+      "sha256": "8de41a587b47c9039bbaecef2fc2e47f27262779d3b3fb1c594cbba42a97636b"
+    },
+    "repositoryStatus": [
+      {
+        "status": " M",
+        "relative": "mir2-web3/apps/game-client/platform-windows/scripts/audit-candidate-map-coverage.mjs"
+      },
+      {
+        "status": " M",
+        "relative": "mir2-web3/apps/game-client/platform-windows/scripts/candidate-release-profile.ps1"
+      },
+      {
+        "status": " M",
+        "relative": "mir2-web3/apps/game-client/platform-windows/scripts/test-candidate-map-coverage.mjs"
+      },
+      {
+        "status": " M",
+        "relative": "mir2-web3/apps/game-client/platform-windows/scripts/test-candidate-map-scope.ps1"
+      },
+      {
+        "status": " M",
+        "relative": "mir2-web3/apps/simulation/src/runtime/npc_script.rs"
+      },
+      {
+        "status": " M",
+        "relative": "mir2-web3/apps/web/scripts/quest-agent/test-route-manifest.mjs"
+      },
+      {
+        "status": " M",
+        "relative": "mir2-web3/packages/game-data/data/content_profiles/platinum_176.json"
+      },
+      {
+        "status": " M",
+        "relative": "mir2-web3/packages/game-data/data/generated/platinum_176_bundle.json"
+      },
+      {
+        "status": " M",
+        "relative": "mir2-web3/packages/game-data/src/lib.rs"
+      },
+      {
+        "status": " M",
+        "relative": "mir2-web3/scripts/build-platinum-176-profile-bundle.mjs"
+      },
+      {
+        "status": "??",
+        "relative": "mir2-web3/apps/simulation/tests/classic_late_route_gates.rs"
+      },
+      {
+        "status": "??",
+        "relative": "mir2-web3/apps/web/scripts/quest-agent/classic-late-route-policy.mjs"
+      },
+      {
+        "status": "??",
+        "relative": "mir2-web3/apps/web/scripts/quest-agent/run-classic-late-route.mjs"
+      },
+      {
+        "status": "??",
+        "relative": "mir2-web3/apps/web/scripts/quest-agent/test-classic-late-route.mjs"
+      },
+      {
+        "status": "??",
+        "relative": "mir2-web3/apps/web/scripts/quest-agent/verify-classic-late-route-evidence.mjs"
+      },
+      {
+        "status": "??",
+        "relative": "mir2-web3/docs/CLASSIC-MAP-CLOSURE-PHASE2-20261004.md"
+      },
+      {
+        "status": "??",
+        "relative": "mir2-web3/packages/game-data/tests/classic_native_resource_scope.rs"
+      }
+    ],
+    "sourceReachabilityNotEdited": true,
+    "sourceTopologyNotEdited": true,
+    "profileVersion": 27,
+    "runtimeMapCount": 208,
+    "nativeResourceCount": 209,
+    "resourceOnlyRoom": "D71653"
+  },
+  "repaired": {
+    "kind": "Candidate-playability-repair",
+    "inferredLegacyIntent": true,
+    "modernCSharpExactParity": false,
+    "numericConditions": [
+      {
+        "script": "Stone",
+        "quest": 135,
+        "token": "0",
+        "accepted": [
+          "InProgress",
+          "ReadyToTurnIn"
+        ]
+      },
+      {
+        "script": "Stone",
+        "quest": 153,
+        "token": "1",
+        "accepted": [
+          "Completed"
+        ]
+      },
+      {
+        "script": "BigTaoist",
+        "quest": 146,
+        "token": "1",
+        "accepted": [
+          "Completed"
+        ]
+      }
+    ],
+    "stoneHeart": {
+      "script": "Stone",
+      "section": "@stonetomba",
+      "canonicalKey": "crystal-item-1080",
+      "validCarrierRequired": true,
+      "nonzeroUidRequired": true,
+      "lawfulNormalRewardTested": true,
+      "exactOneCarrierDebit": true,
+      "otherItemsRejected": true
+    },
+    "genericNumericAndItemMatchersChanged": false,
+    "changedKnownProofFailsClosed": true
+  },
+  "verification": {
+    "preparedOrdinaryClientPacketGates": {
+      "passed": 13,
+      "failed": 0,
+      "log": "rust-final-clean-01.log"
+    },
+    "libSourceProof": {
+      "passed": 2,
+      "failed": 0,
+      "log": "rust-source-proof-02.log"
+    },
+    "nodeControllerAndEvidenceFixtures": {
+      "passed": 44,
+      "failed": 0,
+      "log": "node-tests-03.log",
+      "syntheticIsNetworkAcceptance": false
+    },
+    "genuinePreRepairRed": {
+      "passed": 1,
+      "failed": 7,
+      "log": "rust-red-03.log",
+      "validCanonicalStartingCarriers": true
+    },
+    "syntaxChecksPassed": true,
+    "sourceHashesPassed": true,
+    "patchReverseAndWhitespacePassed": true,
+    "cargoJobsMaximum": 2,
+    "cargoTarget": "C:/mir2-playtest-releases/20261004-native-r17/map-implementation/phase2-208-runtime-209-resources/cargo-test-target",
+    "allFailureAndSuccessEvidence": [
+      {
+        "path": "C:/mir2-playtest-releases/20261004-native-r17/classic-late-route-implementation-01/node-source-first-failure-01.log",
+        "bytes": 1203,
+        "sha256": "87b02cb6eae6a650e834054735d7b06ecdeeacc031ddd704b3e09f508d381779"
+      },
+      {
+        "path": "C:/mir2-playtest-releases/20261004-native-r17/classic-late-route-implementation-01/node-tests-01.exit.txt",
+        "bytes": 3,
+        "sha256": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354"
+      },
+      {
+        "path": "C:/mir2-playtest-releases/20261004-native-r17/classic-late-route-implementation-01/node-tests-01.log",
+        "bytes": 7163,
+        "sha256": "9ddd1ab246d495893e4fa86fd65b9eda85f58bbc9eae0d336ef5c949327fa4da"
+      },
+      {
+        "path": "C:/mir2-playtest-releases/20261004-native-r17/classic-late-route-implementation-01/node-tests-02.exit.txt",
+        "bytes": 3,
+        "sha256": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354"
+      },
+      {
+        "path": "C:/mir2-playtest-releases/20261004-native-r17/classic-late-route-implementation-01/node-tests-02.log",
+        "bytes": 8858,
+        "sha256": "fa5f61d05b742e0401ecc5315be232c7a70f330b58d65ba1cd866b9880a9e4f4"
+      },
+      {
+        "path": "C:/mir2-playtest-releases/20261004-native-r17/classic-late-route-implementation-01/node-tests-03.exit.txt",
+        "bytes": 3,
+        "sha256": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354"
+      },
+      {
+        "path": "C:/mir2-playtest-releases/20261004-native-r17/classic-late-route-implementation-01/node-tests-03.log",
+        "bytes": 9140,
+        "sha256": "5f5099ffb93142c40b68bb8211509608a99eb35003ba5b67a28bcb6330e4d114"
+      },
+      {
+        "path": "C:/mir2-playtest-releases/20261004-native-r17/classic-late-route-implementation-01/patch-reverse-apply-check.log",
+        "bytes": 7,
+        "sha256": "19eaf43821a7660ec323a87c8457bf74823beb296c39f5e01aa8a683aa50f061"
+      },
+      {
+        "path": "C:/mir2-playtest-releases/20261004-native-r17/classic-late-route-implementation-01/rust-final-clean-01.exit.txt",
+        "bytes": 3,
+        "sha256": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354"
+      },
+      {
+        "path": "C:/mir2-playtest-releases/20261004-native-r17/classic-late-route-implementation-01/rust-final-clean-01.log",
+        "bytes": 30166,
+        "sha256": "6c6d6e6484c5a4759559f39ffbd1344d214b4f9694f6ff320344d1b7063edeb1"
+      },
+      {
+        "path": "C:/mir2-playtest-releases/20261004-native-r17/classic-late-route-implementation-01/rust-final-targeted-01.exit.txt",
+        "bytes": 3,
+        "sha256": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354"
+      },
+      {
+        "path": "C:/mir2-playtest-releases/20261004-native-r17/classic-late-route-implementation-01/rust-final-targeted-01.log",
+        "bytes": 29211,
+        "sha256": "39a092f8cab76acd298310f915c9b00585c9eea4442841e3459bd1df32b52c08"
+      },
+      {
+        "path": "C:/mir2-playtest-releases/20261004-native-r17/classic-late-route-implementation-01/rust-green-01.exit.txt",
+        "bytes": 5,
+        "sha256": "bdc830287616dae1818ced3e7c186e1387155900ad30d5983ec02da1519c4a95"
+      },
+      {
+        "path": "C:/mir2-playtest-releases/20261004-native-r17/classic-late-route-implementation-01/rust-green-01.log",
+        "bytes": 5610,
+        "sha256": "81ea0ee04a2c926b0a01bd12a7cd3e9121f01016c55714b6f2f95866dcbc7946"
+      },
+      {
+        "path": "C:/mir2-playtest-releases/20261004-native-r17/classic-late-route-implementation-01/rust-green-02.exit.txt",
+        "bytes": 3,
+        "sha256": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354"
+      },
+      {
+        "path": "C:/mir2-playtest-releases/20261004-native-r17/classic-late-route-implementation-01/rust-green-02.log",
+        "bytes": 29742,
+        "sha256": "cb05702d8ac63232085dcdc586e9d667daf91eb194214bf39a8979947ad47b96"
+      },
+      {
+        "path": "C:/mir2-playtest-releases/20261004-native-r17/classic-late-route-implementation-01/rust-green-03.exit.txt",
+        "bytes": 5,
+        "sha256": "bdc830287616dae1818ced3e7c186e1387155900ad30d5983ec02da1519c4a95"
+      },
+      {
+        "path": "C:/mir2-playtest-releases/20261004-native-r17/classic-late-route-implementation-01/rust-green-03.log",
+        "bytes": 30731,
+        "sha256": "87050f2445d89ed93b3c2567100fd00b96bd11b216bc37c4af8ddb96c4582854"
+      },
+      {
+        "path": "C:/mir2-playtest-releases/20261004-native-r17/classic-late-route-implementation-01/rust-needmove-01.exit.txt",
+        "bytes": 3,
+        "sha256": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354"
+      },
+      {
+        "path": "C:/mir2-playtest-releases/20261004-native-r17/classic-late-route-implementation-01/rust-needmove-01.log",
+        "bytes": 29223,
+        "sha256": "305ced4714de36d9d0977c35337b4a8f911da8174ef806012c1ed080a5c09ed2"
+      },
+      {
+        "path": "C:/mir2-playtest-releases/20261004-native-r17/classic-late-route-implementation-01/rust-red-01.exit.txt",
+        "bytes": 5,
+        "sha256": "bdc830287616dae1818ced3e7c186e1387155900ad30d5983ec02da1519c4a95"
+      },
+      {
+        "path": "C:/mir2-playtest-releases/20261004-native-r17/classic-late-route-implementation-01/rust-red-01.log",
+        "bytes": 38340,
+        "sha256": "bfc83b5a9b4b3467da4fbbae5dc0a9c7c50377c2ccaf0d410de39e05269c368b"
+      },
+      {
+        "path": "C:/mir2-playtest-releases/20261004-native-r17/classic-late-route-implementation-01/rust-red-02.exit.txt",
+        "bytes": 5,
+        "sha256": "bdc830287616dae1818ced3e7c186e1387155900ad30d5983ec02da1519c4a95"
+      },
+      {
+        "path": "C:/mir2-playtest-releases/20261004-native-r17/classic-late-route-implementation-01/rust-red-02.log",
+        "bytes": 32794,
+        "sha256": "06dd5d642d4e221c68b1175135af2a22fc3a30e39f88154ada4acf3e4332166f"
+      },
+      {
+        "path": "C:/mir2-playtest-releases/20261004-native-r17/classic-late-route-implementation-01/rust-red-03.exit.txt",
+        "bytes": 5,
+        "sha256": "bdc830287616dae1818ced3e7c186e1387155900ad30d5983ec02da1519c4a95"
+      },
+      {
+        "path": "C:/mir2-playtest-releases/20261004-native-r17/classic-late-route-implementation-01/rust-red-03.log",
+        "bytes": 32503,
+        "sha256": "438bd371e4b0bb9acc6133a0aa0fe3e85ee431e6da5285cfa05903aeb33cca82"
+      },
+      {
+        "path": "C:/mir2-playtest-releases/20261004-native-r17/classic-late-route-implementation-01/rust-source-proof-01.exit.txt",
+        "bytes": 5,
+        "sha256": "bdc830287616dae1818ced3e7c186e1387155900ad30d5983ec02da1519c4a95"
+      },
+      {
+        "path": "C:/mir2-playtest-releases/20261004-native-r17/classic-late-route-implementation-01/rust-source-proof-01.log",
+        "bytes": 38724,
+        "sha256": "cd67ffd57ed33789b1c85aa63222f4cd0f4dd3dea83052e74ceb66472b88b8ae"
+      },
+      {
+        "path": "C:/mir2-playtest-releases/20261004-native-r17/classic-late-route-implementation-01/rust-source-proof-02.exit.txt",
+        "bytes": 3,
+        "sha256": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354"
+      },
+      {
+        "path": "C:/mir2-playtest-releases/20261004-native-r17/classic-late-route-implementation-01/rust-source-proof-02.log",
+        "bytes": 37846,
+        "sha256": "c3cdb51a337f6b3daea11f80c2809739750010a7f058c9b310b836d922ec1e19"
+      }
+    ]
+  },
+  "routeController": {
+    "plannedDirectedHops": 76,
+    "plannedThreeClassDirectedHops": 228,
+    "actualNetworkRuns": 0,
+    "pairReceiptRequired": true,
+    "pairedHealthRevisionRequired": true,
+    "rootExeAttestationRequired": true,
+    "routeDeadlineMaxMinutes": 120,
+    "spawnWaitCannotExtendRouteDeadline": true,
+    "maxKillsPerTarget": 3,
+    "maxTotalKills": 12,
+    "publicPacketOnly": true,
+    "qaSpawnOrGrant": false,
+    "probabilitiesUnchanged": true,
+    "nonDropAndDeathsRetained": true,
+    "ordinaryLogoutReloginRequired": true,
+    "missingSourcePositionSpawnAndKillLinkageNeverInferred": true
+  },
+  "preservedDefects": [
+    {
+      "id": "D10061-UNBOUND-NEEDMOVE",
+      "from": "D10051",
+      "source": {
+        "x": 178,
+        "y": 53
+      },
+      "to": "D10061",
+      "destination": {
+        "x": 20,
+        "y": 25
+      },
+      "needMove": true,
+      "preparedOrdinaryWalkObservedNoEntry": true,
+      "normalEntryAccepted": false
+    },
+    {
+      "id": "ANCIENT-OUTER-WALKING-EXIT",
+      "maps": [
+        "D710A",
+        "D711A",
+        "D712A",
+        "D713A"
+      ],
+      "noAuthoredOuterWalkingEdge": true,
+      "inventedPortal": false,
+      "ordinaryEscapeItemReturnAccepted": false
+    }
+  ],
+  "acceptance": {
+    "completeClassicWorld": false,
+    "runtimeGameplayAccepted": false,
+    "freshLevelJourneyAccepted": false,
+    "actualNetworkRouteAccepted": false,
+    "naturalBossSpawnAccepted": false,
+    "naturalGearAcquisitionAccepted": false,
+    "naturalBookAcquisitionAccepted": false,
+    "ordinaryAcquiredSkillActivationAccepted": false,
+    "rawDurableStoreBytesVerified": false,
+    "nativeVisualAccepted": false,
+    "humanAcceptance": false
+  },
+  "performed": {
+    "simulationTestCompilation": true,
+    "normalLocalPreparedPacketTests": true,
+    "nodeSyntheticTests": true,
+    "staticSourcePlan": true,
+    "networkGatewayRun": false,
+    "gatewayStartup": false,
+    "gatewayRestart": false,
+    "windowsBuild": false,
+    "package": false,
+    "upload": false,
+    "publication": false,
+    "commit": false,
+    "push": false
+  },
+  "remaining": [
+    "Root six-file integration against its new baseline and consumer compatibility",
+    "Paired authenticated Warrior/Wizard/Taoist ordinary 76-hop routes, real conditional NPC journey and normal save",
+    "Direct committed source-coordinate and exact natural spawn/source-kill evidence missing from public snapshots",
+    "Bounded natural Boss/drop/gear/book acquisition with probability/no-drop/failed/death receipts",
+    "Naturally acquired book skill activation, gear progression and raw durable store bytes",
+    "Ancient branch internal traversal and lawful owned escape-item return",
+    "D10061 supplied-source missing ordinary inbound mechanism remains a defect",
+    "Signed client pairing, actual native screenshots and human gameplay acceptance"
+  ],
+  "documentation": {
+    "path": "C:/mir2-playtest-releases/20261004-native-r17/classic-late-route-implementation-01/README.md",
+    "bytes": 13358,
+    "sha256": "9b5ec5e752011117b64091f3edda74d518df64abdad9209bff2756d8e157a1de"
+  },
+  "planOnly": {
+    "path": "C:/mir2-playtest-releases/20261004-native-r17/classic-late-route-implementation-01/derived-plan-01.json",
+    "bytes": 2650,
+    "sha256": "95e95b3a2b1fe204ea1c6d7423899589a41b27afb28df3d9ebc236a647c062d9"
+  }
+}

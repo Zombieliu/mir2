@@ -4,12 +4,14 @@ import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { verifyBevyRuntimeVersion } from "./lib/bevy-runtime-version.mjs";
 
 const SCRIPT_DIR = path.dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = path.resolve(SCRIPT_DIR, "..", "..", "..");
 const DEFAULT_BASE_URL = "http://127.0.0.1:13010";
 const DEFAULT_OUTPUT_DIR = path.resolve(REPO_ROOT, "docs", "generated", "player-qa", "bevy-runtime-backends");
 const DEFAULT_VIEWPORT = { width: 1024, height: 768, deviceScaleFactor: 1, mobile: false };
+const RUNTIME_MANIFEST_PATH = path.resolve(SCRIPT_DIR, "..", "lib", "generated", "bevy_runtime_version.json");
 
 const args = parseArgs(process.argv.slice(2));
 const baseUrl = args.baseUrl ?? process.env.MIR2_WEB_BASE_URL ?? DEFAULT_BASE_URL;
@@ -20,10 +22,6 @@ const debugPort = numberArg(args.debugPort ?? process.env.MIR2_CHROME_DEBUG_PORT
 const headed = booleanArg(args.headed ?? process.env.MIR2_CHROME_HEADED, false);
 const waitTimeoutMs = numberArg(args.waitTimeoutMs ?? process.env.MIR2_BEVY_BACKEND_WAIT_MS, 45_000);
 const chromePath = process.env.MIR2_CHROME_PATH ?? findChromePath();
-
-if (!chromePath) {
-  throw new Error("Could not find Chrome. Set MIR2_CHROME_PATH.");
-}
 
 class CdpClient {
   constructor(wsUrl) {
@@ -72,7 +70,7 @@ class CdpClient {
     if (message.method === "Log.entryAdded") {
       const entry = message.params?.entry;
       if (entry?.level === "error" && !String(entry.url ?? "").includes("favicon")) {
-        this.consoleErrors.push({ source: entry.source ?? "log", text: entry.text ?? "" });
+        this.consoleErrors.push({ source: entry.source ?? "log", text: entry.text ?? "", url: entry.url ?? "" });
       }
       if (entry?.level === "warning") {
         this.consoleWarnings.push({ source: entry.source ?? "log", text: entry.text ?? "" });
@@ -121,6 +119,10 @@ class CdpClient {
 }
 
 async function main() {
+  const manifest = verifyBevyRuntimeVersion(
+    JSON.parse(await fs.readFile(RUNTIME_MANIFEST_PATH, "utf8")), RUNTIME_MANIFEST_PATH,
+  );
+  if (!chromePath) throw new Error("Could not find Chrome. Set MIR2_CHROME_PATH.");
   await fs.mkdir(outputDir, { recursive: true });
   const userDataDir = path.join(os.tmpdir(), `mir2-bevy-backends-${process.pid}-${Date.now()}`);
   const chrome = spawn(
@@ -140,15 +142,10 @@ async function main() {
 
   try {
     await waitForChrome(debugPort);
-    const scenarios = [
-      { name: "default", query: "" },
-      { name: "force-webgl2", query: "bevyBackend=webgl2&bevyEntities=1&bevyAtlas=1" },
-      { name: "force-webgpu", query: "bevyBackend=webgpu&bevyEntities=1&bevyAtlas=1" },
-      { name: "raw-webgl2-probe", path: "/qa/webgl2-entity-renderer", rawWebGl2Probe: true },
-    ];
+    const scenarios = runtimeSmokeScenarios(manifest);
     const results = [];
     for (const scenario of scenarios) {
-      results.push(await runScenarioInFreshTarget(debugPort, scenario));
+      results.push(await runScenarioInFreshTarget(debugPort, scenario, manifest));
     }
 
     const allConsoleErrors = results.flatMap((result) => result.consoleErrors);
@@ -159,9 +156,12 @@ async function main() {
       runId,
       baseUrl,
       outputDir,
+      runtimeManifest: { schemaVersion: manifest.schemaVersion, version: manifest.version,
+        packages: manifest.packages },
       scenarios: results,
       consoleErrors: allConsoleErrors,
-      criticalConsoleErrors: allConsoleErrors.filter(isCriticalConsoleError),
+      criticalConsoleErrors: results.flatMap((result) => result.consoleErrors.filter((entry) =>
+        isCriticalConsoleError(entry) && !isExpectedGpuPrebootFailure(result.name, result.runtime, entry.url))),
       consoleWarnings: allConsoleWarnings,
       sampledRuntimeResponses: allRuntimeResponses.slice(-80),
     };
@@ -171,29 +171,35 @@ async function main() {
         .every((result) => result.assertions.runtimeDebugPresent),
       runtimeBackendsStayedHealthy: results.every((result) => result.assertions.noCriticalConsoleErrors),
       packageFetchesSucceeded: results.every((result) => result.assertions.packageFetchSucceeded),
+      currentRuntimePackageAgrees: results.filter((result) => result.name !== "raw-webgl2-probe")
+        .every((result) => result.assertions.currentRuntimePackageAgrees),
+      runtimeUrlsUseCurrentVersion: results.filter((result) => result.name !== "raw-webgl2-probe")
+        .every((result) => result.assertions.runtimeUrlsUseCurrentVersion),
       defaultPrefersWebGpuOrFallsBack: Boolean(results.find((result) => result.name === "default")?.assertions.prefersWebGpuOrFallsBack),
       forcedWebGl2UsesWebGl2Package: Boolean(results.find((result) => result.name === "force-webgl2")?.assertions.usesRequestedWebGl2),
+      forcedSharedUsesSharedPackage: !scenarios.some((item) => item.name === "force-webgl2-shared")
+        || Boolean(results.find((result) => result.name === "force-webgl2-shared")?.assertions.usesRequestedSharedWebGl2),
       forcedWebGpuUsesWebGpuOrFallsBack: Boolean(results.find((result) => result.name === "force-webgpu")?.assertions.usesRequestedWebGpuOrFallsBack),
       movementShadowApiAvailable: results
-        .filter((result) => result.name !== "raw-webgl2-probe")
+        .filter((result) => result.name !== "raw-webgl2-probe" && result.name !== "force-webgl2-shared")
         .every((result) => result.assertions.movementShadowApiAvailable),
       presentationPoseSinkDeliveredMonotonicFrames: results
-        .filter((result) => result.name !== "raw-webgl2-probe")
+        .filter((result) => result.name !== "raw-webgl2-probe" && result.name !== "force-webgl2-shared")
         .every((result) => result.assertions.presentationPoseSinkDeliveredMonotonicFrames),
       remoteMotionPresentationDrovePackedOffsets: results
-        .filter((result) => result.name !== "raw-webgl2-probe")
+        .filter((result) => result.name !== "raw-webgl2-probe" && result.name !== "force-webgl2-shared")
         .every((result) => result.assertions.remoteMotionPresentationDrovePackedOffset),
       unifiedPresentationPoseDroveDomContract: results
-        .filter((result) => result.name !== "raw-webgl2-probe")
+        .filter((result) => result.name !== "raw-webgl2-probe" && result.name !== "force-webgl2-shared")
         .every((result) => result.assertions.unifiedPresentationPoseDroveDomContract),
       localMotionShadowMatchesCurrentPose: results
-        .filter((result) => result.name !== "raw-webgl2-probe")
+        .filter((result) => result.name !== "raw-webgl2-probe" && result.name !== "force-webgl2-shared")
         .every((result) => result.assertions.localMotionShadowMatchesCurrentPose),
       localMotionPresentationOwnsSelfPose: results
-        .filter((result) => result.name !== "raw-webgl2-probe")
+        .filter((result) => result.name !== "raw-webgl2-probe" && result.name !== "force-webgl2-shared")
         .every((result) => result.assertions.localMotionPresentationOwnsSelfPose),
       localMotionPathMismatchFallsBack: results
-        .filter((result) => result.name !== "raw-webgl2-probe")
+        .filter((result) => result.name !== "raw-webgl2-probe" && result.name !== "force-webgl2-shared")
         .every((result) => result.assertions.localMotionPathMismatchFallsBack),
       rawWebGl2ProbeRendered: Boolean(results.find((result) => result.name === "raw-webgl2-probe")?.assertions.rawWebGl2ProbeRendered),
       noCriticalConsoleErrors: report.criticalConsoleErrors.length === 0,
@@ -213,7 +219,21 @@ async function main() {
   }
 }
 
-async function runScenarioInFreshTarget(debugPort, scenario) {
+export function runtimeSmokeScenarios(manifest) {
+  const scenarios = [
+    { name: "default", query: "" },
+    { name: "force-webgl2", query: "bevyBackend=webgl2&bevySharedCanvas=0&bevyEntities=1&bevyAtlas=1" },
+    { name: "force-webgpu", query: "bevyBackend=webgpu&bevyEntities=1&bevyAtlas=1" },
+  ];
+  if (manifest.schemaVersion === 2 && manifest.packages.some((entry) => entry.id === "webgl2-shared")) {
+    scenarios.push({ name: "force-webgl2-shared",
+      query: "bevyRuntime=1&bevyBackend=webgl2&bevySharedCanvas=1&bevyQuestUi=1&bevyBagUi=1" });
+  }
+  scenarios.push({ name: "raw-webgl2-probe", path: "/qa/webgl2-entity-renderer", rawWebGl2Probe: true });
+  return scenarios;
+}
+
+async function runScenarioInFreshTarget(debugPort, scenario, manifest) {
   const target = await createTarget(debugPort, "about:blank");
   const client = new CdpClient(target.webSocketDebuggerUrl);
   try {
@@ -223,14 +243,14 @@ async function runScenarioInFreshTarget(debugPort, scenario) {
     await client.send("Log.enable");
     await client.send("Network.enable");
     await setViewport(client, DEFAULT_VIEWPORT);
-    return await runScenario(client, scenario);
+    return await runScenario(client, scenario, manifest);
   } finally {
     client.close();
     await closeTarget(debugPort, target.id).catch(() => {});
   }
 }
 
-async function runScenario(client, scenario) {
+async function runScenario(client, scenario, manifest) {
   client.consoleErrors.length = 0;
   client.consoleWarnings.length = 0;
   client.responses.length = 0;
@@ -243,7 +263,7 @@ async function runScenario(client, scenario) {
     await waitForRuntime(client, waitTimeoutMs);
   }
   await sleep(1_500);
-  const remoteMotionProbe = scenario.rawWebGl2Probe
+  const remoteMotionProbe = scenario.rawWebGl2Probe || scenario.name === "force-webgl2-shared"
     ? null
     : await runRemoteMotionPresentationProbe(client);
   const snapshot = await client.evaluate(`(() => {
@@ -251,12 +271,28 @@ async function runScenario(client, scenario) {
     const canvasStyle = canvas ? window.getComputedStyle(canvas) : null;
     const runtime = window.__mir2BevyRuntimeDebug ?? null;
     const runtimeModule = window.__mir2BevyRuntime ?? null;
+    let runtimeUiCapabilities = null;
+    let runtimeUiCapabilitiesError = null;
+    if (typeof runtimeModule?.getMir2RuntimeUiCapabilities === "function") {
+      try { runtimeUiCapabilities = JSON.parse(runtimeModule.getMir2RuntimeUiCapabilities()); }
+      catch (error) { runtimeUiCapabilitiesError = String(error); }
+    }
     const renderer = window.__mir2BevyEntityRendererDebug ?? null;
     const mapRenderer = window.__mir2BevyMapRendererDebug ?? null;
     const webgl2Renderer = window.__mir2WebGl2EntityRendererDebug ?? null;
     return {
       href: window.location.href,
       runtime,
+      packageId: runtime?.packageId ?? null,
+      runtimeUiCapabilities,
+      runtimeUiCapabilitiesError,
+      stickyBoot: {
+        attempted: window.__mir2BevyRuntimeBootAttempted === true,
+        booted: window.__mir2BevyRuntimeBooted === true,
+        failed: window.__mir2BevyRuntimeFailed === true,
+        backend: window.__mir2BevyRuntimeBackend ?? null,
+        hasRuntime: Boolean(runtimeModule),
+      },
       runtimeApi: {
         movementShadowPush: typeof runtimeModule?.pushMir2MovementShadowEvent === "function",
         movementShadowDiagnostics:
@@ -308,11 +344,12 @@ async function runScenario(client, scenario) {
       scenario.name,
       { ...snapshot, remoteMotionProbe },
       client,
+      manifest,
     ),
   };
 }
 
-function scenarioAssertions(name, snapshot, client) {
+export function scenarioAssertions(name, snapshot, client, manifest) {
   const runtime = snapshot.runtime;
   const selected = runtime?.selectedBackend ?? null;
   const compiled = runtime?.compiledBackend ?? null;
@@ -320,19 +357,26 @@ function scenarioAssertions(name, snapshot, client) {
   const resources = snapshot.runtimeResources ?? [];
   const fetchedWebGpu = resources.some((entry) => entry.includes("/pkg-webgpu/"));
   const fetchedWebGl2 = resources.some((entry) => entry.includes("/pkg-webgl2/"));
+  const fetchedShared = resources.some((entry) => entry.includes("/pkg-webgl2-shared/"));
   const runtimeDebugPresent = Boolean(runtime);
   const rawWebGl2Renderer = snapshot.webgl2Renderer ?? null;
   const compiledMatchesSelected = selected === null || compiled === null || selected === compiled;
-  const packageFetchSucceeded = client.responses.every((response) => response.status >= 200 && response.status < 400);
-  const noCriticalConsoleErrors = client.consoleErrors.filter(isCriticalConsoleError).length === 0;
+  const packageFetchSucceeded = client.responses.every((response) =>
+    (response.status >= 200 && response.status < 400)
+      || isExpectedGpuPrebootFailure(name, runtime, response.url));
+  const noCriticalConsoleErrors = client.consoleErrors.filter((entry) =>
+    isCriticalConsoleError(entry) && !isExpectedGpuPrebootFailure(name, runtime, entry.url)).length === 0;
+  const packageEvidence = evaluateRuntimePackageEvidence(name, snapshot, client.responses, manifest);
+  const motionProbeNotRequired = name === "raw-webgl2-probe" || name === "force-webgl2-shared";
 
   return {
     runtimeDebugPresent,
     compiledMatchesSelected,
     packageFetchSucceeded,
+    ...packageEvidence,
     noCriticalConsoleErrors,
     movementShadowApiAvailable:
-      name === "raw-webgl2-probe" ||
+      motionProbeNotRequired ||
       (snapshot.runtimeApi?.movementShadowPush === true &&
         snapshot.runtimeApi?.movementShadowDiagnostics === true &&
         snapshot.runtimeApi?.remoteMotionPresentationEnable === true &&
@@ -344,12 +388,12 @@ function scenarioAssertions(name, snapshot, client) {
         snapshot.runtimeApi?.localMotionDiagnostics === true &&
         snapshot.runtimeApi?.localMotionPresentationEnable === true),
     presentationPoseSinkDeliveredMonotonicFrames:
-      name === "raw-webgl2-probe" ||
+      motionProbeNotRequired ||
       (snapshot.remoteMotionProbe?.poseSink?.count > 0 &&
         snapshot.remoteMotionProbe?.poseSink?.strictlyIncreasing === true &&
         snapshot.remoteMotionProbe?.poseSink?.parseErrorCount === 0),
     remoteMotionPresentationDrovePackedOffset:
-      name === "raw-webgl2-probe" ||
+      motionProbeNotRequired ||
       (snapshot.remoteMotionProbe?.mismatch?.targetMismatchCount > 0 &&
         snapshot.remoteMotionProbe?.matched?.offsetMatchCount > 0 &&
         snapshot.remoteMotionProbe?.matched?.decodeErrorCount === 0 &&
@@ -357,7 +401,7 @@ function scenarioAssertions(name, snapshot, client) {
         snapshot.remoteMotionProbe?.disabled?.enabled === false &&
         snapshot.remoteMotionProbe?.disabled?.entryCount === 0),
     unifiedPresentationPoseDroveDomContract:
-      name === "raw-webgl2-probe" ||
+      motionProbeNotRequired ||
       (snapshot.remoteMotionProbe?.matchedPoses?.bridgeEnabled === true &&
         snapshot.remoteMotionProbe?.matchedPoses?.rendererEnabled === true &&
         snapshot.remoteMotionProbe?.matchedPoses?.camera?.source === "localCommand" &&
@@ -370,7 +414,7 @@ function scenarioAssertions(name, snapshot, client) {
         snapshot.remoteMotionProbe?.disabledPoses?.camera?.source === "static" &&
         snapshot.remoteMotionProbe?.disabledPoses?.entities?.length === 0),
     localMotionShadowMatchesCurrentPose:
-      name === "raw-webgl2-probe" ||
+      motionProbeNotRequired ||
       (snapshot.remoteMotionProbe?.localMotion?.commandEventCount === 1 &&
         snapshot.remoteMotionProbe?.localMotion?.candidateMatchCount > 0 &&
         snapshot.remoteMotionProbe?.localMotion?.comparisonSampleCount > 0 &&
@@ -381,14 +425,14 @@ function scenarioAssertions(name, snapshot, client) {
         snapshot.remoteMotionProbe?.localMotion?.pendingCommandDropCount === 0 &&
         snapshot.remoteMotionProbe?.localMotion?.decodeErrorCount === 0),
     localMotionPresentationOwnsSelfPose:
-      name === "raw-webgl2-probe" ||
+      motionProbeNotRequired ||
       (snapshot.remoteMotionProbe?.localMotion?.presentationEnabled === true &&
         snapshot.remoteMotionProbe?.matchedPoses?.camera?.source === "localCommand" &&
         snapshot.remoteMotionProbe?.matchedPoses?.entities?.some(
           (entry) => entry.objectId === "local-motion-probe" && entry.source === "localCommand",
         )),
     localMotionPathMismatchFallsBack:
-      name === "raw-webgl2-probe" ||
+      motionProbeNotRequired ||
       (snapshot.remoteMotionProbe?.pathMismatchLocalMotion?.tsWindowPathMismatchCount > 0 &&
         snapshot.remoteMotionProbe?.pathMismatchPoses?.camera?.source === "selfWindow" &&
         snapshot.remoteMotionProbe?.pathMismatchPoses?.entities?.some(
@@ -408,7 +452,12 @@ function scenarioAssertions(name, snapshot, client) {
         compiled === "webgl2" &&
         fetchedWebGl2 &&
         !fetchedWebGpu &&
+         !fetchedShared &&
         noCriticalConsoleErrors),
+    usesRequestedSharedWebGl2:
+      name !== "force-webgl2-shared" ||
+      (runtimeDebugPresent && selected === "webgl2" && compiled === "webgl2" &&
+        fetchedShared && !fetchedWebGpu && !fetchedWebGl2 && noCriticalConsoleErrors),
     usesRequestedWebGpuOrFallsBack:
       name !== "force-webgpu" ||
       (runtimeDebugPresent &&
@@ -416,7 +465,7 @@ function scenarioAssertions(name, snapshot, client) {
           ? compiled === "webgpu" && fetchedWebGpu && noCriticalConsoleErrors
           : selected === "webgl2" &&
             compiled === "webgl2" &&
-            fetchedWebGl2 &&
+            fetchedWebGl2 && !fetchedShared &&
             noCriticalConsoleErrors)),
     rawWebGl2ProbeRendered:
       name !== "raw-webgl2-probe" ||
@@ -426,6 +475,76 @@ function scenarioAssertions(name, snapshot, client) {
         rawWebGl2Renderer.renderedLayers > 0 &&
         noCriticalConsoleErrors),
   };
+}
+
+function isExpectedGpuPrebootFailure(name, runtime, url) {
+  return (name === "default" || name === "force-webgpu") &&
+    runtime?.selectedBackend === "webgl2" && runtime?.fallbackFrom === "webgpu" &&
+    typeof url === "string" && url.includes("/pkg-webgpu/");
+}
+
+/** Pure evidence check; the browser snapshot is read-only and never boots another App. */
+export function evaluateRuntimePackageEvidence(name, snapshot, responses, manifest) {
+  if (name === "raw-webgl2-probe") {
+    return { currentRuntimePackageAgrees: true, runtimeUrlsUseCurrentVersion: true };
+  }
+  const runtime = snapshot.runtime;
+  const selectedBackend = runtime?.selectedBackend;
+  const expectedId = name === "force-webgl2-shared" ? "webgl2-shared"
+    : name === "force-webgl2" ? "webgl2"
+      : selectedBackend === "webgpu" ? "webgpu" : "webgl2";
+  const selectedPackage = manifest.packages.find((item) => item.id === expectedId);
+  const packageId = snapshot.packageId;
+  const sticky = snapshot.stickyBoot;
+  const actual = snapshot.runtimeUiCapabilities;
+  const expectedCapabilityKeys = ["schemaVersion", "backend", "questUiAbiVersion", "bagUiAbiVersion",
+    "primarySharedUiCompiled", "primarySharedUiStartup"];
+  const capabilityMatches = manifest.schemaVersion !== 2 || (
+    actual !== null && typeof actual === "object" && !Array.isArray(actual) &&
+    Object.keys(actual).length === expectedCapabilityKeys.length &&
+    expectedCapabilityKeys.every((key) => Object.hasOwn(actual, key)) &&
+    actual.schemaVersion === 1 && actual.backend === selectedPackage?.backend &&
+    actual.questUiAbiVersion === selectedPackage?.questUiAbiVersion &&
+    actual.bagUiAbiVersion === selectedPackage?.bagUiAbiVersion &&
+    actual.primarySharedUiCompiled === selectedPackage?.primarySharedUiCompiled &&
+    actual.primarySharedUiStartup === (expectedId === "webgl2-shared")
+  );
+  const currentRuntimePackageAgrees = Boolean(runtime && selectedPackage &&
+    packageId === expectedId && selectedBackend === selectedPackage.backend &&
+    runtime.compiledBackend === selectedPackage.backend &&
+    runtime.runtimeVersion === manifest.version &&
+    capabilityMatches &&
+    (manifest.schemaVersion !== 2 || (sticky?.attempted === true && sticky?.booted === true &&
+      sticky?.failed === false && sticky?.hasRuntime === true && sticky?.backend === selectedBackend)));
+
+  const resources = snapshot.runtimeResources ?? [];
+  const responseUrls = responses.map((response) => response.url);
+  const allowedIds = new Set([expectedId]);
+  if ((name === "default" || name === "force-webgpu") && expectedId === "webgl2"
+      && runtime?.fallbackFrom === "webgpu") allowedIds.add("webgpu");
+  const declaredPaths = new Set(manifest.files.map((file) =>
+    `/bevy-runtime/v/${manifest.version}/${file.path.slice("public/bevy-runtime/".length)}`));
+  const selectedPrefix = `/bevy-runtime/v/${manifest.version}/${selectedPackage?.packageDir ?? "missing"}/`;
+  const validUrl = (raw) => {
+    try {
+      const pathname = new URL(raw).pathname;
+      const at = pathname.lastIndexOf("/bevy-runtime/v/");
+      if (at < 0) return false;
+      const versionPath = pathname.slice(at);
+      const matched = /^\/bevy-runtime\/v\/([^/]+)\/(pkg-[^/]+)\/([^/]+)$/.exec(versionPath);
+      return Boolean(matched && matched[1] === manifest.version &&
+        allowedIds.has(matched[2].slice("pkg-".length)) &&
+        declaredPaths.has(versionPath));
+    } catch { return false; }
+  };
+  const hasSelected = (urls) => ["mir2_bevy_runtime.js", "mir2_bevy_runtime_bg.wasm"].every((name) => urls.some((raw) => {
+    try { return new URL(raw).pathname.endsWith(selectedPrefix + name); }
+    catch { return false; }
+  }));
+  const runtimeUrlsUseCurrentVersion = Boolean(selectedPackage && resources.length > 0 && responseUrls.length > 0 &&
+    resources.every(validUrl) && responseUrls.every(validUrl) &&
+    hasSelected(resources) && hasSelected(responseUrls));
+  return { currentRuntimePackageAgrees, runtimeUrlsUseCurrentVersion };
 }
 
 async function runRemoteMotionPresentationProbe(client) {
@@ -743,7 +862,9 @@ function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-main().catch((error) => {
-  console.error(error);
-  process.exitCode = 1;
-});
+if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+  main().catch((error) => {
+    console.error(error);
+    process.exitCode = 1;
+  });
+}

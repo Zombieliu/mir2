@@ -1,0 +1,1987 @@
+{
+  "entries": [
+    {
+      "key": "game.001",
+      "en": "Language",
+      "zh-TW": "語言",
+      "pt-BR": "Idioma",
+      "aliases": []
+    },
+    {
+      "key": "game.002",
+      "en": "Options",
+      "zh-TW": "設定",
+      "pt-BR": "Opções",
+      "aliases": []
+    },
+    {
+      "key": "game.003",
+      "en": "Bag",
+      "zh-TW": "背包",
+      "pt-BR": "Mochila",
+      "aliases": []
+    },
+    {
+      "key": "game.004",
+      "en": "Character / Equipment",
+      "zh-TW": "角色／裝備",
+      "pt-BR": "Personagem / Equipamento",
+      "aliases": []
+    },
+    {
+      "key": "game.005",
+      "en": "Character",
+      "zh-TW": "角色",
+      "pt-BR": "Personagem",
+      "aliases": []
+    },
+    {
+      "key": "game.006",
+      "en": "Equipment",
+      "zh-TW": "裝備",
+      "pt-BR": "Equipamento",
+      "aliases": []
+    },
+    {
+      "key": "game.007",
+      "en": "Skills",
+      "zh-TW": "技能",
+      "pt-BR": "Habilidades",
+      "aliases": []
+    },
+    {
+      "key": "game.008",
+      "en": "Status",
+      "zh-TW": "狀態",
+      "pt-BR": "Estado",
+      "aliases": []
+    },
+    {
+      "key": "game.009",
+      "en": "Statistics",
+      "zh-TW": "屬性",
+      "pt-BR": "Atributos",
+      "aliases": []
+    },
+    {
+      "key": "game.010",
+      "en": "Quest Diary",
+      "zh-TW": "任務日誌",
+      "pt-BR": "Diário de missões",
+      "aliases": []
+    },
+    {
+      "key": "game.011",
+      "en": "Quest",
+      "zh-TW": "任務",
+      "pt-BR": "Missão",
+      "aliases": []
+    },
+    {
+      "key": "game.012",
+      "en": "Quests",
+      "zh-TW": "任務",
+      "pt-BR": "Missões",
+      "aliases": []
+    },
+    {
+      "key": "game.013",
+      "en": "Help",
+      "zh-TW": "說明",
+      "pt-BR": "Ajuda",
+      "aliases": []
+    },
+    {
+      "key": "game.014",
+      "en": "Shortcut Information",
+      "zh-TW": "快捷鍵說明",
+      "pt-BR": "Atalhos",
+      "aliases": []
+    },
+    {
+      "key": "game.015",
+      "en": "Chat Shortcuts",
+      "zh-TW": "聊天快捷鍵",
+      "pt-BR": "Atalhos de conversa",
+      "aliases": []
+    },
+    {
+      "key": "game.016",
+      "en": "Shortcuts",
+      "zh-TW": "快捷鍵",
+      "pt-BR": "Atalhos",
+      "aliases": []
+    },
+    {
+      "key": "game.017",
+      "en": "Information",
+      "zh-TW": "說明",
+      "pt-BR": "Informações",
+      "aliases": []
+    },
+    {
+      "key": "game.018",
+      "en": "Movements",
+      "zh-TW": "移動",
+      "pt-BR": "Movimento",
+      "aliases": []
+    },
+    {
+      "key": "game.019",
+      "en": "Attacking",
+      "zh-TW": "攻擊",
+      "pt-BR": "Ataques",
+      "aliases": []
+    },
+    {
+      "key": "game.020",
+      "en": "Collecting Items",
+      "zh-TW": "拾取物品",
+      "pt-BR": "Coleta de itens",
+      "aliases": []
+    },
+    {
+      "key": "game.021",
+      "en": "Health",
+      "zh-TW": "生命",
+      "pt-BR": "Vida",
+      "aliases": []
+    },
+    {
+      "key": "game.022",
+      "en": "Mana",
+      "zh-TW": "魔力",
+      "pt-BR": "Mana",
+      "aliases": []
+    },
+    {
+      "key": "game.023",
+      "en": "Chatting",
+      "zh-TW": "聊天",
+      "pt-BR": "Conversa",
+      "aliases": []
+    },
+    {
+      "key": "game.024",
+      "en": "Groups",
+      "zh-TW": "隊伍",
+      "pt-BR": "Grupos",
+      "aliases": []
+    },
+    {
+      "key": "game.025",
+      "en": "Durability",
+      "zh-TW": "耐久度",
+      "pt-BR": "Durabilidade",
+      "aliases": []
+    },
+    {
+      "key": "game.026",
+      "en": "Purchasing",
+      "zh-TW": "購買",
+      "pt-BR": "Compras",
+      "aliases": []
+    },
+    {
+      "key": "game.027",
+      "en": "Selling",
+      "zh-TW": "出售",
+      "pt-BR": "Vendas",
+      "aliases": []
+    },
+    {
+      "key": "game.028",
+      "en": "Repairing",
+      "zh-TW": "修理",
+      "pt-BR": "Reparos",
+      "aliases": []
+    },
+    {
+      "key": "game.029",
+      "en": "Trading",
+      "zh-TW": "交易",
+      "pt-BR": "Trocas",
+      "aliases": []
+    },
+    {
+      "key": "game.030",
+      "en": "Inspecting",
+      "zh-TW": "查看",
+      "pt-BR": "Inspeção",
+      "aliases": []
+    },
+    {
+      "key": "game.031",
+      "en": "Mounts",
+      "zh-TW": "坐騎",
+      "pt-BR": "Montarias",
+      "aliases": []
+    },
+    {
+      "key": "game.032",
+      "en": "Fishing",
+      "zh-TW": "釣魚",
+      "pt-BR": "Pesca",
+      "aliases": []
+    },
+    {
+      "key": "game.033",
+      "en": "Gems and Orbs",
+      "zh-TW": "寶石與寶珠",
+      "pt-BR": "Gemas e orbes",
+      "aliases": []
+    },
+    {
+      "key": "game.034",
+      "en": "Heroes",
+      "zh-TW": "英雄",
+      "pt-BR": "Heróis",
+      "aliases": []
+    },
+    {
+      "key": "game.035",
+      "en": "Guild Buffs",
+      "zh-TW": "行會增益",
+      "pt-BR": "Bônus da guilda",
+      "aliases": []
+    },
+    {
+      "key": "game.036",
+      "en": "Skill mode",
+      "zh-TW": "技能模式",
+      "pt-BR": "Modo de habilidade",
+      "aliases": []
+    },
+    {
+      "key": "game.037",
+      "en": "Skill bar",
+      "zh-TW": "技能列",
+      "pt-BR": "Barra de habilidades",
+      "aliases": []
+    },
+    {
+      "key": "game.038",
+      "en": "Effects",
+      "zh-TW": "特效",
+      "pt-BR": "Efeitos",
+      "aliases": []
+    },
+    {
+      "key": "game.039",
+      "en": "Ground items",
+      "zh-TW": "地面物品",
+      "pt-BR": "Itens no chão",
+      "aliases": []
+    },
+    {
+      "key": "game.040",
+      "en": "Names",
+      "zh-TW": "名稱",
+      "pt-BR": "Nomes",
+      "aliases": []
+    },
+    {
+      "key": "game.041",
+      "en": "Health bars",
+      "zh-TW": "生命條",
+      "pt-BR": "Barras de vida",
+      "aliases": []
+    },
+    {
+      "key": "game.042",
+      "en": "Sound",
+      "zh-TW": "音效",
+      "pt-BR": "Som",
+      "aliases": []
+    },
+    {
+      "key": "game.043",
+      "en": "Music",
+      "zh-TW": "音樂",
+      "pt-BR": "Música",
+      "aliases": []
+    },
+    {
+      "key": "game.044",
+      "en": "Allow observation",
+      "zh-TW": "允許觀戰",
+      "pt-BR": "Permitir espectadores",
+      "aliases": []
+    },
+    {
+      "key": "game.045",
+      "en": "New movement",
+      "zh-TW": "新移動方式",
+      "pt-BR": "Novo movimento",
+      "aliases": []
+    },
+    {
+      "key": "game.046",
+      "en": "On",
+      "zh-TW": "開",
+      "pt-BR": "Sim",
+      "aliases": []
+    },
+    {
+      "key": "game.047",
+      "en": "Off",
+      "zh-TW": "關",
+      "pt-BR": "Não",
+      "aliases": []
+    },
+    {
+      "key": "game.048",
+      "en": "Enabled",
+      "zh-TW": "啟用",
+      "pt-BR": "Ativado",
+      "aliases": []
+    },
+    {
+      "key": "game.049",
+      "en": "Disabled",
+      "zh-TW": "停用",
+      "pt-BR": "Desativado",
+      "aliases": []
+    },
+    {
+      "key": "game.050",
+      "en": "Close",
+      "zh-TW": "關閉",
+      "pt-BR": "Fechar",
+      "aliases": []
+    },
+    {
+      "key": "game.051",
+      "en": "OK",
+      "zh-TW": "確定",
+      "pt-BR": "OK",
+      "aliases": []
+    },
+    {
+      "key": "game.052",
+      "en": "Cancel",
+      "zh-TW": "取消",
+      "pt-BR": "Cancelar",
+      "aliases": []
+    },
+    {
+      "key": "game.053",
+      "en": "Yes",
+      "zh-TW": "是",
+      "pt-BR": "Sim",
+      "aliases": []
+    },
+    {
+      "key": "game.054",
+      "en": "No",
+      "zh-TW": "否",
+      "pt-BR": "Não",
+      "aliases": []
+    },
+    {
+      "key": "game.055",
+      "en": "Accept",
+      "zh-TW": "接受",
+      "pt-BR": "Aceitar",
+      "aliases": []
+    },
+    {
+      "key": "game.056",
+      "en": "Finish",
+      "zh-TW": "完成",
+      "pt-BR": "Concluir",
+      "aliases": []
+    },
+    {
+      "key": "game.057",
+      "en": "Share",
+      "zh-TW": "分享",
+      "pt-BR": "Compartilhar",
+      "aliases": []
+    },
+    {
+      "key": "game.058",
+      "en": "Create",
+      "zh-TW": "建立",
+      "pt-BR": "Criar",
+      "aliases": []
+    },
+    {
+      "key": "game.059",
+      "en": "Delete",
+      "zh-TW": "刪除",
+      "pt-BR": "Excluir",
+      "aliases": []
+    },
+    {
+      "key": "game.060",
+      "en": "Buy",
+      "zh-TW": "購買",
+      "pt-BR": "Comprar",
+      "aliases": []
+    },
+    {
+      "key": "game.061",
+      "en": "Sell",
+      "zh-TW": "出售",
+      "pt-BR": "Vender",
+      "aliases": []
+    },
+    {
+      "key": "game.062",
+      "en": "Repair",
+      "zh-TW": "修理",
+      "pt-BR": "Reparar",
+      "aliases": []
+    },
+    {
+      "key": "game.063",
+      "en": "Storage",
+      "zh-TW": "倉庫",
+      "pt-BR": "Armazém",
+      "aliases": []
+    },
+    {
+      "key": "game.064",
+      "en": "Expanded Storage",
+      "zh-TW": "擴充倉庫",
+      "pt-BR": "Armazém ampliado",
+      "aliases": []
+    },
+    {
+      "key": "game.065",
+      "en": "Expanded Storage Locked",
+      "zh-TW": "擴充倉庫尚未解鎖",
+      "pt-BR": "Armazém ampliado bloqueado",
+      "aliases": []
+    },
+    {
+      "key": "game.066",
+      "en": "Mail",
+      "zh-TW": "郵件",
+      "pt-BR": "Correio",
+      "aliases": []
+    },
+    {
+      "key": "game.067",
+      "en": "Send",
+      "zh-TW": "寄送",
+      "pt-BR": "Enviar",
+      "aliases": []
+    },
+    {
+      "key": "game.068",
+      "en": "Read",
+      "zh-TW": "閱讀",
+      "pt-BR": "Ler",
+      "aliases": []
+    },
+    {
+      "key": "game.069",
+      "en": "Reply",
+      "zh-TW": "回覆",
+      "pt-BR": "Responder",
+      "aliases": []
+    },
+    {
+      "key": "game.070",
+      "en": "Collect",
+      "zh-TW": "領取",
+      "pt-BR": "Receber",
+      "aliases": []
+    },
+    {
+      "key": "game.071",
+      "en": "Retrieve",
+      "zh-TW": "取出",
+      "pt-BR": "Retirar",
+      "aliases": []
+    },
+    {
+      "key": "game.072",
+      "en": "Gold",
+      "zh-TW": "金幣",
+      "pt-BR": "Ouro",
+      "aliases": []
+    },
+    {
+      "key": "game.073",
+      "en": "Item",
+      "zh-TW": "物品",
+      "pt-BR": "Item",
+      "aliases": []
+    },
+    {
+      "key": "game.074",
+      "en": "Items",
+      "zh-TW": "物品",
+      "pt-BR": "Itens",
+      "aliases": []
+    },
+    {
+      "key": "game.075",
+      "en": "Sender",
+      "zh-TW": "寄件者",
+      "pt-BR": "Remetente",
+      "aliases": []
+    },
+    {
+      "key": "game.076",
+      "en": "Date",
+      "zh-TW": "日期",
+      "pt-BR": "Data",
+      "aliases": []
+    },
+    {
+      "key": "game.077",
+      "en": "Recipient",
+      "zh-TW": "收件者",
+      "pt-BR": "Destinatário",
+      "aliases": []
+    },
+    {
+      "key": "game.078",
+      "en": "Message",
+      "zh-TW": "訊息",
+      "pt-BR": "Mensagem",
+      "aliases": []
+    },
+    {
+      "key": "game.079",
+      "en": "Select Item",
+      "zh-TW": "選擇物品",
+      "pt-BR": "Escolher item",
+      "aliases": []
+    },
+    {
+      "key": "game.080",
+      "en": "World Map",
+      "zh-TW": "世界地圖",
+      "pt-BR": "Mapa do mundo",
+      "aliases": []
+    },
+    {
+      "key": "game.081",
+      "en": "Location",
+      "zh-TW": "位置",
+      "pt-BR": "Localização",
+      "aliases": []
+    },
+    {
+      "key": "game.082",
+      "en": "Go To",
+      "zh-TW": "前往",
+      "pt-BR": "Ir",
+      "aliases": []
+    },
+    {
+      "key": "game.083",
+      "en": "Loading map...",
+      "zh-TW": "正在載入地圖…",
+      "pt-BR": "Carregando mapa...",
+      "aliases": []
+    },
+    {
+      "key": "game.084",
+      "en": "Cyan: current task · Amber: other tasks (possible spawn areas)",
+      "zh-TW": "青色：目前任務 · 黃色：其他任務（可能出現區域）",
+      "pt-BR": "Ciano: missão atual · Âmbar: outras missões (áreas possíveis)",
+      "aliases": []
+    },
+    {
+      "key": "game.085",
+      "en": "Bichon safe zone (328,264)",
+      "zh-TW": "比奇城安全區 (328,264)",
+      "pt-BR": "Área segura de Bichon (328,264)",
+      "aliases": [
+        "比奇城安全区 (328,264)"
+      ]
+    },
+    {
+      "key": "game.086",
+      "en": "No goods",
+      "zh-TW": "沒有商品",
+      "pt-BR": "Sem mercadorias",
+      "aliases": []
+    },
+    {
+      "key": "game.087",
+      "en": "Trade",
+      "zh-TW": "交易",
+      "pt-BR": "Troca",
+      "aliases": []
+    },
+    {
+      "key": "game.088",
+      "en": "Request trade",
+      "zh-TW": "申請交易",
+      "pt-BR": "Solicitar troca",
+      "aliases": []
+    },
+    {
+      "key": "game.089",
+      "en": "Confirm",
+      "zh-TW": "確認",
+      "pt-BR": "Confirmar",
+      "aliases": []
+    },
+    {
+      "key": "game.090",
+      "en": "Split +",
+      "zh-TW": "增加拆分",
+      "pt-BR": "Dividir +",
+      "aliases": []
+    },
+    {
+      "key": "game.091",
+      "en": "Split -",
+      "zh-TW": "減少拆分",
+      "pt-BR": "Dividir -",
+      "aliases": []
+    },
+    {
+      "key": "game.092",
+      "en": "Confirm drop",
+      "zh-TW": "確認丟棄",
+      "pt-BR": "Confirmar descarte",
+      "aliases": []
+    },
+    {
+      "key": "game.093",
+      "en": "Drop",
+      "zh-TW": "丟棄",
+      "pt-BR": "Descartar",
+      "aliases": []
+    },
+    {
+      "key": "game.094",
+      "en": "Use",
+      "zh-TW": "使用",
+      "pt-BR": "Usar",
+      "aliases": []
+    },
+    {
+      "key": "game.095",
+      "en": "Equip",
+      "zh-TW": "裝備",
+      "pt-BR": "Equipar",
+      "aliases": []
+    },
+    {
+      "key": "game.096",
+      "en": "Unequip",
+      "zh-TW": "卸下",
+      "pt-BR": "Desequipar",
+      "aliases": []
+    },
+    {
+      "key": "game.097",
+      "en": "Inspect",
+      "zh-TW": "查看",
+      "pt-BR": "Inspecionar",
+      "aliases": []
+    },
+    {
+      "key": "game.098",
+      "en": "Move",
+      "zh-TW": "移動",
+      "pt-BR": "Mover",
+      "aliases": []
+    },
+    {
+      "key": "game.099",
+      "en": "Merge",
+      "zh-TW": "合併",
+      "pt-BR": "Juntar",
+      "aliases": []
+    },
+    {
+      "key": "game.100",
+      "en": "Split",
+      "zh-TW": "拆分",
+      "pt-BR": "Dividir",
+      "aliases": []
+    },
+    {
+      "key": "game.101",
+      "en": "Remove",
+      "zh-TW": "移除",
+      "pt-BR": "Remover",
+      "aliases": []
+    },
+    {
+      "key": "game.102",
+      "en": "You are dead",
+      "zh-TW": "你已死亡",
+      "pt-BR": "Você morreu",
+      "aliases": []
+    },
+    {
+      "key": "game.103",
+      "en": "Press V to revive in town",
+      "zh-TW": "按 V 回城復活",
+      "pt-BR": "Pressione V para reviver na cidade",
+      "aliases": []
+    },
+    {
+      "key": "game.104",
+      "en": "Passwords do not match.",
+      "zh-TW": "兩次輸入的密碼不同。",
+      "pt-BR": "As senhas não coincidem.",
+      "aliases": []
+    },
+    {
+      "key": "game.105",
+      "en": "Enter mail recipient name",
+      "zh-TW": "輸入收件者角色名稱",
+      "pt-BR": "Digite o nome do destinatário",
+      "aliases": []
+    },
+    {
+      "key": "game.106",
+      "en": "This parcel contains items or gold. Are you sure you want to delete it?",
+      "zh-TW": "這封包裹含有物品或金幣，確定要刪除嗎？",
+      "pt-BR": "Este pacote contém itens ou ouro. Deseja excluí-lo?",
+      "aliases": []
+    },
+    {
+      "key": "game.107",
+      "en": "Write mail (Tab switches field; Esc cancels)",
+      "zh-TW": "撰寫郵件（Tab 切換欄位，Esc 取消）",
+      "pt-BR": "Escrever carta (Tab muda o campo; Esc cancela)",
+      "aliases": []
+    },
+    {
+      "key": "game.108",
+      "en": "Show Offline",
+      "zh-TW": "顯示離線成員",
+      "pt-BR": "Mostrar desconectados",
+      "aliases": []
+    },
+    {
+      "key": "game.109",
+      "en": "Recruit Member",
+      "zh-TW": "招募成員",
+      "pt-BR": "Recrutar membro",
+      "aliases": []
+    },
+    {
+      "key": "game.110",
+      "en": "Members",
+      "zh-TW": "成員",
+      "pt-BR": "Membros",
+      "aliases": []
+    },
+    {
+      "key": "game.111",
+      "en": "Guild",
+      "zh-TW": "行會",
+      "pt-BR": "Guilda",
+      "aliases": []
+    },
+    {
+      "key": "game.112",
+      "en": "Friends",
+      "zh-TW": "好友",
+      "pt-BR": "Amigos",
+      "aliases": []
+    },
+    {
+      "key": "game.113",
+      "en": "Group",
+      "zh-TW": "隊伍",
+      "pt-BR": "Grupo",
+      "aliases": []
+    },
+    {
+      "key": "game.114",
+      "en": "Notice",
+      "zh-TW": "公告",
+      "pt-BR": "Avisos",
+      "aliases": []
+    },
+    {
+      "key": "game.115",
+      "en": "Ranks",
+      "zh-TW": "職級",
+      "pt-BR": "Cargos",
+      "aliases": []
+    },
+    {
+      "key": "game.116",
+      "en": "Ranking",
+      "zh-TW": "排行榜",
+      "pt-BR": "Classificação",
+      "aliases": []
+    },
+    {
+      "key": "game.117",
+      "en": "Online",
+      "zh-TW": "在線",
+      "pt-BR": "On-line",
+      "aliases": []
+    },
+    {
+      "key": "game.118",
+      "en": "Offline",
+      "zh-TW": "離線",
+      "pt-BR": "Desconectado",
+      "aliases": []
+    },
+    {
+      "key": "game.119",
+      "en": "Add",
+      "zh-TW": "新增",
+      "pt-BR": "Adicionar",
+      "aliases": []
+    },
+    {
+      "key": "game.120",
+      "en": "Invite",
+      "zh-TW": "邀請",
+      "pt-BR": "Convidar",
+      "aliases": []
+    },
+    {
+      "key": "game.121",
+      "en": "Leave",
+      "zh-TW": "離開",
+      "pt-BR": "Sair",
+      "aliases": []
+    },
+    {
+      "key": "game.122",
+      "en": "Kick",
+      "zh-TW": "移除",
+      "pt-BR": "Expulsar",
+      "aliases": []
+    },
+    {
+      "key": "game.123",
+      "en": "Whisper",
+      "zh-TW": "私聊",
+      "pt-BR": "Mensagem privada",
+      "aliases": []
+    },
+    {
+      "key": "game.124",
+      "en": "Refresh",
+      "zh-TW": "重新整理",
+      "pt-BR": "Atualizar",
+      "aliases": []
+    },
+    {
+      "key": "game.125",
+      "en": "Search",
+      "zh-TW": "搜尋",
+      "pt-BR": "Buscar",
+      "aliases": []
+    },
+    {
+      "key": "game.126",
+      "en": "Normal",
+      "zh-TW": "一般",
+      "pt-BR": "Normal",
+      "aliases": []
+    },
+    {
+      "key": "game.127",
+      "en": "System",
+      "zh-TW": "系統",
+      "pt-BR": "Sistema",
+      "aliases": []
+    },
+    {
+      "key": "game.128",
+      "en": "Shout",
+      "zh-TW": "喊話",
+      "pt-BR": "Grito",
+      "aliases": []
+    },
+    {
+      "key": "game.129",
+      "en": "Hint",
+      "zh-TW": "提示",
+      "pt-BR": "Dica",
+      "aliases": []
+    },
+    {
+      "key": "game.130",
+      "en": "Rotate",
+      "zh-TW": "旋轉",
+      "pt-BR": "Girar",
+      "aliases": []
+    },
+    {
+      "key": "game.131",
+      "en": "Close (Z)",
+      "zh-TW": "關閉 (Z)",
+      "pt-BR": "Fechar (Z)",
+      "aliases": []
+    },
+    {
+      "key": "game.132",
+      "en": "Inventory (B)",
+      "zh-TW": "背包 (B)",
+      "pt-BR": "Mochila (B)",
+      "aliases": []
+    },
+    {
+      "key": "game.133",
+      "en": "Character (C)",
+      "zh-TW": "角色 (C)",
+      "pt-BR": "Personagem (C)",
+      "aliases": []
+    },
+    {
+      "key": "game.134",
+      "en": "Skills (S)",
+      "zh-TW": "技能 (S)",
+      "pt-BR": "Habilidades (S)",
+      "aliases": []
+    },
+    {
+      "key": "game.135",
+      "en": "Quests (Q)",
+      "zh-TW": "任務 (Q)",
+      "pt-BR": "Missões (Q)",
+      "aliases": []
+    },
+    {
+      "key": "game.136",
+      "en": "Options (O)",
+      "zh-TW": "設定 (O)",
+      "pt-BR": "Opções (O)",
+      "aliases": []
+    },
+    {
+      "key": "game.137",
+      "en": "Inventory",
+      "zh-TW": "背包",
+      "pt-BR": "Mochila",
+      "aliases": []
+    },
+    {
+      "key": "game.138",
+      "en": "Attack",
+      "zh-TW": "攻擊",
+      "pt-BR": "Ataque",
+      "aliases": []
+    },
+    {
+      "key": "game.139",
+      "en": "Defence",
+      "zh-TW": "防禦",
+      "pt-BR": "Defesa",
+      "aliases": []
+    },
+    {
+      "key": "game.140",
+      "en": "Weight",
+      "zh-TW": "重量",
+      "pt-BR": "Peso",
+      "aliases": []
+    },
+    {
+      "key": "game.141",
+      "en": "Level",
+      "zh-TW": "等級",
+      "pt-BR": "Nível",
+      "aliases": []
+    },
+    {
+      "key": "game.142",
+      "en": "Class",
+      "zh-TW": "職業",
+      "pt-BR": "Classe",
+      "aliases": []
+    },
+    {
+      "key": "game.143",
+      "en": "Gender",
+      "zh-TW": "性別",
+      "pt-BR": "Sexo",
+      "aliases": []
+    },
+    {
+      "key": "game.144",
+      "en": "Name",
+      "zh-TW": "名稱",
+      "pt-BR": "Nome",
+      "aliases": []
+    },
+    {
+      "key": "game.145",
+      "en": "Gold {n}",
+      "zh-TW": "金幣 {n}",
+      "pt-BR": "Ouro {n}",
+      "aliases": [
+        "金币 {n}"
+      ]
+    },
+    {
+      "key": "game.146",
+      "en": "{n} Gold",
+      "zh-TW": "{n} 金幣",
+      "pt-BR": "{n} ouro",
+      "aliases": []
+    },
+    {
+      "key": "game.147",
+      "en": "Gold: {n}",
+      "zh-TW": "金幣：{n}",
+      "pt-BR": "Ouro: {n}",
+      "aliases": []
+    },
+    {
+      "key": "game.148",
+      "en": "Price: {n} gold",
+      "zh-TW": "價格：{n} 金幣",
+      "pt-BR": "Preço: {n} ouro",
+      "aliases": []
+    },
+    {
+      "key": "game.149",
+      "en": "Postage: {n}",
+      "zh-TW": "郵資：{n}",
+      "pt-BR": "Postagem: {n}",
+      "aliases": []
+    },
+    {
+      "key": "game.150",
+      "en": "Attachments: {n}/5",
+      "zh-TW": "附件：{n}/5",
+      "pt-BR": "Anexos: {n}/5",
+      "aliases": []
+    },
+    {
+      "key": "game.151",
+      "en": "Select the Key for: {name}",
+      "zh-TW": "為 {name} 選擇快捷鍵",
+      "pt-BR": "Escolha a tecla para: {name}",
+      "aliases": []
+    },
+    {
+      "key": "game.152",
+      "en": "Delete how many '{name}'?",
+      "zh-TW": "要刪除多少個「{name}」？",
+      "pt-BR": "Quantos '{name}' deseja excluir?",
+      "aliases": []
+    },
+    {
+      "key": "game.153",
+      "en": "Permanently delete '{name}'? This cannot be undone.",
+      "zh-TW": "永久刪除「{name}」？此操作無法復原。",
+      "pt-BR": "Excluir '{name}' permanentemente? Esta ação não pode ser desfeita.",
+      "aliases": []
+    },
+    {
+      "key": "game.154",
+      "en": "Drop {name} x{n}?",
+      "zh-TW": "丟棄 {name} ×{n}？",
+      "pt-BR": "Descartar {name} x{n}?",
+      "aliases": []
+    },
+    {
+      "key": "game.155",
+      "en": "Say: {text}_",
+      "zh-TW": "說話：{text}_",
+      "pt-BR": "Dizer: {text}_",
+      "aliases": []
+    },
+    {
+      "key": "game.156",
+      "en": "Weight {n}/{max}  Gold {gold}",
+      "zh-TW": "重量 {n}/{max}  金幣 {gold}",
+      "pt-BR": "Peso {n}/{max}  Ouro {gold}",
+      "aliases": []
+    },
+    {
+      "key": "game.157",
+      "en": "{name}: {n} left ({x},{y})",
+      "zh-TW": "{name}：剩餘 {n} ({x},{y})",
+      "pt-BR": "{name}: faltam {n} ({x},{y})",
+      "aliases": []
+    },
+    {
+      "key": "game.158",
+      "en": "[Tracked] ",
+      "zh-TW": "[目前] ",
+      "pt-BR": "[Atual] ",
+      "aliases": []
+    },
+    {
+      "key": "game.159",
+      "en": "Online Players: {n}",
+      "zh-TW": "線上玩家：{n}",
+      "pt-BR": "Jogadores conectados: {n}",
+      "aliases": []
+    },
+    {
+      "key": "game.160",
+      "en": "Welcome to the Legend of Mir 2 Server.",
+      "zh-TW": "歡迎來到傳奇 2 伺服器。",
+      "pt-BR": "Bem-vindo ao servidor de Legend of Mir 2.",
+      "aliases": []
+    },
+    {
+      "key": "game.161",
+      "en": "[Mode: Peaceful]",
+      "zh-TW": "[模式：和平]",
+      "pt-BR": "[Modo: pacífico]",
+      "aliases": []
+    },
+    {
+      "key": "game.162",
+      "en": "[Pet: Attack and Move]",
+      "zh-TW": "[寵物：攻擊並移動]",
+      "pt-BR": "[Pet: atacar e mover]",
+      "aliases": []
+    },
+    {
+      "key": "game.163",
+      "en": "Target is blocked and cannot be reached.",
+      "zh-TW": "目標位置有障礙，無法到達。",
+      "pt-BR": "O destino está bloqueado e não pode ser alcançado.",
+      "aliases": [
+        "目标位置有障碍，无法到达。"
+      ]
+    },
+    {
+      "key": "game.164",
+      "en": "You cannot position move on this map.",
+      "zh-TW": "此地圖無法使用定點移動。",
+      "pt-BR": "Não é possível usar movimento por posição neste mapa.",
+      "aliases": []
+    },
+    {
+      "key": "game.165",
+      "en": "Please include the build identifier when reporting a problem.",
+      "zh-TW": "回報問題時請附上版本編號。",
+      "pt-BR": "Inclua o identificador da versão ao relatar um problema.",
+      "aliases": []
+    },
+    {
+      "key": "game.extra.000",
+      "en": "Bag 1",
+      "zh-TW": "背包一",
+      "pt-BR": "Mochila 1",
+      "aliases": []
+    },
+    {
+      "key": "game.extra.001",
+      "en": "Bag 2",
+      "zh-TW": "背包二",
+      "pt-BR": "Mochila 2",
+      "aliases": []
+    },
+    {
+      "key": "game.extra.002",
+      "en": "Quest Items",
+      "zh-TW": "任務物品",
+      "pt-BR": "Itens de missão",
+      "aliases": []
+    },
+    {
+      "key": "game.extra.003",
+      "en": "Expand",
+      "zh-TW": "擴充",
+      "pt-BR": "Ampliar",
+      "aliases": []
+    },
+    {
+      "key": "game.extra.004",
+      "en": "Unlock",
+      "zh-TW": "解鎖",
+      "pt-BR": "Desbloquear",
+      "aliases": []
+    },
+    {
+      "key": "game.extra.005",
+      "en": "Write",
+      "zh-TW": "撰寫",
+      "pt-BR": "Escrever",
+      "aliases": []
+    },
+    {
+      "key": "game.extra.006",
+      "en": "Enter",
+      "zh-TW": "確認",
+      "pt-BR": "Confirmar",
+      "aliases": []
+    },
+    {
+      "key": "game.extra.007",
+      "en": "Random",
+      "zh-TW": "隨機",
+      "pt-BR": "Aleatório",
+      "aliases": []
+    },
+    {
+      "key": "game.extra.008",
+      "en": "Experience",
+      "zh-TW": "經驗",
+      "pt-BR": "Experiência",
+      "aliases": []
+    },
+    {
+      "key": "game.extra.009",
+      "en": "Bag weight",
+      "zh-TW": "背包負重",
+      "pt-BR": "Peso da mochila",
+      "aliases": []
+    },
+    {
+      "key": "game.extra.010",
+      "en": "Equipment weight",
+      "zh-TW": "裝備負重",
+      "pt-BR": "Peso equipado",
+      "aliases": []
+    },
+    {
+      "key": "game.extra.011",
+      "en": "Hand weight",
+      "zh-TW": "腕力",
+      "pt-BR": "Peso nas mãos",
+      "aliases": []
+    },
+    {
+      "key": "game.extra.012",
+      "en": "Magic resistance",
+      "zh-TW": "魔法抵抗",
+      "pt-BR": "Resistência mágica",
+      "aliases": []
+    },
+    {
+      "key": "game.extra.013",
+      "en": "Poison resistance",
+      "zh-TW": "毒素抵抗",
+      "pt-BR": "Resistência a veneno",
+      "aliases": []
+    },
+    {
+      "key": "game.extra.014",
+      "en": "Health recovery",
+      "zh-TW": "生命恢復",
+      "pt-BR": "Recuperação de vida",
+      "aliases": []
+    },
+    {
+      "key": "game.extra.015",
+      "en": "Mana recovery",
+      "zh-TW": "魔力恢復",
+      "pt-BR": "Recuperação de mana",
+      "aliases": []
+    },
+    {
+      "key": "game.extra.016",
+      "en": "Poison recovery",
+      "zh-TW": "解毒能力",
+      "pt-BR": "Recuperação de veneno",
+      "aliases": []
+    },
+    {
+      "key": "game.extra.017",
+      "en": "Freeze",
+      "zh-TW": "冰凍",
+      "pt-BR": "Congelamento",
+      "aliases": []
+    },
+    {
+      "key": "game.extra.018",
+      "en": "Poison",
+      "zh-TW": "毒素",
+      "pt-BR": "Veneno",
+      "aliases": []
+    },
+    {
+      "key": "game.extra.019",
+      "en": "Holy",
+      "zh-TW": "神聖",
+      "pt-BR": "Sagrado",
+      "aliases": []
+    },
+    {
+      "key": "game.extra.020",
+      "en": "Critical chance",
+      "zh-TW": "暴擊機率",
+      "pt-BR": "Chance crítica",
+      "aliases": []
+    },
+    {
+      "key": "game.extra.021",
+      "en": "Critical damage",
+      "zh-TW": "暴擊傷害",
+      "pt-BR": "Dano crítico",
+      "aliases": []
+    },
+    {
+      "key": "game.extra.022",
+      "en": "Accuracy",
+      "zh-TW": "準確",
+      "pt-BR": "Precisão",
+      "aliases": []
+    },
+    {
+      "key": "game.extra.023",
+      "en": "Attack speed",
+      "zh-TW": "攻擊速度",
+      "pt-BR": "Velocidade de ataque",
+      "aliases": []
+    },
+    {
+      "key": "game.extra.024",
+      "en": "Luck",
+      "zh-TW": "幸運",
+      "pt-BR": "Sorte",
+      "aliases": []
+    },
+    {
+      "key": "game.extra.025",
+      "en": "Agility",
+      "zh-TW": "敏捷",
+      "pt-BR": "Agilidade",
+      "aliases": []
+    },
+    {
+      "key": "game.extra.026",
+      "en": "STOCK:",
+      "zh-TW": "庫存：",
+      "pt-BR": "ESTOQUE:",
+      "aliases": []
+    },
+    {
+      "key": "game.extra.027",
+      "en": "Show All",
+      "zh-TW": "顯示全部",
+      "pt-BR": "Mostrar tudo",
+      "aliases": []
+    },
+    {
+      "key": "game.extra.028",
+      "en": "Assign Rule: Strict",
+      "zh-TW": "指定規則：嚴格",
+      "pt-BR": "Regra: estrita",
+      "aliases": []
+    },
+    {
+      "key": "game.extra.029",
+      "en": "Assign Rule: Relaxed",
+      "zh-TW": "指定規則：寬鬆",
+      "pt-BR": "Regra: flexível",
+      "aliases": []
+    },
+    {
+      "key": "game.extra.030",
+      "en": "Buy with Gold",
+      "zh-TW": "使用金幣購買",
+      "pt-BR": "Comprar com ouro",
+      "aliases": []
+    },
+    {
+      "key": "game.extra.031",
+      "en": "Buy with Credits",
+      "zh-TW": "使用點數購買",
+      "pt-BR": "Comprar com créditos",
+      "aliases": []
+    },
+    {
+      "key": "game.extra.032",
+      "en": "All",
+      "zh-TW": "全部",
+      "pt-BR": "Tudo",
+      "aliases": []
+    },
+    {
+      "key": "game.extra.033",
+      "en": "Top",
+      "zh-TW": "熱門",
+      "pt-BR": "Destaques",
+      "aliases": []
+    },
+    {
+      "key": "game.extra.034",
+      "en": "Deals",
+      "zh-TW": "特價",
+      "pt-BR": "Ofertas",
+      "aliases": []
+    },
+    {
+      "key": "game.extra.035",
+      "en": "New",
+      "zh-TW": "新品",
+      "pt-BR": "Novidades",
+      "aliases": []
+    },
+    {
+      "key": "game.extra.036",
+      "en": "From",
+      "zh-TW": "寄件者",
+      "pt-BR": "De",
+      "aliases": []
+    },
+    {
+      "key": "game.extra.037",
+      "en": "To",
+      "zh-TW": "收件者",
+      "pt-BR": "Para",
+      "aliases": []
+    },
+    {
+      "key": "game.extra.038",
+      "en": "Subject",
+      "zh-TW": "主旨",
+      "pt-BR": "Assunto",
+      "aliases": []
+    },
+    {
+      "key": "game.extra.039",
+      "en": "Level: {n}",
+      "zh-TW": "等級：{n}",
+      "pt-BR": "Nível: {n}",
+      "aliases": []
+    },
+    {
+      "key": "game.extra.040",
+      "en": "Durability: {n}/{max}",
+      "zh-TW": "耐久：{n}/{max}",
+      "pt-BR": "Durabilidade: {n}/{max}",
+      "aliases": []
+    },
+    {
+      "key": "game.extra.041",
+      "en": "MP: {n}",
+      "zh-TW": "魔力：{n}",
+      "pt-BR": "PM: {n}",
+      "aliases": []
+    },
+    {
+      "key": "game.extra.042",
+      "en": "Cooldown: {n}",
+      "zh-TW": "冷卻：{n}",
+      "pt-BR": "Recarga: {n}",
+      "aliases": []
+    },
+    {
+      "key": "game.extra.043",
+      "en": "Key: {key}",
+      "zh-TW": "快捷鍵：{key}",
+      "pt-BR": "Tecla: {key}",
+      "aliases": []
+    },
+    {
+      "key": "game.extra.044",
+      "en": "Mail was rejected; draft kept",
+      "zh-TW": "郵件未寄出，已保留草稿",
+      "pt-BR": "A carta foi recusada; rascunho mantido",
+      "aliases": []
+    },
+    {
+      "key": "game.extra.045",
+      "en": "Item rented from: {name}",
+      "zh-TW": "物品出租者：{name}",
+      "pt-BR": "Item alugado de: {name}",
+      "aliases": []
+    },
+    {
+      "key": "game.complete.001",
+      "en": "Blacklist",
+      "zh-TW": "黑名單",
+      "pt-BR": "Bloqueados",
+      "aliases": []
+    },
+    {
+      "key": "game.complete.002",
+      "en": "Reset",
+      "zh-TW": "重設",
+      "pt-BR": "Redefinir",
+      "aliases": []
+    },
+    {
+      "key": "game.complete.003",
+      "en": "None",
+      "zh-TW": "無",
+      "pt-BR": "Nenhum",
+      "aliases": []
+    },
+    {
+      "key": "game.complete.004",
+      "en": "Save",
+      "zh-TW": "儲存",
+      "pt-BR": "Salvar",
+      "aliases": []
+    },
+    {
+      "key": "game.complete.005",
+      "en": "Auto",
+      "zh-TW": "自動",
+      "pt-BR": "Auto",
+      "aliases": []
+    },
+    {
+      "key": "game.complete.007",
+      "en": "Esc to exit",
+      "zh-TW": "按 Esc 離開",
+      "pt-BR": "Esc para sair",
+      "aliases": []
+    },
+    {
+      "key": "game.complete.008",
+      "en": "Function",
+      "zh-TW": "功能",
+      "pt-BR": "Função",
+      "aliases": []
+    },
+    {
+      "key": "game.complete.009",
+      "en": "Default",
+      "zh-TW": "預設",
+      "pt-BR": "Padrão",
+      "aliases": []
+    },
+    {
+      "key": "game.complete.010",
+      "en": "Current",
+      "zh-TW": "目前",
+      "pt-BR": "Atual",
+      "aliases": []
+    },
+    {
+      "key": "game.complete.013",
+      "en": "Rank",
+      "zh-TW": "排名",
+      "pt-BR": "Posição",
+      "aliases": []
+    },
+    {
+      "key": "game.complete.016",
+      "en": "Not Listed",
+      "zh-TW": "未上榜",
+      "pt-BR": "Fora da lista",
+      "aliases": []
+    },
+    {
+      "key": "game.complete.017",
+      "en": "Ranked {n}",
+      "zh-TW": "第 {n} 名",
+      "pt-BR": "Posição {n}",
+      "aliases": []
+    },
+    {
+      "key": "game.complete.018",
+      "en": "Holy Power",
+      "zh-TW": "神聖攻擊",
+      "pt-BR": "Poder sagrado",
+      "aliases": []
+    },
+    {
+      "key": "game.complete.019",
+      "en": "Frost Power",
+      "zh-TW": "冰凍攻擊",
+      "pt-BR": "Poder de gelo",
+      "aliases": []
+    },
+    {
+      "key": "game.complete.020",
+      "en": "Poison Power",
+      "zh-TW": "毒素攻擊",
+      "pt-BR": "Poder de veneno",
+      "aliases": []
+    },
+    {
+      "key": "game.complete.022",
+      "en": "Buffs",
+      "zh-TW": "增益",
+      "pt-BR": "Bônus",
+      "aliases": []
+    },
+    {
+      "key": "game.complete.025",
+      "en": "Points Remaining",
+      "zh-TW": "剩餘點數",
+      "pt-BR": "Pontos restantes",
+      "aliases": []
+    },
+    {
+      "key": "game.complete.026",
+      "en": "Insufficient Level",
+      "zh-TW": "等級不足",
+      "pt-BR": "Nível insuficiente",
+      "aliases": []
+    },
+    {
+      "key": "game.complete.027",
+      "en": "Available",
+      "zh-TW": "可使用",
+      "pt-BR": "Disponível",
+      "aliases": []
+    },
+    {
+      "key": "game.complete.028",
+      "en": "Counting Down",
+      "zh-TW": "倒數中",
+      "pt-BR": "Contagem regressiva",
+      "aliases": []
+    },
+    {
+      "key": "game.complete.029",
+      "en": "Expired",
+      "zh-TW": "已到期",
+      "pt-BR": "Expirado",
+      "aliases": []
+    },
+    {
+      "key": "game.complete.030",
+      "en": "Obtained",
+      "zh-TW": "已取得",
+      "pt-BR": "Obtido",
+      "aliases": []
+    },
+    {
+      "key": "game.complete.031",
+      "en": "Active",
+      "zh-TW": "啟用中",
+      "pt-BR": "Ativo",
+      "aliases": []
+    },
+    {
+      "key": "game.complete.032",
+      "en": "Inactive",
+      "zh-TW": "未啟用",
+      "pt-BR": "Inativo",
+      "aliases": []
+    },
+    {
+      "key": "game.complete.034",
+      "en": "Today",
+      "zh-TW": "今天",
+      "pt-BR": "Hoje",
+      "aliases": []
+    },
+    {
+      "key": "game.complete.035",
+      "en": "Yesterday",
+      "zh-TW": "昨天",
+      "pt-BR": "Ontem",
+      "aliases": []
+    },
+    {
+      "key": "game.complete.036",
+      "en": "{n} days ago",
+      "zh-TW": "{n} 天前",
+      "pt-BR": "Há {n} dias",
+      "aliases": []
+    },
+    {
+      "key": "game.complete.037",
+      "en": "Insufficient points available.",
+      "zh-TW": "可用點數不足。",
+      "pt-BR": "Pontos disponíveis insuficientes.",
+      "aliases": []
+    },
+    {
+      "key": "game.complete.038",
+      "en": "Guild level too low.",
+      "zh-TW": "行會等級不足。",
+      "pt-BR": "O nível da guilda é muito baixo.",
+      "aliases": []
+    },
+    {
+      "key": "game.complete.039",
+      "en": "Guild rank does not allow buff activation.",
+      "zh-TW": "目前職級無權啟用行會增益。",
+      "pt-BR": "Seu cargo não permite ativar bônus da guilda.",
+      "aliases": []
+    },
+    {
+      "key": "game.complete.040",
+      "en": "Buff is still active.",
+      "zh-TW": "此增益仍在生效。",
+      "pt-BR": "Este bônus ainda está ativo.",
+      "aliases": []
+    },
+    {
+      "key": "game.complete.041",
+      "en": "Insufficient guild funds.",
+      "zh-TW": "行會資金不足。",
+      "pt-BR": "Fundos da guilda insuficientes.",
+      "aliases": []
+    },
+    {
+      "key": "game.complete.042",
+      "en": "Are you sure you want to create a new rank?",
+      "zh-TW": "確定要建立新職級嗎？",
+      "pt-BR": "Deseja criar um novo cargo?",
+      "aliases": []
+    },
+    {
+      "key": "game.complete.043",
+      "en": "Minimum Guild Level: {n}",
+      "zh-TW": "行會最低等級：{n}",
+      "pt-BR": "Nível mínimo da guilda: {n}",
+      "aliases": []
+    },
+    {
+      "key": "game.complete.044",
+      "en": "Points Required: {n}",
+      "zh-TW": "所需點數：{n}",
+      "pt-BR": "Pontos necessários: {n}",
+      "aliases": []
+    },
+    {
+      "key": "game.complete.045",
+      "en": "Activation Cost: {n} gold.",
+      "zh-TW": "啟用費用：{n} 金幣。",
+      "pt-BR": "Custo de ativação: {n} de ouro.",
+      "aliases": []
+    },
+    {
+      "key": "game.complete.046",
+      "en": "Time Remaining: {n} minutes",
+      "zh-TW": "剩餘時間：{n} 分鐘",
+      "pt-BR": "Tempo restante: {n} minutos",
+      "aliases": []
+    },
+    {
+      "key": "game.complete.047",
+      "en": "Buff Length: {n} minutes.",
+      "zh-TW": "增益持續時間：{n} 分鐘。",
+      "pt-BR": "Duração do bônus: {n} minutos.",
+      "aliases": []
+    },
+    {
+      "key": "game.complete.048",
+      "en": "Guild Statistics",
+      "zh-TW": "行會統計",
+      "pt-BR": "Estatísticas da guilda",
+      "aliases": []
+    },
+    {
+      "key": "game.complete.049",
+      "en": "Storage 1",
+      "zh-TW": "倉庫一",
+      "pt-BR": "Depósito 1",
+      "aliases": []
+    },
+    {
+      "key": "game.complete.050",
+      "en": "Storage 2",
+      "zh-TW": "倉庫二",
+      "pt-BR": "Depósito 2",
+      "aliases": []
+    },
+    {
+      "key": "game.guild.buff_decreases",
+      "en": "Decreases {stat} by: {value}{suffix}.",
+      "zh-TW": "{stat} 降低：{value}{suffix}。",
+      "pt-BR": "Reduz {stat} em: {value}{suffix}.",
+      "aliases": []
+    },
+    {
+      "key": "game.guild.buff_increases",
+      "en": "Increases {stat} by: {value}{suffix}.",
+      "zh-TW": "{stat} 提升：{value}{suffix}。",
+      "pt-BR": "Aumenta {stat} em: {value}{suffix}.",
+      "aliases": []
+    },
+    {
+      "key": "game.guild.confirm_join",
+      "en": "Do you want to join the {name} guild?",
+      "zh-TW": "要加入 {name} 行會嗎？",
+      "pt-BR": "Deseja entrar na guilda {name}?",
+      "aliases": []
+    },
+    {
+      "key": "game.guild.confirm_kick",
+      "en": "Are you sure you want to kick {name}?",
+      "zh-TW": "確定要移除 {name} 嗎？",
+      "pt-BR": "Deseja remover {name}?",
+      "aliases": []
+    },
+    {
+      "key": "game.guild.confirm_rank",
+      "en": "Are you sure you want to change the rank of {name} to {rank}?",
+      "zh-TW": "確定要將 {name} 的職級改為 {rank} 嗎？",
+      "pt-BR": "Deseja alterar o cargo de {name} para {rank}?",
+      "aliases": []
+    },
+    {
+      "key": "game.creature.pickup.semi_auto",
+      "en": "semi-auto",
+      "zh-TW": "半自動",
+      "pt-BR": "semiautomático",
+      "aliases": [],
+      "sameValueReason": null
+    },
+    {
+      "key": "game.creature.pickup.auto",
+      "en": "auto",
+      "zh-TW": "自動",
+      "pt-BR": "automático",
+      "aliases": [],
+      "sameValueReason": null
+    },
+    {
+      "key": "game.creature.pickup.mouse",
+      "en": "mouse",
+      "zh-TW": "滑鼠",
+      "pt-BR": "mouse",
+      "aliases": [],
+      "sameValueReason": "standard input device name in Brazilian Portuguese"
+    },
+    {
+      "key": "game.shop.confirm",
+      "en": "Are you sure would you like to buy {quantity} x\n{item}({count}) for {total} {currency}?",
+      "zh-TW": "確定購買 {quantity} 份\n{item}（每份 {count} 個），共 {total} {currency}？",
+      "pt-BR": "Deseja comprar {quantity} x\n{item} ({count} por unidade) por {total} {currency}?",
+      "aliases": []
+    },
+    {
+      "key": "game.services.00",
+      "en": "Type",
+      "zh-TW": "類別",
+      "pt-BR": "Tipo",
+      "aliases": []
+    },
+    {
+      "key": "game.services.03",
+      "en": "Postage quote unavailable",
+      "zh-TW": "目前無法取得郵資",
+      "pt-BR": "Não foi possível calcular o porte",
+      "aliases": []
+    },
+    {
+      "key": "game.services.04",
+      "en": "Quote unavailable",
+      "zh-TW": "無法取得報價",
+      "pt-BR": "Preço indisponível",
+      "aliases": []
+    },
+    {
+      "key": "game.services.06",
+      "en": "Special repair",
+      "zh-TW": "特殊修理",
+      "pt-BR": "Reparo especial",
+      "aliases": []
+    },
+    {
+      "key": "game.services.07",
+      "en": "Sale",
+      "zh-TW": "出售",
+      "pt-BR": "Venda",
+      "aliases": []
+    },
+    {
+      "key": "game.npc.service_quote",
+      "en": "{service}\n{amount} gold",
+      "zh-TW": "{service}\n{amount} 金幣",
+      "pt-BR": "{service}\n{amount} de ouro",
+      "aliases": []
+    },
+    {
+      "key": "game.final.00",
+      "en": "Hold",
+      "zh-TW": "保留",
+      "pt-BR": "Manter",
+      "aliases": []
+    },
+    {
+      "key": "game.final.01",
+      "en": "Obtain a stamp to unlock",
+      "zh-TW": "取得郵票後解鎖",
+      "pt-BR": "Obtenha um selo para desbloquear",
+      "aliases": []
+    },
+    {
+      "key": "game.final.02",
+      "en": "Edit ranks",
+      "zh-TW": "編輯職級",
+      "pt-BR": "Editar cargos",
+      "aliases": []
+    },
+    {
+      "key": "game.final.03",
+      "en": "Recruit member",
+      "zh-TW": "招募成員",
+      "pt-BR": "Recrutar membro",
+      "aliases": []
+    },
+    {
+      "key": "game.final.04",
+      "en": "Kick member",
+      "zh-TW": "移除成員",
+      "pt-BR": "Remover membro",
+      "aliases": []
+    },
+    {
+      "key": "game.final.05",
+      "en": "Store item",
+      "zh-TW": "存入物品",
+      "pt-BR": "Guardar item",
+      "aliases": []
+    },
+    {
+      "key": "game.final.06",
+      "en": "Retrieve item",
+      "zh-TW": "取出物品",
+      "pt-BR": "Retirar item",
+      "aliases": []
+    },
+    {
+      "key": "game.final.07",
+      "en": "Alter alliance",
+      "zh-TW": "更改同盟",
+      "pt-BR": "Alterar aliança",
+      "aliases": []
+    },
+    {
+      "key": "game.final.08",
+      "en": "Change notice",
+      "zh-TW": "修改公告",
+      "pt-BR": "Alterar aviso",
+      "aliases": []
+    },
+    {
+      "key": "game.final.09",
+      "en": "Activate Buff",
+      "zh-TW": "啟用增益",
+      "pt-BR": "Ativar bônus",
+      "aliases": []
+    },
+    {
+      "key": "game.shop.price_gold",
+      "en": "Price: {amount} gold",
+      "zh-TW": "價格：{amount} 金幣",
+      "pt-BR": "Preço: {amount} de ouro",
+      "aliases": []
+    },
+    {
+      "key": "game.shop.price_pearl",
+      "en": "Price: {amount} pearl",
+      "zh-TW": "價格：{amount} 顆珍珠",
+      "pt-BR": "Preço: {amount} pérola",
+      "aliases": []
+    },
+    {
+      "key": "game.shop.price_pearls",
+      "en": "Price: {amount} pearls",
+      "zh-TW": "價格：{amount} 顆珍珠",
+      "pt-BR": "Preço: {amount} pérolas",
+      "aliases": []
+    },
+    {
+      "key": "game.option.new_movement",
+      "en": "New",
+      "zh-TW": "新版",
+      "pt-BR": "Novo",
+      "aliases": []
+    },
+    {
+      "key": "game.option.old_movement",
+      "en": "Old",
+      "zh-TW": "舊版",
+      "pt-BR": "Antigo",
+      "aliases": []
+    }
+  ]
+}

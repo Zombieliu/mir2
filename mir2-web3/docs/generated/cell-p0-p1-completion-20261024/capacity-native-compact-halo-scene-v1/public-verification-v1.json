@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "verifiedAt": "2026-10-25T06:19:09.400Z",
+  "method": "Read-only exact original/public raw-byte matching and public file closure; no rerun of static authoring or gameplay tests.",
+  "copyReceipt": {
+    "bytes": 53225,
+    "sha256": "43897b15849b9b02c4336e064cc790b55a6ede1fa6392cb7cb7894f5fca28c73"
+  },
+  "copiesVerified": 125,
+  "copiedBytes": 53552646,
+  "publicFilesBeforeThisReceipt": 127,
+  "rejectedStaticCandidatesPreserved": true,
+  "twoRepairTrialsPreserved": true,
+  "staticOnly": true,
+  "capacityAccepted": false,
+  "finalIndexCreated": false
+}

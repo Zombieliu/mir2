@@ -1,0 +1,2919 @@
+{
+  "schemaVersion": 1,
+  "kind": "mir2-five-class-sprite-closure",
+  "profileId": "platinum_fiveclass",
+  "profileSha256": "9fc2d6875c78691f7e34650eae8e8df868690a1ee6e5960becc113cae0e9d4ac",
+  "catalogueSha256": "b0d48ada978d8a062e993fe0425b6a724672aeea354a3b7b4508fb4c161658b7",
+  "provenance": {
+    "libraries": "Crystal/Client/MirObjects/PlayerObject.cs::SetLibraries",
+    "actions": "Crystal/Client/MirObjects/Frames.cs::Player",
+    "effects": "Crystal/Client/MirObjects/PlayerObject.cs::MirAction.AttackRange1"
+  },
+  "equipment": [
+    {
+      "itemIndex": 5,
+      "name": "SpiritBlade4",
+      "type": 1,
+      "shape": 102,
+      "classMask": 8,
+      "genderMask": 3,
+      "image": 2251
+    },
+    {
+      "itemIndex": 6,
+      "name": "SpiritBlade5",
+      "type": 1,
+      "shape": 207,
+      "classMask": 16,
+      "genderMask": 3,
+      "image": 3397
+    },
+    {
+      "itemIndex": 43,
+      "name": "MirSword4",
+      "type": 1,
+      "shape": 110,
+      "classMask": 8,
+      "genderMask": 3,
+      "image": 1157
+    },
+    {
+      "itemIndex": 44,
+      "name": "MirSword5",
+      "type": 1,
+      "shape": 205,
+      "classMask": 16,
+      "genderMask": 3,
+      "image": 3395
+    },
+    {
+      "itemIndex": 49,
+      "name": "MirArmour(M)4",
+      "type": 2,
+      "shape": 10,
+      "classMask": 8,
+      "genderMask": 1,
+      "image": 595
+    },
+    {
+      "itemIndex": 50,
+      "name": "MirArmour(M)5",
+      "type": 2,
+      "shape": 10,
+      "classMask": 16,
+      "genderMask": 1,
+      "image": 595
+    },
+    {
+      "itemIndex": 55,
+      "name": "MirArmour(F)4",
+      "type": 2,
+      "shape": 10,
+      "classMask": 8,
+      "genderMask": 2,
+      "image": 605
+    },
+    {
+      "itemIndex": 56,
+      "name": "MirArmour(F)5",
+      "type": 2,
+      "shape": 10,
+      "classMask": 16,
+      "genderMask": 2,
+      "image": 605
+    },
+    {
+      "itemIndex": 144,
+      "name": "TarragonArmour(M)4",
+      "type": 2,
+      "shape": 29,
+      "classMask": 8,
+      "genderMask": 1,
+      "image": 2276
+    },
+    {
+      "itemIndex": 145,
+      "name": "TarragonArmour(M)5",
+      "type": 2,
+      "shape": 29,
+      "classMask": 16,
+      "genderMask": 1,
+      "image": 2276
+    },
+    {
+      "itemIndex": 150,
+      "name": "TarragonArmour(F)4",
+      "type": 2,
+      "shape": 29,
+      "classMask": 8,
+      "genderMask": 2,
+      "image": 2286
+    },
+    {
+      "itemIndex": 151,
+      "name": "TarragonArmour(F)5",
+      "type": 2,
+      "shape": 29,
+      "classMask": 16,
+      "genderMask": 2,
+      "image": 2286
+    },
+    {
+      "itemIndex": 281,
+      "name": "HoaSword",
+      "type": 1,
+      "shape": 100,
+      "classMask": 8,
+      "genderMask": 3,
+      "image": 2259
+    },
+    {
+      "itemIndex": 282,
+      "name": "ToughHoaSword",
+      "type": 1,
+      "shape": 100,
+      "classMask": 8,
+      "genderMask": 3,
+      "image": 2259
+    },
+    {
+      "itemIndex": 283,
+      "name": "SharpHoaSword",
+      "type": 1,
+      "shape": 100,
+      "classMask": 8,
+      "genderMask": 3,
+      "image": 2259
+    },
+    {
+      "itemIndex": 284,
+      "name": "BladesOfVelocity",
+      "type": 1,
+      "shape": 101,
+      "classMask": 8,
+      "genderMask": 3,
+      "image": 2250
+    },
+    {
+      "itemIndex": 285,
+      "name": "IronBlades",
+      "type": 1,
+      "shape": 102,
+      "classMask": 8,
+      "genderMask": 3,
+      "image": 2251
+    },
+    {
+      "itemIndex": 286,
+      "name": "DoubleBlades",
+      "type": 1,
+      "shape": 103,
+      "classMask": 8,
+      "genderMask": 3,
+      "image": 2252
+    },
+    {
+      "itemIndex": 287,
+      "name": "ZumaBlades",
+      "type": 1,
+      "shape": 104,
+      "classMask": 8,
+      "genderMask": 3,
+      "image": 2253
+    },
+    {
+      "itemIndex": 288,
+      "name": "BladesOfDarkness",
+      "type": 1,
+      "shape": 104,
+      "classMask": 8,
+      "genderMask": 3,
+      "image": 2253
+    },
+    {
+      "itemIndex": 289,
+      "name": "Dragon'sRoyalBlades",
+      "type": 1,
+      "shape": 106,
+      "classMask": 8,
+      "genderMask": 3,
+      "image": 2254
+    },
+    {
+      "itemIndex": 290,
+      "name": "FreezingBlades",
+      "type": 1,
+      "shape": 105,
+      "classMask": 8,
+      "genderMask": 3,
+      "image": 2255
+    },
+    {
+      "itemIndex": 291,
+      "name": "RoyalBlades",
+      "type": 1,
+      "shape": 106,
+      "classMask": 8,
+      "genderMask": 3,
+      "image": 2254
+    },
+    {
+      "itemIndex": 292,
+      "name": "BladesOfMagi",
+      "type": 1,
+      "shape": 107,
+      "classMask": 8,
+      "genderMask": 3,
+      "image": 2256
+    },
+    {
+      "itemIndex": 293,
+      "name": "Stiletto",
+      "type": 1,
+      "shape": 108,
+      "classMask": 8,
+      "genderMask": 3,
+      "image": 2257
+    },
+    {
+      "itemIndex": 294,
+      "name": "ZincBlades",
+      "type": 1,
+      "shape": 113,
+      "classMask": 8,
+      "genderMask": 3,
+      "image": 3333
+    },
+    {
+      "itemIndex": 295,
+      "name": "ButcheringBlades",
+      "type": 1,
+      "shape": 109,
+      "classMask": 8,
+      "genderMask": 3,
+      "image": 2258
+    },
+    {
+      "itemIndex": 298,
+      "name": "WoodenBow",
+      "type": 1,
+      "shape": 200,
+      "classMask": 16,
+      "genderMask": 3,
+      "image": 3390
+    },
+    {
+      "itemIndex": 299,
+      "name": "EbonyBow",
+      "type": 1,
+      "shape": 200,
+      "classMask": 16,
+      "genderMask": 3,
+      "image": 3390
+    },
+    {
+      "itemIndex": 300,
+      "name": "ShortBow",
+      "type": 1,
+      "shape": 201,
+      "classMask": 16,
+      "genderMask": 3,
+      "image": 3391
+    },
+    {
+      "itemIndex": 301,
+      "name": "BoneBow",
+      "type": 1,
+      "shape": 201,
+      "classMask": 16,
+      "genderMask": 3,
+      "image": 3391
+    },
+    {
+      "itemIndex": 302,
+      "name": "CompoundBow",
+      "type": 1,
+      "shape": 203,
+      "classMask": 16,
+      "genderMask": 3,
+      "image": 3393
+    },
+    {
+      "itemIndex": 303,
+      "name": "LongBow",
+      "type": 1,
+      "shape": 204,
+      "classMask": 16,
+      "genderMask": 3,
+      "image": 3394
+    },
+    {
+      "itemIndex": 304,
+      "name": "SilverBow",
+      "type": 1,
+      "shape": 207,
+      "classMask": 16,
+      "genderMask": 3,
+      "image": 3397
+    },
+    {
+      "itemIndex": 305,
+      "name": "ZumaFiendBow",
+      "type": 1,
+      "shape": 208,
+      "classMask": 16,
+      "genderMask": 3,
+      "image": 3398
+    },
+    {
+      "itemIndex": 306,
+      "name": "FiendBow",
+      "type": 1,
+      "shape": 208,
+      "classMask": 16,
+      "genderMask": 3,
+      "image": 3398
+    },
+    {
+      "itemIndex": 307,
+      "name": "CursedMaleficBow",
+      "type": 1,
+      "shape": 210,
+      "classMask": 16,
+      "genderMask": 3,
+      "image": 3400
+    },
+    {
+      "itemIndex": 308,
+      "name": "LitheBow",
+      "type": 1,
+      "shape": 209,
+      "classMask": 16,
+      "genderMask": 3,
+      "image": 3399
+    },
+    {
+      "itemIndex": 309,
+      "name": "MaleficBow",
+      "type": 1,
+      "shape": 210,
+      "classMask": 16,
+      "genderMask": 3,
+      "image": 3400
+    },
+    {
+      "itemIndex": 310,
+      "name": "BowOfForce",
+      "type": 1,
+      "shape": 211,
+      "classMask": 16,
+      "genderMask": 3,
+      "image": 3401
+    },
+    {
+      "itemIndex": 311,
+      "name": "DreadBow",
+      "type": 1,
+      "shape": 212,
+      "classMask": 16,
+      "genderMask": 3,
+      "image": 3402
+    },
+    {
+      "itemIndex": 312,
+      "name": "GrimBow",
+      "type": 1,
+      "shape": 218,
+      "classMask": 16,
+      "genderMask": 3,
+      "image": 3410
+    },
+    {
+      "itemIndex": 313,
+      "name": "LethalBow",
+      "type": 1,
+      "shape": 213,
+      "classMask": 16,
+      "genderMask": 3,
+      "image": 3403
+    },
+    {
+      "itemIndex": 317,
+      "name": "BaseDress(M)",
+      "type": 2,
+      "shape": 1,
+      "classMask": 31,
+      "genderMask": 1,
+      "image": 60
+    },
+    {
+      "itemIndex": 318,
+      "name": "BaseDress(F)",
+      "type": 2,
+      "shape": 1,
+      "classMask": 31,
+      "genderMask": 2,
+      "image": 80
+    },
+    {
+      "itemIndex": 319,
+      "name": "LightArmour(M)",
+      "type": 2,
+      "shape": 2,
+      "classMask": 31,
+      "genderMask": 1,
+      "image": 61
+    },
+    {
+      "itemIndex": 320,
+      "name": "LightArmour(F)",
+      "type": 2,
+      "shape": 2,
+      "classMask": 31,
+      "genderMask": 2,
+      "image": 81
+    },
+    {
+      "itemIndex": 321,
+      "name": "MediumArmour(M)",
+      "type": 2,
+      "shape": 2,
+      "classMask": 31,
+      "genderMask": 1,
+      "image": 61
+    },
+    {
+      "itemIndex": 322,
+      "name": "MediumArmour(F)",
+      "type": 2,
+      "shape": 2,
+      "classMask": 31,
+      "genderMask": 2,
+      "image": 81
+    },
+    {
+      "itemIndex": 329,
+      "name": "RelicArmour(M)",
+      "type": 2,
+      "shape": 20,
+      "classMask": 8,
+      "genderMask": 1,
+      "image": 2270
+    },
+    {
+      "itemIndex": 330,
+      "name": "RelicArmour(F)",
+      "type": 2,
+      "shape": 20,
+      "classMask": 8,
+      "genderMask": 2,
+      "image": 2280
+    },
+    {
+      "itemIndex": 331,
+      "name": "LightLeatherArmour(M)",
+      "type": 2,
+      "shape": 35,
+      "classMask": 16,
+      "genderMask": 1,
+      "image": 3420
+    },
+    {
+      "itemIndex": 332,
+      "name": "LightLeatherArmour(F)",
+      "type": 2,
+      "shape": 35,
+      "classMask": 16,
+      "genderMask": 2,
+      "image": 3430
+    },
+    {
+      "itemIndex": 339,
+      "name": "AncientArmour(M)",
+      "type": 2,
+      "shape": 21,
+      "classMask": 8,
+      "genderMask": 1,
+      "image": 2271
+    },
+    {
+      "itemIndex": 340,
+      "name": "AncientArmour(F)",
+      "type": 2,
+      "shape": 21,
+      "classMask": 8,
+      "genderMask": 2,
+      "image": 2281
+    },
+    {
+      "itemIndex": 341,
+      "name": "TemperedArmour(M)",
+      "type": 2,
+      "shape": 36,
+      "classMask": 16,
+      "genderMask": 1,
+      "image": 3421
+    },
+    {
+      "itemIndex": 342,
+      "name": "TemperedArmour(F)",
+      "type": 2,
+      "shape": 36,
+      "classMask": 16,
+      "genderMask": 2,
+      "image": 3431
+    },
+    {
+      "itemIndex": 349,
+      "name": "RoyalArmour(M)",
+      "type": 2,
+      "shape": 22,
+      "classMask": 8,
+      "genderMask": 1,
+      "image": 2272
+    },
+    {
+      "itemIndex": 350,
+      "name": "RoyalArmour(F)",
+      "type": 2,
+      "shape": 22,
+      "classMask": 8,
+      "genderMask": 2,
+      "image": 2282
+    },
+    {
+      "itemIndex": 351,
+      "name": "StuddedArmour(M)",
+      "type": 2,
+      "shape": 37,
+      "classMask": 16,
+      "genderMask": 1,
+      "image": 3422
+    },
+    {
+      "itemIndex": 352,
+      "name": "StuddedArmour(F)",
+      "type": 2,
+      "shape": 37,
+      "classMask": 16,
+      "genderMask": 2,
+      "image": 3432
+    },
+    {
+      "itemIndex": 359,
+      "name": "StealthArmour(M)",
+      "type": 2,
+      "shape": 24,
+      "classMask": 8,
+      "genderMask": 1,
+      "image": 2274
+    },
+    {
+      "itemIndex": 360,
+      "name": "StealthArmour(F)",
+      "type": 2,
+      "shape": 24,
+      "classMask": 8,
+      "genderMask": 2,
+      "image": 2284
+    },
+    {
+      "itemIndex": 361,
+      "name": "LightTemperedArmour(M)",
+      "type": 2,
+      "shape": 38,
+      "classMask": 16,
+      "genderMask": 1,
+      "image": 3423
+    },
+    {
+      "itemIndex": 362,
+      "name": "LightTemperedArmour(F)",
+      "type": 2,
+      "shape": 38,
+      "classMask": 16,
+      "genderMask": 2,
+      "image": 3433
+    },
+    {
+      "itemIndex": 369,
+      "name": "GoldDarkArmour(M)",
+      "type": 2,
+      "shape": 23,
+      "classMask": 8,
+      "genderMask": 1,
+      "image": 2273
+    },
+    {
+      "itemIndex": 370,
+      "name": "GoldDarkArmour(F)",
+      "type": 2,
+      "shape": 23,
+      "classMask": 8,
+      "genderMask": 2,
+      "image": 2283
+    },
+    {
+      "itemIndex": 371,
+      "name": "ScaledArmour(M)",
+      "type": 2,
+      "shape": 39,
+      "classMask": 16,
+      "genderMask": 1,
+      "image": 3424
+    },
+    {
+      "itemIndex": 372,
+      "name": "ScaledArmour(F)",
+      "type": 2,
+      "shape": 39,
+      "classMask": 16,
+      "genderMask": 2,
+      "image": 3434
+    },
+    {
+      "itemIndex": 387,
+      "name": "OmaKingRobe(M)4",
+      "type": 2,
+      "shape": 11,
+      "classMask": 8,
+      "genderMask": 1,
+      "image": 596
+    },
+    {
+      "itemIndex": 388,
+      "name": "OmaKingRobe(M)5",
+      "type": 2,
+      "shape": 11,
+      "classMask": 16,
+      "genderMask": 1,
+      "image": 596
+    },
+    {
+      "itemIndex": 393,
+      "name": "OmaKingRobe(F)4",
+      "type": 2,
+      "shape": 11,
+      "classMask": 8,
+      "genderMask": 2,
+      "image": 606
+    },
+    {
+      "itemIndex": 394,
+      "name": "OmaKingRobe(F)5",
+      "type": 2,
+      "shape": 11,
+      "classMask": 16,
+      "genderMask": 2,
+      "image": 606
+    },
+    {
+      "itemIndex": 836,
+      "name": "PickAxe",
+      "type": 1,
+      "shape": 42,
+      "classMask": 31,
+      "genderMask": 3,
+      "image": 50
+    },
+    {
+      "itemIndex": 1173,
+      "name": "ToughHoaSword",
+      "type": 1,
+      "shape": 100,
+      "classMask": 8,
+      "genderMask": 3,
+      "image": 2259
+    },
+    {
+      "itemIndex": 1174,
+      "name": "StiffWoodenBow",
+      "type": 1,
+      "shape": 200,
+      "classMask": 16,
+      "genderMask": 3,
+      "image": 3390
+    },
+    {
+      "itemIndex": 1178,
+      "name": "StrongHoaSword",
+      "type": 1,
+      "shape": 100,
+      "classMask": 8,
+      "genderMask": 3,
+      "image": 2259
+    },
+    {
+      "itemIndex": 1179,
+      "name": "StrongWoodenBow",
+      "type": 1,
+      "shape": 200,
+      "classMask": 16,
+      "genderMask": 3,
+      "image": 3390
+    },
+    {
+      "itemIndex": 1183,
+      "name": "BronzeHoaSword",
+      "type": 1,
+      "shape": 100,
+      "classMask": 8,
+      "genderMask": 3,
+      "image": 2259
+    },
+    {
+      "itemIndex": 1184,
+      "name": "ElkWoodenBow",
+      "type": 1,
+      "shape": 200,
+      "classMask": 16,
+      "genderMask": 3,
+      "image": 3390
+    },
+    {
+      "itemIndex": 1199,
+      "name": "SharpSabre",
+      "type": 1,
+      "shape": 101,
+      "classMask": 8,
+      "genderMask": 3,
+      "image": 2250
+    },
+    {
+      "itemIndex": 1200,
+      "name": "ToughBow",
+      "type": 1,
+      "shape": 203,
+      "classMask": 16,
+      "genderMask": 3,
+      "image": 3393
+    },
+    {
+      "itemIndex": 1219,
+      "name": "BlackIronCrowSwords",
+      "type": 1,
+      "shape": 102,
+      "classMask": 8,
+      "genderMask": 3,
+      "image": 2251
+    },
+    {
+      "itemIndex": 1220,
+      "name": "ToughLongBow",
+      "type": 1,
+      "shape": 204,
+      "classMask": 16,
+      "genderMask": 3,
+      "image": 3394
+    },
+    {
+      "itemIndex": 1227,
+      "name": "SpiritRobe(M)",
+      "type": 2,
+      "shape": 20,
+      "classMask": 8,
+      "genderMask": 1,
+      "image": 2270
+    },
+    {
+      "itemIndex": 1228,
+      "name": "SpiritRobe(F)",
+      "type": 2,
+      "shape": 20,
+      "classMask": 8,
+      "genderMask": 2,
+      "image": 2280
+    },
+    {
+      "itemIndex": 1229,
+      "name": "LeatherArmour(M)",
+      "type": 2,
+      "shape": 35,
+      "classMask": 16,
+      "genderMask": 1,
+      "image": 3420
+    },
+    {
+      "itemIndex": 1230,
+      "name": "LeatherArmour(F)",
+      "type": 2,
+      "shape": 35,
+      "classMask": 16,
+      "genderMask": 2,
+      "image": 3430
+    },
+    {
+      "itemIndex": 1243,
+      "name": "SolidTwinBlades",
+      "type": 1,
+      "shape": 103,
+      "classMask": 8,
+      "genderMask": 3,
+      "image": 2252
+    },
+    {
+      "itemIndex": 1244,
+      "name": "SolidSilverBow",
+      "type": 1,
+      "shape": 207,
+      "classMask": 16,
+      "genderMask": 3,
+      "image": 3397
+    },
+    {
+      "itemIndex": 1252,
+      "name": "FlamingRedArmour(M)",
+      "type": 2,
+      "shape": 21,
+      "classMask": 8,
+      "genderMask": 1,
+      "image": 2271
+    },
+    {
+      "itemIndex": 1253,
+      "name": "FlamingRedArmour(F)",
+      "type": 2,
+      "shape": 21,
+      "classMask": 8,
+      "genderMask": 2,
+      "image": 2281
+    },
+    {
+      "itemIndex": 1254,
+      "name": "HardTemperedArmour(M)",
+      "type": 2,
+      "shape": 36,
+      "classMask": 16,
+      "genderMask": 1,
+      "image": 3421
+    },
+    {
+      "itemIndex": 1255,
+      "name": "HardTemperedArmour(F)",
+      "type": 2,
+      "shape": 36,
+      "classMask": 16,
+      "genderMask": 2,
+      "image": 3431
+    },
+    {
+      "itemIndex": 1257,
+      "name": "RedMoonBlades",
+      "type": 1,
+      "shape": 111,
+      "classMask": 8,
+      "genderMask": 3,
+      "image": 3290
+    },
+    {
+      "itemIndex": 1258,
+      "name": "RedMoonBow",
+      "type": 1,
+      "shape": 211,
+      "classMask": 16,
+      "genderMask": 3,
+      "image": 3401
+    }
+  ],
+  "libraries": [
+    {
+      "library": "AArmour/00",
+      "frameCount": 1024,
+      "usage": [
+        "Assassin"
+      ],
+      "sourceLibrary": {
+        "path": "AArmour/00.Lib",
+        "sha256": "1464ef50ee190bea14b6a87b4fced4de7c5625e2685cdd424c0e6c10cde5b1c1",
+        "bytes": 2229517
+      },
+      "metaSha256": "36dd67a8e1edc4a0979b599554c66098f7b6f0eae88e64ae2d252c41a7eb1663",
+      "frameSetSha256": "833efbf58bf8f2794d6cb5d1053c30956e8d4d57635a533167c458752f416472",
+      "sourceFrameCount": 1024
+    },
+    {
+      "library": "AArmour/01",
+      "frameCount": 1024,
+      "usage": [
+        "Assassin"
+      ],
+      "sourceLibrary": {
+        "path": "AArmour/01.Lib",
+        "sha256": "62b5536fcb565d0507ab55dba2907fef9f21fe8c245abe16cca76979efa51e3b",
+        "bytes": 3012189
+      },
+      "metaSha256": "612aa6f2a1305c3db32a3f81a71860a80050b18cf4ab9ddac252b91dcc9a944f",
+      "frameSetSha256": "833efbf58bf8f2794d6cb5d1053c30956e8d4d57635a533167c458752f416472",
+      "sourceFrameCount": 1024
+    },
+    {
+      "library": "AArmour/02",
+      "frameCount": 1024,
+      "usage": [
+        "Assassin"
+      ],
+      "sourceLibrary": {
+        "path": "AArmour/02.Lib",
+        "sha256": "c9bf93bded224da631ff8e16a04e992dfa06eb2ffb53b38424042b23757ba58a",
+        "bytes": 2914111
+      },
+      "metaSha256": "9d54faee90773a5944a48925648a44e650db029cbf90ab9baf18ba0a358ed2fc",
+      "frameSetSha256": "833efbf58bf8f2794d6cb5d1053c30956e8d4d57635a533167c458752f416472",
+      "sourceFrameCount": 1024
+    },
+    {
+      "library": "AArmour/10",
+      "frameCount": 1024,
+      "usage": [
+        "Assassin"
+      ],
+      "sourceLibrary": {
+        "path": "AArmour/10.Lib",
+        "sha256": "87e759c33176c9e2c5791ddf25873173d43139eaad3203abd27063808d0a66ed",
+        "bytes": 3782170
+      },
+      "metaSha256": "24b368846eb5e0dd365666c40b68cb7d8187822cb783e0e3f898c9c9c2c62363",
+      "frameSetSha256": "833efbf58bf8f2794d6cb5d1053c30956e8d4d57635a533167c458752f416472",
+      "sourceFrameCount": 1024
+    },
+    {
+      "library": "AArmour/11",
+      "frameCount": 1024,
+      "usage": [
+        "Assassin"
+      ],
+      "sourceLibrary": {
+        "path": "AArmour/11.Lib",
+        "sha256": "66bfbbcc150d6770d1ce59896943bec0b72babb2e1238bbbdb02dd5e2b005b55",
+        "bytes": 4305559
+      },
+      "metaSha256": "d008b344868b674beba28983fc30e61bc4fdff90dd171bb4b38318ee0b6977e8",
+      "frameSetSha256": "833efbf58bf8f2794d6cb5d1053c30956e8d4d57635a533167c458752f416472",
+      "sourceFrameCount": 1024
+    },
+    {
+      "library": "AArmour/20",
+      "frameCount": 1024,
+      "usage": [
+        "Assassin"
+      ],
+      "sourceLibrary": {
+        "path": "AArmour/20.Lib",
+        "sha256": "58526c9cea78d2b10dc23d7a6ff27c36a6a2d8e54b8908bb973e7a1a7617819c",
+        "bytes": 1849182
+      },
+      "metaSha256": "0b35bc1ef653a168ba5a8b8ba5627a853085f3e329c577c7d2e8040752ce5d0e",
+      "frameSetSha256": "833efbf58bf8f2794d6cb5d1053c30956e8d4d57635a533167c458752f416472",
+      "sourceFrameCount": 1024
+    },
+    {
+      "library": "AArmour/21",
+      "frameCount": 1024,
+      "usage": [
+        "Assassin"
+      ],
+      "sourceLibrary": {
+        "path": "AArmour/21.Lib",
+        "sha256": "0913a70f734912b5008b4ac0410d7c4aeb8917592c06f303e29506d7dbf8e3fc",
+        "bytes": 1881342
+      },
+      "metaSha256": "24f8f2569262db0d0280b3d381cf020dc13d7e0db730a635f709feb47b0c0ee7",
+      "frameSetSha256": "833efbf58bf8f2794d6cb5d1053c30956e8d4d57635a533167c458752f416472",
+      "sourceFrameCount": 1024
+    },
+    {
+      "library": "AArmour/22",
+      "frameCount": 1024,
+      "usage": [
+        "Assassin"
+      ],
+      "sourceLibrary": {
+        "path": "AArmour/22.Lib",
+        "sha256": "2cc5bc4974dd70dd436160b0a5e50bd68c7989e399706bbf4713cf2e6c1c81cc",
+        "bytes": 2109252
+      },
+      "metaSha256": "a1852d1f1b77fc256d038dabe5daa188f5f80ef38b0e139c522c6e8b6fe32dca",
+      "frameSetSha256": "833efbf58bf8f2794d6cb5d1053c30956e8d4d57635a533167c458752f416472",
+      "sourceFrameCount": 1024
+    },
+    {
+      "library": "AArmour/23",
+      "frameCount": 1024,
+      "usage": [
+        "Assassin"
+      ],
+      "sourceLibrary": {
+        "path": "AArmour/23.Lib",
+        "sha256": "bb21031da605d4612c507030dd3520561d078a705f0fde1a9cb8022dbd87ed89",
+        "bytes": 2762254
+      },
+      "metaSha256": "b7a58e3c0197bf471f7751a0c16c6f52a543a02c55060eb570fb056ee31a7b67",
+      "frameSetSha256": "833efbf58bf8f2794d6cb5d1053c30956e8d4d57635a533167c458752f416472",
+      "sourceFrameCount": 1024
+    },
+    {
+      "library": "AArmour/24",
+      "frameCount": 1024,
+      "usage": [
+        "Assassin"
+      ],
+      "sourceLibrary": {
+        "path": "AArmour/24.Lib",
+        "sha256": "67a8facf572fe39163c84b79c890b98abc60b4ac5614fb11ba4253d596560e42",
+        "bytes": 2164608
+      },
+      "metaSha256": "828d815575e2447367331a698510deb468ae0e5f77ab36c6e2382784bc7ec8e8",
+      "frameSetSha256": "833efbf58bf8f2794d6cb5d1053c30956e8d4d57635a533167c458752f416472",
+      "sourceFrameCount": 1024
+    },
+    {
+      "library": "AArmour/29",
+      "frameCount": 1024,
+      "usage": [
+        "Assassin"
+      ],
+      "sourceLibrary": {
+        "path": "AArmour/29.Lib",
+        "sha256": "e1f3ba8b774fb497ce12e0777e655758a7186ea00f97a4415a661fe52420231f",
+        "bytes": 3707185
+      },
+      "metaSha256": "00f77035dc8fe8443d5388b2135344a16d66de3b680d2066fb97c0ec5ed69924",
+      "frameSetSha256": "833efbf58bf8f2794d6cb5d1053c30956e8d4d57635a533167c458752f416472",
+      "sourceFrameCount": 1024
+    },
+    {
+      "library": "AHair/00",
+      "frameCount": 1024,
+      "usage": [
+        "Assassin"
+      ],
+      "sourceLibrary": {
+        "path": "AHair/00.Lib",
+        "sha256": "0215840d38c827ca7bb6f1a006fea1c1b671bb1cec1b81ae84b5c7d1802fc4a1",
+        "bytes": 225573
+      },
+      "metaSha256": "c2faecffb15a445538c56181a7472fb2aa71ad4663c06c9d6fedb4b7936781a1",
+      "frameSetSha256": "833efbf58bf8f2794d6cb5d1053c30956e8d4d57635a533167c458752f416472",
+      "sourceFrameCount": 1024
+    },
+    {
+      "library": "AHair/01",
+      "frameCount": 1024,
+      "usage": [
+        "Assassin"
+      ],
+      "sourceLibrary": {
+        "path": "AHair/01.Lib",
+        "sha256": "2debf364697883038922f37c0134ec04a23bbd1a23358175f7de60ff9e639abd",
+        "bytes": 290713
+      },
+      "metaSha256": "647174d94311e371ee2f4806459d924aa7bb6ce482f3eb04809f6f66ac5deeb2",
+      "frameSetSha256": "833efbf58bf8f2794d6cb5d1053c30956e8d4d57635a533167c458752f416472",
+      "sourceFrameCount": 1024
+    },
+    {
+      "library": "AHair/02",
+      "frameCount": 1024,
+      "usage": [
+        "Assassin"
+      ],
+      "sourceLibrary": {
+        "path": "AHair/02.Lib",
+        "sha256": "70f54299c0d023f71a4bc7e78f3c0c5757a76a28ac424a8c7840a82fc6c6efe4",
+        "bytes": 384831
+      },
+      "metaSha256": "f16b65061b1d995336dbe735abe6921b8f19fa2485159a4d21009350dbe1df87",
+      "frameSetSha256": "833efbf58bf8f2794d6cb5d1053c30956e8d4d57635a533167c458752f416472",
+      "sourceFrameCount": 1024
+    },
+    {
+      "library": "AHair/03",
+      "frameCount": 1024,
+      "usage": [
+        "Assassin"
+      ],
+      "sourceLibrary": {
+        "path": "AHair/03.Lib",
+        "sha256": "c7b6919815498d0a0ee05db7baa14e6435ac6f8e6d09492cbe740113f5bcf8f5",
+        "bytes": 379962
+      },
+      "metaSha256": "3caccd10faf9f31139c5740777c16c3a0b08b416fde90b251c0ef70ff88bc50f",
+      "frameSetSha256": "833efbf58bf8f2794d6cb5d1053c30956e8d4d57635a533167c458752f416472",
+      "sourceFrameCount": 1024
+    },
+    {
+      "library": "AHair/04",
+      "frameCount": 1024,
+      "usage": [
+        "Assassin"
+      ],
+      "sourceLibrary": {
+        "path": "AHair/04.Lib",
+        "sha256": "c2180783b023fcadc0bb7f1f7de86865da273988e39769258e0072f93f111a53",
+        "bytes": 363238
+      },
+      "metaSha256": "d22db58714520bdf12c465f85ef2debcfcf656a7b16db77f14520294dc9f7beb",
+      "frameSetSha256": "833efbf58bf8f2794d6cb5d1053c30956e8d4d57635a533167c458752f416472",
+      "sourceFrameCount": 1024
+    },
+    {
+      "library": "AHair/05",
+      "frameCount": 1024,
+      "usage": [
+        "Assassin"
+      ],
+      "sourceLibrary": {
+        "path": "AHair/05.Lib",
+        "sha256": "e6d83754814003864ccc329e6a5cf228428daac7688c9454c4df95aa3e3a77be",
+        "bytes": 393906
+      },
+      "metaSha256": "faa23de73cd0b2548a70ef685551dfc3b330aacadd7559e52d82c85f5a00ebfa",
+      "frameSetSha256": "833efbf58bf8f2794d6cb5d1053c30956e8d4d57635a533167c458752f416472",
+      "sourceFrameCount": 1024
+    },
+    {
+      "library": "AHair/06",
+      "frameCount": 1024,
+      "usage": [
+        "Assassin"
+      ],
+      "sourceLibrary": {
+        "path": "AHair/06.Lib",
+        "sha256": "fc9f4e5e64fbb72087292f4dc55379743f672a8a8884879971438eda656cf05b",
+        "bytes": 309950
+      },
+      "metaSha256": "da16068ef7c6e78eab05bf9708d2f1700fa42c49c5722f2998606095889b8129",
+      "frameSetSha256": "833efbf58bf8f2794d6cb5d1053c30956e8d4d57635a533167c458752f416472",
+      "sourceFrameCount": 1024
+    },
+    {
+      "library": "AHair/07",
+      "frameCount": 1024,
+      "usage": [
+        "Assassin"
+      ],
+      "sourceLibrary": {
+        "path": "AHair/07.Lib",
+        "sha256": "7865618c26a378ad67a2b9427972bba8932c163096f05174f571ca4e3eb4a326",
+        "bytes": 284522
+      },
+      "metaSha256": "42f80c962403743669d499648e71381b7357b005410d4143c38fa80008e1b1e4",
+      "frameSetSha256": "833efbf58bf8f2794d6cb5d1053c30956e8d4d57635a533167c458752f416472",
+      "sourceFrameCount": 1024
+    },
+    {
+      "library": "AHair/08",
+      "frameCount": 1024,
+      "usage": [
+        "Assassin"
+      ],
+      "sourceLibrary": {
+        "path": "AHair/08.Lib",
+        "sha256": "fadad8e980c0538a176c35a1bb5221ed5a7daabf52cc87c59352463e642ae7ff",
+        "bytes": 318683
+      },
+      "metaSha256": "557d149a1a0c7940a688a0c17083e00bb2e1be70630375b96507ba2b3ffaf574",
+      "frameSetSha256": "833efbf58bf8f2794d6cb5d1053c30956e8d4d57635a533167c458752f416472",
+      "sourceFrameCount": 1024
+    },
+    {
+      "library": "ARArmour/00",
+      "frameCount": 704,
+      "usage": [
+        "Archer"
+      ],
+      "sourceLibrary": {
+        "path": "ARArmour/00.Lib",
+        "sha256": "6f22aca4fa3f2ab9e8bebb2af4a543caf2f9d89b5f7b071c2583e25a8dd9880d",
+        "bytes": 1512381
+      },
+      "metaSha256": "2dadcefee4a1dba5b3935a85631faf796315b32f526dc2ad24eda63959df9be8",
+      "frameSetSha256": "833efbf58bf8f2794d6cb5d1053c30956e8d4d57635a533167c458752f416472",
+      "sourceFrameCount": 704
+    },
+    {
+      "library": "ARArmour/01",
+      "frameCount": 704,
+      "usage": [
+        "Archer"
+      ],
+      "sourceLibrary": {
+        "path": "ARArmour/01.Lib",
+        "sha256": "6d70b9476de42d7d05990b639353ba033feb382bff027e0b4a98d7e55aa3af5a",
+        "bytes": 2059116
+      },
+      "metaSha256": "25218561c6d3a4cc539c223bbaf1f5f0e418d26f23bf0eff872a7f1bfbb83537",
+      "frameSetSha256": "833efbf58bf8f2794d6cb5d1053c30956e8d4d57635a533167c458752f416472",
+      "sourceFrameCount": 704
+    },
+    {
+      "library": "ARArmour/02",
+      "frameCount": 704,
+      "usage": [
+        "Archer"
+      ],
+      "sourceLibrary": {
+        "path": "ARArmour/02.Lib",
+        "sha256": "730a51415168b2f12892da894dc55c3e0a0be7c21e8c28fed250c397f76de74b",
+        "bytes": 1995594
+      },
+      "metaSha256": "84a8616cda59194dc88d4922e2865b58be85fde479d967eeaf6e4effe6166fb1",
+      "frameSetSha256": "833efbf58bf8f2794d6cb5d1053c30956e8d4d57635a533167c458752f416472",
+      "sourceFrameCount": 704
+    },
+    {
+      "library": "ARArmour/10",
+      "frameCount": 704,
+      "usage": [
+        "Archer"
+      ],
+      "sourceLibrary": {
+        "path": "ARArmour/10.Lib",
+        "sha256": "3a2639e16b92221fa087ce3b320f8ba29e5a21016c801c615902b28a34d400b0",
+        "bytes": 2602098
+      },
+      "metaSha256": "4e794ad646f86ec6ec256d65320909a69fdd58da5af9a3a97e87f3d034733bad",
+      "frameSetSha256": "833efbf58bf8f2794d6cb5d1053c30956e8d4d57635a533167c458752f416472",
+      "sourceFrameCount": 704
+    },
+    {
+      "library": "ARArmour/11",
+      "frameCount": 704,
+      "usage": [
+        "Archer"
+      ],
+      "sourceLibrary": {
+        "path": "ARArmour/11.Lib",
+        "sha256": "f9630eaecd099c83aa89fdc052b7ad13327d3547bacecbb185e5cfc819954d43",
+        "bytes": 2979152
+      },
+      "metaSha256": "fda6694ce8fddae53a776fb44e5460f21cba01a86323027805d3ffbd4e46541e",
+      "frameSetSha256": "833efbf58bf8f2794d6cb5d1053c30956e8d4d57635a533167c458752f416472",
+      "sourceFrameCount": 704
+    },
+    {
+      "library": "ARArmour/29",
+      "frameCount": 704,
+      "usage": [
+        "Archer"
+      ],
+      "sourceLibrary": {
+        "path": "ARArmour/29.Lib",
+        "sha256": "f0f31ad39df548d2d9d79303ef24757e3f96eefa10099735129dc33bc45901c1",
+        "bytes": 2535956
+      },
+      "metaSha256": "df0ef3b57459c2624da4951919816e6393fa5845bd8ae8adfe90ddb65c2dd63b",
+      "frameSetSha256": "833efbf58bf8f2794d6cb5d1053c30956e8d4d57635a533167c458752f416472",
+      "sourceFrameCount": 704
+    },
+    {
+      "library": "ARArmour/35",
+      "frameCount": 704,
+      "usage": [
+        "Archer"
+      ],
+      "sourceLibrary": {
+        "path": "ARArmour/35.Lib",
+        "sha256": "c1016f311e2efc419960dc8074c8ed43a02cf8c44ae2d045001f535508b430e8",
+        "bytes": 2193766
+      },
+      "metaSha256": "a4c6dac4902e935e1f43cdaa5b2277bf0de0b7bd385e6ec4695d9ed65eebc417",
+      "frameSetSha256": "833efbf58bf8f2794d6cb5d1053c30956e8d4d57635a533167c458752f416472",
+      "sourceFrameCount": 704
+    },
+    {
+      "library": "ARArmour/36",
+      "frameCount": 704,
+      "usage": [
+        "Archer"
+      ],
+      "sourceLibrary": {
+        "path": "ARArmour/36.Lib",
+        "sha256": "cf1e16f8d12b362fd64b85874d15e955dfa5543df1c81b6d922a0951acd65be7",
+        "bytes": 1874949
+      },
+      "metaSha256": "5034ae025516c54084f6488670eb97d33255b315aab6e0f51fbaa3e1ab090930",
+      "frameSetSha256": "833efbf58bf8f2794d6cb5d1053c30956e8d4d57635a533167c458752f416472",
+      "sourceFrameCount": 704
+    },
+    {
+      "library": "ARArmour/37",
+      "frameCount": 704,
+      "usage": [
+        "Archer"
+      ],
+      "sourceLibrary": {
+        "path": "ARArmour/37.Lib",
+        "sha256": "ccafbdb1ba575379e82fb57732e4e7c271d1260e0c7f8ef982e2dab4b87d6b9a",
+        "bytes": 2238761
+      },
+      "metaSha256": "4bc4015b691c49fea0918d1c2fceb8d6ac586f873da80309eaa957fc911ed72c",
+      "frameSetSha256": "833efbf58bf8f2794d6cb5d1053c30956e8d4d57635a533167c458752f416472",
+      "sourceFrameCount": 704
+    },
+    {
+      "library": "ARArmour/38",
+      "frameCount": 704,
+      "usage": [
+        "Archer"
+      ],
+      "sourceLibrary": {
+        "path": "ARArmour/38.Lib",
+        "sha256": "ccb37872472d339af909d1f1a0e7cefeb16a802ae99500fb2a508e9397fd543f",
+        "bytes": 1949021
+      },
+      "metaSha256": "4f8a672e9f9d7ea1bedf590b2bdbddc54c18c2bc6cbcf95c885aef0ebfca0229",
+      "frameSetSha256": "833efbf58bf8f2794d6cb5d1053c30956e8d4d57635a533167c458752f416472",
+      "sourceFrameCount": 704
+    },
+    {
+      "library": "ARArmour/39",
+      "frameCount": 704,
+      "usage": [
+        "Archer"
+      ],
+      "sourceLibrary": {
+        "path": "ARArmour/39.Lib",
+        "sha256": "7357c5bf9e0283a9c510f8a6a4122cb752abce68dbb2fe08fcc8bcbe38b43cda",
+        "bytes": 2631769
+      },
+      "metaSha256": "95ea54e66075f509abe1c9917ba97f53d9c7b0154e89be8e7c499ca3c8c562a7",
+      "frameSetSha256": "833efbf58bf8f2794d6cb5d1053c30956e8d4d57635a533167c458752f416472",
+      "sourceFrameCount": 704
+    },
+    {
+      "library": "ARHair/00",
+      "frameCount": 704,
+      "usage": [
+        "Archer"
+      ],
+      "sourceLibrary": {
+        "path": "ARHair/00.Lib",
+        "sha256": "b021d53521c42274661c4baaacd2668dacf709b6b2c1792449343d7af0d86858",
+        "bytes": 209648
+      },
+      "metaSha256": "65cda576487d72d922e8b7d54afa3d3ef4346186e5c67e6b1d81a92d9d36f46f",
+      "frameSetSha256": "833efbf58bf8f2794d6cb5d1053c30956e8d4d57635a533167c458752f416472",
+      "sourceFrameCount": 704
+    },
+    {
+      "library": "ARHair/01",
+      "frameCount": 704,
+      "usage": [
+        "Archer"
+      ],
+      "sourceLibrary": {
+        "path": "ARHair/01.Lib",
+        "sha256": "f374ae87387af32f9a2af1e71cd80ddd1290846e43cbc6be6951844ec1334001",
+        "bytes": 239428
+      },
+      "metaSha256": "23859e003666fbb33ecfacbda9d50963dd6b52dc43bf68286fd0c1f5c01cd096",
+      "frameSetSha256": "833efbf58bf8f2794d6cb5d1053c30956e8d4d57635a533167c458752f416472",
+      "sourceFrameCount": 704
+    },
+    {
+      "library": "ARHair/02",
+      "frameCount": 704,
+      "usage": [
+        "Archer"
+      ],
+      "sourceLibrary": {
+        "path": "ARHair/02.Lib",
+        "sha256": "d8ac0ee7d9e7258b0f676211aa4b64dc177e0b5c2b51a27fa6a4b6837c25ae58",
+        "bytes": 340720
+      },
+      "metaSha256": "11ee8738c11ccf64e8863767947ed448bf7ad68eb9a61cc9c7ee9b1fb4264def",
+      "frameSetSha256": "833efbf58bf8f2794d6cb5d1053c30956e8d4d57635a533167c458752f416472",
+      "sourceFrameCount": 704
+    },
+    {
+      "library": "ARHair/03",
+      "frameCount": 704,
+      "usage": [
+        "Archer"
+      ],
+      "sourceLibrary": {
+        "path": "ARHair/03.Lib",
+        "sha256": "9443aa418a9147bf5215ce0c859da39acb7e81ca72048d0516f6b0eb11c3cc54",
+        "bytes": 314070
+      },
+      "metaSha256": "333a4a1e5953dbe1f762b8923a0d0499397372cfb508a898d35563e3b222e45e",
+      "frameSetSha256": "833efbf58bf8f2794d6cb5d1053c30956e8d4d57635a533167c458752f416472",
+      "sourceFrameCount": 704
+    },
+    {
+      "library": "ARHair/04",
+      "frameCount": 704,
+      "usage": [
+        "Archer"
+      ],
+      "sourceLibrary": {
+        "path": "ARHair/04.Lib",
+        "sha256": "f9334ea2594d28378c43a280dc7b44b47adf6b6e6bdcc2748354afc7f990fdbb",
+        "bytes": 297187
+      },
+      "metaSha256": "9ccc2d46e74f864031efd6608081a75c4cc229500d0d26e3fa42bf4ddcf50ef0",
+      "frameSetSha256": "833efbf58bf8f2794d6cb5d1053c30956e8d4d57635a533167c458752f416472",
+      "sourceFrameCount": 704
+    },
+    {
+      "library": "ARHair/05",
+      "frameCount": 704,
+      "usage": [
+        "Archer"
+      ],
+      "sourceLibrary": {
+        "path": "ARHair/05.Lib",
+        "sha256": "7618503b60fae3dc66fa25da7511a6bf74d5d403e82a6f462f4c666df61c8992",
+        "bytes": 340415
+      },
+      "metaSha256": "ee8ec533490d26f8c71df3c7abcd503a8eff167d3e7eda981c147e2c3735951f",
+      "frameSetSha256": "833efbf58bf8f2794d6cb5d1053c30956e8d4d57635a533167c458752f416472",
+      "sourceFrameCount": 704
+    },
+    {
+      "library": "ARHair/06",
+      "frameCount": 704,
+      "usage": [
+        "Archer"
+      ],
+      "sourceLibrary": {
+        "path": "ARHair/06.Lib",
+        "sha256": "f0e4e88dcb76644dc9f8a01df51af29df960ca09b04c2c3044216ff75e7de193",
+        "bytes": 273518
+      },
+      "metaSha256": "1d3b6f6c79d22311230660dafc95187c3c8c3108ad6b882e65c84406c68e8432",
+      "frameSetSha256": "833efbf58bf8f2794d6cb5d1053c30956e8d4d57635a533167c458752f416472",
+      "sourceFrameCount": 704
+    },
+    {
+      "library": "ARHair/07",
+      "frameCount": 704,
+      "usage": [
+        "Archer"
+      ],
+      "sourceLibrary": {
+        "path": "ARHair/07.Lib",
+        "sha256": "2b0503d55cfa091488ddd562c70ff7c9a6f81324b8906936a414c849c9fe39fe",
+        "bytes": 251858
+      },
+      "metaSha256": "2e27ac933122cf406361e434dacce31484650aa8001837bf5aba7a7893043ebf",
+      "frameSetSha256": "833efbf58bf8f2794d6cb5d1053c30956e8d4d57635a533167c458752f416472",
+      "sourceFrameCount": 704
+    },
+    {
+      "library": "ARHair/08",
+      "frameCount": 704,
+      "usage": [
+        "Archer"
+      ],
+      "sourceLibrary": {
+        "path": "ARHair/08.Lib",
+        "sha256": "fb6e75c1b698a3ef2483be80009c6b2edd94b00d9d41a4950b096e126f225fee",
+        "bytes": 283114
+      },
+      "metaSha256": "7a10aa6dbcaf28d96421e2ed2425f542116a5c92ecf42ca98b2cadc127e5b33d",
+      "frameSetSha256": "833efbf58bf8f2794d6cb5d1053c30956e8d4d57635a533167c458752f416472",
+      "sourceFrameCount": 704
+    },
+    {
+      "library": "ARWeapon/00",
+      "frameCount": 832,
+      "usage": [
+        "Archer"
+      ],
+      "sourceLibrary": {
+        "path": "ARWeapon/00.Lib",
+        "sha256": "62318db033c204302bc696d0ff3c76cdbd1a83272ce208a10bcc83fde9cb86fd",
+        "bytes": 357404
+      },
+      "metaSha256": "76f7fcf067cc1d3ffdb75aa09cc5d589dc3985a26810c33704734665f250d10a",
+      "frameSetSha256": "833efbf58bf8f2794d6cb5d1053c30956e8d4d57635a533167c458752f416472",
+      "sourceFrameCount": 832
+    },
+    {
+      "library": "ARWeapon/00 S",
+      "frameCount": 704,
+      "usage": [
+        "Archer"
+      ],
+      "sourceLibrary": {
+        "path": "ARWeapon/00 S.Lib",
+        "sha256": "623bf887d78c5f693691d8287e4d61afd3e335057e4b426ace439fc989baa69b",
+        "bytes": 298385
+      },
+      "metaSha256": "18afc3b7e28e55ab4974efe2ba2023f691fad9bda4537c7f5dcfd92fafd20943",
+      "frameSetSha256": "833efbf58bf8f2794d6cb5d1053c30956e8d4d57635a533167c458752f416472",
+      "sourceFrameCount": 704
+    },
+    {
+      "library": "ARWeapon/01",
+      "frameCount": 832,
+      "usage": [
+        "Archer"
+      ],
+      "sourceLibrary": {
+        "path": "ARWeapon/01.Lib",
+        "sha256": "405f4bec13f80147f5855b38396f0b4865fbbb4b601a6a6bab4f5ff69f81ecb0",
+        "bytes": 433754
+      },
+      "metaSha256": "382786645f5c9d8e6951be8070626f11352eef94aad512cb446e31f0fa0933de",
+      "frameSetSha256": "833efbf58bf8f2794d6cb5d1053c30956e8d4d57635a533167c458752f416472",
+      "sourceFrameCount": 832
+    },
+    {
+      "library": "ARWeapon/01 S",
+      "frameCount": 704,
+      "usage": [
+        "Archer"
+      ],
+      "sourceLibrary": {
+        "path": "ARWeapon/01 S.Lib",
+        "sha256": "b4890dc758d693bbbcf8ef69c7f70abc7d95b8564834a18f3f011bd5c01bc6d5",
+        "bytes": 364281
+      },
+      "metaSha256": "1ff05746f84cccffbd783aab28a0e78ea62ac075c569efe74c56a72a8c5f8423",
+      "frameSetSha256": "833efbf58bf8f2794d6cb5d1053c30956e8d4d57635a533167c458752f416472",
+      "sourceFrameCount": 704
+    },
+    {
+      "library": "ARWeapon/03",
+      "frameCount": 832,
+      "usage": [
+        "Archer"
+      ],
+      "sourceLibrary": {
+        "path": "ARWeapon/03.Lib",
+        "sha256": "3aa6502a77ef7baa4b0c100f37183664e96c866ee4069bfc8c6df53c72c03fed",
+        "bytes": 467271
+      },
+      "metaSha256": "bfaa67d3a6dd27f7fe45bd89c2002fae4ec989c4dddd7a34c433e9d26123f09e",
+      "frameSetSha256": "833efbf58bf8f2794d6cb5d1053c30956e8d4d57635a533167c458752f416472",
+      "sourceFrameCount": 832
+    },
+    {
+      "library": "ARWeapon/03 S",
+      "frameCount": 704,
+      "usage": [
+        "Archer"
+      ],
+      "sourceLibrary": {
+        "path": "ARWeapon/03 S.Lib",
+        "sha256": "bbe7236aabf2ce187ab89ed43c8fcf0ae88fdbb7d8b188e64bedde782c1ce3df",
+        "bytes": 392096
+      },
+      "metaSha256": "1691fd6c8e5825980343bc13e5b1061210e9fb9eefa8bce25c943c72686bac85",
+      "frameSetSha256": "833efbf58bf8f2794d6cb5d1053c30956e8d4d57635a533167c458752f416472",
+      "sourceFrameCount": 704
+    },
+    {
+      "library": "ARWeapon/04",
+      "frameCount": 832,
+      "usage": [
+        "Archer"
+      ],
+      "sourceLibrary": {
+        "path": "ARWeapon/04.Lib",
+        "sha256": "6d0c402f2c20b7a246cae8d727654789829e276dfc0f474b1efcc33d209afe5f",
+        "bytes": 482812
+      },
+      "metaSha256": "af6564176aec9eefaa661efa69fc3337df5d97adf19b960505c729974614d922",
+      "frameSetSha256": "833efbf58bf8f2794d6cb5d1053c30956e8d4d57635a533167c458752f416472",
+      "sourceFrameCount": 832
+    },
+    {
+      "library": "ARWeapon/04 S",
+      "frameCount": 704,
+      "usage": [
+        "Archer"
+      ],
+      "sourceLibrary": {
+        "path": "ARWeapon/04 S.Lib",
+        "sha256": "b38082061c69e9ccdc73f3cfda336b6accf80dcca5fab7abf7943640429905f6",
+        "bytes": 400754
+      },
+      "metaSha256": "cb5ec392aed59d21e6f2012e20cef099ede3a0c119135acd607e24850fba7c10",
+      "frameSetSha256": "833efbf58bf8f2794d6cb5d1053c30956e8d4d57635a533167c458752f416472",
+      "sourceFrameCount": 704
+    },
+    {
+      "library": "ARWeapon/05",
+      "frameCount": 832,
+      "usage": [
+        "Archer"
+      ],
+      "sourceLibrary": {
+        "path": "ARWeapon/05.Lib",
+        "sha256": "e54c4dc9c5fe48604e17908f835d01793bc1b7183cf33b81082bdc952cf633f1",
+        "bytes": 570736
+      },
+      "metaSha256": "e89e57a9915492d3cb1e74837b2e9a4557903732f6c82640bc43da20f3a12516",
+      "frameSetSha256": "833efbf58bf8f2794d6cb5d1053c30956e8d4d57635a533167c458752f416472",
+      "sourceFrameCount": 832
+    },
+    {
+      "library": "ARWeapon/05 S",
+      "frameCount": 704,
+      "usage": [
+        "Archer"
+      ],
+      "sourceLibrary": {
+        "path": "ARWeapon/05 S.Lib",
+        "sha256": "4355c83228f122e6d4696975422bfe6a64cbc9624518fbdcb7cebcf10f8836c8",
+        "bytes": 483271
+      },
+      "metaSha256": "d6cc213b435bd0759a6694f5dd8ea686df1d0ee8cdd329654baa48578d187e89",
+      "frameSetSha256": "833efbf58bf8f2794d6cb5d1053c30956e8d4d57635a533167c458752f416472",
+      "sourceFrameCount": 704
+    },
+    {
+      "library": "ARWeapon/07",
+      "frameCount": 832,
+      "usage": [
+        "Archer"
+      ],
+      "sourceLibrary": {
+        "path": "ARWeapon/07.Lib",
+        "sha256": "523f5ea8a8834a396f22b09a6d43bc7e0aae8c7137d4529c56933e706dd61683",
+        "bytes": 546567
+      },
+      "metaSha256": "e222ad6225d78d1892ab7533d23eec9ca7485aa621b65c53e7724717ddeeff6b",
+      "frameSetSha256": "833efbf58bf8f2794d6cb5d1053c30956e8d4d57635a533167c458752f416472",
+      "sourceFrameCount": 832
+    },
+    {
+      "library": "ARWeapon/07 S",
+      "frameCount": 704,
+      "usage": [
+        "Archer"
+      ],
+      "sourceLibrary": {
+        "path": "ARWeapon/07 S.Lib",
+        "sha256": "ded6a1860c81e1f8fd299f5e4263aa61f9c8f2073f0fa376902ca6f9d9f18bf3",
+        "bytes": 458669
+      },
+      "metaSha256": "ba0bf011c149c980093e5a2bb3408fcc62ef84d07dccee18506a52eacf6aecda",
+      "frameSetSha256": "833efbf58bf8f2794d6cb5d1053c30956e8d4d57635a533167c458752f416472",
+      "sourceFrameCount": 704
+    },
+    {
+      "library": "ARWeapon/08",
+      "frameCount": 832,
+      "usage": [
+        "Archer"
+      ],
+      "sourceLibrary": {
+        "path": "ARWeapon/08.Lib",
+        "sha256": "de51fb8cbe6bcefbaa2ba2fb1a8396be4f288c2f55186528468ac5ad8af06a9a",
+        "bytes": 510685
+      },
+      "metaSha256": "e4fede79f7dd73b393fbb2acaa5ccfd3496ca22788d465eac4c03816c9c38420",
+      "frameSetSha256": "833efbf58bf8f2794d6cb5d1053c30956e8d4d57635a533167c458752f416472",
+      "sourceFrameCount": 832
+    },
+    {
+      "library": "ARWeapon/08 S",
+      "frameCount": 704,
+      "usage": [
+        "Archer"
+      ],
+      "sourceLibrary": {
+        "path": "ARWeapon/08 S.Lib",
+        "sha256": "96f2c58c7addd8f9c687d5a2a93121dde51bf741fc077ac29a577f378fc4e9a4",
+        "bytes": 427601
+      },
+      "metaSha256": "9622cd3376cdb25512859506783f76634cd5a9fec9ecfa2229cd640a7e0c4c18",
+      "frameSetSha256": "833efbf58bf8f2794d6cb5d1053c30956e8d4d57635a533167c458752f416472",
+      "sourceFrameCount": 704
+    },
+    {
+      "library": "ARWeapon/09",
+      "frameCount": 832,
+      "usage": [
+        "Archer"
+      ],
+      "sourceLibrary": {
+        "path": "ARWeapon/09.Lib",
+        "sha256": "e06de603bc1585152f1ce36234f20cc9313159db685a20f7daf1eb9655d410d7",
+        "bytes": 608728
+      },
+      "metaSha256": "9b18ca99d4f1534761fac31f121332332a59a464b8591fbed6ecf7717da75a5f",
+      "frameSetSha256": "833efbf58bf8f2794d6cb5d1053c30956e8d4d57635a533167c458752f416472",
+      "sourceFrameCount": 832
+    },
+    {
+      "library": "ARWeapon/09 S",
+      "frameCount": 704,
+      "usage": [
+        "Archer"
+      ],
+      "sourceLibrary": {
+        "path": "ARWeapon/09 S.Lib",
+        "sha256": "5cce50bf245bbecced3c3b868da7611d72cda2a8ee35e76f8ee31856f5f6f6b1",
+        "bytes": 509617
+      },
+      "metaSha256": "08bb5c919ba9fcab4041f2d6c03f823041732cfe318ddd51e95c62f6a96a4a8e",
+      "frameSetSha256": "833efbf58bf8f2794d6cb5d1053c30956e8d4d57635a533167c458752f416472",
+      "sourceFrameCount": 704
+    },
+    {
+      "library": "ARWeapon/10",
+      "frameCount": 832,
+      "usage": [
+        "Archer"
+      ],
+      "sourceLibrary": {
+        "path": "ARWeapon/10.Lib",
+        "sha256": "9ffb3f31f336d34603d27fcb6d5d699439d62586ab66fc5aa0d6639b2de512fc",
+        "bytes": 688938
+      },
+      "metaSha256": "6cde9dd5ac210ff82fdd151f411a3e7944c3edc37adc021644bb8bb3772a899d",
+      "frameSetSha256": "833efbf58bf8f2794d6cb5d1053c30956e8d4d57635a533167c458752f416472",
+      "sourceFrameCount": 832
+    },
+    {
+      "library": "ARWeapon/10 S",
+      "frameCount": 704,
+      "usage": [
+        "Archer"
+      ],
+      "sourceLibrary": {
+        "path": "ARWeapon/10 S.Lib",
+        "sha256": "cecd63a6ff6099fd0969e7a7c48e569dda1e47318cd713735fbc6af73b12de95",
+        "bytes": 582161
+      },
+      "metaSha256": "fe41e1e1770fb2f20805dc7be1fbef279f64da4c9f1c75f17b78f69a070d4903",
+      "frameSetSha256": "833efbf58bf8f2794d6cb5d1053c30956e8d4d57635a533167c458752f416472",
+      "sourceFrameCount": 704
+    },
+    {
+      "library": "ARWeapon/11",
+      "frameCount": 832,
+      "usage": [
+        "Archer"
+      ],
+      "sourceLibrary": {
+        "path": "ARWeapon/11.Lib",
+        "sha256": "5a53a23e01d7c74d7eef43b25fb5643eedc87356907c5ddc58c47619a392d1c2",
+        "bytes": 502227
+      },
+      "metaSha256": "b588335cf1c0a3fb3bacf333020a42e3b4ab4b4069a630f8eab3666ee0937746",
+      "frameSetSha256": "833efbf58bf8f2794d6cb5d1053c30956e8d4d57635a533167c458752f416472",
+      "sourceFrameCount": 832
+    },
+    {
+      "library": "ARWeapon/11 S",
+      "frameCount": 704,
+      "usage": [
+        "Archer"
+      ],
+      "sourceLibrary": {
+        "path": "ARWeapon/11 S.Lib",
+        "sha256": "b25652c738f9a1639cc5b54108db3d98543760569b38e733e634a81481b1e06f",
+        "bytes": 419623
+      },
+      "metaSha256": "c1d7f8e3cd4750c9e9c2be9f6dbee3f1eefdd2e50a03aa836f66fc6c1d08644b",
+      "frameSetSha256": "833efbf58bf8f2794d6cb5d1053c30956e8d4d57635a533167c458752f416472",
+      "sourceFrameCount": 704
+    },
+    {
+      "library": "ARWeapon/12",
+      "frameCount": 832,
+      "usage": [
+        "Archer"
+      ],
+      "sourceLibrary": {
+        "path": "ARWeapon/12.Lib",
+        "sha256": "240eac96d20d8f90fda06e251cf9ceeb05744f6f323034f466504e5ca6fb9e88",
+        "bytes": 683904
+      },
+      "metaSha256": "6acef9d1b3b0bc7cc2f89f54be99ad57b2e3aa43a7f533c5f03db0c859d277d7",
+      "frameSetSha256": "833efbf58bf8f2794d6cb5d1053c30956e8d4d57635a533167c458752f416472",
+      "sourceFrameCount": 832
+    },
+    {
+      "library": "ARWeapon/12 S",
+      "frameCount": 704,
+      "usage": [
+        "Archer"
+      ],
+      "sourceLibrary": {
+        "path": "ARWeapon/12 S.Lib",
+        "sha256": "fdc2a6568e1b7abf6a1dec17650c19d5433320c8521223527fbcd7a117de90fb",
+        "bytes": 578422
+      },
+      "metaSha256": "b37b178e4a2ebf2b897534b5883ab5a4bf9d6630c48be5f1cae81077e7756757",
+      "frameSetSha256": "833efbf58bf8f2794d6cb5d1053c30956e8d4d57635a533167c458752f416472",
+      "sourceFrameCount": 704
+    },
+    {
+      "library": "ARWeapon/13",
+      "frameCount": 832,
+      "usage": [
+        "Archer"
+      ],
+      "sourceLibrary": {
+        "path": "ARWeapon/13.Lib",
+        "sha256": "ff9cd2ceabe26113c658283dfb5427698970c048e1238b95d1c2f7b33f3c448f",
+        "bytes": 806552
+      },
+      "metaSha256": "bab106976471538a1d7f16816883887cb309063bae2e0b9d8cca6f44966d78c1",
+      "frameSetSha256": "833efbf58bf8f2794d6cb5d1053c30956e8d4d57635a533167c458752f416472",
+      "sourceFrameCount": 832
+    },
+    {
+      "library": "ARWeapon/13 S",
+      "frameCount": 704,
+      "usage": [
+        "Archer"
+      ],
+      "sourceLibrary": {
+        "path": "ARWeapon/13 S.Lib",
+        "sha256": "8459a7c7c4ed9e854ca5e08a1a8b325056441164f6cf52c6bdda31cf60194e8e",
+        "bytes": 669104
+      },
+      "metaSha256": "d49d84922dc271d76c84b2f68cbf4f7118c315b17cb36e1e5f0a1564a6ede226",
+      "frameSetSha256": "833efbf58bf8f2794d6cb5d1053c30956e8d4d57635a533167c458752f416472",
+      "sourceFrameCount": 704
+    },
+    {
+      "library": "ARWeapon/18",
+      "frameCount": 832,
+      "usage": [
+        "Archer"
+      ],
+      "sourceLibrary": {
+        "path": "ARWeapon/18.Lib",
+        "sha256": "d076bb696060f8b5a134c7550d8370fadc6b3dfd3971f5b2341437328eea3648",
+        "bytes": 925547
+      },
+      "metaSha256": "5804cf9fd7780fd1043c132ef1f970f2080bdb09ee4d470b4ad2719ed569c7c4",
+      "frameSetSha256": "833efbf58bf8f2794d6cb5d1053c30956e8d4d57635a533167c458752f416472",
+      "sourceFrameCount": 832
+    },
+    {
+      "library": "ARWeapon/18 S",
+      "frameCount": 704,
+      "usage": [
+        "Archer"
+      ],
+      "sourceLibrary": {
+        "path": "ARWeapon/18 S.Lib",
+        "sha256": "c40df095706cb193827a702bb80f3742799fd7ea94d72db076ddf4cae8c336a6",
+        "bytes": 779378
+      },
+      "metaSha256": "20c5aa61eea27e64ce90b2dd5fd32faea474b5655f50dd714f4bab69ee513f00",
+      "frameSetSha256": "833efbf58bf8f2794d6cb5d1053c30956e8d4d57635a533167c458752f416472",
+      "sourceFrameCount": 704
+    },
+    {
+      "library": "AWeapon/00 L",
+      "frameCount": 1024,
+      "usage": [
+        "Assassin"
+      ],
+      "sourceLibrary": {
+        "path": "AWeapon/00 L.Lib",
+        "sha256": "fd71388b0e369c23680c66a7b5a47d3a9f06f91a25da2e2ea29c5e09fcedb2bb",
+        "bytes": 197920
+      },
+      "metaSha256": "6fa1dcb75e5eb526adea3cd4d969d7f3b5f511c9afd746d79a2177a43866970b",
+      "frameSetSha256": "833efbf58bf8f2794d6cb5d1053c30956e8d4d57635a533167c458752f416472",
+      "sourceFrameCount": 1024
+    },
+    {
+      "library": "AWeapon/00 R",
+      "frameCount": 1024,
+      "usage": [
+        "Assassin"
+      ],
+      "sourceLibrary": {
+        "path": "AWeapon/00 R.Lib",
+        "sha256": "d6bf09f6e664e6f91183fd30763b165789c7d50e97d5bc715e0ad8d745f3c03a",
+        "bytes": 200682
+      },
+      "metaSha256": "5ee4428e86b715f8a8231ac6962f7ed86c336ce110247d4c729607da9ed89145",
+      "frameSetSha256": "833efbf58bf8f2794d6cb5d1053c30956e8d4d57635a533167c458752f416472",
+      "sourceFrameCount": 1024
+    },
+    {
+      "library": "AWeapon/01 L",
+      "frameCount": 1024,
+      "usage": [
+        "Assassin"
+      ],
+      "sourceLibrary": {
+        "path": "AWeapon/01 L.Lib",
+        "sha256": "d40452401c57b110ac711989971f55bdee32cf9b96e9e178ffb43a222d4b3b2e",
+        "bytes": 272002
+      },
+      "metaSha256": "707e8b457f5ae24d6d412b387dee45a6c8ba592c3bb6cb840fd668a96cf43df8",
+      "frameSetSha256": "833efbf58bf8f2794d6cb5d1053c30956e8d4d57635a533167c458752f416472",
+      "sourceFrameCount": 1024
+    },
+    {
+      "library": "AWeapon/01 R",
+      "frameCount": 1024,
+      "usage": [
+        "Assassin"
+      ],
+      "sourceLibrary": {
+        "path": "AWeapon/01 R.Lib",
+        "sha256": "69e14c3a95ab70a410cf0db4f80885724e06efcd5f2693f39dc7e8337e2cb9d8",
+        "bytes": 273136
+      },
+      "metaSha256": "f42d4b54a63482c2d37c2b5c681553c793ea3b574e3b0667b3934b175692fbbb",
+      "frameSetSha256": "833efbf58bf8f2794d6cb5d1053c30956e8d4d57635a533167c458752f416472",
+      "sourceFrameCount": 1024
+    },
+    {
+      "library": "AWeapon/02 L",
+      "frameCount": 1024,
+      "usage": [
+        "Assassin"
+      ],
+      "sourceLibrary": {
+        "path": "AWeapon/02 L.Lib",
+        "sha256": "3e20ff3f7e29d6f721c054ffadd303c2bb639308d630d6463ad8f1fd3e202963",
+        "bytes": 308784
+      },
+      "metaSha256": "ae0a5e64950a0571a178d79981bf76fff0f6b8f91858a0caabdd7209c2ea3482",
+      "frameSetSha256": "833efbf58bf8f2794d6cb5d1053c30956e8d4d57635a533167c458752f416472",
+      "sourceFrameCount": 1024
+    },
+    {
+      "library": "AWeapon/02 R",
+      "frameCount": 1024,
+      "usage": [
+        "Assassin"
+      ],
+      "sourceLibrary": {
+        "path": "AWeapon/02 R.Lib",
+        "sha256": "cf4f8cd2d28826fbb30f4c844a379599242faedab6599e1ec7da5fa4bee10365",
+        "bytes": 307954
+      },
+      "metaSha256": "059c3be45b6216b29cf2da4758f2fbfcc81ef91ce68634dbe84211eb10231b10",
+      "frameSetSha256": "833efbf58bf8f2794d6cb5d1053c30956e8d4d57635a533167c458752f416472",
+      "sourceFrameCount": 1024
+    },
+    {
+      "library": "AWeapon/03 L",
+      "frameCount": 1024,
+      "usage": [
+        "Assassin"
+      ],
+      "sourceLibrary": {
+        "path": "AWeapon/03 L.Lib",
+        "sha256": "a9db5629009842c38a14cee8edb8de6a78923dc196d3ca27d6568d2b6b3640a0",
+        "bytes": 285360
+      },
+      "metaSha256": "41ae5b36074f5efc2b92f5a77f6b3d3c40cc4746505e799d0f96a340945e07bc",
+      "frameSetSha256": "833efbf58bf8f2794d6cb5d1053c30956e8d4d57635a533167c458752f416472",
+      "sourceFrameCount": 1024
+    },
+    {
+      "library": "AWeapon/03 R",
+      "frameCount": 1024,
+      "usage": [
+        "Assassin"
+      ],
+      "sourceLibrary": {
+        "path": "AWeapon/03 R.Lib",
+        "sha256": "e47618bb0b7cf38b7e8099c3798a4557ec000d393140623cb2cd7b963847de0a",
+        "bytes": 285079
+      },
+      "metaSha256": "0ee77a4462e43a500fec6b4829c13047ee3c15e8e9c21e2b9b19da9fea9573d6",
+      "frameSetSha256": "833efbf58bf8f2794d6cb5d1053c30956e8d4d57635a533167c458752f416472",
+      "sourceFrameCount": 1024
+    },
+    {
+      "library": "AWeapon/04 L",
+      "frameCount": 1024,
+      "usage": [
+        "Assassin"
+      ],
+      "sourceLibrary": {
+        "path": "AWeapon/04 L.Lib",
+        "sha256": "cc98b53bc71102b84031d8253b716b3f6b507b8b32d7daab2de451addf4bf75d",
+        "bytes": 351930
+      },
+      "metaSha256": "4765027bf28170a320d811f412c8754fa999b18cd22bff5d504b638f993b59fe",
+      "frameSetSha256": "833efbf58bf8f2794d6cb5d1053c30956e8d4d57635a533167c458752f416472",
+      "sourceFrameCount": 1024
+    },
+    {
+      "library": "AWeapon/04 R",
+      "frameCount": 1024,
+      "usage": [
+        "Assassin"
+      ],
+      "sourceLibrary": {
+        "path": "AWeapon/04 R.Lib",
+        "sha256": "da982ee18983b67ddf1fff269ff1e94af9ab91497994f688cd1eae36a672c7a2",
+        "bytes": 347678
+      },
+      "metaSha256": "7e365d458a1d77f4f35af3a83d933b4740d22b2efe0718aadf13cba04c772719",
+      "frameSetSha256": "833efbf58bf8f2794d6cb5d1053c30956e8d4d57635a533167c458752f416472",
+      "sourceFrameCount": 1024
+    },
+    {
+      "library": "AWeapon/05 L",
+      "frameCount": 1024,
+      "usage": [
+        "Assassin"
+      ],
+      "sourceLibrary": {
+        "path": "AWeapon/05 L.Lib",
+        "sha256": "ce9cd937b7351965fc9b0412a9a81b31ecb37e5261c803e352e070fecd6caee7",
+        "bytes": 295903
+      },
+      "metaSha256": "34df0bf8ce18e2726b2e10e15f31047dbf8f5450462872ac174cd9251a303149",
+      "frameSetSha256": "833efbf58bf8f2794d6cb5d1053c30956e8d4d57635a533167c458752f416472",
+      "sourceFrameCount": 1024
+    },
+    {
+      "library": "AWeapon/05 R",
+      "frameCount": 1024,
+      "usage": [
+        "Assassin"
+      ],
+      "sourceLibrary": {
+        "path": "AWeapon/05 R.Lib",
+        "sha256": "2fb8d30028c41f3b0323f8ec3ddd4844d982da39f5d50c6e7ff0c92b85cb2702",
+        "bytes": 300202
+      },
+      "metaSha256": "ec3ee46e9c75f0be7e75a50fe7b0bf6b04269ac77b4ca9767e319ac30e2dccbd",
+      "frameSetSha256": "833efbf58bf8f2794d6cb5d1053c30956e8d4d57635a533167c458752f416472",
+      "sourceFrameCount": 1024
+    },
+    {
+      "library": "AWeapon/06 L",
+      "frameCount": 1024,
+      "usage": [
+        "Assassin"
+      ],
+      "sourceLibrary": {
+        "path": "AWeapon/06 L.Lib",
+        "sha256": "e1acec999bb625585cb27366399e56cacade7c6c6d186b9aaeed5d7073a50a96",
+        "bytes": 454678
+      },
+      "metaSha256": "0c2110e34daf708aa260d4d70f2834ebc3afb035e9320ce8780c656be4688355",
+      "frameSetSha256": "833efbf58bf8f2794d6cb5d1053c30956e8d4d57635a533167c458752f416472",
+      "sourceFrameCount": 1024
+    },
+    {
+      "library": "AWeapon/06 R",
+      "frameCount": 1024,
+      "usage": [
+        "Assassin"
+      ],
+      "sourceLibrary": {
+        "path": "AWeapon/06 R.Lib",
+        "sha256": "830242535e27fb4155cb03d00b487f2b2328f9d174715fae64826af5ea6e6371",
+        "bytes": 455920
+      },
+      "metaSha256": "94edda33617693b38f2f9f0363c51b20793ed11dcddb05c84ebb26a2dc9e21e0",
+      "frameSetSha256": "833efbf58bf8f2794d6cb5d1053c30956e8d4d57635a533167c458752f416472",
+      "sourceFrameCount": 1024
+    },
+    {
+      "library": "AWeapon/07 L",
+      "frameCount": 1024,
+      "usage": [
+        "Assassin"
+      ],
+      "sourceLibrary": {
+        "path": "AWeapon/07 L.Lib",
+        "sha256": "cf6f0aebad39f7f07cca5a897680a0ca0fb7206e71c8065b55208cf6aad4dd70",
+        "bytes": 369583
+      },
+      "metaSha256": "daaef62d993b206aff3f8047f7746f2b8caf239ee347323319a2c584650398c1",
+      "frameSetSha256": "833efbf58bf8f2794d6cb5d1053c30956e8d4d57635a533167c458752f416472",
+      "sourceFrameCount": 1024
+    },
+    {
+      "library": "AWeapon/07 R",
+      "frameCount": 1024,
+      "usage": [
+        "Assassin"
+      ],
+      "sourceLibrary": {
+        "path": "AWeapon/07 R.Lib",
+        "sha256": "b2c22930440347beb08e84180e99afebd1306a61c7c69b82872d8f6e49e43a7e",
+        "bytes": 374299
+      },
+      "metaSha256": "c8cb3468fb710b427b696230235e54fc284c1dacb1460de69f8ea00b614571a3",
+      "frameSetSha256": "833efbf58bf8f2794d6cb5d1053c30956e8d4d57635a533167c458752f416472",
+      "sourceFrameCount": 1024
+    },
+    {
+      "library": "AWeapon/08 L",
+      "frameCount": 1024,
+      "usage": [
+        "Assassin"
+      ],
+      "sourceLibrary": {
+        "path": "AWeapon/08 L.Lib",
+        "sha256": "46813d990141adc16581212cee0bd1d222aaece363d0522b3227476259383ded",
+        "bytes": 473494
+      },
+      "metaSha256": "af6271545f469a50166961663a6b2b71b029e3d5427329ad3d13e3ecff25b579",
+      "frameSetSha256": "833efbf58bf8f2794d6cb5d1053c30956e8d4d57635a533167c458752f416472",
+      "sourceFrameCount": 1024
+    },
+    {
+      "library": "AWeapon/08 R",
+      "frameCount": 1024,
+      "usage": [
+        "Assassin"
+      ],
+      "sourceLibrary": {
+        "path": "AWeapon/08 R.Lib",
+        "sha256": "8fb06bf962bbe0ccd56dea856d28866b2d7e21399d391d0e1f91f6e9f7490b83",
+        "bytes": 477030
+      },
+      "metaSha256": "406651406d0c790b022a145dac18b282c211580b2b9f960d9f9edd73d01dbe77",
+      "frameSetSha256": "833efbf58bf8f2794d6cb5d1053c30956e8d4d57635a533167c458752f416472",
+      "sourceFrameCount": 1024
+    },
+    {
+      "library": "AWeapon/09 L",
+      "frameCount": 1024,
+      "usage": [
+        "Assassin"
+      ],
+      "sourceLibrary": {
+        "path": "AWeapon/09 L.Lib",
+        "sha256": "5844ae187d66c3e3196cf673459bb5642a7e4ecec68ea8f9893cd4068f3d309e",
+        "bytes": 539539
+      },
+      "metaSha256": "e19cc9415d329420d4594bc07187a2579b28c7f25ca7faab7c1e5fe33df89d8b",
+      "frameSetSha256": "833efbf58bf8f2794d6cb5d1053c30956e8d4d57635a533167c458752f416472",
+      "sourceFrameCount": 1024
+    },
+    {
+      "library": "AWeapon/09 R",
+      "frameCount": 1024,
+      "usage": [
+        "Assassin"
+      ],
+      "sourceLibrary": {
+        "path": "AWeapon/09 R.Lib",
+        "sha256": "897db4817957d619e4e2092acfcfcd92a453676289f0f95fa7c7aa68277b1295",
+        "bytes": 539931
+      },
+      "metaSha256": "d9daf8f330d0c4babbd0b4c2a296e23f918af0ee7f44d6df185e41223dfd9265",
+      "frameSetSha256": "833efbf58bf8f2794d6cb5d1053c30956e8d4d57635a533167c458752f416472",
+      "sourceFrameCount": 1024
+    },
+    {
+      "library": "AWeapon/10 L",
+      "frameCount": 1024,
+      "usage": [
+        "Assassin"
+      ],
+      "sourceLibrary": {
+        "path": "AWeapon/10 L.Lib",
+        "sha256": "23fe0fd48c3af45e4e8d76caed13ed470aee4623a94b98a561c0cd61910eabe7",
+        "bytes": 445429
+      },
+      "metaSha256": "8e6b01b770c47abd04b09e9c32aba720e7bbcd9f2ca61f2d2edc962ef6e3388b",
+      "frameSetSha256": "833efbf58bf8f2794d6cb5d1053c30956e8d4d57635a533167c458752f416472",
+      "sourceFrameCount": 1024
+    },
+    {
+      "library": "AWeapon/10 R",
+      "frameCount": 1024,
+      "usage": [
+        "Assassin"
+      ],
+      "sourceLibrary": {
+        "path": "AWeapon/10 R.Lib",
+        "sha256": "499b6f191779a0b7f9a2a740cf6e6fe608c895e0c5aee8e08732f489b50fc206",
+        "bytes": 446611
+      },
+      "metaSha256": "3d5801aba29f43daed21419d4433f53a6ed123e68c3cdbdc995797c2392600fc",
+      "frameSetSha256": "833efbf58bf8f2794d6cb5d1053c30956e8d4d57635a533167c458752f416472",
+      "sourceFrameCount": 1024
+    },
+    {
+      "library": "AWeapon/11 L",
+      "frameCount": 1024,
+      "usage": [
+        "Assassin"
+      ],
+      "sourceLibrary": {
+        "path": "AWeapon/11 L.Lib",
+        "sha256": "6cd263c9de48fae4a0f4f6babfda6fe4c296f7d60eef73bb848fdc713412ebe6",
+        "bytes": 501947
+      },
+      "metaSha256": "8e9e0a3c0495839c09bb92365837ea697b0b71f73c4cce39784e56ed6c5f1a7e",
+      "frameSetSha256": "833efbf58bf8f2794d6cb5d1053c30956e8d4d57635a533167c458752f416472",
+      "sourceFrameCount": 1024
+    },
+    {
+      "library": "AWeapon/11 R",
+      "frameCount": 1024,
+      "usage": [
+        "Assassin"
+      ],
+      "sourceLibrary": {
+        "path": "AWeapon/11 R.Lib",
+        "sha256": "e88d80650d0b58aeb2b1677c75c281b0e8c92c56deeddd3eee79ae6c78410626",
+        "bytes": 499321
+      },
+      "metaSha256": "40569bd65201fba1ac9263f9b113bff5228ae00936c61feea7029a7d92844a4b",
+      "frameSetSha256": "833efbf58bf8f2794d6cb5d1053c30956e8d4d57635a533167c458752f416472",
+      "sourceFrameCount": 1024
+    },
+    {
+      "library": "AWeapon/13 L",
+      "frameCount": 1024,
+      "usage": [
+        "Assassin"
+      ],
+      "sourceLibrary": {
+        "path": "AWeapon/13 L.Lib",
+        "sha256": "b7509bd0fc4b82f5ec8035a8912e6db8a87935b08dd175652a078044ed285d93",
+        "bytes": 544283
+      },
+      "metaSha256": "8c684c34c1da6189367e106bbdf4ae34acc471afa6d18a535604ed71db133156",
+      "frameSetSha256": "833efbf58bf8f2794d6cb5d1053c30956e8d4d57635a533167c458752f416472",
+      "sourceFrameCount": 1024
+    },
+    {
+      "library": "AWeapon/13 R",
+      "frameCount": 1024,
+      "usage": [
+        "Assassin"
+      ],
+      "sourceLibrary": {
+        "path": "AWeapon/13 R.Lib",
+        "sha256": "0c29daae05d5f8e49c146d2c7ad6bbf84b4b965e8a66cca522ae3aecf3f016db",
+        "bytes": 540773
+      },
+      "metaSha256": "ba40606e530e90b1ea70e04382dcbcc7044ebe80bec0078afe143582cd0c9f89",
+      "frameSetSha256": "833efbf58bf8f2794d6cb5d1053c30956e8d4d57635a533167c458752f416472",
+      "sourceFrameCount": 1024
+    },
+    {
+      "library": "CArmour/00",
+      "frameCount": 1616,
+      "usage": [
+        "Archer",
+        "Assassin"
+      ],
+      "sourceLibrary": {
+        "path": "CArmour/00.Lib",
+        "sha256": "456e9564285f381e09b3887995593970c948ddbede8c1800d51224772d73ced7",
+        "bytes": 3335095
+      },
+      "metaSha256": "b04b37ca81426b1f344a7f60295c042f112d5866aa61c8ee3587751be759a6fc",
+      "frameSetSha256": "833efbf58bf8f2794d6cb5d1053c30956e8d4d57635a533167c458752f416472",
+      "sourceFrameCount": 1616
+    },
+    {
+      "library": "CArmour/01",
+      "frameCount": 1616,
+      "usage": [
+        "Archer",
+        "Assassin"
+      ],
+      "sourceLibrary": {
+        "path": "CArmour/01.Lib",
+        "sha256": "39a863bcf540ab3c5c1cbe16b669e0d8548860d882135f921bfd2732cb7cdd99",
+        "bytes": 4529875
+      },
+      "metaSha256": "a839275902192792e42eefb1d8da18ec3f449eaf190b05bc8fff87a01d04cc2e",
+      "frameSetSha256": "833efbf58bf8f2794d6cb5d1053c30956e8d4d57635a533167c458752f416472",
+      "sourceFrameCount": 1616
+    },
+    {
+      "library": "CArmour/02",
+      "frameCount": 1616,
+      "usage": [
+        "Archer",
+        "Assassin"
+      ],
+      "sourceLibrary": {
+        "path": "CArmour/02.Lib",
+        "sha256": "b274a07d0bf8cf0019171b64982e93c25322f6574576aed225b0ccf09f3d89aa",
+        "bytes": 4366813
+      },
+      "metaSha256": "acefdbd7c63ecce88236b47852adb8e07b15591cae2a91b6ed680590dcb6ec80",
+      "frameSetSha256": "833efbf58bf8f2794d6cb5d1053c30956e8d4d57635a533167c458752f416472",
+      "sourceFrameCount": 1616
+    },
+    {
+      "library": "CArmour/10",
+      "frameCount": 1616,
+      "usage": [
+        "Archer",
+        "Assassin"
+      ],
+      "sourceLibrary": {
+        "path": "CArmour/10.Lib",
+        "sha256": "870304f256bad11ec24516d65792b80549545f14fe72feb521e2bff99a6dfe09",
+        "bytes": 5579595
+      },
+      "metaSha256": "f8bb16d0781fb79092f98129b27b570030d1a3956787ad92c0411bacd648bcea",
+      "frameSetSha256": "833efbf58bf8f2794d6cb5d1053c30956e8d4d57635a533167c458752f416472",
+      "sourceFrameCount": 1616
+    },
+    {
+      "library": "CArmour/11",
+      "frameCount": 1616,
+      "usage": [
+        "Archer",
+        "Assassin"
+      ],
+      "sourceLibrary": {
+        "path": "CArmour/11.Lib",
+        "sha256": "35c32a0ee4cbeb091f47d3f63b7039e67ae165b68d8b323abed91d73f26e713d",
+        "bytes": 6636853
+      },
+      "metaSha256": "9e789ac9b3ae24a3f690474548fffc7c62b3c9d5f8f20e8fe741ba3e3b2d9fb3",
+      "frameSetSha256": "2941679ef11ce1b3219c104a3d7076d87f3d7ecae4c5f564f0d176627bb7085f",
+      "sourceFrameCount": 1616
+    },
+    {
+      "library": "CArmour/20",
+      "frameCount": 1616,
+      "usage": [
+        "Assassin"
+      ],
+      "sourceLibrary": {
+        "path": "CArmour/20.Lib",
+        "sha256": "c26f7e00d999684da8266ff5145c262a2030fbd84bfef22007fcb7471144a571",
+        "bytes": 13785168
+      },
+      "metaSha256": "92de858929cc1be69357c05d04d93c9b75a7d94dc06633b5a29e619ae2cc1334",
+      "frameSetSha256": "833efbf58bf8f2794d6cb5d1053c30956e8d4d57635a533167c458752f416472",
+      "sourceFrameCount": 8080
+    },
+    {
+      "library": "CArmour/21",
+      "frameCount": 1616,
+      "usage": [
+        "Assassin"
+      ],
+      "sourceLibrary": {
+        "path": "CArmour/21.Lib",
+        "sha256": "d78fe7494e6b3221072a12b811e940bbc83da5db9f2b8cc2873153fc6deaccb7",
+        "bytes": 13877983
+      },
+      "metaSha256": "19ede044337e30207664b8a21cbfffe117a3076f155e62e87f7d1fe56a9ce2f3",
+      "frameSetSha256": "833efbf58bf8f2794d6cb5d1053c30956e8d4d57635a533167c458752f416472",
+      "sourceFrameCount": 8080
+    },
+    {
+      "library": "CArmour/22",
+      "frameCount": 1616,
+      "usage": [
+        "Assassin"
+      ],
+      "sourceLibrary": {
+        "path": "CArmour/22.Lib",
+        "sha256": "e61eb01c721e734e7bc2c63c5ec76284a5df5821c2c658b51d569e7fce500e47",
+        "bytes": 15531878
+      },
+      "metaSha256": "71d3ef53f717aa4b1bfae78710d155aa144cd1169fe87437aed7f566c523c35f",
+      "frameSetSha256": "833efbf58bf8f2794d6cb5d1053c30956e8d4d57635a533167c458752f416472",
+      "sourceFrameCount": 8080
+    },
+    {
+      "library": "CArmour/23",
+      "frameCount": 1616,
+      "usage": [
+        "Assassin"
+      ],
+      "sourceLibrary": {
+        "path": "CArmour/23.Lib",
+        "sha256": "121d54ee67e83156a422f8518fe3107c8c07e6a3a2d58cb7aafb18d01ec93763",
+        "bytes": 20668858
+      },
+      "metaSha256": "bba001d619930f62003b8f83ebbfdef654875c9d041a2f41ca3793418e5663ec",
+      "frameSetSha256": "833efbf58bf8f2794d6cb5d1053c30956e8d4d57635a533167c458752f416472",
+      "sourceFrameCount": 8080
+    },
+    {
+      "library": "CArmour/24",
+      "frameCount": 1616,
+      "usage": [
+        "Assassin"
+      ],
+      "sourceLibrary": {
+        "path": "CArmour/24.Lib",
+        "sha256": "9dea295aef024cbba3f3d410cc839177fdbfbc2465cc2e586089046cacdbeae2",
+        "bytes": 15529948
+      },
+      "metaSha256": "d038e39a8a07063698fa0a37b640e804d87e80553ac9fc1d65345f2bfefcb43a",
+      "frameSetSha256": "833efbf58bf8f2794d6cb5d1053c30956e8d4d57635a533167c458752f416472",
+      "sourceFrameCount": 8080
+    },
+    {
+      "library": "CArmour/29",
+      "frameCount": 1616,
+      "usage": [
+        "Archer",
+        "Assassin"
+      ],
+      "sourceLibrary": {
+        "path": "CArmour/29.Lib",
+        "sha256": "943b81bc8122a3daab88314d057414efb0c541b0be6430fe11645f4a42358ec5",
+        "bytes": 27606563
+      },
+      "metaSha256": "3977a3940f3db7a50802da62872d178b093802b010ac4dfde962e5d7aac9f505",
+      "frameSetSha256": "833efbf58bf8f2794d6cb5d1053c30956e8d4d57635a533167c458752f416472",
+      "sourceFrameCount": 8080
+    },
+    {
+      "library": "CArmour/35",
+      "frameCount": 1616,
+      "usage": [
+        "Archer"
+      ],
+      "sourceLibrary": {
+        "path": "CArmour/35.Lib",
+        "sha256": "fa4b37f255d0ae616759e49cbe5ddfa844175a092782ab598aee246db4463d55",
+        "bytes": 4830881
+      },
+      "metaSha256": "09f92a63bc5ee7b4be27b405127c77f1e5127d50c1e37451327914c72f1b8975",
+      "frameSetSha256": "833efbf58bf8f2794d6cb5d1053c30956e8d4d57635a533167c458752f416472",
+      "sourceFrameCount": 1616
+    },
+    {
+      "library": "CArmour/36",
+      "frameCount": 1616,
+      "usage": [
+        "Archer"
+      ],
+      "sourceLibrary": {
+        "path": "CArmour/36.Lib",
+        "sha256": "edc910a00b42732484f8ba996fff66b2c5d4bf5f0d5c23d3d1a45c8ef9b10f80",
+        "bytes": 4175455
+      },
+      "metaSha256": "2aba2b6d37acd538efd2ecdedc368c3d91282af55884a1fc702df779bc298227",
+      "frameSetSha256": "833efbf58bf8f2794d6cb5d1053c30956e8d4d57635a533167c458752f416472",
+      "sourceFrameCount": 1616
+    },
+    {
+      "library": "CArmour/37",
+      "frameCount": 1616,
+      "usage": [
+        "Archer"
+      ],
+      "sourceLibrary": {
+        "path": "CArmour/37.Lib",
+        "sha256": "eaf77c045cb7e151e010841d9f81d970f4ca3c97f2759bda5556ea176cd69261",
+        "bytes": 4886294
+      },
+      "metaSha256": "06998e0f1acb068568bd59a6391f0a36072a70b088145a730d055f2732deeafa",
+      "frameSetSha256": "833efbf58bf8f2794d6cb5d1053c30956e8d4d57635a533167c458752f416472",
+      "sourceFrameCount": 1616
+    },
+    {
+      "library": "CArmour/38",
+      "frameCount": 1616,
+      "usage": [
+        "Archer"
+      ],
+      "sourceLibrary": {
+        "path": "CArmour/38.Lib",
+        "sha256": "f68def82e823ef3c55afa4fbe0d8dd5590540021717899bbabe17ab2821cb4bb",
+        "bytes": 4338720
+      },
+      "metaSha256": "2cd24655d67aa879dd47a394fb57bb53c9874c1fb37e3cf19e4c52b48076d64f",
+      "frameSetSha256": "833efbf58bf8f2794d6cb5d1053c30956e8d4d57635a533167c458752f416472",
+      "sourceFrameCount": 1616
+    },
+    {
+      "library": "CArmour/39",
+      "frameCount": 1616,
+      "usage": [
+        "Archer"
+      ],
+      "sourceLibrary": {
+        "path": "CArmour/39.Lib",
+        "sha256": "cccaf749654730071b4c6b77c074a6cd019c01eeffb7dac29baa924ffecbc497",
+        "bytes": 5768499
+      },
+      "metaSha256": "db8f8cd08c6991360db28290033f685b833f254247dae7c75060a750e6ced136",
+      "frameSetSha256": "833efbf58bf8f2794d6cb5d1053c30956e8d4d57635a533167c458752f416472",
+      "sourceFrameCount": 1616
+    },
+    {
+      "library": "CHair/00",
+      "frameCount": 1616,
+      "usage": [
+        "Archer",
+        "Assassin"
+      ],
+      "sourceLibrary": {
+        "path": "CHair/00.Lib",
+        "sha256": "876288217ef6ad4568a04e57913b892182d1ed6550fdf933dcf932f9a5b85c93",
+        "bytes": 476194
+      },
+      "metaSha256": "7073311ff92bef1c2ad393a46272d6c60b533affe571bf43e597b9c7543a36c3",
+      "frameSetSha256": "833efbf58bf8f2794d6cb5d1053c30956e8d4d57635a533167c458752f416472",
+      "sourceFrameCount": 1616
+    },
+    {
+      "library": "CHair/01",
+      "frameCount": 1616,
+      "usage": [
+        "Archer",
+        "Assassin"
+      ],
+      "sourceLibrary": {
+        "path": "CHair/01.Lib",
+        "sha256": "0efbbd32c396acbb3c27ad98e59c383d78622961e091cf46963ac838e5f078b9",
+        "bytes": 559142
+      },
+      "metaSha256": "b98df4da17401d745af9ac4ae63122801c6c8eaf8873820d818945b1e2e1b6b9",
+      "frameSetSha256": "833efbf58bf8f2794d6cb5d1053c30956e8d4d57635a533167c458752f416472",
+      "sourceFrameCount": 1616
+    },
+    {
+      "library": "CHair/02",
+      "frameCount": 1616,
+      "usage": [
+        "Archer",
+        "Assassin"
+      ],
+      "sourceLibrary": {
+        "path": "CHair/02.Lib",
+        "sha256": "63617cc8b0fd4abf161620814d8541f9c817b43d6732511b144193e7ef91fbdb",
+        "bytes": 785551
+      },
+      "metaSha256": "c3579af15f92af7e986c5e9230daa2a7e14420541e64f754987d2fb22db51250",
+      "frameSetSha256": "833efbf58bf8f2794d6cb5d1053c30956e8d4d57635a533167c458752f416472",
+      "sourceFrameCount": 1616
+    },
+    {
+      "library": "CHair/03",
+      "frameCount": 1616,
+      "usage": [
+        "Archer",
+        "Assassin"
+      ],
+      "sourceLibrary": {
+        "path": "CHair/03.Lib",
+        "sha256": "a9290a73fae35df929cca4e084f7ee4d788bdcdf61985174cbb56f9cdf9b90d9",
+        "bytes": 718234
+      },
+      "metaSha256": "37660fae6e95940600d912b235b0262521f519cf53d15e22a327e3da1b2d5fc5",
+      "frameSetSha256": "833efbf58bf8f2794d6cb5d1053c30956e8d4d57635a533167c458752f416472",
+      "sourceFrameCount": 1616
+    },
+    {
+      "library": "CHair/04",
+      "frameCount": 1616,
+      "usage": [
+        "Archer",
+        "Assassin"
+      ],
+      "sourceLibrary": {
+        "path": "CHair/04.Lib",
+        "sha256": "45a31209f83f1cf051c803eba7f9e30df3ff052453c9089ff4fd22d176f7fbac",
+        "bytes": 678678
+      },
+      "metaSha256": "5701613ccc117c001c78e3df3cea3e6d5907cf32e083cd97e4f8d114841be425",
+      "frameSetSha256": "833efbf58bf8f2794d6cb5d1053c30956e8d4d57635a533167c458752f416472",
+      "sourceFrameCount": 1616
+    },
+    {
+      "library": "CHair/05",
+      "frameCount": 1616,
+      "usage": [
+        "Archer",
+        "Assassin"
+      ],
+      "sourceLibrary": {
+        "path": "CHair/05.Lib",
+        "sha256": "a4678180c1dbd93711da61c065e6fa1523c661b77eb9e3c95f6b6dae13466548",
+        "bytes": 777878
+      },
+      "metaSha256": "7464b7c337a65dc2be6c43c428495621485a6384680b951180dabaa0d7ebcbc9",
+      "frameSetSha256": "833efbf58bf8f2794d6cb5d1053c30956e8d4d57635a533167c458752f416472",
+      "sourceFrameCount": 1616
+    },
+    {
+      "library": "CHair/06",
+      "frameCount": 1616,
+      "usage": [
+        "Archer",
+        "Assassin"
+      ],
+      "sourceLibrary": {
+        "path": "CHair/06.Lib",
+        "sha256": "6f948807e5717c701d11bcab52cf13e9aee3b86272039fa5f83a1d74cd372121",
+        "bytes": 627936
+      },
+      "metaSha256": "a7cefd69f3393a64a0d27166c7112cc99b2afa0c1a783f062abb9ace00c4c442",
+      "frameSetSha256": "833efbf58bf8f2794d6cb5d1053c30956e8d4d57635a533167c458752f416472",
+      "sourceFrameCount": 1616
+    },
+    {
+      "library": "CHair/07",
+      "frameCount": 1616,
+      "usage": [
+        "Archer",
+        "Assassin"
+      ],
+      "sourceLibrary": {
+        "path": "CHair/07.Lib",
+        "sha256": "8303347ccf8647d1b7ee983f2ad65a44576c3c166809a3b4ac7b5eddfc65b865",
+        "bytes": 544298
+      },
+      "metaSha256": "2cd4f16c755eeeb049efe3d9dda4a64c67f2c7287a1a248ec70ef1ad678e9f76",
+      "frameSetSha256": "833efbf58bf8f2794d6cb5d1053c30956e8d4d57635a533167c458752f416472",
+      "sourceFrameCount": 1616
+    },
+    {
+      "library": "CHair/08",
+      "frameCount": 1616,
+      "usage": [
+        "Archer",
+        "Assassin"
+      ],
+      "sourceLibrary": {
+        "path": "CHair/08.Lib",
+        "sha256": "5cabf734b8b987b8a3c80ae7babb9ebfeed60a5244fffa25e98dd20e71a7650d",
+        "bytes": 653782
+      },
+      "metaSha256": "c0f5ffd4387c869f6e28bff4edc56bc9adb5fcbb521368e203f1c1fb09db1028",
+      "frameSetSha256": "833efbf58bf8f2794d6cb5d1053c30956e8d4d57635a533167c458752f416472",
+      "sourceFrameCount": 1616
+    },
+    {
+      "library": "CWeapon/42",
+      "frameCount": 832,
+      "usage": [
+        "Archer",
+        "Assassin"
+      ],
+      "sourceLibrary": {
+        "path": "CWeapon/42.Lib",
+        "sha256": "0c978299f0ffbf30f31cd4854f04304dd93a40da9284581396ab0209ec927c46",
+        "bytes": 407496
+      },
+      "metaSha256": "d00bb4e40565fc971374ab07088171dab7c15a26777b16b004137abb90ad2905",
+      "frameSetSha256": "833efbf58bf8f2794d6cb5d1053c30956e8d4d57635a533167c458752f416472",
+      "sourceFrameCount": 832
+    }
+  ],
+  "effects": {
+    "library": "Magic3",
+    "sourceLibrary": {
+      "path": "Magic3.Lib",
+      "sha256": "02567b7f4c0076a81202cc47b584385847e80a2d8521e58be4123676788fefa9",
+      "bytes": 34190081
+    },
+    "metaSha256": "7074ae5a569d470f415c003c4c177629df70a4e1506b79d829174e637d1a9dda",
+    "frames": [
+      1030,
+      1031,
+      1032,
+      1033,
+      1034,
+      1040,
+      1041,
+      1042,
+      1043,
+      1044,
+      1050,
+      1051,
+      1052,
+      1053,
+      1054,
+      1060,
+      1061,
+      1062,
+      1063,
+      1064,
+      1070,
+      1071,
+      1072,
+      1073,
+      1074,
+      1080,
+      1081,
+      1082,
+      1083,
+      1084,
+      1090,
+      1091,
+      1092,
+      1093,
+      1094,
+      1100,
+      1101,
+      1102,
+      1103,
+      1104,
+      1110,
+      1111,
+      1112,
+      1113,
+      1114,
+      1120,
+      1121,
+      1122,
+      1123,
+      1124,
+      1130,
+      1131,
+      1132,
+      1133,
+      1134,
+      1140,
+      1141,
+      1142,
+      1143,
+      1144,
+      1150,
+      1151,
+      1152,
+      1153,
+      1154,
+      1160,
+      1161,
+      1162,
+      1163,
+      1164,
+      1170,
+      1171,
+      1172,
+      1173,
+      1174,
+      1180,
+      1181,
+      1182,
+      1183,
+      1184,
+      2730,
+      2731,
+      2732,
+      2733,
+      2734,
+      2735,
+      2736,
+      2737,
+      2738,
+      2739
+    ],
+    "definitions": [
+      {
+        "effect": "ArcherNormalArrow",
+        "kind": "projectile",
+        "library": "Magic3",
+        "base": 1030,
+        "count": 5,
+        "interval": 30,
+        "blend": true,
+        "light": 6,
+        "repeat": false,
+        "offset": {
+          "x": 0,
+          "y": 0
+        },
+        "rate": 1,
+        "directionCount": 16,
+        "directionStride": 10,
+        "directionRanges": [
+          {
+            "direction": 0,
+            "base": 1030,
+            "end": 1034
+          },
+          {
+            "direction": 1,
+            "base": 1040,
+            "end": 1044
+          },
+          {
+            "direction": 2,
+            "base": 1050,
+            "end": 1054
+          },
+          {
+            "direction": 3,
+            "base": 1060,
+            "end": 1064
+          },
+          {
+            "direction": 4,
+            "base": 1070,
+            "end": 1074
+          },
+          {
+            "direction": 5,
+            "base": 1080,
+            "end": 1084
+          },
+          {
+            "direction": 6,
+            "base": 1090,
+            "end": 1094
+          },
+          {
+            "direction": 7,
+            "base": 1100,
+            "end": 1104
+          },
+          {
+            "direction": 8,
+            "base": 1110,
+            "end": 1114
+          },
+          {
+            "direction": 9,
+            "base": 1120,
+            "end": 1124
+          },
+          {
+            "direction": 10,
+            "base": 1130,
+            "end": 1134
+          },
+          {
+            "direction": 11,
+            "base": 1140,
+            "end": 1144
+          },
+          {
+            "direction": 12,
+            "base": 1150,
+            "end": 1154
+          },
+          {
+            "direction": 13,
+            "base": 1160,
+            "end": 1164
+          },
+          {
+            "direction": 14,
+            "base": 1170,
+            "end": 1174
+          },
+          {
+            "direction": 15,
+            "base": 1180,
+            "end": 1184
+          }
+        ],
+        "provenance": {
+          "source": "Crystal/Client/MirObjects/PlayerObject.cs::MirAction.AttackRange1",
+          "symbol": "ArcherNormalArrow"
+        }
+      },
+      {
+        "effect": "ArcherFocusProc",
+        "kind": "attackOverlay",
+        "library": "Magic3",
+        "base": 2730,
+        "count": 10,
+        "interval": 80,
+        "blend": true,
+        "light": 6,
+        "repeat": false,
+        "offset": {
+          "x": 0,
+          "y": 0
+        },
+        "rate": 1,
+        "provenance": {
+          "source": "Crystal/Client/MirObjects/PlayerObject.cs::MirAction.AttackRange1",
+          "symbol": "ArcherFocusProc"
+        }
+      }
+    ]
+  },
+  "sounds": [
+    {
+      "id": 21210,
+      "fileName": "M121-0.wav",
+      "sourcePath": "Sound/M121-0.wav",
+      "path": "/original-ui/Sound/M121-0.wav",
+      "bytes": 124286,
+      "sha256": "13d305e77950b737299ebc67154f2cffadfee781fe5d49809bb11f3c6146e9e9"
+    },
+    {
+      "id": 21212,
+      "fileName": "M121-2.wav",
+      "sourcePath": "Sound/M121-2.wav",
+      "path": "/original-ui/Sound/M121-2.wav",
+      "bytes": 79616,
+      "sha256": "fb24aad9359cc9c5296dc8031b660d884a6161b8e073a6ab835a8dda182dd817"
+    },
+    {
+      "id": 21215,
+      "fileName": "M121-5.wav",
+      "sourcePath": "Sound/M121-5.wav",
+      "path": "/original-ui/Sound/M121-5.wav",
+      "bytes": 115998,
+      "sha256": "39a06d219c3f38a5d1c1e47f3910159d1077b48f12d1c41730ea3069bee9d224"
+    }
+  ]
+}

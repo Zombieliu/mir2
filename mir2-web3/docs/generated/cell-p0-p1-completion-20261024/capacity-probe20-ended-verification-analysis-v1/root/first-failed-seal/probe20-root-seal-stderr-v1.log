@@ -1,0 +1,10 @@
+file:///C:/mir2-build/p01-completion-20261024/release-native-10-v2-scout-selection-diagnostics-feasibility-20/scene-contract.mjs:17
+ if(binding.activeBackendSourceCommit!==DRIVER_BINDING.backendSourceCommit||binding.activeDriverSourceCommit!==DRIVER_BINDING.driverSourceCommit||binding.historicalStaticEvidenceOnly!==true||binding.schemaVersion!==1||binding.state!=='final-compact-static-scene-bound-not-executed'||binding.profile!==COMPACT_SCENE_PROFILE||binding.backendSourceCommit!==backend||binding.driverSourceCommit!==head||binding.driverSourceSha256!==aggregate||binding.rootApprovedFreshProbe!==true||binding.formalCapacityApproved!==false||binding.staticOnly!==true||binding.dynamicSupplyVerified!==false||binding.capacityAccepted!==false)throw Error('Compact scene approval/source binding is not final');
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              ^
+
+Error: Compact scene approval/source binding is not final
+    at Module.verifySceneContract (file:///C:/mir2-build/p01-completion-20261024/release-native-10-v2-scout-selection-diagnostics-feasibility-20/scene-contract.mjs:17:623)
+    at async checkContracts (file:///C:/mir2-build/p01-completion-20261024/release-native-10-v2-scout-selection-diagnostics-feasibility-20/root-seal-and-guard-v1.mjs:68:14)
+    at async file:///C:/mir2-build/p01-completion-20261024/release-native-10-v2-scout-selection-diagnostics-feasibility-20/root-seal-and-guard-v1.mjs:95:16
+
+Node.js v22.18.0

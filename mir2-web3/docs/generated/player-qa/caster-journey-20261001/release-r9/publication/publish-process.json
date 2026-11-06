@@ -1,0 +1,11 @@
+{
+  "sequence": 5,
+  "source": "180b01d46f35a5e97f4c60ee2ae033c7b53717e5",
+  "startedUtc": "2026-10-01T18:25:32.5636926+00:00",
+  "complete": true,
+  "success": true,
+  "pid": 47052,
+  "phase": "complete",
+  "gameServicesChanged": false,
+  "finishedUtc": "2026-10-01T18:57:11.6101693+00:00"
+}

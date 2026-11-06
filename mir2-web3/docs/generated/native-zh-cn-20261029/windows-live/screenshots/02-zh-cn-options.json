@@ -1,0 +1,14 @@
+{
+  "kind": "actual-native-window-computer-use",
+  "observedAtUtc": "2026-10-29T06:10:54.114Z",
+  "window": {
+    "app": "process:C:\\mir2-build\\native-zh-cn-20261029\\bin\\mir2-platform-windows.exe",
+    "id": 58921958,
+    "title": "numeron-legend of rebirth"
+  },
+  "width": 1026,
+  "height": 800,
+  "purpose": "Simplified Options and current language",
+  "locale": "zh-CN",
+  "binarySha256": "abd92be30f421328c3309eac66bbafcdd542df4117ed24ced872098e9b9b64ff"
+}

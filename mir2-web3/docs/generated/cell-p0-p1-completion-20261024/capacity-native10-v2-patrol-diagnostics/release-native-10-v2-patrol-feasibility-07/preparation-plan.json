@@ -1,0 +1,109 @@
+{
+  "schemaVersion": 1,
+  "createdAt": "2026-10-24T21:15:04.070Z",
+  "state": "final-source-bound-not-executed",
+  "root": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-patrol-feasibility-07",
+  "backendSourceCommit": "461f1d85eed6309a55a88bd79a0022f7b97febe4",
+  "backendBinarySha256": "855b4ba3c80ccb99b4128a9ee1170bc56ad51fcbaf022d5269f0b6662986c61f",
+  "backendInputCount": 39,
+  "driverFreeze": "C:\\mir2-build\\p01-completion-20261024\\capacity-patrol-run-preference-driver-frozen-v1.json",
+  "driverSourceCommit": "0998105c30f35502b8b569b82fb7942a5d356c89",
+  "driverSourceSha256": "8c29818d96fc7d0974d248fe7b4f140812385216cc98b04a0712fecfe25385b7",
+  "backendReleaseReused": true,
+  "noRebuild": true,
+  "prepared": false,
+  "seederExecuted": false,
+  "realmStarted": false,
+  "capacityAccepted": false,
+  "profile": "probe",
+  "policy": {
+    "profile": "probe",
+    "activityMode": "native",
+    "movementIntervalMs": 750,
+    "stages": [
+      2,
+      10
+    ],
+    "stageSeconds": 300,
+    "soakSeconds": 360,
+    "wallSeconds": 3600,
+    "layout": "dispersed",
+    "combatActors": 1,
+    "resumeSamples": 0,
+    "saveSamples": 0,
+    "commandsPerSecond": 3,
+    "intentionIntervalMs": 750,
+    "variableActionCadence": true,
+    "maximumSendLatenessMs": 250,
+    "movementP95Ms": 750,
+    "chatP95Ms": 1000,
+    "actionTimeoutMs": 2000,
+    "timeoutExclusive": 0.01,
+    "maximumMissedPlanRatio": 0.05,
+    "maximumCorrectionRatio": 0.05,
+    "minimumMovesPerMinute": 30,
+    "minimumCombatHitsPerMinute": 12,
+    "minimumCombatAttacksPerMinute": 18,
+    "aoiRange": 16,
+    "aoiGraceMs": 1000,
+    "nativeChatIntervalMs": 30000,
+    "nativeTurnIntervalMs": 60000,
+    "minimumNativeRunRatio": 0.5,
+    "minimumNativeCellsPerMinute": 80,
+    "maximumEvidenceInFlight": 4,
+    "maximumMemorySlopeMiBPerHour": 32,
+    "memoryWarmupSeconds": 300,
+    "maximumDriverLagP99Ms": 250,
+    "fullAcceptanceEligible": false
+  },
+  "slowStageThresholdMs": 50,
+  "slowStageHelperValidationReused": {
+    "originalRoot": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-ladder-03",
+    "sameHelperSourceBytes": true,
+    "sameTestSourceBytes": true,
+    "same14TestLogBytes": true,
+    "testsRerun": false,
+    "scope": "Exact previously tested source and evidence bytes copied; no fresh test execution is claimed."
+  },
+  "originalScene": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-coordinated-feasibility-06\\scenario.json",
+    "bytes": 1362,
+    "sha256": "701a2a3e30c1b963653af1a767f5af290e15fef207a7359cc90492cf5e496921"
+  },
+  "originalResourceProfile": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-coordinated-feasibility-06\\resource-profile.json",
+    "bytes": 1194,
+    "sha256": "a5e9012823bd816dedc3c40b13988618f3a18e69b3dd19edc4534a199a778ac3"
+  },
+  "requiredBeforeExecution": [
+    "All final pins and clean committed source must still match",
+    "Explicit preparation/execution argument and owned process checks"
+  ],
+  "commands": {
+    "prepare": [
+      "node",
+      "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-patrol-feasibility-07\\prepare-inputs.mjs",
+      "--prepare-authorized-inputs"
+    ],
+    "run": [
+      "node",
+      "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-patrol-feasibility-07\\run-owned.mjs",
+      "--execute-authorized-probe",
+      "--attack-results=v2"
+    ]
+  },
+  "finalizedAt": "2026-10-24T21:49:11.374Z",
+  "driverFrozenManifest": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\capacity-patrol-run-preference-driver-frozen-v1.json",
+    "bytes": 6826,
+    "sha256": "48e6b2c2dae7e82d26d2a0e95d408b863557530e363a79e4a07c2e77c21f172d"
+  },
+  "admissionCaps": [
+    24,
+    10,
+    10,
+    4,
+    1,
+    2
+  ]
+}

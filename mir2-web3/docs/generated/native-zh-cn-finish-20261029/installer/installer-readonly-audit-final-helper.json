@@ -1,0 +1,47 @@
+{
+  "schema": "mir2.windows.installer-final-helper-audit.v1",
+  "observedAtUtc": "2026-10-29T11:11:01.1746962Z",
+  "passed": true,
+  "scope": "Read-only final helper source comparison and Node syntax check; no helper execution, game launch, credential-file read, process termination, installer action, or source modification.",
+  "previousAudit": {
+    "path": "installer-readonly-audit.json",
+    "sha256": "72c02e5a39b0743d37c0f02cdbb0fadb3c832632ad209976405959126eaa5b22",
+    "preserved": true
+  },
+  "currentHelper": {
+    "path": "launch-installed-native.mjs",
+    "bytes": 2802,
+    "sha256": "91823f73e8bfa5b8953f612fa47abb02ff2d5376a30abf4f6ecc27eebfc55241",
+    "nodeSyntaxCheck": "passed"
+  },
+  "exactDelta": {
+    "changes": [
+      "Read process.argv[2] as phase and require a nonempty string matching ^[a-z0-9-]+$.",
+      "Add phase to the public process receipt.",
+      "Write installed-native-process-<phase>.json with exclusive wx creation instead of the shared installed-native-process.json filename."
+    ],
+    "inverseProjectionMatchesOldRawBytes": true,
+    "projectedBytes": 2679,
+    "projectedSha256": "7240254af3bcf64d9e72a61b7cc1f1cf6140f0be731d6dc9d1a0e9213fcbbd6c",
+    "method": "Remove the exact added phase declaration, remove the exact phase property, and restore the exact original receipt pathname in memory; UTF-8 bytes and SHA256 match the original audit pin exactly."
+  },
+  "unchangedChecks": {
+    "attestedGameHashAndInstalledLauncherHash": true,
+    "freshSimplifiedSeedValidation": true,
+    "clearInheritedMir2Variables": true,
+    "isolatedAppdataValidationProfile": true,
+    "localGatewayAndExistingTestAccountOnly": true,
+    "externalPrivateAppendLogs": true,
+    "launcherNoArguments": true,
+    "normalLauncherUpdaterGameChain": true,
+    "publicReceiptDoesNotContainCredentials": true,
+    "paymentsAttempted": false
+  },
+  "blockingFindings": [],
+  "boundaries": [
+    "No runtime success is newly claimed by this source audit; first-launch and reinstall receipts remain separate coordinator evidence.",
+    "Each invocation must use its designated fresh phase. The exclusive receipt write occurs after process creation, as in the prior helper, so a reused phase is not a pre-launch duplicate-execution guard.",
+    "The validation installer interactive finish-page isolation limitation from the earlier audit remains unchanged; the reviewed acceptance path is silent installation plus this external helper.",
+    "Normal installer roaming preference/seed behavior is unchanged and is not affected by this helper-only change."
+  ]
+}

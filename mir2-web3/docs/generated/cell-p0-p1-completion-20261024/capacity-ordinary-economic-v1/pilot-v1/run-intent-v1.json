@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "manifestPin": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-preparation-pilot-v1\\frozen-source-v1.json",
+    "bytes": 78569,
+    "sha256": "6529be41d213e4a2b0d26b02bab3a7db78c7bd39a897cc8893390f30b758730d"
+  },
+  "options": {
+    "realm": "isolated",
+    "endpoint": "ws://127.0.0.1:17510/ws",
+    "profile": "probe",
+    "activityMode": "native",
+    "stages": "2",
+    "stageSeconds": 30,
+    "soakSeconds": 30,
+    "wallSeconds": 3600,
+    "combatActors": 1,
+    "resumeSamples": 0,
+    "saveSamples": 0,
+    "movementIntervalMs": 750,
+    "layout": "dispersed",
+    "attackResults": "v2",
+    "preparationProfile": "ordinary-economic-v1",
+    "preparationHpTarget": 12,
+    "accountsFile": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-preparation-pilot-v1\\episode\\private\\capacity-pool.json",
+    "monitor": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-preparation-pilot-v1\\episode\\monitor-current.json",
+    "output": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-preparation-pilot-v1\\episode\\reports",
+    "scenarioFile": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-preparation-pilot-v1\\scenario-v1.json",
+    "mapRoot": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\lib\\generated\\crystal-map-pack",
+    "loginNotBefore": "2026-10-26T18:30:55.269Z"
+  },
+  "scope": "Fresh owned realm and six-zero proof establish initial two-account login budget; real LoginBudget ledger and server ordinary limits remain active.",
+  "formalAcceptanceEligible": false,
+  "capacityAccepted": false,
+  "preparationSupplyDurationClaim": false
+}

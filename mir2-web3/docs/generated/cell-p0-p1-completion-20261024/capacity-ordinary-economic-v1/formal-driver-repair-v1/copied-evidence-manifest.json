@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "copies": [
+    {
+      "source": "C:/mir2-build/p01-completion-20261024/formal-exact-goal-navigation-replay-v1.mjs",
+      "file": "offline-exact-goal-replay-v1.mjs",
+      "bytes": 32046,
+      "sha256": "d481cffcbe07cbcb993605b308e665ed4f77242384d03d821fbc3b1c0bee4232"
+    },
+    {
+      "source": "C:/mir2-build/p01-completion-20261024/root-formal-exact-goal-replay-v1.stdout.json",
+      "file": "root-offline-replay-v1.json",
+      "bytes": 1271,
+      "sha256": "852c3b0dfcac6cca4b57ef83334e41d34167e7194c309e050a998bfb4b98378b"
+    }
+  ],
+  "copyCount": 2,
+  "sourceUnchanged": true,
+  "publicOnly": true,
+  "capacityAccepted": false,
+  "p0Accepted": false
+}

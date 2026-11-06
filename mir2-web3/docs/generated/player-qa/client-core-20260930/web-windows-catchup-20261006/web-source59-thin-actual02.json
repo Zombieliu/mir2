@@ -1,0 +1,64 @@
+{
+  "schemaVersion": 1,
+  "owner": "Root",
+  "kind": "Source59-02 actual accepted original full Thin and runtime copy",
+  "outer": {
+    "owner": "Root",
+    "exitCode": 0,
+    "builderPid": 57828,
+    "kind": "Source59-02 original full Thin after Root accepted strict Next59-02",
+    "exited": true,
+    "disposed": true,
+    "elapsedMs": 22193,
+    "configPath": "C:/mir2-cross-platform-storage-20261002/web-source59-bag-pointer-20261011-01/root-approved01/thin-build02-config01.json",
+    "uiOperated": false,
+    "runtimeLaunched": false,
+    "networkUsed": false,
+    "productionBuildAccepted": false,
+    "candidateAccepted": false,
+    "goalComplete": false
+  },
+  "callerExitCode": 0,
+  "inputCount": 55328,
+  "snapshot": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source59-bag-pointer-20261011-01\\thin-preparation02\\full-snapshot.json",
+    "bytes": 14834857,
+    "sha256": "8c9d3b4b29df495654c694f52e3bd39ff6c76114081c86d9d63fef2b0cfe9ace"
+  },
+  "package": {
+    "exists": true,
+    "bytes": 374002718,
+    "files": 7331,
+    "directories": 778,
+    "links": 0
+  },
+  "originalCapBytes": 377487360,
+  "packageRoot": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\.mir2-thin-client-web-windows-catchup-source59-20261011-02",
+  "runtimeCopy": {
+    "root": "C:\\mir2-cross-platform-storage-20261002\\web-source59-bag-pointer-20261011-01\\web-runtime02",
+    "files": 7331,
+    "directories": 778,
+    "links": 0,
+    "hashDifferences": 0,
+    "snapshot": {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\web-source59-bag-pointer-20261011-01\\web-start02\\runtime-snapshot.json",
+      "bytes": 2231562,
+      "sha256": "c2b509d33c934e1614b36eeab19d70f73c53c27b52f6e32b04d5e8497ce3cb2f"
+    }
+  },
+  "warnings": null,
+  "jsonCompaction": {
+    "files": 231,
+    "sourceBytes": 100349931,
+    "outputBytes": 68042309,
+    "savedBytes": 32307622,
+    "detailsPath": "C:\\mir2-cross-platform-storage-20261002\\web-source59-bag-pointer-20261011-01\\thin-build02\\size-report.json-compaction-details.json"
+  },
+  "rendererVersion": "bevy-cbaf32383ce0ff77",
+  "nodeTestsCarry": {
+    "passed": 66,
+    "effectiveInputsOnly": true
+  },
+  "candidate100": false,
+  "goalComplete": false
+}

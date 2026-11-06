@@ -1,0 +1,27 @@
+{
+  "command": [
+    "cargo",
+    "+1.95.0",
+    "test",
+    "--offline",
+    "--locked",
+    "--jobs",
+    "2",
+    "--manifest-path",
+    "apps/game-client/platform-windows/Cargo.toml",
+    "--bin",
+    "mir2-platform-windows",
+    "guild_rank_wire_tests"
+  ],
+  "cwd": "C:\\Users\\Administrator\\.codex\\worktrees\\crowded-combat-control\\mir2-player-journey\\mir2-web3",
+  "target": "C:/mir2-build/gateway-tests-r51",
+  "jobs": 2,
+  "startedUtc": "2026-10-04T19:03:32.474942+00:00",
+  "elapsedSeconds": 373.04240410000784,
+  "exitCode": 0,
+  "logSha256": "77c3705af128cb3757a1d3a12367cf52b1216c240731c360b18b46d91311ba96",
+  "isolatedFaultReceiptDir": "C:\\mir2-playtest-releases\\20261004-native-r18\\guild-rank-native-root-review-01",
+  "privateFixtureContentsExported": false,
+  "networkOrNativeAcceptance": false,
+  "overlapsWorkerChecks": true
+}

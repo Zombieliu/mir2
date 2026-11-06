@@ -1,0 +1,250 @@
+{
+  "owner": "Root",
+  "kind": "Root reviewed Source78 authenticated physical Spells bootstrap plus observational diagnostics",
+  "parentCommit": "ead9311a37edf6ba71ac7633726a1d01b0d5df0a",
+  "files": [
+    {
+      "relativePath": "apps/web/lib/bevy-spells-ui.ts",
+      "before": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\web-source78-spells-readiness-20261012-01\\worker-code01\\before\\apps\\web\\lib\\bevy-spells-ui.ts",
+        "bytes": 19788,
+        "sha256": "c3f3154862728b7ff48ef958beb562323938e2b7c518f73b321ce2f443abd108"
+      },
+      "after": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\web-source78-spells-readiness-20261012-01\\worker-code01\\after\\apps\\web\\lib\\bevy-spells-ui.ts",
+        "bytes": 22960,
+        "sha256": "f77f586c3f291ed5e019eedbfe549780d0b56ebef459eeb0f05ed9bdf3f76ee3"
+      },
+      "mainPath": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\lib\\bevy-spells-ui.ts"
+    },
+    {
+      "relativePath": "apps/web/lib/use-bevy-spells-ui.ts",
+      "before": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\web-source78-spells-readiness-20261012-01\\worker-code01\\before\\apps\\web\\lib\\use-bevy-spells-ui.ts",
+        "bytes": 2823,
+        "sha256": "780e587c8d87bb50cc280e29b90d9a1467e03c723e58cbf4719bf6e1f0dbec94"
+      },
+      "after": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\web-source78-spells-readiness-20261012-01\\worker-code01\\after\\apps\\web\\lib\\use-bevy-spells-ui.ts",
+        "bytes": 3383,
+        "sha256": "7359f97831c9cffd3a8c2ad55e314aa1992376218720edf50643876db974c4c6"
+      },
+      "mainPath": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\lib\\use-bevy-spells-ui.ts"
+    },
+    {
+      "relativePath": "apps/web/scripts/test-bevy-spells-ui.mjs",
+      "before": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\web-source78-spells-readiness-20261012-01\\worker-code01\\before\\apps\\web\\scripts\\test-bevy-spells-ui.mjs",
+        "bytes": 12404,
+        "sha256": "68ef1d3e4304c39eeda5e105517eef8f0a7ff6145043ffe3f17221bf80631a29"
+      },
+      "after": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\web-source78-spells-readiness-20261012-01\\worker-code01\\after\\apps\\web\\scripts\\test-bevy-spells-ui.mjs",
+        "bytes": 23504,
+        "sha256": "fa08a4f8a32853c91ad1770571d539469dcba15bf71e627f5c73d3d8c8cbe0b2"
+      },
+      "mainPath": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-bevy-spells-ui.mjs"
+    },
+    {
+      "relativePath": "apps/web/scripts/test-use-bevy-spells-ui.mjs",
+      "before": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\web-source78-spells-readiness-20261012-01\\worker-code01\\before\\apps\\web\\scripts\\test-use-bevy-spells-ui.mjs",
+        "bytes": 2790,
+        "sha256": "27efb2dd14c35fde07264019ecd22ce7b940b369a3bbc3c4214d57016059edae"
+      },
+      "after": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\web-source78-spells-readiness-20261012-01\\worker-code01\\after\\apps\\web\\scripts\\test-use-bevy-spells-ui.mjs",
+        "bytes": 6853,
+        "sha256": "453ed021dad819efbd845e5e359b98074085a3daf1c6e221b42c98dcc96a9afd"
+      },
+      "mainPath": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-use-bevy-spells-ui.mjs"
+    },
+    {
+      "relativePath": "apps/web/app/page.tsx",
+      "before": {
+        "path": "e:/mir2-player-journey/mir2-web3/apps/web/app/page.tsx",
+        "bytes": 1098126,
+        "sha256": "1b38babb739c0eda629bc4330cc3dd4bece4d5d637be356f88e9b0535f227031"
+      },
+      "after": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\web-source78-spells-readiness-20261012-01\\worker-code01\\bootstrap-repair01\\after\\apps\\web\\app\\page.tsx",
+        "bytes": 1099365,
+        "sha256": "cbd8de41a129c5f50549d22da364fa91bf483300d3d4c1ca89099f85ffbcfe07"
+      },
+      "mainPath": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\app\\page.tsx"
+    },
+    {
+      "relativePath": "apps/web/app/original-client-shell.tsx",
+      "before": {
+        "path": "e:/mir2-player-journey/mir2-web3/apps/web/app/original-client-shell.tsx",
+        "bytes": 334911,
+        "sha256": "a5caa3bda3c2aa53815cc5901092975d0d0f39370d5a266fd58020625ad3ca08"
+      },
+      "after": {
+        "path": "c:/mir2-cross-platform-storage-20261002/web-source78-spells-readiness-20261012-01/worker-code01/root-after/apps/web/app/original-client-shell.tsx",
+        "bytes": 335016,
+        "sha256": "e82fe9a79838ae9e76b4af88811169d3da2bbc0a8e9f40ebe5fd77bc7905e6c3"
+      },
+      "mainPath": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\app\\original-client-shell.tsx"
+    },
+    {
+      "relativePath": "apps/web/scripts/test-spells-page-gate.mjs",
+      "before": {
+        "path": "e:/mir2-player-journey/mir2-web3/apps/web/scripts/test-spells-page-gate.mjs",
+        "bytes": 9600,
+        "sha256": "d10cad9061efccc7d55a8e3902cecf763f2fffcd54787fd40e2ac48972921c3e"
+      },
+      "after": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\web-source78-spells-readiness-20261012-01\\worker-code01\\fixture-repair01\\after\\apps\\web\\scripts\\test-spells-page-gate.mjs",
+        "bytes": 15829,
+        "sha256": "827f9504041eda5a15653be60da08a75d3a8ff80ffdfff977b40564a03cb8810"
+      },
+      "mainPath": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-spells-page-gate.mjs"
+    },
+    {
+      "relativePath": "apps/web/scripts/test-spells-raw-ingress.mjs",
+      "before": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\web-source78-spells-readiness-20261012-01\\worker-code01\\fixture-repair01\\before\\apps\\web\\scripts\\test-spells-raw-ingress.mjs",
+        "bytes": 6550,
+        "sha256": "2da5b3773f58bedcb16b005083eaa6cf5063e51864d128a50229ae294ac49a58"
+      },
+      "after": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\web-source78-spells-readiness-20261012-01\\worker-code01\\bootstrap-repair01\\after\\apps\\web\\scripts\\test-spells-raw-ingress.mjs",
+        "bytes": 16039,
+        "sha256": "ee4599f61e5610256d0af071c0a61754fc3db52de7ddfe36399520c51d294e2b"
+      },
+      "mainPath": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-spells-raw-ingress.mjs"
+    }
+  ],
+  "codeCopies": [
+    {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\web-source78-spells-readiness-20261012-01\\worker-code01\\after\\apps\\web\\lib\\bevy-spells-ui.ts",
+      "bytes": 22960,
+      "sha256": "f77f586c3f291ed5e019eedbfe549780d0b56ebef459eeb0f05ed9bdf3f76ee3"
+    },
+    {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\web-source78-spells-readiness-20261012-01\\worker-code01\\after\\apps\\web\\lib\\use-bevy-spells-ui.ts",
+      "bytes": 3383,
+      "sha256": "7359f97831c9cffd3a8c2ad55e314aa1992376218720edf50643876db974c4c6"
+    },
+    {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\web-source78-spells-readiness-20261012-01\\worker-code01\\after\\apps\\web\\scripts\\test-bevy-spells-ui.mjs",
+      "bytes": 23504,
+      "sha256": "fa08a4f8a32853c91ad1770571d539469dcba15bf71e627f5c73d3d8c8cbe0b2"
+    },
+    {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\web-source78-spells-readiness-20261012-01\\worker-code01\\after\\apps\\web\\scripts\\test-use-bevy-spells-ui.mjs",
+      "bytes": 6853,
+      "sha256": "453ed021dad819efbd845e5e359b98074085a3daf1c6e221b42c98dcc96a9afd"
+    },
+    {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\web-source78-spells-readiness-20261012-01\\worker-code01\\bootstrap-repair01\\after\\apps\\web\\app\\page.tsx",
+      "bytes": 1099365,
+      "sha256": "cbd8de41a129c5f50549d22da364fa91bf483300d3d4c1ca89099f85ffbcfe07"
+    },
+    {
+      "path": "c:/mir2-cross-platform-storage-20261002/web-source78-spells-readiness-20261012-01/worker-code01/root-after/apps/web/app/original-client-shell.tsx",
+      "bytes": 335016,
+      "sha256": "e82fe9a79838ae9e76b4af88811169d3da2bbc0a8e9f40ebe5fd77bc7905e6c3"
+    },
+    {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\web-source78-spells-readiness-20261012-01\\worker-code01\\fixture-repair01\\after\\apps\\web\\scripts\\test-spells-page-gate.mjs",
+      "bytes": 15829,
+      "sha256": "827f9504041eda5a15653be60da08a75d3a8ff80ffdfff977b40564a03cb8810"
+    },
+    {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\web-source78-spells-readiness-20261012-01\\worker-code01\\bootstrap-repair01\\after\\apps\\web\\scripts\\test-spells-raw-ingress.mjs",
+      "bytes": 16039,
+      "sha256": "ee4599f61e5610256d0af071c0a61754fc3db52de7ddfe36399520c51d294e2b"
+    }
+  ],
+  "extraUnchangedTest": [],
+  "controls": [
+    {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\web-source78-spells-readiness-20261012-01\\prepared-input01\\mir2-web3\\apps\\web\\tsconfig.source73-build03.json",
+      "bytes": 5911,
+      "sha256": "651f3e6398616ce87133196df604582e5c102a36149e6122b65fe83b0241de37",
+      "relativePath": "apps/web/tsconfig.source73-build03.json",
+      "internal": true,
+      "sourceRole": "Root own Source78 C build control only dist token replaced"
+    },
+    {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\web-source78-spells-readiness-20261012-01\\prepared-input01\\mir2-web3\\apps\\web\\next-env.d.ts",
+      "bytes": 294,
+      "sha256": "58bb3b5547e25fbaf5437e3d2abda2ec3766c339910ab67ff19496c92430a261",
+      "relativePath": "apps/web/next-env.d.ts",
+      "internal": true,
+      "sourceRole": "Root own Source78 C build control only dist token replaced"
+    }
+  ],
+  "workerManifest": {
+    "path": "c:/mir2-cross-platform-storage-20261002/web-source78-spells-readiness-20261012-01/worker-code01/worker-manifest01.json",
+    "bytes": 7155,
+    "sha256": "fca6c9df22589cc837201b513a899a8f794a769a05c3a7946b8d6229c3f569bd"
+  },
+  "baselineCopy": {
+    "path": "c:/mir2-cross-platform-storage-20261002/web-source78-spells-readiness-20261012-01/root-approved01/source78-baseline-copy-result01.json",
+    "bytes": 296,
+    "sha256": "d007d38885b7c4995b145c81f6929a31b9f8991b7b51be5163135cef2bfb9614"
+  },
+  "strictSnapshot": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source78-spells-readiness-20261012-01\\root-approved01\\source78-strict-snapshot03.json",
+    "bytes": 20522564,
+    "sha256": "86859054aba26372cc0ecab5571af49a07edab95c2dfed5d593fb0226facd8dd"
+  },
+  "checks": {
+    "originalReadinessAndCommandAdmissionPreserved": true,
+    "qualifyAllowsPointerContextIdentityAndPointerRouterUnchanged": true,
+    "secondStatusReadReused": true,
+    "noExtraRuntimeClockCapabilitiesReads": true,
+    "orderedPagePredicateShortCircuitEquivalent": true,
+    "diagnosticOnlyFiniteReasonReadyInputReason": true,
+    "diagnosticNeverAuthorizesUiOrCommands": true,
+    "noRawOwnerOrSkillsIdentifiersOrErrorsSerialized": true,
+    "hookFunctionalValueDedupesToPrevent50msRerenders": true,
+    "noNewFetchIntervalListenersOrEffects": true,
+    "existingTestsPreservedAndMeaningfulRegressionSourceAppended": true,
+    "mainForeignTsconfigUnchanged": true,
+    "unchangedSource77AssetsAndRuntimeAndGateway": true,
+    "noBaselineRetagOrForceReady": true
+  },
+  "sources": 37592,
+  "internal": 37590,
+  "external": 2,
+  "membershipDifferences": 0,
+  "sourceExecution": false,
+  "testsExecuted": false,
+  "actualBrowserRefusalEstablished": false,
+  "goalComplete": false,
+  "fixtureRepair": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source78-spells-readiness-20261012-01\\worker-code01\\fixture-repair01\\worker-fixture-manifest01.json",
+    "bytes": 7713,
+    "sha256": "094752e8c9bd272176682ea95232df5d9572dcb392e707c6ed7ae9cbddae8c5b"
+  },
+  "fixtureDependencyCount": 17,
+  "fixtureDependencyDifferences": 0,
+  "originalSendRawAssertionsByteExact": true,
+  "rootDiagnosticFixtureAndAppendedTestsByteExact": true,
+  "previousActualFailure": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source78-spells-readiness-20261012-01\\root-approved01\\source78-node-failure01.json",
+    "bytes": 2321,
+    "sha256": "1fedbde77c7a02bb5b3cdeeb1997d779038497edad8a15582f0ac857fc704b52"
+  },
+  "bootstrapRepair": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source78-spells-readiness-20261012-01\\worker-code01\\bootstrap-repair01\\root-bootstrap-manifest01.json",
+    "bytes": 1450,
+    "sha256": "a2fda5016015e2c812a6a2754afd655ae7e48790bf96a2b595ac7f6e4a2a35da"
+  },
+  "physicalProofGuardsPreserved": [
+    "socket identity/open",
+    "confirmed session identity/generations",
+    "scene revision",
+    "current snapshot version newer than StartGame",
+    "connected self/map",
+    "raw array<=512"
+  ],
+  "rawCacheRetag": false,
+  "rawAckCaptureChanged": false,
+  "sendGuardChanged": false,
+  "ordinaryBrowserGapResolved": false
+}

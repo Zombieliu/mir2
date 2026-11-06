@@ -1,0 +1,58 @@
+TAP version 13
+# Subtest: adapter runs original once with exact options/result and restores prototype after public terminal capture
+ok 1 - adapter runs original once with exact options/result and restores prototype after public terminal capture
+  ---
+  duration_ms: 13.1294
+  type: 'test'
+  ...
+# Subtest: original run throw object wins over independent terminal persistence failure and original prototype is restored
+ok 2 - original run throw object wins over independent terminal persistence failure and original prototype is restored
+  ---
+  duration_ms: 2.9813
+  type: 'test'
+  ...
+# Subtest: a successful original result cannot hide terminal persistence failure
+ok 3 - a successful original result cannot hide terminal persistence failure
+  ---
+  duration_ms: 3.4764
+  type: 'test'
+  ...
+# Subtest: silent writer failure return is exposed by actual raw count mismatch without granting ACK or acceptance
+ok 4 - silent writer failure return is exposed by actual raw count mismatch without granting ACK or acceptance
+  ---
+  duration_ms: 5.0728
+  type: 'test'
+  ...
+# Subtest: independent raw consumer rejects payload, unknown cause, unsafe ID and out-of-region entity injection
+ok 5 - independent raw consumer rejects payload, unknown cause, unsafe ID and out-of-region entity injection
+  ---
+  duration_ms: 3.7879
+  type: 'test'
+  ...
+# Subtest: diagnostic truncation remains independently incomplete and never rewrites the original failed report
+ok 6 - diagnostic truncation remains independently incomplete and never rewrites the original failed report
+  ---
+  duration_ms: 5.2044
+  type: 'test'
+  ...
+# Subtest: missing terminal is explicitly incomplete and sensitive status extras fail closed
+ok 7 - missing terminal is explicitly incomplete and sensitive status extras fail closed
+  ---
+  duration_ms: 3.8358
+  type: 'test'
+  ...
+# Subtest: independent counter permits the real row-limit sequence gap and keeps pending-limit shape separate
+ok 8 - independent counter permits the real row-limit sequence gap and keeps pending-limit shape separate
+  ---
+  duration_ms: 0.5328
+  type: 'test'
+  ...
+1..8
+# tests 8
+# suites 0
+# pass 8
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 97.4918

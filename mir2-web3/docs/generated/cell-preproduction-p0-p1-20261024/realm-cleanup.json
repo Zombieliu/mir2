@@ -1,0 +1,17 @@
+{
+  "recordedAtUtc": "2026-10-24T12:46:14.3354682Z",
+  "pid": 49716,
+  "verifiedExecutable": "C:\\mir2-build\\cell-preproduction-p0-p1-20261024\\target\\debug\\mir2-gateway.exe",
+  "binarySha256": "ddc134d3affabcf0f88c1bdc31acfb50fa89a78b796c133aa3eb296c0a3d8daa",
+  "preStopCapacity": {
+    "currentWsConnections": 0,
+    "currentActiveSessions": 0,
+    "currentReconnectLeases": 0,
+    "currentLoginInFlight": 0,
+    "currentNewCharacterInFlight": 0,
+    "currentStartGameInFlight": 0
+  },
+  "reason": "Owned isolated P0 realm drained after ordinary logout; release executable lock for integration persistence test",
+  "unrelatedProcessesTouched": false,
+  "stopped": true
+}

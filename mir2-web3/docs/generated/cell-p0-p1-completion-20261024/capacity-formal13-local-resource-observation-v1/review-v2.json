@@ -1,0 +1,129 @@
+{
+  "schemaVersion": 1,
+  "reviewedAt": "2026-10-25T20:57:45.036Z",
+  "runId": "1792959622496-365f0175",
+  "scope": "Independent source review and one ended monitor-only scalar replay; no game raw replay, target-module import, tests, build, service or binary read.",
+  "sources": {
+    "analyzer": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal13-local-resource-observation-v1\\analyze-v2.mjs",
+      "bytes": 8016,
+      "sha256": "5a7787f5fef6ca2e8a11ec16ef94caa0b2ba74aef6cc938c06dc5e251b73212b"
+    },
+    "analysis": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal13-local-resource-observation-v1\\analysis-v2.json",
+      "bytes": 13719,
+      "sha256": "26b2b7e43cdb0df3056d19bfdf5fe89272ef3751f51b8b081089bb4e48310c04"
+    },
+    "report": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-account-store-wait-ladder-13\\reports\\1792959622496-365f0175.report.json",
+      "bytes": 423293,
+      "sha256": "3f167a5fde64e43a0a64a77b41fea9651edaa4deb6a585128065b5626f13be26"
+    },
+    "profile": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-account-store-wait-ladder-13\\resource-profile.json",
+      "bytes": 1630,
+      "sha256": "9c5825d9a0c1a002081e439151d9d158dcbd78af64347f339f83b8e690924a88"
+    },
+    "catalog": {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal-native-v2-account-store-wait-ladder-13\\collect-formal-native-v2-account-store-wait-ladder-13-public-artifact-catalog.json",
+      "bytes": 65388,
+      "sha256": "f96df32acb661959bd36c402710b4f7cac2ea91bfb6f634be977cd5cad6fbe44"
+    },
+    "priorInvalidAnalysis": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal13-local-resource-observation-v1\\analysis-v1.json",
+      "bytes": 10799,
+      "sha256": "075716b6d8f86a7908dbee736fccf690fff92196d2764d0c0d9cbbf8e1168871"
+    },
+    "priorAnalyzer": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal13-local-resource-observation-v1\\analyze-v1.mjs",
+      "bytes": 6974,
+      "sha256": "5ee10b87af205f701effeca3ccb8e2fc795e407928299d187ddbf3733a6491b3"
+    }
+  },
+  "monitorReplay": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-account-store-wait-ladder-13\\monitor-history.jsonl",
+    "bytes": 4931726,
+    "sha256": "8ca7040d7d0643002132e91eff8b66dbab272923e071129417af7f5fdee6556b",
+    "rows": 544,
+    "sampleRows": 542,
+    "nonSampleRows": 2,
+    "startedRows": 1,
+    "stoppedRows": 1
+  },
+  "catalogExternalMonitorPinMatched": true,
+  "monitorSourceUnchangedDuringRead": true,
+  "checks": {
+    "wrappedSampleEnvelopeUsed": true,
+    "terminalRecordsExactlyOneEach": true,
+    "terminalOrderingChecked": true,
+    "sampleClockMonotonic": true,
+    "allPhaseCountsAtLeast100": true,
+    "allFiniteScalarCountsEqualPhaseSampleCounts": true,
+    "allMonitorSummaryFieldsExact": true,
+    "allPhaseSummaryFieldsExact": true,
+    "wholeDriverPayloadArithmeticExact": true,
+    "reportAndProfilePinsExact": true,
+    "invalidV1PreservedAndExplicitlyDisqualified": true
+  },
+  "phaseObservations": [
+    {
+      "name": "stage-2",
+      "measuredSeconds": 300.259,
+      "sampleCount": 153,
+      "maximumSampleGapMs": 2221,
+      "cpuP95": 0.0789873417721519,
+      "cpuMaximum": 0.1104944500504541,
+      "privateMaximumBytes": 574222336,
+      "privateMaximumMiB": 547.62109375,
+      "workingSetMaximumBytes": 620032000,
+      "hostFreeMinimumBytes": 44583620608
+    },
+    {
+      "name": "stage-10",
+      "measuredSeconds": 300.261,
+      "sampleCount": 152,
+      "maximumSampleGapMs": 2175,
+      "cpuP95": 0.3587827015483182,
+      "cpuMaximum": 0.5725606736007924,
+      "privateMaximumBytes": 1370935296,
+      "privateMaximumMiB": 1307.42578125,
+      "workingSetMaximumBytes": 1405534208,
+      "hostFreeMinimumBytes": 44132470784
+    },
+    {
+      "name": "stage-25",
+      "measuredSeconds": 300.254,
+      "sampleCount": 148,
+      "maximumSampleGapMs": 7377,
+      "cpuP95": 1.112895132965379,
+      "cpuMaximum": 3.806468440271257,
+      "privateMaximumBytes": 1962692608,
+      "privateMaximumMiB": 1871.76953125,
+      "workingSetMaximumBytes": 1988784128,
+      "hostFreeMinimumBytes": 43426197504
+    }
+  ],
+  "sourceReview": {
+    "blockingFindingIds": [],
+    "notes": [
+      "The analyzer unwraps row.sample and uses actual report measurement bounds with a half-open timestamp interval and nearest-rank percentiles.",
+      "The 544 monitor rows are 542 samples plus one started and one stopped record; v1 zero samples came from the missing envelope unwrap and are not valid zero resource measurements.",
+      "All nine finite scalar metric series have the complete actual sample count in each of these three phases. No missing CPU or IO values were silently represented as zero in these actual summaries.",
+      "Source-only fail-closed checks cover missing monitor terminals and fewer than 100 samples per executed phase; this review did not run negative fixtures or the target analyzer."
+    ]
+  },
+  "limitations": [
+    "Sampled process CPU and memory do not prove a hardware ceiling, absence of between-sample stalls, steady-state memory, or a capacity result. Stage25 failed the original combat-supply gate.",
+    "Per-sample rates can straddle phase boundaries; cumulative owner maxima can include preceding phases. Host CPU and NIC include clients and unrelated host work; process IO is not an fsync or pure disk metric.",
+    "This input is the closed, catalog-SHA-bound producer monitor. The analyzer retains the actual 542 samples and does not claim an adversarial unlimited-input memory bound.",
+    "No stage50/100, two-hour soak, TLS/WAN, production database, cloud quota or N+1 conclusion is established."
+  ],
+  "verdict": {
+    "resourceObservationConsistent": true,
+    "eligibleForPublicArchive": true,
+    "blockingFindingIds": [],
+    "capacityAccepted": false,
+    "p0Passed": false,
+    "p2Started": false
+  }
+}

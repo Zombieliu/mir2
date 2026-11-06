@@ -23,7 +23,7 @@ public/original-ui/Prguse2/**/*.png
 public/original-ui/Title/**/*.png
 public/original-ui/**/*.wav
 
-# The player selects pkg-webgpu or pkg-webgl2 explicitly. `pkg` was a byte-for-
+# The manifest selects GPU, lean GL2 or shared GL2 explicitly. `pkg` was a byte-for-
 # byte legacy WebGL2 mirror and is not referenced by the runtime loader.
 public/bevy-runtime/pkg/**
 

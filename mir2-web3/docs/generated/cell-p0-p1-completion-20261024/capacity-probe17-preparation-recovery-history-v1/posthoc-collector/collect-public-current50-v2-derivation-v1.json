@@ -1,0 +1,168 @@
+{
+  "schemaVersion": 1,
+  "scope": "Post-run derived collector, not a pre-run frozen input. Original gameplay, 3/4/7 diagnostics, thresholds, verdict, path guards and runtime frozen files are unchanged.",
+  "original": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-account-store-wait-feasibility-17\\collect-public.mjs",
+    "bytes": 43717,
+    "sha256": "fa890d028335d38b7bce79806e88f379522723031806dd263fbf8feade55513b"
+  },
+  "derived": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-account-store-wait-feasibility-17\\collect-public-current50-v2.mjs",
+    "bytes": 43753,
+    "sha256": "c9f20b36990fb2ed92462360bfad9df4a9798c5f96bc5ab31f36037c5baf473c"
+  },
+  "transformations": [
+    {
+      "before": "release-attack-deadline-diagnostics-v1.json",
+      "after": "release-account-store-wait-diagnostics-v1.json",
+      "occurrences": 2,
+      "positions": [
+        13311,
+        32160
+      ]
+    },
+    {
+      "before": "backend-source-attack-deadline-diagnostics-v1.json",
+      "after": "backend-source-account-store-wait-diagnostics-v1.json",
+      "occurrences": 3,
+      "positions": [
+        13440,
+        15787,
+        32213
+      ]
+    },
+    {
+      "before": "attack-deadline-diagnostics-v1-build-receipt.json",
+      "after": "account-store-wait-diagnostics-v1-build-receipt.json",
+      "occurrences": 1,
+      "positions": [
+        32276
+      ]
+    },
+    {
+      "before": "'DIAGNOSTICS-PREPARED.md',",
+      "after": "",
+      "occurrences": 1,
+      "positions": [
+        31436
+      ]
+    },
+    {
+      "before": "'pending-driver-binding.json',",
+      "after": "",
+      "occurrences": 1,
+      "positions": [
+        31496
+      ]
+    },
+    {
+      "before": "'run-adapter-synthetics.mjs',",
+      "after": "",
+      "occurrences": 1,
+      "positions": [
+        31712
+      ]
+    },
+    {
+      "before": "const sourcePaths = [...wireSource.files",
+      "after": "const sourcePaths = [`${realm}/collect-public-current50-v2.mjs`, `${realm}/collect-public-current50-v2-derivation-v1.json`, ...wireSource.files",
+      "occurrences": 1,
+      "positions": [
+        31934
+      ]
+    }
+  ],
+  "forwardRawExact": true,
+  "inverseRawExact": true,
+  "removedNonexistentHistoricalOnly": [
+    "DIAGNOSTICS-PREPARED.md",
+    "pending-driver-binding.json",
+    "run-adapter-synthetics.mjs"
+  ],
+  "removedFilesNotInRuntimeFrozen": true,
+  "runtimeFrozen": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-account-store-wait-feasibility-17\\launcher-source-frozen-v1.json",
+    "bytes": 33193,
+    "sha256": "6c5610464c3ddf69c607ad882b36e42b316fbe1f8dab17c38c0457b591db5b16",
+    "fileCount": 69
+  },
+  "staticSourceExistenceCheck": {
+    "method": "Source literals and immutable public manifests read; regular-file lstat only. No collector import/execution or raw/monitor/recording payload parse.",
+    "groups": [
+      {
+        "group": "fixedLocal",
+        "uniqueFiles": 66,
+        "presentFiles": 65,
+        "orderedPathsSha256": "cadd317c77d94da3f2f72b0850579560e94c989857d369561dc2cb7d18f59693"
+      },
+      {
+        "group": "runtimeFrozen",
+        "uniqueFiles": 69,
+        "presentFiles": 69,
+        "orderedPathsSha256": "a0c8c8892ae53665b1bc4843ff13dc8f91949129dff3dbcc4d1f4237d0f23f71"
+      },
+      {
+        "group": "wire",
+        "uniqueFiles": 11,
+        "presentFiles": 11,
+        "orderedPathsSha256": "cdc3441f90718bf1d27b39f9084ec4e7a2ba4649231c356ad1394861306dfdf5"
+      },
+      {
+        "group": "scene",
+        "uniqueFiles": 41,
+        "presentFiles": 41,
+        "orderedPathsSha256": "9362b35c22aa752f6618f9337988fccdab63432a6dcb6a2530a7c9d7674d83a5"
+      },
+      {
+        "group": "driver",
+        "uniqueFiles": 11,
+        "presentFiles": 11,
+        "orderedPathsSha256": "49bafb694c18f1ae1731e9ff4a0c044320a86d3e9c9b38b24f7b2db06b8b17a6"
+      },
+      {
+        "group": "release",
+        "uniqueFiles": 3,
+        "presentFiles": 3,
+        "orderedPathsSha256": "d36114ffbcfb585de0c8a3bed87618a5f687536eb88d6c845ddfd971da19985e"
+      },
+      {
+        "group": "posthocSource",
+        "uniqueFiles": 1,
+        "presentFiles": 1,
+        "orderedPathsSha256": "133f367cc0f5b6200f0160b258aafe08233333eff703363c4d9e22d48fa831a0"
+      }
+    ],
+    "missing": [],
+    "optionalAbsent": [
+      "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-account-store-wait-feasibility-17\\run-command.log"
+    ],
+    "expectedCollectorCreatedOutputs": [
+      "collect-release-native-10-v2-account-store-wait-feasibility-17-recordings-metadata.json",
+      "collect-release-native-10-v2-account-store-wait-feasibility-17-monitor-endpoints.json"
+    ],
+    "selfProofCreatedAfterSyntax": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-account-store-wait-feasibility-17\\collect-public-current50-v2-derivation-v1.json"
+  },
+  "syntax": {
+    "command": [
+      "C:\\Program Files\\nodejs\\node.exe",
+      "--check",
+      "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-account-store-wait-feasibility-17\\collect-public-current50-v2.mjs"
+    ],
+    "exitCode": 0,
+    "signal": null,
+    "stdout": "",
+    "stderr": ""
+  },
+  "firstCollectorRefusal": {
+    "source": "Root coordinator observed tool output; no original stdout/stderr file captured.",
+    "exitCode": 1,
+    "reportedLine": 196,
+    "reportedCause": "Frozen collector referenced prior attack-deadline Release/manifest/build receipt basenames.",
+    "destinationCreated": false,
+    "recordingMetadataWritten": false,
+    "originalStderrFileCaptured": false
+  },
+  "collectorExecuted": false,
+  "gameVerdictModified": false,
+  "capacityPromoted": false
+}

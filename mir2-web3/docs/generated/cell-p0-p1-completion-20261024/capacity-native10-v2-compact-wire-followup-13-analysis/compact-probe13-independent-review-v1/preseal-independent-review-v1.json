@@ -1,0 +1,177 @@
+{
+  "schemaVersion": 1,
+  "reviewedAt": "2026-10-25T07:15:21.382Z",
+  "reviewer": "/root/fixed_cell_gate_audit",
+  "state": {
+    "checkedAbsent": [
+      "private",
+      "bin",
+      "recordings",
+      "reports",
+      "source-pins.json",
+      "preparation.lock",
+      "execution.lock",
+      "realm-process.json"
+    ],
+    "allAbsent": true,
+    "wrapperInstalledByReviewer": false,
+    "accountsProvisioned": false,
+    "realmStarted": false
+  },
+  "scope": "Source-text and small raw-byte/receipt/log inspection only. No template/wrapper/product imports, sourceguard, test rerun, preparation, accounts or actual realm.",
+  "presealReceipt": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\compact-probe13-preseal-input-check-v1.json",
+    "bytes": 45878,
+    "sha256": "85518e819ed70fdc3c6d36e38543ae8f42941028ce3d34e2593baf2ab0e9f77e"
+  },
+  "reviewChecklist": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\compact-probe13-independent-review-v1\\preseal-review-checklist-v1.json",
+    "bytes": 8267,
+    "sha256": "dd93c91bd5c312f5862effad2761d80fe9d2bbeb8b4acc23af60a1381949527b"
+  },
+  "closure": {
+    "actualLocalFilesVerified": 42,
+    "reviewedSourceSha256": "f8d54751fdffb310574c6c9d9732ffc60e43907115d9934783c9d6ff03d0c9e5",
+    "allLocalRawPinsMatched": true,
+    "actualExternalWrapperPinsVerified": 11,
+    "coreImportDataEvidenceClosureCountAttributedToWriter": 124,
+    "writerSyntaxScripts": 26,
+    "writerSyntaxNotRerun": true,
+    "sourceGuardNotExecutedByReviewer": true
+  },
+  "configuration": {
+    "original12PolicyJsonExact": true,
+    "original12ResourceRawExact": true,
+    "original12ScenarioRawExact": true,
+    "scenario": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-compact-wire-feasibility-13\\scenario.json",
+      "bytes": 804,
+      "sha256": "a42a26a195dd5ac25135bff57e73f7f21b71f97b5cc1814351920ece621362ba"
+    },
+    "resources": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-compact-wire-feasibility-13\\resource-profile.json",
+      "bytes": 1194,
+      "sha256": "a5e9012823bd816dedc3c40b13988618f3a18e69b3dd19edc4534a199a778ac3"
+    },
+    "caps": [
+      24,
+      10,
+      10,
+      4,
+      1,
+      2
+    ],
+    "tokioWorkers": 4,
+    "slowStageThresholdMs": 50,
+    "phaseScope": [
+      [
+        "stage-2",
+        2,
+        300,
+        5
+      ],
+      [
+        "stage-10",
+        10,
+        300,
+        5
+      ],
+      [
+        "soak",
+        10,
+        360,
+        6
+      ]
+    ],
+    "probeCapacityAcceptedAlwaysFalse": true,
+    "coreCodeEvidenceCommit": "6d70d02d0bc390156b77a3e48acee714fc87cda3",
+    "currentDriverDocumentationCommit": "4cab00893b861395b63906b1b8183a021d397cdb",
+    "coreDriverSourceSha256": "05c07c2e487e4b65c5068f8803f96bdc6a66a342c5fc44c21f3a64b6b8581073",
+    "backendSourceCommit": "46880bd1ef415131c4cf85aeb4dd2fa4f6fd4f9b",
+    "backendInputCount": 41,
+    "existingFull16RunId": "1792884517374-04264602"
+  },
+  "adapter": {
+    "source": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-compact-wire-feasibility-13\\wire-diagnostics-adapter.mjs",
+      "bytes": 2514,
+      "sha256": "82c5ae7432cb7b69e576e7c283e4a4ca6afe074b692342ea5a82516dd3fef164"
+    },
+    "callGuard": "run-owned.mjs13 requires exact --execute-authorized-probe --attack-results=v2 before runtime state/lock/spawn or install; top-level adapter imports only definitions. prepare has its independent explicit guard and verifies source metadata without installing.",
+    "installScope": "Frozen v2 exported CapacityClient prototype wrapper only, immediately around original runCapacity; callback exactly(row,writer)=>writer.add(row).",
+    "originalRun": "Called once with same options reference; returned report object preserved. Identical original thrown object wins over status/uninstall/persistence errors. No retry, report mutation or metric/ACK path.",
+    "restoration": "finally captures actual statusBeforeUninstall, attempts uninstall, then captures actual statusAfterUninstall. Exceptions set explicit flags; uninstall diagnostics cannot be hidden as success.",
+    "terminal": "Independent public compact-navigation-wire-terminal.json outside raw after original runCapacity settled/closed its own writer. No writer.close hook or after-close writer.add. Exact before/after states are retained without pretending prior installed=true is final."
+  },
+  "writerSemantics": {
+    "source": "Unchanged BoundedEvidence in playtest-capacity-soak-core.mjs441-453",
+    "defaultCapBytes": 4194304,
+    "addMaySetFailureAndReturnWithoutPersisting": true,
+    "closeRejectsFailure": true,
+    "wrapperEmitReturnCountNotDurable": true,
+    "rawRowsMustMatchTerminalProducerRows": true,
+    "noNewBufferOrCommandBudget": true
+  },
+  "consumer": {
+    "source": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-compact-wire-feasibility-13\\wire-diagnostics-contract.mjs",
+      "bytes": 15767,
+      "sha256": "8d2c06f251a3b623d4ff135211046b9d039b31e9bfdad799c0cb1fd3ddfda13a"
+    },
+    "strictPublicSchema": "Exact per-event keys, fixed causes/phase/direction/kind/flags and bounded public numerics; no arbitrary payload/name/account/credential fields.",
+    "shapes": "row-limit and pending-limit are separately validated; normal rows cap32 projected nonplayers and7 hint cells; pending events<=64, raw rows<=12000 per connection, connections only1/2.",
+    "sequence": "Strictly increasing per-connection diagnosticSequence with legal gaps, not falsely consecutive: producer row-limit can consume an unused sequence. New exact fixture covers gap1→3 and rejects repeated3.",
+    "statusAndRaw": "Both collectors independently stream actual raw compactNavigationWire rows and validate terminal source identity, runId, before/after uninstall consistency, per-connection emitted-return rows versus durable raw rows, truncation/eviction/pending/sink/projection failures. Missing terminal/count mismatch/truncation records incomplete, with original report verdict untouched.",
+    "scopeLimit": "Consumer verifies public shapes, counters and pinned producer identity; it does not independently reconstruct server AOI or assert a collision/acceptance cause.",
+    "normalCleanup": "Owned process cleanup, existing slow-stage completeness, wire observability completeness and original workload verdict stay separate; probe never capacityAccepted."
+  },
+  "collection": {
+    "child": "capacity-native10-v2-compact-wire-followup-13-diagnostics",
+    "explicitPublicSources": "Frozen wrapper11+local reviewed source/unit metadata and independent terminal when present, plus inherited explicit source/scene/build/report files. Full raw/monitor/recordings remain external.",
+    "pathContainmentAndPrivacyRead": true,
+    "identityLinkedAcrossPreparedAdmittedProcessProvenanceCleanupAndCatalog": true,
+    "terminalRawPinValidatedByCollectorAndIndependentVerifier": true,
+    "sourceGuardAndFinalIndexNotGenerated": true
+  },
+  "adapterSyntheticEvidence": {
+    "receipt": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-compact-wire-feasibility-13\\wire-adapter-synthetic-tests.json",
+      "bytes": 2413,
+      "sha256": "5a6905e7ad356e1c41266d92332b1694a2f9a16a80b26b4c4951a40a8ecc9d5a"
+    },
+    "log": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-compact-wire-feasibility-13\\wire-adapter-synthetic-tests.log",
+      "bytes": 2205,
+      "sha256": "910421ec8ebcd51e3caee4cc7a936ba2e61b71f90a81ae3ea0217ac692c4f633"
+    },
+    "tests": 8,
+    "passed": 8,
+    "failed": 0,
+    "exactFinal3SourcesBeforeAfter": true,
+    "actualFooter8_8Checked": true,
+    "testExecutionAttribution": "Author-run fake-class adapter/source/row/terminal suite. Reviewer verified exact raw/log/receipt; did not rerun. Separate frozen wrapper28 and historical core187 retain their own source scope."
+  },
+  "meaningfulFixturesReviewed": [
+    "Original run calledonce with exactoptions/result, prototype descriptors restored and before-installed/after-uninstalled retained.",
+    "Original throw identity wins over independent terminal write failure; successful original cannot hide diagnostic persistence failure.",
+    "Silent writer.add return without raw row yields count mismatch/incomplete, no newACK or acceptance.",
+    "Unexpected payload/unknown cause/unsafe ID/out-of-region entity projection rejected.",
+    "Truncation remains diagnostic incomplete; original failed report unchanged.",
+    "Missing terminal incomplete and sensitive status extra fields rejected.",
+    "Actual row-limit diagnosticSequence gap is permitted; duplicate/nonincreasing sequence rejected."
+  ],
+  "limitations": [
+    "No actual diagnostic load has run. Projection/allocation/callback overhead and any writer overflow remain subject to original cadence/driverlag/resource/safety gates.",
+    "The wrapper is a subset of public packet/membership/position evidence, not full visibility/lifecycle coverage or a server-rejection reason. Synchronous fake reentry remains explicitly incomplete.",
+    "The actual two-hour/100-player supply,886-step scout route/24ACK20s boundary and historical25-player stall remain unresolved. Failed12 and permanently blocked formal09 are unchanged."
+  ],
+  "verdict": {
+    "blockingFindings": [],
+    "noBlockingFound": true,
+    "suitableForRootToAuthorizeSealAndReadOnlyGuard": true,
+    "authorizesPrepareOrRealm": false,
+    "capacityAccepted": false,
+    "p0Accepted": false,
+    "p2Authorized": false
+  }
+}

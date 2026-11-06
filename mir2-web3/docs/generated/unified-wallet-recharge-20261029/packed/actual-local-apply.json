@@ -1,0 +1,27 @@
+{
+  "passed": true,
+  "curatedAtUtc": "2026-10-29T17:39:26.624589+00:00",
+  "producerReceipt": {
+    "filename": "packed-local-health-evidence-run1/LOCAL-APPLY.json",
+    "bytes": 436,
+    "sha256": "65f943838e51d0f5ab10a68763a533a4df9ce07b31637f5aaa6ab71a40e4fdba"
+  },
+  "sanitizedProducerFields": {
+    "fakeAcceptedMarker": false,
+    "localBytesServed": 1271553456,
+    "networkRequests": 0,
+    "outcome": {
+      "activated": true,
+      "downloadedPacks": 33,
+      "elapsedMs": 57358,
+      "manifestSha256": "9DFBD083B6B92972539BC01816645ED6131297BB7CA4DEDEC659438987A74186",
+      "sequence": 2026102912,
+      "wireBytes": 1271553456
+    },
+    "productionApi": "generation::check_update",
+    "transport": "LocalFiles PackSource; no URL override"
+  },
+  "attemptNonceRawValuesOmitted": true,
+  "rawGameStdoutStderrNeverCopied": true,
+  "phase": "Actual production-library local apply/real child proof; not a synthetic ready fixture"
+}

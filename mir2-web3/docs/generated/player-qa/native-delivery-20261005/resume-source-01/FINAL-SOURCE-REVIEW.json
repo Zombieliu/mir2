@@ -1,0 +1,71 @@
+{
+  "createdUtc": "2026-10-05T02:56:24.929734+00:00",
+  "parentCommit": "2afdac8ca4d06e30d9fe4d40c283d301b884ace3",
+  "source": {
+    "src/update.rs": {
+      "bytes": 44294,
+      "sha256": "af016af792a3fc2bdf809ae6199ef410ca651a339236db73aa7c509f301b3fcb"
+    },
+    "src/resume_tests.rs": {
+      "bytes": 26663,
+      "sha256": "9916d3165ae9af2d2ca495794fcbdd58c8bcfb0196e7e1e725d6d87ac73dc8e2"
+    },
+    "src/fs_safe.rs": {
+      "bytes": 9421,
+      "sha256": "ecfe5ca1f6747c5b555d7c53382dcb3d83017a76891d3cb293b4811c7911d610"
+    },
+    "src/delivery.rs": {
+      "bytes": 24256,
+      "sha256": "644330f79af7e8a49bdb923f4273b479cebe74937156c71223057247551b40b2"
+    },
+    "Cargo.toml": {
+      "bytes": 1074,
+      "sha256": "3b48def4e3976149ce3977fc9a818effe67cfc4a534b5a963bc2479c28a4b355"
+    },
+    "Cargo.lock": {
+      "bytes": 21776,
+      "sha256": "9c21e4d1edf0915ab46f1c3673ab3a2355f1f3be1406d5eff0fd6e054882a70a"
+    },
+    "src/download.rs": {
+      "bytes": 9157,
+      "sha256": "5539e85f0c141904ee3df2b379379db307099190ab4fba89bd744cd11433e8c7"
+    }
+  },
+  "unitPassed": 65,
+  "unitFailed": 0,
+  "unitIgnored": 4,
+  "newResumeTestsIncludedInUnitCount": [
+    "actual_download_handle_denies_concurrent_mutation_and_delete",
+    "bad_prefix_sha_and_oversize_responses_discard_untrusted_parts",
+    "bundle_interruption_stops_raw_file_fallback_then_retry_resumes_the_archive",
+    "cancel_before_write_uses_actual_prefix_length_and_preserves_personal_files",
+    "complete_valid_prefix_recovers_with_zero_requests_and_bad_or_oversize_restarts",
+    "download_handle_validates_unicode_and_long_local_paths_without_lossy_conversion",
+    "exact_416_total_allows_one_same_origin_full_restart",
+    "malformed_range_encoding_lengths_multipart_and_redirect_fail_closed",
+    "malformed_raw_headers_status_and_chunk_framing_discard_prefix_without_fallback",
+    "partial_hardlink_is_rejected_before_http_and_external_target_unchanged",
+    "range_ignored_200_resets_prefix_instead_of_appending",
+    "red_interrupted_http_preserves_prefix_then_reopen_requests_only_remaining_bytes",
+    "temporary_failure_of_both_pinned_origins_retains_offset_for_next_206",
+    "unsolicited_206_and_full_bad_sha_do_not_publish_or_retain"
+  ],
+  "newResumeTestsOverlapEarlierFocusedRuns": true,
+  "actualNetwork": "test-only loopback HTTP, synthetic immutable FileEntry fixtures",
+  "realWindowsHandleChecks": true,
+  "actualCdnHttpsOrCmsCheckedThisRound": false,
+  "actualLinuxCheckedThisRound": false,
+  "realPartialResumeInstallOrSpeedAccepted": false,
+  "releaseEngineBuiltOrPublished": false,
+  "gatewayRestarted": false,
+  "userInstallOrSavesChanged": false,
+  "rawFailuresRetained": [
+    "resume-red-01",
+    "bundle-interruption-red-01",
+    "resume-final-01",
+    "resume-final-02"
+  ],
+  "dependencyParserBoundary": "unknown colonless headers are tolerated; invalid unknown names are discarded by pinned ureq; replacement101-header fixture verifies its actual BadHeader path",
+  "journalSchema": 1,
+  "existingShaSyncAndFreshGameGuardsPreserved": true
+}

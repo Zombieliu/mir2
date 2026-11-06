@@ -1,0 +1,30 @@
+{
+  "evidenceKind": "local-test-binaries-not-release-packages",
+  "gateway": {
+    "sha256": "a634fb47ffa7be702953166e9860a6d375b4cd8c30d15be0b9d468f64422734f",
+    "bytes": 129529344,
+    "environmentGate": "all three MIR2_RUNTIME_ENV/MIR2_DEPLOYMENT_ENV/MIR2_ENV markers; trim/lower; production/prod/staging/stage/preprod/preproduction rejected even in recovery",
+    "role": "v4 restarted with new sales disabled; native relogin and duplicate-digest recovery verified"
+  },
+  "windows": {
+    "sha256": "4c8ab7bb76c842eaa3fd2166efe3316baa0887d3b085b362d30e65a3a25bab4b",
+    "bytes": 132312064,
+    "sourceNote": "v1 host bridge, URL and correlation tests passed; host source unchanged by final v2 native UI reopen change, final production executable built against v2 client source"
+  },
+  "rustToolchain": "1.95.0",
+  "remoteDeployment": false,
+  "productionCharging": false,
+  "paymentProducerGateway": {
+    "sha256": "cdb9ab283ef032cf2b9c775ec7b74bbf5e4aa96b06881f9451eac7f7810158ca",
+    "bytes": 129528320,
+    "environmentGate": "all three MIR2_RUNTIME_ENV/MIR2_DEPLOYMENT_ENV/MIR2_ENV markers; trim/lower; production/prod/staging/stage/preprod/preproduction rejected even in recovery",
+    "role": "v3 handled the independently audited successful payment; not overwritten by later v4 recovery test"
+  },
+  "finalRunningEnvironment": {
+    "endpoint": "ws://127.0.0.1:17930/ws",
+    "testOnly": true,
+    "newSalesEnabled": false,
+    "qaProxyStopped": true,
+    "productionCharging": false
+  }
+}

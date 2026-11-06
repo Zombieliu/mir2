@@ -1,0 +1,502 @@
+[
+  {
+    "path": "adjacent-same-map-attempt-01.log",
+    "sha256": "991b940642138734f3db0cfc95bab747764cf592e40d9fef2353cdea363ee1fd",
+    "matchesFrozen": true
+  },
+  {
+    "path": "adjacent-same-map-attempt-02.log",
+    "sha256": "c8d6413fee4798176acbbca89a869f836b23a505eae21e83c85ab0dc3eb14541",
+    "matchesFrozen": true
+  },
+  {
+    "path": "adjacent-same-map-attempt-02.log.json",
+    "sha256": "f1e0578ac1be3513285d667bd1cbcc54bbd0b06dc4235f2a1b5c6fe91eb0ab56",
+    "matchesFrozen": true
+  },
+  {
+    "path": "approved-adjacent-fixture-adaptations.patch",
+    "sha256": "3c24dfdf5cebf6509fab378aaee8296685bfe4675ad1b0ecf63a823cb48e5abe",
+    "matchesFrozen": true
+  },
+  {
+    "path": "baseline/apps/gateway/src/routing.rs",
+    "sha256": "938bb54d16ce8c6028eeb1164dd2509c5f3887a49c3bd9e262ceab8b67fa949f",
+    "matchesFrozen": true
+  },
+  {
+    "path": "baseline/apps/simulation/src/runtime/drops.rs",
+    "sha256": "9b47435fc671c0c60467ff53d4d6518fb9d243ad056612a1e05eb038ac0c6be5",
+    "matchesFrozen": true
+  },
+  {
+    "path": "baseline/apps/simulation/src/runtime/zone/manager.rs",
+    "sha256": "523fea1cdcaaa720c4bd6c2adad0b4a386e0e5b8b3f2ee4d8452b48790c677a3",
+    "matchesFrozen": true
+  },
+  {
+    "path": "baseline/apps/simulation/src/runtime/zone/mod.rs",
+    "sha256": "13dd169ffcb2144b07e41957e066926beacfa93ceb717888199ded7686677916",
+    "matchesFrozen": true
+  },
+  {
+    "path": "baseline/apps/simulation/src/runtime/zone/runtime/checkpoint.rs",
+    "sha256": "c8991352d5efbb536e2d0373e1d044f92daffe783cf1ea6135c52bc2e7a8269f",
+    "matchesFrozen": true
+  },
+  {
+    "path": "baseline/apps/simulation/src/runtime/zone/runtime/experience_ownership.rs",
+    "sha256": "f6f010a983e80f86b52bc67843c1b9fa06380ceaa158a9dcf6db4690669530b0",
+    "matchesFrozen": true
+  },
+  {
+    "path": "baseline/apps/simulation/src/runtime/zone/runtime.rs",
+    "sha256": "d0598c4ce418a26f696ec4efc07dfd1d0db3f1e5a6202f86cdbcc73a703390c3",
+    "matchesFrozen": true
+  },
+  {
+    "path": "baseline/apps/simulation/src/runtime/zone/types.rs",
+    "sha256": "3c16e1a6b7aa191735cf5b7da0398f154c52599e4ce7df0639465669f25a4e39",
+    "matchesFrozen": true
+  },
+  {
+    "path": "baseline.json",
+    "sha256": "488eb58a14c1b74edc519f34f61818eb74692290cbdaa1ce1d66579786dc0155",
+    "matchesFrozen": true
+  },
+  {
+    "path": "case-results.json",
+    "sha256": "553f509a920ccca48c8b7d860ad739cc0b99d934bbd9b5535c1249be0410a8ef",
+    "matchesFrozen": true
+  },
+  {
+    "path": "death18-source-unchanged.json",
+    "sha256": "8b18bad4ac1e6edde1e757556cf0ab3e0fd4e703c71b43154e9e18e12d8f1ebe",
+    "matchesFrozen": true
+  },
+  {
+    "path": "failure-history.json",
+    "sha256": "9f222f4bf6efb0a17234d130ed7fe0ca4cc75da9910cdec9efd75b370ef357e3",
+    "matchesFrozen": true
+  },
+  {
+    "path": "fault-fixtures/unknown-34376-1791126481539512700/accounts.json",
+    "sha256": "3b024bcd491af8ae65d5d6e2764d3f8038122d40403589cb64e43b283bd355e0",
+    "matchesFrozen": true
+  },
+  {
+    "path": "fault-fixtures/unknown-34376-1791126481539512700/accounts.json.writer.lock",
+    "sha256": "8bdfc25e2646afca60845fb68ec782f532ff72a6d53ed430a3f547920bb6c57a",
+    "matchesFrozen": true
+  },
+  {
+    "path": "fault-fixtures/unknown-53752-1791126756900926000/accounts.json",
+    "sha256": "a937ccbc0f419aef42f9aa3f477b401f61f5056170e3ba0397c351521384645e",
+    "matchesFrozen": true
+  },
+  {
+    "path": "fault-fixtures/unknown-53752-1791126756900926000/accounts.json.writer.lock",
+    "sha256": "b90130c184396d35887e6165d9b5e76ec2f1d8e395fdce85601960efa6e7f98d",
+    "matchesFrozen": true
+  },
+  {
+    "path": "fault-fixtures/unknown-56324-1791125753990525400/accounts.json",
+    "sha256": "58789209507936bba6366775974167a28474aa8b3bdc6dd49f3090cdb58c5bb3",
+    "matchesFrozen": true
+  },
+  {
+    "path": "fault-fixtures/unknown-56324-1791125753990525400/accounts.json.writer.lock",
+    "sha256": "220cc1cb82b84d8fb65321ae373130bf9e0e796b9d72d54b12a57f464102c1e1",
+    "matchesFrozen": true
+  },
+  {
+    "path": "fault-fixtures/unknown-61052-1791130049412185800/accounts.json",
+    "sha256": "59e2223d4d6649259a2f12865ca1704faae944eb4a8857aec672d8799ab0b475",
+    "matchesFrozen": true
+  },
+  {
+    "path": "fault-fixtures/unknown-61052-1791130049412185800/accounts.json.writer.lock",
+    "sha256": "a90312625710316bb3159ba611ef6992b2946566ca67b162f3f60cafc8440185",
+    "matchesFrozen": true
+  },
+  {
+    "path": "final-receipt.json",
+    "sha256": "0d7c0ca77518b82075a5ee8d9182e68727fc94c199de59237e32de2c26cde84f",
+    "matchesFrozen": true
+  },
+  {
+    "path": "finalize_receipt.py",
+    "sha256": "b8dba49e09bafdfff87b8a3d1ae8de48ee64fbc1aaf02f06bb1116955e2e0ee1",
+    "matchesFrozen": true
+  },
+  {
+    "path": "finalize_receipt_v2.py",
+    "sha256": "7f621c6859a05b3e267a6ad963fb5302e90f207ad41afd2b1c9137323c7da92c",
+    "matchesFrozen": true
+  },
+  {
+    "path": "fixture-adaptation-before/apps/simulation/src/runtime/zone/runtime/checkpoint.rs",
+    "sha256": "6a9bae840c653b149a22267a506a102b1fd8263b6aaae9a983e452e172602733",
+    "matchesFrozen": true
+  },
+  {
+    "path": "fixture-adaptation-before/apps/simulation/tests/shared_monster_ownership.rs",
+    "sha256": "57e4149452d05527475b452b9f2ee510a2d13cb62f4d20915474f406952fae4e",
+    "matchesFrozen": true
+  },
+  {
+    "path": "fixture-adaptation-before/source-before.json",
+    "sha256": "a3e4c00b8387c80f17f5dea51f3eb51c199acc7a2e3a6fd10b0557c7b530ae9a",
+    "matchesFrozen": true
+  },
+  {
+    "path": "fixture-adaptations.json",
+    "sha256": "289d64483b43fc0731632fd9546dda7b15d3a45770f25b3e0771e70825aac9b2",
+    "matchesFrozen": true
+  },
+  {
+    "path": "focused-tests.json",
+    "sha256": "0eb8142c1457a4a6903ac1cdab1bd04238686e84d1a3765cbf56e1f50228c8d9",
+    "matchesFrozen": true
+  },
+  {
+    "path": "freeze-verification.json",
+    "sha256": "af16020ed37a200ca7bfa0aed04e01515a89022aa9bcc9678a7c7fae5a7dfaca",
+    "matchesFrozen": true
+  },
+  {
+    "path": "frozen-source/apps/gateway/src/routing/tests/cross_map_drop_lifecycle_tests.rs",
+    "sha256": "31cf61152aa5835255332fd979c2490cdbbd4d671935cc65e46ddb50dbb30a7b",
+    "matchesFrozen": true
+  },
+  {
+    "path": "frozen-source/apps/gateway/src/routing.rs",
+    "sha256": "bb838c99429da46e9bd4e051bd86daaeb0e88bb385cc67fe0c9875c9e631d931",
+    "matchesFrozen": true
+  },
+  {
+    "path": "frozen-source/apps/simulation/src/runtime/drops.rs",
+    "sha256": "8c1adf2f6956376e407ed2f09a917bfcba0108cc97d7f7c02671499c26524851",
+    "matchesFrozen": true
+  },
+  {
+    "path": "frozen-source/apps/simulation/src/runtime/zone/manager.rs",
+    "sha256": "887b6d75e4ea513828075693e32f11c5f9c34adeb9311cf61880dd052ed56e70",
+    "matchesFrozen": true
+  },
+  {
+    "path": "frozen-source/apps/simulation/src/runtime/zone/mod.rs",
+    "sha256": "f0a639fa95bdcf11a0b45c8b08abfcc5e38029a62da8c50e62f95d0e193b5118",
+    "matchesFrozen": true
+  },
+  {
+    "path": "frozen-source/apps/simulation/src/runtime/zone/online_identity.rs",
+    "sha256": "8fc962e0c7d270081576b37477619596efedc1b7663730c9620c79b389c54e03",
+    "matchesFrozen": true
+  },
+  {
+    "path": "frozen-source/apps/simulation/src/runtime/zone/runtime/checkpoint.rs",
+    "sha256": "5c3cdd2f93b10c6052a157da2354a14e3e1f49388cf6310d0e8690d642f512f4",
+    "matchesFrozen": true
+  },
+  {
+    "path": "frozen-source/apps/simulation/src/runtime/zone/runtime/experience_ownership.rs",
+    "sha256": "c3b12a1a0685266554b911727b9c1d7c9dbc0ba1ded4818c667951f530ed5ec5",
+    "matchesFrozen": true
+  },
+  {
+    "path": "frozen-source/apps/simulation/src/runtime/zone/runtime/ground_ownership.rs",
+    "sha256": "ba03d424261d54c132bf8a097e46a1b0f556c69ec572cdc2997ad3c520aa0ef8",
+    "matchesFrozen": true
+  },
+  {
+    "path": "frozen-source/apps/simulation/src/runtime/zone/runtime.rs",
+    "sha256": "9ab2f4cb3d138be9347b17efafe7bde654f66ab4eff95e4ea2181a7f67712fb3",
+    "matchesFrozen": true
+  },
+  {
+    "path": "frozen-source/apps/simulation/src/runtime/zone/types.rs",
+    "sha256": "3d0cb53c0da4144da4e7b6969a7442c6934ef0e5833646ea8c0f95407bfb3bd6",
+    "matchesFrozen": true
+  },
+  {
+    "path": "frozen-source/apps/simulation/tests/shared_cross_map_drop_lifecycle.rs",
+    "sha256": "40b35a2b11141247d49062d770c809143afc8baf9eab7f187ad210941cafe0cf",
+    "matchesFrozen": true
+  },
+  {
+    "path": "frozen-source/apps/simulation/tests/shared_monster_ownership.rs",
+    "sha256": "7571f60473f04fdbf247364613df4ef18e6071ca8f6389ce012589c204564c33",
+    "matchesFrozen": true
+  },
+  {
+    "path": "frozen-source/docs/CROSS-MAP-DROP-LIFECYCLE-20261004.md",
+    "sha256": "cc0404b896f020a3055d627945a3f0abd94ea1f62192831dbad25c40ca74f5c5",
+    "matchesFrozen": true
+  },
+  {
+    "path": "gateway-adjacent-01-attempt-01.log",
+    "sha256": "5401644c15f74c2cff33aa025050c5c478820288d99947881315b5ce2c7a71de",
+    "matchesFrozen": true
+  },
+  {
+    "path": "gateway-adjacent-01-attempt-01.log.json",
+    "sha256": "8d65fc6717c78a1874cf0f3a8ca0382cb6ddc4149168fbc3a2f749cc3a66726d",
+    "matchesFrozen": true
+  },
+  {
+    "path": "gateway-adjacent-02-attempt-01.log",
+    "sha256": "841051ad4b18d9430cbf49681d97b1668918f620a53c5c6ea653a89ceefef49f",
+    "matchesFrozen": true
+  },
+  {
+    "path": "gateway-adjacent-02-attempt-01.log.json",
+    "sha256": "45de752994bf74bf6b04ab8d25abd73dbc32f57fe64981dd2ed0ce557a1d3e64",
+    "matchesFrozen": true
+  },
+  {
+    "path": "gateway-adjacent-03-attempt-01.log",
+    "sha256": "bb18b3114711060fe36831243d20d5ed277fa8bc2629b855a97cd716a9ff8002",
+    "matchesFrozen": true
+  },
+  {
+    "path": "gateway-adjacent-03-attempt-01.log.json",
+    "sha256": "e97f58a4b35b5dcb003d6d38502a57cd23f9bd224b639f022f710c65cc44baf0",
+    "matchesFrozen": true
+  },
+  {
+    "path": "gateway-adjacent-04-attempt-01.log",
+    "sha256": "c25b55d309435cbf2fa405467d77098430eccde9b39233c4439bedd90b88cdb8",
+    "matchesFrozen": true
+  },
+  {
+    "path": "gateway-adjacent-04-attempt-01.log.json",
+    "sha256": "5a4f697e647024732a5e01973004a116e2ce18813f69c00a03c91fb70cbe82f2",
+    "matchesFrozen": true
+  },
+  {
+    "path": "gateway-adjacent-05-attempt-01.log",
+    "sha256": "3939b6c5de0cee650ff3dc6c42e89345fcd6a44c63b08c7bb827ed83c59491d0",
+    "matchesFrozen": true
+  },
+  {
+    "path": "gateway-adjacent-05-attempt-01.log.json",
+    "sha256": "929ca79296da73c02f63414d953961651191ecf8f2320946b4326d9b7983f480",
+    "matchesFrozen": true
+  },
+  {
+    "path": "gateway-bag-custody-attempt-01.log",
+    "sha256": "2ab59eb302e034317ba844f1047ec485c36f3b5075c418008faa0d8756e80e90",
+    "matchesFrozen": true
+  },
+  {
+    "path": "gateway-compile-attempt-01.log",
+    "sha256": "fb960db0a0a00f98b3339942543db5b71543b960b7e89981c5bfb20b98ee50f0",
+    "matchesFrozen": true
+  },
+  {
+    "path": "gateway-tests-attempt-01.log",
+    "sha256": "2f967b8d1cdfd068d7354564715e69cb37c860dc35438b181f90fb63cf6a06a5",
+    "matchesFrozen": true
+  },
+  {
+    "path": "gateway-tests-attempt-02.log",
+    "sha256": "2e0e672931f24c5e07490c3c55548c60f4bf796208fbde19fb9aeac8e9d483ce",
+    "matchesFrozen": true
+  },
+  {
+    "path": "gateway-tests-attempt-03.log",
+    "sha256": "a9e427fbcda637959a39cb042c009b19d9da4035eb9a2a1da7b8259724bc5b20",
+    "matchesFrozen": true
+  },
+  {
+    "path": "gateway-tests-attempt-04.log",
+    "sha256": "35354e2f301ba964982545786fae49f074dc6b3b44b8b8de656da9738e0ecd10",
+    "matchesFrozen": true
+  },
+  {
+    "path": "gateway-tests-attempt-05.log",
+    "sha256": "0580eb71a7a342dff0b70cafcf84ee2d89fe5825699ac36eb310ec2228f993cf",
+    "matchesFrozen": true
+  },
+  {
+    "path": "gateway-tests-attempt-06.log",
+    "sha256": "afca2b79cdf892b68040ccdf0812f025a09bbd45d6953e5c2c3f32a994a68683",
+    "matchesFrozen": true
+  },
+  {
+    "path": "gateway-tests-attempt-07.log",
+    "sha256": "ff3765eea504ee79749ac76351b07b9e5b2abce7023e4caf7f6156da2d19a74a",
+    "matchesFrozen": true
+  },
+  {
+    "path": "gateway-tests-attempt-08.log",
+    "sha256": "ca636466643516d562bb8e1e1390b4de3484d08bd5b0d63ebee96a4f066ddd44",
+    "matchesFrozen": true
+  },
+  {
+    "path": "gateway-tests-attempt-08.log.json",
+    "sha256": "8a36d8159b1f8491a5e6497f6460faa4e5db8e80dcbd7545d4c2d8708d5ae1e5",
+    "matchesFrozen": true
+  },
+  {
+    "path": "green-simulation-attempt-01.log",
+    "sha256": "7fe2213fd456fda33b335f6d7aef80082d142dd8c9f387a6cfdbcedfbdd8adff",
+    "matchesFrozen": true
+  },
+  {
+    "path": "green-simulation-attempt-02.log",
+    "sha256": "120c36eb01273553b4fe77d0d5c9cc20e77f6cc1ac6d274fce5530feb2b7bec4",
+    "matchesFrozen": true
+  },
+  {
+    "path": "green-simulation-attempt-03.log",
+    "sha256": "3962b08e4e63907acd60fd80e4a245c1566db29999a93bd1f6a1bb47ec3ad296",
+    "matchesFrozen": true
+  },
+  {
+    "path": "green-simulation-attempt-04.log",
+    "sha256": "f16974c7194b2ccad2b552c2682517576340fe904b1955c830bb3132a3396e94",
+    "matchesFrozen": true
+  },
+  {
+    "path": "green-simulation-attempt-05.log",
+    "sha256": "ceef24363c8ad6365a5b82b4cc15ce06808366055a0f7c6cbb50271ea18b0285",
+    "matchesFrozen": true
+  },
+  {
+    "path": "green-simulation-attempt-06.log",
+    "sha256": "6b134ae03ff5c3c704c1d8ccc207a03056ea846ed40db5bb61e427186c1fd91e",
+    "matchesFrozen": true
+  },
+  {
+    "path": "green-simulation-attempt-06.log.json",
+    "sha256": "271cf0d8479adf68d16b65f53e971a53c47f41591b794cca12f535f088b94b66",
+    "matchesFrozen": true
+  },
+  {
+    "path": "original-source-recheck.json",
+    "sha256": "bfcbd370ecbeb437e28408ce67d48aa1dc4dde351462bb85365301eff6607613",
+    "matchesFrozen": true
+  },
+  {
+    "path": "p3a-complete.patch",
+    "sha256": "57b26653d284164c7122baa4f7de72fb441b08eeb394d473c57df238db9f7ded",
+    "matchesFrozen": true
+  },
+  {
+    "path": "patch-forward-check/mir2-web3/apps/gateway/src/routing.rs",
+    "sha256": "938bb54d16ce8c6028eeb1164dd2509c5f3887a49c3bd9e262ceab8b67fa949f",
+    "matchesFrozen": true
+  },
+  {
+    "path": "patch-forward-check/mir2-web3/apps/simulation/src/runtime/drops.rs",
+    "sha256": "9b47435fc671c0c60467ff53d4d6518fb9d243ad056612a1e05eb038ac0c6be5",
+    "matchesFrozen": true
+  },
+  {
+    "path": "patch-forward-check/mir2-web3/apps/simulation/src/runtime/zone/manager.rs",
+    "sha256": "523fea1cdcaaa720c4bd6c2adad0b4a386e0e5b8b3f2ee4d8452b48790c677a3",
+    "matchesFrozen": true
+  },
+  {
+    "path": "patch-forward-check/mir2-web3/apps/simulation/src/runtime/zone/mod.rs",
+    "sha256": "13dd169ffcb2144b07e41957e066926beacfa93ceb717888199ded7686677916",
+    "matchesFrozen": true
+  },
+  {
+    "path": "patch-forward-check/mir2-web3/apps/simulation/src/runtime/zone/runtime/checkpoint.rs",
+    "sha256": "c8991352d5efbb536e2d0373e1d044f92daffe783cf1ea6135c52bc2e7a8269f",
+    "matchesFrozen": true
+  },
+  {
+    "path": "patch-forward-check/mir2-web3/apps/simulation/src/runtime/zone/runtime/experience_ownership.rs",
+    "sha256": "f6f010a983e80f86b52bc67843c1b9fa06380ceaa158a9dcf6db4690669530b0",
+    "matchesFrozen": true
+  },
+  {
+    "path": "patch-forward-check/mir2-web3/apps/simulation/src/runtime/zone/runtime.rs",
+    "sha256": "d0598c4ce418a26f696ec4efc07dfd1d0db3f1e5a6202f86cdbcc73a703390c3",
+    "matchesFrozen": true
+  },
+  {
+    "path": "patch-forward-check/mir2-web3/apps/simulation/src/runtime/zone/types.rs",
+    "sha256": "3c16e1a6b7aa191735cf5b7da0398f154c52599e4ce7df0639465669f25a4e39",
+    "matchesFrozen": true
+  },
+  {
+    "path": "patch-forward-check/mir2-web3/apps/simulation/tests/shared_monster_ownership.rs",
+    "sha256": "57e4149452d05527475b452b9f2ee510a2d13cb62f4d20915474f406952fae4e",
+    "matchesFrozen": true
+  },
+  {
+    "path": "patch-forward-check-attempt-02.log",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "matchesFrozen": true
+  },
+  {
+    "path": "patch-verification.json",
+    "sha256": "3f53b86737b1a0adf81c9bd87c21d8e488f22b7b5bc61e0f0f7965f07a38a5a6",
+    "matchesFrozen": true
+  },
+  {
+    "path": "receipt-finalizer-attempt-01.log",
+    "sha256": "5a9b1afb1a24ec32a5f21e00a3db6cb49778729d6649a717ac1fb8e453c77c4c",
+    "matchesFrozen": true
+  },
+  {
+    "path": "receipt-finalizer-attempt-02.log",
+    "sha256": "f6135c7bf531672504bd0ac39d30e2fa5e7d295ca681ea58534c7921db5a63ac",
+    "matchesFrozen": true
+  },
+  {
+    "path": "red-simulation-01.json",
+    "sha256": "e04e7485808be94443ed8d70a0c998c6d707fdaaf42848ca0d163cb1dea95728",
+    "matchesFrozen": true
+  },
+  {
+    "path": "red-simulation-01.log",
+    "sha256": "0d8ebf5f3bd120d013255b2257ca46690896f4c369ec6cda3cace909cb8b3245",
+    "matchesFrozen": true
+  },
+  {
+    "path": "simulation-checkpoint-attempt-01.log",
+    "sha256": "543d626fd97e33457b1dee6ee31ba22be9fa5df8da9ddd7d22015dff66df9827",
+    "matchesFrozen": true
+  },
+  {
+    "path": "simulation-checkpoint-attempt-02.log",
+    "sha256": "9cb051712f615643f48983564b5ba03c30b0b64678af28b30ae692797bbaf225",
+    "matchesFrozen": true
+  },
+  {
+    "path": "simulation-checkpoint-attempt-02.log.json",
+    "sha256": "de60e4215e45bb46e1544d067069eaa45ad961f648d307d05c7708e93489a4b9",
+    "matchesFrozen": true
+  },
+  {
+    "path": "simulation-experience-owner-attempt-01.log",
+    "sha256": "fe9e0b1957bf4b2220b8ce0ebcfacbbdf16d81c2b0a31bd9d5a21f153dd04d7d",
+    "matchesFrozen": true
+  },
+  {
+    "path": "simulation-experience-owner-attempt-01.log.json",
+    "sha256": "a1780ba2333f7f5b666efc320f55c1312cedcfa10b66eb2a0938d37623ce873f",
+    "matchesFrozen": true
+  },
+  {
+    "path": "simulation-online-identity-attempt-01.log",
+    "sha256": "563227d2673642b65252dc9b9a10818de973a54f4dd8bfc5c1b225a2637c2c7b",
+    "matchesFrozen": true
+  },
+  {
+    "path": "simulation-online-identity-attempt-01.log.json",
+    "sha256": "d7b1ed821ba8a96e5735b8721e7adbc0913a65179f0b5d3113e1f88e2e1e2a96",
+    "matchesFrozen": true
+  },
+  {
+    "path": "source-manifest.json",
+    "sha256": "587373e643b9585e17e17d95400eeca24ccb28cfd923a729daf459178c72fff9",
+    "matchesFrozen": true
+  }
+]

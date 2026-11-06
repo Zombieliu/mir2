@@ -1,0 +1,16 @@
+{
+  "schema": "mir2.windows.origin-download-speed.v1",
+  "observedAtUtc": "2026-10-30T14:46:19Z",
+  "url": "https://165.154.65.136.sslip.io/client-updates/installers/3b926d5eb5dd8ee1fc46b6d39fba3eda3eb538ba257405733abe1defae840172/Mir2Setup.exe",
+  "method": "HTTPS GET Range bytes=0-8388607; Accept-Encoding identity; Cache-Control no-cache",
+  "status": 206,
+  "measuredBytes": 8388608,
+  "seconds": 116.324,
+  "megabytesPerSecond": 0.072,
+  "fullPackageBytes": 1026815762,
+  "extrapolatedFullPackageMinutesAtSameSpeed": 237.3,
+  "measurementLocation": "current Windows machine",
+  "notPlayerNetworkGuarantee": true,
+  "cdnVersionOfThisInstallerMeasured": false,
+  "deploymentChanged": false
+}

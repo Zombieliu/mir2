@@ -1,0 +1,75 @@
+{
+  "owner": "Root",
+  "kind": "actual original Source78 Node03 all144 passed with authenticated bootstrap regressions",
+  "config": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source78-spells-readiness-20261012-01\\root-approved01\\source78-node-config03.json",
+    "bytes": 4340,
+    "sha256": "7b43c86b9be5bb75460fc1f46500f992bff0c38f3a25e21644ebe81519ececd9"
+  },
+  "snapshot": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source78-spells-readiness-20261012-01\\root-approved01\\source78-strict-snapshot03.json",
+    "bytes": 20522564,
+    "sha256": "86859054aba26372cc0ecab5571af49a07edab95c2dfed5d593fb0226facd8dd"
+  },
+  "sourceReview": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source78-spells-readiness-20261012-01\\root-approved01\\source78-code-review03.json",
+    "bytes": 12754,
+    "sha256": "9cb2a7d64e108fcd51e8f32483b214e2df24218e45fe62fa4132d83b33a35df0"
+  },
+  "fixtureRepair": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source78-spells-readiness-20261012-01\\worker-code01\\fixture-repair01\\worker-fixture-manifest01.json",
+    "bytes": 7713,
+    "sha256": "094752e8c9bd272176682ea95232df5d9572dcb392e707c6ed7ae9cbddae8c5b"
+  },
+  "outer": {
+    "owner": "Root",
+    "exitCode": 0,
+    "builderPid": 105432,
+    "kind": "Root original Source78 Node03 actual physical Spells bootstrap and retained regression",
+    "exited": true,
+    "disposed": true,
+    "elapsedMs": 2099,
+    "configPath": "C:/mir2-cross-platform-storage-20261002/web-source78-spells-readiness-20261012-01/root-approved01/source78-node-config03.json",
+    "uiOperated": false,
+    "runtimeLaunched": false,
+    "networkUsed": false,
+    "productionBuildAccepted": false,
+    "candidateAccepted": false,
+    "goalComplete": false
+  },
+  "outerPin": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source78-spells-readiness-20261012-01\\node-tests03\\outer.json",
+    "bytes": 549,
+    "sha256": "10b1eea6abc49e3a0c6da01d007f2ff8d181fc8bc9252dde6985fb520cfd1a45"
+  },
+  "stdout": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source78-spells-readiness-20261012-01\\node-tests03\\stdout.txt",
+    "bytes": 36399,
+    "sha256": "e2f635df90ac058011b7a9e38258b9eb9efa5cc72fe2457bdcd9399ad4313116"
+  },
+  "stderr": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source78-spells-readiness-20261012-01\\node-tests03\\stderr.txt",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "tests": {
+    "total": 144,
+    "pass": 144,
+    "fail": 0,
+    "skip": 0
+  },
+  "firstFailure": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source78-spells-readiness-20261012-01\\root-approved01\\source78-node-failure01.json",
+    "bytes": 2321,
+    "sha256": "1fedbde77c7a02bb5b3cdeeb1997d779038497edad8a15582f0ac857fc704b52"
+  },
+  "originalAssertionsRetained": true,
+  "originalPreAndPostSourceToolGuardPassed": true,
+  "ordinaryBrowserGapNotYetResolved": true,
+  "goalComplete": false,
+  "bootstrapRepair": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source78-spells-readiness-20261012-01\\worker-code01\\bootstrap-repair01\\root-bootstrap-manifest01.json",
+    "bytes": 1450,
+    "sha256": "a2fda5016015e2c812a6a2754afd655ae7e48790bf96a2b595ac7f6e4a2a35da"
+  }
+}

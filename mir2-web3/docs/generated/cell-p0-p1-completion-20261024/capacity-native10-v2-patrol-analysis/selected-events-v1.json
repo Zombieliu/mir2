@@ -1,0 +1,5655 @@
+{
+  "schemaVersion": 1,
+  "runId": "1792878747018-da931241",
+  "actor": "La809f605",
+  "scope": "Public bounded raw projections around the two original failed actions. No private account/store or recording payload was read.",
+  "inputPins": {
+    "report": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-patrol-feasibility-07\\reports\\1792878747018-da931241.report.json",
+      "bytes": 326916,
+      "sha256": "f1e003be92a13a195d5f958e45adb005c56823a2f7c4733842b6ae2b3e8edd02"
+    },
+    "raw": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-patrol-feasibility-07\\reports\\1792878747018-da931241.samples.jsonl",
+      "bytes": 17377188,
+      "sha256": "f902a608bc7fbb2fae30c99cc5e577e9706e7ba628060d79c0a3740e88a9aeb0",
+      "rows": 28640
+    },
+    "slowStage": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-patrol-feasibility-07\\slow-stage-public.jsonl",
+      "bytes": 11008,
+      "sha256": "edc4f485d7c892ab404d1a7b49edd718fcd1c00733e42e8279ec95c3b867437c"
+    },
+    "standaloneMonitor": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-patrol-feasibility-07\\monitor-history.jsonl",
+      "bytes": 4376572,
+      "sha256": "8acec749797ef9b789d25eddec03c7c026f21ca629f9dbf04a769d7188536794"
+    },
+    "cleanup": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-patrol-feasibility-07\\realm-cleanup.json",
+      "bytes": 2976,
+      "sha256": "7f758896d970b4e527182489232185d0b103a3fcaa7f076bf13ca23c506185f4"
+    }
+  },
+  "controls": [
+    {
+      "line": 2,
+      "type": "phaseStarted",
+      "at": 1792878747073,
+      "name": "bootstrap-2",
+      "kind": "bootstrap",
+      "targetActors": 2,
+      "startedAtMs": 1792878747073,
+      "endedAtMs": null,
+      "completed": false
+    },
+    {
+      "line": 271,
+      "type": "phaseEnded",
+      "at": 1792878786473,
+      "name": "bootstrap-2",
+      "kind": "bootstrap",
+      "targetActors": 2,
+      "startedAtMs": 1792878747073,
+      "endedAtMs": 1792878786473,
+      "completed": true
+    },
+    {
+      "line": 272,
+      "type": "phaseStarted",
+      "at": 1792878786473,
+      "name": "stage-2",
+      "kind": "measurement",
+      "targetActors": 2,
+      "startedAtMs": 1792878786473,
+      "endedAtMs": null,
+      "completed": false
+    },
+    {
+      "line": 3100,
+      "type": "phaseEnded",
+      "at": 1792879086537,
+      "name": "stage-2",
+      "kind": "measurement",
+      "targetActors": 2,
+      "startedAtMs": 1792878786473,
+      "endedAtMs": 1792879086537,
+      "completed": true
+    },
+    {
+      "line": 3102,
+      "type": "phaseStarted",
+      "at": 1792879086537,
+      "name": "bootstrap-10",
+      "kind": "bootstrap",
+      "targetActors": 10,
+      "startedAtMs": 1792879086537,
+      "endedAtMs": null,
+      "completed": false
+    },
+    {
+      "line": 5237,
+      "type": "phaseEnded",
+      "at": 1792879157003,
+      "name": "bootstrap-10",
+      "kind": "bootstrap",
+      "targetActors": 10,
+      "startedAtMs": 1792879086537,
+      "endedAtMs": 1792879157003,
+      "completed": true
+    },
+    {
+      "line": 5238,
+      "type": "phaseStarted",
+      "at": 1792879157003,
+      "name": "stage-10",
+      "kind": "measurement",
+      "targetActors": 10,
+      "startedAtMs": 1792879157003,
+      "endedAtMs": null,
+      "completed": false
+    },
+    {
+      "line": 15856,
+      "type": "phaseEnded",
+      "at": 1792879457050,
+      "name": "stage-10",
+      "kind": "measurement",
+      "targetActors": 10,
+      "startedAtMs": 1792879157003,
+      "endedAtMs": 1792879457050,
+      "completed": true
+    },
+    {
+      "line": 15858,
+      "type": "phaseStarted",
+      "at": 1792879457051,
+      "name": "soak",
+      "kind": "measurement",
+      "targetActors": 10,
+      "startedAtMs": 1792879457051,
+      "endedAtMs": null,
+      "completed": false
+    },
+    {
+      "line": 28597,
+      "type": "phaseEnded",
+      "at": 1792879817149,
+      "name": "soak",
+      "kind": "measurement",
+      "targetActors": 10,
+      "startedAtMs": 1792879457051,
+      "endedAtMs": 1792879817149,
+      "completed": true
+    },
+    {
+      "line": 28634,
+      "type": "continuousFailure",
+      "reason": "Continuous activity window failed, regardless of the measured stage",
+      "evidence": {
+        "actor": "La809f605",
+        "role": "combat",
+        "phases": [
+          "soak"
+        ],
+        "seconds": 51.35843299999996,
+        "final": true,
+        "activityDurationSufficient": true,
+        "activity": {
+          "plans": 50,
+          "gaps": 2,
+          "moves": 18,
+          "attacks": 22,
+          "hits": 22,
+          "damage": 88,
+          "lastSuccessAt": 1792879817040,
+          "runs": 10,
+          "cells": 28,
+          "nativeOpportunities": 50,
+          "nativeCompleted": 46,
+          "offeredDurationMs": 51990,
+          "evidenceWaits": 0,
+          "ownerAckWaits": 2,
+          "unknownPacing": 0
+        },
+        "nativeActivity": {
+          "passed": false,
+          "completionRatio": 0.92,
+          "runRatio": 0.5555555555555556,
+          "cellsPerMinute": 32.711278399011924,
+          "positiveHitsPerMinute": 25.7017187420808,
+          "evidenceWaits": 0,
+          "ownerAckWaits": 2,
+          "offeredDurationMs": 51990,
+          "unknownPacing": 0,
+          "coverageFailureMeaning": "Insufficient native offered/completed load is not, by itself, proof of server overload"
+        },
+        "activityPassed": false,
+        "latencyPassed": true,
+        "fanoutPassed": true,
+        "timeoutRatio": 0.04,
+        "correctionRatio": 0,
+        "movementCorrectionRatio": 0,
+        "attackRejectionRatio": 0,
+        "metrics": {
+          "run": {
+            "count": 10,
+            "status": {
+              "success": 10
+            },
+            "fromSend": {
+              "count": 10,
+              "p50Ms": 1,
+              "p95Ms": 170,
+              "p99Ms": 170,
+              "maxMs": 169.1132000000216
+            },
+            "fromPlan": {
+              "count": 10,
+              "p50Ms": 18,
+              "p95Ms": 174,
+              "p99Ms": 174,
+              "maxMs": 173.54729999997653
+            }
+          },
+          "walk": {
+            "count": 11,
+            "status": {
+              "success": 8,
+              "owner-ack-wait": 2,
+              "timeout": 1
+            },
+            "fromSend": {
+              "count": 8,
+              "p50Ms": 1,
+              "p95Ms": 296,
+              "p99Ms": 296,
+              "maxMs": 295.45940000005066
+            },
+            "fromPlan": {
+              "count": 8,
+              "p50Ms": 24,
+              "p95Ms": 302,
+              "p99Ms": 302,
+              "maxMs": 301.57750000001397
+            }
+          },
+          "turn": {
+            "count": 4,
+            "status": {
+              "success": 4
+            },
+            "fromSend": {
+              "count": 4,
+              "p50Ms": 1,
+              "p95Ms": 1,
+              "p99Ms": 1,
+              "maxMs": 0.5957000000635162
+            },
+            "fromPlan": {
+              "count": 4,
+              "p50Ms": 15,
+              "p95Ms": 27,
+              "p99Ms": 27,
+              "maxMs": 26.82689999998547
+            }
+          },
+          "attack": {
+            "count": 23,
+            "status": {
+              "success": 22,
+              "timeout": 1
+            },
+            "fromSend": {
+              "count": 22,
+              "p50Ms": 77,
+              "p95Ms": 123,
+              "p99Ms": 199,
+              "maxMs": 198.17050000000745
+            },
+            "fromPlan": {
+              "count": 22,
+              "p50Ms": 87,
+              "p95Ms": 151,
+              "p99Ms": 201,
+              "maxMs": 200.060899999924
+            },
+            "attackV2Requests": 23,
+            "attackV2NotLaunched": 0
+          },
+          "fanout-run": {
+            "count": 5,
+            "status": {
+              "success": 5
+            },
+            "fromSend": {
+              "count": 5,
+              "p50Ms": 1,
+              "p95Ms": 173,
+              "p99Ms": 173,
+              "maxMs": 172.4104000000516
+            },
+            "fromPlan": {
+              "count": 0,
+              "p50Ms": null,
+              "p95Ms": null,
+              "p99Ms": null,
+              "maxMs": 0
+            }
+          },
+          "fanout-turn": {
+            "count": 2,
+            "status": {
+              "success": 2
+            },
+            "fromSend": {
+              "count": 2,
+              "p50Ms": 1,
+              "p95Ms": 1,
+              "p99Ms": 1,
+              "maxMs": 0.4561999998986721
+            },
+            "fromPlan": {
+              "count": 0,
+              "p50Ms": null,
+              "p95Ms": null,
+              "p99Ms": null,
+              "maxMs": 0
+            }
+          },
+          "chat": {
+            "count": 2,
+            "status": {
+              "success": 2
+            },
+            "fromSend": {
+              "count": 2,
+              "p50Ms": 1,
+              "p95Ms": 2,
+              "p99Ms": 2,
+              "maxMs": 1.1406000000424683
+            },
+            "fromPlan": {
+              "count": 2,
+              "p50Ms": 11,
+              "p95Ms": 20,
+              "p99Ms": 20,
+              "maxMs": 19.037000000011176
+            }
+          },
+          "peerChat": {
+            "count": 2,
+            "status": {
+              "success": 2
+            },
+            "fromSend": {
+              "count": 2,
+              "p50Ms": 1,
+              "p95Ms": 2,
+              "p99Ms": 2,
+              "maxMs": 1.1406000000424683
+            },
+            "fromPlan": {
+              "count": 0,
+              "p50Ms": null,
+              "p95Ms": null,
+              "p99Ms": null,
+              "maxMs": 0
+            }
+          },
+          "fanout-chat": {
+            "count": 2,
+            "status": {
+              "success": 2
+            },
+            "fromSend": {
+              "count": 2,
+              "p50Ms": 1,
+              "p95Ms": 2,
+              "p99Ms": 2,
+              "maxMs": 1.1406000000424683
+            },
+            "fromPlan": {
+              "count": 0,
+              "p50Ms": null,
+              "p95Ms": null,
+              "p99Ms": null,
+              "maxMs": 0
+            }
+          },
+          "fanout-walk": {
+            "count": 4,
+            "status": {
+              "success": 4
+            },
+            "fromSend": {
+              "count": 4,
+              "p50Ms": 1,
+              "p95Ms": 6,
+              "p99Ms": 6,
+              "maxMs": 5.996299999998882
+            },
+            "fromPlan": {
+              "count": 0,
+              "p50Ms": null,
+              "p95Ms": null,
+              "p99Ms": null,
+              "maxMs": 0
+            }
+          }
+        },
+        "passed": false
+      },
+      "at": 1792879818744
+    },
+    {
+      "line": 28635,
+      "type": "safetyStop",
+      "at": 1792879818744,
+      "reason": "Continuous activity window failed, regardless of the measured stage"
+    },
+    {
+      "line": 28640,
+      "type": "finished",
+      "ok": false,
+      "playableCapacityAccepted": false
+    }
+  ],
+  "failedActions": [
+    {
+      "line": 27206,
+      "type": "action",
+      "at": 1792879778687,
+      "phase": "soak",
+      "actor": "La809f605",
+      "kind": "attack",
+      "plannedGameplay": true,
+      "scheduledAtMs": 1040853.2615,
+      "sentAtMs": 1040861.9001,
+      "targetId": 206701,
+      "hunting": "Deer",
+      "nativeOpportunity": true,
+      "plannedIntervalMs": 1380,
+      "pacingKnown": true,
+      "cadence": {
+        "intervalMs": 1380,
+        "cooldownMs": 1330,
+        "pacingKnown": true,
+        "nativeAttackMs": 1330,
+        "zoneAttackFloorMs": 600,
+        "level": 5,
+        "attackSpeed": 0,
+        "statBlockPresent": true,
+        "statCount": 24,
+        "attackSpeedSource": "authoritative-sparse-zero"
+      },
+      "declaredHome": {
+        "x": 260,
+        "y": 670
+      },
+      "initialCombatTransit": false,
+      "targetPosition": {
+        "x": 261,
+        "y": 649
+      },
+      "attackResults": "v2",
+      "requestId": "300",
+      "attackRequestSent": true,
+      "status": "timeout",
+      "latencyMs": 901.5223000000697,
+      "plannedLatencyMs": 910.1622000000207,
+      "error": "La809f605 timed out waiting for attack authoritative acknowledgement",
+      "targetStillAdjacent": true,
+      "ambiguousTargetQuarantined": true
+    },
+    {
+      "line": 27290,
+      "type": "action",
+      "at": 1792879781209,
+      "phase": "soak",
+      "actor": "La809f605",
+      "kind": "walk",
+      "plannedGameplay": true,
+      "scheduledAtMs": 1042233.2615,
+      "sentAtMs": 1042259.9186,
+      "plannedTarget": {
+        "x": 261,
+        "y": 650
+      },
+      "hunting": "Scarecrow",
+      "chaseTargetId": 206608,
+      "nativeOpportunity": true,
+      "plannedIntervalMs": 750,
+      "pacingKnown": true,
+      "cadence": {
+        "intervalMs": 750,
+        "cooldownMs": 600,
+        "pacingKnown": true
+      },
+      "declaredHome": {
+        "x": 260,
+        "y": 670
+      },
+      "initialCombatTransit": false,
+      "status": "timeout",
+      "latencyMs": 2025.4475000000093,
+      "plannedLatencyMs": 2052.105899999966,
+      "error": "La809f605 timed out waiting for walk authoritative acknowledgement",
+      "ambiguousTargetQuarantined": false
+    }
+  ],
+  "actorActionsAroundFailure": [
+    {
+      "line": 26942,
+      "type": "action",
+      "at": 1792879771021,
+      "phase": "soak",
+      "actor": "La809f605",
+      "kind": "attack",
+      "plannedGameplay": true,
+      "scheduledAtMs": 1033953.2615,
+      "sentAtMs": 1033972.3655,
+      "targetId": 206701,
+      "hunting": "Deer",
+      "nativeOpportunity": true,
+      "plannedIntervalMs": 1380,
+      "pacingKnown": true,
+      "cadence": {
+        "intervalMs": 1380,
+        "cooldownMs": 1330,
+        "pacingKnown": true,
+        "nativeAttackMs": 1330,
+        "zoneAttackFloorMs": 600,
+        "level": 5,
+        "attackSpeed": 0,
+        "statBlockPresent": true,
+        "statCount": 24,
+        "attackSpeedSource": "authoritative-sparse-zero"
+      },
+      "declaredHome": {
+        "x": 260,
+        "y": 670
+      },
+      "initialCombatTransit": false,
+      "targetPosition": {
+        "x": 261,
+        "y": 649
+      },
+      "attackResults": "v2",
+      "requestId": "295",
+      "attackRequestSent": true,
+      "attackResult": "launched",
+      "status": "success",
+      "latencyMs": 97.2567000000272,
+      "plannedLatencyMs": 116.36069999996107,
+      "damage": 3,
+      "sharedHealthVerified": true,
+      "healthPercent": 72
+    },
+    {
+      "line": 26992,
+      "type": "action",
+      "at": 1792879772438,
+      "phase": "soak",
+      "actor": "La809f605",
+      "kind": "attack",
+      "plannedGameplay": true,
+      "scheduledAtMs": 1035333.2615,
+      "sentAtMs": 1035360.5607,
+      "targetId": 206701,
+      "hunting": "Deer",
+      "nativeOpportunity": true,
+      "plannedIntervalMs": 1380,
+      "pacingKnown": true,
+      "cadence": {
+        "intervalMs": 1380,
+        "cooldownMs": 1330,
+        "pacingKnown": true,
+        "nativeAttackMs": 1330,
+        "zoneAttackFloorMs": 600,
+        "level": 5,
+        "attackSpeed": 0,
+        "statBlockPresent": true,
+        "statCount": 24,
+        "attackSpeedSource": "authoritative-sparse-zero"
+      },
+      "declaredHome": {
+        "x": 260,
+        "y": 670
+      },
+      "initialCombatTransit": false,
+      "targetPosition": {
+        "x": 261,
+        "y": 649
+      },
+      "attackResults": "v2",
+      "requestId": "296",
+      "attackRequestSent": true,
+      "attackResult": "launched",
+      "status": "success",
+      "latencyMs": 122.7147999999579,
+      "plannedLatencyMs": 150.01399999996647,
+      "damage": 4,
+      "sharedHealthVerified": true,
+      "healthPercent": 56
+    },
+    {
+      "line": 27002,
+      "type": "action",
+      "at": 1792879772689,
+      "phase": "soak",
+      "actor": "La809f605",
+      "kind": "rtt",
+      "status": "success",
+      "latencyMs": 0.31669999996665865
+    },
+    {
+      "line": 27038,
+      "type": "action",
+      "at": 1792879773703,
+      "phase": "soak",
+      "actor": "La809f605",
+      "kind": "attack",
+      "plannedGameplay": true,
+      "scheduledAtMs": 1036713.2615,
+      "sentAtMs": 1036718.1071,
+      "targetId": 206701,
+      "hunting": "Deer",
+      "nativeOpportunity": true,
+      "plannedIntervalMs": 1380,
+      "pacingKnown": true,
+      "cadence": {
+        "intervalMs": 1380,
+        "cooldownMs": 1330,
+        "pacingKnown": true,
+        "nativeAttackMs": 1330,
+        "zoneAttackFloorMs": 600,
+        "level": 5,
+        "attackSpeed": 0,
+        "statBlockPresent": true,
+        "statCount": 24,
+        "attackSpeedSource": "authoritative-sparse-zero"
+      },
+      "declaredHome": {
+        "x": 260,
+        "y": 670
+      },
+      "initialCombatTransit": false,
+      "targetPosition": {
+        "x": 261,
+        "y": 649
+      },
+      "attackResults": "v2",
+      "requestId": "297",
+      "attackRequestSent": true,
+      "attackResult": "launched",
+      "status": "success",
+      "latencyMs": 47.00599999993574,
+      "plannedLatencyMs": 51.8515999999363,
+      "damage": 5,
+      "sharedHealthVerified": true,
+      "healthPercent": 36
+    },
+    {
+      "line": 27082,
+      "type": "action",
+      "at": 1792879775096,
+      "phase": "soak",
+      "actor": "La809f605",
+      "kind": "attack",
+      "plannedGameplay": true,
+      "scheduledAtMs": 1038093.2615,
+      "sentAtMs": 1038110.0915,
+      "targetId": 206701,
+      "hunting": "Deer",
+      "nativeOpportunity": true,
+      "plannedIntervalMs": 1380,
+      "pacingKnown": true,
+      "cadence": {
+        "intervalMs": 1380,
+        "cooldownMs": 1330,
+        "pacingKnown": true,
+        "nativeAttackMs": 1330,
+        "zoneAttackFloorMs": 600,
+        "level": 5,
+        "attackSpeed": 0,
+        "statBlockPresent": true,
+        "statCount": 24,
+        "attackSpeedSource": "authoritative-sparse-zero"
+      },
+      "declaredHome": {
+        "x": 260,
+        "y": 670
+      },
+      "initialCombatTransit": false,
+      "targetPosition": {
+        "x": 261,
+        "y": 649
+      },
+      "attackResults": "v2",
+      "requestId": "298",
+      "attackRequestSent": true,
+      "attackResult": "launched",
+      "status": "success",
+      "latencyMs": 48.302200000034645,
+      "plannedLatencyMs": 65.13219999999274,
+      "damage": 4,
+      "sharedHealthVerified": true,
+      "healthPercent": 20
+    },
+    {
+      "line": 27131,
+      "type": "action",
+      "at": 1792879776487,
+      "phase": "soak",
+      "actor": "La809f605",
+      "kind": "attack",
+      "plannedGameplay": true,
+      "scheduledAtMs": 1039473.2615,
+      "sentAtMs": 1039495.4303,
+      "targetId": 206701,
+      "hunting": "Deer",
+      "nativeOpportunity": true,
+      "plannedIntervalMs": 1380,
+      "pacingKnown": true,
+      "cadence": {
+        "intervalMs": 1380,
+        "cooldownMs": 1330,
+        "pacingKnown": true,
+        "nativeAttackMs": 1330,
+        "zoneAttackFloorMs": 600,
+        "level": 5,
+        "attackSpeed": 0,
+        "statBlockPresent": true,
+        "statCount": 24,
+        "attackSpeedSource": "authoritative-sparse-zero"
+      },
+      "declaredHome": {
+        "x": 260,
+        "y": 670
+      },
+      "initialCombatTransit": false,
+      "targetPosition": {
+        "x": 261,
+        "y": 649
+      },
+      "attackResults": "v2",
+      "requestId": "299",
+      "attackRequestSent": true,
+      "attackResult": "launched",
+      "status": "success",
+      "latencyMs": 63.881700000027195,
+      "plannedLatencyMs": 86.05050000001211,
+      "damage": 3,
+      "sharedHealthVerified": true,
+      "healthPercent": 8
+    },
+    {
+      "line": 27206,
+      "type": "action",
+      "at": 1792879778687,
+      "phase": "soak",
+      "actor": "La809f605",
+      "kind": "attack",
+      "plannedGameplay": true,
+      "scheduledAtMs": 1040853.2615,
+      "sentAtMs": 1040861.9001,
+      "targetId": 206701,
+      "hunting": "Deer",
+      "nativeOpportunity": true,
+      "plannedIntervalMs": 1380,
+      "pacingKnown": true,
+      "cadence": {
+        "intervalMs": 1380,
+        "cooldownMs": 1330,
+        "pacingKnown": true,
+        "nativeAttackMs": 1330,
+        "zoneAttackFloorMs": 600,
+        "level": 5,
+        "attackSpeed": 0,
+        "statBlockPresent": true,
+        "statCount": 24,
+        "attackSpeedSource": "authoritative-sparse-zero"
+      },
+      "declaredHome": {
+        "x": 260,
+        "y": 670
+      },
+      "initialCombatTransit": false,
+      "targetPosition": {
+        "x": 261,
+        "y": 649
+      },
+      "attackResults": "v2",
+      "requestId": "300",
+      "attackRequestSent": true,
+      "status": "timeout",
+      "latencyMs": 901.5223000000697,
+      "plannedLatencyMs": 910.1622000000207,
+      "error": "La809f605 timed out waiting for attack authoritative acknowledgement",
+      "targetStillAdjacent": true,
+      "ambiguousTargetQuarantined": true
+    },
+    {
+      "line": 27246,
+      "type": "action",
+      "at": 1792879779928,
+      "phase": "soak",
+      "actor": "La809f605",
+      "kind": "walk",
+      "plannedGameplay": true,
+      "nativeOpportunity": true,
+      "plannedIntervalMs": 750,
+      "pacingKnown": true,
+      "cadence": {
+        "intervalMs": 750,
+        "cooldownMs": 600,
+        "pacingKnown": true
+      },
+      "status": "owner-ack-wait"
+    },
+    {
+      "line": 27271,
+      "type": "action",
+      "at": 1792879780667,
+      "phase": "soak",
+      "actor": "La809f605",
+      "kind": "walk",
+      "plannedGameplay": true,
+      "nativeOpportunity": true,
+      "plannedIntervalMs": 750,
+      "pacingKnown": true,
+      "cadence": {
+        "intervalMs": 750,
+        "cooldownMs": 600,
+        "pacingKnown": true
+      },
+      "status": "owner-ack-wait"
+    },
+    {
+      "line": 27290,
+      "type": "action",
+      "at": 1792879781209,
+      "phase": "soak",
+      "actor": "La809f605",
+      "kind": "walk",
+      "plannedGameplay": true,
+      "scheduledAtMs": 1042233.2615,
+      "sentAtMs": 1042259.9186,
+      "plannedTarget": {
+        "x": 261,
+        "y": 650
+      },
+      "hunting": "Scarecrow",
+      "chaseTargetId": 206608,
+      "nativeOpportunity": true,
+      "plannedIntervalMs": 750,
+      "pacingKnown": true,
+      "cadence": {
+        "intervalMs": 750,
+        "cooldownMs": 600,
+        "pacingKnown": true
+      },
+      "declaredHome": {
+        "x": 260,
+        "y": 670
+      },
+      "initialCombatTransit": false,
+      "status": "timeout",
+      "latencyMs": 2025.4475000000093,
+      "plannedLatencyMs": 2052.105899999966,
+      "error": "La809f605 timed out waiting for walk authoritative acknowledgement",
+      "ambiguousTargetQuarantined": false
+    },
+    {
+      "line": 27307,
+      "type": "action",
+      "at": 1792879781724,
+      "phase": "soak",
+      "actor": "La809f605",
+      "kind": "walk",
+      "plannedGameplay": true,
+      "scheduledAtMs": 1044483.2615,
+      "sentAtMs": 1044489.3796,
+      "plannedTarget": {
+        "x": 261,
+        "y": 650
+      },
+      "hunting": "Scarecrow",
+      "chaseTargetId": 206608,
+      "nativeOpportunity": true,
+      "plannedIntervalMs": 750,
+      "pacingKnown": true,
+      "cadence": {
+        "intervalMs": 750,
+        "cooldownMs": 600,
+        "pacingKnown": true
+      },
+      "declaredHome": {
+        "x": 260,
+        "y": 670
+      },
+      "initialCombatTransit": false,
+      "actual": {
+        "x": 261,
+        "y": 650
+      },
+      "direction": "Right",
+      "movedCells": 1,
+      "status": "success",
+      "latencyMs": 295.45940000005066,
+      "plannedLatencyMs": 301.57750000001397
+    },
+    {
+      "line": 27325,
+      "type": "action",
+      "at": 1792879782334,
+      "phase": "soak",
+      "actor": "La809f605",
+      "kind": "run",
+      "plannedGameplay": true,
+      "scheduledAtMs": 1045233.2615,
+      "sentAtMs": 1045237.6956,
+      "plannedTarget": {
+        "x": 263,
+        "y": 650
+      },
+      "hunting": "Scarecrow",
+      "chaseTargetId": 206608,
+      "nativeOpportunity": true,
+      "plannedIntervalMs": 750,
+      "pacingKnown": true,
+      "cadence": {
+        "intervalMs": 750,
+        "cooldownMs": 600,
+        "pacingKnown": true
+      },
+      "declaredHome": {
+        "x": 260,
+        "y": 670
+      },
+      "initialCombatTransit": false,
+      "actual": {
+        "x": 263,
+        "y": 650
+      },
+      "direction": "Right",
+      "movedCells": 2,
+      "status": "success",
+      "latencyMs": 169.1132000000216,
+      "plannedLatencyMs": 173.54729999997653
+    },
+    {
+      "line": 27352,
+      "type": "action",
+      "at": 1792879782715,
+      "phase": "soak",
+      "actor": "La809f605",
+      "kind": "rtt",
+      "status": "success",
+      "latencyMs": 0.6145000000251457
+    },
+    {
+      "line": 27363,
+      "type": "action",
+      "at": 1792879782961,
+      "phase": "soak",
+      "actor": "La809f605",
+      "kind": "run",
+      "plannedGameplay": true,
+      "scheduledAtMs": 1045983.2615,
+      "sentAtMs": 1046007.733,
+      "plannedTarget": {
+        "x": 265,
+        "y": 650
+      },
+      "hunting": "Scarecrow",
+      "chaseTargetId": 206608,
+      "nativeOpportunity": true,
+      "plannedIntervalMs": 750,
+      "pacingKnown": true,
+      "cadence": {
+        "intervalMs": 750,
+        "cooldownMs": 600,
+        "pacingKnown": true
+      },
+      "declaredHome": {
+        "x": 260,
+        "y": 670
+      },
+      "initialCombatTransit": false,
+      "actual": {
+        "x": 265,
+        "y": 650
+      },
+      "direction": "Right",
+      "movedCells": 2,
+      "status": "success",
+      "latencyMs": 0.6768000000156462,
+      "plannedLatencyMs": 25.148300000000745
+    },
+    {
+      "line": 27389,
+      "type": "action",
+      "at": 1792879783703,
+      "phase": "soak",
+      "actor": "La809f605",
+      "kind": "turn",
+      "plannedGameplay": true,
+      "scheduledAtMs": 1046733.2615,
+      "sentAtMs": 1046749.6728,
+      "hunting": "Scarecrow",
+      "nativeOpportunity": true,
+      "plannedIntervalMs": 750,
+      "pacingKnown": true,
+      "cadence": {
+        "intervalMs": 750,
+        "cooldownMs": 350,
+        "pacingKnown": true
+      },
+      "declaredHome": {
+        "x": 260,
+        "y": 670
+      },
+      "initialCombatTransit": false,
+      "status": "success",
+      "latencyMs": 0.400800000061281,
+      "plannedLatencyMs": 16.812099999981
+    },
+    {
+      "line": 27415,
+      "type": "action",
+      "at": 1792879784446,
+      "phase": "soak",
+      "actor": "La809f605",
+      "kind": "chat",
+      "plannedGameplay": true,
+      "scheduledAtMs": 1047483.2615,
+      "sentAtMs": 1047493.2556,
+      "nativeOpportunity": true,
+      "plannedIntervalMs": 750,
+      "pacingKnown": true,
+      "cadence": {
+        "intervalMs": 750,
+        "cooldownMs": 0,
+        "pacingKnown": true
+      },
+      "declaredHome": {
+        "x": 260,
+        "y": 670
+      },
+      "initialCombatTransit": false,
+      "status": "success",
+      "latencyMs": 0.9745000000111759,
+      "plannedLatencyMs": 10.96860000002198
+    },
+    {
+      "line": 27416,
+      "type": "action",
+      "at": 1792879784446,
+      "phase": "soak",
+      "actor": "La809f605",
+      "kind": "peerChat",
+      "status": "success",
+      "latencyMs": 0.9745000000111759
+    }
+  ],
+  "pendingAttackEvidence": [
+    {
+      "line": 26943,
+      "type": "pendingAttackEvidence",
+      "actor": "La809f605",
+      "phase": "soak",
+      "connection": 6,
+      "at": 1792879771021,
+      "sentAtMs": 1033972.3655,
+      "sentAtWallMs": 1792879770896,
+      "sendCursor": 8567,
+      "endedAtMs": 1034098.3483,
+      "endedAtWallMs": 1792879771021,
+      "owner": {
+        "objectId": 1000,
+        "x": 260,
+        "y": 650,
+        "dead": false,
+        "hp": 44,
+        "maxHp": 44
+      },
+      "target": {
+        "objectId": 206701,
+        "x": 261,
+        "y": 649,
+        "dead": false,
+        "hp": 25,
+        "maxHp": 25
+      },
+      "outcome": "success",
+      "protocolVersion": 2,
+      "requestId": "295",
+      "maximumPackets": 64,
+      "packetCount": 10,
+      "truncated": false,
+      "packets": [
+        {
+          "receiver": "observer",
+          "sequence": 6787,
+          "monotonicMs": 1033983.5131,
+          "atMs": 1792879770907,
+          "packet": "ObjectAttack",
+          "payload": {
+            "objectId": 50005,
+            "location": {
+              "x": 260,
+              "y": 650
+            },
+            "direction": "UpRight"
+          }
+        },
+        {
+          "receiver": "owner",
+          "sequence": 8570,
+          "monotonicMs": 1033988.3029,
+          "atMs": 1792879770911,
+          "type": "attackResultV2",
+          "protocolVersion": 2,
+          "requestId": "295",
+          "objectId": 206701,
+          "result": "launched"
+        },
+        {
+          "receiver": "owner",
+          "sequence": 8571,
+          "monotonicMs": 1033988.3543,
+          "atMs": 1792879770911,
+          "packet": "UserLocation",
+          "payload": {
+            "x": 260,
+            "y": 650,
+            "direction": "UpRight"
+          }
+        },
+        {
+          "receiver": "owner",
+          "sequence": 8572,
+          "monotonicMs": 1033988.3777,
+          "atMs": 1792879770912,
+          "packet": "ObjectAttack",
+          "payload": {
+            "objectId": 1000,
+            "location": {
+              "x": 260,
+              "y": 650
+            },
+            "direction": "UpRight"
+          }
+        },
+        {
+          "receiver": "observer",
+          "sequence": 6788,
+          "monotonicMs": 1034068.1549,
+          "atMs": 1792879770991,
+          "packet": "ObjectStruck",
+          "payload": {
+            "objectId": 206701,
+            "attackerId": 50005,
+            "location": {
+              "x": 261,
+              "y": 649
+            },
+            "direction": "DownLeft"
+          }
+        },
+        {
+          "receiver": "observer",
+          "sequence": 6789,
+          "monotonicMs": 1034068.2764,
+          "atMs": 1792879770991,
+          "packet": "DamageIndicator",
+          "payload": {
+            "objectId": 206701,
+            "damage": 3
+          }
+        },
+        {
+          "receiver": "observer",
+          "sequence": 6790,
+          "monotonicMs": 1034068.2902,
+          "atMs": 1792879770991,
+          "packet": "ObjectHealth",
+          "payload": {
+            "objectId": 206701,
+            "percent": 72
+          }
+        },
+        {
+          "receiver": "owner",
+          "sequence": 8573,
+          "monotonicMs": 1034069.5797,
+          "atMs": 1792879770993,
+          "packet": "ObjectStruck",
+          "payload": {
+            "objectId": 206701,
+            "attackerId": 1000,
+            "location": {
+              "x": 261,
+              "y": 649
+            },
+            "direction": "DownLeft"
+          }
+        },
+        {
+          "receiver": "owner",
+          "sequence": 8574,
+          "monotonicMs": 1034069.6051,
+          "atMs": 1792879770993,
+          "packet": "DamageIndicator",
+          "payload": {
+            "objectId": 206701,
+            "damage": 3
+          }
+        },
+        {
+          "receiver": "owner",
+          "sequence": 8575,
+          "monotonicMs": 1034069.6222,
+          "atMs": 1792879770993,
+          "packet": "ObjectHealth",
+          "payload": {
+            "objectId": 206701,
+            "percent": 72
+          }
+        }
+      ],
+      "rule": "Observed public packet fields only; no server incarnation is present or inferred. Diagnostic evidence never changes timeout, miss, rejection or damage accounting."
+    },
+    {
+      "line": 26993,
+      "type": "pendingAttackEvidence",
+      "actor": "La809f605",
+      "phase": "soak",
+      "connection": 6,
+      "at": 1792879772439,
+      "sentAtMs": 1035360.5607,
+      "sentAtWallMs": 1792879772284,
+      "sendCursor": 8578,
+      "endedAtMs": 1035515.4774,
+      "endedAtWallMs": 1792879772439,
+      "owner": {
+        "objectId": 1000,
+        "x": 260,
+        "y": 650,
+        "dead": false,
+        "hp": 44,
+        "maxHp": 44
+      },
+      "target": {
+        "objectId": 206701,
+        "x": 261,
+        "y": 649,
+        "dead": false,
+        "hp": 21,
+        "maxHp": 25
+      },
+      "outcome": "success",
+      "protocolVersion": 2,
+      "requestId": "296",
+      "maximumPackets": 64,
+      "packetCount": 10,
+      "truncated": false,
+      "packets": [
+        {
+          "receiver": "observer",
+          "sequence": 6798,
+          "monotonicMs": 1035371.358,
+          "atMs": 1792879772295,
+          "packet": "ObjectAttack",
+          "payload": {
+            "objectId": 50005,
+            "location": {
+              "x": 260,
+              "y": 650
+            },
+            "direction": "UpRight"
+          }
+        },
+        {
+          "receiver": "owner",
+          "sequence": 8581,
+          "monotonicMs": 1035403.6773,
+          "atMs": 1792879772327,
+          "type": "attackResultV2",
+          "protocolVersion": 2,
+          "requestId": "296",
+          "objectId": 206701,
+          "result": "launched"
+        },
+        {
+          "receiver": "owner",
+          "sequence": 8582,
+          "monotonicMs": 1035403.7295,
+          "atMs": 1792879772327,
+          "packet": "UserLocation",
+          "payload": {
+            "x": 260,
+            "y": 650,
+            "direction": "UpRight"
+          }
+        },
+        {
+          "receiver": "owner",
+          "sequence": 8583,
+          "monotonicMs": 1035403.7555,
+          "atMs": 1792879772327,
+          "packet": "ObjectAttack",
+          "payload": {
+            "objectId": 1000,
+            "location": {
+              "x": 260,
+              "y": 650
+            },
+            "direction": "UpRight"
+          }
+        },
+        {
+          "receiver": "owner",
+          "sequence": 8585,
+          "monotonicMs": 1035480.5198,
+          "atMs": 1792879772404,
+          "packet": "ObjectStruck",
+          "payload": {
+            "objectId": 206701,
+            "attackerId": 1000,
+            "location": {
+              "x": 261,
+              "y": 649
+            },
+            "direction": "DownLeft"
+          }
+        },
+        {
+          "receiver": "observer",
+          "sequence": 6802,
+          "monotonicMs": 1035482.7456,
+          "atMs": 1792879772406,
+          "packet": "ObjectStruck",
+          "payload": {
+            "objectId": 206701,
+            "attackerId": 50005,
+            "location": {
+              "x": 261,
+              "y": 649
+            },
+            "direction": "DownLeft"
+          }
+        },
+        {
+          "receiver": "observer",
+          "sequence": 6803,
+          "monotonicMs": 1035482.7889,
+          "atMs": 1792879772406,
+          "packet": "DamageIndicator",
+          "payload": {
+            "objectId": 206701,
+            "damage": 4
+          }
+        },
+        {
+          "receiver": "observer",
+          "sequence": 6804,
+          "monotonicMs": 1035482.8121,
+          "atMs": 1792879772406,
+          "packet": "ObjectHealth",
+          "payload": {
+            "objectId": 206701,
+            "percent": 56
+          }
+        },
+        {
+          "receiver": "owner",
+          "sequence": 8586,
+          "monotonicMs": 1035483.2355,
+          "atMs": 1792879772406,
+          "packet": "DamageIndicator",
+          "payload": {
+            "objectId": 206701,
+            "damage": 4
+          }
+        },
+        {
+          "receiver": "owner",
+          "sequence": 8587,
+          "monotonicMs": 1035483.2755,
+          "atMs": 1792879772406,
+          "packet": "ObjectHealth",
+          "payload": {
+            "objectId": 206701,
+            "percent": 56
+          }
+        }
+      ],
+      "rule": "Observed public packet fields only; no server incarnation is present or inferred. Diagnostic evidence never changes timeout, miss, rejection or damage accounting."
+    },
+    {
+      "line": 27039,
+      "type": "pendingAttackEvidence",
+      "actor": "La809f605",
+      "phase": "soak",
+      "connection": 6,
+      "at": 1792879773703,
+      "sentAtMs": 1036718.1071,
+      "sentAtWallMs": 1792879773641,
+      "sendCursor": 8598,
+      "endedAtMs": 1036779.8777,
+      "endedAtWallMs": 1792879773703,
+      "owner": {
+        "objectId": 1000,
+        "x": 260,
+        "y": 650,
+        "dead": false,
+        "hp": 43,
+        "maxHp": 44
+      },
+      "target": {
+        "objectId": 206701,
+        "x": 261,
+        "y": 649,
+        "dead": false,
+        "hp": 18,
+        "maxHp": 25
+      },
+      "outcome": "success",
+      "protocolVersion": 2,
+      "requestId": "297",
+      "maximumPackets": 64,
+      "packetCount": 10,
+      "truncated": false,
+      "packets": [
+        {
+          "receiver": "observer",
+          "sequence": 6815,
+          "monotonicMs": 1036728.1203,
+          "atMs": 1792879773651,
+          "packet": "ObjectAttack",
+          "payload": {
+            "objectId": 50005,
+            "location": {
+              "x": 260,
+              "y": 650
+            },
+            "direction": "UpRight"
+          }
+        },
+        {
+          "receiver": "owner",
+          "sequence": 8601,
+          "monotonicMs": 1036732.5266,
+          "atMs": 1792879773656,
+          "type": "attackResultV2",
+          "protocolVersion": 2,
+          "requestId": "297",
+          "objectId": 206701,
+          "result": "launched"
+        },
+        {
+          "receiver": "owner",
+          "sequence": 8602,
+          "monotonicMs": 1036732.5647,
+          "atMs": 1792879773656,
+          "packet": "UserLocation",
+          "payload": {
+            "x": 260,
+            "y": 650,
+            "direction": "UpRight"
+          }
+        },
+        {
+          "receiver": "owner",
+          "sequence": 8603,
+          "monotonicMs": 1036732.5908,
+          "atMs": 1792879773656,
+          "packet": "ObjectAttack",
+          "payload": {
+            "objectId": 1000,
+            "location": {
+              "x": 260,
+              "y": 650
+            },
+            "direction": "UpRight"
+          }
+        },
+        {
+          "receiver": "observer",
+          "sequence": 6816,
+          "monotonicMs": 1036765.0013,
+          "atMs": 1792879773688,
+          "packet": "ObjectStruck",
+          "payload": {
+            "objectId": 206701,
+            "attackerId": 50005,
+            "location": {
+              "x": 261,
+              "y": 649
+            },
+            "direction": "DownLeft"
+          }
+        },
+        {
+          "receiver": "owner",
+          "sequence": 8604,
+          "monotonicMs": 1036765.0598,
+          "atMs": 1792879773688,
+          "packet": "ObjectStruck",
+          "payload": {
+            "objectId": 206701,
+            "attackerId": 1000,
+            "location": {
+              "x": 261,
+              "y": 649
+            },
+            "direction": "DownLeft"
+          }
+        },
+        {
+          "receiver": "owner",
+          "sequence": 8605,
+          "monotonicMs": 1036765.0738,
+          "atMs": 1792879773688,
+          "packet": "DamageIndicator",
+          "payload": {
+            "objectId": 206701,
+            "damage": 5
+          }
+        },
+        {
+          "receiver": "owner",
+          "sequence": 8606,
+          "monotonicMs": 1036765.0868,
+          "atMs": 1792879773688,
+          "packet": "ObjectHealth",
+          "payload": {
+            "objectId": 206701,
+            "percent": 36
+          }
+        },
+        {
+          "receiver": "observer",
+          "sequence": 6817,
+          "monotonicMs": 1036765.1034,
+          "atMs": 1792879773688,
+          "packet": "DamageIndicator",
+          "payload": {
+            "objectId": 206701,
+            "damage": 5
+          }
+        },
+        {
+          "receiver": "observer",
+          "sequence": 6818,
+          "monotonicMs": 1036765.1131,
+          "atMs": 1792879773688,
+          "packet": "ObjectHealth",
+          "payload": {
+            "objectId": 206701,
+            "percent": 36
+          }
+        }
+      ],
+      "rule": "Observed public packet fields only; no server incarnation is present or inferred. Diagnostic evidence never changes timeout, miss, rejection or damage accounting."
+    },
+    {
+      "line": 27083,
+      "type": "pendingAttackEvidence",
+      "actor": "La809f605",
+      "phase": "soak",
+      "connection": 6,
+      "at": 1792879775096,
+      "sentAtMs": 1038110.0915,
+      "sentAtWallMs": 1792879775033,
+      "sendCursor": 8611,
+      "endedAtMs": 1038172.5051,
+      "endedAtWallMs": 1792879775096,
+      "owner": {
+        "objectId": 1000,
+        "x": 260,
+        "y": 650,
+        "dead": false,
+        "hp": 43,
+        "maxHp": 44
+      },
+      "target": {
+        "objectId": 206701,
+        "x": 261,
+        "y": 649,
+        "dead": false,
+        "hp": 14,
+        "maxHp": 25
+      },
+      "outcome": "success",
+      "protocolVersion": 2,
+      "requestId": "298",
+      "maximumPackets": 64,
+      "packetCount": 10,
+      "truncated": false,
+      "packets": [
+        {
+          "receiver": "observer",
+          "sequence": 6825,
+          "monotonicMs": 1038121.5785,
+          "atMs": 1792879775045,
+          "packet": "ObjectAttack",
+          "payload": {
+            "objectId": 50005,
+            "location": {
+              "x": 260,
+              "y": 650
+            },
+            "direction": "UpRight"
+          }
+        },
+        {
+          "receiver": "owner",
+          "sequence": 8614,
+          "monotonicMs": 1038149.7801,
+          "atMs": 1792879775073,
+          "type": "attackResultV2",
+          "protocolVersion": 2,
+          "requestId": "298",
+          "objectId": 206701,
+          "result": "launched"
+        },
+        {
+          "receiver": "owner",
+          "sequence": 8615,
+          "monotonicMs": 1038149.8575,
+          "atMs": 1792879775073,
+          "packet": "UserLocation",
+          "payload": {
+            "x": 260,
+            "y": 650,
+            "direction": "UpRight"
+          }
+        },
+        {
+          "receiver": "owner",
+          "sequence": 8616,
+          "monotonicMs": 1038149.8877,
+          "atMs": 1792879775073,
+          "packet": "ObjectAttack",
+          "payload": {
+            "objectId": 1000,
+            "location": {
+              "x": 260,
+              "y": 650
+            },
+            "direction": "UpRight"
+          }
+        },
+        {
+          "receiver": "observer",
+          "sequence": 6826,
+          "monotonicMs": 1038158.2252,
+          "atMs": 1792879775081,
+          "packet": "ObjectStruck",
+          "payload": {
+            "objectId": 206701,
+            "attackerId": 50005,
+            "location": {
+              "x": 261,
+              "y": 649
+            },
+            "direction": "DownLeft"
+          }
+        },
+        {
+          "receiver": "observer",
+          "sequence": 6827,
+          "monotonicMs": 1038158.2677,
+          "atMs": 1792879775081,
+          "packet": "DamageIndicator",
+          "payload": {
+            "objectId": 206701,
+            "damage": 4
+          }
+        },
+        {
+          "receiver": "owner",
+          "sequence": 8617,
+          "monotonicMs": 1038158.3471,
+          "atMs": 1792879775081,
+          "packet": "ObjectStruck",
+          "payload": {
+            "objectId": 206701,
+            "attackerId": 1000,
+            "location": {
+              "x": 261,
+              "y": 649
+            },
+            "direction": "DownLeft"
+          }
+        },
+        {
+          "receiver": "owner",
+          "sequence": 8618,
+          "monotonicMs": 1038158.3582,
+          "atMs": 1792879775081,
+          "packet": "DamageIndicator",
+          "payload": {
+            "objectId": 206701,
+            "damage": 4
+          }
+        },
+        {
+          "receiver": "owner",
+          "sequence": 8619,
+          "monotonicMs": 1038158.3692,
+          "atMs": 1792879775082,
+          "packet": "ObjectHealth",
+          "payload": {
+            "objectId": 206701,
+            "percent": 20
+          }
+        },
+        {
+          "receiver": "observer",
+          "sequence": 6828,
+          "monotonicMs": 1038158.3937,
+          "atMs": 1792879775082,
+          "packet": "ObjectHealth",
+          "payload": {
+            "objectId": 206701,
+            "percent": 20
+          }
+        }
+      ],
+      "rule": "Observed public packet fields only; no server incarnation is present or inferred. Diagnostic evidence never changes timeout, miss, rejection or damage accounting."
+    },
+    {
+      "line": 27132,
+      "type": "pendingAttackEvidence",
+      "actor": "La809f605",
+      "phase": "soak",
+      "connection": 6,
+      "at": 1792879776487,
+      "sentAtMs": 1039495.4303,
+      "sentAtWallMs": 1792879776419,
+      "sendCursor": 8624,
+      "endedAtMs": 1039563.6838,
+      "endedAtWallMs": 1792879776487,
+      "owner": {
+        "objectId": 1000,
+        "x": 260,
+        "y": 650,
+        "dead": false,
+        "hp": 43,
+        "maxHp": 44
+      },
+      "target": {
+        "objectId": 206701,
+        "x": 261,
+        "y": 649,
+        "dead": false,
+        "hp": 9,
+        "maxHp": 25
+      },
+      "outcome": "success",
+      "protocolVersion": 2,
+      "requestId": "299",
+      "maximumPackets": 64,
+      "packetCount": 12,
+      "truncated": false,
+      "packets": [
+        {
+          "receiver": "observer",
+          "sequence": 6836,
+          "monotonicMs": 1039510.3493,
+          "atMs": 1792879776433,
+          "packet": "ObjectAttack",
+          "payload": {
+            "objectId": 50005,
+            "location": {
+              "x": 260,
+              "y": 650
+            },
+            "direction": "UpRight"
+          }
+        },
+        {
+          "receiver": "owner",
+          "sequence": 8627,
+          "monotonicMs": 1039515.8456,
+          "atMs": 1792879776439,
+          "type": "attackResultV2",
+          "protocolVersion": 2,
+          "requestId": "299",
+          "objectId": 206701,
+          "result": "launched"
+        },
+        {
+          "receiver": "owner",
+          "sequence": 8628,
+          "monotonicMs": 1039516.0251,
+          "atMs": 1792879776439,
+          "packet": "UserLocation",
+          "payload": {
+            "x": 260,
+            "y": 650,
+            "direction": "UpRight"
+          }
+        },
+        {
+          "receiver": "owner",
+          "sequence": 8629,
+          "monotonicMs": 1039516.0482,
+          "atMs": 1792879776439,
+          "packet": "ObjectAttack",
+          "payload": {
+            "objectId": 1000,
+            "location": {
+              "x": 260,
+              "y": 650
+            },
+            "direction": "UpRight"
+          }
+        },
+        {
+          "receiver": "owner",
+          "sequence": 8630,
+          "monotonicMs": 1039559.1716,
+          "atMs": 1792879776482,
+          "packet": "ObjectStruck",
+          "payload": {
+            "objectId": 206701,
+            "attackerId": 1000,
+            "location": {
+              "x": 261,
+              "y": 649
+            },
+            "direction": "DownLeft"
+          }
+        },
+        {
+          "receiver": "owner",
+          "sequence": 8631,
+          "monotonicMs": 1039559.1946,
+          "atMs": 1792879776482,
+          "packet": "DamageIndicator",
+          "payload": {
+            "objectId": 206701,
+            "damage": 3
+          }
+        },
+        {
+          "receiver": "owner",
+          "sequence": 8632,
+          "monotonicMs": 1039559.2077,
+          "atMs": 1792879776482,
+          "packet": "ObjectHealth",
+          "payload": {
+            "objectId": 206701,
+            "percent": 8
+          }
+        },
+        {
+          "receiver": "owner",
+          "sequence": 8635,
+          "monotonicMs": 1039559.2655,
+          "atMs": 1792879776482,
+          "packet": "ObjectHealth",
+          "payload": {
+            "objectId": 1000,
+            "percent": 100
+          }
+        },
+        {
+          "receiver": "observer",
+          "sequence": 6838,
+          "monotonicMs": 1039559.2922,
+          "atMs": 1792879776482,
+          "packet": "ObjectStruck",
+          "payload": {
+            "objectId": 206701,
+            "attackerId": 50005,
+            "location": {
+              "x": 261,
+              "y": 649
+            },
+            "direction": "DownLeft"
+          }
+        },
+        {
+          "receiver": "observer",
+          "sequence": 6839,
+          "monotonicMs": 1039559.3023,
+          "atMs": 1792879776482,
+          "packet": "DamageIndicator",
+          "payload": {
+            "objectId": 206701,
+            "damage": 3
+          }
+        },
+        {
+          "receiver": "observer",
+          "sequence": 6840,
+          "monotonicMs": 1039559.312,
+          "atMs": 1792879776482,
+          "packet": "ObjectHealth",
+          "payload": {
+            "objectId": 206701,
+            "percent": 8
+          }
+        },
+        {
+          "receiver": "observer",
+          "sequence": 6841,
+          "monotonicMs": 1039559.3223,
+          "atMs": 1792879776482,
+          "packet": "ObjectHealth",
+          "payload": {
+            "objectId": 50005,
+            "percent": 100
+          }
+        }
+      ],
+      "rule": "Observed public packet fields only; no server incarnation is present or inferred. Diagnostic evidence never changes timeout, miss, rejection or damage accounting."
+    },
+    {
+      "line": 27207,
+      "type": "pendingAttackEvidence",
+      "actor": "La809f605",
+      "phase": "soak",
+      "connection": 6,
+      "at": 1792879778687,
+      "sentAtMs": 1040861.9001,
+      "sentAtWallMs": 1792879777785,
+      "sendCursor": 8639,
+      "endedAtMs": 1041763.5978,
+      "endedAtWallMs": 1792879778687,
+      "owner": {
+        "objectId": 1000,
+        "x": 260,
+        "y": 650,
+        "dead": false,
+        "hp": 44,
+        "maxHp": 44
+      },
+      "target": {
+        "objectId": 206701,
+        "x": 261,
+        "y": 649,
+        "dead": false,
+        "hp": 5,
+        "maxHp": 25
+      },
+      "outcome": "timeout",
+      "protocolVersion": 2,
+      "requestId": "300",
+      "maximumPackets": 64,
+      "packetCount": 0,
+      "truncated": false,
+      "packets": [],
+      "rule": "Observed public packet fields only; no server incarnation is present or inferred. Diagnostic evidence never changes timeout, miss, rejection or damage accounting."
+    }
+  ],
+  "actualOwnerTransformsAroundFailure": [
+    {
+      "line": 27306,
+      "type": "selfTransform",
+      "actor": "La809f605",
+      "connection": 6,
+      "at": 1792879781708,
+      "sequence": 8673,
+      "monotonicMs": 1044784.839,
+      "phase": "soak",
+      "source": "UserLocation",
+      "mapFileName": "0",
+      "wire": {
+        "x": 261,
+        "y": 650,
+        "direction": "Right"
+      },
+      "before": {
+        "playerObjectId": 1000,
+        "position": {
+          "x": 260,
+          "y": 650
+        },
+        "direction": "UpRight"
+      },
+      "after": {
+        "playerObjectId": 1000,
+        "position": {
+          "x": 261,
+          "y": 650
+        },
+        "direction": "Right"
+      }
+    },
+    {
+      "line": 27322,
+      "type": "selfTransform",
+      "actor": "La809f605",
+      "connection": 6,
+      "at": 1792879782330,
+      "sequence": 8677,
+      "monotonicMs": 1045406.8088,
+      "phase": "soak",
+      "source": "UserLocation",
+      "mapFileName": "0",
+      "wire": {
+        "x": 263,
+        "y": 650,
+        "direction": "Right"
+      },
+      "before": {
+        "playerObjectId": 1000,
+        "position": {
+          "x": 261,
+          "y": 650
+        },
+        "direction": "Right"
+      },
+      "after": {
+        "playerObjectId": 1000,
+        "position": {
+          "x": 263,
+          "y": 650
+        },
+        "direction": "Right"
+      }
+    },
+    {
+      "line": 27360,
+      "type": "selfTransform",
+      "actor": "La809f605",
+      "connection": 6,
+      "at": 1792879782932,
+      "sequence": 8689,
+      "monotonicMs": 1046008.4098,
+      "phase": "soak",
+      "source": "UserLocation",
+      "mapFileName": "0",
+      "wire": {
+        "x": 265,
+        "y": 650,
+        "direction": "Right"
+      },
+      "before": {
+        "playerObjectId": 1000,
+        "position": {
+          "x": 263,
+          "y": 650
+        },
+        "direction": "Right"
+      },
+      "after": {
+        "playerObjectId": 1000,
+        "position": {
+          "x": 265,
+          "y": 650
+        },
+        "direction": "Right"
+      }
+    }
+  ],
+  "originalFailedContinuousWindow": {
+    "line": 28633,
+    "type": "continuousWindow",
+    "actor": "La809f605",
+    "role": "combat",
+    "phases": [
+      "soak"
+    ],
+    "seconds": 51.35843299999996,
+    "final": true,
+    "activityDurationSufficient": true,
+    "activity": {
+      "plans": 50,
+      "gaps": 2,
+      "moves": 18,
+      "attacks": 22,
+      "hits": 22,
+      "damage": 88,
+      "lastSuccessAt": 1792879817040,
+      "runs": 10,
+      "cells": 28,
+      "nativeOpportunities": 50,
+      "nativeCompleted": 46,
+      "offeredDurationMs": 51990,
+      "evidenceWaits": 0,
+      "ownerAckWaits": 2,
+      "unknownPacing": 0
+    },
+    "nativeActivity": {
+      "passed": false,
+      "completionRatio": 0.92,
+      "runRatio": 0.5555555555555556,
+      "cellsPerMinute": 32.711278399011924,
+      "positiveHitsPerMinute": 25.7017187420808,
+      "evidenceWaits": 0,
+      "ownerAckWaits": 2,
+      "offeredDurationMs": 51990,
+      "unknownPacing": 0,
+      "coverageFailureMeaning": "Insufficient native offered/completed load is not, by itself, proof of server overload"
+    },
+    "activityPassed": false,
+    "latencyPassed": true,
+    "fanoutPassed": true,
+    "timeoutRatio": 0.04,
+    "correctionRatio": 0,
+    "movementCorrectionRatio": 0,
+    "attackRejectionRatio": 0,
+    "metrics": {
+      "run": {
+        "count": 10,
+        "status": {
+          "success": 10
+        },
+        "fromSend": {
+          "count": 10,
+          "p50Ms": 1,
+          "p95Ms": 170,
+          "p99Ms": 170,
+          "maxMs": 169.1132000000216
+        },
+        "fromPlan": {
+          "count": 10,
+          "p50Ms": 18,
+          "p95Ms": 174,
+          "p99Ms": 174,
+          "maxMs": 173.54729999997653
+        }
+      },
+      "walk": {
+        "count": 11,
+        "status": {
+          "success": 8,
+          "owner-ack-wait": 2,
+          "timeout": 1
+        },
+        "fromSend": {
+          "count": 8,
+          "p50Ms": 1,
+          "p95Ms": 296,
+          "p99Ms": 296,
+          "maxMs": 295.45940000005066
+        },
+        "fromPlan": {
+          "count": 8,
+          "p50Ms": 24,
+          "p95Ms": 302,
+          "p99Ms": 302,
+          "maxMs": 301.57750000001397
+        }
+      },
+      "turn": {
+        "count": 4,
+        "status": {
+          "success": 4
+        },
+        "fromSend": {
+          "count": 4,
+          "p50Ms": 1,
+          "p95Ms": 1,
+          "p99Ms": 1,
+          "maxMs": 0.5957000000635162
+        },
+        "fromPlan": {
+          "count": 4,
+          "p50Ms": 15,
+          "p95Ms": 27,
+          "p99Ms": 27,
+          "maxMs": 26.82689999998547
+        }
+      },
+      "attack": {
+        "count": 23,
+        "status": {
+          "success": 22,
+          "timeout": 1
+        },
+        "fromSend": {
+          "count": 22,
+          "p50Ms": 77,
+          "p95Ms": 123,
+          "p99Ms": 199,
+          "maxMs": 198.17050000000745
+        },
+        "fromPlan": {
+          "count": 22,
+          "p50Ms": 87,
+          "p95Ms": 151,
+          "p99Ms": 201,
+          "maxMs": 200.060899999924
+        },
+        "attackV2Requests": 23,
+        "attackV2NotLaunched": 0
+      },
+      "fanout-run": {
+        "count": 5,
+        "status": {
+          "success": 5
+        },
+        "fromSend": {
+          "count": 5,
+          "p50Ms": 1,
+          "p95Ms": 173,
+          "p99Ms": 173,
+          "maxMs": 172.4104000000516
+        },
+        "fromPlan": {
+          "count": 0,
+          "p50Ms": null,
+          "p95Ms": null,
+          "p99Ms": null,
+          "maxMs": 0
+        }
+      },
+      "fanout-turn": {
+        "count": 2,
+        "status": {
+          "success": 2
+        },
+        "fromSend": {
+          "count": 2,
+          "p50Ms": 1,
+          "p95Ms": 1,
+          "p99Ms": 1,
+          "maxMs": 0.4561999998986721
+        },
+        "fromPlan": {
+          "count": 0,
+          "p50Ms": null,
+          "p95Ms": null,
+          "p99Ms": null,
+          "maxMs": 0
+        }
+      },
+      "chat": {
+        "count": 2,
+        "status": {
+          "success": 2
+        },
+        "fromSend": {
+          "count": 2,
+          "p50Ms": 1,
+          "p95Ms": 2,
+          "p99Ms": 2,
+          "maxMs": 1.1406000000424683
+        },
+        "fromPlan": {
+          "count": 2,
+          "p50Ms": 11,
+          "p95Ms": 20,
+          "p99Ms": 20,
+          "maxMs": 19.037000000011176
+        }
+      },
+      "peerChat": {
+        "count": 2,
+        "status": {
+          "success": 2
+        },
+        "fromSend": {
+          "count": 2,
+          "p50Ms": 1,
+          "p95Ms": 2,
+          "p99Ms": 2,
+          "maxMs": 1.1406000000424683
+        },
+        "fromPlan": {
+          "count": 0,
+          "p50Ms": null,
+          "p95Ms": null,
+          "p99Ms": null,
+          "maxMs": 0
+        }
+      },
+      "fanout-chat": {
+        "count": 2,
+        "status": {
+          "success": 2
+        },
+        "fromSend": {
+          "count": 2,
+          "p50Ms": 1,
+          "p95Ms": 2,
+          "p99Ms": 2,
+          "maxMs": 1.1406000000424683
+        },
+        "fromPlan": {
+          "count": 0,
+          "p50Ms": null,
+          "p95Ms": null,
+          "p99Ms": null,
+          "maxMs": 0
+        }
+      },
+      "fanout-walk": {
+        "count": 4,
+        "status": {
+          "success": 4
+        },
+        "fromSend": {
+          "count": 4,
+          "p50Ms": 1,
+          "p95Ms": 6,
+          "p99Ms": 6,
+          "maxMs": 5.996299999998882
+        },
+        "fromPlan": {
+          "count": 0,
+          "p50Ms": null,
+          "p95Ms": null,
+          "p99Ms": null,
+          "maxMs": 0
+        }
+      }
+    },
+    "passed": false,
+    "at": 1792879818744
+  },
+  "driverCritical": [
+    {
+      "line": 26918,
+      "at": 1792879770287,
+      "phase": "soak",
+      "rssBytes": 91631616,
+      "eventLoopLagP99Ms": 32.260095,
+      "eventLoopLagMaxMs": 32.260095
+    },
+    {
+      "line": 26954,
+      "at": 1792879771302,
+      "phase": "soak",
+      "rssBytes": 73658368,
+      "eventLoopLagP99Ms": 32.047103,
+      "eventLoopLagMaxMs": 32.047103
+    },
+    {
+      "line": 26988,
+      "at": 1792879772314,
+      "phase": "soak",
+      "rssBytes": 76898304,
+      "eventLoopLagP99Ms": 32.522239,
+      "eventLoopLagMaxMs": 32.522239
+    },
+    {
+      "line": 27020,
+      "at": 1792879773318,
+      "phase": "soak",
+      "rssBytes": 78430208,
+      "eventLoopLagP99Ms": 34.668543,
+      "eventLoopLagMaxMs": 34.668543
+    },
+    {
+      "line": 27057,
+      "at": 1792879774324,
+      "phase": "soak",
+      "rssBytes": 108924928,
+      "eventLoopLagP99Ms": 36.241407,
+      "eventLoopLagMaxMs": 36.241407
+    },
+    {
+      "line": 27092,
+      "at": 1792879775330,
+      "phase": "soak",
+      "rssBytes": 79892480,
+      "eventLoopLagP99Ms": 32.194559,
+      "eventLoopLagMaxMs": 32.194559
+    },
+    {
+      "line": 27125,
+      "at": 1792879776342,
+      "phase": "soak",
+      "rssBytes": 80011264,
+      "eventLoopLagP99Ms": 31.899647,
+      "eventLoopLagMaxMs": 31.899647
+    },
+    {
+      "line": 27159,
+      "at": 1792879777350,
+      "phase": "soak",
+      "rssBytes": 80060416,
+      "eventLoopLagP99Ms": 32.079871,
+      "eventLoopLagMaxMs": 32.079871
+    },
+    {
+      "line": 27194,
+      "at": 1792879778359,
+      "phase": "soak",
+      "rssBytes": 85946368,
+      "eventLoopLagP99Ms": 32.292863,
+      "eventLoopLagMaxMs": 32.292863
+    },
+    {
+      "line": 27230,
+      "at": 1792879779370,
+      "phase": "soak",
+      "rssBytes": 79835136,
+      "eventLoopLagP99Ms": 32.014335,
+      "eventLoopLagMaxMs": 32.014335
+    },
+    {
+      "line": 27261,
+      "at": 1792879780373,
+      "phase": "soak",
+      "rssBytes": 79843328,
+      "eventLoopLagP99Ms": 31.932415,
+      "eventLoopLagMaxMs": 31.932415
+    },
+    {
+      "line": 27295,
+      "at": 1792879781379,
+      "phase": "soak",
+      "rssBytes": 105836544,
+      "eventLoopLagP99Ms": 31.948799,
+      "eventLoopLagMaxMs": 31.948799
+    },
+    {
+      "line": 27334,
+      "at": 1792879782392,
+      "phase": "soak",
+      "rssBytes": 92729344,
+      "eventLoopLagP99Ms": 32.014335,
+      "eventLoopLagMaxMs": 32.014335
+    },
+    {
+      "line": 27379,
+      "at": 1792879783395,
+      "phase": "soak",
+      "rssBytes": 94990336,
+      "eventLoopLagP99Ms": 31.768575,
+      "eventLoopLagMaxMs": 31.768575
+    },
+    {
+      "line": 27412,
+      "at": 1792879784401,
+      "phase": "soak",
+      "rssBytes": 91492352,
+      "eventLoopLagP99Ms": 32.145407,
+      "eventLoopLagMaxMs": 32.145407
+    }
+  ],
+  "selectedSlow": [
+    {
+      "line": 67,
+      "observedAtMs": 1792879781142,
+      "stage": "socket_input.queue_residence",
+      "durationMs": 3356,
+      "receiverPhase": "soak",
+      "estimatedSpanStartIfReceivedImmediatelyMs": 1792879777786
+    },
+    {
+      "line": 68,
+      "observedAtMs": 1792879781143,
+      "stage": "socket_input.queue_residence",
+      "durationMs": 229,
+      "receiverPhase": "soak",
+      "estimatedSpanStartIfReceivedImmediatelyMs": 1792879780914
+    },
+    {
+      "line": 69,
+      "observedAtMs": 1792879781309,
+      "stage": "flush.save",
+      "durationMs": 151,
+      "receiverPhase": "soak",
+      "estimatedSpanStartIfReceivedImmediatelyMs": 1792879781158
+    },
+    {
+      "line": 70,
+      "observedAtMs": 1792879781309,
+      "stage": "zone_cadence.total",
+      "durationMs": 116,
+      "receiverPhase": "soak",
+      "estimatedSpanStartIfReceivedImmediatelyMs": 1792879781193
+    },
+    {
+      "line": 71,
+      "observedAtMs": 1792879781313,
+      "stage": "session_action.flush",
+      "durationMs": 158,
+      "receiverPhase": "soak",
+      "estimatedSpanStartIfReceivedImmediatelyMs": 1792879781155
+    },
+    {
+      "line": 72,
+      "observedAtMs": 1792879781315,
+      "stage": "socket_input.queue_residence",
+      "durationMs": 2132,
+      "receiverPhase": "soak",
+      "estimatedSpanStartIfReceivedImmediatelyMs": 1792879779183
+    },
+    {
+      "line": 73,
+      "observedAtMs": 1792879781315,
+      "stage": "serial_gate.zone_outbound_wait",
+      "durationMs": 161,
+      "receiverPhase": "soak",
+      "estimatedSpanStartIfReceivedImmediatelyMs": 1792879781154
+    },
+    {
+      "line": 74,
+      "observedAtMs": 1792879782330,
+      "stage": "zone_cadence.total",
+      "durationMs": 139,
+      "receiverPhase": "soak",
+      "estimatedSpanStartIfReceivedImmediatelyMs": 1792879782191
+    },
+    {
+      "line": 75,
+      "observedAtMs": 1792879782332,
+      "stage": "zone_owner.in_process.execute_request",
+      "durationMs": 81,
+      "receiverPhase": "soak",
+      "estimatedSpanStartIfReceivedImmediatelyMs": 1792879782251
+    },
+    {
+      "line": 76,
+      "observedAtMs": 1792879782332,
+      "stage": "runtime_tick.execute",
+      "durationMs": 81,
+      "receiverPhase": "soak",
+      "estimatedSpanStartIfReceivedImmediatelyMs": 1792879782251
+    },
+    {
+      "line": 77,
+      "observedAtMs": 1792879782332,
+      "stage": "socket_input.queue_residence",
+      "durationMs": 80,
+      "receiverPhase": "soak",
+      "estimatedSpanStartIfReceivedImmediatelyMs": 1792879782252
+    },
+    {
+      "line": 78,
+      "observedAtMs": 1792879782333,
+      "stage": "zone_owner.in_process.execute_request",
+      "durationMs": 112,
+      "receiverPhase": "soak",
+      "estimatedSpanStartIfReceivedImmediatelyMs": 1792879782221
+    },
+    {
+      "line": 79,
+      "observedAtMs": 1792879782333,
+      "stage": "runtime_tick.execute",
+      "durationMs": 113,
+      "receiverPhase": "soak",
+      "estimatedSpanStartIfReceivedImmediatelyMs": 1792879782220
+    }
+  ],
+  "monitorBefore": {
+    "line": 27107,
+    "type": "monitor",
+    "sample": {
+      "schemaVersion": 1,
+      "sampledAt": 1792879775378,
+      "stop": false,
+      "profileId": "release-native-10-v2-coordinated-feasibility-06",
+      "health": {
+        "currentWsConnections": 10,
+        "currentActiveSessions": 10,
+        "currentReconnectLeases": 0,
+        "currentLoginInFlight": 0,
+        "currentNewCharacterInFlight": 0,
+        "currentStartGameInFlight": 0,
+        "maxWsConnections": 24,
+        "maxActiveSessions": 10,
+        "maxReconnectLeases": 10,
+        "maxLoginInFlight": 4,
+        "maxNewCharacterInFlight": 1,
+        "maxStartGameInFlight": 2
+      },
+      "memory": {
+        "currentBytes": 1354768384,
+        "definition": "Win32_Process.PrivatePageCount committed private bytes; working set separately recorded",
+        "workingSetBytes": 1390141440
+      },
+      "process": {
+        "pid": 59292,
+        "creationTimeMs": 1792878740084,
+        "cpuTimeMs": 156000,
+        "handles": 184,
+        "threads": 21,
+        "rates": {
+          "cpuCores": 0.12564950401511574,
+          "readBytesPerSecond": 0,
+          "writeBytesPerSecond": 187470.00472366557,
+          "otherIoBytesPerSecond": 1844.1190363722249,
+          "ioOperationsPerSecond": 121.8705715635333
+        },
+        "rawCounters": {
+          "readBytes": 209169802,
+          "writeBytes": 208548369,
+          "otherIoBytes": 3025188,
+          "readOperations": 4562,
+          "writeOperations": 5856,
+          "otherIoOperations": 176133
+        },
+        "ioScope": "Windows process I/O counters include file/device I/O and are not pure disk throughput or latency"
+      },
+      "host": {
+        "freeBytes": 39087112192,
+        "totalBytes": 68463349760,
+        "cores": [
+          {
+            "id": "0",
+            "busyPercent": 16
+          },
+          {
+            "id": "1",
+            "busyPercent": 34
+          },
+          {
+            "id": "10",
+            "busyPercent": 46
+          },
+          {
+            "id": "11",
+            "busyPercent": 10
+          },
+          {
+            "id": "12",
+            "busyPercent": 4
+          },
+          {
+            "id": "13",
+            "busyPercent": 22
+          },
+          {
+            "id": "14",
+            "busyPercent": 4
+          },
+          {
+            "id": "15",
+            "busyPercent": 16
+          },
+          {
+            "id": "16",
+            "busyPercent": 16
+          },
+          {
+            "id": "17",
+            "busyPercent": 4
+          },
+          {
+            "id": "18",
+            "busyPercent": 4
+          },
+          {
+            "id": "19",
+            "busyPercent": 4
+          },
+          {
+            "id": "2",
+            "busyPercent": 10
+          },
+          {
+            "id": "20",
+            "busyPercent": 10
+          },
+          {
+            "id": "21",
+            "busyPercent": 4
+          },
+          {
+            "id": "22",
+            "busyPercent": 4
+          },
+          {
+            "id": "23",
+            "busyPercent": 10
+          },
+          {
+            "id": "24",
+            "busyPercent": 10
+          },
+          {
+            "id": "25",
+            "busyPercent": 4
+          },
+          {
+            "id": "26",
+            "busyPercent": 4
+          },
+          {
+            "id": "27",
+            "busyPercent": 4
+          },
+          {
+            "id": "28",
+            "busyPercent": 4
+          },
+          {
+            "id": "29",
+            "busyPercent": 4
+          },
+          {
+            "id": "3",
+            "busyPercent": 4
+          },
+          {
+            "id": "30",
+            "busyPercent": 4
+          },
+          {
+            "id": "31",
+            "busyPercent": 4
+          },
+          {
+            "id": "4",
+            "busyPercent": 22
+          },
+          {
+            "id": "5",
+            "busyPercent": 76
+          },
+          {
+            "id": "6",
+            "busyPercent": 100
+          },
+          {
+            "id": "7",
+            "busyPercent": 22
+          },
+          {
+            "id": "8",
+            "busyPercent": 10
+          },
+          {
+            "id": "9",
+            "busyPercent": 88
+          }
+        ],
+        "cpuScope": "Host-wide logical-core utilization, including processes outside this realm"
+      },
+      "network": {
+        "adapters": [
+          {
+            "sentBytes": 2728222272,
+            "name": "Intel[R] Ethernet Controller I226-V",
+            "receivedBytes": 5373560048,
+            "receivedBytesPerSecond": 13654.700047236656,
+            "sentBytesPerSecond": 2161.549362305149
+          },
+          {
+            "sentBytes": 0,
+            "name": "Intel[R] Wi-Fi 6E AX211 160MHz",
+            "receivedBytes": 0,
+            "receivedBytesPerSecond": 0,
+            "sentBytesPerSecond": 0
+          }
+        ],
+        "hostBytesPerSecond": 15816.249409541804,
+        "processBytesPerSecond": null,
+        "scope": "Host NIC cumulative counters; loopback traffic may be absent. Realm WebSocket payload bytes are measured separately by the gameplay driver. No TLS/PPS/physical-link capacity inferred."
+      },
+      "zoneMetrics": {
+        "version": 2,
+        "scope": "gateway shared-owner transaction, may contain multiple maps",
+        "sinceInitializationMs": 1034756,
+        "budgetUs": 50000,
+        "complete": true,
+        "zoneWork": {
+          "count": 10282,
+          "sumUs": 6920834,
+          "maxUs": 19765,
+          "overBudgetCount": 0,
+          "saturated": false,
+          "discardedSamples": 0,
+          "buckets": [
+            {
+              "upperBoundUs": 100,
+              "count": 36
+            },
+            {
+              "upperBoundUs": 250,
+              "count": 40
+            },
+            {
+              "upperBoundUs": 500,
+              "count": 2991
+            },
+            {
+              "upperBoundUs": 1000,
+              "count": 6828
+            },
+            {
+              "upperBoundUs": 2000,
+              "count": 365
+            },
+            {
+              "upperBoundUs": 5000,
+              "count": 14
+            },
+            {
+              "upperBoundUs": 10000,
+              "count": 2
+            },
+            {
+              "upperBoundUs": 20000,
+              "count": 6
+            },
+            {
+              "upperBoundUs": 35000,
+              "count": 0
+            },
+            {
+              "upperBoundUs": 50000,
+              "count": 0
+            },
+            {
+              "upperBoundUs": 75000,
+              "count": 0
+            },
+            {
+              "upperBoundUs": 100000,
+              "count": 0
+            },
+            {
+              "upperBoundUs": 150000,
+              "count": 0
+            },
+            {
+              "upperBoundUs": 250000,
+              "count": 0
+            },
+            {
+              "upperBoundUs": 500000,
+              "count": 0
+            },
+            {
+              "upperBoundUs": 1000000,
+              "count": 0
+            },
+            {
+              "upperBoundUs": 5000000,
+              "count": 0
+            },
+            {
+              "upperBoundUs": 30000000,
+              "count": 0
+            },
+            {
+              "upperBoundUs": null,
+              "count": 0
+            }
+          ],
+          "p50UpperUs": 1000,
+          "p95UpperUs": 1000,
+          "p99UpperUs": 2000,
+          "p999UpperUs": 5000
+        },
+        "ownerTickDeadlineLag": {
+          "count": 10282,
+          "sumUs": 89093833,
+          "maxUs": 50336,
+          "overBudgetCount": 1,
+          "saturated": false,
+          "discardedSamples": 0,
+          "buckets": [
+            {
+              "upperBoundUs": 100,
+              "count": 0
+            },
+            {
+              "upperBoundUs": 250,
+              "count": 5
+            },
+            {
+              "upperBoundUs": 500,
+              "count": 28
+            },
+            {
+              "upperBoundUs": 1000,
+              "count": 169
+            },
+            {
+              "upperBoundUs": 2000,
+              "count": 677
+            },
+            {
+              "upperBoundUs": 5000,
+              "count": 1880
+            },
+            {
+              "upperBoundUs": 10000,
+              "count": 3343
+            },
+            {
+              "upperBoundUs": 20000,
+              "count": 4089
+            },
+            {
+              "upperBoundUs": 35000,
+              "count": 84
+            },
+            {
+              "upperBoundUs": 50000,
+              "count": 6
+            },
+            {
+              "upperBoundUs": 75000,
+              "count": 1
+            },
+            {
+              "upperBoundUs": 100000,
+              "count": 0
+            },
+            {
+              "upperBoundUs": 150000,
+              "count": 0
+            },
+            {
+              "upperBoundUs": 250000,
+              "count": 0
+            },
+            {
+              "upperBoundUs": 500000,
+              "count": 0
+            },
+            {
+              "upperBoundUs": 1000000,
+              "count": 0
+            },
+            {
+              "upperBoundUs": 5000000,
+              "count": 0
+            },
+            {
+              "upperBoundUs": 30000000,
+              "count": 0
+            },
+            {
+              "upperBoundUs": null,
+              "count": 0
+            }
+          ],
+          "p50UpperUs": 10000,
+          "p95UpperUs": 20000,
+          "p99UpperUs": 20000,
+          "p999UpperUs": 35000
+        },
+        "pendingMovementDeadlineLag": {
+          "count": 0,
+          "sumUs": 0,
+          "maxUs": 0,
+          "overBudgetCount": 0,
+          "saturated": false,
+          "discardedSamples": 0,
+          "buckets": [
+            {
+              "upperBoundUs": 100,
+              "count": 0
+            },
+            {
+              "upperBoundUs": 250,
+              "count": 0
+            },
+            {
+              "upperBoundUs": 500,
+              "count": 0
+            },
+            {
+              "upperBoundUs": 1000,
+              "count": 0
+            },
+            {
+              "upperBoundUs": 2000,
+              "count": 0
+            },
+            {
+              "upperBoundUs": 5000,
+              "count": 0
+            },
+            {
+              "upperBoundUs": 10000,
+              "count": 0
+            },
+            {
+              "upperBoundUs": 20000,
+              "count": 0
+            },
+            {
+              "upperBoundUs": 35000,
+              "count": 0
+            },
+            {
+              "upperBoundUs": 50000,
+              "count": 0
+            },
+            {
+              "upperBoundUs": 75000,
+              "count": 0
+            },
+            {
+              "upperBoundUs": 100000,
+              "count": 0
+            },
+            {
+              "upperBoundUs": 150000,
+              "count": 0
+            },
+            {
+              "upperBoundUs": 250000,
+              "count": 0
+            },
+            {
+              "upperBoundUs": 500000,
+              "count": 0
+            },
+            {
+              "upperBoundUs": 1000000,
+              "count": 0
+            },
+            {
+              "upperBoundUs": 5000000,
+              "count": 0
+            },
+            {
+              "upperBoundUs": 30000000,
+              "count": 0
+            },
+            {
+              "upperBoundUs": null,
+              "count": 0
+            }
+          ],
+          "p50UpperUs": null,
+          "p95UpperUs": null,
+          "p99UpperUs": null,
+          "p999UpperUs": null
+        },
+        "immediateRequests": {
+          "successCount": 704,
+          "failureCount": 0,
+          "duration": {
+            "count": 704,
+            "sumUs": 3941873,
+            "maxUs": 23426,
+            "overBudgetCount": 0,
+            "saturated": false,
+            "discardedSamples": 0,
+            "buckets": [
+              {
+                "upperBoundUs": 100,
+                "count": 0
+              },
+              {
+                "upperBoundUs": 250,
+                "count": 9
+              },
+              {
+                "upperBoundUs": 500,
+                "count": 19
+              },
+              {
+                "upperBoundUs": 1000,
+                "count": 125
+              },
+              {
+                "upperBoundUs": 2000,
+                "count": 159
+              },
+              {
+                "upperBoundUs": 5000,
+                "count": 58
+              },
+              {
+                "upperBoundUs": 10000,
+                "count": 169
+              },
+              {
+                "upperBoundUs": 20000,
+                "count": 162
+              },
+              {
+                "upperBoundUs": 35000,
+                "count": 3
+              },
+              {
+                "upperBoundUs": 50000,
+                "count": 0
+              },
+              {
+                "upperBoundUs": 75000,
+                "count": 0
+              },
+              {
+                "upperBoundUs": 100000,
+                "count": 0
+              },
+              {
+                "upperBoundUs": 150000,
+                "count": 0
+              },
+              {
+                "upperBoundUs": 250000,
+                "count": 0
+              },
+              {
+                "upperBoundUs": 500000,
+                "count": 0
+              },
+              {
+                "upperBoundUs": 1000000,
+                "count": 0
+              },
+              {
+                "upperBoundUs": 5000000,
+                "count": 0
+              },
+              {
+                "upperBoundUs": 30000000,
+                "count": 0
+              },
+              {
+                "upperBoundUs": null,
+                "count": 0
+              }
+            ],
+            "p50UpperUs": 5000,
+            "p95UpperUs": 20000,
+            "p99UpperUs": 20000,
+            "p999UpperUs": 35000
+          }
+        },
+        "lifecycleRequests": {
+          "successCount": 30,
+          "failureCount": 0,
+          "duration": {
+            "count": 30,
+            "sumUs": 12933798,
+            "maxUs": 2027083,
+            "overBudgetCount": 19,
+            "saturated": false,
+            "discardedSamples": 0,
+            "buckets": [
+              {
+                "upperBoundUs": 100,
+                "count": 0
+              },
+              {
+                "upperBoundUs": 250,
+                "count": 0
+              },
+              {
+                "upperBoundUs": 500,
+                "count": 0
+              },
+              {
+                "upperBoundUs": 1000,
+                "count": 0
+              },
+              {
+                "upperBoundUs": 2000,
+                "count": 0
+              },
+              {
+                "upperBoundUs": 5000,
+                "count": 0
+              },
+              {
+                "upperBoundUs": 10000,
+                "count": 9
+              },
+              {
+                "upperBoundUs": 20000,
+                "count": 1
+              },
+              {
+                "upperBoundUs": 35000,
+                "count": 0
+              },
+              {
+                "upperBoundUs": 50000,
+                "count": 1
+              },
+              {
+                "upperBoundUs": 75000,
+                "count": 7
+              },
+              {
+                "upperBoundUs": 100000,
+                "count": 0
+              },
+              {
+                "upperBoundUs": 150000,
+                "count": 2
+              },
+              {
+                "upperBoundUs": 250000,
+                "count": 0
+              },
+              {
+                "upperBoundUs": 500000,
+                "count": 0
+              },
+              {
+                "upperBoundUs": 1000000,
+                "count": 0
+              },
+              {
+                "upperBoundUs": 5000000,
+                "count": 10
+              },
+              {
+                "upperBoundUs": 30000000,
+                "count": 0
+              },
+              {
+                "upperBoundUs": null,
+                "count": 0
+              }
+            ],
+            "p50UpperUs": 75000,
+            "p95UpperUs": 5000000,
+            "p99UpperUs": 5000000,
+            "p999UpperUs": 5000000
+          }
+        },
+        "movementAdmissions": {
+          "successCount": 9060,
+          "failureCount": 0,
+          "duration": {
+            "count": 9060,
+            "sumUs": 5844185,
+            "maxUs": 39174,
+            "overBudgetCount": 0,
+            "saturated": false,
+            "discardedSamples": 0,
+            "buckets": [
+              {
+                "upperBoundUs": 100,
+                "count": 0
+              },
+              {
+                "upperBoundUs": 250,
+                "count": 2326
+              },
+              {
+                "upperBoundUs": 500,
+                "count": 4086
+              },
+              {
+                "upperBoundUs": 1000,
+                "count": 1835
+              },
+              {
+                "upperBoundUs": 2000,
+                "count": 304
+              },
+              {
+                "upperBoundUs": 5000,
+                "count": 349
+              },
+              {
+                "upperBoundUs": 10000,
+                "count": 157
+              },
+              {
+                "upperBoundUs": 20000,
+                "count": 2
+              },
+              {
+                "upperBoundUs": 35000,
+                "count": 0
+              },
+              {
+                "upperBoundUs": 50000,
+                "count": 1
+              },
+              {
+                "upperBoundUs": 75000,
+                "count": 0
+              },
+              {
+                "upperBoundUs": 100000,
+                "count": 0
+              },
+              {
+                "upperBoundUs": 150000,
+                "count": 0
+              },
+              {
+                "upperBoundUs": 250000,
+                "count": 0
+              },
+              {
+                "upperBoundUs": 500000,
+                "count": 0
+              },
+              {
+                "upperBoundUs": 1000000,
+                "count": 0
+              },
+              {
+                "upperBoundUs": 5000000,
+                "count": 0
+              },
+              {
+                "upperBoundUs": 30000000,
+                "count": 0
+              },
+              {
+                "upperBoundUs": null,
+                "count": 0
+              }
+            ],
+            "p50UpperUs": 500,
+            "p95UpperUs": 5000,
+            "p99UpperUs": 10000,
+            "p999UpperUs": 10000
+          }
+        }
+      },
+      "gatewayTelemetryAvailable": true,
+      "environment": {
+        "cpuLimit": "No hard CPU quota or affinity; 4 Tokio workers, 32 logical CPUs; diagnostic SOFT CPU guard=8 logical-equivalent cores; no parallel build/test",
+        "memoryLimit": "No hard memory quota; private memory stop=4GiB, working set stop=8GiB, host free reserve=8GiB",
+        "storage": "Local Windows scratch File store; unthrottled disk; process IO includes file/device IO",
+        "database": "Dedicated fresh File backend; PostgreSQL not exercised",
+        "network": "Literal loopback; no external NIC throughput, PPS, retransmission or cloud bandwidth certificate",
+        "tls": "Plain WS/HTTP on loopback only; TLS not exercised",
+        "failureDomain": "One development host; no failover, N+1, power/disk failure scope"
+      },
+      "resourceLimitsEnforcedByMonitor": false,
+      "sampledAtMs": 1792879775378
+    }
+  },
+  "monitorAfter": {
+    "line": 27315,
+    "type": "monitor",
+    "sample": {
+      "schemaVersion": 1,
+      "sampledAt": 1792879781508,
+      "stop": false,
+      "profileId": "release-native-10-v2-coordinated-feasibility-06",
+      "health": {
+        "currentWsConnections": 10,
+        "currentActiveSessions": 10,
+        "currentReconnectLeases": 0,
+        "currentLoginInFlight": 0,
+        "currentNewCharacterInFlight": 0,
+        "currentStartGameInFlight": 0,
+        "maxWsConnections": 24,
+        "maxActiveSessions": 10,
+        "maxReconnectLeases": 10,
+        "maxLoginInFlight": 4,
+        "maxNewCharacterInFlight": 1,
+        "maxStartGameInFlight": 2
+      },
+      "memory": {
+        "currentBytes": 1354817536,
+        "definition": "Win32_Process.PrivatePageCount committed private bytes; working set separately recorded",
+        "workingSetBytes": 1390170112
+      },
+      "process": {
+        "pid": 59292,
+        "creationTimeMs": 1792878740084,
+        "cpuTimeMs": 156890,
+        "handles": 186,
+        "threads": 22,
+        "rates": {
+          "cpuCores": 0,
+          "readBytesPerSecond": 0,
+          "writeBytesPerSecond": 0,
+          "otherIoBytesPerSecond": 1049.1803278688524,
+          "ioOperationsPerSecond": 52.3532522474881
+        },
+        "rawCounters": {
+          "readBytes": 209169802,
+          "writeBytes": 209256911,
+          "otherIoBytes": 3034976,
+          "readOperations": 4562,
+          "writeOperations": 5872,
+          "otherIoOperations": 176731
+        },
+        "ioScope": "Windows process I/O counters include file/device I/O and are not pure disk throughput or latency"
+      },
+      "host": {
+        "freeBytes": 39363301376,
+        "totalBytes": 68463349760,
+        "cores": [
+          {
+            "id": "0",
+            "busyPercent": 1
+          },
+          {
+            "id": "1",
+            "busyPercent": 7
+          },
+          {
+            "id": "10",
+            "busyPercent": 1
+          },
+          {
+            "id": "11",
+            "busyPercent": 0
+          },
+          {
+            "id": "12",
+            "busyPercent": 0
+          },
+          {
+            "id": "13",
+            "busyPercent": 7
+          },
+          {
+            "id": "14",
+            "busyPercent": 0
+          },
+          {
+            "id": "15",
+            "busyPercent": 1
+          },
+          {
+            "id": "16",
+            "busyPercent": 0
+          },
+          {
+            "id": "17",
+            "busyPercent": 1
+          },
+          {
+            "id": "18",
+            "busyPercent": 0
+          },
+          {
+            "id": "19",
+            "busyPercent": 1
+          },
+          {
+            "id": "2",
+            "busyPercent": 0
+          },
+          {
+            "id": "20",
+            "busyPercent": 19
+          },
+          {
+            "id": "21",
+            "busyPercent": 1
+          },
+          {
+            "id": "22",
+            "busyPercent": 1
+          },
+          {
+            "id": "23",
+            "busyPercent": 1
+          },
+          {
+            "id": "24",
+            "busyPercent": 1
+          },
+          {
+            "id": "25",
+            "busyPercent": 1
+          },
+          {
+            "id": "26",
+            "busyPercent": 1
+          },
+          {
+            "id": "27",
+            "busyPercent": 1
+          },
+          {
+            "id": "28",
+            "busyPercent": 1
+          },
+          {
+            "id": "29",
+            "busyPercent": 1
+          },
+          {
+            "id": "3",
+            "busyPercent": 1
+          },
+          {
+            "id": "30",
+            "busyPercent": 1
+          },
+          {
+            "id": "31",
+            "busyPercent": 1
+          },
+          {
+            "id": "4",
+            "busyPercent": 26
+          },
+          {
+            "id": "5",
+            "busyPercent": 1
+          },
+          {
+            "id": "6",
+            "busyPercent": 1
+          },
+          {
+            "id": "7",
+            "busyPercent": 1
+          },
+          {
+            "id": "8",
+            "busyPercent": 7
+          },
+          {
+            "id": "9",
+            "busyPercent": 1
+          }
+        ],
+        "cpuScope": "Host-wide logical-core utilization, including processes outside this realm"
+      },
+      "network": {
+        "adapters": [
+          {
+            "sentBytes": 2728243505,
+            "name": "Intel[R] Ethernet Controller I226-V",
+            "receivedBytes": 5373632627,
+            "receivedBytesPerSecond": 10231.09465891063,
+            "sentBytesPerSecond": 992.0676890534108
+          },
+          {
+            "sentBytes": 0,
+            "name": "Intel[R] Wi-Fi 6E AX211 160MHz",
+            "receivedBytes": 0,
+            "receivedBytesPerSecond": 0,
+            "sentBytesPerSecond": 0
+          }
+        ],
+        "hostBytesPerSecond": 11223.16234796404,
+        "processBytesPerSecond": null,
+        "scope": "Host NIC cumulative counters; loopback traffic may be absent. Realm WebSocket payload bytes are measured separately by the gameplay driver. No TLS/PPS/physical-link capacity inferred."
+      },
+      "zoneMetrics": {
+        "version": 2,
+        "scope": "gateway shared-owner transaction, may contain multiple maps",
+        "sinceInitializationMs": 1040886,
+        "budgetUs": 50000,
+        "complete": true,
+        "zoneWork": {
+          "count": 10343,
+          "sumUs": 6970702,
+          "maxUs": 19765,
+          "overBudgetCount": 0,
+          "saturated": false,
+          "discardedSamples": 0,
+          "buckets": [
+            {
+              "upperBoundUs": 100,
+              "count": 36
+            },
+            {
+              "upperBoundUs": 250,
+              "count": 40
+            },
+            {
+              "upperBoundUs": 500,
+              "count": 2991
+            },
+            {
+              "upperBoundUs": 1000,
+              "count": 6887
+            },
+            {
+              "upperBoundUs": 2000,
+              "count": 367
+            },
+            {
+              "upperBoundUs": 5000,
+              "count": 14
+            },
+            {
+              "upperBoundUs": 10000,
+              "count": 2
+            },
+            {
+              "upperBoundUs": 20000,
+              "count": 6
+            },
+            {
+              "upperBoundUs": 35000,
+              "count": 0
+            },
+            {
+              "upperBoundUs": 50000,
+              "count": 0
+            },
+            {
+              "upperBoundUs": 75000,
+              "count": 0
+            },
+            {
+              "upperBoundUs": 100000,
+              "count": 0
+            },
+            {
+              "upperBoundUs": 150000,
+              "count": 0
+            },
+            {
+              "upperBoundUs": 250000,
+              "count": 0
+            },
+            {
+              "upperBoundUs": 500000,
+              "count": 0
+            },
+            {
+              "upperBoundUs": 1000000,
+              "count": 0
+            },
+            {
+              "upperBoundUs": 5000000,
+              "count": 0
+            },
+            {
+              "upperBoundUs": 30000000,
+              "count": 0
+            },
+            {
+              "upperBoundUs": null,
+              "count": 0
+            }
+          ],
+          "p50UpperUs": 1000,
+          "p95UpperUs": 1000,
+          "p99UpperUs": 2000,
+          "p999UpperUs": 5000
+        },
+        "ownerTickDeadlineLag": {
+          "count": 10343,
+          "sumUs": 89715620,
+          "maxUs": 129801,
+          "overBudgetCount": 2,
+          "saturated": false,
+          "discardedSamples": 0,
+          "buckets": [
+            {
+              "upperBoundUs": 100,
+              "count": 0
+            },
+            {
+              "upperBoundUs": 250,
+              "count": 5
+            },
+            {
+              "upperBoundUs": 500,
+              "count": 28
+            },
+            {
+              "upperBoundUs": 1000,
+              "count": 169
+            },
+            {
+              "upperBoundUs": 2000,
+              "count": 681
+            },
+            {
+              "upperBoundUs": 5000,
+              "count": 1893
+            },
+            {
+              "upperBoundUs": 10000,
+              "count": 3362
+            },
+            {
+              "upperBoundUs": 20000,
+              "count": 4113
+            },
+            {
+              "upperBoundUs": 35000,
+              "count": 84
+            },
+            {
+              "upperBoundUs": 50000,
+              "count": 6
+            },
+            {
+              "upperBoundUs": 75000,
+              "count": 1
+            },
+            {
+              "upperBoundUs": 100000,
+              "count": 0
+            },
+            {
+              "upperBoundUs": 150000,
+              "count": 1
+            },
+            {
+              "upperBoundUs": 250000,
+              "count": 0
+            },
+            {
+              "upperBoundUs": 500000,
+              "count": 0
+            },
+            {
+              "upperBoundUs": 1000000,
+              "count": 0
+            },
+            {
+              "upperBoundUs": 5000000,
+              "count": 0
+            },
+            {
+              "upperBoundUs": 30000000,
+              "count": 0
+            },
+            {
+              "upperBoundUs": null,
+              "count": 0
+            }
+          ],
+          "p50UpperUs": 10000,
+          "p95UpperUs": 20000,
+          "p99UpperUs": 20000,
+          "p999UpperUs": 35000
+        },
+        "pendingMovementDeadlineLag": {
+          "count": 0,
+          "sumUs": 0,
+          "maxUs": 0,
+          "overBudgetCount": 0,
+          "saturated": false,
+          "discardedSamples": 0,
+          "buckets": [
+            {
+              "upperBoundUs": 100,
+              "count": 0
+            },
+            {
+              "upperBoundUs": 250,
+              "count": 0
+            },
+            {
+              "upperBoundUs": 500,
+              "count": 0
+            },
+            {
+              "upperBoundUs": 1000,
+              "count": 0
+            },
+            {
+              "upperBoundUs": 2000,
+              "count": 0
+            },
+            {
+              "upperBoundUs": 5000,
+              "count": 0
+            },
+            {
+              "upperBoundUs": 10000,
+              "count": 0
+            },
+            {
+              "upperBoundUs": 20000,
+              "count": 0
+            },
+            {
+              "upperBoundUs": 35000,
+              "count": 0
+            },
+            {
+              "upperBoundUs": 50000,
+              "count": 0
+            },
+            {
+              "upperBoundUs": 75000,
+              "count": 0
+            },
+            {
+              "upperBoundUs": 100000,
+              "count": 0
+            },
+            {
+              "upperBoundUs": 150000,
+              "count": 0
+            },
+            {
+              "upperBoundUs": 250000,
+              "count": 0
+            },
+            {
+              "upperBoundUs": 500000,
+              "count": 0
+            },
+            {
+              "upperBoundUs": 1000000,
+              "count": 0
+            },
+            {
+              "upperBoundUs": 5000000,
+              "count": 0
+            },
+            {
+              "upperBoundUs": 30000000,
+              "count": 0
+            },
+            {
+              "upperBoundUs": null,
+              "count": 0
+            }
+          ],
+          "p50UpperUs": null,
+          "p95UpperUs": null,
+          "p99UpperUs": null,
+          "p999UpperUs": null
+        },
+        "immediateRequests": {
+          "successCount": 709,
+          "failureCount": 0,
+          "duration": {
+            "count": 709,
+            "sumUs": 7560971,
+            "maxUs": 3368839,
+            "overBudgetCount": 2,
+            "saturated": false,
+            "discardedSamples": 0,
+            "buckets": [
+              {
+                "upperBoundUs": 100,
+                "count": 0
+              },
+              {
+                "upperBoundUs": 250,
+                "count": 9
+              },
+              {
+                "upperBoundUs": 500,
+                "count": 19
+              },
+              {
+                "upperBoundUs": 1000,
+                "count": 125
+              },
+              {
+                "upperBoundUs": 2000,
+                "count": 159
+              },
+              {
+                "upperBoundUs": 5000,
+                "count": 60
+              },
+              {
+                "upperBoundUs": 10000,
+                "count": 169
+              },
+              {
+                "upperBoundUs": 20000,
+                "count": 163
+              },
+              {
+                "upperBoundUs": 35000,
+                "count": 3
+              },
+              {
+                "upperBoundUs": 50000,
+                "count": 0
+              },
+              {
+                "upperBoundUs": 75000,
+                "count": 0
+              },
+              {
+                "upperBoundUs": 100000,
+                "count": 0
+              },
+              {
+                "upperBoundUs": 150000,
+                "count": 0
+              },
+              {
+                "upperBoundUs": 250000,
+                "count": 1
+              },
+              {
+                "upperBoundUs": 500000,
+                "count": 0
+              },
+              {
+                "upperBoundUs": 1000000,
+                "count": 0
+              },
+              {
+                "upperBoundUs": 5000000,
+                "count": 1
+              },
+              {
+                "upperBoundUs": 30000000,
+                "count": 0
+              },
+              {
+                "upperBoundUs": null,
+                "count": 0
+              }
+            ],
+            "p50UpperUs": 5000,
+            "p95UpperUs": 20000,
+            "p99UpperUs": 20000,
+            "p999UpperUs": 5000000
+          }
+        },
+        "lifecycleRequests": {
+          "successCount": 30,
+          "failureCount": 0,
+          "duration": {
+            "count": 30,
+            "sumUs": 12933798,
+            "maxUs": 2027083,
+            "overBudgetCount": 19,
+            "saturated": false,
+            "discardedSamples": 0,
+            "buckets": [
+              {
+                "upperBoundUs": 100,
+                "count": 0
+              },
+              {
+                "upperBoundUs": 250,
+                "count": 0
+              },
+              {
+                "upperBoundUs": 500,
+                "count": 0
+              },
+              {
+                "upperBoundUs": 1000,
+                "count": 0
+              },
+              {
+                "upperBoundUs": 2000,
+                "count": 0
+              },
+              {
+                "upperBoundUs": 5000,
+                "count": 0
+              },
+              {
+                "upperBoundUs": 10000,
+                "count": 9
+              },
+              {
+                "upperBoundUs": 20000,
+                "count": 1
+              },
+              {
+                "upperBoundUs": 35000,
+                "count": 0
+              },
+              {
+                "upperBoundUs": 50000,
+                "count": 1
+              },
+              {
+                "upperBoundUs": 75000,
+                "count": 7
+              },
+              {
+                "upperBoundUs": 100000,
+                "count": 0
+              },
+              {
+                "upperBoundUs": 150000,
+                "count": 2
+              },
+              {
+                "upperBoundUs": 250000,
+                "count": 0
+              },
+              {
+                "upperBoundUs": 500000,
+                "count": 0
+              },
+              {
+                "upperBoundUs": 1000000,
+                "count": 0
+              },
+              {
+                "upperBoundUs": 5000000,
+                "count": 10
+              },
+              {
+                "upperBoundUs": 30000000,
+                "count": 0
+              },
+              {
+                "upperBoundUs": null,
+                "count": 0
+              }
+            ],
+            "p50UpperUs": 75000,
+            "p95UpperUs": 5000000,
+            "p99UpperUs": 5000000,
+            "p999UpperUs": 5000000
+          }
+        },
+        "movementAdmissions": {
+          "successCount": 9136,
+          "failureCount": 0,
+          "duration": {
+            "count": 9136,
+            "sumUs": 8035452,
+            "maxUs": 2136134,
+            "overBudgetCount": 1,
+            "saturated": false,
+            "discardedSamples": 0,
+            "buckets": [
+              {
+                "upperBoundUs": 100,
+                "count": 0
+              },
+              {
+                "upperBoundUs": 250,
+                "count": 2345
+              },
+              {
+                "upperBoundUs": 500,
+                "count": 4129
+              },
+              {
+                "upperBoundUs": 1000,
+                "count": 1845
+              },
+              {
+                "upperBoundUs": 2000,
+                "count": 306
+              },
+              {
+                "upperBoundUs": 5000,
+                "count": 349
+              },
+              {
+                "upperBoundUs": 10000,
+                "count": 157
+              },
+              {
+                "upperBoundUs": 20000,
+                "count": 2
+              },
+              {
+                "upperBoundUs": 35000,
+                "count": 1
+              },
+              {
+                "upperBoundUs": 50000,
+                "count": 1
+              },
+              {
+                "upperBoundUs": 75000,
+                "count": 0
+              },
+              {
+                "upperBoundUs": 100000,
+                "count": 0
+              },
+              {
+                "upperBoundUs": 150000,
+                "count": 0
+              },
+              {
+                "upperBoundUs": 250000,
+                "count": 0
+              },
+              {
+                "upperBoundUs": 500000,
+                "count": 0
+              },
+              {
+                "upperBoundUs": 1000000,
+                "count": 0
+              },
+              {
+                "upperBoundUs": 5000000,
+                "count": 1
+              },
+              {
+                "upperBoundUs": 30000000,
+                "count": 0
+              },
+              {
+                "upperBoundUs": null,
+                "count": 0
+              }
+            ],
+            "p50UpperUs": 500,
+            "p95UpperUs": 5000,
+            "p99UpperUs": 10000,
+            "p999UpperUs": 10000
+          }
+        }
+      },
+      "gatewayTelemetryAvailable": true,
+      "environment": {
+        "cpuLimit": "No hard CPU quota or affinity; 4 Tokio workers, 32 logical CPUs; diagnostic SOFT CPU guard=8 logical-equivalent cores; no parallel build/test",
+        "memoryLimit": "No hard memory quota; private memory stop=4GiB, working set stop=8GiB, host free reserve=8GiB",
+        "storage": "Local Windows scratch File store; unthrottled disk; process IO includes file/device IO",
+        "database": "Dedicated fresh File backend; PostgreSQL not exercised",
+        "network": "Literal loopback; no external NIC throughput, PPS, retransmission or cloud bandwidth certificate",
+        "tls": "Plain WS/HTTP on loopback only; TLS not exercised",
+        "failureDomain": "One development host; no failover, N+1, power/disk failure scope"
+      },
+      "resourceLimitsEnforcedByMonitor": false,
+      "sampledAtMs": 1792879781508
+    }
+  },
+  "nearbyMonitorResources": [
+    {
+      "line": 26967,
+      "sampledAt": 1792879771317,
+      "stop": false,
+      "memory": {
+        "currentBytes": 1354768384,
+        "definition": "Win32_Process.PrivatePageCount committed private bytes; working set separately recorded",
+        "workingSetBytes": 1390137344
+      },
+      "process": {
+        "pid": 59292,
+        "creationTimeMs": 1792878740084,
+        "cpuTimeMs": 155468,
+        "handles": 184,
+        "threads": 21,
+        "rates": {
+          "cpuCores": 0.15457115928369464,
+          "readBytesPerSecond": 0,
+          "writeBytesPerSecond": 243104.61828463714,
+          "otherIoBytesPerSecond": 2324.2224316682377,
+          "ioOperationsPerSecond": 160.22620169651273
+        },
+        "rawCounters": {
+          "readBytes": 209169802,
+          "writeBytes": 207409323,
+          "otherIoBytes": 3014984,
+          "readOperations": 4562,
+          "writeOperations": 5831,
+          "otherIoOperations": 175434
+        },
+        "ioScope": "Windows process I/O counters include file/device I/O and are not pure disk throughput or latency"
+      },
+      "host": {
+        "freeBytes": 38736404480,
+        "totalBytes": 68463349760,
+        "cores": [
+          {
+            "id": "0",
+            "busyPercent": 17
+          },
+          {
+            "id": "1",
+            "busyPercent": 5
+          },
+          {
+            "id": "10",
+            "busyPercent": 11
+          },
+          {
+            "id": "11",
+            "busyPercent": 5
+          },
+          {
+            "id": "12",
+            "busyPercent": 0
+          },
+          {
+            "id": "13",
+            "busyPercent": 17
+          },
+          {
+            "id": "14",
+            "busyPercent": 0
+          },
+          {
+            "id": "15",
+            "busyPercent": 11
+          },
+          {
+            "id": "16",
+            "busyPercent": 17
+          },
+          {
+            "id": "17",
+            "busyPercent": 5
+          },
+          {
+            "id": "18",
+            "busyPercent": 0
+          },
+          {
+            "id": "19",
+            "busyPercent": 0
+          },
+          {
+            "id": "2",
+            "busyPercent": 11
+          },
+          {
+            "id": "20",
+            "busyPercent": 0
+          },
+          {
+            "id": "21",
+            "busyPercent": 0
+          },
+          {
+            "id": "22",
+            "busyPercent": 0
+          },
+          {
+            "id": "23",
+            "busyPercent": 0
+          },
+          {
+            "id": "24",
+            "busyPercent": 0
+          },
+          {
+            "id": "25",
+            "busyPercent": 0
+          },
+          {
+            "id": "26",
+            "busyPercent": 0
+          },
+          {
+            "id": "27",
+            "busyPercent": 0
+          },
+          {
+            "id": "28",
+            "busyPercent": 0
+          },
+          {
+            "id": "29",
+            "busyPercent": 0
+          },
+          {
+            "id": "3",
+            "busyPercent": 0
+          },
+          {
+            "id": "30",
+            "busyPercent": 0
+          },
+          {
+            "id": "31",
+            "busyPercent": 0
+          },
+          {
+            "id": "4",
+            "busyPercent": 52
+          },
+          {
+            "id": "5",
+            "busyPercent": 0
+          },
+          {
+            "id": "6",
+            "busyPercent": 5
+          },
+          {
+            "id": "7",
+            "busyPercent": 40
+          },
+          {
+            "id": "8",
+            "busyPercent": 5
+          },
+          {
+            "id": "9",
+            "busyPercent": 5
+          }
+        ],
+        "cpuScope": "Host-wide logical-core utilization, including processes outside this realm"
+      }
+    },
+    {
+      "line": 27040,
+      "sampledAt": 1792879773259,
+      "stop": false,
+      "memory": {
+        "currentBytes": 1354768384,
+        "definition": "Win32_Process.PrivatePageCount committed private bytes; working set separately recorded",
+        "workingSetBytes": 1390141440
+      },
+      "process": {
+        "pid": 59292,
+        "creationTimeMs": 1792878740084,
+        "cpuTimeMs": 155734,
+        "handles": 184,
+        "threads": 21,
+        "rates": {
+          "cpuCores": 0.13697219361483007,
+          "readBytesPerSecond": 0,
+          "writeBytesPerSecond": 382168.8980432544,
+          "otherIoBytesPerSecond": 3244.0782698249227,
+          "ioOperationsPerSecond": 239.9588053553038
+        },
+        "rawCounters": {
+          "readBytes": 209169802,
+          "writeBytes": 208151495,
+          "otherIoBytes": 3021284,
+          "readOperations": 4562,
+          "writeOperations": 5848,
+          "otherIoOperations": 175883
+        },
+        "ioScope": "Windows process I/O counters include file/device I/O and are not pure disk throughput or latency"
+      },
+      "host": {
+        "freeBytes": 38982004736,
+        "totalBytes": 68463349760,
+        "cores": [
+          {
+            "id": "0",
+            "busyPercent": 13
+          },
+          {
+            "id": "1",
+            "busyPercent": 19
+          },
+          {
+            "id": "10",
+            "busyPercent": 25
+          },
+          {
+            "id": "11",
+            "busyPercent": 0
+          },
+          {
+            "id": "12",
+            "busyPercent": 0
+          },
+          {
+            "id": "13",
+            "busyPercent": 13
+          },
+          {
+            "id": "14",
+            "busyPercent": 13
+          },
+          {
+            "id": "15",
+            "busyPercent": 6
+          },
+          {
+            "id": "16",
+            "busyPercent": 13
+          },
+          {
+            "id": "17",
+            "busyPercent": 19
+          },
+          {
+            "id": "18",
+            "busyPercent": 0
+          },
+          {
+            "id": "19",
+            "busyPercent": 6
+          },
+          {
+            "id": "2",
+            "busyPercent": 0
+          },
+          {
+            "id": "20",
+            "busyPercent": 13
+          },
+          {
+            "id": "21",
+            "busyPercent": 0
+          },
+          {
+            "id": "22",
+            "busyPercent": 0
+          },
+          {
+            "id": "23",
+            "busyPercent": 6
+          },
+          {
+            "id": "24",
+            "busyPercent": 13
+          },
+          {
+            "id": "25",
+            "busyPercent": 0
+          },
+          {
+            "id": "26",
+            "busyPercent": 6
+          },
+          {
+            "id": "27",
+            "busyPercent": 0
+          },
+          {
+            "id": "28",
+            "busyPercent": 13
+          },
+          {
+            "id": "29",
+            "busyPercent": 19
+          },
+          {
+            "id": "3",
+            "busyPercent": 6
+          },
+          {
+            "id": "30",
+            "busyPercent": 6
+          },
+          {
+            "id": "31",
+            "busyPercent": 13
+          },
+          {
+            "id": "4",
+            "busyPercent": 25
+          },
+          {
+            "id": "5",
+            "busyPercent": 0
+          },
+          {
+            "id": "6",
+            "busyPercent": 6
+          },
+          {
+            "id": "7",
+            "busyPercent": 56
+          },
+          {
+            "id": "8",
+            "busyPercent": 0
+          },
+          {
+            "id": "9",
+            "busyPercent": 13
+          }
+        ],
+        "cpuScope": "Host-wide logical-core utilization, including processes outside this realm"
+      }
+    },
+    {
+      "line": 27107,
+      "sampledAt": 1792879775378,
+      "stop": false,
+      "memory": {
+        "currentBytes": 1354768384,
+        "definition": "Win32_Process.PrivatePageCount committed private bytes; working set separately recorded",
+        "workingSetBytes": 1390141440
+      },
+      "process": {
+        "pid": 59292,
+        "creationTimeMs": 1792878740084,
+        "cpuTimeMs": 156000,
+        "handles": 184,
+        "threads": 21,
+        "rates": {
+          "cpuCores": 0.12564950401511574,
+          "readBytesPerSecond": 0,
+          "writeBytesPerSecond": 187470.00472366557,
+          "otherIoBytesPerSecond": 1844.1190363722249,
+          "ioOperationsPerSecond": 121.8705715635333
+        },
+        "rawCounters": {
+          "readBytes": 209169802,
+          "writeBytes": 208548369,
+          "otherIoBytes": 3025188,
+          "readOperations": 4562,
+          "writeOperations": 5856,
+          "otherIoOperations": 176133
+        },
+        "ioScope": "Windows process I/O counters include file/device I/O and are not pure disk throughput or latency"
+      },
+      "host": {
+        "freeBytes": 39087112192,
+        "totalBytes": 68463349760,
+        "cores": [
+          {
+            "id": "0",
+            "busyPercent": 16
+          },
+          {
+            "id": "1",
+            "busyPercent": 34
+          },
+          {
+            "id": "10",
+            "busyPercent": 46
+          },
+          {
+            "id": "11",
+            "busyPercent": 10
+          },
+          {
+            "id": "12",
+            "busyPercent": 4
+          },
+          {
+            "id": "13",
+            "busyPercent": 22
+          },
+          {
+            "id": "14",
+            "busyPercent": 4
+          },
+          {
+            "id": "15",
+            "busyPercent": 16
+          },
+          {
+            "id": "16",
+            "busyPercent": 16
+          },
+          {
+            "id": "17",
+            "busyPercent": 4
+          },
+          {
+            "id": "18",
+            "busyPercent": 4
+          },
+          {
+            "id": "19",
+            "busyPercent": 4
+          },
+          {
+            "id": "2",
+            "busyPercent": 10
+          },
+          {
+            "id": "20",
+            "busyPercent": 10
+          },
+          {
+            "id": "21",
+            "busyPercent": 4
+          },
+          {
+            "id": "22",
+            "busyPercent": 4
+          },
+          {
+            "id": "23",
+            "busyPercent": 10
+          },
+          {
+            "id": "24",
+            "busyPercent": 10
+          },
+          {
+            "id": "25",
+            "busyPercent": 4
+          },
+          {
+            "id": "26",
+            "busyPercent": 4
+          },
+          {
+            "id": "27",
+            "busyPercent": 4
+          },
+          {
+            "id": "28",
+            "busyPercent": 4
+          },
+          {
+            "id": "29",
+            "busyPercent": 4
+          },
+          {
+            "id": "3",
+            "busyPercent": 4
+          },
+          {
+            "id": "30",
+            "busyPercent": 4
+          },
+          {
+            "id": "31",
+            "busyPercent": 4
+          },
+          {
+            "id": "4",
+            "busyPercent": 22
+          },
+          {
+            "id": "5",
+            "busyPercent": 76
+          },
+          {
+            "id": "6",
+            "busyPercent": 100
+          },
+          {
+            "id": "7",
+            "busyPercent": 22
+          },
+          {
+            "id": "8",
+            "busyPercent": 10
+          },
+          {
+            "id": "9",
+            "busyPercent": 88
+          }
+        ],
+        "cpuScope": "Host-wide logical-core utilization, including processes outside this realm"
+      }
+    },
+    {
+      "line": 27297,
+      "sampledAt": 1792879781286,
+      "stop": false,
+      "memory": {
+        "currentBytes": 1354768384,
+        "definition": "Win32_Process.PrivatePageCount committed private bytes; working set separately recorded",
+        "workingSetBytes": 1390149632
+      },
+      "process": {
+        "pid": 59292,
+        "creationTimeMs": 1792878740084,
+        "cpuTimeMs": 156890,
+        "handles": 185,
+        "threads": 21,
+        "rates": {
+          "cpuCores": 0.022826614861583293,
+          "readBytesPerSecond": 0,
+          "writeBytesPerSecond": 95791.64643030596,
+          "otherIoBytesPerSecond": 1643.516270033997,
+          "ioOperationsPerSecond": 100.53423992229237
+        },
+        "rawCounters": {
+          "readBytes": 209169802,
+          "writeBytes": 209256911,
+          "otherIoBytes": 3032992,
+          "readOperations": 4562,
+          "writeOperations": 5872,
+          "otherIoOperations": 176632
+        },
+        "ioScope": "Windows process I/O counters include file/device I/O and are not pure disk throughput or latency"
+      },
+      "host": {
+        "freeBytes": 39365947392,
+        "totalBytes": 68463349760,
+        "cores": [
+          {
+            "id": "0",
+            "busyPercent": 0
+          },
+          {
+            "id": "1",
+            "busyPercent": 82
+          },
+          {
+            "id": "10",
+            "busyPercent": 0
+          },
+          {
+            "id": "11",
+            "busyPercent": 22
+          },
+          {
+            "id": "12",
+            "busyPercent": 0
+          },
+          {
+            "id": "13",
+            "busyPercent": 10
+          },
+          {
+            "id": "14",
+            "busyPercent": 0
+          },
+          {
+            "id": "15",
+            "busyPercent": 0
+          },
+          {
+            "id": "16",
+            "busyPercent": 10
+          },
+          {
+            "id": "17",
+            "busyPercent": 0
+          },
+          {
+            "id": "18",
+            "busyPercent": 0
+          },
+          {
+            "id": "19",
+            "busyPercent": 4
+          },
+          {
+            "id": "2",
+            "busyPercent": 4
+          },
+          {
+            "id": "20",
+            "busyPercent": 0
+          },
+          {
+            "id": "21",
+            "busyPercent": 0
+          },
+          {
+            "id": "22",
+            "busyPercent": 0
+          },
+          {
+            "id": "23",
+            "busyPercent": 0
+          },
+          {
+            "id": "24",
+            "busyPercent": 10
+          },
+          {
+            "id": "25",
+            "busyPercent": 4
+          },
+          {
+            "id": "26",
+            "busyPercent": 0
+          },
+          {
+            "id": "27",
+            "busyPercent": 4
+          },
+          {
+            "id": "28",
+            "busyPercent": 16
+          },
+          {
+            "id": "29",
+            "busyPercent": 0
+          },
+          {
+            "id": "3",
+            "busyPercent": 0
+          },
+          {
+            "id": "30",
+            "busyPercent": 0
+          },
+          {
+            "id": "31",
+            "busyPercent": 0
+          },
+          {
+            "id": "4",
+            "busyPercent": 28
+          },
+          {
+            "id": "5",
+            "busyPercent": 22
+          },
+          {
+            "id": "6",
+            "busyPercent": 4
+          },
+          {
+            "id": "7",
+            "busyPercent": 10
+          },
+          {
+            "id": "8",
+            "busyPercent": 16
+          },
+          {
+            "id": "9",
+            "busyPercent": 0
+          }
+        ],
+        "cpuScope": "Host-wide logical-core utilization, including processes outside this realm"
+      }
+    },
+    {
+      "line": 27315,
+      "sampledAt": 1792879781508,
+      "stop": false,
+      "memory": {
+        "currentBytes": 1354817536,
+        "definition": "Win32_Process.PrivatePageCount committed private bytes; working set separately recorded",
+        "workingSetBytes": 1390170112
+      },
+      "process": {
+        "pid": 59292,
+        "creationTimeMs": 1792878740084,
+        "cpuTimeMs": 156890,
+        "handles": 186,
+        "threads": 22,
+        "rates": {
+          "cpuCores": 0,
+          "readBytesPerSecond": 0,
+          "writeBytesPerSecond": 0,
+          "otherIoBytesPerSecond": 1049.1803278688524,
+          "ioOperationsPerSecond": 52.3532522474881
+        },
+        "rawCounters": {
+          "readBytes": 209169802,
+          "writeBytes": 209256911,
+          "otherIoBytes": 3034976,
+          "readOperations": 4562,
+          "writeOperations": 5872,
+          "otherIoOperations": 176731
+        },
+        "ioScope": "Windows process I/O counters include file/device I/O and are not pure disk throughput or latency"
+      },
+      "host": {
+        "freeBytes": 39363301376,
+        "totalBytes": 68463349760,
+        "cores": [
+          {
+            "id": "0",
+            "busyPercent": 1
+          },
+          {
+            "id": "1",
+            "busyPercent": 7
+          },
+          {
+            "id": "10",
+            "busyPercent": 1
+          },
+          {
+            "id": "11",
+            "busyPercent": 0
+          },
+          {
+            "id": "12",
+            "busyPercent": 0
+          },
+          {
+            "id": "13",
+            "busyPercent": 7
+          },
+          {
+            "id": "14",
+            "busyPercent": 0
+          },
+          {
+            "id": "15",
+            "busyPercent": 1
+          },
+          {
+            "id": "16",
+            "busyPercent": 0
+          },
+          {
+            "id": "17",
+            "busyPercent": 1
+          },
+          {
+            "id": "18",
+            "busyPercent": 0
+          },
+          {
+            "id": "19",
+            "busyPercent": 1
+          },
+          {
+            "id": "2",
+            "busyPercent": 0
+          },
+          {
+            "id": "20",
+            "busyPercent": 19
+          },
+          {
+            "id": "21",
+            "busyPercent": 1
+          },
+          {
+            "id": "22",
+            "busyPercent": 1
+          },
+          {
+            "id": "23",
+            "busyPercent": 1
+          },
+          {
+            "id": "24",
+            "busyPercent": 1
+          },
+          {
+            "id": "25",
+            "busyPercent": 1
+          },
+          {
+            "id": "26",
+            "busyPercent": 1
+          },
+          {
+            "id": "27",
+            "busyPercent": 1
+          },
+          {
+            "id": "28",
+            "busyPercent": 1
+          },
+          {
+            "id": "29",
+            "busyPercent": 1
+          },
+          {
+            "id": "3",
+            "busyPercent": 1
+          },
+          {
+            "id": "30",
+            "busyPercent": 1
+          },
+          {
+            "id": "31",
+            "busyPercent": 1
+          },
+          {
+            "id": "4",
+            "busyPercent": 26
+          },
+          {
+            "id": "5",
+            "busyPercent": 1
+          },
+          {
+            "id": "6",
+            "busyPercent": 1
+          },
+          {
+            "id": "7",
+            "busyPercent": 1
+          },
+          {
+            "id": "8",
+            "busyPercent": 7
+          },
+          {
+            "id": "9",
+            "busyPercent": 1
+          }
+        ],
+        "cpuScope": "Host-wide logical-core utilization, including processes outside this realm"
+      }
+    },
+    {
+      "line": 27414,
+      "sampledAt": 1792879783870,
+      "stop": false,
+      "memory": {
+        "currentBytes": 1354952704,
+        "definition": "Win32_Process.PrivatePageCount committed private bytes; working set separately recorded",
+        "workingSetBytes": 1390309376
+      },
+      "process": {
+        "pid": 59292,
+        "creationTimeMs": 1792878740084,
+        "cpuTimeMs": 157265,
+        "handles": 187,
+        "threads": 22,
+        "rates": {
+          "cpuCores": 0.16838796587337224,
+          "readBytesPerSecond": 0,
+          "writeBytesPerSecond": 357753.03098338575,
+          "otherIoBytesPerSecond": 2507.4090704984287,
+          "ioOperationsPerSecond": 270.7678491243826
+        },
+        "rawCounters": {
+          "readBytes": 209169802,
+          "writeBytes": 210053627,
+          "otherIoBytes": 3040560,
+          "readOperations": 4562,
+          "writeOperations": 5955,
+          "otherIoOperations": 177251
+        },
+        "ioScope": "Windows process I/O counters include file/device I/O and are not pure disk throughput or latency"
+      },
+      "host": {
+        "freeBytes": 39785992192,
+        "totalBytes": 68463349760,
+        "cores": [
+          {
+            "id": "0",
+            "busyPercent": 0
+          },
+          {
+            "id": "1",
+            "busyPercent": 3
+          },
+          {
+            "id": "10",
+            "busyPercent": 0
+          },
+          {
+            "id": "11",
+            "busyPercent": 0
+          },
+          {
+            "id": "12",
+            "busyPercent": 15
+          },
+          {
+            "id": "13",
+            "busyPercent": 0
+          },
+          {
+            "id": "14",
+            "busyPercent": 0
+          },
+          {
+            "id": "15",
+            "busyPercent": 3
+          },
+          {
+            "id": "16",
+            "busyPercent": 57
+          },
+          {
+            "id": "17",
+            "busyPercent": 9
+          },
+          {
+            "id": "18",
+            "busyPercent": 3
+          },
+          {
+            "id": "19",
+            "busyPercent": 0
+          },
+          {
+            "id": "2",
+            "busyPercent": 0
+          },
+          {
+            "id": "20",
+            "busyPercent": 27
+          },
+          {
+            "id": "21",
+            "busyPercent": 15
+          },
+          {
+            "id": "22",
+            "busyPercent": 0
+          },
+          {
+            "id": "23",
+            "busyPercent": 9
+          },
+          {
+            "id": "24",
+            "busyPercent": 63
+          },
+          {
+            "id": "25",
+            "busyPercent": 0
+          },
+          {
+            "id": "26",
+            "busyPercent": 0
+          },
+          {
+            "id": "27",
+            "busyPercent": 3
+          },
+          {
+            "id": "28",
+            "busyPercent": 15
+          },
+          {
+            "id": "29",
+            "busyPercent": 0
+          },
+          {
+            "id": "3",
+            "busyPercent": 9
+          },
+          {
+            "id": "30",
+            "busyPercent": 3
+          },
+          {
+            "id": "31",
+            "busyPercent": 3
+          },
+          {
+            "id": "4",
+            "busyPercent": 33
+          },
+          {
+            "id": "5",
+            "busyPercent": 15
+          },
+          {
+            "id": "6",
+            "busyPercent": 33
+          },
+          {
+            "id": "7",
+            "busyPercent": 3
+          },
+          {
+            "id": "8",
+            "busyPercent": 3
+          },
+          {
+            "id": "9",
+            "busyPercent": 0
+          }
+        ],
+        "cpuScope": "Host-wide logical-core utilization, including processes outside this realm"
+      }
+    }
+  ],
+  "zoneMetricsDelta": {
+    "fromSampledAtMs": 1792879775378,
+    "toSampledAtMs": 1792879781508,
+    "scope": "gateway shared-owner transaction, may contain multiple maps",
+    "durationMs": 6130,
+    "movementAdmissionsDefinition": "Successful movement handler admission is not proof of authoritative position application or an outbound ACK",
+    "pendingMovementDeadlineLagDefinition": "Owner work start lateness after the original deadline, not a movement ACK latency",
+    "immediateRequests": {
+      "successCount": 5,
+      "failureCount": 0,
+      "duration": {
+        "count": 5,
+        "overBudgetCount": 2,
+        "p50UpperUs": 20000,
+        "p95UpperUs": 5000000,
+        "p99UpperUs": 5000000,
+        "p999UpperUs": 5000000,
+        "processLifetimeMaxBeforeUs": 23426,
+        "processLifetimeMaxAfterUs": 3368839,
+        "buckets": [
+          {
+            "upperBoundUs": 100,
+            "count": 0
+          },
+          {
+            "upperBoundUs": 250,
+            "count": 0
+          },
+          {
+            "upperBoundUs": 500,
+            "count": 0
+          },
+          {
+            "upperBoundUs": 1000,
+            "count": 0
+          },
+          {
+            "upperBoundUs": 2000,
+            "count": 0
+          },
+          {
+            "upperBoundUs": 5000,
+            "count": 2
+          },
+          {
+            "upperBoundUs": 10000,
+            "count": 0
+          },
+          {
+            "upperBoundUs": 20000,
+            "count": 1
+          },
+          {
+            "upperBoundUs": 35000,
+            "count": 0
+          },
+          {
+            "upperBoundUs": 50000,
+            "count": 0
+          },
+          {
+            "upperBoundUs": 75000,
+            "count": 0
+          },
+          {
+            "upperBoundUs": 100000,
+            "count": 0
+          },
+          {
+            "upperBoundUs": 150000,
+            "count": 0
+          },
+          {
+            "upperBoundUs": 250000,
+            "count": 1
+          },
+          {
+            "upperBoundUs": 500000,
+            "count": 0
+          },
+          {
+            "upperBoundUs": 1000000,
+            "count": 0
+          },
+          {
+            "upperBoundUs": 5000000,
+            "count": 1
+          },
+          {
+            "upperBoundUs": 30000000,
+            "count": 0
+          },
+          {
+            "upperBoundUs": null,
+            "count": 0
+          }
+        ]
+      }
+    },
+    "lifecycleRequests": {
+      "successCount": 0,
+      "failureCount": 0,
+      "duration": {
+        "count": 0,
+        "overBudgetCount": 0,
+        "p50UpperUs": null,
+        "p95UpperUs": null,
+        "p99UpperUs": null,
+        "p999UpperUs": null,
+        "processLifetimeMaxBeforeUs": 2027083,
+        "processLifetimeMaxAfterUs": 2027083,
+        "buckets": [
+          {
+            "upperBoundUs": 100,
+            "count": 0
+          },
+          {
+            "upperBoundUs": 250,
+            "count": 0
+          },
+          {
+            "upperBoundUs": 500,
+            "count": 0
+          },
+          {
+            "upperBoundUs": 1000,
+            "count": 0
+          },
+          {
+            "upperBoundUs": 2000,
+            "count": 0
+          },
+          {
+            "upperBoundUs": 5000,
+            "count": 0
+          },
+          {
+            "upperBoundUs": 10000,
+            "count": 0
+          },
+          {
+            "upperBoundUs": 20000,
+            "count": 0
+          },
+          {
+            "upperBoundUs": 35000,
+            "count": 0
+          },
+          {
+            "upperBoundUs": 50000,
+            "count": 0
+          },
+          {
+            "upperBoundUs": 75000,
+            "count": 0
+          },
+          {
+            "upperBoundUs": 100000,
+            "count": 0
+          },
+          {
+            "upperBoundUs": 150000,
+            "count": 0
+          },
+          {
+            "upperBoundUs": 250000,
+            "count": 0
+          },
+          {
+            "upperBoundUs": 500000,
+            "count": 0
+          },
+          {
+            "upperBoundUs": 1000000,
+            "count": 0
+          },
+          {
+            "upperBoundUs": 5000000,
+            "count": 0
+          },
+          {
+            "upperBoundUs": 30000000,
+            "count": 0
+          },
+          {
+            "upperBoundUs": null,
+            "count": 0
+          }
+        ]
+      }
+    },
+    "movementAdmissions": {
+      "successCount": 76,
+      "failureCount": 0,
+      "duration": {
+        "count": 76,
+        "overBudgetCount": 1,
+        "p50UpperUs": 500,
+        "p95UpperUs": 2000,
+        "p99UpperUs": 5000000,
+        "p999UpperUs": 5000000,
+        "processLifetimeMaxBeforeUs": 39174,
+        "processLifetimeMaxAfterUs": 2136134,
+        "buckets": [
+          {
+            "upperBoundUs": 100,
+            "count": 0
+          },
+          {
+            "upperBoundUs": 250,
+            "count": 19
+          },
+          {
+            "upperBoundUs": 500,
+            "count": 43
+          },
+          {
+            "upperBoundUs": 1000,
+            "count": 10
+          },
+          {
+            "upperBoundUs": 2000,
+            "count": 2
+          },
+          {
+            "upperBoundUs": 5000,
+            "count": 0
+          },
+          {
+            "upperBoundUs": 10000,
+            "count": 0
+          },
+          {
+            "upperBoundUs": 20000,
+            "count": 0
+          },
+          {
+            "upperBoundUs": 35000,
+            "count": 1
+          },
+          {
+            "upperBoundUs": 50000,
+            "count": 0
+          },
+          {
+            "upperBoundUs": 75000,
+            "count": 0
+          },
+          {
+            "upperBoundUs": 100000,
+            "count": 0
+          },
+          {
+            "upperBoundUs": 150000,
+            "count": 0
+          },
+          {
+            "upperBoundUs": 250000,
+            "count": 0
+          },
+          {
+            "upperBoundUs": 500000,
+            "count": 0
+          },
+          {
+            "upperBoundUs": 1000000,
+            "count": 0
+          },
+          {
+            "upperBoundUs": 5000000,
+            "count": 1
+          },
+          {
+            "upperBoundUs": 30000000,
+            "count": 0
+          },
+          {
+            "upperBoundUs": null,
+            "count": 0
+          }
+        ]
+      }
+    },
+    "zoneWork": {
+      "count": 61,
+      "overBudgetCount": 0,
+      "p50UpperUs": 1000,
+      "p95UpperUs": 1000,
+      "p99UpperUs": 2000,
+      "p999UpperUs": 2000,
+      "processLifetimeMaxBeforeUs": 19765,
+      "processLifetimeMaxAfterUs": 19765,
+      "buckets": [
+        {
+          "upperBoundUs": 100,
+          "count": 0
+        },
+        {
+          "upperBoundUs": 250,
+          "count": 0
+        },
+        {
+          "upperBoundUs": 500,
+          "count": 0
+        },
+        {
+          "upperBoundUs": 1000,
+          "count": 59
+        },
+        {
+          "upperBoundUs": 2000,
+          "count": 2
+        },
+        {
+          "upperBoundUs": 5000,
+          "count": 0
+        },
+        {
+          "upperBoundUs": 10000,
+          "count": 0
+        },
+        {
+          "upperBoundUs": 20000,
+          "count": 0
+        },
+        {
+          "upperBoundUs": 35000,
+          "count": 0
+        },
+        {
+          "upperBoundUs": 50000,
+          "count": 0
+        },
+        {
+          "upperBoundUs": 75000,
+          "count": 0
+        },
+        {
+          "upperBoundUs": 100000,
+          "count": 0
+        },
+        {
+          "upperBoundUs": 150000,
+          "count": 0
+        },
+        {
+          "upperBoundUs": 250000,
+          "count": 0
+        },
+        {
+          "upperBoundUs": 500000,
+          "count": 0
+        },
+        {
+          "upperBoundUs": 1000000,
+          "count": 0
+        },
+        {
+          "upperBoundUs": 5000000,
+          "count": 0
+        },
+        {
+          "upperBoundUs": 30000000,
+          "count": 0
+        },
+        {
+          "upperBoundUs": null,
+          "count": 0
+        }
+      ]
+    },
+    "ownerTickDeadlineLag": {
+      "count": 61,
+      "overBudgetCount": 1,
+      "p50UpperUs": 10000,
+      "p95UpperUs": 20000,
+      "p99UpperUs": 150000,
+      "p999UpperUs": 150000,
+      "processLifetimeMaxBeforeUs": 50336,
+      "processLifetimeMaxAfterUs": 129801,
+      "buckets": [
+        {
+          "upperBoundUs": 100,
+          "count": 0
+        },
+        {
+          "upperBoundUs": 250,
+          "count": 0
+        },
+        {
+          "upperBoundUs": 500,
+          "count": 0
+        },
+        {
+          "upperBoundUs": 1000,
+          "count": 0
+        },
+        {
+          "upperBoundUs": 2000,
+          "count": 4
+        },
+        {
+          "upperBoundUs": 5000,
+          "count": 13
+        },
+        {
+          "upperBoundUs": 10000,
+          "count": 19
+        },
+        {
+          "upperBoundUs": 20000,
+          "count": 24
+        },
+        {
+          "upperBoundUs": 35000,
+          "count": 0
+        },
+        {
+          "upperBoundUs": 50000,
+          "count": 0
+        },
+        {
+          "upperBoundUs": 75000,
+          "count": 0
+        },
+        {
+          "upperBoundUs": 100000,
+          "count": 0
+        },
+        {
+          "upperBoundUs": 150000,
+          "count": 1
+        },
+        {
+          "upperBoundUs": 250000,
+          "count": 0
+        },
+        {
+          "upperBoundUs": 500000,
+          "count": 0
+        },
+        {
+          "upperBoundUs": 1000000,
+          "count": 0
+        },
+        {
+          "upperBoundUs": 5000000,
+          "count": 0
+        },
+        {
+          "upperBoundUs": 30000000,
+          "count": 0
+        },
+        {
+          "upperBoundUs": null,
+          "count": 0
+        }
+      ]
+    },
+    "pendingMovementDeadlineLag": {
+      "count": 0,
+      "overBudgetCount": 0,
+      "p50UpperUs": null,
+      "p95UpperUs": null,
+      "p99UpperUs": null,
+      "p999UpperUs": null,
+      "processLifetimeMaxBeforeUs": 0,
+      "processLifetimeMaxAfterUs": 0,
+      "buckets": [
+        {
+          "upperBoundUs": 100,
+          "count": 0
+        },
+        {
+          "upperBoundUs": 250,
+          "count": 0
+        },
+        {
+          "upperBoundUs": 500,
+          "count": 0
+        },
+        {
+          "upperBoundUs": 1000,
+          "count": 0
+        },
+        {
+          "upperBoundUs": 2000,
+          "count": 0
+        },
+        {
+          "upperBoundUs": 5000,
+          "count": 0
+        },
+        {
+          "upperBoundUs": 10000,
+          "count": 0
+        },
+        {
+          "upperBoundUs": 20000,
+          "count": 0
+        },
+        {
+          "upperBoundUs": 35000,
+          "count": 0
+        },
+        {
+          "upperBoundUs": 50000,
+          "count": 0
+        },
+        {
+          "upperBoundUs": 75000,
+          "count": 0
+        },
+        {
+          "upperBoundUs": 100000,
+          "count": 0
+        },
+        {
+          "upperBoundUs": 150000,
+          "count": 0
+        },
+        {
+          "upperBoundUs": 250000,
+          "count": 0
+        },
+        {
+          "upperBoundUs": 500000,
+          "count": 0
+        },
+        {
+          "upperBoundUs": 1000000,
+          "count": 0
+        },
+        {
+          "upperBoundUs": 5000000,
+          "count": 0
+        },
+        {
+          "upperBoundUs": 30000000,
+          "count": 0
+        },
+        {
+          "upperBoundUs": null,
+          "count": 0
+        }
+      ]
+    }
+  }
+}

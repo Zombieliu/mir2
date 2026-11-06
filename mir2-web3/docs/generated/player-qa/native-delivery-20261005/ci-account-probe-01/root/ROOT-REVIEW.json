@@ -1,0 +1,16 @@
+{
+  "schema": "mir2.fixed-account-probe-root-review.v1",
+  "passed": true,
+  "productionDiffOnlyDocstringAndFixedVerifyPath": true,
+  "sourceSha256": "a1294fd9a4c6a7978ab9ad8fd2874f7f393697eb1a8746f5d3d4cb8185ec9faa",
+  "testSha256": "258495419be6acda64d1c559dcf511e8e6d4aad7739cdc2f5b39e9b0dd88913d",
+  "rootTestReceipt": {
+    "name": "TEST-RECEIPT-1791154508638092700.json",
+    "sha256": "492ed5556e15e565ace02d86acaa4ff154e16fe9d89e71c9b35ecd8dd95931e1"
+  },
+  "tests": 32,
+  "actualCredentialsReadOrAuthRequests": false,
+  "previousUserEndpoint401Retained": true,
+  "tokenExpiredClaim": false,
+  "writePermissionProven": false
+}

@@ -1,0 +1,449 @@
+{
+  "formatVersion": 1,
+  "captureKind": "computer-use target-window JPEG",
+  "sourceSidecarsPreservedUnmodified": true,
+  "associations": [
+    {
+      "image": "01-publish-quote-rejected.jpg",
+      "sidecar": "01-publish-quote-rejected.jpg.json",
+      "captureKind": "computer-use target-window JPEG, not native-capture PNG",
+      "capturedAtUtc": "2026-10-28T15:14:13.833Z",
+      "window": {
+        "app": "process:C:\\mir2-build\\personal-procurement-v1-20261028\\bin-final\\mir2-platform-windows.exe",
+        "id": 4721742,
+        "title": "numeron-legend of rebirth"
+      },
+      "stageSnapshot": "../evidence/publish-quote-rejected-no-custody.json",
+      "stageSnapshotAtUtc": "2026-10-28T15:12:15.496Z",
+      "stageSnapshotRawSha256": "145ea47a84f2de1318bd81a87f3255f679fefa07d08b8e915f6dead2bd423ebf",
+      "orderId": null,
+      "relation": "Same acceptance step; image and account projection captured separately, not an atomic screen/database snapshot"
+    },
+    {
+      "image": "02-final-npc-entry.jpg",
+      "sidecar": "02-final-npc-entry.jpg.json",
+      "captureKind": "computer-use target-window JPEG, not native-capture PNG",
+      "capturedAtUtc": "2026-10-28T15:20:11.395Z",
+      "window": {
+        "app": "process:C:\\mir2-build\\personal-procurement-v1-20261028\\bin-final-v3\\mir2-platform-windows.exe",
+        "id": 11670264,
+        "title": "numeron-legend of rebirth"
+      },
+      "stageSnapshot": "../evidence/test-quota-confirmed.json",
+      "stageSnapshotAtUtc": "2026-10-28T15:09:44.124Z",
+      "stageSnapshotRawSha256": "7bb25ff1aea24847d25e8f7cac7a6277a5501c71d0a7eab4c92be7fde105f1b7",
+      "orderId": null,
+      "relation": "Same acceptance step; image and account projection captured separately, not an atomic screen/database snapshot"
+    },
+    {
+      "image": "03-final-publish-confirm.jpg",
+      "sidecar": "03-final-publish-confirm.jpg.json",
+      "captureKind": "computer-use target-window JPEG, not native-capture PNG",
+      "capturedAtUtc": "2026-10-28T15:22:48.528Z",
+      "window": {
+        "app": "process:C:\\mir2-build\\personal-procurement-v1-20261028\\bin-final-v3\\mir2-platform-windows.exe",
+        "id": 11670264,
+        "title": "numeron-legend of rebirth"
+      },
+      "stageSnapshot": "../evidence/fill-order-publishing.json",
+      "stageSnapshotAtUtc": "2026-10-28T15:23:49.582Z",
+      "stageSnapshotRawSha256": "aa7fb07b53d302d90289971f9a8ff1180e7b1746b496282e3e8de29cc5b91411",
+      "orderId": "0x70cdaa52f85d1e1e787fa40749cf5f3ad72245a6399fdfdc24caa8a30807a14f",
+      "relation": "Same acceptance step; image and account projection captured separately, not an atomic screen/database snapshot"
+    },
+    {
+      "image": "04-final-publish-custody.jpg",
+      "sidecar": "04-final-publish-custody.jpg.json",
+      "captureKind": "computer-use target-window JPEG, not native-capture PNG",
+      "capturedAtUtc": "2026-10-28T15:23:49.370Z",
+      "window": {
+        "app": "process:C:\\mir2-build\\personal-procurement-v1-20261028\\bin-final-v3\\mir2-platform-windows.exe",
+        "id": 11670264,
+        "title": "numeron-legend of rebirth"
+      },
+      "stageSnapshot": "../evidence/fill-order-publishing.json",
+      "stageSnapshotAtUtc": "2026-10-28T15:23:49.582Z",
+      "stageSnapshotRawSha256": "aa7fb07b53d302d90289971f9a8ff1180e7b1746b496282e3e8de29cc5b91411",
+      "orderId": "0x70cdaa52f85d1e1e787fa40749cf5f3ad72245a6399fdfdc24caa8a30807a14f",
+      "relation": "Same acceptance step; image and account projection captured separately, not an atomic screen/database snapshot"
+    },
+    {
+      "image": "05-seller-public-list.jpg",
+      "sidecar": "05-seller-public-list.jpg.json",
+      "captureKind": "computer-use target-window JPEG, not native-capture PNG",
+      "capturedAtUtc": "2026-10-28T15:26:41.873Z",
+      "window": {
+        "app": "process:C:\\mir2-build\\personal-procurement-v1-20261028\\bin-final-v3\\mir2-platform-windows.exe",
+        "id": 2035716,
+        "title": "numeron-legend of rebirth"
+      },
+      "stageSnapshot": "../evidence/fill-order-open.json",
+      "stageSnapshotAtUtc": "2026-10-28T15:26:59.991Z",
+      "stageSnapshotRawSha256": "fc39b8e74b5b69cf5fbeb24a310f3c24b89c420c1f44c85f38d8ffda70a66b8b",
+      "orderId": "0x70cdaa52f85d1e1e787fa40749cf5f3ad72245a6399fdfdc24caa8a30807a14f",
+      "relation": "Same acceptance step; image and account projection captured separately, not an atomic screen/database snapshot"
+    },
+    {
+      "image": "06-seller-delivery-confirm.jpg",
+      "sidecar": "06-seller-delivery-confirm.jpg.json",
+      "captureKind": "computer-use target-window JPEG, not native-capture PNG",
+      "capturedAtUtc": "2026-10-28T15:26:59.782Z",
+      "window": {
+        "app": "process:C:\\mir2-build\\personal-procurement-v1-20261028\\bin-final-v3\\mir2-platform-windows.exe",
+        "id": 2035716,
+        "title": "numeron-legend of rebirth"
+      },
+      "stageSnapshot": "../evidence/fill-order-open.json",
+      "stageSnapshotAtUtc": "2026-10-28T15:26:59.991Z",
+      "stageSnapshotRawSha256": "fc39b8e74b5b69cf5fbeb24a310f3c24b89c420c1f44c85f38d8ffda70a66b8b",
+      "orderId": "0x70cdaa52f85d1e1e787fa40749cf5f3ad72245a6399fdfdc24caa8a30807a14f",
+      "relation": "Same acceptance step; image and account projection captured separately, not an atomic screen/database snapshot"
+    },
+    {
+      "image": "07-server-restart-open-order.jpg",
+      "sidecar": "07-server-restart-open-order.jpg.json",
+      "captureKind": "computer-use target-window JPEG, not native-capture PNG",
+      "capturedAtUtc": "2026-10-28T15:34:16.641Z",
+      "window": {
+        "app": "process:C:\\mir2-build\\personal-procurement-v1-20261028\\bin-final-v3\\mir2-platform-windows.exe",
+        "id": 2035716,
+        "title": "numeron-legend of rebirth"
+      },
+      "stageSnapshot": "../evidence/open-before-server-restart.json",
+      "stageSnapshotAtUtc": "2026-10-28T15:33:40.510Z",
+      "stageSnapshotRawSha256": "5fa97823a4f6d657876c2e6caeaabe4210c71cd2b37c454ccad66bb047984a32",
+      "orderId": "0x70cdaa52f85d1e1e787fa40749cf5f3ad72245a6399fdfdc24caa8a30807a14f",
+      "relation": "Same acceptance step; image and account projection captured separately, not an atomic screen/database snapshot"
+    },
+    {
+      "image": "08-restart-requires-login.jpg",
+      "sidecar": "08-restart-requires-login.jpg.json",
+      "captureKind": "computer-use target-window JPEG, not native-capture PNG",
+      "capturedAtUtc": "2026-10-28T15:34:54.901Z",
+      "window": {
+        "app": "process:C:\\mir2-build\\personal-procurement-v1-20261028\\bin-final-v3\\mir2-platform-windows.exe",
+        "id": 2035716,
+        "title": "numeron-legend of rebirth"
+      },
+      "stageSnapshot": "../evidence/open-after-server-restart.json",
+      "stageSnapshotAtUtc": "2026-10-28T15:35:23.076Z",
+      "stageSnapshotRawSha256": "9563b6a4c4850f68235e82123f24e98783393128129c6d377f8c041c5499ffbb",
+      "orderId": "0x70cdaa52f85d1e1e787fa40749cf5f3ad72245a6399fdfdc24caa8a30807a14f",
+      "relation": "Same acceptance step; image and account projection captured separately, not an atomic screen/database snapshot"
+    },
+    {
+      "image": "09-restored-open-delivery-enabled.jpg",
+      "sidecar": "09-restored-open-delivery-enabled.jpg.json",
+      "captureKind": "computer-use target-window JPEG, not native-capture PNG",
+      "capturedAtUtc": "2026-10-28T15:37:56.459Z",
+      "window": {
+        "app": "process:C:\\mir2-build\\personal-procurement-v1-20261028\\bin-final-v3\\mir2-platform-windows.exe",
+        "id": 28509230,
+        "title": "numeron-legend of rebirth"
+      },
+      "stageSnapshot": "../evidence/open-after-server-restart.json",
+      "stageSnapshotAtUtc": "2026-10-28T15:35:23.076Z",
+      "stageSnapshotRawSha256": "9563b6a4c4850f68235e82123f24e98783393128129c6d377f8c041c5499ffbb",
+      "orderId": "0x70cdaa52f85d1e1e787fa40749cf5f3ad72245a6399fdfdc24caa8a30807a14f",
+      "relation": "Same acceptance step; image and account projection captured separately, not an atomic screen/database snapshot"
+    },
+    {
+      "image": "10-real-equipment-delivery-quote.jpg",
+      "sidecar": "10-real-equipment-delivery-quote.jpg.json",
+      "captureKind": "computer-use target-window JPEG, not native-capture PNG",
+      "capturedAtUtc": "2026-10-28T15:39:02.831Z",
+      "window": {
+        "app": "process:C:\\mir2-build\\personal-procurement-v1-20261028\\bin-final-v3\\mir2-platform-windows.exe",
+        "id": 28509230,
+        "title": "numeron-legend of rebirth"
+      },
+      "stageSnapshot": "../evidence/seller-original-item-locked.json",
+      "stageSnapshotAtUtc": "2026-10-28T15:40:17.461Z",
+      "stageSnapshotRawSha256": "e9112d9036acacb5b5fa7a49ac23102f6d215db6b59a1211202b138b268f0804",
+      "orderId": "0x70cdaa52f85d1e1e787fa40749cf5f3ad72245a6399fdfdc24caa8a30807a14f",
+      "relation": "Same acceptance step; image and account projection captured separately, not an atomic screen/database snapshot"
+    },
+    {
+      "image": "11-seller-original-item-locked.jpg",
+      "sidecar": "11-seller-original-item-locked.jpg.json",
+      "captureKind": "computer-use target-window JPEG, not native-capture PNG",
+      "capturedAtUtc": "2026-10-28T15:40:17.245Z",
+      "window": {
+        "app": "process:C:\\mir2-build\\personal-procurement-v1-20261028\\bin-final-v3\\mir2-platform-windows.exe",
+        "id": 28509230,
+        "title": "numeron-legend of rebirth"
+      },
+      "stageSnapshot": "../evidence/seller-original-item-locked.json",
+      "stageSnapshotAtUtc": "2026-10-28T15:40:17.461Z",
+      "stageSnapshotRawSha256": "e9112d9036acacb5b5fa7a49ac23102f6d215db6b59a1211202b138b268f0804",
+      "orderId": "0x70cdaa52f85d1e1e787fa40749cf5f3ad72245a6399fdfdc24caa8a30807a14f",
+      "relation": "Same acceptance step; image and account projection captured separately, not an atomic screen/database snapshot"
+    },
+    {
+      "image": "12-seller-proceeds-pending.jpg",
+      "sidecar": "12-seller-proceeds-pending.jpg.json",
+      "captureKind": "computer-use target-window JPEG, not native-capture PNG",
+      "capturedAtUtc": "2026-10-28T15:46:43.056Z",
+      "window": {
+        "app": "process:C:\\mir2-build\\personal-procurement-v1-20261028\\bin-final-v3\\mir2-platform-windows.exe",
+        "id": 28509230,
+        "title": "numeron-legend of rebirth"
+      },
+      "stageSnapshot": "../evidence/filled-buyer-offline-pending.json",
+      "stageSnapshotAtUtc": "2026-10-28T15:43:20.013Z",
+      "stageSnapshotRawSha256": "ddc11ae008cf92c7761351e3132eac808e6e240e616e74526cdff611635242ff",
+      "orderId": "0x70cdaa52f85d1e1e787fa40749cf5f3ad72245a6399fdfdc24caa8a30807a14f",
+      "relation": "Same acceptance step; image and account projection captured separately, not an atomic screen/database snapshot"
+    },
+    {
+      "image": "13-buyer-chain-filled-game-pending.jpg",
+      "sidecar": "13-buyer-chain-filled-game-pending.jpg.json",
+      "captureKind": "computer-use target-window JPEG, not native-capture PNG",
+      "capturedAtUtc": "2026-10-28T15:56:33.106Z",
+      "window": {
+        "app": "process:C:\\mir2-build\\personal-procurement-v1-20261028\\bin-final-v3\\mir2-platform-windows.exe",
+        "id": 15209250,
+        "title": "numeron-legend of rebirth"
+      },
+      "stageSnapshot": "../evidence/filled-buyer-offline-pending.json",
+      "stageSnapshotAtUtc": "2026-10-28T15:43:20.013Z",
+      "stageSnapshotRawSha256": "ddc11ae008cf92c7761351e3132eac808e6e240e616e74526cdff611635242ff",
+      "orderId": "0x70cdaa52f85d1e1e787fa40749cf5f3ad72245a6399fdfdc24caa8a30807a14f",
+      "relation": "Same acceptance step; image and account projection captured separately, not an atomic screen/database snapshot"
+    },
+    {
+      "image": "14-buyer-original-uid-pending.jpg",
+      "sidecar": "14-buyer-original-uid-pending.jpg.json",
+      "captureKind": "computer-use target-window JPEG, not native-capture PNG",
+      "capturedAtUtc": "2026-10-28T15:56:46.345Z",
+      "window": {
+        "app": "process:C:\\mir2-build\\personal-procurement-v1-20261028\\bin-final-v3\\mir2-platform-windows.exe",
+        "id": 15209250,
+        "title": "numeron-legend of rebirth"
+      },
+      "stageSnapshot": "../evidence/filled-buyer-offline-pending.json",
+      "stageSnapshotAtUtc": "2026-10-28T15:43:20.013Z",
+      "stageSnapshotRawSha256": "ddc11ae008cf92c7761351e3132eac808e6e240e616e74526cdff611635242ff",
+      "orderId": "0x70cdaa52f85d1e1e787fa40749cf5f3ad72245a6399fdfdc24caa8a30807a14f",
+      "relation": "Same acceptance step; image and account projection captured separately, not an atomic screen/database snapshot"
+    },
+    {
+      "image": "15-buyer-original-uid-delivered.jpg",
+      "sidecar": "15-buyer-original-uid-delivered.jpg.json",
+      "captureKind": "computer-use target-window JPEG, not native-capture PNG",
+      "capturedAtUtc": "2026-10-28T15:57:00.753Z",
+      "window": {
+        "app": "process:C:\\mir2-build\\personal-procurement-v1-20261028\\bin-final-v3\\mir2-platform-windows.exe",
+        "id": 15209250,
+        "title": "numeron-legend of rebirth"
+      },
+      "stageSnapshot": "../evidence/buyer-original-equipment-claimed.json",
+      "stageSnapshotAtUtc": "2026-10-28T15:57:00.959Z",
+      "stageSnapshotRawSha256": "4624e2649073d96f4bd9ecb657732b62bf9170193c8636c66d4dfec30f384442",
+      "orderId": "0x70cdaa52f85d1e1e787fa40749cf5f3ad72245a6399fdfdc24caa8a30807a14f",
+      "relation": "Same acceptance step; image and account projection captured separately, not an atomic screen/database snapshot"
+    },
+    {
+      "image": "16-buyer-normal-inventory.jpg",
+      "sidecar": "16-buyer-normal-inventory.jpg.json",
+      "captureKind": "computer-use target-window JPEG, not native-capture PNG",
+      "capturedAtUtc": "2026-10-28T15:59:10.324Z",
+      "window": {
+        "app": "process:C:\\mir2-build\\personal-procurement-v1-20261028\\bin-final-v3\\mir2-platform-windows.exe",
+        "id": 15209250,
+        "title": "numeron-legend of rebirth"
+      },
+      "stageSnapshot": "../evidence/buyer-original-equipment-claimed.json",
+      "stageSnapshotAtUtc": "2026-10-28T15:57:00.959Z",
+      "stageSnapshotRawSha256": "4624e2649073d96f4bd9ecb657732b62bf9170193c8636c66d4dfec30f384442",
+      "orderId": "0x70cdaa52f85d1e1e787fa40749cf5f3ad72245a6399fdfdc24caa8a30807a14f",
+      "relation": "Same acceptance step; image and account projection captured separately, not an atomic screen/database snapshot"
+    },
+    {
+      "image": "17-buyer-original-equipment-tooltip.jpg",
+      "sidecar": "17-buyer-original-equipment-tooltip.jpg.json",
+      "captureKind": "computer-use target-window JPEG, not native-capture PNG",
+      "capturedAtUtc": "2026-10-28T16:00:05.695Z",
+      "window": {
+        "app": "process:C:\\mir2-build\\personal-procurement-v1-20261028\\bin-final-v3\\mir2-platform-windows.exe",
+        "id": 15209250,
+        "title": "numeron-legend of rebirth"
+      },
+      "stageSnapshot": "../evidence/buyer-original-equipment-claimed.json",
+      "stageSnapshotAtUtc": "2026-10-28T15:57:00.959Z",
+      "stageSnapshotRawSha256": "4624e2649073d96f4bd9ecb657732b62bf9170193c8636c66d4dfec30f384442",
+      "orderId": "0x70cdaa52f85d1e1e787fa40749cf5f3ad72245a6399fdfdc24caa8a30807a14f",
+      "relation": "Same acceptance step; image and account projection captured separately, not an atomic screen/database snapshot"
+    },
+    {
+      "image": "18-cancel-open-order.jpg",
+      "sidecar": "18-cancel-open-order.jpg.json",
+      "captureKind": "computer-use target-window JPEG, not native-capture PNG",
+      "capturedAtUtc": "2026-10-28T16:05:28.274Z",
+      "window": {
+        "app": "process:C:\\mir2-build\\personal-procurement-v1-20261028\\bin-final-v3\\mir2-platform-windows.exe",
+        "id": 15209250,
+        "title": "numeron-legend of rebirth"
+      },
+      "stageSnapshot": "../evidence/cancel-order-publishing.json",
+      "stageSnapshotAtUtc": "2026-10-28T15:58:38.483Z",
+      "stageSnapshotRawSha256": "1971ed871050ccb8ea3063bd499653e46ee9be099886e02753e5842a46eace26",
+      "orderId": "0x243e18275fd667bc4d29082c906bfe963b021f9b942a47bde3a402b427452d11",
+      "relation": "Same acceptance step; image and account projection captured separately, not an atomic screen/database snapshot"
+    },
+    {
+      "image": "19-cancel-explicit-confirm.jpg",
+      "sidecar": "19-cancel-explicit-confirm.jpg.json",
+      "captureKind": "computer-use target-window JPEG, not native-capture PNG",
+      "capturedAtUtc": "2026-10-28T16:07:21.031Z",
+      "window": {
+        "app": "process:C:\\mir2-build\\personal-procurement-v1-20261028\\bin-final-v3\\mir2-platform-windows.exe",
+        "id": 15209250,
+        "title": "numeron-legend of rebirth"
+      },
+      "stageSnapshot": "../evidence/cancel-submitted-custody-retained.json",
+      "stageSnapshotAtUtc": "2026-10-28T16:09:07.750Z",
+      "stageSnapshotRawSha256": "6c1648304f9f401921e1739befbd46b8c2b996585eb5a908fc9813a43a463feb",
+      "orderId": "0x243e18275fd667bc4d29082c906bfe963b021f9b942a47bde3a402b427452d11",
+      "relation": "Same acceptance step; image and account projection captured separately, not an atomic screen/database snapshot"
+    },
+    {
+      "image": "20-cancel-finalized-game-refund-pending.jpg",
+      "sidecar": "20-cancel-finalized-game-refund-pending.jpg.json",
+      "captureKind": "computer-use target-window JPEG, not native-capture PNG",
+      "capturedAtUtc": "2026-10-28T16:12:24.143Z",
+      "window": {
+        "app": "process:C:\\mir2-build\\personal-procurement-v1-20261028\\bin-final-v3\\mir2-platform-windows.exe",
+        "id": 15209250,
+        "title": "numeron-legend of rebirth"
+      },
+      "stageSnapshot": "../evidence/cancel-finalized-refund-pending.json",
+      "stageSnapshotAtUtc": "2026-10-28T16:12:24.355Z",
+      "stageSnapshotRawSha256": "56a2d58312934e2d89ee8359c9367821742dee6be0be1ea2e97f1acfe08d88bf",
+      "orderId": "0x243e18275fd667bc4d29082c906bfe963b021f9b942a47bde3a402b427452d11",
+      "relation": "Same acceptance step; image and account projection captured separately, not an atomic screen/database snapshot"
+    },
+    {
+      "image": "21-cancel-refund-claimed.jpg",
+      "sidecar": "21-cancel-refund-claimed.jpg.json",
+      "captureKind": "computer-use target-window JPEG, not native-capture PNG",
+      "capturedAtUtc": "2026-10-28T16:14:03.522Z",
+      "window": {
+        "app": "process:C:\\mir2-build\\personal-procurement-v1-20261028\\bin-final-v3\\mir2-platform-windows.exe",
+        "id": 15209250,
+        "title": "numeron-legend of rebirth"
+      },
+      "stageSnapshot": "../evidence/cancel-refund-claimed.json",
+      "stageSnapshotAtUtc": "2026-10-28T16:14:03.729Z",
+      "stageSnapshotRawSha256": "b7b1fa2def1d583ee26581e229a01aabeb9ee7fddd50fd5d11046eea50c63524",
+      "orderId": "0x243e18275fd667bc4d29082c906bfe963b021f9b942a47bde3a402b427452d11",
+      "relation": "Same acceptance step; image and account projection captured separately, not an atomic screen/database snapshot"
+    },
+    {
+      "image": "21b-cancel-refund-visible.jpg",
+      "sidecar": "21b-cancel-refund-visible.jpg.json",
+      "captureKind": "computer-use target-window JPEG, not native-capture PNG",
+      "capturedAtUtc": "2026-10-28T16:14:56.821Z",
+      "window": {
+        "app": "process:C:\\mir2-build\\personal-procurement-v1-20261028\\bin-final-v3\\mir2-platform-windows.exe",
+        "id": 15209250,
+        "title": "numeron-legend of rebirth"
+      },
+      "stageSnapshot": "../evidence/cancel-refund-claimed.json",
+      "stageSnapshotAtUtc": "2026-10-28T16:14:03.729Z",
+      "stageSnapshotRawSha256": "b7b1fa2def1d583ee26581e229a01aabeb9ee7fddd50fd5d11046eea50c63524",
+      "orderId": "0x243e18275fd667bc4d29082c906bfe963b021f9b942a47bde3a402b427452d11",
+      "relation": "Same acceptance step; image and account projection captured separately, not an atomic screen/database snapshot"
+    },
+    {
+      "image": "22-expiry-120s-explicit-quote.jpg",
+      "sidecar": "22-expiry-120s-explicit-quote.jpg.json",
+      "captureKind": "computer-use target-window JPEG, not native-capture PNG",
+      "capturedAtUtc": "2026-10-28T16:17:18.007Z",
+      "window": {
+        "app": "process:C:\\mir2-build\\personal-procurement-v1-20261028\\bin-final-v3\\mir2-platform-windows.exe",
+        "id": 15209250,
+        "title": "numeron-legend of rebirth"
+      },
+      "stageSnapshot": "../evidence/expire-order-publishing.json",
+      "stageSnapshotAtUtc": "2026-10-28T16:17:34.640Z",
+      "stageSnapshotRawSha256": "bf029bbd48647d3b7f95eaa666b97d8e8978d89bc1b291151284dbf4f06f5801",
+      "orderId": "0xcbe276110159616beafbe56a648b2e117518e04bc7c6ead04ec5aa440421de49",
+      "relation": "Same acceptance step; image and account projection captured separately, not an atomic screen/database snapshot"
+    },
+    {
+      "image": "23-three-chain-terminal-states.jpg",
+      "sidecar": "23-three-chain-terminal-states.jpg.json",
+      "captureKind": "computer-use target-window JPEG, not native-capture PNG",
+      "capturedAtUtc": "2026-10-28T16:31:33.263Z",
+      "window": {
+        "app": "process:C:\\mir2-build\\personal-procurement-v1-20261028\\bin-final-v3\\mir2-platform-windows.exe",
+        "id": 15209250,
+        "title": "numeron-legend of rebirth"
+      },
+      "stageSnapshot": "../evidence/expiry-refund-claimed-final.json",
+      "stageSnapshotAtUtc": "2026-10-28T16:34:48.958Z",
+      "stageSnapshotRawSha256": "5930939fe438d80cb4057053844d0fac3124cb7f8dfd8a02e0192e832d6cd12f",
+      "orderId": "0xcbe276110159616beafbe56a648b2e117518e04bc7c6ead04ec5aa440421de49",
+      "relation": "Same acceptance step; image and account projection captured separately, not an atomic screen/database snapshot"
+    },
+    {
+      "image": "24-all-deliveries-and-refunds-received.jpg",
+      "sidecar": "24-all-deliveries-and-refunds-received.jpg.json",
+      "captureKind": "computer-use target-window JPEG, not native-capture PNG",
+      "capturedAtUtc": "2026-10-28T16:36:49.334Z",
+      "window": {
+        "app": "process:C:\\mir2-build\\personal-procurement-v1-20261028\\bin-final-v3\\mir2-platform-windows.exe",
+        "id": 15209250,
+        "title": "numeron-legend of rebirth"
+      },
+      "stageSnapshot": "../evidence/expiry-refund-claimed-final.json",
+      "stageSnapshotAtUtc": "2026-10-28T16:34:48.958Z",
+      "stageSnapshotRawSha256": "5930939fe438d80cb4057053844d0fac3124cb7f8dfd8a02e0192e832d6cd12f",
+      "orderId": "0xcbe276110159616beafbe56a648b2e117518e04bc7c6ead04ec5aa440421de49",
+      "relation": "Same acceptance step; image and account projection captured separately, not an atomic screen/database snapshot"
+    },
+    {
+      "image": "25-final-buyer-relogin-inventory.jpg",
+      "sidecar": "25-final-buyer-relogin-inventory.jpg.json",
+      "captureKind": "computer-use target-window JPEG, not native-capture PNG",
+      "capturedAtUtc": "2026-10-28T17:01:04.981Z",
+      "window": {
+        "app": "process:C:\\mir2-build\\personal-procurement-v1-20261028\\bin-final-v3\\mir2-platform-windows.exe",
+        "id": 2625540,
+        "title": "numeron-legend of rebirth"
+      },
+      "stageSnapshot": "../evidence/final-after-both-relogin.json",
+      "stageSnapshotAtUtc": "2026-10-28T17:11:29.443Z",
+      "stageSnapshotRawSha256": "13f8f86f4cdd7d74a3e9e172b5f79ba6a361c08323147d9059ca1a8e2ae57f8f",
+      "orderId": null,
+      "orderIds": [
+        "0x243e18275fd667bc4d29082c906bfe963b021f9b942a47bde3a402b427452d11",
+        "0x70cdaa52f85d1e1e787fa40749cf5f3ad72245a6399fdfdc24caa8a30807a14f",
+        "0xcbe276110159616beafbe56a648b2e117518e04bc7c6ead04ec5aa440421de49"
+      ],
+      "relation": "Both actors relogged after all three orders settled; image and account projection captured separately, not an atomic screen/database snapshot"
+    },
+    {
+      "image": "26-final-seller-relogin-inventory.jpg",
+      "sidecar": "26-final-seller-relogin-inventory.jpg.json",
+      "captureKind": "computer-use target-window JPEG, not native-capture PNG",
+      "capturedAtUtc": "2026-10-28T17:11:29.202Z",
+      "window": {
+        "app": "process:C:\\mir2-build\\personal-procurement-v1-20261028\\bin-final-v3\\mir2-platform-windows.exe",
+        "id": 6558308,
+        "title": "numeron-legend of rebirth"
+      },
+      "stageSnapshot": "../evidence/final-after-both-relogin.json",
+      "stageSnapshotAtUtc": "2026-10-28T17:11:29.443Z",
+      "stageSnapshotRawSha256": "13f8f86f4cdd7d74a3e9e172b5f79ba6a361c08323147d9059ca1a8e2ae57f8f",
+      "orderId": null,
+      "orderIds": [
+        "0x243e18275fd667bc4d29082c906bfe963b021f9b942a47bde3a402b427452d11",
+        "0x70cdaa52f85d1e1e787fa40749cf5f3ad72245a6399fdfdc24caa8a30807a14f",
+        "0xcbe276110159616beafbe56a648b2e117518e04bc7c6ead04ec5aa440421de49"
+      ],
+      "relation": "Both actors relogged after all three orders settled; image and account projection captured separately, not an atomic screen/database snapshot"
+    }
+  ]
+}

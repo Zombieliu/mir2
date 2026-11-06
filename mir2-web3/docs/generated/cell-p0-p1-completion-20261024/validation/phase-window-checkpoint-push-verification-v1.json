@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "verifiedAtUtc": "2026-10-25 01:06:04 UTC",
+  "localHead": "30ba328ad3d1b1eb46e51540cb1880d66eba3ee1",
+  "remoteCheckpointHead": "30ba328ad3d1b1eb46e51540cb1880d66eba3ee1",
+  "branch": "codex/cell-preproduction-p0-p1-20261024",
+  "remote": "git@github.com:Zombieliu/mir2.git",
+  "pushExitCode": 0,
+  "lsRemoteExitCode": 0,
+  "originalBranch": "codex/windows-player-journey",
+  "originalRemoteHead": "e11c32fb15ca4cf18d933768b8e70866cd089f26",
+  "originalBranchUnchanged": true,
+  "capacityAccepted": false,
+  "scope": "Checkpoint push and exact remote reference verification; active P0 capacity work continues."
+}

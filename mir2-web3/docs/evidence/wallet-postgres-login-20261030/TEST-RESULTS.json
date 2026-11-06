@@ -1,0 +1,89 @@
+{
+  "runId": 41033137982,
+  "jobId": 123987442596,
+  "jobName": "verify-and-build",
+  "conclusion": "success",
+  "checkedAtUtc": "2026-10-30T09:44:09.193085+00:00",
+  "logSha256": "4e0f2b33cdf7479569c68d43ab31f7bffa65b66408565b9c35801d17d5318588",
+  "logBytes": 569718,
+  "matchingLines": [
+    "2026-10-30T09:26:32.7277417Z      Running unittests src/lib.rs (target/debug/deps/mir2_simulation-0733d6d575469730)",
+    "2026-10-30T09:26:46.0146544Z test result: ok. 23 passed; 0 failed; 0 ignored; 0 measured; 3035 filtered out; finished in 13.28s",
+    "2026-10-30T09:26:46.2953488Z      Running unittests src/lib.rs (target/debug/deps/mir2_simulation-0733d6d575469730)",
+    "2026-10-30T09:26:46.7890212Z test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 3050 filtered out; finished in 0.52s",
+    "2026-10-30T09:26:47.0398877Z      Running unittests src/lib.rs (target/debug/deps/mir2_simulation-0733d6d575469730)",
+    "2026-10-30T09:26:58.3330709Z test result: ok. 21 passed; 0 failed; 0 ignored; 0 measured; 3037 filtered out; finished in 11.31s",
+    "2026-10-30T09:26:58.5920775Z      Running unittests src/lib.rs (target/debug/deps/mir2_simulation-0733d6d575469730)",
+    "2026-10-30T09:26:59.0621379Z test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 3057 filtered out; finished in 0.48s",
+    "2026-10-30T09:27:36.2389936Z      Running tests/wallet_postgres.rs (target/debug/deps/wallet_postgres-5aed76fb574433f1)",
+    "2026-10-30T09:27:37.5047192Z test wallet_postgres_provision_survives_restart_without_unlocking_password_login ... ok",
+    "2026-10-30T09:27:37.5049290Z test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.26s"
+  ],
+  "sourceSha": "2decb491856dcd8d9b91aa40c7fca32dcf18101a",
+  "testCommandEvidence": [
+    "cargo +1.95.0 test --locked -p mir2-simulation --lib wallet",
+    "cargo +1.95.0 test --locked -p mir2-simulation --lib passkey",
+    "cargo +1.95.0 test --locked -p mir2-simulation --lib password",
+    "cargo +1.95.0 test --locked -p mir2-simulation --lib account_creation_persistence_failure",
+    "cargo +1.95.0 test --locked -p mir2-simulation --test wallet_postgres -- --ignored --nocapture"
+  ],
+  "unitGroups": [
+    {
+      "status": "ok",
+      "passed": 23,
+      "failed": 0,
+      "ignored": 0,
+      "measured": 0,
+      "filteredOut": 3035,
+      "durationSeconds": 13.28,
+      "rawLine": "2026-10-30T09:26:46.0146544Z test result: ok. 23 passed; 0 failed; 0 ignored; 0 measured; 3035 filtered out; finished in 13.28s",
+      "filter": "wallet"
+    },
+    {
+      "status": "ok",
+      "passed": 8,
+      "failed": 0,
+      "ignored": 0,
+      "measured": 0,
+      "filteredOut": 3050,
+      "durationSeconds": 0.52,
+      "rawLine": "2026-10-30T09:26:46.7890212Z test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 3050 filtered out; finished in 0.52s",
+      "filter": "passkey"
+    },
+    {
+      "status": "ok",
+      "passed": 21,
+      "failed": 0,
+      "ignored": 0,
+      "measured": 0,
+      "filteredOut": 3037,
+      "durationSeconds": 11.31,
+      "rawLine": "2026-10-30T09:26:58.3330709Z test result: ok. 21 passed; 0 failed; 0 ignored; 0 measured; 3037 filtered out; finished in 11.31s",
+      "filter": "password"
+    },
+    {
+      "status": "ok",
+      "passed": 1,
+      "failed": 0,
+      "ignored": 0,
+      "measured": 0,
+      "filteredOut": 3057,
+      "durationSeconds": 0.48,
+      "rawLine": "2026-10-30T09:26:59.0621379Z test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 3057 filtered out; finished in 0.48s",
+      "filter": "account_creation_persistence_failure"
+    }
+  ],
+  "unitTotalPassed": 53,
+  "postgresIntegration": {
+    "status": "ok",
+    "passed": 1,
+    "failed": 0,
+    "ignored": 0,
+    "measured": 0,
+    "filteredOut": 0,
+    "durationSeconds": 1.26,
+    "rawLine": "2026-10-30T09:27:37.5049290Z test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.26s",
+    "testName": "wallet_postgres_provision_survives_restart_without_unlocking_password_login",
+    "rawTestLine": "2026-10-30T09:27:37.5047192Z test wallet_postgres_provision_survives_restart_without_unlocking_password_login ... ok"
+  }
+}

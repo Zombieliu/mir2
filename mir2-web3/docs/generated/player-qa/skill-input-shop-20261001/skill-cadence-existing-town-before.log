@@ -1,0 +1,20 @@
+
+running 1 test
+test runtime::session::tests::town_teleport_returns_player_to_spawn ... FAILED
+
+failures:
+
+---- runtime::session::tests::town_teleport_returns_player_to_spawn stdout ----
+
+thread 'runtime::session::tests::town_teleport_returns_player_to_spawn' (94276) panicked at apps\simulation\src\runtime\tests.rs:45844:5:
+assertion `left == right` failed
+  left: 328
+ right: 330
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    runtime::session::tests::town_teleport_returns_player_to_spawn
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 1921 filtered out; finished in 0.73s
+

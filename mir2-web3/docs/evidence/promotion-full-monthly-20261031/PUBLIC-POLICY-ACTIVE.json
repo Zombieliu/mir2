@@ -1,0 +1,79 @@
+{
+  "schema": "mir2.full-monthly.active-public-policy-verification.v1",
+  "observedAtUtc": "2026-10-31T03:33:40.120Z",
+  "sourceSha": "3a52daef5c3fe92e1e738d6656b9fdbf54de56c3",
+  "deploymentId": "dpl_F1ZwKtAph1YVBVYHdVfKVWhfBZ9S",
+  "origin": "https://mir2.obelisk.build",
+  "campaignId": "numeron-windows-playtest-20261030",
+  "responses": [
+    {
+      "route": "/api/promotions/bootstrap?campaignId=numeron-windows-playtest-20261030",
+      "status": 200,
+      "characters": 1929,
+      "sha256": "de46b52e429325ceef8bbb359d1f7f6f87e991ec45c11acd94da0e0c3a9b65db"
+    },
+    {
+      "route": "/version",
+      "status": 200,
+      "characters": 55,
+      "sha256": "4b91130a230454b11a31b31c45b78e3cfad07da6dc0371de81b31974cc7c55e7"
+    },
+    {
+      "route": "/api/promotions/bootstrap",
+      "status": 200,
+      "characters": 1929,
+      "sha256": "de46b52e429325ceef8bbb359d1f7f6f87e991ec45c11acd94da0e0c3a9b65db"
+    }
+  ],
+  "bootstrap": {
+    "authenticated": false,
+    "gameClient": "windows",
+    "recognition": "monthly_purchase_full",
+    "publicRecognition": "monthly_purchase_full",
+    "commissionEnabled": true,
+    "payoutEnabled": false,
+    "reserveBps": 0,
+    "termsVersion": "numeron-windows-playtest-20261030-v1",
+    "startsAtMs": 1793219738449,
+    "endsAtMs": 1793824538449
+  },
+  "browser": {
+    "independentAnonymousContext": true,
+    "mockedApi": false,
+    "walletAccessed": false,
+    "apiReads": [
+      {
+        "status": 200,
+        "path": "/api/promotions/bootstrap"
+      }
+    ],
+    "writes": [],
+    "errors": [],
+    "checks": [
+      {
+        "name": "actual public Chinese anonymous earnings uses full monthly policy",
+        "passed": true,
+        "displayedPolicy": "计佣口径\n\n赛季内购买并激活的合格月卡，按已核实的实付金额全额计佣：月卡消费金额 × 对应分段费率，不按赛季剩余时长折算。同一张月卡只计佣一次。\n\n充值点券本身不计佣；退款会扣回对应佣金。收益需满足活动资格并核实付款来源，赛季结束核账后统一结算。"
+      },
+      {
+        "name": "actual public rules page uses the same full monthly policy",
+        "passed": true
+      },
+      {
+        "name": "actual public Chinese mobile layout has no horizontal overflow",
+        "passed": true,
+        "widths": {
+          "viewport": 390,
+          "document": 390,
+          "body": 390
+        }
+      }
+    ]
+  },
+  "limits": {
+    "ssh": false,
+    "serviceOrPolicyMutations": false,
+    "loggedInCommissionAmountVerified": false,
+    "actualCommissionDatabaseVerificationOwnedByCoordinator": true
+  }
+}

@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "expectedHead": "71eea39ba667753e11f830f3c912ead3123d4974",
+  "scope": "Root current-source formal qualification. Saved100 is a cold source, actual full16-v2 is strict14-dependency reuse, no formal ladder or capacity acceptance has been performed by this script.",
+  "config": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-formal-ladder-v4\\prepare-config-pending-v1.json",
+    "bytes": 18349,
+    "sha256": "2a1c4a91e246760dbb9f5c13d67789ab75720073c815b9cb00ed22ac931b7a7f"
+  },
+  "node": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\root-capacity-chat-focused-v22\\root-focused-receipt-v1.json",
+    "bytes": 19732,
+    "sha256": "f4190ab326c415491813a44443f244cadbad906341c66a94b8ecdb7cfad6948e"
+  },
+  "full16ReuseProof": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-full16-reuse-proof-formal-v4.json",
+    "bytes": 70287,
+    "sha256": "48fe3aadeebdff30ce4f5b02ecc1b1a9c21d5319b921ea666ad771e013a6d888"
+  },
+  "runtimeSources": 33,
+  "namedSources": 45,
+  "freshNodeTestsPassed": 78,
+  "savedSourceCharacters": 100,
+  "toolCount": 11,
+  "verdict": {
+    "sourceContractPassed": true,
+    "eligibleForRootFreezeExecution": true,
+    "blockingFindingIds": []
+  },
+  "capacityAccepted": false,
+  "p0Accepted": false
+}

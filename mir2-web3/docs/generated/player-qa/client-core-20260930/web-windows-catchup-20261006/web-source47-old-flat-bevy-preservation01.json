@@ -1,0 +1,166 @@
+{
+  "owner": "Root",
+  "kind": "Source47 actual entire old flat Bevy product artifact preservation before original full publication",
+  "generatedAtUtc": "2026-10-08T16:40:36.115Z",
+  "sourceRoot": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\public\\bevy-runtime",
+  "savedRoot": "C:\\mir2-cross-platform-storage-20261002\\web-source47-old-flat-bevy-preserved01",
+  "files": [
+    {
+      "source": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\public\\bevy-runtime\\pkg-webgl2\\mir2_bevy_runtime.d.ts",
+        "bytes": 12717,
+        "sha256": "cfc8adf01fa51053ed34b88518e92a252389935b2c7fd50f81c3557929727107"
+      },
+      "saved": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\web-source47-old-flat-bevy-preserved01\\pkg-webgl2\\mir2_bevy_runtime.d.ts",
+        "bytes": 12717,
+        "sha256": "cfc8adf01fa51053ed34b88518e92a252389935b2c7fd50f81c3557929727107"
+      }
+    },
+    {
+      "source": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\public\\bevy-runtime\\pkg-webgl2\\mir2_bevy_runtime.js",
+        "bytes": 117176,
+        "sha256": "465a615a2f3e05359031db763c738657d3c62ee89c7ce5547391f721c450a81f"
+      },
+      "saved": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\web-source47-old-flat-bevy-preserved01\\pkg-webgl2\\mir2_bevy_runtime.js",
+        "bytes": 117176,
+        "sha256": "465a615a2f3e05359031db763c738657d3c62ee89c7ce5547391f721c450a81f"
+      }
+    },
+    {
+      "source": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\public\\bevy-runtime\\pkg-webgl2\\mir2_bevy_runtime_bg.wasm",
+        "bytes": 17743841,
+        "sha256": "cac15ba3bfb55bb2741be39f2a5a0e0ea386f61a580c07c3e092fd6af294530b"
+      },
+      "saved": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\web-source47-old-flat-bevy-preserved01\\pkg-webgl2\\mir2_bevy_runtime_bg.wasm",
+        "bytes": 17743841,
+        "sha256": "cac15ba3bfb55bb2741be39f2a5a0e0ea386f61a580c07c3e092fd6af294530b"
+      }
+    },
+    {
+      "source": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\public\\bevy-runtime\\pkg-webgl2\\mir2_bevy_runtime_bg.wasm.d.ts",
+        "bytes": 6056,
+        "sha256": "470c0238d591f1e760cf06a4d6776603dc00fdb0f25d0418959ddfcb46734fd8"
+      },
+      "saved": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\web-source47-old-flat-bevy-preserved01\\pkg-webgl2\\mir2_bevy_runtime_bg.wasm.d.ts",
+        "bytes": 6056,
+        "sha256": "470c0238d591f1e760cf06a4d6776603dc00fdb0f25d0418959ddfcb46734fd8"
+      }
+    },
+    {
+      "source": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\public\\bevy-runtime\\pkg-webgl2-shared\\mir2_bevy_runtime.d.ts",
+        "bytes": 19701,
+        "sha256": "30de3280231dd56ed0c9bc0e261477c108973306a203b525b0764831f164438b"
+      },
+      "saved": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\web-source47-old-flat-bevy-preserved01\\pkg-webgl2-shared\\mir2_bevy_runtime.d.ts",
+        "bytes": 19701,
+        "sha256": "30de3280231dd56ed0c9bc0e261477c108973306a203b525b0764831f164438b"
+      }
+    },
+    {
+      "source": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\public\\bevy-runtime\\pkg-webgl2-shared\\mir2_bevy_runtime.js",
+        "bytes": 132320,
+        "sha256": "d9253e1dcba5e198ad6594bfe98304f79d106b7b2bf7f695e0cd48a87248866e"
+      },
+      "saved": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\web-source47-old-flat-bevy-preserved01\\pkg-webgl2-shared\\mir2_bevy_runtime.js",
+        "bytes": 132320,
+        "sha256": "d9253e1dcba5e198ad6594bfe98304f79d106b7b2bf7f695e0cd48a87248866e"
+      }
+    },
+    {
+      "source": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\public\\bevy-runtime\\pkg-webgl2-shared\\mir2_bevy_runtime_bg.wasm",
+        "bytes": 31842665,
+        "sha256": "045a67f547ae00976ebb934067750d6e7c9cfcc4517aac1903c64d5345ee6580"
+      },
+      "saved": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\web-source47-old-flat-bevy-preserved01\\pkg-webgl2-shared\\mir2_bevy_runtime_bg.wasm",
+        "bytes": 31842665,
+        "sha256": "045a67f547ae00976ebb934067750d6e7c9cfcc4517aac1903c64d5345ee6580"
+      }
+    },
+    {
+      "source": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\public\\bevy-runtime\\pkg-webgl2-shared\\mir2_bevy_runtime_bg.wasm.d.ts",
+        "bytes": 9610,
+        "sha256": "3b9dd388de611a024015c003f0cf2504467729c49d18b714335646e09b8bc547"
+      },
+      "saved": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\web-source47-old-flat-bevy-preserved01\\pkg-webgl2-shared\\mir2_bevy_runtime_bg.wasm.d.ts",
+        "bytes": 9610,
+        "sha256": "3b9dd388de611a024015c003f0cf2504467729c49d18b714335646e09b8bc547"
+      }
+    },
+    {
+      "source": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\public\\bevy-runtime\\pkg-webgpu\\mir2_bevy_runtime.d.ts",
+        "bytes": 19937,
+        "sha256": "1e5218264646ed23a270d38ee0585a8444f2082a5d2e29b7d341f0a8a52143ed"
+      },
+      "saved": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\web-source47-old-flat-bevy-preserved01\\pkg-webgpu\\mir2_bevy_runtime.d.ts",
+        "bytes": 19937,
+        "sha256": "1e5218264646ed23a270d38ee0585a8444f2082a5d2e29b7d341f0a8a52143ed"
+      }
+    },
+    {
+      "source": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\public\\bevy-runtime\\pkg-webgpu\\mir2_bevy_runtime.js",
+        "bytes": 134346,
+        "sha256": "56548489d9c1d6debbf7e2b5b624dd24e63ecc354c12ebc1fdb470ad64d1abe4"
+      },
+      "saved": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\web-source47-old-flat-bevy-preserved01\\pkg-webgpu\\mir2_bevy_runtime.js",
+        "bytes": 134346,
+        "sha256": "56548489d9c1d6debbf7e2b5b624dd24e63ecc354c12ebc1fdb470ad64d1abe4"
+      }
+    },
+    {
+      "source": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\public\\bevy-runtime\\pkg-webgpu\\mir2_bevy_runtime_bg.wasm",
+        "bytes": 30880674,
+        "sha256": "cde02551dc95ea53c6a5eb0ef7344b45ef5e8647a92c7c1667fc0668ecd89ed4"
+      },
+      "saved": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\web-source47-old-flat-bevy-preserved01\\pkg-webgpu\\mir2_bevy_runtime_bg.wasm",
+        "bytes": 30880674,
+        "sha256": "cde02551dc95ea53c6a5eb0ef7344b45ef5e8647a92c7c1667fc0668ecd89ed4"
+      }
+    },
+    {
+      "source": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\public\\bevy-runtime\\pkg-webgpu\\mir2_bevy_runtime_bg.wasm.d.ts",
+        "bytes": 9846,
+        "sha256": "a590fd1c7cd55ec549749dfc09c488cd40a58228bfb078dde922e9065ebb2e9a"
+      },
+      "saved": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\web-source47-old-flat-bevy-preserved01\\pkg-webgpu\\mir2_bevy_runtime_bg.wasm.d.ts",
+        "bytes": 9846,
+        "sha256": "a590fd1c7cd55ec549749dfc09c488cd40a58228bfb078dde922e9065ebb2e9a"
+      }
+    }
+  ],
+  "fileCount": 12,
+  "totalBytes": 80928889,
+  "allOpaqueByteCopiesMatched": true,
+  "sourceFilesUnmodified": true,
+  "entireActualOldFlatInventoryMatched": true,
+  "oldImmutableVersionsStillRequired": true,
+  "productArtifactsCopiedOnly": true,
+  "newExecutableHelperCreated": false,
+  "apiUsed": false,
+  "productLaunched": false,
+  "fullMetadataOrAbiValidated": false,
+  "candidate100": false,
+  "qualification": "Exact actual three pkg directories/four original generated runtime leaves each copied as opaque existing product artifacts, including both .d.ts forms. No helper/runner or source introduced/executed. Preserves old flat bytes before original builder normal old-flat transaction backup cleanup; no old output deleted or moved. Initial filename reader and later display errors are retained as Root data-only failures, not tests."
+}

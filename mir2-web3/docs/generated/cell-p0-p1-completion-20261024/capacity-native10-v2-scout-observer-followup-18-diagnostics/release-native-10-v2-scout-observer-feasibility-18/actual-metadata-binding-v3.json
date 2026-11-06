@@ -1,0 +1,172 @@
+{
+  "schemaVersion": 1,
+  "scope": "Actual small full16 audit/realm/source proof and explicit16-pin prerequisite plus independent facts bind only final metadata. No protocol trace parsed or audit rerun; no mode executed.",
+  "prerequisite": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\scout-observer-full16-public-archive-v1\\full16-actual-prerequisite-v1.json",
+    "bytes": 4922,
+    "sha256": "2fd5bb822e631128ff483528ea09b74cd2e4db1316107ffb5c57b579bf8d2157"
+  },
+  "independentFacts": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\scout-observer-full16-actual-independent-review-v1.json",
+    "bytes": 4775,
+    "sha256": "5a504f85a598fe3c67f971ce8960b90f5a8b1ded1a863a2c88b6cde071e1ae9d"
+  },
+  "checkedPublicOriginals": [
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-observer-preference-v1\\public\\1792963900426-f1496383.independent-audit.json",
+      "bytes": 1907,
+      "sha256": "92a72770bab2e302537eda593baf72a8cb5438a0d6956fa171e2f7e80128533f"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-observer-preference-v1\\public\\1792963900426-f1496383.source-manifest-verification.json",
+      "bytes": 717,
+      "sha256": "4c580c3b6e29e8a4bc0440698c3f007c75b7db827ae0439f51c8ccd97a79ba3d"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-observer-preference-v1\\public\\1792963900426-f1496383.realm-evidence.json",
+      "bytes": 35109,
+      "sha256": "f41f368182319ad881c960fcd59ba3150381751de6679683d8bed6fef59df0e3"
+    }
+  ],
+  "before": [
+    {
+      "name": "candidate-release-binding.json",
+      "pin": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-observer-feasibility-18\\candidate-release-binding.json",
+        "bytes": 2203,
+        "sha256": "40c3fa1c5edc73598df00b8655ee8a836118ffd635cde9c346396eb893f36801"
+      },
+      "preimage": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-observer-feasibility-18\\candidate-release-binding.json.before-actual-v3.txt",
+        "bytes": 2203,
+        "sha256": "40c3fa1c5edc73598df00b8655ee8a836118ffd635cde9c346396eb893f36801"
+      }
+    },
+    {
+      "name": "current-driver-binding.json",
+      "pin": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-observer-feasibility-18\\current-driver-binding.json",
+        "bytes": 2769,
+        "sha256": "171d141de05c86a2b2abe5b3bbfade61a0253388323761139993d6eb1dc90461"
+      },
+      "preimage": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-observer-feasibility-18\\current-driver-binding.json.before-actual-v3.txt",
+        "bytes": 2769,
+        "sha256": "171d141de05c86a2b2abe5b3bbfade61a0253388323761139993d6eb1dc90461"
+      }
+    },
+    {
+      "name": "scene-binding.json",
+      "pin": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-observer-feasibility-18\\scene-binding.json",
+        "bytes": 6797,
+        "sha256": "363a09a840867f3b6aa7f41b47fed2506fb11ae1b3a588725386279b555a131b"
+      },
+      "preimage": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-observer-feasibility-18\\scene-binding.json.before-actual-v3.txt",
+        "bytes": 6797,
+        "sha256": "363a09a840867f3b6aa7f41b47fed2506fb11ae1b3a588725386279b555a131b"
+      }
+    },
+    {
+      "name": "launcher-source-prepared-v1.json",
+      "pin": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-observer-feasibility-18\\launcher-source-prepared-v1.json",
+        "bytes": 622,
+        "sha256": "6bd100d95614c50f76068fa924bc41bcd0a5887e01d4418e19c61f0d412e8a29"
+      },
+      "preimage": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-observer-feasibility-18\\launcher-source-prepared-v1.json.before-actual-v3.txt",
+        "bytes": 622,
+        "sha256": "6bd100d95614c50f76068fa924bc41bcd0a5887e01d4418e19c61f0d412e8a29"
+      }
+    },
+    {
+      "name": "preparation-plan.json",
+      "pin": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-observer-feasibility-18\\preparation-plan.json",
+        "bytes": 611,
+        "sha256": "ddc44e47bd0ff037260dcf36b3a7583ad81c275bb8d1f5a5e0263e4d6df76a9a"
+      },
+      "preimage": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-observer-feasibility-18\\preparation-plan.json.before-actual-v3.txt",
+        "bytes": 611,
+        "sha256": "ddc44e47bd0ff037260dcf36b3a7583ad81c275bb8d1f5a5e0263e4d6df76a9a"
+      }
+    },
+    {
+      "name": "final-inputs-approved.json",
+      "pin": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-observer-feasibility-18\\final-inputs-approved.json",
+        "bytes": 616,
+        "sha256": "b579660936ebffa3f95074b865bd4c511a275d6d0c889ebf890f65d6e92e9ded"
+      },
+      "preimage": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-observer-feasibility-18\\final-inputs-approved.json.before-actual-v3.txt",
+        "bytes": 616,
+        "sha256": "b579660936ebffa3f95074b865bd4c511a275d6d0c889ebf890f65d6e92e9ded"
+      }
+    },
+    {
+      "name": "static-preparation-verification.json",
+      "pin": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-observer-feasibility-18\\static-preparation-verification.json",
+        "bytes": 626,
+        "sha256": "14289dfadfd3c221cf56daf8251cfd0e5a45c962919cfe25ef0240f3941ebcf4"
+      },
+      "preimage": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-observer-feasibility-18\\static-preparation-verification.json.before-actual-v3.txt",
+        "bytes": 626,
+        "sha256": "14289dfadfd3c221cf56daf8251cfd0e5a45c962919cfe25ef0240f3941ebcf4"
+      }
+    }
+  ],
+  "after": [
+    {
+      "name": "candidate-release-binding.json",
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-observer-feasibility-18\\candidate-release-binding.json",
+      "bytes": 7226,
+      "sha256": "986430cfa67b2a9aea685f6a03943af9877eb65b3547b25dd97abbe43292e726"
+    },
+    {
+      "name": "current-driver-binding.json",
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-observer-feasibility-18\\current-driver-binding.json",
+      "bytes": 2756,
+      "sha256": "8702d54a12dbbf2a57e841a2fab66f4ab25b884407fb13ee863c412d759817d1"
+    },
+    {
+      "name": "scene-binding.json",
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-observer-feasibility-18\\scene-binding.json",
+      "bytes": 6784,
+      "sha256": "a8baefebcd78812287ff25bc9b0b0eb31cb8fb2af5f27f33c925ed03d121733d"
+    },
+    {
+      "name": "launcher-source-prepared-v1.json",
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-observer-feasibility-18\\launcher-source-prepared-v1.json",
+      "bytes": 1466,
+      "sha256": "45837dc2d011ca99b6cf2a95ee925cf965ddc6290cd32b4d06a5c1582beca171"
+    },
+    {
+      "name": "preparation-plan.json",
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-observer-feasibility-18\\preparation-plan.json",
+      "bytes": 1455,
+      "sha256": "137d1820bdb2f7caf85b64a589f191bdc6036b264923a743925f42ac41824d71"
+    },
+    {
+      "name": "final-inputs-approved.json",
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-observer-feasibility-18\\final-inputs-approved.json",
+      "bytes": 1460,
+      "sha256": "7c3e2fc8d517e06fd121544c2a8a7be79a8d31343bd1332bb69212c46d962097"
+    },
+    {
+      "name": "static-preparation-verification.json",
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-observer-feasibility-18\\static-preparation-verification.json",
+      "bytes": 1470,
+      "sha256": "1117cd927a48cf9cf9812358d4d243c32215c215f7e0246f26570f5d3ad9abb5"
+    }
+  ],
+  "backendSourceCommit": "c743122af05faca43d9535d8c6c2a4bfb01b924f",
+  "executionSourceCommit": "3a6d8c862d03ded3133605472a8f38bc6258af52",
+  "full16Passed": true,
+  "capacityAccepted": false
+}

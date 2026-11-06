@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "recordedAtUtc": "2026-10-25T21:20:18.233Z",
+  "before": {
+    "path": "C:\\mir2-build\\p01-completion-20261024\\scout-observer-preference-runtime-v1\\current-execution-binding-v1.json",
+    "bytes": 1271,
+    "sha256": "2faf380631c621e142086cae45e2d46cc83241f02e2848d6c3211e7c741ab696"
+  },
+  "preimage": {
+    "path": "C:\\mir2-build\\p01-completion-20261024\\scout-observer-preference-runtime-v1\\current-execution-binding-before-H-v1.json",
+    "bytes": 1271,
+    "sha256": "2faf380631c621e142086cae45e2d46cc83241f02e2848d6c3211e7c741ab696"
+  },
+  "after": {
+    "path": "C:\\mir2-build\\p01-completion-20261024\\scout-observer-preference-runtime-v1\\current-execution-binding-v1.json",
+    "bytes": 1404,
+    "sha256": "665051040cc0a966cb48d0e8e46782cdb617279c537cc36953f096309ed8f18d"
+  },
+  "onlyFiveBindingFieldsChanged": true,
+  "actualFreeze": {
+    "path": "C:\\mir2-build\\p01-completion-20261024\\capacity-scout-observer-preference-driver-frozen-v1.json",
+    "bytes": 9465,
+    "sha256": "1cf08b52d98d557fa17ea66e336e3adbf6495cb4cb086b22bec461b713ae696e"
+  },
+  "backendBuildCommit": "c743122af05faca43d9535d8c6c2a4bfb01b924f",
+  "currentExecutionHead": "3a6d8c862d03ded3133605472a8f38bc6258af52",
+  "driverSourceCommit": "3a6d8c862d03ded3133605472a8f38bc6258af52",
+  "rebuildPerformed": false,
+  "guardExecutedByBinding": false,
+  "realmStarted": false,
+  "scope": "Root final binding after actual clean committed H and exact same-source219 freeze; prior PENDING bytes preserved."
+}

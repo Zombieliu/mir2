@@ -1,0 +1,54 @@
+{
+  "schemaVersion": 1,
+  "scope": "Only the specifically authorised fatal test character from this run final active AccountStore. No credentials, account key, character name, inventory/runtime JSON or other characters are output.",
+  "actor": "actor-1",
+  "globalZoneIdFromIndependentPeerEvidence": 50045,
+  "raw": {
+    "path": "C:\\mir2-build\\p01-completion-20261024\\native-steady-single-stage-diagnostic-v12\\episode-50\\private\\accounts.json",
+    "bytes": 469387,
+    "sha256": "e0175df377732a3906d904278ce4260ee6b7a09e89a9f8c866ccd57b841e2094",
+    "physicalReadPasses": 1,
+    "sizeBefore": 469387,
+    "sizeAfter": 469387,
+    "lastModifiedBeforeUtc": "2026-10-26T16:35:07.045Z",
+    "lastModifiedAfterUtc": "2026-10-26T16:35:07.045Z",
+    "stableDuringRead": true
+  },
+  "targetSelection": {
+    "matchCount": 1,
+    "selector": "character.name equals the authorised fatal character; name not republished",
+    "savePointer": "/accounts/<redacted-account-key>/saves/46",
+    "accountKeyRedacted": true,
+    "originalPointerSha256": "1391de0a8d6dccb882a018ec683ad68efed7df4c2d05ecff1c216962cecd94ee",
+    "fieldPointers": {
+      "hp": "/accounts/<redacted-account-key>/saves/46/hp",
+      "max_hp": "/accounts/<redacted-account-key>/saves/46/max_hp",
+      "mp": "/accounts/<redacted-account-key>/saves/46/mp",
+      "max_mp": "/accounts/<redacted-account-key>/saves/46/max_mp",
+      "revision": "/accounts/<redacted-account-key>/saves/46/revision",
+      "position": "/accounts/<redacted-account-key>/saves/46/position",
+      "character/level": "/accounts/<redacted-account-key>/saves/46/character/level"
+    }
+  },
+  "finalSavedState": {
+    "hp": 0,
+    "max_hp": 18,
+    "mp": 14,
+    "max_mp": 14,
+    "revision": 27,
+    "position": {
+      "x": 233,
+      "y": 623
+    },
+    "level": 1,
+    "deadStored": null,
+    "exactHpNonpositive": true,
+    "deadMeaning": "CharacterSaveRecord has no dead scalar in its current schema. exactHpNonpositive is derived only from the saved exact HP, not from percent or report text."
+  },
+  "temporalLimit": "This file was read after run cleanup and reflects final durable save state. It is not an observation at the fatal instant and does not establish lethal attack source or exact death time.",
+  "sourceSchema": {
+    "file": "mir2-web3/apps/simulation/src/config.rs",
+    "struct": "CharacterSaveRecord",
+    "hpAndMpFields": "hp/max_hp/mp/max_mp direct numeric fields; no runtime JSON decoding required"
+  }
+}

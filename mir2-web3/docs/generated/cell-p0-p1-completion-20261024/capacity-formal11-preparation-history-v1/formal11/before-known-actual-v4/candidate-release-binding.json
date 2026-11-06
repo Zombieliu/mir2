@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "state": "PENDING_FRESH44_RELEASE_AND_FULL16",
+  "backendSourceCommit": null,
+  "backendInputCount": 44,
+  "backendSourceAggregate": null,
+  "releaseRecord": null,
+  "backendSourceManifest": null,
+  "binary": null,
+  "buildReceipt": null,
+  "buildLog": null,
+  "rootFunctionalValidation": null,
+  "full16": {
+    "state": "pending",
+    "audit": null,
+    "files": null
+  },
+  "driverSourceCommit": null,
+  "driverSourceSha256": "db4e22c69b4f1365d8135023e158f4de00ff35d58330cf7eca98801780e674e7",
+  "coreCodeEvidenceCommit": "b84d5d02a8299b6ac36c5e56cb7006f6bc80d3bd",
+  "driverFrozenManifest": {
+    "file": "C:/mir2-build/p01-completion-20261024/capacity-native-chase-preference-driver-frozen-v1.json",
+    "bytes": 19099,
+    "sha256": "20fd347d029d9a912514e400bc74b0d08ec940bd90af20ff2f91bd64dba08bef"
+  },
+  "prepareExecuted": false,
+  "realmStarted": false,
+  "capacityAccepted": false,
+  "driverFreezeRole": "Historical b84d Node9/db4e and13/200 validation only. Any468/backend/full16 fields inside that freeze are historical, never the active Probe15 backend binding."
+}

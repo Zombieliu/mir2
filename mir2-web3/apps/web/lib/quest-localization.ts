@@ -2,6 +2,11 @@ import {
   localizeCrystalEntityName,
   localizeCrystalItemName,
 } from "./crystal-content-localization";
+import {
+  localizeNewcomerV2Text,
+  newcomerV2ObjectiveTextFor,
+  newcomerV2QuestCopyFor,
+} from "./newcomer-v2-journey";
 
 export type QuestTranslateFn = (
   key: string,
@@ -58,6 +63,11 @@ export function localizeQuestEntry<T extends LocalizableQuestEntry>(
   quest: T,
   t: QuestTranslateFn,
 ): T {
+  const newcomerV2Copy = newcomerV2QuestCopyFor(quest.questId);
+  if (newcomerV2Copy) {
+    return localizeNewcomerV2QuestEntry(quest, newcomerV2Copy, t);
+  }
+
   const questKey = CRYSTAL_QUEST_KEY_BY_ID[quest.questId];
   if (!questKey) return quest;
 
@@ -128,6 +138,32 @@ export function localizeQuestEntry<T extends LocalizableQuestEntry>(
 
   return localized;
 }
+
+function localizeNewcomerV2QuestEntry<T extends LocalizableQuestEntry>(
+  quest: T,
+  copy: NonNullable<ReturnType<typeof newcomerV2QuestCopyFor>>,
+  t: QuestTranslateFn,
+): T {
+  const targetCopyApplies = quest.stage === "inProgress" || quest.stage === "readyToTurnIn";
+  const localized = {
+    ...quest,
+    title: localizeNewcomerV2Text(copy.title, t),
+    ...(targetCopyApplies ? { objective: localizeNewcomerV2Text(copy.objective, t) } : {}),
+  } as T;
+
+  if (quest.objectives?.length && copy.objectives?.length) {
+    localized.objectives = quest.objectives.map((objective) => {
+      const objectiveCopy = newcomerV2ObjectiveTextFor(quest.questId, objective.label);
+      return {
+        ...objective,
+        label: objectiveCopy ? localizeNewcomerV2Text(objectiveCopy, t) : objective.label,
+      };
+    });
+  }
+
+  return localized;
+}
+
 
 export function localizeQuestLog<T extends LocalizableQuestEntry>(
   quests: readonly T[],

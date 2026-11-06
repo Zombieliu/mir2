@@ -1,0 +1,950 @@
+{
+  "mapFileName": "0",
+  "anchors": [
+    {
+      "x": 252,
+      "y": 671
+    },
+    {
+      "x": 256,
+      "y": 671
+    },
+    {
+      "x": 260,
+      "y": 670
+    },
+    {
+      "x": 265,
+      "y": 665
+    },
+    {
+      "x": 265,
+      "y": 675
+    }
+  ],
+  "patrolSpan": 2,
+  "monsterNames": [
+    "Deer",
+    "Scarecrow"
+  ],
+  "combatClusters": [
+    {
+      "combatActorIndices": [
+        2
+      ],
+      "movementActorIndices": [
+        0,
+        1,
+        3,
+        4
+      ]
+    }
+  ],
+  "generated": {
+    "staticOnly": true,
+    "sustainableSupplyAccepted": false,
+    "staticProof": {
+      "homes": [
+        {
+          "x": 252,
+          "y": 671
+        },
+        {
+          "x": 256,
+          "y": 671
+        },
+        {
+          "x": 260,
+          "y": 670
+        },
+        {
+          "x": 265,
+          "y": 665
+        },
+        {
+          "x": 265,
+          "y": 675
+        }
+      ],
+      "visitedCells": 13826,
+      "mapCells": 490000,
+      "footprintCells": 45
+    },
+    "attackAccessibilitySource": "C:/mir2-build/p01-completion-20261024/release-accessibility-5-01/accessibility-south-openfield.json",
+    "attackAccessibilityCapturedAt": 1792855384081,
+    "actualTargets": [
+      {
+        "objectId": 206501,
+        "name": "Deer",
+        "x": 249,
+        "y": 670,
+        "hp": 25,
+        "covered": true,
+        "reachableRoutes": [
+          {
+            "goal": {
+              "x": 249,
+              "y": 669
+            },
+            "first": {
+              "x": 259,
+              "y": 670
+            },
+            "routeLength": 11
+          },
+          {
+            "goal": {
+              "x": 250,
+              "y": 669
+            },
+            "first": {
+              "x": 259,
+              "y": 670
+            },
+            "routeLength": 10
+          },
+          {
+            "goal": {
+              "x": 250,
+              "y": 670
+            },
+            "first": {
+              "x": 259,
+              "y": 670
+            },
+            "routeLength": 10
+          },
+          {
+            "goal": {
+              "x": 250,
+              "y": 671
+            },
+            "first": {
+              "x": 259,
+              "y": 670
+            },
+            "routeLength": 10
+          },
+          {
+            "goal": {
+              "x": 249,
+              "y": 671
+            },
+            "first": {
+              "x": 259,
+              "y": 670
+            },
+            "routeLength": 11
+          },
+          {
+            "goal": {
+              "x": 248,
+              "y": 671
+            },
+            "first": {
+              "x": 259,
+              "y": 670
+            },
+            "routeLength": 12
+          },
+          {
+            "goal": {
+              "x": 248,
+              "y": 670
+            },
+            "first": {
+              "x": 259,
+              "y": 670
+            },
+            "routeLength": 13
+          },
+          {
+            "goal": {
+              "x": 248,
+              "y": 669
+            },
+            "first": {
+              "x": 259,
+              "y": 670
+            },
+            "routeLength": 12
+          }
+        ]
+      },
+      {
+        "objectId": 206504,
+        "name": "Deer",
+        "x": 268,
+        "y": 668,
+        "hp": 25,
+        "covered": true,
+        "reachableRoutes": [
+          {
+            "goal": {
+              "x": 268,
+              "y": 667
+            },
+            "first": {
+              "x": 261,
+              "y": 670
+            },
+            "routeLength": 8
+          },
+          {
+            "goal": {
+              "x": 269,
+              "y": 667
+            },
+            "first": {
+              "x": 261,
+              "y": 670
+            },
+            "routeLength": 9
+          },
+          {
+            "goal": {
+              "x": 269,
+              "y": 668
+            },
+            "first": {
+              "x": 261,
+              "y": 670
+            },
+            "routeLength": 10
+          },
+          {
+            "goal": {
+              "x": 269,
+              "y": 669
+            },
+            "first": {
+              "x": 261,
+              "y": 670
+            },
+            "routeLength": 9
+          },
+          {
+            "goal": {
+              "x": 268,
+              "y": 669
+            },
+            "first": {
+              "x": 261,
+              "y": 670
+            },
+            "routeLength": 8
+          },
+          {
+            "goal": {
+              "x": 267,
+              "y": 669
+            },
+            "first": {
+              "x": 261,
+              "y": 670
+            },
+            "routeLength": 7
+          },
+          {
+            "goal": {
+              "x": 267,
+              "y": 668
+            },
+            "first": {
+              "x": 261,
+              "y": 670
+            },
+            "routeLength": 7
+          },
+          {
+            "goal": {
+              "x": 267,
+              "y": 667
+            },
+            "first": {
+              "x": 261,
+              "y": 670
+            },
+            "routeLength": 7
+          }
+        ]
+      },
+      {
+        "objectId": 206513,
+        "name": "Deer",
+        "x": 274,
+        "y": 662,
+        "hp": 25,
+        "covered": true,
+        "reachableRoutes": [
+          {
+            "goal": {
+              "x": 274,
+              "y": 661
+            },
+            "first": {
+              "x": 261,
+              "y": 670
+            },
+            "routeLength": 14
+          },
+          {
+            "goal": {
+              "x": 275,
+              "y": 661
+            },
+            "first": {
+              "x": 261,
+              "y": 670
+            },
+            "routeLength": 15
+          },
+          {
+            "goal": {
+              "x": 275,
+              "y": 662
+            },
+            "first": {
+              "x": 261,
+              "y": 670
+            },
+            "routeLength": 16
+          },
+          {
+            "goal": {
+              "x": 275,
+              "y": 663
+            },
+            "first": {
+              "x": 261,
+              "y": 670
+            },
+            "routeLength": 15
+          },
+          {
+            "goal": {
+              "x": 274,
+              "y": 663
+            },
+            "first": {
+              "x": 261,
+              "y": 670
+            },
+            "routeLength": 14
+          },
+          {
+            "goal": {
+              "x": 273,
+              "y": 663
+            },
+            "first": {
+              "x": 261,
+              "y": 670
+            },
+            "routeLength": 13
+          },
+          {
+            "goal": {
+              "x": 273,
+              "y": 662
+            },
+            "first": {
+              "x": 261,
+              "y": 670
+            },
+            "routeLength": 13
+          },
+          {
+            "goal": {
+              "x": 273,
+              "y": 661
+            },
+            "first": {
+              "x": 261,
+              "y": 670
+            },
+            "routeLength": 13
+          }
+        ]
+      },
+      {
+        "objectId": 206525,
+        "name": "Deer",
+        "x": 259,
+        "y": 655,
+        "hp": 25,
+        "covered": true,
+        "reachableRoutes": [
+          {
+            "goal": {
+              "x": 259,
+              "y": 654
+            },
+            "first": {
+              "x": 260,
+              "y": 669
+            },
+            "routeLength": 17
+          },
+          {
+            "goal": {
+              "x": 260,
+              "y": 654
+            },
+            "first": {
+              "x": 260,
+              "y": 669
+            },
+            "routeLength": 16
+          },
+          {
+            "goal": {
+              "x": 260,
+              "y": 655
+            },
+            "first": {
+              "x": 260,
+              "y": 669
+            },
+            "routeLength": 15
+          },
+          {
+            "goal": {
+              "x": 260,
+              "y": 656
+            },
+            "first": {
+              "x": 260,
+              "y": 669
+            },
+            "routeLength": 14
+          },
+          {
+            "goal": {
+              "x": 259,
+              "y": 656
+            },
+            "first": {
+              "x": 260,
+              "y": 669
+            },
+            "routeLength": 14
+          },
+          {
+            "goal": {
+              "x": 258,
+              "y": 656
+            },
+            "first": {
+              "x": 260,
+              "y": 669
+            },
+            "routeLength": 14
+          },
+          {
+            "goal": {
+              "x": 258,
+              "y": 655
+            },
+            "first": {
+              "x": 260,
+              "y": 669
+            },
+            "routeLength": 15
+          },
+          {
+            "goal": {
+              "x": 258,
+              "y": 654
+            },
+            "first": {
+              "x": 260,
+              "y": 669
+            },
+            "routeLength": 16
+          }
+        ]
+      },
+      {
+        "objectId": 206624,
+        "name": "Scarecrow",
+        "x": 259,
+        "y": 682,
+        "hp": 20,
+        "covered": true,
+        "reachableRoutes": [
+          {
+            "goal": {
+              "x": 259,
+              "y": 681
+            },
+            "first": {
+              "x": 260,
+              "y": 671
+            },
+            "routeLength": 12
+          },
+          {
+            "goal": {
+              "x": 260,
+              "y": 681
+            },
+            "first": {
+              "x": 260,
+              "y": 671
+            },
+            "routeLength": 11
+          },
+          {
+            "goal": {
+              "x": 260,
+              "y": 682
+            },
+            "first": {
+              "x": 260,
+              "y": 671
+            },
+            "routeLength": 12
+          },
+          {
+            "goal": {
+              "x": 260,
+              "y": 683
+            },
+            "first": {
+              "x": 260,
+              "y": 671
+            },
+            "routeLength": 13
+          },
+          {
+            "goal": {
+              "x": 259,
+              "y": 683
+            },
+            "first": {
+              "x": 260,
+              "y": 671
+            },
+            "routeLength": 14
+          },
+          {
+            "goal": {
+              "x": 258,
+              "y": 682
+            },
+            "first": {
+              "x": 259,
+              "y": 671
+            },
+            "routeLength": 12
+          },
+          {
+            "goal": {
+              "x": 258,
+              "y": 681
+            },
+            "first": {
+              "x": 260,
+              "y": 671
+            },
+            "routeLength": 13
+          }
+        ]
+      },
+      {
+        "objectId": 206639,
+        "name": "Scarecrow",
+        "x": 249,
+        "y": 668,
+        "hp": 20,
+        "covered": true,
+        "reachableRoutes": [
+          {
+            "goal": {
+              "x": 249,
+              "y": 667
+            },
+            "first": {
+              "x": 259,
+              "y": 670
+            },
+            "routeLength": 11
+          },
+          {
+            "goal": {
+              "x": 250,
+              "y": 667
+            },
+            "first": {
+              "x": 259,
+              "y": 670
+            },
+            "routeLength": 10
+          },
+          {
+            "goal": {
+              "x": 250,
+              "y": 668
+            },
+            "first": {
+              "x": 259,
+              "y": 670
+            },
+            "routeLength": 10
+          },
+          {
+            "goal": {
+              "x": 250,
+              "y": 669
+            },
+            "first": {
+              "x": 259,
+              "y": 670
+            },
+            "routeLength": 10
+          },
+          {
+            "goal": {
+              "x": 249,
+              "y": 669
+            },
+            "first": {
+              "x": 259,
+              "y": 670
+            },
+            "routeLength": 11
+          },
+          {
+            "goal": {
+              "x": 248,
+              "y": 669
+            },
+            "first": {
+              "x": 259,
+              "y": 670
+            },
+            "routeLength": 12
+          },
+          {
+            "goal": {
+              "x": 248,
+              "y": 668
+            },
+            "first": {
+              "x": 259,
+              "y": 670
+            },
+            "routeLength": 13
+          },
+          {
+            "goal": {
+              "x": 248,
+              "y": 667
+            },
+            "first": {
+              "x": 259,
+              "y": 670
+            },
+            "routeLength": 12
+          }
+        ]
+      },
+      {
+        "objectId": 206642,
+        "name": "Scarecrow",
+        "x": 261,
+        "y": 665,
+        "hp": 20,
+        "covered": true,
+        "reachableRoutes": [
+          {
+            "goal": {
+              "x": 261,
+              "y": 664
+            },
+            "first": {
+              "x": 260,
+              "y": 669
+            },
+            "routeLength": 7
+          },
+          {
+            "goal": {
+              "x": 262,
+              "y": 664
+            },
+            "first": {
+              "x": 260,
+              "y": 669
+            },
+            "routeLength": 6
+          },
+          {
+            "goal": {
+              "x": 262,
+              "y": 665
+            },
+            "first": {
+              "x": 260,
+              "y": 669
+            },
+            "routeLength": 5
+          },
+          {
+            "goal": {
+              "x": 262,
+              "y": 666
+            },
+            "first": {
+              "x": 260,
+              "y": 669
+            },
+            "routeLength": 4
+          },
+          {
+            "goal": {
+              "x": 261,
+              "y": 666
+            },
+            "first": {
+              "x": 260,
+              "y": 669
+            },
+            "routeLength": 4
+          },
+          {
+            "goal": {
+              "x": 260,
+              "y": 666
+            },
+            "first": {
+              "x": 260,
+              "y": 669
+            },
+            "routeLength": 4
+          },
+          {
+            "goal": {
+              "x": 260,
+              "y": 665
+            },
+            "first": {
+              "x": 260,
+              "y": 669
+            },
+            "routeLength": 5
+          },
+          {
+            "goal": {
+              "x": 260,
+              "y": 664
+            },
+            "first": {
+              "x": 260,
+              "y": 669
+            },
+            "routeLength": 6
+          }
+        ]
+      },
+      {
+        "objectId": 206648,
+        "name": "Scarecrow",
+        "x": 258,
+        "y": 661,
+        "hp": 20,
+        "covered": true,
+        "reachableRoutes": [
+          {
+            "goal": {
+              "x": 258,
+              "y": 660
+            },
+            "first": {
+              "x": 260,
+              "y": 669
+            },
+            "routeLength": 11
+          },
+          {
+            "goal": {
+              "x": 259,
+              "y": 660
+            },
+            "first": {
+              "x": 260,
+              "y": 669
+            },
+            "routeLength": 10
+          },
+          {
+            "goal": {
+              "x": 259,
+              "y": 661
+            },
+            "first": {
+              "x": 260,
+              "y": 669
+            },
+            "routeLength": 9
+          },
+          {
+            "goal": {
+              "x": 259,
+              "y": 662
+            },
+            "first": {
+              "x": 260,
+              "y": 669
+            },
+            "routeLength": 8
+          },
+          {
+            "goal": {
+              "x": 258,
+              "y": 662
+            },
+            "first": {
+              "x": 260,
+              "y": 669
+            },
+            "routeLength": 8
+          },
+          {
+            "goal": {
+              "x": 257,
+              "y": 662
+            },
+            "first": {
+              "x": 260,
+              "y": 669
+            },
+            "routeLength": 8
+          },
+          {
+            "goal": {
+              "x": 257,
+              "y": 661
+            },
+            "first": {
+              "x": 260,
+              "y": 669
+            },
+            "routeLength": 9
+          },
+          {
+            "goal": {
+              "x": 257,
+              "y": 660
+            },
+            "first": {
+              "x": 260,
+              "y": 669
+            },
+            "routeLength": 10
+          }
+        ]
+      },
+      {
+        "objectId": 206712,
+        "name": "Deer",
+        "x": 261,
+        "y": 657,
+        "hp": 25,
+        "covered": true,
+        "reachableRoutes": [
+          {
+            "goal": {
+              "x": 261,
+              "y": 656
+            },
+            "first": {
+              "x": 260,
+              "y": 669
+            },
+            "routeLength": 15
+          },
+          {
+            "goal": {
+              "x": 262,
+              "y": 656
+            },
+            "first": {
+              "x": 260,
+              "y": 669
+            },
+            "routeLength": 14
+          },
+          {
+            "goal": {
+              "x": 262,
+              "y": 657
+            },
+            "first": {
+              "x": 260,
+              "y": 669
+            },
+            "routeLength": 13
+          },
+          {
+            "goal": {
+              "x": 262,
+              "y": 658
+            },
+            "first": {
+              "x": 260,
+              "y": 669
+            },
+            "routeLength": 12
+          },
+          {
+            "goal": {
+              "x": 261,
+              "y": 658
+            },
+            "first": {
+              "x": 260,
+              "y": 669
+            },
+            "routeLength": 12
+          },
+          {
+            "goal": {
+              "x": 260,
+              "y": 658
+            },
+            "first": {
+              "x": 260,
+              "y": 669
+            },
+            "routeLength": 12
+          },
+          {
+            "goal": {
+              "x": 260,
+              "y": 657
+            },
+            "first": {
+              "x": 260,
+              "y": 669
+            },
+            "routeLength": 13
+          },
+          {
+            "goal": {
+              "x": 260,
+              "y": 656
+            },
+            "first": {
+              "x": 260,
+              "y": 669
+            },
+            "routeLength": 14
+          }
+        ]
+      }
+    ],
+    "purpose": "Final strict 5 native actor gate; first2 exactly match100 candidate; matrix confirms routes, live witness/continuous supply still pending"
+  }
+}

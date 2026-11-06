@@ -1,0 +1,271 @@
+{
+  "schemaVersion": 1,
+  "sourcePackage": "C:/mir2-build/p01-completion-20261024/ordinary-v6-full-lifecycle-v1",
+  "files": [
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-v6-full-lifecycle-v1\\source-lib-v1.mjs",
+      "target": "tools/source-lib-v1.mjs",
+      "role": "reviewed-owned-tool"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-v6-full-lifecycle-v1\\backend-source-lib-v1.mjs",
+      "target": "tools/backend-source-lib-v1.mjs",
+      "role": "reviewed-owned-tool"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-v6-full-lifecycle-v1\\verify-inputs.mjs",
+      "target": "tools/verify-inputs.mjs",
+      "role": "reviewed-owned-tool"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-v6-full-lifecycle-v1\\finalize-inputs-v1.mjs",
+      "target": "tools/finalize-inputs-v1.mjs",
+      "role": "reviewed-owned-tool"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-v6-full-lifecycle-v1\\freeze-inputs-v1.mjs",
+      "target": "tools/freeze-inputs-v1.mjs",
+      "role": "reviewed-owned-tool"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-v6-full-lifecycle-v1\\run-owned-full.mjs",
+      "target": "tools/run-owned-full.mjs",
+      "role": "reviewed-owned-tool"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-v6-full-lifecycle-v1\\audit-owned-full.mjs",
+      "target": "tools/audit-owned-full.mjs",
+      "role": "reviewed-owned-tool"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-v6-full-lifecycle-v1\\frozen-audit-support.mjs",
+      "target": "tools/frozen-audit-support.mjs",
+      "role": "reviewed-owned-tool"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-v6-full-lifecycle-v1\\initialize-fresh-private.ps1",
+      "target": "tools/initialize-fresh-private.ps1",
+      "role": "reviewed-owned-tool"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-v6-full-lifecycle-v1\\author-pending-v1.mjs",
+      "target": "tools/author-pending-v1.mjs",
+      "role": "reviewed-owned-tool"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-v6-full-lifecycle-v1\\authoring-receipt-v1.json",
+      "target": "preparation/authoring-receipt-v1.json",
+      "role": "unaltered-authoring-or-Root-review"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-v6-full-lifecycle-v1\\backend-release-binding-pending-v1.json",
+      "target": "preparation/backend-release-binding-pending-v1.json",
+      "role": "unaltered-authoring-or-Root-review"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-v6-full-lifecycle-v1\\candidate-driver-preview-v1.json",
+      "target": "preparation/candidate-driver-preview-v1.json",
+      "role": "unaltered-authoring-or-Root-review"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-v6-full-lifecycle-v1\\config-pending-v1.json",
+      "target": "preparation/config-pending-v1.json",
+      "role": "unaltered-authoring-or-Root-review"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-v6-full-lifecycle-v1\\derivation-v1.json",
+      "target": "preparation/derivation-v1.json",
+      "role": "unaltered-authoring-or-Root-review"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-v6-full-lifecycle-v1\\README-PENDING.md",
+      "target": "preparation/README-PENDING.md",
+      "role": "unaltered-authoring-or-Root-review"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-v6-full-lifecycle-v1\\root-pending-tools-review-v1.json",
+      "target": "preparation/root-pending-tools-review-v1.json",
+      "role": "unaltered-authoring-or-Root-review"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-v6-full-lifecycle-v1\\syntax-checks-v1.json",
+      "target": "preparation/syntax-checks-v1.json",
+      "role": "unaltered-authoring-or-Root-review"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-v6-full-lifecycle-v1\\syntax-source-lib-v1.mjs.log",
+      "target": "preparation/syntax-source-lib-v1.mjs.log",
+      "role": "unaltered-authoring-or-Root-review"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-v6-full-lifecycle-v1\\syntax-backend-source-lib-v1.mjs.log",
+      "target": "preparation/syntax-backend-source-lib-v1.mjs.log",
+      "role": "unaltered-authoring-or-Root-review"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-v6-full-lifecycle-v1\\syntax-verify-inputs.mjs.log",
+      "target": "preparation/syntax-verify-inputs.mjs.log",
+      "role": "unaltered-authoring-or-Root-review"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-v6-full-lifecycle-v1\\syntax-finalize-inputs-v1.mjs.log",
+      "target": "preparation/syntax-finalize-inputs-v1.mjs.log",
+      "role": "unaltered-authoring-or-Root-review"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-v6-full-lifecycle-v1\\syntax-freeze-inputs-v1.mjs.log",
+      "target": "preparation/syntax-freeze-inputs-v1.mjs.log",
+      "role": "unaltered-authoring-or-Root-review"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-v6-full-lifecycle-v1\\syntax-run-owned-full.mjs.log",
+      "target": "preparation/syntax-run-owned-full.mjs.log",
+      "role": "unaltered-authoring-or-Root-review"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-v6-full-lifecycle-v1\\syntax-audit-owned-full.mjs.log",
+      "target": "preparation/syntax-audit-owned-full.mjs.log",
+      "role": "unaltered-authoring-or-Root-review"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-v6-full-lifecycle-v1\\syntax-frozen-audit-support.mjs.log",
+      "target": "preparation/syntax-frozen-audit-support.mjs.log",
+      "role": "unaltered-authoring-or-Root-review"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-v6-full-lifecycle-v1\\syntax-author-pending-v1.mjs.log",
+      "target": "preparation/syntax-author-pending-v1.mjs.log",
+      "role": "unaltered-authoring-or-Root-review"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-v6-full-lifecycle-v1\\backend-release-binding-v1.json",
+      "target": "inputs/backend-release-binding-v1.json",
+      "role": "actual-final-and-frozen-input"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-v6-full-lifecycle-v1\\final-current-driver-v1.json",
+      "target": "inputs/final-current-driver-v1.json",
+      "role": "actual-final-and-frozen-input"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-v6-full-lifecycle-v1\\final-input-binding-v1.json",
+      "target": "inputs/final-input-binding-v1.json",
+      "role": "actual-final-and-frozen-input"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-v6-full-lifecycle-v1\\frozen-inputs-v1.json",
+      "target": "inputs/frozen-inputs-v1.json",
+      "role": "actual-final-and-frozen-input"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-v6-full-lifecycle-v1\\public\\1793057632464-9c427e44.audit-source.mjs",
+      "target": "run/1793057632464-9c427e44.audit-source.mjs",
+      "role": "original-public-run-artifact"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-v6-full-lifecycle-v1\\public\\1793057632464-9c427e44.backend-source.json",
+      "target": "run/1793057632464-9c427e44.backend-source.json",
+      "role": "original-public-run-artifact"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-v6-full-lifecycle-v1\\public\\1793057632464-9c427e44.independent-audit.json",
+      "target": "run/1793057632464-9c427e44.independent-audit.json",
+      "role": "original-public-run-artifact"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-v6-full-lifecycle-v1\\public\\1793057632464-9c427e44.prepared-profile.json",
+      "target": "run/1793057632464-9c427e44.prepared-profile.json",
+      "role": "original-public-run-artifact"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-v6-full-lifecycle-v1\\public\\1793057632464-9c427e44.realm-evidence.json",
+      "target": "run/1793057632464-9c427e44.realm-evidence.json",
+      "role": "original-public-run-artifact"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-v6-full-lifecycle-v1\\public\\1793057632464-9c427e44.release-input.json",
+      "target": "run/1793057632464-9c427e44.release-input.json",
+      "role": "original-public-run-artifact"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-v6-full-lifecycle-v1\\public\\1793057632464-9c427e44.runner-source.mjs",
+      "target": "run/1793057632464-9c427e44.runner-source.mjs",
+      "role": "original-public-run-artifact"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-v6-full-lifecycle-v1\\public\\1793057632464-9c427e44.source-manifest-verification.json",
+      "target": "run/1793057632464-9c427e44.source-manifest-verification.json",
+      "role": "original-public-run-artifact"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-v6-full-lifecycle-v1\\public\\1793057632464-9c427e44.zone-metrics.json",
+      "target": "run/1793057632464-9c427e44.zone-metrics.json",
+      "role": "original-public-run-artifact"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-v6-full-lifecycle-v1\\public\\1793057646570-c2fb7dc7-a.trace.jsonl",
+      "target": "run/1793057646570-c2fb7dc7-a.trace.jsonl",
+      "role": "original-redacted-public-trace"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-v6-full-lifecycle-v1\\public\\1793057646570-c2fb7dc7-b.trace.jsonl",
+      "target": "run/1793057646570-c2fb7dc7-b.trace.jsonl",
+      "role": "original-redacted-public-trace"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-v6-full-lifecycle-v1\\public\\1793057646570-c2fb7dc7-guard-newCharacter.trace.jsonl",
+      "target": "run/1793057646570-c2fb7dc7-guard-newCharacter.trace.jsonl",
+      "role": "original-redacted-public-trace"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-v6-full-lifecycle-v1\\public\\1793057646570-c2fb7dc7-guard-startGame.trace.jsonl",
+      "target": "run/1793057646570-c2fb7dc7-guard-startGame.trace.jsonl",
+      "role": "original-redacted-public-trace"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-v6-full-lifecycle-v1\\public\\1793057646570-c2fb7dc7-relogin-0.trace.jsonl",
+      "target": "run/1793057646570-c2fb7dc7-relogin-0.trace.jsonl",
+      "role": "original-redacted-public-trace"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-v6-full-lifecycle-v1\\public\\1793057646570-c2fb7dc7-relogin-1.trace.jsonl",
+      "target": "run/1793057646570-c2fb7dc7-relogin-1.trace.jsonl",
+      "role": "original-redacted-public-trace"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-v6-full-lifecycle-v1\\public\\1793057646570-c2fb7dc7.report.json",
+      "target": "run/1793057646570-c2fb7dc7.report.json",
+      "role": "original-public-run-artifact"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-v6-full-lifecycle-v1\\root-independent-cleanup-v1.json",
+      "target": "cleanup/root-independent-cleanup-v1.json",
+      "role": "actual-independent-Root-OS-check"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\root-capacity-preparation-validation-v9\\root-focused-receipt-v1.json",
+      "target": "qualification/root-focused-receipt-v1.json",
+      "role": "current-Root647-metadata-only"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-hp-wake-release-v6\\build-receipt-v6.json",
+      "target": "qualification/reused-v6-build-receipt.json",
+      "role": "original-V6-build-metadata-reused-not-rerun"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\root-ordinary-hp-wake-validation-v2\\root-focused-receipt-v1.json",
+      "target": "qualification/reused-v6-rust32-receipt.json",
+      "role": "original-V6-Rust32-metadata-reused-not-rerun"
+    }
+  ],
+  "excluded": [
+    "private/ account Store and recovery",
+    "four secret values/files",
+    "registration credential files",
+    "gateway stdout/stderr",
+    "complete spectator/AI-live recordings",
+    "executables",
+    "Root647 stdout/stderr duplicated copies"
+  ],
+  "publicSetExact": true
+}

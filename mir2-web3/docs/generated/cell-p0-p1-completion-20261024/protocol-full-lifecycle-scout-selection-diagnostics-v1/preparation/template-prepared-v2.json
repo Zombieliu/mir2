@@ -1,0 +1,215 @@
+{
+  "schemaVersion": 1,
+  "state": "PENDING_ROOT_FINALIZATION_NOT_EXECUTED",
+  "preparedAt": "2026-10-26T01:22:04.034099+00:00",
+  "root": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-selection-diagnostics-v1",
+  "files": [
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-selection-diagnostics-v1\\actual-K-binding-derivation-v2.json",
+      "bytes": 5118,
+      "sha256": "ee341df0d3621ddba609ce401fa4c62760b851033097c29931840fefc0ceeb81"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-selection-diagnostics-v1\\audit-owned-full.mjs",
+      "bytes": 9491,
+      "sha256": "278309304f6b929499c19367028ee109432b59a886c2476b81c911b9a9f87422"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-selection-diagnostics-v1\\candidate-release-binding-before-actual-K-v1.json",
+      "bytes": 2979,
+      "sha256": "2d67e191294bcccf4b51ef291a1e6c957c53f8176d9db8e9b331e76f2e5c0f11"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-selection-diagnostics-v1\\candidate-release-binding-v1.json",
+      "bytes": 3297,
+      "sha256": "90014c778f572443ae39209a3fe5d32d57c9efd66f74dba2d22f5aa48d36f27c"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-selection-diagnostics-v1\\derivation-proof-v1.json",
+      "bytes": 12018,
+      "sha256": "abc7855f000056787ceb22faf00b2d0f1940731f7b964bd9b89eceecba8fe39d"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-selection-diagnostics-v1\\finalize-launcher-inputs.mjs",
+      "bytes": 2418,
+      "sha256": "4561c3f6a5c3965b0adb6ac50b003db6e513a8830220e6c1c13fd8e576d791ad"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-selection-diagnostics-v1\\frozen-audit-support.mjs",
+      "bytes": 46572,
+      "sha256": "3988052a4ba9de791dbdb887b267eced6ca8bc915fa5676228f6d70c0761f4d5"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-selection-diagnostics-v1\\full-lifecycle-profile-before-actual-K-v1.json",
+      "bytes": 4602,
+      "sha256": "ff44e901506e6404b3dd6f48f681a5ab0cb0619138dd823a6810182013e19205"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-selection-diagnostics-v1\\full-lifecycle-profile.json",
+      "bytes": 4838,
+      "sha256": "1ca0cb2ef77f73dbc0b6e2743d77796119702d651f9cc740fbd84622995e6477"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-selection-diagnostics-v1\\initialize-fresh-private.ps1",
+      "bytes": 1643,
+      "sha256": "c3a8ddecafe8c82752d963ee3237b55b25841d9674af83ea791e67ef8a82fd77"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-selection-diagnostics-v1\\projection-build-source-lib.mjs",
+      "bytes": 225,
+      "sha256": "3902723a32143dca49fdeb242cc6c8234c0a11fc7668a5c214871e888ea0b6a1"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-selection-diagnostics-v1\\README-before-actual-K-v1.md",
+      "bytes": 1599,
+      "sha256": "db21e29b184b84b875b2eaa91b8d485763792ade0ba314b5564cbba797c6659d"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-selection-diagnostics-v1\\README.md",
+      "bytes": 1613,
+      "sha256": "ca9afdfd96d2b269b1455ddf5878da9fcf9e5a91ce89a8a9fc1fe77056f57e21"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-selection-diagnostics-v1\\run-owned-full.mjs",
+      "bytes": 14516,
+      "sha256": "07940d612fe14044235d6ee1cba2a763ec4206da2f8eeaa48770eadaa5e013e7"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-selection-diagnostics-v1\\syntax-check-v1.json",
+      "bytes": 3212,
+      "sha256": "dca879eaa06fa8d67d774ffd10e2f8cfaebd73487132a455e50dd33742bc5ac6"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-selection-diagnostics-v1\\verify-inputs.mjs",
+      "bytes": 14340,
+      "sha256": "a421f94c8e86bd94745b57d883cb47613179eaac27d1eb53ed59baefe2ae115b"
+    }
+  ],
+  "sourceSha256": "8cdacb016ee73a72a09973bc9fed9dd4b020bcf047e22ac504b97923397a4efd",
+  "syntax": {
+    "passed": true,
+    "scripts": 5,
+    "receipt": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-selection-diagnostics-v1\\syntax-check-v1.json",
+      "bytes": 3212,
+      "sha256": "dca879eaa06fa8d67d774ffd10e2f8cfaebd73487132a455e50dd33742bc5ac6"
+    },
+    "kind": "Actual Node --check only; no ESM import",
+    "rawExactUnchangedNeutralAndPowerShellCopies": 2,
+    "scriptsExecutedForActualMetadataBinding": 0,
+    "reusedUnchangedScripts": 5
+  },
+  "backendSourceCommit": "c743122af05faca43d9535d8c6c2a4bfb01b924f",
+  "backendInputCount": 50,
+  "backendSourceAggregate": "09081ea9b49d968574b99f444c238932045eccb0dc3f7de4b24496a932c895f7",
+  "binarySha256": "dae1f873878ee5212e8d84cd57cb9cc737104aaec8a644c4aeb33a49980d82cc",
+  "executionSourceCommit": "b5374083d257d375437af3de42bead159cd2b917",
+  "driverSourceCommit": "b5374083d257d375437af3de42bead159cd2b917",
+  "driverSourceSha256": "d61b7cd057e1a2a55191fe6c407b3058b5ff9205141eaf9290d16da42b028db1",
+  "currentDriverFrozen": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\capacity-scout-selection-diagnostics-driver-frozen-v1.json",
+    "bytes": 12423,
+    "sha256": "e3300e34d060fb23638bdc690726b6f4376f7fdeb1049aa8871ebdb4bfd628f8"
+  },
+  "currentNodeRegression": {
+    "path": "C:\\mir2-build\\p01-completion-20261024\\root-scout-selection-diagnostics-validation-v1\\root-full-driver-receipt-v1.json",
+    "bytes": 5162,
+    "sha256": "733754ea1cade189fa92c29d5a808f7b940315909605cf636d2d3bf7b51a8446"
+  },
+  "expectedCurrentNodeRegressionTests": 232,
+  "actualCurrentNodeRegressionPassed": 232,
+  "externalRuntimeAdapter": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\scout-selection-diagnostics-runtime-v1\\source-lib-v1.mjs",
+    "bytes": 57227,
+    "sha256": "c94effada25cba3664c9920412d833b2356d98f503e36f8521e7d958e591f48d"
+  },
+  "externalRuntimeAdapterBoundForExecution": true,
+  "rootReadonlyRuntimeGuard": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\scout-selection-diagnostics-runtime-readonly-guard-stdout-v1.log",
+    "bytes": 513,
+    "sha256": "d124d042a9c6385f29d649fa0d5d4c60a95a4ba731e89858effebc86e0fddd75"
+  },
+  "ordinaryDriverCount": 6,
+  "requiredFullLifecycleChecks": 16,
+  "durationSeconds": 900,
+  "originalAttack900msContractUnchanged": true,
+  "allSixOrdinaryRawPinsCurrentAndUnchanged": true,
+  "actualFull16Passed": null,
+  "missingBindings": [
+    "Independent actual-bound full16 source review",
+    "Root explicit launcher finalization",
+    "New actual ordinary full16 execution and audit"
+  ],
+  "rootExecutionRequired": true,
+  "rootFinalizer": "finalize-launcher-inputs.mjs",
+  "moduleImported": false,
+  "modeExecuted": false,
+  "accountsCreated": 0,
+  "realmStarted": false,
+  "oldExecutionOutputsCopied": false,
+  "currentRuntimeStatesAbsent": [
+    "private",
+    "bin",
+    "public",
+    "launcher-final-binding-v1.json"
+  ],
+  "eligibleForRootFinalization": false,
+  "eligibleForRealm": false,
+  "capacityAccepted": false,
+  "p0Passed": false,
+  "notes": [
+    "Actual runtime guard exit0 before/after-identical source evidence is bound without modifying its Windows raw reference spelling.",
+    "K ordinary full16 has not executed; no J349/351/341 or other prior result is copied or relabeled.",
+    "Current232 Node regression is actual source evidence; six ordinary driver verification and new full16 execution remain independent.",
+    "--repository requires the mir2-web3 project root. The dynamic prepared-vN selector consumes exact current review and source pins.",
+    "No tool source changed for actual metadata binding; all five prior actual Node --check records are reused for exactly unchanged raw sources."
+  ],
+  "rootReadonlyRuntimeGuardExecution": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\scout-selection-diagnostics-runtime-readonly-guard-execution-v1.json",
+    "bytes": 2980,
+    "sha256": "e8023368558947d24b4940349d8e2e07fdf33f757707738f6a9d3f8e25326bd8"
+  },
+  "runtimeFinalBinding": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\scout-selection-diagnostics-runtime-v1\\current-execution-binding-v1.json",
+    "bytes": 1429,
+    "sha256": "1886e56e3e3846000932d053c727c21c893393cb6be35e844ee880a2a711b506"
+  },
+  "runtimeFinalReview": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\scout-selection-diagnostics-runtime-independent-review-v1\\final-binding-review-v2.json",
+    "bytes": 4774,
+    "sha256": "bb8fa1794aae6a06ad7a6b8b24b62ea54a830d9a0a2e732298d943bbef8e4117"
+  },
+  "currentNodeFullRegressionReview": {
+    "path": "C:\\mir2-build\\p01-completion-20261024\\scout-selection-decision-diagnostics-independent-review-v1\\full-regression-addendum-v1.json",
+    "bytes": 3712,
+    "sha256": "4c6c4abcf14d20451e740439a417939384e06ee5db02941cd6e72812b1a517e2"
+  },
+  "actualBindingDerivation": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-selection-diagnostics-v1\\actual-K-binding-derivation-v2.json",
+    "bytes": 5118,
+    "sha256": "ee341df0d3621ddba609ce401fa4c62760b851033097c29931840fefc0ceeb81"
+  },
+  "previousPreparation": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-selection-diagnostics-v1\\template-prepared-v1.json",
+    "bytes": 6585,
+    "sha256": "80635584ba7d62c693c5b6d8b569bbd1bb47c81d8f1b774d353de03bd454a0f6"
+  },
+  "pendingBeforeImages": [
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-selection-diagnostics-v1\\full-lifecycle-profile-before-actual-K-v1.json",
+      "bytes": 4602,
+      "sha256": "ff44e901506e6404b3dd6f48f681a5ab0cb0619138dd823a6810182013e19205"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-selection-diagnostics-v1\\candidate-release-binding-before-actual-K-v1.json",
+      "bytes": 2979,
+      "sha256": "2d67e191294bcccf4b51ef291a1e6c957c53f8176d9db8e9b331e76f2e5c0f11"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-selection-diagnostics-v1\\README-before-actual-K-v1.md",
+      "bytes": 1599,
+      "sha256": "db21e29b184b84b875b2eaa91b8d485763792ade0ba314b5564cbba797c6659d"
+    }
+  ],
+  "eligibleForIndependentFinalSourceReview": true
+}

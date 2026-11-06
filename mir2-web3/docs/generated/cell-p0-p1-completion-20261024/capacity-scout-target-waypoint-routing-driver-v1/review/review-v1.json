@@ -1,0 +1,285 @@
+{
+  "schemaVersion": 1,
+  "recordedAt": "2026-10-26T04:09:35.544Z",
+  "scope": "Independent read-only source and actual full-regression review for the bounded scout target-waypoint routing experiment.",
+  "originalCodeCommit": "b5374083d257d375437af3de42bead159cd2b917",
+  "currentNineSourceAggregate": "30863fa8e8b0af6f5588cddafb43ec7355e83bd2c3f9a792fb8c4ebc6f3f1750",
+  "currentSourcePins": [
+    {
+      "file": "apps/web/scripts/playtest-capacity-soak-core.mjs",
+      "bytes": 37930,
+      "sha256": "40ccd36ee84265a29bd509ca9a7bb360691f2be002411c8cab5f64a3e254cacc"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-soak.mjs",
+      "bytes": 157409,
+      "sha256": "8acb34b5c1815bab0ab82ec26fff1b770cbbf159779f7c55103dacb51c127d56"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-soak.test.mjs",
+      "bytes": 286361,
+      "sha256": "efa0779b746d138894f63300c1e484bee72ae405d41d9e3d0271b25ad0069656"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-observability.mjs",
+      "bytes": 4447,
+      "sha256": "19edb25f68fdd18567391e52a247964bd689346b58535871ce17051f53af9af7"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-observability.test.mjs",
+      "bytes": 5228,
+      "sha256": "00ff902194f805eb3433b192b2838b6eea6cd80860052860b825ab34f58a626d"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-monitor.mjs",
+      "bytes": 21246,
+      "sha256": "e585081835d9232b58d91bb0f717a796b483a818ed5c6fd943abf93350d74e7f"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-monitor.test.mjs",
+      "bytes": 10882,
+      "sha256": "0e60e4636ea5e384e6455fe9d474d56a760881505e765ccfc82eec490d8d92f8"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-telemetry.mjs",
+      "bytes": 6548,
+      "sha256": "d3b74c3b8e0401530e787f6b35bd9a578de4f455b3f7817b6230df41c5871964"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-telemetry.test.mjs",
+      "bytes": 6277,
+      "sha256": "f5efe4aa510f67eb10ebba26a5de9cb5402f061de07900998a77a191a749f974"
+    }
+  ],
+  "sourcePreservationAndFocusedEvidence": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\scout-target-waypoint-routing-v1\\source-preservation-and-focused-receipt-v1.json",
+    "bytes": 11450,
+    "sha256": "3f073e4cf97dcd1d85ccefe24d37263477e5f63ef341c23273e7d864f0d082cc"
+  },
+  "productionMutation": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\scout-target-waypoint-routing-v1\\production-mutation-v1.json",
+    "bytes": 3891,
+    "sha256": "d5b71b842eb8e610d15643cff9a3effe3999424c6a0212d8bbdd189996c43729"
+  },
+  "existingTestMaintenance": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\scout-target-waypoint-routing-v1\\existing-test-search-count-maintenance-v1.json",
+    "bytes": 2777,
+    "sha256": "1119032c4e1b5acab94158ba006d6affc5f30cf1aeffe71bf57afab74be6c1df"
+  },
+  "originalRawPreimages": [
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\scout-target-waypoint-routing-v1\\preimages\\playtest-capacity-soak.mjs.txt",
+      "bytes": 156391,
+      "sha256": "158aaaba83967153fc8f764895c9bce823993732618be934636654cc4401f0d2"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\scout-target-waypoint-routing-v1\\preimages\\playtest-capacity-soak.test.mjs.txt",
+      "bytes": 278248,
+      "sha256": "7cf64c8b28a7b57381dc4beaa5fa01e2d77378fa977e869205b1dc941893b68a"
+    }
+  ],
+  "sourceChecks": {
+    "productionSixRulesForwardAndInverseRawExact": true,
+    "originalMainAndTestPreimagesGitLFMatchK": true,
+    "gitLFComparisonDoesNotRewriteRawPreimages": true,
+    "originalTestPrefixRawExact": false,
+    "originalTestPrefixRawExactAfterSixMaintenanceHunksInverse": true,
+    "authorizedChangedOriginalCaseLines": [
+      3173,
+      3308,
+      3447
+    ],
+    "authorizedSearchCounts": [
+      {
+        "hintSearches": 1,
+        "totalSearches": 2
+      },
+      {
+        "hintSearches": 1,
+        "totalSearches": 2
+      },
+      {
+        "hintSearches": 2,
+        "totalSearches": 3
+      }
+    ],
+    "appendedTests": 5,
+    "otherSevenCurrentInputsRawExactToK": true,
+    "sevenReportDeclarationsAndAllCodeOutsideSixProductionRulesPreserved": true,
+    "restoreCombatPursuitBodyRawExact": true,
+    "restoreAssessment": "Existing same-map scout spread carries targetWaypoint and goal; visited is copied to a new Map, accumulated active elapsed time and the new socket receipt sequence retain the original rules. A changed map invalidates the scout. No hint-specific resume test was added or independently run by this reviewer.",
+    "multiTickAssessment": "A new hint selects its already validated candidate.attackTile. The same scout/goal and private flag survive successful movement ACK ticks; current geometry, transfer exclusion, endpoint occupancy and path legality are checked again before planning. A retained invalid/unreachable goal only attempts original home candidates within the same four-search counter; no legal plan may return null. Falling back to a home goal removes the private flag without rebuilding clock, ACK count or visited state.",
+    "ordinaryScoutAssessment": "Only a new scout considers hints. Existing ordinary scouts retain original home goals, stable order and finite state; no extra observer scan, target claim, owner AOI insertion, gameplay credit or dummy path search was introduced.",
+    "budgetsPreserved": {
+      "maximumPathSearches": 4,
+      "maximumHints": 4,
+      "scoutOnlineMs": 20000,
+      "confirmedMoves": 24,
+      "positionVisits": 3,
+      "attackDeadlineMs": 900,
+      "minimumCombatLaunchesPerMinute": 18,
+      "minimumCombatHitsPerMinute": 12
+    },
+    "selectionDiagnostics": "selectedWaypoint and selectedWaypointSource are emitted only with the original first-selection record, inside the unchanged 32-row cap; neither proves target visibility, arrival, attack or damage."
+  },
+  "focusedEvidence": {
+    "red": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\scout-target-waypoint-routing-v1\\focused-red-execution-v1.json",
+      "bytes": 4457,
+      "sha256": "3b3abe47ad15fde3723e37f2b090a93575244bf0346b779fc3c2e2f65c8ad214"
+    },
+    "redCounts": {
+      "tests": 5,
+      "pass": 2,
+      "fail": 3,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0
+    },
+    "green": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\scout-target-waypoint-routing-v1\\focused-green-execution-v1.json",
+      "bytes": 4447,
+      "sha256": "0e85ea2f6d1ac74ff266db10ba0c44b3c3f50b78d9f7ef5a90bd8da9ba929fab"
+    },
+    "greenCounts": {
+      "tests": 5,
+      "pass": 5,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0
+    },
+    "initialAdjacentFailure": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\scout-target-waypoint-routing-v1\\adjacent-initial-execution-v1.json",
+      "bytes": 4457,
+      "sha256": "e2b1719a5640a1fc027a45c29e8bca02862a890440836ba9196dd72ab675e74b"
+    },
+    "finalAdjacent": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\scout-target-waypoint-routing-v1\\adjacent-final-execution-v1.json",
+      "bytes": 4453,
+      "sha256": "26f76c32053ba0bf1ce2bcf33127a2765e04c9d67296f2633cf24bac8b564984"
+    },
+    "finalAdjacentCounts": {
+      "tests": 58,
+      "pass": 58,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0
+    },
+    "syntaxAndDiff": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\scout-target-waypoint-routing-v1\\syntax-and-diff-check-execution-v1.json",
+      "bytes": 6253,
+      "sha256": "b873918bed7b2e154fa8b88533bbb93e82a3e5c0ec257f7788f865e4acf22952"
+    },
+    "newFiveIncludedIn58And237": true,
+    "countsAreNotAdditive": true
+  },
+  "actualReceipt": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\root-scout-target-waypoint-routing-validation-v2\\root-full-driver-receipt-v1.json",
+    "bytes": 5729,
+    "sha256": "c2d41440e773116aa20c6a12595b79728b34290be3b1547b6f20fdf7df52b562"
+  },
+  "actualStdout": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\root-scout-target-waypoint-routing-validation-v2\\root-full-driver-v1.stdout.log",
+    "bytes": 63934,
+    "sha256": "f83d0f8989c8757a7f3b698788ca15f6483dd0d7d8a76336e824b998a54d529c"
+  },
+  "actualStderr": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\root-scout-target-waypoint-routing-validation-v2\\root-full-driver-v1.stderr.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "actualCounts": {
+    "tests": 237,
+    "passed": 237,
+    "failed": 0,
+    "cancelled": 0,
+    "skipped": 0,
+    "todo": 0
+  },
+  "actualTapCounts": {
+    "tests": 237,
+    "pass": 237,
+    "fail": 0,
+    "cancelled": 0,
+    "skipped": 0,
+    "todo": 0
+  },
+  "actualExecution": {
+    "exitCode": 0,
+    "signal": null,
+    "fourOriginalTestEntrypoints": [
+      "apps/web/scripts/playtest-capacity-soak.test.mjs",
+      "apps/web/scripts/playtest-capacity-observability.test.mjs",
+      "apps/web/scripts/playtest-capacity-monitor.test.mjs",
+      "apps/web/scripts/playtest-capacity-telemetry.test.mjs"
+    ],
+    "sourceBeforeAfterAndCurrentRawExact": true,
+    "allFiveNewTestsPresentAndPassedInActualTAP": true,
+    "prior232Receipt": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\root-scout-selection-diagnostics-validation-v1\\root-full-driver-receipt-v1.json",
+      "bytes": 5162,
+      "sha256": "733754ea1cade189fa92c29d5a808f7b940315909605cf636d2d3bf7b51a8446"
+    }
+  },
+  "firstRootWrapperFailure": {
+    "stdout": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\scout-target-waypoint-routing-full-root-stdout-v1.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "stderr": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\scout-target-waypoint-routing-full-root-stderr-v1.log",
+      "bytes": 428,
+      "sha256": "dd0dd7e830262f6626ad8b4e8ca4ae485936c165287571516a700bd82a077fa2"
+    },
+    "failedBeforeTestSpawn": true,
+    "reason": "The original wrapper normalized maintenance literals to a single EOL; its cardinality guard failed before spawn. The corrected wrapper preserves the six actual raw literals and the original failure files remain unchanged."
+  },
+  "boundedDocumentationReview": {
+    "files": [
+      {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\AGENT-CURRENT.md",
+        "bytes": 5568,
+        "sha256": "dd7ca5a1a3edb449b7495ae404dae1ab213ac14b3de31494c554b9544fa8b237"
+      },
+      {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\CELL-ZONING-PREPRODUCTION-PLAN.zh-CN.md",
+        "bytes": 43685,
+        "sha256": "a3355671214f59087e4b73ab46f4920cb2867aac9dbd990ad7a78a1606c19ccd"
+      }
+    ],
+    "topicSection": {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\README.md",
+      "heading": "提示攻击邻格导航实验：237 项工具回归通过，容量待复测",
+      "bytes": 1659,
+      "sha256": "d24550740d52628885567fadffd5b9dc2577fa183f7fdfc3b0fe8a5d2ae0ff40"
+    },
+    "latestCountsAndLimitsConsistent": true,
+    "pendingPublicLinks": [
+      {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-scout-target-waypoint-routing-driver-v1\\README.md",
+        "reason": "New source child is still being prepared by its sole archive writer; not counted as a passed link."
+      }
+    ],
+    "fullTopicLinkCheckPerformed": false
+  },
+  "verdict": {
+    "sourceContractPassed": true,
+    "fullRegressionPassed": true,
+    "currentNineSourceFullRegressionPassed": true,
+    "blockingFindingIds": []
+  },
+  "limits": {
+    "testsRerunByReviewer": false,
+    "targetModulesImportedByReviewer": false,
+    "sourceOrRepositoryChangedByReviewer": false,
+    "newRustBuildPerformed": false,
+    "realmOrCapacityRunPerformed": false,
+    "capacityAccepted": false,
+    "p0Accepted": false,
+    "p2ImplementationPermitted": false,
+    "statement": "Source and tool regression qualification only. No live supply improvement, fairness, unique root cause or 25-person success has been demonstrated; the original Formal16 failure remains unchanged."
+  }
+}

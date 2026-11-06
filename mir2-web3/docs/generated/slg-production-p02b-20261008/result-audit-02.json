@@ -1,0 +1,92 @@
+{
+  "schema": "mir2.production-result-audit.v1",
+  "reviewer": "Root",
+  "createdUtc": "2026-10-08T14:02:38.1234989Z",
+  "accepted": true,
+  "actualPassingExecutions": 177.0,
+  "newUniqueTests": 19,
+  "checks": [
+    {
+      "run": "uid-tests-05",
+      "verifiedDeclaredInputs": 455,
+      "sourceDrift": 0,
+      "actualNamedTestPasses": 11,
+      "remainingCBytes": "199140040704",
+      "freshnessUpperBoundMs": 81.9889,
+      "nonce": "6df6989ea3234f18b80cbd4947e38b5c",
+      "completed": true,
+      "exited": true,
+      "disposed": true,
+      "exitCode": 0
+    },
+    {
+      "run": "simulation-tests-03",
+      "verifiedDeclaredInputs": 455,
+      "sourceDrift": 0,
+      "actualNamedTestPasses": 18,
+      "remainingCBytes": "199138308096",
+      "freshnessUpperBoundMs": 70.9693,
+      "nonce": "97d04cb41d8b454090c27d005bfac78e",
+      "completed": true,
+      "exited": true,
+      "disposed": true,
+      "exitCode": 0
+    },
+    {
+      "run": "npc-regression-02",
+      "verifiedDeclaredInputs": 455,
+      "sourceDrift": 0,
+      "actualNamedTestPasses": 35,
+      "remainingCBytes": "199132782592",
+      "freshnessUpperBoundMs": 77.4458,
+      "nonce": "96a0df2aa8264047a37b3018d20fb87c",
+      "completed": true,
+      "exited": true,
+      "disposed": true,
+      "exitCode": 0
+    },
+    {
+      "run": "save-regression-02",
+      "verifiedDeclaredInputs": 455,
+      "sourceDrift": 0,
+      "actualNamedTestPasses": 59,
+      "remainingCBytes": "199126745088",
+      "freshnessUpperBoundMs": 79.4301,
+      "nonce": "c972ecbcc41442478b169f039e69324f",
+      "completed": true,
+      "exited": true,
+      "disposed": true,
+      "exitCode": 0
+    },
+    {
+      "run": "inventory-regression-03",
+      "verifiedDeclaredInputs": 455,
+      "sourceDrift": 0,
+      "actualNamedTestPasses": 37,
+      "remainingCBytes": "199171112960",
+      "freshnessUpperBoundMs": 71.1319,
+      "nonce": "2e3356749e22449d8b9e586e0076f972",
+      "completed": true,
+      "exited": true,
+      "disposed": true,
+      "exitCode": 0
+    },
+    {
+      "run": "uid-file-regression-01",
+      "verifiedDeclaredInputs": 455,
+      "sourceDrift": 0,
+      "actualNamedTestPasses": 17,
+      "remainingCBytes": "199120957440",
+      "freshnessUpperBoundMs": 80.1088,
+      "nonce": "227abd73957a4f83a6251b4e2e9fc114",
+      "completed": true,
+      "exited": true,
+      "disposed": true,
+      "exitCode": 0
+    }
+  ],
+  "controlledDurableInventoryTestsPassed": true,
+  "liveGameplayAcceptance": false,
+  "allIssuerMigrationAccepted": false,
+  "postgresAccepted": false
+}

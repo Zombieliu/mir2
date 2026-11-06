@@ -1,0 +1,61 @@
+{
+  "schemaVersion": 1,
+  "startedAt": "2026-10-25T16:18:23.082Z",
+  "endedAt": "2026-10-25T16:21:00.010Z",
+  "command": "rustup",
+  "arguments": [
+    "run",
+    "1.95.0",
+    "cargo",
+    "test",
+    "--locked",
+    "--offline",
+    "-p",
+    "mir2-gateway",
+    "--lib",
+    "web::tests::socket_diagnostics_tests",
+    "-j",
+    "4",
+    "--",
+    "--nocapture"
+  ],
+  "cwd": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3",
+  "toolchain": "1.95.0",
+  "buildJobs": 4,
+  "externalTargetDirectory": "C:/mir2-build/cell-preproduction-p0-p1-20261024/target",
+  "visualStudioTarget": "x64",
+  "sourceBefore": {
+    "file": "apps/gateway/src/web.rs",
+    "bytes": 857503,
+    "sha256": "41d81bf7cdc6c0aaacbbd11aee12425b27b8a4c27a02b5a0d0915351fb811e40"
+  },
+  "sourceAfter": {
+    "file": "apps/gateway/src/web.rs",
+    "bytes": 857503,
+    "sha256": "41d81bf7cdc6c0aaacbbd11aee12425b27b8a4c27a02b5a0d0915351fb811e40"
+  },
+  "sourceUnchanged": true,
+  "exit": {
+    "code": 0,
+    "signal": null
+  },
+  "tests": {
+    "status": "ok",
+    "passed": 8,
+    "failed": 0,
+    "ignored": 0,
+    "measured": 0,
+    "filtered": 1245
+  },
+  "log": {
+    "file": "C:/mir2-build/p01-completion-20261024/formal11-correlated-slow-stage-validation-v1/focused-v1.log",
+    "bytes": 64266,
+    "sha256": "43ab5289f35aeea4e9ad34e89321409695662c450441fec06259e86127c0e2a6"
+  },
+  "rustfmt": {
+    "command": "rustup run1.95.0 rustfmt --edition2021 --config skip_children=true --check apps/gateway/src/web.rs",
+    "exitCode": 0,
+    "sourceWritten": false
+  },
+  "scope": "Existing socket diagnostics format/state tests plus one five-label/two-connection regression only; no realm or capacity acceptance."
+}

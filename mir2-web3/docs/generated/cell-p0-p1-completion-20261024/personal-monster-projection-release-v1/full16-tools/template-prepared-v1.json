@@ -1,0 +1,152 @@
+{
+  "schemaVersion": 1,
+  "state": "PREPARED_UNSEALED_NOT_RUNNABLE",
+  "preparedAt": "2026-10-25T12:54:59.056Z",
+  "directory": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-personal-monster-projection-v1",
+  "scope": "Only seven candidate-specific launcher/config files plus byte-identical neutral audit and ACL support. No actual final source, build, finalization, account, binary, process or protocol preparation.",
+  "files": [
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-personal-monster-projection-v1\\run-owned-full.mjs",
+      "bytes": 14389,
+      "sha256": "b7ad0b746575b01a4dd0133694e07799e435859241e6d845c9aa2c66ab25e45e"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-personal-monster-projection-v1\\audit-owned-full.mjs",
+      "bytes": 9066,
+      "sha256": "c694d39f4d4c6c7d388d7a66c10018c339bc529326510e7b7049cf3d0f222d37"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-personal-monster-projection-v1\\verify-inputs.mjs",
+      "bytes": 9392,
+      "sha256": "4a8435a05bce4805ca49ad243e61f5c51369dfe6d5c9b22ef4dd9a61225c7c3c"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-personal-monster-projection-v1\\finalize-launcher-inputs.mjs",
+      "bytes": 2038,
+      "sha256": "df13d2a46fff49f21d147c24e4db366777ccf125338c374f1b780c7710bdc0d0"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-personal-monster-projection-v1\\full-lifecycle-profile.json",
+      "bytes": 4294,
+      "sha256": "ba6481b8798765c1ea2bc604b7da4b803af150196c41fa9e9ac6df21a97229c6"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-personal-monster-projection-v1\\projection-build-source-lib.mjs",
+      "bytes": 239,
+      "sha256": "bc00eaa2b2c22121c0db9284bfcb79eacea6d0415edde5bd4726e3aa0a63f353"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-personal-monster-projection-v1\\candidate-release-binding-v1.json",
+      "bytes": 534,
+      "sha256": "da14ec989b21981c87739190788f767de18e7d8a9c857d3b2d1add954cbff3f0"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-personal-monster-projection-v1\\frozen-audit-support.mjs",
+      "bytes": 46572,
+      "sha256": "3988052a4ba9de791dbdb887b267eced6ca8bc915fa5676228f6d70c0761f4d5"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-personal-monster-projection-v1\\initialize-fresh-private.ps1",
+      "bytes": 1643,
+      "sha256": "c3a8ddecafe8c82752d963ee3237b55b25841d9674af83ea791e67ef8a82fd77"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-personal-monster-projection-v1\\derivation-proof-v1.json",
+      "bytes": 5066,
+      "sha256": "366305b86f139396725f0ef395c50936fc9012fef631c8d8858b516715b80dc0"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-personal-monster-projection-v1\\README.md",
+      "bytes": 2185,
+      "sha256": "8ae0a0d14b8cf73d2cac7913d55f83158329aab31d261d03e6cd157aaa8d7a59"
+    }
+  ],
+  "sourceSha256": "816decf6fefa29a992f5ce62a48696ca375b67abf0bf550ee3be946e9652eb11",
+  "driverPins": [
+    {
+      "file": "apps/web/scripts/playtest-multiplayer-smoke.mjs",
+      "bytes": 38856,
+      "sha256": "a3ce02d111925c41e25b32a5522f0d17243cd78fab8142e92bca5eb1c45915ea"
+    },
+    {
+      "file": "apps/web/scripts/playtest-lifecycle.mjs",
+      "bytes": 39080,
+      "sha256": "e5dffc398590e9a4c6593257770753b7979431977fb2aba3d2e48986f3287410"
+    },
+    {
+      "file": "apps/web/scripts/playtest-catalog-transport.mjs",
+      "bytes": 3794,
+      "sha256": "a833ad9709da46145a991a8270ed5864f37a8023ea1290f44f7c17bf3589d24f"
+    },
+    {
+      "file": "apps/web/scripts/quest-agent/protocol-play.mjs",
+      "bytes": 46278,
+      "sha256": "ce01b337cb8650abccb04c2eb5783d20c76f73b92af1c9db441d89e9bbed8781"
+    },
+    {
+      "file": "apps/web/scripts/quest-agent/protocol-navigation.mjs",
+      "bytes": 18249,
+      "sha256": "6ce9fa87088ae31bcac1916c4ad46158bdb6802122de6925a219a9a40cb67036"
+    },
+    {
+      "file": "apps/web/scripts/quest-agent/protocol-observation.mjs",
+      "bytes": 14376,
+      "sha256": "b69ba03e9f6ee05286d401341c6dbbe6dac4a6e5014fa6a67e9c6167c072d097"
+    }
+  ],
+  "externalSourceLibrary": {
+    "path": "C:\\mir2-build\\p01-completion-20261024\\personal-monster-projection-release-v1\\source-lib-v3.mjs",
+    "bytes": 15618,
+    "sha256": "ffd87a222e5f04d1f61c29ee71bc69144cc90f696decf5c5aacc821817ba80fb"
+  },
+  "expectedBackendInputCount": 44,
+  "expectedRustInputs": 39,
+  "expectedCargoInputs": 5,
+  "actualCandidateSourceCommit": null,
+  "actualCandidateManifest": null,
+  "actualCandidateRelease": null,
+  "actualCandidateBinary": null,
+  "actualCandidateBuildReceipt": null,
+  "actualRootFunctionalValidation": null,
+  "syntax": {
+    "nodeCheckPassed": 6,
+    "powerShellAstPassed": 1,
+    "targetImportsExecuted": false,
+    "earlierDraftSyntaxRefusal": {
+      "observed": true,
+      "exitCode": 1,
+      "file": "verify-inputs.mjs",
+      "reason": "Draft escape correction; fixed before this prepared receipt. No runtime entry was executed.",
+      "originalStderrFileCaptured": false
+    }
+  },
+  "rawReusedDrivers": 6,
+  "neutralAuditAndAclRawExact": true,
+  "runnerAndAuditInverseToHistoricalExact": true,
+  "sourceCaptureExecuted": false,
+  "buildExecuted": false,
+  "finalizationExecuted": false,
+  "accountsCreated": 0,
+  "realmStarted": false,
+  "capacityAccepted": false,
+  "fullLifecyclePassed": false,
+  "humanFrontendAccepted": false,
+  "absentState": [
+    {
+      "name": "private",
+      "absent": true
+    },
+    {
+      "name": "public",
+      "absent": true
+    },
+    {
+      "name": "bin",
+      "absent": true
+    },
+    {
+      "name": "launcher-final-binding-v1.json",
+      "absent": true
+    }
+  ]
+}

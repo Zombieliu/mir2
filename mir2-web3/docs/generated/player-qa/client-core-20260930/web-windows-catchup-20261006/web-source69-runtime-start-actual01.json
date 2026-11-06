@@ -1,0 +1,57 @@
+{
+  "schemaVersion": 1,
+  "source": "Source69",
+  "actualRuntime": {
+    "originalCallerOnly": true,
+    "originalSession": 67629,
+    "ownedNodePid": 65652,
+    "originalParentPid": 80164,
+    "loopback": "127.0.0.1:19205",
+    "ownedImageAndCommandVerified": true,
+    "originalParentVerified": true,
+    "running": true,
+    "closed": false,
+    "activeLogsRead": false
+  },
+  "config": {
+    "path": "C:/mir2-cross-platform-storage-20261002/web-source69-warehouse-map-local-20261011-01/root-approved01/web-start01-config.json",
+    "bytes": 3104,
+    "sha256": "0623c3ef277ad785765456722b9a60e24e80595c5419990681a3b80c985eb1d9"
+  },
+  "rootReview": {
+    "path": "C:/mir2-cross-platform-storage-20261002/web-source69-warehouse-map-local-20261011-01/root-approved01/web-runtime-review01.json",
+    "bytes": 4013,
+    "sha256": "7d913c33968f7a984191e39f7bf3d7606b1ef1ea31b5837282dd032475771df6"
+  },
+  "copy": {
+    "files": 4182,
+    "dirsIncludingRoot": 517,
+    "bytes": 285106825,
+    "links": 0,
+    "rootFreshSourceHashes": 4182,
+    "rootFreshTargetHashes": 4182,
+    "rootOrdinaryAncestors": 1052,
+    "differences": 0
+  },
+  "renderedResources": {
+    "exact116LocalPngs": true,
+    "newManifestCount": 41248,
+    "newManifestAssetHash": "004f5da2655d1901625e51a3baf4b5f83354461a8f04b8143114a45af38a14c0",
+    "compiledSource68PageUnchanged": true
+  },
+  "browser": {
+    "normalLogin": true,
+    "normalStartGame": true,
+    "newAssetManifestObserved": true,
+    "warehouseVisualAccepted": false,
+    "staleSceneEvidence": "web-source69-warehouse-scene-stale01.json"
+  },
+  "gatewayChanged": false,
+  "productionBuildAccepted": false,
+  "sharedStorageOwnerAccepted": false,
+  "mobileAccepted": false,
+  "humanAccepted": false,
+  "candidate100": false,
+  "overallPercentage": null,
+  "goalComplete": false
+}

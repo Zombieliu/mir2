@@ -1,0 +1,178 @@
+TAP version 13
+# Subtest: send calls original once, preserves return/arguments and passes only the existing writer as callback context
+ok 1 - send calls original once, preserves return/arguments and passes only the existing writer as callback context
+  ---
+  duration_ms: 2.0164
+  type: 'test'
+  ...
+# Subtest: observe projects true before/after snapshots and records only after the one original fold
+ok 2 - observe projects true before/after snapshots and records only after the one original fold
+  ---
+  duration_ms: 0.5532
+  type: 'test'
+  ...
+# Subtest: original send throw object is preserved after exactly one call, with no invented pending success
+ok 3 - original send throw object is preserved after exactly one call, with no invented pending success
+  ---
+  duration_ms: 0.5789
+  type: 'test'
+  ...
+# Subtest: original observe throw object is preserved after exactly one call
+ok 4 - original observe throw object is preserved after exactly one call
+  ---
+  duration_ms: 0.8141
+  type: 'test'
+  ...
+# Subtest: observer wrapper makes no additional client/message/hint mutation compared with the original
+ok 5 - observer wrapper makes no additional client/message/hint mutation compared with the original
+  ---
+  duration_ms: 0.6089
+  type: 'test'
+  ...
+# Subtest: send wrapper makes no additional client/command/hint mutation compared with original
+ok 6 - send wrapper makes no additional client/command/hint mutation compared with original
+  ---
+  duration_ms: 0.3641
+  type: 'test'
+  ...
+# Subtest: unknown motion retains numeric id/cause and before/after absence without synthesizing an entity
+ok 7 - unknown motion retains numeric id/cause and before/after absence without synthesizing an entity
+  ---
+  duration_ms: 0.2468
+  type: 'test'
+  ...
+# Subtest: all ordinary combat position-fold causes retain their exact static source without copying damage or magic payload
+ok 8 - all ordinary combat position-fold causes retain their exact static source without copying damage or magic payload
+  ---
+  duration_ms: 0.4984
+  type: 'test'
+  ...
+# Subtest: a remembered regional monster Remove is recorded after it moved outside the region
+ok 9 - a remembered regional monster Remove is recorded after it moved outside the region
+  ---
+  duration_ms: 0.4658
+  type: 'test'
+  ...
+# Subtest: snapshot replacement deletion is distinguished from explicit ObjectRemove
+ok 10 - snapshot replacement deletion is distinguished from explicit ObjectRemove
+  ---
+  duration_ms: 0.3073
+  type: 'test'
+  ...
+# Subtest: map and geometric boundaries are fixed inclusive bounds; other-map samples are excluded
+ok 11 - map and geometric boundaries are fixed inclusive bounds; other-map samples are excluded
+  ---
+  duration_ms: 0.2678
+  type: 'test'
+  ...
+# Subtest: known player lifecycle is not emitted or kept as remembered monster after id reuse
+ok 12 - known player lifecycle is not emitted or kept as remembered monster after id reuse
+  ---
+  duration_ms: 0.229
+  type: 'test'
+  ...
+# Subtest: navigation association copies the existing hint/cursor and observes release without classifying ACK success
+ok 13 - navigation association copies the existing hint/cursor and observes release without classifying ACK success
+  ---
+  duration_ms: 0.2437
+  type: 'test'
+  ...
+# Subtest: only actual connections one and two are captured; other clients still call originals once
+ok 14 - only actual connections one and two are captured; other clients still call originals once
+  ---
+  duration_ms: 0.375
+  type: 'test'
+  ...
+# Subtest: entity projections together cap32 per row with true totalCount/truncated
+ok 15 - entity projections together cap32 per row with true totalCount/truncated
+  ---
+  duration_ms: 0.31
+  type: 'test'
+  ...
+# Subtest: remembered lifecycle cache never exceeds64 and explicitly reports eviction
+ok 16 - remembered lifecycle cache never exceeds64 and explicitly reports eviction
+  ---
+  duration_ms: 3.58
+  type: 'test'
+  ...
+# Subtest: each observational pending window logs at most64 events including explicit truncation marker
+ok 17 - each observational pending window logs at most64 events including explicit truncation marker
+  ---
+  duration_ms: 0.9394
+  type: 'test'
+  ...
+# Subtest: a new existing hint keeps at most one pending window and explicitly marks the prior trace superseded
+ok 18 - a new existing hint keeps at most one pending window and explicitly marks the prior trace superseded
+  ---
+  duration_ms: 0.2469
+  type: 'test'
+  ...
+# Subtest: row cap is fixed12000 per connection including terminal marker and never skips an original fold
+ok 19 - row cap is fixed12000 per connection including terminal marker and never skips an original fold
+  ---
+  duration_ms: 30.9278
+  type: 'test'
+  ...
+# Subtest: strict projection never copies names, credentials, accounts, payloads or arbitrary source/direction strings
+ok 20 - strict projection never copies names, credentials, accounts, payloads or arbitrary source/direction strings
+  ---
+  duration_ms: 0.4541
+  type: 'test'
+  ...
+# Subtest: sink exception propagates after original once and marks incomplete, without changing original error precedence
+ok 21 - sink exception propagates after original once and marks incomplete, without changing original error precedence
+  ---
+  duration_ms: 0.259
+  type: 'test'
+  ...
+# Subtest: projection exception cannot prevent original call; original error retains priority
+ok 22 - projection exception cannot prevent original call; original error retains priority
+  ---
+  duration_ms: 0.2046
+  type: 'test'
+  ...
+# Subtest: connection-selection exception cannot skip original and cannot replace its own throw
+ok 23 - connection-selection exception cannot skip original and cannot replace its own throw
+  ---
+  duration_ms: 0.1788
+  type: 'test'
+  ...
+# Subtest: send-only entity truncation also makes diagnostic completeness false
+ok 24 - send-only entity truncation also makes diagnostic completeness false
+  ---
+  duration_ms: 0.2937
+  type: 'test'
+  ...
+# Subtest: uninstall restores exact descriptors and duplicate installation cannot stack wrappers
+ok 25 - uninstall restores exact descriptors and duplicate installation cannot stack wrappers
+  ---
+  duration_ms: 0.1543
+  type: 'test'
+  ...
+# Subtest: pending cannot emit or remember never-regional far spawn, unknown motion or unknown Remove
+ok 26 - pending cannot emit or remember never-regional far spawn, unknown motion or unknown Remove
+  ---
+  duration_ms: 0.3144
+  type: 'test'
+  ...
+# Subtest: synchronous fake inbound reentry is causally before post-send window creation and stays incomplete without ACK credit
+ok 27 - synchronous fake inbound reentry is causally before post-send window creation and stays incomplete without ACK credit
+  ---
+  duration_ms: 0.2456
+  type: 'test'
+  ...
+# Subtest: the actual settle phase has a fixed explicit enum instead of being collapsed to other
+ok 28 - the actual settle phase has a fixed explicit enum instead of being collapsed to other
+  ---
+  duration_ms: 0.1571
+  type: 'test'
+  ...
+1..28
+# tests 28
+# suites 0
+# pass 28
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 100.8153

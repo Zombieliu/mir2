@@ -1,0 +1,88 @@
+{
+  "owner": "Root",
+  "generatedAtUtc": "2026-10-07T13:10:39.020Z",
+  "kind": "Source29 independent read-only actual finite-result02 acceptance",
+  "reviewer": "/root/source24_actual_result_review",
+  "finiteResult": {
+    "repo": {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\npc-purchase-source29-finite-result02.json",
+      "bytes": 159338,
+      "sha256": "20aa294a4eed1e8fc164cd213af184ad0dfa9b36e41e27fa61e4c5afcc77c180"
+    },
+    "qa": {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source29-finite-result02.json",
+      "bytes": 159338,
+      "sha256": "20aa294a4eed1e8fc164cd213af184ad0dfa9b36e41e27fa61e4c5afcc77c180"
+    }
+  },
+  "sourceOnlyAccepted": true,
+  "finiteExecutionEvidenceAccepted": true,
+  "confirmedBlockers": 0,
+  "checks": {
+    "recordAndNestedConfigPins": 109,
+    "rustActualUniqueSourcePins": 897,
+    "nodeActualUniqueSourcePins": 27915,
+    "sourceDrift": 0,
+    "rustOriginalChanged": 11,
+    "rustOriginalProtected": 877,
+    "rustSnapshotAdded": 9,
+    "rustRemoved": 0,
+    "nodeChanged": 10,
+    "nodeAdded": 459,
+    "rustCurrentNamedPassed": 245,
+    "webCurrentNamedPassed": 106,
+    "newDistinctRust": 48,
+    "newDistinctWeb": 12,
+    "newDistinctTotal": 60,
+    "strictNonincrementalTscExit": 0,
+    "actualGuardCalls": 9,
+    "actualNonceFiles": 45,
+    "guardSerialExitedDisposed": true,
+    "postChildPolicy": "B",
+    "actualGetVolumeCMinimumRemainingBytes": "422882545664",
+    "requiredBytes": "53687091200",
+    "sampleEndToChildStartLowerBoundMinimumMs": 67.3252,
+    "sampleEndToChildStartLowerBoundMaximumMs": 84.5647,
+    "childStartTruncatedMillisecondsUpperBoundMaximumMs": 85.5647,
+    "freshnessLimitMs": 2000,
+    "originalPolicyAndDependencyPinsUnchanged": true
+  },
+  "metadataCorrectionAccepted": {
+    "previousRejectedRecord": {
+      "repo": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\npc-purchase-source29-finite-result01.json",
+        "bytes": 152890,
+        "sha256": "e026d5cb3803c553c81e34c39c3dba9b8440c37e0dcce4ef83d0f3668743a1fb"
+      },
+      "qa": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source29-finite-result01.json",
+        "bytes": 152890,
+        "sha256": "e026d5cb3803c553c81e34c39c3dba9b8440c37e0dcce4ef83d0f3668743a1fb"
+      }
+    },
+    "onlyChanges": [
+      "generatedAtUtc",
+      "nine freshnessMs derived fields and explicit .NET truncated-millisecond bounds/basis",
+      "old probe-end delta accurately renamed",
+      "metadataCorrection"
+    ],
+    "originalReceiptsLogsSourcePinsCountsBoundariesUnchanged": true,
+    "retestsRequired": false
+  },
+  "notAccepted": [
+    "Source29 production packages or actual launch",
+    "Native/Web real receiver and complete applied economic bundle",
+    "actual socket/PG/replication deployment/cold OS process",
+    "player/UI/mobile acceptance"
+  ],
+  "uiOperated": false,
+  "runtimeLaunched": false,
+  "networkUsed": false,
+  "wasmApiUsed": false,
+  "productionBuildAccepted": false,
+  "candidateAccepted": false,
+  "goalComplete": false,
+  "overallPercentage": null,
+  "goalStatus": "active",
+  "gitPublication": "Root actual commit/push still pending and separately recorded"
+}

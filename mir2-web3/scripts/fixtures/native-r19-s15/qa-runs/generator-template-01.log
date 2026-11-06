@@ -1,0 +1,13 @@
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+    import importlib.util,pathlib; p=pathlib.Path("scripts/prepare_native_r19_s15_fixed.py").resolve(); s=importlib.util.spec_from_file_location("r19_fixed_generator",p); g=importlib.util.module_from_spec(s); s.loader.exec_module(g); g.template_inputs()
+                                                                                                                                                                                                                                          ~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Administrator\.codex\worktrees\native-packed-resources\mir2-player-journey\mir2-web3\scripts\prepare_native_r19_s15_fixed.py", line 115, in template_inputs
+    raw = {name: read(BASE / name, MAX_METADATA) for name in TEMPLATES}
+                 ~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Administrator\.codex\worktrees\native-packed-resources\mir2-player-journey\mir2-web3\scripts\prepare_native_r19_s15_fixed.py", line 89, in read
+    require(identity(os.fstat(stream.fileno())) == identity(before), 'input_changed_before_read')
+    ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Administrator\.codex\worktrees\native-packed-resources\mir2-player-journey\mir2-web3\scripts\prepare_native_r19_s15_fixed.py", line 54, in require
+    raise GuardError(label)
+r19_fixed_generator.GuardError: input_changed_before_read

@@ -17,27 +17,77 @@ use mir2_protocol::{
     ClientPacket, Point, ServerPacket,
 };
 use mir2_simulation::{
-    AccountRecord, ActiveSessionIdentity, CharacterSaveRecord, GameShopPurchaseOutcome,
-    NativeGameShopPurchaseRequest, WorldCommand, WorldCommandExecution, WorldCommandOutcome,
-    WorldSnapshot,
+    AccountRecord, ActiveSessionIdentity, CharacterHandoffCheckpoint, CharacterHandoffCommitment,
+    CharacterSaveRecord, GameShopPurchaseOutcome, NativeAttackAdmission, NativeAttackError,
+    NativeAttackExecution, NativeGameShopGiftRequest, NativeGameShopPurchaseRequest,
+    PlayerDropJournalResult, WorldCommand, WorldCommandExecution, WorldCommandOutcome, WorldSnapshot, ZoneSaveFence,
+    ZoneSaveOperationBinding, ZoneSaveOperationReceipt, ZoneSaveOperationStatus,
 };
 use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
 use tokio::sync::mpsc;
 
+use crate::npc_purchase_owner_route::NpcPurchaseOwnerRouteExecution;
 use crate::routing::{
-    HostedZoneOwnerCommandClient, SharedInProcessZoneRuntimeFactory, SharedZoneLiveOutbound,
-    SharedZoneLiveOutboundRegistration, SharedZoneLiveOutboundSender, SharedZoneMutationGate,
-    SharedZoneOwnerLeaseAuthority, ZoneId, ZoneLiveOutboundRegistration, ZoneOwnerCommandMode,
-    ZoneOwnerCommandRequest, ZoneOwnerLease, ZoneOwnerRpcTransport, ZoneRuntimeFactory,
+    HostedZoneOwnerCommandClient, OwnerHealthDelivery, OwnerHealthValidator, PreparedZoneTeardown,
+    SharedInProcessZoneRuntimeFactory, SharedZoneLiveOutbound, SharedZoneLiveOutboundRegistration,
+    SharedZoneLiveOutboundSender, SharedZoneMutationGate, SharedZoneOwnerLeaseAuthority, ZoneId,
+    ZoneLiveOutboundRegistration, ZoneOwnerCommandMode, ZoneOwnerCommandRequest, ZoneOwnerLease,
+    ZoneOwnerRpcTransport, ZoneRuntimeFactory,
 };
+use crate::web::GatewaySlowStage;
 use crate::GatewayConfig;
 use crate::ZonePlacementLease;
+use mir2_simulation::{
+    NpcPurchaseDurableError, NpcPurchaseOwnerAction, NpcPurchaseOwnerReply, NpcPurchaseProducer,
+    NPC_PURCHASE_OWNER_PROTOCOL_VERSION,
+};
 
 pub const ZONE_RPC_PROTOCOL_VERSION: u16 = 8;
+#[cfg(test)]
+#[path = "zone_rpc/lease_failure_tests.rs"]
+mod lease_failure_tests;
+
+#[cfg(test)]
+#[path = "zone_rpc/owner_health_sync_tests.rs"]
+mod owner_health_sync_tests;
+#[cfg(test)]
+#[path = "zone_rpc/stable_owner_poll_tests.rs"]
+mod stable_owner_poll_tests;
 pub const ZONE_RPC_TYPED_GAME_SHOP_OUTCOME_V1: &str = "typedGameShopOutcomeV1";
 pub const ZONE_RPC_NATIVE_GAME_SHOP_PURCHASE_V2: &str = "nativeGameShopPurchaseV2";
+pub const ZONE_RPC_NATIVE_GAME_SHOP_GIFT_V1: &str = "nativeGameShopGiftV1";
+pub const ZONE_RPC_CHARACTER_HANDOFF_V1: &str = "characterHandoffCheckpointV1";
+#[cfg(test)]
+#[path = "character_handoff_rpc_tests.rs"]
+mod character_handoff_rpc_tests;
 pub const ZONE_RPC_STORAGE_REQUEST_ID_V1: &str = "storageRequestIdV1";
+pub const ZONE_RPC_BILLING_V1: &str = "billingCreditsMonthlyCardV1";
+pub const ZONE_RPC_DURABLE_NPC_PURCHASE_OWNER_V1: &str = "durableNpcPurchaseOwnerV1";
+pub const ZONE_RPC_NATIVE_ATTACK_OUTCOME_V1: &str = "nativeAttackOutcomeV1";
+pub const ZONE_RPC_ZONE_SAVE_OPERATIONS_V1: &str = "zoneSaveOperationsV1";
+#[cfg(test)]
+#[path = "zone_rpc/native_attack_tests.rs"]
+mod native_attack_tests;
+#[cfg(test)]
+#[path = "zone_rpc/unknown_economy_freeze_tests.rs"]
+mod unknown_economy_freeze_tests;
+#[cfg(test)]
+#[path = "zone_rpc/player_drop_journal_tests.rs"]
+mod player_drop_journal_tests;
+#[cfg(test)]
+#[path = "zone_rpc/canonical_recovery_replay_tests.rs"]
+mod canonical_recovery_replay_tests;
+#[cfg(test)]
+#[path = "zone_rpc/canonical_recovery_pg_tests.rs"]
+mod canonical_recovery_pg_tests;
+#[cfg(test)]
+#[path = "zone_rpc/admission_recovery_pg_tests.rs"]
+mod admission_recovery_pg_tests;
+mod canonical_recovery;
+#[cfg(test)]
+#[path = "zone_rpc/zone_save_operation_tests.rs"]
+mod zone_save_operation_tests;
 pub const DEFAULT_ZONE_RPC_MAX_FRAME_BYTES: usize = 16 * 1024 * 1024;
 pub const DEFAULT_ZONE_RPC_MAX_CONNECTIONS: usize = 64;
 pub const DEFAULT_ZONE_RPC_MAX_SESSIONS: usize = 4096;
@@ -74,6 +124,35 @@ enum ZoneRpcPriority {
     Control,
     Outbound,
     Gameplay,
+}
+
+/// The boundary is the first attempt to send a mutation, not receipt of its
+/// reply. In particular a malformed or missing reply must never become a
+/// gameplay rejection or authorize a second endpoint attempt.
+enum MutationOnceError {
+    BeforeExecution(String),
+    Unknown(String),
+}
+
+impl MutationOnceError {
+    fn into_detail(self) -> String {
+        match self {
+            Self::BeforeExecution(detail) | Self::Unknown(detail) => detail,
+        }
+    }
+
+    fn into_attack_error(self) -> NativeAttackError {
+        match self {
+            Self::BeforeExecution(detail) => NativeAttackError::BeforeExecution(detail),
+            Self::Unknown(detail) => NativeAttackError::Unknown(detail),
+        }
+    }
+}
+
+impl From<String> for MutationOnceError {
+    fn from(detail: String) -> Self {
+        Self::BeforeExecution(detail)
+    }
 }
 
 #[derive(Debug)]
@@ -829,6 +908,22 @@ impl ZoneReplicationCatalog {
         entry: &WireHostJournalEntry,
     ) -> Result<(), ZoneRpcFault> {
         let source_sequence = self.next_sequence_for_append(&entry.zone_id)?;
+        if let Some(WireWorldCommand::PlayerDropJournalResult { result }) = &entry.command {
+            entry.validate_player_drop_result(result, source_sequence)?;
+        }
+        if let Some(WireWorldCommand::CanonicalZoneRecovery { snapshot }) = &entry.command {
+            let head = self.head(&entry.zone_id);
+            entry.validate_canonical_zone_recovery(snapshot, &head)?;
+            if head.base_snapshot_id.as_deref() != Some(snapshot.snapshot_id.as_str())
+                || head.base_sequence != snapshot.base_sequence
+                || head.next_sequence != head.base_sequence
+            {
+                return Err(ZoneRpcFault::new(
+                    "canonical_recovery_base_unanchored",
+                    "canonical recovery reset requires its exact base to be installed before append",
+                ));
+            }
+        }
         let cursor = self.cursors.entry(entry.zone_id.clone()).or_default();
         debug_assert_eq!(cursor.next_sequence, source_sequence);
         let next_sequence = source_sequence
@@ -984,6 +1079,12 @@ impl ZoneReplicationCatalog {
                 )
             })?;
             if payload.len() > max_payload_bytes && entries.is_empty() {
+                if matches!(host_entry.command, Some(WireWorldCommand::CanonicalZoneRecovery { .. })) {
+                    return Err(ZoneRpcFault::new(
+                        "replication_cursor_compacted",
+                        "canonical recovery exceeds this mutation batch; install a fresh base snapshot",
+                    ));
+                }
                 return Err(ZoneRpcFault::new(
                     "replication_entry_too_large",
                     format!(
@@ -1217,6 +1318,9 @@ impl ZoneHostJournal {
 pub struct SequencedZoneHostPacket {
     pub sequence: u64,
     pub packet: ServerPacket,
+    pub(crate) owner_health: Option<mir2_simulation::ZoneOwnerHealthChange>,
+    pub(crate) source_registration_id: u64,
+    pub(crate) source_endpoint: usize,
 }
 
 #[derive(Debug, Clone)]
@@ -1226,6 +1330,7 @@ pub struct ZoneHostOutboundBatch {
     pub reset: bool,
     pub last_issued_sequence: u64,
     pub has_more: bool,
+    pub current_source_registration_id: Option<u64>,
 }
 
 #[derive(Debug, Clone)]
@@ -1273,6 +1378,8 @@ pub struct TcpZoneOwnerRpcTransport {
     outbound_acknowledged: Arc<AtomicU64>,
     outbound_generation: Arc<AtomicU64>,
     outbound_stream_id: Arc<Mutex<Option<String>>>,
+    owner_route_guard: Option<Arc<dyn Fn() -> Result<(), String> + Send + Sync>>,
+    explicit_zone_save_endpoint: bool,
 }
 
 impl fmt::Debug for TcpZoneOwnerRpcTransport {
@@ -1296,6 +1403,50 @@ impl fmt::Debug for TcpZoneOwnerRpcTransport {
 }
 
 impl TcpZoneOwnerRpcTransport {
+    /// One explicit endpoint, with no environment-derived routing, codec or
+    /// shared pool. Stable owner routing must never fall back to another Host.
+    pub fn with_explicit_options(
+        address: std::net::SocketAddr,
+        zone_id: ZoneId,
+        session_id: String,
+        auth_token: Option<String>,
+        limits: ZoneRpcLimits,
+    ) -> Self {
+        Self {
+            addresses: Arc::new(vec![address.to_string()]),
+            active_endpoint: Arc::new(AtomicUsize::new(0)),
+            zone_id,
+            session_id,
+            auth_token,
+            limits,
+            codec: ZoneRpcCodec::Json,
+            reuse_connections: false,
+            connections: Arc::new(vec![Mutex::new(None)]),
+            shared_connections: None,
+            outbound_acknowledged: Arc::new(AtomicU64::new(0)),
+            outbound_generation: Arc::new(AtomicU64::new(0)),
+            outbound_stream_id: Arc::new(Mutex::new(None)),
+            owner_route_guard: None,
+            explicit_zone_save_endpoint: true,
+        }
+    }
+
+    /// Clones captured by live pollers retain the same immutable owner pin.
+    pub fn with_owner_route_guard(
+        mut self,
+        guard: Arc<dyn Fn() -> Result<(), String> + Send + Sync>,
+    ) -> Self {
+        self.owner_route_guard = Some(guard);
+        self
+    }
+
+    fn validate_owner_route(&self) -> Result<(), String> {
+        if let Some(guard) = &self.owner_route_guard {
+            guard()?;
+        }
+        Ok(())
+    }
+
     pub fn new(address: impl Into<String>, zone_id: ZoneId) -> Self {
         Self::with_options(
             address,
@@ -1359,6 +1510,8 @@ impl TcpZoneOwnerRpcTransport {
             outbound_acknowledged: Arc::new(AtomicU64::new(0)),
             outbound_generation: Arc::new(AtomicU64::new(0)),
             outbound_stream_id: Arc::new(Mutex::new(None)),
+            owner_route_guard: None,
+            explicit_zone_save_endpoint: false,
         })
     }
 
@@ -1669,23 +1822,31 @@ impl TcpZoneOwnerRpcTransport {
         acknowledged_sequence: u64,
         max_items: usize,
     ) -> Result<ZoneHostOutboundBatch, String> {
+        self.validate_owner_route()?;
         let max_items = max_items.max(1).min(self.limits.outbound_poll_limit);
         let stream_id = self
             .outbound_stream_id
             .lock()
             .map_err(|_| "zone RPC outbound stream mutex poisoned".to_string())?
             .clone();
-        match self.call(ZoneRpcRequest::PollOutbounds {
-            stream_id,
-            acknowledged_sequence,
-            max_items,
-        })? {
+        let (source_endpoint, payload) = self.call_with_response_endpoint(
+            ZoneRpcRequest::PollOutbounds {
+                stream_id,
+                acknowledged_sequence,
+                max_items,
+            },
+            None,
+        )?;
+        // Do not deliver an old batch observed across an owner/epoch change.
+        self.validate_owner_route()?;
+        match payload {
             ZoneRpcPayload::Outbounds {
                 items,
                 stream_id,
                 reset,
                 last_issued_sequence,
                 has_more,
+                current_source_registration_id,
             } => {
                 if reset {
                     self.outbound_acknowledged.store(0, Ordering::Release);
@@ -1698,6 +1859,9 @@ impl TcpZoneOwnerRpcTransport {
                 let mut decoded = Vec::with_capacity(items.len());
                 for item in items {
                     decoded.push(SequencedZoneHostPacket {
+                        owner_health: item.owner_health,
+                        source_registration_id: item.source_registration_id,
+                        source_endpoint,
                         sequence: item.sequence,
                         packet: decode_server_packet(&item.frame).map_err(|error| {
                             format!("zone RPC outbound packet decode failed: {error}")
@@ -1710,6 +1874,7 @@ impl TcpZoneOwnerRpcTransport {
                     reset,
                     last_issued_sequence,
                     has_more,
+                    current_source_registration_id,
                 })
             }
             payload => Err(unexpected_payload("poll_outbounds", &payload)),
@@ -1761,6 +1926,52 @@ impl TcpZoneOwnerRpcTransport {
         }
     }
 
+    fn validate_zone_save_binding(&self, binding: &ZoneSaveOperationBinding) -> Result<(), String> {
+        if !self.explicit_zone_save_endpoint || self.addresses.len() != 1 {
+            return Err(
+                "zone save operations require one explicitly configured owner endpoint".into(),
+            );
+        }
+        if binding.rpc_session_id() != self.session_id
+            || binding.fence().zone_id() != self.zone_id.as_str()
+        {
+            return Err(
+                "zone save operation binding does not match the transport session and Zone".into(),
+            );
+        }
+        Ok(())
+    }
+
+    fn call_zone_save_mutation(&self, request: ZoneRpcRequest) -> Result<ZoneRpcPayload, String> {
+        self.call_mutation_once_classified(request, Some(ZONE_RPC_ZONE_SAVE_OPERATIONS_V1))
+            .map_err(|error| match error {
+                MutationOnceError::BeforeExecution(detail) => detail,
+                MutationOnceError::Unknown(detail) => {
+                    format!("ZONE_SAVE_COMMIT_OUTCOME_UNKNOWN: {detail}")
+                }
+            })
+    }
+
+    fn decode_zone_save_receipt(
+        &self,
+        payload: ZoneRpcPayload,
+        binding: &ZoneSaveOperationBinding,
+    ) -> Result<Option<ZoneSaveOperationReceipt>, String> {
+        let ZoneRpcPayload::ZoneSaveOperation { receipt } = payload else {
+            return Err(
+                "ZONE_SAVE_COMMIT_OUTCOME_UNKNOWN: invalid zone save response payload".into(),
+            );
+        };
+        receipt.map(|value| {
+            let receipt = ZoneSaveOperationReceipt::from_json_checked(value)
+                .map_err(|detail| format!("ZONE_SAVE_COMMIT_OUTCOME_UNKNOWN: invalid zone save receipt: {detail}"))?;
+            if receipt.operation().binding() != binding {
+                return Err("ZONE_SAVE_COMMIT_OUTCOME_UNKNOWN: response binding differs from requested operation".into());
+            }
+            Ok(receipt)
+        }).transpose()
+    }
+
     fn call(&self, request: ZoneRpcRequest) -> Result<ZoneRpcPayload, String> {
         self.call_with_required_capability(request, None)
     }
@@ -1770,6 +1981,15 @@ impl TcpZoneOwnerRpcTransport {
         request: ZoneRpcRequest,
         required_capability: Option<&str>,
     ) -> Result<ZoneRpcPayload, String> {
+        self.call_with_response_endpoint(request, required_capability)
+            .map(|(_, payload)| payload)
+    }
+
+    fn call_with_response_endpoint(
+        &self,
+        request: ZoneRpcRequest,
+        required_capability: Option<&str>,
+    ) -> Result<(usize, ZoneRpcPayload), String> {
         validate_identifier("RPC session id", &self.session_id)?;
         if let ZoneRpcRequest::Execute { command, .. } = &request {
             if wire_correlated_mutation_policy(command)?.is_some() {
@@ -1777,6 +1997,23 @@ impl TcpZoneOwnerRpcTransport {
                     "zone RPC correlated mutation must use the single-attempt executor".to_string(),
                 );
             }
+        }
+        if matches!(&request, ZoneRpcRequest::NpcPurchaseOwner { request } if request.action.is_mutation())
+        {
+            return Err(
+                "durable NPC purchase mutation must use the single-attempt executor".into(),
+            );
+        }
+        if matches!(&request, ZoneRpcRequest::ExecuteNativeAttack { .. }) {
+            return Err("typed ordinary attack must use the single-attempt executor".into());
+        }
+        if matches!(
+            &request,
+            ZoneRpcRequest::PrepareZoneSaveOperation { .. }
+                | ZoneRpcRequest::PersistZoneSaveOperation { .. }
+                | ZoneRpcRequest::ReleaseZoneSaveOperation { .. }
+        ) {
+            return Err("zone save mutations must use the single-attempt executor".into());
         }
         let priority = request.priority();
         let envelope = ZoneRpcEnvelope {
@@ -1839,7 +2076,7 @@ impl TcpZoneOwnerRpcTransport {
             match response {
                 Ok(ZoneRpcResponse::Ok { payload }) => {
                     self.active_endpoint.store(index, Ordering::Release);
-                    return Ok(*payload);
+                    return Ok((index, *payload));
                 }
                 Ok(ZoneRpcResponse::Error { code, message })
                     if matches!(
@@ -1876,6 +2113,15 @@ impl TcpZoneOwnerRpcTransport {
         request: ZoneRpcRequest,
         required_capability: Option<&str>,
     ) -> Result<ZoneRpcPayload, String> {
+        self.call_mutation_once_classified(request, required_capability)
+            .map_err(MutationOnceError::into_detail)
+    }
+
+    fn call_mutation_once_classified(
+        &self,
+        request: ZoneRpcRequest,
+        required_capability: Option<&str>,
+    ) -> Result<ZoneRpcPayload, MutationOnceError> {
         validate_identifier("RPC session id", &self.session_id)?;
         let priority = request.priority();
         let encoded = encode_rpc_envelope(
@@ -1893,7 +2139,8 @@ impl TcpZoneOwnerRpcTransport {
             return Err(format!(
                 "zone RPC request frame exceeds {} bytes",
                 self.limits.max_frame_bytes
-            ));
+            )
+            .into());
         }
         let encoded_health = required_capability
             .map(|_| {
@@ -1958,11 +2205,11 @@ impl TcpZoneOwnerRpcTransport {
                     Ok(*payload)
                 }
                 Ok(ZoneRpcResponse::Error { code, message }) => {
-                    Err(format!("zone RPC {code}: {message}"))
+                    Err(MutationOnceError::Unknown(format!("zone RPC {code}: {message}")))
                 }
-                Err(error) => Err(format!(
+                Err(error) => Err(MutationOnceError::Unknown(format!(
                     "zone RPC mutating request commit state is unknown at {address}; no endpoint fallback: {error}"
-                )),
+                ))),
             };
         }
         let required_capability = required_capability
@@ -1970,7 +2217,8 @@ impl TcpZoneOwnerRpcTransport {
         Err(format!(
             "zone RPC capability {required_capability} unavailable before execution: {}",
             probe_failures.join("; ")
-        ))
+        )
+        .into())
     }
 
     fn execute_owner_request(
@@ -2025,16 +2273,32 @@ impl TcpZoneOwnerRpcTransport {
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 enum CorrelatedMutationPolicy {
     NativePurchaseV2,
+    NativeGiftV1,
     OrdinaryPurchase,
     StorageRequestV2,
+    Billing,
 }
+
+#[cfg(test)]
+#[path = "zone_rpc_billing_tests.rs"]
+mod billing_tests;
+
+#[cfg(test)]
+#[path = "zone_rpc_game_shop_gift_tests.rs"]
+mod game_shop_gift_tests;
 
 /// Keep the no-fallback rule narrow: correlated GameShop and Storage writes
 /// must never be replayed after an endpoint may have committed them. Read-only
 /// and unrelated gameplay commands retain endpoint fallback behavior.
 fn correlated_mutation_policy(command: &WorldCommand) -> Option<CorrelatedMutationPolicy> {
     match command {
+        WorldCommand::BillingRefresh { .. }
+        | WorldCommand::BillingBuyMonthlyCard { .. }
+        | WorldCommand::BillingActivateMonthlyCard { .. } => {
+            Some(CorrelatedMutationPolicy::Billing)
+        }
         WorldCommand::NativeGameShopPurchase(_) => Some(CorrelatedMutationPolicy::NativePurchaseV2),
+        WorldCommand::NativeGameShopGift(_) => Some(CorrelatedMutationPolicy::NativeGiftV1),
         WorldCommand::ClientPacket(ClientPacket::GameShopBuy { .. }) => {
             Some(CorrelatedMutationPolicy::OrdinaryPurchase)
         }
@@ -2049,8 +2313,16 @@ fn wire_correlated_mutation_policy(
     command: &WireWorldCommand,
 ) -> Result<Option<CorrelatedMutationPolicy>, String> {
     match command {
+        WireWorldCommand::BillingRefresh { .. }
+        | WireWorldCommand::BillingBuyMonthlyCard { .. }
+        | WireWorldCommand::BillingActivateMonthlyCard { .. } => {
+            Ok(Some(CorrelatedMutationPolicy::Billing))
+        }
         WireWorldCommand::NativeGameShopPurchaseV2 { .. } => {
             Ok(Some(CorrelatedMutationPolicy::NativePurchaseV2))
+        }
+        WireWorldCommand::NativeGameShopGiftV1 { .. } => {
+            Ok(Some(CorrelatedMutationPolicy::NativeGiftV1))
         }
         WireWorldCommand::ClientPacket { frame } => match decode_client_packet(frame)
             .map_err(|error| format!("client packet decode failed: {error}"))?
@@ -2068,6 +2340,186 @@ fn wire_correlated_mutation_policy(
 }
 
 impl ZoneOwnerRpcTransport for TcpZoneOwnerRpcTransport {
+    fn supports_zone_save_operations(&self) -> bool {
+        self.explicit_zone_save_endpoint
+            && self.addresses.len() == 1
+            && matches!(self.call(ZoneRpcRequest::Health), Ok(ZoneRpcPayload::Health { capabilities, .. })
+                if capabilities.iter().any(|capability| capability == ZONE_RPC_ZONE_SAVE_OPERATIONS_V1))
+    }
+
+    fn prepare_zone_save_operation(
+        &self,
+        lease: &ZoneOwnerLease,
+        operation_id: &str,
+    ) -> Result<Option<PreparedZoneTeardown>, String> {
+        let binding = ZoneSaveOperationBinding::new(
+            operation_id.to_string(),
+            self.session_id.clone(),
+            ZoneSaveFence::new(
+                lease.zone_id().as_str().to_string(),
+                lease.owner_id().to_string(),
+                lease.fencing_token(),
+            )?,
+        )?;
+        self.validate_zone_save_binding(&binding)?;
+        let payload = self.call_zone_save_mutation(ZoneRpcRequest::PrepareZoneSaveOperation {
+            owner_lease: lease.into(),
+            operation_id: operation_id.to_string(),
+        })?;
+        self.decode_zone_save_receipt(payload, &binding)?
+            .as_ref()
+            .map(PreparedZoneTeardown::from_remote_operation)
+            .transpose()
+    }
+
+    fn persist_zone_save_operation(
+        &self,
+        binding: &ZoneSaveOperationBinding,
+    ) -> Result<ZoneSaveOperationReceipt, String> {
+        self.validate_zone_save_binding(binding)?;
+        let payload = self.call_zone_save_mutation(ZoneRpcRequest::PersistZoneSaveOperation {
+            binding: WireZoneSaveBinding::from(binding),
+        })?;
+        let receipt = self
+            .decode_zone_save_receipt(payload, binding)?
+            .ok_or_else(|| {
+                "ZONE_SAVE_COMMIT_OUTCOME_UNKNOWN: persist response omitted its receipt".to_string()
+            })?;
+        if receipt.status() == ZoneSaveOperationStatus::Prepared {
+            return Err(
+                "ZONE_SAVE_COMMIT_OUTCOME_UNKNOWN: persist response did not establish commitment"
+                    .into(),
+            );
+        }
+        Ok(receipt)
+    }
+
+    fn query_zone_save_operation(
+        &self,
+        binding: &ZoneSaveOperationBinding,
+    ) -> Result<Option<ZoneSaveOperationReceipt>, String> {
+        self.validate_zone_save_binding(binding)?;
+        let payload = self.call_with_required_capability(
+            ZoneRpcRequest::QueryZoneSaveOperation {
+                binding: WireZoneSaveBinding::from(binding),
+            },
+            Some(ZONE_RPC_ZONE_SAVE_OPERATIONS_V1),
+        )?;
+        self.decode_zone_save_receipt(payload, binding)
+    }
+
+    fn release_zone_save_operation(
+        &self,
+        binding: &ZoneSaveOperationBinding,
+    ) -> Result<ZoneSaveOperationReceipt, String> {
+        self.validate_zone_save_binding(binding)?;
+        let payload = self.call_zone_save_mutation(ZoneRpcRequest::ReleaseZoneSaveOperation {
+            binding: WireZoneSaveBinding::from(binding),
+        })?;
+        let receipt = self
+            .decode_zone_save_receipt(payload, binding)?
+            .ok_or_else(|| {
+                "ZONE_SAVE_COMMIT_OUTCOME_UNKNOWN: release response omitted its receipt".to_string()
+            })?;
+        if receipt.status() != ZoneSaveOperationStatus::Released {
+            return Err(
+                "ZONE_SAVE_COMMIT_OUTCOME_UNKNOWN: release response did not establish release"
+                    .into(),
+            );
+        }
+        Ok(receipt)
+    }
+
+    fn execute_production_attack_requiring_typed_outcome(
+        &self,
+        request: ZoneOwnerCommandRequest,
+    ) -> Result<NativeAttackExecution, NativeAttackError> {
+        let (owner_lease, mode, command) = request.into_parts();
+        if owner_lease.zone_id() != &self.zone_id {
+            return Err(NativeAttackError::BeforeExecution(
+                "attack lease does not match the transport Zone".into(),
+            ));
+        }
+        let (
+            ZoneOwnerCommandMode::ProductionPlayer { authenticated },
+            WorldCommand::Attack { object_id },
+        ) = (mode, command)
+        else {
+            return Err(NativeAttackError::BeforeExecution(
+                "typed attack requires an ordinary production-player Attack".into(),
+            ));
+        };
+        if !authenticated || object_id == 0 {
+            return Err(NativeAttackError::BeforeExecution(
+                "typed attack requires authentication and a nonzero target".into(),
+            ));
+        }
+        mir2_simulation::validate_production_player_command(
+            authenticated,
+            &WorldCommand::Attack { object_id },
+        )
+        .map_err(NativeAttackError::BeforeExecution)?;
+        let payload = self
+            .call_mutation_once_classified(
+                ZoneRpcRequest::ExecuteNativeAttack {
+                    owner_lease: (&owner_lease).into(),
+                    authenticated,
+                    object_id,
+                },
+                Some(ZONE_RPC_NATIVE_ATTACK_OUTCOME_V1),
+            )
+            .map_err(MutationOnceError::into_attack_error)?;
+        match payload {
+            ZoneRpcPayload::NativeAttack { response } => response.into_execution(),
+            payload => Err(NativeAttackError::Unknown(unexpected_payload(
+                "nativeAttack",
+                &payload,
+            ))),
+        }
+    }
+
+    fn supports_durable_npc_purchase_owner(&self) -> bool {
+        matches!(self.call(ZoneRpcRequest::Health), Ok(ZoneRpcPayload::Health { capabilities, .. })
+            if capabilities.iter().any(|capability| capability == ZONE_RPC_DURABLE_NPC_PURCHASE_OWNER_V1))
+    }
+
+    fn execute_npc_purchase_owner(
+        &self,
+        lease: &ZoneOwnerLease,
+        authenticated: bool,
+        action: NpcPurchaseOwnerAction,
+    ) -> Result<NpcPurchaseOwnerRouteExecution, NpcPurchaseDurableError> {
+        if !authenticated || lease.zone_id() != &self.zone_id {
+            return Err(crate::npc_purchase_owner_route::before(
+                "NPC purchase requires the authenticated current Zone owner",
+            ));
+        }
+        let request = ZoneRpcRequest::NpcPurchaseOwner {
+            request: WireNpcPurchaseOwnerRequest {
+                protocol_version: NPC_PURCHASE_OWNER_PROTOCOL_VERSION,
+                owner_lease: lease.into(),
+                authenticated,
+                action,
+            },
+        };
+        let payload = if action.is_mutation() {
+            self.call_mutation_once(request, Some(ZONE_RPC_DURABLE_NPC_PURCHASE_OWNER_V1))
+        } else {
+            self.call_with_required_capability(
+                request,
+                Some(ZONE_RPC_DURABLE_NPC_PURCHASE_OWNER_V1),
+            )
+        }
+        .map_err(|detail| crate::npc_purchase_owner_route::failure(detail, None))?;
+        match payload {
+            ZoneRpcPayload::NpcPurchaseOwner { response } => response.into_execution(action),
+            payload => Err(crate::npc_purchase_owner_route::failure(
+                unexpected_payload("npcPurchaseOwner", &payload),
+                None,
+            )),
+        }
+    }
+
     fn on_connect(&self) -> Result<Vec<ServerPacket>, String> {
         match self.call(ZoneRpcRequest::OnConnect)? {
             ZoneRpcPayload::Packets { frames } => decode_server_frames(frames),
@@ -2077,11 +2529,17 @@ impl ZoneOwnerRpcTransport for TcpZoneOwnerRpcTransport {
 
     fn execute(&self, request: ZoneOwnerCommandRequest) -> Result<WorldCommandExecution, String> {
         match correlated_mutation_policy(request.command()) {
+            Some(CorrelatedMutationPolicy::Billing) => {
+                self.execute_owner_request(request, Some(ZONE_RPC_BILLING_V1), true)
+            }
             Some(CorrelatedMutationPolicy::NativePurchaseV2) => self.execute_owner_request(
                 request,
                 Some(ZONE_RPC_NATIVE_GAME_SHOP_PURCHASE_V2),
                 true,
             ),
+            Some(CorrelatedMutationPolicy::NativeGiftV1) => {
+                self.execute_owner_request(request, Some(ZONE_RPC_NATIVE_GAME_SHOP_GIFT_V1), true)
+            }
             Some(CorrelatedMutationPolicy::OrdinaryPurchase) => {
                 // Preserve old-host compatibility (no capability probe), but
                 // never replay an economic write to another endpoint after the
@@ -2099,13 +2557,17 @@ impl ZoneOwnerRpcTransport for TcpZoneOwnerRpcTransport {
         &self,
         request: ZoneOwnerCommandRequest,
     ) -> Result<WorldCommandExecution, String> {
-        if !matches!(request.command(), WorldCommand::NativeGameShopPurchase(_)) {
-            return Err(
-                "typed GameShop outcome execution requires a native idempotent purchase"
-                    .to_string(),
-            );
-        }
-        self.execute_owner_request(request, Some(ZONE_RPC_NATIVE_GAME_SHOP_PURCHASE_V2), true)
+        let required = match request.command() {
+            WorldCommand::NativeGameShopPurchase(_) => ZONE_RPC_NATIVE_GAME_SHOP_PURCHASE_V2,
+            WorldCommand::NativeGameShopGift(_) => ZONE_RPC_NATIVE_GAME_SHOP_GIFT_V1,
+            _ => {
+                return Err(
+                    "typed GameShop outcome execution requires a native idempotent purchase or gift"
+                        .to_string(),
+                );
+            }
+        };
+        self.execute_owner_request(request, Some(required), true)
     }
 
     fn supports_typed_game_shop_purchase_outcome(&self) -> bool {
@@ -2115,6 +2577,16 @@ impl ZoneOwnerRpcTransport for TcpZoneOwnerRpcTransport {
                 if capabilities
                     .iter()
                     .any(|capability| capability == ZONE_RPC_NATIVE_GAME_SHOP_PURCHASE_V2)
+        )
+    }
+
+    fn supports_native_game_shop_gifts(&self) -> bool {
+        matches!(
+            self.call(ZoneRpcRequest::Health),
+            Ok(ZoneRpcPayload::Health { capabilities, .. })
+                if capabilities
+                    .iter()
+                    .any(|capability| capability == ZONE_RPC_NATIVE_GAME_SHOP_GIFT_V1)
         )
     }
 
@@ -2163,6 +2635,32 @@ impl ZoneOwnerRpcTransport for TcpZoneOwnerRpcTransport {
         }
     }
 
+    fn prepare_character_handoff(
+        &self,
+        lease: &ZoneOwnerLease,
+    ) -> Result<CharacterHandoffCheckpoint, String> {
+        match self.call(ZoneRpcRequest::PrepareCharacterHandoff {
+            owner_lease: lease.into(),
+        })? {
+            ZoneRpcPayload::CharacterHandoff { checkpoint } => Ok(*checkpoint),
+            payload => Err(unexpected_payload("prepare_character_handoff", &payload)),
+        }
+    }
+
+    fn resume_character_handoff(
+        &self,
+        lease: &ZoneOwnerLease,
+        checkpoint: &CharacterHandoffCheckpoint,
+    ) -> Result<CharacterHandoffCommitment, String> {
+        match self.call(ZoneRpcRequest::ResumeCharacterHandoff {
+            owner_lease: lease.into(),
+            checkpoint: Box::new(checkpoint.clone()),
+        })? {
+            ZoneRpcPayload::CharacterHandoffCommitment { commitment } => Ok(*commitment),
+            payload => Err(unexpected_payload("resume_character_handoff", &payload)),
+        }
+    }
+
     fn refresh_active_external_mail(&self) -> Result<bool, String> {
         match self.call(ZoneRpcRequest::RefreshActiveExternalMail)? {
             ZoneRpcPayload::Bool { value } => Ok(value),
@@ -2197,6 +2695,8 @@ impl ZoneOwnerRpcTransport for TcpZoneOwnerRpcTransport {
         let transport = self.clone();
         let acknowledged = Arc::clone(&self.outbound_acknowledged);
         let current_generation = Arc::clone(&self.outbound_generation);
+        let highest_health_sent_sequence = Arc::new(Mutex::new(0));
+        let transport_failed = Arc::new(AtomicBool::new(false));
         let handle = thread::spawn(move || {
             let minimum_idle_poll = Duration::from_millis(20);
             let maximum_idle_poll = Duration::from_millis(100);
@@ -2216,20 +2716,50 @@ impl ZoneOwnerRpcTransport for TcpZoneOwnerRpcTransport {
                             continue;
                         }
                         idle_poll = minimum_idle_poll;
+                        let source_registration = batch.current_source_registration_id;
                         for item in batch.items {
+                            if transport.validate_owner_route().is_err() {
+                                sender
+                                    .cancel_registration(registration_id, transport_failed.clone());
+                                return;
+                            }
                             if worker_stop.load(Ordering::Acquire)
                                 || current_generation.load(Ordering::Acquire) != generation
                             {
                                 return;
                             }
                             let sequence = item.sequence;
-                            if sender
-                                .blocking_send(SharedZoneLiveOutbound::new(
-                                    registration_id,
-                                    item.packet,
-                                ))
-                                .is_err()
-                            {
+                            if !source_viewport_frame_is_current(&item, source_registration) {
+                                // Retain the Host frame and numbering until the
+                                // normal ACK. A replaced Source viewport must
+                                // never be relabelled as this new Gateway view.
+                                if worker_stop.load(Ordering::Acquire)
+                                    || current_generation.load(Ordering::Acquire) != generation
+                                {
+                                    return;
+                                }
+                                acknowledged.store(sequence, Ordering::Release);
+                                continue;
+                            }
+                            let mut outbound =
+                                SharedZoneLiveOutbound::new(registration_id, item.packet);
+                            outbound.with_transport_failure_flag(transport_failed.clone());
+                            outbound.with_owner_route_guard(transport.owner_route_guard.clone());
+                            if let Some(change) = item.owner_health {
+                                outbound = outbound.with_owner_health(OwnerHealthDelivery {
+                                    change,
+                                    validator: Arc::new(RemoteOwnerHealthValidator {
+                                        transport: transport.clone(),
+                                        endpoint: item.source_endpoint,
+                                        source_registration_id: item.source_registration_id,
+                                        generation,
+                                        current_generation: current_generation.clone(),
+                                        stop: worker_stop.clone(),
+                                    }),
+                                    highest_sent_sequence: highest_health_sent_sequence.clone(),
+                                });
+                            }
+                            if sender.blocking_send(outbound).is_err() {
                                 return;
                             }
                             if current_generation.load(Ordering::Acquire) != generation {
@@ -2239,8 +2769,17 @@ impl ZoneOwnerRpcTransport for TcpZoneOwnerRpcTransport {
                         }
                     }
                     Err(error) => {
-                        if error.contains("outbound_gap") {
+                        if worker_stop.load(Ordering::Acquire)
+                            || current_generation.load(Ordering::Acquire) != generation
+                        {
+                            return;
+                        }
+                        if error.starts_with("zone_owner_")
+                            || error.contains("outbound_gap")
+                            || error.contains("health_validation")
+                        {
                             eprintln!("zone RPC live outbound requires snapshot resync: {error}");
+                            sender.cancel_registration(registration_id, transport_failed.clone());
                             return;
                         }
                         thread::sleep(Duration::from_millis(50));
@@ -2262,6 +2801,71 @@ struct RemoteZoneLiveOutboundRegistration {
     stop: Arc<AtomicBool>,
     active: Arc<AtomicBool>,
     handle: Option<thread::JoinHandle<()>>,
+}
+
+fn source_viewport_frame_is_current(
+    item: &SequencedZoneHostPacket,
+    current_source_registration: Option<u64>,
+) -> bool {
+    item.source_registration_id == 0
+        || !(crate::routing::is_owner_health_fifo_packet(&item.packet)
+            || matches!(item.packet, ServerPacket::UserLocation { .. }))
+        || current_source_registration == Some(item.source_registration_id)
+}
+
+#[derive(Debug)]
+struct RemoteOwnerHealthValidator {
+    transport: TcpZoneOwnerRpcTransport,
+    endpoint: usize,
+    source_registration_id: u64,
+    generation: u64,
+    current_generation: Arc<AtomicU64>,
+    stop: Arc<AtomicBool>,
+}
+
+impl OwnerHealthValidator for RemoteOwnerHealthValidator {
+    fn validate(&self, change: &mir2_simulation::ZoneOwnerHealthChange) -> Result<bool, String> {
+        if self.stop.load(Ordering::Acquire)
+            || self.current_generation.load(Ordering::Acquire) != self.generation
+        {
+            return Ok(false);
+        }
+        let encoded = encode_rpc_envelope(
+            &ZoneRpcEnvelope {
+                protocol_version: ZONE_RPC_PROTOCOL_VERSION,
+                session_id: self.transport.session_id.clone(),
+                zone_id: self.transport.zone_id.as_str().into(),
+                auth_token: self.transport.auth_token.clone(),
+                request: ZoneRpcRequest::ValidateOwnerHealth {
+                    source_registration_id: self.source_registration_id,
+                    change: change.clone(),
+                },
+            },
+            self.transport.codec,
+        )
+        .map_err(|e| format!("owner health validation encode failed: {e}"))?;
+        // Use the Host that actually returned this frame. A fallback Host or a
+        // concurrent active_endpoint change cannot authenticate its old Node.
+        let response = self.transport.call_endpoint_index(
+            self.endpoint,
+            &encoded,
+            ZoneRpcPriority::Outbound,
+        )?;
+        if self.stop.load(Ordering::Acquire)
+            || self.current_generation.load(Ordering::Acquire) != self.generation
+        {
+            return Ok(false);
+        }
+        match response {
+            ZoneRpcResponse::Ok { payload } => match *payload {
+                ZoneRpcPayload::Bool { value } => Ok(value),
+                payload => Err(unexpected_payload("validate_owner_health", &payload)),
+            },
+            ZoneRpcResponse::Error { code, message } => {
+                Err(format!("owner health validation {code}: {message}"))
+            }
+        }
+    }
 }
 
 impl fmt::Debug for RemoteZoneLiveOutboundRegistration {
@@ -2298,6 +2902,7 @@ struct ZoneHostSession {
     outbound_sender: SharedZoneLiveOutboundSender,
     outbound_receiver: Mutex<mpsc::Receiver<SharedZoneLiveOutbound>>,
     live_registration: Mutex<Option<SharedZoneLiveOutboundRegistration>>,
+    registration_refresh_gate: Mutex<()>,
     outbox: Mutex<ZoneHostOutbox>,
     max_outbound_messages: usize,
 }
@@ -2308,30 +2913,52 @@ impl ZoneHostSession {
         let (outbound_sender, outbound_receiver) = mpsc::channel(capacity);
         Self {
             hosted,
-            outbound_sender,
+            outbound_sender: SharedZoneLiveOutboundSender::single(outbound_sender),
             outbound_receiver: Mutex::new(outbound_receiver),
             live_registration: Mutex::new(None),
+            registration_refresh_gate: Mutex::new(()),
             outbox: Mutex::new(ZoneHostOutbox::new()),
             max_outbound_messages: capacity,
         }
     }
 
     fn refresh_live_registration(&self, force: bool) -> Result<(), ZoneRpcFault> {
+        // Poll and Execute may overlap. Keep the whole replacement serialized
+        // without holding live_registration while acquiring the Zone writer.
+        let _refresh = self.registration_refresh_gate.lock().map_err(|_| {
+            ZoneRpcFault::new("internal", "zone host registration refresh mutex poisoned")
+        })?;
+        self.refresh_live_registration_locked(force)
+    }
+
+    fn refresh_live_registration_locked(&self, force: bool) -> Result<(), ZoneRpcFault> {
         let mut live_registration = self.live_registration.lock().map_err(|_| {
             ZoneRpcFault::new("internal", "zone host live registration mutex poisoned")
         })?;
-        if !force && live_registration.is_some() {
+        if live_registration
+            .as_ref()
+            .is_some_and(|registration| registration.resync_required())
+        {
+            return Err(ZoneRpcFault::new(
+                "outbound_gap",
+                "zone host presentation overflow requires snapshot resync",
+            ));
+        }
+        if !force
+            && live_registration
+                .as_ref()
+                .is_some_and(|registration| registration.is_current())
+        {
             return Ok(());
         }
-        if force {
-            *live_registration = None;
-        }
+        *live_registration = None;
         drop(live_registration);
         let registration = self
             .hosted
             .register_live_outbound(self.outbound_sender.clone())
             .map_err(classify_runtime_error)?;
         if let Some(registration) = registration {
+            registration.activate();
             *self.live_registration.lock().map_err(|_| {
                 ZoneRpcFault::new("internal", "zone host live registration mutex poisoned")
             })? = Some(registration);
@@ -2371,7 +2998,21 @@ impl ZoneHostSession {
         acknowledged_sequence: u64,
         max_items: usize,
     ) -> Result<ZoneRpcPayload, ZoneRpcFault> {
-        self.refresh_live_registration(false)?;
+        // Registration replacement must not occur between this snapshot and
+        // receiver drain: a new registration's packets cannot be discarded as
+        // if they belonged to the old viewport.
+        let _refresh = self.registration_refresh_gate.lock().map_err(|_| {
+            ZoneRpcFault::new("internal", "zone host registration refresh mutex poisoned")
+        })?;
+        self.refresh_live_registration_locked(false)?;
+        let current_registration = self
+            .live_registration
+            .lock()
+            .map_err(|_| {
+                ZoneRpcFault::new("internal", "zone host live registration mutex poisoned")
+            })?
+            .as_ref()
+            .map(|registration| registration.registration_id());
         let mut receiver = self.outbound_receiver.lock().map_err(|_| {
             ZoneRpcFault::new("internal", "zone host outbound receiver mutex poisoned")
         })?;
@@ -2380,13 +3021,40 @@ impl ZoneHostSession {
             .lock()
             .map_err(|_| ZoneRpcFault::new("internal", "zone host outbox mutex poisoned"))?;
         while let Ok(outbound) = receiver.try_recv() {
+            if current_registration != Some(outbound.registration_id()) {
+                continue;
+            }
+            if outbound.is_overloaded() {
+                return Err(ZoneRpcFault::new(
+                    "outbound_gap",
+                    "zone host presentation requires snapshot resync",
+                ));
+            }
+            let source_registration_id = outbound.registration_id();
+            let owner_health = outbound
+                .owner_health()
+                .map(|delivery| delivery.change.clone());
+            if let Some(delivery) = outbound.owner_health() {
+                if !delivery
+                    .validator
+                    .validate(&delivery.change)
+                    .map_err(|e| ZoneRpcFault::new("health_validation", e))?
+                {
+                    continue;
+                }
+            }
             let frame = encode_server_packet(&outbound.into_packet()).map_err(|error| {
                 ZoneRpcFault::new(
                     "packet_encode",
                     format!("live outbound packet encode failed: {error}"),
                 )
             })?;
-            outbox.push(frame, self.max_outbound_messages);
+            outbox.push_stamped(
+                frame,
+                self.max_outbound_messages,
+                owner_health,
+                source_registration_id,
+            );
         }
         let reset = stream_id != Some(outbox.stream_id.as_str());
         let acknowledged_sequence = if reset { 0 } else { acknowledged_sequence };
@@ -2408,6 +3076,7 @@ impl ZoneHostSession {
             reset,
             last_issued_sequence: outbox.last_issued_sequence,
             has_more,
+            current_source_registration_id: current_registration,
         })
     }
 }
@@ -2430,10 +3099,22 @@ impl ZoneHostOutbox {
     }
 
     fn push(&mut self, frame: Vec<u8>, capacity: usize) {
+        self.push_stamped(frame, capacity, None, 0);
+    }
+
+    fn push_stamped(
+        &mut self,
+        frame: Vec<u8>,
+        capacity: usize,
+        owner_health: Option<mir2_simulation::ZoneOwnerHealthChange>,
+        source_registration_id: u64,
+    ) {
         self.last_issued_sequence = self.last_issued_sequence.saturating_add(1).max(1);
         self.messages.push_back(WireSequencedServerFrame {
             sequence: self.last_issued_sequence,
             frame,
+            owner_health,
+            source_registration_id,
         });
         while self.messages.len() > capacity.max(1) {
             if let Some(dropped) = self.messages.pop_front() {
@@ -2486,6 +3167,9 @@ pub struct ZoneHostServer {
     promotion_readiness: Mutex<BTreeMap<String, ZonePromotionReadinessRecord>>,
     quiesced_zones: Mutex<BTreeSet<String>>,
     promotion_frozen_zones: Mutex<BTreeSet<String>>,
+    // Unknown source commits have no TTL and must never share the readiness
+    // lifecycle. Only explicit durable recovery can resolve these outcomes.
+    unknown_commit_frozen_zones: Arc<Mutex<BTreeSet<String>>>,
     auth_token: Option<String>,
     limits: ZoneRpcLimits,
     zone_capacity: usize,
@@ -2510,6 +3194,8 @@ pub struct ZoneHostServer {
     execute_requests_total: AtomicU64,
     #[cfg(test)]
     runtime_execute_calls: AtomicU64,
+    #[cfg(test)]
+    test_player_drop_before_journal_failure: AtomicBool,
     execute_runtime_duration_ns_total: AtomicU64,
     execute_journal_duration_ns_total: AtomicU64,
     checkpoint_exports_total: AtomicU64,
@@ -2615,6 +3301,8 @@ impl ZoneHostServer {
             .expect("Zone Host replay baseline account store should be available");
         let operation_gate = Arc::new(SharedZoneMutationGate::default());
         let journal = Arc::new(Mutex::new(ZoneHostJournal::default()));
+        let unknown_commit_frozen_zones = Arc::new(Mutex::new(BTreeSet::<String>::new()));
+        let tick_unknown_commit_frozen_zones = Arc::clone(&unknown_commit_frozen_zones);
         let tick_journal = Arc::clone(&journal);
         let tick_authority = Arc::clone(&owner_lease_authority);
         let tick_host_id = host_id.clone();
@@ -2622,7 +3310,17 @@ impl ZoneHostServer {
         runtime_factory.configure_mutation_capture(
             Arc::clone(&operation_gate),
             Arc::new(move |zone_id| {
-                let lease = tick_authority.owner_lease(zone_id);
+                if tick_unknown_commit_frozen_zones
+                    .lock()
+                    .map_err(|_| "unknown commit freeze mutex poisoned".to_string())?
+                    .contains(zone_id.as_str())
+                {
+                    return Err(
+                        "ZONE_COMMIT_OUTCOME_UNKNOWN: Zone cadence requires explicit durable reconciliation"
+                            .into(),
+                    );
+                }
+                let lease = tick_authority.try_owner_lease(zone_id)?;
                 let legacy_in_process_owner =
                     lease.owner_id() == "in-process" || lease.owner_id().starts_with("in-process:");
                 if !legacy_in_process_owner && !tick_owner_ids.contains(lease.owner_id()) {
@@ -2665,6 +3363,7 @@ impl ZoneHostServer {
             promotion_readiness: Mutex::new(BTreeMap::new()),
             quiesced_zones: Mutex::new(BTreeSet::new()),
             promotion_frozen_zones: Mutex::new(BTreeSet::new()),
+            unknown_commit_frozen_zones,
             auth_token,
             limits,
             zone_capacity: zone_capacity.max(1),
@@ -2689,6 +3388,8 @@ impl ZoneHostServer {
             execute_requests_total: AtomicU64::new(0),
             #[cfg(test)]
             runtime_execute_calls: AtomicU64::new(0),
+            #[cfg(test)]
+            test_player_drop_before_journal_failure: AtomicBool::new(false),
             execute_runtime_duration_ns_total: AtomicU64::new(0),
             execute_journal_duration_ns_total: AtomicU64::new(0),
             checkpoint_exports_total: AtomicU64::new(0),
@@ -2956,11 +3657,40 @@ impl ZoneHostServer {
         self.owner_ids.contains(owner_id)
     }
 
+    fn require_known_zone_commit(&self, zone_id: &str) -> Result<(), ZoneRpcFault> {
+        if self
+            .unknown_commit_frozen_zones
+            .lock()
+            .map_err(|_| ZoneRpcFault::new("internal", "unknown commit freeze mutex poisoned"))?
+            .contains(zone_id)
+        {
+            return Err(ZoneRpcFault::new(
+                "commit_outcome_unknown",
+                "ZONE_COMMIT_OUTCOME_UNKNOWN: Zone requires explicit durable reconciliation",
+            ));
+        }
+        Ok(())
+    }
+
+    fn require_all_zone_commits_known(&self) -> Result<(), ZoneRpcFault> {
+        if !self
+            .unknown_commit_frozen_zones
+            .lock()
+            .map_err(|_| ZoneRpcFault::new("internal", "unknown commit freeze mutex poisoned"))?
+            .is_empty()
+        {
+            return Err(ZoneRpcFault::new("commit_outcome_unknown",
+                "ZONE_COMMIT_OUTCOME_UNKNOWN: host checkpoint requires explicit durable reconciliation"));
+        }
+        Ok(())
+    }
+
     fn quiesce_for_promotion_locked(
         &self,
         zone_id: &ZoneId,
         owner_lease: &ZoneOwnerLease,
     ) -> Result<ZoneQuiesceReceipt, ZoneRpcFault> {
+        self.require_known_zone_commit(zone_id.as_str())?;
         if owner_lease.zone_id() != zone_id {
             return Err(ZoneRpcFault::new(
                 "zone_mismatch",
@@ -3011,6 +3741,7 @@ impl ZoneHostServer {
         zone_id: &ZoneId,
         owner_lease: &ZoneOwnerLease,
     ) -> Result<(), ZoneRpcFault> {
+        self.require_known_zone_commit(zone_id.as_str())?;
         if owner_lease.zone_id() != zone_id || !self.accepts_owner_id(owner_lease.owner_id()) {
             return Err(ZoneRpcFault::new(
                 "resume_owner_mismatch",
@@ -3059,6 +3790,7 @@ impl ZoneHostServer {
         source_observed_at_ms: u64,
         max_lag_ms: u64,
     ) -> Result<ZonePromotionReadiness, ZoneRpcFault> {
+        self.require_known_zone_commit(zone_id.as_str())?;
         if active_head.version != ZONE_REPLICATION_HEAD_VERSION {
             return Err(ZoneRpcFault::new(
                 "promotion_head_version",
@@ -3237,6 +3969,7 @@ impl ZoneHostServer {
         readiness_id: &str,
         owner_lease: &ZoneOwnerLease,
     ) -> Result<ZonePromotionReceipt, ZoneRpcFault> {
+        self.require_known_zone_commit(zone_id.as_str())?;
         self.promotion_attempts_total
             .fetch_add(1, Ordering::Relaxed);
         if readiness_id.trim().is_empty() {
@@ -3301,24 +4034,39 @@ impl ZoneHostServer {
                 "standby replication head changed after readiness was assessed",
             ));
         }
-        self.activate_replica_session_persistence(zone_id)?;
-        self.runtime_factory
-            .lock()
-            .map_err(|_| ZoneRpcFault::new("internal", "zone host factory mutex poisoned"))?
-            .promote_zone_from_replica(zone_id)
+        let source_of_truth = self.config.lock()
+            .map_err(|_| ZoneRpcFault::new("internal", "Host configuration poisoned"))?
+            .account_store_database_mode == mir2_simulation::AccountStoreDatabaseMode::SourceOfTruth;
+        let (current_head, canonical_deadline) = if source_of_truth {
+            let recovered = self.recover_source_of_truth_replica(zone_id, owner_lease, &current_head)
+                .map_err(|error| {
+                    if let Ok(mut records) = self.promotion_readiness.lock() { records.remove(readiness_id); }
+                    if error.message.contains("COMMIT_OUTCOME_UNKNOWN") {
+                        self.classify_zone_runtime_error(zone_id.as_str(), error.message)
+                    } else { error }
+                })?;
+            (recovered.head, Some(recovered.valid_until))
+        } else {
+            self.activate_replica_session_persistence(zone_id)?;
+            (current_head, None)
+        };
+        self.owner_lease_authority.validate_owner_lease(owner_lease)
+            .map_err(|detail| ZoneRpcFault::new("promotion_fence_rejected", detail))?;
+        // Acquire cleanup guards before enabling ticks. No fallible operation
+        // may report failed promotion after the Zone has become active.
+        let factory = self.runtime_factory.lock()
+            .map_err(|_| ZoneRpcFault::new("internal", "zone host factory mutex poisoned"))?;
+        let mut quiesced = self.quiesced_zones.lock()
+            .map_err(|_| ZoneRpcFault::new("internal", "quiesced Zone mutex poisoned"))?;
+        let mut readiness = self.promotion_readiness.lock()
+            .map_err(|_| ZoneRpcFault::new("internal", "promotion readiness mutex poisoned"))?;
+        let mut frozen = self.promotion_frozen_zones.lock()
+            .map_err(|_| ZoneRpcFault::new("internal", "promotion freeze mutex poisoned"))?;
+        factory.promote_zone_from_replica_before(zone_id, canonical_deadline)
             .map_err(|message| ZoneRpcFault::new("promotion_replica_invalid", message))?;
-        self.quiesced_zones
-            .lock()
-            .map_err(|_| ZoneRpcFault::new("internal", "quiesced Zone mutex poisoned"))?
-            .remove(zone_id.as_str());
-        self.promotion_readiness
-            .lock()
-            .map_err(|_| ZoneRpcFault::new("internal", "promotion readiness mutex poisoned"))?
-            .remove(readiness_id);
-        self.promotion_frozen_zones
-            .lock()
-            .map_err(|_| ZoneRpcFault::new("internal", "promotion freeze mutex poisoned"))?
-            .remove(zone_id.as_str());
+        quiesced.remove(zone_id.as_str());
+        readiness.remove(readiness_id);
+        frozen.remove(zone_id.as_str());
         self.promotions_total.fetch_add(1, Ordering::Relaxed);
         self.promotion_last_promoted_at_ms
             .store(now_ms, Ordering::Release);
@@ -3340,6 +4088,16 @@ impl ZoneHostServer {
             .lock()
             .map_err(|_| ZoneRpcFault::new("internal", "zone host config mutex poisoned"))?
             .clone();
+        if authoritative_config.account_store_database_mode
+            == mir2_simulation::AccountStoreDatabaseMode::SourceOfTruth
+        {
+            // A shadow checkpoint cannot establish current source revisions or
+            // reconcile durable drop custody. Never seed the authoritative cache.
+            return Err(ZoneRpcFault::new(
+                "canonical_recovery_required",
+                "SourceOfTruth promotion requires canonical source and player-drop custody recovery before persistence activation",
+            ));
+        }
         let selected_sessions = self
             .sessions
             .lock()
@@ -3612,6 +4370,44 @@ impl ZoneHostServer {
         }
     }
 
+    fn supports_zone_save_operations(&self) -> bool {
+        self.owner_lease_authority.requires_transactional_zone_save_fence()
+            && self.config.lock().map(|config| {
+                config.account_store_database_url.is_some()
+                    && config.account_store_database_mode == mir2_simulation::AccountStoreDatabaseMode::SourceOfTruth
+                    // Pure binding validation also rejects a retained File authority.
+                    // Neither capability negotiation nor an RPC mutation migrates schema.
+                    && config.clone().with_zone_save_fence(
+                        ZoneSaveFence::new("capability-probe".into(), "capability-probe".into(), 1)
+                            .expect("fixed capability probe identifiers are valid")
+                    ).is_ok()
+            }).unwrap_or(false)
+    }
+
+    fn classify_zone_runtime_error(&self, zone_id: &str, message: String) -> ZoneRpcFault {
+        if message.contains("COMMIT_OUTCOME_UNKNOWN") {
+            if let Ok(mut frozen) = self.unknown_commit_frozen_zones.lock() {
+                frozen.insert(zone_id.to_string());
+            }
+        }
+        classify_runtime_error(message)
+    }
+
+    fn zone_save_operation_result(
+        &self,
+        zone_id: &str,
+        result: Result<Option<ZoneSaveOperationReceipt>, String>,
+    ) -> Result<ZoneRpcPayload, ZoneRpcFault> {
+        let receipt =
+            result.map_err(|message| self.classify_zone_runtime_error(zone_id, message))?;
+        Ok(ZoneRpcPayload::ZoneSaveOperation {
+            receipt: receipt
+                .map(|value| value.to_json())
+                .transpose()
+                .map_err(classify_runtime_error)?,
+        })
+    }
+
     fn handle_envelope(&self, envelope: ZoneRpcEnvelope) -> Result<ZoneRpcPayload, ZoneRpcFault> {
         if envelope.protocol_version != ZONE_RPC_PROTOCOL_VERSION {
             return Err(ZoneRpcFault::new(
@@ -3632,6 +4428,53 @@ impl ZoneHostServer {
 
         if matches!(envelope.request, ZoneRpcRequest::Health) {
             let health = self.health();
+            // Only the exact existing Source runtime can opt this Session in.
+            // Missing, old, handed-off or poisoned runtimes fail closed without
+            // creating a runtime or performing any economic work during Health.
+            let hosted = self.sessions.lock().ok().and_then(|sessions| {
+                sessions
+                    .get(&(envelope.session_id.clone(), envelope.zone_id.clone()))
+                    .map(|session| Arc::clone(&session.hosted))
+            });
+            let mut capabilities = vec![
+                ZONE_RPC_NATIVE_ATTACK_OUTCOME_V1.to_string(),
+                ZONE_RPC_TYPED_GAME_SHOP_OUTCOME_V1.to_string(),
+                ZONE_RPC_NATIVE_GAME_SHOP_PURCHASE_V2.to_string(),
+                ZONE_RPC_STORAGE_REQUEST_ID_V1.to_string(),
+                ZONE_RPC_BILLING_V1.to_string(),
+                ZONE_RPC_CHARACTER_HANDOFF_V1.to_string(),
+            ];
+            if self.supports_zone_save_operations() {
+                capabilities.push(ZONE_RPC_ZONE_SAVE_OPERATIONS_V1.to_string());
+            }
+            if hosted.is_some_and(|hosted| {
+                ZoneOwnerRpcTransport::supports_native_game_shop_gifts(hosted.as_ref())
+            }) {
+                capabilities.push(ZONE_RPC_NATIVE_GAME_SHOP_GIFT_V1.to_string());
+            }
+            let durable_source = self
+                .config
+                .lock()
+                .map(|config| {
+                    config.account_store_path.is_some()
+                        || (config.account_store_database_url.is_some()
+                            && config.account_store_database_mode
+                                == mir2_simulation::AccountStoreDatabaseMode::SourceOfTruth)
+                })
+                .unwrap_or(false);
+            let active_owner = self
+                .runtime_factory
+                .lock()
+                .map(|factory| !factory.is_zone_replica(&ZoneId::new(&envelope.zone_id)))
+                .unwrap_or(false);
+            if durable_source
+                && active_owner
+                && self
+                    .owner_lease_authority
+                    .supports_durable_npc_purchase_lease()
+            {
+                capabilities.push(ZONE_RPC_DURABLE_NPC_PURCHASE_OWNER_V1.to_string());
+            }
             return Ok(ZoneRpcPayload::Health {
                 host_id: health.host_id,
                 process_id: health.process_id,
@@ -3644,15 +4487,100 @@ impl ZoneHostServer {
                 zone_capacity: health.zone_capacity,
                 draining: health.draining,
                 protocol_version: health.protocol_version,
-                capabilities: vec![
-                    ZONE_RPC_TYPED_GAME_SHOP_OUTCOME_V1.to_string(),
-                    ZONE_RPC_NATIVE_GAME_SHOP_PURCHASE_V2.to_string(),
-                    ZONE_RPC_STORAGE_REQUEST_ID_V1.to_string(),
-                ],
+                capabilities,
             });
         }
 
         let request = envelope.request;
+        if matches!(&request, ZoneRpcRequest::SaveActiveCharacter)
+            && self
+                .owner_lease_authority
+                .requires_transactional_zone_save_fence()
+        {
+            return Err(ZoneRpcFault::new(
+                "unsupported_capability",
+                "transactional owners require zoneSaveOperationsV1",
+            ));
+        }
+        // Reconciliation is a database read against the exact original server
+        // binding. It remains available after owner expiry, takeover, process
+        // restart, quiesce or Unknown freeze, and never admits a world Session.
+        if let ZoneRpcRequest::QueryZoneSaveOperation { binding } = &request {
+            let binding = binding
+                .clone()
+                .into_binding(&envelope.session_id, &envelope.zone_id)?;
+            if !self.supports_zone_save_operations() {
+                return Err(ZoneRpcFault::new(
+                    "unsupported_capability",
+                    ZONE_RPC_ZONE_SAVE_OPERATIONS_V1,
+                ));
+            }
+            let config = self
+                .config
+                .lock()
+                .map_err(|_| ZoneRpcFault::new("internal", "zone host config mutex poisoned"))?
+                .clone();
+            return self.zone_save_operation_result(
+                &envelope.zone_id,
+                config.query_zone_save_operation(&binding),
+            );
+        }
+        match &request {
+            ZoneRpcRequest::PrepareZoneSaveOperation {
+                owner_lease,
+                operation_id,
+            } => {
+                WireZoneSaveBinding {
+                    operation_id: operation_id.clone(),
+                    rpc_session_id: envelope.session_id.clone(),
+                    zone_id: owner_lease.zone_id.clone(),
+                    owner_id: owner_lease.owner_id.clone(),
+                    fencing_token: owner_lease.fencing_token,
+                }
+                .into_binding(&envelope.session_id, &envelope.zone_id)?;
+            }
+            ZoneRpcRequest::PersistZoneSaveOperation { binding }
+            | ZoneRpcRequest::ReleaseZoneSaveOperation { binding } => {
+                binding
+                    .clone()
+                    .into_binding(&envelope.session_id, &envelope.zone_id)?;
+            }
+            _ => {}
+        }
+        if matches!(
+            &request,
+            ZoneRpcRequest::PrepareZoneSaveOperation { .. }
+                | ZoneRpcRequest::PersistZoneSaveOperation { .. }
+                | ZoneRpcRequest::ReleaseZoneSaveOperation { .. }
+        ) && !self.supports_zone_save_operations()
+        {
+            return Err(ZoneRpcFault::new(
+                "unsupported_capability",
+                ZONE_RPC_ZONE_SAVE_OPERATIONS_V1,
+            ));
+        }
+        if let ZoneRpcRequest::ExecuteNativeAttack {
+            owner_lease,
+            authenticated,
+            object_id,
+        } = &request
+        {
+            // Unlike the general production validator, this opt-in mutation
+            // requires an authenticated, bound world actor. Reject malformed
+            // trust input before creating even an empty hosted Session.
+            if let Err(error) = validate_native_attack_envelope(
+                &envelope.zone_id,
+                owner_lease,
+                *authenticated,
+                *object_id,
+            ) {
+                return Ok(ZoneRpcPayload::NativeAttack {
+                    response: WireNativeAttackResponse::Error {
+                        error: error.into(),
+                    },
+                });
+            }
+        }
         if matches!(request, ZoneRpcRequest::PollOutbounds { .. }) {
             let session = self.hosted_session(&envelope.session_id, &envelope.zone_id)?;
             return self.handle_session_request(
@@ -3664,6 +4592,11 @@ impl ZoneHostServer {
         }
         let zone_id = ZoneId::new(&envelope.zone_id);
         let gate_wait_started = Instant::now();
+        let slow_gate_wait = matches!(
+            &request,
+            ZoneRpcRequest::Execute { .. } | ZoneRpcRequest::ExecuteNativeAttack { .. }
+        )
+        .then(|| GatewaySlowStage::start("zone_rpc.execute_gate_wait"));
         let _operation = if matches!(
             &request,
             ZoneRpcRequest::ExportHostCheckpoint | ZoneRpcRequest::InstallHostCheckpoint { .. }
@@ -3673,12 +4606,29 @@ impl ZoneHostServer {
             self.operation_gate.lock_zone(&zone_id)
         }
         .map_err(|_| ZoneRpcFault::new("internal", "zone host operation mutex poisoned"))?;
+        drop(slow_gate_wait);
         let gate_wait_duration_ns = saturating_duration_ns(gate_wait_started.elapsed());
         self.zone_gate_wait_duration_ns_total
             .fetch_add(gate_wait_duration_ns, Ordering::Relaxed);
         self.zone_gate_wait_duration_ns_max
             .fetch_max(gate_wait_duration_ns, Ordering::Relaxed);
         self.prune_expired_promotion_readiness(unix_now_ms())?;
+        if zone_rpc_request_requires_active_mutation(&request)
+            || matches!(
+                &request,
+                ZoneRpcRequest::RestoreActiveCharacterCheckpoint { .. }
+                    | ZoneRpcRequest::InstallBaseSnapshot { .. }
+                    | ZoneRpcRequest::CompactMutationJournal { .. }
+                    | ZoneRpcRequest::ApplyMutationBatch { .. }
+                    | ZoneRpcRequest::AssessPromotionReadiness { .. }
+                    | ZoneRpcRequest::PromoteReplica { .. }
+                    | ZoneRpcRequest::QuiesceForPromotion { .. }
+                    | ZoneRpcRequest::ResumeAfterQuiesce { .. }
+                    | ZoneRpcRequest::InstallHostCheckpoint { .. }
+            )
+        {
+            self.require_known_zone_commit(&envelope.zone_id)?;
+        }
         let replica_is_read_only = zone_rpc_request_requires_active_session(&request)
             && self
                 .runtime_factory
@@ -3704,6 +4654,7 @@ impl ZoneHostServer {
                 .lock()
                 .map_err(|_| ZoneRpcFault::new("internal", "promotion freeze mutex poisoned"))?
                 .contains(&envelope.zone_id)
+                && !matches!(&request, ZoneRpcRequest::ReleaseZoneSaveOperation { .. })
         {
             if !zone_rpc_request_requires_active_mutation(&request) {
                 // Read-only and replication administration remains available
@@ -3719,6 +4670,62 @@ impl ZoneHostServer {
             }
         }
         match request {
+            ZoneRpcRequest::ValidateOwnerHealth {
+                source_registration_id,
+                change,
+            } => {
+                let zone_id = ZoneId::new(&envelope.zone_id);
+                let lease = self
+                    .owner_lease_authority
+                    .try_owner_lease(&zone_id)
+                    .map_err(classify_runtime_error)?;
+                let legacy_owner =
+                    lease.owner_id() == "in-process" || lease.owner_id().starts_with("in-process:");
+                let blocked = (!legacy_owner && !self.owner_ids.contains(lease.owner_id()))
+                    || self
+                        .owner_lease_authority
+                        .validate_owner_lease(&lease)
+                        .is_err()
+                    || self
+                        .quiesced_zones
+                        .lock()
+                        .map_err(|_| ZoneRpcFault::new("internal", "quiesce mutex poisoned"))?
+                        .contains(&envelope.zone_id)
+                    || self
+                        .promotion_frozen_zones
+                        .lock()
+                        .map_err(|_| ZoneRpcFault::new("internal", "freeze mutex poisoned"))?
+                        .contains(&envelope.zone_id);
+                let blocked = blocked || self.require_known_zone_commit(&envelope.zone_id).is_err();
+                if blocked {
+                    return Ok(ZoneRpcPayload::Bool { value: false });
+                }
+                // Validation must never create a missing session, execute a
+                // snapshot/Tick, save state, or append a mutation journal row.
+                let session = self
+                    .sessions
+                    .lock()
+                    .map_err(|_| ZoneRpcFault::new("internal", "session mutex poisoned"))?
+                    .get(&(envelope.session_id.clone(), envelope.zone_id.clone()))
+                    .cloned();
+                let Some(session) = session else {
+                    return Ok(ZoneRpcPayload::Bool { value: false });
+                };
+                let validator = session
+                    .live_registration
+                    .lock()
+                    .map_err(|_| ZoneRpcFault::new("internal", "registration mutex poisoned"))?
+                    .as_ref()
+                    .filter(|reg| reg.registration_id() == source_registration_id)
+                    .and_then(|reg| reg.owner_health_validator());
+                let value = match validator {
+                    Some(validator) => validator
+                        .validate(&change)
+                        .map_err(|e| ZoneRpcFault::new("health_validation", e))?,
+                    None => false,
+                };
+                return Ok(ZoneRpcPayload::Bool { value });
+            }
             ZoneRpcRequest::ReplicationHead => {
                 return self
                     .replication_head(&ZoneId::new(&envelope.zone_id))
@@ -3814,7 +4821,28 @@ impl ZoneHostServer {
                 );
             }
             request => {
-                let session = self.hosted_session(&envelope.session_id, &envelope.zone_id)?;
+                let session = if matches!(
+                    &request,
+                    ZoneRpcRequest::PrepareZoneSaveOperation { .. }
+                        | ZoneRpcRequest::PersistZoneSaveOperation { .. }
+                        | ZoneRpcRequest::ReleaseZoneSaveOperation { .. }
+                ) {
+                    self.sessions
+                        .lock()
+                        .map_err(|_| {
+                            ZoneRpcFault::new("internal", "zone host session mutex poisoned")
+                        })?
+                        .get(&(envelope.session_id.clone(), envelope.zone_id.clone()))
+                        .cloned()
+                        .ok_or_else(|| {
+                            ZoneRpcFault::new(
+                                "zone_save_session_missing",
+                                "zone save operations require the existing authoritative Session",
+                            )
+                        })?
+                } else {
+                    self.hosted_session(&envelope.session_id, &envelope.zone_id)?
+                };
                 return self.handle_session_request(
                     &envelope.session_id,
                     &envelope.zone_id,
@@ -3833,7 +4861,9 @@ impl ZoneHostServer {
         request: ZoneRpcRequest,
     ) -> Result<ZoneRpcPayload, ZoneRpcFault> {
         match request {
-            ZoneRpcRequest::Health => unreachable!(),
+            ZoneRpcRequest::Health
+            | ZoneRpcRequest::ValidateOwnerHealth { .. }
+            | ZoneRpcRequest::QueryZoneSaveOperation { .. } => unreachable!(),
             ZoneRpcRequest::ReplicationHead
             | ZoneRpcRequest::ExportMutationBatch { .. }
             | ZoneRpcRequest::ExportBaseSnapshot
@@ -3852,6 +4882,151 @@ impl ZoneHostServer {
             ZoneRpcRequest::OnConnect => Ok(ZoneRpcPayload::Packets {
                 frames: encode_server_frames(session.hosted.on_connect()?)?,
             }),
+            ZoneRpcRequest::PrepareZoneSaveOperation {
+                owner_lease,
+                operation_id,
+            } => {
+                let lease = owner_lease.into_lease()?;
+                let result =
+                    session
+                        .hosted
+                        .prepare_remote_zone_teardown(&lease, &operation_id, session_id);
+                self.zone_save_operation_result(zone_id, result)
+            }
+            ZoneRpcRequest::PersistZoneSaveOperation { binding } => {
+                let binding = binding.into_binding(session_id, zone_id)?;
+                let result = session
+                    .hosted
+                    .persist_remote_zone_teardown(&binding)
+                    .map(Some);
+                self.zone_save_operation_result(zone_id, result)
+            }
+            ZoneRpcRequest::ReleaseZoneSaveOperation { binding } => {
+                let binding = binding.into_binding(session_id, zone_id)?;
+                let result = session
+                    .hosted
+                    .release_remote_zone_teardown(&binding)
+                    .map(Some);
+                self.zone_save_operation_result(zone_id, result)
+            }
+
+            ZoneRpcRequest::ExecuteNativeAttack {
+                owner_lease,
+                authenticated,
+                object_id,
+            } => {
+                let result = self.execute_native_attack_request(
+                    session_id,
+                    zone_id,
+                    &session,
+                    owner_lease,
+                    authenticated,
+                    object_id,
+                );
+                let response = match result {
+                    Ok(execution) => WireNativeAttackResponse::from_execution(execution)
+                        .unwrap_or_else(|error| WireNativeAttackResponse::Error {
+                            error: NativeAttackError::Unknown(format!(
+                                "attack executed but response encoding failed: {}",
+                                error.message,
+                            ))
+                            .into(),
+                        }),
+                    Err(error) => WireNativeAttackResponse::Error {
+                        error: error.into(),
+                    },
+                };
+                Ok(ZoneRpcPayload::NativeAttack { response })
+            }
+
+            ZoneRpcRequest::NpcPurchaseOwner { request } => {
+                let payload = |response| Ok(ZoneRpcPayload::NpcPurchaseOwner { response });
+                if request.protocol_version != NPC_PURCHASE_OWNER_PROTOCOL_VERSION
+                    || !request.authenticated
+                {
+                    return payload(WireNpcPurchaseOwnerResponse::Error {
+                        error: crate::npc_purchase_owner_route::before(
+                            "NPC purchase owner protocol/authentication rejected before execution",
+                        ),
+                    });
+                }
+                if request.owner_lease.zone_id != zone_id {
+                    return payload(WireNpcPurchaseOwnerResponse::Error {
+                        error: crate::npc_purchase_owner_route::before(
+                            "NPC purchase owner lease zone differs from the actual envelope",
+                        ),
+                    });
+                }
+                let lease = request.owner_lease.into_lease()?;
+                let source_sequence = if request.action.is_mutation() {
+                    Some(
+                        self.journal
+                            .lock()
+                            .map_err(|_| {
+                                ZoneRpcFault::new("internal", "zone host journal mutex poisoned")
+                            })?
+                            .replication
+                            .next_sequence_for_append(zone_id)?,
+                    )
+                } else {
+                    None
+                };
+                let mut result = session
+                    .hosted
+                    .execute_npc_purchase_owner_with_source_sequence(
+                        &lease,
+                        request.authenticated,
+                        request.action,
+                        source_sequence,
+                    );
+                if request.action.is_mutation() {
+                    let known = match &result {
+                        Ok(execution) => {
+                            crate::npc_purchase_owner_route::terminal_receipt(&execution.reply)
+                        }
+                        Err(NpcPurchaseDurableError::PostCommit { receipt, .. }) => {
+                            Some(receipt.clone())
+                        }
+                        _ => None,
+                    };
+                    let checkpoint = match &result {
+                        Ok(execution) => execution.checkpoint.clone(),
+                        Err(NpcPurchaseDurableError::PostCommit { .. }) => session
+                            .hosted
+                            .npc_purchase_owner_checkpoint_with_lease(&lease)
+                            .ok()
+                            .flatten(),
+                        _ => None,
+                    };
+                    let changed = result.is_ok()
+                        || matches!(&result, Err(NpcPurchaseDurableError::PostCommit { .. }));
+                    if changed {
+                        let recorded = checkpoint.ok_or_else(|| "NPC purchase committed checkpoint is unavailable for replication".to_string())
+                            .and_then(|checkpoint| self.append_journal(WireHostJournalEntry {
+                                sequence: 0, session_id: session_id.to_string(), zone_id: zone_id.to_string(),
+                                owner_lease: WireZoneOwnerLease::from(&lease), mode: WireZoneOwnerCommandMode::Direct,
+                                command: Some(WireWorldCommand::NpcPurchaseOwnerCheckpoint { checkpoint: Box::new(checkpoint) }),
+                                closed: false, zone_tick_ms: None,
+                            }).map_err(|error| format!("NPC purchase checkpoint journal publication failed: {error:?}")));
+                        if let Err(detail) = recorded {
+                            if let Ok(mut frozen) = self.unknown_commit_frozen_zones.lock() {
+                                frozen.insert(zone_id.to_string());
+                            }
+                            result = Err(crate::npc_purchase_owner_route::failure(detail, known));
+                        }
+                    } else if matches!(&result, Err(NpcPurchaseDurableError::Unknown { .. })) {
+                        // No replica may be promoted past an unrecorded unknown
+                        // source commit. Original-ID read-only recovery remains.
+                        if let Ok(mut frozen) = self.unknown_commit_frozen_zones.lock() {
+                            frozen.insert(zone_id.to_string());
+                        }
+                    }
+                }
+                payload(match result {
+                    Ok(execution) => WireNpcPurchaseOwnerResponse::from_execution(execution),
+                    Err(error) => WireNpcPurchaseOwnerResponse::Error { error },
+                })
+            }
             ZoneRpcRequest::Execute {
                 owner_lease,
                 mode,
@@ -3907,13 +5082,87 @@ impl ZoneHostServer {
                 let runtime_started = Instant::now();
                 #[cfg(test)]
                 self.runtime_execute_calls.fetch_add(1, Ordering::Relaxed);
-                let execution = session.execute_request(request)?;
+                let execution = {
+                    let _slow_stage = GatewaySlowStage::start("zone_rpc.execute_runtime");
+                    match session.execute_request(request) {
+                        Ok(execution) => execution,
+                        Err(error) => {
+                            // execute_request also refreshes live registration
+                            // after runtime execution. That later failure must
+                            // not turn an already committed debit into a safe
+                            // rejection or authorize an ordinary gameplay retry.
+                            let committed_drop = session.hosted.take_player_drop_journal_result();
+                            let drop_unknown = match committed_drop {
+                                Ok(Some(_)) => Some(format!(
+                                    "PLAYER_DROP_COMMIT_OUTCOME_UNKNOWN: committed drop completed before execution response failed: {}",
+                                    error.message,
+                                )),
+                                Err(detail) => Some(format!(
+                                    "PLAYER_DROP_COMMIT_OUTCOME_UNKNOWN: failed execution cannot establish its committed drop result: {detail}; original error: {}",
+                                    error.message,
+                                )),
+                                Ok(None) => None,
+                            };
+                            if let Some(detail) = drop_unknown {
+                                return Err(self.classify_zone_runtime_error(zone_id, detail));
+                            }
+                            if error.message.contains("COMMIT_OUTCOME_UNKNOWN") {
+                                return Err(
+                                    self.classify_zone_runtime_error(zone_id, error.message)
+                                );
+                            }
+                            return Err(error);
+                        }
+                    }
+                };
                 self.execute_runtime_duration_ns_total.fetch_add(
                     saturating_duration_ns(runtime_started.elapsed()),
                     Ordering::Relaxed,
                 );
+                let player_drop_result = session
+                    .hosted
+                    .take_player_drop_journal_result()
+                    .map_err(|detail| {
+                        self.classify_zone_runtime_error(
+                            zone_id,
+                            format!("PLAYER_DROP_COMMIT_OUTCOME_UNKNOWN: executed result is unavailable for journal publication: {detail}"),
+                        )
+                    })?;
+                let player_drop_ack = player_drop_result.as_ref().map(|result| {
+                    (
+                        result.receipt.operation_key().to_string(),
+                        result.receipt.intent_digest().to_string(),
+                    )
+                });
+                #[cfg(test)]
+                if player_drop_result.is_some()
+                    && self.test_player_drop_before_journal_failure.swap(false, Ordering::AcqRel)
+                {
+                    return Err(self.classify_zone_runtime_error(
+                        zone_id,
+                        "PLAYER_DROP_COMMIT_OUTCOME_UNKNOWN: injected failure after real source commit before journal publication".into(),
+                    ));
+                }
                 let journal_started = Instant::now();
-                self.append_journal(journal_entry)?;
+                {
+                    let _slow_stage = GatewaySlowStage::start("zone_rpc.execute_journal");
+                    self.append_execution_journal(
+                        journal_entry,
+                        source_sequence,
+                        player_drop_result,
+                    )?;
+                }
+                if let Some((operation_key, intent_digest)) = player_drop_ack {
+                    session
+                        .hosted
+                        .acknowledge_player_drop_journal_result(&operation_key, &intent_digest)
+                        .map_err(|detail| {
+                            self.classify_zone_runtime_error(
+                                zone_id,
+                                format!("PLAYER_DROP_COMMIT_OUTCOME_UNKNOWN: frozen journal acknowledgement failed: {detail}"),
+                            )
+                        })?;
+                }
                 self.execute_journal_duration_ns_total.fetch_add(
                     saturating_duration_ns(journal_started.elapsed()),
                     Ordering::Relaxed,
@@ -3956,7 +5205,10 @@ impl ZoneHostServer {
             }
             ZoneRpcRequest::RestoreActiveCharacterCheckpoint { checkpoint } => {
                 let zone_id = ZoneId::new(zone_id);
-                let owner_lease = self.owner_lease_authority.owner_lease(&zone_id);
+                let owner_lease = self
+                    .owner_lease_authority
+                    .try_owner_lease(&zone_id)
+                    .map_err(classify_runtime_error)?;
                 self.owner_lease_authority
                     .validate_owner_lease(&owner_lease)
                     .map_err(classify_runtime_error)?;
@@ -3984,7 +5236,72 @@ impl ZoneHostServer {
                 self.append_journal(journal_entry)?;
                 Ok(ZoneRpcPayload::Unit)
             }
+            ZoneRpcRequest::PrepareCharacterHandoff { owner_lease } => {
+                if owner_lease.zone_id != zone_id {
+                    return Err(ZoneRpcFault::new(
+                        "zone_mismatch",
+                        "handoff lease does not match envelope zone",
+                    ));
+                }
+                let lease = owner_lease.into_lease()?;
+                self.owner_lease_authority
+                    .validate_owner_lease(&lease)
+                    .map_err(classify_runtime_error)?;
+                let checkpoint = session
+                    .hosted
+                    .prepare_character_handoff(&lease)
+                    .map_err(classify_runtime_error)?;
+                Ok(ZoneRpcPayload::CharacterHandoff {
+                    checkpoint: Box::new(checkpoint),
+                })
+            }
+            ZoneRpcRequest::ResumeCharacterHandoff {
+                owner_lease,
+                checkpoint,
+            } => {
+                if owner_lease.zone_id != zone_id {
+                    return Err(ZoneRpcFault::new(
+                        "zone_mismatch",
+                        "handoff lease does not match envelope zone",
+                    ));
+                }
+                let lease = owner_lease.clone().into_lease()?;
+                self.owner_lease_authority
+                    .validate_owner_lease(&lease)
+                    .map_err(classify_runtime_error)?;
+                self.journal
+                    .lock()
+                    .map_err(|_| ZoneRpcFault::new("internal", "zone host journal mutex poisoned"))?
+                    .replication
+                    .next_sequence_for_append(zone_id)?;
+                let commitment = session
+                    .hosted
+                    .resume_character_handoff(&lease, &checkpoint)
+                    .map_err(classify_runtime_error)?;
+                self.append_journal(WireHostJournalEntry {
+                    sequence: 0,
+                    session_id: session_id.into(),
+                    zone_id: zone_id.into(),
+                    owner_lease,
+                    mode: WireZoneOwnerCommandMode::Direct,
+                    command: Some(WireWorldCommand::ResumeCharacterHandoff { checkpoint }),
+                    closed: false,
+                    zone_tick_ms: None,
+                })?;
+                Ok(ZoneRpcPayload::CharacterHandoffCommitment {
+                    commitment: Box::new(commitment),
+                })
+            }
             ZoneRpcRequest::SaveActiveCharacter => {
+                if self
+                    .owner_lease_authority
+                    .requires_transactional_zone_save_fence()
+                {
+                    return Err(ZoneRpcFault::new(
+                        "unsupported_capability",
+                        "transactional owners require zoneSaveOperationsV1",
+                    ));
+                }
                 ZoneOwnerRpcTransport::save_active_character(session.hosted.as_ref())
                     .map_err(classify_runtime_error)?;
                 Ok(ZoneRpcPayload::Unit)
@@ -3994,6 +5311,100 @@ impl ZoneHostServer {
                     .map_err(classify_runtime_error)?,
             }),
         }
+    }
+
+    fn execute_native_attack_request(
+        &self,
+        session_id: &str,
+        zone_id: &str,
+        session: &ZoneHostSession,
+        owner_lease: WireZoneOwnerLease,
+        authenticated: bool,
+        object_id: u32,
+    ) -> Result<NativeAttackExecution, NativeAttackError> {
+        self.execute_requests_total.fetch_add(1, Ordering::Relaxed);
+        validate_native_attack_envelope(zone_id, &owner_lease, authenticated, object_id)?;
+        let command = WorldCommand::Attack { object_id };
+        mir2_simulation::validate_production_player_command(authenticated, &command)
+            .map_err(NativeAttackError::BeforeExecution)?;
+        let lease = owner_lease
+            .clone()
+            .into_lease()
+            .map_err(|error| NativeAttackError::BeforeExecution(error.message))?;
+        self.owner_lease_authority
+            .validate_owner_lease(&lease)
+            .map_err(NativeAttackError::BeforeExecution)?;
+        // Even a non-launched swing may cancel an earlier movement intent.
+        // Reserve a journal slot before entering the authoritative runtime and
+        // record the original ordinary Attack without inventing a new ledger.
+        let source_sequence = self
+            .journal
+            .lock()
+            .map_err(|_| {
+                NativeAttackError::BeforeExecution("zone host journal mutex poisoned".into())
+            })?
+            .replication
+            .next_sequence_for_append(zone_id)
+            .map_err(|error| NativeAttackError::BeforeExecution(error.message))?;
+        let request = ZoneOwnerCommandRequest::production_player(lease, authenticated, command)
+            .with_source_sequence(source_sequence);
+        let runtime_started = Instant::now();
+        #[cfg(test)]
+        self.runtime_execute_calls.fetch_add(1, Ordering::Relaxed);
+        let result = {
+            let _slow_stage = GatewaySlowStage::start("zone_rpc.execute_runtime");
+            session
+                .hosted
+                .execute_production_attack_requiring_typed_outcome(request)
+        };
+        self.execute_runtime_duration_ns_total.fetch_add(
+            saturating_duration_ns(runtime_started.elapsed()),
+            Ordering::Relaxed,
+        );
+        let execution = match result {
+            Ok(execution) => execution,
+            Err(error) => {
+                if matches!(&error, NativeAttackError::Unknown(_)) {
+                    if let Ok(mut frozen) = self.unknown_commit_frozen_zones.lock() {
+                        frozen.insert(zone_id.to_string());
+                    }
+                }
+                return Err(error);
+            }
+        };
+        let journal_started = Instant::now();
+        let recorded = self.append_journal(WireHostJournalEntry {
+            sequence: 0,
+            session_id: session_id.to_string(),
+            zone_id: zone_id.to_string(),
+            owner_lease,
+            mode: WireZoneOwnerCommandMode::ProductionPlayer { authenticated },
+            command: Some(WireWorldCommand::Attack { object_id }),
+            closed: false,
+            zone_tick_ms: None,
+        });
+        self.execute_journal_duration_ns_total.fetch_add(
+            saturating_duration_ns(journal_started.elapsed()),
+            Ordering::Relaxed,
+        );
+        if let Err(error) = recorded {
+            if let Ok(mut frozen) = self.unknown_commit_frozen_zones.lock() {
+                frozen.insert(zone_id.to_string());
+            }
+            return Err(NativeAttackError::Unknown(format!(
+                "attack executed but journal publication failed: {}",
+                error.message,
+            )));
+        }
+        // The mutation is already journaled. Presentation failure does not
+        // turn its known launch into a gameplay rejection or permit retry.
+        session.refresh_live_registration(false).map_err(|error| {
+            NativeAttackError::Unknown(format!(
+                "attack executed but live registration failed: {}",
+                error.message
+            ))
+        })?;
+        Ok(execution)
     }
 
     fn close_hosted_session(
@@ -4140,11 +5551,49 @@ impl ZoneHostServer {
         append_host_journal(self.journal.as_ref(), entry)
     }
 
+    fn append_execution_journal(
+        &self,
+        mut entry: WireHostJournalEntry,
+        source_sequence: u64,
+        player_drop_result: Option<PlayerDropJournalResult>,
+    ) -> Result<(), ZoneRpcFault> {
+        let Some(result) = player_drop_result else {
+            return self.append_journal(entry);
+        };
+        let zone_id = entry.zone_id.clone();
+        // A canonical debit already committed. Any failure to bind or publish
+        // its frozen result must block later writes and replica promotion.
+        let publication = (|| {
+            entry.validate_player_drop_result(&result, source_sequence)?;
+            if !entry
+                .command
+                .as_ref()
+                .is_some_and(WireWorldCommand::is_player_drop)
+            {
+                return Err(ZoneRpcFault::new(
+                    "player_drop_journal_binding",
+                    "player-drop result does not replace an ordinary drop command",
+                ));
+            }
+            entry.command = Some(WireWorldCommand::PlayerDropJournalResult {
+                result: Box::new(result),
+            });
+            self.append_journal(entry)
+        })();
+        publication.map_err(|error| {
+            self.classify_zone_runtime_error(
+                &zone_id,
+                format!("PLAYER_DROP_COMMIT_OUTCOME_UNKNOWN: frozen journal publication failed: {}", error.message),
+            )
+        })
+    }
+
     fn compact_mutation_journal(
         &self,
         requested_zone_id: &str,
         snapshot: &ZoneBaseSnapshot,
     ) -> Result<usize, ZoneRpcFault> {
+        self.require_known_zone_commit(requested_zone_id)?;
         if snapshot.zone_id != requested_zone_id {
             return Err(ZoneRpcFault::new(
                 "zone_mismatch",
@@ -4185,6 +5634,7 @@ impl ZoneHostServer {
     }
 
     fn export_host_checkpoint(&self) -> Result<ZoneRpcPayload, ZoneRpcFault> {
+        self.require_all_zone_commits_known()?;
         let started = Instant::now();
         let journal = self
             .journal
@@ -4276,6 +5726,7 @@ impl ZoneHostServer {
     }
 
     fn export_base_snapshot(&self, zone_id: &ZoneId) -> Result<ZoneRpcPayload, ZoneRpcFault> {
+        self.require_known_zone_commit(zone_id.as_str())?;
         let head = self
             .journal
             .lock()
@@ -4337,6 +5788,7 @@ impl ZoneHostServer {
         requested_zone_id: &str,
         snapshot: &ZoneBaseSnapshot,
     ) -> Result<(), ZoneRpcFault> {
+        self.require_known_zone_commit(requested_zone_id)?;
         snapshot.verify().map_err(|error| {
             ZoneRpcFault::new(
                 "base_snapshot_invalid",
@@ -4438,6 +5890,12 @@ impl ZoneHostServer {
             Ok(published) => published,
             Err(error) => return Err(error),
         };
+        if published {
+            for session in live_sessions.values() {
+                session.hosted.rebind_adopted_replica_factory(&target_factory)
+                    .map_err(classify_runtime_error)?;
+            }
+        }
         drop(target_factory);
         if !published && !payload.sessions.is_empty() {
             return Err(ZoneRpcFault::new(
@@ -4482,20 +5940,20 @@ impl ZoneHostServer {
                 commitment.active_identity.as_ref(),
                 commitment.active_character_bytes.as_ref(),
             ) {
-                let zone_id = ZoneId::new(&commitment.zone_id);
-                let lease = ZoneOwnerLease::in_process(&zone_id);
-                session.execute_request(ZoneOwnerCommandRequest::direct(
-                    lease.clone(),
-                    WorldCommand::PasskeyLogin {
-                        account_id: identity.account_id.clone(),
-                    },
-                ))?;
-                session.execute_request(ZoneOwnerCommandRequest::direct(
-                    lease,
-                    WorldCommand::ClientPacket(ClientPacket::StartGame {
-                        character_index: identity.character_index,
-                    }),
-                ))?;
+                let active_character: CharacterSaveRecord =
+                    serde_json::from_slice(active_character_bytes).map_err(|error| {
+                        ZoneRpcFault::new(
+                            "base_snapshot_decode",
+                            format!(
+                                "session {} active character decode failed: {error}",
+                                commitment.session_id
+                            ),
+                        )
+                    })?;
+                session
+                    .hosted
+                    .restore_replica_session_checkpoint(identity, &active_character)
+                    .map_err(classify_runtime_error)?;
                 let actual_identity = session
                     .hosted
                     .active_identity()
@@ -4509,20 +5967,6 @@ impl ZoneHostServer {
                         ),
                     ));
                 }
-                let active_character: CharacterSaveRecord =
-                    serde_json::from_slice(active_character_bytes).map_err(|error| {
-                        ZoneRpcFault::new(
-                            "base_snapshot_decode",
-                            format!(
-                                "session {} active character decode failed: {error}",
-                                commitment.session_id
-                            ),
-                        )
-                    })?;
-                session
-                    .hosted
-                    .restore_active_character_checkpoint(&active_character)
-                    .map_err(classify_runtime_error)?;
             }
             sessions.insert(key, session);
         }
@@ -4574,6 +6018,7 @@ impl ZoneHostServer {
         requested_zone_id: &str,
         batch: &ZoneMutationBatch,
     ) -> Result<(), ZoneRpcFault> {
+        self.require_known_zone_commit(requested_zone_id)?;
         batch.verify().map_err(|error| {
             ZoneRpcFault::new(
                 "mutation_batch_invalid",
@@ -4632,7 +6077,19 @@ impl ZoneHostServer {
                     )
                 })?;
             let key = (entry.session_id.clone(), entry.zone_id.clone());
-            if let Some(now_ms) = entry.zone_tick_ms {
+            if let Some(WireWorldCommand::CanonicalZoneRecovery { snapshot }) = &entry.command {
+                let pre_head = self
+                    .journal
+                    .lock()
+                    .map_err(|_| ZoneRpcFault::new("internal", "zone host journal mutex poisoned"))?
+                    .replication
+                    .head(requested_zone_id);
+                entry.validate_canonical_zone_recovery(snapshot, &pre_head)?;
+                // The batch was authenticated and digest-verified above. This
+                // replaces the whole shadow Zone before any Session routing;
+                // canonical recovery is never ordinary Execute or a PG write.
+                self.install_base_snapshot(requested_zone_id, snapshot)?;
+            } else if let Some(now_ms) = entry.zone_tick_ms {
                 if entry.command.is_some() || entry.closed {
                     return Err(ZoneRpcFault::new(
                         "mutation_decode",
@@ -4718,6 +6175,7 @@ impl ZoneHostServer {
     }
 
     fn install_host_checkpoint(&self, bytes: &[u8]) -> Result<(), ZoneRpcFault> {
+        self.require_all_zone_commits_known()?;
         let started = Instant::now();
         let checkpoint: WireZoneHostCheckpoint =
             serde_json::from_slice(bytes).map_err(|error| {
@@ -4746,6 +6204,7 @@ impl ZoneHostServer {
             .fork_for_replica_apply()
             .map_err(classify_runtime_error)?;
         let mut sessions = BTreeMap::<(String, String), Arc<ZoneHostSession>>::new();
+        let mut replay_sequences = BTreeMap::<String, u64>::new();
         for (expected_sequence, entry) in checkpoint.entries.iter().enumerate() {
             if entry.sequence != expected_sequence as u64 {
                 return Err(ZoneRpcFault::new(
@@ -4762,6 +6221,11 @@ impl ZoneHostServer {
                     "zone host checkpoint lease does not match journal zone",
                 ));
             }
+            let zone_sequence = replay_sequences.entry(entry.zone_id.clone()).or_default();
+            let source_sequence = *zone_sequence;
+            *zone_sequence = zone_sequence.checked_add(1).ok_or_else(|| {
+                ZoneRpcFault::new("checkpoint_sequence", "Zone replay sequence exhausted")
+            })?;
             if let Some(now_ms) = entry.zone_tick_ms {
                 if entry.command.is_some() || entry.closed {
                     return Err(ZoneRpcFault::new(
@@ -4791,7 +6255,17 @@ impl ZoneHostServer {
                     self.create_replay_session(&factory, &replay_config, &entry.zone_id)
                 })
                 .clone();
-            entry.replay_session_mutation(&session, entry.sequence, false)?;
+            // Legacy procedural mutations retain their historical replay
+            // context. Frozen drops instead bind the original per-Zone cursor.
+            let replay_sequence = if matches!(
+                &entry.command,
+                Some(WireWorldCommand::PlayerDropJournalResult { .. })
+            ) {
+                source_sequence
+            } else {
+                entry.sequence
+            };
+            entry.replay_session_mutation(&session, replay_sequence, false)?;
         }
 
         let installed_zone_count = factory
@@ -4973,17 +6447,28 @@ fn saturating_duration_ns(duration: Duration) -> u64 {
 }
 
 fn zone_replication_build_id() -> String {
-    if let Ok(build_id) = std::env::var("MIR2_ZONE_HOST_BUILD_ID") {
-        let build_id = build_id.trim();
-        if !build_id.is_empty() && build_id.len() <= 128 && !build_id.chars().any(char::is_control)
-        {
-            return build_id.to_string();
-        }
-    }
-    option_env!("GIT_COMMIT_SHA")
-        .filter(|build_id| !build_id.trim().is_empty() && build_id.len() <= 128)
-        .map(str::to_string)
-        .unwrap_or_else(|| format!("mir2-gateway/{}", env!("CARGO_PKG_VERSION")))
+    let configured = std::env::var("MIR2_ZONE_HOST_BUILD_ID")
+        .ok()
+        .and_then(|build_id| {
+            let build_id = build_id.trim();
+            (!build_id.is_empty()
+                && build_id.len() <= 128
+                && !build_id.chars().any(char::is_control))
+            .then(|| build_id.to_string())
+        });
+    let source_build = configured.unwrap_or_else(|| {
+        option_env!("GIT_COMMIT_SHA")
+            .filter(|build_id| !build_id.trim().is_empty() && build_id.len() <= 128)
+            .map(str::to_string)
+            .unwrap_or_else(|| format!("mir2-gateway/{}", env!("CARGO_PKG_VERSION")))
+    });
+    // Every base/batch/promotion comparison includes the checkpoint restore
+    // schema, even when deployment supplied only a reusable version label.
+    // Bound the identifier without truncating the source build identity.
+    format!(
+        "mir2-zone/v5-durable-drop-admission/{}",
+        hex_lower_bytes(&Sha256::digest(source_build.as_bytes()))
+    )
 }
 
 fn zone_replication_entry_digest(
@@ -5036,8 +6521,188 @@ struct ZoneRpcEnvelope {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+struct WireNpcPurchaseOwnerRequest {
+    protocol_version: u16,
+    owner_lease: WireZoneOwnerLease,
+    authenticated: bool,
+    action: NpcPurchaseOwnerAction,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+#[serde(
+    tag = "kind",
+    rename_all = "camelCase",
+    rename_all_fields = "camelCase",
+    deny_unknown_fields
+)]
+enum WireNpcPurchaseOwnerResponse {
+    Execution {
+        reply: NpcPurchaseOwnerReply,
+        frames: Vec<Vec<u8>>,
+        packet_count: usize,
+        active_identity: Option<ActiveSessionIdentity>,
+        snapshot: Option<Box<WorldSnapshot>>,
+        authority: Option<NpcPurchaseProducer>,
+    },
+    Error {
+        error: NpcPurchaseDurableError,
+    },
+}
+
+impl WireNpcPurchaseOwnerResponse {
+    fn from_execution(execution: NpcPurchaseOwnerRouteExecution) -> Self {
+        let known = crate::npc_purchase_owner_route::terminal_receipt(&execution.reply);
+        let frames = match encode_server_frames(execution.execution.packets) {
+            Ok(frames) => frames,
+            Err(error) => {
+                return Self::Error {
+                    error: crate::npc_purchase_owner_route::failure(
+                        format!("NPC purchase frame publication failed: {error:?}"),
+                        known,
+                    ),
+                }
+            }
+        };
+        Self::Execution {
+            reply: execution.reply,
+            packet_count: frames.len(),
+            frames,
+            active_identity: execution.execution.outcome.active_identity,
+            snapshot: execution.snapshot.map(Box::new),
+            authority: execution.authority,
+        }
+    }
+
+    fn into_execution(
+        self,
+        action: NpcPurchaseOwnerAction,
+    ) -> Result<NpcPurchaseOwnerRouteExecution, NpcPurchaseDurableError> {
+        let (reply, frames, packet_count, active_identity, snapshot, authority) = match self {
+            Self::Execution {
+                reply,
+                frames,
+                packet_count,
+                active_identity,
+                snapshot,
+                authority,
+            } => (
+                reply,
+                frames,
+                packet_count,
+                active_identity,
+                snapshot,
+                authority,
+            ),
+            Self::Error { error } => {
+                if let NpcPurchaseDurableError::PostCommit { receipt, .. } = &error {
+                    if action
+                        .operation()
+                        .is_none_or(|operation| receipt.validate_for_operation(operation).is_err())
+                    {
+                        return Err(crate::npc_purchase_owner_route::failure("RPC NPC purchase error carries an invalid or unrelated terminal receipt", None));
+                    }
+                }
+                return Err(error);
+            }
+        };
+        let valid_reply = match (action, &reply) {
+            (NpcPurchaseOwnerAction::Begin, NpcPurchaseOwnerReply::Producer { producer }) => {
+                producer.actor != [0; 32]
+                    && producer.producer_scope != [0; 32]
+                    && producer.server_revision > 0
+                    && producer.server_revision < u64::MAX
+            }
+            (
+                NpcPurchaseOwnerAction::Quote { request },
+                NpcPurchaseOwnerReply::Quote { intent },
+            ) => intent.request == request && intent.service_catalog_proof != [0; 32],
+            (
+                NpcPurchaseOwnerAction::Query { operation },
+                NpcPurchaseOwnerReply::Recovery { receipt },
+            ) => receipt
+                .as_ref()
+                .is_none_or(|receipt| receipt.validate_for_operation(operation).is_ok()),
+            (
+                NpcPurchaseOwnerAction::Purchase { operation },
+                NpcPurchaseOwnerReply::Purchase { receipt, .. },
+            ) => receipt.validate_for_operation(operation).is_ok(),
+            _ => false,
+        };
+        if !valid_reply {
+            return Err(crate::npc_purchase_owner_route::failure(
+                "RPC NPC purchase response does not match a valid original action result",
+                None,
+            ));
+        }
+        // Only a correlated, semantically valid terminal result may survive a
+        // later frame/snapshot error as a known receipt.
+        let known = crate::npc_purchase_owner_route::terminal_receipt(&reply);
+        let malformed = |detail| crate::npc_purchase_owner_route::failure(detail, known.clone());
+        if snapshot.is_some() != authority.is_some() {
+            return Err(malformed(
+                "RPC NPC purchase full snapshot/authority pair is incomplete",
+            ));
+        }
+        if let Some(authority) = authority.as_ref() {
+            if authority.actor == [0; 32]
+                || authority.producer_scope == [0; 32]
+                || authority.server_revision == 0
+                || authority.server_revision == u64::MAX
+                || known.as_ref().is_some_and(|receipt| {
+                    receipt.entry.operation.actor != authority.actor
+                        || receipt.producer_scope != authority.producer_scope
+                        || receipt.entry.server_revision > authority.server_revision
+                })
+            {
+                return Err(malformed(
+                    "RPC NPC purchase snapshot authority does not cover its terminal receipt",
+                ));
+            }
+            if let NpcPurchaseOwnerReply::Producer { producer } = &reply {
+                if producer != authority {
+                    return Err(malformed(
+                        "RPC NPC producer differs from its complete baseline",
+                    ));
+                }
+            }
+        }
+        let packets = decode_server_frames(frames)
+            .map_err(|detail| crate::npc_purchase_owner_route::failure(detail, known.clone()))?;
+        if packets.len() != packet_count {
+            return Err(malformed("RPC NPC purchase packet count mismatch"));
+        }
+        let snapshot = snapshot.map(|snapshot| *snapshot);
+        let snapshot_tick = snapshot.as_ref().map(|snapshot| snapshot.tick).unwrap_or(0);
+        Ok(NpcPurchaseOwnerRouteExecution {
+            reply,
+            authority,
+            snapshot,
+            checkpoint: None,
+            execution: WorldCommandExecution {
+                packets,
+                outcome: WorldCommandOutcome {
+                    command_kind: crate::npc_purchase_owner_route::action_kind(action),
+                    packet_count,
+                    snapshot_tick,
+                    active_identity,
+                },
+                game_shop_purchase_outcome: None,
+            },
+        })
+    }
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(tag = "operation", content = "arguments", rename_all = "camelCase")]
 enum ZoneRpcRequest {
+    ValidateOwnerHealth {
+        source_registration_id: u64,
+        change: mir2_simulation::ZoneOwnerHealthChange,
+    },
+    NpcPurchaseOwner {
+        request: WireNpcPurchaseOwnerRequest,
+    },
     Health,
     ReplicationHead,
     ExportMutationBatch {
@@ -5076,6 +6741,24 @@ enum ZoneRpcRequest {
         mode: WireZoneOwnerCommandMode,
         command: WireWorldCommand,
     },
+    ExecuteNativeAttack {
+        owner_lease: WireZoneOwnerLease,
+        authenticated: bool,
+        object_id: u32,
+    },
+    PrepareZoneSaveOperation {
+        owner_lease: WireZoneOwnerLease,
+        operation_id: String,
+    },
+    PersistZoneSaveOperation {
+        binding: WireZoneSaveBinding,
+    },
+    QueryZoneSaveOperation {
+        binding: WireZoneSaveBinding,
+    },
+    ReleaseZoneSaveOperation {
+        binding: WireZoneSaveBinding,
+    },
     PollOutbounds {
         stream_id: Option<String>,
         acknowledged_sequence: u64,
@@ -5086,6 +6769,13 @@ enum ZoneRpcRequest {
     ActiveCharacterCheckpoint,
     RestoreActiveCharacterCheckpoint {
         checkpoint: Box<CharacterSaveRecord>,
+    },
+    PrepareCharacterHandoff {
+        owner_lease: WireZoneOwnerLease,
+    },
+    ResumeCharacterHandoff {
+        owner_lease: WireZoneOwnerLease,
+        checkpoint: Box<CharacterHandoffCheckpoint>,
     },
     SaveActiveCharacter,
     RefreshActiveExternalMail,
@@ -5113,17 +6803,27 @@ impl ZoneRpcRequest {
             | Self::QuiesceForPromotion { .. }
             | Self::ResumeAfterQuiesce { .. }
             | Self::ExportHostCheckpoint
-            | Self::InstallHostCheckpoint { .. } => ZoneRpcPriority::Control,
-            Self::OnConnect
+            | Self::InstallHostCheckpoint { .. }
+            | Self::PrepareZoneSaveOperation { .. }
+            | Self::PersistZoneSaveOperation { .. }
+            | Self::QueryZoneSaveOperation { .. }
+            | Self::ReleaseZoneSaveOperation { .. } => ZoneRpcPriority::Control,
+            Self::NpcPurchaseOwner { .. }
+            | Self::OnConnect
             | Self::Execute { .. }
+            | Self::ExecuteNativeAttack { .. }
             | Self::WorldSnapshot
             | Self::ActiveIdentity
             | Self::ActiveCharacterCheckpoint
             | Self::RestoreActiveCharacterCheckpoint { .. }
+            | Self::PrepareCharacterHandoff { .. }
+            | Self::ResumeCharacterHandoff { .. }
             | Self::SaveActiveCharacter
             | Self::RefreshActiveExternalMail
             | Self::CloseSession { .. } => ZoneRpcPriority::Gameplay,
-            Self::PollOutbounds { .. } => ZoneRpcPriority::Outbound,
+            Self::PollOutbounds { .. } | Self::ValidateOwnerHealth { .. } => {
+                ZoneRpcPriority::Outbound
+            }
         }
     }
 }
@@ -5138,6 +6838,15 @@ enum ZoneRpcResponse {
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(tag = "type", rename_all = "camelCase")]
 enum ZoneRpcPayload {
+    ZoneSaveOperation {
+        receipt: Option<serde_json::Value>,
+    },
+    NpcPurchaseOwner {
+        response: WireNpcPurchaseOwnerResponse,
+    },
+    NativeAttack {
+        response: WireNativeAttackResponse,
+    },
     Health {
         host_id: String,
         process_id: u32,
@@ -5191,6 +6900,8 @@ enum ZoneRpcPayload {
         reset: bool,
         last_issued_sequence: u64,
         has_more: bool,
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        current_source_registration_id: Option<u64>,
     },
     WorldSnapshot {
         snapshot: Box<WorldSnapshot>,
@@ -5201,6 +6912,12 @@ enum ZoneRpcPayload {
     ActiveCharacterCheckpoint {
         checkpoint: Option<Box<CharacterSaveRecord>>,
     },
+    CharacterHandoff {
+        checkpoint: Box<CharacterHandoffCheckpoint>,
+    },
+    CharacterHandoffCommitment {
+        commitment: Box<CharacterHandoffCommitment>,
+    },
     Unit,
     Bool {
         value: bool,
@@ -5210,11 +6927,166 @@ enum ZoneRpcPayload {
     },
 }
 
+#[derive(Debug, Clone, Copy, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+enum WireNativeAttackAdmission {
+    Launched,
+    NotLaunched,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+#[serde(tag = "kind", rename_all = "camelCase")]
+enum WireNativeAttackError {
+    Unsupported,
+    BeforeExecution { detail: String },
+    Unknown { detail: String },
+}
+
+impl From<NativeAttackError> for WireNativeAttackError {
+    fn from(error: NativeAttackError) -> Self {
+        match error {
+            NativeAttackError::Unsupported => Self::Unsupported,
+            NativeAttackError::BeforeExecution(detail) => Self::BeforeExecution { detail },
+            NativeAttackError::Unknown(detail) => Self::Unknown { detail },
+        }
+    }
+}
+
+impl From<WireNativeAttackError> for NativeAttackError {
+    fn from(error: WireNativeAttackError) -> Self {
+        match error {
+            WireNativeAttackError::Unsupported => Self::Unsupported,
+            WireNativeAttackError::BeforeExecution { detail } => Self::BeforeExecution(detail),
+            WireNativeAttackError::Unknown { detail } => Self::Unknown(detail),
+        }
+    }
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+#[serde(tag = "status", rename_all = "camelCase")]
+enum WireNativeAttackResponse {
+    Complete {
+        frames: Vec<Vec<u8>>,
+        packet_count: usize,
+        snapshot_tick: u64,
+        active_identity: Option<ActiveSessionIdentity>,
+        admission: WireNativeAttackAdmission,
+    },
+    Error {
+        error: WireNativeAttackError,
+    },
+}
+
+impl WireNativeAttackResponse {
+    fn from_execution(execution: NativeAttackExecution) -> Result<Self, ZoneRpcFault> {
+        let NativeAttackExecution {
+            execution,
+            admission,
+        } = execution;
+        Ok(Self::Complete {
+            frames: encode_server_frames(execution.packets)?,
+            packet_count: execution.outcome.packet_count,
+            snapshot_tick: execution.outcome.snapshot_tick,
+            active_identity: execution.outcome.active_identity,
+            admission: match admission {
+                NativeAttackAdmission::Launched => WireNativeAttackAdmission::Launched,
+                NativeAttackAdmission::NotLaunched => WireNativeAttackAdmission::NotLaunched,
+            },
+        })
+    }
+
+    fn into_execution(self) -> Result<NativeAttackExecution, NativeAttackError> {
+        let Self::Complete {
+            frames,
+            packet_count,
+            snapshot_tick,
+            active_identity,
+            admission,
+        } = self
+        else {
+            let Self::Error { error } = self else {
+                unreachable!()
+            };
+            return Err(error.into());
+        };
+        let packets = decode_server_frames(frames).map_err(NativeAttackError::Unknown)?;
+        if packets.len() != packet_count {
+            return Err(NativeAttackError::Unknown(format!(
+                "zone RPC attack packet count mismatch: declared {packet_count}, decoded {}",
+                packets.len()
+            )));
+        }
+        Ok(NativeAttackExecution {
+            execution: WorldCommandExecution {
+                packets,
+                outcome: WorldCommandOutcome {
+                    command_kind: WorldCommand::Attack { object_id: 0 }.kind(),
+                    packet_count,
+                    snapshot_tick,
+                    active_identity,
+                },
+                game_shop_purchase_outcome: None,
+            },
+            admission: match admission {
+                WireNativeAttackAdmission::Launched => NativeAttackAdmission::Launched,
+                WireNativeAttackAdmission::NotLaunched => NativeAttackAdmission::NotLaunched,
+            },
+        })
+    }
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 struct WireSequencedServerFrame {
     sequence: u64,
     frame: Vec<u8>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    owner_health: Option<mir2_simulation::ZoneOwnerHealthChange>,
+    #[serde(default)]
+    source_registration_id: u64,
+}
+
+/// The only client-submitted save input is an exact opaque server binding.
+/// A frozen checkpoint or alleged receipt is never accepted as write authority.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+struct WireZoneSaveBinding {
+    operation_id: String,
+    rpc_session_id: String,
+    zone_id: String,
+    owner_id: String,
+    fencing_token: u64,
+}
+
+impl From<&ZoneSaveOperationBinding> for WireZoneSaveBinding {
+    fn from(binding: &ZoneSaveOperationBinding) -> Self {
+        Self {
+            operation_id: binding.operation_id().to_string(),
+            rpc_session_id: binding.rpc_session_id().to_string(),
+            zone_id: binding.fence().zone_id().to_string(),
+            owner_id: binding.fence().owner_id().to_string(),
+            fencing_token: binding.fence().fencing_token(),
+        }
+    }
+}
+
+impl WireZoneSaveBinding {
+    fn into_binding(
+        self,
+        session_id: &str,
+        zone_id: &str,
+    ) -> Result<ZoneSaveOperationBinding, ZoneRpcFault> {
+        if self.rpc_session_id != session_id || self.zone_id != zone_id {
+            return Err(ZoneRpcFault::new(
+                "invalid_request",
+                "zone save operation binding differs from the actual envelope session or Zone",
+            ));
+        }
+        let fence = ZoneSaveFence::new(self.zone_id, self.owner_id, self.fencing_token)
+            .map_err(|message| ZoneRpcFault::new("invalid_request", message))?;
+        ZoneSaveOperationBinding::new(self.operation_id, self.rpc_session_id, fence)
+            .map_err(|message| ZoneRpcFault::new("invalid_request", message))
+    }
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -5287,11 +7159,17 @@ impl WireZoneOwnerCommandMode {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(tag = "command", content = "arguments", rename_all = "camelCase")]
 enum WireWorldCommand {
+    ReplayRetainedStartGameBootstrap {
+        character_index: i32,
+    },
     ClientPacket {
         frame: Vec<u8>,
     },
     NativeGameShopPurchaseV2 {
         request: NativeGameShopPurchaseRequest,
+    },
+    NativeGameShopGiftV1 {
+        request: NativeGameShopGiftRequest,
     },
     PasskeyLogin {
         account_id: String,
@@ -5362,15 +7240,52 @@ enum WireWorldCommand {
     SetLanguage {
         language: String,
     },
+    BillingRefresh {
+        character_index: i32,
+    },
+    BillingBuyMonthlyCard {
+        character_index: i32,
+        request_id: String,
+    },
+    BillingActivateMonthlyCard {
+        character_index: i32,
+        unique_id: u64,
+    },
+    ResumeCharacterHandoff {
+        checkpoint: Box<CharacterHandoffCheckpoint>,
+    },
     RestoreActiveCharacterCheckpoint {
         checkpoint: Box<CharacterSaveRecord>,
+    },
+    NpcPurchaseOwnerCheckpoint {
+        checkpoint: Box<CharacterSaveRecord>,
+    },
+    PlayerDropJournalResult {
+        result: Box<PlayerDropJournalResult>,
+    },
+    CanonicalZoneRecovery {
+        snapshot: Box<ZoneBaseSnapshot>,
     },
     Tick,
 }
 
 impl WireWorldCommand {
+    fn is_player_drop(&self) -> bool {
+        match self {
+            Self::DropItem { .. } => true,
+            Self::ClientPacket { frame } => matches!(
+                decode_client_packet(frame),
+                Ok(ClientPacket::DropGold { .. } | ClientPacket::DropItem { .. })
+            ),
+            _ => false,
+        }
+    }
+
     fn from_world(command: WorldCommand) -> Result<Self, String> {
         Ok(match command {
+            WorldCommand::ReplayRetainedStartGameBootstrap { character_index } => {
+                Self::ReplayRetainedStartGameBootstrap { character_index }
+            }
             WorldCommand::ClientPacket(packet) => Self::ClientPacket {
                 frame: encode_client_packet(&packet)
                     .map_err(|error| format!("client packet encode failed: {error}"))?,
@@ -5378,6 +7293,7 @@ impl WireWorldCommand {
             WorldCommand::NativeGameShopPurchase(request) => {
                 Self::NativeGameShopPurchaseV2 { request }
             }
+            WorldCommand::NativeGameShopGift(request) => Self::NativeGameShopGiftV1 { request },
             WorldCommand::PasskeyLogin { account_id } => Self::PasskeyLogin { account_id },
             WorldCommand::MoveTo { position, running } => Self::MoveTo { position, running },
             WorldCommand::Attack { object_id } => Self::Attack { object_id },
@@ -5436,12 +7352,32 @@ impl WireWorldCommand {
                 renting,
             },
             WorldCommand::SetLanguage { language } => Self::SetLanguage { language },
+            WorldCommand::BillingRefresh { character_index } => {
+                Self::BillingRefresh { character_index }
+            }
+            WorldCommand::BillingBuyMonthlyCard {
+                character_index,
+                request_id,
+            } => Self::BillingBuyMonthlyCard {
+                character_index,
+                request_id,
+            },
+            WorldCommand::BillingActivateMonthlyCard {
+                character_index,
+                unique_id,
+            } => Self::BillingActivateMonthlyCard {
+                character_index,
+                unique_id,
+            },
             WorldCommand::Tick => Self::Tick,
         })
     }
 
     fn into_world(self) -> Result<WorldCommand, ZoneRpcFault> {
         Ok(match self {
+            Self::ReplayRetainedStartGameBootstrap { character_index } => {
+                WorldCommand::ReplayRetainedStartGameBootstrap { character_index }
+            }
             Self::ClientPacket { frame } => {
                 WorldCommand::ClientPacket(decode_client_packet(&frame).map_err(|error| {
                     ZoneRpcFault::new(
@@ -5453,6 +7389,7 @@ impl WireWorldCommand {
             Self::NativeGameShopPurchaseV2 { request } => {
                 WorldCommand::NativeGameShopPurchase(request)
             }
+            Self::NativeGameShopGiftV1 { request } => WorldCommand::NativeGameShopGift(request),
             Self::PasskeyLogin { account_id } => WorldCommand::PasskeyLogin { account_id },
             Self::MoveTo { position, running } => WorldCommand::MoveTo { position, running },
             Self::Attack { object_id } => WorldCommand::Attack { object_id },
@@ -5511,7 +7448,28 @@ impl WireWorldCommand {
                 renting,
             },
             Self::SetLanguage { language } => WorldCommand::SetLanguage { language },
-            Self::RestoreActiveCharacterCheckpoint { .. } => {
+            Self::BillingRefresh { character_index } => {
+                WorldCommand::BillingRefresh { character_index }
+            }
+            Self::BillingBuyMonthlyCard {
+                character_index,
+                request_id,
+            } => WorldCommand::BillingBuyMonthlyCard {
+                character_index,
+                request_id,
+            },
+            Self::BillingActivateMonthlyCard {
+                character_index,
+                unique_id,
+            } => WorldCommand::BillingActivateMonthlyCard {
+                character_index,
+                unique_id,
+            },
+            Self::RestoreActiveCharacterCheckpoint { .. }
+            | Self::NpcPurchaseOwnerCheckpoint { .. }
+            | Self::PlayerDropJournalResult { .. }
+            | Self::CanonicalZoneRecovery { .. }
+            | Self::ResumeCharacterHandoff { .. } => {
                 return Err(ZoneRpcFault::new(
                     "checkpoint_command",
                     "active character checkpoint restore is an internal journal mutation",
@@ -5538,6 +7496,66 @@ struct WireHostJournalEntry {
 }
 
 impl WireHostJournalEntry {
+    fn validate_canonical_zone_recovery(
+        &self,
+        snapshot: &ZoneBaseSnapshot,
+        pre_head: &ZoneReplicationHead,
+    ) -> Result<(), ZoneRpcFault> {
+        snapshot.verify().map_err(|detail| {
+            ZoneRpcFault::new("canonical_recovery_reset_invalid", detail)
+        })?;
+        self.owner_lease.clone().into_lease()?;
+        if self.session_id != "__canonical_recovery__"
+            || !matches!(&self.mode, WireZoneOwnerCommandMode::Direct)
+            || self.closed
+            || self.zone_tick_ms.is_some()
+            || self.owner_lease.zone_id != self.zone_id
+            || snapshot.zone_id != self.zone_id
+            || pre_head.zone_id != self.zone_id
+            || pre_head.version != ZONE_REPLICATION_HEAD_VERSION
+            || snapshot.build_id != zone_replication_build_id()
+            || snapshot.build_id != pre_head.build_id
+            || snapshot.mutation_coverage != ZoneReplicationCoverage::CommandJournal
+            || snapshot.mutation_coverage != pre_head.mutation_coverage
+            || !snapshot.apply_ready
+            || snapshot.base_sequence != pre_head.next_sequence
+            || snapshot.latest_digest != pre_head.latest_digest
+        {
+            return Err(ZoneRpcFault::new(
+                "canonical_recovery_reset_invalid",
+                "canonical recovery reset differs from its reserved entry, Zone, build or pre-recovery head",
+            ));
+        }
+        Ok(())
+    }
+
+    fn validate_player_drop_result(
+        &self,
+        result: &PlayerDropJournalResult,
+        source_sequence: u64,
+    ) -> Result<(), ZoneRpcFault> {
+        result
+            .validate_integrity()
+            .map_err(|detail| ZoneRpcFault::new("player_drop_journal_binding", detail))?;
+        let binding = result.operation.binding();
+        if self.closed
+            || self.zone_tick_ms.is_some()
+            || self.zone_id != self.owner_lease.zone_id
+            || binding.zone_id() != self.zone_id
+            || binding.owner_id() != self.owner_lease.owner_id
+            || binding.owner_epoch() != self.owner_lease.fencing_token
+            || binding.source_sequence() != source_sequence
+        {
+            return Err(ZoneRpcFault::new(
+                "player_drop_journal_binding",
+                "player-drop result differs from its journal Zone, owner lease or source sequence",
+            ));
+        }
+        // source_rpc_session is the authoritative ZoneManager SessionId. The
+        // outer RPC session id is retained for hosted Session routing only.
+        Ok(())
+    }
+
     fn into_request(self) -> Result<ZoneOwnerCommandRequest, ZoneRpcFault> {
         if self.zone_tick_ms.is_some() {
             return Err(ZoneRpcFault::new(
@@ -5566,6 +7584,37 @@ impl WireHostJournalEntry {
         source_sequence: u64,
         replicated: bool,
     ) -> Result<(), ZoneRpcFault> {
+        if matches!(&self.command, Some(WireWorldCommand::CanonicalZoneRecovery { .. })) {
+            return Err(ZoneRpcFault::new(
+                "checkpoint_command",
+                "canonical Zone recovery requires the Zone-level journal dispatcher",
+            ));
+        }
+        if let Some(WireWorldCommand::PlayerDropJournalResult { result }) = self.command.as_ref() {
+            self.validate_player_drop_result(result, source_sequence)?;
+            session
+                .hosted
+                .apply_player_drop_journal_result(result)
+                .map_err(classify_runtime_error)?;
+            return Ok(());
+        }
+        if let Some(WireWorldCommand::ResumeCharacterHandoff { checkpoint }) = self.command.as_ref()
+        {
+            session
+                .hosted
+                .apply_character_handoff_replica(checkpoint)
+                .map_err(classify_runtime_error)?;
+            return Ok(());
+        }
+        if let Some(WireWorldCommand::NpcPurchaseOwnerCheckpoint { checkpoint }) =
+            self.command.as_ref()
+        {
+            session
+                .hosted
+                .apply_npc_purchase_owner_replica_checkpoint(checkpoint)
+                .map_err(classify_runtime_error)?;
+            return Ok(());
+        }
         if let Some(WireWorldCommand::RestoreActiveCharacterCheckpoint { checkpoint }) =
             self.command.as_ref()
         {
@@ -5808,7 +7857,9 @@ impl From<String> for ZoneRpcFault {
 }
 
 fn classify_runtime_error(message: String) -> ZoneRpcFault {
-    if message.contains("stale zone owner lease") {
+    if message.contains("COMMIT_OUTCOME_UNKNOWN") {
+        ZoneRpcFault::new("commit_outcome_unknown", message)
+    } else if message.contains("stale zone owner lease") {
         ZoneRpcFault::new("stale_lease", message)
     } else {
         ZoneRpcFault::new("runtime", message)
@@ -6620,11 +8671,39 @@ fn unexpected_payload(operation: &str, payload: &ZoneRpcPayload) -> String {
     format!("zone RPC {operation} returned unexpected payload {payload:?}")
 }
 
+fn validate_native_attack_envelope(
+    zone_id: &str,
+    owner_lease: &WireZoneOwnerLease,
+    authenticated: bool,
+    object_id: u32,
+) -> Result<(), NativeAttackError> {
+    if !authenticated || object_id == 0 {
+        return Err(NativeAttackError::BeforeExecution(
+            "typed attack requires authentication and a nonzero target".into(),
+        ));
+    }
+    if owner_lease.zone_id != zone_id {
+        return Err(NativeAttackError::BeforeExecution(
+            "attack lease zone does not match envelope zone".into(),
+        ));
+    }
+    Ok(())
+}
+
 fn zone_rpc_request_requires_active_mutation(request: &ZoneRpcRequest) -> bool {
+    if let ZoneRpcRequest::NpcPurchaseOwner { request } = request {
+        return request.action.is_mutation();
+    }
     matches!(
         request,
         ZoneRpcRequest::OnConnect
             | ZoneRpcRequest::Execute { .. }
+            | ZoneRpcRequest::ExecuteNativeAttack { .. }
+            | ZoneRpcRequest::PrepareZoneSaveOperation { .. }
+            | ZoneRpcRequest::PersistZoneSaveOperation { .. }
+            | ZoneRpcRequest::ReleaseZoneSaveOperation { .. }
+            | ZoneRpcRequest::PrepareCharacterHandoff { .. }
+            | ZoneRpcRequest::ResumeCharacterHandoff { .. }
             | ZoneRpcRequest::SaveActiveCharacter
             | ZoneRpcRequest::RefreshActiveExternalMail
             | ZoneRpcRequest::CloseSession { .. }
@@ -6634,9 +8713,17 @@ fn zone_rpc_request_requires_active_mutation(request: &ZoneRpcRequest) -> bool {
 fn zone_rpc_request_requires_active_session(request: &ZoneRpcRequest) -> bool {
     matches!(
         request,
-        ZoneRpcRequest::OnConnect
+        ZoneRpcRequest::NpcPurchaseOwner { .. }
+            | ZoneRpcRequest::OnConnect
             | ZoneRpcRequest::Execute { .. }
+            | ZoneRpcRequest::ExecuteNativeAttack { .. }
+            | ZoneRpcRequest::PrepareZoneSaveOperation { .. }
+            | ZoneRpcRequest::PersistZoneSaveOperation { .. }
+            | ZoneRpcRequest::ReleaseZoneSaveOperation { .. }
+            | ZoneRpcRequest::PrepareCharacterHandoff { .. }
+            | ZoneRpcRequest::ResumeCharacterHandoff { .. }
             | ZoneRpcRequest::PollOutbounds { .. }
+            | ZoneRpcRequest::ValidateOwnerHealth { .. }
             | ZoneRpcRequest::WorldSnapshot
             | ZoneRpcRequest::ActiveIdentity
             | ZoneRpcRequest::SaveActiveCharacter
@@ -6811,6 +8898,23 @@ mod exact_ground_drop_snapshot_tests {
 #[cfg(test)]
 mod zone_rpc_authorization_tests {
     use super::*;
+
+    #[test]
+    fn retained_bootstrap_rpc_round_trip_remains_gateway_only() {
+        let wire = WireWorldCommand::from_world(WorldCommand::ReplayRetainedStartGameBootstrap {
+            character_index: 8,
+        })
+        .unwrap();
+        let encoded = serde_json::to_vec(&wire).unwrap();
+        let decoded: WireWorldCommand = serde_json::from_slice(&encoded).unwrap();
+        let command = decoded.into_world().unwrap();
+        assert!(matches!(
+            command,
+            WorldCommand::ReplayRetainedStartGameBootstrap { character_index: 8 }
+        ));
+        assert!(mir2_simulation::validate_production_player_command(true, &command).is_err());
+        assert!(mir2_simulation::validate_production_player_command(false, &command).is_err());
+    }
 
     fn envelope() -> ZoneRpcEnvelope {
         ZoneRpcEnvelope {
@@ -8058,3 +10162,7 @@ mod shard_endpoint_tests {
         assert_eq!(endpoints[1], standby[active_index]);
     }
 }
+
+#[cfg(test)]
+#[path = "npc_purchase_owner_route_tests.rs"]
+mod npc_purchase_owner_route_tests;

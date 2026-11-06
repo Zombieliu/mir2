@@ -1,0 +1,11 @@
+{
+  "schema": "mir2.production-history-clarification.v1",
+  "createdUtc": "2026-10-09T01:03:08.2271156Z",
+  "corrects": "historical-results-audit.json description only",
+  "originalRawLogsPoliciesNoncesUnchanged": true,
+  "prior122RawManifestCopiesUnchanged": true,
+  "actualCargoStarted": false,
+  "testsExecuted": 0,
+  "clarification": "The old set_player_position helper only sets ECS Position; it does not itself update bind_point. The active bind was already imported by bootstrap/old save restoration or relocation and differed from config.spawn. Source02 explicitly pins this scroll-routing fixture bind point while retaining every original assertion and normal product latest-safe-zone behavior.",
+  "source": "independent-teleport-failure-exploration-01.json"
+}

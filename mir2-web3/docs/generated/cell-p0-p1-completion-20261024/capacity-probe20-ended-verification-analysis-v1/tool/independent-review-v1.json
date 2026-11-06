@@ -1,0 +1,139 @@
+{
+  "schemaVersion": 1,
+  "reviewedAt": "2026-10-26T02:16:11.771Z",
+  "preparation": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\probe20-independent-verification-v1\\preparation-v1.json",
+    "bytes": 9766,
+    "sha256": "318e3852ee8259d63058f21c04efdf75b917f81c8dd8e2c926f9a13933f0ca4a"
+  },
+  "sourceFiles": [
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\probe20-independent-verification-v1\\verify-ended-probe20-v1.mjs",
+      "bytes": 44400,
+      "sha256": "335e2121bc24ad616061e829ed5e352f9658f431ef36571b1aae662eb61ad149"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\probe20-independent-verification-v1\\probe-contract-v1.mjs",
+      "bytes": 5860,
+      "sha256": "70da9fbc95c66e06dde5402ac159ccba4870c5695be9f556e8eb5c3396b0c455"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\probe20-independent-verification-v1\\hp-proof-contract-v2.mjs",
+      "bytes": 4644,
+      "sha256": "cbf67686e1fa385404782c27548dbe3fbaa10f55a5d97c3379d5a41ed01cf285"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\probe20-independent-verification-v1\\expected-probe-policy-v1.json",
+      "bytes": 1008,
+      "sha256": "e3bc309c4830ffed84c924c5d71dda6fa44e90bcbe552fd3a969dc9760edb242"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\probe20-independent-verification-v1\\run-ended-probe20-v1.mjs",
+      "bytes": 2257,
+      "sha256": "0665b467d2553f4355309b29b813620e6454942deee50f668ea2a7e566e7c4e9"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\probe20-independent-verification-v1\\seal-tool-source-v1.mjs",
+      "bytes": 3011,
+      "sha256": "cc646ed39d511137b83655ec7abe215091dca4e81ac5e10b24c93af2a4f7b499"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\probe20-independent-verification-v1\\derivation-v1.json",
+      "bytes": 20091,
+      "sha256": "e0b1c0558f39f7a581cba7c767e09fd2572d42fc082c65dc0c20466c0913ac38"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\probe20-independent-verification-v1\\root-actual-terminal-and-consumer-facts-v1.json",
+      "bytes": 10706,
+      "sha256": "d280ca72e1bacc7147eac04867d28b8c68665155a61963a184739c429cb64a6b"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\probe20-independent-verification-v1\\syntax-check-v1.log",
+      "bytes": 673,
+      "sha256": "ce69536a9b7903892566bc52d06022b35137d40107ad452a08345b57c4a665ab"
+    }
+  ],
+  "sourceSha256": "d13a095dfea922bc9e4b80872fe0ce7181001728435c481e3eca831df7c6c280",
+  "externalIdentityPins": {
+    "rootActualFacts": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\probe20-root-actual-terminal-and-consumer-facts-v1.json",
+      "bytes": 10706,
+      "sha256": "d280ca72e1bacc7147eac04867d28b8c68665155a61963a184739c429cb64a6b"
+    },
+    "rootCleanup": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\probe20-root-independent-cleanup-v1.json",
+      "bytes": 450,
+      "sha256": "aa29be311ec8583e5c160de79f078e177d2683a52cde81f90e2171eda97cbd71"
+    },
+    "currentKFreeze": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\capacity-scout-selection-diagnostics-driver-frozen-v1.json",
+      "bytes": 12423,
+      "sha256": "e3300e34d060fb23638bdc690726b6f4376f7fdeb1049aa8871ebdb4bfd628f8"
+    },
+    "historicalJFreeze": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\capacity-scout-anti-convergence-driver-frozen-v1.json",
+      "bytes": 9472,
+      "sha256": "ed0d9783871dd74107c3ec7980574a31acf06a1ed7c5daac40f1f94e78a40182"
+    },
+    "runtimeSeal": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-selection-diagnostics-feasibility-20\\launcher-source-frozen-v1.json",
+      "bytes": 68899,
+      "sha256": "b0b5252cd0ae36d31bbcb2306a4e6f5f8721bb459cff5c45b79da88a90ba3412"
+    },
+    "preparedSourceConfig": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-selection-diagnostics-feasibility-20\\source-pins.json",
+      "bytes": 56758,
+      "sha256": "8177b9b108dea8177f5b1fe7cf87327a93c1ba703d60a4b8aeb044327c8daf99"
+    },
+    "admittedSourceConfig": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-selection-diagnostics-feasibility-20\\source-pins-admitted-v2.json",
+      "bytes": 56009,
+      "sha256": "29424765ce723588e3328b1db6fbd8cc2fe494fb7bb30841dd2209dfc6af7946"
+    },
+    "boundedTerminalFacts": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\probe20-actual-independent-facts-v1.json",
+      "bytes": 15626,
+      "sha256": "4228cc8daa663319040ab6c315d5a8cd52bb4f51f312b321fd81db88c3e0e491"
+    }
+  },
+  "checks": {
+    "localSourcePinsMatched": 9,
+    "expectedSourceSealInputs": 11,
+    "mainRulesForwardAndInverseRawExact": 31,
+    "contractRulesForwardAndInverseRawExact": 2,
+    "runnerRulesForwardAndInverseRawExact": 2,
+    "rawExactHpPolicyAndSealerCopies": 3,
+    "prior19SourceUntouched": true,
+    "originalSixteenWindowsFiveFiveSixAndActualElapsedConditionsRetained": true,
+    "originalCounterMetricContinuousFailurePartialAndHpBodiesRetained": true,
+    "capacityAndRawVerifierAcceptanceRemainFalse": true,
+    "currentK232ReceiptArraysAndTapFieldsMatchActualSchema": true,
+    "priorKToJToHTo210ToSixDeclarationBasisBound": true,
+    "backendC50AndDriverExecutionKSeparate": true,
+    "rootActualOsOwnedPidsAndClosedConsumerReferencesMatched": true,
+    "runtimeSeal122Prepared201Admitted206Distinct": true,
+    "fiveProducerSyntaxChecksReportedZeroWithoutRerun": true,
+    "scoutAppendixOnlyExistingCallbackAndResultField": true,
+    "scoutAppendixFiveFieldsAndFixedReasonSet": true,
+    "scoutSelectedTuplesMaximum32": true,
+    "scoutTuplesScalarOnlyWithStringsCapped80": true,
+    "scoutSentinelsSeparateFromMissingDetailedFields": true,
+    "scoutAbsentInvalidOrUnknownRowsOnlyDiagnostic": true,
+    "scoutAppendixNotAndedIntoAnyGameAcceptance": true
+  },
+  "limits": [
+    "Static source/metadata review only; no target import, self-check, raw stream, monitor, recording, binary, private read, behavioral test or mode execution.",
+    "Original trusted frozen-producer readline/input bounds are retained; this does not add a hostile unbounded-line memory guarantee.",
+    "Source eligibility permits Root to seal and execute the ended verifier; it is not an independent game pass. The actual ended result and per-packet900ms limits remain separate.",
+    "Report-declared whole350 versus measured343 attacks leaves7 outside unclassified here; this tool source review makes no phase attribution or causal-improvement claim."
+  ],
+  "verdict": {
+    "toolSourceContractPassed": true,
+    "eligibleForRootSealing": true,
+    "blockingFindingIds": []
+  },
+  "actualVerificationExecutedByReviewer": false,
+  "capacityAccepted": false,
+  "p0AcceptanceAdjudicated": false,
+  "p2ImplementationPermitted": false
+}

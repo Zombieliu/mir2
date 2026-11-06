@@ -17,7 +17,8 @@ use mir2_ui_core::effect::{
     SecurityRequest, UiEffect, GUILD_STORAGE_LIST_CHANGE_TYPE, GUILD_STORAGE_SLOT_COUNT,
 };
 use mir2_ui_core::game_shop::{
-    GameShopReceipt, GameShopRequest, NATIVE_GAME_SHOP_RECEIPT_CAPABILITY,
+    GameShopReceipt, GameShopRequest, NATIVE_GAME_SHOP_GIFT_RECEIPT_CAPABILITY,
+    NATIVE_GAME_SHOP_RECEIPT_CAPABILITY,
 };
 use mir2_ui_core::reducer::reduce;
 use mir2_ui_core::state::UiState;
@@ -48,7 +49,7 @@ pub const ANDROID_GUILD_STORAGE_SLOT_COUNT: i32 = GUILD_STORAGE_SLOT_COUNT;
 pub fn native_game_shop_capabilities_json() -> Value {
     json!({
         "type": "clientCapabilities",
-        "capabilities": ["nativeResumeV1", NATIVE_GAME_SHOP_RECEIPT_CAPABILITY]
+        "capabilities": ["nativeResumeV1", NATIVE_GAME_SHOP_RECEIPT_CAPABILITY, NATIVE_GAME_SHOP_GIFT_RECEIPT_CAPABILITY]
     })
 }
 
@@ -941,22 +942,54 @@ pub fn enqueue_game_shop_purchase(
     quantity: u8,
     price_type: i32,
 ) -> Result<GameShopRequest, AndroidGameShopAdapterError> {
-    let transition = reduce(
+    enqueue_game_shop_action(
         ui_state,
+        gateway,
+        inbound,
         UiAction::GameShopBuy {
             g_index,
             quantity,
             price_type,
         },
-    );
+    )
+}
+
+pub fn enqueue_game_shop_gift(
+    ui_state: &mut UiState,
+    gateway: &mut AndroidGatewayOutboundQueue,
+    inbound: &mut AndroidGatewayInboundQueue,
+    g_index: i32,
+    quantity: u8,
+    recipient_name: String,
+) -> Result<GameShopRequest, AndroidGameShopAdapterError> {
+    enqueue_game_shop_action(
+        ui_state,
+        gateway,
+        inbound,
+        UiAction::GameShopGift {
+            g_index,
+            quantity,
+            recipient_name,
+        },
+    )
+}
+
+fn enqueue_game_shop_action(
+    ui_state: &mut UiState,
+    gateway: &mut AndroidGatewayOutboundQueue,
+    inbound: &mut AndroidGatewayInboundQueue,
+    action: UiAction,
+) -> Result<GameShopRequest, AndroidGameShopAdapterError> {
+    let transition = reduce(ui_state, action);
     let request = transition
         .state
         .game_shop_pending
         .clone()
         .ok_or(AndroidGameShopAdapterError::ReducerRejected)?;
     let mut effects = transition.effects.into_iter();
-    let Some(UiEffect::GatewayCommand(command @ GatewayCommand::GameShopBuy { .. })) =
-        effects.next()
+    let Some(UiEffect::GatewayCommand(
+        command @ (GatewayCommand::GameShopBuy { .. } | GatewayCommand::GameShopGift { .. }),
+    )) = effects.next()
     else {
         return Err(AndroidGameShopAdapterError::UnexpectedEffects);
     };
@@ -1368,19 +1401,14 @@ impl AndroidGatewayOutboundQueue {
             }
             _ => {}
         }
-        if let GatewayCommand::GameShopBuy {
-            request_id,
-            g_index,
-            quantity,
-            price_type,
-        } = &command
-        {
+        if matches!(
+            &command,
+            GatewayCommand::GameShopBuy { .. } | GatewayCommand::GameShopGift { .. }
+        ) {
             if self.pending_game_shop.is_some() {
                 return Err(AndroidGatewayEnqueueError::RequestInFlight);
             }
-            let Some(request) =
-                GameShopRequest::new(request_id.clone(), *g_index, *quantity, *price_type)
-            else {
+            let Some(request) = game_shop_request_for_command(&command) else {
                 return Err(AndroidGatewayEnqueueError::RequestInFlight);
             };
             // Reserved below only after queue capacity is confirmed.
@@ -1425,15 +1453,11 @@ impl AndroidGatewayOutboundQueue {
             });
         }
 
-        if let GatewayCommand::GameShopBuy {
-            request_id,
-            g_index,
-            quantity,
-            price_type,
-        } = &command
-        {
-            self.pending_game_shop =
-                GameShopRequest::new(request_id.clone(), *g_index, *quantity, *price_type);
+        if matches!(
+            &command,
+            GatewayCommand::GameShopBuy { .. } | GatewayCommand::GameShopGift { .. }
+        ) {
+            self.pending_game_shop = game_shop_request_for_command(&command);
             self.game_shop_unknown = false;
         }
         if let GatewayCommand::StoreItem {
@@ -1624,12 +1648,35 @@ impl AndroidGatewayOutboundQueue {
     }
 }
 
+fn game_shop_request_for_command(command: &GatewayCommand) -> Option<GameShopRequest> {
+    match command {
+        GatewayCommand::GameShopBuy {
+            request_id,
+            g_index,
+            quantity,
+            price_type,
+        } => GameShopRequest::new(request_id.clone(), *g_index, *quantity, *price_type),
+        GatewayCommand::GameShopGift {
+            request_id,
+            g_index,
+            quantity,
+            price_type: 0,
+            recipient_name,
+        } => GameShopRequest::new_gift(
+            request_id.clone(),
+            *g_index,
+            *quantity,
+            recipient_name.clone(),
+        ),
+        _ => None,
+    }
+}
+
 fn outbound_is_game_shop(entry: &AndroidGatewayOutbound) -> bool {
     serde_json::from_str::<Value>(&entry.json)
         .ok()
         .and_then(|value| value.get("type").and_then(Value::as_str).map(str::to_owned))
-        .as_deref()
-        == Some("gameShopBuy")
+        .is_some_and(|kind| kind == "gameShopBuy" || kind == "gameShopGift")
 }
 
 fn outbound_is_storage(entry: &AndroidGatewayOutbound) -> bool {
@@ -1651,8 +1698,10 @@ fn outbound_matches_game_shop_request(entry: &AndroidGatewayOutbound, request_id
     let Ok(value) = serde_json::from_str::<Value>(&entry.json) else {
         return false;
     };
-    value.get("type").and_then(Value::as_str) == Some("gameShopBuy")
-        && value.get("requestId").and_then(Value::as_str) == Some(request_id)
+    matches!(
+        value.get("type").and_then(Value::as_str),
+        Some("gameShopBuy" | "gameShopGift")
+    ) && value.get("requestId").and_then(Value::as_str) == Some(request_id)
 }
 
 fn outbound_matches_storage_request(entry: &AndroidGatewayOutbound, request_id: &str) -> bool {
@@ -1675,6 +1724,7 @@ fn command_type(command: &GatewayCommand) -> String {
         GatewayCommand::RegisterAccount { .. } => "newAccount",
         GatewayCommand::StartGame { .. } => "startGame",
         GatewayCommand::GameShopBuy { .. } => "gameShopBuy",
+        GatewayCommand::GameShopGift { .. } => "gameShopGift",
         GatewayCommand::StoreItem { .. } => "storeItemV2",
         GatewayCommand::TakeBackItem { .. } => "takeBackItemV2",
         GatewayCommand::SendMail { .. } => "sendMail",
@@ -1773,6 +1823,17 @@ fn to_wire_value(command: &GatewayCommand) -> (AndroidGatewayOutboundKind, Value
                 "quantity":quantity,
                 "priceType":price_type
             }),
+        ),
+        GatewayCommand::GameShopGift {
+            request_id,
+            g_index,
+            quantity,
+            price_type,
+            recipient_name,
+        } => (
+            AndroidGatewayOutboundKind::Wire,
+            json!({"type":"gameShopGift","requestId":request_id,"gIndex":g_index,
+                "quantity":quantity,"priceType":price_type,"recipientName":recipient_name}),
         ),
         GatewayCommand::StoreItem {
             request_id,
@@ -2615,7 +2676,7 @@ mod tests {
             native_game_shop_capabilities_json(),
             json!({
                 "type": "clientCapabilities",
-                "capabilities": ["nativeResumeV1", "nativeGameShopReceiptV1"]
+                "capabilities": ["nativeResumeV1", "nativeGameShopReceiptV1", "nativeGameShopGiftReceiptV1"]
             })
         );
         let receipt = parse_native_game_shop_receipt(

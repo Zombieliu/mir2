@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "profileId": "release-native-10-v2-feasibility-05",
+  "realm": "isolated",
+  "resourceLimitsEnforcedByMonitor": false,
+  "hostLogicalProcessors": 32,
+  "maxPrivateBytes": 4294967296,
+  "maxWorkingSetBytes": 8589934592,
+  "minHostFreeBytes": 8589934592,
+  "maxCpuCores": 8,
+  "maxIoBytesPerSecond": 536870912,
+  "maxIoOperationsPerSecond": 100000,
+  "sustainedSamples": 3,
+  "environment": {
+    "cpuLimit": "No hard CPU quota or affinity; 4 Tokio workers, 32 logical CPUs; diagnostic SOFT CPU guard=8 logical-equivalent cores; no parallel build/test",
+    "memoryLimit": "No hard memory quota; private memory stop=4GiB, working set stop=8GiB, host free reserve=8GiB",
+    "storage": "Local Windows scratch File store; unthrottled disk; process IO includes file/device IO",
+    "database": "Dedicated fresh File backend; PostgreSQL not exercised",
+    "network": "Literal loopback; no external NIC throughput, PPS, retransmission or cloud bandwidth certificate",
+    "tls": "Plain WS/HTTP on loopback only; TLS not exercised",
+    "failureDomain": "One development host; no failover, N+1, power/disk failure scope"
+  },
+  "gatewayTelemetryRequired": true
+}

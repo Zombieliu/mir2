@@ -1,0 +1,3954 @@
+{
+  "owner": "Root",
+  "kind": "Source28 actual finite File/lib owner/Hosted/RPC codec and checkpoint replay regression",
+  "generatedAtUtc": "2026-10-07T11:32:34.211Z",
+  "parentCommit": "e2c42e066b48313309f62d65a2b320b9d93f4495",
+  "baselineWindows": "f72e36fb84c3574fff0aeb2abed856454b14289d",
+  "sourceSnapshot": {
+    "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-rust05-snapshot.json",
+    "bytes": 274835,
+    "sha256": "dc0272994f0762b13ee8751851bc144a225c2d16d9b7d75a5a01ca539bbfdaa9"
+  },
+  "sourceReview": {
+    "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-rust05-review.json",
+    "bytes": 3154,
+    "sha256": "ef2d945cb96549064225a52036e992007e2f3eba53a970d8b7f21781cdc2710e"
+  },
+  "sourceCount": 888,
+  "postExecutionInputDrift": [],
+  "originalInputProtection": {
+    "previousSourceCount": 884,
+    "changed": 14,
+    "protected": 870,
+    "added": 4,
+    "removed": 0
+  },
+  "runs": [
+    {
+      "name": "simulation-purchase01",
+      "config": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-simulation-purchase01.config.json",
+        "bytes": 4068,
+        "sha256": "4b7dd656ddc106fdf4a6acf8f8b58d800fcd900525cbe9ae16a7f637e573c87d"
+      },
+      "policy": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-simulation-purchase01.policy.json",
+        "bytes": 2341,
+        "sha256": "67cd40aea35c62bbf4ef9f362ef567329be86dd99ab581c5f0577cdc2ece5d79"
+      },
+      "snapshot": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-rust01-snapshot.json",
+        "bytes": 273531,
+        "sha256": "93c8660f6641f763e1600418cea655216f6585ed79692d234b82144a04dd4b2c"
+      },
+      "sourceReview": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-rust01-review.json",
+        "bytes": 1443,
+        "sha256": "7dc94a81dd74445bc4f6d4e0d9c47d6eec7235a0792c79125d13fd5e11034edd"
+      },
+      "authority": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-rust01-authority.json",
+        "bytes": 522,
+        "sha256": "7cb3dd7facf44d31747f48f7a736c62bd2f3bd56ff02961635609fa33c5e4792"
+      },
+      "args": [
+        "+1.95.0",
+        "test",
+        "--manifest-path",
+        "apps/simulation/Cargo.toml",
+        "--locked",
+        "--offline",
+        "--jobs",
+        "1",
+        "--lib",
+        "npc_purchase",
+        "--",
+        "--test-threads=1"
+      ],
+      "outerPin": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-simulation-purchase01.outer.json",
+        "bytes": 461,
+        "sha256": "e9260d4d9c2adfd8b240c81547353f5f8496bf821e59ed1095f8aa4a3045b4ab"
+      },
+      "stdoutPin": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-simulation-purchase01.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderrPin": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-simulation-purchase01.stderr.log",
+        "bytes": 2245,
+        "sha256": "f5812380c18c78b1ea14468369c3a808107131dc0599d551cc95d4c77389db37"
+      },
+      "receiptFiles": [
+        {
+          "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-simulation-purchase01-cargo-receipts/9cd1a44ab3e94ea8bb5cdfd6fe484572/before.json",
+          "bytes": 1008,
+          "sha256": "9c03d4b461ed668ecccb48dcdf1303a5b48a3570ee1c6c48914d3a0e4929baf5"
+        },
+        {
+          "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-simulation-purchase01-cargo-receipts/9cd1a44ab3e94ea8bb5cdfd6fe484572/after.json",
+          "bytes": 332,
+          "sha256": "35a94a7e6ba2b27d1612bbb52a1bef4af79272461a7df0a2d70042d43936b28f"
+        },
+        {
+          "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-simulation-purchase01-cargo-receipts/9cd1a44ab3e94ea8bb5cdfd6fe484572/probe-process.json",
+          "bytes": 433,
+          "sha256": "395b401c1ed7f04475a621b5da8cad77716524fa53f347488f6a4fb10f77e9ae"
+        },
+        {
+          "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-simulation-purchase01-cargo-receipts/9cd1a44ab3e94ea8bb5cdfd6fe484572/probe.stderr.bin",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-simulation-purchase01-cargo-receipts/9cd1a44ab3e94ea8bb5cdfd6fe484572/probe.stdout.bin",
+          "bytes": 197,
+          "sha256": "885b9d52d180be0c29f18b1f2772df22269425b5e6abeee241ee0951ca90758e"
+        }
+      ],
+      "before": {
+        "schemaVersion": 1,
+        "mode": "real-cargo",
+        "nonce": "9cd1a44ab3e94ea8bb5cdfd6fe484572",
+        "policyPath": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-simulation-purchase01.policy.json",
+        "policySha": "67cd40aea35c62bbf4ef9f362ef567329be86dd99ab581c5f0577cdc2ece5d79",
+        "args": [
+          "+1.95.0",
+          "test",
+          "--manifest-path",
+          "apps/simulation/Cargo.toml",
+          "--locked",
+          "--offline",
+          "--jobs",
+          "1",
+          "--lib",
+          "npc_purchase",
+          "--",
+          "--test-threads=1"
+        ],
+        "cwd": "E:\\mir2-player-journey\\mir2-web3",
+        "calleePath": "C:/Users/Administrator/.cargo/bin/cargo.exe",
+        "calleeSha": "86478e53f769379d7f0ebfa7c9aa97cb76ca92233f79aa2cc0dbee2efaac73c7",
+        "sample": {
+          "schemaVersion": "1",
+          "driveLetter": "C",
+          "sampleBeginUtc": "2026-10-07T11:01:58.3837075Z",
+          "sampleEndUtc": "2026-10-07T11:01:59.2886201Z",
+          "remainingBytes": "435844517888",
+          "requiredBytes": "53687091200"
+        },
+        "probePid": 129872,
+        "probeLaunchMs": 106.0343,
+        "probeEndMs": 1265.2235,
+        "decision": "FORWARD",
+        "thresholdBytes": "53687091200",
+        "sampleProof": "actualGetVolumeC"
+      },
+      "after": {
+        "childPid": 134540,
+        "childStartedUtc": "/Date(1791370919359)/",
+        "childStartMs": 1288.2609,
+        "completed": true,
+        "exited": true,
+        "disposed": true,
+        "exitCode": 101,
+        "exitBits": "101",
+        "completedUtc": "/Date(1791370922262)/",
+        "completionMs": 4191.038500000001,
+        "postChildPolicy": "B",
+        "lifecycle": ".NET Start/Exited/WaitForExit/Dispose; not Node close"
+      },
+      "probe": {
+        "probePid": 129872,
+        "probeKilled": false,
+        "probeCode": 0,
+        "probeLaunchUtc": "/Date(1791370918177)/",
+        "probeEndUtc": "/Date(1791370919336)/",
+        "probeLaunchMs": 106.0343,
+        "probeEndMs": 1265.2235,
+        "probeMode": "actual",
+        "probePath": "C:/mir2-cross-platform-storage-20261002/repo-qa-shared-quest-heading-locale-01/cargo-per-call-guard-implementation01/probe-volume-C.ps1",
+        "probeSha": "45e14d26e608c36c8073fa9e8e61562062b2d5d2df142d35e90f7213fb72f1ab"
+      },
+      "outer": {
+        "owner": "Root",
+        "exitCode": 101,
+        "guardPid": 136868,
+        "exited": true,
+        "disposed": true,
+        "elapsedMs": 4258,
+        "configPath": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-simulation-purchase01.config.json",
+        "uiOperated": false,
+        "runtimeLaunched": false,
+        "networkUsed": false,
+        "productionBuildAccepted": false,
+        "candidateAccepted": false,
+        "goalComplete": false
+      },
+      "freshUpperMs": 72,
+      "result": {
+        "kind": "compilationFailedBeforeTestExecution",
+        "passed": 0,
+        "failedTests": 0
+      },
+      "namedTests": []
+    },
+    {
+      "name": "simulation-purchase02",
+      "config": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-simulation-purchase02.config.json",
+        "bytes": 4068,
+        "sha256": "e93da9a57cdfdbd195c3a56db824d0621cc1ac6092d997f489ae05921400a106"
+      },
+      "policy": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-simulation-purchase02.policy.json",
+        "bytes": 2341,
+        "sha256": "8ee6b126749d6f44b2faa130ba1999ab901b12ec65395dc1f7f7cbdd8caa1866"
+      },
+      "snapshot": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-rust02-snapshot.json",
+        "bytes": 274136,
+        "sha256": "6f1905a8a9fd10b05a324c659f0690801fe602b049bf6e954456c7ddad612851"
+      },
+      "sourceReview": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-rust02-review.json",
+        "bytes": 1320,
+        "sha256": "39fb9a6fc8a38f4d085ac198f732b3bb382e4b8fa51fdea394b7fa5abee13349"
+      },
+      "authority": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-rust02-authority.json",
+        "bytes": 522,
+        "sha256": "797d4bc27ede2c0a72431337d52b6651f31bbb7a1b371751f13a805f0a1136fc"
+      },
+      "args": [
+        "+1.95.0",
+        "test",
+        "--manifest-path",
+        "apps/simulation/Cargo.toml",
+        "--locked",
+        "--offline",
+        "--jobs",
+        "1",
+        "--lib",
+        "npc_purchase",
+        "--",
+        "--test-threads=1"
+      ],
+      "outerPin": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-simulation-purchase02.outer.json",
+        "bytes": 463,
+        "sha256": "7f9635d597cc3843e73d8ed3c7ff33524fd33f72efa7b29a6286ce69692fc465"
+      },
+      "stdoutPin": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-simulation-purchase02.stdout.log",
+        "bytes": 11068,
+        "sha256": "5aefe7907a5972716fb5ea5c519f573c23423c01c1118c8c72a971408f849cad"
+      },
+      "stderrPin": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-simulation-purchase02.stderr.log",
+        "bytes": 37497,
+        "sha256": "ff460f924b26415d35c778aad03bdc13eb73ddd43712d925278c5b5353fcfb2f"
+      },
+      "receiptRoot": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-simulation-purchase02-cargo-receipts",
+      "receiptFiles": [
+        {
+          "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-simulation-purchase02-cargo-receipts/0b40aded8f8e443fbbec739c35826193/before.json",
+          "bytes": 1018,
+          "sha256": "3fcaf0febc51522d2db896380dfb2d01756eced21611e1020ee5b0e588f746f0"
+        },
+        {
+          "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-simulation-purchase02-cargo-receipts/0b40aded8f8e443fbbec739c35826193/after.json",
+          "bytes": 332,
+          "sha256": "541a51fed3211a3165ddcf7f8a62f771b5df9ff9d4a7626d055bb5a7cafc61b0"
+        },
+        {
+          "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-simulation-purchase02-cargo-receipts/0b40aded8f8e443fbbec739c35826193/probe-process.json",
+          "bytes": 443,
+          "sha256": "f1c413bd354d9caf436d6d82cbd409d01282853d086f15f901b3eecab0468c44"
+        },
+        {
+          "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-simulation-purchase02-cargo-receipts/0b40aded8f8e443fbbec739c35826193/probe.stderr.bin",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-simulation-purchase02-cargo-receipts/0b40aded8f8e443fbbec739c35826193/probe.stdout.bin",
+          "bytes": 197,
+          "sha256": "0dee6ea61f1c16a77428eb3db1ca482be50cb2a94026636587f799ff23a39930"
+        }
+      ],
+      "before": {
+        "schemaVersion": 1,
+        "mode": "real-cargo",
+        "nonce": "0b40aded8f8e443fbbec739c35826193",
+        "policyPath": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-simulation-purchase02.policy.json",
+        "policySha": "8ee6b126749d6f44b2faa130ba1999ab901b12ec65395dc1f7f7cbdd8caa1866",
+        "args": [
+          "+1.95.0",
+          "test",
+          "--manifest-path",
+          "apps/simulation/Cargo.toml",
+          "--locked",
+          "--offline",
+          "--jobs",
+          "1",
+          "--lib",
+          "npc_purchase",
+          "--",
+          "--test-threads=1"
+        ],
+        "cwd": "E:\\mir2-player-journey\\mir2-web3",
+        "calleePath": "C:/Users/Administrator/.cargo/bin/cargo.exe",
+        "calleeSha": "86478e53f769379d7f0ebfa7c9aa97cb76ca92233f79aa2cc0dbee2efaac73c7",
+        "sample": {
+          "schemaVersion": "1",
+          "driveLetter": "C",
+          "sampleBeginUtc": "2026-10-07T11:03:39.9714130Z",
+          "sampleEndUtc": "2026-10-07T11:03:40.8942387Z",
+          "remainingBytes": "434901381120",
+          "requiredBytes": "53687091200"
+        },
+        "probePid": 134464,
+        "probeLaunchMs": 115.17370000000001,
+        "probeEndMs": 1353.1837,
+        "decision": "FORWARD",
+        "thresholdBytes": "53687091200",
+        "sampleProof": "actualGetVolumeC"
+      },
+      "after": {
+        "childPid": 137196,
+        "childStartedUtc": "/Date(1791371020976)/",
+        "childStartMs": 1378.0296,
+        "completed": true,
+        "exited": true,
+        "disposed": true,
+        "exitCode": 101,
+        "exitBits": "101",
+        "completedUtc": "/Date(1791371199062)/",
+        "completionMs": 179461.57140000002,
+        "postChildPolicy": "B",
+        "lifecycle": ".NET Start/Exited/WaitForExit/Dispose; not Node close"
+      },
+      "probe": {
+        "probePid": 134464,
+        "probeKilled": false,
+        "probeCode": 0,
+        "probeLaunchUtc": "/Date(1791371019713)/",
+        "probeEndUtc": "/Date(1791371020951)/",
+        "probeLaunchMs": 115.17370000000001,
+        "probeEndMs": 1353.1837,
+        "probeMode": "actual",
+        "probePath": "C:/mir2-cross-platform-storage-20261002/repo-qa-shared-quest-heading-locale-01/cargo-per-call-guard-implementation01/probe-volume-C.ps1",
+        "probeSha": "45e14d26e608c36c8073fa9e8e61562062b2d5d2df142d35e90f7213fb72f1ab"
+      },
+      "outer": {
+        "owner": "Root",
+        "exitCode": 101,
+        "guardPid": 124452,
+        "exited": true,
+        "disposed": true,
+        "elapsedMs": 179525,
+        "configPath": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-simulation-purchase02.config.json",
+        "uiOperated": false,
+        "runtimeLaunched": false,
+        "networkUsed": false,
+        "productionBuildAccepted": false,
+        "candidateAccepted": false,
+        "goalComplete": false
+      },
+      "freshUpperMs": 83,
+      "result": {
+        "result": "FAILED",
+        "passed": 68,
+        "failed": 4,
+        "ignored": 0,
+        "measured": 0,
+        "filteredOut": 1998,
+        "elapsedSeconds": 46.41
+      },
+      "namedTests": [
+        {
+          "name": "npc_purchase_journal::tests::all_five_supported_combinations_preserve_actual_terminal_results",
+          "status": "ok"
+        },
+        {
+          "name": "npc_purchase_journal::tests::canonical_account_exact_character_and_nonzero_actor_are_required",
+          "status": "ok"
+        },
+        {
+          "name": "npc_purchase_journal::tests::corrupted_existing_state_is_never_extended_or_returned_as_a_lookup_hit",
+          "status": "ok"
+        },
+        {
+          "name": "npc_purchase_journal::tests::duplicate_keys_are_invalid_even_with_increasing_revisions_or_new_intents",
+          "status": "ok"
+        },
+        {
+          "name": "npc_purchase_journal::tests::exact_duplicate_and_changed_tuple_outcome_or_revision_never_append",
+          "status": "ok"
+        },
+        {
+          "name": "npc_purchase_journal::tests::final_sequence_and_largest_usable_revision_preserve_full_u64_item_identity",
+          "status": "ok"
+        },
+        {
+          "name": "npc_purchase_journal::tests::full_capacity_refuses_new_purchase_record_and_never_evicts_old_keys",
+          "status": "ok"
+        },
+        {
+          "name": "npc_purchase_journal::tests::lookup_conflicts_for_every_changed_intent_and_never_returns_retry_miss",
+          "status": "ok"
+        },
+        {
+          "name": "npc_purchase_journal::tests::malformed_outcomes_leave_room_for_the_following_actual_result",
+          "status": "ok"
+        },
+        {
+          "name": "npc_purchase_journal::tests::request_scopes_are_part_of_the_key_and_sequence_does_not_sort_revisions",
+          "status": "ok"
+        },
+        {
+          "name": "npc_purchase_journal::tests::revision_zero_max_repetition_and_reordering_are_refused",
+          "status": "ok"
+        },
+        {
+          "name": "npc_purchase_journal::tests::schema_refuses_unknown_outcomes_and_missing_binding_fields",
+          "status": "ok"
+        },
+        {
+          "name": "npc_purchase_journal::tests::serde_refuses_raw_duplicate_and_escaped_duplicate_fields",
+          "status": "ok"
+        },
+        {
+          "name": "npc_purchase_journal::tests::serde_refuses_wrong_opaque_width_and_numeric_types_without_coercion",
+          "status": "ok"
+        },
+        {
+          "name": "npc_purchase_journal::tests::strict_camel_case_schema_roundtrips_and_unknown_fields_are_refused",
+          "status": "ok"
+        },
+        {
+          "name": "npc_purchase_journal::tests::terminal_rejection_is_retained_and_checkpoint_revision_is_required",
+          "status": "ok"
+        },
+        {
+          "name": "npc_purchase_journal::tests::whole_merge_zero_uid_and_free_charge_need_no_inventory_presence",
+          "status": "ok"
+        },
+        {
+          "name": "npc_purchase_journal::tests::zero_opaque_sequence_quantity_and_wrong_panel_are_rejected_without_mutation",
+          "status": "ok"
+        },
+        {
+          "name": "npc_purchase_owner::tests::action_wire_names_and_mutation_classification_preserve_original_operations",
+          "status": "ok"
+        },
+        {
+          "name": "npc_purchase_owner::tests::raw_duplicate_and_escaped_duplicate_action_fields_are_refused",
+          "status": "ok"
+        },
+        {
+          "name": "npc_purchase_owner::tests::raw_duplicate_and_escaped_duplicate_reply_fields_are_refused",
+          "status": "ok"
+        },
+        {
+          "name": "npc_purchase_owner::tests::raw_full_u64_identity_and_zero_incoming_uid_decode_losslessly",
+          "status": "ok"
+        },
+        {
+          "name": "npc_purchase_owner::tests::recovery_requires_explicit_receipt_and_only_null_represents_a_miss",
+          "status": "ok"
+        },
+        {
+          "name": "npc_purchase_owner::tests::replies_roundtrip_all_named_variants_without_private_journal_or_account_fields",
+          "status": "ok"
+        },
+        {
+          "name": "npc_purchase_owner::tests::unknown_fields_are_rejected_at_every_action_layer",
+          "status": "FAILED"
+        },
+        {
+          "name": "npc_purchase_owner::tests::unknown_fields_are_rejected_at_every_reply_layer",
+          "status": "ok"
+        },
+        {
+          "name": "npc_purchase_owner::tests::unknown_tags_and_wrong_variant_shapes_are_rejected",
+          "status": "FAILED"
+        },
+        {
+          "name": "npc_purchase_owner::tests::wrong_numeric_types_and_ranges_are_never_coerced",
+          "status": "ok"
+        },
+        {
+          "name": "npc_purchase_owner::tests::wrong_opaque_width_and_nested_enum_shapes_are_rejected",
+          "status": "ok"
+        },
+        {
+          "name": "runtime::npc::pearl_tests::pearl_npc_purchase_uses_only_pearl_wallet_and_rejects_insufficient_funds",
+          "status": "ok"
+        },
+        {
+          "name": "runtime::npc_purchase_outcome::tests::npc_purchase_all_primary_branches_capture_actual_currency_source_and_delivery",
+          "status": "ok"
+        },
+        {
+          "name": "runtime::npc_purchase_outcome::tests::npc_purchase_insufficient_currency_is_rejected_without_reusing_previous_commit",
+          "status": "ok"
+        },
+        {
+          "name": "runtime::npc_purchase_outcome::tests::npc_purchase_known_resale_commit_survives_postprocessing_failure_or_panic",
+          "status": "ok"
+        },
+        {
+          "name": "runtime::npc_purchase_outcome::tests::npc_purchase_missing_capture_or_precommit_panic_is_unknown_and_does_not_debit",
+          "status": "ok"
+        },
+        {
+          "name": "runtime::npc_purchase_outcome::tests::npc_purchase_pearl_used_fallback_keeps_currency_and_source_orthogonal",
+          "status": "ok"
+        },
+        {
+          "name": "runtime::npc_purchase_outcome::tests::npc_purchase_resale_admitted_count_is_clamped_and_removes_legacy_whole_entry",
+          "status": "ok"
+        },
+        {
+          "name": "runtime::npc_purchase_outcome::tests::npc_purchase_resale_delivery_matches_valid_old_gain_carrier",
+          "status": "ok"
+        },
+        {
+          "name": "runtime::npc_purchase_outcome::tests::npc_purchase_resale_invalid_source_or_roster_never_debits_or_removes_stock",
+          "status": "ok"
+        },
+        {
+          "name": "runtime::npc_purchase_outcome::tests::npc_purchase_resale_stack_slack_without_free_cells_cannot_overwrite_inventory",
+          "status": "ok"
+        },
+        {
+          "name": "runtime::npc_purchase_outcome::tests::npc_purchase_session_and_runtime_require_authentication_and_start_game",
+          "status": "ok"
+        },
+        {
+          "name": "runtime::npc_purchase_outcome::tests::npc_purchase_unsupported_runtime_never_executes_legacy_fallback",
+          "status": "ok"
+        },
+        {
+          "name": "runtime::npc_purchase_outcome::tests::npc_purchase_zero_resale_selector_is_not_reconstructed_from_template_index",
+          "status": "ok"
+        },
+        {
+          "name": "runtime::npc_purchase_transaction::tests::actual_delete_and_recreate_retires_old_actor_and_recovery_key",
+          "status": "ok"
+        },
+        {
+          "name": "runtime::npc_purchase_transaction::tests::actual_durable_mentor_credit_merge_publishes_level_xp_roster_and_complete_stage5",
+          "status": "ok"
+        },
+        {
+          "name": "runtime::npc_purchase_transaction::tests::actual_external_mail_is_merged_into_complete_purchase_checkpoint_and_published_live",
+          "status": "ok"
+        },
+        {
+          "name": "runtime::npc_purchase_transaction::tests::ambiguous_rename_freezes_stale_cache_and_query_but_actual_file_retains_terminal_result",
+          "status": "ok"
+        },
+        {
+          "name": "runtime::npc_purchase_transaction::tests::committed_empty_checkpoint_reopens_without_demo_wallet_or_container_reseeding_before_actor",
+          "status": "ok"
+        },
+        {
+          "name": "runtime::npc_purchase_transaction::tests::conflicting_nonce_tuple_foreign_actor_and_missing_query_never_write_or_debit",
+          "status": "ok"
+        },
+        {
+          "name": "runtime::npc_purchase_transaction::tests::durable_duplicate_original_id_has_empty_packets_without_second_wallet_delivery_or_stock_change",
+          "status": "ok"
+        },
+        {
+          "name": "runtime::npc_purchase_transaction::tests::durable_purchase_five_actual_currency_source_branches_share_full_file_checkpoint",
+          "status": "ok"
+        },
+        {
+          "name": "runtime::npc_purchase_transaction::tests::durable_terminal_rejection_advances_revision_without_economic_debit",
+          "status": "ok"
+        },
+        {
+          "name": "runtime::npc_purchase_transaction::tests::durable_zero_raw_resale_selector_survives_actual_file_journal_and_recovery",
+          "status": "ok"
+        },
+        {
+          "name": "runtime::npc_purchase_transaction::tests::failed_logout_or_disconnect_save_retires_authority_while_preserving_original_recovery_state",
+          "status": "ok"
+        },
+        {
+          "name": "runtime::npc_purchase_transaction::tests::genuine_new_session_producer_queries_original_scope_but_cannot_execute_it",
+          "status": "ok"
+        },
+        {
+          "name": "runtime::npc_purchase_transaction::tests::legacy_missing_journal_enables_persistent_actor_and_ordinary_save_keeps_history",
+          "status": "ok"
+        },
+        {
+          "name": "runtime::npc_purchase_transaction::tests::legacy_revision_zero_demo_checkpoint_still_seeds_missing_wallet_and_containers",
+          "status": "ok"
+        },
+        {
+          "name": "runtime::npc_purchase_transaction::tests::older_complete_checkpoint_cannot_roll_back_committed_purchase_or_actor",
+          "status": "ok"
+        },
+        {
+          "name": "runtime::npc_purchase_transaction::tests::owner_tests::owner_actual_checkpoint_replica_apply_mirrors_complete_state_without_reexecution_or_source_writes",
+          "status": "FAILED"
+        },
+        {
+          "name": "runtime::npc_purchase_transaction::tests::owner_tests::owner_actual_purchase_and_exact_replay_preserve_receipt_and_full_live_authority",
+          "status": "ok"
+        },
+        {
+          "name": "runtime::npc_purchase_transaction::tests::owner_tests::owner_authentication_epoch_and_enrollment_preflight_leave_actual_source_unchanged",
+          "status": "ok"
+        },
+        {
+          "name": "runtime::npc_purchase_transaction::tests::owner_tests::owner_begin_same_epoch_is_stable_idempotent_and_reports_verified_complete_revision",
+          "status": "ok"
+        },
+        {
+          "name": "runtime::npc_purchase_transaction::tests::owner_tests::owner_capability_requires_real_durable_source_and_refuses_memory_runtime",
+          "status": "ok"
+        },
+        {
+          "name": "runtime::npc_purchase_transaction::tests::owner_tests::owner_current_revision_and_journal_cannot_certify_unpublished_wallet_or_delivery",
+          "status": "FAILED"
+        },
+        {
+          "name": "runtime::npc_purchase_transaction::tests::owner_tests::owner_epoch_change_requires_begin_and_recovers_original_identity_without_old_scope_execution",
+          "status": "ok"
+        },
+        {
+          "name": "runtime::npc_purchase_transaction::tests::owner_tests::owner_failed_begin_and_failed_logout_or_disconnect_retire_authority_without_losing_recovery",
+          "status": "ok"
+        },
+        {
+          "name": "runtime::npc_purchase_transaction::tests::owner_tests::owner_partial_or_stale_live_publication_cannot_certify_recovered_receipt_revision",
+          "status": "ok"
+        },
+        {
+          "name": "runtime::npc_purchase_transaction::tests::owner_tests::owner_quote_and_original_id_query_never_write_file_revision_or_live_state",
+          "status": "ok"
+        },
+        {
+          "name": "runtime::npc_purchase_transaction::tests::owner_tests::owner_replica_refuses_source_truth_apply_and_older_foreign_or_rewritten_actual_history",
+          "status": "ok"
+        },
+        {
+          "name": "runtime::npc_purchase_transaction::tests::postcommit_error_and_panic_preserve_exact_receipt_for_original_id_query",
+          "status": "ok"
+        },
+        {
+          "name": "runtime::npc_purchase_transaction::tests::prepublication_faults_preserve_live_file_stock_carrier_and_buyback_expiry",
+          "status": "ok"
+        },
+        {
+          "name": "runtime::npc_purchase_transaction::tests::revision_and_journal_capacity_exhaustion_fail_closed_before_live_purchase",
+          "status": "ok"
+        },
+        {
+          "name": "runtime::npc_purchase_transaction::tests::wellformed_wrong_catalog_currency_or_source_rejects_without_removing_resale_stock",
+          "status": "ok"
+        }
+      ]
+    },
+    {
+      "name": "gateway-owner03",
+      "config": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-gateway-owner03.config.json",
+        "bytes": 4047,
+        "sha256": "510a8aa6a1eb2e0b4fcd65813fb9204bb42f265411b487c60589ce3e0de85a19"
+      },
+      "policy": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-gateway-owner03.policy.json",
+        "bytes": 2335,
+        "sha256": "2eb49804f287576a323f7526ad5925cfbdd73833b2766238b92b746f4a756bf0"
+      },
+      "snapshot": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-rust03-snapshot.json",
+        "bytes": 274157,
+        "sha256": "5f6231f4a1c24fe84c7c8e163181381ea7d1c95498db8ecf67ec50cf90cc574a"
+      },
+      "sourceReview": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-rust03-review.json",
+        "bytes": 2010,
+        "sha256": "38c30b0d159705ed83df6938430a54d223d40b41e4533e6c3f61cbd21b39dc75"
+      },
+      "authority": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-rust03-authority.json",
+        "bytes": 522,
+        "sha256": "3cd45388279d4c8458ec551c4df35597e612bdc05bee9007780e9dee0db0220a"
+      },
+      "args": [
+        "+1.95.0",
+        "test",
+        "--manifest-path",
+        "apps/gateway/Cargo.toml",
+        "--locked",
+        "--offline",
+        "--jobs",
+        "1",
+        "--lib",
+        "npc_purchase_owner_route_tests",
+        "--",
+        "--test-threads=1"
+      ],
+      "outerPin": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-gateway-owner03.outer.json",
+        "bytes": 456,
+        "sha256": "beb341b0ca0a97fc576fc65ac9c0d5f6a484f9805e75774a969a05f329e14e62"
+      },
+      "stdoutPin": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-gateway-owner03.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderrPin": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-gateway-owner03.stderr.log",
+        "bytes": 33777,
+        "sha256": "151d9962d7238db6566af6b38255e648d88a5000b760a2dd50153a24d67d20b7"
+      },
+      "receiptFiles": [
+        {
+          "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-gateway-owner03-cargo-receipts/b99bed137b00424d83849db8db559d18/before.json",
+          "bytes": 1017,
+          "sha256": "d22dedc26eab666e36297a5a8261c81e1acfe784648857aba59a472ed362bd57"
+        },
+        {
+          "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-gateway-owner03-cargo-receipts/b99bed137b00424d83849db8db559d18/after.json",
+          "bytes": 324,
+          "sha256": "41a44fb0217421760e89721d393db4d6518fd76900502b1b929a87695db963dc"
+        },
+        {
+          "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-gateway-owner03-cargo-receipts/b99bed137b00424d83849db8db559d18/probe-process.json",
+          "bytes": 433,
+          "sha256": "b8ea6201123594aaab2b11b91c61f651ee3b6c595a29661e32f70240ddbc03fc"
+        },
+        {
+          "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-gateway-owner03-cargo-receipts/b99bed137b00424d83849db8db559d18/probe.stderr.bin",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-gateway-owner03-cargo-receipts/b99bed137b00424d83849db8db559d18/probe.stdout.bin",
+          "bytes": 197,
+          "sha256": "119942ebf9ce57e1d346dfc1f3ab01bd52c38c583caf65424a9d91b40f855093"
+        }
+      ],
+      "before": {
+        "schemaVersion": 1,
+        "mode": "real-cargo",
+        "nonce": "b99bed137b00424d83849db8db559d18",
+        "policyPath": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-gateway-owner03.policy.json",
+        "policySha": "2eb49804f287576a323f7526ad5925cfbdd73833b2766238b92b746f4a756bf0",
+        "args": [
+          "+1.95.0",
+          "test",
+          "--manifest-path",
+          "apps/gateway/Cargo.toml",
+          "--locked",
+          "--offline",
+          "--jobs",
+          "1",
+          "--lib",
+          "npc_purchase_owner_route_tests",
+          "--",
+          "--test-threads=1"
+        ],
+        "cwd": "E:\\mir2-player-journey\\mir2-web3",
+        "calleePath": "C:/Users/Administrator/.cargo/bin/cargo.exe",
+        "calleeSha": "86478e53f769379d7f0ebfa7c9aa97cb76ca92233f79aa2cc0dbee2efaac73c7",
+        "sample": {
+          "schemaVersion": "1",
+          "driveLetter": "C",
+          "sampleBeginUtc": "2026-10-07T11:11:15.6567008Z",
+          "sampleEndUtc": "2026-10-07T11:11:16.4612062Z",
+          "remainingBytes": "432593498112",
+          "requiredBytes": "53687091200"
+        },
+        "probePid": 133648,
+        "probeLaunchMs": 102.0019,
+        "probeEndMs": 1161.7175,
+        "decision": "FORWARD",
+        "thresholdBytes": "53687091200",
+        "sampleProof": "actualGetVolumeC"
+      },
+      "after": {
+        "childPid": 131892,
+        "childStartedUtc": "/Date(1791371476536)/",
+        "childStartMs": 1186.2035,
+        "completed": true,
+        "exited": true,
+        "disposed": true,
+        "exitCode": 101,
+        "exitBits": "101",
+        "completedUtc": "/Date(1791371575049)/",
+        "completionMs": 99698.1967,
+        "postChildPolicy": "B",
+        "lifecycle": ".NET Start/Exited/WaitForExit/Dispose; not Node close"
+      },
+      "probe": {
+        "probePid": 133648,
+        "probeKilled": false,
+        "probeCode": 0,
+        "probeLaunchUtc": "/Date(1791371475452)/",
+        "probeEndUtc": "/Date(1791371476511)/",
+        "probeLaunchMs": 102.0019,
+        "probeEndMs": 1161.7175,
+        "probeMode": "actual",
+        "probePath": "C:/mir2-cross-platform-storage-20261002/repo-qa-shared-quest-heading-locale-01/cargo-per-call-guard-implementation01/probe-volume-C.ps1",
+        "probeSha": "45e14d26e608c36c8073fa9e8e61562062b2d5d2df142d35e90f7213fb72f1ab"
+      },
+      "outer": {
+        "owner": "Root",
+        "exitCode": 101,
+        "guardPid": 138144,
+        "exited": true,
+        "disposed": true,
+        "elapsedMs": 99757,
+        "configPath": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-gateway-owner03.config.json",
+        "uiOperated": false,
+        "runtimeLaunched": false,
+        "networkUsed": false,
+        "productionBuildAccepted": false,
+        "candidateAccepted": false,
+        "goalComplete": false
+      },
+      "freshUpperMs": 76,
+      "result": {
+        "kind": "compilationFailedBeforeTestExecution",
+        "passed": 0,
+        "failedTests": 0
+      },
+      "namedTests": []
+    },
+    {
+      "name": "gateway-owner04",
+      "config": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-gateway-owner04.config.json",
+        "bytes": 4047,
+        "sha256": "8850ae0a75b1667d4b92a9b22b6341904f98f68dca8081e4181eb2498ef6eb1d"
+      },
+      "policy": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-gateway-owner04.policy.json",
+        "bytes": 2335,
+        "sha256": "00bc2900ac3e9cf48ad01035b585a4e7e4ca1f1076d7b98d986ed37041ee6ddb"
+      },
+      "snapshot": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-rust04-snapshot.json",
+        "bytes": 274879,
+        "sha256": "10ac9798b3f74fa02cfd04715b374fb5817274fdbe5713a858279d2590c5189f"
+      },
+      "sourceReview": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-rust04-review.json",
+        "bytes": 2867,
+        "sha256": "242ac575fe31375f4c0bb18d900698086b906f7073e98bfaf443aef1116b97f9"
+      },
+      "authority": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-rust04-authority.json",
+        "bytes": 522,
+        "sha256": "c2ec5b481b3f9b0a59fbc5bf6347cc88d81676e6b1eb2e7ff4886e9da12c2fc9"
+      },
+      "args": [
+        "+1.95.0",
+        "test",
+        "--manifest-path",
+        "apps/gateway/Cargo.toml",
+        "--locked",
+        "--offline",
+        "--jobs",
+        "1",
+        "--lib",
+        "npc_purchase_owner_route_tests",
+        "--",
+        "--test-threads=1"
+      ],
+      "outerPin": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-gateway-owner04.outer.json",
+        "bytes": 457,
+        "sha256": "7cf3876a4530631e096d75fac5f8ec7afa227f87dcbf9c708ab3be02d5d8e336"
+      },
+      "stdoutPin": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-gateway-owner04.stdout.log",
+        "bytes": 2021,
+        "sha256": "61a7e8123c66d0470d0feece2d73ea9b06d05f49440d080a32469173204a9045"
+      },
+      "stderrPin": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-gateway-owner04.stderr.log",
+        "bytes": 31841,
+        "sha256": "d586dd983f1c80bd8f0ff0e90ad7ececa59ce8d3f21926589e14387e5b58fc48"
+      },
+      "receiptRoot": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-gateway-owner04-cargo-receipts",
+      "receiptFiles": [
+        {
+          "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-gateway-owner04-cargo-receipts/e4085b9a923c4b829015bba85d9a1c93/before.json",
+          "bytes": 1027,
+          "sha256": "15e7b945dfb5d90da7c66f9992f30a91b8d39362afb17bedcdce05926e982244"
+        },
+        {
+          "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-gateway-owner04-cargo-receipts/e4085b9a923c4b829015bba85d9a1c93/after.json",
+          "bytes": 333,
+          "sha256": "bef6c8f0ea63725312c7a6a4f2009199085fadc1a601220369e3f1910665edd8"
+        },
+        {
+          "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-gateway-owner04-cargo-receipts/e4085b9a923c4b829015bba85d9a1c93/probe-process.json",
+          "bytes": 443,
+          "sha256": "b6d136bf0543918ae6093e33b26d288509985862257170ef5383607ccaa2e0bb"
+        },
+        {
+          "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-gateway-owner04-cargo-receipts/e4085b9a923c4b829015bba85d9a1c93/probe.stderr.bin",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-gateway-owner04-cargo-receipts/e4085b9a923c4b829015bba85d9a1c93/probe.stdout.bin",
+          "bytes": 197,
+          "sha256": "682be1308e6de47174cbd30de5c3a77835e45268109114b0717f0e2e33bfb7dc"
+        }
+      ],
+      "before": {
+        "schemaVersion": 1,
+        "mode": "real-cargo",
+        "nonce": "e4085b9a923c4b829015bba85d9a1c93",
+        "policyPath": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-gateway-owner04.policy.json",
+        "policySha": "00bc2900ac3e9cf48ad01035b585a4e7e4ca1f1076d7b98d986ed37041ee6ddb",
+        "args": [
+          "+1.95.0",
+          "test",
+          "--manifest-path",
+          "apps/gateway/Cargo.toml",
+          "--locked",
+          "--offline",
+          "--jobs",
+          "1",
+          "--lib",
+          "npc_purchase_owner_route_tests",
+          "--",
+          "--test-threads=1"
+        ],
+        "cwd": "E:\\mir2-player-journey\\mir2-web3",
+        "calleePath": "C:/Users/Administrator/.cargo/bin/cargo.exe",
+        "calleeSha": "86478e53f769379d7f0ebfa7c9aa97cb76ca92233f79aa2cc0dbee2efaac73c7",
+        "sample": {
+          "schemaVersion": "1",
+          "driveLetter": "C",
+          "sampleBeginUtc": "2026-10-07T11:17:00.9333654Z",
+          "sampleEndUtc": "2026-10-07T11:17:01.7523210Z",
+          "remainingBytes": "432573739008",
+          "requiredBytes": "53687091200"
+        },
+        "probePid": 128356,
+        "probeLaunchMs": 101.74600000000001,
+        "probeEndMs": 1177.4597,
+        "decision": "FORWARD",
+        "thresholdBytes": "53687091200",
+        "sampleProof": "actualGetVolumeC"
+      },
+      "after": {
+        "childPid": 121920,
+        "childStartedUtc": "/Date(1791371821826)/",
+        "childStartMs": 1201.4016000000001,
+        "completed": true,
+        "exited": true,
+        "disposed": true,
+        "exitCode": 101,
+        "exitBits": "101",
+        "completedUtc": "/Date(1791371957496)/",
+        "completionMs": 136869.638,
+        "postChildPolicy": "B",
+        "lifecycle": ".NET Start/Exited/WaitForExit/Dispose; not Node close"
+      },
+      "probe": {
+        "probePid": 128356,
+        "probeKilled": false,
+        "probeCode": 0,
+        "probeLaunchUtc": "/Date(1791371820726)/",
+        "probeEndUtc": "/Date(1791371821802)/",
+        "probeLaunchMs": 101.74600000000001,
+        "probeEndMs": 1177.4597,
+        "probeMode": "actual",
+        "probePath": "C:/mir2-cross-platform-storage-20261002/repo-qa-shared-quest-heading-locale-01/cargo-per-call-guard-implementation01/probe-volume-C.ps1",
+        "probeSha": "45e14d26e608c36c8073fa9e8e61562062b2d5d2df142d35e90f7213fb72f1ab"
+      },
+      "outer": {
+        "owner": "Root",
+        "exitCode": 101,
+        "guardPid": 135968,
+        "exited": true,
+        "disposed": true,
+        "elapsedMs": 136930,
+        "configPath": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-gateway-owner04.config.json",
+        "uiOperated": false,
+        "runtimeLaunched": false,
+        "networkUsed": false,
+        "productionBuildAccepted": false,
+        "candidateAccepted": false,
+        "goalComplete": false
+      },
+      "freshUpperMs": 75,
+      "result": {
+        "result": "FAILED",
+        "passed": 7,
+        "failed": 1,
+        "ignored": 0,
+        "measured": 0,
+        "filteredOut": 896,
+        "elapsedSeconds": 5.95
+      },
+      "namedTests": [
+        {
+          "name": "zone_rpc::npc_purchase_owner_route_tests::durable_actual_local_and_hosted_purchase_replay_preserve_receipt_checkpoint_and_authority",
+          "status": "ok"
+        },
+        {
+          "name": "zone_rpc::npc_purchase_owner_route_tests::durable_hosted_rpc_adapter_uses_real_file_owner_and_leaves_unlogged_shadow_untouched",
+          "status": "ok"
+        },
+        {
+          "name": "zone_rpc::npc_purchase_owner_route_tests::durable_in_process_begin_quote_and_query_use_actual_file_and_read_only_original_id",
+          "status": "ok"
+        },
+        {
+          "name": "zone_rpc::npc_purchase_owner_route_tests::durable_lease_handoff_refuses_stale_debit_and_recovers_exact_original_operation",
+          "status": "ok"
+        },
+        {
+          "name": "zone_rpc::npc_purchase_owner_route_tests::durable_library_host_dispatch_fences_auth_version_lease_and_records_only_replay_checkpoint",
+          "status": "FAILED"
+        },
+        {
+          "name": "zone_rpc::npc_purchase_owner_route_tests::durable_mutation_classification_blocks_generic_tcp_fallback_before_any_endpoint_access",
+          "status": "ok"
+        },
+        {
+          "name": "zone_rpc::npc_purchase_owner_route_tests::durable_owner_defaults_and_missing_lease_authority_refuse_without_generic_execution",
+          "status": "ok"
+        },
+        {
+          "name": "zone_rpc::npc_purchase_owner_route_tests::durable_real_receipt_wire_roundtrips_and_refuses_mismatched_action_pair_and_packet_count",
+          "status": "ok"
+        }
+      ]
+    },
+    {
+      "name": "gateway-owner05",
+      "config": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-gateway-owner05.config.json",
+        "bytes": 4047,
+        "sha256": "3e727a4297d2606cd3f9f8cd0588752cf7b93ab5927517b21115977682e0de68"
+      },
+      "policy": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-gateway-owner05.policy.json",
+        "bytes": 2335,
+        "sha256": "ea33fc37fb6a0f03b2403f5d020909f19834bd7f8e88f475a62cd037012a9fa0"
+      },
+      "snapshot": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-rust05-snapshot.json",
+        "bytes": 274835,
+        "sha256": "dc0272994f0762b13ee8751851bc144a225c2d16d9b7d75a5a01ca539bbfdaa9"
+      },
+      "sourceReview": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-rust05-review.json",
+        "bytes": 3154,
+        "sha256": "ef2d945cb96549064225a52036e992007e2f3eba53a970d8b7f21781cdc2710e"
+      },
+      "authority": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-rust05-authority.json",
+        "bytes": 522,
+        "sha256": "d81bef0e5ce100563b014da52cc0261bd5d438cc20c23f3678e32b1d4a789228"
+      },
+      "args": [
+        "+1.95.0",
+        "test",
+        "--manifest-path",
+        "apps/gateway/Cargo.toml",
+        "--locked",
+        "--offline",
+        "--jobs",
+        "1",
+        "--lib",
+        "npc_purchase_owner_route_tests",
+        "--",
+        "--test-threads=1"
+      ],
+      "outerPin": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-gateway-owner05.outer.json",
+        "bytes": 455,
+        "sha256": "d440201f5908d5b88af01c31af6b46345610caa339bcdcf21e2aa7e6f2f9b0ae"
+      },
+      "stdoutPin": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-gateway-owner05.stdout.log",
+        "bytes": 1236,
+        "sha256": "1f5a5038252876c75ec02b32b3f9e84025561aebad98706ea697ce52eb6e4ea9"
+      },
+      "stderrPin": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-gateway-owner05.stderr.log",
+        "bytes": 31799,
+        "sha256": "49ecebfdbab83a11f0cc962ca502fcb9a7e49eb7d5c58a0c1c4a3d4fe29835bb"
+      },
+      "receiptRoot": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-gateway-owner05-cargo-receipts",
+      "receiptFiles": [
+        {
+          "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-gateway-owner05-cargo-receipts/a5a1419a9c7647c69fbf6cede378436a/before.json",
+          "bytes": 1026,
+          "sha256": "423f97b5d8f4cb54ff39ea40b0e15cbaa14a4c38c04dd279b8bcb32519e4dad9"
+        },
+        {
+          "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-gateway-owner05-cargo-receipts/a5a1419a9c7647c69fbf6cede378436a/after.json",
+          "bytes": 321,
+          "sha256": "a6d23193e41f34a1ec1e4bd329b6c99587eef76c3c3db93870a3eaca09552a8d"
+        },
+        {
+          "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-gateway-owner05-cargo-receipts/a5a1419a9c7647c69fbf6cede378436a/probe-process.json",
+          "bytes": 442,
+          "sha256": "37b1c47e59e7c0bc5d0f52fa23d6a9901d1b4184ea43c1760a6d51a1e98e7c75"
+        },
+        {
+          "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-gateway-owner05-cargo-receipts/a5a1419a9c7647c69fbf6cede378436a/probe.stderr.bin",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-gateway-owner05-cargo-receipts/a5a1419a9c7647c69fbf6cede378436a/probe.stdout.bin",
+          "bytes": 197,
+          "sha256": "9fb7de11edfa0f24cdca9bdb08c4a4ea18b91be877de6510fd87b71cd9ca3213"
+        }
+      ],
+      "before": {
+        "schemaVersion": 1,
+        "mode": "real-cargo",
+        "nonce": "a5a1419a9c7647c69fbf6cede378436a",
+        "policyPath": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-gateway-owner05.policy.json",
+        "policySha": "ea33fc37fb6a0f03b2403f5d020909f19834bd7f8e88f475a62cd037012a9fa0",
+        "args": [
+          "+1.95.0",
+          "test",
+          "--manifest-path",
+          "apps/gateway/Cargo.toml",
+          "--locked",
+          "--offline",
+          "--jobs",
+          "1",
+          "--lib",
+          "npc_purchase_owner_route_tests",
+          "--",
+          "--test-threads=1"
+        ],
+        "cwd": "E:\\mir2-player-journey\\mir2-web3",
+        "calleePath": "C:/Users/Administrator/.cargo/bin/cargo.exe",
+        "calleeSha": "86478e53f769379d7f0ebfa7c9aa97cb76ca92233f79aa2cc0dbee2efaac73c7",
+        "sample": {
+          "schemaVersion": "1",
+          "driveLetter": "C",
+          "sampleBeginUtc": "2026-10-07T11:21:30.1968904Z",
+          "sampleEndUtc": "2026-10-07T11:21:31.0042427Z",
+          "remainingBytes": "433214889984",
+          "requiredBytes": "53687091200"
+        },
+        "probePid": 136404,
+        "probeLaunchMs": 100.5664,
+        "probeEndMs": 1157.6489000000001,
+        "decision": "FORWARD",
+        "thresholdBytes": "53687091200",
+        "sampleProof": "actualGetVolumeC"
+      },
+      "after": {
+        "childPid": 134780,
+        "childStartedUtc": "/Date(1791372091077)/",
+        "childStartMs": 1180.6204,
+        "completed": true,
+        "exited": true,
+        "disposed": true,
+        "exitCode": 0,
+        "exitBits": "0",
+        "completedUtc": "/Date(1791372233830)/",
+        "completionMs": 143932.3663,
+        "postChildPolicy": "B",
+        "lifecycle": ".NET Start/Exited/WaitForExit/Dispose; not Node close"
+      },
+      "probe": {
+        "probePid": 136404,
+        "probeKilled": false,
+        "probeCode": 0,
+        "probeLaunchUtc": "/Date(1791372089997)/",
+        "probeEndUtc": "/Date(1791372091054)/",
+        "probeLaunchMs": 100.5664,
+        "probeEndMs": 1157.6489000000001,
+        "probeMode": "actual",
+        "probePath": "C:/mir2-cross-platform-storage-20261002/repo-qa-shared-quest-heading-locale-01/cargo-per-call-guard-implementation01/probe-volume-C.ps1",
+        "probeSha": "45e14d26e608c36c8073fa9e8e61562062b2d5d2df142d35e90f7213fb72f1ab"
+      },
+      "outer": {
+        "owner": "Root",
+        "exitCode": 0,
+        "guardPid": 136484,
+        "exited": true,
+        "disposed": true,
+        "elapsedMs": 143992,
+        "configPath": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-gateway-owner05.config.json",
+        "uiOperated": false,
+        "runtimeLaunched": false,
+        "networkUsed": false,
+        "productionBuildAccepted": false,
+        "candidateAccepted": false,
+        "goalComplete": false
+      },
+      "freshUpperMs": 74,
+      "result": {
+        "result": "ok",
+        "passed": 8,
+        "failed": 0,
+        "ignored": 0,
+        "measured": 0,
+        "filteredOut": 896,
+        "elapsedSeconds": 5.94
+      },
+      "namedTests": [
+        {
+          "name": "zone_rpc::npc_purchase_owner_route_tests::durable_actual_local_and_hosted_purchase_replay_preserve_receipt_checkpoint_and_authority",
+          "status": "ok"
+        },
+        {
+          "name": "zone_rpc::npc_purchase_owner_route_tests::durable_hosted_rpc_adapter_uses_real_file_owner_and_leaves_unlogged_shadow_untouched",
+          "status": "ok"
+        },
+        {
+          "name": "zone_rpc::npc_purchase_owner_route_tests::durable_in_process_begin_quote_and_query_use_actual_file_and_read_only_original_id",
+          "status": "ok"
+        },
+        {
+          "name": "zone_rpc::npc_purchase_owner_route_tests::durable_lease_handoff_refuses_stale_debit_and_recovers_exact_original_operation",
+          "status": "ok"
+        },
+        {
+          "name": "zone_rpc::npc_purchase_owner_route_tests::durable_library_host_dispatch_fences_auth_version_lease_and_records_only_replay_checkpoint",
+          "status": "ok"
+        },
+        {
+          "name": "zone_rpc::npc_purchase_owner_route_tests::durable_mutation_classification_blocks_generic_tcp_fallback_before_any_endpoint_access",
+          "status": "ok"
+        },
+        {
+          "name": "zone_rpc::npc_purchase_owner_route_tests::durable_owner_defaults_and_missing_lease_authority_refuse_without_generic_execution",
+          "status": "ok"
+        },
+        {
+          "name": "zone_rpc::npc_purchase_owner_route_tests::durable_real_receipt_wire_roundtrips_and_refuses_mismatched_action_pair_and_packet_count",
+          "status": "ok"
+        }
+      ]
+    },
+    {
+      "name": "simulation-purchase05",
+      "config": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-simulation-purchase05.config.json",
+        "bytes": 4068,
+        "sha256": "44e54863996e3a4909818e549106a3602aeb1eb8f82ce258c13956dc98c288b0"
+      },
+      "policy": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-simulation-purchase05.policy.json",
+        "bytes": 2341,
+        "sha256": "296d29d4a254bc9b61cc541c6067e92ce3781ea97fe4935f6a1f1edebb6d0647"
+      },
+      "snapshot": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-rust05-snapshot.json",
+        "bytes": 274835,
+        "sha256": "dc0272994f0762b13ee8751851bc144a225c2d16d9b7d75a5a01ca539bbfdaa9"
+      },
+      "sourceReview": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-rust05-review.json",
+        "bytes": 3154,
+        "sha256": "ef2d945cb96549064225a52036e992007e2f3eba53a970d8b7f21781cdc2710e"
+      },
+      "authority": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-rust05-authority.json",
+        "bytes": 522,
+        "sha256": "d81bef0e5ce100563b014da52cc0261bd5d438cc20c23f3678e32b1d4a789228"
+      },
+      "args": [
+        "+1.95.0",
+        "test",
+        "--manifest-path",
+        "apps/simulation/Cargo.toml",
+        "--locked",
+        "--offline",
+        "--jobs",
+        "1",
+        "--lib",
+        "npc_purchase",
+        "--",
+        "--test-threads=1"
+      ],
+      "outerPin": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-simulation-purchase05.outer.json",
+        "bytes": 461,
+        "sha256": "689f482306fdf96b255328a2e90c59721cace67014ffe4071712abd967910002"
+      },
+      "stdoutPin": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-simulation-purchase05.stdout.log",
+        "bytes": 8927,
+        "sha256": "b122f80db773d38e9907cbc220596c7981643bf37e3dd54edcaaa1a513fee517"
+      },
+      "stderrPin": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-simulation-purchase05.stderr.log",
+        "bytes": 37455,
+        "sha256": "7bc925896a2ec5ed7633d03bec6c70baabdd8b21e9cb5fbe19aa761737eef723"
+      },
+      "receiptRoot": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-simulation-purchase05-cargo-receipts",
+      "receiptFiles": [
+        {
+          "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-simulation-purchase05-cargo-receipts/168e7d389c2b47bf9e8cdc86cbfaaead/before.json",
+          "bytes": 1008,
+          "sha256": "169e3e9b718793482a30a8349a966b9db8fd3046d9764365b7580781e422074a"
+        },
+        {
+          "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-simulation-purchase05-cargo-receipts/168e7d389c2b47bf9e8cdc86cbfaaead/after.json",
+          "bytes": 321,
+          "sha256": "313e1df769fd057d436be60247ecd1bc430d1f2714f286f920fda71cdb167016"
+        },
+        {
+          "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-simulation-purchase05-cargo-receipts/168e7d389c2b47bf9e8cdc86cbfaaead/probe-process.json",
+          "bytes": 433,
+          "sha256": "ca1b4604af31d816c3db028c90aad46f5c1e460695f602dc76cf202213fa1820"
+        },
+        {
+          "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-simulation-purchase05-cargo-receipts/168e7d389c2b47bf9e8cdc86cbfaaead/probe.stderr.bin",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-simulation-purchase05-cargo-receipts/168e7d389c2b47bf9e8cdc86cbfaaead/probe.stdout.bin",
+          "bytes": 197,
+          "sha256": "2abba434f7f8888b488db0b2e10108f4f0763ad6afbfc860da64240a7ec39dd3"
+        }
+      ],
+      "before": {
+        "schemaVersion": 1,
+        "mode": "real-cargo",
+        "nonce": "168e7d389c2b47bf9e8cdc86cbfaaead",
+        "policyPath": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-simulation-purchase05.policy.json",
+        "policySha": "296d29d4a254bc9b61cc541c6067e92ce3781ea97fe4935f6a1f1edebb6d0647",
+        "args": [
+          "+1.95.0",
+          "test",
+          "--manifest-path",
+          "apps/simulation/Cargo.toml",
+          "--locked",
+          "--offline",
+          "--jobs",
+          "1",
+          "--lib",
+          "npc_purchase",
+          "--",
+          "--test-threads=1"
+        ],
+        "cwd": "E:\\mir2-player-journey\\mir2-web3",
+        "calleePath": "C:/Users/Administrator/.cargo/bin/cargo.exe",
+        "calleeSha": "86478e53f769379d7f0ebfa7c9aa97cb76ca92233f79aa2cc0dbee2efaac73c7",
+        "sample": {
+          "schemaVersion": "1",
+          "driveLetter": "C",
+          "sampleBeginUtc": "2026-10-07T11:26:24.5894318Z",
+          "sampleEndUtc": "2026-10-07T11:26:25.4856660Z",
+          "remainingBytes": "433191137280",
+          "requiredBytes": "53687091200"
+        },
+        "probePid": 136288,
+        "probeLaunchMs": 108.0537,
+        "probeEndMs": 1271.9798,
+        "decision": "FORWARD",
+        "thresholdBytes": "53687091200",
+        "sampleProof": "actualGetVolumeC"
+      },
+      "after": {
+        "childPid": 126480,
+        "childStartedUtc": "/Date(1791372385560)/",
+        "childStartMs": 1297.0669,
+        "completed": true,
+        "exited": true,
+        "disposed": true,
+        "exitCode": 0,
+        "exitBits": "0",
+        "completedUtc": "/Date(1791372563695)/",
+        "completionMs": 179429.2885,
+        "postChildPolicy": "B",
+        "lifecycle": ".NET Start/Exited/WaitForExit/Dispose; not Node close"
+      },
+      "probe": {
+        "probePid": 136288,
+        "probeKilled": false,
+        "probeCode": 0,
+        "probeLaunchUtc": "/Date(1791372384371)/",
+        "probeEndUtc": "/Date(1791372385535)/",
+        "probeLaunchMs": 108.0537,
+        "probeEndMs": 1271.9798,
+        "probeMode": "actual",
+        "probePath": "C:/mir2-cross-platform-storage-20261002/repo-qa-shared-quest-heading-locale-01/cargo-per-call-guard-implementation01/probe-volume-C.ps1",
+        "probeSha": "45e14d26e608c36c8073fa9e8e61562062b2d5d2df142d35e90f7213fb72f1ab"
+      },
+      "outer": {
+        "owner": "Root",
+        "exitCode": 0,
+        "guardPid": 136688,
+        "exited": true,
+        "disposed": true,
+        "elapsedMs": 179486,
+        "configPath": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-simulation-purchase05.config.json",
+        "uiOperated": false,
+        "runtimeLaunched": false,
+        "networkUsed": false,
+        "productionBuildAccepted": false,
+        "candidateAccepted": false,
+        "goalComplete": false
+      },
+      "freshUpperMs": 76,
+      "result": {
+        "result": "ok",
+        "passed": 72,
+        "failed": 0,
+        "ignored": 0,
+        "measured": 0,
+        "filteredOut": 1998,
+        "elapsedSeconds": 45.46
+      },
+      "namedTests": [
+        {
+          "name": "npc_purchase_journal::tests::all_five_supported_combinations_preserve_actual_terminal_results",
+          "status": "ok"
+        },
+        {
+          "name": "npc_purchase_journal::tests::canonical_account_exact_character_and_nonzero_actor_are_required",
+          "status": "ok"
+        },
+        {
+          "name": "npc_purchase_journal::tests::corrupted_existing_state_is_never_extended_or_returned_as_a_lookup_hit",
+          "status": "ok"
+        },
+        {
+          "name": "npc_purchase_journal::tests::duplicate_keys_are_invalid_even_with_increasing_revisions_or_new_intents",
+          "status": "ok"
+        },
+        {
+          "name": "npc_purchase_journal::tests::exact_duplicate_and_changed_tuple_outcome_or_revision_never_append",
+          "status": "ok"
+        },
+        {
+          "name": "npc_purchase_journal::tests::final_sequence_and_largest_usable_revision_preserve_full_u64_item_identity",
+          "status": "ok"
+        },
+        {
+          "name": "npc_purchase_journal::tests::full_capacity_refuses_new_purchase_record_and_never_evicts_old_keys",
+          "status": "ok"
+        },
+        {
+          "name": "npc_purchase_journal::tests::lookup_conflicts_for_every_changed_intent_and_never_returns_retry_miss",
+          "status": "ok"
+        },
+        {
+          "name": "npc_purchase_journal::tests::malformed_outcomes_leave_room_for_the_following_actual_result",
+          "status": "ok"
+        },
+        {
+          "name": "npc_purchase_journal::tests::request_scopes_are_part_of_the_key_and_sequence_does_not_sort_revisions",
+          "status": "ok"
+        },
+        {
+          "name": "npc_purchase_journal::tests::revision_zero_max_repetition_and_reordering_are_refused",
+          "status": "ok"
+        },
+        {
+          "name": "npc_purchase_journal::tests::schema_refuses_unknown_outcomes_and_missing_binding_fields",
+          "status": "ok"
+        },
+        {
+          "name": "npc_purchase_journal::tests::serde_refuses_raw_duplicate_and_escaped_duplicate_fields",
+          "status": "ok"
+        },
+        {
+          "name": "npc_purchase_journal::tests::serde_refuses_wrong_opaque_width_and_numeric_types_without_coercion",
+          "status": "ok"
+        },
+        {
+          "name": "npc_purchase_journal::tests::strict_camel_case_schema_roundtrips_and_unknown_fields_are_refused",
+          "status": "ok"
+        },
+        {
+          "name": "npc_purchase_journal::tests::terminal_rejection_is_retained_and_checkpoint_revision_is_required",
+          "status": "ok"
+        },
+        {
+          "name": "npc_purchase_journal::tests::whole_merge_zero_uid_and_free_charge_need_no_inventory_presence",
+          "status": "ok"
+        },
+        {
+          "name": "npc_purchase_journal::tests::zero_opaque_sequence_quantity_and_wrong_panel_are_rejected_without_mutation",
+          "status": "ok"
+        },
+        {
+          "name": "npc_purchase_owner::tests::action_wire_names_and_mutation_classification_preserve_original_operations",
+          "status": "ok"
+        },
+        {
+          "name": "npc_purchase_owner::tests::raw_duplicate_and_escaped_duplicate_action_fields_are_refused",
+          "status": "ok"
+        },
+        {
+          "name": "npc_purchase_owner::tests::raw_duplicate_and_escaped_duplicate_reply_fields_are_refused",
+          "status": "ok"
+        },
+        {
+          "name": "npc_purchase_owner::tests::raw_full_u64_identity_and_zero_incoming_uid_decode_losslessly",
+          "status": "ok"
+        },
+        {
+          "name": "npc_purchase_owner::tests::recovery_requires_explicit_receipt_and_only_null_represents_a_miss",
+          "status": "ok"
+        },
+        {
+          "name": "npc_purchase_owner::tests::replies_roundtrip_all_named_variants_without_private_journal_or_account_fields",
+          "status": "ok"
+        },
+        {
+          "name": "npc_purchase_owner::tests::unknown_fields_are_rejected_at_every_action_layer",
+          "status": "ok"
+        },
+        {
+          "name": "npc_purchase_owner::tests::unknown_fields_are_rejected_at_every_reply_layer",
+          "status": "ok"
+        },
+        {
+          "name": "npc_purchase_owner::tests::unknown_tags_and_wrong_variant_shapes_are_rejected",
+          "status": "ok"
+        },
+        {
+          "name": "npc_purchase_owner::tests::wrong_numeric_types_and_ranges_are_never_coerced",
+          "status": "ok"
+        },
+        {
+          "name": "npc_purchase_owner::tests::wrong_opaque_width_and_nested_enum_shapes_are_rejected",
+          "status": "ok"
+        },
+        {
+          "name": "runtime::npc::pearl_tests::pearl_npc_purchase_uses_only_pearl_wallet_and_rejects_insufficient_funds",
+          "status": "ok"
+        },
+        {
+          "name": "runtime::npc_purchase_outcome::tests::npc_purchase_all_primary_branches_capture_actual_currency_source_and_delivery",
+          "status": "ok"
+        },
+        {
+          "name": "runtime::npc_purchase_outcome::tests::npc_purchase_insufficient_currency_is_rejected_without_reusing_previous_commit",
+          "status": "ok"
+        },
+        {
+          "name": "runtime::npc_purchase_outcome::tests::npc_purchase_known_resale_commit_survives_postprocessing_failure_or_panic",
+          "status": "ok"
+        },
+        {
+          "name": "runtime::npc_purchase_outcome::tests::npc_purchase_missing_capture_or_precommit_panic_is_unknown_and_does_not_debit",
+          "status": "ok"
+        },
+        {
+          "name": "runtime::npc_purchase_outcome::tests::npc_purchase_pearl_used_fallback_keeps_currency_and_source_orthogonal",
+          "status": "ok"
+        },
+        {
+          "name": "runtime::npc_purchase_outcome::tests::npc_purchase_resale_admitted_count_is_clamped_and_removes_legacy_whole_entry",
+          "status": "ok"
+        },
+        {
+          "name": "runtime::npc_purchase_outcome::tests::npc_purchase_resale_delivery_matches_valid_old_gain_carrier",
+          "status": "ok"
+        },
+        {
+          "name": "runtime::npc_purchase_outcome::tests::npc_purchase_resale_invalid_source_or_roster_never_debits_or_removes_stock",
+          "status": "ok"
+        },
+        {
+          "name": "runtime::npc_purchase_outcome::tests::npc_purchase_resale_stack_slack_without_free_cells_cannot_overwrite_inventory",
+          "status": "ok"
+        },
+        {
+          "name": "runtime::npc_purchase_outcome::tests::npc_purchase_session_and_runtime_require_authentication_and_start_game",
+          "status": "ok"
+        },
+        {
+          "name": "runtime::npc_purchase_outcome::tests::npc_purchase_unsupported_runtime_never_executes_legacy_fallback",
+          "status": "ok"
+        },
+        {
+          "name": "runtime::npc_purchase_outcome::tests::npc_purchase_zero_resale_selector_is_not_reconstructed_from_template_index",
+          "status": "ok"
+        },
+        {
+          "name": "runtime::npc_purchase_transaction::tests::actual_delete_and_recreate_retires_old_actor_and_recovery_key",
+          "status": "ok"
+        },
+        {
+          "name": "runtime::npc_purchase_transaction::tests::actual_durable_mentor_credit_merge_publishes_level_xp_roster_and_complete_stage5",
+          "status": "ok"
+        },
+        {
+          "name": "runtime::npc_purchase_transaction::tests::actual_external_mail_is_merged_into_complete_purchase_checkpoint_and_published_live",
+          "status": "ok"
+        },
+        {
+          "name": "runtime::npc_purchase_transaction::tests::ambiguous_rename_freezes_stale_cache_and_query_but_actual_file_retains_terminal_result",
+          "status": "ok"
+        },
+        {
+          "name": "runtime::npc_purchase_transaction::tests::committed_empty_checkpoint_reopens_without_demo_wallet_or_container_reseeding_before_actor",
+          "status": "ok"
+        },
+        {
+          "name": "runtime::npc_purchase_transaction::tests::conflicting_nonce_tuple_foreign_actor_and_missing_query_never_write_or_debit",
+          "status": "ok"
+        },
+        {
+          "name": "runtime::npc_purchase_transaction::tests::durable_duplicate_original_id_has_empty_packets_without_second_wallet_delivery_or_stock_change",
+          "status": "ok"
+        },
+        {
+          "name": "runtime::npc_purchase_transaction::tests::durable_purchase_five_actual_currency_source_branches_share_full_file_checkpoint",
+          "status": "ok"
+        },
+        {
+          "name": "runtime::npc_purchase_transaction::tests::durable_terminal_rejection_advances_revision_without_economic_debit",
+          "status": "ok"
+        },
+        {
+          "name": "runtime::npc_purchase_transaction::tests::durable_zero_raw_resale_selector_survives_actual_file_journal_and_recovery",
+          "status": "ok"
+        },
+        {
+          "name": "runtime::npc_purchase_transaction::tests::failed_logout_or_disconnect_save_retires_authority_while_preserving_original_recovery_state",
+          "status": "ok"
+        },
+        {
+          "name": "runtime::npc_purchase_transaction::tests::genuine_new_session_producer_queries_original_scope_but_cannot_execute_it",
+          "status": "ok"
+        },
+        {
+          "name": "runtime::npc_purchase_transaction::tests::legacy_missing_journal_enables_persistent_actor_and_ordinary_save_keeps_history",
+          "status": "ok"
+        },
+        {
+          "name": "runtime::npc_purchase_transaction::tests::legacy_revision_zero_demo_checkpoint_still_seeds_missing_wallet_and_containers",
+          "status": "ok"
+        },
+        {
+          "name": "runtime::npc_purchase_transaction::tests::older_complete_checkpoint_cannot_roll_back_committed_purchase_or_actor",
+          "status": "ok"
+        },
+        {
+          "name": "runtime::npc_purchase_transaction::tests::owner_tests::owner_actual_checkpoint_replica_apply_mirrors_complete_state_without_reexecution_or_source_writes",
+          "status": "ok"
+        },
+        {
+          "name": "runtime::npc_purchase_transaction::tests::owner_tests::owner_actual_purchase_and_exact_replay_preserve_receipt_and_full_live_authority",
+          "status": "ok"
+        },
+        {
+          "name": "runtime::npc_purchase_transaction::tests::owner_tests::owner_authentication_epoch_and_enrollment_preflight_leave_actual_source_unchanged",
+          "status": "ok"
+        },
+        {
+          "name": "runtime::npc_purchase_transaction::tests::owner_tests::owner_begin_same_epoch_is_stable_idempotent_and_reports_verified_complete_revision",
+          "status": "ok"
+        },
+        {
+          "name": "runtime::npc_purchase_transaction::tests::owner_tests::owner_capability_requires_real_durable_source_and_refuses_memory_runtime",
+          "status": "ok"
+        },
+        {
+          "name": "runtime::npc_purchase_transaction::tests::owner_tests::owner_current_revision_and_journal_cannot_certify_unpublished_wallet_or_delivery",
+          "status": "ok"
+        },
+        {
+          "name": "runtime::npc_purchase_transaction::tests::owner_tests::owner_epoch_change_requires_begin_and_recovers_original_identity_without_old_scope_execution",
+          "status": "ok"
+        },
+        {
+          "name": "runtime::npc_purchase_transaction::tests::owner_tests::owner_failed_begin_and_failed_logout_or_disconnect_retire_authority_without_losing_recovery",
+          "status": "ok"
+        },
+        {
+          "name": "runtime::npc_purchase_transaction::tests::owner_tests::owner_partial_or_stale_live_publication_cannot_certify_recovered_receipt_revision",
+          "status": "ok"
+        },
+        {
+          "name": "runtime::npc_purchase_transaction::tests::owner_tests::owner_quote_and_original_id_query_never_write_file_revision_or_live_state",
+          "status": "ok"
+        },
+        {
+          "name": "runtime::npc_purchase_transaction::tests::owner_tests::owner_replica_refuses_source_truth_apply_and_older_foreign_or_rewritten_actual_history",
+          "status": "ok"
+        },
+        {
+          "name": "runtime::npc_purchase_transaction::tests::postcommit_error_and_panic_preserve_exact_receipt_for_original_id_query",
+          "status": "ok"
+        },
+        {
+          "name": "runtime::npc_purchase_transaction::tests::prepublication_faults_preserve_live_file_stock_carrier_and_buyback_expiry",
+          "status": "ok"
+        },
+        {
+          "name": "runtime::npc_purchase_transaction::tests::revision_and_journal_capacity_exhaustion_fail_closed_before_live_purchase",
+          "status": "ok"
+        },
+        {
+          "name": "runtime::npc_purchase_transaction::tests::wellformed_wrong_catalog_currency_or_source_rejects_without_removing_resale_stock",
+          "status": "ok"
+        }
+      ]
+    },
+    {
+      "name": "simulation-gold05",
+      "config": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-simulation-gold05.config.json",
+        "bytes": 4052,
+        "sha256": "8f82be7aa1af33902c3dfdad23f994430da1e705375b79dcd1b8c145ee4f185b"
+      },
+      "policy": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-simulation-gold05.policy.json",
+        "bytes": 2337,
+        "sha256": "d8492ee3d1f3f9c05a9e81968fc0c0d3b5473dcb574c25fb902c2f278ff0045e"
+      },
+      "snapshot": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-rust05-snapshot.json",
+        "bytes": 274835,
+        "sha256": "dc0272994f0762b13ee8751851bc144a225c2d16d9b7d75a5a01ca539bbfdaa9"
+      },
+      "sourceReview": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-rust05-review.json",
+        "bytes": 3154,
+        "sha256": "ef2d945cb96549064225a52036e992007e2f3eba53a970d8b7f21781cdc2710e"
+      },
+      "authority": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-rust05-authority.json",
+        "bytes": 522,
+        "sha256": "d81bef0e5ce100563b014da52cc0261bd5d438cc20c23f3678e32b1d4a789228"
+      },
+      "args": [
+        "+1.95.0",
+        "test",
+        "--manifest-path",
+        "apps/simulation/Cargo.toml",
+        "--locked",
+        "--offline",
+        "--jobs",
+        "1",
+        "--lib",
+        "npc_gold_buy_outcome",
+        "--",
+        "--test-threads=1"
+      ],
+      "outerPin": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-simulation-gold05.outer.json",
+        "bytes": 455,
+        "sha256": "5efeda607a5506948359748607d667d755fa06967bbaf73f4214bcb42e37481c"
+      },
+      "stdoutPin": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-simulation-gold05.stdout.log",
+        "bytes": 2032,
+        "sha256": "debfc894b7d329b65c15509247d53b2a2f284db134c15e33c7c446e65742d5c4"
+      },
+      "stderrPin": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-simulation-gold05.stderr.log",
+        "bytes": 37367,
+        "sha256": "47e26f3160a04282cd21911e28c90b2d199b53da5700065663d26b8082890f1a"
+      },
+      "receiptRoot": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-simulation-gold05-cargo-receipts",
+      "receiptFiles": [
+        {
+          "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-simulation-gold05-cargo-receipts/2dd1b76bcf0442c9a8a97a429e4ad504/before.json",
+          "bytes": 1012,
+          "sha256": "bcf8c428370b1a035e3b24ab648e85f147a11cbce14534c0a5580b58d0e00044"
+        },
+        {
+          "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-simulation-gold05-cargo-receipts/2dd1b76bcf0442c9a8a97a429e4ad504/after.json",
+          "bytes": 328,
+          "sha256": "77e90eaff2a765d08ace20208f89bedee2a77db9f3e0cb70aaed25e4e15e4c4d"
+        },
+        {
+          "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-simulation-gold05-cargo-receipts/2dd1b76bcf0442c9a8a97a429e4ad504/probe-process.json",
+          "bytes": 433,
+          "sha256": "1c95d06a25748207066f8e77e17790e4315b0fd7252921f8b3fb432d0b608fdd"
+        },
+        {
+          "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-simulation-gold05-cargo-receipts/2dd1b76bcf0442c9a8a97a429e4ad504/probe.stderr.bin",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-simulation-gold05-cargo-receipts/2dd1b76bcf0442c9a8a97a429e4ad504/probe.stdout.bin",
+          "bytes": 197,
+          "sha256": "00cd1c1ec5b486087b9ea5fe9fc672902c6e48cfb4d14f91be9d6c6c686221a1"
+        }
+      ],
+      "before": {
+        "schemaVersion": 1,
+        "mode": "real-cargo",
+        "nonce": "2dd1b76bcf0442c9a8a97a429e4ad504",
+        "policyPath": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-simulation-gold05.policy.json",
+        "policySha": "d8492ee3d1f3f9c05a9e81968fc0c0d3b5473dcb574c25fb902c2f278ff0045e",
+        "args": [
+          "+1.95.0",
+          "test",
+          "--manifest-path",
+          "apps/simulation/Cargo.toml",
+          "--locked",
+          "--offline",
+          "--jobs",
+          "1",
+          "--lib",
+          "npc_gold_buy_outcome",
+          "--",
+          "--test-threads=1"
+        ],
+        "cwd": "E:\\mir2-player-journey\\mir2-web3",
+        "calleePath": "C:/Users/Administrator/.cargo/bin/cargo.exe",
+        "calleeSha": "86478e53f769379d7f0ebfa7c9aa97cb76ca92233f79aa2cc0dbee2efaac73c7",
+        "sample": {
+          "schemaVersion": "1",
+          "driveLetter": "C",
+          "sampleBeginUtc": "2026-10-07T11:29:24.9034773Z",
+          "sampleEndUtc": "2026-10-07T11:29:25.7285787Z",
+          "remainingBytes": "432449875968",
+          "requiredBytes": "53687091200"
+        },
+        "probePid": 134840,
+        "probeLaunchMs": 100.0856,
+        "probeEndMs": 1187.0445,
+        "decision": "FORWARD",
+        "thresholdBytes": "53687091200",
+        "sampleProof": "actualGetVolumeC"
+      },
+      "after": {
+        "childPid": 134624,
+        "childStartedUtc": "/Date(1791372565802)/",
+        "childStartMs": 1210.3502,
+        "completed": true,
+        "exited": true,
+        "disposed": true,
+        "exitCode": 0,
+        "exitBits": "0",
+        "completedUtc": "/Date(1791372573269)/",
+        "completionMs": 8676.964100000001,
+        "postChildPolicy": "B",
+        "lifecycle": ".NET Start/Exited/WaitForExit/Dispose; not Node close"
+      },
+      "probe": {
+        "probePid": 134840,
+        "probeKilled": false,
+        "probeCode": 0,
+        "probeLaunchUtc": "/Date(1791372564692)/",
+        "probeEndUtc": "/Date(1791372565780)/",
+        "probeLaunchMs": 100.0856,
+        "probeEndMs": 1187.0445,
+        "probeMode": "actual",
+        "probePath": "C:/mir2-cross-platform-storage-20261002/repo-qa-shared-quest-heading-locale-01/cargo-per-call-guard-implementation01/probe-volume-C.ps1",
+        "probeSha": "45e14d26e608c36c8073fa9e8e61562062b2d5d2df142d35e90f7213fb72f1ab"
+      },
+      "outer": {
+        "owner": "Root",
+        "exitCode": 0,
+        "guardPid": 125112,
+        "exited": true,
+        "disposed": true,
+        "elapsedMs": 8733,
+        "configPath": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-simulation-gold05.config.json",
+        "uiOperated": false,
+        "runtimeLaunched": false,
+        "networkUsed": false,
+        "productionBuildAccepted": false,
+        "candidateAccepted": false,
+        "goalComplete": false
+      },
+      "freshUpperMs": 75,
+      "result": {
+        "result": "ok",
+        "passed": 15,
+        "failed": 0,
+        "ignored": 0,
+        "measured": 0,
+        "filteredOut": 2055,
+        "elapsedSeconds": 7.02
+      },
+      "namedTests": [
+        {
+          "name": "runtime::npc_gold_buy_outcome::tests::npc_gold_buy_outcome_actual_precommit_panic_is_unknown_without_gold_debit",
+          "status": "ok"
+        },
+        {
+          "name": "runtime::npc_gold_buy_outcome::tests::npc_gold_buy_outcome_invalid_roster_rejects_without_debit_or_partial_carrier",
+          "status": "ok"
+        },
+        {
+          "name": "runtime::npc_gold_buy_outcome::tests::npc_gold_buy_outcome_legacy_packet_economics_and_full_incoming_carrier_unchanged",
+          "status": "ok"
+        },
+        {
+          "name": "runtime::npc_gold_buy_outcome::tests::npc_gold_buy_outcome_missing_capture_and_error_are_unknown_not_rejected",
+          "status": "ok"
+        },
+        {
+          "name": "runtime::npc_gold_buy_outcome::tests::npc_gold_buy_outcome_ordinary_buy_used_fallback_is_typed_rejected_before_legacy_economics",
+          "status": "ok"
+        },
+        {
+          "name": "runtime::npc_gold_buy_outcome::tests::npc_gold_buy_outcome_pearl_service_rejects_typed_but_legacy_purchase_is_unchanged",
+          "status": "ok"
+        },
+        {
+          "name": "runtime::npc_gold_buy_outcome::tests::npc_gold_buy_outcome_post_commit_panic_preserves_known_commit_and_actual_inventory",
+          "status": "ok"
+        },
+        {
+          "name": "runtime::npc_gold_buy_outcome::tests::npc_gold_buy_outcome_postprocessing_error_preserves_actual_committed_outcome",
+          "status": "ok"
+        },
+        {
+          "name": "runtime::npc_gold_buy_outcome::tests::npc_gold_buy_outcome_real_commit_is_current_memory_not_delivery_ack",
+          "status": "ok"
+        },
+        {
+          "name": "runtime::npc_gold_buy_outcome::tests::npc_gold_buy_outcome_resale_services_reject_typed_and_keep_legacy_carrier_path",
+          "status": "ok"
+        },
+        {
+          "name": "runtime::npc_gold_buy_outcome::tests::npc_gold_buy_outcome_same_four_keys_success_reject_success_never_leaks_previous_result",
+          "status": "ok"
+        },
+        {
+          "name": "runtime::npc_gold_buy_outcome::tests::npc_gold_buy_outcome_session_authentication_and_start_game_are_both_required",
+          "status": "ok"
+        },
+        {
+          "name": "runtime::npc_gold_buy_outcome::tests::npc_gold_buy_outcome_trusted_true_cannot_upgrade_unlogged_or_pre_start_runtime",
+          "status": "ok"
+        },
+        {
+          "name": "runtime::npc_gold_buy_outcome::tests::npc_gold_buy_outcome_unsupported_runtime_never_executes_legacy_fallback",
+          "status": "ok"
+        },
+        {
+          "name": "runtime::npc_gold_buy_outcome::tests::npc_gold_buy_outcome_validation_rejections_do_not_mutate_purchase",
+          "status": "ok"
+        }
+      ]
+    },
+    {
+      "name": "simulation-pearl05",
+      "config": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-simulation-pearl05.config.json",
+        "bytes": 4049,
+        "sha256": "6259e9bec918423efe7fd8ff777ddc5cd1980366c746fc3ad32803840c80c4ee"
+      },
+      "policy": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-simulation-pearl05.policy.json",
+        "bytes": 2338,
+        "sha256": "88659dbb02615bb18d5624c33d2b746ab913ede8f92d5437dea7cd90863582da"
+      },
+      "snapshot": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-rust05-snapshot.json",
+        "bytes": 274835,
+        "sha256": "dc0272994f0762b13ee8751851bc144a225c2d16d9b7d75a5a01ca539bbfdaa9"
+      },
+      "sourceReview": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-rust05-review.json",
+        "bytes": 3154,
+        "sha256": "ef2d945cb96549064225a52036e992007e2f3eba53a970d8b7f21781cdc2710e"
+      },
+      "authority": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-rust05-authority.json",
+        "bytes": 522,
+        "sha256": "d81bef0e5ce100563b014da52cc0261bd5d438cc20c23f3678e32b1d4a789228"
+      },
+      "args": [
+        "+1.95.0",
+        "test",
+        "--manifest-path",
+        "apps/simulation/Cargo.toml",
+        "--locked",
+        "--offline",
+        "--jobs",
+        "1",
+        "--lib",
+        "pearl_tests",
+        "--",
+        "--test-threads=1"
+      ],
+      "outerPin": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-simulation-pearl05.outer.json",
+        "bytes": 456,
+        "sha256": "1c70c5527de94efd42d64f4253b41ef0c5dffae7e5648cdfbb3ee6939e16986d"
+      },
+      "stdoutPin": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-simulation-pearl05.stdout.log",
+        "bytes": 745,
+        "sha256": "a7869d3bed6467cd36410fb82ab7e522ebf2efc086422a7d0e333aa18a6562c0"
+      },
+      "stderrPin": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-simulation-pearl05.stderr.log",
+        "bytes": 37367,
+        "sha256": "47e26f3160a04282cd21911e28c90b2d199b53da5700065663d26b8082890f1a"
+      },
+      "receiptRoot": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-simulation-pearl05-cargo-receipts",
+      "receiptFiles": [
+        {
+          "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-simulation-pearl05-cargo-receipts/07994bed8d0d4e18866fb26afc9838e3/before.json",
+          "bytes": 1014,
+          "sha256": "e559a2eecbf5953e66b058533f9586e6a39267fe5587a49e86be768e0f28f917"
+        },
+        {
+          "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-simulation-pearl05-cargo-receipts/07994bed8d0d4e18866fb26afc9838e3/after.json",
+          "bytes": 337,
+          "sha256": "bf5c785fb086f93411efa074a2c0eb345d5ddd8cbd488e991df3f46355ac2555"
+        },
+        {
+          "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-simulation-pearl05-cargo-receipts/07994bed8d0d4e18866fb26afc9838e3/probe-process.json",
+          "bytes": 443,
+          "sha256": "56aa4ccd704838abd591cc4ec41d5e9eb242bcf8ecd0e476881e03275606d71d"
+        },
+        {
+          "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-simulation-pearl05-cargo-receipts/07994bed8d0d4e18866fb26afc9838e3/probe.stderr.bin",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-simulation-pearl05-cargo-receipts/07994bed8d0d4e18866fb26afc9838e3/probe.stdout.bin",
+          "bytes": 197,
+          "sha256": "4138afd053194402a347e4e4ba6e26d421f91419519db30d3eff793490ed7ba6"
+        }
+      ],
+      "before": {
+        "schemaVersion": 1,
+        "mode": "real-cargo",
+        "nonce": "07994bed8d0d4e18866fb26afc9838e3",
+        "policyPath": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-simulation-pearl05.policy.json",
+        "policySha": "88659dbb02615bb18d5624c33d2b746ab913ede8f92d5437dea7cd90863582da",
+        "args": [
+          "+1.95.0",
+          "test",
+          "--manifest-path",
+          "apps/simulation/Cargo.toml",
+          "--locked",
+          "--offline",
+          "--jobs",
+          "1",
+          "--lib",
+          "pearl_tests",
+          "--",
+          "--test-threads=1"
+        ],
+        "cwd": "E:\\mir2-player-journey\\mir2-web3",
+        "calleePath": "C:/Users/Administrator/.cargo/bin/cargo.exe",
+        "calleeSha": "86478e53f769379d7f0ebfa7c9aa97cb76ca92233f79aa2cc0dbee2efaac73c7",
+        "sample": {
+          "schemaVersion": "1",
+          "driveLetter": "C",
+          "sampleBeginUtc": "2026-10-07T11:29:34.5375520Z",
+          "sampleEndUtc": "2026-10-07T11:29:35.3180522Z",
+          "remainingBytes": "432449994752",
+          "requiredBytes": "53687091200"
+        },
+        "probePid": 134528,
+        "probeLaunchMs": 105.11160000000001,
+        "probeEndMs": 1141.2591,
+        "decision": "FORWARD",
+        "thresholdBytes": "53687091200",
+        "sampleProof": "actualGetVolumeC"
+      },
+      "after": {
+        "childPid": 137240,
+        "childStartedUtc": "/Date(1791372575395)/",
+        "childStartMs": 1166.2169000000001,
+        "completed": true,
+        "exited": true,
+        "disposed": true,
+        "exitCode": 0,
+        "exitBits": "0",
+        "completedUtc": "/Date(1791372577968)/",
+        "completionMs": 3740.4089000000004,
+        "postChildPolicy": "B",
+        "lifecycle": ".NET Start/Exited/WaitForExit/Dispose; not Node close"
+      },
+      "probe": {
+        "probePid": 134528,
+        "probeKilled": false,
+        "probeCode": 0,
+        "probeLaunchUtc": "/Date(1791372574333)/",
+        "probeEndUtc": "/Date(1791372575370)/",
+        "probeLaunchMs": 105.11160000000001,
+        "probeEndMs": 1141.2591,
+        "probeMode": "actual",
+        "probePath": "C:/mir2-cross-platform-storage-20261002/repo-qa-shared-quest-heading-locale-01/cargo-per-call-guard-implementation01/probe-volume-C.ps1",
+        "probeSha": "45e14d26e608c36c8073fa9e8e61562062b2d5d2df142d35e90f7213fb72f1ab"
+      },
+      "outer": {
+        "owner": "Root",
+        "exitCode": 0,
+        "guardPid": 124096,
+        "exited": true,
+        "disposed": true,
+        "elapsedMs": 3788,
+        "configPath": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-simulation-pearl05.config.json",
+        "uiOperated": false,
+        "runtimeLaunched": false,
+        "networkUsed": false,
+        "productionBuildAccepted": false,
+        "candidateAccepted": false,
+        "goalComplete": false
+      },
+      "freshUpperMs": 78,
+      "result": {
+        "result": "ok",
+        "passed": 6,
+        "failed": 0,
+        "ignored": 0,
+        "measured": 0,
+        "filteredOut": 2064,
+        "elapsedSeconds": 2.13
+      },
+      "namedTests": [
+        {
+          "name": "runtime::npc::pearl_tests::pearl_full_bag_and_belt_stack_slack_cannot_debit_or_overlap",
+          "status": "ok"
+        },
+        {
+          "name": "runtime::npc::pearl_tests::pearl_npc_packet_and_script_wallet_bounds_match_source",
+          "status": "ok"
+        },
+        {
+          "name": "runtime::npc::pearl_tests::pearl_npc_purchase_uses_only_pearl_wallet_and_rejects_insufficient_funds",
+          "status": "ok"
+        },
+        {
+          "name": "runtime::npc::pearl_tests::pearl_single_legal_free_slot_delivers_legacy_metadata_and_raw_catalog_uid",
+          "status": "ok"
+        },
+        {
+          "name": "runtime::npc::pearl_tests::pearl_used_fallback_commits_delivery_wallet_and_selected_stock_together",
+          "status": "ok"
+        },
+        {
+          "name": "runtime::npc::pearl_tests::pearl_used_fallback_failed_delivery_retains_stock_and_wallet",
+          "status": "ok"
+        }
+      ]
+    },
+    {
+      "name": "simulation-save05",
+      "config": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-simulation-save05.config.json",
+        "bytes": 4047,
+        "sha256": "777eff5ec61c77cac15b74acd11c46d05e29103a046d5ae12e423b8471b1e96d"
+      },
+      "policy": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-simulation-save05.policy.json",
+        "bytes": 2337,
+        "sha256": "a96439691f9113738b105191851e018ef47bb1df44d31e2cd4afb0e06f82275a"
+      },
+      "snapshot": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-rust05-snapshot.json",
+        "bytes": 274835,
+        "sha256": "dc0272994f0762b13ee8751851bc144a225c2d16d9b7d75a5a01ca539bbfdaa9"
+      },
+      "sourceReview": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-rust05-review.json",
+        "bytes": 3154,
+        "sha256": "ef2d945cb96549064225a52036e992007e2f3eba53a970d8b7f21781cdc2710e"
+      },
+      "authority": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-rust05-authority.json",
+        "bytes": 522,
+        "sha256": "d81bef0e5ce100563b014da52cc0261bd5d438cc20c23f3678e32b1d4a789228"
+      },
+      "args": [
+        "+1.95.0",
+        "test",
+        "--manifest-path",
+        "apps/simulation/Cargo.toml",
+        "--locked",
+        "--offline",
+        "--jobs",
+        "1",
+        "--lib",
+        "runtime::save::",
+        "--",
+        "--test-threads=1"
+      ],
+      "outerPin": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-simulation-save05.outer.json",
+        "bytes": 456,
+        "sha256": "9792d731831654efdd191c67f267101041d51f93f48eb3916258014acb8ec91f"
+      },
+      "stdoutPin": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-simulation-save05.stdout.log",
+        "bytes": 7470,
+        "sha256": "c87cc0cf2265ce0740f672b4816926b097571e9c126fbee97bbb0efb9e7ea395"
+      },
+      "stderrPin": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-simulation-save05.stderr.log",
+        "bytes": 37367,
+        "sha256": "b72ce58901a697479be5eaad187a02dfebcff3dd4174f7213b10322384ed7b74"
+      },
+      "receiptRoot": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-simulation-save05-cargo-receipts",
+      "receiptFiles": [
+        {
+          "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-simulation-save05-cargo-receipts/b79fd8f6982a463186e2120e81a1af97/before.json",
+          "bytes": 1015,
+          "sha256": "c14569a68313e4d3bd0d603743e5edb93a3538e3ac52776b69bbea183d466d28"
+        },
+        {
+          "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-simulation-save05-cargo-receipts/b79fd8f6982a463186e2120e81a1af97/after.json",
+          "bytes": 319,
+          "sha256": "fbc023f156d8567e943fc6c612f33ce4722705022eeba7f178f4d742908844e5"
+        },
+        {
+          "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-simulation-save05-cargo-receipts/b79fd8f6982a463186e2120e81a1af97/probe-process.json",
+          "bytes": 441,
+          "sha256": "d608d0fab6409bc1516f5b3ed466052ef40d3e39f89213f7531e73b432b6f9ac"
+        },
+        {
+          "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-simulation-save05-cargo-receipts/b79fd8f6982a463186e2120e81a1af97/probe.stderr.bin",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-simulation-save05-cargo-receipts/b79fd8f6982a463186e2120e81a1af97/probe.stdout.bin",
+          "bytes": 197,
+          "sha256": "95707a22b6ee44e5ee42688fdd288254eb2be59e988bdcc40b2d0f6d63800524"
+        }
+      ],
+      "before": {
+        "schemaVersion": 1,
+        "mode": "real-cargo",
+        "nonce": "b79fd8f6982a463186e2120e81a1af97",
+        "policyPath": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-simulation-save05.policy.json",
+        "policySha": "a96439691f9113738b105191851e018ef47bb1df44d31e2cd4afb0e06f82275a",
+        "args": [
+          "+1.95.0",
+          "test",
+          "--manifest-path",
+          "apps/simulation/Cargo.toml",
+          "--locked",
+          "--offline",
+          "--jobs",
+          "1",
+          "--lib",
+          "runtime::save::",
+          "--",
+          "--test-threads=1"
+        ],
+        "cwd": "E:\\mir2-player-journey\\mir2-web3",
+        "calleePath": "C:/Users/Administrator/.cargo/bin/cargo.exe",
+        "calleeSha": "86478e53f769379d7f0ebfa7c9aa97cb76ca92233f79aa2cc0dbee2efaac73c7",
+        "sample": {
+          "schemaVersion": "1",
+          "driveLetter": "C",
+          "sampleBeginUtc": "2026-10-07T11:29:38.9881459Z",
+          "sampleEndUtc": "2026-10-07T11:29:39.6629927Z",
+          "remainingBytes": "432449216512",
+          "requiredBytes": "53687091200"
+        },
+        "probePid": 132380,
+        "probeLaunchMs": 91.1117,
+        "probeEndMs": 971.6518000000001,
+        "decision": "FORWARD",
+        "thresholdBytes": "53687091200",
+        "sampleProof": "actualGetVolumeC"
+      },
+      "after": {
+        "childPid": 133312,
+        "childStartedUtc": "/Date(1791372579726)/",
+        "childStartMs": 993.7512,
+        "completed": true,
+        "exited": true,
+        "disposed": true,
+        "exitCode": 0,
+        "exitBits": "0",
+        "completedUtc": "/Date(1791372591975)/",
+        "completionMs": 13243.0328,
+        "postChildPolicy": "B",
+        "lifecycle": ".NET Start/Exited/WaitForExit/Dispose; not Node close"
+      },
+      "probe": {
+        "probePid": 132380,
+        "probeKilled": false,
+        "probeCode": 0,
+        "probeLaunchUtc": "/Date(1791372578822)/",
+        "probeEndUtc": "/Date(1791372579704)/",
+        "probeLaunchMs": 91.1117,
+        "probeEndMs": 971.6518000000001,
+        "probeMode": "actual",
+        "probePath": "C:/mir2-cross-platform-storage-20261002/repo-qa-shared-quest-heading-locale-01/cargo-per-call-guard-implementation01/probe-volume-C.ps1",
+        "probeSha": "45e14d26e608c36c8073fa9e8e61562062b2d5d2df142d35e90f7213fb72f1ab"
+      },
+      "outer": {
+        "owner": "Root",
+        "exitCode": 0,
+        "guardPid": 134744,
+        "exited": true,
+        "disposed": true,
+        "elapsedMs": 13287,
+        "configPath": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-simulation-save05.config.json",
+        "uiOperated": false,
+        "runtimeLaunched": false,
+        "networkUsed": false,
+        "productionBuildAccepted": false,
+        "candidateAccepted": false,
+        "goalComplete": false
+      },
+      "freshUpperMs": 65,
+      "result": {
+        "result": "ok",
+        "passed": 59,
+        "failed": 0,
+        "ignored": 0,
+        "measured": 0,
+        "filteredOut": 2011,
+        "elapsedSeconds": 11.87
+      },
+      "namedTests": [
+        {
+          "name": "runtime::save::character_save_item_validation_tests::committed_zero_quantity_persisted_roots_and_children_reject_atomically",
+          "status": "ok"
+        },
+        {
+          "name": "runtime::save::character_save_item_validation_tests::crystal_buff_state_survives_save_preflight_and_apply",
+          "status": "ok"
+        },
+        {
+          "name": "runtime::save::character_save_item_validation_tests::crystal_inventory_capacity_controls_bag2_and_user_information_raw_slots",
+          "status": "ok"
+        },
+        {
+          "name": "runtime::save::character_save_item_validation_tests::duplicate_exact_equipment_root_uid_rejects_start_game_atomically",
+          "status": "ok"
+        },
+        {
+          "name": "runtime::save::character_save_item_validation_tests::legacy_candidate_key_with_conflicting_exact_index_is_rejected",
+          "status": "ok"
+        },
+        {
+          "name": "runtime::save::character_save_item_validation_tests::legacy_candidate_keys_migrate_across_stage5_item_carriers",
+          "status": "ok"
+        },
+        {
+          "name": "runtime::save::character_save_item_validation_tests::legal_legacy_item_save_without_metadata_carrier_still_applies",
+          "status": "ok"
+        },
+        {
+          "name": "runtime::save::character_save_item_validation_tests::malformed_item_carrier_rejects_before_mutating_the_world",
+          "status": "ok"
+        },
+        {
+          "name": "runtime::save::character_save_item_validation_tests::malformed_npc_buy_back_json_rejects_before_world_session_or_disk_changes",
+          "status": "ok"
+        },
+        {
+          "name": "runtime::save::character_save_item_validation_tests::malformed_quest_and_skill_state_fail_preflight_instead_of_clearing",
+          "status": "ok"
+        },
+        {
+          "name": "runtime::save::character_save_item_validation_tests::malformed_stage5_json_rejects_before_mutating_world_or_session",
+          "status": "ok"
+        },
+        {
+          "name": "runtime::save::character_save_item_validation_tests::overbudget_mail_attachment_is_rejected_before_disk_or_world_changes",
+          "status": "ok"
+        },
+        {
+          "name": "runtime::save::character_save_item_validation_tests::overbudget_npc_used_goods_item_rejects_before_world_session_or_disk_changes",
+          "status": "ok"
+        },
+        {
+          "name": "runtime::save::character_save_item_validation_tests::oversized_item_carrier_start_game_returns_result_two_without_partial_state",
+          "status": "ok"
+        },
+        {
+          "name": "runtime::save::character_save_item_validation_tests::six_legacy_candidate_keys_migrate_once_to_exact_crystal_templates",
+          "status": "ok"
+        },
+        {
+          "name": "runtime::save::character_save_item_validation_tests::start_game_legacy_item_migration_is_persisted_and_idempotent",
+          "status": "ok"
+        },
+        {
+          "name": "runtime::save::character_save_item_validation_tests::zero_quantity_live_inventory_rejects_active_save_without_mutation",
+          "status": "ok"
+        },
+        {
+          "name": "runtime::save::character_save_item_validation_tests::zero_quantity_persisted_inventory_rejects_start_game_atomically",
+          "status": "ok"
+        },
+        {
+          "name": "runtime::save::save_fail_closed_tests::account_creation_persistence_failure_returns_crystal_failure_and_rolls_back_live_store",
+          "status": "ok"
+        },
+        {
+          "name": "runtime::save::save_fail_closed_tests::active_snapshot_without_account_identity_is_rejected",
+          "status": "ok"
+        },
+        {
+          "name": "runtime::save::save_fail_closed_tests::canonical_account_switch_with_colliding_index_cannot_refresh_foreign_mail",
+          "status": "ok"
+        },
+        {
+          "name": "runtime::save::save_fail_closed_tests::canonical_cross_account_send_mail_commits_sender_and_exact_target",
+          "status": "ok"
+        },
+        {
+          "name": "runtime::save::save_fail_closed_tests::canonical_identity_still_commits_mail_transaction_and_full_save",
+          "status": "ok"
+        },
+        {
+          "name": "runtime::save::save_fail_closed_tests::canonical_select_missing_character_returns_crystal_result_two_without_mutation",
+          "status": "ok"
+        },
+        {
+          "name": "runtime::save::save_fail_closed_tests::delete_character_persistence_failure_keeps_character",
+          "status": "ok"
+        },
+        {
+          "name": "runtime::save::save_fail_closed_tests::delete_character_without_account_identity_is_rejected_and_does_not_mutate_account_store",
+          "status": "ok"
+        },
+        {
+          "name": "runtime::save::save_fail_closed_tests::disconnect_persistence_failure_still_clears_gm_permissions",
+          "status": "ok"
+        },
+        {
+          "name": "runtime::save::save_fail_closed_tests::existing_only_passkey_login_does_not_provision_missing_account",
+          "status": "ok"
+        },
+        {
+          "name": "runtime::save::save_fail_closed_tests::first_time_passkey_provision_is_durable_and_locked",
+          "status": "ok"
+        },
+        {
+          "name": "runtime::save::save_fail_closed_tests::forged_roster_durable_identity_collision_rejects_all_private_mail_transactions",
+          "status": "ok"
+        },
+        {
+          "name": "runtime::save::save_fail_closed_tests::forged_roster_durable_identity_collision_rejects_normal_revision_full_save",
+          "status": "ok"
+        },
+        {
+          "name": "runtime::save::save_fail_closed_tests::forged_roster_durable_identity_collision_rejects_stale_revision_full_save",
+          "status": "ok"
+        },
+        {
+          "name": "runtime::save::save_fail_closed_tests::gm_password_binding_login_switch_and_successful_disconnect_clear_permissions",
+          "status": "ok"
+        },
+        {
+          "name": "runtime::save::save_fail_closed_tests::in_game_character_lifecycle_requests_are_silent_and_leave_world_and_store_unchanged",
+          "status": "ok"
+        },
+        {
+          "name": "runtime::save::save_fail_closed_tests::legacy_password_migration_persistence_failure_rejects_login_and_keeps_live_password",
+          "status": "ok"
+        },
+        {
+          "name": "runtime::save::save_fail_closed_tests::legal_gm_and_ranking_paths_sync_exact_authorized_levels",
+          "status": "ok"
+        },
+        {
+          "name": "runtime::save::save_fail_closed_tests::local_missing_account_start_returns_none_without_recreating_account",
+          "status": "ok"
+        },
+        {
+          "name": "runtime::save::save_fail_closed_tests::malformed_empty_and_switched_identities_cannot_reuse_gm_or_leak_private_packets",
+          "status": "ok"
+        },
+        {
+          "name": "runtime::save::save_fail_closed_tests::new_character_persistence_failure_returns_crystal_failure_and_keeps_roster",
+          "status": "ok"
+        },
+        {
+          "name": "runtime::save::save_fail_closed_tests::new_character_without_account_identity_is_rejected_and_does_not_mutate_account_store",
+          "status": "ok"
+        },
+        {
+          "name": "runtime::save::save_fail_closed_tests::noncanonical_bound_identity_cannot_alias_or_mutate_either_account",
+          "status": "ok"
+        },
+        {
+          "name": "runtime::save::save_fail_closed_tests::noncanonical_live_identity_cannot_read_merge_or_mutate_either_mailbox",
+          "status": "ok"
+        },
+        {
+          "name": "runtime::save::save_fail_closed_tests::passkey_provision_persistence_failure_rolls_back_live_account",
+          "status": "ok"
+        },
+        {
+          "name": "runtime::save::save_fail_closed_tests::password_change_persistence_failure_returns_crystal_failure_and_keeps_old_hash",
+          "status": "ok"
+        },
+        {
+          "name": "runtime::save::save_fail_closed_tests::recovery_password_reset_persistence_failure_keeps_old_hash",
+          "status": "ok"
+        },
+        {
+          "name": "runtime::save::save_fail_closed_tests::send_mail_target_durable_identity_mismatch_is_silent_and_atomic",
+          "status": "ok"
+        },
+        {
+          "name": "runtime::save::save_fail_closed_tests::source_of_truth_start_requires_authoritative_refresh_and_does_not_recreate_account",
+          "status": "ok"
+        },
+        {
+          "name": "runtime::save::save_fail_closed_tests::standard_and_passkey_recovery_preflight_fail_closed_for_source_states",
+          "status": "ok"
+        },
+        {
+          "name": "runtime::save::save_fail_closed_tests::start_game_without_account_identity_is_rejected_and_does_not_mutate_account_store",
+          "status": "ok"
+        },
+        {
+          "name": "runtime::save::save_fail_closed_tests::start_normalization_persistence_failure_returns_crystal_failure_and_keeps_live_save",
+          "status": "ok"
+        },
+        {
+          "name": "runtime::save::save_fail_closed_tests::trusted_select_account_for_recovery_still_starts_game",
+          "status": "ok"
+        },
+        {
+          "name": "runtime::save::skill_cooldown_restore_tests::durable_cooldown_rebase_uses_elapsed_wall_time_and_authoritative_cap",
+          "status": "ok"
+        },
+        {
+          "name": "runtime::save::skill_cooldown_restore_tests::inactive_skill_encoding_is_deterministic_across_wall_clock_samples",
+          "status": "ok"
+        },
+        {
+          "name": "runtime::save::skill_cooldown_restore_tests::legacy_absolute_skill_deadline_expires_instead_of_becoming_an_hour_cooldown",
+          "status": "ok"
+        },
+        {
+          "name": "runtime::save::skill_cooldown_restore_tests::new_session_restore_rebases_remaining_skill_cooldown_and_keeps_progression",
+          "status": "ok"
+        },
+        {
+          "name": "runtime::save::skill_cooldown_restore_tests::same_session_checkpoint_restore_preserves_active_skill_cooldown",
+          "status": "ok"
+        },
+        {
+          "name": "runtime::save::stale_mail_status_merge_tests::stale_snapshot_can_only_strengthen_mail_lock",
+          "status": "ok"
+        },
+        {
+          "name": "runtime::save::stale_mail_status_merge_tests::stale_snapshot_cannot_remove_newer_durable_mail_lock",
+          "status": "ok"
+        },
+        {
+          "name": "runtime::save::stale_mail_status_merge_tests::stale_unlocked_snapshot_cannot_delete_newer_durable_locked_mail",
+          "status": "ok"
+        }
+      ]
+    },
+    {
+      "name": "simulation-demo05",
+      "config": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-simulation-demo05.config.json",
+        "bytes": 4078,
+        "sha256": "41d65c4a291a0e8045cf457431e1edba87bc15355a90f4f42efae089487531a7"
+      },
+      "policy": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-simulation-demo05.policy.json",
+        "bytes": 2337,
+        "sha256": "685d64bda0ea6f4c4b9477fb6ac97f2cb008ff752a895c17c009ffa79be2b183"
+      },
+      "snapshot": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-rust05-snapshot.json",
+        "bytes": 274835,
+        "sha256": "dc0272994f0762b13ee8751851bc144a225c2d16d9b7d75a5a01ca539bbfdaa9"
+      },
+      "sourceReview": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-rust05-review.json",
+        "bytes": 3154,
+        "sha256": "ef2d945cb96549064225a52036e992007e2f3eba53a970d8b7f21781cdc2710e"
+      },
+      "authority": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-rust05-authority.json",
+        "bytes": 522,
+        "sha256": "d81bef0e5ce100563b014da52cc0261bd5d438cc20c23f3678e32b1d4a789228"
+      },
+      "args": [
+        "+1.95.0",
+        "test",
+        "--manifest-path",
+        "apps/simulation/Cargo.toml",
+        "--locked",
+        "--offline",
+        "--jobs",
+        "1",
+        "--lib",
+        "default_demo_character_keeps_stage5_seed_state",
+        "--",
+        "--test-threads=1"
+      ],
+      "outerPin": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-simulation-demo05.outer.json",
+        "bytes": 455,
+        "sha256": "214c7ae99afc07aacc3a4a34cb0c3c51c4aa4bfeed6e411a758c325613d41c89"
+      },
+      "stdoutPin": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-simulation-demo05.stdout.log",
+        "bytes": 199,
+        "sha256": "19abe08c3dd116403647f2b58bcef246dd0630697ca0b6a70bfa865f039a9e41"
+      },
+      "stderrPin": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-simulation-demo05.stderr.log",
+        "bytes": 37367,
+        "sha256": "47e26f3160a04282cd21911e28c90b2d199b53da5700065663d26b8082890f1a"
+      },
+      "receiptRoot": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-simulation-demo05-cargo-receipts",
+      "receiptFiles": [
+        {
+          "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-simulation-demo05-cargo-receipts/81ad5f198c9a499b9e8b663c556835a5/before.json",
+          "bytes": 1037,
+          "sha256": "e3e5c254e6123789dd95210686ebacfb486268daab7eda11728699edf74c92dc"
+        },
+        {
+          "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-simulation-demo05-cargo-receipts/81ad5f198c9a499b9e8b663c556835a5/after.json",
+          "bytes": 319,
+          "sha256": "9699ffb7b133e64c510b7e877de365ed6359ea523785cd33a48b98c1a0c1abbf"
+        },
+        {
+          "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-simulation-demo05-cargo-receipts/81ad5f198c9a499b9e8b663c556835a5/probe-process.json",
+          "bytes": 432,
+          "sha256": "2d547854c33191934554dbd9f15109c3304333cc440085e83382b3b643ca090c"
+        },
+        {
+          "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-simulation-demo05-cargo-receipts/81ad5f198c9a499b9e8b663c556835a5/probe.stderr.bin",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-simulation-demo05-cargo-receipts/81ad5f198c9a499b9e8b663c556835a5/probe.stdout.bin",
+          "bytes": 197,
+          "sha256": "e4ad60ab4c1df9d2d72b15cc41cf0dcdc0ad1c575366b59cf8d7d964050b7314"
+        }
+      ],
+      "before": {
+        "schemaVersion": 1,
+        "mode": "real-cargo",
+        "nonce": "81ad5f198c9a499b9e8b663c556835a5",
+        "policyPath": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-simulation-demo05.policy.json",
+        "policySha": "685d64bda0ea6f4c4b9477fb6ac97f2cb008ff752a895c17c009ffa79be2b183",
+        "args": [
+          "+1.95.0",
+          "test",
+          "--manifest-path",
+          "apps/simulation/Cargo.toml",
+          "--locked",
+          "--offline",
+          "--jobs",
+          "1",
+          "--lib",
+          "default_demo_character_keeps_stage5_seed_state",
+          "--",
+          "--test-threads=1"
+        ],
+        "cwd": "E:\\mir2-player-journey\\mir2-web3",
+        "calleePath": "C:/Users/Administrator/.cargo/bin/cargo.exe",
+        "calleeSha": "86478e53f769379d7f0ebfa7c9aa97cb76ca92233f79aa2cc0dbee2efaac73c7",
+        "sample": {
+          "schemaVersion": "1",
+          "driveLetter": "C",
+          "sampleBeginUtc": "2026-10-07T11:29:52.9893893Z",
+          "sampleEndUtc": "2026-10-07T11:29:53.7001835Z",
+          "remainingBytes": "432446275584",
+          "requiredBytes": "53687091200"
+        },
+        "probePid": 136768,
+        "probeLaunchMs": 93.6483,
+        "probeEndMs": 1015.2926,
+        "decision": "FORWARD",
+        "thresholdBytes": "53687091200",
+        "sampleProof": "actualGetVolumeC"
+      },
+      "after": {
+        "childPid": 137200,
+        "childStartedUtc": "/Date(1791372593766)/",
+        "childStartMs": 1036.8077,
+        "completed": true,
+        "exited": true,
+        "disposed": true,
+        "exitCode": 0,
+        "exitBits": "0",
+        "completedUtc": "/Date(1791372594869)/",
+        "completionMs": 2138.9712,
+        "postChildPolicy": "B",
+        "lifecycle": ".NET Start/Exited/WaitForExit/Dispose; not Node close"
+      },
+      "probe": {
+        "probePid": 136768,
+        "probeKilled": false,
+        "probeCode": 0,
+        "probeLaunchUtc": "/Date(1791372592823)/",
+        "probeEndUtc": "/Date(1791372593745)/",
+        "probeLaunchMs": 93.6483,
+        "probeEndMs": 1015.2926,
+        "probeMode": "actual",
+        "probePath": "C:/mir2-cross-platform-storage-20261002/repo-qa-shared-quest-heading-locale-01/cargo-per-call-guard-implementation01/probe-volume-C.ps1",
+        "probeSha": "45e14d26e608c36c8073fa9e8e61562062b2d5d2df142d35e90f7213fb72f1ab"
+      },
+      "outer": {
+        "owner": "Root",
+        "exitCode": 0,
+        "guardPid": 137032,
+        "exited": true,
+        "disposed": true,
+        "elapsedMs": 2188,
+        "configPath": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-simulation-demo05.config.json",
+        "uiOperated": false,
+        "runtimeLaunched": false,
+        "networkUsed": false,
+        "productionBuildAccepted": false,
+        "candidateAccepted": false,
+        "goalComplete": false
+      },
+      "freshUpperMs": 67,
+      "result": {
+        "result": "ok",
+        "passed": 1,
+        "failed": 0,
+        "ignored": 0,
+        "measured": 0,
+        "filteredOut": 2069,
+        "elapsedSeconds": 0.67
+      },
+      "namedTests": [
+        {
+          "name": "runtime::session::tests::default_demo_character_keeps_stage5_seed_state",
+          "status": "ok"
+        }
+      ]
+    },
+    {
+      "name": "gateway-gold05",
+      "config": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-gateway-gold05.config.json",
+        "bytes": 4035,
+        "sha256": "40e486dce1f354d348545c249296dd04ff1c7dbc2c388a3aa275403967b3b398"
+      },
+      "policy": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-gateway-gold05.policy.json",
+        "bytes": 2334,
+        "sha256": "6ef92161d5005df69384b27c87143e25ce0620673878010c50c5a0f0998c729a"
+      },
+      "snapshot": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-rust05-snapshot.json",
+        "bytes": 274835,
+        "sha256": "dc0272994f0762b13ee8751851bc144a225c2d16d9b7d75a5a01ca539bbfdaa9"
+      },
+      "sourceReview": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-rust05-review.json",
+        "bytes": 3154,
+        "sha256": "ef2d945cb96549064225a52036e992007e2f3eba53a970d8b7f21781cdc2710e"
+      },
+      "authority": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-rust05-authority.json",
+        "bytes": 522,
+        "sha256": "d81bef0e5ce100563b014da52cc0261bd5d438cc20c23f3678e32b1d4a789228"
+      },
+      "args": [
+        "+1.95.0",
+        "test",
+        "--manifest-path",
+        "apps/gateway/Cargo.toml",
+        "--locked",
+        "--offline",
+        "--jobs",
+        "1",
+        "--lib",
+        "npc_gold_buy_route_tests",
+        "--",
+        "--test-threads=1"
+      ],
+      "outerPin": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-gateway-gold05.outer.json",
+        "bytes": 453,
+        "sha256": "53c72e4037fc83180257507325ec04229fdbebc962f6aed539e55bf47e06e28b"
+      },
+      "stdoutPin": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-gateway-gold05.stdout.log",
+        "bytes": 2127,
+        "sha256": "4efb520ec44bbc55d508f11ec10ab41ebedfff402c0de2e3937d7602a7be9aa1"
+      },
+      "stderrPin": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-gateway-gold05.stderr.log",
+        "bytes": 31717,
+        "sha256": "e28b74a7137e2a427a697225f19a87a9fccb2b8d40ca1dd8a9d6d9e2894007cd"
+      },
+      "receiptRoot": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-gateway-gold05-cargo-receipts",
+      "receiptFiles": [
+        {
+          "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-gateway-gold05-cargo-receipts/374bab0a9d2047dab75659f6588d3242/before.json",
+          "bytes": 1008,
+          "sha256": "c6947868b0b1c8f42fce3019275fa143bfd2f3728023252bb64d16fcf1c2fd79"
+        },
+        {
+          "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-gateway-gold05-cargo-receipts/374bab0a9d2047dab75659f6588d3242/after.json",
+          "bytes": 328,
+          "sha256": "882f89ca815faf6d2cbbac317b6835565e24452b0779092cba75c5a6da7ee2db"
+        },
+        {
+          "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-gateway-gold05-cargo-receipts/374bab0a9d2047dab75659f6588d3242/probe-process.json",
+          "bytes": 431,
+          "sha256": "42ebbe72878e06c4e5a5138e8b8bad15d970b182a876e7b0e4df71f2d15cdebe"
+        },
+        {
+          "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-gateway-gold05-cargo-receipts/374bab0a9d2047dab75659f6588d3242/probe.stderr.bin",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-gateway-gold05-cargo-receipts/374bab0a9d2047dab75659f6588d3242/probe.stdout.bin",
+          "bytes": 197,
+          "sha256": "07e5e9e1de09e2f209299b001c072565c07127e235019e8fae4089c058675931"
+        }
+      ],
+      "before": {
+        "schemaVersion": 1,
+        "mode": "real-cargo",
+        "nonce": "374bab0a9d2047dab75659f6588d3242",
+        "policyPath": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-gateway-gold05.policy.json",
+        "policySha": "6ef92161d5005df69384b27c87143e25ce0620673878010c50c5a0f0998c729a",
+        "args": [
+          "+1.95.0",
+          "test",
+          "--manifest-path",
+          "apps/gateway/Cargo.toml",
+          "--locked",
+          "--offline",
+          "--jobs",
+          "1",
+          "--lib",
+          "npc_gold_buy_route_tests",
+          "--",
+          "--test-threads=1"
+        ],
+        "cwd": "E:\\mir2-player-journey\\mir2-web3",
+        "calleePath": "C:/Users/Administrator/.cargo/bin/cargo.exe",
+        "calleeSha": "86478e53f769379d7f0ebfa7c9aa97cb76ca92233f79aa2cc0dbee2efaac73c7",
+        "sample": {
+          "schemaVersion": "1",
+          "driveLetter": "C",
+          "sampleBeginUtc": "2026-10-07T11:29:56.0728660Z",
+          "sampleEndUtc": "2026-10-07T11:29:56.8968603Z",
+          "remainingBytes": "432447430656",
+          "requiredBytes": "53687091200"
+        },
+        "probePid": 129944,
+        "probeLaunchMs": 103.177,
+        "probeEndMs": 1175.008,
+        "decision": "FORWARD",
+        "thresholdBytes": "53687091200",
+        "sampleProof": "actualGetVolumeC"
+      },
+      "after": {
+        "childPid": 125612,
+        "childStartedUtc": "/Date(1791372596972)/",
+        "childStartMs": 1199.7143,
+        "completed": true,
+        "exited": true,
+        "disposed": true,
+        "exitCode": 0,
+        "exitBits": "0",
+        "completedUtc": "/Date(1791372612438)/",
+        "completionMs": 16665.977300000002,
+        "postChildPolicy": "B",
+        "lifecycle": ".NET Start/Exited/WaitForExit/Dispose; not Node close"
+      },
+      "probe": {
+        "probePid": 129944,
+        "probeKilled": false,
+        "probeCode": 0,
+        "probeLaunchUtc": "/Date(1791372595875)/",
+        "probeEndUtc": "/Date(1791372596947)/",
+        "probeLaunchMs": 103.177,
+        "probeEndMs": 1175.008,
+        "probeMode": "actual",
+        "probePath": "C:/mir2-cross-platform-storage-20261002/repo-qa-shared-quest-heading-locale-01/cargo-per-call-guard-implementation01/probe-volume-C.ps1",
+        "probeSha": "45e14d26e608c36c8073fa9e8e61562062b2d5d2df142d35e90f7213fb72f1ab"
+      },
+      "outer": {
+        "owner": "Root",
+        "exitCode": 0,
+        "guardPid": 135260,
+        "exited": true,
+        "disposed": true,
+        "elapsedMs": 16721,
+        "configPath": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-gateway-gold05.config.json",
+        "uiOperated": false,
+        "runtimeLaunched": false,
+        "networkUsed": false,
+        "productionBuildAccepted": false,
+        "candidateAccepted": false,
+        "goalComplete": false
+      },
+      "freshUpperMs": 77,
+      "result": {
+        "result": "ok",
+        "passed": 16,
+        "failed": 0,
+        "ignored": 0,
+        "measured": 0,
+        "filteredOut": 888,
+        "elapsedSeconds": 14.92
+      },
+      "namedTests": [
+        {
+          "name": "session::npc_gold_buy_route_tests::npc_gold_explicit_route_leaves_legacy_npc_and_game_shop_paths_unchanged",
+          "status": "ok"
+        },
+        {
+          "name": "session::npc_gold_buy_route_tests::npc_gold_gateway_actual_success_reject_success_has_current_outcome_metadata_and_events",
+          "status": "ok"
+        },
+        {
+          "name": "session::npc_gold_buy_route_tests::npc_gold_gateway_default_and_lying_custom_owner_are_unsupported_without_generic_execution",
+          "status": "ok"
+        },
+        {
+          "name": "session::npc_gold_buy_route_tests::npc_gold_gateway_event_panic_retains_actual_commit_and_subsequent_rejection",
+          "status": "ok"
+        },
+        {
+          "name": "session::npc_gold_buy_route_tests::npc_gold_gateway_false_unlogged_and_pre_start_are_guarded_without_economy_or_events",
+          "status": "ok"
+        },
+        {
+          "name": "session::npc_gold_buy_route_tests::npc_gold_gateway_global_bus_drain_preserves_existing_event_and_packet_count_order",
+          "status": "ok"
+        },
+        {
+          "name": "session::npc_gold_buy_route_tests::npc_gold_gateway_stale_lease_stops_before_owner_client_and_runtime",
+          "status": "ok"
+        },
+        {
+          "name": "session::npc_gold_buy_route_tests::npc_gold_in_process_owner_stale_lease_and_wrong_mode_or_tuple_never_enter_typed_runtime",
+          "status": "ok"
+        },
+        {
+          "name": "session::npc_gold_buy_route_tests::npc_gold_owner_before_capture_panic_is_unknown_and_next_call_has_its_own_outcome",
+          "status": "ok"
+        },
+        {
+          "name": "session::npc_gold_buy_route_tests::npc_gold_owner_metadata_panic_and_known_post_error_preserve_actual_commit",
+          "status": "ok"
+        },
+        {
+          "name": "session::npc_gold_buy_route_tests::npc_gold_rpc_and_hosted_owner_do_not_advertise_shadow_capability_or_execute_fallback",
+          "status": "ok"
+        },
+        {
+          "name": "session::npc_gold_buy_route_tests::npc_gold_runtime_default_and_lying_support_never_call_legacy_purchase",
+          "status": "ok"
+        },
+        {
+          "name": "session::npc_gold_buy_route_tests::npc_gold_shared_logout_returns_to_session_guard_without_context_or_sequence_advance",
+          "status": "ok"
+        },
+        {
+          "name": "session::npc_gold_buy_route_tests::npc_gold_shared_post_capture_reconcile_unwind_keeps_commit_and_clears_context",
+          "status": "ok"
+        },
+        {
+          "name": "session::npc_gold_buy_route_tests::npc_gold_shared_pre_capture_failure_is_unknown_after_previous_success",
+          "status": "ok"
+        },
+        {
+          "name": "session::npc_gold_buy_route_tests::npc_gold_shared_real_purchase_retains_predrain_and_full_tail_packets",
+          "status": "ok"
+        }
+      ]
+    }
+  ],
+  "preparedButNotExecuted": [
+    {
+      "name": "gateway-owner01",
+      "config": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-gateway-owner01.config.json",
+        "bytes": 4047,
+        "sha256": "ea369dcaf540827d25ba04d3583dadf16c7da234bdd54b676e3e2e73fefe711a"
+      },
+      "policy": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-gateway-owner01.policy.json",
+        "bytes": 2335,
+        "sha256": "31528152f2ce37f4a07109df41c34d7cddedec08c64443c3cf91935f2192a822"
+      },
+      "snapshot": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-rust01-snapshot.json",
+        "bytes": 273531,
+        "sha256": "93c8660f6641f763e1600418cea655216f6585ed79692d234b82144a04dd4b2c"
+      },
+      "sourceReview": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-rust01-review.json",
+        "bytes": 1443,
+        "sha256": "7dc94a81dd74445bc4f6d4e0d9c47d6eec7235a0792c79125d13fd5e11034edd"
+      },
+      "authority": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-rust01-authority.json",
+        "bytes": 522,
+        "sha256": "7cb3dd7facf44d31747f48f7a736c62bd2f3bd56ff02961635609fa33c5e4792"
+      }
+    },
+    {
+      "name": "simulation-purchase04",
+      "config": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-simulation-purchase04.config.json",
+        "bytes": 4068,
+        "sha256": "2b3b53cf9a9f28efc3f1c554c2e34b5c259bc9b490355ddd283445d5da2f9abb"
+      },
+      "policy": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-simulation-purchase04.policy.json",
+        "bytes": 2341,
+        "sha256": "4f0308252f8d78322b87a27743a8aefcd803ddfab194359d636f6354b4efa459"
+      },
+      "snapshot": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-rust04-snapshot.json",
+        "bytes": 274879,
+        "sha256": "10ac9798b3f74fa02cfd04715b374fb5817274fdbe5713a858279d2590c5189f"
+      },
+      "sourceReview": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-rust04-review.json",
+        "bytes": 2867,
+        "sha256": "242ac575fe31375f4c0bb18d900698086b906f7073e98bfaf443aef1116b97f9"
+      },
+      "authority": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-rust04-authority.json",
+        "bytes": 522,
+        "sha256": "c2ec5b481b3f9b0a59fbc5bf6347cc88d81676e6b1eb2e7ff4886e9da12c2fc9"
+      }
+    },
+    {
+      "name": "simulation-gold04",
+      "config": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-simulation-gold04.config.json",
+        "bytes": 4052,
+        "sha256": "d97b71fda474895bcb2543dc686b1e43cb0b3a442a9d80bde4daed301df8f901"
+      },
+      "policy": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-simulation-gold04.policy.json",
+        "bytes": 2337,
+        "sha256": "be8c45d7b8d7daafeb3846fd6e7895d1a1063e55b0b0e8b8335a68342ac6c3b4"
+      },
+      "snapshot": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-rust04-snapshot.json",
+        "bytes": 274879,
+        "sha256": "10ac9798b3f74fa02cfd04715b374fb5817274fdbe5713a858279d2590c5189f"
+      },
+      "sourceReview": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-rust04-review.json",
+        "bytes": 2867,
+        "sha256": "242ac575fe31375f4c0bb18d900698086b906f7073e98bfaf443aef1116b97f9"
+      },
+      "authority": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-rust04-authority.json",
+        "bytes": 522,
+        "sha256": "c2ec5b481b3f9b0a59fbc5bf6347cc88d81676e6b1eb2e7ff4886e9da12c2fc9"
+      }
+    },
+    {
+      "name": "simulation-pearl04",
+      "config": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-simulation-pearl04.config.json",
+        "bytes": 4049,
+        "sha256": "ff04799d9d71b20d62a397053af6776f3c4b731492b3d2e9a27a4b9c76de5c18"
+      },
+      "policy": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-simulation-pearl04.policy.json",
+        "bytes": 2338,
+        "sha256": "9a5b04f0c40658702c73feedb96e42f16e218a42dc1258bbd77134b3b0ddd59e"
+      },
+      "snapshot": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-rust04-snapshot.json",
+        "bytes": 274879,
+        "sha256": "10ac9798b3f74fa02cfd04715b374fb5817274fdbe5713a858279d2590c5189f"
+      },
+      "sourceReview": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-rust04-review.json",
+        "bytes": 2867,
+        "sha256": "242ac575fe31375f4c0bb18d900698086b906f7073e98bfaf443aef1116b97f9"
+      },
+      "authority": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-rust04-authority.json",
+        "bytes": 522,
+        "sha256": "c2ec5b481b3f9b0a59fbc5bf6347cc88d81676e6b1eb2e7ff4886e9da12c2fc9"
+      }
+    },
+    {
+      "name": "simulation-save04",
+      "config": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-simulation-save04.config.json",
+        "bytes": 4047,
+        "sha256": "3e40857a8ae681756e1679a6710f1e4a13aba1bc966c49ac91e3d145bb16c75c"
+      },
+      "policy": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-simulation-save04.policy.json",
+        "bytes": 2337,
+        "sha256": "9e356b03bf56daae22c16eebf7631050df6cdce94908f9497e5b9b4229eb94b5"
+      },
+      "snapshot": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-rust04-snapshot.json",
+        "bytes": 274879,
+        "sha256": "10ac9798b3f74fa02cfd04715b374fb5817274fdbe5713a858279d2590c5189f"
+      },
+      "sourceReview": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-rust04-review.json",
+        "bytes": 2867,
+        "sha256": "242ac575fe31375f4c0bb18d900698086b906f7073e98bfaf443aef1116b97f9"
+      },
+      "authority": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-rust04-authority.json",
+        "bytes": 522,
+        "sha256": "c2ec5b481b3f9b0a59fbc5bf6347cc88d81676e6b1eb2e7ff4886e9da12c2fc9"
+      }
+    },
+    {
+      "name": "simulation-demo04",
+      "config": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-simulation-demo04.config.json",
+        "bytes": 4078,
+        "sha256": "0e25c5e9dda52fbe83fb303347bb906f3a404ea0e648958ccd4e5b1f12fd7ff0"
+      },
+      "policy": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-simulation-demo04.policy.json",
+        "bytes": 2337,
+        "sha256": "2cdf74fc5b295894dbbbdbbc0cca02c5ab0376c497dc2585a3f55300f41e6849"
+      },
+      "snapshot": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-rust04-snapshot.json",
+        "bytes": 274879,
+        "sha256": "10ac9798b3f74fa02cfd04715b374fb5817274fdbe5713a858279d2590c5189f"
+      },
+      "sourceReview": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-rust04-review.json",
+        "bytes": 2867,
+        "sha256": "242ac575fe31375f4c0bb18d900698086b906f7073e98bfaf443aef1116b97f9"
+      },
+      "authority": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-rust04-authority.json",
+        "bytes": 522,
+        "sha256": "c2ec5b481b3f9b0a59fbc5bf6347cc88d81676e6b1eb2e7ff4886e9da12c2fc9"
+      }
+    },
+    {
+      "name": "gateway-gold04",
+      "config": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-gateway-gold04.config.json",
+        "bytes": 4035,
+        "sha256": "0e5852ee86bea82882410add54417eaab918f35f64f230a2593f40c27a13dcfe"
+      },
+      "policy": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-gateway-gold04.policy.json",
+        "bytes": 2334,
+        "sha256": "2572ef326aed7ff615cb5400a9e043ef3aff089446dcdc6a1e1f20bb04c6c245"
+      },
+      "snapshot": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-rust04-snapshot.json",
+        "bytes": 274879,
+        "sha256": "10ac9798b3f74fa02cfd04715b374fb5817274fdbe5713a858279d2590c5189f"
+      },
+      "sourceReview": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-rust04-review.json",
+        "bytes": 2867,
+        "sha256": "242ac575fe31375f4c0bb18d900698086b906f7073e98bfaf443aef1116b97f9"
+      },
+      "authority": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-rust04-authority.json",
+        "bytes": 522,
+        "sha256": "c2ec5b481b3f9b0a59fbc5bf6347cc88d81676e6b1eb2e7ff4886e9da12c2fc9"
+      }
+    }
+  ],
+  "acceptedSelectedExecutions": 177,
+  "acceptedUniqueNamedTests": 176,
+  "acceptedSimulationExecutions": 153,
+  "acceptedGatewayExecutions": 24,
+  "newDistinctTestDeclarationsExecuted": 30,
+  "newTestProofs": [
+    {
+      "relativePath": "apps/simulation/src/npc_purchase_owner.rs",
+      "name": "action_wire_names_and_mutation_classification_preserve_original_operations",
+      "source": {
+        "path": "E:/mir2-player-journey/mir2-web3/apps/simulation/src/npc_purchase_owner.rs",
+        "bytes": 21830,
+        "sha256": "bec552c731b00a5eb0a0cb8102306377d2f8635c14910edbf2371b1c67baa4db",
+        "relativePath": "apps/simulation/src/npc_purchase_owner.rs"
+      },
+      "run": "simulation-purchase05",
+      "config": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-simulation-purchase05.config.json",
+        "bytes": 4068,
+        "sha256": "44e54863996e3a4909818e549106a3602aeb1eb8f82ce258c13956dc98c288b0"
+      },
+      "actualTestName": "npc_purchase_owner::tests::action_wire_names_and_mutation_classification_preserve_original_operations",
+      "status": "ok"
+    },
+    {
+      "relativePath": "apps/simulation/src/npc_purchase_owner.rs",
+      "name": "replies_roundtrip_all_named_variants_without_private_journal_or_account_fields",
+      "source": {
+        "path": "E:/mir2-player-journey/mir2-web3/apps/simulation/src/npc_purchase_owner.rs",
+        "bytes": 21830,
+        "sha256": "bec552c731b00a5eb0a0cb8102306377d2f8635c14910edbf2371b1c67baa4db",
+        "relativePath": "apps/simulation/src/npc_purchase_owner.rs"
+      },
+      "run": "simulation-purchase05",
+      "config": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-simulation-purchase05.config.json",
+        "bytes": 4068,
+        "sha256": "44e54863996e3a4909818e549106a3602aeb1eb8f82ce258c13956dc98c288b0"
+      },
+      "actualTestName": "npc_purchase_owner::tests::replies_roundtrip_all_named_variants_without_private_journal_or_account_fields",
+      "status": "ok"
+    },
+    {
+      "relativePath": "apps/simulation/src/npc_purchase_owner.rs",
+      "name": "raw_full_u64_identity_and_zero_incoming_uid_decode_losslessly",
+      "source": {
+        "path": "E:/mir2-player-journey/mir2-web3/apps/simulation/src/npc_purchase_owner.rs",
+        "bytes": 21830,
+        "sha256": "bec552c731b00a5eb0a0cb8102306377d2f8635c14910edbf2371b1c67baa4db",
+        "relativePath": "apps/simulation/src/npc_purchase_owner.rs"
+      },
+      "run": "simulation-purchase05",
+      "config": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-simulation-purchase05.config.json",
+        "bytes": 4068,
+        "sha256": "44e54863996e3a4909818e549106a3602aeb1eb8f82ce258c13956dc98c288b0"
+      },
+      "actualTestName": "npc_purchase_owner::tests::raw_full_u64_identity_and_zero_incoming_uid_decode_losslessly",
+      "status": "ok"
+    },
+    {
+      "relativePath": "apps/simulation/src/npc_purchase_owner.rs",
+      "name": "unknown_fields_are_rejected_at_every_action_layer",
+      "source": {
+        "path": "E:/mir2-player-journey/mir2-web3/apps/simulation/src/npc_purchase_owner.rs",
+        "bytes": 21830,
+        "sha256": "bec552c731b00a5eb0a0cb8102306377d2f8635c14910edbf2371b1c67baa4db",
+        "relativePath": "apps/simulation/src/npc_purchase_owner.rs"
+      },
+      "run": "simulation-purchase05",
+      "config": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-simulation-purchase05.config.json",
+        "bytes": 4068,
+        "sha256": "44e54863996e3a4909818e549106a3602aeb1eb8f82ce258c13956dc98c288b0"
+      },
+      "actualTestName": "npc_purchase_owner::tests::unknown_fields_are_rejected_at_every_action_layer",
+      "status": "ok"
+    },
+    {
+      "relativePath": "apps/simulation/src/npc_purchase_owner.rs",
+      "name": "unknown_fields_are_rejected_at_every_reply_layer",
+      "source": {
+        "path": "E:/mir2-player-journey/mir2-web3/apps/simulation/src/npc_purchase_owner.rs",
+        "bytes": 21830,
+        "sha256": "bec552c731b00a5eb0a0cb8102306377d2f8635c14910edbf2371b1c67baa4db",
+        "relativePath": "apps/simulation/src/npc_purchase_owner.rs"
+      },
+      "run": "simulation-purchase05",
+      "config": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-simulation-purchase05.config.json",
+        "bytes": 4068,
+        "sha256": "44e54863996e3a4909818e549106a3602aeb1eb8f82ce258c13956dc98c288b0"
+      },
+      "actualTestName": "npc_purchase_owner::tests::unknown_fields_are_rejected_at_every_reply_layer",
+      "status": "ok"
+    },
+    {
+      "relativePath": "apps/simulation/src/npc_purchase_owner.rs",
+      "name": "raw_duplicate_and_escaped_duplicate_action_fields_are_refused",
+      "source": {
+        "path": "E:/mir2-player-journey/mir2-web3/apps/simulation/src/npc_purchase_owner.rs",
+        "bytes": 21830,
+        "sha256": "bec552c731b00a5eb0a0cb8102306377d2f8635c14910edbf2371b1c67baa4db",
+        "relativePath": "apps/simulation/src/npc_purchase_owner.rs"
+      },
+      "run": "simulation-purchase05",
+      "config": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-simulation-purchase05.config.json",
+        "bytes": 4068,
+        "sha256": "44e54863996e3a4909818e549106a3602aeb1eb8f82ce258c13956dc98c288b0"
+      },
+      "actualTestName": "npc_purchase_owner::tests::raw_duplicate_and_escaped_duplicate_action_fields_are_refused",
+      "status": "ok"
+    },
+    {
+      "relativePath": "apps/simulation/src/npc_purchase_owner.rs",
+      "name": "raw_duplicate_and_escaped_duplicate_reply_fields_are_refused",
+      "source": {
+        "path": "E:/mir2-player-journey/mir2-web3/apps/simulation/src/npc_purchase_owner.rs",
+        "bytes": 21830,
+        "sha256": "bec552c731b00a5eb0a0cb8102306377d2f8635c14910edbf2371b1c67baa4db",
+        "relativePath": "apps/simulation/src/npc_purchase_owner.rs"
+      },
+      "run": "simulation-purchase05",
+      "config": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-simulation-purchase05.config.json",
+        "bytes": 4068,
+        "sha256": "44e54863996e3a4909818e549106a3602aeb1eb8f82ce258c13956dc98c288b0"
+      },
+      "actualTestName": "npc_purchase_owner::tests::raw_duplicate_and_escaped_duplicate_reply_fields_are_refused",
+      "status": "ok"
+    },
+    {
+      "relativePath": "apps/simulation/src/npc_purchase_owner.rs",
+      "name": "recovery_requires_explicit_receipt_and_only_null_represents_a_miss",
+      "source": {
+        "path": "E:/mir2-player-journey/mir2-web3/apps/simulation/src/npc_purchase_owner.rs",
+        "bytes": 21830,
+        "sha256": "bec552c731b00a5eb0a0cb8102306377d2f8635c14910edbf2371b1c67baa4db",
+        "relativePath": "apps/simulation/src/npc_purchase_owner.rs"
+      },
+      "run": "simulation-purchase05",
+      "config": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-simulation-purchase05.config.json",
+        "bytes": 4068,
+        "sha256": "44e54863996e3a4909818e549106a3602aeb1eb8f82ce258c13956dc98c288b0"
+      },
+      "actualTestName": "npc_purchase_owner::tests::recovery_requires_explicit_receipt_and_only_null_represents_a_miss",
+      "status": "ok"
+    },
+    {
+      "relativePath": "apps/simulation/src/npc_purchase_owner.rs",
+      "name": "unknown_tags_and_wrong_variant_shapes_are_rejected",
+      "source": {
+        "path": "E:/mir2-player-journey/mir2-web3/apps/simulation/src/npc_purchase_owner.rs",
+        "bytes": 21830,
+        "sha256": "bec552c731b00a5eb0a0cb8102306377d2f8635c14910edbf2371b1c67baa4db",
+        "relativePath": "apps/simulation/src/npc_purchase_owner.rs"
+      },
+      "run": "simulation-purchase05",
+      "config": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-simulation-purchase05.config.json",
+        "bytes": 4068,
+        "sha256": "44e54863996e3a4909818e549106a3602aeb1eb8f82ce258c13956dc98c288b0"
+      },
+      "actualTestName": "npc_purchase_owner::tests::unknown_tags_and_wrong_variant_shapes_are_rejected",
+      "status": "ok"
+    },
+    {
+      "relativePath": "apps/simulation/src/npc_purchase_owner.rs",
+      "name": "wrong_numeric_types_and_ranges_are_never_coerced",
+      "source": {
+        "path": "E:/mir2-player-journey/mir2-web3/apps/simulation/src/npc_purchase_owner.rs",
+        "bytes": 21830,
+        "sha256": "bec552c731b00a5eb0a0cb8102306377d2f8635c14910edbf2371b1c67baa4db",
+        "relativePath": "apps/simulation/src/npc_purchase_owner.rs"
+      },
+      "run": "simulation-purchase05",
+      "config": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-simulation-purchase05.config.json",
+        "bytes": 4068,
+        "sha256": "44e54863996e3a4909818e549106a3602aeb1eb8f82ce258c13956dc98c288b0"
+      },
+      "actualTestName": "npc_purchase_owner::tests::wrong_numeric_types_and_ranges_are_never_coerced",
+      "status": "ok"
+    },
+    {
+      "relativePath": "apps/simulation/src/npc_purchase_owner.rs",
+      "name": "wrong_opaque_width_and_nested_enum_shapes_are_rejected",
+      "source": {
+        "path": "E:/mir2-player-journey/mir2-web3/apps/simulation/src/npc_purchase_owner.rs",
+        "bytes": 21830,
+        "sha256": "bec552c731b00a5eb0a0cb8102306377d2f8635c14910edbf2371b1c67baa4db",
+        "relativePath": "apps/simulation/src/npc_purchase_owner.rs"
+      },
+      "run": "simulation-purchase05",
+      "config": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-simulation-purchase05.config.json",
+        "bytes": 4068,
+        "sha256": "44e54863996e3a4909818e549106a3602aeb1eb8f82ce258c13956dc98c288b0"
+      },
+      "actualTestName": "npc_purchase_owner::tests::wrong_opaque_width_and_nested_enum_shapes_are_rejected",
+      "status": "ok"
+    },
+    {
+      "relativePath": "apps/simulation/src/runtime/npc_purchase_owner_tests.rs",
+      "name": "owner_capability_requires_real_durable_source_and_refuses_memory_runtime",
+      "source": {
+        "path": "E:/mir2-player-journey/mir2-web3/apps/simulation/src/runtime/npc_purchase_owner_tests.rs",
+        "bytes": 34132,
+        "sha256": "0af7f301c44d9d9c51de85c6db96ccddc3a8081ce48ce0236008a5029bdaef0d",
+        "relativePath": "apps/simulation/src/runtime/npc_purchase_owner_tests.rs"
+      },
+      "run": "simulation-purchase05",
+      "config": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-simulation-purchase05.config.json",
+        "bytes": 4068,
+        "sha256": "44e54863996e3a4909818e549106a3602aeb1eb8f82ce258c13956dc98c288b0"
+      },
+      "actualTestName": "runtime::npc_purchase_transaction::tests::owner_tests::owner_capability_requires_real_durable_source_and_refuses_memory_runtime",
+      "status": "ok"
+    },
+    {
+      "relativePath": "apps/simulation/src/runtime/npc_purchase_owner_tests.rs",
+      "name": "owner_authentication_epoch_and_enrollment_preflight_leave_actual_source_unchanged",
+      "source": {
+        "path": "E:/mir2-player-journey/mir2-web3/apps/simulation/src/runtime/npc_purchase_owner_tests.rs",
+        "bytes": 34132,
+        "sha256": "0af7f301c44d9d9c51de85c6db96ccddc3a8081ce48ce0236008a5029bdaef0d",
+        "relativePath": "apps/simulation/src/runtime/npc_purchase_owner_tests.rs"
+      },
+      "run": "simulation-purchase05",
+      "config": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-simulation-purchase05.config.json",
+        "bytes": 4068,
+        "sha256": "44e54863996e3a4909818e549106a3602aeb1eb8f82ce258c13956dc98c288b0"
+      },
+      "actualTestName": "runtime::npc_purchase_transaction::tests::owner_tests::owner_authentication_epoch_and_enrollment_preflight_leave_actual_source_unchanged",
+      "status": "ok"
+    },
+    {
+      "relativePath": "apps/simulation/src/runtime/npc_purchase_owner_tests.rs",
+      "name": "owner_begin_same_epoch_is_stable_idempotent_and_reports_verified_complete_revision",
+      "source": {
+        "path": "E:/mir2-player-journey/mir2-web3/apps/simulation/src/runtime/npc_purchase_owner_tests.rs",
+        "bytes": 34132,
+        "sha256": "0af7f301c44d9d9c51de85c6db96ccddc3a8081ce48ce0236008a5029bdaef0d",
+        "relativePath": "apps/simulation/src/runtime/npc_purchase_owner_tests.rs"
+      },
+      "run": "simulation-purchase05",
+      "config": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-simulation-purchase05.config.json",
+        "bytes": 4068,
+        "sha256": "44e54863996e3a4909818e549106a3602aeb1eb8f82ce258c13956dc98c288b0"
+      },
+      "actualTestName": "runtime::npc_purchase_transaction::tests::owner_tests::owner_begin_same_epoch_is_stable_idempotent_and_reports_verified_complete_revision",
+      "status": "ok"
+    },
+    {
+      "relativePath": "apps/simulation/src/runtime/npc_purchase_owner_tests.rs",
+      "name": "owner_quote_and_original_id_query_never_write_file_revision_or_live_state",
+      "source": {
+        "path": "E:/mir2-player-journey/mir2-web3/apps/simulation/src/runtime/npc_purchase_owner_tests.rs",
+        "bytes": 34132,
+        "sha256": "0af7f301c44d9d9c51de85c6db96ccddc3a8081ce48ce0236008a5029bdaef0d",
+        "relativePath": "apps/simulation/src/runtime/npc_purchase_owner_tests.rs"
+      },
+      "run": "simulation-purchase05",
+      "config": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-simulation-purchase05.config.json",
+        "bytes": 4068,
+        "sha256": "44e54863996e3a4909818e549106a3602aeb1eb8f82ce258c13956dc98c288b0"
+      },
+      "actualTestName": "runtime::npc_purchase_transaction::tests::owner_tests::owner_quote_and_original_id_query_never_write_file_revision_or_live_state",
+      "status": "ok"
+    },
+    {
+      "relativePath": "apps/simulation/src/runtime/npc_purchase_owner_tests.rs",
+      "name": "owner_actual_purchase_and_exact_replay_preserve_receipt_and_full_live_authority",
+      "source": {
+        "path": "E:/mir2-player-journey/mir2-web3/apps/simulation/src/runtime/npc_purchase_owner_tests.rs",
+        "bytes": 34132,
+        "sha256": "0af7f301c44d9d9c51de85c6db96ccddc3a8081ce48ce0236008a5029bdaef0d",
+        "relativePath": "apps/simulation/src/runtime/npc_purchase_owner_tests.rs"
+      },
+      "run": "simulation-purchase05",
+      "config": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-simulation-purchase05.config.json",
+        "bytes": 4068,
+        "sha256": "44e54863996e3a4909818e549106a3602aeb1eb8f82ce258c13956dc98c288b0"
+      },
+      "actualTestName": "runtime::npc_purchase_transaction::tests::owner_tests::owner_actual_purchase_and_exact_replay_preserve_receipt_and_full_live_authority",
+      "status": "ok"
+    },
+    {
+      "relativePath": "apps/simulation/src/runtime/npc_purchase_owner_tests.rs",
+      "name": "owner_epoch_change_requires_begin_and_recovers_original_identity_without_old_scope_execution",
+      "source": {
+        "path": "E:/mir2-player-journey/mir2-web3/apps/simulation/src/runtime/npc_purchase_owner_tests.rs",
+        "bytes": 34132,
+        "sha256": "0af7f301c44d9d9c51de85c6db96ccddc3a8081ce48ce0236008a5029bdaef0d",
+        "relativePath": "apps/simulation/src/runtime/npc_purchase_owner_tests.rs"
+      },
+      "run": "simulation-purchase05",
+      "config": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-simulation-purchase05.config.json",
+        "bytes": 4068,
+        "sha256": "44e54863996e3a4909818e549106a3602aeb1eb8f82ce258c13956dc98c288b0"
+      },
+      "actualTestName": "runtime::npc_purchase_transaction::tests::owner_tests::owner_epoch_change_requires_begin_and_recovers_original_identity_without_old_scope_execution",
+      "status": "ok"
+    },
+    {
+      "relativePath": "apps/simulation/src/runtime/npc_purchase_owner_tests.rs",
+      "name": "owner_partial_or_stale_live_publication_cannot_certify_recovered_receipt_revision",
+      "source": {
+        "path": "E:/mir2-player-journey/mir2-web3/apps/simulation/src/runtime/npc_purchase_owner_tests.rs",
+        "bytes": 34132,
+        "sha256": "0af7f301c44d9d9c51de85c6db96ccddc3a8081ce48ce0236008a5029bdaef0d",
+        "relativePath": "apps/simulation/src/runtime/npc_purchase_owner_tests.rs"
+      },
+      "run": "simulation-purchase05",
+      "config": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-simulation-purchase05.config.json",
+        "bytes": 4068,
+        "sha256": "44e54863996e3a4909818e549106a3602aeb1eb8f82ce258c13956dc98c288b0"
+      },
+      "actualTestName": "runtime::npc_purchase_transaction::tests::owner_tests::owner_partial_or_stale_live_publication_cannot_certify_recovered_receipt_revision",
+      "status": "ok"
+    },
+    {
+      "relativePath": "apps/simulation/src/runtime/npc_purchase_owner_tests.rs",
+      "name": "owner_failed_begin_and_failed_logout_or_disconnect_retire_authority_without_losing_recovery",
+      "source": {
+        "path": "E:/mir2-player-journey/mir2-web3/apps/simulation/src/runtime/npc_purchase_owner_tests.rs",
+        "bytes": 34132,
+        "sha256": "0af7f301c44d9d9c51de85c6db96ccddc3a8081ce48ce0236008a5029bdaef0d",
+        "relativePath": "apps/simulation/src/runtime/npc_purchase_owner_tests.rs"
+      },
+      "run": "simulation-purchase05",
+      "config": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-simulation-purchase05.config.json",
+        "bytes": 4068,
+        "sha256": "44e54863996e3a4909818e549106a3602aeb1eb8f82ce258c13956dc98c288b0"
+      },
+      "actualTestName": "runtime::npc_purchase_transaction::tests::owner_tests::owner_failed_begin_and_failed_logout_or_disconnect_retire_authority_without_losing_recovery",
+      "status": "ok"
+    },
+    {
+      "relativePath": "apps/simulation/src/runtime/npc_purchase_owner_tests.rs",
+      "name": "owner_current_revision_and_journal_cannot_certify_unpublished_wallet_or_delivery",
+      "source": {
+        "path": "E:/mir2-player-journey/mir2-web3/apps/simulation/src/runtime/npc_purchase_owner_tests.rs",
+        "bytes": 34132,
+        "sha256": "0af7f301c44d9d9c51de85c6db96ccddc3a8081ce48ce0236008a5029bdaef0d",
+        "relativePath": "apps/simulation/src/runtime/npc_purchase_owner_tests.rs"
+      },
+      "run": "simulation-purchase05",
+      "config": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-simulation-purchase05.config.json",
+        "bytes": 4068,
+        "sha256": "44e54863996e3a4909818e549106a3602aeb1eb8f82ce258c13956dc98c288b0"
+      },
+      "actualTestName": "runtime::npc_purchase_transaction::tests::owner_tests::owner_current_revision_and_journal_cannot_certify_unpublished_wallet_or_delivery",
+      "status": "ok"
+    },
+    {
+      "relativePath": "apps/simulation/src/runtime/npc_purchase_owner_tests.rs",
+      "name": "owner_actual_checkpoint_replica_apply_mirrors_complete_state_without_reexecution_or_source_writes",
+      "source": {
+        "path": "E:/mir2-player-journey/mir2-web3/apps/simulation/src/runtime/npc_purchase_owner_tests.rs",
+        "bytes": 34132,
+        "sha256": "0af7f301c44d9d9c51de85c6db96ccddc3a8081ce48ce0236008a5029bdaef0d",
+        "relativePath": "apps/simulation/src/runtime/npc_purchase_owner_tests.rs"
+      },
+      "run": "simulation-purchase05",
+      "config": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-simulation-purchase05.config.json",
+        "bytes": 4068,
+        "sha256": "44e54863996e3a4909818e549106a3602aeb1eb8f82ce258c13956dc98c288b0"
+      },
+      "actualTestName": "runtime::npc_purchase_transaction::tests::owner_tests::owner_actual_checkpoint_replica_apply_mirrors_complete_state_without_reexecution_or_source_writes",
+      "status": "ok"
+    },
+    {
+      "relativePath": "apps/simulation/src/runtime/npc_purchase_owner_tests.rs",
+      "name": "owner_replica_refuses_source_truth_apply_and_older_foreign_or_rewritten_actual_history",
+      "source": {
+        "path": "E:/mir2-player-journey/mir2-web3/apps/simulation/src/runtime/npc_purchase_owner_tests.rs",
+        "bytes": 34132,
+        "sha256": "0af7f301c44d9d9c51de85c6db96ccddc3a8081ce48ce0236008a5029bdaef0d",
+        "relativePath": "apps/simulation/src/runtime/npc_purchase_owner_tests.rs"
+      },
+      "run": "simulation-purchase05",
+      "config": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-simulation-purchase05.config.json",
+        "bytes": 4068,
+        "sha256": "44e54863996e3a4909818e549106a3602aeb1eb8f82ce258c13956dc98c288b0"
+      },
+      "actualTestName": "runtime::npc_purchase_transaction::tests::owner_tests::owner_replica_refuses_source_truth_apply_and_older_foreign_or_rewritten_actual_history",
+      "status": "ok"
+    },
+    {
+      "relativePath": "apps/gateway/src/npc_purchase_owner_route_tests.rs",
+      "name": "durable_owner_defaults_and_missing_lease_authority_refuse_without_generic_execution",
+      "source": {
+        "path": "E:/mir2-player-journey/mir2-web3/apps/gateway/src/npc_purchase_owner_route_tests.rs",
+        "bytes": 38701,
+        "sha256": "d076b6370af58ec311235d2a4d76469842584f09b0ca9763ffe8d65081cc652a",
+        "relativePath": "apps/gateway/src/npc_purchase_owner_route_tests.rs"
+      },
+      "run": "gateway-owner05",
+      "config": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-gateway-owner05.config.json",
+        "bytes": 4047,
+        "sha256": "3e727a4297d2606cd3f9f8cd0588752cf7b93ab5927517b21115977682e0de68"
+      },
+      "actualTestName": "zone_rpc::npc_purchase_owner_route_tests::durable_owner_defaults_and_missing_lease_authority_refuse_without_generic_execution",
+      "status": "ok"
+    },
+    {
+      "relativePath": "apps/gateway/src/npc_purchase_owner_route_tests.rs",
+      "name": "durable_in_process_begin_quote_and_query_use_actual_file_and_read_only_original_id",
+      "source": {
+        "path": "E:/mir2-player-journey/mir2-web3/apps/gateway/src/npc_purchase_owner_route_tests.rs",
+        "bytes": 38701,
+        "sha256": "d076b6370af58ec311235d2a4d76469842584f09b0ca9763ffe8d65081cc652a",
+        "relativePath": "apps/gateway/src/npc_purchase_owner_route_tests.rs"
+      },
+      "run": "gateway-owner05",
+      "config": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-gateway-owner05.config.json",
+        "bytes": 4047,
+        "sha256": "3e727a4297d2606cd3f9f8cd0588752cf7b93ab5927517b21115977682e0de68"
+      },
+      "actualTestName": "zone_rpc::npc_purchase_owner_route_tests::durable_in_process_begin_quote_and_query_use_actual_file_and_read_only_original_id",
+      "status": "ok"
+    },
+    {
+      "relativePath": "apps/gateway/src/npc_purchase_owner_route_tests.rs",
+      "name": "durable_hosted_rpc_adapter_uses_real_file_owner_and_leaves_unlogged_shadow_untouched",
+      "source": {
+        "path": "E:/mir2-player-journey/mir2-web3/apps/gateway/src/npc_purchase_owner_route_tests.rs",
+        "bytes": 38701,
+        "sha256": "d076b6370af58ec311235d2a4d76469842584f09b0ca9763ffe8d65081cc652a",
+        "relativePath": "apps/gateway/src/npc_purchase_owner_route_tests.rs"
+      },
+      "run": "gateway-owner05",
+      "config": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-gateway-owner05.config.json",
+        "bytes": 4047,
+        "sha256": "3e727a4297d2606cd3f9f8cd0588752cf7b93ab5927517b21115977682e0de68"
+      },
+      "actualTestName": "zone_rpc::npc_purchase_owner_route_tests::durable_hosted_rpc_adapter_uses_real_file_owner_and_leaves_unlogged_shadow_untouched",
+      "status": "ok"
+    },
+    {
+      "relativePath": "apps/gateway/src/npc_purchase_owner_route_tests.rs",
+      "name": "durable_actual_local_and_hosted_purchase_replay_preserve_receipt_checkpoint_and_authority",
+      "source": {
+        "path": "E:/mir2-player-journey/mir2-web3/apps/gateway/src/npc_purchase_owner_route_tests.rs",
+        "bytes": 38701,
+        "sha256": "d076b6370af58ec311235d2a4d76469842584f09b0ca9763ffe8d65081cc652a",
+        "relativePath": "apps/gateway/src/npc_purchase_owner_route_tests.rs"
+      },
+      "run": "gateway-owner05",
+      "config": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-gateway-owner05.config.json",
+        "bytes": 4047,
+        "sha256": "3e727a4297d2606cd3f9f8cd0588752cf7b93ab5927517b21115977682e0de68"
+      },
+      "actualTestName": "zone_rpc::npc_purchase_owner_route_tests::durable_actual_local_and_hosted_purchase_replay_preserve_receipt_checkpoint_and_authority",
+      "status": "ok"
+    },
+    {
+      "relativePath": "apps/gateway/src/npc_purchase_owner_route_tests.rs",
+      "name": "durable_lease_handoff_refuses_stale_debit_and_recovers_exact_original_operation",
+      "source": {
+        "path": "E:/mir2-player-journey/mir2-web3/apps/gateway/src/npc_purchase_owner_route_tests.rs",
+        "bytes": 38701,
+        "sha256": "d076b6370af58ec311235d2a4d76469842584f09b0ca9763ffe8d65081cc652a",
+        "relativePath": "apps/gateway/src/npc_purchase_owner_route_tests.rs"
+      },
+      "run": "gateway-owner05",
+      "config": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-gateway-owner05.config.json",
+        "bytes": 4047,
+        "sha256": "3e727a4297d2606cd3f9f8cd0588752cf7b93ab5927517b21115977682e0de68"
+      },
+      "actualTestName": "zone_rpc::npc_purchase_owner_route_tests::durable_lease_handoff_refuses_stale_debit_and_recovers_exact_original_operation",
+      "status": "ok"
+    },
+    {
+      "relativePath": "apps/gateway/src/npc_purchase_owner_route_tests.rs",
+      "name": "durable_real_receipt_wire_roundtrips_and_refuses_mismatched_action_pair_and_packet_count",
+      "source": {
+        "path": "E:/mir2-player-journey/mir2-web3/apps/gateway/src/npc_purchase_owner_route_tests.rs",
+        "bytes": 38701,
+        "sha256": "d076b6370af58ec311235d2a4d76469842584f09b0ca9763ffe8d65081cc652a",
+        "relativePath": "apps/gateway/src/npc_purchase_owner_route_tests.rs"
+      },
+      "run": "gateway-owner05",
+      "config": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-gateway-owner05.config.json",
+        "bytes": 4047,
+        "sha256": "3e727a4297d2606cd3f9f8cd0588752cf7b93ab5927517b21115977682e0de68"
+      },
+      "actualTestName": "zone_rpc::npc_purchase_owner_route_tests::durable_real_receipt_wire_roundtrips_and_refuses_mismatched_action_pair_and_packet_count",
+      "status": "ok"
+    },
+    {
+      "relativePath": "apps/gateway/src/npc_purchase_owner_route_tests.rs",
+      "name": "durable_mutation_classification_blocks_generic_tcp_fallback_before_any_endpoint_access",
+      "source": {
+        "path": "E:/mir2-player-journey/mir2-web3/apps/gateway/src/npc_purchase_owner_route_tests.rs",
+        "bytes": 38701,
+        "sha256": "d076b6370af58ec311235d2a4d76469842584f09b0ca9763ffe8d65081cc652a",
+        "relativePath": "apps/gateway/src/npc_purchase_owner_route_tests.rs"
+      },
+      "run": "gateway-owner05",
+      "config": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-gateway-owner05.config.json",
+        "bytes": 4047,
+        "sha256": "3e727a4297d2606cd3f9f8cd0588752cf7b93ab5927517b21115977682e0de68"
+      },
+      "actualTestName": "zone_rpc::npc_purchase_owner_route_tests::durable_mutation_classification_blocks_generic_tcp_fallback_before_any_endpoint_access",
+      "status": "ok"
+    },
+    {
+      "relativePath": "apps/gateway/src/npc_purchase_owner_route_tests.rs",
+      "name": "durable_library_host_dispatch_fences_auth_version_lease_and_records_only_replay_checkpoint",
+      "source": {
+        "path": "E:/mir2-player-journey/mir2-web3/apps/gateway/src/npc_purchase_owner_route_tests.rs",
+        "bytes": 38701,
+        "sha256": "d076b6370af58ec311235d2a4d76469842584f09b0ca9763ffe8d65081cc652a",
+        "relativePath": "apps/gateway/src/npc_purchase_owner_route_tests.rs"
+      },
+      "run": "gateway-owner05",
+      "config": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-gateway-owner05.config.json",
+        "bytes": 4047,
+        "sha256": "3e727a4297d2606cd3f9f8cd0588752cf7b93ab5927517b21115977682e0de68"
+      },
+      "actualTestName": "zone_rpc::npc_purchase_owner_route_tests::durable_library_host_dispatch_fences_auth_version_lease_and_records_only_replay_checkpoint",
+      "status": "ok"
+    }
+  ],
+  "retainedFailures": [
+    {
+      "run": "simulation-purchase01",
+      "compileExit": 101,
+      "testsExecuted": 0,
+      "reason": "DTO json! array method expression syntax; ten parentheses pairs only."
+    },
+    {
+      "run": "simulation-purchase02",
+      "passed": 68,
+      "failed": 4,
+      "reason": "Real Begin unit variant swallowed unknown fields; fixed strict empty struct decoding. Two genuine drug658 fixtures assumed Bag, actual File showed unique Belt0/UID0 carrier; corrected expected container while retaining full checkpoint checks."
+    },
+    {
+      "run": "gateway-owner03",
+      "compileExit": 101,
+      "testsExecuted": 0,
+      "reason": "Actual digest Array lacks LowerHex; reused existing exact hex helper. Unsupported probe implemented two required trait methods."
+    },
+    {
+      "run": "gateway-owner04",
+      "passed": 7,
+      "failed": 1,
+      "reason": "Standby fixture wrongly saved before replay and advanced its revision; same-revision conflict protection correctly refused. Changed only actual Login/StartGame at original baseline, with new revision/journal assertions."
+    }
+  ],
+  "executionQualification": {
+    "finiteFileFixturesOnly": true,
+    "finiteDirectLibraryHostDispatch": true,
+    "actualRpcAdapter": true,
+    "wireJsonAndNamedMessagePackFromGenuineOwner": true,
+    "ownedTempFixturesOnly": true,
+    "standbyIsolatedBeforeGenuineCommit": true,
+    "noBackgroundOwnerLoop": true,
+    "noExternalAccountRead": true,
+    "noDbContact": true,
+    "noSocketOrListener": true,
+    "noUiOrWasmInstance": true
+  },
+  "guardQualification": {
+    "originalImmutableGuard": true,
+    "cargoCalls": 11,
+    "thresholdBytes": "53687091200",
+    "allActualGetVolumeC": true,
+    "allFreshWithin2000ms": true,
+    "freshUpperMs": [
+      {
+        "run": "simulation-purchase01",
+        "ms": 72
+      },
+      {
+        "run": "simulation-purchase02",
+        "ms": 83
+      },
+      {
+        "run": "gateway-owner03",
+        "ms": 76
+      },
+      {
+        "run": "gateway-owner04",
+        "ms": 75
+      },
+      {
+        "run": "gateway-owner05",
+        "ms": 74
+      },
+      {
+        "run": "simulation-purchase05",
+        "ms": 76
+      },
+      {
+        "run": "simulation-gold05",
+        "ms": 75
+      },
+      {
+        "run": "simulation-pearl05",
+        "ms": 78
+      },
+      {
+        "run": "simulation-save05",
+        "ms": 65
+      },
+      {
+        "run": "simulation-demo05",
+        "ms": 67
+      },
+      {
+        "run": "gateway-gold05",
+        "ms": 77
+      }
+    ],
+    "allPolicyBExitedDisposed": true,
+    "receiptFileCount": 55,
+    "serialLifecycle": [
+      {
+        "name": "simulation-purchase01",
+        "startedMs": 1791370919359,
+        "completedMs": 1791370922262,
+        "exited": true,
+        "disposed": true
+      },
+      {
+        "name": "simulation-purchase02",
+        "startedMs": 1791371020976,
+        "completedMs": 1791371199062,
+        "exited": true,
+        "disposed": true
+      },
+      {
+        "name": "gateway-owner03",
+        "startedMs": 1791371476536,
+        "completedMs": 1791371575049,
+        "exited": true,
+        "disposed": true
+      },
+      {
+        "name": "gateway-owner04",
+        "startedMs": 1791371821826,
+        "completedMs": 1791371957496,
+        "exited": true,
+        "disposed": true
+      },
+      {
+        "name": "gateway-owner05",
+        "startedMs": 1791372091077,
+        "completedMs": 1791372233830,
+        "exited": true,
+        "disposed": true
+      },
+      {
+        "name": "simulation-purchase05",
+        "startedMs": 1791372385560,
+        "completedMs": 1791372563695,
+        "exited": true,
+        "disposed": true
+      },
+      {
+        "name": "simulation-gold05",
+        "startedMs": 1791372565802,
+        "completedMs": 1791372573269,
+        "exited": true,
+        "disposed": true
+      },
+      {
+        "name": "simulation-pearl05",
+        "startedMs": 1791372575395,
+        "completedMs": 1791372577968,
+        "exited": true,
+        "disposed": true
+      },
+      {
+        "name": "simulation-save05",
+        "startedMs": 1791372579726,
+        "completedMs": 1791372591975,
+        "exited": true,
+        "disposed": true
+      },
+      {
+        "name": "simulation-demo05",
+        "startedMs": 1791372593766,
+        "completedMs": 1791372594869,
+        "exited": true,
+        "disposed": true
+      },
+      {
+        "name": "gateway-gold05",
+        "startedMs": 1791372596972,
+        "completedMs": 1791372612438,
+        "exited": true,
+        "disposed": true
+      }
+    ]
+  },
+  "completed": [
+    "Real durable owner capability defaults false; actual source, auth, active actor and held lease guard required.",
+    "Dedicated owner Begin/Quote/Query/Purchase route; no generic BuyItem execution or mutation fallback.",
+    "Original operation/full-intent receipt correlation and terminal semantics checked before preserving known PostCommit.",
+    "Shared owner leaf avoids old economy/pending drain under lease row lock; capture actual receipt before tail.",
+    "Internal Host journal replays actual complete committed checkpoint into isolated replica without debit/delivery/re-enrollment or source File writes.",
+    "Same revision requires exact checkpoint; final shared store compare-and-set prevents concurrent overwrite; replica restore retires producer/owner authority.",
+    "Replication identity includes explicit NPC checkpoint schema and full source label hash.",
+    "Partial/stale wallet/delivery cannot certify live authority revision; full snapshot/authority captured in one owner turn."
+  ],
+  "outstanding": [
+    "Strict external client decimal u64 wire and raw duplicate-field rejection, accepted server capability/Begin response.",
+    "Core ABI and actual Native/Web receipt ledger dispatch/recovery, retained per Actor through reconnect/UI remount.",
+    "Native atomic economic snapshot application acknowledgement and Web complete application witness; queued or inventory-only readiness is insufficient.",
+    "Latest matching Native/Gateway/Core/PUI/Next/Thin build after full integration.",
+    "Actual TCP endpoint/PG lease/replication deployment and process-cold recovery remain unrun.",
+    "Personal NPC Used stock checkpoint does not establish shared-zone global stock ownership.",
+    "Resources/WASM/login/combat/save/relogin/mobile/frontend acceptance remain deferred."
+  ],
+  "latestBuiltHistoricalPackage": {
+    "publication": {
+      "path": "E:/mir2-player-journey/mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/ranking-source25-publication01.json",
+      "bytes": 9948,
+      "sha256": "5577d9778e660f5d0e4b9ad14b08f7cfe393b56c374f5a9d443d50c3427f7e34"
+    },
+    "sourceCommit": "7b1afe2706a4eec037f085d1f599d2ea987f031f",
+    "root": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\.mir2-thin-client-web-windows-catchup-20261007-08",
+    "containsSource26": false,
+    "playerVerified": false,
+    "containsSource27": false
+  },
+  "matrixUnchanged": {
+    "path": "E:/mir2-player-journey/mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/feature-matrix11.json",
+    "bytes": 3228933,
+    "sha256": "1b533c6fba3af282d58be119cc591f004ee579b7d50e86b186a65249c100f6b1"
+  },
+  "previousActualPublication": {
+    "path": "E:/mir2-player-journey/mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/npc-purchase-source27-publication01.json",
+    "bytes": 5776,
+    "sha256": "0100115cfc647827290fd40216364d6907d4eb6be64805ecd277d0d3ca134883"
+  },
+  "gitPublication": {
+    "currentRoundCommitted": false,
+    "currentRoundPushed": false,
+    "qualifiedAt": "Before Source28 git operations; postcommit publication recorded separately."
+  },
+  "uiOperated": false,
+  "runtimeLaunched": false,
+  "networkUsed": false,
+  "wasmApiUsed": false,
+  "finiteCpuAccepted": true,
+  "source28ProductionBuildAccepted": false,
+  "playerAccepted": false,
+  "candidate100": false,
+  "overallPercentage": null,
+  "goalComplete": false
+}

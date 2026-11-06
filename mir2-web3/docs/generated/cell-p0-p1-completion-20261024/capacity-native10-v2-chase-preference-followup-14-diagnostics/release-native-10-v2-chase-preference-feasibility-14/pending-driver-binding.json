@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "state": "PENDING_CURRENT_DRIVER_COMMIT_FREEZE_AND_FULL200",
+  "driverSourceCommit": null,
+  "coreCodeEvidenceCommit": null,
+  "driverSourceSha256": null,
+  "driverFrozenFile": null,
+  "driverManifestBytes": null,
+  "driverManifestSha256": null,
+  "currentEvidence": [],
+  "staticGeometryCompatibilityProof": null,
+  "requiresRootFinalizationAfterFull200": true,
+  "realmStarted": false,
+  "capacityAccepted": false
+}

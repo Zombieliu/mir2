@@ -1,0 +1,70 @@
+TAP version 13
+# Subtest: formal146 raw windows match five5-window stages,120 soak windows and one post-resume window
+ok 1 - formal146 raw windows match five5-window stages,120 soak windows and one post-resume window
+  ---
+  duration_ms: 3.1465
+  type: 'test'
+  ...
+# Subtest: fresh probe13 keeps the exact sixteen-window5/5/6 profile
+ok 2 - fresh probe13 keeps the exact sixteen-window5/5/6 profile
+  ---
+  duration_ms: 0.1886
+  type: 'test'
+  ...
+# Subtest: partial tail and stage-completion records never substitute for a missing complete minute
+ok 3 - partial tail and stage-completion records never substitute for a missing complete minute
+  ---
+  duration_ms: 1.0047
+  type: 'test'
+  ...
+# Subtest: short real windows are rejected even if source and report both label them passing
+ok 4 - short real windows are rejected even if source and report both label them passing
+  ---
+  duration_ms: 0.3063
+  type: 'test'
+  ...
+# Subtest: full raw assessment must match original report, not merely its passed boolean
+ok 5 - full raw assessment must match original report, not merely its passed boolean
+  ---
+  duration_ms: 0.7237
+  type: 'test'
+  ...
+# Subtest: extra complete windows, missing windows and unknown phases all fail closed
+ok 6 - extra complete windows, missing windows and unknown phases all fail closed
+  ---
+  duration_ms: 1.0495
+  type: 'test'
+  ...
+# Subtest: phase order and contiguous raw start clocks cannot be substituted
+ok 7 - phase order and contiguous raw start clocks cannot be substituted
+  ---
+  duration_ms: 0.2771
+  type: 'test'
+  ...
+# Subtest: elapsed report clock and phase-end containment remain strict
+ok 8 - elapsed report clock and phase-end containment remain strict
+  ---
+  duration_ms: 0.4616
+  type: 'test'
+  ...
+# Subtest: only the fixed report phase-window counts and two named profiles are accepted
+ok 9 - only the fixed report phase-window counts and two named profiles are accepted
+  ---
+  duration_ms: 0.3456
+  type: 'test'
+  ...
+# Subtest: failed/partial archival wiring does not construct the passing-report window counter
+ok 10 - failed/partial archival wiring does not construct the passing-report window counter
+  ---
+  duration_ms: 3.8816
+  type: 'test'
+  ...
+1..10
+# tests 10
+# suites 0
+# pass 10
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 57.5678

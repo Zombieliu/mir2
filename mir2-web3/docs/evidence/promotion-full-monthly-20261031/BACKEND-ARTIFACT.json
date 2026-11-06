@@ -1,0 +1,75 @@
+{
+  "localOnly": true,
+  "sourceSha": "13fc2e9f60203e65df152792d9ee63fb059065db",
+  "workflowRunId": 41136078361,
+  "artifactId": 13018090837,
+  "artifactName": "promotion-backend-13fc2e9f60203e65df152792d9ee63fb059065db",
+  "sourceZip": "E:\\mir2-task-temp\\full-monthly-artifact-13fc2e9f6020\\range-full-55a37eabb7104b64abbdb6bc55526278\\backend-original.zip",
+  "sourceZipSha256": "2bdfc5d23b077a2374d5565c5563987582cd47a5f77bf598663cfa6073db5c80",
+  "zipBytes": 93159737,
+  "normalizedTar": "E:\\mir2-task-temp\\full-monthly-artifact-13fc2e9f6020\\normalized-13018090837-cc060d7c6531436ba3caa61a9ccddfb6\\backend.tar.gz",
+  "artifactSha256": "3c130ae24707908278ea4fccbc27f354c1bf47896b81ff393b8bb7a3ecaf812b",
+  "tarBytes": 89447497,
+  "fullManifest": "E:\\mir2-task-temp\\full-monthly-artifact-13fc2e9f6020\\normalized-13018090837-cc060d7c6531436ba3caa61a9ccddfb6\\TRUSTED-FILES-MANIFEST.json",
+  "fullManifestSha256": "b617589270d841163e214fe530e0f6b94cf8112977bab8837f8e77943f5c81aa",
+  "files": 1830,
+  "authenticatedMetadata": "E:\\mir2-task-temp\\full-monthly-artifact-13fc2e9f6020\\normalized-13018090837-cc060d7c6531436ba3caa61a9ccddfb6\\AUTHENTICATED-METADATA.json",
+  "authenticatedMetadataSha256": "445f4743894b6a785f9bd64d11dc75b1348b5a76cecca45239d3d9341a69491b",
+  "originalAuthenticatedMetadata": "E:\\mir2-task-temp\\full-monthly-artifact-13fc2e9f6020\\range-full-55a37eabb7104b64abbdb6bc55526278\\AUTHENTICATED-METADATA.json",
+  "originalAuthenticatedMetadataSha256": "445f4743894b6a785f9bd64d11dc75b1348b5a76cecca45239d3d9341a69491b",
+  "validationReceipt": "E:\\mir2-task-temp\\full-monthly-artifact-13fc2e9f6020\\normalized-13018090837-cc060d7c6531436ba3caa61a9ccddfb6\\ARTIFACT-VALIDATION.json",
+  "validationReceiptSha256": "cc48d599245aa52449a82b1c869cb298b2b07999244f8e35dcb99263c5f8c5d3",
+  "testsExecuted": 80,
+  "logs": {
+    "NATIVE-PG-TESTS.log": {
+      "passed": true,
+      "testsExecuted": 58,
+      "logSha256": "e0a2d5172819660d00f55237ba1110881da63d5af7d2b73eea311dfb2a57ccce"
+    },
+    "CLONE-CLI-TESTS.log": {
+      "passed": true,
+      "testsExecuted": 14,
+      "logSha256": "c498ca0a161fa11d45978589c5cf567aa414495bc0962e5b08fe99f575b6279c"
+    },
+    "WALLET-IDENTITY-TESTS.log": {
+      "passed": true,
+      "testsExecuted": 8,
+      "logSha256": "2a2bef9622b0a53800c75316efea18e5730d6c3e9bb1c26b8a4465f82280851b"
+    }
+  },
+  "requiredBinaries": {
+    "mir2-gateway": "7343ad2c6efb82b06d69a29ca87797fdf28e191f683df89a6730308dc20847e8",
+    "promotion_worker": "4bd750ecaff0e4d89cc28ac5e648321d32c4eb588e685236dfc855fc0230491d",
+    "promotion_recalculate": "4418023759d63e07dab97906dc362a77060e54b96ade2182b856c014dea7892f",
+    "promotion_full_monthly_policy": "6a165845357c3b77fbfa4ea4bd2b46a475090ac442ddb17c2b59f2ab1cf8d743"
+  },
+  "selectedRuntime": "E:\\mir2-task-temp\\full-monthly-artifact-13fc2e9f6020\\normalized-13018090837-cc060d7c6531436ba3caa61a9ccddfb6\\selected-runtime-6d34c0dc3cca4ecf9778cbac6a11ca50",
+  "selectedFiles": {
+    "mir2-gateway": {
+      "path": "E:\\mir2-task-temp\\full-monthly-artifact-13fc2e9f6020\\normalized-13018090837-cc060d7c6531436ba3caa61a9ccddfb6\\selected-runtime-6d34c0dc3cca4ecf9778cbac6a11ca50\\mir2-gateway",
+      "sha256": "7343ad2c6efb82b06d69a29ca87797fdf28e191f683df89a6730308dc20847e8",
+      "bytes": 89926896
+    },
+    "promotion_worker": {
+      "path": "E:\\mir2-task-temp\\full-monthly-artifact-13fc2e9f6020\\normalized-13018090837-cc060d7c6531436ba3caa61a9ccddfb6\\selected-runtime-6d34c0dc3cca4ecf9778cbac6a11ca50\\promotion_worker",
+      "sha256": "4bd750ecaff0e4d89cc28ac5e648321d32c4eb588e685236dfc855fc0230491d",
+      "bytes": 5515776
+    },
+    "promotion_recalculate": {
+      "path": "E:\\mir2-task-temp\\full-monthly-artifact-13fc2e9f6020\\normalized-13018090837-cc060d7c6531436ba3caa61a9ccddfb6\\selected-runtime-6d34c0dc3cca4ecf9778cbac6a11ca50\\promotion_recalculate",
+      "sha256": "4418023759d63e07dab97906dc362a77060e54b96ade2182b856c014dea7892f",
+      "bytes": 2527016
+    },
+    "promotion_full_monthly_policy": {
+      "path": "E:\\mir2-task-temp\\full-monthly-artifact-13fc2e9f6020\\normalized-13018090837-cc060d7c6531436ba3caa61a9ccddfb6\\selected-runtime-6d34c0dc3cca4ecf9778cbac6a11ca50\\promotion_full_monthly_policy",
+      "sha256": "6a165845357c3b77fbfa4ea4bd2b46a475090ac442ddb17c2b59f2ab1cf8d743",
+      "bytes": 3812816
+    }
+  },
+  "tools": {
+    "prepare_artifact.py": "f805ac7c73e55a6f7acb5c47c43b0d6998bd905d4a601b9cfae34dd00548ab5b",
+    "range_transport.py": "245ce92b63f415854a987389edf028a59d7a8fc668f9b05f494d573bf87d782d",
+    "export_artifact.py": "1fb3a476c9473fdcfb0a29ed80603fbb32b2988c50cc335fd1cc428cce8dcbb0"
+  },
+  "sshOrRemoteMutations": false
+}

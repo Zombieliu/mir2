@@ -1,0 +1,35 @@
+{
+  "visualAccepted": false,
+  "buildNote": "Gateway corrected tests use debug=2 to avoid an existing Windows test executable lock; source unchanged. Simulation debug=1,opt-level=1; explicit x86_64-pc-windows-msvc target.",
+  "date": "2026-09-09",
+  "windows": {
+    "testThreads": 1,
+    "failed": 0,
+    "passed": 561
+  },
+  "simulationInventory": {
+    "passed": 98,
+    "failed": 0
+  },
+  "packaged": false,
+  "gatewayTrade": {
+    "focusedTwoSessionPassed": 2,
+    "initialFailed": 2,
+    "resolvedUniqueTests": 55,
+    "focusedTwoSessionOverlaps": true,
+    "correctedFocusedPassed": 2,
+    "initialPassed": 53,
+    "freshFullPass": false
+  },
+  "simulationTrade": {
+    "passed": 31,
+    "failed": 0
+  },
+  "accepted": false,
+  "nativeUi": {
+    "passed": 618,
+    "failed": 0
+  },
+  "baseCommit": "d1007a349",
+  "globalParityPercent": null
+}

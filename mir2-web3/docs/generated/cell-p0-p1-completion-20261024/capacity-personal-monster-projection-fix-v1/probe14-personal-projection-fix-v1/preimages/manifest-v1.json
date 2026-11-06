@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "capturedAt": "2026-10-25T10:55:35.951Z",
+  "head": "b84d5d02a8299b6ac36c5e56cb7006f6bc80d3bd",
+  "files": [
+    {
+      "file": "apps/gateway/src/routing.rs",
+      "preimage": "C:\\mir2-build\\p01-completion-20261024\\probe14-personal-projection-fix-v1\\preimages\\routing.rs.txt",
+      "bytes": 1388304,
+      "sha256": "a0e3a19ad1184efd87a632118a98a65c975ca12d2adfda95b2f9e4a6138eff49"
+    },
+    {
+      "file": "apps/gateway/src/routing/tests/personal_monster_projection_tests.rs",
+      "preimage": "C:\\mir2-build\\p01-completion-20261024\\probe14-personal-projection-fix-v1\\preimages\\personal_monster_projection_tests.rs.txt",
+      "bytes": 12555,
+      "sha256": "dc5d0862501b588263f1a187628af6a1e00ec30a268d000e73feebb8aa42f722"
+    }
+  ],
+  "productEdited": false,
+  "testsExecuted": false
+}

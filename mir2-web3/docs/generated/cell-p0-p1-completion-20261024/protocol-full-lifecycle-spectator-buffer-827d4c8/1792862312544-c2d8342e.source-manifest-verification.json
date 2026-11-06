@@ -1,0 +1,11 @@
+{
+  "schemaVersion": 1,
+  "sourceCommit": "827d4c8b52066d033a2f18941be80c97b337d6de",
+  "backendInputCount": 33,
+  "sourceManifestSha256": "d8936d2f2b77bfcf2f9b84c8ecc1d5c3ad37f095abe73836ed785ad852dcd5ea",
+  "sourceManifestFileSha256": "c6cd3a1cfa0a02bb1a709d937b85457be72def4a61c5fa50a3a7768a2b2ebc1f",
+  "matchedRawInputs": 33,
+  "matchedRawDriverPins": 6,
+  "releaseSha256": "187775e2398ca593d4aa6021e1b2a7cf3a577ec2a19ca5e7446eaaa70a506f8c",
+  "scope": "This fresh buffered Release only; old32-input proof unchanged"
+}

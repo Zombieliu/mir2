@@ -1,0 +1,86 @@
+{
+  "owner": "Root",
+  "accepted": true,
+  "originalCaller": {
+    "bytes": 4569,
+    "sha256": "497a5b184074ca9591cb666b0124097f7fe4e4a5fae28dbd9f54807b423e8383",
+    "sessionId": 4715,
+    "closed": true,
+    "exitCode": 0,
+    "postguardPassed": true
+  },
+  "actualOuter": {
+    "owner": "Root",
+    "exitCode": 0,
+    "builderPid": 72976,
+    "kind": "Root approved original Source75 Thin01 actual strict Next and portable27",
+    "exited": true,
+    "disposed": true,
+    "elapsedMs": 26517,
+    "configPath": "C:/mir2-cross-platform-storage-20261002/web-source75-storage-prepare-paint-20261012-01/root-approved01/thin-build01-config.json",
+    "uiOperated": false,
+    "runtimeLaunched": false,
+    "networkUsed": false,
+    "productionBuildAccepted": false,
+    "candidateAccepted": false,
+    "goalComplete": false
+  },
+  "configPin": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source75-storage-prepare-paint-20261012-01\\root-approved01\\thin-build01-config.json",
+    "bytes": 6703,
+    "sha256": "9f6c6dffe860db2b01926bff2c6620d105f38033ba571f5f446e99bfa012c494"
+  },
+  "inputSnapshotPin": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source75-storage-prepare-paint-20261012-01\\root-approved01\\source75-full-snapshot01.json",
+    "bytes": 44325719,
+    "sha256": "eb5e312c90dcf548eb107d32a3c94f6f9539c995b2ecfbd0682d750f7d53e019"
+  },
+  "wholeOutputPin": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source75-storage-prepare-paint-20261012-01\\root-approved01\\source75-thin-output-manifest01.json",
+    "bytes": 2770251,
+    "sha256": "7386c0e033e0efbb95a8b70bd187d0fe66c54c29fd817f963543b5ec9062e424"
+  },
+  "physical": {
+    "files": 4433,
+    "directoriesIncludingRoot": 752,
+    "bytes": 315435442,
+    "links": 0,
+    "special": 0
+  },
+  "budget": {
+    "capBytes": 377487360,
+    "inclusive": true,
+    "passed": true
+  },
+  "verification": {
+    "actualNextEqualLeaves": 222,
+    "hashDifferences": 0,
+    "skinUnion": 30,
+    "genuineSkinBytes": 196318,
+    "fontPreserved": true,
+    "uiJsonValuesPreserved": 229,
+    "mapFrames": 116,
+    "coreLeaves": 6,
+    "dependencyWarnings": 59,
+    "warningMultisetEqualsSource74": true,
+    "warningDetailsRetained": true
+  },
+  "sizeReportPin": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source75-storage-prepare-paint-20261012-01\\thin-build01\\size-report.json",
+    "bytes": 83200,
+    "sha256": "ccb4a4e23fb4a922cbd46677c13c016740cf5942328288a02fa2a1c7529e1bbf"
+  },
+  "stdoutPin": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source75-storage-prepare-paint-20261012-01\\thin-build01\\stdout.txt",
+    "bytes": 83200,
+    "sha256": "ccb4a4e23fb4a922cbd46677c13c016740cf5942328288a02fa2a1c7529e1bbf"
+  },
+  "stderrPin": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source75-storage-prepare-paint-20261012-01\\thin-build01\\stderr.txt",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "candidateAccepted": false,
+  "goalComplete": false,
+  "sharedNativeOwnershipAccepted": false
+}

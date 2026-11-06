@@ -1,0 +1,118 @@
+{
+  "schemaVersion": 1,
+  "state": "DRAFT_PENDING_NOT_FINALIZED_NOT_SEALED",
+  "identity": "probe16",
+  "draftDirectory": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-attack-deadline-feasibility-16",
+  "notAnExecutionIdentityRegistration": true,
+  "eligibility": {
+    "finalize": false,
+    "seal": false,
+    "sourceGuard": false,
+    "prepareAccounts": false,
+    "runRealm": false,
+    "capacityAccepted": false
+  },
+  "futureActualBindings": {
+    "executionCommit": null,
+    "driverCodeEvidenceCommit": null,
+    "driverSourceSha256": null,
+    "driverFrozenManifest": null,
+    "backendSourceCommit": null,
+    "backendSourceManifest": null,
+    "backendSourceSha256": null,
+    "release": null,
+    "binary": null,
+    "functionalFull16": null,
+    "probe16IndependentVerification": null,
+    "independentVerifierToolSeal": null,
+    "independentVerifierExecutionReceipt": null
+  },
+  "historicalOnly": {
+    "previousExecutionCommit": "5c2e713863d3e9556a92f856b11df2396c73b137",
+    "previousNodeCodeEvidenceCommit": "b84d5d02a8299b6ac36c5e56cb7006f6bc80d3bd",
+    "previousNodeSourceSha256": "db4e22c69b4f1365d8135023e158f4de00ff35d58330cf7eca98801780e674e7",
+    "previousBinarySha256": "d8791cceeed00fdb7019d1201aad19f06005790162df1b459a8cacac96f68756",
+    "previousOutcome": "Probe15 PASS is historical; it cannot validate the future driver or backend",
+    "wireCodeEvidenceCommit": "6d70d02d0bc390156b77a3e48acee714fc87cda3",
+    "wireEvidenceRule": "Original wrapper28/adapter8 and historical187 stay separate from current/new Node regression evidence."
+  },
+  "preservedProfile": {
+    "policy": {
+      "profile": "probe",
+      "activityMode": "native",
+      "movementIntervalMs": 750,
+      "stages": [
+        2,
+        10
+      ],
+      "stageSeconds": 300,
+      "soakSeconds": 360,
+      "wallSeconds": 3600,
+      "layout": "dispersed",
+      "combatActors": 1,
+      "resumeSamples": 0,
+      "saveSamples": 0,
+      "commandsPerSecond": 3,
+      "intentionIntervalMs": 750,
+      "variableActionCadence": true,
+      "maximumSendLatenessMs": 250,
+      "movementP95Ms": 750,
+      "chatP95Ms": 1000,
+      "actionTimeoutMs": 2000,
+      "timeoutExclusive": 0.01,
+      "maximumMissedPlanRatio": 0.05,
+      "maximumCorrectionRatio": 0.05,
+      "minimumMovesPerMinute": 30,
+      "minimumCombatHitsPerMinute": 12,
+      "minimumCombatAttacksPerMinute": 18,
+      "aoiRange": 16,
+      "aoiGraceMs": 1000,
+      "nativeChatIntervalMs": 30000,
+      "nativeTurnIntervalMs": 60000,
+      "minimumNativeRunRatio": 0.5,
+      "minimumNativeCellsPerMinute": 80,
+      "maximumEvidenceInFlight": 4,
+      "maximumMemorySlopeMiBPerHour": 32,
+      "memoryWarmupSeconds": 300,
+      "maximumDriverLagP99Ms": 250,
+      "fullAcceptanceEligible": false
+    },
+    "expectedCompleteWindows": 16,
+    "completeWindowMinimumSeconds": 60,
+    "wholePhaseRateDenominator": "actual measuredSeconds",
+    "nominalSecondsRetained": true,
+    "postObservation": null,
+    "caps": [
+      24,
+      10,
+      10,
+      4,
+      1,
+      2
+    ],
+    "scenario": {
+      "path": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-personal-projection-feasibility-15\\scenario.json",
+      "bytes": 804,
+      "sha256": "a42a26a195dd5ac25135bff57e73f7f21b71f97b5cc1814351920ece621362ba"
+    },
+    "resource": {
+      "path": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-personal-projection-feasibility-15\\resource-profile.json",
+      "bytes": 1194,
+      "sha256": "a5e9012823bd816dedc3c40b13988618f3a18e69b3dd19edc4534a199a778ac3"
+    }
+  },
+  "requiredFutureGates": [
+    "Final new driver raw9 manifest and actual focused/full regression evidence for the new source; do not inherit db4e as current.",
+    "New committed clean execution/backend HEAD; original44 paths preserved, only web.rs may differ from5c2 manifest and the other43 raw/GitLF entries must match exactly.",
+    "Fresh Release manifest, binary and bounded build log with before/after source equality; oldd879/a430/855b are not a new diagnostic Release.",
+    "Fresh full16 ordinary dual-client lifecycle pass on that exact new Release, with normal cleanup.",
+    "Future scoped slow-stage strict helper schema must match new web fields, without modifying old frozen helpers.",
+    "Actual complete probe16 must pass original2/10x300+360 with5/5/6>=60s windows, original18launch/12dualhit/1%/5% and native gates, normal cleanup/public collection and independent verifier actual complete source closure before formal12 admission."
+  ],
+  "forbiddenPromotion": [
+    "No use of Probe13/15 PASS as evidence for the changed backend/driver.",
+    "No copied pending report.ok or historicalfull16 can grant fresh eligibility.",
+    "No ACK credit from diagnostics; original900ms filtering and all game thresholds remain.",
+    "No changed actors, scene, HP rules or reduced formal stages."
+  ]
+}

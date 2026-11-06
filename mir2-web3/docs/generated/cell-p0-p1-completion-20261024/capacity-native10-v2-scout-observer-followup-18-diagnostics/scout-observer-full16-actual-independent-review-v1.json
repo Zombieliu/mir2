@@ -1,0 +1,98 @@
+{
+  "schemaVersion": 1,
+  "reviewedAt": "2026-10-25T21:35:12.995Z",
+  "scope": "Read-only small ended artifact/actual audit/source/provenance/Root OS-proof review. No independent trace replay, audit rerun, service, test, private value or executable read.",
+  "realmStamp": "1792963900426-f1496383",
+  "runId": "1792963911146-f4437694",
+  "sources": {
+    "report": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-observer-preference-v1\\public\\1792963911146-f4437694.report.json",
+      "bytes": 109384,
+      "sha256": "8e635a13d012553e140ddb0633771c4f1e2cb4596026a60153f0bfe5198460c7"
+    },
+    "realm": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-observer-preference-v1\\public\\1792963900426-f1496383.realm-evidence.json",
+      "bytes": 35109,
+      "sha256": "f41f368182319ad881c960fcd59ba3150381751de6679683d8bed6fef59df0e3"
+    },
+    "independentAudit": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-observer-preference-v1\\public\\1792963900426-f1496383.independent-audit.json",
+      "bytes": 1907,
+      "sha256": "92a72770bab2e302537eda593baf72a8cb5438a0d6956fa171e2f7e80128533f"
+    },
+    "sourceVerification": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-observer-preference-v1\\public\\1792963900426-f1496383.source-manifest-verification.json",
+      "bytes": 717,
+      "sha256": "4c580c3b6e29e8a4bc0440698c3f007c75b7db827ae0439f51c8ccd97a79ba3d"
+    },
+    "rootCleanup": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\scout-observer-full16-root-independent-cleanup-v1.json",
+      "bytes": 322,
+      "sha256": "26b848d824fea7880bd038f3e30b6b1851422c4d924bb9de3a8108c23387423a"
+    },
+    "actualFinalBinding": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-observer-preference-v1\\launcher-final-binding-v1.json",
+      "bytes": 2409,
+      "sha256": "3c219d03f6fa7182669412ba5d9f69c27140dd1c3e0a8638730da8e2e7c2dbf5"
+    },
+    "logs": {
+      "run_stdout": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\scout-observer-full16-root-run-stdout-v1.log",
+        "bytes": 1832,
+        "sha256": "bf455d636f6fef2ce18762b1f50689b2736fbfa53f53b2661ced6be7735f854d"
+      },
+      "run_stderr": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\scout-observer-full16-root-run-stderr-v1.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "audit_stdout": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\scout-observer-full16-root-audit-stdout-v1.log",
+        "bytes": 1646,
+        "sha256": "810ce5f3acb38be754b2b5e241c90a86517ab084a161cc4d21bbcfa17057ab1d"
+      },
+      "audit_stderr": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\scout-observer-full16-root-audit-stderr-v1.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    }
+  },
+  "actualFacts": {
+    "full16Passed": true,
+    "ordinarySentCommandCount": 351,
+    "backendSourceCommit": "c743122af05faca43d9535d8c6c2a4bfb01b924f",
+    "executionSourceCommit": "3a6d8c862d03ded3133605472a8f38bc6258af52",
+    "driverSourceCommit": "3a6d8c862d03ded3133605472a8f38bc6258af52",
+    "backendInputCount": 50,
+    "backendSourceAggregate": "09081ea9b49d968574b99f444c238932045eccb0dc3f7de4b24496a932c895f7",
+    "binarySha256": "dae1f873878ee5212e8d84cd57cb9cc737104aaec8a644c4aeb33a49980d82cc",
+    "ordinaryLifecycleDriverCount": 6,
+    "sixCountersZeroBeforeAndAfter": true,
+    "normalExitCode": 0,
+    "firstNoLootAttemptPreservedByActualAudit": true,
+    "rootObservedGatewayPid": 66224,
+    "rootObservedGatewayProcessPresent": false,
+    "rootObservedRemainingOwnedPortListeners": []
+  },
+  "checks": {
+    "all16ReportAndActualAuditStatusesPassed": true,
+    "threeArtifactsBackendAndHIdentityMatch": true,
+    "source50AndOrdinary6CountsMatch": true,
+    "actualReviewedV2FinalizerBindingPinMatched": true,
+    "pairedRawReceiptProofReportedByActualAudit": true,
+    "rootCleanupPinAndRealmPidMatch": true
+  },
+  "limitations": [
+    "351 ordinary sends, paired raw receipt and first no-loot preservation are the actual already-executed audit findings; this reviewer did not reparse traces or rerun that audit.",
+    "Fresh full16 validates the six ordinary lifecycle drivers. It is separate from current Node9/219 and does not establish scout supply improvement, a probe result or formal capacity."
+  ],
+  "verdict": {
+    "actualEndedFactsConsistent": true,
+    "eligibleForProbe18PrerequisiteBinding": true,
+    "blockingFindingIds": [],
+    "capacityAccepted": false,
+    "p0Passed": false,
+    "p2Started": false
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "schema": "mir2.windows.asset-input-gap-after-recovery.v1",
+  "capturedAtUtc": "2026-10-29T09:30:51.501Z",
+  "sourceRevision": "24216899acd4301d8c3b1eff08b825f4896cc410",
+  "metadataFiles": 324,
+  "frameImageReferences": 197652,
+  "missingImageReferences": 0,
+  "missingImages": [],
+  "explicitActorLibraries": 128,
+  "missingActorMetadataLibraries": [],
+  "sourceClean": true,
+  "passed": true,
+  "remainingGate": "Original production closure helper still running; package v4 will independently enforce all normal gates. No gate skipped or weakened."
+}

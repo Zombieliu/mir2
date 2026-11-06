@@ -1,0 +1,19 @@
+{
+  "artifact": "Numeron-Legend-of-Rebirth-20260930-r6-Setup.exe",
+  "absolutePath": "C:\\mir2-playtest-releases\\20260930-ui-r6\\Numeron-Legend-of-Rebirth-20260930-r6-Setup.exe",
+  "version": "2026.9.30.6",
+  "bytes": 602699175,
+  "sha256": "C02BB6E61116E10C09C1CBDD40448571CABB7FA33EB828CFA7E4D6C430998E6B",
+  "authenticodeStatus": "NotSigned",
+  "sourceRevision": "f8800b9a078fa3591b4b02bea9f70d642f08b709",
+  "candidate": "WN-CANDIDATE-20260930-invited-06",
+  "exeSha256": "DFA0C5ADF521FCF62A1A58CB8F21D55981795F038C05C6F1F53C145BCD897BD0",
+  "exeBytes": 110327808,
+  "exeAuthenticodeStatus": "NotSigned",
+  "packageFileCount": 123035,
+  "packageManifestSha256": "D339A2082941C408E1FCF82F1261F451E1BF84A5A5E3FB5A811AE320D84E7F22",
+  "compilerExitCode": 0,
+  "installedDuringTask": false,
+  "liveAcceptance": false,
+  "automaticUpdater": false
+}

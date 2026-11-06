@@ -1,0 +1,20 @@
+{
+  "name": "installed-back-to-sc-settings",
+  "capturedAtUtc": "2026-10-29T17:22:41.055Z",
+  "window": {
+    "app": "process:F:\\mir2-build\\unified-20261029\\installed-validation\\game\\mir2-platform-windows.exe",
+    "id": 4788964,
+    "title": "numeron-legend of rebirth"
+  },
+  "files": [
+    {
+      "path": "C:/mir2-build/unified-20261029/windows-live/screenshots/installed-back-to-sc-settings-0.jpg",
+      "sha256": "cfaa76e4c2f6f1c801a30d66b161bebd9b5888ac7fc69bc538baa6b3d04b09d0",
+      "bytes": 198609,
+      "width": 1026,
+      "height": 800,
+      "screenshotId": "screenshot-0",
+      "unmodified": true
+    }
+  ]
+}

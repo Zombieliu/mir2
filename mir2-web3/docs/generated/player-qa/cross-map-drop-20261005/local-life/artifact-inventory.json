@@ -1,0 +1,150 @@
+{
+  "schema": "mir2.p3a.local-life.frozen-artifacts.v1",
+  "files": [
+    {
+      "path": "baseline-14-source-verification.json",
+      "bytes": 3711,
+      "sha256": "0e297cd9c2e3ad202e3900ab0bef8440c8c3bcb2f53283e8d7ae3da73b22e93b"
+    },
+    {
+      "path": "experience_ownership.frozen.rs",
+      "bytes": 21889,
+      "sha256": "c3b12a1a0685266554b911727b9c1d7c9dbc0ba1ded4818c667951f530ed5ec5"
+    },
+    {
+      "path": "final-receipt.json",
+      "bytes": 1523,
+      "sha256": "421efaa789f0ace6c0b7e8c47c5cf363e5ecf722585118e1fa9f1dc416642077"
+    },
+    {
+      "path": "final-source/apps/simulation/src/runtime/zone/runtime/experience_ownership.rs",
+      "bytes": 22736,
+      "sha256": "e8602ca303ea9b8a963602cd4a53901e323106b9f3c8f1068879f1d28c330f14"
+    },
+    {
+      "path": "final-source/apps/simulation/tests/shared_experience_owner_tick_life.rs",
+      "bytes": 11352,
+      "sha256": "afdaa83267f217a65ddd45060bf2a0b1cb74a66df621b15fa902216ef5bff208"
+    },
+    {
+      "path": "finalize-phase.py",
+      "bytes": 15737,
+      "sha256": "82cbf3d9a08ca16f02c523c3bc7b1ab149f8653f07cbe3bc0aa86efabc0197ca"
+    },
+    {
+      "path": "focused-tests.json",
+      "bytes": 1098,
+      "sha256": "3e19b33c88e463e7ab630992a03cb32bbbfc69792c6e523766ec7ae2d0151478"
+    },
+    {
+      "path": "frozen-artifact-inventory.json",
+      "bytes": 18614,
+      "sha256": "7a22bc310d7137ae43523bcd4d3d184d45fb6f2c45ec475e34d4504636d7ef3c"
+    },
+    {
+      "path": "frozen-source-manifest.json",
+      "bytes": 2937,
+      "sha256": "587373e643b9585e17e17d95400eeca24ccb28cfd923a729daf459178c72fff9"
+    },
+    {
+      "path": "green-and-owner-adjacent-attempt-01-result.json",
+      "bytes": 335,
+      "sha256": "29a11c659ac907f02df027c59c1fcbadd385c007b8ea1043a35a59a0572fcc7d"
+    },
+    {
+      "path": "green-and-owner-adjacent-attempt-01.log",
+      "bytes": 33087,
+      "sha256": "9e562d04014d151acafab0b058ca476cda2e9064690a7cb40cc19731469903fe"
+    },
+    {
+      "path": "object-id-collision-readonly.json",
+      "bytes": 4359,
+      "sha256": "f726a22f933d00498a99fb2b34d63505549de632fea21fad3ded53f5d6efcdd6"
+    },
+    {
+      "path": "original-nine-source-unchanged.json",
+      "bytes": 1649,
+      "sha256": "e73b88f747edeebb19d8b15da673c07cc911813c5585ef620473126cc7c02a9d"
+    },
+    {
+      "path": "p3-local-life-follow-up.patch",
+      "bytes": 13756,
+      "sha256": "0639884c3952a5df5e51efa68d679a883893fb16bff1e4c089a935035799a888"
+    },
+    {
+      "path": "patch-applied-byte-verification.json",
+      "bytes": 387,
+      "sha256": "61e72bdbf514b394e167d1dd26d0cf324a7a7a3ad75eb16ad104a5a00f25ed7d"
+    },
+    {
+      "path": "patch-check-forward-01/mir2-web3/apps/simulation/src/runtime/zone/runtime/experience_ownership.rs",
+      "bytes": 22736,
+      "sha256": "e8602ca303ea9b8a963602cd4a53901e323106b9f3c8f1068879f1d28c330f14"
+    },
+    {
+      "path": "patch-check-forward-01/mir2-web3/apps/simulation/tests/shared_experience_owner_tick_life.rs",
+      "bytes": 11352,
+      "sha256": "afdaa83267f217a65ddd45060bf2a0b1cb74a66df621b15fa902216ef5bff208"
+    },
+    {
+      "path": "patch-forward-apply-attempt-01.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "patch-forward-check-attempt-01.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "patch-reverse-check-attempt-01.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "patch-verification.json",
+      "bytes": 620,
+      "sha256": "50a20966dc00c52aba0276fad167acb582a8c4df539c527ae16c372b4a6ac1ed"
+    },
+    {
+      "path": "prior-100-artifacts-unchanged.json",
+      "bytes": 18272,
+      "sha256": "d53e2dcde592e2ac01fdfc7286a4c360f42c4f543f4c43a7b04b064010a3d26d"
+    },
+    {
+      "path": "prior-13-source-unchanged.json",
+      "bytes": 4355,
+      "sha256": "278351506c03dcad76ba17ea231ec01d0bed425d815a346389806c91e6c0b62e"
+    },
+    {
+      "path": "red-attempt-01-result.json",
+      "bytes": 201,
+      "sha256": "926a808adb9ebde3323d8fcf88b0bb0e852454dfa181a5187fdd6527bcc32a59"
+    },
+    {
+      "path": "red-attempt-01.log",
+      "bytes": 35142,
+      "sha256": "b4e5102dc8d4c9d9acc3ed7b08779972bd4f9bd9f16ef8e590edd4bb8e0f04a7"
+    },
+    {
+      "path": "REVIEW.md",
+      "bytes": 3447,
+      "sha256": "e5f551926f14394301ac6f15d50c526144b11aa19ec428abc715cdfcb8131948"
+    },
+    {
+      "path": "scope.json",
+      "bytes": 608,
+      "sha256": "ec28e46fd8e65c9edab356f88c834edd8a81a760d54bf6e486835dc0414738ef"
+    },
+    {
+      "path": "shared_experience_owner_tick_life.red.rs",
+      "bytes": 9854,
+      "sha256": "7650cf6a6c57b8f52cf638eb6563cab24d1d5be4b32ee799241e9826175f462b"
+    },
+    {
+      "path": "source-manifest.json",
+      "bytes": 531,
+      "sha256": "e4c03fe2f0575fbd814d301a87b4cb067cc2ca04fd030a0777b87c4b76805e84"
+    }
+  ]
+}

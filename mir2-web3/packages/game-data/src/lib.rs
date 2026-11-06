@@ -1,9 +1,27 @@
-use mir2_protocol::{MapInformation, MirClass, MirDirection, MirGender, Point};
+use mir2_protocol::{MapInformation, MirClass, MirDirection, MirGender, Point, Spell};
 use serde::{Deserialize, Serialize};
 use std::collections::{BTreeMap, BTreeSet};
 use std::sync::OnceLock;
 
+mod crystal_creature_settings;
+mod crystal_guild_settings;
+mod crystal_hero_settings;
+mod crystal_npc_goods;
+pub use crystal_creature_settings::{crystal_creature_settings, CrystalCreatureSettings};
+pub use crystal_hero_settings::{
+    calculate_crystal_hero_base_stat, crystal_hero_settings, CrystalHeroRules, CrystalHeroSettings,
+    CrystalHeroSource,
+};
+pub use crystal_npc_goods::{crystal_npc_goods_item_json, crystal_npc_goods_list_json};
+#[cfg(test)]
+mod crystal_item_image;
 pub mod crystal_map_events;
+pub mod periodic_quests;
+pub use crystal_guild_settings::{
+    crystal_guild_buff_definitions, crystal_guild_settings, CrystalGuildCreationCost,
+    CrystalGuildSettings,
+};
+pub use mir2_protocol::crystal_user_item_image;
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -16,6 +34,9 @@ pub struct ContentProfile {
     pub rate_policy: ContentRatePolicy,
     pub experience_curve: Vec<ExperienceLevel>,
     pub map_whitelist: Vec<ContentMapRule>,
+    /// Exact original rooms shipped as assets, never runtime map admission.
+    #[serde(default)]
+    pub native_resource_only_maps: Vec<String>,
     pub monster_whitelist: Vec<String>,
     pub boss_monsters: Vec<String>,
     pub boss_respawn_jitter_minutes: u16,
@@ -157,6 +178,10 @@ pub struct ContentProfileBundleFile {
 #[serde(rename_all = "camelCase")]
 pub struct ContentProfileBundleSummary {
     pub maps: usize,
+    #[serde(default)]
+    pub native_resource_only_maps: usize,
+    #[serde(default)]
+    pub native_maps: usize,
     pub monsters: usize,
     pub items: usize,
     pub skills: usize,
@@ -189,6 +214,37 @@ pub fn platinum_176_profile_bundle() -> ContentProfileBundle {
                 (bundle.profile_id.as_str(), bundle.profile_version),
                 (profile.profile_id.as_str(), profile.version),
                 "platinum_176 bundle must describe the compiled content profile"
+            );
+            bundle
+        })
+        .clone()
+}
+
+pub fn platinum_fiveclass_profile() -> ContentProfile {
+    static PROFILE: OnceLock<ContentProfile> = OnceLock::new();
+    PROFILE
+        .get_or_init(|| {
+            serde_json::from_str(include_str!(
+                "../data/content_profiles/platinum_fiveclass.json"
+            ))
+            .expect("platinum_fiveclass content profile json should be valid")
+        })
+        .clone()
+}
+
+pub fn platinum_fiveclass_profile_bundle() -> ContentProfileBundle {
+    static BUNDLE: OnceLock<ContentProfileBundle> = OnceLock::new();
+    BUNDLE
+        .get_or_init(|| {
+            let bundle: ContentProfileBundle = serde_json::from_str(include_str!(
+                "../data/generated/platinum_fiveclass_bundle.json"
+            ))
+            .expect("platinum_fiveclass content profile bundle json should be valid");
+            let profile = platinum_fiveclass_profile();
+            assert_eq!(
+                (bundle.profile_id.as_str(), bundle.profile_version),
+                (profile.profile_id.as_str(), profile.version),
+                "platinum_fiveclass bundle must describe the compiled content profile"
             );
             bundle
         })
@@ -266,6 +322,83 @@ pub fn content_profile_respawn_overrides_for_map(
         .collect()
 }
 
+fn validate_native_resource_only_maps(
+    profile: &ContentProfile,
+    manifest: &CrystalRespawnManifest,
+    errors: &mut Vec<String>,
+) {
+    validate_unique_strings(
+        "nativeResourceOnlyMaps",
+        profile.native_resource_only_maps.iter().map(String::as_str),
+        errors,
+    );
+    for name in &profile.native_resource_only_maps {
+        if name != "D71653"
+            || !matches!(
+                profile.profile_id.as_str(),
+                "platinum_176" | "platinum_fiveclass"
+            )
+        {
+            errors.push(format!(
+                "nativeResourceOnlyMaps has no named original-room policy for {name}"
+            ));
+            continue;
+        }
+        if profile
+            .map_whitelist
+            .iter()
+            .any(|map| map.file_name.eq_ignore_ascii_case(name))
+        {
+            errors.push(format!(
+                "nativeResourceOnlyMaps room {name} must not be runtime-admitted"
+            ));
+        }
+        let rooms = manifest
+            .maps
+            .iter()
+            .filter(|map| map.map_file_name == *name)
+            .collect::<Vec<_>>();
+        let source_matches = rooms.len() == 1 && {
+            let room = rooms[0];
+            room.map_index == 235
+                && room.map_title == "TacticalMaze"
+                && room.mini_map == 0
+                && room.big_map == 0
+                && room.respawn_count == 0
+                && room.respawns.is_empty()
+                && room.safe_zones.is_empty()
+                && room.movement_count == 1
+                && room.movements.len() == 1
+                && room.movements[0]
+                    == CrystalMovementTemplate {
+                        map_index: 209,
+                        source: Point { x: 17, y: 12 },
+                        destination: Point { x: 36, y: 34 },
+                        need_hole: false,
+                        need_move: false,
+                        conquest_index: 0,
+                        show_on_big_map: false,
+                        icon: 0,
+                    }
+                && !manifest.maps.iter().any(|map| {
+                    map.movements
+                        .iter()
+                        .any(|movement| movement.map_index == 235)
+                })
+                && !serde_json::to_string(&crystal_npc_manifest())
+                    .expect("imported NPC manifest serializes")
+                    .to_ascii_lowercase()
+                    .contains("d71653")
+                && !include_str!("../data/generated/crystal_map_event_manifest.json")
+                    .to_ascii_lowercase()
+                    .contains("d71653")
+        };
+        if !source_matches {
+            errors.push(format!("nativeResourceOnlyMaps room {name} no longer matches its original no-entry source proof"));
+        }
+    }
+}
+
 pub fn validate_content_profile(profile: &ContentProfile) -> Result<(), Vec<String>> {
     let mut errors = Vec::new();
 
@@ -332,12 +465,22 @@ pub fn validate_content_profile(profile: &ContentProfile) -> Result<(), Vec<Stri
         ));
     }
 
-    let expected_classes = [MirClass::Warrior, MirClass::Wizard, MirClass::Taoist];
+    let classic_classes = [MirClass::Warrior, MirClass::Wizard, MirClass::Taoist];
+    let five_classes = [
+        MirClass::Warrior,
+        MirClass::Wizard,
+        MirClass::Taoist,
+        MirClass::Assassin,
+        MirClass::Archer,
+    ];
+    let expected_classes: &[MirClass] = if profile.profile_id == "platinum_fiveclass" {
+        &five_classes
+    } else {
+        &classic_classes
+    };
     if profile.allowed_classes.as_slice() != expected_classes {
-        errors.push(
-            "allowedClasses must contain exactly Warrior, Wizard, Taoist in canonical order"
-                .to_string(),
-        );
+        errors
+            .push("allowedClasses must match the selected profile in canonical order".to_string());
     }
 
     let mut expected_level = 1_u16;
@@ -452,6 +595,7 @@ pub fn validate_content_profile(profile: &ContentProfile) -> Result<(), Vec<Stri
     );
 
     let crystal_map_manifest = crystal_respawn_manifest();
+    validate_native_resource_only_maps(profile, &crystal_map_manifest, &mut errors);
     let crystal_maps: BTreeSet<_> = crystal_map_manifest
         .maps
         .iter()
@@ -821,7 +965,7 @@ pub fn validate_content_profile(profile: &ContentProfile) -> Result<(), Vec<Stri
     for skill in &profile.skills {
         if !expected_classes.contains(&skill.class) {
             errors.push(format!(
-                "skill {} references a class outside platinum_176",
+                "skill {} references a class outside the selected profile",
                 skill.spell
             ));
         }
@@ -837,7 +981,22 @@ pub fn validate_content_profile(profile: &ContentProfile) -> Result<(), Vec<Stri
                 skill.spell
             ));
         }
-        if !profile.item_whitelist.contains(&skill.spell) {
+        if !profile.item_whitelist.iter().any(|name| {
+            let Some(book) = crystal_item_by_name(name) else {
+                return false;
+            };
+            let class_flag = match skill.class {
+                MirClass::Warrior => 1,
+                MirClass::Wizard => 2,
+                MirClass::Taoist => 4,
+                MirClass::Assassin => 8,
+                MirClass::Archer => 16,
+            };
+            book.required_class & class_flag != 0
+                && book.required_type == 0
+                && u16::from(book.required_amount) == skill.required_level
+                && crystal_magic_for_book(&book).is_some_and(|magic| magic.spell == skill.spell)
+        }) {
             errors.push(format!(
                 "skill {} has no matching book in itemWhitelist",
                 skill.spell
@@ -1739,9 +1898,19 @@ pub struct CrystalGameShopPacketTemplate {
     pub gold_price: u32,
     pub credit_price: u32,
     pub count: u16,
+    pub item_shape: i16,
+    pub item_stack_size: u16,
     pub class: String,
     pub category: String,
     pub stock: i32,
+    #[serde(alias = "individual_stock", alias = "iStock")]
+    pub individual_stock: bool,
+    pub deal: bool,
+    pub top_item: bool,
+    #[serde(alias = "date_binary", alias = "date_binary_datetime")]
+    pub date_binary_datetime: String,
+    pub can_buy_credit: bool,
+    pub can_buy_gold: bool,
     pub stock_level: i32,
     pub payload_len: usize,
     pub payload_hex: String,
@@ -1873,6 +2042,8 @@ pub struct CrystalMonsterTemplate {
     pub min_sc: i32,
     pub max_sc: i32,
     #[serde(default)]
+    pub accuracy: i32,
+    #[serde(default)]
     pub agility: i32,
     pub light: u8,
     pub attack_speed: u16,
@@ -1964,6 +2135,16 @@ pub struct CrystalRespawnMap {
     pub map_file_name: String,
     pub map_title: String,
     #[serde(default)]
+    pub fight: bool,
+    #[serde(default)]
+    pub no_fight: bool,
+    #[serde(default)]
+    pub no_experience: bool,
+    #[serde(default)]
+    pub no_group: bool,
+    #[serde(default)]
+    pub no_pets: bool,
+    #[serde(default)]
     pub mini_map: u16,
     #[serde(default)]
     pub big_map: u16,
@@ -1995,6 +2176,8 @@ pub struct CrystalRespawnMap {
     pub no_drop_monster: bool,
     #[serde(default)]
     pub no_mount: bool,
+    #[serde(default)]
+    pub no_intelligent_creatures: bool,
     #[serde(default)]
     pub no_hero: bool,
     #[serde(default)]
@@ -2242,81 +2425,102 @@ pub fn starter_server_data() -> StarterServerData {
         .clone()
 }
 
+mod stone_items;
+ pub use stone_items::{RAW_STONE_ROUGH, RAW_STONE_FINE, RAW_STONE_PRECIOUS, RAW_STONE_INDICES};
+
 pub fn crystal_item_manifest() -> CrystalItemManifest {
+    crystal_item_manifest_ref().clone()
+}
+
+/// Borrow the immutable catalogue; single-item lookups clone only the match.
+pub fn crystal_item_manifest_ref() -> &'static CrystalItemManifest {
     static CRYSTAL_ITEM_MANIFEST: OnceLock<CrystalItemManifest> = OnceLock::new();
-    CRYSTAL_ITEM_MANIFEST
-        .get_or_init(|| {
-            serde_json::from_str(include_str!("../data/generated/crystal_item_manifest.json"))
-                .expect("crystal item manifest json should be valid")
-        })
-        .clone()
+    CRYSTAL_ITEM_MANIFEST.get_or_init(|| {
+        let mut manifest: CrystalItemManifest = serde_json::from_str(include_str!("../data/generated/crystal_item_manifest.json"))
+            .expect("crystal item manifest json should be valid");
+        stone_items::extend(&mut manifest.items);
+        manifest.total_items = manifest.items.len();
+        manifest
+    })
 }
 
 pub fn crystal_random_item_stats_manifest() -> CrystalRandomItemStatsManifest {
+    crystal_random_item_stats_manifest_ref().clone()
+}
+
+pub fn crystal_random_item_stats_manifest_ref() -> &'static CrystalRandomItemStatsManifest {
     static CRYSTAL_RANDOM_ITEM_STATS_MANIFEST: OnceLock<CrystalRandomItemStatsManifest> =
         OnceLock::new();
-    CRYSTAL_RANDOM_ITEM_STATS_MANIFEST
-        .get_or_init(|| {
-            serde_json::from_str(include_str!(
-                "../data/generated/crystal_random_item_stats_manifest.json"
-            ))
-            .expect("crystal random item stats manifest json should be valid")
-        })
-        .clone()
+    CRYSTAL_RANDOM_ITEM_STATS_MANIFEST.get_or_init(|| {
+        serde_json::from_str(include_str!(
+            "../data/generated/crystal_random_item_stats_manifest.json"
+        ))
+        .expect("crystal random item stats manifest json should be valid")
+    })
 }
 
 pub fn crystal_magic_manifest() -> CrystalMagicManifest {
+    crystal_magic_manifest_ref().clone()
+}
+
+pub fn crystal_magic_manifest_ref() -> &'static CrystalMagicManifest {
     static CRYSTAL_MAGIC_MANIFEST: OnceLock<CrystalMagicManifest> = OnceLock::new();
-    CRYSTAL_MAGIC_MANIFEST
-        .get_or_init(|| {
-            serde_json::from_str(include_str!(
-                "../data/generated/crystal_magic_manifest.json"
-            ))
-            .expect("crystal magic manifest json should be valid")
-        })
-        .clone()
+    CRYSTAL_MAGIC_MANIFEST.get_or_init(|| {
+        serde_json::from_str(include_str!(
+            "../data/generated/crystal_magic_manifest.json"
+        ))
+        .expect("crystal magic manifest json should be valid")
+    })
 }
 
 pub fn crystal_buff_manifest() -> CrystalBuffManifest {
+    crystal_buff_manifest_ref().clone()
+}
+
+pub fn crystal_buff_manifest_ref() -> &'static CrystalBuffManifest {
     static CRYSTAL_BUFF_MANIFEST: OnceLock<CrystalBuffManifest> = OnceLock::new();
-    CRYSTAL_BUFF_MANIFEST
-        .get_or_init(|| {
-            serde_json::from_str(include_str!("../data/generated/crystal_buff_manifest.json"))
-                .expect("crystal buff manifest json should be valid")
-        })
-        .clone()
+    CRYSTAL_BUFF_MANIFEST.get_or_init(|| {
+        serde_json::from_str(include_str!("../data/generated/crystal_buff_manifest.json"))
+            .expect("crystal buff manifest json should be valid")
+    })
 }
 
 pub fn crystal_drop_manifest() -> CrystalDropManifest {
+    crystal_drop_manifest_ref().clone()
+}
+
+pub fn crystal_drop_manifest_ref() -> &'static CrystalDropManifest {
     static CRYSTAL_DROP_MANIFEST: OnceLock<CrystalDropManifest> = OnceLock::new();
-    CRYSTAL_DROP_MANIFEST
-        .get_or_init(|| {
-            serde_json::from_str(include_str!("../data/generated/crystal_drop_manifest.json"))
-                .expect("crystal drop manifest json should be valid")
-        })
-        .clone()
+    CRYSTAL_DROP_MANIFEST.get_or_init(|| {
+        serde_json::from_str(include_str!("../data/generated/crystal_drop_manifest.json"))
+            .expect("crystal drop manifest json should be valid")
+    })
 }
 
 pub fn crystal_npc_manifest() -> CrystalNpcManifest {
+    crystal_npc_manifest_ref().clone()
+}
+
+pub fn crystal_npc_manifest_ref() -> &'static CrystalNpcManifest {
     static CRYSTAL_NPC_MANIFEST: OnceLock<CrystalNpcManifest> = OnceLock::new();
-    CRYSTAL_NPC_MANIFEST
-        .get_or_init(|| {
-            serde_json::from_str(include_str!("../data/generated/crystal_npc_manifest.json"))
-                .expect("crystal npc manifest json should be valid")
-        })
-        .clone()
+    CRYSTAL_NPC_MANIFEST.get_or_init(|| {
+        serde_json::from_str(include_str!("../data/generated/crystal_npc_manifest.json"))
+            .expect("crystal npc manifest json should be valid")
+    })
 }
 
 pub fn crystal_npc_info_manifest() -> CrystalNpcInfoManifest {
+    crystal_npc_info_manifest_ref().clone()
+}
+
+pub fn crystal_npc_info_manifest_ref() -> &'static CrystalNpcInfoManifest {
     static CRYSTAL_NPC_INFO_MANIFEST: OnceLock<CrystalNpcInfoManifest> = OnceLock::new();
-    CRYSTAL_NPC_INFO_MANIFEST
-        .get_or_init(|| {
-            serde_json::from_str(include_str!(
-                "../data/generated/crystal_npc_info_manifest.json"
-            ))
-            .expect("crystal npc info manifest json should be valid")
-        })
-        .clone()
+    CRYSTAL_NPC_INFO_MANIFEST.get_or_init(|| {
+        serde_json::from_str(include_str!(
+            "../data/generated/crystal_npc_info_manifest.json"
+        ))
+        .expect("crystal npc info manifest json should be valid")
+    })
 }
 
 pub fn crystal_quest_packet_manifest() -> CrystalQuestPacketManifest {
@@ -2657,15 +2861,17 @@ pub fn crystal_npc_command_summary() -> CrystalNpcCommandSummary {
 }
 
 pub fn crystal_monster_manifest() -> CrystalMonsterManifest {
+    crystal_monster_manifest_ref().clone()
+}
+
+pub fn crystal_monster_manifest_ref() -> &'static CrystalMonsterManifest {
     static CRYSTAL_MONSTER_MANIFEST: OnceLock<CrystalMonsterManifest> = OnceLock::new();
-    CRYSTAL_MONSTER_MANIFEST
-        .get_or_init(|| {
-            serde_json::from_str(include_str!(
-                "../data/generated/crystal_monster_manifest.json"
-            ))
-            .expect("crystal monster manifest json should be valid")
-        })
-        .clone()
+    CRYSTAL_MONSTER_MANIFEST.get_or_init(|| {
+        serde_json::from_str(include_str!(
+            "../data/generated/crystal_monster_manifest.json"
+        ))
+        .expect("crystal monster manifest json should be valid")
+    })
 }
 
 pub fn crystal_monster_ai_summary() -> CrystalMonsterAiSummary {
@@ -2698,24 +2904,41 @@ pub fn crystal_respawn_manifest() -> CrystalRespawnManifest {
 }
 
 pub fn crystal_magic_by_spell(spell: &str) -> Option<CrystalMagicTemplate> {
-    crystal_magic_manifest()
+    crystal_magic_manifest_ref()
         .magics
-        .into_iter()
+        .iter()
         .find(|magic| magic.spell == spell)
+        .cloned()
+}
+
+/// Crystal stores a skill book's authoritative spell ID in Shape. Display
+/// names include historical typos (CresentSlash, CatTognue, StoneTrap).
+pub fn crystal_magic_for_book(book: &CrystalItemTemplate) -> Option<CrystalMagicTemplate> {
+    if book.item_type != 20 {
+        return None;
+    }
+    let spell = Spell::try_from(u8::try_from(book.shape).ok()?).ok()?;
+    crystal_magic_manifest_ref()
+        .magics
+        .iter()
+        .find(|magic| Spell::from_crystal_name(&magic.spell) == Some(spell))
+        .cloned()
 }
 
 pub fn crystal_buff_by_type(buff_type: &str) -> Option<CrystalBuffTemplate> {
-    crystal_buff_manifest()
+    crystal_buff_manifest_ref()
         .buffs
-        .into_iter()
+        .iter()
         .find(|buff| buff.buff_type == buff_type)
+        .cloned()
 }
 
 pub fn crystal_drop_table_by_key(table_key: &str) -> Option<CrystalDropTable> {
-    crystal_drop_manifest()
+    crystal_drop_manifest_ref()
         .tables
-        .into_iter()
+        .iter()
         .find(|table| table.table_key == table_key)
+        .cloned()
 }
 
 pub fn crystal_drop_table_for_monster_name(monster_name: &str) -> Option<CrystalDropTable> {
@@ -2726,52 +2949,176 @@ pub fn crystal_drop_table_for_monster_name(monster_name: &str) -> Option<Crystal
 }
 
 pub fn crystal_item_by_name(name: &str) -> Option<CrystalItemTemplate> {
-    crystal_item_manifest()
+    if name.eq_ignore_ascii_case(BILLING_MONTHLY_CARD_ITEM_NAME) {
+        return Some(billing_monthly_card_item_template());
+    }
+    crystal_item_manifest_ref()
         .items
-        .into_iter()
+        .iter()
         .find(|item| item.name.eq_ignore_ascii_case(name))
+        .cloned()
 }
 
 pub fn crystal_item_by_index(item_index: i32) -> Option<CrystalItemTemplate> {
-    crystal_item_manifest()
+    if item_index == BILLING_MONTHLY_CARD_ITEM_INDEX {
+        return Some(billing_monthly_card_item_template());
+    }
+    crystal_item_manifest_ref()
         .items
-        .into_iter()
+        .iter()
         .find(|item| item.item_index == item_index)
+        .cloned()
+}
+
+/// Application-owned catalogue row. The imported Crystal manifests stay exact.
+pub const BILLING_MONTHLY_CARD_ITEM_INDEX: i32 = 1_000_001;
+pub const BILLING_MONTHLY_CARD_GAME_SHOP_INDEX: i32 = 1_000_001;
+pub const BILLING_MONTHLY_CARD_ITEM_NAME: &str = "MonthlyCard30Days";
+
+pub fn billing_monthly_card_item_template() -> CrystalItemTemplate {
+    CrystalItemTemplate {
+        item_index: BILLING_MONTHLY_CARD_ITEM_INDEX,
+        name: BILLING_MONTHLY_CARD_ITEM_NAME.into(),
+        item_type: 17,
+        grade: 0,
+        required_type: 0,
+        required_class: 31,
+        required_gender: 3,
+        item_set: 0,
+        shape: 1000,
+        weight: 1,
+        light: 0,
+        required_amount: 0,
+        image: 1813,
+        durability: 0,
+        stack_size: 1,
+        price: 0,
+        start_item: false,
+        effect: 0,
+        need_identify: false,
+        show_group_pickup: false,
+        class_based: false,
+        level_based: false,
+        can_mine: false,
+        global_drop_notify: false,
+        // DontDeathdrop/Drop/Sell/Store/Trade/Repair/Upgrade, UnableToRent/Disassemble,
+        // NoMail and NoHero keep the issued unit in its owner's custody.
+        bind: (0x0001u16 | 0x0002 | 0x0004 | 0x0008 | 0x0010 | 0x0020 | 0x0040
+            | 0x1000 | 0x2000 | 0x4000 | 0x8000) as i16,
+        unique: 0,
+        random_stats_id: 0,
+        can_fast_run: false,
+        can_awakening: false,
+        slots: 0,
+        stats: Vec::new(),
+        tooltip: Some("Adds 30 days of account-wide game access when used. Active access is extended from its current expiry. Offline time counts. Single use.".into()),
+    }
+}
+
+/// Exact data-selection port of Crystal `Functions.GetRealItem`.
+///
+/// The stored `UserItem.Info` remains the origin for identity/name/bind data,
+/// while several tooltip and equipment paths select a class/level-specific
+/// catalogue row for stats, requirements, shape, and image presentation.
+pub fn crystal_real_item_for_player(
+    origin: &CrystalItemTemplate,
+    level: u16,
+    class: MirClass,
+) -> CrystalItemTemplate {
+    if !origin.class_based && !origin.level_based {
+        return origin.clone();
+    }
+
+    crystal_real_item_from_catalogue(&crystal_item_manifest_ref().items, origin, level, class)
+}
+
+fn crystal_real_item_from_catalogue(
+    items: &[CrystalItemTemplate],
+    origin: &CrystalItemTemplate,
+    level: u16,
+    class: MirClass,
+) -> CrystalItemTemplate {
+    let class_flag = 1u8 << class as u8;
+    if origin.class_based && origin.level_based {
+        let mut output = origin;
+        for info in items {
+            if info.name.starts_with(&origin.name)
+                && info.required_class == class_flag
+                && info.required_type == 0
+                && u16::from(info.required_amount) <= level
+                && output.required_amount <= info.required_amount
+                && origin.required_gender == info.required_gender
+            {
+                output = info;
+            }
+        }
+        return output.clone();
+    }
+
+    if origin.class_based {
+        return items
+            .iter()
+            .find(|info| {
+                info.name.starts_with(&origin.name)
+                    && info.required_class == class_flag
+                    && origin.required_gender == info.required_gender
+            })
+            .unwrap_or(origin)
+            .clone();
+    }
+
+    let mut output = origin;
+    for info in items {
+        if info.name.starts_with(&origin.name)
+            && info.required_type == 0
+            && u16::from(info.required_amount) <= level
+            && output.required_amount < info.required_amount
+            && origin.required_gender == info.required_gender
+        {
+            output = info;
+        }
+    }
+    output.clone()
 }
 
 pub fn crystal_random_item_stat_profile(id: u8) -> Option<CrystalRandomItemStatProfile> {
-    crystal_random_item_stats_manifest()
+    crystal_random_item_stats_manifest_ref()
         .profiles
-        .into_iter()
+        .iter()
         .find(|profile| profile.id == id)
+        .cloned()
 }
 
 pub fn crystal_npc_script_by_key(script_key: &str) -> Option<CrystalNpcScript> {
-    crystal_npc_manifest()
+    crystal_npc_manifest_ref()
         .scripts
-        .into_iter()
+        .iter()
         .find(|script| script.script_key == script_key)
+        .cloned()
 }
 
 pub fn crystal_npc_info_by_script_key(script_key: &str) -> Option<CrystalNpcInfoTemplate> {
-    crystal_npc_info_manifest()
+    crystal_npc_info_manifest_ref()
         .npcs
-        .into_iter()
+        .iter()
         .find(|npc| npc.script_key.eq_ignore_ascii_case(script_key))
+        .cloned()
 }
 
 pub fn crystal_monster_by_name(name: &str) -> Option<CrystalMonsterTemplate> {
-    crystal_monster_manifest()
+    crystal_monster_manifest_ref()
         .monsters
-        .into_iter()
+        .iter()
         .find(|monster| monster.name.eq_ignore_ascii_case(name))
+        .cloned()
 }
 
 pub fn crystal_monster_by_index(monster_index: i32) -> Option<CrystalMonsterTemplate> {
-    crystal_monster_manifest()
+    crystal_monster_manifest_ref()
         .monsters
-        .into_iter()
+        .iter()
         .find(|monster| monster.monster_index == monster_index)
+        .cloned()
 }
 
 /// Borrow the respawn record for `file_name` from the process-wide manifest
@@ -2853,6 +3200,486 @@ fn hex_nibble(byte: u8) -> Result<u8, String> {
 }
 
 #[cfg(test)]
+mod manifest_lookup_tests {
+    use super::*;
+
+    #[test]
+    fn item_and_monster_lookups_preserve_first_match_and_ascii_case() {
+        let items = crystal_item_manifest();
+        for item in &items.items {
+            assert_eq!(
+                crystal_item_by_index(item.item_index).as_ref(),
+                items
+                    .items
+                    .iter()
+                    .find(|row| row.item_index == item.item_index)
+            );
+            for name in [
+                item.name.clone(),
+                item.name.to_ascii_lowercase(),
+                item.name.to_ascii_uppercase(),
+            ] {
+                assert_eq!(
+                    crystal_item_by_name(&name).as_ref(),
+                    items
+                        .items
+                        .iter()
+                        .find(|row| row.name.eq_ignore_ascii_case(&name))
+                );
+            }
+        }
+        let monsters = crystal_monster_manifest();
+        for monster in &monsters.monsters {
+            assert_eq!(
+                crystal_monster_by_index(monster.monster_index).as_ref(),
+                monsters
+                    .monsters
+                    .iter()
+                    .find(|row| row.monster_index == monster.monster_index)
+            );
+            for name in [
+                monster.name.clone(),
+                monster.name.to_ascii_lowercase(),
+                monster.name.to_ascii_uppercase(),
+            ] {
+                assert_eq!(
+                    crystal_monster_by_name(&name).as_ref(),
+                    monsters
+                        .monsters
+                        .iter()
+                        .find(|row| row.name.eq_ignore_ascii_case(&name))
+                );
+            }
+        }
+        assert_eq!(crystal_item_by_index(i32::MIN), None);
+        assert_eq!(crystal_monster_by_index(i32::MIN), None);
+        assert_eq!(crystal_item_by_name("__missing_manifest_lookup__"), None);
+        assert_eq!(crystal_monster_by_name("__missing_manifest_lookup__"), None);
+    }
+
+    #[test]
+    fn other_lookups_preserve_order_and_original_case_rules() {
+        macro_rules! check_exact_lookup {
+            ($manifest:expr, $rows:ident, $key:ident, $lookup:path) => {{
+                let manifest = $manifest;
+                for row in &manifest.$rows {
+                    for key in [
+                        row.$key.clone(),
+                        row.$key.to_ascii_lowercase(),
+                        row.$key.to_ascii_uppercase(),
+                    ] {
+                        assert_eq!(
+                            $lookup(&key).as_ref(),
+                            manifest.$rows.iter().find(|entry| entry.$key == key)
+                        );
+                    }
+                }
+                assert_eq!($lookup("__missing_manifest_lookup__"), None);
+            }};
+        }
+        check_exact_lookup!(
+            crystal_magic_manifest(),
+            magics,
+            spell,
+            crystal_magic_by_spell
+        );
+        check_exact_lookup!(
+            crystal_buff_manifest(),
+            buffs,
+            buff_type,
+            crystal_buff_by_type
+        );
+        check_exact_lookup!(
+            crystal_drop_manifest(),
+            tables,
+            table_key,
+            crystal_drop_table_by_key
+        );
+        check_exact_lookup!(
+            crystal_npc_manifest(),
+            scripts,
+            script_key,
+            crystal_npc_script_by_key
+        );
+
+        let npcs = crystal_npc_info_manifest();
+        for npc in &npcs.npcs {
+            for key in [
+                npc.script_key.clone(),
+                npc.script_key.to_ascii_lowercase(),
+                npc.script_key.to_ascii_uppercase(),
+            ] {
+                assert_eq!(
+                    crystal_npc_info_by_script_key(&key).as_ref(),
+                    npcs.npcs
+                        .iter()
+                        .find(|row| row.script_key.eq_ignore_ascii_case(&key))
+                );
+            }
+        }
+        assert_eq!(
+            crystal_npc_info_by_script_key("__missing_manifest_lookup__"),
+            None
+        );
+        let stats = crystal_random_item_stats_manifest();
+        for id in u8::MIN..=u8::MAX {
+            assert_eq!(
+                crystal_random_item_stat_profile(id).as_ref(),
+                stats.profiles.iter().find(|profile| profile.id == id)
+            );
+        }
+    }
+
+    #[test]
+    fn owned_manifests_and_lookup_results_do_not_mutate_shared_catalogues() {
+        macro_rules! check_owned_manifest {
+            ($owned:path, $borrowed:path, $rows:ident) => {{
+                let mut owned = $owned();
+                assert_eq!(&owned, $borrowed());
+                assert!(std::ptr::eq($borrowed(), $borrowed()));
+                assert!(!owned.$rows.is_empty());
+                owned.$rows.clear();
+                assert!(!$borrowed().$rows.is_empty());
+                assert_eq!(&$owned(), $borrowed());
+            }};
+        }
+        check_owned_manifest!(crystal_item_manifest, crystal_item_manifest_ref, items);
+        check_owned_manifest!(
+            crystal_monster_manifest,
+            crystal_monster_manifest_ref,
+            monsters
+        );
+        check_owned_manifest!(crystal_magic_manifest, crystal_magic_manifest_ref, magics);
+        check_owned_manifest!(crystal_buff_manifest, crystal_buff_manifest_ref, buffs);
+        check_owned_manifest!(crystal_drop_manifest, crystal_drop_manifest_ref, tables);
+        check_owned_manifest!(crystal_npc_manifest, crystal_npc_manifest_ref, scripts);
+        check_owned_manifest!(
+            crystal_npc_info_manifest,
+            crystal_npc_info_manifest_ref,
+            npcs
+        );
+        check_owned_manifest!(
+            crystal_random_item_stats_manifest,
+            crystal_random_item_stats_manifest_ref,
+            profiles
+        );
+
+        let expected = crystal_item_by_index(1).expect("catalogue item");
+        let mut item = expected.clone();
+        item.name.clear();
+        item.stats.clear();
+        item.tooltip = Some("owned change".to_string());
+        assert_eq!(crystal_item_by_index(1), Some(expected));
+        let script_key = &crystal_npc_manifest_ref().scripts[0].script_key;
+        let expected = crystal_npc_script_by_key(script_key).expect("catalogue script");
+        let mut script = expected.clone();
+        script.lines.clear();
+        script.raw_text.clear();
+        assert_eq!(crystal_npc_script_by_key(script_key), Some(expected));
+    }
+
+    // The pre-optimization selection algorithm is retained only as the oracle.
+    fn old_real_item_selection(
+        items: Vec<CrystalItemTemplate>,
+        origin: &CrystalItemTemplate,
+        level: u16,
+        class: MirClass,
+    ) -> CrystalItemTemplate {
+        if !origin.class_based && !origin.level_based {
+            return origin.clone();
+        }
+        let class_flag = 1u8 << class as u8;
+        if origin.class_based && origin.level_based {
+            let mut output = origin.clone();
+            for info in items {
+                if info.name.starts_with(&origin.name)
+                    && info.required_class == class_flag
+                    && info.required_type == 0
+                    && u16::from(info.required_amount) <= level
+                    && output.required_amount <= info.required_amount
+                    && origin.required_gender == info.required_gender
+                {
+                    output = info;
+                }
+            }
+            return output;
+        }
+        if origin.class_based {
+            return items
+                .into_iter()
+                .find(|info| {
+                    info.name.starts_with(&origin.name)
+                        && info.required_class == class_flag
+                        && origin.required_gender == info.required_gender
+                })
+                .unwrap_or_else(|| origin.clone());
+        }
+        let mut output = origin.clone();
+        for info in items {
+            if info.name.starts_with(&origin.name)
+                && info.required_type == 0
+                && u16::from(info.required_amount) <= level
+                && output.required_amount < info.required_amount
+                && origin.required_gender == info.required_gender
+            {
+                output = info;
+            }
+        }
+        output
+    }
+
+    #[test]
+    fn real_item_selection_matches_old_algorithm_for_all_catalogue_origins() {
+        let items = &crystal_item_manifest_ref().items;
+        for origin in items {
+            if !origin.class_based && !origin.level_based {
+                assert_eq!(
+                    crystal_real_item_for_player(origin, 30, MirClass::Warrior),
+                    *origin
+                );
+                continue;
+            }
+            for class in [
+                MirClass::Warrior,
+                MirClass::Wizard,
+                MirClass::Taoist,
+                MirClass::Assassin,
+                MirClass::Archer,
+            ] {
+                for level in [0, 1, 10, 20, 39, 40, 50, 255, u16::MAX] {
+                    assert_eq!(
+                        crystal_real_item_for_player(origin, level, class),
+                        old_real_item_selection(items.clone(), origin, level, class),
+                        "origin={}, level={level}, class={class:?}",
+                        origin.item_index
+                    );
+                }
+            }
+        }
+    }
+
+    #[test]
+    fn real_item_selection_preserves_ties_filters_and_origin_fallback() {
+        let mut origin = crystal_item_manifest_ref().items[0].clone();
+        origin.name = "__variant".to_string();
+        origin.required_class = 1;
+        origin.required_gender = 0;
+        origin.required_amount = 1;
+        origin.required_type = 0;
+        let rows: Vec<_> = (0..5)
+            .map(|index| {
+                let mut row = origin.clone();
+                row.item_index = 100_000 + index;
+                row.name = format!("__variant{index}");
+                row.required_amount = 20;
+                row
+            })
+            .collect();
+        origin.class_based = true;
+        origin.level_based = true;
+        assert_eq!(
+            crystal_real_item_from_catalogue(&rows, &origin, 20, MirClass::Warrior),
+            rows[4]
+        );
+        origin.class_based = false;
+        assert_eq!(
+            crystal_real_item_from_catalogue(&rows, &origin, 20, MirClass::Warrior),
+            rows[0]
+        );
+        origin.class_based = true;
+        origin.level_based = false;
+        // Class-only selection has no required-type or level filter.
+        let mut class_rows = rows.clone();
+        class_rows[0].required_type = 7;
+        class_rows[0].required_amount = 255;
+        assert_eq!(
+            crystal_real_item_from_catalogue(&class_rows, &origin, 0, MirClass::Warrior),
+            class_rows[0]
+        );
+
+        let mut filtered = rows;
+        filtered[0].name = "other".to_string();
+        filtered[1].required_class = 2;
+        filtered[2].required_type = 7;
+        filtered[3].required_amount = 21;
+        filtered[4].required_gender = 1;
+        origin.level_based = true;
+        assert_eq!(
+            crystal_real_item_from_catalogue(&filtered, &origin, 20, MirClass::Warrior),
+            origin
+        );
+        for class_based in [false, true] {
+            for level_based in [false, true] {
+                if !class_based && !level_based {
+                    continue;
+                }
+                origin.class_based = class_based;
+                origin.level_based = level_based;
+                for class in [MirClass::Warrior, MirClass::Wizard] {
+                    for level in [0, 20, 21, 255] {
+                        assert_eq!(
+                            crystal_real_item_from_catalogue(&filtered, &origin, level, class),
+                            old_real_item_selection(filtered.clone(), &origin, level, class)
+                        );
+                    }
+                }
+            }
+        }
+    }
+
+    #[test]
+    #[ignore = "explicit before/after timing; run release with --ignored --nocapture --test-threads=1"]
+    fn manifest_lookup_benchmark() {
+        use std::{
+            fmt::Debug,
+            hint::black_box,
+            time::{Duration, Instant},
+        };
+
+        fn measure<T>(count: usize, lookup: &impl Fn(usize) -> T) -> Duration {
+            let start = Instant::now();
+            for query in 0..count {
+                drop(black_box(lookup(black_box(query % 4))));
+            }
+            start.elapsed()
+        }
+        fn compare<T: PartialEq + Debug>(
+            label: &str,
+            count: usize,
+            before: impl Fn(usize) -> T,
+            after: impl Fn(usize) -> T,
+        ) {
+            for query in 0..4 {
+                assert_eq!(before(query), after(query));
+            }
+            let mut old_times = Vec::new();
+            let mut new_times = Vec::new();
+            for trial in 0..5 {
+                if trial % 2 == 0 {
+                    old_times.push(measure(count, &before));
+                    new_times.push(measure(count, &after));
+                } else {
+                    new_times.push(measure(count, &after));
+                    old_times.push(measure(count, &before));
+                }
+            }
+            old_times.sort();
+            new_times.sort();
+            eprintln!("manifest_lookup {label}: queries={count} trials=5 old_median_us={} new_median_us={} ratio={:.2}",
+                old_times[2].as_micros(), new_times[2].as_micros(),
+                old_times[2].as_secs_f64() / new_times[2].as_secs_f64());
+        }
+
+        let items = &crystal_item_manifest_ref().items;
+        let item_keys = [
+            items[0].item_index,
+            items[items.len() / 2].item_index,
+            items[items.len() - 1].item_index,
+            i32::MIN,
+        ];
+        compare(
+            "item-index",
+            1000,
+            |query| {
+                crystal_item_manifest()
+                    .items
+                    .into_iter()
+                    .find(|row| row.item_index == item_keys[query])
+            },
+            |query| crystal_item_by_index(item_keys[query]),
+        );
+        let origin = items
+            .iter()
+            .find(|item| item.class_based || item.level_based)
+            .expect("class or level catalogue origin");
+        let variants = [
+            (0, MirClass::Warrior),
+            (20, MirClass::Wizard),
+            (40, MirClass::Taoist),
+            (u16::MAX, MirClass::Archer),
+        ];
+        compare(
+            "real-item-selection",
+            1000,
+            |query| {
+                let (level, class) = variants[query];
+                old_real_item_selection(crystal_item_manifest().items, origin, level, class)
+            },
+            |query| {
+                let (level, class) = variants[query];
+                crystal_real_item_for_player(origin, level, class)
+            },
+        );
+        let monsters = &crystal_monster_manifest_ref().monsters;
+        let monster_names = [
+            monsters[0].name.as_str(),
+            monsters[monsters.len() / 2].name.as_str(),
+            monsters[monsters.len() - 1].name.as_str(),
+            "__missing_manifest_lookup__",
+        ];
+        compare(
+            "monster-name",
+            1000,
+            |query| {
+                crystal_monster_manifest()
+                    .monsters
+                    .into_iter()
+                    .find(|row| row.name.eq_ignore_ascii_case(monster_names[query]))
+            },
+            |query| crystal_monster_by_name(monster_names[query]),
+        );
+        let scripts = &crystal_npc_manifest_ref().scripts;
+        let script_keys = [
+            scripts[0].script_key.as_str(),
+            scripts[scripts.len() / 2].script_key.as_str(),
+            scripts[scripts.len() - 1].script_key.as_str(),
+            "__missing_manifest_lookup__",
+        ];
+        compare(
+            "npc-script",
+            40,
+            |query| {
+                crystal_npc_manifest()
+                    .scripts
+                    .into_iter()
+                    .find(|row| row.script_key == script_keys[query])
+            },
+            |query| crystal_npc_script_by_key(script_keys[query]),
+        );
+        let tables = &crystal_drop_manifest_ref().tables;
+        let table_keys = [
+            tables[0].table_key.as_str(),
+            tables[tables.len() / 2].table_key.as_str(),
+            tables[tables.len() - 1].table_key.as_str(),
+            "__missing_manifest_lookup__",
+        ];
+        compare(
+            "drop-table",
+            20,
+            |query| {
+                crystal_drop_manifest()
+                    .tables
+                    .into_iter()
+                    .find(|row| row.table_key == table_keys[query])
+            },
+            |query| crystal_drop_table_by_key(table_keys[query]),
+        );
+
+        // Count copied logical payload only; this is not allocator/RSS/peak-heap measurement.
+        let stats = items.iter().map(|item| item.stats.len()).sum::<usize>();
+        let string_bytes = items
+            .iter()
+            .map(|item| item.name.len() + item.tooltip.as_ref().map_or(0, String::len))
+            .sum::<usize>();
+        eprintln!("manifest_lookup item-copy-work: all_rows={} item_size={} stats={} stat_size={} string_bytes={} logical_payload_bytes={} (excludes capacity/allocator/manifest metadata)",
+            items.len(), std::mem::size_of::<CrystalItemTemplate>(), stats,
+            std::mem::size_of::<CrystalItemStat>(), string_bytes,
+            items.len() * std::mem::size_of::<CrystalItemTemplate>() + stats * std::mem::size_of::<CrystalItemStat>() + string_bytes);
+        eprintln!("manifest_lookup selected-row copies: before={} per query; after=1 for hit or 0 for miss", items.len());
+    }
+}
+
+#[cfg(test)]
 mod tests {
     use super::{
         content_profile_experience_required, content_profile_respawn_overrides_for_map,
@@ -2868,11 +3695,12 @@ mod tests {
         crystal_npc_info_manifest, crystal_npc_manifest, crystal_npc_script_by_key,
         crystal_quest_packet_manifest, crystal_quest_packet_payloads,
         crystal_random_item_stat_profile, crystal_random_item_stats_manifest,
-        crystal_recipe_bootstrap_packets, crystal_recipe_packet_manifest, crystal_recipes,
-        crystal_respawn_manifest, crystal_starter_region_respawns, format_localized_text,
-        localization_bundle, localized_text, platinum_176_profile, platinum_176_profile_bundle,
-        starter_map_collision, starter_scene, starter_server_data, validate_content_profile,
-        ContentLevelRate, ContentRatePolicy, DropTemplate, LanguageCode, MapCellAttribute,
+        crystal_real_item_for_player, crystal_recipe_bootstrap_packets,
+        crystal_recipe_packet_manifest, crystal_recipes, crystal_respawn_manifest,
+        crystal_starter_region_respawns, format_localized_text, localization_bundle,
+        localized_text, platinum_176_profile, platinum_176_profile_bundle, starter_map_collision,
+        starter_scene, starter_server_data, validate_content_profile, ContentLevelRate,
+        ContentRatePolicy, DropTemplate, LanguageCode, MapCellAttribute,
         MonsterSpawnDispositionTemplate, SkillEffectTemplate,
     };
     use mir2_protocol::{MirClass, Point};
@@ -2897,7 +3725,7 @@ mod tests {
         let profile = platinum_176_profile();
 
         assert_eq!(profile.profile_id, "platinum_176");
-        assert_eq!(profile.version, 25);
+        assert_eq!(profile.version, 27);
         assert_eq!(
             profile.allowed_classes,
             [MirClass::Warrior, MirClass::Wizard, MirClass::Taoist,]
@@ -3150,6 +3978,14 @@ mod tests {
             .all(|byte| byte.is_ascii_hexdigit()));
         assert_eq!(bundle.source_data.crystal_database_version, 117);
         assert_eq!(bundle.summary.maps, profile.map_whitelist.len());
+        assert_eq!(
+            bundle.summary.native_resource_only_maps,
+            profile.native_resource_only_maps.len()
+        );
+        assert_eq!(
+            bundle.summary.native_maps,
+            profile.map_whitelist.len() + profile.native_resource_only_maps.len()
+        );
         assert_eq!(bundle.summary.monsters, profile.monster_whitelist.len());
         assert_eq!(bundle.summary.items, profile.item_whitelist.len());
         assert_eq!(bundle.summary.skills, profile.skills.len());
@@ -3166,7 +4002,12 @@ mod tests {
             bundle.summary.quest_reward_overrides,
             profile.quest_reward_overrides.len()
         );
-        assert_eq!(bundle.files.len(), 13);
+        assert_eq!(bundle.files.len(), 14);
+        assert!(bundle
+            .files
+            .iter()
+            .any(|file| file.path
+                == "packages/game-data/data/generated/crystal_mining_manifest.json"));
     }
 
     #[test]
@@ -3563,6 +4404,33 @@ mod tests {
     }
 
     #[test]
+    fn crystal_real_item_selection_matches_class_and_level_variants() {
+        let spirit_blade = crystal_item_by_index(1).expect("SpiritBlade origin");
+        assert_eq!(
+            crystal_real_item_for_player(&spirit_blade, 20, MirClass::Warrior).item_index,
+            2
+        );
+        assert_eq!(
+            crystal_real_item_for_player(&spirit_blade, 20, MirClass::Wizard).item_index,
+            3
+        );
+
+        let heaven_armour = crystal_item_by_index(375).expect("HeavenArmour level origin");
+        assert_eq!(
+            crystal_real_item_for_player(&heaven_armour, 39, MirClass::Warrior).item_index,
+            376
+        );
+        assert_eq!(
+            crystal_real_item_for_player(&heaven_armour, 50, MirClass::Warrior).item_index,
+            378
+        );
+        assert_eq!(
+            crystal_real_item_for_player(&heaven_armour, 10, MirClass::Warrior).item_index,
+            375
+        );
+    }
+
+    #[test]
     fn crystal_random_item_stats_manifest_loads() {
         let manifest = crystal_random_item_stats_manifest();
 
@@ -3864,6 +4732,19 @@ mod tests {
         assert!(summary.commands.iter().any(|entry| {
             entry.command == "CONQUESTGUARD" && entry.runtime_status == "implemented"
         }));
+    }
+
+    #[test]
+    fn monster_accuracy_preserves_source_stat_and_legacy_manifest_compatibility() {
+        // Server.MirDB Stat 10, verified with the generator's accuracy-only
+        // check mode. This guards against dropping Accuracy during serde load.
+        let shinsu = crystal_monster_by_name("Shinsu").expect("Shinsu template");
+        assert_eq!(shinsu.accuracy, 25);
+        let mut legacy = serde_json::to_value(&shinsu).unwrap();
+        legacy.as_object_mut().unwrap().remove("accuracy");
+        let restored: super::CrystalMonsterTemplate = serde_json::from_value(legacy).unwrap();
+        assert_eq!(restored.accuracy, 0);
+        assert_eq!(restored.max_dc, shinsu.max_dc);
     }
 
     #[test]
@@ -4172,3 +5053,10 @@ mod tests {
         }));
     }
 }
+mod crystal_mining;
+#[cfg(test)]
+mod fiveclass_tests;
+pub use crystal_mining::{
+    crystal_mine_set, crystal_mining_item, crystal_mining_manifest, crystal_mining_map,
+    CrystalMineDrop, CrystalMineSet, CrystalMineZone, CrystalMiningManifest, CrystalMiningMap,
+};

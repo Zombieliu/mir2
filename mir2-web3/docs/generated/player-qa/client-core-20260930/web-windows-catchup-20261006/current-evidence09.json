@@ -1,0 +1,684 @@
+{
+  "schemaVersion": 1,
+  "id": "current-evidence09-source23",
+  "generatedAtUtc": "2026-10-07T02:09:00.409Z",
+  "parentCommit": "4cc32c3f9a3348ebbcd4dce9475acc4c6c7d91ef",
+  "fixedWindowsBaseline": "f72e36fb84c3574fff0aeb2abed856454b14289d",
+  "currentSourceEpoch": "Source23",
+  "matrix": {
+    "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\feature-matrix09.json",
+    "bytes": 3075429,
+    "sha256": "8a22c9faef39a09f4bdda4eabe1db537487345756a391e94d6f64c4edb2bfde1"
+  },
+  "matrixMd": {
+    "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\feature-matrix09.md",
+    "bytes": 29934,
+    "sha256": "f79a60b8a359546feb27f821231ce2dc3e4e92c1731e7e36cb8e37111e8de551"
+  },
+  "finite": {
+    "relativePath": "docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/fishing-source23-finite-result01.json",
+    "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\fishing-source23-finite-result01.json",
+    "bytes": 25598,
+    "sha256": "dc3f7d952147b40d9f5d73342ef92c4bb681854fa8b683c818b1aa6ae7da4e6d"
+  },
+  "action": {
+    "relativePath": "docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/fishing-source23-action-chain-review01.json",
+    "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\fishing-source23-action-chain-review01.json",
+    "bytes": 25594,
+    "sha256": "ae8904d0a7aa327b4122e49e1b3710e4cb43e946d93c189f0c3fa719315cbdf6"
+  },
+  "combined": {
+    "relativePath": "docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/fishing-source23-combined-build-result01.json",
+    "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\fishing-source23-combined-build-result01.json",
+    "bytes": 28259,
+    "sha256": "323999cd3a932c10163a7350aa4312c51ad21c14bb030f1195479ac93993d90c"
+  },
+  "products": [
+    {
+      "relativePath": "apps/game-client/client-bevy/src/crystal_ui/mount_fishing_dialog.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\crystal_ui\\mount_fishing_dialog.rs",
+      "bytes": 16447,
+      "sha256": "9494e5ba9042b3915f3429318732015a62ddbd3a983dbcda2bd2505eb4297117"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/lib.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\lib.rs",
+      "bytes": 4628,
+      "sha256": "e8d8b2ae9e8781bb440cf332ba4a68c0d579ed15fd20784d4bed521fc8d35952"
+    },
+    {
+      "relativePath": "apps/game-client/client-core/src/lib.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-core\\src\\lib.rs",
+      "bytes": 766,
+      "sha256": "d76537b2f6485221f042249c7633e2fa66aaeaedd74d546b7039bc93f62dadf7"
+    },
+    {
+      "relativePath": "apps/game-client/platform-web/src/bag_to_belt.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\platform-web\\src\\bag_to_belt.rs",
+      "bytes": 16516,
+      "sha256": "c209be803870326f8d0869dd7db4f065b56a111a1a11405552a7c0af99f4014d"
+    },
+    {
+      "relativePath": "apps/game-client/platform-web/src/item_tooltip.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\platform-web\\src\\item_tooltip.rs",
+      "bytes": 63748,
+      "sha256": "a33c21d6ccb557d064fd36121c0a5be07b75fff3a077f8ced91645fc0ee84654"
+    },
+    {
+      "relativePath": "apps/game-client/platform-web/src/lib.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\platform-web\\src\\lib.rs",
+      "bytes": 1663,
+      "sha256": "6aed377283d57e95654063e2e9ecb411e0687d89c67ce77913fe7489f9c18829"
+    },
+    {
+      "relativePath": "apps/game-client/platform-windows/src/input.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\platform-windows\\src\\input.rs",
+      "bytes": 367623,
+      "sha256": "6d67ff71dc910e76f452ec468e42e9da15780e306ae7a35b01046da91c4f36c9"
+    },
+    {
+      "relativePath": "apps/game-client/platform-windows/src/map_parser.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\platform-windows\\src\\map_parser.rs",
+      "bytes": 105184,
+      "sha256": "376d1f6416032c93484bfd8ca91fec39f6aa67a4bba6a1c3d3fd694d5d6d78c9"
+    },
+    {
+      "relativePath": "apps/game-client/runtime/src/entity_animation.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\runtime\\src\\entity_animation.rs",
+      "bytes": 203,
+      "sha256": "380d310bf2d761159915dd820142a671cfd460f45bed4ee5e33f305c68ffb9e4"
+    },
+    {
+      "relativePath": "apps/game-client/runtime/src/entity_animation_bridge.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\runtime\\src\\entity_animation_bridge.rs",
+      "bytes": 236,
+      "sha256": "74b7fc12e7354bfdfef49f0ce7bd100e01de259e57d2e39af208e25cd3b106e0"
+    },
+    {
+      "relativePath": "apps/game-client/runtime/src/lib.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\runtime\\src\\lib.rs",
+      "bytes": 435227,
+      "sha256": "751be21351e0dd01902fced467e46aeee43e560ec80147a8b92c366cb1091041"
+    },
+    {
+      "relativePath": "apps/gateway/src/routing.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\gateway\\src\\routing.rs",
+      "bytes": 1210541,
+      "sha256": "267e20c423cd5af67163ab7f00f209ab8a60f557527c07e2cd4355964c8f6b7f"
+    },
+    {
+      "relativePath": "apps/simulation/src/config.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\config.rs",
+      "bytes": 297151,
+      "sha256": "a04a094963a2710403cf2f51265baaf2711df87e4f8d7d41db48b661fc7005f9"
+    },
+    {
+      "relativePath": "apps/simulation/src/runtime/packets.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\packets.rs",
+      "bytes": 388565,
+      "sha256": "9b1da8f34ac961d6c31cf200977765374946314f33e18acdc98309ed94ae1a85"
+    },
+    {
+      "relativePath": "apps/simulation/src/runtime/zone/runtime.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\zone\\runtime.rs",
+      "bytes": 649363,
+      "sha256": "c5f356c4e8153255ffafcd3ee7f8cd4c9a3cf7c6e4cc9c73b45fc3206f66df43"
+    },
+    {
+      "relativePath": "apps/simulation/tests/great_fox_spirit_recall.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\tests\\great_fox_spirit_recall.rs",
+      "bytes": 7665,
+      "sha256": "749ed4054f9554024deda5ca55fa49091799c388dfa9176801244e3ca341c41e"
+    },
+    {
+      "relativePath": "apps/web/app/components/original-client-entity-animation-runtime.ts",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\app\\components\\original-client-entity-animation-runtime.ts",
+      "bytes": 15571,
+      "sha256": "f477a5b06d095d8e7c18474af73add726ed423ba50a9d7018b0d2c6f4b8dd5a2"
+    },
+    {
+      "relativePath": "apps/web/app/components/original-client-shell-types.ts",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\app\\components\\original-client-shell-types.ts",
+      "bytes": 18241,
+      "sha256": "128661db8387300b0ccd027f7ad7943db50211d81374921eeece2c1fd92650fe"
+    },
+    {
+      "relativePath": "apps/web/app/original-client-shell.tsx",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\app\\original-client-shell.tsx",
+      "bytes": 321102,
+      "sha256": "303b6645cbb445273f2b3258d989a7de010f7b6e508d409cacf7ffc6bb768b71"
+    },
+    {
+      "relativePath": "apps/web/app/page.tsx",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\app\\page.tsx",
+      "bytes": 995759,
+      "sha256": "7836bf1a0c8bb4934efbaccb269eca4d75605ac5f205fb5abe77d34c13167307"
+    },
+    {
+      "relativePath": "apps/web/lib/client-core-runtime.ts",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\lib\\client-core-runtime.ts",
+      "bytes": 40650,
+      "sha256": "b2976241abb57c2c33513962e7dc44845e356ff781f2e51d37fd68de07e2224a"
+    },
+    {
+      "relativePath": "apps/web/lib/client-presentation-runtime.ts",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\lib\\client-presentation-runtime.ts",
+      "bytes": 24534,
+      "sha256": "d8206341fa5e594f3474bb6504e2e69c40e8691e07fce21f96b6e76552034c12"
+    },
+    {
+      "relativePath": "apps/web/lib/generated/bevy_runtime_version.json",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\lib\\generated\\bevy_runtime_version.json",
+      "bytes": 1711,
+      "sha256": "a2dc7560bebacdabe990e54c226122da738a678fecdc3b443cb1e0f85d0075d3"
+    },
+    {
+      "relativePath": "apps/web/lib/generated/client_core_runtime.json",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\lib\\generated\\client_core_runtime.json",
+      "bytes": 1039,
+      "sha256": "6cdf327f3373d552514cd0c5d8a8b1bb1ecb01927846911a118041483905f3a5"
+    },
+    {
+      "relativePath": "apps/web/scripts/test-bevy-combat-input.mjs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-bevy-combat-input.mjs",
+      "bytes": 70365,
+      "sha256": "0e39a0d94a129ab6f7e6aef0bf1bbbf5151a3658178da3bbd53a9ea18ad1db56"
+    },
+    {
+      "relativePath": "apps/web/scripts/test-bevy-quest-ui.mjs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-bevy-quest-ui.mjs",
+      "bytes": 69545,
+      "sha256": "b167db1673c6832b80f6319fdbb22a78b4cdc838d904f8d7c56a4d09d30a9758"
+    },
+    {
+      "relativePath": "apps/web/scripts/test-stage5-adapters.mjs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-stage5-adapters.mjs",
+      "bytes": 545600,
+      "sha256": "fd7691baf7f2b153d12ab3c885ed313800e2e14af1964a28e71959d517561157"
+    },
+    {
+      "relativePath": "apps/web/scripts/test-storage-page-gate.mjs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-storage-page-gate.mjs",
+      "bytes": 138133,
+      "sha256": "656cc86ebfb99c6891bd5800d7c50d4b1d09e49deb10205e63c9d3e23c94c54e"
+    },
+    {
+      "relativePath": "apps/game-client/client-core/src/fishing_click.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-core\\src\\fishing_click.rs",
+      "bytes": 14575,
+      "sha256": "b022699aef538a4cf70d550cecb0c9abec31bf629b961bf249816200c1d8f0aa"
+    },
+    {
+      "relativePath": "apps/game-client/client-core/src/entity_animation.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-core\\src\\entity_animation.rs",
+      "bytes": 63457,
+      "sha256": "48afc568bb2e7e867dd30906b020ac1039a2b913ac7e6145abacea0666ab5d1e"
+    },
+    {
+      "relativePath": "apps/game-client/platform-web/src/fishing_click.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\platform-web\\src\\fishing_click.rs",
+      "bytes": 34144,
+      "sha256": "aed8af65acd91c1189a4c3b23d4500ac9747c7dcb64363472c22b6fadcb59b4c"
+    },
+    {
+      "relativePath": "apps/game-client/platform-web/src/entity_animation.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\platform-web\\src\\entity_animation.rs",
+      "bytes": 4527,
+      "sha256": "091ef8e7ee6282a14cca14fcff464e25352bb74fe6e0edf2673e289bb3bfd38f"
+    },
+    {
+      "relativePath": "apps/game-client/platform-web/src/entity_animation_state.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\platform-web\\src\\entity_animation_state.rs",
+      "bytes": 36055,
+      "sha256": "cb49aff50076dfd29669cb191651e1a6185a066d09727ed50f68a6a6d4b71552"
+    },
+    {
+      "relativePath": "apps/web/lib/shared-fishing-click.ts",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\lib\\shared-fishing-click.ts",
+      "bytes": 8842,
+      "sha256": "21e0ef36d53cba70f9168975e73c63444cab8d383e4a547aeca4cabf756cd6bf"
+    },
+    {
+      "relativePath": "apps/web/lib/world-fishing-source.ts",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\lib\\world-fishing-source.ts",
+      "bytes": 14284,
+      "sha256": "ee24569a0ae5946397fff550784e7ef5a2e0bc62abb93a981bf3136a4c18c2f4"
+    },
+    {
+      "relativePath": "apps/web/lib/world-fishing-input.ts",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\lib\\world-fishing-input.ts",
+      "bytes": 1056,
+      "sha256": "224a6a3c91336cb699bf70987880536fe2d0f3e6a01e9415cd923187d1e89135"
+    },
+    {
+      "relativePath": "apps/simulation/tests/fishing_transform.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\tests\\fishing_transform.rs",
+      "bytes": 5581,
+      "sha256": "690782db8caac6b31efaafddecce1cd8df5e33cd3f3389f421aef1f338880e3c"
+    },
+    {
+      "relativePath": "apps/game-client/client-core/src/ordered_map.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-core\\src\\ordered_map.rs",
+      "bytes": 9323,
+      "sha256": "e01db4fc2679d8174948d9820fb3d971c0cb041d9b64373bec667b0e4f754a31"
+    },
+    {
+      "relativePath": "apps/web/public/client-core/c2d0b86c5a9123dba5052f75792685a298b45ce6d786083f5728aa7d69c47dfa/mir2_platform_web.js",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\public\\client-core\\c2d0b86c5a9123dba5052f75792685a298b45ce6d786083f5728aa7d69c47dfa\\mir2_platform_web.js",
+      "bytes": 24393,
+      "sha256": "875090fd42d891cb003f63e46aaed848ead048f322e86ad5338db9a088fa01e7"
+    },
+    {
+      "relativePath": "apps/web/public/client-core/c2d0b86c5a9123dba5052f75792685a298b45ce6d786083f5728aa7d69c47dfa/mir2_platform_web_bg.wasm",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\public\\client-core\\c2d0b86c5a9123dba5052f75792685a298b45ce6d786083f5728aa7d69c47dfa\\mir2_platform_web_bg.wasm",
+      "bytes": 252590,
+      "sha256": "3e03e63323b3efa502f175a324f8e47a048dd113ca8da661ec04bd0054865b3d"
+    },
+    {
+      "relativePath": "apps/web/public/client-core/45c4d45d8e764333c677355a8db56c35e76396dc4e02ec48d9b378d9c51e0b7b/mir2_platform_web.js",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\public\\client-core\\45c4d45d8e764333c677355a8db56c35e76396dc4e02ec48d9b378d9c51e0b7b\\mir2_platform_web.js",
+      "bytes": 22264,
+      "sha256": "b3c36573482e268673fde424650dadb9af81549a48a9f62344ea09e0c01451b2"
+    },
+    {
+      "relativePath": "apps/web/public/client-core/45c4d45d8e764333c677355a8db56c35e76396dc4e02ec48d9b378d9c51e0b7b/mir2_platform_web_bg.wasm",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\public\\client-core\\45c4d45d8e764333c677355a8db56c35e76396dc4e02ec48d9b378d9c51e0b7b\\mir2_platform_web_bg.wasm",
+      "bytes": 259415,
+      "sha256": "941a6322f083ba2cbd09772d6ab6d341a156d2e928b5bea2ca365a2e74c950a9"
+    }
+  ],
+  "documents": [
+    {
+      "relativePath": "docs/AGENT-ORCHESTRATION.md",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\AGENT-ORCHESTRATION.md",
+      "bytes": 232624,
+      "sha256": "41a9a57f4cb872edd673492f040340c88a532273425dcec5082f18b06bdf2328"
+    },
+    {
+      "relativePath": "docs/AGENT-TASK-QUEUE.md",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\AGENT-TASK-QUEUE.md",
+      "bytes": 847082,
+      "sha256": "813ab787da095f99be4339f4e07e554d2e6ad7e4e497872d2faa8b7d5595e501"
+    },
+    {
+      "relativePath": "docs/CRYSTAL-1TO1-ROADMAP.md",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\CRYSTAL-1TO1-ROADMAP.md",
+      "bytes": 964769,
+      "sha256": "90028131f5b51d458ea8bd117d91e0222deb2e33fadb68aabc4043cbf3734b86"
+    },
+    {
+      "relativePath": "docs/BACKEND-1TO1-PROGRESS.md",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\BACKEND-1TO1-PROGRESS.md",
+      "bytes": 507697,
+      "sha256": "950445821d8dd2bfed6ea8691129a4bb59728d43585db14276ec204fe98c6f1c"
+    },
+    {
+      "relativePath": "docs/CRYSTAL-SERVER-PARITY.md",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\CRYSTAL-SERVER-PARITY.md",
+      "bytes": 450226,
+      "sha256": "25e218f06ead14bc7c412ae2853ca4e6754babdeb272e81268266451e245cf86"
+    },
+    {
+      "relativePath": "docs/FRONTEND-1TO1-GAPS.md",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\FRONTEND-1TO1-GAPS.md",
+      "bytes": 588606,
+      "sha256": "783996772ee7cf759d9210c10d4f8f5a3c4aea81f71def59c61ff761a4e817a2"
+    },
+    {
+      "relativePath": "docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/README.md",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\README.md",
+      "bytes": 36335,
+      "sha256": "a0f40c552657445edc0cd13693bbb7744d73398c2bb39182b9afde80795ff020"
+    }
+  ],
+  "evidence": [
+    {
+      "relativePath": "docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/fishing-source23-action-chain-review01.json",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\fishing-source23-action-chain-review01.json",
+      "bytes": 25594,
+      "sha256": "ae8904d0a7aa327b4122e49e1b3710e4cb43e946d93c189f0c3fa719315cbdf6"
+    },
+    {
+      "relativePath": "docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/fishing-source23-backend-finite01.json",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\fishing-source23-backend-finite01.json",
+      "bytes": 43362,
+      "sha256": "a2c276f5c65046101ca07b567f75f78b672259a0ccae212266ccf6f8e92aaa4a"
+    },
+    {
+      "relativePath": "docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/fishing-source23-backend01-review.json",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\fishing-source23-backend01-review.json",
+      "bytes": 912,
+      "sha256": "d8885a8fba10c4ef365adfdd5d68d1d1d791db1f6cbfdf975af7a2d0b53bf2ce"
+    },
+    {
+      "relativePath": "docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/fishing-source23-backend01-snapshot.json",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\fishing-source23-backend01-snapshot.json",
+      "bytes": 145500,
+      "sha256": "5c5dfba040a433c7502977d31f7dd28316cfc6586c7967f17f6158b421791bcf"
+    },
+    {
+      "relativePath": "docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/fishing-source23-bag-codec-before01.json",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\fishing-source23-bag-codec-before01.json",
+      "bytes": 9268,
+      "sha256": "802b5e354ff63291db3d3693c4372ee929f5ac37391f58c2a18b5083d52d034a"
+    },
+    {
+      "relativePath": "docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/fishing-source23-budget-failures01.json",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\fishing-source23-budget-failures01.json",
+      "bytes": 32754,
+      "sha256": "d002b4e2c90241e170ac16df3d043fad3f13caa65b5f382925704779834712d8"
+    },
+    {
+      "relativePath": "docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/fishing-source23-client-finite04.json",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\fishing-source23-client-finite04.json",
+      "bytes": 34573,
+      "sha256": "96ffe3aab62c2eb87cba02bf29ae4703d3a5757a2d1e90880e90e13be2f4fe4f"
+    },
+    {
+      "relativePath": "docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/fishing-source23-combined-build-result01.json",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\fishing-source23-combined-build-result01.json",
+      "bytes": 28259,
+      "sha256": "323999cd3a932c10163a7350aa4312c51ad21c14bb030f1195479ac93993d90c"
+    },
+    {
+      "relativePath": "docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/fishing-source23-core-static05.json",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\fishing-source23-core-static05.json",
+      "bytes": 16573,
+      "sha256": "343e2ad6c01eab7d774e93408c9cc3ae234d87ed0c56dc877f5dfb4c26fb5d7c"
+    },
+    {
+      "relativePath": "docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/fishing-source23-finite-result01.json",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\fishing-source23-finite-result01.json",
+      "bytes": 25598,
+      "sha256": "dc3f7d952147b40d9f5d73342ef92c4bb681854fa8b683c818b1aa6ae7da4e6d"
+    },
+    {
+      "relativePath": "docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/fishing-source23-fishing-codec-before01.json",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\fishing-source23-fishing-codec-before01.json",
+      "bytes": 17894,
+      "sha256": "21deafd1f1dc13ebb774dfc88e8e20772b041ade3a1706b6c522ab9fe6aa0105"
+    },
+    {
+      "relativePath": "docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/fishing-source23-fixture-before-combat01.json",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\fishing-source23-fixture-before-combat01.json",
+      "bytes": 68985,
+      "sha256": "14a3f4476a349c36994ff15c2a71ee9e37059332a5619cdd536456bfd4678096"
+    },
+    {
+      "relativePath": "docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/fishing-source23-fixture-before-quest01.json",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\fishing-source23-fixture-before-quest01.json",
+      "bytes": 71892,
+      "sha256": "cfdbb6b3de25b4cb85d132ec42440f6f58b3ed259a8bd2b5aa4c8a45a0a3b0e1"
+    },
+    {
+      "relativePath": "docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/fishing-source23-fixture-before-storage01.json",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\fishing-source23-fixture-before-storage01.json",
+      "bytes": 140364,
+      "sha256": "26fe1dd0e470143ba069345b06d62065f565629a0ed206f42db7eeaa80002bb7"
+    },
+    {
+      "relativePath": "docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/fishing-source23-gateway-static01.json",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\fishing-source23-gateway-static01.json",
+      "bytes": 6343,
+      "sha256": "01dc8659c75465cbbb3c2e15d5c1e4559d9aeba849a93746e643f6ce15433e15"
+    },
+    {
+      "relativePath": "docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/fishing-source23-native-static05.json",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\fishing-source23-native-static05.json",
+      "bytes": 6346,
+      "sha256": "593f0b19d5d3d7f0f0d6d7ce7934ed0f0fd9a1225c5e26a65e7fca548c317876"
+    },
+    {
+      "relativePath": "docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/fishing-source23-next01-nft-closure.json",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\fishing-source23-next01-nft-closure.json",
+      "bytes": 14444829,
+      "sha256": "8ad7ae6e57e86904a910e07a739461b22dcb95ecfffdf57f9a3b8a36fa914c91"
+    },
+    {
+      "relativePath": "docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/fishing-source23-next01-output-snapshot.json",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\fishing-source23-next01-output-snapshot.json",
+      "bytes": 7822926,
+      "sha256": "0d8c41d7fb0e3d41a1319bfd481fc725b5fb34d808b1911994045c8497ceac3a"
+    },
+    {
+      "relativePath": "docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/fishing-source23-next01-source-review.json",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\fishing-source23-next01-source-review.json",
+      "bytes": 4089,
+      "sha256": "48f1595427931c573bc9f1a229ea27a9ab4f44d1b933c145fe21eaf82bbe2032"
+    },
+    {
+      "relativePath": "docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/fishing-source23-next01-source-snapshot.json",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\fishing-source23-next01-source-snapshot.json",
+      "bytes": 9760353,
+      "sha256": "42fe88a5985f2cada99cb1ac2ef292c05e455d5b402f68a4c6ecf7e4809e436a"
+    },
+    {
+      "relativePath": "docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/fishing-source23-node-failure04.json",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\fishing-source23-node-failure04.json",
+      "bytes": 5007,
+      "sha256": "f0f191a0647284fb8d8508ed24fd7cc3849c0020a0f09d4cc24d6bd6a691d4d7"
+    },
+    {
+      "relativePath": "docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/fishing-source23-node04-snapshot.json",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\fishing-source23-node04-snapshot.json",
+      "bytes": 9773743,
+      "sha256": "add4a34c036a7961266b224cf3ad723ac270585acb8d3129f482f390a2bb4759"
+    },
+    {
+      "relativePath": "docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/fishing-source23-node04-source-review.json",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\fishing-source23-node04-source-review.json",
+      "bytes": 3932,
+      "sha256": "18fe60bf740cdb2287bdfa1bf62b4ba09aa1a8239463beffb60b8c1feb33c58e"
+    },
+    {
+      "relativePath": "docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/fishing-source23-node05-snapshot.json",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\fishing-source23-node05-snapshot.json",
+      "bytes": 9776291,
+      "sha256": "996468bae73436afa857edc1265a4894a0e79104a028fb24e66492cc95641e0f"
+    },
+    {
+      "relativePath": "docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/fishing-source23-node05-source-review.json",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\fishing-source23-node05-source-review.json",
+      "bytes": 8595,
+      "sha256": "060f267d9d0fd54f4e603abdbf9419b23826f408b44630811bbc63f7d03737ce"
+    },
+    {
+      "relativePath": "docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/fishing-source23-node05-source-review06.json",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\fishing-source23-node05-source-review06.json",
+      "bytes": 9643,
+      "sha256": "c7c3f08fc7f94b82b23738c44862bc99d706d09e2eae2a60820d43af12831fec"
+    },
+    {
+      "relativePath": "docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/fishing-source23-pui-failure06.json",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\fishing-source23-pui-failure06.json",
+      "bytes": 6520,
+      "sha256": "af90afcfd7b00e4fd6a5ce749e51709e8bb3f80c7f591aeb042822e8f52bc30a"
+    },
+    {
+      "relativePath": "docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/fishing-source23-pui-finite05.json",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\fishing-source23-pui-finite05.json",
+      "bytes": 6776,
+      "sha256": "135dec2b074b7d93dc5e55006ad07d07ddc3aef9960aac3c4f1d799728eb74c5"
+    },
+    {
+      "relativePath": "docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/fishing-source23-pui-finite07.json",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\fishing-source23-pui-finite07.json",
+      "bytes": 7508,
+      "sha256": "3963424782707a9445bcd1591e7fc75a7ec705a6895d067ddfbbe9b3801ea919"
+    },
+    {
+      "relativePath": "docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/fishing-source23-renderer-static05.json",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\fishing-source23-renderer-static05.json",
+      "bytes": 27976,
+      "sha256": "888a47403fa15459cadd316518b77d7af348060480fb28d22de068e77c402b2a"
+    },
+    {
+      "relativePath": "docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/fishing-source23-rust05-review.json",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\fishing-source23-rust05-review.json",
+      "bytes": 2086,
+      "sha256": "87b5d48d427fe6ebf0857aba695e41105c6bb5fadb505ade98bbc62639d4fb94"
+    },
+    {
+      "relativePath": "docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/fishing-source23-rust05-snapshot.json",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\fishing-source23-rust05-snapshot.json",
+      "bytes": 146647,
+      "sha256": "8bed82448c33442fff8c0ea567d797aba5fe8802b01254139cdaecad847caa37"
+    },
+    {
+      "relativePath": "docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/fishing-source23-rust06-review.json",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\fishing-source23-rust06-review.json",
+      "bytes": 2720,
+      "sha256": "ce89e1b173dc6713c6df9b043143416fade377404139484db07d3711c3fcbe85"
+    },
+    {
+      "relativePath": "docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/fishing-source23-rust06-snapshot.json",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\fishing-source23-rust06-snapshot.json",
+      "bytes": 147552,
+      "sha256": "711011f4c4300bb2f51cd07d230f4f27b5e56d315141b5a99d9d97c6212a6c5b"
+    },
+    {
+      "relativePath": "docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/fishing-source23-rust07-review.json",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\fishing-source23-rust07-review.json",
+      "bytes": 2948,
+      "sha256": "eb320ca5f0c239ee672e5ad4ed23f85772e0f8fcbc074e6aac9b46a999f3af66"
+    },
+    {
+      "relativePath": "docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/fishing-source23-rust07-snapshot.json",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\fishing-source23-rust07-snapshot.json",
+      "bytes": 148546,
+      "sha256": "37211548ac2b7a6b81d8e7462e660a60ecc7eeca3154ecf1d64d450432723753"
+    },
+    {
+      "relativePath": "docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/fishing-source23-thin01-output-snapshot.json",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\fishing-source23-thin01-output-snapshot.json",
+      "bytes": 2924659,
+      "sha256": "fc65ccdc9c1f1641e6ef7b10330704157f1280488c0c607c81f842caa9b45826"
+    },
+    {
+      "relativePath": "docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/fishing-source23-thin01-size-report.json",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\fishing-source23-thin01-size-report.json",
+      "bytes": 21895,
+      "sha256": "47db8feec2d231da1e669aa429ae0475a47bb0fb6b68a71f10e781cb11140362"
+    },
+    {
+      "relativePath": "docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/fishing-source23-thin01-size-report.json-compaction-details.json",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\fishing-source23-thin01-size-report.json-compaction-details.json",
+      "bytes": 65777,
+      "sha256": "b82f37b7ecdb2562419b9752936df43f973dba22946abcfaa59392fc073f83a9"
+    },
+    {
+      "relativePath": "docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/fishing-source23-thin01-source-snapshot.json",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\fishing-source23-thin01-source-snapshot.json",
+      "bytes": 23804849,
+      "sha256": "d2f89332ebb4c08988f68f9c98648780d16087f96b399e087208719b755f15f9"
+    },
+    {
+      "relativePath": "docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/fishing-source23-thin01-static-extra.json",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\fishing-source23-thin01-static-extra.json",
+      "bytes": 157944,
+      "sha256": "9dfdd06fda7c84a3abacaf6aff85c4c9564dacab8ac577570b0a93caffab779d"
+    },
+    {
+      "relativePath": "docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/fishing-source23-tooltip-codec-before01.json",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\fishing-source23-tooltip-codec-before01.json",
+      "bytes": 55404,
+      "sha256": "607a3bcc9eb4b3268cdb74cfed37d17b37ce7cd9bfeb9cd1e815b8860435f547"
+    },
+    {
+      "relativePath": "docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/fishing-source23-tsc06-source-snapshot.json",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\fishing-source23-tsc06-source-snapshot.json",
+      "bytes": 9755741,
+      "sha256": "a339e5863446bdac31c2221bc2e0261f0d38e85e06424489cf6325441933d1c8"
+    },
+    {
+      "relativePath": "docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/fishing-source23-web-finite05.json",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\fishing-source23-web-finite05.json",
+      "bytes": 9902,
+      "sha256": "14685bf0e504e92233ee29a8dabfc5041469ea98b0839202a7e9df790d884861"
+    },
+    {
+      "relativePath": "docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/fishing-source23-web-finite06.json",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\fishing-source23-web-finite06.json",
+      "bytes": 11505,
+      "sha256": "8b3789784af980d4f41be6d25e60b8966d3874f923551f8c9fb6cc79ebe11c1a"
+    },
+    {
+      "relativePath": "docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/fishing-source23-web-retirement-finite01.json",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\fishing-source23-web-retirement-finite01.json",
+      "bytes": 5883,
+      "sha256": "16325480ab6c5e2e2c4e13739f745533b008ffa378d6da6e4433c87a8d647260"
+    },
+    {
+      "relativePath": "docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/feature-matrix09.json",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\feature-matrix09.json",
+      "bytes": 3075429,
+      "sha256": "8a22c9faef39a09f4bdda4eabe1db537487345756a391e94d6f64c4edb2bfde1"
+    },
+    {
+      "relativePath": "docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/feature-matrix09.md",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\feature-matrix09.md",
+      "bytes": 29934,
+      "sha256": "f79a60b8a359546feb27f821231ce2dc3e4e92c1731e7e36cb8e37111e8de551"
+    }
+  ],
+  "sourcePublication": "pending Root actual commit/push at creation; Source22 alreadypublished4cc32c3f9a3348ebbcd4dce9475acc4c6c7d91ef",
+  "classification": {
+    "shared": 103,
+    "legacy": 204,
+    "open": 2,
+    "common limitation": 8
+  },
+  "fixtureAssociationCounts": {
+    "rowAssociations": 312,
+    "uniqueDeclarations": 179,
+    "rowDeduplicatedAssociations": 311
+  },
+  "all317PlayerStatus": "not-run",
+  "actualNode05": {
+    "selectedOriginalScripts": 11,
+    "passed": 218,
+    "failed": 0,
+    "skipped": 0,
+    "stage5Old318PlusNew39": 357,
+    "stage5GlobalFileTests": 1
+  },
+  "actualCurrentPuiRust07": {
+    "passed": 64,
+    "newManualCodecOracleTests": 6
+  },
+  "actualBackend": {
+    "passed": 242,
+    "newDistinctTests": 6
+  },
+  "historicalClientTestsQualified": "FinalRust07 PUI64 is a newactual CPU run of whole PUI suite. Prior Rust04 Core141/default44+3oldignored/Native-fishing6/Runtime-animation17 and prior Rust03 Native-input133 are historical actual executions; final epochs only modified presentation-ui-gated codecs whose source consumption is separate from these unchanged effective configurations. Do not claim all432 or all executions freshly rerun in Rust07.",
+  "thin": {
+    "declaredRecords": 63205,
+    "uniqueNormalizedWindowsPaths": 63187,
+    "aliasGroups": 18,
+    "files": 7301,
+    "dirs": 776,
+    "links": 0,
+    "bytes": 373049068,
+    "cap": 377487360,
+    "headroom": 4438292
+  },
+  "budgets": {
+    "coreWasm": 252590,
+    "puiWasm": 259415,
+    "strictWasmBelow": 262144,
+    "jsMaximum": 204800,
+    "unchanged": true
+  },
+  "renderIgnoredImmutableRelease": "bevy-8e38472ba5cf5ef3 remains generatedignored, no forced Git publication",
+  "scope": "Only42 Source23 products including4 currentCore/PUI leaves,7MD docs and bounded currentQA ordinaryJSON/MD evidence. No unrelatedtsconfig/Next/Thin trees/accounts/private locks/other bundles/helpers/runner staging. Versionedrenderer immutable leaves omitted fromGit perexistingignore.",
+  "overallPercentage": null,
+  "candidate100": false,
+  "goalStatus": "active",
+  "uiOperated": false,
+  "runtimeLaunched": false,
+  "networkUsed": false,
+  "wasmApiUsed": false,
+  "candidateAccepted": false,
+  "playerAccepted": false,
+  "goalComplete": false
+}

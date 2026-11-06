@@ -1,0 +1,49 @@
+{
+  "owner": "Root",
+  "kind": "Source72 actual ENOSPC boundary and safe C continuation",
+  "eCopyFailure": {
+    "reason": "ENOSPC",
+    "actualCopiedFiles": 29500,
+    "plannedFiles": 49750,
+    "ordinaryDirectories": 3681,
+    "partialBytes": 1311464471,
+    "productExecuted": false
+  },
+  "publicQaWriteFailure": {
+    "reason": "ENOSPC",
+    "productBuildAlreadySucceeded": true
+  },
+  "preservedPartialManifest": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source72-storage-takeback-20261012-01\\thin-preparation01\\incomplete-baseline-snapshot01.json",
+    "bytes": 25024665,
+    "sha256": "957fa4af999fb8c7a48e65ba96053d9e3169113f6ea2f7994830ab9fce13fc8a"
+  },
+  "cFullInputRoot": "C:\\mir2-cross-platform-storage-20261002\\web-source72-storage-takeback-20261012-01\\full-deps01\\mir2-web3",
+  "cFullInputs": 70788,
+  "cFullOrdinaryFiles": 70786,
+  "rootIndependentRecoverableCopiesVerified": 29500,
+  "recoveryPlan": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source72-storage-takeback-20261012-01\\root-approved01\\enospc-recoverable-owned-duplicate-plan01.json",
+    "bytes": 17568780,
+    "sha256": "7baabdfae97372059aac3381ce887f77f854483fbf0e24ac4c33ba0501263809"
+  },
+  "userAuthorizedOnlyOwnedDuplicateDelete": true,
+  "deleteCommandAutomaticReview": {
+    "rejected": true,
+    "reason": "blocked by policy",
+    "executed": false
+  },
+  "compressionExecuted": false,
+  "filesRemoved": 0,
+  "ownedEPartialRetained": true,
+  "subsequentAvailableEBytes": 2140790784,
+  "whySpaceChanged": "not established",
+  "nextActualProofCopied": {
+    "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\web-source72-next-actual02.json",
+    "bytes": 2757,
+    "sha256": "848dc3ad388a7acf6659932e44ec372936237e70ba0aff5dcc1f3c158f3bd601"
+  },
+  "mainSource71Source72NextRetained": true,
+  "candidateAccepted": false,
+  "goalComplete": false
+}

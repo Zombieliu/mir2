@@ -1,0 +1,274 @@
+{
+  "schemaVersion": 1,
+  "reviewedAt": "2026-10-26T01:42:54.946Z",
+  "scope": "Independent static source and metadata contract review only; no target module import or mode executed.",
+  "prepared": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-selection-diagnostics-feasibility-20\\runtime-prepared-v2.json",
+    "bytes": 50348,
+    "sha256": "cdb89bd41d5187dd7e68aab27f36b0e00e05f12d52e570a0d22a983e42179794"
+  },
+  "controller": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-selection-diagnostics-feasibility-20\\root-seal-and-guard-v1.mjs",
+    "bytes": 17598,
+    "sha256": "06429d705d71cdf3af1062070648b146f95f6a2b4d4dd6f7171a2d96d3e6e12b"
+  },
+  "verdict": {
+    "preparedContractPassed": true,
+    "eligibleForSealNow": true,
+    "blockingFindingIds": []
+  },
+  "checkedPreparation": {
+    "originalPrepared": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-selection-diagnostics-feasibility-20\\runtime-prepared-v1.json",
+      "bytes": 49222,
+      "sha256": "3deea5350627c65d5fd031acce4f6c3f4d89e3daec5a8b458c91fa89e32c25a2"
+    },
+    "currentLocalPins": 68,
+    "externalPins": 36,
+    "localAggregate": "3e1e3cf7ed92cbe6868c512838f39965b8cc7cb8ffab79114b49eb4369f77678",
+    "externalAggregate": "e71787cab169090acd5d7ebf160b61539bcd4a0a769dfa8612e12dcdfecd0d00",
+    "priorActualRawHashesChecked": 96,
+    "priorOpaqueTraceRefsAndSizesCheckedWithoutReading": 6,
+    "currentDeltaPinsChecked": true,
+    "original102PinsUnchanged": true,
+    "templateRowsForwardAndInverseRawExact": 33,
+    "evidencePositionHunksForwardAndInverseRawExact": 3,
+    "controllerPositionHunksForwardAndInverseRawExact": 2,
+    "storeChildLiteralsForwardAndInverseRawExact": 2,
+    "syntaxEvidenceRows": 28,
+    "syntaxEvidenceScope": "Author actual 26 Node checks and 2 PowerShell AST results; reviewer did not repeat or treat syntax as ESM evaluation."
+  },
+  "metadataCorrection": {
+    "reference": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-selection-diagnostics-feasibility-20\\metadata-null-placeholder-correction-v1.json",
+      "bytes": 10338,
+      "sha256": "60081598bbac16683694d49fe9c8191e158971b91f011ddfbde9e595e14cbd99"
+    },
+    "original8258ProofRetained": true,
+    "completeUnionKeyComparisonVerified": true,
+    "rows": [
+      {
+        "document": "current-driver-binding.json",
+        "changedFields": [
+          "state"
+        ],
+        "omittedNullPlaceholderDeletions": []
+      },
+      {
+        "document": "candidate-release-binding.json",
+        "changedFields": [
+          "full16",
+          "state"
+        ],
+        "omittedNullPlaceholderDeletions": []
+      },
+      {
+        "document": "backend-library-binding.json",
+        "changedFields": [
+          "runtimeGuardExecution",
+          "runtimeGuardStdout"
+        ],
+        "omittedNullPlaceholderDeletions": []
+      },
+      {
+        "document": "launcher-source-prepared-v1.json",
+        "changedFields": [
+          "accountsCreated",
+          "accountsProvisioned",
+          "actualInputsBound",
+          "document",
+          "driverFrozen",
+          "freshFull16",
+          "full16",
+          "guardExecuted",
+          "moduleImported",
+          "sourceFreezeNotSealed",
+          "state"
+        ],
+        "omittedNullPlaceholderDeletions": [
+          "freshFull16"
+        ]
+      },
+      {
+        "document": "final-inputs-approved.json",
+        "changedFields": [
+          "accountsCreated",
+          "accountsProvisioned",
+          "actualInputsBound",
+          "document",
+          "driverFrozen",
+          "freshFull16",
+          "full16",
+          "guardExecuted",
+          "moduleImported",
+          "sourceFreezeNotSealed",
+          "state"
+        ],
+        "omittedNullPlaceholderDeletions": [
+          "freshFull16"
+        ]
+      },
+      {
+        "document": "static-preparation-verification.json",
+        "changedFields": [
+          "accountsCreated",
+          "accountsProvisioned",
+          "actualInputsBound",
+          "document",
+          "driverFrozen",
+          "freshFull16",
+          "full16",
+          "guardExecuted",
+          "moduleImported",
+          "sourceFreezeNotSealed",
+          "state"
+        ],
+        "omittedNullPlaceholderDeletions": [
+          "freshFull16"
+        ]
+      },
+      {
+        "document": "preparation-plan.json",
+        "changedFields": [
+          "actualInputsBound",
+          "actualProbeResult",
+          "canonicalGeometryProof",
+          "document",
+          "freshFull16",
+          "full16",
+          "guardExecuted",
+          "maximumControlledActors",
+          "moduleImported",
+          "ordinaryAccountPoolSize",
+          "policy",
+          "sourceFreezeNotSealed",
+          "state"
+        ],
+        "omittedNullPlaceholderDeletions": [
+          "actualProbeResult",
+          "freshFull16"
+        ]
+      }
+    ],
+    "fiveNullPlaceholderDeletionOmissionsCorrected": true,
+    "allSevenActualBoundDocumentsAndAllModulesUnchanged": true
+  },
+  "sourceSealPlan": {
+    "existingUniqueInputs": 115,
+    "additionalPreparedSelfReviewAndSyntax": 3,
+    "expectedFinalUniqueInputs": 118,
+    "maximum": 128,
+    "preparationReferences": 27,
+    "controllerPreparation": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-selection-diagnostics-feasibility-20\\root-controller-preparation-v1.json",
+      "bytes": 1463,
+      "sha256": "fd5a7da6f198fdca3e668fc550a68e81453996fb0bf30fbc763c3acd03699fcd"
+    }
+  },
+  "contracts": {
+    "backendBuildCommit": "c743122af05faca43d9535d8c6c2a4bfb01b924f",
+    "executionSourceCommit": "b5374083d257d375437af3de42bead159cd2b917",
+    "driverSourceCommit": "b5374083d257d375437af3de42bead159cd2b917",
+    "currentNodeTests": 232,
+    "historicalPriorJTests": 226,
+    "historicalPriorHTests": 219,
+    "historicalBuildNodeTests": 210,
+    "currentDriverAggregate": "d61b7cd057e1a2a55191fe6c407b3058b5ff9205141eaf9290d16da42b028db1",
+    "historicalChainKtoJtoHto6759to19099Verified": true,
+    "sixDeclarationsUseHistoricalBasis": true,
+    "lazyCycleReferencesPreserved": true,
+    "windows": {
+      "required": 16,
+      "phases": [
+        5,
+        5,
+        6
+      ],
+      "actualMinimumSeconds": 60,
+      "phaseSeconds": [
+        300,
+        300,
+        360
+      ]
+    },
+    "ordinaryAccountPoolSize": 100,
+    "maximumActors": 10,
+    "combatActors": 1,
+    "admissionCaps": [
+      24,
+      10,
+      10,
+      4,
+      1,
+      2
+    ],
+    "tokioWorkers": 4,
+    "softResourceProfileUnchanged": true,
+    "nativeThresholdsAnd900msBoundaryUnchanged": true,
+    "scoutDiagnostic32RowBoundNoAcceptanceCredit": true,
+    "storeSeparateDatasetNoGameAnd": true,
+    "policyScenarioResourceWindowHelperUnchanged": true,
+    "windowsPathReferencesCanonicalCompatible": true
+  },
+  "actualFreshFull16": {
+    "prerequisite": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\scout-selection-diagnostics-full16-public-archive-v1\\full16-actual-prerequisite-v1.json",
+      "bytes": 9510,
+      "sha256": "4ef0ee82a018ee6f419dae732e8db66e4488f6686ad96f98d241e8b7dfb0b907"
+    },
+    "independentFacts": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\scout-selection-diagnostics-full16-actual-independent-facts-v1.json",
+      "bytes": 6568,
+      "sha256": "9e64800b29037bf9ab70cddc2eaf8b28f7465527b07da48a57705dcdec0297d5"
+    },
+    "all16Passed": true,
+    "ordinarySentCommands": 343,
+    "backendInputs": 50,
+    "sixCountersZero": true,
+    "normalExitCode": 0,
+    "notCurrentProbeResult": true
+  },
+  "closedFindings": [
+    {
+      "id": "B1",
+      "summary": "Both Store collector child literals now use the new Probe20 Store child. Original beforeimages and exact two inverses retained."
+    },
+    {
+      "id": "B2",
+      "summary": "Union-of-keys metadata correction records all seven documents, including five deleted null placeholders in four rows. Original incomplete proof remains historical, superseded explicitly."
+    }
+  ],
+  "informationalFindings": [
+    {
+      "id": "I1",
+      "summary": "run-owned console.phase retains a historical Probe19 text label; no consumer dependency found. Actual paths, PIDs/endpoints and C/K/K identity fields use Probe20."
+    }
+  ],
+  "runtimeStateAbsent": [
+    "private",
+    "bin",
+    "reports",
+    "recordings",
+    "preparation.lock",
+    "execution.lock",
+    "source-pins.json",
+    "compact-navigation-wire-terminal.json",
+    "realm-cleanup.json",
+    "realm-execution.json",
+    "launcher-source-frozen-v1.json",
+    "source-guard-readonly-verification.json",
+    "launcher-syntax-check.log"
+  ],
+  "limitations": {
+    "targetModulesImported": false,
+    "guardSealSeedOrRealmExecuted": false,
+    "testsOrBuildExecuted": false,
+    "gameplayRawMonitorPrivateOrBinaryRead": false,
+    "sixTracePayloadsReadOrRehashed": false,
+    "esmEvaluationNotEstablishedByStaticCheck": true,
+    "currentProbeResultKnown": false,
+    "capacityAccepted": false,
+    "p0Passed": false,
+    "p2Started": false
+  }
+}

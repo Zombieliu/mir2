@@ -1,0 +1,437 @@
+{
+  "schemaVersion": 1,
+  "state": "SUMMARY_OF_ROOT_ACTUAL_INDEPENDENT_REPLAY_NO_NEW_REPLAY",
+  "runId": "1792971941351-af013515",
+  "sources": {
+    "independentFinal": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\probe19-independent-verification-v1\\final-verification.json",
+      "bytes": 455554,
+      "sha256": "7a8adbf0a67f312344acba4eedfce01d9c87eff26e5a348390e92a3beae16acc"
+    },
+    "report": {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-native10-v2-scout-anti-convergence-followup-19-diagnostics\\release-native-10-v2-scout-anti-convergence-feasibility-19\\reports\\1792971941351-af013515.report.json",
+      "bytes": 325156,
+      "sha256": "9d7b8dafb07d0d2b9b79616453ccf3d3cd361e2ccd7753960e7724e108e667fc"
+    },
+    "toolSeal": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\probe19-independent-verification-v1\\tool-source-frozen-v1.json",
+      "bytes": 2785,
+      "sha256": "419abe39e5b5ec71f47cbefd52a9c4e541eb9a92d86df5ea77f6504e6bd63c51"
+    },
+    "actualExecution": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\probe19-independent-verification-v1\\actual-verification-execution-receipt-v1.json",
+      "bytes": 813,
+      "sha256": "33dd7b9b83769800aab3a52fea3e4b884d4ceb194304c05684c6938f1f725d2d"
+    }
+  },
+  "verdict": {
+    "independentVerificationPassed": true,
+    "probePassed": true,
+    "capacityAccepted": false,
+    "P0Accepted": false,
+    "P2Started": false
+  },
+  "phases": [
+    {
+      "name": "stage-2",
+      "configuredSeconds": 300,
+      "measuredSeconds": 300.294,
+      "windowCount": 5,
+      "windowSeconds": [
+        60.097,
+        60.081,
+        60.018,
+        60.043,
+        60.055
+      ],
+      "allWindowsPassed": true,
+      "attackRequests": 0,
+      "attackMetricCount": 0,
+      "attackStatuses": {},
+      "combat": [],
+      "windowCombat": [
+        {
+          "seconds": 60.097,
+          "actors": []
+        },
+        {
+          "seconds": 60.081,
+          "actors": []
+        },
+        {
+          "seconds": 60.018,
+          "actors": []
+        },
+        {
+          "seconds": 60.043,
+          "actors": []
+        },
+        {
+          "seconds": 60.055,
+          "actors": []
+        }
+      ]
+    },
+    {
+      "name": "stage-10",
+      "configuredSeconds": 300,
+      "measuredSeconds": 300.22,
+      "windowCount": 5,
+      "windowSeconds": [
+        60.009,
+        60.032,
+        60.095,
+        60.025,
+        60.059
+      ],
+      "allWindowsPassed": true,
+      "attackRequests": 160,
+      "attackMetricCount": 160,
+      "attackStatuses": {
+        "success": 160
+      },
+      "combat": [
+        {
+          "actor": "Lf70f2a05",
+          "launchedAttacks": 160,
+          "positiveHits": 160,
+          "damage": 467,
+          "nativeOpportunities": 258,
+          "nativeCompleted": 258,
+          "launchesPerMinute": 31.976550529611615,
+          "hitsPerMinute": 31.976550529611615
+        }
+      ],
+      "windowCombat": [
+        {
+          "seconds": 60.009,
+          "actors": [
+            {
+              "actor": "Lf70f2a05",
+              "launchedAttacks": 33,
+              "positiveHits": 33,
+              "launchesPerMinute": 32.99505074238864,
+              "hitsPerMinute": 32.99505074238864
+            }
+          ]
+        },
+        {
+          "seconds": 60.032,
+          "actors": [
+            {
+              "actor": "Lf70f2a05",
+              "launchedAttacks": 34,
+              "positiveHits": 34,
+              "launchesPerMinute": 33.981876332622605,
+              "hitsPerMinute": 33.981876332622605
+            }
+          ]
+        },
+        {
+          "seconds": 60.095,
+          "actors": [
+            {
+              "actor": "Lf70f2a05",
+              "launchedAttacks": 29,
+              "positiveHits": 29,
+              "launchesPerMinute": 28.95415591979366,
+              "hitsPerMinute": 28.95415591979366
+            }
+          ]
+        },
+        {
+          "seconds": 60.025,
+          "actors": [
+            {
+              "actor": "Lf70f2a05",
+              "launchedAttacks": 30,
+              "positiveHits": 30,
+              "launchesPerMinute": 29.987505206164098,
+              "hitsPerMinute": 29.987505206164098
+            }
+          ]
+        },
+        {
+          "seconds": 60.059,
+          "actors": [
+            {
+              "actor": "Lf70f2a05",
+              "launchedAttacks": 34,
+              "positiveHits": 34,
+              "launchesPerMinute": 33.96659951048136,
+              "hitsPerMinute": 33.96659951048136
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "soak",
+      "configuredSeconds": 360,
+      "measuredSeconds": 360.319,
+      "windowCount": 6,
+      "windowSeconds": [
+        60.104,
+        60.053,
+        60.002,
+        60.019,
+        60.089,
+        60.052
+      ],
+      "allWindowsPassed": true,
+      "attackRequests": 186,
+      "attackMetricCount": 186,
+      "attackStatuses": {
+        "success": 186
+      },
+      "combat": [
+        {
+          "actor": "Lf70f2a05",
+          "launchedAttacks": 186,
+          "positiveHits": 186,
+          "damage": 620,
+          "nativeOpportunities": 323,
+          "nativeCompleted": 323,
+          "launchesPerMinute": 30.972554874985775,
+          "hitsPerMinute": 30.972554874985775
+        }
+      ],
+      "windowCombat": [
+        {
+          "seconds": 60.104,
+          "actors": [
+            {
+              "actor": "Lf70f2a05",
+              "launchedAttacks": 35,
+              "positiveHits": 35,
+              "launchesPerMinute": 34.93943830693465,
+              "hitsPerMinute": 34.93943830693465
+            }
+          ]
+        },
+        {
+          "seconds": 60.053,
+          "actors": [
+            {
+              "actor": "Lf70f2a05",
+              "launchedAttacks": 30,
+              "positiveHits": 30,
+              "launchesPerMinute": 29.973523387674224,
+              "hitsPerMinute": 29.973523387674224
+            }
+          ]
+        },
+        {
+          "seconds": 60.002,
+          "actors": [
+            {
+              "actor": "Lf70f2a05",
+              "launchedAttacks": 33,
+              "positiveHits": 33,
+              "launchesPerMinute": 32.99890003666545,
+              "hitsPerMinute": 32.99890003666545
+            }
+          ]
+        },
+        {
+          "seconds": 60.019,
+          "actors": [
+            {
+              "actor": "Lf70f2a05",
+              "launchedAttacks": 29,
+              "positiveHits": 29,
+              "launchesPerMinute": 28.99081957380163,
+              "hitsPerMinute": 28.99081957380163
+            }
+          ]
+        },
+        {
+          "seconds": 60.089,
+          "actors": [
+            {
+              "actor": "Lf70f2a05",
+              "launchedAttacks": 30,
+              "positiveHits": 30,
+              "launchesPerMinute": 29.955565910565994,
+              "hitsPerMinute": 29.955565910565994
+            }
+          ]
+        },
+        {
+          "seconds": 60.052,
+          "actors": [
+            {
+              "actor": "Lf70f2a05",
+              "launchedAttacks": 29,
+              "positiveHits": 29,
+              "launchesPerMinute": 28.97488843002731,
+              "hitsPerMinute": 28.97488843002731
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "continuous": {
+    "assessed": 132,
+    "completeAtLeast60Seconds": 122,
+    "partialUnder60Seconds": 10,
+    "finalFlagCount": 10,
+    "minimumCompleteSeconds": 60.000430399999956,
+    "partialSeconds": {
+      "minimum": 14.7560821,
+      "maximum": 48.10101740000001
+    },
+    "failed": 0,
+    "allAssessedPassed": true,
+    "rule": "132 assessed is 122 complete plus 10 final partial, not 132 full minutes."
+  },
+  "attacks": {
+    "wholeRun": {
+      "metricCount": 353,
+      "requests": 353,
+      "notLaunched": 0,
+      "statuses": {
+        "success": 353
+      },
+      "sendCompletionMaximumMs": 272.31729999999516
+    },
+    "measuredPhases": {
+      "totalRequests": 346,
+      "byPhase": [
+        {
+          "name": "stage-2",
+          "requests": 0
+        },
+        {
+          "name": "stage-10",
+          "requests": 160
+        },
+        {
+          "name": "soak",
+          "requests": 186
+        }
+      ]
+    },
+    "outsideThreeMeasuredPhases": 7,
+    "outsideScopeRule": "Seven requests lie outside the three measured phases. This metadata-only summary does not assign them to ramp/settle/bootstrap or independently replay packet timestamps.",
+    "full16OrdinarySentCommands": 349,
+    "full16IsDifferentRunAndDifferentDenominator": true
+  },
+  "rawArchiveReferenceOnly": {
+    "rows": 41130,
+    "bytes": 29130996,
+    "sha256": "692a855584060769b177681c141e392ade2716954d456bfb412d5d981efb1685",
+    "typeCounts": {
+      "monitor": 534,
+      "phaseStarted": 5,
+      "action": 11001,
+      "coverage": 1038,
+      "playerLifecycle": 8420,
+      "admitted": 10,
+      "selfTransform": 9158,
+      "fanoutDistribution": 5073,
+      "compactNavigationWire": 5372,
+      "phaseEnded": 5,
+      "continuousWindow": 132,
+      "window": 16,
+      "stageComplete": 3,
+      "combatArrival": 1,
+      "pendingAttackEvidence": 353,
+      "movementCorrection": 3,
+      "combatScoutSelection": 3,
+      "combatScoutAdvanced": 2,
+      "finished": 1
+    },
+    "wholeRunCorrectedMovementActions": 3,
+    "correctedActions": [
+      {
+        "line": 6630,
+        "at": 1792972326479,
+        "actor": "Lf70f2a06",
+        "phase": "settle",
+        "kind": "walk",
+        "plannedTarget": {
+          "x": 258,
+          "y": 590
+        },
+        "actual": {
+          "x": 257,
+          "y": 590
+        },
+        "latencyMs": 4.385699999984354
+      },
+      {
+        "line": 22333,
+        "at": 1792972632517,
+        "actor": "Lf70f2a06",
+        "phase": "soak",
+        "kind": "run",
+        "plannedTarget": {
+          "x": 259,
+          "y": 590
+        },
+        "actual": {
+          "x": 257,
+          "y": 590
+        },
+        "latencyMs": 1.1859000000404194
+      },
+      {
+        "line": 30250,
+        "at": 1792972779035,
+        "actor": "Lf70f2a08",
+        "phase": "soak",
+        "kind": "run",
+        "plannedTarget": {
+          "x": 232,
+          "y": 613
+        },
+        "actual": {
+          "x": 232,
+          "y": 615
+        },
+        "latencyMs": 1.3013999999966472
+      }
+    ],
+    "correctedActionsTruncated": false
+  },
+  "store": {
+    "rows": 13,
+    "bytes": 2841,
+    "sha256": "9263b7277256a27b9729ae8890433ae4287abd204cd32765fb0298c63ea752e3",
+    "sourceValid": true,
+    "countsMatch": true,
+    "complete": true,
+    "reasons": [],
+    "contributesToGameAcceptance": false,
+    "limitations": "Completed-only threshold50ms diagnostic rows; nested spans are not additive. No holder, no5s-stall exclusion or25-player causal improvement is inferred."
+  },
+  "wire": {
+    "rows": 5372,
+    "complete": true,
+    "contributesToGameAcceptance": false
+  },
+  "hp": {
+    "rows": 0,
+    "verifiedEventsChecked": 0,
+    "successProofChecked": false,
+    "noVerifiedDoseObserved": true,
+    "notContinuousHpCoverage": true
+  },
+  "monitor": {
+    "rawMonitorRows": 534,
+    "complete": true,
+    "noStops": true,
+    "invalidCount": 0,
+    "maxGapMs": 7391
+  },
+  "limits": [
+    "Only final/report/tool metadata read here; no raw/monitor/trace/recording scan, verifier rerun, tests or binary hash.",
+    "Original action/native/window/continuous replay was Root actual runner. Independent per-request typed900ms/dual-packet replay was not added.",
+    "HPzero does not prove a real dose or continuous survival.",
+    "Two-hour memory,25/50/100-player capacity,frontend or cloud production acceptance is not established.",
+    "Original Formal14failure and all earlier evidence remain unchanged. Root producer facts keep their earlier independentWindowAdjudicationPending point in time."
+  ],
+  "publicCopyExecuted": false
+}

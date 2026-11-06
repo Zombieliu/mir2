@@ -1,6 +1,6 @@
 use bevy_ecs::prelude::World;
 use mir2_game_data::{crystal_drop_table_by_key, localized_text_or_fallback, CrystalItemTemplate};
-use mir2_protocol::{ChatType, Point, ServerPacket};
+use mir2_protocol::{ChatType, Point, ServerPacket, UserItem};
 
 use crate::config::{EquipmentSlot, ItemContainer, WorldEntityDisposition};
 
@@ -10,11 +10,15 @@ use super::crystal_compat::{
     CRYSTAL_STAT_CRITICAL_RATE, CRYSTAL_STAT_MAX_AC, CRYSTAL_STAT_MAX_DC, CRYSTAL_STAT_MIN_AC,
 };
 use super::drops::{can_gain_gold, crystal_attempt_drop_entry, ResolvedDropTemplate};
-use super::equipment::{equipment_slot_unique_id, EquipmentState};
-use super::inventory::{add_or_increment_item_with_random_metadata, can_gain_item_quantity};
+use super::equipment::{
+    equipment_slot_unique_id, equipment_state_from_item_state, item_state_from_equipment_state,
+    user_item_from_equipment_state, validated_item_state_user_item, EquipmentState,
+};
+use super::inventory::can_gain_item_quantity;
+use super::item_grants::{FreshItemGrant, publish_world_grants};
 use super::items::{
-    crystal_item_template_for_item_key, item_unique_id, user_item_from_item_state,
-    user_item_stat_total, ItemState,
+    crystal_item_template_for_item_key, item_unique_id, try_item_state_from_user_item,
+    user_item_from_item_state, user_item_stat_total, ItemState,
 };
 use super::monsters::{
     crystal_dynamic_monster_template, crystal_spawn_candidates_on_map, deterministic_roll,
@@ -68,6 +72,7 @@ pub(super) fn fishing_cast_impl(world: &mut World, cast_out: bool) -> Vec<Server
     if !is_in_world(world) {
         return Vec::new();
     }
+    sync_fishing_slots_from_equipment(world);
 
     if cast_out {
         let mut packets = Vec::new();
@@ -107,6 +112,7 @@ pub(super) fn fishing_change_autocast_impl(
     if !is_in_world(world) {
         return Vec::new();
     }
+    sync_fishing_slots_from_equipment(world);
 
     if !has_equipped_fishing_rod(world) {
         return Vec::new();
@@ -122,6 +128,11 @@ pub(super) fn fishing_change_autocast_impl(
 
 pub(super) fn tick_fishing(world: &mut World, packets: &mut Vec<ServerPacket>) {
     if !is_in_world(world) || !world.resource::<FishingResource>().fishing {
+        return;
+    }
+    sync_fishing_slots_from_equipment(world);
+    if !has_equipped_fishing_rod(world) {
+        reject_fishing(world);
         return;
     }
     let mut found_this_tick = false;
@@ -267,11 +278,111 @@ fn equipment_is_fishing_rod(equipment: &EquipmentState) -> bool {
 }
 
 fn fishing_slot_model_available(world: &World) -> bool {
+    if has_crystal_fishing_slot_carrier(world) {
+        return true;
+    }
     world
         .resource::<FishingResource>()
         .slot_items
         .iter()
         .any(Option::is_some)
+}
+
+fn has_crystal_fishing_slot_carrier(world: &World) -> bool {
+    world
+        .resource::<InventoryResource>()
+        .equipment_items
+        .iter()
+        .any(|item| {
+            item.slot == EquipmentSlot::Weapon
+                && crystal_item_template_for_item_key(&item.key).is_some_and(|template| {
+                    template.item_type == CRYSTAL_ITEM_TYPE_WEAPON
+                        && CRYSTAL_FISHING_ROD_SHAPES.contains(&template.shape)
+                })
+        })
+}
+
+fn equipped_fishing_slot_carrier(world: &World) -> Option<(usize, ItemState, UserItem)> {
+    let resources = world.resource::<InventoryResource>();
+    let (index, rod) = resources
+        .equipment_items
+        .iter()
+        .enumerate()
+        .find(|(_, item)| item.slot == EquipmentSlot::Weapon)?;
+    let template = crystal_item_template_for_item_key(&rod.key)?;
+    if template.item_type != CRYSTAL_ITEM_TYPE_WEAPON
+        || !CRYSTAL_FISHING_ROD_SHAPES.contains(&template.shape)
+    {
+        return None;
+    }
+    let user_item = user_item_from_equipment_state(rod)?;
+    if user_item.slots.len() != 5 {
+        return None;
+    }
+    let carrier = item_state_from_equipment_state(rod.clone(), ItemContainer::Bag1, 0);
+    Some((index, carrier, user_item))
+}
+
+fn sync_fishing_slots_from_equipment(world: &mut World) {
+    let Some((_, carrier, user_item)) = equipped_fishing_slot_carrier(world) else {
+        if has_crystal_fishing_slot_carrier(world) {
+            world.resource_mut::<FishingResource>().slot_items = vec![None; 5];
+        }
+        return;
+    };
+    let Some(hydrated) = try_item_state_from_user_item(carrier, &user_item).ok() else {
+        world.resource_mut::<FishingResource>().slot_items = vec![None; 5];
+        return;
+    };
+    let slots = user_item
+        .slots
+        .iter()
+        .enumerate()
+        .map(|(slot, item)| {
+            let item = item.as_ref()?;
+            let mut child = hydrated
+                .socketed
+                .iter()
+                .find(|child| child.unique_id == item.unique_id)?
+                .clone();
+            child.slot = slot as u8;
+            Some(child)
+        })
+        .collect();
+    world.resource_mut::<FishingResource>().slot_items = slots;
+}
+
+/// FishingResource is a transient view; the equipped rod owns every child.
+/// Also used by fixtures migrating old sidecar-only fishing state.
+pub(super) fn persist_fishing_slots_to_equipment(world: &mut World) -> bool {
+    let Some((index, carrier, mut user_item)) = equipped_fishing_slot_carrier(world) else {
+        return !has_crystal_fishing_slot_carrier(world);
+    };
+    let fishing = world.resource::<FishingResource>();
+    if fishing.slot_items.len() != 5 {
+        return false;
+    }
+    let Some(slots) = fishing
+        .slot_items
+        .iter()
+        .map(|item| match item {
+            Some(item) => validated_item_state_user_item(item).map(Some),
+            None => Some(None),
+        })
+        .collect::<Option<Vec<_>>>()
+    else {
+        return false;
+    };
+    user_item.slots = slots;
+    let Ok(next) = try_item_state_from_user_item(carrier, &user_item) else {
+        return false;
+    };
+    let next = equipment_state_from_item_state(&next, EquipmentSlot::Weapon);
+    if user_item_from_equipment_state(&next).is_none() {
+        return false;
+    }
+    world.resource_mut::<InventoryResource>().equipment_items[index] = next;
+    true
 }
 
 fn fishing_has_hook(world: &World) -> bool {
@@ -325,6 +436,7 @@ fn consume_one_fishing_bait(world: &mut World) -> Option<FishingBaitUse> {
 }
 
 fn consume_one_fishing_slot_bait(world: &mut World) -> Option<FishingBaitUse> {
+    let previous = world.resource::<FishingResource>().slot_items.clone();
     let mut fishing = world.resource_mut::<FishingResource>();
     let slot = fishing.slot_items.get_mut(FISHING_SLOT_BAIT)?;
     let item = slot.as_mut()?;
@@ -337,6 +449,11 @@ fn consume_one_fishing_slot_bait(world: &mut World) -> Option<FishingBaitUse> {
         item.quantity -= 1;
     } else {
         *slot = None;
+    }
+    drop(fishing);
+    if !persist_fishing_slots_to_equipment(world) {
+        world.resource_mut::<FishingResource>().slot_items = previous;
+        return None;
     }
     Some(FishingBaitUse {
         stats,
@@ -382,6 +499,7 @@ fn damage_fishing_slot_item(
     slot_index: usize,
     packets: &mut Vec<ServerPacket>,
 ) -> bool {
+    let previous = world.resource::<FishingResource>().slot_items.clone();
     let Some(expected_type) = fishing_slot_expected_item_type(slot_index) else {
         return false;
     };
@@ -402,6 +520,11 @@ fn damage_fishing_slot_item(
     };
     if current_dura == 0 {
         *slot = None;
+        drop(fishing);
+        if !persist_fishing_slots_to_equipment(world) {
+            world.resource_mut::<FishingResource>().slot_items = previous;
+            return false;
+        }
         packets.push(ServerPacket::DeleteItem {
             unique_id,
             count: 1,
@@ -411,6 +534,11 @@ fn damage_fishing_slot_item(
 
     let next_dura = current_dura.saturating_sub(1);
     item.durability_current = Some(next_dura);
+    drop(fishing);
+    if !persist_fishing_slots_to_equipment(world) {
+        world.resource_mut::<FishingResource>().slot_items = previous;
+        return false;
+    }
     packets.push(ServerPacket::DuraChanged {
         unique_id,
         current_dura: next_dura,
@@ -430,12 +558,14 @@ fn fishing_slot_expected_item_type(slot_index: usize) -> Option<u8> {
 }
 
 fn damage_equipped_fishing_rod(world: &mut World) -> Option<ServerPacket> {
-    let unique_id = equipment_slot_unique_id(EquipmentSlot::Weapon).unwrap_or_default();
     let mut inventory = world.resource_mut::<InventoryResource>();
     let rod = inventory
         .equipment_items
         .iter_mut()
         .find(|item| equipment_is_fishing_rod(item))?;
+    let unique_id = user_item_from_equipment_state(rod)
+        .map(|item| item.unique_id)
+        .unwrap_or_else(|| equipment_slot_unique_id(EquipmentSlot::Weapon).unwrap_or_default());
     rod.durability_current = rod.durability_current.saturating_sub(1);
     Some(ServerPacket::DuraChanged {
         unique_id,
@@ -470,8 +600,14 @@ fn complete_fishing_reel(world: &mut World) -> FishingReelOutcome {
         };
     }
 
+    let mut outcome = match award_fishing_loot(world) {
+        Ok(outcome) => outcome,
+        Err(_) => return FishingReelOutcome {
+            packets: vec![fishing_chat(world, "server.ItemDeliveryUnavailable", "Item delivery is temporarily unavailable. Please try again.")],
+            cancel_autocast: true,
+        },
+    };
     world.resource_mut::<FishingResource>().chance_counter = 0;
-    let mut outcome = award_fishing_loot(world);
     maybe_spawn_fishing_monster_event(world);
     if fishing_has_reel(world) {
         if fishing_slot_model_available(world) {
@@ -525,27 +661,27 @@ pub(super) fn fishing_reel_succeeds(world: &World) -> bool {
         <= chance
 }
 
-fn award_fishing_loot(world: &mut World) -> FishingReelOutcome {
+fn award_fishing_loot(world: &mut World) -> Result<FishingReelOutcome, String> {
     let Some(drop) = resolved_fishing_drop(world) else {
-        return FishingReelOutcome {
+        return Ok(FishingReelOutcome {
             packets: vec![fishing_chat(world, "server.FishGotAway", "FishGotAway")],
             cancel_autocast: false,
-        };
+        });
     };
 
     match drop {
         ResolvedDropTemplate::Gold { amount, .. } => {
             if !can_gain_gold(world.resource::<PlayerRuntimeResource>(), amount) {
-                return FishingReelOutcome {
+                return Ok(FishingReelOutcome {
                     packets: vec![fishing_chat(world, "server.NoBagSpace", "NoBagSpace")],
                     cancel_autocast: true,
-                };
+                });
             }
             world.resource_mut::<PlayerRuntimeResource>().gold += amount;
-            FishingReelOutcome {
+            Ok(FishingReelOutcome {
                 packets: vec![ServerPacket::GainedGold { gold: amount }],
                 cancel_autocast: false,
-            }
+            })
         }
         ResolvedDropTemplate::Item {
             key,
@@ -565,14 +701,13 @@ fn award_fishing_loot(world: &mut World) -> FishingReelOutcome {
             {
                 let inventory = world.resource::<InventoryResource>();
                 if !can_gain_item_quantity(&inventory, ItemContainer::Bag1, &key, quantity) {
-                    return FishingReelOutcome {
+                    return Ok(FishingReelOutcome {
                         packets: vec![fishing_chat(world, "server.NoBagSpace", "NoBagSpace")],
                         cancel_autocast: true,
-                    };
+                    });
                 }
             }
-            let item = add_or_increment_item_with_random_metadata(
-                world,
+            let mut grant = FreshItemGrant::plain(
                 ItemContainer::Bag1,
                 &key,
                 &name,
@@ -580,23 +715,29 @@ fn award_fishing_loot(world: &mut World) -> FishingReelOutcome {
                 30,
                 quantity,
                 weight,
-                durability_current,
-                durability_max,
-                added_attack,
-                added_defence,
-                added_stats,
-                cursed,
-                socket_slots,
-            );
-            FishingReelOutcome {
-                packets: vec![ServerPacket::GainedItem {
-                    item: user_item_from_item_state(&item),
-                }],
+                crate::UserItemUidReason::Fishing,
+            )?;
+            grant.prototype.durability_current = durability_current.or(grant.prototype.durability_current);
+            grant.prototype.durability_max = durability_max.or(grant.prototype.durability_max);
+            grant.prototype.added_attack = added_attack;
+            grant.prototype.added_defence = added_defence;
+            grant.prototype.added_stats = added_stats;
+            grant.prototype.cursed = cursed;
+            grant.prototype.socket_slots = grant.prototype.socket_slots.max(socket_slots);
+            let changed = publish_world_grants(world, &[grant])?;
+            Ok(FishingReelOutcome {
+                packets: changed.iter().map(|item| ServerPacket::GainedItem {
+                    item: user_item_from_item_state(item),
+                }).collect(),
                 cancel_autocast: false,
-            }
+            })
         }
     }
 }
+
+#[cfg(test)]
+#[path = "fishing_uid_tests.rs"]
+mod uid_tests;
 
 pub(super) fn resolved_fishing_drop(world: &World) -> Option<ResolvedDropTemplate> {
     let fishing_attribute = world.resource::<FishingResource>().fishing_attribute;

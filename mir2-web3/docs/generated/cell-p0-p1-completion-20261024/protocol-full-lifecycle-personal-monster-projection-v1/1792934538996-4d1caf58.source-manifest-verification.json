@@ -1,0 +1,11 @@
+{
+  "schemaVersion": 1,
+  "sourceCommit": "5c2e713863d3e9556a92f856b11df2396c73b137",
+  "backendInputCount": 44,
+  "sourceManifestSha256": "6276d11a740e956cf8e3d316362a49900f1c761d9ffcdfd462cb7394056f7828",
+  "sourceManifestFileSha256": "151869b76d13202e3c6557f908b5adc5643d1b0579cd7d4961cf0458c71cec52",
+  "matchedRawInputs": 44,
+  "matchedRawDriverPins": 6,
+  "releaseSha256": "d8791cceeed00fdb7019d1201aad19f06005790162df1b459a8cacac96f68756",
+  "scope": "This fresh44-input personal-monster-projection Release only; historical source/binary proofs remain unchanged"
+}

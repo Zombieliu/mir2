@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "pid": 46896,
+  "exe": "C:\\mir2-build\\p01-completion-20261024\\probe-natural-5-02\\bin\\mir2-gateway.exe",
+  "sha256": "d7a085f4d82f533f0ac9a9008cecdee763f4b226ca192cf67e7110ec894b7d70",
+  "endpoint": "ws://127.0.0.1:17510/ws",
+  "startedAtUtc": "2026-10-24T14:46:19.9735584+00:00",
+  "tokioWorkers": 4,
+  "content": "platinum_176",
+  "routing": "single",
+  "accountBackend": "file",
+  "maxWs": 12,
+  "maxActive": 5,
+  "maxReconnect": 5,
+  "maxLoginInFlight": 2,
+  "maxNewCharacterInFlight": 1,
+  "maxStartGameInFlight": 1,
+  "capacityAcceptanceEligible": false,
+  "newSourceAcceptanceEligible": false,
+  "parallelCompilation": true,
+  "freshPrivateSecrets": 4
+}

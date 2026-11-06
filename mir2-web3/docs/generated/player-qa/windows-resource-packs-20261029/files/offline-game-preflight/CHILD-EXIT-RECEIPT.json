@@ -1,0 +1,16 @@
+{
+  "projectedReport": {
+    "driverDidNotKill": true,
+    "elapsedMs": 3249417,
+    "exitCode": 0,
+    "healthPassed": true,
+    "pid": 61864,
+    "schema": "mir2.offline-game-preflight.exit.v1",
+    "unix": 1793261137
+  },
+  "projectionBoundary": "Explicit fields only; raw log/body/attempt/env/argv/private config excluded.",
+  "role": "real-game-exit",
+  "schema": "mir2.evidence.public-projection.v1",
+  "sourceSha256": "C7AF2E217680B66C3C2419B4A6262B80779F5C9F3E5833F659599625A9908719",
+  "sourceSize": 184
+}

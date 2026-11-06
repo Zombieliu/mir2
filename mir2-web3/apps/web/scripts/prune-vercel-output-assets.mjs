@@ -36,7 +36,7 @@ const PRUNE_TARGETS = [
   },
   {
     path: "static/bevy-runtime/pkg",
-    reason: "unused legacy WebGL2 mirror; the loader selects pkg-webgpu or pkg-webgl2 explicitly",
+    reason: "unused legacy WebGL2 mirror; the manifest selects GPU, lean GL2 or shared GL2 explicitly",
   },
   // NOTE: generated/original-map-blend is intentionally retained until the
   // remote release manifest proves all generated blend frames are present.

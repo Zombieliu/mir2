@@ -1,0 +1,20 @@
+{
+  "head": "321316b791120a6fe549e4006623e63333a5543f",
+  "phase": "before production change; ordinary typed Gateway RED tests added only",
+  "files": {
+    "apps/simulation/src/runtime/shared_guilds.rs": {
+      "sha256": "9583c034b13a532a9d0940cbab5473a404965575c73f293e2c3ae5da208307d0",
+      "bytes": 40140
+    },
+    "apps/gateway/src/shared_guilds.rs": {
+      "sha256": "04a2a67cf1eb3116ef8fea094ff1a7ada4d8c5688df34d4f733fe0f806fcfb24",
+      "bytes": 15795
+    },
+    "apps/gateway/tests/shared_guild_rank_management.rs": {
+      "sha256": "13a703caaf6c3bbb0d4c32160fdfe44be8b2dce934305defeb1e51ea1c16500c",
+      "bytes": 15016
+    }
+  },
+  "new_production_module_present": false,
+  "scope": "isolated prepared guild fixture; not native UI, network or production stores"
+}

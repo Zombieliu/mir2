@@ -1,0 +1,277 @@
+{
+  "scope": "All personal special monster mechanisms into shared Zone; includes prethink, attack plans, damage/death and lifecycle.",
+  "status": "bounded_shared_update_integration_verified_crystal_parity_remaining",
+  "globalComplete": false,
+  "modules": [
+    {
+      "module": "armadillo",
+      "status": "shared_update_integrated_regression_verified_full_crystal_family_parity_not_claimed",
+      "previousCheckpointStatus": "shared_mechanism_tests_passed_full_family_parity_not_claimed"
+    },
+    {
+      "module": "axe_skeleton_fear",
+      "status": "shared_update_integrated_regression_verified_full_crystal_family_parity_not_claimed",
+      "previousCheckpointStatus": "shared_mechanism_tests_passed_full_family_parity_not_claimed"
+    },
+    {
+      "module": "bomb_spider",
+      "status": "shared_update_integrated_regression_verified_full_crystal_family_parity_not_claimed",
+      "previousCheckpointStatus": "shared_mechanism_tests_passed_full_family_parity_not_claimed"
+    },
+    {
+      "module": "bone_lord",
+      "status": "shared_update_integrated_regression_verified_full_crystal_family_parity_not_claimed",
+      "previousCheckpointStatus": "shared_mechanism_tests_passed_full_family_parity_not_claimed"
+    },
+    {
+      "module": "boulder_spirit",
+      "status": "shared_update_integrated_regression_verified_full_crystal_family_parity_not_claimed",
+      "previousCheckpointStatus": "shared_player_mechanism_tests_passed_full_family_parity_not_claimed"
+    },
+    {
+      "module": "cannibal_plant",
+      "status": "shared_update_integrated_regression_verified_full_crystal_family_parity_not_claimed",
+      "previousCheckpointStatus": "shared_mechanism_tests_passed_full_family_parity_not_claimed"
+    },
+    {
+      "module": "deer_run_away",
+      "status": "shared_update_integrated_regression_verified_full_crystal_family_parity_not_claimed",
+      "previousCheckpointStatus": "shared_mechanism_tests_passed_full_family_parity_not_claimed"
+    },
+    {
+      "module": "dig_out_zombie",
+      "status": "shared_update_integrated_regression_verified_full_crystal_family_parity_not_claimed",
+      "previousCheckpointStatus": "shared_mechanism_tests_passed_full_family_parity_not_claimed"
+    },
+    {
+      "module": "dragon_statue_sleep",
+      "status": "shared_update_integrated_regression_verified_full_crystal_family_parity_not_claimed",
+      "previousCheckpointStatus": "shared_mechanism_tests_passed_full_family_parity_not_claimed"
+    },
+    {
+      "module": "evil_centipede",
+      "status": "shared_update_integrated_regression_verified_full_crystal_family_parity_not_claimed",
+      "previousCheckpointStatus": "shared_mechanism_tests_passed_full_family_parity_not_claimed"
+    },
+    {
+      "module": "evil_mir",
+      "status": "shared_update_integrated_regression_verified_full_crystal_family_parity_not_claimed",
+      "previousCheckpointStatus": "shared_leaf_written_core_integration_and_tests_pending"
+    },
+    {
+      "module": "football",
+      "status": "shared_update_integrated_regression_verified_full_crystal_family_parity_not_claimed",
+      "previousCheckpointStatus": "shared_code_integrated_verification_in_progress"
+    },
+    {
+      "module": "foxman_fear",
+      "status": "shared_update_integrated_regression_verified_full_crystal_family_parity_not_claimed",
+      "previousCheckpointStatus": "shared_mechanism_tests_passed_full_family_parity_not_claimed"
+    },
+    {
+      "module": "frost_tiger_sitting",
+      "status": "shared_update_integrated_regression_verified_full_crystal_family_parity_not_claimed",
+      "previousCheckpointStatus": "shared_mechanism_tests_passed_full_family_parity_not_claimed"
+    },
+    {
+      "module": "gate",
+      "status": "shared_update_integrated_regression_verified_full_crystal_family_parity_not_claimed",
+      "previousCheckpointStatus": "shared_leaf_written_core_integration_and_tests_pending"
+    },
+    {
+      "module": "general_meow_meow",
+      "status": "shared_update_integrated_regression_verified_full_crystal_family_parity_not_claimed",
+      "previousCheckpointStatus": "shared_leaf_written_core_integration_and_tests_pending"
+    },
+    {
+      "module": "great_fox_spirit",
+      "status": "shared_update_integrated_regression_verified_full_crystal_family_parity_not_claimed",
+      "previousCheckpointStatus": "shared_mechanism_tests_passed_full_family_parity_not_claimed"
+    },
+    {
+      "module": "hell_bomb",
+      "status": "shared_update_integrated_regression_verified_full_crystal_family_parity_not_claimed",
+      "previousCheckpointStatus": "shared_player_mechanism_tests_passed_full_family_parity_not_claimed"
+    },
+    {
+      "module": "hell_lord",
+      "status": "shared_update_integrated_regression_verified_full_crystal_family_parity_not_claimed",
+      "previousCheckpointStatus": "shared_player_mechanism_tests_passed_full_family_parity_not_claimed"
+    },
+    {
+      "module": "holy_deva_fear",
+      "status": "shared_update_integrated_regression_verified_full_crystal_family_parity_not_claimed",
+      "previousCheckpointStatus": "shared_hooks_integrated_tests_pending"
+    },
+    {
+      "module": "horned_archer",
+      "status": "shared_update_integrated_regression_verified_full_crystal_family_parity_not_claimed",
+      "previousCheckpointStatus": "shared_code_integrated_verification_in_progress"
+    },
+    {
+      "module": "horned_commander",
+      "status": "shared_update_integrated_regression_verified_full_crystal_family_parity_not_claimed",
+      "previousCheckpointStatus": "shared_hooks_integrated_tests_pending"
+    },
+    {
+      "module": "horned_mage",
+      "status": "shared_update_integrated_regression_verified_full_crystal_family_parity_not_claimed",
+      "previousCheckpointStatus": "shared_code_integrated_verification_in_progress"
+    },
+    {
+      "module": "horned_sorceror",
+      "status": "shared_update_integrated_regression_verified_full_crystal_family_parity_not_claimed",
+      "previousCheckpointStatus": "shared_hooks_integrated_tests_pending"
+    },
+    {
+      "module": "horned_warrior",
+      "status": "shared_update_integrated_regression_verified_full_crystal_family_parity_not_claimed",
+      "previousCheckpointStatus": "shared_code_integrated_verification_in_progress"
+    },
+    {
+      "module": "hugger",
+      "status": "shared_update_integrated_regression_verified_full_crystal_family_parity_not_claimed",
+      "previousCheckpointStatus": "shared_player_mechanism_tests_passed_full_family_parity_not_claimed"
+    },
+    {
+      "module": "kirin_ice_thrust",
+      "status": "shared_update_integrated_regression_verified_full_crystal_family_parity_not_claimed",
+      "previousCheckpointStatus": "shared_hooks_integrated_tests_pending"
+    },
+    {
+      "module": "mud_zombie",
+      "status": "shared_update_integrated_regression_verified_full_crystal_family_parity_not_claimed",
+      "previousCheckpointStatus": "shared_player_mechanism_tests_passed_full_family_parity_not_claimed"
+    },
+    {
+      "module": "poison_hugger",
+      "status": "shared_update_integrated_regression_verified_full_crystal_family_parity_not_claimed",
+      "previousCheckpointStatus": "shared_player_mechanism_tests_passed_full_family_parity_not_claimed"
+    },
+    {
+      "module": "reviving_zombie",
+      "status": "shared_update_integrated_regression_verified_full_crystal_family_parity_not_claimed",
+      "previousCheckpointStatus": "shared_mechanism_tests_passed_full_family_parity_not_claimed"
+    },
+    {
+      "module": "shinsu",
+      "status": "shared_update_integrated_regression_verified_full_crystal_family_parity_not_claimed",
+      "previousCheckpointStatus": "shared_mechanism_tests_passed_full_family_parity_not_claimed"
+    },
+    {
+      "module": "snake_totem",
+      "status": "shared_update_integrated_regression_verified_full_crystal_family_parity_not_claimed",
+      "previousCheckpointStatus": "pending_source_comparison_and_shared_tests"
+    },
+    {
+      "module": "snow_wolf_king",
+      "status": "shared_update_integrated_regression_verified_full_crystal_family_parity_not_claimed",
+      "previousCheckpointStatus": "shared_hooks_integrated_tests_pending"
+    },
+    {
+      "module": "spitting_toad",
+      "status": "shared_update_integrated_regression_verified_full_crystal_family_parity_not_claimed",
+      "previousCheckpointStatus": "pending_source_comparison_and_shared_tests"
+    },
+    {
+      "module": "stone_trap",
+      "status": "shared_update_integrated_regression_verified_full_crystal_family_parity_not_claimed",
+      "previousCheckpointStatus": "pending_source_comparison_and_shared_tests"
+    },
+    {
+      "module": "summoned_monster",
+      "status": "shared_update_integrated_regression_verified_full_crystal_family_parity_not_claimed",
+      "previousCheckpointStatus": "pending_source_comparison_and_shared_tests"
+    },
+    {
+      "module": "thunder_element",
+      "status": "shared_update_integrated_regression_verified_full_crystal_family_parity_not_claimed",
+      "previousCheckpointStatus": "shared_mechanism_tests_passed_full_family_parity_not_claimed"
+    },
+    {
+      "module": "town_archer",
+      "status": "shared_update_integrated_regression_verified_full_crystal_family_parity_not_claimed",
+      "previousCheckpointStatus": "shared_special_mechanism_implemented_verification_in_progress"
+    },
+    {
+      "module": "trap_rock",
+      "status": "shared_update_integrated_regression_verified_full_crystal_family_parity_not_claimed",
+      "previousCheckpointStatus": "shared_mechanism_tests_passed_full_family_parity_not_claimed"
+    },
+    {
+      "module": "tree_queen",
+      "status": "shared_update_integrated_regression_verified_full_crystal_family_parity_not_claimed",
+      "previousCheckpointStatus": "shared_leaf_written_core_integration_and_tests_pending"
+    },
+    {
+      "module": "tucson_general",
+      "status": "shared_update_integrated_regression_verified_full_crystal_family_parity_not_claimed",
+      "previousCheckpointStatus": "pending_source_comparison_and_shared_tests"
+    },
+    {
+      "module": "vampire_spider",
+      "status": "shared_update_integrated_regression_verified_full_crystal_family_parity_not_claimed",
+      "previousCheckpointStatus": "pending_source_comparison_and_shared_tests"
+    },
+    {
+      "module": "wooma_taurus",
+      "status": "shared_update_integrated_regression_verified_full_crystal_family_parity_not_claimed",
+      "previousCheckpointStatus": "shared_mechanism_tests_passed_full_family_parity_not_claimed"
+    },
+    {
+      "module": "yimoogi",
+      "status": "shared_update_integrated_regression_verified_full_crystal_family_parity_not_claimed",
+      "previousCheckpointStatus": "shared_leaf_written_core_integration_and_tests_pending"
+    },
+    {
+      "module": "yin_devil_node",
+      "status": "shared_update_integrated_regression_verified_full_crystal_family_parity_not_claimed",
+      "previousCheckpointStatus": "shared_mechanism_tests_passed_full_family_parity_not_claimed"
+    },
+    {
+      "module": "zuma_monster",
+      "status": "shared_update_integrated_regression_verified_full_crystal_family_parity_not_claimed",
+      "previousCheckpointStatus": "shared_mechanism_tests_passed_full_family_parity_not_claimed"
+    },
+    {
+      "module": "zuma_taurus_stage",
+      "status": "shared_update_integrated_regression_verified_full_crystal_family_parity_not_claimed",
+      "previousCheckpointStatus": "shared_mechanism_tests_passed_full_family_parity_not_claimed"
+    }
+  ],
+  "crossCutting": [
+    "attack branches in monster_ai/mod.rs:1008-1211",
+    "AI180 low HP summons",
+    "combat on_damage/on_death including revival and death explosions",
+    "AOI hidden/stone/teleport and target immunity",
+    "spawn/slave lifecycle/checkpoint and replay",
+    "do not enable per-session monster tick in shared mode"
+  ],
+  "verifiedIntermediateCheckpoint": {
+    "newIntegrationTests": 69,
+    "sharedZoneRegressionTests": 204,
+    "checkpointLibraryTests": 15,
+    "finalSourceVerification": false,
+    "zoneLibraryTests": 58,
+    "poisonProjectionAndCompatibilityTests": 2
+  },
+  "sourceCoverageAudit": "coverage-audit-20260909.json (read snapshot predates latest Shinsu/GreatFox/TownArcher integration)",
+  "latestVerification": "shared-update-verification-20260909.json",
+  "deliveryReport": "shared-update-delivery-20260909.md",
+  "fullyCertifiedCrystalFamilies": 0,
+  "gatewayResolvedBaselineCoverage": {
+    "passed": 792,
+    "ignored": 1,
+    "initialFailedTests": [
+      "gateway_assistant_jane_survives_ordinary_walk_aoi_round_trip",
+      "gateway_fresh_account_bichon_logout_and_new_session_reload_are_authoritative",
+      "gateway_ordinary_bichon_starter_loop_uses_client_packets_and_reloads",
+      "gateway_original_bichon_q1_to_q4_uses_client_packets_and_reloads",
+      "gateway_session_handoffs_between_remote_map_zones_without_leaking_host_sessions",
+      "gateway_session_uses_zone_host_from_environment",
+      "real_mir2_map_workload_survives_remote_zone_handoff_and_failover"
+    ],
+    "allInitialFailuresResolved": true,
+    "notAFreshFullRun": true
+  }
+}

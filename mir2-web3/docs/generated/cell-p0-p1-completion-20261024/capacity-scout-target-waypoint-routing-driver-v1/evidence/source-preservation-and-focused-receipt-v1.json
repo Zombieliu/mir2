@@ -1,0 +1,275 @@
+{
+  "schemaVersion": 1,
+  "recordedAt": "2026-10-26T03:46:15.373894+00:00",
+  "scope": "Bounded target-waypoint routing experiment; no live capacity claim.",
+  "originalCodeCommit": "b5374083d257d375437af3de42bead159cd2b917",
+  "preimages": [
+    {
+      "source": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\playtest-capacity-soak.mjs",
+        "bytes": 156391,
+        "sha256": "158aaaba83967153fc8f764895c9bce823993732618be934636654cc4401f0d2"
+      },
+      "rawPreimage": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\scout-target-waypoint-routing-v1\\preimages\\playtest-capacity-soak.mjs.txt",
+        "bytes": 156391,
+        "sha256": "158aaaba83967153fc8f764895c9bce823993732618be934636654cc4401f0d2"
+      },
+      "rawExact": true
+    },
+    {
+      "source": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\playtest-capacity-soak.test.mjs",
+        "bytes": 278248,
+        "sha256": "7cf64c8b28a7b57381dc4beaa5fa01e2d77378fa977e869205b1dc941893b68a"
+      },
+      "rawPreimage": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\scout-target-waypoint-routing-v1\\preimages\\playtest-capacity-soak.test.mjs.txt",
+        "bytes": 278248,
+        "sha256": "7cf64c8b28a7b57381dc4beaa5fa01e2d77378fa977e869205b1dc941893b68a"
+      },
+      "rawExact": true
+    }
+  ],
+  "currentSourcePins": [
+    {
+      "file": "apps/web/scripts/playtest-capacity-soak-core.mjs",
+      "bytes": 37930,
+      "sha256": "40ccd36ee84265a29bd509ca9a7bb360691f2be002411c8cab5f64a3e254cacc"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-soak.mjs",
+      "bytes": 157409,
+      "sha256": "8acb34b5c1815bab0ab82ec26fff1b770cbbf159779f7c55103dacb51c127d56"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-soak.test.mjs",
+      "bytes": 286361,
+      "sha256": "efa0779b746d138894f63300c1e484bee72ae405d41d9e3d0271b25ad0069656"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-observability.mjs",
+      "bytes": 4447,
+      "sha256": "19edb25f68fdd18567391e52a247964bd689346b58535871ce17051f53af9af7"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-observability.test.mjs",
+      "bytes": 5228,
+      "sha256": "00ff902194f805eb3433b192b2838b6eea6cd80860052860b825ab34f58a626d"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-monitor.mjs",
+      "bytes": 21246,
+      "sha256": "e585081835d9232b58d91bb0f717a796b483a818ed5c6fd943abf93350d74e7f"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-monitor.test.mjs",
+      "bytes": 10882,
+      "sha256": "0e60e4636ea5e384e6455fe9d474d56a760881505e765ccfc82eec490d8d92f8"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-telemetry.mjs",
+      "bytes": 6548,
+      "sha256": "d3b74c3b8e0401530e787f6b35bd9a578de4f455b3f7817b6230df41c5871964"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-telemetry.test.mjs",
+      "bytes": 6277,
+      "sha256": "f5efe4aa510f67eb10ebba26a5de9cb5402f061de07900998a77a191a749f974"
+    }
+  ],
+  "sourceSha256": "30863fa8e8b0af6f5588cddafb43ec7355e83bd2c3f9a792fb8c4ebc6f3f1750",
+  "preservation": {
+    "productionMutation": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\scout-target-waypoint-routing-v1\\production-mutation-v1.json",
+      "bytes": 3891,
+      "sha256": "d5b71b842eb8e610d15643cff9a3effe3999424c6a0212d8bbdd189996c43729"
+    },
+    "productionSixHunksInverseRawExact": true,
+    "mainBeforeAndAfterScoutFunctionRawExact": true,
+    "originalScoutReceiptAndRestoreBodiesRawExact": true,
+    "originalHintScanAndAntiConvergenceRawExact": true,
+    "originalSelectionRowCapAndCountsReasonRawExact": true,
+    "otherSevenSourcePinsRawExact": [
+      {
+        "file": "apps/web/scripts/playtest-capacity-soak-core.mjs",
+        "bytes": 37930,
+        "sha256": "40ccd36ee84265a29bd509ca9a7bb360691f2be002411c8cab5f64a3e254cacc"
+      },
+      {
+        "file": "apps/web/scripts/playtest-capacity-observability.mjs",
+        "bytes": 4447,
+        "sha256": "19edb25f68fdd18567391e52a247964bd689346b58535871ce17051f53af9af7"
+      },
+      {
+        "file": "apps/web/scripts/playtest-capacity-observability.test.mjs",
+        "bytes": 5228,
+        "sha256": "00ff902194f805eb3433b192b2838b6eea6cd80860052860b825ab34f58a626d"
+      },
+      {
+        "file": "apps/web/scripts/playtest-capacity-monitor.mjs",
+        "bytes": 21246,
+        "sha256": "e585081835d9232b58d91bb0f717a796b483a818ed5c6fd943abf93350d74e7f"
+      },
+      {
+        "file": "apps/web/scripts/playtest-capacity-monitor.test.mjs",
+        "bytes": 10882,
+        "sha256": "0e60e4636ea5e384e6455fe9d474d56a760881505e765ccfc82eec490d8d92f8"
+      },
+      {
+        "file": "apps/web/scripts/playtest-capacity-telemetry.mjs",
+        "bytes": 6548,
+        "sha256": "d3b74c3b8e0401530e787f6b35bd9a578de4f455b3f7817b6230df41c5871964"
+      },
+      {
+        "file": "apps/web/scripts/playtest-capacity-telemetry.test.mjs",
+        "bytes": 6277,
+        "sha256": "f5efe4aa510f67eb10ebba26a5de9cb5402f061de07900998a77a191a749f974"
+      }
+    ],
+    "reportDeclarationsRawExact": [
+      {
+        "name": "measurementClock",
+        "bytes": 742,
+        "sha256": "f2eda2c20d5a7c4bef388b41dfd1e55ab4733d7ca69b10f9c3eab211b60cc99f",
+        "rawExact": true
+      },
+      {
+        "name": "navigationCoordination",
+        "bytes": 548,
+        "sha256": "72d016c9f4836113bc358570bc6f310500092da14345dd59cb94deabacd24423",
+        "rawExact": true
+      },
+      {
+        "name": "nativePatrolPlanning",
+        "bytes": 583,
+        "sha256": "6e1fd09fde3d17f1d331d6ca9b85314aa33698b12d3d8890cd8f8617c36895d9",
+        "rawExact": true
+      },
+      {
+        "name": "nativeHpMaintenance",
+        "bytes": 639,
+        "sha256": "0eb7baf64b02f24588e49c2e439d52ad5b64ddfb9b252258b72715827cf56054",
+        "rawExact": true
+      },
+      {
+        "name": "nativeChasePreference",
+        "bytes": 902,
+        "sha256": "4d1658ef243a1b06dcd9ea2e187be112b95c1d5f551274199f40ce765b762a01",
+        "rawExact": true
+      },
+      {
+        "name": "nativeAttackWitness",
+        "bytes": 896,
+        "sha256": "acfad94aa6dd482a8631c766a2d02c7ae9e32d4b18b705504b7a29bf18d7012a",
+        "rawExact": true
+      },
+      {
+        "name": "attackResults",
+        "bytes": 369,
+        "sha256": "c50ce55bd1bdfefd629b9469eccbe4bb46dfc661e062a5b72e423e50cda8620d",
+        "rawExact": true
+      }
+    ],
+    "originalTestPrefixRawExact": false,
+    "reason": "Only Root-authorized exact search-count/name updates in three original tests; complete original raw test retained.",
+    "originalTestPrefixRawExactAfterSixMaintenanceHunksInverse": true,
+    "existingTestMaintenance": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\scout-target-waypoint-routing-v1\\existing-test-search-count-maintenance-v1.json",
+      "bytes": 2777,
+      "sha256": "1119032c4e1b5acab94158ba006d6affc5f30cf1aeffe71bf57afab74be6c1df"
+    },
+    "newTestCount": 5,
+    "newTests": [
+      "scout target waypoint follows the validated attack tile across real movement ACK ticks without visibility or credit",
+      "scout target waypoint invalidation safely falls back without rebuilding the finite scout",
+      "scout target waypoint unreachable new hint retains the exact original cyclic fallback within four searches",
+      "scout target waypoint does not redirect an ordinary established scout or reset its saved state",
+      "scout target waypoint keeps corrected ACK exclusion and the existing time move and visit limits"
+    ],
+    "newTestsAppendedAfterOriginalPrefixInverse": {
+      "bytes": 8117,
+      "sha256": "d850af2be9930dc1439419569a7f9f8e2f6d8b91c5e1cb0a7b6069c5ac4f1cfe"
+    }
+  },
+  "behavior": {
+    "newHintGoal": "The previously validated candidate.attackTile, without rescanning or owner-AOI injection.",
+    "retention": "Private targetWaypoint flag retains the same geometrically legal goal across movement ACK ticks; original scout object, startedAt, elapsed time, confirmedMoves and visited survive.",
+    "fallback": "An invalid or unreachable retained target falls through to original home goals; an unreachable new hint uses the precomputed cyclic fallback, within one shared maximum-four-search counter.",
+    "ordinaryScout": "Existing home goals, stable ordering and no-hint behavior are retained for ordinary scouts.",
+    "diagnostics": "First-selection selectedWaypoint{x,y} and selectedWaypointSource enum share the existing 32-row cap. No arrival, attack or damage credit.",
+    "budgetsUnchanged": [
+      4,
+      20000,
+      24,
+      3
+    ],
+    "attackDeadlineMsUnchanged": 900,
+    "minimumCombatLaunchesPerMinuteUnchanged": 18,
+    "minimumCombatHitsPerMinuteUnchanged": 12
+  },
+  "actualChecks": {
+    "red": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\scout-target-waypoint-routing-v1\\focused-red-execution-v1.json",
+      "bytes": 4457,
+      "sha256": "3b3abe47ad15fde3723e37f2b090a93575244bf0346b779fc3c2e2f65c8ad214"
+    },
+    "redCounts": {
+      "tests": 5,
+      "pass": 2,
+      "fail": 3,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0
+    },
+    "initialGreen": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\scout-target-waypoint-routing-v1\\focused-green-execution-v1.json",
+      "bytes": 4447,
+      "sha256": "0e85ea2f6d1ac74ff266db10ba0c44b3c3f50b78d9f7ef5a90bd8da9ba929fab"
+    },
+    "initialGreenCounts": {
+      "tests": 5,
+      "pass": 5,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0
+    },
+    "initialAdjacentFailure": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\scout-target-waypoint-routing-v1\\adjacent-initial-execution-v1.json",
+      "bytes": 4457,
+      "sha256": "e2b1719a5640a1fc027a45c29e8bca02862a890440836ba9196dd72ab675e74b"
+    },
+    "finalAdjacent": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\scout-target-waypoint-routing-v1\\adjacent-final-execution-v1.json",
+      "bytes": 4453,
+      "sha256": "26f76c32053ba0bf1ce2bcf33127a2765e04c9d67296f2633cf24bac8b564984"
+    },
+    "finalAdjacentCounts": {
+      "tests": 58,
+      "pass": 58,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0
+    },
+    "syntaxAndDiff": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\scout-target-waypoint-routing-v1\\syntax-and-diff-check-execution-v1.json",
+      "bytes": 6253,
+      "sha256": "b873918bed7b2e154fa8b88533bbb93e82a3e5c0ec257f7788f865e4acf22952"
+    },
+    "sourceBeforeAfterIdentical": true,
+    "newFiveIncludedInFinal58": true
+  },
+  "sourceDiff": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\scout-target-waypoint-routing-v1\\source-diff-v1.patch",
+    "bytes": 18959,
+    "sha256": "853daca27405db3bcacc926eb797ffc318f1adba9f3faca9bfc1a9f95605c413"
+  },
+  "limits": [
+    "This changes routing behavior as a testable hypothesis; Formal16 failed history is unchanged.",
+    "No full product regression, Rust build, realm, probe, freeze, commit or push was performed here.",
+    "No live supply, fairness, capacity or causal improvement has been demonstrated.",
+    "The retained hint waypoint is revalidated for map/coverage/transfer/occupancy/path legality, not a fresh target visibility or arrival claim."
+  ]
+}

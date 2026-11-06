@@ -1,0 +1,1038 @@
+{
+  "schemaVersion": 1,
+  "scope": "Explicit public source/config only. No old runtime/locks/private/bin/reports/recordings. Metadata is PENDING until actual new50 Release and fresh full16.",
+  "baselineRoot": "C:/mir2-build/p01-completion-20261024/release-native-10-v2-attack-deadline-feasibility-16",
+  "files": [
+    {
+      "source": {
+        "file": "C:/mir2-build/p01-completion-20261024/release-native-10-v2-attack-deadline-feasibility-16/backend-driver-source-guard.mjs",
+        "bytes": 1811,
+        "sha256": "85885be1409c9b40701dd5640d871ac01ca85db6352ece769905ca4a402d8459"
+      },
+      "target": {
+        "file": "C:/mir2-build/p01-completion-20261024/release-native-10-v2-account-store-wait-feasibility-17/backend-driver-source-guard.mjs",
+        "bytes": 1814,
+        "sha256": "f159d2399810274508714fa526a8e842364cd4778f922947a9d907514381f885"
+      },
+      "mode": "position-exact-inverse-derived",
+      "hunks": [
+        {
+          "oldOffset": 184,
+          "newOffset": 184,
+          "beforeBase64": "Y29uc3Qgcm9vdD1wYXRoLmRpcm5hbWUoaW1wb3J0Lm1ldGEuZmlsZW5hbWUpLGxpYnJhcnk9cGF0aC5yZXNvbHZlKHJvb3QsJy4uL2F0dGFjay1kZWFkbGluZS1kaWFnbm9zdGljcy1yZWxlYXNlLXYxL3NvdXJjZS1saWItdjEubWpzJyk7Cg==",
+          "afterBase64": "Y29uc3Qgcm9vdD1wYXRoLmRpcm5hbWUoaW1wb3J0Lm1ldGEuZmlsZW5hbWUpLGxpYnJhcnk9cGF0aC5yZXNvbHZlKHJvb3QsJy4uL2FjY291bnQtc3RvcmUtd2FpdC1kaWFnbm9zdGljcy1yZWxlYXNlLXYxL3NvdXJjZS1saWItdjEubWpzJyk7Cg=="
+        },
+        {
+          "oldOffset": 832,
+          "newOffset": 835,
+          "beforeBase64": "IGlmKGJpbmRpbmcuZXhwZWN0ZWRCYWNrZW5kSW5wdXRDb3VudCE9PTQ0fHxyZWY/LnBhdGghPT1saWJyYXJ5fHwhTnVtYmVyLmlzU2FmZUludGVnZXIocmVmLmJ5dGVzKXx8cmVmLmJ5dGVzPDF8fCEvXlthLWYwLTldezY0fSQvLnRlc3QocmVmLnNoYTI1Nj8/JycpKXRocm93IEVycm9yKCdQaW5uZWQgb3JpZ2luYWwtbG9jYXRpb240NCBzb3VyY2UgbGlicmFyeSByZXF1aXJlZCcpOwo=",
+          "afterBase64": "IGlmKGJpbmRpbmcuZXhwZWN0ZWRCYWNrZW5kSW5wdXRDb3VudCE9PTUwfHxyZWY/LnBhdGghPT1saWJyYXJ5fHwhTnVtYmVyLmlzU2FmZUludGVnZXIocmVmLmJ5dGVzKXx8cmVmLmJ5dGVzPDF8fCEvXlthLWYwLTldezY0fSQvLnRlc3QocmVmLnNoYTI1Nj8/JycpKXRocm93IEVycm9yKCdQaW5uZWQgb3JpZ2luYWwtbG9jYXRpb241MCBzb3VyY2UgbGlicmFyeSByZXF1aXJlZCcpOwo="
+        },
+        {
+          "oldOffset": 1452,
+          "newOffset": 1455,
+          "beforeBase64": "IGlmKGNoZWNrcy5FWFBFQ1RFRF9JTlBVVF9DT1VOVCE9PTQ0KXRocm93IEVycm9yKCdOZXcgc291cmNlIGxpYnJhcnkgY2xvc3VyZSBkaWZmZXJzJyk7Cg==",
+          "afterBase64": "IGlmKGNoZWNrcy5FWFBFQ1RFRF9JTlBVVF9DT1VOVCE9PTUwKXRocm93IEVycm9yKCdOZXcgc291cmNlIGxpYnJhcnkgY2xvc3VyZSBkaWZmZXJzJyk7Cg=="
+        }
+      ],
+      "inverseRestoresOriginalRaw": true
+    },
+    {
+      "source": {
+        "file": "C:/mir2-build/p01-completion-20261024/release-native-10-v2-attack-deadline-feasibility-16/backend-library-binding.json",
+        "bytes": 343,
+        "sha256": "37ed2f37a817b821828b3970d266150c36d4438b3fd73855842887439f5bb2ca"
+      },
+      "target": {
+        "file": "C:/mir2-build/p01-completion-20261024/release-native-10-v2-account-store-wait-feasibility-17/backend-library-binding.json",
+        "bytes": 342,
+        "sha256": "91f2f045e5b5610ad352683090eef6b54dbf24702b411b84f15093f8c8d7f86d"
+      },
+      "mode": "position-exact-inverse-derived",
+      "hunks": [
+        {
+          "oldOffset": 39,
+          "newOffset": 39,
+          "beforeBase64": "ICAgICJwYXRoIjogIkM6XFxtaXIyLWJ1aWxkXFxwMDEtY29tcGxldGlvbi0yMDI2MTAyNFxcYXR0YWNrLWRlYWRsaW5lLWRpYWdub3N0aWNzLXJlbGVhc2UtdjFcXHNvdXJjZS1saWItdjEubWpzIiwKICAgICJieXRlcyI6IDE2NTQxLAogICAgInNoYTI1NiI6ICI5Zjg4MzJhZmNiOGZmMmQwZWYyZjAxYzU0Njc5ZTUyNTJlMTM2NzUxMTVjNGMzYTRlOWQ2NDUxNjJiYWQ1NmYxIgo=",
+          "afterBase64": "ICAgICJwYXRoIjogIkM6L21pcjItYnVpbGQvcDAxLWNvbXBsZXRpb24tMjAyNjEwMjQvYWNjb3VudC1zdG9yZS13YWl0LWRpYWdub3N0aWNzLXJlbGVhc2UtdjEvc291cmNlLWxpYi12MS5tanMiLAogICAgImJ5dGVzIjogMjMwMzEsCiAgICAic2hhMjU2IjogIjgzMWEzOGNlMDUyYjExMjU4ZDQ4YTU5NDZkOTUxNzNjYjI5OTMwNGVjN2Q3ZTIxMGU3ZWI5YmVjMDUwYjU3ZWYiCg=="
+        },
+        {
+          "oldOffset": 307,
+          "newOffset": 306,
+          "beforeBase64": "ICAiZXhwZWN0ZWRCYWNrZW5kSW5wdXRDb3VudCI6IDQ0Cg==",
+          "afterBase64": "ICAiZXhwZWN0ZWRCYWNrZW5kSW5wdXRDb3VudCI6IDUwCg=="
+        }
+      ],
+      "inverseRestoresOriginalRaw": true
+    },
+    {
+      "source": {
+        "file": "C:/mir2-build/p01-completion-20261024/release-native-10-v2-attack-deadline-feasibility-16/candidate-release-binding.json",
+        "bytes": 7176,
+        "sha256": "a711f0fe068bb9cfc6dd9dd78904daef3420f6380a230d9e0a7af63c703f3fd1"
+      },
+      "target": {
+        "file": "C:/mir2-build/p01-completion-20261024/release-native-10-v2-account-store-wait-feasibility-17/candidate-release-binding.json",
+        "bytes": 469,
+        "sha256": "049baa9311a3886937ada559be909d6ceb36334b186cc0f3de1a34a49138eec1"
+      },
+      "mode": "position-exact-inverse-derived",
+      "hunks": [
+        {
+          "oldOffset": 24,
+          "newOffset": 24,
+          "beforeBase64": "ICAic3RhdGUiOiAibmV3NDQtcmVsZWFzZS1hbmQtZnVsbDE2LWJvdW5kLW5vdC1leGVjdXRlZCIsCiAgImJhY2tlbmRTb3VyY2VDb21taXQiOiAiZDI0MDdmYjg0MDU1ZTIwODhlM2NhNmNjZGI0ZjhiODBkMTVhOWQxNiIsCiAgImRyaXZlclNvdXJjZUNvbW1pdCI6ICJkMjQwN2ZiODQwNTVlMjA4OGUzY2E2Y2NkYjRmOGI4MGQxNWE5ZDE2IiwKICAiYmFja2VuZElucHV0Q291bnQiOiA0NCwKICAiYmFja2VuZFNvdXJjZUFnZ3JlZ2F0ZSI6ICIxM2U1MTU2MDI1MTk4YjdjOTZlYWJhZDhmMzI2MTM4NTU0ZGU5MTNhYmQ5ODE5OWRhNTk4ODhiMjNiZGJlNWYyIiwKICAicmVsZWFzZVJlY29yZCI6IHsKICAgICJmaWxlIjogIkM6XFxtaXIyLWJ1aWxkXFxwMDEtY29tcGxldGlvbi0yMDI2MTAyNFxccmVsZWFzZS1hdHRhY2stZGVhZGxpbmUtZGlhZ25vc3RpY3MtdjEuanNvbiIsCiAgICAiYnl0ZXMiOiAzMTQ2LAogICAgInNoYTI1NiI6ICI0NmY5N2VhZGYzNDVmNGM0M2E3NzExYWQ0MWFkMjIzODM5NDBhMjk0MzdlNmJiYWY5NTJmNjQwOGNlMjU2OWY4IgogIH0sCiAgImJhY2tlbmRTb3VyY2VNYW5pZmVzdCI6IHsKICAgICJmaWxlIjogIkM6XFxtaXIyLWJ1aWxkXFxwMDEtY29tcGxldGlvbi0yMDI2MTAyNFxcYmFja2VuZC1zb3VyY2UtYXR0YWNrLWRlYWRsaW5lLWRpYWdub3N0aWNzLXYxLmpzb24iLAogICAgImJ5dGVzIjogMzU1ODEsCiAgICAic2hhMjU2IjogIjZjMWQ3ZDU4ZGUyMjU5YWU4OWIyZjdjOWU4ZDM3NjhlOTgzNGZkOTA2MmUzZTFjMDJhNzk0Y2I3YjdhMWYzMWUiCiAgfSwKICAiYmluYXJ5IjogewogICAgInBhdGgiOiAiQzpcXG1pcjItYnVpbGRcXHAwMS1jb21wbGV0aW9uLTIwMjYxMDI0XFxhdHRhY2stZGVhZGxpbmUtZGlhZ25vc3RpY3MtcmVsZWFzZS12MVxcYmluXFxtaXIyLWdhdGV3YXkuZXhlIiwKICAgICJieXRlcyI6IDg3MzcxMjY0LAogICAgInNoYTI1NiI6ICIxOTgwYjdiZWQ1ODQ5OTk3N2ViNjQ0M2FhM2YxYmYwZmFiY2I5ZTgyNjJiNDkwZjJiYzZmYjc0Y2Y2ZjdiMzE4IgogIH0sCiAgImJ1aWxkUmVjZWlwdCI6IHsKICAgICJmaWxlIjogIkM6XFxtaXIyLWJ1aWxkXFxwMDEtY29tcGxldGlvbi0yMDI2MTAyNFxcYXR0YWNrLWRlYWRsaW5lLWRpYWdub3N0aWNzLXYxLWJ1aWxkLXJlY2VpcHQuanNvbiIsCiAgICAiYnl0ZXMiOiAyMzczLAogICAgInNoYTI1NiI6ICJjMWMzMjU5ZTUwYWM3ZWJhMWZlNWNhZGJlNzc4MzBhNzc1NDlmNzAwZjk4YThiYzlkZWIxNTMwNGYyYzViM2Y3IgogIH0sCiAgImJ1aWxkTG9nIjogewogICAgImZpbGUiOiAiQzpcXG1pcjItYnVpbGRcXGNlbGwtcHJlcHJvZHVjdGlvbi1wMC1wMS0yMDI2MTAyNFxccDAtYXR0YWNrLWRlYWRsaW5lLWRpYWdub3N0aWNzLXYxLXJlbGVhc2UtYnVpbGQubG9nIiwKICAgICJieXRlcyI6IDU1NTYwLAogICAgInNoYTI1NiI6ICJlMTExMjlkMmI4ZTI2NjU0OWE1MDRmYjNlZTExOTk0YWVjODM0NTE4Yzc4MDhhNjY2NTMxOWMyYTQ1YzZlZTI5IgogIH0sCiAgInJvb3RGdW5jdGlvbmFsVmFsaWRhdGlvbiI6IHsKICAgICJmaWxlIjogIkM6XFxtaXIyLWJ1aWxkXFxwMDEtY29tcGxldGlvbi0yMDI2MTAyNFxccm9vdC1hdHRhY2stZGVhZGxpbmUtZnVuY3Rpb25hbC12YWxpZGF0aW9uLXYxLmpzb24iLAogICAgImJ5dGVzIjogNzgxOSwKICAgICJzaGEyNTYiOiAiY2IxYWFmMzA4MThjYTQzMGU1ZWU4ZmU5NDJkMzY2NzVhOTY5MGUzNmFiY2QyZjQyNDg3MTdlZDZjODY4NmRlYSIKICB9LAogICJmdWxsMTYiOiB7CiAgICAic3RhdGUiOiAicGFzc2VkIiwKICAgICJhdWRpdCI6IHsKICAgICAgImZpbGUiOiAiQzovbWlyMi1idWlsZC9wMDEtY29tcGxldGlvbi0yMDI2MTAyNC9mdWxsLWxpZmVjeWNsZS1hdHRhY2stZGVhZGxpbmUtZGlhZ25vc3RpY3MtdjEvcHVibGljLzE3OTI5NDY1OTEwNzctODEyZDBiMGQuaW5kZXBlbmRlbnQtYXVkaXQuanNvbiIsCiAgICAgICJieXRlcyI6IDE3NDYsCiAgICAgICJzaGEyNTYiOiAiZTMyYmFlYzRkMWI0NDg0YWZlNjNkZmUzODkwYWE4OGNmYzgyMjAwOGFkNDhmYWE0NmNlY2RjN2M3NTFiNDJhZCIKICAgIH0sCiAgICAiZmlsZXMiOiBbCiAgICAgIHsKICAgICAgICAiZmlsZSI6ICJDOi9taXIyLWJ1aWxkL3AwMS1jb21wbGV0aW9uLTIwMjYxMDI0L2Z1bGwtbGlmZWN5Y2xlLWF0dGFjay1kZWFkbGluZS1kaWFnbm9zdGljcy12MS9wdWJsaWMvMTc5Mjk0NjU5MTA3Ny04MTJkMGIwZC5hdWRpdC1zb3VyY2UubWpzIiwKICAgICAgICAiYnl0ZXMiOiA5MDY2LAogICAgICAgICJzaGEyNTYiOiAiZDVlYWI4M2YwNjQ5YzY4NjlkZDIwZDdjMWQzZTRiOGQ5ZTYzYjg1NmUxOGZiMzFkNDBiNjE2NjlmODg3ZDg5MyIKICAgICAgfSwKICAgICAgewogICAgICAgICJmaWxlIjogIkM6L21pcjItYnVpbGQvcDAxLWNvbXBsZXRpb24tMjAyNjEwMjQvZnVsbC1saWZlY3ljbGUtYXR0YWNrLWRlYWRsaW5lLWRpYWdub3N0aWNzLXYxL3B1YmxpYy8xNzkyOTQ2NTkxMDc3LTgxMmQwYjBkLmJhY2tlbmQtc291cmNlLmpzb24iLAogICAgICAgICJieXRlcyI6IDM1NTgxLAogICAgICAgICJzaGEyNTYiOiAiNmMxZDdkNThkZTIyNTlhZTg5YjJmN2M5ZThkMzc2OGU5ODM0ZmQ5MDYyZTNlMWMwMmE3OTRjYjdiN2ExZjMxZSIKICAgICAgfSwKICAgICAgewogICAgICAgICJmaWxlIjogIkM6L21pcjItYnVpbGQvcDAxLWNvbXBsZXRpb24tMjAyNjEwMjQvZnVsbC1saWZlY3ljbGUtYXR0YWNrLWRlYWRsaW5lLWRpYWdub3N0aWNzLXYxL3B1YmxpYy8xNzkyOTQ2NTkxMDc3LTgxMmQwYjBkLmluZGVwZW5kZW50LWF1ZGl0Lmpzb24iLAogICAgICAgICJieXRlcyI6IDE3NDYsCiAgICAgICAgInNoYTI1NiI6ICJlMzJiYWVjNGQxYjQ0ODRhZmU2M2RmZTM4OTBhYTg4Y2ZjODIyMDA4YWQ0OGZhYTQ2Y2VjZGM3Yzc1MWI0MmFkIgogICAgICB9LAogICAgICB7CiAgICAgICAgImZpbGUiOiAiQzovbWlyMi1idWlsZC9wMDEtY29tcGxldGlvbi0yMDI2MTAyNC9mdWxsLWxpZmVjeWNsZS1hdHRhY2stZGVhZGxpbmUtZGlhZ25vc3RpY3MtdjEvcHVibGljLzE3OTI5NDY1OTEwNzctODEyZDBiMGQucHJlcGFyZWQtcHJvZmlsZS5qc29uIiwKICAgICAgICAiYnl0ZXMiOiA0MzMzLAogICAgICAgICJzaGEyNTYiOiAiYTA5OWIwZmNhMjEyM2NiNzVjNWY3ODFhNDk3NDZjMDA3ZGI4ODAzZTc2NjJiM2RjMTJhZThhMThiNzM1NjM5OCIKICAgICAgfSwKICAgICAgewogICAgICAgICJmaWxlIjogIkM6L21pcjItYnVpbGQvcDAxLWNvbXBsZXRpb24tMjAyNjEwMjQvZnVsbC1saWZlY3ljbGUtYXR0YWNrLWRlYWRsaW5lLWRpYWdub3N0aWNzLXYxL3B1YmxpYy8xNzkyOTQ2NTkxMDc3LTgxMmQwYjBkLnJlYWxtLWV2aWRlbmNlLmpzb24iLAogICAgICAgICJieXRlcyI6IDM0OTgwLAogICAgICAgICJzaGEyNTYiOiAiNmZlNzY0NThlODRjZGFjMjNlMjgzZTI0YmEzODg5MTNkMTg3MjM0OWY3ZjU1YTk2OWY2NGNjMjZjMWYyZjMxNiIKICAgICAgfSwKICAgICAgewogICAgICAgICJmaWxlIjogIkM6L21pcjItYnVpbGQvcDAxLWNvbXBsZXRpb24tMjAyNjEwMjQvZnVsbC1saWZlY3ljbGUtYXR0YWNrLWRlYWRsaW5lLWRpYWdub3N0aWNzLXYxL3B1YmxpYy8xNzkyOTQ2NTkxMDc3LTgxMmQwYjBkLnJlbGVhc2UtaW5wdXQuanNvbiIsCiAgICAgICAgImJ5dGVzIjogMzE0NiwKICAgICAgICAic2hhMjU2IjogIjQ2Zjk3ZWFkZjM0NWY0YzQzYTc3MTFhZDQxYWQyMjM4Mzk0MGEyOTQzN2U2YmJhZjk1MmY2NDA4Y2UyNTY5ZjgiCiAgICAgIH0sCiAgICAgIHsKICAgICAgICAiZmlsZSI6ICJDOi9taXIyLWJ1aWxkL3AwMS1jb21wbGV0aW9uLTIwMjYxMDI0L2Z1bGwtbGlmZWN5Y2xlLWF0dGFjay1kZWFkbGluZS1kaWFnbm9zdGljcy12MS9wdWJsaWMvMTc5Mjk0NjU5MTA3Ny04MTJkMGIwZC5ydW5uZXItc291cmNlLm1qcyIsCiAgICAgICAgImJ5dGVzIjogMTQzODksCiAgICAgICAgInNoYTI1NiI6ICJkYzcwNTBjODRhNmI2NjAxYWY2ZTJkOTRlZDdkZjc3Nzg4NzJkOTc0OGUyYjM3NzAwNmUxYzY5YjM4Mzg1ZmIxIgogICAgICB9LAogICAgICB7CiAgICAgICAgImZpbGUiOiAiQzovbWlyMi1idWlsZC9wMDEtY29tcGxldGlvbi0yMDI2MTAyNC9mdWxsLWxpZmVjeWNsZS1hdHRhY2stZGVhZGxpbmUtZGlhZ25vc3RpY3MtdjEvcHVibGljLzE3OTI5NDY1OTEwNzctODEyZDBiMGQuc291cmNlLW1hbmlmZXN0LXZlcmlmaWNhdGlvbi5qc29uIiwKICAgICAgICAiYnl0ZXMiOiA1NzIsCiAgICAgICAgInNoYTI1NiI6ICJiNTY5YzMxOGMzYTgwMTM0Zjc1Nzc4MWI4NzQxNWVjNTFhNTI0ZjJhNmZiNjcwODE2OWEzYTliNWJiNDk3NmE0IgogICAgICB9LAogICAgICB7CiAgICAgICAgImZpbGUiOiAiQzovbWlyMi1idWlsZC9wMDEtY29tcGxldGlvbi0yMDI2MTAyNC9mdWxsLWxpZmVjeWNsZS1hdHRhY2stZGVhZGxpbmUtZGlhZ25vc3RpY3MtdjEvcHVibGljLzE3OTI5NDY1OTEwNzctODEyZDBiMGQuem9uZS1tZXRyaWNzLmpzb24iLAogICAgICAgICJieXRlcyI6IDIzNjAxLAogICAgICAgICJzaGEyNTYiOiAiZGUxOTE3OGY3Zjg4ZDM5ZmFkNjUzMDU3NDA1Yjc5ZDEyZWM5MThiZjg4NDczYjYzNmY2NzAzZWVlNGY0NzM1YSIKICAgICAgfSwKICAgICAgewogICAgICAgICJmaWxlIjogIkM6L21pcjItYnVpbGQvcDAxLWNvbXBsZXRpb24tMjAyNjEwMjQvZnVsbC1saWZlY3ljbGUtYXR0YWNrLWRlYWRsaW5lLWRpYWdub3N0aWNzLXYxL3B1YmxpYy8xNzkyOTQ2NTk5MzQ1LTAwMzRjMmI5LWEudHJhY2UuanNvbmwiLAogICAgICAgICJieXRlcyI6IDk4MDI2MSwKICAgICAgICAic2hhMjU2IjogIjliODRjMGRlYjY3NmFkNTJjODIwZDk4ZDhkMTU2ZTcyMmNkOTQyYzIyMzAzYTI2ZGEwOGNkOTBkYmJjYzFkNWYiCiAgICAgIH0sCiAgICAgIHsKICAgICAgICAiZmlsZSI6ICJDOi9taXIyLWJ1aWxkL3AwMS1jb21wbGV0aW9uLTIwMjYxMDI0L2Z1bGwtbGlmZWN5Y2xlLWF0dGFjay1kZWFkbGluZS1kaWFnbm9zdGljcy12MS9wdWJsaWMvMTc5Mjk0NjU5OTM0NS0wMDM0YzJiOS1iLnRyYWNlLmpzb25sIiwKICAgICAgICAiYnl0ZXMiOiA5MDQ2OTEsCiAgICAgICAgInNoYTI1NiI6ICI0MDFjODViYjZlMDk3OTlmYWI0ZjczZDQ3ZDgxMDZkODEzNGNiMjBmYjUxMzZkNThkZjY3NzhkOGIxZTUxZDBiIgogICAgICB9LAogICAgICB7CiAgICAgICAgImZpbGUiOiAiQzovbWlyMi1idWlsZC9wMDEtY29tcGxldGlvbi0yMDI2MTAyNC9mdWxsLWxpZmVjeWNsZS1hdHRhY2stZGVhZGxpbmUtZGlhZ25vc3RpY3MtdjEvcHVibGljLzE3OTI5NDY1OTkzNDUtMDAzNGMyYjktZ3VhcmQtbmV3Q2hhcmFjdGVyLnRyYWNlLmpzb25sIiwKICAgICAgICAiYnl0ZXMiOiAzNDc4LAogICAgICAgICJzaGEyNTYiOiAiYzEwZWJmOGViYTYwNjlmMjczY2NmZWEwOTQ2ZWEyMDQ2OTFiZmVjMTJkNGM0ZmIxNjJkMzI5ZWM4MjhiMDI0YiIKICAgICAgfSwKICAgICAgewogICAgICAgICJmaWxlIjogIkM6L21pcjItYnVpbGQvcDAxLWNvbXBsZXRpb24tMjAyNjEwMjQvZnVsbC1saWZlY3ljbGUtYXR0YWNrLWRlYWRsaW5lLWRpYWdub3N0aWNzLXYxL3B1YmxpYy8xNzkyOTQ2NTk5MzQ1LTAwMzRjMmI5LWd1YXJkLXN0YXJ0R2FtZS50cmFjZS5qc29ubCIsCiAgICAgICAgImJ5dGVzIjogMzQzOSwKICAgICAgICAic2hhMjU2IjogIjY3ZjdkNjJmYjc0ZGZmNDY2Njc4OTRiMjJiNTcwMDI2NmQ4YjY4NDIzNzVlY2U4OGJjMzk2YTVlNjhkZjJlNTMiCiAgICAgIH0sCiAgICAgIHsKICAgICAgICAiZmlsZSI6ICJDOi9taXIyLWJ1aWxkL3AwMS1jb21wbGV0aW9uLTIwMjYxMDI0L2Z1bGwtbGlmZWN5Y2xlLWF0dGFjay1kZWFkbGluZS1kaWFnbm9zdGljcy12MS9wdWJsaWMvMTc5Mjk0NjU5OTM0NS0wMDM0YzJiOS1yZWxvZ2luLTAudHJhY2UuanNvbmwiLAogICAgICAgICJieXRlcyI6IDY4NDI2OCwKICAgICAgICAic2hhMjU2IjogImVjZjM0NzQ5ODlkM2Q4ODVhMTJlM2ZiZTMwZDU2M2Y5OGI4ZDUwMGQyNThiOGRhZDNmYTA5MDMwYjE1NTZlYWIiCiAgICAgIH0sCiAgICAgIHsKICAgICAgICAiZmlsZSI6ICJDOi9taXIyLWJ1aWxkL3AwMS1jb21wbGV0aW9uLTIwMjYxMDI0L2Z1bGwtbGlmZWN5Y2xlLWF0dGFjay1kZWFkbGluZS1kaWFnbm9zdGljcy12MS9wdWJsaWMvMTc5Mjk0NjU5OTM0NS0wMDM0YzJiOS1yZWxvZ2luLTEudHJhY2UuanNvbmwiLAogICAgICAgICJieXRlcyI6IDY4MTA3NSwKICAgICAgICAic2hhMjU2IjogImM5NDU5OWU1YWY3MDg5NTYxODRlMDE2ZjE3ZjgzNGQ0OTU2ZTQxMjZkZDIzYzk4MDQxZTJiZDhhMGU5YjhmNDkiCiAgICAgIH0sCiAgICAgIHsKICAgICAgICAiZmlsZSI6ICJDOi9taXIyLWJ1aWxkL3AwMS1jb21wbGV0aW9uLTIwMjYxMDI0L2Z1bGwtbGlmZWN5Y2xlLWF0dGFjay1kZWFkbGluZS1kaWFnbm9zdGljcy12MS9wdWJsaWMvMTc5Mjk0NjU5OTM0NS0wMDM0YzJiOS5yZXBvcnQuanNvbiIsCiAgICAgICAgImJ5dGVzIjogMTEwNzc3LAogICAgICAgICJzaGEyNTYiOiAiNTQzZTE5ZTgyZTI1MTE2MWU0ZmFlNGM1MzQ0ZmQ3OGEyMDQyODc4MzY4MTlmMGMzNzM0YjJiMjUyYWMwMjEzNyIKICAgICAgfQogICAgXSwKICAgICJyb290SW5kZXBlbmRlbnRDbGVhbnVwIjogewogICAgICAiZmlsZSI6ICJDOi9taXIyLWJ1aWxkL3AwMS1jb21wbGV0aW9uLTIwMjYxMDI0L2F0dGFjay1kZWFkbGluZS1mdWxsMTYtcm9vdC1pbmRlcGVuZGVudC1jbGVhbnVwLXYxLmpzb24iLAogICAgICAiYnl0ZXMiOiAzMDUsCiAgICAgICJzaGEyNTYiOiAiYjg3YjgxNzU5ZThmZmVkYWI2OTk5ZDZiZjU5ZWIyNzg5NzkzZTE2ZmMzYTY5YWFmMGY1NWM2ZTk3ZWNlZGFjYiIKICAgIH0KICB9LAogICJmdWxsMTZJbmRlcGVuZGVudEZhY3RzIjogewogICAgImZpbGUiOiAiQzpcXG1pcjItYnVpbGRcXHAwMS1jb21wbGV0aW9uLTIwMjYxMDI0XFxhdHRhY2stZGVhZGxpbmUtZnVsbDE2LWFjdHVhbC10ZXJtaW5hbC1pbmRlcGVuZGVudC1mYWN0cy12MS5qc29uIiwKICAgICJieXRlcyI6IDEwODIwLAogICAgInNoYTI1NiI6ICI0ZmQ1ODY3ZTQyMTM2MGRjYTRiYjVjZjBlYzlmNWJjZDliMjFhMzY0ZjQ2ZjBiYmIzYmY5N2Q1M2M1NzFmMWZhIgogIH0sCg==",
+          "afterBase64": "ICAic3RhdGUiOiAiUEVORElOR19ORVc1MF9SRUxFQVNFX0FORF9GVUxMMTYiLAogICJiYWNrZW5kU291cmNlQ29tbWl0IjogbnVsbCwKICAiZHJpdmVyU291cmNlQ29tbWl0IjogbnVsbCwKICAiYmFja2VuZElucHV0Q291bnQiOiA1MCwKICAiYmFja2VuZFNvdXJjZUFnZ3JlZ2F0ZSI6IG51bGwsCiAgInJlbGVhc2VSZWNvcmQiOiBudWxsLAogICJiYWNrZW5kU291cmNlTWFuaWZlc3QiOiBudWxsLAogICJiaW5hcnkiOiBudWxsLAogICJidWlsZFJlY2VpcHQiOiBudWxsLAogICJidWlsZExvZyI6IG51bGwsCiAgInJvb3RGdW5jdGlvbmFsVmFsaWRhdGlvbiI6IG51bGwsCiAgImZ1bGwxNiI6IG51bGwsCg=="
+        },
+        {
+          "oldOffset": 7146,
+          "newOffset": 420,
+          "beforeBase64": "",
+          "afterBase64": "ICAic2VhbGVkIjogZmFsc2UsCg=="
+        }
+      ],
+      "inverseRestoresOriginalRaw": true
+    },
+    {
+      "source": {
+        "file": "C:/mir2-build/p01-completion-20261024/release-native-10-v2-attack-deadline-feasibility-16/collect-public.mjs",
+        "bytes": 43666,
+        "sha256": "dd63ad09cb2b7deaca39fc41d7efa574fc976074d3aaf1a3cc157e608d469534"
+      },
+      "target": {
+        "file": "C:/mir2-build/p01-completion-20261024/release-native-10-v2-account-store-wait-feasibility-17/collect-public.mjs",
+        "bytes": 43696,
+        "sha256": "fdb9907113148f11ce739622a7c59932a4e112971365d1ae5cd2b367e45ba4f7"
+      },
+      "mode": "position-exact-inverse-derived",
+      "hunks": [
+        {
+          "oldOffset": 1361,
+          "newOffset": 1361,
+          "beforeBase64": "Y29uc3QgY2hpbGQgPSAnY2FwYWNpdHktbmF0aXZlMTAtdjItYXR0YWNrLWRlYWRsaW5lLWZvbGxvd3VwLTE2LWRpYWdub3N0aWNzJywgZGVzdCA9IHBhdGguam9pbih0b3BpYywgY2hpbGQpOwpjb25zdCByZWFsbSA9ICdyZWxlYXNlLW5hdGl2ZS0xMC12Mi1hdHRhY2stZGVhZGxpbmUtZmVhc2liaWxpdHktMTYnOwo=",
+          "afterBase64": "Y29uc3QgY2hpbGQgPSAnY2FwYWNpdHktbmF0aXZlMTAtdjItYWNjb3VudC1zdG9yZS13YWl0LWZvbGxvd3VwLTE3LWRpYWdub3N0aWNzJywgZGVzdCA9IHBhdGguam9pbih0b3BpYywgY2hpbGQpOwpjb25zdCByZWFsbSA9ICdyZWxlYXNlLW5hdGl2ZS0xMC12Mi1hY2NvdW50LXN0b3JlLXdhaXQtZmVhc2liaWxpdHktMTcnOwo="
+        },
+        {
+          "oldOffset": 13671,
+          "newOffset": 13677,
+          "beforeBase64": "aWYoSlNPTi5zdHJpbmdpZnkocHJvY2Vzc1JlY29yZC5leHBsaWNpdEFkbWlzc2lvbkNhcHMpIT09J1syNCwxMCwxMCw0LDEsMl0nfHxwcm9jZXNzUmVjb3JkLnRva2lvV29ya2VycyE9PTR8fHByb2Nlc3NSZWNvcmQuc2xvd1N0YWdlVGhyZXNob2xkTXMhPT01MHx8cHJvY2Vzc1JlY29yZC5jb250ZW50IT09J3BsYXRpbnVtXzE3Nid8fHByb2Nlc3NSZWNvcmQucm91dGluZyE9PSdzaW5nbGUnfHxwcm9jZXNzUmVjb3JkLmFjY291bnRCYWNrZW5kIT09J2ZpbGUnKXRocm93IEVycm9yKCdQcm9iZTE2IG11c3QgcmV0YWluIHRoZSBhY3R1YWwgb3JpZ2luYWwwNiBsYXVuY2hlciBjYXBzL3J1bnRpbWUgcHJvZmlsZScpOwo=",
+          "afterBase64": "aWYoSlNPTi5zdHJpbmdpZnkocHJvY2Vzc1JlY29yZC5leHBsaWNpdEFkbWlzc2lvbkNhcHMpIT09J1syNCwxMCwxMCw0LDEsMl0nfHxwcm9jZXNzUmVjb3JkLnRva2lvV29ya2VycyE9PTR8fHByb2Nlc3NSZWNvcmQuc2xvd1N0YWdlVGhyZXNob2xkTXMhPT01MHx8cHJvY2Vzc1JlY29yZC5jb250ZW50IT09J3BsYXRpbnVtXzE3Nid8fHByb2Nlc3NSZWNvcmQucm91dGluZyE9PSdzaW5nbGUnfHxwcm9jZXNzUmVjb3JkLmFjY291bnRCYWNrZW5kIT09J2ZpbGUnKXRocm93IEVycm9yKCdQcm9iZTE3IG11c3QgcmV0YWluIHRoZSBhY3R1YWwgb3JpZ2luYWwwNiBsYXVuY2hlciBjYXBzL3J1bnRpbWUgcHJvZmlsZScpOwo="
+        },
+        {
+          "oldOffset": 14987,
+          "newOffset": 14993,
+          "beforeBase64": "ICAgIHJlbGVhc2Uuc291cmNlQ29tbWl0ICE9PSBiYWNrZW5kU291cmNlQ29tbWl0IHx8IHJlbGVhc2UuYmluYXJ5LnNoYTI1NiAhPT0gYmFja2VuZEJpbmFyeVNoYTI1NiB8fCBtYW5pZmVzdC5maWxlcz8ubGVuZ3RoICE9PSA0NCB8fAo=",
+          "afterBase64": "ICAgIHJlbGVhc2Uuc291cmNlQ29tbWl0ICE9PSBiYWNrZW5kU291cmNlQ29tbWl0IHx8IHJlbGVhc2UuYmluYXJ5LnNoYTI1NiAhPT0gYmFja2VuZEJpbmFyeVNoYTI1NiB8fCBtYW5pZmVzdC5maWxlcz8ubGVuZ3RoICE9PSA1MCB8fAo="
+        },
+        {
+          "oldOffset": 21259,
+          "newOffset": 21265,
+          "beforeBase64": "ICBpZighZGVmaW5pdGlvbnx8c3RhZ2UuY29udHJvbGxlZEFjdG9ycyE9PWRlZmluaXRpb25bMF18fHN0YWdlLnNlY29uZHMhPT1kZWZpbml0aW9uWzFdKXRocm93IEVycm9yKCdQcm9iZTE2IG9yaWdpbmFsIG1lYXN1cmVkMi8xMC9zb2FrMzAwLzMwMC8zNjAgc2NvcGUgZGlmZmVycycpOwo=",
+          "afterBase64": "ICBpZighZGVmaW5pdGlvbnx8c3RhZ2UuY29udHJvbGxlZEFjdG9ycyE9PWRlZmluaXRpb25bMF18fHN0YWdlLnNlY29uZHMhPT1kZWZpbml0aW9uWzFdKXRocm93IEVycm9yKCdQcm9iZTE3IG9yaWdpbmFsIG1lYXN1cmVkMi8xMC9zb2FrMzAwLzMwMC8zNjAgc2NvcGUgZGlmZmVycycpOwo="
+        },
+        {
+          "oldOffset": 23564,
+          "newOffset": 23570,
+          "beforeBase64": "aWYocmF3VmVyaWZpZXJBY2NlcHRlZCE9PWZhbHNlKXRocm93IEVycm9yKCdQcm9iZTE2IG11c3QgbmV2ZXIgYmUgcHJvbW90ZWQgdG8gZm9ybWFsIGNhcGFjaXR5IGFjY2VwdGFuY2UnKTsK",
+          "afterBase64": "aWYocmF3VmVyaWZpZXJBY2NlcHRlZCE9PWZhbHNlKXRocm93IEVycm9yKCdQcm9iZTE3IG11c3QgbmV2ZXIgYmUgcHJvbW90ZWQgdG8gZm9ybWFsIGNhcGFjaXR5IGFjY2VwdGFuY2UnKTsK"
+        },
+        {
+          "oldOffset": 28964,
+          "newOffset": 28970,
+          "beforeBase64": "Y29uc3QgcmVjb3JkaW5nU3VtbWFyeUZpbGUgPSBwYXRoLmpvaW4oYmFzZSwgJ2NvbGxlY3QtcmVsZWFzZS1uYXRpdmUtMTAtdjItYXR0YWNrLWRlYWRsaW5lLWZlYXNpYmlsaXR5LTE2LXJlY29yZGluZ3MtbWV0YWRhdGEuanNvbicpOwo=",
+          "afterBase64": "Y29uc3QgcmVjb3JkaW5nU3VtbWFyeUZpbGUgPSBwYXRoLmpvaW4oYmFzZSwgJ2NvbGxlY3QtcmVsZWFzZS1uYXRpdmUtMTAtdjItYWNjb3VudC1zdG9yZS13YWl0LWZlYXNpYmlsaXR5LTE3LXJlY29yZGluZ3MtbWV0YWRhdGEuanNvbicpOwo="
+        },
+        {
+          "oldOffset": 29154,
+          "newOffset": 29163,
+          "beforeBase64": "Y29uc3QgbW9uaXRvckVuZHBvaW50c0ZpbGUgPSBwYXRoLmpvaW4oYmFzZSwgJ2NvbGxlY3QtcmVsZWFzZS1uYXRpdmUtMTAtdjItYXR0YWNrLWRlYWRsaW5lLWZlYXNpYmlsaXR5LTE2LW1vbml0b3ItZW5kcG9pbnRzLmpzb24nKTsK",
+          "afterBase64": "Y29uc3QgbW9uaXRvckVuZHBvaW50c0ZpbGUgPSBwYXRoLmpvaW4oYmFzZSwgJ2NvbGxlY3QtcmVsZWFzZS1uYXRpdmUtMTAtdjItYWNjb3VudC1zdG9yZS13YWl0LWZlYXNpYmlsaXR5LTE3LW1vbml0b3ItZW5kcG9pbnRzLmpzb24nKTsK"
+        },
+        {
+          "oldOffset": 32403,
+          "newOffset": 32415,
+          "beforeBase64": "ICAnY29sbGVjdC1yZWxlYXNlLW5hdGl2ZS0xMC12Mi1hdHRhY2stZGVhZGxpbmUtZmVhc2liaWxpdHktMTYtcmVjb3JkaW5ncy1tZXRhZGF0YS5qc29uJywgJ2NvbGxlY3QtcmVsZWFzZS1uYXRpdmUtMTAtdjItYXR0YWNrLWRlYWRsaW5lLWZlYXNpYmlsaXR5LTE2LW1vbml0b3ItZW5kcG9pbnRzLmpzb24nLAogICdyZWxlYXNlLW5hdGl2ZS0xMC12Mi1hdHRhY2stZGVhZGxpbmUtZmVhc2liaWxpdHktMTYvY29sbGVjdC1wdWJsaWMubWpzJywgJ3JlbGVhc2UtbmF0aXZlLTEwLXYyLWF0dGFjay1kZWFkbGluZS1mZWFzaWJpbGl0eS0xNi92ZXJpZnktcHVibGljLm1qcyddOwo=",
+          "afterBase64": "ICAnY29sbGVjdC1yZWxlYXNlLW5hdGl2ZS0xMC12Mi1hY2NvdW50LXN0b3JlLXdhaXQtZmVhc2liaWxpdHktMTctcmVjb3JkaW5ncy1tZXRhZGF0YS5qc29uJywgJ2NvbGxlY3QtcmVsZWFzZS1uYXRpdmUtMTAtdjItYWNjb3VudC1zdG9yZS13YWl0LWZlYXNpYmlsaXR5LTE3LW1vbml0b3ItZW5kcG9pbnRzLmpzb24nLAogICdyZWxlYXNlLW5hdGl2ZS0xMC12Mi1hY2NvdW50LXN0b3JlLXdhaXQtZmVhc2liaWxpdHktMTcvY29sbGVjdC1wdWJsaWMubWpzJywgJ3JlbGVhc2UtbmF0aXZlLTEwLXYyLWFjY291bnQtc3RvcmUtd2FpdC1mZWFzaWJpbGl0eS0xNy92ZXJpZnktcHVibGljLm1qcyddOwo="
+        },
+        {
+          "oldOffset": 34372,
+          "newOffset": 34396,
+          "beforeBase64": "ICBzY29wZTogJ05ldzE2Y29sbGVjdGlvbiB3aXRoIGluaGVyaXRlZCBjb3JyZWN0ZWQgYm91bmRlZDE2bWludXRlIHNjaGVtYTsgbmV3ZHJpdmVyMjEwIGV2aWRlbmNlIGlzIHNlcGFyYXRlIGZyb20gaGlzdG9yaWNhbCB3cmFwcGVyMTg3LiBJbmRlcGVuZGVudCBleHBsaWNpdCBwdWJsaWMgYWxsb3dsaXN0IGZvciBhdXRoZW50aWMgbm9uLWFjY2VwdGluZyBvcmRpbmFyeSBuYXRpdmUgY29tcGFjdCBzcGFuMi1oYWxvIHByb2JlMTYuIE9yaWdpbmFsIHBhcnRpYWwvZmFpbHVyZS9wYXNzIHJlcG9ydCBieXRlcyBhcmUgcmV0YWluZWQ7IHN0cmljdCBmcm96ZW4gdmVyaWZpZXIgcGx1cyBhdXRoZW50aWMgbm9ybWFsIGNsZWFudXAgYWRqdWRpY2F0ZXMgZm9ybWFsIGFjY2VwdGFuY2UuIE5vIHByaXZhdGUgc3RvcmUsIHNlY3JldCwgRVhFIG9yIHJlY29yZGluZyBwYXlsb2FkIGNvcGllZC4nLAo=",
+          "afterBase64": "ICBzY29wZTogJ05ldzE2Y29sbGVjdGlvbiB3aXRoIGluaGVyaXRlZCBjb3JyZWN0ZWQgYm91bmRlZDE2bWludXRlIHNjaGVtYTsgbmV3ZHJpdmVyMjEwIGV2aWRlbmNlIGlzIHNlcGFyYXRlIGZyb20gaGlzdG9yaWNhbCB3cmFwcGVyMTg3LiBJbmRlcGVuZGVudCBleHBsaWNpdCBwdWJsaWMgYWxsb3dsaXN0IGZvciBhdXRoZW50aWMgbm9uLWFjY2VwdGluZyBvcmRpbmFyeSBuYXRpdmUgY29tcGFjdCBzcGFuMi1oYWxvIHByb2JlMTcuIE9yaWdpbmFsIHBhcnRpYWwvZmFpbHVyZS9wYXNzIHJlcG9ydCBieXRlcyBhcmUgcmV0YWluZWQ7IHN0cmljdCBmcm96ZW4gdmVyaWZpZXIgcGx1cyBhdXRoZW50aWMgbm9ybWFsIGNsZWFudXAgYWRqdWRpY2F0ZXMgZm9ybWFsIGFjY2VwdGFuY2UuIE5vIHByaXZhdGUgc3RvcmUsIHNlY3JldCwgRVhFIG9yIHJlY29yZGluZyBwYXlsb2FkIGNvcGllZC4nLAo="
+        },
+        {
+          "oldOffset": 39545,
+          "newOffset": 39569,
+          "beforeBase64": "Y29uc3QgY2F0YWxvZ05hbWUgPSAnY29sbGVjdC1yZWxlYXNlLW5hdGl2ZS0xMC12Mi1hdHRhY2stZGVhZGxpbmUtZmVhc2liaWxpdHktMTYtcHVibGljLWFydGlmYWN0LWNhdGFsb2cuanNvbic7Cg==",
+          "afterBase64": "Y29uc3QgY2F0YWxvZ05hbWUgPSAnY29sbGVjdC1yZWxlYXNlLW5hdGl2ZS0xMC12Mi1hY2NvdW50LXN0b3JlLXdhaXQtZmVhc2liaWxpdHktMTctcHVibGljLWFydGlmYWN0LWNhdGFsb2cuanNvbic7Cg=="
+        },
+        {
+          "oldOffset": 43218,
+          "newOffset": 43245,
+          "beforeBase64": "YXdhaXQgd3JpdGVOZXcocGF0aC5qb2luKGJhc2UsICdjb2xsZWN0LXJlbGVhc2UtbmF0aXZlLTEwLXYyLWF0dGFjay1kZWFkbGluZS1mZWFzaWJpbGl0eS0xNi1jb2xsZWN0aW9uLXJlc3VsdC5qc29uJyksIHsgZGVzdGluYXRpb246IGRlc3QsIHN1bW1hcnksIG1hbmlmZXN0OiBlbnRyeSB9KTsK",
+          "afterBase64": "YXdhaXQgd3JpdGVOZXcocGF0aC5qb2luKGJhc2UsICdjb2xsZWN0LXJlbGVhc2UtbmF0aXZlLTEwLXYyLWFjY291bnQtc3RvcmUtd2FpdC1mZWFzaWJpbGl0eS0xNy1jb2xsZWN0aW9uLXJlc3VsdC5qc29uJyksIHsgZGVzdGluYXRpb246IGRlc3QsIHN1bW1hcnksIG1hbmlmZXN0OiBlbnRyeSB9KTsK"
+        }
+      ],
+      "inverseRestoresOriginalRaw": true
+    },
+    {
+      "source": {
+        "file": "C:/mir2-build/p01-completion-20261024/release-native-10-v2-attack-deadline-feasibility-16/current-driver-binding.json",
+        "bytes": 2381,
+        "sha256": "3587f6193aaa9142482900c63f3695588774446112263dabc73d4d78d2aee64f"
+      },
+      "target": {
+        "file": "C:/mir2-build/p01-completion-20261024/release-native-10-v2-account-store-wait-feasibility-17/current-driver-binding.json",
+        "bytes": 2215,
+        "sha256": "73fd7ed345ad2cfb363382836b9b98bcf6b8dbbb79deb4b130234907e937d72d"
+      },
+      "mode": "position-exact-inverse-derived",
+      "hunks": [
+        {
+          "oldOffset": 24,
+          "newOffset": 24,
+          "beforeBase64": "ICAic3RhdGUiOiAiRklOQUxfTkVXX0RJQUdOT1NUSUNfQkFDS0VORF9BTkRfTk9ERTkiLAogICJkcml2ZXJTb3VyY2VDb21taXQiOiAiZDI0MDdmYjg0MDU1ZTIwODhlM2NhNmNjZGI0ZjhiODBkMTVhOWQxNiIsCiAgImJhY2tlbmRTb3VyY2VDb21taXQiOiAiZDI0MDdmYjg0MDU1ZTIwODhlM2NhNmNjZGI0ZjhiODBkMTVhOWQxNiIsCg==",
+          "afterBase64": "ICAic3RhdGUiOiAiUEVORElOR19ORVdfQUNDT1VOVF9TVE9SRV9SRUxFQVNFX0FORF9GVUxMMTYiLAogICJkcml2ZXJTb3VyY2VDb21taXQiOiBudWxsLAogICJiYWNrZW5kU291cmNlQ29tbWl0IjogbnVsbCwK"
+        },
+        {
+          "oldOffset": 616,
+          "newOffset": 546,
+          "beforeBase64": "ICAiYmFja2VuZEJpbmFyeVNoYTI1NiI6ICIxOTgwYjdiZWQ1ODQ5OTk3N2ViNjQ0M2FhM2YxYmYwZmFiY2I5ZTgyNjJiNDkwZjJiYzZmYjc0Y2Y2ZjdiMzE4IiwK",
+          "afterBase64": "ICAiYmFja2VuZEJpbmFyeVNoYTI1NiI6IG51bGwsCg=="
+        },
+        {
+          "oldOffset": 2019,
+          "newOffset": 1887,
+          "beforeBase64": "ICAiZHJpdmVyRnJlZXplUm9sZSI6ICJOZXdkMjQwIE5vZGU5LzViYSBhbmQgYWN0dWFsMjEwOyBzaXggaW1tdXRhYmxlIGRlY2xhcmF0aW9ucyByZW1haW4gcHJpb3IyMGZkIG1ldGFkYXRhIGFuZCBhcmUgcmV2YWxpZGF0ZWQgYWdhaW5zdCBuZXcgcmF3IHNvdXJjZS4gTm8gaGlzdG9yaWNhbDEzLzIwMCBpcyBjbGFpbWVkIGFzIGN1cnJlbnQyMTAuIiwK",
+          "afterBase64": "ICAiZHJpdmVyRnJlZXplUm9sZSI6ICJVbmNoYW5nZWQgaGlzdG9yaWNhbCBkMjQwIE5vZGU5LzViYSBhbmQgYWN0dWFsMjEwIG9ubHk7IGFjdGl2ZSBuZXc1MCBiYWNrZW5kL1JlbGVhc2UvZnVsbDE2L2V4ZWN1dGlvbiBpcyBzZXBhcmF0ZSwgbm90IGEgbmV3IE5vZGUgcmVncmVzc2lvbi4iLAo="
+        }
+      ],
+      "inverseRestoresOriginalRaw": true
+    },
+    {
+      "source": {
+        "file": "C:/mir2-build/p01-completion-20261024/release-native-10-v2-attack-deadline-feasibility-16/driver-binding-contract.mjs",
+        "bytes": 1187,
+        "sha256": "4bbffabe92c1973d4065abc829651ae670ac267fcbbc9ffdb2db61576d8cf83a"
+      },
+      "target": {
+        "file": "C:/mir2-build/p01-completion-20261024/release-native-10-v2-account-store-wait-feasibility-17/driver-binding-contract.mjs",
+        "bytes": 1231,
+        "sha256": "3d88d7d6bf10cf659f73c0049ac74003797c701ef291b2e19e070dc5fa5c5b77"
+      },
+      "mode": "position-exact-inverse-derived",
+      "hunks": [
+        {
+          "oldOffset": 227,
+          "newOffset": 227,
+          "beforeBase64": "ZXhwb3J0IGZ1bmN0aW9uIGFzc2VydEZpbmFsRHJpdmVyQmluZGluZygpe2lmKERSSVZFUl9CSU5ESU5HLnN0YXRlIT09J0ZJTkFMX05FV19ESUFHTk9TVElDX0JBQ0tFTkRfQU5EX05PREU5J3x8RFJJVkVSX0JJTkRJTkcuZHJpdmVyU291cmNlQ29tbWl0IT09J2QyNDA3ZmI4NDA1NWUyMDg4ZTNjYTZjY2RiNGY4YjgwZDE1YTlkMTYnfHxEUklWRVJfQklORElORy5iYWNrZW5kU291cmNlQ29tbWl0IT09RFJJVkVSX0JJTkRJTkcuZHJpdmVyU291cmNlQ29tbWl0fHxEUklWRVJfQklORElORy5jb3JlQ29kZUV2aWRlbmNlQ29tbWl0IT09RFJJVkVSX0JJTkRJTkcuZHJpdmVyU291cmNlQ29tbWl0fHxEUklWRVJfQklORElORy5kcml2ZXJTb3VyY2VTaGEyNTYhPT0nNWJhNDZhZTRhNzI5YzRhZTg1MTQ3MjEyODRkYTBmOTFkNzk2YWZmMjQ3Y2Q3YzAxN2IyMDY3OTBiZTg4ZTJkOSd8fCEvXlthLWYwLTldezY0fSQvLnRlc3QoRFJJVkVSX0JJTkRJTkcuYmFja2VuZEJpbmFyeVNoYTI1Nj8/JycpfHwhRFJJVkVSX0JJTkRJTkcuZHJpdmVyRnJvemVuRmlsZXx8RFJJVkVSX0JJTkRJTkcuZHJpdmVyTWFuaWZlc3RCeXRlcyE9PTY3NTl8fERSSVZFUl9CSU5ESU5HLmRyaXZlck1hbmlmZXN0U2hhMjU2IT09J2M3YTQzMjM5NzE3MjFlYjU0YjU3NDY0OWQ4YzRlZmVlYTgwMGZkMDg0ODQzNDliNWViOGQwZWMwZmZiMTFmN2InfHwhQXJyYXkuaXNBcnJheShEUklWRVJfQklORElORy5jdXJyZW50RXZpZGVuY2UpfHxEUklWRVJfQklORElORy5jdXJyZW50RXZpZGVuY2UubGVuZ3RoIT09MXx8IURSSVZFUl9CSU5ESU5HLnN0YXRpY0dlb21ldHJ5Q29tcGF0aWJpbGl0eVByb29mKXRocm93IEVycm9yKCdQcm9iZTE2IHNvdXJjZS9SZWxlYXNlL2Z1bGwxNiBiaW5kaW5nIGlzIFBFTkRJTkcgbGF1bmNoZXIgUUE7IG5vIGd1YXJkLCBhY2NvdW50LCByZWFsbSBvciBjb2xsZWN0aW9uIGlzIHBlcm1pdHRlZCcpO30K",
+          "afterBase64": "ZXhwb3J0IGZ1bmN0aW9uIGFzc2VydEZpbmFsRHJpdmVyQmluZGluZygpe2lmKERSSVZFUl9CSU5ESU5HLnN0YXRlIT09J0ZJTkFMX05FV19BQ0NPVU5UX1NUT1JFX0JBQ0tFTkRfQU5EX0hJU1RPUklDQUxfTk9ERTknfHwhL15bYS1mMC05XXs0MH0kLy50ZXN0KERSSVZFUl9CSU5ESU5HLmRyaXZlclNvdXJjZUNvbW1pdD8/JycpfHxEUklWRVJfQklORElORy5iYWNrZW5kU291cmNlQ29tbWl0IT09RFJJVkVSX0JJTkRJTkcuZHJpdmVyU291cmNlQ29tbWl0fHxEUklWRVJfQklORElORy5jb3JlQ29kZUV2aWRlbmNlQ29tbWl0IT09J2QyNDA3ZmI4NDA1NWUyMDg4ZTNjYTZjY2RiNGY4YjgwZDE1YTlkMTYnfHxEUklWRVJfQklORElORy5kcml2ZXJTb3VyY2VTaGEyNTYhPT0nNWJhNDZhZTRhNzI5YzRhZTg1MTQ3MjEyODRkYTBmOTFkNzk2YWZmMjQ3Y2Q3YzAxN2IyMDY3OTBiZTg4ZTJkOSd8fCEvXlthLWYwLTldezY0fSQvLnRlc3QoRFJJVkVSX0JJTkRJTkcuYmFja2VuZEJpbmFyeVNoYTI1Nj8/JycpfHwhRFJJVkVSX0JJTkRJTkcuZHJpdmVyRnJvemVuRmlsZXx8RFJJVkVSX0JJTkRJTkcuZHJpdmVyTWFuaWZlc3RCeXRlcyE9PTY3NTl8fERSSVZFUl9CSU5ESU5HLmRyaXZlck1hbmlmZXN0U2hhMjU2IT09J2M3YTQzMjM5NzE3MjFlYjU0YjU3NDY0OWQ4YzRlZmVlYTgwMGZkMDg0ODQzNDliNWViOGQwZWMwZmZiMTFmN2InfHwhQXJyYXkuaXNBcnJheShEUklWRVJfQklORElORy5jdXJyZW50RXZpZGVuY2UpfHxEUklWRVJfQklORElORy5jdXJyZW50RXZpZGVuY2UubGVuZ3RoIT09MXx8IURSSVZFUl9CSU5ESU5HLnN0YXRpY0dlb21ldHJ5Q29tcGF0aWJpbGl0eVByb29mKXRocm93IEVycm9yKCdQRU5ESU5HX1BST0JFMTdfTkVXNTBfUkVMRUFTRV9BTkRfRlJFU0hfRlVMTDE2OiBhY3R1YWwgc291cmNlLCBSZWxlYXNlLCBmdWxsMTYgYW5kIGxhdW5jaGVyIHJldmlldyByZXF1aXJlZCBiZWZvcmUgZ3VhcmQsIGFjY291bnRzLCByZWFsbSBvciBjb2xsZWN0aW9uJyk7fQo="
+        }
+      ],
+      "inverseRestoresOriginalRaw": true
+    },
+    {
+      "source": {
+        "file": "C:/mir2-build/p01-completion-20261024/release-native-10-v2-attack-deadline-feasibility-16/driver-evidence-contract.mjs",
+        "bytes": 4575,
+        "sha256": "b23df3246d3f23102394f5e8652dad8890f87bf8a02021991ea7748e81224860"
+      },
+      "target": {
+        "file": "C:/mir2-build/p01-completion-20261024/release-native-10-v2-account-store-wait-feasibility-17/driver-evidence-contract.mjs",
+        "bytes": 4579,
+        "sha256": "8aca8c26abcd4f3def242a73068ff2ed00a48f92e4ca42627d092970a9582469"
+      },
+      "mode": "position-exact-inverse-derived",
+      "hunks": [
+        {
+          "oldOffset": 1048,
+          "newOffset": 1048,
+          "beforeBase64": "ZXhwb3J0IGFzeW5jIGZ1bmN0aW9uIHZlcmlmeURyaXZlckV2aWRlbmNlQmFzaXMoZnJvemVuLGFzc2VydFBpbil7YXNzZXJ0RmluYWxEcml2ZXJCaW5kaW5nKCk7YXNzZXJ0LmVxdWFsKGZyb3plbi5hY3R1YWxDb2RlQ29tbWl0LERSSVZFUl9CSU5ESU5HLmNvcmVDb2RlRXZpZGVuY2VDb21taXQpO2Fzc2VydC5lcXVhbChmcm96ZW4uZHJpdmVyU291cmNlQ29tbWl0LERSSVZFUl9CSU5ESU5HLmRyaXZlclNvdXJjZUNvbW1pdCk7YXNzZXJ0LmVxdWFsKGZyb3plbi5maWxlcz8ubGVuZ3RoLDkpO2Fzc2VydC5lcXVhbChmcm96ZW4uc291cmNlU2hhMjU2LERSSVZFUl9CSU5ESU5HLmRyaXZlclNvdXJjZVNoYTI1Nik7YXNzZXJ0LmVxdWFsKHNoYShKU09OLnN0cmluZ2lmeShmcm96ZW4uZmlsZXMpKSxmcm96ZW4uc291cmNlU2hhMjU2KTthc3NlcnQuZXF1YWwoZnJvemVuLmNhcGFjaXR5QWNjZXB0ZWQsZmFsc2UpO2Fzc2VydC5lcXVhbChmcm96ZW4ub3RoZXJTZXZlbklucHV0c1VuY2hhbmdlZCx0cnVlKTtjb25zdCBwaW5zPVtdLHNlZW49bmV3IFNldCgpLGFkZD1hc3luYyByZWY9Pntjb25zdCBwPW5vcm1hbGl6ZShyZWYpO2Fzc2VydC5vayhwJiZ0eXBlb2YgcC5maWxlPT09J3N0cmluZycmJnBhdGguaXNBYnNvbHV0ZShwLmZpbGUpKTtjb25zdCByZWFsPWF3YWl0IGZzLnJlYWxwYXRoKHAuZmlsZSkscmVsYXRpdmU9cGF0aC5yZWxhdGl2ZShhd2FpdCBmcy5yZWFscGF0aChiYXNlKSxyZWFsKTthc3NlcnQub2socmVsYXRpdmUmJiFwYXRoLmlzQWJzb2x1dGUocmVsYXRpdmUpJiYhcmVsYXRpdmUuc3BsaXQoL1tcXC9dLykuc29tZSh4PT54PT09Jy4uJ3x8L14ocHJpdmF0ZXxzdG9yZXxyZWNvcmRpbmdzfGJpbikkL2kudGVzdCh4KSkmJnNhbWVQYXRoKHJlYWwscC5maWxlKSk7YXdhaXQgYXNzZXJ0UGluKHApO2lmKCFzZWVuLmhhcyhyZWFsLnRvTG93ZXJDYXNlKCkpKXtzZWVuLmFkZChyZWFsLnRvTG93ZXJDYXNlKCkpO3BpbnMucHVzaChwKTt9cmV0dXJuIHA7fTsK",
+          "afterBase64": "ZXhwb3J0IGFzeW5jIGZ1bmN0aW9uIHZlcmlmeURyaXZlckV2aWRlbmNlQmFzaXMoZnJvemVuLGFzc2VydFBpbil7YXNzZXJ0RmluYWxEcml2ZXJCaW5kaW5nKCk7YXNzZXJ0LmVxdWFsKGZyb3plbi5hY3R1YWxDb2RlQ29tbWl0LERSSVZFUl9CSU5ESU5HLmNvcmVDb2RlRXZpZGVuY2VDb21taXQpO2Fzc2VydC5lcXVhbChmcm96ZW4uZHJpdmVyU291cmNlQ29tbWl0LERSSVZFUl9CSU5ESU5HLmNvcmVDb2RlRXZpZGVuY2VDb21taXQpO2Fzc2VydC5lcXVhbChmcm96ZW4uZmlsZXM/Lmxlbmd0aCw5KTthc3NlcnQuZXF1YWwoZnJvemVuLnNvdXJjZVNoYTI1NixEUklWRVJfQklORElORy5kcml2ZXJTb3VyY2VTaGEyNTYpO2Fzc2VydC5lcXVhbChzaGEoSlNPTi5zdHJpbmdpZnkoZnJvemVuLmZpbGVzKSksZnJvemVuLnNvdXJjZVNoYTI1Nik7YXNzZXJ0LmVxdWFsKGZyb3plbi5jYXBhY2l0eUFjY2VwdGVkLGZhbHNlKTthc3NlcnQuZXF1YWwoZnJvemVuLm90aGVyU2V2ZW5JbnB1dHNVbmNoYW5nZWQsdHJ1ZSk7Y29uc3QgcGlucz1bXSxzZWVuPW5ldyBTZXQoKSxhZGQ9YXN5bmMgcmVmPT57Y29uc3QgcD1ub3JtYWxpemUocmVmKTthc3NlcnQub2socCYmdHlwZW9mIHAuZmlsZT09PSdzdHJpbmcnJiZwYXRoLmlzQWJzb2x1dGUocC5maWxlKSk7Y29uc3QgcmVhbD1hd2FpdCBmcy5yZWFscGF0aChwLmZpbGUpLHJlbGF0aXZlPXBhdGgucmVsYXRpdmUoYXdhaXQgZnMucmVhbHBhdGgoYmFzZSkscmVhbCk7YXNzZXJ0Lm9rKHJlbGF0aXZlJiYhcGF0aC5pc0Fic29sdXRlKHJlbGF0aXZlKSYmIXJlbGF0aXZlLnNwbGl0KC9bXFwvXS8pLnNvbWUoeD0+eD09PScuLid8fC9eKHByaXZhdGV8c3RvcmV8cmVjb3JkaW5nc3xiaW4pJC9pLnRlc3QoeCkpJiZzYW1lUGF0aChyZWFsLHAuZmlsZSkpO2F3YWl0IGFzc2VydFBpbihwKTtpZighc2Vlbi5oYXMocmVhbC50b0xvd2VyQ2FzZSgpKSl7c2Vlbi5hZGQocmVhbC50b0xvd2VyQ2FzZSgpKTtwaW5zLnB1c2gocCk7fXJldHVybiBwO307Cg=="
+        }
+      ],
+      "inverseRestoresOriginalRaw": true
+    },
+    {
+      "source": {
+        "file": "C:/mir2-build/p01-completion-20261024/release-native-10-v2-attack-deadline-feasibility-16/driver-report-contract.mjs",
+        "bytes": 9778,
+        "sha256": "dcae5502bc7f5e5e8a658b95b4ce614c1c1ea3fe0519a25ee07f466ee0c4cc5a"
+      },
+      "target": {
+        "file": "C:/mir2-build/p01-completion-20261024/release-native-10-v2-account-store-wait-feasibility-17/driver-report-contract.mjs",
+        "bytes": 9778,
+        "sha256": "dcae5502bc7f5e5e8a658b95b4ce614c1c1ea3fe0519a25ee07f466ee0c4cc5a"
+      },
+      "mode": "exact-copy",
+      "hunks": [],
+      "inverseRestoresOriginalRaw": true
+    },
+    {
+      "source": {
+        "file": "C:/mir2-build/p01-completion-20261024/release-native-10-v2-attack-deadline-feasibility-16/initialize-private.ps1",
+        "bytes": 2226,
+        "sha256": "95f66e1b42a00182563adfe8a99cded539340b006f7a89ad2c80908b7c941169"
+      },
+      "target": {
+        "file": "C:/mir2-build/p01-completion-20261024/release-native-10-v2-account-store-wait-feasibility-17/initialize-private.ps1",
+        "bytes": 2226,
+        "sha256": "95f66e1b42a00182563adfe8a99cded539340b006f7a89ad2c80908b7c941169"
+      },
+      "mode": "exact-copy",
+      "hunks": [],
+      "inverseRestoresOriginalRaw": true
+    },
+    {
+      "source": {
+        "file": "C:/mir2-build/p01-completion-20261024/release-native-10-v2-attack-deadline-feasibility-16/input-lib.mjs",
+        "bytes": 16479,
+        "sha256": "2da9c9b4a173875b1ddf761fa26b74021268f08a6b54be84656acacd591635cd"
+      },
+      "target": {
+        "file": "C:/mir2-build/p01-completion-20261024/release-native-10-v2-account-store-wait-feasibility-17/input-lib.mjs",
+        "bytes": 16617,
+        "sha256": "08b25287afe2d0219da7c8ec28a08ed6ea474446dfb13e0c8847af9eb6a0dcad"
+      },
+      "mode": "position-exact-inverse-derived",
+      "hunks": [
+        {
+          "oldOffset": 774,
+          "newOffset": 774,
+          "beforeBase64": "ZXhwb3J0IGNvbnN0IHJlbGVhc2VGaWxlID0gcGF0aC5qb2luKGJhc2UsICdyZWxlYXNlLWF0dGFjay1kZWFkbGluZS1kaWFnbm9zdGljcy12MS5qc29uJyk7Cg==",
+          "afterBase64": "ZXhwb3J0IGNvbnN0IHJlbGVhc2VGaWxlID0gcGF0aC5qb2luKGJhc2UsICdyZWxlYXNlLWFjY291bnQtc3RvcmUtd2FpdC1kaWFnbm9zdGljcy12MS5qc29uJyk7Cg=="
+        },
+        {
+          "oldOffset": 3081,
+          "newOffset": 3084,
+          "beforeBase64": "ICBpZihjYW5kaWRhdGUuc3RhdGUhPT0nbmV3NDQtcmVsZWFzZS1hbmQtZnVsbDE2LWJvdW5kLW5vdC1leGVjdXRlZCd8fGNhbmRpZGF0ZS5iYWNrZW5kSW5wdXRDb3VudCE9PTQ0fHxjYW5kaWRhdGUuYmFja2VuZFNvdXJjZUNvbW1pdCE9PURSSVZFUl9CSU5ESU5HLmJhY2tlbmRTb3VyY2VDb21taXR8fAo=",
+          "afterBase64": "ICBpZihjYW5kaWRhdGUuc3RhdGUhPT0nbmV3NTAtcmVsZWFzZS1hbmQtZnVsbDE2LWJvdW5kLW5vdC1leGVjdXRlZCd8fGNhbmRpZGF0ZS5iYWNrZW5kSW5wdXRDb3VudCE9PTUwfHxjYW5kaWRhdGUuYmFja2VuZFNvdXJjZUNvbW1pdCE9PURSSVZFUl9CSU5ESU5HLmJhY2tlbmRTb3VyY2VDb21taXR8fAo="
+        },
+        {
+          "oldOffset": 3452,
+          "newOffset": 3455,
+          "beforeBase64": "ICAgICFjYW5kaWRhdGUuYmluYXJ5fHwhcGF0aC5pc0Fic29sdXRlKGNhbmRpZGF0ZS5iaW5hcnkucGF0aD8/JycpfHwhTnVtYmVyLmlzU2FmZUludGVnZXIoY2FuZGlkYXRlLmJpbmFyeS5ieXRlcyl8fCFoZXgoY2FuZGlkYXRlLmJpbmFyeS5zaGEyNTYpfHxjYW5kaWRhdGUuZnVsbDE2Py5zdGF0ZSE9PSdwYXNzZWQnKXRocm93IEVycm9yKCdQRU5ESU5HX0ZSRVNINDRfUkVMRUFTRV9BTkRfRlVMTDE2OiBhY3R1YWwgbmV3IGJhY2tlbmQsIHN1Y2Nlc3NmdWwgYnVpbGQvcm9vdCB2YWxpZGF0aW9uIGFuZCBmcmVzaCBvcmRpbmFyeSBmdWxsMTYgYXJlIHJlcXVpcmVkJyk7Cg==",
+          "afterBase64": "ICAgICFjYW5kaWRhdGUuYmluYXJ5fHwhcGF0aC5pc0Fic29sdXRlKGNhbmRpZGF0ZS5iaW5hcnkucGF0aD8/JycpfHwhTnVtYmVyLmlzU2FmZUludGVnZXIoY2FuZGlkYXRlLmJpbmFyeS5ieXRlcyl8fCFoZXgoY2FuZGlkYXRlLmJpbmFyeS5zaGEyNTYpfHxjYW5kaWRhdGUuZnVsbDE2Py5zdGF0ZSE9PSdwYXNzZWQnKXRocm93IEVycm9yKCdQRU5ESU5HX0ZSRVNINTBfUkVMRUFTRV9BTkRfRlVMTDE2OiBhY3R1YWwgbmV3IGJhY2tlbmQsIHN1Y2Nlc3NmdWwgYnVpbGQvcm9vdCB2YWxpZGF0aW9uIGFuZCBmcmVzaCBvcmRpbmFyeSBmdWxsMTYgYXJlIHJlcXVpcmVkJyk7Cg=="
+        },
+        {
+          "oldOffset": 3969,
+          "newOffset": 3972,
+          "beforeBase64": "ICBpZihmaW5hbFRlbXBsYXRlLnN0YXRlIT09J2ZpbmFsLXNvdXJjZS1ib3VuZC1ub3QtZXhlY3V0ZWQnfHxmaW5hbFRlbXBsYXRlLmJhY2tlbmRTb3VyY2VDb21taXQhPT1iYWNrZW5kU291cmNlQ29tbWl0fHxmaW5hbFRlbXBsYXRlLmRyaXZlclNvdXJjZUNvbW1pdCE9PWRyaXZlclNvdXJjZUNvbW1pdHx8ZmluYWxUZW1wbGF0ZS5kcml2ZXJTb3VyY2VTaGEyNTYhPT1FWFBFQ1RFRF9EUklWRVJfU09VUkNFX1NIQTI1Nil0aHJvdyBFcnJvcignUmV2aWV3ZWQgZmluYWw0NC1pbnB1dCBsYXVuY2hlciBzb3VyY2UgYmluZGluZyBpcyBub3QgcmVhZHknKTsK",
+          "afterBase64": "ICBpZihmaW5hbFRlbXBsYXRlLnN0YXRlIT09J2ZpbmFsLXNvdXJjZS1ib3VuZC1ub3QtZXhlY3V0ZWQnfHxmaW5hbFRlbXBsYXRlLmJhY2tlbmRTb3VyY2VDb21taXQhPT1iYWNrZW5kU291cmNlQ29tbWl0fHxmaW5hbFRlbXBsYXRlLmRyaXZlclNvdXJjZUNvbW1pdCE9PWRyaXZlclNvdXJjZUNvbW1pdHx8ZmluYWxUZW1wbGF0ZS5kcml2ZXJTb3VyY2VTaGEyNTYhPT1FWFBFQ1RFRF9EUklWRVJfU09VUkNFX1NIQTI1Nil0aHJvdyBFcnJvcignUmV2aWV3ZWQgZmluYWw1MC1pbnB1dCBsYXVuY2hlciBzb3VyY2UgYmluZGluZyBpcyBub3QgcmVhZHknKTsK"
+        },
+        {
+          "oldOffset": 5083,
+          "newOffset": 5086,
+          "beforeBase64": "ICAgIHJlbGVhc2Uuc2NoZW1hVmVyc2lvbiE9PTF8fHJlbGVhc2UucHJvZmlsZSE9PSdyZWxlYXNlJ3x8cmVsZWFzZS5zb3VyY2VDb21taXQhPT1iYWNrZW5kU291cmNlQ29tbWl0fHxyZWxlYXNlLmJhc2VDb21taXQhPT1tYW5pZmVzdC5naXRCYXNlfHxyZWxlYXNlLmJhY2tlbmRJbnB1dENvdW50IT09NDR8fG1hbmlmZXN0LmZpbGVzLmxlbmd0aCE9PTQ0fHwK",
+          "afterBase64": "ICAgIHJlbGVhc2Uuc2NoZW1hVmVyc2lvbiE9PTF8fHJlbGVhc2UucHJvZmlsZSE9PSdyZWxlYXNlJ3x8cmVsZWFzZS5zb3VyY2VDb21taXQhPT1iYWNrZW5kU291cmNlQ29tbWl0fHxyZWxlYXNlLmRyaXZlclNvdXJjZUNvbW1pdCE9PURSSVZFUl9CSU5ESU5HLmNvcmVDb2RlRXZpZGVuY2VDb21taXR8fHJlbGVhc2UuZHJpdmVyU291cmNlU2hhMjU2IT09RFJJVkVSX0JJTkRJTkcuZHJpdmVyU291cmNlU2hhMjU2fHxyZWxlYXNlLmJhc2VDb21taXQhPT1tYW5pZmVzdC5naXRCYXNlfHxyZWxlYXNlLmJhY2tlbmRJbnB1dENvdW50IT09NTB8fG1hbmlmZXN0LmZpbGVzLmxlbmd0aCE9PTUwfHwK"
+        },
+        {
+          "oldOffset": 5684,
+          "newOffset": 5819,
+          "beforeBase64": "ICAgIHJlbGVhc2UuYmluYXJ5Py5zaGEyNTYhPT1EUklWRVJfQklORElORy5iYWNrZW5kQmluYXJ5U2hhMjU2fHwhc2FtZVBhdGgoY2FuZGlkYXRlLmJpbmFyeS5wYXRoLHJlbGVhc2UuYmluYXJ5LnBhdGgpfHwhc2FtZVBpbihjYW5kaWRhdGUuYmluYXJ5LHJlbGVhc2UuYmluYXJ5KXx8cmVsZWFzZS5idWlsZEpvYnMhPT00fHxKU09OLnN0cmluZ2lmeShyZWxlYXNlLmJ1aWxkQXJndW1lbnRzKSE9PUpTT04uc3RyaW5naWZ5KGNoZWNrcy5CVUlMRF9BUkdTKSl0aHJvdyBFcnJvcignRnJlc2ggYWN0dWFsNDQtaW5wdXQgUmVsZWFzZS9zb3VyY2UgaWRlbnRpdHkgZGlmZmVycycpOwo=",
+          "afterBase64": "ICAgIHJlbGVhc2UuYmluYXJ5Py5zaGEyNTYhPT1EUklWRVJfQklORElORy5iYWNrZW5kQmluYXJ5U2hhMjU2fHwhc2FtZVBhdGgoY2FuZGlkYXRlLmJpbmFyeS5wYXRoLHJlbGVhc2UuYmluYXJ5LnBhdGgpfHwhc2FtZVBpbihjYW5kaWRhdGUuYmluYXJ5LHJlbGVhc2UuYmluYXJ5KXx8cmVsZWFzZS5idWlsZEpvYnMhPT00fHxKU09OLnN0cmluZ2lmeShyZWxlYXNlLmJ1aWxkQXJndW1lbnRzKSE9PUpTT04uc3RyaW5naWZ5KGNoZWNrcy5CVUlMRF9BUkdTKSl0aHJvdyBFcnJvcignRnJlc2ggYWN0dWFsNTAtaW5wdXQgUmVsZWFzZS9zb3VyY2UgaWRlbnRpdHkgZGlmZmVycycpOwo="
+        },
+        {
+          "oldOffset": 7018,
+          "newOffset": 7153,
+          "beforeBase64": "ICBpZihyZWNlaXB0LmtpbmQhPT0nYXR0YWNrLWRlYWRsaW5lLWRpYWdub3N0aWNzLXYxLW93bmVkLWNhcmdvLWJ1aWxkJ3x8cmVjZWlwdC5zdWNjZXNzIT09dHJ1ZXx8cmVjZWlwdC5leGl0Py5jb2RlIT09MHx8cmVjZWlwdC5leGl0Py5zaWduYWx8fHJlY2VpcHQuZXJyb3J8fHJlY2VpcHQucG9zdFNvdXJjZUZhaWx1cmV8fHJlY2VpcHQuc291cmNlVW5jaGFuZ2VkQmVmb3JlQWZ0ZXIhPT10cnVlfHxyZWNlaXB0LmJhY2tlbmRJbnB1dENvdW50IT09NDR8fHJlY2VpcHQuc291cmNlQ29tbWl0IT09YmFja2VuZFNvdXJjZUNvbW1pdHx8cmVjZWlwdC5zb3VyY2VNYW5pZmVzdFNoYTI1NiE9PXJlbGVhc2Uuc291cmNlTWFuaWZlc3RTaGEyNTZ8fHJlY2VpcHQuc291cmNlTWFuaWZlc3RGaWxlU2hhMjU2IT09cmVsZWFzZS5zb3VyY2VNYW5pZmVzdEZpbGVTaGEyNTZ8fAo=",
+          "afterBase64": "ICBpZihyZWNlaXB0LmtpbmQhPT0nYWNjb3VudC1zdG9yZS13YWl0LWRpYWdub3N0aWNzLXYxLW93bmVkLWNhcmdvLWJ1aWxkJ3x8cmVjZWlwdC5zdWNjZXNzIT09dHJ1ZXx8cmVjZWlwdC5leGl0Py5jb2RlIT09MHx8cmVjZWlwdC5leGl0Py5zaWduYWx8fHJlY2VpcHQuZXJyb3J8fHJlY2VpcHQucG9zdFNvdXJjZUZhaWx1cmV8fHJlY2VpcHQuc291cmNlVW5jaGFuZ2VkQmVmb3JlQWZ0ZXIhPT10cnVlfHxyZWNlaXB0LmJhY2tlbmRJbnB1dENvdW50IT09NTB8fHJlY2VpcHQuc291cmNlQ29tbWl0IT09YmFja2VuZFNvdXJjZUNvbW1pdHx8cmVjZWlwdC5zb3VyY2VNYW5pZmVzdFNoYTI1NiE9PXJlbGVhc2Uuc291cmNlTWFuaWZlc3RTaGEyNTZ8fHJlY2VpcHQuc291cmNlTWFuaWZlc3RGaWxlU2hhMjU2IT09cmVsZWFzZS5zb3VyY2VNYW5pZmVzdEZpbGVTaGEyNTZ8fAo="
+        }
+      ],
+      "inverseRestoresOriginalRaw": true
+    },
+    {
+      "source": {
+        "file": "C:/mir2-build/p01-completion-20261024/release-native-10-v2-attack-deadline-feasibility-16/legacy14-original.mjs.txt",
+        "bytes": 10310,
+        "sha256": "d6d2bc6954d546cccc0d3273fbe9e236f381a10963a0a1d039087e74ae46e7ee"
+      },
+      "target": {
+        "file": "C:/mir2-build/p01-completion-20261024/release-native-10-v2-account-store-wait-feasibility-17/legacy14-original.mjs.txt",
+        "bytes": 10310,
+        "sha256": "d6d2bc6954d546cccc0d3273fbe9e236f381a10963a0a1d039087e74ae46e7ee"
+      },
+      "mode": "exact-copy",
+      "hunks": [],
+      "inverseRestoresOriginalRaw": true
+    },
+    {
+      "source": {
+        "file": "C:/mir2-build/p01-completion-20261024/release-native-10-v2-attack-deadline-feasibility-16/measured-phase-contract.mjs",
+        "bytes": 772,
+        "sha256": "b0977c31d9ee2345977e6af85f79beabc369d4c3e5c9448a50fa39133e0e2b39"
+      },
+      "target": {
+        "file": "C:/mir2-build/p01-completion-20261024/release-native-10-v2-account-store-wait-feasibility-17/measured-phase-contract.mjs",
+        "bytes": 772,
+        "sha256": "b0977c31d9ee2345977e6af85f79beabc369d4c3e5c9448a50fa39133e0e2b39"
+      },
+      "mode": "exact-copy",
+      "hunks": [],
+      "inverseRestoresOriginalRaw": true
+    },
+    {
+      "source": {
+        "file": "C:/mir2-build/p01-completion-20261024/release-native-10-v2-attack-deadline-feasibility-16/monitor-owned.mjs",
+        "bytes": 1182,
+        "sha256": "204abfb6fa4000b9da770a8dbc128225ff3583caf9e7763dbedcf6b22d5adc72"
+      },
+      "target": {
+        "file": "C:/mir2-build/p01-completion-20261024/release-native-10-v2-account-store-wait-feasibility-17/monitor-owned.mjs",
+        "bytes": 1182,
+        "sha256": "204abfb6fa4000b9da770a8dbc128225ff3583caf9e7763dbedcf6b22d5adc72"
+      },
+      "mode": "exact-copy",
+      "hunks": [],
+      "inverseRestoresOriginalRaw": true
+    },
+    {
+      "source": {
+        "file": "C:/mir2-build/p01-completion-20261024/release-native-10-v2-attack-deadline-feasibility-16/native-chase-report-contract.mjs",
+        "bytes": 2266,
+        "sha256": "66b9ce1a39a1cfbe610d3f1a98559c67d178667319718f8baaa748a5d7d102c0"
+      },
+      "target": {
+        "file": "C:/mir2-build/p01-completion-20261024/release-native-10-v2-account-store-wait-feasibility-17/native-chase-report-contract.mjs",
+        "bytes": 2266,
+        "sha256": "66b9ce1a39a1cfbe610d3f1a98559c67d178667319718f8baaa748a5d7d102c0"
+      },
+      "mode": "exact-copy",
+      "hunks": [],
+      "inverseRestoresOriginalRaw": true
+    },
+    {
+      "source": {
+        "file": "C:/mir2-build/p01-completion-20261024/release-native-10-v2-attack-deadline-feasibility-16/passed-probe-window-contract.mjs",
+        "bytes": 3040,
+        "sha256": "3a238991e9ee9b81b93cdcb282cdd7c718afa076ec5eb1db11ef96cbe4b15cdb"
+      },
+      "target": {
+        "file": "C:/mir2-build/p01-completion-20261024/release-native-10-v2-account-store-wait-feasibility-17/passed-probe-window-contract.mjs",
+        "bytes": 3040,
+        "sha256": "3a238991e9ee9b81b93cdcb282cdd7c718afa076ec5eb1db11ef96cbe4b15cdb"
+      },
+      "mode": "exact-copy",
+      "hunks": [],
+      "inverseRestoresOriginalRaw": true
+    },
+    {
+      "source": {
+        "file": "C:/mir2-build/p01-completion-20261024/release-native-10-v2-attack-deadline-feasibility-16/passed-probe-window-contract.test.mjs",
+        "bytes": 3366,
+        "sha256": "7ab914ff3e0ed491b8b897b3099efd3ab4ad6613d452ec0e70351b092a8ceb58"
+      },
+      "target": {
+        "file": "C:/mir2-build/p01-completion-20261024/release-native-10-v2-account-store-wait-feasibility-17/passed-probe-window-contract.test.mjs",
+        "bytes": 3366,
+        "sha256": "7ab914ff3e0ed491b8b897b3099efd3ab4ad6613d452ec0e70351b092a8ceb58"
+      },
+      "mode": "exact-copy",
+      "hunks": [],
+      "inverseRestoresOriginalRaw": true
+    },
+    {
+      "source": {
+        "file": "C:/mir2-build/p01-completion-20261024/release-native-10-v2-attack-deadline-feasibility-16/prepare-inputs.mjs",
+        "bytes": 11638,
+        "sha256": "33f1801a462608e385a64acfa197688cf3c73b29936e957ee3dbdde78abf5dd6"
+      },
+      "target": {
+        "file": "C:/mir2-build/p01-completion-20261024/release-native-10-v2-account-store-wait-feasibility-17/prepare-inputs.mjs",
+        "bytes": 11712,
+        "sha256": "aa60e838b1ffc227aecb90f171257ba2ab9cc00b12e4156f0e3368d3c3c709fc"
+      },
+      "mode": "position-exact-inverse-derived",
+      "hunks": [
+        {
+          "oldOffset": 4242,
+          "newOffset": 4242,
+          "beforeBase64": "",
+          "afterBase64": "YXdhaXQgZnMuYWNjZXNzKHBhdGguam9pbihyb290LCdsYXVuY2hlci1zeW50YXgtY2hlY2subG9nJykpOwo="
+        },
+        {
+          "oldOffset": 5840,
+          "newOffset": 5902,
+          "beforeBase64": "Y29uc3QgYWNjb3VudHMgPSBBcnJheS5mcm9tKHsgbGVuZ3RoOiAxMCB9LCAoXywgaW5kZXgpID0+IHsgY29uc3Qgc3VmZml4ID0gaW5kZXgudG9TdHJpbmcoMzYpLnBhZFN0YXJ0KDIsICcwJyk7IHJldHVybiB7IGFjY291bnRJZDogJ2x0JyArIGJhdGNoICsgc3VmZml4LCBuYW1lOiAnTCcgKyBiYXRjaCArIHN1ZmZpeCwK",
+          "afterBase64": "Y29uc3QgYWNjb3VudHMgPSBBcnJheS5mcm9tKHsgbGVuZ3RoOiAxMDAgfSwgKF8sIGluZGV4KSA9PiB7IGNvbnN0IHN1ZmZpeCA9IGluZGV4LnRvU3RyaW5nKDM2KS5wYWRTdGFydCgyLCAnMCcpOyByZXR1cm4geyBhY2NvdW50SWQ6ICdsdCcgKyBiYXRjaCArIHN1ZmZpeCwgbmFtZTogJ0wnICsgYmF0Y2ggKyBzdWZmaXgsCg=="
+        },
+        {
+          "oldOffset": 6745,
+          "newOffset": 6808,
+          "beforeBase64": "Y29uc3QgcHJvdmlzaW9uaW5nID0gSlNPTi5wYXJzZShleGVjRmlsZVN5bmMoc2VlZGVyLCBbJy0tbWFuaWZlc3QnLCBwb29sRmlsZSwgJy0tYWNjb3VudC1zdG9yZScsIHBhdGguam9pbihyb290LCAncHJpdmF0ZS9hY2NvdW50cy5qc29uJyldLCB7IGVuY29kaW5nOiAndXRmOCcsIHdpbmRvd3NIaWRlOiB0cnVlLCB0aW1lb3V0OiA5MDAwMCB9KSk7CmlmIChwcm92aXNpb25pbmcucGFzc2VkICE9PSB0cnVlIHx8IHByb3Zpc2lvbmluZy5jcmVhdGVkICE9PSAxMCB8fCBwcm92aXNpb25pbmcuY2hhcmFjdGVyc0NyZWF0ZWQgIT09IDAgfHwgcHJvdmlzaW9uaW5nLmdhbWVwbGF5R3JhbnRzICE9PSAwIHx8IHByb3Zpc2lvbmluZy5uZXR3b3JrUmVxdWVzdHMgIT09IDAgfHwgcHJvdmlzaW9uaW5nLmV4aXN0aW5nU3RvcmVNb2RpZmllZCAhPT0gZmFsc2UpIHRocm93IG5ldyBFcnJvcignQWNjb3VudC1vbmx5MTAgcHJvdmlzaW9uaW5nIGNvbnRyYWN0IGRpZmZlcnMnKTsK",
+          "afterBase64": "Y29uc3QgcHJvdmlzaW9uaW5nID0gSlNPTi5wYXJzZShleGVjRmlsZVN5bmMoc2VlZGVyLCBbJy0tbWFuaWZlc3QnLCBwb29sRmlsZSwgJy0tYWNjb3VudC1zdG9yZScsIHBhdGguam9pbihyb290LCAncHJpdmF0ZS9hY2NvdW50cy5qc29uJyldLCB7IGVuY29kaW5nOiAndXRmOCcsIHdpbmRvd3NIaWRlOiB0cnVlLCB0aW1lb3V0OiAxODAwMDAgfSkpOwppZiAocHJvdmlzaW9uaW5nLnBhc3NlZCAhPT0gdHJ1ZSB8fCBwcm92aXNpb25pbmcuY3JlYXRlZCAhPT0gMTAwIHx8IHByb3Zpc2lvbmluZy5jaGFyYWN0ZXJzQ3JlYXRlZCAhPT0gMCB8fCBwcm92aXNpb25pbmcuZ2FtZXBsYXlHcmFudHMgIT09IDAgfHwgcHJvdmlzaW9uaW5nLm5ldHdvcmtSZXF1ZXN0cyAhPT0gMCB8fCBwcm92aXNpb25pbmcuZXhpc3RpbmdTdG9yZU1vZGlmaWVkICE9PSBmYWxzZSkgdGhyb3cgbmV3IEVycm9yKCdBY2NvdW50LW9ubHkxMDAgcHJvdmlzaW9uaW5nIGNvbnRyYWN0IGRpZmZlcnMnKTsK"
+        },
+        {
+          "oldOffset": 8603,
+          "newOffset": 8669,
+          "beforeBase64": "ICBwYXRoLmpvaW4ocm9vdCwnc3ludGhldGljLXRlc3RzLXYxLmxvZycpLHBhdGguam9pbihyb290LCdzbG93LXN0YWdlLWhlbHBlci1mcmVlemUtdjEuanNvbicpLHBhdGguam9pbihyb290LCdzbG93LXN0YWdlLXNjaGVtYS1jb250cmFjdC5qc29uJykscGF0aC5qb2luKHJvb3QsJ2xlZ2FjeTE0LW9yaWdpbmFsLm1qcy50eHQnKSxwYXRoLmpvaW4ocm9vdCwnY2FuZGlkYXRlLXJlbGVhc2UtYmluZGluZy5qc29uJyksIHBhdGguam9pbihyb290LCdiYWNrZW5kLWxpYnJhcnktYmluZGluZy5qc29uJyksIHBhdGguam9pbihiYXNlLCdhdHRhY2stZGVhZGxpbmUtZGlhZ25vc3RpY3MtcmVsZWFzZS12MS9zb3VyY2UtbGliLXYxLm1qcycpLCBwYXRoLmpvaW4ocm9vdCwgJ2xhdW5jaGVyLXN5bnRheC1jaGVjay5sb2cnKSwgcmVsZWFzZUJpbmRpbmcucmVsZWFzZVBpbi5maWxlLCByZWxlYXNlQmluZGluZy5tYW5pZmVzdFBpbi5maWxlLCBwYXRoLmpvaW4oYmFzZSwnYXR0YWNrLWRlYWRsaW5lLWRpYWdub3N0aWNzLXYxLWJ1aWxkLXJlY2VpcHQuanNvbicpLAo=",
+          "afterBase64": "ICBwYXRoLmpvaW4ocm9vdCwnc3ludGhldGljLXRlc3RzLXYxLmxvZycpLHBhdGguam9pbihyb290LCdzbG93LXN0YWdlLWhlbHBlci1mcmVlemUtdjEuanNvbicpLHBhdGguam9pbihyb290LCdzbG93LXN0YWdlLXNjaGVtYS1jb250cmFjdC5qc29uJykscGF0aC5qb2luKHJvb3QsJ2xlZ2FjeTE0LW9yaWdpbmFsLm1qcy50eHQnKSxwYXRoLmpvaW4ocm9vdCwnY2FuZGlkYXRlLXJlbGVhc2UtYmluZGluZy5qc29uJyksIHBhdGguam9pbihyb290LCdiYWNrZW5kLWxpYnJhcnktYmluZGluZy5qc29uJyksIHBhdGguam9pbihiYXNlLCdhY2NvdW50LXN0b3JlLXdhaXQtZGlhZ25vc3RpY3MtcmVsZWFzZS12MS9zb3VyY2UtbGliLXYxLm1qcycpLCBwYXRoLmpvaW4ocm9vdCwgJ2xhdW5jaGVyLXN5bnRheC1jaGVjay5sb2cnKSwgcmVsZWFzZUJpbmRpbmcucmVsZWFzZVBpbi5maWxlLCByZWxlYXNlQmluZGluZy5tYW5pZmVzdFBpbi5maWxlLCBwYXRoLmpvaW4oYmFzZSwnYWNjb3VudC1zdG9yZS13YWl0LWRpYWdub3N0aWNzLXYxLWJ1aWxkLXJlY2VpcHQuanNvbicpLAo="
+        },
+        {
+          "oldOffset": 11133,
+          "newOffset": 11205,
+          "beforeBase64": "ICByZWFsT3JkaW5hcnlBY2NvdW50czogMTAsIGNoYXJhY3RlcnNDcmVhdGVkOiAwLCBnYW1lcGxheUdyYW50czogMCwgcmVhbG1TdGFydGVkOiBmYWxzZSwgY2FwYWNpdHlBY2NlcHRlZDogZmFsc2UgfSk7Cg==",
+          "afterBase64": "ICByZWFsT3JkaW5hcnlBY2NvdW50czogMTAwLCBjaGFyYWN0ZXJzQ3JlYXRlZDogMCwgZ2FtZXBsYXlHcmFudHM6IDAsIHJlYWxtU3RhcnRlZDogZmFsc2UsIGNhcGFjaXR5QWNjZXB0ZWQ6IGZhbHNlIH0pOwo="
+        },
+        {
+          "oldOffset": 11467,
+          "newOffset": 11540,
+          "beforeBase64": "ICBzaGEyNTY6IGNvcGllZC5zaGEyNTYsIHJlYWxPcmRpbmFyeUFjY291bnRzOiAxMCwgY2hhcmFjdGVyc0NyZWF0ZWQ6IDAsIHNvdXJjZUNvbmZpZ1NoYTI1Njogc2hhKEpTT04uc3RyaW5naWZ5KGZpbGVzKSksIHJlYWxtU3RhcnRlZDogZmFsc2UsIGNhcGFjaXR5QWNjZXB0ZWQ6IGZhbHNlIH0pKTsK",
+          "afterBase64": "ICBzaGEyNTY6IGNvcGllZC5zaGEyNTYsIHJlYWxPcmRpbmFyeUFjY291bnRzOiAxMDAsIGNoYXJhY3RlcnNDcmVhdGVkOiAwLCBzb3VyY2VDb25maWdTaGEyNTY6IHNoYShKU09OLnN0cmluZ2lmeShmaWxlcykpLCByZWFsbVN0YXJ0ZWQ6IGZhbHNlLCBjYXBhY2l0eUFjY2VwdGVkOiBmYWxzZSB9KSk7Cg=="
+        }
+      ],
+      "inverseRestoresOriginalRaw": true
+    },
+    {
+      "source": {
+        "file": "C:/mir2-build/p01-completion-20261024/release-native-10-v2-attack-deadline-feasibility-16/projection-build-source-lib.mjs",
+        "bytes": 153,
+        "sha256": "27716706ffe3f2c674a7193ce9a54c17cda141703d8e05a75696b1c67baa0206"
+      },
+      "target": {
+        "file": "C:/mir2-build/p01-completion-20261024/release-native-10-v2-account-store-wait-feasibility-17/projection-build-source-lib.mjs",
+        "bytes": 156,
+        "sha256": "5793e909eb1c552e01c3ee24b95992e921d5efb6bb1fe6702780badfac5d753b"
+      },
+      "mode": "position-exact-inverse-derived",
+      "hunks": [
+        {
+          "oldOffset": 76,
+          "newOffset": 76,
+          "beforeBase64": "ZXhwb3J0ICogZnJvbSAnLi4vYXR0YWNrLWRlYWRsaW5lLWRpYWdub3N0aWNzLXJlbGVhc2UtdjEvc291cmNlLWxpYi12MS5tanMnOwo=",
+          "afterBase64": "ZXhwb3J0ICogZnJvbSAnLi4vYWNjb3VudC1zdG9yZS13YWl0LWRpYWdub3N0aWNzLXJlbGVhc2UtdjEvc291cmNlLWxpYi12MS5tanMnOwo="
+        }
+      ],
+      "inverseRestoresOriginalRaw": true
+    },
+    {
+      "source": {
+        "file": "C:/mir2-build/p01-completion-20261024/release-native-10-v2-attack-deadline-feasibility-16/recover-drained-owned.ps1",
+        "bytes": 3195,
+        "sha256": "d312a0bd57a2d77159ba61817a4a793798e39ab98fcef512aa6660e69fc25a37"
+      },
+      "target": {
+        "file": "C:/mir2-build/p01-completion-20261024/release-native-10-v2-account-store-wait-feasibility-17/recover-drained-owned.ps1",
+        "bytes": 3195,
+        "sha256": "d312a0bd57a2d77159ba61817a4a793798e39ab98fcef512aa6660e69fc25a37"
+      },
+      "mode": "exact-copy",
+      "hunks": [],
+      "inverseRestoresOriginalRaw": true
+    },
+    {
+      "source": {
+        "file": "C:/mir2-build/p01-completion-20261024/release-native-10-v2-attack-deadline-feasibility-16/request-stop.mjs",
+        "bytes": 915,
+        "sha256": "14a5c691187006ebb50798068100d47af7ed3a6c4358c29f75b6774c79ebc90f"
+      },
+      "target": {
+        "file": "C:/mir2-build/p01-completion-20261024/release-native-10-v2-account-store-wait-feasibility-17/request-stop.mjs",
+        "bytes": 915,
+        "sha256": "14a5c691187006ebb50798068100d47af7ed3a6c4358c29f75b6774c79ebc90f"
+      },
+      "mode": "exact-copy",
+      "hunks": [],
+      "inverseRestoresOriginalRaw": true
+    },
+    {
+      "source": {
+        "file": "C:/mir2-build/p01-completion-20261024/release-native-10-v2-attack-deadline-feasibility-16/resource-profile.json",
+        "bytes": 1194,
+        "sha256": "a5e9012823bd816dedc3c40b13988618f3a18e69b3dd19edc4534a199a778ac3"
+      },
+      "target": {
+        "file": "C:/mir2-build/p01-completion-20261024/release-native-10-v2-account-store-wait-feasibility-17/resource-profile.json",
+        "bytes": 1194,
+        "sha256": "a5e9012823bd816dedc3c40b13988618f3a18e69b3dd19edc4534a199a778ac3"
+      },
+      "mode": "exact-copy",
+      "hunks": [],
+      "inverseRestoresOriginalRaw": true
+    },
+    {
+      "source": {
+        "file": "C:/mir2-build/p01-completion-20261024/release-native-10-v2-attack-deadline-feasibility-16/run-options.json",
+        "bytes": 2831,
+        "sha256": "9445629d26ce8e4132ad7131fccc3de0308a14b51637ec37b5c3228b612b4ba6"
+      },
+      "target": {
+        "file": "C:/mir2-build/p01-completion-20261024/release-native-10-v2-account-store-wait-feasibility-17/run-options.json",
+        "bytes": 2786,
+        "sha256": "c5e15eaf1b41ab8228d27931a59b927d03c5d4ca4f962f13d42f7dc275b674f4"
+      },
+      "mode": "position-exact-inverse-derived",
+      "hunks": [
+        {
+          "oldOffset": 321,
+          "newOffset": 321,
+          "beforeBase64": "ICAic2NlbmFyaW9GaWxlIjogIkM6XFxtaXIyLWJ1aWxkXFxwMDEtY29tcGxldGlvbi0yMDI2MTAyNFxccmVsZWFzZS1uYXRpdmUtMTAtdjItYXR0YWNrLWRlYWRsaW5lLWZlYXNpYmlsaXR5LTE2XFxzY2VuYXJpby5qc29uIiwK",
+          "afterBase64": "ICAic2NlbmFyaW9GaWxlIjogIkM6L21pcjItYnVpbGQvcDAxLWNvbXBsZXRpb24tMjAyNjEwMjQvcmVsZWFzZS1uYXRpdmUtMTAtdjItYWNjb3VudC1zdG9yZS13YWl0LWZlYXNpYmlsaXR5LTE3L3NjZW5hcmlvLmpzb24iLAo="
+        },
+        {
+          "oldOffset": 2106,
+          "newOffset": 2105,
+          "beforeBase64": "ICAicmVzb3VyY2VQcm9maWxlIjogIkM6XFxtaXIyLWJ1aWxkXFxwMDEtY29tcGxldGlvbi0yMDI2MTAyNFxccmVsZWFzZS1uYXRpdmUtMTAtdjItYXR0YWNrLWRlYWRsaW5lLWZlYXNpYmlsaXR5LTE2XFxyZXNvdXJjZS1wcm9maWxlLmpzb24iLAo=",
+          "afterBase64": "ICAicmVzb3VyY2VQcm9maWxlIjogIkM6L21pcjItYnVpbGQvcDAxLWNvbXBsZXRpb24tMjAyNjEwMjQvcmVsZWFzZS1uYXRpdmUtMTAtdjItYWNjb3VudC1zdG9yZS13YWl0LWZlYXNpYmlsaXR5LTE3L3Jlc291cmNlLXByb2ZpbGUuanNvbiIsCg=="
+        },
+        {
+          "oldOffset": 2574,
+          "newOffset": 2572,
+          "beforeBase64": "ICAic2NvcGUiOiAiUHJlcGFyZWQtb25seSBQcm9iZTE2IG9uIGFjdHVhbCBkMjQwL25ldzkvMjEwIGFuZCBkaWFnbm9zdGljNDQgc291cmNlLiBOZXcgUmVsZWFzZSBhbmQgZnJlc2ggZnVsbDE2IG11c3QgYmUgYWN0dWFsIGJvdW5kIGJlZm9yZSBleGVjdXRpb24uIE9yaWdpbmFsMi8xMHgzMDArMzYwLCBjb21wYWN0MTAsIHJlc291cmNlIGd1YXJkcyBhbmQgYWxsIHRocmVzaG9sZHMgdW5jaGFuZ2VkOyBubyBjYXBhY2l0eSBhY2NlcHRhbmNlLiIK",
+          "afterBase64": "ICAic2NvcGUiOiAiUEVORElORyBQcm9iZTE3IHN0cmljdDUwIFJlbGVhc2UgYW5kIGZyZXNoIGZ1bGwxNi4gSW5pdGlhbDEwMCBlbXB0eSBvcmRpbmFyeSBhY2NvdW50czsgYWN0aXZlMi8xMCBvbmx5LiBPcmlnaW5hbCBjb21wYWN0MTAvcG9saWN5L3Jlc291cmNlczsgaW5kZXBlbmRlbnQgU3RvcmUgZGlhZ25vc3RpY3MgZG8gbm90IGFkanVkaWNhdGUgZ2FtZXBsYXkuIgo="
+        }
+      ],
+      "inverseRestoresOriginalRaw": true
+    },
+    {
+      "source": {
+        "file": "C:/mir2-build/p01-completion-20261024/release-native-10-v2-attack-deadline-feasibility-16/run-owned.mjs",
+        "bytes": 19729,
+        "sha256": "bcc3a4913186d7cf894a41aae497ee50c8d245d144a8486cd722d9370851a927"
+      },
+      "target": {
+        "file": "C:/mir2-build/p01-completion-20261024/release-native-10-v2-account-store-wait-feasibility-17/run-owned.mjs",
+        "bytes": 20900,
+        "sha256": "5211630c073846fc31b9392955dc700418ceb288b4498925131382fb91d2cd20"
+      },
+      "mode": "position-exact-inverse-derived",
+      "hunks": [
+        {
+          "oldOffset": 782,
+          "newOffset": 782,
+          "beforeBase64": "",
+          "afterBase64": "aW1wb3J0IHsgY3JlYXRlU3RvcmVQdWJsaWNDYXB0dXJlLCB2ZXJpZnlTdG9yZURpYWdub3N0aWNTb3VyY2UsIHN0b3JlRGlhZ25vc3RpY0lkZW50aXR5IH0gZnJvbSAnLi9zdG9yZS1kaWFnbm9zdGljcy1jb250cmFjdC5tanMnOwo="
+        },
+        {
+          "oldOffset": 1720,
+          "newOffset": 1851,
+          "beforeBase64": "",
+          "afterBase64": "Y29uc3Qgc3RvcmVTb3VyY2UgPSBhd2FpdCB2ZXJpZnlTdG9yZURpYWdub3N0aWNTb3VyY2UoKSwgc3RvcmVJZGVudGl0eSA9IHN0b3JlRGlhZ25vc3RpY0lkZW50aXR5KHN0b3JlU291cmNlKTsK"
+        },
+        {
+          "oldOffset": 4338,
+          "newOffset": 4580,
+          "beforeBase64": "ICBNSVIyX0dBVEVXQVlfSUQ6ICdwMDEtcmVsZWFzZS1uYXRpdmUtMTAtdjItYXR0YWNrLWRlYWRsaW5lLWZlYXNpYmlsaXR5LTE2JywgTUlSMl9aT05FX1JPVVRJTkdfTU9ERTogJ3NpbmdsZScsIE1JUjJfQ09OVEVOVF9QUk9GSUxFOiAncGxhdGludW1fMTc2JywgTUlSMl9NT05USExZX0NBUkRfUkVRVUlSRUQ6ICcwJywgTUlSMl9SVU5USU1FX0VOVjogJ2RldmVsb3BtZW50JywK",
+          "afterBase64": "ICBNSVIyX0dBVEVXQVlfSUQ6ICdwMDEtcmVsZWFzZS1uYXRpdmUtMTAtdjItYWNjb3VudC1zdG9yZS13YWl0LWZlYXNpYmlsaXR5LTE3JywgTUlSMl9aT05FX1JPVVRJTkdfTU9ERTogJ3NpbmdsZScsIE1JUjJfQ09OVEVOVF9QUk9GSUxFOiAncGxhdGludW1fMTc2JywgTUlSMl9NT05USExZX0NBUkRfUkVRVUlSRUQ6ICcwJywgTUlSMl9SVU5USU1FX0VOVjogJ2RldmVsb3BtZW50JywK"
+        },
+        {
+          "oldOffset": 5515,
+          "newOffset": 5760,
+          "beforeBase64": "bGV0IGdhdGV3YXksIG1vbml0b3IsIHJlcG9ydCwgc2xvd1N0YWdlQ2FwdHVyZSwgc3RvcFJlcXVlc3RlZCA9IGZhbHNlLCBzdG9wUmVsYXksIHJlcG9ydEVycm9yOwo=",
+          "afterBase64": "bGV0IGdhdGV3YXksIG1vbml0b3IsIHJlcG9ydCwgc2xvd1N0YWdlQ2FwdHVyZSwgc3RvcmVTdGFnZUNhcHR1cmUsIHN0b3BSZXF1ZXN0ZWQgPSBmYWxzZSwgc3RvcFJlbGF5LCByZXBvcnRFcnJvcjsK"
+        },
+        {
+          "oldOffset": 6554,
+          "newOffset": 6818,
+          "beforeBase64": "",
+          "afterBase64": "ICBzdG9yZVN0YWdlQ2FwdHVyZSA9IGNyZWF0ZVN0b3JlUHVibGljQ2FwdHVyZSh7IGlucHV0OiBnYXRld2F5LmNoaWxkLnN0ZGVyciwgb3V0cHV0RmlsZTogcGF0aC5qb2luKHJvb3QsICdzdG9yZS1zdGFnZS1wdWJsaWMuanNvbmwnKSwgcmVxdWVzdFN0b3AsIHN0b3JlT25seTogdHJ1ZSB9KTsK"
+        },
+        {
+          "oldOffset": 7077,
+          "newOffset": 7509,
+          "beforeBase64": "ICAgIHdpcmVEaWFnbm9zdGljczp3aXJlSWRlbnRpdHksIGNvcmVDb2RlRXZpZGVuY2VDb21taXQ6Q09SRV9DT0RFX0VWSURFTkNFX0NPTU1JVCwgc2NlbmVQcm9maWxlOiBzY2VuZS5wcm9maWxlLCBzY2VuZVNvdXJjZVNoYTI1Njogc2NlbmUuc291cmNlU2hhMjU2LCBzY2VuZTEwU2hhMjU2OiBzY2VuZS5wcm9iZVNjZW5lLnNoYTI1Niwgc2NlbmUxMDBTaGEyNTY6IHNjZW5lLmZvcm1hbFNjZW5lLnNoYTI1Niwgc2NlbmVBbmFseXNpc1NoYTI1Njogc2NlbmUuYW5hbHlzaXMuc2hhMjU2LCBwYXRyb2xTcGFuOiAyLCBhdHRhY2tSZXN1bHRzOiAndjInLCBzbG93U3RhZ2VUaHJlc2hvbGRNczogNTAsIHNsb3dTdGFnZVB1YmxpY1NjaGVtYTogJ3NvY2tldC1jb250ZXh0LXYxJywgc2xvd1N0YWdlSGVscGVyU2hhMjU2OiAnODAzMzg3NDU0OGQ5MzMyM2VmNjM5MGIwNzUwOTg4N2U3MjdiNTkyMDg1MGQwYzNhMWMyYTBmODEwYzU2Njc3YycsIGZ1bGwxNlJ1bklkOiBiaW5kaW5nLmZ1bGwxNkdhdGUucnVuSWQsIHNsb3dTdGFnZVB1YmxpY0ZpbGU6IHBhdGguam9pbihyb290LCAnc2xvdy1zdGFnZS1wdWJsaWMuanNvbmwnKSwgc3RkaW5TaHV0ZG93bjogdHJ1ZSwgZnJlc2hQcml2YXRlU2VjcmV0czogNCwgcGFyYWxsZWxDb21waWxhdGlvbjogZmFsc2UsIGNhcGFjaXR5QWNjZXB0YW5jZUVsaWdpYmxlOiBmYWxzZSwgY2FwYWNpdHlBY2NlcHRhbmNlQWN0dWFsbHlQYXNzZWQ6IGZhbHNlLAo=",
+          "afterBase64": "ICAgIHdpcmVEaWFnbm9zdGljczp3aXJlSWRlbnRpdHksIHN0b3JlRGlhZ25vc3RpY3M6c3RvcmVJZGVudGl0eSwgb3JkaW5hcnlBY2NvdW50UG9vbFNpemU6MTAwLCBtYXhpbXVtQ29udHJvbGxlZEFjdG9yczoxMCwgY29yZUNvZGVFdmlkZW5jZUNvbW1pdDpDT1JFX0NPREVfRVZJREVOQ0VfQ09NTUlULCBzY2VuZVByb2ZpbGU6IHNjZW5lLnByb2ZpbGUsIHNjZW5lU291cmNlU2hhMjU2OiBzY2VuZS5zb3VyY2VTaGEyNTYsIHNjZW5lMTBTaGEyNTY6IHNjZW5lLnByb2JlU2NlbmUuc2hhMjU2LCBzY2VuZTEwMFNoYTI1Njogc2NlbmUuZm9ybWFsU2NlbmUuc2hhMjU2LCBzY2VuZUFuYWx5c2lzU2hhMjU2OiBzY2VuZS5hbmFseXNpcy5zaGEyNTYsIHBhdHJvbFNwYW46IDIsIGF0dGFja1Jlc3VsdHM6ICd2MicsIHNsb3dTdGFnZVRocmVzaG9sZE1zOiA1MCwgc2xvd1N0YWdlUHVibGljU2NoZW1hOiAnc29ja2V0LWNvbnRleHQtdjEnLCBzbG93U3RhZ2VIZWxwZXJTaGEyNTY6ICc4MDMzODc0NTQ4ZDkzMzIzZWY2MzkwYjA3NTA5ODg3ZTcyN2I1OTIwODUwZDBjM2ExYzJhMGY4MTBjNTY2NzdjJywgZnVsbDE2UnVuSWQ6IGJpbmRpbmcuZnVsbDE2R2F0ZS5ydW5JZCwgc2xvd1N0YWdlUHVibGljRmlsZTogcGF0aC5qb2luKHJvb3QsICdzbG93LXN0YWdlLXB1YmxpYy5qc29ubCcpLCBzdGRpblNodXRkb3duOiB0cnVlLCBmcmVzaFByaXZhdGVTZWNyZXRzOiA0LCBwYXJhbGxlbENvbXBpbGF0aW9uOiBmYWxzZSwgY2FwYWNpdHlBY2NlcHRhbmNlRWxpZ2libGU6IGZhbHNlLCBjYXBhY2l0eUFjY2VwdGFuY2VBY3R1YWxseVBhc3NlZDogZmFsc2UsCg=="
+        },
+        {
+          "oldOffset": 11905,
+          "newOffset": 12426,
+          "beforeBase64": "ICBjb25zb2xlLmxvZyhKU09OLnN0cmluZ2lmeSh7IHBoYXNlOiAnb3duZWQtbmF0aXZlLXBlcnNvbmFsLXByb2plY3Rpb24tcHJvYmUxNi1yZWFkeScsIHBpZDogZ2F0ZXdheS5jaGlsZC5waWQsIG1vbml0b3JQaWQ6IG1vbml0b3IuY2hpbGQucGlkLCBzaGEyNTY6IGJ1aWxkLnNoYTI1Niwgc291cmNlQ29tbWl0OiBidWlsZC5zb3VyY2VDb21taXQsIGJhY2tlbmRTb3VyY2VDb21taXQ6IGJ1aWxkLmJhY2tlbmRTb3VyY2VDb21taXQsIGRyaXZlclNvdXJjZUNvbW1pdDogYnVpbGQuZHJpdmVyU291cmNlQ29tbWl0LCBleHBsaWNpdEF0dGFja1Jlc3VsdHM6ICd2MicsIGVuZHBvaW50IH0pKTsK",
+          "afterBase64": "ICBjb25zb2xlLmxvZyhKU09OLnN0cmluZ2lmeSh7IHBoYXNlOiAnb3duZWQtbmF0aXZlLXBlcnNvbmFsLXByb2plY3Rpb24tcHJvYmUxNy1yZWFkeScsIHBpZDogZ2F0ZXdheS5jaGlsZC5waWQsIG1vbml0b3JQaWQ6IG1vbml0b3IuY2hpbGQucGlkLCBzaGEyNTY6IGJ1aWxkLnNoYTI1Niwgc291cmNlQ29tbWl0OiBidWlsZC5zb3VyY2VDb21taXQsIGJhY2tlbmRTb3VyY2VDb21taXQ6IGJ1aWxkLmJhY2tlbmRTb3VyY2VDb21taXQsIGRyaXZlclNvdXJjZUNvbW1pdDogYnVpbGQuZHJpdmVyU291cmNlQ29tbWl0LCBleHBsaWNpdEF0dGFja1Jlc3VsdHM6ICd2MicsIGVuZHBvaW50IH0pKTsK"
+        },
+        {
+          "oldOffset": 13839,
+          "newOffset": 14360,
+          "beforeBase64": "ICAgIGNhcGFjaXR5QWNjZXB0ZWQ6IGZhbHNlLCB3aXJlRGlhZ25vc3RpY3M6d2lyZUlkZW50aXR5LCBjb3JlQ29kZUV2aWRlbmNlQ29tbWl0OkNPUkVfQ09ERV9FVklERU5DRV9DT01NSVQsIHNjZW5lUHJvZmlsZTogc2NlbmUucHJvZmlsZSwgc2NlbmVTb3VyY2VTaGEyNTY6IHNjZW5lLnNvdXJjZVNoYTI1NiwgbmF2aWdhdGlvbkNvb3JkaW5hdGlvbjogcmVwb3J0Lm5hdmlnYXRpb25Db29yZGluYXRpb24sIG5hdGl2ZVBhdHJvbFBsYW5uaW5nOiByZXBvcnQubmF0aXZlUGF0cm9sUGxhbm5pbmcsIG1lYXN1cmVtZW50Q2xvY2s6IHJlcG9ydC5tZWFzdXJlbWVudENsb2NrLCBuYXRpdmVIcE1haW50ZW5hbmNlOiByZXBvcnQubmF0aXZlSHBNYWludGVuYW5jZSwgbmF0aXZlQXR0YWNrV2l0bmVzczogcmVwb3J0Lm5hdGl2ZUF0dGFja1dpdG5lc3MsIG5hdGl2ZUNoYXNlUHJlZmVyZW5jZTogcmVwb3J0Lm5hdGl2ZUNoYXNlUHJlZmVyZW5jZSwgZnVsbDE2UnVuSWQ6IGJpbmRpbmcuZnVsbDE2R2F0ZS5ydW5JZCwK",
+          "afterBase64": "ICAgIGNhcGFjaXR5QWNjZXB0ZWQ6IGZhbHNlLCB3aXJlRGlhZ25vc3RpY3M6d2lyZUlkZW50aXR5LCBzdG9yZURpYWdub3N0aWNzOnN0b3JlSWRlbnRpdHksIG9yZGluYXJ5QWNjb3VudFBvb2xTaXplOjEwMCwgbWF4aW11bUNvbnRyb2xsZWRBY3RvcnM6MTAsIGNvcmVDb2RlRXZpZGVuY2VDb21taXQ6Q09SRV9DT0RFX0VWSURFTkNFX0NPTU1JVCwgc2NlbmVQcm9maWxlOiBzY2VuZS5wcm9maWxlLCBzY2VuZVNvdXJjZVNoYTI1Njogc2NlbmUuc291cmNlU2hhMjU2LCBuYXZpZ2F0aW9uQ29vcmRpbmF0aW9uOiByZXBvcnQubmF2aWdhdGlvbkNvb3JkaW5hdGlvbiwgbmF0aXZlUGF0cm9sUGxhbm5pbmc6IHJlcG9ydC5uYXRpdmVQYXRyb2xQbGFubmluZywgbWVhc3VyZW1lbnRDbG9jazogcmVwb3J0Lm1lYXN1cmVtZW50Q2xvY2ssIG5hdGl2ZUhwTWFpbnRlbmFuY2U6IHJlcG9ydC5uYXRpdmVIcE1haW50ZW5hbmNlLCBuYXRpdmVBdHRhY2tXaXRuZXNzOiByZXBvcnQubmF0aXZlQXR0YWNrV2l0bmVzcywgbmF0aXZlQ2hhc2VQcmVmZXJlbmNlOiByZXBvcnQubmF0aXZlQ2hhc2VQcmVmZXJlbmNlLCBmdWxsMTZSdW5JZDogYmluZGluZy5mdWxsMTZHYXRlLnJ1bklkLAo="
+        },
+        {
+          "oldOffset": 18085,
+          "newOffset": 18695,
+          "beforeBase64": "",
+          "afterBase64": "ICBpZiAoc3RvcmVTdGFnZUNhcHR1cmUpIHsKICAgIHRyeSB7CiAgICAgIGNsZWFudXAuc3RvcmVTdGFnZURpYWdub3N0aWNzID0gYXdhaXQgc3RvcmVTdGFnZUNhcHR1cmUuZmluaXNoKHsgZ2F0ZXdheUV4aXRlZDogQm9vbGVhbihnYXRld2F5Py5zdGF0dXMpIH0pOwogICAgICBhd2FpdCB3cml0ZU5ldyhwYXRoLmpvaW4ocm9vdCwgJ3N0b3JlLXN0YWdlLXB1YmxpYy1zdGF0dXMuanNvbicpLCB7IC4uLmNsZWFudXAuc3RvcmVTdGFnZURpYWdub3N0aWNzLCB0aHJlc2hvbGRNczo1MCwgZGF0YUZpbGU6cGF0aC5qb2luKHJvb3QsJ3N0b3JlLXN0YWdlLXB1YmxpYy5qc29ubCcpLCBzb3VyY2VJZGVudGl0eTpzdG9yZUlkZW50aXR5IH0pOwogICAgfSBjYXRjaCB7IGNsZWFudXAuc3RvcmVTdGFnZURpYWdub3N0aWNzID0geyBjb21wbGV0ZTpmYWxzZSxyZWFzb25zOlsnc3RvcmUtc3RhdHVzLXdyaXRlLWZhaWxlZCddIH07IH0KICB9IGVsc2UgY2xlYW51cC5zdG9yZVN0YWdlRGlhZ25vc3RpY3MgPSB7IGNvbXBsZXRlOmZhbHNlLHJlYXNvbnM6WydjYXB0dXJlLW5vdC1jcmVhdGVkJ10gfTsK"
+        }
+      ],
+      "inverseRestoresOriginalRaw": true
+    },
+    {
+      "source": {
+        "file": "C:/mir2-build/p01-completion-20261024/release-native-10-v2-attack-deadline-feasibility-16/scenario-prefix-readiness.json",
+        "bytes": 2279,
+        "sha256": "7029269c6148b39f9c3def94d5d5313102b7e57e4df1d792e0343a98f9ee88ba"
+      },
+      "target": {
+        "file": "C:/mir2-build/p01-completion-20261024/release-native-10-v2-account-store-wait-feasibility-17/scenario-prefix-readiness.json",
+        "bytes": 2279,
+        "sha256": "7029269c6148b39f9c3def94d5d5313102b7e57e4df1d792e0343a98f9ee88ba"
+      },
+      "mode": "exact-copy",
+      "hunks": [],
+      "inverseRestoresOriginalRaw": true
+    },
+    {
+      "source": {
+        "file": "C:/mir2-build/p01-completion-20261024/release-native-10-v2-attack-deadline-feasibility-16/scenario.json",
+        "bytes": 804,
+        "sha256": "a42a26a195dd5ac25135bff57e73f7f21b71f97b5cc1814351920ece621362ba"
+      },
+      "target": {
+        "file": "C:/mir2-build/p01-completion-20261024/release-native-10-v2-account-store-wait-feasibility-17/scenario.json",
+        "bytes": 804,
+        "sha256": "a42a26a195dd5ac25135bff57e73f7f21b71f97b5cc1814351920ece621362ba"
+      },
+      "mode": "exact-copy",
+      "hunks": [],
+      "inverseRestoresOriginalRaw": true
+    },
+    {
+      "source": {
+        "file": "C:/mir2-build/p01-completion-20261024/release-native-10-v2-attack-deadline-feasibility-16/scene-binding.json",
+        "bytes": 6703,
+        "sha256": "d76752be7e1c7bf983cdca1766a68682de1dfa1e840141a5dbac7be6eb808e6b"
+      },
+      "target": {
+        "file": "C:/mir2-build/p01-completion-20261024/release-native-10-v2-account-store-wait-feasibility-17/scene-binding.json",
+        "bytes": 6504,
+        "sha256": "8756e4fadbfbbb8a45c4f5e5a7c4b49b2482911257e131c40d7e7ab649b2aac5"
+      },
+      "mode": "position-exact-inverse-derived",
+      "hunks": [
+        {
+          "oldOffset": 5312,
+          "newOffset": 5312,
+          "beforeBase64": "ICAic2NvcGUiOiAiSGlzdG9yaWNhbCBpbW11dGFibGUgY29tcGFjdCBzY2VuZSBzYWZldHkvQSovZ2VvbWV0cnkgZXZpZGVuY2UgaXMgcmV1c2VkIHVuY2hhbmdlZC4gT3JpZ2luYWw0NjgvNmQvMDVjIGJlbG93IGlkZW50aWZ5IG9ubHkgdGhhdCBoaXN0b3JpY2FsIHN0YXRpYyBzdHVkeS4gQWN0aXZlIFByb2JlMTUgYmFja2VuZC9leGVjdXRpb24gcmVtYWluIG51bGwgdW50aWwgcm9vdCBiaW5kcyBmcmVzaDQ0IFJlbGVhc2UvZnVsbDE2OyBubyBsaXZlIHN1cHBseSBvciBhY2NlcHRhbmNlIGlzIGluaGVyaXRlZC4iLAo=",
+          "afterBase64": "ICAic2NvcGUiOiAiSGlzdG9yaWNhbCBpbW11dGFibGUgY29tcGFjdCBnZW9tZXRyeS9zY291dCBldmlkZW5jZSwgbm8gQSogcmVydW4uIEFjdGl2ZSBQcm9iZTE3IG5ldzUwIGJhY2tlbmQvZXhlY3V0aW9uIFBFTkRJTkc7IG5vIHN1cHBseSBvciBjYXBhY2l0eSBhY2NlcHRhbmNlIGluaGVyaXRlZC4iLAo="
+        },
+        {
+          "oldOffset": 6553,
+          "newOffset": 6430,
+          "beforeBase64": "ICAiYWN0aXZlQmFja2VuZFNvdXJjZUNvbW1pdCI6ICJkMjQwN2ZiODQwNTVlMjA4OGUzY2E2Y2NkYjRmOGI4MGQxNWE5ZDE2IiwKICAiYWN0aXZlRHJpdmVyU291cmNlQ29tbWl0IjogImQyNDA3ZmI4NDA1NWUyMDg4ZTNjYTZjY2RiNGY4YjgwZDE1YTlkMTYiCg==",
+          "afterBase64": "ICAiYWN0aXZlQmFja2VuZFNvdXJjZUNvbW1pdCI6IG51bGwsCiAgImFjdGl2ZURyaXZlclNvdXJjZUNvbW1pdCI6IG51bGwK"
+        }
+      ],
+      "inverseRestoresOriginalRaw": true
+    },
+    {
+      "source": {
+        "file": "C:/mir2-build/p01-completion-20261024/release-native-10-v2-attack-deadline-feasibility-16/scene-contract.mjs",
+        "bytes": 10796,
+        "sha256": "6f91a930d2c1d05a7ca813aaff0c1e44d29289303913d470ac2a72c4211b207f"
+      },
+      "target": {
+        "file": "C:/mir2-build/p01-completion-20261024/release-native-10-v2-account-store-wait-feasibility-17/scene-contract.mjs",
+        "bytes": 10796,
+        "sha256": "6f91a930d2c1d05a7ca813aaff0c1e44d29289303913d470ac2a72c4211b207f"
+      },
+      "mode": "exact-copy",
+      "hunks": [],
+      "inverseRestoresOriginalRaw": true
+    },
+    {
+      "source": {
+        "file": "C:/mir2-build/p01-completion-20261024/release-native-10-v2-attack-deadline-feasibility-16/scene-driver-compatibility-proof-v1.json",
+        "bytes": 4074,
+        "sha256": "f9b695b3c1c3d7299e27e6bd5a0809a5e7811f14e035b327ca00e4a64d5e6656"
+      },
+      "target": {
+        "file": "C:/mir2-build/p01-completion-20261024/release-native-10-v2-account-store-wait-feasibility-17/scene-driver-compatibility-proof-v1.json",
+        "bytes": 4074,
+        "sha256": "f9b695b3c1c3d7299e27e6bd5a0809a5e7811f14e035b327ca00e4a64d5e6656"
+      },
+      "mode": "exact-copy",
+      "hunks": [],
+      "inverseRestoresOriginalRaw": true
+    },
+    {
+      "source": {
+        "file": "C:/mir2-build/p01-completion-20261024/release-native-10-v2-attack-deadline-feasibility-16/scene-driver-compatibility.mjs",
+        "bytes": 1550,
+        "sha256": "260b80faa43d6a52936097cb1587989cc7a9dc52022dc5f667b10dd3e76c0289"
+      },
+      "target": {
+        "file": "C:/mir2-build/p01-completion-20261024/release-native-10-v2-account-store-wait-feasibility-17/scene-driver-compatibility.mjs",
+        "bytes": 1550,
+        "sha256": "260b80faa43d6a52936097cb1587989cc7a9dc52022dc5f667b10dd3e76c0289"
+      },
+      "mode": "exact-copy",
+      "hunks": [],
+      "inverseRestoresOriginalRaw": true
+    },
+    {
+      "source": {
+        "file": "C:/mir2-build/p01-completion-20261024/release-native-10-v2-attack-deadline-feasibility-16/slow-stage-diagnostics-config.json",
+        "bytes": 4315,
+        "sha256": "1868fd25df6bd3a9e3f2405668bf80c0f7fec5b41a9e2db95e14361fc4f2411f"
+      },
+      "target": {
+        "file": "C:/mir2-build/p01-completion-20261024/release-native-10-v2-account-store-wait-feasibility-17/slow-stage-diagnostics-config.json",
+        "bytes": 4315,
+        "sha256": "1868fd25df6bd3a9e3f2405668bf80c0f7fec5b41a9e2db95e14361fc4f2411f"
+      },
+      "mode": "exact-copy",
+      "hunks": [],
+      "inverseRestoresOriginalRaw": true
+    },
+    {
+      "source": {
+        "file": "C:/mir2-build/p01-completion-20261024/release-native-10-v2-attack-deadline-feasibility-16/slow-stage-helper-freeze-v1.json",
+        "bytes": 2314,
+        "sha256": "f554d0e280318f3a3624046e3344d8c3becdc7057ca261b28df99c419c283a00"
+      },
+      "target": {
+        "file": "C:/mir2-build/p01-completion-20261024/release-native-10-v2-account-store-wait-feasibility-17/slow-stage-helper-freeze-v1.json",
+        "bytes": 2314,
+        "sha256": "f554d0e280318f3a3624046e3344d8c3becdc7057ca261b28df99c419c283a00"
+      },
+      "mode": "exact-copy",
+      "hunks": [],
+      "inverseRestoresOriginalRaw": true
+    },
+    {
+      "source": {
+        "file": "C:/mir2-build/p01-completion-20261024/release-native-10-v2-attack-deadline-feasibility-16/slow-stage-public.mjs",
+        "bytes": 10318,
+        "sha256": "8033874548d93323ef6390b07509887e727b5920850d0c3a1c2a0f810c56677c"
+      },
+      "target": {
+        "file": "C:/mir2-build/p01-completion-20261024/release-native-10-v2-account-store-wait-feasibility-17/slow-stage-public.mjs",
+        "bytes": 10318,
+        "sha256": "8033874548d93323ef6390b07509887e727b5920850d0c3a1c2a0f810c56677c"
+      },
+      "mode": "exact-copy",
+      "hunks": [],
+      "inverseRestoresOriginalRaw": true
+    },
+    {
+      "source": {
+        "file": "C:/mir2-build/p01-completion-20261024/release-native-10-v2-attack-deadline-feasibility-16/slow-stage-public.test.mjs",
+        "bytes": 22894,
+        "sha256": "a0f10c9d721404378e8b5bc56070425393fdf82af21588bbf70de2c274af76ae"
+      },
+      "target": {
+        "file": "C:/mir2-build/p01-completion-20261024/release-native-10-v2-account-store-wait-feasibility-17/slow-stage-public.test.mjs",
+        "bytes": 22894,
+        "sha256": "a0f10c9d721404378e8b5bc56070425393fdf82af21588bbf70de2c274af76ae"
+      },
+      "mode": "exact-copy",
+      "hunks": [],
+      "inverseRestoresOriginalRaw": true
+    },
+    {
+      "source": {
+        "file": "C:/mir2-build/p01-completion-20261024/release-native-10-v2-attack-deadline-feasibility-16/slow-stage-row-contract.mjs",
+        "bytes": 1553,
+        "sha256": "cc860f6578109f0a615ae83d9675c1f099f4814109f0fd95fcf475a7632d6db8"
+      },
+      "target": {
+        "file": "C:/mir2-build/p01-completion-20261024/release-native-10-v2-account-store-wait-feasibility-17/slow-stage-row-contract.mjs",
+        "bytes": 1553,
+        "sha256": "cc860f6578109f0a615ae83d9675c1f099f4814109f0fd95fcf475a7632d6db8"
+      },
+      "mode": "exact-copy",
+      "hunks": [],
+      "inverseRestoresOriginalRaw": true
+    },
+    {
+      "source": {
+        "file": "C:/mir2-build/p01-completion-20261024/release-native-10-v2-attack-deadline-feasibility-16/slow-stage-schema-contract.json",
+        "bytes": 3573,
+        "sha256": "b8a66eaeb6dd6518b9d242c6d9d794ff1f0252d75f3c017eb2ef62d01728b512"
+      },
+      "target": {
+        "file": "C:/mir2-build/p01-completion-20261024/release-native-10-v2-account-store-wait-feasibility-17/slow-stage-schema-contract.json",
+        "bytes": 3573,
+        "sha256": "b8a66eaeb6dd6518b9d242c6d9d794ff1f0252d75f3c017eb2ef62d01728b512"
+      },
+      "mode": "exact-copy",
+      "hunks": [],
+      "inverseRestoresOriginalRaw": true
+    },
+    {
+      "source": {
+        "file": "C:/mir2-build/p01-completion-20261024/release-native-10-v2-attack-deadline-feasibility-16/synthetic-tests-v1.log",
+        "bytes": 7579,
+        "sha256": "451c97bfe087895450890a37e42f21e9f2305da127a73f9ce9857b8955bf9d37"
+      },
+      "target": {
+        "file": "C:/mir2-build/p01-completion-20261024/release-native-10-v2-account-store-wait-feasibility-17/synthetic-tests-v1.log",
+        "bytes": 7579,
+        "sha256": "451c97bfe087895450890a37e42f21e9f2305da127a73f9ce9857b8955bf9d37"
+      },
+      "mode": "exact-copy",
+      "hunks": [],
+      "inverseRestoresOriginalRaw": true
+    },
+    {
+      "source": {
+        "file": "C:/mir2-build/p01-completion-20261024/release-native-10-v2-attack-deadline-feasibility-16/verify-full16-gate.mjs",
+        "bytes": 5142,
+        "sha256": "1ecd3b23d54451ccb5eb35e9116a46ede0e039488edebac9672b52024164d4e7"
+      },
+      "target": {
+        "file": "C:/mir2-build/p01-completion-20261024/release-native-10-v2-account-store-wait-feasibility-17/verify-full16-gate.mjs",
+        "bytes": 5262,
+        "sha256": "8d370a0819bf9fec3b0de57c25769ff84cac5bf5134cf4327630c76113ae8055"
+      },
+      "mode": "position-exact-inverse-derived",
+      "hunks": [
+        {
+          "oldOffset": 141,
+          "newOffset": 141,
+          "beforeBase64": "Y29uc3QgYmFzZT0nQzovbWlyMi1idWlsZC9wMDEtY29tcGxldGlvbi0yMDI2MTAyNCcsZGlyZWN0b3J5PXBhdGguam9pbihiYXNlLCdmdWxsLWxpZmVjeWNsZS1hdHRhY2stZGVhZGxpbmUtZGlhZ25vc3RpY3MtdjEvcHVibGljJyk7Cg==",
+          "afterBase64": "Y29uc3QgYmFzZT0nQzovbWlyMi1idWlsZC9wMDEtY29tcGxldGlvbi0yMDI2MTAyNCcsZGlyZWN0b3J5PXBhdGguam9pbihiYXNlLCdmdWxsLWxpZmVjeWNsZS1hY2NvdW50LXN0b3JlLXdhaXQtZGlhZ25vc3RpY3MtdjEvcHVibGljJyk7Cg=="
+        },
+        {
+          "oldOffset": 459,
+          "newOffset": 462,
+          "beforeBase64": "ICBpZighZW50cnl8fCFzYW1lKHBhdGguZGlybmFtZShlbnRyeS5maWxlPz8nJyksZGlyZWN0b3J5KXx8IS9eXGR7MTN9LVthLWYwLTldezh9W2EtekEtWjAtOV8uLV0qJC8udGVzdChwYXRoLmJhc2VuYW1lKGVudHJ5LmZpbGUpKXx8IU51bWJlci5pc1NhZmVJbnRlZ2VyKGVudHJ5LmJ5dGVzKXx8ZW50cnkuYnl0ZXM8MXx8IWhleChlbnRyeS5zaGEyNTYpKXRocm93IEVycm9yKCdPbmx5IGV4YWN0IHB1YmxpYyBmcmVzaDQ0IGZ1bGwxNiBhcnRpZmFjdCBwaW5zIGFyZSBwZXJtaXR0ZWQnKTsK",
+          "afterBase64": "ICBpZighZW50cnl8fCFzYW1lKHBhdGguZGlybmFtZShlbnRyeS5maWxlPz8nJyksZGlyZWN0b3J5KXx8IS9eXGR7MTN9LVthLWYwLTldezh9W2EtekEtWjAtOV8uLV0qJC8udGVzdChwYXRoLmJhc2VuYW1lKGVudHJ5LmZpbGUpKXx8IU51bWJlci5pc1NhZmVJbnRlZ2VyKGVudHJ5LmJ5dGVzKXx8ZW50cnkuYnl0ZXM8MXx8IWhleChlbnRyeS5zaGEyNTYpKXRocm93IEVycm9yKCdPbmx5IGV4YWN0IHB1YmxpYyBmcmVzaDUwIGZ1bGwxNiBhcnRpZmFjdCBwaW5zIGFyZSBwZXJtaXR0ZWQnKTsK"
+        },
+        {
+          "oldOffset": 1386,
+          "newOffset": 1389,
+          "beforeBase64": "ICBpZihyZWxlYXNlPy5zb3VyY2VDb21taXQhPT0nZDI0MDdmYjg0MDU1ZTIwODhlM2NhNmNjZGI0ZjhiODBkMTVhOWQxNid8fGJpbmRpbmcuYmFja2VuZFNvdXJjZUNvbW1pdCE9PXJlbGVhc2Uuc291cmNlQ29tbWl0fHxbJ2Q4NzkxY2NlZWVkMDBmZGI3MDE5ZDEyMDFhYWQxOWYwNjAwNTc5MDE2MmRmMWI0NTlhOGNhY2FjOTZmNjg3NTYnLCdhNDMwNzhiMDVlNzBiNDgwZjk0OGZlZTUwNWUyM2QyNzU3Y2UxYWUyMGZkYzFmMjJiMjM0OGRmNDZlZTcxMjVkJywnODU1YjRiYTNjODBjY2I5OWI0MTI4YTllZTExNzBiYzU2YWQ1MWZjYmFmMDIyZDUyNjlmMGI2NjYyOTg2YzYxZiddLmluY2x1ZGVzKHJlbGVhc2UuYmluYXJ5Py5zaGEyNTYpKXRocm93IEVycm9yKCdGcmVzaCBkaWFnbm9zdGljIGZ1bGwxNiByZXF1aXJlcyB0aGUgY29tbWl0dGVkIG5ldyBiYWNrZW5kIGFuZCBpdHMgYWN0dWFsIG5ldyBSZWxlYXNlJyk7Cg==",
+          "afterBase64": "ICBpZighL15bYS1mMC05XXs0MH0kLy50ZXN0KHJlbGVhc2U/LnNvdXJjZUNvbW1pdD8/JycpfHxyZWxlYXNlLnNvdXJjZUNvbW1pdD09PSdkMjQwN2ZiODQwNTVlMjA4OGUzY2E2Y2NkYjRmOGI4MGQxNWE5ZDE2J3x8YmluZGluZy5iYWNrZW5kU291cmNlQ29tbWl0IT09cmVsZWFzZS5zb3VyY2VDb21taXR8fFsnMTk4MGI3YmVkNTg0OTk5NzdlYjY0NDNhYTNmMWJmMGZhYmNiOWU4MjYyYjQ5MGYyYmM2ZmI3NGNmNmY3YjMxOCcsJ2Q4NzkxY2NlZWVkMDBmZGI3MDE5ZDEyMDFhYWQxOWYwNjAwNTc5MDE2MmRmMWI0NTlhOGNhY2FjOTZmNjg3NTYnLCdhNDMwNzhiMDVlNzBiNDgwZjk0OGZlZTUwNWUyM2QyNzU3Y2UxYWUyMGZkYzFmMjJiMjM0OGRmNDZlZTcxMjVkJywnODU1YjRiYTNjODBjY2I5OWI0MTI4YTllZTExNzBiYzU2YWQ1MWZjYmFmMDIyZDUyNjlmMGI2NjYyOTg2YzYxZiddLmluY2x1ZGVzKHJlbGVhc2UuYmluYXJ5Py5zaGEyNTYpKXRocm93IEVycm9yKCdGcmVzaCBkaWFnbm9zdGljIGZ1bGwxNiByZXF1aXJlcyB0aGUgY29tbWl0dGVkIG5ldyBiYWNrZW5kIGFuZCBpdHMgYWN0dWFsIG5ldyBSZWxlYXNlJyk7Cg=="
+        },
+        {
+          "oldOffset": 1878,
+          "newOffset": 1998,
+          "beforeBase64": "ICBpZihiaW5kaW5nLnN0YXRlIT09J25ldzQ0LXJlbGVhc2UtYW5kLWZ1bGwxNi1ib3VuZC1ub3QtZXhlY3V0ZWQnfHxmdWxsPy5zdGF0ZSE9PSdwYXNzZWQnfHwhQXJyYXkuaXNBcnJheShmdWxsLmZpbGVzKXx8ZnVsbC5maWxlcy5sZW5ndGg8Nnx8ZnVsbC5maWxlcy5sZW5ndGg+NjQpdGhyb3cgRXJyb3IoJ0ZyZXNoIGVuYWJsZWQ1MCBmcmVzaDQ0IGZ1bGwxNiBhY2NlcHRhbmNlIGlzIHN0aWxsIHBlbmRpbmcnKTsK",
+          "afterBase64": "ICBpZihiaW5kaW5nLnN0YXRlIT09J25ldzUwLXJlbGVhc2UtYW5kLWZ1bGwxNi1ib3VuZC1ub3QtZXhlY3V0ZWQnfHxmdWxsPy5zdGF0ZSE9PSdwYXNzZWQnfHwhQXJyYXkuaXNBcnJheShmdWxsLmZpbGVzKXx8ZnVsbC5maWxlcy5sZW5ndGg8Nnx8ZnVsbC5maWxlcy5sZW5ndGg+NjQpdGhyb3cgRXJyb3IoJ0ZyZXNoIGVuYWJsZWQ1MCBmcmVzaDUwIGZ1bGwxNiBhY2NlcHRhbmNlIGlzIHN0aWxsIHBlbmRpbmcnKTsK"
+        },
+        {
+          "oldOffset": 2574,
+          "newOffset": 2694,
+          "beforeBase64": "ICBpZighL15cZHsxM30tW2EtZjAtOV17OH0kLy50ZXN0KGF1ZGl0LnJ1bklkPz8nJyl8fCEvXlxkezEzfS1bYS1mMC05XXs4fSQvLnRlc3QoYXVkaXQucmVhbG1TdGFtcD8/JycpfHxhdWRpdC5hbGwxNlBhc3NlZCE9PXRydWV8fGF1ZGl0Lm9ubHlPcmRpbmFyeVNlbnRDb21tYW5kcyE9PXRydWV8fGF1ZGl0LmJhY2tlbmRJbnB1dENvdW50IT09NDR8fAo=",
+          "afterBase64": "ICBpZighL15cZHsxM30tW2EtZjAtOV17OH0kLy50ZXN0KGF1ZGl0LnJ1bklkPz8nJyl8fCEvXlxkezEzfS1bYS1mMC05XXs4fSQvLnRlc3QoYXVkaXQucmVhbG1TdGFtcD8/JycpfHxhdWRpdC5hbGwxNlBhc3NlZCE9PXRydWV8fGF1ZGl0Lm9ubHlPcmRpbmFyeVNlbnRDb21tYW5kcyE9PXRydWV8fGF1ZGl0LmJhY2tlbmRJbnB1dENvdW50IT09NTB8fAo="
+        },
+        {
+          "oldOffset": 4147,
+          "newOffset": 4267,
+          "beforeBase64": "ICAgIHJlYWxtLm9rIT09dHJ1ZXx8cmVhbG0uc2h1dGRvd24/LmNvZGUhPT0wfHxyZWFsbS5yZW1haW5pbmdPd25lZFBvcnRMaXN0ZW5lcnM/Lmxlbmd0aCE9PTB8fHJlYWxtLmNvbmZpZ3VyYXRpb24/LnNsb3dTdGFnZVRocmVzaG9sZE1zIT09NTB8fHJlYWxtLnJlbGVhc2U/LnNoYTI1NiE9PXJlbGVhc2UuYmluYXJ5LnNoYTI1Nnx8cmVhbG0ucmVsZWFzZT8uc291cmNlQ29tbWl0IT09cmVsZWFzZS5zb3VyY2VDb21taXR8fHJlYWxtLnJlbGVhc2U/LmJhY2tlbmRJbnB1dENvdW50IT09NDR8fAogICAgc291cmNlLm1hdGNoZWRSYXdJbnB1dHMhPT00NHx8c291cmNlLm1hdGNoZWRSYXdEcml2ZXJQaW5zIT09Nnx8c291cmNlLnNvdXJjZUNvbW1pdCE9PXJlbGVhc2Uuc291cmNlQ29tbWl0fHxzb3VyY2Uuc291cmNlTWFuaWZlc3RTaGEyNTYhPT1tYW5pZmVzdC5zb3VyY2VNYW5pZmVzdFNoYTI1Nnx8c291cmNlLnNvdXJjZU1hbmlmZXN0RmlsZVNoYTI1NiE9PXJlbGVhc2Uuc291cmNlTWFuaWZlc3RGaWxlU2hhMjU2fHxzb3VyY2UucmVsZWFzZVNoYTI1NiE9PXJlbGVhc2UuYmluYXJ5LnNoYTI1Nil0aHJvdyBFcnJvcignRnVsbDE2IG9yaWdpbmFsIHJlcG9ydC9yZWFsbS9zb3VyY2UgcHJvb2YgY29udHJhZGljdHMgaXRzIGluZGVwZW5kZW50IGF1ZGl0Jyk7CiAgcmV0dXJue3NjaGVtYVZlcnNpb246MSx2ZXJpZmllZEF0Om5ldyBEYXRlKCkudG9JU09TdHJpbmcoKSxwYXNzZWQ6dHJ1ZSxydW5JZDphdWRpdC5ydW5JZCxyZWFsbVN0YW1wOmF1ZGl0LnJlYWxtU3RhbXAsYmFja2VuZFNvdXJjZUNvbW1pdDpyZWxlYXNlLnNvdXJjZUNvbW1pdCxiYWNrZW5kSW5wdXRDb3VudDo0NCxiYWNrZW5kU291cmNlQWdncmVnYXRlOm1hbmlmZXN0LnNvdXJjZU1hbmlmZXN0U2hhMjU2LGJpbmFyeVNoYTI1NjpyZWxlYXNlLmJpbmFyeS5zaGEyNTYsc2xvd1N0YWdlVGhyZXNob2xkTXM6NTAsZmlsZXM6ZnVsbC5maWxlcyxjYXBhY2l0eUFjY2VwdGVkOmZhbHNlfTsK",
+          "afterBase64": "ICAgIHJlYWxtLm9rIT09dHJ1ZXx8cmVhbG0uc2h1dGRvd24/LmNvZGUhPT0wfHxyZWFsbS5yZW1haW5pbmdPd25lZFBvcnRMaXN0ZW5lcnM/Lmxlbmd0aCE9PTB8fHJlYWxtLmNvbmZpZ3VyYXRpb24/LnNsb3dTdGFnZVRocmVzaG9sZE1zIT09NTB8fHJlYWxtLnJlbGVhc2U/LnNoYTI1NiE9PXJlbGVhc2UuYmluYXJ5LnNoYTI1Nnx8cmVhbG0ucmVsZWFzZT8uc291cmNlQ29tbWl0IT09cmVsZWFzZS5zb3VyY2VDb21taXR8fHJlYWxtLnJlbGVhc2U/LmJhY2tlbmRJbnB1dENvdW50IT09NTB8fAogICAgc291cmNlLm1hdGNoZWRSYXdJbnB1dHMhPT01MHx8c291cmNlLm1hdGNoZWRSYXdEcml2ZXJQaW5zIT09Nnx8c291cmNlLnNvdXJjZUNvbW1pdCE9PXJlbGVhc2Uuc291cmNlQ29tbWl0fHxzb3VyY2Uuc291cmNlTWFuaWZlc3RTaGEyNTYhPT1tYW5pZmVzdC5zb3VyY2VNYW5pZmVzdFNoYTI1Nnx8c291cmNlLnNvdXJjZU1hbmlmZXN0RmlsZVNoYTI1NiE9PXJlbGVhc2Uuc291cmNlTWFuaWZlc3RGaWxlU2hhMjU2fHxzb3VyY2UucmVsZWFzZVNoYTI1NiE9PXJlbGVhc2UuYmluYXJ5LnNoYTI1Nil0aHJvdyBFcnJvcignRnVsbDE2IG9yaWdpbmFsIHJlcG9ydC9yZWFsbS9zb3VyY2UgcHJvb2YgY29udHJhZGljdHMgaXRzIGluZGVwZW5kZW50IGF1ZGl0Jyk7CiAgcmV0dXJue3NjaGVtYVZlcnNpb246MSx2ZXJpZmllZEF0Om5ldyBEYXRlKCkudG9JU09TdHJpbmcoKSxwYXNzZWQ6dHJ1ZSxydW5JZDphdWRpdC5ydW5JZCxyZWFsbVN0YW1wOmF1ZGl0LnJlYWxtU3RhbXAsYmFja2VuZFNvdXJjZUNvbW1pdDpyZWxlYXNlLnNvdXJjZUNvbW1pdCxiYWNrZW5kSW5wdXRDb3VudDo1MCxiYWNrZW5kU291cmNlQWdncmVnYXRlOm1hbmlmZXN0LnNvdXJjZU1hbmlmZXN0U2hhMjU2LGJpbmFyeVNoYTI1NjpyZWxlYXNlLmJpbmFyeS5zaGEyNTYsc2xvd1N0YWdlVGhyZXNob2xkTXM6NTAsZmlsZXM6ZnVsbC5maWxlcyxjYXBhY2l0eUFjY2VwdGVkOmZhbHNlfTsK"
+        }
+      ],
+      "inverseRestoresOriginalRaw": true
+    },
+    {
+      "source": {
+        "file": "C:/mir2-build/p01-completion-20261024/release-native-10-v2-attack-deadline-feasibility-16/verify-public.mjs",
+        "bytes": 19225,
+        "sha256": "327b49e29aca302f9586bbfd4ded8f4b47a0c722f59c998b6aa6e036826bcc94"
+      },
+      "target": {
+        "file": "C:/mir2-build/p01-completion-20261024/release-native-10-v2-account-store-wait-feasibility-17/verify-public.mjs",
+        "bytes": 19237,
+        "sha256": "94b074563023476224a68bd05bd86c93696c7d4b8ab51e2fb01ee57beaae9328"
+      },
+      "mode": "position-exact-inverse-derived",
+      "hunks": [
+        {
+          "oldOffset": 2034,
+          "newOffset": 2034,
+          "beforeBase64": "Y29uc3QgcmVhbG0gPSAncmVsZWFzZS1uYXRpdmUtMTAtdjItYXR0YWNrLWRlYWRsaW5lLWZlYXNpYmlsaXR5LTE2JzsK",
+          "afterBase64": "Y29uc3QgcmVhbG0gPSAncmVsZWFzZS1uYXRpdmUtMTAtdjItYWNjb3VudC1zdG9yZS13YWl0LWZlYXNpYmlsaXR5LTE3JzsK"
+        },
+        {
+          "oldOffset": 3312,
+          "newOffset": 3315,
+          "beforeBase64": "Y29uc3QgY2hpbGQgPSAnY2FwYWNpdHktbmF0aXZlMTAtdjItYXR0YWNrLWRlYWRsaW5lLWZvbGxvd3VwLTE2LWRpYWdub3N0aWNzJywgZGlyZWN0b3J5ID0gcGF0aC5qb2luKHRvcGljLCBjaGlsZCksIHNoYSA9IGJ5dGVzID0+IGNyeXB0by5jcmVhdGVIYXNoKCdzaGEyNTYnKS51cGRhdGUoYnl0ZXMpLmRpZ2VzdCgnaGV4Jyk7Cg==",
+          "afterBase64": "Y29uc3QgY2hpbGQgPSAnY2FwYWNpdHktbmF0aXZlMTAtdjItYWNjb3VudC1zdG9yZS13YWl0LWZvbGxvd3VwLTE3LWRpYWdub3N0aWNzJywgZGlyZWN0b3J5ID0gcGF0aC5qb2luKHRvcGljLCBjaGlsZCksIHNoYSA9IGJ5dGVzID0+IGNyeXB0by5jcmVhdGVIYXNoKCdzaGEyNTYnKS51cGRhdGUoYnl0ZXMpLmRpZ2VzdCgnaGV4Jyk7Cg=="
+        },
+        {
+          "oldOffset": 8102,
+          "newOffset": 8108,
+          "beforeBase64": "Y29uc3QgY2F0YWxvZyA9IGF3YWl0IHJlYWRBdChkaXJlY3RvcnksICdjb2xsZWN0LXJlbGVhc2UtbmF0aXZlLTEwLXYyLWF0dGFjay1kZWFkbGluZS1mZWFzaWJpbGl0eS0xNi1wdWJsaWMtYXJ0aWZhY3QtY2F0YWxvZy5qc29uJyk7Cg==",
+          "afterBase64": "Y29uc3QgY2F0YWxvZyA9IGF3YWl0IHJlYWRBdChkaXJlY3RvcnksICdjb2xsZWN0LXJlbGVhc2UtbmF0aXZlLTEwLXYyLWFjY291bnQtc3RvcmUtd2FpdC1mZWFzaWJpbGl0eS0xNy1wdWJsaWMtYXJ0aWZhY3QtY2F0YWxvZy5qc29uJyk7Cg=="
+        },
+        {
+          "oldOffset": 19061,
+          "newOffset": 19070,
+          "beforeBase64": "YXdhaXQgd3JpdGVOZXdBdChiYXNlLCAnY29sbGVjdC1yZWxlYXNlLW5hdGl2ZS0xMC12Mi1hdHRhY2stZGVhZGxpbmUtZmVhc2liaWxpdHktMTYtcHVibGljLXZlcmlmaWNhdGlvbi1yZXN1bHQuanNvbicsIHJlc3VsdCk7Cg==",
+          "afterBase64": "YXdhaXQgd3JpdGVOZXdBdChiYXNlLCAnY29sbGVjdC1yZWxlYXNlLW5hdGl2ZS0xMC12Mi1hY2NvdW50LXN0b3JlLXdhaXQtZmVhc2liaWxpdHktMTctcHVibGljLXZlcmlmaWNhdGlvbi1yZXN1bHQuanNvbicsIHJlc3VsdCk7Cg=="
+        }
+      ],
+      "inverseRestoresOriginalRaw": true
+    },
+    {
+      "source": {
+        "file": "C:/mir2-build/p01-completion-20261024/release-native-10-v2-attack-deadline-feasibility-16/wire-adapter-synthetic-tests.json",
+        "bytes": 2413,
+        "sha256": "5a6905e7ad356e1c41266d92332b1694a2f9a16a80b26b4c4951a40a8ecc9d5a"
+      },
+      "target": {
+        "file": "C:/mir2-build/p01-completion-20261024/release-native-10-v2-account-store-wait-feasibility-17/wire-adapter-synthetic-tests.json",
+        "bytes": 2413,
+        "sha256": "5a6905e7ad356e1c41266d92332b1694a2f9a16a80b26b4c4951a40a8ecc9d5a"
+      },
+      "mode": "exact-copy",
+      "hunks": [],
+      "inverseRestoresOriginalRaw": true
+    },
+    {
+      "source": {
+        "file": "C:/mir2-build/p01-completion-20261024/release-native-10-v2-attack-deadline-feasibility-16/wire-adapter-synthetic-tests.log",
+        "bytes": 2205,
+        "sha256": "910421ec8ebcd51e3caee4cc7a936ba2e61b71f90a81ae3ea0217ac692c4f633"
+      },
+      "target": {
+        "file": "C:/mir2-build/p01-completion-20261024/release-native-10-v2-account-store-wait-feasibility-17/wire-adapter-synthetic-tests.log",
+        "bytes": 2205,
+        "sha256": "910421ec8ebcd51e3caee4cc7a936ba2e61b71f90a81ae3ea0217ac692c4f633"
+      },
+      "mode": "exact-copy",
+      "hunks": [],
+      "inverseRestoresOriginalRaw": true
+    },
+    {
+      "source": {
+        "file": "C:/mir2-build/p01-completion-20261024/release-native-10-v2-attack-deadline-feasibility-16/wire-diagnostics-adapter.mjs",
+        "bytes": 2514,
+        "sha256": "82c5ae7432cb7b69e576e7c283e4a4ca6afe074b692342ea5a82516dd3fef164"
+      },
+      "target": {
+        "file": "C:/mir2-build/p01-completion-20261024/release-native-10-v2-account-store-wait-feasibility-17/wire-diagnostics-adapter.mjs",
+        "bytes": 2514,
+        "sha256": "82c5ae7432cb7b69e576e7c283e4a4ca6afe074b692342ea5a82516dd3fef164"
+      },
+      "mode": "exact-copy",
+      "hunks": [],
+      "inverseRestoresOriginalRaw": true
+    },
+    {
+      "source": {
+        "file": "C:/mir2-build/p01-completion-20261024/release-native-10-v2-attack-deadline-feasibility-16/wire-diagnostics-adapter.test.mjs",
+        "bytes": 7373,
+        "sha256": "8ffa525f9df27dae593faeb355f4a82d227ae0576af4afc2b5f807cb8baab3c5"
+      },
+      "target": {
+        "file": "C:/mir2-build/p01-completion-20261024/release-native-10-v2-account-store-wait-feasibility-17/wire-diagnostics-adapter.test.mjs",
+        "bytes": 7373,
+        "sha256": "8ffa525f9df27dae593faeb355f4a82d227ae0576af4afc2b5f807cb8baab3c5"
+      },
+      "mode": "exact-copy",
+      "hunks": [],
+      "inverseRestoresOriginalRaw": true
+    },
+    {
+      "source": {
+        "file": "C:/mir2-build/p01-completion-20261024/release-native-10-v2-attack-deadline-feasibility-16/wire-diagnostics-contract.mjs",
+        "bytes": 15767,
+        "sha256": "8d2c06f251a3b623d4ff135211046b9d039b31e9bfdad799c0cb1fd3ddfda13a"
+      },
+      "target": {
+        "file": "C:/mir2-build/p01-completion-20261024/release-native-10-v2-account-store-wait-feasibility-17/wire-diagnostics-contract.mjs",
+        "bytes": 15767,
+        "sha256": "8d2c06f251a3b623d4ff135211046b9d039b31e9bfdad799c0cb1fd3ddfda13a"
+      },
+      "mode": "exact-copy",
+      "hunks": [],
+      "inverseRestoresOriginalRaw": true
+    }
+  ],
+  "policyExact": true,
+  "resourceAndScenarioRawExact": true,
+  "preparedAccounts": 100,
+  "maximumControlledActors": 10,
+  "initialConstructionChecksOnly": "Two in-memory construction assertions were corrected before this receipt; neither imported a runtime module nor created runtime state. Final proof uses actual byte-offset hunks, not ambiguous global50 reversal."
+}

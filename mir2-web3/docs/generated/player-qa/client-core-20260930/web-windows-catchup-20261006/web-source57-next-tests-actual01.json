@@ -1,0 +1,91 @@
+{
+  "schemaVersion": 1,
+  "owner": "Root",
+  "observedAtUtc": "2026-10-11T02:50:00.270Z",
+  "kind": "Source57 physical combat source actual original tests and strict Next build",
+  "tests": {
+    "owner": "Root",
+    "exitCode": 0,
+    "builderPid": 59332,
+    "kind": "Source57 original53 combat input regressions with physical source adoption",
+    "exited": true,
+    "disposed": true,
+    "elapsedMs": 4539,
+    "configPath": "C:/mir2-cross-platform-storage-20261002/web-source57-combat-source-20261011-01/node-tests01/config.json",
+    "uiOperated": false,
+    "runtimeLaunched": false,
+    "networkUsed": false,
+    "productionBuildAccepted": false,
+    "candidateAccepted": false,
+    "goalComplete": false,
+    "testCount": 53,
+    "passed": 53,
+    "failed": 0,
+    "skipped": 0,
+    "sourceCount": 19569,
+    "actualCallerPrePostHashesPassed": true,
+    "config": {
+      "path": "C:/mir2-cross-platform-storage-20261002/web-source57-combat-source-20261011-01/node-tests01/config.json",
+      "bytes": 4370,
+      "sha256": "a9e6fbe37d1d1d2d3b5bf41fe4850e4ddfd3293b2e4fb5e8724895d66fa6b702"
+    },
+    "stdout": {
+      "path": "C:/mir2-cross-platform-storage-20261002/web-source57-combat-source-20261011-01/node-tests01/stdout.log",
+      "bytes": 13061,
+      "sha256": "d5dbf8ec3b372fb0ed5917d9b650ddaae3f94349bb6e2ac5889e27b95607d161"
+    },
+    "stderr": {
+      "path": "C:/mir2-cross-platform-storage-20261002/web-source57-combat-source-20261011-01/node-tests01/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  },
+  "next": {
+    "owner": "Root",
+    "exitCode": 0,
+    "builderPid": 58760,
+    "kind": "Source57 strict Next full build physical combat source",
+    "exited": true,
+    "disposed": true,
+    "elapsedMs": 97523,
+    "configPath": "C:/mir2-cross-platform-storage-20261002/web-source57-combat-source-20261011-01/next-build01/config.json",
+    "uiOperated": false,
+    "runtimeLaunched": false,
+    "networkUsed": false,
+    "productionBuildAccepted": false,
+    "candidateAccepted": false,
+    "goalComplete": false,
+    "sourceCount": 19570,
+    "strict": true,
+    "staticPages": 13,
+    "actualCallerPrePostHashesPassed": true,
+    "config": {
+      "path": "C:/mir2-cross-platform-storage-20261002/web-source57-combat-source-20261011-01/next-build01/config.json",
+      "bytes": 4365,
+      "sha256": "11f644aa84e0d2c94ff99eacf5d04ce52d8818ebc14ed63a813c970eb17d8e7e"
+    },
+    "stdout": {
+      "path": "C:/mir2-cross-platform-storage-20261002/web-source57-combat-source-20261011-01/next-build01/stdout.log",
+      "bytes": 2024,
+      "sha256": "4bf20b27c9aa648e0910e8281b5748f8f2741c8f5b682538b07328e1b3b8ea0b"
+    },
+    "stderr": {
+      "path": "C:/mir2-cross-platform-storage-20261002/web-source57-combat-source-20261011-01/next-build01/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  },
+  "scope": "Finite original build/test intervals only. Runtime/browser checks separately qualified. No new executable helper or Cargo build.",
+  "secondaryReadOnlySourceReview": "Physical source and guards reviewed; no material defect reported; no product execution by reviewer.",
+  "mainTsconfig": {
+    "path": "E:/mir2-player-journey/mir2-web3/apps/web/tsconfig.json",
+    "bytes": 4932,
+    "sha256": "08fed5308fee3466445cad5b0f4c0cc0f8e00f4fa53823999ff1bed0bcde3182"
+  },
+  "rendererVersion": "bevy-201eff554f63b9a8",
+  "combatActualPassed": false,
+  "quest2RewardPassed": false,
+  "overallPercentage": null,
+  "candidate100": false,
+  "goalComplete": false
+}

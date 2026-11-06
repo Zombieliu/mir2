@@ -1,0 +1,163 @@
+{
+  "schema": "mir2.unified.evidence.phase.v1",
+  "passed": true,
+  "curatedAtUtc": "2026-10-29T15:53:22.464335+00:00",
+  "producerReceipt": {
+    "filename": "native-client-focused-results.json",
+    "bytes": 4611,
+    "sha256": "2b405009411b3b2e9f6d6da2cac77ed39882bce77ebb3bee64c387684d542ad8"
+  },
+  "producerReport": [
+    {
+      "filter": "native_i18n::",
+      "exitCode": 0,
+      "startedAtUtc": "2026-10-29T14:14:11.6241274Z",
+      "elapsedSeconds": 632.6767748,
+      "log": "C:\\mir2-build\\unified-20261029\\native-client-01-native-i18n.log",
+      "passed": 16,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "filter": "native_login_locale::",
+      "exitCode": 0,
+      "startedAtUtc": "2026-10-29T14:24:44.3193137Z",
+      "elapsedSeconds": 0.4860069,
+      "log": "C:\\mir2-build\\unified-20261029\\native-client-02-native-login-locale.log",
+      "passed": 2,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "filter": "native_wallet_login::",
+      "exitCode": 0,
+      "startedAtUtc": "2026-10-29T14:24:44.8070438Z",
+      "elapsedSeconds": 0.3598902,
+      "log": "C:\\mir2-build\\unified-20261029\\native-client-03-native-wallet-login.log",
+      "passed": 2,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "filter": "native_shell_ui::tests::wallet_",
+      "exitCode": 0,
+      "startedAtUtc": "2026-10-29T14:24:45.1681079Z",
+      "elapsedSeconds": 0.4404787,
+      "log": "C:\\mir2-build\\unified-20261029\\native-client-04-native-shell-ui-tests-wallet.log",
+      "passed": 6,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "filter": "native_billing::",
+      "exitCode": 0,
+      "startedAtUtc": "2026-10-29T14:24:45.6097731Z",
+      "elapsedSeconds": 0.4384897,
+      "log": "C:\\mir2-build\\unified-20261029\\native-client-05-native-billing.log",
+      "passed": 20,
+      "failed": 0,
+      "ignored": 1
+    },
+    {
+      "filter": "native_procurement::",
+      "exitCode": 0,
+      "startedAtUtc": "2026-10-29T14:24:46.0493987Z",
+      "elapsedSeconds": 0.3553288,
+      "log": "C:\\mir2-build\\unified-20261029\\native-client-06-native-procurement.log",
+      "passed": 12,
+      "failed": 0,
+      "ignored": 1
+    },
+    {
+      "filter": "native_display::",
+      "exitCode": 0,
+      "startedAtUtc": "2026-10-29T14:24:46.4057793Z",
+      "elapsedSeconds": 0.3689529,
+      "log": "C:\\mir2-build\\unified-20261029\\native-client-07-native-display.log",
+      "passed": 7,
+      "failed": 0,
+      "ignored": 1
+    },
+    {
+      "filter": "player_text::",
+      "exitCode": 0,
+      "startedAtUtc": "2026-10-29T14:24:46.7757830Z",
+      "elapsedSeconds": 0.475402,
+      "log": "C:\\mir2-build\\unified-20261029\\native-client-08-player-text.log",
+      "passed": 11,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "filter": "quest_practice::",
+      "exitCode": 0,
+      "startedAtUtc": "2026-10-29T14:24:47.2524629Z",
+      "elapsedSeconds": 0.5555593,
+      "log": "C:\\mir2-build\\unified-20261029\\native-client-09-quest-practice.log",
+      "passed": 7,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "filter": "native_system_role_and_group_captions",
+      "exitCode": 0,
+      "startedAtUtc": "2026-10-29T14:24:47.8096487Z",
+      "elapsedSeconds": 0.4812187,
+      "log": "C:\\mir2-build\\unified-20261029\\native-client-10-native-system-role-and-group-captions.log",
+      "passed": 1,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "filter": "native_quest_counters_render_localized",
+      "exitCode": 0,
+      "startedAtUtc": "2026-10-29T14:24:48.2919156Z",
+      "elapsedSeconds": 0.4894593,
+      "log": "C:\\mir2-build\\unified-20261029\\native-client-11-native-quest-counters-render-localized.log",
+      "passed": 1,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "filter": "procurement_modal_and_close_frame",
+      "exitCode": 0,
+      "startedAtUtc": "2026-10-29T14:24:48.7824484Z",
+      "elapsedSeconds": 0.3927971,
+      "log": "C:\\mir2-build\\unified-20261029\\native-client-12-procurement-modal-and-close-frame.log",
+      "passed": 1,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "filter": "native_inventory_double_click",
+      "exitCode": 0,
+      "startedAtUtc": "2026-10-29T14:24:49.1763148Z",
+      "elapsedSeconds": 0.420099,
+      "log": "C:\\mir2-build\\unified-20261029\\native-client-13-native-inventory-double-click.log",
+      "passed": 8,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "filter": "guild_pixel_text",
+      "exitCode": 0,
+      "startedAtUtc": "2026-10-29T14:24:49.5975288Z",
+      "elapsedSeconds": 0.4095005,
+      "log": "C:\\mir2-build\\unified-20261029\\native-client-14-guild-pixel-text.log",
+      "passed": 3,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "filter": "crystal_ui::widget::tests::",
+      "exitCode": 0,
+      "startedAtUtc": "2026-10-29T14:24:50.0080333Z",
+      "elapsedSeconds": 0.4214782,
+      "log": "C:\\mir2-build\\unified-20261029\\native-client-15-crystal-ui-widget-tests.log",
+      "passed": 20,
+      "failed": 0,
+      "ignored": 0
+    }
+  ],
+  "phase": "initial integrated snapshot; historical relative to final1875 Game; no stale source pins treated as current"
+}

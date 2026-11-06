@@ -1,0 +1,205 @@
+{
+  "schemaVersion": 1,
+  "runId": "1793018136789-d65f6a9c",
+  "status": "ACTUAL_DIAGNOSTIC_PARTIAL_AOI_FAILURE_PRESERVED",
+  "report": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\native-steady-single-stage-diagnostic-v7\\episode-50\\reports\\1793018136789-d65f6a9c.report.json",
+    "bytes": 61790,
+    "sha256": "347f0b2dcf064cae30ff54fed8193a2111dd0409fc1dc3009d87b3b5aef84ade"
+  },
+  "raw": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\native-steady-single-stage-diagnostic-v7\\episode-50\\reports\\1793018136789-d65f6a9c.samples.jsonl",
+    "bytes": 24048333,
+    "rows": 41665,
+    "sha256": "52f20d740efddd18a88ee1f15d028a22cbc6f47b50d1d3df3a63ead4556d3f0a"
+  },
+  "selectedEvidence": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\steady-navigation-workspace-v7-aoi-analysis-v1\\selected-evidence-v1.json",
+    "bytes": 1594975,
+    "sha256": "a3f9e15f7f7a1aa67b2476db3905b970f6ddb3a7f83b4d8ed67578bec6149777"
+  },
+  "actualCompleteRawReadPassesByThisAnalysis": 1,
+  "knownOtherRawRead": "Root live-phase tail read32768B once; this analysis made the first complete streaming parse/hash. No claim that every tool globally read the file only once.",
+  "pair": {
+    "observer": "L0252cf0k",
+    "observerConnection": 21,
+    "owner": "L0252cf0c",
+    "ownerConnection": 13,
+    "observerPeerObjectId": 50012,
+    "ownerPeerObjectId": 50020
+  },
+  "originalResult": {
+    "runExitCodeReportedByRoot": 2,
+    "stages": [],
+    "phase": "bootstrap/settle",
+    "bootstrapCompleted": false,
+    "all50Admitted": true,
+    "safetyStopped": true,
+    "reason": "Persistent AOI loss, ghost or duplicate during active load",
+    "cleanupAllSevenTrueReportedByRoot": true,
+    "independent100Eligible": false,
+    "capacityAccepted": false,
+    "p0Accepted": false
+  },
+  "timeline": [
+    {
+      "line": 40093,
+      "observedAtMs": 1793018476372,
+      "observedAtUtc": "2026-10-26T12:41:16.372000+00:00",
+      "type": "playerLifecycle",
+      "actor": "L0252cf0k",
+      "source": "ObjectRemove",
+      "note": "Observer connection21 received ObjectRemove for owner object50012 at8476372; owner own ACK to(247,597) arrived on connection13 at8476380,8ms later. This prior boundary demonstrates independent socket observation order."
+    },
+    {
+      "line": 40486,
+      "observedAtMs": 1793018477813,
+      "observedAtUtc": "2026-10-26T12:41:17.813000+00:00",
+      "type": "playerLifecycle",
+      "actor": "L0252cf0k",
+      "source": "ObjectPlayer",
+      "note": "Observer received ObjectPlayer owner object50012 at(245,595); its own position(254,580). Owner current self was still(245,597) until later ACK, so received peer location and independent owner snapshot temporarily differed."
+    },
+    {
+      "line": 40515,
+      "observedAtMs": 1793018478000,
+      "observedAtUtc": "2026-10-26T12:41:18+00:00",
+      "type": "selfTransform",
+      "actor": "L0252cf0c",
+      "source": "UserLocation",
+      "note": "Owner UserLocation ACK from(245,597) to(245,595). With observer y580, owner/observer authoritative-snapshot Chebyshev distance15, within16."
+    },
+    {
+      "line": 40564,
+      "observedAtMs": 1793018478104,
+      "observedAtUtc": "2026-10-26T12:41:18.104000+00:00",
+      "type": "coverage",
+      "actor": null,
+      "source": null,
+      "note": "Nominal1s poll at8478104 had no issues. Pair snapshots were within range."
+    },
+    {
+      "line": 40779,
+      "observedAtMs": 1793018478656,
+      "observedAtUtc": "2026-10-26T12:41:18.656000+00:00",
+      "type": "selfTransform",
+      "actor": "L0252cf0k",
+      "source": "UserLocation",
+      "note": "Observer ACK to(252,580); owner remains y595, distance15."
+    },
+    {
+      "line": 40797,
+      "observedAtMs": 1793018478689,
+      "observedAtUtc": "2026-10-26T12:41:18.689000+00:00",
+      "type": "selfTransform",
+      "actor": "L0252cf0c",
+      "source": "UserLocation",
+      "note": "Owner ACK to(247,595); distance15."
+    },
+    {
+      "line": 40920,
+      "observedAtMs": 1793018479023,
+      "observedAtUtc": "2026-10-26T12:41:19.023000+00:00",
+      "type": "selfTransform",
+      "actor": "L0252cf0k",
+      "source": "UserLocation",
+      "note": "Observer ACK to(254,580); owner remains(247,595), distance15."
+    },
+    {
+      "line": 40925,
+      "observedAtMs": 1793018479103,
+      "observedAtUtc": "2026-10-26T12:41:19.103000+00:00",
+      "type": "selfTransform",
+      "actor": "L0252cf0c",
+      "source": "UserLocation",
+      "note": "Owner ACK to(247,597), first final transition to distance17. No later recorded owner or observer selfTransform returns this pair within16 before fatal."
+    },
+    {
+      "line": 40928,
+      "observedAtMs": 1793018479103,
+      "observedAtUtc": "2026-10-26T12:41:19.103000+00:00",
+      "type": "playerLifecycle",
+      "actor": "L0252cf0c",
+      "source": "ObjectRemove",
+      "note": "Owner connection13 removes observer object50020 in same observed millisecond as owner ACK. Reverse direction removal was received promptly; this does not establish observer connection21 delivery timing."
+    },
+    {
+      "line": 40929,
+      "observedAtMs": 1793018479105,
+      "observedAtUtc": "2026-10-26T12:41:19.105000+00:00",
+      "type": "coverage",
+      "actor": null,
+      "source": null,
+      "note": "Poll8479105 has no issues. Under unchanged AoiCoverage semantics this is consistent with starting a new extraSince timer for observer→owner, rather than yet failing. Timer internal value is not logged."
+    },
+    {
+      "line": 41134,
+      "observedAtMs": 1793018480110,
+      "observedAtUtc": "2026-10-26T12:41:20.110000+00:00",
+      "type": "continuousFailure",
+      "actor": null,
+      "source": null,
+      "note": "Poll8480110 reports one ghost: observerL0252cf0k→ownerL0252cf0c; activeOwners50; expectedPairs470/observedPairs465. Original safety fatal preserved."
+    },
+    {
+      "line": 41158,
+      "observedAtMs": 1793018480120,
+      "observedAtUtc": "2026-10-26T12:41:20.120000+00:00",
+      "type": "playerLifecycle",
+      "actor": "L0252cf0k",
+      "source": "ObjectRemove",
+      "note": "Observer connection21 receives owner ObjectRemove at8480120,1017ms after owner boundary ACK and10ms after fatal. Before-projection still contains owner at(247,595); after removes it."
+    },
+    {
+      "line": 41159,
+      "observedAtMs": 1793018480120,
+      "observedAtUtc": "2026-10-26T12:41:20.120000+00:00",
+      "type": "selfTransform",
+      "actor": "L0252cf0k",
+      "source": "UserLocation",
+      "note": "Observer UserLocation ACK to(252,580) follows Remove in connection sequence4488 vs4487, same wall millisecond. Distance to owner(247,597) stays17. Packet receipt order is recorded; server emit timestamps are absent."
+    }
+  ],
+  "intervals": {
+    "finalOwnerOutsideAckMs": 1793018479103,
+    "lastRecordedInRangeOwnerAckMs": 1793018478689,
+    "firstOutsidePollMs": 1793018479105,
+    "fatalPollMs": 1793018480110,
+    "observerRemoveMs": 1793018480120,
+    "ownerAckToObserverRemoveMs": 1017,
+    "ownerAckToFatalMs": 1007,
+    "firstOutsidePollToFatalWallMs": 1005,
+    "fatalToRemoveMs": 10,
+    "recordedReturnInRangeDuringFinalOutsideInterval": false,
+    "timerInstrumentationPresent": false,
+    "timerStartScope": "Inferred from received snapshot history and unchanged sample/reconcile code, not a recorded timer value; polling uses performance.now while row wall timestamps use Date.now."
+  },
+  "provenFacts": [
+    "The receiver had a real named player entry before the actual ObjectRemove; its last received peer coordinates remainedy595 while independent owner ACK wasy597.",
+    "All recorded owner/observer transforms stay Chebyshev17 from final ownerACK until fatal; no recorded short in-range interruption explains this as the old between-polls blind spot.",
+    "ObjectRemove did arrive; this evidence supports late relative receipt at this threshold boundary, not permanently lost Leave.",
+    "The original1000ms ghost guard fired10ms before the delayed receiver Remove. No threshold or report was changed."
+  ],
+  "reconcileAssessment": {
+    "code": {
+      "coreFile": "apps/web/scripts/playtest-capacity-soak-core.mjs",
+      "reconcileLines": "373-401",
+      "sampleLines": "403-444",
+      "derivedMainHookLine": 265,
+      "sameCanonicalNode9Aggregate": "cb8c542abdda05a3d6bc2fac7309a14bcb359517cfdb2eae5554e2f708bb03e1"
+    },
+    "scope": "The received-state hook is present in this derived main after super.observe. It can only clear existing timers when range/membership recovers. This final observed interval had no qualifying recovery until Remove after fatal; there is no evidence of a missed in-range clear. Exact hook invocation/internal clock contents are not logged."
+  },
+  "actionableNextInvestigation": [
+    "Correlate owner boundary movement with observer connection21 Zone outbound enqueue/send and receive timing for object50012; current public rows give receiver decode time only.",
+    "Compare the prompt reverse-direction Remove on connection13 with delayed connection21 Remove, preserving independent snapshots and packet sequence. Do not assume a shared server emit timestamp.",
+    "Keep original AOI fatal/1000ms threshold. This client trace alone does not justify changing range/grace or bypassing the independent100 eligibility guard."
+  ],
+  "unknown": [
+    "Server authoritative movement/visibility recalculation time and actual ObjectRemove enqueue/send time are not present.",
+    "Cannot distinguish Zone serialization/outbound wait, gateway/WebSocket queue, transport delay, client scheduling or a combination from these rows.",
+    "No connection-specific slow-stage correlation was read in this task. No unique server root cause, CPU capacity conclusion or causal navigation-cache effect is established.",
+    "Lifecycle player lists for ordinary peer events are intentionally peer-selected before this analysis; an empty filtered list on an unrelated peer event is not evidence that this owner was absent. Full packet capture is not claimed."
+  ],
+  "method": "Single binary stream simultaneously JSON-parsed and SHA256 hashed, retaining a bounded final60s ring; after fatal pair names were known, pair-only projections were wx persisted before summary. Summary reads only that persisted selection. Raw stat stable. No private input, old raw, tests, network or source writes."
+}

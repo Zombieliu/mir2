@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "startedAt": "2026-10-26T14:28:15.262Z",
+  "finishedAt": "2026-10-26T14:32:44.836Z",
+  "command": [
+    "C:\\Program Files\\nodejs\\node.exe",
+    "run-episode.mjs",
+    "--execute-diagnostic-episode",
+    "--actors=50",
+    "--manifest-sha256=a0ea651c2337c8cd79af6aa69e684669f888a31e24d762ca220334ab53376d41",
+    "--attack-results=v2"
+  ],
+  "cwd": "C:\\mir2-build\\p01-completion-20261024\\native-steady-single-stage-diagnostic-v9",
+  "actors": 50,
+  "manifestSha256": "a0ea651c2337c8cd79af6aa69e684669f888a31e24d762ca220334ab53376d41",
+  "passiveZoneDeliveryTrace": true,
+  "exitCode": 2,
+  "signal": null,
+  "error": null,
+  "stdoutFile": "C:\\mir2-build\\p01-completion-20261024\\zone-delivery-trace-v9-stage50-root-run-stdout-v1.log",
+  "stderrFile": "C:\\mir2-build\\p01-completion-20261024\\zone-delivery-trace-v9-stage50-root-run-stderr-v1.log",
+  "capacityAccepted": false
+}

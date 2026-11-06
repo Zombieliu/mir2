@@ -1,0 +1,43 @@
+{
+  "schema": "mir2.unified.evidence.phase.v1",
+  "passed": true,
+  "curatedAtUtc": "2026-10-29T17:39:26.624589+00:00",
+  "producerReceipt": {
+    "filename": "original-worktrees-final-preservation.json",
+    "bytes": 1372,
+    "sha256": "b360b68de4b0ffb7154cdb1c30ec78b687f5d8ea19349bf9bc233fed46d99586"
+  },
+  "producerReport": {
+    "schema": "mir2.unified.original-worktree-final-preservation.v1",
+    "passed": true,
+    "observedAtUtc": "2026-10-29T17:06:10.359466+00:00",
+    "readOnlySnapshots": [
+      {
+        "name": "original-main",
+        "root": "E:/mir2-player-journey",
+        "head": "b87f4071a2026ce96c85ca746ed69f207887a322",
+        "branch": "codex/windows-player-journey",
+        "workingPatchSha256": "b6b2f39120ae948789cf93bb229475b73cbbd10e66b832ec8850d8fd917dc176",
+        "workingPatchBytes": 72087,
+        "stagedPatchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stagedPatchBytes": 0,
+        "privatePatchContentsPublished": false,
+        "matchedInitialTrackedState": true
+      },
+      {
+        "name": "original-r10",
+        "root": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey",
+        "head": "d7a34129be0ecaa4dad4bf6bbfc28cb9e1b69844",
+        "branch": "codex/sui-usdc-recharge-20261029",
+        "workingPatchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "workingPatchBytes": 0,
+        "stagedPatchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stagedPatchBytes": 0,
+        "privatePatchContentsPublished": false,
+        "matchedInitialTrackedState": true
+      }
+    ],
+    "untrackedFilesModifiedByThisCheck": false
+  },
+  "phase": "Independent actual runtime or read-only observation; no source/test/build rerun by curator"
+}

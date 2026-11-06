@@ -1,0 +1,47 @@
+{
+  "passed": true,
+  "kind": "physical-build-path-correction-and-production-ads-probes-only",
+  "reports": [
+    {
+      "path": "short-build-worktree-move.json",
+      "sourceReceipt": {
+        "filename": "short-build-worktree-move.json",
+        "bytes": 405,
+        "sha256": "d3fab5a17abfb0c9ecf1054de9fde4c0cca3769641f088477deaa521d0f0f4f2",
+        "included": false
+      }
+    },
+    {
+      "path": "short-path-ads-pwsh.json",
+      "sourceReceipt": {
+        "filename": "short-path-ads-pwsh.json",
+        "bytes": 248,
+        "sha256": "c726edff3616c24a2aa460d7fb09ac0f145d22ba75b11fb4eb6cd7f7e0fec45c",
+        "included": false
+      }
+    },
+    {
+      "path": "short-path-ads-windows-powershell.json",
+      "sourceReceipt": {
+        "filename": "short-path-ads-windows-powershell.json",
+        "bytes": 278,
+        "sha256": "6212e320864ada9f370a2dd8bf72cbadb070cd1276989234902af9785d1416a6",
+        "included": false
+      }
+    }
+  ],
+  "sourceRevision": "24216899acd4301d8c3b1eff08b825f4896cc410",
+  "curatorRecheckedMovedHeadAndGameExe": true,
+  "nativeBuildAttestationBytesUnchanged": true,
+  "physicalWorktreeMoveOnly": true,
+  "productionPathOrAdsGatesRelaxed": false,
+  "maximumRepresentativePath": 236,
+  "powerShellHosts": [
+    "7.6.5",
+    "5.1.26100.9711"
+  ],
+  "bothHostsAcceptedNormalAndRejectedNamedStream": true,
+  "historicalEvidencePathsRewritten": false,
+  "actualPackageV5StatusAtThisPhase": "running, not asserted passed",
+  "actualCandidateOrInstallerPassedByThisReport": false
+}

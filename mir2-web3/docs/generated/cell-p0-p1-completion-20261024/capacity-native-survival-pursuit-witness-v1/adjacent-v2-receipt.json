@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "args": [
+    "--test",
+    "--test-name-pattern=^native hunt|^native scout|^temporary observer|^active observer|^navigation|^native fast|^native primed|^native fallback|^pending attack|^planned disconnect|^drain includes|^fanout latency|^real hit|^shared combat|^V2 admission|^attackResultV2|^native timing|^native attack pacing|^native calendar|^native evidence",
+    "apps/web/scripts/playtest-capacity-soak.test.mjs"
+  ],
+  "startedAtMs": 1792895716768,
+  "elapsedMs": 321,
+  "exitCode": 0,
+  "signal": null,
+  "error": null,
+  "sourcePins": [
+    {
+      "file": "apps/web/scripts/playtest-capacity-soak.mjs",
+      "bytes": 143423,
+      "sha256": "01db0e25728208d17468f708819cd4d1f134a81c97884614da06d06525929f6d"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-soak.test.mjs",
+      "bytes": 216821,
+      "sha256": "dbf345725668b465fd2c94472f25a224d3f0b381e6684241579026e41077950f"
+    }
+  ],
+  "log": {
+    "file": "C:/mir2-build/p01-completion-20261024/native-hp-pursuit-maintenance-v1/adjacent-v2.log",
+    "bytes": 14454,
+    "sha256": "26d25b4e7f502b673d3a3a7674d82846c3468dfba77e1ba174f904e805723fc0"
+  }
+}

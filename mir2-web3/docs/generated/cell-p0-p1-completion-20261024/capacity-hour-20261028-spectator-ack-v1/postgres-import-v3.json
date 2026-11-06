@@ -1,0 +1,20 @@
+{
+  "at": "2026-10-28T08:12:34.851Z",
+  "backend": "PostgreSQL16.15 SourceOfTruth",
+  "newCluster": true,
+  "importedAndExactlyReadbackAccounts": 500,
+  "importExitCode": 0,
+  "importer": {
+    "file": "C:/mir2-build/cell-preproduction-p0-p1-20261024/target/release/examples/capacity_pvp_fixture_import.exe",
+    "bytes": 7460352,
+    "sha256": "075a473ddca78a5703332575d5152d4c2503e98c07c967bfb99636897cec6308"
+  },
+  "fixture": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\server-only-pvp-capacity-v10\\fixture\\private\\accounts.json",
+    "bytes": 8637278,
+    "sha256": "b07428bd4b1407a57d3ed35260e470e904c749c31cfd85be3804c62ef6d24a9c"
+  },
+  "importerReuse": "Unchanged offline repository importer, distinct from new Gateway Release",
+  "capacityAccepted": false,
+  "p0Accepted": false
+}

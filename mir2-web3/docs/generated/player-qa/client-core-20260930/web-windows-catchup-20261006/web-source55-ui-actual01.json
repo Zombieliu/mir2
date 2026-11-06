@@ -1,0 +1,37 @@
+{
+  "schemaVersion": 1,
+  "owner": "Root",
+  "observedAtUtc": "2026-10-11T02:29:08.117Z",
+  "url": "http://127.0.0.1:19205/",
+  "ordinaryLoginAndStartGame": true,
+  "normalNameplateClick": {
+    "objectId": "206644",
+    "selected": true,
+    "offsetTileMovement": false,
+    "distance": 1,
+    "hp": 20,
+    "maxHp": 20
+  },
+  "combatDiagnostics": {
+    "attached": true,
+    "owns": true,
+    "rawPresent": false,
+    "snapshotPresent": false,
+    "input": {
+      "factsPresent": true,
+      "enabled": true,
+      "ownerMatched": false
+    },
+    "snapshotAccepted": null,
+    "edgeAccepted": false,
+    "uiHeld": [],
+    "frame": null,
+    "statusReady": false
+  },
+  "finding": "page captured raw exists but Host baseline missing; hook only ingests once and never recovers failed handoff",
+  "combatVerified": false,
+  "quest2RewardVerified": false,
+  "source56Required": true,
+  "candidateAccepted": false,
+  "goalComplete": false
+}

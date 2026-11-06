@@ -1,0 +1,15 @@
+{
+  "$schema": "../../../node_modules/wrangler/config-schema.json",
+  "name": "mir2-full-installer-downloads",
+  "main": "src/index.mjs",
+  "compatibility_date": "2026-10-30",
+  "workers_dev": false,
+  "preview_urls": false,
+  "routes": [
+    { "pattern": "assets.mir2.obelisk.build/client-updates/installers/3b926d5eb5dd8ee1fc46b6d39fba3eda3eb538ba257405733abe1defae840172/*", "zone_name": "obelisk.build" }
+  ],
+  "r2_buckets": [
+    { "binding": "MIR2_ASSETS", "bucket_name": "mir2-web3-assets" }
+  ],
+  "observability": { "enabled": true, "head_sampling_rate": 1 }
+}

@@ -1,0 +1,46 @@
+{
+  "schemaVersion": 1,
+  "completedAt": "2026-10-25T17:26:34.591Z",
+  "kind": "source-pins-only-resume-after-existing-account-provisioning",
+  "passed": true,
+  "partialStateNote": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\root-resume-probe16-source-pins-partial-state-v1.json",
+    "bytes": 4095,
+    "sha256": "29b082ab472060a624b04d160b20b1c01ecc06dfebe86d178b55506ab23c0ffc"
+  },
+  "resumeScript": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\root-resume-probe16-source-pins-v3.mjs",
+    "bytes": 18943,
+    "sha256": "587e954260768c9f6f54340ca741ae8d96fe7889c22d0bceabe49ec4ecfa82bd"
+  },
+  "originalPreparationSource": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-attack-deadline-feasibility-16\\prepare-inputs.mjs",
+    "bytes": 11638,
+    "sha256": "33f1801a462608e385a64acfa197688cf3c73b29936e957ee3dbdde78abf5dd6"
+  },
+  "sourcePins": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-attack-deadline-feasibility-16\\source-pins.json",
+    "bytes": 52715,
+    "sha256": "b57fa2153224644e7131cd69b10a3de221aeb3c041ad4a71d32c5b7ac681d24b"
+  },
+  "sourceConfigSha256": "5cc5e733fb47b05694e53de6caace2cff4c519eacbbd8feae3d6dfe2f12239d2",
+  "node": {
+    "file": "C:\\Program Files\\nodejs\\node.exe",
+    "bytes": 85202416,
+    "sha256": "c22d1c59a1f767a1ed0178445a027f2257d318c55430fc819d48f269586822b7"
+  },
+  "seeder": {
+    "file": "C:\\mir2-build\\cell-preproduction-p0-p1-20261024\\target\\debug\\seed_capacity_accounts.exe",
+    "bytes": 67982336,
+    "sha256": "b261ed037a2055e6a10964554a0da8a98719b95b5017317b11e623e0ff622094"
+  },
+  "accountPreparationRepeated": false,
+  "seederInvoked": false,
+  "privateValuesRead": false,
+  "privateMetadataChanged": false,
+  "accountsAddedHere": 0,
+  "charactersCreatedHere": 0,
+  "gameplayGrantsHere": 0,
+  "realmStarted": false,
+  "capacityAccepted": false
+}

@@ -1,0 +1,33 @@
+{
+  "projectedReport": {
+    "backendServicesModified": false,
+    "codePushed": true,
+    "databaseWritesExecuted": false,
+    "dockerStarted": false,
+    "domesticCdnAvailable": false,
+    "filedDownloadDomainAvailable": false,
+    "fiveClassBridge30Promoted": false,
+    "fiveClassSequenceKept": 24,
+    "fiveMinuteAcceptance": false,
+    "implementationRevision": "29a187a272acb4129e3de2cd37e6bbdf62bf11e3",
+    "intendedRegions": [
+      "mainland-china",
+      "overseas"
+    ],
+    "legacyBridge29Promoted": false,
+    "legacySequenceKept": 23,
+    "oldClientAutoMigrationEnabled": false,
+    "originPackedHttpChecksPassed": 137,
+    "originPackedSequence": 31,
+    "recordedUtc": "2026-10-29T09:26:29.5057877Z",
+    "regionalDeliveryAcceptance": false,
+    "schema": "mir2.windows.packed-rollout-decision.v1",
+    "sourceAndOfflineGameVerified": true,
+    "status": "held-for-performance"
+  },
+  "projectionBoundary": "Explicit fields only; raw log/body/attempt/env/argv/private config excluded.",
+  "role": "rollout-decision",
+  "schema": "mir2.evidence.public-projection.v1",
+  "sourceSha256": "DDAE2441B676945A8DB93F50DF198C34ADCE5024CEBEBFAA1EE00F5B1E8F099A",
+  "sourceSize": 1158
+}

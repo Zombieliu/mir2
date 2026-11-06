@@ -1,0 +1,62 @@
+{
+  "ok": true,
+  "applied": true,
+  "revision": "2b04e82c4f42b22f895f5f95b5bd79a8147eacdf",
+  "previousRevision": "6032ef8b3e27dd97bad0b20c8676ef9f185db64b",
+  "binarySha256": "1c2eab2da38f31c7a96c308fff80c00fccfe6b1edb6602878c2b5c8845c44d83",
+  "mapRoot": "/opt/mir2-playtest/releases/20aeb345f8bf584582acddef5c4ac3f4874458a1/crystal-map-pack",
+  "backup": "/var/backups/mir2-playtest-before-2b04e82c4f42b22f895f5f95b5bd79a8147eacdf",
+  "databaseDumpSha256": "9f1ebbc6dc07ffd0db43685841648937dff0b387e8a96d8e53860ffb50ae69b9",
+  "priorStop": {
+    "MainPID": "0",
+    "Result": "success",
+    "NRestarts": "0",
+    "ExecMainCode": "1",
+    "ExecMainStatus": "0"
+  },
+  "candidateStop": {
+    "MainPID": "0",
+    "Result": "success",
+    "NRestarts": "0",
+    "ExecMainCode": "1",
+    "ExecMainStatus": "0"
+  },
+  "candidateShutdownPanic": false,
+  "originalPid": "3855184",
+  "originalRelease": "/opt/mir2/gateway/releases/79ba815c0-checkpoint-base64",
+  "capacity": {
+    "maxWsConnections": 66,
+    "maxActiveSessions": 51,
+    "maxReconnectLeases": 51,
+    "maxLoginInFlight": 2,
+    "maxNewCharacterInFlight": 1,
+    "maxStartGameInFlight": 2,
+    "currentWsConnections": 0,
+    "currentActiveSessions": 0,
+    "currentReconnectLeases": 0,
+    "currentLoginInFlight": 0,
+    "currentNewCharacterInFlight": 0,
+    "currentStartGameInFlight": 0
+  },
+  "pid": "2930135",
+  "resourceLimitsUnchanged": {
+    "EffectiveCPUs": "",
+    "CPUWeight": "25",
+    "CPUQuotaPerSecUSec": "infinity",
+    "CPUQuotaPeriodUSec": "infinity",
+    "AllowedCPUs": "",
+    "MemoryMin": "0",
+    "MemoryLow": "0",
+    "MemoryHigh": "1468006400",
+    "MemoryMax": "1677721600",
+    "MemorySwapMax": "0",
+    "TasksMax": "9483",
+    "LimitNOFILE": "4096",
+    "CPUAffinity": "",
+    "DropInPaths": "/etc/systemd/system/mir2-playtest.service.d/50-periodic-b71.conf"
+  },
+  "envBeforeSha256": "77f12d974ca32103673181669803c89283c68cf34a952c0a177b721c1d013729",
+  "envAfterSha256": "77f12d974ca32103673181669803c89283c68cf34a952c0a177b721c1d013729",
+  "modifiedDropInPath": "/etc/systemd/system/mir2-playtest.service.d/50-periodic-b71.conf",
+  "baseUnitSha256Unchanged": "9bf1b374db39732ad7b59e6d468086eea8c4563fbfb3185ef3bf9dfd714551a9"
+}

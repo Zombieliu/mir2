@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "createdAt": "2026-10-25T04:55:04.463Z",
+  "scope": "Posthoc independent read-only rerun. The five helper imports resolve to the original frozen realm. Only the two terminal receipt writes are replaced by comparison with the existing public verification and one new external receipt. All inventory, raw/monitor/recording hash, privacy, projection and status checks are byte-identical.",
+  "original": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-halo-feasibility-11\\verify-public.mjs",
+    "bytes": 17281,
+    "sha256": "feb671e72188b3a2eb7fd996f1c61a374d21ebb12a7ecb135786ca38adfb85d5"
+  },
+  "preRunFreeze": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-halo-feasibility-11\\launcher-source-frozen-v1.json",
+    "bytes": 13975,
+    "sha256": "9275ec784473fd3a542648c70ebcd595bf42fc854290711fe0ece31fd5161b55"
+  },
+  "derived": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\verify-probe11-collected-readonly-v1.mjs",
+    "bytes": 18256,
+    "sha256": "1ce2e1a78b73a758076b60e607e941ce1a508f538589e447e293b1bc1e2ca8e0"
+  },
+  "changes": {
+    "staticImportRelocations": 5,
+    "terminalBlockReplaced": true,
+    "policyOrVerdictLogicChanged": false,
+    "exactInverse": true
+  },
+  "originalFilesModified": false,
+  "capacityAccepted": false
+}

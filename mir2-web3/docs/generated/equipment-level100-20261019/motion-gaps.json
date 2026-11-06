@@ -1,0 +1,591 @@
+{
+  "CWeapon/71|416|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead": {
+    "library": "CWeapon/71",
+    "genderOffset": 416,
+    "counts": {
+      "ok": 398,
+      "frame_out_of_range": 2
+    },
+    "referencesPresent": false,
+    "drawableEveryActionDirection": false,
+    "actions": [
+      {
+        "action": "Standing",
+        "direction": 0,
+        "counts": {
+          "ok": 4
+        }
+      },
+      {
+        "action": "Standing",
+        "direction": 1,
+        "counts": {
+          "ok": 4
+        }
+      },
+      {
+        "action": "Standing",
+        "direction": 2,
+        "counts": {
+          "ok": 4
+        }
+      },
+      {
+        "action": "Standing",
+        "direction": 3,
+        "counts": {
+          "ok": 4
+        }
+      },
+      {
+        "action": "Standing",
+        "direction": 4,
+        "counts": {
+          "ok": 4
+        }
+      },
+      {
+        "action": "Standing",
+        "direction": 5,
+        "counts": {
+          "ok": 4
+        }
+      },
+      {
+        "action": "Standing",
+        "direction": 6,
+        "counts": {
+          "ok": 4
+        }
+      },
+      {
+        "action": "Standing",
+        "direction": 7,
+        "counts": {
+          "ok": 4
+        }
+      },
+      {
+        "action": "Walking",
+        "direction": 0,
+        "counts": {
+          "ok": 6
+        }
+      },
+      {
+        "action": "Walking",
+        "direction": 1,
+        "counts": {
+          "ok": 6
+        }
+      },
+      {
+        "action": "Walking",
+        "direction": 2,
+        "counts": {
+          "ok": 6
+        }
+      },
+      {
+        "action": "Walking",
+        "direction": 3,
+        "counts": {
+          "ok": 6
+        }
+      },
+      {
+        "action": "Walking",
+        "direction": 4,
+        "counts": {
+          "ok": 6
+        }
+      },
+      {
+        "action": "Walking",
+        "direction": 5,
+        "counts": {
+          "ok": 6
+        }
+      },
+      {
+        "action": "Walking",
+        "direction": 6,
+        "counts": {
+          "ok": 6
+        }
+      },
+      {
+        "action": "Walking",
+        "direction": 7,
+        "counts": {
+          "ok": 6
+        }
+      },
+      {
+        "action": "Running",
+        "direction": 0,
+        "counts": {
+          "ok": 6
+        }
+      },
+      {
+        "action": "Running",
+        "direction": 1,
+        "counts": {
+          "ok": 6
+        }
+      },
+      {
+        "action": "Running",
+        "direction": 2,
+        "counts": {
+          "ok": 6
+        }
+      },
+      {
+        "action": "Running",
+        "direction": 3,
+        "counts": {
+          "ok": 6
+        }
+      },
+      {
+        "action": "Running",
+        "direction": 4,
+        "counts": {
+          "ok": 6
+        }
+      },
+      {
+        "action": "Running",
+        "direction": 5,
+        "counts": {
+          "ok": 6
+        }
+      },
+      {
+        "action": "Running",
+        "direction": 6,
+        "counts": {
+          "ok": 6
+        }
+      },
+      {
+        "action": "Running",
+        "direction": 7,
+        "counts": {
+          "ok": 6
+        }
+      },
+      {
+        "action": "Attack1",
+        "direction": 0,
+        "counts": {
+          "ok": 6
+        }
+      },
+      {
+        "action": "Attack1",
+        "direction": 1,
+        "counts": {
+          "ok": 6
+        }
+      },
+      {
+        "action": "Attack1",
+        "direction": 2,
+        "counts": {
+          "ok": 6
+        }
+      },
+      {
+        "action": "Attack1",
+        "direction": 3,
+        "counts": {
+          "ok": 6
+        }
+      },
+      {
+        "action": "Attack1",
+        "direction": 4,
+        "counts": {
+          "ok": 6
+        }
+      },
+      {
+        "action": "Attack1",
+        "direction": 5,
+        "counts": {
+          "ok": 6
+        }
+      },
+      {
+        "action": "Attack1",
+        "direction": 6,
+        "counts": {
+          "ok": 6
+        }
+      },
+      {
+        "action": "Attack1",
+        "direction": 7,
+        "counts": {
+          "ok": 6
+        }
+      },
+      {
+        "action": "Attack2",
+        "direction": 0,
+        "counts": {
+          "ok": 6
+        }
+      },
+      {
+        "action": "Attack2",
+        "direction": 1,
+        "counts": {
+          "ok": 6
+        }
+      },
+      {
+        "action": "Attack2",
+        "direction": 2,
+        "counts": {
+          "ok": 6
+        }
+      },
+      {
+        "action": "Attack2",
+        "direction": 3,
+        "counts": {
+          "ok": 6
+        }
+      },
+      {
+        "action": "Attack2",
+        "direction": 4,
+        "counts": {
+          "ok": 6
+        }
+      },
+      {
+        "action": "Attack2",
+        "direction": 5,
+        "counts": {
+          "ok": 6
+        }
+      },
+      {
+        "action": "Attack2",
+        "direction": 6,
+        "counts": {
+          "ok": 6
+        }
+      },
+      {
+        "action": "Attack2",
+        "direction": 7,
+        "counts": {
+          "ok": 6
+        }
+      },
+      {
+        "action": "Attack3",
+        "direction": 0,
+        "counts": {
+          "ok": 8
+        }
+      },
+      {
+        "action": "Attack3",
+        "direction": 1,
+        "counts": {
+          "ok": 8
+        }
+      },
+      {
+        "action": "Attack3",
+        "direction": 2,
+        "counts": {
+          "ok": 8
+        }
+      },
+      {
+        "action": "Attack3",
+        "direction": 3,
+        "counts": {
+          "ok": 8
+        }
+      },
+      {
+        "action": "Attack3",
+        "direction": 4,
+        "counts": {
+          "ok": 8
+        }
+      },
+      {
+        "action": "Attack3",
+        "direction": 5,
+        "counts": {
+          "ok": 8
+        }
+      },
+      {
+        "action": "Attack3",
+        "direction": 6,
+        "counts": {
+          "ok": 8
+        }
+      },
+      {
+        "action": "Attack3",
+        "direction": 7,
+        "counts": {
+          "ok": 8
+        }
+      },
+      {
+        "action": "Spell",
+        "direction": 0,
+        "counts": {
+          "ok": 6
+        }
+      },
+      {
+        "action": "Spell",
+        "direction": 1,
+        "counts": {
+          "ok": 6
+        }
+      },
+      {
+        "action": "Spell",
+        "direction": 2,
+        "counts": {
+          "ok": 6
+        }
+      },
+      {
+        "action": "Spell",
+        "direction": 3,
+        "counts": {
+          "ok": 6
+        }
+      },
+      {
+        "action": "Spell",
+        "direction": 4,
+        "counts": {
+          "ok": 6
+        }
+      },
+      {
+        "action": "Spell",
+        "direction": 5,
+        "counts": {
+          "ok": 6
+        }
+      },
+      {
+        "action": "Spell",
+        "direction": 6,
+        "counts": {
+          "ok": 6
+        }
+      },
+      {
+        "action": "Spell",
+        "direction": 7,
+        "counts": {
+          "ok": 6
+        }
+      },
+      {
+        "action": "Struck",
+        "direction": 0,
+        "counts": {
+          "ok": 3
+        }
+      },
+      {
+        "action": "Struck",
+        "direction": 1,
+        "counts": {
+          "ok": 3
+        }
+      },
+      {
+        "action": "Struck",
+        "direction": 2,
+        "counts": {
+          "ok": 3
+        }
+      },
+      {
+        "action": "Struck",
+        "direction": 3,
+        "counts": {
+          "ok": 3
+        }
+      },
+      {
+        "action": "Struck",
+        "direction": 4,
+        "counts": {
+          "ok": 3
+        }
+      },
+      {
+        "action": "Struck",
+        "direction": 5,
+        "counts": {
+          "ok": 3
+        }
+      },
+      {
+        "action": "Struck",
+        "direction": 6,
+        "counts": {
+          "ok": 3
+        }
+      },
+      {
+        "action": "Struck",
+        "direction": 7,
+        "counts": {
+          "ok": 3
+        }
+      },
+      {
+        "action": "Die",
+        "direction": 0,
+        "counts": {
+          "ok": 4
+        }
+      },
+      {
+        "action": "Die",
+        "direction": 1,
+        "counts": {
+          "ok": 4
+        }
+      },
+      {
+        "action": "Die",
+        "direction": 2,
+        "counts": {
+          "ok": 4
+        }
+      },
+      {
+        "action": "Die",
+        "direction": 3,
+        "counts": {
+          "ok": 4
+        }
+      },
+      {
+        "action": "Die",
+        "direction": 4,
+        "counts": {
+          "ok": 4
+        }
+      },
+      {
+        "action": "Die",
+        "direction": 5,
+        "counts": {
+          "ok": 4
+        }
+      },
+      {
+        "action": "Die",
+        "direction": 6,
+        "counts": {
+          "ok": 4
+        }
+      },
+      {
+        "action": "Die",
+        "direction": 7,
+        "counts": {
+          "ok": 3,
+          "frame_out_of_range": 1
+        }
+      },
+      {
+        "action": "Dead",
+        "direction": 0,
+        "counts": {
+          "ok": 1
+        }
+      },
+      {
+        "action": "Dead",
+        "direction": 1,
+        "counts": {
+          "ok": 1
+        }
+      },
+      {
+        "action": "Dead",
+        "direction": 2,
+        "counts": {
+          "ok": 1
+        }
+      },
+      {
+        "action": "Dead",
+        "direction": 3,
+        "counts": {
+          "ok": 1
+        }
+      },
+      {
+        "action": "Dead",
+        "direction": 4,
+        "counts": {
+          "ok": 1
+        }
+      },
+      {
+        "action": "Dead",
+        "direction": 5,
+        "counts": {
+          "ok": 1
+        }
+      },
+      {
+        "action": "Dead",
+        "direction": 6,
+        "counts": {
+          "ok": 1
+        }
+      },
+      {
+        "action": "Dead",
+        "direction": 7,
+        "counts": {
+          "frame_out_of_range": 1
+        }
+      }
+    ],
+    "issues": [
+      {
+        "action": "Die",
+        "direction": 7,
+        "phase": 3,
+        "index": 831,
+        "status": "frame_out_of_range"
+      },
+      {
+        "action": "Dead",
+        "direction": 7,
+        "phase": 0,
+        "index": 831,
+        "status": "frame_out_of_range"
+      }
+    ]
+  }
+}

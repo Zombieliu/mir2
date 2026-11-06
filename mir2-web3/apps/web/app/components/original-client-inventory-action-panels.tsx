@@ -326,7 +326,7 @@ export function inventoryItemFilterLabel(t: TranslateFn, filter: InventoryItemFi
 }
 
 /** Classify an item into one of the coarse filter buckets. */
-export function inventoryItemFilterFor(item: Pick<DisplayItem, "key" | "name" | "container">): InventoryItemFilter {
+export function inventoryItemFilterFor(item: Pick<DisplayItem, "key" | "name" | "container" | "equipSlot">): InventoryItemFilter {
   if (item.container === "quest") return "quest";
   if (equipmentSlotForItem(item)) return "equip";
   const haystack = `${item.key} ${item.name}`;
@@ -340,7 +340,7 @@ export function inventoryItemFilterFor(item: Pick<DisplayItem, "key" | "name" | 
 
 /** True when an item should be shown under the given active filter. */
 export function inventoryItemMatchesFilter(
-  item: Pick<DisplayItem, "key" | "name" | "container">,
+  item: Pick<DisplayItem, "key" | "name" | "container" | "equipSlot">,
   filter: InventoryItemFilter,
 ): boolean {
   if (filter === "all") return true;
@@ -514,7 +514,7 @@ export function InventoryContextMenu({
   y: number;
   /** Whether the item maps to an equipment slot (shows Equip vs Use). */
   canEquip: boolean;
-  /** Whether the stack can be split (quantity > 1). */
+  /** Whether this is a splittable stack, excluding equipment. */
   canSplit: boolean;
   /** Fired with the chosen action; the host decides which callbacks exist. */
   onAction: (action: InventoryContextAction) => void;
@@ -530,7 +530,7 @@ export function InventoryContextMenu({
     : [
         { action: "use", label: t("ui.useItem", [], "Use"), enabled: true },
         { action: "move", label: t("ui.moveItem", [], "Move"), enabled: true },
-        { action: "split", label: t("ui.splitItem", [], "Split Item"), enabled: canSplit },
+        ...(canSplit ? [{ action: "split" as const, label: t("ui.splitItem", [], "Split Item"), enabled: true }] : []),
         { action: "drop", label: t("ui.deleteItem"), enabled: true },
         { action: "sell", label: t("ui.sellItem", [], "Sell Item"), enabled: true },
       ];

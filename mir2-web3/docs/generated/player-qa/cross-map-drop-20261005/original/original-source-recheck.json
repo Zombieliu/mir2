@@ -1,0 +1,68 @@
+{
+  "sources": [
+    {
+      "file": "Server/MirObjects/MapObject.cs",
+      "sha256": "f465ee5fe84bc9fe6ab3ef9dd0c138c8c6b1dee83d1ea5b007cc5cb3afe53f7f",
+      "bytes": 35194,
+      "originalPath": "E:/mir2/Crystal/Server/MirObjects/MapObject.cs",
+      "snapshot": "C:/mir2-playtest-releases/20261004-native-r17/cross-map-drop-plan-01/original-source/Server/MirObjects/MapObject.cs"
+    },
+    {
+      "file": "Server/MirObjects/PlayerObject.cs",
+      "sha256": "48607c437fe56859c0fbc2a84195693395806e532e95bf5861aed9423a19ff11",
+      "bytes": 586620,
+      "originalPath": "E:/mir2/Crystal/Server/MirObjects/PlayerObject.cs",
+      "snapshot": "C:/mir2-playtest-releases/20261004-native-r17/cross-map-drop-plan-01/original-source/Server/MirObjects/PlayerObject.cs"
+    },
+    {
+      "file": "Server/MirObjects/MonsterObject.cs",
+      "sha256": "2cc4e673c589ad57452b4682c3bcb155b4b6b3027b1d3ee52a18a5ae1b7df98e",
+      "bytes": 147722,
+      "originalPath": "E:/mir2/Crystal/Server/MirObjects/MonsterObject.cs",
+      "snapshot": "C:/mir2-playtest-releases/20261004-native-r17/cross-map-drop-plan-01/original-source/Server/MirObjects/MonsterObject.cs"
+    },
+    {
+      "file": "Server/MirObjects/ItemObject.cs",
+      "sha256": "da52f31cd9d7ae51e05bae2f14c435c06048a6647e273d74b6be1312e18372e1",
+      "bytes": 15172,
+      "originalPath": "E:/mir2/Crystal/Server/MirObjects/ItemObject.cs",
+      "snapshot": "C:/mir2-playtest-releases/20261004-native-r17/cross-map-drop-plan-01/original-source/Server/MirObjects/ItemObject.cs"
+    },
+    {
+      "file": "Server/MirObjects/HumanObject.cs",
+      "sha256": "c4a4e060a6c88c41d869b4b3b6a78fe5a935e0456b8ee7c230db3d0596b299d3",
+      "bytes": 353159,
+      "originalPath": "E:/mir2/Crystal/Server/MirObjects/HumanObject.cs",
+      "snapshot": "C:/mir2-playtest-releases/20261004-native-r17/cross-map-drop-plan-01/original-source/Server/MirObjects/HumanObject.cs"
+    },
+    {
+      "file": "Server/MirEnvir/Map.cs",
+      "sha256": "4df569012db86428b82b3c4994a1b0e982b1da7b5ed0b58dcf1930020ed4d5d1",
+      "bytes": 104536,
+      "originalPath": "E:/mir2/Crystal/Server/MirEnvir/Map.cs",
+      "snapshot": "C:/mir2-playtest-releases/20261004-native-r17/cross-map-drop-plan-01/original-source/Server/MirEnvir/Map.cs"
+    },
+    {
+      "file": "Server/MirNetwork/MirConnection.cs",
+      "sha256": "fc7b59487d21171e48cb8ce0bfa29141f8bd52160298cc0069aee1cf4812d292",
+      "bytes": 81323,
+      "originalPath": "E:/mir2/Crystal/Server/MirNetwork/MirConnection.cs",
+      "snapshot": "C:/mir2-playtest-releases/20261004-native-r17/cross-map-drop-plan-01/original-source/Server/MirNetwork/MirConnection.cs"
+    },
+    {
+      "file": "Server/MirEnvir/Envir.cs",
+      "sha256": "13595bbff0963d8f5ddcbaa10947def81d60b41fb77b1a734238772097bf203f",
+      "bytes": 214372,
+      "originalPath": "E:/mir2/Crystal/Server/MirEnvir/Envir.cs",
+      "snapshot": "C:/mir2-playtest-releases/20261004-native-r17/cross-map-drop-plan-01/original-source/Server/MirEnvir/Envir.cs"
+    },
+    {
+      "file": "Server/Settings.cs",
+      "sha256": "c9fbfa492e33b1a4e07a79a86a002c7918418531b7bdf4ba6671916a38f2faec",
+      "bytes": 100436,
+      "originalPath": "E:/mir2/Crystal/Server/Settings.cs",
+      "snapshot": "C:/mir2-playtest-releases/20261004-native-r17/cross-map-drop-plan-01/original-source/Server/Settings.cs"
+    }
+  ],
+  "allExact": true
+}

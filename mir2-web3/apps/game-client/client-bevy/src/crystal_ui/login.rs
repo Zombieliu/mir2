@@ -3,6 +3,8 @@
 use bevy::prelude::*;
 use bevy::ui::{AlignItems, BackgroundColor, JustifyContent, Node, PositionType, UiRect, Val};
 
+use crate::native_i18n;
+use crate::native_login_locale::NativeUiLocale;
 use crate::native_shell::{LoginFocus, NativeShellModel};
 
 use super::assets::login_assets;
@@ -14,6 +16,7 @@ const FIELD_TEXT: Color = Color::srgb(0.96, 0.94, 0.90);
 const NOTICE_INFO: Color = Color::srgb(0.94, 0.88, 0.72);
 const NOTICE_ERROR: Color = Color::srgb(0.93, 0.47, 0.43);
 const CARET_BLINK_SECONDS: f32 = 0.5;
+const WALLET_LOGIN_BUTTON_RECT: CrystalRect = CrystalRect::new(378.0, 550.0, 268.0, 34.0);
 
 #[derive(Component)]
 pub struct CrystalLoginCaret {
@@ -36,6 +39,7 @@ pub enum CrystalLoginAction {
     RegisterAccount,
     ChangePassword,
     SafeKey,
+    DubheWallet,
     Cancel,
 }
 
@@ -117,12 +121,37 @@ pub fn spawn_login_screen(
     asset_server: &AssetServer,
     model: &NativeShellModel,
     masked_password: &str,
+    locale: NativeUiLocale,
 ) {
     let assets = login_assets();
     spawn_stage_frame(parent, asset_server, spec::login::PANEL);
-    spawn_stage_frame(parent, asset_server, spec::login::TITLE);
-    spawn_stage_frame(parent, asset_server, spec::login::ACCOUNT_LABEL);
-    spawn_stage_frame(parent, asset_server, spec::login::PASSWORD_LABEL);
+    if native_i18n::active() {
+        spawn_label(
+            parent,
+            "Login",
+            CrystalRect::new(368.0, 286.0, 288.0, 28.0),
+            20.0,
+            Justify::Center,
+        );
+        spawn_label(
+            parent,
+            "Account",
+            CrystalRect::new(352.0, 355.0, 77.0, 21.0),
+            12.0,
+            Justify::Right,
+        );
+        spawn_label(
+            parent,
+            "Password",
+            CrystalRect::new(352.0, 378.0, 77.0, 21.0),
+            12.0,
+            Justify::Right,
+        );
+    } else {
+        spawn_stage_frame(parent, asset_server, spec::login::TITLE);
+        spawn_stage_frame(parent, asset_server, spec::login::ACCOUNT_LABEL);
+        spawn_stage_frame(parent, asset_server, spec::login::PASSWORD_LABEL);
+    }
 
     spawn_login_field(
         parent,
@@ -155,7 +184,7 @@ pub fn spawn_login_screen(
         assets.new_account,
         CrystalLoginAction::RegisterAccount,
         matches!(model.login.focus, LoginFocus::NewAccountButton),
-        model.login.is_ready(),
+        true,
     );
     spawn_crystal_image_button(
         parent,
@@ -184,6 +213,32 @@ pub fn spawn_login_screen(
         false,
         true,
     );
+
+    parent
+        .spawn((
+            Button,
+            CrystalLoginAction::DubheWallet,
+            Node {
+                position_type: PositionType::Absolute,
+                left: Val::Px(WALLET_LOGIN_BUTTON_RECT.left),
+                top: Val::Px(WALLET_LOGIN_BUTTON_RECT.top),
+                width: Val::Px(WALLET_LOGIN_BUTTON_RECT.width),
+                height: Val::Px(WALLET_LOGIN_BUTTON_RECT.height),
+                justify_content: JustifyContent::Center,
+                align_items: AlignItems::Center,
+                border: UiRect::all(Val::Px(1.0)),
+                ..default()
+            },
+            BorderColor::all(Color::srgb(0.67, 0.51, 0.24)),
+            BackgroundColor(Color::srgba(0.12, 0.10, 0.07, 0.96)),
+        ))
+        .with_children(|button| {
+            button.spawn((
+                Text::new(locale.wallet_entry()),
+                login_font(14.0),
+                TextColor(NOTICE_INFO),
+            ));
+        });
 
     if let Some(notice) = &model.notice {
         spawn_notice(
@@ -215,6 +270,40 @@ fn spawn_stage_frame(
     ));
 }
 
+fn spawn_label(
+    parent: &mut ChildSpawnerCommands,
+    label: &str,
+    rect: CrystalRect,
+    size: f32,
+    justify: Justify,
+) {
+    parent.spawn((
+        Node {
+            position_type: PositionType::Absolute,
+            left: Val::Px(rect.left),
+            top: Val::Px(rect.top),
+            width: Val::Px(rect.width),
+            height: Val::Px(rect.height),
+            ..default()
+        },
+        Text::new(native_i18n::tr(label)),
+        super::typography::crystal_text_font(size),
+        TextColor(FIELD_TEXT),
+        TextLayout::justify(justify),
+    ));
+}
+
+fn login_font(size: f32) -> TextFont {
+    if native_i18n::active() {
+        super::typography::crystal_text_font(size)
+    } else {
+        TextFont {
+            font_size: FontSize::Px(size),
+            ..default()
+        }
+    }
+}
+
 fn spawn_login_field(
     parent: &mut ChildSpawnerCommands,
     rect: CrystalRect,
@@ -241,20 +330,14 @@ fn spawn_login_field(
         .with_children(|field| {
             field.spawn((
                 Text::new(text.to_owned()),
-                TextFont {
-                    font_size: FontSize::Px(10.0),
-                    ..default()
-                },
+                login_font(10.0),
                 TextColor(FIELD_TEXT),
             ));
             if focused {
                 field.spawn((
                     CrystalLoginCaret::default(),
                     Text::new("|"),
-                    TextFont {
-                        font_size: FontSize::Px(10.0),
-                        ..default()
-                    },
+                    login_font(10.0),
                     TextColor(FIELD_TEXT),
                     Visibility::Visible,
                 ));
@@ -289,11 +372,8 @@ fn spawn_notice(parent: &mut ChildSpawnerCommands, text: &str, is_error: bool) {
         },))
         .with_children(|notice| {
             notice.spawn((
-                Text::new(text.to_owned()),
-                TextFont {
-                    font_size: FontSize::Px(15.0),
-                    ..default()
-                },
+                Text::new(native_i18n::tr(text)),
+                login_font(15.0),
                 TextColor(if is_error { NOTICE_ERROR } else { NOTICE_INFO }),
             ));
         });
@@ -329,6 +409,30 @@ mod tests {
         assert_eq!(buttons[0].rect, CrystalRect::new(575.0, 355.0, 42.0, 42.0));
         assert_eq!(buttons[1].rect.top, 437.0);
         assert_eq!(buttons[4].rect.left, 514.0);
+    }
+
+    #[test]
+    fn wallet_entry_does_not_overlap_classic_login_controls_or_notice() {
+        for element in LOGIN_ELEMENT_SPECS.iter().filter(|element| {
+            matches!(
+                element.kind,
+                LoginElementKind::AccountField
+                    | LoginElementKind::PasswordField
+                    | LoginElementKind::OkButton
+                    | LoginElementKind::NewAccountButton
+                    | LoginElementKind::ChangePasswordButton
+                    | LoginElementKind::SafeKeyButton
+                    | LoginElementKind::CancelButton
+            )
+        }) {
+            assert!(
+                WALLET_LOGIN_BUTTON_RECT.top >= element.rect.top + element.rect.height,
+                "wallet button overlaps {:?}",
+                element.kind
+            );
+        }
+        assert!(WALLET_LOGIN_BUTTON_RECT.top >= 540.0);
+        assert!(WALLET_LOGIN_BUTTON_RECT.top + WALLET_LOGIN_BUTTON_RECT.height <= 768.0);
     }
 
     #[test]

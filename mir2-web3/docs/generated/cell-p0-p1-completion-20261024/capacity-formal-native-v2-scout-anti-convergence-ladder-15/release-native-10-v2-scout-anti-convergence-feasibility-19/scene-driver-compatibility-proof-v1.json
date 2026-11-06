@@ -1,0 +1,56 @@
+{
+  "schemaVersion": 1,
+  "scope": "Only three unchanged geometry function bodies are compared. Anti-convergence is a planning preference change; no static A* or capacity run was rerun.",
+  "actualCodeCommit": "4fb58ade4aa95b677bb795625d01da542a84a3f7",
+  "driverSourceSha256": "3b0a0a8300744d6e0d34315f7bbab934252e1e70b124353ae7cf7a2398952df8",
+  "historicalMain": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\native-chase-preference-main-before-v1.mjs.txt",
+    "bytes": 144416,
+    "sha256": "2251b3a9cbdc391ecc0e68f17f7568468d677550a0f7425604a1ec0a7a485a42"
+  },
+  "currentMain": {
+    "file": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/apps/web/scripts/playtest-capacity-soak.mjs",
+    "bytes": 155475,
+    "sha256": "6c2f4e3dfcbc38465a13cf05c8c8945fdb4fe7c99acaea43dfad493fb77696d8"
+  },
+  "priorCompatibilityProof": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-observer-feasibility-18\\scene-driver-compatibility-proof-v1.json",
+    "bytes": 2535,
+    "sha256": "31941ce952a31916bb8ca14abba4647efe012a72fbf81c45e708a8d61ab2f4ef"
+  },
+  "driverFreeze": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\capacity-scout-anti-convergence-driver-frozen-v1.json",
+    "bytes": 9472,
+    "sha256": "ed0d9783871dd74107c3ec7980574a31acf06a1ed7c5daac40f1f94e78a40182"
+  },
+  "geometryFunctions": {
+    "validateNativeExplicitHomes": {
+      "bytes": 3186,
+      "sha256": "644a4305de903c0451ff0faec2e2df4942f40739d06df9f03e727e03346d3f05",
+      "rawBytes": 3186,
+      "rawSha256": "644a4305de903c0451ff0faec2e2df4942f40739d06df9f03e727e03346d3f05",
+      "oldAndNewExact": true,
+      "rawAndNormalizedBodyExact": true
+    },
+    "validateNativeCombatClusters": {
+      "bytes": 1815,
+      "sha256": "b9e09ba7aa3d58bf3c9aec9da776076599b41baefb68568c04b9d268dbc39443",
+      "rawBytes": 1815,
+      "rawSha256": "b9e09ba7aa3d58bf3c9aec9da776076599b41baefb68568c04b9d268dbc39443",
+      "oldAndNewExact": true,
+      "rawAndNormalizedBodyExact": true
+    },
+    "insideCombatCoverage": {
+      "bytes": 287,
+      "sha256": "9f5b5a85a555e8c8bd2ef0473422ec656ccd4dca66d03e9ef9759a30a65784e1",
+      "rawBytes": 287,
+      "rawSha256": "9f5b5a85a555e8c8bd2ef0473422ec656ccd4dca66d03e9ef9759a30a65784e1",
+      "oldAndNewExact": true,
+      "rawAndNormalizedBodyExact": true
+    }
+  },
+  "geometryFunctionsExact": true,
+  "wholeMainReverseRawExact": false,
+  "originalAStarReexecuted": false,
+  "capacityAccepted": false
+}

@@ -1,0 +1,354 @@
+{
+  "schemaVersion": 1,
+  "publicChild": "protocol-full-lifecycle-scout-observer-preference-v1",
+  "preparedAt": "2026-10-25T21:38:12.944Z",
+  "scope": "Exact closed public16 plus current source/preparation/actualRoot evidence; no private/bin/recording, no wildcard source discovery. Reused c743 backend with current H driver/execution. Public copy not yet executed.",
+  "files": [
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-observer-preference-v1\\public\\1792963900426-f1496383.audit-source.mjs",
+        "bytes": 9481,
+        "sha256": "da2636cb33f6ce11454f45e0f684c79e98173f591c7e62bfdc0c9324794723ce"
+      },
+      "destination": "public/1792963900426-f1496383.audit-source.mjs"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-observer-preference-v1\\public\\1792963900426-f1496383.backend-source.json",
+        "bytes": 41831,
+        "sha256": "f9199f375175782b46dc0d18589cd714e2a2a75d7b8fad662af64c700d417ec5"
+      },
+      "destination": "public/1792963900426-f1496383.backend-source.json"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-observer-preference-v1\\public\\1792963900426-f1496383.independent-audit.json",
+        "bytes": 1907,
+        "sha256": "92a72770bab2e302537eda593baf72a8cb5438a0d6956fa171e2f7e80128533f"
+      },
+      "destination": "public/1792963900426-f1496383.independent-audit.json"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-observer-preference-v1\\public\\1792963900426-f1496383.prepared-profile.json",
+        "bytes": 4571,
+        "sha256": "8736f7c2f3c002a8a57b972cb9d5ba6be09d83a224ffcd444b277dd49f9ade98"
+      },
+      "destination": "public/1792963900426-f1496383.prepared-profile.json"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-observer-preference-v1\\public\\1792963900426-f1496383.realm-evidence.json",
+        "bytes": 35109,
+        "sha256": "f41f368182319ad881c960fcd59ba3150381751de6679683d8bed6fef59df0e3"
+      },
+      "destination": "public/1792963900426-f1496383.realm-evidence.json"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-observer-preference-v1\\public\\1792963900426-f1496383.release-input.json",
+        "bytes": 3343,
+        "sha256": "8a8228a97e4ea2005f3e47839868ba2a90615028e1c7da573130f8663c15c9fc"
+      },
+      "destination": "public/1792963900426-f1496383.release-input.json"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-observer-preference-v1\\public\\1792963900426-f1496383.runner-source.mjs",
+        "bytes": 14494,
+        "sha256": "b1bf77146f5f6cdddc93198b2bf0d21ebc0ef0522ed47ec34a4a2755e2e65802"
+      },
+      "destination": "public/1792963900426-f1496383.runner-source.mjs"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-observer-preference-v1\\public\\1792963900426-f1496383.source-manifest-verification.json",
+        "bytes": 717,
+        "sha256": "4c580c3b6e29e8a4bc0440698c3f007c75b7db827ae0439f51c8ccd97a79ba3d"
+      },
+      "destination": "public/1792963900426-f1496383.source-manifest-verification.json"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-observer-preference-v1\\public\\1792963900426-f1496383.zone-metrics.json",
+        "bytes": 23593,
+        "sha256": "d2cbe34bdf3405f4d44c480549ffbbef5e02739475e646b027f57ed719081ede"
+      },
+      "destination": "public/1792963900426-f1496383.zone-metrics.json"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-observer-preference-v1\\public\\1792963911146-f4437694-a.trace.jsonl",
+        "bytes": 982984,
+        "sha256": "bff94267486f19494628a7a106f45c656f90d0f0044d0d724397848afe0afe89"
+      },
+      "destination": "public/1792963911146-f4437694-a.trace.jsonl"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-observer-preference-v1\\public\\1792963911146-f4437694-b.trace.jsonl",
+        "bytes": 908448,
+        "sha256": "9ec1ab4fb027908a5b524c8ac9095e76784d8e335bd5040f7f5519b761857a18"
+      },
+      "destination": "public/1792963911146-f4437694-b.trace.jsonl"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-observer-preference-v1\\public\\1792963911146-f4437694-guard-newCharacter.trace.jsonl",
+        "bytes": 3486,
+        "sha256": "d2349f826580d669c54c3cf1d9c801a80cf5ef84776a9de3d34dcc853403bc0d"
+      },
+      "destination": "public/1792963911146-f4437694-guard-newCharacter.trace.jsonl"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-observer-preference-v1\\public\\1792963911146-f4437694-guard-startGame.trace.jsonl",
+        "bytes": 3450,
+        "sha256": "c8fdf014325402531e4ec75be4725e50e151a0c6c84db15931da9297f74cdc7c"
+      },
+      "destination": "public/1792963911146-f4437694-guard-startGame.trace.jsonl"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-observer-preference-v1\\public\\1792963911146-f4437694-relogin-0.trace.jsonl",
+        "bytes": 685108,
+        "sha256": "b4ab57e86cb079273484a0a8d44299731bc82d22e6c5535e049a7737630b7e9f"
+      },
+      "destination": "public/1792963911146-f4437694-relogin-0.trace.jsonl"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-observer-preference-v1\\public\\1792963911146-f4437694-relogin-1.trace.jsonl",
+        "bytes": 680202,
+        "sha256": "35bf1edfa2085531587106509dff6e48c8095e4af06891217af8f07904ddf8a4"
+      },
+      "destination": "public/1792963911146-f4437694-relogin-1.trace.jsonl"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-observer-preference-v1\\public\\1792963911146-f4437694.report.json",
+        "bytes": 109384,
+        "sha256": "8e635a13d012553e140ddb0633771c4f1e2cb4596026a60153f0bfe5198460c7"
+      },
+      "destination": "public/1792963911146-f4437694.report.json"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-observer-preference-v1\\verify-inputs.mjs",
+        "bytes": 14002,
+        "sha256": "ac97e49bc729d6fef822c800b7090cddad4d41fb256da101fa1d5fef15e508cd"
+      },
+      "destination": "preparation/verify-inputs.mjs"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-observer-preference-v1\\finalize-launcher-inputs.mjs",
+        "bytes": 2416,
+        "sha256": "b7c9bca1ac42af49828b49163638f3f6dd1b005aea26d4f73a5ccd27ad343b33"
+      },
+      "destination": "preparation/finalize-launcher-inputs.mjs"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-observer-preference-v1\\projection-build-source-lib.mjs",
+        "bytes": 223,
+        "sha256": "4d8e456917179f8d516e39a0b6aad10be82bbd60da52ba60f1e606cc866038ce"
+      },
+      "destination": "preparation/projection-build-source-lib.mjs"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-observer-preference-v1\\initialize-fresh-private.ps1",
+        "bytes": 1643,
+        "sha256": "c3a8ddecafe8c82752d963ee3237b55b25841d9674af83ea791e67ef8a82fd77"
+      },
+      "destination": "preparation/initialize-fresh-private.ps1"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-observer-preference-v1\\frozen-audit-support.mjs",
+        "bytes": 46572,
+        "sha256": "3988052a4ba9de791dbdb887b267eced6ca8bc915fa5676228f6d70c0761f4d5"
+      },
+      "destination": "preparation/frozen-audit-support.mjs"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-observer-preference-v1\\candidate-release-binding-v1.json",
+        "bytes": 3130,
+        "sha256": "91ea704e2b7225a70d6469da82eca9f1878f21a0473ab85de86333279bb33929"
+      },
+      "destination": "preparation/candidate-release-binding-v1.json"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-observer-preference-v1\\launcher-final-binding-v1.json",
+        "bytes": 2409,
+        "sha256": "3c219d03f6fa7182669412ba5d9f69c27140dd1c3e0a8638730da8e2e7c2dbf5"
+      },
+      "destination": "preparation/launcher-final-binding-v1.json"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-observer-preference-v1\\template-prepared-v2.json",
+        "bytes": 6774,
+        "sha256": "1d91d04d6910a07bba1df58970d1e2c8b814683cfeacf523e6a6d9423dddac59"
+      },
+      "destination": "preparation/template-prepared-v2.json"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-observer-preference-v1\\derivation-proof-v2.json",
+        "bytes": 21974,
+        "sha256": "f9aae1e6d2b19d027bd748159ad1d955072021b1db8aa885984e80dc59b065c2"
+      },
+      "destination": "preparation/derivation-proof-v2.json"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-observer-preference-v1\\syntax-check-v2.json",
+        "bytes": 2181,
+        "sha256": "7c83827fd66bfbd47f5d7c4e41ae7c6904e54fa53a54b6c0e67ac75bf027b9f7"
+      },
+      "destination": "preparation/syntax-check-v2.json"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-observer-preference-v1\\README.md",
+        "bytes": 1827,
+        "sha256": "f11efe3b8aae8eef3e285b7f2efc739e7441c7fccb8ac8e4bf6d55f1e6ae4ae8"
+      },
+      "destination": "preparation/README-PREPARED.md"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-observer-independent-review-v1\\prepared-review-v2.json",
+        "bytes": 3434,
+        "sha256": "70917695899d44bb909d2875d1a6fa041988cab9ae3db393aaa207cf4e2149eb"
+      },
+      "destination": "review/prepared-review-v2.json"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\scout-observer-full16-actual-independent-review-v1.json",
+        "bytes": 4775,
+        "sha256": "5a504f85a598fe3c67f971ce8960b90f5a8b1ded1a863a2c88b6cde071e1ae9d"
+      },
+      "destination": "review/scout-observer-full16-actual-independent-review-v1.json"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\scout-observer-preference-runtime-v1\\source-lib-v1.mjs",
+        "bytes": 33531,
+        "sha256": "9b12d67e7e31eb0ada4550c9aceb8dd9c0e64e74892007b4ffc8d0fa710b366f"
+      },
+      "destination": "source/runtime/source-lib-v1.mjs"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\scout-observer-preference-runtime-v1\\current-execution-binding-v1.json",
+        "bytes": 1404,
+        "sha256": "665051040cc0a966cb48d0e8e46782cdb617279c537cc36953f096309ed8f18d"
+      },
+      "destination": "source/runtime/current-execution-binding-v1.json"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\capacity-scout-observer-preference-driver-frozen-v1.json",
+        "bytes": 9465,
+        "sha256": "1cf08b52d98d557fa17ea66e336e3adbf6495cb4cb086b22bec461b713ae696e"
+      },
+      "destination": "source/capacity-scout-observer-preference-driver-frozen-v1.json"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\scout-observer-preference-root-full-driver-receipt-v1.json",
+        "bytes": 5378,
+        "sha256": "00dbc4862d8919a6ce52a45de66cb7e46434b66715ee08d63b0117cf253a78e1"
+      },
+      "destination": "source/scout-observer-preference-root-full-driver-receipt-v1.json"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\scout-observer-runtime-readonly-guard-stdout-v1.log",
+        "bytes": 513,
+        "sha256": "caa541b94ea55b725acba6d663583bd2222e1922c8a0a0d6adef8b88bb6bc4ce"
+      },
+      "destination": "source/runtime/scout-observer-runtime-readonly-guard-stdout-v1.log"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\scout-observer-full16-root-finalize-stdout-v2.log",
+        "bytes": 331,
+        "sha256": "6943851fcdc28b0628e5748a71bfd806da5282d57e29de010770238583fc605f"
+      },
+      "destination": "execution/scout-observer-full16-root-finalize-stdout-v2.log"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\scout-observer-full16-root-finalize-stderr-v2.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "destination": "execution/scout-observer-full16-root-finalize-stderr-v2.log"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\scout-observer-full16-root-run-stdout-v1.log",
+        "bytes": 1832,
+        "sha256": "bf455d636f6fef2ce18762b1f50689b2736fbfa53f53b2661ced6be7735f854d"
+      },
+      "destination": "execution/scout-observer-full16-root-run-stdout-v1.log"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\scout-observer-full16-root-run-stderr-v1.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "destination": "execution/scout-observer-full16-root-run-stderr-v1.log"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\scout-observer-full16-root-audit-stdout-v1.log",
+        "bytes": 1646,
+        "sha256": "810ce5f3acb38be754b2b5e241c90a86517ab084a161cc4d21bbcfa17057ab1d"
+      },
+      "destination": "execution/scout-observer-full16-root-audit-stdout-v1.log"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\scout-observer-full16-root-audit-stderr-v1.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "destination": "execution/scout-observer-full16-root-audit-stderr-v1.log"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\scout-observer-full16-root-independent-cleanup-v1.json",
+        "bytes": 322,
+        "sha256": "26b848d824fea7880bd038f3e30b6b1851422c4d924bb9de3a8108c23387423a"
+      },
+      "destination": "execution/scout-observer-full16-root-independent-cleanup-v1.json"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\scout-observer-full16-public-archive-v1\\full16-actual-prerequisite-v1.json",
+        "bytes": 4922,
+        "sha256": "2fd5bb822e631128ff483528ea09b74cd2e4db1316107ffb5c57b579bf8d2157"
+      },
+      "destination": "full16-actual-prerequisite-v1.json"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\scout-observer-full16-public-archive-v1\\copy-public-v1.mjs",
+        "bytes": 6019,
+        "sha256": "17a9ac1dbc87df0642fb17ea2df7f5d016ab6c1d7430b43f87ee8823e7510d80"
+      },
+      "destination": "archive-tools/copy-public-v1.mjs"
+    }
+  ],
+  "totalCopiedBytes": 3684831,
+  "readme": "# Fresh ordinary full16 under scout observer execution H\n\nRoot ran a new isolated two-account ordinary protocol lifecycle: all16 checks passed,351 ordinary sent commands, six capacity counters zero before/after, normal exit0 and first no-loot attempt preserved. [Actual independent audit](public/1792963900426-f1496383.independent-audit.json), [protocol report](public/1792963911146-f4437694.report.json), [realm evidence](public/1792963900426-f1496383.realm-evidence.json) and [Root OS cleanup](execution/scout-observer-full16-root-independent-cleanup-v1.json) bind realm1792963900426-f1496383/run1792963911146-f4437694.\n\nThe backend remains original c743/50/dae1. Execution and capacity Node driver are H=3a6d8c862d03ded3133605472a8f38bc6258af52; the original Release keeps historical driver d240. No new Rust build or Release was made. [Source verification](public/1792963900426-f1496383.source-manifest-verification.json), [runtime reader](source/runtime/source-lib-v1.mjs), [current binding](source/runtime/current-execution-binding-v1.json) and [Root actual readonly check](source/runtime/scout-observer-runtime-readonly-guard-stdout-v1.log) preserve these distinct identities. The six full16 ordinary driver pins are independent of capacity Node9/[actual219 source tests](source/scout-observer-preference-root-full-driver-receipt-v1.json). Historical341 commands are not this351 result.\n\n[Prepared v2 QA](review/prepared-review-v2.json) and [actual result QA](review/scout-observer-full16-actual-independent-review-v1.json) are separate. The preparation tool path-separator correction was made before any full16 execution; old v1 preparation/review remain original external history. [Root finalization output](execution/scout-observer-full16-root-finalize-stdout-v2.log), [run output](execution/scout-observer-full16-root-run-stdout-v1.log), [audit output](execution/scout-observer-full16-root-audit-stdout-v1.log) and [exact16 prerequisite pins](full16-actual-prerequisite-v1.json) preserve actual execution evidence.\n\nThe six public traces are copied byte-for-byte after Root audit. This archive only hashes/copies them; it does not re-execute the audit or replay packets. No private data, executable or recording is copied. Capacity/P0 acceptance remains false, human frontend acceptance is absent, P2 remains frozen. This successful full16 is not a new probe18 or formal result. Original backend build evidence remains in the [existing Release archive](../capacity-account-store-wait-diagnostics-release-v1/README.md).\n"
+}

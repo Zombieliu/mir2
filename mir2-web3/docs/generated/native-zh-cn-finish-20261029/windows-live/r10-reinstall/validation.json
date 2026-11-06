@@ -1,0 +1,188 @@
+{
+  "passed": true,
+  "kind": "actual-r10-uninstall-same-setup-reinstall-and-locale-persistence",
+  "gameSourceRevision": "24216899acd4301d8c3b1eff08b825f4896cc410",
+  "updaterSourceRevision": "81942dda7fa09e869d42fb9560e57abdbd542495",
+  "updaterSequence": 2026102910,
+  "uninstall": {
+    "exitCode": 0,
+    "elapsedSeconds": 16.3992197,
+    "separateAppId": true,
+    "registrationAbsent": true,
+    "gameExeRemoved": true
+  },
+  "reinstall": {
+    "exitCode": 0,
+    "elapsedSeconds": 263.7015644,
+    "sameImmutableSetupAsFirst": true,
+    "setupSha256": "6a196bc8010b95bed6c94ee9472ee56897bc7a23ac5e02e0bc72eb65176b16c8"
+  },
+  "installedGameClosureFiles": 255027,
+  "fullPayloadHashVerifiedThisPhase": false,
+  "fullPayloadHashEvidence": "../r10-first-runtime/installed-identity-verification.json",
+  "selectedGamePayloadHashesVerified": 7,
+  "gameMetadataHashesVerified": 4,
+  "updaterFilesVerified": 9,
+  "profileHashesPreservedAcrossReinstall": 3,
+  "localePreferenceAndSeedSurvivedUninstall": true,
+  "localeAfterReinstall": "zh-CN",
+  "normalRegistrationGameAndGlobalPreferencesUnchanged": true,
+  "fullNoArgumentLauncherChain": true,
+  "directGameLaunch": false,
+  "actualLauncherPid": 91660,
+  "actualUpdaterPid": 66376,
+  "actualGamePid": 56712,
+  "assetRootOverride": false,
+  "defaultInstalledAssetsComplete": true,
+  "defaultAssetDiscoveryLine": "[platform-windows] asset_root=F:\\mir2-build\\native-zh-cn-finish-20261029\\installed-validation\\game\\mir2-assets has_map_layout=true has_entity_manifest=true has_map_manifest=true has_native_map_keyed_manifest=true has_effect_manifest=true has_character_wings=true has_crystal_cursors=true complete=true",
+  "screenshots": [
+    {
+      "image": "r10-reinstall-startup.png",
+      "sidecar": "r10-reinstall-startup.png.json",
+      "imageReceipt": {
+        "filename": "r10-reinstall-startup.png",
+        "bytes": 201637,
+        "sha256": "fceb2c494404946b45412b85363d33768f04c547421ecac3691ad07424bdddc7",
+        "sourceIncluded": false
+      },
+      "sidecarReceipt": {
+        "filename": "r10-reinstall-startup.png.json",
+        "bytes": 622,
+        "sha256": "20c9536421e6a236a24ed841a25e8f59eb3accecc9b16c477f00ccbd39027806",
+        "sourceIncluded": false
+      },
+      "curatorViewedActualPng": true
+    },
+    {
+      "image": "r10-reinstall-fiat-zh-cn.png",
+      "sidecar": "r10-reinstall-fiat-zh-cn.png.json",
+      "imageReceipt": {
+        "filename": "r10-reinstall-fiat-zh-cn.png",
+        "bytes": 85179,
+        "sha256": "33877131f4e0e3c860c8a79965870517181587f0df68681377f1d0731dc79b42",
+        "sourceIncluded": false
+      },
+      "sidecarReceipt": {
+        "filename": "r10-reinstall-fiat-zh-cn.png.json",
+        "bytes": 589,
+        "sha256": "a927992ba5ab57bea90960422611db05cb5b6c5f7889a19e3245b0a45fd96a3a",
+        "sourceIncluded": false
+      },
+      "curatorViewedActualPng": true
+    },
+    {
+      "image": "r10-reinstall-usdc-zh-cn.png",
+      "sidecar": "r10-reinstall-usdc-zh-cn.png.json",
+      "imageReceipt": {
+        "filename": "r10-reinstall-usdc-zh-cn.png",
+        "bytes": 98019,
+        "sha256": "759263d167b9dafcc801048e13275d365a7b85ea9a51a6471f78e1f59930476f",
+        "sourceIncluded": false
+      },
+      "sidecarReceipt": {
+        "filename": "r10-reinstall-usdc-zh-cn.png.json",
+        "bytes": 604,
+        "sha256": "86a42a7999aac543bd318fea1355725289670358b876c264f187a69f10ff5964",
+        "sourceIncluded": false
+      },
+      "curatorViewedActualPng": true
+    },
+    {
+      "image": "r10-reinstall-monthly-zh-cn.png",
+      "sidecar": "r10-reinstall-monthly-zh-cn.png.json",
+      "imageReceipt": {
+        "filename": "r10-reinstall-monthly-zh-cn.png",
+        "bytes": 86262,
+        "sha256": "1e358c68ead9f28fb48f8ee9fe949b9a4d39599cfe7dd0791bae76a0f575c3a7",
+        "sourceIncluded": false
+      },
+      "sidecarReceipt": {
+        "filename": "r10-reinstall-monthly-zh-cn.png.json",
+        "bytes": 590,
+        "sha256": "eb10ee00931bdc4ba6b68db798857504e5931d74627a9d204e4f6f80c81d50e7",
+        "sourceIncluded": false
+      },
+      "curatorViewedActualPng": true
+    }
+  ],
+  "actualPngCount": 4,
+  "curatorVisualReview": {
+    "simplifiedStartupAndThreePagesObserved": true,
+    "missingGlyphObserved": false,
+    "blockingTextOverlapObserved": false,
+    "humanFrontendAccepted": false
+  },
+  "economyUnchanged": {
+    "credit": 100,
+    "gold": 10000,
+    "usdcOrders": 3,
+    "stableEconomyHash": "62075679239d8dd5370fc02c307c81f74d379548844ef2f061c66f10789b8a27"
+  },
+  "paymentsOrMonthlyCardPurchasesAttempted": false,
+  "actualNormalSetupOverwriteInstallClaimed": false,
+  "validationHarnessBoundary": "Silent isolated install plus reviewed helper sets isolated APPDATA; interactive validation finish-page launch is not claimed isolated.",
+  "sourceReceipts": {
+    "installer-r10-uninstall-execution.json": {
+      "filename": "installer-r10-uninstall-execution.json",
+      "bytes": 248,
+      "sha256": "9331a378d517aa8ac25c18047f43360e181172175140b37da24c8d80e68f6b77",
+      "sourceIncluded": false
+    },
+    "installer-r10-removed.json": {
+      "filename": "installer-r10-removed.json",
+      "bytes": 452,
+      "sha256": "8f6507de777b58cdad34c880b1461df90af80487f257a474ed5b7dffdc717b4a",
+      "sourceIncluded": false
+    },
+    "profile-before-r10-uninstall.json": {
+      "filename": "profile-before-r10-uninstall.json",
+      "bytes": 558,
+      "sha256": "81f75913c099ea5cb7a4bb56579625ca93283b25515a2d0996916392f19db474",
+      "sourceIncluded": false
+    },
+    "profile-after-r10-uninstall.json": {
+      "filename": "profile-after-r10-uninstall.json",
+      "bytes": 595,
+      "sha256": "c668fdf30b3edf3249908e415b37e71c77a6bd0067580713256593b907a966e5",
+      "sourceIncluded": false
+    },
+    "profile-before-r10-reinstall.json": {
+      "filename": "profile-before-r10-reinstall.json",
+      "bytes": 529,
+      "sha256": "eda2baabe10ea3a258b977302b9e0bac9c41d6481cbf6d0c270ffc3d78b8c3de",
+      "sourceIncluded": false
+    },
+    "installer-r10-reinstall-execution.json": {
+      "filename": "installer-r10-reinstall-execution.json",
+      "bytes": 799,
+      "sha256": "c85092e9887c289088903729b640c61ee5694206b5674ccdd3e8d8aedb9d9e94",
+      "sourceIncluded": false
+    },
+    "installer-r10-reinstall.json": {
+      "filename": "installer-r10-reinstall.json",
+      "bytes": 1290,
+      "sha256": "bdaa7f95f0856d6961361beb732d94f5b2cc29ad7cead2e99169eac79a304d9c",
+      "sourceIncluded": false
+    },
+    "launch-chain-r10-reinstall.json": {
+      "filename": "launch-chain-r10-reinstall.json",
+      "bytes": 1149,
+      "sha256": "d94cfc7c13cc5be5afb80c6a89ebdcc72a0449050f29b9219c44036251ff8cad",
+      "sourceIncluded": false
+    },
+    "installed-native-process-r10-reinstall.json": {
+      "filename": "installed-native-process-r10-reinstall.json",
+      "bytes": 830,
+      "sha256": "58457958c3b15fa0c7a49c5f757ef1f374c32b9203889dc406b7f003144aa05e",
+      "sourceIncluded": false
+    },
+    "after-r10-reinstall-ui.json": {
+      "filename": "after-r10-reinstall-ui.json",
+      "bytes": 1341,
+      "sha256": "edfb047997068266a2a53b26d74aa022cee1eba31e7784125bd0919bca04c92f",
+      "sourceIncluded": false
+    }
+  },
+  "humanLinguisticAccepted": false,
+  "productionDeployed": false
+}

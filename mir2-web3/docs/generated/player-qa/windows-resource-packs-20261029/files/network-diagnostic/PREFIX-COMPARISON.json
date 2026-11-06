@@ -1,0 +1,15 @@
+{
+  "projectedReport": {
+    "catalogExpectedSha256": "708511179A1A5EBF64326C029ABEF8DB728E9DA0E95366DBF914300C723F476F",
+    "fullCatalogReadOrHashPerformedHere": false,
+    "networkReusedExistingResponseBodiesOnly": true,
+    "passed": true,
+    "results": {},
+    "schema": "mir2.packed.bounded-prefix-comparison.v1"
+  },
+  "projectionBoundary": "Explicit fields only; raw log/body/attempt/env/argv/private config excluded.",
+  "role": "network-prefix-binding",
+  "schema": "mir2.evidence.public-projection.v1",
+  "sourceSha256": "2C7B852091EB2D324B2E8FD55C0D7942D00256268F5EB934BEA9FFC4EBD6362F",
+  "sourceSize": 842
+}

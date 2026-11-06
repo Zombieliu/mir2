@@ -1,0 +1,7 @@
+**********************************************************************
+** Visual Studio 2022 Developer PowerShell v17.14.13
+** Copyright (c) 2025 Microsoft Corporation
+**********************************************************************
+{"kind":"ownedReleaseBuildEnvironment","cargoBuildJobs":"4","targetDirectory":"C:/mir2-build/cell-preproduction-p0-p1-20261024/target","targetArchitecture":"x64","vcToolsVersion":"14.44.35207","linker":"C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.44.35207\\bin\\HostX64\\x64\\link.exe"}
+{"type":"buildStarted","startedAtMs":1792883699601,"sourceCommit":"46880bd1ef415131c4cf85aeb4dd2fa4f6fd4f9b","log":"C:\\mir2-build\\cell-preproduction-p0-p1-20261024\\p0-socket-diagnostics-v1-release-build.log","command":"cargo","arguments":["+1.95.0","build","--locked","--offline","--release","-p","mir2-gateway","--bin","mir2-gateway"],"cwd":"C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3"}
+{"receipt":{"path":"C:\\mir2-build\\p01-completion-20261024\\socket-diagnostics-v1-build-receipt.json","bytes":2095,"sha256":"36181ed0755c44bafd676f44bda8a33c72f958777660fb649686f0119478eabd"},"success":true,"exit":{"code":0,"signal":null},"binary":{"path":"C:\\mir2-build\\p01-completion-20261024\\socket-diagnostics-v1\\bin\\mir2-gateway.exe","bytes":87370240,"sha256":"a43078b05e70b480f948fee505e23d2757ce1ae20fdc1f22b2348df46ee7125d"}}

@@ -1,0 +1,264 @@
+{
+  "schemaVersion": 1,
+  "copiedAt": "2026-10-25T16:11:38.8377312Z",
+  "publicChild": "capacity-formal11-ended-verification-analysis-v1",
+  "files": [
+    {
+      "source": {
+        "path": "C:\\mir2-build\\p01-completion-20261024\\formal11-independent-verification-v1\\verify-ended-formal11-v1.mjs",
+        "bytes": 29032,
+        "sha256": "6d4dbe1fb92027ea514c70b5d59055fbd89b73e345ebb774105ef69297aae69e"
+      },
+      "destination": "ended-v1/verify-ended-formal11-v1.mjs"
+    },
+    {
+      "source": {
+        "path": "C:\\mir2-build\\p01-completion-20261024\\formal11-independent-verification-v1\\formal-contract-v1.mjs",
+        "bytes": 6103,
+        "sha256": "0f0dcf7daacdc19b9e5397b80ce836f4f3e3bd274b8ca4f32513e8aee6798152"
+      },
+      "destination": "ended-v1/formal-contract-v1.mjs"
+    },
+    {
+      "source": {
+        "path": "C:\\mir2-build\\p01-completion-20261024\\formal11-independent-verification-v1\\hp-proof-contract-v2.mjs",
+        "bytes": 4644,
+        "sha256": "cbf67686e1fa385404782c27548dbe3fbaa10f55a5d97c3379d5a41ed01cf285"
+      },
+      "destination": "ended-v1/hp-proof-contract-v2.mjs"
+    },
+    {
+      "source": {
+        "path": "C:\\mir2-build\\p01-completion-20261024\\formal11-independent-verification-v1\\expected-formal-policy-v1.json",
+        "bytes": 1038,
+        "sha256": "b949f19d4460da9c8a38a00a96cf785a9e9a4bba7c343af27094b5192f00921a"
+      },
+      "destination": "ended-v1/expected-formal-policy-v1.json"
+    },
+    {
+      "source": {
+        "path": "C:\\mir2-build\\p01-completion-20261024\\formal11-independent-verification-v1\\run-ended-formal11-v1.mjs",
+        "bytes": 2259,
+        "sha256": "1ae5f984f247e5341dca5302165a2444cfba17e1cb980db8a6a6440c290a27c7"
+      },
+      "destination": "ended-v1/run-ended-formal11-v1.mjs"
+    },
+    {
+      "source": {
+        "path": "C:\\mir2-build\\p01-completion-20261024\\formal11-independent-verification-v1\\seal-tool-source-v1.mjs",
+        "bytes": 3011,
+        "sha256": "cc646ed39d511137b83655ec7abe215091dca4e81ac5e10b24c93af2a4f7b499"
+      },
+      "destination": "ended-v1/seal-tool-source-v1.mjs"
+    },
+    {
+      "source": {
+        "path": "C:\\mir2-build\\p01-completion-20261024\\formal11-independent-verification-v1\\derivation-proof-v1.json",
+        "bytes": 11358,
+        "sha256": "6e185c890c696eab45365ed44e094a4deb2f5cd9f81dd69db08b25974e2ba9fb"
+      },
+      "destination": "ended-v1/derivation-proof-v1.json"
+    },
+    {
+      "source": {
+        "path": "C:\\mir2-build\\p01-completion-20261024\\formal11-independent-verification-v1\\preparation-v1.json",
+        "bytes": 6718,
+        "sha256": "cfdfdd4051a88dfcc1010bb36582e30afa4a035818e9de801ae3f959cd7ab7ed"
+      },
+      "destination": "ended-v1/preparation-v1.json"
+    },
+    {
+      "source": {
+        "path": "C:\\mir2-build\\p01-completion-20261024\\formal11-independent-verification-v1\\independent-review-v1.json",
+        "bytes": 8879,
+        "sha256": "8fbd70193f4b7924e3e5cd41d8bec7472e60ed802b40a766107a46f91179476a"
+      },
+      "destination": "ended-v1/independent-review-v1.json"
+    },
+    {
+      "source": {
+        "path": "C:\\mir2-build\\p01-completion-20261024\\formal11-independent-verification-v1\\tool-source-frozen-v1.json",
+        "bytes": 1955,
+        "sha256": "798799c298c188d98cf7d8bd2f9399591ead9f6fae7e1bd521edc1b2ec36aade"
+      },
+      "destination": "ended-v1/tool-source-frozen-v1.json"
+    },
+    {
+      "source": {
+        "path": "C:\\mir2-build\\p01-completion-20261024\\formal11-independent-verification-v1\\actual-verification.log",
+        "bytes": 1435,
+        "sha256": "3c86c7718d4889eade40d0bb70c5a0d19104bc9a93ae3bbcd2f28bcf86c76ee5"
+      },
+      "destination": "ended-v1/actual-verification.log"
+    },
+    {
+      "source": {
+        "path": "C:\\mir2-build\\p01-completion-20261024\\formal11-independent-verification-v1\\actual-verification-execution-receipt-v1.json",
+        "bytes": 672,
+        "sha256": "4ecaa21fc07466f1d3b32e689bd409ccd8f862308fa1b7af72cfae8e9c5455b4"
+      },
+      "destination": "ended-v1/actual-verification-execution-receipt-v1.json"
+    },
+    {
+      "source": {
+        "path": "C:\\mir2-build\\p01-completion-20261024\\formal11-independent-verification-v2\\verify-ended-formal11-v1.mjs",
+        "bytes": 29070,
+        "sha256": "cb7b98b25e01d61708b79f7c0df1197e161e78ee27a33109f73c4087f5cf0010"
+      },
+      "destination": "ended-v2/verify-ended-formal11-v1.mjs"
+    },
+    {
+      "source": {
+        "path": "C:\\mir2-build\\p01-completion-20261024\\formal11-independent-verification-v2\\formal-contract-v1.mjs",
+        "bytes": 6103,
+        "sha256": "0f0dcf7daacdc19b9e5397b80ce836f4f3e3bd274b8ca4f32513e8aee6798152"
+      },
+      "destination": "ended-v2/formal-contract-v1.mjs"
+    },
+    {
+      "source": {
+        "path": "C:\\mir2-build\\p01-completion-20261024\\formal11-independent-verification-v2\\hp-proof-contract-v2.mjs",
+        "bytes": 4644,
+        "sha256": "cbf67686e1fa385404782c27548dbe3fbaa10f55a5d97c3379d5a41ed01cf285"
+      },
+      "destination": "ended-v2/hp-proof-contract-v2.mjs"
+    },
+    {
+      "source": {
+        "path": "C:\\mir2-build\\p01-completion-20261024\\formal11-independent-verification-v2\\expected-formal-policy-v1.json",
+        "bytes": 1038,
+        "sha256": "b949f19d4460da9c8a38a00a96cf785a9e9a4bba7c343af27094b5192f00921a"
+      },
+      "destination": "ended-v2/expected-formal-policy-v1.json"
+    },
+    {
+      "source": {
+        "path": "C:\\mir2-build\\p01-completion-20261024\\formal11-independent-verification-v2\\run-ended-formal11-v1.mjs",
+        "bytes": 2259,
+        "sha256": "1ae5f984f247e5341dca5302165a2444cfba17e1cb980db8a6a6440c290a27c7"
+      },
+      "destination": "ended-v2/run-ended-formal11-v1.mjs"
+    },
+    {
+      "source": {
+        "path": "C:\\mir2-build\\p01-completion-20261024\\formal11-independent-verification-v2\\seal-tool-source-v1.mjs",
+        "bytes": 3011,
+        "sha256": "cc646ed39d511137b83655ec7abe215091dca4e81ac5e10b24c93af2a4f7b499"
+      },
+      "destination": "ended-v2/seal-tool-source-v1.mjs"
+    },
+    {
+      "source": {
+        "path": "C:\\mir2-build\\p01-completion-20261024\\formal11-independent-verification-v2\\derivation-proof-v1.json",
+        "bytes": 5566,
+        "sha256": "5deeeb599e483cf135c7618877b1b827b4c9a0b5e1462e578d6319231d0a5a3c"
+      },
+      "destination": "ended-v2/derivation-proof-v1.json"
+    },
+    {
+      "source": {
+        "path": "C:\\mir2-build\\p01-completion-20261024\\formal11-independent-verification-v2\\preparation-v1.json",
+        "bytes": 7760,
+        "sha256": "d6211e8f3bd521b1df94a97a81baea0506c9b9657a589efa972b03e9a6edabbd"
+      },
+      "destination": "ended-v2/preparation-v1.json"
+    },
+    {
+      "source": {
+        "path": "C:\\mir2-build\\p01-completion-20261024\\formal11-independent-verification-v2\\independent-review-v1.json",
+        "bytes": 5988,
+        "sha256": "233b880a8dd21a53085f9e77fd1d2f303f772abd3b1e1953f5bfbed5b856c82e"
+      },
+      "destination": "ended-v2/independent-review-v1.json"
+    },
+    {
+      "source": {
+        "path": "C:\\mir2-build\\p01-completion-20261024\\formal11-independent-verification-v2\\tool-source-frozen-v1.json",
+        "bytes": 1954,
+        "sha256": "cd460c0b4851e3cd48611c04395e87a9af052df856549815e14356bd863f1b94"
+      },
+      "destination": "ended-v2/tool-source-frozen-v1.json"
+    },
+    {
+      "source": {
+        "path": "C:\\mir2-build\\p01-completion-20261024\\formal11-independent-verification-v2\\actual-verification.log",
+        "bytes": 1809,
+        "sha256": "4ce88a0a28e3a5c74c5f37604cc0486b6122feae35a589923823c02563c08fe7"
+      },
+      "destination": "ended-v2/actual-verification.log"
+    },
+    {
+      "source": {
+        "path": "C:\\mir2-build\\p01-completion-20261024\\formal11-independent-verification-v2\\actual-verification-execution-receipt-v1.json",
+        "bytes": 813,
+        "sha256": "3035659fa893d500334b5074b63f7688a643311a9b68a633e34a73c339979587"
+      },
+      "destination": "ended-v2/actual-verification-execution-receipt-v1.json"
+    },
+    {
+      "source": {
+        "path": "C:\\mir2-build\\p01-completion-20261024\\formal11-independent-verification-v2\\final-verification.json",
+        "bytes": 650410,
+        "sha256": "1341193001cc95cda4116b71bcd6d8dff749ff54e8d82c75054d535736524eb2"
+      },
+      "destination": "ended-v2/final-verification.json"
+    },
+    {
+      "source": {
+        "path": "C:\\mir2-build\\p01-completion-20261024\\formal11-ended-tool-independent-review-v1.json",
+        "bytes": 8879,
+        "sha256": "8fbd70193f4b7924e3e5cd41d8bec7472e60ed802b40a766107a46f91179476a"
+      },
+      "destination": "independent/formal11-ended-tool-independent-review-v1.json"
+    },
+    {
+      "source": {
+        "path": "C:\\mir2-build\\p01-completion-20261024\\formal11-ended-tool-independent-review-v2.json",
+        "bytes": 5988,
+        "sha256": "233b880a8dd21a53085f9e77fd1d2f303f772abd3b1e1953f5bfbed5b856c82e"
+      },
+      "destination": "independent/formal11-ended-tool-independent-review-v2.json"
+    },
+    {
+      "source": {
+        "path": "C:\\mir2-build\\p01-completion-20261024\\formal11-root-independent-cleanup-v1.json",
+        "bytes": 324,
+        "sha256": "18c777e45d9742bf73152560778ab36f614b031f68d7df2e0bc2b8847fa31460"
+      },
+      "destination": "actual/formal11-root-independent-cleanup-v1.json"
+    },
+    {
+      "source": {
+        "path": "C:\\mir2-build\\p01-completion-20261024\\formal11-actual-terminal-independent-facts-v1.json",
+        "bytes": 10133,
+        "sha256": "2e5e5312ddc168dff9bd8b5195f034ff063a43e4c80493c88a35f4361143737a"
+      },
+      "destination": "actual/formal11-actual-terminal-independent-facts-v1.json"
+    }
+  ],
+  "originalCopies": 29,
+  "originalCopiedBytes": 822853,
+  "allSourceAndDestinationRawExact": true,
+  "sourceAfterMatched": true,
+  "whitelist": {
+    "path": "C:\\mir2-build\\p01-completion-20261024\\formal11-ended-verification-archive-v1\\public-whitelist-v1.json",
+    "bytes": 10343,
+    "sha256": "42d87aaa0bd3aa3e0cb011f4d7665014d78f15ac2083fa472673bb39d7bfc83d"
+  },
+  "readme": {
+    "path": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal11-ended-verification-analysis-v1\\README.md",
+    "bytes": 2691,
+    "sha256": "855c454953a00d2a1ddcda6169029f2cea77d7c5c03c342f84045c0a744aed69"
+  },
+  "originalBasenamesPreserved": true,
+  "v1Exit1AndNoFinalPreserved": true,
+  "v2Exit0DoesNotMeanFormalPass": true,
+  "formalRunPassed": false,
+  "capacityAccepted": false,
+  "P0Accepted": false,
+  "P2Started": false,
+  "protectedCollectorChanged": false,
+  "rawMonitorOrRecordingReadOrCopied": false,
+  "privateDataRead": false,
+  "root11OrGameSourceChanged": false
+}

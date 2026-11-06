@@ -1,0 +1,206 @@
+{
+  "schemaVersion": 1,
+  "reviewedAt": "2026-10-25T13:09:16.9937536Z",
+  "reviewKind": "READ_ONLY_BOUNDED_FUNCTIONAL_SOURCE_AND_EVIDENCE_REVIEW",
+  "summary": {
+    "bytes": 13454,
+    "sha256": "94d58944d2a441bd1c3358a11a356fca9323f8aa88027af4cb988bf58ccc72b8",
+    "path": "C:\\mir2-build\\p01-completion-20261024\\root-personal-projection-functional-validation-v1.json"
+  },
+  "summaryProducer": {
+    "bytes": 7401,
+    "sha256": "efed401ca35fd2e58e1a26aa6d78a0b9291fedfbd1d02d67e52fe50cf60ece41",
+    "path": "C:\\mir2-build\\p01-completion-20261024\\root-personal-projection-functional-validation-v1.mjs"
+  },
+  "verdict": {
+    "noBlockingFindings": true,
+    "blockingFindingIds": [],
+    "boundedRustEvidenceConsistent": true,
+    "productionAndFixtureDiffReviewed": true,
+    "eligibleForRootIntegrationDecision": true,
+    "wholeWorkspaceCertified": false,
+    "newReleaseCertified": false,
+    "freshFull16Certified": false,
+    "capacityAccepted": false,
+    "fixedCellStarted": false
+  },
+  "actualReviewerActions": [
+    "Read source diffs and narrow callsites; no source entrypoint imported.",
+    "Hash-check current44 inputs, the5 final change pins, source-control/adjacent-execution/mutation receipts and5 logs.",
+    "Parse individual Rust test rows and summaries independently, merge only the exact repaired overflow and previously ignored isolated quest test names.",
+    "Verify unchanged original Node9 raw files against the existing frozen manifest.",
+    "Compare old generic helper code with LF normalization for code comparison only; compare original test prefix and overflow-unaffected source prefix as raw UTF8 bytes."
+  ],
+  "sourceClosure": {
+    "currentInputsMatched": 44,
+    "rustInputs": 39,
+    "cargoInputs": 5,
+    "changedInputs": [
+      {
+        "path": "mir2-web3/apps/gateway/src/routing.rs",
+        "bytes": 1389827,
+        "sha256": "9135f2f3a019b04c1bb6ffe3717f730c65632df4e642702057bfbf7a699564de"
+      },
+      {
+        "path": "mir2-web3/apps/gateway/src/routing/tests/personal_monster_projection_tests.rs",
+        "bytes": 30917,
+        "sha256": "7d474f50150108175bd96268c2f22270f916bbfdefc8a47e5f4fd0c249ffc0fc"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/zone/runtime.rs",
+        "bytes": 749298,
+        "sha256": "d19840e87e6b2e718303d90d02a03e8c1c4941e069f0b168d9d253644950f3b6"
+      },
+      {
+        "path": "mir2-web3/apps/gateway/src/routing/tests/live_aoi_order_tests.rs",
+        "bytes": 28187,
+        "sha256": "0f21bfd95760a94f189c6b95567b0e65f1a0018cf88e90b2342ff753010a7279"
+      },
+      {
+        "path": "mir2-web3/apps/gateway/src/routing/tests/pending_zone_aoi_tests.rs",
+        "bytes": 13491,
+        "sha256": "01a11394c304296aefc450eb128a18a358c3e854c25e6627a2b3ff4484d14716"
+      }
+    ],
+    "oldManifest": {
+      "bytes": 14000,
+      "sha256": "4da9d4dac73773bae041c98b641874a9ad4427217c1b36bb453f1a014ad7b058",
+      "path": "C:\\mir2-build\\p01-completion-20261024\\backend-source-socket-diagnostics-v1.json"
+    },
+    "oldOriginalInputsUnchanged": 39,
+    "explicitAddedInputs": [
+      "mir2-web3/apps/gateway/src/routing/tests/live_aoi_order_tests.rs",
+      "mir2-web3/apps/gateway/src/routing/tests/pending_zone_aoi_tests.rs",
+      "mir2-web3/apps/gateway/src/routing/tests/personal_monster_projection_tests.rs"
+    ],
+    "adjacentBeforeAndAfter44Exact": true,
+    "other43BeforeOverflowSourceInputsExact": true,
+    "unchangedSourcePrefixBeforeOverflowTestBytes": 24299,
+    "oldPersonalProjectionTestPrefixRawExactBytes": 12555,
+    "nodeNineFreeze": {
+      "bytes": 19099,
+      "sha256": "20fd347d029d9a912514e400bc74b0d08ec940bd90af20ff2f91bd64dba08bef",
+      "path": "C:\\mir2-build\\p01-completion-20261024\\capacity-native-chase-preference-driver-frozen-v1.json"
+    },
+    "nodeNineCurrentRawMatched": 9
+  },
+  "testEvidence": {
+    "logs": [
+      {
+        "name": "probe14-personal-projection-focused-modules-v1.log",
+        "path": "C:/mir2-build/p01-completion-20261024/probe14-personal-projection-focused-modules-v1.log",
+        "bytes": 59301,
+        "sha256": "af1bd4900daea7f9fb7809f091756686b0c678e25986e747f4ae2a919de2cbf1"
+      },
+      {
+        "name": "probe14-personal-projection-overflow-green-v1.log",
+        "path": "C:/mir2-build/p01-completion-20261024/probe14-personal-projection-overflow-green-v1.log",
+        "bytes": 55033,
+        "sha256": "bf0a9968f469c128e2030e068ebfa2e4977c10af446a511253cd676a239eb471"
+      },
+      {
+        "name": "probe14-personal-projection-remaining-adjacent-v2.log",
+        "path": "C:/mir2-build/p01-completion-20261024/probe14-personal-projection-remaining-adjacent-v2.log",
+        "bytes": 75656,
+        "sha256": "02467ff9aa3b0d86b9d409993b721cf985cf1a9165a41ef889da4496fc4d5571"
+      },
+      {
+        "name": "probe14-personal-projection-isolated-quest-v1.log",
+        "path": "C:/mir2-build/p01-completion-20261024/probe14-personal-projection-isolated-quest-v1.log",
+        "bytes": 54774,
+        "sha256": "ae731d34e92fd5cfa18cd00a1293a919288aab55c9e08caf060b865e42c524fe"
+      },
+      {
+        "name": "probe14-personal-projection-rustfmt39-v2.log",
+        "path": "C:/mir2-build/p01-completion-20261024/probe14-personal-projection-rustfmt39-v2.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    ],
+    "initialFocused": {
+      "failed": 1,
+      "passed": 26,
+      "selected": 27
+    },
+    "repairedOverflow": {
+      "replacesOnlyExactOriginalFailedTest": true,
+      "passed": 1,
+      "selected": 1
+    },
+    "remainingAdjacent": {
+      "ignored": 4,
+      "noOverlapWithFocused": true,
+      "failed": 0,
+      "passed": 174,
+      "selected": 178
+    },
+    "isolatedQuest": {
+      "environment": {
+        "MIR2_QUEST_CADENCE": "newcomer-v2"
+      },
+      "onlyOriginallyIgnoredNamesReplaced": true,
+      "failed": 0,
+      "passed": 2,
+      "selected": 2
+    },
+    "distinctFinal": {
+      "ignored": 2,
+      "ignoredNames": [
+        "economy::prepared_kill::tests::prepared_kill_postgres_source_guild_ledger_rollback_and_exact_checkpoint_replay",
+        "routing::tests::crowded_fixture_transport_tests::crowded_fixture_normal_websocket_three_class_attack_escape_cohort"
+      ],
+      "failed": 0,
+      "passed": 203,
+      "selected": 205
+    },
+    "rustfmt": {
+      "coordinatorRecordedExitCode": 0,
+      "pinnedStdoutLogBytes": 0,
+      "toolchain": "1.95.0",
+      "sourceCount": 39,
+      "notRerunByReviewer": true
+    },
+    "adjacentExecution": {
+      "path": "C:/mir2-build/p01-completion-20261024/probe14-personal-projection-remaining-adjacent-execution-v2.json",
+      "bytes": 42271,
+      "sha256": "f69a2126c5f08794efa51e9f27b9eb252229162ab140b8e4490b877e44241183"
+    },
+    "sourceControlBeforeOverflow": {
+      "path": "C:/mir2-build/p01-completion-20261024/root-personal-projection-final-source-inputs-v1.json",
+      "bytes": 9940,
+      "sha256": "1eb072a6f36d61cd213e816ba95673f782195ad19542450291f72ebef35dd768"
+    },
+    "overflowMutation": {
+      "path": "C:/mir2-build/p01-completion-20261024/probe14-adjacent-fixture-repair-v1/overflow-mutation-proof-v2.json",
+      "bytes": 3682,
+      "sha256": "faaef41c2998e5844930d26708b711c2f693b5329d3ae83a1157e8957758e90e"
+    }
+  },
+  "sourceFindings": [
+    {
+      "finding": "The new Remove filter is applied only to fresh personal journey output before merge at three reposition callsites and the ordinary join-state hook. Existing Zone output vectors are not passed through the new Remove filter.",
+      "id": "S1"
+    },
+    {
+      "finding": "The original generic retained-monster projection helper is code-LF-exact with the b84d preimage and remains ObjectMonster-only. The mixed command result path at routing17994 still uses that original helper; the actual Zone AOI Remove positive fixture remains.",
+      "id": "S2"
+    },
+    {
+      "finding": "The new native_monster_is_unowned query returns Some(true) only when the actual native table entry has no owner session, master or owner player. Unknown is None; pets and unknown removals remain. The query adds no state, serialization, RNG or timing mutation.",
+      "id": "S3"
+    },
+    {
+      "finding": "All six boundary regressions first assert a real private finalize spawn/remove, then exercise actual Gateway immediate movement, queued predrain or pre-save synchronization; actual Zone ownership and successful UserLocation checks remain. Genuine Zone leave/reentry and mixed-filter positives protect authoritative removal.",
+      "id": "S4"
+    },
+    {
+      "finding": "AOI fixture repair explicitly installs unbounded collision for its synthetic map and asserts actual queued movement. FIFO monster lifecycle and durable XP separation match current packet routing. TownRevive presents the real private Death guard before revival. Overflow still injects XP and health in the old order and preserves overload, epoch fencing, durable XP and replacement checks while excluding old transient health.",
+      "id": "S5"
+    }
+  ],
+  "limits": [
+    "This is a read-only review of matching bounded execution records, not a new Cargo run. Root executed the tests and rustfmt; this review independently checks the recorded log bytes and merge logic.",
+    "203 passed is a distinct bounded Rust selection; the two named ignored tests are not passes. This does not certify the full Rust workspace.",
+    "No new Release, fresh full16, gameplay probe, formal capacity or P2 acceptance is established by this receipt. Historical failures are retained; no source, document or old evidence was edited by the reviewer."
+  ]
+}

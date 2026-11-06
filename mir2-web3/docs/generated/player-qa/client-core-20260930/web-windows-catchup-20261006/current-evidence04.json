@@ -1,0 +1,132 @@
+{
+  "schemaVersion": 1,
+  "kind": "presentation-source18-code-compile-static-package-checkpoint",
+  "generatedAtUtc": "2026-10-06T17:10:34.910Z",
+  "parentCommit": "2e574054a7734fa75efea9378e831a8ee476cc8a",
+  "baselineWindows": "f72e36fb84c3574fff0aeb2abed856454b14289d",
+  "matrix": {
+    "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\feature-matrix04.json",
+    "bytes": 2730564,
+    "sha256": "6a9cfde960a81a2d033476b51d77488bd1a8c0f68f814a9a43cfc3208b590116",
+    "relativePath": "docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/feature-matrix04.json"
+  },
+  "matrixMarkdown": {
+    "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\feature-matrix04.md",
+    "bytes": 33297,
+    "sha256": "4a6a45ffb3ce6ffe2357a8211b3ea7c266577b15ba83c709e902408fd35f4751"
+  },
+  "finiteResult": {
+    "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\presentation-source18-finite-result01.json",
+    "bytes": 56042,
+    "sha256": "1397ebf52a3decffc64fc3eff0c3671cf255d9d0557099ae572ac0d86e0d6f30",
+    "relativePath": "docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/presentation-source18-finite-result01.json"
+  },
+  "combinedBuildResult": {
+    "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\presentation-source18-combined-build-result01.json",
+    "bytes": 49366,
+    "sha256": "1ec9407e2282845acb1a491052bece7da8687daed758eaba7f46f24c53e3feba",
+    "relativePath": "docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/presentation-source18-combined-build-result01.json"
+  },
+  "qaReadme": {
+    "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\README.md",
+    "bytes": 11669,
+    "sha256": "9f57a7955b1f26ad02a9dc78b7eacf923dfcb22158ca2ce29ff033240601df19"
+  },
+  "currentDocs": [
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\AGENT-ORCHESTRATION.md",
+      "bytes": 214036,
+      "sha256": "c727ae8cacc33386803108a2f481e3c6d3f20bc02ae382763142dd467b282de3",
+      "relativePath": "docs/AGENT-ORCHESTRATION.md"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\AGENT-TASK-QUEUE.md",
+      "bytes": 825588,
+      "sha256": "6641917a15d66ba3ba4dc45b723535184ecda4cb87fa538dbaadf0536b41269c",
+      "relativePath": "docs/AGENT-TASK-QUEUE.md"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\CROSS-PLATFORM-CLIENT-GOAL.md",
+      "bytes": 151627,
+      "sha256": "05caae8c0838a91fc35f47934e51506a308ee6eb7af1d1b2cab7919267ddef7e",
+      "relativePath": "docs/CROSS-PLATFORM-CLIENT-GOAL.md"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\CRYSTAL-1TO1-ROADMAP.md",
+      "bytes": 943375,
+      "sha256": "d9bf458b88b8320a4e75ad9f917c90bbc3d32d096d12923f306f4abae4d10aa7",
+      "relativePath": "docs/CRYSTAL-1TO1-ROADMAP.md"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\FRONTEND-1TO1-GAPS.md",
+      "bytes": 567306,
+      "sha256": "c4c4708c16964db439fd1b9541d689e184bdcaf6196161a418b6b3f3db67aaf3",
+      "relativePath": "docs/FRONTEND-1TO1-GAPS.md"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\WEB-WINDOWS-CATCHUP-GOAL-20261006.md",
+      "bytes": 25248,
+      "sha256": "2e76b543c18204ee7ae9c2f58a2f28a7384b6b17421c4c88a95c4e7a09f78a63",
+      "relativePath": "docs/WEB-WINDOWS-CATCHUP-GOAL-20261006.md"
+    }
+  ],
+  "priorEvidence": {
+    "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\current-evidence03.json",
+    "bytes": 4027,
+    "sha256": "b08cdd0cceb318e9c078adfac150953fea0bb46b174d80c840f7d342d3875bf4"
+  },
+  "sourceFreeze": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-presentation-rust-source18.json",
+    "bytes": 133394,
+    "sha256": "2bc95be2087f4c680f708d909daf40982cf56fbb841b24b21cbe895b1c586d15"
+  },
+  "summary": {
+    "buildStagesPassed": 5,
+    "nodePass": 218,
+    "selectedRustPassExecutions": 212,
+    "rustIgnored": 3,
+    "strictNonincrementalTscPassed": true,
+    "nextPages": 13,
+    "packageFiles": 7301,
+    "packageDirectoriesIncludingRoot": 776,
+    "packageLinks": 0,
+    "packageBytes": 372680891,
+    "packageCapBytes": 377487360,
+    "packageHeadroomBytes": 4806469,
+    "all317PlayerRows": "not-run",
+    "overallPercentage": null
+  },
+  "knownRemainingGapCount": 9,
+  "knownRemainingGapIds": [
+    "F02.world.fishing-click",
+    "F05.bag.tooltip-compat",
+    "F05.belt.move-from-bag",
+    "F05.belt.tooltip",
+    "F09.NPC.PEARL",
+    "F09.NPC.REPAIR_BAG",
+    "F09.NPC.SREPAIR_BAG",
+    "F09.NPC.REPAIR_QUOTE",
+    "F11.RANKING.INSPECT"
+  ],
+  "completeDenominatorFrozen": false,
+  "overallPercentage": null,
+  "verificationLimits": "Selected Rust counts are qualified cross-group executions under matching effective inputs; Node uses finite extraction/mocks; builds and static closure do not verify mounted WASM, service/UI/player/mobile behavior. All 317 player rows remain not-run.",
+  "independentReview": {
+    "sourceAndArtifacts": {
+      "coreNativeRenderer": "w2b_finite_test_finish: actual configs/snapshots/Guard receipts and source/public/archive bytes accepted in build-only scope.",
+      "nextThin": "w2b_finite_test_finish: 27386 Next and 63135 Thin declared inputs, all 19007 Next files, 61 NFT sets and all 7301 Thin files/links/caps independently recomputed; exact Core/PUI and renderer closure; 44 warning multiset and two precise generated metadata changes accepted.",
+      "confirmedBlockers": 0,
+      "reviewExecutions": 0
+    },
+    "matrixSource": "Read-only final reviewer confirmed 317 stable IDs and originalAudit/native preservation, 190 fixture associations/104 declarations, nine remaining open, actual Source18 build links; no reviewer execution.",
+    "reviewerToolsExecuted": false,
+    "rootMarkdownNormalization": "Only Matrix04 Markdown CRLF normalized to repository LF after read-only content review; textual content unchanged."
+  },
+  "uiOperated": false,
+  "runtimeLaunched": false,
+  "productNetworkUsed": false,
+  "wasmInstantiated": false,
+  "playerAcceptance": false,
+  "candidateAccepted": false,
+  "goalComplete": false
+}

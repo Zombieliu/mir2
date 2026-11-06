@@ -1,0 +1,133 @@
+{
+  "cases": [
+    {
+      "cameraStage": [
+        1024,
+        768
+      ],
+      "choice": "1024x768",
+      "mode": "windowed",
+      "nativePhysicalHit": true,
+      "physical": [
+        1024,
+        768
+      ],
+      "tooltipMatchesCursor": true,
+      "uiScale": 1.0,
+      "worldAndUiMatch": true
+    },
+    {
+      "cameraStage": [
+        1024,
+        768
+      ],
+      "choice": "1280x960",
+      "mode": "windowed",
+      "nativePhysicalHit": true,
+      "physical": [
+        1280,
+        960
+      ],
+      "tooltipMatchesCursor": true,
+      "uiScale": 1.25,
+      "worldAndUiMatch": true
+    },
+    {
+      "cameraStage": [
+        1024,
+        768
+      ],
+      "choice": "1440x1080",
+      "mode": "windowed",
+      "nativePhysicalHit": true,
+      "physical": [
+        1440,
+        1080
+      ],
+      "tooltipMatchesCursor": true,
+      "uiScale": 1.40625,
+      "worldAndUiMatch": true
+    },
+    {
+      "cameraStage": [
+        1024,
+        768
+      ],
+      "choice": "1600x1200",
+      "mode": "windowed",
+      "nativePhysicalHit": true,
+      "physical": [
+        1600,
+        1200
+      ],
+      "tooltipMatchesCursor": true,
+      "uiScale": 1.5625,
+      "worldAndUiMatch": true
+    },
+    {
+      "cameraStage": [
+        1024,
+        768
+      ],
+      "choice": "auto",
+      "mode": "windowed",
+      "nativePhysicalHit": true,
+      "physical": [
+        1024,
+        768
+      ],
+      "tooltipMatchesCursor": true,
+      "uiScale": 1.0,
+      "worldAndUiMatch": true
+    },
+    {
+      "cameraStage": [
+        1024,
+        768
+      ],
+      "choice": "auto",
+      "mode": "fullscreen",
+      "nativePhysicalHit": true,
+      "physical": [
+        2560,
+        1440
+      ],
+      "tooltipMatchesCursor": true,
+      "uiScale": 1.875,
+      "viewportOrigin": [
+        320,
+        0
+      ],
+      "viewportSize": [
+        1920,
+        1440
+      ],
+      "worldAndUiMatch": true
+    },
+    {
+      "cameraStage": [
+        1024,
+        768
+      ],
+      "choice": "auto",
+      "mode": "restored-windowed",
+      "nativePhysicalHit": true,
+      "physical": [
+        1024,
+        768
+      ],
+      "tooltipMatchesCursor": true,
+      "uiScale": 1.0,
+      "viewportOrigin": [
+        0,
+        0
+      ],
+      "viewportSize": [
+        1024,
+        768
+      ],
+      "worldAndUiMatch": true
+    }
+  ],
+  "passed": true
+}

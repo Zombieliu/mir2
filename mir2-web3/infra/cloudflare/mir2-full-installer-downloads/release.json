@@ -1,0 +1,139 @@
+{
+  "schema": 1,
+  "sha256": "3b926d5eb5dd8ee1fc46b6d39fba3eda3eb538ba257405733abe1defae840172",
+  "bytes": 1026815762,
+  "publicBase": "https://assets.mir2.obelisk.build/client-updates/installers/3b926d5eb5dd8ee1fc46b6d39fba3eda3eb538ba257405733abe1defae840172/",
+  "lastModified": "Fri, 30 Oct 2026 10:51:47 GMT",
+  "allowedHosts": [
+    "assets.mir2.obelisk.build",
+    "mir2-full-installer-downloads.zombiesliu.workers.dev"
+  ],
+  "parts": [
+    {
+      "offset": 0,
+      "bytes": 67108864,
+      "sha256": "fa8c95aa18bb4e640f1db9c807803ee1ba24f7fe04fea475a937dbf4b812c9f4",
+      "key": "mir2/native/windows-full-installers/3b926d5eb5dd8ee1fc46b6d39fba3eda3eb538ba257405733abe1defae840172/parts/fa8c95aa18bb4e640f1db9c807803ee1ba24f7fe04fea475a937dbf4b812c9f4.bin"
+    },
+    {
+      "offset": 67108864,
+      "bytes": 67108864,
+      "sha256": "9dede17a99a4976e70ad3c73f65e5face41b7d8723b62a004d2f71385d0ed98f",
+      "key": "mir2/native/windows-full-installers/3b926d5eb5dd8ee1fc46b6d39fba3eda3eb538ba257405733abe1defae840172/parts/9dede17a99a4976e70ad3c73f65e5face41b7d8723b62a004d2f71385d0ed98f.bin"
+    },
+    {
+      "offset": 134217728,
+      "bytes": 67108864,
+      "sha256": "ebe0dd5e7125bf9c91ba88e82704602c91c83272a7432aaaafc8ef311f373763",
+      "key": "mir2/native/windows-full-installers/3b926d5eb5dd8ee1fc46b6d39fba3eda3eb538ba257405733abe1defae840172/parts/ebe0dd5e7125bf9c91ba88e82704602c91c83272a7432aaaafc8ef311f373763.bin"
+    },
+    {
+      "offset": 201326592,
+      "bytes": 67108864,
+      "sha256": "061e5cdc34d1dda0d6b97b2049def332d465c92da7b767a89426f8a8876d3804",
+      "key": "mir2/native/windows-full-installers/3b926d5eb5dd8ee1fc46b6d39fba3eda3eb538ba257405733abe1defae840172/parts/061e5cdc34d1dda0d6b97b2049def332d465c92da7b767a89426f8a8876d3804.bin"
+    },
+    {
+      "offset": 268435456,
+      "bytes": 67108864,
+      "sha256": "a9b30bd00aea3be10c5c13a6739f412f219f4830a22431d08509403370869a3e",
+      "key": "mir2/native/windows-full-installers/3b926d5eb5dd8ee1fc46b6d39fba3eda3eb538ba257405733abe1defae840172/parts/a9b30bd00aea3be10c5c13a6739f412f219f4830a22431d08509403370869a3e.bin"
+    },
+    {
+      "offset": 335544320,
+      "bytes": 67108864,
+      "sha256": "ece8f3ac68f49d2ff034efa973d457ffa0911fe321550bad4db288f00ee1a671",
+      "key": "mir2/native/windows-full-installers/3b926d5eb5dd8ee1fc46b6d39fba3eda3eb538ba257405733abe1defae840172/parts/ece8f3ac68f49d2ff034efa973d457ffa0911fe321550bad4db288f00ee1a671.bin"
+    },
+    {
+      "offset": 402653184,
+      "bytes": 67108864,
+      "sha256": "4ffa0235342cc4153a87f494cb66b447a413fd108243fca4ad262086f93cb223",
+      "key": "mir2/native/windows-full-installers/3b926d5eb5dd8ee1fc46b6d39fba3eda3eb538ba257405733abe1defae840172/parts/4ffa0235342cc4153a87f494cb66b447a413fd108243fca4ad262086f93cb223.bin"
+    },
+    {
+      "offset": 469762048,
+      "bytes": 67108864,
+      "sha256": "b1c7b88158c24f6b83cd2bf014901f217d6eadb2df28dfe89c134a0115dc4663",
+      "key": "mir2/native/windows-full-installers/3b926d5eb5dd8ee1fc46b6d39fba3eda3eb538ba257405733abe1defae840172/parts/b1c7b88158c24f6b83cd2bf014901f217d6eadb2df28dfe89c134a0115dc4663.bin"
+    },
+    {
+      "offset": 536870912,
+      "bytes": 67108864,
+      "sha256": "884164381a9dbcd972e458d26e96b3508dfad37ad165776f0bf5f2830ed789ce",
+      "key": "mir2/native/windows-full-installers/3b926d5eb5dd8ee1fc46b6d39fba3eda3eb538ba257405733abe1defae840172/parts/884164381a9dbcd972e458d26e96b3508dfad37ad165776f0bf5f2830ed789ce.bin"
+    },
+    {
+      "offset": 603979776,
+      "bytes": 67108864,
+      "sha256": "3ef63f7c10f292b4a4701eded726aac72bc27a9f27656e8045810ad731668a41",
+      "key": "mir2/native/windows-full-installers/3b926d5eb5dd8ee1fc46b6d39fba3eda3eb538ba257405733abe1defae840172/parts/3ef63f7c10f292b4a4701eded726aac72bc27a9f27656e8045810ad731668a41.bin"
+    },
+    {
+      "offset": 671088640,
+      "bytes": 67108864,
+      "sha256": "d202f31956731865ca76073580c3b5de8f60cb0ca2970dc6c1ac11c7956393ac",
+      "key": "mir2/native/windows-full-installers/3b926d5eb5dd8ee1fc46b6d39fba3eda3eb538ba257405733abe1defae840172/parts/d202f31956731865ca76073580c3b5de8f60cb0ca2970dc6c1ac11c7956393ac.bin"
+    },
+    {
+      "offset": 738197504,
+      "bytes": 67108864,
+      "sha256": "dda39331f8a104a5fb6e67594c90968e7d4d5189532308b33b8df5366e6784e4",
+      "key": "mir2/native/windows-full-installers/3b926d5eb5dd8ee1fc46b6d39fba3eda3eb538ba257405733abe1defae840172/parts/dda39331f8a104a5fb6e67594c90968e7d4d5189532308b33b8df5366e6784e4.bin"
+    },
+    {
+      "offset": 805306368,
+      "bytes": 67108864,
+      "sha256": "a59664e923e40aa286d315138c1f96da43b064b53da6e21e62acfd89d5d75716",
+      "key": "mir2/native/windows-full-installers/3b926d5eb5dd8ee1fc46b6d39fba3eda3eb538ba257405733abe1defae840172/parts/a59664e923e40aa286d315138c1f96da43b064b53da6e21e62acfd89d5d75716.bin"
+    },
+    {
+      "offset": 872415232,
+      "bytes": 67108864,
+      "sha256": "8e67697b984e9d53cd3c995a0b2e1f8d66aa1954f3ae411a45eb1e7115b499bf",
+      "key": "mir2/native/windows-full-installers/3b926d5eb5dd8ee1fc46b6d39fba3eda3eb538ba257405733abe1defae840172/parts/8e67697b984e9d53cd3c995a0b2e1f8d66aa1954f3ae411a45eb1e7115b499bf.bin"
+    },
+    {
+      "offset": 939524096,
+      "bytes": 67108864,
+      "sha256": "7e0cbcc9d8a98c003ddb5c83d3f8f49802cbb660d8faf075fb0de0535a1ecae0",
+      "key": "mir2/native/windows-full-installers/3b926d5eb5dd8ee1fc46b6d39fba3eda3eb538ba257405733abe1defae840172/parts/7e0cbcc9d8a98c003ddb5c83d3f8f49802cbb660d8faf075fb0de0535a1ecae0.bin"
+    },
+    {
+      "offset": 1006632960,
+      "bytes": 20182802,
+      "sha256": "aa501eec28f909b9718de83eb0337c7cbf628589a53564f8de659f4f0a96da0b",
+      "key": "mir2/native/windows-full-installers/3b926d5eb5dd8ee1fc46b6d39fba3eda3eb538ba257405733abe1defae840172/parts/aa501eec28f909b9718de83eb0337c7cbf628589a53564f8de659f4f0a96da0b.bin"
+    }
+  ],
+  "files": [
+    {
+      "name": "release.json",
+      "bytes": 2556,
+      "sha256": "1c83b417423710aad71e1b50316b452e45a99b4c67ea11c31054f086333760ef",
+      "key": "mir2/native/windows-full-installers/3b926d5eb5dd8ee1fc46b6d39fba3eda3eb538ba257405733abe1defae840172/files/release.json",
+      "contentType": "application/json"
+    },
+    {
+      "name": "release.p7s",
+      "bytes": 1614,
+      "sha256": "43265b21ccde2f460dbb9e4db79606913c6915663bad0bf10ed8ba89037aab3a",
+      "key": "mir2/native/windows-full-installers/3b926d5eb5dd8ee1fc46b6d39fba3eda3eb538ba257405733abe1defae840172/files/release.p7s",
+      "contentType": "application/pkcs7-signature"
+    },
+    {
+      "name": "SHA256SUMS.txt",
+      "bytes": 80,
+      "sha256": "a2780b9d3f6e426e3f56d2a28145997cae91724897e48deb937601086e08b3ba",
+      "key": "mir2/native/windows-full-installers/3b926d5eb5dd8ee1fc46b6d39fba3eda3eb538ba257405733abe1defae840172/files/SHA256SUMS.txt",
+      "contentType": "text/plain; charset=utf-8"
+    },
+    {
+      "name": "README.zh-CN.txt",
+      "bytes": 945,
+      "sha256": "533ec2b0eda19a15811e32e2c9cccf23a9eb90204bc5829a88499b4c36a9ab37",
+      "key": "mir2/native/windows-full-installers/3b926d5eb5dd8ee1fc46b6d39fba3eda3eb538ba257405733abe1defae840172/files/README.zh-CN.txt",
+      "contentType": "text/plain; charset=utf-8"
+    }
+  ]
+}

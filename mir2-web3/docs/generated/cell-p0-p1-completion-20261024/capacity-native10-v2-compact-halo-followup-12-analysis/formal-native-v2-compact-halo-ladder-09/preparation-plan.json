@@ -1,0 +1,96 @@
+{
+  "schemaVersion": 1,
+  "preparedAt": "2026-10-25T06:23:48.060Z",
+  "state": "historical-template-required-compact12-failed-not-sealed",
+  "backendSourceCommit": "46880bd1ef415131c4cf85aeb4dd2fa4f6fd4f9b",
+  "backendInputCount": 41,
+  "backendRebuildRequired": false,
+  "binarySha256": "a43078b05e70b480f948fee505e23d2757ce1ae20fdc1f22b2348df46ee7125d",
+  "driverSourceCommit": "6d70d02d0bc390156b77a3e48acee714fc87cda3",
+  "driverSourceSha256": "05c07c2e487e4b65c5068f8803f96bdc6a66a342c5fc44c21f3a64b6b8581073",
+  "driverFrozenManifest": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\capacity-native-witness-approach-driver-frozen-v1.json",
+    "bytes": 41896,
+    "sha256": "5cd1dafffa530e145828183e8b9089c6900b67760d79c3fe225f2399d904cada"
+  },
+  "freshProbeGateRoot": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-compact-halo-feasibility-12",
+  "onlyProbeRunId": "1792908575146-40a66fff",
+  "requiredProbePassed": false,
+  "requiredProbeActualOutcome": "failed continuous movement during stage2 before stage10; no successful layout certificate",
+  "expectedPhases": [
+    "stage-2",
+    "stage-10",
+    "stage-25",
+    "stage-50",
+    "stage-100",
+    "soak",
+    "post-resume-observation"
+  ],
+  "originalFormalPolicyPreserved": true,
+  "originalFormalResourceBytesPreserved": true,
+  "explicitSceneChanges": {
+    "patrolSpan": 2,
+    "body": "3x3",
+    "staticHalo": "5x5",
+    "probe": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\candidate-10-repaired-v4.json",
+      "bytes": 804,
+      "sha256": "a42a26a195dd5ac25135bff57e73f7f21b71f97b5cc1814351920ece621362ba"
+    },
+    "formal": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\candidate-100-repaired-v4.json",
+      "bytes": 5844,
+      "sha256": "f87aae78a2d68d8daa63916a93580c33f4ef974da4769bd3531a62aafcf0f205"
+    }
+  },
+  "gateRequirements": {
+    "configuredSeconds": [
+      300,
+      300,
+      360
+    ],
+    "completeWindows": [
+      5,
+      5,
+      6
+    ],
+    "minimumTrueWindowSeconds": 60,
+    "measuredSecondsRequired": true,
+    "normalCleanupRequired": true,
+    "diagnosticsCompleteRequired": true,
+    "publicCollectionAndIndependentVerificationRequired": true,
+    "onlyFreshCompact12": true,
+    "laterProbeSubstitutionForbidden": true
+  },
+  "actualAdmissionCaps": [
+    128,
+    100,
+    100,
+    4,
+    1,
+    2
+  ],
+  "tokioWorkers": 4,
+  "slowStageThresholdMs": 50,
+  "functionalTests": {
+    "focused": 12,
+    "adjacent": 88,
+    "full": 187,
+    "exactSource": true
+  },
+  "liveRisks": [
+    "100representative tour886unitsteps is not an actual complete online tour.",
+    "53..65unitstep legs can exceed the original24ACK/20s waypoint advance boundary; no budget is changed.",
+    "Conditional positive-hit supply does not prove180 launched attacks/120 positive hits per minute or2h progression.",
+    "The historical stage25 server/fanout stall remains unresolved; a new static scene does not clear that failure.",
+    "The compact layout has not passed the actual two-person measurement."
+  ],
+  "sourceConfigNotYet": true,
+  "finalFreezeCreated": false,
+  "permanentlyUnsealedHistoricalTemplate": true,
+  "currentSourceGuardExecuted": false,
+  "freshProbeGateExecuted": false,
+  "accountsProvisioned": false,
+  "realmStarted": false,
+  "capacityAccepted": false
+}

@@ -1,0 +1,166 @@
+{
+  "owner": "Root",
+  "reviewer": "/root/source30_native_bundle",
+  "acceptance": "Actual finite outputs and qualified current leased Source41 scope accepted by readonly review. No UI/player/package/Candidate acceptance.",
+  "finiteResult": {
+    "path": "E:/mir2-player-journey/mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-hero-source41-finite-result02.json",
+    "bytes": 115834,
+    "sha256": "3c3acb87ef52cb1224b167bf160224e6b17c030fbf3476fe762d788b6b8b200b"
+  },
+  "priorFiniteResult": {
+    "path": "E:/mir2-player-journey/mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-hero-source41-finite-result01.json",
+    "bytes": 114860,
+    "sha256": "2a9a7d531d63e245b84eac75783501eb03948818f48705da8967334c8edc78b9"
+  },
+  "rawEvidence": {
+    "path": "E:/mir2-player-journey/mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-hero-source41-raw-evidence01.json",
+    "bytes": 292527,
+    "sha256": "4cb601e2262d2d266eea0d6d1bc259f704b660660d5ae810302a6217dda54bcb"
+  },
+  "historical": {
+    "path": "E:/mir2-player-journey/mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-hero-source41-historical-failures01.json",
+    "bytes": 50577,
+    "sha256": "3f9c5d6f147d309fa1ec611564b7c22d4d95a88209f301bd3017fd3235133421"
+  },
+  "lateForeignQualification": {
+    "path": "E:/mir2-player-journey/mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-hero-source41-late-foreign-qualification01.json",
+    "bytes": 5401,
+    "sha256": "ceb9b534d507375cb92aa7ef609ace0d3501fa71ea3ecbbf8e8a5e7497ea1e88"
+  },
+  "checks": {
+    "currentRustRuns": 92,
+    "normalizedRustFunctions": 79,
+    "currentNodeTap": 184,
+    "stage5Groups": 457,
+    "tscExit": 0,
+    "tscDiagnosticBytes": 0,
+    "currentCargoCalls": 5,
+    "currentNonceFiles": 25,
+    "totalRawFiles": 71,
+    "totalNonceFiles": 35,
+    "rawExactBytes": 259741,
+    "policyBAllComplete": true,
+    "minCBytes": "236199809024",
+    "maxFreshnessConservativeUpperMs": 122,
+    "currentWholeCheckoutAccepted": false,
+    "currentLeasedSevenMatch": true,
+    "lateObservedForeignDifferences": 7
+  },
+  "docs": [
+    {
+      "name": "AGENT-ORCHESTRATION.md",
+      "before": {
+        "path": "E:/mir2-player-journey/mir2-web3/docs/AGENT-ORCHESTRATION.md",
+        "bytes": 291553,
+        "sha256": "0897eb1ec62343aa1611fc2c174c05777afcac8c7d154228b3d12340be300a8f"
+      },
+      "after": {
+        "path": "E:/mir2-player-journey/mir2-web3/docs/AGENT-ORCHESTRATION.md",
+        "bytes": 295901,
+        "sha256": "d12368f7d9ab956f6ecab4d06e8e5056f7c3e9e5144f760c901b131c029149c7"
+      }
+    },
+    {
+      "name": "AGENT-TASK-QUEUE.md",
+      "before": {
+        "path": "E:/mir2-player-journey/mir2-web3/docs/AGENT-TASK-QUEUE.md",
+        "bytes": 910412,
+        "sha256": "1fdb2fe53d9663bdf86eb86e006fa925cac65abdc29f3e1fbc89dc884423aed7"
+      },
+      "after": {
+        "path": "E:/mir2-player-journey/mir2-web3/docs/AGENT-TASK-QUEUE.md",
+        "bytes": 914760,
+        "sha256": "f57e1947361c72c0e402e4db92b376bdfe9712d12f129e78c72745d632ce53c3"
+      }
+    },
+    {
+      "name": "CRYSTAL-1TO1-ROADMAP.md",
+      "before": {
+        "path": "E:/mir2-player-journey/mir2-web3/docs/CRYSTAL-1TO1-ROADMAP.md",
+        "bytes": 1030309,
+        "sha256": "5a4303d66ef755e4f7cb018df62bea2e3a5b040befcc89db10e70e18a14926a7"
+      },
+      "after": {
+        "path": "E:/mir2-player-journey/mir2-web3/docs/CRYSTAL-1TO1-ROADMAP.md",
+        "bytes": 1034657,
+        "sha256": "5d55716c10a96663a0a692a8be2180a3e6d803bd6a1ac25f5ab84ed161aa1ff1"
+      }
+    },
+    {
+      "name": "FRONTEND-1TO1-GAPS.md",
+      "before": {
+        "path": "E:/mir2-player-journey/mir2-web3/docs/FRONTEND-1TO1-GAPS.md",
+        "bytes": 651198,
+        "sha256": "784098d0902e210eac3652c28ddf63129ec4fc6dfe90ce9dff42124212d756e0"
+      },
+      "after": {
+        "path": "E:/mir2-player-journey/mir2-web3/docs/FRONTEND-1TO1-GAPS.md",
+        "bytes": 655546,
+        "sha256": "c4e3986c72b1431e4a0475583d3ddbab81d701257025cc57cc6633904cfb17f6"
+      }
+    },
+    {
+      "name": "NATIVE-WINDOWS-PLAYER-QA.md",
+      "before": {
+        "path": "E:/mir2-player-journey/mir2-web3/docs/NATIVE-WINDOWS-PLAYER-QA.md",
+        "bytes": 65550,
+        "sha256": "c4874b639b30924952fe41eb743bcfddf29a05a2f7c77e4acf874973a0c9d149"
+      },
+      "after": {
+        "path": "E:/mir2-player-journey/mir2-web3/docs/NATIVE-WINDOWS-PLAYER-QA.md",
+        "bytes": 69898,
+        "sha256": "9e1d37b8fc04ede6fd4dd97b35d7c59beec6393a37aaca3f8c3adcc6ea579758"
+      }
+    },
+    {
+      "name": "PLAYER-QA-PLAYTHROUGH.md",
+      "before": {
+        "path": "E:/mir2-player-journey/mir2-web3/docs/PLAYER-QA-PLAYTHROUGH.md",
+        "bytes": 46526,
+        "sha256": "cd829a0f30598611adfcbf34e2d899fedeb8e5b25a158463c2aca4e8a91db7af"
+      },
+      "after": {
+        "path": "E:/mir2-player-journey/mir2-web3/docs/PLAYER-QA-PLAYTHROUGH.md",
+        "bytes": 50874,
+        "sha256": "8c60a4bc056709c44620a56c2731fc7959dbeea2632d7e59fe64d9789cfd4515"
+      }
+    }
+  ],
+  "indexOwnOnlyData": [
+    {
+      "name": "AGENT-TASK-QUEUE.md",
+      "data": "w0-hero-source41-queue-head-before01.md",
+      "output": "w0-hero-source41-queue-own-stage01.md",
+      "gitHeadBlob": "d44ec6848f27ca6b12a0de666855a45ebb5c98ff",
+      "pin": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-hero-source41-queue-own-stage02.md",
+        "bytes": 914021,
+        "sha256": "e5ccca52c19725afa8a5c1f10ef6b8f8e2b6d92c9a2533007373e0df810fab6e"
+      },
+      "relativePath": "mir2-web3/docs/AGENT-TASK-QUEUE.md"
+    },
+    {
+      "name": "CRYSTAL-1TO1-ROADMAP.md",
+      "data": "w0-hero-source41-roadmap-head-before01.md",
+      "output": "w0-hero-source41-roadmap-own-stage01.md",
+      "gitHeadBlob": "6621d7c6c96984a4e966417c2a3b8491eb8eaa38",
+      "pin": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-hero-source41-roadmap-own-stage02.md",
+        "bytes": 1033787,
+        "sha256": "3d201b25b9f413a483d7b57dce650d5a45e3c46f6fec01e95b9ff237b89ab9a6"
+      },
+      "relativePath": "mir2-web3/docs/CRYSTAL-1TO1-ROADMAP.md"
+    }
+  ],
+  "stageQualification": "Queue/roadmap staged data will be HEAD+onlySource41 section, preserving worktree-only production updates. Git stage/commit/push not yet accepted or inferred here.",
+  "userTsconfigExcludedAndPreserved": {
+    "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\tsconfig.json",
+    "bytes": 4932,
+    "sha256": "08fed5308fee3466445cad5b0f4c0cc0f8e00f4fa53823999ff1bed0bcde3182"
+  },
+  "goalStatus": "active",
+  "candidate100": false,
+  "candidateAccepted": false,
+  "overallPercentage": null,
+  "goalComplete": false
+}

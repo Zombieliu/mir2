@@ -1,0 +1,19 @@
+{
+  "schema": "mir2.native-linux-ci-root-success.v1",
+  "passed": true,
+  "runId": 37251484195,
+  "sourceHead": "bb4679272cb6ae6a677f18a0e636d31dd3d139f3",
+  "actualLinuxTestsPassed": 46,
+  "errors": 0,
+  "skipped": 0,
+  "posixBranchesExecutedByRealLinux": true,
+  "productionAndStageAndWebAndCredentialJobsSkipped": true,
+  "cloudflareCredentialOrNetworkProved": false,
+  "artifactId": 11321185826,
+  "zipSha256": "1a215e087eadbf86b30b2a2a88db7baf8548b8a351ae6c0dec8422b77fc997a4",
+  "zipBytes": 49224,
+  "zipMemberCount": 31,
+  "zipExtracted": false,
+  "receiptByteSha256": "2f58a570a99b4744c248338ea248e47161bc3f550cb3f599a78b7039f8d5f94a",
+  "createdUtc": "2026-10-05T01:31:51.529689+00:00"
+}

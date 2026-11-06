@@ -1,0 +1,141 @@
+{
+  "schemaVersion": 1,
+  "createdAt": "2026-10-25T05:46:33.183Z",
+  "scope": "Narrow post-receipt review of final producer summary; no further source, search or gameplay execution.",
+  "reviewPin": {
+    "path": "C:/mir2-build/p01-completion-20261024/compact-halo-repair-independent-review-v1.json",
+    "bytes": 13583,
+    "sha256": "793e2334baf32a2c1963cf32f45ee4781bdb1dcc7fa486809b1b54b0f0b9f76e"
+  },
+  "summaryPin": {
+    "path": "C:/mir2-build/p01-completion-20261024/partition-span2-compact-halo-repair-v1/review-summary-v4.json",
+    "bytes": 20628,
+    "sha256": "1669a862e5281a7623e0ba112471282556804df1c6eac24ea2d2cd78c5e43fd5"
+  },
+  "blockingFound": false,
+  "trialCorrectionAccurate": true,
+  "representativeScoutOnly": true,
+  "onlineScoutWaypointBudget": {
+    "ackLimit": 24,
+    "activeTimeLimitMs": 20000,
+    "sourceBytePinAlreadyBound": true
+  },
+  "longLegRisk": [
+    {
+      "actors": 50,
+      "secondCircuit": 372,
+      "maxLegUnitWalkSteps": 55,
+      "legsOver48UnitSteps": [
+        {
+          "observerIndex": 0,
+          "from": {
+            "x": 263,
+            "y": 652
+          },
+          "goal": {
+            "x": 243,
+            "y": 597
+          },
+          "steps": 55
+        }
+      ]
+    },
+    {
+      "actors": 100,
+      "secondCircuit": 886,
+      "maxLegUnitWalkSteps": 65,
+      "legsOver48UnitSteps": [
+        {
+          "observerIndex": 64,
+          "from": {
+            "x": 219,
+            "y": 667
+          },
+          "goal": {
+            "x": 259,
+            "y": 616
+          },
+          "steps": 61
+        },
+        {
+          "observerIndex": 92,
+          "from": {
+            "x": 283,
+            "y": 542
+          },
+          "goal": {
+            "x": 230,
+            "y": 535
+          },
+          "steps": 53
+        },
+        {
+          "observerIndex": 96,
+          "from": {
+            "x": 225,
+            "y": 549
+          },
+          "goal": {
+            "x": 281,
+            "y": 610
+          },
+          "steps": 65
+        },
+        {
+          "observerIndex": 0,
+          "from": {
+            "x": 299,
+            "y": 632
+          },
+          "goal": {
+            "x": 243,
+            "y": 595
+          },
+          "steps": 63
+        },
+        {
+          "observerIndex": 64,
+          "from": {
+            "x": 219,
+            "y": 667
+          },
+          "goal": {
+            "x": 259,
+            "y": 616
+          },
+          "steps": 61
+        },
+        {
+          "observerIndex": 92,
+          "from": {
+            "x": 283,
+            "y": 542
+          },
+          "goal": {
+            "x": 230,
+            "y": 535
+          },
+          "steps": 53
+        },
+        {
+          "observerIndex": 96,
+          "from": {
+            "x": 225,
+            "y": 549
+          },
+          "goal": {
+            "x": 281,
+            "y": 610
+          },
+          "steps": 65
+        }
+      ]
+    }
+  ],
+  "interpretation": "The full representative A* routes pass unchanged coverage and node budgets. Some53..65-step legs at50/100 cannot be presumed to reach their waypoint before ordinary24ACK/20sadvance, even if Run is used. Consequently886steps is a static route-cost illustration, not an executed loop or proof of continuous supply.",
+  "positiveVersusLaunchDistinctionCorrect": true,
+  "rootDecisionDoesNotClaimCapacity": true,
+  "accepted": false,
+  "capacityAccepted": false,
+  "privateDataRead": false
+}

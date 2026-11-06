@@ -1,0 +1,10 @@
+
+running 1 test
+test postgres_periodic::postgres_periodic_claim_is_atomic_before_ack_and_cas_blocks_retries ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 18 filtered out; finished in 112.30s
+
+
+STDERR
+PERIODIC_POSTGRES_QA {"cases":[{"acceptedLockPersistedBeforeAck":true,"cadence":"daily","claimedPeriod":20728,"commitBarrierObserved":true,"committedRevision":3,"independentStaleCasRejected":true,"noAckBeforeCommit":true,"postgresSaveVersion":5,"questId":92006,"retryAndReloginNoDoubleReward":true,"rewardExp":14000,"rewardGold":8000},{"acceptedLockPersistedBeforeAck":true,"cadence":"weekly","claimedPeriod":2961,"commitBarrierObserved":true,"committedRevision":3,"independentStaleCasRejected":true,"noAckBeforeCommit":true,"postgresSaveVersion":5,"questId":92009,"retryAndReloginNoDoubleReward":true,"rewardExp":70000,"rewardGold":60000}],"credentialsRedacted":true,"database":"mir2_periodic_qa_20261002_claims","isolatedSourceOfTruth":true,"naturalKills":false,"ordinaryTimedCompletion":false,"ownedSchema":"periodic_qa_20261002_50116_18da9104ece5a090","publicSchemaUsed":false,"schema":1}
+periodic PostgreSQL QA owned schema retained: periodic_qa_20261002_50116_18da9104ece5a090

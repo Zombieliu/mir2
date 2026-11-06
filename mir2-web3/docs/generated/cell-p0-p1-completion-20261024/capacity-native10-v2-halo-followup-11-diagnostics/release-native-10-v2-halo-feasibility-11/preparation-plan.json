@@ -1,0 +1,50 @@
+{
+  "schemaVersion": 1,
+  "preparedAt": "2026-10-25T04:06:02.094Z",
+  "state": "final-inputs-bound-pending-independent-review-and-seal",
+  "backendSourceCommit": "46880bd1ef415131c4cf85aeb4dd2fa4f6fd4f9b",
+  "backendInputCount": 41,
+  "binarySha256": "a43078b05e70b480f948fee505e23d2757ce1ae20fdc1f22b2348df46ee7125d",
+  "backendRebuildRequired": false,
+  "driverSourceCommit": "6d70d02d0bc390156b77a3e48acee714fc87cda3",
+  "driverSourceSha256": "05c07c2e487e4b65c5068f8803f96bdc6a66a342c5fc44c21f3a64b6b8581073",
+  "driverFrozenManifest": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\capacity-native-witness-approach-driver-frozen-v1.json",
+    "bytes": 41896,
+    "sha256": "5cd1dafffa530e145828183e8b9089c6900b67760d79c3fe225f2399d904cada"
+  },
+  "actualAdmissionCaps": [
+    24,
+    10,
+    10,
+    4,
+    1,
+    2
+  ],
+  "tokioWorkers": 4,
+  "slowStageThresholdMs": 50,
+  "canonicalScene100": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\partition-ordinary-two-name-span4-halo-100-v1.json",
+    "bytes": 5844,
+    "sha256": "19c80f2722a9fc992f6834304c4fc5bf54f2fe86dbcf7c53887589d11aa9f8fb"
+  },
+  "canonicalScene10": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\partition-ordinary-two-name-span4-halo-10-v1.json",
+    "bytes": 804,
+    "sha256": "539c8abab8a3930a33a5a130601591c3bfdaede166e5b93cec995479df1c745c"
+  },
+  "staticValidation": "C:\\mir2-build\\p01-completion-20261024\\partition-span4-halo-static-validation-v4.json",
+  "staticReadiness": "C:\\mir2-build\\p01-completion-20261024\\partition-span4-halo-static-readiness-v4.json",
+  "existingFiveReportDeclarationsRetained": true,
+  "additionalWitnessApproachRule": "Native approach paths require a current active living same-map observer whose actual snapshot contains both attacker and target and whose actual position is within6 of the target and prospective attack tile; otherwise continue other eligible targets or ordinary scouting.",
+  "policyUnchanged": true,
+  "resourceBytesUnchanged": true,
+  "canonicalSceneBytesUnchanged": true,
+  "full16HistoricalBackendGateRetained": true,
+  "sourceConfigNotYet": true,
+  "finalFreezePending": true,
+  "currentSourceGuardExecuted": false,
+  "accountsProvisioned": false,
+  "realmStarted": false,
+  "capacityAccepted": false
+}

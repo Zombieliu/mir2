@@ -1,0 +1,96 @@
+{
+  "schemaVersion": 1,
+  "createdAt": "2026-10-25T08:13:55.607Z",
+  "original": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\formal10-independent-verification-v1/verify-ended-formal10-v1.mjs",
+    "bytes": 25419,
+    "sha256": "841f4abe47c9616a5aed9b1f37cdf59eb205c8e5c02c1fc7061d39d55cde58f2"
+  },
+  "derived": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\formal10-independent-verification-v1/verify-ended-formal10-v2.mjs",
+    "bytes": 27524,
+    "sha256": "e98c3fdbc84e8dd8f14d76bdd793ea6ea4eeaaf4c2fc65b083908260fae5bdba"
+  },
+  "edits": [
+    {
+      "before": "function addMetric(m,r,weight=1){const v=m[r.kind]??={count:0,status:{}};",
+      "after": "function addMetric(m,r,weight=1){assert.ok(typeof r.kind==='string'&&r.kind.length<=80);assert.ok(Object.hasOwn(m,r.kind)||Object.keys(m).length<128);const v=m[r.kind]??={count:0,status:{}};"
+    },
+    {
+      "before": "function add(s,r){if(!s.actors.has(r.actor))s.actors.set(r.actor,freshCounter());",
+      "after": "function add(s,r){if(!s.actors.has(r.actor)){assert.ok(s.actors.size<100);s.actors.set(r.actor,freshCounter());}"
+    },
+    {
+      "before": "function checkAssessment(s,a,p,label){for(const v of a.activity){",
+      "after": "function checkAssessment(s,a,p,label){const elapsed=a.measuredSeconds??a.seconds;for(const v of a.activity){"
+    },
+    {
+      "before": "activityPassed(v,v.role,a.seconds,p)",
+      "after": "activityPassed(v,v.role,elapsed,p)"
+    },
+    {
+      "before": "nativePassed(v,v.role,a.seconds,p)",
+      "after": "nativePassed(v,v.role,elapsed,p)"
+    },
+    {
+      "before": "v.status[r.status]=(v.status[r.status]??0)+weight;}",
+      "after": "v.status[r.status]=(v.status[r.status]??0)+weight;if(r.kind==='attack'&&r.attackResults==='v2'&&r.attackRequestSent===true){v.attackV2Requests=(v.attackV2Requests??0)+1;if(r.attackResult==='notLaunched')v.attackV2NotLaunched=(v.attackV2NotLaunched??0)+1;}}"
+    },
+    {
+      "before": "assert.deepEqual(v.status,expected[k].status,label+': '+k+' status');}",
+      "after": "assert.deepEqual(v.status,expected[k].status,label+': '+k+' status');if(k==='attack'){assert.equal(v.attackV2Requests??0,expected[k].attackV2Requests??0);assert.equal(v.attackV2NotLaunched??0,expected[k].attackV2NotLaunched??0);}}"
+    },
+    {
+      "before": "return{timeoutRatio:timeouts/Math.max(1,all),movementCorrectionRatio:corrected/Math.max(1,moves)};",
+      "after": "const attackRejectionRatio=(metrics.attack?.attackV2NotLaunched??0)/Math.max(1,metrics.attack?.attackV2Requests??0);return{timeoutRatio:timeouts/Math.max(1,all),movementCorrectionRatio:corrected/Math.max(1,moves),attackRejectionRatio,correctionRatio:Math.max(corrected/Math.max(1,moves),attackRejectionRatio)};"
+    },
+    {
+      "before": "if(a.attackRejectionRatio===undefined)assert.equal(ratios.movementCorrectionRatio,a.correctionRatio,label+': correction');",
+      "after": "assert.equal(ratios.correctionRatio,a.correctionRatio,label+': correction');if(a.attackRejectionRatio!==undefined){assert.equal(ratios.attackRejectionRatio,a.attackRejectionRatio);assert.equal(ratios.movementCorrectionRatio,a.movementCorrectionRatio);}"
+    },
+    {
+      "before": "const rows=await stream(rawFile,(r,line)=>{typeCounts[r.type]=(typeCounts[r.type]??0)+1;",
+      "after": "const rows=await stream(rawFile,(r,line)=>{assert.ok(typeof r.type==='string'&&r.type.length<=80);assert.ok(Object.hasOwn(typeCounts,r.type)||Object.keys(typeCounts).length<128);typeCounts[r.type]=(typeCounts[r.type]??0)+1;"
+    },
+    {
+      "before": "if(r.type==='phaseStarted'&&r.kind==='measurement'){states.set(r.name,state());",
+      "after": "if(r.type==='phaseStarted'&&r.kind==='measurement'){assert.ok(FORMAL_PHASES.some(p=>p[0]===r.name)&&!states.has(r.name));states.set(r.name,state());"
+    },
+    {
+      "before": "if(!continuousCounters.has(r.actor))continuousCounters.set(r.actor,freshCounter());",
+      "after": "if(!continuousCounters.has(r.actor)){assert.ok(continuousCounters.size<100);continuousCounters.set(r.actor,freshCounter());}"
+    },
+    {
+      "before": "if(r.type==='phaseEnded'&&r.kind==='measurement')phaseEnds.push(",
+      "after": "if(r.type==='phaseEnded'&&r.kind==='measurement'){assert.ok(phaseEnds.length<7);phaseEnds.push("
+    },
+    {
+      "before": "completed:r.completed});\n  if(r.type==='continuousFailure')",
+      "after": "completed:r.completed});}\n  if(r.type==='continuousFailure')"
+    },
+    {
+      "before": "source.sourceConfigSha256);\n const admitted",
+      "after": "source.sourceConfigSha256);assert.equal(source.sourceConfigSha256,'3c49fdaddd4d59b2ac0cb8159b50e52ecd2a2edc746b773623f40a038d06c162');\n const admitted"
+    },
+    {
+      "before": "assert.equal(launcher.files.length,51);",
+      "after": "assert.equal(launcher.files.length,51);assert.deepEqual(await pin(dir,`${REALM}/launcher-source-frozen-v1.json`),{path:`${REALM}/launcher-source-frozen-v1.json`,bytes:23133,sha256:'c4b83227e99e9a3b131e3ea80d77afb6afde0c128de7b179c383f451be023724'});"
+    },
+    {
+      "before": "let replayedMemory=null;if(report.memoryTrend&&soakMemorySnapshot){const soak=report.stages.find(s=>s.name==='soak');replayedMemory=memoryTrend(soakMemorySnapshot.filter(s=>s.sampledAtMs>=soak.startedAtMs+300000));assert.deepEqual(replayedMemory,report.memoryTrend);}",
+      "after": "let replayedMemory=null;if(report.memoryTrend&&soakMemorySnapshot){assert.ok(Number.isSafeInteger(report.memoryTrend.samples)&&report.memoryTrend.samples>=2&&report.memoryTrend.samples<=soakMemorySnapshot.length);const first=soakMemorySnapshot.length-report.memoryTrend.samples,points=soakMemorySnapshot.slice(first),trend=memoryTrend(points);assert.deepEqual(trend,report.memoryTrend);replayedMemory={...trend,warmupCutoffRecordedInRaw:false,matchingRetainedSuffix:{firstSampleAtMs:points[0].sampledAtMs,precedingSampleAtMs:soakMemorySnapshot[first-1]?.sampledAtMs??null},limitation:'initialMemoryAt is captured immediately before measure but is not recorded; suffix arithmetic is replayed exactly, warmup cutoff cannot independently be proven to millisecond precision.'};}"
+    },
+    {
+      "before": "Every completed300/300/360s phase requires5/5/6 actual complete>=60s windows.",
+      "after": "Every completed2/10/25/50/100 stage requires5 actual complete>=60s windows;7200s soak120;60s post-resume1, total146."
+    },
+    {
+      "before": "Original bounded1201x3s monitor history atsoakend, afterwarmup300; originalminimum1800s and32MiB/hr retained.",
+      "after": "Original bounded1201x3s monitor history atsoakend; report memory suffix arithmetic replayed exactly, initialMemoryAt cutoff not recorded; originalminimum1800s and32MiB/hr retained."
+    }
+  ],
+  "inverseRawExact": true,
+  "actualRunRead": false,
+  "productSourceChanged": false,
+  "doesNotAlterGameVerdict": true
+}

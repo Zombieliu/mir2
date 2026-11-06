@@ -1,0 +1,20 @@
+    Finished `test` profile [unoptimized] target(s) in 0.34s
+     Running unittests src\lib.rs (E:\mir2-capacity-goal-20261030/target\debug\deps\mir2_gateway-2a9a3f29c94c0482.exe)
+
+running 8 tests
+test economy::tests::committed_ground_drop_survives_full_projection_and_reconciles_later ... ok
+test economy::tests::ground_drop_projection_mark_failure_retries_without_double_credit ... ok
+test economy::tests::missing_context_ground_drop_is_explicitly_deferred_without_store_access ... ok
+test routing::tests::active_character_retries_pending_ground_drop_projection_then_caches_clear_state ... ok
+gateway lifecycle session_id=gateway-97204-1793375076785-2 stage=session.close phase=begin
+gateway lifecycle session_id=gateway-97204-1793375076785-2 stage=session.close phase=end elapsed_ms=0
+gateway lifecycle session_id=gateway-97204-1793375076785-1 stage=session.close phase=begin
+gateway lifecycle session_id=gateway-97204-1793375076785-1 stage=session.close phase=end elapsed_ms=0
+test routing::tests::shared_in_process_registry_surfaces_shared_ground_drops ... ok
+gateway lifecycle session_id=gateway-97204-1793375078585-3 stage=session.close phase=begin
+gateway lifecycle session_id=gateway-97204-1793375078585-3 stage=session.close phase=end elapsed_ms=0
+test session::tests::drop_item_creates_ground_drop_packet ... ok
+test zone_rpc::exact_ground_drop_snapshot_tests::internal_world_snapshot_rpc_roundtrip_is_lossless_but_client_view_is_redacted ... ok
+test zone_rpc::exact_ground_drop_snapshot_tests::zone_base_snapshot_roundtrip_retains_exact_identity_and_digest_covers_metadata ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 1499 filtered out; finished in 5.17s

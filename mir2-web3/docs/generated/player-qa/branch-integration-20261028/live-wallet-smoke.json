@@ -1,0 +1,10 @@
+{
+  "verifiedAt": "2026-10-28T11:18:36.1797780Z",
+  "gatewayHealth": 200,
+  "relaySessionCreate": 200,
+  "relayPoll": 200,
+  "relayState": "pending",
+  "invalidProofExchange": 401,
+  "intentTokenPersisted": false,
+  "walletSignaturePerformedByAgent": false
+}

@@ -1,0 +1,240 @@
+{
+  "schemaVersion": 1,
+  "state": "PREPARED_ONLY_PENDING_NEW_COMMIT_DRIVER_FREEZE_AND_ROOT_QA",
+  "files": [
+    {
+      "file": "source-lib-v1.mjs",
+      "bytes": 16541,
+      "sha256": "9f8832afcb8ff2d0ef2f01c54679e5252e13675115c4c3a4e9d645162bad56f1"
+    },
+    {
+      "file": "pin-build-source-v1.mjs",
+      "bytes": 906,
+      "sha256": "9c2bb5502f3f9d6eadd7146daf670c5a2d88372da6518e198a82e8abaac385cc"
+    },
+    {
+      "file": "build-release-v1.mjs",
+      "bytes": 4904,
+      "sha256": "864ab65942cebd22edab689bab3eb46222fb38e42e0ec5124d4c22d3c3cbdbf1"
+    },
+    {
+      "file": "capture-release-v1.mjs",
+      "bytes": 3492,
+      "sha256": "7e6f40d82f785a397ef24022cccb53f92e30eac1ddc18f1d5296afbb598e545f"
+    },
+    {
+      "file": "prepare-entrypoints-v1.mjs",
+      "bytes": 4717,
+      "sha256": "2939c504f293248e8320e0acca7bc403e2cd4dcc52e91d3499b5b93003aa6243"
+    },
+    {
+      "file": "entrypoint-derivation-v1.json",
+      "bytes": 5817,
+      "sha256": "28b68650ab94aa627651e7d7c0ff7451df77aac7ef492fb12c7b4d0d4cd5c582"
+    },
+    {
+      "file": "final-source-binding-v1.json",
+      "bytes": 192,
+      "sha256": "678463e39a418a376ffa786c44733ce0096ebfe2e4e503470907e3e2007ba7db"
+    },
+    {
+      "file": "source-and-parameter-schema-v1.json",
+      "bytes": 3002,
+      "sha256": "2a773f037d4db999454f8564171a3f6acebb77ab38a0977af5cdb905558e774f"
+    },
+    {
+      "file": "slow-stage-scoped-draft-v1.json",
+      "bytes": 1000,
+      "sha256": "bd518cf5ed1328bc9511a97fc5b19c08031cfb6bea4f4774f40f71743358850e"
+    },
+    {
+      "file": "README.md",
+      "bytes": 3186,
+      "sha256": "ccee84531a2c4a639844e317d08766757ea237df21f1afd0d7df4b76385c5029"
+    },
+    {
+      "file": "prepare-metadata-v1.mjs",
+      "bytes": 4935,
+      "sha256": "5dcb9281abf053937b699fdaaa497168430e8b2c67e16ebe37f65a2026700646"
+    }
+  ],
+  "sourceSha256": "c619a33b49dc8a25f8b2c99f11deaaae177df30c3c06d29aee60fb9f1cf8d7a0",
+  "syntax": [
+    {
+      "file": "source-lib-v1.mjs",
+      "command": [
+        "node",
+        "--check",
+        "source-lib-v1.mjs"
+      ],
+      "exitCode": 0,
+      "stdoutBytes": 0,
+      "scope": "Syntax only; no entrypoint imported or executed"
+    },
+    {
+      "file": "pin-build-source-v1.mjs",
+      "command": [
+        "node",
+        "--check",
+        "pin-build-source-v1.mjs"
+      ],
+      "exitCode": 0,
+      "stdoutBytes": 0,
+      "scope": "Syntax only; no entrypoint imported or executed"
+    },
+    {
+      "file": "build-release-v1.mjs",
+      "command": [
+        "node",
+        "--check",
+        "build-release-v1.mjs"
+      ],
+      "exitCode": 0,
+      "stdoutBytes": 0,
+      "scope": "Syntax only; no entrypoint imported or executed"
+    },
+    {
+      "file": "capture-release-v1.mjs",
+      "command": [
+        "node",
+        "--check",
+        "capture-release-v1.mjs"
+      ],
+      "exitCode": 0,
+      "stdoutBytes": 0,
+      "scope": "Syntax only; no entrypoint imported or executed"
+    },
+    {
+      "file": "prepare-entrypoints-v1.mjs",
+      "command": [
+        "node",
+        "--check",
+        "prepare-entrypoints-v1.mjs"
+      ],
+      "exitCode": 0,
+      "stdoutBytes": 0,
+      "scope": "Syntax only; no entrypoint imported or executed"
+    },
+    {
+      "file": "prepare-metadata-v1.mjs",
+      "command": [
+        "node",
+        "--check",
+        "prepare-metadata-v1.mjs"
+      ],
+      "exitCode": 0,
+      "stdoutBytes": 0,
+      "scope": "Syntax only; no entrypoint imported or executed"
+    }
+  ],
+  "linksChecked": [
+    "source-and-parameter-schema-v1.json",
+    "entrypoint-derivation-v1.json",
+    "slow-stage-scoped-draft-v1.json"
+  ],
+  "baselineManifest": {
+    "path": "C:\\mir2-build\\p01-completion-20261024\\backend-source-personal-monster-projection-v1.json",
+    "bytes": 32926,
+    "sha256": "151869b76d13202e3c6557f908b5adc5643d1b0579cd7d4961cf0458c71cec52"
+  },
+  "oldReviewedLibrary": {
+    "path": "C:\\mir2-build\\p01-completion-20261024\\personal-monster-projection-release-v1\\source-lib-v3.mjs",
+    "bytes": 15618,
+    "sha256": "ffd87a222e5f04d1f61c29ee71bc69144cc90f696decf5c5aacc821817ba80fb"
+  },
+  "oldReviewedEntrypoints": [
+    {
+      "path": "C:\\mir2-build\\p01-completion-20261024\\personal-monster-projection-release-v1\\pin-build-source-v3.mjs",
+      "bytes": 997,
+      "sha256": "40c56afaaf0ff528d5c7300c93b7aa0167672ed561ef914a4bd211300e5d3538"
+    },
+    {
+      "path": "C:\\mir2-build\\p01-completion-20261024\\personal-monster-projection-release-v1\\build-release-v3.mjs",
+      "bytes": 4895,
+      "sha256": "055254f856a71d1ffc7d0e98fc4657bc29782a7b78c534bcf31f6d58726f6642"
+    },
+    {
+      "path": "C:\\mir2-build\\p01-completion-20261024\\personal-monster-projection-release-v1\\capture-release-v3.mjs",
+      "bytes": 3379,
+      "sha256": "ae76760c0d328982e1d52858e1fae408835188419522dd0881ddb681c74920b4"
+    }
+  ],
+  "newComparator": {
+    "directBaselineCommit": "5c2e713863d3e9556a92f856b11df2396c73b137",
+    "inputCount": 44,
+    "rustInputs": 39,
+    "cargoInputs": 5,
+    "allowedBackendDelta": [
+      "mir2-web3/apps/gateway/src/web.rs"
+    ],
+    "other43RawAndGitLfExact": true,
+    "originalGitBaseClosureRecomputedBeforeBuild": true,
+    "ignoredInclusiveUntrackedRejected": true,
+    "dirtyAndDifferentHeadRejected": true,
+    "fourNoneFixtureFunctionExactOldSource": true,
+    "driver9SeparatelyVerified": true
+  },
+  "knownActualButNotFinalBinding": {
+    "rootFunctionalValidation": {
+      "path": "C:\\mir2-build\\p01-completion-20261024\\root-attack-deadline-functional-validation-v1.json",
+      "bytes": 7819,
+      "sha256": "cb1aaf30818ca430e5ee8fe942d36675a9690e36abcd2f4248717ed6c8686dea"
+    },
+    "sourcePins": [
+      {
+        "path": "mir2-web3/apps/gateway/src/web.rs",
+        "bytes": 857503,
+        "sha256": "41d81bf7cdc6c0aaacbbd11aee12425b27b8a4c27a02b5a0d0915351fb811e40"
+      }
+    ],
+    "driverSourceSha256": "5ba46ae4a729c4ae8514721284da0f91d796aff247cd7c017b206790be88e2d9",
+    "actualChecks": [
+      {
+        "kind": "rustFocused",
+        "passed": 8,
+        "failed": 0,
+        "exitCode": 0
+      },
+      {
+        "kind": "nodeRegression",
+        "passed": 210,
+        "failed": 0,
+        "exitCode": 0
+      },
+      {
+        "kind": "rustfmt",
+        "passed": 1,
+        "failed": 0,
+        "exitCode": 0
+      }
+    ]
+  },
+  "pending": {
+    "newHead": null,
+    "driverFrozenManifest": null,
+    "finalBinding": null,
+    "toolSeal": null,
+    "newRelease": null,
+    "binary": null,
+    "freshFull16": null
+  },
+  "eligibility": {
+    "capture": false,
+    "build": false,
+    "releaseCapture": false,
+    "realm": false
+  },
+  "executionScope": {
+    "onlySourceDerivationAndSyntaxPerformed": true,
+    "captureSourceCalled": false,
+    "cargoOrBuildCalled": false,
+    "releaseCaptureCalled": false,
+    "sourceGuardCalled": false,
+    "capacityAccepted": false
+  },
+  "limitations": [
+    "Prepared raw source references and actual checks do not stand in for a final committed HEAD or new driverfreeze.",
+    "No new executable exists yet; oldd879/a430/855b cannot satisfy future binary identity.",
+    "No lifecycle or capacity test has been performed by these preparation tools."
+  ]
+}

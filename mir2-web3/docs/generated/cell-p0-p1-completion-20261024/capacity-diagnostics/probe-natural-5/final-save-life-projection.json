@@ -1,0 +1,16 @@
+{
+  "scope": "Read-only selected life/transform fields from this owned dedicated probe store; no credentials copied",
+  "saves": [
+    {
+      "character": "Lf04f0600",
+      "map": "0",
+      "hp": 0,
+      "maxHp": 18,
+      "position": {
+        "x": 313,
+        "y": 579
+      },
+      "direction": "Right"
+    }
+  ]
+}

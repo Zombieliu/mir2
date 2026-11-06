@@ -1,0 +1,41 @@
+{
+  "node": {
+    "passed": 21,
+    "failed": 0,
+    "command": "npm test",
+    "includesOfficialFaucetPowConformance": true
+  },
+  "move": {
+    "passed": 14,
+    "failed": 0,
+    "buildSucceeded": true,
+    "warningsAsErrors": true,
+    "oneLintSuppressed": "share_owned on fresh same-transaction create_dapp return"
+  },
+  "testnet": {
+    "passed": true,
+    "finalizedOrderTransactions": 9,
+    "finalizedSetupTransactions": 3,
+    "scenarios": [
+      "fill",
+      "cancel",
+      "expire"
+    ],
+    "replayDecodedActualOrderTransition": true,
+    "fullnodeClockFirstStableOrderObservation": true,
+    "sourceDriverFrozen": true,
+    "graphqlFilteredBackfillAllNineTransactions": true,
+    "graphqlOpaqueEventCursorRestartPassed": true,
+    "defaultListener": "filtered GraphQL wakeups, authoritative gRPC reconciliation"
+  },
+  "limits": [
+    "Isolated real testnet contract lifecycle with custody fixtures; not game database delivery or Windows UI acceptance.",
+    "Temporary gRPC NOT_FOUND/fetch failures recovered from persisted exact transaction bytes; no replacement on unknown results.",
+    "Original Git-pinned Move manifest preserved; external source-equivalent local dependency compile copy used."
+  ],
+  "driverSha256": {
+    "canonical": "630b96f7a69ebdce0fa869549c9c6ef9a27b8b036fc5e5d004c118f5eb88deb1",
+    "driver": "aa622628b23bfacda15fcbb2febc13f35f46b7248966859f59edaa0de7d243d3",
+    "grpc": "0e6ab7cb4062fa2686325754f85b67e082f1498514af96a466b920f294d37b0c"
+  }
+}

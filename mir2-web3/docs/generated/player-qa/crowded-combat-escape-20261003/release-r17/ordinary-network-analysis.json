@@ -1,0 +1,311 @@
+{
+  "schema": "mir2.r17.exact-linux-ordinary-smoke-independent-analysis.v1",
+  "generatedUtc": "2026-10-04T02:58:11.727426+00:00",
+  "readOnlyRunAudit": true,
+  "frozenInputsUnchanged": true,
+  "frozenManifestSha256": "32d01d11aa64861c0008f6d9899573051f7af930a39e2f66771d18d5163d8f0b",
+  "sourceRevision": "6032ef8b3e27dd97bad0b20c8676ef9f185db64b",
+  "gatewayBinarySha256": "1ed52738885292b734c4055a9fd7d585b79d519779084bca2a617d0a9f5eb9ab",
+  "wrapperOk": true,
+  "gatewayExitCode": 0,
+  "normalShutdownSignal": "SIGTERM",
+  "ordinarySmokePassed": true,
+  "classes": [
+    {
+      "className": "Warrior",
+      "level": 1,
+      "classStatus": "passed",
+      "attackTarget": {
+        "objectId": 206302,
+        "name": "Deer"
+      },
+      "ownerObjectId": 1000,
+      "ownerAttackReceipt": {
+        "sequence": 759,
+        "at": "2026-10-04T02:20:09.920Z",
+        "location": {
+          "x": 288,
+          "y": 612,
+          "direction": null
+        }
+      },
+      "escapeRequest": {
+        "sequence": 760,
+        "at": "2026-10-04T02:20:09.931Z",
+        "direction": "Up"
+      },
+      "escapeAck": {
+        "sequence": 766,
+        "at": "2026-10-04T02:20:10.454Z",
+        "location": {
+          "x": 288,
+          "y": 611,
+          "direction": "Up"
+        },
+        "reportedLatencyMs": 529,
+        "receiptTimestampLatencyMs": 523,
+        "requestCountBeforeAck": 1
+      },
+      "oldPositionActionCorrectionReceipts": [
+        {
+          "sequence": 762,
+          "at": "2026-10-04T02:20:09.972Z",
+          "location": {
+            "x": 288,
+            "y": 612,
+            "direction": "UpLeft"
+          }
+        }
+      ],
+      "positiveDamageReceipts": [
+        {
+          "sequence": 764,
+          "at": "2026-10-04T02:20:10.050Z",
+          "damage": 2,
+          "damageType": 0,
+          "afterEscapeSent": true,
+          "beforeEscapeAck": true
+        }
+      ],
+      "struckTargetReceipts": [
+        {
+          "sequence": 763,
+          "at": "2026-10-04T02:20:10.050Z",
+          "attackerId": 1000,
+          "objectId": 206302
+        }
+      ],
+      "committedAttackHitPreservedBeforeEscape": true,
+      "quietWindow": {
+        "requiredMs": 1500,
+        "measuredToFirstSnapshotMs": 1524,
+        "snapshotSequence": 773,
+        "snapshotPosition": {
+          "x": 288,
+          "y": 611,
+          "direction": "Up"
+        },
+        "driftReceiptCount": 0,
+        "remainedSettled": true
+      },
+      "ownerReceivedMonsterHitCount": 0,
+      "castStatus": "not-available-to-fresh-character",
+      "persistenceMatched": true,
+      "normalLogoutAck": 778,
+      "normalFinalLogoutAck": 676,
+      "prohibitedRequestCount": 0,
+      "trace": {
+        "relativePath": "linux-exact-6032-01/receipts/Warrior.jsonl",
+        "bytes": 738579,
+        "sha256": "7ea0b4a3cb69448ab9fb48c7f101c082ccc63e978358e2fabb9fd40bb76d93c1"
+      }
+    },
+    {
+      "className": "Wizard",
+      "level": 1,
+      "classStatus": "passed",
+      "attackTarget": {
+        "objectId": 206302,
+        "name": "Deer"
+      },
+      "ownerObjectId": 1000,
+      "ownerAttackReceipt": {
+        "sequence": 722,
+        "at": "2026-10-04T02:20:26.112Z",
+        "location": {
+          "x": 288,
+          "y": 612,
+          "direction": null
+        }
+      },
+      "escapeRequest": {
+        "sequence": 723,
+        "at": "2026-10-04T02:20:26.140Z",
+        "direction": "Up"
+      },
+      "escapeAck": {
+        "sequence": 729,
+        "at": "2026-10-04T02:20:26.643Z",
+        "location": {
+          "x": 288,
+          "y": 611,
+          "direction": "Up"
+        },
+        "reportedLatencyMs": 527,
+        "receiptTimestampLatencyMs": 503,
+        "requestCountBeforeAck": 1
+      },
+      "oldPositionActionCorrectionReceipts": [
+        {
+          "sequence": 725,
+          "at": "2026-10-04T02:20:26.180Z",
+          "location": {
+            "x": 288,
+            "y": 612,
+            "direction": "UpLeft"
+          }
+        }
+      ],
+      "positiveDamageReceipts": [
+        {
+          "sequence": 727,
+          "at": "2026-10-04T02:20:26.256Z",
+          "damage": 4,
+          "damageType": 0,
+          "afterEscapeSent": true,
+          "beforeEscapeAck": true
+        }
+      ],
+      "struckTargetReceipts": [
+        {
+          "sequence": 726,
+          "at": "2026-10-04T02:20:26.256Z",
+          "attackerId": 1000,
+          "objectId": 206302
+        }
+      ],
+      "committedAttackHitPreservedBeforeEscape": true,
+      "quietWindow": {
+        "requiredMs": 1500,
+        "measuredToFirstSnapshotMs": 1543,
+        "snapshotSequence": 736,
+        "snapshotPosition": {
+          "x": 288,
+          "y": 611,
+          "direction": "Up"
+        },
+        "driftReceiptCount": 0,
+        "remainedSettled": true
+      },
+      "ownerReceivedMonsterHitCount": 0,
+      "castStatus": "not-available-to-fresh-character",
+      "persistenceMatched": true,
+      "normalLogoutAck": 741,
+      "normalFinalLogoutAck": 676,
+      "prohibitedRequestCount": 0,
+      "trace": {
+        "relativePath": "linux-exact-6032-01/receipts/Wizard.jsonl",
+        "bytes": 707633,
+        "sha256": "a24b8f60fc60fa45b0f5e2557a52496e27b5f87e0e3e51b6d335482f08335e78"
+      }
+    },
+    {
+      "className": "Taoist",
+      "level": 1,
+      "classStatus": "passed",
+      "attackTarget": {
+        "objectId": 206302,
+        "name": "Deer"
+      },
+      "ownerObjectId": 1000,
+      "ownerAttackReceipt": {
+        "sequence": 722,
+        "at": "2026-10-04T02:20:41.923Z",
+        "location": {
+          "x": 288,
+          "y": 612,
+          "direction": null
+        }
+      },
+      "escapeRequest": {
+        "sequence": 723,
+        "at": "2026-10-04T02:20:41.964Z",
+        "direction": "Up"
+      },
+      "escapeAck": {
+        "sequence": 729,
+        "at": "2026-10-04T02:20:42.455Z",
+        "location": {
+          "x": 288,
+          "y": 611,
+          "direction": "Up"
+        },
+        "reportedLatencyMs": 526,
+        "receiptTimestampLatencyMs": 491,
+        "requestCountBeforeAck": 1
+      },
+      "oldPositionActionCorrectionReceipts": [
+        {
+          "sequence": 725,
+          "at": "2026-10-04T02:20:41.974Z",
+          "location": {
+            "x": 288,
+            "y": 612,
+            "direction": "UpLeft"
+          }
+        }
+      ],
+      "positiveDamageReceipts": [
+        {
+          "sequence": 727,
+          "at": "2026-10-04T02:20:42.040Z",
+          "damage": 3,
+          "damageType": 0,
+          "afterEscapeSent": true,
+          "beforeEscapeAck": true
+        }
+      ],
+      "struckTargetReceipts": [
+        {
+          "sequence": 726,
+          "at": "2026-10-04T02:20:42.040Z",
+          "attackerId": 1000,
+          "objectId": 206302
+        }
+      ],
+      "committedAttackHitPreservedBeforeEscape": true,
+      "quietWindow": {
+        "requiredMs": 1500,
+        "measuredToFirstSnapshotMs": 1572,
+        "snapshotSequence": 736,
+        "snapshotPosition": {
+          "x": 288,
+          "y": 611,
+          "direction": "Up"
+        },
+        "driftReceiptCount": 0,
+        "remainedSettled": true
+      },
+      "ownerReceivedMonsterHitCount": 0,
+      "castStatus": "not-available-to-fresh-character",
+      "persistenceMatched": true,
+      "normalLogoutAck": 741,
+      "normalFinalLogoutAck": 676,
+      "prohibitedRequestCount": 0,
+      "trace": {
+        "relativePath": "linux-exact-6032-01/receipts/Taoist.jsonl",
+        "bytes": 707753,
+        "sha256": "06336d8835ed0945c81d1f0ad90726cbd0c79db645b9611e88fa1c7abf9c90f0"
+      }
+    }
+  ],
+  "inputs": [
+    {
+      "relativePath": "linux-exact-6032-01/wrapper-report.json",
+      "bytes": 3929,
+      "sha256": "d860c976534f740a7c0d7b59674ce65e813736e7c86e31d8cfb8b1fa2830b6d0"
+    },
+    {
+      "relativePath": "linux-exact-6032-01/receipts/report.json",
+      "bytes": 24460,
+      "sha256": "57f1406b868eda919882c131113c804c0058741393cf911a515cf3807623b64a"
+    },
+    {
+      "relativePath": "linux-exact-6032-01/gateway.log",
+      "bytes": 178,
+      "sha256": "4c1006af705ec1c4ce4c48bff2587e7de020093cd483b537627ff619b65ed08e"
+    }
+  ],
+  "denseMonsterAccepted": false,
+  "learnedSpellAccepted": false,
+  "nativeInputVisualAccepted": false,
+  "fullP1Accepted": false,
+  "reviewPassed": true,
+  "limits": [
+    "Positive damage 2/4/3 is player-to-Deer, not repeated monster-to-player damage; each owner hit count is zero in this attack/escape window.",
+    "The accepted attack packet and committed positive hit survive the ordinary escape request before the accepted move. This is network action-barrier evidence, not native animation/rendering acceptance.",
+    "Every fresh learned-skill set is empty. Spell/cast and death barriers were not exercised.",
+    "One corrected old position preceding each escape ACK is retained; no movement or snapshot drift after the accepted final step is ignored.",
+    "Three isolated File-backed ordinary characters do not attest production database, concurrent capacity, long-line leveling, or seven-monster continuous-hit acceptance."
+  ]
+}

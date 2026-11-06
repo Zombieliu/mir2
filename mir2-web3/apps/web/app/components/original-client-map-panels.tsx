@@ -1,6 +1,17 @@
 "use client";
 
-import { memo, useEffect, useRef, useState } from "react";
+import { memo, useEffect, useRef, useState, type MouseEvent } from "react";
+
+import {
+  mapRouteSourceMatchesWorld,
+  nativeBigMapImagePointToTile,
+  nativeBigMapImageRect,
+  nativeMiniMapCrop,
+  nativeMiniMapViewportPointToTile,
+  sameMapRouteSource,
+  type MapImageRouteIntent,
+  type MapImageRouteSource,
+} from "../../lib/client-map-input";
 
 import {
   crystalMiniMapRadarColor,
@@ -102,26 +113,46 @@ const BIG_MAP_NPC_INDEX = new Map(
 const MINI_MAP_VIEW_WIDTH = 120;
 const MINI_MAP_VIEW_HEIGHT = 108;
 
+type LoadedMapRaster = Readonly<{ src: string; width: number; height: number }>;
+
+function loadedRasterFor(asset: MapRasterAsset | null, loaded: LoadedMapRaster | null): MapRasterAsset | null {
+  return asset && loaded && loaded.src === asset.src && loaded.width > 0 && loaded.height > 0
+    ? { src: asset.src, width: loaded.width, height: loaded.height } : asset;
+}
+
+function consumeMapImageClick<T extends HTMLElement>(event: MouseEvent<T>) {
+  event.preventDefault();
+  event.stopPropagation();
+}
+
 export function BigMapDialog({
   t,
   world,
   player,
   onClose,
+  routeSource = null,
+  onImageRoute,
+  onImageRoutePress,
 }: {
   t: TranslateFn;
   world: DisplayWorld;
   player: DisplayEntity | null;
   onClose: () => void;
+  routeSource?: MapImageRouteSource | null;
+  onImageRoute?: (intent: MapImageRouteIntent) => void;
+  onImageRoutePress?: (source: MapImageRouteSource | null) => void;
 }) {
   const [showWorldMap, setShowWorldMap] = useState(false);
   const [search, setSearch] = useState("");
+  const [loadedRaster, setLoadedRaster] = useState<LoadedMapRaster | null>(null);
   const searchRef = useRef<HTMLInputElement>(null);
   const mapDebug = useMapDebugEnabled();
-  const bigMapAsset =
-    originalBigMapAssetPath(world.bigMapIndex) ?? originalMiniMapAssetPath(world.miniMapIndex);
+  const routeAsset = originalBigMapAssetPath(world.bigMapIndex);
+  const sourceAsset = routeAsset ?? originalMiniMapAssetPath(world.miniMapIndex);
+  const bigMapAsset = loadedRasterFor(sourceAsset, loadedRaster);
   const viewport = bigMapViewport(bigMapAsset);
   const transform = mapPanelTransformForWorld(world, bigMapAsset, "big");
-  const playerImagePoint = transform && player ? worldToMiniMapImagePoint(transform, player) : null;
+  const playerImagePoint = player ? nativeMapTileImagePoint(world, bigMapAsset, "big", player) : null;
   const playerViewportPoint = playerImagePoint
     ? bigMapImagePointToViewportPoint(playerImagePoint, viewport, bigMapAsset)
     : null;
@@ -131,6 +162,28 @@ export function BigMapDialog({
     .filter((entity) => !searchQuery || entity.name.toLowerCase().includes(searchQuery))
     .slice(0, 18);
   const mapDebugNpcRows = mapDebug ? bigMapNpcRowsForWorld(world) : [];
+  const routeSourceValid = !showWorldMap && Boolean(routeAsset && bigMapAsset?.src === routeAsset.src
+    && loadedRaster?.src === routeAsset.src
+    && loadedRaster.width === routeAsset.width && loadedRaster.height === routeAsset.height
+    && mapRouteSourceMatchesWorld(routeSource, world, player?.objectId, "big"));
+  const routeBigMapClick = (event: MouseEvent<HTMLDivElement>) => {
+    consumeMapImageClick(event);
+    if (showWorldMap || !bigMapAsset || typeof document === "undefined"
+      || document.visibilityState !== "visible" || !document.hasFocus()) return;
+    const rect = event.currentTarget.getBoundingClientRect();
+    if (rect.width <= 0 || rect.height <= 0) return;
+    const pointX = (event.clientX - rect.left) * viewport.width / rect.width - viewport.imageLeft;
+    const pointY = (event.clientY - rect.top) * viewport.height / rect.height - viewport.imageTop;
+    if (!Number.isFinite(pointX) || !Number.isFinite(pointY) || pointX < 0 || pointY < 0
+      || pointX >= viewport.contentWidth || pointY >= viewport.contentHeight) return;
+    onImageRoutePress?.(routeSource);
+    if (!routeSourceValid || !routeSource || !onImageRoute || !routeAsset || !loadedRaster) return;
+    const tile = nativeBigMapImagePointToTile(pointX, pointY,
+      routeSource.mapWidth, routeSource.mapHeight, loadedRaster.width, loadedRaster.height);
+    if (!tile) return;
+    onImageRoute({ source: routeSource, kind: "big", ...tile,
+      imageSrc: routeAsset.src, imageWidth: loadedRaster.width, imageHeight: loadedRaster.height });
+  };
 
   return (
     <section className="big-map-dialog" aria-label={t("client.BigMapKey", ["M"], t("ui.map"))}>
@@ -150,7 +203,8 @@ export function BigMapDialog({
       <div className="big-map-scroll up"><SpriteButton sprite={ORIGINAL_UI.bigMap.upButton} label={t("ui.up", [], "Up")} disabled /></div>
       <div className="big-map-scroll thumb"><SpriteButton sprite={ORIGINAL_UI.bigMap.positionBar} label={t("ui.scroll", [], "Scroll")} disabled /></div>
       <div className="big-map-scroll down"><SpriteButton sprite={ORIGINAL_UI.bigMap.downButton} label={t("ui.down", [], "Down")} disabled /></div>
-      <div className="big-map-viewport" style={{ left: viewport.left, top: viewport.top, width: viewport.width, height: viewport.height }}>
+      <div className="big-map-viewport" style={{ left: viewport.left, top: viewport.top, width: viewport.width, height: viewport.height }}
+        onClick={routeBigMapClick} onContextMenu={routeBigMapClick}>
         {bigMapAsset ? (
           <img
             className="big-map-raster"
@@ -158,8 +212,19 @@ export function BigMapDialog({
             alt=""
             draggable={false}
             data-mir2-original-src={bigMapAsset.src}
-            onError={handleSceneAssetImageError}
-            onLoad={handleSceneAssetImageLoad}
+            onError={(event) => {
+              handleSceneAssetImageError(event);
+              setLoadedRaster((current) => current?.src === sourceAsset?.src ? null : current);
+            }}
+            onLoad={(event) => {
+              handleSceneAssetImageLoad(event);
+              const image = event.currentTarget;
+               const src = image.dataset.mir2OriginalSrc;
+               if (src && src === sourceAsset?.src
+                && image.naturalWidth > 0 && image.naturalHeight > 0) {
+                 setLoadedRaster({ src, width: image.naturalWidth, height: image.naturalHeight });
+              }
+            }}
             style={{ width: viewport.contentWidth, height: viewport.contentHeight, left: viewport.imageLeft, top: viewport.imageTop }}
           />
         ) : (
@@ -167,7 +232,7 @@ export function BigMapDialog({
         )}
         {world.entities.map((entity) => {
           const point = bigMapImagePointToViewportPoint(
-            worldToMiniMapImagePoint(transform, entity),
+            nativeMapTileImagePoint(world, bigMapAsset, "big", entity),
             viewport,
             bigMapAsset,
           );
@@ -263,7 +328,7 @@ export function BigMapDialog({
         spellCheck={false}
       />
       {showWorldMap ? (
-        <div className="big-map-world-overlay">
+        <div className="big-map-world-overlay" onClick={consumeMapImageClick} onContextMenu={consumeMapImageClick}>
           <img
             className="big-map-world-image"
             src={ORIGINAL_UI.bigMap.worldMap}
@@ -307,6 +372,9 @@ export type MiniMapPanelProps = {
   onToggleMail: () => void;
   onToggleBigMap: () => void;
   showMailAction?: boolean;
+  routeSource?: MapImageRouteSource | null;
+  onImageRoute?: (intent: MapImageRouteIntent) => void;
+  onImageRoutePress?: (source: MapImageRouteSource | null) => void;
 };
 
 export function MiniMapPanel({
@@ -318,8 +386,12 @@ export function MiniMapPanel({
   onToggleMail,
   onToggleBigMap,
   showMailAction = true,
+  routeSource = null,
+  onImageRoute,
+  onImageRoutePress,
 }: MiniMapPanelProps) {
   const [collapsed, setCollapsed] = useState(false);
+  const [loadedRaster, setLoadedRaster] = useState<LoadedMapRaster | null>(null);
   const miniMapAsset = originalMiniMapAssetPath(world.miniMapIndex);
   const hasRasterMiniMap = Boolean(miniMapAsset);
   const smallMode = collapsed || !hasRasterMiniMap;
@@ -355,7 +427,11 @@ export function MiniMapPanel({
       <div className={`mini-map-scene-shell ${smallMode ? "hidden" : ""}`}>
         {/* Unmount (return null) when collapsed/small instead of CSS-hiding: a hidden scene still
             reconciles one <rect> per entity every flush. Skipping the mount removes that cost. */}
-        {smallMode ? null : <MiniMapScene world={world} player={player} />}
+        {smallMode ? null : <MiniMapScene world={world} player={player} loadedRaster={loadedRaster}
+          routeSource={routeSource} onImageRoute={onImageRoute}
+          onImageRoutePress={onImageRoutePress}
+          onRasterLoad={(src, width, height) => setLoadedRaster({ src, width, height })}
+          onRasterError={(src) => setLoadedRaster((current) => current?.src === src ? null : current)} />}
       </div>
       {!smallMode ? <div className="mini-map-name">
         <span>{mapTitle}</span>
@@ -395,6 +471,12 @@ export function MiniMapPanel({
 type MiniMapSceneProps = {
   world: DisplayWorld;
   player: DisplayEntity | null;
+  loadedRaster: LoadedMapRaster | null;
+  routeSource: MapImageRouteSource | null;
+  onImageRoute?: (intent: MapImageRouteIntent) => void;
+  onImageRoutePress?: (source: MapImageRouteSource | null) => void;
+  onRasterLoad: (src: string, width: number, height: number) => void;
+  onRasterError: (src: string) => void;
 };
 
 // Re-render only when an input the scene actually reads changes: the radar dots key on
@@ -403,7 +485,10 @@ type MiniMapSceneProps = {
 // `world.mapFileName` / `world.bigMapIndex`. Everything else on `world` (combat fields, the 30Hz
 // motion tick, etc.) is irrelevant here, so a fresh `world` identity alone must NOT re-render.
 function areMiniMapScenePropsEqual(prev: MiniMapSceneProps, next: MiniMapSceneProps): boolean {
-  if (prev.player !== next.player) return false;
+  if (prev.player !== next.player || prev.loadedRaster !== next.loadedRaster
+    || !sameMapRouteSource(prev.routeSource, next.routeSource)
+    || prev.onImageRoute !== next.onImageRoute || prev.onImageRoutePress !== next.onImageRoutePress || prev.onRasterLoad !== next.onRasterLoad
+    || prev.onRasterError !== next.onRasterError) return false;
   const a = prev.world;
   const b = next.world;
   return (
@@ -416,10 +501,12 @@ function areMiniMapScenePropsEqual(prev: MiniMapSceneProps, next: MiniMapScenePr
   );
 }
 
-const MiniMapScene = memo(function MiniMapScene({ world, player }: MiniMapSceneProps) {
+const MiniMapScene = memo(function MiniMapScene({ world, player, loadedRaster, routeSource,
+  onImageRoute, onImageRoutePress, onRasterLoad, onRasterError }: MiniMapSceneProps) {
   const mapDebug = useMapDebugEnabled();
   const miniMapAssetPath = originalMiniMapAssetPath(world.miniMapIndex);
-  const bounds = miniMapBounds(world, player, miniMapAssetPath);
+  const miniMapAsset = loadedRasterFor(miniMapAssetPath, loadedRaster);
+  const bounds = miniMapBounds(world, player, miniMapAsset);
 
   if (!bounds) {
     return null;
@@ -437,9 +524,32 @@ const MiniMapScene = memo(function MiniMapScene({ world, player }: MiniMapSceneP
     : `0 0 ${bounds.width} ${bounds.height}`;
   const playerImagePoint = bounds.transform && player ? worldToMiniMapImagePoint(bounds.transform, player) : null;
   const mapDebugNpcRows = mapDebug ? bigMapNpcRowsForWorld(world) : [];
+  const routeSourceValid = Boolean(miniMapAssetPath && miniMapAsset && loadedRaster
+    && loadedRaster.src === miniMapAssetPath.src && loadedRaster.width === miniMapAssetPath.width
+    && loadedRaster.height === miniMapAssetPath.height
+    && mapRouteSourceMatchesWorld(routeSource, world, player?.objectId, "mini"));
+  const routeMiniMapClick = (event: MouseEvent<HTMLDivElement>) => {
+    consumeMapImageClick(event);
+    if (document.visibilityState === "visible" && document.hasFocus()) onImageRoutePress?.(routeSource);
+    if (!routeSourceValid || !routeSource || !onImageRoute || !miniMapAssetPath || !loadedRaster
+      || typeof document === "undefined" || !document.hasFocus()) return;
+    const rect = event.currentTarget.getBoundingClientRect();
+    if (rect.width <= 0 || rect.height <= 0) return;
+    const viewportX = (event.clientX - rect.left) * MINI_MAP_VIEW_WIDTH / rect.width;
+    const viewportY = (event.clientY - rect.top) * MINI_MAP_VIEW_HEIGHT / rect.height;
+    const imageViewport = bounds.imageViewport;
+    if (!imageViewport) return;
+    const crop = { left: imageViewport.imageLeft, top: imageViewport.imageTop,
+      width: imageViewport.width, height: imageViewport.height };
+    const tile = nativeMiniMapViewportPointToTile(viewportX, viewportY, crop,
+      routeSource.mapWidth, routeSource.mapHeight, loadedRaster.width, loadedRaster.height);
+    if (!tile) return;
+    onImageRoute({ source: routeSource, kind: "mini", ...tile,
+      imageSrc: miniMapAssetPath.src, imageWidth: loadedRaster.width, imageHeight: loadedRaster.height });
+  };
 
   return (
-    <div className="mini-map-scene">
+    <div className="mini-map-scene" onClick={routeMiniMapClick} onContextMenu={routeMiniMapClick}>
       {miniMapAssetPath && bounds.raster ? (
         <img
           className="mini-map-raster"
@@ -447,8 +557,15 @@ const MiniMapScene = memo(function MiniMapScene({ world, player }: MiniMapSceneP
           alt=""
           draggable={false}
           data-mir2-original-src={miniMapAssetPath.src}
-          onError={handleSceneAssetImageError}
-          onLoad={handleSceneAssetImageLoad}
+          onError={(event) => { handleSceneAssetImageError(event); onRasterError(miniMapAssetPath.src); }}
+          onLoad={(event) => {
+            handleSceneAssetImageLoad(event);
+            const image = event.currentTarget;
+            if (image.dataset.mir2OriginalSrc === miniMapAssetPath.src
+              && image.naturalWidth > 0 && image.naturalHeight > 0) {
+              onRasterLoad(miniMapAssetPath.src, image.naturalWidth, image.naturalHeight);
+            }
+          }}
           style={miniMapRasterStyle(bounds.raster)}
         />
       ) : (
@@ -620,34 +737,33 @@ function miniMapBounds(
     const mapWidth = Math.max(world.originalMapRegion.mapWidth, 1);
     const mapHeight = Math.max(world.originalMapRegion.mapHeight, 1);
     const transform = mapPanelTransformForWorld(world, asset, "mini");
-    const viewWidth = Math.min(120, asset.width);
-    const viewHeight = Math.min(108, asset.height);
-    const center = player
-      ? worldToMiniMapImagePoint(transform, player)
-      : {
-          x: (transform.imageMinX + transform.imageMaxX) / 2,
-          y: (transform.imageMinY + transform.imageMaxY) / 2,
-        };
-    const rasterLeft = clampNumber(Math.trunc(center.x) - Math.floor(viewWidth / 2), 0, Math.max(asset.width - viewWidth, 0));
-    const rasterTop = clampNumber(Math.trunc(center.y) - Math.floor(viewHeight / 2), 0, Math.max(asset.height - viewHeight, 0));
+    const crop = nativeMiniMapCrop(Math.trunc(player?.x ?? mapWidth / 2), Math.trunc(player?.y ?? mapHeight / 2),
+      mapWidth, mapHeight, asset.width, asset.height);
+    if (!crop) return null;
+    const scaleX = MINI_MAP_VIEW_WIDTH / crop.width;
+    const scaleY = MINI_MAP_VIEW_HEIGHT / crop.height;
 
     return {
       minX: player ? player.x - 12 : mapWidth / 2 - 12,
       minY: player ? player.y - 12 : mapHeight / 2 - 12,
       width: 24,
       height: 24,
+      mapWidth,
+      mapHeight,
+      imageWidth: asset.width,
+      imageHeight: asset.height,
       imageViewport: {
-        imageLeft: rasterLeft,
-        imageTop: rasterTop,
-        width: viewWidth,
-        height: viewHeight,
+        imageLeft: crop.left,
+        imageTop: crop.top,
+        width: crop.width,
+        height: crop.height,
       },
       transform,
       raster: {
-        left: -rasterLeft,
-        top: -rasterTop,
-        width: asset.width,
-        height: asset.height,
+        left: -crop.left * scaleX,
+        top: -crop.top * scaleY,
+        width: asset.width * scaleX,
+        height: asset.height * scaleY,
       },
     };
   }
@@ -703,24 +819,56 @@ function bigMapViewport(asset: MapRasterAsset | null) {
       contentScale: 1,
     };
   }
-
-  const contentScale = Math.min(
-    maxViewportWidth / Math.max(asset.width, 1),
-    maxViewportHeight / Math.max(asset.height, 1),
-  );
-  const contentWidth = Math.max(1, Math.round(asset.width * contentScale));
-  const contentHeight = Math.max(1, Math.round(asset.height * contentScale));
+  const rect = nativeBigMapImageRect(asset.width, asset.height);
+  if (!rect) {
+    return {
+      left: 14,
+      top: 52,
+      width: maxViewportWidth,
+      height: maxViewportHeight,
+      contentWidth: maxViewportWidth,
+      contentHeight: maxViewportHeight,
+      imageLeft: 0,
+      imageTop: 0,
+      contentScale: 1,
+    };
+  }
 
   return {
-    left: 14 + Math.round((maxViewportWidth - contentWidth) / 2),
-    top: 52 + Math.round((maxViewportHeight - contentHeight) / 2),
+    left: 14,
+    top: 52,
     width: maxViewportWidth,
     height: maxViewportHeight,
-    contentWidth,
-    contentHeight,
-    imageLeft: 0,
-    imageTop: 0,
-    contentScale,
+    contentWidth: rect.width,
+    contentHeight: rect.height,
+    imageLeft: rect.left - 14,
+    imageTop: rect.top - 52,
+    contentScale: 1,
+  };
+}
+
+function nativeMapTileImagePoint(
+  world: DisplayWorld,
+  asset: MapRasterAsset | null,
+  kind: "mini" | "big",
+  tile: Pick<DisplayEntity, "x" | "y">,
+): CrystalMiniMapPoint {
+  const mapWidth = world.originalMapRegion?.mapWidth ?? 0;
+  const mapHeight = world.originalMapRegion?.mapHeight ?? 0;
+  if (!asset || mapWidth <= 0 || mapHeight <= 0) return { x: 0, y: 0 };
+  if (kind === "big") {
+    const rect = nativeBigMapImageRect(asset.width, asset.height);
+    if (!rect) return { x: 0, y: 0 };
+    const fractionX = Math.max(0, Math.min(1, Math.fround(Math.fround(tile.x) / Math.fround(mapWidth))));
+    const fractionY = Math.max(0, Math.min(1, Math.fround(Math.fround(tile.y) / Math.fround(mapHeight))));
+    return {
+      x: Math.fround(fractionX * Math.fround(rect.width)),
+      y: Math.fround(fractionY * Math.fround(rect.height)),
+    };
+  }
+  return {
+    x: Math.fround(Math.fround(Math.fround(tile.x) * Math.fround(asset.width)) / Math.fround(mapWidth)),
+    y: Math.fround(Math.fround(Math.fround(tile.y) * Math.fround(asset.height)) / Math.fround(mapHeight)),
   };
 }
 
@@ -775,8 +923,16 @@ function miniMapViewportPointForWorldPoint(
   bounds: NonNullable<ReturnType<typeof miniMapBounds>>,
   point: CrystalMiniMapPoint,
 ) {
-  if (bounds.transform && bounds.imageViewport) {
-    return worldToCrystalMiniMapRadarPoint(bounds.transform, bounds.imageViewport, point);
+  if (bounds.imageViewport && "mapWidth" in bounds && "mapHeight" in bounds
+    && "imageWidth" in bounds && "imageHeight" in bounds) {
+    const sourceX = Math.fround(Math.fround(Math.fround(point.x) * Math.fround(bounds.imageWidth)) / Math.fround(bounds.mapWidth));
+    const sourceY = Math.fround(Math.fround(Math.fround(point.y) * Math.fround(bounds.imageHeight)) / Math.fround(bounds.mapHeight));
+    return {
+      x: Math.fround(Math.fround(Math.fround(sourceX - Math.fround(bounds.imageViewport.imageLeft))
+        * MINI_MAP_VIEW_WIDTH) / Math.fround(bounds.imageViewport.width)),
+      y: Math.fround(Math.fround(Math.fround(sourceY - Math.fround(bounds.imageViewport.imageTop))
+        * MINI_MAP_VIEW_HEIGHT) / Math.fround(bounds.imageViewport.height)),
+    };
   }
   return {
     x: point.x - bounds.minX,

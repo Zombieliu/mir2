@@ -1,0 +1,18 @@
+{
+  "projectedReport": {
+    "engineSha256": "343C5E52355E012A6E4CDABD81289A52C9D893114F378CD875AE3AF70AC2BBE3",
+    "files": 9,
+    "gameCandidate": "WN-CANDIDATE-20261029-wallet-28",
+    "gameSourceRevision": "33f0b8c252f65cc4a24b133292cd1f9eba122dae",
+    "launcherSha256": "831F4805423188391AEEF6391EB00675F3DB4E30897A9A4DC47DCFCACF09D49C",
+    "passed": true,
+    "schema": "mir2.windows.updater-bundle-verification.v1",
+    "signingKeySha256": "6C70C777B27D50949370D494B4B25798200FBDD5C171BAEEAA94D7E289900F3E",
+    "sourceRevision": "ba79cc90b47fa2fe017f977c29ea2c987342bcfe"
+  },
+  "projectionBoundary": "Explicit fields only; raw log/body/attempt/env/argv/private config excluded.",
+  "role": "bridge30-cms",
+  "schema": "mir2.evidence.public-projection.v1",
+  "sourceSha256": "72350B9E8D5E7675A8AD15541E8FAF16C77A074F15D47C2EDB128B84ACB6DC74",
+  "sourceSize": 591
+}

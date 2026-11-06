@@ -13,7 +13,7 @@ use sha2::{Digest, Sha256};
 use std::collections::{BTreeMap, VecDeque};
 use std::env;
 use std::fs::{self, File, OpenOptions};
-use std::io::{BufRead, BufReader, Write};
+use std::io::{BufRead, BufReader, BufWriter, Write};
 use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::{Arc, Mutex};
@@ -30,6 +30,7 @@ const DEFAULT_RETENTION_HOURS: u64 = 168;
 const DEFAULT_ENTITY_STALE_MS: u64 = 15_000;
 const MAX_FRAME_BYTES: usize = 2 * 1024 * 1024;
 const MAX_EVENTS_PER_FRAME: usize = 512;
+const RECORDING_WRITE_BUFFER_BYTES: usize = 64 * 1024;
 
 #[derive(Debug, Clone)]
 pub struct SpectatorConfig {
@@ -684,32 +685,34 @@ impl SpectatorHub {
 }
 
 fn sanitize_world(snapshot: &WorldSnapshot, max_entities: usize) -> Result<Value, String> {
-    let value = serde_json::to_value(snapshot.client_view())
-        .map_err(|error| format!("encode world snapshot for spectator failed: {error}"))?;
-    let source = value
-        .as_object()
-        .ok_or_else(|| "world snapshot did not encode to an object".to_string())?;
-    let entities = source
-        .get("entities")
-        .and_then(Value::as_array)
-        .cloned()
-        .unwrap_or_default()
-        .into_iter()
+    // Project only spectator fields. Serializing the complete client view first
+    // also encodes private inventory and systems which this boundary discards.
+    let entities = snapshot
+        .entities
+        .iter()
         .take(max_entities)
-        .map(sanitize_entity)
-        .collect::<Vec<_>>();
-    let drops = source
-        .get("groundDrops")
-        .and_then(Value::as_array)
-        .cloned()
-        .unwrap_or_default();
+        .map(|entity| {
+            serde_json::to_value(entity)
+                .map(sanitize_entity)
+                .map_err(|error| format!("encode world snapshot for spectator failed: {error}"))
+        })
+        .collect::<Result<Vec<_>, _>>()?;
+    let drops = snapshot
+        .ground_drops
+        .iter()
+        .map(|drop| {
+            serde_json::to_value(drop)
+                .map(sanitize_ground_drop)
+                .map_err(|error| format!("encode world snapshot for spectator failed: {error}"))
+        })
+        .collect::<Result<Vec<_>, _>>()?;
 
     Ok(json!({
-        "tick": source.get("tick").cloned().unwrap_or(json!(0)),
-        "mapTitle": source.get("mapTitle").cloned().unwrap_or(Value::Null),
-        "mapFileName": source.get("mapFileName").cloned().unwrap_or(Value::Null),
-        "inSafeZone": source.get("inSafeZone").cloned().unwrap_or(json!(false)),
-        "lightSetting": source.get("lightSetting").cloned().unwrap_or(json!(0)),
+        "tick": snapshot.tick,
+        "mapTitle": &snapshot.map_title,
+        "mapFileName": &snapshot.map_file_name,
+        "inSafeZone": snapshot.in_safe_zone,
+        "lightSetting": snapshot.light_setting,
         "playerObjectId": Value::Null,
         "playerHp": Value::Null,
         "playerMaxHp": Value::Null,
@@ -728,9 +731,9 @@ fn sanitize_world(snapshot: &WorldSnapshot, max_entities: usize) -> Result<Value
         "hasExpandedStorage": false,
         "hasStoragePassword": false,
         "requireStoragePassword": false,
-        "sceneView": source.get("sceneView").cloned().unwrap_or(Value::Null),
-        "terrainPatches": source.get("terrainPatches").cloned().unwrap_or(json!([])),
-        "decorObjects": source.get("decorObjects").cloned().unwrap_or(json!([])),
+        "sceneView": &snapshot.scene_view,
+        "terrainPatches": &snapshot.terrain_patches,
+        "decorObjects": &snapshot.decor_objects,
         "entities": entities,
         "groundDrops": drops,
         "beltItems": [],
@@ -743,9 +746,18 @@ fn sanitize_world(snapshot: &WorldSnapshot, max_entities: usize) -> Result<Value
         "knownSkills": [],
         "activeBuffs": [],
         "stage5Systems": {},
-        "mapTransfers": source.get("mapTransfers").cloned().unwrap_or(json!([])),
+        "mapTransfers": &snapshot.map_transfers,
         "interactionHints": []
     }))
+}
+
+fn sanitize_ground_drop(mut drop: Value) -> Value {
+    if let Some(loot) = drop.get_mut("loot").and_then(Value::as_object_mut) {
+        // Preserve the client-view boundary for exact server-owned item data.
+        loot.remove("exactItem");
+        loot.remove("exact_item");
+    }
+    drop
 }
 
 fn sanitize_entity(mut entity: Value) -> Value {
@@ -1022,11 +1034,43 @@ fn append_frame(data_dir: &Path, frame: &SpectatorFrame) -> Result<(), String> {
         .append(true)
         .open(&path)
         .map_err(|error| format!("open {} failed: {error}", path.display()))?;
-    serde_json::to_writer(&mut file, frame)
-        .map_err(|error| format!("encode {} failed: {error}", path.display()))?;
-    file.write_all(b"\n")
-        .and_then(|()| file.flush())
-        .map_err(|error| format!("flush {} failed: {error}", path.display()))
+    write_recording_jsonl(&mut file, frame).map_err(|error| match error {
+        RecordingWriteError::Encode(error) => {
+            format!("encode {} failed: {error}", path.display())
+        }
+        RecordingWriteError::Flush(error) => {
+            format!("flush {} failed: {error}", path.display())
+        }
+    })
+}
+
+#[derive(Debug)]
+enum RecordingWriteError {
+    Encode(serde_json::Error),
+    Flush(std::io::Error),
+}
+
+fn write_recording_jsonl<W: Write, T: ?Sized + Serialize>(
+    writer: &mut W,
+    value: &T,
+) -> Result<(), RecordingWriteError> {
+    // JSON serializers issue tiny writes for punctuation, keys and values.
+    // Bound buffering independently of frame size and explicitly flush before
+    // success so an immediate replay sees the complete, unchanged JSONL record.
+    let mut buffered = BufWriter::with_capacity(RECORDING_WRITE_BUFFER_BYTES, writer);
+    let result = serde_json::to_writer(&mut buffered, value)
+        .map_err(RecordingWriteError::Encode)
+        .and_then(|()| {
+            buffered
+                .write_all(b"\n")
+                .and_then(|()| buffered.flush())
+                .map_err(RecordingWriteError::Flush)
+        });
+    // A failed write may leave an unwritten suffix. Never let Drop retry it
+    // behind an error return or hide a flush error; partial failed appends keep
+    // their existing semantics, with no new atomicity or fsync promise.
+    let _ = buffered.into_parts();
+    result
 }
 
 fn prune_recordings(config: &SpectatorConfig) {
@@ -1248,6 +1292,321 @@ mod tests {
             mir2_protocol::ServerPacket::StartGame { result: 4, .. }
         )));
         session
+    }
+
+    // Independent pre-optimization boundary: serialize the complete client view
+    // before projecting spectator fields, as the production code previously did.
+    fn legacy_sanitize_world(snapshot: &WorldSnapshot, max_entities: usize) -> Value {
+        let value = serde_json::to_value(snapshot.client_view()).unwrap();
+        let source = value.as_object().unwrap();
+        let entities = source["entities"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .take(max_entities)
+            .cloned()
+            .map(|mut entity| {
+                entity
+                    .as_object_mut()
+                    .unwrap()
+                    .insert("questIds".into(), json!([]));
+                entity
+            })
+            .collect::<Vec<_>>();
+        json!({
+            "tick": source["tick"], "mapTitle": source["mapTitle"],
+            "mapFileName": source["mapFileName"], "inSafeZone": source["inSafeZone"],
+            "lightSetting": source["lightSetting"],
+            "playerObjectId": null, "playerHp": null, "playerMaxHp": null,
+            "playerMp": null, "playerMaxMp": null, "playerExperience": 0,
+            "playerMaxExperience": 1, "gold": 0, "credit": 0, "cityCurrencies": {},
+            "currentWeight": 0, "maxWeight": 0, "freeBagSlots": 0, "maxBagSlots": 0,
+            "storageSize": 0, "hasExpandedStorage": false,
+            "hasStoragePassword": false, "requireStoragePassword": false,
+            "sceneView": source["sceneView"], "terrainPatches": source["terrainPatches"],
+            "decorObjects": source["decorObjects"], "entities": entities,
+            "groundDrops": source["groundDrops"], "beltItems": [], "inventoryItems": [],
+            "storageItems": [], "equipmentItems": [], "questLog": [],
+            "activeNpcDialog": null, "npcScriptDiagnostics": [], "knownSkills": [],
+            "activeBuffs": [], "stage5Systems": {}, "mapTransfers": source["mapTransfers"],
+            "interactionHints": []
+        })
+    }
+
+    #[test]
+    fn direct_spectator_projection_matches_legacy_complete_snapshot() {
+        let mut snapshot = started_demo_session().world_snapshot();
+        snapshot.tick = 91;
+        snapshot.map_title = Some("spectator projection fixture".into());
+        snapshot.light_setting = 7;
+        snapshot.gold = 123_456;
+        snapshot.credit = 654_321;
+        snapshot
+            .city_currencies
+            .insert("private-currency".into(), 77);
+        snapshot
+            .interaction_hints
+            .push("private-spectator-marker".into());
+        snapshot.stage5_systems.mail.push(
+            serde_json::from_value(json!({
+                "id": 91, "deliveryNonce": "private-spectator-marker", "from": "fixture",
+                "to": "fixture", "subject": "private", "body": "private-spectator-marker",
+                "gold": 19, "claimed": false, "deleted": false
+            }))
+            .unwrap(),
+        );
+        snapshot.ground_drops.push(exact_ground_drop());
+        let mut second = snapshot.entities.first().unwrap().clone();
+        second.object_id = 91_002;
+        second.name = "second projection entity".into();
+        snapshot.entities.push(second);
+        let full = sanitize_world(&snapshot, usize::MAX).unwrap();
+        assert_eq!(full, legacy_sanitize_world(&snapshot, usize::MAX));
+        assert_eq!(full["stage5Systems"], json!({}));
+        assert!(!full.to_string().contains("private-spectator-marker"));
+        assert!(full["groundDrops"][0]["loot"].get("exactItem").is_none());
+        for maximum in [0, 1, snapshot.entities.len(), usize::MAX] {
+            let actual = sanitize_world(&snapshot, maximum).unwrap();
+            assert_eq!(actual, legacy_sanitize_world(&snapshot, maximum));
+            assert_eq!(
+                actual["entities"].as_array().unwrap().len(),
+                maximum.min(snapshot.entities.len())
+            );
+        }
+        snapshot.map_title = None;
+        snapshot.map_file_name = None;
+        snapshot.scene_view = None;
+        snapshot.terrain_patches.clear();
+        snapshot.decor_objects.clear();
+        snapshot.map_transfers.clear();
+        assert_eq!(
+            sanitize_world(&snapshot, 1).unwrap(),
+            legacy_sanitize_world(&snapshot, 1)
+        );
+    }
+
+    #[test]
+    fn direct_spectator_projection_removes_both_exact_aliases_and_quest_ids() {
+        let drop = json!({"objectId": 91, "loot": {
+            "name": "visible", "exactItem": {"secret": 1}, "exact_item": {"secret": 2}
+        }});
+        assert_eq!(
+            sanitize_ground_drop(drop),
+            json!({"objectId": 91, "loot": {"name": "visible"}})
+        );
+        let entity = json!({"objectId": 92, "name": "visible", "questIds": [11, 12]});
+        assert_eq!(
+            sanitize_entity(entity),
+            json!({"objectId": 92, "name": "visible", "questIds": []})
+        );
+    }
+
+    #[derive(Default)]
+    struct RecordingTestWriter {
+        bytes: Vec<u8>,
+        writes: usize,
+        flushes: usize,
+        max_requested_write: usize,
+        short_write_bytes: Option<usize>,
+        fail_write_at: Option<usize>,
+        interrupt_write_at: Option<usize>,
+        zero_write_at: Option<usize>,
+        fail_flush: bool,
+    }
+
+    impl Write for RecordingTestWriter {
+        fn write(&mut self, bytes: &[u8]) -> std::io::Result<usize> {
+            self.writes += 1;
+            self.max_requested_write = self.max_requested_write.max(bytes.len());
+            if self.fail_write_at == Some(self.writes) {
+                return Err(std::io::Error::new(
+                    std::io::ErrorKind::Other,
+                    "fixture write failure",
+                ));
+            }
+            if self.interrupt_write_at == Some(self.writes) {
+                return Err(std::io::Error::new(
+                    std::io::ErrorKind::Interrupted,
+                    "fixture interrupted write",
+                ));
+            }
+            if self.zero_write_at == Some(self.writes) {
+                return Ok(0);
+            }
+            let written = self
+                .short_write_bytes
+                .unwrap_or(bytes.len())
+                .min(bytes.len());
+            self.bytes.extend_from_slice(&bytes[..written]);
+            Ok(written)
+        }
+
+        fn flush(&mut self) -> std::io::Result<()> {
+            self.flushes += 1;
+            if self.fail_flush {
+                return Err(std::io::Error::new(
+                    std::io::ErrorKind::Other,
+                    "fixture flush failure",
+                ));
+            }
+            Ok(())
+        }
+    }
+
+    fn recording_fixture(world: Value) -> SpectatorFrame {
+        SpectatorFrame {
+            schema: SPECTATOR_SCHEMA.to_string(),
+            recording_id: "0-1".to_string(),
+            sequence: 1,
+            captured_at_ms: 3_600_001,
+            map_file_name: "0".to_string(),
+            map_title: "比奇 \"港口\"\n".to_string(),
+            digest: "fixture-digest".to_string(),
+            events: Vec::new(),
+            world,
+        }
+    }
+
+    #[test]
+    fn recording_buffer_batches_fragment_writes_without_changing_jsonl_bytes() {
+        let frame = recording_fixture(json!({
+            "entities": (0..2_048).map(|id| json!({
+                "objectId": id, "name": format!("观察者 {id} \"quoted\"\n"),
+                "kind": "monster", "x": id % 100, "y": id / 100,
+                "hp": 25, "dead": false, "stats": [1, 2, 3, 4, 5]
+            })).collect::<Vec<_>>()
+        }));
+        let mut original = RecordingTestWriter::default();
+        serde_json::to_writer(&mut original, &frame).unwrap();
+        original.write_all(b"\n").unwrap();
+        original.flush().unwrap();
+
+        let mut buffered = RecordingTestWriter::default();
+        write_recording_jsonl(&mut buffered, &frame).unwrap();
+        assert_eq!(buffered.bytes, original.bytes);
+        assert!(buffered.bytes.len() > RECORDING_WRITE_BUFFER_BYTES * 2);
+        assert!(original.writes > 100_000);
+        // With a writer accepting complete writes, successive buffer drains
+        // together exceed the buffer size; bound calls by the encoded bytes.
+        let maximum_writes = 2 * buffered.bytes.len().div_ceil(RECORDING_WRITE_BUFFER_BYTES) + 1;
+        assert!(buffered.writes <= maximum_writes);
+        assert!(original.writes > buffered.writes * 100);
+        assert!(buffered.max_requested_write <= RECORDING_WRITE_BUFFER_BYTES);
+        assert_eq!(buffered.flushes, 1);
+        eprintln!(
+            "spectator recording bytes={} originalWrites={} bufferedWrites={} bufferBytes={}",
+            buffered.bytes.len(),
+            original.writes,
+            buffered.writes,
+            RECORDING_WRITE_BUFFER_BYTES
+        );
+    }
+
+    #[test]
+    fn recording_buffer_completes_short_and_interrupted_writes_before_success() {
+        let frame = recording_fixture(json!({"text": "反斜线\\与换行\n", "hp": 21}));
+        let mut expected = serde_json::to_vec(&frame).unwrap();
+        expected.push(b'\n');
+        let mut writer = RecordingTestWriter {
+            short_write_bytes: Some(7),
+            interrupt_write_at: Some(1),
+            ..Default::default()
+        };
+        write_recording_jsonl(&mut writer, &frame).unwrap();
+        assert_eq!(writer.bytes, expected);
+        assert!(writer.writes > 2);
+        assert_eq!(writer.flushes, 1);
+    }
+
+    #[test]
+    fn recording_buffer_propagates_encoding_failure_without_implicit_drop_flush() {
+        struct EncodingFailure;
+        impl Serialize for EncodingFailure {
+            fn serialize<S: serde::Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
+                use serde::ser::SerializeStruct;
+                let mut fields = serializer.serialize_struct("EncodingFailure", 2)?;
+                fields.serialize_field("beforeFailure", &true)?;
+                Err(serde::ser::Error::custom("fixture encoding failure"))
+            }
+        }
+        let mut writer = RecordingTestWriter::default();
+        let error = write_recording_jsonl(&mut writer, &EncodingFailure).unwrap_err();
+        assert!(matches!(error, RecordingWriteError::Encode(error)
+            if error.to_string() == "fixture encoding failure"));
+        assert_eq!(writer.writes, 0);
+        assert_eq!(writer.flushes, 0);
+        assert!(writer.bytes.is_empty());
+    }
+
+    #[test]
+    fn recording_buffer_does_not_retry_a_failed_encoding_write_on_drop() {
+        let value = "x".repeat(RECORDING_WRITE_BUFFER_BYTES * 2);
+        let mut writer = RecordingTestWriter {
+            fail_write_at: Some(2),
+            ..Default::default()
+        };
+        let error = write_recording_jsonl(&mut writer, &value).unwrap_err();
+        assert!(matches!(error, RecordingWriteError::Encode(error) if error.is_io()));
+        assert_eq!(writer.bytes, b"\"");
+        assert_eq!(writer.writes, 2);
+        assert_eq!(writer.flushes, 0);
+    }
+
+    #[test]
+    fn recording_buffer_reports_write_zero_and_explicit_flush_failures() {
+        let frame = recording_fixture(json!({"hp": 1}));
+        let mut zero = RecordingTestWriter {
+            zero_write_at: Some(1),
+            ..Default::default()
+        };
+        let error = write_recording_jsonl(&mut zero, &frame).unwrap_err();
+        assert!(matches!(error, RecordingWriteError::Flush(error)
+            if error.kind() == std::io::ErrorKind::WriteZero));
+        assert_eq!(zero.writes, 1);
+        assert_eq!(zero.flushes, 0);
+
+        let mut flush = RecordingTestWriter {
+            fail_flush: true,
+            ..Default::default()
+        };
+        let error = write_recording_jsonl(&mut flush, &frame).unwrap_err();
+        assert!(matches!(error, RecordingWriteError::Flush(error)
+            if error.to_string() == "fixture flush failure"));
+        let mut expected = serde_json::to_vec(&frame).unwrap();
+        expected.push(b'\n');
+        assert_eq!(flush.bytes, expected);
+        assert_eq!(flush.writes, 1);
+        assert_eq!(flush.flushes, 1);
+    }
+
+    #[test]
+    fn recording_append_is_immediately_readable_and_replay_keeps_append_order() {
+        let data_dir = temp_dir("append-buffer-order");
+        let hub = SpectatorHub::new(test_config(data_dir.clone()));
+        let first = recording_fixture(json!({"entities": [], "hp": 21}));
+        let mut second = first.clone();
+        second.sequence = 2;
+        second.world["hp"] = json!(20);
+        let file = data_dir.join("0-1.jsonl");
+        append_frame(&data_dir, &first).unwrap();
+        let mut expected = serde_json::to_vec(&first).unwrap();
+        expected.push(b'\n');
+        assert_eq!(fs::read(&file).unwrap(), expected);
+        append_frame(&data_dir, &second).unwrap();
+        expected.extend(serde_json::to_vec(&second).unwrap());
+        expected.push(b'\n');
+        assert_eq!(fs::read(&file).unwrap(), expected);
+        let replay = hub.load_replay("0-1", true, u64::MAX).unwrap();
+        assert_eq!(
+            replay
+                .iter()
+                .map(|frame| frame.sequence)
+                .collect::<Vec<_>>(),
+            vec![1, 2]
+        );
+        assert_eq!(replay[0].world["hp"], json!(21));
+        assert_eq!(replay[1].world["hp"], json!(20));
+        fs::remove_dir_all(data_dir).ok();
     }
 
     #[test]

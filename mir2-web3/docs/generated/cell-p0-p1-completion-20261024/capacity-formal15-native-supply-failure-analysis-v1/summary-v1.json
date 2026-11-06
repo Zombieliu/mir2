@@ -1,0 +1,266 @@
+{
+  "schemaVersion": 1,
+  "createdAt": "2026-10-26T00:51:37.774645+00:00",
+  "runId": "1792974410829-a5288349",
+  "scope": "Read-only bounded failure diagnosis; no new capacity acceptance or live fix.",
+  "sources": {
+    "analysis": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal15-supply-failure-analysis-v1\\analysis-v1.json",
+      "bytes": 60833,
+      "sha256": "ae5f5011ecf1fcba20c93946e81183c1957a1c985d4b4be7b29590c3d60f5dd2"
+    },
+    "selectedEvidence": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal15-supply-failure-analysis-v1\\selected-evidence-v1.json",
+      "bytes": 243096,
+      "sha256": "6d87c31611fbac423fea8737c23875a8a04f26ce45e12f89e501694e33d7807f"
+    },
+    "analyzer": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal15-supply-failure-analysis-v1\\analyze-v1.py",
+      "bytes": 12813,
+      "sha256": "05fc30416d1382d108647ab6b90e6d06f1c9a307f7a65214a9ea6ab1b9fa61d1"
+    },
+    "raw": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-anti-convergence-ladder-15\\reports\\1792974410829-a5288349.samples.jsonl",
+      "bytes": 50817509,
+      "rows": 82451,
+      "sha256": "721be7e82a41ea08e1cad5d705a67ea603a09cc7ca08418871b1765741854d0d"
+    },
+    "actualCatalog": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\collect-formal-native-v2-scout-anti-convergence-ladder-15-public-artifact-catalog.json",
+      "bytes": 67349,
+      "sha256": "6cf8f584e0b1f248d16ebe3febec276cbbcb3d9ae7945ba830500c4481ef1d7a"
+    },
+    "driverSource": {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\playtest-capacity-soak.mjs",
+      "bytes": 155475,
+      "sha256": "6c2f4e3dfcbc38465a13cf05c8c8945fdb4fe7c99acaea43dfad493fb77696d8"
+    },
+    "driverFreeze": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\capacity-scout-anti-convergence-driver-frozen-v1.json",
+      "bytes": 9472,
+      "sha256": "ed0d9783871dd74107c3ec7980574a31acf06a1ed7c5daac40f1f94e78a40182"
+    },
+    "formalFreeze": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-anti-convergence-ladder-15\\launcher-source-frozen-v1.json",
+      "bytes": 52054,
+      "sha256": "9f2af38f22337788512700dce010f83a312b2cbdfc8877a57acdce7be46c3f65"
+    },
+    "rootActualTerminalAndConsumers": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal15-root-actual-terminal-and-consumer-facts-v1.json",
+      "bytes": 7547,
+      "sha256": "ba15eabedb1ad456e464cc121a4baea38f44b887cb68ad25a94642146c4a4fd1"
+    },
+    "rootOS": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal15-root-independent-cleanup-v1.json",
+      "bytes": 401,
+      "sha256": "2f560a2c82a6f3ee744f35d54e0cd79726e1c8a5a0df7499393dec7eaa5601de"
+    }
+  },
+  "rawParsePasses": 1,
+  "sourceAndGameModified": false,
+  "findings": [
+    {
+      "id": "F1",
+      "kind": "ObservedFailure",
+      "text": "The sole failing full minute is stage25 W4,60.048s. Combat actor05 launches/hits16; actor0f launches/hits15, giving15.987210/14.988010 per minute below original18 launch/min. Positive12-hit, native67/67, no gaps and response gates pass. Stage25 has232 successful attacks; whole run451, with zero attack outcomes other than success."
+    },
+    {
+      "id": "F2",
+      "kind": "ObservedTravel",
+      "text": "W4 actor05 uses8 scout+36 chase moves; actor0f uses12 scout+33 chase moves. All selected action statuses are success; maximum observed action latency is173.836/109.978ms. Travel/target acquisition consumes offered opportunities; the observed failed gate is not a movement ACK or attack timeout."
+    },
+    {
+      "id": "F3",
+      "kind": "ObservedPreferenceCoverage",
+      "text": "All run9 scout-selection rows and stage25 six rows are below the32-row per-actor/phase cap; no sentinel was reached. The single active-scout preference reorder=true is stage25 W2. W4 has three hint selections, all reorder=false; later both actors select declared home6=(255,609), from actual observer(257,609), hint206706 at(261,615),5621ms apart. Repeated target/waypoint choice does not prove eligible unshared alternatives existed."
+    },
+    {
+      "id": "F4",
+      "kind": "ConservativeOverlap",
+      "text": "Three conservative same-target consecutive chase-ACK spans overlap in W4:206634=1472ms,206613=1502ms,206706=153ms. Spans break at different non-chat actions. They cannot prove full internal pursuit lifetime, claim ownership or contemporaneous server target coordinates."
+    },
+    {
+      "id": "F5",
+      "kind": "CompletedDiagnosticLimit",
+      "text": "No Store record is received within W4 and no recorded producer completed Store span intersects it. All-run Store92 rows maximum401ms is received2641ms after W4 ends; its producer maximum span starts after W4. Base slow W4 has67 completed rows, maximum89ms. Completed-only50ms records do not exclude shorter, ongoing, uninstrumented or uncompleted stalls; nested spans must not be summed, trace IDs are not request/account identities."
+    },
+    {
+      "id": "F6",
+      "kind": "SourceContractExplainsLimits",
+      "text": "preferUnsharedScoutWaypoints leaves fewer than2 hints unchanged and only changes order when both shared and unshared waypoints exist. It runs only for a new scout and preserves established state. Native chase ranking can still select shared targets without a better eligible alternative in the original first4 candidates. targetClaims guards pending actual attacks, not all scouting/chasing. These match the bounded preference contract; current data does not prove a faulty branch."
+    }
+  ],
+  "codeLocations": [
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\playtest-capacity-soak.mjs",
+      "startLine": 1005,
+      "endLine": 1027,
+      "role": "Anti-convergence bounded stable partition; <2hints/no mixed alternatives unchanged."
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\playtest-capacity-soak.mjs",
+      "startLine": 1030,
+      "endLine": 1059,
+      "role": "Actual peer target/attack-tile eligibility and first4 hint cap; full hints not serialized."
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\playtest-capacity-soak.mjs",
+      "startLine": 1063,
+      "endLine": 1071,
+      "role": "Existing bounded scalar diagnostic, hint-present only; cap not reached."
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\playtest-capacity-soak.mjs",
+      "startLine": 1112,
+      "endLine": 1134,
+      "role": "Only new scout can use preference; fallback retained, original total4 searches."
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\playtest-capacity-soak.mjs",
+      "startLine": 1198,
+      "endLine": 1255,
+      "role": "Owner candidate/witness eligibility, retained pursuit and first4 chase preference."
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\playtest-capacity-soak.mjs",
+      "startLine": 1344,
+      "endLine": 1347,
+      "role": "Pending attack claim begins after plan selection."
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\playtest-capacity-soak.mjs",
+      "startLine": 1475,
+      "endLine": 1480,
+      "role": "Finally releases pending attack claim."
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\playtest-capacity-soak.mjs",
+      "startLine": 145,
+      "endLine": 148,
+      "role": "Lifecycle projection cohort-player-only; cannot recover monster AOI."
+    }
+  ],
+  "observedSharedHintSelections": [
+    {
+      "line": 69380,
+      "type": "combatScoutSelection",
+      "actor": "Ldf5bef05",
+      "phase": "stage-25",
+      "at": 1792975404268,
+      "reason": "observer-target-waypoint",
+      "fallbackHomeIndex": 18,
+      "selectedHomeIndex": 6,
+      "pathSearches": 2,
+      "hintPathSearches": 1,
+      "hintScanTruncated": false,
+      "hintOrderChangedByActiveScoutPreference": false,
+      "hintTargetId": 206706,
+      "hintTarget": {
+        "x": 261,
+        "y": 615
+      },
+      "actualObserver": {
+        "x": 257,
+        "y": 609
+      },
+      "potentialAttackTile": {
+        "x": 261,
+        "y": 614
+      },
+      "truncated": false
+    },
+    {
+      "line": 70278,
+      "type": "combatScoutSelection",
+      "actor": "Ldf5bef0f",
+      "phase": "stage-25",
+      "at": 1792975409889,
+      "reason": "observer-target-waypoint",
+      "fallbackHomeIndex": 7,
+      "selectedHomeIndex": 6,
+      "pathSearches": 2,
+      "hintPathSearches": 1,
+      "hintScanTruncated": false,
+      "hintOrderChangedByActiveScoutPreference": false,
+      "hintTargetId": 206706,
+      "hintTarget": {
+        "x": 261,
+        "y": 615
+      },
+      "actualObserver": {
+        "x": 257,
+        "y": 609
+      },
+      "potentialAttackTile": {
+        "x": 261,
+        "y": 614
+      },
+      "truncated": false
+    }
+  ],
+  "scoutSharedWaypoint": {
+    "homeIndex": 6,
+    "declaredCoordinate": {
+      "x": 255,
+      "y": 609
+    },
+    "actualObserverCoordinates": [
+      {
+        "x": 257,
+        "y": 609
+      },
+      {
+        "x": 257,
+        "y": 609
+      }
+    ],
+    "targetId": 206706,
+    "selectionIntervalMs": 5621,
+    "reorderFlags": [
+      false,
+      false
+    ],
+    "hintScanTruncatedFlags": [
+      false,
+      false
+    ]
+  },
+  "repairReadiness": {
+    "verifiedBehaviorBug": false,
+    "productionFixRecommendedNow": false,
+    "minimumSupportedConclusion": "Original supply failure is genuine. Continued scout/chase travel and repeated same targets consume opportunities; the new waypoint preference does not guarantee distributed supply. Current scalar evidence cannot distinguish missing eligible alternatives, snapshot/witness geometry or bounded selection order as the decisive cause.",
+    "missingEvidence": [
+      "Exact owner/peer eligible monster sets at each chase/waypoint decision; compact wire captures1/2 while fighters are6/16.",
+      "Hint candidate/shared/unshared counts and rejection reasons; no row cap truncation occurred, but only final selected hint is serialized.",
+      "Full targetClaims and eligibility/filter state; action rows and ACK spans do not establish all alternatives."
+    ],
+    "smallestNextFalsifiableChangeIfRootAuthorizes": "Extend existing bounded combatScoutSelection scalar row with eligibleHintCount, sharedHintCount, unsharedHintCount and eligibleOtherScoutCount plus fixed no-reorder reason (same4 hints/10fighters and32-row cap). No new collector/snapshots/commands/counters/claims/relaxed thresholds. A behavior fix follows only if recorded mixed alternatives should reorder but do not.",
+    "preserve": [
+      "Fallback-first/original4 total A* searches",
+      "No-candidate/no-alternative original behavior",
+      "Existing scout budgets/owner AOI",
+      "Pending attack claims/900ms dual evidence",
+      "18launch/12positive/.95completion/80cell thresholds",
+      "Backend/rules/resource/scene identity"
+    ],
+    "fixtureCriteria": [
+      "Two eligible hints: shared active same-map scout plus reachable unshared alternative must prefer unshared within4 searches while retaining fallback.",
+      "One eligible shared hint or no reachable unshared hint must keep original fallback; no manufactured target/pass."
+    ]
+  },
+  "gapScopeClarification": {
+    "actor0fLongestGapMs": 27702,
+    "leftAt": 1792975408561,
+    "rightAt": 1792975436263,
+    "failedWindowPortionMs": 12659,
+    "extendsIntoPassedW5": true,
+    "notEntireGapInsideFailedWindow": true
+  },
+  "acceptance": {
+    "formal15Passed": false,
+    "capacityAccepted": false,
+    "P0Accepted": false,
+    "P2Started": false,
+    "noIndependentPerRequest900msReplayClaim": true
+  }
+}

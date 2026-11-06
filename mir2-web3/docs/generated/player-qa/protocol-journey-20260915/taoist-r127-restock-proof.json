@@ -1,0 +1,11 @@
+{
+  "trace": "C:\\mir2-protocol-journey-20260911\\Taoist.2026-09-15T20-40-27-269Z.trace.jsonl",
+  "character": "JT3f4a4e1f",
+  "quest": {"id":89,"priest":1,"shiZombie":3,"cursedZombie":2},
+  "beforeRestock": {"sequence":4579,"at":"2026-09-15T20:49:19.984Z","map":"0","x":287,"y":607,"hp":180,"mp":175,"gold":20343,"amulet":{"equipped":5,"bag":0,"belt":26,"total":31}},
+  "purchase": {"sequence":4578,"at":"2026-09-15T20:49:19.907Z","itemIndex":46661648,"count":69,"kind":"buyItem"},
+  "debit": {"sequence":4580,"at":"2026-09-15T20:49:20.539Z","packet":"LoseGold","amount":1725},
+  "afterRestock": {"sequence":4582,"at":"2026-09-15T20:49:20.618Z","map":"0","x":287,"y":607,"hp":180,"mp":175,"gold":18618,"amulet":{"equipped":5,"bag":69,"belt":26,"total":100}},
+  "continuedNavigation": {"lastSequence":5867,"at":"2026-09-15T20:52:16.820Z","lastReceivedLocation":{"x":265,"y":110},"nextAction":"walk","q89ProgressUnchanged":true},
+  "proof": {"freshOwnedInventorySnapshot":true,"target100Satisfied":true,"shopCommandAloneInsufficient":true,"additionalDeathObservedAfterRestock":false}
+}

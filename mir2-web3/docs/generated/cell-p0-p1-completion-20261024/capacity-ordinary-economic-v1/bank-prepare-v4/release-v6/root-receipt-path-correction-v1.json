@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "reason": "V1 selected gateway bin and executed zero gateway tests; preserved false. V2 correctly selected lib and actually passed32 tests.",
+  "original": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-hp-wake-release-v6\\source-lib-before-root-receipt-v2.mjs",
+    "bytes": 22267,
+    "sha256": "0816b2714b25a2571f7f06fb56479abbbb031c00bf86e13cd3fa889813949685"
+  },
+  "current": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-hp-wake-release-v6\\source-lib-v6.mjs",
+    "bytes": 22267,
+    "sha256": "ed10735da3b15b1cb201e7d691f33de7dbc7d24d89296a51e67c655bb36f630b"
+  },
+  "newReceipt": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\root-ordinary-hp-wake-validation-v2\\root-focused-receipt-v1.json",
+    "bytes": 28585,
+    "sha256": "b11edacef0931e437503df444d87c16c4d95b98d6b026a242e5eb1cf3861783d"
+  },
+  "onlyReplacement": {
+    "old": "root-ordinary-hp-wake-validation-v1/root-focused-receipt-v1.json",
+    "new": "root-ordinary-hp-wake-validation-v2/root-focused-receipt-v1.json"
+  },
+  "capacityAccepted": false,
+  "p0Accepted": false
+}

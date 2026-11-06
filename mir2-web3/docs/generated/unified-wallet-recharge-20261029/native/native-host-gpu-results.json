@@ -1,0 +1,22 @@
+{
+  "schema": "mir2.unified.evidence.phase.v1",
+  "passed": true,
+  "curatedAtUtc": "2026-10-29T15:53:22.464335+00:00",
+  "producerReceipt": {
+    "filename": "native-host-gpu-results.json",
+    "bytes": 338,
+    "sha256": "edb7f4360a4895e87f7fd16f2b72d09f3e63c384cb962f1cbc040180d228f86e"
+  },
+  "producerReport": {
+    "filter": "native_wallet_login_offscreen_fixture",
+    "scope": "host-gpu",
+    "exitCode": 0,
+    "startedAtUtc": "2026-10-29T14:27:02.5019540Z",
+    "elapsedSeconds": 4.6080857,
+    "log": "C:\\mir2-build\\unified-20261029\\native-host-gpu-native_wallet_login_offscreen_fixture.log",
+    "passed": 1,
+    "failed": 0,
+    "ignored": 0
+  },
+  "phase": "initial integrated snapshot; historical relative to final1875 Game; no stale source pins treated as current"
+}

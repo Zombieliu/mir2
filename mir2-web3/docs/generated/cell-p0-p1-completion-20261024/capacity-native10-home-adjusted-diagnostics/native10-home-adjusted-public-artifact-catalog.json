@@ -1,0 +1,183 @@
+{
+  "schemaVersion": 1,
+  "createdAt": "2026-10-24T17:28:47.720Z",
+  "archiveRoot": "C:/mir2-build/p01-completion-20261024",
+  "scope": "Explicit public-only allowlist for actual04 fresh ordinary10 home-adjusted feasibility probe. Original strict failure retained; no formal capacity acceptance. No private/store/credential/EXE/recording payload copied.",
+  "files": [
+    {
+      "path": "release-native-10-feasibility-04/gateway-build-pin.json",
+      "bytes": 588,
+      "sha256": "f72ddbd486e16c472a99f6ac8e410ed97d615e48043a18009e2575b959932e37",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-10-feasibility-04/gateway-build-pin-source-v2.json",
+      "bytes": 1121,
+      "sha256": "fb919f22f142cf4b3061a069ad965207d85b918487ebe60d9dd80a11c6230c1e",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-10-feasibility-04/source-pins.json",
+      "bytes": 4793,
+      "sha256": "63d95390ad4dea13808dd4910bedfca38f684b641f49bef72d7c2d0daa0e0495",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-10-feasibility-04/source-pins-checkpoint-v2.json",
+      "bytes": 7312,
+      "sha256": "3c8136db285cf74774d85b26009f769dfee2eb4a3112ee26e9f4f66c0ee8ea60",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-10-feasibility-04/realm-process.json",
+      "bytes": 1044,
+      "sha256": "914a50b2496e40e86722c0c92e0bb8b29230e6ac4f021aed3500dc1538e6ed90",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-10-feasibility-04/realm-cleanup.json",
+      "bytes": 1437,
+      "sha256": "5d2c569cd6ff4ceb2a5808e263f9b9b041fb3d32d11b7da2d2dfea4fa7496f47",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-10-feasibility-04/resource-profile.json",
+      "bytes": 1179,
+      "sha256": "a5d3a45d780a27abc2bd97528e4002c616dc8fc29d15ca5ff30085196102c9a5",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-10-feasibility-04/run-options.json",
+      "bytes": 891,
+      "sha256": "a5d05a04f0cae46e6a13612df8e59b96f5f9e4a3f3a96c5d05741b61c910a514",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-10-feasibility-04/run-options-admitted-v2.json",
+      "bytes": 1278,
+      "sha256": "0cfec12543113d4d57c22f78074013a2c3dd2c95837fe0b2010d9300299347b4",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-10-feasibility-04/scenario.json",
+      "bytes": 1362,
+      "sha256": "701a2a3e30c1b963653af1a767f5af290e15fef207a7359cc90492cf5e496921",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-10-feasibility-04/provisioning.json",
+      "bytes": 282,
+      "sha256": "556fdd5acc451cc628c3eb506cbf6295bdfb05506e217caabdb0169bf1042fc4",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-10-feasibility-04/spectator-health-before.json",
+      "bytes": 739,
+      "sha256": "7bac03d95cf077af864c64bfb0d81f02d88b63c62c9663166b0a940d9325be9d",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-10-feasibility-04/spectator-health-after.json",
+      "bytes": 744,
+      "sha256": "55333ab838e454662a3522dce1c823614191ab41431ed438a981f1b3fde6c10e",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-10-feasibility-04/spectator-recordings-summary.json",
+      "bytes": 1009,
+      "sha256": "fb9b9806268766d438cd0a6d803f7cc3f68d8780b5e1f8769588b837ee5c8329",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-10-feasibility-04/reports/1792862572246-34eb80be.report.json",
+      "bytes": 46335,
+      "sha256": "7cffb52685ea97d2576bb8c14f7d21b09881f5326a18f006ba039de3d6188312",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "native-10-home-adjusted-diagnostics-v1.json",
+      "bytes": 41837,
+      "sha256": "759528b20c85b1452899f49d7a2c38df9ee25f21bb6624db0aa0d81772628de4",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "start-release-native-10-feasibility-04.ps1",
+      "bytes": 4158,
+      "sha256": "32416c518e4019dbfe1920ca81488d99fe0b389c94c22075a7f273acaf108378",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "capture-native10-04-spectator-health.mjs",
+      "bytes": 1733,
+      "sha256": "93607ff250e3775ac3850829a0ed2869bd5e21a8b240827c3b5f8d10842951d4",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "summarize-native10-04-spectator-recordings.mjs",
+      "bytes": 3417,
+      "sha256": "c9941dcbc39657bc7485b8e6ea238eee1e96325aa99b752559d9255862c9634f",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "partition-native10-actor4-home-candidate-v1.json",
+      "bytes": 1176,
+      "sha256": "2e58c3413fc6603183eca3e752bb480c3d985c7e0c2fd17ca0a433bc380b5cee",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "partition-native10-actor4-home-review-v1.json",
+      "bytes": 4304,
+      "sha256": "fc3b8797aa0710dbbaa3ae49ef8dd99bcebdd736316f5ecc31e2ea2bb8481fe5",
+      "classification": "explicit-public-original"
+    }
+  ],
+  "externalArchives": [
+    {
+      "path": "release-native-10-feasibility-04/reports/1792862572246-34eb80be.samples.jsonl",
+      "bytes": 2539399,
+      "sha256": "05165aa99e90e962c6ed2321a9602a87305b0d5e5e96a41edd1e6d5e633472b2",
+      "kind": "capacity-samples-jsonl",
+      "copyToRepository": false
+    },
+    {
+      "path": "release-native-10-feasibility-04/monitor-history.jsonl",
+      "bytes": 662299,
+      "sha256": "330966607183a0543523d5904cbc4619100730a2f38719515689d7e466c1ba3f",
+      "kind": "resource-monitor-history-jsonl",
+      "copyToRepository": false
+    },
+    {
+      "path": "release-native-10-feasibility-04/recordings/0-498017.jsonl",
+      "bytes": 30819971,
+      "sha256": "d41ccc6eb958ae7edd81df74a856d7b8da490349dac88361eb04fb69307a86e7",
+      "frames": 557,
+      "kind": "spectator-recording-jsonl",
+      "copyToRepository": false
+    }
+  ],
+  "run": {
+    "runId": "1792862572246-34eb80be",
+    "sourceCommit": "827d4c8b52066d033a2f18941be80c97b337d6de",
+    "gatewaySha256": "187775e2398ca593d4aa6021e1b2a7cf3a577ec2a19ca5e7446eaaa70a506f8c",
+    "realGameplayAttempt": true,
+    "report": "release-native-10-feasibility-04/reports/1792862572246-34eb80be.report.json",
+    "raw": "release-native-10-feasibility-04/reports/1792862572246-34eb80be.samples.jsonl",
+    "peakControlledActors": 10,
+    "completedStageSeconds": 30,
+    "stagePassed": true,
+    "soakIntervalSeconds": 38.828,
+    "soakCompleted": false,
+    "completed60SecondSoakWindows": 0,
+    "capacityAccepted": false,
+    "formalRunStarted": false,
+    "stop": "Original continuous timeout ratio1/55=0.0181818 >=0.01; combat activity/native/latency/fanout passed but single unacknowledged attack retained as timeout. No completed60s soak window.",
+    "allSixCleanupCountersZero": true,
+    "allOwnedProcessesStopped": true
+  },
+  "limits": [
+    "Observer4 solehome relocation252645 to246646; original classes/span/cluster/thresholds remain. Stage observer4 Run34/38=.8947 passes, but final report fails.",
+    "Moving Deer206513 leaving range is a bounded inference from sampled dedicated replay frames, not an exact socket/server receipt proof. A same-coordinate correction packet was not preserved.",
+    "All397/557 recording comparisons remain separate attempts; no old03 or previous failure evidence is rewritten.",
+    "MonitorStopped fetch failed occurs after owned Gateway cleanup, is not a resource stop during the run, and remains in the standalone original history."
+  ]
+}

@@ -1,0 +1,84 @@
+{
+  "checkedAt": "2026-10-25T01:11:28.374Z",
+  "allPassed": true,
+  "checks": [
+    {
+      "file": "backend-driver-source-guard.mjs",
+      "passed": true
+    },
+    {
+      "file": "collect-public.mjs",
+      "passed": true
+    },
+    {
+      "file": "driver-evidence-contract.mjs",
+      "passed": true
+    },
+    {
+      "file": "driver-report-contract.mjs",
+      "passed": true
+    },
+    {
+      "file": "initialize-private.ps1",
+      "passed": true
+    },
+    {
+      "file": "input-lib.mjs",
+      "passed": true
+    },
+    {
+      "file": "measured-phase-contract.mjs",
+      "passed": true
+    },
+    {
+      "file": "monitor-owned.mjs",
+      "passed": true
+    },
+    {
+      "file": "prepare-inputs.mjs",
+      "passed": true
+    },
+    {
+      "file": "recover-drained-owned.ps1",
+      "passed": true
+    },
+    {
+      "file": "request-stop.mjs",
+      "passed": true
+    },
+    {
+      "file": "run-owned.mjs",
+      "passed": true
+    },
+    {
+      "file": "scene-contract.mjs",
+      "passed": true
+    },
+    {
+      "file": "slow-stage-public.mjs",
+      "passed": true
+    },
+    {
+      "file": "slow-stage-public.test.mjs",
+      "passed": true
+    },
+    {
+      "file": "slow-stage-row-contract.mjs",
+      "passed": true
+    },
+    {
+      "file": "socket-build-source-lib.mjs",
+      "passed": true
+    },
+    {
+      "file": "verify-full16-gate.mjs",
+      "passed": true
+    },
+    {
+      "file": "verify-public.mjs",
+      "passed": true
+    }
+  ],
+  "gameModulesEvaluated": false,
+  "realmStarted": false
+}

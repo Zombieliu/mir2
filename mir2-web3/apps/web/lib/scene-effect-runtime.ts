@@ -191,6 +191,26 @@ export type ObjectAttackSceneEntity = {
   attackUntil?: number;
 };
 
+/**
+ * Action locations are snapshots, not owner movement acknowledgements. The
+ * owner's current position may already include a newer UserLocation packet.
+ * Call only for ObjectAttack, ObjectRangeAttack and ObjectMagic poses.
+ */
+export function applyObjectActionScenePose<T extends ObjectAttackSceneEntity>(
+  entity: T,
+  payload: Record<string, unknown>,
+  ownerObjectId?: string | null,
+): T {
+  const location = payload.location as { x?: unknown; y?: unknown } | undefined;
+  const preserveOwnerPosition = entity.objectId === ownerObjectId;
+  return {
+    ...entity,
+    x: !preserveOwnerPosition && typeof location?.x === "number" ? location.x : entity.x,
+    y: !preserveOwnerPosition && typeof location?.y === "number" ? location.y : entity.y,
+    direction: typeof payload.direction === "string" ? payload.direction : entity.direction,
+  };
+}
+
 function objectAttackAnimation(payload: Record<string, unknown>): ObjectAttackAnimation {
   if (typeof payload.spell === "string") return "range";
   switch (packetNumber(payload.attackType)) {
@@ -215,19 +235,16 @@ export function applyObjectAttackSceneState<T extends ObjectAttackSceneEntity>(
   payload: Record<string, unknown>,
   now: number,
   actionDurationMs: (entity: T, animation: ObjectAttackAnimation) => number,
+  ownerObjectId?: string | null,
 ): { entities: T[]; effects: DisplaySceneEffect[] } {
   const objectId = packetObjectId(payload.objectId);
   if (!objectId) return { entities, effects };
-  const location = payload.location as { x?: unknown; y?: unknown } | undefined;
   const anchor = entities.find((entity) => entity.objectId === objectId) ?? null;
   const animation = objectAttackAnimation(payload);
   const nextEntities = entities.map((entity) =>
     entity.objectId === objectId
       ? {
-          ...entity,
-          x: typeof location?.x === "number" ? location.x : entity.x,
-          y: typeof location?.y === "number" ? location.y : entity.y,
-          direction: typeof payload.direction === "string" ? payload.direction : entity.direction,
+          ...applyObjectActionScenePose(entity, payload, ownerObjectId),
           attackAnimation: animation,
           attackStartedAt: now,
           attackUntil: now + actionDurationMs(entity, animation),

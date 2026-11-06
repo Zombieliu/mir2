@@ -4,6 +4,7 @@ import crypto from "node:crypto";
 import fs from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { verifyBevyRuntimeVersion } from "./lib/bevy-runtime-version.mjs";
 
 const scriptDir = path.dirname(fileURLToPath(import.meta.url));
 const webRoot = path.resolve(scriptDir, "..");
@@ -11,7 +12,6 @@ const repoRoot = path.resolve(webRoot, "..", "..");
 const defaultManifestPath = path.join(webRoot, "lib", "generated", "bevy_runtime_version.json");
 const defaultConfigPath = path.join(repoRoot, "config", "production-web-assets.json");
 const defaultOutputDir = path.join(webRoot, "public", "bevy-runtime");
-const runtimePathPattern = /^public\/bevy-runtime\/pkg-(?:webgpu|webgl2)\/mir2_bevy_runtime(?:_bg\.wasm|\.js)$/;
 
 export async function installPrebuiltRuntime(options = {}) {
   const manifestPath = path.resolve(options.manifestPath ?? defaultManifestPath);
@@ -78,32 +78,14 @@ export async function installPrebuiltRuntime(options = {}) {
 }
 
 export function validateRuntimeManifest(manifest, manifestPath = "runtime manifest") {
-  const version = String(manifest?.version ?? "").trim();
-  if (!/^bevy-[a-f0-9]{16}$/i.test(version)) {
-    throw new Error(`Invalid Bevy runtime version in ${manifestPath}.`);
-  }
-  if (!Array.isArray(manifest?.files) || manifest.files.length !== 4) {
-    throw new Error(`Expected exactly four Bevy runtime files in ${manifestPath}.`);
-  }
+  return verifyBevyRuntimeVersion(manifest, manifestPath).files;
+}
 
-  const records = manifest.files.map((entry) => ({
-    path: String(entry?.path ?? ""),
-    sha256: String(entry?.sha256 ?? "").toLowerCase(),
-  }));
-  const uniquePaths = new Set(records.map((record) => record.path));
-  if (uniquePaths.size !== 4) throw new Error(`Duplicate Bevy runtime paths in ${manifestPath}.`);
-  for (const record of records) {
-    if (!runtimePathPattern.test(record.path) || !/^[a-f0-9]{64}$/.test(record.sha256)) {
-      throw new Error(`Invalid Bevy runtime file entry in ${manifestPath}: ${JSON.stringify(record)}`);
-    }
-  }
-  for (const backend of ["webgpu", "webgl2"]) {
-    for (const suffix of [".js", "_bg.wasm"]) {
-      const expected = `public/bevy-runtime/pkg-${backend}/mir2_bevy_runtime${suffix}`;
-      if (!uniquePaths.has(expected)) throw new Error(`Missing Bevy runtime file in ${manifestPath}: ${expected}`);
-    }
-  }
-  return records;
+export async function localPrebuiltRuntimeReady(options = {}) {
+  const manifestPath = path.resolve(options.manifestPath ?? defaultManifestPath);
+  const outputDir = path.resolve(options.outputDir ?? defaultOutputDir);
+  const manifest = await readJson(manifestPath, "runtime version manifest");
+  return runtimeMatches(outputDir, validateRuntimeManifest(manifest, manifestPath));
 }
 
 async function runtimeMatches(outputDir, records) {

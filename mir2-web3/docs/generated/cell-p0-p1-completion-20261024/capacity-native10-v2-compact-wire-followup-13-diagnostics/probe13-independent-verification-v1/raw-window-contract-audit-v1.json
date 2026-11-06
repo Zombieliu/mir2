@@ -1,0 +1,273 @@
+{
+  "schemaVersion": 1,
+  "auditedAt": "2026-10-25T07:40:49.980Z",
+  "runId": "1792912711217-e7ea81f2",
+  "scope": "Independent single streaming pass of the closed raw checking only actual phase/window time, count and exact report/raw assessment shape. Not full gameplay or capacity acceptance.",
+  "raw": {
+    "file": "C:/mir2-build/p01-completion-20261024/release-native-10-v2-compact-wire-feasibility-13/reports/1792912711217-e7ea81f2.samples.jsonl",
+    "bytes": 29072097,
+    "sha256": "83a7a56df6780212dd7a4671f3fd9bb1ee721cba5ad473e91f86c8c04bd13152",
+    "rows": 41088,
+    "unchangedDuringRead": true
+  },
+  "report": {
+    "file": "C:/mir2-build/p01-completion-20261024/release-native-10-v2-compact-wire-feasibility-13/reports/1792912711217-e7ea81f2.report.json",
+    "bytes": 324347,
+    "sha256": "2843083724cd658254f6eab39370148cb360786e0819c7f25fa7acad5744be7f"
+  },
+  "api": {
+    "file": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/docs/generated/cell-p0-p1-completion-20261024/evidence-tools/verify-evidence.mjs",
+    "bytes": 46895,
+    "sha256": "5d7033ea574537d9fbf01ee271a3fae4e7b40ca677e7c9aacb5ee76e6c33fe58"
+  },
+  "frozenCollector": {
+    "file": "C:/mir2-build/p01-completion-20261024/release-native-10-v2-compact-wire-feasibility-13/collect-public.mjs",
+    "bytes": 41613,
+    "sha256": "70cf1fdd3a1194efb39ac9d3dfce77d0c52d9f44383110e4f23b83cf0db87571"
+  },
+  "windowContractPassed": true,
+  "phases": [
+    {
+      "name": "stage-2",
+      "actors": 2,
+      "configuredSeconds": 300,
+      "actualSeconds": 300.301,
+      "completeWindows": 5,
+      "rawStageReportExact": true,
+      "phaseBoundaryReportExact": true,
+      "windows": [
+        {
+          "line": 1195,
+          "index": 1,
+          "startedAtMs": 1792912748445,
+          "endedAtMs": 1792912808552,
+          "actualSeconds": 60.107,
+          "elapsedSeconds": 60.107,
+          "reportAssessmentRawExact": true,
+          "passed": true
+        },
+        {
+          "line": 2011,
+          "index": 2,
+          "startedAtMs": 1792912808552,
+          "endedAtMs": 1792912868578,
+          "actualSeconds": 60.026,
+          "elapsedSeconds": 120.133,
+          "reportAssessmentRawExact": true,
+          "passed": true
+        },
+        {
+          "line": 2827,
+          "index": 3,
+          "startedAtMs": 1792912868578,
+          "endedAtMs": 1792912928630,
+          "actualSeconds": 60.052,
+          "elapsedSeconds": 180.185,
+          "reportAssessmentRawExact": true,
+          "passed": true
+        },
+        {
+          "line": 3646,
+          "index": 4,
+          "startedAtMs": 1792912928630,
+          "endedAtMs": 1792912988734,
+          "actualSeconds": 60.104,
+          "elapsedSeconds": 240.289,
+          "reportAssessmentRawExact": true,
+          "passed": true
+        },
+        {
+          "line": 4475,
+          "index": 5,
+          "startedAtMs": 1792912988734,
+          "endedAtMs": 1792913048746,
+          "actualSeconds": 60.012,
+          "elapsedSeconds": 300.301,
+          "reportAssessmentRawExact": true,
+          "passed": true
+        }
+      ]
+    },
+    {
+      "name": "stage-10",
+      "actors": 10,
+      "configuredSeconds": 300,
+      "actualSeconds": 300.119,
+      "completeWindows": 5,
+      "rawStageReportExact": true,
+      "phaseBoundaryReportExact": true,
+      "windows": [
+        {
+          "line": 9858,
+          "index": 1,
+          "startedAtMs": 1792913101928,
+          "endedAtMs": 1792913161978,
+          "actualSeconds": 60.05,
+          "elapsedSeconds": 60.05,
+          "reportAssessmentRawExact": true,
+          "passed": true
+        },
+        {
+          "line": 12968,
+          "index": 2,
+          "startedAtMs": 1792913161978,
+          "endedAtMs": 1792913221984,
+          "actualSeconds": 60.006,
+          "elapsedSeconds": 120.056,
+          "reportAssessmentRawExact": true,
+          "passed": true
+        },
+        {
+          "line": 16038,
+          "index": 3,
+          "startedAtMs": 1792913221984,
+          "endedAtMs": 1792913282016,
+          "actualSeconds": 60.032,
+          "elapsedSeconds": 180.088,
+          "reportAssessmentRawExact": true,
+          "passed": true
+        },
+        {
+          "line": 19069,
+          "index": 4,
+          "startedAtMs": 1792913282016,
+          "endedAtMs": 1792913342034,
+          "actualSeconds": 60.018,
+          "elapsedSeconds": 240.106,
+          "reportAssessmentRawExact": true,
+          "passed": true
+        },
+        {
+          "line": 22199,
+          "index": 5,
+          "startedAtMs": 1792913342034,
+          "endedAtMs": 1792913402047,
+          "actualSeconds": 60.013,
+          "elapsedSeconds": 300.119,
+          "reportAssessmentRawExact": true,
+          "passed": true
+        }
+      ]
+    },
+    {
+      "name": "soak",
+      "actors": 10,
+      "configuredSeconds": 360,
+      "actualSeconds": 360.406,
+      "completeWindows": 6,
+      "rawStageReportExact": true,
+      "phaseBoundaryReportExact": true,
+      "windows": [
+        {
+          "line": 25327,
+          "index": 1,
+          "startedAtMs": 1792913402048,
+          "endedAtMs": 1792913462109,
+          "actualSeconds": 60.061,
+          "elapsedSeconds": 60.061,
+          "reportAssessmentRawExact": true,
+          "passed": true
+        },
+        {
+          "line": 28504,
+          "index": 2,
+          "startedAtMs": 1792913462109,
+          "endedAtMs": 1792913522128,
+          "actualSeconds": 60.019,
+          "elapsedSeconds": 120.08,
+          "reportAssessmentRawExact": true,
+          "passed": true
+        },
+        {
+          "line": 31686,
+          "index": 3,
+          "startedAtMs": 1792913522128,
+          "endedAtMs": 1792913582240,
+          "actualSeconds": 60.112,
+          "elapsedSeconds": 180.192,
+          "reportAssessmentRawExact": true,
+          "passed": true
+        },
+        {
+          "line": 34832,
+          "index": 4,
+          "startedAtMs": 1792913582240,
+          "endedAtMs": 1792913642256,
+          "actualSeconds": 60.016,
+          "elapsedSeconds": 240.208,
+          "reportAssessmentRawExact": true,
+          "passed": true
+        },
+        {
+          "line": 37885,
+          "index": 5,
+          "startedAtMs": 1792913642256,
+          "endedAtMs": 1792913702360,
+          "actualSeconds": 60.104,
+          "elapsedSeconds": 300.312,
+          "reportAssessmentRawExact": true,
+          "passed": true
+        },
+        {
+          "line": 41039,
+          "index": 6,
+          "startedAtMs": 1792913702360,
+          "endedAtMs": 1792913762454,
+          "actualSeconds": 60.094,
+          "elapsedSeconds": 360.406,
+          "reportAssessmentRawExact": true,
+          "passed": true
+        }
+      ]
+    }
+  ],
+  "continuousFailuresRecorded": 0,
+  "safetyStopsRecorded": 0,
+  "rawTypeCounts": {
+    "monitor": 543,
+    "phaseStarted": 5,
+    "action": 11010,
+    "coverage": 1042,
+    "playerLifecycle": 8586,
+    "admitted": 10,
+    "selfTransform": 9165,
+    "fanoutDistribution": 5107,
+    "compactNavigationWire": 5101,
+    "phaseEnded": 5,
+    "continuousWindow": 132,
+    "window": 16,
+    "movementCorrection": 3,
+    "stageComplete": 3,
+    "combatArrival": 1,
+    "pendingAttackEvidence": 352,
+    "combatScoutAdvanced": 6,
+    "finished": 1
+  },
+  "collectorFailure": {
+    "category": "Posthoc collector selector/schema bug, not a short-window finding.",
+    "source": "Frozen collector filters streamed.selected for window rows, but the unchanged API SELECTED_RAW excludes that type.",
+    "actualSelectorLine": "const SELECTED_RAW = new Set(['stageComplete', 'phaseStarted', 'phaseEnded', 'continuousFailure', 'safetyStop', 'finished']);",
+    "expectedCompleteWindows": [
+      5,
+      5,
+      6
+    ],
+    "actualCompleteWindows": [
+      5,
+      5,
+      6
+    ],
+    "frozenInputsChanged": false
+  },
+  "limits": [
+    "This confirms16actual>=60s windows and report/raw agreement, not every actor counter, packet proof, monitor or diagnostic terminal.",
+    "Full independent v2 verification still requires reviewed posthoc publiccollection and its byte/source closure.",
+    "Original collector refusal and subsequent ENOENT verifier attempt remain historical setup results; report/raw bytes are untouched."
+  ],
+  "reportOk": true,
+  "fullIndependentVerificationPerformed": false,
+  "probePassedNotYetIndependentlyAdjudicated": true,
+  "capacityAccepted": false,
+  "privateDataRead": false,
+  "recordingRead": false
+}

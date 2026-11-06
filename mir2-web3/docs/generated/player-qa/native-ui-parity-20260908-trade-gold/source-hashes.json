@@ -1,0 +1,14 @@
+[
+  {
+    "path": "Server/MirObjects/PlayerObject.cs",
+    "sha256": "48607C437FE56859C0FBC2A84195693395806E532E95BF5861AED9423A19FF11"
+  },
+  {
+    "path": "Client/MirScenes/Dialogs/TradeDialogs.cs",
+    "sha256": "93433BB70CC2EB6792E4039F794197C851FF085ABBA2FFED627811ED23C58BAF"
+  },
+  {
+    "path": "Client/MirScenes/GameScene.cs",
+    "sha256": "935D1CA35DDF4800BCCDAC4CD1675FCB59A269560A57BF98C2B952A459FFB504"
+  }
+]

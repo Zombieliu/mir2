@@ -1,0 +1,80 @@
+   Compiling mir2-protocol v0.1.0 (E:\mir2-player-journey\mir2-web3\packages\protocol)
+   Compiling mir2-game-data v0.1.0 (E:\mir2-player-journey\mir2-web3\packages\game-data)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 17.70s
+     Running unittests src\lib.rs (E:\mir2-player-journey\work\slg-stonecutting-20261009\target\debug\deps\mir2_game_data-ebb6fd445b3fdd57.exe)
+
+running 56 tests
+test crystal_creature_settings::tests::creature_drop_rate_matches_current_source ... ok
+test crystal_creature_settings::tests::creature_drop_rate_rejects_invalid_f32_values ... ok
+test crystal_guild_settings::tests::guild_buff_catalog_is_complete_unique_and_server_owned ... ok
+test crystal_guild_settings::tests::guild_settings_preserve_source_costs_and_int64_threshold ... ok
+test crystal_hero_settings::tests::hero_base_formulas_use_original_class_stats_and_max_rule ... ok
+test crystal_hero_settings::tests::hero_rules_match_original_creation_item_and_luck_configuration ... ok
+test crystal_hero_settings::tests::hero_settings_import_five_classes_and_int64_experience_without_rounding ... ok
+test crystal_hero_settings::tests::hero_settings_reject_invalid_class_formula_and_experience ... ok
+test crystal_item_image::tests::complete_catalogue_only_changes_the_three_source_stack_shapes ... ok
+test crystal_item_image::tests::every_wire_count_matches_the_source_image_bands ... ok
+test crystal_item_image::tests::guards_and_non_stack_previews_retain_the_catalogue_image ... ok
+test crystal_npc_goods::tests::npc_goods_snapshot_projection_keeps_max_identity_and_template_facts ... ok
+test crystal_npc_goods::tests::npc_goods_snapshot_projection_list_and_unknown_template_preserve_wire ... ok
+test manifest_lookup_tests::item_and_monster_lookups_preserve_first_match_and_ascii_case ... ok
+test manifest_lookup_tests::manifest_lookup_benchmark ... ignored, explicit before/after timing; run release with --ignored --nocapture --test-threads=1
+test manifest_lookup_tests::other_lookups_preserve_order_and_original_case_rules ... ok
+test manifest_lookup_tests::owned_manifests_and_lookup_results_do_not_mutate_shared_catalogues ... ok
+test manifest_lookup_tests::real_item_selection_matches_old_algorithm_for_all_catalogue_origins ... ok
+test manifest_lookup_tests::real_item_selection_preserves_ties_filters_and_origin_fallback ... ok
+test tests::crystal_base_stats_packet_manifest_loads ... ok
+test tests::crystal_buff_manifest_loads ... ok
+test tests::crystal_drop_entry_deserializes_group_shape ... ok
+test tests::crystal_drop_lookup_preserves_special_entry_shapes ... ok
+test tests::crystal_drop_manifest_loads ... ok
+test tests::crystal_game_shop_packet_manifest_loads ... ok
+test tests::crystal_guild_buff_packet_manifest_loads ... ok
+test tests::crystal_item_manifest_loads ... ok
+test tests::crystal_magic_manifest_contains_only_unique_enabled_spells ... ok
+test tests::crystal_magic_manifest_loads ... ok
+test tests::crystal_monster_ai_summary_classifies_manifest_families ... ok
+test tests::crystal_monster_drop_path_resolves_imported_drop_table ... ok
+test tests::crystal_monster_manifest_loads ... ok
+test tests::crystal_npc_command_summary_classifies_runtime_coverage ... ok
+test tests::crystal_npc_info_manifest_loads ... ok
+test tests::crystal_npc_manifest_loads ... ok
+test tests::crystal_quest_packet_manifest_loads ... ok
+test tests::crystal_random_item_stats_manifest_loads ... ok
+test tests::crystal_real_item_selection_matches_class_and_level_variants ... ok
+test tests::crystal_recipe_packet_manifest_loads ... ok
+test tests::crystal_recipes_decode_every_payload ... ok
+test tests::crystal_recipes_decode_per_ingredient_counts ... ok
+test tests::crystal_respawn_manifest_loads ... ok
+test tests::crystal_starter_region_respawns_include_expected_monsters ... ok
+test tests::localization_bundle_loads ... ok
+test tests::localization_formatter_replaces_placeholders ... ok
+test tests::localization_lookup_uses_selected_language ... ok
+test tests::monster_accuracy_preserves_source_stat_and_legacy_manifest_compatibility ... ok
+test tests::platinum_176_exposes_every_source_three_class_book_through_level_50 ... ok
+test tests::platinum_176_prajna_island_requires_the_visible_round_trip_sailor_scripts ... ok
+test tests::platinum_176_profile_bundle_matches_the_compiled_profile ... ok
+test tests::platinum_176_profile_is_reference_complete_and_has_a_1_to_50_curve ... ok
+test tests::portuguese_language_is_wired ... ok
+test tests::starter_map_collision_loads ... ok
+test tests::starter_runtime_data_maps_into_crystal_manifests ... ok
+test tests::starter_scene_loads ... ok
+test tests::starter_server_data_loads ... ok
+
+test result: ok. 55 passed; 0 failed; 1 ignored; 0 measured; 0 filtered out; finished in 5.22s
+
+     Running tests\platinum_176_content_loop.rs (E:\mir2-player-journey\work\slg-stonecutting-20261009\target\debug\deps\platinum_176_content_loop-dfc74fee7a34e6b5.exe)
+
+running 3 tests
+test platinum_176_levels_22_to_35_have_core_skills_gear_and_boss_sources ... ok
+test platinum_176_levels_36_to_50_have_endgame_boss_and_equipment_sources ... ok
+test platinum_176_levels_8_to_21_have_a_complete_natural_product_loop ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.42s
+
+   Doc-tests mir2_game_data
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+

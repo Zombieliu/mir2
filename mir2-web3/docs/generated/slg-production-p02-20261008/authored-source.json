@@ -1,0 +1,56 @@
+{
+  "schema": "mir2.production-p02-authored-source.v1",
+  "createdUtc": "2026-10-08T09:01:52.5113362Z",
+  "files": [
+    {
+      "path": "mir2-web3/packages/production/src/lib.rs",
+      "sha256": "df271e2021ccf7dac5aaf9e5e1b019c198d44103c9e67d40ad62128b5575fc6f",
+      "length": 1784
+    },
+    {
+      "path": "mir2-web3/packages/production/src/jobs.rs",
+      "sha256": "fd1ed35fc43e24f530e39bfcdc3b53886563f850483751e97925ecc7b4a17ed4",
+      "length": 22932
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/config.rs",
+      "sha256": "45b48a99f0d83f94a3b94994af8d0054d1276117c74b176d041219dc43367175",
+      "length": 299667
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/lib.rs",
+      "sha256": "63b4b7d06f36c8df6f61ed47185b9fbb9aef8518bdfe69e7c6a2cb8d31daef35",
+      "length": 5664
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/mod.rs",
+      "sha256": "4bab90c9690166f03be8c202e384f5ec0e13bffdaf5724e4717a630cea372d7f",
+      "length": 7187
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/resources.rs",
+      "sha256": "3caee03e5cc2cff874453cec0bcac7c187cf42774ab6b4bf25b3dea2ffb50cc8",
+      "length": 39212
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/save.rs",
+      "sha256": "274cfa6c7115d28f4fecd9ac13e46e4634401a125014aea9109ffc76c69587bf",
+      "length": 165614
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/npc_purchase_transaction.rs",
+      "sha256": "bd8c0355e9a38862ce591c8a001b8fb50f2ac91c3d6afe84663bad9a11c8601f",
+      "length": 38761
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/production.rs",
+      "sha256": "d202f10bc8cf1e538bb7bcace898eacd4a9de68f6e2c693e00d5f08fd80100ad",
+      "length": 32975
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/production_tests.rs",
+      "sha256": "7f044aa68a6183d8fcdd9318cbf88a8268295e2424ce4072ee6882df1ff9e51c",
+      "length": 27006
+    }
+  ]
+}

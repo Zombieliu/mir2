@@ -1,0 +1,164 @@
+{
+  "schemaVersion": 1,
+  "createdAt": "2026-10-26T00:56:45.312787+00:00",
+  "state": "DIAGNOSTICS_ONLY_FOCUSED_VALIDATED_NOT_CAPACITY_ACCEPTED",
+  "files": [
+    {
+      "file": "apps/web/scripts/playtest-capacity-soak-core.mjs",
+      "bytes": 37930,
+      "sha256": "40ccd36ee84265a29bd509ca9a7bb360691f2be002411c8cab5f64a3e254cacc"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-soak.mjs",
+      "bytes": 156391,
+      "sha256": "158aaaba83967153fc8f764895c9bce823993732618be934636654cc4401f0d2"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-soak.test.mjs",
+      "bytes": 278248,
+      "sha256": "7cf64c8b28a7b57381dc4beaa5fa01e2d77378fa977e869205b1dc941893b68a"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-observability.mjs",
+      "bytes": 4447,
+      "sha256": "19edb25f68fdd18567391e52a247964bd689346b58535871ce17051f53af9af7"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-observability.test.mjs",
+      "bytes": 5228,
+      "sha256": "00ff902194f805eb3433b192b2838b6eea6cd80860052860b825ab34f58a626d"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-monitor.mjs",
+      "bytes": 21246,
+      "sha256": "e585081835d9232b58d91bb0f717a796b483a818ed5c6fd943abf93350d74e7f"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-monitor.test.mjs",
+      "bytes": 10882,
+      "sha256": "0e60e4636ea5e384e6455fe9d474d56a760881505e765ccfc82eec490d8d92f8"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-telemetry.mjs",
+      "bytes": 6548,
+      "sha256": "d3b74c3b8e0401530e787f6b35bd9a578de4f455b3f7817b6230df41c5871964"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-telemetry.test.mjs",
+      "bytes": 6277,
+      "sha256": "f5efe4aa510f67eb10ebba26a5de9cb5402f061de07900998a77a191a749f974"
+    }
+  ],
+  "sourceSha256": "d61b7cd057e1a2a55191fe6c407b3058b5ff9205141eaf9290d16da42b028db1",
+  "onlyMainAndTestChanged": true,
+  "otherSevenRawExact": true,
+  "originalTestPrefix": {
+    "bytes": 270311,
+    "sha256": "f1ba119770bde34135e734780b04539206e859bd7b896977d4e6595555c032ef",
+    "rawExact": true,
+    "newTests": 6
+  },
+  "mainFiveRangesInverseRawExact": true,
+  "mainMutation": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\scout-selection-decision-diagnostics-v1\\production-mutation-v1.json",
+    "bytes": 3246,
+    "sha256": "d520eeb564accde06d8353cd8e5be0ff066071b523c011dcc6288e1a3a0a511e"
+  },
+  "rawPreimages": {
+    "playtest-capacity-soak.mjs": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\scout-selection-decision-diagnostics-v1\\preimages\\playtest-capacity-soak.mjs.txt",
+      "bytes": 155475,
+      "sha256": "6c2f4e3dfcbc38465a13cf05c8c8945fdb4fe7c99acaea43dfad493fb77696d8"
+    },
+    "playtest-capacity-soak.test.mjs": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\scout-selection-decision-diagnostics-v1\\preimages\\playtest-capacity-soak.test.mjs.txt",
+      "bytes": 270311,
+      "sha256": "f1ba119770bde34135e734780b04539206e859bd7b896977d4e6595555c032ef"
+    }
+  },
+  "sixImmutableReportDeclarations": [
+    {
+      "name": "measurementClock",
+      "bytes": 742,
+      "sha256": "f2eda2c20d5a7c4bef388b41dfd1e55ab4733d7ca69b10f9c3eab211b60cc99f",
+      "rawExact": true
+    },
+    {
+      "name": "navigationCoordination",
+      "bytes": 548,
+      "sha256": "72d016c9f4836113bc358570bc6f310500092da14345dd59cb94deabacd24423",
+      "rawExact": true
+    },
+    {
+      "name": "nativePatrolPlanning",
+      "bytes": 583,
+      "sha256": "6e1fd09fde3d17f1d331d6ca9b85314aa33698b12d3d8890cd8f8617c36895d9",
+      "rawExact": true
+    },
+    {
+      "name": "nativeHpMaintenance",
+      "bytes": 639,
+      "sha256": "0eb7baf64b02f24588e49c2e439d52ad5b64ddfb9b252258b72715827cf56054",
+      "rawExact": true
+    },
+    {
+      "name": "nativeChasePreference",
+      "bytes": 902,
+      "sha256": "4d1658ef243a1b06dcd9ea2e187be112b95c1d5f551274199f40ce765b762a01",
+      "rawExact": true
+    },
+    {
+      "name": "nativeAttackWitness",
+      "bytes": 896,
+      "sha256": "acfad94aa6dd482a8631c766a2d02c7ae9e32d4b18b705504b7a29bf18d7012a",
+      "rawExact": true
+    }
+  ],
+  "recordScoutAckBodyRawExact": true,
+  "rowCapEmitterBodyRawExact": true,
+  "combatPlanAndAllFollowingActionCadenceClaimsWitnessCreditCodeRawExact": true,
+  "newScans": 0,
+  "clockCallsAdded": 0,
+  "reasonEnums": [
+    "insufficient-hints",
+    "no-active-other-waypoints",
+    "all-hints-shared",
+    "all-hints-unshared",
+    "reordered"
+  ],
+  "countContract": {
+    "hintCount": "Existing eligible hint array length0..4; rows remain hint-present only.",
+    "activeOtherWaypointCount": "Existing scan distinct eligible waypoint-coordinate Set size0..100; not actor/request identities.",
+    "sharedHintCount": "Existing stable partition length0..4.",
+    "unsharedHintCount": "Existing stable partition length0..4.",
+    "lowHintEarlyReturn": "Other three counts remain null because the original<2hint early return performs no peer scout scan.",
+    "reorderedMeaning": "Existing mixed shared/unshared stable-partition branch is applied, preserving the legacy array-return/reference boolean semantics; it does not claim movement, arrival or capacity improvement."
+  },
+  "focusedRed": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\scout-selection-decision-diagnostics-v1\\focused-red-execution-v1.json",
+    "bytes": 4660,
+    "sha256": "8b752fa6ea7f5f9581b4a6ea5a83089920ff163f9e281dd0707a305d447e684e"
+  },
+  "focusedGreen": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\scout-selection-decision-diagnostics-v1\\focused-green-execution-v1.json",
+    "bytes": 4755,
+    "sha256": "1c8e50cdcce7c48bfb3ed2d485d728061266e33f86419c5cde7b5c7fcb66bf08"
+  },
+  "staticChecks": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\scout-selection-decision-diagnostics-v1\\static-checks-v1.json",
+    "bytes": 938,
+    "sha256": "22fefa3c756653fbd26817ebe6271d89dd31f5cc71d0a8823b8810fe428a9f99"
+  },
+  "patch": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\scout-selection-decision-diagnostics-v1\\source-diff-v1.patch",
+    "bytes": 12554,
+    "sha256": "b1cf86b12bc6ffb271a9dc2c1e74316c6a92a490ee4545d6f4202dd4ced1b407"
+  },
+  "fullRegressionRunHere": false,
+  "gameOrCapacityAccepted": false,
+  "limitations": [
+    "This change adds diagnostic fields only. It does not claim to repair Formal15 stage25 supply failure.",
+    "No eligible target list, account identity or unbounded snapshot is added.",
+    "The existing final truncation sentinel has no counts/reason; all31 detailed rows and per-phase reset remain unchanged."
+  ]
+}

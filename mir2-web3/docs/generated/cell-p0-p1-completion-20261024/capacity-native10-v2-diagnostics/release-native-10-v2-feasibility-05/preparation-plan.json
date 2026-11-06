@@ -1,0 +1,97 @@
+{
+  "schemaVersion": 1,
+  "preparedAt": "2026-10-24T18:33:03.767Z",
+  "state": "scripts-only-not-executed",
+  "realmStarted": false,
+  "accountsCreated": 0,
+  "charactersCreated": 0,
+  "capacityAccepted": false,
+  "releaseRecord": "C:/mir2-build/p01-completion-20261024/release-native-attack-v2.json",
+  "backendSourceManifestFromReleaseRecord": true,
+  "priorScenario": {
+    "path": "C:/mir2-build/p01-completion-20261024/release-native-10-feasibility-04/scenario.json",
+    "sha256": "701a2a3e30c1b963653af1a767f5af290e15fef207a7359cc90492cf5e496921",
+    "geometry": "original04 bytes, observer4=(246,646), onefighter/nineobservers, Deer/Scarecrow, span2"
+  },
+  "profile": {
+    "kind": "probe",
+    "activityMode": "native",
+    "stages": [
+      10
+    ],
+    "stageSeconds": 30,
+    "soakSeconds": 360,
+    "combatActors": 1,
+    "resumeSamples": 0,
+    "saveSamples": 0,
+    "wallSeconds": 1800,
+    "attackResults": "v2",
+    "explicitCLI": "--attack-results=v2",
+    "capacityAcceptanceEligible": false
+  },
+  "admissionCaps": [
+    24,
+    10,
+    10,
+    4,
+    1,
+    2
+  ],
+  "tokioWorkers": 4,
+  "resourceGuards": {
+    "maxPrivateBytes": 4294967296,
+    "maxWorkingSetBytes": 8589934592,
+    "minHostFreeBytes": 8589934592,
+    "maxCpuLogicalEquivalents": 8,
+    "maxProcessIoBytesPerSecond": 536870912,
+    "maxProcessIoOperationsPerSecond": 100000,
+    "sustainedSamples": 3,
+    "hardQuotas": false
+  },
+  "commands": {
+    "prepare": "node \"C:/mir2-build/p01-completion-20261024/release-native-10-v2-feasibility-05/prepare-inputs.mjs\" --prepare-authorized-inputs",
+    "run": "node \"C:/mir2-build/p01-completion-20261024/release-native-10-v2-feasibility-05/run-owned.mjs\" --execute-authorized-probe --attack-results=v2",
+    "normalStop": "node \"C:/mir2-build/p01-completion-20261024/release-native-10-v2-feasibility-05/request-stop.mjs\" --request-normal-drain",
+    "explicitDrainedRecovery": "powershell.exe -NoProfile -NonInteractive -File \"C:/mir2-build/p01-completion-20261024/release-native-10-v2-feasibility-05/recover-drained-owned.ps1\" -StopDrainedOwnedGateway"
+  },
+  "cleanup": "Original driver drains first, verify six0, IPC stop owned monitor preserving terminal, stdin shutdown/45s, verify exact PID/exe/SHA and released ports. If not clean, retain failure; explicit drained forced recovery never claims normal exit. Monitor exit0 and a persisted stop terminal are independently required for cleanupComplete; stopped alone does not imply normal terminal.",
+  "sourceFiles": [
+    {
+      "file": "initialize-private.ps1",
+      "bytes": 1941,
+      "sha256": "4deff086a5f53aaad191bcfd7e99de8e23c297fc6e1a121852a3fc13c1cf390e"
+    },
+    {
+      "file": "input-lib.mjs",
+      "bytes": 11005,
+      "sha256": "931f4a84122756246bc059df6937c8611ff22d8a06e5d558ac54c455039d206f"
+    },
+    {
+      "file": "monitor-owned.mjs",
+      "bytes": 1082,
+      "sha256": "f2d56c3eb26182251b6c8cc69c2274e5708d4e633c17bc4abb1414ed81c66c47"
+    },
+    {
+      "file": "prepare-inputs.mjs",
+      "bytes": 7700,
+      "sha256": "95c0c9c94b4792e542728db3d10cebba9b73159791a77cbe4c12de029b69e617"
+    },
+    {
+      "file": "recover-drained-owned.ps1",
+      "bytes": 2910,
+      "sha256": "443b47eb1988c982ffafb3b228e0aafff06734e1542d8219054d5c35ce408735"
+    },
+    {
+      "file": "request-stop.mjs",
+      "bytes": 815,
+      "sha256": "13c6a9aee3cc0845344ebd0ebb5aa43a62da8b1629daf0fd77e7bb6d9b89d639"
+    },
+    {
+      "file": "run-owned.mjs",
+      "bytes": 13855,
+      "sha256": "8876cfb6316defd4f4c2f6e9a7a43f0266111c41e6687be748cab5c49ad4a939"
+    }
+  ],
+  "validation": "Syntax checks only; prepare/run/monitor/request-stop/recovery were not executed.",
+  "finalizedAt": "2026-10-24T18:35:52.686Z"
+}

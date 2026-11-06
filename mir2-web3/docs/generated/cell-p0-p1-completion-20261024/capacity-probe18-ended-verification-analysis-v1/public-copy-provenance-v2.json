@@ -1,0 +1,461 @@
+{
+  "schemaVersion": 1,
+  "createdAt": "2026-10-25T22:24:23.218Z",
+  "state": "EXPLICIT_RAW_COPY_COMPLETE",
+  "runId": "1792965008290-fc5e2eed",
+  "publicChild": "capacity-probe18-ended-verification-analysis-v1",
+  "publicDirectory": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-probe18-ended-verification-analysis-v1",
+  "whitelist": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\probe18-run-analysis-v1\\public-whitelist-v2.json",
+    "bytes": 14991,
+    "sha256": "2d6248f5b524c60b29234267da00f73c5b4da08f45b62d97bce59e7014f012fa"
+  },
+  "previousWhitelistPreserved": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\probe18-run-analysis-v1\\public-whitelist-v1.json",
+    "bytes": 13922,
+    "sha256": "3c45d2e02e19a0b462c0e2f16406555809a7e63c207ad9b23a5235d20565c12d"
+  },
+  "copyCount": 31,
+  "totalSourceBytes": 754333,
+  "files": [
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\probe18-run-analysis-v1\\analyze-ended-probe18-v1.mjs",
+        "bytes": 14865,
+        "sha256": "f4742b968ed8a4bbeb2776d905116a19b972bc439083e5d87fe448700f759824"
+      },
+      "destination": {
+        "path": "diagnostic-analysis/analyze-ended-probe18-v1.mjs",
+        "bytes": 14865,
+        "sha256": "f4742b968ed8a4bbeb2776d905116a19b972bc439083e5d87fe448700f759824"
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\probe18-run-analysis-v1\\analysis-v1.json",
+        "bytes": 61382,
+        "sha256": "209cdd663c98153631d5876b9a0bb83268aa8477fda21857930ab9f37c1c42f0"
+      },
+      "destination": {
+        "path": "diagnostic-analysis/analysis-v1.json",
+        "bytes": 61382,
+        "sha256": "209cdd663c98153631d5876b9a0bb83268aa8477fda21857930ab9f37c1c42f0"
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\probe18-run-analysis-v1\\selected-scout-and-corrections-v1.json",
+        "bytes": 2538,
+        "sha256": "d40999a97fd7d92be6a786a7c3a243f016cb737af23c724c861b1f633175405e"
+      },
+      "destination": {
+        "path": "diagnostic-analysis/selected-scout-and-corrections-v1.json",
+        "bytes": 2538,
+        "sha256": "d40999a97fd7d92be6a786a7c3a243f016cb737af23c724c861b1f633175405e"
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\probe18-run-analysis-v1\\facts-v1.json",
+        "bytes": 9261,
+        "sha256": "90d3862c8b1d1124cd46a17fec1dd12cc958450682a5464e2f6c27a799f040ff"
+      },
+      "destination": {
+        "path": "diagnostic-analysis/facts-v1.json",
+        "bytes": 9261,
+        "sha256": "90d3862c8b1d1124cd46a17fec1dd12cc958450682a5464e2f6c27a799f040ff"
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\probe18-run-analysis-v1\\scope-correction-v1.json",
+        "bytes": 1262,
+        "sha256": "1dbabd71a481f15bee248cd9373e438ee49f02f4d2398e9466b74c299656edac"
+      },
+      "destination": {
+        "path": "diagnostic-analysis/scope-correction-v1.json",
+        "bytes": 1262,
+        "sha256": "1dbabd71a481f15bee248cd9373e438ee49f02f4d2398e9466b74c299656edac"
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\probe18-root-independent-cleanup-v1.json",
+        "bytes": 371,
+        "sha256": "1ad90c3a6ab3f6e802e90135bf6838f4befd6e7841e6d9f582aa3d9ab8e7e1af"
+      },
+      "destination": {
+        "path": "root-execution/probe18-root-independent-cleanup-v1.json",
+        "bytes": 371,
+        "sha256": "1ad90c3a6ab3f6e802e90135bf6838f4befd6e7841e6d9f582aa3d9ab8e7e1af"
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\probe18-root-base-collection-stdout-v1.log",
+        "bytes": 105061,
+        "sha256": "fe6ebfd50ea27610518c35626d3937cb9b9e3d4cf599778f461bd4d6a8d0928c"
+      },
+      "destination": {
+        "path": "root-execution/probe18-root-base-collection-stdout-v1.log",
+        "bytes": 105061,
+        "sha256": "fe6ebfd50ea27610518c35626d3937cb9b9e3d4cf599778f461bd4d6a8d0928c"
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\probe18-root-base-collection-stderr-v1.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "destination": {
+        "path": "root-execution/probe18-root-base-collection-stderr-v1.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\probe18-root-base-verification-stdout-v1.log",
+        "bytes": 5020,
+        "sha256": "43ca1fa8aae653a6b1571bd2612107a9a54b2d64e315f01ff520d30aa5c47312"
+      },
+      "destination": {
+        "path": "root-execution/probe18-root-base-verification-stdout-v1.log",
+        "bytes": 5020,
+        "sha256": "43ca1fa8aae653a6b1571bd2612107a9a54b2d64e315f01ff520d30aa5c47312"
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\probe18-root-base-verification-stderr-v1.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "destination": {
+        "path": "root-execution/probe18-root-base-verification-stderr-v1.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\probe18-root-store-collection-stdout-v1.log",
+        "bytes": 384,
+        "sha256": "e4211fe86f731d9260cd868432162639e650928dd733ea188018d8e23ef75e07"
+      },
+      "destination": {
+        "path": "root-execution/probe18-root-store-collection-stdout-v1.log",
+        "bytes": 384,
+        "sha256": "e4211fe86f731d9260cd868432162639e650928dd733ea188018d8e23ef75e07"
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\probe18-root-store-collection-stderr-v1.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "destination": {
+        "path": "root-execution/probe18-root-store-collection-stderr-v1.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\probe18-root-store-verification-stdout-v1.log",
+        "bytes": 1241,
+        "sha256": "4c791f45fff15ae4a429371098337b214970d5240729e9f63f70e36efe946c74"
+      },
+      "destination": {
+        "path": "root-execution/probe18-root-store-verification-stdout-v1.log",
+        "bytes": 1241,
+        "sha256": "4c791f45fff15ae4a429371098337b214970d5240729e9f63f70e36efe946c74"
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\probe18-root-store-verification-stderr-v1.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "destination": {
+        "path": "root-execution/probe18-root-store-verification-stderr-v1.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\probe18-independent-verification-v1\\verify-ended-probe18-v1.mjs",
+        "bytes": 36368,
+        "sha256": "92acea1f0fa6bfadea32a62ea0e35ea53327bef7e5c797cf65f1ada0ea71e5a1"
+      },
+      "destination": {
+        "path": "ended-verifier/verify-ended-probe18-v1.mjs",
+        "bytes": 36368,
+        "sha256": "92acea1f0fa6bfadea32a62ea0e35ea53327bef7e5c797cf65f1ada0ea71e5a1"
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\probe18-independent-verification-v1\\probe-contract-v1.mjs",
+        "bytes": 5695,
+        "sha256": "c40b20f789f72ff34a264d8b3fc4509829d834bf9999caf4e706befbeab6e06a"
+      },
+      "destination": {
+        "path": "ended-verifier/probe-contract-v1.mjs",
+        "bytes": 5695,
+        "sha256": "c40b20f789f72ff34a264d8b3fc4509829d834bf9999caf4e706befbeab6e06a"
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\probe18-independent-verification-v1\\hp-proof-contract-v2.mjs",
+        "bytes": 4644,
+        "sha256": "cbf67686e1fa385404782c27548dbe3fbaa10f55a5d97c3379d5a41ed01cf285"
+      },
+      "destination": {
+        "path": "ended-verifier/hp-proof-contract-v2.mjs",
+        "bytes": 4644,
+        "sha256": "cbf67686e1fa385404782c27548dbe3fbaa10f55a5d97c3379d5a41ed01cf285"
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\probe18-independent-verification-v1\\expected-probe-policy-v1.json",
+        "bytes": 1008,
+        "sha256": "e3bc309c4830ffed84c924c5d71dda6fa44e90bcbe552fd3a969dc9760edb242"
+      },
+      "destination": {
+        "path": "ended-verifier/expected-probe-policy-v1.json",
+        "bytes": 1008,
+        "sha256": "e3bc309c4830ffed84c924c5d71dda6fa44e90bcbe552fd3a969dc9760edb242"
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\probe18-independent-verification-v1\\run-ended-probe18-v1.mjs",
+        "bytes": 2257,
+        "sha256": "b26816d6ed4694e21ef1443c12b6df9f6834cea5d6d8c4dadbb7b07921d2ab45"
+      },
+      "destination": {
+        "path": "ended-verifier/run-ended-probe18-v1.mjs",
+        "bytes": 2257,
+        "sha256": "b26816d6ed4694e21ef1443c12b6df9f6834cea5d6d8c4dadbb7b07921d2ab45"
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\probe18-independent-verification-v1\\seal-tool-source-v1.mjs",
+        "bytes": 3011,
+        "sha256": "cc646ed39d511137b83655ec7abe215091dca4e81ac5e10b24c93af2a4f7b499"
+      },
+      "destination": {
+        "path": "ended-verifier/seal-tool-source-v1.mjs",
+        "bytes": 3011,
+        "sha256": "cc646ed39d511137b83655ec7abe215091dca4e81ac5e10b24c93af2a4f7b499"
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\probe18-independent-verification-v1\\derivation-v1.json",
+        "bytes": 15779,
+        "sha256": "ea5509d304431d0e7c4033e712d760f08b16bcb8ee822c74456cc2f9f17fe2ff"
+      },
+      "destination": {
+        "path": "ended-verifier/derivation-v1.json",
+        "bytes": 15779,
+        "sha256": "ea5509d304431d0e7c4033e712d760f08b16bcb8ee822c74456cc2f9f17fe2ff"
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\probe18-independent-verification-v1\\derive-verifier-v1.mjs",
+        "bytes": 9843,
+        "sha256": "ca6816fe56b271aa9b2dcbeac64440f4edc2e4189be518ada4f8a48fa24bb9ba"
+      },
+      "destination": {
+        "path": "ended-verifier/derive-verifier-v1.mjs",
+        "bytes": 9843,
+        "sha256": "ca6816fe56b271aa9b2dcbeac64440f4edc2e4189be518ada4f8a48fa24bb9ba"
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\probe18-independent-verification-v1\\preparation-v1.json",
+        "bytes": 4186,
+        "sha256": "6714b4206d762cc25676357267eea107e0a3ebd479dbec4927043fc79219547b"
+      },
+      "destination": {
+        "path": "ended-verifier/preparation-v1.json",
+        "bytes": 4186,
+        "sha256": "6714b4206d762cc25676357267eea107e0a3ebd479dbec4927043fc79219547b"
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\probe18-independent-verification-v1\\independent-review-v1.json",
+        "bytes": 8417,
+        "sha256": "e029e2e080204aeb38a87c963d2ac1b01e50b33cb92f41b3d2c4c09b50d03b10"
+      },
+      "destination": {
+        "path": "ended-verifier/independent-review-v1.json",
+        "bytes": 8417,
+        "sha256": "e029e2e080204aeb38a87c963d2ac1b01e50b33cb92f41b3d2c4c09b50d03b10"
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\probe18-independent-verification-v1\\tool-source-frozen-v1.json",
+        "bytes": 2111,
+        "sha256": "4a1d392606edeb54700a7d49e5e620dcd17c35d9466c5c019788945bb722a5aa"
+      },
+      "destination": {
+        "path": "ended-verifier/tool-source-frozen-v1.json",
+        "bytes": 2111,
+        "sha256": "4a1d392606edeb54700a7d49e5e620dcd17c35d9466c5c019788945bb722a5aa"
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\probe18-independent-verification-v1\\actual-verification-execution-receipt-v1.json",
+        "bytes": 813,
+        "sha256": "e9841d7cf9355ec66a980ea2056fba49de870c645b830bb2fbfceb91c0fc9257"
+      },
+      "destination": {
+        "path": "ended-verifier/actual-verification-execution-receipt-v1.json",
+        "bytes": 813,
+        "sha256": "e9841d7cf9355ec66a980ea2056fba49de870c645b830bb2fbfceb91c0fc9257"
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\probe18-independent-verification-v1\\actual-verification.log",
+        "bytes": 877,
+        "sha256": "500791ad3545dbfdea51ee379a4d98a2cad0f6adbc133ad68a4985711f02a9b9"
+      },
+      "destination": {
+        "path": "ended-verifier/actual-verification.log",
+        "bytes": 877,
+        "sha256": "500791ad3545dbfdea51ee379a4d98a2cad0f6adbc133ad68a4985711f02a9b9"
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\probe18-independent-verification-v1\\final-verification.json",
+        "bytes": 437094,
+        "sha256": "d8558cb32ec366f21d744c132f30e64cb1923e3d73d60427d0edd21c9935c9e4"
+      },
+      "destination": {
+        "path": "ended-verifier/final-verification.json",
+        "bytes": 437094,
+        "sha256": "d8558cb32ec366f21d744c132f30e64cb1923e3d73d60427d0edd21c9935c9e4"
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\probe18-actual-terminal-independent-facts-v1.json",
+        "bytes": 10133,
+        "sha256": "ef3a0ec4f8f5cf69e2bcfa0e73bfc96041074de60d3383852527d676eec6cdf3"
+      },
+      "destination": {
+        "path": "ended-verifier/actual-terminal-independent-facts-v1.json",
+        "bytes": 10133,
+        "sha256": "ef3a0ec4f8f5cf69e2bcfa0e73bfc96041074de60d3383852527d676eec6cdf3"
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\probe18-root-actual-terminal-and-consumer-facts-v1.json",
+        "bytes": 8568,
+        "sha256": "2ba0c6750a0f02533e141554ca639ad611a215e722236e732946d9648d2db106"
+      },
+      "destination": {
+        "path": "ended-verifier/root-actual-terminal-and-consumer-facts-v1.json",
+        "bytes": 8568,
+        "sha256": "2ba0c6750a0f02533e141554ca639ad611a215e722236e732946d9648d2db106"
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\probe18-attack-phase-scope-correction-v1.json",
+        "bytes": 2144,
+        "sha256": "4078718d14ce572277727f04f36952946f46885086163ce584411b042049345a"
+      },
+      "destination": {
+        "path": "ended-verifier/attack-phase-scope-correction-v1.json",
+        "bytes": 2144,
+        "sha256": "4078718d14ce572277727f04f36952946f46885086163ce584411b042049345a"
+      }
+    }
+  ],
+  "allSourcePinsCheckedBeforeWriting": true,
+  "allSourcePinsUnchangedAfterCopy": true,
+  "allDestinationPinsReadBack": true,
+  "copyMode": "COPYFILE_EXCL",
+  "regularCanonicalBaseSourcesOnly": true,
+  "topicContainmentChecked": true,
+  "referenceOnlyNotCopied": {
+    "raw": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-observer-feasibility-18\\reports\\1792965008290-fc5e2eed.samples.jsonl",
+      "bytes": 29612729,
+      "sha256": "ab31e2b81cf6e1fd89fabc9c9d25699c742f724fda2570140feb629ddb56444e",
+      "rows": 41154
+    },
+    "original204CopyCatalog": {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-native10-v2-scout-observer-followup-18-diagnostics\\collect-release-native-10-v2-scout-observer-feasibility-18-public-artifact-catalog.json",
+      "bytes": 72158,
+      "sha256": "80a5baa03493b2f8d137303a28ae1f348109053881130e5de9ab6a04dcfb1cbf"
+    },
+    "originalPublicVerification": {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-native10-v2-scout-observer-followup-18-diagnostics\\public-verification.json",
+      "bytes": 7108,
+      "sha256": "cf38707c66c491d0ac1db30f3176d5412f480e3d20587699b6e8e1381730cb73"
+    },
+    "existingStoreData": {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-native10-v2-scout-observer-followup-18-store-diagnostics\\store-stage-public.jsonl",
+      "bytes": 4571,
+      "sha256": "1844e2991d25f74dbcbb511455df7e576af405ce999ddfc1a20da5375a43f377"
+    },
+    "existingStoreVerification": {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-native10-v2-scout-observer-followup-18-store-diagnostics\\store-public-verification.json",
+      "bytes": 1423,
+      "sha256": "38bc6317d0a9e9b1637ab3bdbfa0e36228a7529850256e007c318eb604db840f"
+    },
+    "full16Audit": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-observer-preference-v1\\public\\1792963900426-f1496383.independent-audit.json",
+      "bytes": 1907,
+      "sha256": "92a72770bab2e302537eda593baf72a8cb5438a0d6956fa171e2f7e80128533f"
+    },
+    "alreadyCopiedRootSealV1FailureLogs": [
+      {
+        "path": "probe18-root-seal-stderr-v1.log",
+        "bytes": 1019,
+        "sha256": "8718f0345424500ff4a560cc687679a019760d2d718b2e86b9430263b340a4bf",
+        "classification": "explicit-public-original"
+      },
+      {
+        "path": "probe18-root-seal-stdout-v1.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "classification": "explicit-public-original"
+      }
+    ]
+  },
+  "readme": {
+    "path": "README.md",
+    "bytes": 4104,
+    "sha256": "7149721d7892c4805942514bf51dd3577c07f8b9ce0cf283aaa8e79f97a83959",
+    "relativeLinksChecked": 12,
+    "allRelativeLinksExist": true
+  },
+  "originalGameVerdictPreserved": true,
+  "capacityAccepted": false,
+  "p0Passed": false,
+  "p2Started": false,
+  "trackedRootDocsModified": false,
+  "frozenSourcesModified": false,
+  "testsOrRealmExecuted": false
+}

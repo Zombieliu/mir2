@@ -1,0 +1,208 @@
+{
+  "schemaVersion": 1,
+  "createdAt": "2026-10-25T02:01:13.007Z",
+  "backendSourceCommit": "46880bd1ef415131c4cf85aeb4dd2fa4f6fd4f9b",
+  "driverSourceCommit": "30ba328ad3d1b1eb46e51540cb1880d66eba3ee1",
+  "scope": "Source/data facts for ordinary platinum_176 NewCharacter only, explicitly separate from the unrecorded final inventory of probe09 actor05. One public raw scan, no private/recording data or mutation.",
+  "itemManifest": {
+    "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\packages\\game-data\\data\\generated\\crystal_item_manifest.json",
+    "bytes": 1589543,
+    "sha256": "b0d48ada978d8a062e993fe0425b6a724672aeea354a3b7b4508fb4c161658b7"
+  },
+  "sourcePins": [
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\inventory.rs",
+      "bytes": 190859,
+      "sha256": "69a73ae6d83b7a232ff635e0cc4cb128d7cc78b0f51db6e258eaf77208591fca",
+      "line": 103,
+      "scope": "Crystal start inventory: manifest start_item and class/gender eligibility; quantity1, full template durability, Bag1."
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\save.rs",
+      "bytes": 179980,
+      "sha256": "86a97da8bd68223c55ce150547e5520bae811a4bbfa809ec7cbd1dbb9d801370",
+      "line": 2095,
+      "scope": "Actual Crystal new character save: gold0, start inventory, empty belt/storage/equipment."
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\save.rs",
+      "bytes": 179980,
+      "sha256": "86a97da8bd68223c55ce150547e5520bae811a4bbfa809ec7cbd1dbb9d801370",
+      "line": 73,
+      "scope": "Any content profile or Crystal-world config selects the Crystal starter loadout."
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\packets.rs",
+      "bytes": 422139,
+      "sha256": "d79c9be38e901fda92ff74a14133e853d7092527b58adb098ac9d4a18a8e86b8",
+      "line": 10833,
+      "scope": "Ordinary UseItem(unique_id,grid) resolves the held item and uses normal item handling."
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\packets.rs",
+      "bytes": 422139,
+      "sha256": "d79c9be38e901fda92ff74a14133e853d7092527b58adb098ac9d4a18a8e86b8",
+      "line": 1846,
+      "scope": "Potion handling reads HP from the actual Crystal item stat."
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\quest-agent\\protocol-play.mjs",
+      "bytes": 46278,
+      "sha256": "ce01b337cb8650abccb04c2eb5783d20c76f73b92af1c9db441d89e9bbed8781",
+      "line": 46,
+      "scope": "Existing equipStarterGear uses ordinary equipItem and waits for successful ack/owned equipment state."
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\playtest-capacity-soak.mjs",
+      "bytes": 132218,
+      "sha256": "c3a12cfa80dc55cf591ecaaa0031b4cabe9acc7f175a3a8de511df76d3630e55",
+      "line": 1633,
+      "scope": "Capacity bootstrap invokes equipStarterGear; no active healing is added by this evidence task."
+    }
+  ],
+  "ordinaryNewWarrior": {
+    "maleStarterItems": [
+      {
+        "itemIndex": 221,
+        "name": "WoodenSword",
+        "itemType": 1,
+        "shape": 0,
+        "initialQuantity": 1,
+        "stackLimit": 1,
+        "initialDurabilityRaw": {
+          "current": 4000,
+          "maximum": 4000
+        },
+        "hpStat": 0
+      },
+      {
+        "itemIndex": 317,
+        "name": "BaseDress(M)",
+        "itemType": 2,
+        "shape": 1,
+        "initialQuantity": 1,
+        "stackLimit": 1,
+        "initialDurabilityRaw": {
+          "current": 5000,
+          "maximum": 5000
+        },
+        "hpStat": 0
+      },
+      {
+        "itemIndex": 658,
+        "name": "(HP)DrugSmall",
+        "itemType": 13,
+        "shape": 0,
+        "initialQuantity": 1,
+        "stackLimit": 20,
+        "initialDurabilityRaw": null,
+        "hpStat": 30
+      },
+      {
+        "itemIndex": 722,
+        "name": "Candle",
+        "itemType": 12,
+        "shape": 0,
+        "initialQuantity": 1,
+        "stackLimit": 1,
+        "initialDurabilityRaw": {
+          "current": 8000,
+          "maximum": 8000
+        },
+        "hpStat": 0
+      }
+    ],
+    "femaleStarterItems": [
+      {
+        "itemIndex": 221,
+        "name": "WoodenSword",
+        "itemType": 1,
+        "shape": 0,
+        "initialQuantity": 1,
+        "stackLimit": 1,
+        "initialDurabilityRaw": {
+          "current": 4000,
+          "maximum": 4000
+        },
+        "hpStat": 0
+      },
+      {
+        "itemIndex": 318,
+        "name": "BaseDress(F)",
+        "itemType": 2,
+        "shape": 1,
+        "initialQuantity": 1,
+        "stackLimit": 1,
+        "initialDurabilityRaw": {
+          "current": 5000,
+          "maximum": 5000
+        },
+        "hpStat": 0
+      },
+      {
+        "itemIndex": 658,
+        "name": "(HP)DrugSmall",
+        "itemType": 13,
+        "shape": 0,
+        "initialQuantity": 1,
+        "stackLimit": 20,
+        "initialDurabilityRaw": null,
+        "hpStat": 30
+      },
+      {
+        "itemIndex": 722,
+        "name": "Candle",
+        "itemType": 12,
+        "shape": 0,
+        "initialQuantity": 1,
+        "stackLimit": 1,
+        "initialDurabilityRaw": {
+          "current": 8000,
+          "maximum": 8000
+        },
+        "hpStat": 0
+      }
+    ],
+    "gold": 0,
+    "beltInitiallyEmpty": true,
+    "equipmentInitiallyEmpty": true,
+    "ordinaryDriverStarterEquipSlots": [
+      "weapon",
+      "armour",
+      "torch"
+    ],
+    "otherSlotsNotGrantedByStarter": true,
+    "drugQuantityIsNotStackLimit": true
+  },
+  "actualProbe09LastAttack": {
+    "actor": "L26466205",
+    "requestId": "66",
+    "rawLine": 13893,
+    "lineSha256WithoutNewline": "446d277f9a61f2175b738b5626f811f8886c2281f9a72cb354b16d7463a2a1f9",
+    "at": 1792891597329,
+    "recordedOwner": {
+      "objectId": 1000,
+      "x": 265,
+      "y": 649,
+      "dead": false,
+      "hp": 3,
+      "maxHp": 24
+    },
+    "inventory": "not recorded",
+    "equipment": "not recorded",
+    "gold": "not recorded",
+    "durability": "not recorded",
+    "publicResourceScan": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\probe09-actor05-public-resource-scan-v1.json",
+      "bytes": 12779,
+      "sha256": "7f790debb814d56d42acc3dd01ad204a280ab38e5ead7500bac6eda60d012420"
+    }
+  },
+  "conclusion": "The ordinary starter configuration provides one real HP drug as a potential existing UseItem resource. Its continued possession, successful use, stock decrement and resulting HP recovery in a new run require ordinary authoritative receipts. Probe09 public raw cannot establish the final held resources.",
+  "limitations": [
+    "No claim that one initial dose sustains two hours or fixes per-minute combat supply.",
+    "No private save was read, no gold/items were granted, no driver/source/scene was changed and no healing was enabled.",
+    "Initial durability is raw Crystal data, not a measured remaining durability at attack66."
+  ],
+  "capacityAccepted": false
+}

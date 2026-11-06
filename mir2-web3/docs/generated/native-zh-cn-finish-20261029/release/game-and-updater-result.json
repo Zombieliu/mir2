@@ -1,0 +1,23 @@
+{
+  "passed": true,
+  "kind": "formal-game-and-final-updater-component-assembly-only",
+  "game": {
+    "path": "../candidate/validation.json",
+    "candidate": "WN-CANDIDATE-20261029-invited-09",
+    "sourceRevision": "24216899acd4301d8c3b1eff08b825f4896cc410",
+    "files": 255027,
+    "requireCurrentSourceSwitch": false,
+    "currentSourceValidated": true
+  },
+  "updater": {
+    "path": "../updater/final-r9/validation.json",
+    "sourceRevision": "11d8a75ba72e626a287630c3a8a4b6c6278d0647",
+    "sequence": 2026102909,
+    "files": 9,
+    "publicAuthenticode": "NotSigned"
+  },
+  "signedGameCandidateIdentityMatchesUpdaterMetadata": true,
+  "installerAndInstalledGuiVerifiedByThisReport": false,
+  "humanAccepted": false,
+  "productionDeployment": false
+}

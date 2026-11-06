@@ -1,0 +1,24 @@
+{
+  "sourceRound": "Source66",
+  "kind": "C isolated Next strict compilation passed but Thin closure not accepted",
+  "strictBuildProof": {
+    "path": "E:/mir2-player-journey/mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source66-next-actual01.json",
+    "bytes": 2770,
+    "sha256": "74f4bcdb448b0106a36e149f559b4a28878dcedafe4b640d0c98ab0c6b3f31c9"
+  },
+  "rawNftTraces": 61,
+  "rawReferences": 69886,
+  "outOfScopeRawReferences": 20140,
+  "uniqueMalformedTargets": 5035,
+  "affectedTraces": 4,
+  "evidence": {
+    "path": "C:/mir2-cross-platform-storage-20261002/web-source66-npc-visible-range-20261011-01/thin-preparation01/nft-out-of-scope-blocker01.json",
+    "bytes": 16903357,
+    "sha256": "0599dd526a1166c095364ed924ebe6f53b43e5e1d3a12d163be2b45d7b80712d"
+  },
+  "unknownTargetsRead": false,
+  "thinExecuted": false,
+  "rootAccepted": false,
+  "correction": "Rebuild unchanged product sources on same drive, retaining original NFT resolver and builder.",
+  "candidate100": false
+}

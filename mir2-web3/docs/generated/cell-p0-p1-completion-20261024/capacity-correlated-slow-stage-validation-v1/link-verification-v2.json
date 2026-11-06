@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "verifiedAt": "2026-10-25T16:29:02.878Z",
+  "scope": "README link addendum only after Root Node archive became available; no original byte copies or historical verification rewritten.",
+  "previousVerification": {
+    "file": "archive-verification-v1.json",
+    "bytes": 4395,
+    "sha256": "ba546916c1c9dfde4b07aa23fcc0df447f0d3c401a94e1cde299e9106d6b4a7b"
+  },
+  "previousPendingRootIntegrationLinkResolved": true,
+  "allReadmeLinksExist": true,
+  "readmeLinks": [
+    "source/web-before-v1.rs.txt",
+    "source/web-after-v1.rs.txt",
+    "validation/mutation-v1.json",
+    "validation/focused-v1.log",
+    "validation/focused-execution-v1.json",
+    "validation/validation-receipt-v1.json",
+    "review/independent-review-v1.json",
+    "validation/rustfmt-command-record-v1.json",
+    "archive-tools/public-whitelist-v1.json",
+    "archive-tools/archive-correlated-slow-stage-validation-v1.mjs",
+    "../capacity-attack-deadline-poll-fix-v1/README.md"
+  ],
+  "actualFocusedPassed": 8,
+  "originalTests": 7,
+  "newTests": 1,
+  "newReleaseBuilt": false,
+  "newLoadPerformed": false,
+  "capacityAccepted": false
+}

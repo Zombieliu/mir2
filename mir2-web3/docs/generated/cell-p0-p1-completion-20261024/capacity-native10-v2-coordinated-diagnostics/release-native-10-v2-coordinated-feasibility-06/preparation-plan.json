@@ -1,0 +1,37 @@
+{
+  "schemaVersion": 1,
+  "preparedAt": "2026-10-24T19:13:16.427Z",
+  "state": "scripts-only-not-executed",
+  "sourceRealm": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-feasibility-05",
+  "scenarioRule": "Exact original04 scenario bytes, anchor4=(246,646), Deer/Scarecrow only, patrolSpan2, onefighter5 andnine ordinary movement observers",
+  "unchangedPolicy": {
+    "profile": "probe",
+    "activityMode": "native",
+    "stages": "10",
+    "stageSeconds": 30,
+    "soakSeconds": 360,
+    "combatActors": 1,
+    "resumeSamples": 0,
+    "saveSamples": 0,
+    "wallSeconds": 1800,
+    "attackResults": "v2"
+  },
+  "unchangedResources": {
+    "maxCpuCores": 8,
+    "maxPrivateBytes": 4294967296,
+    "maxWorkingSetBytes": 8589934592,
+    "minHostFreeBytes": 8589934592,
+    "maxIoBytesPerSecond": 536870912,
+    "maxIoOperationsPerSecond": 100000,
+    "sustainedSamples": 3,
+    "hardQuota": false
+  },
+  "backendRule": "Original461f/855b/39 inputs reused unchanged. Every rawinput and461f blob matches; base-to-currentHEAD backend path set equalsmanifest;461f-to-currentHEAD backenddiff empty; trackedtreeclean; anyuntrackedbackend rejected.",
+  "driverRule": "New frozen9/import/data/tool raw closure and current driverHEAD Git blobs; driverSourceCommit separate frombackendSourceCommit. No duplicate backend Release binding.",
+  "prepareCommand": "node prepare-inputs.mjs --prepare-authorized-inputs",
+  "executeCommand": "node run-owned.mjs --execute-authorized-probe --attack-results=v2",
+  "executionAuthorizedByPreparation": false,
+  "realmStarted": false,
+  "accountsCreated": 0,
+  "capacityAccepted": false
+}

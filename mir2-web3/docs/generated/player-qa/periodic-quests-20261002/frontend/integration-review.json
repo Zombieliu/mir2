@@ -1,0 +1,102 @@
+{
+  "schema": 1,
+  "scope": "Offline production-widget and native route regressions, not live gameplay or human acceptance",
+  "rootReviewedImages": [
+    "visual-r3/zh-TW-ready-2180.png",
+    "visual-r3/pt-BR-npc-list-accept.png",
+    "visual-r3/ar-npc-list-finish.png"
+  ],
+  "review": "Authoritative complete counts, readable labels, scrollable details and controls fit. R1 failed old tab labels retained; R3 corrected actual wire objectives and NPC captions.",
+  "sourceLineEndings": [
+    {
+      "file": "apps/game-client/client-bevy/src/quest_destination.rs",
+      "testedWorkingBytesSha256": "4fd27139507b5e82c74f8ace8a3b9bb72079803f77f4d0fb080c86e70fbe7355",
+      "gitLfBytesSha256": "4fd27139507b5e82c74f8ace8a3b9bb72079803f77f4d0fb080c86e70fbe7355",
+      "changedOnlyLineEndings": false
+    },
+    {
+      "file": "apps/game-client/client-bevy/src/quest_hunt_regions.rs",
+      "testedWorkingBytesSha256": "dee5887003408e2204bfa8020fdf81efc63e3a85dff2f88dcbff01b3ca9f0589",
+      "gitLfBytesSha256": "dee5887003408e2204bfa8020fdf81efc63e3a85dff2f88dcbff01b3ca9f0589",
+      "changedOnlyLineEndings": false
+    },
+    {
+      "file": "apps/game-client/client-bevy/src/quest_turn_in.rs",
+      "testedWorkingBytesSha256": "e84ebc05f7ae6fc4c84e5e4e0eac04d17d7605fc2da5416786ae9af94337257b",
+      "gitLfBytesSha256": "e84ebc05f7ae6fc4c84e5e4e0eac04d17d7605fc2da5416786ae9af94337257b",
+      "changedOnlyLineEndings": false
+    },
+    {
+      "file": "apps/game-client/client-bevy/src/quest_multi_guidance.rs",
+      "testedWorkingBytesSha256": "84065dcb7e49f07b3b0083e79569f797ccb63522baf3a32ae03e62c3fccef0a2",
+      "gitLfBytesSha256": "af69150e8727e7dbdda244197d1a159fba291e954b8b871bcc275747068b13d4",
+      "changedOnlyLineEndings": true
+    },
+    {
+      "file": "apps/game-client/client-bevy/src/quest_ui.rs",
+      "testedWorkingBytesSha256": "1cc5414cfe55e36f332cc7f3a78ee0837140b03a1e57f51a0bd4d92dc11b2943",
+      "gitLfBytesSha256": "188b4a2529626992de59b15fc28b2195f22353bdfe7ea553ad81d403a2d6f325",
+      "changedOnlyLineEndings": true
+    },
+    {
+      "file": "apps/game-client/client-bevy/src/player_text.rs",
+      "testedWorkingBytesSha256": "78d9b1aa99eba66ef1f90b42abc843f92638f7277f8e57354b26714c74ddf46d",
+      "gitLfBytesSha256": "ae704918318324ec0c09a6c36a7eeefc40c0532c5a28a7f58e69daef331fcefe",
+      "changedOnlyLineEndings": true
+    },
+    {
+      "file": "apps/game-client/client-bevy/src/native_i18n.rs",
+      "testedWorkingBytesSha256": "cc1cfdb4b937bccefe75b688bb96785814515ee068abc5acdafd702e01e25ab0",
+      "gitLfBytesSha256": "6348a7ce8be1af4f6688b67338b74fdf781888e71fdbfa3b252fa9701d4d56cf",
+      "changedOnlyLineEndings": true
+    },
+    {
+      "file": "apps/game-client/client-bevy/src/crystal_ui/quest_targets.rs",
+      "testedWorkingBytesSha256": "188b4273058c106f158f3b7f6384341fadf7ff9190329af76e50d89847b1d39d",
+      "gitLfBytesSha256": "188b4273058c106f158f3b7f6384341fadf7ff9190329af76e50d89847b1d39d",
+      "changedOnlyLineEndings": false
+    },
+    {
+      "file": "apps/game-client/client-bevy/src/periodic_quest_ui_tests.rs",
+      "testedWorkingBytesSha256": "09d9be7b40bd7bfbba7033ab41c265973ff07fbe5df756472960accb8206f01b",
+      "gitLfBytesSha256": "09d9be7b40bd7bfbba7033ab41c265973ff07fbe5df756472960accb8206f01b",
+      "changedOnlyLineEndings": false
+    },
+    {
+      "file": "packages/game-data/data/native-i18n/periodic.json",
+      "testedWorkingBytesSha256": "c5ec0c4ac6904525ae92003dcae9dd7a799abcd01c04003149452c44b3fea73d",
+      "gitLfBytesSha256": "66c0e597bee3653711037aa378b0d05c5c4ad1253087a82841d3ce70f8e8ad8a",
+      "changedOnlyLineEndings": true
+    },
+    {
+      "file": "apps/game-client/platform-windows/src/input.rs",
+      "testedWorkingBytesSha256": "15584174941ffa8d182f3921c7a5ae3f75582c33fadf16006109cd0c822d8d3e",
+      "gitLfBytesSha256": "376e78164a6a96b4b7b111b2e32a64e1122f3956e07351a908bdca6dae434912",
+      "changedOnlyLineEndings": true
+    },
+    {
+      "file": "apps/game-client/platform-windows/src/quest_route_input_tests.rs",
+      "testedWorkingBytesSha256": "a29e776382e9ed4f08b6019d182aa95e95bd0ba0122d9c87367a38413be7b1bf",
+      "gitLfBytesSha256": "c73be612324d5703f7389dab36ae35430d3ddd2f6dbc1033ee7882a256600a12",
+      "changedOnlyLineEndings": true
+    },
+    {
+      "file": "packages/game-data/src/periodic_quests.rs",
+      "testedWorkingBytesSha256": "5f6fa1e864187cd1d96f7fa11b58fa5870ef5bbe9b6d25cc0cac4da710a6150b",
+      "gitLfBytesSha256": "5f6fa1e864187cd1d96f7fa11b58fa5870ef5bbe9b6d25cc0cac4da710a6150b",
+      "changedOnlyLineEndings": false
+    },
+    {
+      "file": "config/quest-guidance/daily-weekly-v1.json",
+      "testedWorkingBytesSha256": "22a089fbb05d2bb3663e1b5f2555b6d8147139167a67833e626add6a15b47db0",
+      "gitLfBytesSha256": "22a089fbb05d2bb3663e1b5f2555b6d8147139167a67833e626add6a15b47db0",
+      "changedOnlyLineEndings": false
+    },
+    {
+      "file": "apps/game-client/client-bevy/src/native_i18n_visual_tests.rs",
+      "testedWorkingBytesSha256": "e54e2c330f565b377beaffc9f58cac026620594b6018d80102da02718487dc8f",
+      "gitLfBytesSha256": "e54e2c330f565b377beaffc9f58cac026620594b6018d80102da02718487dc8f",
+      "changedOnlyLineEndings": false
+    }
+  ]
+}

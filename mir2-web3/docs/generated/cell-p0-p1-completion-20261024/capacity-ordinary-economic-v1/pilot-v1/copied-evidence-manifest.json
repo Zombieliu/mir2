@@ -1,0 +1,156 @@
+{
+  "schemaVersion": 1,
+  "scope": "Original d926 ordinary economic pilot failure and actual JavaScript checks. No private account/secrets/Store/gateway raw log copied; original report bytes unchanged.",
+  "driverSourceCommit": "d926d5bcd2058c1da1a2a98563689e8a1fbe5f89",
+  "backendSourceCommit": "7b43caa41ee12f2e6b41d0a5df7e9ab45a32580d",
+  "preparedActors": 0,
+  "measurementPerformed": false,
+  "capacityAccepted": false,
+  "p0Accepted": false,
+  "copies": [
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-preparation-pilot-v1\\source-lib-v1.mjs",
+      "file": "source-lib-v1.mjs",
+      "bytes": 13652,
+      "sha256": "8256849e7fc41a1369c3255652b2dcb2adbc27223d342a6df7cd64de8444d162"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-preparation-pilot-v1\\freeze-pilot-v1.mjs",
+      "file": "freeze-pilot-v1.mjs",
+      "bytes": 6261,
+      "sha256": "2b67831fbc3e03b6e1fc1ce1016d67b2f7461e38b16eb46243df07c7aa6ab1ce"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-preparation-pilot-v1\\run-pilot-v1.mjs",
+      "file": "run-pilot-v1.mjs",
+      "bytes": 18691,
+      "sha256": "b9f6c96f50cb0c0d5e4501e2bd2e3b3036b064a1e61c34258a30ca8638e656fd"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-preparation-pilot-v1\\owned-child-v1.mjs",
+      "file": "owned-child-v1.mjs",
+      "bytes": 1555,
+      "sha256": "b9eb53a2420ea3e6305983ee9cb23b066fbc28d2cc5be813bce133a9252bce1f"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-preparation-pilot-v1\\pilot-config-pending-v1.json",
+      "file": "pilot-config-pending-v1.json",
+      "bytes": 2538,
+      "sha256": "2062c1d48c9f75dd10e34b2e3900545a2a8247c7b71c520549764955849234ee"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-preparation-pilot-v1\\resource-profile-v1.json",
+      "file": "resource-profile-v1.json",
+      "bytes": 1630,
+      "sha256": "9c5825d9a0c1a002081e439151d9d158dcbd78af64347f339f83b8e690924a88"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-preparation-pilot-v1\\static-map-proof-v1.json",
+      "file": "static-map-proof-v1.json",
+      "bytes": 1708,
+      "sha256": "a261a7ebbc605afe0eebdb8575179d1195177a356721023426469779119f82d3"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-preparation-pilot-v1\\frozen-source-v1.json",
+      "file": "frozen-source-v1.json",
+      "bytes": 78569,
+      "sha256": "6529be41d213e4a2b0d26b02bab3a7db78c7bd39a897cc8893390f30b758730d"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-preparation-pilot-v1\\root-independent-cleanup-v1.json",
+      "file": "root-independent-cleanup-v1.json",
+      "bytes": 241,
+      "sha256": "0f00c9922197443842e341597cce1fe85cab9530e36bbcd0414c3bff2596d3c4"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-preparation-pilot-v1\\episode\\pilot-receipt-v1.json",
+      "file": "pilot-receipt-v1.json",
+      "bytes": 2186,
+      "sha256": "7cdce028116fe07b3cfb3efe142b453a2d02fc3d08822fca6f7a21147edac624"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-preparation-pilot-v1\\episode\\cleanup-v1.json",
+      "file": "cleanup-v1.json",
+      "bytes": 984,
+      "sha256": "19724b1c4e03c2eca906079e1e4b08e4e446c330dd21f56743a7c59e198e1323"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-preparation-pilot-v1\\episode\\owned-process-v1.json",
+      "file": "owned-process-v1.json",
+      "bytes": 681,
+      "sha256": "91fcfa21c5ee88392908b84fcbd81c8cc5fadc06c1547e8775271db0ee9718e2"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-preparation-pilot-v1\\episode\\provisioning-v1.json",
+      "file": "provisioning-v1.json",
+      "bytes": 328,
+      "sha256": "f5f9ed0a7eedff615aa546159ff86637b1ae6763e8c4a30f1286684a71566488"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-preparation-pilot-v1\\episode\\health-before-v1.json",
+      "file": "health-before-v1.json",
+      "bytes": 521,
+      "sha256": "4444e1f5f1dd5a2a27a08c63342e65e0f5d35df87e9c19cba44a5fe715b2bbdd"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-preparation-pilot-v1\\episode\\health-after-v1.json",
+      "file": "health-after-v1.json",
+      "bytes": 476,
+      "sha256": "465e22d832780e916e05e4d9afe0bf6782cfe0570f20e2c996e8dc2b9decff1a"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-preparation-pilot-v1\\episode\\run-intent-v1.json",
+      "file": "run-intent-v1.json",
+      "bytes": 1726,
+      "sha256": "c906fde8ad29fc99ba99624ef18410546095dc0d72ab71505eb02f52137f50ba"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-preparation-pilot-v1\\episode\\reports\\1793039455345-4130b3d1.report.json",
+      "file": "1793039455345-4130b3d1.report.json",
+      "bytes": 14101,
+      "sha256": "4762a6fbb7c1837b9aa6f0b9cda5b10c6cff2e0f09887ae3f8daaa42ba7ed514"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-preparation-pilot-v1\\episode\\reports\\1793039455345-4130b3d1.samples.jsonl",
+      "file": "1793039455345-4130b3d1.samples.jsonl",
+      "bytes": 30867,
+      "sha256": "a91e7bdcd23cf05f4100e0ac992c63db12f259d2365418dbc58de8ad9fb417c8"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\root-ordinary-economic-validation-v1\\root-focused-receipt-v1.json",
+      "file": "root-focused-receipt-v1.json",
+      "bytes": 13665,
+      "sha256": "6b9e876fbf26358ab2ad78367a06ec49957c32bda47a14efe4c7597a7df3694b"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\root-ordinary-economic-validation-v1\\complete-capacity-driver.stdout.log",
+      "file": "complete-capacity-driver.stdout.log",
+      "bytes": 74008,
+      "sha256": "b86b8d7214ceed990a8dac31d1c85fad0edecd3e1f4b0e6fcd993560d9985d45"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\root-ordinary-economic-validation-v1\\complete-capacity-driver.stderr.log",
+      "file": "complete-capacity-driver.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\root-ordinary-economic-validation-v1\\ordinary-economy-and-navigation-dependencies.stdout.log",
+      "file": "ordinary-economy-and-navigation-dependencies.stdout.log",
+      "bytes": 69485,
+      "sha256": "7356d826eb32ba6e9f827ddbbcb57c6a466f912c725d46515a51b71fd3d16e30"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\root-ordinary-economic-validation-v1\\ordinary-economy-and-navigation-dependencies.stderr.log",
+      "file": "ordinary-economy-and-navigation-dependencies.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\root-ordinary-economic-validation-runner-v1.mjs",
+      "file": "root-validation-runner.mjs",
+      "bytes": 5216,
+      "sha256": "bb5287fd731646a4c0af606f1f5e9318f74573b3b0e93a56f7834e5a94931724"
+    }
+  ]
+}

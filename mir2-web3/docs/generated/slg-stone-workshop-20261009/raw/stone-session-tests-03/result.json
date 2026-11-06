@@ -1,0 +1,28 @@
+{
+  "schema": "mir2.production-check.v1",
+  "kind": "stone-tests",
+  "startedUtc": "2026-10-09T15:04:09.2359676Z",
+  "finishedUtc": "2026-10-09T15:09:30.3154971Z",
+  "exitCode": 0,
+  "argv": [
+    "+1.95.0",
+    "test",
+    "-p",
+    "mir2-simulation",
+    "--lib",
+    "runtime::stones::tests::",
+    "--locked",
+    "--offline",
+    "--jobs",
+    "1",
+    "--",
+    "--test-threads=1"
+  ],
+  "sourceSnapshotSha256": "64d1fe9f007b32382c701b4e449564ccfd167879b766930477cbae258946804b",
+  "declaredInputs": 470,
+  "sourceDrift": [],
+  "cargoLogSha256": "d8880f1ebebc7a5af4429e92a6507aa1da6d6b4d410d369f0cc9ec57a35b4599",
+  "gameStarted": false,
+  "gatewayRestarted": false,
+  "controlledInventoryCommitTests": false
+}

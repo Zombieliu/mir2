@@ -1,0 +1,23 @@
+    Finished `test` profile [unoptimized] target(s) in 0.34s
+
+running 11 tests
+     Running unittests src\lib.rs (E:\mir2-capacity-goal-20261030/target\debug\deps\mir2_gateway-2a9a3f29c94c0482.exe)
+test zone_rpc::npc_purchase_owner_route_tests::durable_actual_local_and_hosted_purchase_replay_preserve_receipt_checkpoint_and_authority ... ok
+test zone_rpc::npc_purchase_owner_route_tests::durable_hosted_rpc_adapter_uses_real_file_owner_and_leaves_unlogged_shadow_untouched ... ok
+test zone_rpc::npc_purchase_owner_route_tests::durable_in_process_begin_quote_and_query_use_actual_file_and_read_only_original_id ... ok
+test zone_rpc::npc_purchase_owner_route_tests::durable_lease_handoff_refuses_stale_debit_and_recovers_exact_original_operation ... ok
+gateway transport_registration registration_id=1 stage=unregister phase=begin
+gateway transport_registration registration_id=1 stage=unregister phase=end elapsed_ms=0
+test zone_rpc::npc_purchase_owner_route_tests::durable_library_host_dispatch_fences_auth_version_lease_and_records_only_replay_checkpoint ... ok
+test zone_rpc::npc_purchase_owner_route_tests::durable_mutation_classification_blocks_generic_tcp_fallback_before_any_endpoint_access ... ok
+gateway lifecycle session_id=gateway-53648-1793346513819-1 stage=session.close phase=begin
+gateway lifecycle session_id=gateway-53648-1793346513819-1 stage=session.close phase=end elapsed_ms=0
+test zone_rpc::npc_purchase_owner_route_tests::durable_npc_purchase_browser_accepts_only_actual_begin_and_idempotent_owner_pair ... ok
+gateway lifecycle session_id=gateway-53648-1793346514148-2 stage=session.close phase=begin
+gateway lifecycle session_id=gateway-53648-1793346514148-2 stage=session.close phase=end elapsed_ms=0
+test zone_rpc::npc_purchase_owner_route_tests::durable_npc_purchase_browser_actual_purchase_original_query_and_replay_are_lossless ... ok
+test zone_rpc::npc_purchase_owner_route_tests::durable_npc_purchase_browser_snapshot_projection_keeps_original_turn_and_known_receipt_on_size_failure ... ok
+test zone_rpc::npc_purchase_owner_route_tests::durable_owner_defaults_and_missing_lease_authority_refuse_without_generic_execution ... ok
+test zone_rpc::npc_purchase_owner_route_tests::durable_real_receipt_wire_roundtrips_and_refuses_mismatched_action_pair_and_packet_count ... ok
+
+test result: ok. 11 passed; 0 failed; 0 ignored; 0 measured; 1420 filtered out; finished in 6.35s

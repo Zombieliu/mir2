@@ -1,0 +1,220 @@
+{
+  "schemaVersion": 1,
+  "capturedAt": "2026-10-24T17:00:13.186Z",
+  "gitBase": "68f810b442321ae66360a2be18e31dc309efdaf7",
+  "sourceCommit": "827d4c8b52066d033a2f18941be80c97b337d6de",
+  "trackedTreeClean": true,
+  "scope": "Exact changed Rust/Cargo/.cargo inputs over base plus five build manifests. Complete source tree is identified by sourceCommit; content/runtime configuration pinned separately. This new 33-input build does not overwrite the old 32-input lifecycle proof.",
+  "sourceManifestSha256": "d8936d2f2b77bfcf2f9b84c8ecc1d5c3ad37f095abe73836ed785ad852dcd5ea",
+  "files": [
+    {
+      "path": "mir2-web3/.cargo/config.toml",
+      "bytes": 30,
+      "sha256": "17d6d9fdca4859d571020695c0af7fefd2589200d6277be62762605c0d78bdab",
+      "gitBlobLfSha256": "17d6d9fdca4859d571020695c0af7fefd2589200d6277be62762605c0d78bdab"
+    },
+    {
+      "path": "mir2-web3/Cargo.lock",
+      "bytes": 250739,
+      "sha256": "1b5b2a34fb5d6c055c089d17ca6ce15ffd2a9f363504b9390d648c0be9831a98",
+      "gitBlobLfSha256": "ad3c52ac44ccf0b2e53086414e63118a6239fccab2d00eae0b90048a9f51c4df"
+    },
+    {
+      "path": "mir2-web3/Cargo.toml",
+      "bytes": 365,
+      "sha256": "6de1c26df325285aa51515e99abe32677775b3396aa6e8a83a0983deee3500ac",
+      "gitBlobLfSha256": "6de1c26df325285aa51515e99abe32677775b3396aa6e8a83a0983deee3500ac"
+    },
+    {
+      "path": "mir2-web3/apps/gateway/Cargo.toml",
+      "bytes": 3230,
+      "sha256": "00f0762eb427f84d0963951ddc8cef332a3ed6c8f0209b47bd7bfa2f0235cf40",
+      "gitBlobLfSha256": "00f0762eb427f84d0963951ddc8cef332a3ed6c8f0209b47bd7bfa2f0235cf40"
+    },
+    {
+      "path": "mir2-web3/apps/gateway/src/bin/seed_capacity_accounts.rs",
+      "bytes": 20499,
+      "sha256": "898d3af764856e6a304a263b2737671e24baa1306bcf5d93789d5db95102c085",
+      "gitBlobLfSha256": "898d3af764856e6a304a263b2737671e24baa1306bcf5d93789d5db95102c085"
+    },
+    {
+      "path": "mir2-web3/apps/gateway/src/lib.rs",
+      "bytes": 11297,
+      "sha256": "8cf070257a997c539ee92bdbaaf097663e87eb0961d2e22b911fae1476867110",
+      "gitBlobLfSha256": "8cf070257a997c539ee92bdbaaf097663e87eb0961d2e22b911fae1476867110"
+    },
+    {
+      "path": "mir2-web3/apps/gateway/src/routing.rs",
+      "bytes": 1368522,
+      "sha256": "720e590e21c99358582a43b2bb643aac1662a3d4eaeefa7ccdde69af6dbbacf3",
+      "gitBlobLfSha256": "720e590e21c99358582a43b2bb643aac1662a3d4eaeefa7ccdde69af6dbbacf3"
+    },
+    {
+      "path": "mir2-web3/apps/gateway/src/routing/partition_binding.rs",
+      "bytes": 25213,
+      "sha256": "bd38a834e6855082ee4ae694d16f8113e91057d2904ecb99020b15500b7a2654",
+      "gitBlobLfSha256": "bd38a834e6855082ee4ae694d16f8113e91057d2904ecb99020b15500b7a2654"
+    },
+    {
+      "path": "mir2-web3/apps/gateway/src/routing/partition_directory.rs",
+      "bytes": 11932,
+      "sha256": "cd6483ba6159a35f807ff3f90821617988e4a784159249e5c40be78313d0193e",
+      "gitBlobLfSha256": "cd6483ba6159a35f807ff3f90821617988e4a784159249e5c40be78313d0193e"
+    },
+    {
+      "path": "mir2-web3/apps/gateway/src/routing/tests/mining_tests.rs",
+      "bytes": 41476,
+      "sha256": "00e63dc060d585c27cfa032a6ac71254e1e6fb5dc564df0fc46072e6f5737121",
+      "gitBlobLfSha256": "00e63dc060d585c27cfa032a6ac71254e1e6fb5dc564df0fc46072e6f5737121"
+    },
+    {
+      "path": "mir2-web3/apps/gateway/src/spectator.rs",
+      "bytes": 58692,
+      "sha256": "3aa1ea329da20cb827440a67329d5af77251b666fff9e135125d9742ae9f0a6f",
+      "gitBlobLfSha256": "3aa1ea329da20cb827440a67329d5af77251b666fff9e135125d9742ae9f0a6f"
+    },
+    {
+      "path": "mir2-web3/apps/gateway/src/web.rs",
+      "bytes": 823385,
+      "sha256": "6657d53fab5c46626255e35af1763c510ef3e4cff1e16ecfc238183c2569d659",
+      "gitBlobLfSha256": "6657d53fab5c46626255e35af1763c510ef3e4cff1e16ecfc238183c2569d659"
+    },
+    {
+      "path": "mir2-web3/apps/gateway/src/zone_metrics.rs",
+      "bytes": 18356,
+      "sha256": "37ac259c5ef95948299b16887db435f04869ab9e6ecd569d7c478df230d1e3a8",
+      "gitBlobLfSha256": "37ac259c5ef95948299b16887db435f04869ab9e6ecd569d7c478df230d1e3a8"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/Cargo.toml",
+      "bytes": 812,
+      "sha256": "5903a066b9838cde6d52ba654a04587c9b2149f2b944bb897337ca2127b64942",
+      "gitBlobLfSha256": "5903a066b9838cde6d52ba654a04587c9b2149f2b944bb897337ca2127b64942"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/lib.rs",
+      "bytes": 7084,
+      "sha256": "cd9fbea15a6b797f3c9e7b3f08ceead44a5112968d6a767ef99e154e8772d519",
+      "gitBlobLfSha256": "cd9fbea15a6b797f3c9e7b3f08ceead44a5112968d6a767ef99e154e8772d519"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/zone/contract.rs",
+      "bytes": 20853,
+      "sha256": "47b979f5532c6e7183fb814614de393a6e9662d0cca55a57bb276d6b6e532c9a",
+      "gitBlobLfSha256": "47b979f5532c6e7183fb814614de393a6e9662d0cca55a57bb276d6b6e532c9a"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/zone/manager.rs",
+      "bytes": 63790,
+      "sha256": "0b9336668ecfd6958fac641060cb8b0a030fb12cee57aabb4656411b2f0dbd30",
+      "gitBlobLfSha256": "0b9336668ecfd6958fac641060cb8b0a030fb12cee57aabb4656411b2f0dbd30"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/zone/manager_admission.rs",
+      "bytes": 14691,
+      "sha256": "04d678c450f508e8c1cec30b6880660a3d6556cbf0f28d278e20136960b4fe6a",
+      "gitBlobLfSha256": "04d678c450f508e8c1cec30b6880660a3d6556cbf0f28d278e20136960b4fe6a"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/zone/mod.rs",
+      "bytes": 2486,
+      "sha256": "f85dfd8eb808d360a37d5394e0829a85783c3b2265754acd21da4101ccddbd17",
+      "gitBlobLfSha256": "f85dfd8eb808d360a37d5394e0829a85783c3b2265754acd21da4101ccddbd17"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/zone/runtime.rs",
+      "bytes": 748912,
+      "sha256": "4f4eaa4519e745c0bd376f33ef76b86c88ad1c1015fd42bb53ef3a159ce320a8",
+      "gitBlobLfSha256": "4f4eaa4519e745c0bd376f33ef76b86c88ad1c1015fd42bb53ef3a159ce320a8"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/zone/runtime/checkpoint.rs",
+      "bytes": 95833,
+      "sha256": "401acaf3f91d83ec50e7e14689aeda0dbd348f4423ebee6bf02ac0576e270276",
+      "gitBlobLfSha256": "401acaf3f91d83ec50e7e14689aeda0dbd348f4423ebee6bf02ac0576e270276"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/zone/runtime/combat_random.rs",
+      "bytes": 3229,
+      "sha256": "f9e431d281c16af0961f8d254d8215908fa02813d9e589ff29a7f03c2be49066",
+      "gitBlobLfSha256": "f9e431d281c16af0961f8d254d8215908fa02813d9e589ff29a7f03c2be49066"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/zone/runtime/combat_random_checkpoint_tests.rs",
+      "bytes": 4781,
+      "sha256": "a8c97bac5497fd66235109251c32b151b417ae008395241a6aea97b9f503be00",
+      "gitBlobLfSha256": "a8c97bac5497fd66235109251c32b151b417ae008395241a6aea97b9f503be00"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/zone/runtime/combat_random_tests.rs",
+      "bytes": 3307,
+      "sha256": "ac4d8ff54145782ca96683e637bcf3f8bcdd780b259d4f2898f6d5dac0edf6f6",
+      "gitBlobLfSha256": "ac4d8ff54145782ca96683e637bcf3f8bcdd780b259d4f2898f6d5dac0edf6f6"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/zone/runtime/experience_ownership.rs",
+      "bytes": 26376,
+      "sha256": "e1a178d316dccb794cf6d36ce72e802fd5ecd372c0f929425b42f7192a0c6137",
+      "gitBlobLfSha256": "e1a178d316dccb794cf6d36ce72e802fd5ecd372c0f929425b42f7192a0c6137"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/zone/runtime/mining.rs",
+      "bytes": 12551,
+      "sha256": "e1bf408ff0125021928a13e678aae65ef6413b6c57ab5460ec7d2ee6d98d98ce",
+      "gitBlobLfSha256": "e1bf408ff0125021928a13e678aae65ef6413b6c57ab5460ec7d2ee6d98d98ce"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/zone/runtime/owned_pet_combat.rs",
+      "bytes": 207260,
+      "sha256": "3fcbff68a7dfafb54620992fd5d7c339f403bfb603ee6cc45fb6ee8f221d49bc",
+      "gitBlobLfSha256": "3fcbff68a7dfafb54620992fd5d7c339f403bfb603ee6cc45fb6ee8f221d49bc"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/zone/runtime/owned_pet_combat_tests.rs",
+      "bytes": 80522,
+      "sha256": "edbb31213088ca8e0b59b804e57a3f5ac1319e29e957eac5332e9509d891e22f",
+      "gitBlobLfSha256": "edbb31213088ca8e0b59b804e57a3f5ac1319e29e957eac5332e9509d891e22f"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/zone/runtime/owned_pet_random_tests.rs",
+      "bytes": 8041,
+      "sha256": "75e72b073849d14f52f86126c7b66a1d0180d1e69830db4e491ac8d46fec9af7",
+      "gitBlobLfSha256": "75e72b073849d14f52f86126c7b66a1d0180d1e69830db4e491ac8d46fec9af7"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/zone/types.rs",
+      "bytes": 64392,
+      "sha256": "681de43d73cee93ad246c65dd2cc5963fe45475f76f348c4146edd51cb6c7488",
+      "gitBlobLfSha256": "681de43d73cee93ad246c65dd2cc5963fe45475f76f348c4146edd51cb6c7488"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/tests/zone_manager_admission_contract.rs",
+      "bytes": 19135,
+      "sha256": "7f16d2302ce57e32aa21eaeec64406baa0f5af9b5074e9f69e8d824b76463dfe",
+      "gitBlobLfSha256": "7f16d2302ce57e32aa21eaeec64406baa0f5af9b5074e9f69e8d824b76463dfe"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/tests/zone_partition_contract.rs",
+      "bytes": 14196,
+      "sha256": "710049134fa4924508a2480bd0ac040e303f8eee9a97b6a092292889a7f97ec9",
+      "gitBlobLfSha256": "710049134fa4924508a2480bd0ac040e303f8eee9a97b6a092292889a7f97ec9"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/tests/zone_partition_identity_contract.rs",
+      "bytes": 11438,
+      "sha256": "88b391a9ed19c2daf261f6a9372a90154d8e3f2b93adf24639d2e81ddc6aef24",
+      "gitBlobLfSha256": "88b391a9ed19c2daf261f6a9372a90154d8e3f2b93adf24639d2e81ddc6aef24"
+    }
+  ],
+  "buildArguments": [
+    "+1.95.0",
+    "build",
+    "--locked",
+    "--offline",
+    "--release",
+    "-p",
+    "mir2-gateway",
+    "--bin",
+    "mir2-gateway"
+  ]
+}

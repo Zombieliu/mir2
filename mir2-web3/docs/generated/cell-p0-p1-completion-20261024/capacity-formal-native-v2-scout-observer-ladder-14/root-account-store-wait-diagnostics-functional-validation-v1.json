@@ -1,0 +1,242 @@
+{
+  "schemaVersion": 1,
+  "kind": "account-store-wait-diagnostics-functional-validation",
+  "verifiedAt": "2026-10-25T18:48:36.099Z",
+  "sourceBaseCommit": "7644faa14402aa1bfdad8096fedfe61dc6a0a660",
+  "sourcePins": [
+    {
+      "path": "apps/simulation/src/config_account_store_diagnostics.rs",
+      "bytes": 10863,
+      "sha256": "bdd0805104f396d924a6663be46166a9b2bb759c580efcb6e07b6fbf0cb970e4"
+    },
+    {
+      "path": "apps/simulation/src/lib.rs",
+      "bytes": 7191,
+      "sha256": "0724307baaf0ca81c7a55e3ab0300e28b40f2fb376f06a389a84548f7fa910c3"
+    },
+    {
+      "path": "apps/simulation/src/config.rs",
+      "bytes": 347044,
+      "sha256": "df3eceebeb434b817e32ebc9bb4c2901257f5e4199901252ec18234a5260b07d"
+    },
+    {
+      "path": "apps/simulation/src/config_file_authority.rs",
+      "bytes": 24828,
+      "sha256": "ba3d5318241173429abe5b73c836e1a2a8082fef11a1d42c768f1438ea73deff"
+    },
+    {
+      "path": "apps/simulation/src/config_shared_guilds.rs",
+      "bytes": 53319,
+      "sha256": "e73b5c6b095f84447f99d41d0cc5f2952d208655dd81c9555cee49e2ebe36bd0"
+    },
+    {
+      "path": "apps/simulation/src/config_guild_clock_driver.rs",
+      "bytes": 22968,
+      "sha256": "5b5e41dde7a38eb8f1eae3893dc54c085aa13716fd6624cad5738d3c5016b8b8"
+    },
+    {
+      "path": "apps/simulation/src/runtime/shared_experience_profile.rs",
+      "bytes": 76309,
+      "sha256": "8a6cbcb3cb1177111e8700c279583f730f8d26d475b121a316e270b7a1a8ceab"
+    }
+  ],
+  "sourceSha256": "c0df8fc3dc4ed5f411788002d2b7f157fe752d2aaff4e4ee5e8bcd5155cb21f5",
+  "sourceCandidate": {
+    "path": "C:/mir2-build/p01-completion-20261024/formal12-account-store-diagnostics-v1/source-candidate-v1.json",
+    "bytes": 6682,
+    "sha256": "fe037243485836fae250965c710b8096dcf10e7d254d75c4533b0241569912e7"
+  },
+  "checks": {
+    "rustFocusedPassed": true,
+    "rustAdjacentPassed": true,
+    "rustfmtPassed": true
+  },
+  "actualChecks": [
+    {
+      "kind": "rustFocused",
+      "exitCode": 0,
+      "passed": 3,
+      "failed": 0,
+      "ignored": 0,
+      "unit": "tests",
+      "log": {
+        "path": "C:/mir2-build/p01-completion-20261024/account-store-wait-diagnostics-validation-v1/focused-v1.log",
+        "bytes": 46679,
+        "sha256": "64aa992eb5051f43088e476e43baafee73d7849a3b3d9a29d66345cd24a3a7b9"
+      },
+      "receipt": {
+        "path": "C:/mir2-build/p01-completion-20261024/account-store-wait-diagnostics-validation-v1/focused-execution-v1.json",
+        "bytes": 3854,
+        "sha256": "b86f6234cbfd0a73d134f0a94b0a23243b687f35bfb8e294467c49e26805f004"
+      }
+    },
+    {
+      "kind": "rustAdjacent",
+      "exitCode": 0,
+      "passed": 19,
+      "failed": 0,
+      "ignored": 0,
+      "unit": "distinct tests",
+      "aggregateOfSixCases": true,
+      "diagnosticsEnabledThresholdMs": 1,
+      "logs": [
+        {
+          "path": "C:/mir2-build/p01-completion-20261024/account-store-wait-diagnostics-validation-v1/adjacent-v1/case-01.log",
+          "bytes": 64859,
+          "sha256": "87b14cf2a3410d641754ebf3756c552d1d2645080a7d09127fc37a41e095305e"
+        },
+        {
+          "path": "C:/mir2-build/p01-completion-20261024/account-store-wait-diagnostics-validation-v1/adjacent-v1/case-02.log",
+          "bytes": 75023,
+          "sha256": "84763baa12a7e3b0e774db5499b784448cf02ad6f10acada5537fa966c0ea3db"
+        },
+        {
+          "path": "C:/mir2-build/p01-completion-20261024/account-store-wait-diagnostics-validation-v1/adjacent-v1/case-03.log",
+          "bytes": 47742,
+          "sha256": "04346316b00c20cb2421aa3864439feba7a44a106de616d4f88ceb4cd8833f02"
+        },
+        {
+          "path": "C:/mir2-build/p01-completion-20261024/account-store-wait-diagnostics-validation-v1/adjacent-v1/case-04.log",
+          "bytes": 44944,
+          "sha256": "7ebc61d6fc362cb3a8841de5779082b3d21922f87a8de720efbdebc32c3d03f9"
+        },
+        {
+          "path": "C:/mir2-build/p01-completion-20261024/account-store-wait-diagnostics-validation-v1/adjacent-v1/case-05.log",
+          "bytes": 44359,
+          "sha256": "91bbe7088d06aaee35d7495fdd792944570ac43084339db1ddd9402abee3a9d8"
+        },
+        {
+          "path": "C:/mir2-build/p01-completion-20261024/account-store-wait-diagnostics-validation-v1/adjacent-v1/case-06.log",
+          "bytes": 45694,
+          "sha256": "79b61ee1b73131225f578d0fc7b1a396b6541788c709a1815222933b7582f920"
+        }
+      ],
+      "receipt": {
+        "path": "C:/mir2-build/p01-completion-20261024/account-store-wait-diagnostics-validation-v1/adjacent-v1/execution-receipt-v1.json",
+        "bytes": 11980,
+        "sha256": "40f8c70b342e506ee38885bba09a0ea0dedb0258f57e4ba0693ba24d14c59512"
+      },
+      "testInventory": {
+        "path": "C:/mir2-build/p01-completion-20261024/account-store-wait-diagnostics-validation-v1/adjacent-v1/test-list-v1.log",
+        "bytes": 355876,
+        "sha256": "72c5a9a4c0d2b5370a1450000ec13cc245fa58a187d3f38eecc10ead9747cf36"
+      }
+    },
+    {
+      "kind": "rustfmt",
+      "exitCode": 0,
+      "passed": 7,
+      "failed": 0,
+      "ignored": 0,
+      "unit": "source files checked",
+      "log": {
+        "path": "C:/mir2-build/p01-completion-20261024/account-store-wait-diagnostics-validation-v1/rustfmt-v1.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "receipt": {
+        "path": "C:/mir2-build/p01-completion-20261024/account-store-wait-diagnostics-validation-v1/rustfmt-execution-v1.json",
+        "bytes": 829,
+        "sha256": "ec0d92e81b06c96c8e2f60c661afd6fc1232c6b4e299a0432ea3f923196fbeca"
+      }
+    }
+  ],
+  "distinctRust": {
+    "selected": 22,
+    "passed": 22,
+    "failed": 0,
+    "ignored": 0,
+    "focusedCount": 3,
+    "adjacentCount": 19,
+    "focusedNames": [
+      "config_account_store_diagnostics::tests::diagnostics_disabled_and_positive_threshold_match_gateway_contract",
+      "config_account_store_diagnostics::tests::diagnostics_emit_after_business_guard_on_success_and_error",
+      "config_account_store_diagnostics::tests::diagnostics_fixed_slots_emit_inclusive_maximum_without_private_values"
+    ],
+    "adjacentNames": [
+      "config::config_account_store_durability_tests::post_rename_unknown_keeps_live_old_and_freezes_all_shared_writers",
+      "config::config_account_store_durability_tests::pre_rename_failure_keeps_live_and_disk_old_but_allows_a_later_write",
+      "config::file_authority::tests::config_fences_before_external_writer_and_preserves_uncertain_restart",
+      "config::file_authority::tests::definite_file_failure_settles_marker_and_allows_retry",
+      "config::file_authority::tests::durable_freeze_child_reopen_probe",
+      "config::file_authority::tests::durable_freeze_survives_last_authority_release",
+      "config::file_authority::tests::guild_clock_file_child_lock_probe",
+      "config::file_authority::tests::guild_clock_file_configs_share_store_mutex_and_frozen_state",
+      "config::file_authority::tests::guild_clock_file_independent_configs_preserve_concurrent_account_writes",
+      "config::file_authority::tests::guild_clock_file_second_process_is_rejected_and_release_allows_reopen",
+      "config::file_authority::tests::interrupted_operator_reconciliation_blocks_an_empty_publication_marker",
+      "config::file_authority::tests::malformed_publication_marker_is_fail_closed_and_preserved",
+      "config::file_authority::tests::pending_publication_requires_explicit_settlement",
+      "config::guild_clock_driver::tests::guild_clock_file_late_same_owner_keeps_anchor_and_charges_one_minute",
+      "config::guild_clock_driver::tests::guild_clock_file_pump_publication_failure_preserves_anchor_and_retries_once",
+      "config::guild_clock_driver::tests::guild_clock_file_pump_runs_without_players_and_duplicate_factories_share_one_anchor",
+      "config::shared_guild_store::tests::guild_file_transaction_keeps_wallet_and_bank_atomic_on_failure",
+      "config::shared_guild_store::tests::guild_scoped_read_and_account_save_cannot_write_authority",
+      "runtime::shared_experience_profile::tests::locked_source_authority_keeps_legacy_profile_absent_and_rejects_wrong_identity"
+    ],
+    "allNames": [
+      "config::config_account_store_durability_tests::post_rename_unknown_keeps_live_old_and_freezes_all_shared_writers",
+      "config::config_account_store_durability_tests::pre_rename_failure_keeps_live_and_disk_old_but_allows_a_later_write",
+      "config::file_authority::tests::config_fences_before_external_writer_and_preserves_uncertain_restart",
+      "config::file_authority::tests::definite_file_failure_settles_marker_and_allows_retry",
+      "config::file_authority::tests::durable_freeze_child_reopen_probe",
+      "config::file_authority::tests::durable_freeze_survives_last_authority_release",
+      "config::file_authority::tests::guild_clock_file_child_lock_probe",
+      "config::file_authority::tests::guild_clock_file_configs_share_store_mutex_and_frozen_state",
+      "config::file_authority::tests::guild_clock_file_independent_configs_preserve_concurrent_account_writes",
+      "config::file_authority::tests::guild_clock_file_second_process_is_rejected_and_release_allows_reopen",
+      "config::file_authority::tests::interrupted_operator_reconciliation_blocks_an_empty_publication_marker",
+      "config::file_authority::tests::malformed_publication_marker_is_fail_closed_and_preserved",
+      "config::file_authority::tests::pending_publication_requires_explicit_settlement",
+      "config::guild_clock_driver::tests::guild_clock_file_late_same_owner_keeps_anchor_and_charges_one_minute",
+      "config::guild_clock_driver::tests::guild_clock_file_pump_publication_failure_preserves_anchor_and_retries_once",
+      "config::guild_clock_driver::tests::guild_clock_file_pump_runs_without_players_and_duplicate_factories_share_one_anchor",
+      "config::shared_guild_store::tests::guild_file_transaction_keeps_wallet_and_bank_atomic_on_failure",
+      "config::shared_guild_store::tests::guild_scoped_read_and_account_save_cannot_write_authority",
+      "config_account_store_diagnostics::tests::diagnostics_disabled_and_positive_threshold_match_gateway_contract",
+      "config_account_store_diagnostics::tests::diagnostics_emit_after_business_guard_on_success_and_error",
+      "config_account_store_diagnostics::tests::diagnostics_fixed_slots_emit_inclusive_maximum_without_private_values",
+      "runtime::shared_experience_profile::tests::locked_source_authority_keeps_legacy_profile_absent_and_rejects_wrong_identity"
+    ],
+    "inventoryCount": 2938
+  },
+  "rustSourceBeforeAfterIdentical": true,
+  "currentSourcePinsMatch": true,
+  "historicalNodeEvidence": {
+    "reexecutedHere": false,
+    "driverCodeCommit": "d2407fb84055e2088e3ca6ccdb4f8b80d15a9d16",
+    "driverFrozenManifest": {
+      "path": "C:/mir2-build/p01-completion-20261024/capacity-attack-deadline-driver-frozen-v1.json",
+      "bytes": 6759,
+      "sha256": "c7a4323971721eb54b574649d8c4efeea800fd08484349b5eb8d0ec0ffb11f7b"
+    },
+    "sourceSha256": "5ba46ae4a729c4ae8514721284da0f91d796aff247cd7c017b206790be88e2d9",
+    "originalPassed": 210,
+    "originalFailed": 0,
+    "actualOriginalReceipt": {
+      "path": "C:/mir2-build/p01-completion-20261024/attack-deadline-poll-fix-v1/frozen-full-driver-receipt-v1.json",
+      "bytes": 4758,
+      "sha256": "c5f1d7461a35407c8fa74245482ae49d9cd796ad31357a97152aa572a636e7f4"
+    },
+    "sourcePinsUnchanged": true,
+    "nodeInputCount": 9
+  },
+  "independentReview": {
+    "path": "C:/mir2-build/p01-completion-20261024/formal12-account-store-diagnostics-independent-review-v1/review-v1.json",
+    "bytes": 9745,
+    "sha256": "ad473b1af8874efbb7a9772dc5f6f07c5ef0cbb676dbe8137583eec597775633"
+  },
+  "limits": {
+    "validationOnly": true,
+    "newReleasePassed": false,
+    "newFull16Passed": false,
+    "newCapacityRunPerformed": false,
+    "capacityAccepted": false,
+    "p0Passed": false,
+    "p2Frozen": true,
+    "unfinishedSpansAndOriginalNoneCallersUnobserved": true,
+    "newNineFieldSlowGrammarNeedsNewHelper": true,
+    "allU64ValuesAlwaysJsSafe": false,
+    "cargoOrTestsExecutedByAggregator": false
+  }
+}

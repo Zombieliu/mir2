@@ -1,0 +1,31 @@
+{
+  "schema": "mir2.unified.evidence.phase.v1",
+  "passed": true,
+  "curatedAtUtc": "2026-10-29T16:49:21.727157+00:00",
+  "producerReceipt": {
+    "filename": "unified-updater-staged-preflight.json",
+    "bytes": 1037,
+    "sha256": "ac234edfb7d53b71d0ae7e9a6a5e1a4ccfa20c3d9e2a75b00e7a5883c0e37d2b"
+  },
+  "producerReport": {
+    "passed": true,
+    "producerPackagePending": true,
+    "installOrPublishAllowed": false,
+    "stageRoot": "F:\\mu\\mir2-web3\\dist\\mir2-windows-candidate\\.WN-CANDIDATE-20261029-unified-11.staging-de076792a7ca4016a4e9259a2e25f932",
+    "gameSource": "1875c6c20e1285ffefc45ef6c21eab33e26fc536",
+    "engineSource": "77a2007a449d1f437a8d411bfa41f105be992fcf",
+    "versionSha256": "51AFE182412B0CD7DABEB23228F3CCE354D82DB9694062FA40FAB1166397308A",
+    "manifestSha256": "820BE88B998E414ACB23F713EBBAB0A5ABDA87B54FC4BF0870595C09DC5D812B",
+    "gameSha256": "85879BFEB1B44D4C759E6A338338BB58A383B7701F886D1090A96B6267F00C6F",
+    "rootBindingReceiptSha256": "2D4B92312D8DD091ECB1B17F8503643DD932506E825A767A9AADC4964B51BD23",
+    "engineSnapshotReceiptSha256": "C1F01F9BD0935090866CD29052AC0A7477B930B2B33928232C06A4D12A110A62",
+    "statementSha256": "44A6B09F26450778F7ECBD66E5B381FCAFBE96A5CBFC7ACF94680047BEABF6C3",
+    "signatureSha256": "671BF2A43575EFD97124ED6DFA70D731E7317861CC1CEE1FBC91B0069FE9E29E",
+    "cmsFreshlyVerified": true
+  },
+  "phase": "Real Engine77 local TEST-CMS bundle/archive pipeline; complete Game producer postmove gate remains separate pending",
+  "gameSourceRevision": "1875c6c20e1285ffefc45ef6c21eab33e26fc536",
+  "engineSourceRevision": "77a2007a449d1f437a8d411bfa41f105be992fcf",
+  "producerPackageOverallPassed": false,
+  "installationOrPublicationAllowed": false
+}

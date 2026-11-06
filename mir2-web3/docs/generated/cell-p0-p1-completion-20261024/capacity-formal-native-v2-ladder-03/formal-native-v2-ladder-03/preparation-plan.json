@@ -1,0 +1,138 @@
+{
+  "schemaVersion": 1,
+  "preparedAt": "2026-10-24T20:22:30.462Z",
+  "state": "scripts-config-only-not-executed",
+  "originalProfile": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-ladder-02",
+  "sourceGuard": "Exact02/06 original461f/855b/39 backend and clean committedc42/9 driver closure; original05 Release binding is reused.",
+  "policy": {
+    "profile": "standard",
+    "activityMode": "native",
+    "movementIntervalMs": 750,
+    "stages": [
+      2,
+      10,
+      25,
+      50,
+      100
+    ],
+    "stageSeconds": 300,
+    "soakSeconds": 7200,
+    "wallSeconds": 18000,
+    "layout": "dispersed",
+    "combatActors": 10,
+    "resumeSamples": 5,
+    "saveSamples": 5,
+    "commandsPerSecond": 3,
+    "intentionIntervalMs": 750,
+    "variableActionCadence": true,
+    "maximumSendLatenessMs": 250,
+    "movementP95Ms": 750,
+    "chatP95Ms": 1000,
+    "actionTimeoutMs": 2000,
+    "timeoutExclusive": 0.01,
+    "maximumMissedPlanRatio": 0.05,
+    "maximumCorrectionRatio": 0.05,
+    "minimumMovesPerMinute": 30,
+    "minimumCombatHitsPerMinute": 12,
+    "minimumCombatAttacksPerMinute": 18,
+    "aoiRange": 16,
+    "aoiGraceMs": 1000,
+    "nativeChatIntervalMs": 30000,
+    "nativeTurnIntervalMs": 60000,
+    "minimumNativeRunRatio": 0.5,
+    "minimumNativeCellsPerMinute": 80,
+    "maximumEvidenceInFlight": 4,
+    "maximumMemorySlopeMiBPerHour": 32,
+    "memoryWarmupSeconds": 300,
+    "maximumDriverLagP99Ms": 250,
+    "fullAcceptanceEligible": true
+  },
+  "nativePostResumeObservation": {
+    "name": "post-resume-observation",
+    "seconds": 60,
+    "controlledActors": 100,
+    "originalDriverPhase": true
+  },
+  "diagnostics": {
+    "thresholdMs": 50,
+    "lineLimitBytes": 8192,
+    "totalLimitBytes": 33554432,
+    "writeLimitBytes": 1048576,
+    "metadataOnly": true,
+    "originalStderrPrivate": true,
+    "stopOnIncomplete": true
+  },
+  "sourceFiles": [
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-ladder-03\\collect-public.mjs",
+      "bytes": 36115,
+      "sha256": "d642917d73df089f6511aad1451d6afc8078a7a0e28d6222b710a19bc6b9eb1d"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-ladder-03\\initialize-private.ps1",
+      "bytes": 1941,
+      "sha256": "4deff086a5f53aaad191bcfd7e99de8e23c297fc6e1a121852a3fc13c1cf390e"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-ladder-03\\input-lib.mjs",
+      "bytes": 13776,
+      "sha256": "dc865126c27b3b8da895b915f5d9e7c9e6c74aa887bc8e46613b476de27c70c6"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-ladder-03\\monitor-owned.mjs",
+      "bytes": 1082,
+      "sha256": "f2d56c3eb26182251b6c8cc69c2274e5708d4e633c17bc4abb1414ed81c66c47"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-ladder-03\\prepare-inputs.mjs",
+      "bytes": 11310,
+      "sha256": "a994d62d40d62971f36f782e9cab36dbe3b6dec4ac8b815e53ed33861f7d739c"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-ladder-03\\recover-drained-owned.ps1",
+      "bytes": 2910,
+      "sha256": "443b47eb1988c982ffafb3b228e0aafff06734e1542d8219054d5c35ce408735"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-ladder-03\\request-stop.mjs",
+      "bytes": 815,
+      "sha256": "13c6a9aee3cc0845344ebd0ebb5aa43a62da8b1629daf0fd77e7bb6d9b89d639"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-ladder-03\\run-owned.mjs",
+      "bytes": 17197,
+      "sha256": "1c7f5dab484500e5f720858c97c19cc27381851b1fb82fec055c1f54036cc115"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-ladder-03\\slow-stage-public.mjs",
+      "bytes": 7767,
+      "sha256": "2c2f72385d9c9db25237e4c98aa56375639f6a0b8f82bd2602ce04684a0b607c"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-ladder-03\\slow-stage-public.test.mjs",
+      "bytes": 10310,
+      "sha256": "d6d2bc6954d546cccc0d3273fbe9e236f381a10963a0a1d039087e74ae46e7ee"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-ladder-03\\verify-feasibility-gate.mjs",
+      "bytes": 12529,
+      "sha256": "ebab305c5b50500e381966e92de42892d5ff154f0bd42924ad20a033617675a9"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-ladder-03\\verify-public.mjs",
+      "bytes": 14730,
+      "sha256": "7a2d99c6de7db4ea80677a3c67ce6e62131752e31a61dd091d3ea9a0e0cda213"
+    }
+  ],
+  "sourceSha256": "0198993ba09a6a5f581691f6d9bbbfd1aca8d301b090677fa6ad29e2a468e14c",
+  "publicCollector": "collect-public.mjs --collect-after-owned-cleanup",
+  "independentVerifier": "verify-public.mjs --verify-collected-public",
+  "sourcePinClosure": "Every top-levelmjs/ps1 including helper/test/collectors plus fixed config/static verification and both synthetic logs are in prepare source-pins. Runtime metadata/status copied only after strict schema/label/cap checks; no other stderr/private data copied.",
+  "prepareCommand": "node prepare-inputs.mjs --prepare-authorized-inputs",
+  "executeCommand": "node run-owned.mjs --execute-authorized-probe --attack-results=v2",
+  "prepareExecuted": false,
+  "accountsCreated": 0,
+  "charactersCreated": 0,
+  "realmStarted": false,
+  "capacityAccepted": false
+}

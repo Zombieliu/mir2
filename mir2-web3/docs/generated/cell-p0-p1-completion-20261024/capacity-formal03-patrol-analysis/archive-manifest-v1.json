@@ -1,0 +1,50 @@
+{
+  "schemaVersion": 1,
+  "copiedAt": "2026-10-24T21:38:14.142Z",
+  "runId": "1792873511986-56c2dbe6",
+  "scope": "Read-only public bounded analysis of formal03, not a reconstruction of every send-time owner AOI. Original failure remains failed.",
+  "sourceDirectory": "C:/mir2-build/p01-completion-20261024/formal03-analysis",
+  "files": [
+    {
+      "file": "actor00-track-and-slow-v1.json",
+      "bytes": 97889,
+      "sha256": "8be1e4ba8a56d828b8beb20a3be161977f3a181772782de5af5c941294b74de8"
+    },
+    {
+      "file": "compact-tracks-and-slow-v1.mjs",
+      "bytes": 5818,
+      "sha256": "700106fed4ea1252f5e5d83c163822b48686fff755b57577f649a008e5d50f68"
+    },
+    {
+      "file": "compare-four-corner-choice-v1.mjs",
+      "bytes": 5728,
+      "sha256": "bb29e453e85a8ddb617492c1192f45a39041e236cf66f2f92eb40d17aeef2d59"
+    },
+    {
+      "file": "extract-tracks-v1.mjs",
+      "bytes": 4522,
+      "sha256": "5e1f2e98ef7b9d0c77f1420ed7af52cfbe14290301026af081016905a99cffd4"
+    },
+    {
+      "file": "five-public-position-frames-v1.json",
+      "bytes": 9779,
+      "sha256": "acc4a6a8872a1a932fe724e2a1f61976c18910d1f8b1d8b9ec01b3235469abd6"
+    },
+    {
+      "file": "four-corner-choice-fixture-v1.json",
+      "bytes": 29370,
+      "sha256": "976ea7d458b680e149525d4da9ae965eb78ed5de8a244a85276a0537c458c53d"
+    },
+    {
+      "file": "project-five-frames-v1.mjs",
+      "bytes": 3928,
+      "sha256": "4b914743b93ed35f834a9fe668e339b2aa596916792d7b05b8f9d708984d63b2"
+    },
+    {
+      "file": "tracks-v1.json",
+      "bytes": 767868,
+      "sha256": "0ecfa3c35f3390ff91a3627f6c7b0ca5288185f668381264b77643d0ff1f15ac"
+    }
+  ],
+  "capacityAccepted": false
+}

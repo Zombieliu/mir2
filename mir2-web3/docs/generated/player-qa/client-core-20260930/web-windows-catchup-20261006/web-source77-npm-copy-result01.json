@@ -1,0 +1,68 @@
+{
+  "owner": "storage_prepare_paint_worker",
+  "kind": "Source77 ordinary dependency COPYFILE_EXCL result",
+  "dataOnly": true,
+  "productExecutionAllowed": false,
+  "seed": {
+    "path": "C:/mir2-cross-platform-storage-20261002/web-source77-public-catalog-starter-20261012-01/root-approved01/ordinary-dependency-supplement-seed01.json",
+    "bytes": 13491434,
+    "sha256": "00f20c00ca92715ae33098ce41874031cd2821df2a0c7d8db601c1213492aeb9"
+  },
+  "closedBuildProof": {
+    "path": "C:/mir2-cross-platform-storage-20261002/web-source77-public-catalog-starter-20261012-01/root-approved01/source77-next-actual01.json",
+    "bytes": 2852,
+    "sha256": "755bdf7ed0498c7588106eb2e6e10a18a8c5f5d79a05b79af0a92e84e377d0c1"
+  },
+  "sourcePrefix": "C:\\mir2-cross-platform-storage-20261002\\web-source76-shop-character-20261012-01\\prepared-input01\\mir2-web3\\apps\\web\\.next-web-windows-catchup-source76-20261012-01\\standalone\\mir2-web3\\apps\\web\\node_modules",
+  "destinationPrefix": "C:\\mir2-cross-platform-storage-20261002\\web-source77-public-catalog-starter-20261012-01\\prepared-input01\\mir2-web3\\apps\\web\\.next-web-windows-catchup-source77-20261012-01\\standalone\\mir2-web3\\apps\\web\\node_modules",
+  "counts": {
+    "seedRows": 13261,
+    "copiedExclusively": 13261,
+    "existingSeedLeavesVerified": 0,
+    "copiedBytes": 334077695,
+    "completeTargetFiles": 15209,
+    "completeTargetDirectories": 1775,
+    "completeTargetBytes": 380580501,
+    "untouchedPreexistingNonseedNpmLeaves": 1948,
+    "overwritten": 0,
+    "sourceSizeShaDifferences": 0,
+    "copiedTargetSizeShaDifferences": 0,
+    "missingApprovedTargetLeaves": 0
+  },
+  "checks": {
+    "boundedExactMapping": true,
+    "ordinaryAncestorsAndLeaves": true,
+    "noLinks": true,
+    "windowsPrecopyReparseAttributeChecks": 15344,
+    "windowsPostcopySourceTargetAncestorChecks": 30032,
+    "wholeTargetWindowsReparseAttributeChecks": 16984,
+    "reparsePoints": 0,
+    "sourcePinsBeforeAndAfterCopyMatch": true,
+    "copyFlag": "COPYFILE_EXCL",
+    "concurrency": 4,
+    "allApprovedTargetPinsMatch": true,
+    "completeTargetInventoryContainsApprovedPlusUntouchedExisting": true,
+    "onlyAcceptedOrdinaryNpmDependenciesCopied": true,
+    "sourceApplicationCompileOutputCopied": false,
+    "mainEdited": false,
+    "sourceEdited": false,
+    "productExecuted": false,
+    "testsExecuted": false,
+    "guardOrRunnerExecuted": false,
+    "guiUsed": false,
+    "networkUsed": false,
+    "processQueried": false,
+    "deletion": false,
+    "compression": false
+  },
+  "targetManifest": {
+    "path": "C:/mir2-cross-platform-storage-20261002/web-source77-public-catalog-starter-20261012-01/dependency-preparation01/ordinary-dependency-target-sha25601.json",
+    "bytes": 10387175,
+    "sha256": "b3d65c5ce49895859ead3fd47981bb4740ea2bc279756aca8687085ef274616a"
+  },
+  "inventoryNote": "Complete target inventory includes1948 existing traced npm leaves outside the supplement seed. They were only read and hashed, never overwritten. The supplement remains exactly13261 approved copied leaves.",
+  "limitations": [
+    "Root owns independent complete Source77 standalone acceptance and all61 NFT closure verification; worker only prepared finite ordinary npm DATA.",
+    "Supplement leaf hashes compare to the approved seed. Pre-existing nonseed npm hashes are recorded for Root independent acceptance, without replacing existing files."
+  ]
+}

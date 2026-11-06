@@ -1,0 +1,201 @@
+{
+  "schemaVersion": 1,
+  "validatedAt": "2026-10-28T11:45:59.479Z",
+  "scope": "Windows English 96-DPI Guild Notice/Statistics page; production renderer, independent C# GDI reference",
+  "gpuTestPassed": true,
+  "rawGdiLabels": 6,
+  "exactGpuRegions": 6,
+  "allTwelveChecksPassed": true,
+  "guildTests": {
+    "passed": 86,
+    "failed": 0,
+    "ignored": 2
+  },
+  "widgetTests": {
+    "passed": 20,
+    "failed": 0
+  },
+  "guildAssets": {
+    "frames": 42,
+    "mismatches": 0
+  },
+  "nativeExecutable": {
+    "bytes": 131709952,
+    "sha256": "d355d71967340320f50d70ba729eb0e7db624629425558a51c5dea39b1d5f0e7",
+    "buildReceipt": "build/build-exit.json"
+  },
+  "humanAcceptance": false,
+  "fullGuildPixelAcceptance": false,
+  "otherLocalesAndDpiAccepted": false,
+  "installedPackageModified": false,
+  "remoteServerDeployed": false,
+  "sources": [
+    {
+      "file": "apps/game-client/client-bevy/src/crystal_ui/overlays.rs",
+      "bytes": 941298,
+      "sha256": "9ccd07902b75e0bf4099fc8da667696615c0d81a993a96f94ee26b2c52e37d92"
+    },
+    {
+      "file": "apps/game-client/client-bevy/src/crystal_ui/widget.rs",
+      "bytes": 81120,
+      "sha256": "89ec9c6f5f622ee5586e1c2084e85c3e6d3d41f5e5c111ef751f8f369deca8aa"
+    },
+    {
+      "file": "apps/game-client/client-bevy/src/crystal_ui/guild_pixel_text.rs",
+      "bytes": 321,
+      "sha256": "dd29832e9918e6ce9ba26f4e04443c134b54aa6bef009addee6509c9f3f1ab3d"
+    },
+    {
+      "file": "apps/game-client/client-bevy/src/crystal_ui/guild_pixel_text_view.rs",
+      "bytes": 11512,
+      "sha256": "0d5d809f5e426660f4a74aaed5594682e3404e4d30d644a7137a9625452d076f"
+    },
+    {
+      "file": "apps/game-client/crystal-gdi-text/src/lib.rs",
+      "bytes": 19976,
+      "sha256": "2a81b5043c88caf991fcda131a2906ee325441a26059973ae1ee350addb18710"
+    },
+    {
+      "file": "apps/game-client/crystal-gdi-text/Cargo.toml",
+      "bytes": 222,
+      "sha256": "930a5f79d2775411ca615959bd19a078c1ea4cd615c1004e21f578ad13c4a4f1"
+    },
+    {
+      "file": "apps/game-client/client-bevy/src/native_i18n_visual_tests.rs",
+      "bytes": 66089,
+      "sha256": "0adc63fafdb6fa3ef25f51816a5893bacc34a00e98e858aabd5a7cb4f335a5d0"
+    },
+    {
+      "file": "apps/web/public/original-ui/Prguse2/424.png",
+      "bytes": 1514,
+      "sha256": "8143accb57ff42aae2c8a757e76f32a0e229603240c433d92015d25f50f4253d"
+    }
+  ],
+  "files": [
+    {
+      "file": "reference-audit.json",
+      "bytes": 73097,
+      "sha256": "2baafe91472839e1405e35085343e9f34a7040bf1cc2786c5fd522d491d2b41f"
+    },
+    {
+      "file": "reference-audit.md",
+      "bytes": 4657,
+      "sha256": "499e14cd2d784b8011da9b8ecbd96d8b9adb803402bac5c372de29201c425e6b"
+    },
+    {
+      "file": "render-crystal-guild-reference-v2.cs",
+      "bytes": 7771,
+      "sha256": "86cd3e75d3d1e6a8217064bd3ec007cc7e7b72d688cc2078969bf164976bf060"
+    },
+    {
+      "file": "source-frame-424-audit.json",
+      "bytes": 3277,
+      "sha256": "fd406874764fe3ea60571624cffc79403ac3b62ee85434496f92253b8adf77d4"
+    },
+    {
+      "file": "gpu/guild-main-window-pixel-report.json",
+      "bytes": 4917,
+      "sha256": "0a14a22345a3f9db5887d94f232e4411dc55e4924f96f4d08bb67576c9cef68b"
+    },
+    {
+      "file": "gpu/guild-main-window-english-1024x768.png",
+      "bytes": 101428,
+      "sha256": "f7c5b144411e41df694ad1b6cddfb03ad2301b677fdf88423bfbe08bb40cd43a"
+    },
+    {
+      "file": "gpu/run-exit.json",
+      "bytes": 301,
+      "sha256": "9545c08b609a80590659f8c281beb49f854f1f6660937e7eee1fc95880c9fcb8"
+    },
+    {
+      "file": "gpu/run.log",
+      "bytes": 28543,
+      "sha256": "e2d857d9013ff42b80e9136c53bae762e422c9dbaf864892101935854a9afe58"
+    },
+    {
+      "file": "build/build-exit.json",
+      "bytes": 990,
+      "sha256": "c15c9fd86ac87b8f0c4a17acd5bf15fda4d7e86da115cec0a9a6d978d9f753b2"
+    },
+    {
+      "file": "build/build.log",
+      "bytes": 60147,
+      "sha256": "39b29d5e0f9478ca027b3b8695f9818970d4f7c57981fa584b72e2a8671225a3"
+    },
+    {
+      "file": "checks/guild-exit.json",
+      "bytes": 980,
+      "sha256": "6e257d873ef9eefa6ee111c3721eb15120882f2be81c5608dc5fcaffcf03fe3a"
+    },
+    {
+      "file": "checks/guild.log",
+      "bytes": 39265,
+      "sha256": "80f61e6769100a58906dfd753a350ca9ee0d167ac7c0ed8fb9c77bbcea52f8f7"
+    },
+    {
+      "file": "checks/widget-exit.json",
+      "bytes": 881,
+      "sha256": "225d825a34698d4dbd1a85f1e1494dcca223929cf606acc8fc3f11e5978776c1"
+    },
+    {
+      "file": "checks/widget.log",
+      "bytes": 29961,
+      "sha256": "f5c4c0ada1705e2a4a9ca748d06f86cabf96fb8f1b3686332f27f97bf658912b"
+    },
+    {
+      "file": "assets/source-export-proof.json",
+      "bytes": 6534,
+      "sha256": "24fcab8170445950dbcfa2960e5f1314cf20a03c6440ccd1c525af428da81da1"
+    },
+    {
+      "file": "assets/validator-final.json",
+      "bytes": 906,
+      "sha256": "3d7d515da39b79d037a9a742768646979ccfa75d06c3fa64ce30d8644805b20a"
+    },
+    {
+      "file": "reference/reference-validation.json",
+      "bytes": 5113,
+      "sha256": "3afb99d5cffb78c1e914c3d78ae31764c654ef4f95b19a1c8eb71a150ee48617"
+    },
+    {
+      "file": "reference/glyphbounds.json",
+      "bytes": 4602,
+      "sha256": "00fc9fc1ccba47572da2a1aac0a9db3dd83fd6308941b894e1741d4cb01a63de"
+    },
+    {
+      "file": "reference/guild-notice-statistics-label-reference.png",
+      "bytes": 50065,
+      "sha256": "5d8430c065ce5b9dc5cee966dbf6d2c02993f7f22cbb72647fb438b9a457d9cf"
+    },
+    {
+      "file": "reference/statistics-headers.png",
+      "bytes": 749,
+      "sha256": "ed08fc24efcf13a7504d64c459d94c4d7539d5a43b8cd5613a359dedce580dd3"
+    },
+    {
+      "file": "reference/guild-hahah.png",
+      "bytes": 334,
+      "sha256": "c45dcf502c1ddc71ef18ae41f96ba6acc015ecc497753c4d1a46bdaedd7b202a"
+    },
+    {
+      "file": "reference/level-0.png",
+      "bytes": 272,
+      "sha256": "70ddc42bed48865e6cea624c9a8e662db9fb13ab1d3a5b1e6cb5a73306d04fb6"
+    },
+    {
+      "file": "reference/members-1-of-5.png",
+      "bytes": 310,
+      "sha256": "517cde2fe58100002b09fb590fa2dc36db84cfb19c54208109662a2da8714573"
+    },
+    {
+      "file": "reference/recruit-label.png",
+      "bytes": 411,
+      "sha256": "4d675047bb75ee226a13b5b30aa129d5921069c7c7b6b4bfadbaed4d9ed685ce"
+    },
+    {
+      "file": "reference/experience-0-percent.png",
+      "bytes": 241,
+      "sha256": "785b52cd72844a3528d734521aa2384902b37752a59221834ad5bc51a8921f30"
+    }
+  ]
+}

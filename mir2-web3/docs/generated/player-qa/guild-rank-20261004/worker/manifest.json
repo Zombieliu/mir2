@@ -1,0 +1,124 @@
+{
+  "files": [
+    {
+      "path": "baseline-source/mir2-web3/apps/gateway/src/shared_guilds.rs",
+      "bytes": 15795,
+      "sha256": "04a2a67cf1eb3116ef8fea094ff1a7ada4d8c5688df34d4f733fe0f806fcfb24"
+    },
+    {
+      "path": "baseline-source/mir2-web3/apps/simulation/src/runtime/shared_guilds.rs",
+      "bytes": 40140,
+      "sha256": "9583c034b13a532a9d0940cbab5473a404965575c73f293e2c3ae5da208307d0"
+    },
+    {
+      "path": "baseline.json",
+      "bytes": 804,
+      "sha256": "a4046d6fa785cd5cb593e174d246da91f929680bb9e27fd670dfcd44d6244ad0"
+    },
+    {
+      "path": "final-source/mir2-web3/apps/gateway/src/shared_guilds.rs",
+      "bytes": 19369,
+      "sha256": "b51a93a339fae841813a67cb3782218ed75e9003869e5c2e2723d622a99afe22"
+    },
+    {
+      "path": "final-source/mir2-web3/apps/gateway/tests/shared_guild_rank_management.rs",
+      "bytes": 16260,
+      "sha256": "7a8cfe15c24149a99145401ff46d1904e33757ab5c23ae175ec0e677c48ef60e"
+    },
+    {
+      "path": "final-source/mir2-web3/apps/simulation/src/runtime/shared_guild_management.rs",
+      "bytes": 3246,
+      "sha256": "1e3beec2699b3ae5c8b7a9d87af0bc4df20c3cb926f88387ff14e054764f0a26"
+    },
+    {
+      "path": "final-source/mir2-web3/apps/simulation/src/runtime/shared_guilds.rs",
+      "bytes": 40196,
+      "sha256": "a2ed1cc11013cd1763d7e885557f4739d1caca31a1897abc9f26f6e3ff050356"
+    },
+    {
+      "path": "final-source/mir2-web3/apps/simulation/tests/shared_guild_rank_management.rs",
+      "bytes": 9539,
+      "sha256": "be8e42a9fd37bf2accc6f150c76f92fea2742123d80a8e4904107fc92d530291"
+    },
+    {
+      "path": "final-source/mir2-web3/docs/SHARED-GUILD-RANK-RENAME-20261004.md",
+      "bytes": 11197,
+      "sha256": "0d808c7af661e56066c9c492154beaa67fec2b566b36023b0b696d5c1af28c06"
+    },
+    {
+      "path": "final.patch",
+      "bytes": 46885,
+      "sha256": "48fbcac187c23836634b2b0faf7bcc388a7bdee833453b9c6be56313722c711f"
+    },
+    {
+      "path": "freeze-preflight-error-01.txt",
+      "bytes": 1185,
+      "sha256": "5f3b304f3532f50a7099b8bf23aaa0b925308d091c3bd43ac8fd12af257d9da8"
+    },
+    {
+      "path": "freeze.py",
+      "bytes": 9101,
+      "sha256": "9fb5994803b41ec6d0c703c610342e58c83bc39f54c8419ee8bc39590abe9461"
+    },
+    {
+      "path": "gateway-green-01.json",
+      "bytes": 1378,
+      "sha256": "a88c6ef61d4408ef7c7f6016dc9f2ee7abdcd5746ef86758a87d2609022ac956"
+    },
+    {
+      "path": "gateway-green-01.log",
+      "bytes": 32103,
+      "sha256": "ee57d6829820802f2e72a60cb6f9eb366ee2d2518618cb58436a57f731d6f05b"
+    },
+    {
+      "path": "gateway-red-01.json",
+      "bytes": 1199,
+      "sha256": "4ab7e3ad2061e35b46aeec44c7331d1be0c345cce0bbd894d12a7124519545b4"
+    },
+    {
+      "path": "gateway-red-01.log",
+      "bytes": 54756,
+      "sha256": "28dfc2fccd523dd9826e66aeba3111b614961a58a0c84598df6834209a78a22f"
+    },
+    {
+      "path": "gateway-red-input.rs",
+      "bytes": 16260,
+      "sha256": "7a8cfe15c24149a99145401ff46d1904e33757ab5c23ae175ec0e677c48ef60e"
+    },
+    {
+      "path": "guild-adjacent-01.json",
+      "bytes": 1598,
+      "sha256": "25f89545888acfeae4b4b52ab88120da59cd0094e8b6e49e0a98af87f3e4015b"
+    },
+    {
+      "path": "guild-adjacent-01.log",
+      "bytes": 32220,
+      "sha256": "5371b109f9ae5d0fb1e7dc19b0fc944741f66fdaa8b209f4327ce215822a7d55"
+    },
+    {
+      "path": "patch-check.log",
+      "bytes": 449,
+      "sha256": "a8d06e3ce98840bc972dbfe9b4888f2baf0c9d4ebbb73cd226993623f116434f"
+    },
+    {
+      "path": "run_checks.py",
+      "bytes": 3036,
+      "sha256": "8148418ac9cb5e5c41bd2da2430137e1be1d6cf0dc9faff40d84cd2ef312f2fe"
+    },
+    {
+      "path": "simulation-green-01.json",
+      "bytes": 1602,
+      "sha256": "9158d9bfc167b25cabd2d738052a266b6edae882b95db4ba13d7f973fa7193e9"
+    },
+    {
+      "path": "simulation-green-01.log",
+      "bytes": 31311,
+      "sha256": "ae1a9ac1569c4c6074590acb889f8213e2acca60c63ea4263f2b6ea209a40d99"
+    },
+    {
+      "path": "test-results.json",
+      "bytes": 6010,
+      "sha256": "77546224c675f26589e733f90ebcc38b72dd165a5fddfae79592f1b8ad9c7dab"
+    }
+  ]
+}

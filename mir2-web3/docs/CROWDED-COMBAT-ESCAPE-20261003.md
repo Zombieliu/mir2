@@ -1,0 +1,157 @@
+# 怪群中右键无法逃跑：源码、复现与修复
+
+> 2026-10-06 原始槽/位置受限编排通过六项检查；新 owned WebSocket network06
+> 法师/道士七怪普通攻击后撤退531/496ms、五秒无漂移通过。战士正伤害资格不足，
+> 不算玩法失败或通过。更早未装备试次的超时保留。源码十五秒入场周期刷新宽限
+> 和专用移动实时包集合解释了被动等待的遗漏，最终驱动继续正常刷新而不改时钟。
+> 五项网关/十四项共享回归及默认编译通过；原13/1冷恢复断言失败保留，修正仅
+> 接受刻意清空的在线身份/根，同时仍严格拒绝原始根被篡改。Windows右键、施法、
+> 持续奔跑、全包围、保存和配套发布仍未验收，没有生产战斗变更。
+> [完整边界和证据](CLASSIC-COLD-CROWDED-FIXTURE-20261006.md)。
+
+> 2026-10-04 source57729 paired CI/native builds pass, but clean actor preparation
+> identifies exactly225 absent Monster049 generated files (224 frames + metadata).
+> Root admits only that source-bound generated library; the action catalog remains
+> tracked/exact and Candidate closure is not relaxed. Failed cache preflights are
+> retained, no actors were copied by them. New exact-revision builds/package and
+> isolated dense/dead acceptance remain pending; live R17/F are unchanged.
+> [Packaging input scope](R18-ACTOR-CACHE-PREFLIGHT-20261004.md).
+
+> 2026-10-04 root verifies frozen v6 pure attribution88/88 and31 inputs;
+> victim-only damage and dead-level-up HP refill remain inconclusive alone,
+> while actual R17 caster MP failures remain failures. R18 first pair/source51e8
+> compiles, but overall CI37198506131 fails an unchanged R17 siege fixture after
+> real bootstrap advances beyond today's18:00. Local real TCP/WebSocket RED0/1 turns
+> GREEN1/1 when only that fixture chooses the next calendar day; source calendar
+> and stale guard are unchanged. First failed logs/build attestation are retained.
+> A clean final paired build/CI and native/ordinary dense gates remain pending.
+> [Clock scope](SABUK-TRANSPORT-CLOCK-20261004.md),
+> [v6 review](generated/player-qa/crowded-combat-escape-20261003/dense-v6-offline-20261004/README.md).
+
+> 2026-10-04 root integrates the frozen18-file transient death/EXP slice on
+> e0877a198: original meaningful RED Gateway1/5 and personal1/2 remain;
+> final worker focused15 + adjacent61 pass. Root independently rechecks the
+> integrated Gateway12/personal3, overlapping those15. Online Dead survives
+> level-up HP/MP refill and same-epoch rollback; typed server-only life mirrors,
+> pre-spend native rejection, explicit revive and post-award teardown pools
+> are verified. Genuine HP0 login refills after RefreshStats; no saved Dead
+> schema is added. Exact published R17 MP failures remain. New paired build,
+> TCP/WSS/native/SQL/socket-resume acceptance are still open; F stays untouched.
+> [Scope](DEAD-EXPERIENCE-CHAIN-20261004.md),
+> [raw root review](generated/player-qa/crowded-combat-escape-20261003/dead-experience-chain-20261004/README.md).
+
+用户补充的症状是「按住右键往空地跑也不动」，不仅是自动寻路或追怪停止。
+本轮从已发布 R16 文档提交 `ac9ea83be8880319272919bc0b7d82416c919e57`
+建立独立分支 `codex/crowded-combat-control-20261003`；对应已发布游戏源码为
+`5ec7e7227833e5caacc31957902ca3b9f9fd4d0a`。未使用玩家存档作为测试夹具。
+
+## 已复现的缺陷和处理
+
+| 缺陷 | 旧行为 | 修复后的行为 |
+| --- | --- | --- |
+| 右键被怪物/NPC图像吞掉 | 图像命中就结束右键处理；指针后来移到空地，同一次按住也没有移动意图 | 普通右键建立逃跑意图，实际格子由碰撞检查判断。Ctrl+其他玩家/Hero查看、模态窗口保留输入归属 |
+| 过期挡路记录饿死寻路 | 先用临时挡路记录搜索A*，找到路径以后才清理；八个出口曾被拒绝，就可能永远走不到清理步骤 | 每帧在任何路径搜索前清理超过现有3秒期限的拒绝记录。活怪仍占据自己的格子 |
+| 密集受击动画积压 | 48个受击事件变成48个等待动作；逃跑画面要排在历史受击后面 | 玩家最多保留一个等待受击动作；最新位移可替换过时的移动/受击显示，真正的攻击、施法、死亡和复活屏障保留 |
+| 服务端每击发送受击动作 | 多个怪物各自制造一个受击显示，增加客户端排队压力 | 普通怪物攻击共享玩家严格500ms受击显示窗口，每次实际伤害、生命、伤害指示和结算仍然执行 |
+| 本地预测与真实包共用序号 | 本地预测占用N+1，下一真实死亡/施法包同为N+1时会被当成重复丢弃 | 原始包去重序号与显示动作序号分开；保留真实动作，迟到的位移回包不会重播运动 |
+| 控制状态范围过宽 | STUN或DAZED被当成全面移动锁；可信网关还会把STUN重新变成物理攻击锁 | 移动只受真实麻痹/LR麻痹/冰冻等现有规则约束；STUN允许移动和物理攻击，DAZED允许移动但限制物理攻击；实际施法仍受专用状态限制 |
+
+普通技能包绕过个人技能处理器的共享入口也补了可信状态检查。检查仅作用于
+`cast=true`，位于怪物实体化、材料扣除及法术时钟写入之前。`cast=false`准备和
+技能资料查询保持原有语义；失明不会被新共享施法检查扩展成法术锁。
+现有个人失明/攻击规则未在本轮重写。
+
+## Crystal源码依据与边界
+
+- `Client/MirScenes/GameScene.cs:3394–3395`：玩家ActionFeed已有等待受击动作就不再添加。
+- 同文件`11671–11705`：普通右键方向移动没有「鼠标碰到任何怪物图像就拒绝」规则；
+  Ctrl+其他玩家查看独占该输入。
+- `Server/MirObjects/HumanObject.cs:121–156`：CanMove、CanAttack和CanCast的状态掩码不同。
+  CanCast包含STUN/DAZED/Paralysis/Frozen，不包含LRParalysis或Blindness。
+- 同文件`7304–7308`：普通攻击受击显示由一个`StruckTime`窗口控制，严格到期后再发，
+  窗口为500ms；伤害仍逐击结算。
+- 同文件`3425`：普通施法还受既有1800ms全局SpellTime约束。
+
+最新位移替换过时显示是原生客户端显示与已建立运动窗口之间的衔接修复。
+它不把预测坐标当成服务器确认，也不丢弃未确认移动、不重发重复移动包或放宽碰撞。
+原版受击后`NextRunTime=now+2500`的完整奔跑手感未在本轮补齐或验收；既有NewMove
+按住跟随指针也是现有原生行为。本轮不据此声明整体Crystal动作时序100%一致。
+
+共享Zone的移动等待队列本来已保留最新移动意图。源码检查及回归证明，普通受击
+不会不断延长玩家自己的攻击/施法/移动就绪时间。七怪围攻、留一条出口的测试，
+等待中的逃跑仍按既有有限动作截止时间执行。八方向全被活怪封住时仍然不能穿怪；
+普通怪物死亡后，其格子会释放，新的合法逃跑可以执行。
+
+## 自动验证
+
+完整记录见[验证收据](generated/player-qa/crowded-combat-escape-20261003/validation.json)。
+测试使用Rust1.95.0，原生测试串行执行，进程级素材根指向完整R16资源。
+
+| 验证 | 结果 | 范围 |
+| --- | --- | --- |
+| Windows原生完整单元测试 | 858通过，0失败，5忽略 | 输入、回包、预测、动作、技能/物品快捷键等；忽略项需要独立GPU窗口 |
+| 独立共享动画核心 | 23通过 | 受击合并、序号、FIFO及死亡/施法/复活屏障 |
+| 新增拥挤共享Zone集成 | 14通过 | 七怪真实攻击逐击结算、500ms显示窗口、有限逃跑截止时间、尸体释放、控制期限、检查点/生命重置 |
+| Zone周边模块 | 168通过 | 移动截止时间、控制跨图、技能冷却、生命、伤害和检查点等 |
+| 个人状态准入 | 3通过 | STUN/DAZED区分及真实控制期限 |
+| 普通Gateway包准入 | 5通过 | 普通攻击、真实施法拒绝、拒绝不扣蓝/不占时钟、解除后可施法、失明施法 |
+| Gateway周边回归 | 43通过 | 三职业冷却、施毒材料、Flame准备、回包身份/顺序、满队列回压、跨图状态 |
+| 完整shared_zone集成 | 209通过 | 既有共享位置、碰撞、战斗、召唤、AOI和生命周期；五个过时施法夹具按既有1800ms时钟修正 |
+
+原生连续60步测试在每步前后各接收8个受击事件，总计960个；没有历史受击积压
+拖到下一次逃跑，显示中的等待受击不超过一个。真实包序号连续递增，未通过跳过
+本地预测占用的序号来规避碰撞；另外覆盖下一真实死亡、施法和位移确认的冲突。
+
+旧行为失败记录保留：新增原生选择集首次2通过/5失败；预测序号集1通过/2失败；
+拥挤服务端首次3通过/7失败；个人状态1通过/2失败；网关物理1通过/1失败；
+新增网关施法3通过/1失败。首次夹具编译错误单列，不算行为测试通过。
+
+完整shared_zone首次204通过/5失败；原封不动的R16基线也得到同样的204/5，
+失败用例均在现有全局SpellTime结束之前要求再次施法。五个隔离用例现在使用
+原施法时间+1800ms，后续检查保持时间顺序。跨技能用例额外核对到期前1ms拒绝且
+不扣蓝、到期时接受并准确扣1MP。生产施法截止时间未因此改动；两次失败日志保留。
+
+新增有限控制状态隔离入口仅在`test-support`功能下编译，不是普通客户端命令。
+Gateway测试以隔离内存角色和普通认证ClientPacket执行；没有开启公网监听、
+没有写入真人存档。七怪攻击使用共享Zone真实怪物AI和伤害路径。
+
+## 发布和实机验收状态
+
+配套 R17 客户端/Gateway 和 sequence 12 自动更新清单已经发布；公网完整文件与
+27,482,388 字节在线安装器均核验通过。实际签名 R16→R17 更新/失败回滚在隔离副本
+通过，仅下载 3 个文件，素材和引擎保持不变。详情见
+[R17 交付证据](generated/player-qa/crowded-combat-escape-20261003/release-r17/README.md)。
+
+同一 Linux ELF 的正常三职业烟测验证攻击鹿后跑动、停止及正常登出/重登保存。
+玩家没有收到怪物攻击，未学习技能，因此连续受击、围攻、真实施法/死亡屏障仍未
+通过该协议验收。F盘安装目录、更新日志和玩家存档未改动，容量目标保持暂停。
+上述测试不是用户原地图/职业的录像复现，也不是服务器在线负载测试；没有新增GPU
+截图或真人操作验收。P1 整体仍未完成，独立的地图阶段继续推进。
+
+2026-10-04，保持原始怪物属性和时钟的 R17 v4 隔离实测通过普通购书、学习及重登，
+随后复现死亡后的真实施法消耗：法师 HP0/Dead 后火球扣 3 MP、改方向、目标减 8 HP；
+道士 HP0/Dead 后治愈术扣 3 MP。没有施法回包不能证明拒绝，原冻结分类器的两个
+castBarrier 通过标记及道士整体通过标记是误报，独立审计明确拒绝这些结论。
+死亡保存、正常重登、显式回城复活与静止窗口的证据单独保留，不抵消失败。
+此次短形成窗口没有满足七怪连续正伤害资格，未发出合格压力下的逃跑试验命令；
+结果不能称为逃跑算法失败或通过。正在独立修复 life/HP 边界及实际消耗检查。
+
+离线 v5 保留原 v4 误报并以绝对 MP 把两个 caster 判为失败，69 项纯工具检查通过。
+法师目标8HP损失还可能来自同目标之前的 dead Attack；DamageIndicator 不提供
+攻击来源，不能归因于单个技能。原版 LevelUp 保留 Dead 时会补满HP，也不能由
+正生命值推断复活。工具后续边界单独收紧，不再执行已证明有问题的同一 R17。
+[原始记录、离线重读与根复核](R17-DEAD-CAST-AUDIT-20261004.md)。
+
+配套发布后的验收步骤：
+
+1. 在可通行出口旁吸引多怪，持续攻击后按住右键；分别让指针碰到怪物图像和空地，
+   确认取消追怪后能按既有动作间隔逃跑。经典移动/NewMove各一次。
+2. 被八怪完全包围时保持右键，消灭或移开一只；出口打开后确认同一次按住恢复移动。
+3. 分别观察普通受击、真实麻痹/冰冻和STUN/DAZED；实际控制到期后应恢复，受击动画
+   不应自行延长服务器动作截止时间。战士、法师、道士使用各自正常技能和材料。
+4. 检查攻击/施法/死亡/复活画面、药品数字键、非模态技能面板及NPC购买模态输入。
+
+可选诊断使用既有`MIR2_NATIVE_MOVEMENT_TRACE_PATH`。新增
+`selfEscapePresentationStarted`和`ownerFlinchCoalesced`说明显示队列是否被及时整理；
+队列仍使用现有有界非阻塞记录器。它们是显示证据，移动被接受必须同时核对实际
+移动发送、服务器位置确认/纠正以及控制状态，不能仅凭动画标记判定成功。

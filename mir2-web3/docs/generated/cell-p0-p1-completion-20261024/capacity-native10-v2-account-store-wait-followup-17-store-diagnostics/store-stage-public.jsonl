@@ -1,0 +1,7 @@
+{"observedAtMs":1792956766161,"stage":"account_store.store_held","durationMs":96,"operation":"transaction","traceId":111,"startedUnixMs":1792956766065,"maxStartUs":1,"maxEndUs":96781,"samples":1,"totalUs":96780}
+{"observedAtMs":1792956766162,"stage":"account_store.store_wait","durationMs":54,"operation":"guild_lookup","traceId":112,"startedUnixMs":1792956766108,"maxStartUs":0,"maxEndUs":54188,"samples":1,"totalUs":54188}
+{"observedAtMs":1792956766162,"stage":"account_store.marker_begin_sync","durationMs":91,"operation":"transaction","traceId":111,"startedUnixMs":1792956766065,"maxStartUs":370,"maxEndUs":92365,"samples":1,"totalUs":91994}
+{"observedAtMs":1792957156875,"stage":"account_store.store_held","durationMs":92,"operation":"transaction","traceId":13561,"startedUnixMs":1792957156783,"maxStartUs":1,"maxEndUs":92761,"samples":1,"totalUs":92760}
+{"observedAtMs":1792957156875,"stage":"account_store.temp_write_sync","durationMs":84,"operation":"transaction","traceId":13561,"startedUnixMs":1792957156783,"maxStartUs":5324,"maxEndUs":89943,"samples":1,"totalUs":84619}
+{"observedAtMs":1792957732286,"stage":"account_store.store_held","durationMs":68,"operation":"transaction","traceId":73543,"startedUnixMs":1792957732218,"maxStartUs":1,"maxEndUs":68477,"samples":1,"totalUs":68476}
+{"observedAtMs":1792957732286,"stage":"account_store.marker_begin_sync","durationMs":63,"operation":"transaction","traceId":73543,"startedUnixMs":1792957732218,"maxStartUs":768,"maxEndUs":63933,"samples":1,"totalUs":63165}

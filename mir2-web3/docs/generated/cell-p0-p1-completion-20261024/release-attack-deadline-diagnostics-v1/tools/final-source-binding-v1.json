@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "state": "FINAL_COMMITTED_BACKEND_SOURCE",
+  "sourceCommit": "d2407fb84055e2088e3ca6ccdb4f8b80d15a9d16",
+  "sourcePins": [
+    {
+      "path": "mir2-web3/apps/gateway/src/web.rs",
+      "bytes": 857503,
+      "sha256": "41d81bf7cdc6c0aaacbbd11aee12425b27b8a4c27a02b5a0d0915351fb811e40"
+    }
+  ],
+  "rootFunctionalValidation": {
+    "path": "C:\\mir2-build\\p01-completion-20261024\\root-attack-deadline-functional-validation-v1.json",
+    "bytes": 7819,
+    "sha256": "cb1aaf30818ca430e5ee8fe942d36675a9690e36abcd2f4248717ed6c8686dea"
+  },
+  "driverFrozenManifest": {
+    "path": "C:\\mir2-build\\p01-completion-20261024\\capacity-attack-deadline-driver-frozen-v1.json",
+    "bytes": 6759,
+    "sha256": "c7a4323971721eb54b574649d8c4efeea800fd08484349b5eb8d0ec0ffb11f7b"
+  }
+}

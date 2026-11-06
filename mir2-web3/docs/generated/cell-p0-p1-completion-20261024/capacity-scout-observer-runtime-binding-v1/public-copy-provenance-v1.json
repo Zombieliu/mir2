@@ -1,0 +1,155 @@
+{
+  "schemaVersion": 1,
+  "createdAt": "2026-10-25T21:25:38.592Z",
+  "scope": "Explicit18 public closed sources/evidence; only this new public child written. No target import, source guard, test, binary/private/game-raw copy or service execution.",
+  "publicRoot": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/docs/generated/cell-p0-p1-completion-20261024/capacity-scout-observer-runtime-binding-v1",
+  "copiedOriginalCount": 18,
+  "copiedOriginalBytes": 94374,
+  "files": [
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\scout-observer-preference-runtime-v1\\source-lib-v1.mjs",
+      "destination": "runtime/source-lib-v1.mjs",
+      "bytes": 33531,
+      "sha256": "9b12d67e7e31eb0ada4550c9aceb8dd9c0e64e74892007b4ffc8d0fa710b366f"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\scout-observer-preference-runtime-v1\\readonly-source-guard-v1.mjs",
+      "destination": "runtime/readonly-source-guard-v1.mjs",
+      "bytes": 724,
+      "sha256": "0969b4edc588e96c147fdaa86b6c8347636134b6ce27fa855eb029f99bff2490"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\scout-observer-preference-runtime-v1\\current-execution-binding-v1.json",
+      "destination": "runtime/current-execution-binding-v1.json",
+      "bytes": 1404,
+      "sha256": "665051040cc0a966cb48d0e8e46782cdb617279c537cc36953f096309ed8f18d"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\scout-observer-preference-runtime-v1\\root-final-binding-derivation-v1.json",
+      "destination": "runtime/root-final-binding-derivation-v1.json",
+      "bytes": 1524,
+      "sha256": "3b991a9acae2ef78f0fe010ce4d847cf5965f9d1b5dd5101b67c56cc5e042ba8"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\scout-observer-preference-runtime-v1\\current-execution-binding-before-H-v1.json",
+      "destination": "prepared-history/current-execution-binding-before-H-v1.json",
+      "bytes": 1271,
+      "sha256": "2faf380631c621e142086cae45e2d46cc83241f02e2848d6c3211e7c741ab696"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\scout-observer-preference-runtime-v1\\preparation-v1.json",
+      "destination": "prepared-history/preparation-v1.json",
+      "bytes": 2693,
+      "sha256": "0ff2a7821420ea191f0f1c0ba70aeed9be3b19e544c2a7dd8271154eea328844"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\scout-observer-preference-runtime-v1\\source-derivation-proof-v1.json",
+      "destination": "prepared-history/source-derivation-proof-v1.json",
+      "bytes": 20845,
+      "sha256": "48c45d5dda1f94c3366ca47cfe63affb4702e9191d7fd4f7b2aebc2fe3dbecbf"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\scout-observer-preference-runtime-v1\\node-syntax-check-v1.json",
+      "destination": "prepared-history/node-syntax-check-v1.json",
+      "bytes": 595,
+      "sha256": "9e755402c45af10439bdae13ceadc9bc7874c6ef712f6fddea057b5bf9e4ab25"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\scout-observer-preference-runtime-v1\\README.md",
+      "destination": "prepared-history/README.md",
+      "bytes": 1413,
+      "sha256": "671d011bec33759c0814ea1bfac49cf45f462eb9f9dc162524ed8cc704f9399f"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\scout-observer-preference-runtime-independent-review-v1\\prepared-review-v1.json",
+      "destination": "review/prepared-review-v1.json",
+      "bytes": 5414,
+      "sha256": "764c194a05c75837d5b1dcf37bedc1c5852baa0af9c2d3243cdec34d3e75c091"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\scout-observer-preference-runtime-independent-review-v1\\freeze-shape-review-v1.json",
+      "destination": "review/freeze-shape-review-v1.json",
+      "bytes": 2425,
+      "sha256": "ab55c239e3e07b7f2f787e32436440f43f465452d5baa5ade12aa5d5a4243ee7"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\scout-observer-preference-runtime-independent-review-v1\\final-binding-review-v1.json",
+      "destination": "review/final-binding-review-v1.json",
+      "bytes": 2365,
+      "sha256": "24fe9d0f21699ceb17bed55d8ec6d18799096f6bdbd55284873a4ae5fefca488"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\capacity-scout-observer-preference-driver-frozen-v1.json",
+      "destination": "freeze/capacity-scout-observer-preference-driver-frozen-v1.json",
+      "bytes": 9465,
+      "sha256": "1cf08b52d98d557fa17ea66e336e3adbf6495cb4cb086b22bec461b713ae696e"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\scout-observer-preference-v1\\freeze-committed-driver-v1.mjs",
+      "destination": "freeze/freeze-committed-driver-v1.mjs",
+      "bytes": 5960,
+      "sha256": "27cab14b71601f687c5acce05fca77dc93dfa196ed490cca0b753d61be7831d6"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\scout-observer-checkpoint-git-and-runtime-facts-v1.json",
+      "destination": "actual/scout-observer-checkpoint-git-and-runtime-facts-v1.json",
+      "bytes": 3467,
+      "sha256": "a42a98019287575db7fc8ce7cb0314a39febbe167611b14d2c19e7c08ced6fb5"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\scout-observer-runtime-readonly-guard-stdout-v1.log",
+      "destination": "actual/scout-observer-runtime-readonly-guard-stdout-v1.log",
+      "bytes": 513,
+      "sha256": "caa541b94ea55b725acba6d663583bd2222e1922c8a0a0d6adef8b88bb6bc4ce"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\scout-observer-runtime-readonly-guard-stderr-v1.log",
+      "destination": "actual/scout-observer-runtime-readonly-guard-stderr-v1.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\root-scout-observer-checkpoint-preview-verification-v1.json",
+      "destination": "actual/root-scout-observer-checkpoint-preview-verification-v1.json",
+      "bytes": 765,
+      "sha256": "789dfc93849e204aee4acd7c086219d664050a34f1d3c427ec88f9f93c3f7c62"
+    }
+  ],
+  "README": {
+    "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-scout-observer-runtime-binding-v1\\README.md",
+    "bytes": 3116,
+    "sha256": "482db3b1df7f78e1f6a99bc1200eb3c4be6b4486a576704cda180acb8fba93de",
+    "relativeLinks": [
+      "actual/scout-observer-checkpoint-git-and-runtime-facts-v1.json",
+      "actual/scout-observer-runtime-readonly-guard-stdout-v1.log",
+      "actual/scout-observer-runtime-readonly-guard-stderr-v1.log",
+      "runtime/current-execution-binding-v1.json",
+      "runtime/root-final-binding-derivation-v1.json",
+      "../capacity-account-store-wait-diagnostics-release-v1/README.md",
+      "freeze/capacity-scout-observer-preference-driver-frozen-v1.json",
+      "freeze/freeze-committed-driver-v1.mjs",
+      "../capacity-scout-observer-preference-driver-v1/README.md",
+      "review/prepared-review-v1.json",
+      "review/freeze-shape-review-v1.json",
+      "review/final-binding-review-v1.json",
+      "prepared-history/preparation-v1.json",
+      "prepared-history/current-execution-binding-before-H-v1.json",
+      "prepared-history/README.md",
+      "../protocol-full-lifecycle-account-store-wait-diagnostics-v1/README.md"
+    ],
+    "allLinksExist": true
+  },
+  "sourcePinsRecheckedAfterCopy": true,
+  "allCopyBytesAndSha256Matched": true,
+  "oldPreparedSixClosureClaimedUnchanged": false,
+  "actualGuardCopiedNotReexecuted": true,
+  "backendBuildCommit": "c743122af05faca43d9535d8c6c2a4bfb01b924f",
+  "driverSourceCommit": "3a6d8c862d03ded3133605472a8f38bc6258af52",
+  "executionSourceCommit": "3a6d8c862d03ded3133605472a8f38bc6258af52",
+  "rustRebuilt": false,
+  "newRealmRunPerformed": false,
+  "liveScoutImprovementEstablished": false,
+  "capacityAccepted": false,
+  "p0Passed": false,
+  "p2Started": false
+}

@@ -1,0 +1,100 @@
+{
+  "passed": true,
+  "kind": "frozen-asset-input-recovery-and-production-preflight-only",
+  "reports": [
+    {
+      "path": "asset-input-recovery-summary.json",
+      "sourceReceipt": {
+        "filename": "asset-input-recovery-summary.json",
+        "bytes": 43885,
+        "sha256": "4589c969471818a33a162f7aa2fd55acbd28c6e557f0e504d3403024f2b3fe08",
+        "included": false
+      }
+    },
+    {
+      "path": "asset-input-gap-after-recovery.json",
+      "sourceReceipt": {
+        "filename": "asset-input-gap-after-recovery.json",
+        "bytes": 558,
+        "sha256": "c3bb1c1f86f5e963dc72ee37be278a8bb7c17db5604bc52707adb54739bd109b",
+        "included": false
+      }
+    },
+    {
+      "path": "actor-source-trust.json",
+      "sourceReceipt": {
+        "filename": "actor-source-trust.json",
+        "bytes": 860,
+        "sha256": "77a4081d8e83fb599d594288d8c4625801e4e907ae6a1dd40bbae4f34cb240d8",
+        "included": false
+      }
+    },
+    {
+      "path": "actor-input-bootstrap.json",
+      "sourceReceipt": {
+        "filename": "actor-input-bootstrap.json",
+        "bytes": 797,
+        "sha256": "c9ea49c1c8f8255c3f74c2b25651c0b1ec5e117ba65b5c071fd0c329e20f70b6",
+        "included": false
+      }
+    },
+    {
+      "path": "production-asset-closure-after.json",
+      "sourceReceipt": {
+        "filename": "production-asset-closure-after.json",
+        "bytes": 1884,
+        "sha256": "a9c1d2006e3e04f0524b49cdb898c976478694221b36c420e6e645fb2d9b2304",
+        "included": false
+      }
+    }
+  ],
+  "createdPng": 98880,
+  "sourceLibraries": 103,
+  "verifiedPackedPages": 184,
+  "createdPngBytes": 145604378,
+  "pngAndRgbaIdentityMatchFrozenMetadata": true,
+  "trackedInputsWritten": 0,
+  "existingInputsOverwritten": 0,
+  "metadataModified": false,
+  "sourceModified": false,
+  "largePerFileManifest": {
+    "filename": "asset-input-recovery-files.json",
+    "bytes": 14518332,
+    "sha256": "1df8b1f8526a958c73da2082202e27124010d3b9123e9708244f2fac81ae2d1d",
+    "included": false,
+    "schema": "mir2.windows.asset-input-recovery-files.v1",
+    "records": 98880,
+    "recordFields": [
+      "bytes",
+      "path",
+      "sha256"
+    ]
+  },
+  "largePerFileManifestCopiedToGit": false,
+  "missingReferencesAfterRecovery": 0,
+  "metadataFilesAfterRecovery": 324,
+  "frameReferencesAfterRecovery": 197652,
+  "oneLegacyActorBootstrap": {
+    "library": "Monster/049",
+    "files": 225,
+    "png": 224,
+    "sourceCandidate": "WN-CANDIDATE-20261011-invited-25",
+    "sourceRevision": "d917de1ff4988e2d9fc7ca58f958cb5c80861fdf",
+    "authenticatedBySignedOriginalCandidate": true,
+    "differentFromFreshBaseAtlasSeed": true
+  },
+  "productionClosureCases": [
+    "entity",
+    "player",
+    "item",
+    "stateItem",
+    "actor",
+    "petGuild",
+    "sound"
+  ],
+  "productionClosureAllSevenPassed": true,
+  "scope": "Restored ignored asset inputs and production non-map closure functions. Actual full209-map Candidate, signatures, updater bundle, installer compilation/installation remain independent later gates.",
+  "actualPackageV4StatusAtThisPhase": "running, not asserted passed",
+  "actualCandidatePassedByThisReport": false,
+  "newPaymentsOrProductionDeployment": false
+}

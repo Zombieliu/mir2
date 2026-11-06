@@ -1,0 +1,1717 @@
+{
+  "schemaVersion": 1,
+  "kind": "ANONYMIZED_ORIGINAL_BANK_FUNCTIONAL_PILOT_FAILURE_METRICS",
+  "packageId": "ordinary-bank-relogin-pilot-v1",
+  "sources": [
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-bank-relogin-pilot-v1\\episode\\reports\\1793043370759-685834a8.report.json",
+      "bytes": 35864,
+      "sha256": "64d85dc393d6b94ecf763afee8872811a6a5520c984e6fd337deba743b5d7a3b"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-bank-relogin-pilot-v1\\episode\\reports\\1793043370759-685834a8.samples.jsonl",
+      "bytes": 717854,
+      "sha256": "d7223762224cc98d30b79425da6c7a104f59c33a799c80a851fc3efa87324bac"
+    }
+  ],
+  "rawOriginalVerdict": {
+    "ok": false,
+    "error": "Soak failed fixed rolling activity or delivery gates",
+    "highestPassedStage": 2,
+    "highestMeasuredStage": 2,
+    "safetyStopped": false
+  },
+  "reportKeys": [
+    "schemaVersion",
+    "runId",
+    "endpoint",
+    "policy",
+    "startedAt",
+    "stages",
+    "nativeResume",
+    "savedVerification",
+    "phaseWindows",
+    "ordinaryAccountsOnly",
+    "visualAccepted",
+    "capacityUpperBound",
+    "acceptanceScope",
+    "preparation",
+    "measurementClock",
+    "navigationCoordination",
+    "nativePatrolPlanning",
+    "nativeHpMaintenance",
+    "nativeChasePreference",
+    "nativeAttackWitness",
+    "attackResults",
+    "provisioning",
+    "registrationLoadTested",
+    "simultaneousLoginBurstTested",
+    "mixedClassCombatTested",
+    "baselineActiveSessions",
+    "initialLoginNotBefore",
+    "scenario",
+    "peakControlledActors",
+    "highestMeasuredStage",
+    "highestPassedStage",
+    "memoryTrend",
+    "error",
+    "finishedAt",
+    "safetyStopped",
+    "cleanupErrors",
+    "metrics",
+    "samples",
+    "continuousAcceptance",
+    "density",
+    "peakServerActive",
+    "bytes",
+    "bytesDefinition",
+    "activityMode",
+    "actorActivity",
+    "nativeLoadScope",
+    "combatScenario",
+    "boundedStorage",
+    "diagnosticCompleted",
+    "ok",
+    "movementCapacityAccepted",
+    "combatCapacityAccepted",
+    "playableCapacityAccepted",
+    "acceptedControlledActors",
+    "reportPath"
+  ],
+  "reportMetrics": {
+    "stages": [
+      {
+        "name": "stage-2",
+        "controlledActors": 2,
+        "completed": true,
+        "passed": true,
+        "seconds": 30,
+        "activity": [
+          {
+            "actor": "anonymous-actor-1",
+            "role": "movement",
+            "plans": 40,
+            "gaps": 0,
+            "moves": 39,
+            "attacks": 0,
+            "hits": 0,
+            "damage": 0,
+            "lastSuccessAt": 1793043428783,
+            "runs": 36,
+            "cells": 75,
+            "nativeOpportunities": 40,
+            "nativeCompleted": 40,
+            "offeredDurationMs": 30000,
+            "evidenceWaits": 0,
+            "ownerAckWaits": 0,
+            "unknownPacing": 0,
+            "nativeActivity": {
+              "passed": true,
+              "completionRatio": 1,
+              "runRatio": 0.9230769230769231,
+              "cellsPerMinute": 149.97500416597234,
+              "positiveHitsPerMinute": 0,
+              "evidenceWaits": 0,
+              "ownerAckWaits": 0,
+              "offeredDurationMs": 30000,
+              "unknownPacing": 0,
+              "coverageFailureMeaning": "Insufficient native offered/completed load is not, by itself, proof of server overload"
+            },
+            "passed": true
+          },
+          {
+            "actor": "anonymous-actor-2",
+            "role": "combat",
+            "plans": 23,
+            "gaps": 0,
+            "moves": 4,
+            "attacks": 18,
+            "hits": 18,
+            "damage": 50,
+            "lastSuccessAt": 1793043428168,
+            "runs": 1,
+            "cells": 5,
+            "nativeOpportunities": 23,
+            "nativeCompleted": 23,
+            "offeredDurationMs": 29346,
+            "evidenceWaits": 0,
+            "ownerAckWaits": 0,
+            "unknownPacing": 0,
+            "nativeActivity": {
+              "passed": true,
+              "completionRatio": 1,
+              "runRatio": 0.25,
+              "cellsPerMinute": 9.998333611064822,
+              "positiveHitsPerMinute": 35.99400099983336,
+              "evidenceWaits": 0,
+              "ownerAckWaits": 0,
+              "offeredDurationMs": 29346,
+              "unknownPacing": 0,
+              "coverageFailureMeaning": "Insufficient native offered/completed load is not, by itself, proof of server overload"
+            },
+            "passed": true
+          }
+        ],
+        "timeoutRatio": 0,
+        "correctionRatio": 0,
+        "movementCorrectionRatio": 0,
+        "attackRejectionRatio": 0,
+        "movementPassed": true,
+        "chatPassed": true,
+        "combatCoverage": "shared-positive-damage",
+        "metrics": {
+          "run": {
+            "count": 37,
+            "status": {
+              "success": 37
+            },
+            "fromSend": {
+              "count": 37,
+              "p50Ms": 1,
+              "p95Ms": 5,
+              "p99Ms": 5,
+              "maxMs": 4.742799999999988
+            },
+            "fromPlan": {
+              "count": 37,
+              "p50Ms": 17,
+              "p95Ms": 30,
+              "p99Ms": 31,
+              "maxMs": 30.349099999999453
+            }
+          },
+          "fanout-run": {
+            "count": 37,
+            "status": {
+              "success": 37
+            },
+            "fromSend": {
+              "count": 37,
+              "p50Ms": 1,
+              "p95Ms": 3,
+              "p99Ms": 3,
+              "maxMs": 2.7410999999992782
+            },
+            "fromPlan": {
+              "count": 0,
+              "p50Ms": null,
+              "p95Ms": null,
+              "p99Ms": null,
+              "maxMs": 0
+            }
+          },
+          "attack": {
+            "count": 18,
+            "status": {
+              "success": 18
+            },
+            "fromSend": {
+              "count": 18,
+              "p50Ms": 62,
+              "p95Ms": 110,
+              "p99Ms": 110,
+              "maxMs": 109.8930999999975
+            },
+            "fromPlan": {
+              "count": 18,
+              "p50Ms": 68,
+              "p95Ms": 140,
+              "p99Ms": 140,
+              "maxMs": 139.68089999999938
+            },
+            "attackV2Requests": 18,
+            "attackV2NotLaunched": 0
+          },
+          "walk": {
+            "count": 6,
+            "status": {
+              "success": 6
+            },
+            "fromSend": {
+              "count": 6,
+              "p50Ms": 1,
+              "p95Ms": 1,
+              "p99Ms": 1,
+              "maxMs": 0.7908999999999651
+            },
+            "fromPlan": {
+              "count": 6,
+              "p50Ms": 20,
+              "p95Ms": 31,
+              "p99Ms": 31,
+              "maxMs": 30.264400000000023
+            }
+          },
+          "fanout-walk": {
+            "count": 6,
+            "status": {
+              "success": 6
+            },
+            "fromSend": {
+              "count": 6,
+              "p50Ms": 1,
+              "p95Ms": 1,
+              "p99Ms": 1,
+              "maxMs": 0.9887000000016997
+            },
+            "fromPlan": {
+              "count": 0,
+              "p50Ms": null,
+              "p95Ms": null,
+              "p99Ms": null,
+              "maxMs": 0
+            }
+          },
+          "rtt": {
+            "count": 6,
+            "status": {
+              "success": 6
+            },
+            "fromSend": {
+              "count": 6,
+              "p50Ms": 1,
+              "p95Ms": 1,
+              "p99Ms": 1,
+              "maxMs": 0.6069000000061351
+            },
+            "fromPlan": {
+              "count": 0,
+              "p50Ms": null,
+              "p95Ms": null,
+              "p99Ms": null,
+              "maxMs": 0
+            }
+          },
+          "chat": {
+            "count": 2,
+            "status": {
+              "success": 2
+            },
+            "fromSend": {
+              "count": 2,
+              "p50Ms": 1,
+              "p95Ms": 5,
+              "p99Ms": 5,
+              "maxMs": 4.919700000005832
+            },
+            "fromPlan": {
+              "count": 2,
+              "p50Ms": 7,
+              "p95Ms": 27,
+              "p99Ms": 27,
+              "maxMs": 26.97609999999986
+            }
+          },
+          "peerChat": {
+            "count": 2,
+            "status": {
+              "success": 2
+            },
+            "fromSend": {
+              "count": 2,
+              "p50Ms": 1,
+              "p95Ms": 5,
+              "p99Ms": 5,
+              "maxMs": 4.919700000005832
+            },
+            "fromPlan": {
+              "count": 0,
+              "p50Ms": null,
+              "p95Ms": null,
+              "p99Ms": null,
+              "maxMs": 0
+            }
+          },
+          "fanout-chat": {
+            "count": 2,
+            "status": {
+              "success": 2
+            },
+            "fromSend": {
+              "count": 2,
+              "p50Ms": 1,
+              "p95Ms": 5,
+              "p99Ms": 5,
+              "maxMs": 4.919700000005832
+            },
+            "fromPlan": {
+              "count": 0,
+              "p50Ms": null,
+              "p95Ms": null,
+              "p99Ms": null,
+              "maxMs": 0
+            }
+          }
+        },
+        "aoi": {
+          "samples": 30,
+          "expectedPairs": 60,
+          "observedPairs": 60,
+          "persistentMissing": 0,
+          "ghosts": 0,
+          "duplicates": 0,
+          "minimumCoverage": 1,
+          "maximumExpectedPerObserver": 1
+        },
+        "fanoutPassed": true,
+        "measuredSeconds": 30.005,
+        "rollingWindows": [],
+        "startedAtMs": 1793043398793,
+        "endedAtMs": 1793043428798
+      },
+      {
+        "name": "soak",
+        "controlledActors": 2,
+        "completed": true,
+        "passed": false,
+        "seconds": 30,
+        "activity": [
+          {
+            "actor": "anonymous-actor-1",
+            "role": "movement",
+            "plans": 40,
+            "gaps": 0,
+            "moves": 38,
+            "attacks": 0,
+            "hits": 0,
+            "damage": 0,
+            "lastSuccessAt": 1793043458769,
+            "runs": 34,
+            "cells": 72,
+            "nativeOpportunities": 40,
+            "nativeCompleted": 40,
+            "offeredDurationMs": 30000,
+            "evidenceWaits": 0,
+            "ownerAckWaits": 0,
+            "unknownPacing": 0,
+            "nativeActivity": {
+              "passed": true,
+              "completionRatio": 1,
+              "runRatio": 0.8947368421052632,
+              "cellsPerMinute": 143.5549795633536,
+              "positiveHitsPerMinute": 0,
+              "evidenceWaits": 0,
+              "ownerAckWaits": 0,
+              "offeredDurationMs": 30000,
+              "unknownPacing": 0,
+              "coverageFailureMeaning": "Insufficient native offered/completed load is not, by itself, proof of server overload"
+            },
+            "passed": true
+          },
+          {
+            "actor": "anonymous-actor-2",
+            "role": "combat",
+            "plans": 40,
+            "gaps": 0,
+            "moves": 39,
+            "attacks": 0,
+            "hits": 0,
+            "damage": 0,
+            "lastSuccessAt": 1793043458153,
+            "runs": 13,
+            "cells": 52,
+            "nativeOpportunities": 40,
+            "nativeCompleted": 40,
+            "offeredDurationMs": 30000,
+            "evidenceWaits": 0,
+            "ownerAckWaits": 0,
+            "unknownPacing": 0,
+            "nativeActivity": {
+              "passed": true,
+              "completionRatio": 1,
+              "runRatio": 0.3333333333333333,
+              "cellsPerMinute": 103.67859635131093,
+              "positiveHitsPerMinute": 0,
+              "evidenceWaits": 0,
+              "ownerAckWaits": 0,
+              "offeredDurationMs": 30000,
+              "unknownPacing": 0,
+              "coverageFailureMeaning": "Insufficient native offered/completed load is not, by itself, proof of server overload"
+            },
+            "passed": false
+          }
+        ],
+        "timeoutRatio": 0,
+        "correctionRatio": 0,
+        "movementPassed": true,
+        "chatPassed": true,
+        "combatCoverage": "scenario-insufficient",
+        "metrics": {
+          "walk": {
+            "count": 30,
+            "status": {
+              "success": 30
+            },
+            "fromSend": {
+              "count": 30,
+              "p50Ms": 1,
+              "p95Ms": 1,
+              "p99Ms": 5,
+              "maxMs": 4.642699999996694
+            },
+            "fromPlan": {
+              "count": 30,
+              "p50Ms": 12,
+              "p95Ms": 27,
+              "p99Ms": 29,
+              "maxMs": 28.737699999997858
+            }
+          },
+          "fanout-walk": {
+            "count": 28,
+            "status": {
+              "success": 28
+            },
+            "fromSend": {
+              "count": 28,
+              "p50Ms": 1,
+              "p95Ms": 2,
+              "p99Ms": 3,
+              "maxMs": 2.7317999999941094
+            },
+            "fromPlan": {
+              "count": 0,
+              "p50Ms": null,
+              "p95Ms": null,
+              "p99Ms": null,
+              "maxMs": 0
+            }
+          },
+          "run": {
+            "count": 47,
+            "status": {
+              "success": 47
+            },
+            "fromSend": {
+              "count": 47,
+              "p50Ms": 1,
+              "p95Ms": 5,
+              "p99Ms": 5,
+              "maxMs": 4.9363999999914085
+            },
+            "fromPlan": {
+              "count": 47,
+              "p50Ms": 23,
+              "p95Ms": 32,
+              "p99Ms": 32,
+              "maxMs": 31.79950000000099
+            }
+          },
+          "fanout-run": {
+            "count": 47,
+            "status": {
+              "success": 47
+            },
+            "fromSend": {
+              "count": 47,
+              "p50Ms": 1,
+              "p95Ms": 3,
+              "p99Ms": 4,
+              "maxMs": 3.0592000000033295
+            },
+            "fromPlan": {
+              "count": 0,
+              "p50Ms": null,
+              "p95Ms": null,
+              "p99Ms": null,
+              "maxMs": 0
+            }
+          },
+          "rtt": {
+            "count": 4,
+            "status": {
+              "success": 4
+            },
+            "fromSend": {
+              "count": 4,
+              "p50Ms": 1,
+              "p95Ms": 1,
+              "p99Ms": 1,
+              "maxMs": 0.3557999999902677
+            },
+            "fromPlan": {
+              "count": 0,
+              "p50Ms": null,
+              "p95Ms": null,
+              "p99Ms": null,
+              "maxMs": 0
+            }
+          },
+          "refresh": {
+            "count": 2,
+            "status": {
+              "success": 2
+            },
+            "fromSend": {
+              "count": 2,
+              "p50Ms": 5,
+              "p95Ms": 5,
+              "p99Ms": 5,
+              "maxMs": 4.568799999993644
+            },
+            "fromPlan": {
+              "count": 0,
+              "p50Ms": null,
+              "p95Ms": null,
+              "p99Ms": null,
+              "maxMs": 0
+            }
+          },
+          "turn": {
+            "count": 1,
+            "status": {
+              "success": 1
+            },
+            "fromSend": {
+              "count": 1,
+              "p50Ms": 1,
+              "p95Ms": 1,
+              "p99Ms": 1,
+              "maxMs": 0.4444999999977881
+            },
+            "fromPlan": {
+              "count": 1,
+              "p50Ms": 16,
+              "p95Ms": 16,
+              "p99Ms": 16,
+              "maxMs": 15.207599999994272
+            }
+          },
+          "fanout-turn": {
+            "count": 1,
+            "status": {
+              "success": 1
+            },
+            "fromSend": {
+              "count": 1,
+              "p50Ms": 1,
+              "p95Ms": 1,
+              "p99Ms": 1,
+              "maxMs": 0.509699999995064
+            },
+            "fromPlan": {
+              "count": 0,
+              "p50Ms": null,
+              "p95Ms": null,
+              "p99Ms": null,
+              "maxMs": 0
+            }
+          },
+          "chat": {
+            "count": 2,
+            "status": {
+              "success": 2
+            },
+            "fromSend": {
+              "count": 2,
+              "p50Ms": 1,
+              "p95Ms": 1,
+              "p99Ms": 1,
+              "maxMs": 0.5513000000064494
+            },
+            "fromPlan": {
+              "count": 2,
+              "p50Ms": 19,
+              "p95Ms": 31,
+              "p99Ms": 31,
+              "maxMs": 30.984499999991385
+            }
+          },
+          "peerChat": {
+            "count": 2,
+            "status": {
+              "success": 2
+            },
+            "fromSend": {
+              "count": 2,
+              "p50Ms": 1,
+              "p95Ms": 1,
+              "p99Ms": 1,
+              "maxMs": 0.5513000000064494
+            },
+            "fromPlan": {
+              "count": 0,
+              "p50Ms": null,
+              "p95Ms": null,
+              "p99Ms": null,
+              "maxMs": 0
+            }
+          },
+          "fanout-chat": {
+            "count": 2,
+            "status": {
+              "success": 2
+            },
+            "fromSend": {
+              "count": 2,
+              "p50Ms": 1,
+              "p95Ms": 1,
+              "p99Ms": 1,
+              "maxMs": 0.5513000000064494
+            },
+            "fromPlan": {
+              "count": 0,
+              "p50Ms": null,
+              "p95Ms": null,
+              "p99Ms": null,
+              "maxMs": 0
+            }
+          }
+        },
+        "aoi": {
+          "samples": 30,
+          "expectedPairs": 60,
+          "observedPairs": 60,
+          "persistentMissing": 0,
+          "ghosts": 0,
+          "duplicates": 0,
+          "minimumCoverage": 1,
+          "maximumExpectedPerObserver": 1
+        },
+        "fanoutPassed": true,
+        "measuredSeconds": 30.093,
+        "rollingWindows": [],
+        "startedAtMs": 1793043428799,
+        "endedAtMs": 1793043458892
+      }
+    ],
+    "acceptanceScope": "One real egress, ordinary same-map movement/AOI and the explicitly declared combat subgroup",
+    "nativeHpMaintenance": {
+      "scope": "Stage maintenance uses already-held ordinary HP potions only; no MP, purchase, grants or revival.",
+      "hpThreshold": 0.6,
+      "reuseDelayMs": 6000,
+      "evidenceDeadlineMs": 2000,
+      "commandBudgetPerSecond": 3,
+      "rule": "Fresh matching UseItem success plus complete-inventory consumption or exact HP increase within the same deadline; consumption is not proof of healing.",
+      "activityRule": "HP recovery is offered before gameplay and auxiliary work. Pending HP evidence records original offered native opportunities as evidence-wait with maintenanceReason; it never credits movement, attack or completion."
+    },
+    "mixedClassCombatTested": false,
+    "scenario": {
+      "layout": "dispersed",
+      "monsterNames": [
+        "Deer"
+      ],
+      "combatActors": 1,
+      "patrolSpan": 2,
+      "explicitNativeHomes": {
+        "visitedCells": 12,
+        "mapCells": 490000,
+        "footprintCells": 18
+      },
+      "mapFileName": "0",
+      "anchors": [
+        {
+          "x": 285,
+          "y": 602
+        },
+        {
+          "x": 288,
+          "y": 602
+        }
+      ],
+      "knownStationaryNpcCount": 46
+    },
+    "highestMeasuredStage": 2,
+    "highestPassedStage": 2,
+    "error": "Soak failed fixed rolling activity or delivery gates",
+    "safetyStopped": false,
+    "cleanupErrors": [],
+    "continuousAcceptance": {
+      "passed": true,
+      "failureCount": 0,
+      "firstFailure": null,
+      "assessedWindows": 4,
+      "shortSegments": 2,
+      "shortSegmentRule": "Under 20 active seconds: protocol/latency/error gates still apply; no activity-rate claim",
+      "actors": [
+        {
+          "name": "anonymous-actor-1",
+          "role": "movement",
+          "activeSeconds": 68.1650267,
+          "plannedPauseSeconds": 0.4353934000000008,
+          "assessedWindows": 2
+        },
+        {
+          "name": "anonymous-actor-2",
+          "role": "combat",
+          "activeSeconds": 68.1650267,
+          "plannedPauseSeconds": 0.4353934000000008,
+          "assessedWindows": 2
+        }
+      ]
+    },
+    "combatScenario": {
+      "rule": "First reach the declared home by ordinary Walk/Run, then hunt; initial transit stays in continuous activity and stage measurement starts only after arrival",
+      "searchRadiusFromCurrentPosition": 16,
+      "monsterNames": [
+        "Deer"
+      ],
+      "huntingRangeMeaning": "Actual attack positions; chasing may leave the initial home. Authored spawns do not prove live target supply",
+      "actors": [
+        {
+          "actor": "anonymous-actor-2",
+          "declaredHome": {
+            "x": 288,
+            "y": 602
+          },
+          "arrival": {
+            "at": 1793043398062,
+            "phase": "settle",
+            "mapFileName": "0",
+            "declaredHome": {
+              "x": 288,
+              "y": 602
+            },
+            "actual": {
+              "x": 288,
+              "y": 602
+            },
+            "authoritativeSequence": 755,
+            "activeElapsedMs": 7335.3897
+          },
+          "hunting": {
+            "attempts": 18,
+            "positiveHits": 18,
+            "totalDamage": 50,
+            "firstAt": 1793043399547,
+            "ownerBounds": {
+              "minX": 288,
+              "maxX": 290,
+              "minY": 601,
+              "maxY": 602
+            },
+            "targetBounds": {
+              "minX": 288,
+              "maxX": 291,
+              "minY": 600,
+              "maxY": 603
+            },
+            "maximumTargetDistanceFromHome": 3,
+            "lastAt": 1793043425206
+          }
+        }
+      ]
+    },
+    "combatCapacityAccepted": false
+  },
+  "ordinaryPreparationRows": [
+    {
+      "type": "ordinaryPreparation",
+      "actor": "anonymous-actor-1",
+      "at": 1793043379102,
+      "status": "ready",
+      "result": {
+        "profile": "ordinary-economic-v1",
+        "status": "ready",
+        "targetHp": 12,
+        "before": {
+          "sequence": 702,
+          "monotonicMs": 2339.7809,
+          "ownerId": 1000,
+          "ownerName": "anonymous-actor-1",
+          "map": "0",
+          "x": 285,
+          "y": 602,
+          "hp": 24,
+          "maxHp": 24,
+          "inSafeZone": false,
+          "nearbyHostileCount": 0,
+          "playerPoison": null,
+          "ownerPoison": null,
+          "dazed": false,
+          "gold": 65,
+          "hpStock": 12,
+          "venison": 1,
+          "saleRemaining": null,
+          "npcId": null,
+          "buyLink": false,
+          "sellLink": false
+        },
+        "after": {
+          "ownerId": 1000,
+          "ownerName": "anonymous-actor-1",
+          "map": "0",
+          "x": 286,
+          "y": 616,
+          "hp": 24,
+          "maxHp": 24,
+          "inSafeZone": true,
+          "nearbyHostileCount": 3,
+          "playerPoison": null,
+          "ownerPoison": null,
+          "dazed": false,
+          "gold": 65,
+          "hpStock": 12,
+          "venison": 1,
+          "saleRemaining": null,
+          "npcId": null,
+          "buyLink": false,
+          "sellLink": false,
+          "currentNearbyHostileCount": 3,
+          "sequence": 743,
+          "monotonicMs": 8362.3126,
+          "actualStagingReached": true,
+          "stagingProtection": "authoritative-safe-zone-normal-monsters"
+        },
+        "actualStagingReached": true,
+        "commands": 12,
+        "movementCommands": 10,
+        "commandCounts": {
+          "clientVersion": 2,
+          "run": 8,
+          "walk": 2
+        },
+        "purchased": 0,
+        "soldVenison": 0,
+        "goldEarned": 0,
+        "goldSpent": 0,
+        "funding": null,
+        "proofs": [],
+        "elapsedMs": 6054.152900000001,
+        "failure": null
+      }
+    },
+    {
+      "type": "ordinaryPreparation",
+      "actor": "anonymous-actor-2",
+      "at": 1793043389174,
+      "status": "ready",
+      "result": {
+        "profile": "ordinary-economic-v1",
+        "status": "ready",
+        "targetHp": 12,
+        "before": {
+          "sequence": 651,
+          "monotonicMs": 12439.0097,
+          "ownerId": 1000,
+          "ownerName": "anonymous-actor-2",
+          "map": "0",
+          "x": 288,
+          "y": 602,
+          "hp": 24,
+          "maxHp": 24,
+          "inSafeZone": false,
+          "nearbyHostileCount": 0,
+          "playerPoison": null,
+          "ownerPoison": null,
+          "dazed": false,
+          "gold": 232,
+          "hpStock": 12,
+          "venison": 0,
+          "saleRemaining": null,
+          "npcId": null,
+          "buyLink": false,
+          "sellLink": false
+        },
+        "after": {
+          "ownerId": 1000,
+          "ownerName": "anonymous-actor-2",
+          "map": "0",
+          "x": 289,
+          "y": 616,
+          "hp": 24,
+          "maxHp": 24,
+          "inSafeZone": true,
+          "nearbyHostileCount": 3,
+          "playerPoison": null,
+          "ownerPoison": null,
+          "dazed": false,
+          "gold": 232,
+          "hpStock": 12,
+          "venison": 0,
+          "saleRemaining": null,
+          "npcId": null,
+          "buyLink": false,
+          "sellLink": false,
+          "currentNearbyHostileCount": 3,
+          "sequence": 701,
+          "monotonicMs": 18434.5393,
+          "actualStagingReached": true,
+          "stagingProtection": "authoritative-safe-zone-normal-monsters"
+        },
+        "actualStagingReached": true,
+        "commands": 12,
+        "movementCommands": 10,
+        "commandCounts": {
+          "clientVersion": 2,
+          "walk": 5,
+          "run": 5
+        },
+        "purchased": 0,
+        "soldVenison": 0,
+        "goldEarned": 0,
+        "goldSpent": 0,
+        "funding": null,
+        "proofs": [],
+        "elapsedMs": 6027.739899999999,
+        "failure": null
+      }
+    }
+  ],
+  "cohortActivations": [
+    {
+      "type": "cohortActivated",
+      "profile": "ordinary-economic-v1",
+      "at": 1793043390727,
+      "newActors": 2,
+      "controlledActors": 2,
+      "activityStartedAtMs": 20013.1999,
+      "existingActorsContinue": true
+    }
+  ],
+  "sampleTypeShapes": {
+    "monitor": [
+      "type",
+      "sample"
+    ],
+    "phaseStarted": [
+      "type",
+      "at",
+      "name",
+      "kind",
+      "targetActors",
+      "startedAtMs",
+      "endedAtMs",
+      "completed"
+    ],
+    "action": [
+      "type",
+      "at",
+      "phase",
+      "actor",
+      "kind",
+      "status",
+      "latencyMs",
+      "plannedGameplay",
+      "scheduledAtMs",
+      "sentAtMs",
+      "plannedTarget",
+      "nativeOpportunity",
+      "plannedIntervalMs",
+      "pacingKnown",
+      "cadence",
+      "actual",
+      "direction",
+      "movedCells",
+      "plannedLatencyMs",
+      "declaredHome",
+      "initialCombatTransit",
+      "hunting",
+      "targetId",
+      "targetPosition",
+      "attackResults",
+      "requestId",
+      "attackRequestSent",
+      "attackResult",
+      "damage",
+      "sharedHealthVerified",
+      "healthPercent",
+      "chaseTargetId"
+    ],
+    "coverage": [
+      "type",
+      "phase",
+      "at",
+      "aoi",
+      "driver",
+      "density"
+    ],
+    "playerLifecycle": [
+      "type",
+      "actor",
+      "connection",
+      "at",
+      "sequence",
+      "monotonicMs",
+      "phase",
+      "source",
+      "before",
+      "after",
+      "peer",
+      "beforePresent",
+      "afterPresent",
+      "identitySource",
+      "wire",
+      "orphanMotion"
+    ],
+    "selfTransform": [
+      "type",
+      "actor",
+      "connection",
+      "at",
+      "sequence",
+      "monotonicMs",
+      "phase",
+      "source",
+      "mapFileName",
+      "wire",
+      "before",
+      "after"
+    ],
+    "ordinaryPreparation": [
+      "type",
+      "actor",
+      "at",
+      "result"
+    ],
+    "admitted": [
+      "type",
+      "actor",
+      "role",
+      "characterIndex",
+      "at",
+      "controlledActors"
+    ],
+    "cohortActivated": [
+      "type",
+      "profile",
+      "at",
+      "newActors",
+      "controlledActors",
+      "activityStartedAtMs",
+      "existingActorsContinue"
+    ],
+    "phaseEnded": [
+      "type",
+      "at",
+      "name",
+      "kind",
+      "targetActors",
+      "startedAtMs",
+      "endedAtMs",
+      "completed"
+    ],
+    "fanoutDistribution": [
+      "type",
+      "actor",
+      "phase",
+      "kind",
+      "expected",
+      "delivered",
+      "latencyUpperBoundsMs",
+      "at"
+    ],
+    "combatArrival": [
+      "type",
+      "actor",
+      "at",
+      "phase",
+      "mapFileName",
+      "declaredHome",
+      "actual",
+      "authoritativeSequence",
+      "activeElapsedMs"
+    ],
+    "pendingAttackEvidence": [
+      "type",
+      "actor",
+      "phase",
+      "connection",
+      "at",
+      "sentAtMs",
+      "sentAtWallMs",
+      "sendCursor",
+      "endedAtMs",
+      "endedAtWallMs",
+      "owner",
+      "target",
+      "outcome",
+      "protocolVersion",
+      "requestId",
+      "maximumPackets",
+      "packetCount",
+      "truncated",
+      "packets",
+      "rule"
+    ],
+    "stageComplete": [
+      "type",
+      "stage"
+    ],
+    "continuousWindow": [
+      "type",
+      "actor",
+      "role",
+      "phases",
+      "seconds",
+      "final",
+      "activityDurationSufficient",
+      "activity",
+      "nativeActivity",
+      "activityPassed",
+      "latencyPassed",
+      "fanoutPassed",
+      "timeoutRatio",
+      "correctionRatio",
+      "metrics",
+      "passed",
+      "at",
+      "movementCorrectionRatio",
+      "attackRejectionRatio"
+    ],
+    "finished": [
+      "type",
+      "ok",
+      "playableCapacityAccepted"
+    ]
+  },
+  "sampleAggregates": {
+    "monitor": {
+      "count": 45,
+      "statusCounts": {},
+      "phaseCounts": {},
+      "kindCounts": {},
+      "numericTopLevel": {}
+    },
+    "phaseStarted": {
+      "count": 4,
+      "statusCounts": {},
+      "phaseCounts": {},
+      "kindCounts": {
+        "bootstrap": 2,
+        "measurement": 2
+      },
+      "numericTopLevel": {
+        "targetActors": {
+          "count": 4,
+          "min": 2,
+          "max": 2,
+          "sum": 8
+        },
+        "startedAtMs": {
+          "count": 4,
+          "min": 1793043370838,
+          "max": 1793043428799,
+          "sum": 7172173569268
+        }
+      }
+    },
+    "action": {
+      "count": 194,
+      "statusCounts": {
+        "success": 194
+      },
+      "phaseCounts": {
+        "preparation": 7,
+        "settle": 26,
+        "stage-2": 71,
+        "soak": 88,
+        "drain": 2
+      },
+      "kindCounts": {
+        "login": 2,
+        "startGame": 2,
+        "bootstrap": 2,
+        "rtt": 13,
+        "walk": 43,
+        "run": 96,
+        "chat": 6,
+        "peerChat": 6,
+        "turn": 2,
+        "attack": 18,
+        "refresh": 2,
+        "logOut": 2
+      },
+      "numericTopLevel": {
+        "latencyMs": {
+          "count": 194,
+          "min": 0.26829999999608845,
+          "max": 2185.2261,
+          "sum": 8314.029100000027
+        },
+        "scheduledAtMs": {
+          "count": 165,
+          "min": 20513.1999,
+          "max": 88013.1999,
+          "sum": 9119677.983500008
+        },
+        "sentAtMs": {
+          "count": 165,
+          "min": 20515.7836,
+          "max": 88023.7246,
+          "sum": 9122340.831700005
+        },
+        "plannedIntervalMs": {
+          "count": 165,
+          "min": 750,
+          "max": 1422,
+          "sum": 135846
+        },
+        "movedCells": {
+          "count": 139,
+          "min": 1,
+          "max": 2,
+          "sum": 235
+        },
+        "plannedLatencyMs": {
+          "count": 165,
+          "min": 1.1270999999978812,
+          "max": 139.68089999999938,
+          "sum": 3831.699299999611
+        },
+        "damage": {
+          "count": 18,
+          "min": 2,
+          "max": 4,
+          "sum": 50
+        },
+        "healthPercent": {
+          "count": 18,
+          "min": 0,
+          "max": 92,
+          "sum": 820
+        },
+        "chaseTargetId": {
+          "count": 33,
+          "min": 206320,
+          "max": 206536,
+          "sum": 6809220
+        }
+      }
+    },
+    "coverage": {
+      "count": 87,
+      "statusCounts": {},
+      "phaseCounts": {
+        "preparation": 19,
+        "settle": 8,
+        "stage-2": 30,
+        "soak": 30
+      },
+      "kindCounts": {},
+      "numericTopLevel": {}
+    },
+    "playerLifecycle": {
+      "count": 7,
+      "statusCounts": {},
+      "phaseCounts": {
+        "preparation": 6,
+        "drain": 1
+      },
+      "kindCounts": {},
+      "numericTopLevel": {
+        "connection": {
+          "count": 7,
+          "min": 1,
+          "max": 2,
+          "sum": 11
+        }
+      }
+    },
+    "selfTransform": {
+      "count": 159,
+      "statusCounts": {},
+      "phaseCounts": {
+        "preparation": 20,
+        "settle": 19,
+        "stage-2": 43,
+        "soak": 77
+      },
+      "kindCounts": {},
+      "numericTopLevel": {
+        "connection": {
+          "count": 159,
+          "min": 1,
+          "max": 2,
+          "sum": 221
+        }
+      }
+    },
+    "ordinaryPreparation": {
+      "count": 2,
+      "statusCounts": {},
+      "phaseCounts": {},
+      "kindCounts": {},
+      "numericTopLevel": {}
+    },
+    "admitted": {
+      "count": 2,
+      "statusCounts": {},
+      "phaseCounts": {},
+      "kindCounts": {},
+      "numericTopLevel": {
+        "characterIndex": {
+          "count": 2,
+          "min": 1,
+          "max": 2,
+          "sum": 3
+        },
+        "controlledActors": {
+          "count": 2,
+          "min": 1,
+          "max": 2,
+          "sum": 3
+        }
+      }
+    },
+    "cohortActivated": {
+      "count": 1,
+      "statusCounts": {},
+      "phaseCounts": {},
+      "kindCounts": {},
+      "numericTopLevel": {
+        "newActors": {
+          "count": 1,
+          "min": 2,
+          "max": 2,
+          "sum": 2
+        },
+        "controlledActors": {
+          "count": 1,
+          "min": 2,
+          "max": 2,
+          "sum": 2
+        },
+        "activityStartedAtMs": {
+          "count": 1,
+          "min": 20013.1999,
+          "max": 20013.1999,
+          "sum": 20013.1999
+        }
+      }
+    },
+    "phaseEnded": {
+      "count": 4,
+      "statusCounts": {},
+      "phaseCounts": {},
+      "kindCounts": {
+        "bootstrap": 2,
+        "measurement": 2
+      },
+      "numericTopLevel": {
+        "targetActors": {
+          "count": 4,
+          "min": 2,
+          "max": 2,
+          "sum": 8
+        },
+        "startedAtMs": {
+          "count": 4,
+          "min": 1793043370838,
+          "max": 1793043428799,
+          "sum": 7172173569268
+        },
+        "endedAtMs": {
+          "count": 4,
+          "min": 1793043390727,
+          "max": 1793043458892,
+          "sum": 7172173677209
+        }
+      }
+    },
+    "fanoutDistribution": {
+      "count": 142,
+      "statusCounts": {},
+      "phaseCounts": {
+        "settle": 19,
+        "stage-2": 45,
+        "soak": 78
+      },
+      "kindCounts": {
+        "walk": 40,
+        "run": 94,
+        "chat": 6,
+        "turn": 2
+      },
+      "numericTopLevel": {
+        "expected": {
+          "count": 142,
+          "min": 1,
+          "max": 1,
+          "sum": 142
+        },
+        "delivered": {
+          "count": 142,
+          "min": 1,
+          "max": 1,
+          "sum": 142
+        }
+      }
+    },
+    "combatArrival": {
+      "count": 1,
+      "statusCounts": {},
+      "phaseCounts": {
+        "settle": 1
+      },
+      "kindCounts": {},
+      "numericTopLevel": {
+        "authoritativeSequence": {
+          "count": 1,
+          "min": 755,
+          "max": 755,
+          "sum": 755
+        },
+        "activeElapsedMs": {
+          "count": 1,
+          "min": 7335.3897,
+          "max": 7335.3897,
+          "sum": 7335.3897
+        }
+      }
+    },
+    "pendingAttackEvidence": {
+      "count": 18,
+      "statusCounts": {},
+      "phaseCounts": {
+        "stage-2": 18
+      },
+      "kindCounts": {},
+      "numericTopLevel": {
+        "connection": {
+          "count": 18,
+          "min": 2,
+          "max": 2,
+          "sum": 36
+        },
+        "sentAtMs": {
+          "count": 18,
+          "min": 28832.9877,
+          "max": 54492.1754,
+          "sum": 749779.8767999997
+        },
+        "sentAtWallMs": {
+          "count": 18,
+          "min": 1793043399547,
+          "max": 1793043425206,
+          "sum": 32274781422624
+        },
+        "sendCursor": {
+          "count": 18,
+          "min": 770,
+          "max": 1040,
+          "sum": 16240
+        },
+        "endedAtMs": {
+          "count": 18,
+          "min": 28958.305,
+          "max": 54570.8167,
+          "sum": 751262.7247000001
+        },
+        "endedAtWallMs": {
+          "count": 18,
+          "min": 1793043399672,
+          "max": 1793043425284,
+          "sum": 32274781424105
+        },
+        "protocolVersion": {
+          "count": 18,
+          "min": 2,
+          "max": 2,
+          "sum": 36
+        },
+        "maximumPackets": {
+          "count": 18,
+          "min": 64,
+          "max": 64,
+          "sum": 1152
+        },
+        "packetCount": {
+          "count": 18,
+          "min": 10,
+          "max": 16,
+          "sum": 196
+        }
+      }
+    },
+    "stageComplete": {
+      "count": 2,
+      "statusCounts": {},
+      "phaseCounts": {},
+      "kindCounts": {},
+      "numericTopLevel": {}
+    },
+    "continuousWindow": {
+      "count": 4,
+      "statusCounts": {},
+      "phaseCounts": {},
+      "kindCounts": {},
+      "numericTopLevel": {
+        "seconds": {
+          "count": 4,
+          "min": 7.542568499999994,
+          "max": 60.622458200000004,
+          "sum": 136.3300534
+        },
+        "timeoutRatio": {
+          "count": 4,
+          "min": 0,
+          "max": 0,
+          "sum": 0
+        },
+        "correctionRatio": {
+          "count": 4,
+          "min": 0,
+          "max": 0,
+          "sum": 0
+        },
+        "movementCorrectionRatio": {
+          "count": 1,
+          "min": 0,
+          "max": 0,
+          "sum": 0
+        },
+        "attackRejectionRatio": {
+          "count": 1,
+          "min": 0,
+          "max": 0,
+          "sum": 0
+        }
+      }
+    },
+    "finished": {
+      "count": 1,
+      "statusCounts": {},
+      "phaseCounts": {},
+      "kindCounts": {},
+      "numericTopLevel": {}
+    }
+  },
+  "combatAndHpScalarExamples": {
+    "combatArrival": {
+      "first": [
+        {
+          "type": "combatArrival",
+          "actor": "anonymous-actor-2",
+          "at": 1793043398062,
+          "phase": "settle",
+          "mapFileName": "0",
+          "authoritativeSequence": 755,
+          "activeElapsedMs": 7335.3897
+        }
+      ],
+      "last": [
+        {
+          "type": "combatArrival",
+          "actor": "anonymous-actor-2",
+          "at": 1793043398062,
+          "phase": "settle",
+          "mapFileName": "0",
+          "authoritativeSequence": 755,
+          "activeElapsedMs": 7335.3897
+        }
+      ]
+    },
+    "pendingAttackEvidence": {
+      "first": [
+        {
+          "type": "pendingAttackEvidence",
+          "actor": "anonymous-actor-2",
+          "phase": "stage-2",
+          "connection": 2,
+          "at": 1793043399672,
+          "sentAtMs": 28832.9877,
+          "sentAtWallMs": 1793043399547,
+          "sendCursor": 770,
+          "endedAtMs": 28958.305,
+          "endedAtWallMs": 1793043399672,
+          "outcome": "success",
+          "protocolVersion": 2,
+          "requestId": "1",
+          "maximumPackets": 64,
+          "packetCount": 12,
+          "truncated": false,
+          "rule": "Observed public packet fields only; no server incarnation is present or inferred. Diagnostic evidence never changes timeout, miss, rejection or damage accounting."
+        },
+        {
+          "type": "pendingAttackEvidence",
+          "actor": "anonymous-actor-2",
+          "phase": "stage-2",
+          "connection": 2,
+          "at": 1793043401061,
+          "sentAtMs": 30255.8506,
+          "sentAtWallMs": 1793043400969,
+          "sendCursor": 786,
+          "endedAtMs": 30347.8191,
+          "endedAtWallMs": 1793043401061,
+          "outcome": "success",
+          "protocolVersion": 2,
+          "requestId": "2",
+          "maximumPackets": 64,
+          "packetCount": 10,
+          "truncated": false,
+          "rule": "Observed public packet fields only; no server incarnation is present or inferred. Diagnostic evidence never changes timeout, miss, rejection or damage accounting."
+        },
+        {
+          "type": "pendingAttackEvidence",
+          "actor": "anonymous-actor-2",
+          "phase": "stage-2",
+          "connection": 2,
+          "at": 1793043402476,
+          "sentAtMs": 31655.6996,
+          "sentAtWallMs": 1793043402369,
+          "sendCursor": 797,
+          "endedAtMs": 31762.893,
+          "endedAtWallMs": 1793043402476,
+          "outcome": "success",
+          "protocolVersion": 2,
+          "requestId": "3",
+          "maximumPackets": 64,
+          "packetCount": 10,
+          "truncated": false,
+          "rule": "Observed public packet fields only; no server incarnation is present or inferred. Diagnostic evidence never changes timeout, miss, rejection or damage accounting."
+        }
+      ],
+      "last": [
+        {
+          "type": "pendingAttackEvidence",
+          "actor": "anonymous-actor-2",
+          "phase": "stage-2",
+          "connection": 2,
+          "at": 1793043422477,
+          "sentAtMs": 51656.3102,
+          "sentAtWallMs": 1793043422370,
+          "sendCursor": 1010,
+          "endedAtMs": 51763.7569,
+          "endedAtWallMs": 1793043422477,
+          "outcome": "success",
+          "protocolVersion": 2,
+          "requestId": "16",
+          "maximumPackets": 64,
+          "packetCount": 10,
+          "truncated": false,
+          "rule": "Observed public packet fields only; no server incarnation is present or inferred. Diagnostic evidence never changes timeout, miss, rejection or damage accounting."
+        },
+        {
+          "type": "pendingAttackEvidence",
+          "actor": "anonymous-actor-2",
+          "phase": "stage-2",
+          "connection": 2,
+          "at": 1793043423880,
+          "sentAtMs": 53074.8326,
+          "sentAtWallMs": 1793043423788,
+          "sendCursor": 1023,
+          "endedAtMs": 53166.5542,
+          "endedAtWallMs": 1793043423880,
+          "outcome": "success",
+          "protocolVersion": 2,
+          "requestId": "17",
+          "maximumPackets": 64,
+          "packetCount": 10,
+          "truncated": false,
+          "rule": "Observed public packet fields only; no server incarnation is present or inferred. Diagnostic evidence never changes timeout, miss, rejection or damage accounting."
+        },
+        {
+          "type": "pendingAttackEvidence",
+          "actor": "anonymous-actor-2",
+          "phase": "stage-2",
+          "connection": 2,
+          "at": 1793043425284,
+          "sentAtMs": 54492.1754,
+          "sentAtWallMs": 1793043425206,
+          "sendCursor": 1040,
+          "endedAtMs": 54570.8167,
+          "endedAtWallMs": 1793043425284,
+          "outcome": "success",
+          "protocolVersion": 2,
+          "requestId": "18",
+          "maximumPackets": 64,
+          "packetCount": 12,
+          "truncated": false,
+          "rule": "Observed public packet fields only; no server incarnation is present or inferred. Diagnostic evidence never changes timeout, miss, rejection or damage accounting."
+        }
+      ]
+    }
+  },
+  "scope": "One bounded read of each exact Root-pinned public report and sample file. Original gate results preserved. Actor identifiers replaced consistently; no private store or credentials read. Numeric aggregates are raw descriptive sums/min/max, not capacity acceptance or an inference of target supply."
+}

@@ -1,0 +1,49 @@
+{
+  "owner": "Root",
+  "generatedAtUtc": "2026-10-07T14:23:10.770Z",
+  "sourceSnapshot": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source30-web03-snapshot.json",
+    "bytes": 46396,
+    "sha256": "b6194d14f9f7db60b9c7cd870ffe210896b471e9a9e945ba081fd05ead71329a"
+  },
+  "sourceCount": 144,
+  "independentSecondReadDrift": [],
+  "sourceAccepted": true,
+  "sourceOnlyAcceptance": true,
+  "reviewers": [
+    "/root/source30_web_receiver",
+    "Root frontier integration lead"
+  ],
+  "review": "Source30 Web worker21 test instances + Root one strict no-emit pure receiver/facade API test in original NPC script; original106 assertions remain. Same actual product source frozen. Installed VSCode TypeScript5.9.2 has language-service compiler API but no tsc CLI; existing-script compiler API is used, no new QA/helper/runner file.",
+  "limitations": [
+    "Tests and production build not executed at preparation.",
+    "Pure AST/source fixtures use existing installed TypeScript5.9.2, not deleted project dependency toolchain. Full project TSC and matching packages remain not-run.",
+    "Unsafe integral UID/i64 date snapshots unavailable until canonical lossless projection; cached Hero XP/maxXP visible model issue remains.",
+    "No browser/game/socket/network or WASM API/instance acceptance."
+  ],
+  "finiteCpuAccepted": false,
+  "productionBuildAccepted": false,
+  "candidateAccepted": false,
+  "goalComplete": false,
+  "previousSnapshot": 144,
+  "actualPriorRun": {
+    "outer": {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source30-web01.outer.json",
+      "bytes": 481,
+      "sha256": "892b9fc2f3d069676d216775fa2fee9221ba41aaa972b6ddae2885bac43d3a5c"
+    },
+    "stdout": {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source30-web01.stdout.log",
+      "bytes": 15380,
+      "sha256": "7dfcc3014f257c480c672cd851b05811a1a0894979c77c8c852a51682c13ab6e"
+    },
+    "exitCode": 1,
+    "total": 128,
+    "passed": 126,
+    "failed": 2
+  },
+  "repairs": [
+    "Move rejected outcome local read before fields predicate control-flow narrowing; preserve runtime validation.",
+    "Initialize real legacy dispatcher via observe before asserting empty Core slot, additionally assert uninitialized adapter unavailable; preserve all five retained-phase assertions."
+  ]
+}

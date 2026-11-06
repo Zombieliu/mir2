@@ -1,0 +1,27 @@
+{
+  "owner": "Root",
+  "kind": "Exact old compiled Source31 Native EXE historical copy before original target-cache new compile",
+  "generatedAtUtc": "2026-10-08T15:09:54.362Z",
+  "original": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\rust-target\\windows\\debug\\mir2-platform-windows.exe",
+    "bytes": 106137600,
+    "sha256": "78d4c00e8da1920aa077e92b9d0ed82ac3be0997bd4174d611cef0ba8289f206"
+  },
+  "actualOriginalBefore": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\rust-target\\windows\\debug\\mir2-platform-windows.exe",
+    "bytes": 106137600,
+    "sha256": "78d4c00e8da1920aa077e92b9d0ed82ac3be0997bd4174d611cef0ba8289f206"
+  },
+  "savedExactCopy": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\native-source46-delivery01\\source31-historical-mir2-platform-windows.exe",
+    "bytes": 106137600,
+    "sha256": "78d4c00e8da1920aa077e92b9d0ed82ac3be0997bd4174d611cef0ba8289f206"
+  },
+  "sourceUnchanged": true,
+  "exeLaunched": false,
+  "uiUsed": false,
+  "runtimeLaunched": false,
+  "networkUsed": false,
+  "goalComplete": false,
+  "qualification": "Historical opaque file copy only; old EXE cannot prove current source matching or playability."
+}

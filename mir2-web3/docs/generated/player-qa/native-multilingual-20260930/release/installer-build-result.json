@@ -1,0 +1,23 @@
+{
+  "schema": 1,
+  "compilerExitCode": 0,
+  "compiledUtc": "2026-09-29T20:36:22.8851848Z",
+  "setupPath": "C:/mir2-playtest-releases/20260930-multilingual/Numeron-Legend-of-Rebirth-20260930-r4-Setup.exe",
+  "sizeBytes": 601242477,
+  "sha256": "60B0D003C7F366A0B82E465361D930DA8E03341A57D7F77297CE1CECCB48DAFF",
+  "machine": "0x8664",
+  "subsystem": 2,
+  "productName": "Numeron - Legend of Rebirth",
+  "fileVersion": "2026.9.30.4",
+  "nativeSourceRevision": "97144d6a0c819d608c0e9d1c5034259cac489297",
+  "installerRecipeSha256": "210904E7394EC90B4F44706216F4EDAE4E8241C271B5FCBCC9988BADBA8CEEB2",
+  "locales": [
+    "en",
+    "zh-TW",
+    "pt-BR"
+  ],
+  "publicAuthenticodeSigned": false,
+  "packageCmsVerified": true,
+  "installedOnThisComputer": false,
+  "externalAlienwareRetest": false
+}

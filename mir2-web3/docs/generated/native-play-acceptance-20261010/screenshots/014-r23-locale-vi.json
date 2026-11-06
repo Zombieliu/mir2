@@ -1,0 +1,16 @@
+{
+  "path": "E:/mir2-player-journey/work/native-play-acceptance-20261010/screenshots/014-r23-locale-vi.jpg",
+  "purpose": "Vietnamese accents visible; screen-keyboard caption wraps inside its button. Game translation and play remain pending.",
+  "observedWindow": {
+    "app": "process:D:\\Mir2Invite\\game\\mir2-platform-windows.exe",
+    "id": 18419886,
+    "title": "numeron-legend of rebirth"
+  },
+  "screenshotId": "screenshot-0",
+  "width": 1026,
+  "height": 800,
+  "mime": "image/jpeg",
+  "bytes": 319657,
+  "sha256": "c01386c06b43553f65ad6afbe59ce075969d8953318b2947d14a0f9b954d2a21",
+  "recordedUtc": "2026-10-09T18:56:55.572Z"
+}

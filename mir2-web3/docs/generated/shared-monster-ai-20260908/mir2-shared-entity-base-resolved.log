@@ -1,0 +1,382 @@
+   Compiling mir2-simulation v0.1.0 (E:\mir2-player-journey\mir2-web3\apps\simulation)
+warning: use of deprecated method `bevy_ecs::world::World::iter_entities`: use world.query::<EntityRef>()` instead
+   --> apps\simulation\src\runtime\monster_ai\great_fox_spirit.rs:163:28
+    |
+163 |     for candidate in world.iter_entities() {
+    |                            ^^^^^^^^^^^^^
+    |
+    = note: `#[warn(deprecated)]` on by default
+
+warning: use of deprecated method `bevy_ecs::world::World::iter_entities`: use world.query::<EntityRef>()` instead
+    --> apps\simulation\src\runtime\packets.rs:7292:25
+     |
+7292 |     for entity in world.iter_entities() {
+     |                         ^^^^^^^^^^^^^
+
+warning: use of deprecated method `bevy_ecs::world::World::iter_entities`: use world.query::<EntityRef>()` instead
+    --> apps\simulation\src\runtime\skills.rs:4946:10
+     |
+4946 |         .iter_entities()
+     |          ^^^^^^^^^^^^^
+
+warning: use of deprecated method `bevy_ecs::world::World::iter_entities`: use world.query::<EntityRef>()` instead
+    --> apps\simulation\src\runtime\skills.rs:5028:10
+     |
+5028 |         .iter_entities()
+     |          ^^^^^^^^^^^^^
+
+warning: type `ZoneCombatEntityRef` is more private than the item `HornedState::target_ref`
+  --> apps\simulation\src\runtime\zone\runtime\horned_ai.rs:14:5
+   |
+14 |     pub target_ref: Option<ZoneCombatEntityRef>,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ field `HornedState::target_ref` is reachable at visibility `pub(in crate::runtime::zone)`
+   |
+note: but type `ZoneCombatEntityRef` is only usable at visibility `pub(in crate::runtime::zone::runtime)`
+  --> apps\simulation\src\runtime\zone\runtime\entity_combat.rs:7:1
+   |
+ 7 | pub(super) enum ZoneCombatEntityRef {
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   = note: `#[warn(private_interfaces)]` on by default
+
+warning: type `ZoneCombatEntityRef` is more private than the item `HornedHit::source_ref`
+  --> apps\simulation\src\runtime\zone\runtime\horned_ai.rs:28:5
+   |
+28 |     pub source_ref: Option<ZoneCombatEntityRef>,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ field `HornedHit::source_ref` is reachable at visibility `pub(in crate::runtime::zone)`
+   |
+note: but type `ZoneCombatEntityRef` is only usable at visibility `pub(in crate::runtime::zone::runtime)`
+  --> apps\simulation\src\runtime\zone\runtime\entity_combat.rs:7:1
+   |
+ 7 | pub(super) enum ZoneCombatEntityRef {
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: type `ZoneCombatEntityRef` is more private than the item `HornedHit::target_ref`
+  --> apps\simulation\src\runtime\zone\runtime\horned_ai.rs:30:5
+   |
+30 |     pub target_ref: Option<ZoneCombatEntityRef>,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ field `HornedHit::target_ref` is reachable at visibility `pub(in crate::runtime::zone)`
+   |
+note: but type `ZoneCombatEntityRef` is only usable at visibility `pub(in crate::runtime::zone::runtime)`
+  --> apps\simulation\src\runtime\zone\runtime\entity_combat.rs:7:1
+   |
+ 7 | pub(super) enum ZoneCombatEntityRef {
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: methods `scoped_to_account` and `scoped_to_accounts` are never used
+   --> apps\simulation\src\config.rs:225:8
+    |
+109 | impl AccountStore {
+    | ----------------- methods in this implementation
+...
+225 |     fn scoped_to_account(&self, account_id: &str) -> Self {
+    |        ^^^^^^^^^^^^^^^^^
+...
+229 |     fn scoped_to_accounts(&self, account_ids: &[&str]) -> Self {
+    |        ^^^^^^^^^^^^^^^^^^
+    |
+    = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: variant `MacAgility` is never constructed
+   --> apps\simulation\src\runtime\combat.rs:767:5
+    |
+760 | pub(super) enum CrystalDefence {
+    |                 -------------- variant in this enum
+...
+767 |     MacAgility,
+    |     ^^^^^^^^^^
+    |
+    = note: `CrystalDefence` has derived impls for the traits `Debug` and `Clone`, but these are intentionally ignored during dead code analysis
+
+warning: method `socketed_count` is never used
+   --> apps\simulation\src\runtime\equipment.rs:303:19
+    |
+119 | impl EquipmentState {
+    | ------------------- method in this implementation
+...
+303 |     pub(super) fn socketed_count(&self) -> usize {
+    |                   ^^^^^^^^^^^^^^
+
+warning: function `equipment_state_identified` is never used
+   --> apps\simulation\src\runtime\equipment.rs:308:15
+    |
+308 | pub(super) fn equipment_state_identified(item: &EquipmentState) -> bool {
+    |               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `equipment_state_soul_bound_id` is never used
+   --> apps\simulation\src\runtime\equipment.rs:313:15
+    |
+313 | pub(super) fn equipment_state_soul_bound_id(item: &EquipmentState) -> i32 {
+    |               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `repair_conquest_asset` is never used
+    --> apps\simulation\src\runtime\monsters.rs:1813:15
+     |
+1813 | pub(super) fn repair_conquest_asset(world: &mut World, ai: u8, asset_id: u8) -> bool {
+     |               ^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `complete_quest` is never used
+   --> apps\simulation\src\runtime\quests.rs:814:15
+    |
+814 | pub(super) fn complete_quest(world: &mut World, quest_id: i32) {
+    |               ^^^^^^^^^^^^^^
+
+warning: function `default_save_for_character` is never used
+  --> apps\simulation\src\runtime\save.rs:76:15
+   |
+76 | pub(super) fn default_save_for_character(
+   |               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `persist_character_save` is never used
+   --> apps\simulation\src\runtime\save.rs:818:15
+    |
+818 | pub(super) fn persist_character_save(
+    |               ^^^^^^^^^^^^^^^^^^^^^^
+
+warning: method `game_shop_buy_product` is never used
+    --> apps\simulation\src\runtime\stage5.rs:4258:8
+     |
+3188 | impl SimulationSession {
+     | ---------------------- method in this implementation
+...
+4258 |     fn game_shop_buy_product(
+     |        ^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `hell_can_move` is never used
+  --> apps\simulation\src\runtime\zone\runtime\hell_ai.rs:59:15
+   |
+59 | pub(super) fn hell_can_move(m: &ZoneNativeMonster) -> bool {
+   |               ^^^^^^^^^^^^^
+
+warning: function `hell_accepts_struck` is never used
+  --> apps\simulation\src\runtime\zone\runtime\hell_ai.rs:62:15
+   |
+62 | pub(super) fn hell_accepts_struck(m: &ZoneNativeMonster) -> bool {
+   |               ^^^^^^^^^^^^^^^^^^^
+
+warning: function `hell_can_regen` is never used
+  --> apps\simulation\src\runtime\zone\runtime\hell_ai.rs:65:15
+   |
+65 | pub(super) fn hell_can_regen(m: &ZoneNativeMonster) -> bool {
+   |               ^^^^^^^^^^^^^^
+
+warning: `mir2-simulation` (lib) generated 20 warnings
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 7.16s
+     Running tests\shared_entity_combat.rs (C:\Users\Administrator\AppData\Local\Temp\mir2-trade-gold-simulation-20260908\x86_64-pc-windows-msvc\debug\deps\shared_entity_combat-d05e4edf1fd21328.exe)
+
+running 3 tests
+test queued_pet_hit_does_not_fabricate_damage_after_owner_leaves ... ok
+test wild_attack_lands_on_real_pet_after_300ms_and_checkpoints_the_pending_life ... ok
+test wild_monsters_do_not_gain_aggro_against_other_unowned_monsters ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.09s
+
+     Running tests\shared_zone.rs (C:\Users\Administrator\AppData\Local\Temp\mir2-trade-gold-simulation-20260908\x86_64-pc-windows-msvc\debug\deps\shared_zone-c794111d1300a649.exe)
+
+running 204 tests
+test aoi_grid_players_far_apart_do_not_see_each_other ... ok
+test aoi_grid_relocates_moving_shared_monster_before_visibility_diff ... ok
+test aoi_grid_walking_into_range_triggers_appearance ... ok
+test buffered_walk_run_reverse_chain_waits_for_real_ready_ticks ... ok
+test call_npc_packet_opens_runtime_npc_dialog ... ok
+test conquest_archer_guard_ignores_defender_guild_and_attacks_enemy_guild ... ok
+test continuous_run_extends_run_grace_after_successful_run ... ok
+test detached_ground_drop_claim_survives_session_leave_and_restores_once ... ok
+test each_joined_player_has_unique_object_id ... ok
+test harvest_admission_is_trusted_and_fail_closed ... ok
+test harvested_deer_late_join_still_waits_for_wall_clock_due ... ok
+test high_frequency_input_keeps_latest_crystal_movement_intent ... ok
+test interaction_boundary_cancels_queued_movement_without_moving_the_player ... ok
+test late_join_sync_cannot_respawn_scheduled_corpse_before_zone_due ... ok
+test later_joiner_receives_rebased_player_buffs_in_object_player ... ok
+test later_joiner_receives_retained_zone_object_spawns ... ok
+test later_joiners_receive_player_hidden_dead_and_effect_state ... ok
+test later_joiners_receive_retained_player_visual_status ... ok
+test level50_taoist_control_debuff_and_revelation_paths_are_shared ... ok
+test level50_taoist_purification_clears_shared_poison_and_curse_state ... ok
+test level50_taoist_support_spells_apply_to_shared_friendly_targets ... ok
+test level50_warrior_entrapment_pulls_and_counterattack_closes_shared_combat_loop ... ok
+test level50_warrior_melee_skills_keep_crystal_range_shapes_and_hit_timing ... ok
+test level50_wizard_ground_and_direction_spell_families_hit_crystal_shapes ... ok
+test level50_wizard_relocation_clone_and_self_buffs_are_zone_authoritative ... ok
+test level50_wizard_single_target_specializations_keep_control_and_monster_rules ... ok
+test level50_wizard_vampirism_damages_and_heals_through_shared_authority ... ok
+test living_native_monster_blocks_player_walk_into_its_tile ... ok
+test living_native_monsters_do_not_walk_onto_the_same_tile ... ok
+test materialized_melee_rejection_is_atomic_and_allowed_attack_commits ... ok
+test materialized_range_refresh_rejects_stale_readiness_before_spawn ... ok
+test materialized_range_rejects_neutral_ai_atomically ... ok
+test mounted_player_run_moves_three_tiles_and_broadcasts_object_run ... ok
+test mounted_player_walk_uses_the_same_crystal_server_delay ... ok
+test mounted_run_checks_third_tile_before_moving ... ok
+test movement_input_after_ready_acknowledges_without_waiting_for_world_tick ... ok
+test npc_teleport_discards_movement_intent_queued_before_commit ... ok
+test npc_teleport_enabled_fixture_commits_exact_front_and_refreshes_observers ... ok
+test npc_teleport_real_disabled_policy_is_silent_and_mutates_nothing ... ok
+test npc_teleport_rejections_preserve_transform_for_missing_ineligible_low_gold_and_occupied_front ... ok
+test npc_teleport_rollback_sync_restores_aoi_and_occupancy ... ok
+test observer_actions_require_the_authenticated_owner_actor ... ok
+test owner_leave_removes_owned_retained_zone_objects ... ok
+test paused_swift_feet_does_not_extend_run_to_three_tiles ... ok
+test player_a_leaves_player_b_receives_object_remove ... ok
+test player_a_runs_player_b_receives_object_run ... ok
+test player_a_turns_player_b_receives_object_turn ... ok
+test player_a_walks_player_b_receives_object_walk ... ok
+test player_action_packets_are_rewritten_and_broadcast_to_observers ... ok
+test player_buff_mana_and_effect_packets_use_zone_object_id_for_observers ... ok
+test player_drop_spawn_packets_are_broadcast_to_observers ... ok
+test player_harvest_packets_use_zone_object_id_for_observers ... ok
+test player_intelligent_creature_pickup_is_broadcast_to_observers ... ok
+test player_late_status_packets_use_zone_object_id_for_observers ... ok
+test player_magic_and_projectiles_use_zone_object_id_for_observers ... ok
+test player_movement_diffs_retained_zone_object_visibility ... ok
+test player_movement_skill_packets_use_zone_object_id_for_observers ... ok
+test player_spawned_hero_and_npc_packets_are_broadcast_to_observers ... ok
+test player_spawned_monster_packets_rebase_master_for_observers ... ok
+test player_special_skill_state_packets_use_zone_object_id_for_observers ... ok
+test ready_pending_run_is_consumed_at_real_arrival_before_followup_is_queued ... ok
+test retained_dead_monster_does_not_block_player_walk ... ok
+test retained_object_remove_clears_blocking_occupancy ... ok
+test retained_zone_drops_expire_on_zone_tick ... ok
+test retained_zone_npc_blocks_player_walk ... ok
+test retained_zone_object_buff_payloads_are_replayed_for_late_joiner ... ok
+test retained_zone_object_buffs_expire_for_observers_and_late_joiners ... ok
+test retained_zone_object_harvested_before_spawn_keeps_late_spawn_dead ... ok
+test retained_zone_object_harvested_is_canonical_for_late_joiners ... ok
+test retained_zone_object_health_does_not_increase_from_stale_runtime_packet ... ok
+test retained_zone_object_health_updates_for_late_joiner ... ok
+test retained_zone_object_health_updates_when_entering_object_aoi ... ok
+test retained_zone_object_mana_updates_for_late_joiner ... ok
+test retained_zone_object_pickup_reaches_local_object_observer_without_visible_set ... ok
+test retained_zone_object_remove_suppresses_late_join_spawn ... ok
+test retained_zone_object_remove_uses_object_visibility_not_actor_aoi ... ok
+test retained_zone_object_revive_before_spawn_suppresses_stale_dead_spawn ... ok
+test retained_zone_object_revive_updates_existing_dead_object ... ok
+test retained_zone_object_spawn_uses_object_aoi_not_actor_aoi ... ok
+test retained_zone_object_state_updates_for_late_joiner ... ok
+test retained_zone_object_zero_health_marks_dead_for_late_joiner ... ok
+test run_checks_intermediate_tile ... ok
+test run_from_standstill_degrades_to_walk ... ok
+test run_received_inside_grace_survives_late_zone_tick ... ok
+test run_step_expires_after_crystal_celltime_grace ... ok
+test session_applies_shared_monster_snapshot_to_local_runtime ... ok
+test session_materializes_missing_shared_deer_corpse_and_resets_it_on_respawn ... ok
+test session_mirrors_zone_monster_death_until_explicit_revive ... ok
+test session_resets_shared_deer_harvest_state_on_explicit_zone_revive ... ok
+test shared_object_health_updates_retained_state_for_late_joiner ... ok
+test shared_object_strike_rebases_local_self_results_to_zone_player ... ok
+test shared_object_update_uses_zone_object_aoi_not_same_map ... ok
+test stale_movement_intent_is_not_replayed ... ok
+test stale_retained_zone_object_movement_and_vitals_after_death_are_suppressed ... ok
+test stale_retained_zone_object_spawn_after_death_stays_dead ... ok
+test stale_retained_zone_object_spawn_after_remove_is_suppressed ... ok
+test swift_feet_run_moves_three_tiles_unless_sneaking ... ok
+test synchronized_native_monsters_never_spawn_with_overlapping_hitboxes ... ok
+test taoist_poison_item_shape_reaches_shared_zone_authority ... ok
+test two_players_cannot_occupy_same_tile ... ok
+test two_players_join_same_zone_see_each_other ... ok
+test zero_health_before_retained_spawn_marks_late_spawn_dead ... ok
+test zone_applies_player_movement_skill_transform_and_save ... ok
+test zone_applies_user_location_action_transform_before_observer_effect ... ok
+test zone_authoritative_attack_is_deterministic_across_runs ... ok
+test zone_authoritative_damage_shared_hp_consistent_across_attackers ... ok
+test zone_checkpoint_preserves_wall_clock_respawn_due_time ... ok
+test zone_direct_and_materialized_melee_reject_neutral_monsters_atomically ... ok
+test zone_expires_player_buffs_for_observers_and_late_joiners ... ok
+test zone_explicit_disposition_overrides_ai0_for_direct_and_materialized_attacks ... ok
+test zone_ground_drop_claim_blocks_non_owner_until_owner_window_expires ... ok
+test zone_ground_drop_claim_cancel_restores_visibility ... ok
+test zone_ground_drop_claim_commit_removes_for_late_joiners ... ok
+test zone_ground_drop_countdown_changes_keep_generation_but_not_claim_identity ... ok
+test zone_ground_drop_nearest_claim_filters_range_and_allowed_ids ... ok
+test zone_ground_drop_object_id_claim_allows_adjacent_player_tile_only ... ok
+test zone_ground_drop_owner_group_and_unowned_protection_follow_crystal_semantics ... ok
+test zone_ground_drop_reclaim_uses_fresh_claim_id_and_stable_economic_key ... ok
+test zone_ground_drop_ticket_prevents_aba_and_duplicate_followups ... ok
+test zone_ground_drop_ticket_tampering_and_legacy_commands_fail_closed ... ok
+test zone_group_chat_routes_declared_members ... ok
+test zone_guild_chat_routes_same_guild ... ok
+test zone_melee_enforces_fishing_and_authoritative_mount_attack_capability ... ok
+test zone_melee_requires_trusted_dead_and_blocked_admission ... ok
+test zone_movement_emits_save_transform ... ok
+test zone_movement_writes_back_authoritative_transform_to_session ... ok
+test zone_native_archer_stonetrap_spawns_static_trap_and_expires ... ok
+test zone_native_archer_summon_snakes_spawns_static_totem_profile ... ok
+test zone_native_archer_summon_toad_uses_ranged_pet_attack ... ok
+test zone_native_archer_summon_vampire_spawns_at_target_and_recalls_existing_pet ... ok
+test zone_native_charmed_snake_hit_applies_paralysis_poison ... ok
+test zone_native_harvestable_monster_cannot_respawn_before_object_harvested ... ok
+test zone_native_holy_deva_uses_ranged_summon_attack_against_hostile_monster ... ok
+test zone_native_monster_combat_kill_and_drop_are_authoritative ... ok
+test zone_native_monster_green_poison_does_not_block_movement ... ok
+test zone_native_monster_melee_damage_is_data_driven_from_crystal_stats ... ok
+test zone_native_monster_paralysis_blocks_movement_until_status_expires ... ok
+test zone_native_monster_preserves_crystal_move_speed_in_real_milliseconds ... ok
+test zone_native_monster_same_object_id_respawns_as_attackable_new_incarnation ... ok
+test zone_native_monster_tick_attacks_adjacent_player_with_delayed_hit ... ok
+test zone_native_monster_tick_walks_toward_visible_player ... ok
+test zone_native_neutral_guards_do_not_follow_player ... ok
+test zone_native_pet_enhancer_buffs_owned_summon_and_increases_damage ... ok
+test zone_native_player_area_magic_damages_secondary_monsters_authoritatively ... ok
+test zone_native_player_blizzard_family_spawns_ground_spell_and_ticks_damage ... ok
+test zone_native_player_buff_stats_authoritatively_modify_damage_until_expiry ... ok
+test zone_native_player_cripple_shot_consumes_poison_buff_and_spreads_green_poison ... ok
+test zone_native_player_cripple_shot_consumes_vampire_buff_and_heals_owner ... ok
+test zone_native_player_defence_buff_mitigates_monster_damage_until_expiry ... ok
+test zone_native_player_explosive_trap_spawns_front_row_and_detonates_once ... ok
+test zone_native_player_fire_bounce_cancels_when_target_moves_beyond_crystal_tolerance ... ok
+test zone_native_player_fire_bounce_chains_projectiles_and_damage ... ok
+test zone_native_player_firewall_accepts_targetless_ground_cast ... ok
+test zone_native_player_firewall_spawns_ground_spell_and_ticks_damage ... ok
+test zone_native_player_firewall_subtracts_monster_magic_armour ... ok
+test zone_native_player_healing_circle_spawns_spell_and_heals_in_zone ... ok
+test zone_native_player_healing_self_schedules_zone_heal ... ok
+test zone_native_player_magic_control_stops_monster_ai_until_expiry ... ok
+test zone_native_player_magic_damages_monster_and_projects_authoritatively ... ok
+test zone_native_player_magic_respects_spell_action_window_across_spells ... ok
+test zone_native_player_magic_shield_adds_zone_buff_and_mitigates_hits ... ok
+test zone_native_player_magic_spends_mana_and_enforces_cooldown ... ok
+test zone_native_player_magic_subtracts_monster_magic_armour ... ok
+test zone_native_player_mass_healing_schedules_area_zone_heal ... ok
+test zone_native_player_meteor_shower_damages_primary_and_secondary_monsters ... ok
+test zone_native_player_poison_cloud_spawns_ground_spell_and_poisons_monsters ... ok
+test zone_native_player_poison_shot_applies_visible_arrow_buff ... ok
+test zone_native_player_poison_shot_ticks_green_damage_and_awards_kill ... ok
+test zone_native_player_range_attack_damages_monster_authoritatively ... ok
+test zone_native_player_range_attack_rejects_invalid_target ... ok
+test zone_native_player_range_attack_respects_attack_action_window ... ok
+test zone_native_player_summon_skeleton_recalls_existing_owned_summon_without_respawn ... ok
+test zone_native_player_summon_skeleton_spawns_owned_friendly_summon_after_delay ... ok
+test zone_native_player_trap_hexagon_roots_area_and_spawns_ring_objects ... ok
+test zone_native_player_trap_spawns_object_and_roots_lower_level_monster ... ok
+test zone_native_player_vampire_shot_heals_owner_through_zone_authority ... ok
+test zone_native_ranged_monster_attacks_without_chasing_when_target_not_adjacent ... ok
+test zone_native_snake_totem_caps_minions_and_respawns_after_minion_expiry ... ok
+test zone_native_snake_totem_self_destruct_kills_owned_minions ... ok
+test zone_native_stonetrap_draws_hostile_monster_aggro_without_player_damage ... ok
+test zone_native_summon_attacks_hostile_monster_for_owner_without_hitting_players ... ok
+test zone_native_summon_shinsu_spawns_owned_pet_and_attacks_hostile_monster ... ok
+test zone_native_vampire_spider_explodes_on_expiry_and_vampires_nearby_target ... ok
+test zone_native_vampire_spider_hit_bleeds_target_and_heals_owner ... ok
+test zone_neutral_harvestable_monster_accepts_only_adjacent_melee ... ok
+test zone_one_shot_map_shout_is_consumed_before_next_profile_sync ... ok
+test zone_player_attack_armour_can_fully_block_authoritative_damage ... ok
+test zone_player_attack_luck_biases_authoritative_damage_toward_max ... ok
+test zone_player_attack_misses_evasive_monster_authoritatively ... ok
+test zone_player_base_armour_mitigates_incoming_monster_melee ... ok
+test zone_player_physical_armour_does_not_reduce_incoming_magic_damage ... ok
+test zone_range_attack_requires_trusted_admission_and_enforces_nine_tile_boundary ... ok
+test zone_recomputes_authoritative_magic_damage_ignoring_supplied_scalar ... ok
+test zone_rejects_player_movement_skill_transform_into_occupied_tile ... ok
+test zone_resolves_player_attack_damage_from_authoritative_stats ... ok
+test zone_resolves_player_critical_hit_from_authoritative_stats ... ok
+test zone_shout_applies_crystal_cooldown_and_position_macro ... ok
+test zone_shout_level_gate_and_linked_item_text_match_crystal_surface ... ok
+test zone_starter_armour_can_fully_block_scarecrow_damage ... ok
+test zone_update_player_combat_stats_promotes_to_authoritative_damage ... ok
+test zone_wall_clock_deer_respawn_waits_for_authoritative_harvest ... ok
+test zone_wall_clock_respawn_is_emitted_once_for_two_observing_sessions ... ok
+test zone_wall_clock_respawn_waits_for_every_crystal_harvest_ai ... ok
+test zone_whisper_routes_sender_and_target_only ... ok
+
+test result: ok. 204 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 3.57s
+

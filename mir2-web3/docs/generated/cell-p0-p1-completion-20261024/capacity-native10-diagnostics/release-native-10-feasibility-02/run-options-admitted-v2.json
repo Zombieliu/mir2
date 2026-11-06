@@ -1,0 +1,18 @@
+{
+  "realm": "isolated",
+  "endpoint": "ws://127.0.0.1:17510/ws",
+  "profile": "probe",
+  "activityMode": "native",
+  "stages": "10",
+  "stageSeconds": 30,
+  "soakSeconds": 360,
+  "combatActors": 1,
+  "resumeSamples": 0,
+  "saveSamples": 0,
+  "wallSeconds": 1800,
+  "scenarioFile": "C:/mir2-build/p01-completion-20261024/release-native-10-feasibility-02/scenario.json",
+  "scope": "Frozen Release99bc and original native driver plus narrowly authorized probe cap10 boundary; unique independent ten ordinary fresh account/character natural-supply feasibility run. No grants, teleports, Butcher or server content changes. Original18/12 and six60s windows unchanged. Not formal capacity acceptance.",
+  "loginNotBefore": "2026-10-24T16:35:23.3344864+00:00",
+  "repositoryCommit": "38194647a59bc356259e442b3f837e8c231e279d",
+  "admissionLedgerScope": "Fresh private File realm; zero prior Login; persistent per-realm auth ledger; ordinary NewCharacter serialized by max-in-flight1; no limit reset or credentials rotation"
+}

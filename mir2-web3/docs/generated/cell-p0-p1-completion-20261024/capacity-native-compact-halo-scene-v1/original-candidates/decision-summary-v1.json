@@ -1,0 +1,458 @@
+{
+  "schemaVersion": 1,
+  "createdAt": "2026-10-25T05:21:22.609Z",
+  "scope": "Small root-decision projection of static proposal; no runtime acceptance",
+  "productFrozen": "6d70d02d0bc390156b77a3e48acee714fc87cda3",
+  "driver9": "05c07c2e487e4b65c5068f8803f96bdc6a66a342c5fc44c21f3a64b6b8581073",
+  "source9RawVerified": true,
+  "parameters": {
+    "schemaVersion": 1,
+    "mapFileName": "0",
+    "patrolSpan": 2,
+    "bodySide": 3,
+    "haloSide": 5,
+    "bounds": {
+      "minX": 208,
+      "maxX": 376,
+      "minY": 512,
+      "maxY": 682
+    },
+    "origin": {
+      "x": 288,
+      "y": 616
+    },
+    "monsterNames": [
+      "Deer",
+      "Scarecrow"
+    ],
+    "actors": 100,
+    "prefixes": [
+      2,
+      10,
+      25,
+      50,
+      100
+    ],
+    "fighterIndices": [
+      5,
+      15,
+      25,
+      35,
+      45,
+      55,
+      65,
+      75,
+      85,
+      95
+    ],
+    "maxExpanded": 4000,
+    "stableWitnessRange": 6,
+    "bodyExcludesCanonicalInitialMonsters": true,
+    "initialDangerHalfWidth": 8,
+    "initialDangerHalfHeight": 6,
+    "ordinaryProtocolOnly": true,
+    "freshWarrior": true,
+    "grants": false,
+    "newSpawnRules": false,
+    "productChanges": false,
+    "attacksPerFighterMinute": 18,
+    "positiveHitsPerFighterMinute": 12,
+    "minimumNativeCompletion": 0.95,
+    "minimumRunFraction": 0.5,
+    "minimumNativeCellsPerMinute": 80,
+    "opportunityMs": 750,
+    "commandsPerSecond": 3,
+    "actualRuntimeLimitsUnchanged": {
+      "pathTargets": 4,
+      "adjacentGoals": 8,
+      "searchNodesPerPath": 4000,
+      "attackDeadlineMs": 900,
+      "chaseMoves": 40,
+      "chaseMs": 30000,
+      "visits": 3
+    },
+    "accepted": false,
+    "capacityAccepted": false,
+    "staticOnly": true
+  },
+  "firstTen": [
+    {
+      "x": 242,
+      "y": 596
+    },
+    {
+      "x": 234,
+      "y": 590
+    },
+    {
+      "x": 232,
+      "y": 578
+    },
+    {
+      "x": 237,
+      "y": 578
+    },
+    {
+      "x": 252,
+      "y": 585
+    },
+    {
+      "x": 239,
+      "y": 596
+    },
+    {
+      "x": 257,
+      "y": 590
+    },
+    {
+      "x": 255,
+      "y": 609
+    },
+    {
+      "x": 232,
+      "y": 613
+    },
+    {
+      "x": 239,
+      "y": 602
+    }
+  ],
+  "tenScene": {
+    "file": "candidate-10-compact-v2.json",
+    "bytes": 804,
+    "sha256": "a42a26a195dd5ac25135bff57e73f7f21b71f97b5cc1814351920ece621362ba"
+  },
+  "initial100Scene": {
+    "file": "candidate-100-compact-v2.json",
+    "bytes": 5844,
+    "sha256": "db9031fa25c4d6666dd11911792bbefd8652fe5ff30e3b5c21c692a0e6c1a299"
+  },
+  "sameConservativeSixComparison": {
+    "currentSpan4": {
+      "targets": 8,
+      "Deer": 5,
+      "Scarecrow": 3,
+      "representativeScoutSteps": 92
+    },
+    "newSpan2": {
+      "targets": 28,
+      "Deer": 21,
+      "Scarecrow": 7,
+      "representativeScoutSteps": 97
+    },
+    "actualSupplyUnknown": true
+  },
+  "conditionalLevelSupply": [
+    {
+      "actors": 2,
+      "fighters": 0,
+      "targets": 0,
+      "requiredHitsPerMinute": 0,
+      "levels": [
+        {
+          "level": 1,
+          "dc": [
+            2,
+            4
+          ],
+          "expectedIdealHitsPerMinute": 0,
+          "scope": "conditional ideal expectation; not a bound or pass"
+        },
+        {
+          "level": 5,
+          "dc": [
+            3,
+            5
+          ],
+          "expectedIdealHitsPerMinute": 0,
+          "scope": "conditional ideal expectation; not a bound or pass"
+        },
+        {
+          "level": 10,
+          "dc": [
+            4,
+            6
+          ],
+          "expectedIdealHitsPerMinute": 0,
+          "scope": "conditional ideal expectation; not a bound or pass"
+        },
+        {
+          "level": 15,
+          "dc": [
+            5,
+            7
+          ],
+          "expectedIdealHitsPerMinute": 0,
+          "scope": "conditional ideal expectation; not a bound or pass"
+        }
+      ]
+    },
+    {
+      "actors": 10,
+      "fighters": 1,
+      "targets": 28,
+      "requiredHitsPerMinute": 12,
+      "levels": [
+        {
+          "level": 1,
+          "dc": [
+            2,
+            4
+          ],
+          "expectedIdealHitsPerMinute": 57.722063220564486,
+          "scope": "conditional ideal expectation; not a bound or pass"
+        },
+        {
+          "level": 5,
+          "dc": [
+            3,
+            5
+          ],
+          "expectedIdealHitsPerMinute": 44.09352232891327,
+          "scope": "conditional ideal expectation; not a bound or pass"
+        },
+        {
+          "level": 10,
+          "dc": [
+            4,
+            6
+          ],
+          "expectedIdealHitsPerMinute": 35.816186556927306,
+          "scope": "conditional ideal expectation; not a bound or pass"
+        },
+        {
+          "level": 15,
+          "dc": [
+            5,
+            7
+          ],
+          "expectedIdealHitsPerMinute": 30.787654320987638,
+          "scope": "conditional ideal expectation; not a bound or pass"
+        }
+      ]
+    },
+    {
+      "actors": 25,
+      "fighters": 2,
+      "targets": 72,
+      "requiredHitsPerMinute": 24,
+      "levels": [
+        {
+          "level": 1,
+          "dc": [
+            2,
+            4
+          ],
+          "expectedIdealHitsPerMinute": 149.27417279936375,
+          "scope": "conditional ideal expectation; not a bound or pass"
+        },
+        {
+          "level": 5,
+          "dc": [
+            3,
+            5
+          ],
+          "expectedIdealHitsPerMinute": 114.03736727124918,
+          "scope": "conditional ideal expectation; not a bound or pass"
+        },
+        {
+          "level": 10,
+          "dc": [
+            4,
+            6
+          ],
+          "expectedIdealHitsPerMinute": 92.63122999542755,
+          "scope": "conditional ideal expectation; not a bound or pass"
+        },
+        {
+          "level": 15,
+          "dc": [
+            5,
+            7
+          ],
+          "expectedIdealHitsPerMinute": 79.66460905349791,
+          "scope": "conditional ideal expectation; not a bound or pass"
+        }
+      ]
+    },
+    {
+      "actors": 50,
+      "fighters": 5,
+      "targets": 110,
+      "requiredHitsPerMinute": 60,
+      "levels": [
+        {
+          "level": 1,
+          "dc": [
+            2,
+            4
+          ],
+          "expectedIdealHitsPerMinute": 226.4498498735827,
+          "scope": "conditional ideal expectation; not a bound or pass"
+        },
+        {
+          "level": 5,
+          "dc": [
+            3,
+            5
+          ],
+          "expectedIdealHitsPerMinute": 172.99400497891594,
+          "scope": "conditional ideal expectation; not a bound or pass"
+        },
+        {
+          "level": 10,
+          "dc": [
+            4,
+            6
+          ],
+          "expectedIdealHitsPerMinute": 140.52080475537264,
+          "scope": "conditional ideal expectation; not a bound or pass"
+        },
+        {
+          "level": 15,
+          "dc": [
+            5,
+            7
+          ],
+          "expectedIdealHitsPerMinute": 120.8436213991769,
+          "scope": "conditional ideal expectation; not a bound or pass"
+        }
+      ]
+    },
+    {
+      "actors": 100,
+      "fighters": 10,
+      "targets": 129,
+      "requiredHitsPerMinute": 120,
+      "levels": [
+        {
+          "level": 1,
+          "dc": [
+            2,
+            4
+          ],
+          "expectedIdealHitsPerMinute": 257.801094884788,
+          "scope": "conditional ideal expectation; not a bound or pass"
+        },
+        {
+          "level": 5,
+          "dc": [
+            3,
+            5
+          ],
+          "expectedIdealHitsPerMinute": 196.98065335568805,
+          "scope": "conditional ideal expectation; not a bound or pass"
+        },
+        {
+          "level": 10,
+          "dc": [
+            4,
+            6
+          ],
+          "expectedIdealHitsPerMinute": 160.0105166895289,
+          "scope": "conditional ideal expectation; not a bound or pass"
+        },
+        {
+          "level": 15,
+          "dc": [
+            5,
+            7
+          ],
+          "expectedIdealHitsPerMinute": 137.78436213991765,
+          "scope": "conditional ideal expectation; not a bound or pass"
+        }
+      ]
+    }
+  ],
+  "conditionalClosedPoolXp": {
+    "canonicalSlots": 129,
+    "scope": "Conditional closed129canonical-slot pool only, no external wandering-in targets/quest/other XP/positive bonuses, every slot killed immediately after due refresh; all rewards assigned to ONE actor at tier2 for the whole bound. Level penalties, shared allocation, travel and kill time omitted, so deliberately overgenerous.",
+    "twoHours": {
+      "minutes": 120,
+      "idealKillsIncludingInitial": 3881,
+      "deliberatelyOvergenerousTier2XpAssignedAllToOneFreshActor": 133266
+    },
+    "entire18000SecondBudget": {
+      "minutes": 300,
+      "idealKillsIncludingInitial": 9509,
+      "deliberatelyOvergenerousTier2XpAssignedAllToOneFreshActor": 326586
+    },
+    "requiredXpLevel20": 456900,
+    "requiredXpLevel25": 1896900,
+    "level20NotReachedEvenByThisOvergenerousClosedFiveHourModel": true
+  },
+  "boundedSuffix": {
+    "sameFirst10Raw": true,
+    "sameCoordinateSet": true,
+    "nearest": {
+      "file": "candidate-100-nearest-ordered-final-v3.json",
+      "bytes": 5844,
+      "sha256": "ed268ed3b81f06d1894a2ad60689a70dbabfced752042a773551e77d8483d436"
+    },
+    "nearestSafetyAndBfsPassed": true,
+    "nearestScout": {
+      "10": 97,
+      "25": 172,
+      "50": 372,
+      "100": "FAILED atobserver92 first4original4000paths"
+    },
+    "continuous": "FAILED originalcluster:Combat home lacks declared observer coverage",
+    "noFurtherAttempts": true
+  },
+  "full100AndTenCanBeJointlyPromised": false,
+  "tenStaticCandidateOnly": true,
+  "realProbeAuthorized": false,
+  "formalReady": false,
+  "capacityAccepted": false,
+  "accepted": false,
+  "mainArtifacts": [
+    {
+      "file": "review-proposal-v1.json",
+      "bytes": 188641,
+      "sha256": "31f59618df57aec60811a32c39c0cf76a5244d8cc4af844a017bff6220cdfb54"
+    },
+    {
+      "file": "validation-compact-v2-final-v2.json",
+      "bytes": 9263181,
+      "sha256": "38e2dcd3516fde45b299a6a63df58ccfb42ed5bafcb1b0e64471c4616b7a7d4a"
+    },
+    {
+      "file": "conditional-level-supply-final-v2.json",
+      "bytes": 50855,
+      "sha256": "464506dbfd043d46588cd2e34ca3b0687dbc0db4b2fb710fca4b5be3ae568f7c"
+    },
+    {
+      "file": "prefix-scout-cost-compact-final-v2.json",
+      "bytes": 50131,
+      "sha256": "0746f4901f3cbadb47b74e4ba1386c3e7bfffe24025ab278856685462509112f"
+    },
+    {
+      "file": "validation-nearest-ordered-final-v3.json",
+      "bytes": 7233814,
+      "sha256": "358e1eb027306424d82324147374e9eb9d11d190a98cc86b9934ac536869a8de"
+    },
+    {
+      "file": "conditional-level-supply-nearest-final-v3.json",
+      "bytes": 48409,
+      "sha256": "974c824a8b5fc99a4b9ac6212571f0c0679f6ff74f6e4d5a0553c2aae72e3ab1"
+    },
+    {
+      "file": "prefix-scout-cost-nearest-final-v3.json",
+      "bytes": 58602,
+      "sha256": "d997af8375ba508f9b87ec833da239a542681ca0cc32ea3342d666df599ca1d0"
+    },
+    {
+      "file": "validation-continuous-ordered-final-v3.log",
+      "bytes": 993,
+      "sha256": "0e9c3bc7ffab7be5ac1e6756433d84bcb39d7e5b850b8326a0c086d101e5f2be"
+    },
+    {
+      "file": "syntax-verification-v1.json",
+      "bytes": 3844,
+      "sha256": "0afbaeec83645a2a055a536f33a6cdc3d83e1903d525383e4eb5cdaca7005dd8"
+    }
+  ],
+  "correction": "Externalmetadata80field means receipt-backed movedcells/minute, not distinct coordinates; oldreports/lib .txt preimage kept; fresh final validation/model numeric results identical.",
+  "nextStep": "Wait for independent QA and root decision; do not start new service/launcher or P2. Static candidate is not a fresh2h capacity result.",
+  "independentReviewPending": true
+}

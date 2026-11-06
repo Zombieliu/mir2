@@ -1,0 +1,71 @@
+{
+  "schemaVersion": 1,
+  "state": "PENDING_FRESH_PROBE16_TERMINAL_AND_TOOL_CLOSURE",
+  "policy": {
+    "profile": "standard",
+    "activityMode": "native",
+    "movementIntervalMs": 750,
+    "stages": [
+      2,
+      10,
+      25,
+      50,
+      100
+    ],
+    "stageSeconds": 300,
+    "soakSeconds": 7200,
+    "wallSeconds": 18000,
+    "layout": "dispersed",
+    "combatActors": 10,
+    "resumeSamples": 5,
+    "saveSamples": 5,
+    "commandsPerSecond": 3,
+    "intentionIntervalMs": 750,
+    "variableActionCadence": true,
+    "maximumSendLatenessMs": 250,
+    "movementP95Ms": 750,
+    "chatP95Ms": 1000,
+    "actionTimeoutMs": 2000,
+    "timeoutExclusive": 0.01,
+    "maximumMissedPlanRatio": 0.05,
+    "maximumCorrectionRatio": 0.05,
+    "minimumMovesPerMinute": 30,
+    "minimumCombatHitsPerMinute": 12,
+    "minimumCombatAttacksPerMinute": 18,
+    "aoiRange": 16,
+    "aoiGraceMs": 1000,
+    "nativeChatIntervalMs": 30000,
+    "nativeTurnIntervalMs": 60000,
+    "minimumNativeRunRatio": 0.5,
+    "minimumNativeCellsPerMinute": 80,
+    "maximumEvidenceInFlight": 4,
+    "maximumMemorySlopeMiBPerHour": 32,
+    "memoryWarmupSeconds": 300,
+    "maximumDriverLagP99Ms": 250,
+    "fullAcceptanceEligible": true
+  },
+  "formalCompleteMinuteWindows": 146,
+  "postObservation": {
+    "phase": "post-resume-observation",
+    "seconds": 60,
+    "actors": 100
+  },
+  "actualRateDenominator": "measuredSeconds",
+  "originalThresholdsUnchanged": true,
+  "resourceProfile": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-attack-deadline-ladder-12\\resource-profile.json",
+    "bytes": 1630,
+    "sha256": "9c5825d9a0c1a002081e439151d9d158dcbd78af64347f339f83b8e690924a88"
+  },
+  "knownActualPrerequisites": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-attack-deadline-ladder-12\\known-actual-prerequisites-v2.json",
+    "bytes": 2279,
+    "sha256": "d1cccb177788b1adff608b93a0111134b1407135281dcaa57982618d4718d6a4"
+  },
+  "freshProbe16Pending": true,
+  "sealExecuted": false,
+  "guardExecuted": false,
+  "accountsPrepared": false,
+  "realmStarted": false,
+  "capacityAccepted": false
+}

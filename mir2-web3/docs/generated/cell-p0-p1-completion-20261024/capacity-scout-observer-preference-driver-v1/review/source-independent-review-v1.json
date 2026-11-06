@@ -1,0 +1,123 @@
+{
+  "schemaVersion": 1,
+  "reviewedAt": "2026-10-25T21:00:10.523Z",
+  "scope": "Read-only review of the frozen two-file scout waypoint preference candidate, raw preimages, nine added fixtures and existing author-run focused TAP. No target import, tests, service, benchmark or game-raw read performed by this reviewer.",
+  "sources": {
+    "main": {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\playtest-capacity-soak.mjs",
+      "bytes": 153586,
+      "sha256": "99914efc602be1600207ab4e2e78f960766332d3064a93307f5268c29448e037"
+    },
+    "test": {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\playtest-capacity-soak.test.mjs",
+      "bytes": 258200,
+      "sha256": "0e28f856648a69053fd538d2e493c97ad046b0714381e8fdfaacb72782abe711"
+    },
+    "beforeMain": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\scout-observer-preference-v1\\preimages\\playtest-capacity-soak.mjs.txt",
+      "bytes": 149057,
+      "sha256": "bd731443c41d54a237fc0a6d83f2619d049c0226cbd7f154f67717e8fb0dcea5"
+    },
+    "beforeTest": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\scout-observer-preference-v1\\preimages\\playtest-capacity-soak.test.mjs.txt",
+      "bytes": 243920,
+      "sha256": "ec388119871058883781e2cf422a417c3fb319c25d344fd3092f18da9b354966"
+    },
+    "preimageManifest": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\scout-observer-preference-v1\\preimages-v1.json",
+      "bytes": 752,
+      "sha256": "43938a42d1b6fe5925dd6b6cd36d3e5dbc1b0bf8003afa2c722170d304ff15f7"
+    },
+    "authorFocusedLog": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\scout-observer-preference-focused-final-v1.log",
+      "bytes": 2753,
+      "sha256": "466425ec6d7cf724952c0867035ab65b3635083c0107b78241155414ce5fbd94"
+    }
+  },
+  "preservation": {
+    "mainExactInverseTo149057BytePreimage": true,
+    "inverseMethod": "Remove four new limit constants, revert only movement signature/obstacle-source two-line change, replace added hint/selection helpers and changed scout function with original scout function; recovered full original raw string exactly.",
+    "originalTest243920BytePrefixExact": true,
+    "oldAssertionsAndFixturesUnchanged": true,
+    "nineNewTestsAppended": true
+  },
+  "sourceFindings": [
+    {
+      "id": "fallback-budget",
+      "passed": true,
+      "detail": "The original cyclic plan is found first. Its successful result is retained while preference candidates consume only the unused part of the same four scout A* calls, each retaining maxExpanded4000. Failed hints cannot erase that plan."
+    },
+    {
+      "id": "existing-scout",
+      "passed": true,
+      "detail": "An established scout is limited to its original home and receives no preference scan; clock, online elapsed time, confirmed ACKs, sequence and visited Map retain the original rules. Original 24 ACK/20s/3visit advance conditions are unchanged."
+    },
+    {
+      "id": "peer-hint-only",
+      "passed": true,
+      "detail": "Only declared active/living/same-map movement peers participate. Eligible ordinary positive-ID integer-position targets must pass failed/deferred/claim, active coverage, actual peer-target6 and potential walkable unoccupied adjacent-tile6/transfer filters. A hint selects a declared peer waypoint, without adding an owner entity, selecting direct attack, acquiring a target claim or creating pursuit evidence."
+    },
+    {
+      "id": "send-and-receipts",
+      "passed": true,
+      "detail": "Combat approach/selection, action send-time navigation and stable witness checks, pending claims, actual typed attack deadlines and all measurement paths are outside the changed source ranges. Fresh successful nonzero movement receipts remain necessary for scout ACK credit; Run-first is not waypoint arrival."
+    },
+    {
+      "id": "discarded-obstacles",
+      "passed": true,
+      "detail": "The optional fifth movement argument is supplied only for preference paths and reuses the already captured obstacles; discarded hint paths do not invoke additional rejectedWalkCells expiry cleanup. Existing callers retain original behavior."
+    },
+    {
+      "id": "bounded-public-diagnostic",
+      "passed": true,
+      "detail": "Scan limits are 100 declared observer homes,2048 snapshot entities each,and four hint waypoints; diagnostic writes occur after selection only when hints exist. At most31 full selection rows plus one truncation row per actor/phase; fixed fields do not copy snapshots, names or packets and do not change opportunity/completion counters."
+    }
+  ],
+  "testReview": {
+    "appendedNames": [
+      "observer scout preference keeps the original cyclic no-hint plan and emits no selection credit",
+      "observer scout preference uses peer-only target geometry for ordinary movement without inventing owner visibility",
+      "observer scout preference preserves the exact cyclic fallback when hints exhaust only the remaining four-search budget",
+      "observer scout preference excludes ineligible targets, unavailable peers and geometry without changing fallback",
+      "observer scout preference allows expired exclusions and own claims using wall-clock eligibility",
+      "observer scout preference never resets an established scout clock, ACKs, visits or other finite pursuit budgets",
+      "observer scout preference keeps Run-first ACK separate from waypoint arrival and ignores duplicate or corrected receipts",
+      "observer scout preference bounds snapshot hints and per-phase selection diagnostics without gameplay credit",
+      "observer scout preference discarded paths reuse read-only obstacles without an extra rejected-cell cleanup"
+    ],
+    "coverage": [
+      "Original cyclic no-hint plan/no extra row and original18/12 cadence preserved.",
+      "Peer-only visible target selects ordinary movement while owner snapshot/claim/pursuit/action evidence remain unchanged.",
+      "Hint path failure consumes three remaining attempts and returns byte-equivalent original fallback.",
+      "34 ineligibility variants include target lifecycle/ownership/type/ID/coordinate/terrain/transfer/coverage/exclusions and peer lifecycle/role/map/declaration.",
+      "Expired wall-clock exclusions and own claims remain allowed.",
+      "Established scout clock/ACK/visited/pursuit budget identity preserved; corrected receipt gives no credit and real ACK reaches original24-move exit.",
+      "Run-first ACK gives one movement credit without waypoint advance; duplicate/corrected receipts give none; actual goal ACK advances.",
+      "2048 entity boundary and32 per-phase rows with explicit truncation; phase reset and no gameplay credit.",
+      "Time-changing peer fixture proves discarded paths cannot add another rejected-cell cleanup."
+    ],
+    "authorFocusedTAP": {
+      "passed": 9,
+      "failed": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "logReadByReviewer": true,
+      "reexecutedByReviewer": false
+    },
+    "fullRegressionObservedByReviewer": false
+  },
+  "limitations": [
+    "This establishes static correctness of the bounded planning preference and fixture quality, not improved live monster supply, CPU performance or capacity acceptance.",
+    "The selected waypoint is the peer home neighborhood; the potential attack tile is eligibility geometry only, not a guarantee that the selected route ends in attack range or that a target remains live/visible after movement.",
+    "No new full regression result is claimed in this source review; the author-run9 focused TAP is the only new execution evidence reviewed here."
+  ],
+  "verdict": {
+    "sourceContractPassed": true,
+    "testQualityPassed": true,
+    "eligibleForRootFullRegression": true,
+    "blockingFindingIds": [],
+    "capacityAccepted": false,
+    "p0Passed": false,
+    "p2Started": false
+  }
+}

@@ -1,0 +1,129 @@
+{
+  "schema": "mir2-bounded-source-review/1",
+  "reviewer": "/root/five_class_content_audit",
+  "createdUtc": "2026-10-11T08:58:29.408802+00:00",
+  "acceptedForFocusedTests": true,
+  "scope": [
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/zone/runtime/entity_combat.rs",
+      "sha256": "956e1224d3b94971340a33de04c70a0d5e94c347bed02091bf2bcb9ddf39a944"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/zone/runtime.rs",
+      "sha256": "8b5cfe48c9661f594d8f49f62f9b237bbff3b6b38a6799671b1ca134d3433dd9"
+    }
+  ],
+  "independentReviewReferences": [
+    {
+      "path": "work/fiveclass-20261010/legacy-fixture-repair-review01.json",
+      "sha256": "c28deb1a0ed2d0702180bac90da1baf7102f2d65bd04f3eb56a2d90ffd81a8ee"
+    }
+  ],
+  "beforeScope": [
+    {
+      "path": "work/fiveclass-20261010/legacy-fixture-repair01/before-runtime.rs",
+      "sha256": "e6cb8db6e28eb67fd67e05342696a8cd543893c005b7accd777fb8c9ad1f60b5"
+    },
+    {
+      "path": "work/fiveclass-20261010/legacy-fixture-repair01/before-entity_combat.rs",
+      "sha256": "a517fd7dcab1bcb38adc08f2a66e497ad98c8e7f534069db4f91d74e7477db72"
+    }
+  ],
+  "checks": [
+    {
+      "name": "historical_entity_review_unchanged_and_exact_scope_matches",
+      "accepted": true,
+      "evidence": {
+        "priorReview": "work/fiveclass-20261010/legacy-fixture-repair-review01.json",
+        "priorReviewSha256": "c28deb1a0ed2d0702180bac90da1baf7102f2d65bd04f3eb56a2d90ffd81a8ee",
+        "entityScopeSha256": "956e1224d3b94971340a33de04c70a0d5e94c347bed02091bf2bcb9ddf39a944",
+        "threeTestPrerequisiteRepairs": "two real SyncPlayerVitalsAndLife death/revive cycles and lawful stationary wild-to-pet target at551; all prior strict assertions retained"
+      }
+    },
+    {
+      "name": "only_two_runtime_test_bodies_changed",
+      "accepted": true,
+      "evidence": {
+        "tests": [
+          "all_mode_shared_range_attack_damages_remote_player",
+          "all_mode_shared_magic_damages_remote_player_and_spends_mana"
+        ],
+        "inverseReplaceBothBodiesExactlyRestoresBeforeRuntime": true,
+        "productionChanged": false,
+        "testDefinitionCountUnchanged": true,
+        "allOtherTestsAndHelpersUnchanged": true
+      }
+    },
+    {
+      "name": "archer_source_impact_boundary_and_actual_aoi_recipient",
+      "accepted": true,
+      "evidence": {
+        "source": "E:/mir2-player-journey/Crystal/Server/MirObjects/HumanObject.cs:2749-2753,2812-2845",
+        "admission": "existing class-aware helper already installs real Archer class/has_class_weapon=true trusted admission; no new bypass",
+        "distance": 4,
+        "launchAtMs": 100,
+        "sourceDelayMs": 750,
+        "impactAtMs": 850,
+        "negativeBoundaryAtMs": 849,
+        "originalAssertionsPreserved": [
+          "HP becomes0",
+          "PlayerDamaged actual damage40",
+          "ObjectRangeAttack target_id102"
+        ],
+        "newAssertions": [
+          "HP40 immediately at launch",
+          "HP40 at849",
+          "no PlayerDamaged for actual target before850"
+        ],
+        "deliveryAssertion": "ObjectRangeAttack must be in ToMany whose session_ids contains the actual target SessionId, not an arbitrary packet or receipt",
+        "actualVariantFields": "zone/types.rs:873-875 ToMany { session_ids: Vec<SessionId>, packets: Vec<ServerPacket> }",
+        "deterministicFixtureMath": "existing Source range fixture at100 yields RangeHitChance roll6 below chance56 and raw DC48; this calculation predicts original capped damage40 without weakening it; not a test execution claim"
+      }
+    },
+    {
+      "name": "wizard_source_identity_mana_and_fireball_boundary",
+      "accepted": true,
+      "evidence": {
+        "source": "E:/mir2-player-journey/Crystal/Server/MirObjects/HumanObject.cs:3939-3949",
+        "casterCorrection": "actual MirClass::Wizard and trusted min_mc=max_mc50 rather than Warrior with only DC50; no changed MP cost or damage argument",
+        "launchAtMs": 100,
+        "sourceDelayMs": 700,
+        "impactAtMs": 800,
+        "negativeBoundaryAtMs": 799,
+        "originalAssertionsPreserved": [
+          "target HP becomes0",
+          "caster MP95",
+          "PlayerDamaged actual damage40",
+          "ObjectMagic target_id102 in original ToAll delivery"
+        ],
+        "newAssertions": [
+          "target HP40 at launch and799",
+          "MP95 already at launch",
+          "no PlayerDamaged for actual target before800"
+        ],
+        "oldSourceComparison": "FireBall already used the same delayed owned_human_spell_delay/queue in baseline64b6b10c; only new StraightShot/DoubleShot branch touches neighboring player-magic method"
+      }
+    },
+    {
+      "name": "failure_classification_and_strictness",
+      "accepted": true,
+      "evidence": {
+        "oldResults": "native_entity_19pass/3fail and all_mode_shared_1pass/2fail raw results preserved",
+        "oldEntityAndPvpTests": "all five tested functions and relevant fixtures existed unchanged in baseline",
+        "rangeCause": "intentional Source-correct new Archer typed delayed impact makes old immediate-damage/AOI-ToAll fixture obsolete",
+        "otherCauses": "two lifecycle and Dazed legal-threat prerequisites plus existing FireBall delay fixture omissions",
+        "noWeakenedDamageManaLifeTiming": "same Source-based values; add exact earlier deadline checks rather than widen intervals or bypass production gates",
+        "baselineNotExecuted": "reviewer compared exact baseline source only; no baseline runtime result asserted"
+      }
+    }
+  ],
+  "findings": [],
+  "sourceDrift": [],
+  "cargoStarted": false,
+  "productWrittenByReviewer": false,
+  "limitations": [
+    "acceptedForFocusedTests authorizes Root controlled serial focused checks of exact reviewed source; it is not a test pass or release acceptance.",
+    "This review supersedes the one-file scope of review01 by adding exact runtime test fixture scope; review01 remains preserved byte-for-byte.",
+    "Reviewer did not edit product/tests, run Cargo/builds/Node tests or access live accounts."
+  ]
+}

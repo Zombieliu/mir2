@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "library": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\scout-selection-diagnostics-runtime-v1\\source-lib-v1.mjs",
+    "bytes": 57227,
+    "sha256": "c94effada25cba3664c9920412d833b2356d98f503e36f8521e7d958e591f48d"
+  },
+  "adapter": "projection-build-source-lib.mjs",
+  "expectedBackendInputCount": 50,
+  "backendBuildCommit": "c743122af05faca43d9535d8c6c2a4bfb01b924f",
+  "currentExecutionHead": "b5374083d257d375437af3de42bead159cd2b917",
+  "runtimeBinding": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\scout-selection-diagnostics-runtime-v1\\current-execution-binding-v1.json",
+    "bytes": 1429,
+    "sha256": "1886e56e3e3846000932d053c727c21c893393cb6be35e844ee880a2a711b506"
+  },
+  "runtimeBindingDerivation": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\scout-selection-diagnostics-runtime-v1\\root-final-binding-derivation-v1.json",
+    "bytes": 2491,
+    "sha256": "4ed60d7e4267632af1145470841b96e802cdc1c987fd8f5becdd497db264e493"
+  },
+  "oldPreparedPendingBindingNotUsed": true,
+  "runtimeSourceReview": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\scout-selection-diagnostics-runtime-independent-review-v1\\final-binding-review-v2.json",
+    "bytes": 4774,
+    "sha256": "bb8fa1794aae6a06ad7a6b8b24b62ea54a830d9a0a2e732298d943bbef8e4117"
+  },
+  "runtimeGuardExecution": null,
+  "runtimeGuardStdout": null
+}

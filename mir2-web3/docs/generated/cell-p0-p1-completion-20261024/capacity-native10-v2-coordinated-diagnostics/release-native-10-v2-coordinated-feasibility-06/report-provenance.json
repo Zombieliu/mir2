@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "runId": "1792870589933-af9ef086",
+  "report": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-coordinated-feasibility-06\\reports\\1792870589933-af9ef086.report.json",
+    "bytes": 172239,
+    "sha256": "3cff9154f0ed9ea1c7b80089b144074f8b1fd86849620675d30f8c9eadb27da4"
+  },
+  "backendSourceCommit": "461f1d85eed6309a55a88bd79a0022f7b97febe4",
+  "driverSourceCommit": "c42f860e0544f0687a5ccf5ddaccad4daecc8acc",
+  "backendBinarySha256": "855b4ba3c80ccb99b4128a9ee1170bc56ad51fcbaf022d5269f0b6662986c61f",
+  "driverFrozenManifest": "C:\\mir2-build\\p01-completion-20261024\\capacity-movement-coordination-driver-frozen-v1.json",
+  "driverSourceSha256": "35868583cbacd7215bf3eadee0e8d6781ed1abe4f21bc40c0c0255d24797faae",
+  "originalBackendReleaseReused": true,
+  "scope": "Identity sidecar only. The original driver report bytes and verdict are unchanged; Launched remains distinct from positive damage.",
+  "capacityAccepted": false
+}

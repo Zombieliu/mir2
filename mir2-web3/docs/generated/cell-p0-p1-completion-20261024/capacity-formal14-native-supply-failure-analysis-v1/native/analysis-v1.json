@@ -1,0 +1,2035 @@
+{
+  "schemaVersion": 1,
+  "runId": "1792967155359-90bac462",
+  "scope": "One ended raw stream plus original report and historical13 summary. No tests,load,source writes,900ms packet replay or verdict changes.",
+  "createdAt": "2026-10-25T22:49:27.168Z",
+  "sources": {
+    "report": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\reports\\1792967155359-90bac462.report.json",
+      "bytes": 425962,
+      "sha256": "256f070c235cf7d188f0b0dc3700fbba8140e07781c3222b84eec53357989195"
+    },
+    "raw": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\reports\\1792967155359-90bac462.samples.jsonl",
+      "bytes": 52028305,
+      "rows": 82727,
+      "sha256": "25a4ae6a2635e61be6bdf27904415716c9f35de17138c6e8a74f39d92a8dfd05"
+    },
+    "reportFacts": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal14-native-failure-analysis-v1\\report-facts-v1.json",
+      "bytes": 18041,
+      "sha256": "e5e30d8a0ff7a89c6551f9508fee0b97861fcede8d686476c25b558ac60e1280"
+    },
+    "selectedEvidence": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal14-native-failure-analysis-v1\\selected-evidence-v1.json",
+      "bytes": 133251,
+      "sha256": "689f4ead8171a7f3d12513ec48bd31b76b860ec64b4b32d9af8d950afe41b2b1"
+    }
+  },
+  "reportFailure": "Stage25 W4 launch rate only:16 and18 attacks over60.075s are both below18/min; both positive hit rates exceed12/min,all native opportunities complete,other reported gates pass. Eighteen attempts is insufficient for a window longer than60s; the original actual-duration threshold is preserved.",
+  "wholeRunAttackReport": {
+    "count": 477,
+    "status": {
+      "success": 477
+    },
+    "fromSend": {
+      "count": 477,
+      "p50Ms": 77,
+      "p95Ms": 131,
+      "p99Ms": 175,
+      "maxMs": 516.3924000000115
+    },
+    "fromPlan": {
+      "count": 477,
+      "p50Ms": 93,
+      "p95Ms": 151,
+      "p99Ms": 202,
+      "maxMs": 530.2296999999089
+    },
+    "attackV2Requests": 477,
+    "attackV2NotLaunched": 0
+  },
+  "rawWholeRunAttackCounters": {
+    "rows": 477,
+    "success": 477,
+    "timeout": 0,
+    "notLaunched": 0,
+    "miss": 0,
+    "v2Requests": 477,
+    "launched": 477,
+    "positiveShared": 477,
+    "maxCompletionLatencyMs": 516.3924000000115
+  },
+  "continuous": {
+    "rows": 230,
+    "passed": 230,
+    "failed": 0
+  },
+  "rawTypes": {
+    "monitor": 546,
+    "phaseStarted": 6,
+    "action": 18993,
+    "coverage": 1059,
+    "playerLifecycle": 28009,
+    "admitted": 25,
+    "selfTransform": 15927,
+    "fanoutDistribution": 11801,
+    "compactNavigationWire": 5603,
+    "phaseEnded": 6,
+    "continuousWindow": 230,
+    "window": 15,
+    "stageComplete": 3,
+    "combatArrival": 2,
+    "pendingAttackEvidence": 477,
+    "combatScoutSelection": 12,
+    "movementCorrection": 2,
+    "combatScoutAdvanced": 10,
+    "finished": 1
+  },
+  "rawWindowHeaders": [
+    {
+      "line": 42504,
+      "phase": "stage-25",
+      "startedAtMs": 1792967921574,
+      "endedAtMs": 1792967981584,
+      "seconds": 60.01,
+      "passed": true,
+      "combat": [
+        {
+          "actor": "Leca0c805",
+          "attacks": 31,
+          "hits": 31,
+          "moves": 18
+        },
+        {
+          "actor": "Leca0c80f",
+          "attacks": 31,
+          "hits": 31,
+          "moves": 14
+        }
+      ]
+    },
+    {
+      "line": 52508,
+      "phase": "stage-25",
+      "startedAtMs": 1792967981584,
+      "endedAtMs": 1792968041667,
+      "seconds": 60.083,
+      "passed": true,
+      "combat": [
+        {
+          "actor": "Leca0c805",
+          "attacks": 20,
+          "hits": 20,
+          "moves": 38
+        },
+        {
+          "actor": "Leca0c80f",
+          "attacks": 24,
+          "hits": 24,
+          "moves": 29
+        }
+      ]
+    },
+    {
+      "line": 62336,
+      "phase": "stage-25",
+      "startedAtMs": 1792968041667,
+      "endedAtMs": 1792968101694,
+      "seconds": 60.027,
+      "passed": true,
+      "combat": [
+        {
+          "actor": "Leca0c805",
+          "attacks": 28,
+          "hits": 28,
+          "moves": 22
+        },
+        {
+          "actor": "Leca0c80f",
+          "attacks": 26,
+          "hits": 26,
+          "moves": 27
+        }
+      ]
+    },
+    {
+      "line": 72504,
+      "phase": "stage-25",
+      "startedAtMs": 1792968101694,
+      "endedAtMs": 1792968161769,
+      "seconds": 60.075,
+      "passed": false,
+      "combat": [
+        {
+          "actor": "Leca0c805",
+          "attacks": 16,
+          "hits": 16,
+          "moves": 48
+        },
+        {
+          "actor": "Leca0c80f",
+          "attacks": 18,
+          "hits": 18,
+          "moves": 44
+        }
+      ]
+    },
+    {
+      "line": 82497,
+      "phase": "stage-25",
+      "startedAtMs": 1792968161769,
+      "endedAtMs": 1792968221855,
+      "seconds": 60.086,
+      "passed": true,
+      "combat": [
+        {
+          "actor": "Leca0c805",
+          "attacks": 28,
+          "hits": 28,
+          "moves": 24
+        },
+        {
+          "actor": "Leca0c80f",
+          "attacks": 21,
+          "hits": 21,
+          "moves": 36
+        }
+      ]
+    }
+  ],
+  "windowAnalysis": [
+    {
+      "index": 1,
+      "seconds": 60.01,
+      "passed": true,
+      "actors": [
+        {
+          "actor": "Leca0c805",
+          "nativeOpportunities": 52,
+          "successfulMoves": 18,
+          "scoutMoves": 0,
+          "chaseMoves": 18,
+          "unclassifiedMoves": 0,
+          "launchedAttacks": 31,
+          "positiveHits": 31,
+          "timeoutRows": 0,
+          "notLaunchedRows": 0,
+          "kindStatuses": {
+            "attack:success": 31,
+            "turn:success": 1,
+            "chat:success": 2,
+            "walk:success": 10,
+            "run:success": 8
+          },
+          "reportAttacks": 31,
+          "reportMoves": 18,
+          "rawCompletionCountMatchesReport": true,
+          "scoutHomeMoveCounts": {},
+          "chaseTargetMoveCounts": {
+            "206313": 5,
+            "206328": 4,
+            "206527": 3,
+            "206607": 6
+          }
+        },
+        {
+          "actor": "Leca0c80f",
+          "nativeOpportunities": 53,
+          "successfulMoves": 14,
+          "scoutMoves": 0,
+          "chaseMoves": 14,
+          "unclassifiedMoves": 0,
+          "launchedAttacks": 31,
+          "positiveHits": 31,
+          "timeoutRows": 0,
+          "notLaunchedRows": 0,
+          "kindStatuses": {
+            "attack:success": 31,
+            "chat:success": 2,
+            "walk:success": 9,
+            "run:success": 5,
+            "turn:success": 6
+          },
+          "reportAttacks": 31,
+          "reportMoves": 14,
+          "rawCompletionCountMatchesReport": true,
+          "scoutHomeMoveCounts": {},
+          "chaseTargetMoveCounts": {
+            "206313": 1,
+            "206328": 1,
+            "206518": 7,
+            "206527": 3,
+            "206635": 2
+          }
+        }
+      ]
+    },
+    {
+      "index": 2,
+      "seconds": 60.083,
+      "passed": true,
+      "actors": [
+        {
+          "actor": "Leca0c805",
+          "nativeOpportunities": 64,
+          "successfulMoves": 38,
+          "scoutMoves": 4,
+          "chaseMoves": 34,
+          "unclassifiedMoves": 0,
+          "launchedAttacks": 20,
+          "positiveHits": 20,
+          "timeoutRows": 0,
+          "notLaunchedRows": 0,
+          "kindStatuses": {
+            "walk:success": 24,
+            "turn:success": 4,
+            "attack:success": 20,
+            "run:success": 14,
+            "chat:success": 2
+          },
+          "reportAttacks": 20,
+          "reportMoves": 38,
+          "rawCompletionCountMatchesReport": true,
+          "scoutHomeMoveCounts": {
+            "11": 4
+          },
+          "chaseTargetMoveCounts": {
+            "206327": 8,
+            "206331": 8,
+            "206514": 3,
+            "206529": 8,
+            "206635": 4,
+            "206710": 3
+          }
+        },
+        {
+          "actor": "Leca0c80f",
+          "nativeOpportunities": 58,
+          "successfulMoves": 29,
+          "scoutMoves": 5,
+          "chaseMoves": 24,
+          "unclassifiedMoves": 0,
+          "launchedAttacks": 24,
+          "positiveHits": 24,
+          "timeoutRows": 0,
+          "notLaunchedRows": 0,
+          "kindStatuses": {
+            "walk:success": 10,
+            "turn:success": 3,
+            "attack:success": 24,
+            "run:success": 19,
+            "chat:success": 2
+          },
+          "reportAttacks": 24,
+          "reportMoves": 29,
+          "rawCompletionCountMatchesReport": true,
+          "scoutHomeMoveCounts": {
+            "1": 4,
+            "4": 1
+          },
+          "chaseTargetMoveCounts": {
+            "206327": 1,
+            "206331": 2,
+            "206548": 5,
+            "206612": 7,
+            "206635": 1,
+            "206710": 8
+          }
+        }
+      ]
+    },
+    {
+      "index": 3,
+      "seconds": 60.027,
+      "passed": true,
+      "actors": [
+        {
+          "actor": "Leca0c805",
+          "nativeOpportunities": 56,
+          "successfulMoves": 22,
+          "scoutMoves": 2,
+          "chaseMoves": 20,
+          "unclassifiedMoves": 0,
+          "launchedAttacks": 28,
+          "positiveHits": 28,
+          "timeoutRows": 0,
+          "notLaunchedRows": 0,
+          "kindStatuses": {
+            "turn:success": 4,
+            "attack:success": 28,
+            "walk:success": 7,
+            "run:success": 15,
+            "chat:success": 2
+          },
+          "reportAttacks": 28,
+          "reportMoves": 22,
+          "rawCompletionCountMatchesReport": true,
+          "scoutHomeMoveCounts": {
+            "1": 2
+          },
+          "chaseTargetMoveCounts": {
+            "206330": 1,
+            "206334": 2,
+            "206532": 6,
+            "206547": 7,
+            "206601": 4
+          }
+        },
+        {
+          "actor": "Leca0c80f",
+          "nativeOpportunities": 57,
+          "successfulMoves": 27,
+          "scoutMoves": 0,
+          "chaseMoves": 27,
+          "unclassifiedMoves": 0,
+          "launchedAttacks": 26,
+          "positiveHits": 26,
+          "timeoutRows": 0,
+          "notLaunchedRows": 0,
+          "kindStatuses": {
+            "attack:success": 26,
+            "walk:success": 13,
+            "run:success": 14,
+            "chat:success": 2,
+            "turn:success": 2
+          },
+          "reportAttacks": 26,
+          "reportMoves": 27,
+          "rawCompletionCountMatchesReport": true,
+          "scoutHomeMoveCounts": {},
+          "chaseTargetMoveCounts": {
+            "206330": 8,
+            "206529": 4,
+            "206601": 4,
+            "206646": 11
+          }
+        }
+      ]
+    },
+    {
+      "index": 4,
+      "seconds": 60.075,
+      "passed": false,
+      "actors": [
+        {
+          "actor": "Leca0c805",
+          "nativeOpportunities": 67,
+          "successfulMoves": 48,
+          "scoutMoves": 25,
+          "chaseMoves": 23,
+          "unclassifiedMoves": 0,
+          "launchedAttacks": 16,
+          "positiveHits": 16,
+          "timeoutRows": 0,
+          "notLaunchedRows": 0,
+          "kindStatuses": {
+            "run:success": 30,
+            "turn:success": 1,
+            "attack:success": 16,
+            "walk:success": 18,
+            "chat:success": 2
+          },
+          "reportAttacks": 16,
+          "reportMoves": 48,
+          "rawCompletionCountMatchesReport": true,
+          "scoutHomeMoveCounts": {
+            "1": 3,
+            "2": 12,
+            "6": 10
+          },
+          "chaseTargetMoveCounts": {
+            "206517": 10,
+            "206601": 3,
+            "206706": 10
+          }
+        },
+        {
+          "actor": "Leca0c80f",
+          "nativeOpportunities": 66,
+          "successfulMoves": 44,
+          "scoutMoves": 19,
+          "chaseMoves": 25,
+          "unclassifiedMoves": 0,
+          "launchedAttacks": 18,
+          "positiveHits": 18,
+          "timeoutRows": 0,
+          "notLaunchedRows": 0,
+          "kindStatuses": {
+            "run:success": 28,
+            "walk:success": 16,
+            "attack:success": 18,
+            "chat:success": 2,
+            "turn:success": 2
+          },
+          "reportAttacks": 18,
+          "reportMoves": 44,
+          "rawCompletionCountMatchesReport": true,
+          "scoutHomeMoveCounts": {
+            "2": 14,
+            "6": 5
+          },
+          "chaseTargetMoveCounts": {
+            "206521": 8,
+            "206600": 8,
+            "206601": 5,
+            "206706": 4
+          }
+        }
+      ]
+    },
+    {
+      "index": 5,
+      "seconds": 60.086,
+      "passed": true,
+      "actors": [
+        {
+          "actor": "Leca0c805",
+          "nativeOpportunities": 57,
+          "successfulMoves": 24,
+          "scoutMoves": 3,
+          "chaseMoves": 21,
+          "unclassifiedMoves": 0,
+          "launchedAttacks": 28,
+          "positiveHits": 28,
+          "timeoutRows": 0,
+          "notLaunchedRows": 0,
+          "kindStatuses": {
+            "turn:success": 3,
+            "attack:success": 28,
+            "walk:success": 8,
+            "run:success": 16,
+            "chat:success": 2
+          },
+          "reportAttacks": 28,
+          "reportMoves": 24,
+          "rawCompletionCountMatchesReport": true,
+          "scoutHomeMoveCounts": {
+            "8": 3
+          },
+          "chaseTargetMoveCounts": {
+            "206313": 4,
+            "206335": 8,
+            "206338": 2,
+            "206527": 3,
+            "206539": 1,
+            "206615": 1,
+            "206649": 2
+          }
+        },
+        {
+          "actor": "Leca0c80f",
+          "nativeOpportunities": 60,
+          "successfulMoves": 36,
+          "scoutMoves": 4,
+          "chaseMoves": 32,
+          "unclassifiedMoves": 0,
+          "launchedAttacks": 21,
+          "positiveHits": 21,
+          "timeoutRows": 0,
+          "notLaunchedRows": 0,
+          "kindStatuses": {
+            "walk:success": 14,
+            "run:success": 22,
+            "attack:success": 21,
+            "chat:success": 2,
+            "turn:success": 1
+          },
+          "reportAttacks": 21,
+          "reportMoves": 36,
+          "rawCompletionCountMatchesReport": true,
+          "scoutHomeMoveCounts": {
+            "8": 4
+          },
+          "chaseTargetMoveCounts": {
+            "206539": 9,
+            "206615": 6,
+            "206622": 5,
+            "206649": 6,
+            "206710": 6
+          }
+        }
+      ]
+    }
+  ],
+  "hintSummary": [
+    {
+      "actor": "Leca0c805",
+      "rows": 5,
+      "selectedHints": 5,
+      "cyclicFallbacks": 0,
+      "truncationRows": 0,
+      "failedWindowRows": [
+        {
+          "line": 63930,
+          "type": "combatScoutSelection",
+          "actor": "Leca0c805",
+          "phase": "stage-25",
+          "at": 1792968111253,
+          "reason": "observer-target-waypoint",
+          "fallbackHomeIndex": 2,
+          "selectedHomeIndex": 6,
+          "pathSearches": 2,
+          "hintPathSearches": 1,
+          "hintScanTruncated": false,
+          "hintTargetId": 206521,
+          "hintTarget": {
+            "x": 261,
+            "y": 608
+          },
+          "actualObserver": {
+            "x": 255,
+            "y": 611
+          },
+          "potentialAttackTile": {
+            "x": 261,
+            "y": 607
+          },
+          "truncated": false
+        },
+        {
+          "line": 68006,
+          "type": "combatScoutSelection",
+          "actor": "Leca0c805",
+          "phase": "stage-25",
+          "at": 1792968135275,
+          "reason": "observer-target-waypoint",
+          "fallbackHomeIndex": 7,
+          "selectedHomeIndex": 2,
+          "pathSearches": 2,
+          "hintPathSearches": 1,
+          "hintScanTruncated": false,
+          "hintTargetId": 206517,
+          "hintTarget": {
+            "x": 231,
+            "y": 580
+          },
+          "actualObserver": {
+            "x": 234,
+            "y": 580
+          },
+          "potentialAttackTile": {
+            "x": 231,
+            "y": 579
+          },
+          "truncated": false
+        }
+      ],
+      "potentialGeometryRows": [
+        {
+          "line": 43600,
+          "targetId": 206331,
+          "targetDistance": 4,
+          "tileDistance": 5
+        },
+        {
+          "line": 61643,
+          "targetId": 206601,
+          "targetDistance": 1,
+          "tileDistance": 1
+        },
+        {
+          "line": 63930,
+          "targetId": 206521,
+          "targetDistance": 6,
+          "tileDistance": 6
+        },
+        {
+          "line": 68006,
+          "targetId": 206517,
+          "targetDistance": 3,
+          "tileDistance": 3
+        },
+        {
+          "line": 76234,
+          "targetId": 206335,
+          "targetDistance": 6,
+          "tileDistance": 6
+        }
+      ]
+    },
+    {
+      "actor": "Leca0c80f",
+      "rows": 5,
+      "selectedHints": 5,
+      "cyclicFallbacks": 0,
+      "truncationRows": 0,
+      "failedWindowRows": [
+        {
+          "line": 63449,
+          "type": "combatScoutSelection",
+          "actor": "Leca0c80f",
+          "phase": "stage-25",
+          "at": 1792968108250,
+          "reason": "observer-target-waypoint",
+          "fallbackHomeIndex": 5,
+          "selectedHomeIndex": 6,
+          "pathSearches": 2,
+          "hintPathSearches": 1,
+          "hintScanTruncated": false,
+          "hintTargetId": 206521,
+          "hintTarget": {
+            "x": 261,
+            "y": 608
+          },
+          "actualObserver": {
+            "x": 255,
+            "y": 611
+          },
+          "potentialAttackTile": {
+            "x": 261,
+            "y": 607
+          },
+          "truncated": false
+        },
+        {
+          "line": 68222,
+          "type": "combatScoutSelection",
+          "actor": "Leca0c80f",
+          "phase": "stage-25",
+          "at": 1792968136588,
+          "reason": "observer-target-waypoint",
+          "fallbackHomeIndex": 7,
+          "selectedHomeIndex": 2,
+          "pathSearches": 2,
+          "hintPathSearches": 1,
+          "hintScanTruncated": false,
+          "hintTargetId": 206517,
+          "hintTarget": {
+            "x": 231,
+            "y": 580
+          },
+          "actualObserver": {
+            "x": 232,
+            "y": 578
+          },
+          "potentialAttackTile": {
+            "x": 231,
+            "y": 579
+          },
+          "truncated": false
+        }
+      ],
+      "potentialGeometryRows": [
+        {
+          "line": 43834,
+          "targetId": 206548,
+          "targetDistance": 5,
+          "tileDistance": 4
+        },
+        {
+          "line": 47227,
+          "targetId": 206710,
+          "targetDistance": 6,
+          "tileDistance": 6
+        },
+        {
+          "line": 63449,
+          "targetId": 206521,
+          "targetDistance": 6,
+          "tileDistance": 6
+        },
+        {
+          "line": 68222,
+          "targetId": 206517,
+          "targetDistance": 2,
+          "tileDistance": 1
+        },
+        {
+          "line": 75779,
+          "targetId": 206335,
+          "targetDistance": 4,
+          "tileDistance": 4
+        }
+      ]
+    }
+  ],
+  "scoutAdvanced": [
+    {
+      "line": 43599,
+      "type": "combatScoutAdvanced",
+      "actor": "Leca0c805",
+      "phase": "stage-25",
+      "at": 1792967988143,
+      "reason": "time-budget",
+      "homeIndex": 5,
+      "confirmedMoves": 7,
+      "elapsedMs": 80278
+    },
+    {
+      "line": 47226,
+      "type": "combatScoutAdvanced",
+      "actor": "Leca0c80f",
+      "phase": "stage-25",
+      "at": 1792968009815,
+      "reason": "time-budget",
+      "homeIndex": 1,
+      "confirmedMoves": 4,
+      "elapsedMs": 20363
+    },
+    {
+      "line": 61642,
+      "type": "combatScoutAdvanced",
+      "actor": "Leca0c805",
+      "phase": "stage-25",
+      "at": 1792968097353,
+      "reason": "time-budget",
+      "homeIndex": 11,
+      "confirmedMoves": 4,
+      "elapsedMs": 109210
+    },
+    {
+      "line": 63448,
+      "type": "combatScoutAdvanced",
+      "actor": "Leca0c80f",
+      "phase": "stage-25",
+      "at": 1792968108250,
+      "reason": "time-budget",
+      "homeIndex": 4,
+      "confirmedMoves": 1,
+      "elapsedMs": 98435
+    },
+    {
+      "line": 63833,
+      "type": "combatScoutAdvanced",
+      "actor": "Leca0c805",
+      "phase": "stage-25",
+      "at": 1792968110515,
+      "reason": "waypoint-reached",
+      "homeIndex": 1,
+      "confirmedMoves": 5,
+      "elapsedMs": 13162
+    },
+    {
+      "line": 68005,
+      "type": "combatScoutAdvanced",
+      "actor": "Leca0c805",
+      "phase": "stage-25",
+      "at": 1792968135275,
+      "reason": "time-budget",
+      "homeIndex": 6,
+      "confirmedMoves": 10,
+      "elapsedMs": 24022
+    },
+    {
+      "line": 68221,
+      "type": "combatScoutAdvanced",
+      "actor": "Leca0c80f",
+      "phase": "stage-25",
+      "at": 1792968136588,
+      "reason": "time-budget",
+      "homeIndex": 6,
+      "confirmedMoves": 5,
+      "elapsedMs": 28338
+    },
+    {
+      "line": 75778,
+      "type": "combatScoutAdvanced",
+      "actor": "Leca0c80f",
+      "phase": "stage-25",
+      "at": 1792968181238,
+      "reason": "time-budget",
+      "homeIndex": 2,
+      "confirmedMoves": 14,
+      "elapsedMs": 44650
+    },
+    {
+      "line": 76233,
+      "type": "combatScoutAdvanced",
+      "actor": "Leca0c805",
+      "phase": "stage-25",
+      "at": 1792968184006,
+      "reason": "time-budget",
+      "homeIndex": 2,
+      "confirmedMoves": 12,
+      "elapsedMs": 48731
+    }
+  ],
+  "chaseDeferred": [],
+  "longestAttackGaps": [
+    {
+      "actor": "Leca0c805",
+      "fromRequestId": "297",
+      "toRequestId": "298",
+      "fromLine": 63365,
+      "toLine": 66663,
+      "startedAtMs": 1792968107734,
+      "endedAtMs": 1792968127139,
+      "completionGapMs": 19405,
+      "sendGapMs": 19369.628999999957,
+      "nativeOpportunities": 24,
+      "successfulMoves": 23,
+      "scoutMoves": 13,
+      "chaseMoves": 10,
+      "unclassifiedMoves": 0,
+      "launchedAttacks": 0,
+      "positiveHits": 0,
+      "timeoutRows": 0,
+      "notLaunchedRows": 0,
+      "kindStatuses": {
+        "walk:success": 12,
+        "run:success": 11,
+        "chat:success": 1
+      },
+      "scoutHomes": [
+        1,
+        6
+      ],
+      "chaseTargets": [
+        206706
+      ],
+      "selectedMovementEdges": [
+        {
+          "line": 63584,
+          "type": "action",
+          "actor": "Leca0c805",
+          "phase": "stage-25",
+          "at": 1792968109030,
+          "kind": "walk",
+          "status": "success",
+          "sentAtMs": 972886.5283,
+          "latencyMs": 3.6692000000039116,
+          "nativeOpportunity": true,
+          "plannedIntervalMs": 750,
+          "cadence": {
+            "intervalMs": 750,
+            "cooldownMs": 600,
+            "pacingKnown": true
+          },
+          "scouting": true,
+          "scoutHomeIndex": 1,
+          "plannedTarget": {
+            "x": 235,
+            "y": 590
+          },
+          "actual": {
+            "x": 235,
+            "y": 590
+          },
+          "movedCells": 1,
+          "initialCombatTransit": false
+        },
+        {
+          "line": 63715,
+          "type": "action",
+          "actor": "Leca0c805",
+          "phase": "stage-25",
+          "at": 1792968109775,
+          "kind": "walk",
+          "status": "success",
+          "sentAtMs": 973632.8584,
+          "latencyMs": 7.75179999996908,
+          "nativeOpportunity": true,
+          "plannedIntervalMs": 750,
+          "cadence": {
+            "intervalMs": 750,
+            "cooldownMs": 600,
+            "pacingKnown": true
+          },
+          "scouting": true,
+          "scoutHomeIndex": 1,
+          "plannedTarget": {
+            "x": 235,
+            "y": 589
+          },
+          "actual": {
+            "x": 235,
+            "y": 589
+          },
+          "movedCells": 1,
+          "initialCombatTransit": false
+        },
+        {
+          "line": 63834,
+          "type": "action",
+          "actor": "Leca0c805",
+          "phase": "stage-25",
+          "at": 1792968110515,
+          "kind": "walk",
+          "status": "success",
+          "sentAtMs": 974379.334,
+          "latencyMs": 2.4923999999882653,
+          "nativeOpportunity": true,
+          "plannedIntervalMs": 750,
+          "cadence": {
+            "intervalMs": 750,
+            "cooldownMs": 600,
+            "pacingKnown": true
+          },
+          "scouting": true,
+          "scoutHomeIndex": 1,
+          "plannedTarget": {
+            "x": 234,
+            "y": 589
+          },
+          "actual": {
+            "x": 234,
+            "y": 589
+          },
+          "movedCells": 1,
+          "initialCombatTransit": false
+        },
+        {
+          "line": 66271,
+          "type": "action",
+          "actor": "Leca0c805",
+          "phase": "stage-25",
+          "at": 1792968124773,
+          "kind": "walk",
+          "status": "success",
+          "sentAtMs": 988633.785,
+          "latencyMs": 0.8216000000247732,
+          "nativeOpportunity": true,
+          "plannedIntervalMs": 750,
+          "cadence": {
+            "intervalMs": 750,
+            "cooldownMs": 600,
+            "pacingKnown": true
+          },
+          "chaseTargetId": 206706,
+          "plannedTarget": {
+            "x": 256,
+            "y": 610
+          },
+          "actual": {
+            "x": 256,
+            "y": 610
+          },
+          "movedCells": 1,
+          "initialCombatTransit": false
+        },
+        {
+          "line": 66401,
+          "type": "action",
+          "actor": "Leca0c805",
+          "phase": "stage-25",
+          "at": 1792968125521,
+          "kind": "run",
+          "status": "success",
+          "sentAtMs": 989377.6303,
+          "latencyMs": 1.2197000000160187,
+          "nativeOpportunity": true,
+          "plannedIntervalMs": 750,
+          "cadence": {
+            "intervalMs": 750,
+            "cooldownMs": 600,
+            "pacingKnown": true
+          },
+          "chaseTargetId": 206706,
+          "plannedTarget": {
+            "x": 258,
+            "y": 612
+          },
+          "actual": {
+            "x": 258,
+            "y": 612
+          },
+          "movedCells": 2,
+          "initialCombatTransit": false
+        },
+        {
+          "line": 66539,
+          "type": "action",
+          "actor": "Leca0c805",
+          "phase": "stage-25",
+          "at": 1792968126275,
+          "kind": "run",
+          "status": "success",
+          "sentAtMs": 990133.5322,
+          "latencyMs": 0.7374999999301508,
+          "nativeOpportunity": true,
+          "plannedIntervalMs": 750,
+          "cadence": {
+            "intervalMs": 750,
+            "cooldownMs": 600,
+            "pacingKnown": true
+          },
+          "chaseTargetId": 206706,
+          "plannedTarget": {
+            "x": 260,
+            "y": 614
+          },
+          "actual": {
+            "x": 260,
+            "y": 614
+          },
+          "movedCells": 2,
+          "initialCombatTransit": false
+        }
+      ],
+      "scoutAdvances": [
+        {
+          "line": 63833,
+          "type": "combatScoutAdvanced",
+          "actor": "Leca0c805",
+          "phase": "stage-25",
+          "at": 1792968110515,
+          "reason": "waypoint-reached",
+          "homeIndex": 1,
+          "confirmedMoves": 5,
+          "elapsedMs": 13162
+        }
+      ],
+      "hintSelections": [
+        {
+          "line": 63930,
+          "type": "combatScoutSelection",
+          "actor": "Leca0c805",
+          "phase": "stage-25",
+          "at": 1792968111253,
+          "reason": "observer-target-waypoint",
+          "fallbackHomeIndex": 2,
+          "selectedHomeIndex": 6,
+          "pathSearches": 2,
+          "hintPathSearches": 1,
+          "hintScanTruncated": false,
+          "hintTargetId": 206521,
+          "hintTarget": {
+            "x": 261,
+            "y": 608
+          },
+          "actualObserver": {
+            "x": 255,
+            "y": 611
+          },
+          "potentialAttackTile": {
+            "x": 261,
+            "y": 607
+          },
+          "truncated": false
+        }
+      ],
+      "chaseDeferrals": [],
+      "scope": "No globally missing target,stale snapshot,unreachable map,or per-request900ms packet conclusion follows from these action/scout projections."
+    },
+    {
+      "actor": "Leca0c805",
+      "fromRequestId": "303",
+      "toRequestId": "304",
+      "fromLine": 67790,
+      "toLine": 71000,
+      "startedAtMs": 1792968134036,
+      "endedAtMs": 1792968152641,
+      "completionGapMs": 18605,
+      "sendGapMs": 18612.647299999953,
+      "nativeOpportunities": 23,
+      "successfulMoves": 22,
+      "scoutMoves": 12,
+      "chaseMoves": 10,
+      "unclassifiedMoves": 0,
+      "launchedAttacks": 0,
+      "positiveHits": 0,
+      "timeoutRows": 0,
+      "notLaunchedRows": 0,
+      "kindStatuses": {
+        "walk:success": 6,
+        "run:success": 16,
+        "chat:success": 1
+      },
+      "scoutHomes": [
+        2
+      ],
+      "chaseTargets": [
+        206517
+      ],
+      "selectedMovementEdges": [
+        {
+          "line": 68019,
+          "type": "action",
+          "actor": "Leca0c805",
+          "phase": "stage-25",
+          "at": 1792968135384,
+          "kind": "walk",
+          "status": "success",
+          "sentAtMs": 999166.1232,
+          "latencyMs": 87.19160000002012,
+          "nativeOpportunity": true,
+          "plannedIntervalMs": 750,
+          "cadence": {
+            "intervalMs": 750,
+            "cooldownMs": 600,
+            "pacingKnown": true
+          },
+          "scouting": true,
+          "scoutHomeIndex": 2,
+          "plannedTarget": {
+            "x": 260,
+            "y": 613
+          },
+          "actual": {
+            "x": 260,
+            "y": 613
+          },
+          "movedCells": 1,
+          "initialCombatTransit": false
+        },
+        {
+          "line": 68146,
+          "type": "action",
+          "actor": "Leca0c805",
+          "phase": "stage-25",
+          "at": 1792968136059,
+          "kind": "run",
+          "status": "success",
+          "sentAtMs": 999912.8569,
+          "latencyMs": 0.913799999980256,
+          "nativeOpportunity": true,
+          "plannedIntervalMs": 750,
+          "cadence": {
+            "intervalMs": 750,
+            "cooldownMs": 600,
+            "pacingKnown": true
+          },
+          "scouting": true,
+          "scoutHomeIndex": 2,
+          "plannedTarget": {
+            "x": 260,
+            "y": 611
+          },
+          "actual": {
+            "x": 260,
+            "y": 611
+          },
+          "movedCells": 2,
+          "initialCombatTransit": false
+        },
+        {
+          "line": 68262,
+          "type": "action",
+          "actor": "Leca0c805",
+          "phase": "stage-25",
+          "at": 1792968136797,
+          "kind": "run",
+          "status": "success",
+          "sentAtMs": 1000660.526,
+          "latencyMs": 1.4002000000327826,
+          "nativeOpportunity": true,
+          "plannedIntervalMs": 750,
+          "cadence": {
+            "intervalMs": 750,
+            "cooldownMs": 600,
+            "pacingKnown": true
+          },
+          "scouting": true,
+          "scoutHomeIndex": 2,
+          "plannedTarget": {
+            "x": 260,
+            "y": 609
+          },
+          "actual": {
+            "x": 260,
+            "y": 609
+          },
+          "movedCells": 2,
+          "initialCombatTransit": false
+        },
+        {
+          "line": 70582,
+          "type": "action",
+          "actor": "Leca0c805",
+          "phase": "stage-25",
+          "at": 1792968150311,
+          "kind": "run",
+          "status": "success",
+          "sentAtMs": 1014171.3875,
+          "latencyMs": 1.1591999999945983,
+          "nativeOpportunity": true,
+          "plannedIntervalMs": 750,
+          "cadence": {
+            "intervalMs": 750,
+            "cooldownMs": 600,
+            "pacingKnown": true
+          },
+          "chaseTargetId": 206517,
+          "plannedTarget": {
+            "x": 235,
+            "y": 582
+          },
+          "actual": {
+            "x": 235,
+            "y": 582
+          },
+          "movedCells": 2,
+          "initialCombatTransit": false
+        },
+        {
+          "line": 70725,
+          "type": "action",
+          "actor": "Leca0c805",
+          "phase": "stage-25",
+          "at": 1792968151056,
+          "kind": "run",
+          "status": "success",
+          "sentAtMs": 1014913.6683,
+          "latencyMs": 2.5562999999383464,
+          "nativeOpportunity": true,
+          "plannedIntervalMs": 750,
+          "cadence": {
+            "intervalMs": 750,
+            "cooldownMs": 600,
+            "pacingKnown": true
+          },
+          "chaseTargetId": 206517,
+          "plannedTarget": {
+            "x": 233,
+            "y": 580
+          },
+          "actual": {
+            "x": 233,
+            "y": 580
+          },
+          "movedCells": 2,
+          "initialCombatTransit": false
+        },
+        {
+          "line": 70862,
+          "type": "action",
+          "actor": "Leca0c805",
+          "phase": "stage-25",
+          "at": 1792968151803,
+          "kind": "walk",
+          "status": "success",
+          "sentAtMs": 1015664.4591,
+          "latencyMs": 7.970900000073016,
+          "nativeOpportunity": true,
+          "plannedIntervalMs": 750,
+          "cadence": {
+            "intervalMs": 750,
+            "cooldownMs": 600,
+            "pacingKnown": true
+          },
+          "chaseTargetId": 206517,
+          "plannedTarget": {
+            "x": 232,
+            "y": 580
+          },
+          "actual": {
+            "x": 232,
+            "y": 580
+          },
+          "movedCells": 1,
+          "initialCombatTransit": false
+        }
+      ],
+      "scoutAdvances": [
+        {
+          "line": 68005,
+          "type": "combatScoutAdvanced",
+          "actor": "Leca0c805",
+          "phase": "stage-25",
+          "at": 1792968135275,
+          "reason": "time-budget",
+          "homeIndex": 6,
+          "confirmedMoves": 10,
+          "elapsedMs": 24022
+        }
+      ],
+      "hintSelections": [
+        {
+          "line": 68006,
+          "type": "combatScoutSelection",
+          "actor": "Leca0c805",
+          "phase": "stage-25",
+          "at": 1792968135275,
+          "reason": "observer-target-waypoint",
+          "fallbackHomeIndex": 7,
+          "selectedHomeIndex": 2,
+          "pathSearches": 2,
+          "hintPathSearches": 1,
+          "hintScanTruncated": false,
+          "hintTargetId": 206517,
+          "hintTarget": {
+            "x": 231,
+            "y": 580
+          },
+          "actualObserver": {
+            "x": 234,
+            "y": 580
+          },
+          "potentialAttackTile": {
+            "x": 231,
+            "y": 579
+          },
+          "truncated": false
+        }
+      ],
+      "chaseDeferrals": [],
+      "scope": "No globally missing target,stale snapshot,unreachable map,or per-request900ms packet conclusion follows from these action/scout projections."
+    },
+    {
+      "actor": "Leca0c80f",
+      "fromRequestId": "112",
+      "toRequestId": "113",
+      "fromLine": 68000,
+      "toLine": 71224,
+      "startedAtMs": 1792968135260,
+      "endedAtMs": 1792968153939,
+      "completionGapMs": 18679,
+      "sendGapMs": 18633.440500000026,
+      "nativeOpportunities": 23,
+      "successfulMoves": 22,
+      "scoutMoves": 14,
+      "chaseMoves": 8,
+      "unclassifiedMoves": 0,
+      "launchedAttacks": 0,
+      "positiveHits": 0,
+      "timeoutRows": 0,
+      "notLaunchedRows": 0,
+      "kindStatuses": {
+        "walk:success": 8,
+        "run:success": 14,
+        "chat:success": 1
+      },
+      "scoutHomes": [
+        2
+      ],
+      "chaseTargets": [
+        206600
+      ],
+      "selectedMovementEdges": [
+        {
+          "line": 68226,
+          "type": "action",
+          "actor": "Leca0c80f",
+          "phase": "stage-25",
+          "at": 1792968136618,
+          "kind": "walk",
+          "status": "success",
+          "sentAtMs": 1000480.9781,
+          "latencyMs": 3.130200000014156,
+          "nativeOpportunity": true,
+          "plannedIntervalMs": 750,
+          "cadence": {
+            "intervalMs": 750,
+            "cooldownMs": 600,
+            "pacingKnown": true
+          },
+          "scouting": true,
+          "scoutHomeIndex": 2,
+          "plannedTarget": {
+            "x": 261,
+            "y": 613
+          },
+          "actual": {
+            "x": 261,
+            "y": 613
+          },
+          "movedCells": 1,
+          "initialCombatTransit": false
+        },
+        {
+          "line": 68351,
+          "type": "action",
+          "actor": "Leca0c80f",
+          "phase": "stage-25",
+          "at": 1792968137355,
+          "kind": "run",
+          "status": "success",
+          "sentAtMs": 1001222.4885,
+          "latencyMs": 0.9995000000344589,
+          "nativeOpportunity": true,
+          "plannedIntervalMs": 750,
+          "cadence": {
+            "intervalMs": 750,
+            "cooldownMs": 600,
+            "pacingKnown": true
+          },
+          "scouting": true,
+          "scoutHomeIndex": 2,
+          "plannedTarget": {
+            "x": 261,
+            "y": 611
+          },
+          "actual": {
+            "x": 261,
+            "y": 611
+          },
+          "movedCells": 2,
+          "initialCombatTransit": false
+        },
+        {
+          "line": 68474,
+          "type": "action",
+          "actor": "Leca0c80f",
+          "phase": "stage-25",
+          "at": 1792968138112,
+          "kind": "walk",
+          "status": "success",
+          "sentAtMs": 1001970.5581,
+          "latencyMs": 1.5555000000167638,
+          "nativeOpportunity": true,
+          "plannedIntervalMs": 750,
+          "cadence": {
+            "intervalMs": 750,
+            "cooldownMs": 600,
+            "pacingKnown": true
+          },
+          "scouting": true,
+          "scoutHomeIndex": 2,
+          "plannedTarget": {
+            "x": 261,
+            "y": 610
+          },
+          "actual": {
+            "x": 261,
+            "y": 610
+          },
+          "movedCells": 1,
+          "initialCombatTransit": false
+        },
+        {
+          "line": 70823,
+          "type": "action",
+          "actor": "Leca0c80f",
+          "phase": "stage-25",
+          "at": 1792968151616,
+          "kind": "run",
+          "status": "success",
+          "sentAtMs": 1015475.0498,
+          "latencyMs": 8.912499999976717,
+          "nativeOpportunity": true,
+          "plannedIntervalMs": 750,
+          "cadence": {
+            "intervalMs": 750,
+            "cooldownMs": 600,
+            "pacingKnown": true
+          },
+          "chaseTargetId": 206600,
+          "plannedTarget": {
+            "x": 238,
+            "y": 583
+          },
+          "actual": {
+            "x": 238,
+            "y": 583
+          },
+          "movedCells": 2,
+          "initialCombatTransit": false
+        },
+        {
+          "line": 70955,
+          "type": "action",
+          "actor": "Leca0c80f",
+          "phase": "stage-25",
+          "at": 1792968152364,
+          "kind": "run",
+          "status": "success",
+          "sentAtMs": 1016222.683,
+          "latencyMs": 2.6251000000629574,
+          "nativeOpportunity": true,
+          "plannedIntervalMs": 750,
+          "cadence": {
+            "intervalMs": 750,
+            "cooldownMs": 600,
+            "pacingKnown": true
+          },
+          "chaseTargetId": 206600,
+          "plannedTarget": {
+            "x": 236,
+            "y": 581
+          },
+          "actual": {
+            "x": 236,
+            "y": 581
+          },
+          "movedCells": 2,
+          "initialCombatTransit": false
+        },
+        {
+          "line": 71077,
+          "type": "action",
+          "actor": "Leca0c80f",
+          "phase": "stage-25",
+          "at": 1792968153102,
+          "kind": "run",
+          "status": "success",
+          "sentAtMs": 1016968.3999,
+          "latencyMs": 4.424899999983609,
+          "nativeOpportunity": true,
+          "plannedIntervalMs": 750,
+          "cadence": {
+            "intervalMs": 750,
+            "cooldownMs": 600,
+            "pacingKnown": true
+          },
+          "chaseTargetId": 206600,
+          "plannedTarget": {
+            "x": 234,
+            "y": 579
+          },
+          "actual": {
+            "x": 234,
+            "y": 579
+          },
+          "movedCells": 2,
+          "initialCombatTransit": false
+        }
+      ],
+      "scoutAdvances": [
+        {
+          "line": 68221,
+          "type": "combatScoutAdvanced",
+          "actor": "Leca0c80f",
+          "phase": "stage-25",
+          "at": 1792968136588,
+          "reason": "time-budget",
+          "homeIndex": 6,
+          "confirmedMoves": 5,
+          "elapsedMs": 28338
+        }
+      ],
+      "hintSelections": [
+        {
+          "line": 68222,
+          "type": "combatScoutSelection",
+          "actor": "Leca0c80f",
+          "phase": "stage-25",
+          "at": 1792968136588,
+          "reason": "observer-target-waypoint",
+          "fallbackHomeIndex": 7,
+          "selectedHomeIndex": 2,
+          "pathSearches": 2,
+          "hintPathSearches": 1,
+          "hintScanTruncated": false,
+          "hintTargetId": 206517,
+          "hintTarget": {
+            "x": 231,
+            "y": 580
+          },
+          "actualObserver": {
+            "x": 232,
+            "y": 578
+          },
+          "potentialAttackTile": {
+            "x": 231,
+            "y": 579
+          },
+          "truncated": false
+        }
+      ],
+      "chaseDeferrals": [],
+      "scope": "No globally missing target,stale snapshot,unreachable map,or per-request900ms packet conclusion follows from these action/scout projections."
+    },
+    {
+      "actor": "Leca0c80f",
+      "fromRequestId": "102",
+      "toRequestId": "103",
+      "fromLine": 63250,
+      "toLine": 65425,
+      "startedAtMs": 1792968106942,
+      "endedAtMs": 1792968119633,
+      "completionGapMs": 12691,
+      "sendGapMs": 12655.65260000003,
+      "nativeOpportunities": 15,
+      "successfulMoves": 13,
+      "scoutMoves": 5,
+      "chaseMoves": 8,
+      "unclassifiedMoves": 0,
+      "launchedAttacks": 0,
+      "positiveHits": 0,
+      "timeoutRows": 0,
+      "notLaunchedRows": 0,
+      "kindStatuses": {
+        "walk:success": 3,
+        "run:success": 10,
+        "chat:success": 1,
+        "turn:success": 1
+      },
+      "scoutHomes": [
+        6
+      ],
+      "chaseTargets": [
+        206521
+      ],
+      "selectedMovementEdges": [
+        {
+          "line": 63463,
+          "type": "action",
+          "actor": "Leca0c80f",
+          "phase": "stage-25",
+          "at": 1792968108282,
+          "kind": "walk",
+          "status": "success",
+          "sentAtMs": 972140.1818,
+          "latencyMs": 1.7924999999813735,
+          "nativeOpportunity": true,
+          "plannedIntervalMs": 750,
+          "cadence": {
+            "intervalMs": 750,
+            "cooldownMs": 600,
+            "pacingKnown": true
+          },
+          "scouting": true,
+          "scoutHomeIndex": 6,
+          "plannedTarget": {
+            "x": 238,
+            "y": 591
+          },
+          "actual": {
+            "x": 238,
+            "y": 591
+          },
+          "movedCells": 1,
+          "initialCombatTransit": false
+        },
+        {
+          "line": 63589,
+          "type": "action",
+          "actor": "Leca0c80f",
+          "phase": "stage-25",
+          "at": 1792968109030,
+          "kind": "run",
+          "status": "success",
+          "sentAtMs": 972889.7338,
+          "latencyMs": 2.2682999999960884,
+          "nativeOpportunity": true,
+          "plannedIntervalMs": 750,
+          "cadence": {
+            "intervalMs": 750,
+            "cooldownMs": 600,
+            "pacingKnown": true
+          },
+          "scouting": true,
+          "scoutHomeIndex": 6,
+          "plannedTarget": {
+            "x": 240,
+            "y": 593
+          },
+          "actual": {
+            "x": 240,
+            "y": 593
+          },
+          "movedCells": 2,
+          "initialCombatTransit": false
+        },
+        {
+          "line": 63720,
+          "type": "action",
+          "actor": "Leca0c80f",
+          "phase": "stage-25",
+          "at": 1792968109776,
+          "kind": "run",
+          "status": "success",
+          "sentAtMs": 973640.1457,
+          "latencyMs": 1.022899999981746,
+          "nativeOpportunity": true,
+          "plannedIntervalMs": 750,
+          "cadence": {
+            "intervalMs": 750,
+            "cooldownMs": 600,
+            "pacingKnown": true
+          },
+          "scouting": true,
+          "scoutHomeIndex": 6,
+          "plannedTarget": {
+            "x": 242,
+            "y": 595
+          },
+          "actual": {
+            "x": 242,
+            "y": 595
+          },
+          "movedCells": 2,
+          "initialCombatTransit": false
+        },
+        {
+          "line": 64901,
+          "type": "action",
+          "actor": "Leca0c80f",
+          "phase": "stage-25",
+          "at": 1792968116532,
+          "kind": "run",
+          "status": "success",
+          "sentAtMs": 980390.9297,
+          "latencyMs": 8.442500000004657,
+          "nativeOpportunity": true,
+          "plannedIntervalMs": 750,
+          "cadence": {
+            "intervalMs": 750,
+            "cooldownMs": 600,
+            "pacingKnown": true
+          },
+          "chaseTargetId": 206521,
+          "plannedTarget": {
+            "x": 257,
+            "y": 606
+          },
+          "actual": {
+            "x": 257,
+            "y": 606
+          },
+          "movedCells": 2,
+          "initialCombatTransit": false
+        },
+        {
+          "line": 65032,
+          "type": "action",
+          "actor": "Leca0c80f",
+          "phase": "stage-25",
+          "at": 1792968117278,
+          "kind": "run",
+          "status": "success",
+          "sentAtMs": 981139.2218,
+          "latencyMs": 7.130499999970198,
+          "nativeOpportunity": true,
+          "plannedIntervalMs": 750,
+          "cadence": {
+            "intervalMs": 750,
+            "cooldownMs": 600,
+            "pacingKnown": true
+          },
+          "chaseTargetId": 206521,
+          "plannedTarget": {
+            "x": 259,
+            "y": 608
+          },
+          "actual": {
+            "x": 259,
+            "y": 608
+          },
+          "movedCells": 2,
+          "initialCombatTransit": false
+        },
+        {
+          "line": 65160,
+          "type": "action",
+          "actor": "Leca0c80f",
+          "phase": "stage-25",
+          "at": 1792968118101,
+          "kind": "walk",
+          "status": "success",
+          "sentAtMs": 981886.7065,
+          "latencyMs": 71.28960000001825,
+          "nativeOpportunity": true,
+          "plannedIntervalMs": 750,
+          "cadence": {
+            "intervalMs": 750,
+            "cooldownMs": 600,
+            "pacingKnown": true
+          },
+          "chaseTargetId": 206521,
+          "plannedTarget": {
+            "x": 260,
+            "y": 609
+          },
+          "actual": {
+            "x": 260,
+            "y": 609
+          },
+          "movedCells": 1,
+          "initialCombatTransit": false
+        }
+      ],
+      "scoutAdvances": [
+        {
+          "line": 63448,
+          "type": "combatScoutAdvanced",
+          "actor": "Leca0c80f",
+          "phase": "stage-25",
+          "at": 1792968108250,
+          "reason": "time-budget",
+          "homeIndex": 4,
+          "confirmedMoves": 1,
+          "elapsedMs": 98435
+        }
+      ],
+      "hintSelections": [
+        {
+          "line": 63449,
+          "type": "combatScoutSelection",
+          "actor": "Leca0c80f",
+          "phase": "stage-25",
+          "at": 1792968108250,
+          "reason": "observer-target-waypoint",
+          "fallbackHomeIndex": 5,
+          "selectedHomeIndex": 6,
+          "pathSearches": 2,
+          "hintPathSearches": 1,
+          "hintScanTruncated": false,
+          "hintTargetId": 206521,
+          "hintTarget": {
+            "x": 261,
+            "y": 608
+          },
+          "actualObserver": {
+            "x": 255,
+            "y": 611
+          },
+          "potentialAttackTile": {
+            "x": 261,
+            "y": 607
+          },
+          "truncated": false
+        }
+      ],
+      "chaseDeferrals": [],
+      "scope": "No globally missing target,stale snapshot,unreachable map,or per-request900ms packet conclusion follows from these action/scout projections."
+    }
+  ],
+  "cadenceLevelsObserved": {
+    "Leca0c805": {
+      "levelMin": 4,
+      "levelMax": 5,
+      "intervalMinMs": 1380,
+      "intervalMaxMs": 1394
+    },
+    "Leca0c80f": {
+      "levelMin": 1,
+      "levelMax": 3,
+      "intervalMinMs": 1408,
+      "intervalMaxMs": 1436
+    }
+  },
+  "comparisonWithFormal13": {
+    "source": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal13-report-failure-analysis-v1\\analysis-v1.json",
+      "bytes": 42280,
+      "sha256": "a71c159e87ed0fd1b88c94d69d768addd233aa589ef236369815d7e48fa8af1e"
+    },
+    "runId": "1792959622496-365f0175",
+    "reportReason": "Stage25 failed two complete rolling windows on per-fighter native combat launch supply; actual-duration positive-hit supply also failed for actor05. No stage25 attack timeout or not-launched action was found.",
+    "stage25MeasuredSeconds": 300.254,
+    "oldMinutes": [
+      {
+        "index": 1,
+        "seconds": 60.017,
+        "passed": true,
+        "actors": [
+          {
+            "actor": "L8b25a105",
+            "attacks": 31,
+            "hits": 31,
+            "scoutMoves": 0,
+            "chaseMoves": 17,
+            "failedGates": []
+          },
+          {
+            "actor": "L8b25a10f",
+            "attacks": 23,
+            "hits": 23,
+            "scoutMoves": 8,
+            "chaseMoves": 25,
+            "failedGates": []
+          }
+        ]
+      },
+      {
+        "index": 2,
+        "seconds": 60.101,
+        "passed": true,
+        "actors": [
+          {
+            "actor": "L8b25a105",
+            "attacks": 29,
+            "hits": 29,
+            "scoutMoves": 0,
+            "chaseMoves": 22,
+            "failedGates": []
+          },
+          {
+            "actor": "L8b25a10f",
+            "attacks": 32,
+            "hits": 32,
+            "scoutMoves": 0,
+            "chaseMoves": 15,
+            "failedGates": []
+          }
+        ]
+      },
+      {
+        "index": 3,
+        "seconds": 60.034,
+        "passed": false,
+        "actors": [
+          {
+            "actor": "L8b25a105",
+            "attacks": 11,
+            "hits": 11,
+            "scoutMoves": 36,
+            "chaseMoves": 22,
+            "failedGates": [
+              "minimumCombatAttacksPerMinute",
+              "minimumCombatHitsPerMinute"
+            ]
+          },
+          {
+            "actor": "L8b25a10f",
+            "attacks": 14,
+            "hits": 14,
+            "scoutMoves": 33,
+            "chaseMoves": 18,
+            "failedGates": [
+              "minimumCombatAttacksPerMinute"
+            ]
+          }
+        ]
+      },
+      {
+        "index": 4,
+        "seconds": 60.082,
+        "passed": false,
+        "actors": [
+          {
+            "actor": "L8b25a105",
+            "attacks": 12,
+            "hits": 12,
+            "scoutMoves": 31,
+            "chaseMoves": 22,
+            "failedGates": [
+              "minimumCombatAttacksPerMinute",
+              "minimumCombatHitsPerMinute"
+            ]
+          },
+          {
+            "actor": "L8b25a10f",
+            "attacks": 16,
+            "hits": 16,
+            "scoutMoves": 26,
+            "chaseMoves": 20,
+            "failedGates": [
+              "minimumCombatAttacksPerMinute"
+            ]
+          }
+        ]
+      },
+      {
+        "index": 5,
+        "seconds": 60.02,
+        "passed": true,
+        "actors": [
+          {
+            "actor": "L8b25a105",
+            "attacks": 23,
+            "hits": 23,
+            "scoutMoves": 4,
+            "chaseMoves": 30,
+            "failedGates": []
+          },
+          {
+            "actor": "L8b25a10f",
+            "attacks": 27,
+            "hits": 27,
+            "scoutMoves": 0,
+            "chaseMoves": 25,
+            "failedGates": []
+          }
+        ]
+      }
+    ],
+    "scope": "Historical evidence comparison only; account timing,live mobs/levels and window alignment differ,so counts are not a causal A/B test."
+  },
+  "capacityAccepted": false,
+  "p0Passed": false,
+  "p2Started": false,
+  "provenEdges": [
+    "Actual successful attacks continue; no attack timeout/not-launched row found by this raw census.",
+    "FailedW4 remains below original actual-duration18launch/min even after observer-hint feature,while12hit/min and native completion pass."
+  ],
+  "unprovenEdges": [
+    "No per-decision complete owner/peer snapshot,eligible-target universe or full collision state is retained; cannot prove global absence,stale state,or a particular blocked path.",
+    "Observer-target hint is prospective ordinary movement guidance,not actual attack witness or owner membership.",
+    "Raw phase-label completion counts may differ at a phase boundary from original report snapshot; original window assessment remains authoritative.",
+    "This is not a test of CPU/server capacity or a guaranteed25-player result; no50/100/two-hour execution occurred."
+  ],
+  "minimalNextStep": "Use selected failed-window scout/chase/gap and any completed Store intervals to choose a specific fixture before source change; do not lower18/12/900/native gates or remove finite budgets."
+}

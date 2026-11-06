@@ -1,0 +1,41 @@
+{
+  "utc": "2026-10-11T09:13:02.947761+00:00",
+  "readOnly": true,
+  "sequence": 19,
+  "candidate": "WN-CANDIDATE-20261010-invited-24",
+  "feedChanged": false,
+  "rows": [
+    {
+      "url": "https://165.154.65.136.sslip.io/client-updates/latest.json",
+      "status": 200,
+      "bytes": 1159,
+      "sha256": "a97dbb60c48a19e7f3daf28a9b9ea42c9dbfea42bb8566f160c47475516f6d62",
+      "tlsVerified": true,
+      "cacheControl": "no-store"
+    },
+    {
+      "url": "https://165.154.65.136.sslip.io/client-updates/latest.p7s",
+      "status": 200,
+      "bytes": 1614,
+      "sha256": "01ac444bc13bd822ba8283db4be7f30a36562e84c651c9bb6553b10921285d43",
+      "tlsVerified": true,
+      "cacheControl": "no-store"
+    },
+    {
+      "url": "https://assets.mir2.obelisk.build/client-updates/latest.json",
+      "status": 200,
+      "bytes": 1159,
+      "sha256": "a97dbb60c48a19e7f3daf28a9b9ea42c9dbfea42bb8566f160c47475516f6d62",
+      "tlsVerified": true,
+      "cacheControl": "no-store"
+    },
+    {
+      "url": "https://assets.mir2.obelisk.build/client-updates/latest.p7s",
+      "status": 200,
+      "bytes": 1614,
+      "sha256": "01ac444bc13bd822ba8283db4be7f30a36562e84c651c9bb6553b10921285d43",
+      "tlsVerified": true,
+      "cacheControl": "no-store"
+    }
+  ]
+}

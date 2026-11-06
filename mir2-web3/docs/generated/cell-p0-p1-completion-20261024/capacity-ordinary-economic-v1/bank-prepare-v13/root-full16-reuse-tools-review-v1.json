@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "source": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\verify-full16-reuse-v4.mjs",
+    "bytes": 15209,
+    "sha256": "f23742f07d9991e86c861c7f953c3de6aea4952039d939d8075b705b4884497d"
+  },
+  "tool": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\verify-full16-reuse-v5.mjs",
+    "bytes": 15209,
+    "sha256": "6f20c8f0d4802ff05916798d2d3f85287e533734ffabefc2b809fa12b2370e3f"
+  },
+  "exactSixPackageLabelHunksOnly": true,
+  "allOtherChecksRetained": true,
+  "actualProofExecuted": false,
+  "capacityAccepted": false,
+  "p0Accepted": false
+}

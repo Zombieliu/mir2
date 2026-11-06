@@ -1,0 +1,42 @@
+{
+  "projectedReport": {
+    "fiveClassBridgePromoted": false,
+    "fiveMinuteAcceptance": false,
+    "legacyBridgePromoted": false,
+    "oldClientAutoMigrationEnabled": false,
+    "packedR2PointerPromoted": false,
+    "passed": true,
+    "permanentBicRuleRetained": {
+      "enabled": true
+    },
+    "permanentReaderRouteRetained": true,
+    "privateTransportConfigRemoved": true,
+    "schema": "mir2.windows.temporary-publisher-cleanup.v1",
+    "secretContentsPrinted": false,
+    "temporaryBicRuleAbsent": true,
+    "temporaryResourcesDeleted": [
+      {
+        "kind": "route",
+        "status": 200,
+        "success": true
+      },
+      {
+        "kind": "temporary-bic-rule",
+        "status": 200,
+        "success": true
+      },
+      {
+        "kind": "publisher-worker",
+        "status": 200,
+        "success": true
+      }
+    ],
+    "temporaryRouteAbsent": true,
+    "temporaryWorkerAbsent": true
+  },
+  "projectionBoundary": "Explicit fields only; raw log/body/attempt/env/argv/private config excluded.",
+  "role": "publisher-cleanup",
+  "schema": "mir2.evidence.public-projection.v1",
+  "sourceSha256": "30170DED9A264A307B407D5FDBBF5D2721BAE1168E9ABDE6B1D385B9B82680F5",
+  "sourceSize": 938
+}

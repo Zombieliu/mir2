@@ -1,0 +1,56 @@
+{
+  "schemaVersion": 1,
+  "scope": "Post-terminal collector source derivation only; this v2 was not a pre-run frozen input. Original100 runtime inputs, original game/Store verdict and original collector bytes are preserved.",
+  "original": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-account-store-wait-ladder-13\\collect-public.mjs",
+    "bytes": 43271,
+    "sha256": "5131b65ae652f36442ea1fadb6cebb37da4c0fc37c9b911f8bc7a940b87ae562"
+  },
+  "derived": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-account-store-wait-ladder-13\\collect-public-current50-v2.mjs",
+    "bytes": 43374,
+    "sha256": "1eb5a6e57e64e6f8ce5329bb48259508cff91a9fc0fbad5eba3ea55582eb7481"
+  },
+  "runtimeSourceSeal": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-account-store-wait-ladder-13\\launcher-source-frozen-v1.json",
+    "bytes": 43488,
+    "sha256": "55d2344aa547e8c1a00dbb9b0d457c5637dc3a388606cc817a7d6c44f4f22c4a",
+    "fileCount": 100,
+    "originalCollectorRawPinMatched": true
+  },
+  "transformations": [
+    {
+      "before": "scope: 'Independent explicit public allowlist for authentic formal standard native compact-wire span2-halo ladder10.",
+      "after": "scope: 'Independent explicit public allowlist for authentic formal standard native compact-wire span2-halo ladder13.",
+      "occurrences": 1
+    },
+    {
+      "before": "const sourcePaths = [...wireSource.files",
+      "after": "const sourcePaths = [`${realm}/collect-public-current50-v2.mjs`, `${realm}/collect-public-current50-v2-derivation-v1.json`, ...wireSource.files",
+      "occurrences": 1
+    }
+  ],
+  "forwardRawExact": true,
+  "inverseRawExact": true,
+  "actualSyntax": {
+    "command": [
+      "C:\\Program Files\\nodejs\\node.exe",
+      "--check",
+      "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-account-store-wait-ladder-13\\collect-public-current50-v2.mjs"
+    ],
+    "exitCode": 0,
+    "signal": null,
+    "stdout": "",
+    "stderr": ""
+  },
+  "changesGameplayGates": false,
+  "changesSchemaCountsOrVerdict": false,
+  "changesStoreOrVerifier": false,
+  "collectorExecuted": false,
+  "verificationExecuted": false,
+  "terminalContext": {
+    "source": "Root coordinator actual terminal message; not a raw runtime log or new adjudication.",
+    "runId": "1792959622496-365f0175",
+    "rootReportedExitCode": 1
+  }
+}

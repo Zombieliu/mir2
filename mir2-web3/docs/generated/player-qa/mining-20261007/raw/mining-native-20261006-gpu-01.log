@@ -1,0 +1,28 @@
+
+running 1 test
+[frame-sets] loaded 697 Crystal library catalogs from "C:/mir2-build/r10-src/mir2-web3/apps/web/public\\original-ui/frame-sets.generated.json"
+[native-fonts] pinned Arial from C:\Windows\Fonts\arial.ttf
+[native-fonts] pinned Arial from C:\Windows\Fonts\arialbd.ttf
+[native-fonts] pinned Arial from C:\Windows\Fonts\ariali.ttf
+[native-fonts] pinned Arial from C:\Windows\Fonts\arialbi.ttf
+[native-fonts] pinned Microsoft YaHei from C:\Windows\Fonts\msyh.ttc
+[native-fonts] pinned Microsoft YaHei from C:\Windows\Fonts\msyhbd.ttc
+[native-fonts] pinned Microsoft YaHei from C:\Windows\Fonts\msyhl.ttc
+[native-fonts] retained 7 installed font asset(s); system discovery and fallback remain enabled
+
+thread 'Compute Task Pool (20)' (76276) panicked at C:\Users\Administrator\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\bevy_ecs-0.19.0\src\error\handler.rs:130:1:
+Encountered an error in system `<Enable the debug feature to see the name>`: Parameter `<Enable the debug feature to see the name>` failed validation: Resource does not exist
+If this is an expected state, wrap the parameter in `Option<T>` and handle `None` when it happens, or wrap the parameter in `If<T>` to skip the system when it happens.
+
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+Encountered a panic in system `<Enable the debug feature to see the name>`!
+Encountered a panic in system `<Enable the debug feature to see the name>`!
+test entity_presentation::mining_visual_tests::mining_source_pose_and_original_ore_icons_offscreen_gpu ... FAILED
+
+failures:
+
+failures:
+    entity_presentation::mining_visual_tests::mining_source_pose_and_original_ore_icons_offscreen_gpu
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 878 filtered out; finished in 2.73s
+

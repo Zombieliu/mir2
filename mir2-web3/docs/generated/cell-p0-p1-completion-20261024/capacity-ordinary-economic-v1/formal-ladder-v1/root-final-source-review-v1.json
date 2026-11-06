@@ -1,0 +1,169 @@
+{
+  "schemaVersion": 1,
+  "reviewedAt": "2026-10-27T11:29:08.548Z",
+  "repository": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey",
+  "expectedHead": "cc1f4bb5c9b68164df5beb96876a9c559ac012ab",
+  "scope": "Final actual formal original100 source/config review after Root1179 and complete functional dependency equality. Only execution freeze is eligible; gameplay/capacity/P0 remains unaccepted.",
+  "config": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-formal-ladder-v1\\prepare-config-pending-v1.json",
+    "bytes": 8621,
+    "sha256": "e90b2f16024ecf2ad54359f516450496ff12e7590adc3e19f8cb3bf2a28697aa"
+  },
+  "before": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-formal-ladder-v1\\prepare-config-pending-v1.json",
+    "bytes": 8415,
+    "sha256": "23b8bc7ab7a1a5640a0c9b7bad5f1b00d87bac56b38b904a9d986caa2490a0d2"
+  },
+  "preimage": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-formal-ladder-v1\\prepare-config-before-full16-root-review-v1.json",
+    "bytes": 8415,
+    "sha256": "23b8bc7ab7a1a5640a0c9b7bad5f1b00d87bac56b38b904a9d986caa2490a0d2"
+  },
+  "actualRootQualification": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\root-capacity-preparation-validation-v18\\root-focused-receipt-v1.json",
+    "bytes": 22032,
+    "sha256": "6c81864c07a32a232113f8139218e8e2558c859a65b0330cfb006925e9dff3c8"
+  },
+  "actualRootFreshSelectedTestsPassed": 1179,
+  "namedSources": 42,
+  "runtimeLocalSources": 32,
+  "backendSourcesExact": 55,
+  "reusedOriginalRustTestsPassed": 32,
+  "full16ReuseProof": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-full16-reuse-proof-formal-v1.json",
+    "bytes": 73043,
+    "sha256": "c2bfa9649405de76857888e90678d89b9a52845e11c62420f5d31ae747ef7c21"
+  },
+  "all16StrictlyReused": true,
+  "full16ActualRerunPerformed": false,
+  "sourceSavedCount": 100,
+  "sourceFreshAtStart": false,
+  "ordinaryFreshReadinessRequiredForAll100": true,
+  "originalStages": [
+    2,
+    10,
+    25,
+    50,
+    100
+  ],
+  "stageSeconds": 300,
+  "soakSeconds": 7200,
+  "combatActorIndices": [
+    5,
+    15,
+    25,
+    35,
+    45,
+    55,
+    65,
+    75,
+    85,
+    95
+  ],
+  "allGameGatesUnchanged": true,
+  "oldProbe21QualificationInherited": false,
+  "toolPins": [
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-formal-ladder-v1\\source-lib-v1.mjs",
+      "bytes": 18471,
+      "sha256": "bdbcb65eb6027f8d0c0812ab6975b5d53beee28d133be36d8cdf75593f57ca16"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-formal-ladder-v1\\formal-contract-v1.mjs",
+      "bytes": 9160,
+      "sha256": "29ab56d6de9ddbb5fa5d0047451e0deb76a52e8b88d0bb224356183a18d7bff1"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-formal-ladder-v1\\freeze-formal-v1.mjs",
+      "bytes": 3640,
+      "sha256": "4d594a2a96d2e39135d468d836c87aa519508521071efd85d7f11d502dd6bb34"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-formal-ladder-v1\\run-owned-formal-v1.mjs",
+      "bytes": 21497,
+      "sha256": "e95707e5ba9262fd57ded1032081e99de2ec28be2d728cff37758247712dae74"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-formal-ladder-v1\\owned-child-v1.mjs",
+      "bytes": 2697,
+      "sha256": "cdd5ed67ac436716b2c7b7a7644c02da52ad0f1cd057bbb95642cf691ba37585"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-formal-ladder-v1\\copy-source-bank-v1.mjs",
+      "bytes": 15947,
+      "sha256": "5fd390b46114896d548e84f613cec8b1c8e6704e4be228b3e4f0003c9e0683f2"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-formal-ladder-v1\\diagnostics\\base\\slow-stage-public.mjs",
+      "bytes": 10318,
+      "sha256": "8033874548d93323ef6390b07509887e727b5920850d0c3a1c2a0f810c56677c"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-formal-ladder-v1\\diagnostics\\base\\slow-stage-row-contract.mjs",
+      "bytes": 1553,
+      "sha256": "cc860f6578109f0a615ae83d9675c1f099f4814109f0fd95fcf475a7632d6db8"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-formal-ladder-v1\\diagnostics\\store\\slow-stage-public.mjs",
+      "bytes": 15386,
+      "sha256": "6cde67571184692d7b89da32adb21fb2f8a228db5e0865cb9cc96bf3a34925c7"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-formal-ladder-v1\\diagnostics\\store\\account-store-public-validator.mjs",
+      "bytes": 5407,
+      "sha256": "d71add02703a84acc2d870d5c7daf96dd17e0533b2d49af0480e55dea7aea262"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-formal-ladder-v1\\diagnostics-v1.mjs",
+      "bytes": 2396,
+      "sha256": "d828eefb489f18c01b2b2176df0b7d119dc5faf3495776f64178f06b387def1b"
+    }
+  ],
+  "dataPins": [
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\quest-agent\\warrior-1-30-newcomer-v1.json",
+      "bytes": 2661153,
+      "sha256": "ba415e68f7c3724d367542320809d4b43b122845a3e1b7a9e3b998b2cedbc975"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\lib\\generated\\crystal-map-pack\\0.map.gz",
+      "bytes": 512762,
+      "sha256": "bbd02c7d0125fe78983e2dea5f4aecc73b53d4b91517bde6fdbee9853bb183a5"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\lib\\generated\\crystal_respawn_manifest.json",
+      "bytes": 6799671,
+      "sha256": "907db052030a97036e404429373dd3ad3e0e838e279613080e92c3be28bf3ff2"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\packages\\game-data\\data\\generated\\crystal_npc_info_manifest.json",
+      "bytes": 313945,
+      "sha256": "dcc31e181b1f329c6da3658846ff18adb13731b18d899f8914b7628d54074105"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\packages\\game-data\\data\\generated\\crystal_respawn_manifest.json",
+      "bytes": 6799671,
+      "sha256": "907db052030a97036e404429373dd3ad3e0e838e279613080e92c3be28bf3ff2"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\packages\\game-data\\data\\generated\\crystal_item_manifest.json",
+      "bytes": 1589543,
+      "sha256": "b0d48ada978d8a062e993fe0425b6a724672aeea354a3b7b4508fb4c161658b7"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\config\\quest-guidance\\newcomer-journey-v2.json",
+      "bytes": 35329,
+      "sha256": "fd35732d9356fcf5aeb4c06d639261a816626a54ccaf33f8cc6d461e98c93182"
+    }
+  ],
+  "verdict": {
+    "sourceContractPassed": true,
+    "eligibleForRootFreezeExecution": true,
+    "blockingFindingIds": []
+  },
+  "authPerformed": false,
+  "bankCopied": false,
+  "ownedExecuted": false,
+  "capacityAccepted": false,
+  "p0Accepted": false
+}

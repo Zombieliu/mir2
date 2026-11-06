@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "stoppedAtUtc": "2026-10-24T16:37:57.0720038+00:00",
+  "pid": 45172,
+  "ownedExe": "C:/mir2-build/p01-completion-20261024/release-native-10-feasibility-02/bin/mir2-gateway.exe",
+  "sha256": "99bca561822a2d02bd4a012546c228923f3f34e6612612085d6caed9f82ee50d",
+  "stopReason": "Unique actual10 feasibility probe stopped during bootstrap by original frozen process IO operation rate guard; no measured stage or soak",
+  "preStopCapacity": {
+    "maxWsConnections": 24,
+    "maxActiveSessions": 10,
+    "maxReconnectLeases": 10,
+    "maxLoginInFlight": 4,
+    "maxNewCharacterInFlight": 1,
+    "maxStartGameInFlight": 2,
+    "currentWsConnections": 0,
+    "currentActiveSessions": 0,
+    "currentReconnectLeases": 0,
+    "currentLoginInFlight": 0,
+    "currentNewCharacterInFlight": 0,
+    "currentStartGameInFlight": 0
+  },
+  "capacityAccepted": false,
+  "formalStarted": false,
+  "report": "reports/1792859765238-d670d739.report.json",
+  "monitor": "Automatic original guard stop; normal terminal record expected in preserved monitor history"
+}

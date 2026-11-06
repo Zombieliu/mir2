@@ -1,0 +1,11 @@
+{
+  "schema": "mir2.production-independent-review.v2",
+  "reviewer": "/root/production_review",
+  "acceptedForFocusedTests": true,
+  "reviewedUtc": "2026-10-08T09:13:17.2977834Z",
+  "authoredSourceSha256": "1aefac3905ebb04d4f3669ac3eb961ab3d9035e2f7011fa0f78b0fd6067c642e",
+  "authoredSourcePath": "E:\\mir2-player-journey\\work\\slg-production-p02-20261008\\authored-source.json",
+  "rawFinal": "Static delta review accepted. Four blocker classes fixed; no confirmed remaining P0/P1. Ten source paths/hash/length match; 15 new transaction tests. Controlled File and adjacent save/NPC tests only, not public deployment/UI. All item issuers sharing global UID authority and explicit unknown-publication reconciliation remain rollout prerequisites.",
+  "noCargoRun": true,
+  "noUiRun": true
+}

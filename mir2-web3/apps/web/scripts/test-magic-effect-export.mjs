@@ -108,7 +108,7 @@ function buildSyntheticLib(frameIndices) {
 function completeMetaFetch() {
   const metas = Object.fromEntries([...allRequiredIndices()].map(([library, indices]) => [library, syntheticUiMeta([...indices])]));
   const fetchImpl = async (url) => {
-    const match = String(url).match(/\/original-ui\/([^/]+)\/meta\.json$/);
+    const match = String(url).match(/\/original-ui\/(.+)\/meta\.json$/);
     const meta = metas[match?.[1]];
     return { ok: Boolean(meta), status: meta ? 200 : 404, json: async () => meta ?? {} };
   };
@@ -120,15 +120,15 @@ async function testAssembleMode() {
   const outputDir = path.join(root, "original-effects");
   const { fetchImpl } = completeMetaFetch();
   const summary = await assembleMagicEffectsFromMeta({ assetBaseUrl: "https://r2.example/v/x", outputDir, fetchImpl });
-  assert.deepEqual(summary.available, ["Effect", "Magic", "Magic2", "Magic3"]);
+  assert.deepEqual(summary.available, [...allRequiredIndices().keys()].sort());
 
   const manifestPath = path.join(outputDir, "effects.generated.json");
   const manifest = JSON.parse(readFileSync(manifestPath, "utf8"));
   assert.equal(manifest.schemaVersion, 2);
   assert.equal(manifest.generatedAt, null, "manifest has no clock-dependent data");
   assert.equal(manifest.spell_effects.length, SPELL_EFFECTS.length);
-  assert.deepEqual(manifest.client_effects, CLIENT_EFFECTS);
-  assert.deepEqual(manifest.client_effects[0], {
+  assert.deepEqual(manifest.client_effects, [...CLIENT_EFFECTS].sort((a, b) => a.effect.localeCompare(b.effect)));
+  assert.deepEqual(manifest.client_effects.find((effect) => effect.effect === "LeftGuardRangeProjectile"), {
     effect: "LeftGuardRangeProjectile",
     library: "Magic",
     base: 10,
@@ -151,7 +151,7 @@ async function testAssembleMode() {
       symbol: "LeftGuardRangeProjectile",
     },
   });
-  assert.deepEqual(manifest.client_effects[1], {
+  assert.deepEqual(manifest.client_effects.find((effect) => effect.effect === "NewMoveDestination"), {
     effect: "NewMoveDestination",
     library: "Magic3",
     base: 500,
@@ -167,7 +167,7 @@ async function testAssembleMode() {
       symbol: "NewMoveDestination",
     },
   });
-  assert.deepEqual(manifest.client_effects[2], {
+  assert.deepEqual(manifest.client_effects.find((effect) => effect.effect === "PlayerRevive"), {
     effect: "PlayerRevive",
     library: "Magic2",
     base: 1220,
@@ -183,7 +183,7 @@ async function testAssembleMode() {
       symbol: "PlayerRevive",
     },
   });
-  assert.deepEqual(manifest.client_effects[3], {
+  assert.deepEqual(manifest.client_effects.find((effect) => effect.effect === "RightGuardRangeHit"), {
     effect: "RightGuardRangeHit",
     library: "Magic2",
     base: 10,
@@ -398,10 +398,14 @@ async function testLibMode() {
   const outputDir = path.join(root, "original-effects");
   const fs = nodeRequire("node:fs");
   fs.mkdirSync(dataDir, { recursive: true });
-  for (const [library, indices] of allRequiredIndices()) fs.writeFileSync(path.join(dataDir, `${library}.Lib`), buildSyntheticLib(indices));
+  for (const [library, indices] of allRequiredIndices()) {
+    const sourcePath = path.join(dataDir, `${library}.Lib`);
+    fs.mkdirSync(path.dirname(sourcePath), { recursive: true });
+    fs.writeFileSync(sourcePath, buildSyntheticLib(indices));
+  }
 
   const summary = await runCrystalMagicEffectExport({ dataDir, outputDir, deflateLevel: 0 });
-  assert.deepEqual(summary.available, ["Effect", "Magic", "Magic2", "Magic3"]);
+  assert.deepEqual(summary.available, [...allRequiredIndices().keys()].sort());
   const png = readFileSync(path.join(outputDir, "Magic", "0.png"));
   assert.ok(png.subarray(0, 8).equals(Buffer.from([137, 80, 78, 71, 13, 10, 26, 10])));
   const assets = await effects.loadEffectAssets(effectsFetch(outputDir));
@@ -444,6 +448,17 @@ function testPackedAtlasCrop() {
 }
 
 async function main() {
+  for (const name of ["MassHiding", "SoulShield", "BlessedArmour", "Curse", "Plague", "PoisonCloud"]) {
+    const effect = SPELL_EFFECTS.find((entry) => entry.spell === name);
+    assert.equal(effect.kind, "projectile", `${name} has no invented caster bitmap`);
+    assert.equal(effect.projectile.base, 1160);
+    assert.equal(effect.projectile.count, 3);
+    assert.equal(effect.projectile.interval, 30);
+    assert.equal(effect.projectile.directionCount, 16);
+    assert.equal(effect.projectile.directionStride, 10);
+    if (name === "PoisonCloud") assert.equal(effect.impact, undefined);
+    else assert.equal(effect.impact.kind, "ground", `${name} completion belongs to fixed TargetPoint`);
+  }
   testAdditiveAlphaNormalization();
   testPackedAtlasCrop();
   await testAssembleMode();

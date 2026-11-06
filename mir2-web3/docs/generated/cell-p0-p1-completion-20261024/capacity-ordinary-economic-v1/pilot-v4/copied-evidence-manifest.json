@@ -1,0 +1,134 @@
+{
+  "schemaVersion": 1,
+  "scope": "Original f1d4a00 two-actor functional pilot with independent safe-zone staging; failed unchanged hostile guard before second admission. Fresh source byte recheck reused exact same-HEAD381 selected test receipt from pilot-v3, no additional test count. Preserves original failure, invalid timestamp-v1 extract and corrected v2 extract. No private credentials, Store, raw Gateway logs or full recording copied.",
+  "driverSourceCommit": "f1d4a00d5c73f6580e4e72b02d05b554a729aae8",
+  "backendSourceCommit": "7b43caa41ee12f2e6b41d0a5df7e9ab45a32580d",
+  "qualificationEvidence": "../pilot-v3/root-focused-receipt-v1.json",
+  "sourceQualificationReused": true,
+  "preparedActors": 0,
+  "measurementPerformed": false,
+  "capacityAccepted": false,
+  "p0Accepted": false,
+  "copies": [
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-preparation-pilot-v4\\source-lib-v1.mjs",
+      "file": "source-lib-v1.mjs",
+      "bytes": 13728,
+      "sha256": "c9b3c6810c36d3f158db899d1df9e285f0fca6565d302c50767beea68d297ff2"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-preparation-pilot-v4\\freeze-pilot-v1.mjs",
+      "file": "freeze-pilot-v1.mjs",
+      "bytes": 7553,
+      "sha256": "75ae0bef5bba6c71b2f287e70453782c389ea6c7ca17b26fedef1040c66dbb22"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-preparation-pilot-v4\\run-pilot-v1.mjs",
+      "file": "run-pilot-v1.mjs",
+      "bytes": 18891,
+      "sha256": "24cfc078f0d8bd62b6ac9f90c3a2d3d45c2f28dd496c3ceff4e949e6965e07b7"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-preparation-pilot-v4\\owned-child-v1.mjs",
+      "file": "owned-child-v1.mjs",
+      "bytes": 1555,
+      "sha256": "b9eb53a2420ea3e6305983ee9cb23b066fbc28d2cc5be813bce133a9252bce1f"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-preparation-pilot-v4\\pilot-config-pending-v1.json",
+      "file": "pilot-config-pending-v1.json",
+      "bytes": 2595,
+      "sha256": "6e627af469ed443324fc81fa08711da4fed78ae192c989dcfa45d8c7d805d0bb"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-preparation-pilot-v4\\resource-profile-v1.json",
+      "file": "resource-profile-v1.json",
+      "bytes": 1630,
+      "sha256": "9c5825d9a0c1a002081e439151d9d158dcbd78af64347f339f83b8e690924a88"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-preparation-pilot-v4\\static-map-proof-v1.json",
+      "file": "static-map-proof-v1.json",
+      "bytes": 3393,
+      "sha256": "c85cb309da93fc72d99a840c4cd561b0409a925b50e3256502b96ccafe28a9fc"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-preparation-pilot-v4\\frozen-source-v1.json",
+      "file": "frozen-source-v1.json",
+      "bytes": 79651,
+      "sha256": "ee7ab96c10432d06e72198f756a42f9bd9181cb510db707c65ca9493ebb9d8bf"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-preparation-pilot-v4\\root-independent-cleanup-v1.json",
+      "file": "root-independent-cleanup-v1.json",
+      "bytes": 476,
+      "sha256": "cda1251af4ed801a15a6322b74e62a4fc708c86af321d612dd168b89695589c6"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-preparation-pilot-v4\\public-staging-threat-observation-v1.json",
+      "file": "public-staging-threat-observation-v1.json",
+      "bytes": 1808,
+      "sha256": "4a814a1923200f7d8e2dc16218a0315507f196f031518c3146526c228fe34850"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-preparation-pilot-v4\\public-staging-threat-observation-v2.json",
+      "file": "public-staging-threat-observation-v2.json",
+      "bytes": 28107,
+      "sha256": "da26c9da223620924db0cc6a80421c1c5cca4bb8af6c6ea893bc0949cace3ea5"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-preparation-pilot-v4\\episode\\pilot-receipt-v1.json",
+      "file": "pilot-receipt-v1.json",
+      "bytes": 2289,
+      "sha256": "be4e235f044cbd654b35b6db27580720033129415de549e03cf0cd4951d0e92c"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-preparation-pilot-v4\\episode\\cleanup-v1.json",
+      "file": "cleanup-v1.json",
+      "bytes": 1041,
+      "sha256": "ba898bc069a8dad0ef35d4380a5f129d979b1fd1adb2fa3cda2a0bc3c25304dc"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-preparation-pilot-v4\\episode\\owned-process-v1.json",
+      "file": "owned-process-v1.json",
+      "bytes": 681,
+      "sha256": "d466fc90234006aad354fc71c080268face1e15d369ab130654e16dc88880e7f"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-preparation-pilot-v4\\episode\\provisioning-v1.json",
+      "file": "provisioning-v1.json",
+      "bytes": 328,
+      "sha256": "f5f9ed0a7eedff615aa546159ff86637b1ae6763e8c4a30f1286684a71566488"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-preparation-pilot-v4\\episode\\health-before-v1.json",
+      "file": "health-before-v1.json",
+      "bytes": 521,
+      "sha256": "12e6676876b9cb6b9a3ec3e8d251fba6b89b56a3a02449040bbc043cddb5541c"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-preparation-pilot-v4\\episode\\health-after-v1.json",
+      "file": "health-after-v1.json",
+      "bytes": 476,
+      "sha256": "bfdd3d3116c6957134294f5bbfda9b3ed6504e0029223cdc0495181b2b7d4f11"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-preparation-pilot-v4\\episode\\run-intent-v1.json",
+      "file": "run-intent-v1.json",
+      "bytes": 1726,
+      "sha256": "32c9f8f0c45fb25aaa4a83108608e47acd04be78f9722d4369be7138890380c7"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-preparation-pilot-v4\\episode\\reports\\1793042214886-d262ad8a.report.json",
+      "file": "1793042214886-d262ad8a.report.json",
+      "bytes": 14086,
+      "sha256": "f76d920527b27c81a72ee7e84b16628aede40699cb854c2e0cd48a507a22d218"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-preparation-pilot-v4\\episode\\reports\\1793042214886-d262ad8a.samples.jsonl",
+      "file": "1793042214886-d262ad8a.samples.jsonl",
+      "bytes": 733845,
+      "sha256": "7af4427d85eb1d72cd8176edacec4f7e1e54207b8c382a6a4e1f33ed7260c564"
+    }
+  ]
+}

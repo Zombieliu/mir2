@@ -1,0 +1,108 @@
+{
+  "schemaVersion": 1,
+  "runId": "1792965008290-fc5e2eed",
+  "raw": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-observer-feasibility-18\\reports\\1792965008290-fc5e2eed.samples.jsonl",
+    "bytes": 29612729,
+    "sha256": "ab31e2b81cf6e1fd89fabc9c9d25699c742f724fda2570140feb629ddb56444e",
+    "rows": 41154
+  },
+  "scope": "Bounded original public scalar fields and line numbers; no packet snapshot payloads or private data.",
+  "scoutRows": [
+    {
+      "line": 15966,
+      "type": "combatScoutSelection",
+      "actor": "L22b92f05",
+      "phase": "stage-10",
+      "at": 1792965567901,
+      "reason": "observer-target-waypoint",
+      "fallbackHomeIndex": 0,
+      "selectedHomeIndex": 1,
+      "pathSearches": 2,
+      "hintPathSearches": 1,
+      "hintScanTruncated": true,
+      "hintTargetId": 206502,
+      "hintTarget": {
+        "x": 240,
+        "y": 586
+      },
+      "actualObserver": {
+        "x": 236,
+        "y": 590
+      },
+      "potentialAttackTile": {
+        "x": 240,
+        "y": 585
+      },
+      "truncated": false
+    },
+    {
+      "line": 34304,
+      "type": "combatScoutSelection",
+      "actor": "L22b92f05",
+      "phase": "soak",
+      "at": 1792965919347,
+      "reason": "observer-target-waypoint",
+      "fallbackHomeIndex": 2,
+      "selectedHomeIndex": 3,
+      "pathSearches": 2,
+      "hintPathSearches": 1,
+      "hintScanTruncated": true,
+      "hintTargetId": 206502,
+      "hintTarget": {
+        "x": 240,
+        "y": 586
+      },
+      "actualObserver": {
+        "x": 239,
+        "y": 580
+      },
+      "potentialAttackTile": {
+        "x": 240,
+        "y": 585
+      },
+      "truncated": false
+    }
+  ],
+  "selectedScoutRowsTruncated": false,
+  "corrections": [
+    {
+      "line": 7909,
+      "actor": "L22b92f03",
+      "phase": "stage-10",
+      "kind": "run",
+      "status": "corrected",
+      "at": 1792965410471,
+      "plannedTarget": {
+        "x": 239,
+        "y": 578
+      },
+      "actual": {
+        "x": 237,
+        "y": 578
+      },
+      "movedCells": 0,
+      "direction": "Right",
+      "latencyMs": 1.0961000000243075
+    },
+    {
+      "line": 9933,
+      "actor": "L22b92f02",
+      "phase": "stage-10",
+      "kind": "run",
+      "status": "corrected",
+      "at": 1792965449272,
+      "plannedTarget": {
+        "x": 232,
+        "y": 578
+      },
+      "actual": {
+        "x": 232,
+        "y": 580
+      },
+      "movedCells": 0,
+      "direction": "Up",
+      "latencyMs": 2.9792000000015832
+    }
+  ]
+}

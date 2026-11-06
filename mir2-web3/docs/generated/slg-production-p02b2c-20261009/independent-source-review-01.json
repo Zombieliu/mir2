@@ -1,0 +1,70 @@
+{
+  "schema": "mir2.production-independent-source-review.v1",
+  "reviewer": "/root/production_review",
+  "createdUtc": "2026-10-08T23:30:04.6571057+00:00",
+  "acceptedForFocusedTests": true,
+  "authoredSourcePath": "E:\\mir2-player-journey\\work\\slg-production-p02b2c-20261009\\authored-source-01.json",
+  "authoredSourceSha256": "0a749e8cf6ab03a4bf3f96b16a1cef2f8b173b7a2050f1e905bb7acc608902f2",
+  "baselineCommit": "78d3abecb887d0e2c447d06e8224e7670486758e",
+  "authoredFileCount": 3,
+  "shaAndLengthMismatches": 0,
+  "authoredFiles": [
+    {
+      "path": "mir2-web3/apps/simulation/src/user_item_uid.rs",
+      "sha256": "5335ced4868a62f8eb59f0d816a76459e0d57a4c23959c0164c8fdce64106b41",
+      "length": 43402
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/intelligent_creatures.rs",
+      "sha256": "b271a9ebbd24419f8ce5938580aac484330c319725b0b6cefc05d3c3d36e6523",
+      "length": 24237
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/creature_reward_uid_tests.rs",
+      "sha256": "aba96d0cd4e60deb3d51b4e6eb4749ceab7e3525d5e5403ebe6ae52e603d833f",
+      "length": 9230
+    }
+  ],
+  "newTestFunctions": 8,
+  "confirmedBlockingFindings": [],
+  "rawFinal": "Independent bounded static acceptance of Source01. The actual source-reference check precedes original-world history refresh while the source is still live. Unavailable/Fenced and mismatched authorities fail before source publication. Checked the disjoint staged policy/inventory borrow and later borrow lifetime, module/type visibility, fallible raw carrier validation before issuance, unchanged original selection/random/dynamic behavior, Legacy allocation avoiding the source, empty/NoSpace outcomes and existing Belt fallback. Only the selected fresh reward is issued through the shared File authority, followed by one live inventory replacement. The eight authored tests retain meaningful output identity, source retirement, actual normal UseItem/logout/memory-account relogin, shared authority, corruption/exhaustion, fences, mismatch, shipped empty table and stale-reference assertions. No confirmed static P0/P1 blocker; compilation and test results are not yet asserted.",
+  "runnerReview": {
+    "path": "E:\\mir2-player-journey\\work\\slg-production-p02b2c-20261009\\run-check.ps1",
+    "sha256": "323594a70682a24d7ef76ee56594dd576505b9ddd0a986458e452c209421c99e",
+    "comparedWith": "work/slg-production-p02b2b-20261009/run-check.ps1",
+    "allowedDeltaOnly": true,
+    "allowedChanges": [
+      "Current source acceptance path",
+      "Current constrained scope text",
+      "Three added filter kinds: creature-reward-tests, creature-regression, use-item-regression"
+    ],
+    "originalSevenToolPinsMatch": true,
+    "originalGuardAndPolicyUnchanged": true,
+    "thresholdBytes": 53687091200,
+    "freshnessMs": 2000,
+    "probeTimeoutMs": 15000,
+    "postChildPolicy": "B",
+    "mode": "real-cargo"
+  },
+  "privateCache": {
+    "path": "E:\\mir2-player-journey\\work\\slg-production-p02b2c-20261009\\private-cache.json",
+    "sha256": "fa4af510c3f10754ba6ac1c0e930e7aba8b72d0712503cf2a73938fb5f66925d",
+    "completedRecordRead": true,
+    "copiedNonExecutableFiles": 2353,
+    "copiedBytes": 2285980194,
+    "sourceDeleted": false,
+    "userGameClosed": false,
+    "sourceAndDestinationWithinWorkspace": true,
+    "cacheBytesIndividuallyHashed": false
+  },
+  "scope": "Controlled File opt-in personal creature reward-box issuance and synchronous in-memory source/reward publication only. Existing memory AccountStore logout/relogin fixture does not establish account-atomic durability.",
+  "limitations": [
+    "No actual Cargo, compilation or tests executed by this reviewer; permission for focused original Guard checks only.",
+    "Selected-output pickup/use-time UID issuance does not establish original discarded-candidate mint timing parity.",
+    "Existing Belt fallback difference from original Crystal bag-space check remains open.",
+    "No full-account atomicity, all-issuer migration, periodic fresh mail or custody-mail lifecycle, server census, shared claims, PostgreSQL, public gateway/UI/installer or deployment acceptance."
+  ],
+  "noCargoRun": true,
+  "noUiRun": true,
+  "noSourceEdits": true
+}

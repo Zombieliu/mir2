@@ -1,0 +1,194 @@
+{
+  "schemaVersion": 1,
+  "createdAt": "2026-10-26T01:34:00.116720+00:00",
+  "scope": "Only pending-to-actual metadata bindings. Exact prior rawfiles retained; changes are allowlisted top-level semantic values, not claims of JSON reserialization raw inverse. Fresh K full16 producer343/C-K-K is preserved. No probe mode, sourceguard or account action executed.",
+  "actualExecutionCommit": "b5374083d257d375437af3de42bead159cd2b917",
+  "driverSourceSha256": "d61b7cd057e1a2a55191fe6c407b3058b5ff9205141eaf9290d16da42b028db1",
+  "actualFull16Prerequisite": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\scout-selection-diagnostics-full16-public-archive-v1\\full16-actual-prerequisite-v1.json",
+    "bytes": 9510,
+    "sha256": "4ef0ee82a018ee6f419dae732e8db66e4488f6686ad96f98d241e8b7dfb0b907"
+  },
+  "actualFull16Facts": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\scout-selection-diagnostics-full16-actual-independent-facts-v1.json",
+    "bytes": 6568,
+    "sha256": "9e64800b29037bf9ab70cddc2eaf8b28f7465527b07da48a57705dcdec0297d5"
+  },
+  "changes": [
+    {
+      "document": "current-driver-binding.json",
+      "before": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-selection-diagnostics-feasibility-20\\current-driver-binding.json.before-actual-full16-v1.txt",
+        "bytes": 2842,
+        "sha256": "a2926f99e9d1d5494fe15acd215f07fc51674f054ee9a33b91aa3f0823997759"
+      },
+      "after": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-selection-diagnostics-feasibility-20\\current-driver-binding.json",
+        "bytes": 2845,
+        "sha256": "9d63bebc0bb2b1bf1c9cf697a8b99944be7af2a429f2fe649b2d1b50826c1325"
+      },
+      "changedTopLevelFields": [
+        "state"
+      ],
+      "otherTopLevelValuesSemanticExact": true,
+      "rawBeforeImagePreserved": true
+    },
+    {
+      "document": "candidate-release-binding.json",
+      "before": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-selection-diagnostics-feasibility-20\\candidate-release-binding.json.before-actual-full16-v1.txt",
+        "bytes": 2204,
+        "sha256": "a31d1dcc7290d991c20514e2a98fc4ba6b33cb0bd9ad408b319434bf1383c32e"
+      },
+      "after": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-selection-diagnostics-feasibility-20\\candidate-release-binding.json",
+        "bytes": 11994,
+        "sha256": "432f3d48db82509cadb7d1c6c4b42745eff5aecaacebde14be15489afc58131c"
+      },
+      "changedTopLevelFields": [
+        "full16",
+        "state"
+      ],
+      "otherTopLevelValuesSemanticExact": true,
+      "rawBeforeImagePreserved": true
+    },
+    {
+      "document": "backend-library-binding.json",
+      "before": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-selection-diagnostics-feasibility-20\\backend-library-binding.json.before-actual-full16-v1.txt",
+        "bytes": 1392,
+        "sha256": "a1ae0850f973b7c166f6a6f044ee0c4fe3eff93a2005ff7bc6beed20074936ac"
+      },
+      "after": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-selection-diagnostics-feasibility-20\\backend-library-binding.json",
+        "bytes": 1839,
+        "sha256": "dbb630453ae18709c487e81849592299d9086050dc3a8566414483a4a486c28f"
+      },
+      "changedTopLevelFields": [
+        "runtimeGuardExecution",
+        "runtimeGuardStdout"
+      ],
+      "otherTopLevelValuesSemanticExact": true,
+      "rawBeforeImagePreserved": true
+    },
+    {
+      "document": "launcher-source-prepared-v1.json",
+      "before": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-selection-diagnostics-feasibility-20\\launcher-source-prepared-v1.json.before-actual-full16-v1.txt",
+        "bytes": 890,
+        "sha256": "e0a53f8e4e00ccc316f86f8304d0bd473e0eb1e768ca813c76ba868bf6c7ded8"
+      },
+      "after": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-selection-diagnostics-feasibility-20\\launcher-source-prepared-v1.json",
+        "bytes": 1511,
+        "sha256": "e9591e1f6c5c4e668b15ea5165d1dad034a93a29067d8058ffff1e52128e10e1"
+      },
+      "changedTopLevelFields": [
+        "accountsCreated",
+        "accountsProvisioned",
+        "actualInputsBound",
+        "document",
+        "driverFrozen",
+        "full16",
+        "guardExecuted",
+        "moduleImported",
+        "sourceFreezeNotSealed",
+        "state"
+      ],
+      "otherTopLevelValuesSemanticExact": true,
+      "rawBeforeImagePreserved": true
+    },
+    {
+      "document": "final-inputs-approved.json",
+      "before": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-selection-diagnostics-feasibility-20\\final-inputs-approved.json.before-actual-full16-v1.txt",
+        "bytes": 890,
+        "sha256": "e0a53f8e4e00ccc316f86f8304d0bd473e0eb1e768ca813c76ba868bf6c7ded8"
+      },
+      "after": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-selection-diagnostics-feasibility-20\\final-inputs-approved.json",
+        "bytes": 1505,
+        "sha256": "a483cbb4100977f65130807d64945766ddd36c220f597da39356fd5e3f087cbd"
+      },
+      "changedTopLevelFields": [
+        "accountsCreated",
+        "accountsProvisioned",
+        "actualInputsBound",
+        "document",
+        "driverFrozen",
+        "full16",
+        "guardExecuted",
+        "moduleImported",
+        "sourceFreezeNotSealed",
+        "state"
+      ],
+      "otherTopLevelValuesSemanticExact": true,
+      "rawBeforeImagePreserved": true
+    },
+    {
+      "document": "static-preparation-verification.json",
+      "before": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-selection-diagnostics-feasibility-20\\static-preparation-verification.json.before-actual-full16-v1.txt",
+        "bytes": 890,
+        "sha256": "e0a53f8e4e00ccc316f86f8304d0bd473e0eb1e768ca813c76ba868bf6c7ded8"
+      },
+      "after": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-selection-diagnostics-feasibility-20\\static-preparation-verification.json",
+        "bytes": 1515,
+        "sha256": "efafaf050d519d6fca85317595d866a55011665e7f661d9eaefa2eb352c24325"
+      },
+      "changedTopLevelFields": [
+        "accountsCreated",
+        "accountsProvisioned",
+        "actualInputsBound",
+        "document",
+        "driverFrozen",
+        "full16",
+        "guardExecuted",
+        "moduleImported",
+        "sourceFreezeNotSealed",
+        "state"
+      ],
+      "otherTopLevelValuesSemanticExact": true,
+      "rawBeforeImagePreserved": true
+    },
+    {
+      "document": "preparation-plan.json",
+      "before": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-selection-diagnostics-feasibility-20\\preparation-plan.json.before-actual-full16-v1.txt",
+        "bytes": 1180,
+        "sha256": "43236c5f69b6564b3e725a6ffbb973000991d8c93faa5c561bf0048cd36b1268"
+      },
+      "after": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-selection-diagnostics-feasibility-20\\preparation-plan.json",
+        "bytes": 1500,
+        "sha256": "da62d6f97162271fb1ddff75f5fd21c92fcb52a8dc6dab2f8a27340cc9e0bb9a"
+      },
+      "changedTopLevelFields": [
+        "actualInputsBound",
+        "canonicalGeometryProof",
+        "document",
+        "full16",
+        "guardExecuted",
+        "maximumControlledActors",
+        "moduleImported",
+        "ordinaryAccountPoolSize",
+        "policy",
+        "sourceFreezeNotSealed",
+        "state"
+      ],
+      "otherTopLevelValuesSemanticExact": true,
+      "rawBeforeImagePreserved": true
+    }
+  ],
+  "codeChangesForFinalMetadataBinding": 0,
+  "storeChildTwoLiteralFix": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-selection-diagnostics-feasibility-20\\store-child-identity-fix-v1.json",
+    "bytes": 2286,
+    "sha256": "7923f3a31eb21aac9d65eec214e2a77f2a5132b0d36d14a9aa4a5b0daed95331"
+  },
+  "moduleImported": false,
+  "modeExecuted": false,
+  "newProbeResultKnown": false,
+  "capacityAccepted": false
+}

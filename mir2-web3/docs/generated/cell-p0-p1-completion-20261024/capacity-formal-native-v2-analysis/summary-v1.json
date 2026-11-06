@@ -1,0 +1,2803 @@
+{
+  "schemaVersion": 1,
+  "summarizedAt": "2026-10-24T20:08:31.996Z",
+  "runId": "1792871143682-f3d8c161",
+  "originalVerdictRetained": true,
+  "sourceCommits": {
+    "backend": "461f1d85eed6309a55a88bd79a0022f7b97febe4",
+    "driver": "c42f860e0544f0687a5ccf5ddaccad4daecc8acc"
+  },
+  "originalOutcome": {
+    "ok": false,
+    "error": "Continuous activity window failed, regardless of the measured stage",
+    "highestPassedStage": 10,
+    "highestMeasuredStage": 10,
+    "playableCapacityAccepted": false,
+    "failureCount": 5,
+    "stages": [
+      {
+        "name": "stage-2",
+        "controlledActors": 2,
+        "passed": true
+      },
+      {
+        "name": "stage-10",
+        "controlledActors": 10,
+        "passed": true
+      }
+    ],
+    "phaseWindows": [
+      {
+        "name": "bootstrap-2",
+        "kind": "bootstrap",
+        "targetActors": 2,
+        "startedAtMs": 1792871143727,
+        "endedAtMs": 1792871180251,
+        "completed": true
+      },
+      {
+        "name": "stage-2",
+        "kind": "measurement",
+        "targetActors": 2,
+        "startedAtMs": 1792871180251,
+        "endedAtMs": 1792871480279,
+        "completed": true
+      },
+      {
+        "name": "bootstrap-10",
+        "kind": "bootstrap",
+        "targetActors": 10,
+        "startedAtMs": 1792871480280,
+        "endedAtMs": 1792871545227,
+        "completed": true
+      },
+      {
+        "name": "stage-10",
+        "kind": "measurement",
+        "targetActors": 10,
+        "startedAtMs": 1792871545227,
+        "endedAtMs": 1792871845255,
+        "completed": true
+      },
+      {
+        "name": "bootstrap-25",
+        "kind": "bootstrap",
+        "targetActors": 25,
+        "startedAtMs": 1792871845257,
+        "endedAtMs": 1792871934189,
+        "completed": true
+      },
+      {
+        "name": "stage-25",
+        "kind": "measurement",
+        "targetActors": 25,
+        "startedAtMs": 1792871934189,
+        "endedAtMs": 1792872154905,
+        "completed": false
+      }
+    ],
+    "cleanupChecks": {
+      "sixCountersZero": true,
+      "monitorTerminalPreserved": true,
+      "monitorStoppedBeforeGateway": true,
+      "monitorExitZero": true,
+      "normalOwnedShutdown": true,
+      "processAbsent": true,
+      "portsFree": true
+    }
+  },
+  "fiveFailures": [
+    {
+      "actor": "L7324bd04",
+      "role": "movement",
+      "final": false,
+      "emittedAtMs": 1792872154828,
+      "activeDurationSeconds": 60.00409270000004,
+      "estimatedWallWindow": {
+        "estimatedStartAtMs": 1792872094822.9072,
+        "estimatedActiveEndAtMs": 1792872154827,
+        "emittedWindowAtMs": 1792872154827,
+        "emittedFailureAtMs": 1792872154828,
+        "finalPauseSecondsRemoved": 0,
+        "rule": "Interval is an estimate from emitted wall time minus recorded active monotonic duration. For final segments, remove the reported actor planned-pause duration (this run has only the common final drain pause). No original per-window wall-start exists; do not claim exact packet boundaries."
+      },
+      "activityPassed": true,
+      "latencyPassed": true,
+      "fanoutPassed": false,
+      "timeoutRatio": 0,
+      "correctionRatio": 0,
+      "nativeCompletion": 0.9875,
+      "runRatio": 0.8421052631578947,
+      "fanoutRun": {
+        "count": 36,
+        "statuses": {
+          "success": 35,
+          "timeout": 1
+        },
+        "sendP95Ms": 252,
+        "sendP99Ms": 1282,
+        "successMaximumMs": 1281.782899999991
+      },
+      "failingMetricStatuses": {
+        "fanout-run": {
+          "count": 36,
+          "status": {
+            "success": 35,
+            "timeout": 1
+          },
+          "fromSend": {
+            "count": 35,
+            "p50Ms": 6,
+            "p95Ms": 252,
+            "p99Ms": 1282,
+            "maxMs": 1281.782899999991
+          },
+          "fromPlan": {
+            "count": 0,
+            "p50Ms": null,
+            "p95Ms": null,
+            "p99Ms": null,
+            "maxMs": 0
+          }
+        }
+      }
+    },
+    {
+      "actor": "L7324bd05",
+      "role": "combat",
+      "final": true,
+      "emittedAtMs": 1792872158687,
+      "activeDurationSeconds": 56.395358799999926,
+      "estimatedWallWindow": {
+        "estimatedStartAtMs": 1792872098510.676,
+        "estimatedActiveEndAtMs": 1792872154906.035,
+        "emittedWindowAtMs": 1792872158687,
+        "emittedFailureAtMs": 1792872158687,
+        "finalPauseSecondsRemoved": 3.78096510000003,
+        "rule": "Interval is an estimate from emitted wall time minus recorded active monotonic duration. For final segments, remove the reported actor planned-pause duration (this run has only the common final drain pause). No original per-window wall-start exists; do not claim exact packet boundaries."
+      },
+      "activityPassed": false,
+      "latencyPassed": true,
+      "fanoutPassed": true,
+      "timeoutRatio": 0.017857142857142856,
+      "correctionRatio": 0.041666666666666664,
+      "nativeCompletion": 0.9464285714285714,
+      "runRatio": 0.5769230769230769,
+      "fanoutRun": {
+        "count": 12,
+        "statuses": {
+          "success": 12
+        },
+        "sendP95Ms": 34,
+        "sendP99Ms": 34,
+        "successMaximumMs": 33.03040000004694
+      },
+      "failingMetricStatuses": {
+        "attack": {
+          "count": 24,
+          "status": {
+            "success": 22,
+            "timeout": 1,
+            "not-launched": 1
+          },
+          "fromSend": {
+            "count": 23,
+            "p50Ms": 134,
+            "p95Ms": 303,
+            "p99Ms": 353,
+            "maxMs": 352.5823000000091
+          },
+          "fromPlan": {
+            "count": 23,
+            "p50Ms": 155,
+            "p95Ms": 319,
+            "p99Ms": 377,
+            "maxMs": 376.78920000011567
+          },
+          "attackV2Requests": 24,
+          "attackV2NotLaunched": 1
+        }
+      }
+    },
+    {
+      "actor": "L7324bd07",
+      "role": "movement",
+      "final": true,
+      "emittedAtMs": 1792872158687,
+      "activeDurationSeconds": 49.109059599999924,
+      "estimatedWallWindow": {
+        "estimatedStartAtMs": 1792872105796.9753,
+        "estimatedActiveEndAtMs": 1792872154906.035,
+        "emittedWindowAtMs": 1792872158687,
+        "emittedFailureAtMs": 1792872158687,
+        "finalPauseSecondsRemoved": 3.78096510000003,
+        "rule": "Interval is an estimate from emitted wall time minus recorded active monotonic duration. For final segments, remove the reported actor planned-pause duration (this run has only the common final drain pause). No original per-window wall-start exists; do not claim exact packet boundaries."
+      },
+      "activityPassed": true,
+      "latencyPassed": false,
+      "fanoutPassed": true,
+      "timeoutRatio": 0,
+      "correctionRatio": 0,
+      "nativeCompletion": 0.9848484848484849,
+      "runRatio": 0.8709677419354839,
+      "failingMetricStatuses": {
+        "walk": {
+          "count": 9,
+          "status": {
+            "success": 8,
+            "owner-ack-wait": 1
+          },
+          "fromSend": {
+            "count": 8,
+            "p50Ms": 6,
+            "p95Ms": 1409,
+            "p99Ms": 1409,
+            "maxMs": 1408.7922000000253
+          },
+          "fromPlan": {
+            "count": 8,
+            "p50Ms": 26,
+            "p95Ms": 1425,
+            "p99Ms": 1425,
+            "maxMs": 1424.9701999999816
+          }
+        }
+      }
+    },
+    {
+      "actor": "L7324bd09",
+      "role": "movement",
+      "final": true,
+      "emittedAtMs": 1792872158687,
+      "activeDurationSeconds": 40.46338739999989,
+      "estimatedWallWindow": {
+        "estimatedStartAtMs": 1792872114442.6475,
+        "estimatedActiveEndAtMs": 1792872154906.035,
+        "emittedWindowAtMs": 1792872158687,
+        "emittedFailureAtMs": 1792872158687,
+        "finalPauseSecondsRemoved": 3.78096510000003,
+        "rule": "Interval is an estimate from emitted wall time minus recorded active monotonic duration. For final segments, remove the reported actor planned-pause duration (this run has only the common final drain pause). No original per-window wall-start exists; do not claim exact packet boundaries."
+      },
+      "activityPassed": false,
+      "latencyPassed": true,
+      "fanoutPassed": true,
+      "timeoutRatio": 0.018518518518518517,
+      "correctionRatio": 0,
+      "nativeCompletion": 0.9444444444444444,
+      "runRatio": 0.8979591836734694,
+      "fanoutRun": {
+        "count": 12,
+        "statuses": {
+          "success": 12
+        },
+        "sendP95Ms": 63,
+        "sendP99Ms": 63,
+        "successMaximumMs": 62.96470000001136
+      },
+      "failingMetricStatuses": {
+        "run": {
+          "count": 45,
+          "status": {
+            "success": 44,
+            "timeout": 1
+          },
+          "fromSend": {
+            "count": 44,
+            "p50Ms": 5,
+            "p95Ms": 92,
+            "p99Ms": 182,
+            "maxMs": 181.22340000001714
+          },
+          "fromPlan": {
+            "count": 44,
+            "p50Ms": 23,
+            "p95Ms": 98,
+            "p99Ms": 199,
+            "maxMs": 198.4836999999825
+          }
+        }
+      }
+    },
+    {
+      "actor": "L7324bd0f",
+      "role": "combat",
+      "final": true,
+      "emittedAtMs": 1792872158688,
+      "activeDurationSeconds": 44.041904599999896,
+      "estimatedWallWindow": {
+        "estimatedStartAtMs": 1792872110865.1304,
+        "estimatedActiveEndAtMs": 1792872154907.035,
+        "emittedWindowAtMs": 1792872158688,
+        "emittedFailureAtMs": 1792872158688,
+        "finalPauseSecondsRemoved": 3.78096510000003,
+        "rule": "Interval is an estimate from emitted wall time minus recorded active monotonic duration. For final segments, remove the reported actor planned-pause duration (this run has only the common final drain pause). No original per-window wall-start exists; do not claim exact packet boundaries."
+      },
+      "activityPassed": false,
+      "latencyPassed": true,
+      "fanoutPassed": true,
+      "timeoutRatio": 0.02631578947368421,
+      "correctionRatio": 0.1111111111111111,
+      "nativeCompletion": 0.9473684210526315,
+      "runRatio": 0.25,
+      "failingMetricStatuses": {
+        "attack": {
+          "count": 24,
+          "status": {
+            "success": 23,
+            "timeout": 1
+          },
+          "fromSend": {
+            "count": 23,
+            "p50Ms": 121,
+            "p95Ms": 296,
+            "p99Ms": 430,
+            "maxMs": 429.4908000000287
+          },
+          "fromPlan": {
+            "count": 23,
+            "p50Ms": 145,
+            "p95Ms": 304,
+            "p99Ms": 450,
+            "maxMs": 449.87329999997746
+          },
+          "attackV2Requests": 24,
+          "attackV2NotLaunched": 0
+        }
+      }
+    }
+  ],
+  "allTimeouts": [
+    {
+      "line": 38639,
+      "type": "action",
+      "at": 1792872121893,
+      "phase": "stage-25",
+      "actor": "L7324bd05",
+      "kind": "attack",
+      "plannedGameplay": true,
+      "scheduledAtMs": 985840.8626999999,
+      "sentAtMs": 985856.6348,
+      "targetId": 206602,
+      "hunting": "Scarecrow",
+      "nativeOpportunity": true,
+      "plannedIntervalMs": 1380,
+      "pacingKnown": true,
+      "cadence": {
+        "intervalMs": 1380,
+        "cooldownMs": 1330,
+        "pacingKnown": true,
+        "nativeAttackMs": 1330,
+        "zoneAttackFloorMs": 600,
+        "level": 5,
+        "attackSpeed": 0,
+        "statBlockPresent": true,
+        "statCount": 24,
+        "attackSpeedSource": "authoritative-sparse-zero"
+      },
+      "declaredHome": {
+        "x": 260,
+        "y": 670
+      },
+      "initialCombatTransit": false,
+      "targetPosition": {
+        "x": 246,
+        "y": 647
+      },
+      "attackResults": "v2",
+      "requestId": "282",
+      "attackRequestSent": true,
+      "status": "timeout",
+      "latencyMs": 902.4063000000315,
+      "plannedLatencyMs": 918.1797000000952,
+      "error": "L7324bd05 timed out waiting for attack authoritative acknowledgement",
+      "targetStillAdjacent": true,
+      "ambiguousTargetQuarantined": true,
+      "estimatedSentWallMs": 1792872120990.2854
+    },
+    {
+      "line": 38661,
+      "type": "action",
+      "at": 1792872122516,
+      "phase": "stage-25",
+      "actor": "L7324bd0f",
+      "kind": "attack",
+      "plannedGameplay": true,
+      "scheduledAtMs": 986477.1923,
+      "sentAtMs": 986481.0827,
+      "targetId": 206313,
+      "hunting": "Deer",
+      "nativeOpportunity": true,
+      "plannedIntervalMs": 1408,
+      "pacingKnown": true,
+      "cadence": {
+        "intervalMs": 1408,
+        "cooldownMs": 1358,
+        "pacingKnown": true,
+        "nativeAttackMs": 1358,
+        "zoneAttackFloorMs": 600,
+        "level": 3,
+        "attackSpeed": 0,
+        "statBlockPresent": true,
+        "statCount": 24,
+        "attackSpeedSource": "authoritative-sparse-zero"
+      },
+      "declaredHome": {
+        "x": 248,
+        "y": 592
+      },
+      "initialCombatTransit": false,
+      "targetPosition": {
+        "x": 235,
+        "y": 608
+      },
+      "attackResults": "v2",
+      "requestId": "130",
+      "attackRequestSent": true,
+      "status": "timeout",
+      "latencyMs": 901.1489999999758,
+      "plannedLatencyMs": 905.0409000000218,
+      "error": "L7324bd0f timed out waiting for attack authoritative acknowledgement",
+      "targetStillAdjacent": true,
+      "ambiguousTargetQuarantined": true,
+      "estimatedSentWallMs": 1792872121614.7334
+    },
+    {
+      "line": 38719,
+      "type": "action",
+      "at": 1792872123053,
+      "phase": "stage-25",
+      "actor": "L7324bd04",
+      "kind": "fanout-run",
+      "observer": "L7324bd05",
+      "status": "timeout",
+      "latencyMs": 2000.2258999999613,
+      "evidence": true
+    },
+    {
+      "line": 38726,
+      "type": "action",
+      "at": 1792872123178,
+      "phase": "stage-25",
+      "actor": "L7324bd09",
+      "kind": "run",
+      "plannedGameplay": true,
+      "scheduledAtMs": 986014.0377,
+      "sentAtMs": 986043.7883,
+      "plannedTarget": {
+        "x": 250,
+        "y": 680
+      },
+      "nativeOpportunity": true,
+      "plannedIntervalMs": 750,
+      "pacingKnown": true,
+      "cadence": {
+        "intervalMs": 750,
+        "cooldownMs": 600,
+        "pacingKnown": true
+      },
+      "status": "timeout",
+      "latencyMs": 2000.4616000000387,
+      "plannedLatencyMs": 2030.2133000000613,
+      "error": "L7324bd09 timed out waiting for run authoritative acknowledgement",
+      "ambiguousTargetQuarantined": false,
+      "estimatedSentWallMs": 1792872121177.439
+    }
+  ],
+  "failureInterpretation": "One complete60s actor04 window triggered normal drain. Four additional failed actor segments were finalized after drain, but their timeout/latency/correction evidence came from real pre-stop actions; they are not five independent stalls or shutdown-generated false failures.",
+  "commonStall": {
+    "observedActionSendWallEstimateRangeMs": [
+      1792872120990,
+      1792872121769
+    ],
+    "observedDelayedCompletionRangeMs": [
+      1792872121893,
+      1792872123257
+    ],
+    "firstFailureEmittedAtMs": 1792872154828,
+    "actionClockEstimateRule": {
+      "medianWallMinusMonotonicMs": 1792871135133.6506,
+      "minimumOffsetMs": 1792871135132.9543,
+      "maximumOffsetMs": 1792871135134.3418,
+      "samples": 2000,
+      "use": "Estimated action send wall times for diagnostic correlation only, never protocol ACK identity."
+    },
+    "ownerMovementMaximumObservedMs": 2000.4616000000387,
+    "successfulOwnerMovementMaximumObservedMs": 1924.7778000000399,
+    "timeoutFanout": [
+      {
+        "timeout": {
+          "line": 38719,
+          "type": "action",
+          "at": 1792872123053,
+          "phase": "stage-25",
+          "actor": "L7324bd04",
+          "kind": "fanout-run",
+          "observer": "L7324bd05",
+          "status": "timeout",
+          "latencyMs": 2000.2258999999613,
+          "evidence": true
+        },
+        "estimatedCommonSendWallMs": 1792872121052.7742,
+        "candidates": [
+          {
+            "line": 38634,
+            "at": 1792872121081,
+            "actor": "L7324bd04",
+            "kind": "run",
+            "status": "success",
+            "sentAtMs": 985919.262,
+            "estimatedSentWallMs": 1792872121052.9126,
+            "latencyMs": 6.418500000028871,
+            "plannedLatencyMs": 31.648999999975786,
+            "actual": {
+              "x": 248,
+              "y": 648
+            },
+            "plannedTarget": {
+              "x": 248,
+              "y": 648
+            },
+            "startDifferenceMs": 0.138427734375
+          }
+        ],
+        "associationRule": "Time-correlated candidates only. Movement/fanout raw rows do not contain a request ID, so do not claim an exact packet association."
+      }
+    ],
+    "diagnosticMetricInterval": [
+      {
+        "from": 1792872121229,
+        "to": 1792872123482,
+        "seconds": 2.253,
+        "metrics": {
+          "zoneWork": {
+            "count": 7,
+            "p50UpperUs": 10000,
+            "p95UpperUs": 10000,
+            "p99UpperUs": 10000,
+            "p999UpperUs": 10000,
+            "overBudgetCount": 0,
+            "overBudgetRatio": 0,
+            "lifetimeMaxBeforeUs": 13568,
+            "lifetimeMaxAfterUs": 13568,
+            "exactWindowMaxUs": null
+          },
+          "ownerTickDeadlineLag": {
+            "count": 7,
+            "p50UpperUs": 35000,
+            "p95UpperUs": 5000000,
+            "p99UpperUs": 5000000,
+            "p999UpperUs": 5000000,
+            "overBudgetCount": 1,
+            "overBudgetRatio": 0.14285714285714285,
+            "lifetimeMaxBeforeUs": 320140,
+            "lifetimeMaxAfterUs": 1793732,
+            "exactWindowMaxUs": null
+          },
+          "pendingMovementDeadlineLag": {
+            "count": 0,
+            "p50UpperUs": null,
+            "p95UpperUs": null,
+            "p99UpperUs": null,
+            "p999UpperUs": null,
+            "overBudgetCount": 0,
+            "overBudgetRatio": null,
+            "lifetimeMaxBeforeUs": 20000,
+            "lifetimeMaxAfterUs": 20000,
+            "exactWindowMaxUs": null
+          },
+          "immediateRequests": {
+            "successCount": 4,
+            "failureCount": 0,
+            "duration": {
+              "count": 4,
+              "p50UpperUs": 250000,
+              "p95UpperUs": 5000000,
+              "p99UpperUs": 5000000,
+              "p999UpperUs": 5000000,
+              "overBudgetCount": 4,
+              "overBudgetRatio": 1,
+              "lifetimeMaxBeforeUs": 173450,
+              "lifetimeMaxAfterUs": 1641541,
+              "exactWindowMaxUs": null
+            }
+          },
+          "lifecycleRequests": {
+            "successCount": 0,
+            "failureCount": 0,
+            "duration": {
+              "count": 0,
+              "p50UpperUs": null,
+              "p95UpperUs": null,
+              "p99UpperUs": null,
+              "p999UpperUs": null,
+              "overBudgetCount": 0,
+              "overBudgetRatio": null,
+              "lifetimeMaxBeforeUs": 1498960,
+              "lifetimeMaxAfterUs": 1498960,
+              "exactWindowMaxUs": null
+            }
+          },
+          "movementAdmissions": {
+            "successCount": 38,
+            "failureCount": 0,
+            "duration": {
+              "count": 38,
+              "p50UpperUs": 5000000,
+              "p95UpperUs": 5000000,
+              "p99UpperUs": 5000000,
+              "p999UpperUs": 5000000,
+              "overBudgetCount": 30,
+              "overBudgetRatio": 0.7894736842105263,
+              "lifetimeMaxBeforeUs": 441619,
+              "lifetimeMaxAfterUs": 2018131,
+              "exactWindowMaxUs": null
+            }
+          }
+        },
+        "resources": {
+          "sampledAt": 1792872123482,
+          "stop": false,
+          "health": {
+            "currentWsConnections": 25,
+            "currentActiveSessions": 25,
+            "currentReconnectLeases": 0,
+            "currentLoginInFlight": 0,
+            "currentNewCharacterInFlight": 0,
+            "currentStartGameInFlight": 0,
+            "maxWsConnections": 128,
+            "maxActiveSessions": 100,
+            "maxReconnectLeases": 100,
+            "maxLoginInFlight": 4,
+            "maxNewCharacterInFlight": 1,
+            "maxStartGameInFlight": 2
+          },
+          "privateBytes": 2301050880,
+          "workingSetBytes": 2321637376,
+          "process": {
+            "pid": 44896,
+            "creationTimeMs": 1792871139571,
+            "cpuTimeMs": 434796,
+            "handles": 268,
+            "threads": 49,
+            "rates": {
+              "cpuCores": 0.5698398576512456,
+              "readBytesPerSecond": 0,
+              "writeBytesPerSecond": 260034.69750889676,
+              "otherIoBytesPerSecond": 2302.4911032028467,
+              "ioOperationsPerSecond": 130.33807829181492
+            },
+            "rawCounters": {
+              "readBytes": 209287492,
+              "writeBytes": 360623785,
+              "otherIoBytes": 3740884,
+              "readOperations": 4952,
+              "writeOperations": 7723,
+              "otherIoOperations": 187063
+            },
+            "ioScope": "Windows process I/O counters include file/device I/O and are not pure disk throughput or latency"
+          },
+          "host": {
+            "freeBytes": 34246639616,
+            "totalBytes": 68463349760,
+            "cores": [
+              {
+                "id": "0",
+                "busyPercent": 45
+              },
+              {
+                "id": "1",
+                "busyPercent": 0
+              },
+              {
+                "id": "10",
+                "busyPercent": 27
+              },
+              {
+                "id": "11",
+                "busyPercent": 15
+              },
+              {
+                "id": "12",
+                "busyPercent": 0
+              },
+              {
+                "id": "13",
+                "busyPercent": 39
+              },
+              {
+                "id": "14",
+                "busyPercent": 51
+              },
+              {
+                "id": "15",
+                "busyPercent": 0
+              },
+              {
+                "id": "16",
+                "busyPercent": 3
+              },
+              {
+                "id": "17",
+                "busyPercent": 15
+              },
+              {
+                "id": "18",
+                "busyPercent": 15
+              },
+              {
+                "id": "19",
+                "busyPercent": 0
+              },
+              {
+                "id": "2",
+                "busyPercent": 0
+              },
+              {
+                "id": "20",
+                "busyPercent": 15
+              },
+              {
+                "id": "21",
+                "busyPercent": 3
+              },
+              {
+                "id": "22",
+                "busyPercent": 0
+              },
+              {
+                "id": "23",
+                "busyPercent": 0
+              },
+              {
+                "id": "24",
+                "busyPercent": 15
+              },
+              {
+                "id": "25",
+                "busyPercent": 21
+              },
+              {
+                "id": "26",
+                "busyPercent": 0
+              },
+              {
+                "id": "27",
+                "busyPercent": 33
+              },
+              {
+                "id": "28",
+                "busyPercent": 27
+              },
+              {
+                "id": "29",
+                "busyPercent": 9
+              },
+              {
+                "id": "3",
+                "busyPercent": 69
+              },
+              {
+                "id": "30",
+                "busyPercent": 0
+              },
+              {
+                "id": "31",
+                "busyPercent": 3
+              },
+              {
+                "id": "4",
+                "busyPercent": 100
+              },
+              {
+                "id": "5",
+                "busyPercent": 87
+              },
+              {
+                "id": "6",
+                "busyPercent": 87
+              },
+              {
+                "id": "7",
+                "busyPercent": 0
+              },
+              {
+                "id": "8",
+                "busyPercent": 15
+              },
+              {
+                "id": "9",
+                "busyPercent": 15
+              }
+            ],
+            "meanLogicalBusyPercent": 22.15625
+          },
+          "network": {
+            "adapters": [
+              {
+                "sentBytes": 2035984828,
+                "name": "Intel[R] Ethernet Controller I226-V",
+                "receivedBytes": 4750650832,
+                "receivedBytesPerSecond": 23810.94306049822,
+                "sentBytesPerSecond": 6258.451957295373
+              },
+              {
+                "sentBytes": 0,
+                "name": "Intel[R] Wi-Fi 6E AX211 160MHz",
+                "receivedBytes": 0,
+                "receivedBytesPerSecond": 0,
+                "sentBytesPerSecond": 0
+              }
+            ],
+            "hostBytesPerSecond": 30069.39501779359,
+            "processBytesPerSecond": null,
+            "scope": "Host NIC cumulative counters; loopback traffic may be absent. Realm WebSocket payload bytes are measured separately by the gameplay driver. No TLS/PPS/physical-link capacity inferred."
+          },
+          "zoneMetrics": {
+            "version": 2,
+            "scope": "gateway shared-owner transaction, may contain multiple maps",
+            "sinceInitializationMs": 983366,
+            "budgetUs": 50000,
+            "complete": true,
+            "zoneWork": {
+              "count": 9783,
+              "sumUs": 17534354,
+              "maxUs": 13568,
+              "overBudgetCount": 0,
+              "saturated": false,
+              "discardedSamples": 0,
+              "buckets": [
+                {
+                  "upperBoundUs": 100,
+                  "count": 26
+                },
+                {
+                  "upperBoundUs": 250,
+                  "count": 80
+                },
+                {
+                  "upperBoundUs": 500,
+                  "count": 2968
+                },
+                {
+                  "upperBoundUs": 1000,
+                  "count": 2132
+                },
+                {
+                  "upperBoundUs": 2000,
+                  "count": 2088
+                },
+                {
+                  "upperBoundUs": 5000,
+                  "count": 1497
+                },
+                {
+                  "upperBoundUs": 10000,
+                  "count": 990
+                },
+                {
+                  "upperBoundUs": 20000,
+                  "count": 2
+                },
+                {
+                  "upperBoundUs": 35000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 50000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 75000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 100000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 150000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 250000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 500000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 1000000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 5000000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 30000000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": null,
+                  "count": 0
+                }
+              ],
+              "p50UpperUs": 1000,
+              "p95UpperUs": 10000,
+              "p99UpperUs": 10000,
+              "p999UpperUs": 10000
+            },
+            "ownerTickDeadlineLag": {
+              "count": 9777,
+              "sumUs": 95332689,
+              "maxUs": 1793732,
+              "overBudgetCount": 3,
+              "saturated": false,
+              "discardedSamples": 0,
+              "buckets": [
+                {
+                  "upperBoundUs": 100,
+                  "count": 1
+                },
+                {
+                  "upperBoundUs": 250,
+                  "count": 3
+                },
+                {
+                  "upperBoundUs": 500,
+                  "count": 21
+                },
+                {
+                  "upperBoundUs": 1000,
+                  "count": 78
+                },
+                {
+                  "upperBoundUs": 2000,
+                  "count": 519
+                },
+                {
+                  "upperBoundUs": 5000,
+                  "count": 1606
+                },
+                {
+                  "upperBoundUs": 10000,
+                  "count": 3083
+                },
+                {
+                  "upperBoundUs": 20000,
+                  "count": 4224
+                },
+                {
+                  "upperBoundUs": 35000,
+                  "count": 231
+                },
+                {
+                  "upperBoundUs": 50000,
+                  "count": 8
+                },
+                {
+                  "upperBoundUs": 75000,
+                  "count": 1
+                },
+                {
+                  "upperBoundUs": 100000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 150000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 250000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 500000,
+                  "count": 1
+                },
+                {
+                  "upperBoundUs": 1000000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 5000000,
+                  "count": 1
+                },
+                {
+                  "upperBoundUs": 30000000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": null,
+                  "count": 0
+                }
+              ],
+              "p50UpperUs": 10000,
+              "p95UpperUs": 20000,
+              "p99UpperUs": 35000,
+              "p999UpperUs": 50000
+            },
+            "pendingMovementDeadlineLag": {
+              "count": 6,
+              "sumUs": 56000,
+              "maxUs": 20000,
+              "overBudgetCount": 0,
+              "saturated": false,
+              "discardedSamples": 0,
+              "buckets": [
+                {
+                  "upperBoundUs": 100,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 250,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 500,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 1000,
+                  "count": 1
+                },
+                {
+                  "upperBoundUs": 2000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 5000,
+                  "count": 1
+                },
+                {
+                  "upperBoundUs": 10000,
+                  "count": 1
+                },
+                {
+                  "upperBoundUs": 20000,
+                  "count": 3
+                },
+                {
+                  "upperBoundUs": 35000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 50000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 75000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 100000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 150000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 250000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 500000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 1000000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 5000000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 30000000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": null,
+                  "count": 0
+                }
+              ],
+              "p50UpperUs": 10000,
+              "p95UpperUs": 20000,
+              "p99UpperUs": 20000,
+              "p999UpperUs": 20000
+            },
+            "immediateRequests": {
+              "successCount": 1034,
+              "failureCount": 0,
+              "duration": {
+                "count": 1034,
+                "sumUs": 23709851,
+                "maxUs": 1641541,
+                "overBudgetCount": 131,
+                "saturated": false,
+                "discardedSamples": 0,
+                "buckets": [
+                  {
+                    "upperBoundUs": 100,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 250,
+                    "count": 17
+                  },
+                  {
+                    "upperBoundUs": 500,
+                    "count": 26
+                  },
+                  {
+                    "upperBoundUs": 1000,
+                    "count": 36
+                  },
+                  {
+                    "upperBoundUs": 2000,
+                    "count": 83
+                  },
+                  {
+                    "upperBoundUs": 5000,
+                    "count": 113
+                  },
+                  {
+                    "upperBoundUs": 10000,
+                    "count": 107
+                  },
+                  {
+                    "upperBoundUs": 20000,
+                    "count": 331
+                  },
+                  {
+                    "upperBoundUs": 35000,
+                    "count": 101
+                  },
+                  {
+                    "upperBoundUs": 50000,
+                    "count": 89
+                  },
+                  {
+                    "upperBoundUs": 75000,
+                    "count": 80
+                  },
+                  {
+                    "upperBoundUs": 100000,
+                    "count": 34
+                  },
+                  {
+                    "upperBoundUs": 150000,
+                    "count": 13
+                  },
+                  {
+                    "upperBoundUs": 250000,
+                    "count": 3
+                  },
+                  {
+                    "upperBoundUs": 500000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 1000000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 5000000,
+                    "count": 1
+                  },
+                  {
+                    "upperBoundUs": 30000000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": null,
+                    "count": 0
+                  }
+                ],
+                "p50UpperUs": 20000,
+                "p95UpperUs": 75000,
+                "p99UpperUs": 150000,
+                "p999UpperUs": 250000
+              }
+            },
+            "lifecycleRequests": {
+              "successCount": 75,
+              "failureCount": 0,
+              "duration": {
+                "count": 75,
+                "sumUs": 34642594,
+                "maxUs": 1498960,
+                "overBudgetCount": 51,
+                "saturated": false,
+                "discardedSamples": 0,
+                "buckets": [
+                  {
+                    "upperBoundUs": 100,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 250,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 500,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 1000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 2000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 5000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 10000,
+                    "count": 1
+                  },
+                  {
+                    "upperBoundUs": 20000,
+                    "count": 23
+                  },
+                  {
+                    "upperBoundUs": 35000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 50000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 75000,
+                    "count": 22
+                  },
+                  {
+                    "upperBoundUs": 100000,
+                    "count": 3
+                  },
+                  {
+                    "upperBoundUs": 150000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 250000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 500000,
+                    "count": 1
+                  },
+                  {
+                    "upperBoundUs": 1000000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 5000000,
+                    "count": 25
+                  },
+                  {
+                    "upperBoundUs": 30000000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": null,
+                    "count": 0
+                  }
+                ],
+                "p50UpperUs": 75000,
+                "p95UpperUs": 5000000,
+                "p99UpperUs": 5000000,
+                "p999UpperUs": 5000000
+              }
+            },
+            "movementAdmissions": {
+              "successCount": 12993,
+              "failureCount": 0,
+              "duration": {
+                "count": 12993,
+                "sumUs": 80836612,
+                "maxUs": 2018131,
+                "overBudgetCount": 132,
+                "saturated": false,
+                "discardedSamples": 0,
+                "buckets": [
+                  {
+                    "upperBoundUs": 100,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 250,
+                    "count": 971
+                  },
+                  {
+                    "upperBoundUs": 500,
+                    "count": 4055
+                  },
+                  {
+                    "upperBoundUs": 1000,
+                    "count": 3278
+                  },
+                  {
+                    "upperBoundUs": 2000,
+                    "count": 770
+                  },
+                  {
+                    "upperBoundUs": 5000,
+                    "count": 1938
+                  },
+                  {
+                    "upperBoundUs": 10000,
+                    "count": 1175
+                  },
+                  {
+                    "upperBoundUs": 20000,
+                    "count": 321
+                  },
+                  {
+                    "upperBoundUs": 35000,
+                    "count": 226
+                  },
+                  {
+                    "upperBoundUs": 50000,
+                    "count": 127
+                  },
+                  {
+                    "upperBoundUs": 75000,
+                    "count": 83
+                  },
+                  {
+                    "upperBoundUs": 100000,
+                    "count": 5
+                  },
+                  {
+                    "upperBoundUs": 150000,
+                    "count": 9
+                  },
+                  {
+                    "upperBoundUs": 250000,
+                    "count": 6
+                  },
+                  {
+                    "upperBoundUs": 500000,
+                    "count": 5
+                  },
+                  {
+                    "upperBoundUs": 1000000,
+                    "count": 1
+                  },
+                  {
+                    "upperBoundUs": 5000000,
+                    "count": 23
+                  },
+                  {
+                    "upperBoundUs": 30000000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": null,
+                    "count": 0
+                  }
+                ],
+                "p50UpperUs": 1000,
+                "p95UpperUs": 20000,
+                "p99UpperUs": 75000,
+                "p999UpperUs": 5000000
+              }
+            }
+          }
+        }
+      }
+    ],
+    "driverFirstWindow": {
+      "p99SamplesMs": {
+        "count": 60,
+        "p50": 33.980415,
+        "p95": 37.289983,
+        "p99": 37.847039,
+        "max": 37.847039
+      },
+      "maximumSamplesMs": {
+        "count": 60,
+        "p50": 33.980415,
+        "p95": 37.289983,
+        "p99": 37.847039,
+        "max": 37.847039
+      }
+    },
+    "driverMaximumObservedAllRunMs": 50.003967
+  },
+  "phaseComparisons": [
+    {
+      "name": "stage-2",
+      "targetActors": 2,
+      "completed": true,
+      "seconds": 300.028,
+      "bracket": {
+        "from": 1792871178123,
+        "to": 1792871481086,
+        "startMarginMs": 2128,
+        "endMarginMs": 807
+      },
+      "resources": {
+        "samples": 142,
+        "firstSampleAt": 1792871180329,
+        "lastSampleAt": 1792871478975,
+        "processCpuCores": {
+          "count": 142,
+          "p50": 0.04309545875810936,
+          "p95": 0.0926094890510949,
+          "p99": 0.112225405921681,
+          "max": 0.12065637065637065
+        },
+        "processIoOperationsPerSecond": {
+          "count": 142,
+          "p50": 81.26195028680688,
+          "p95": 127.78315585672799,
+          "p99": 133.91136801541424,
+          "max": 134.72485768500948
+        },
+        "processReadBytesPerSecond": {
+          "count": 142,
+          "p50": 0,
+          "p95": 0,
+          "p99": 0,
+          "max": 0
+        },
+        "processWriteBytesPerSecond": {
+          "count": 142,
+          "p50": 97346.81255946719,
+          "p95": 176188.3988494727,
+          "p99": 218475.15095215978,
+          "max": 223239.50729927004
+        },
+        "processOtherIoBytesPerSecond": {
+          "count": 142,
+          "p50": 1025.545750116117,
+          "p95": 1470.0047236655644,
+          "p99": 1540.796963946869,
+          "max": 1560.6936416184972
+        },
+        "privateBytes": {
+          "count": 142,
+          "p50": 290377728,
+          "p95": 424574976,
+          "p99": 436957184,
+          "max": 439185408
+        },
+        "workingSetBytes": {
+          "count": 142,
+          "p50": 340074496,
+          "p95": 472031232,
+          "p99": 484454400,
+          "max": 486596608
+        },
+        "hostFreeBytes": {
+          "minimum": 33693118464,
+          "count": 142,
+          "p50": 34610118656,
+          "p95": 34761383936,
+          "p99": 34888486912,
+          "max": 34895163392
+        },
+        "hostLogicalCoreBusyPercent": [
+          {
+            "id": "0",
+            "count": 142,
+            "p50": 23,
+            "p95": 81,
+            "p99": 87,
+            "max": 94
+          },
+          {
+            "id": "1",
+            "count": 142,
+            "p50": 39,
+            "p95": 81,
+            "p99": 94,
+            "max": 100
+          },
+          {
+            "id": "2",
+            "count": 142,
+            "p50": 9,
+            "p95": 75,
+            "p99": 82,
+            "max": 87
+          },
+          {
+            "id": "3",
+            "count": 142,
+            "p50": 46,
+            "p95": 82,
+            "p99": 93,
+            "max": 100
+          },
+          {
+            "id": "4",
+            "count": 142,
+            "p50": 27,
+            "p95": 100,
+            "p99": 100,
+            "max": 100
+          },
+          {
+            "id": "5",
+            "count": 142,
+            "p50": 64,
+            "p95": 100,
+            "p99": 100,
+            "max": 100
+          },
+          {
+            "id": "6",
+            "count": 142,
+            "p50": 81,
+            "p95": 100,
+            "p99": 100,
+            "max": 100
+          },
+          {
+            "id": "7",
+            "count": 142,
+            "p50": 8,
+            "p95": 93,
+            "p99": 100,
+            "max": 100
+          },
+          {
+            "id": "8",
+            "count": 142,
+            "p50": 33,
+            "p95": 70,
+            "p99": 81,
+            "max": 82
+          },
+          {
+            "id": "9",
+            "count": 142,
+            "p50": 14,
+            "p95": 70,
+            "p99": 81,
+            "max": 82
+          },
+          {
+            "id": "10",
+            "count": 142,
+            "p50": 34,
+            "p95": 70,
+            "p99": 81,
+            "max": 82
+          },
+          {
+            "id": "11",
+            "count": 142,
+            "p50": 10,
+            "p95": 75,
+            "p99": 87,
+            "max": 87
+          },
+          {
+            "id": "12",
+            "count": 142,
+            "p50": 4,
+            "p95": 57,
+            "p99": 70,
+            "max": 88
+          },
+          {
+            "id": "13",
+            "count": 142,
+            "p50": 46,
+            "p95": 76,
+            "p99": 81,
+            "max": 88
+          },
+          {
+            "id": "14",
+            "count": 142,
+            "p50": 39,
+            "p95": 69,
+            "p99": 76,
+            "max": 100
+          },
+          {
+            "id": "15",
+            "count": 142,
+            "p50": 7,
+            "p95": 62,
+            "p99": 82,
+            "max": 87
+          },
+          {
+            "id": "16",
+            "count": 142,
+            "p50": 22,
+            "p95": 50,
+            "p99": 57,
+            "max": 63
+          },
+          {
+            "id": "17",
+            "count": 142,
+            "p50": 4,
+            "p95": 44,
+            "p99": 69,
+            "max": 70
+          },
+          {
+            "id": "18",
+            "count": 142,
+            "p50": 4,
+            "p95": 28,
+            "p99": 46,
+            "max": 57
+          },
+          {
+            "id": "19",
+            "count": 142,
+            "p50": 4,
+            "p95": 38,
+            "p99": 46,
+            "max": 57
+          },
+          {
+            "id": "20",
+            "count": 142,
+            "p50": 19,
+            "p95": 47,
+            "p99": 57,
+            "max": 58
+          },
+          {
+            "id": "21",
+            "count": 142,
+            "p50": 7,
+            "p95": 40,
+            "p99": 52,
+            "max": 56
+          },
+          {
+            "id": "22",
+            "count": 142,
+            "p50": 5,
+            "p95": 39,
+            "p99": 63,
+            "max": 63
+          },
+          {
+            "id": "23",
+            "count": 142,
+            "p50": 5,
+            "p95": 39,
+            "p99": 69,
+            "max": 70
+          },
+          {
+            "id": "24",
+            "count": 142,
+            "p50": 20,
+            "p95": 50,
+            "p99": 63,
+            "max": 63
+          },
+          {
+            "id": "25",
+            "count": 142,
+            "p50": 15,
+            "p95": 46,
+            "p99": 58,
+            "max": 63
+          },
+          {
+            "id": "26",
+            "count": 142,
+            "p50": 6,
+            "p95": 39,
+            "p99": 75,
+            "max": 100
+          },
+          {
+            "id": "27",
+            "count": 142,
+            "p50": 5,
+            "p95": 39,
+            "p99": 88,
+            "max": 100
+          },
+          {
+            "id": "28",
+            "count": 142,
+            "p50": 26,
+            "p95": 57,
+            "p99": 69,
+            "max": 75
+          },
+          {
+            "id": "29",
+            "count": 142,
+            "p50": 10,
+            "p95": 50,
+            "p99": 70,
+            "max": 70
+          },
+          {
+            "id": "30",
+            "count": 142,
+            "p50": 3,
+            "p95": 17,
+            "p99": 57,
+            "max": 100
+          },
+          {
+            "id": "31",
+            "count": 142,
+            "p50": 3,
+            "p95": 15,
+            "p99": 27,
+            "max": 37
+          }
+        ],
+        "driverEventLoop": {
+          "p99SamplesMs": {
+            "count": 296,
+            "p50": 31.637503,
+            "p95": 32.096255,
+            "p99": 33.685503,
+            "max": 50.003967
+          },
+          "maximumSamplesMs": {
+            "count": 296,
+            "p50": 31.637503,
+            "p95": 32.096255,
+            "p99": 33.685503,
+            "max": 50.003967
+          }
+        },
+        "limits": {
+          "cpuCores": 24,
+          "ioOperationsPerSecond": 100000,
+          "ioBytesPerSecond": 536870912,
+          "privateBytes": 34359738368,
+          "workingSetBytes": 42949672960,
+          "hostFreeBytesMinimum": 8589934592,
+          "driverEventLoopP99MsFor3Samples": 250
+        }
+      },
+      "serverTelemetry": {
+        "zoneWork": {
+          "count": 3030,
+          "p50UpperUs": 500,
+          "p95UpperUs": 1000,
+          "p99UpperUs": 1000,
+          "p999UpperUs": 1000,
+          "overBudgetCount": 0,
+          "overBudgetRatio": 0,
+          "lifetimeMaxBeforeUs": 640,
+          "lifetimeMaxAfterUs": 1027,
+          "exactWindowMaxUs": null
+        },
+        "ownerTickDeadlineLag": {
+          "count": 3030,
+          "p50UpperUs": 10000,
+          "p95UpperUs": 20000,
+          "p99UpperUs": 20000,
+          "p999UpperUs": 20000,
+          "overBudgetCount": 0,
+          "overBudgetRatio": 0,
+          "lifetimeMaxBeforeUs": 19703,
+          "lifetimeMaxAfterUs": 25940,
+          "exactWindowMaxUs": null
+        },
+        "pendingMovementDeadlineLag": {
+          "count": 0,
+          "p50UpperUs": null,
+          "p95UpperUs": null,
+          "p99UpperUs": null,
+          "p999UpperUs": null,
+          "overBudgetCount": 0,
+          "overBudgetRatio": null,
+          "lifetimeMaxBeforeUs": 0,
+          "lifetimeMaxAfterUs": 0,
+          "exactWindowMaxUs": null
+        },
+        "immediateRequests": {
+          "successCount": 31,
+          "failureCount": 0,
+          "duration": {
+            "count": 31,
+            "p50UpperUs": 1000,
+            "p95UpperUs": 5000,
+            "p99UpperUs": 5000,
+            "p999UpperUs": 5000,
+            "overBudgetCount": 0,
+            "overBudgetRatio": 0,
+            "lifetimeMaxBeforeUs": 15600,
+            "lifetimeMaxAfterUs": 15600,
+            "exactWindowMaxUs": null
+          }
+        },
+        "lifecycleRequests": {
+          "successCount": 1,
+          "failureCount": 0,
+          "duration": {
+            "count": 1,
+            "p50UpperUs": 75000,
+            "p95UpperUs": 75000,
+            "p99UpperUs": 75000,
+            "p999UpperUs": 75000,
+            "overBudgetCount": 1,
+            "overBudgetRatio": 1,
+            "lifetimeMaxBeforeUs": 1405100,
+            "lifetimeMaxAfterUs": 1405100,
+            "exactWindowMaxUs": null
+          }
+        },
+        "movementAdmissions": {
+          "successCount": 788,
+          "failureCount": 0,
+          "duration": {
+            "count": 788,
+            "p50UpperUs": 250,
+            "p95UpperUs": 500,
+            "p99UpperUs": 10000,
+            "p999UpperUs": 20000,
+            "overBudgetCount": 0,
+            "overBudgetRatio": 0,
+            "lifetimeMaxBeforeUs": 476,
+            "lifetimeMaxAfterUs": 12657,
+            "exactWindowMaxUs": null
+          }
+        }
+      }
+    },
+    {
+      "name": "stage-10",
+      "targetActors": 10,
+      "completed": true,
+      "seconds": 300.028,
+      "bracket": {
+        "from": 1792871543900,
+        "to": 1792871845637,
+        "startMarginMs": 1327,
+        "endMarginMs": 382
+      },
+      "resources": {
+        "samples": 139,
+        "firstSampleAt": 1792871545987,
+        "lastSampleAt": 1792871843601,
+        "processCpuCores": {
+          "count": 139,
+          "p50": 0.2701535508637236,
+          "p95": 0.4628410159924741,
+          "p99": 0.6206244087038789,
+          "max": 0.8894073728418106
+        },
+        "processIoOperationsPerSecond": {
+          "count": 139,
+          "p50": 146.9890943575154,
+          "p95": 198.25072886297377,
+          "p99": 243.47826086956525,
+          "max": 558.5627624825012
+        },
+        "processReadBytesPerSecond": {
+          "count": 139,
+          "p50": 0,
+          "p95": 0,
+          "p99": 0,
+          "max": 0
+        },
+        "processWriteBytesPerSecond": {
+          "count": 139,
+          "p50": 265469.9029126213,
+          "p95": 425076.92307692306,
+          "p99": 578853.1400966184,
+          "max": 1041702.7531497901
+        },
+        "processOtherIoBytesPerSecond": {
+          "count": 139,
+          "p50": 2105.363075462743,
+          "p95": 2625.8503401360545,
+          "p99": 3037.9506641366224,
+          "max": 7817.07886140924
+        },
+        "privateBytes": {
+          "count": 139,
+          "p50": 925904896,
+          "p95": 1115049984,
+          "p99": 1123028992,
+          "max": 1124036608
+        },
+        "workingSetBytes": {
+          "count": 139,
+          "p50": 967430144,
+          "p95": 1154084864,
+          "p99": 1161875456,
+          "max": 1162919936
+        },
+        "hostFreeBytes": {
+          "minimum": 33927692288,
+          "count": 139,
+          "p50": 34420080640,
+          "p95": 35071856640,
+          "p99": 35120324608,
+          "max": 35162931200
+        },
+        "hostLogicalCoreBusyPercent": [
+          {
+            "id": "0",
+            "count": 139,
+            "p50": 15,
+            "p95": 76,
+            "p99": 88,
+            "max": 88
+          },
+          {
+            "id": "1",
+            "count": 139,
+            "p50": 45,
+            "p95": 82,
+            "p99": 93,
+            "max": 100
+          },
+          {
+            "id": "2",
+            "count": 139,
+            "p50": 9,
+            "p95": 70,
+            "p99": 82,
+            "max": 82
+          },
+          {
+            "id": "3",
+            "count": 139,
+            "p50": 50,
+            "p95": 87,
+            "p99": 88,
+            "max": 93
+          },
+          {
+            "id": "4",
+            "count": 139,
+            "p50": 69,
+            "p95": 100,
+            "p99": 100,
+            "max": 100
+          },
+          {
+            "id": "5",
+            "count": 139,
+            "p50": 22,
+            "p95": 94,
+            "p99": 100,
+            "max": 100
+          },
+          {
+            "id": "6",
+            "count": 139,
+            "p50": 76,
+            "p95": 100,
+            "p99": 100,
+            "max": 100
+          },
+          {
+            "id": "7",
+            "count": 139,
+            "p50": 10,
+            "p95": 94,
+            "p99": 100,
+            "max": 100
+          },
+          {
+            "id": "8",
+            "count": 139,
+            "p50": 39,
+            "p95": 75,
+            "p99": 81,
+            "max": 82
+          },
+          {
+            "id": "9",
+            "count": 139,
+            "p50": 11,
+            "p95": 75,
+            "p99": 76,
+            "max": 81
+          },
+          {
+            "id": "10",
+            "count": 139,
+            "p50": 34,
+            "p95": 75,
+            "p99": 82,
+            "max": 82
+          },
+          {
+            "id": "11",
+            "count": 139,
+            "p50": 10,
+            "p95": 64,
+            "p99": 81,
+            "max": 82
+          },
+          {
+            "id": "12",
+            "count": 139,
+            "p50": 3,
+            "p95": 58,
+            "p99": 69,
+            "max": 70
+          },
+          {
+            "id": "13",
+            "count": 139,
+            "p50": 44,
+            "p95": 75,
+            "p99": 81,
+            "max": 82
+          },
+          {
+            "id": "14",
+            "count": 139,
+            "p50": 39,
+            "p95": 70,
+            "p99": 82,
+            "max": 82
+          },
+          {
+            "id": "15",
+            "count": 139,
+            "p50": 4,
+            "p95": 63,
+            "p99": 81,
+            "max": 81
+          },
+          {
+            "id": "16",
+            "count": 139,
+            "p50": 20,
+            "p95": 52,
+            "p99": 63,
+            "max": 70
+          },
+          {
+            "id": "17",
+            "count": 139,
+            "p50": 6,
+            "p95": 40,
+            "p99": 52,
+            "max": 58
+          },
+          {
+            "id": "18",
+            "count": 139,
+            "p50": 6,
+            "p95": 34,
+            "p99": 51,
+            "max": 70
+          },
+          {
+            "id": "19",
+            "count": 139,
+            "p50": 7,
+            "p95": 40,
+            "p99": 51,
+            "max": 70
+          },
+          {
+            "id": "20",
+            "count": 139,
+            "p50": 16,
+            "p95": 46,
+            "p99": 63,
+            "max": 64
+          },
+          {
+            "id": "21",
+            "count": 139,
+            "p50": 15,
+            "p95": 51,
+            "p99": 58,
+            "max": 70
+          },
+          {
+            "id": "22",
+            "count": 139,
+            "p50": 9,
+            "p95": 44,
+            "p99": 57,
+            "max": 63
+          },
+          {
+            "id": "23",
+            "count": 139,
+            "p50": 9,
+            "p95": 32,
+            "p99": 52,
+            "max": 52
+          },
+          {
+            "id": "24",
+            "count": 139,
+            "p50": 22,
+            "p95": 52,
+            "p99": 64,
+            "max": 64
+          },
+          {
+            "id": "25",
+            "count": 139,
+            "p50": 15,
+            "p95": 45,
+            "p99": 58,
+            "max": 64
+          },
+          {
+            "id": "26",
+            "count": 139,
+            "p50": 4,
+            "p95": 31,
+            "p99": 58,
+            "max": 75
+          },
+          {
+            "id": "27",
+            "count": 139,
+            "p50": 5,
+            "p95": 22,
+            "p99": 70,
+            "max": 100
+          },
+          {
+            "id": "28",
+            "count": 139,
+            "p50": 22,
+            "p95": 51,
+            "p99": 64,
+            "max": 76
+          },
+          {
+            "id": "29",
+            "count": 139,
+            "p50": 9,
+            "p95": 34,
+            "p99": 51,
+            "max": 52
+          },
+          {
+            "id": "30",
+            "count": 139,
+            "p50": 6,
+            "p95": 33,
+            "p99": 56,
+            "max": 62
+          },
+          {
+            "id": "31",
+            "count": 139,
+            "p50": 5,
+            "p95": 41,
+            "p99": 75,
+            "max": 76
+          }
+        ],
+        "driverEventLoop": {
+          "p99SamplesMs": {
+            "count": 297,
+            "p50": 31.752191,
+            "p95": 33.210367,
+            "p99": 35.094527,
+            "max": 40.665087
+          },
+          "maximumSamplesMs": {
+            "count": 297,
+            "p50": 31.752191,
+            "p95": 33.210367,
+            "p99": 35.094527,
+            "max": 40.665087
+          }
+        },
+        "limits": {
+          "cpuCores": 24,
+          "ioOperationsPerSecond": 100000,
+          "ioBytesPerSecond": 536870912,
+          "privateBytes": 34359738368,
+          "workingSetBytes": 42949672960,
+          "hostFreeBytesMinimum": 8589934592,
+          "driverEventLoopP99MsFor3Samples": 250
+        }
+      },
+      "serverTelemetry": {
+        "zoneWork": {
+          "count": 3017,
+          "p50UpperUs": 2000,
+          "p95UpperUs": 2000,
+          "p99UpperUs": 2000,
+          "p999UpperUs": 5000,
+          "overBudgetCount": 0,
+          "overBudgetRatio": 0,
+          "lifetimeMaxBeforeUs": 1637,
+          "lifetimeMaxAfterUs": 2754,
+          "exactWindowMaxUs": null
+        },
+        "ownerTickDeadlineLag": {
+          "count": 3017,
+          "p50UpperUs": 10000,
+          "p95UpperUs": 20000,
+          "p99UpperUs": 20000,
+          "p999UpperUs": 20000,
+          "overBudgetCount": 0,
+          "overBudgetRatio": 0,
+          "lifetimeMaxBeforeUs": 35514,
+          "lifetimeMaxAfterUs": 35514,
+          "exactWindowMaxUs": null
+        },
+        "pendingMovementDeadlineLag": {
+          "count": 0,
+          "p50UpperUs": null,
+          "p95UpperUs": null,
+          "p99UpperUs": null,
+          "p999UpperUs": null,
+          "overBudgetCount": 0,
+          "overBudgetRatio": null,
+          "lifetimeMaxBeforeUs": 0,
+          "lifetimeMaxAfterUs": 0,
+          "exactWindowMaxUs": null
+        },
+        "immediateRequests": {
+          "successCount": 303,
+          "failureCount": 0,
+          "duration": {
+            "count": 303,
+            "p50UpperUs": 20000,
+            "p95UpperUs": 20000,
+            "p99UpperUs": 35000,
+            "p999UpperUs": 35000,
+            "overBudgetCount": 0,
+            "overBudgetRatio": 0,
+            "lifetimeMaxBeforeUs": 22729,
+            "lifetimeMaxAfterUs": 25910,
+            "exactWindowMaxUs": null
+          }
+        },
+        "lifecycleRequests": {
+          "successCount": 0,
+          "failureCount": 0,
+          "duration": {
+            "count": 0,
+            "p50UpperUs": null,
+            "p95UpperUs": null,
+            "p99UpperUs": null,
+            "p999UpperUs": null,
+            "overBudgetCount": 0,
+            "overBudgetRatio": null,
+            "lifetimeMaxBeforeUs": 1405100,
+            "lifetimeMaxAfterUs": 1405100,
+            "exactWindowMaxUs": null
+          }
+        },
+        "movementAdmissions": {
+          "successCount": 3637,
+          "failureCount": 0,
+          "duration": {
+            "count": 3637,
+            "p50UpperUs": 500,
+            "p95UpperUs": 10000,
+            "p99UpperUs": 10000,
+            "p999UpperUs": 20000,
+            "overBudgetCount": 0,
+            "overBudgetRatio": 0,
+            "lifetimeMaxBeforeUs": 21520,
+            "lifetimeMaxAfterUs": 21520,
+            "exactWindowMaxUs": null
+          }
+        }
+      }
+    },
+    {
+      "name": "stage-25",
+      "targetActors": 25,
+      "completed": false,
+      "seconds": 220.716,
+      "bracket": {
+        "from": 1792871932852,
+        "to": 1792872156782,
+        "startMarginMs": 1337,
+        "endMarginMs": 1877
+      },
+      "resources": {
+        "samples": 103,
+        "firstSampleAt": 1792871935063,
+        "lastSampleAt": 1792872154611,
+        "processCpuCores": {
+          "count": 103,
+          "p50": 1.2252621979024167,
+          "p95": 1.5579777365491652,
+          "p99": 1.64030131826742,
+          "max": 1.6959586466165413
+        },
+        "processIoOperationsPerSecond": {
+          "count": 103,
+          "p50": 256.04089219330854,
+          "p95": 317.38512553292276,
+          "p99": 336.29976580796256,
+          "max": 370.72945521698983
+        },
+        "processReadBytesPerSecond": {
+          "count": 103,
+          "p50": 0,
+          "p95": 0,
+          "p99": 0,
+          "max": 0
+        },
+        "processWriteBytesPerSecond": {
+          "count": 103,
+          "p50": 792518.889394629,
+          "p95": 1162836.186950486,
+          "p99": 1267029.6762589926,
+          "max": 1303263.2318501172
+        },
+        "processOtherIoBytesPerSecond": {
+          "count": 103,
+          "p50": 3961.0389610389607,
+          "p95": 4571.428571428572,
+          "p99": 4704.449648711944,
+          "max": 5440.443213296399
+        },
+        "privateBytes": {
+          "count": 103,
+          "p50": 1968607232,
+          "p95": 2361507840,
+          "p99": 2383720448,
+          "max": 2390835200
+        },
+        "workingSetBytes": {
+          "count": 103,
+          "p50": 1994522624,
+          "p95": 2405527552,
+          "p99": 2438770688,
+          "max": 2445897728
+        },
+        "hostFreeBytes": {
+          "minimum": 33902657536,
+          "count": 103,
+          "p50": 34232381440,
+          "p95": 34427097088,
+          "p99": 34570178560,
+          "max": 34981138432
+        },
+        "hostLogicalCoreBusyPercent": [
+          {
+            "id": "0",
+            "count": 103,
+            "p50": 25,
+            "p95": 76,
+            "p99": 87,
+            "max": 88
+          },
+          {
+            "id": "1",
+            "count": 103,
+            "p50": 28,
+            "p95": 87,
+            "p99": 93,
+            "max": 93
+          },
+          {
+            "id": "2",
+            "count": 103,
+            "p50": 25,
+            "p95": 81,
+            "p99": 87,
+            "max": 94
+          },
+          {
+            "id": "3",
+            "count": 103,
+            "p50": 31,
+            "p95": 81,
+            "p99": 82,
+            "max": 87
+          },
+          {
+            "id": "4",
+            "count": 103,
+            "p50": 62,
+            "p95": 100,
+            "p99": 100,
+            "max": 100
+          },
+          {
+            "id": "5",
+            "count": 103,
+            "p50": 38,
+            "p95": 100,
+            "p99": 100,
+            "max": 100
+          },
+          {
+            "id": "6",
+            "count": 103,
+            "p50": 75,
+            "p95": 100,
+            "p99": 100,
+            "max": 100
+          },
+          {
+            "id": "7",
+            "count": 103,
+            "p50": 23,
+            "p95": 94,
+            "p99": 100,
+            "max": 100
+          },
+          {
+            "id": "8",
+            "count": 103,
+            "p50": 39,
+            "p95": 69,
+            "p99": 81,
+            "max": 87
+          },
+          {
+            "id": "9",
+            "count": 103,
+            "p50": 9,
+            "p95": 69,
+            "p99": 75,
+            "max": 76
+          },
+          {
+            "id": "10",
+            "count": 103,
+            "p50": 35,
+            "p95": 75,
+            "p99": 93,
+            "max": 100
+          },
+          {
+            "id": "11",
+            "count": 103,
+            "p50": 13,
+            "p95": 69,
+            "p99": 81,
+            "max": 81
+          },
+          {
+            "id": "12",
+            "count": 103,
+            "p50": 3,
+            "p95": 57,
+            "p99": 69,
+            "max": 69
+          },
+          {
+            "id": "13",
+            "count": 103,
+            "p50": 50,
+            "p95": 75,
+            "p99": 81,
+            "max": 93
+          },
+          {
+            "id": "14",
+            "count": 103,
+            "p50": 33,
+            "p95": 75,
+            "p99": 81,
+            "max": 81
+          },
+          {
+            "id": "15",
+            "count": 103,
+            "p50": 9,
+            "p95": 69,
+            "p99": 75,
+            "max": 82
+          },
+          {
+            "id": "16",
+            "count": 103,
+            "p50": 20,
+            "p95": 50,
+            "p99": 69,
+            "max": 75
+          },
+          {
+            "id": "17",
+            "count": 103,
+            "p50": 21,
+            "p95": 46,
+            "p99": 52,
+            "max": 75
+          },
+          {
+            "id": "18",
+            "count": 103,
+            "p50": 10,
+            "p95": 39,
+            "p99": 63,
+            "max": 68
+          },
+          {
+            "id": "19",
+            "count": 103,
+            "p50": 8,
+            "p95": 41,
+            "p99": 58,
+            "max": 62
+          },
+          {
+            "id": "20",
+            "count": 103,
+            "p50": 22,
+            "p95": 57,
+            "p99": 68,
+            "max": 69
+          },
+          {
+            "id": "21",
+            "count": 103,
+            "p50": 15,
+            "p95": 50,
+            "p99": 58,
+            "max": 81
+          },
+          {
+            "id": "22",
+            "count": 103,
+            "p50": 3,
+            "p95": 39,
+            "p99": 46,
+            "max": 75
+          },
+          {
+            "id": "23",
+            "count": 103,
+            "p50": 2,
+            "p95": 33,
+            "p99": 51,
+            "max": 87
+          },
+          {
+            "id": "24",
+            "count": 103,
+            "p50": 21,
+            "p95": 46,
+            "p99": 62,
+            "max": 69
+          },
+          {
+            "id": "25",
+            "count": 103,
+            "p50": 5,
+            "p95": 38,
+            "p99": 56,
+            "max": 87
+          },
+          {
+            "id": "26",
+            "count": 103,
+            "p50": 2,
+            "p95": 23,
+            "p99": 52,
+            "max": 68
+          },
+          {
+            "id": "27",
+            "count": 103,
+            "p50": 4,
+            "p95": 39,
+            "p99": 75,
+            "max": 100
+          },
+          {
+            "id": "28",
+            "count": 103,
+            "p50": 17,
+            "p95": 51,
+            "p99": 52,
+            "max": 62
+          },
+          {
+            "id": "29",
+            "count": 103,
+            "p50": 9,
+            "p95": 52,
+            "p99": 69,
+            "max": 70
+          },
+          {
+            "id": "30",
+            "count": 103,
+            "p50": 11,
+            "p95": 51,
+            "p99": 69,
+            "max": 75
+          },
+          {
+            "id": "31",
+            "count": 103,
+            "p50": 9,
+            "p95": 39,
+            "p99": 50,
+            "max": 87
+          }
+        ],
+        "driverEventLoop": {
+          "p99SamplesMs": {
+            "count": 219,
+            "p50": 33.718271,
+            "p95": 36.372479,
+            "p99": 39.780351,
+            "max": 48.758783
+          },
+          "maximumSamplesMs": {
+            "count": 219,
+            "p50": 33.718271,
+            "p95": 36.372479,
+            "p99": 39.780351,
+            "max": 48.758783
+          }
+        },
+        "limits": {
+          "cpuCores": 24,
+          "ioOperationsPerSecond": 100000,
+          "ioBytesPerSecond": 536870912,
+          "privateBytes": 34359738368,
+          "workingSetBytes": 42949672960,
+          "hostFreeBytesMinimum": 8589934592,
+          "driverEventLoopP99MsFor3Samples": 250
+        }
+      },
+      "serverTelemetry": {
+        "zoneWork": {
+          "count": 2238,
+          "p50UpperUs": 5000,
+          "p95UpperUs": 10000,
+          "p99UpperUs": 10000,
+          "p999UpperUs": 10000,
+          "overBudgetCount": 0,
+          "overBudgetRatio": 0,
+          "lifetimeMaxBeforeUs": 10865,
+          "lifetimeMaxAfterUs": 13568,
+          "exactWindowMaxUs": null
+        },
+        "ownerTickDeadlineLag": {
+          "count": 2221,
+          "p50UpperUs": 20000,
+          "p95UpperUs": 35000,
+          "p99UpperUs": 35000,
+          "p999UpperUs": 75000,
+          "overBudgetCount": 3,
+          "overBudgetRatio": 0.0013507429085997298,
+          "lifetimeMaxBeforeUs": 320140,
+          "lifetimeMaxAfterUs": 1793732,
+          "exactWindowMaxUs": null
+        },
+        "pendingMovementDeadlineLag": {
+          "count": 20,
+          "p50UpperUs": 5000,
+          "p95UpperUs": 20000,
+          "p99UpperUs": 20000,
+          "p999UpperUs": 20000,
+          "overBudgetCount": 0,
+          "overBudgetRatio": 0,
+          "lifetimeMaxBeforeUs": 20000,
+          "lifetimeMaxAfterUs": 20000,
+          "exactWindowMaxUs": null
+        },
+        "immediateRequests": {
+          "successCount": 500,
+          "failureCount": 0,
+          "duration": {
+            "count": 500,
+            "p50UpperUs": 35000,
+            "p95UpperUs": 150000,
+            "p99UpperUs": 250000,
+            "p999UpperUs": 5000000,
+            "overBudgetCount": 134,
+            "overBudgetRatio": 0.268,
+            "lifetimeMaxBeforeUs": 116918,
+            "lifetimeMaxAfterUs": 1641541,
+            "exactWindowMaxUs": null
+          }
+        },
+        "lifecycleRequests": {
+          "successCount": 12,
+          "failureCount": 0,
+          "duration": {
+            "count": 12,
+            "p50UpperUs": 1000000,
+            "p95UpperUs": 1000000,
+            "p99UpperUs": 1000000,
+            "p999UpperUs": 1000000,
+            "overBudgetCount": 12,
+            "overBudgetRatio": 1,
+            "lifetimeMaxBeforeUs": 1498960,
+            "lifetimeMaxAfterUs": 1498960,
+            "exactWindowMaxUs": null
+          }
+        },
+        "movementAdmissions": {
+          "successCount": 6786,
+          "failureCount": 0,
+          "duration": {
+            "count": 6786,
+            "p50UpperUs": 5000,
+            "p95UpperUs": 35000,
+            "p99UpperUs": 75000,
+            "p999UpperUs": 5000000,
+            "overBudgetCount": 168,
+            "overBudgetRatio": 0.02475685234305924,
+            "lifetimeMaxBeforeUs": 441619,
+            "lifetimeMaxAfterUs": 2018131,
+            "exactWindowMaxUs": null
+          }
+        }
+      }
+    }
+  ],
+  "attribution": {
+    "directlyObserved": [
+      "The frozen formal02 report failed at25 actors; stage2 and10 each passed300s,25 ended at220.716s,50/100 and7200s soak were never reached.",
+      "Within the same approximately2.253s monitor interval, new server owner-tick deadline lateness reached1793732us, movement handler admission duration reached2018131us, and immediate handler duration reached1641541us.",
+      "In that interval,7 measured zoneWork samples were within the10000us bucket with zero over50000us. Movement admissions had30 of38 over50000us, immediate handlers4 of4 over50000us. Pending-movement deadline-lag had zero samples.",
+      "The driver first failing-window event-loop maximum was37.847039ms; maximum observed over the entire run was50.003967ms. The original250ms-for3-samples driver stop did not trigger.",
+      "Gateway process CPU in the diagnostic interval was0.56984 logical CPU equivalent, total process IO130.34 operations/s, write260034.7B/s, host available memory34246639616B. These sampled values did not approach the frozen aggregate guards.",
+      "A host logical-core sample reached100%, but these counters are host-wide and cannot identify the owner process or prove aggregate physical saturation."
+    ],
+    "supportedInference": "The measured service-side handler/deadline stall is real and consistent with waiting/scheduling before measured Zone work, rather than a1.8s Zone-work execution or a matching long Node event-loop pause. This is an inference about scope, not a named root cause.",
+    "rootCauseUnresolved": [
+      "Spectator snapshot/merge/serialize/recording contention is a source-level candidate only; no timed lock/flush span or public ring-frame timeline binds it to the incident.",
+      "OS scheduling, storage flush latency, shared lock/queue wait and packet/event-retention effects remain unseparated. Low sampled total IO/CPU does not exclude a serialized stall.",
+      "Movement/fanout has no request ID or retained complete receive trace. The owner-run to timeout association is unique within a15ms timing tolerance but remains diagnostic correlation.",
+      "No ETW, thread-level CPU/wait stack, disk queue/flush latency or complete per-packet stream was captured. Do not claim a unique cause or hardware maximum."
+    ],
+    "nextEvidenceRule": "Any diagnostic optimization or lower-N two-hour follow-up must have a new prospective frozen profile and preserve this failure. Stage10 passing300s is not a two-hour baseline or the original standard100 acceptance."
+  },
+  "evidence": {
+    "detail": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal02-analysis\\diagnostic-v1.json",
+      "bytes": 1085699,
+      "sha256": "1fefea08e2ce81edead52bf90094f445108094eed9d57b2fe78175a25bca638b"
+    },
+    "selected": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal02-analysis\\selected-events-v1.json",
+      "bytes": 160669,
+      "sha256": "41519a68be82ff013ece653c54bfdf5ac4a4992c7586376fa79b4854fa1d2fc1"
+    },
+    "parser": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal02-analysis\\analyze-formal02-v1.mjs",
+      "bytes": 16583,
+      "sha256": "bf956b7bd12b5fc65646b3e968d596865820fcb891614331378c6d25c4f3dd89"
+    },
+    "independentSourceReview": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal02-source-stall-review-v1.json",
+      "bytes": 12691,
+      "sha256": "7481c64359984fe591237296a71df498d19abaaecd3155b7130b0fe5b9b1a2cf"
+    }
+  },
+  "limitations": [
+    "Owner/fanout timings are observed by the same Node process. They include local socket scheduling and callback execution; raw movement rows have no correlated request ID or complete packet receive trace.",
+    "CIM resource rates are sampled intervals (roughly seconds), not exact spans of a subsecond or one-second stall. Host logical-core utilization includes other processes and cannot assign a busy core to Gateway.",
+    "Process IO aggregates file/device/network operations and is not disk IOPS, flush latency or queue depth. No ETW, thread scheduling, storage latency or per-lock tracing was recorded.",
+    "Zone histograms measure shared-owner work and handler admissions, not authoritative position-ACK or outbound peer delivery. Only raw bucket differences are used; cumulative maxima cannot yield exact interval maxima.",
+    "No spectator frame-count timeline is present in the public monitor whitelist. Ring-full timing or a particular recording flush cannot be proven by these inputs; no recording payload was opened.",
+    "Failure of stage25 fanout is real under the frozen profile. Correlation or spare aggregate CPU cannot establish a unique root cause or classify the result as a physical-machine maximum.",
+    "The5 original failures include post-stop/final actor segments if present. Their original final/phases/seconds are retained rather than treating them as5 independent pre-stop overload episodes."
+  ],
+  "operations": {
+    "harnessChanged": false,
+    "trackedFilesWritten": false,
+    "testsOrBuildsRun": false,
+    "privateRead": false,
+    "recordingPayloadRead": false,
+    "externalAnalysisOnly": true
+  }
+}

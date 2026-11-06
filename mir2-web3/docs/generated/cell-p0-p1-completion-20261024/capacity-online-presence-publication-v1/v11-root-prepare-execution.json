@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "startedAt": "2026-10-26T15:28:22.182Z",
+  "finishedAt": "2026-10-26T15:28:42.902Z",
+  "command": [
+    "C:\\Program Files\\nodejs\\node.exe",
+    "prepare-episode.mjs",
+    "--prepare-diagnostic-episode",
+    "--actors=50",
+    "--manifest-sha256=937b6cafb8d7ddc64ee7302de8dc08eadca0684f4419a18b3293c8e5f3461f3c"
+  ],
+  "cwd": "C:\\mir2-build\\p01-completion-20261024\\native-steady-single-stage-diagnostic-v11",
+  "actors": 50,
+  "manifestSha256": "937b6cafb8d7ddc64ee7302de8dc08eadca0684f4419a18b3293c8e5f3461f3c",
+  "passiveZoneDeliveryTrace": true,
+  "exitCode": 0,
+  "signal": null,
+  "error": null,
+  "stdoutFile": "C:\\mir2-build\\p01-completion-20261024\\owner-action-pose-v11-stage50-root-prepare-stdout-v1.log",
+  "stderrFile": "C:\\mir2-build\\p01-completion-20261024\\owner-action-pose-v11-stage50-root-prepare-stderr-v1.log",
+  "capacityAccepted": false
+}

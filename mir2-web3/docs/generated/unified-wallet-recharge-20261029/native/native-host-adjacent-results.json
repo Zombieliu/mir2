@@ -1,0 +1,35 @@
+{
+  "schema": "mir2.unified.evidence.phase.v1",
+  "passed": true,
+  "curatedAtUtc": "2026-10-29T15:53:22.464335+00:00",
+  "producerReceipt": {
+    "filename": "native-host-adjacent-results.json",
+    "bytes": 888,
+    "sha256": "369700f81606e0f221e9f60f94fa6836238171b866ca08c207151572ddface12"
+  },
+  "producerReport": [
+    {
+      "filter": "billing_credit_cache_requires_the_current_request_account_and_active_character",
+      "scope": "host-adjacent",
+      "exitCode": 0,
+      "startedAtUtc": "2026-10-29T14:25:27.7971002Z",
+      "elapsedSeconds": 94.2297791,
+      "log": "C:\\mir2-build\\unified-20261029\\native-host-adjacent-billing_credit_cache_requires_the_current_request_account_and_active_character.log",
+      "passed": 1,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "filter": "world_and_pointer_gates_cover_modal_dialog_dead_and_capture_states",
+      "scope": "host-adjacent",
+      "exitCode": 0,
+      "startedAtUtc": "2026-10-29T14:27:02.0456379Z",
+      "elapsedSeconds": 0.4479894,
+      "log": "C:\\mir2-build\\unified-20261029\\native-host-adjacent-world_and_pointer_gates_cover_modal_dialog_dead_and_capture_states.log",
+      "passed": 1,
+      "failed": 0,
+      "ignored": 0
+    }
+  ],
+  "phase": "initial integrated snapshot; historical relative to final1875 Game; no stale source pins treated as current"
+}

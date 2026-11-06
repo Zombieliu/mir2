@@ -1,0 +1,12 @@
+{
+  "argv": [
+    "gh",
+    "api",
+    "repos/Zombieliu/mir2/git/ref/heads/codex/crowded-combat-control-20261003",
+    "--jq",
+    ".object.sha"
+  ],
+  "exitCode": 0,
+  "elapsedSeconds": 0.8041898999945261,
+  "createdUtc": "2026-10-05T01:17:31.138939+00:00"
+}

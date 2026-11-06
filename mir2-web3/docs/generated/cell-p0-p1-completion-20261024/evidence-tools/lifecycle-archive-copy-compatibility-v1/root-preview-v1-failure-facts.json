@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "recordedAt": "2026-10-25T23:16:32.867Z",
+  "basis": "Observed exec session29262 terminal output; this is a facts note, not a reconstructed stdout log.",
+  "command": [
+    "node",
+    "C:/mir2-build/p01-completion-20261024/root-scout-anti-convergence-checkpoint-preview-v1.mjs"
+  ],
+  "exitCode": 1,
+  "signal": null,
+  "error": "Full lifecycle needs exactly one matching owned realm record",
+  "location": "evidence-tools/verify-evidence.mjs:501",
+  "index": {
+    "file": "C:/mir2-build/p01-completion-20261024/root-scout-anti-convergence-checkpoint-preview-index-v1.json",
+    "bytes": 1101364,
+    "sha256": "e4e59278e85058b2f1babf30b357990250c678a59b78679e31e7d0e5dbb1f655"
+  },
+  "duplicateRunId": "1792963911146-f4437694",
+  "reason": "The full16 archive and probe18 prerequisite archive each retain an identical report/realm bundle. Global realm discovery sees two. The game result is unchanged.",
+  "rawSourceMutationPerformed": false,
+  "capacityAccepted": false,
+  "p2Started": false,
+  "verificationOutputCreated": false
+}

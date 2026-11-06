@@ -1,0 +1,309 @@
+{
+  "schemaVersion": 1,
+  "recordedAt": "2026-10-26T03:16:47.916Z",
+  "runId": "1792981760951-0079fde7",
+  "scope": "Root actual formal16 terminal and eight command results. Formal25 fails W5 at original attack supply gate; independent complete ended window replay remains pending, no capacity/P0/P2 claim.",
+  "executionSourceCommit": "b5374083d257d375437af3de42bead159cd2b917",
+  "backendSourceCommit": "c743122af05faca43d9535d8c6c2a4bfb01b924f",
+  "driverSourceCommit": "b5374083d257d375437af3de42bead159cd2b917",
+  "commands": [
+    {
+      "label": "seal",
+      "exitCode": 0,
+      "signal": null,
+      "basis": "Actual Root unified exec command completed exit0",
+      "stdout": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\formal16-root-seal-stdout-v1.log",
+        "bytes": 350,
+        "sha256": "8b2d1f009eb25680e90e56a0c9ab5a8a349f86ca3b537048375baec0fb9df47c"
+      },
+      "stderr": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\formal16-root-seal-stderr-v1.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "label": "guard",
+      "exitCode": 0,
+      "signal": null,
+      "basis": "Actual Root unified exec command completed exit0",
+      "stdout": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\formal16-root-guard-stdout-v1.log",
+        "bytes": 328,
+        "sha256": "bda45356acc8051e4e141b8a638b3953ac49eaad2ac8f12fae6806d28cd15106"
+      },
+      "stderr": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\formal16-root-guard-stderr-v1.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "label": "prepare",
+      "exitCode": 0,
+      "signal": null,
+      "basis": "Actual Root unified exec session50783 completed exit0",
+      "stdout": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\formal16-root-prepare-stdout-v1.log",
+        "bytes": 644,
+        "sha256": "369445b3cb0901a2dadd4ba2f21d04796559cc7001cc655f730bf11941d1f93e"
+      },
+      "stderr": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\formal16-root-prepare-stderr-v1.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "label": "run",
+      "exitCode": 1,
+      "signal": null,
+      "basis": "Actual Root unified exec session41040 completed exit1",
+      "stdout": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\formal16-root-run-stdout-v1.log",
+        "bytes": 2897,
+        "sha256": "2f71bc3fec91633868340335f9ad35cfdd334ba7bb0ccfaa8b9b8b0db33c5293"
+      },
+      "stderr": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\formal16-root-run-stderr-v1.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "label": "base-collection",
+      "exitCode": 0,
+      "signal": null,
+      "basis": "Actual sequential Root unified exec session14840; each four native exit codes0 and enclosing shell exit0",
+      "stdout": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\formal16-root-base-collection-stdout-v1.log",
+        "bytes": 132833,
+        "sha256": "c2c050e43300a3088c0b1c628772afd17bff66d861a4f321d63b400aaf383976"
+      },
+      "stderr": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\formal16-root-base-collection-stderr-v1.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "label": "base-verification",
+      "exitCode": 0,
+      "signal": null,
+      "basis": "Actual sequential Root unified exec session14840; each four native exit codes0 and enclosing shell exit0",
+      "stdout": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\formal16-root-base-verification-stdout-v1.log",
+        "bytes": 5026,
+        "sha256": "6bb47800fa7f59a012ea9eabcc20d36bb42f22a613cdd8a318ddbb4454a99c28"
+      },
+      "stderr": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\formal16-root-base-verification-stderr-v1.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "label": "store-collection",
+      "exitCode": 0,
+      "signal": null,
+      "basis": "Actual sequential Root unified exec session14840; each four native exit codes0 and enclosing shell exit0",
+      "stdout": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\formal16-root-store-collection-stdout-v1.log",
+        "bytes": 402,
+        "sha256": "9e6d4ab692b25bda840b306ce038fb3a1dfe77905358f7ab11c014faf9d0c10b"
+      },
+      "stderr": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\formal16-root-store-collection-stderr-v1.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "label": "store-verification",
+      "exitCode": 0,
+      "signal": null,
+      "basis": "Actual sequential Root unified exec session14840; each four native exit codes0 and enclosing shell exit0",
+      "stdout": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\formal16-root-store-verification-stdout-v1.log",
+        "bytes": 1244,
+        "sha256": "7983d05dcac60561727d4d219c8b16522b12ec334a2a142948c5e236013e7856"
+      },
+      "stderr": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\formal16-root-store-verification-stderr-v1.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    }
+  ],
+  "rootFreshOs": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\formal16-root-independent-cleanup-v1.json",
+    "bytes": 451,
+    "sha256": "4f4badf50c3154f047949b699fcd3d86ab6eb90583c52993a06e17b484e86df5"
+  },
+  "runtimeSeal": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-selection-diagnostics-ladder-16\\launcher-source-frozen-v1.json",
+    "bytes": 52689,
+    "sha256": "c2b3f4f66a34c2c70eeff33bf9db13225c642278368a58d5d4debfe7b101f1c1"
+  },
+  "runtimeSealInputs": 128,
+  "readonlySourceGuard": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-selection-diagnostics-ladder-16\\source-guard-readonly-verification.json",
+    "bytes": 2389,
+    "sha256": "8400db9fd6200e515c262c01ab652bf473386cd4e031a7b082cc8e4bc1b12179"
+  },
+  "preparedSourceConfig": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-selection-diagnostics-ladder-16\\source-pins.json",
+    "bytes": 171979,
+    "sha256": "6a403ca26c37733867c87779ae8ed60644078b8d6c81e9ad3f2a45e81c645315",
+    "sourceConfigSha256": "2436c902e3b4f41ce78b53ac97006d9cc4ba5ffe79fc4c7feb197ae137a53168",
+    "inputCount": 371
+  },
+  "admittedSourceConfig": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-selection-diagnostics-ladder-16\\source-pins-admitted-v2.json",
+    "bytes": 171249,
+    "sha256": "513c4484f05e114d9ac2cc39fef2b5d07cf26b01b2c4a7033011c03f0fdbe43f",
+    "sourceConfigSha256": "d9e9664b68636264f46315a88e159a5b0bdbd3deb53ee6d4093a8a2193a38c00",
+    "inputCount": 376
+  },
+  "report": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-selection-diagnostics-ladder-16\\reports\\1792981760951-0079fde7.report.json",
+    "bytes": 422257,
+    "sha256": "ee804e825a3826749286eb22bc53fe0841e774cbc4518537457fb4db888c7e1a"
+  },
+  "cleanup": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-selection-diagnostics-ladder-16\\realm-cleanup.json",
+    "bytes": 6590,
+    "sha256": "4c3a04999c508799164fdd8bb0035038f461bb9d3f1a9e5115bd8527db02d270"
+  },
+  "realm": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-selection-diagnostics-ladder-16\\realm-process.json",
+    "bytes": 4377,
+    "sha256": "14ba25922e5c07d2e8bf75dd7ab00aff09304821542f3e86522fa89b543e0209"
+  },
+  "monitor": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-selection-diagnostics-ladder-16\\monitor-process.json",
+    "bytes": 223,
+    "sha256": "e7de29aa2a98115ba3d1a57b8888b76d970effc3c69525328efcbaf867756df6"
+  },
+  "provenance": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-selection-diagnostics-ladder-16\\report-provenance.json",
+    "bytes": 7738,
+    "sha256": "b224a895168320e4b61dc2fc5d4823ac8117742fcd2820e5066fe8d9e6ccd375"
+  },
+  "summary": {
+    "reportOk": false,
+    "safetyStopped": false,
+    "stages": [
+      {
+        "name": "stage-2",
+        "completed": true,
+        "passed": true,
+        "actualElapsedMs": 300220,
+        "completeWindowCount": 5,
+        "completeWindowVerdicts": [
+          true,
+          true,
+          true,
+          true,
+          true
+        ],
+        "attackCount": 0
+      },
+      {
+        "name": "stage-10",
+        "completed": true,
+        "passed": true,
+        "actualElapsedMs": 300223,
+        "completeWindowCount": 5,
+        "completeWindowVerdicts": [
+          true,
+          true,
+          true,
+          true,
+          true
+        ],
+        "attackCount": 164
+      },
+      {
+        "name": "stage-25",
+        "completed": true,
+        "passed": false,
+        "actualElapsedMs": 300270,
+        "completeWindowCount": 5,
+        "completeWindowVerdicts": [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        "attackCount": 249
+      }
+    ],
+    "failureWindow": {
+      "stage": "stage-25",
+      "index": 5,
+      "seconds": 60,
+      "startedAtMs": 1792982768898,
+      "endedAtMs": 1792982828898,
+      "movementPassed": true,
+      "chatPassed": true,
+      "timeoutRatio": 0,
+      "correctionRatio": 0,
+      "actors": [
+        {
+          "actor": "Le984da05",
+          "passed": false,
+          "attacks": 15,
+          "hits": 15,
+          "plans": 67,
+          "gaps": 0,
+          "nativePassed": true,
+          "cellsPerMinute": 85
+        },
+        {
+          "actor": "Le984da0f",
+          "passed": true,
+          "attacks": 23,
+          "hits": 23,
+          "plans": 60,
+          "gaps": 0,
+          "nativePassed": true,
+          "cellsPerMinute": 57
+        }
+      ]
+    },
+    "wholeAttackCount": 487,
+    "wholeAttackV2NotLaunched": 0,
+    "measuredAttackCount": 413,
+    "outsideMeasuredAttackCount": 74,
+    "outsideMeasuredPhaseClassification": "Not independently classified",
+    "cleanupChecks": {
+      "sixCountersZero": true,
+      "monitorTerminalPreserved": true,
+      "monitorStoppedBeforeGateway": true,
+      "monitorExitZero": true,
+      "normalOwnedShutdown": true,
+      "processAbsent": true,
+      "portsFree": true
+    },
+    "gatewayExit": {
+      "code": 0,
+      "signal": null
+    },
+    "monitorExit": {
+      "code": 0,
+      "signal": null
+    },
+    "baseDiagnosticRows": 1051,
+    "storeDiagnosticRows": 107,
+    "storeDatasetDoesNotAdjudicateGame": true,
+    "originalCleanupCapacityAccepted": null,
+    "originalCleanupCapacityAcceptanceAdjudicated": false
+  },
+  "independentWindowAdjudicationPending": true,
+  "capacityAccepted": false,
+  "p0Accepted": false,
+  "p2Started": false
+}

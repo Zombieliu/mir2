@@ -1,0 +1,22 @@
+{
+  "repository": "https://github.com/0xobelisk/dubhe",
+  "commit": "04700a9a13e6f279be3709e84bf4ad24b4349af3",
+  "license": "Apache-2.0",
+  "frameworkPath": "framework/src/dubhe",
+  "sdkVersion": "2.0.0",
+  "sdkSuiVersion": "1.35.0",
+  "networkTransport": "@mysten/sui-modern alias of @mysten/sui@2.16.2, authoritative gRPC; official filtered GraphQL for event wakeups",
+  "suiFrameworkCommit": "3c0f387ebb40b8be292d3b7bd3f5bee8ad226d33",
+  "suiFrameworkTag": "mainnet-v1.68.1",
+  "integration": [
+    "dubhe::dapp_system::create_dapp and DappStorage guards",
+    "dubhe::dapp_system::create_and_share_typed_object entity registry",
+    "dubhe::dapp_service::ObjectStorage<Order> and typed field CRUD",
+    "Dubhe_Object_Created and Dubhe_Object_SetField events",
+    "@0xobelisk/sui-client Dubhe raw PTB builders and offline signing of already-built bytes",
+    "@mysten/sui@2.16.2 gRPC transaction build, submit, finality and BCS object/event reads",
+    "Official GraphQL EventFilter.module and opaque edge cursors for durable filtered wakeups; explicit bounded checkpoint fallback"
+  ],
+  "excluded": ["Marketplace Coin payment", "UserStorage equipment records", "NFTs", "gold token", "production deployment"],
+  "notes": "Independent package: existing mir2_mine and its pre-release dependencies are unchanged. The published SDK is exact version pinned; the Move framework uses the exact audited Git commit. No SDK default network/key constructor is used."
+}

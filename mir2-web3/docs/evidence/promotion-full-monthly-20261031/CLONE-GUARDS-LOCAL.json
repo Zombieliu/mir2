@@ -1,0 +1,15 @@
+{
+  "schema": "mir2.full-monthly.clone-helper-local-tests.v1",
+  "observedAtUtc": "2026-10-30T22:09:22.161402+00:00",
+  "testsExecuted": 13,
+  "passed": 13,
+  "failures": 0,
+  "errors": 0,
+  "skipped": 0,
+  "actualFunctionFixtures": true,
+  "externalIoMocked": true,
+  "remoteActions": false,
+  "docker": false,
+  "sourceSha256": "6e15b74a753c9bb8f052fadb63b5b7551415b0a034e232161908eefb5983fa43",
+  "testSourceSha256": "cea8cb733f224353c1df7a22a8963c9f342ea3cd0e97b789fcddbfdee34512a1"
+}

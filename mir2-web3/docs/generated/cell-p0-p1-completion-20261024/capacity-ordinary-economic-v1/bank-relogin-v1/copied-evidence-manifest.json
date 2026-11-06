@@ -1,0 +1,191 @@
+{
+  "schemaVersion": 1,
+  "scope": "Actual e73d04d two-character ordinary-earned bank relogin. Full source qualification330 capacity and301 ordinary dependencies. Original30s stage passed; original30s soak failed scenario-insufficient combat. Relogin stock12 with no new funding/sale/purchase and fresh authoritative safezone readiness proven for both, original report remains false. No private account Store, pool, auth ledger, secret file contents, recovery tree, Gateway raw log or spectator stream copied; plan/copy receipts contain file pins only.",
+  "driverSourceCommit": "e73d04d251902a876620a111fc845adb4b2025ef",
+  "backendSourceCommit": "7b43caa41ee12f2e6b41d0a5df7e9ab45a32580d",
+  "freshCapacityToolTestsPassed": 330,
+  "freshOrdinaryDependencyTestsPassed": 301,
+  "bankPersistedInventoryReusePassed": true,
+  "freshPreparationReadyActors": 2,
+  "cohortActivations": 1,
+  "formalFiveMinuteStagePerformed": false,
+  "sustainableTwoHourSupplyProven": false,
+  "capacityAccepted": false,
+  "p0Accepted": false,
+  "copies": [
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-bank-relogin-pilot-v1\\source-lib-v1.mjs",
+      "file": "source-lib-v1.mjs",
+      "bytes": 13777,
+      "sha256": "6fe3ed3e360c88260d3c145fdeaf66bb30cfacb58a1dd6144991780a608d4d2e"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-bank-relogin-pilot-v1\\freeze-bank-pilot-v1.mjs",
+      "file": "freeze-bank-pilot-v1.mjs",
+      "bytes": 7943,
+      "sha256": "752cd077900ad40ddcc099e4a95da0f6f6f3173ae2bc3e48f124d0bd822d092f"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-bank-relogin-pilot-v1\\run-bank-pilot-v1.mjs",
+      "file": "run-bank-pilot-v1.mjs",
+      "bytes": 20588,
+      "sha256": "bd6695da3243c0168061d6bbd4dda8f5ff46af86ccbfc88866323b1f0b8c0a41"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-bank-relogin-pilot-v1\\owned-child-v1.mjs",
+      "file": "owned-child-v1.mjs",
+      "bytes": 1555,
+      "sha256": "b9eb53a2420ea3e6305983ee9cb23b066fbc28d2cc5be813bce133a9252bce1f"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-bank-relogin-pilot-v1\\copy-bank-v1.mjs",
+      "file": "copy-bank-v1.mjs",
+      "bytes": 7743,
+      "sha256": "5b383d46230ab834cfcadf8dd9c3e843d97a4a50893b4106920ee14a380de63f"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-bank-relogin-pilot-v1\\pilot-config-pending-v1.json",
+      "file": "pilot-config-pending-v1.json",
+      "bytes": 3252,
+      "sha256": "70822854103b9c1e59bd9b619e61d0c8c26d4cf4671538d1627d437af5fe6828"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-bank-relogin-pilot-v1\\bank-plan-pending-v1.json",
+      "file": "bank-plan-pending-v1.json",
+      "bytes": 7710,
+      "sha256": "bc40a37dd2f4074d60fbc0ff32181e88b9bb904ff8f429905b58b79b5d63df69"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-bank-relogin-pilot-v1\\derivation-v1.json",
+      "file": "derivation-v1.json",
+      "bytes": 10927,
+      "sha256": "e30363cb3a6e20011a5b7a699c5380d46c91c5ce5ba8031b338d6570b6c10327"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-bank-relogin-pilot-v1\\preparation-v1.json",
+      "file": "preparation-v1.json",
+      "bytes": 4457,
+      "sha256": "f652e977cc768e1c71300f2eea1852c12f5d77b741a36de2854105c37857a3c1"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-bank-relogin-pilot-v1\\syntax-check-v1.json",
+      "file": "syntax-check-v1.json",
+      "bytes": 2729,
+      "sha256": "b3d31a0aa4706b927b81ccfd90afa99558d3cc97ef519c2e7071de747d90a3ea"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-bank-relogin-pilot-v1\\syntax-check-v1.log",
+      "file": "syntax-check-v1.log",
+      "bytes": 560,
+      "sha256": "3461c15d462c989e7a0eff8e62137bf99469c27304944c3d82abc1672bf9f38b"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-bank-relogin-pilot-v1\\frozen-source-v1.json",
+      "file": "frozen-source-v1.json",
+      "bytes": 79506,
+      "sha256": "259afb207fbdd7bea946b172cb2db9d773e683f28ec1ee570e1f1d855814b410"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-bank-relogin-pilot-v1\\root-independent-cleanup-v1.json",
+      "file": "root-independent-cleanup-v1.json",
+      "bytes": 460,
+      "sha256": "e3ef329581aaa4d14e4d20770112a8e73c54fa92b8542713ba5feee8fdf0f322"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-bank-relogin-pilot-v1\\public-failure-metrics-v1.json",
+      "file": "public-failure-metrics-v1.json",
+      "bytes": 44219,
+      "sha256": "e001f686ef7d7ee620dae94e8c8e12c1f0c9764b98a1476728ca756581dd3192"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-bank-relogin-pilot-v1\\episode\\bank-copy-receipt-v1.json",
+      "file": "bank-copy-receipt-v1.json",
+      "bytes": 8095,
+      "sha256": "a2d0d1ca6e1b3816b4565f2782581533ee144297a342c12f9d6ca1de729c26dc"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-bank-relogin-pilot-v1\\episode\\pilot-receipt-v1.json",
+      "file": "pilot-receipt-v1.json",
+      "bytes": 6402,
+      "sha256": "80ec037522dc7f39e8b36fc42d051708c3ef2e7782e3a0a68df76aa4888a6a87"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-bank-relogin-pilot-v1\\episode\\cleanup-v1.json",
+      "file": "cleanup-v1.json",
+      "bytes": 1033,
+      "sha256": "47e4f5fafff2be6145ec0ec1b5d4882fd9510756a23c36fedb199ba4b50ecd90"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-bank-relogin-pilot-v1\\episode\\owned-process-v1.json",
+      "file": "owned-process-v1.json",
+      "bytes": 681,
+      "sha256": "2995fbe26d42e0dd931589950e86560e43837c448ba01e05850efc560b580885"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-bank-relogin-pilot-v1\\episode\\health-before-v1.json",
+      "file": "health-before-v1.json",
+      "bytes": 521,
+      "sha256": "a935b06d9799a6dc8293b5197bcb34f0e2a93df16f9fcb259e03437d9fbc3822"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-bank-relogin-pilot-v1\\episode\\health-after-v1.json",
+      "file": "health-after-v1.json",
+      "bytes": 476,
+      "sha256": "01ed19d058798e2ea0867535e15c13d62ab95739620f4ef89974693ae53933c9"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-bank-relogin-pilot-v1\\episode\\run-intent-v1.json",
+      "file": "run-intent-v1.json",
+      "bytes": 1789,
+      "sha256": "9374ba05c723edb0957267ea53a3f7358885f5e03bfaed20e3b120700eee467c"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-bank-relogin-pilot-v1\\episode\\reports\\1793043370759-685834a8.report.json",
+      "file": "1793043370759-685834a8.report.json",
+      "bytes": 35864,
+      "sha256": "64d85dc393d6b94ecf763afee8872811a6a5520c984e6fd337deba743b5d7a3b"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-bank-relogin-pilot-v1\\episode\\reports\\1793043370759-685834a8.samples.jsonl",
+      "file": "1793043370759-685834a8.samples.jsonl",
+      "bytes": 717854,
+      "sha256": "d7223762224cc98d30b79425da6c7a104f59c33a799c80a851fc3efa87324bac"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\root-ordinary-economic-validation-v4\\root-focused-receipt-v1.json",
+      "file": "root-focused-receipt-v1.json",
+      "bytes": 13665,
+      "sha256": "d17b8f573a9304c9e442d00a87c117acbe9a9c767f9e679ad19f5dd19ae96753"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\root-ordinary-economic-validation-v4\\complete-capacity-driver.stdout.log",
+      "file": "complete-capacity-driver.stdout.log",
+      "bytes": 82478,
+      "sha256": "02cd391719c7a1bccbe3a282d085e26f29a1e638fa44be9a616eb8ce1361d09e"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\root-ordinary-economic-validation-v4\\complete-capacity-driver.stderr.log",
+      "file": "complete-capacity-driver.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\root-ordinary-economic-validation-v4\\ordinary-economy-and-navigation-dependencies.stdout.log",
+      "file": "ordinary-economy-and-navigation-dependencies.stdout.log",
+      "bytes": 69483,
+      "sha256": "ba273cb96324869fc73aaa149371e40f4a530b0b310e16658cbe1b80ef862689"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\root-ordinary-economic-validation-v4\\ordinary-economy-and-navigation-dependencies.stderr.log",
+      "file": "ordinary-economy-and-navigation-dependencies.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\root-ordinary-economic-validation-runner-v1.mjs",
+      "file": "root-validation-runner.mjs",
+      "bytes": 5216,
+      "sha256": "bb5287fd731646a4c0af606f1f5e9318f74573b3b0e93a56f7834e5a94931724"
+    }
+  ]
+}

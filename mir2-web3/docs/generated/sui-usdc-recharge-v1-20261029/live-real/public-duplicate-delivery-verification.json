@@ -1,0 +1,35 @@
+{
+  "evidenceKind": "real-running-gateway-duplicate-payment-notification-and-status",
+  "observedAtUtc": "2026-10-28T21:16:45.706Z",
+  "orderId": "usdc_066575bf24e8ede6000e73d8d0fc2aaa9bdb475aa3e44d7faa72f1bff215fd7e",
+  "digest": "E2yqrhVNuVPCWcvJkmW93fbXfHAfRLkqXyTqiTcdA4SJ",
+  "gameCredit": 100,
+  "gold": 10000,
+  "responses": [
+    {
+      "operation": "submitted",
+      "status": 200,
+      "state": "applied"
+    },
+    {
+      "operation": "submitted",
+      "status": 200,
+      "state": "applied"
+    },
+    {
+      "operation": "status",
+      "status": 200,
+      "state": "applied"
+    }
+  ],
+  "checks": {
+    "creditUnchanged": true,
+    "goldUnchanged": true,
+    "appliedReceiptUnchanged": true,
+    "chainReceiptUnchanged": true,
+    "onlyOneAppliedOrder": true,
+    "orderCountUnchanged": true
+  },
+  "noSigningOrBroadcast": true,
+  "noDatabaseEdits": true
+}

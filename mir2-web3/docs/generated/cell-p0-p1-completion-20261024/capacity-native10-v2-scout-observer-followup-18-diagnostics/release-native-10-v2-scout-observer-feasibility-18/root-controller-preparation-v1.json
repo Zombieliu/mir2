@@ -1,0 +1,39 @@
+{
+  "schemaVersion": 1,
+  "state": "controller-prepared-not-executed",
+  "controller": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-observer-feasibility-18\\root-seal-and-guard-v1.mjs",
+    "bytes": 17596,
+    "sha256": "5767d9e1af9844413cc579624cf8571fd3edc4c0f56aff1d799b2bd7688cb95d"
+  },
+  "syntax": {
+    "kind": "node--check",
+    "exitCode": 0,
+    "log": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-observer-feasibility-18\\root-controller-syntax-v2.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "targetImported": false
+  },
+  "supportInputs": [
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-observer-preference-v1\\verify-inputs.mjs",
+      "bytes": 14002,
+      "sha256": "ac97e49bc729d6fef822c800b7090cddad4d41fb256da101fa1d5fef15e508cd"
+    }
+  ],
+  "derivation": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-observer-feasibility-18\\root-controller-derivation-v1.json",
+    "bytes": 9141,
+    "sha256": "461e2812bc3f8cf885e3d5310e7722802c5d7f26870275753d760fc22cc4f808"
+  },
+  "oldControllerConstructionFailurePreserved": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-observer-feasibility-18\\root-controller-syntax-v1.log",
+    "bytes": 374,
+    "sha256": "465205c95906953d5c5649c306daa61cd9aba7303726379e736772dfc3a25818"
+  },
+  "backendBuildCommit": "c743122af05faca43d9535d8c6c2a4bfb01b924f",
+  "executionSourceCommit": "3a6d8c862d03ded3133605472a8f38bc6258af52",
+  "actualModesExecuted": false
+}

@@ -1,0 +1,373 @@
+{
+  "schemaVersion": 1,
+  "scope": "Actual17 binding and mechanical fresh17 gate derivation. Original formal12 policy/resource/100scene/146window/thresholds unchanged. No gate, guard, seal or preparation mode executed.",
+  "bound": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-account-store-wait-ladder-13\\bound-formal13-binding-v1.json",
+    "bytes": 19457,
+    "sha256": "e208e8f2825f4217cc336df6dc2f74ae81617188d24fb9d42c8278058e7196a0"
+  },
+  "derivations": [
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-attack-deadline-ladder-12\\formal-template-contract.mjs",
+        "bytes": 1291,
+        "sha256": "1c8bdfcbf7147d2b81ff8ceff2bf8c2a81283978e6550a34a19fcfb03ec851a2"
+      },
+      "target": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-account-store-wait-ladder-13\\formal-template-contract.mjs",
+        "bytes": 1291,
+        "sha256": "0acd15156a52211c3731505cc77d1845dc36727e51904d372505492c82d312e8"
+      },
+      "rules": [
+        {
+          "before": "formal12",
+          "after": "formal13",
+          "positions": [
+            59,
+            228
+          ]
+        },
+        {
+          "before": "FORMAL12",
+          "after": "FORMAL13",
+          "positions": [
+            116,
+            333,
+            1081
+          ]
+        },
+        {
+          "before": "assertFormal12",
+          "after": "assertFormal13",
+          "positions": [
+            298
+          ]
+        },
+        {
+          "before": "PROBE16",
+          "after": "PROBE17",
+          "positions": [
+            388
+          ]
+        },
+        {
+          "before": "NEW44",
+          "after": "NEW50",
+          "positions": [
+            400
+          ]
+        },
+        {
+          "before": "backendInputCount!==44",
+          "after": "backendInputCount!==50",
+          "positions": [
+            449
+          ]
+        },
+        {
+          "before": "probe16",
+          "after": "probe17",
+          "positions": [
+            354
+          ]
+        },
+        {
+          "before": "Probe16",
+          "after": "Probe17",
+          "positions": [
+            1106,
+            1278
+          ]
+        }
+      ],
+      "inverseRawExact": true
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-attack-deadline-ladder-12\\verify-feasibility-gate.mjs",
+        "bytes": 19628,
+        "sha256": "dc13d189d393bca422b7807f3836a132bbb03fbbee651b1ba2a99c028c4d180e"
+      },
+      "target": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-account-store-wait-ladder-13\\verify-feasibility-gate.mjs",
+        "bytes": 19631,
+        "sha256": "b7c5c4cc2d6fc2ad45b24121f09c2e43d8909acf371757602c09e13fc6721ec7"
+      },
+      "rules": [
+        {
+          "before": "FORMAL12",
+          "after": "FORMAL13",
+          "positions": [
+            8,
+            8520
+          ]
+        },
+        {
+          "before": "Formal12",
+          "after": "Formal13",
+          "positions": [
+            31,
+            1200,
+            8367
+          ]
+        },
+        {
+          "before": "probe16",
+          "after": "probe17",
+          "positions": [
+            239,
+            1655,
+            3071,
+            8537,
+            9915,
+            15392
+          ]
+        },
+        {
+          "before": "Probe16",
+          "after": "Probe17",
+          "positions": [
+            174,
+            1461,
+            2413,
+            3379,
+            4412,
+            4893,
+            5245,
+            5610,
+            7157,
+            7473,
+            8164,
+            8431,
+            8826,
+            9000,
+            9310,
+            10239,
+            10644,
+            11915,
+            12388,
+            12789,
+            13692,
+            14145,
+            14399,
+            15135,
+            16612,
+            17072,
+            17333,
+            17733,
+            17837
+          ]
+        },
+        {
+          "before": "PROBE16",
+          "after": "PROBE17",
+          "positions": [
+            208,
+            8339
+          ]
+        },
+        {
+          "before": "attack-deadline-feasibility-16",
+          "after": "account-store-wait-feasibility-17",
+          "positions": [
+            1352
+          ]
+        },
+        {
+          "before": "build.sourceManifest?.inputs !== 44",
+          "after": "build.sourceManifest?.inputs !== 50",
+          "positions": [
+            2949
+          ]
+        },
+        {
+          "before": "samed240/1980/44",
+          "after": "samec743/dae1/50",
+          "positions": [
+            3039
+          ]
+        }
+      ],
+      "inverseRawExact": true
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-attack-deadline-ladder-12\\verify-probe16-collected-evidence.mjs",
+        "bytes": 16157,
+        "sha256": "f548b97565a962797ddca2129ba3420831e27dd44c14241d1989a9a66a89719b"
+      },
+      "target": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-account-store-wait-ladder-13\\verify-probe17-collected-evidence.mjs",
+        "bytes": 17264,
+        "sha256": "02cb8cd660abefaa34b22e6db81267081dc1e4257248d71e475ffe6432791a7c"
+      },
+      "rules": [
+        {
+          "before": "FORMAL12",
+          "after": "FORMAL13",
+          "positions": [
+            8,
+            754,
+            988,
+            7626,
+            8990,
+            9373
+          ]
+        },
+        {
+          "before": "Formal12",
+          "after": "Formal13",
+          "positions": [
+            31,
+            3647
+          ]
+        },
+        {
+          "before": "probe16",
+          "after": "probe17",
+          "positions": [
+            771,
+            1005,
+            2978,
+            3386,
+            7643,
+            8209,
+            8707,
+            8837,
+            9007,
+            9390,
+            10533,
+            11902
+          ]
+        },
+        {
+          "before": "Probe16",
+          "after": "Probe17",
+          "positions": [
+            3514
+          ]
+        },
+        {
+          "before": "PROBE16",
+          "after": "PROBE17",
+          "positions": [
+            739,
+            808,
+            2477,
+            2539,
+            2841,
+            2884,
+            3697,
+            3894,
+            4013,
+            4330,
+            5946,
+            6081,
+            7241,
+            7301
+          ]
+        },
+        {
+          "before": "attack-deadline-feasibility-16",
+          "after": "account-store-wait-feasibility-17",
+          "positions": [
+            920
+          ]
+        },
+        {
+          "before": "attack-deadline-followup-16",
+          "after": "account-store-wait-followup-17",
+          "positions": [
+            844
+          ]
+        },
+        {
+          "before": "run.backendInputCount!==44",
+          "after": "run.backendInputCount!==50",
+          "positions": [
+            6597
+          ]
+        },
+        {
+          "before": "identity.backendInputs!==44",
+          "after": "identity.backendInputs!==50",
+          "positions": [
+            10895
+          ]
+        },
+        {
+          "before": " return{schemaVersion:1,runId:report.runId,publicCollectionVerified:true",
+          "after": "\n // Store metadata is source-bound only, not an added gameplay threshold.\n const storeDiagnostics=receipt.storeDiagnostics,storeBound=FORMAL13_BINDING.probe17.storeDiagnostics;\n if(!storeDiagnostics||!storeBound||storeDiagnostics.contributesToGameAcceptance!==false||storeDiagnostics.diagnosticsDoNotChangeOriginalGameVerdict!==true||typeof storeDiagnostics.complete!=='boolean'||typeof storeDiagnostics.countsMatch!=='boolean'||JSON.stringify(storeDiagnostics)!==JSON.stringify(storeBound.summary))throw Error('Fresh17 independent Store metadata/source binding differs');\n const storeFiles=[];for(const[key,p]of Object.entries(storeDiagnostics.pins)){if(!['catalog','publicVerification','status','data'].includes(key)||p.path!==storeBound.pins[key]?.path||p.bytes!==storeBound.pins[key]?.bytes||p.sha256!==storeBound.pins[key]?.sha256)throw Error('Store companion exact public pin differs');const file=await under(topic,p.path),actual=await pin(file);if(actual.bytes!==p.bytes||actual.sha256!==p.sha256)throw Error('Store companion changed');storeFiles.push(actual);}\n return{schemaVersion:1,runId:report.runId,publicCollectionVerified:true,storeDiagnostics",
+          "positions": [
+            15656
+          ]
+        },
+        {
+          "before": "...independentVerifierPins]",
+          "after": "...independentVerifierPins,...storeFiles]",
+          "positions": [
+            17218
+          ]
+        }
+      ],
+      "inverseRawExact": true
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-account-store-wait-ladder-13\\initialize-private.ps1.before-actual-fresh17-v1.txt",
+        "bytes": 2499,
+        "sha256": "19cdd3a211e206517a21af53fdabb63a3c1853c701a52ff89ba1ccb5e68fb97e"
+      },
+      "target": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-account-store-wait-ladder-13\\initialize-private.ps1",
+        "bytes": 2653,
+        "sha256": "463aac45694b47be7fcbb287375c1d67148209168125985f5cc45a55574f34b6"
+      },
+      "rules": [
+        {
+          "before": "$taskFormal=Get-Content -LiteralPath (Join-Path $PSScriptRoot 'pending-formal13-binding-v1.json') -Raw|ConvertFrom-Json",
+          "after": "$taskFormalFile=Join-Path $PSScriptRoot 'bound-formal13-binding-v1.json'\nif(-not (Test-Path -LiteralPath $taskFormalFile)){$taskFormalFile=Join-Path $PSScriptRoot 'pending-formal13-binding-v1.json'}\n$taskFormal=Get-Content -LiteralPath $taskFormalFile -Raw|ConvertFrom-Json"
+        }
+      ],
+      "inverseRawExact": true
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-account-store-wait-ladder-13\\recover-drained-owned.ps1.before-actual-fresh17-v1.txt",
+        "bytes": 3468,
+        "sha256": "67cf7583ff2d90dd8d8127a76f0dc69a8b19e33c7affe282f9896d22a93274cb"
+      },
+      "target": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-account-store-wait-ladder-13\\recover-drained-owned.ps1",
+        "bytes": 3622,
+        "sha256": "16bdcf7cf3bca1d2ccdb3d7c65d04af54ff4f488c1d4ad706af25a8cb3b4a9b7"
+      },
+      "rules": [
+        {
+          "before": "$taskFormal=Get-Content -LiteralPath (Join-Path $PSScriptRoot 'pending-formal13-binding-v1.json') -Raw|ConvertFrom-Json",
+          "after": "$taskFormalFile=Join-Path $PSScriptRoot 'bound-formal13-binding-v1.json'\nif(-not (Test-Path -LiteralPath $taskFormalFile)){$taskFormalFile=Join-Path $PSScriptRoot 'pending-formal13-binding-v1.json'}\n$taskFormal=Get-Content -LiteralPath $taskFormalFile -Raw|ConvertFrom-Json"
+        }
+      ],
+      "inverseRawExact": true
+    }
+  ],
+  "actualEndedVerification": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\probe17-independent-verification-v1\\final-verification.json",
+    "bytes": 451627,
+    "sha256": "4203ff7d2384e0dfbe4a8cb7c2548168603aee67828d389d191e621ece93b519"
+  },
+  "actualExecution": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\probe17-independent-verification-v1\\actual-verification-execution-receipt-v1.json",
+    "bytes": 813,
+    "sha256": "df616e6f7e602b274ac411c9c1dc154de09a9b3aedf8566a33aa6b6e314fed1c"
+  },
+  "toolSeal": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\probe17-independent-verification-v1\\tool-source-frozen-v1.json",
+    "bytes": 2111,
+    "sha256": "b0dc5460824f6b621314a08a3c9596e350e07f45db54caffbf017f4c49266009"
+  },
+  "sourceSealInputsChecked": 10,
+  "rawAndMonitorPayloadReread": false,
+  "gameplayRulesChanged": false,
+  "oldPendingSourcesPreserved": true
+}

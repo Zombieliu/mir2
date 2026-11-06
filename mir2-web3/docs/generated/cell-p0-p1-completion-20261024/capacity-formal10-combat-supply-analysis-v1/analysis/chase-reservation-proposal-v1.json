@@ -1,0 +1,43 @@
+{
+  "schemaVersion": 1,
+  "scope": "Proposal only for bounded controlled-client approach coordination; no product implementation or runtime change is authorized by this file.",
+  "evidence": {
+    "conservativeOverlappingApproachAckSpans": 9,
+    "failedWindow4OverlappingSpans": 4,
+    "simultaneousSameTargetPendingAttackIntervals": 0,
+    "window3CauseNotFullyResolvedByApproachReservation": true,
+    "proof": "overlapping-chase-proof-v2.json"
+  },
+  "minimumBoundary": {
+    "meaning": "A tool-local hint that one live controlled client is already spending actual acknowledged approach steps on this target. It grants no world authority or economic ownership.",
+    "key": "Actual mapFileName plus public target objectId; never infer a server incarnation.",
+    "owner": "Controlled client identity/reference, never the nonunique owner objectId1000.",
+    "maximumEntries": "At most the predeclared live combat actors, maximum10; at most one approach hint per client.",
+    "acquire": "Synchronously immediately before a genuinely selected ordinary chase movement is sent; never while merely considering a candidate or replaying a read-only plan.",
+    "renew": "Only a fresh successful ordinary UserLocation that proves progress in the existing chase segment; never mere plan selection, a timeout or a repeated non-improving receipt.",
+    "expiry": "A small finite lease based on original native movement cadence, proposed three750ms opportunities. Expiry must not reset any existing chase ACK, loop, nonprogress or total-time budget.",
+    "release": "Owned token only, on selected-target change, invalid or missing target, owner inactive/dead/map change, scout transition, original chase deferral, send failure or ordinary exit. A stale completion cannot release a newer owner's hint.",
+    "effect": "An approaching rival considers other original eligible candidates or original scouting under the unchanged four-candidate/eight-neighbor/4000-node limits. Every original offered opportunity and failure remains in its denominator."
+  },
+  "policyDecisionStillNeeded": {
+    "adjacentReadyStrike": "Prefer preserving an already adjacent, actually witnessed ordinary strike under the existing pending-attack targetClaims exclusion; an approach hint should not make a nearby productive strike wait behind a distant walker. Such a strike invalidates the old approach hint for the next decision, without cancelling an already sent move.",
+    "scope": "Implementing approach-only exclusion requires its own focused fixtures and root review. Do not simply add a global availableCombatTarget rejection that accidentally suppresses these already productive adjacent strikes."
+  },
+  "requiredFocusedCasesBeforeProductChange": [
+    "Two distinct clients sharing numeric owner objectId1000 cannot hold the same live approach hint.",
+    "A new token survives an old finally/release, and a lease cannot outlive the original finite chase budget.",
+    "No claim is created by an unsent candidate, failed path, read-only plan or ordinary scouting.",
+    "Unavailable shared target falls through to existing bounded alternatives without new A-star expansion or altered native cadence.",
+    "Existing valid adjacent witnessed attack, typed launch, dual-end damage,900ms evidence and pending targetClaims remain unchanged.",
+    "Fresh owner/map/target removal and diagnostic or command failure release only the appropriate tool-local hint."
+  ],
+  "limitations": [
+    "This is not proof that reservation would satisfy the original sustained18launch/12positivehit requirements.",
+    "The failed third window contains substantial real scouting without a detected conservative overlapping approach span; local supply and stable-witness filter causes remain partly unobserved.",
+    "No proposed hint or peer observation may add ACK, hit, completion, movement or capacity credit."
+  ],
+  "sourceChanged": false,
+  "implemented": false,
+  "realmStarted": false,
+  "capacityAccepted": false
+}

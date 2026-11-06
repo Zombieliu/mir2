@@ -1,0 +1,186 @@
+{
+  "schema": "mir2.same-map-owner-root-evidence-index.v1",
+  "createdUtc": "2026-10-04T07:28:52.306873+00:00",
+  "sourceBase": "3e1f9167097ff239faeffdde809a17b2c0009b6c",
+  "reviewedSourceFiles": 12,
+  "rootVerifiedOriginalLogCount": 23,
+  "rootIntegratedProfile27OwnershipTestsPassed": 21,
+  "files": [
+    {
+      "path": "source-manifest.json",
+      "bytes": 3150,
+      "sha256": "5945eb293ea1bec7b09ccb64ce3874e9e0dfb02457e9ecfe0821be9421a28385"
+    },
+    {
+      "path": "run-receipts.json",
+      "bytes": 51257,
+      "sha256": "02140e9449a2bc0a8978e0e0141f9e045c9fc65dd7e3697473ad52215a45b01e"
+    },
+    {
+      "path": "evidence-manifest.json",
+      "bytes": 769,
+      "sha256": "11bd319b4d1278f06266febe54ea38774d53058a9adbcc83b0b53210b2fe919a"
+    },
+    {
+      "path": "implementation.diff",
+      "bytes": 95193,
+      "sha256": "0fddf9d5b49f043111db7a64e8a41c7d68f79d4948c24f696d5af48084469d96"
+    },
+    {
+      "path": "capture_evidence.py",
+      "bytes": 17960,
+      "sha256": "04ceca39c533de18676fd318806e87c87edb60a08bd61689eed768009e0eab71"
+    },
+    {
+      "path": "README.md",
+      "bytes": 5457,
+      "sha256": "206adc10bb3357a6fb7ed17ba0cb97e130e5ec3cb28cf70d9bdfe913bc6cc76a"
+    },
+    {
+      "path": "logs/shared-monster-ownership-red-01-20261004.log",
+      "bytes": 35247,
+      "sha256": "28298ffa07ec96f009e3b526f73ea8867a3c1c3714674497a87b92cfb8e34af2"
+    },
+    {
+      "path": "logs/shared-monster-ownership-red-02-20261004.log",
+      "bytes": 34692,
+      "sha256": "d16642c5f84c92ea0d98446a1d2837aa6d2923ccc6b9c8fab15247bba2d2c6e8"
+    },
+    {
+      "path": "logs/shared-monster-ownership-environment-red-03-20261004.log",
+      "bytes": 31737,
+      "sha256": "6dc0bdeda56f77c1a373615396f99c8200886ec600d8a38bb931fff1fc176bcb"
+    },
+    {
+      "path": "logs/shared-monster-ownership-master-baseline-04-20261004.log",
+      "bytes": 29275,
+      "sha256": "0f00e24ce158aa21edcc0f492427ff70da6734c263af2b3d6bfdd1b09c15a15f"
+    },
+    {
+      "path": "logs/shared-monster-ownership-green-01-20261004.log",
+      "bytes": 31181,
+      "sha256": "1faf9a9c65e76dee292212fcfe75b9cefffc626650d35d33a4c696f86919f310"
+    },
+    {
+      "path": "logs/shared-monster-ownership-private-green-02-20261004.log",
+      "bytes": 38121,
+      "sha256": "fcc66630b5a383758abc76c9d865faa0a98c27a939830dc17fa2b4d2a00b2599"
+    },
+    {
+      "path": "logs/shared-monster-ownership-checkpoint-adjacent-03-20261004.log",
+      "bytes": 39250,
+      "sha256": "3c0658b538d1e8dd826c64299c95181aa6803f496de396da1b8fa836454c3aa5"
+    },
+    {
+      "path": "logs/shared-monster-ownership-adjacent-summon-ai-04-20261004.log",
+      "bytes": 32581,
+      "sha256": "a9cb204549af0328018d34cc2ed311fcb85e0d25d27236437e91bdffe5841052"
+    },
+    {
+      "path": "logs/shared-monster-ownership-adjacent-summon-ai-05-20261004.log",
+      "bytes": 39954,
+      "sha256": "4ba6af366bd4264edc8d2afdfeff521b8c88073d69034c6870cdabfc255cf918"
+    },
+    {
+      "path": "logs/shared-monster-ownership-hell-r17-baseline-06-20261004.log",
+      "bytes": 29986,
+      "sha256": "0a4c6997da0b8c4b68289ac2bcccac232e162566add32a4f49106e007151d557"
+    },
+    {
+      "path": "logs/shared-monster-ownership-current-return-07-20261004.log",
+      "bytes": 59191,
+      "sha256": "0ce2821ecff7cfba3e6b74e96085c67e73786d2585082884f0db5ca1185ee671"
+    },
+    {
+      "path": "logs/shared-monster-ownership-final-green-08-20261004.log",
+      "bytes": 31032,
+      "sha256": "19991e2a87ee8a061a267ae900515ce94921b21f41c507500bc91358c5fe7604"
+    },
+    {
+      "path": "logs/shared-monster-ownership-lib-group_experience_tests-20261004.log",
+      "bytes": 38041,
+      "sha256": "1dfbf7240fec0e44ba0e14c3db2d8f9405a9c58225ef89759a3b93150fc324af"
+    },
+    {
+      "path": "logs/shared-monster-ownership-lib-summon_damage_tests-20261004.log",
+      "bytes": 37529,
+      "sha256": "933f16005523c6258771714fbc56a593d606548777feaa357acf3f092d571e24"
+    },
+    {
+      "path": "logs/shared-monster-ownership-lib-soulfire_practice_tests-20261004.log",
+      "bytes": 38651,
+      "sha256": "d3d66368e77259e11cfbcd66f37e178c261effacb6a6f2b6236bcdc3cc4b13d2"
+    },
+    {
+      "path": "logs/shared-monster-ownership-lib-entity_combat-tests-20261004.log",
+      "bytes": 40764,
+      "sha256": "0bca3999984b6c284c1686886b1e0f92838f5d558ced2b03b9a1c3f375a2fab6"
+    },
+    {
+      "path": "logs/shared-monster-ownership-lib-reward_rate_tests-20261004.log",
+      "bytes": 37648,
+      "sha256": "e3b0e2c199a84dbc89f376c2ce714eac1de1c9af1e8dd406cf59cd2a1fd121e2"
+    },
+    {
+      "path": "logs/shared-monster-ownership-shared-zone-poison-20261004.log",
+      "bytes": 30262,
+      "sha256": "9eddd8c19dda3d5e43a8af8de2d7fa83fe656fbdff82de0dda2ed3961e8c69ab"
+    },
+    {
+      "path": "logs/shared-monster-ownership-shared-zone-summon-20261004.log",
+      "bytes": 30253,
+      "sha256": "0a61a37a18e452b36d71e3291843f24550a12fdf6eefb14d73e30251d32f6d71"
+    },
+    {
+      "path": "logs/shared-monster-ownership-gateway-kill_award-20261004.log",
+      "bytes": 31027,
+      "sha256": "de714701aacee72f79295ea3f81fae1146e0da1e376cb3e1b7800411704f5486"
+    },
+    {
+      "path": "logs/shared-monster-ownership-gateway-world_checkpoint-20261004.log",
+      "bytes": 30384,
+      "sha256": "9c877140c27d862139f97f876a55f62393cf2f68d04a8de6701df2319de4bb5f"
+    },
+    {
+      "path": "logs/shared-monster-ownership-gateway-shared_drop_aoi_tests-20261004.log",
+      "bytes": 30219,
+      "sha256": "a00c0c9c10ce704f3449415dd1cbf6d6f8d248dfd2cda7e31e533eb6d0537d05"
+    },
+    {
+      "path": "logs/shared-monster-ownership-gateway-guild_kill_source_tests-20261004.log",
+      "bytes": 30273,
+      "sha256": "53694948dfe6fedb14b09927330a8eb613f0544f21cc8cde828b302e20c7d270"
+    },
+    {
+      "path": "source-audit/evidence-receipt.json",
+      "bytes": 693,
+      "sha256": "4f7a7e78b8944c9064fb5a7d0f14dd3e436cbf12921629f30d56af3e55e6d368"
+    },
+    {
+      "path": "source-audit/source-index.json",
+      "bytes": 22511,
+      "sha256": "93320751419f1aa9ed177960b2fe3722e2671fc83ccb3c54ec1e73c591239db0"
+    },
+    {
+      "path": "source-audit/source-excerpts.txt",
+      "bytes": 180182,
+      "sha256": "02bcc3a3a2d884cbd2af3d7ad3ea30c630c0b23c8d75834c0c8ae3354ceab663"
+    },
+    {
+      "path": "source-audit/README.md",
+      "bytes": 22225,
+      "sha256": "e9cc9f0be315fe0aac165bc968e7c228d9ffec256614de51b3e31c2b4ccd0fda"
+    },
+    {
+      "path": "source-audit/build_source_evidence.py",
+      "bytes": 6124,
+      "sha256": "4a9fab4d532f15f735e60b43985a88fad5426d494b34c0842f8cec337ac0943e"
+    }
+  ],
+  "published": false,
+  "personalDeadLevelUpAccepted": false,
+  "crossMapAccepted": false,
+  "fullStage3Accepted": false,
+  "nativeAccepted": false,
+  "humanAccepted": false
+}

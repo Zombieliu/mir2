@@ -4,14 +4,14 @@
 //! `zone_owner_leases` row per zone records the current owner, a monotonic fencing
 //! token, and an absolute expiry. Ownership semantics:
 //!
-//! - **acquire**: claim the zone if it is unowned, owned by us, or expired. A steal
-//!   from a *different, expired* owner bumps the fencing token; renewing our own
-//!   lease keeps it. If a *live* different owner holds it, we observe their lease
-//!   and learn we are not the owner.
+//! - **acquire**: claim the zone if it is unowned, owned by us, or expired. Every
+//!   expired lease starts a new epoch, including reacquisition by the same owner.
+//!   Renewing our own live lease keeps its token. A live different owner is only
+//!   observed; neither acquisition nor validation trusts a cached lease.
 //! - **renew (heartbeat)**: extend expiry iff we still hold the lease with a
 //!   matching fencing token and it has not expired. Otherwise the lease is lost.
-//! - **release**: drop the lease on graceful shutdown so a peer can take over
-//!   immediately instead of waiting for TTL.
+//! - **release**: expire the exact owner/token on graceful shutdown while retaining
+//!   its fencing history, so a peer can take over immediately without token reuse.
 //!
 //! A returning "zombie" owner is fenced out: its stale token fails renewal, and any
 //! token-checked write is rejected by the new epoch's higher token.
@@ -20,11 +20,12 @@
 //! spawned OS thread — the same pattern the simulation account store uses to avoid
 //! nested-Tokio-runtime panics inside the async gateway.
 //!
-//! NOTE: this makes ownership *coordination* production-grade. Transferring the
-//! live in-memory zone runtime to a new owner still depends on the zone-owner RPC
-//! transport, which is tracked separately.
+//! Validation is a current-row check, not a lock through an arbitrary later write.
+//! Durable writes still need a guard held through their commit. Live runtime
+//! transfer and owner process-incarnation uniqueness are separate contracts.
 
 use std::collections::{BTreeMap, BTreeSet};
+use std::ops::Deref;
 use std::sync::{Arc, Mutex};
 use std::time::{SystemTime, UNIX_EPOCH};
 
@@ -35,6 +36,49 @@ use crate::routing::{
 };
 
 const DEFAULT_LEASE_TTL_MS: u64 = 30_000;
+
+/// Owns a synchronous PostgreSQL resource all the way through its destruction.
+/// `postgres::Client::drop` drives its private Tokio runtime. The last owner may
+/// disappear on an async worker when a server future is cancelled or fails, so
+/// putting only construction/queries on blocking workers is not sufficient.
+pub(crate) struct SyncPostgresResource<T: Send> {
+    value: Option<T>,
+}
+
+impl<T: Send> SyncPostgresResource<T> {
+    pub(crate) fn new(value: T) -> Self {
+        Self { value: Some(value) }
+    }
+}
+
+impl<T: Send> Deref for SyncPostgresResource<T> {
+    type Target = T;
+
+    fn deref(&self) -> &Self::Target {
+        self.value
+            .as_ref()
+            .expect("PostgreSQL resource is owned until drop")
+    }
+}
+
+impl<T: Send> Drop for SyncPostgresResource<T> {
+    fn drop(&mut self) {
+        if tokio::runtime::Handle::try_current().is_err() {
+            // Ordinary synchronous callers already have a safe context.
+            drop(self.value.take());
+            return;
+        }
+        // This worker does not depend on a live Tokio scheduler, including on a
+        // current-thread runtime or during shutdown. Join before returning: do
+        // not leak connections or defer cleanup to a runtime being destroyed.
+        std::thread::scope(|scope| {
+            let worker = scope.spawn(|| drop(self.value.take()));
+            if let Err(panic) = worker.join() {
+                std::panic::resume_unwind(panic);
+            }
+        });
+    }
+}
 
 fn now_ms() -> u64 {
     SystemTime::now()
@@ -62,14 +106,7 @@ pub struct PostgresZoneOwnerLeaseAuthority {
     database_url: String,
     owner_id: String,
     lease_ttl_ms: u64,
-    client: Arc<Mutex<Option<Client>>>,
-    last_known: Mutex<BTreeMap<String, CachedZoneLease>>,
-}
-
-#[derive(Debug, Clone)]
-struct CachedZoneLease {
-    lease: ZoneOwnerLease,
-    expires_at_ms: u64,
+    client: Arc<SyncPostgresResource<Mutex<Option<Client>>>>,
 }
 
 impl std::fmt::Debug for PostgresZoneOwnerLeaseAuthority {
@@ -97,8 +134,7 @@ impl PostgresZoneOwnerLeaseAuthority {
             database_url: database_url.into(),
             owner_id,
             lease_ttl_ms: lease_ttl_ms.max(1),
-            client: Arc::new(Mutex::new(None)),
-            last_known: Mutex::new(BTreeMap::new()),
+            client: Arc::new(SyncPostgresResource::new(Mutex::new(None))),
         }
     }
 
@@ -165,46 +201,21 @@ impl PostgresZoneOwnerLeaseAuthority {
         .map_err(|_| "zone lease worker thread panicked".to_string())?
     }
 
-    fn remember(&self, lease: &ZoneOwnerLease, expires_at_ms: u64) {
-        if let Ok(mut cache) = self.last_known.lock() {
-            cache.insert(
-                lease.zone_id().as_str().to_string(),
-                CachedZoneLease {
-                    lease: lease.clone(),
-                    expires_at_ms,
-                },
-            );
-        }
-    }
-
-    fn cached(&self, zone_id: &ZoneId) -> Option<ZoneOwnerLease> {
-        self.cached_entry(zone_id).map(|entry| entry.lease)
-    }
-
-    fn cached_entry(&self, zone_id: &ZoneId) -> Option<CachedZoneLease> {
-        self.last_known
-            .lock()
-            .ok()
-            .and_then(|cache| cache.get(zone_id.as_str()).cloned())
-    }
-
     /// Atomically acquire/renew/steal the lease, returning the resulting stored
     /// lease (whose owner may be a *different* live process).
     pub fn acquire_at(&self, zone_id: &ZoneId, now_ms: u64) -> Result<ZoneOwnerLease, String> {
         let zone = zone_id.as_str().to_string();
         let owner_id = self.owner_id.clone();
-        let expires_at = now_ms.saturating_add(self.lease_ttl_ms) as i64;
-        let now = now_ms as i64;
+        let (now, expires_at) = postgres_lease_times(now_ms, self.lease_ttl_ms)?;
         let zone_for_lease = zone_id.clone();
-        let (lease, stored_expires_at_ms) = self.run(move |client| {
+        self.run(move |client| {
             let row = client
-                .query_one(
+                .query_opt(
                     "INSERT INTO zone_owner_leases \
                      (zone_id, owner_id, fencing_token, expires_at_ms, heartbeat_at_ms, acquired_at_ms) \
                      VALUES ($1, $2, 1, $3, $4, $4) \
                      ON CONFLICT (zone_id) DO UPDATE SET \
                        fencing_token = CASE \
-                           WHEN zone_owner_leases.owner_id = EXCLUDED.owner_id THEN zone_owner_leases.fencing_token \
                            WHEN zone_owner_leases.expires_at_ms <= $4 THEN zone_owner_leases.fencing_token + 1 \
                            ELSE zone_owner_leases.fencing_token END, \
                        owner_id = CASE \
@@ -217,23 +228,25 @@ impl PostgresZoneOwnerLeaseAuthority {
                            WHEN zone_owner_leases.owner_id = EXCLUDED.owner_id OR zone_owner_leases.expires_at_ms <= $4 \
                                THEN EXCLUDED.heartbeat_at_ms ELSE zone_owner_leases.heartbeat_at_ms END, \
                        acquired_at_ms = CASE \
-                           WHEN zone_owner_leases.owner_id <> EXCLUDED.owner_id AND zone_owner_leases.expires_at_ms <= $4 \
+                           WHEN zone_owner_leases.expires_at_ms <= $4 \
                                THEN EXCLUDED.acquired_at_ms ELSE zone_owner_leases.acquired_at_ms END, \
                        updated_at = now() \
+                     WHERE zone_owner_leases.fencing_token > 0 \
+                       AND (zone_owner_leases.expires_at_ms > $4 \
+                            OR zone_owner_leases.fencing_token < 9223372036854775807) \
                      RETURNING owner_id, fencing_token, expires_at_ms",
                     &[&zone, &owner_id, &expires_at, &now],
                 )
-                .map_err(|error| format!("zone lease acquire failed for {zone}: {error}"))?;
+                .map_err(|error| format!("zone lease acquire failed for {zone}: {error}"))?
+                .ok_or_else(|| format!("zone lease fencing token invalid or exhausted for {zone}"))?;
             let owner_id: String = row.get("owner_id");
             let fencing_token: i64 = row.get("fencing_token");
-            let stored_expires_at_ms: i64 = row.get("expires_at_ms");
-            Ok((
-                ZoneOwnerLease::new(zone_for_lease, owner_id, fencing_token.max(1) as u64),
-                stored_expires_at_ms.max(0) as u64,
+            Ok(ZoneOwnerLease::new(
+                zone_for_lease,
+                owner_id,
+                postgres_fencing_token(fencing_token)?,
             ))
-        })?;
-        self.remember(&lease, stored_expires_at_ms);
-        Ok(lease)
+        })
     }
 
     /// Extend the lease iff we still hold it (matching owner + fencing token and
@@ -248,9 +261,8 @@ impl PostgresZoneOwnerLeaseAuthority {
         }
         let zone = lease.zone_id().as_str().to_string();
         let owner_id = self.owner_id.clone();
-        let token = lease.fencing_token() as i64;
-        let expires_at = now_ms.saturating_add(self.lease_ttl_ms) as i64;
-        let now = now_ms as i64;
+        let token = checked_postgres_fencing_token(lease.fencing_token())?;
+        let (now, expires_at) = postgres_lease_times(now_ms, self.lease_ttl_ms)?;
         let zone_id = lease.zone_id().clone();
         let renewed = self.run(move |client| {
             let updated = client
@@ -273,7 +285,6 @@ impl PostgresZoneOwnerLeaseAuthority {
             Ok(()) => {
                 let lease =
                     ZoneOwnerLease::new(zone_id, self.owner_id.clone(), lease.fencing_token());
-                self.remember(&lease, now_ms.saturating_add(self.lease_ttl_ms));
                 Ok(lease)
             }
             Err(error) => Err(error),
@@ -302,10 +313,11 @@ impl PostgresZoneOwnerLeaseAuthority {
         }
         let zone = current.zone_id().as_str().to_string();
         let current_owner_id = self.owner_id.clone();
-        let current_token = current.fencing_token() as i64;
-        let new_expires_at_ms = now_ms.saturating_add(self.lease_ttl_ms);
-        let new_expires_at = new_expires_at_ms as i64;
-        let now = now_ms as i64;
+        let current_token = checked_postgres_fencing_token(current.fencing_token())?;
+        let next_token = current_token
+            .checked_add(1)
+            .ok_or_else(|| format!("zone lease fencing token exhausted for {zone}"))?;
+        let (now, new_expires_at) = postgres_lease_times(now_ms, self.lease_ttl_ms)?;
         let zone_id = current.zone_id().clone();
         let owner_for_query = new_owner_id.clone();
         let new_token = self.run(move |client| {
@@ -313,7 +325,7 @@ impl PostgresZoneOwnerLeaseAuthority {
                 .query_opt(
                     "UPDATE zone_owner_leases
                      SET owner_id=$4,
-                         fencing_token=fencing_token+1,
+                         fencing_token=$7,
                          expires_at_ms=$5,
                          heartbeat_at_ms=$6,
                          acquired_at_ms=$6,
@@ -330,6 +342,7 @@ impl PostgresZoneOwnerLeaseAuthority {
                         &owner_for_query,
                         &new_expires_at,
                         &now,
+                        &next_token,
                     ],
                 )
                 .map_err(|error| format!("zone lease handoff failed for {zone}: {error}"))?
@@ -337,31 +350,32 @@ impl PostgresZoneOwnerLeaseAuthority {
                     format!("stale zone owner lease for {zone}: handoff compare-and-set rejected")
                 })?;
             let token: i64 = row.get("fencing_token");
-            Ok(token.max(1) as u64)
+            postgres_fencing_token(token)
         })?;
         let lease = ZoneOwnerLease::new(zone_id, new_owner_id, new_token);
-        self.remember(&lease, new_expires_at_ms);
         Ok(lease)
     }
 
-    /// Release the lease on graceful shutdown so a peer can take over immediately.
+    /// Expire only this exact epoch, retaining its monotonic fencing history.
+    /// Repeated or stale releases are harmless; they cannot expire a newer epoch.
     pub fn release(&self, lease: &ZoneOwnerLease) -> Result<(), String> {
+        if lease.owner_id() != self.owner_id {
+            return Err("cannot release another authority's zone owner lease".into());
+        }
         let zone = lease.zone_id().as_str().to_string();
         let owner_id = self.owner_id.clone();
-        let token = lease.fencing_token() as i64;
+        let token = checked_postgres_fencing_token(lease.fencing_token())?;
         self.run(move |client| {
             client
                 .execute(
-                    "DELETE FROM zone_owner_leases \
-                     WHERE zone_id = $1 AND owner_id = $2 AND fencing_token = $3",
+                    "UPDATE zone_owner_leases SET expires_at_ms = 0, updated_at = now() \
+                     WHERE zone_id = $1 AND owner_id = $2 AND fencing_token = $3 \
+                       AND expires_at_ms <> 0",
                     &[&zone, &owner_id, &token],
                 )
                 .map_err(|error| format!("zone lease release failed for {zone}: {error}"))?;
             Ok(())
         })?;
-        if let Ok(mut cache) = self.last_known.lock() {
-            cache.remove(lease.zone_id().as_str());
-        }
         Ok(())
     }
 
@@ -380,19 +394,46 @@ impl PostgresZoneOwnerLeaseAuthority {
                     &[&zone],
                 )
                 .map_err(|error| format!("zone lease observe failed for {zone}: {error}"))?;
-            Ok(row.map(|row| {
+            row.map(|row| {
                 let fencing_token: i64 = row.get("fencing_token");
                 let expires_at_ms: i64 = row.get("expires_at_ms");
                 let heartbeat_at_ms: i64 = row.get("heartbeat_at_ms");
-                ObservedZoneLease {
+                Ok(ObservedZoneLease {
                     owner_id: row.get("owner_id"),
-                    fencing_token: fencing_token.max(0) as u64,
-                    expires_at_ms: expires_at_ms.max(0) as u64,
-                    heartbeat_at_ms: heartbeat_at_ms.max(0) as u64,
-                }
-            }))
+                    fencing_token: postgres_fencing_token(fencing_token)?,
+                    expires_at_ms: u64::try_from(expires_at_ms)
+                        .map_err(|_| "zone lease expiry must not be negative".to_string())?,
+                    heartbeat_at_ms: u64::try_from(heartbeat_at_ms)
+                        .map_err(|_| "zone lease heartbeat must not be negative".to_string())?,
+                })
+            })
+            .transpose()
         })
     }
+}
+
+fn checked_postgres_fencing_token(token: u64) -> Result<i64, String> {
+    i64::try_from(token)
+        .ok()
+        .filter(|token| *token > 0)
+        .ok_or_else(|| "zone lease fencing token is outside PostgreSQL BIGINT range".to_string())
+}
+
+fn postgres_fencing_token(token: i64) -> Result<u64, String> {
+    u64::try_from(token)
+        .ok()
+        .filter(|token| *token > 0)
+        .ok_or_else(|| "stored zone lease fencing token must be positive".to_string())
+}
+
+fn postgres_lease_times(now_ms: u64, ttl_ms: u64) -> Result<(i64, i64), String> {
+    let now = i64::try_from(now_ms)
+        .map_err(|_| "zone lease timestamp exceeds PostgreSQL BIGINT range".to_string())?;
+    let expires_at = now_ms
+        .checked_add(ttl_ms)
+        .and_then(|expiry| i64::try_from(expiry).ok())
+        .ok_or_else(|| "zone lease expiry exceeds PostgreSQL BIGINT range".to_string())?;
+    Ok((now, expires_at))
 }
 
 fn configured_owner_id(explicit_owner: Option<String>, instance_id: Option<String>) -> String {
@@ -403,75 +444,99 @@ fn configured_owner_id(explicit_owner: Option<String>, instance_id: Option<Strin
 }
 
 impl ZoneOwnerLeaseAuthority for PostgresZoneOwnerLeaseAuthority {
+    fn requires_transactional_zone_save_fence(&self) -> bool {
+        true
+    }
+
+    fn supports_durable_npc_purchase_lease(&self) -> bool {
+        true
+    }
+
+    fn with_durable_npc_purchase_lease(
+        &self,
+        lease: &ZoneOwnerLease,
+        operation: &mut (dyn FnMut() + Send),
+    ) -> Result<(), String> {
+        // A scoped worker keeps the real row lock through the account commit;
+        // no cached/bootstrap lease is accepted and no new schema is created.
+        std::thread::scope(|scope| {
+            scope.spawn(|| {
+                let mut slot = self.client.lock().map_err(|_| "zone lease client mutex poisoned")?;
+                if slot.is_none() {
+                    *slot = Some(Client::connect(&self.database_url, NoTls)
+                        .map_err(|error| format!("durable NPC lease connect failed: {error}"))?);
+                }
+                let guarded_result = (|| {
+                let client = slot.as_mut().expect("connected lease client");
+                let mut transaction = client.transaction()
+                    .map_err(|error| format!("durable NPC lease transaction failed: {error}"))?;
+                let row = transaction.query_opt(
+                    "SELECT owner_id, fencing_token, expires_at_ms FROM zone_owner_leases WHERE zone_id=$1 FOR UPDATE",
+                    &[&lease.zone_id().as_str()],
+                ).map_err(|error| format!("durable NPC owner lease lock failed: {error}"))?
+                    .ok_or("durable NPC owner lease is not registered")?;
+                let owner: String = row.get("owner_id");
+                let token: i64 = row.get("fencing_token");
+                let expires: i64 = row.get("expires_at_ms");
+                if owner != lease.owner_id() || token <= 0 || token as u64 != lease.fencing_token()
+                    || expires <= 0 || expires as u64 <= now_ms() {
+                    return Err("stale durable NPC purchase owner lease".into());
+                }
+                crate::session::catch_gateway_panic("durable NPC lease callback", || operation())?;
+                // The row was only locked. Rollback releases the fencing guard;
+                // any release error follows the already captured commit receipt.
+                transaction.rollback().map_err(|error| format!("durable NPC lease guard release failed: {error}"))
+                })();
+                if guarded_result.is_err() { *slot = None; }
+                guarded_result
+            }).join().map_err(|_| "durable NPC lease guard worker panicked".to_string())?
+        })
+    }
+
     fn owner_lease(&self, zone_id: &ZoneId) -> ZoneOwnerLease {
-        let now = now_ms();
-        if let Some(cached) = self.cached_entry(zone_id) {
-            let live = cached.expires_at_ms > now;
-            let owned_by_peer = cached.lease.owner_id() != self.owner_id;
-            let safely_before_renewal =
-                cached.expires_at_ms.saturating_sub(now) > self.lease_ttl_ms.saturating_div(2);
-            if live && (owned_by_peer || safely_before_renewal) {
-                return cached.lease;
-            }
-        }
-        match self.acquire_at(zone_id, now) {
-            Ok(lease) => lease,
-            Err(error) => {
-                // Transient DB unavailability must not relinquish ownership: return
-                // the last known good lease, or a stable bootstrap lease for this
-                // owner. Fencing is reconciled by renew/acquire once the DB heals.
-                eprintln!(
-                    "zone lease authority degraded for {}: {error}",
-                    zone_id.as_str()
-                );
-                self.cached(zone_id).unwrap_or_else(|| {
-                    ZoneOwnerLease::new(zone_id.clone(), self.owner_id.clone(), 1)
-                })
-            }
-        }
+        // Legacy callers must opt into the fallible API to handle availability
+        // errors. Never mint a bootstrap lease or forward a stale cached owner.
+        self.try_owner_lease(zone_id)
+            .expect("zone owner lease acquisition failed")
     }
 
     fn refresh_owner_lease(&self, zone_id: &ZoneId) -> ZoneOwnerLease {
-        let now = now_ms();
-        match self.acquire_at(zone_id, now) {
-            Ok(lease) => lease,
-            Err(error) => {
-                eprintln!(
-                    "zone lease authority refresh degraded for {}: {error}",
-                    zone_id.as_str()
-                );
-                self.cached(zone_id).unwrap_or_else(|| {
-                    ZoneOwnerLease::new(zone_id.clone(), self.owner_id.clone(), 1)
-                })
-            }
-        }
+        self.try_refresh_owner_lease(zone_id)
+            .expect("zone owner lease refresh failed")
+    }
+
+    fn try_owner_lease(&self, zone_id: &ZoneId) -> Result<ZoneOwnerLease, String> {
+        self.acquire_at(zone_id, now_ms())
+    }
+
+    fn try_refresh_owner_lease(&self, zone_id: &ZoneId) -> Result<ZoneOwnerLease, String> {
+        self.acquire_at(zone_id, now_ms())
     }
 
     fn validate_owner_lease(&self, lease: &ZoneOwnerLease) -> Result<(), String> {
+        checked_postgres_fencing_token(lease.fencing_token())?;
         let now = now_ms();
-        if let Some(cached) = self.cached_entry(lease.zone_id()) {
-            let safely_live = cached.expires_at_ms > now
-                && (cached.lease.owner_id() != self.owner_id
-                    || cached.expires_at_ms.saturating_sub(now)
-                        > self.lease_ttl_ms.saturating_div(2));
-            if safely_live && cached.lease == *lease {
-                return Ok(());
-            }
-        }
-        let current = self.acquire_at(lease.zone_id(), now).map_err(|error| {
-            format!(
-                "cannot validate zone owner lease for {} after cached TTL: {error}",
-                lease.zone_id()
-            )
-        })?;
-        if current == *lease {
+        let current = self
+            .observe_at(lease.zone_id(), now)
+            .map_err(|error| {
+                format!(
+                    "cannot validate current zone owner lease for {}: {error}",
+                    lease.zone_id()
+                )
+            })?
+            .ok_or_else(|| format!("zone owner lease is not registered for {}", lease.zone_id()))?;
+        if current.is_live(now_ms())
+            && current.owner_id == lease.owner_id()
+            && current.fencing_token == lease.fencing_token()
+        {
             Ok(())
         } else {
             Err(format!(
-                "stale zone owner lease for zone {}: current owner {} fencing token {}, got owner {} fencing token {}",
+                "stale zone owner lease for zone {}: current owner {} fencing token {} expiry {}, got owner {} fencing token {}",
                 lease.zone_id(),
-                current.owner_id(),
-                current.fencing_token(),
+                current.owner_id,
+                current.fencing_token,
+                current.expires_at_ms,
                 lease.owner_id(),
                 lease.fencing_token()
             ))
@@ -619,8 +684,250 @@ pub fn default_zone_owner_lease_authority_from_env() -> SharedZoneOwnerLeaseAuth
 }
 
 #[cfg(test)]
+pub(crate) struct LifecyclePostgresTest {
+    url: String,
+    monitor: Client,
+}
+
+#[cfg(test)]
+impl LifecyclePostgresTest {
+    pub(crate) fn new() -> Self {
+        let url = std::env::var("MIR2_GATEWAY_LIFECYCLE_TEST_DATABASE_URL")
+            .expect("explicit isolated lifecycle test database URL is required");
+        let config = url
+            .parse::<postgres::Config>()
+            .unwrap_or_else(|_| panic!("invalid lifecycle test database configuration"));
+        let database = config
+            .get_dbname()
+            .expect("explicit lifecycle database required");
+        let suffix = database
+            .strip_prefix("mir2_playtest_lifecycle_")
+            .expect("lifecycle tests refuse ordinary game databases");
+        assert!(
+            !suffix.is_empty()
+                && suffix
+                    .bytes()
+                    .all(|byte| byte.is_ascii_lowercase() || byte.is_ascii_digit() || byte == b'_')
+        );
+        assert!(config.get_user() == Some("mir2_playtest"));
+        assert!(
+            config.get_hosts().len() == 1
+                && matches!(&config.get_hosts()[0],
+            postgres::config::Host::Tcp(host) if host == "127.0.0.1" || host == "::1")
+        );
+        assert!(
+            config.get_ports().len() == 1
+                && config.get_ports()[0] != 0
+                && config.get_ports()[0] != 5432
+        );
+        assert!(config.get_hostaddrs().is_empty() && config.get_options().is_none());
+        let parsed = reqwest::Url::parse(&url)
+            .unwrap_or_else(|_| panic!("lifecycle tests require a PostgreSQL URL"));
+        assert!(parsed.query().is_none() && parsed.fragment().is_none());
+        let mut monitor = config
+            .connect(NoTls)
+            .unwrap_or_else(|_| panic!("isolated lifecycle database connection failed"));
+        let identity = monitor
+            .query_one("SELECT current_database()::text, current_user::text", &[])
+            .unwrap_or_else(|_| panic!("lifecycle database identity check failed"));
+        assert!(identity.get::<_, &str>(0) == database);
+        assert!(identity.get::<_, &str>(1) == "mir2_playtest");
+        Self { url, monitor }
+    }
+
+    pub(crate) fn tagged_url(&self, label: &str) -> (String, String) {
+        let nonce = SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .unwrap()
+            .as_nanos();
+        let tag = format!("lifecycle-{label}-{}-{nonce}", std::process::id());
+        assert!(tag.len() < 64);
+        let mut url = reqwest::Url::parse(&self.url)
+            .unwrap_or_else(|_| panic!("validated lifecycle URL became invalid"));
+        url.query_pairs_mut().append_pair("application_name", &tag);
+        (url.to_string(), tag)
+    }
+
+    pub(crate) fn connections(&mut self, tag: &str) -> i64 {
+        self.monitor.query_one(
+            "SELECT count(*)::bigint FROM pg_stat_activity WHERE datname = current_database() AND usename = current_user AND application_name = $1",
+            &[&tag],
+        ).unwrap_or_else(|_| panic!("lifecycle connection observation failed"))
+            .get(0)
+    }
+
+    pub(crate) fn assert_connections_closed(&mut self, tag: &str) {
+        for _ in 0..200 {
+            if self.connections(tag) == 0 {
+                return;
+            }
+            std::thread::sleep(std::time::Duration::from_millis(25));
+        }
+        panic!("owned PostgreSQL connections remained after lifecycle completion");
+    }
+}
+
+#[cfg(test)]
+pub(crate) fn lifecycle_test_runtime(multi_thread: bool) -> tokio::runtime::Runtime {
+    let mut builder = if multi_thread {
+        let mut builder = tokio::runtime::Builder::new_multi_thread();
+        builder.worker_threads(2);
+        builder
+    } else {
+        tokio::runtime::Builder::new_current_thread()
+    };
+    builder
+        .enable_all()
+        .build()
+        .expect("lifecycle test Tokio runtime")
+}
+
+#[cfg(test)]
 mod tests {
     use super::*;
+
+    fn runtime_resource() -> (
+        Arc<SyncPostgresResource<tokio::runtime::Runtime>>,
+        tokio::sync::oneshot::Receiver<()>,
+    ) {
+        let runtime = lifecycle_test_runtime(false);
+        let (sender, receiver) = tokio::sync::oneshot::channel();
+        runtime.spawn(async move {
+            std::future::pending::<()>().await;
+            drop(sender);
+        });
+        (Arc::new(SyncPostgresResource::new(runtime)), receiver)
+    }
+
+    #[test]
+    fn sync_postgres_resource_drops_a_real_runtime_before_returning() {
+        for multi_thread in [false, true] {
+            let outer = lifecycle_test_runtime(multi_thread);
+            let (resource, mut receiver) = runtime_resource();
+            let weak = Arc::downgrade(&resource);
+            outer.block_on(async move {
+                drop(resource);
+            });
+            assert!(weak.upgrade().is_none());
+            assert!(matches!(
+                receiver.try_recv(),
+                Err(tokio::sync::oneshot::error::TryRecvError::Closed)
+            ));
+        }
+    }
+
+    #[test]
+    fn sync_postgres_resource_handles_concurrent_last_arc_and_cancelled_task() {
+        for multi_thread in [false, true] {
+            let outer = lifecycle_test_runtime(multi_thread);
+            let (resource, mut receiver) = runtime_resource();
+            let copies = (0..4).map(|_| Arc::clone(&resource)).collect::<Vec<_>>();
+            drop(resource);
+            outer.block_on(async move {
+                let barrier = Arc::new(tokio::sync::Barrier::new(copies.len()));
+                let workers = copies
+                    .into_iter()
+                    .map(|copy| {
+                        let barrier = Arc::clone(&barrier);
+                        tokio::spawn(async move {
+                            barrier.wait().await;
+                            drop(copy);
+                        })
+                    })
+                    .collect::<Vec<_>>();
+                for worker in workers {
+                    worker.await.expect("last owner must drop safely");
+                }
+            });
+            assert!(matches!(
+                receiver.try_recv(),
+                Err(tokio::sync::oneshot::error::TryRecvError::Closed)
+            ));
+
+            let (resource, mut receiver) = runtime_resource();
+            outer.block_on(async move {
+                let (ready, started) = tokio::sync::oneshot::channel();
+                let worker = tokio::spawn(async move {
+                    ready.send(()).unwrap();
+                    std::future::pending::<()>().await;
+                    drop(resource);
+                });
+                started.await.unwrap();
+                worker.abort();
+                assert!(worker.await.unwrap_err().is_cancelled());
+            });
+            assert!(matches!(
+                receiver.try_recv(),
+                Err(tokio::sync::oneshot::error::TryRecvError::Closed)
+            ));
+        }
+    }
+
+    #[test]
+    fn sync_postgres_resource_handles_async_initialization_error() {
+        for multi_thread in [false, true] {
+            let outer = lifecycle_test_runtime(multi_thread);
+            let (resource, mut receiver) = runtime_resource();
+            let result = outer.block_on(async move {
+                let _resource = resource;
+                tokio::task::yield_now().await;
+                Err::<(), _>("later initializer failed")
+            });
+            assert!(result.is_err());
+            assert!(matches!(
+                receiver.try_recv(),
+                Err(tokio::sync::oneshot::error::TryRecvError::Closed)
+            ));
+        }
+    }
+
+    #[test]
+    #[ignore = "requires isolated MIR2_GATEWAY_LIFECYCLE_TEST_DATABASE_URL"]
+    fn lifecycle_postgres_closes_actual_zone_authority_cache() {
+        let mut database = LifecyclePostgresTest::new();
+        for multi_thread in [false, true] {
+            let outer = lifecycle_test_runtime(multi_thread);
+            let (url, tag) = database.tagged_url("zone-cache");
+            let authority = Arc::new(PostgresZoneOwnerLeaseAuthority::new(
+                &url,
+                "lifecycle-only",
+                1_000,
+            ));
+            // Populate the actual cached-client field. Do not run unrelated game
+            // schema migrations or acquire/modify leases in this drop-only test.
+            *authority.client.lock().unwrap() = Some(
+                Client::connect(&url, NoTls)
+                    .unwrap_or_else(|_| panic!("lifecycle cached client connection failed")),
+            );
+            assert_eq!(
+                authority
+                    .run(|client| {
+                        client
+                            .query_one("SELECT 1::int", &[])
+                            .map(|row| row.get::<_, i32>(0))
+                            .map_err(|_| "lifecycle cached client query failed".to_string())
+                    })
+                    .unwrap_or_else(|_| panic!("real authority cached operation failed")),
+                1
+            );
+            assert_eq!(database.connections(&tag), 1);
+            outer.block_on(async move {
+                let (ready, started) = tokio::sync::oneshot::channel();
+                let worker = tokio::spawn(async move {
+                    ready.send(()).unwrap();
+                    std::future::pending::<()>().await;
+                    drop(authority);
+                });
+                started.await.unwrap();
+                worker.abort();
+                assert!(worker.await.unwrap_err().is_cancelled());
+            });
+            database.assert_connections_closed(&tag);
+        }
+        eprintln!(
+            "actual zone authority cached-client closure verified in both Tokio runtime flavours"
+        );
+    }
 
     #[test]
     fn trusted_rpc_authority_adopts_and_fences_allowed_owner() {
@@ -668,25 +975,96 @@ mod tests {
     }
 
     #[test]
-    fn live_cached_lease_validates_without_a_database_round_trip() {
+    fn postgres_fencing_values_reject_implicit_integer_wrapping() {
+        assert_eq!(
+            checked_postgres_fencing_token(i64::MAX as u64),
+            Ok(i64::MAX)
+        );
+        assert!(checked_postgres_fencing_token(0).is_err());
+        assert!(checked_postgres_fencing_token(i64::MAX as u64 + 1).is_err());
+        assert!(checked_postgres_fencing_token(u64::MAX).is_err());
+        assert_eq!(postgres_fencing_token(i64::MAX), Ok(i64::MAX as u64));
+        assert!(postgres_fencing_token(0).is_err());
+        assert!(postgres_fencing_token(-1).is_err());
+    }
+
+    #[test]
+    fn postgres_lease_times_reject_expiry_and_timestamp_overflow() {
+        assert_eq!(postgres_lease_times(0, 1), Ok((0, 1)));
+        assert_eq!(
+            postgres_lease_times(i64::MAX as u64 - 1, 1),
+            Ok((i64::MAX - 1, i64::MAX))
+        );
+        assert!(postgres_lease_times(i64::MAX as u64, 1).is_err());
+        assert!(postgres_lease_times(i64::MAX as u64 + 1, 1).is_err());
+        assert!(postgres_lease_times(1, u64::MAX).is_err());
+    }
+
+    #[test]
+    fn invalid_epoch_and_time_fail_before_connecting_to_postgres() {
+        let authority = PostgresZoneOwnerLeaseAuthority::new("not a database URL", "owner", 1);
+        let zone = ZoneId::new("out-of-range-without-database");
+        let invalid = ZoneOwnerLease::new(zone.clone(), "owner", u64::MAX);
+        assert!(authority.validate_owner_lease(&invalid).is_err());
+        assert!(authority.renew_at(&invalid, 0).is_err());
+        assert!(authority.handoff_at(&invalid, "other", 0).is_err());
+        assert!(authority.release(&invalid).is_err());
+        assert!(authority.acquire_at(&zone, u64::MAX).is_err());
+    }
+
+    #[test]
+    fn fallible_getters_and_validation_return_errors_when_postgres_is_unreachable() {
+        // Port zero cannot name an existing PostgreSQL listener. Bound connection
+        // time too, and never read the configured test/QA/production database URL.
         let authority = PostgresZoneOwnerLeaseAuthority::new(
-            "postgres://invalid@127.0.0.1:1/invalid",
-            "cached-owner",
+            "host=127.0.0.1 port=0 user=unavailable dbname=mir2_zone_lease_test_unreachable connect_timeout=1",
+            "previous-owner",
             30_000,
         );
-        let zone = unique_zone("cached-validation");
-        let lease = ZoneOwnerLease::new(zone, "cached-owner", 7);
-        authority.remember(&lease, now_ms().saturating_add(30_000));
-
-        authority
-            .validate_owner_lease(&lease)
-            .expect("a safely live cached fence should validate locally");
+        let zone = ZoneId::new("unreachable-pg-must-not-create-a-lease");
+        let previous = ZoneOwnerLease::new(zone.clone(), "previous-owner", 7);
+        for result in [
+            authority.try_owner_lease(&zone),
+            authority.try_refresh_owner_lease(&zone),
+        ] {
+            assert!(result.unwrap_err().contains("zone lease connect failed"));
+        }
+        assert!(authority
+            .validate_owner_lease(&previous)
+            .unwrap_err()
+            .contains("zone lease connect failed"));
     }
 
     fn pg_test_url() -> Option<String> {
-        let url = std::env::var("MIR2_TEST_POSTGRES_URL")
-            .unwrap_or_else(|_| "postgres://mir2:mir2_dev_password@127.0.0.1:5432/mir2".into());
-        Client::connect(&url, NoTls).ok().map(|_| url)
+        let url = match std::env::var("MIR2_TEST_POSTGRES_URL") {
+            Ok(url) => url,
+            Err(std::env::VarError::NotPresent) => {
+                eprintln!(
+                    "skipping zone lease PG test: no explicit isolated MIR2_TEST_POSTGRES_URL"
+                );
+                return None;
+            }
+            Err(_) => panic!("zone lease test database URL must be valid Unicode"),
+        };
+        let config = url
+            .parse::<postgres::Config>()
+            .unwrap_or_else(|_| panic!("invalid zone lease test database configuration"));
+        let suffix = config
+            .get_dbname()
+            .and_then(|database| database.strip_prefix("mir2_zone_lease_test_"))
+            .filter(|suffix| {
+                !suffix.is_empty()
+                    && suffix
+                        .bytes()
+                        .all(|byte| byte.is_ascii_alphanumeric() || byte == b'_')
+            });
+        assert!(
+            suffix.is_some(),
+            "zone lease tests require a dedicated mir2_zone_lease_test_* database"
+        );
+        Client::connect(&url, NoTls)
+            .unwrap_or_else(|_| panic!("explicit zone lease test database is unavailable"));
+        Some(url)
     }
 
     fn unique_zone(label: &str) -> ZoneId {
@@ -767,12 +1145,19 @@ mod tests {
         assert_eq!(blocked.owner_id(), "instance-A");
 
         owner_a.release(&lease_a).expect("A releases");
-        // A released, so the row is gone -> B acquires fresh (token resets to 1).
+        let released = owner_b.observe_at(&zone, 100).unwrap().unwrap();
+        assert_eq!(released.owner_id, "instance-A");
+        assert_eq!(released.fencing_token, lease_a.fencing_token());
+        assert!(
+            !released.is_live(0),
+            "release retains an expired historical row"
+        );
+        // A released, so B takes a strictly newer epoch without waiting for TTL.
         let lease_b = owner_b
             .acquire_at(&zone, 200)
             .expect("B acquires after release");
         assert_eq!(lease_b.owner_id(), "instance-B");
-        assert_eq!(lease_b.fencing_token(), 1);
+        assert_eq!(lease_b.fencing_token(), lease_a.fencing_token() + 1);
 
         let observed = owner_b
             .observe_at(&zone, 250)
@@ -781,6 +1166,237 @@ mod tests {
         assert_eq!(observed.owner_id, "instance-B");
         assert!(observed.is_live(250));
 
+        cleanup(&url, &zone);
+    }
+
+    #[test]
+    fn release_and_reacquire_same_owner_advance_epoch_and_stale_release_is_harmless() {
+        let Some(url) = pg_test_url() else { return };
+        let zone = unique_zone("same-owner-release");
+        let first = PostgresZoneOwnerLeaseAuthority::new(url.clone(), "instance-A", 60_000);
+        let restarted = PostgresZoneOwnerLeaseAuthority::new(url.clone(), "instance-A", 60_000);
+        let lease = first.acquire_at(&zone, 100).unwrap();
+        first.release(&lease).unwrap();
+        let released = restarted.observe_at(&zone, 101).unwrap().unwrap();
+        first.release(&lease).unwrap();
+        assert_eq!(restarted.observe_at(&zone, 101).unwrap().unwrap(), released);
+
+        let next = restarted.acquire_at(&zone, 102).unwrap();
+        assert!(next.fencing_token() > lease.fencing_token());
+        let before_stale_release = restarted.observe_at(&zone, 103).unwrap().unwrap();
+        first.release(&lease).unwrap();
+        assert_eq!(
+            restarted.observe_at(&zone, 103).unwrap().unwrap(),
+            before_stale_release
+        );
+        assert!(first.renew_at(&lease, 103).is_err());
+        cleanup(&url, &zone);
+    }
+
+    #[test]
+    fn expired_same_owner_reacquisition_starts_a_new_epoch_at_the_expiry_boundary() {
+        let Some(url) = pg_test_url() else { return };
+        let zone = unique_zone("same-owner-expiry");
+        let first = PostgresZoneOwnerLeaseAuthority::new(url.clone(), "instance-A", 1_000);
+        let restarted = PostgresZoneOwnerLeaseAuthority::new(url.clone(), "instance-A", 1_000);
+        let lease = first.acquire_at(&zone, 100).unwrap();
+        let next = restarted.acquire_at(&zone, 1_100).unwrap();
+        assert_eq!(next.fencing_token(), lease.fencing_token() + 1);
+        assert!(first.renew_at(&lease, 1_101).is_err());
+        first.release(&lease).unwrap();
+        assert!(restarted
+            .observe_at(&zone, 1_101)
+            .unwrap()
+            .unwrap()
+            .is_live(1_101));
+        let same_epoch = restarted.acquire_at(&zone, 1_102).unwrap();
+        assert_eq!(same_epoch, next, "a live owner may renew its current epoch");
+        cleanup(&url, &zone);
+    }
+
+    #[test]
+    fn independent_authorities_reject_previous_live_owner_and_refresh_peer_observations() {
+        let Some(url) = pg_test_url() else { return };
+        let zone = unique_zone("strict-current-row");
+        let owner_a = PostgresZoneOwnerLeaseAuthority::new(url.clone(), "instance-A", 60_000);
+        let owner_b = PostgresZoneOwnerLeaseAuthority::new(url.clone(), "instance-B", 60_000);
+        let observer = PostgresZoneOwnerLeaseAuthority::new(url.clone(), "observer", 60_000);
+        let first = owner_a.owner_lease(&zone);
+        owner_a.validate_owner_lease(&first).unwrap();
+        assert_eq!(observer.owner_lease(&zone), first);
+        let next = owner_a.handoff_at(&first, "instance-B", now_ms()).unwrap();
+
+        assert!(owner_a.validate_owner_lease(&first).is_err());
+        assert!(owner_b.validate_owner_lease(&first).is_err());
+        assert!(owner_a.renew_at(&first, now_ms()).is_err());
+        assert_eq!(owner_a.owner_lease(&zone), next);
+        assert_eq!(observer.owner_lease(&zone), next);
+        assert_eq!(owner_a.refresh_owner_lease(&zone), next);
+        owner_b.validate_owner_lease(&next).unwrap();
+        owner_a.release(&first).unwrap();
+        assert_eq!(
+            owner_b
+                .observe_at(&zone, now_ms())
+                .unwrap()
+                .unwrap()
+                .fencing_token,
+            next.fencing_token()
+        );
+
+        let mut called = false;
+        assert!(owner_a
+            .with_durable_npc_purchase_lease(&first, &mut || called = true)
+            .is_err());
+        assert!(!called, "stale owner must not enter the durable callback");
+        owner_b
+            .with_durable_npc_purchase_lease(&next, &mut || called = true)
+            .unwrap();
+        assert!(called);
+        cleanup(&url, &zone);
+    }
+
+    #[test]
+    fn validation_is_read_only_and_cannot_register_or_resurrect_a_lease() {
+        let Some(url) = pg_test_url() else { return };
+        let zone = unique_zone("validation-no-acquire");
+        let authority = PostgresZoneOwnerLeaseAuthority::new(url.clone(), "instance-A", 1_000);
+        let invented = ZoneOwnerLease::new(zone.clone(), "instance-A", 1);
+        assert!(authority.validate_owner_lease(&invented).is_err());
+        assert!(authority.observe_at(&zone, now_ms()).unwrap().is_none());
+        let expired = authority.acquire_at(&zone, 0).unwrap();
+        let before = authority.observe_at(&zone, now_ms()).unwrap().unwrap();
+        assert!(authority.validate_owner_lease(&expired).is_err());
+        assert_eq!(
+            authority.observe_at(&zone, now_ms()).unwrap().unwrap(),
+            before
+        );
+        authority.release(&expired).unwrap();
+        let released = authority.observe_at(&zone, now_ms()).unwrap().unwrap();
+        assert!(authority.validate_owner_lease(&expired).is_err());
+        assert_eq!(
+            authority.observe_at(&zone, now_ms()).unwrap().unwrap(),
+            released
+        );
+        cleanup(&url, &zone);
+    }
+
+    #[test]
+    fn release_refuses_another_authority_and_preserves_the_exact_row() {
+        let Some(url) = pg_test_url() else { return };
+        let zone = unique_zone("release-foreign");
+        let owner_a = PostgresZoneOwnerLeaseAuthority::new(url.clone(), "instance-A", 1_000);
+        let owner_b = PostgresZoneOwnerLeaseAuthority::new(url.clone(), "instance-B", 1_000);
+        let lease = owner_a.acquire_at(&zone, 100).unwrap();
+        let before = owner_a.observe_at(&zone, 100).unwrap().unwrap();
+        assert!(owner_b.release(&lease).is_err());
+        assert_eq!(owner_a.observe_at(&zone, 100).unwrap().unwrap(), before);
+        cleanup(&url, &zone);
+    }
+
+    #[test]
+    fn bigint_epoch_exhaustion_refuses_reacquisition_and_handoff_without_row_changes() {
+        let Some(url) = pg_test_url() else { return };
+        let zone = unique_zone("epoch-exhaustion");
+        let owner_a = PostgresZoneOwnerLeaseAuthority::new(url.clone(), "instance-A", 1_000);
+        let owner_b = PostgresZoneOwnerLeaseAuthority::new(url.clone(), "instance-B", 1_000);
+        owner_a.acquire_at(&zone, 0).unwrap();
+        let mut client = Client::connect(&url, NoTls).unwrap();
+        assert_eq!(
+            client
+                .execute(
+                    "UPDATE zone_owner_leases SET fencing_token=$2 WHERE zone_id=$1",
+                    &[&zone.as_str(), &i64::MAX],
+                )
+                .unwrap(),
+            1
+        );
+        let max_lease = ZoneOwnerLease::new(zone.clone(), "instance-A", i64::MAX as u64);
+        let before = owner_b.observe_at(&zone, 0).unwrap().unwrap();
+        assert!(owner_a
+            .handoff_at(&max_lease, "instance-B", 500)
+            .unwrap_err()
+            .contains("exhausted"));
+        assert_eq!(owner_b.observe_at(&zone, 500).unwrap().unwrap(), before);
+        assert_eq!(owner_a.acquire_at(&zone, 500).unwrap(), max_lease);
+        let live_max = owner_a.observe_at(&zone, 500).unwrap().unwrap();
+        assert!(owner_a
+            .acquire_at(&zone, 1_500)
+            .unwrap_err()
+            .contains("exhausted"));
+        assert!(owner_b
+            .acquire_at(&zone, 1_500)
+            .unwrap_err()
+            .contains("exhausted"));
+        assert_eq!(owner_a.observe_at(&zone, 1_500).unwrap().unwrap(), live_max);
+        cleanup(&url, &zone);
+    }
+
+    #[test]
+    fn concurrent_independent_acquisitions_choose_one_live_owner_and_one_epoch() {
+        let Some(url) = pg_test_url() else { return };
+        let zone = unique_zone("concurrent-acquire");
+        let owner_a = PostgresZoneOwnerLeaseAuthority::new(url.clone(), "instance-A", 60_000);
+        let owner_b = PostgresZoneOwnerLeaseAuthority::new(url.clone(), "instance-B", 60_000);
+        // Initialize both real connections before racing the atomic acquire.
+        assert!(owner_a.observe_at(&zone, 100).unwrap().is_none());
+        assert!(owner_b.observe_at(&zone, 100).unwrap().is_none());
+        let barrier = std::sync::Barrier::new(2);
+        let (first, second) = std::thread::scope(|scope| {
+            let first = scope.spawn(|| {
+                barrier.wait();
+                owner_a.acquire_at(&zone, 100)
+            });
+            let second = scope.spawn(|| {
+                barrier.wait();
+                owner_b.acquire_at(&zone, 100)
+            });
+            (
+                first.join().unwrap().unwrap(),
+                second.join().unwrap().unwrap(),
+            )
+        });
+        assert_eq!(first, second);
+        assert_eq!(first.fencing_token(), 1);
+        assert!(matches!(first.owner_id(), "instance-A" | "instance-B"));
+        cleanup(&url, &zone);
+    }
+
+    #[test]
+    fn invalid_stored_epoch_is_not_repaired_or_rewritten_by_acquisition() {
+        let Some(url) = pg_test_url() else { return };
+        let zone = unique_zone("invalid-stored-epoch");
+        let authority = PostgresZoneOwnerLeaseAuthority::new(url.clone(), "instance-A", 1_000);
+        authority.acquire_at(&zone, 0).unwrap();
+        let mut client = Client::connect(&url, NoTls).unwrap();
+        for invalid in [0_i64, -1] {
+            client
+                .execute(
+                    "UPDATE zone_owner_leases SET fencing_token=$2 WHERE zone_id=$1",
+                    &[&zone.as_str(), &invalid],
+                )
+                .unwrap();
+            let raw_row = |client: &mut Client| -> String {
+                client.query_one(
+                    "SELECT row_to_json(lease)::text FROM zone_owner_leases lease WHERE zone_id=$1",
+                    &[&zone.as_str()],
+                ).unwrap().get(0)
+            };
+            let before = raw_row(&mut client);
+            assert!(authority
+                .acquire_at(&zone, 100)
+                .unwrap_err()
+                .contains("invalid"));
+            assert!(authority
+                .acquire_at(&zone, 1_000)
+                .unwrap_err()
+                .contains("invalid"));
+            assert_eq!(
+                raw_row(&mut client),
+                before,
+                "invalid epochs are never repaired implicitly"
+            );
+            assert!(authority.observe_at(&zone, 1_000).is_err());
+        }
         cleanup(&url, &zone);
     }
 

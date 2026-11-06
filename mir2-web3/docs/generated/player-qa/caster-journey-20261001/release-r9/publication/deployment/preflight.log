@@ -1,0 +1,7 @@
+c9eb1149dd23bed11b94b921e812ff111822410e487c4ef61b3c9bb351c649bd  /etc/caddy/Caddyfile
+Filesystem      Size  Used Avail Use% Mounted on
+/dev/vda1       116G   44G   72G  38% /
+{"ok": true, "http": "ready", "ws": "ready", "revision": null, "capacity": {"maxWsConnections": 100, "maxActiveSessions": 100, "maxReconnectLeases": 100, "maxLoginInFlight": 8, "maxNewCharacterInFlight": 4, "maxStartGameInFlight": 4, "currentWsConnections": 0, "currentActiveSessions": 0, "currentReconnectLeases": 0, "currentLoginInFlight": 0, "currentNewCharacterInFlight": 0, "currentStartGameInFlight": 0}}
+
+{"ok": true, "http": "ready", "ws": "ready", "revision": "3f5e61533235921369bc13a7760b4a56b0e467e5", "capacity": {"maxWsConnections": 66, "maxActiveSessions": 51, "maxReconnectLeases": 51, "maxLoginInFlight": 2, "maxNewCharacterInFlight": 1, "maxStartGameInFlight": 2, "currentWsConnections": 0, "currentActiveSessions": 0, "currentReconnectLeases": 0, "currentLoginInFlight": 0, "currentNewCharacterInFlight": 0, "currentStartGameInFlight": 0}}
+

@@ -1,0 +1,4 @@
+# Preserve pinned upstream/derived bytes, including original CRLF and spaces.
+*.isl -text whitespace=cr-at-eol,-blank-at-eol
+*.islu -text whitespace=cr-at-eol,-blank-at-eol
+Inno-Setup-LICENSE.txt -text whitespace=cr-at-eol,-blank-at-eol

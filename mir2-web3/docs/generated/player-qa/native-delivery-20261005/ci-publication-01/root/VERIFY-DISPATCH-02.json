@@ -1,0 +1,17 @@
+{
+  "argv": [
+    "gh",
+    "workflow",
+    "run",
+    "web-assets-r2-release.yml",
+    "--repo",
+    "Zombieliu/mir2",
+    "--ref",
+    "codex/crowded-combat-control-20261003",
+    "-f",
+    "native_delivery_operation=verify"
+  ],
+  "head": "bb4679272cb6ae6a677f18a0e636d31dd3d139f3",
+  "exitCode": 0,
+  "stagePromoteAndProductionDispatched": false
+}

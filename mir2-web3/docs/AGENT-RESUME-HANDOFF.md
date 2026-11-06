@@ -1,5 +1,52 @@
 # Agent Resume Handoff
 
+> Current resume entry: [AGENT-CURRENT.md](AGENT-CURRENT.md) and
+> [AGENT-ORCHESTRATION.md](AGENT-ORCHESTRATION.md), then only task-specific source
+> and evidence. The dated material below is historical reference; do not load it
+> in full or treat its paths, ports, PIDs, test counts or model choices as current.
+
+> 2026-10-07 shared-player appearance source c6c32381a6 is actually live in
+> the isolated invited playtest after human normal-exit/switch authorization.
+> Drained preflight, private DB/state/config backup, normal old/Candidate stops
+> and Candidate cold restart pass; only ExecStart changes. Capacity51/66/51,
+> environment/unit/resource limits and original production PID stay unchanged.
+> Verified public HTTPS/WSS passes44 checks across all three classes/both
+> genders using five owned accounts; all8 ordinary lifecycles log out normally
+> and final connections/admissions/leases drain. No Windows reinstall/feed16
+> update is needed. Native two-client/human visual acceptance remains open.
+> [Actual rollout evidence](generated/player-qa/shared-player-appearance-20261007/rollout-01/README.md).
+
+> The fix uses ordinary transformation-1 and trusted current equipment/hair
+> before Join and on changes, preserving Zone life/position/status authority.
+> Clean Linux CI37617054260, Zone5/Gateway3, checkpoint regressions and read-only
+> review pass. Both public harness failures are retained: missing Origin,
+> then the unchanged fifth-registration/hour budget. The passing run reuses
+> owned accounts without weakening limits. Original drop-award failure,
+> Windows relink and archive-name verifier failures stay recorded. father50000
+> gold is delivered once by private mail, awaiting claim; fullP1–P8 is unfinished.
+> [Exact scope and evidence](SHARED-PLAYER-APPEARANCE-20261007.md).
+
+> 2026-10-07 final client-only NPC map/shop publication: actual R20/source8fa
+> and signed16 are public. Strict complete packaging/CMS/decoded delivery,
+> stage37603327260 (41 objects / 1,077,405,420 full CDN bytes), same-commit
+> separate promote37605195682 and actual Windows HTTPS/CMS/206 pass.
+> Previous feed15 bytes/fingerprints, all service PIDs, D/F files and saves
+> are preserved; no Gateway restart or UI takeover. Existing Launcher updates
+> without reinstalling; exact old engine/Bootstrap are reused. Public native
+> NPC/shop human and affected-laptop acceptance remain open; fullP1–P8 is
+> unfinished. Earlier R19/15 entries below are historical freeze records.
+> [Actual release evidence](generated/player-qa/npc-map-shop-20261007/publication-16/README.md).
+
+> Latest 2026-10-07 NPC map/shop lane: root owns isolated
+> codex/npc-map-go-20261007 based on c1033. NPC selection/ordinary GO TO,
+> auto-run retirement and missing shop wheel/thumb input pass37+20+23+9 and
+> GPU1. Preserve E/D/F and live Gateway; publicR19/feed15 remains current.
+> Next: clean attested Windows client, signed complete R20/s16 closure,
+> actual upgrade/input acceptance. Read-only release audit identifies reusable
+> signed engine b4390, R19 persistent delivery artifacts, r2-client-delivery
+> generic recipes, old r18 verified resource input and fixed s16 publisher gates.
+> [Implementation and exact receipts](NATIVE-NPC-MAP-SHOP-20261007.md).
+
 > Latest map-render handoff: 2026-07-13. The visible Bichon rectangles came from
 > opaque black matte pixels in packed object atlases plus a browser-incompatible
 > additive alpha equation. The runtime now routes all object-like libraries,
@@ -329,32 +376,28 @@
 > Latest sync: R159 completed. Trainer immediate damage reporting now routes through Crystal `server.PetInflictedDamageDps` with localized `server.You` actor; modeled `Physical Agility` damage type and DPS value are preserved. Validation: focused trainer test 1/1, `cargo +1.89.0 fmt --check`, and full `mir2-simulation` 638/638. Active backend round is R160; backend/server parity estimate is 99.70%.
 
 
-Last updated: 2026-04-28
+Original handoff baseline: 2026-04-28 (historical)
 
-Purpose: this file is the restart-safe handoff for continuing the autonomous Crystal / Mir2 1:1 push after the Codex session is closed, the machine is rebooted, or chat context is lost. A new session should not depend on prior chat history; read this file plus the queue/run-log docs and continue from the active round.
+Purpose: retain dated Crystal / Mir2 checkpoints and their evidence for targeted
+historical lookup. Resume through [current context](AGENT-CURRENT.md) and
+[coordination](AGENT-ORCHESTRATION.md); this file and the full queue/run-log are
+not mandatory startup reading. Historical active-round instructions below do
+not override the present user task or current coordination policy.
 
 ## Resume Order
 
-1. Open `E:\mir2\mir2-web3`.
-2. Read these files first:
-   - `docs/AGENT-RESUME-HANDOFF.md`
-   - `docs/AGENT-ORCHESTRATION.md`
-   - `docs/AGENT-TASK-QUEUE.md`
-   - `docs/AGENT-RUN-LOG.md`
-   - `docs/CRYSTAL-1TO1-ROADMAP.md`
-   - `docs/BACKEND-1TO1-PROGRESS.md`
-   - `docs/PARITY-TRUTH-AUDIT.md`
-   - `docs/WINDOWS-CONTINUATION.md`
-   - `docs/POST-1TO1-EVOLUTION-PLAN.md`
-   - `docs/TECH-MODERNIZATION-RFC.md`
-   - `docs/ARCHITECTURE-ADOPTION-PLAN.md`
-   - `docs/PLATFORM-CLIENT-STRATEGY.md`
-   - `docs/ADMIN-OPERATIONS-ARCHITECTURE.md`
-3. Treat `docs/AGENT-TASK-QUEUE.md` as the source of truth for the active round.
-4. Continue autonomously from the active round. Do not repeat completed rounds unless tests or code inspection show a regression.
-5. Use subagents only for clearly bounded parallel work. Keep one writer per high-conflict file.
+1. Resolve `mir2-web3` relative to the actual repository root on this machine.
+2. Read [current context](AGENT-CURRENT.md) and
+   [coordination](AGENT-ORCHESTRATION.md) once per working context. Small bounded
+   tasks need only their affected files and local instructions.
+3. Resume the user's current task. For general queue advancement, find the newest
+   relevant task section in [the queue](AGENT-TASK-QUEUE.md); do not read all logs.
+4. Read only task-specific source and evidence. Dated checkpoints below are not
+   fresh validation and do not mandate old toolchains, services or full builds.
+5. Preserve other work, keep one writer per high-conflict file and use bounded
+   parallel work only when it helps. Do not repeat completed rounds without cause.
 
-## Current Checkpoint
+## Historical Checkpoint
 
 - Active parity round: `2026-04-28-R301`
 - Active product-evolution continuation: after `2026-04-28-R246`.

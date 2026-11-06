@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "state": "reviewed-formal16-fresh20-bound-not-executed",
+  "preparedReceipt": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-selection-diagnostics-ladder-16\\runtime-prepared-v2.json",
+    "bytes": 54142,
+    "sha256": "c6340f21e49879896db88e59c2fe1c109dedd59eb955021ea621f99f0775ce7f"
+  },
+  "independentReview": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\formal16-runtime-independent-review-v1\\preseal-independent-review-v2.json",
+    "bytes": 5707,
+    "sha256": "ef1a7f93d10b0ed8d90c8ff151c7d6b16631b3958693add8083e262a08517872"
+  },
+  "backendSourceCommit": "c743122af05faca43d9535d8c6c2a4bfb01b924f",
+  "executionSourceCommit": "b5374083d257d375437af3de42bead159cd2b917",
+  "driverSourceCommit": "b5374083d257d375437af3de42bead159cd2b917",
+  "backendInputCount": 50,
+  "freshProbe20RunId": "1792979329578-cf62e25d",
+  "freshProbe20Passed": true,
+  "formalCompleteMinuteWindows": 146,
+  "accountsProvisioned": false,
+  "realmStarted": false,
+  "capacityAccepted": false,
+  "approved": true,
+  "rootExecutionRequired": true
+}

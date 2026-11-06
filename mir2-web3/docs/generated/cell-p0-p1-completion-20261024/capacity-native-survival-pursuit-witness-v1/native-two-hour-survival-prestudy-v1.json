@@ -1,0 +1,545 @@
+{
+  "schemaVersion": 1,
+  "scope": "Bounded read-only current-source and existing public08/09 evidence pre-study. No source edits, new scene, module imports, tests, loads, accounts, private data, recordings, economic grants or broader implementation were performed.",
+  "conclusion": {
+    "oneHeldSmallHpPotionGuaranteesTwoHourSurvival": false,
+    "twoHourSurvival": "unknown; no live two-hour evidence and no deterministic incoming-damage bound",
+    "notAnImpossibilityProof": true,
+    "currentProbeShouldRemainSameSceneThreeHarnessFixes": true,
+    "capacityAccepted": false
+  },
+  "sourcePins": [
+    {
+      "file": "apps/simulation/src/runtime/zone/runtime.rs",
+      "bytes": 748912,
+      "sha256": "4f4eaa4519e745c0bd376f33ef76b86c88ad1c1015fd42bb53ef3a159ce320a8",
+      "repositoryRelative": "apps/simulation/src/runtime/zone/runtime.rs"
+    },
+    {
+      "file": "apps/simulation/src/runtime/leveling.rs",
+      "bytes": 15932,
+      "sha256": "a2c16667440e9e53a1145d663243fb2d97ca54ce5a42c1532b02618653cd9e0c",
+      "repositoryRelative": "apps/simulation/src/runtime/leveling.rs"
+    },
+    {
+      "file": "apps/simulation/src/runtime/inventory.rs",
+      "bytes": 190859,
+      "sha256": "69a73ae6d83b7a232ff635e0cc4cb128d7cc78b0f51db6e258eaf77208591fca",
+      "repositoryRelative": "apps/simulation/src/runtime/inventory.rs"
+    },
+    {
+      "file": "apps/web/scripts/quest-agent/protocol-play.mjs",
+      "bytes": 46278,
+      "sha256": "ce01b337cb8650abccb04c2eb5783d20c76f73b92af1c9db441d89e9bbed8781",
+      "repositoryRelative": "apps/web/scripts/quest-agent/protocol-play.mjs"
+    },
+    {
+      "file": "apps/web/scripts/quest-agent/protocol-supplies.mjs",
+      "bytes": 79734,
+      "sha256": "0b1fd8478ac1a007a7185654dc407f68fa27f866d0fd174c45740af48d0c1fc1",
+      "repositoryRelative": "apps/web/scripts/quest-agent/protocol-supplies.mjs"
+    },
+    {
+      "file": "apps/web/scripts/quest-agent/protocol-survival.mjs",
+      "bytes": 52409,
+      "sha256": "5fd6b537c7625e00131b62e48734102b363ca2bf813c367e30c1f694191488dd",
+      "repositoryRelative": "apps/web/scripts/quest-agent/protocol-survival.mjs"
+    },
+    {
+      "file": "apps/web/scripts/quest-agent/protocol-loadout.mjs",
+      "bytes": 33042,
+      "sha256": "43479cb8d2fe7f4d3feefff13d0a2b4291112d3971629bfc07ae3bfee28f14f2",
+      "repositoryRelative": "apps/web/scripts/quest-agent/protocol-loadout.mjs"
+    },
+    {
+      "file": "apps/web/scripts/playtest-multiplayer-smoke.mjs",
+      "bytes": 38856,
+      "sha256": "a3ce02d111925c41e25b32a5522f0d17243cd78fab8142e92bca5eb1c45915ea",
+      "repositoryRelative": "apps/web/scripts/playtest-multiplayer-smoke.mjs"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-soak.mjs",
+      "bytes": 143423,
+      "sha256": "01db0e25728208d17468f708819cd4d1f134a81c97884614da06d06525929f6d",
+      "repositoryRelative": "apps/web/scripts/playtest-capacity-soak.mjs"
+    },
+    {
+      "file": "apps/gateway/src/web.rs",
+      "bytes": 855687,
+      "sha256": "769186e87e166a7ba0fbb971463c8e0ae2b4dd119292798badee3b8e28522dd6",
+      "repositoryRelative": "apps/gateway/src/web.rs"
+    }
+  ],
+  "evidencePins": [
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/probe09-death-analysis/summary-v1.json",
+      "bytes": 19950,
+      "sha256": "7d21d92d74e40d8d5199580cf14a95a73e93cb522f5a69e74188ec332f75a90d"
+    },
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/probe09-death-analysis/selected-events-v1.json",
+      "bytes": 293598,
+      "sha256": "40c77dd1f91cc4426e4b9da372c1701e3c723d69f6795a67e86f683265e4fff7"
+    },
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/probe09-death-analysis/request49-witness-loss-v1.json",
+      "bytes": 7778,
+      "sha256": "1596d9217b6028c18725f56df96bba859094b55839194da609ac0c81aa4674bb"
+    },
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/halo-natural-progression-risk-summary-v2.json",
+      "bytes": 14916,
+      "sha256": "a60506cfbee21423c91f2469594f2daacc87aa01ab500a2f24737cce73ccfae5"
+    }
+  ],
+  "ordinaryMechanisms": [
+    {
+      "name": "shared-Zone passive vital regeneration",
+      "refs": [
+        {
+          "file": "apps/simulation/src/runtime/zone/runtime.rs",
+          "lines": [
+            282,
+            283,
+            2796,
+            2806,
+            2815,
+            2819,
+            2820,
+            2821
+          ]
+        }
+      ],
+      "rule": "Alive, exact HP>0 and below max; one floor(maxHP*3/100)+1 HP pulse no faster than every3000ms, and only after at least3000ms since the last damage.",
+      "knownAtHp24": {
+        "hpPerPulse": 1,
+        "pulseMs": 3000,
+        "uninterruptedMaximumHpPerMinute": 20
+      },
+      "protocolCost": "No player command needed for natural server regeneration. Optional authoritative refresh consumes ordinary command budget.",
+      "limit": "Repeated incoming damage inside three seconds prevents pulses; no guarantee of a safe gap while a retaliating monster remains adjacent."
+    },
+    {
+      "name": "ordinary natural level-up refills vitals",
+      "refs": [
+        {
+          "file": "apps/simulation/src/runtime/leveling.rs",
+          "lines": [
+            109,
+            114,
+            121,
+            178,
+            179,
+            224,
+            245,
+            249
+          ]
+        }
+      ],
+      "rule": "A legitimately earned level refreshes stats and sets HP/MP to their new maxima.",
+      "protocolCost": "No synthetic level command; requires actual eligible experience and enough kills.",
+      "limit": "Cannot schedule or assume the next level before lethal damage. Level/DPS/XP changes can also change the natural target supply required for18/12."
+    },
+    {
+      "name": "already-held HP potion maintenance",
+      "refs": [
+        {
+          "file": "apps/simulation/src/runtime/inventory.rs",
+          "lines": [
+            4446,
+            4449
+          ]
+        },
+        {
+          "file": "apps/web/scripts/quest-agent/protocol-loadout.mjs",
+          "lines": [
+            58,
+            68,
+            71
+          ]
+        },
+        {
+          "file": "apps/web/scripts/playtest-capacity-soak.mjs",
+          "symbol": "offerNativeHpRecovery"
+        }
+      ],
+      "rule": "The normal small HP template nominally carries30 HP recovery metadata. Final harness uses one already-held ordinary dose at a low-health threshold and proves matching UID/grid UseItem success plus consumption or real exact HP increase.",
+      "protocolCost": "One ordinary useItem command, original per-account3/s budget, shared monotonic6000ms reuse gate, fresh evidence within2000ms; independent auxiliary operation.",
+      "limit": "Consumption is not proof of immediate full healing; no automatic purchase, free refill, MP/Healing class change or revival is added. Finite one-dose supply cannot bound future incoming damage for two hours."
+    },
+    {
+      "name": "visible lawful ground pickup and normal gold income",
+      "refs": [
+        {
+          "file": "apps/web/scripts/quest-agent/protocol-play.mjs",
+          "lines": [
+            57,
+            60,
+            63,
+            64,
+            65
+          ]
+        },
+        {
+          "file": "apps/web/scripts/quest-agent/protocol-funding.mjs",
+          "lines": [
+            433,
+            438,
+            439,
+            440
+          ]
+        }
+      ],
+      "reuse": "collectNearbyGold searches only an actually visible gold drop within three cells, navigates near it, sends ordinary pickUp, then checks authoritative gold increase. Existing objective/Venison pickup paths also require live visible drop plus resulting inventory/progress.",
+      "protocolCost": "Real walk/run commands plus one pickUp, existing gold helper wait up to1500ms; inventory/weight/ownership and drop lifetime can reject.",
+      "limit": "Current Capacity base command allowlist permits pickUp, but current native capacity chooser has no loot policy. No08/09 bounded evidence proves reliable potion/gold drop income or ownership. Killing/seeing a drop is not proof of successful acquisition."
+    },
+    {
+      "name": "ordinary village HP restocking",
+      "refs": [
+        {
+          "file": "apps/web/scripts/quest-agent/protocol-supplies.mjs",
+          "lines": [
+            5,
+            15,
+            35,
+            36,
+            89,
+            111,
+            121,
+            1125,
+            1129,
+            1138,
+            1144,
+            1155
+          ]
+        }
+      ],
+      "reuse": "restockInVillage supports Warrior HP stock, default target6/lowStock3, default gold reserve100. Merchant_Ruben declared coordinates288608 on map0; HP small catalog price40 is a planning value and purchases require live goods row/price, exact gold debit and inventory increment.",
+      "protocolCost": "Ordinary navigation, interact, selectNpcDialog, then buyItem. Existing service waits up to12000ms; live NPC missing can require a normal clientVersion refresh.",
+      "geometricCostOnly": {
+        "fighterDeclaredHome": {
+          "x": 261,
+          "y": 669
+        },
+        "merchant": {
+          "x": 288,
+          "y": 608
+        },
+        "oneWayChebyshevCells": 61,
+        "idealTwoCellRunOpportunitiesAtLeast": 31,
+        "idealReturnTripMovementOpportunitiesAtLeast": 62,
+        "navigationNotExecuted": true
+      },
+      "limit": "Current Capacity inherited allowlist does not permit interact/selectNpcDialog/buyItem/sellItem. Directly plugging this helper would reject commands. Gold, stock, live price, bag room and route safety are not established by the selected09 trace. Shop travel would leave the frozen combat observer coverage and cannot be hidden as pause/exempt time."
+    },
+    {
+      "name": "ordinary equipment repair",
+      "refs": [
+        {
+          "file": "apps/gateway/src/web.rs",
+          "lines": [
+            2215,
+            2219,
+            8955,
+            8960,
+            11682
+          ]
+        },
+        {
+          "file": "apps/web/scripts/playtest-multiplayer-smoke.mjs",
+          "lines": [
+            19,
+            20
+          ]
+        }
+      ],
+      "reuse": "Gateway supports public repairItem/specialRepairItem ordinary commands. A ready capacity/quest repair maintenance helper was not established by this bounded source search.",
+      "protocolCost": "Must reach an actual offering NPC, obtain live service, send real held UID request, pay actual gold and verify durability/gold changes; current capacity inherited command allowlist excludes repair commands.",
+      "limit": "Repair restores durability, not an HP pool guarantee. Expanding to shops/repair needs a separate bounded driver adapter, proofs, source freeze and new profile; none is authorized or implemented here."
+    },
+    {
+      "name": "ordinary legal evasive movement while naturally recovering",
+      "refs": [
+        {
+          "file": "apps/web/scripts/quest-agent/protocol-survival.mjs",
+          "lines": [
+            785,
+            806,
+            807,
+            809,
+            812,
+            813,
+            814,
+            834,
+            840
+          ]
+        },
+        {
+          "file": "apps/web/scripts/playtest-capacity-soak.mjs",
+          "symbols": [
+            "movement",
+            "combatPlan",
+            "offerNativeAction"
+          ]
+        }
+      ],
+      "reuse": "Existing waitForPassiveHealthRecovery and recoverHealthWhileEvading offer bounded ordinary snapshot polling and movement. Recovery defaults include45s evasion timeout, up to4 evasive moves and real living-player checks.",
+      "protocolCost": "Only true movement ACKs can count as movement/native completion; all sends and waits remain in the original load schedule and budget.",
+      "limit": "These helpers are not current Capacity callbacks. Calling an awaited recovery loop that pauses the native engine would violate the original coverage contract; a future bounded action-selection adapter must retain map, transfer, collision, active observer coverage and original cadence. Retreat time still has to satisfy actual18 attacks/12 positive hits every required window."
+    }
+  ],
+  "observedEvidence": {
+    "probe09": {
+      "sampledHpOrMaxIncreases": [
+        {
+          "requestId": "10",
+          "sentAtWallMs": 1792891430276,
+          "hp": 18,
+          "maxHp": 18,
+          "priorSample": {
+            "requestId": "9",
+            "hp": 17,
+            "maxHp": 18
+          },
+          "attribution": "not identified from these discrete attack-at-send samples"
+        },
+        {
+          "requestId": "26",
+          "sentAtWallMs": 1792891460006,
+          "hp": 17,
+          "maxHp": 18,
+          "priorSample": {
+            "requestId": "25",
+            "hp": 16,
+            "maxHp": 18
+          },
+          "attribution": "not identified from these discrete attack-at-send samples"
+        },
+        {
+          "requestId": "27",
+          "sentAtWallMs": 1792891462195,
+          "hp": 18,
+          "maxHp": 18,
+          "priorSample": {
+            "requestId": "26",
+            "hp": 17,
+            "maxHp": 18
+          },
+          "attribution": "not identified from these discrete attack-at-send samples"
+        },
+        {
+          "requestId": "34",
+          "sentAtWallMs": 1792891475982,
+          "hp": 24,
+          "maxHp": 24,
+          "priorSample": {
+            "requestId": "33",
+            "hp": 18,
+            "maxHp": 18
+          },
+          "attribution": "not identified from these discrete attack-at-send samples"
+        },
+        {
+          "requestId": "39",
+          "sentAtWallMs": 1792891487586,
+          "hp": 22,
+          "maxHp": 24,
+          "priorSample": {
+            "requestId": "38",
+            "hp": 21,
+            "maxHp": 24
+          },
+          "attribution": "not identified from these discrete attack-at-send samples"
+        },
+        {
+          "requestId": "40",
+          "sentAtWallMs": 1792891507017,
+          "hp": 24,
+          "maxHp": 24,
+          "priorSample": {
+            "requestId": "39",
+            "hp": 22,
+            "maxHp": 24
+          },
+          "attribution": "not identified from these discrete attack-at-send samples"
+        },
+        {
+          "requestId": "45",
+          "sentAtWallMs": 1792891560618,
+          "hp": 23,
+          "maxHp": 24,
+          "priorSample": {
+            "requestId": "44",
+            "hp": 22,
+            "maxHp": 24
+          },
+          "attribution": "not identified from these discrete attack-at-send samples"
+        },
+        {
+          "requestId": "51",
+          "sentAtWallMs": 1792891573665,
+          "hp": 12,
+          "maxHp": 24,
+          "priorSample": {
+            "requestId": "50",
+            "hp": 11,
+            "maxHp": 24
+          },
+          "attribution": "not identified from these discrete attack-at-send samples"
+        },
+        {
+          "requestId": "53",
+          "sentAtWallMs": 1792891576510,
+          "hp": 13,
+          "maxHp": 24,
+          "priorSample": {
+            "requestId": "52",
+            "hp": 12,
+            "maxHp": 24
+          },
+          "attribution": "not identified from these discrete attack-at-send samples"
+        },
+        {
+          "requestId": "58",
+          "sentAtWallMs": 1792891585851,
+          "hp": 11,
+          "maxHp": 24,
+          "priorSample": {
+            "requestId": "57",
+            "hp": 10,
+            "maxHp": 24
+          },
+          "attribution": "not identified from these discrete attack-at-send samples"
+        }
+      ],
+      "firstAttackOwner": {
+        "objectId": 1000,
+        "x": 267,
+        "y": 669,
+        "dead": false,
+        "hp": 18,
+        "maxHp": 18
+      },
+      "lastAttackOwner": {
+        "objectId": 1000,
+        "x": 265,
+        "y": 649,
+        "dead": false,
+        "hp": 3,
+        "maxHp": 24
+      },
+      "nearFinalPosition": {
+        "x": 264,
+        "y": 649
+      },
+      "actualDeathSupportedByThreeAlreadyRecordedPublicDerivedFrames": true,
+      "fatalAttacker": "unknown",
+      "knownRetaliation": "Request49/54 recorded ordinary Deer206528 harming the player; this does not identify the fatal attacker.",
+      "discreteSampleLimit": "HP increases can be natural regeneration, level-up or another lawful effect; individual attribution was not continuously recorded."
+    },
+    "probe08": {
+      "summary": {
+        "elapsedAttackMinutes": 11.318233333333334,
+        "firstAttack": {
+          "line": 4541,
+          "at": 1792885627442,
+          "phase": "settle",
+          "level": 1,
+          "status": "success",
+          "requestId": "1",
+          "result": "launched",
+          "targetId": 206639,
+          "damage": 3,
+          "hunting": "Scarecrow"
+        },
+        "lastAttack": {
+          "line": 28511,
+          "at": 1792886306536,
+          "phase": "soak",
+          "level": 5,
+          "status": "success",
+          "requestId": "350",
+          "result": "launched",
+          "targetId": 206642,
+          "damage": 3,
+          "hunting": "Scarecrow"
+        },
+        "totalAttackActions": 350,
+        "confirmedPositiveHits": 349,
+        "objectDiedTraces": 46,
+        "perLevel": [
+          {
+            "level": 1,
+            "attackActions": 29,
+            "positiveHits": 29,
+            "confirmedDamageHistogram": {
+              "1": 2,
+              "2": 13,
+              "3": 4,
+              "4": 10
+            }
+          },
+          {
+            "level": 2,
+            "attackActions": 49,
+            "positiveHits": 49,
+            "confirmedDamageHistogram": {
+              "1": 1,
+              "2": 21,
+              "3": 16,
+              "4": 11
+            }
+          },
+          {
+            "level": 3,
+            "attackActions": 69,
+            "positiveHits": 69,
+            "confirmedDamageHistogram": {
+              "1": 2,
+              "2": 22,
+              "3": 16,
+              "4": 29
+            }
+          },
+          {
+            "level": 4,
+            "attackActions": 97,
+            "positiveHits": 97,
+            "confirmedDamageHistogram": {
+              "1": 2,
+              "2": 44,
+              "3": 29,
+              "4": 22
+            }
+          },
+          {
+            "level": 5,
+            "attackActions": 106,
+            "positiveHits": 105,
+            "confirmedDamageHistogram": {
+              "1": 2,
+              "2": 5,
+              "3": 44,
+              "4": 28,
+              "5": 26
+            }
+          }
+        ],
+        "scope": "Levels are cadence.level from real owner snapshots. Damage is positive dual-end evidence. This old08 failed12 movement planning opportunities; these attack observations do not promote it to capacity acceptance."
+      },
+      "limit": "Roughly11.3min, natural levels1to5 and349positive hits without this death cannot establish the same future encounter path or two-hour survival."
+    }
+  },
+  "minimalFallbackRecommendation": [
+    "Do not change or pre-accept the next same-scene three-fix probe; preserve death-stop and every original activity threshold.",
+    "Measure actual HP loss, natural recovery, held-dose consumption and death-stop outcome on that valid frozen workload first; one nominal30HP dose is no proof of sustain.",
+    "If a later two-hour run shows real supply exhaustion, freeze a separate ordinary preparation/supply profile: only verified existing gold or transparently earned lawful income, real NPC purchases and held-item consumption. Record resulting level/equipment/DPS/inventory and revalidate the same18/12/95% rules; do not grant gold, lock XP, add drugs or exempt shop time.",
+    "The narrowest future in-run extension would prioritize a safe lawful held-item/visible-drop action and bounded real evasive movement inside existing observer coverage; only real successful receipts count. If sustained combat requirements cannot remain satisfied, keep the failure rather than treating maintenance as completed combat."
+  ],
+  "limits": [
+    "No guarantee of future target paths, hostile encounters, damages, upgrade cadence, drop income, current gold balance, live merchant price, weight room or durability lifetime is available.",
+    "All alternatives above are pre-study, not adopted code, a new scene or live evidence.",
+    "The source is final-main01db with full regression still pending when this study was written; test fixture-only deltas do not establish capacity."
+  ]
+}

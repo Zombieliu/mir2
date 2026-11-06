@@ -1,0 +1,40 @@
+{
+  "schemaVersion": 1,
+  "dataset": "account-store",
+  "complete": true,
+  "reasons": [],
+  "stopRequested": false,
+  "stderrEnded": true,
+  "writerFinished": true,
+  "rowsQueued": 107,
+  "bytesQueued": 23441,
+  "maxBufferedLineBytes": 204,
+  "lineLimitBytes": 8192,
+  "totalLimitBytes": 33554432,
+  "writeLimitBytes": 1048576,
+  "writeHighWaterMarkBytes": 1048576,
+  "maxQueuedWriteBytes": 1728,
+  "scope": "Only complete ASCII exact-format lines from the frozen static GatewaySlowStage label/phase/class allowlists. Account-store rows use separate fixed stage/operation allowlists and scalar-only metadata; malformed targeted account_store lines stop this capture. Their durationMs is the floored maximum completed single occurrence; samples and totalUs aggregate same-stage occurrences, nested stages overlap and must not be summed. Endpoint microsecond truncation can add one microsecond to their difference. traceId is an opaque process-local record counter, not identity; only completed records emit after their business guards release, so missing rows do not prove an ongoing holder is absent. observedAtMs is the launcher receive clock, not server span start/end. connection is an opaque diagnostic counter, never identity or an action/request ID; queuedPhase and phaseElapsedMs were sampled when the input was queued. Queued counts alone do not prove durable output when incomplete. Existing50ms logging is left-censored; missing rows do not prove absence of a stall.",
+  "thresholdMs": 50,
+  "dataFile": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\store-stage-public.jsonl",
+  "sourceIdentity": {
+    "schemaVersion": 1,
+    "dataset": "account-store",
+    "storeOnly": true,
+    "manifest": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\account-store-slow-stage-diagnostics-v1\\source-freeze-v1.json",
+      "bytes": 4628,
+      "sha256": "632e875bd2d56299009411d6d22ee8912eed3f15c3d26f8b95466be2bd22f9cb"
+    },
+    "review": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\account-store-slow-stage-independent-review-v1\\review-v1.json",
+      "bytes": 6459,
+      "sha256": "54a9c1a27336537d0232b6f8b76ac18f92ef76f8064899b2a253f78d68eefb68"
+    },
+    "sourceSha256": "8db992f5b7246f585d0158a914e616bbf9397421b66d92f27b350444b1939c8c",
+    "helperSha256": "6cde67571184692d7b89da32adb21fb2f8a228db5e0865cb9cc96bf3a34925c7",
+    "validatorSha256": "d71add02703a84acc2d870d5c7daf96dd17e0533b2d49af0480e55dea7aea262",
+    "separateFromBaseThreeFourSeven": true,
+    "contributesToGameAcceptance": false
+  }
+}

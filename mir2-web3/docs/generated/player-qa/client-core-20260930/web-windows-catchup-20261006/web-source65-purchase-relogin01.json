@@ -1,0 +1,36 @@
+{
+  "sourceRound": "Source65",
+  "observedAt": "2026-10-11T09:51:25.199Z",
+  "webRound": 64,
+  "gatewayRound": 65,
+  "normalLoginStartGame": true,
+  "normalAltXSaveExit": true,
+  "normalF9BagOpened": true,
+  "gold": 180,
+  "bagSpace": "5/40",
+  "weight": "10/51",
+  "visibleItemNames": [
+    "Candle",
+    "CopperRing",
+    "GoldenPendant",
+    "Candle",
+    "Candle"
+  ],
+  "candleCount": 3,
+  "level": 2,
+  "hp": "24/24",
+  "position": {
+    "x": 291,
+    "y": 611
+  },
+  "qaAdminOrGameApiUsed": false,
+  "purchaseCharge": 10,
+  "purchaseAdmittedCount": 1,
+  "purchaseReplayed": false,
+  "purchaseOrderProof": "web-source65-purchase-gold-stable01.json",
+  "purchaseAndSaveReloginPassed": true,
+  "storageLivePassed": false,
+  "mobileDeviceTested": false,
+  "candidate100": false,
+  "goalComplete": false
+}

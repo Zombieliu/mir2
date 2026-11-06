@@ -1,0 +1,168 @@
+{
+  "schemaVersion": 1,
+  "state": "SOURCE_BANK_IDENTIFIED_RUNTIME_BINDING_PENDING",
+  "packageId": "ordinary-bank-relogin-pilot-v1",
+  "sourceEpisode": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-preparation-pilot-v3\\episode",
+  "sourcePrivate": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-preparation-pilot-v3\\episode\\private",
+  "sourcePilotReceipt": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-preparation-pilot-v3\\episode\\pilot-receipt-v1.json",
+    "bytes": 2290,
+    "sha256": "6c1fbb52c70ba7425c829e2ca7114a8178b0f19157f932da15e0809ada265ada"
+  },
+  "sourceCleanup": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-preparation-pilot-v3\\episode\\cleanup-v1.json",
+    "bytes": 1041,
+    "sha256": "91846c75685634c5e3bcf64e1e49dc257baed6a19f58e98b4e86d4103b5ddfd8"
+  },
+  "sourceRootIndependentCleanup": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-preparation-pilot-v3\\root-independent-cleanup-v1.json",
+    "bytes": 1478,
+    "sha256": "f8386790bfb6e6d8ecb4932b4bdf36991903f848179ddef3954ae585fb33c1d3"
+  },
+  "sourceReadyCharacters": [
+    {
+      "name": "L23d06a00",
+      "state": "ready",
+      "characterIndex": 1
+    },
+    {
+      "name": "L23d06a01",
+      "state": "ready",
+      "characterIndex": 2
+    }
+  ],
+  "files": [
+    {
+      "relative": "accounts.json",
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-preparation-pilot-v3\\episode\\private\\accounts.json",
+      "bytes": 33570,
+      "sha256": "481c03348cb46042722a970efa568ee4a4f5f20c57644ec5a2e282df796c8f9d"
+    },
+    {
+      "relative": "capacity-auth-budget.json",
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-preparation-pilot-v3\\episode\\private\\capacity-auth-budget.json",
+      "bytes": 255,
+      "sha256": "e7ce88e9f263c6f5e2c72ddabfe993aebc1640863508346cd6e7b35e0a42c1bc"
+    },
+    {
+      "relative": "capacity-pool.json",
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-preparation-pilot-v3\\episode\\private\\capacity-pool.json",
+      "bytes": 619,
+      "sha256": "2ab44eea8010bc4a50ad3dbf11140a081a7a1a896fd43f38bb6fa7ced8bd92b8"
+    },
+    {
+      "relative": "identity-recovery-pepper.txt",
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-preparation-pilot-v3\\episode\\private\\identity-recovery-pepper.txt",
+      "bytes": 64,
+      "sha256": "3c081a6cc1c1fb7187b9183402f6b514a0cdbf9bbf10f468230b8096ceedfeac"
+    },
+    {
+      "relative": "identity-session-secret.txt",
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-preparation-pilot-v3\\episode\\private\\identity-session-secret.txt",
+      "bytes": 64,
+      "sha256": "097b3ca4dcd7612673333c6d4f5485e8caa8f70c1aa284d2fea0465db07f12b3"
+    },
+    {
+      "relative": "passkey-auth-secret.txt",
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-preparation-pilot-v3\\episode\\private\\passkey-auth-secret.txt",
+      "bytes": 64,
+      "sha256": "3489e7133811f4127dbcf265f73b23307acce1e9aa4fd560fb08f5a19ebf3a00"
+    },
+    {
+      "relative": "recovery-mac-key.txt",
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-preparation-pilot-v3\\episode\\private\\recovery-mac-key.txt",
+      "bytes": 64,
+      "sha256": "93f7587aa6a941e0c7f0ac548255506e12972398308ebabd34d4dd215cf1e10c"
+    },
+    {
+      "relative": "save-recovery/.mir2-directory-durability",
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-preparation-pilot-v3\\episode\\private\\save-recovery\\.mir2-directory-durability",
+      "bytes": 29,
+      "sha256": "49f358ea406bd4a68597120e55264cd2a128cbd8441f790e1813a75535790ac3"
+    },
+    {
+      "relative": "save-recovery/.mir2-recovery-exclusive.lock",
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-preparation-pilot-v3\\episode\\private\\save-recovery\\.mir2-recovery-exclusive.lock",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "relative": "save-recovery/.mir2-recovery-owner-v1.json",
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-preparation-pilot-v3\\episode\\private\\save-recovery\\.mir2-recovery-owner-v1.json",
+      "bytes": 340,
+      "sha256": "1eb50ae95eb16f11d0bfd16abc5347bc29bc5fcd6c2afa4e9d5e6cb86b7c4055"
+    },
+    {
+      "relative": "save-recovery/quarantine/.mir2-directory-durability",
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-preparation-pilot-v3\\episode\\private\\save-recovery\\quarantine\\.mir2-directory-durability",
+      "bytes": 29,
+      "sha256": "49f358ea406bd4a68597120e55264cd2a128cbd8441f790e1813a75535790ac3"
+    }
+  ],
+  "fileCount": 11,
+  "totalBytes": 35098,
+  "recovery": {
+    "sourceDirectory": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-preparation-pilot-v3\\episode\\private\\save-recovery",
+    "expectedControlFiles": [
+      ".mir2-directory-durability",
+      ".mir2-recovery-exclusive.lock",
+      ".mir2-recovery-owner-v1.json",
+      "quarantine/.mir2-directory-durability"
+    ],
+    "journalPayloadsMustEqualZero": true,
+    "preservedDestination": "source-save-recovery-preserved",
+    "activeDestination": "save-recovery",
+    "activeInitialization": "Empty new activity directory; ordinary Gateway initializes a new path-bound ownership sentinel. Never copy the source sentinel into the active directory.",
+    "sourceSentinelUnchanged": true,
+    "sourceContract": {
+      "file": "apps/gateway/src/save_recovery.rs",
+      "initializeExistingSentinelLines": [
+        1377,
+        1378
+      ],
+      "canonicalPathValidationLines": [
+        1445,
+        1449
+      ]
+    }
+  },
+  "copyPolicy": {
+    "copyExclusively": true,
+    "regularNonSymlinkSources": true,
+    "sourceAndTargetPinsBeforeAndAfter": true,
+    "poolRewritePerformed": false,
+    "accountStoreRewritePerformed": false,
+    "seederInvoked": false,
+    "characterItemsGoldEdits": false,
+    "accountWriterLockCopied": false,
+    "authLedgerCopiedUnchanged": true,
+    "oldRecoveryCopiedUnchanged": true,
+    "secretValuesNeverReported": true
+  },
+  "runtime": {
+    "state": "PENDING_CURRENT_SOURCE_GUARD_FREEZE_AND_ROOT_EXECUTION",
+    "repositoryHead": null,
+    "frozenManifest": null,
+    "actors": 2,
+    "stageSeconds": 30,
+    "soakSeconds": 30,
+    "profile": "probe",
+    "preparationProfile": "ordinary-economic-v1",
+    "preparationHpTarget": 12,
+    "reusedOrdinaryEarnedBank": true,
+    "freshZeroCharacterPool": false,
+    "ordinaryReloginReadbackRequired": true,
+    "expectedNamesAndCharacterIndexes": true,
+    "durableHpStockVerified": false,
+    "pilotExecuted": false,
+    "capacityAccepted": false,
+    "p0Accepted": false
+  },
+  "notes": [
+    "V3 cleanupComplete was verified from the original receipt; one preparation ready and one staging-hostile failure are preserved.",
+    "Both actors had live HP stock12 in V3 public preparation rows; this does not certify durable state. Fresh ordinary Login/StartGame plus preparation.before snapshot must prove current stock and identity.",
+    "The original auth ledger is copied; ordinary login uses its original reservation and persistence semantics. No login-budget reset is claimed.",
+    "No source-bank file is an output. Runtime may ordinarily mutate only the exclusive copied store/pool/ledger and new activity recovery.",
+    "Original V4 staging scenario is only a draft reuse input and does not prove safety; the current source guard and any approved scenario must be frozen by Root before execution."
+  ]
+}

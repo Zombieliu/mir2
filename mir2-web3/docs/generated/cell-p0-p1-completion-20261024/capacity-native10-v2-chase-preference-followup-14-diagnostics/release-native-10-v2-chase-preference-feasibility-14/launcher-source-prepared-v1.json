@@ -1,0 +1,242 @@
+{
+  "schemaVersion": 1,
+  "verifiedAt": "2026-10-25T10:02:47.399Z",
+  "state": "FINALIZED_FOR_INDEPENDENT_PRESEAL_REVIEW",
+  "backendSourceCommit": "46880bd1ef415131c4cf85aeb4dd2fa4f6fd4f9b",
+  "driverSourceCommit": "b84d5d02a8299b6ac36c5e56cb7006f6bc80d3bd",
+  "driverSourceSha256": "db4e22c69b4f1365d8135023e158f4de00ff35d58330cf7eca98801780e674e7",
+  "driverFreeze": {
+    "file": "C:/mir2-build/p01-completion-20261024/capacity-native-chase-preference-driver-frozen-v1.json",
+    "bytes": 19099,
+    "sha256": "20fd347d029d9a912514e400bc74b0d08ec940bd90af20ff2f91bd64dba08bef"
+  },
+  "declarationsAllSixSourceBound": true,
+  "actualNested13And200EvidenceValidated": true,
+  "oldRed4pass9failRetained": true,
+  "sceneCompatibility": {
+    "file": "C:/mir2-build/p01-completion-20261024/release-native-10-v2-chase-preference-feasibility-14/scene-driver-compatibility-proof-v1.json",
+    "bytes": 1936,
+    "sha256": "de4e8d981233d0fb5422a7d5469ed6c905d3632f5161a19b5b74384d3eb21059"
+  },
+  "sceneSourceSha256": "17183144a708188fe24a138e7a7c9b79f7382f0c6a8e985d765c3798a9da44bb",
+  "sceneStaticCodeCommit": "6d70d02d0bc390156b77a3e48acee714fc87cda3",
+  "scene10": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\candidate-10-repaired-v4.json",
+    "bytes": 804,
+    "sha256": "a42a26a195dd5ac25135bff57e73f7f21b71f97b5cc1814351920ece621362ba"
+  },
+  "scene100": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\candidate-100-repaired-v4.json",
+    "bytes": 5844,
+    "sha256": "f87aae78a2d68d8daa63916a93580c33f4ef974da4769bd3531a62aafcf0f205"
+  },
+  "oldSceneAStarNotReexecuted": true,
+  "evidenceBasis": {
+    "schemaVersion": 1,
+    "scope": "Actual nested redgreen/current13 and full200 receipts, exact sourceBefore/sourceAfter, original4pass9fail red retained. Historical core187/wrapper28/adapter8 remain separate evidence.",
+    "exactSourceSha256": "db4e22c69b4f1365d8135023e158f4de00ff35d58330cf7eca98801780e674e7",
+    "fullRegressionPerformedOnFinalSource": true,
+    "focusedPassed": 13,
+    "fullPassed": 200,
+    "redOriginalPassed": 4,
+    "redOriginalFailed": 9,
+    "capacityAccepted": false,
+    "pins": [
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\native-chase-preference-verification-v1\\red-green-receipt-v1.json",
+        "bytes": 5650,
+        "sha256": "395e3285af4b73f95efd1c4bc1ac185bd968315587c5b7978508a6cc3b4b4fef"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\native-chase-preference-verification-v1\\old-red-v1.log",
+        "bytes": 12333,
+        "sha256": "d3895e8a707f76dbd5ccef72a59d562582a3ea6d730509ba8f56b75ebb660712"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\native-chase-preference-verification-v1\\current-green-v1.log",
+        "bytes": 3691,
+        "sha256": "eb89dda9485646b250fdfeee3f08d8374af0f90498c4f1d435e74853a312c853"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\native-chase-preference-verification-v1\\full-current-receipt-v1.json",
+        "bytes": 4682,
+        "sha256": "5e71b6dbf69c9ed79e085c41a61946d2dcaed7d0b81cb6060123b46d4a8a1b7a"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\native-chase-preference-verification-v1\\full-current-v1.log",
+        "bytes": 53991,
+        "sha256": "702c6c80eb52ec008dbdd3c18a8a578749d99ffd84e4163b7b527ed6de36554e"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\native-chase-preference-main-mutation-v1.json",
+        "bytes": 6417,
+        "sha256": "6c0d95fbcdb5f9a035da54bff5920cc47f8834daa8bb3eb0e8a8bafc05942291"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\native-chase-preference-tests-v1\\append-receipt-v2.json",
+        "bytes": 2943,
+        "sha256": "b16a417a9d5cf3a758e4ae41e66240b80896948c414f66d92bc6194666bea3af"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\native-chase-preference-independent-review-v1\\source-review-v1.json",
+        "bytes": 7006,
+        "sha256": "62bade1cc1a842453274f19371adf7b7ca6cb197405560cabedb66253c8f67bd"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\native-chase-preference-independent-review-v1\\test-review-v1.json",
+        "bytes": 6437,
+        "sha256": "95682bf8c45ae2784405f0ca423b0bf309402d79a4145e3784347f4ab271dcfd"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\native-chase-preference-independent-review-v1\\test-review-v2.json",
+        "bytes": 7722,
+        "sha256": "e405722272174429c6794acff574d8efe120dd3dbe411fd66c4fd4f76f68d6d3"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\native-chase-preference-independent-review-v1\\final-integration-review-v1.json",
+        "bytes": 6013,
+        "sha256": "c92ea8583a1faea74ebd0b1890d9f878d59341e11eb481dc2829760d5d453555"
+      }
+    ]
+  },
+  "syntax": [
+    {
+      "name": "backend-driver-source-guard.mjs",
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "name": "collect-public.mjs",
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "name": "driver-binding-contract.mjs",
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "name": "driver-evidence-contract.mjs",
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "name": "driver-report-contract.mjs",
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "name": "input-lib.mjs",
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "name": "measured-phase-contract.mjs",
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "name": "monitor-owned.mjs",
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "name": "native-chase-report-contract.mjs",
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "name": "passed-probe-window-contract.mjs",
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "name": "passed-probe-window-contract.test.mjs",
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "name": "prepare-inputs.mjs",
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "name": "request-stop.mjs",
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "name": "run-adapter-synthetics.mjs",
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "name": "run-owned.mjs",
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "name": "scene-contract.mjs",
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "name": "scene-driver-compatibility.mjs",
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "name": "slow-stage-public.mjs",
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "name": "slow-stage-public.test.mjs",
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "name": "slow-stage-row-contract.mjs",
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "name": "socket-build-source-lib.mjs",
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "name": "verify-full16-gate.mjs",
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "name": "verify-public.mjs",
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "name": "wire-diagnostics-adapter.mjs",
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "name": "wire-diagnostics-adapter.test.mjs",
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "name": "wire-diagnostics-contract.mjs",
+      "exitCode": 0,
+      "stderr": ""
+    }
+  ],
+  "fullBackendSourceGuardExecuted": false,
+  "accountPrepared": false,
+  "binaryCopied": false,
+  "realmStarted": false,
+  "sealed": false,
+  "capacityAccepted": false,
+  "artifactName": "launcher-source-prepared-v1.json",
+  "rootApprovalForExecution": false
+}

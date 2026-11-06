@@ -1,0 +1,4433 @@
+{
+  "cases": [
+    {
+      "image": "monthly-card-zh-TW.png",
+      "locale": "zh-TW",
+      "texts": [
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 6,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            44.0,
+            17.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            649.0,
+            304.0,
+            264.0,
+            20.0
+          ],
+          "text": "Cancel"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 4,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            31.0,
+            17.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            649.0,
+            200.0,
+            264.0,
+            20.0
+          ],
+          "text": "Gold"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 15,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            75.0,
+            13.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            472.0,
+            62.0,
+            75.0,
+            13.0
+          ],
+          "text": "Legend of Mir 2"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 47,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            422.0,
+            18.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            224.0,
+            384.0,
+            438.0,
+            42.0
+          ],
+          "text": "MC1-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 5,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            54.0,
+            13.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            200.0,
+            613.0,
+            54.0,
+            13.0
+          ],
+          "text": "上次上線："
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 2,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            24.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            224.0,
+            523.0,
+            180.0,
+            36.0
+          ],
+          "text": "兌換"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 4,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            40.0,
+            12.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            490.0,
+            743.0,
+            40.0,
+            12.0
+          ],
+          "text": "刪除角色"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 35,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            211.0,
+            34.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            224.0,
+            318.0,
+            576.0,
+            58.0
+          ],
+          "text": "尚未啟用月卡或已到期\n有效期限：2027-01-15 08:00 UTC"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 4,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            43.0,
+            13.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            265.0,
+            613.0,
+            43.0,
+            13.0
+          ],
+          "text": "尚未登入"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 2,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            20.0,
+            12.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            336.0,
+            743.0,
+            20.0,
+            12.0
+          ],
+          "text": "建立"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 2,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            24.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            774.0,
+            58.0,
+            226.0,
+            36.0
+          ],
+          "text": "月卡"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 2,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            44.0,
+            27.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            222.0,
+            207.0,
+            580.0,
+            34.0
+          ],
+          "text": "月卡"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 4,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            48.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            422.0,
+            523.0,
+            182.0,
+            36.0
+          ],
+          "text": "查詢狀態"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 28,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            358.0,
+            17.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            224.0,
+            252.0,
+            576.0,
+            60.0
+          ],
+          "text": "每張增加 30 天，帳號內所有角色共用期限；離線也計時。"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 2,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            26.0,
+            16.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            649.0,
+            225.0,
+            174.0,
+            20.0
+          ],
+          "text": "法師"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 5,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            70.0,
+            17.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            649.0,
+            522.0,
+            264.0,
+            24.0
+          ],
+          "text": "空角色欄位"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 5,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            70.0,
+            17.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            649.0,
+            418.0,
+            264.0,
+            24.0
+          ],
+          "text": "空角色欄位"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 4,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            37.0,
+            16.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            831.0,
+            225.0,
+            80.0,
+            20.0
+          ],
+          "text": "等級 7"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 4,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            37.0,
+            16.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            831.0,
+            329.0,
+            80.0,
+            20.0
+          ],
+          "text": "等級 8"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 21,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            294.0,
+            17.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            224.0,
+            439.0,
+            576.0,
+            65.0
+          ],
+          "text": "結果尚未確認，請查詢狀態或重試同一啟用碼。"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 7,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            66.0,
+            16.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            859.0,
+            734.0,
+            66.0,
+            16.0
+          ],
+          "text": "繁體中文  ^"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 4,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            40.0,
+            12.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            654.0,
+            743.0,
+            40.0,
+            12.0
+          ],
+          "text": "製作名單"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 2,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            26.0,
+            16.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            649.0,
+            329.0,
+            174.0,
+            20.0
+          ],
+          "text": "道士"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 4,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            88.0,
+            27.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            312.0,
+            16.0,
+            400.0,
+            34.0
+          ],
+          "text": "選擇角色"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 2,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            20.0,
+            12.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            172.0,
+            743.0,
+            20.0,
+            12.0
+          ],
+          "text": "開始"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 2,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            24.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            622.0,
+            523.0,
+            180.0,
+            36.0
+          ],
+          "text": "關閉"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 2,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            20.0,
+            12.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            828.0,
+            743.0,
+            20.0,
+            12.0
+          ],
+          "text": "離開"
+        }
+      ]
+    },
+    {
+      "image": "monthly-card-en.png",
+      "locale": "en",
+      "texts": [
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 6,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            44.0,
+            17.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            649.0,
+            304.0,
+            264.0,
+            20.0
+          ],
+          "text": "Cancel"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 12,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            72.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            422.0,
+            523.0,
+            182.0,
+            36.0
+          ],
+          "text": "Check status"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 5,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            31.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            622.0,
+            523.0,
+            180.0,
+            36.0
+          ],
+          "text": "Close"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 6,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            31.0,
+            12.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            331.0,
+            743.0,
+            31.0,
+            12.0
+          ],
+          "text": "Create"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 7,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            34.0,
+            12.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            657.0,
+            743.0,
+            34.0,
+            12.0
+          ],
+          "text": "Credits"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 16,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            79.0,
+            12.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            471.0,
+            743.0,
+            79.0,
+            12.0
+          ],
+          "text": "Delete Character"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 85,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            558.0,
+            17.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            224.0,
+            252.0,
+            576.0,
+            60.0
+          ],
+          "text": "Each card adds 30 days. All characters share the account's expiry; offline time counts."
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 10,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            71.0,
+            17.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            649.0,
+            418.0,
+            264.0,
+            24.0
+          ],
+          "text": "Empty Slot"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 10,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            71.0,
+            17.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            649.0,
+            522.0,
+            264.0,
+            24.0
+          ],
+          "text": "Empty Slot"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 10,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            59.0,
+            16.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            863.0,
+            734.0,
+            59.0,
+            16.0
+          ],
+          "text": "English  ^"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 4,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            18.0,
+            12.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            829.0,
+            743.0,
+            18.0,
+            12.0
+          ],
+          "text": "Exit"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 4,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            31.0,
+            17.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            649.0,
+            200.0,
+            264.0,
+            20.0
+          ],
+          "text": "Gold"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 12,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            60.0,
+            13.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            200.0,
+            613.0,
+            60.0,
+            13.0
+          ],
+          "text": "Last Online:"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 15,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            79.0,
+            13.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            470.0,
+            62.0,
+            79.0,
+            13.0
+          ],
+          "text": "Legend of Mir 2"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 5,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            28.0,
+            16.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            831.0,
+            225.0,
+            80.0,
+            20.0
+          ],
+          "text": "Lv. 7"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 5,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            28.0,
+            16.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            831.0,
+            329.0,
+            80.0,
+            20.0
+          ],
+          "text": "Lv. 8"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 47,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            449.0,
+            18.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            224.0,
+            384.0,
+            465.0,
+            42.0
+          ],
+          "text": "MC1-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 12,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            77.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            774.0,
+            58.0,
+            226.0,
+            36.0
+          ],
+          "text": "Monthly Card"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 12,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            140.0,
+            27.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            222.0,
+            207.0,
+            580.0,
+            34.0
+          ],
+          "text": "Monthly Card"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 61,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            218.0,
+            34.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            224.0,
+            318.0,
+            576.0,
+            58.0
+          ],
+          "text": "Monthly card required or expired\nExpires: 2027-01-15 08:00 UTC"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 5,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            30.0,
+            13.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            265.0,
+            613.0,
+            30.0,
+            13.0
+          ],
+          "text": "Never"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 6,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            47.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            224.0,
+            523.0,
+            180.0,
+            36.0
+          ],
+          "text": "Redeem"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 57,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            385.0,
+            17.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            224.0,
+            439.0,
+            576.0,
+            65.0
+          ],
+          "text": "Result not confirmed. Check status or retry the same code."
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 16,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            168.0,
+            27.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            312.0,
+            16.0,
+            400.0,
+            34.0
+          ],
+          "text": "Select Character"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 5,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            23.0,
+            12.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            171.0,
+            743.0,
+            23.0,
+            12.0
+          ],
+          "text": "Start"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 6,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            36.0,
+            16.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            649.0,
+            329.0,
+            174.0,
+            20.0
+          ],
+          "text": "Taoist"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 6,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            42.0,
+            16.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            649.0,
+            225.0,
+            174.0,
+            20.0
+          ],
+          "text": "Wizard"
+        }
+      ]
+    },
+    {
+      "image": "monthly-card-pt-BR.png",
+      "locale": "pt-BR",
+      "texts": [
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 6,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            33.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            224.0,
+            523.0,
+            180.0,
+            36.0
+          ],
+          "text": "Ativar"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 92,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            546.0,
+            34.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            224.0,
+            252.0,
+            576.0,
+            60.0
+          ],
+          "text": "Cada cartão adiciona 30 dias para todos os personagens da conta. O tempo offline também conta."
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 6,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            44.0,
+            17.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            649.0,
+            304.0,
+            264.0,
+            20.0
+          ],
+          "text": "Cancel"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 13,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            82.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            774.0,
+            58.0,
+            226.0,
+            36.0
+          ],
+          "text": "Cartão mensal"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 13,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            150.0,
+            27.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            222.0,
+            207.0,
+            580.0,
+            34.0
+          ],
+          "text": "Cartão mensal"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 64,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            228.0,
+            34.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            224.0,
+            318.0,
+            576.0,
+            58.0
+          ],
+          "text": "Cartão mensal ausente ou vencido\nVálido até: 2027-01-15 08:00 UTC"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 16,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            92.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            422.0,
+            523.0,
+            182.0,
+            36.0
+          ],
+          "text": "Consultar status"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 5,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            23.0,
+            12.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            335.0,
+            743.0,
+            23.0,
+            12.0
+          ],
+          "text": "Criar"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 8,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            40.0,
+            12.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            654.0,
+            743.0,
+            40.0,
+            12.0
+          ],
+          "text": "Créditos"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 12,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            84.0,
+            17.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            649.0,
+            418.0,
+            264.0,
+            24.0
+          ],
+          "text": "Espaço vazio"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 12,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            84.0,
+            17.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            649.0,
+            522.0,
+            264.0,
+            24.0
+          ],
+          "text": "Espaço vazio"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 18,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            94.0,
+            12.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            463.0,
+            743.0,
+            94.0,
+            12.0
+          ],
+          "text": "Excluir personagem"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 6,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            38.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            622.0,
+            523.0,
+            180.0,
+            36.0
+          ],
+          "text": "Fechar"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 4,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            31.0,
+            17.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            649.0,
+            200.0,
+            264.0,
+            20.0
+          ],
+          "text": "Gold"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 7,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            30.0,
+            12.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            167.0,
+            743.0,
+            30.0,
+            12.0
+          ],
+          "text": "Iniciar"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 15,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            79.0,
+            13.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            470.0,
+            62.0,
+            79.0,
+            13.0
+          ],
+          "text": "Legend of Mir 2"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 47,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            449.0,
+            18.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            224.0,
+            384.0,
+            465.0,
+            42.0
+          ],
+          "text": "MC1-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 4,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            35.0,
+            16.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            649.0,
+            225.0,
+            174.0,
+            20.0
+          ],
+          "text": "Mago"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 5,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            33.0,
+            13.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            265.0,
+            613.0,
+            33.0,
+            13.0
+          ],
+          "text": "Nunca"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 5,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            31.0,
+            16.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            831.0,
+            225.0,
+            80.0,
+            20.0
+          ],
+          "text": "Nv. 7"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 5,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            31.0,
+            16.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            831.0,
+            329.0,
+            80.0,
+            20.0
+          ],
+          "text": "Nv. 8"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 21,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            123.0,
+            16.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            831.0,
+            734.0,
+            123.0,
+            16.0
+          ],
+          "text": "Português (Brasil)  ^"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 77,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            549.0,
+            17.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            224.0,
+            439.0,
+            576.0,
+            65.0
+          ],
+          "text": "Resultado não confirmado. Consulte o status ou tente o mesmo código novamente."
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 4,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            18.0,
+            12.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            829.0,
+            743.0,
+            18.0,
+            12.0
+          ],
+          "text": "Sair"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 21,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            245.0,
+            27.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            312.0,
+            16.0,
+            400.0,
+            34.0
+          ],
+          "text": "Selecionar personagem"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 7,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            43.0,
+            16.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            649.0,
+            329.0,
+            174.0,
+            20.0
+          ],
+          "text": "Taoísta"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 14,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            74.0,
+            13.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            200.0,
+            613.0,
+            74.0,
+            13.0
+          ],
+          "text": "Último acesso:"
+        }
+      ]
+    },
+    {
+      "image": "monthly-card-ru.png",
+      "locale": "ru",
+      "texts": [
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 6,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            44.0,
+            17.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            649.0,
+            304.0,
+            264.0,
+            20.0
+          ],
+          "text": "Cancel"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 4,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            31.0,
+            17.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            649.0,
+            200.0,
+            264.0,
+            20.0
+          ],
+          "text": "Gold"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 15,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            79.0,
+            13.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            470.0,
+            62.0,
+            79.0,
+            13.0
+          ],
+          "text": "Legend of Mir 2"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 47,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            449.0,
+            18.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            224.0,
+            384.0,
+            465.0,
+            42.0
+          ],
+          "text": "MC1-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 6,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            37.0,
+            12.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            656.0,
+            743.0,
+            37.0,
+            12.0
+          ],
+          "text": "Авторы"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 12,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            82.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            224.0,
+            523.0,
+            180.0,
+            36.0
+          ],
+          "text": "Активировать"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 15,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            193.0,
+            27.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            312.0,
+            16.0,
+            400.0,
+            34.0
+          ],
+          "text": "Выбор персонажа"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 5,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            31.0,
+            12.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            823.0,
+            743.0,
+            31.0,
+            12.0
+          ],
+          "text": "Выход"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 4,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            31.0,
+            16.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            649.0,
+            329.0,
+            174.0,
+            20.0
+          ],
+          "text": "Даос"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 7,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            49.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            622.0,
+            523.0,
+            180.0,
+            36.0
+          ],
+          "text": "Закрыть"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 93,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            557.0,
+            34.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            224.0,
+            252.0,
+            576.0,
+            60.0
+          ],
+          "text": "Каждая карта добавляет 30 дней для всех персонажей аккаунта. Время вне игры тоже учитывается."
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 3,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            25.0,
+            16.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            649.0,
+            225.0,
+            174.0,
+            20.0
+          ],
+          "text": "Маг"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 17,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            117.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            774.0,
+            58.0,
+            226.0,
+            36.0
+          ],
+          "text": "Месячная подписка"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 17,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            214.0,
+            27.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            222.0,
+            207.0,
+            580.0,
+            34.0
+          ],
+          "text": "Месячная подписка"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 6,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            35.0,
+            12.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            165.0,
+            743.0,
+            35.0,
+            12.0
+          ],
+          "text": "Начать"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 7,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            43.0,
+            13.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            265.0,
+            613.0,
+            43.0,
+            13.0
+          ],
+          "text": "Никогда"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 67,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            250.0,
+            34.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            224.0,
+            318.0,
+            576.0,
+            58.0
+          ],
+          "text": "Подписка отсутствует или истекла\nСрок действия: 2027-01-15 08:00 UTC"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 15,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            88.0,
+            13.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            200.0,
+            613.0,
+            88.0,
+            13.0
+          ],
+          "text": "Последний вход:"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 16,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            102.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            422.0,
+            523.0,
+            182.0,
+            36.0
+          ],
+          "text": "Проверить статус"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 13,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            98.0,
+            17.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            649.0,
+            418.0,
+            264.0,
+            24.0
+          ],
+          "text": "Пустая ячейка"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 13,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            98.0,
+            17.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            649.0,
+            522.0,
+            264.0,
+            24.0
+          ],
+          "text": "Пустая ячейка"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 68,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            485.0,
+            17.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            224.0,
+            439.0,
+            576.0,
+            65.0
+          ],
+          "text": "Результат не подтверждён. Проверьте статус или повторите тот же код."
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 10,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            65.0,
+            16.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            860.0,
+            734.0,
+            65.0,
+            16.0
+          ],
+          "text": "Русский  ^"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 7,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            39.0,
+            12.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            327.0,
+            743.0,
+            39.0,
+            12.0
+          ],
+          "text": "Создать"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 17,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            53.0,
+            24.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            463.0,
+            737.0,
+            94.0,
+            24.0
+          ],
+          "text": "Удалить персонажа"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 5,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            31.0,
+            16.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            831.0,
+            225.0,
+            80.0,
+            20.0
+          ],
+          "text": "Ур. 7"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 5,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            31.0,
+            16.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            831.0,
+            329.0,
+            80.0,
+            20.0
+          ],
+          "text": "Ур. 8"
+        }
+      ]
+    },
+    {
+      "image": "monthly-card-hi.png",
+      "locale": "hi",
+      "texts": [
+        {
+          "font": "Family(\"Noto Sans Devanagari\")",
+          "glyphs": 6,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            44.0,
+            17.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            649.0,
+            304.0,
+            264.0,
+            20.0
+          ],
+          "text": "Cancel"
+        },
+        {
+          "font": "Family(\"Noto Sans Devanagari\")",
+          "glyphs": 4,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            31.0,
+            17.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            649.0,
+            200.0,
+            264.0,
+            20.0
+          ],
+          "text": "Gold"
+        },
+        {
+          "font": "Family(\"Noto Sans Devanagari\")",
+          "glyphs": 15,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            79.0,
+            13.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            470.0,
+            62.0,
+            79.0,
+            13.0
+          ],
+          "text": "Legend of Mir 2"
+        },
+        {
+          "font": "Family(\"Noto Sans Devanagari\")",
+          "glyphs": 47,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            449.0,
+            18.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            224.0,
+            384.0,
+            465.0,
+            42.0
+          ],
+          "text": "MC1-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+        },
+        {
+          "font": "Family(\"Noto Sans Devanagari\")",
+          "glyphs": 7,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            36.0,
+            13.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            265.0,
+            613.0,
+            36.0,
+            13.0
+          ],
+          "text": "कभी नहीं"
+        },
+        {
+          "font": "Family(\"Noto Sans Devanagari\")",
+          "glyphs": 9,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            58.0,
+            17.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            649.0,
+            418.0,
+            264.0,
+            24.0
+          ],
+          "text": "खाली स्थान"
+        },
+        {
+          "font": "Family(\"Noto Sans Devanagari\")",
+          "glyphs": 9,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            58.0,
+            17.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            649.0,
+            522.0,
+            264.0,
+            24.0
+          ],
+          "text": "खाली स्थान"
+        },
+        {
+          "font": "Family(\"Noto Sans Devanagari\")",
+          "glyphs": 5,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            33.0,
+            16.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            649.0,
+            225.0,
+            174.0,
+            20.0
+          ],
+          "text": "जादूगर"
+        },
+        {
+          "font": "Family(\"Noto Sans Devanagari\")",
+          "glyphs": 7,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            45.0,
+            16.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            649.0,
+            329.0,
+            174.0,
+            20.0
+          ],
+          "text": "ताओवादी"
+        },
+        {
+          "font": "Family(\"Noto Sans Devanagari\")",
+          "glyphs": 58,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            327.0,
+            17.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            224.0,
+            439.0,
+            576.0,
+            65.0
+          ],
+          "text": "परिणाम की पुष्टि नहीं हुई। स्थिति जाँचें या वही कोड फिर आज़माएँ।"
+        },
+        {
+          "font": "Family(\"Noto Sans Devanagari\")",
+          "glyphs": 8,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            63.0,
+            27.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            312.0,
+            16.0,
+            400.0,
+            34.0
+          ],
+          "text": "पात्र चुनें"
+        },
+        {
+          "font": "Family(\"Noto Sans Devanagari\")",
+          "glyphs": 9,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            35.0,
+            12.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            493.0,
+            743.0,
+            35.0,
+            12.0
+          ],
+          "text": "पात्र हटाएँ"
+        },
+        {
+          "font": "Family(\"Noto Sans Devanagari\")",
+          "glyphs": 17,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            87.0,
+            13.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            200.0,
+            613.0,
+            87.0,
+            13.0
+          ],
+          "text": "पिछली बार ऑनलाइन:"
+        },
+        {
+          "font": "Family(\"Noto Sans Devanagari\")",
+          "glyphs": 7,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            31.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            622.0,
+            523.0,
+            180.0,
+            36.0
+          ],
+          "text": "बंद करें"
+        },
+        {
+          "font": "Family(\"Noto Sans Devanagari\")",
+          "glyphs": 5,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            20.0,
+            12.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            336.0,
+            743.0,
+            20.0,
+            12.0
+          ],
+          "text": "बनाएँ"
+        },
+        {
+          "font": "Family(\"Noto Sans Devanagari\")",
+          "glyphs": 10,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            43.0,
+            12.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            817.0,
+            743.0,
+            43.0,
+            12.0
+          ],
+          "text": "बाहर निकलें"
+        },
+        {
+          "font": "Family(\"Noto Sans Devanagari\")",
+          "glyphs": 9,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            52.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            774.0,
+            58.0,
+            226.0,
+            36.0
+          ],
+          "text": "मासिक पास"
+        },
+        {
+          "font": "Family(\"Noto Sans Devanagari\")",
+          "glyphs": 9,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            96.0,
+            27.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            222.0,
+            207.0,
+            580.0,
+            34.0
+          ],
+          "text": "मासिक पास"
+        },
+        {
+          "font": "Family(\"Noto Sans Devanagari\")",
+          "glyphs": 66,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            228.0,
+            34.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            224.0,
+            318.0,
+            576.0,
+            58.0
+          ],
+          "text": "मासिक पास आवश्यक है या समाप्त हो चुका है\nसमाप्ति: 2027-01-15 08:00 UTC"
+        },
+        {
+          "font": "Family(\"Noto Sans Devanagari\")",
+          "glyphs": 7,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            29.0,
+            12.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            168.0,
+            743.0,
+            29.0,
+            12.0
+          ],
+          "text": "शुरू करें"
+        },
+        {
+          "font": "Family(\"Noto Sans Devanagari\")",
+          "glyphs": 3,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            13.0,
+            12.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            668.0,
+            743.0,
+            13.0,
+            12.0
+          ],
+          "text": "श्रेय"
+        },
+        {
+          "font": "Family(\"Noto Sans Devanagari\")",
+          "glyphs": 8,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            45.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            224.0,
+            523.0,
+            180.0,
+            36.0
+          ],
+          "text": "सक्रिय करें"
+        },
+        {
+          "font": "Family(\"Noto Sans Devanagari\")",
+          "glyphs": 5,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            29.0,
+            16.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            831.0,
+            225.0,
+            80.0,
+            20.0
+          ],
+          "text": "स्तर 7"
+        },
+        {
+          "font": "Family(\"Noto Sans Devanagari\")",
+          "glyphs": 5,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            29.0,
+            16.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            831.0,
+            329.0,
+            80.0,
+            20.0
+          ],
+          "text": "स्तर 8"
+        },
+        {
+          "font": "Family(\"Noto Sans Devanagari\")",
+          "glyphs": 11,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            48.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            422.0,
+            523.0,
+            182.0,
+            36.0
+          ],
+          "text": "स्थिति जाँचें"
+        },
+        {
+          "font": "Family(\"Noto Sans Devanagari\")",
+          "glyphs": 76,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            442.0,
+            17.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            224.0,
+            252.0,
+            576.0,
+            60.0
+          ],
+          "text": "हर पास खाते के सभी पात्रों के लिए 30 दिन जोड़ता है। ऑफलाइन समय भी गिना जाता है।"
+        },
+        {
+          "font": "Family(\"Noto Sans Devanagari\")",
+          "glyphs": 8,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            39.0,
+            16.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            873.0,
+            734.0,
+            39.0,
+            16.0
+          ],
+          "text": "हिन्दी  ^"
+        }
+      ]
+    },
+    {
+      "image": "monthly-card-id.png",
+      "locale": "id",
+      "texts": [
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 8,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            47.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            224.0,
+            523.0,
+            180.0,
+            36.0
+          ],
+          "text": "Aktifkan"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 19,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            123.0,
+            16.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            831.0,
+            734.0,
+            123.0,
+            16.0
+          ],
+          "text": "Bahasa Indonesia  ^"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 12,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            72.0,
+            13.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            265.0,
+            613.0,
+            72.0,
+            13.0
+          ],
+          "text": "Belum pernah"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 4,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            22.0,
+            12.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            335.0,
+            743.0,
+            22.0,
+            12.0
+          ],
+          "text": "Buat"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 6,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            44.0,
+            17.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            649.0,
+            304.0,
+            264.0,
+            20.0
+          ],
+          "text": "Cancel"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 4,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            31.0,
+            17.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            649.0,
+            200.0,
+            264.0,
+            20.0
+          ],
+          "text": "Gold"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 14,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            72.0,
+            12.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            474.0,
+            743.0,
+            72.0,
+            12.0
+          ],
+          "text": "Hapus karakter"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 70,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            474.0,
+            17.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            224.0,
+            439.0,
+            576.0,
+            65.0
+          ],
+          "text": "Hasil belum dikonfirmasi. Periksa status atau coba kode yang sama lagi."
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 6,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            31.0,
+            12.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            823.0,
+            743.0,
+            31.0,
+            12.0
+          ],
+          "text": "Keluar"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 74,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            273.0,
+            34.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            224.0,
+            318.0,
+            576.0,
+            58.0
+          ],
+          "text": "Langganan belum aktif atau kedaluwarsa\nBerlaku sampai: 2027-01-15 08:00 UTC"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 17,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            113.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            774.0,
+            58.0,
+            226.0,
+            36.0
+          ],
+          "text": "Langganan bulanan"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 17,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            207.0,
+            27.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            222.0,
+            207.0,
+            580.0,
+            34.0
+          ],
+          "text": "Langganan bulanan"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 15,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            79.0,
+            13.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            470.0,
+            62.0,
+            79.0,
+            13.0
+          ],
+          "text": "Legend of Mir 2"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 5,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            28.0,
+            16.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            831.0,
+            225.0,
+            80.0,
+            20.0
+          ],
+          "text": "Lv. 7"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 5,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            28.0,
+            16.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            831.0,
+            329.0,
+            80.0,
+            20.0
+          ],
+          "text": "Lv. 8"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 47,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            449.0,
+            18.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            224.0,
+            384.0,
+            465.0,
+            42.0
+          ],
+          "text": "MC1-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 5,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            27.0,
+            12.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            169.0,
+            743.0,
+            27.0,
+            12.0
+          ],
+          "text": "Mulai"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 8,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            50.0,
+            16.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            649.0,
+            225.0,
+            174.0,
+            20.0
+          ],
+          "text": "Penyihir"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 14,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            79.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            422.0,
+            523.0,
+            182.0,
+            36.0
+          ],
+          "text": "Periksa status"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 14,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            136.0,
+            27.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            312.0,
+            16.0,
+            400.0,
+            34.0
+          ],
+          "text": "Pilih karakter"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 90,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            574.0,
+            34.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            224.0,
+            252.0,
+            576.0,
+            60.0
+          ],
+          "text": "Setiap kartu menambah 30 hari untuk semua karakter dalam akun. Waktu offline tetap dihitung."
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 11,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            77.0,
+            17.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            649.0,
+            418.0,
+            264.0,
+            24.0
+          ],
+          "text": "Slot kosong"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 11,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            77.0,
+            17.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            649.0,
+            522.0,
+            264.0,
+            24.0
+          ],
+          "text": "Slot kosong"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 5,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            31.0,
+            16.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            649.0,
+            329.0,
+            174.0,
+            20.0
+          ],
+          "text": "Taois"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 16,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            78.0,
+            13.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            200.0,
+            613.0,
+            78.0,
+            13.0
+          ],
+          "text": "Terakhir online:"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 11,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            63.0,
+            12.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            643.0,
+            743.0,
+            63.0,
+            12.0
+          ],
+          "text": "Tim pembuat"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 5,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            33.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            622.0,
+            523.0,
+            180.0,
+            36.0
+          ],
+          "text": "Tutup"
+        }
+      ]
+    },
+    {
+      "image": "monthly-card-vi.png",
+      "locale": "vi",
+      "texts": [
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 7,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            37.0,
+            12.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            164.0,
+            743.0,
+            37.0,
+            12.0
+          ],
+          "text": "Bắt đầu"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 6,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            44.0,
+            17.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            649.0,
+            304.0,
+            264.0,
+            20.0
+          ],
+          "text": "Cancel"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 66,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            257.0,
+            34.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            224.0,
+            318.0,
+            576.0,
+            58.0
+          ],
+          "text": "Chưa có thẻ tháng hoặc thẻ đã hết hạn\nHết hạn: 2027-01-15 08:00 UTC"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 9,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            54.0,
+            13.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            265.0,
+            613.0,
+            54.0,
+            13.0
+          ],
+          "text": "Chưa từng"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 64,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            427.0,
+            17.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            224.0,
+            439.0,
+            576.0,
+            65.0
+          ],
+          "text": "Chưa xác nhận kết quả. Kiểm tra trạng thái hoặc thử lại cùng mã."
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 14,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            151.0,
+            27.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            312.0,
+            16.0,
+            400.0,
+            34.0
+          ],
+          "text": "Chọn nhân vật"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 5,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            35.0,
+            16.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            831.0,
+            225.0,
+            80.0,
+            20.0
+          ],
+          "text": "Cấp 7"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 5,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            35.0,
+            16.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            831.0,
+            329.0,
+            80.0,
+            20.0
+          ],
+          "text": "Cấp 8"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 4,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            31.0,
+            17.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            649.0,
+            200.0,
+            264.0,
+            20.0
+          ],
+          "text": "Gold"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 19,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            106.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            422.0,
+            523.0,
+            182.0,
+            36.0
+          ],
+          "text": "Kiểm tra trạng thái"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 9,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            53.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            224.0,
+            523.0,
+            180.0,
+            36.0
+          ],
+          "text": "Kích hoạt"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 15,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            79.0,
+            13.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            470.0,
+            62.0,
+            79.0,
+            13.0
+          ],
+          "text": "Legend of Mir 2"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 20,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            103.0,
+            13.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            200.0,
+            613.0,
+            103.0,
+            13.0
+          ],
+          "text": "Lần online gần nhất:"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 47,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            449.0,
+            18.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            224.0,
+            384.0,
+            465.0,
+            42.0
+          ],
+          "text": "MC1-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 92,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            548.0,
+            34.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            224.0,
+            252.0,
+            576.0,
+            60.0
+          ],
+          "text": "Mỗi thẻ thêm 30 ngày cho mọi nhân vật trong tài khoản. Thời gian ngoại tuyến vẫn được tính."
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 7,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            50.0,
+            16.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            649.0,
+            225.0,
+            174.0,
+            20.0
+          ],
+          "text": "Pháp sư"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 5,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            28.0,
+            12.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            824.0,
+            743.0,
+            28.0,
+            12.0
+          ],
+          "text": "Thoát"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 9,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            58.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            774.0,
+            58.0,
+            226.0,
+            36.0
+          ],
+          "text": "Thẻ tháng"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 9,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            105.0,
+            27.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            222.0,
+            207.0,
+            580.0,
+            34.0
+          ],
+          "text": "Thẻ tháng"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 13,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            75.0,
+            16.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            855.0,
+            734.0,
+            75.0,
+            16.0
+          ],
+          "text": "Tiếng Việt  ^"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 3,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            17.0,
+            12.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            338.0,
+            743.0,
+            17.0,
+            12.0
+          ],
+          "text": "Tạo"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 12,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            62.0,
+            12.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            479.0,
+            743.0,
+            62.0,
+            12.0
+          ],
+          "text": "Xóa nhân vật"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 7,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            51.0,
+            17.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            649.0,
+            418.0,
+            264.0,
+            24.0
+          ],
+          "text": "Ô trống"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 7,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            51.0,
+            17.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            649.0,
+            522.0,
+            264.0,
+            24.0
+          ],
+          "text": "Ô trống"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 4,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            31.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            622.0,
+            523.0,
+            180.0,
+            36.0
+          ],
+          "text": "Đóng"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 6,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            38.0,
+            16.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            649.0,
+            329.0,
+            174.0,
+            20.0
+          ],
+          "text": "Đạo sĩ"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 18,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            86.0,
+            12.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            631.0,
+            743.0,
+            86.0,
+            12.0
+          ],
+          "text": "Đội ngũ phát triển"
+        }
+      ]
+    },
+    {
+      "image": "monthly-card-th.png",
+      "locale": "th",
+      "texts": [
+        {
+          "font": "Family(\"Noto Sans Thai\")",
+          "glyphs": 6,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            44.0,
+            17.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            649.0,
+            304.0,
+            264.0,
+            20.0
+          ],
+          "text": "Cancel"
+        },
+        {
+          "font": "Family(\"Noto Sans Thai\")",
+          "glyphs": 4,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            31.0,
+            17.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            649.0,
+            200.0,
+            264.0,
+            20.0
+          ],
+          "text": "Gold"
+        },
+        {
+          "font": "Family(\"Noto Sans Thai\")",
+          "glyphs": 15,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            79.0,
+            13.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            470.0,
+            62.0,
+            79.0,
+            13.0
+          ],
+          "text": "Legend of Mir 2"
+        },
+        {
+          "font": "Family(\"Noto Sans Thai\")",
+          "glyphs": 47,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            449.0,
+            18.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            224.0,
+            384.0,
+            465.0,
+            42.0
+          ],
+          "text": "MC1-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+        },
+        {
+          "font": "Family(\"Noto Sans Thai\")",
+          "glyphs": 8,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            44.0,
+            17.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            649.0,
+            418.0,
+            264.0,
+            24.0
+          ],
+          "text": "ช่องว่าง"
+        },
+        {
+          "font": "Family(\"Noto Sans Thai\")",
+          "glyphs": 8,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            44.0,
+            17.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            649.0,
+            522.0,
+            264.0,
+            24.0
+          ],
+          "text": "ช่องว่าง"
+        },
+        {
+          "font": "Family(\"Noto Sans Thai\")",
+          "glyphs": 12,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            78.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            422.0,
+            523.0,
+            182.0,
+            36.0
+          ],
+          "text": "ตรวจสอบสถานะ"
+        },
+        {
+          "font": "Family(\"Noto Sans Thai\")",
+          "glyphs": 6,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            40.0,
+            16.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            649.0,
+            329.0,
+            174.0,
+            20.0
+          ],
+          "text": "นักพรต"
+        },
+        {
+          "font": "Family(\"Noto Sans Thai\")",
+          "glyphs": 6,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            34.0,
+            16.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            649.0,
+            225.0,
+            174.0,
+            20.0
+          ],
+          "text": "นักเวท"
+        },
+        {
+          "font": "Family(\"Noto Sans Thai\")",
+          "glyphs": 12,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            64.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            774.0,
+            58.0,
+            226.0,
+            36.0
+          ],
+          "text": "บัตรรายเดือน"
+        },
+        {
+          "font": "Family(\"Noto Sans Thai\")",
+          "glyphs": 12,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            117.0,
+            27.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            222.0,
+            207.0,
+            580.0,
+            34.0
+          ],
+          "text": "บัตรรายเดือน"
+        },
+        {
+          "font": "Family(\"Noto Sans Thai\")",
+          "glyphs": 65,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            378.0,
+            17.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            224.0,
+            252.0,
+            576.0,
+            60.0
+          ],
+          "text": "บัตรแต่ละใบเพิ่ม 30 วันให้ทุกตัวละครในบัญชี โดยนับเวลาออฟไลน์ด้วย"
+        },
+        {
+          "font": "Family(\"Noto Sans Thai\")",
+          "glyphs": 3,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            15.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            622.0,
+            523.0,
+            180.0,
+            36.0
+          ],
+          "text": "ปิด"
+        },
+        {
+          "font": "Family(\"Noto Sans Thai\")",
+          "glyphs": 9,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            29.0,
+            12.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            660.0,
+            743.0,
+            29.0,
+            12.0
+          ],
+          "text": "ผู้จัดทำ"
+        },
+        {
+          "font": "Family(\"Noto Sans Thai\")",
+          "glyphs": 68,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            425.0,
+            17.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            224.0,
+            318.0,
+            576.0,
+            58.0
+          ],
+          "text": "ยังไม่มีบัตรรายเดือนหรือบัตรหมดอายุแล้ว\nหมดอายุ: 2027-01-15 08:00 UTC"
+        },
+        {
+          "font": "Family(\"Noto Sans Thai\")",
+          "glyphs": 54,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            332.0,
+            17.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            224.0,
+            439.0,
+            576.0,
+            65.0
+          ],
+          "text": "ยังไม่ยืนยันผล โปรดตรวจสอบสถานะหรือลองรหัสเดิมอีกครั้ง"
+        },
+        {
+          "font": "Family(\"Noto Sans Thai\")",
+          "glyphs": 9,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            38.0,
+            13.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            265.0,
+            613.0,
+            38.0,
+            13.0
+          ],
+          "text": "ยังไม่เคย"
+        },
+        {
+          "font": "Family(\"Noto Sans Thai\")",
+          "glyphs": 9,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            44.0,
+            12.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            488.0,
+            743.0,
+            44.0,
+            12.0
+          ],
+          "text": "ลบตัวละคร"
+        },
+        {
+          "font": "Family(\"Noto Sans Thai\")",
+          "glyphs": 5,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            21.0,
+            12.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            336.0,
+            743.0,
+            21.0,
+            12.0
+          ],
+          "text": "สร้าง"
+        },
+        {
+          "font": "Family(\"Noto Sans Thai\")",
+          "glyphs": 3,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            18.0,
+            12.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            829.0,
+            743.0,
+            18.0,
+            12.0
+          ],
+          "text": "ออก"
+        },
+        {
+          "font": "Family(\"Noto Sans Thai\")",
+          "glyphs": 14,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            61.0,
+            13.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            200.0,
+            613.0,
+            61.0,
+            13.0
+          ],
+          "text": "ออนไลน์ล่าสุด:"
+        },
+        {
+          "font": "Family(\"Noto Sans Thai\")",
+          "glyphs": 10,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            47.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            224.0,
+            523.0,
+            180.0,
+            36.0
+          ],
+          "text": "เปิดใช้งาน"
+        },
+        {
+          "font": "Family(\"Noto Sans Thai\")",
+          "glyphs": 5,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            14.0,
+            12.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            175.0,
+            743.0,
+            14.0,
+            12.0
+          ],
+          "text": "เริ่ม"
+        },
+        {
+          "font": "Family(\"Noto Sans Thai\")",
+          "glyphs": 12,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            114.0,
+            27.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            312.0,
+            16.0,
+            400.0,
+            34.0
+          ],
+          "text": "เลือกตัวละคร"
+        },
+        {
+          "font": "Family(\"Noto Sans Thai\")",
+          "glyphs": 7,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            40.0,
+            16.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            831.0,
+            225.0,
+            80.0,
+            20.0
+          ],
+          "text": "เลเวล 7"
+        },
+        {
+          "font": "Family(\"Noto Sans Thai\")",
+          "glyphs": 7,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            40.0,
+            16.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            831.0,
+            329.0,
+            80.0,
+            20.0
+          ],
+          "text": "เลเวล 8"
+        },
+        {
+          "font": "Family(\"Noto Sans Thai\")",
+          "glyphs": 6,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            34.0,
+            16.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            875.0,
+            734.0,
+            34.0,
+            16.0
+          ],
+          "text": "ไทย  ^"
+        }
+      ]
+    },
+    {
+      "image": "monthly-card-ar.png",
+      "locale": "ar",
+      "texts": [
+        {
+          "font": "Family(\"Noto Sans Arabic\")",
+          "glyphs": 6,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            44.0,
+            17.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            649.0,
+            304.0,
+            264.0,
+            20.0
+          ],
+          "text": "Cancel"
+        },
+        {
+          "font": "Family(\"Noto Sans Arabic\")",
+          "glyphs": 4,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            31.0,
+            17.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            649.0,
+            200.0,
+            264.0,
+            20.0
+          ],
+          "text": "Gold"
+        },
+        {
+          "font": "Family(\"Noto Sans Arabic\")",
+          "glyphs": 15,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            79.0,
+            13.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            470.0,
+            62.0,
+            79.0,
+            13.0
+          ],
+          "text": "Legend of Mir 2"
+        },
+        {
+          "font": "Family(\"Noto Sans Arabic\")",
+          "glyphs": 47,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            449.0,
+            18.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            224.0,
+            384.0,
+            465.0,
+            42.0
+          ],
+          "text": "MC1-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+        },
+        {
+          "font": "Family(\"Noto Sans Arabic\")",
+          "glyphs": 12,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            41.0,
+            13.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            200.0,
+            613.0,
+            41.0,
+            13.0
+          ],
+          "text": "آخر ظهور:"
+        },
+        {
+          "font": "Family(\"Noto Sans Arabic\")",
+          "glyphs": 7,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            14.0,
+            13.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            265.0,
+            613.0,
+            14.0,
+            13.0
+          ],
+          "text": "أبدًا"
+        },
+        {
+          "font": "Family(\"Noto Sans Arabic\")",
+          "glyphs": 8,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            26.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            622.0,
+            523.0,
+            180.0,
+            36.0
+          ],
+          "text": "إغلاق"
+        },
+        {
+          "font": "Family(\"Noto Sans Arabic\")",
+          "glyphs": 8,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            21.0,
+            12.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            336.0,
+            743.0,
+            21.0,
+            12.0
+          ],
+          "text": "إنشاء"
+        },
+        {
+          "font": "Family(\"Noto Sans Arabic\")",
+          "glyphs": 21,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            139.0,
+            27.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            312.0,
+            16.0,
+            400.0,
+            34.0
+          ],
+          "text": "اختيار الشخصية"
+        },
+        {
+          "font": "Family(\"Noto Sans Arabic\")",
+          "glyphs": 20,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            81.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            774.0,
+            58.0,
+            226.0,
+            36.0
+          ],
+          "text": "الاشتراك الشهري"
+        },
+        {
+          "font": "Family(\"Noto Sans Arabic\")",
+          "glyphs": 20,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            149.0,
+            27.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            222.0,
+            207.0,
+            580.0,
+            34.0
+          ],
+          "text": "الاشتراك الشهري"
+        },
+        {
+          "font": "Family(\"Noto Sans Arabic\")",
+          "glyphs": 93,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            245.0,
+            34.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            224.0,
+            318.0,
+            576.0,
+            58.0
+          ],
+          "text": "الاشتراك الشهري مطلوب أو منتهي الصلاحية\nتنتهي الصلاحية: 2027-01-15 08:00 UTC"
+        },
+        {
+          "font": "Family(\"Noto Sans Arabic\")",
+          "glyphs": 21,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            82.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            422.0,
+            523.0,
+            182.0,
+            36.0
+          ],
+          "text": "التحقق من الحالة"
+        },
+        {
+          "font": "Family(\"Noto Sans Arabic\")",
+          "glyphs": 13,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            47.0,
+            16.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            869.0,
+            734.0,
+            47.0,
+            16.0
+          ],
+          "text": "العربية  ^"
+        },
+        {
+          "font": "Family(\"Noto Sans Arabic\")",
+          "glyphs": 10,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            57.0,
+            16.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            831.0,
+            225.0,
+            80.0,
+            20.0
+          ],
+          "text": "المستوى 7"
+        },
+        {
+          "font": "Family(\"Noto Sans Arabic\")",
+          "glyphs": 10,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            57.0,
+            16.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            831.0,
+            329.0,
+            80.0,
+            20.0
+          ],
+          "text": "المستوى 8"
+        },
+        {
+          "font": "Family(\"Noto Sans Arabic\")",
+          "glyphs": 4,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            13.0,
+            12.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            176.0,
+            743.0,
+            13.0,
+            12.0
+          ],
+          "text": "بدء"
+        },
+        {
+          "font": "Family(\"Noto Sans Arabic\")",
+          "glyphs": 102,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            472.0,
+            17.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            224.0,
+            252.0,
+            576.0,
+            60.0
+          ],
+          "text": "تضيف كل بطاقة 30 يومًا لجميع شخصيات الحساب. يُحتسب الوقت خارج اللعبة أيضًا."
+        },
+        {
+          "font": "Family(\"Noto Sans Arabic\")",
+          "glyphs": 8,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            30.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            224.0,
+            523.0,
+            180.0,
+            36.0
+          ],
+          "text": "تفعيل"
+        },
+        {
+          "font": "Family(\"Noto Sans Arabic\")",
+          "glyphs": 17,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            62.0,
+            12.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            479.0,
+            743.0,
+            62.0,
+            12.0
+          ],
+          "text": "حذف الشخصية"
+        },
+        {
+          "font": "Family(\"Noto Sans Arabic\")",
+          "glyphs": 16,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            56.0,
+            17.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            649.0,
+            418.0,
+            264.0,
+            24.0
+          ],
+          "text": "خانة فارغة"
+        },
+        {
+          "font": "Family(\"Noto Sans Arabic\")",
+          "glyphs": 16,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            56.0,
+            17.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            649.0,
+            522.0,
+            264.0,
+            24.0
+          ],
+          "text": "خانة فارغة"
+        },
+        {
+          "font": "Family(\"Noto Sans Arabic\")",
+          "glyphs": 6,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            21.0,
+            12.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            828.0,
+            743.0,
+            21.0,
+            12.0
+          ],
+          "text": "خروج"
+        },
+        {
+          "font": "Family(\"Noto Sans Arabic\")",
+          "glyphs": 4,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            27.0,
+            16.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            649.0,
+            225.0,
+            174.0,
+            20.0
+          ],
+          "text": "ساحر"
+        },
+        {
+          "font": "Family(\"Noto Sans Arabic\")",
+          "glyphs": 5,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            29.0,
+            16.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            649.0,
+            329.0,
+            174.0,
+            20.0
+          ],
+          "text": "طاوي"
+        },
+        {
+          "font": "Family(\"Noto Sans Arabic\")",
+          "glyphs": 13,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            46.0,
+            12.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            651.0,
+            743.0,
+            46.0,
+            12.0
+          ],
+          "text": "فريق العمل"
+        },
+        {
+          "font": "Family(\"Noto Sans Arabic\")",
+          "glyphs": 80,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            328.0,
+            17.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            224.0,
+            439.0,
+            576.0,
+            65.0
+          ],
+          "text": "لم تُؤكد النتيجة. تحقق من الحالة أو أعد المحاولة بالرمز نفسه."
+        }
+      ]
+    }
+  ],
+  "passed": true
+}

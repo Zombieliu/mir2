@@ -1,0 +1,147 @@
+{
+  "passed": true,
+  "evidenceKind": "full packaging-source script self-tests, distinct from actual package/export/install verification",
+  "suites": [
+    {
+      "name": "package-windows-candidate FULL selftest",
+      "passed": true,
+      "command": "pwsh -NoProfile -File apps/game-client/platform-windows/scripts/package-windows-candidate.ps1 -SelfTest",
+      "log": {
+        "filename": "package-selftest-v3.log",
+        "bytes": 654,
+        "sha256": "e5921e09b1e5bf9fc1fb8950085eb89c366e9f6db422e2f709fe43b37d5b5823",
+        "included": false
+      },
+      "resultLines": [
+        "Candidate release configuration tests passed (endpoints, profiles, daylight, 209-map profile coverage, explicit legacy/custom coverage, actor allowlist)",
+        "ADS_SELFTEST=passed",
+        "PET_GUILD_CLOSURE_SELFTEST=passed (6224 PNG, 22 metadata, 15 Pet frame sets, 11 sounds; mutation rejection checks passed)",
+        "Candidate actor closure guards passed (valid frame, duplicate, escaping path, missing image, missing library)",
+        "GENERATED_MAP_ALLOWLIST_SELFTEST=passed (2 deterministic path-policy fixtures, 8 rejected near-misses; existing caches also scanned; production generation/coverage unchanged)",
+        "REPARSE_SELFTEST=passed",
+        "package-windows-candidate self-test passed"
+      ],
+      "sourcePaths": [
+        "apps/game-client/platform-windows/scripts/package-windows-candidate.ps1",
+        "apps/game-client/platform-windows/scripts/pet-guild-asset-closure.ps1",
+        "apps/game-client/platform-windows/scripts/candidate-release-profile.ps1",
+        "apps/game-client/platform-windows/scripts/entity-atlas-closure.ps1",
+        "apps/game-client/platform-windows/scripts/player-sprite-closure.ps1",
+        "apps/game-client/platform-windows/scripts/five-class-asset-closure.ps1"
+      ],
+      "sourcePhase": "Bound to packaging/gates-source-summary.json raw/LF snapshot; installer r9 and final product/export steps are outside these selftests."
+    },
+    {
+      "name": "verify-windows-candidate FULL selftest",
+      "passed": true,
+      "command": "pwsh -NoProfile -File apps/game-client/platform-windows/scripts/verify-windows-candidate.ps1 -SelfTest",
+      "log": {
+        "filename": "verify-selftest-v1.log",
+        "bytes": 997,
+        "sha256": "f67b0e3e0c839cef69061d6de4c62180de424634c3cdf0ffa38a9386da195eaf",
+        "included": false
+      },
+      "resultLines": [
+        "Candidate release configuration tests passed (endpoints, profiles, daylight, 209-map profile coverage, explicit legacy/custom coverage, actor allowlist)",
+        "Candidate actor closure guards passed (valid frame, duplicate, escaping path, missing image, missing library)",
+        "PET_GUILD_CLOSURE_SELFTEST=passed (6224 PNG, 22 metadata, 15 Pet frame sets, 11 sounds; mutation rejection checks passed)",
+        "VERIFY_ADS_SELFTEST=passed",
+        "MULTILINGUAL_FONT_PATH_SCAN=passed (8 static multilingual pins plus 2 dedicated Han pins; exact glyf/CFF/SC cmap only; source mutation, truncated fonts, injected/adjacent paths and SFNT range boundaries checked)",
+        "PINNED_FONT_PATH_SCAN=passed (11 full-font pins; TC gvar/static glyf/SC CFF+cmap only; adjacent leaks and altered fonts rejected)",
+        "UNICODE_PATH_BOUNDARY_SELFTEST=passed",
+        "ASCII_UTF8_WORD_BOUNDARY_SELFTEST=passed (L/M/N only; strict predecessor decoding; inner/adjacent real paths, invalid UTF-8, separators and range bounds)",
+        "verify-windows-candidate self-test passed"
+      ],
+      "sourcePaths": [
+        "apps/game-client/platform-windows/scripts/verify-windows-candidate.ps1",
+        "apps/game-client/platform-windows/scripts/pet-guild-asset-closure.ps1",
+        "apps/game-client/platform-windows/scripts/candidate-release-profile.ps1",
+        "apps/game-client/platform-windows/scripts/entity-atlas-closure.ps1",
+        "apps/game-client/platform-windows/scripts/player-sprite-closure.ps1"
+      ],
+      "sourcePhase": "Bound to packaging/gates-source-summary.json raw/LF snapshot; installer r9 and final product/export steps are outside these selftests."
+    }
+  ],
+  "sourcePhasePins": "gates-source-summary.json; seven source files and eleven full-font identities independently matched when curated",
+  "actualCandidateVerified": false,
+  "actualUpdaterVerified": false,
+  "actualInstallerCompiled": false,
+  "actualInstallationVerified": false,
+  "productionDeployed": false,
+  "snapshotSourcePins": [
+    {
+      "path": "apps/game-client/platform-windows/scripts/package-windows-candidate.ps1",
+      "bytes": 123657,
+      "rawSha256": "29d656330c372f4c45d48c94e6a71376fb959e4c63f32a5d8b1fa8dd31cf7aed",
+      "normalizedLfSha256": "d28da79b7e94cab6b447a033e47f4d12238018666baa953fe753310a88943020",
+      "lastWriteUtc": "2026-10-29T07:35:04.698Z"
+    },
+    {
+      "path": "apps/game-client/platform-windows/scripts/verify-windows-candidate.ps1",
+      "bytes": 175626,
+      "rawSha256": "66fef5c4bff848106de05ec4e915b22a4f7450d022480338dceae0b6006c0c6b",
+      "normalizedLfSha256": "a599a46c099052da0512603bc3d9872e35cf6d1d4dc269b520acf430a47c08e2",
+      "lastWriteUtc": "2026-10-29T06:09:51.020Z"
+    },
+    {
+      "path": "apps/game-client/platform-windows/scripts/pet-guild-asset-closure.ps1",
+      "bytes": 21778,
+      "rawSha256": "3b641381bcdfb6adeb0245dd541713515296875d85f39c780e7c59af4cfec479",
+      "normalizedLfSha256": "944a69ad6b1c3210672e9c33cb11e3c7a863664ff67d9cb38c93adc40f849b5c",
+      "lastWriteUtc": "2026-10-29T07:14:33.298Z"
+    },
+    {
+      "path": "apps/game-client/platform-windows/scripts/candidate-release-profile.ps1",
+      "bytes": 36192,
+      "rawSha256": "2311297dd58f81609f194991f5135b4e5ec6a25a337d1badada8f545f5db3f98",
+      "normalizedLfSha256": "711bb1b6274b657e827417cbfab04d1ed2d0b04038b4bda04dca16f2a3bdaf34",
+      "lastWriteUtc": "2026-10-24T11:52:03.006Z"
+    },
+    {
+      "path": "apps/game-client/platform-windows/scripts/entity-atlas-closure.ps1",
+      "bytes": 5210,
+      "rawSha256": "c45b2cdf15cc4d1c2c54ce4bd6a9669bf5f70472b9780e097d1a6b3753b1b2a1",
+      "normalizedLfSha256": "7949ac14cae0767c7fd3ded084ff16bd848cd1ce28dcdaa0157a4ee1e067a865",
+      "lastWriteUtc": "2026-10-24T11:52:03.006Z"
+    },
+    {
+      "path": "apps/game-client/platform-windows/scripts/player-sprite-closure.ps1",
+      "bytes": 5198,
+      "rawSha256": "3a030f590e93d360ce159bd294aed46f11be38f5827d6f5b2ac6ccc961025846",
+      "normalizedLfSha256": "b3c50be80b7f63b4cb9a9f0a027aad8770c62d47774e39c4a230eee3af6725da",
+      "lastWriteUtc": "2026-10-24T11:52:03.019Z"
+    },
+    {
+      "path": "apps/game-client/platform-windows/scripts/five-class-asset-closure.ps1",
+      "bytes": 1307,
+      "rawSha256": "05d7fdc54459dc3f7a2838d70465b4acc2948c27b72cbfa4aeffa4996840cdbe",
+      "normalizedLfSha256": "95491d643e2b3a1846499ce421a6061b7e2d942906390d0af3d7e35dda3aa04e",
+      "lastWriteUtc": "2026-10-24T11:52:03.007Z"
+    }
+  ],
+  "supersededStages": [
+    {
+      "filename": "package-selftest-v1.log",
+      "passed": false,
+      "reason": "Development-cache prerequisite failed; no final product verification occurred.",
+      "log": {
+        "filename": "package-selftest-v1.log",
+        "bytes": 843,
+        "sha256": "bcde605841dc0ce161e23a96c93d30f285037b8d8f7846a1eb7199f7ef6fefde",
+        "included": false
+      }
+    },
+    {
+      "filename": "package-selftest-v2.log",
+      "passed": true,
+      "supersededBy": "package-selftest-v3.log",
+      "reason": "Passed before the final two atlas-reference repairs; do not label that older success fresh for v3 source.",
+      "log": {
+        "filename": "package-selftest-v2.log",
+        "bytes": 654,
+        "sha256": "e5921e09b1e5bf9fc1fb8950085eb89c366e9f6db422e2f709fe43b37d5b5823",
+        "included": false
+      }
+    }
+  ]
+}

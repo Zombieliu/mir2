@@ -1,0 +1,648 @@
+{
+  "schemaVersion": 1,
+  "verifiedAt": "2026-10-25T11:56:22.0044500Z",
+  "coordinatorActuallyExecuted": true,
+  "toolchain": "1.95.0",
+  "sourceInputs": 42,
+  "sourceBefore": [
+    {
+      "path": "mir2-web3/.cargo/config.toml",
+      "bytes": 30,
+      "sha256": "17d6d9fdca4859d571020695c0af7fefd2589200d6277be62762605c0d78bdab"
+    },
+    {
+      "path": "mir2-web3/apps/gateway/Cargo.toml",
+      "bytes": 3230,
+      "sha256": "00f0762eb427f84d0963951ddc8cef332a3ed6c8f0209b47bd7bfa2f0235cf40"
+    },
+    {
+      "path": "mir2-web3/apps/gateway/src/attack_protocol.rs",
+      "bytes": 11818,
+      "sha256": "6d230edd0fd1903b411cb05ffb2cef8d0c2852fafc3ae3b0a568a6745923a7f6"
+    },
+    {
+      "path": "mir2-web3/apps/gateway/src/bin/seed_capacity_accounts.rs",
+      "bytes": 20499,
+      "sha256": "898d3af764856e6a304a263b2737671e24baa1306bcf5d93789d5db95102c085"
+    },
+    {
+      "path": "mir2-web3/apps/gateway/src/lib.rs",
+      "bytes": 11322,
+      "sha256": "c4c7350abe5225c1dbc1d92c91dcdc894bac9adc44cc14c8398cc8c905768ce7"
+    },
+    {
+      "path": "mir2-web3/apps/gateway/src/routing.rs",
+      "bytes": 1389827,
+      "sha256": "9135f2f3a019b04c1bb6ffe3717f730c65632df4e642702057bfbf7a699564de"
+    },
+    {
+      "path": "mir2-web3/apps/gateway/src/routing/partition_binding.rs",
+      "bytes": 25213,
+      "sha256": "bd38a834e6855082ee4ae694d16f8113e91057d2904ecb99020b15500b7a2654"
+    },
+    {
+      "path": "mir2-web3/apps/gateway/src/routing/partition_directory.rs",
+      "bytes": 11932,
+      "sha256": "cd6483ba6159a35f807ff3f90821617988e4a784159249e5c40be78313d0193e"
+    },
+    {
+      "path": "mir2-web3/apps/gateway/src/routing/tests/mining_tests.rs",
+      "bytes": 41476,
+      "sha256": "00e63dc060d585c27cfa032a6ac71254e1e6fb5dc564df0fc46072e6f5737121"
+    },
+    {
+      "path": "mir2-web3/apps/gateway/src/routing/tests/native_attack_outcome_tests.rs",
+      "bytes": 17228,
+      "sha256": "642924834f1db4dbaa7d8a7ca7670b1ee2bc13e340b65eaac0ee0a0dd7c730f6"
+    },
+    {
+      "path": "mir2-web3/apps/gateway/src/routing/tests/personal_monster_projection_tests.rs",
+      "bytes": 30640,
+      "sha256": "fe507e961403679b3b92f23986dff3f53bb52a5c528fae251dd2f7ec546197f0"
+    },
+    {
+      "path": "mir2-web3/apps/gateway/src/session.rs",
+      "bytes": 112616,
+      "sha256": "ef6bcedb2bee850de6461f0352c930f4be9f50197cae088d6d64286b3bd2fb6c"
+    },
+    {
+      "path": "mir2-web3/apps/gateway/src/spectator.rs",
+      "bytes": 58692,
+      "sha256": "3aa1ea329da20cb827440a67329d5af77251b666fff9e135125d9742ae9f0a6f"
+    },
+    {
+      "path": "mir2-web3/apps/gateway/src/web_live_overflow_tests.rs",
+      "bytes": 29131,
+      "sha256": "d0dabc744d4001163cd3f57443bbf0fa22cd279ad8e1d66d5b37840ee132a2fa"
+    },
+    {
+      "path": "mir2-web3/apps/gateway/src/web_transport_close_tests.rs",
+      "bytes": 5814,
+      "sha256": "11d946af65af9a4bad38d3879348c48a87bbf4b3d8abae15a8bb50f18e9425e5"
+    },
+    {
+      "path": "mir2-web3/apps/gateway/src/web.rs",
+      "bytes": 855687,
+      "sha256": "769186e87e166a7ba0fbb971463c8e0ae2b4dd119292798badee3b8e28522dd6"
+    },
+    {
+      "path": "mir2-web3/apps/gateway/src/zone_metrics.rs",
+      "bytes": 18356,
+      "sha256": "37ac259c5ef95948299b16887db435f04869ab9e6ecd569d7c478df230d1e3a8"
+    },
+    {
+      "path": "mir2-web3/apps/gateway/src/zone_rpc.rs",
+      "bytes": 367763,
+      "sha256": "f284a38c43131c823626633ba463feb9f6e44fc67a3c233acf0a98f77bbcad37"
+    },
+    {
+      "path": "mir2-web3/apps/gateway/src/zone_rpc/native_attack_tests.rs",
+      "bytes": 18382,
+      "sha256": "d4bd13def0f8d046cc1bb485ae59dc275a6e680688df2afc225ceec3138f4bb7"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/Cargo.toml",
+      "bytes": 812,
+      "sha256": "5903a066b9838cde6d52ba654a04587c9b2149f2b944bb897337ca2127b64942"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/lib.rs",
+      "bytes": 7153,
+      "sha256": "3b7bcf3abfa84ad25fdb0aa8857439aa870f154549dd98168ae319739e4c25dc"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/zone/contract.rs",
+      "bytes": 20853,
+      "sha256": "47b979f5532c6e7183fb814614de393a6e9662d0cca55a57bb276d6b6e532c9a"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/zone/manager_admission.rs",
+      "bytes": 14691,
+      "sha256": "04d678c450f508e8c1cec30b6880660a3d6556cbf0f28d278e20136960b4fe6a"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/zone/manager.rs",
+      "bytes": 63790,
+      "sha256": "0b9336668ecfd6958fac641060cb8b0a030fb12cee57aabb4656411b2f0dbd30"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/zone/mod.rs",
+      "bytes": 2486,
+      "sha256": "f85dfd8eb808d360a37d5394e0829a85783c3b2265754acd21da4101ccddbd17"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/zone/runtime.rs",
+      "bytes": 749298,
+      "sha256": "d19840e87e6b2e718303d90d02a03e8c1c4941e069f0b168d9d253644950f3b6"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/zone/runtime/checkpoint.rs",
+      "bytes": 95833,
+      "sha256": "401acaf3f91d83ec50e7e14689aeda0dbd348f4423ebee6bf02ac0576e270276"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/zone/runtime/combat_random_checkpoint_tests.rs",
+      "bytes": 4781,
+      "sha256": "a8c97bac5497fd66235109251c32b151b417ae008395241a6aea97b9f503be00"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/zone/runtime/combat_random_tests.rs",
+      "bytes": 3307,
+      "sha256": "ac4d8ff54145782ca96683e637bcf3f8bcdd780b259d4f2898f6d5dac0edf6f6"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/zone/runtime/combat_random.rs",
+      "bytes": 3229,
+      "sha256": "f9e431d281c16af0961f8d254d8215908fa02813d9e589ff29a7f03c2be49066"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/zone/runtime/experience_ownership.rs",
+      "bytes": 26376,
+      "sha256": "e1a178d316dccb794cf6d36ce72e802fd5ecd372c0f929425b42f7192a0c6137"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/zone/runtime/mining.rs",
+      "bytes": 12551,
+      "sha256": "e1bf408ff0125021928a13e678aae65ef6413b6c57ab5460ec7d2ee6d98d98ce"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/zone/runtime/owned_pet_combat_tests.rs",
+      "bytes": 80522,
+      "sha256": "edbb31213088ca8e0b59b804e57a3f5ac1319e29e957eac5332e9509d891e22f"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/zone/runtime/owned_pet_combat.rs",
+      "bytes": 207260,
+      "sha256": "3fcbff68a7dfafb54620992fd5d7c339f403bfb603ee6cc45fb6ee8f221d49bc"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/zone/runtime/owned_pet_random_tests.rs",
+      "bytes": 8041,
+      "sha256": "75e72b073849d14f52f86126c7b66a1d0180d1e69830db4e491ac8d46fec9af7"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/zone/types.rs",
+      "bytes": 64392,
+      "sha256": "681de43d73cee93ad246c65dd2cc5963fe45475f76f348c4146edd51cb6c7488"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/world_runtime.rs",
+      "bytes": 81407,
+      "sha256": "c190ffecd81d6fc3f5918b3524bc19e13abe770f9844a095caf105cad64734bc"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/tests/zone_manager_admission_contract.rs",
+      "bytes": 19135,
+      "sha256": "7f16d2302ce57e32aa21eaeec64406baa0f5af9b5074e9f69e8d824b76463dfe"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/tests/zone_partition_contract.rs",
+      "bytes": 14196,
+      "sha256": "710049134fa4924508a2480bd0ac040e303f8eee9a97b6a092292889a7f97ec9"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/tests/zone_partition_identity_contract.rs",
+      "bytes": 11438,
+      "sha256": "88b391a9ed19c2daf261f6a9372a90154d8e3f2b93adf24639d2e81ddc6aef24"
+    },
+    {
+      "path": "mir2-web3/Cargo.lock",
+      "bytes": 250739,
+      "sha256": "1b5b2a34fb5d6c055c089d17ca6ce15ffd2a9f363504b9390d648c0be9831a98"
+    },
+    {
+      "path": "mir2-web3/Cargo.toml",
+      "bytes": 365,
+      "sha256": "6de1c26df325285aa51515e99abe32677775b3396aa6e8a83a0983deee3500ac"
+    }
+  ],
+  "sourceAfter": [
+    {
+      "path": "mir2-web3/.cargo/config.toml",
+      "bytes": 30,
+      "sha256": "17d6d9fdca4859d571020695c0af7fefd2589200d6277be62762605c0d78bdab"
+    },
+    {
+      "path": "mir2-web3/apps/gateway/Cargo.toml",
+      "bytes": 3230,
+      "sha256": "00f0762eb427f84d0963951ddc8cef332a3ed6c8f0209b47bd7bfa2f0235cf40"
+    },
+    {
+      "path": "mir2-web3/apps/gateway/src/attack_protocol.rs",
+      "bytes": 11818,
+      "sha256": "6d230edd0fd1903b411cb05ffb2cef8d0c2852fafc3ae3b0a568a6745923a7f6"
+    },
+    {
+      "path": "mir2-web3/apps/gateway/src/bin/seed_capacity_accounts.rs",
+      "bytes": 20499,
+      "sha256": "898d3af764856e6a304a263b2737671e24baa1306bcf5d93789d5db95102c085"
+    },
+    {
+      "path": "mir2-web3/apps/gateway/src/lib.rs",
+      "bytes": 11322,
+      "sha256": "c4c7350abe5225c1dbc1d92c91dcdc894bac9adc44cc14c8398cc8c905768ce7"
+    },
+    {
+      "path": "mir2-web3/apps/gateway/src/routing.rs",
+      "bytes": 1389827,
+      "sha256": "9135f2f3a019b04c1bb6ffe3717f730c65632df4e642702057bfbf7a699564de"
+    },
+    {
+      "path": "mir2-web3/apps/gateway/src/routing/partition_binding.rs",
+      "bytes": 25213,
+      "sha256": "bd38a834e6855082ee4ae694d16f8113e91057d2904ecb99020b15500b7a2654"
+    },
+    {
+      "path": "mir2-web3/apps/gateway/src/routing/partition_directory.rs",
+      "bytes": 11932,
+      "sha256": "cd6483ba6159a35f807ff3f90821617988e4a784159249e5c40be78313d0193e"
+    },
+    {
+      "path": "mir2-web3/apps/gateway/src/routing/tests/mining_tests.rs",
+      "bytes": 41476,
+      "sha256": "00e63dc060d585c27cfa032a6ac71254e1e6fb5dc564df0fc46072e6f5737121"
+    },
+    {
+      "path": "mir2-web3/apps/gateway/src/routing/tests/native_attack_outcome_tests.rs",
+      "bytes": 17228,
+      "sha256": "642924834f1db4dbaa7d8a7ca7670b1ee2bc13e340b65eaac0ee0a0dd7c730f6"
+    },
+    {
+      "path": "mir2-web3/apps/gateway/src/routing/tests/personal_monster_projection_tests.rs",
+      "bytes": 30640,
+      "sha256": "fe507e961403679b3b92f23986dff3f53bb52a5c528fae251dd2f7ec546197f0"
+    },
+    {
+      "path": "mir2-web3/apps/gateway/src/session.rs",
+      "bytes": 112616,
+      "sha256": "ef6bcedb2bee850de6461f0352c930f4be9f50197cae088d6d64286b3bd2fb6c"
+    },
+    {
+      "path": "mir2-web3/apps/gateway/src/spectator.rs",
+      "bytes": 58692,
+      "sha256": "3aa1ea329da20cb827440a67329d5af77251b666fff9e135125d9742ae9f0a6f"
+    },
+    {
+      "path": "mir2-web3/apps/gateway/src/web_live_overflow_tests.rs",
+      "bytes": 29131,
+      "sha256": "d0dabc744d4001163cd3f57443bbf0fa22cd279ad8e1d66d5b37840ee132a2fa"
+    },
+    {
+      "path": "mir2-web3/apps/gateway/src/web_transport_close_tests.rs",
+      "bytes": 5814,
+      "sha256": "11d946af65af9a4bad38d3879348c48a87bbf4b3d8abae15a8bb50f18e9425e5"
+    },
+    {
+      "path": "mir2-web3/apps/gateway/src/web.rs",
+      "bytes": 855687,
+      "sha256": "769186e87e166a7ba0fbb971463c8e0ae2b4dd119292798badee3b8e28522dd6"
+    },
+    {
+      "path": "mir2-web3/apps/gateway/src/zone_metrics.rs",
+      "bytes": 18356,
+      "sha256": "37ac259c5ef95948299b16887db435f04869ab9e6ecd569d7c478df230d1e3a8"
+    },
+    {
+      "path": "mir2-web3/apps/gateway/src/zone_rpc.rs",
+      "bytes": 367763,
+      "sha256": "f284a38c43131c823626633ba463feb9f6e44fc67a3c233acf0a98f77bbcad37"
+    },
+    {
+      "path": "mir2-web3/apps/gateway/src/zone_rpc/native_attack_tests.rs",
+      "bytes": 18382,
+      "sha256": "d4bd13def0f8d046cc1bb485ae59dc275a6e680688df2afc225ceec3138f4bb7"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/Cargo.toml",
+      "bytes": 812,
+      "sha256": "5903a066b9838cde6d52ba654a04587c9b2149f2b944bb897337ca2127b64942"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/lib.rs",
+      "bytes": 7153,
+      "sha256": "3b7bcf3abfa84ad25fdb0aa8857439aa870f154549dd98168ae319739e4c25dc"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/zone/contract.rs",
+      "bytes": 20853,
+      "sha256": "47b979f5532c6e7183fb814614de393a6e9662d0cca55a57bb276d6b6e532c9a"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/zone/manager_admission.rs",
+      "bytes": 14691,
+      "sha256": "04d678c450f508e8c1cec30b6880660a3d6556cbf0f28d278e20136960b4fe6a"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/zone/manager.rs",
+      "bytes": 63790,
+      "sha256": "0b9336668ecfd6958fac641060cb8b0a030fb12cee57aabb4656411b2f0dbd30"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/zone/mod.rs",
+      "bytes": 2486,
+      "sha256": "f85dfd8eb808d360a37d5394e0829a85783c3b2265754acd21da4101ccddbd17"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/zone/runtime.rs",
+      "bytes": 749298,
+      "sha256": "d19840e87e6b2e718303d90d02a03e8c1c4941e069f0b168d9d253644950f3b6"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/zone/runtime/checkpoint.rs",
+      "bytes": 95833,
+      "sha256": "401acaf3f91d83ec50e7e14689aeda0dbd348f4423ebee6bf02ac0576e270276"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/zone/runtime/combat_random_checkpoint_tests.rs",
+      "bytes": 4781,
+      "sha256": "a8c97bac5497fd66235109251c32b151b417ae008395241a6aea97b9f503be00"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/zone/runtime/combat_random_tests.rs",
+      "bytes": 3307,
+      "sha256": "ac4d8ff54145782ca96683e637bcf3f8bcdd780b259d4f2898f6d5dac0edf6f6"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/zone/runtime/combat_random.rs",
+      "bytes": 3229,
+      "sha256": "f9e431d281c16af0961f8d254d8215908fa02813d9e589ff29a7f03c2be49066"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/zone/runtime/experience_ownership.rs",
+      "bytes": 26376,
+      "sha256": "e1a178d316dccb794cf6d36ce72e802fd5ecd372c0f929425b42f7192a0c6137"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/zone/runtime/mining.rs",
+      "bytes": 12551,
+      "sha256": "e1bf408ff0125021928a13e678aae65ef6413b6c57ab5460ec7d2ee6d98d98ce"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/zone/runtime/owned_pet_combat_tests.rs",
+      "bytes": 80522,
+      "sha256": "edbb31213088ca8e0b59b804e57a3f5ac1319e29e957eac5332e9509d891e22f"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/zone/runtime/owned_pet_combat.rs",
+      "bytes": 207260,
+      "sha256": "3fcbff68a7dfafb54620992fd5d7c339f403bfb603ee6cc45fb6ee8f221d49bc"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/zone/runtime/owned_pet_random_tests.rs",
+      "bytes": 8041,
+      "sha256": "75e72b073849d14f52f86126c7b66a1d0180d1e69830db4e491ac8d46fec9af7"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/zone/types.rs",
+      "bytes": 64392,
+      "sha256": "681de43d73cee93ad246c65dd2cc5963fe45475f76f348c4146edd51cb6c7488"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/world_runtime.rs",
+      "bytes": 81407,
+      "sha256": "c190ffecd81d6fc3f5918b3524bc19e13abe770f9844a095caf105cad64734bc"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/tests/zone_manager_admission_contract.rs",
+      "bytes": 19135,
+      "sha256": "7f16d2302ce57e32aa21eaeec64406baa0f5af9b5074e9f69e8d824b76463dfe"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/tests/zone_partition_contract.rs",
+      "bytes": 14196,
+      "sha256": "710049134fa4924508a2480bd0ac040e303f8eee9a97b6a092292889a7f97ec9"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/tests/zone_partition_identity_contract.rs",
+      "bytes": 11438,
+      "sha256": "88b391a9ed19c2daf261f6a9372a90154d8e3f2b93adf24639d2e81ddc6aef24"
+    },
+    {
+      "path": "mir2-web3/Cargo.lock",
+      "bytes": 250739,
+      "sha256": "1b5b2a34fb5d6c055c089d17ca6ce15ffd2a9f363504b9390d648c0be9831a98"
+    },
+    {
+      "path": "mir2-web3/Cargo.toml",
+      "bytes": 365,
+      "sha256": "6de1c26df325285aa51515e99abe32677775b3396aa6e8a83a0983deee3500ac"
+    }
+  ],
+  "sourceUnchangedBeforeAfter": true,
+  "sourcePins": [
+    {
+      "path": "mir2-web3/apps/gateway/src/routing.rs",
+      "bytes": 1389827,
+      "sha256": "9135f2f3a019b04c1bb6ffe3717f730c65632df4e642702057bfbf7a699564de"
+    },
+    {
+      "path": "mir2-web3/apps/gateway/src/routing/tests/personal_monster_projection_tests.rs",
+      "bytes": 30640,
+      "sha256": "fe507e961403679b3b92f23986dff3f53bb52a5c528fae251dd2f7ec546197f0"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/zone/runtime.rs",
+      "bytes": 749298,
+      "sha256": "d19840e87e6b2e718303d90d02a03e8c1c4941e069f0b168d9d253644950f3b6"
+    }
+  ],
+  "selectedExactNames": [
+    "attack_protocol::tests::auth_and_active_actor_are_required_before_any_reservation",
+    "attack_protocol::tests::completion_cannot_change_reserved_actor_and_errors_never_expose_internal_details",
+    "attack_protocol::tests::eviction_never_revives_old_request_and_ambiguous_execution_blocks_new_mutation",
+    "attack_protocol::tests::replay_resends_result_without_reexecution_and_changed_payload_or_actor_is_denied",
+    "attack_protocol::tests::strict_original_bytes_reject_unknown_duplicate_missing_and_noncanonical_fields",
+    "control_plane::tests::scheduler_spreads_replicas_across_failure_domains_and_keeps_a_stable_lease",
+    "economy::prepared_kill::tests::prepared_kill_postgres_source_guild_ledger_rollback_and_exact_checkpoint_replay",
+    "routing::partition_binding::tests::partition_binding_admission_is_stable_across_owner_handoff_and_cold_restore",
+    "routing::partition_binding::tests::partition_binding_cold_restore_derives_routes_without_reactivating_snapshot_owner",
+    "routing::partition_binding::tests::partition_binding_factory_rejects_legacy_cross_domain_identity_ambiguity",
+    "routing::partition_binding::tests::partition_binding_in_process_requests_share_the_domain_guard",
+    "routing::partition_binding::tests::partition_binding_real_join_projects_existing_domain_and_validated_owner",
+    "routing::partition_binding::tests::partition_binding_rejects_wrong_execution_domain_before_real_join_mutation",
+    "routing::partition_binding::tests::partition_binding_stale_lease_and_unknown_partition_do_not_mutate_state",
+    "routing::partition_binding::tests::partition_binding_unvalidated_host_cannot_observe_an_active_owner",
+    "routing::partition_directory::tests::global_directory_is_committed_and_strictly_validated_before_restore",
+    "routing::partition_directory::tests::legacy_factory_v2_migrates_without_importing_owner_authority",
+    "routing::partition_directory::tests::wrong_world_in_later_manager_does_not_partially_replace_live_state",
+    "routing::shared_conquest::tests::conquest_observation_uses_live_zone_state_and_excludes_dead_offline_fenced_replicas",
+    "routing::shared_conquest::tests::conquest_replica_registry_failure_is_visible_and_cannot_become_empty_palace",
+    "routing::tests::abnormal_teardown_zone_drain_tests::abrupt_teardown_rolls_back_unmatched_debited_trade_before_checkpoint",
+    "routing::tests::atomic_world_checkpoint_restore_preserves_factory_when_later_zone_is_invalid",
+    "routing::tests::atomic_world_checkpoint_restore_preserves_replica_state_and_tick_flags",
+    "routing::tests::checkpoint_handoff_repairs_a_stale_target_projection_before_commit",
+    "routing::tests::checkpoint_restore_requires_pending_drop_claims_to_match_presence_and_zone",
+    "routing::tests::commit_ack_unknown_ground_claim_is_checkpointed_and_retried_without_restore",
+    "routing::tests::cross_map_drop_lifecycle_tests::cold_world_checkpoint_keeps_source_item_payload_and_ttl_but_revokes_all_online_owners",
+    "routing::tests::crowded_fixture_transport_tests::crowded_fixture_normal_websocket_three_class_attack_escape_cohort",
+    "routing::tests::economy_source_sequence_survives_checkpoint_and_exhaustion_fails_closed",
+    "routing::tests::failed_replica_promotion_preserves_the_replica_marker",
+    "routing::tests::first_resource_creation_honors_an_existing_replica_marker",
+    "routing::tests::gateway_ordinary_accepted_attack_prepares_passive_slaying_without_mana",
+    "routing::tests::gateway_refreshes_mount_attack_capability_before_each_melee_intent",
+    "routing::tests::handoff_local_collision_rejects_changed_admission_and_drops_prepared_presence",
+    "routing::tests::health_zero_authority_tests::health_zero_registered_owner_full_channel_keeps_global_attack_until_one_wire_rebase",
+    "routing::tests::legacy_checkpoint_heals_are_migrated_before_new_signed_damage",
+    "routing::tests::legacy_checkpoint_pending_packets_are_truncated_on_restore",
+    "routing::tests::mining_tests::mining_breaking_pick_refreshes_shared_ac_hp_before_next_attack",
+    "routing::tests::mining_tests::mining_ordinary_attack_ingress_rejects_immediate_spam_and_non_mining_spell",
+    "routing::tests::mining_tests::mining_original_d401_strict_checkpoint_restores_stone_clock_and_pending_effect",
+    "routing::tests::mining_tests::mining_original_free_space_rule_prefers_bag2_then_belt_and_full_inventory_still_wears",
+    "routing::tests::mining_tests::mining_save_failure_rolls_back_exact_item_uid_tool_and_shared_stone",
+    "routing::tests::mining_tests::mining_source_ore_sells_at_purity_price_and_unloaded_pick_repairs_normally",
+    "routing::tests::mining_tests::mining_three_classes_buy_equip_mine_exact_uid_purity_and_save_reload",
+    "routing::tests::mining_tests::mining_uncertain_file_publication_retains_one_durable_award_and_freezes_retries",
+    "routing::tests::movement_deadline_tests::movement_deadline_gateway_dispatches_due_move_without_maintenance_and_freeze_suppresses_wake",
+    "routing::tests::movement_deadline_tests::movement_deadline_maintenance_cost_does_not_drift_and_late_ticks_skip_burst",
+    "routing::tests::movement_deadline_tests::movement_deadline_owner_wakes_without_maintenance_even_with_pending_inputs",
+    "routing::tests::native_attack_outcome_tests::a_launched_swing_does_not_require_positive_damage",
+    "routing::tests::native_attack_outcome_tests::authentication_and_actual_registered_actor_are_required_before_dispatch",
+    "routing::tests::native_attack_outcome_tests::cooldown_and_out_of_range_are_not_launched",
+    "routing::tests::native_attack_outcome_tests::earlier_owner_animation_in_predrain_does_not_admit_this_rejected_attack",
+    "routing::tests::native_attack_outcome_tests::full_live_fifo_cannot_revoke_a_launched_attack",
+    "routing::tests::native_attack_outcome_tests::launched_result_preserves_ordinary_owner_and_peer_animation_identity",
+    "routing::tests::native_attack_outcome_tests::manager_admission_overflow_is_an_error_not_a_missing_animation_rejection",
+    "routing::tests::native_attack_outcome_tests::missing_target_is_not_launched_and_still_returns_the_ordinary_correction",
+    "routing::tests::native_attack_outcome_tests::owner_domain_mismatch_is_rejected_before_the_shared_pipeline",
+    "routing::tests::native_attack_outcome_tests::post_dispatch_failure_and_missing_observation_remain_unknown",
+    "routing::tests::native_attack_outcome_tests::private_runtime_defaults_to_unsupported_without_executing_legacy_attack",
+    "routing::tests::native_attack_outcome_tests::session_bridge_requires_authentication_and_uses_the_shared_typed_route",
+    "routing::tests::native_attack_outcome_tests::stale_owner_lease_cannot_enter_the_typed_runtime",
+    "routing::tests::native_attack_outcome_tests::strict_dispatch_preserves_authority_errors_without_fabricating_a_decision",
+    "routing::tests::native_attack_outcome_tests::teardown_fence_never_becomes_not_launched",
+    "routing::tests::ordered_economy_replay_tests::hosted_verified_economy_replay_preserves_ordering_and_next_direct_request",
+    "routing::tests::owner_attack_animation_tests::public_melee_attack_uses_local_actor_for_owner_and_zone_actor_for_observer",
+    "routing::tests::owner_health_packet_rebases_zone_object_id_to_local_player_id",
+    "routing::tests::owner_health_sync_tests::owner_health_routing_actual_town_revive_tail_preserves_new_life_damage",
+    "routing::tests::owner_health_sync_tests::owner_health_routing_authenticated_key_sun_potion_publishes_exact_pools_once",
+    "routing::tests::owner_health_sync_tests::owner_health_routing_authenticated_key_town_scroll_commits_same_map_relocation",
+    "routing::tests::owner_health_sync_tests::owner_health_routing_cast_and_toggle_cannot_overtake_mp_on_the_live_channel",
+    "routing::tests::owner_health_sync_tests::owner_health_routing_closed_at_fifo_cap_preserves_normal_death_for_source_drain",
+    "routing::tests::owner_health_sync_tests::owner_health_routing_confirmed_level_keeps_ceiling_but_cannot_replay_old_life_refill",
+    "routing::tests::owner_health_sync_tests::owner_health_routing_duplicate_reverse_sequence_and_payload_tamper_fail_closed",
+    "routing::tests::owner_health_sync_tests::owner_health_routing_exact_hp_then_mp_uses_only_owner_channel",
+    "routing::tests::owner_health_sync_tests::owner_health_routing_full_channel_preserves_death_then_health_then_revived_fifo",
+    "routing::tests::owner_health_sync_tests::owner_health_routing_late_old_cancellation_cannot_replace_current_signal",
+    "routing::tests::owner_health_sync_tests::owner_health_routing_live_queued_level_is_saved_in_actual_fenced_teardown",
+    "routing::tests::owner_health_sync_tests::owner_health_routing_mentor_peer_uses_confirmed_source_level_before_viewport_refresh",
+    "routing::tests::owner_health_sync_tests::owner_health_routing_mentor_source_level_graduates_immediately_and_during_fenced_teardown",
+    "routing::tests::owner_health_sync_tests::owner_health_routing_metadata_tail_cannot_overwrite_a_later_shared_death",
+    "routing::tests::owner_health_sync_tests::owner_health_routing_normal_drug_tick_starts_at_latest_zone_hp_and_keeps_recovery",
+    "routing::tests::owner_health_sync_tests::owner_health_routing_overload_closes_instead_of_silently_truncating_tcp_health",
+    "routing::tests::owner_health_sync_tests::owner_health_routing_personal_delta_cannot_cross_replaced_teardown_fence",
+    "routing::tests::owner_health_sync_tests::owner_health_routing_personal_potion_cannot_revive_a_concurrent_death_or_new_life",
+    "routing::tests::owner_health_sync_tests::owner_health_routing_personal_potion_delta_preserves_a_concurrent_zone_hit",
+    "routing::tests::owner_health_sync_tests::owner_health_routing_queued_old_life_is_rejected_after_revive_without_cache_tick",
+    "routing::tests::owner_health_sync_tests::owner_health_routing_replaced_registration_and_cold_state_reject_old_capability",
+    "routing::tests::owner_health_sync_tests::owner_health_routing_repository_admission_can_acquire_zone_while_personal_tick_waits",
+    "routing::tests::owner_health_sync_tests::owner_health_routing_same_life_history_survives_lethal_commit",
+    "routing::tests::owner_health_sync_tests::owner_health_routing_social_receipts_survive_bootstrap_and_checkpoint",
+    "routing::tests::owner_health_sync_tests::owner_health_routing_unchanged_mirror_does_not_advance_an_extra_personal_tick",
+    "routing::tests::player_attack_routes_to_finalized_world_event_monster",
+    "routing::tests::ranking_inspect_registry_fence_rejects_replaced_arc_and_changed_replica_set",
+    "routing::tests::ranking_inspect_replica_absence_is_unknown_and_live_missing_projection_is_not_offline",
+    "routing::tests::shared_in_process_registry_routes_monster_attack_through_zone_native_combat",
+    "routing::tests::shared_in_process_runtime_rejects_early_range_attack_at_zone_boundary",
+    "routing::tests::shared_in_process_runtime_routes_range_attack_through_shared_zone",
+    "routing::tests::shared_player_kill_source_tests::actual_player_death_known_source_failure_cold_checkpoint_retry_publishes_then_acknowledges_once",
+    "routing::tests::shared_runtime_npc_teleport_checkpoint_failure_rolls_back_before_dispatch",
+    "routing::tests::shared_zone_mutation_gate_runs_zones_in_parallel_but_fences_host_checkpoint",
+    "routing::tests::trade_invitation_tests::world_checkpoint_drops_all_online_trade_links",
+    "routing::tests::world_checkpoint_removes_sessions_players_and_pending_packets",
+    "routing::tests::zone_journey_event_bridge_tests::zone_journey_event_is_owner_bound_deduplicated_and_checkpointed",
+    "routing::tests::zone_skill_cadence_tests::owner_health_registered_melee_consumes_flame_and_orders_reset_after_attack",
+    "routing::tests::zone_skill_cadence_tests::owner_health_registered_three_class_casts_commit_personal_mp_and_cooldown",
+    "routing::tests::zone_soulfire_practice_tests::zone_fireball_practice_owner_only_spell_aware_dedupe_and_checkpoint_replay",
+    "routing::tests::zone_soulfire_practice_tests::zone_magic_practice_legacy_soulfire_checkpoint_preserves_pending_and_replay_fence",
+    "routing::tests::zone_soulfire_practice_tests::zone_soulfire_practice_normal_teardown_checkpoint_includes_prior_resolved_practice",
+    "routing::tests::zone_soulfire_practice_tests::zone_soulfire_practice_pending_and_dedupe_progress_survive_shared_checkpoint",
+    "session::abnormal_teardown_persistence_tests::db_and_journal_failure_retain_frozen_authority_and_retry_same_checkpoint",
+    "session::abnormal_teardown_persistence_tests::db_failure_journals_the_exact_frozen_checkpoint_and_revokes_resume_eligibility",
+    "session::abnormal_teardown_persistence_tests::owner_lease_handoff_racing_prepare_is_rejected_before_cache_or_persistence",
+    "session::save_fail_closed_tests::failed_handoff_rollback_persistence_is_reported_as_not_durable",
+    "session::tests::gateway_session_refreshes_finalized_zone_owner_after_handoff",
+    "session::tests::gateway_session_rejects_superseded_zone_owner_after_handoff",
+    "session::tests::gateway_session_rejects_zone_owner_renewal_after_handoff",
+    "session::tests::hosted_zone_owner_runtime_handoff_moves_state_to_next_owner_host",
+    "session::tests::native_attack_result_binding_is_checked_before_session_identity_changes",
+    "web::tests::attack_v2_socket_reparses_original_bytes_and_rejects_unknown_fields",
+    "web::tests::attack_v2_socket_tag_cannot_fall_back_to_legacy_gameplay_dispatch",
+    "web::tests::mining_websocket_tests::mining_real_websocket_attack_direction_refill_cooldown_logout_and_reentry",
+    "web::tests::slow_stage_threshold_accepts_only_positive_milliseconds",
+    "web::tests::socket_serial_guard_blocks_zone_bypass_until_action_finishes",
+    "web::tests::web_session_save_queue_flushes_on_checkpoint_and_close",
+    "web::web_live_overflow_tests::owner_health_web_current_health_is_sent_once_before_next_normal_packet",
+    "web::web_live_overflow_tests::owner_health_web_final_gate_rejects_already_dequeued_stale_health",
+    "web::web_live_overflow_tests::owner_health_web_validation_failure_cancels_the_whole_current_transport",
+    "world_director::tests::runtime_service_reports_durable_checkpoint_write_failures",
+    "zone_metrics::tests::count_sum_and_duration_overflow_are_explicit_and_never_wrap_to_healthy",
+    "zone_metrics::tests::empty_histograms_have_no_invented_quantiles_and_fixed_acceptance_bounds",
+    "zone_metrics::tests::exact_budget_boundary_and_submicrosecond_overrun_cannot_round_down_to_pass",
+    "zone_metrics::tests::fixed_storage_and_concurrent_observations_retain_every_count_without_labels",
+    "zone_metrics::tests::nearest_rank_quantiles_report_bucket_upper_bounds_at_p99_and_p999",
+    "zone_metrics::tests::overflow_quantiles_are_unknown_even_when_the_observed_maximum_is_finite",
+    "zone_metrics::tests::poison_is_visible_in_snapshot_and_does_not_crash_command_instrumentation",
+    "zone_metrics::tests::request_outcomes_and_both_deadline_kinds_remain_separate",
+    "zone_rpc::character_handoff_rpc_tests::handoff_actual_hosted_rpc_binds_saved_source_replays_verified_journal_and_retires_failed_target",
+    "zone_rpc::character_handoff_rpc_tests::handoff_password_account_base_snapshot_restore_does_not_convert_credentials",
+    "zone_rpc::native_attack_tests::absent_typed_result_after_dispatch_is_unknown_instead_of_nonlaunch",
+    "zone_rpc::native_attack_tests::incomplete_or_corrupt_wire_results_never_default_to_nonlaunch",
+    "zone_rpc::native_attack_tests::invalid_production_requests_fail_before_contacting_the_endpoint",
+    "zone_rpc::native_attack_tests::lost_reply_never_contacts_another_endpoint_or_replays_generic_attack",
+    "zone_rpc::native_attack_tests::old_host_is_probed_but_receives_no_attack_or_generic_execute",
+    "zone_rpc::native_attack_tests::real_host_promotion_and_sequence_gates_cover_dedicated_attack",
+    "zone_rpc::native_attack_tests::real_host_rejects_stale_owner_before_entering_runtime",
+    "zone_rpc::native_attack_tests::real_host_rejects_unauthenticated_and_mismatched_world_before_runtime_or_journal",
+    "zone_rpc::native_attack_tests::real_standby_rejects_dedicated_attack_before_session_creation",
+    "zone_rpc::native_attack_tests::retrying_rpc_helper_cannot_send_the_dedicated_mutation",
+    "zone_rpc::native_attack_tests::typed_errors_keep_unsupported_preflight_and_unknown_distinct",
+    "zone_rpc::native_attack_tests::typed_launch_and_nonlaunch_survive_json_and_messagepack_without_packet_inference",
+    "zone_rpc::npc_purchase_owner_route_tests::durable_actual_local_and_hosted_purchase_replay_preserve_receipt_checkpoint_and_authority",
+    "zone_rpc::npc_purchase_owner_route_tests::durable_lease_handoff_refuses_stale_debit_and_recovers_exact_original_operation",
+    "zone_rpc::npc_purchase_owner_route_tests::durable_library_host_dispatch_fences_auth_version_lease_and_records_only_replay_checkpoint",
+    "zone_rpc::owner_health_sync_tests::owner_health_rpc_changed_map_rebuilds_host_registration_and_new_drug_still_arrives",
+    "zone_rpc::owner_health_sync_tests::owner_health_rpc_concurrent_refresh_keeps_the_installed_registration_current",
+    "zone_rpc::owner_health_sync_tests::owner_health_rpc_drain_never_serializes_a_private_cancellation_sentinel",
+    "zone_rpc::owner_health_sync_tests::owner_health_rpc_old_viewport_is_skipped_without_renumbering_or_losing_social_receipts",
+    "zone_rpc::owner_health_sync_tests::owner_health_rpc_retained_expired_frame_keeps_sequence_until_normal_ack",
+    "zone_rpc::owner_health_sync_tests::owner_health_rpc_source_overflow_requires_resync_and_cancels_remote_transport",
+    "zone_rpc::owner_health_sync_tests::owner_health_rpc_validation_is_authenticated_read_only_and_rejects_wrong_source",
+    "zone_rpc::replication_sequence_exhaustion_tests::authenticated_economy_fails_before_runtime_and_store_when_sequence_is_exhausted",
+    "routing::tests::personal_tick_drops_shared_monster_motion_but_preserves_other_packets",
+    "routing::tests::observer_aoi_remove_does_not_tombstone_retained_native_monster_globally",
+    "routing::tests::shared_map_sync_preserves_zone_native_monster_authority",
+    "routing::tests::shared_gateway_tick_does_not_run_private_monster_authority",
+    "routing::tests::shared_zone_state_records_object_monster_spawn_packet",
+    "routing::tests::shared_zone_seeds_distant_current_map_monsters_for_later_owner_aoi_entry",
+    "routing::tests::shared_zone_state_preserves_owned_generated_entity_owner_during_snapshot_merge",
+    "routing::tests::shared_zone_state_save_transform_updates_presence_before_pending_drain",
+    "routing::tests::private_monster_snapshot_tests::shared_snapshot_omits_buried_zombie_until_real_three_cell_reveal",
+    "routing::tests::private_monster_snapshot_tests::shared_snapshot_visibility_survives_aoi_leave_rejoin_and_never_reburies_zombie",
+    "routing::tests::private_monster_snapshot_tests::shared_snapshot_private_plants_do_not_hide_stone_zuma_or_owned_summon_metadata",
+    "routing::tests::private_monster_snapshot_tests::shared_snapshot_map_transition_and_global_remove_do_not_resurrect_private_actors",
+    "routing::tests::pending_zone_aoi_tests::town_revive_discards_stale_queued_spawn_and_reentering_aoi_gets_one_fresh_spawn",
+    "routing::tests::pending_zone_aoi_tests::authoritative_zone_death_discards_queued_live_spawn_and_positive_health",
+    "routing::tests::live_aoi_order_tests::live_aoi_order_old_direct_remove_cannot_delete_new_live_reentry",
+    "routing::tests::live_aoi_order_tests::live_aoi_order_old_live_create_cannot_resurrect_after_new_direct_remove",
+    "routing::tests::live_aoi_order_tests::live_aoi_order_personal_flush_cannot_bypass_backlog_but_owner_location_has_priority",
+    "routing::tests::live_aoi_order_tests::live_aoi_order_monster_lifecycle_and_personal_rewards_keep_the_existing_direct_path",
+    "routing::tests::harvest_corpse_expiry_tests::expired_shared_harvest_corpse_leaves_gateway_projection_until_scheduled_revive",
+    "routing::tests::harvest_corpse_expiry_tests::unobserved_harvest_corpse_expiry_is_reconciled_without_a_remove_recipient",
+    "routing::tests::incremental_monster_hydration_tests::async_walk_into_aoi_hydrates_actual_distant_manifest_spawn_on_serialized_drain",
+    "routing::tests::zone_journey_event_bridge_tests::public_v2_safe_arrival_pending_walk_survives_autosave_before_tick",
+    "routing::tests::zone_journey_event_bridge_tests::public_v2_pending_safe_zone_snapshot_follows_zone_before_private_tick",
+    "routing::tests::personal_monster_projection_tests::harvested_zone_corpse_blocks_reactivated_personal_live_projection_until_zone_revive",
+    "routing::tests::personal_monster_projection_tests::projection_filter_preserves_owner_pet_and_unadmitted_initial_monster"
+  ],
+  "selectedCount": 186,
+  "exitCode": 101,
+  "expectedSummaryMatched": false,
+  "focusedNewNineNotRepeated": true,
+  "ignoredAreNotPassed": true,
+  "log": {
+    "path": "C:\\mir2-build\\p01-completion-20261024\\probe14-personal-projection-adjacent-v1.log",
+    "bytes": 79905,
+    "sha256": "3ab8730b424cd5847e6776d994583a927922de0472c65f7b17a40ff4f95cb640"
+  },
+  "capacityAccepted": false
+}

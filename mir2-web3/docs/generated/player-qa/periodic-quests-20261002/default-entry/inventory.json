@@ -1,0 +1,41 @@
+{
+  "schema": 1,
+  "source": "C:\\mir2-default-entry-20261002",
+  "files": [
+    {
+      "path": "default-entry-worker-receipt.json",
+      "size": 3212,
+      "sha256": "65810b81b4dd2a51317fcfc1b9626b3df137f832166584ed3c2f931cb34b1e90"
+    },
+    {
+      "path": "native-entry-before.log",
+      "size": 12664,
+      "sha256": "53cd3b20707c44c2348b8e508ac31949e60d9769d3cc2401df61d2daa6a9fcde"
+    },
+    {
+      "path": "connection-notice-before.log",
+      "size": 10226,
+      "sha256": "9df9f75b14d55c5e4fcc1d7161b5e57057a4e02140e8cb8ef2e01c7fa1c08486"
+    },
+    {
+      "path": "native-entry-before-attempt2.log",
+      "size": 47455,
+      "sha256": "ee0d83c22b486e008f54197f5f3db3929312a976fcb12f12dcf6e260a442e4fe"
+    },
+    {
+      "path": "connection-notice-before-attempt2.log",
+      "size": 29724,
+      "sha256": "4471071880111a1b32cb0abc400b7827bb838dbce127c622103e171e843bd4d7"
+    },
+    {
+      "path": "native-session-after.log",
+      "size": 45638,
+      "sha256": "2cedcd68081ac386ddf2a3512438fb68068378a38c133de7549f660464e763bb"
+    },
+    {
+      "path": "native-shell-ui-after.log",
+      "size": 30806,
+      "sha256": "53a4fa9fd45d66be7cf450d5ff5c072e130e3af36264758b67ff967e4a76e888"
+    }
+  ]
+}

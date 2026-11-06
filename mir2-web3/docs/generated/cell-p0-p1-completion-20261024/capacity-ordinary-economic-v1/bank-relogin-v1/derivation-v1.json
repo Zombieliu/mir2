@@ -1,0 +1,132 @@
+{
+  "schemaVersion": 1,
+  "state": "STATIC_DRAFT_NO_FREEZE_OR_PILOT_EXECUTION",
+  "sourceRunner": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-preparation-pilot-v4\\run-pilot-v1.mjs",
+    "bytes": 18891,
+    "sha256": "24cfc078f0d8bd62b6ac9f90c3a2d3d45c2f28dd496c3ceff4e949e6965e07b7"
+  },
+  "currentRunner": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-bank-relogin-pilot-v1\\run-bank-pilot-v1.mjs",
+    "bytes": 20588,
+    "sha256": "bd6695da3243c0168061d6bbd4dda8f5ff46af86ccbfc88866323b1f0b8c0a41"
+  },
+  "positionRules": [
+    {
+      "label": "Add exclusive ordinary bank copier dependency",
+      "beforeByteOffset": 302,
+      "before": "import {DIRECTORY,PACKAGE_ID,assert,pin,checked,same,verifyFrozen} from './source-lib-v1.mjs';",
+      "after": "import {DIRECTORY,PACKAGE_ID,assert,pin,checked,same,verifyFrozen} from './source-lib-v1.mjs';\nimport {copySourceBankExclusively} from './copy-bank-v1.mjs';"
+    },
+    {
+      "label": "Bind the exact approved V3 bank plan without assuming a future HEAD",
+      "beforeByteOffset": 898,
+      "before": "const {manifest:m,manifestPin}=verifyFrozen(args[2]),config=JSON.parse(checked(m.configPin)),root=path.join(DIRECTORY,'episode'),privateRoot=path.join(root,'private'),recordings=path.join(root,'recordings');",
+      "after": "const {manifest:m,manifestPin}=verifyFrozen(args[2]),config=JSON.parse(checked(m.configPin)),root=path.join(DIRECTORY,'episode'),privateRoot=path.join(root,'private'),recordings=path.join(root,'recordings');\nconst bankPlanPin={\"file\":\"C:\\\\mir2-build\\\\p01-completion-20261024\\\\ordinary-bank-relogin-pilot-v1\\\\bank-plan-pending-v1.json\",\"bytes\":7710,\"sha256\":\"bc40a37dd2f4074d60fbc0ff32181e88b9bb904ff8f429905b58b79b5d63df69\"};assert(config.reusedOrdinaryEarnedBank===true&&config.freshZeroCharacterPool===false&&config.actors===2&&config.options.stageSeconds===30&&config.options.soakSeconds===30&&config.options.preparationHpTarget===12,'Explicit reused ordinary bank functional profile required');checked(bankPlanPin);"
+    },
+    {
+      "label": "Replace fresh account seeding and secret generation with exact ordinary-earned bank copying",
+      "beforeByteOffset": 6279,
+      "before": "const batch=crypto.randomBytes(3).toString('hex'),accounts=Array.from({length:config.actors},(_,i)=>({accountId:'lt'+batch+i.toString(36).padStart(2,'0'),name:'L'+batch+i.toString(36).padStart(2,'0'),password:crypto.randomBytes(10).toString('hex'),state:'registered',provisioning:'admin-provisioned-file-account-only'})),poolFile=path.join(privateRoot,'capacity-pool.json');await write(poolFile,{schemaVersion:1,purpose:'isolated-load-actors',realm:'isolated',endpoint:config.options.endpoint,batch,accounts});\nconst seeding=JSON.parse(execFileSync(m.backend.seeder.file,['--manifest',poolFile,'--account-store',path.join(privateRoot,'accounts.json')],{encoding:'utf8',windowsHide:true,timeout:180000,env:inherited}));assert(seeding.passed===true&&seeding.created===config.actors&&seeding.charactersCreated===0&&seeding.gameplayGrants===0&&seeding.networkRequests===0&&seeding.existingStoreModified===false,'Audited seeder must create only fresh ordinary accounts');await write(path.join(root,'provisioning-v1.json'),seeding);\nconst secretNames=['recovery-mac-key.txt','identity-session-secret.txt','identity-recovery-pepper.txt','passkey-auth-secret.txt'],secrets=[];for(const name of secretNames){const secret=crypto.randomBytes(32).toString('hex');secrets.push(secret);await fs.writeFile(path.join(privateRoot,name),secret,{flag:'wx',mode:0o600})}\n",
+      "after": "const bankCopyReceipt=copySourceBankExclusively(bankPlanPin,privateRoot);await write(path.join(root,'bank-copy-receipt-v1.json'),bankCopyReceipt);\nconst poolFile=path.join(privateRoot,'capacity-pool.json'),secretNames=['recovery-mac-key.txt','identity-session-secret.txt','identity-recovery-pepper.txt','passkey-auth-secret.txt'],secrets=await Promise.all(secretNames.map(name=>fs.readFile(path.join(privateRoot,name),'utf8')));\nassert(secrets.every(value=>/^[a-f0-9]{64}$/.test(value)),'Exact copied ordinary bank secrets required');\n"
+    },
+    {
+      "label": "State reused bank rather than fresh account provenance",
+      "beforeByteOffset": 11426,
+      "before": "scope:'Fresh owned realm and six-zero proof establish initial two-account login budget; real LoginBudget ledger and server ordinary limits remain active.'",
+      "after": "scope:'A fresh owned Gateway reuses an exclusively copied V3 ordinarily earned two-character bank. Original ready names/indices, complete auth ledger and server ordinary login limits remain active; no zero-character claim, seeder or gameplay grant.'"
+    },
+    {
+      "label": "Keep bounded actual fresh preparation readback for the two copied identities",
+      "beforeByteOffset": 17039,
+      "before": "cohortActivations:activations.map(r=>({newActors:r.newActors,controlledActors:r.controlledActors,at:r.at}))",
+      "after": "cohortActivations:activations.map(r=>({newActors:r.newActors,controlledActors:r.controlledActors,at:r.at})),reloginReadback:preparations.slice(0,2).map(r=>({actor:r.actor??r.result?.actor??null,characterIndex:admissions.find(a=>a.actor===r.actor)?.characterIndex??null,status:r.result?.status??null,before:r.result?.before??null,after:r.result?.after??null,targetHp:r.result?.targetHp??null,actualStagingReached:r.result?.actualStagingReached??false,purchased:r.result?.purchased??null,soldVenison:r.result?.soldVenison??null,funding:r.result?.funding??null,fundingFieldPresent:Object.hasOwn(r.result??{},'funding')}))"
+    },
+    {
+      "label": "Add independently labelled ordinary relogin readback adjudication",
+      "beforeByteOffset": 18206,
+      "before": "const receipt={schemaVersion:1,packageId:PACKAGE_ID,mode:'ordinary-economic-preparation-functional-pilot'",
+      "after": "const expectedBankIdentities=bankCopyReceipt.readyCharacters,readback=evidence?.reloginReadback??[];const ordinaryReloginReadbackPassed=readback.length===2&&expectedBankIdentities.every(expected=>readback.some(r=>r.actor===expected.name&&r.characterIndex===expected.characterIndex&&r.purchased===0&&r.soldVenison===0&&r.fundingFieldPresent===true&&r.funding===null&&r.before?.ownerName===expected.name&&r.after?.ownerName===expected.name&&r.before?.ownerId===r.after?.ownerId&&r.before?.map==='0'&&r.after?.map==='0'&&Number.isInteger(r.before?.hpStock)&&r.before.hpStock>=12&&Number.isInteger(r.after?.hpStock)&&r.after.hpStock>=12&&Number.isFinite(r.before?.gold)&&Number.isFinite(r.after?.gold)&&Number.isFinite(r.before?.sequence)&&Number.isFinite(r.after?.sequence)&&r.after.sequence>r.before.sequence));\nconst receipt={schemaVersion:1,packageId:PACKAGE_ID,mode:'reused-ordinary-earned-bank-relogin-functional-pilot',sourceBankPlan:bankPlanPin,bankCopyReceipt:pin(path.join(root,'bank-copy-receipt-v1.json')),ordinaryReloginReadbackPassed,bankPersistedInventoryReusePassed:ordinaryReloginReadbackPassed,reusedOrdinaryEarnedBank:true,freshZeroCharacterPool:false,sourceBankPreparationReadyCount:1,sourceBankPreparationFailedCount:1"
+    },
+    {
+      "label": "Readback failure cannot produce a successful pilot exit",
+      "beforeByteOffset": 20311,
+      "before": "process.exitCode=cleanupComplete&&report?.ok===true&&!executionError?0:1;",
+      "after": "process.exitCode=cleanupComplete&&ordinaryReloginReadbackPassed&&report?.ok===true&&!executionError?0:1;"
+    },
+    {
+      "label": "Collect only the two real admitted character indexes in the existing single sample pass",
+      "before": "const preparations=[],activations=[];",
+      "after": "const preparations=[],activations=[],admissions=[];",
+      "beforeByteOffset": 16204
+    },
+    {
+      "label": "Preserve real admitted identity scalar without a second raw pass",
+      "before": "if(row.type==='ordinaryPreparation')preparations.push(row);if(row.type==='cohortActivated')",
+      "after": "if(row.type==='ordinaryPreparation')preparations.push(row);if(row.type==='admitted'){assert(admissions.length<2,'Unexpected extra bank admissions');admissions.push({actor:row.actor,characterIndex:row.characterIndex})}if(row.type==='cohortActivated')",
+      "beforeByteOffset": 16463
+    }
+  ],
+  "completeRawInverseExact": true,
+  "normalOwnedCleanupBlockRawExact": true,
+  "sourceLibrary": {
+    "basis": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-preparation-pilot-v4\\source-lib-v1.mjs",
+      "bytes": 13728,
+      "sha256": "c9b3c6810c36d3f158db899d1df9e285f0fca6565d302c50767beea68d297ff2"
+    },
+    "current": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-bank-relogin-pilot-v1\\source-lib-v1.mjs",
+      "bytes": 13730,
+      "sha256": "9a306f9c85447769842496e3f63f33ba806d4a47e3de46276f48dc752702462b"
+    },
+    "onlyChange": {
+      "before": "export const TOOL_NAMES=['source-lib-v1.mjs','freeze-pilot-v1.mjs','run-pilot-v1.mjs','owned-child-v1.mjs'];",
+      "after": "export const TOOL_NAMES=['source-lib-v1.mjs','run-bank-pilot-v1.mjs','owned-child-v1.mjs','copy-bank-v1.mjs'];"
+    },
+    "existingBackend55AndFocusedSourceGuardsRawExact": true,
+    "actualFutureHead": null
+  },
+  "ownedChild": {
+    "basis": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-preparation-pilot-v4\\owned-child-v1.mjs",
+      "bytes": 1555,
+      "sha256": "b9eb53a2420ea3e6305983ee9cb23b066fbc28d2cc5be813bce133a9252bce1f"
+    },
+    "current": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-bank-relogin-pilot-v1\\owned-child-v1.mjs",
+      "bytes": 1555,
+      "sha256": "b9eb53a2420ea3e6305983ee9cb23b066fbc28d2cc5be813bce133a9252bce1f"
+    },
+    "rawExact": true
+  },
+  "configuration": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-bank-relogin-pilot-v1\\pilot-config-pending-v1.json",
+    "bytes": 3252,
+    "sha256": "70822854103b9c1e59bd9b619e61d0c8c26d4cf4671538d1627d437af5fe6828"
+  },
+  "bankPlan": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-bank-relogin-pilot-v1\\bank-plan-pending-v1.json",
+    "bytes": 7710,
+    "sha256": "bc40a37dd2f4074d60fbc0ff32181e88b9bb904ff8f429905b58b79b5d63df69"
+  },
+  "copier": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-bank-relogin-pilot-v1\\copy-bank-v1.mjs",
+    "bytes": 7743,
+    "sha256": "5b383d46230ab834cfcadf8dd9c3e843d97a4a50893b4106920ee14a380de63f"
+  },
+  "sourceBankCopierExecuted": false,
+  "frozenManifestProduced": false,
+  "pilotExecuted": false,
+  "capacityAccepted": false,
+  "p0Accepted": false,
+  "bankStockReuseQualification": {
+    "ordinaryFreshBeforeStockAtLeast12": true,
+    "sourceNameAndActualAdmittedCharacterIndexMatch": true,
+    "purchasedMustEqualZero": true,
+    "soldVenisonMustEqualZero": true,
+    "fundingMustBeExplicitNull": true,
+    "secondRawPass": false,
+    "originalReportUnchanged": true
+  }
+}

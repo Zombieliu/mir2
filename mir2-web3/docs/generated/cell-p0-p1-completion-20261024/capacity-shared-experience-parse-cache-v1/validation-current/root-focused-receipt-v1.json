@@ -1,0 +1,333 @@
+{
+  "schemaVersion": 1,
+  "state": "WORKING_TREE_CANDIDATE",
+  "startedAt": "2026-10-26T09:41:58.610Z",
+  "endedAt": "2026-10-26T09:44:04.788Z",
+  "changedBackendInput": "mir2-web3/apps/simulation/src/runtime/shared_experience_profile.rs",
+  "unchangedBackendInputs": 49,
+  "driverInputs": 9,
+  "sourceUnchanged": true,
+  "checks": [
+    {
+      "name": "format",
+      "command": [
+        "C:/Users/Administrator/.cargo/bin/rustup.exe",
+        "run",
+        "1.95.0",
+        "rustfmt",
+        "--check",
+        "--edition",
+        "2021",
+        "apps/simulation/src/runtime/shared_experience_profile.rs"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "durationMs": 60.080299999999994,
+      "totals": [],
+      "passed": true,
+      "logs": [
+        {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\root-shared-experience-parse-cache-validation-v3\\format-stdout-v1.log",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\root-shared-experience-parse-cache-validation-v3\\format-stderr-v1.log",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      ]
+    },
+    {
+      "name": "experience-profile",
+      "command": [
+        "C:/Users/Administrator/.cargo/bin/rustup.exe",
+        "run",
+        "1.95.0",
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "--jobs",
+        "4",
+        "-p",
+        "mir2-simulation",
+        "--lib",
+        "runtime::shared_experience_profile::tests::",
+        "--",
+        "--nocapture",
+        "--test-threads=1"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "durationMs": 23712.212199999998,
+      "totals": [
+        {
+          "status": "ok",
+          "passed": 21,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filteredOut": 2925
+        }
+      ],
+      "passed": true,
+      "logs": [
+        {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\root-shared-experience-parse-cache-validation-v3\\experience-profile-stdout-v1.log",
+          "bytes": 2798,
+          "sha256": "7a03e0c2f3a4969c0a82ae3b0e1b3b306925e940719f5029b6734c24959af3a3"
+        },
+        {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\root-shared-experience-parse-cache-validation-v3\\experience-profile-stderr-v1.log",
+          "bytes": 43609,
+          "sha256": "689c30716c1eeeba5eb76f00489406e31a8298727840c0a772af5946f075f029"
+        }
+      ]
+    },
+    {
+      "name": "store-durability",
+      "command": [
+        "C:/Users/Administrator/.cargo/bin/rustup.exe",
+        "run",
+        "1.95.0",
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "--jobs",
+        "4",
+        "-p",
+        "mir2-simulation",
+        "--lib",
+        "config::config_account_store_durability_tests::",
+        "--",
+        "--nocapture",
+        "--test-threads=1"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "durationMs": 451.90849999999773,
+      "totals": [
+        {
+          "status": "ok",
+          "passed": 2,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filteredOut": 2944
+        }
+      ],
+      "passed": true,
+      "logs": [
+        {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\root-shared-experience-parse-cache-validation-v3\\store-durability-stdout-v1.log",
+          "bytes": 368,
+          "sha256": "9899b97c10b02e3132e6f46753aad1c0ee65a5810e2a3c807d0d2fd37d05dd3d"
+        },
+        {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\root-shared-experience-parse-cache-validation-v3\\store-durability-stderr-v1.log",
+          "bytes": 43101,
+          "sha256": "bc3db98f513089721f0e6cd2ca295f74f48b768f447218ec01c416b43ef0d6a6"
+        }
+      ]
+    },
+    {
+      "name": "guild-clock-store",
+      "command": [
+        "C:/Users/Administrator/.cargo/bin/rustup.exe",
+        "run",
+        "1.95.0",
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "--jobs",
+        "4",
+        "-p",
+        "mir2-simulation",
+        "--lib",
+        "guild_clock_file_configs_share_store_mutex_and_frozen_state",
+        "--",
+        "--nocapture",
+        "--test-threads=1"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "durationMs": 409.1683000000012,
+      "totals": [
+        {
+          "status": "ok",
+          "passed": 1,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filteredOut": 2945
+        }
+      ],
+      "passed": true,
+      "logs": [
+        {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\root-shared-experience-parse-cache-validation-v3\\guild-clock-store-stdout-v1.log",
+          "bytes": 218,
+          "sha256": "ee61da1a6c268b6b225d5b44584635bb991e15ca2ab34bcbcabd1e4a96572061"
+        },
+        {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\root-shared-experience-parse-cache-validation-v3\\guild-clock-store-stderr-v1.log",
+          "bytes": 43101,
+          "sha256": "f77324c005858228901d991d70a2ed190a35671cbe3839791a7d6a6742e24663"
+        }
+      ]
+    },
+    {
+      "name": "admission-lock-order",
+      "command": [
+        "C:/Users/Administrator/.cargo/bin/rustup.exe",
+        "run",
+        "1.95.0",
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "--jobs",
+        "4",
+        "-p",
+        "mir2-gateway",
+        "--lib",
+        "owner_health_routing_repository_admission_can_acquire_zone_while_personal_tick_waits",
+        "--",
+        "--nocapture",
+        "--test-threads=1"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "durationMs": 97217.337,
+      "totals": [
+        {
+          "status": "ok",
+          "passed": 1,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filteredOut": 1252
+        }
+      ],
+      "passed": true,
+      "logs": [
+        {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\root-shared-experience-parse-cache-validation-v3\\admission-lock-order-stdout-v1.log",
+          "bytes": 253,
+          "sha256": "130db78452259019a5ac6a1a4d6b31ba90e6e633885b1f9947e295ec20713426"
+        },
+        {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\root-shared-experience-parse-cache-validation-v3\\admission-lock-order-stderr-v1.log",
+          "bytes": 53869,
+          "sha256": "3e64ca77e9e66c0e026e0c583948de08c6d053f9951cf790e8fa76dc28286e73"
+        }
+      ]
+    },
+    {
+      "name": "kill-award-commit",
+      "command": [
+        "C:/Users/Administrator/.cargo/bin/rustup.exe",
+        "run",
+        "1.95.0",
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "--jobs",
+        "4",
+        "-p",
+        "mir2-gateway",
+        "--lib",
+        "shared_in_process_runtime_emits_gain_experience_after_kill_award_commit",
+        "--",
+        "--nocapture",
+        "--test-threads=1"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "durationMs": 1750.0041999999958,
+      "totals": [
+        {
+          "status": "ok",
+          "passed": 1,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filteredOut": 1252
+        }
+      ],
+      "passed": true,
+      "logs": [
+        {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\root-shared-experience-parse-cache-validation-v3\\kill-award-commit-stdout-v1.log",
+          "bytes": 215,
+          "sha256": "e559fda2b305933bc676986bb03e0be0db1212cb9358b60f99f3278a165df2f1"
+        },
+        {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\root-shared-experience-parse-cache-validation-v3\\kill-award-commit-stderr-v1.log",
+          "bytes": 53409,
+          "sha256": "eb28d1255d0f081a66226232b4281a0f50f85c7733a0da56977c361a66eb580e"
+        }
+      ]
+    },
+    {
+      "name": "guild-kill-durability",
+      "command": [
+        "C:/Users/Administrator/.cargo/bin/rustup.exe",
+        "run",
+        "1.95.0",
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "--jobs",
+        "4",
+        "-p",
+        "mir2-gateway",
+        "--lib",
+        "guild_kill_source_",
+        "--",
+        "--nocapture",
+        "--test-threads=1"
+      ],
+      "exitCode": 101,
+      "signal": null,
+      "error": null,
+      "durationMs": 2558.0901999999915,
+      "totals": [
+        {
+          "status": "FAILED",
+          "passed": 0,
+          "failed": 2,
+          "ignored": 0,
+          "measured": 0,
+          "filteredOut": 1251
+        }
+      ],
+      "passed": false,
+      "logs": [
+        {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\root-shared-experience-parse-cache-validation-v3\\guild-kill-durability-stdout-v1.log",
+          "bytes": 700,
+          "sha256": "9d09a0c53baa9346ed95dfa417a1c73676d713bde31d893fb5db5e30f9386762"
+        },
+        {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\root-shared-experience-parse-cache-validation-v3\\guild-kill-durability-stderr-v1.log",
+          "bytes": 54316,
+          "sha256": "928390e6ee06a52468cb71047f2f61fe31ded6afc8216c459cea620bc75bdef0"
+        }
+      ]
+    }
+  ],
+  "passed": false,
+  "capacityAcceptance": false
+}

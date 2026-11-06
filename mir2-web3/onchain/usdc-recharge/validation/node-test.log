@@ -1,0 +1,110 @@
+
+> @mir2/usdc-recharge-chain@0.1.0 test
+> node --test test/*.test.mjs
+
+TAP version 13
+# Subtest: configuration only permits the exact official testnet/native USDC domain
+ok 1 - configuration only permits the exact official testnet/native USDC domain
+  ---
+  duration_ms: 1.6298
+  type: 'test'
+  ...
+# Subtest: monetary values preserve u64 precision and reject floating point/ambiguous decimals
+ok 2 - monetary values preserve u64 precision and reject floating point/ambiguous decimals
+  ---
+  duration_ms: 0.3193
+  type: 'test'
+  ...
+# Subtest: BCS invoice and payment event have a frozen field order
+ok 3 - BCS invoice and payment event have a frozen field order
+  ---
+  duration_ms: 2.1043
+  type: 'test'
+  ...
+# Subtest: verified paid receipt binds fullnode transaction, sender, BCS event and invoice object
+ok 4 - verified paid receipt binds fullnode transaction, sender, BCS event and invoice object
+  ---
+  duration_ms: 1.2127
+  type: 'test'
+  ...
+# Subtest: unpaid invoice verifies creation and never grants credits
+ok 5 - unpaid invoice verifies creation and never grants credits
+  ---
+  duration_ms: 0.7301
+  type: 'test'
+  ...
+# Subtest: not finalized, missing transaction or missing object remains unknown
+ok 6 - not finalized, missing transaction or missing object remains unknown
+  ---
+  duration_ms: 0.6943
+  type: 'test'
+  ...
+# Subtest: failed create is explicit only after a checkpoint, without issuing a new invoice
+ok 7 - failed create is explicit only after a checkpoint, without issuing a new invoice
+  ---
+  duration_ms: 0.3003
+  type: 'test'
+  ...
+# Subtest: payment receipt rejects forged sender, foreign package, wrong event type and duplicate events
+ok 8 - payment receipt rejects forged sender, foreign package, wrong event type and duplicate events
+  ---
+  duration_ms: 1.1898
+  type: 'test'
+  ...
+# Subtest: payment cannot be replayed for a different order/account/offer/payer/merchant/amount/expiry
+ok 9 - payment cannot be replayed for a different order/account/offer/payer/merchant/amount/expiry
+  ---
+  duration_ms: 1.0976
+  type: 'test'
+  ...
+# Subtest: invoice mutation effects and payment timestamp must match the returned object
+ok 10 - invoice mutation effects and payment timestamp must match the returned object
+  ---
+  duration_ms: 1.3153
+  type: 'test'
+  ...
+# Subtest: a changing fullnode observation does not invent a settlement receipt
+ok 11 - a changing fullnode observation does not invent a settlement receipt
+  ---
+  duration_ms: 0.3021
+  type: 'test'
+  ...
+# Subtest: wallet proof verifies Sui personal-message signature for exactly this address/message
+ok 12 - wallet proof verifies Sui personal-message signature for exactly this address/message
+  ---
+  duration_ms: 19.5401
+  type: 'test'
+  ...
+# Subtest: exact issuer create bytes/signature bind every issued invoice term
+ok 13 - exact issuer create bytes/signature bind every issued invoice term
+  ---
+  duration_ms: 27.071
+  type: 'test'
+  ...
+# Subtest: wallet pay contains exact native USDC split, invoice call and payer change, without issuer gas
+ok 14 - wallet pay contains exact native USDC split, invoice call and payer change, without issuer gas
+  ---
+  duration_ms: 126.6928
+  type: 'test'
+  ...
+# Subtest: coin selection fails closed for insufficient or foreign owned USDC
+ok 15 - coin selection fails closed for insufficient or foreign owned USDC
+  ---
+  duration_ms: 1.9101
+  type: 'test'
+  ...
+# Subtest: CLI returns bounded JSON only and does not expose arbitrary errors or secrets
+ok 16 - CLI returns bounded JSON only and does not expose arbitrary errors or secrets
+  ---
+  duration_ms: 131.5639
+  type: 'test'
+  ...
+1..16
+# tests 16
+# suites 0
+# pass 16
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 799.3083

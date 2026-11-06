@@ -1,0 +1,84 @@
+{
+  "schemaVersion": 1,
+  "reviewedAt": "2026-10-26T00:11:26.480Z",
+  "scope": "Independent static source and metadata review of the ended19 tool only. No verifier import/self-check, archive replay, raw/monitor stream, binary read, test, source guard or realm execution.",
+  "preparation": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\probe19-independent-verification-v1\\preparation-v1.json",
+    "bytes": 6278,
+    "sha256": "70cbff100aa46d59b41cd4e69ccbc11fd8ec0f26211d57db4cec0e5602184531"
+  },
+  "main": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\probe19-independent-verification-v1\\verify-ended-probe19-v1.mjs",
+    "bytes": 39544,
+    "sha256": "b0d40fcccb6ea67b5d29537c2b7d79ccb712ec3b14e171366bb3ec6d72c68768"
+  },
+  "contract": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\probe19-independent-verification-v1\\probe-contract-v1.mjs",
+    "bytes": 5860,
+    "sha256": "4248510a14558a606694faed7644485efb802cfc965e95ba545209893c8675cd"
+  },
+  "derivationDraft": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\probe19-independent-verification-v1\\derivation-draft-v1.json",
+    "bytes": 24262,
+    "sha256": "7bf664866e8fb724b3c8c97a2dab15b1b15580a1e444c150491312a99e4519b9"
+  },
+  "derivationFinal": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\probe19-independent-verification-v1\\derivation-final-v1.json",
+    "bytes": 7570,
+    "sha256": "9865fa03e12521db5ccd0d389d43102f8e54619bed4ef6261174e7d4dce72c4c"
+  },
+  "rootActualFacts": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\probe19-root-actual-terminal-and-consumer-facts-v1.json",
+    "bytes": 8316,
+    "sha256": "e2e9629496fbef2cdc5ae5bee8fede6a05fe9834a1866fc1aa6372e4bbaf47d5"
+  },
+  "rootCleanup": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\probe19-root-independent-cleanup-v1.json",
+    "bytes": 327,
+    "sha256": "fffd285c3a20d7596fd0cc365bc0aef55b9d145812387a539e4e9727144f913f"
+  },
+  "checks": {
+    "preparedRawSourceFiles": 12,
+    "preparedSourceAggregate": "262f9ef511f48452e29dfa44b8bb29e658fc8561641ba489de7cb55c56f0a28e",
+    "allTwelveRawPinsAndAggregateMatched": true,
+    "expectedToolSealInputs": 14,
+    "draft28RulesForwardInverseExactOriginal18": true,
+    "finalFourRulesForwardInverseExactDraft": true,
+    "runnerOnlyProbe18To19IdentityChange": true,
+    "HPPolicyAndSealerThreeCopiesRawExact": true,
+    "originalPolicyAndActualElapsedMinute5_5_6AndPartialBranchesPreserved": true,
+    "independentCounterContinuousAndTelemetryAlgorithmsUnchanged": true,
+    "noPrefilledFullOrPartial132Adjudication": true,
+    "HPZeroNoDoseProofSemanticsPreserved": true,
+    "backendC50DriverExecutionJAndCurrent9472FreezeBound": true,
+    "current226ArrayReceiptsAndH9465_D6759_19099DeclarationChainBound": true,
+    "wireHistorical6dAndCurrentDriverSeparate": true,
+    "StoreSeparateNonGameDatasetPreserved": true,
+    "sourceConfig1225And116InputLauncher66317Bound": true,
+    "currentStreamVerifier49105Cc3765PinnedBeforeImport": true,
+    "actualRunId": "1792971941351-af013515",
+    "actualOwnedPids": [
+      67440,
+      62240
+    ],
+    "RootFourConsumerTerminalsAndEightExistingLogsRawPinned": true,
+    "RootOSObservedShapeAndShaMatch": true,
+    "RootEarlier8316FactsRawCopyAndHistoricalPendingFlagPreserved": true,
+    "actualFiveJSChecksZero": true,
+    "sourceToolNotSealedOrReplayed": true
+  },
+  "limitations": [
+    "This verdict approves only tool source sealing. It is not an independent Probe19 replay result or a prefilled game PASS.",
+    "The Root source facts preserve the earlier independent-window-pending statement; actual runner output must establish all counters/windows later.",
+    "No per-request typed900ms packet replay or two-hour memory acceptance is added; old evidence, game verdict and capacity=false semantics remain."
+  ],
+  "verdict": {
+    "toolSourceContractPassed": true,
+    "eligibleForRootSealing": true,
+    "blockingFindingIds": [],
+    "actualVerifierExecuted": false,
+    "capacityAccepted": false,
+    "p0Passed": false,
+    "p2Started": false
+  }
+}

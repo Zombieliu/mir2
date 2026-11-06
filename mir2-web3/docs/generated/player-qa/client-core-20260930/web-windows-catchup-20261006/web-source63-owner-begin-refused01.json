@@ -1,0 +1,43 @@
+{
+  "owner": "root",
+  "kind": "normal-ui-observed-owner-begin-failure",
+  "observedAt": "2026-10-11T07:30:03.941Z",
+  "webSource": 63,
+  "gatewaySource": 62,
+  "endpoint": "http://127.0.0.1:19205/",
+  "trigger": [
+    "normal Scott talk",
+    "normal View"
+  ],
+  "observation": {
+    "webSocketEvents": 6,
+    "truncated": false,
+    "hasMore": false,
+    "ownerFrames": [
+      {
+        "direction": "sent",
+        "actionKind": "begin"
+      },
+      {
+        "direction": "received",
+        "replyKind": "failure",
+        "state": "beforeExecution",
+        "receiptPresent": false,
+        "snapshotPresent": false,
+        "authorityPresent": false
+      }
+    ]
+  },
+  "visible": {
+    "item": "Candle",
+    "totalGold": 10,
+    "playerGold": 200,
+    "buyEnabled": true
+  },
+  "limits": [
+    "Finite structural network observations only; no raw auth/authority/token frames persisted",
+    "This proves server refused Begin before execution; it does not identify the server refusal branch",
+    "No successful purchase, deduction, delivered item, storage or saved purchase claim"
+  ],
+  "input": "normal browser UI only"
+}

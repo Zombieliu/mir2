@@ -1,0 +1,12 @@
+
+running 7 tests
+test web::load_test_login_policy_tests::default_login_policy_preserves_thirty_and_omits_test_health ... ok
+test web::load_test_login_policy_tests::explicit_login_limit_has_exact_bounds_and_integer_syntax ... ok
+test web::load_test_login_policy_tests::explicit_login_limit_rejects_non_development_and_conflicting_aliases ... ok
+test web::load_test_login_policy_tests::explicit_login_limit_requires_both_literal_loopback_addresses_and_actual_web_match ... ok
+test web::load_test_login_policy_tests::real_enforcement_does_not_relax_registration_recovery_or_password_change ... ok
+test web::load_test_login_policy_tests::real_enforcement_retains_login_pair_eight_and_account_fifty ... ok
+test web::load_test_login_policy_tests::real_enforcement_uses_only_the_explicit_login_peer_and_device_limit ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 1271 filtered out; finished in 0.04s
+

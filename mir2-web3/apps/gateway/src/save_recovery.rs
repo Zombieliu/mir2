@@ -8,8 +8,11 @@ use std::sync::{Arc, Mutex, OnceLock};
 use std::time::{SystemTime, UNIX_EPOCH};
 
 use hmac::{Hmac, KeyInit, Mac};
-use mir2_protocol::{ClientPacket, MirDirection, Point, ServerPacket};
-use mir2_simulation::{CharacterSaveRecord, SimulationConfig, SimulationSession};
+use mir2_protocol::{MirDirection, Point};
+use mir2_simulation::{
+    CharacterSaveRecord, RecoveryCharacterLoadError, SimulationConfig, SimulationSession,
+    ZoneSaveOperationBinding, ZoneSaveOperationReceipt, ZoneSaveOperationStatus,
+};
 use rand::{rngs::OsRng, RngCore};
 use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
@@ -19,6 +22,7 @@ type HmacSha256 = Hmac<Sha256>;
 const JOURNAL_SCHEMA: &str = "mir2.character-recovery-journal";
 const JOURNAL_VERSION: u16 = 1;
 const CHECKPOINT_SCHEMA_VERSION: u16 = 1;
+const REMOTE_OPERATION_BINDING_VERSION: u16 = 1;
 const HASH_ALGORITHM: &str = "sha256";
 const MAC_ALGORITHM: &str = "hmac-sha256";
 const JOURNAL_DIRECTORY: &str = ".mir2-save-recovery-v1";
@@ -104,6 +108,32 @@ struct RecoveryPayload {
     character_index: i32,
     authoritative_transform: RecoveryTransform,
     checkpoint: CharacterSaveRecord,
+    // Optional v1 extension. Omitting it preserves the exact original v1
+    // canonical payload bytes, hashes and MACs. A remote record may only query
+    // this original operation; it must never enter legacy checkpoint replay.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    remote_zone_save_operation: Option<RemoteRecoveryOperation>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+struct RemoteRecoveryOperation {
+    version: u16,
+    binding: serde_json::Value,
+}
+
+impl RemoteRecoveryOperation {
+    fn from_binding(binding: &ZoneSaveOperationBinding) -> Result<Self, String> {
+        Ok(Self { version: REMOTE_OPERATION_BINDING_VERSION, binding: binding.to_json()? })
+    }
+
+    fn checked_binding(&self) -> Result<ZoneSaveOperationBinding, String> {
+        if self.version != REMOTE_OPERATION_BINDING_VERSION {
+            return Err("unsupported remote recovery operation binding version".into());
+        }
+        ZoneSaveOperationBinding::from_json_checked(self.binding.clone())
+            .map_err(|_| "invalid remote recovery operation binding".into())
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -233,13 +263,40 @@ pub(crate) fn journal_checkpoint(
     character_index: i32,
     checkpoint: &CharacterSaveRecord,
 ) -> Result<JournalReceipt, String> {
+    journal_checkpoint_with_binding(config, account_id, character_index, checkpoint, None)
+}
+
+/// Record the original Host operation for read-only Unknown reconciliation.
+/// The checkpoint and binding are authenticated together by the existing MAC.
+pub(crate) fn journal_remote_checkpoint(
+    config: &SimulationConfig,
+    account_id: &str,
+    character_index: i32,
+    checkpoint: &CharacterSaveRecord,
+    binding: &ZoneSaveOperationBinding,
+) -> Result<JournalReceipt, String> {
+    journal_checkpoint_with_binding(config, account_id, character_index, checkpoint, Some(binding))
+}
+
+fn journal_checkpoint_with_binding(
+    config: &SimulationConfig,
+    account_id: &str,
+    character_index: i32,
+    checkpoint: &CharacterSaveRecord,
+    binding: Option<&ZoneSaveOperationBinding>,
+) -> Result<JournalReceipt, String> {
     let _guard = journal_guard()?;
     let journal = RecoveryJournal::from_config(config)?.ok_or_else(|| {
         "recovery journal requires an explicit recovery directory or file account-store path"
             .to_string()
     })?;
     journal.ensure_layout()?;
-    journal.store(account_id, character_index, checkpoint)
+    match binding {
+        Some(binding) => journal.store_with_remote_binding(
+            account_id, character_index, checkpoint, Some(binding), |_path| {},
+        ),
+        None => journal.store(account_id, character_index, checkpoint),
+    }
 }
 
 pub(crate) fn replay_startup(config: &SimulationConfig) -> Result<ReplaySummary, String> {
@@ -443,13 +500,29 @@ impl RecoveryJournal {
         account_id: &str,
         character_index: i32,
         checkpoint: &CharacterSaveRecord,
+        after_publish: F,
+    ) -> Result<JournalReceipt, String>
+    where
+        F: FnMut(&Path),
+    {
+        self.store_with_remote_binding(account_id, character_index, checkpoint, None, after_publish)
+    }
+
+    fn store_with_remote_binding<F>(
+        &self,
+        account_id: &str,
+        character_index: i32,
+        checkpoint: &CharacterSaveRecord,
+        binding: Option<&ZoneSaveOperationBinding>,
         mut after_publish: F,
     ) -> Result<JournalReceipt, String>
     where
         F: FnMut(&Path),
     {
         self.verify_directory_trust()?;
-        let payload = RecoveryPayload::new(account_id, character_index, checkpoint)?;
+        let mut payload = RecoveryPayload::new(account_id, character_index, checkpoint)?;
+        payload.remote_zone_save_operation = binding.map(RemoteRecoveryOperation::from_binding).transpose()?;
+        payload.validate()?;
         let payload_bytes = canonical_payload_bytes(&payload)?;
         let payload_hash = sha256_hex(&payload_bytes);
         let key_hash = character_key_hash(account_id, character_index);
@@ -1108,12 +1181,16 @@ impl RecoveryPayload {
                 direction: checkpoint.direction,
             },
             checkpoint: checkpoint.clone(),
+            remote_zone_save_operation: None,
         };
         payload.validate()?;
         Ok(payload)
     }
 
     fn validate(&self) -> Result<(), String> {
+        if let Some(remote) = &self.remote_zone_save_operation {
+            remote.checked_binding()?;
+        }
         if self.account_id.trim().is_empty() {
             return Err("recovery journal account id is empty".to_string());
         }
@@ -1135,24 +1212,22 @@ fn replay_envelope(
     envelope: &RecoveryEnvelope,
 ) -> Result<ReplayDecision, String> {
     let payload = &envelope.payload;
+    if let Some(remote) = &payload.remote_zone_save_operation {
+        let binding = remote.checked_binding().map_err(replay_conflict)?;
+        // This branch precedes creation/restoration of a personal Session.
+        // A missing, pending or unreadable Host receipt must retain the journal
+        // and block login, without retrying source work under a new operation.
+        return replay_remote_checkpoint_with_query(payload, &binding, |binding| {
+            config.query_zone_save_operation(binding)
+        });
+    }
     let mut session = SimulationSession::new(config.clone());
     session
-        .select_account_for_recovery(&payload.account_id)
-        .map_err(|error| replay_conflict(format!("recovery account selection failed: {error}")))?;
-    let packets = session.handle_packet(ClientPacket::StartGame {
-        character_index: payload.character_index,
-    });
-    if !packets
-        .iter()
-        .any(|packet| matches!(packet, ServerPacket::StartGame { result: 4, .. }))
-    {
-        return Err(replay_conflict(
-            "recovery StartGame did not select the journal character".to_string(),
-        ));
-    }
-    let current = session.active_character_checkpoint().ok_or_else(|| {
-        replay_conflict("recovery runtime produced no active checkpoint".to_string())
-    })?;
+        .bind_account_for_recovery(&payload.account_id)
+        .map_err(recovery_load_error)?;
+    let current = session
+        .select_character_for_recovery(payload.character_index)
+        .map_err(recovery_load_error)?;
     let journal_revision = payload.checkpoint.revision;
     if current.revision > journal_revision {
         if checkpoints_equivalent(&current, &payload.checkpoint)? {
@@ -1170,15 +1245,9 @@ fn replay_envelope(
         )));
     }
 
-    session
-        .restore_active_character_checkpoint(&payload.checkpoint)
-        .map_err(|error| replay_conflict(format!("restore recovery checkpoint: {error}")))?;
-    session
-        .save_active_character()
+    let committed = session
+        .persist_character_for_recovery(&payload.checkpoint)
         .map_err(|error| format!("recovery DB save failed; journal retained: {error}"))?;
-    let committed = session.active_character_checkpoint().ok_or_else(|| {
-        "recovery DB save returned success but active checkpoint disappeared".to_string()
-    })?;
     if committed.revision <= journal_revision
         || !checkpoints_equivalent(&committed, &payload.checkpoint)?
     {
@@ -1189,19 +1258,50 @@ fn replay_envelope(
     Ok(ReplayDecision::Replayed)
 }
 
+fn replay_remote_checkpoint_with_query<F>(
+    payload: &RecoveryPayload,
+    binding: &ZoneSaveOperationBinding,
+    query: F,
+) -> Result<ReplayDecision, String>
+where
+    F: FnOnce(&ZoneSaveOperationBinding) -> Result<Option<ZoneSaveOperationReceipt>, String>,
+{
+    let receipt = query(binding).map_err(|error| {
+        if error == "ZONE_SAVE_OPERATION_REJECTED" {
+            replay_conflict("remote operation binding differs from durable ledger".into())
+        } else {
+            format!("remote recovery receipt unavailable; journal retained and login blocked: {error}")
+        }
+    })?.ok_or_else(|| "remote recovery operation is absent; journal retained and login blocked".to_string())?;
+    let operation = receipt.operation();
+    if operation.binding() != binding
+        || operation.account_id() != payload.account_id.as_str()
+        || operation.character_index() != payload.character_index
+        || serde_json::to_value(operation.frozen_checkpoint()).map_err(|e| e.to_string())?
+            != serde_json::to_value(&payload.checkpoint).map_err(|e| e.to_string())? {
+        return Err(replay_conflict("remote receipt binding/identity/frozen checkpoint mismatch".into()));
+    }
+    match receipt.status() {
+        ZoneSaveOperationStatus::Committed | ZoneSaveOperationStatus::Released => Ok(ReplayDecision::AlreadyCommitted),
+        ZoneSaveOperationStatus::Prepared => Err(
+            "remote recovery operation remains Prepared; journal retained and login blocked".into()),
+    }
+}
+
+fn recovery_load_error(error: RecoveryCharacterLoadError) -> String {
+    match error {
+        RecoveryCharacterLoadError::Conflict(error) => replay_conflict(error),
+        RecoveryCharacterLoadError::Deferred(error) => {
+            format!("recovery source or access unavailable; journal retained: {error}")
+        }
+    }
+}
+
 fn checkpoints_equivalent(
     left: &CharacterSaveRecord,
     right: &CharacterSaveRecord,
 ) -> Result<bool, String> {
-    let mut left = left.clone();
-    let mut right = right.clone();
-    left.revision = 0;
-    right.revision = 0;
-    let left = serde_json::to_vec(&left)
-        .map_err(|error| format!("encode current recovery checkpoint: {error}"))?;
-    let right = serde_json::to_vec(&right)
-        .map_err(|error| format!("encode journal recovery checkpoint: {error}"))?;
-    Ok(left == right)
+    SimulationSession::recovery_checkpoints_equivalent(left, right)
 }
 
 fn replay_conflict(message: String) -> String {
@@ -1313,12 +1413,35 @@ fn absolute_without_parent_components(path: &Path) -> Result<PathBuf, String> {
     {
         return Err("save recovery paths must not contain parent-directory components".to_string());
     }
-    if path.is_absolute() {
-        Ok(path.to_path_buf())
-    } else {
-        std::env::current_dir()
-            .map(|current| current.join(path))
-            .map_err(|error| format!("resolve save recovery path: {error}"))
+    let absolute = std::path::absolute(path)
+        .map_err(|error| format!("resolve save recovery path: {error}"))?;
+    // FileAuthority uses canonical paths (including the Windows verbatim
+    // prefix). Compare the same physical spelling even before a new account
+    // file exists; comparing verbatim and ordinary PathBuf prefixes misses an
+    // overlapping directory. Keep nonexistent descendants without creating them.
+    let mut ancestor = absolute.as_path();
+    let mut descendants = Vec::new();
+    loop {
+        match fs::canonicalize(ancestor) {
+            Ok(mut resolved) => {
+                for component in descendants.iter().rev() {
+                    resolved.push(component);
+                }
+                return Ok(resolved);
+            }
+            Err(error) if error.kind() == io::ErrorKind::NotFound => {
+                descendants.push(
+                    ancestor
+                        .file_name()
+                        .ok_or("save recovery path has no existing ancestor")?
+                        .to_os_string(),
+                );
+                ancestor = ancestor
+                    .parent()
+                    .ok_or("save recovery path has no existing parent")?;
+            }
+            Err(error) => return Err(format!("resolve save recovery ancestor: {error}")),
+        }
     }
 }
 
@@ -2329,18 +2452,33 @@ fn durable_rename(from: &Path, to: &Path, replace_existing: bool) -> io::Result<
 
 #[cfg(windows)]
 fn windows_extended_path(path: &Path) -> io::Result<Vec<u16>> {
-    use std::os::windows::ffi::OsStrExt;
+    use std::os::windows::ffi::{OsStrExt, OsStringExt};
 
-    let absolute = if path.is_absolute() {
-        path.to_path_buf()
-    } else {
-        std::env::current_dir()?.join(path)
-    };
+    let mut wide = path.as_os_str().encode_wide().collect::<Vec<_>>();
+    if wide.contains(&0) {
+        return Err(io::Error::new(
+            io::ErrorKind::InvalidInput,
+            "path contains NUL",
+        ));
+    }
+    // Verbatim paths already have explicit Win32 semantics. Preserve them,
+    // including their UTF-16 spelling, instead of normalizing their components.
+    if wide.starts_with(&[b'\\' as u16, b'\\' as u16, b'?' as u16, b'\\' as u16]) {
+        wide.push(0);
+        return Ok(wide);
+    }
+    // The extended prefix disables Win32 slash/dot normalization. Perform it
+    // before adding the prefix. `absolute` is lexical and also works for a
+    // rename destination that has not been created; canonicalize would not.
+    for unit in &mut wide {
+        if *unit == b'/' as u16 {
+            *unit = b'\\' as u16;
+        }
+    }
+    let normalized = std::ffi::OsString::from_wide(&wide);
+    let absolute = std::path::absolute(Path::new(&normalized))?;
     let wide = absolute.as_os_str().encode_wide().collect::<Vec<_>>();
-    let mut extended = if wide.starts_with(&[b'\\' as u16, b'\\' as u16, b'?' as u16, b'\\' as u16])
-    {
-        wide
-    } else if wide.starts_with(&[b'\\' as u16, b'\\' as u16]) {
+    let mut extended = if wide.starts_with(&[b'\\' as u16, b'\\' as u16]) {
         let mut value = "\\\\?\\UNC\\".encode_utf16().collect::<Vec<_>>();
         value.extend_from_slice(&wide[2..]);
         value
@@ -2422,3 +2560,7 @@ fn now_millis() -> u128 {
 #[cfg(test)]
 #[path = "save_recovery_tests.rs"]
 mod tests;
+
+#[cfg(test)]
+#[path = "save_recovery/zone_save_operation_tests.rs"]
+mod zone_save_operation_tests;

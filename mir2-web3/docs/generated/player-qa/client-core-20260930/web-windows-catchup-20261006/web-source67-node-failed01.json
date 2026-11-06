@@ -1,0 +1,158 @@
+{
+  "schemaVersion": 1,
+  "source": "Source67",
+  "status": "failed-not-accepted",
+  "originalCaller": {
+    "utf8Bytes": 4569,
+    "sha256": "497a5b184074ca9591cb666b0124097f7fe4e4a5fae28dbd9f54807b423e8383"
+  },
+  "actual": {
+    "owner": "Root",
+    "exitCode": 1,
+    "builderPid": 65560,
+    "kind": "Source67 pending originalNode four actual scripts",
+    "exited": true,
+    "disposed": true,
+    "elapsedMs": 13653,
+    "configPath": "C:/mir2-cross-platform-storage-20261002/web-source67-storage-ownership-20261011-01/root-approved01/node-tests01-config.json",
+    "uiOperated": false,
+    "runtimeLaunched": false,
+    "networkUsed": false,
+    "productionBuildAccepted": false,
+    "candidateAccepted": false,
+    "goalComplete": false
+  },
+  "inputs": {
+    "sources": 36369,
+    "internalFiles": 36368,
+    "ordinaryAncestors": 7447,
+    "rootFreshTargetDifferences": 0,
+    "rootFreshCopyDifferences": 0,
+    "rootFreshControls": 19,
+    "rootFreshControlDifferences": 0,
+    "rootMembershipDifferences": 0
+  },
+  "tests": {
+    "actualTotal": 256,
+    "passed": 242,
+    "failed": 14,
+    "skipped": 0,
+    "cancelled": 0,
+    "npcScriptsPassed": 208,
+    "storageScriptPassed": 32,
+    "newStorageTestsPassed": 5,
+    "bagShellPassed": 2,
+    "bagShellFailed": 14
+  },
+  "failures": [
+    {
+      "name": "not ok 1 - actual Shell UI-down dragged out and released never reaches the world helper",
+      "error": "  error: 'cancelBagBeltPointer is not defined'",
+      "code": "  code: 'ERR_TEST_FAILURE'"
+    },
+    {
+      "name": "not ok 2 - actual Shell outside-world down/click and hold work while compatibility mouse cannot duplicate",
+      "error": "  error: 'cancelBagBeltPointer is not defined'",
+      "code": "  code: 'ERR_TEST_FAILURE'"
+    },
+    {
+      "name": "not ok 3 - actual Shell lost layout cancels an outstanding world pulse and never releases it as a click",
+      "error": "  error: 'cancelBagBeltPointer is not defined'",
+      "code": "  code: 'ERR_TEST_FAILURE'"
+    },
+    {
+      "name": "not ok 4 - actual Shell touch down requests compatibility without granting a world or Bevy gesture",
+      "error": "  error: 'cancelBagBeltPointer is not defined'",
+      "code": "  code: 'ERR_TEST_FAILURE'"
+    },
+    {
+      "name": "not ok 5 - actual Shell wide touch uses the Bag lease, swallows second finger and never emits world input",
+      "error": "  error: 'cancelBagBeltPointer is not defined'",
+      "code": "  code: 'ERR_TEST_FAILURE'"
+    },
+    {
+      "name": "not ok 6 - fixed stage UI canvas keeps Bag touch lease, second-finger exclusion, and world-canvas isolation",
+      "error": "  error: 'cancelBagBeltPointer is not defined'",
+      "code": "  code: 'ERR_TEST_FAILURE'"
+    },
+    {
+      "name": "not ok 7 - opt-in primary canvas retains mouse world origin and blur quarantine without stale click",
+      "error": "  error: 'cancelBagBeltPointer is not defined'",
+      "code": "  code: 'ERR_TEST_FAILURE'"
+    },
+    {
+      "name": "not ok 8 - actual Shell terminal pointercancel immediately frees its pointerId for the next real gesture",
+      "error": "  error: 'cancelBagBeltPointer is not defined'",
+      "code": "  code: 'ERR_TEST_FAILURE'"
+    },
+    {
+      "name": "not ok 9 - actual Shell retired proactive cancel cannot clear the next pointer lease",
+      "error": "  error: 'cancelBagBeltPointer is not defined'",
+      "code": "  code: 'ERR_TEST_FAILURE'"
+    },
+    {
+      "name": "not ok 10 - actual Shell blur without old up accepts a new down with the reused touch pointerId",
+      "error": "  error: 'cancelBagBeltPointer is not defined'",
+      "code": "  code: 'ERR_TEST_FAILURE'"
+    },
+    {
+      "name": "not ok 13 - actual root JSX lost capture traverses Mail Spells Bag Character owners exactly once and preserves successor lease",
+      "error": "  error: 'document.addEventListener is not a function'",
+      "code": "  code: 'ERR_TEST_FAILURE'"
+    },
+    {
+      "name": "not ok 14 - actual Shell skill DOM up and cancel retire the old Quest pointer before yielding new DOM gestures",
+      "error": "  error: 'heroPointerLeaseRef is not defined'",
+      "code": "  code: 'ERR_TEST_FAILURE'"
+    },
+    {
+      "name": "not ok 15 - actual Shell skill DOM terminals reach existing Bag Mail Spells and Character canvas leases",
+      "error": "  error: 'heroPointerLeaseRef is not defined'",
+      "code": "  code: 'ERR_TEST_FAILURE'"
+    },
+    {
+      "name": "not ok 16 - actual Shell new skill DOM down cannot borrow a canvas router or create a world gesture",
+      "error": "  error: 'heroPointerLeaseRef is not defined'",
+      "code": "  code: 'ERR_TEST_FAILURE'"
+    }
+  ],
+  "reason": "Existing Bag Shell fixtures lacked current cancellation callbacks, Hero pointer lease and document event-listener APIs. No assertions were removed and no product guard was weakened.",
+  "proofPins": {
+    "config": {
+      "path": "C:/mir2-cross-platform-storage-20261002/web-source67-storage-ownership-20261011-01/root-approved01/node-tests01-config.json",
+      "bytes": 5265,
+      "sha256": "e8a4e2190487214820bae93ead1af852f65a7694dbb9304500890ab43c83895a"
+    },
+    "sourceReview": {
+      "path": "C:/mir2-cross-platform-storage-20261002/web-source67-storage-ownership-20261011-01/root-approved01/source-review01.json",
+      "bytes": 9023,
+      "sha256": "955378e66f286946d5a165c6dd574b8ada5f5a5a95321d47f2f9a59219a97d5f"
+    },
+    "snapshot": {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\web-source67-storage-ownership-20261011-01\\preparation\\source67-isolated-source-snapshot01.json",
+      "bytes": 22165060,
+      "sha256": "742cf6fa6d274a4f36c5fc96e9adf0be2047c264eb09e8caec3159f2af7321e3"
+    },
+    "outer": {
+      "path": "C:/mir2-cross-platform-storage-20261002/web-source67-storage-ownership-20261011-01/node-tests01/outer.json",
+      "bytes": 510,
+      "sha256": "fe19e17682ea9dd10ed55e9e435693e43e7b782d573829c660158dc0240fe680"
+    },
+    "stdout": {
+      "path": "C:/mir2-cross-platform-storage-20261002/web-source67-storage-ownership-20261011-01/node-tests01/stdout.log",
+      "bytes": 79997,
+      "sha256": "71909f417e04cfb268ebeba24ad2ce67f49183f8c01cf91c31e164218ccfef5b"
+    },
+    "stderr": {
+      "path": "C:/mir2-cross-platform-storage-20261002/web-source67-storage-ownership-20261011-01/node-tests01/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  },
+  "nextExecuted": false,
+  "thinExecuted": false,
+  "runtimeLaunched": false,
+  "storageUiPassed": false,
+  "candidate100": false,
+  "overallPercentage": null
+}

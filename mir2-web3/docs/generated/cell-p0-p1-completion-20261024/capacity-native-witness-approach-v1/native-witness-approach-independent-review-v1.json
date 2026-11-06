@@ -1,0 +1,208 @@
+{
+  "schemaVersion": 1,
+  "reviewer": "capacity_baseline",
+  "result": "no-blocking-findings",
+  "scope": "Independent bounded read-only review of final native witness-approach source/fixtures and raw test artifacts. No tests, benchmarks, product imports, realms, scene changes or source edits were executed by this reviewer.",
+  "baselineCommit": "6e05932000740abc88997db9496c57b301e0a4a9",
+  "expectedFinalSourceSha256": "05c07c2e487e4b65c5068f8803f96bdc6a66a342c5fc44c21f3a64b6b8581073",
+  "sourceFiles": [
+    {
+      "file": "apps/web/scripts/playtest-capacity-soak-core.mjs",
+      "bytes": 37930,
+      "sha256": "40ccd36ee84265a29bd509ca9a7bb360691f2be002411c8cab5f64a3e254cacc",
+      "unchangedFrom6e": true
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-soak.mjs",
+      "bytes": 144416,
+      "sha256": "2251b3a9cbdc391ecc0e68f17f7568468d677550a0f7425604a1ec0a7a485a42",
+      "unchangedFrom6e": false
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-soak.test.mjs",
+      "bytes": 224817,
+      "sha256": "de493f04c78bb961e2a5cfd230ce9c1e4843ec9057edf34ca055edaecaaf7c59",
+      "unchangedFrom6e": false
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-observability.mjs",
+      "bytes": 4447,
+      "sha256": "19edb25f68fdd18567391e52a247964bd689346b58535871ce17051f53af9af7",
+      "unchangedFrom6e": true
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-observability.test.mjs",
+      "bytes": 5228,
+      "sha256": "00ff902194f805eb3433b192b2838b6eea6cd80860052860b825ab34f58a626d",
+      "unchangedFrom6e": true
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-monitor.mjs",
+      "bytes": 21246,
+      "sha256": "e585081835d9232b58d91bb0f717a796b483a818ed5c6fd943abf93350d74e7f",
+      "unchangedFrom6e": true
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-monitor.test.mjs",
+      "bytes": 10882,
+      "sha256": "0e60e4636ea5e384e6455fe9d474d56a760881505e765ccfc82eec490d8d92f8",
+      "unchangedFrom6e": true
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-telemetry.mjs",
+      "bytes": 6548,
+      "sha256": "d3b74c3b8e0401530e787f6b35bd9a578de4f455b3f7817b6230df41c5871964",
+      "unchangedFrom6e": true
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-telemetry.test.mjs",
+      "bytes": 6277,
+      "sha256": "f5efe4aa510f67eb10ebba26a5de9cb5402f061de07900998a77a191a749f974",
+      "unchangedFrom6e": true
+    }
+  ],
+  "independentlyReproducedInverseProofs": {
+    "productionMain": {
+      "method": "Reverse only the optional prospective-owner parameter, native cheap eligibility/filter list, filtered adjacent-tile source and immutable approachRule metadata in memory.",
+      "restoredSha256": "01db0e25728208d17468f708819cd4d1f134a81c97884614da06d06525929f6d",
+      "restoredIsExact6eGitBlob": true
+    },
+    "test": {
+      "method": "Remove additive12-case/helper block and test-only prepareHuntWitness, then reverse the explicit pursuit/escaping/coverage/denominator fixture-input additions in memory.",
+      "restoredBytes": 216899,
+      "restoredSha256": "4280e97d90981f75d37ed15c5d395d3d0129f3d5d213310ad7fc134429e25097",
+      "restoredIsExact6eGitBlob": true
+    },
+    "authorProductionProof": {
+      "file": "C:/mir2-build/p01-completion-20261024/native-witness-approach-planning-v1/source-preservation-v1.json",
+      "bytes": 2130,
+      "sha256": "114187e79fa2c834074f3eb1183d313d0fc585f3445c5fc8ed1d5671e43c6b96"
+    },
+    "authorFixtureProof": {
+      "file": "C:/mir2-build/p01-completion-20261024/native-witness-approach-planning-v1/fixture-preservation-v1.json",
+      "bytes": 4106,
+      "sha256": "1c14334b07c402a000674d336a96c8a845508d10a384d19ff0742d08b4617702"
+    },
+    "sourceEditedByProof": false
+  },
+  "correctnessFindings": [
+    {
+      "area": "prospective versus actual strike",
+      "finding": "Optional prospective owner is used only during native approach eligibility. Actual attack witness call retains the default current self, re-resolves real observer/attacker ID and cursor immediately before send, and still requires actual matching dual-end damage/V2 outcome evidence."
+    },
+    {
+      "area": "candidate eligibility and path bounds",
+      "finding": "Every original native candidate has at most eight prospective adjacent tiles checked for declared coverage plus active living same-map actual observer snapshot membership and <=6 target/tile geometry. Only eligible targets enter the original candidates.slice(0,4) path loop; each target still uses at most eight original neighboring destinations and the original4000-node path budget. This is not a claim that the whole decision uses at most four A* calls."
+    },
+    {
+      "area": "failed eligibility remains ordinary activity",
+      "finding": "Unavailable targets are omitted before approach path work; remaining eligible targets or original bounded scouting/fallback can run. No position, snapshot membership, attack/hit or native completion is fabricated. Only actual receipt-backed actions credit the original counters."
+    },
+    {
+      "area": "unchanged guards",
+      "finding": "Exact inverse proves baseline selection, initial combat transit, actual send validation, post-strike timing, movement/AOI,40move/30s/loop/nonprogress rules,18/12,95%,750ms cadence,900ms proof deadline and all acceptance thresholds were not changed."
+    },
+    {
+      "area": "legacy fixture input preservation",
+      "finding": "Existing chase/escaping fixtures now provide a real active peer with actual attacker/target members. Peer at target+2 is outside current-owner movement fanout but can witness the prospective attack tile, so the fixtures exercise prospective geometry without pausing the peer or discarding telemetry. Coverage pause/restore fixture adds actual double objects and x25. Original assertions/control flow restore exactly after those explicit input changes; original test bodies must not be called entirely unmodified."
+    }
+  ],
+  "performanceScope": {
+    "blockingIoIntroduced": false,
+    "obviousRepeatedPureCpuWork": true,
+    "parameters": {
+      "C": "visible eligible combat candidates before four-target path truncation",
+      "N": "current controlled clients",
+      "B": "declared movement observer bindings",
+      "P": "nearby active observer peers",
+      "E": "peer snapshot entity count"
+    },
+    "conservativeStaticShape": "Up to8*C witness-helper calls. Each call rebuilds combatObservers/active coverage and scans peer snapshots, roughly O(8*C*(B*N+P*B+P*E)), with repeated temporary arrays/sorts.",
+    "oneHundredPlayerTenFighterMeasured": false,
+    "stallEstablished": false,
+    "recommendation": "Keep actual driver-lag/resource gates in the new live profile. If measured planning cost warrants work, derive a read-only active-peer/membership view once per synchronous decision and reuse geometry checks; do not cache across ticks or replace the final fresh send-time validation. No optimization or benchmark was performed here."
+  },
+  "tests": {
+    "artifactsIndependentlyReadAndHashed": [
+      {
+        "name": "focused-v2",
+        "passed": 12,
+        "failed": 0,
+        "receipt": {
+          "file": "C:/mir2-build/p01-completion-20261024/native-witness-approach-planning-v1/focused-v2-receipt.json",
+          "bytes": 1475,
+          "sha256": "ae7d50544f66135d538df9d207e66da9d9ea7b7cbf8a8baf1e70509994539e14"
+        },
+        "log": {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\native-witness-approach-planning-v1\\focused-v2.log",
+          "bytes": 3217,
+          "sha256": "0eab26e49bc9624776ac537f67f976bf5c2494c5e979ebff1f0648d057de7075"
+        },
+        "sourceSha256": "05c07c2e487e4b65c5068f8803f96bdc6a66a342c5fc44c21f3a64b6b8581073",
+        "sourceSha256After": "05c07c2e487e4b65c5068f8803f96bdc6a66a342c5fc44c21f3a64b6b8581073",
+        "sourcePinsUnchangedAfterRun": true
+      },
+      {
+        "name": "adjacent-v3",
+        "passed": 88,
+        "failed": 0,
+        "receipt": {
+          "file": "C:/mir2-build/p01-completion-20261024/native-witness-approach-planning-v1/adjacent-v3-receipt.json",
+          "bytes": 1920,
+          "sha256": "2d3cf259782d37045dd825f942c7b7f9427dc7cd2ef4a1b9719eb1785ccb3a32"
+        },
+        "log": {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\native-witness-approach-planning-v1\\adjacent-v3.log",
+          "bytes": 23797,
+          "sha256": "8a83faad887188361e5ef3b889e24f37150ef46fbdf05882a881c75462d55d45"
+        },
+        "sourceSha256": "05c07c2e487e4b65c5068f8803f96bdc6a66a342c5fc44c21f3a64b6b8581073",
+        "sourceSha256After": "05c07c2e487e4b65c5068f8803f96bdc6a66a342c5fc44c21f3a64b6b8581073",
+        "sourcePinsUnchangedAfterRun": true
+      },
+      {
+        "name": "full-v1",
+        "passed": 187,
+        "failed": 0,
+        "receipt": {
+          "file": "C:/mir2-build/p01-completion-20261024/native-witness-approach-planning-v1/full-v1-receipt.json",
+          "bytes": 1606,
+          "sha256": "19cd53188c41fafe6520bb5bf7eea6ba9a9a808bae2b2c3811e1007bc6c83e75"
+        },
+        "log": {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\native-witness-approach-planning-v1\\full-v1.log",
+          "bytes": 50385,
+          "sha256": "0b583d1989be3aaa1d8336dc97c9387fe0542b3eea751a87ef7706254a4976f7"
+        },
+        "sourceSha256": "05c07c2e487e4b65c5068f8803f96bdc6a66a342c5fc44c21f3a64b6b8581073",
+        "sourceSha256After": "05c07c2e487e4b65c5068f8803f96bdc6a66a342c5fc44c21f3a64b6b8581073",
+        "sourcePinsUnchangedAfterRun": true
+      }
+    ],
+    "reviewerReranTests": false,
+    "authorFailuresRetained": true,
+    "historicalScope": "Earlier adjacent78/10 and82/6 fixture failures are preserved by the author, not retroactively passed. Final12/88/187 results refer to the final source pins."
+  },
+  "probe10EvidenceBasis": {
+    "summary": {
+      "file": "C:/mir2-build/p01-completion-20261024/probe10-combat-analysis-v1/summary-v1.json",
+      "bytes": 21261,
+      "sha256": "249f0fc07ae343adc92d6549d73507038afe6443913ff306c1294d78bfbc4ac4"
+    },
+    "geometry": {
+      "file": "C:/mir2-build/p01-completion-20261024/probe10-combat-analysis-v1/gap-deferral-observer-geometry-v1.json",
+      "bytes": 18586,
+      "sha256": "2d251b1da5cc4626bc87541cf2ca277d86520181eab09c704ed5f2223941bbf5"
+    },
+    "sourceOnlyReview": {
+      "file": "C:/mir2-build/p01-completion-20261024/probe10-combat-source-review-v1.json",
+      "bytes": 13785,
+      "sha256": "aa7d380eee44e82a6072c41af9c85a932d3c7ddbc1cab04f0aaefba9fa5c8487"
+    }
+  },
+  "limitations": [
+    "New geometry fixtures are source regressions using real recorded coordinates on an open test map, not actual terrain replay, live target supply or capacity acceptance.",
+    "The unchanged100-person scenario and ten-fighter CPU load have not passed a new live baseline under this approach revision.",
+    "Original probe10 failures and ambiguity limits remain; no server capacity ceiling is inferred."
+  ]
+}

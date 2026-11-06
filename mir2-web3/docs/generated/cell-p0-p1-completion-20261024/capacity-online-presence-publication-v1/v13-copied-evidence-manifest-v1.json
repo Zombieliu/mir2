@@ -1,0 +1,258 @@
+{
+  "schemaVersion": 1,
+  "scope": "V13 bounded offline evidence archive only. Original input bytes and false verdicts preserved; no capacity/frontend/production acceptance claim.",
+  "capacityAccepted": false,
+  "p0Accepted": false,
+  "productionAccepted": false,
+  "formalAcceptanceEligible": false,
+  "stages": [],
+  "measurement": {
+    "startedAtMs": 1793035626910,
+    "endedAtMs": 1793035682771,
+    "wallSeconds": 55.861,
+    "completed": false,
+    "onlineSamples": 55,
+    "minimumOnlineActors": 50,
+    "maximumOnlineActors": 50
+  },
+  "finalSavedState": {
+    "hp": 0,
+    "maxHp": 18,
+    "mp": 14,
+    "maxMp": 14,
+    "gold": 0,
+    "hpTemplate658Total": 0,
+    "hpTemplate660Total": 0,
+    "scope": "Post-cleanup durable state, not an exact fatal-instant packet."
+  },
+  "aoiDelivery": {
+    "measurementProducedProducerToSentAtLeastOneSecondCount": 0,
+    "maximumProducerToSentUs": 204716,
+    "meaning": "Server producer to send/flush return; not client receive or client membership failure."
+  },
+  "excluded": [
+    "Complete original samples/stderr streams",
+    "Complete anonymous derived streams",
+    "Private accounts store",
+    "Release binaries",
+    "PENDING build configuration"
+  ],
+  "copies": [
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\snapshot-reuse-v13-stage50-root-independent-cleanup-v1.json",
+      "file": "v13-root-independent-cleanup.json",
+      "bytes": 1355,
+      "sha256": "2555ecf0e64f3c5810b9d9059248004bc9c9246ae722288c89eaf63caddc25de",
+      "sourceReadPassesForThisOperation": 1,
+      "exclusiveWrite": true
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\native-steady-single-stage-diagnostic-v13\\episode-50\\reports\\1793035283410-2a81573b.report.json",
+      "file": "v13-original-report.json",
+      "bytes": 72002,
+      "sha256": "6566ffea05af69c73b5698f4bfd6f0ed43e4a3766ccf6ccb6c6658bd5163e748",
+      "sourceReadPassesForThisOperation": 1,
+      "exclusiveWrite": true
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\native-steady-single-stage-diagnostic-v13\\episode-50\\episode-receipt.json",
+      "file": "v13-original-episode-receipt.json",
+      "bytes": 49025,
+      "sha256": "4ee458e75ece09467137175d0f0f225504b95f64dad8961637d97b83e346f745",
+      "sourceReadPassesForThisOperation": 1,
+      "exclusiveWrite": true
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\native-steady-single-stage-diagnostic-v13\\online-presence-reuse-v13-root-guard-execution-v1.json",
+      "file": "v13-root-guard-execution.json",
+      "bytes": 2054,
+      "sha256": "8f897eab19a2e92f40f9c6bd71b2645f20d2bfb7acdf7702db84dba6dc69a214",
+      "sourceReadPassesForThisOperation": 1,
+      "exclusiveWrite": true
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\native-steady-single-stage-diagnostic-v13\\online-presence-reuse-v13-stage50-root-prepare-execution-v1.json",
+      "file": "v13-root-prepare-execution.json",
+      "bytes": 2095,
+      "sha256": "9f8fce706ddc31b3894ae4a21109838422022e6cd3ab767edb21e920d9e60954",
+      "sourceReadPassesForThisOperation": 1,
+      "exclusiveWrite": true
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\native-steady-single-stage-diagnostic-v13\\online-presence-reuse-v13-stage50-root-run-execution-v1.json",
+      "file": "v13-root-run-execution.json",
+      "bytes": 2100,
+      "sha256": "c01f43d080f1a734e1e940754c765c2bd9ee61a0fa51fa27b38e5f64e5f0ffdf",
+      "sourceReadPassesForThisOperation": 1,
+      "exclusiveWrite": true
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\native-steady-single-stage-diagnostic-v13\\source-pins-v1.json",
+      "file": "v13-source-pins.json",
+      "bytes": 81685,
+      "sha256": "41a42f7bec5e7a6e5625a2e5fb4de15769095cf9160778a53e49e12656514eaf",
+      "sourceReadPassesForThisOperation": 1,
+      "exclusiveWrite": true
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\native-steady-single-stage-diagnostic-v13\\episode-50\\source-pins.json",
+      "file": "v13-episode-source-pins.json",
+      "bytes": 41441,
+      "sha256": "651ee2261eda06853463cc4e3865e9f90bbdac47e3393ef1db0e678c5f76cf9b",
+      "sourceReadPassesForThisOperation": 1,
+      "exclusiveWrite": true
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\native-steady-single-stage-diagnostic-v13\\episode-50\\source-pins-admitted-v2.json",
+      "file": "v13-admitted-source-pins.json",
+      "bytes": 44796,
+      "sha256": "977aaa97f189d432e11a702903327e437e7c9dd263de4abd5541e988b2db96b8",
+      "sourceReadPassesForThisOperation": 1,
+      "exclusiveWrite": true
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\native-steady-single-stage-diagnostic-v13\\episode-50\\report-provenance.json",
+      "file": "v13-report-provenance.json",
+      "bytes": 9907,
+      "sha256": "8f03f933838868f00c3fc163ae733fc879c38009bfce01a6d4eb11a23a524e2d",
+      "sourceReadPassesForThisOperation": 1,
+      "exclusiveWrite": true
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\native-steady-single-stage-diagnostic-v13\\episode-50\\realm-cleanup.json",
+      "file": "v13-realm-cleanup.json",
+      "bytes": 6535,
+      "sha256": "9576ac4e966dd1ba83ff9aa05dbf45d2ba1e91a093da63c236c8175afbd54b99",
+      "sourceReadPassesForThisOperation": 1,
+      "exclusiveWrite": true
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\native-steady-single-stage-diagnostic-v13\\episode-50\\gateway-build-pin.json",
+      "file": "v13-gateway-build-pin.json",
+      "bytes": 1203,
+      "sha256": "13981763522a6cf913f14db7bfe668ae2c50a90c648a53e03285ed82e85d60b5",
+      "sourceReadPassesForThisOperation": 1,
+      "exclusiveWrite": true
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\steady-presence-reuse-v13-analysis-v1\\findings-final-v2.json",
+      "file": "v13-findings-final.json",
+      "bytes": 13613,
+      "sha256": "2ea0713b50f3a8d2c1d932d79bd9c532c55c6d8f78d18076a3a36bdc5d1008b5",
+      "sourceReadPassesForThisOperation": 1,
+      "exclusiveWrite": true
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\steady-presence-reuse-v13-analysis-v1\\selected-causal-chain-v2.jsonl",
+      "file": "v13-selected-causal-chain.jsonl",
+      "bytes": 3622,
+      "sha256": "89937b1a5ed6655045c975e0bf52423847cf1df4fce9ed46acb6f7635d9342c1",
+      "sourceReadPassesForThisOperation": 1,
+      "exclusiveWrite": true
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\steady-presence-reuse-v13-analysis-v1\\final-saved-actor-state-v1.json",
+      "file": "v13-final-saved-actor-state.json",
+      "bytes": 2369,
+      "sha256": "a35c6f3ef39e6dab79572860a3d727bda976cac485e0dac6a06616cd1f8cd199",
+      "sourceReadPassesForThisOperation": 1,
+      "exclusiveWrite": true
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\steady-presence-reuse-v13-analysis-v1\\manifest-final-v2.json",
+      "file": "v13-analysis-manifest.json",
+      "bytes": 3332,
+      "sha256": "1fbdf7a73fb42b2384963f6585df1a6a165d767d90c53b2a0240af6c500f9284",
+      "sourceReadPassesForThisOperation": 1,
+      "exclusiveWrite": true
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\archive-presence-v13-evidence-v1.mjs",
+      "file": "v13-archive-evidence-tool.mjs",
+      "bytes": 6469,
+      "sha256": "795bf0d2fca289f090c485ea9bc3cb342ff735268747a58c49af6a7b2e7ca764",
+      "sourceReadPassesForThisOperation": 1,
+      "exclusiveWrite": true
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\online-presence-reuse-release-v5\\source-lib-v5.mjs",
+      "file": "release-v5/source-lib-v5.mjs",
+      "bytes": 21520,
+      "sha256": "2e4bb28ba64adb0cdbd930242e9039c8aa1184471de3e30f1e8f8ea08fcad186",
+      "sourceReadPassesForThisOperation": 1,
+      "exclusiveWrite": true
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\online-presence-reuse-release-v5\\build-release-v5.mjs",
+      "file": "release-v5/build-release-v5.mjs",
+      "bytes": 6924,
+      "sha256": "193a601a7c598a677dc67e2c5c3fc6b235a0c63f1b81940a18d103a53ea2d02a",
+      "sourceReadPassesForThisOperation": 1,
+      "exclusiveWrite": true
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\online-presence-reuse-release-v5\\root-final-config-v5.json",
+      "file": "release-v5/root-final-config-v5.json",
+      "bytes": 11996,
+      "sha256": "5165c480baf1d32d9ace65540279e89542fff503b5e71742ae7475e4b8aeaafb",
+      "sourceReadPassesForThisOperation": 1,
+      "exclusiveWrite": true
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\online-presence-reuse-release-v5\\backend-source-v5.json",
+      "file": "release-v5/backend-source-v5.json",
+      "bytes": 66046,
+      "sha256": "cf2c8e39096e5133dc8cf95045e957b8f81a4e04f626444b5d25c1a015d3f0f7",
+      "sourceReadPassesForThisOperation": 1,
+      "exclusiveWrite": true
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\online-presence-reuse-release-v5\\release-v5.json",
+      "file": "release-v5/release-v5.json",
+      "bytes": 2275,
+      "sha256": "8272b00152df3bd96902fa7fbaa6a0bb365ca50abd0b9b25ef5fa0d570a1d65c",
+      "sourceReadPassesForThisOperation": 1,
+      "exclusiveWrite": true
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\online-presence-reuse-release-v5\\build-receipt-v5.json",
+      "file": "release-v5/build-receipt-v5.json",
+      "bytes": 2263,
+      "sha256": "25c8bd180ad2b0ec63e52b060d5f9b0c8560520c49f951e414fb1a9245820a3a",
+      "sourceReadPassesForThisOperation": 1,
+      "exclusiveWrite": true
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\online-presence-reuse-release-v5\\source-before-v5.json",
+      "file": "release-v5/source-before-v5.json",
+      "bytes": 39336,
+      "sha256": "cc2108587fdf748ce423b4e99515f4e6006aaa688b0d3ae698a6bcd37d9e8a93",
+      "sourceReadPassesForThisOperation": 1,
+      "exclusiveWrite": true
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\online-presence-reuse-release-v5\\source-after-v5.json",
+      "file": "release-v5/source-after-v5.json",
+      "bytes": 39336,
+      "sha256": "cc2108587fdf748ce423b4e99515f4e6006aaa688b0d3ae698a6bcd37d9e8a93",
+      "sourceReadPassesForThisOperation": 1,
+      "exclusiveWrite": true
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\online-presence-reuse-release-v5\\build-stdout-v5.log",
+      "file": "release-v5/build-stdout-v5.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "sourceReadPassesForThisOperation": 1,
+      "exclusiveWrite": true
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\online-presence-reuse-release-v5\\build-stderr-v5.log",
+      "file": "release-v5/build-stderr-v5.log",
+      "bytes": 56033,
+      "sha256": "92d71b58e9fcc1e46d8d4a5f4d097fb25809fe0721af0a34662cf09a47248179",
+      "sourceReadPassesForThisOperation": 1,
+      "exclusiveWrite": true
+    }
+  ]
+}

@@ -1,0 +1,159 @@
+{
+  "schema": "mir2.unified.evidence.phase.v1",
+  "passed": true,
+  "curatedAtUtc": "2026-10-29T15:53:22.464335+00:00",
+  "producerReceipt": {
+    "filename": "web-dependency-preservation.json",
+    "bytes": 4696,
+    "sha256": "b1a774bdde57d941699a5d9c3d31419ec19ff0550853e58fa135a6d72533a11c"
+  },
+  "producerReport": {
+    "recordedAt": "2026-10-29T14:41:35.934Z",
+    "refs": {
+      "wallet": "b87f4071a2026ce96c85ca746ed69f207887a322",
+      "recharge": "d7a34129be0ecaa4dad4bf6bbfc28cb9e1b69844"
+    },
+    "currentWeb": {
+      "@mysten/sui": "^2.16.2",
+      "@mysten/wallet-standard": "^0.20.3",
+      "qrcode": "1.5.4",
+      "@types/qrcode": "1.5.6",
+      "next": "16.4.1",
+      "typescript": "5.9.3"
+    },
+    "historicalWeb": {
+      "wallet": {
+        "@mysten/sui": "^2.16.2",
+        "@mysten/wallet-standard": "^0.20.3",
+        "qrcode": "1.5.4",
+        "@types/qrcode": "1.5.6",
+        "next": "16.4.1",
+        "typescript": "5.9.3"
+      },
+      "recharge": {
+        "@mysten/sui": "^2.16.2",
+        "@mysten/wallet-standard": "^0.20.3",
+        "qrcode": null,
+        "@types/qrcode": null,
+        "next": "16.4.1",
+        "typescript": "5.9.3"
+      }
+    },
+    "lock": {
+      "@mysten/sui": {
+        "version": "2.16.2",
+        "integrityPresent": true
+      },
+      "@mysten/wallet-standard": {
+        "version": "0.20.3",
+        "integrityPresent": true
+      },
+      "qrcode": {
+        "version": "1.5.4",
+        "integrityPresent": true
+      },
+      "@types/qrcode": {
+        "version": "1.5.6",
+        "integrityPresent": true
+      },
+      "next": {
+        "version": "16.4.1",
+        "integrityPresent": true
+      },
+      "typescript": {
+        "version": "5.9.3",
+        "integrityPresent": true
+      }
+    },
+    "dubheNetwork": {
+      "gatewayPathDependencyPreserved": true,
+      "vendorCargoManifestMatchesParents": {
+        "wallet": true,
+        "recharge": true
+      },
+      "upstreamRepository": "https://github.com/0xobelisk/dubhe-chain-poc"
+    },
+    "procurement": {
+      "dependencies": {
+        "@0xobelisk/sui-client": "2.0.0",
+        "@0xobelisk/sui-common": "2.0.0",
+        "@mysten/sui": "1.35.0",
+        "@mysten/sui-modern": "npm:@mysten/sui@2.16.2"
+      },
+      "upstreamCommit": "04700a9a13e6f279be3709e84bf4ad24b4349af3",
+      "suiFrameworkCommit": "3c0f387ebb40b8be292d3b7bd3f5bee8ad226d33",
+      "packageDeclarationMatchesRechargeParent": true,
+      "upstreamDeclarationMatchesRechargeParent": true
+    },
+    "usdc": {
+      "dependencies": {
+        "@mysten/sui": "2.16.2"
+      },
+      "packageDeclarationMatchesRechargeParent": true
+    },
+    "sourcePins": [
+      {
+        "path": "apps/web/package.json",
+        "bytes": 22851,
+        "sha256": "d8895e48a866e8227b071e66c0a2150696a7440715a617a6b68f7f64a15d7a94",
+        "normalizedSha256": "d8895e48a866e8227b071e66c0a2150696a7440715a617a6b68f7f64a15d7a94"
+      },
+      {
+        "path": "apps/web/package-lock.json",
+        "bytes": 88658,
+        "sha256": "c4211041caeaaae3203415df7334c661d2a8dfd54c1e235a531eb6e68f6c4e74",
+        "normalizedSha256": "c4211041caeaaae3203415df7334c661d2a8dfd54c1e235a531eb6e68f6c4e74"
+      },
+      {
+        "path": "apps/gateway/Cargo.toml",
+        "bytes": 3230,
+        "sha256": "00f0762eb427f84d0963951ddc8cef332a3ed6c8f0209b47bd7bfa2f0235cf40",
+        "normalizedSha256": "00f0762eb427f84d0963951ddc8cef332a3ed6c8f0209b47bd7bfa2f0235cf40"
+      },
+      {
+        "path": "vendor/dubhe-network-core/Cargo.toml",
+        "bytes": 703,
+        "sha256": "69ea6ba4d25f55d5dc41bc582d5a91ac95289dfc98f0f5f03711b9f551d20c74",
+        "normalizedSha256": "69ea6ba4d25f55d5dc41bc582d5a91ac95289dfc98f0f5f03711b9f551d20c74"
+      },
+      {
+        "path": "onchain/procurement/package.json",
+        "bytes": 566,
+        "sha256": "9b4f8b0ab5cdae5d01e8aaee46f9c050b018102aaf6ab14757f6dcdedd6492da",
+        "normalizedSha256": "9b4f8b0ab5cdae5d01e8aaee46f9c050b018102aaf6ab14757f6dcdedd6492da"
+      },
+      {
+        "path": "onchain/procurement/package-lock.json",
+        "bytes": 96306,
+        "sha256": "82f8387732b94714df61b79fc6a90a14c516feadf49a28428fe517b9bbe9f3d6",
+        "normalizedSha256": "82f8387732b94714df61b79fc6a90a14c516feadf49a28428fe517b9bbe9f3d6"
+      },
+      {
+        "path": "onchain/procurement/UPSTREAM.json",
+        "bytes": 1464,
+        "sha256": "d61bee6fb810abfdc4582f0b61c008203d4721b0dc1d7cb44c2b591247637639",
+        "normalizedSha256": "d61bee6fb810abfdc4582f0b61c008203d4721b0dc1d7cb44c2b591247637639"
+      },
+      {
+        "path": "onchain/usdc-recharge/package.json",
+        "bytes": 270,
+        "sha256": "a1e10937535de662d0422108f767b2b3033e6a7eaec9ac718f061de0469c6fe8",
+        "normalizedSha256": "a1e10937535de662d0422108f767b2b3033e6a7eaec9ac718f061de0469c6fe8"
+      },
+      {
+        "path": "onchain/usdc-recharge/package-lock.json",
+        "bytes": 10547,
+        "sha256": "ce74134567732a3633acfa4f08382887359116c3453981765c29d8751e2cac5b",
+        "normalizedSha256": "ce74134567732a3633acfa4f08382887359116c3453981765c29d8751e2cac5b"
+      }
+    ],
+    "boundaries": {
+      "sourceWrites": false,
+      "dependencyInstall": false,
+      "network": false,
+      "rustTestRerun": false,
+      "chainTransactions": false
+    }
+  },
+  "phase": "read-only dependency declaration and lock preservation; no reinstall or onchain check"
+}

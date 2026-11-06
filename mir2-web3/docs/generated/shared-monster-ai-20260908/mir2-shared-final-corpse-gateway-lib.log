@@ -1,0 +1,1052 @@
+warning: use of deprecated method `bevy_ecs::world::World::iter_entities`: use world.query::<EntityRef>()` instead
+   --> apps\simulation\src\runtime\monster_ai\great_fox_spirit.rs:163:28
+    |
+163 |     for candidate in world.iter_entities() {
+    |                            ^^^^^^^^^^^^^
+    |
+    = note: `#[warn(deprecated)]` on by default
+
+warning: use of deprecated method `bevy_ecs::world::World::iter_entities`: use world.query::<EntityRef>()` instead
+    --> apps\simulation\src\runtime\packets.rs:7292:25
+     |
+7292 |     for entity in world.iter_entities() {
+     |                         ^^^^^^^^^^^^^
+
+warning: use of deprecated method `bevy_ecs::world::World::iter_entities`: use world.query::<EntityRef>()` instead
+    --> apps\simulation\src\runtime\skills.rs:4946:10
+     |
+4946 |         .iter_entities()
+     |          ^^^^^^^^^^^^^
+
+warning: use of deprecated method `bevy_ecs::world::World::iter_entities`: use world.query::<EntityRef>()` instead
+    --> apps\simulation\src\runtime\skills.rs:5028:10
+     |
+5028 |         .iter_entities()
+     |          ^^^^^^^^^^^^^
+
+warning: type `ZoneCombatEntityRef` is more private than the item `tree_queen_ai::TreeQueenRoot::source_ref`
+  --> apps\simulation\src\runtime\zone\runtime\tree_queen_ai.rs:39:5
+   |
+39 |     pub source_ref: Option<ZoneCombatEntityRef>,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ field `tree_queen_ai::TreeQueenRoot::source_ref` is reachable at visibility `pub(in crate::runtime::zone)`
+   |
+note: but type `ZoneCombatEntityRef` is only usable at visibility `pub(in crate::runtime::zone::runtime)`
+  --> apps\simulation\src\runtime\zone\runtime\entity_combat.rs:7:1
+   |
+ 7 | pub(super) enum ZoneCombatEntityRef {
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   = note: `#[warn(private_interfaces)]` on by default
+
+warning: type `ZoneCombatEntityRef` is more private than the item `EvilMirState::target_ref`
+  --> apps\simulation\src\runtime\zone\runtime\evil_mir_ai.rs:11:5
+   |
+11 |     pub target_ref: Option<ZoneCombatEntityRef>,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ field `EvilMirState::target_ref` is reachable at visibility `pub(in crate::runtime::zone)`
+   |
+note: but type `ZoneCombatEntityRef` is only usable at visibility `pub(in crate::runtime::zone::runtime)`
+  --> apps\simulation\src\runtime\zone\runtime\entity_combat.rs:7:1
+   |
+ 7 | pub(super) enum ZoneCombatEntityRef {
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: type `ZoneCombatEntityRef` is more private than the item `EvilMirPendingSource::source`
+  --> apps\simulation\src\runtime\zone\runtime\evil_mir_ai.rs:20:5
+   |
+20 |     pub source: ZoneCombatEntityRef,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ field `EvilMirPendingSource::source` is reachable at visibility `pub(in crate::runtime::zone)`
+   |
+note: but type `ZoneCombatEntityRef` is only usable at visibility `pub(in crate::runtime::zone::runtime)`
+  --> apps\simulation\src\runtime\zone\runtime\entity_combat.rs:7:1
+   |
+ 7 | pub(super) enum ZoneCombatEntityRef {
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: type `ZoneCombatEntityRef` is more private than the item `GreatFoxState::target_ref`
+  --> apps\simulation\src\runtime\zone\runtime\great_fox_ai.rs:15:5
+   |
+15 |     pub target_ref: Option<ZoneCombatEntityRef>,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ field `GreatFoxState::target_ref` is reachable at visibility `pub(in crate::runtime::zone)`
+   |
+note: but type `ZoneCombatEntityRef` is only usable at visibility `pub(in crate::runtime::zone::runtime)`
+  --> apps\simulation\src\runtime\zone\runtime\entity_combat.rs:7:1
+   |
+ 7 | pub(super) enum ZoneCombatEntityRef {
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: type `ZoneCombatEntityRef` is more private than the item `GreatFoxHit::source_ref`
+  --> apps\simulation\src\runtime\zone\runtime\great_fox_ai.rs:42:5
+   |
+42 |     pub source_ref: Option<ZoneCombatEntityRef>,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ field `GreatFoxHit::source_ref` is reachable at visibility `pub(in crate::runtime::zone)`
+   |
+note: but type `ZoneCombatEntityRef` is only usable at visibility `pub(in crate::runtime::zone::runtime)`
+  --> apps\simulation\src\runtime\zone\runtime\entity_combat.rs:7:1
+   |
+ 7 | pub(super) enum ZoneCombatEntityRef {
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: type `ZoneCombatEntityRef` is more private than the item `GreatFoxHit::target_ref`
+  --> apps\simulation\src\runtime\zone\runtime\great_fox_ai.rs:44:5
+   |
+44 |     pub target_ref: Option<ZoneCombatEntityRef>,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ field `GreatFoxHit::target_ref` is reachable at visibility `pub(in crate::runtime::zone)`
+   |
+note: but type `ZoneCombatEntityRef` is only usable at visibility `pub(in crate::runtime::zone::runtime)`
+  --> apps\simulation\src\runtime\zone\runtime\entity_combat.rs:7:1
+   |
+ 7 | pub(super) enum ZoneCombatEntityRef {
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: type `ZoneCombatEntityRef` is more private than the item `HornedEncounterState::target_ref`
+  --> apps\simulation\src\runtime\zone\runtime\horned_encounter_ai.rs:12:5
+   |
+12 |     pub target_ref: Option<ZoneCombatEntityRef>,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ field `HornedEncounterState::target_ref` is reachable at visibility `pub(in crate::runtime::zone)`
+   |
+note: but type `ZoneCombatEntityRef` is only usable at visibility `pub(in crate::runtime::zone::runtime)`
+  --> apps\simulation\src\runtime\zone\runtime\entity_combat.rs:7:1
+   |
+ 7 | pub(super) enum ZoneCombatEntityRef {
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: type `ZoneCombatEntityRef` is more private than the item `HornedEncounterHit::source_ref`
+  --> apps\simulation\src\runtime\zone\runtime\horned_encounter_ai.rs:38:5
+   |
+38 |     pub source_ref: Option<ZoneCombatEntityRef>,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ field `HornedEncounterHit::source_ref` is reachable at visibility `pub(in crate::runtime::zone)`
+   |
+note: but type `ZoneCombatEntityRef` is only usable at visibility `pub(in crate::runtime::zone::runtime)`
+  --> apps\simulation\src\runtime\zone\runtime\entity_combat.rs:7:1
+   |
+ 7 | pub(super) enum ZoneCombatEntityRef {
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: type `ZoneCombatEntityRef` is more private than the item `HornedEncounterHit::target_ref`
+  --> apps\simulation\src\runtime\zone\runtime\horned_encounter_ai.rs:41:5
+   |
+41 |     pub target_ref: Option<ZoneCombatEntityRef>,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ field `HornedEncounterHit::target_ref` is reachable at visibility `pub(in crate::runtime::zone)`
+   |
+note: but type `ZoneCombatEntityRef` is only usable at visibility `pub(in crate::runtime::zone::runtime)`
+  --> apps\simulation\src\runtime\zone\runtime\entity_combat.rs:7:1
+   |
+ 7 | pub(super) enum ZoneCombatEntityRef {
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: type `ZoneCombatEntityRef` is more private than the item `HornedMapSpell::source_ref`
+  --> apps\simulation\src\runtime\zone\runtime\horned_encounter_ai.rs:60:5
+   |
+60 |     pub source_ref: Option<ZoneCombatEntityRef>,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ field `HornedMapSpell::source_ref` is reachable at visibility `pub(in crate::runtime::zone)`
+   |
+note: but type `ZoneCombatEntityRef` is only usable at visibility `pub(in crate::runtime::zone::runtime)`
+  --> apps\simulation\src\runtime\zone\runtime\entity_combat.rs:7:1
+   |
+ 7 | pub(super) enum ZoneCombatEntityRef {
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: type `ZoneCombatEntityRef` is more private than the item `HornedState::target_ref`
+  --> apps\simulation\src\runtime\zone\runtime\horned_ai.rs:14:5
+   |
+14 |     pub target_ref: Option<ZoneCombatEntityRef>,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ field `HornedState::target_ref` is reachable at visibility `pub(in crate::runtime::zone)`
+   |
+note: but type `ZoneCombatEntityRef` is only usable at visibility `pub(in crate::runtime::zone::runtime)`
+  --> apps\simulation\src\runtime\zone\runtime\entity_combat.rs:7:1
+   |
+ 7 | pub(super) enum ZoneCombatEntityRef {
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: type `ZoneCombatEntityRef` is more private than the item `HornedHit::source_ref`
+  --> apps\simulation\src\runtime\zone\runtime\horned_ai.rs:28:5
+   |
+28 |     pub source_ref: Option<ZoneCombatEntityRef>,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ field `HornedHit::source_ref` is reachable at visibility `pub(in crate::runtime::zone)`
+   |
+note: but type `ZoneCombatEntityRef` is only usable at visibility `pub(in crate::runtime::zone::runtime)`
+  --> apps\simulation\src\runtime\zone\runtime\entity_combat.rs:7:1
+   |
+ 7 | pub(super) enum ZoneCombatEntityRef {
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: type `ZoneCombatEntityRef` is more private than the item `HornedHit::target_ref`
+  --> apps\simulation\src\runtime\zone\runtime\horned_ai.rs:30:5
+   |
+30 |     pub target_ref: Option<ZoneCombatEntityRef>,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ field `HornedHit::target_ref` is reachable at visibility `pub(in crate::runtime::zone)`
+   |
+note: but type `ZoneCombatEntityRef` is only usable at visibility `pub(in crate::runtime::zone::runtime)`
+  --> apps\simulation\src\runtime\zone\runtime\entity_combat.rs:7:1
+   |
+ 7 | pub(super) enum ZoneCombatEntityRef {
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: type `ZoneCombatEntityRef` is more private than the item `HellState::explosion_source_ref`
+  --> apps\simulation\src\runtime\zone\runtime\hell_ai.rs:14:5
+   |
+14 |     pub explosion_source_ref: Option<ZoneCombatEntityRef>,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ field `HellState::explosion_source_ref` is reachable at visibility `pub(in crate::runtime::zone)`
+   |
+note: but type `ZoneCombatEntityRef` is only usable at visibility `pub(in crate::runtime::zone::runtime)`
+  --> apps\simulation\src\runtime\zone\runtime\entity_combat.rs:7:1
+   |
+ 7 | pub(super) enum ZoneCombatEntityRef {
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: type `ZoneCombatEntityRef` is more private than the item `SpiderAiState::parent_ref`
+  --> apps\simulation\src\runtime\zone\runtime\spider_ai.rs:40:5
+   |
+40 |     pub parent_ref: Option<ZoneCombatEntityRef>,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ field `SpiderAiState::parent_ref` is reachable at visibility `pub(in crate::runtime::zone)`
+   |
+note: but type `ZoneCombatEntityRef` is only usable at visibility `pub(in crate::runtime::zone::runtime)`
+  --> apps\simulation\src\runtime\zone\runtime\entity_combat.rs:7:1
+   |
+ 7 | pub(super) enum ZoneCombatEntityRef {
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: type `ZoneCombatEntityRef` is more private than the item `PendingRootSpiderSpawn::source`
+  --> apps\simulation\src\runtime\zone\runtime\spider_ai.rs:52:5
+   |
+52 |     pub source: Option<ZoneCombatEntityRef>,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ field `PendingRootSpiderSpawn::source` is reachable at visibility `pub(in crate::runtime::zone)`
+   |
+note: but type `ZoneCombatEntityRef` is only usable at visibility `pub(in crate::runtime::zone::runtime)`
+  --> apps\simulation\src\runtime\zone\runtime\entity_combat.rs:7:1
+   |
+ 7 | pub(super) enum ZoneCombatEntityRef {
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: type `ZoneCombatEntityRef` is more private than the item `PendingRootSpiderSpawn::target`
+  --> apps\simulation\src\runtime\zone\runtime\spider_ai.rs:54:5
+   |
+54 |     pub target: Option<ZoneCombatEntityRef>,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ field `PendingRootSpiderSpawn::target` is reachable at visibility `pub(in crate::runtime::zone)`
+   |
+note: but type `ZoneCombatEntityRef` is only usable at visibility `pub(in crate::runtime::zone::runtime)`
+  --> apps\simulation\src\runtime\zone\runtime\entity_combat.rs:7:1
+   |
+ 7 | pub(super) enum ZoneCombatEntityRef {
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: methods `scoped_to_account` and `scoped_to_accounts` are never used
+   --> apps\simulation\src\config.rs:225:8
+    |
+109 | impl AccountStore {
+    | ----------------- methods in this implementation
+...
+225 |     fn scoped_to_account(&self, account_id: &str) -> Self {
+    |        ^^^^^^^^^^^^^^^^^
+...
+229 |     fn scoped_to_accounts(&self, account_ids: &[&str]) -> Self {
+    |        ^^^^^^^^^^^^^^^^^^
+    |
+    = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: variant `MacAgility` is never constructed
+   --> apps\simulation\src\runtime\combat.rs:767:5
+    |
+760 | pub(super) enum CrystalDefence {
+    |                 -------------- variant in this enum
+...
+767 |     MacAgility,
+    |     ^^^^^^^^^^
+    |
+    = note: `CrystalDefence` has derived impls for the traits `Debug` and `Clone`, but these are intentionally ignored during dead code analysis
+
+warning: method `socketed_count` is never used
+   --> apps\simulation\src\runtime\equipment.rs:303:19
+    |
+119 | impl EquipmentState {
+    | ------------------- method in this implementation
+...
+303 |     pub(super) fn socketed_count(&self) -> usize {
+    |                   ^^^^^^^^^^^^^^
+
+warning: function `equipment_state_identified` is never used
+   --> apps\simulation\src\runtime\equipment.rs:308:15
+    |
+308 | pub(super) fn equipment_state_identified(item: &EquipmentState) -> bool {
+    |               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `equipment_state_soul_bound_id` is never used
+   --> apps\simulation\src\runtime\equipment.rs:313:15
+    |
+313 | pub(super) fn equipment_state_soul_bound_id(item: &EquipmentState) -> i32 {
+    |               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `repair_conquest_asset` is never used
+    --> apps\simulation\src\runtime\monsters.rs:1813:15
+     |
+1813 | pub(super) fn repair_conquest_asset(world: &mut World, ai: u8, asset_id: u8) -> bool {
+     |               ^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `complete_quest` is never used
+   --> apps\simulation\src\runtime\quests.rs:814:15
+    |
+814 | pub(super) fn complete_quest(world: &mut World, quest_id: i32) {
+    |               ^^^^^^^^^^^^^^
+
+warning: function `default_save_for_character` is never used
+  --> apps\simulation\src\runtime\save.rs:76:15
+   |
+76 | pub(super) fn default_save_for_character(
+   |               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `persist_character_save` is never used
+   --> apps\simulation\src\runtime\save.rs:818:15
+    |
+818 | pub(super) fn persist_character_save(
+    |               ^^^^^^^^^^^^^^^^^^^^^^
+
+warning: method `game_shop_buy_product` is never used
+    --> apps\simulation\src\runtime\stage5.rs:4258:8
+     |
+3188 | impl SimulationSession {
+     | ---------------------- method in this implementation
+...
+4258 |     fn game_shop_buy_product(
+     |        ^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `hell_can_move` is never used
+  --> apps\simulation\src\runtime\zone\runtime\hell_ai.rs:68:15
+   |
+68 | pub(super) fn hell_can_move(m: &ZoneNativeMonster) -> bool {
+   |               ^^^^^^^^^^^^^
+
+warning: function `hell_can_regen` is never used
+  --> apps\simulation\src\runtime\zone\runtime\hell_ai.rs:74:15
+   |
+74 | pub(super) fn hell_can_regen(m: &ZoneNativeMonster) -> bool {
+   |               ^^^^^^^^^^^^^^
+
+warning: `mir2-simulation` (lib) generated 33 warnings
+   Compiling mir2-gateway v0.1.0 (E:\mir2-player-journey\mir2-web3\apps\gateway)
+warning: variable does not need to be mutable
+    --> apps\gateway\src\routing.rs:3655:13
+     |
+3655 |         let mut current_player_heals = Vec::new();
+     |             ----^^^^^^^^^^^^^^^^^^^^
+     |             |
+     |             help: remove this `mut`
+     |
+     = note: `#[warn(unused_mut)]` (part of `#[warn(unused)]`) on by default
+
+warning: `mir2-gateway` (lib test) generated 1 warning (run `cargo fix --lib -p mir2-gateway --tests` to apply 1 suggestion)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1m 11s
+     Running unittests src\lib.rs (C:\Users\Administrator\AppData\Local\Temp\mir2-trade-gold-simulation-20260908\x86_64-pc-windows-msvc\debug\deps\mir2_gateway-7f3d593ba68ee25b.exe)
+
+running 710 tests
+test ai_distribution::tests::channel_preferences_are_persistent ... ok
+test ai_distribution::tests::generic_queue_survives_restart_and_deduplicates ... ok
+test ai_distribution::tests::launch_readiness_waits_for_runtime_and_real_push_delivery ... ok
+test ai_distribution::tests::one_content_package_fans_out_to_configured_channels ... ok
+test ai_distribution::tests::push_adapter_receives_canonical_package_auth_and_idempotency ... ok
+test ai_distribution::tests::runtime_heartbeat_requires_exact_token_and_expires ... ok
+test ai_live::tests::audio_path_rejects_traversal ... ok
+test ai_live::tests::control_mode_requires_exact_operator_token ... ok
+test ai_live::tests::death_scores_as_maximum_highlight ... ok
+test ai_live::tests::discord_retry_queue_survives_hub_restart ... ok
+test ai_live::tests::live_pipeline_calls_model_tts_discord_and_persists_evidence ... ok
+test ai_live::tests::production_rejects_non_https_provider ... ok
+test ai_live::tests::strict_model_commentary_rejects_unknown_fields_and_invalid_target ... ok
+test auth::tests::canonical_gateway_identity_token_is_bound_to_obelisk_player ... ok
+test auth::tests::channel_guest_proof_is_provider_bound_and_expires ... ok
+test auth::tests::operator_token_accepts_match_and_rejects_mismatch ... ok
+test auth::tests::operator_token_dev_fallback_requires_opt_in ... ok
+test auth::tests::operator_token_required_in_production ... ok
+test auth::tests::passkey_gateway_token_maps_only_supported_auth_methods ... ok
+test auth::tests::passkey_gateway_token_requires_configured_secret_in_production ... ok
+test auth::tests::passkey_gateway_token_requires_matching_hmac_account_and_expiry ... ok
+test auth::tests::production_rejects_replayable_legacy_sui_proofs ... ok
+test auth::tests::sui_proof_preserves_passkey_or_wallet_provider ... ok
+test beta::tests::gate10_acceptance_closes_verified_work_to_finalized_sui_settlement ... ok
+test beta::tests::readiness_fails_closed_without_finality_capacity_or_quorum ... ok
+test cache::tests::in_memory_auth_attempts_increment_and_clear ... ok
+test cache::tests::in_memory_auth_token_can_only_be_consumed_once ... ok
+test cache::tests::in_memory_identity_session_revocation_is_visible ... ok
+test cache::tests::in_memory_trace_records_assignment_transfer_failover_and_disconnect ... ok
+test cache::tests::owned_route_refresh_does_not_resurrect_removed_session ... ok
+test cache::tests::redis_sentinel_cache_rediscovers_a_promoted_master_after_connection_failure ... ok
+test cache::tests::redis_session_cache_character_index_removes_matching_record ... ok
+test cache::tests::redis_session_cache_key_filters_separate_records_from_indexes_and_leases ... ok
+test cache::tests::redis_session_cache_roundtrips_removes_and_expires_records ... ok
+test cache::tests::redis_session_cache_route_lease_blocks_competing_owner ... ok
+test cache::tests::session_cache_environment_defaults_to_in_memory_for_local_dev ... ok
+test cache::tests::session_cache_environment_explicit_flag_requires_redis ... ok
+test cache::tests::session_cache_environment_postgres_account_policy_requires_redis ... ok
+test cache::tests::session_cache_environment_required_redis_must_be_reachable ... ok
+test cache::tests::session_cache_environment_requires_redis_for_production_like_gateway ... ok
+test cache::tests::session_cache_environment_uses_redis_when_url_is_configured ... ok
+test cache::tests::session_cache_fresh_route_rejects_stale_presence_records ... ok
+test cache::tests::session_cache_hit_matches_authoritative_world_snapshot_after_refresh ... ok
+test cache::tests::session_cache_is_empty_until_character_enters_world ... ok
+test cache::tests::session_cache_refresh_replaces_stale_position_state ... ok
+test cache::tests::session_cache_remove_character_clears_matching_presence_record ... ok
+test cache::tests::session_cache_remove_clears_online_presence_record ... ok
+test cache::tests::session_cache_route_lease_blocks_stale_owner_overwrite_and_owned_remove ... ok
+test cache::tests::session_cache_route_request_can_drive_zone_registry ... ok
+test cache::tests::session_cache_routes_online_character_to_zone ... ok
+test cache::tests::session_cache_stale_route_cleanup_keeps_fresh_records ... ok
+test cache::tests::session_cache_status_reports_backend_and_stale_records ... ok
+test channel_identity::tests::identity_link_rejects_cross_player_takeover ... ok
+test channel_identity::tests::json_store_roundtrips_identity_index ... ok
+test channel_identity::tests::linking_passkey_promotes_guest_account_primary ... ok
+test channel_identity::tests::postgres_store_is_shared_across_gateway_instances ... ignored, requires MIR2_CHANNEL_IDENTITY_TEST_DATABASE_URL
+test channel_identity::tests::same_provider_subject_resolves_to_stable_player_without_persisting_raw_subject ... ok
+test consensus_log::tests::finalized_commands_project_into_scheduler_and_guild_admission_state ... ok
+test consensus_log::tests::finalizes_only_after_byzantine_quorum_and_never_emits_empty_blocks ... ok
+test consensus_log::tests::imported_finality_replays_identically_and_rejects_forks_or_duplicates ... ok
+test consensus_log::tests::reward_policy_and_epoch_close_take_effect_only_after_commonware_finality ... ok
+test consensus_log::tests::sui_finality_and_capacity_become_membership_only_after_commonware_quorum ... ok
+test control_plane::tests::drain_rebalances_with_a_new_generation_and_fences_the_old_lease ... ok
+test control_plane::tests::expired_heartbeat_triggers_failover_and_capacity_is_enforced ... ok
+test control_plane::tests::registration_and_heartbeats_enforce_per_zone_capacity ... ok
+test control_plane::tests::scheduler_spreads_replicas_across_failure_domains_and_keeps_a_stable_lease ... ok
+test economy::tests::business_effect_id_ignores_attempt_fields_but_binds_payload ... ok
+test economy::tests::commit_ack_error_with_lookup_failure_returns_ground_outcome_unknown ... ok
+test economy::tests::commit_ack_error_with_lookup_failure_returns_trade_outcome_unknown ... ok
+test economy::tests::committed_ground_drop_survives_full_projection_and_reconciles_later ... ok
+test economy::tests::committed_then_ack_error_ground_pickup_recovers_exactly_once ... ok
+test economy::tests::committed_then_ack_error_trade_recovers_by_lookup_and_keeps_projections_pending ... ok
+test economy::tests::corrupted_duplicate_receipt_fields_fail_closed ... ok
+test economy::tests::delayed_commit_visibility_is_resolved_before_absent_can_be_observed ... ok
+test economy::tests::durable_commit_before_projection_replays_under_new_context_exactly_once ... ok
+test economy::tests::durable_marked_pickup_bypasses_capacity_preflight_after_state_changes ... ok
+test economy::tests::durable_projection_marker_prevents_replay_after_offsetting_transaction ... ok
+test economy::tests::durable_trade_rows_reconcile_each_party_after_ledger_commit_and_retry_mark ... ok
+test economy::tests::event_id_is_deterministic_and_binds_the_fence ... ok
+test economy::tests::gateway_ground_projection_save_failure_rolls_back_then_retries_once ... ok
+test economy::tests::ground_bootstrap_failure_stays_unknown_until_retry ... ok
+test economy::tests::ground_drop_projection_mark_failure_retries_without_double_credit ... ok
+test economy::tests::ground_initial_lookup_failure_stays_unknown_until_retry ... ok
+test economy::tests::ground_retry_rejects_regenerated_zone_key_before_store_and_uses_original_key ... ok
+test economy::tests::missing_context_ground_drop_is_explicitly_deferred_without_store_access ... ok
+test economy::tests::missing_context_trade_is_explicitly_deferred_without_store_access ... ok
+test economy::tests::pending_trade_projection_query_failure_fails_closed ... ok
+test economy::tests::player_gold_and_item_drops_map_to_fenced_debits ... ok
+test economy::tests::player_trade_maps_gold_and_item_quantities_to_conserved_ledger_legs ... ok
+test economy::tests::reused_idempotency_key_with_changed_payload_fails_closed ... ok
+test economy::tests::skill_consumption_maps_exact_runtime_components_to_negative_ledger_legs ... ok
+test economy::tests::stale_cross_player_reclaim_keeps_original_ground_projection_pending ... ok
+test economy::tests::stale_cross_player_reclaim_removes_drop_without_second_credit ... ok
+test economy::tests::standby_context_cannot_authorize_an_external_commit ... ok
+test economy::tests::store_failure_before_commit_leaves_ledger_and_projection_unchanged ... ok
+test economy::tests::trade_requires_two_sided_asset_conservation ... ok
+test economy::tests::trade_retry_rejects_regenerated_zone_key_before_store_and_uses_original_key ... ok
+test economy::tests::zone_gold_pickup_binds_business_key_fence_and_source_sequence ... ok
+test events::tests::gameplay_event_json_matches_clickhouse_kafka_projection_columns ... ok
+test events::tests::gameplay_event_publisher_serializes_concurrent_sequences ... ok
+test events::tests::parsed_http_url_extracts_host_port_and_base_path ... ok
+test events::tests::redpanda_publish_posts_gameplay_event_records ... ok
+test gate14::tests::authoritative_state_replays_account_inventory_gold_and_leases ... ok
+test gate14::tests::state_machine_rejects_duplicate_receipt_and_stale_fencing ... ok
+test gate14::tests::world_director_anchor_is_finalized_and_replay_stable ... ok
+test gate15::tests::duplicate_display_name_gets_a_deterministic_control_alias ... ok
+test gate15::tests::finalized_placement_becomes_primary_first_rpc_route ... ok
+test gate15::tests::migrated_control_name_alias_does_not_reject_the_same_character_slot ... ok
+test gate15::tests::real_character_index_resolves_to_finalized_identity ... ok
+test home_tunnel_transport::tests::relay_issued_timestamps_allow_small_client_clock_skew ... ok
+test hotspot::tests::affinity_and_explicit_line_are_stable ... ok
+test hotspot::tests::affinity_pin_is_removed_after_its_last_session_leaves ... ok
+test hotspot::tests::hard_capacity_rejects_overflow_instead_of_overloading_a_line ... ok
+test hotspot::tests::only_empty_lines_scale_in_after_grace ... ok
+test hotspot::tests::three_hundred_players_create_six_bounded_lines ... ok
+test hotspot::tests::transient_empty_lines_do_not_fragment_final_hotspot_placement ... ok
+test identity::tests::identity_sessions_are_signed_listed_and_revocable ... ok
+test identity::tests::postgres_worker_leaves_the_callers_tokio_runtime_context ... ok
+test identity::tests::recovery_codes_are_one_time_and_rotated ... ok
+test identity::tests::sui_credential_resolves_owner_and_rejects_cross_account_binding ... ok
+test inject::tests::credit_gold_uses_ore_amount_as_placeholder_rate ... ok
+test inject::tests::dispatch_routes_to_the_registered_session_and_returns_the_receipt ... ok
+test inject::tests::dispatch_without_a_registered_session_is_not_connected ... ok
+test inject::tests::mine_depleted_is_accepted_but_not_a_world_command ... ok
+test inject::tests::parses_grant_onchain_ore_and_maps_to_world_command ... ok
+test inject::tests::registration_guard_unregisters_on_drop ... ok
+test node_security::tests::admission_expiry_fails_closed_before_execution ... ok
+test node_security::tests::permissionless_admission_requires_sui_finality_and_trusted_capacity_issuer ... ok
+test node_security::tests::two_of_three_quorum_releases_honest_execution_and_quarantines_divergence ... ok
+test node_security::tests::verified_execution_emits_rewardable_receipt_for_agreeing_nodes_only ... ok
+test operator::tests::ed25519_heartbeat_binds_node_id_and_key_generation ... ok
+test operator::tests::heartbeat_secret_must_have_adequate_entropy_length ... ok
+test operator::tests::management_bearer_token_is_required_and_compared_exactly ... ok
+test operator::tests::management_token_must_have_adequate_entropy_length ... ok
+test operator::tests::prometheus_output_is_low_cardinality_and_escapes_host_id ... ok
+test operator::tests::public_operator_bind_requires_signed_heartbeats ... ok
+test operator::tests::remote_capacity_challenge_is_bounded_and_signed_by_node_identity ... ok
+test operator::tests::signed_heartbeat_round_trips_and_rejects_wrong_secret ... ok
+test operator::tests::world_director_operator_status_is_authenticated_and_exported_as_metrics ... ok
+test regional::tests::reference_profile_is_valid_and_exact ... ok
+test regional::tests::stage_cannot_relax_economy_or_latency_invariants ... ok
+test regional::tests::workload_cannot_count_only_idle_connections ... ok
+test resume::tests::binding_and_rotation_retain_only_latest_two_generations ... ok
+test resume::tests::concurrent_consumers_have_exactly_one_success ... ok
+test resume::tests::consuming_one_generation_revokes_siblings_and_replay ... ok
+test resume::tests::deserialize_rejects_wrong_length_alphabet_padding_and_decoded_size ... ok
+test resume::tests::generated_credential_is_32_random_bytes_and_registry_is_hash_only ... ok
+test resume::tests::malformed_and_expired_credentials_fail_closed ... ok
+test routing::tests::abnormal_teardown_zone_drain_tests::abrupt_tcp_and_web_teardown_drain_authoritative_state_and_economy_once ... ok
+test routing::tests::abnormal_teardown_zone_drain_tests::abrupt_teardown_rolls_back_unmatched_debited_trade_before_checkpoint ... ok
+test routing::tests::abnormal_teardown_zone_drain_tests::web_mail_refresh_cannot_overwrite_zone_vitals_before_teardown_drain ... ok
+test routing::tests::active_character_reconciles_durable_trade_projection_once_without_local_trade_state ... ok
+test routing::tests::active_character_retries_pending_ground_drop_projection_then_caches_clear_state ... ok
+test routing::tests::atomic_world_checkpoint_restore_preserves_factory_when_later_zone_is_invalid ... ok
+test routing::tests::atomic_world_checkpoint_restore_preserves_replica_state_and_tick_flags ... ok
+test routing::tests::checkpoint_handoff_repairs_a_stale_target_projection_before_commit ... ok
+test routing::tests::checkpoint_restore_requires_pending_drop_claims_to_match_presence_and_zone ... ok
+test routing::tests::command_tail_aoi_remove_does_not_tombstone_retained_shared_npc_globally ... ok
+test routing::tests::commit_ack_unknown_ground_claim_is_checkpointed_and_retried_without_restore ... ok
+test routing::tests::deferred_trade_recovery_keeps_authority_then_retries_the_real_key ... ok
+test routing::tests::delayed_old_death_receipt_is_not_lost_after_new_life_receipts_are_acknowledged ... ok
+test routing::tests::delayed_player_action_packets_keep_only_owned_tick_damage_bundle ... ok
+test routing::tests::durable_settlement_invalidates_clear_projection_cache_without_local_trade_state ... ok
+test routing::tests::economy_source_sequence_survives_checkpoint_and_exhaustion_fails_closed ... ok
+test routing::tests::failed_replica_promotion_preserves_the_replica_marker ... ok
+test routing::tests::failed_target_prepare_rolls_the_source_back_without_rebinding ... ok
+test routing::tests::final_shared_entity_apply_does_not_tombstone_retained_shared_npc_globally ... ok
+test routing::tests::finalized_world_event_monster_is_indexed_as_player_action_target ... ok
+test routing::tests::first_resource_creation_honors_an_existing_replica_marker ... ok
+test routing::tests::gateway_legal_archer_cannot_materialize_neutral_range_target ... ok
+test routing::tests::gateway_melee_materializes_neutral_harvestable_deer ... ok
+test routing::tests::gateway_prefilter_uses_explicit_disposition_for_friendly_and_hostile_ai0 ... ok
+test routing::tests::gateway_refreshes_changed_combat_state_before_the_next_range_intent ... ok
+test routing::tests::gateway_refreshes_mount_attack_capability_before_each_melee_intent ... ok
+test routing::tests::gateway_refreshes_trusted_range_admission_and_rejects_unauthorized_sessions ... ok
+test routing::tests::gateway_shared_range_uses_crystal_nine_tile_boundary ... ok
+test routing::tests::gateway_unauthorized_materialized_range_is_atomic ... ok
+test routing::tests::generated_vital_receipts_preserve_batched_death_revival_for_current_and_queued_owners ... ok
+test routing::tests::hosted_owner_only_fences_authenticated_active_production_economy ... ok
+test routing::tests::in_memory_zone_owner_lease_authority_rejects_expired_renewal ... ok
+test routing::tests::in_memory_zone_owner_lease_authority_renews_ttl_before_expiry ... ok
+test routing::tests::in_process_account_inventory_service_deduplicates_committed_zone_rewards ... ok
+test routing::tests::in_process_account_inventory_service_handles_skill_item_consumption_command ... ok
+test routing::tests::in_process_account_inventory_service_rejects_identity_mismatch ... ok
+test routing::tests::in_process_registry_routes_new_sessions_to_primary_zone ... ok
+test routing::tests::intelligent_creature_shared_pickup_service_failure_cancels_without_personal_fallback ... ok
+test routing::tests::intelligent_creature_shared_pickup_uses_ticket_bound_account_service ... ok
+test routing::tests::inventory_receipt_scope_tests::direct_and_journaled_sequences_have_distinct_receipt_domains_in_one_zone ... ok
+test routing::tests::inventory_receipt_scope_tests::direct_item_receipts_use_actual_map_without_fabricating_fencing_context ... ok
+test routing::tests::inventory_receipt_scope_tests::fenced_gold_receipts_debit_each_zone_once ... ok
+test routing::tests::inventory_receipt_scope_tests::fenced_item_receipts_are_scoped_by_zone_but_not_fencing_generation ... ok
+test routing::tests::legacy_checkpoint_heals_are_migrated_before_new_signed_damage ... ok
+test routing::tests::legacy_checkpoint_pending_packets_are_truncated_on_restore ... ok
+test routing::tests::lethal_delta_registers_death_penalty_drops_without_waiting_for_snapshot_tick ... ok
+test routing::tests::live_native_reconcile_clears_stale_harvest_marker ... ok
+test routing::tests::map_zone_transfer_atomically_rebinds_to_the_destination_zone ... ok
+test routing::tests::map_zone_two_sessions_on_same_map_share_a_zone_and_see_each_other ... ok
+test routing::tests::object_player_info_preserves_authoritative_layered_appearance ... ok
+test routing::tests::observer_aoi_remove_does_not_tombstone_retained_native_monster_globally ... ok
+test routing::tests::ordered_economy_replay_tests::hosted_verified_economy_replay_preserves_ordering_and_next_direct_request ... ok
+test routing::tests::owner_attack_animation_tests::public_melee_attack_uses_local_actor_for_owner_and_zone_actor_for_observer ... ok
+test routing::tests::pending_durable_trade_blocks_every_trade_state_mutation_packet ... ok
+test routing::tests::pending_zone_packets_never_exceed_rpc_outbound_capacity ... ok
+test routing::tests::per_map_router_derives_distinct_zone_per_map ... ok
+test routing::tests::per_map_routing_assigns_two_maps_to_two_zones_through_registry ... ok
+test routing::tests::personal_tick_drops_shared_monster_motion_but_preserves_other_packets ... ok
+test routing::tests::personal_viewport_remove_does_not_delete_retained_shared_npc_from_zone ... ok
+test routing::tests::player_attack_routes_to_finalized_world_event_monster ... ok
+test routing::tests::player_observer_broadcast_does_not_delete_retained_shared_npc_from_zone ... ok
+test routing::tests::receipt_from_another_incarnation_or_future_generation_is_rejected ... ok
+test routing::tests::retained_shared_npc_survives_owner_aoi_leave_and_reentry ... ok
+test routing::tests::retained_shared_npc_survives_personal_ticks_outside_aoi ... ok
+test routing::tests::server_shout_crosses_zone_boundaries_through_the_global_bus ... ok
+test routing::tests::shared_account_inventory_skill_item_key_includes_request_id ... ok
+test routing::tests::shared_death_drop_spawn_packet_uses_committed_drop_payload ... ok
+test routing::tests::shared_drop_aoi_tests::shared_item_aoi_leave_preserves_global_drop_and_reentry_projection ... ok
+test routing::tests::shared_drop_aoi_tests::shared_item_real_pickup_removes_zone_object_and_global_drop ... ok
+test routing::tests::shared_gateway_dead_potion_requires_town_revive_and_logout_saves_zone_authority ... ok
+test routing::tests::shared_gateway_tick_does_not_run_private_monster_authority ... ok
+test routing::tests::shared_gateway_turn_commits_allowed_crystal_map_coordinate_transfer ... ok
+test routing::tests::shared_harvest_syncs_private_player_to_authoritative_zone_transform ... ok
+test routing::tests::shared_in_process_crystal_runtime_does_not_apply_starter_demo_gate_transfer ... ok
+test routing::tests::shared_in_process_crystal_world_runtime_does_not_apply_starter_demo_gate_transfer ... ok
+test routing::tests::shared_in_process_factory_isolates_state_by_zone_id ... ok
+test routing::tests::shared_in_process_registry_allocates_unique_ids_for_concurrent_player_gold_drops ... ok
+test routing::tests::shared_in_process_registry_broadcasts_player_drop_gold_spawn ... ok
+test routing::tests::shared_in_process_registry_callnpc_shared_guide_starts_sparse_session_quest ... ok
+test routing::tests::shared_in_process_registry_commits_trade_through_economy_boundary ... ok
+test routing::tests::shared_in_process_registry_commits_two_sided_item_rental_delivery ... ok
+test routing::tests::shared_in_process_registry_commits_two_sided_trade_delivery ... ok
+test routing::tests::shared_in_process_registry_consumes_ready_crystal_run_chain ... ok
+test routing::tests::shared_in_process_registry_gains_remote_picked_up_shared_gold ... ok
+test routing::tests::shared_in_process_registry_intelligent_creature_auto_picks_remote_shared_gold ... ok
+test routing::tests::shared_in_process_registry_intelligent_creature_filter_blocks_remote_shared_item ... ok
+test routing::tests::shared_in_process_registry_intelligent_creature_picks_up_remote_shared_gold ... ok
+test routing::tests::shared_in_process_registry_keeps_npc_quest_icons_personal_per_session ... ok
+test routing::tests::shared_in_process_registry_post_movement_grace_yields_world_tick ... ok
+test routing::tests::shared_in_process_registry_qa_apply_native_state_syncs_zone_transform ... ok
+test routing::tests::shared_in_process_registry_rejects_run_outside_bichon_collision_bounds ... ok
+test routing::tests::shared_in_process_registry_rejects_walk_outside_bichon_collision_bounds ... ok
+test routing::tests::shared_in_process_registry_relays_share_quest_to_online_group_member ... ok
+test routing::tests::shared_in_process_registry_removes_logged_out_remote_players ... ok
+test routing::tests::shared_in_process_registry_removes_packet_picked_up_shared_drop ... ok
+test routing::tests::shared_in_process_registry_removes_remote_picked_up_shared_drop ... ok
+test routing::tests::shared_in_process_registry_rolls_back_item_rental_when_partner_cancels ... ok
+test routing::tests::shared_in_process_registry_rolls_back_pending_trade_when_partner_cancels ... ok
+test routing::tests::shared_in_process_registry_rolls_back_pending_trade_when_partner_disconnects ... ok
+test routing::tests::shared_in_process_registry_rolls_back_two_sided_trade_when_receiver_is_full ... ok
+test routing::tests::shared_in_process_registry_routes_chat_through_shared_zone ... ok
+test routing::tests::shared_in_process_registry_routes_gm_chat_commands_to_personal_session ... ok
+test routing::tests::shared_in_process_registry_routes_leave_through_shared_zone ... ok
+test routing::tests::shared_in_process_registry_routes_melee_pvp_and_accrues_unlawful_pk ... ok
+test routing::tests::shared_in_process_registry_routes_monster_attack_through_zone_native_combat ... ok
+test routing::tests::shared_in_process_registry_routes_run_through_shared_zone ... ok
+test routing::tests::shared_in_process_registry_routes_turn_through_shared_zone ... ok
+test routing::tests::shared_in_process_registry_routes_walk_through_shared_zone ... ok
+test routing::tests::shared_in_process_registry_same_map_transfer_syncs_zone_movement_origin ... ok
+test routing::tests::shared_in_process_registry_surfaces_remote_players_in_snapshots ... ok
+test routing::tests::shared_in_process_registry_surfaces_shared_ground_drops ... ok
+test routing::tests::shared_in_process_registry_surfaces_shared_npcs_for_sparse_sessions ... ok
+test routing::tests::shared_in_process_registry_syncs_equipped_mount_before_three_tile_run ... ok
+test routing::tests::shared_in_process_registry_syncs_npc_random_seed_between_sessions ... ok
+test routing::tests::shared_in_process_registry_syncs_npc_saved_values_between_sessions ... ok
+test routing::tests::shared_in_process_registry_syncs_stage5_event_spawn_to_zone ... ok
+test routing::tests::shared_in_process_registry_syncs_visible_paid_sailor_round_trip_into_zone ... ok
+test routing::tests::shared_in_process_registry_uses_adjacent_remote_player_for_item_rental_request ... ok
+test routing::tests::shared_in_process_registry_uses_adjacent_remote_player_for_trade_request ... ok
+test routing::tests::shared_in_process_registry_walk_onto_crystal_movement_transfers_map ... ok
+test routing::tests::shared_in_process_registry_walk_onto_library_movement_transfers_map ... ok
+test routing::tests::shared_in_process_runtime_applies_current_map_shared_monsters_to_local_runtime ... ok
+test routing::tests::shared_in_process_runtime_applies_pending_zone_player_damage_to_session_hp ... ok
+test routing::tests::shared_in_process_runtime_applies_pending_zone_player_heal_to_session_hp ... ok
+test routing::tests::shared_in_process_runtime_broadcasts_delayed_player_tick_damage ... ok
+test routing::tests::shared_in_process_runtime_broadcasts_shared_entity_action_packets ... ok
+test routing::tests::shared_in_process_runtime_broadcasts_shared_entity_movement_packets ... ok
+test routing::tests::shared_in_process_runtime_claims_packet_spawned_shared_drop_through_zone ... ok
+test routing::tests::shared_in_process_runtime_claims_shared_drop_through_zone ... ok
+test routing::tests::shared_in_process_runtime_commits_npc_script_outcome_atomically ... ok
+test routing::tests::shared_in_process_runtime_delegates_typed_game_shop_outcome ... ok
+test routing::tests::shared_in_process_runtime_emits_gain_experience_after_kill_award_commit ... ok
+test routing::tests::shared_in_process_runtime_expires_shared_drop_on_zone_cadence ... ok
+test routing::tests::shared_in_process_runtime_filters_snapshots_at_crystal_object_data_range ... ok
+test routing::tests::shared_in_process_runtime_level_one_field_melee_resolves_damage_on_tick ... ok
+test routing::tests::shared_in_process_runtime_mirrors_pending_zone_self_buff_to_session_snapshot ... ok
+test routing::tests::shared_in_process_runtime_pickup_uses_zone_authoritative_position_for_packet_drop ... ok
+test routing::tests::shared_in_process_runtime_prechecks_item_skill_before_consuming_items ... ok
+test routing::tests::shared_in_process_runtime_rebases_owned_summon_master_before_disconnect_cleanup ... ok
+test routing::tests::shared_in_process_runtime_rejects_early_range_attack_at_zone_boundary ... ok
+test routing::tests::shared_in_process_runtime_removes_owned_summon_when_owner_changes_map ... ok
+test routing::tests::shared_in_process_runtime_removes_owner_generated_entities_on_disconnect ... ok
+test routing::tests::shared_in_process_runtime_rolls_back_shared_gold_claim_when_gold_cap_blocks_commit ... ok
+test routing::tests::shared_in_process_runtime_routes_magic_through_shared_zone ... ok
+test routing::tests::shared_in_process_runtime_routes_range_attack_through_shared_zone ... ok
+test routing::tests::shared_in_process_runtime_routes_summon_magic_through_zone_item_boundary ... ok
+test routing::tests::shared_in_process_runtime_uses_account_inventory_receipts_for_zone_rewards ... ok
+test routing::tests::shared_in_process_runtime_uses_account_inventory_service_boundary ... ok
+test routing::tests::shared_in_process_runtime_uses_npc_world_service_boundary ... ok
+test routing::tests::shared_in_process_town_revive_preserves_private_death_until_zone_sync ... ok
+test routing::tests::shared_map_sync_preserves_zone_native_monster_authority ... ok
+test routing::tests::shared_melee_direction_uses_authoritative_zone_transform ... ok
+test routing::tests::shared_npc_entity_side_effects_emit_death_packets_for_monclear ... ok
+test routing::tests::shared_npc_entity_side_effects_emit_spawn_packets_for_new_monsters ... ok
+test routing::tests::shared_npc_interact_uses_authoritative_zone_transform_after_long_movement ... ok
+test routing::tests::shared_owner_dead_entity_packet_filter_drops_stale_transforms_after_death ... ok
+test routing::tests::shared_pickup_zone_path_is_handled_even_when_it_emits_no_packets ... ok
+test routing::tests::shared_pvp_red_name_death_applies_two_item_penalty_without_penalizing_killer ... ok
+test routing::tests::shared_quest_packet_uses_authoritative_zone_transform_after_callnpc ... ok
+test routing::tests::shared_runtime_npc_teleport_checkpoint_failure_rolls_back_before_dispatch ... ok
+test routing::tests::shared_runtime_npc_teleport_routes_protocol_atomically_and_persists_transform ... ok
+test routing::tests::shared_runtime_real_disabled_npc_teleport_is_silent_and_zero_mutation ... ok
+test routing::tests::shared_trade_repeat_request_cannot_replace_debited_unmatched_offer ... ok
+test routing::tests::shared_zone_cadence_is_not_multiplied_by_personal_session_ticks ... ok
+test routing::tests::shared_zone_movement_ingress_returns_fallback_near_map_transfer ... ok
+test routing::tests::shared_zone_movement_ingress_returns_fallback_when_queue_is_full ... ok
+test routing::tests::shared_zone_movement_ingress_runs_while_private_runtime_is_blocked ... ok
+test routing::tests::shared_zone_movement_reply_wait_is_bounded ... ok
+test routing::tests::shared_zone_mutation_gate_hands_off_to_exact_next_ticket ... ok
+test routing::tests::shared_zone_mutation_gate_runs_zones_in_parallel_but_fences_host_checkpoint ... ok
+test routing::tests::shared_zone_owner_cadence_consumes_queued_player_movement_without_session_tick ... ok
+test routing::tests::shared_zone_presence_epoch_advances_on_map_membership_change ... ok
+test routing::tests::shared_zone_seeds_current_map_npcs_for_later_owner_aoi_entry ... ok
+test routing::tests::shared_zone_seeds_distant_current_map_monsters_for_later_owner_aoi_entry ... ok
+test routing::tests::shared_zone_state_allows_shared_drop_after_ownership_window ... ok
+test routing::tests::shared_zone_state_allows_shared_drop_owner_group_member ... ok
+test routing::tests::shared_zone_state_applies_dead_marker_to_late_object_monster_packet ... ok
+test routing::tests::shared_zone_state_applies_object_died_before_snapshot_arrives ... ok
+test routing::tests::shared_zone_state_applies_object_died_without_stale_revive ... ok
+test routing::tests::shared_zone_state_applies_object_health_without_stale_overwrite ... ok
+test routing::tests::shared_zone_state_applies_object_movement_packets_to_shared_entities ... ok
+test routing::tests::shared_zone_state_applies_object_remove_as_entity_tombstone ... ok
+test routing::tests::shared_zone_state_applies_object_revived_before_snapshot_arrives ... ok
+test routing::tests::shared_zone_state_applies_object_revived_without_stale_redeath ... ok
+test routing::tests::shared_zone_state_applies_object_transform_packets_to_shared_entities ... ok
+test routing::tests::shared_zone_state_blocks_actions_against_dead_entities ... ok
+test routing::tests::shared_zone_state_blocks_reharvest_when_harvest_packet_arrives_before_snapshot ... ok
+test routing::tests::shared_zone_state_blocks_reharvesting_harvested_shared_corpse ... ok
+test routing::tests::shared_zone_state_clears_stale_harvest_only_for_a_new_corpse_incarnation ... ok
+test routing::tests::shared_zone_state_coalesces_pending_movement_by_object ... ok
+test routing::tests::shared_zone_state_commits_death_drop_without_prior_entity_snapshot ... ok
+test routing::tests::shared_zone_state_commits_monster_death_drops_once ... ok
+test routing::tests::shared_zone_state_commits_zero_health_monster_drops_once ... ok
+test routing::tests::shared_zone_state_death_drop_anchor_survives_corpse_remove ... ok
+test routing::tests::shared_zone_state_dispatches_current_and_pending_monster_kill_awards ... ok
+test routing::tests::shared_zone_state_dispatches_current_and_pending_player_damages ... ok
+test routing::tests::shared_zone_state_dispatches_current_and_pending_player_heals ... ok
+test routing::tests::shared_zone_state_expires_shared_drop_and_queues_object_remove ... ok
+test routing::tests::shared_zone_state_expires_shared_drop_ownership_deadline_before_auto_creature_pickup ... ok
+test routing::tests::shared_zone_state_expires_shared_drop_ownership_deadline_before_pickup ... ok
+test routing::tests::shared_zone_state_filters_stale_dead_entity_packets_for_owner_stream ... ok
+test routing::tests::shared_zone_state_ignores_object_transform_packets_for_dead_entities ... ok
+test routing::tests::shared_zone_state_keeps_absent_viewport_drops_until_object_remove_or_pickup ... ok
+test routing::tests::shared_zone_state_keeps_absent_viewport_entities_until_object_remove ... ok
+test routing::tests::shared_zone_state_keeps_lower_health_against_stale_packet_increase ... ok
+test routing::tests::shared_zone_state_object_revived_clears_remove_tombstone ... ok
+test routing::tests::shared_zone_state_preserves_owned_generated_entity_owner_during_snapshot_merge ... ok
+test routing::tests::shared_zone_state_records_object_hero_and_npc_spawn_packets ... ok
+test routing::tests::shared_zone_state_records_object_monster_spawn_packet ... ok
+test routing::tests::shared_zone_state_records_summon_owner_from_monster_master ... ok
+test routing::tests::shared_zone_state_removes_owned_generated_entities_on_player_leave ... ok
+test routing::tests::shared_zone_state_resolves_harvest_target_across_crystal_front_scan ... ok
+test routing::tests::shared_zone_state_respects_shared_drop_ownership_window ... ok
+test routing::tests::shared_zone_state_save_transform_updates_presence_before_pending_drain ... ok
+test routing::tests::shared_zone_state_treats_intelligent_creature_pickup_as_drop_remove ... ok
+test routing::tests::shared_zone_state_treats_zero_health_as_dead ... ok
+test routing::tests::shared_zone_state_treats_zero_health_without_max_hp_as_dead ... ok
+test routing::tests::shared_zone_upsert_preserves_same_map_authoritative_transform ... ok
+test routing::tests::signed_zone_vitals_preserve_heal_then_damage_for_current_and_remote_sessions ... ok
+test routing::tests::stale_live_outbound_registration_cannot_remove_replacement ... ok
+test routing::tests::trade_completion_tests::cancellation_refunds_waiting_offer_once_without_any_completion ... ok
+test routing::tests::trade_completion_tests::each_party_completes_once_only_after_its_committed_delivery ... ok
+test routing::tests::trade_completion_tests::receiver_capacity_rejection_refunds_both_sides_without_completion ... ok
+test routing::tests::trade_completion_tests::unfenced_deferred_settlement_never_announces_completion ... ok
+test routing::tests::trade_completion_tests::unknown_outcome_holds_both_offers_until_definitive_commit_or_rejection ... ok
+test routing::tests::trade_gold_tests::first_gold_debit_bootstraps_the_predebit_balance_and_failure_debits_nothing ... ok
+test routing::tests::trade_gold_tests::gold_edits_are_rejected_when_either_participant_has_prepared ... ok
+test routing::tests::trade_gold_tests::invalid_gold_deltas_do_not_debit_or_replace_the_held_quote ... ok
+test routing::tests::trade_gold_tests::peer_preparation_rejects_item_retrieval_and_deposit_without_changing_accepted_offer ... ok
+test routing::tests::trade_gold_tests::preparation_never_debits_gold_a_second_time_and_settlement_conserves_total ... ok
+test routing::tests::trade_gold_tests::prepared_refund_overflow_retains_final_offer_until_capacity_allows_one_refund ... ok
+test routing::tests::trade_gold_tests::repeated_gold_deltas_debit_immediately_and_only_partner_sees_cumulative_quote ... ok
+test routing::tests::trade_gold_tests::saved_unprepared_gold_in_a_fresh_zone_refunds_once_but_pending_projection_holds_it ... ok
+test routing::tests::trade_gold_tests::unprepared_logout_or_disconnect_refunds_before_save_and_peer_refunds_once ... ok
+test routing::tests::trade_gold_tests::unprepared_self_or_peer_cancel_refunds_each_owner_once ... ok
+test routing::tests::trade_invitation_tests::bootstrap_failure_closes_pair_and_refunds_the_waiting_peer ... ok
+test routing::tests::trade_invitation_tests::disabled_trade_preference_rejects_invites ... ok
+test routing::tests::trade_invitation_tests::disconnected_inviter_cannot_be_accepted_and_new_invite_is_possible ... ok
+test routing::tests::trade_invitation_tests::editable_unlock_keeps_pair_and_private_edit_routing ... ok
+test routing::tests::trade_invitation_tests::gold_and_items_are_private_to_the_established_partner ... ok
+test routing::tests::trade_invitation_tests::invitation_requires_mutual_facing ... ok
+test routing::tests::trade_invitation_tests::only_recipient_receives_invitation_and_decline_notifies_only_inviter ... ok
+test routing::tests::trade_invitation_tests::pending_old_pair_cancellation_blocks_a_new_invitation_until_drained ... ok
+test routing::tests::trade_invitation_tests::prepared_unlock_cancels_and_refunds_both_sides_without_stale_open_pair ... ok
+test routing::tests::trade_invitation_tests::teardown_fenced_recipient_rejects_request_and_inviter_rejects_acceptance ... ok
+test routing::tests::trade_invitation_tests::unprepared_pair_cancel_closes_both_personal_states ... ok
+test routing::tests::trade_invitation_tests::unsolicited_reply_and_edits_cannot_create_a_trade ... ok
+test routing::tests::trade_invitation_tests::world_checkpoint_drops_all_online_trade_links ... ok
+test routing::tests::unfenced_initial_trade_is_deferred_and_rolls_back_exactly_once ... ok
+test routing::tests::unknown_ground_claim_survives_process_restart_and_credits_once_after_new_login ... ok
+test routing::tests::unknown_trade_survives_process_restart_and_delivers_both_sides_once_after_new_logins ... ok
+test routing::tests::unmatched_offerer_logout_rolls_back_before_persisting_character ... ok
+test routing::tests::unreconciled_character_blocks_trade_mutation_until_projection_query_succeeds ... ok
+test routing::tests::world_checkpoint_removes_sessions_players_and_pending_packets ... ok
+test routing::tests::world_entity_from_monster_info_fails_closed_without_explicit_disposition ... ok
+test routing::tests::zone_monster_spawn_from_shared_entity_preserves_explicit_hostile_passive_override ... ok
+test routing::tests::zone_monster_spawn_from_shared_entity_restores_crystal_drop_templates ... ok
+test routing::tests::zone_monster_spawn_from_shared_entity_restores_crystal_neutral_ai ... ok
+test routing::tests::zone_registry_can_route_sessions_through_policy ... ok
+test session::abnormal_teardown_persistence_tests::abnormal_teardown_updates_the_next_character_roster_last_access ... ok
+test session::abnormal_teardown_persistence_tests::db_and_journal_failure_retain_frozen_authority_and_retry_same_checkpoint ... ok
+test session::abnormal_teardown_persistence_tests::db_failure_journals_the_exact_frozen_checkpoint_and_revokes_resume_eligibility ... ok
+test session::abnormal_teardown_persistence_tests::mismatched_or_switched_prepared_identity_is_rejected_without_persist_journal_or_cleanup ... ok
+test session::abnormal_teardown_persistence_tests::owner_lease_handoff_racing_prepare_is_rejected_before_cache_or_persistence ... ok
+test session::save_fail_closed_tests::failed_handoff_rollback_persistence_is_reported_as_not_durable ... ok
+test session::save_fail_closed_tests::gateway_save_failure_reaches_caller_after_authoritative_transform_sync ... ok
+test session::save_fail_closed_tests::rejected_logout_and_disconnect_emit_no_success_and_keep_zone_presence ... ok
+test session::save_recovery::tests::atomic_publish_never_overwrites_an_existing_final_path ... ok
+test session::save_recovery::tests::atomic_publish_rejects_temp_replacement_and_preserves_both_files ... ok
+test session::save_recovery::tests::authenticated_filename_identity_mismatch_blocks_payload_and_claimed_accounts ... ok
+test session::save_recovery::tests::authenticated_final_replacement_is_rejected_before_store_receipt ... ok
+test session::save_recovery::tests::directory_durability_marker_and_active_temp_are_ignored_by_journal_scans ... ok
+test session::save_recovery::tests::entry_limit_rejects_without_silent_eviction ... ok
+test session::save_recovery::tests::journal_is_secret_free_idempotent_and_replays_before_cleanup ... ok
+test session::save_recovery::tests::newer_durable_state_is_quarantined_instead_of_overwritten ... ok
+test session::save_recovery::tests::path_swap_during_open_is_rejected_by_stable_identity_check ... ok
+test session::save_recovery::tests::postgres_style_config_uses_explicit_recovery_directory ... ok
+test session::save_recovery::tests::postgres_style_startup_without_recovery_directory_is_rejected ... ok
+test session::save_recovery::tests::publication_final_and_different_temp_fails_closed_without_cleanup ... ok
+test session::save_recovery::tests::publication_final_and_same_hard_link_temp_fails_closed_and_retains_evidence ... ok
+test session::save_recovery::tests::publication_temp_only_is_promoted_idempotently ... ok
+test session::save_recovery::tests::record_size_limit_rejects_before_creating_a_file ... ok
+test session::save_recovery::tests::recovery_directory_cannot_overlap_account_store_parent ... ok
+test session::save_recovery::tests::recovery_enabled_without_dedicated_mac_key_is_rejected_before_directory_adoption ... ok
+test session::save_recovery::tests::recovery_publication_source_has_no_link_then_unlink_fallback ... ok
+test session::save_recovery::tests::recovery_root_below_a_symlink_or_reparse_ancestor_is_rejected ... ok
+test session::save_recovery::tests::recovery_root_replacement_is_blocked_or_detected_by_stable_identity ... ok
+test session::save_recovery::tests::replacement_after_authenticated_read_blocks_commit_cleanup ... ok
+test session::save_recovery::tests::replacement_after_authenticated_read_blocks_quarantine_move ... ok
+test session::save_recovery::tests::second_independent_manager_cannot_lock_same_recovery_directory ... ok
+test session::save_recovery::tests::symlink_or_reparse_journal_entry_is_rejected_without_following ... ok
+test session::save_recovery::tests::tamper_with_recomputed_sha_is_rejected_by_mac_without_quarantining_untrusted_bytes ... ok
+test session::save_recovery::tests::unowned_nonempty_directory_fails_closed_without_moving_unrelated_content ... ok
+test session::save_recovery::tests::windows_full_file_id_detects_path_replacement_while_original_handle_is_held ... ok
+test session::tests::chat_before_start_game_rejects_without_packets ... ok
+test session::tests::chat_normal_message_emits_crystal_object_chat_only ... ok
+test session::tests::delete_character_removes_entry_from_character_list ... ok
+test session::tests::drop_item_creates_ground_drop_packet ... ok
+test session::tests::gateway_panic_boundary_returns_operation_error ... ok
+test session::tests::gateway_session_accepts_current_zone_owner_fenced_command ... ok
+test session::tests::gateway_session_dispatches_valid_zone_owner_request_through_command_client ... ok
+test session::tests::gateway_session_exposes_world_command_outcome ... ok
+test session::tests::gateway_session_generic_execute_auto_forces_native_typed_path ... ok
+test session::tests::gateway_session_heartbeat_rejects_expired_zone_owner ... ok
+test session::tests::gateway_session_heartbeat_renews_zone_owner_before_ttl_expiry ... ok
+test session::tests::gateway_session_movement_event_skips_snapshot_tick ... ok
+test session::tests::gateway_session_publishes_gameplay_event_from_world_outcome ... ok
+test session::tests::gateway_session_refreshes_finalized_zone_owner_after_handoff ... ok
+test session::tests::gateway_session_rejects_stale_zone_owner_before_command_client ... ok
+test session::tests::gateway_session_rejects_stale_zone_owner_fencing_token ... ok
+test session::tests::gateway_session_rejects_superseded_zone_owner_after_handoff ... ok
+test session::tests::gateway_session_rejects_wrong_zone_owner_before_production_command ... ok
+test session::tests::gateway_session_rejects_zone_owner_renewal_after_handoff ... ok
+test session::tests::gateway_session_renews_current_zone_owner_lease ... ok
+test session::tests::gateway_zone_movement_ingress_publishes_gameplay_event_once ... ok
+test session::tests::gateway_zone_movement_ingress_rejects_stale_owner_lease ... ok
+test session::tests::hosted_zone_owner_command_client_executes_on_owner_runtime_not_gateway_runtime ... ok
+test session::tests::hosted_zone_owner_command_client_rejects_stale_request_at_owner_boundary ... ok
+test session::tests::hosted_zone_owner_runtime_handoff_moves_state_to_next_owner_host ... ok
+test session::tests::in_process_zone_owner_command_client_rejects_stale_request_at_owner_boundary ... ok
+test session::tests::login_returns_character_list ... ok
+test session::tests::new_character_is_added_and_returned ... ok
+test session::tests::reexported_character_record_matches_expected_shape ... ok
+test session::tests::rpc_zone_owner_command_client_executes_on_transport_owner_runtime ... ok
+test session::tests::rpc_zone_owner_command_client_rejects_stale_request_at_transport_boundary ... ok
+test session::tests::start_game_emits_bootstrap_sequence ... ok
+test session::tests::walk_updates_self_location ... ok
+test spectator::tests::camera_or_target_becomes_the_only_self_player ... ok
+test spectator::tests::event_timeline_tracks_movement_health_death_and_drops ... ok
+test spectator::tests::public_delay_is_enforced_but_director_can_be_live ... ok
+test spectator::tests::recording_disabled_keeps_live_ring_but_does_not_touch_disk ... ok
+test spectator::tests::sanitized_recording_excludes_private_inventory_and_supports_replay ... ok
+test spectator::tests::spectator_live_and_replay_redact_exact_ground_item_identity ... ok
+test spectator::tests::stale_entities_are_pruned_from_the_merged_world ... ok
+test tcp::chat_broadcast::tests::default_line_messages_are_project_owned_and_never_use_third_party_fallback_copy ... ok
+test tcp::chat_broadcast::tests::presence_unregisters_when_connection_guard_is_dropped ... ok
+test tcp::chat_broadcast::tests::qa_overrides_fail_closed_without_nonempty_control_token ... ok
+test tcp::chat_broadcast::tests::qa_packet_limit_waits_for_presence_and_stops_on_original_order ... ok
+test tcp::chat_broadcast::tests::schedule_orders_zero_five_ten_fifteen_twenty_minutes ... ok
+test tcp::chat_broadcast::tests::tcp_and_websocket_share_presence_and_broadcasts ... ok
+test tcp::tcp_save_fail_closed_tests::persistence_admission_is_finite_and_releases_capacity ... ok
+test tcp::tcp_save_fail_closed_tests::socket_is_dropped_before_potentially_long_persistence_retry ... ok
+test tcp::tests::delayed_zone_movement_reaches_idle_tcp_client ... ok
+test topology::tests::adaptive_hot_map_routes_three_hundred_sessions_to_six_lines ... ok
+test topology::tests::adaptive_router_releases_departed_session_placement ... ok
+test topology::tests::checked_adaptive_route_rejects_capacity_exhaustion ... ok
+test topology::tests::per_map_topology_groups_cold_maps_and_dedicates_unknown_maps ... ok
+test topology::tests::registry_routes_grouped_and_dedicated_maps_to_separate_owner_leases ... ok
+test topology::tests::single_topology_marks_its_default_zone_as_all_maps ... ok
+test topology::tests::topology_rejects_duplicate_map_assignment ... ok
+test topology::tests::zones_tick_independently_at_configured_cadences ... ok
+test web::tests::action_capacity_waits_for_a_released_slot ... ok
+test web::tests::admin_session_trace_requires_configured_gateway_operator_token ... ok
+test web::tests::admin_sessions_and_control_endpoints_are_queryable ... ok
+test web::tests::admin_system_mail_endpoint_writes_live_account_store ... ok
+test web::tests::big_map_browser_commands_map_exactly_to_protocol_packets ... ok
+test web::tests::big_map_browser_commands_reject_invalid_or_malformed_inputs ... ok
+test web::tests::blocking_component_initializer_supports_sync_clients_with_own_runtime ... ok
+test web::tests::bootstrap_state_packets_force_snapshot ... ok
+test web::tests::browser_send_mail_requires_authenticated_active_character_before_simulation ... ok
+test web::tests::buy_item_command_maps_to_protocol_packet ... ok
+test web::tests::capacity_state_rejects_websocket_connections_over_limit ... ok
+test web::tests::capacity_state_tracks_account_command_inflight_limits ... ok
+test web::tests::capacity_state_tracks_active_sessions_and_reconnect_leases ... ok
+test web::tests::cast_skill_command_accepts_key_field ... ok
+test web::tests::change_password_command_accepts_camel_case_fields ... ok
+test web::tests::channel_identity_proofs_are_consumed_once ... ok
+test web::tests::character_roster_events_preserve_crystal_last_access_ticks ... ok
+test web::tests::combine_item_server_event_exposes_crystal_payload_fields ... ok
+test web::tests::credit_delta_server_events_expose_crystal_payload_fields ... ok
+test web::tests::delete_character_command_accepts_camel_case_fields ... ok
+test web::tests::delete_item_command_maps_to_protocol_packet ... ok
+test web::tests::development_capacity_policy_is_unlimited_unless_explicitly_configured ... ok
+test web::tests::disconnect_command_maps_to_protocol_packet ... ok
+test web::tests::drop_gold_command_maps_to_protocol_packet ... ok
+test web::tests::drop_item_command_accepts_key_field ... ok
+test web::tests::equip_item_command_maps_to_protocol_packet ... ok
+test web::tests::explicit_logout_and_disconnect_revoke_native_resume_family_before_execution ... ok
+test web::tests::fishing_commands_map_to_crystal_protocol_packets ... ok
+test web::tests::forwarded_loopback_header_cannot_authorize_remote_unsafe_commands ... ok
+test web::tests::frozen_legacy_gateway_schema_rejects_storage_v2_before_execution ... ok
+test web::tests::game_shop_buy_command_maps_exactly_to_dedicated_protocol_packet ... ok
+test web::tests::group_utility_packets_are_exposed_as_browser_events ... ok
+test web::tests::health_reports_cache_and_gameplay_event_boundaries ... ok
+test web::tests::hero_and_world_control_commands_map_to_crystal_protocol_packets ... ok
+test web::tests::hero_commands_map_to_crystal_protocol_packets ... ok
+test web::tests::hero_packets_are_exposed_as_browser_events ... ok
+test web::tests::intelligent_creature_commands_map_to_crystal_protocol_packets ... ok
+test web::tests::intelligent_creature_packets_are_exposed_as_browser_events ... ok
+test web::tests::item_slot_and_seal_server_events_expose_crystal_payload_fields ... ok
+test web::tests::keep_alive_command_maps_to_protocol_packet_without_snapshot ... ok
+test web::tests::local_debug_transfer_rejects_extra_segments_without_relocation ... ok
+test web::tests::login_command_accepts_camel_case_fields ... ok
+test web::tests::magic_commands_map_to_crystal_protocol_packets ... ok
+test web::tests::magic_packets_are_exposed_as_browser_events ... ok
+test web::tests::mail_friend_commands_map_to_crystal_protocol_packets ... ok
+test web::tests::mail_friend_packets_are_exposed_as_browser_events ... ok
+test web::tests::map_environment_packets_use_browser_facing_fields ... ok
+test web::tests::market_packets_expose_contract_listing_fields ... ok
+test web::tests::market_relationship_commands_map_to_crystal_protocol_packets ... ok
+test web::tests::market_relationship_packets_are_exposed_as_browser_events ... ok
+test web::tests::merge_item_command_maps_to_protocol_packet ... ok
+test web::tests::mount_and_fishing_packets_are_exposed_as_browser_events ... ok
+test web::tests::move_actions_skip_snapshot_without_visibility_changes ... ok
+test web::tests::movement_packets_skip_snapshot_by_default ... ok
+test web::tests::native_authenticated_websocket_game_shop_receipt_mail_collect_is_e2e ... ok
+test web::tests::native_game_shop_capability_and_request_id_are_independent_and_strict ... ok
+test web::tests::native_game_shop_handler_failures_are_exact_and_atomic ... ok
+test web::tests::native_game_shop_ordinary_buy_mail_collect_and_reload_is_exactly_once ... ok
+test web::tests::native_game_shop_pending_rejects_second_request_without_replacing_first ... ok
+test web::tests::native_game_shop_pre_execution_failures_are_definite_and_exact ... ok
+test web::tests::native_game_shop_pre_execution_send_failure_keeps_pending_unknown ... ok
+test web::tests::native_game_shop_receipt_is_exact_and_maps_stable_failure_codes ... ok
+test web::tests::native_resume_atomically_restores_bound_session_and_replay_fails ... ok
+test web::tests::native_resume_auth_revision_overflow_blocks_issue_reserve_and_commit ... ok
+test web::tests::native_resume_commit_rechecks_lease_expiry_under_the_store_mutex ... ok
+test web::tests::native_resume_control_never_maps_to_simulation_auth_or_unsafe_actions ... ok
+test web::tests::native_resume_credential_and_lease_are_consumed_once_under_one_mutex ... ok
+test web::tests::native_resume_expired_credential_with_live_lease_is_terminal_and_releases_capacity ... ok
+test web::tests::native_resume_first_post_resume_action_rechecks_identity_before_execution ... ok
+test web::tests::native_resume_handler_reconnects_once_rotates_credential_and_replays_no_commands ... ok
+test web::tests::native_resume_identity_revoked_during_prepare_cannot_commit_or_retry_and_drops_resources ... ok
+test web::tests::native_resume_json_is_explicit_strict_and_secret_redacted ... ok
+test web::tests::native_resume_rejects_cache_revocation_without_consuming_the_lease ... ok
+test web::tests::native_resume_rejects_expired_identity_binding ... ok
+test web::tests::native_resume_rejects_revoked_identity_without_consuming_the_lease ... ok
+test web::tests::native_resume_rejects_wrong_gateway_session_and_character_bindings ... ok
+test web::tests::native_resume_remote_revocation_after_precheck_is_caught_by_post_commit_shared_revalidate ... ok
+test web::tests::native_resume_reservation_drop_and_explicit_rollback_restore_exact_lease ... ok
+test web::tests::native_resume_revocation_after_revalidate_before_commit_is_linearized_and_never_activates ... ok
+test web::tests::native_resume_route_failure_rolls_back_and_exact_token_retries_without_orphan_permits ... ok
+test web::tests::native_resume_server_event_contracts_are_exact_and_rejection_is_uniform ... ok
+test web::tests::native_resume_zone_failure_rolls_back_and_second_attempt_commits ... ok
+test web::tests::new_account_command_accepts_camel_case_fields ... ok
+test web::tests::new_quest_info_exposes_contract_quest_fields ... ok
+test web::tests::newly_typed_server_events_expose_structured_payload_fields ... ok
+test web::tests::non_opted_in_game_shop_keeps_the_ordinary_packet_path_without_receipt ... ok
+test web::tests::non_opted_in_web_never_reaches_resume_issuance_and_map_change_forces_rotation ... ok
+test web::tests::npc_goods_stack_images_follow_live_count_and_keep_raw_user_item ... ok
+test web::tests::npc_service_server_events_expose_crystal_payload_fields ... ok
+test web::tests::pickup_command_accepts_camel_case_fields ... ok
+test web::tests::player_command_safety_defaults_closed_when_environment_is_unconfigured ... ok
+test web::tests::production_admin_operator_token_rejects_short_secrets ... ok
+test web::tests::production_and_staging_cannot_disable_player_command_safety ... ok
+test web::tests::production_capacity_defaults_are_finite_and_environment_overrides_remain_explicit ... ok
+test web::tests::production_game_shop_requires_authentication_and_generic_stage5_stays_closed ... ok
+test web::tests::production_web_path_allows_start_game_after_login_success ... ok
+test web::tests::production_web_path_rejects_debug_runtime_commands ... ok
+test web::tests::production_web_path_rejects_unauthenticated_start_game ... ok
+test web::tests::q23_quest_info_event_exposes_all_selectable_rewards ... ok
+test web::tests::qa_control_apply_native_state_updates_live_session_snapshot ... ok
+test web::tests::qa_control_is_rejected_when_player_command_safety_is_enabled ... ok
+test web::tests::qa_control_rejects_wrong_token ... ok
+test web::tests::qa_control_requires_configured_token ... ok
+test web::tests::qa_control_token_works_only_with_real_loopback_dev_opt_out ... ok
+test web::tests::quest_operation_ack_is_exact_and_reports_rejection_without_guessing ... ok
+test web::tests::quest_packets_are_exposed_as_browser_events ... ok
+test web::tests::quest_request_ids_reject_malformed_values_and_preserve_legacy_web_commands ... ok
+test web::tests::raw_server_events_expose_copyable_payload_fields ... ok
+test web::tests::realm_info_exposes_platinum_176_release_identity ... ok
+test web::tests::reconnect_grace_expiry_revokes_native_resume_credentials ... ok
+test web::tests::reconnect_resume_key_helpers_match_login_and_start_game_actions ... ok
+test web::tests::reconnect_session_store_discards_expired_sessions ... ok
+test web::tests::reconnect_session_store_restores_active_session_before_grace_expires ... ok
+test web::tests::reconnect_session_store_scheduled_purge_discards_expired_sessions ... ok
+test web::tests::refine_packets_are_exposed_as_browser_events ... ok
+test web::tests::remove_slot_item_command_maps_to_protocol_packet ... ok
+test web::tests::repair_item_command_maps_to_protocol_packet ... ok
+test web::tests::request_item_info_command_maps_to_protocol_packet ... ok
+test web::tests::resize_storage_server_event_exposes_crystal_payload_fields ... ok
+test web::tests::runtime_tick_defers_after_bootstrap_but_not_player_movement ... ok
+test web::tests::select_npc_dialog_command_accepts_target_field ... ok
+test web::tests::sell_item_command_maps_to_protocol_packet ... ok
+test web::tests::simple_bootstrap_social_packets_are_exposed_as_browser_events ... ok
+test web::tests::socket_serial_guard_blocks_zone_bypass_until_action_finishes ... ok
+test web::tests::special_repair_item_command_maps_to_protocol_packet ... ok
+test web::tests::split_item_command_maps_to_protocol_packet ... ok
+test web::tests::stage5_command_accepts_action_and_args ... ok
+test web::tests::stage5_damage_equipment_browser_command_returns_dura_changed_event ... ok
+test web::tests::stage5_damage_equipment_still_works_after_storage_password_flow ... ok
+test web::tests::start_game_command_accepts_camel_case_fields ... ok
+test web::tests::start_game_route_lease_blocks_duplicate_online_character_before_world_entry ... ok
+test web::tests::start_game_route_lease_releases_when_start_game_does_not_claim_identity ... ok
+test web::tests::storage_password_commands_map_to_protocol_packets ... ok
+test web::tests::storage_password_server_events_expose_crystal_payload_fields ... ok
+test web::tests::storage_request_ids_opt_into_v2_without_breaking_legacy_commands ... ok
+test web::tests::storage_v2_server_packets_echo_the_exact_request_id ... ok
+test web::tests::store_item_command_maps_to_protocol_packet ... ok
+test web::tests::successful_identity_packets_build_gate15_write_through_batches ... ok
+test web::tests::take_back_item_command_maps_to_protocol_packet ... ok
+test web::tests::trade_commands_map_to_crystal_protocol_packets ... ok
+test web::tests::trade_packets_are_exposed_as_browser_events ... ok
+test web::tests::transfer_map_command_accepts_key_field ... ok
+test web::tests::unsafe_player_command_opt_out_requires_explicit_dev_or_test_loopback ... ok
+test web::tests::use_item_command_accepts_key_field ... ok
+test web::tests::use_item_with_unique_id_maps_to_packet ... ok
+test web::tests::vis01_bichon_actor_fixture_is_exact_gateway_typed_packet_output ... ok
+test web::tests::vis02_bichon_fireball_fixture_is_exact_gateway_typed_packet_output ... ok
+test web::tests::vis02_bichon_firewall_fixture_is_exact_packet_event_projection ... ok
+test web::tests::vis02_bichon_flaming_sword_fixture_is_exact_packet_event_projection ... ok
+test web::tests::vis02_bichon_great_fireball_fixture_is_exact_packet_event_projection ... ok
+test web::tests::vis02_bichon_lightning_fixture_is_exact_gateway_typed_packet_output ... ok
+test web::tests::vis02_bichon_soul_fireball_fixture_is_exact_packet_event_projection ... ok
+test web::tests::visibility_packets_force_snapshot ... ok
+test web::tests::web_session_route_refresh_throttles_low_latency_updates ... ok
+test web::tests::web_session_save_queue_debounces_until_due_or_limit ... ok
+test web::tests::web_session_save_queue_flushes_on_checkpoint_and_close ... ok
+test web::tests::websocket_frame_message_and_input_queue_memory_bounds_are_constant_and_finite ... ok
+test web::tests::with_env_vars_restores_after_panic_and_recovers_poisoned_lock ... ok
+test web::tests::world_snapshot_skill_contract_serializes_authoritative_mp_cost ... ok
+test web::tests::zone_movement_reader_bypass_only_accepts_walk_run_and_turn_packets ... ok
+test web::web_save_fail_closed_tests::authenticated_login_replays_once_and_returns_fresh_roster_on_all_three_paths ... ok
+test web::web_save_fail_closed_tests::banned_passkey_account_never_replays_its_pending_journal ... ok
+test web::web_save_fail_closed_tests::banned_standard_login_never_replays_recovery_on_all_three_paths ... ok
+test web::web_save_fail_closed_tests::client_visible_login_and_save_errors_are_fixed_and_secret_free ... ok
+test web::web_save_fail_closed_tests::debounced_save_failure_keeps_dirty_until_successful_retry ... ok
+test web::web_save_fail_closed_tests::deleted_passkey_account_with_pending_journal_is_not_recreated ... ok
+test web::web_save_fail_closed_tests::dev_and_production_web_leave_paths_propagate_stale_save_and_keep_identity ... ok
+test web::web_save_fail_closed_tests::first_time_trusted_passkey_provisions_only_after_recovery_clear_check ... ok
+test web::web_save_fail_closed_tests::forced_save_failure_marks_clean_queue_dirty_and_retry_clears_it ... ok
+test web::web_save_fail_closed_tests::journaled_teardown_revokes_resume_then_replay_fences_stale_writer ... ok
+test web::web_save_fail_closed_tests::persistence_admission_capacity_is_finite_and_permits_are_released ... ok
+test web::web_save_fail_closed_tests::saved_teardown_preserves_resume_policy_but_journaled_never_retains ... ok
+test web::web_save_fail_closed_tests::source_rejected_or_unavailable_preflight_never_cleans_or_applies_journal ... ok
+test web::web_save_fail_closed_tests::unverified_web_passkey_action_cannot_provision_an_account ... ok
+test web::web_save_fail_closed_tests::wrong_password_never_replays_recovery_on_tcp_production_web_or_dev_web ... ok
+test world_director::tests::ai_adapter_accepts_only_strict_bounded_template_proposals ... ok
+test world_director::tests::bichon_wooma_command_finalizes_and_executes_idempotently ... ok
+test world_director::tests::finalized_schedule_spawns_real_zone_monsters_and_survives_restart ... ok
+test world_director::tests::policy_rejects_unobserved_zone_and_excess_budget ... ok
+test world_director::tests::pressure_model_is_bounded_and_deterministic ... ok
+test world_director::tests::runtime_service_imports_finality_and_restores_pending_stages ... ok
+test world_director::tests::runtime_service_reports_durable_checkpoint_write_failures ... ok
+test world_director::tests::signed_command_rejects_tamper_and_expiry ... ok
+test zone_lease::tests::acquire_renew_and_fence_on_steal ... ok
+test zone_lease::tests::explicit_lease_owner_is_independent_from_process_instance_id ... ok
+test zone_lease::tests::live_cached_lease_validates_without_a_database_round_trip ... ok
+test zone_lease::tests::release_lets_peer_take_over_immediately ... ok
+test zone_lease::tests::trait_owner_lease_acquires_and_renews_same_token ... ok
+test zone_lease::tests::trusted_rpc_authority_adopts_and_fences_allowed_owner ... ok
+test zone_lease::tests::trusted_rpc_authority_rejects_unlisted_owner ... ok
+test zone_rpc::exact_ground_drop_snapshot_tests::internal_world_snapshot_rpc_roundtrip_is_lossless_but_client_view_is_redacted ... ok
+test zone_rpc::exact_ground_drop_snapshot_tests::zone_base_snapshot_roundtrip_retains_exact_identity_and_digest_covers_metadata ... ok
+test zone_rpc::replication_sequence_exhaustion_tests::authenticated_economy_fails_before_runtime_and_store_when_sequence_is_exhausted ... ok
+test zone_rpc::shard_endpoint_tests::colocated_standby_is_the_next_distinct_active_host ... ok
+test zone_rpc::shard_endpoint_tests::dedicated_standby_order_remains_unchanged ... ok
+test zone_rpc::shard_endpoint_tests::paired_standby_uses_the_active_shard_index ... ok
+test zone_rpc::typed_game_shop_rpc_tests::capable_host_roundtrips_typed_purchase_outcome_over_wire ... ok
+test zone_rpc::typed_game_shop_rpc_tests::game_shop_economic_mutation_classifier_is_exact ... ok
+test zone_rpc::typed_game_shop_rpc_tests::generic_execute_cannot_bypass_native_v2_single_endpoint_invariant ... ok
+test zone_rpc::typed_game_shop_rpc_tests::legacy_execution_payload_without_typed_field_decodes_as_none ... ok
+test zone_rpc::typed_game_shop_rpc_tests::old_host_without_storage_request_id_capability_rejects_before_execute ... ok
+test zone_rpc::typed_game_shop_rpc_tests::old_host_without_typed_capability_rejects_before_execute_is_sent ... ok
+test zone_rpc::typed_game_shop_rpc_tests::ordinary_game_shop_buy_reaches_old_host_without_capability_probe ... ok
+test zone_rpc::typed_game_shop_rpc_tests::ordinary_game_shop_response_loss_never_replays_to_fallback_endpoint ... ok
+test zone_rpc::typed_game_shop_rpc_tests::raw_common_call_rejects_economic_execute_before_network_io ... ok
+test zone_rpc::typed_game_shop_rpc_tests::storage_v2_response_loss_never_replays_execute_to_fallback_endpoint ... ok
+test zone_rpc::typed_game_shop_rpc_tests::typed_purchase_may_fallback_during_health_probe_before_any_execute ... ok
+test zone_rpc::typed_game_shop_rpc_tests::typed_purchase_response_loss_never_replays_execute_to_fallback_endpoint ... ok
+test zone_rpc::typed_game_shop_rpc_tests::typed_purchase_wire_fails_legacy_decode_before_runtime_execute ... ok
+test zone_rpc::typed_game_shop_rpc_tests::unrelated_execute_retains_endpoint_fallback ... ok
+test zone_rpc::zone_rpc_authorization_tests::relay_credential_is_replaced_in_every_supported_codec ... ok
+
+test result: ok. 709 passed; 0 failed; 1 ignored; 0 measured; 0 filtered out; finished in 826.50s
+

@@ -1,0 +1,227 @@
+{
+  "schema": "w7-wire-raw-boundary-review-v1",
+  "sourceCommit": "39fdac91a7bac0ff8dabde2613342b95f01fe468",
+  "sourceHelperSha256": "9bde0958794d59b8d42bd6f8759b0e8e4aeb27b55c3985ce392c7222690edda6",
+  "sourceCondition": {
+    "rawBranchCallsWirePlannerEntity": false,
+    "actualRawCertificateComparison": "row?.wireCertificate && row.wireCertificate.name !== entity.name",
+    "rawMasterFieldOptional": true,
+    "acceptedRawClearsWireCertificate": true
+  },
+  "inputs": [
+    {
+      "path": "C:/mir2-build/p01-completion-20261024/ordinary-capacity-bank-prepare-v7/episode/reports/1793055214252-59fbbbbd.preparation-report.json",
+      "sha256": "3086c177b2b4011693f6d201567f742be49fd39d5de8e3f14f9e155b7889a266"
+    },
+    {
+      "path": "C:/mir2-build/p01-completion-20261024/ordinary-capacity-bank-prepare-v7/episode/reports/1793055214252-59fbbbbd.preparation.jsonl",
+      "sha256": "4651f3bf0dde840677920edfa7ece0bb5fa3e75bdd82884a7a87baeb7319b3da"
+    },
+    {
+      "path": "C:/mir2-build/p01-completion-20261024/ordinary-capacity-bank-prepare-v7/episode/recordings/0-498070.jsonl",
+      "readScope": "final frame only; no whole-recording digest asserted"
+    }
+  ],
+  "originalVerdict": {
+    "ok": false,
+    "error": "No walk path on 0 from 305,612 to 289,617",
+    "preparedCount": 4
+  },
+  "failedActor": {
+    "characterIndex": 5,
+    "ownerId": 1000,
+    "map": "0",
+    "before": {
+      "hp": 18,
+      "x": 331,
+      "y": 590,
+      "hpStock": 12,
+      "maxHp": 18
+    },
+    "commands": 31,
+    "movementCommands": 26,
+    "commandCounts": {
+      "clientVersion": 5,
+      "run": 19,
+      "walk": 7
+    },
+    "elapsedMs": 18803.581900000005,
+    "resolvedStagingPoint": {
+      "x": 289,
+      "y": 617
+    },
+    "pathHazardCount": 0,
+    "pathReplanCount": 0,
+    "plannerThreatMemory": {
+      "lifetimeMs": 20000,
+      "positionLimit": 2048,
+      "identityLimit": 1024,
+      "positions": 17,
+      "identities": 46,
+      "coarseFallbackCount": 0,
+      "packetRenewals": 6,
+      "exemptionGloballyQuarantined": false
+    }
+  },
+  "finalPublicFrame": {
+    "sequence": 85,
+    "capturedAtMs": 1793055249119,
+    "map": "0",
+    "entityCount": 37,
+    "entitiesWithMasterField": 0,
+    "actor": [
+      {
+        "objectId": 1000,
+        "kind": "selfPlayer",
+        "x": 305,
+        "y": 612,
+        "hp": 18,
+        "maxHp": 18,
+        "dead": false
+      }
+    ],
+    "monsters": [
+      {
+        "objectId": 206013,
+        "kind": "monster",
+        "name": "RakingCat",
+        "ownerName": null,
+        "ai": 0,
+        "class": null,
+        "disposition": "hostile",
+        "dead": false,
+        "hp": 32,
+        "x": 301,
+        "y": 596
+      },
+      {
+        "objectId": 206026,
+        "kind": "monster",
+        "name": "RakingCat",
+        "ownerName": null,
+        "ai": 0,
+        "class": null,
+        "disposition": "hostile",
+        "dead": false,
+        "hp": 32,
+        "x": 320,
+        "y": 589
+      },
+      {
+        "objectId": 206032,
+        "kind": "monster",
+        "name": "RakingCat",
+        "ownerName": null,
+        "ai": 0,
+        "class": null,
+        "disposition": "hostile",
+        "dead": false,
+        "hp": 32,
+        "x": 322,
+        "y": 595
+      },
+      {
+        "objectId": 206117,
+        "kind": "monster",
+        "name": "HookingCat",
+        "ownerName": null,
+        "ai": 0,
+        "class": null,
+        "disposition": "hostile",
+        "dead": false,
+        "hp": 30,
+        "x": 321,
+        "y": 588
+      },
+      {
+        "objectId": 206136,
+        "kind": "monster",
+        "name": "HookingCat",
+        "ownerName": null,
+        "ai": 0,
+        "class": null,
+        "disposition": "hostile",
+        "dead": false,
+        "hp": 30,
+        "x": 337,
+        "y": 589
+      },
+      {
+        "objectId": 206610,
+        "kind": "monster",
+        "name": "Scarecrow",
+        "ownerName": null,
+        "ai": 0,
+        "class": null,
+        "disposition": "hostile",
+        "dead": false,
+        "hp": 20,
+        "x": 300,
+        "y": 597
+      },
+      {
+        "objectId": 206623,
+        "kind": "monster",
+        "name": "Scarecrow",
+        "ownerName": null,
+        "ai": 0,
+        "class": null,
+        "disposition": "hostile",
+        "dead": false,
+        "hp": 20,
+        "x": 321,
+        "y": 631
+      },
+      {
+        "objectId": 206644,
+        "kind": "monster",
+        "name": "Scarecrow",
+        "ownerName": null,
+        "ai": 0,
+        "class": null,
+        "disposition": "hostile",
+        "dead": false,
+        "hp": 20,
+        "x": 293,
+        "y": 614
+      }
+    ],
+    "globalInSafeZoneCannotBindActor": true
+  },
+  "lastTransforms": [
+    {
+      "sequence": 782,
+      "monotonicMs": 31343.8845,
+      "source": "UserLocation",
+      "mapFileName": "0",
+      "wire": {
+        "x": 305,
+        "y": 616,
+        "direction": "Left"
+      }
+    },
+    {
+      "sequence": 789,
+      "monotonicMs": 31999.854,
+      "source": "UserLocation",
+      "mapFileName": "0",
+      "wire": {
+        "x": 305,
+        "y": 614,
+        "direction": "Up"
+      }
+    },
+    {
+      "sequence": 794,
+      "monotonicMs": 32657.9463,
+      "source": "UserLocation",
+      "mapFileName": "0",
+      "wire": {
+        "x": 305,
+        "y": 612,
+        "direction": "Up"
+      }
+    }
+  ],
+  "conclusion": "The suspected strict wire check is absent from the frozen W7 raw branch. DTO masterObjectId omission is real, but does not prove the proposed quarantine cause. Per-ID blockedUntil is not exposed in public samples. No source edits, tests, builds or loads performed."
+}

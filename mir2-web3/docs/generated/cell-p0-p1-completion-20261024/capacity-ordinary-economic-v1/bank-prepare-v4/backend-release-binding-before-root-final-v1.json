@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "state": "PENDING_ACTUAL_V6_BUILD_CURRENT_COMMIT_AND_JS_QUALIFICATION",
+  "finalized": false,
+  "backendSourceCommit": null,
+  "executionSourceCommit": null,
+  "currentJsSourceCommit": null,
+  "release": null,
+  "immutableExecutable": null,
+  "newRootRustReceipt": null,
+  "newRootJsReceipt": null,
+  "oldV5ExecutableIsNotV6": true,
+  "capacityAccepted": false,
+  "p0Accepted": false
+}

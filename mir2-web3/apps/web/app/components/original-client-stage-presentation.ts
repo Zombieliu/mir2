@@ -83,7 +83,7 @@ const REGULAR_TOUCH_CONTROL_METRICS: Mir2TouchControlMetrics = {
 const COMPACT_TOUCH_CONTROL_METRICS: Mir2TouchControlMetrics = {
   actionSize: 36,
   primarySize: 52,
-  panelSize: 36,
+  panelSize: 40,
   padWidth: 98,
   columnStep: 38,
   quickRowTops: [40, 78, 116],

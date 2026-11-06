@@ -1,0 +1,814 @@
+{
+  "schemaVersion": 1,
+  "analyzedAt": "2026-10-25T18:09:29.451Z",
+  "runId": "1792951023370-34757a8d",
+  "inputs": {
+    "raw": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-attack-deadline-ladder-12\\reports\\1792951023370-34757a8d.samples.jsonl",
+      "bytes": 2054564,
+      "sha256": "6e9a23aab7d71faee1b2e109aba076da722efcf3785f71a079137b0bbf9b1619"
+    },
+    "report": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-attack-deadline-ladder-12\\reports\\1792951023370-34757a8d.report.json",
+      "bytes": 26347,
+      "sha256": "36a21c5d838add035fbdf0d993868cb07744c34810246e603d0cf388573ab86e"
+    },
+    "slow": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-attack-deadline-ladder-12\\slow-stage-public.jsonl",
+      "bytes": 3987,
+      "sha256": "0280ab9aef5450df7ad462aa6c71045c025e42fe8a665d4baee02747173e63a9"
+    },
+    "monitor": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-attack-deadline-ladder-12\\monitor-history.jsonl",
+      "bytes": 641859,
+      "sha256": "66a0be2c7cd31335c5fcb8ff62946fd1d49c459045f036bfbc93bea4d94dff99"
+    },
+    "driverSource": {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\playtest-capacity-soak.mjs",
+      "bytes": 149057,
+      "sha256": "bd731443c41d54a237fc0a6d83f2619d049c0226cbd7f154f67717e8fb0dcea5"
+    }
+  },
+  "originalResult": {
+    "reportOk": false,
+    "stages": [],
+    "peakActors": 2,
+    "continuousFailureCount": 3,
+    "firstFailure": {
+      "reason": "A participating actor received a real gameplay failure",
+      "evidence": {
+        "actor": "L6b35ac00",
+        "phase": "stage-2",
+        "kind": "walk",
+        "status": "rejected"
+      }
+    },
+    "gameVerdictChanged": false
+  },
+  "rawCensus": {
+    "rows": 1888,
+    "serverErrors": 2,
+    "rejectedActions": 1,
+    "movementCorrectionActions": 0,
+    "timeoutActions": 6,
+    "actionFailures": [
+      {
+        "line": 1839,
+        "type": "action",
+        "at": 1792951171956,
+        "phase": "stage-2",
+        "actor": "L6b35ac01",
+        "kind": "run",
+        "plannedGameplay": true,
+        "scheduledAtMs": 158447.6814,
+        "sentAtMs": 158459.5506,
+        "plannedTarget": {
+          "x": 234,
+          "y": 592
+        },
+        "nativeOpportunity": true,
+        "plannedIntervalMs": 750,
+        "pacingKnown": true,
+        "cadence": {
+          "intervalMs": 750,
+          "cooldownMs": 600,
+          "pacingKnown": true
+        },
+        "status": "timeout",
+        "latencyMs": 2012.6372000000265,
+        "plannedLatencyMs": 2024.5078999999969,
+        "error": "L6b35ac01 timed out waiting for run authoritative acknowledgement",
+        "ambiguousTargetQuarantined": false
+      },
+      {
+        "line": 1840,
+        "type": "action",
+        "at": 1792951172451,
+        "phase": "stage-2",
+        "actor": "L6b35ac00",
+        "kind": "run",
+        "plannedGameplay": true,
+        "scheduledAtMs": 158923.89740000002,
+        "sentAtMs": 158953.096,
+        "plannedTarget": {
+          "x": 244,
+          "y": 596
+        },
+        "nativeOpportunity": true,
+        "plannedIntervalMs": 750,
+        "pacingKnown": true,
+        "cadence": {
+          "intervalMs": 750,
+          "cooldownMs": 600,
+          "pacingKnown": true
+        },
+        "status": "timeout",
+        "latencyMs": 2013.8311000000103,
+        "plannedLatencyMs": 2043.0299999999697,
+        "error": "L6b35ac00 timed out waiting for run authoritative acknowledgement",
+        "ambiguousTargetQuarantined": false
+      },
+      {
+        "line": 1847,
+        "type": "action",
+        "at": 1792951173969,
+        "phase": "stage-2",
+        "actor": "L6b35ac01",
+        "kind": "rtt",
+        "status": "timeout",
+        "error": "L6b35ac01 timed out waiting for rtt"
+      },
+      {
+        "line": 1849,
+        "type": "action",
+        "at": 1792951174217,
+        "phase": "stage-2",
+        "actor": "L6b35ac01",
+        "kind": "walk",
+        "plannedGameplay": true,
+        "scheduledAtMs": 160697.6814,
+        "sentAtMs": 160720.3083,
+        "plannedTarget": {
+          "x": 235,
+          "y": 592
+        },
+        "nativeOpportunity": true,
+        "plannedIntervalMs": 750,
+        "pacingKnown": true,
+        "cadence": {
+          "intervalMs": 750,
+          "cooldownMs": 600,
+          "pacingKnown": true
+        },
+        "status": "timeout",
+        "latencyMs": 2012.1375999999873,
+        "plannedLatencyMs": 2034.7657999999938,
+        "error": "L6b35ac01 timed out waiting for walk authoritative acknowledgement",
+        "ambiguousTargetQuarantined": false
+      },
+      {
+        "line": 1852,
+        "type": "action",
+        "at": 1792951174678,
+        "phase": "stage-2",
+        "actor": "L6b35ac00",
+        "kind": "walk",
+        "plannedGameplay": true,
+        "scheduledAtMs": 161173.89740000002,
+        "sentAtMs": 161184.8682,
+        "plannedTarget": {
+          "x": 243,
+          "y": 596
+        },
+        "nativeOpportunity": true,
+        "plannedIntervalMs": 750,
+        "pacingKnown": true,
+        "cadence": {
+          "intervalMs": 750,
+          "cooldownMs": 600,
+          "pacingKnown": true
+        },
+        "status": "timeout",
+        "latencyMs": 2009.3318999999901,
+        "plannedLatencyMs": 2020.309899999993,
+        "error": "L6b35ac00 timed out waiting for walk authoritative acknowledgement",
+        "ambiguousTargetQuarantined": false
+      },
+      {
+        "line": 1867,
+        "type": "action",
+        "at": 1792951176453,
+        "phase": "stage-2",
+        "actor": "L6b35ac01",
+        "kind": "walk",
+        "plannedGameplay": true,
+        "scheduledAtMs": 162947.6814,
+        "sentAtMs": 162948.8179,
+        "plannedTarget": {
+          "x": 235,
+          "y": 592
+        },
+        "nativeOpportunity": true,
+        "plannedIntervalMs": 750,
+        "pacingKnown": true,
+        "cadence": {
+          "intervalMs": 750,
+          "cooldownMs": 600,
+          "pacingKnown": true
+        },
+        "status": "timeout",
+        "latencyMs": 2019.6520000000019,
+        "plannedLatencyMs": 2020.7895999999892,
+        "error": "L6b35ac01 timed out waiting for walk authoritative acknowledgement",
+        "ambiguousTargetQuarantined": false
+      },
+      {
+        "line": 1870,
+        "type": "action",
+        "at": 1792951176453,
+        "phase": "stage-2",
+        "actor": "L6b35ac00",
+        "kind": "walk",
+        "plannedGameplay": true,
+        "scheduledAtMs": 163423.89740000002,
+        "sentAtMs": 163441.5127,
+        "plannedTarget": {
+          "x": 243,
+          "y": 596
+        },
+        "nativeOpportunity": true,
+        "plannedIntervalMs": 750,
+        "pacingKnown": true,
+        "cadence": {
+          "intervalMs": 750,
+          "cooldownMs": 600,
+          "pacingKnown": true
+        },
+        "status": "rejected",
+        "latencyMs": 1527.2566000000224,
+        "plannedLatencyMs": 1544.8720999999787,
+        "error": "Public gameplay command rejected",
+        "ambiguousTargetQuarantined": false
+      }
+    ]
+  },
+  "firstRejectedMovement": {
+    "actionLine": 1870,
+    "action": {
+      "type": "action",
+      "at": 1792951176453,
+      "phase": "stage-2",
+      "actor": "L6b35ac00",
+      "kind": "walk",
+      "plannedGameplay": true,
+      "scheduledAtMs": 163423.89740000002,
+      "sentAtMs": 163441.5127,
+      "plannedTarget": {
+        "x": 243,
+        "y": 596
+      },
+      "nativeOpportunity": true,
+      "plannedIntervalMs": 750,
+      "pacingKnown": true,
+      "cadence": {
+        "intervalMs": 750,
+        "cooldownMs": 600,
+        "pacingKnown": true
+      },
+      "status": "rejected",
+      "latencyMs": 1527.2566000000224,
+      "plannedLatencyMs": 1544.8720999999787,
+      "error": "Public gameplay command rejected",
+      "ambiguousTargetQuarantined": false
+    },
+    "sendLine": 1854,
+    "sendCursor": 2434,
+    "recordedSendSequence": 2435,
+    "ordinaryProtocolRequestId": null,
+    "origin": {
+      "x": 242,
+      "y": 596
+    },
+    "first": {
+      "x": 243,
+      "y": 596
+    },
+    "target": {
+      "x": 243,
+      "y": 596
+    },
+    "direction": "Right",
+    "ownerUserLocation": {
+      "line": 1859,
+      "sequence": 2436,
+      "monotonicMs": 164945.9264,
+      "position": {
+        "x": 243,
+        "y": 596
+      }
+    },
+    "serverError": {
+      "line": 1866,
+      "event": {
+        "message": "shared zone movement owner timed out after 5000ms",
+        "type": "error",
+        "direction": "received",
+        "sequence": 2439,
+        "monotonicMs": 164951.5442
+      }
+    },
+    "deltas": {
+      "sendToUserLocationMs": 1504.4137000000046,
+      "sendToErrorMs": 1510.0315000000119,
+      "userLocationToErrorMs": 5.617800000007264
+    },
+    "beforeSnapshotProjectedOccupants": [
+      {
+        "objectId": 206607,
+        "x": 244,
+        "y": 597,
+        "kind": "monster",
+        "dead": false
+      },
+      {
+        "objectId": 206622,
+        "x": 243,
+        "y": 597,
+        "kind": "monster",
+        "dead": false
+      }
+    ],
+    "ownerSnapshotAtSendIsNotServerConsumptionState": true
+  },
+  "decisiveFacts": [
+    "Both owner clients received the explicit shared-zone movement-owner5000ms timeout error. This is not a collision/terrain/AOI rejection reason.",
+    "Both clients had already recorded2s Run/Walk and RTT timeouts before the fatal error.",
+    "The final owner00 Walk received UserLocation+1504.4137ms at its planned target, then a server error+1510.0315ms. The driver prioritizes fresh error before UserLocation; this is a real public-server error, not grounds to change the original failure.",
+    "A5000ms owner wait cannot have begun after the final Walk sent only1510ms before that error. Ordinary movements have no request IDs; the exact earlier queued movement cannot be uniquely attributed from these packets.",
+    "Public slow diagnostics recorded zone_cadence.total6500ms and both spectator branches4899ms near the error burst. Inside-sampled ownerTick/zoneWork counters stopped advancing while two movement-admission durations accumulated about5s each."
+  ],
+  "sourceAssertions": [
+    {
+      "line": 1281,
+      "assertion": "Action acknowledgement checks fresh type:error before UserLocation. A co-arriving server error can mark the currently awaited movement rejected even when a fresh UserLocation is also present; no request correlation exists for ordinary Walk."
+    },
+    {
+      "line": 243,
+      "assertion": "serverError raw rows are recorded from actual received error events."
+    }
+  ],
+  "monitorDelta": {
+    "sampleIntervalMs": 4857,
+    "zoneWorkCount": 0,
+    "ownerTickCount": 0,
+    "movementAdmissionsCount": 2,
+    "movementAdmissionsDurationSumUs": 10023589,
+    "movementAdmissionsOverBudget": 2
+  },
+  "slowEvidence": {
+    "cadence6500": {
+      "line": 22,
+      "row": {
+        "observedAtMs": 1792951176430,
+        "stage": "zone_cadence.total",
+        "durationMs": 6500
+      }
+    },
+    "spectator": [
+      {
+        "line": 14,
+        "row": {
+          "observedAtMs": 1792951162880,
+          "stage": "socket_turn.spectator",
+          "durationMs": 781,
+          "connection": 2
+        }
+      },
+      {
+        "line": 15,
+        "row": {
+          "observedAtMs": 1792951162880,
+          "stage": "socket_turn.spectator",
+          "durationMs": 781,
+          "connection": 1
+        }
+      },
+      {
+        "line": 16,
+        "row": {
+          "observedAtMs": 1792951163745,
+          "stage": "socket_turn.spectator",
+          "durationMs": 600,
+          "connection": 1
+        }
+      },
+      {
+        "line": 17,
+        "row": {
+          "observedAtMs": 1792951163745,
+          "stage": "socket_turn.spectator",
+          "durationMs": 600,
+          "connection": 2
+        }
+      },
+      {
+        "line": 18,
+        "row": {
+          "observedAtMs": 1792951167953,
+          "stage": "socket_turn.spectator",
+          "durationMs": 3157,
+          "connection": 1
+        }
+      },
+      {
+        "line": 19,
+        "row": {
+          "observedAtMs": 1792951167954,
+          "stage": "socket_turn.spectator",
+          "durationMs": 3158,
+          "connection": 2
+        }
+      },
+      {
+        "line": 20,
+        "row": {
+          "observedAtMs": 1792951171535,
+          "stage": "socket_turn.spectator",
+          "durationMs": 3324,
+          "connection": 2
+        }
+      },
+      {
+        "line": 21,
+        "row": {
+          "observedAtMs": 1792951171536,
+          "stage": "socket_turn.spectator",
+          "durationMs": 3324,
+          "connection": 1
+        }
+      },
+      {
+        "line": 23,
+        "row": {
+          "observedAtMs": 1792951176435,
+          "stage": "socket_turn.spectator",
+          "durationMs": 4899,
+          "connection": 2
+        }
+      },
+      {
+        "line": 26,
+        "row": {
+          "observedAtMs": 1792951176436,
+          "stage": "socket_turn.spectator",
+          "durationMs": 4899,
+          "connection": 1
+        }
+      }
+    ],
+    "queueResidence": [
+      {
+        "line": 24,
+        "row": {
+          "observedAtMs": 1792951176435,
+          "stage": "socket_input.queue_residence",
+          "durationMs": 1479,
+          "connection": 2,
+          "queuedPhase": "spectator",
+          "phaseElapsedMs": 3420,
+          "inputClass": "other"
+        }
+      },
+      {
+        "line": 25,
+        "row": {
+          "observedAtMs": 1792951176436,
+          "stage": "socket_input.queue_residence",
+          "durationMs": 1479,
+          "connection": 2,
+          "queuedPhase": "spectator",
+          "phaseElapsedMs": 3420,
+          "inputClass": "move"
+        }
+      },
+      {
+        "line": 27,
+        "row": {
+          "observedAtMs": 1792951176436,
+          "stage": "socket_input.queue_residence",
+          "durationMs": 985,
+          "connection": 1,
+          "queuedPhase": "spectator",
+          "phaseElapsedMs": 3913,
+          "inputClass": "other"
+        }
+      },
+      {
+        "line": 28,
+        "row": {
+          "observedAtMs": 1792951176436,
+          "stage": "socket_input.queue_residence",
+          "durationMs": 986,
+          "connection": 1,
+          "queuedPhase": "spectator",
+          "phaseElapsedMs": 3913,
+          "inputClass": "move"
+        }
+      },
+      {
+        "line": 29,
+        "row": {
+          "observedAtMs": 1792951176439,
+          "stage": "socket_input.queue_residence",
+          "durationMs": 1483,
+          "connection": 2,
+          "queuedPhase": "spectator",
+          "phaseElapsedMs": 3420,
+          "inputClass": "move"
+        }
+      },
+      {
+        "line": 30,
+        "row": {
+          "observedAtMs": 1792951176439,
+          "stage": "socket_input.queue_residence",
+          "durationMs": 989,
+          "connection": 1,
+          "queuedPhase": "spectator",
+          "phaseElapsedMs": 3913,
+          "inputClass": "move"
+        }
+      }
+    ],
+    "missingLabelsAreNotExclusion": [
+      "zone_cadence.gate_wait",
+      "zone_state_wait"
+    ]
+  },
+  "driverCoverageNearFailure": [
+    {
+      "line": 1681,
+      "at": 1792951158510,
+      "driver": {
+        "rssBytes": 71987200,
+        "eventLoopLagP99Ms": 32.079871,
+        "eventLoopLagMaxMs": 32.079871
+      },
+      "aoi": {
+        "expectedPairs": 2,
+        "observedPairs": 2,
+        "activeOwners": 2,
+        "issues": []
+      }
+    },
+    {
+      "line": 1693,
+      "at": 1792951159519,
+      "driver": {
+        "rssBytes": 71987200,
+        "eventLoopLagP99Ms": 32.096255,
+        "eventLoopLagMaxMs": 32.096255
+      },
+      "aoi": {
+        "expectedPairs": 2,
+        "observedPairs": 2,
+        "activeOwners": 2,
+        "issues": []
+      }
+    },
+    {
+      "line": 1708,
+      "at": 1792951160527,
+      "driver": {
+        "rssBytes": 72548352,
+        "eventLoopLagP99Ms": 32.047103,
+        "eventLoopLagMaxMs": 32.047103
+      },
+      "aoi": {
+        "expectedPairs": 2,
+        "observedPairs": 2,
+        "activeOwners": 2,
+        "issues": []
+      }
+    },
+    {
+      "line": 1721,
+      "at": 1792951161540,
+      "driver": {
+        "rssBytes": 73281536,
+        "eventLoopLagP99Ms": 32.047103,
+        "eventLoopLagMaxMs": 32.047103
+      },
+      "aoi": {
+        "expectedPairs": 2,
+        "observedPairs": 2,
+        "activeOwners": 2,
+        "issues": []
+      }
+    },
+    {
+      "line": 1737,
+      "at": 1792951162544,
+      "driver": {
+        "rssBytes": 73490432,
+        "eventLoopLagP99Ms": 32.243711,
+        "eventLoopLagMaxMs": 32.243711
+      },
+      "aoi": {
+        "expectedPairs": 2,
+        "observedPairs": 2,
+        "activeOwners": 2,
+        "issues": []
+      }
+    },
+    {
+      "line": 1746,
+      "at": 1792951163558,
+      "driver": {
+        "rssBytes": 73490432,
+        "eventLoopLagP99Ms": 34.013183,
+        "eventLoopLagMaxMs": 34.013183
+      },
+      "aoi": {
+        "expectedPairs": 2,
+        "observedPairs": 2,
+        "activeOwners": 2,
+        "issues": []
+      }
+    },
+    {
+      "line": 1762,
+      "at": 1792951164565,
+      "driver": {
+        "rssBytes": 73490432,
+        "eventLoopLagP99Ms": 31.981567,
+        "eventLoopLagMaxMs": 31.981567
+      },
+      "aoi": {
+        "expectedPairs": 2,
+        "observedPairs": 2,
+        "activeOwners": 2,
+        "issues": []
+      }
+    },
+    {
+      "line": 1775,
+      "at": 1792951165570,
+      "driver": {
+        "rssBytes": 73506816,
+        "eventLoopLagP99Ms": 32.063487,
+        "eventLoopLagMaxMs": 32.063487
+      },
+      "aoi": {
+        "expectedPairs": 2,
+        "observedPairs": 2,
+        "activeOwners": 2,
+        "issues": []
+      }
+    },
+    {
+      "line": 1786,
+      "at": 1792951166577,
+      "driver": {
+        "rssBytes": 73506816,
+        "eventLoopLagP99Ms": 32.129023,
+        "eventLoopLagMaxMs": 32.129023
+      },
+      "aoi": {
+        "expectedPairs": 2,
+        "observedPairs": 2,
+        "activeOwners": 2,
+        "issues": []
+      }
+    },
+    {
+      "line": 1801,
+      "at": 1792951167589,
+      "driver": {
+        "rssBytes": 73506816,
+        "eventLoopLagP99Ms": 32.063487,
+        "eventLoopLagMaxMs": 32.063487
+      },
+      "aoi": {
+        "expectedPairs": 2,
+        "observedPairs": 2,
+        "activeOwners": 2,
+        "issues": []
+      }
+    },
+    {
+      "line": 1817,
+      "at": 1792951168597,
+      "driver": {
+        "rssBytes": 73736192,
+        "eventLoopLagP99Ms": 31.948799,
+        "eventLoopLagMaxMs": 31.948799
+      },
+      "aoi": {
+        "expectedPairs": 2,
+        "observedPairs": 2,
+        "activeOwners": 2,
+        "issues": []
+      }
+    },
+    {
+      "line": 1827,
+      "at": 1792951169603,
+      "driver": {
+        "rssBytes": 73736192,
+        "eventLoopLagP99Ms": 32.079871,
+        "eventLoopLagMaxMs": 32.079871
+      },
+      "aoi": {
+        "expectedPairs": 2,
+        "observedPairs": 2,
+        "activeOwners": 2,
+        "issues": []
+      }
+    },
+    {
+      "line": 1833,
+      "at": 1792951170604,
+      "driver": {
+        "rssBytes": 73736192,
+        "eventLoopLagP99Ms": 31.834111,
+        "eventLoopLagMaxMs": 31.834111
+      },
+      "aoi": {
+        "expectedPairs": 2,
+        "observedPairs": 2,
+        "activeOwners": 2,
+        "issues": []
+      }
+    },
+    {
+      "line": 1837,
+      "at": 1792951171611,
+      "driver": {
+        "rssBytes": 73736192,
+        "eventLoopLagP99Ms": 32.063487,
+        "eventLoopLagMaxMs": 32.063487
+      },
+      "aoi": {
+        "expectedPairs": 2,
+        "observedPairs": 2,
+        "activeOwners": 2,
+        "issues": []
+      }
+    },
+    {
+      "line": 1841,
+      "at": 1792951172620,
+      "driver": {
+        "rssBytes": 85508096,
+        "eventLoopLagP99Ms": 32.096255,
+        "eventLoopLagMaxMs": 32.096255
+      },
+      "aoi": {
+        "expectedPairs": 2,
+        "observedPairs": 2,
+        "activeOwners": 2,
+        "issues": []
+      }
+    },
+    {
+      "line": 1845,
+      "at": 1792951173630,
+      "driver": {
+        "rssBytes": 85508096,
+        "eventLoopLagP99Ms": 32.309247,
+        "eventLoopLagMaxMs": 32.309247
+      },
+      "aoi": {
+        "expectedPairs": 2,
+        "observedPairs": 2,
+        "activeOwners": 2,
+        "issues": []
+      }
+    },
+    {
+      "line": 1851,
+      "at": 1792951174633,
+      "driver": {
+        "rssBytes": 73736192,
+        "eventLoopLagP99Ms": 32.112639,
+        "eventLoopLagMaxMs": 32.112639
+      },
+      "aoi": {
+        "expectedPairs": 2,
+        "observedPairs": 2,
+        "activeOwners": 2,
+        "issues": []
+      }
+    },
+    {
+      "line": 1856,
+      "at": 1792951175635,
+      "driver": {
+        "rssBytes": 82513920,
+        "eventLoopLagP99Ms": 32.604159,
+        "eventLoopLagMaxMs": 32.604159
+      },
+      "aoi": {
+        "expectedPairs": 2,
+        "observedPairs": 2,
+        "activeOwners": 2,
+        "issues": []
+      }
+    }
+  ],
+  "unknowns": [
+    "Exact5000ms request identity and authoritative execution order are not in ordinary movement protocol.",
+    "No server lock-owner stack or request-linked cadence substage is recorded; owner-opening Zone lock, cadence internals and other queue/lock waits remain source-review hypotheses.",
+    "Nearby owner snapshot occupants do not establish authoritative blocking; no collision cause is proved.",
+    "No CPU/core/resource ceiling, permanent deadlock, missing global creature or lifetime memory leak is established."
+  ],
+  "scope": {
+    "privateRead": false,
+    "recordingPayloadRead": false,
+    "binaryRead": false,
+    "sourceOrSceneChanged": false,
+    "testsOrRealmExecuted": false,
+    "capacityAccepted": false
+  }
+}

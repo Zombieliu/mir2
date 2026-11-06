@@ -1,0 +1,198 @@
+{
+  "owner": "Root",
+  "kind": "F01 shared auth source and finite checks; not player acceptance",
+  "fixedWindowsBaseline": "f72e36fb84c3574fff0aeb2abed856454b14289d",
+  "parentCommit": "80c8e1d80dc17c269991f61c992bb75b36c49d98",
+  "rustSnapshot": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-auth-rust-source12.json",
+    "bytes": 128679,
+    "sha256": "b25c4015ce8aa2a0a8856e215dda032b9fa8ebc6d7e300272b52b8269cba8425"
+  },
+  "rustFinite": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-auth-rust11-finite-result01.json",
+    "bytes": 6112,
+    "sha256": "af4120aa97d167eea97506611be550dd120d8309c8a689e14b6f201cda7ee0e9"
+  },
+  "rustPassingExecutions": 39,
+  "node": {
+    "actualChunk": "fd2399",
+    "config": {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-auth-node-finite04.config.json",
+      "bytes": 3994,
+      "sha256": "4d1a914a5028ea2ec7435d2f1da641fe8fde8498c9f313db7d5ebd7a8dff8ffd"
+    },
+    "snapshot": {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-auth-node-finite04-snapshot.json",
+      "bytes": 9730191,
+      "sha256": "e57ea5ff1a20a22a3a0c4880b5a25c17554ebc94eb4e611471ec0f0558625d6b"
+    },
+    "outer": {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-auth-node-finite04.outer.json",
+      "bytes": 537,
+      "sha256": "c45c75144e7108da4392f344a719a4e421a376c019fc590d7358caacc508aece"
+    },
+    "stdout": {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-auth-node-finite04.stdout.log",
+      "bytes": 18407,
+      "sha256": "45d59caf83d05f6c7c882a068e789432b224f99292adc1525e383624d9c866a6"
+    },
+    "stderr": {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-auth-node-finite04.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "tests": 171,
+    "passed": 171,
+    "failed": 0,
+    "skipped": 0,
+    "addedAuthGroups": 14,
+    "storageGroups": 65,
+    "originalStorage51Preserved": true
+  },
+  "tsc": {
+    "actualChunk": "46e204",
+    "config": {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-auth-tsc03.config.json",
+      "bytes": 3861,
+      "sha256": "397a7576999a2fd8f0dedfb58ce8161bb1da40ef97961f03cb316dbad3a8c7a3"
+    },
+    "snapshot": {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-auth-tsc03-snapshot.json",
+      "bytes": 9728985,
+      "sha256": "9cdfd1cb662109c9d95c46d66c5257cc7cebcba265ceedacd331df3b0bd59823"
+    },
+    "project": {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w5-final-web-code-tsconfig01.json",
+      "bytes": 533,
+      "sha256": "bfacf0dc29c7cd400f866789a96738e18dd6a9e408e7a34958a81ea2065043b7"
+    },
+    "outer": {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-auth-tsc03.outer.json",
+      "bytes": 503,
+      "sha256": "9b3158683dae779e93b39a6f4d6d9417bb2b793978ca94a4347ff7c3fd78baae"
+    },
+    "stdout": {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-auth-tsc03.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "stderr": {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-auth-tsc03.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "exitCode": 0,
+    "strict": true,
+    "incremental": false
+  },
+  "core": {
+    "actualChunk": "d1b88f",
+    "config": {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-auth-core-build02.config.json",
+      "bytes": 4997,
+      "sha256": "9295068371b7d86465ed09e9fb47e8fcb82e52bb836337b4ece1a8cbcdc50915"
+    },
+    "outer": {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-auth-core-build02.outer.json",
+      "bytes": 494,
+      "sha256": "aec64138037923f44e7ab7932cc9210ecf9baaeb1339b4838d0de548303eac4d"
+    },
+    "stdout": {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-auth-core-build02.stdout.log",
+      "bytes": 1138,
+      "sha256": "bf2268c0abda4a4ee7410d162bb9a090510cf73a76817060a2ebedfa124c5607"
+    },
+    "stderr": {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-auth-core-build02.stderr.log",
+      "bytes": 62,
+      "sha256": "90c8a1a69c0155761cff4bfe0e61bbee007961d2b96729d2127c2e0c291489dd"
+    },
+    "manifest": {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\lib\\generated\\client_core_runtime.json",
+      "bytes": 496,
+      "sha256": "a1be37699a31a5729702aa130bbaefb0137b0714c3b8dd319c09480851dcb811",
+      "relativePath": "apps/web/lib/generated/client_core_runtime.json"
+    },
+    "version": "cccd7ea2b06b258d8d34ececf5edcd3f018765bac4a30e12eb979a6465301feb",
+    "wasmBytes": 252167,
+    "jsBytes": 24393,
+    "wasmLimitExclusive": 262144,
+    "jsLimit": 204800,
+    "authAbi": 1,
+    "baseAbi": 1,
+    "optimizationFlag": "-Oz",
+    "metadataMatched": true,
+    "wasmExecuted": false
+  },
+  "native": {
+    "actualChunk": "8fca1d",
+    "config": {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-auth-native-build01.config.json",
+      "bytes": 3756,
+      "sha256": "711a7ec3a68efb3ed0dfcb6ecabebee121fe7a87984c1bb502f7bc04f1a3a563"
+    },
+    "outer": {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-auth-native-build01.outer.json",
+      "bytes": 439,
+      "sha256": "d96925d9400d7e8d1d38e5728ba6c596aa1b19977d1943dad1e51109a080980c"
+    },
+    "stdout": {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-auth-native-build01.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "stderr": {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-auth-native-build01.stderr.log",
+      "bytes": 52939,
+      "sha256": "ed7f9446b120094b6a1bf0ad32f91d9b7fd720acfdad4f88f600f70699c9f880"
+    },
+    "artifact": {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\rust-target\\windows\\debug\\mir2-platform-windows.exe",
+      "bytes": 104720384,
+      "sha256": "5581eb8caf88c801abac6fe523db6869fda395eb5737e9b6ff0109d8be2994ea"
+    },
+    "archive": {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\native-auth-source12-build01.exe",
+      "bytes": 104720384,
+      "sha256": "5581eb8caf88c801abac6fe523db6869fda395eb5737e9b6ff0109d8be2994ea"
+    },
+    "profile": "dev optimized+debuginfo",
+    "launched": false
+  },
+  "priorResults": {
+    "source10CoreFailed": true,
+    "wrongNativeTargetZeroTests": true,
+    "node01PrecheckOnlyRejected": true,
+    "node02Passed132Failed1": true,
+    "tsc02ImplicitAnyRejected": true,
+    "coreBuild01Wasm271180OverBudgetRejectedBeforePublish": true,
+    "preserved": true
+  },
+  "sourceReview": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-auth-rust-source12-review.json",
+    "bytes": 1576,
+    "sha256": "179d06e16694211c4eaed59c14b89732087c75b5307e05e84d4e7eb35d533480"
+  },
+  "sourceDelta": [
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\lib\\client-core-runtime.ts",
+      "bytes": 36064,
+      "sha256": "30a1c967e26855cc7001a6cdf56669609063a223fac6e25f0d2f9a4255766f51",
+      "relativePath": "apps/web/lib/client-core-runtime.ts"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\lib\\generated\\client_core_runtime.json",
+      "bytes": 496,
+      "sha256": "a1be37699a31a5729702aa130bbaefb0137b0714c3b8dd319c09480851dcb811",
+      "relativePath": "apps/web/lib/generated/client_core_runtime.json"
+    }
+  ],
+  "uiOperated": false,
+  "runtimeLaunched": false,
+  "networkUsed": false,
+  "wasmInstantiated": false,
+  "combinedRendererNextThinAccepted": false,
+  "candidateAccepted": false,
+  "playerAccepted": false,
+  "goalComplete": false
+}

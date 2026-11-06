@@ -1,0 +1,213 @@
+{
+  "createdAt": "2026-10-24T12:30:02.988263+00:00",
+  "endpoint": "ws://127.0.0.1:17410/ws",
+  "gatewayPid": 49716,
+  "routing": "single",
+  "profile": "platinum_176",
+  "accountBackend": "file",
+  "liveRuns": [
+    {
+      "runId": "1792844299531-72b3a0bb",
+      "report": "1792844299531-72b3a0bb.report.json",
+      "profile": "full-lifecycle",
+      "ok": false,
+      "fullLifecyclePassed": false,
+      "startedAt": "2026-10-24T12:18:19.577Z",
+      "finishedAt": "2026-10-24T12:22:02.157Z",
+      "checks": {
+        "authGuards": {
+          "status": "passed"
+        },
+        "twoAccounts": {
+          "status": "passed"
+        },
+        "mutualVisibility": {
+          "status": "passed"
+        },
+        "movement": {
+          "status": "passed"
+        },
+        "turn": {
+          "status": "passed"
+        },
+        "chat": {
+          "status": "passed"
+        },
+        "chatLatency": {
+          "status": "passed"
+        },
+        "sharedCombat": {
+          "status": "passed"
+        },
+        "sharedKill": {
+          "status": "passed"
+        },
+        "sharedDrop": {
+          "status": "failed",
+          "reason": "No fresh source-name/location-correlated drop visible with matching spawn packets on both clients"
+        },
+        "uniquePickup": {
+          "status": "not_run",
+          "reason": "Shared drop did not pass"
+        },
+        "playerDeath": {
+          "status": "failed",
+          "reason": "a timed out waiting for owner Death and the same observer ObjectDied during ordinary monster exposure"
+        },
+        "townRevive": {
+          "status": "not_run",
+          "reason": "No passed player death evidence; townRevive is never sent to a living actor"
+        },
+        "mapRoundTrip": {
+          "status": "passed"
+        },
+        "logout": {
+          "status": "passed"
+        },
+        "reloginPersistence": {
+          "status": "passed"
+        }
+      }
+    },
+    {
+      "runId": "1792844550249-a3b772bb",
+      "report": "1792844550249-a3b772bb.report.json",
+      "profile": "full-lifecycle",
+      "ok": false,
+      "fullLifecyclePassed": false,
+      "startedAt": "2026-10-24T12:22:30.251Z",
+      "finishedAt": "2026-10-24T12:24:01.523Z",
+      "checks": {
+        "authGuards": {
+          "status": "passed"
+        },
+        "twoAccounts": {
+          "status": "passed"
+        },
+        "mutualVisibility": {
+          "status": "passed"
+        },
+        "movement": {
+          "status": "passed"
+        },
+        "turn": {
+          "status": "passed"
+        },
+        "chat": {
+          "status": "passed"
+        },
+        "chatLatency": {
+          "status": "passed"
+        },
+        "sharedCombat": {
+          "status": "failed",
+          "error": "Both actors did not prove positive hits and matching public health on the same ordinary monster within the bounded search"
+        },
+        "sharedKill": {
+          "status": "not_run",
+          "reason": "Shared combat prerequisite did not pass"
+        },
+        "sharedDrop": {
+          "status": "not_run",
+          "reason": "Shared combat prerequisite did not pass"
+        },
+        "uniquePickup": {
+          "status": "not_run",
+          "reason": "Shared combat prerequisite did not pass"
+        },
+        "playerDeath": {
+          "status": "not_run",
+          "reason": "Shared combat prerequisite did not pass"
+        },
+        "townRevive": {
+          "status": "not_run",
+          "reason": "Shared combat prerequisite did not pass"
+        },
+        "mapRoundTrip": {
+          "status": "passed"
+        },
+        "logout": {
+          "status": "passed"
+        },
+        "reloginPersistence": {
+          "status": "passed"
+        }
+      }
+    },
+    {
+      "runId": "1792844742353-ccf6fb6e",
+      "report": "1792844742353-ccf6fb6e.report.json",
+      "profile": "full-lifecycle",
+      "ok": false,
+      "fullLifecyclePassed": false,
+      "startedAt": "2026-10-24T12:25:42.400Z",
+      "finishedAt": "2026-10-24T12:27:42.456Z",
+      "checks": {
+        "authGuards": {
+          "status": "passed"
+        },
+        "twoAccounts": {
+          "status": "passed"
+        },
+        "mutualVisibility": {
+          "status": "passed"
+        },
+        "movement": {
+          "status": "passed"
+        },
+        "turn": {
+          "status": "passed"
+        },
+        "chat": {
+          "status": "passed"
+        },
+        "chatLatency": {
+          "status": "passed"
+        },
+        "sharedCombat": {
+          "status": "passed"
+        },
+        "sharedKill": {
+          "status": "passed"
+        },
+        "sharedDrop": {
+          "status": "passed"
+        },
+        "uniquePickup": {
+          "status": "passed"
+        },
+        "playerDeath": {
+          "status": "not_run",
+          "reason": "No ordinary live HookingCat/RakingCat is visible; no spawn, QA grant, PvP or teleport fallback"
+        },
+        "townRevive": {
+          "status": "not_run",
+          "reason": "No passed player death evidence; townRevive is never sent to a living actor"
+        },
+        "mapRoundTrip": {
+          "status": "passed"
+        },
+        "logout": {
+          "status": "passed"
+        },
+        "reloginPersistence": {
+          "status": "passed"
+        }
+      }
+    }
+  ],
+  "limits": [
+    "Two real public-protocol sockets on one host; no renderer, visual or two-physical-computer acceptance.",
+    "Gold pickup source correlation uses fresh packet order, location and snapshot sourceMonster name; no unique source-monster ID is exposed by public packets.",
+    "No real Death/Revived event passed. The ordinary unequip implementation has fixtures, but was not exercised in the final live phase because no live cat was then visible.",
+    "First failed Deer and subsequent failed/non-run checks remain unchanged."
+  ],
+  "coreProjection": {
+    "report": "1792844742353-ccf6fb6e.core-projection.report.json",
+    "scope": "Derived original eleven core checks only; does not change any original full run or certify full lifecycle."
+  },
+  "deerSourceReferences": [
+    "apps/simulation/src/runtime/drops.rs:1584",
+    "apps/simulation/src/runtime/drops/zone_harvest_drop_tests.rs:4"
+  ]
+}

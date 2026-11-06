@@ -1,0 +1,129 @@
+{
+  "schemaVersion": 1,
+  "scope": "Parser-only syntax check of external static-scene author/validator tools; no game tests/build/services",
+  "startedAt": "2026-10-25T05:20:32.119Z",
+  "finishedAt": "2026-10-25T05:20:32.787Z",
+  "files": [
+    {
+      "file": "author-candidates.mjs",
+      "bytes": 11154,
+      "sha256": "995cfb9b003030447f0df64c06de284cd1b04cbc147ec304afbc96a663e1d447",
+      "exitCode": 0,
+      "diagnostic": null
+    },
+    {
+      "file": "compare-scenes.mjs",
+      "bytes": 6486,
+      "sha256": "dda6d755f52373854256d4e563bd39f235a65569ba659d38d32947adbbe8b353",
+      "exitCode": 0,
+      "diagnostic": null
+    },
+    {
+      "file": "complete-suffix-permutations-v3.mjs",
+      "bytes": 2787,
+      "sha256": "404ed58c095843c8262eb1ecefb612ddf783a0b9a14943bc732d51775625d9ae",
+      "exitCode": 0,
+      "diagnostic": null
+    },
+    {
+      "file": "conditional-level-supply-final-v2.mjs",
+      "bytes": 8380,
+      "sha256": "3bbd555c1f2a5ae49383b7f5a63a9e202bb28267e0b8becc990f0e7cbf7f836c",
+      "exitCode": 0,
+      "diagnostic": null
+    },
+    {
+      "file": "conditional-level-supply-nearest-final-v3.mjs",
+      "bytes": 8407,
+      "sha256": "ace668519d08c3ed6323a2ebeb01fa47cdb0919db283c25d79dd924611d46cf1",
+      "exitCode": 0,
+      "diagnostic": null
+    },
+    {
+      "file": "conditional-level-supply.mjs",
+      "bytes": 8110,
+      "sha256": "cbf1844f6cf4859049646ab82f831867a15438dcd01157cd5c1990f171ec9fa9",
+      "exitCode": 0,
+      "diagnostic": null
+    },
+    {
+      "file": "extend-compact-draft.mjs",
+      "bytes": 3037,
+      "sha256": "8f66b1750ca8fd5f2c02c061428b5c965e102c8377745a3c9172d41a832394e5",
+      "exitCode": 0,
+      "diagnostic": null
+    },
+    {
+      "file": "extend-short-tour-draft.mjs",
+      "bytes": 3033,
+      "sha256": "9f604b6dc3ccb6f006fba38c919febcc4e3d58d8767c94c19715848b8324a250",
+      "exitCode": 0,
+      "diagnostic": null
+    },
+    {
+      "file": "inspect-candidates.mjs",
+      "bytes": 1832,
+      "sha256": "d17e2ed511dc98640151509a13762bf248c3f81e20302a431fc5b6e74be7b0f8",
+      "exitCode": 0,
+      "diagnostic": null
+    },
+    {
+      "file": "make-review-proposal.mjs",
+      "bytes": 11247,
+      "sha256": "978a9bb32aa1fcb06b62c1b659313325f037ce169f7b47a964d50cb3f68f8686",
+      "exitCode": 0,
+      "diagnostic": null
+    },
+    {
+      "file": "prefix-scout-cost-compact-final-v2.mjs",
+      "bytes": 2548,
+      "sha256": "ac30da68c8c15f64a999d9cc6a6aa5f020c89e5865a418162e34d810a3d38ae8",
+      "exitCode": 0,
+      "diagnostic": null
+    },
+    {
+      "file": "prefix-scout-cost-compact-v2.mjs",
+      "bytes": 2542,
+      "sha256": "c3f26a5961b9e0bbe266bb7aad50627a95a7c16114672614bc888f3b5da89ba9",
+      "exitCode": 0,
+      "diagnostic": null
+    },
+    {
+      "file": "prefix-scout-cost-nearest-final-v3.mjs",
+      "bytes": 2562,
+      "sha256": "8bfec072bcce1d734615bf74dd0c1068029144b181311bbaeb7044711ea3017a",
+      "exitCode": 0,
+      "diagnostic": null
+    },
+    {
+      "file": "prefix-scout-cost.mjs",
+      "bytes": 2534,
+      "sha256": "23edb62f24801d53d501d503f94dffdd3a5f9a46b0a5c6097543a2ff764a3c46",
+      "exitCode": 0,
+      "diagnostic": null
+    },
+    {
+      "file": "reorder-suffix-v3.mjs",
+      "bytes": 4011,
+      "sha256": "d73cd6fa82e0d28bbe21084b8f924b33c895afe27c51b66753cfafc76aaa4f76",
+      "exitCode": 0,
+      "diagnostic": null
+    },
+    {
+      "file": "static-lib.mjs",
+      "bytes": 11368,
+      "sha256": "2cf4c12d8aaead978a569db223e1c4527a594fa1f07e535601803e447f74df19",
+      "exitCode": 0,
+      "diagnostic": null
+    },
+    {
+      "file": "validate-candidate.mjs",
+      "bytes": 11177,
+      "sha256": "29a256fca718bfcc39987c68b37a0cf613f7adc98e2223bd48b9904777bc944b",
+      "exitCode": 0,
+      "diagnostic": null
+    }
+  ],
+  "count": 17,
+  "passed": true
+}

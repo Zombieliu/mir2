@@ -1,0 +1,95 @@
+{
+  "round": "Source78",
+  "scope": "ordinary packaged Web authenticated Spells bootstrap, empty learned branch",
+  "publicObservations": [
+    {
+      "phase": "before repair",
+      "ready": false,
+      "reason": "baseline-missing",
+      "compatibilityNameCount": 1
+    },
+    {
+      "phase": "new package Character equipment",
+      "ready": false,
+      "reason": "closed",
+      "compatibilityNameCount": 0
+    },
+    {
+      "phase": "new package Spells tab",
+      "ready": true,
+      "reason": "ready",
+      "compatibilityNameCount": 0
+    },
+    {
+      "phase": "Spells while Bag opened and close pointer attempted",
+      "ready": true,
+      "reason": "ready",
+      "compatibilityNameCount": 0
+    },
+    {
+      "phase": "Bag I shortcut closed and Spells stayed visible",
+      "ready": true,
+      "reason": "ready"
+    },
+    {
+      "phase": "normal save/logout and retained-cache reentry Spells",
+      "ready": true,
+      "reason": "ready",
+      "compatibilityNameCount": 0
+    },
+    {
+      "phase": "reentry native Bag and Spells coexist",
+      "ready": true,
+      "reason": "ready"
+    }
+  ],
+  "flow": {
+    "normalLoginAndStartGame": true,
+    "originalDiagnosticPackageNormallySavedAndClosed": true,
+    "normalAltXSaveLogout": true,
+    "passwordPageConfirmedAfterLogout": true,
+    "cacheRetainingReload": true,
+    "sameExistingAccountRelogin": true,
+    "normalSecondStartGame": true,
+    "noRepeatedStartGameAfterTransientMerchantLocatorTimeout": true,
+    "afterReentryNativeGearVisible": true,
+    "afterReentryNativeBagVisible": true,
+    "visualGoldBeforeAndAfter": 170,
+    "bagItemArtVisuallyPreserved": true,
+    "nativeEmptySpellsVisible": true
+  },
+  "uiNotes": {
+    "cShortcutSwitchedToEquipmentRatherThanClosingCharacter": true,
+    "bagHeaderCoordinateCloseNotVerified": true,
+    "ordinaryIShortcutBagCloseVisuallyVerified": true
+  },
+  "screenshots": [
+    "source78-character-native01.png",
+    "source78-spells-baseline-missing01.png",
+    "source78-bootstrap-character-native01.png",
+    "source78-bootstrap-spells-native01.png",
+    "source78-bootstrap-bag-native01.png",
+    "source78-bootstrap-spells-after-bag01.png",
+    "source78-bootstrap-spells-after-bag-toggle01.png",
+    "source78-bootstrap-relogin-character01.png",
+    "source78-bootstrap-relogin-spells-native01.png",
+    "source78-bootstrap-relogin-bag-spells01.png"
+  ],
+  "boundaries": {
+    "onlyOrdinaryUiAndFinitePublicSpellsDiagnostic": true,
+    "noLoginScreenshots": true,
+    "noCredentialsOutput": true,
+    "noQaAdminTeleportCommands": true,
+    "noPrivateSnapshotOrProductRuntimeRead": true,
+    "noCacheClearingOrViewportOverride": true,
+    "noSource65GatewayChange": true
+  },
+  "acceptance": {
+    "emptySpellsBootstrapAndRelogin": true,
+    "learnedSkillAssignmentOrCasting": false,
+    "mobile": false,
+    "fullWebWindowsParity": false,
+    "candidate100": false,
+    "goalComplete": false
+  }
+}

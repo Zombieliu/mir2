@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "recordedAt": "2026-10-25T09:01:33.584Z",
+  "source": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/apps/web/scripts/playtest-capacity-soak.test.mjs",
+  "original": {
+    "bytes": 224817,
+    "sha256": "de493f04c78bb961e2a5cfd230ce9c1e4843ec9057edf34ca055edaecaaf7c59",
+    "preimage": "C:\\mir2-build\\p01-completion-20261024\\native-chase-preference-tests-v1\\before-187.test.mjs.txt"
+  },
+  "appendedFragment": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\native-chase-preference-tests-v1\\appended-cases-v1.mjs.txt",
+    "bytes": 13619,
+    "sha256": "14487e72c7dd744a6863aa0c7708b4bfd9c57158aaee49cfe18576fa411fb9fd"
+  },
+  "final": {
+    "bytes": 238437,
+    "sha256": "2c95cccec9d2aadf3b4a59bc5e48894ade2951fc50c8c26a1ddd48b903ad24b5"
+  },
+  "originalPrefixByteIdentical": true,
+  "old187BodiesOrAssertionsChanged": false,
+  "mainOrCoreWritten": false
+}

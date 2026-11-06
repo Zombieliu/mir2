@@ -1,0 +1,186 @@
+{
+  "schemaVersion": 1,
+  "reviewedAt": "2026-10-25T06:56:30.345Z",
+  "reviewer": "/root/fixed_cell_gate_audit",
+  "state": "independent-readonly-review-blocked-by-region-scope-expansion",
+  "scope": "Source-text and raw-byte closure/log/receipt review only. No wrapper/product imports, test rerun, scene search, prepare or realm.",
+  "sourceFreeze": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\compact-navigation-wire-diagnostics-v1\\source-frozen-v1.json",
+    "bytes": 11470,
+    "sha256": "9b6fe294b6941ee8c751d9c4491809c41e9296b04c8a084d294ffc28bf09e06c"
+  },
+  "closure": {
+    "fileCount": 17,
+    "sourceSha256": "8c1b06d30f301e158cf7a880c9b2cf66c000223b28322f3c9ef89d9d6ff86ebf",
+    "all17RawPinsVerified": true,
+    "core9RawPinsVerified": true,
+    "inspection4RawPinsVerified": true,
+    "originalFrozenInputsModified": false
+  },
+  "finalSyntheticEvidence": {
+    "receipt": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\compact-navigation-wire-diagnostics-v1\\tests-v5.json",
+      "bytes": 1711,
+      "sha256": "e6b2f65d15c112a080e9f3546a91b978cbdb3b7c5220e16b97bb6303f5ae249f"
+    },
+    "log": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\compact-navigation-wire-diagnostics-v1\\tests-v5.log",
+      "bytes": 6321,
+      "sha256": "e7339502f5710b08b49cdac8f92d18d118c6ff83261ff3cb8b4f5f44559c7459"
+    },
+    "tests": 25,
+    "passed": 25,
+    "failed": 0,
+    "exactSourceBeforeAfter": true,
+    "logFooterMatched": true,
+    "testExecutionAttribution": "Author-run fake-class suite; reviewer did not execute it. Historical core12/88/187 does not validate this new wrapper."
+  },
+  "criticalInputs": [
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\compact-navigation-wire-diagnostics-v1\\wrapper.mjs",
+      "bytes": 14587,
+      "sha256": "c062c325f657c5cc753342749131b0897859ad73cb1f7202b28ffd59d0957112"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\compact-navigation-wire-diagnostics-v1\\wrapper.test.mjs",
+      "bytes": 19272,
+      "sha256": "3bc4f96e4a0bc9e916e2ea7fb4b58f6a17b70f13f1d3c35806d1c173fd85df0c"
+    }
+  ],
+  "blockers": [
+    {
+      "id": "B1-region-scope-pending-bypass",
+      "severity": "blocking-before-any-realm-or-template",
+      "file": "compact-navigation-wire-diagnostics-v1/wrapper.mjs",
+      "line": 76,
+      "code": "... entityRelevant || regionInterest && ownerControl || Boolean(state.pending)",
+      "issue": "The final pending disjunct admits any allowed ordinary nonplayer packet anywhere on map0 while a region-intersecting movement is pending. It logs wire objectId/x/y for an ID which was never inside the fixed rectangle and was never remembered. This violates root fixed region+remembered-identity scope. It is an observability scope defect, not a gameplay or snapshot mutation.",
+      "staticCounterexample": {
+        "setup": "Connection1/owner242596, valid region hint and successful original walk send open pending.",
+        "packet": {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "objectId": 9001,
+            "x": 255,
+            "y": 610
+          }
+        },
+        "expectedUnderApprovedScope": "Saved original observe runs once with identical input/return; no diagnostic row for this unrelated far object, no remembered insertion.",
+        "actualSourcePath": "mapRelevant=true; entityRelevant=false; region owner may be true but packet not ownerControl; pending=true makes scope=true and emits far wire numbers."
+      },
+      "minimalNewRevision": "In a separately authorized v2 copy, limit pending fallback to worldSnapshot/map controls and existing owner UserLocation/Pushed/UserDash/UserDashFail context. Ordinary nonplayer records must satisfy entityRelevant. Keep remembered IDs eligible for later out-of-region Remove/motion; do not loosen original gameplay counters."
+    }
+  ],
+  "negativeFixturesForV2": [
+    {
+      "id": "outside-unremembered-during-pending",
+      "steps": [
+        "Open a valid region hint through original send exactly once.",
+        "Observe far never-remembered ObjectMonster then ObjectWalk then ObjectRemove at255610.",
+        "Assert original call/argument/return and real snapshot fold effects preserved, but no unrelated diagnostic row/remembered insertion.",
+        "Then observe a regional unknown motion and a remembered regional object Remove after it moves outside: both permitted causes remain recorded."
+      ]
+    },
+    {
+      "id": "sync-reentry-is-not-a-credit",
+      "steps": [
+        "A fake saved original send invokes this.observe(UserLocation) synchronously before returning.",
+        "Assert exactly one saved send/observe call and original return/error precedence.",
+        "Document pre-send-pending boundary: observation can precede send row, pending opens after original send and may remain open; diagnostic complete must be false, no ACK/gameplay/Measurements credit is invented."
+      ]
+    },
+    {
+      "id": "literal-fold-labels",
+      "steps": [
+        "Use ObjectRevived, not nonexistent ObjectRevive, and show known-ID dead flag can clear while missing ID is not upserted.",
+        "If self Revived is deliberately excluded, state that scope; do not claim all lifecycle/visibility packets.",
+        "Use actual phase settle or explicitly normalize it to fixed other without copying arbitrary strings."
+      ]
+    }
+  ],
+  "nonBlockingFindings": [
+    {
+      "id": "N1-send-pending-opens-after-original",
+      "fact": "sendAfter creates private pending only after saved original returns. Actual CapacityClient->PlaytestClient.send records sent sequence then calls Node ws.send synchronously, and real WS receive callbacks run asynchronously. Current ordinary path remains coherent. A synchronous fake/reentrant observe can be recorded before send row and leave an unclosed pending; existing25 tests do not exercise this case.",
+      "classification": "Causal limitation, no current original-method-count/metric/acceptance mutation; v2 fixture and explicit limitation requested by root."
+    },
+    {
+      "id": "N2-phase-normalization",
+      "fact": "PHASES lists settle-2/settle-10 while actual current context uses settle. Output maps it to fixed other; sequence/time/raw stream still correlate.",
+      "classification": "Static label precision loss, not privacy or gameplay blocker."
+    },
+    {
+      "id": "N3-pending-count-definition",
+      "fact": "At most64 received-observation rows are emitted per private pending window, including its terminal pending-limit row; the single send row is additional. Per-connection12000 rows includes its row-limit marker.",
+      "classification": "Root original64pending-events bound satisfied when defined as received events; README wording should be precise in v2 without rewriting v1."
+    }
+  ],
+  "positiveChecks": {
+    "savedOriginalObserveAndSendExactlyOnce": true,
+    "sameThisAndArgumentReferences": true,
+    "identicalNormalReturnAndOriginalThrowObject": true,
+    "originalErrorWinsOverProjectionOrSinkError": true,
+    "diagnosticProjectionOrSinkThrowOccursAfterOriginalAndCanStopDriver": true,
+    "noClientSnapshotEventsPlanHintCommandMeasurementsOrAcceptanceAssignmentFound": true,
+    "emitReceivesProjectedRowAndExistingWriterOnly": true,
+    "actualFoldThenRecordSequenceUsed": true,
+    "wirePrivacy": "Fixed source/direction/phase enums, bounded numeric public object/position/cursor data and booleans; no arbitrary name/account/credential/inventory/requestId/payload copied.",
+    "unknownMotionDoesNotSynthesizeEntity": true,
+    "beforeAfterEntitiesBounded32Total": true,
+    "rememberedPerConnection64": true,
+    "pendingAtMostOne": true,
+    "connectionsAtMostTwo": true,
+    "rowsPerConnection12000": true,
+    "truncationEvictionOpenPendingOrDiagnosticErrorsMakeDiagnosticIncomplete": true,
+    "noDiagnosticCompletenessIsCapacityAcceptance": true
+  },
+  "actualWireAndFoldClosure": {
+    "extraReadPins": [
+      {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\gateway\\src\\web.rs",
+        "bytes": 855687,
+        "sha256": "769186e87e166a7ba0fbb971463c8e0ae2b4dd119292798badee3b8e28522dd6"
+      },
+      {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\packages\\protocol\\src\\types.rs",
+        "bytes": 120092,
+        "sha256": "cf18d6c3c7066acb9d82edc35ad49548adb858d925c489410c614efc0882d0fb"
+      }
+    ],
+    "userLocation": "web.rs11212 emits payload{x,y,direction}, without owner objectId; normal UserLocation therefore does not hit knownPlayer exclusion and finally closes pending when existing hint clears.",
+    "receiveOrder": "PlaytestClient.observe189 applies protocol fold before record; NativeResumeClient delegates; CapacityClient.observe245 calls super then releases existing navigation hint. Wrapper post-view/sequence runs after these originals.",
+    "revival": "ObjectRevived is the actual object wire/fold literal (web.rs12309/protocol-observation326) and is already in v1 SOURCES; it mutates existing entity only. Self Revived is separate and excluded; ObjectRevive is not a real compatibility alias.",
+    "visibility": "ObjectHide/ObjectShow and hidden projection are not captured; this wrapper must not be described as a complete visibility/lifecycle trace."
+  },
+  "performanceAndInterference": {
+    "boundedState": true,
+    "work": "Both snapshot views scan the actual AOI entity array; outputs/private caches are bounded but scanning/allocation/callback overhead is real. Original cadence/lag/resource/safety gates remain mandatory.",
+    "sinkFailure": "The approved adapter(row,writer)=>writer.add(row) can throw after original send/fold. This may stop the driver through its existing failure path; no zero-impact claim."
+  },
+  "historicalEvidence": {
+    "initialFailed19of21Preserved": true,
+    "v1FreezeAndAll17Preserved": true,
+    "currentDocumentationCommit": "4cab00893b861395b63906b1b8183a021d397cdb",
+    "coreCodeEvidenceCommit": "6d70d02d0bc390156b77a3e48acee714fc87cda3",
+    "coreDriverSourceSha256": "05c07c2e487e4b65c5068f8803f96bdc6a66a342c5fc44c21f3a64b6b8581073",
+    "noRealmAdapterCreated": true,
+    "failed12OrHistoricalFormal09Unchanged": true
+  },
+  "verdict": {
+    "blockingFindings": 1,
+    "approvedForRealm": false,
+    "approvedForNew13Template": false,
+    "requiresSeparateV2Authorization": true,
+    "capacityAccepted": false,
+    "p0Accepted": false,
+    "p2Authorized": false
+  },
+  "notPerformed": {
+    "wrapperOrProductImport": true,
+    "testExecution": true,
+    "sourceOrFixtureEdit": true,
+    "freezeEdit": true,
+    "realmOrAccount": true
+  }
+}

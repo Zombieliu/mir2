@@ -1,0 +1,104 @@
+{
+  "schemaVersion": 1,
+  "copiedAt": "2026-10-26T00:56:14.940024+00:00",
+  "scope": "Explicit four-original public analysis copy only. No source or diagnostic modification, raw/monitor/trace/recording/binary/private read, analyzer execution, test, game mode, Git stage or commit.",
+  "runId": "1792974410829-a5288349",
+  "sourceDirectory": "C:\\mir2-build\\p01-completion-20261024\\formal15-supply-failure-analysis-v1",
+  "publicChild": "capacity-formal15-native-supply-failure-analysis-v1",
+  "copies": [
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\formal15-supply-failure-analysis-v1\\summary-v1.json",
+        "bytes": 12449,
+        "sha256": "cfd6bb7f414ce381ac68858bacd66dbf429e5b0ec632565c1c6ee29bb1528fb1"
+      },
+      "destination": {
+        "path": "summary-v1.json",
+        "bytes": 12449,
+        "sha256": "cfd6bb7f414ce381ac68858bacd66dbf429e5b0ec632565c1c6ee29bb1528fb1"
+      },
+      "sourceBeforeAfterIdentical": true,
+      "destinationRawExact": true
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\formal15-supply-failure-analysis-v1\\analysis-v1.json",
+        "bytes": 60833,
+        "sha256": "ae5f5011ecf1fcba20c93946e81183c1957a1c985d4b4be7b29590c3d60f5dd2"
+      },
+      "destination": {
+        "path": "analysis-v1.json",
+        "bytes": 60833,
+        "sha256": "ae5f5011ecf1fcba20c93946e81183c1957a1c985d4b4be7b29590c3d60f5dd2"
+      },
+      "sourceBeforeAfterIdentical": true,
+      "destinationRawExact": true
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\formal15-supply-failure-analysis-v1\\selected-evidence-v1.json",
+        "bytes": 243096,
+        "sha256": "6d87c31611fbac423fea8737c23875a8a04f26ce45e12f89e501694e33d7807f"
+      },
+      "destination": {
+        "path": "selected-evidence-v1.json",
+        "bytes": 243096,
+        "sha256": "6d87c31611fbac423fea8737c23875a8a04f26ce45e12f89e501694e33d7807f"
+      },
+      "sourceBeforeAfterIdentical": true,
+      "destinationRawExact": true
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\formal15-supply-failure-analysis-v1\\analyze-v1.py",
+        "bytes": 12813,
+        "sha256": "05fc30416d1382d108647ab6b90e6d06f1c9a307f7a65214a9ea6ab1b9fa61d1"
+      },
+      "destination": {
+        "path": "analyze-v1.py",
+        "bytes": 12813,
+        "sha256": "05fc30416d1382d108647ab6b90e6d06f1c9a307f7a65214a9ea6ab1b9fa61d1"
+      },
+      "sourceBeforeAfterIdentical": true,
+      "destinationRawExact": true
+    }
+  ],
+  "originalsCopied": 4,
+  "originalBytes": 329191,
+  "everySourceAndDestinationBytesSha256Checked": true,
+  "regularCanonicalNonsymlinkExplicitSourcesChecked": true,
+  "newChildOnlyAndExclusiveWrites": true,
+  "readme": {
+    "path": "README.md",
+    "bytes": 2694,
+    "sha256": "4392c1caaecc29e6682d3cb1a7c4c1eb462c7153ea31069457bcf313f30db795"
+  },
+  "relativeLinksChecked": 9,
+  "relativeLinksAllExistAfterCopy": true,
+  "publicFieldReview": {
+    "selectedFieldsScalarAndNoProtocolPacketPayload": true,
+    "noCredentialValueFieldsOrCredentialStringPatternsFound": true,
+    "sourceCodeReviewedWithoutExecution": true
+  },
+  "factBoundaries": {
+    "formal15Passed": false,
+    "capacityAccepted": false,
+    "P0Accepted": false,
+    "P2Started": false,
+    "stage25WindowPassed": [
+      true,
+      true,
+      true,
+      false,
+      true
+    ],
+    "measuredStage25Attacks": 232,
+    "rawPhaseLabelStage25Attacks": 233,
+    "wholeRunAttackSuccess": 451,
+    "measurementVsRawPhaseScopeNotChanged": true,
+    "rawParsePassesByOriginalAnalyzer": 1,
+    "rawParsePassesByArchiveCopier": 0,
+    "uniqueRootCauseNotProven": true,
+    "independentPerRequest900msReplayNotClaimed": true
+  }
+}
