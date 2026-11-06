@@ -27,9 +27,13 @@ export type EffectSubSpec = {
   base: number;
   count: number;
   interval?: number;
-  kind?: "cast" | "projectile" | "impact" | "target" | "ground" | "return";
+  directionCount?: number;
+  directionStride?: number;
+  directionRanges?: Array<{ direction: number; base: number; end: number }>;
+  kind?: "cast" | "projectile" | "impact" | "target" | "ground" | "return" | "attackOverlay";
   light?: number;
   blend?: boolean;
+  rate?: number;
   repeat?: boolean;
   offset?: { x: number; y: number };
 };
@@ -39,7 +43,7 @@ export type EffectSpec = {
   spellId?: number;
   effect?: string;
   effectId?: number;
-  kind?: "cast" | "projectile" | "impact" | "target" | "ground";
+  kind?: "cast" | "projectile" | "impact" | "target" | "ground" | "attackOverlay";
   library: string;
   base: number;
   count: number;
@@ -52,6 +56,7 @@ export type EffectSpec = {
   valueRanges?: Array<{ value: number; base: number; end: number }>;
   light?: number;
   blend?: boolean;
+  rate?: number;
   repeat?: boolean;
   offset?: { x: number; y: number };
   provenance?: { source: string; symbol: string };
@@ -66,6 +71,7 @@ export type EffectAnimation = {
   frames: EffectFrameMeta[];
   interval: number;
   blend: boolean;
+  opacity: number;
   light: number;
   repeat: boolean;
   offset: { x: number; y: number };
@@ -117,6 +123,7 @@ export async function loadEffectAssets(
     spell_effect_map?: NumericEffectName[];
     spell_effects?: EffectSpec[];
     ground_effects?: EffectSpec[];
+    client_effects?: EffectSpec[];
     object_effects?: EffectSpec[];
     map_effects?: EffectSpec[];
   };
@@ -154,6 +161,9 @@ export async function loadEffectAssets(
     if (entry.spell) groundBySpell.set(entry.spell, entry);
   }
   const mapByName = new Map<string, EffectSpec>();
+  for (const entry of manifest.client_effects ?? []) {
+    if (entry.effect) mapByName.set(entry.effect, entry);
+  }
   for (const entry of manifest.object_effects ?? []) {
     if (entry.effect) mapByName.set(entry.effect, entry);
   }
@@ -200,8 +210,12 @@ function resolveSub(
   sub: EffectSubSpec,
   name: string,
   fallbackKind: EffectSubSpec["kind"],
+  direction = 0,
 ): EffectAnimation | undefined {
-  const frames = resolveFrames(assets, sub.library, sub.base, sub.count);
+  if (!Number.isInteger(direction) || direction < 0) return undefined;
+  if (sub.directionCount !== undefined && direction >= sub.directionCount) return undefined;
+  const base = sub.base + direction * (sub.directionStride ?? 0);
+  const frames = resolveFrames(assets, sub.library, base, sub.count);
   if (frames.length === 0) {
     return undefined;
   }
@@ -212,6 +226,7 @@ function resolveSub(
     frames,
     interval,
     blend: sub.blend ?? true,
+    opacity: Math.min(1, Math.max(0, sub.rate ?? 1)),
     light: sub.light ?? 0,
     repeat: sub.repeat ?? false,
     offset: sub.offset ?? { x: 0, y: 0 },
@@ -249,6 +264,7 @@ export function resolveAnimation(
     frames,
     interval: entry.interval,
     blend: entry.blend ?? true,
+    opacity: Math.min(1, Math.max(0, entry.rate ?? 1)),
     light: entry.light ?? 6,
     repeat: entry.repeat ?? false,
     offset: entry.offset ?? { x: 0, y: 0 },
@@ -281,20 +297,31 @@ export function resolveSpellCastEffect(
   direction = 0,
 ): EffectAnimation | null {
   const entry = assets.spellByName.get(spell);
-  if (!entry || entry.kind === "projectile" || entry.kind === "impact" || entry.kind === "target") {
+  if (!entry || entry.kind === "projectile" || entry.kind === "impact" || entry.kind === "target" || entry.kind === "attackOverlay") {
     return null;
   }
   return resolveAnimation(assets, entry, direction);
 }
 
+/** Resolve an attacker-bound Attack1 overlay without treating it as ObjectMagic cast art. */
+export function resolveSpellAttackOverlayEffect(
+  assets: EffectAssets,
+  spell: string,
+  direction = 0,
+): EffectAnimation | null {
+  const entry = assets.spellByName.get(spell);
+  return entry?.kind === "attackOverlay" ? resolveAnimation(assets, entry, direction) : null;
+}
+
 export function resolveSpellProjectileEffect(
   assets: EffectAssets,
   spell: string,
+  direction = 0,
 ): EffectAnimation | null {
   const entry = assets.spellByName.get(spell);
   if (!entry) return null;
   if (entry.projectile) {
-    return resolveSub(assets, entry.projectile, spell, "projectile") ?? null;
+    return resolveSub(assets, entry.projectile, spell, "projectile", direction) ?? null;
   }
   return entry.kind === "projectile" ? resolveAnimation(assets, entry) : null;
 }
@@ -464,6 +491,9 @@ const SPELL_NAME_BY_ID: Record<number, string> = {
   217: "HornedCommanderRockFall",
   218: "HornedCommanderRockSpike",
 };
+const SPELL_ID_BY_NAME = new Map(
+  Object.entries(SPELL_NAME_BY_ID).map(([id, name]) => [name, Number(id)]),
+);
 
 /**
  * Resolves a `MapEffect` / `ObjectEffect` packet's numeric `effect` (a raw SpellEffect byte) to a
@@ -491,6 +521,11 @@ export function effectNameForNumber(assets: EffectAssets, effect: number): strin
 /** Spell packets use the protocol Spell enum, not the overlapping SpellEffect enum. */
 export function spellNameForNumber(spell: number): string | null {
   return SPELL_NAME_BY_ID[Math.trunc(spell)] ?? null;
+}
+
+/** Convert an exact protocol Spell enum name back to its numeric wire id. */
+export function spellNumberForName(spell: string): number | null {
+  return SPELL_ID_BY_NAME.get(spell) ?? null;
 }
 
 /** A live effect placed at a tile, used by the render loop. */

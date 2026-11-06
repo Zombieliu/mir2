@@ -1,4 +1,6 @@
 use std::collections::{BTreeMap, BTreeSet};
+use std::sync::OnceLock;
+use std::time::{SystemTime, UNIX_EPOCH};
 
 use serde::{Deserialize, Serialize};
 
@@ -44,6 +46,21 @@ use super::resources::{
 pub(super) struct NpcFlagState {
     pub(super) index: u32,
     pub(super) value: bool,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub(super) struct CrystalNpcLocalTime {
+    pub(super) day_of_week: u8,
+    pub(super) minute_of_day: u16,
+}
+
+impl CrystalNpcLocalTime {
+    pub(super) const fn new(day_of_week: u8, hour: u8, minute: u8) -> Self {
+        Self {
+            day_of_week,
+            minute_of_day: hour as u16 * 60 + minute as u16,
+        }
+    }
 }
 
 #[derive(Debug, Clone)]
@@ -227,9 +244,19 @@ pub(super) fn crystal_quest_ids_by_npc() -> BTreeMap<u32, BTreeSet<i32>> {
 pub(super) fn crystal_npc_visible_to_character(
     npc: &CrystalNpcInfoTemplate,
     character: &CharacterRecord,
+    npc_flags: &[NpcFlagState],
+    local_time: CrystalNpcLocalTime,
 ) -> bool {
     if npc.flag_needed != 0 {
-        return false;
+        let Ok(flag_index) = u32::try_from(npc.flag_needed) else {
+            return false;
+        };
+        if !npc_flags
+            .iter()
+            .any(|flag| flag.index == flag_index && flag.value)
+        {
+            return false;
+        }
     }
     if npc.min_level != 0 && i32::from(character.level) < i32::from(npc.min_level) {
         return false;
@@ -244,10 +271,113 @@ pub(super) fn crystal_npc_visible_to_character(
     {
         return false;
     }
-    if npc.time_visible {
+    if !npc.day_of_week.is_empty()
+        && !npc
+            .day_of_week
+            .eq_ignore_ascii_case(crystal_day_of_week_name(local_time.day_of_week))
+    {
         return false;
     }
+    if npc.time_visible {
+        let start = u16::from(npc.hour_start) * 60 + u16::from(npc.minute_start);
+        let finish = u16::from(npc.hour_end) * 60 + u16::from(npc.minute_end);
+        if start > local_time.minute_of_day || finish <= local_time.minute_of_day {
+            return false;
+        }
+    }
     true
+}
+
+pub(super) fn crystal_npc_visible_in_world(world: &World, npc: &CrystalNpcInfoTemplate) -> bool {
+    let Some(character) = world
+        .resource::<SessionResource>()
+        .selected_character
+        .as_ref()
+    else {
+        return false;
+    };
+    let local_time = if npc.time_visible || !npc.day_of_week.is_empty() {
+        current_crystal_npc_local_time()
+    } else {
+        CrystalNpcLocalTime::new(0, 0, 0)
+    };
+    crystal_npc_visible_to_character(
+        npc,
+        character,
+        &world.resource::<NpcStateResource>().npc_flags,
+        local_time,
+    )
+}
+
+pub(super) fn crystal_npc_object_visible_in_world(world: &World, object_id: u32) -> bool {
+    static BY_OBJECT_ID: OnceLock<BTreeMap<u32, CrystalNpcInfoTemplate>> = OnceLock::new();
+    BY_OBJECT_ID
+        .get_or_init(|| {
+            crystal_npc_info_manifest()
+                .npcs
+                .into_iter()
+                .filter_map(|npc| Some((npc.loaded_object_id?, npc)))
+                .collect()
+        })
+        .get(&object_id)
+        .is_none_or(|npc| crystal_npc_visible_in_world(world, &npc))
+}
+
+pub(super) fn current_crystal_npc_local_time() -> CrystalNpcLocalTime {
+    let unix_seconds = SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .map(|duration| duration.as_secs())
+        .unwrap_or(0);
+
+    local_calendar_time(unix_seconds).unwrap_or_else(|| utc_calendar_time(unix_seconds))
+}
+
+fn local_calendar_time(unix_seconds: u64) -> Option<CrystalNpcLocalTime> {
+    let seconds = libc::time_t::try_from(unix_seconds).ok()?;
+    let mut local = std::mem::MaybeUninit::<libc::tm>::zeroed();
+
+    #[cfg(windows)]
+    let success = unsafe { libc::localtime_s(local.as_mut_ptr(), &seconds) == 0 };
+    #[cfg(unix)]
+    let success = unsafe { !libc::localtime_r(&seconds, local.as_mut_ptr()).is_null() };
+    #[cfg(not(any(windows, unix)))]
+    let success = false;
+
+    if !success {
+        return None;
+    }
+    let local = unsafe { local.assume_init() };
+    Some(CrystalNpcLocalTime::new(
+        u8::try_from(local.tm_wday).ok()?,
+        u8::try_from(local.tm_hour).ok()?,
+        u8::try_from(local.tm_min).ok()?,
+    ))
+}
+
+fn utc_calendar_time(unix_seconds: u64) -> CrystalNpcLocalTime {
+    const SECONDS_PER_DAY: u64 = 24 * 60 * 60;
+    let days_since_epoch = unix_seconds / SECONDS_PER_DAY;
+    let seconds_today = unix_seconds % SECONDS_PER_DAY;
+    // 1970-01-01 was a Thursday; .NET DayOfWeek uses Sunday = 0.
+    let day_of_week = u8::try_from((days_since_epoch + 4) % 7).unwrap_or(0);
+    CrystalNpcLocalTime::new(
+        day_of_week,
+        u8::try_from(seconds_today / 3600).unwrap_or(0),
+        u8::try_from((seconds_today / 60) % 60).unwrap_or(0),
+    )
+}
+
+fn crystal_day_of_week_name(day_of_week: u8) -> &'static str {
+    match day_of_week {
+        0 => "Sunday",
+        1 => "Monday",
+        2 => "Tuesday",
+        3 => "Wednesday",
+        4 => "Thursday",
+        5 => "Friday",
+        6 => "Saturday",
+        _ => "",
+    }
 }
 
 pub(super) fn crystal_class_name(class: MirClass) -> &'static str {
@@ -260,11 +390,14 @@ pub(super) fn crystal_class_name(class: MirClass) -> &'static str {
     }
 }
 
-pub(super) fn crystal_npc_service_object_in_range(world: &World, npc_object_id: u32) -> bool {
+pub(super) fn crystal_npc_object_in_data_range(world: &World, npc_object_id: u32) -> bool {
     let Some(npc_entity) = entity_by_object_id(world, npc_object_id) else {
         return false;
     };
     if !world.entity(npc_entity).contains::<Npc>() {
+        return false;
+    }
+    if !crystal_npc_object_visible_in_world(world, npc_object_id) {
         return false;
     }
 
@@ -279,6 +412,10 @@ pub(super) fn crystal_npc_service_object_in_range(world: &World, npc_object_id: 
     };
 
     tile_distance(&player_position, &npc_position) <= CRYSTAL_DATA_RANGE
+}
+
+pub(super) fn crystal_npc_service_object_in_range(world: &World, npc_object_id: u32) -> bool {
+    crystal_npc_object_in_data_range(world, npc_object_id)
 }
 
 pub(super) fn current_crystal_npc_service_in_range(world: &World) -> Option<ActiveNpcServiceState> {

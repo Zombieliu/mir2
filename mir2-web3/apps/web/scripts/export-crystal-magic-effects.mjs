@@ -24,7 +24,7 @@ const DEFAULT_PACK_INDEX_PATH = "/generated/crystal-packs/full/index.json";
 const DIRECTION_COUNT = 8;
 
 const SPELL_IDS = {
-  TwinDrakeBlade: 6, Entrapment: 7, LionRoar: 9, BladeAvalanche: 11,
+  TwinDrakeBlade: 6, Entrapment: 7, FlamingSword: 8, LionRoar: 9, BladeAvalanche: 11,
   ProtectionField: 12, Rage: 13, CounterAttack: 14, SlashingBurst: 15, Fury: 16,
   ImmortalSkin: 17, FireBall: 31, Repulsion: 32, ElectricShock: 33,
   GreatFireBall: 34, HellFire: 35, ThunderBolt: 36, Teleport: 37, FireBang: 38,
@@ -54,9 +54,14 @@ export const SPELL_EFFECT_ENUM = [
 ].map((name, id) => ({ id, name }));
 
 const PLAYER_SPELL_SOURCE = "Crystal/Client/MirObjects/PlayerObject.cs::MirAction.Spell";
+const PLAYER_ATTACK_OVERLAY_SOURCE = "Crystal/Client/MirObjects/PlayerObject.cs::DrawEffects/MirAction.Attack1";
 const WORLD_SPELL_SOURCE = "Crystal/Client/MirObjects/SpellObject.cs::Load";
 const OBJECT_EFFECT_SOURCE = "Crystal/Client/MirScenes/GameScene.cs::ObjectEffect";
 const MAP_EFFECT_SOURCE = "Crystal/Client/MirScenes/GameScene.cs::MapEffect";
+const PLAYER_REVIVE_SOURCE = "Crystal/Client/MirScenes/GameScene.cs::Revived/ObjectRevived";
+const RIGHT_GUARD_RANGE_HIT_SOURCE = "Crystal/Client/MirObjects/MonsterObject.cs::RightGuard/AttackRange1/FrameIndex4";
+const LEFT_GUARD_RANGE_PROJECTILE_SOURCE = "Crystal/Client/MirObjects/MonsterObject.cs::LeftGuard/AttackRange1/FrameIndex4/CreateProjectile";
+const NEW_MOVE_DESTINATION_SOURCE = "Crystal/Client/MirScenes/GameScene.cs::MapControl.OnMouseClick/Settings.NewMove";
 
 const spell = (name, library, base, count, interval, kind = "cast", directionStride) => ({
   spell: name,
@@ -97,10 +102,49 @@ const phase = (library, base, count, interval, kind, extra = {}) => ({
 
 const withPhases = (effect, phases) => ({ ...effect, ...phases });
 
-// Cast effects constructed immediately by PlayerObject's MirAction.Spell switch.
+const attackOverlay = (name, library, base, count, interval, directionStride, rate) => ({
+  spell: name,
+  spellId: SPELL_IDS[name],
+  library,
+  base,
+  count,
+  interval,
+  kind: "attackOverlay",
+  directionCount: DIRECTION_COUNT,
+  directionStride,
+  directionRanges: Array.from({ length: DIRECTION_COUNT }, (_, direction) => ({
+    direction,
+    base: base + direction * directionStride,
+    end: base + direction * directionStride + count - 1,
+  })),
+  blend: true,
+  rate,
+  light: 0,
+  repeat: false,
+  offset: { x: 0, y: 0 },
+  provenance: { source: PLAYER_ATTACK_OVERLAY_SOURCE, symbol: `Spell.${name}` },
+});
+
+const direction16 = (base, count, directionStride) => ({
+  directionCount: 16,
+  directionStride,
+  directionRanges: Array.from({ length: 16 }, (_, direction) => ({
+    direction,
+    base: base + direction * directionStride,
+    end: base + direction * directionStride + count - 1,
+  })),
+});
+
+// PlayerObject spell/cast effects plus explicitly-labelled action overlays.
 export const SPELL_EFFECTS = [
+  // FlamingSword is not a MirAction.Spell cast. SpellToggle arms it and the
+  // next valid Attack1 consumes it; ObjectAttack carries spell=8 and selects
+  // this attacker-bound six-frame overlay.
+  attackOverlay("FlamingSword", "Magic", 3480, 6, 100, 10, 0.7),
   withPhases(spell("FireBall", "Magic", 0, 10, 60), {
-    projectile: phase("Magic", 10, 6, 30, "projectile"),
+    projectile: phase("Magic", 10, 6, 30, "projectile", {
+      ...direction16(10, 6, 10),
+    }),
     impact: phase("Magic", 170, 10, 60, "target"),
   }),
   withPhases(spell("Healing", "Magic", 200, 10, 60), {
@@ -114,7 +158,9 @@ export const SPELL_EFFECTS = [
     impact: phase("Magic", 770, 10, 100, "target"),
   }),
   withPhases(spell("GreatFireBall", "Magic", 400, 10, 60), {
-    projectile: phase("Magic", 410, 6, 30, "projectile"),
+    projectile: phase("Magic", 410, 6, 30, "projectile", {
+      ...direction16(410, 6, 10),
+    }),
     impact: phase("Magic", 570, 10, 60, "target"),
   }),
   withPhases(spell("HellFire", "Magic", 920, 10, 60), {
@@ -203,8 +249,19 @@ export const SPELL_EFFECTS = [
   spell("ElementalBarrier", "Magic3", 1880, 8, 75),
   spell("PoisonShot", "Magic3", 2300, 8, 125),
   spell("OneWithNature", "Magic3", 2710, 8, 150, "ground"),
-  spell("FireBounce", "Magic", 400, 10, 60),
-  withPhases(spell("SoulFireBall", "Magic", 1160, 3, 30, "projectile"), {
+  withPhases(spell("FireBounce", "Magic", 400, 10, 60), {
+    projectile: phase("Magic", 410, 6, 30, "projectile", {
+      ...direction16(410, 6, 10),
+    }),
+    impact: phase("Magic", 570, 10, 60, "target"),
+  }),
+  withPhases({
+    ...spell("SoulFireBall", "Magic", 1160, 3, 30, "projectile"),
+    ...direction16(1160, 3, 10),
+  }, {
+    projectile: phase("Magic", 1160, 3, 30, "projectile", {
+      ...direction16(1160, 3, 10),
+    }),
     impact: phase("Magic", 1360, 10, 60, "target"),
   }),
   withPhases(spell("MassHiding", "Magic", 1160, 3, 30, "projectile"), {
@@ -216,7 +273,13 @@ export const SPELL_EFFECTS = [
   withPhases(spell("BlessedArmour", "Magic", 1160, 3, 30, "projectile"), {
     impact: phase("Magic", 1340, 15, 80, "target"),
   }),
-  withPhases(spell("Hallucination", "Magic", 1160, 3, 48, "projectile"), {
+  withPhases({
+    ...spell("Hallucination", "Magic", 1160, 3, 48, "projectile"),
+    ...direction16(1160, 3, 10),
+  }, {
+    projectile: phase("Magic", 1160, 3, 48, "projectile", {
+      ...direction16(1160, 3, 10),
+    }),
     impact: phase("Magic2", 1110, 10, 100, "target"),
   }),
   withPhases(spell("Curse", "Magic", 1160, 3, 30, "projectile"), {
@@ -247,7 +310,8 @@ const worldSpell = (name, library, base, count, interval, extra = {}) => ({
 // Packet-backed world spell objects use a different frame range from the
 // caster's MirAction.Spell animation and remain alive until ObjectRemove.
 export const WORLD_SPELL_EFFECTS = [
-  worldSpell("TrapHexagon", "Magic", 1390, 10, 100),
+  // SpellObject.Draw uses DrawBlend(..., 0.8F) for persistent world spells.
+  worldSpell("TrapHexagon", "Magic", 1390, 10, 100, { rate: 0.8 }),
   worldSpell("FireWall", "Magic", 1630, 6, 120, { light: 3 }),
   worldSpell("PoisonCloud", "Magic2", 1650, 20, 120, { light: 3 }),
   worldSpell("Blizzard", "Magic2", 1550, 30, 100, {
@@ -280,6 +344,35 @@ const packetEffect = (effect, library, base, count, interval, source, extra = {}
   provenance: { source, symbol: `SpellEffect.${effect}` },
 });
 
+const clientEffect = (effect, library, base, count, interval, source, extra = {}) => ({
+  effect,
+  kind: "target",
+  library,
+  base,
+  count,
+  interval,
+  blend: true,
+  light: 6,
+  repeat: false,
+  offset: { x: 0, y: 0 },
+  ...extra,
+  provenance: { source, symbol: effect },
+});
+
+// Client-owned effects that are not SpellEffect enum packets. Crystal creates
+// these exact actor-bound effects from packet-driven client object actions.
+export const CLIENT_EFFECTS = [
+  clientEffect("LeftGuardRangeProjectile", "Magic", 10, 6, 30, LEFT_GUARD_RANGE_PROJECTILE_SOURCE, {
+    kind: "projectile",
+    ...direction16(10, 6, 10),
+  }),
+  clientEffect("NewMoveDestination", "Magic3", 500, 10, 60, NEW_MOVE_DESTINATION_SOURCE, {
+    kind: "ground",
+  }),
+  clientEffect("PlayerRevive", "Magic2", 1220, 20, 100, PLAYER_REVIVE_SOURCE),
+  clientEffect("RightGuardRangeHit", "Magic2", 10, 5, 60, RIGHT_GUARD_RANGE_HIT_SOURCE, { kind: "impact" }),
+];
+
 // Single-layer ObjectEffect cases whose frame selection is fully determined by the packet effect.
 export const OBJECT_EFFECTS = [
   packetEffect("FatalSword", "Magic2", 1940, 4, 100, OBJECT_EFFECT_SOURCE),
@@ -305,7 +398,13 @@ export const MAP_EFFECTS = [
   packetEffect("Tester", "Effect", 328, 10, 50, MAP_EFFECT_SOURCE, { light: 0 }),
 ];
 
-const allSpecs = () => [...SPELL_EFFECTS, ...WORLD_SPELL_EFFECTS, ...OBJECT_EFFECTS, ...MAP_EFFECTS];
+const allSpecs = () => [
+  ...SPELL_EFFECTS,
+  ...WORLD_SPELL_EFFECTS,
+  ...CLIENT_EFFECTS,
+  ...OBJECT_EFFECTS,
+  ...MAP_EFFECTS,
+];
 
 function assertInteger(value, label, minimum = 0) {
   if (!Number.isInteger(value) || value < minimum) throw new Error(`${label} must be an integer >= ${minimum}`);
@@ -347,14 +446,30 @@ export function validateEffectDefinitions() {
       });
     }
     if (spec.spell && !Number.isInteger(spec.spellId)) throw new Error(`${name} lacks an authoritative Spell id`);
-    if (spec.effect && (!Number.isInteger(spec.effectId) || !enumNames.has(spec.effect))) throw new Error(`${name} lacks an authoritative SpellEffect id`);
+    if (
+      spec.effect
+      && !CLIENT_EFFECTS.includes(spec)
+      && (!Number.isInteger(spec.effectId) || !enumNames.has(spec.effect))
+    ) throw new Error(`${name} lacks an authoritative SpellEffect id`);
     if (typeof spec.blend !== "boolean" || typeof spec.repeat !== "boolean" || !Number.isInteger(spec.light)) throw new Error(`${name} lacks explicit render flags`);
+    if (spec.rate !== undefined && (typeof spec.rate !== "number" || !Number.isFinite(spec.rate) || spec.rate < 0 || spec.rate > 1)) {
+      throw new Error(`${name}.rate must be a finite number between 0 and 1`);
+    }
     for (const phaseName of ["projectile", "impact", "returnEffect"]) {
       const sub = spec[phaseName];
       if (!sub) continue;
       if (!sub.library || !sub.kind) throw new Error(`${name}.${phaseName} lacks library/kind`);
       for (const field of ["base", "count", "interval"]) {
         assertInteger(sub[field], `${name}.${phaseName}.${field}`, field === "base" ? 0 : 1);
+      }
+      if (sub.directionStride !== undefined) {
+        assertInteger(sub.directionCount, `${name}.${phaseName}.directionCount`, 1);
+        assertInteger(sub.directionStride, `${name}.${phaseName}.directionStride`, sub.count);
+        if (sub.directionRanges?.length !== sub.directionCount) throw new Error(`${name}.${phaseName} lacks explicit direction ranges`);
+        sub.directionRanges.forEach((range, direction) => {
+          const base = sub.base + direction * sub.directionStride;
+          if (range.direction !== direction || range.base !== base || range.end !== base + sub.count - 1) throw new Error(`${name}.${phaseName} has an invalid direction range`);
+        });
       }
       if (typeof sub.blend !== "boolean" || typeof sub.repeat !== "boolean" || !Number.isInteger(sub.light)) {
         throw new Error(`${name}.${phaseName} lacks explicit render flags`);
@@ -442,6 +557,7 @@ async function writeEffectsManifest(outputDir, available, mode) {
       ...SPELL_EFFECTS.filter((entry) => entry.kind === "ground"),
       ...WORLD_SPELL_EFFECTS,
     ].map(manifestSpec).sort(byName),
+    client_effects: CLIENT_EFFECTS.map(manifestSpec).sort(byName),
     object_effects: OBJECT_EFFECTS.map(manifestSpec).sort(byName),
     map_effects: MAP_EFFECTS.map(manifestSpec).sort(byName),
   };

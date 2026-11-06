@@ -1,0 +1,1756 @@
+{
+  "schemaVersion": 1,
+  "source": {
+    "envirRoot": "Envir",
+    "mapCoordinates": "SystemScripts/00Default/MapCoords.txt",
+    "events": "Events"
+  },
+  "limits": {
+    "maxDepth": 32,
+    "maxFileBytes": 1048576,
+    "maxTotalBytes": 8388608,
+    "maxResolvedLines": 200000
+  },
+  "mapCoordinates": [
+    {
+      "mapId": "3",
+      "x": 861,
+      "y": 686,
+      "eventId": "@Main",
+      "eventName": "@Main",
+      "bindingSourceFile": "SystemScripts/00Default/MapCoords.txt",
+      "bindingSourceLine": 12,
+      "include": {
+        "sourceFile": "SystemScripts/00Default/MapCoords.txt",
+        "sourceLine": 13,
+        "targetFile": "SystemScripts/00Default/MapCoords/PenalCavern.txt",
+        "section": "@Main"
+      },
+      "resolvedSection": {
+        "name": "@MAIN",
+        "header": "[@MAIN]",
+        "sourceFile": "SystemScripts/00Default/MapCoords/PenalCavern.txt",
+        "sourceLine": 1,
+        "braced": true,
+        "lines": [
+          {
+            "text": "#IF",
+            "sourceFile": "SystemScripts/00Default/MapCoords/PenalCavern.txt",
+            "sourceLine": 3,
+            "includeChain": [
+              "SystemScripts/00Default/MapCoords.txt:13"
+            ]
+          },
+          {
+            "text": "CHECKPKPOINT > 199",
+            "sourceFile": "SystemScripts/00Default/MapCoords/PenalCavern.txt",
+            "sourceLine": 4,
+            "includeChain": [
+              "SystemScripts/00Default/MapCoords.txt:13"
+            ]
+          },
+          {
+            "text": "#ACT",
+            "sourceFile": "SystemScripts/00Default/MapCoords/PenalCavern.txt",
+            "sourceLine": 5,
+            "includeChain": [
+              "SystemScripts/00Default/MapCoords.txt:13"
+            ]
+          },
+          {
+            "text": "ENTERMAP",
+            "sourceFile": "SystemScripts/00Default/MapCoords/PenalCavern.txt",
+            "sourceLine": 6,
+            "includeChain": [
+              "SystemScripts/00Default/MapCoords.txt:13"
+            ]
+          },
+          {
+            "text": "#ELSEACT",
+            "sourceFile": "SystemScripts/00Default/MapCoords/PenalCavern.txt",
+            "sourceLine": 7,
+            "includeChain": [
+              "SystemScripts/00Default/MapCoords.txt:13"
+            ]
+          },
+          {
+            "text": "LocalMessage \"A Mysterious evil force seems to be pushing you back.\" Hint",
+            "sourceFile": "SystemScripts/00Default/MapCoords/PenalCavern.txt",
+            "sourceLine": 8,
+            "includeChain": [
+              "SystemScripts/00Default/MapCoords.txt:13"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "mapId": "3",
+      "x": 862,
+      "y": 687,
+      "eventId": "@Main",
+      "eventName": "@Main",
+      "bindingSourceFile": "SystemScripts/00Default/MapCoords.txt",
+      "bindingSourceLine": 41,
+      "include": {
+        "sourceFile": "SystemScripts/00Default/MapCoords.txt",
+        "sourceLine": 42,
+        "targetFile": "SystemScripts/00Default/MapCoords/PenalCavern.txt",
+        "section": "@Main"
+      },
+      "resolvedSection": {
+        "name": "@MAIN",
+        "header": "[@MAIN]",
+        "sourceFile": "SystemScripts/00Default/MapCoords/PenalCavern.txt",
+        "sourceLine": 1,
+        "braced": true,
+        "lines": [
+          {
+            "text": "#IF",
+            "sourceFile": "SystemScripts/00Default/MapCoords/PenalCavern.txt",
+            "sourceLine": 3,
+            "includeChain": [
+              "SystemScripts/00Default/MapCoords.txt:42"
+            ]
+          },
+          {
+            "text": "CHECKPKPOINT > 199",
+            "sourceFile": "SystemScripts/00Default/MapCoords/PenalCavern.txt",
+            "sourceLine": 4,
+            "includeChain": [
+              "SystemScripts/00Default/MapCoords.txt:42"
+            ]
+          },
+          {
+            "text": "#ACT",
+            "sourceFile": "SystemScripts/00Default/MapCoords/PenalCavern.txt",
+            "sourceLine": 5,
+            "includeChain": [
+              "SystemScripts/00Default/MapCoords.txt:42"
+            ]
+          },
+          {
+            "text": "ENTERMAP",
+            "sourceFile": "SystemScripts/00Default/MapCoords/PenalCavern.txt",
+            "sourceLine": 6,
+            "includeChain": [
+              "SystemScripts/00Default/MapCoords.txt:42"
+            ]
+          },
+          {
+            "text": "#ELSEACT",
+            "sourceFile": "SystemScripts/00Default/MapCoords/PenalCavern.txt",
+            "sourceLine": 7,
+            "includeChain": [
+              "SystemScripts/00Default/MapCoords.txt:42"
+            ]
+          },
+          {
+            "text": "LocalMessage \"A Mysterious evil force seems to be pushing you back.\" Hint",
+            "sourceFile": "SystemScripts/00Default/MapCoords/PenalCavern.txt",
+            "sourceLine": 8,
+            "includeChain": [
+              "SystemScripts/00Default/MapCoords.txt:42"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "mapId": "DogYoArena2",
+      "x": 117,
+      "y": 26,
+      "eventId": "@Main",
+      "eventName": "@Main",
+      "bindingSourceFile": "SystemScripts/00Default/MapCoords.txt",
+      "bindingSourceLine": 16,
+      "include": {
+        "sourceFile": "SystemScripts/00Default/MapCoords.txt",
+        "sourceLine": 17,
+        "targetFile": "SystemScripts/00Default/MapCoords/DogYoArena.txt",
+        "section": "@Main"
+      },
+      "resolvedSection": {
+        "name": "@MAIN",
+        "header": "[@MAIN]",
+        "sourceFile": "SystemScripts/00Default/MapCoords/DogYoArena.txt",
+        "sourceLine": 1,
+        "braced": true,
+        "lines": [
+          {
+            "text": "#IF",
+            "sourceFile": "SystemScripts/00Default/MapCoords/DogYoArena.txt",
+            "sourceLine": 3,
+            "includeChain": [
+              "SystemScripts/00Default/MapCoords.txt:17"
+            ]
+          },
+          {
+            "text": "Level > 49",
+            "sourceFile": "SystemScripts/00Default/MapCoords/DogYoArena.txt",
+            "sourceLine": 4,
+            "includeChain": [
+              "SystemScripts/00Default/MapCoords.txt:17"
+            ]
+          },
+          {
+            "text": "#ACT",
+            "sourceFile": "SystemScripts/00Default/MapCoords/DogYoArena.txt",
+            "sourceLine": 5,
+            "includeChain": [
+              "SystemScripts/00Default/MapCoords.txt:17"
+            ]
+          },
+          {
+            "text": "ENTERMAP",
+            "sourceFile": "SystemScripts/00Default/MapCoords/DogYoArena.txt",
+            "sourceLine": 6,
+            "includeChain": [
+              "SystemScripts/00Default/MapCoords.txt:17"
+            ]
+          },
+          {
+            "text": "#ELSEACT",
+            "sourceFile": "SystemScripts/00Default/MapCoords/DogYoArena.txt",
+            "sourceLine": 7,
+            "includeChain": [
+              "SystemScripts/00Default/MapCoords.txt:17"
+            ]
+          },
+          {
+            "text": "LocalMessage \"Doors are locked until you reach level 50!\" Hint",
+            "sourceFile": "SystemScripts/00Default/MapCoords/DogYoArena.txt",
+            "sourceLine": 8,
+            "includeChain": [
+              "SystemScripts/00Default/MapCoords.txt:17"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "mapId": "DogYoArena2",
+      "x": 118,
+      "y": 27,
+      "eventId": "@Main",
+      "eventName": "@Main",
+      "bindingSourceFile": "SystemScripts/00Default/MapCoords.txt",
+      "bindingSourceLine": 19,
+      "include": {
+        "sourceFile": "SystemScripts/00Default/MapCoords.txt",
+        "sourceLine": 20,
+        "targetFile": "SystemScripts/00Default/MapCoords/DogYoArena.txt",
+        "section": "@Main"
+      },
+      "resolvedSection": {
+        "name": "@MAIN",
+        "header": "[@MAIN]",
+        "sourceFile": "SystemScripts/00Default/MapCoords/DogYoArena.txt",
+        "sourceLine": 1,
+        "braced": true,
+        "lines": [
+          {
+            "text": "#IF",
+            "sourceFile": "SystemScripts/00Default/MapCoords/DogYoArena.txt",
+            "sourceLine": 3,
+            "includeChain": [
+              "SystemScripts/00Default/MapCoords.txt:20"
+            ]
+          },
+          {
+            "text": "Level > 49",
+            "sourceFile": "SystemScripts/00Default/MapCoords/DogYoArena.txt",
+            "sourceLine": 4,
+            "includeChain": [
+              "SystemScripts/00Default/MapCoords.txt:20"
+            ]
+          },
+          {
+            "text": "#ACT",
+            "sourceFile": "SystemScripts/00Default/MapCoords/DogYoArena.txt",
+            "sourceLine": 5,
+            "includeChain": [
+              "SystemScripts/00Default/MapCoords.txt:20"
+            ]
+          },
+          {
+            "text": "ENTERMAP",
+            "sourceFile": "SystemScripts/00Default/MapCoords/DogYoArena.txt",
+            "sourceLine": 6,
+            "includeChain": [
+              "SystemScripts/00Default/MapCoords.txt:20"
+            ]
+          },
+          {
+            "text": "#ELSEACT",
+            "sourceFile": "SystemScripts/00Default/MapCoords/DogYoArena.txt",
+            "sourceLine": 7,
+            "includeChain": [
+              "SystemScripts/00Default/MapCoords.txt:20"
+            ]
+          },
+          {
+            "text": "LocalMessage \"Doors are locked until you reach level 50!\" Hint",
+            "sourceFile": "SystemScripts/00Default/MapCoords/DogYoArena.txt",
+            "sourceLine": 8,
+            "includeChain": [
+              "SystemScripts/00Default/MapCoords.txt:20"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "mapId": "DogYoArena2",
+      "x": 119,
+      "y": 28,
+      "eventId": "@Main",
+      "eventName": "@Main",
+      "bindingSourceFile": "SystemScripts/00Default/MapCoords.txt",
+      "bindingSourceLine": 22,
+      "include": {
+        "sourceFile": "SystemScripts/00Default/MapCoords.txt",
+        "sourceLine": 23,
+        "targetFile": "SystemScripts/00Default/MapCoords/DogYoArena.txt",
+        "section": "@Main"
+      },
+      "resolvedSection": {
+        "name": "@MAIN",
+        "header": "[@MAIN]",
+        "sourceFile": "SystemScripts/00Default/MapCoords/DogYoArena.txt",
+        "sourceLine": 1,
+        "braced": true,
+        "lines": [
+          {
+            "text": "#IF",
+            "sourceFile": "SystemScripts/00Default/MapCoords/DogYoArena.txt",
+            "sourceLine": 3,
+            "includeChain": [
+              "SystemScripts/00Default/MapCoords.txt:23"
+            ]
+          },
+          {
+            "text": "Level > 49",
+            "sourceFile": "SystemScripts/00Default/MapCoords/DogYoArena.txt",
+            "sourceLine": 4,
+            "includeChain": [
+              "SystemScripts/00Default/MapCoords.txt:23"
+            ]
+          },
+          {
+            "text": "#ACT",
+            "sourceFile": "SystemScripts/00Default/MapCoords/DogYoArena.txt",
+            "sourceLine": 5,
+            "includeChain": [
+              "SystemScripts/00Default/MapCoords.txt:23"
+            ]
+          },
+          {
+            "text": "ENTERMAP",
+            "sourceFile": "SystemScripts/00Default/MapCoords/DogYoArena.txt",
+            "sourceLine": 6,
+            "includeChain": [
+              "SystemScripts/00Default/MapCoords.txt:23"
+            ]
+          },
+          {
+            "text": "#ELSEACT",
+            "sourceFile": "SystemScripts/00Default/MapCoords/DogYoArena.txt",
+            "sourceLine": 7,
+            "includeChain": [
+              "SystemScripts/00Default/MapCoords.txt:23"
+            ]
+          },
+          {
+            "text": "LocalMessage \"Doors are locked until you reach level 50!\" Hint",
+            "sourceFile": "SystemScripts/00Default/MapCoords/DogYoArena.txt",
+            "sourceLine": 8,
+            "includeChain": [
+              "SystemScripts/00Default/MapCoords.txt:23"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "mapId": "DogYoArena2",
+      "x": 119,
+      "y": 29,
+      "eventId": "@Main",
+      "eventName": "@Main",
+      "bindingSourceFile": "SystemScripts/00Default/MapCoords.txt",
+      "bindingSourceLine": 25,
+      "include": {
+        "sourceFile": "SystemScripts/00Default/MapCoords.txt",
+        "sourceLine": 26,
+        "targetFile": "SystemScripts/00Default/MapCoords/DogYoArena.txt",
+        "section": "@Main"
+      },
+      "resolvedSection": {
+        "name": "@MAIN",
+        "header": "[@MAIN]",
+        "sourceFile": "SystemScripts/00Default/MapCoords/DogYoArena.txt",
+        "sourceLine": 1,
+        "braced": true,
+        "lines": [
+          {
+            "text": "#IF",
+            "sourceFile": "SystemScripts/00Default/MapCoords/DogYoArena.txt",
+            "sourceLine": 3,
+            "includeChain": [
+              "SystemScripts/00Default/MapCoords.txt:26"
+            ]
+          },
+          {
+            "text": "Level > 49",
+            "sourceFile": "SystemScripts/00Default/MapCoords/DogYoArena.txt",
+            "sourceLine": 4,
+            "includeChain": [
+              "SystemScripts/00Default/MapCoords.txt:26"
+            ]
+          },
+          {
+            "text": "#ACT",
+            "sourceFile": "SystemScripts/00Default/MapCoords/DogYoArena.txt",
+            "sourceLine": 5,
+            "includeChain": [
+              "SystemScripts/00Default/MapCoords.txt:26"
+            ]
+          },
+          {
+            "text": "ENTERMAP",
+            "sourceFile": "SystemScripts/00Default/MapCoords/DogYoArena.txt",
+            "sourceLine": 6,
+            "includeChain": [
+              "SystemScripts/00Default/MapCoords.txt:26"
+            ]
+          },
+          {
+            "text": "#ELSEACT",
+            "sourceFile": "SystemScripts/00Default/MapCoords/DogYoArena.txt",
+            "sourceLine": 7,
+            "includeChain": [
+              "SystemScripts/00Default/MapCoords.txt:26"
+            ]
+          },
+          {
+            "text": "LocalMessage \"Doors are locked until you reach level 50!\" Hint",
+            "sourceFile": "SystemScripts/00Default/MapCoords/DogYoArena.txt",
+            "sourceLine": 8,
+            "includeChain": [
+              "SystemScripts/00Default/MapCoords.txt:26"
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "typedMapCoordinateBindings": [
+    {
+      "mapId": "3",
+      "x": 861,
+      "y": 686,
+      "bindingSourceFile": "SystemScripts/00Default/MapCoords.txt",
+      "bindingSourceLine": 12,
+      "conditions": [
+        {
+          "kind": "pkPoints",
+          "operator": ">",
+          "value": 199,
+          "sourceFile": "SystemScripts/00Default/MapCoords/PenalCavern.txt",
+          "sourceLine": 4
+        }
+      ],
+      "onPass": {
+        "kind": "enterMap",
+        "sourceFile": "SystemScripts/00Default/MapCoords/PenalCavern.txt",
+        "sourceLine": 6
+      },
+      "onFail": {
+        "kind": "localMessage",
+        "message": "A Mysterious evil force seems to be pushing you back.",
+        "chatType": "Hint",
+        "sourceFile": "SystemScripts/00Default/MapCoords/PenalCavern.txt",
+        "sourceLine": 8
+      },
+      "needMove": {
+        "sourceMapIndex": 172,
+        "sourceMapFileName": "3",
+        "targetMapIndex": 385,
+        "targetMapFileName": "D1801",
+        "targetMapTitle": "PenalCavern",
+        "source": {
+          "x": 861,
+          "y": 686
+        },
+        "destination": {
+          "x": 128,
+          "y": 171
+        },
+        "conquestIndex": 0,
+        "sourceFile": "SystemScripts/00Default/MapCoords.txt",
+        "sourceLine": 12
+      }
+    },
+    {
+      "mapId": "3",
+      "x": 862,
+      "y": 687,
+      "bindingSourceFile": "SystemScripts/00Default/MapCoords.txt",
+      "bindingSourceLine": 41,
+      "conditions": [
+        {
+          "kind": "pkPoints",
+          "operator": ">",
+          "value": 199,
+          "sourceFile": "SystemScripts/00Default/MapCoords/PenalCavern.txt",
+          "sourceLine": 4
+        }
+      ],
+      "onPass": {
+        "kind": "enterMap",
+        "sourceFile": "SystemScripts/00Default/MapCoords/PenalCavern.txt",
+        "sourceLine": 6
+      },
+      "onFail": {
+        "kind": "localMessage",
+        "message": "A Mysterious evil force seems to be pushing you back.",
+        "chatType": "Hint",
+        "sourceFile": "SystemScripts/00Default/MapCoords/PenalCavern.txt",
+        "sourceLine": 8
+      },
+      "needMove": {
+        "sourceMapIndex": 172,
+        "sourceMapFileName": "3",
+        "targetMapIndex": 385,
+        "targetMapFileName": "D1801",
+        "targetMapTitle": "PenalCavern",
+        "source": {
+          "x": 862,
+          "y": 687
+        },
+        "destination": {
+          "x": 128,
+          "y": 171
+        },
+        "conquestIndex": 0,
+        "sourceFile": "SystemScripts/00Default/MapCoords.txt",
+        "sourceLine": 41
+      }
+    },
+    {
+      "mapId": "DogYoArena2",
+      "x": 117,
+      "y": 26,
+      "bindingSourceFile": "SystemScripts/00Default/MapCoords.txt",
+      "bindingSourceLine": 16,
+      "conditions": [
+        {
+          "kind": "level",
+          "operator": ">",
+          "value": 49,
+          "sourceFile": "SystemScripts/00Default/MapCoords/DogYoArena.txt",
+          "sourceLine": 4
+        }
+      ],
+      "onPass": {
+        "kind": "enterMap",
+        "sourceFile": "SystemScripts/00Default/MapCoords/DogYoArena.txt",
+        "sourceLine": 6
+      },
+      "onFail": {
+        "kind": "localMessage",
+        "message": "Doors are locked until you reach level 50!",
+        "chatType": "Hint",
+        "sourceFile": "SystemScripts/00Default/MapCoords/DogYoArena.txt",
+        "sourceLine": 8
+      },
+      "needMove": {
+        "sourceMapIndex": 439,
+        "sourceMapFileName": "DogYoArena2",
+        "targetMapIndex": 440,
+        "targetMapFileName": "DogYoHyun",
+        "targetMapTitle": "DogYoHyun",
+        "source": {
+          "x": 117,
+          "y": 26
+        },
+        "destination": {
+          "x": 21,
+          "y": 765
+        },
+        "conquestIndex": 0,
+        "sourceFile": "SystemScripts/00Default/MapCoords.txt",
+        "sourceLine": 16
+      }
+    },
+    {
+      "mapId": "DogYoArena2",
+      "x": 118,
+      "y": 27,
+      "bindingSourceFile": "SystemScripts/00Default/MapCoords.txt",
+      "bindingSourceLine": 19,
+      "conditions": [
+        {
+          "kind": "level",
+          "operator": ">",
+          "value": 49,
+          "sourceFile": "SystemScripts/00Default/MapCoords/DogYoArena.txt",
+          "sourceLine": 4
+        }
+      ],
+      "onPass": {
+        "kind": "enterMap",
+        "sourceFile": "SystemScripts/00Default/MapCoords/DogYoArena.txt",
+        "sourceLine": 6
+      },
+      "onFail": {
+        "kind": "localMessage",
+        "message": "Doors are locked until you reach level 50!",
+        "chatType": "Hint",
+        "sourceFile": "SystemScripts/00Default/MapCoords/DogYoArena.txt",
+        "sourceLine": 8
+      },
+      "needMove": {
+        "sourceMapIndex": 439,
+        "sourceMapFileName": "DogYoArena2",
+        "targetMapIndex": 440,
+        "targetMapFileName": "DogYoHyun",
+        "targetMapTitle": "DogYoHyun",
+        "source": {
+          "x": 118,
+          "y": 27
+        },
+        "destination": {
+          "x": 21,
+          "y": 765
+        },
+        "conquestIndex": 0,
+        "sourceFile": "SystemScripts/00Default/MapCoords.txt",
+        "sourceLine": 19
+      }
+    },
+    {
+      "mapId": "DogYoArena2",
+      "x": 119,
+      "y": 28,
+      "bindingSourceFile": "SystemScripts/00Default/MapCoords.txt",
+      "bindingSourceLine": 22,
+      "conditions": [
+        {
+          "kind": "level",
+          "operator": ">",
+          "value": 49,
+          "sourceFile": "SystemScripts/00Default/MapCoords/DogYoArena.txt",
+          "sourceLine": 4
+        }
+      ],
+      "onPass": {
+        "kind": "enterMap",
+        "sourceFile": "SystemScripts/00Default/MapCoords/DogYoArena.txt",
+        "sourceLine": 6
+      },
+      "onFail": {
+        "kind": "localMessage",
+        "message": "Doors are locked until you reach level 50!",
+        "chatType": "Hint",
+        "sourceFile": "SystemScripts/00Default/MapCoords/DogYoArena.txt",
+        "sourceLine": 8
+      },
+      "needMove": {
+        "sourceMapIndex": 439,
+        "sourceMapFileName": "DogYoArena2",
+        "targetMapIndex": 440,
+        "targetMapFileName": "DogYoHyun",
+        "targetMapTitle": "DogYoHyun",
+        "source": {
+          "x": 119,
+          "y": 28
+        },
+        "destination": {
+          "x": 21,
+          "y": 765
+        },
+        "conquestIndex": 0,
+        "sourceFile": "SystemScripts/00Default/MapCoords.txt",
+        "sourceLine": 22
+      }
+    },
+    {
+      "mapId": "DogYoArena2",
+      "x": 119,
+      "y": 29,
+      "bindingSourceFile": "SystemScripts/00Default/MapCoords.txt",
+      "bindingSourceLine": 25,
+      "conditions": [
+        {
+          "kind": "level",
+          "operator": ">",
+          "value": 49,
+          "sourceFile": "SystemScripts/00Default/MapCoords/DogYoArena.txt",
+          "sourceLine": 4
+        }
+      ],
+      "onPass": {
+        "kind": "enterMap",
+        "sourceFile": "SystemScripts/00Default/MapCoords/DogYoArena.txt",
+        "sourceLine": 6
+      },
+      "onFail": {
+        "kind": "localMessage",
+        "message": "Doors are locked until you reach level 50!",
+        "chatType": "Hint",
+        "sourceFile": "SystemScripts/00Default/MapCoords/DogYoArena.txt",
+        "sourceLine": 8
+      },
+      "needMove": {
+        "sourceMapIndex": 439,
+        "sourceMapFileName": "DogYoArena2",
+        "targetMapIndex": 440,
+        "targetMapFileName": "DogYoHyun",
+        "targetMapTitle": "DogYoHyun",
+        "source": {
+          "x": 119,
+          "y": 29
+        },
+        "destination": {
+          "x": 21,
+          "y": 765
+        },
+        "conquestIndex": 0,
+        "sourceFile": "SystemScripts/00Default/MapCoords.txt",
+        "sourceLine": 25
+      }
+    }
+  ],
+  "generalEventScripts": {
+    "status": "open",
+    "detail": "Only validated _MAPCOORD E1 bindings are typed and executable; general Crystal event scripts remain imported source data only."
+  },
+  "events": [
+    {
+      "sourceFile": "Events/0-Event-40.txt",
+      "bytes": 125,
+      "resolvedLines": [
+        {
+          "text": "[@_EventReward]",
+          "sourceFile": "Events/0-Event-40.txt",
+          "sourceLine": 1,
+          "includeChain": []
+        },
+        {
+          "text": "#ACT",
+          "sourceFile": "Events/0-Event-40.txt",
+          "sourceLine": 2,
+          "includeChain": []
+        },
+        {
+          "text": "GIVEEXP 12000",
+          "sourceFile": "Events/0-Event-40.txt",
+          "sourceLine": 3,
+          "includeChain": []
+        },
+        {
+          "text": "GIVEGOLD 120000",
+          "sourceFile": "Events/0-Event-40.txt",
+          "sourceLine": 4,
+          "includeChain": []
+        },
+        {
+          "text": "ADDATTRIBUTEPOINT 2",
+          "sourceFile": "Events/0-Event-40.txt",
+          "sourceLine": 5,
+          "includeChain": []
+        },
+        {
+          "text": "LOCALMESSAGE \"You've Completed Bichon Lord Event\" Hint",
+          "sourceFile": "Events/0-Event-40.txt",
+          "sourceLine": 6,
+          "includeChain": []
+        }
+      ],
+      "sections": [
+        {
+          "name": "@_EventReward",
+          "header": "[@_EventReward]",
+          "sourceFile": "Events/0-Event-40.txt",
+          "sourceLine": 1,
+          "braced": false,
+          "lines": [
+            {
+              "text": "#ACT",
+              "sourceFile": "Events/0-Event-40.txt",
+              "sourceLine": 2,
+              "includeChain": []
+            },
+            {
+              "text": "GIVEEXP 12000",
+              "sourceFile": "Events/0-Event-40.txt",
+              "sourceLine": 3,
+              "includeChain": []
+            },
+            {
+              "text": "GIVEGOLD 120000",
+              "sourceFile": "Events/0-Event-40.txt",
+              "sourceLine": 4,
+              "includeChain": []
+            },
+            {
+              "text": "ADDATTRIBUTEPOINT 2",
+              "sourceFile": "Events/0-Event-40.txt",
+              "sourceLine": 5,
+              "includeChain": []
+            },
+            {
+              "text": "LOCALMESSAGE \"You've Completed Bichon Lord Event\" Hint",
+              "sourceFile": "Events/0-Event-40.txt",
+              "sourceLine": 6,
+              "includeChain": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "sourceFile": "Events/Event/Event41.txt",
+      "bytes": 186,
+      "resolvedLines": [
+        {
+          "text": "[@Main]",
+          "sourceFile": "Events/Event/Event41.txt",
+          "sourceLine": 1,
+          "includeChain": []
+        },
+        {
+          "text": "{",
+          "sourceFile": "Events/Event/Event41.txt",
+          "sourceLine": 2,
+          "includeChain": []
+        },
+        {
+          "text": "#IF",
+          "sourceFile": "Events/Event/Event41.txt",
+          "sourceLine": 3,
+          "includeChain": []
+        },
+        {
+          "text": "RANDOM 1",
+          "sourceFile": "Events/Event/Event41.txt",
+          "sourceLine": 4,
+          "includeChain": []
+        },
+        {
+          "text": "#ACT",
+          "sourceFile": "Events/Event/Event41.txt",
+          "sourceLine": 5,
+          "includeChain": []
+        },
+        {
+          "text": "GIVEITEM FortuneWeapon 1",
+          "sourceFile": "Events/Event/Event41.txt",
+          "sourceLine": 6,
+          "includeChain": []
+        },
+        {
+          "text": "",
+          "sourceFile": "Events/Event/Event41.txt",
+          "sourceLine": 7,
+          "includeChain": []
+        },
+        {
+          "text": "#IF",
+          "sourceFile": "Events/Event/Event41.txt",
+          "sourceLine": 8,
+          "includeChain": []
+        },
+        {
+          "text": "RANDOM 1",
+          "sourceFile": "Events/Event/Event41.txt",
+          "sourceLine": 9,
+          "includeChain": []
+        },
+        {
+          "text": "#ACT",
+          "sourceFile": "Events/Event/Event41.txt",
+          "sourceLine": 10,
+          "includeChain": []
+        },
+        {
+          "text": "GIVEITEM FortuneArmour 1",
+          "sourceFile": "Events/Event/Event41.txt",
+          "sourceLine": 11,
+          "includeChain": []
+        },
+        {
+          "text": "",
+          "sourceFile": "Events/Event/Event41.txt",
+          "sourceLine": 12,
+          "includeChain": []
+        },
+        {
+          "text": "#IF",
+          "sourceFile": "Events/Event/Event41.txt",
+          "sourceLine": 13,
+          "includeChain": []
+        },
+        {
+          "text": "RANDOM 1",
+          "sourceFile": "Events/Event/Event41.txt",
+          "sourceLine": 14,
+          "includeChain": []
+        },
+        {
+          "text": "#ACT",
+          "sourceFile": "Events/Event/Event41.txt",
+          "sourceLine": 15,
+          "includeChain": []
+        },
+        {
+          "text": "GIVEITEM FortuneAccessory 1",
+          "sourceFile": "Events/Event/Event41.txt",
+          "sourceLine": 16,
+          "includeChain": []
+        },
+        {
+          "text": "",
+          "sourceFile": "Events/Event/Event41.txt",
+          "sourceLine": 17,
+          "includeChain": []
+        },
+        {
+          "text": "#IF",
+          "sourceFile": "Events/Event/Event41.txt",
+          "sourceLine": 18,
+          "includeChain": []
+        },
+        {
+          "text": "RANDOM 1",
+          "sourceFile": "Events/Event/Event41.txt",
+          "sourceLine": 19,
+          "includeChain": []
+        },
+        {
+          "text": "#ACT",
+          "sourceFile": "Events/Event/Event41.txt",
+          "sourceLine": 20,
+          "includeChain": []
+        },
+        {
+          "text": "GIVEITEM FortuneOrb 1",
+          "sourceFile": "Events/Event/Event41.txt",
+          "sourceLine": 21,
+          "includeChain": []
+        },
+        {
+          "text": "}",
+          "sourceFile": "Events/Event/Event41.txt",
+          "sourceLine": 22,
+          "includeChain": []
+        }
+      ],
+      "sections": [
+        {
+          "name": "@Main",
+          "header": "[@Main]",
+          "sourceFile": "Events/Event/Event41.txt",
+          "sourceLine": 1,
+          "braced": true,
+          "lines": [
+            {
+              "text": "#IF",
+              "sourceFile": "Events/Event/Event41.txt",
+              "sourceLine": 3,
+              "includeChain": []
+            },
+            {
+              "text": "RANDOM 1",
+              "sourceFile": "Events/Event/Event41.txt",
+              "sourceLine": 4,
+              "includeChain": []
+            },
+            {
+              "text": "#ACT",
+              "sourceFile": "Events/Event/Event41.txt",
+              "sourceLine": 5,
+              "includeChain": []
+            },
+            {
+              "text": "GIVEITEM FortuneWeapon 1",
+              "sourceFile": "Events/Event/Event41.txt",
+              "sourceLine": 6,
+              "includeChain": []
+            },
+            {
+              "text": "",
+              "sourceFile": "Events/Event/Event41.txt",
+              "sourceLine": 7,
+              "includeChain": []
+            },
+            {
+              "text": "#IF",
+              "sourceFile": "Events/Event/Event41.txt",
+              "sourceLine": 8,
+              "includeChain": []
+            },
+            {
+              "text": "RANDOM 1",
+              "sourceFile": "Events/Event/Event41.txt",
+              "sourceLine": 9,
+              "includeChain": []
+            },
+            {
+              "text": "#ACT",
+              "sourceFile": "Events/Event/Event41.txt",
+              "sourceLine": 10,
+              "includeChain": []
+            },
+            {
+              "text": "GIVEITEM FortuneArmour 1",
+              "sourceFile": "Events/Event/Event41.txt",
+              "sourceLine": 11,
+              "includeChain": []
+            },
+            {
+              "text": "",
+              "sourceFile": "Events/Event/Event41.txt",
+              "sourceLine": 12,
+              "includeChain": []
+            },
+            {
+              "text": "#IF",
+              "sourceFile": "Events/Event/Event41.txt",
+              "sourceLine": 13,
+              "includeChain": []
+            },
+            {
+              "text": "RANDOM 1",
+              "sourceFile": "Events/Event/Event41.txt",
+              "sourceLine": 14,
+              "includeChain": []
+            },
+            {
+              "text": "#ACT",
+              "sourceFile": "Events/Event/Event41.txt",
+              "sourceLine": 15,
+              "includeChain": []
+            },
+            {
+              "text": "GIVEITEM FortuneAccessory 1",
+              "sourceFile": "Events/Event/Event41.txt",
+              "sourceLine": 16,
+              "includeChain": []
+            },
+            {
+              "text": "",
+              "sourceFile": "Events/Event/Event41.txt",
+              "sourceLine": 17,
+              "includeChain": []
+            },
+            {
+              "text": "#IF",
+              "sourceFile": "Events/Event/Event41.txt",
+              "sourceLine": 18,
+              "includeChain": []
+            },
+            {
+              "text": "RANDOM 1",
+              "sourceFile": "Events/Event/Event41.txt",
+              "sourceLine": 19,
+              "includeChain": []
+            },
+            {
+              "text": "#ACT",
+              "sourceFile": "Events/Event/Event41.txt",
+              "sourceLine": 20,
+              "includeChain": []
+            },
+            {
+              "text": "GIVEITEM FortuneOrb 1",
+              "sourceFile": "Events/Event/Event41.txt",
+              "sourceLine": 21,
+              "includeChain": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "sourceFile": "Events/gumi203-Event-41.txt",
+      "bytes": 163,
+      "resolvedLines": [
+        {
+          "text": "[@_EventReward]",
+          "sourceFile": "Events/gumi203-Event-41.txt",
+          "sourceLine": 1,
+          "includeChain": []
+        },
+        {
+          "text": "#ACT",
+          "sourceFile": "Events/gumi203-Event-41.txt",
+          "sourceLine": 2,
+          "includeChain": []
+        },
+        {
+          "text": "GIVEEXP 12000",
+          "sourceFile": "Events/gumi203-Event-41.txt",
+          "sourceLine": 3,
+          "includeChain": []
+        },
+        {
+          "text": "GIVEGOLD 120000",
+          "sourceFile": "Events/gumi203-Event-41.txt",
+          "sourceLine": 4,
+          "includeChain": []
+        },
+        {
+          "text": "ADDATTRIBUTEPOINT 2",
+          "sourceFile": "Events/gumi203-Event-41.txt",
+          "sourceLine": 5,
+          "includeChain": []
+        },
+        {
+          "text": "#IF",
+          "sourceFile": "Events/Event/Event41.txt",
+          "sourceLine": 3,
+          "includeChain": [
+            "Events/gumi203-Event-41.txt:6"
+          ]
+        },
+        {
+          "text": "RANDOM 1",
+          "sourceFile": "Events/Event/Event41.txt",
+          "sourceLine": 4,
+          "includeChain": [
+            "Events/gumi203-Event-41.txt:6"
+          ]
+        },
+        {
+          "text": "#ACT",
+          "sourceFile": "Events/Event/Event41.txt",
+          "sourceLine": 5,
+          "includeChain": [
+            "Events/gumi203-Event-41.txt:6"
+          ]
+        },
+        {
+          "text": "GIVEITEM FortuneWeapon 1",
+          "sourceFile": "Events/Event/Event41.txt",
+          "sourceLine": 6,
+          "includeChain": [
+            "Events/gumi203-Event-41.txt:6"
+          ]
+        },
+        {
+          "text": "",
+          "sourceFile": "Events/Event/Event41.txt",
+          "sourceLine": 7,
+          "includeChain": [
+            "Events/gumi203-Event-41.txt:6"
+          ]
+        },
+        {
+          "text": "#IF",
+          "sourceFile": "Events/Event/Event41.txt",
+          "sourceLine": 8,
+          "includeChain": [
+            "Events/gumi203-Event-41.txt:6"
+          ]
+        },
+        {
+          "text": "RANDOM 1",
+          "sourceFile": "Events/Event/Event41.txt",
+          "sourceLine": 9,
+          "includeChain": [
+            "Events/gumi203-Event-41.txt:6"
+          ]
+        },
+        {
+          "text": "#ACT",
+          "sourceFile": "Events/Event/Event41.txt",
+          "sourceLine": 10,
+          "includeChain": [
+            "Events/gumi203-Event-41.txt:6"
+          ]
+        },
+        {
+          "text": "GIVEITEM FortuneArmour 1",
+          "sourceFile": "Events/Event/Event41.txt",
+          "sourceLine": 11,
+          "includeChain": [
+            "Events/gumi203-Event-41.txt:6"
+          ]
+        },
+        {
+          "text": "",
+          "sourceFile": "Events/Event/Event41.txt",
+          "sourceLine": 12,
+          "includeChain": [
+            "Events/gumi203-Event-41.txt:6"
+          ]
+        },
+        {
+          "text": "#IF",
+          "sourceFile": "Events/Event/Event41.txt",
+          "sourceLine": 13,
+          "includeChain": [
+            "Events/gumi203-Event-41.txt:6"
+          ]
+        },
+        {
+          "text": "RANDOM 1",
+          "sourceFile": "Events/Event/Event41.txt",
+          "sourceLine": 14,
+          "includeChain": [
+            "Events/gumi203-Event-41.txt:6"
+          ]
+        },
+        {
+          "text": "#ACT",
+          "sourceFile": "Events/Event/Event41.txt",
+          "sourceLine": 15,
+          "includeChain": [
+            "Events/gumi203-Event-41.txt:6"
+          ]
+        },
+        {
+          "text": "GIVEITEM FortuneAccessory 1",
+          "sourceFile": "Events/Event/Event41.txt",
+          "sourceLine": 16,
+          "includeChain": [
+            "Events/gumi203-Event-41.txt:6"
+          ]
+        },
+        {
+          "text": "",
+          "sourceFile": "Events/Event/Event41.txt",
+          "sourceLine": 17,
+          "includeChain": [
+            "Events/gumi203-Event-41.txt:6"
+          ]
+        },
+        {
+          "text": "#IF",
+          "sourceFile": "Events/Event/Event41.txt",
+          "sourceLine": 18,
+          "includeChain": [
+            "Events/gumi203-Event-41.txt:6"
+          ]
+        },
+        {
+          "text": "RANDOM 1",
+          "sourceFile": "Events/Event/Event41.txt",
+          "sourceLine": 19,
+          "includeChain": [
+            "Events/gumi203-Event-41.txt:6"
+          ]
+        },
+        {
+          "text": "#ACT",
+          "sourceFile": "Events/Event/Event41.txt",
+          "sourceLine": 20,
+          "includeChain": [
+            "Events/gumi203-Event-41.txt:6"
+          ]
+        },
+        {
+          "text": "GIVEITEM FortuneOrb 1",
+          "sourceFile": "Events/Event/Event41.txt",
+          "sourceLine": 21,
+          "includeChain": [
+            "Events/gumi203-Event-41.txt:6"
+          ]
+        },
+        {
+          "text": "LOCALMESSAGE \"I see you Mete FlyingStatue!\" Hint",
+          "sourceFile": "Events/gumi203-Event-41.txt",
+          "sourceLine": 7,
+          "includeChain": []
+        },
+        {
+          "text": "",
+          "sourceFile": "Events/gumi203-Event-41.txt",
+          "sourceLine": 8,
+          "includeChain": []
+        },
+        {
+          "text": "",
+          "sourceFile": "Events/gumi203-Event-41.txt",
+          "sourceLine": 9,
+          "includeChain": []
+        }
+      ],
+      "sections": [
+        {
+          "name": "@_EventReward",
+          "header": "[@_EventReward]",
+          "sourceFile": "Events/gumi203-Event-41.txt",
+          "sourceLine": 1,
+          "braced": false,
+          "lines": [
+            {
+              "text": "#ACT",
+              "sourceFile": "Events/gumi203-Event-41.txt",
+              "sourceLine": 2,
+              "includeChain": []
+            },
+            {
+              "text": "GIVEEXP 12000",
+              "sourceFile": "Events/gumi203-Event-41.txt",
+              "sourceLine": 3,
+              "includeChain": []
+            },
+            {
+              "text": "GIVEGOLD 120000",
+              "sourceFile": "Events/gumi203-Event-41.txt",
+              "sourceLine": 4,
+              "includeChain": []
+            },
+            {
+              "text": "ADDATTRIBUTEPOINT 2",
+              "sourceFile": "Events/gumi203-Event-41.txt",
+              "sourceLine": 5,
+              "includeChain": []
+            },
+            {
+              "text": "#IF",
+              "sourceFile": "Events/Event/Event41.txt",
+              "sourceLine": 3,
+              "includeChain": [
+                "Events/gumi203-Event-41.txt:6"
+              ]
+            },
+            {
+              "text": "RANDOM 1",
+              "sourceFile": "Events/Event/Event41.txt",
+              "sourceLine": 4,
+              "includeChain": [
+                "Events/gumi203-Event-41.txt:6"
+              ]
+            },
+            {
+              "text": "#ACT",
+              "sourceFile": "Events/Event/Event41.txt",
+              "sourceLine": 5,
+              "includeChain": [
+                "Events/gumi203-Event-41.txt:6"
+              ]
+            },
+            {
+              "text": "GIVEITEM FortuneWeapon 1",
+              "sourceFile": "Events/Event/Event41.txt",
+              "sourceLine": 6,
+              "includeChain": [
+                "Events/gumi203-Event-41.txt:6"
+              ]
+            },
+            {
+              "text": "",
+              "sourceFile": "Events/Event/Event41.txt",
+              "sourceLine": 7,
+              "includeChain": [
+                "Events/gumi203-Event-41.txt:6"
+              ]
+            },
+            {
+              "text": "#IF",
+              "sourceFile": "Events/Event/Event41.txt",
+              "sourceLine": 8,
+              "includeChain": [
+                "Events/gumi203-Event-41.txt:6"
+              ]
+            },
+            {
+              "text": "RANDOM 1",
+              "sourceFile": "Events/Event/Event41.txt",
+              "sourceLine": 9,
+              "includeChain": [
+                "Events/gumi203-Event-41.txt:6"
+              ]
+            },
+            {
+              "text": "#ACT",
+              "sourceFile": "Events/Event/Event41.txt",
+              "sourceLine": 10,
+              "includeChain": [
+                "Events/gumi203-Event-41.txt:6"
+              ]
+            },
+            {
+              "text": "GIVEITEM FortuneArmour 1",
+              "sourceFile": "Events/Event/Event41.txt",
+              "sourceLine": 11,
+              "includeChain": [
+                "Events/gumi203-Event-41.txt:6"
+              ]
+            },
+            {
+              "text": "",
+              "sourceFile": "Events/Event/Event41.txt",
+              "sourceLine": 12,
+              "includeChain": [
+                "Events/gumi203-Event-41.txt:6"
+              ]
+            },
+            {
+              "text": "#IF",
+              "sourceFile": "Events/Event/Event41.txt",
+              "sourceLine": 13,
+              "includeChain": [
+                "Events/gumi203-Event-41.txt:6"
+              ]
+            },
+            {
+              "text": "RANDOM 1",
+              "sourceFile": "Events/Event/Event41.txt",
+              "sourceLine": 14,
+              "includeChain": [
+                "Events/gumi203-Event-41.txt:6"
+              ]
+            },
+            {
+              "text": "#ACT",
+              "sourceFile": "Events/Event/Event41.txt",
+              "sourceLine": 15,
+              "includeChain": [
+                "Events/gumi203-Event-41.txt:6"
+              ]
+            },
+            {
+              "text": "GIVEITEM FortuneAccessory 1",
+              "sourceFile": "Events/Event/Event41.txt",
+              "sourceLine": 16,
+              "includeChain": [
+                "Events/gumi203-Event-41.txt:6"
+              ]
+            },
+            {
+              "text": "",
+              "sourceFile": "Events/Event/Event41.txt",
+              "sourceLine": 17,
+              "includeChain": [
+                "Events/gumi203-Event-41.txt:6"
+              ]
+            },
+            {
+              "text": "#IF",
+              "sourceFile": "Events/Event/Event41.txt",
+              "sourceLine": 18,
+              "includeChain": [
+                "Events/gumi203-Event-41.txt:6"
+              ]
+            },
+            {
+              "text": "RANDOM 1",
+              "sourceFile": "Events/Event/Event41.txt",
+              "sourceLine": 19,
+              "includeChain": [
+                "Events/gumi203-Event-41.txt:6"
+              ]
+            },
+            {
+              "text": "#ACT",
+              "sourceFile": "Events/Event/Event41.txt",
+              "sourceLine": 20,
+              "includeChain": [
+                "Events/gumi203-Event-41.txt:6"
+              ]
+            },
+            {
+              "text": "GIVEITEM FortuneOrb 1",
+              "sourceFile": "Events/Event/Event41.txt",
+              "sourceLine": 21,
+              "includeChain": [
+                "Events/gumi203-Event-41.txt:6"
+              ]
+            },
+            {
+              "text": "LOCALMESSAGE \"I see you Mete FlyingStatue!\" Hint",
+              "sourceFile": "Events/gumi203-Event-41.txt",
+              "sourceLine": 7,
+              "includeChain": []
+            },
+            {
+              "text": "",
+              "sourceFile": "Events/gumi203-Event-41.txt",
+              "sourceLine": 8,
+              "includeChain": []
+            },
+            {
+              "text": "",
+              "sourceFile": "Events/gumi203-Event-41.txt",
+              "sourceLine": 9,
+              "includeChain": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "sourceFile": "Events/gumi203-Event-42.txt",
+      "bytes": 0,
+      "resolvedLines": [
+        {
+          "text": "",
+          "sourceFile": "Events/gumi203-Event-42.txt",
+          "sourceLine": 1,
+          "includeChain": []
+        }
+      ],
+      "sections": []
+    },
+    {
+      "sourceFile": "Events/gumi203-Event-43.txt",
+      "bytes": 0,
+      "resolvedLines": [
+        {
+          "text": "",
+          "sourceFile": "Events/gumi203-Event-43.txt",
+          "sourceLine": 1,
+          "includeChain": []
+        }
+      ],
+      "sections": []
+    },
+    {
+      "sourceFile": "Events/gumi203-Event-44.txt",
+      "bytes": 0,
+      "resolvedLines": [
+        {
+          "text": "",
+          "sourceFile": "Events/gumi203-Event-44.txt",
+          "sourceLine": 1,
+          "includeChain": []
+        }
+      ],
+      "sections": []
+    },
+    {
+      "sourceFile": "Events/gumi2031-Event-49.txt",
+      "bytes": 0,
+      "resolvedLines": [
+        {
+          "text": "",
+          "sourceFile": "Events/gumi2031-Event-49.txt",
+          "sourceLine": 1,
+          "includeChain": []
+        }
+      ],
+      "sections": []
+    },
+    {
+      "sourceFile": "Events/gumi2031-Event-50.txt",
+      "bytes": 0,
+      "resolvedLines": [
+        {
+          "text": "",
+          "sourceFile": "Events/gumi2031-Event-50.txt",
+          "sourceLine": 1,
+          "includeChain": []
+        }
+      ],
+      "sections": []
+    },
+    {
+      "sourceFile": "Events/gumi2031-Event-51.txt",
+      "bytes": 0,
+      "resolvedLines": [
+        {
+          "text": "",
+          "sourceFile": "Events/gumi2031-Event-51.txt",
+          "sourceLine": 1,
+          "includeChain": []
+        }
+      ],
+      "sections": []
+    },
+    {
+      "sourceFile": "Events/gumi2031-Event-52.txt",
+      "bytes": 0,
+      "resolvedLines": [
+        {
+          "text": "",
+          "sourceFile": "Events/gumi2031-Event-52.txt",
+          "sourceLine": 1,
+          "includeChain": []
+        }
+      ],
+      "sections": []
+    },
+    {
+      "sourceFile": "Events/gumi204-Event-45.txt",
+      "bytes": 0,
+      "resolvedLines": [
+        {
+          "text": "",
+          "sourceFile": "Events/gumi204-Event-45.txt",
+          "sourceLine": 1,
+          "includeChain": []
+        }
+      ],
+      "sections": []
+    },
+    {
+      "sourceFile": "Events/gumi204-Event-46.txt",
+      "bytes": 0,
+      "resolvedLines": [
+        {
+          "text": "",
+          "sourceFile": "Events/gumi204-Event-46.txt",
+          "sourceLine": 1,
+          "includeChain": []
+        }
+      ],
+      "sections": []
+    },
+    {
+      "sourceFile": "Events/gumi204-Event-47.txt",
+      "bytes": 0,
+      "resolvedLines": [
+        {
+          "text": "",
+          "sourceFile": "Events/gumi204-Event-47.txt",
+          "sourceLine": 1,
+          "includeChain": []
+        }
+      ],
+      "sections": []
+    },
+    {
+      "sourceFile": "Events/gumi204-Event-48.txt",
+      "bytes": 0,
+      "resolvedLines": [
+        {
+          "text": "",
+          "sourceFile": "Events/gumi204-Event-48.txt",
+          "sourceLine": 1,
+          "includeChain": []
+        }
+      ],
+      "sections": []
+    },
+    {
+      "sourceFile": "Events/gumi2041-Event-53.txt",
+      "bytes": 0,
+      "resolvedLines": [
+        {
+          "text": "",
+          "sourceFile": "Events/gumi2041-Event-53.txt",
+          "sourceLine": 1,
+          "includeChain": []
+        }
+      ],
+      "sections": []
+    },
+    {
+      "sourceFile": "Events/gumi2041-Event-54.txt",
+      "bytes": 0,
+      "resolvedLines": [
+        {
+          "text": "",
+          "sourceFile": "Events/gumi2041-Event-54.txt",
+          "sourceLine": 1,
+          "includeChain": []
+        }
+      ],
+      "sections": []
+    },
+    {
+      "sourceFile": "Events/gumi2041-Event-55.txt",
+      "bytes": 0,
+      "resolvedLines": [
+        {
+          "text": "",
+          "sourceFile": "Events/gumi2041-Event-55.txt",
+          "sourceLine": 1,
+          "includeChain": []
+        }
+      ],
+      "sections": []
+    },
+    {
+      "sourceFile": "Events/gumi2041-Event-56.txt",
+      "bytes": 0,
+      "resolvedLines": [
+        {
+          "text": "",
+          "sourceFile": "Events/gumi2041-Event-56.txt",
+          "sourceLine": 1,
+          "includeChain": []
+        }
+      ],
+      "sections": []
+    }
+  ],
+  "references": [
+    {
+      "kind": "include",
+      "sourceFile": "Events/gumi203-Event-41.txt",
+      "sourceLine": 6,
+      "targetFile": "Events/Event/Event41.txt",
+      "section": "@Main",
+      "resolved": true
+    },
+    {
+      "kind": "include",
+      "sourceFile": "Events/gumi203-Event-41.txt",
+      "sourceLine": 6,
+      "targetFile": "Events/Event/Event41.txt",
+      "section": "@Main",
+      "resolved": true
+    },
+    {
+      "kind": "include",
+      "sourceFile": "SystemScripts/00Default/MapCoords.txt",
+      "sourceLine": 13,
+      "targetFile": "SystemScripts/00Default/MapCoords/PenalCavern.txt",
+      "section": "@Main",
+      "resolved": true
+    },
+    {
+      "kind": "include",
+      "sourceFile": "SystemScripts/00Default/MapCoords.txt",
+      "sourceLine": 17,
+      "targetFile": "SystemScripts/00Default/MapCoords/DogYoArena.txt",
+      "section": "@Main",
+      "resolved": true
+    },
+    {
+      "kind": "include",
+      "sourceFile": "SystemScripts/00Default/MapCoords.txt",
+      "sourceLine": 20,
+      "targetFile": "SystemScripts/00Default/MapCoords/DogYoArena.txt",
+      "section": "@Main",
+      "resolved": true
+    },
+    {
+      "kind": "include",
+      "sourceFile": "SystemScripts/00Default/MapCoords.txt",
+      "sourceLine": 23,
+      "targetFile": "SystemScripts/00Default/MapCoords/DogYoArena.txt",
+      "section": "@Main",
+      "resolved": true
+    },
+    {
+      "kind": "include",
+      "sourceFile": "SystemScripts/00Default/MapCoords.txt",
+      "sourceLine": 26,
+      "targetFile": "SystemScripts/00Default/MapCoords/DogYoArena.txt",
+      "section": "@Main",
+      "resolved": true
+    },
+    {
+      "kind": "include",
+      "sourceFile": "SystemScripts/00Default/MapCoords.txt",
+      "sourceLine": 42,
+      "targetFile": "SystemScripts/00Default/MapCoords/PenalCavern.txt",
+      "section": "@Main",
+      "resolved": true
+    }
+  ],
+  "diagnostics": {
+    "danglingPaths": [],
+    "pathTraversalRejected": [],
+    "cycles": [],
+    "warnings": []
+  }
+}

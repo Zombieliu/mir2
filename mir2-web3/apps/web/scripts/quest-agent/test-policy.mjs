@@ -3196,7 +3196,7 @@ test("active threats preempt corpse harvesting and stationary field recovery", a
   );
   assert.match(
     page,
-    /function markPlayerStruck[\s\S]{0,2200}patchEntityInList\(current\.entities, attackerId,[\s\S]{0,180}attackStartedAt: now/,
+    /function markPlayerStruck[\s\S]{0,2800}patchEntityInList\([\s\S]{0,600}attackerId,[\s\S]{0,180}attackStartedAt: now/,
   );
 });
 

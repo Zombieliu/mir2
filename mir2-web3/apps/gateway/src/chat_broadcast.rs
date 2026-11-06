@@ -24,10 +24,10 @@ const QA_FIXED_LINE_INDEX_ENV: &str = "MIR2_GATEWAY_QA_CHAT_FIXED_LINE_INDEX";
 const QA_MAX_PACKETS_ENV: &str = "MIR2_GATEWAY_QA_CHAT_MAX_PACKETS";
 
 const DEFAULT_LINE_MESSAGES: &[&str] = &[
-    "Welcome to Crystal Mir 2 released by Suprcode.",
-    "Make sure to follow JevLomcn on github for the latest Database releases.",
-    "www.LOMCN.net",
-    "Now in Net.8",
+    "Welcome to the Legend of Mir 2 Server.",
+    "This is a development Candidate build.",
+    "Gameplay, data, and presentation may change during development.",
+    "Please include the build identifier when reporting a problem.",
 ];
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -660,5 +660,19 @@ mod tests {
 
         clock.elapsed_ms.store(20_000, Ordering::Release);
         assert!(scheduler.tick().is_empty());
+    }
+
+    #[test]
+    fn default_line_messages_are_project_owned_and_never_use_third_party_fallback_copy() {
+        let messages = default_line_messages();
+        assert_eq!(messages.len(), 4);
+        let combined = messages.join("\n").to_ascii_lowercase();
+        for forbidden in ["lomcn", "suprcode", "supercode", "jevlomcn", "now in net"] {
+            assert!(
+                !combined.contains(forbidden),
+                "default gateway line messages must stay project-owned: {forbidden}"
+            );
+        }
+        assert_eq!(messages[0], "Welcome to the Legend of Mir 2 Server.");
     }
 }

@@ -702,10 +702,12 @@ export type MainHudProps = {
   world: HudWorldLike;
   showCharacter: boolean;
   showInventory: boolean;
+  showQuestLog: boolean;
   activeCharacterTab: CharacterTabKey;
   activeInventoryTab: InventoryTabKey;
   onToggleCharacter: () => void;
   onToggleInventory: () => void;
+  onToggleQuestLog: () => void;
   onOpenCharacterTab: (tab: CharacterTabKey) => void;
   onOpenInventoryTab: (tab: InventoryTabKey) => void;
   onDropGold: () => void;
@@ -725,10 +727,12 @@ export function MainHud({
   world,
   showCharacter,
   showInventory,
+  showQuestLog,
   activeCharacterTab,
   activeInventoryTab,
   onToggleCharacter,
   onToggleInventory,
+  onToggleQuestLog,
   onOpenCharacterTab,
   onOpenInventoryTab,
   showGameShop,
@@ -854,10 +858,12 @@ export function MainHud({
           <SpriteButton sprite={ORIGINAL_UI.hud.buttons.skill} label={t("ui.skills")} onClick={() => onOpenCharacterTab("spells")} active={showCharacter && activeCharacterTab === "spells"} />
         </div>
         <div className="hud-button quest">
-          <SpriteButton sprite={ORIGINAL_UI.hud.buttons.quest} label={t("ui.quest")} onClick={() => onOpenInventoryTab("quest")} active={showInventory && activeInventoryTab === "quest"} />
+          <SpriteButton sprite={ORIGINAL_UI.hud.buttons.quest} label={t("ui.quest")} onClick={onToggleQuestLog} active={showQuestLog} />
         </div>
         <div className="hud-button option">
-          <SpriteButton sprite={ORIGINAL_UI.hud.buttons.option} label={t("ui.options")} onClick={() => onOpenCharacterTab("stats2")} active={showCharacter && activeCharacterTab === "stats2"} />
+          {/* The Crystal button opens OptionDialog, not Character/stats2. Keep
+              it truthfully disabled until that distinct dialog is wired. */}
+          <SpriteButton sprite={ORIGINAL_UI.hud.buttons.option} label={t("ui.options")} disabled />
         </div>
       </div>
     </div>
@@ -867,39 +873,43 @@ export function MainHud({
 export type SpriteButtonProps = {
   sprite: SpriteState;
   label: string;
-  onClick: () => void;
+  onClick?: () => void;
   onPointerActivate?: () => void;
   active?: boolean;
+  disabled?: boolean;
 };
 
-export function SpriteButton({ sprite, label, onClick, onPointerActivate, active = false }: SpriteButtonProps) {
+export function SpriteButton({ sprite, label, onClick, onPointerActivate, active = false, disabled = false }: SpriteButtonProps) {
   const [hovered, setHovered] = useState(false);
   const [pressed, setPressed] = useState(false);
   const pointerActivatedRef = useRef(false);
   const suppressClickRef = useRef(false);
 
   let source = sprite.base;
-  if (pressed && sprite.pressed) {
+  if (!disabled && pressed && sprite.pressed) {
     source = sprite.pressed;
-  } else if (active && sprite.active) {
+  } else if (!disabled && active && sprite.active) {
     source = sprite.active;
-  } else if ((hovered || active) && sprite.hover) {
+  } else if (!disabled && (hovered || active) && sprite.hover) {
     source = sprite.hover;
   }
 
   return (
     <button
       type="button"
-      className="sprite-button"
+      className={`sprite-button${disabled ? " disabled" : ""}`}
+      disabled={disabled}
       onClick={(event) => {
+        if (disabled) return;
         if (onPointerActivate && event.detail !== 0 && suppressClickRef.current) {
           suppressClickRef.current = false;
           return;
         }
         playOriginalSoundId(ORIGINAL_SOUND_IDS.uiButtonClick);
-        onClick();
+        onClick?.();
       }}
       onPointerDown={(event) => {
+        if (disabled) return;
         if (!onPointerActivate) return;
         event.preventDefault();
         pointerActivatedRef.current = true;
@@ -916,6 +926,7 @@ export function SpriteButton({ sprite, label, onClick, onPointerActivate, active
         setPressed(false);
       }}
       onMouseDown={() => {
+        if (disabled) return;
         setPressed(true);
         if (onPointerActivate && !pointerActivatedRef.current) {
           pointerActivatedRef.current = true;
@@ -925,11 +936,13 @@ export function SpriteButton({ sprite, label, onClick, onPointerActivate, active
         }
       }}
       onMouseUp={() => {
+        if (disabled) return;
         pointerActivatedRef.current = false;
         setPressed(false);
       }}
       aria-label={label}
       title={label}
+      aria-disabled={disabled || undefined}
     >
       <img
         src={source}

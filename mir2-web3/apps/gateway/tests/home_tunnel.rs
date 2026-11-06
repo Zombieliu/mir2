@@ -401,7 +401,9 @@ async fn home_agent_process_reconnects_after_relay_restart() {
         match HomeTunnelRelay::bind(relay_config(relay_address, gateway_address)).await {
             Ok(relay) => break relay,
             Err(error)
-                if error.contains("Address already in use")
+                if (error.contains("Address already in use")
+                    || error.contains("os error 10048")
+                    || error.contains("os error 98"))
                     && tokio::time::Instant::now() < rebind_deadline =>
             {
                 tokio::time::sleep(Duration::from_millis(50)).await;

@@ -77,8 +77,20 @@ import {
   type BevyMovementShadowMode,
 } from "../lib/bevy-movement-shadow";
 import {
+  cancelPendingEntitySounds,
   type SoundEntityRef,
 } from "../lib/original-sound-triggers";
+import {
+  actorStruckIsActive,
+  actorStruckIsAlreadyPending,
+  advanceActorStruck,
+  applyActorDeath,
+  applyActorHealth,
+  applyActorRevive,
+  applyActorStruck,
+  clearActorActionFeed,
+  createPlayerReviveSceneEffect,
+} from "../lib/world-model/actor-combat-state";
 import { createGameEventBus, makeRealAudioSink, registerSoundSubscriber, registerVfxSubscriber } from "../lib/game-events";
 import type { GameEventBus } from "../lib/game-events";
 import {
@@ -150,6 +162,9 @@ import type {
   SceneView,
   TerrainPatch,
 } from "../lib/scene-types";
+import {
+  applyObjectAttackSceneState,
+} from "../lib/scene-effect-runtime";
 import type { ClientScreen } from "../lib/original-ui";
 import {
   attackModeChatMessage,
@@ -608,11 +623,6 @@ type GatewayNpcScriptDiagnostic = {
   message: string;
 };
 
-type QuickTransferOption = {
-  key: string;
-  label: string;
-};
-
 type GatewayWorldSnapshot = {
   tick: number;
   mapTitle: string | null;
@@ -696,8 +706,16 @@ type WorldEntity = {
   attackUntil?: number;
   struckStartedAt?: number;
   struckUntil?: number;
+  pendingStruck?: {
+    attackerId?: string;
+    x?: number;
+    y?: number;
+    direction?: string;
+    durationMs: number;
+  };
   dieStartedAt?: number;
   dieUntil?: number;
+  deathHandled?: boolean;
   reviveStartedAt?: number;
   reviveUntil?: number;
 };
@@ -730,7 +748,7 @@ type ProjectileState = {
 
 type SceneEffectState = {
   key: string;
-  source: "spell" | "objectSpell" | "map" | "object";
+  source: "spell" | "attackOverlay" | "actorEffect" | "objectSpell" | "map" | "object";
   spellOrEffect: string | number;
   objectId?: string;
   x: number;
@@ -1236,18 +1254,6 @@ const BEVY_RUNTIME_ASSET_BASE_URL =
 // Allow enough headroom for the ~6 MiB compressed WASM on slower mobile/Asian
 // routes instead of aborting at the exact boundary of an otherwise valid load.
 const BEVY_RUNTIME_BOOT_TIMEOUT_MS = 120_000;
-const QUICK_TRANSFER_OPTIONS: QuickTransferOption[] = [
-  { key: "crystal:0:330:270", label: "Bichon Province (0)" },
-  { key: "crystal:1:315:82", label: "Woomyon Woods S (1)" },
-  { key: "crystal:2:503:483", label: "Serpent Valley (2)" },
-  { key: "crystal:n0:200:200", label: "n0 (QA)" },
-  { key: "crystal:HF1:200:200", label: "HellFire 1F (HF1)" },
-  { key: "crystal:HF2:200:200", label: "HellFire 2F (HF2)" },
-  { key: "crystal:HF3:200:200", label: "HellFire 3F (HF3)" },
-  { key: "crystal:D1801:200:200", label: "Penal Cavern (D1801)" },
-  { key: "crystal:HKR:200:200", label: "HellFire Kings Room (HKR)" },
-];
-
 function isLocalWebHost(hostname: string) {
   return hostname === "localhost" || hostname === "127.0.0.1" || hostname === "::1" || hostname === "[::1]";
 }
@@ -1866,6 +1872,10 @@ export default function HomePage() {
     movementShadowBridgeRef.current = createBevyMovementShadowBridge(() => runtimeRef.current);
   }
   const socketRef = useRef<WebSocket | null>(null);
+  const storageRequestSequenceRef = useRef(1);
+  const pendingStorageRequestsRef = useRef<
+    Map<string, { operation: "deposit" | "withdraw"; from: number; to: number }>
+  >(new Map());
   const worldRef = useRef<WorldState>(DEFAULT_WORLD_STATE);
   // NewQuestInfo is a static definition stream, while world snapshots contain
   // only quests currently visible for this character. Keep definitions outside
@@ -2206,6 +2216,7 @@ export default function HomePage() {
     return () => {
       unsubSound();
       unsubVfx();
+      cancelPendingEntitySounds();
     };
     // soundEntityRefFor, pushDamageFloaterFromBus, markEntityStruckFlash are
     // stable hoisted closures over refs; intentionally excluded from deps.
@@ -3191,6 +3202,7 @@ export default function HomePage() {
       currentEntity.attackUntil > now;
     const struckActive =
       typeof currentEntity.struckUntil === "number" && currentEntity.struckUntil > now;
+    const struckRetained = struckActive || currentEntity.pendingStruck !== undefined;
     const dieActive = typeof currentEntity.dieUntil === "number" && currentEntity.dieUntil > now;
     const reviveActive = typeof currentEntity.reviveUntil === "number" && currentEntity.reviveUntil > now;
 
@@ -3210,10 +3222,15 @@ export default function HomePage() {
           ? currentEntity.attackStartedAt
           : snapshotEntity.attackStartedAt,
       attackUntil: attackActive ? currentEntity.attackUntil : undefined,
-      struckStartedAt: struckActive ? currentEntity.struckStartedAt : undefined,
-      struckUntil: struckActive ? currentEntity.struckUntil : undefined,
+      struckStartedAt: struckRetained ? currentEntity.struckStartedAt : undefined,
+      struckUntil: struckRetained ? currentEntity.struckUntil : undefined,
+      pendingStruck: struckRetained ? currentEntity.pendingStruck : undefined,
       dieStartedAt: dieActive ? currentEntity.dieStartedAt : undefined,
       dieUntil: dieActive ? currentEntity.dieUntil : undefined,
+      // Death packets are incarnation events, not transient animation state.
+      // Preserve their consumption marker until Revived/ObjectRemove clears
+      // the actor so a delayed replay cannot restart Die or its audio.
+      deathHandled: currentEntity.deathHandled,
       reviveStartedAt: reviveActive ? currentEntity.reviveStartedAt : undefined,
       reviveUntil: reviveActive ? currentEntity.reviveUntil : undefined,
     };
@@ -4689,6 +4706,9 @@ export default function HomePage() {
     return () => {
       socketRef.current?.close();
       socketRef.current = null;
+      // Storage mutations are never replayed across a reconnect. Their exact
+      // request ids remain spent; snapshots reconcile any unknown outcome.
+      pendingStorageRequestsRef.current.clear();
     };
   }, []);
 
@@ -5072,6 +5092,7 @@ export default function HomePage() {
     let animationFrame = 0;
     const tickMovementPlan = () => {
       const tickNow = Date.now();
+      advanceQueuedActorStruckActions(tickNow);
       pruneCrystalSelfActionFeed(tickNow);
       pruneLocallySettledDirectionStepPending(tickNow);
       clearSettledPredictedPlayer(tickNow);
@@ -5194,7 +5215,10 @@ export default function HomePage() {
 
   function crystalBootstrapLineMessage() {
     const params = new URLSearchParams(window.location.search);
-    return params.get("crystalLineMessage")?.trim() || "www.LOMCN.net";
+    return (
+      params.get("crystalLineMessage")?.trim() ||
+      "Welcome to the Legend of Mir 2 Server."
+    );
   }
 
   function crystalBootstrapVisibleChatLines(
@@ -5964,9 +5988,11 @@ export default function HomePage() {
 
     socket.addEventListener("close", () => {
       if (socketRef.current !== socket) return;
+      cancelPendingEntitySounds();
       const closedManually = manualSocketCloseRef.current;
       socketRef.current = null;
       manualSocketCloseRef.current = false;
+      pendingStorageRequestsRef.current.clear();
       if (closedManually) {
         pendingGatewayProtocolActionRef.current = null;
       }
@@ -6320,6 +6346,7 @@ export default function HomePage() {
   }
 
   function resetClient() {
+    cancelPendingEntitySounds();
     const socketToClose = socketRef.current;
     manualSocketCloseRef.current = Boolean(
       socketToClose &&
@@ -7206,19 +7233,41 @@ export default function HomePage() {
   }
 
   function storeItem(item: ItemMoveRef, toSlot: number) {
-    send({
-      type: "storeItem",
+    const sequence = storageRequestSequenceRef.current;
+    if (!Number.isSafeInteger(sequence) || sequence <= 0) return;
+    const requestId = `st-${sequence.toString().padStart(16, "0")}`;
+    if (!send({
+      type: "storeItemV2",
+      requestId,
+      from: item.slot,
+      to: toSlot,
+    })) return;
+    pendingStorageRequestsRef.current.set(requestId, {
+      operation: "deposit",
       from: item.slot,
       to: toSlot,
     });
+    storageRequestSequenceRef.current =
+      sequence === Number.MAX_SAFE_INTEGER ? 0 : sequence + 1;
   }
 
   function takeBackItem(item: ItemMoveRef, toSlot: number) {
-    send({
-      type: "takeBackItem",
+    const sequence = storageRequestSequenceRef.current;
+    if (!Number.isSafeInteger(sequence) || sequence <= 0) return;
+    const requestId = `st-${sequence.toString().padStart(16, "0")}`;
+    if (!send({
+      type: "takeBackItemV2",
+      requestId,
+      from: item.slot,
+      to: toSlot,
+    })) return;
+    pendingStorageRequestsRef.current.set(requestId, {
+      operation: "withdraw",
       from: item.slot,
       to: toSlot,
     });
+    storageRequestSequenceRef.current =
+      sequence === Number.MAX_SAFE_INTEGER ? 0 : sequence + 1;
   }
 
   function unlockStorage(storagePassword: string) {
@@ -7368,30 +7417,23 @@ export default function HomePage() {
   }
 
   function claimMail(mailId: number) {
-    // Real protocol packets first (ReadMail marks the mail opened, CollectParcel
-    // pulls the gold/items), then the stage5 action channel as a fallback for the
-    // dev gateway's in-process mailbox. Field shapes match BrowserCommand::ReadMail
-    // / CollectParcel (`mailId`) in apps/gateway/src/web.rs.
+    // The dedicated Crystal packets operate on the same authoritative mailbox
+    // as GameShop delivery. Normal players must never need generic Stage5 access.
     send({ type: "readMail", mailId }, { quiet: true });
-    send({ type: "collectParcel", mailId }, { quiet: true });
-    send({ type: "stage5Command", action: "mail.claim", args: [String(mailId)] });
+    send({ type: "collectParcel", mailId });
   }
 
   function deleteMail(mailId: number) {
-    send({ type: "deleteMail", mailId }, { quiet: true });
-    send({ type: "stage5Command", action: "mail.delete", args: [String(mailId)] });
+    send({ type: "deleteMail", mailId });
   }
 
   function buyGameShopItem(gameShopIndex: number, quantity: number, paymentType: "gold" | "credit") {
     send({
-      type: "stage5Command",
-      action: paymentType === "credit" ? "gameShop.buyCredit" : "gameShop.buyGold",
-      args: [String(gameShopIndex), String(quantity)],
+      type: "gameShopBuy",
+      gIndex: gameShopIndex,
+      quantity,
+      priceType: paymentType === "credit" ? 0 : 1,
     });
-  }
-
-  function runStage5Command(action: string, args: string[] = []) {
-    send({ type: "stage5Command", action, args });
   }
 
   function sendClientCommand(command: Record<string, unknown>) {
@@ -7593,27 +7635,15 @@ export default function HomePage() {
 
   // Leaving / disbanding the group rides ClientPacket::SwitchGroup with
   // allowGroup=false, which the simulation maps to clearing the roster +
-  // DeleteGroup. The stage-5 group.leave channel is kept as a dev fallback.
+  // DeleteGroup. Normal players never require a generic Stage5 fallback.
   function groupLeave() {
-    send({ type: "switchGroup", allowGroup: false }, { quiet: true });
-    send({ type: "stage5Command", action: "group.leave" });
+    send({ type: "switchGroup", allowGroup: false });
   }
 
   // Toggling whether the player accepts group invites rides SwitchGroup's
   // allowGroup flag directly.
   function groupToggleAllowInvites(allow: boolean) {
     send({ type: "switchGroup", allowGroup: allow });
-  }
-
-  // Loot mode has no dedicated ClientPacket; it stays on the stage-5 channel.
-  function groupToggleLootMode() {
-    const current = world.stage5Systems.group?.lootMode;
-    const next = current === "group" ? "solo" : "group";
-    send({ type: "stage5Command", action: "group.loot", args: [next] });
-  }
-
-  function conquestStartWar() {
-    send({ type: "stage5Command", action: "conquest.start" });
   }
 
   // Quest log actions. The window's "track" button shares the quest with the
@@ -7637,11 +7667,53 @@ export default function HomePage() {
     send({ type: "abandonQuest", questIndex: questId });
   }
 
+  function activeQuestDialogTarget(
+    questId: number,
+    operation: "accept" | "finish",
+    selectedItemIndex?: number,
+  ) {
+    const targets = operation === "accept"
+      ? [`@AcceptQuest:${questId}`, `@quest:accept:${questId}`]
+      : [
+          ...(selectedItemIndex === undefined ? [] : [`@quest:finish:${questId}:${selectedItemIndex}`]),
+          `@FinishQuest:${questId}`,
+          `@quest:finish:${questId}`,
+        ];
+    const normalizedTargets = new Set(targets.map((target) => target.toLowerCase()));
+    return worldRef.current.activeNpcDialog?.links.find((link) =>
+      normalizedTargets.has(link.target.trim().toLowerCase()))?.target ?? null;
+  }
+
   function acceptQuest(questId: number) {
-    send({ type: "acceptQuest", npcIndex: 0, questIndex: questId });
+    const target = activeQuestDialogTarget(questId, "accept");
+    const npcIndex = Number(worldRef.current.activeNpcDialog?.npcObjectId);
+    if (!target || !Number.isSafeInteger(npcIndex) || npcIndex <= 0) {
+      appendLog(
+        t(
+          "content.quest.generic.stage.available.objective",
+          [],
+          "Talk to the quest giver to accept this quest.",
+        ),
+        "system",
+      );
+      return;
+    }
+    send({ type: "acceptQuest", npcIndex, questIndex: questId });
   }
 
   function finishQuest(questId: number, selectedItemIndex?: number) {
+    const target = activeQuestDialogTarget(questId, "finish", selectedItemIndex);
+    if (!target) {
+      appendLog(
+        t(
+          "content.quest.generic.stage.readyToTurnIn.objective",
+          [],
+          "Return to the quest NPC to turn in this quest.",
+        ),
+        "system",
+      );
+      return;
+    }
     send({
       type: "finishQuest",
       questIndex: questId,
@@ -8867,6 +8939,7 @@ export default function HomePage() {
       case "ObjectRemove":
       case "ObjectHide": {
         const removedObjectId = stringifyId(payload.objectId);
+        cancelPendingEntitySounds(removedObjectId);
         if (removedObjectId !== worldRef.current.playerObjectId) {
           observeBevyMovementShadow({
             type: "remoteRemove",
@@ -9205,6 +9278,7 @@ export default function HomePage() {
         break;
       }
       case "LogOutSuccess":
+        cancelPendingEntitySounds();
         setIdentitySessionToken(null);
         resetGatewayReconnectState();
         activeReconnectAuthRef.current = null;
@@ -9430,37 +9504,12 @@ export default function HomePage() {
         appendLog(t("ui.poisoned", [], "You are poisoned."), "system");
         break;
       case "Death":
-        // Crystal `S.Death` (self only): mark the player dead and surface the
-        // revive-in-town prompt. Reset any stale request flag so the button is live.
         setReviveRequested(false);
-        updateWorld((current) => ({
-          ...current,
-          playerHp: 0,
-          entities: current.playerObjectId
-            ? patchEntityInList(current.entities, current.playerObjectId, (entity) => ({
-                ...entity,
-                hp: 0,
-                dead: true,
-              }))
-            : current.entities,
-        }));
+        markSelfPlayerDead(payload);
         break;
       case "Revived":
-        // Crystal `S.Revived`: the town-revive request succeeded — restore HP and
-        // dismiss the prompt (the overlay clears once the player is no longer dead).
         setReviveRequested(false);
-        updateWorld((current) => ({
-          ...current,
-          playerHp:
-            typeof current.playerMaxHp === "number" ? Math.max(1, current.playerMaxHp) : current.playerHp,
-          entities: current.playerObjectId
-            ? patchEntityInList(current.entities, current.playerObjectId, (entity) => ({
-                ...entity,
-                dead: false,
-                hp: typeof entity.maxHp === "number" ? Math.max(1, entity.maxHp) : entity.hp,
-              }))
-            : current.entities,
-        }));
+        markSelfPlayerRevived();
         break;
 
       // Inventory / item lifecycle --------------------------------------------
@@ -10264,10 +10313,19 @@ export default function HomePage() {
         pushDamageFloater(payload);
         break;
       }
-      case "ObjectEffect":
+      case "ObjectEffect": {
+        const objectId = stringifyId(payload.objectId);
+        const effect = numberOrUndefined(payload.effect);
+        const hasAuthoritativeTarget = objectId !== "0" && worldRef.current.entities.some(
+          (entity) => entity.objectId === objectId,
+        );
         enqueueSceneEffect(payload, "object");
-        restoreObjectSelection(stringifyId(payload.objectId));
+        if (effect === 3 && hasAuthoritativeTarget) {
+          gameBusRef.current!.emit({ type: "magicEffect", objectId, effect });
+        }
+        restoreObjectSelection(objectId);
         break;
+      }
 
       // Quests -----------------------------------------------------------------
       case "CompleteQuest": {
@@ -10343,6 +10401,9 @@ export default function HomePage() {
       // Map / navigation -------------------------------------------------------
       case "MapChanged": {
         const fileName = stringOrNull(payload.fileName);
+        if (normalizeMapFileName(fileName) !== normalizeMapFileName(worldRef.current.mapFileName)) {
+          cancelPendingEntitySounds();
+        }
         const miniMap = numberOrUndefined(payload.miniMap);
         const bigMap = numberOrUndefined(payload.bigMap);
         const mapLightSetting = numberOrUndefined(payload.lights);
@@ -10359,12 +10420,14 @@ export default function HomePage() {
           const movedSelf =
             preservedSelfEntity && location
               ? {
-                  ...preservedSelfEntity,
+                  ...clearActorActionFeed(preservedSelfEntity),
                   x: numberOrZero(location.x),
                   y: numberOrZero(location.y),
                   direction: stringOrNull(payload.direction) ?? preservedSelfEntity.direction,
                 }
-              : preservedSelfEntity;
+              : preservedSelfEntity
+                ? clearActorActionFeed(preservedSelfEntity)
+                : undefined;
           const nextMapLightSetting =
             typeof mapLightSetting === "number" && mapLightSetting >= 0 && mapLightSetting <= 4
               ? mapLightSetting
@@ -10446,6 +10509,24 @@ export default function HomePage() {
           appendLog(t("ui.itemActionFailed", [], "Item action failed."), "system");
         }
         break;
+      case "StoreItemV2":
+      case "TakeBackItemV2": {
+        const requestId = typeof payload.requestId === "string" ? payload.requestId : "";
+        const pending = pendingStorageRequestsRef.current.get(requestId);
+        const expectedOperation = event.packet === "StoreItemV2" ? "deposit" : "withdraw";
+        if (
+          pending &&
+          pending.operation === expectedOperation &&
+          pending.from === payload.from &&
+          pending.to === payload.to
+        ) {
+          pendingStorageRequestsRef.current.delete(requestId);
+          if (payload.success === false) {
+            appendLog(t("ui.itemActionFailed", [], "Item action failed."), "system");
+          }
+        }
+        break;
+      }
       case "UserSlotsRefresh":
         // Full inventory/equipment refresh handled by the snapshot pipeline; flag
         // the next snapshot as an in-place packet refresh so it merges cleanly.
@@ -10459,6 +10540,7 @@ export default function HomePage() {
         }
         break;
       case "ReturnToLogin":
+        pendingStorageRequestsRef.current.clear();
         screenRef.current = "login";
         setScreen("login");
         setLoginBusy(false);
@@ -11431,37 +11513,46 @@ export default function HomePage() {
     if (!entity) {
       return null;
     }
-    return { kind: entity.kind, sprite: entity.sprite, genderKey: entity.genderKey };
+    return {
+      kind: entity.kind,
+      sprite: entity.sprite,
+      genderKey: entity.genderKey,
+      classKey: entity.classKey,
+    };
   }
 
   function markWorldEntityAttack(payload: Record<string, unknown>) {
     const objectId = stringifyId(payload.objectId);
-    gameBusRef.current!.emit({ type: "entityAttack", objectId });
-    const location = payload.location as { x?: number; y?: number } | undefined;
+    const spell =
+      typeof payload.spell === "number" || typeof payload.spell === "string"
+        ? payload.spell
+        : undefined;
+    gameBusRef.current!.emit({ type: "entityAttack", objectId, spell });
     const now = Date.now();
 
-    updateWorld((current) => ({
-      ...current,
-      entities: patchEntityInList(current.entities, objectId, (entity) => {
-        const animation = attackAnimationVariant(payload);
-        return {
-          ...entity,
-          x: typeof location?.x === "number" ? location.x : entity.x,
-          y: typeof location?.y === "number" ? location.y : entity.y,
-          direction: stringOrNull(payload.direction) ?? entity.direction,
-          attackAnimation: animation,
-          attackStartedAt: now,
-          attackUntil: now + crystalAttackActionDurationMs(entity, animation),
-        };
-      }),
-    }));
+    updateWorld((current) => {
+      const attackState = applyObjectAttackSceneState(
+        current.entities,
+        current.effects,
+        payload,
+        now,
+        crystalAttackActionDurationMs,
+      );
+      return {
+        ...current,
+        ...attackState,
+      };
+    });
   }
 
   function markWorldEntityMagic(payload: Record<string, unknown>) {
     const objectId = stringifyId(payload.objectId);
+    const spell = typeof payload.spell === "number" || typeof payload.spell === "string"
+      ? payload.spell
+      : undefined;
     // Crystal plays magic-cast sounds (20000 + Spell*10); most are not yet in SoundList, so this
     // resolves only for the few that are and is otherwise a graceful no-op.
-    gameBusRef.current!.emit({ type: "magicCast", objectId, spell: numberOrUndefined(payload.spell) });
+    gameBusRef.current!.emit({ type: "magicCast", objectId, spell });
     const location = payload.location as { x?: number; y?: number } | undefined;
     const now = Date.now();
 
@@ -11584,48 +11675,94 @@ export default function HomePage() {
     // redundant clone. The sound subscriber still ran on the same emit.
     if (suppressStruckFlashRef.current) return;
     const now = Date.now();
+    const currentEntity = worldRef.current.entities.find((entity) => entity.objectId === objectId);
+    if (!currentEntity || actorStruckIsAlreadyPending(currentEntity, now)) return;
     updateWorld((current) => ({
       ...current,
-      entities: patchEntityInList(current.entities, objectId, (entity) => ({
-        ...entity,
-        struckStartedAt: now,
-        struckUntil: now + crystalStruckActionDurationMs(entity),
-      })),
+      entities: patchEntityInList(current.entities, objectId, (entity) =>
+        applyActorStruck(entity, now, crystalStruckActionDurationMs(entity)),
+      ),
     }));
+  }
+
+  function emitInlineEntityStruck(objectId: string, attackerId: string) {
+    suppressStruckFlashRef.current = true;
+    try {
+      gameBusRef.current!.emit({ type: "entityStruck", objectId, attackerId });
+    } finally {
+      suppressStruckFlashRef.current = false;
+    }
+  }
+
+  function advanceQueuedActorStruckActions(now: number) {
+    const due = worldRef.current.entities
+      .filter(
+        (entity) =>
+          entity.pendingStruck !== undefined &&
+          !actorStruckIsActive(entity, now) &&
+          entity.dead !== true &&
+          !(typeof entity.dieUntil === "number" && entity.dieUntil > now) &&
+          !(typeof entity.reviveUntil === "number" && entity.reviveUntil > now),
+      )
+      .map((entity) => ({
+        objectId: entity.objectId,
+        attackerId: entity.pendingStruck?.attackerId ?? "0",
+      }));
+    if (due.length === 0) return;
+
+    const dueIds = new Set(due.map((entry) => entry.objectId));
+    updateWorld((current) => ({
+      ...current,
+      entities: current.entities.map((entity) =>
+        dueIds.has(entity.objectId) ? advanceActorStruck(entity, now) : entity,
+      ),
+    }));
+    for (const event of due) {
+      emitInlineEntityStruck(event.objectId, event.attackerId);
+    }
   }
 
   function markWorldEntityStruck(payload: Record<string, unknown>) {
     const objectId = stringifyId(payload.objectId);
+    const attackerId = stringifyId(payload.attackerId);
     const location = payload.location as { x?: number; y?: number } | undefined;
     const now = Date.now();
-    // Stage-2: emit `entityStruck` only for the SOUND subscriber; suppress the VFX subscriber's
-    // flash callback (markEntityStruckFlash) so it does not re-enter updateWorld for a redundant
-    // clone — the same struck-flash fields are applied inline in the single updater below. The
-    // bus dispatch is synchronous, so the flag is read + reset within this emit.
-    suppressStruckFlashRef.current = true;
-    gameBusRef.current!.emit({ type: "entityStruck", objectId });
-    suppressStruckFlashRef.current = false;
+    const currentEntity = worldRef.current.entities.find((entity) => entity.objectId === objectId);
+    if (!currentEntity || actorStruckIsAlreadyPending(currentEntity, now)) return;
+    const queued = actorStruckIsActive(currentEntity, now);
     updateWorld((current) => ({
       ...current,
-      entities: patchEntityInList(current.entities, objectId, (entity) => ({
-        ...entity,
-        x: typeof location?.x === "number" ? location.x : entity.x,
-        y: typeof location?.y === "number" ? location.y : entity.y,
-        direction: stringOrNull(payload.direction) ?? entity.direction,
-        // Folds markEntityStruckFlash's body (crystalStruckActionDurationMs) into this one map.
-        struckStartedAt: now,
-        struckUntil: now + crystalStruckActionDurationMs(entity),
-      })),
+      entities: patchEntityInList(current.entities, objectId, (entity) =>
+        applyActorStruck(
+          entity,
+          now,
+          crystalStruckActionDurationMs(entity),
+          {
+            x: numberOrUndefined(location?.x),
+            y: numberOrUndefined(location?.y),
+            direction: stringOrNull(payload.direction) ?? undefined,
+          },
+          attackerId,
+        ),
+      ),
     }));
+    if (!queued) {
+      emitInlineEntityStruck(objectId, attackerId);
+    }
   }
 
   function markPlayerStruck(payload: Record<string, unknown>) {
     const attackerId = stringifyId(payload.attackerId);
     const playerObjectId = worldRef.current.playerObjectId;
     const now = Date.now();
-    // Sound + hit-flash via bus; selection update stays inline.
+    let accepted = false;
+    let queued = false;
     if (playerObjectId) {
-      gameBusRef.current!.emit({ type: "entityStruck", objectId: playerObjectId });
+      const player = worldRef.current.entities.find((entity) => entity.objectId === playerObjectId);
+      if (player && !actorStruckIsAlreadyPending(player, now)) {
+        accepted = true;
+        queued = actorStruckIsActive(player, now);
+      }
     }
     updateWorld((current) => ({
       ...current,
@@ -11635,13 +11772,25 @@ export default function HomePage() {
       // animation: it proves this exact entity just damaged the player. Keep
       // that timestamp on the rendered entity for bounded autonomous threat
       // handling without inferring hostility from proximity alone.
-      entities: attackerId === "0"
-        ? current.entities
-        : patchEntityInList(current.entities, attackerId, (entity) => ({
-            ...entity,
-            attackStartedAt: now,
-          })),
+      entities: patchEntityInList(
+        current.entities.map((entity) =>
+          accepted && entity.objectId === playerObjectId
+            ? applyActorStruck(
+                entity,
+                now,
+                crystalStruckActionDurationMs(entity),
+                {},
+                attackerId,
+              )
+            : entity,
+        ),
+        attackerId,
+        (entity) => (attackerId === "0" ? entity : { ...entity, attackStartedAt: now }),
+      ),
     }));
+    if (accepted && !queued && playerObjectId) {
+      emitInlineEntityStruck(playerObjectId, attackerId);
+    }
   }
 
   function spawnRangeProjectile(payload: Record<string, unknown>) {
@@ -11723,10 +11872,16 @@ export default function HomePage() {
     if (typeof rawId !== "string" && typeof rawId !== "number") return;
 
     const now = Date.now();
-    const delayMs = Math.max(
-      0,
-      numberOrUndefined(payload.delayTime ?? payload.delay_time) ?? 0,
-    );
+    // Crystal's ObjectEffect.Healing branch ignores DelayTime and creates the
+    // target-owned Magic/370..379 effect immediately. Other effect families
+    // retain the packet delay used by the generic scene-effect path.
+    const ignoresPacketDelay = source === "object" && Number(rawId) === 3;
+    const delayMs = ignoresPacketDelay
+      ? 0
+      : Math.max(
+          0,
+          numberOrUndefined(payload.delayTime ?? payload.delay_time) ?? 0,
+        );
     const explicitTimeMs = Math.max(0, numberOrUndefined(payload.time) ?? 0);
     const location = payload.location as { x?: number; y?: number } | undefined;
     const objectId = stringifyId(payload.objectId ?? payload.sourceId);
@@ -11791,54 +11946,82 @@ export default function HomePage() {
     });
   }
 
+  function appendPlayerReviveEffect(current: WorldState, entity: WorldEntity, now: number): SceneEffectState[] {
+    const effect = createPlayerReviveSceneEffect(entity, now);
+    return [
+      ...current.effects.filter((entry) => entry.expiresAt > now && entry.key !== effect.key).slice(-95),
+      effect,
+    ];
+  }
+
+  function markSelfPlayerDead(payload: Record<string, unknown>) {
+    const objectId = worldRef.current.playerObjectId;
+    if (!objectId) return;
+    markWorldEntityDead({ ...payload, objectId });
+  }
+
+  function markSelfPlayerRevived() {
+    const objectId = worldRef.current.playerObjectId;
+    if (!objectId) return;
+    const currentEntity = worldRef.current.entities.find((entity) => entity.objectId === objectId);
+    if (!currentEntity) return;
+    const now = Date.now();
+    cancelPendingEntitySounds(objectId);
+    gameBusRef.current!.emit({ type: "entityRevived", objectId });
+    updateWorld((current) => ({
+      ...current,
+      // Crystal Revived changes action/dead/effect state only. Authoritative
+      // HealthChanged/ObjectHealth owns the restored HP value.
+      entities: patchEntityInList(current.entities, objectId, (entity) =>
+        applyActorRevive(entity, now, crystalReviveActionDurationMs(entity), "standing"),
+      ),
+      effects: appendPlayerReviveEffect(current, currentEntity, now),
+    }));
+  }
+
   function markWorldEntityDead(payload: Record<string, unknown>) {
     const location = payload.location as { x?: number; y?: number } | undefined;
     const objectId = stringifyId(payload.objectId);
+    const currentEntity = worldRef.current.entities.find((entity) => entity.objectId === objectId);
+    if (!currentEntity || currentEntity.deathHandled === true) return;
     gameBusRef.current!.emit({ type: "entityDied", objectId });
     const now = Date.now();
 
     updateWorld((current) => ({
       ...current,
       playerHp: current.playerObjectId === objectId ? 0 : current.playerHp,
-      entities: patchEntityInList(current.entities, objectId, (entity) => ({
-        ...entity,
-        x: numberOrZero(location?.x),
-        y: numberOrZero(location?.y),
-        direction: stringOrNull(payload.direction) ?? entity.direction,
-        hp: 0,
-        dead: true,
-        dieStartedAt: now,
-        dieUntil: now + crystalDeathActionDurationMs(entity),
-        attackAnimation: undefined,
-        attackStartedAt: undefined,
-        attackUntil: undefined,
-        struckStartedAt: undefined,
-        struckUntil: undefined,
-        reviveStartedAt: undefined,
-        reviveUntil: undefined,
-      })),
+      entities: patchEntityInList(current.entities, objectId, (entity) =>
+        applyActorDeath(entity, now, crystalDeathActionDurationMs(entity), {
+          x: numberOrUndefined(location?.x),
+          y: numberOrUndefined(location?.y),
+          direction: stringOrNull(payload.direction) ?? undefined,
+        }),
+      ),
     }));
   }
 
   function markWorldEntityRevived(payload: Record<string, unknown>) {
     const objectId = stringifyId(payload.objectId);
     const now = Date.now();
+    const withEffect = payload.effect === true;
+    const currentEntity = worldRef.current.entities.find((entity) => entity.objectId === objectId);
+    if (!currentEntity) return;
+    const duplicateRevive = typeof currentEntity.reviveUntil === "number" && currentEntity.reviveUntil > now;
+    cancelPendingEntitySounds(objectId);
+    if (withEffect && !duplicateRevive) {
+      gameBusRef.current!.emit({ type: "entityRevived", objectId });
+    }
 
     updateWorld((current) => ({
       ...current,
-      playerHp:
-        current.playerObjectId === objectId && typeof current.playerMaxHp === "number"
-          ? Math.max(1, current.playerMaxHp)
-          : current.playerHp,
-      entities: patchEntityInList(current.entities, objectId, (entity) => ({
-        ...entity,
-        hp: typeof entity.maxHp === "number" ? Math.max(1, entity.maxHp) : entity.hp,
-        dead: false,
-        dieStartedAt: undefined,
-        dieUntil: undefined,
-        reviveStartedAt: now,
-        reviveUntil: now + crystalReviveActionDurationMs(entity),
-      })),
+      // ObjectRevived does not carry HP; retain the last value until
+      // ObjectHealth supplies the authoritative post-revive percentage/value.
+      entities: patchEntityInList(current.entities, objectId, (entity) =>
+        applyActorRevive(entity, now, crystalReviveActionDurationMs(entity), "animated"),
+      ),
+      effects: withEffect && !duplicateRevive
+        ? appendPlayerReviveEffect(current, currentEntity, now)
+        : current.effects,
     }));
   }
 
@@ -11956,8 +12139,6 @@ export default function HomePage() {
             : isSelf && percent <= 0
               ? 0
               : current.playerHp;
-      const now = Date.now();
-
       return {
         ...current,
         playerHp: nextPlayerHp,
@@ -11979,19 +12160,7 @@ export default function HomePage() {
               : typeof entity.maxHp === "number"
                 ? entity.maxHp
                 : undefined;
-          const died = percent <= 0;
-          const revived = percent > 0 && entity.dead;
-
-          return {
-            ...entity,
-            hp: nextHp,
-            maxHp: nextMaxHp,
-            dead: died,
-            dieStartedAt: died && !entity.dead ? now : entity.dieStartedAt,
-            dieUntil: died && !entity.dead ? now + crystalDeathActionDurationMs(entity) : entity.dieUntil,
-            reviveStartedAt: revived ? now : entity.reviveStartedAt,
-            reviveUntil: revived ? now + crystalReviveActionDurationMs(entity) : entity.reviveUntil,
-          };
+          return applyActorHealth(entity, nextHp, nextMaxHp);
         }),
       };
     });
@@ -12259,8 +12428,10 @@ export default function HomePage() {
             attackUntil: entity.attackUntil,
             struckStartedAt: entity.struckStartedAt,
             struckUntil: entity.struckUntil,
+            pendingStruck: entity.pendingStruck,
             dieStartedAt: entity.dieStartedAt,
             dieUntil: entity.dieUntil,
+            deathHandled: entity.deathHandled,
             reviveStartedAt: entity.reviveStartedAt,
             reviveUntil: entity.reviveUntil,
           },
@@ -12288,13 +12459,16 @@ export default function HomePage() {
               ? transient.attackUntil
               : undefined,
           struckStartedAt:
-            typeof transient.struckUntil === "number" && transient.struckUntil > currentTime
+            transient.pendingStruck !== undefined ||
+            (typeof transient.struckUntil === "number" && transient.struckUntil > currentTime)
               ? transient.struckStartedAt
               : undefined,
           struckUntil:
-            typeof transient.struckUntil === "number" && transient.struckUntil > currentTime
+            transient.pendingStruck !== undefined ||
+            (typeof transient.struckUntil === "number" && transient.struckUntil > currentTime)
               ? transient.struckUntil
               : undefined,
+          pendingStruck: transient.pendingStruck,
           dieStartedAt:
             typeof transient.dieUntil === "number" && transient.dieUntil > currentTime
               ? transient.dieStartedAt
@@ -12303,6 +12477,7 @@ export default function HomePage() {
             typeof transient.dieUntil === "number" && transient.dieUntil > currentTime
               ? transient.dieUntil
               : undefined,
+          deathHandled: transient.deathHandled,
           reviveStartedAt:
             typeof transient.reviveUntil === "number" && transient.reviveUntil > currentTime
               ? transient.reviveStartedAt
@@ -13837,13 +14012,10 @@ export default function HomePage() {
       onRepairItem={repairItem}
       onSpecialRepairItem={specialRepairItem}
       onCastSkill={castSkill}
-      onTransferMap={transferMap}
       onClaimMail={claimMail}
       onDeleteMail={deleteMail}
       onBuyGameShopItem={buyGameShopItem}
-      onRunStage5Command={runStage5Command}
       onSendClientCommand={sendClientCommand}
-      transferOptions={QUICK_TRANSFER_OPTIONS}
       onStartTutorial={startTutorial}
       onToggleCharacter={toggleCharacterWindow}
       onToggleInventory={toggleInventoryWindow}
@@ -13878,15 +14050,28 @@ export default function HomePage() {
     />
     <ExtraWindows
       t={t}
-      questLog={{ open: showQuestLog, onClose: () => setShowQuestLog(false), quests: localizedQuestLog, playerClass: self?.classKey ?? null, onTrackQuest: trackQuest, onAbandonQuest: abandonQuest, onShareQuest: shareQuest, onAcceptQuest: acceptQuest, onFinishQuest: finishQuest }}
+      questLog={{
+        open: showQuestLog,
+        onClose: () => setShowQuestLog(false),
+        quests: localizedQuestLog,
+        playerClass: self?.classKey ?? null,
+        onTrackQuest: trackQuest,
+        onAbandonQuest: abandonQuest,
+        onShareQuest: shareQuest,
+        onAcceptQuest: acceptQuest,
+        onFinishQuest: finishQuest,
+        canAcceptQuest: (questId) => activeQuestDialogTarget(questId, "accept") !== null,
+        canFinishQuest: (questId, selectedItemIndex) =>
+          activeQuestDialogTarget(questId, "finish", selectedItemIndex) !== null,
+      }}
       heroPet={{ open: showHeroPet, onClose: () => setShowHeroPet(false), hero: extraWindowData.hero, creatures: extraWindowData.creatures, onSummonHero: summonHero, onSummonCreature: summonCreature, onReleaseCreature: releaseCreature, onCyclePickupMode: cycleCreaturePickupMode, onSetHeroBehaviour: setHeroBehaviour, onRecallHero: recallHero }}
       guild={{ open: showGuild, onClose: () => setShowGuild(false), guild: world.stage5Systems?.guild ?? null, playerName: self?.name ?? null, onEditNotice: editGuildNotice, onInviteMember: inviteGuildMember, onKickMember: kickGuildMember, onSendGuildChat: sendGuildChat, onChangeMemberRank: changeGuildMemberRank, onSaveRank: saveGuildRank, onDepositGold: guildDepositGold, onWithdrawGold: guildWithdrawGold }}
-      group={{ open: showGroup, onClose: () => setShowGroup(false), group: extraWindowData.group, playerName: self?.name ?? null, onInviteMember: groupInviteMember, onKickMember: kickGroupMember, onLeaveGroup: groupLeave, onToggleLootMode: groupToggleLootMode, onToggleAllowInvites: groupToggleAllowInvites }}
+      group={{ open: showGroup, onClose: () => setShowGroup(false), group: extraWindowData.group, playerName: self?.name ?? null, onInviteMember: groupInviteMember, onKickMember: kickGroupMember, onLeaveGroup: groupLeave, onToggleAllowInvites: groupToggleAllowInvites }}
       friends={{ open: showFriends, onClose: () => setShowFriends(false), social: extraWindowData.friends, onAddFriend: addFriend, onBlockPlayer: blockPlayer, onRemoveFriend: removeFriendEntry, onUnblockPlayer: removeFriendEntry, onWhisper: whisperPlayer, onMail: openMailWindow, onEditMemo: editFriendMemo }}
       bonds={{ open: showBonds, onClose: () => setShowBonds(false), relationship: extraWindowData.relationship, mentor: extraWindowData.mentor, onProposeMarriage: proposeMarriage, onDivorce: divorce, onAllowMarriage: toggleAllowMarriage, onAddMentor: addMentor, onAllowMentor: allowMentor, onCancelMentor: cancelMentor }}
       ranking={{ open: showRanking, onClose: () => setShowRanking(false), activeTab: extraWindowData.rankingTab, page: extraWindowData.rankingPage, playerName: self?.name ?? null, onSelectTab: requestRanking, onRefresh: requestRanking, onToggleOnlineOnly: setRankingOnlineOnly }}
       market={{ open: showMarket, onClose: () => setShowMarket(false), listings: extraWindowData.marketListings, gold: world.gold, cityCurrencies: world.cityCurrencies, onBuy: marketBuyListing, onCancel: marketCancelListing, onSearch: marketSearch, onRefresh: marketRefresh, onCollect: marketCancelListing }}
-      conquest={{ open: showConquest, onClose: () => setShowConquest(false), conquest: extraWindowData.conquest, territory: extraWindowData.guildTerritory, guildName: world.stage5Systems?.guild?.name ?? null, onStartWar: conquestStartWar }}
+      conquest={{ open: showConquest, onClose: () => setShowConquest(false), conquest: extraWindowData.conquest, territory: extraWindowData.guildTerritory, guildName: world.stage5Systems?.guild?.name ?? null }}
       trade={{ open: showTrade, onClose: () => setShowTrade(false), trade: extraWindowData.trade, myGold: world.gold, onAccept: acceptTrade, onConfirm: confirmTrade, onCancel: cancelTrade, onSetGold: setTradeGold }}
       buffs={{ open: showBuffs, onClose: () => setShowBuffs(false), buffs: extraWindowData.buffs }}
       mail={{ open: showMail, onClose: () => setShowMail(false), mail: extraWindowData.mail, gold: world.gold, onOpen: openMailMessage, onClaimAttachment: claimMailAttachment, onDeleteMail: deleteMailMessage, onSendMail: sendMailMessage }}
@@ -15206,25 +15391,6 @@ function setOriginalMapDoorClosed(
     return { ...cell, closedDoor: closed };
   });
   return changed ? { ...region, cells } : region;
-}
-
-function attackAnimationVariant(
-  payload: Record<string, unknown>,
-): "melee1" | "melee2" | "melee3" | "melee4" | "range" {
-  if (typeof payload.spell === "string") {
-    return "range";
-  }
-
-  switch (numberOrUndefined(payload.attackType)) {
-    case 1:
-      return "melee2";
-    case 2:
-      return "melee3";
-    case 3:
-      return "melee4";
-    default:
-      return "melee1";
-  }
 }
 
 function crystalAttackActionDurationMs(

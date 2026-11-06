@@ -1,5 +1,29 @@
 # Agent Orchestration
 
+> Latest Windows visual-parity sync (2026-08-28): VIS-04 Scarecrow Struck
+> audio revision `354bb9f9648758c9f38d5ce149a273ae07cd2a7e` binds Crystal's
+> exact `005-2.wav` flinch-first plus optional attacker-weapon `60..65.wav`
+> clang order across native, Web and Candidate package/verify. Full audited
+> weapon-image groups, Assassin override, unknown-attacker fail-closed,
+> lethal ordering, feed dedupe and actor/scene lifecycle gates are covered.
+> Windows 406/406, Bevy 419/419, runtime 191/191, Web 49 groups plus
+> audio/export/typecheck, Candidate self-tests and independent P0=0/P1=0/
+> P2=0 review pass. This closes one automated audio leaf only. Other monster
+> actions/families and the semantic denominator remain open, as do exact-head
+> package, same-EXE/live-WSS, real DPI, native soak, human audio/visual/feel,
+> legal assets and signing. No global percentage is claimed.
+
+> Latest Windows visual-parity sync (2026-08-28): VIS-04 Scarecrow Attack1
+> audio revision `e1dd6d6379d23efeafe57aa01c170452f1261b83` binds exact
+> Crystal `Monster/005 BaseSound+1=51 -> 005-1.wav` across native actor
+> context/effects, Web export/runtime and Candidate package/verify. Windows
+> 403/403, Bevy native-ui 419/419, runtime 191/191, Web 47 groups plus
+> audio/export/typecheck, Candidate self-tests and independent P0=0/P1=0
+> review pass. This closes one automated audio leaf only. `005-2` flinch,
+> weapon struck clang/order, other monsters and the semantic denominator are
+> open, as are exact-head package, same-EXE/live-WSS, real DPI, native soak,
+> human audio/visual/feel and signing. No global percentage is claimed.
+
 > Latest all-map resource/gameplay audit sync: 2026-05-16 completed. The current all-map gate supersedes the older R303 map-resource warning set: 463/463 Crystal manifest maps are present and parseable, missing minimap indices are `[]`, sampled map libraries are present, and Web `visualFallbackRisk.mapCount=0`; Crystal empty/out-of-range source frame references are tracked separately as source-client no-draw behavior, not frontend fallback. The new gameplay audit checks movements, respawns, NPC scripts, safe zones, safe-zone spell flags, doors, cell lights, fishing cells, drop rules, light/feature flags, and static map semantics with movement failures 0, respawn failures 0, static failures 0, and unimplemented NPC commands 0. Simulation now also filters invalid/special Crystal movement rows from runtime direct transfer exposure, fixes type-1 map cell stride parsing, finds the local full client root, and leaves no-candidate respawns inert. Evidence: `docs/generated/map/latest-crystal-map-coverage.json`, `docs/generated/map/latest-crystal-map-gameplay.json`, Web `npx tsc --noEmit`, Simulation fmt check, focused `crystal_manifest_movements` 2/2, and focused `spread_slots` 2/2.
 
 > Latest runtime/frontend comparison sync: 2026-04-29-R310 completed/monitoring. R310 fixes two visible comparison blockers: the login transition overlay is cleared before game screenshots (`transitionOverlayVisible=false`), and NPC quest icons now require matching server `questIds` instead of rendering on every NPC. Added `apps/web/scripts/capture-crystal-parity.mjs` for repeatable Web same-scene capture and `apps/web/scripts/r310-visual-watch.ps1` for original/Web long-run sampling. Evidence: `docs/generated/player-qa/r310-visual-watch/r310-final-web-scene-state.json`, `docs/generated/player-qa/r310-visual-watch/r310-final-web-scene.png`, and the one-sample watch log under `docs/generated/player-qa/r310-visual-watch/r310-visual-watch-log.jsonl`.

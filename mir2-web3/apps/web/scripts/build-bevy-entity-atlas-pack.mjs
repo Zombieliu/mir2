@@ -12,6 +12,9 @@ const DEFAULT_ROOTS = [
   "CArmour/00",
   "CHair/00",
   "CWeapon/00",
+  // Crystal harvest always draws CWeapon/01 even when the equipped weapon is
+  // the starter CWeapon/00. Keep that authoritative VIS-01 layer local.
+  "CWeapon/01",
   "AArmour/00",
   "AHair/00",
   "AWeapon/00 L",

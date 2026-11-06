@@ -224,6 +224,7 @@ fn boss_spawn() -> ZoneMonsterSpawn {
         name_colour_argb: -1,
         image: template.image,
         ai: template.ai,
+        disposition: Some(mir2_simulation::WorldEntityDisposition::Hostile),
         level: template.level,
         max_hp: template.hp,
         hp: template.hp,
@@ -234,6 +235,7 @@ fn boss_spawn() -> ZoneMonsterSpawn {
         position: Point { x: 23, y: 18 },
         direction: MirDirection::Left,
         defense: ZoneMonsterDefense::from_crystal_template(template),
+        respawn: None,
         drops: Vec::<GroundDropSnapshot>::new(),
     }
 }
@@ -305,6 +307,19 @@ fn run_combat(active: &[Participant]) -> CombatRunReport {
         ZoneRuntime::new_with_collision(ZoneKey::for_map(BOSS_MAP), ZoneCollision::unbounded());
     for participant in active {
         zone.handle(ZoneCommand::Join(join(participant)));
+        // Production attacks are admitted only after the authenticated
+        // session synchronizes its authoritative combat predicates. This
+        // trusted constructor has no raw client protocol representation.
+        zone.handle(ZoneCommand::sync_player_combat_state(
+            session(participant.session),
+            participant.class,
+            participant.class == MirClass::Archer,
+            false,
+            true,
+            false,
+            false,
+            false,
+        ));
     }
     let owner = session(active[0].session);
     zone.handle(ZoneCommand::SpawnMonster {

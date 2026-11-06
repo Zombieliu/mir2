@@ -108,15 +108,22 @@ services:
       context: ../..
       dockerfile: Dockerfile
       target: gateway
+    labels:
+      com.obelisk.mir2.role: "gateway"
     restart: unless-stopped
     environment:
       MIR2_GATEWAY_TCP_ADDR: 0.0.0.0:7000
       MIR2_GATEWAY_WEB_ADDR: 0.0.0.0:7010
+      MIR2_GATEWAY_INSTANCE_ID: gate12-gateway-1
+      MIR2_SAVE_RECOVERY_DIR: /var/lib/obelisk/save-recovery/gateway
+      MIR2_SAVE_RECOVERY_MAC_KEY: ${MIR2_GATEWAY_SAVE_RECOVERY_MAC_KEY:?set MIR2_GATEWAY_SAVE_RECOVERY_MAC_KEY to a stable 64-hex secret}
       MIR2_ZONE_HOST_ADDRS: zone-host-a:7020,zone-host-b:7020
       MIR2_ZONE_HOST_TOKEN: ${MIR2_ZONE_HOST_TOKEN:-gate12-local-zone-rpc-token}
       MIR2_ACCOUNT_STORE_BACKEND: postgres
       MIR2_ACCOUNT_STORE_DATABASE_URL: postgres://mir2:mir2_dev_password@postgres:5432/mir2
       MIR2_ACCOUNT_STORE_PATH: /var/lib/obelisk/accounts.json
+    volumes:
+      - gateway-save-recovery:/var/lib/obelisk/save-recovery/gateway
     ports:
       - "${GATE12_GATEWAY_TCP_PORT:-17000}:7000"
       - "${GATE12_GATEWAY_WEB_PORT:-17010}:7010"
@@ -237,6 +244,8 @@ services:
       - obelisk
 
 volumes:
+  gateway-save-recovery:
+    name: mir2-gate12-gateway-save-recovery-v1
   postgres-data:
   prometheus-data:
   grafana-data:

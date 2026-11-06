@@ -5,6 +5,7 @@ use std::path::PathBuf;
 use std::time::{SystemTime, UNIX_EPOCH};
 
 use mir2_gateway::economy::{EconomyBalanceKey, PostgresEconomyStore};
+use mir2_gateway::routing::SharedAccountInventoryCommitOutcome;
 use mir2_gateway::{
     GatewayConfig, PostgresEconomyAccountInventoryService, SharedAccountInventoryCommand,
     SharedAccountInventoryCommandEnvelope, SharedAccountInventoryExecutionContext,
@@ -128,9 +129,15 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .ok_or("recovery Gate 18 runtime has no identity")?;
     let recovery_command = gold_pickup(recovery_identity, object_id, 25);
     let recovered_gold_before = recovery_runtime.world_snapshot().gold;
+    let recovery_context = SharedAccountInventoryExecutionContext {
+        fencing_generation: active_context.fencing_generation.saturating_add(100),
+        source_sequence: active_context.source_sequence.saturating_add(10_000),
+        created_at_ms: active_context.created_at_ms.saturating_add(60_000),
+        ..active_context.clone()
+    };
     let recovered = recovery_service.commit_fenced(
         &mut recovery_runtime,
-        Some(&active_context),
+        Some(&recovery_context),
         recovery_command,
     );
     let recovered_gold_after = recovery_runtime.world_snapshot().gold;
@@ -152,7 +159,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let active_bootstrap =
         store.bootstrap_character(&identity, &active_runtime.world_snapshot(), generated_at_ms)?;
     let bob_account_id = format!("{run_id}-bob-account");
-    let bob_runtime = start_runtime(&bob_account_id, "RegionalBob")?;
+    let mut bob_runtime = start_runtime(&bob_account_id, "RegionalBob")?;
     let bob_identity = bob_runtime
         .active_identity()
         .ok_or("Bob Gate 18 runtime has no identity")?;
@@ -181,18 +188,20 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let alice_item_before_trade = store.balance(&alice_item_balance)?;
     let bob_item_before_trade = store.balance(&bob_item_balance)?;
     let alice_offer = SharedTradeOffer {
+        settlement_nonce: "00000000000000000000000000000001".to_string(),
         account_id: account_id.clone(),
         character_index: identity.character_index,
         character_name: character_name.clone(),
         partner_name: bob_identity.character_name.clone(),
         gold: 10,
         items: vec![SharedTradeOfferItem {
-            item_state_json: r#"{"quantity":1}"#.to_string(),
+            item_state_json: serde_json::to_string(&alice_item)?,
             key: trade_item_key.clone(),
             unique_id: alice_item.unique_id,
         }],
     };
     let bob_offer = SharedTradeOffer {
+        settlement_nonce: "00000000000000000000000000000002".to_string(),
         account_id: bob_account_id.clone(),
         character_index: bob_identity.character_index,
         character_name: bob_identity.character_name.clone(),
@@ -205,8 +214,16 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let trade_bob_gold_after = store.balance(&bob_gold_balance)?;
     let trade_alice_item_after = store.balance(&alice_item_balance)?;
     let trade_bob_item_after = store.balance(&bob_item_balance)?;
+    // A retry from a successor producer has a new attempt fence/sequence/time
+    // but must recover the same trade settlement nonce pair and event id.
+    let trade_retry_context = SharedAccountInventoryExecutionContext {
+        fencing_generation: bob_context.fencing_generation.saturating_add(100),
+        source_sequence: bob_context.source_sequence.saturating_add(10_000),
+        created_at_ms: bob_context.created_at_ms.saturating_add(60_000),
+        ..bob_context.clone()
+    };
     let trade_retry =
-        active_service.settle_trade_fenced(Some(&bob_context), &alice_offer, &bob_offer);
+        active_service.settle_trade_fenced(Some(&trade_retry_context), &alice_offer, &bob_offer);
     let standby_trade = active_service.settle_trade_fenced(
         Some(&SharedAccountInventoryExecutionContext {
             external_commit_authorized: false,
@@ -216,6 +233,24 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         &bob_offer,
     );
     let unfenced_trade = active_service.settle_trade_fenced(None, &alice_offer, &bob_offer);
+
+    let alice_private_gold_before_trade = active_runtime.world_snapshot().gold;
+    let bob_private_gold_before_trade = bob_runtime.world_snapshot().gold;
+    let expected_trade_item_count = u16::try_from(alice_item.quantity)?;
+    let alice_trade_packets =
+        active_service.reconcile_trade_projections_fenced(&mut active_runtime, Some(&bob_context));
+    let bob_trade_packets =
+        active_service.reconcile_trade_projections_fenced(&mut bob_runtime, Some(&bob_context));
+    let alice_trade_snapshot = active_runtime.world_snapshot();
+    let bob_trade_snapshot = bob_runtime.world_snapshot();
+    let alice_trade_replay =
+        active_service.reconcile_trade_projections_fenced(&mut active_runtime, Some(&bob_context));
+    let bob_trade_replay =
+        active_service.reconcile_trade_projections_fenced(&mut bob_runtime, Some(&bob_context));
+    let alice_trade_pending =
+        active_service.has_pending_trade_projection_fenced(&active_runtime, Some(&bob_context));
+    let bob_trade_pending =
+        active_service.has_pending_trade_projection_fenced(&bob_runtime, Some(&bob_context));
 
     let skill_account_id = format!("{run_id}-skill-account");
     let mut skill_runtime = start_runtime(&skill_account_id, "RegionalTaoist")?;
@@ -307,8 +342,12 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 && ledger_gold_after_materialized == ledger_gold_after_active,
         ),
         (
-            "unfencedProducerRejected".to_string(),
-            !unfenced.committed && unfenced.packets.is_empty(),
+            "unfencedProducerDeferred".to_string(),
+            matches!(
+                unfenced,
+                SharedAccountInventoryCommitOutcome::Deferred { ref receipt }
+                    if !receipt.committed && receipt.packets.is_empty()
+            ),
         ),
         (
             "ownerFenceAndSourceSequenceBound".to_string(),
@@ -325,7 +364,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         ),
         (
             "twoSidedTradeConservedGoldAndItems".to_string(),
-            trade == SharedTradeSettlementOutcome::Committed
+            matches!(trade, SharedTradeSettlementOutcome::DurableCommitted { .. })
                 && trade_alice_gold_after == alice_gold_before_trade - 10
                 && trade_bob_gold_after == bob_gold_before_trade + 10
                 && trade_alice_item_after == alice_item_before_trade - 1
@@ -333,16 +372,48 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         ),
         (
             "tradeRetryAndStandbyDidNotDoubleSettle".to_string(),
-            trade_retry == SharedTradeSettlementOutcome::Duplicate
-                && standby_trade == SharedTradeSettlementOutcome::Committed
+            matches!(
+                trade_retry,
+                SharedTradeSettlementOutcome::DurableDuplicate { .. }
+            ) && standby_trade == SharedTradeSettlementOutcome::Committed
                 && store.balance(&balance)? == trade_alice_gold_after
                 && store.balance(&bob_gold_balance)? == trade_bob_gold_after
                 && store.balance(&alice_item_balance)? == trade_alice_item_after
                 && store.balance(&bob_item_balance)? == trade_bob_item_after,
         ),
         (
-            "unfencedTradeRejected".to_string(),
-            unfenced_trade == SharedTradeSettlementOutcome::Rejected,
+            "unfencedTradeDeferred".to_string(),
+            unfenced_trade == SharedTradeSettlementOutcome::Deferred,
+        ),
+        (
+            "tradePrivateProjectionsMaterializedExactlyOnce".to_string(),
+            alice_trade_packets.iter().any(|packet| matches!(
+                packet,
+                ServerPacket::LoseGold { gold: 10 }
+            )) && alice_trade_packets.iter().any(|packet| matches!(
+                packet,
+                ServerPacket::DeleteItem { unique_id, count }
+                    if *unique_id == alice_item.unique_id && *count == expected_trade_item_count
+            )) && bob_trade_packets.iter().any(|packet| matches!(
+                packet,
+                ServerPacket::GainedGold { gold: 10 }
+            )) && bob_trade_packets.iter().any(|packet| matches!(
+                packet,
+                ServerPacket::GainedItem { item } if item.unique_id == alice_item.unique_id
+            )) && alice_trade_snapshot.gold == alice_private_gold_before_trade - 10
+                && bob_trade_snapshot.gold == bob_private_gold_before_trade + 10
+                && !alice_trade_snapshot
+                    .inventory_items
+                    .iter()
+                    .any(|item| item.unique_id == alice_item.unique_id)
+                && bob_trade_snapshot
+                    .inventory_items
+                    .iter()
+                    .any(|item| item.unique_id == alice_item.unique_id)
+                && alice_trade_replay.is_empty()
+                && bob_trade_replay.is_empty()
+                && !alice_trade_pending
+                && !bob_trade_pending,
         ),
         (
             "exactSkillComponentsDebitedOnce".to_string(),

@@ -14,7 +14,8 @@ const ZONE_MANAGER_CHECKPOINT_VERSION: u32 = 2;
 
 use super::runtime::ZoneRuntime;
 use super::types::{
-    SessionId, ZoneCommand, ZoneJoin, ZoneKey, ZoneNativeMonsterSnapshot, ZoneOutbound,
+    GroundDropClaimTicket, SessionId, ZoneCommand, ZoneJoin, ZoneKey, ZoneNativeMonsterSnapshot,
+    ZoneOutbound,
 };
 
 // Not `Clone`/`Default`-derived: it holds `ZoneRuntime`s which own a
@@ -142,8 +143,10 @@ impl ZoneManager {
             | ZoneCommand::Walk { session_id, .. }
             | ZoneCommand::Run { session_id, .. }
             | ZoneCommand::Turn { session_id, .. }
+            | ZoneCommand::TeleportToNpc { session_id, .. }
             | ZoneCommand::UpdateChatProfile { session_id, .. }
             | ZoneCommand::UpdatePlayerCombatStats { session_id, .. }
+            | ZoneCommand::SyncPlayerCombatState { session_id, .. }
             | ZoneCommand::SyncPlayerTransform { session_id, .. }
             | ZoneCommand::SyncPlayerVitals { session_id, .. }
             | ZoneCommand::Chat { session_id, .. }
@@ -154,14 +157,19 @@ impl ZoneManager {
             | ZoneCommand::SpawnMonster { session_id, .. }
             | ZoneCommand::SyncNativeMonsters { session_id, .. }
             | ZoneCommand::PlayerAttackObject { session_id, .. }
+            | ZoneCommand::PlayerAttackMaterializedObject { session_id, .. }
             | ZoneCommand::PlayerRangeAttackObject { session_id, .. }
+            | ZoneCommand::PlayerRangeAttackMaterializedObject { session_id, .. }
             | ZoneCommand::PlayerCastMagic { session_id, .. }
             | ZoneCommand::PlayerCastMagicWithItem { session_id, .. }
             | ZoneCommand::ResolveReincarnation { session_id, .. }
             | ZoneCommand::ClaimGroundDrop { session_id, .. }
             | ZoneCommand::ClaimNearestGroundDrop { session_id, .. }
             | ZoneCommand::CommitGroundDropClaim { session_id, .. }
+            | ZoneCommand::CommitGroundDropClaimWithTicket { session_id, .. }
             | ZoneCommand::CancelGroundDropClaim { session_id, .. }
+            | ZoneCommand::CancelGroundDropClaimWithTicket { session_id, .. }
+            | ZoneCommand::CancelPendingMovement { session_id }
             | ZoneCommand::OpenDoor { session_id, .. }
             | ZoneCommand::ConfigureHazards { session_id, .. }
             | ZoneCommand::TickPlayerMovement { session_id, .. } => {
@@ -179,6 +187,90 @@ impl ZoneManager {
     /// World-level checkpoints must not resurrect Gateway sessions after a
     /// process restart. The Gateway owns session recovery; the Zone manager only
     /// contributes persistent map/world state to those checkpoints.
+    pub fn zone_key_for_session(&self, session_id: &SessionId) -> Option<ZoneKey> {
+        self.session_zones.get(session_id).cloned()
+    }
+
+    pub fn detached_ground_drop_claim_ticket_is_canonical(
+        &self,
+        key: &ZoneKey,
+        ticket: &GroundDropClaimTicket,
+    ) -> bool {
+        self.zones
+            .get(key)
+            .is_some_and(|zone| zone.detached_ground_drop_claim_ticket_is_canonical(ticket))
+    }
+
+    pub fn has_detached_ground_drop_claim_ticket(
+        &self,
+        key: &ZoneKey,
+        ticket: &GroundDropClaimTicket,
+    ) -> bool {
+        self.zones
+            .get(key)
+            .is_some_and(|zone| zone.has_detached_ground_drop_claim_ticket(ticket))
+    }
+
+    pub fn detach_ground_drop_claim(
+        &mut self,
+        session_id: &SessionId,
+        ticket: &GroundDropClaimTicket,
+    ) -> Option<ZoneKey> {
+        let key = self.session_zones.get(session_id)?.clone();
+        self.zones
+            .get_mut(&key)?
+            .detach_ground_drop_claim(session_id, ticket)
+            .then_some(key)
+    }
+
+    pub fn detach_all_ground_drop_claims(
+        &mut self,
+    ) -> Vec<(ZoneKey, SessionId, GroundDropClaimTicket)> {
+        let mut detached = Vec::new();
+        for (key, zone) in &mut self.zones {
+            detached.extend(
+                zone.detach_all_ground_drop_claims()
+                    .into_iter()
+                    .map(|(session_id, ticket)| (key.clone(), session_id, ticket)),
+            );
+        }
+        detached
+    }
+
+    pub fn restore_detached_ground_drop_claim(
+        &mut self,
+        key: &ZoneKey,
+        ticket: &GroundDropClaimTicket,
+        now_ms: u64,
+    ) -> Option<Vec<ZoneOutbound>> {
+        self.zones
+            .get_mut(key)?
+            .restore_detached_ground_drop_claim(ticket, now_ms)
+    }
+
+    pub fn has_pending_ground_drop_claim_ticket(
+        &self,
+        session_id: &SessionId,
+        ticket: &GroundDropClaimTicket,
+    ) -> bool {
+        let Some(key) = self.session_zones.get(session_id) else {
+            return false;
+        };
+        self.zones
+            .get(key)
+            .is_some_and(|zone| zone.has_pending_ground_drop_claim_ticket(session_id, ticket))
+    }
+
+    /// Enumerate the authoritative Zone claims awaiting Gateway settlement.
+    /// Gateway checkpoint recovery validates each entry against its own
+    /// presence mappings before adopting it.
+    pub fn pending_ground_drop_claim_tickets(&self) -> Vec<(SessionId, GroundDropClaimTicket)> {
+        self.zones
+            .values()
+            .flat_map(ZoneRuntime::pending_ground_drop_claim_tickets)
+            .collect()
+    }
+
     pub fn leave_all_sessions(&mut self) -> usize {
         let session_ids = self.session_zones.keys().cloned().collect::<Vec<_>>();
         let session_count = session_ids.len();
@@ -246,6 +338,18 @@ impl ZoneManager {
         self.zones.get(key)
     }
 
+    /// Install caller-configured policy before any session joins the Zone.
+    /// Used by deterministic fixtures and trusted bootstrap configuration;
+    /// replacing an active Zone is deliberately rejected.
+    pub fn install_empty_zone(&mut self, zone: ZoneRuntime) -> bool {
+        let key = zone.key().clone();
+        if self.session_zones.values().any(|active| active == &key) {
+            return false;
+        }
+        self.zones.insert(key, zone);
+        true
+    }
+
     pub fn native_monster_snapshots(&self, key: &ZoneKey) -> Vec<ZoneNativeMonsterSnapshot> {
         self.zones
             .get(key)
@@ -303,6 +407,17 @@ impl ZoneManager {
     pub fn player_vitals(&self, session_id: &SessionId) -> Option<(i32, i32, i32)> {
         let key = self.session_zones.get(session_id)?;
         self.zones.get(key)?.player_vitals(session_id)
+    }
+
+    /// Trusted server-only Harvest admission query for the player's active
+    /// Zone. No raw client command can synchronize the predicates it reads.
+    pub fn player_harvest_admitted(&self, session_id: &SessionId, now_ms: u64) -> bool {
+        let Some(key) = self.session_zones.get(session_id) else {
+            return false;
+        };
+        self.zones
+            .get(key)
+            .is_some_and(|zone| zone.player_harvest_admitted(session_id, now_ms))
     }
 
     pub fn can_player_cast_magic(

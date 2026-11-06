@@ -1,13 +1,17 @@
 use bevy_ecs::{component::Component, entity::Entity, prelude::World, query::With};
 use mir2_game_data::{
-    crystal_drop_table_for_monster_name, crystal_item_by_name, crystal_monster_by_name,
-    format_localized_text, starter_server_data, CrystalDropEntry, CrystalItemTemplate,
-    CrystalRandomItemStatProfile, CrystalRandomStatRoll, DropTemplate, QuestTemplate,
+    crystal_drop_table_for_monster_name, crystal_item_by_name, crystal_item_manifest,
+    crystal_monster_by_name, format_localized_text, starter_server_data, CrystalDropEntry,
+    CrystalItemTemplate, CrystalRandomItemStatProfile, CrystalRandomStatRoll, DropTemplate,
+    QuestTemplate,
 };
-use mir2_protocol::{ChatType, MirDirection, ObjectGoldInfo, Point, ServerPacket, UserItemStat};
+use mir2_protocol::{
+    ChatType, MirDirection, ObjectGoldInfo, Point, ServerPacket, UserItem, UserItemStat,
+};
 
 use crate::config::{
-    GroundDropLootSnapshot, GroundDropSnapshot, ItemContainer, QuestStage, SimulationConfig,
+    GroundDropItemPayload, GroundDropLootSnapshot, GroundDropSnapshot, ItemContainer, QuestStage,
+    SimulationConfig,
 };
 
 use super::components::{
@@ -16,15 +20,17 @@ use super::components::{
     HarvestOwnership, MonsterAgent, MonsterAiState, ObjectId, Position, WorldObject, YimoogiState,
 };
 use super::crystal_compat::*;
-use super::equipment::equipment_slot_unique_id;
+use super::equipment::{equipment_slot_unique_id, item_state_from_equipment_state};
 use super::inventory::{
-    add_or_increment_item_with_durability, add_or_increment_item_with_random_metadata,
+    add_exact_ground_drop_items, add_or_increment_item_with_durability,
+    add_or_increment_item_with_random_metadata, can_gain_exact_ground_drop_item,
     can_gain_item_quantity, equipment_index_for_client_reference, item_matches_inventory_unique_id,
 };
 use super::items::{
     crystal_item_has_bind_flag, crystal_item_key_for_template, crystal_item_template_for_item_key,
-    equipment_has_crystal_or_rental_bind_flag, item_has_crystal_or_rental_bind_flag,
-    item_icon_for_key, localized_drop_name_key, localized_item_name, normalize_crystal_item_key,
+    embedded_item_state_from_template, equipment_has_crystal_or_rental_bind_flag,
+    item_has_crystal_or_rental_bind_flag, item_icon_for_key, localized_drop_name_key,
+    localized_item_name, normalize_crystal_item_key, try_user_item_from_item_state,
     user_item_from_item_state,
 };
 use super::map::{
@@ -184,6 +190,7 @@ pub(super) enum DropLoot {
         cursed: bool,
         socket_slots: u8,
         show_group_pickup: bool,
+        exact_item: Option<GroundDropItemPayload>,
     },
 }
 
@@ -223,6 +230,113 @@ pub(super) struct CrystalRandomDropStats {
     pub(super) socket_slots: u8,
 }
 
+fn clear_ground_drop_user_item_uids(item: &mut UserItem) {
+    item.unique_id = 0;
+    for child in item.slots.iter_mut().flatten() {
+        clear_ground_drop_user_item_uids(child);
+    }
+}
+
+fn unique_crystal_item_by_display_name(name: &str) -> Option<CrystalItemTemplate> {
+    let mut matches = crystal_item_manifest()
+        .items
+        .into_iter()
+        .filter(|item| item.name.eq_ignore_ascii_case(name.trim()));
+    let template = matches.next()?;
+    matches.next().is_none().then_some(template)
+}
+
+#[allow(clippy::too_many_arguments)]
+fn ground_drop_item_payload_from_resolved(
+    key: &str,
+    name: &str,
+    description: &str,
+    weight: u16,
+    quantity: u32,
+    durability_current: Option<u16>,
+    durability_max: Option<u16>,
+    added_attack: i32,
+    added_defence: i32,
+    added_stats: &[UserItemStat],
+    cursed: bool,
+    socket_slots: u8,
+) -> Option<GroundDropItemPayload> {
+    let direct_template = crystal_item_template_for_item_key(key);
+    let template = direct_template
+        .clone()
+        .or_else(|| unique_crystal_item_by_display_name(key))
+        .or_else(|| unique_crystal_item_by_display_name(name))?;
+    let canonical_key = direct_template
+        .map(|_| key.to_string())
+        .unwrap_or_else(|| crystal_item_key_for_template(&template));
+    let mut state = embedded_item_state_from_template(&template, ItemContainer::Bag1, 0);
+    state.key = canonical_key;
+    state.name = name.to_string();
+    state.description = description.to_string();
+    state.weight = weight;
+    state.quantity = quantity;
+    state.durability_current = durability_current.or(state.durability_current);
+    state.durability_max = durability_max.or(state.durability_max);
+    state.added_attack = added_attack;
+    state.added_defence = added_defence;
+    state.added_stats = added_stats.to_vec();
+    state.cursed = cursed;
+    state.socket_slots = state.socket_slots.max(socket_slots);
+    let mut item = try_user_item_from_item_state(&state).ok()?;
+    clear_ground_drop_user_item_uids(&mut item);
+    Some(GroundDropItemPayload {
+        item,
+        uid_assigned: false,
+    })
+}
+
+fn ground_drop_item_payload_from_state(
+    state: &super::items::ItemState,
+    quantity: u32,
+    preserve_uid: bool,
+) -> Option<GroundDropItemPayload> {
+    let mut state = state.clone();
+    state.quantity = quantity;
+    let mut item = try_user_item_from_item_state(&state).ok()?;
+    if !preserve_uid {
+        clear_ground_drop_user_item_uids(&mut item);
+    }
+    Some(GroundDropItemPayload {
+        item,
+        uid_assigned: preserve_uid,
+    })
+}
+
+#[allow(clippy::too_many_arguments)]
+fn legacy_ground_drop_item_payload(
+    key: &str,
+    name: &str,
+    description: &str,
+    weight: u16,
+    quantity: u32,
+    durability_current: Option<u16>,
+    durability_max: Option<u16>,
+    added_attack: i32,
+    added_defence: i32,
+    added_stats: &[UserItemStat],
+    cursed: bool,
+    socket_slots: u8,
+) -> Option<GroundDropItemPayload> {
+    ground_drop_item_payload_from_resolved(
+        key,
+        name,
+        description,
+        weight,
+        quantity,
+        durability_current,
+        durability_max,
+        added_attack,
+        added_defence,
+        added_stats,
+        cursed,
+        socket_slots,
+    )
+}
 pub(super) fn resolved_monster_drop_templates(
     world: &World,
     monster_object_id: u32,
@@ -1295,6 +1409,22 @@ pub(super) fn spawn_configured_monster_drops(
                     );
                     continue;
                 }
+                let Some(exact_item) = ground_drop_item_payload_from_resolved(
+                    &key,
+                    &name,
+                    &description,
+                    weight,
+                    quantity,
+                    durability_current,
+                    durability_max,
+                    added_attack,
+                    added_defence,
+                    &added_stats,
+                    cursed,
+                    socket_slots,
+                ) else {
+                    continue;
+                };
                 if drop_ground_drop_with_ownership(
                     world,
                     position.clone(),
@@ -1314,6 +1444,7 @@ pub(super) fn spawn_configured_monster_drops(
                         cursed,
                         socket_slots,
                         show_group_pickup,
+                        exact_item: Some(exact_item),
                     },
                     quantity,
                     name.clone(),
@@ -1396,6 +1527,20 @@ fn zone_ground_drop_snapshot_from_template(
             if quest_required {
                 return None;
             }
+            let exact_item = ground_drop_item_payload_from_resolved(
+                &key,
+                &name,
+                &description,
+                weight,
+                quantity,
+                durability_current,
+                durability_max,
+                added_attack,
+                added_defence,
+                &added_stats,
+                cursed,
+                socket_slots,
+            )?;
             let colour_probe = DropLoot::InventoryItem {
                 key: key.clone(),
                 name: name.clone(),
@@ -1409,6 +1554,7 @@ fn zone_ground_drop_snapshot_from_template(
                 cursed,
                 socket_slots,
                 show_group_pickup,
+                exact_item: Some(exact_item.clone()),
             };
             Some(GroundDropSnapshot {
                 object_id: 0,
@@ -1434,6 +1580,7 @@ fn zone_ground_drop_snapshot_from_template(
                     cursed,
                     socket_slots,
                     show_group_pickup,
+                    exact_item: Some(exact_item),
                 },
             })
         }
@@ -1952,7 +2099,6 @@ pub(super) fn drop_pickup_candidate_status(
         return DropPickupCandidateStatus::OwnerBlocked;
     }
 
-    let resources = world.resource::<InventoryResource>();
     let payload = world
         .entity(drop_entity)
         .get::<DropPayload>()
@@ -1965,16 +2111,67 @@ pub(super) fn drop_pickup_candidate_status(
                 DropPickupCandidateStatus::GoldCapBlocked
             }
         }
-        DropLoot::InventoryItem { key, .. } => {
-            if !can_gain_item_quantity(resources, ItemContainer::Bag1, key, payload.quantity) {
-                DropPickupCandidateStatus::NoFreeSlot
+        DropLoot::InventoryItem {
+            key,
+            name,
+            description,
+            weight,
+            durability_current,
+            durability_max,
+            added_attack,
+            added_defence,
+            added_stats,
+            cursed,
+            socket_slots,
+            exact_item,
+            ..
+        } => {
+            let legacy_item = exact_item.as_ref().cloned().or_else(|| {
+                legacy_ground_drop_item_payload(
+                    key,
+                    name,
+                    description,
+                    *weight,
+                    payload.quantity,
+                    *durability_current,
+                    *durability_max,
+                    *added_attack,
+                    *added_defence,
+                    added_stats,
+                    *cursed,
+                    *socket_slots,
+                )
+            });
+            if legacy_item.is_none() {
+                return DropPickupCandidateStatus::NoFreeSlot;
+            }
+            let can_gain = if let Some(exact_item) = legacy_item {
+                can_gain_exact_ground_drop_item(
+                    world,
+                    ItemContainer::Bag1,
+                    key,
+                    name,
+                    description,
+                    8,
+                    payload.quantity,
+                    &exact_item,
+                )
             } else {
+                can_gain_item_quantity(
+                    world.resource::<InventoryResource>(),
+                    ItemContainer::Bag1,
+                    key,
+                    payload.quantity,
+                )
+            };
+            if can_gain {
                 DropPickupCandidateStatus::Pickable
+            } else {
+                DropPickupCandidateStatus::NoFreeSlot
             }
         }
     }
 }
-
 pub(super) fn current_player_drop_ownership(world: &World) -> Option<DropOwnership> {
     let player = player_entity(world)?;
     let owner_object_id = entity_object_id(world, player)?;
@@ -2296,35 +2493,90 @@ pub(super) fn pick_up_ground_drop(world: &mut World, object_id: u32) -> Vec<Serv
             cursed,
             socket_slots,
             show_group_pickup,
+            exact_item,
         } => {
-            {
-                let resources = world.resource::<InventoryResource>();
-                if !can_gain_item_quantity(&resources, ItemContainer::Bag1, &key, payload.quantity)
-                {
+            let exact_item = exact_item.or_else(|| {
+                legacy_ground_drop_item_payload(
+                    &key,
+                    &name,
+                    &description,
+                    weight,
+                    payload.quantity,
+                    durability_current,
+                    durability_max,
+                    added_attack,
+                    added_defence,
+                    &added_stats,
+                    cursed,
+                    socket_slots,
+                )
+            });
+            if exact_item.is_none() {
+                return Vec::new();
+            }
+            let gained_items = if let Some(exact_item) = exact_item.as_ref() {
+                if !can_gain_exact_ground_drop_item(
+                    world,
+                    ItemContainer::Bag1,
+                    &key,
+                    &name,
+                    &description,
+                    8,
+                    payload.quantity,
+                    exact_item,
+                ) {
                     return vec![system_message_key(world, "server.YouCannotCarryAnymore")];
                 }
-            }
-            let gained_item = add_or_increment_item_with_random_metadata(
-                world,
-                ItemContainer::Bag1,
-                &key,
-                &name,
-                &description,
-                8,
-                payload.quantity,
-                weight,
-                durability_current,
-                durability_max,
-                added_attack,
-                added_defence,
-                added_stats,
-                cursed,
-                socket_slots,
-            );
+                let Some(items) = add_exact_ground_drop_items(
+                    world,
+                    ItemContainer::Bag1,
+                    &key,
+                    &name,
+                    &description,
+                    8,
+                    payload.quantity,
+                    exact_item,
+                ) else {
+                    return Vec::new();
+                };
+                items
+            } else {
+                {
+                    let resources = world.resource::<InventoryResource>();
+                    if !can_gain_item_quantity(
+                        resources,
+                        ItemContainer::Bag1,
+                        &key,
+                        payload.quantity,
+                    ) {
+                        return vec![system_message_key(world, "server.YouCannotCarryAnymore")];
+                    }
+                }
+                vec![add_or_increment_item_with_random_metadata(
+                    world,
+                    ItemContainer::Bag1,
+                    &key,
+                    &name,
+                    &description,
+                    8,
+                    payload.quantity,
+                    weight,
+                    durability_current,
+                    durability_max,
+                    added_attack,
+                    added_defence,
+                    added_stats,
+                    cursed,
+                    socket_slots,
+                )]
+            };
             let _ = world.despawn(drop_entity);
-            let mut packets = vec![ServerPacket::GainedItem {
-                item: user_item_from_item_state(&gained_item),
-            }];
+            let mut packets = gained_items
+                .into_iter()
+                .map(|item| ServerPacket::GainedItem {
+                    item: user_item_from_item_state(&item),
+                })
+                .collect::<Vec<_>>();
             if show_group_pickup
                 && !world
                     .resource::<GroupResource>()
@@ -2443,7 +2695,12 @@ pub(super) fn drop_item_packet(
         return vec![failed_packet];
     };
 
+    let exact_item =
+        ground_drop_item_payload_from_state(&item, requested, requested == item.quantity);
     if !destroy_on_drop {
+        if exact_item.is_none() {
+            return vec![failed_packet];
+        }
         if drop_ground_drop(
             world,
             player_position,
@@ -2465,6 +2722,7 @@ pub(super) fn drop_item_packet(
                 show_group_pickup: crystal_item_template_for_item_key(&item.key)
                     .map(|template| template.show_group_pickup)
                     .unwrap_or(false),
+                exact_item,
             },
             requested,
             item.name.clone(),
@@ -2610,6 +2868,10 @@ fn drop_player_death_inventory_item(world: &mut World, unique_id: u64) -> Vec<Se
     else {
         return Vec::new();
     };
+    let exact_item = ground_drop_item_payload_from_state(&item, 1, item.quantity == 1);
+    if !destroy_on_drop && exact_item.is_none() {
+        return Vec::new();
+    }
     if !destroy_on_drop
         && drop_ground_drop(
             world,
@@ -2632,6 +2894,7 @@ fn drop_player_death_inventory_item(world: &mut World, unique_id: u64) -> Vec<Se
                 show_group_pickup: crystal_item_template_for_item_key(&item.key)
                     .map(|template| template.show_group_pickup)
                     .unwrap_or(false),
+                exact_item,
             },
             1,
             item.name.clone(),
@@ -2673,6 +2936,14 @@ fn drop_player_death_equipment(world: &mut World, unique_id: u64) -> Vec<ServerP
         return Vec::new();
     };
     let template = crystal_item_template_for_item_key(&equipment.key);
+    let exact_item = ground_drop_item_payload_from_state(
+        &item_state_from_equipment_state(equipment.clone(), ItemContainer::Bag1, 0),
+        1,
+        true,
+    );
+    if !destroy_on_drop && exact_item.is_none() {
+        return Vec::new();
+    }
     if !destroy_on_drop
         && drop_ground_drop(
             world,
@@ -2699,6 +2970,7 @@ fn drop_player_death_equipment(world: &mut World, unique_id: u64) -> Vec<ServerP
                     .as_ref()
                     .map(|item| item.show_group_pickup)
                     .unwrap_or(false),
+                exact_item,
             },
             1,
             equipment.name.clone(),
@@ -2996,13 +3268,77 @@ impl SimulationSession {
             GroundDropLootSnapshot::Gold { amount } => {
                 can_gain_gold(world.resource::<PlayerRuntimeResource>(), *amount)
             }
-            GroundDropLootSnapshot::InventoryItem { key, .. } => {
-                can_gain_item_quantity(
-                    world.resource::<InventoryResource>(),
-                    ItemContainer::Bag1,
-                    key,
-                    drop.quantity,
-                ) || crystal_quest_item_task_drop(world, key, &drop.name, drop.quantity).is_some()
+            GroundDropLootSnapshot::InventoryItem {
+                key,
+                name,
+                description,
+                weight,
+                durability_current,
+                durability_max,
+                added_attack,
+                added_defence,
+                added_stats,
+                cursed,
+                socket_slots,
+                exact_item,
+                ..
+            } => {
+                if let Some(task_drop) =
+                    crystal_quest_item_task_drop(world, key, name, drop.quantity)
+                {
+                    return if let Some(exact_item) = exact_item.as_ref() {
+                        can_gain_exact_ground_drop_item(
+                            world,
+                            ItemContainer::Quest,
+                            &task_drop.item_key,
+                            &task_drop.item_name,
+                            &task_drop.description,
+                            0,
+                            drop.quantity,
+                            exact_item,
+                        )
+                    } else {
+                        true
+                    };
+                }
+                let legacy_item = exact_item.as_ref().cloned().or_else(|| {
+                    legacy_ground_drop_item_payload(
+                        key,
+                        name,
+                        description,
+                        *weight,
+                        drop.quantity,
+                        *durability_current,
+                        *durability_max,
+                        *added_attack,
+                        *added_defence,
+                        added_stats,
+                        *cursed,
+                        *socket_slots,
+                    )
+                });
+                if legacy_item.is_none() {
+                    return false;
+                }
+                if let Some(exact_item) = legacy_item.as_ref() {
+                    can_gain_exact_ground_drop_item(
+                        world,
+                        ItemContainer::Bag1,
+                        key,
+                        name,
+                        description,
+                        8,
+                        drop.quantity,
+                        exact_item,
+                    )
+                } else {
+                    can_gain_item_quantity(
+                        world.resource::<InventoryResource>(),
+                        ItemContainer::Bag1,
+                        key,
+                        drop.quantity,
+                    )
+                }
             }
         }
     }
@@ -3152,7 +3488,24 @@ impl SimulationSession {
                 cursed,
                 socket_slots,
                 show_group_pickup,
+                exact_item,
             } => {
+                let legacy_item = exact_item.as_ref().cloned().or_else(|| {
+                    legacy_ground_drop_item_payload(
+                        key,
+                        name,
+                        description,
+                        *weight,
+                        drop.quantity,
+                        *durability_current,
+                        *durability_max,
+                        *added_attack,
+                        *added_defence,
+                        added_stats,
+                        *cursed,
+                        *socket_slots,
+                    )
+                });
                 // Shared Zone drops must preserve the same quest-item routing
                 // as the personal-session pickup path. An ordinary Crystal
                 // ground drop (for example CannibalLeaf) may simultaneously
@@ -3162,32 +3515,52 @@ impl SimulationSession {
                 if let Some(task_drop) =
                     crystal_quest_item_task_drop(world, key, name, drop.quantity)
                 {
-                    let gained_item = add_or_increment_item_with_durability(
-                        world,
-                        ItemContainer::Quest,
-                        &task_drop.item_key,
-                        &task_drop.item_name,
-                        &task_drop.description,
-                        0,
-                        drop.quantity,
-                        task_drop.weight,
-                        *durability_current,
-                        *durability_max,
-                    );
-                    let mut packets = vec![
-                        ServerPacket::GainedItem {
-                            item: user_item_from_item_state(&gained_item),
-                        },
-                        system_message_key_args(
+                    let gained_items = if let Some(exact_item) = exact_item.as_ref() {
+                        let Some(items) = add_exact_ground_drop_items(
                             world,
-                            "server.YouFound",
-                            [localized_item_name(
-                                current_language(world),
-                                &task_drop.item_key,
-                                &task_drop.item_name,
-                            )],
-                        ),
-                    ];
+                            ItemContainer::Quest,
+                            &task_drop.item_key,
+                            &task_drop.item_name,
+                            &task_drop.description,
+                            0,
+                            drop.quantity,
+                            exact_item,
+                        ) else {
+                            return SharedAccountInventoryTransactionReceipt::ground_drop_pickup(
+                                false,
+                                Vec::new(),
+                            );
+                        };
+                        items
+                    } else {
+                        vec![add_or_increment_item_with_durability(
+                            world,
+                            ItemContainer::Quest,
+                            &task_drop.item_key,
+                            &task_drop.item_name,
+                            &task_drop.description,
+                            0,
+                            drop.quantity,
+                            task_drop.weight,
+                            *durability_current,
+                            *durability_max,
+                        )]
+                    };
+                    let mut packets = gained_items
+                        .into_iter()
+                        .map(|item| ServerPacket::GainedItem {
+                            item: user_item_from_item_state(&item),
+                        })
+                        .collect::<Vec<_>>();
+                    packets.push(system_message_key_args(
+                        world,
+                        "server.YouFound",
+                        [localized_item_name(
+                            current_language(world),
+                            &task_drop.item_key,
+                            &task_drop.item_name,
+                        )],
+                    ));
                     if advance_crystal_quest_item_task(
                         world,
                         task_drop.quest_id,
@@ -3204,14 +3577,36 @@ impl SimulationSession {
                     );
                 }
 
-                {
-                    let resources = world.resource::<InventoryResource>();
-                    if !can_gain_item_quantity(resources, ItemContainer::Bag1, key, drop.quantity) {
-                        return SharedAccountInventoryTransactionReceipt::ground_drop_pickup(
-                            false,
-                            vec![system_message_key(world, "server.YouCannotCarryAnymore")],
-                        );
-                    }
+                if legacy_item.is_none() {
+                    return SharedAccountInventoryTransactionReceipt::ground_drop_pickup(
+                        false,
+                        Vec::new(),
+                    );
+                }
+                let can_gain = if let Some(exact_item) = legacy_item.as_ref() {
+                    can_gain_exact_ground_drop_item(
+                        world,
+                        ItemContainer::Bag1,
+                        key,
+                        name,
+                        description,
+                        8,
+                        drop.quantity,
+                        exact_item,
+                    )
+                } else {
+                    can_gain_item_quantity(
+                        world.resource::<InventoryResource>(),
+                        ItemContainer::Bag1,
+                        key,
+                        drop.quantity,
+                    )
+                };
+                if !can_gain {
+                    return SharedAccountInventoryTransactionReceipt::ground_drop_pickup(
+                        false,
+                        vec![system_message_key(world, "server.YouCannotCarryAnymore")],
+                    );
                 }
 
                 let player = player_entity(world).expect("player should exist");
@@ -3220,26 +3615,48 @@ impl SimulationSession {
                     .get::<DisplayName>()
                     .map(|name| name.resolve(current_language(world)))
                     .unwrap_or_else(|| "Player".to_string());
-                let gained_item = add_or_increment_item_with_random_metadata(
-                    world,
-                    ItemContainer::Bag1,
-                    key,
-                    name,
-                    description,
-                    8,
-                    drop.quantity,
-                    *weight,
-                    *durability_current,
-                    *durability_max,
-                    *added_attack,
-                    *added_defence,
-                    added_stats.clone(),
-                    *cursed,
-                    *socket_slots,
-                );
-                let mut packets = vec![ServerPacket::GainedItem {
-                    item: user_item_from_item_state(&gained_item),
-                }];
+                let gained_items = if let Some(exact_item) = legacy_item.as_ref() {
+                    let Some(items) = add_exact_ground_drop_items(
+                        world,
+                        ItemContainer::Bag1,
+                        key,
+                        name,
+                        description,
+                        8,
+                        drop.quantity,
+                        exact_item,
+                    ) else {
+                        return SharedAccountInventoryTransactionReceipt::ground_drop_pickup(
+                            false,
+                            Vec::new(),
+                        );
+                    };
+                    items
+                } else {
+                    vec![add_or_increment_item_with_random_metadata(
+                        world,
+                        ItemContainer::Bag1,
+                        key,
+                        name,
+                        description,
+                        8,
+                        drop.quantity,
+                        *weight,
+                        *durability_current,
+                        *durability_max,
+                        *added_attack,
+                        *added_defence,
+                        added_stats.clone(),
+                        *cursed,
+                        *socket_slots,
+                    )]
+                };
+                let mut packets = gained_items
+                    .into_iter()
+                    .map(|item| ServerPacket::GainedItem {
+                        item: user_item_from_item_state(&item),
+                    })
+                    .collect::<Vec<_>>();
                 if *show_group_pickup
                     && !world
                         .resource::<GroupResource>()
@@ -3333,5 +3750,1205 @@ mod qa_natural_kill_experience_multiplier_tests {
             qa_natural_kill_drop_sample_multiplier_from(Some("101")),
             100
         );
+    }
+}
+#[cfg(test)]
+mod ground_drop_identity_tests {
+    use super::*;
+    use crate::runtime::inventory::add_exact_ground_drop_item;
+    use mir2_protocol::{
+        ClientPacket, UserItemExpireInfo, UserItemRentalInformation, UserItemSealedInfo,
+    };
+
+    fn exact_mount_payload() -> (String, String, String, u16, GroundDropItemPayload) {
+        let mount = crystal_item_by_name("RedTiger").expect("RedTiger template");
+        let key = crystal_item_key_for_template(&mount);
+        let name = mount.name.clone();
+        let description = mount.tooltip.clone().unwrap_or_default();
+        let weight = u16::from(mount.weight);
+        let mut payload = ground_drop_item_payload_from_resolved(
+            &key,
+            &name,
+            &description,
+            weight,
+            1,
+            Some(22_222),
+            Some(33_333),
+            4,
+            5,
+            &[UserItemStat { stat: 17, value: 6 }],
+            true,
+            mount.slots,
+        )
+        .expect("canonical mount payload");
+        payload.item.identified = false;
+        payload.item.soul_bound_id = 77;
+        payload.item.awake_type = 2;
+        payload.item.awake_values = vec![4, 5];
+        payload.item.refined_value = 6;
+        payload.item.refine_added = 7;
+        payload.item.refine_success_chance = 88;
+        payload.item.wedding_ring = 23;
+        payload.item.expire_info = Some(UserItemExpireInfo {
+            expiry_binary_datetime: 123_456,
+        });
+        payload.item.rental_information = Some(UserItemRentalInformation {
+            owner_name: "owner".to_string(),
+            binding_flags: 3,
+            expiry_binary_datetime: 234_567,
+            rental_locked: true,
+        });
+        payload.item.sealed_info = Some(UserItemSealedInfo {
+            expiry_binary_datetime: 345_678,
+            next_seal_binary_datetime: 456_789,
+        });
+        payload.item.is_shop_item = true;
+        payload.item.gm_made = true;
+
+        let bell = crystal_item_by_name("BronzeBell").expect("BronzeBell template");
+        let bell_payload = ground_drop_item_payload_from_resolved(
+            &crystal_item_key_for_template(&bell),
+            &bell.name,
+            bell.tooltip.as_deref().unwrap_or_default(),
+            u16::from(bell.weight),
+            1,
+            None,
+            None,
+            0,
+            0,
+            &[],
+            false,
+            bell.slots,
+        )
+        .expect("canonical bell payload");
+        payload.item.slots = vec![None, Some(bell_payload.item)];
+        (key, name, description, weight, payload)
+    }
+
+    fn assign_ground_drop_user_item_uids(item: &mut UserItem, next_uid: &mut u64) {
+        item.unique_id = *next_uid;
+        *next_uid = next_uid.saturating_add(1);
+        for child in item.slots.iter_mut().flatten() {
+            assign_ground_drop_user_item_uids(child, next_uid);
+        }
+    }
+
+    #[test]
+    fn exact_ground_drop_schema_round_trips_and_old_json_defaults_to_legacy() {
+        let (key, name, description, weight, payload) = exact_mount_payload();
+        let snapshot = GroundDropSnapshot {
+            object_id: 900_001,
+            name: name.clone(),
+            name_colour_argb: -1,
+            icon: item_icon_for_key(&key),
+            x: 10,
+            y: 20,
+            quantity: 1,
+            source_monster: "schema-test".to_string(),
+            owner_object_id: None,
+            ownership_remaining_ticks: None,
+            loot: GroundDropLootSnapshot::InventoryItem {
+                key,
+                name,
+                description,
+                weight,
+                durability_current: Some(22_222),
+                durability_max: Some(33_333),
+                added_attack: 4,
+                added_defence: 5,
+                added_stats: vec![UserItemStat { stat: 17, value: 6 }],
+                cursed: true,
+                socket_slots: 2,
+                show_group_pickup: false,
+                exact_item: Some(payload),
+            },
+        };
+        let json = serde_json::to_value(&snapshot).expect("exact snapshot encodes");
+        let decoded: GroundDropSnapshot =
+            serde_json::from_value(json.clone()).expect("exact snapshot decodes");
+        assert_eq!(decoded, snapshot);
+
+        let mut legacy_json = json;
+        legacy_json
+            .get_mut("loot")
+            .and_then(serde_json::Value::as_object_mut)
+            .expect("loot object")
+            .remove("exactItem");
+        let legacy: GroundDropSnapshot =
+            serde_json::from_value(legacy_json).expect("legacy snapshot decodes");
+        assert!(matches!(
+            legacy.loot,
+            GroundDropLootSnapshot::InventoryItem {
+                exact_item: None,
+                ..
+            }
+        ));
+    }
+
+    #[test]
+    fn legacy_display_name_key_freezes_and_inserts_as_canonical_exact_item() {
+        let template = crystal_item_by_name("Venison").expect("Venison template");
+        let canonical_key = crystal_item_key_for_template(&template);
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        let characters = session
+            .handle_packet(ClientPacket::Login {
+                account_id: "demo".to_string(),
+                password: "demo".to_string(),
+            })
+            .into_iter()
+            .find_map(|packet| match packet {
+                ServerPacket::LoginSuccess { characters } => Some(characters),
+                _ => None,
+            })
+            .expect("demo login");
+        let character_index = characters.first().expect("demo character").index;
+        let _ = session.handle_packet(ClientPacket::StartGame { character_index });
+
+        let receipt = session.commit_shared_ground_drop_pickup_transaction(&GroundDropSnapshot {
+            object_id: 900_010,
+            name: "Venison".to_string(),
+            name_colour_argb: -1,
+            icon: template.image,
+            x: 10,
+            y: 20,
+            quantity: 1,
+            source_monster: "legacy-packet".to_string(),
+            owner_object_id: None,
+            ownership_remaining_ticks: None,
+            loot: GroundDropLootSnapshot::InventoryItem {
+                key: "Venison".to_string(),
+                name: "Venison".to_string(),
+                description: String::new(),
+                weight: 0,
+                durability_current: None,
+                durability_max: None,
+                added_attack: 0,
+                added_defence: 0,
+                added_stats: Vec::new(),
+                cursed: false,
+                socket_slots: 0,
+                show_group_pickup: false,
+                exact_item: None,
+            },
+        });
+
+        assert!(receipt.committed);
+        assert!(receipt.packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::GainedItem { item }
+                if item.item_index == template.item_index && item.count == 1
+        )));
+        assert!(session
+            .world_snapshot()
+            .inventory_items
+            .iter()
+            .any(|item| item.key == canonical_key && item.quantity == 1));
+    }
+
+    #[test]
+    fn ambiguous_legacy_display_name_fails_closed_without_inventory_mutation() {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        let characters = session
+            .handle_packet(ClientPacket::Login {
+                account_id: "demo".to_string(),
+                password: "demo".to_string(),
+            })
+            .into_iter()
+            .find_map(|packet| match packet {
+                ServerPacket::LoginSuccess { characters } => Some(characters),
+                _ => None,
+            })
+            .expect("demo login");
+        let character_index = characters.first().expect("demo character").index;
+        let _ = session.handle_packet(ClientPacket::StartGame { character_index });
+        let before = session.world_snapshot().inventory_items;
+        let drop = GroundDropSnapshot {
+            object_id: 900_011,
+            name: "ToughHoaSword".to_string(),
+            name_colour_argb: -1,
+            icon: 0,
+            x: 10,
+            y: 20,
+            quantity: 1,
+            source_monster: "ambiguous-legacy-packet".to_string(),
+            owner_object_id: None,
+            ownership_remaining_ticks: None,
+            loot: GroundDropLootSnapshot::InventoryItem {
+                key: "ToughHoaSword".to_string(),
+                name: "ToughHoaSword".to_string(),
+                description: String::new(),
+                weight: 0,
+                durability_current: None,
+                durability_max: None,
+                added_attack: 0,
+                added_defence: 0,
+                added_stats: Vec::new(),
+                cursed: false,
+                socket_slots: 0,
+                show_group_pickup: false,
+                exact_item: None,
+            },
+        };
+
+        assert!(!session.can_commit_shared_ground_drop_pickup(&drop));
+        let receipt = session.commit_shared_ground_drop_pickup_transaction(&drop);
+        assert!(!receipt.committed);
+        assert!(receipt.packets.is_empty());
+        assert_eq!(session.world_snapshot().inventory_items, before);
+    }
+
+    #[test]
+    fn shared_pickup_preserves_frozen_identity_without_rerolling_metadata() {
+        let (key, name, description, weight, payload) = exact_mount_payload();
+        let mut expected = payload.item.clone();
+        clear_ground_drop_user_item_uids(&mut expected);
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        let characters = session
+            .handle_packet(ClientPacket::Login {
+                account_id: "demo".to_string(),
+                password: "demo".to_string(),
+            })
+            .into_iter()
+            .find_map(|packet| match packet {
+                ServerPacket::LoginSuccess { characters } => Some(characters),
+                _ => None,
+            })
+            .expect("demo login");
+        let character_index = characters.first().expect("demo character").index;
+        let _ = session.handle_packet(ClientPacket::StartGame { character_index });
+
+        let drop = GroundDropSnapshot {
+            object_id: 900_002,
+            name: name.clone(),
+            name_colour_argb: -1,
+            icon: item_icon_for_key(&key),
+            x: 10,
+            y: 20,
+            quantity: 1,
+            source_monster: "identity-test".to_string(),
+            owner_object_id: None,
+            ownership_remaining_ticks: None,
+            loot: GroundDropLootSnapshot::InventoryItem {
+                key,
+                name,
+                description,
+                weight,
+                durability_current: Some(22_222),
+                durability_max: Some(33_333),
+                added_attack: 4,
+                added_defence: 5,
+                added_stats: vec![UserItemStat { stat: 17, value: 6 }],
+                cursed: true,
+                socket_slots: 2,
+                show_group_pickup: false,
+                exact_item: Some(payload),
+            },
+        };
+        let receipt = session.commit_shared_ground_drop_pickup_transaction(&drop);
+        assert!(receipt.committed);
+        let mut gained = receipt
+            .packets
+            .into_iter()
+            .find_map(|packet| match packet {
+                ServerPacket::GainedItem { item } => Some(item),
+                _ => None,
+            })
+            .expect("exact gained item");
+        assert_ne!(gained.unique_id, 0);
+        assert!(gained
+            .slots
+            .iter()
+            .flatten()
+            .all(|item| item.unique_id != 0));
+        clear_ground_drop_user_item_uids(&mut gained);
+        assert_eq!(gained, expected);
+    }
+
+    #[test]
+    fn assigned_ground_drop_uid_collision_fails_closed_without_mutation() {
+        let (key, name, description, _weight, mut payload) = exact_mount_payload();
+        let mut next_uid = 77_777;
+        assign_ground_drop_user_item_uids(&mut payload.item, &mut next_uid);
+        payload.uid_assigned = true;
+        let mut world = World::new();
+        world.insert_resource(InventoryResource::new(BASE_STORAGE_SLOTS));
+
+        let first = add_exact_ground_drop_item(
+            &mut world,
+            ItemContainer::Bag1,
+            &key,
+            &name,
+            &description,
+            8,
+            1,
+            &payload,
+        );
+        assert!(first.is_some());
+        let before = world
+            .resource::<InventoryResource>()
+            .inventory_items
+            .clone();
+        assert!(add_exact_ground_drop_item(
+            &mut world,
+            ItemContainer::Bag1,
+            &key,
+            &name,
+            &description,
+            8,
+            1,
+            &payload,
+        )
+        .is_none());
+        assert_eq!(
+            format!(
+                "{:?}",
+                world.resource::<InventoryResource>().inventory_items
+            ),
+            format!("{before:?}")
+        );
+    }
+
+    #[test]
+    fn assigned_zero_uid_fails_the_same_preflight_used_before_durable_commit() {
+        let (key, name, description, _weight, mut payload) = exact_mount_payload();
+        payload.uid_assigned = true;
+        let mut world = World::new();
+        world.insert_resource(InventoryResource::new(BASE_STORAGE_SLOTS));
+        let before = format!("{:?}", world.resource::<InventoryResource>());
+
+        assert!(!can_gain_exact_ground_drop_item(
+            &world,
+            ItemContainer::Bag1,
+            &key,
+            &name,
+            &description,
+            8,
+            1,
+            &payload,
+        ));
+        assert!(add_exact_ground_drop_item(
+            &mut world,
+            ItemContainer::Bag1,
+            &key,
+            &name,
+            &description,
+            8,
+            1,
+            &payload,
+        )
+        .is_none());
+        assert_eq!(
+            before,
+            format!("{:?}", world.resource::<InventoryResource>())
+        );
+    }
+
+    #[test]
+    fn malformed_exact_payload_fails_preflight_without_inventory_mutation() {
+        let (key, name, description, _weight, mut payload) = exact_mount_payload();
+        let mut next_uid = 87_000;
+        assign_ground_drop_user_item_uids(&mut payload.item, &mut next_uid);
+        payload.uid_assigned = true;
+
+        for malformed in [
+            {
+                let mut malformed = payload.clone();
+                malformed.item.count = 2;
+                malformed
+            },
+            {
+                let mut malformed = payload.clone();
+                malformed.item.item_index = malformed.item.item_index.saturating_add(1);
+                malformed
+            },
+        ] {
+            let mut world = World::new();
+            world.insert_resource(InventoryResource::new(BASE_STORAGE_SLOTS));
+            let before = format!("{:?}", world.resource::<InventoryResource>());
+            assert!(!can_gain_exact_ground_drop_item(
+                &world,
+                ItemContainer::Bag1,
+                &key,
+                &name,
+                &description,
+                8,
+                1,
+                &malformed,
+            ));
+            assert!(add_exact_ground_drop_item(
+                &mut world,
+                ItemContainer::Bag1,
+                &key,
+                &name,
+                &description,
+                8,
+                1,
+                &malformed,
+            )
+            .is_none());
+            assert_eq!(
+                before,
+                format!("{:?}", world.resource::<InventoryResource>())
+            );
+        }
+    }
+
+    #[test]
+    fn unassigned_exact_stack_merges_when_the_bag_has_no_empty_slot() {
+        let template = crystal_item_template_for_item_key("red-potion")
+            .expect("Red Potion canonical template");
+        let key = crystal_item_key_for_template(&template);
+        let name = template.name.clone();
+        let description = template.tooltip.clone().unwrap_or_default();
+        let max_stack = super::super::items::crystal_stack_size_for_item_key(&key);
+        assert!(max_stack > 1);
+        let payload = ground_drop_item_payload_from_resolved(
+            &key,
+            &name,
+            &description,
+            u16::from(template.weight),
+            1,
+            None,
+            None,
+            0,
+            0,
+            &[],
+            false,
+            template.slots,
+        )
+        .expect("canonical stackable payload");
+        let mut resources = InventoryResource::new(BASE_STORAGE_SLOTS);
+        for slot in 0_u8..40 {
+            let quantity = if slot == 0 { max_stack - 1 } else { max_stack };
+            let mut existing_user_item = payload.item.clone();
+            existing_user_item.unique_id = 10_000 + u64::from(slot);
+            existing_user_item.count = u16::try_from(quantity).expect("stack count fits u16");
+            let base = embedded_item_state_from_template(&template, ItemContainer::Bag1, slot);
+            let mut item =
+                super::super::items::try_item_state_from_user_item(base, &existing_user_item)
+                    .expect("exact compatible existing stack");
+            item.container = ItemContainer::Bag1;
+            item.slot = slot;
+            resources.inventory_items.push(item);
+        }
+        let mut world = World::new();
+        world.insert_resource(resources);
+
+        assert!(can_gain_exact_ground_drop_item(
+            &world,
+            ItemContainer::Bag1,
+            &key,
+            &name,
+            &description,
+            8,
+            1,
+            &payload,
+        ));
+        let gained = add_exact_ground_drop_item(
+            &mut world,
+            ItemContainer::Bag1,
+            &key,
+            &name,
+            &description,
+            8,
+            1,
+            &payload,
+        )
+        .expect("compatible exact stack merges");
+        let resources = world.resource::<InventoryResource>();
+        assert_eq!(resources.inventory_items.len(), 40);
+        assert_eq!(gained.slot, 0);
+        assert_eq!(gained.quantity, max_stack);
+        assert_eq!(resources.inventory_items[0].quantity, max_stack);
+    }
+
+    #[test]
+    fn assigned_ground_drop_stack_merges_when_bag_is_full() {
+        let template = crystal_item_template_for_item_key("red-potion")
+            .expect("Red Potion canonical template");
+        let key = crystal_item_key_for_template(&template);
+        let name = template.name.clone();
+        let description = template.tooltip.clone().unwrap_or_default();
+        let max_stack = super::super::items::crystal_stack_size_for_item_key(&key);
+        assert!(max_stack > 1);
+        let payload = ground_drop_item_payload_from_resolved(
+            &key,
+            &name,
+            &description,
+            u16::from(template.weight),
+            1,
+            None,
+            None,
+            0,
+            0,
+            &[],
+            false,
+            template.slots,
+        )
+        .expect("canonical assigned stackable payload");
+        let mut resources = InventoryResource::new(BASE_STORAGE_SLOTS);
+        for slot in 0_u8..40 {
+            let quantity = if slot == 0 { max_stack - 1 } else { max_stack };
+            let mut existing_user_item = payload.item.clone();
+            existing_user_item.unique_id = 10_000 + u64::from(slot);
+            existing_user_item.count = u16::try_from(quantity).expect("stack count fits u16");
+            let base = embedded_item_state_from_template(&template, ItemContainer::Bag1, slot);
+            let mut item =
+                super::super::items::try_item_state_from_user_item(base, &existing_user_item)
+                    .expect("exact compatible existing stack");
+            item.container = ItemContainer::Bag1;
+            item.slot = slot;
+            resources.inventory_items.push(item);
+        }
+        let mut world = World::new();
+        world.insert_resource(resources);
+        let mut assigned = payload.clone();
+        assigned.item.unique_id = 99_999;
+        assigned.uid_assigned = true;
+
+        let changed = add_exact_ground_drop_items(
+            &mut world,
+            ItemContainer::Bag1,
+            &key,
+            &name,
+            &description,
+            8,
+            1,
+            &assigned,
+        )
+        .expect("assigned compatible stack merges without a free slot");
+        assert_eq!(changed.len(), 1);
+        assert_eq!(changed[0].unique_id, 10_000);
+        assert_eq!(changed[0].quantity, max_stack);
+        assert!(world
+            .resource::<InventoryResource>()
+            .inventory_items
+            .iter()
+            .all(|item| item.unique_id != 99_999));
+    }
+
+    #[test]
+    fn exact_ground_drop_multi_stack_pickup_emits_each_changed_stack() {
+        let template = crystal_item_template_for_item_key("red-potion")
+            .expect("Red Potion canonical template");
+        let key = crystal_item_key_for_template(&template);
+        let name = template.name.clone();
+        let description = template.tooltip.clone().unwrap_or_default();
+        let max_stack = super::super::items::crystal_stack_size_for_item_key(&key);
+        assert!(max_stack > 4);
+        let mut payload = ground_drop_item_payload_from_resolved(
+            &key,
+            &name,
+            &description,
+            u16::from(template.weight),
+            4,
+            None,
+            None,
+            0,
+            0,
+            &[],
+            false,
+            template.slots,
+        )
+        .expect("canonical multi-stack payload");
+        payload.item.unique_id = 88_888;
+        payload.uid_assigned = true;
+
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        let characters = session
+            .handle_packet(ClientPacket::Login {
+                account_id: "demo".to_string(),
+                password: "demo".to_string(),
+            })
+            .into_iter()
+            .find_map(|packet| match packet {
+                ServerPacket::LoginSuccess { characters } => Some(characters),
+                _ => None,
+            })
+            .expect("demo login");
+        let character_index = characters.first().expect("demo character").index;
+        let _ = session.handle_packet(ClientPacket::StartGame { character_index });
+        {
+            let mut inventory = session.app.world_mut().resource_mut::<InventoryResource>();
+            inventory.inventory_items.clear();
+            inventory.belt_items.clear();
+            for slot in 0_u8..40 {
+                let quantity = if slot < 2 { max_stack - 2 } else { max_stack };
+                let mut existing_user_item = payload.item.clone();
+                existing_user_item.unique_id = 20_000 + u64::from(slot);
+                existing_user_item.count = u16::try_from(quantity).expect("stack count fits u16");
+                let base = embedded_item_state_from_template(&template, ItemContainer::Bag1, slot);
+                let mut item =
+                    super::super::items::try_item_state_from_user_item(base, &existing_user_item)
+                        .expect("exact compatible existing stack");
+                item.container = ItemContainer::Bag1;
+                item.slot = slot;
+                inventory.inventory_items.push(item);
+            }
+        }
+        let drop = GroundDropSnapshot {
+            object_id: 900_004,
+            name: name.clone(),
+            name_colour_argb: -1,
+            icon: item_icon_for_key(&key),
+            x: 10,
+            y: 20,
+            quantity: 4,
+            source_monster: "multi-stack-test".to_string(),
+            owner_object_id: None,
+            ownership_remaining_ticks: None,
+            loot: GroundDropLootSnapshot::InventoryItem {
+                key,
+                name,
+                description,
+                weight: u16::from(template.weight),
+                durability_current: None,
+                durability_max: None,
+                added_attack: 0,
+                added_defence: 0,
+                added_stats: Vec::new(),
+                cursed: false,
+                socket_slots: template.slots,
+                show_group_pickup: false,
+                exact_item: Some(payload),
+            },
+        };
+
+        let receipt = session.commit_shared_ground_drop_pickup_transaction(&drop);
+        assert!(receipt.committed);
+        let gained = receipt
+            .packets
+            .into_iter()
+            .filter_map(|packet| match packet {
+                ServerPacket::GainedItem { item } => Some(item),
+                _ => None,
+            })
+            .collect::<Vec<_>>();
+        assert_eq!(gained.len(), 2);
+        assert_eq!(gained[0].unique_id, 20_000);
+        assert_eq!(gained[0].count, max_stack as u16);
+        assert_eq!(gained[1].unique_id, 20_001);
+        assert_eq!(gained[1].count, max_stack as u16);
+        assert!(gained.iter().all(|item| item.unique_id != 88_888));
+    }
+    fn assert_player_drop_preconditions(world: &World, unique_id: u64) {
+        let item = world
+            .resource::<InventoryResource>()
+            .inventory_items
+            .iter()
+            .find(|item| item_matches_inventory_unique_id(item, unique_id))
+            .unwrap_or_else(|| {
+                panic!(
+                    "inserted item uid {unique_id} is not addressable; items={:?}",
+                    world.resource::<InventoryResource>().inventory_items
+                )
+            });
+        assert!(
+            !item_has_crystal_or_rental_bind_flag(item, CRYSTAL_BIND_DONT_DROP),
+            "test item unexpectedly has DontDrop binding: {item:?}"
+        );
+        assert!(
+            ground_drop_item_payload_from_state(item, 1, item.quantity == 1).is_some(),
+            "test item must convert to exact payload: {item:?}"
+        );
+        let position = player_entity(world)
+            .and_then(|entity| entity_position(world, entity))
+            .expect("started player has a position");
+        assert!(
+            crystal_ground_drop_position(world, &position, CRYSTAL_PLAYER_DROP_ITEM_RANGE)
+                .is_some(),
+            "started player needs an adjacent ground-drop position: {position:?}"
+        );
+    }
+
+    #[test]
+    fn whole_player_drop_roundtrip_preserves_assigned_uid_tree() {
+        let (_mount_key, _mount_name, _mount_description, _mount_weight, mut payload) =
+            exact_mount_payload();
+        let template = crystal_item_by_name("Dagger").expect("droppable Dagger template");
+        let key = crystal_item_key_for_template(&template);
+        let name = template.name.clone();
+        let description = template.tooltip.clone().unwrap_or_default();
+        payload.item.item_index = template.item_index;
+        payload
+            .item
+            .rental_information
+            .as_mut()
+            .expect("fixture rental metadata")
+            .binding_flags = 0;
+        let mut next_uid = 88_000;
+        assign_ground_drop_user_item_uids(&mut payload.item, &mut next_uid);
+        payload.uid_assigned = true;
+        let expected = payload.item.clone();
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        let characters = session
+            .handle_packet(ClientPacket::Login {
+                account_id: "demo".to_string(),
+                password: "demo".to_string(),
+            })
+            .into_iter()
+            .find_map(|packet| match packet {
+                ServerPacket::LoginSuccess { characters } => Some(characters),
+                _ => None,
+            })
+            .expect("demo login");
+        let character_index = characters.first().expect("demo character").index;
+        let start_packets = session.handle_packet(ClientPacket::StartGame { character_index });
+        assert!(
+            is_in_world(session.app.world()),
+            "start packets: {start_packets:?}"
+        );
+        {
+            let mut inventory = session.app.world_mut().resource_mut::<InventoryResource>();
+            inventory.inventory_items.clear();
+            inventory.belt_items.clear();
+        }
+        let inserted = add_exact_ground_drop_item(
+            session.app.world_mut(),
+            ItemContainer::Bag1,
+            &key,
+            &name,
+            &description,
+            8,
+            1,
+            &payload,
+        )
+        .expect("assigned item enters inventory");
+        assert_player_drop_preconditions(session.app.world(), inserted.unique_id);
+        let packets = drop_item_packet(session.app.world_mut(), inserted.unique_id, 1, false);
+        assert!(
+            packets
+                .iter()
+                .any(|packet| matches!(packet, ServerPacket::DropItem { success: true, .. })),
+            "drop packets: {packets:?}"
+        );
+        let drop = session
+            .world_snapshot()
+            .ground_drops
+            .into_iter()
+            .find(|drop| matches!(drop.loot, GroundDropLootSnapshot::InventoryItem { .. }))
+            .expect("whole item ground drop");
+        let GroundDropLootSnapshot::InventoryItem {
+            exact_item: Some(exact_item),
+            ..
+        } = &drop.loot
+        else {
+            panic!("whole drop exact payload");
+        };
+        assert!(exact_item.uid_assigned);
+        assert_eq!(exact_item.item, expected);
+
+        let receipt = session.commit_shared_ground_drop_pickup_transaction(&drop);
+        assert!(receipt.committed);
+        let gained = receipt
+            .packets
+            .into_iter()
+            .find_map(|packet| match packet {
+                ServerPacket::GainedItem { item } => Some(item),
+                _ => None,
+            })
+            .expect("whole drop gained item");
+        assert_eq!(gained, expected);
+    }
+
+    #[test]
+    fn partial_player_drop_roundtrip_reuses_source_stack_without_uid_duplication() {
+        let template = crystal_item_template_for_item_key("red-potion")
+            .expect("Red Potion canonical template");
+        let key = crystal_item_key_for_template(&template);
+        let name = template.name.clone();
+        let description = template.tooltip.clone().unwrap_or_default();
+        let mut payload = ground_drop_item_payload_from_resolved(
+            &key,
+            &name,
+            &description,
+            u16::from(template.weight),
+            2,
+            None,
+            None,
+            0,
+            0,
+            &[],
+            false,
+            template.slots,
+        )
+        .expect("canonical partial-stack source");
+        payload.item.unique_id = 89_000;
+        payload.uid_assigned = true;
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        let characters = session
+            .handle_packet(ClientPacket::Login {
+                account_id: "demo".to_string(),
+                password: "demo".to_string(),
+            })
+            .into_iter()
+            .find_map(|packet| match packet {
+                ServerPacket::LoginSuccess { characters } => Some(characters),
+                _ => None,
+            })
+            .expect("demo login");
+        let character_index = characters.first().expect("demo character").index;
+        let start_packets = session.handle_packet(ClientPacket::StartGame { character_index });
+        assert!(
+            is_in_world(session.app.world()),
+            "start packets: {start_packets:?}"
+        );
+        {
+            let mut inventory = session.app.world_mut().resource_mut::<InventoryResource>();
+            inventory.inventory_items.clear();
+            inventory.belt_items.clear();
+        }
+        let inserted = add_exact_ground_drop_item(
+            session.app.world_mut(),
+            ItemContainer::Bag1,
+            &key,
+            &name,
+            &description,
+            8,
+            2,
+            &payload,
+        )
+        .expect("assigned stack enters inventory");
+        {
+            let mut inventory = session.app.world_mut().resource_mut::<InventoryResource>();
+            if let Some(index) = inventory
+                .belt_items
+                .iter()
+                .position(|item| item.unique_id == inserted.unique_id)
+            {
+                let mut item = inventory.belt_items.remove(index);
+                item.container = ItemContainer::Bag1;
+                item.slot = 8;
+                inventory.inventory_items.push(item);
+            }
+        }
+        assert_player_drop_preconditions(session.app.world(), inserted.unique_id);
+        let packets = drop_item_packet(session.app.world_mut(), inserted.unique_id, 1, false);
+        assert!(
+            packets
+                .iter()
+                .any(|packet| matches!(packet, ServerPacket::DropItem { success: true, .. })),
+            "drop packets: {packets:?}"
+        );
+        let drop = session
+            .world_snapshot()
+            .ground_drops
+            .into_iter()
+            .find(|drop| matches!(drop.loot, GroundDropLootSnapshot::InventoryItem { .. }))
+            .expect("partial stack ground drop");
+        let GroundDropLootSnapshot::InventoryItem {
+            exact_item: Some(exact_item),
+            ..
+        } = &drop.loot
+        else {
+            panic!("partial drop exact payload");
+        };
+        assert!(!exact_item.uid_assigned);
+        assert_eq!(exact_item.item.unique_id, 0);
+        assert_eq!(exact_item.item.count, 1);
+
+        let receipt = session.commit_shared_ground_drop_pickup_transaction(&drop);
+        assert!(receipt.committed);
+        let gained = receipt
+            .packets
+            .into_iter()
+            .find_map(|packet| match packet {
+                ServerPacket::GainedItem { item } => Some(item),
+                _ => None,
+            })
+            .expect("partial drop gained stack");
+        assert_eq!(gained.unique_id, 89_000);
+        assert_eq!(gained.count, 2);
+        let inventory = session.app.world().resource::<InventoryResource>();
+        assert_eq!(inventory.inventory_items.len(), 1);
+        assert_eq!(inventory.inventory_items[0].unique_id, 89_000);
+        assert_eq!(inventory.inventory_items[0].quantity, 2);
+    }
+    #[test]
+    fn shared_quest_pickup_preserves_exact_identity() {
+        let template = crystal_item_by_name("CannibalLeaf").expect("CannibalLeaf template");
+        let key = crystal_item_key_for_template(&template);
+        let name = template.name.clone();
+        let description = template.tooltip.clone().unwrap_or_default();
+        let mut payload = ground_drop_item_payload_from_resolved(
+            &key,
+            &name,
+            &description,
+            u16::from(template.weight),
+            1,
+            None,
+            None,
+            0,
+            0,
+            &[],
+            false,
+            template.slots,
+        )
+        .expect("canonical quest-task payload");
+        payload.item.is_shop_item = true;
+        payload.item.gm_made = true;
+        let mut expected = payload.item.clone();
+        clear_ground_drop_user_item_uids(&mut expected);
+
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        let characters = session
+            .handle_packet(ClientPacket::Login {
+                account_id: "demo".to_string(),
+                password: "demo".to_string(),
+            })
+            .into_iter()
+            .find_map(|packet| match packet {
+                ServerPacket::LoginSuccess { characters } => Some(characters),
+                _ => None,
+            })
+            .expect("demo login");
+        let character_index = characters.first().expect("demo character").index;
+        let _ = session.handle_packet(ClientPacket::StartGame { character_index });
+        super::super::quests::ensure_runtime_quest(session.app.world_mut(), 25);
+        super::super::quests::set_quest_stage(session.app.world_mut(), 25, QuestStage::InProgress);
+        let drop = GroundDropSnapshot {
+            object_id: 900_003,
+            name: name.clone(),
+            name_colour_argb: -1,
+            icon: item_icon_for_key(&key),
+            x: 10,
+            y: 20,
+            quantity: 1,
+            source_monster: "CannibalPlant".to_string(),
+            owner_object_id: None,
+            ownership_remaining_ticks: None,
+            loot: GroundDropLootSnapshot::InventoryItem {
+                key,
+                name,
+                description,
+                weight: u16::from(template.weight),
+                durability_current: None,
+                durability_max: None,
+                added_attack: 0,
+                added_defence: 0,
+                added_stats: Vec::new(),
+                cursed: false,
+                socket_slots: template.slots,
+                show_group_pickup: false,
+                exact_item: Some(payload),
+            },
+        };
+
+        assert!(session.can_commit_shared_ground_drop_pickup(&drop));
+        let receipt = session.commit_shared_ground_drop_pickup_transaction(&drop);
+        assert!(receipt.committed);
+        let mut gained = receipt
+            .packets
+            .into_iter()
+            .find_map(|packet| match packet {
+                ServerPacket::GainedItem { item } => Some(item),
+                _ => None,
+            })
+            .expect("quest exact gained item");
+        assert!(gained.unique_id != 0);
+        clear_ground_drop_user_item_uids(&mut gained);
+        assert_eq!(gained, expected);
+        assert!(session
+            .world_snapshot()
+            .inventory_items
+            .iter()
+            .any(|item| { item.container == ItemContainer::Quest && item.name == "CannibalLeaf" }));
+    }
+
+    #[test]
+    fn legacy_drop_full_bag_partial_stack_preserves_frozen_metadata() {
+        let template = crystal_item_template_for_item_key("red-potion")
+            .expect("Red Potion canonical template");
+        let key = crystal_item_key_for_template(&template);
+        let name = template.name.clone();
+        let description = template.tooltip.clone().unwrap_or_default();
+        let max_stack = super::super::items::crystal_stack_size_for_item_key(&key);
+        let added_stats = vec![UserItemStat { stat: 17, value: 6 }];
+        let frozen = ground_drop_item_payload_from_resolved(
+            &key,
+            &name,
+            &description,
+            u16::from(template.weight),
+            1,
+            None,
+            None,
+            4,
+            5,
+            &added_stats,
+            true,
+            template.slots,
+        )
+        .expect("legacy frozen payload fixture");
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        let characters = session
+            .handle_packet(ClientPacket::Login {
+                account_id: "demo".to_string(),
+                password: "demo".to_string(),
+            })
+            .into_iter()
+            .find_map(|packet| match packet {
+                ServerPacket::LoginSuccess { characters } => Some(characters),
+                _ => None,
+            })
+            .expect("demo login");
+        let character_index = characters.first().expect("demo character").index;
+        let _ = session.handle_packet(ClientPacket::StartGame { character_index });
+        {
+            let mut inventory = session.app.world_mut().resource_mut::<InventoryResource>();
+            inventory.inventory_items.clear();
+            inventory.belt_items.clear();
+            for slot in 0_u8..40 {
+                let quantity = if slot == 0 { max_stack - 1 } else { max_stack };
+                let mut existing_user_item = frozen.item.clone();
+                existing_user_item.unique_id = 30_000 + u64::from(slot);
+                existing_user_item.count = u16::try_from(quantity).expect("stack count fits u16");
+                let base = embedded_item_state_from_template(&template, ItemContainer::Bag1, slot);
+                let mut item =
+                    super::super::items::try_item_state_from_user_item(base, &existing_user_item)
+                        .expect("legacy-compatible metadata stack");
+                item.container = ItemContainer::Bag1;
+                item.slot = slot;
+                inventory.inventory_items.push(item);
+            }
+        }
+        let player = player_entity(session.app.world()).expect("player entity");
+        let position = entity_position(session.app.world(), player).expect("player position");
+        spawn_ground_drop(
+            session.app.world_mut(),
+            position,
+            "legacy-metadata-test",
+            None,
+            DropLoot::InventoryItem {
+                key: key.clone(),
+                name: name.clone(),
+                description: description.clone(),
+                weight: u16::from(template.weight),
+                durability_current: None,
+                durability_max: None,
+                added_attack: 4,
+                added_defence: 5,
+                added_stats,
+                cursed: true,
+                socket_slots: template.slots,
+                show_group_pickup: false,
+                exact_item: None,
+            },
+            1,
+            name,
+        );
+
+        let packets = session.handle_packet(ClientPacket::PickUp);
+        let gained = packets
+            .into_iter()
+            .find_map(|packet| match packet {
+                ServerPacket::GainedItem { item } => Some(item),
+                _ => None,
+            })
+            .expect("legacy exact planner gained stack");
+        assert_eq!(gained.unique_id, 30_000);
+        assert_eq!(gained.count, max_stack as u16);
+        assert_eq!(
+            gained.added_stats,
+            vec![
+                UserItemStat { stat: 17, value: 6 },
+                UserItemStat { stat: 1, value: 5 },
+                UserItemStat { stat: 5, value: 4 },
+            ]
+        );
+        assert!(gained.cursed);
+        assert_eq!(
+            session
+                .app
+                .world()
+                .resource::<InventoryResource>()
+                .inventory_items
+                .len(),
+            40
+        );
+    }
+    #[test]
+    fn local_pickup_preserves_frozen_identity_without_rerolling_metadata() {
+        let (key, name, description, weight, payload) = exact_mount_payload();
+        let mut expected = payload.item.clone();
+        clear_ground_drop_user_item_uids(&mut expected);
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        let characters = session
+            .handle_packet(ClientPacket::Login {
+                account_id: "demo".to_string(),
+                password: "demo".to_string(),
+            })
+            .into_iter()
+            .find_map(|packet| match packet {
+                ServerPacket::LoginSuccess { characters } => Some(characters),
+                _ => None,
+            })
+            .expect("demo login");
+        let character_index = characters.first().expect("demo character").index;
+        let _ = session.handle_packet(ClientPacket::StartGame { character_index });
+        let player = player_entity(session.app.world()).expect("player entity");
+        let position = entity_position(session.app.world(), player).expect("player position");
+        spawn_ground_drop(
+            session.app.world_mut(),
+            position,
+            "identity-test",
+            None,
+            DropLoot::InventoryItem {
+                key,
+                name: name.clone(),
+                description,
+                weight,
+                durability_current: Some(22_222),
+                durability_max: Some(33_333),
+                added_attack: 4,
+                added_defence: 5,
+                added_stats: vec![
+                    UserItemStat { stat: 17, value: 6 },
+                    UserItemStat { stat: 1, value: 5 },
+                    UserItemStat { stat: 5, value: 4 },
+                ],
+                cursed: true,
+                socket_slots: 2,
+                show_group_pickup: false,
+                exact_item: Some(payload),
+            },
+            1,
+            name,
+        );
+
+        let world_snapshot = session.world_snapshot();
+        let internal_snapshot =
+            serde_json::to_value(&world_snapshot).expect("internal world snapshot encodes");
+        assert!(internal_snapshot["groundDrops"][0]["loot"]
+            .get("exactItem")
+            .is_some());
+        let client_snapshot =
+            serde_json::to_value(world_snapshot.client_view()).expect("world snapshot encodes");
+        let client_loot = client_snapshot
+            .get("groundDrops")
+            .and_then(serde_json::Value::as_array)
+            .and_then(|drops| drops.first())
+            .and_then(|drop| drop.get("loot"))
+            .expect("client ground-drop loot");
+        assert!(client_loot.get("exactItem").is_none());
+        let internal_json =
+            serde_json::to_value(&world_snapshot.ground_drops).expect("internal drops encode");
+        assert!(internal_json[0]["loot"].get("exactItem").is_some());
+
+        let mut gained = session
+            .handle_packet(ClientPacket::PickUp)
+            .into_iter()
+            .find_map(|packet| match packet {
+                ServerPacket::GainedItem { item } => Some(item),
+                _ => None,
+            })
+            .expect("exact local gained item");
+        assert_ne!(gained.unique_id, 0);
+        assert!(gained
+            .slots
+            .iter()
+            .flatten()
+            .all(|item| item.unique_id != 0));
+        clear_ground_drop_user_item_uids(&mut gained);
+        assert_eq!(gained, expected);
     }
 }

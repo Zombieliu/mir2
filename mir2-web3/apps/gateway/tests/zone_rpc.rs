@@ -131,6 +131,7 @@ fn tcp_zone_rpc_player_attacks_finalized_world_event_monster() {
         name_colour_argb: -1,
         image: 29,
         ai: 0,
+        disposition: Some(mir2_simulation::WorldEntityDisposition::Hostile),
         level: 30,
         max_hp: 285,
         hp: 285,
@@ -141,6 +142,7 @@ fn tcp_zone_rpc_player_attacks_finalized_world_event_monster() {
         position: Point { x: 168, y: 155 },
         direction: MirDirection::Down,
         defense: ZoneMonsterDefense::default(),
+        respawn: None,
         drops: Vec::new(),
     };
     factory
@@ -692,6 +694,64 @@ fn zone_host_checkpoint_replays_two_sessions_and_promotes_under_a_new_fence() {
         .execute(ZoneOwnerCommandRequest::direct(lease, WorldCommand::Tick))
         .expect_err("old active must be fenced")
         .contains("stale_lease"));
+
+    stop_server(active_address, active_stop, active_handle);
+    stop_server(standby_address, standby_stop, standby_handle);
+}
+
+#[test]
+fn zone_host_checkpoint_replays_character_restore_before_later_world_commands() {
+    let authority = Arc::new(InMemoryZoneOwnerLeaseAuthority::new());
+    let (active_address, _active_server, active_stop, active_handle) =
+        start_server(authority.clone());
+    let (standby_address, _standby_server, standby_stop, standby_handle) =
+        start_server(authority.clone());
+    let zone_id = ZoneId::primary();
+    let active = test_transport(active_address, zone_id.clone(), "restore-order");
+    let standby = test_transport(standby_address, zone_id.clone(), "restore-order");
+    let lease = authority.owner_lease(&zone_id);
+
+    start_new_character(&active, lease.clone(), "restore-order", "RestoreOrder");
+    let mut restored_character = active
+        .active_character_checkpoint()
+        .expect("active character checkpoint RPC")
+        .expect("started character checkpoint");
+    restored_character.hp = restored_character.hp.saturating_sub(1);
+    active
+        .restore_active_character_checkpoint(&restored_character)
+        .expect("active character restore should be journaled");
+    active
+        .execute(ZoneOwnerCommandRequest::direct(
+            lease.clone(),
+            WorldCommand::TransferMap {
+                key: "crystal:0:330:270".to_string(),
+            },
+        ))
+        .expect("post-restore transfer should execute");
+    active
+        .execute(ZoneOwnerCommandRequest::direct(
+            lease,
+            WorldCommand::ClientPacket(ClientPacket::Walk {
+                direction: MirDirection::Right,
+            }),
+        ))
+        .expect("post-restore movement should execute");
+
+    let expected = active
+        .world_snapshot()
+        .expect("active snapshot after restore");
+    let checkpoint = active
+        .export_host_checkpoint()
+        .expect("checkpoint with ordered restore should export");
+    standby
+        .install_host_checkpoint(&checkpoint)
+        .expect("checkpoint with ordered restore should install");
+    assert_eq!(
+        standby
+            .world_snapshot()
+            .expect("standby snapshot after ordered restore replay"),
+        expected
+    );
 
     stop_server(active_address, active_stop, active_handle);
     stop_server(standby_address, standby_stop, standby_handle);

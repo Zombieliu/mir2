@@ -112,6 +112,10 @@ pub struct MapModel {
     pub patches: Vec<TerrainPatch>,
     pub center_x: i32,
     pub center_y: i32,
+    /// Crystal's global `TimeOfDay` light setting (0..=4). The minimap uses
+    /// this value to select its day/dawn/evening/night indicator.
+    #[serde(default)]
+    pub time_of_day_light_setting: Option<u8>,
 }
 
 impl MapModel {

@@ -405,12 +405,6 @@ fn measure_case(class: MirClass, milestone: Milestone) -> CombatCaseReport {
     let target_hp_before = target.hp.expect("target hp before action");
     let self_object_id = before.player_object_id.expect("player object id");
     let mut packets = Vec::new();
-    if let MeasuredAction::Melee(spell) = action {
-        packets.extend(session.handle_packet(ClientPacket::SpellToggle {
-            spell,
-            toggle_state: 1,
-        }));
-    }
     let mut actions_issued = 0;
     let mut ticks_observed = 0;
     'actions: for _ in 0..MAX_ACTIONS {
@@ -436,6 +430,15 @@ fn measure_case(class: MirClass, milestone: Milestone) -> CombatCaseReport {
             },
             MirDirection::Right,
         );
+        // Crystal consumes one-shot weapon skills such as FlamingSword when
+        // the attack is issued. Re-arm every measured attempt so a miss or a
+        // zero-damage armour roll does not turn later attempts into plain swings.
+        if let MeasuredAction::Melee(spell) = action {
+            packets.extend(session.handle_packet(ClientPacket::SpellToggle {
+                spell,
+                toggle_state: 1,
+            }));
+        }
         let action_packets = match action {
             MeasuredAction::Melee(spell) => session.handle_packet(ClientPacket::Attack {
                 direction: MirDirection::Right,

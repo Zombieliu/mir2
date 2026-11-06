@@ -1,0 +1,62 @@
+{
+  "schemaVersion": 1,
+  "kind": "mir2-windows-vis02-flaming-sword-packet-event-projection",
+  "contractScope": "server_packet_to_event-projection",
+  "productionReachability": "not-asserted",
+  "source": {
+    "crystalRevision": "484983404e3d6afa584e93801f8006ae3429bea9",
+    "spell": "FlamingSword",
+    "spellId": 8,
+    "triggerPacket": "ObjectAttack",
+    "toggleBehavior": "arms-only-no-vfx-no-audio",
+    "actorAction": "Attack1",
+    "effect": {
+      "library": "Magic",
+      "base": 3480,
+      "directionCount": 8,
+      "directionStride": 10,
+      "frameCount": 6,
+      "intervalMs": 100,
+      "durationMs": 600,
+      "blend": true,
+      "rate": 0.7,
+      "light": 0,
+      "shadow": false
+    },
+    "audio": {
+      "cue": "FlamingSword.attack",
+      "file": "M8-1.wav",
+      "sourceBytes": 132720,
+      "sha256": "6a4a29c45e6d9882dd63d67fd4825c9401481df52383bb74c5ff0644a8ec1b0b",
+      "playCount": 1,
+      "phase": "actualAttack"
+    },
+    "provenance": "Crystal/Client/MirObjects/PlayerObject.cs::DrawEffects/MirAction.Attack1"
+  },
+  "directionCases": [
+    { "directionIndex": 0, "firstFrame": 3480, "lastFrame": 3485, "event": { "type": "packet", "packet": "ObjectAttack", "payload": { "objectId": 1000, "location": { "x": 288, "y": 616 }, "direction": "Up", "spell": 8, "level": 3, "attackType": 0 } } },
+    { "directionIndex": 1, "firstFrame": 3490, "lastFrame": 3495, "event": { "type": "packet", "packet": "ObjectAttack", "payload": { "objectId": 1000, "location": { "x": 288, "y": 616 }, "direction": "UpRight", "spell": 8, "level": 3, "attackType": 0 } } },
+    { "directionIndex": 2, "firstFrame": 3500, "lastFrame": 3505, "event": { "type": "packet", "packet": "ObjectAttack", "payload": { "objectId": 1000, "location": { "x": 288, "y": 616 }, "direction": "Right", "spell": 8, "level": 3, "attackType": 0 } } },
+    { "directionIndex": 3, "firstFrame": 3510, "lastFrame": 3515, "event": { "type": "packet", "packet": "ObjectAttack", "payload": { "objectId": 1000, "location": { "x": 288, "y": 616 }, "direction": "DownRight", "spell": 8, "level": 3, "attackType": 0 } } },
+    { "directionIndex": 4, "firstFrame": 3520, "lastFrame": 3525, "event": { "type": "packet", "packet": "ObjectAttack", "payload": { "objectId": 1000, "location": { "x": 288, "y": 616 }, "direction": "Down", "spell": 8, "level": 3, "attackType": 0 } } },
+    { "directionIndex": 5, "firstFrame": 3530, "lastFrame": 3535, "event": { "type": "packet", "packet": "ObjectAttack", "payload": { "objectId": 1000, "location": { "x": 288, "y": 616 }, "direction": "DownLeft", "spell": 8, "level": 3, "attackType": 0 } } },
+    { "directionIndex": 6, "firstFrame": 3540, "lastFrame": 3545, "event": { "type": "packet", "packet": "ObjectAttack", "payload": { "objectId": 1000, "location": { "x": 288, "y": 616 }, "direction": "Left", "spell": 8, "level": 3, "attackType": 0 } } },
+    { "directionIndex": 7, "firstFrame": 3550, "lastFrame": 3555, "event": { "type": "packet", "packet": "ObjectAttack", "payload": { "objectId": 1000, "location": { "x": 288, "y": 616 }, "direction": "UpLeft", "spell": 8, "level": 3, "attackType": 0 } } }
+  ],
+  "compatibilityCases": {
+    "ordinaryAttack": {
+      "syntheticCompatibilityCase": true,
+      "event": { "type": "packet", "packet": "ObjectAttack", "payload": { "objectId": 1000, "location": { "x": 288, "y": 616 }, "direction": "Down", "spell": 0, "level": 0, "attackType": 0 } },
+      "expectedOverlayCount": 0,
+      "expectedSoundCount": 0
+    }
+  },
+  "claimBoundary": {
+    "typedGatewayProjection": true,
+    "nativeStateTiming": true,
+    "productionFrameAndAudioClosure": true,
+    "authenticatedLiveWssPlayback": false,
+    "gpuRasterAccepted": false,
+    "humanAudioAccepted": false
+  }
+}

@@ -2,11 +2,14 @@ use std::collections::BTreeSet;
 use std::time::{SystemTime, UNIX_EPOCH};
 
 use crate::config::{
-    AccountRecord, CharacterRecord, EquipmentSlot, ItemContainer, ItemGrade, SimulationConfig,
+    AccountRecord, CharacterRecord, EquipmentSlot, GroundDropItemPayload, ItemContainer, ItemGrade,
+    SimulationConfig,
 };
 use bevy_ecs::prelude::World;
-use mir2_game_data::{crystal_item_manifest, localized_text_or_fallback};
-use mir2_protocol::{ChatType, MirClass, MirGender, MirGridType, ServerPacket, UserItemStat};
+use mir2_game_data::{crystal_item_by_index, crystal_item_manifest, localized_text_or_fallback};
+use mir2_protocol::{
+    ChatType, MirClass, MirGender, MirGridType, ServerPacket, UserItem, UserItemStat,
+};
 
 use super::components::current_player_is_dead;
 use super::crystal_compat::{
@@ -17,8 +20,11 @@ use super::items::{
     crystal_belt_slot_range_for_item_key, crystal_equipment_slot_for_item_key,
     crystal_equipment_slot_for_template, crystal_item_has_bind_flag, crystal_item_key_for_template,
     crystal_item_stat_value, crystal_item_template_for_item_key, crystal_stack_size_for_item_key,
-    default_item_unique_id, item_has_rental_bind_flag, item_icon_for_key, item_unique_id,
-    user_item_from_item_state, ItemState,
+    default_item_unique_id, embedded_item_state_from_template, item_has_rental_bind_flag,
+    item_icon_for_key, item_unique_id, try_item_state_from_user_item,
+    try_user_item_from_item_state, user_item_from_item_state,
+    validate_committed_item_state_carrier, validate_committed_user_item_carrier, ItemState,
+    ItemStateUserItemMetadata,
 };
 use super::npc::active_crystal_storage_service;
 use super::resources::{InventoryResource, RuntimeConfigResource, SessionResource};
@@ -62,6 +68,7 @@ fn seed_item(
         added_defence,
         added_stats: Vec::new(),
         socketed: Vec::new(),
+        user_item_metadata: None,
         cursed: false,
         socket_slots: 0,
         gem_count: 0,
@@ -135,6 +142,7 @@ pub(super) fn crystal_start_inventory_items(character: &CharacterRecord) -> Vec<
                 added_defence: 0,
                 added_stats: Vec::new(),
                 socketed: Vec::new(),
+                user_item_metadata: None,
                 cursed: false,
                 socket_slots: template.slots,
                 gem_count: 0,
@@ -198,13 +206,13 @@ pub(super) fn seed_inventory_items() -> Vec<ItemState> {
             20,
         ),
         seed_item(
-            "training-manual",
-            "Training Manual",
+            "crystal-item-990",
+            "FireBall",
             2,
             2,
             ItemContainer::Bag1,
             1,
-            "Reminds the tester to open inventory, belt, and character panes.",
+            "Real Crystal FireBall skill book for inspecting the starter inventory.",
             None,
             None,
             1,
@@ -343,13 +351,13 @@ pub(super) fn seed_belt_items() -> Vec<ItemState> {
             20,
         ),
         seed_item(
-            "belt-lantern-oil",
-            "Lantern Oil",
-            5,
+            "crystal-item-706",
+            "RepairOil",
+            2,
             5,
             ItemContainer::Belt,
             1,
-            "Placeholder consumable for later shortcut actions.",
+            "Real Crystal RepairOil assigned to the starter belt.",
             None,
             None,
             1,
@@ -1013,24 +1021,31 @@ pub(super) fn item_matches_client_reference(
 ) -> bool {
     match grid {
         MirGridType::Belt => {
-            item.container == ItemContainer::Belt && item_unique_id(item) == unique_id
+            item.container == ItemContainer::Belt && inventory_item_unique_id(item) == unique_id
         }
         MirGridType::QuestInventory => {
-            item.container == ItemContainer::Quest && item_unique_id(item) == unique_id
+            item.container == ItemContainer::Quest && inventory_item_unique_id(item) == unique_id
         }
         MirGridType::Storage => {
-            item.container == ItemContainer::Storage && item_unique_id(item) == unique_id
+            item.container == ItemContainer::Storage && inventory_item_unique_id(item) == unique_id
         }
         _ => {
             matches!(item.container, ItemContainer::Bag1 | ItemContainer::Bag2)
-                && item_unique_id(item) == unique_id
+                && inventory_item_unique_id(item) == unique_id
         }
     }
 }
 
 pub(super) fn item_matches_inventory_unique_id(item: &ItemState, unique_id: u64) -> bool {
     matches!(item.container, ItemContainer::Bag1 | ItemContainer::Bag2)
-        && item_unique_id(item) == unique_id
+        && inventory_item_unique_id(item) == unique_id
+}
+
+/// Protocol sidecars make `ItemState::unique_id` authoritative, including
+/// exact zero. Sidecar-less legacy records retain the historical slot-derived
+/// fallback so old saves continue to normalize deterministically.
+fn inventory_item_unique_id(item: &ItemState) -> u64 {
+    item_unique_id(item)
 }
 
 pub(super) fn item_index_for_client_reference(
@@ -1043,13 +1058,192 @@ pub(super) fn item_index_for_client_reference(
         .position(|item| item_matches_client_reference(item, grid, unique_id))
 }
 
-fn inventory_unique_id_is_used(resources: &InventoryResource, unique_id: u64) -> bool {
+fn user_item_tree_unique_id_is_used(item: &UserItem, unique_id: u64) -> bool {
+    item.unique_id == unique_id
+        || item
+            .slots
+            .iter()
+            .flatten()
+            .any(|embedded| user_item_tree_unique_id_is_used(embedded, unique_id))
+}
+
+fn metadata_unique_id_is_used(
+    metadata: Option<&ItemStateUserItemMetadata>,
+    unique_id: u64,
+) -> bool {
+    metadata.is_some_and(|metadata| {
+        metadata
+            .slots
+            .iter()
+            .flatten()
+            .any(|embedded| user_item_tree_unique_id_is_used(embedded, unique_id))
+    })
+}
+
+pub(super) fn item_tree_unique_id_is_used(item: &ItemState, unique_id: u64) -> bool {
+    inventory_item_unique_id(item) == unique_id
+        || metadata_unique_id_is_used(item.user_item_metadata.as_ref(), unique_id)
+        || item
+            .socketed
+            .iter()
+            .any(|embedded| item_tree_unique_id_is_used(embedded, unique_id))
+}
+
+pub(super) fn item_list_unique_id_is_used(items: &[ItemState], unique_id: u64) -> bool {
+    items
+        .iter()
+        .any(|item| item_tree_unique_id_is_used(item, unique_id))
+}
+
+fn user_item_tree_max_unique_id(item: &UserItem) -> u64 {
+    item.slots
+        .iter()
+        .flatten()
+        .map(user_item_tree_max_unique_id)
+        .fold(item.unique_id, u64::max)
+}
+
+fn metadata_max_unique_id(metadata: Option<&ItemStateUserItemMetadata>) -> u64 {
+    metadata
+        .into_iter()
+        .flat_map(|metadata| metadata.slots.iter().flatten())
+        .map(user_item_tree_max_unique_id)
+        .max()
+        .unwrap_or(0)
+}
+
+fn collect_user_item_tree_unique_ids(item: &UserItem, seen: &mut BTreeSet<u64>) {
+    seen.insert(item.unique_id);
+    for embedded in item.slots.iter().flatten() {
+        collect_user_item_tree_unique_ids(embedded, seen);
+    }
+}
+
+fn collect_metadata_unique_ids(
+    metadata: Option<&ItemStateUserItemMetadata>,
+    seen: &mut BTreeSet<u64>,
+) {
+    if let Some(metadata) = metadata {
+        for embedded in metadata.slots.iter().flatten() {
+            collect_user_item_tree_unique_ids(embedded, seen);
+        }
+    }
+}
+
+fn normalize_user_item_tree_unique_ids(
+    item: &mut UserItem,
+    seen: &mut BTreeSet<u64>,
+    next_unique_id: &mut u64,
+    preserve_exact_zero: bool,
+) {
+    let current_unique_id = item.unique_id;
+    if preserve_exact_zero && current_unique_id == 0 && seen.insert(0) {
+        // A protocol UserItem always carries an exact identity. Preserve only
+        // the first exact zero; every later zero is a collision.
+    } else if current_unique_id == 0 || !seen.insert(current_unique_id) {
+        while *next_unique_id == 0 || seen.contains(&*next_unique_id) {
+            *next_unique_id = next_unique_id.saturating_add(1);
+        }
+        item.unique_id = *next_unique_id;
+        seen.insert(item.unique_id);
+        *next_unique_id = next_unique_id.saturating_add(1);
+    }
+    for embedded in item.slots.iter_mut().flatten() {
+        normalize_user_item_tree_unique_ids(embedded, seen, next_unique_id, preserve_exact_zero);
+    }
+}
+
+fn clear_user_item_tree_unique_ids(item: &mut UserItem) {
+    item.unique_id = 0;
+    for embedded in item.slots.iter_mut().flatten() {
+        clear_user_item_tree_unique_ids(embedded);
+    }
+}
+
+/// The root protocol UID of an equipped item is distinct from the historical
+/// equipment-slot packet UID. New saves retain the exact former inventory UID;
+/// old saves intentionally fall back to the latter. In particular, `Some(0)`
+/// is an exact captured marker and must not be replaced by the slot fallback.
+fn equipment_root_unique_id(equipment: &super::equipment::EquipmentState) -> u64 {
+    equipment
+        .user_item_unique_id
+        .unwrap_or_else(|| super::equipment::equipment_slot_unique_id(equipment.slot).unwrap_or(0))
+}
+
+fn equipment_tree_unique_id_is_used(
+    equipment: &super::equipment::EquipmentState,
+    unique_id: u64,
+) -> bool {
+    equipment_root_unique_id(equipment) == unique_id
+        || metadata_unique_id_is_used(equipment.user_item_metadata.as_ref(), unique_id)
+        || item_list_unique_id_is_used(&equipment.socketed, unique_id)
+}
+
+pub(super) fn inventory_unique_id_is_used(resources: &InventoryResource, unique_id: u64) -> bool {
+    item_list_unique_id_is_used(&resources.belt_items, unique_id)
+        || item_list_unique_id_is_used(&resources.inventory_items, unique_id)
+        || item_list_unique_id_is_used(&resources.storage_items, unique_id)
+        || resources
+            .equipment_items
+            .iter()
+            .any(|equipment| equipment_tree_unique_id_is_used(equipment, unique_id))
+}
+
+fn item_tree_max_unique_id(item: &ItemState) -> u64 {
+    item.socketed
+        .iter()
+        .map(item_tree_max_unique_id)
+        .chain(std::iter::once(metadata_max_unique_id(
+            item.user_item_metadata.as_ref(),
+        )))
+        .fold(inventory_item_unique_id(item), u64::max)
+}
+
+fn equipment_tree_max_unique_id(equipment: &super::equipment::EquipmentState) -> u64 {
+    equipment
+        .socketed
+        .iter()
+        .map(item_tree_max_unique_id)
+        .chain(std::iter::once(metadata_max_unique_id(
+            equipment.user_item_metadata.as_ref(),
+        )))
+        .fold(equipment_root_unique_id(equipment), u64::max)
+}
+
+fn collect_item_tree_unique_ids(items: &[ItemState], seen: &mut BTreeSet<u64>) {
+    for item in items {
+        seen.insert(inventory_item_unique_id(item));
+        collect_metadata_unique_ids(item.user_item_metadata.as_ref(), seen);
+        collect_item_tree_unique_ids(&item.socketed, seen);
+    }
+}
+
+fn collect_inventory_unique_ids(resources: &InventoryResource, seen: &mut BTreeSet<u64>) {
+    collect_item_tree_unique_ids(&resources.belt_items, seen);
+    collect_item_tree_unique_ids(&resources.inventory_items, seen);
+    collect_item_tree_unique_ids(&resources.storage_items, seen);
+    for equipment in &resources.equipment_items {
+        seen.insert(equipment_root_unique_id(equipment));
+        collect_metadata_unique_ids(equipment.user_item_metadata.as_ref(), seen);
+        collect_item_tree_unique_ids(&equipment.socketed, seen);
+    }
+}
+
+fn inventory_max_unique_id(resources: &InventoryResource) -> u64 {
     resources
         .belt_items
         .iter()
         .chain(resources.inventory_items.iter())
         .chain(resources.storage_items.iter())
-        .any(|item| item_unique_id(item) == unique_id)
+        .map(item_tree_max_unique_id)
+        .chain(
+            resources
+                .equipment_items
+                .iter()
+                .map(equipment_tree_max_unique_id),
+        )
+        .max()
+        .unwrap_or(0)
 }
 
 fn next_available_unique_id(resources: &InventoryResource, minimum: u64) -> u64 {
@@ -1065,39 +1259,177 @@ pub(super) fn allocate_item_unique_id(
     container: ItemContainer,
     slot: u8,
 ) -> u64 {
+    allocate_item_unique_id_avoiding(resources, container, slot, &[])
+}
+
+pub(super) fn allocate_item_unique_id_avoiding(
+    resources: &InventoryResource,
+    container: ItemContainer,
+    slot: u8,
+    reserved_items: &[ItemState],
+) -> u64 {
     let preferred = default_item_unique_id(container, slot);
-    if !inventory_unique_id_is_used(resources, preferred) {
+    if !inventory_unique_id_is_used(resources, preferred)
+        && !item_list_unique_id_is_used(reserved_items, preferred)
+    {
         return preferred;
     }
 
-    let max_existing = resources
-        .belt_items
+    let max_existing = reserved_items
         .iter()
-        .chain(resources.inventory_items.iter())
-        .chain(resources.storage_items.iter())
-        .map(item_unique_id)
+        .map(item_tree_max_unique_id)
+        .fold(inventory_max_unique_id(resources), u64::max);
+    let mut unique_id = next_available_unique_id(resources, max_existing.saturating_add(1));
+    while item_list_unique_id_is_used(reserved_items, unique_id) {
+        unique_id = next_available_unique_id(resources, unique_id.saturating_add(1));
+    }
+    unique_id
+}
+
+/// Normalize an externally returned item tree before inserting it into the
+/// active inventory. Existing global IDs and `reserved_items` are immutable;
+/// the incoming parent and every socket are visited parent-first DFS. Valid,
+/// non-conflicting IDs are preserved, while zeroes, global conflicts and
+/// internal duplicates are reassigned deterministically above the complete
+/// recursive high-water mark.
+pub(super) fn normalize_incoming_item_tree_unique_ids(
+    resources: &InventoryResource,
+    item: &mut ItemState,
+    reserved_items: &[ItemState],
+) {
+    normalize_incoming_item_tree_unique_ids_impl(resources, item, reserved_items, true);
+}
+
+fn normalize_incoming_item_tree_unique_ids_impl(
+    resources: &InventoryResource,
+    item: &mut ItemState,
+    reserved_items: &[ItemState],
+    preserve_exact_zero: bool,
+) {
+    let mut seen = BTreeSet::new();
+    collect_inventory_unique_ids(resources, &mut seen);
+    collect_item_tree_unique_ids(reserved_items, &mut seen);
+
+    let incoming_max = item_tree_max_unique_id(item);
+    let reserved_max = reserved_items
+        .iter()
+        .map(item_tree_max_unique_id)
         .max()
         .unwrap_or(0);
-    next_available_unique_id(resources, max_existing.saturating_add(1))
+    let mut next_unique_id = inventory_max_unique_id(resources)
+        .max(reserved_max)
+        .max(incoming_max)
+        .saturating_add(1)
+        .max(1);
+
+    fn normalize_tree(
+        item: &mut ItemState,
+        seen: &mut BTreeSet<u64>,
+        next_unique_id: &mut u64,
+        preserve_exact_zero: bool,
+    ) {
+        let current_unique_id = item.unique_id;
+        let exact_zero =
+            preserve_exact_zero && current_unique_id == 0 && item.user_item_metadata.is_some();
+        if exact_zero && seen.insert(0) {
+            // Preserve the first exact zero. A second zero is an impossible
+            // protocol identity collision and is deterministically repaired.
+        } else if current_unique_id == 0 || !seen.insert(current_unique_id) {
+            while *next_unique_id == 0 || seen.contains(&*next_unique_id) {
+                *next_unique_id = next_unique_id.saturating_add(1);
+            }
+            item.unique_id = *next_unique_id;
+            seen.insert(item.unique_id);
+            *next_unique_id = next_unique_id.saturating_add(1);
+        }
+        if let Some(metadata) = item.user_item_metadata.as_mut() {
+            for embedded in metadata.slots.iter_mut().flatten() {
+                normalize_user_item_tree_unique_ids(
+                    embedded,
+                    seen,
+                    next_unique_id,
+                    preserve_exact_zero,
+                );
+            }
+        }
+        for socketed in &mut item.socketed {
+            normalize_tree(socketed, seen, next_unique_id, preserve_exact_zero);
+        }
+    }
+
+    normalize_tree(item, &mut seen, &mut next_unique_id, preserve_exact_zero);
+}
+
+/// Assign new server identities to an entire delivered item tree. Exact mail
+/// and GameShop attachments are grants, not returning inventory objects, so
+/// sender-provided parent and embedded IDs must never survive collection.
+pub(super) fn normalize_fresh_item_tree_unique_ids(
+    resources: &InventoryResource,
+    item: &mut ItemState,
+    reserved_items: &[ItemState],
+) {
+    fn clear_tree(item: &mut ItemState) {
+        item.unique_id = 0;
+        if let Some(metadata) = item.user_item_metadata.as_mut() {
+            for embedded in metadata.slots.iter_mut().flatten() {
+                clear_user_item_tree_unique_ids(embedded);
+            }
+        }
+        for socketed in &mut item.socketed {
+            clear_tree(socketed);
+        }
+    }
+
+    clear_tree(item);
+    normalize_incoming_item_tree_unique_ids_impl(resources, item, reserved_items, false);
 }
 
 fn normalize_item_list_unique_ids(
     items: &mut [ItemState],
     seen: &mut BTreeSet<u64>,
+    exact_equipment_root_unique_ids: &BTreeSet<u64>,
     next_unique_id: &mut u64,
 ) {
+    // Exact metadata-backed identities participate in the shared global set.
+    // Sidecar-less records remain grid-scoped legacy aliases, but still use a
+    // local set so duplicate references inside one packet grid are repaired.
+    // Exact equipped roots keep precedence over both forms for save compatibility.
+    let mut local_seen = BTreeSet::new();
     for item in items {
-        let current_unique_id = item_unique_id(item);
-        if seen.insert(current_unique_id) {
+        let exact_identity = item.user_item_metadata.is_some();
+        let current_unique_id = inventory_item_unique_id(item);
+        let collides_locally = local_seen.contains(&current_unique_id);
+        let collides_globally = if exact_identity {
+            seen.contains(&current_unique_id)
+        } else {
+            exact_equipment_root_unique_ids.contains(&current_unique_id)
+        };
+        if !collides_locally && !collides_globally {
             item.unique_id = current_unique_id;
+            local_seen.insert(current_unique_id);
+            if exact_identity {
+                seen.insert(current_unique_id);
+            }
             continue;
         }
 
         let preferred = default_item_unique_id(item.container, item.slot);
-        let normalized_unique_id = if !seen.contains(&preferred) {
+        let preferred_available = !local_seen.contains(&preferred)
+            && if exact_identity {
+                !seen.contains(&preferred)
+            } else {
+                !exact_equipment_root_unique_ids.contains(&preferred)
+            };
+        let normalized_unique_id = if preferred_available {
             preferred
         } else {
-            while seen.contains(&*next_unique_id) {
+            while local_seen.contains(&*next_unique_id)
+                || if exact_identity {
+                    seen.contains(&*next_unique_id)
+                } else {
+                    exact_equipment_root_unique_ids.contains(&*next_unique_id)
+                }
+            {
                 *next_unique_id = next_unique_id.saturating_add(1);
             }
             let allocated = *next_unique_id;
@@ -1105,44 +1437,99 @@ fn normalize_item_list_unique_ids(
             allocated
         };
         item.unique_id = normalized_unique_id;
-        seen.insert(normalized_unique_id);
+        local_seen.insert(normalized_unique_id);
+        if exact_identity {
+            seen.insert(normalized_unique_id);
+        }
+    }
+}
+
+fn normalize_item_state_children_unique_ids(
+    item: &mut ItemState,
+    seen: &mut BTreeSet<u64>,
+    next_unique_id: &mut u64,
+) {
+    if let Some(metadata) = item.user_item_metadata.as_mut() {
+        for embedded in metadata.slots.iter_mut().flatten() {
+            normalize_user_item_tree_unique_ids(embedded, seen, next_unique_id, true);
+        }
+    }
+    normalize_embedded_item_unique_ids(&mut item.socketed, seen, next_unique_id);
+}
+
+fn normalize_embedded_item_unique_ids(
+    items: &mut [ItemState],
+    seen: &mut BTreeSet<u64>,
+    next_unique_id: &mut u64,
+) {
+    for item in items {
+        let current_unique_id = item.unique_id;
+        if current_unique_id == 0 && item.user_item_metadata.is_some() && seen.insert(0) {
+            // Preserve the first exact zero; repair subsequent collisions.
+        } else if current_unique_id == 0 || !seen.insert(current_unique_id) {
+            while *next_unique_id == 0 || seen.contains(&*next_unique_id) {
+                *next_unique_id = next_unique_id.saturating_add(1);
+            }
+            item.unique_id = *next_unique_id;
+            seen.insert(item.unique_id);
+            *next_unique_id = next_unique_id.saturating_add(1);
+        }
+        normalize_item_state_children_unique_ids(item, seen, next_unique_id);
     }
 }
 
 pub(super) fn normalize_inventory_unique_ids(resources: &mut InventoryResource) {
-    let mut seen = BTreeSet::new();
-    let mut next_unique_id = resources
-        .belt_items
+    // Exact equipped roots retain their existing precedence. Every remaining root is
+    // then normalized through one global belt -> inventory -> storage identity
+    // set and allocator, so only the first occurrence survives a collision.
+    let exact_equipment_root_unique_ids = resources
+        .equipment_items
         .iter()
-        .map(item_unique_id)
-        .max()
-        .unwrap_or(0)
-        .saturating_add(1);
-    normalize_item_list_unique_ids(&mut resources.belt_items, &mut seen, &mut next_unique_id);
+        .filter_map(|equipment| equipment.user_item_unique_id)
+        .collect::<BTreeSet<_>>();
+    let next_after_all_existing = inventory_max_unique_id(resources).saturating_add(1).max(1);
 
-    let mut seen = BTreeSet::new();
-    let mut next_unique_id = resources
-        .inventory_items
-        .iter()
-        .map(item_unique_id)
-        .max()
-        .unwrap_or(0)
-        .saturating_add(1);
+    let mut seen = exact_equipment_root_unique_ids.clone();
+    let mut next_unique_id = next_after_all_existing;
+    normalize_item_list_unique_ids(
+        &mut resources.belt_items,
+        &mut seen,
+        &exact_equipment_root_unique_ids,
+        &mut next_unique_id,
+    );
     normalize_item_list_unique_ids(
         &mut resources.inventory_items,
         &mut seen,
+        &exact_equipment_root_unique_ids,
+        &mut next_unique_id,
+    );
+    normalize_item_list_unique_ids(
+        &mut resources.storage_items,
+        &mut seen,
+        &exact_equipment_root_unique_ids,
         &mut next_unique_id,
     );
 
-    let mut seen = BTreeSet::new();
-    let mut next_unique_id = resources
-        .storage_items
-        .iter()
-        .map(item_unique_id)
-        .max()
-        .unwrap_or(0)
-        .saturating_add(1);
-    normalize_item_list_unique_ids(&mut resources.storage_items, &mut seen, &mut next_unique_id);
+    // Embedded items (legacy metadata-only slots, ordinary sockets, and
+    // MountSlot.Bells) continue from the same global identity state after every
+    // equipped and top-level root.
+    for item in &mut resources.belt_items {
+        normalize_item_state_children_unique_ids(item, &mut seen, &mut next_unique_id);
+    }
+    for item in &mut resources.inventory_items {
+        normalize_item_state_children_unique_ids(item, &mut seen, &mut next_unique_id);
+    }
+    for item in &mut resources.storage_items {
+        normalize_item_state_children_unique_ids(item, &mut seen, &mut next_unique_id);
+    }
+    for equipment in &mut resources.equipment_items {
+        if let Some(metadata) = equipment.user_item_metadata.as_mut() {
+            for embedded in metadata.slots.iter_mut().flatten() {
+                normalize_user_item_tree_unique_ids(embedded, &mut seen, &mut next_unique_id, true);
+            }
+        }
+        normalize_embedded_item_unique_ids(&mut equipment.socketed, &mut seen, &mut next_unique_id);
+    }
 }
 
 pub(super) fn item_heal_values_for_key(key: &str) -> (i32, i32) {
@@ -1375,6 +1762,320 @@ pub(super) fn can_gain_item_quantity(
     needed_slots <= u32::try_from(free_slots).unwrap_or(u32::MAX)
 }
 
+fn ground_drop_user_item_uids_are_assigned(item: &UserItem) -> bool {
+    item.unique_id != 0
+        && item
+            .slots
+            .iter()
+            .flatten()
+            .all(ground_drop_user_item_uids_are_assigned)
+}
+
+#[allow(clippy::too_many_arguments)]
+fn plan_exact_ground_drop_item(
+    resources: &InventoryResource,
+    container: ItemContainer,
+    key: &str,
+    name: &str,
+    description: &str,
+    preferred_slot: u8,
+    expected_quantity: u32,
+    payload: &GroundDropItemPayload,
+) -> Option<(InventoryResource, Vec<ItemState>)> {
+    validate_committed_user_item_carrier(&payload.item).ok()?;
+    if u32::from(payload.item.count) != expected_quantity || expected_quantity == 0 {
+        return None;
+    }
+    if payload.uid_assigned && !ground_drop_user_item_uids_are_assigned(&payload.item) {
+        return None;
+    }
+
+    let direct_template = crystal_item_template_for_item_key(key);
+    let template = direct_template
+        .clone()
+        .or_else(|| crystal_item_by_index(payload.item.item_index))?;
+    if payload.item.item_index != template.item_index {
+        return None;
+    }
+    let canonical_key = direct_template
+        .map(|_| key.to_string())
+        .unwrap_or_else(|| crystal_item_key_for_template(&template));
+
+    let mut base = embedded_item_state_from_template(&template, container, preferred_slot);
+    base.key = canonical_key.clone();
+    base.name = name.to_string();
+    base.description = description.to_string();
+    let mut canonical = try_item_state_from_user_item(base, &payload.item).ok()?;
+    canonical.container = container;
+    canonical.slot = preferred_slot;
+
+    let max_stack = u32::from(template.stack_size.max(1));
+    if payload.uid_assigned && expected_quantity > max_stack {
+        return None;
+    }
+
+    let mut staged = resources.clone();
+    if payload.uid_assigned {
+        if max_stack > 1 {
+            let mut merge_capacity = 0_u32;
+            if matches!(container, ItemContainer::Bag1 | ItemContainer::Bag2) {
+                merge_capacity = merge_capacity.saturating_add(
+                    staged
+                        .belt_items
+                        .iter()
+                        .filter(|item| {
+                            item.key == canonical_key
+                                && item.quantity < max_stack
+                                && item_stack_identity_compatible(item, &canonical)
+                        })
+                        .map(|item| max_stack.saturating_sub(item.quantity))
+                        .sum::<u32>(),
+                );
+            }
+            merge_capacity = merge_capacity.saturating_add(
+                staged
+                    .inventory_items
+                    .iter()
+                    .filter(|item| {
+                        item.key == canonical_key
+                            && item_containers_stack_together(item.container, container)
+                            && item.quantity < max_stack
+                            && item_stack_identity_compatible(item, &canonical)
+                    })
+                    .map(|item| max_stack.saturating_sub(item.quantity))
+                    .sum::<u32>(),
+            );
+
+            // An assigned source UID is retired only when the entire source
+            // stack is absorbed. This prevents a partial merge from either
+            // duplicating the source UID or silently changing exact identity.
+            if merge_capacity >= expected_quantity {
+                let mut remaining = expected_quantity;
+                let mut changed = Vec::new();
+                if matches!(container, ItemContainer::Bag1 | ItemContainer::Bag2) {
+                    for existing in staged.belt_items.iter_mut().filter(|item| {
+                        item.key == canonical_key
+                            && item.quantity < max_stack
+                            && item_stack_identity_compatible(item, &canonical)
+                    }) {
+                        let added = remaining.min(max_stack - existing.quantity);
+                        if added == 0 {
+                            continue;
+                        }
+                        existing.quantity += added;
+                        remaining -= added;
+                        validate_committed_item_state_carrier(existing).ok()?;
+                        changed.push(existing.clone());
+                        if remaining == 0 {
+                            return Some((staged, changed));
+                        }
+                    }
+                }
+                for existing in staged.inventory_items.iter_mut().filter(|item| {
+                    item.key == canonical_key
+                        && item_containers_stack_together(item.container, container)
+                        && item.quantity < max_stack
+                        && item_stack_identity_compatible(item, &canonical)
+                }) {
+                    let added = remaining.min(max_stack - existing.quantity);
+                    if added == 0 {
+                        continue;
+                    }
+                    existing.quantity += added;
+                    remaining -= added;
+                    validate_committed_item_state_carrier(existing).ok()?;
+                    changed.push(existing.clone());
+                    if remaining == 0 {
+                        return Some((staged, changed));
+                    }
+                }
+                return None;
+            }
+        }
+
+        let exact_before = try_user_item_from_item_state(&canonical).ok()?;
+        normalize_incoming_item_tree_unique_ids(resources, &mut canonical, &[]);
+        if try_user_item_from_item_state(&canonical).ok()? != exact_before {
+            return None;
+        }
+        let (item_container, slot) =
+            crystal_empty_add_item_slots(&staged, container, &canonical_key)
+                .into_iter()
+                .next()
+                .or_else(|| {
+                    find_empty_inventory_item_slot(&staged.inventory_items, container)
+                        .or(Some((container, preferred_slot)))
+                        .filter(|(candidate_container, candidate_slot)| {
+                            !collection_slot_occupied(
+                                &staged,
+                                *candidate_container,
+                                *candidate_slot,
+                            )
+                        })
+                })?;
+        canonical.container = item_container;
+        canonical.slot = slot;
+        validate_committed_item_state_carrier(&canonical).ok()?;
+        if item_container == ItemContainer::Belt {
+            staged.belt_items.push(canonical.clone());
+        } else {
+            staged.inventory_items.push(canonical.clone());
+        }
+        return Some((staged, vec![canonical]));
+    }
+
+    let mut remaining = expected_quantity;
+    let mut changed = Vec::new();
+    if max_stack > 1 {
+        if matches!(container, ItemContainer::Bag1 | ItemContainer::Bag2) {
+            for existing in staged.belt_items.iter_mut().filter(|item| {
+                item.key == canonical_key
+                    && item.quantity < max_stack
+                    && item_stack_identity_compatible(item, &canonical)
+            }) {
+                let added = remaining.min(max_stack - existing.quantity);
+                if added == 0 {
+                    continue;
+                }
+                existing.quantity += added;
+                remaining -= added;
+                validate_committed_item_state_carrier(existing).ok()?;
+                changed.push(existing.clone());
+                if remaining == 0 {
+                    return Some((staged, changed));
+                }
+            }
+        }
+        for existing in staged.inventory_items.iter_mut().filter(|item| {
+            item.key == canonical_key
+                && item_containers_stack_together(item.container, container)
+                && item.quantity < max_stack
+                && item_stack_identity_compatible(item, &canonical)
+        }) {
+            let added = remaining.min(max_stack - existing.quantity);
+            if added == 0 {
+                continue;
+            }
+            existing.quantity += added;
+            remaining -= added;
+            validate_committed_item_state_carrier(existing).ok()?;
+            changed.push(existing.clone());
+            if remaining == 0 {
+                return Some((staged, changed));
+            }
+        }
+    }
+
+    while remaining > 0 {
+        let (item_container, slot) =
+            crystal_empty_add_item_slots(&staged, container, &canonical_key)
+                .into_iter()
+                .next()
+                .or_else(|| {
+                    find_empty_inventory_item_slot(&staged.inventory_items, container)
+                        .or(Some((container, preferred_slot)))
+                        .filter(|(candidate_container, candidate_slot)| {
+                            !collection_slot_occupied(
+                                &staged,
+                                *candidate_container,
+                                *candidate_slot,
+                            )
+                        })
+                })?;
+        let mut item = canonical.clone();
+        item.container = item_container;
+        item.slot = slot;
+        item.quantity = remaining.min(max_stack);
+        normalize_fresh_item_tree_unique_ids(&staged, &mut item, &[]);
+        validate_committed_item_state_carrier(&item).ok()?;
+        if item_container == ItemContainer::Belt {
+            staged.belt_items.push(item.clone());
+        } else {
+            staged.inventory_items.push(item.clone());
+        }
+        remaining -= item.quantity;
+        changed.push(item);
+    }
+
+    Some((staged, changed))
+}
+#[allow(clippy::too_many_arguments)]
+pub(super) fn can_gain_exact_ground_drop_item(
+    world: &World,
+    container: ItemContainer,
+    key: &str,
+    name: &str,
+    description: &str,
+    preferred_slot: u8,
+    expected_quantity: u32,
+    payload: &GroundDropItemPayload,
+) -> bool {
+    plan_exact_ground_drop_item(
+        world.resource::<InventoryResource>(),
+        container,
+        key,
+        name,
+        description,
+        preferred_slot,
+        expected_quantity,
+        payload,
+    )
+    .is_some()
+}
+
+#[cfg(test)]
+#[allow(clippy::too_many_arguments)]
+pub(super) fn add_exact_ground_drop_item(
+    world: &mut World,
+    container: ItemContainer,
+    key: &str,
+    name: &str,
+    description: &str,
+    preferred_slot: u8,
+    expected_quantity: u32,
+    payload: &GroundDropItemPayload,
+) -> Option<ItemState> {
+    add_exact_ground_drop_items(
+        world,
+        container,
+        key,
+        name,
+        description,
+        preferred_slot,
+        expected_quantity,
+        payload,
+    )?
+    .into_iter()
+    .last()
+}
+
+#[allow(clippy::too_many_arguments)]
+pub(super) fn add_exact_ground_drop_items(
+    world: &mut World,
+    container: ItemContainer,
+    key: &str,
+    name: &str,
+    description: &str,
+    preferred_slot: u8,
+    expected_quantity: u32,
+    payload: &GroundDropItemPayload,
+) -> Option<Vec<ItemState>> {
+    let (staged, changed_items) = {
+        let resources = world.resource::<InventoryResource>();
+        plan_exact_ground_drop_item(
+            resources,
+            container,
+            key,
+            name,
+            description,
+            preferred_slot,
+            expected_quantity,
+            payload,
+        )?
+    };
+    *world.resource_mut::<InventoryResource>() = staged;
+    Some(changed_items)
+}
 pub(super) fn add_or_increment_item(
     world: &mut World,
     container: ItemContainer,
@@ -1585,6 +2286,7 @@ pub(super) fn add_or_increment_item_with_random_metadata(
             added_defence,
             added_stats: added_stats.clone(),
             socketed: Vec::new(),
+            user_item_metadata: None,
             cursed,
             socket_slots,
             gem_count: 0,
@@ -1818,7 +2520,7 @@ pub(super) fn store_item_impl(world: &mut World, from: i32, to: i32) -> Vec<Serv
         let mut item = resources.inventory_items.remove(index);
         item.slot = to_slot;
         item.container = ItemContainer::Storage;
-        if inventory_unique_id_is_used(&resources, item_unique_id(&item)) {
+        if inventory_unique_id_is_used(&resources, inventory_item_unique_id(&item)) {
             item.unique_id = allocate_item_unique_id(&resources, item.container, item.slot);
         }
         resources.storage_items.push(item);
@@ -1881,7 +2583,7 @@ pub(super) fn take_back_item_impl(world: &mut World, from: i32, to: i32) -> Vec<
         let mut item = resources.storage_items.remove(index);
         item.slot = to_inventory_slot;
         item.container = to_container;
-        if inventory_unique_id_is_used(&resources, item_unique_id(&item)) {
+        if inventory_unique_id_is_used(&resources, inventory_item_unique_id(&item)) {
             item.unique_id = allocate_item_unique_id(&resources, item.container, item.slot);
         }
         resources.inventory_items.push(item);
@@ -2175,6 +2877,95 @@ pub(super) fn merge_item_impl(
     }]
 }
 
+fn item_stack_identity_compatible(left: &ItemState, right: &ItemState) -> bool {
+    let (Ok(mut left_protocol), Ok(mut right_protocol)) = (
+        try_user_item_from_item_state(left),
+        try_user_item_from_item_state(right),
+    ) else {
+        return false;
+    };
+
+    // Only the root objects are the two stacks being merged. Normalize their
+    // location-scoped identity and count while retaining every nested UID and
+    // count inside UserItem::slots for the complete equality comparison.
+    left_protocol.unique_id = 0;
+    right_protocol.unique_id = 0;
+    left_protocol.count = 0;
+    right_protocol.count = 0;
+
+    left_protocol == right_protocol && item_state_functional_identity_compatible(left, right)
+}
+
+fn item_state_socket_authority_is_empty(metadata: &ItemStateUserItemMetadata) -> bool {
+    metadata.slots.is_empty()
+        && metadata
+            .captured_socket_positions
+            .as_ref()
+            .is_none_or(Vec::is_empty)
+        && metadata.captured_socket_position.is_none()
+}
+
+fn item_state_socket_authority_compatible(
+    left: Option<&ItemStateUserItemMetadata>,
+    right: Option<&ItemStateUserItemMetadata>,
+) -> bool {
+    match (left, right) {
+        (None, None) => true,
+        (Some(left), Some(right)) => {
+            left.live_socketed_at_capture == right.live_socketed_at_capture
+                && left.socket_layout_hydrated == right.socket_layout_hydrated
+                && left.captured_socket_positions == right.captured_socket_positions
+                && left.captured_socket_position == right.captured_socket_position
+        }
+        (None, Some(metadata)) | (Some(metadata), None) => {
+            item_state_socket_authority_is_empty(metadata)
+        }
+    }
+}
+
+/// Compare ItemState-only functional identity after both trees have passed the
+/// bounded protocol conversion. Iteration avoids a second unbudgeted recursive
+/// traversal; try_user_item_from_item_state has already bounded both trees.
+fn item_state_functional_identity_compatible(left: &ItemState, right: &ItemState) -> bool {
+    let mut pending = vec![(left, right)];
+    while let Some((left, right)) = pending.pop() {
+        let left_metadata = left.user_item_metadata.as_ref();
+        let right_metadata = right.user_item_metadata.as_ref();
+        if left.key != right.key
+            || left.name != right.name
+            || left.icon != right.icon
+            || left.description != right.description
+            || left.weight != right.weight
+            || left.equip_slot != right.equip_slot
+            || left.grade != right.grade
+            || left.attack != right.attack
+            || left.defence != right.defence
+            || left.heal_hp != right.heal_hp
+            || left.heal_mp != right.heal_mp
+            || !item_state_socket_authority_compatible(left_metadata, right_metadata)
+            || left.socketed.len() != right.socketed.len()
+        {
+            return false;
+        }
+        pending.extend(left.socketed.iter().zip(&right.socketed));
+    }
+    true
+}
+
+/// Splitting clones the complete ItemState carrier. Until nested identities
+/// have an allocator-aware clone path, reject any embedded item instead of
+/// duplicating its protocol UID into two stacks.
+fn item_has_nested_identity_for_split(item: &ItemState) -> bool {
+    !item.socketed.is_empty()
+        || item.user_item_metadata.as_ref().is_some_and(|metadata| {
+            metadata.slots.iter().any(Option::is_some)
+                || metadata
+                    .captured_socket_positions
+                    .as_ref()
+                    .is_some_and(|positions| positions.iter().any(Option::is_some))
+        })
+}
+
 pub(super) fn merge_item_within_collection(
     items: &mut Vec<ItemState>,
     grid: MirGridType,
@@ -2198,7 +2989,7 @@ pub(super) fn merge_item_within_collection(
             return false;
         }
     }
-    if items[from_index].key != items[to_index].key {
+    if !item_stack_identity_compatible(&items[from_index], &items[to_index]) {
         return false;
     }
 
@@ -2247,7 +3038,7 @@ pub(super) fn merge_item_across_collections(
             return false;
         }
     }
-    if from_items[from_index].key != to_items[to_index].key {
+    if !item_stack_identity_compatible(&from_items[from_index], &to_items[to_index]) {
         return false;
     }
 
@@ -2310,6 +3101,9 @@ pub(super) fn split_item_impl(
             if resources.storage_items[index].quantity <= u32::from(count) {
                 return vec![failed_packet];
             }
+            if item_has_nested_identity_for_split(&resources.storage_items[index]) {
+                return vec![failed_packet];
+            }
             let storage_slot_limit = accessible_storage_size(&resources);
             let Some(next_slot) =
                 find_empty_storage_slot(&resources.storage_items, storage_slot_limit)
@@ -2317,12 +3111,18 @@ pub(super) fn split_item_impl(
                 return vec![failed_packet];
             };
 
-            resources.storage_items[index].quantity -= u32::from(count);
             let mut split = resources.storage_items[index].clone();
             split.slot = next_slot;
+            // Crystal's storage item identity is scoped by the Storage grid;
+            // the empty slot is therefore the canonical ID even when another
+            // grid uses the same numeric value.
             split.unique_id = default_item_unique_id(split.container, next_slot);
             split.quantity = u32::from(count);
-            let split_packet_item = user_item_from_item_state(&split);
+            let Ok(split_packet_item) = try_user_item_from_item_state(&split) else {
+                return vec![failed_packet];
+            };
+
+            resources.storage_items[index].quantity -= u32::from(count);
             resources.storage_items.push(split);
             split_packet_item
         }
@@ -2337,6 +3137,9 @@ pub(super) fn split_item_impl(
             if resources.inventory_items[index].quantity <= u32::from(count) {
                 return vec![failed_packet];
             }
+            if item_has_nested_identity_for_split(&resources.inventory_items[index]) {
+                return vec![failed_packet];
+            }
             let source_container = resources.inventory_items[index].container;
             let source_key = resources.inventory_items[index].key.clone();
             let Some((next_container, next_slot)) =
@@ -2347,13 +3150,16 @@ pub(super) fn split_item_impl(
                 return vec![failed_packet];
             };
 
-            resources.inventory_items[index].quantity -= u32::from(count);
             let mut split = resources.inventory_items[index].clone();
             split.container = next_container;
             split.slot = next_slot;
             split.unique_id = allocate_item_unique_id(&resources, split.container, next_slot);
             split.quantity = u32::from(count);
-            let split_packet_item = user_item_from_item_state(&split);
+            let Ok(split_packet_item) = try_user_item_from_item_state(&split) else {
+                return vec![failed_packet];
+            };
+
+            resources.inventory_items[index].quantity -= u32::from(count);
             match split.container {
                 ItemContainer::Belt => resources.belt_items.push(split),
                 _ => resources.inventory_items.push(split),
@@ -2411,4 +3217,876 @@ pub(super) fn delete_item_impl(
     }
 
     vec![ServerPacket::DeleteItem { unique_id, count }]
+}
+
+#[cfg(test)]
+mod stack_identity_tests {
+    use super::*;
+    use mir2_protocol::{Point, UserItemRentalInformation, UserItemSealedInfo};
+
+    use super::super::components::{Npc, ObjectId, Position, SelfPlayer};
+    use super::super::equipment::EquipmentState;
+    use super::super::npc::ActiveNpcServiceState;
+    use super::super::resources::NpcStateResource;
+
+    fn identity_stack(
+        unique_id: u64,
+        slot: u8,
+        container: ItemContainer,
+        quantity: u32,
+    ) -> ItemState {
+        crystal_fixture_item("red-potion", unique_id, slot, container, quantity)
+    }
+
+    fn identity_socket(
+        unique_id: u64,
+        slot: u8,
+        container: ItemContainer,
+        quantity: u32,
+    ) -> ItemState {
+        // BronzeBell is a real Crystal ItemType.Bells carrier. It keeps nested
+        // identity comparisons on a catalog-valid socket tree.
+        crystal_fixture_item("crystal-item-778", unique_id, slot, container, quantity)
+    }
+
+    fn crystal_fixture_item(
+        key: &str,
+        unique_id: u64,
+        slot: u8,
+        container: ItemContainer,
+        quantity: u32,
+    ) -> ItemState {
+        let template = crystal_item_template_for_item_key(key)
+            .unwrap_or_else(|| panic!("Crystal fixture {key} must exist"));
+        seed_item(
+            key,
+            &template.name,
+            slot,
+            unique_id,
+            container,
+            quantity,
+            template.tooltip.as_deref().unwrap_or_default(),
+            None,
+            None,
+            u16::from(template.weight),
+            crystal_equipment_slot_for_template(&template),
+            ItemGrade::None,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+        )
+    }
+
+    fn metadata(awake_type: u8) -> ItemStateUserItemMetadata {
+        ItemStateUserItemMetadata {
+            item_index: Some(
+                crystal_item_template_for_item_key("red-potion")
+                    .expect("red-potion Crystal fixture must exist")
+                    .item_index,
+            ),
+            awake_type,
+            awake_values: vec![awake_type],
+            refined_value: 1,
+            refine_added: 2,
+            refine_success_chance: 3,
+            wedding_ring: -1,
+            expire_info: None,
+            rental_information: None,
+            sealed_info: None,
+            slots: Vec::new(),
+            is_shop_item: false,
+            gm_made: false,
+            live_socketed_at_capture: false,
+            socket_layout_hydrated: false,
+            captured_socket_positions: None,
+            captured_socket_position: None,
+        }
+    }
+
+    fn live_socket_metadata() -> ItemStateUserItemMetadata {
+        let mut metadata = metadata(1);
+        metadata.slots = vec![None];
+        metadata.live_socketed_at_capture = true;
+        metadata
+    }
+
+    fn equipped_item_with_root_uid(
+        slot: EquipmentSlot,
+        user_item_unique_id: Option<u64>,
+    ) -> EquipmentState {
+        EquipmentState {
+            key: "uid-reservation-equipment".to_string(),
+            slot,
+            quantity: 1,
+            name: "UID Reservation Equipment".to_string(),
+            icon: 0,
+            shape: None,
+            description: String::new(),
+            durability_current: 1,
+            durability_max: 1,
+            grade: ItemGrade::None,
+            added_attack: 0,
+            added_defence: 0,
+            added_luck: 0,
+            added_stats: Vec::new(),
+            socketed: Vec::new(),
+            cursed: false,
+            socket_slots: 0,
+            gem_count: 0,
+            awake_type: 0,
+            awake_values: Vec::new(),
+            user_item_metadata: None,
+            user_item_unique_id,
+            identified: None,
+            soul_bound_id: None,
+            sealed_expiry_time_binary_datetime: 0,
+            sealed_next_time_binary_datetime: 0,
+            rental_binding_flags: 0,
+            rental_owner_name: String::new(),
+            rental_expiry_binary_datetime: 0,
+            rental_locked: false,
+            attack: 0,
+            defence: 0,
+        }
+    }
+
+    fn assert_within_merge_rejected_without_mutation(from: ItemState, to: ItemState) {
+        let mut items = vec![from, to];
+        let before = items.clone();
+
+        assert!(!merge_item_within_collection(
+            &mut items,
+            MirGridType::Inventory,
+            before[0].unique_id,
+            before[1].unique_id,
+            None,
+        ));
+        assert_eq!(format!("{items:?}"), format!("{before:?}"));
+    }
+
+    fn storage_world_with_item(item: ItemState) -> World {
+        const STORAGE_NPC_OBJECT_ID: u32 = 4_294_960_001;
+
+        let mut world = World::new();
+        let mut inventory = InventoryResource::new(BASE_STORAGE_SLOTS);
+        inventory.storage_items.push(item);
+        world.insert_resource(inventory);
+        world.insert_resource(RuntimeConfigResource::new(&SimulationConfig::default()));
+        world.insert_resource(NpcStateResource::new());
+        world.spawn((SelfPlayer, Position(Point { x: 10, y: 10 })));
+        world.spawn((
+            Npc,
+            ObjectId(STORAGE_NPC_OBJECT_ID),
+            Position(Point { x: 10, y: 10 }),
+        ));
+        world.resource_mut::<NpcStateResource>().active_npc_service = Some(ActiveNpcServiceState {
+            script_key: "identity-test-storage".to_string(),
+            label_key: "STORAGE".to_string(),
+            npc_object_id: STORAGE_NPC_OBJECT_ID,
+        });
+        world
+    }
+
+    fn add_over_budget_stats(item: &mut ItemState) {
+        item.added_stats = (0..257)
+            .map(|index| UserItemStat {
+                stat: (index % 255) as u8,
+                value: index + 1,
+            })
+            .collect();
+    }
+    #[test]
+    fn equipped_root_uids_are_reserved_for_allocation_and_incoming_rekeys() {
+        let mut resources = InventoryResource::new(BASE_STORAGE_SLOTS);
+        resources
+            .equipment_items
+            .push(equipped_item_with_root_uid(EquipmentSlot::Weapon, Some(44)));
+        resources
+            .equipment_items
+            .push(equipped_item_with_root_uid(EquipmentSlot::Armour, None));
+        resources
+            .equipment_items
+            .push(equipped_item_with_root_uid(EquipmentSlot::Helmet, Some(0)));
+        resources.equipment_items[0]
+            .socketed
+            .push(identity_stack(45, 0, ItemContainer::Bag1, 1));
+
+        // Explicit roots, legacy slot fallback, exact zero, and nested sockets
+        // all reserve their identity before any fresh item is allocated.
+        for unique_id in [0, 1, 44, 45] {
+            assert!(inventory_unique_id_is_used(&resources, unique_id));
+        }
+        let allocated = allocate_item_unique_id(&resources, ItemContainer::Bag1, 44);
+        assert_ne!(allocated, 44);
+        assert_ne!(allocated, 45);
+        assert!(allocated > 45);
+
+        let mut incoming = identity_stack(44, 7, ItemContainer::Bag1, 1);
+        normalize_incoming_item_tree_unique_ids(&resources, &mut incoming, &[]);
+        assert_ne!(incoming.unique_id, 44);
+        assert_ne!(incoming.unique_id, 45);
+        assert_ne!(incoming.unique_id, 0);
+
+        // Load-time normalization reserves the worn root as well, without
+        // rewriting the equipped item's captured UID or its nested socket.
+        resources
+            .inventory_items
+            .push(identity_stack(44, 8, ItemContainer::Bag1, 1));
+        normalize_inventory_unique_ids(&mut resources);
+        assert_ne!(resources.inventory_items[0].unique_id, 44);
+        assert_eq!(resources.equipment_items[0].user_item_unique_id, Some(44));
+        assert_eq!(resources.equipment_items[0].socketed[0].unique_id, 45);
+    }
+
+    #[test]
+    fn seeded_legacy_packet_items_remain_addressable_after_global_normalization() {
+        let mut resources = InventoryResource::new(BASE_STORAGE_SLOTS);
+        resources.belt_items = seed_belt_items();
+        resources.inventory_items = seed_inventory_items();
+        resources.storage_items = seed_storage_items();
+        resources.equipment_items = super::super::equipment::seed_equipment_items();
+        assert!(resources
+            .belt_items
+            .iter()
+            .chain(resources.inventory_items.iter())
+            .chain(resources.storage_items.iter())
+            .all(|item| item.user_item_metadata.is_none()));
+
+        let expected_belt = resources
+            .belt_items
+            .iter()
+            .map(item_unique_id)
+            .collect::<Vec<_>>();
+        let expected_inventory = resources
+            .inventory_items
+            .iter()
+            .map(item_unique_id)
+            .collect::<Vec<_>>();
+        let expected_storage = resources
+            .storage_items
+            .iter()
+            .map(item_unique_id)
+            .collect::<Vec<_>>();
+
+        normalize_inventory_unique_ids(&mut resources);
+
+        assert_eq!(
+            resources
+                .belt_items
+                .iter()
+                .map(inventory_item_unique_id)
+                .collect::<Vec<_>>(),
+            expected_belt
+        );
+        assert_eq!(
+            resources
+                .inventory_items
+                .iter()
+                .map(inventory_item_unique_id)
+                .collect::<Vec<_>>(),
+            expected_inventory
+        );
+        assert_eq!(
+            resources
+                .storage_items
+                .iter()
+                .map(inventory_item_unique_id)
+                .collect::<Vec<_>>(),
+            expected_storage
+        );
+
+        for (index, unique_id) in expected_belt.iter().copied().enumerate() {
+            assert_eq!(
+                item_index_for_client_reference(
+                    &resources.belt_items,
+                    MirGridType::Belt,
+                    unique_id,
+                ),
+                Some(index)
+            );
+        }
+        for (index, unique_id) in expected_inventory.iter().copied().enumerate() {
+            assert_eq!(
+                item_index_for_client_reference(
+                    &resources.inventory_items,
+                    MirGridType::Inventory,
+                    unique_id,
+                ),
+                Some(index)
+            );
+            assert!(item_matches_inventory_unique_id(
+                &resources.inventory_items[index],
+                unique_id
+            ));
+        }
+        for (index, unique_id) in expected_storage.iter().copied().enumerate() {
+            assert_eq!(
+                item_index_for_client_reference(
+                    &resources.storage_items,
+                    MirGridType::Storage,
+                    unique_id,
+                ),
+                Some(index)
+            );
+        }
+
+        assert!(matches!(
+            find_use_item_location(&resources, "red-potion", Some((0, MirGridType::Inventory)),),
+            Some(UseItemLocation::Inventory(0))
+        ));
+        assert!(matches!(
+            find_use_item_location(&resources, "belt-red-potion", Some((0, MirGridType::Belt)),),
+            Some(UseItemLocation::Belt(0))
+        ));
+        let equip_index = resources
+            .inventory_items
+            .iter()
+            .position(|item| item.equip_slot == Some(EquipmentSlot::Helmet))
+            .expect("seeded helmet remains available to EquipItem");
+        let equip_unique_id = expected_inventory[equip_index];
+        assert_eq!(
+            item_index_for_client_reference(
+                &resources.inventory_items,
+                MirGridType::Inventory,
+                equip_unique_id,
+            ),
+            Some(equip_index)
+        );
+    }
+
+    #[test]
+    fn normalization_rekeys_cross_container_zero_and_nonzero_collisions_globally() {
+        let mut belt_zero = identity_stack(0, 0, ItemContainer::Belt, 1);
+        belt_zero.user_item_metadata = Some(metadata(1));
+        let mut belt_nonzero = identity_stack(700, 1, ItemContainer::Belt, 1);
+        belt_nonzero.user_item_metadata = Some(metadata(1));
+        let mut inventory_zero = identity_stack(0, 8, ItemContainer::Bag1, 1);
+        inventory_zero.user_item_metadata = Some(metadata(1));
+        let mut inventory_nonzero = identity_stack(700, 9, ItemContainer::Bag1, 1);
+        inventory_nonzero.user_item_metadata = Some(metadata(1));
+        let mut storage_zero = identity_stack(0, 2, ItemContainer::Storage, 1);
+        storage_zero.user_item_metadata = Some(metadata(1));
+        let mut storage_nonzero = identity_stack(700, 3, ItemContainer::Storage, 1);
+        storage_nonzero.user_item_metadata = Some(metadata(1));
+
+        let mut resources = InventoryResource::new(BASE_STORAGE_SLOTS);
+        resources.belt_items = vec![belt_zero, belt_nonzero];
+        resources.inventory_items = vec![inventory_zero, inventory_nonzero];
+        resources.storage_items = vec![storage_zero, storage_nonzero];
+
+        normalize_inventory_unique_ids(&mut resources);
+
+        let root_ids = resources
+            .belt_items
+            .iter()
+            .chain(resources.inventory_items.iter())
+            .chain(resources.storage_items.iter())
+            .map(inventory_item_unique_id)
+            .collect::<Vec<_>>();
+        assert_eq!(root_ids, vec![0, 700, 8, 9, 2, 3]);
+        assert_eq!(
+            root_ids
+                .iter()
+                .copied()
+                .collect::<std::collections::BTreeSet<_>>()
+                .len(),
+            root_ids.len(),
+            "all top-level container identities must be globally unique"
+        );
+
+        assert_eq!(
+            item_index_for_client_reference(&resources.belt_items, MirGridType::Belt, 0),
+            Some(0)
+        );
+        assert_eq!(
+            item_index_for_client_reference(&resources.inventory_items, MirGridType::Inventory, 8,),
+            Some(0)
+        );
+        assert_eq!(
+            item_index_for_client_reference(&resources.storage_items, MirGridType::Storage, 2),
+            Some(0)
+        );
+        assert_eq!(
+            item_index_for_client_reference(&resources.inventory_items, MirGridType::Inventory, 0,),
+            None,
+            "the later inventory zero must no longer alias the belt zero"
+        );
+        assert_eq!(
+            item_index_for_client_reference(&resources.storage_items, MirGridType::Storage, 700,),
+            None,
+            "the later storage nonzero collision must be rekeyed"
+        );
+
+        normalize_inventory_unique_ids(&mut resources);
+        let reloaded_ids = resources
+            .belt_items
+            .iter()
+            .chain(resources.inventory_items.iter())
+            .chain(resources.storage_items.iter())
+            .map(inventory_item_unique_id)
+            .collect::<Vec<_>>();
+        assert_eq!(reloaded_ids, root_ids, "normalization must be stable");
+    }
+
+    #[test]
+    fn normalization_preserves_metadata_exact_zero_and_rekeys_legacy_zero() {
+        let mut exact_zero = identity_stack(0, 8, ItemContainer::Bag1, 1);
+        exact_zero.user_item_metadata = Some(metadata(1));
+        let legacy_zero = identity_stack(0, 9, ItemContainer::Bag1, 1);
+        let mut second_exact_zero = identity_stack(0, 10, ItemContainer::Bag1, 1);
+        second_exact_zero.user_item_metadata = Some(metadata(2));
+        let mut resources = InventoryResource::new(BASE_STORAGE_SLOTS);
+        resources.inventory_items = vec![exact_zero, legacy_zero, second_exact_zero];
+
+        normalize_inventory_unique_ids(&mut resources);
+
+        let exact_zero = resources
+            .inventory_items
+            .iter()
+            .find(|item| item.slot == 8)
+            .expect("exact-zero fixture remains in its slot");
+        assert_eq!(exact_zero.unique_id, 0);
+        assert_eq!(item_unique_id(exact_zero), 0);
+        assert!(item_matches_inventory_unique_id(exact_zero, 0));
+        assert!(!item_matches_inventory_unique_id(exact_zero, 8));
+        let second_exact_zero = resources
+            .inventory_items
+            .iter()
+            .find(|item| item.slot == 10)
+            .expect("second exact-zero fixture remains in its slot");
+        assert_ne!(
+            second_exact_zero.unique_id, 0,
+            "a duplicate exact zero must be deterministically repaired"
+        );
+        let legacy_zero = resources
+            .inventory_items
+            .iter()
+            .find(|item| item.slot == 9)
+            .expect("legacy-zero fixture remains in its slot");
+        assert_eq!(legacy_zero.unique_id, 9);
+        assert!(item_matches_inventory_unique_id(legacy_zero, 9));
+        assert!(!item_matches_inventory_unique_id(legacy_zero, 0));
+
+        let encoded = serde_json::to_string(&resources.inventory_items)
+            .expect("normalized inventory should encode");
+        resources.inventory_items =
+            serde_json::from_str(&encoded).expect("normalized inventory should reload");
+        normalize_inventory_unique_ids(&mut resources);
+        assert_eq!(
+            resources
+                .inventory_items
+                .iter()
+                .find(|item| item.slot == 8)
+                .expect("exact-zero fixture reloads")
+                .unique_id,
+            0
+        );
+
+        let mut incoming_exact = identity_stack(0, 10, ItemContainer::Bag1, 1);
+        incoming_exact.user_item_metadata = Some(metadata(1));
+        let empty = InventoryResource::new(BASE_STORAGE_SLOTS);
+        normalize_incoming_item_tree_unique_ids(&empty, &mut incoming_exact, &[]);
+        assert_eq!(incoming_exact.unique_id, 0);
+
+        let mut occupied = InventoryResource::new(BASE_STORAGE_SLOTS);
+        occupied.inventory_items.push(incoming_exact.clone());
+        let mut colliding_exact = identity_stack(0, 11, ItemContainer::Bag1, 1);
+        colliding_exact.user_item_metadata = Some(metadata(3));
+        normalize_incoming_item_tree_unique_ids(&occupied, &mut colliding_exact, &[]);
+        assert_ne!(
+            colliding_exact.unique_id, 0,
+            "an incoming second exact zero must be rekeyed instead of remaining ambiguous"
+        );
+
+        normalize_fresh_item_tree_unique_ids(&empty, &mut incoming_exact, &[]);
+        assert_ne!(incoming_exact.unique_id, 0);
+    }
+
+    #[test]
+    fn metadata_difference_rejects_within_merge_without_mutation() {
+        let mut items = vec![
+            {
+                let mut item = identity_stack(101, 1, ItemContainer::Bag1, 3);
+                item.user_item_metadata = Some(metadata(1));
+                item
+            },
+            {
+                let mut item = identity_stack(102, 2, ItemContainer::Bag1, 5);
+                item.user_item_metadata = Some(metadata(2));
+                item
+            },
+        ];
+        let before = items.clone();
+
+        assert!(!merge_item_within_collection(
+            &mut items,
+            MirGridType::Inventory,
+            101,
+            102,
+            None,
+        ));
+        assert_eq!(format!("{items:?}"), format!("{before:?}"));
+    }
+
+    #[test]
+    fn fully_compatible_within_merge_succeeds() {
+        let mut items = vec![
+            identity_stack(201, 1, ItemContainer::Bag1, 3),
+            identity_stack(202, 2, ItemContainer::Bag1, 5),
+        ];
+
+        assert!(merge_item_within_collection(
+            &mut items,
+            MirGridType::Inventory,
+            201,
+            202,
+            None,
+        ));
+        assert_eq!(items.len(), 1);
+        assert_eq!(items[0].unique_id, 202);
+        assert_eq!(items[0].quantity, 8);
+    }
+
+    #[test]
+    fn nested_item_uid_or_count_difference_rejects_merge() {
+        let mut from = identity_stack(211, 1, ItemContainer::Bag1, 3);
+        from.socket_slots = 1;
+        from.user_item_metadata = Some(live_socket_metadata());
+        from.socketed
+            .push(identity_socket(9_001, 0, ItemContainer::Bag1, 1));
+        let mut to = identity_stack(212, 2, ItemContainer::Bag1, 5);
+        to.socket_slots = 1;
+        to.user_item_metadata = Some(live_socket_metadata());
+        to.socketed
+            .push(identity_socket(9_002, 0, ItemContainer::Bag1, 1));
+        assert_within_merge_rejected_without_mutation(from, to);
+
+        let mut from = identity_stack(213, 3, ItemContainer::Bag1, 3);
+        from.socket_slots = 1;
+        from.user_item_metadata = Some(live_socket_metadata());
+        from.socketed
+            .push(identity_socket(9_003, 0, ItemContainer::Bag1, 1));
+        let mut to = identity_stack(214, 4, ItemContainer::Bag1, 5);
+        to.socket_slots = 1;
+        to.user_item_metadata = Some(live_socket_metadata());
+        to.socketed
+            .push(identity_socket(9_003, 0, ItemContainer::Bag1, 2));
+        assert_within_merge_rejected_without_mutation(from, to);
+
+        let nested = user_item_from_item_state(&identity_socket(9_004, 0, ItemContainer::Bag1, 1));
+        let mut from = identity_stack(215, 5, ItemContainer::Bag1, 3);
+        from.socket_slots = 1;
+        let mut from_metadata = metadata(1);
+        from_metadata.slots = vec![Some(nested.clone())];
+        from.user_item_metadata = Some(from_metadata);
+        let mut to = identity_stack(216, 6, ItemContainer::Bag1, 5);
+        to.socket_slots = 1;
+        let mut to_metadata = metadata(1);
+        let mut different_nested_count = nested;
+        different_nested_count.count = 2;
+        to_metadata.slots = vec![Some(different_nested_count)];
+        to.user_item_metadata = Some(to_metadata);
+        assert_within_merge_rejected_without_mutation(from, to);
+    }
+
+    #[test]
+    fn exact_item_index_difference_rejects_merge() {
+        let mut from = identity_stack(221, 1, ItemContainer::Bag1, 3);
+        let mut from_metadata = metadata(1);
+        from_metadata.item_index = Some(-77);
+        from.user_item_metadata = Some(from_metadata);
+
+        let mut to = identity_stack(222, 2, ItemContainer::Bag1, 5);
+        let mut to_metadata = metadata(1);
+        to_metadata.item_index = Some(-78);
+        to.user_item_metadata = Some(to_metadata);
+
+        assert_within_merge_rejected_without_mutation(from, to);
+    }
+
+    #[test]
+    fn default_optional_rental_or_sealed_presence_rejects_merge() {
+        let mut from = identity_stack(223, 3, ItemContainer::Bag1, 3);
+        let mut from_metadata = metadata(1);
+        from_metadata.rental_information = Some(UserItemRentalInformation {
+            owner_name: String::new(),
+            binding_flags: 0,
+            expiry_binary_datetime: 0,
+            rental_locked: false,
+        });
+        from.user_item_metadata = Some(from_metadata);
+        let mut to = identity_stack(224, 4, ItemContainer::Bag1, 5);
+        to.user_item_metadata = Some(metadata(1));
+        assert_within_merge_rejected_without_mutation(from, to);
+
+        let mut from = identity_stack(225, 5, ItemContainer::Bag1, 3);
+        let mut from_metadata = metadata(1);
+        from_metadata.sealed_info = Some(UserItemSealedInfo {
+            expiry_binary_datetime: 0,
+            next_seal_binary_datetime: 0,
+        });
+        from.user_item_metadata = Some(from_metadata);
+        let mut to = identity_stack(226, 6, ItemContainer::Bag1, 5);
+        to.user_item_metadata = Some(metadata(1));
+        assert_within_merge_rejected_without_mutation(from, to);
+    }
+
+    #[test]
+    fn live_socket_authority_difference_rejects_merge() {
+        let mut from = identity_stack(227, 7, ItemContainer::Bag1, 3);
+        from.socket_slots = 1;
+        let mut from_metadata = live_socket_metadata();
+        from_metadata.live_socketed_at_capture = false;
+        from.user_item_metadata = Some(from_metadata);
+        from.socketed
+            .push(identity_socket(9_005, 0, ItemContainer::Bag1, 1));
+
+        let mut to = identity_stack(228, 8, ItemContainer::Bag1, 5);
+        to.socket_slots = 1;
+        let to_metadata = live_socket_metadata();
+        to.user_item_metadata = Some(to_metadata);
+        to.socketed
+            .push(identity_socket(9_005, 0, ItemContainer::Bag1, 1));
+
+        let mut from_protocol =
+            try_user_item_from_item_state(&from).expect("from carrier should serialize");
+        let mut to_protocol =
+            try_user_item_from_item_state(&to).expect("to carrier should serialize");
+        from_protocol.unique_id = 0;
+        to_protocol.unique_id = 0;
+        from_protocol.count = 0;
+        to_protocol.count = 0;
+        assert_eq!(
+            from_protocol, to_protocol,
+            "the authority marker itself is intentionally outside UserItem"
+        );
+        assert_within_merge_rejected_without_mutation(from, to);
+    }
+    #[test]
+    fn metadata_difference_rejects_across_merge_without_mutation() {
+        let mut from_items = vec![{
+            let mut item = identity_stack(301, 1, ItemContainer::Bag1, 3);
+            item.user_item_metadata = Some(metadata(1));
+            item
+        }];
+        let mut to_items = vec![{
+            let mut item = identity_stack(302, 2, ItemContainer::Storage, 5);
+            item.user_item_metadata = Some(metadata(2));
+            item
+        }];
+        let before_from = from_items.clone();
+        let before_to = to_items.clone();
+
+        assert!(!merge_item_across_collections(
+            &mut from_items,
+            MirGridType::Inventory,
+            301,
+            &mut to_items,
+            MirGridType::Storage,
+            302,
+            None,
+        ));
+        assert_eq!(format!("{from_items:?}"), format!("{before_from:?}"));
+        assert_eq!(format!("{to_items:?}"), format!("{before_to:?}"));
+    }
+
+    #[test]
+    fn fully_compatible_across_merge_succeeds() {
+        let mut from_items = vec![identity_stack(401, 1, ItemContainer::Bag1, 3)];
+        let mut to_items = vec![identity_stack(402, 2, ItemContainer::Storage, 5)];
+
+        assert!(merge_item_across_collections(
+            &mut from_items,
+            MirGridType::Inventory,
+            401,
+            &mut to_items,
+            MirGridType::Storage,
+            402,
+            None,
+        ));
+        assert!(from_items.is_empty());
+        assert_eq!(to_items.len(), 1);
+        assert_eq!(to_items[0].unique_id, 402);
+        assert_eq!(to_items[0].quantity, 8);
+    }
+
+    #[test]
+    fn split_rejects_nested_socket_identity_without_mutation() {
+        let mut source = identity_stack(501, 1, ItemContainer::Bag1, 6);
+        source.socket_slots = 1;
+        source
+            .socketed
+            .push(identity_stack(9001, 0, ItemContainer::Bag1, 1));
+
+        let mut world = World::new();
+        let mut resources = InventoryResource::new(BASE_STORAGE_SLOTS);
+        resources.inventory_items.push(source);
+        world.insert_resource(resources);
+
+        let packets = split_item_impl(&mut world, MirGridType::Inventory, 501, 2);
+        assert!(matches!(
+            packets.as_slice(),
+            [ServerPacket::SplitItem1 { success: false, .. }]
+        ));
+
+        let resources = world.resource::<InventoryResource>();
+        assert_eq!(resources.inventory_items.len(), 1);
+        assert_eq!(resources.inventory_items[0].quantity, 6);
+        assert_eq!(resources.inventory_items[0].socketed.len(), 1);
+        assert_eq!(resources.inventory_items[0].socketed[0].unique_id, 9001);
+    }
+    #[test]
+    fn storage_split_rejects_nested_socket_identity_without_mutation() {
+        let mut source = identity_stack(502, 1, ItemContainer::Storage, 6);
+        source.socket_slots = 1;
+        source
+            .socketed
+            .push(identity_stack(9_101, 0, ItemContainer::Bag1, 1));
+        let mut world = storage_world_with_item(source);
+
+        let packets = split_item_impl(&mut world, MirGridType::Storage, 502, 2);
+        assert!(matches!(
+            packets.as_slice(),
+            [ServerPacket::SplitItem1 { success: false, .. }]
+        ));
+
+        let resources = world.resource::<InventoryResource>();
+        assert_eq!(resources.storage_items.len(), 1);
+        assert_eq!(resources.storage_items[0].quantity, 6);
+        assert_eq!(resources.storage_items[0].socketed.len(), 1);
+        assert_eq!(resources.storage_items[0].socketed[0].unique_id, 9_101);
+    }
+
+    #[test]
+    fn split_conversion_error_preserves_inventory_and_storage_state() {
+        let mut inventory_source = identity_stack(503, 1, ItemContainer::Bag1, 6);
+        add_over_budget_stats(&mut inventory_source);
+        let mut world = World::new();
+        let mut inventory = InventoryResource::new(BASE_STORAGE_SLOTS);
+        inventory.inventory_items.push(inventory_source);
+        world.insert_resource(inventory);
+        let before = format!(
+            "{:?}",
+            world.resource::<InventoryResource>().inventory_items
+        );
+
+        let packets = split_item_impl(&mut world, MirGridType::Inventory, 503, 2);
+        assert!(matches!(
+            packets.as_slice(),
+            [ServerPacket::SplitItem1 { success: false, .. }]
+        ));
+        assert_eq!(
+            format!(
+                "{:?}",
+                world.resource::<InventoryResource>().inventory_items
+            ),
+            before
+        );
+
+        let mut storage_source = identity_stack(504, 1, ItemContainer::Storage, 6);
+        add_over_budget_stats(&mut storage_source);
+        let mut world = storage_world_with_item(storage_source);
+        let before = format!("{:?}", world.resource::<InventoryResource>().storage_items);
+
+        let packets = split_item_impl(&mut world, MirGridType::Storage, 504, 2);
+        assert!(matches!(
+            packets.as_slice(),
+            [ServerPacket::SplitItem1 { success: false, .. }]
+        ));
+        assert_eq!(
+            format!("{:?}", world.resource::<InventoryResource>().storage_items),
+            before
+        );
+    }
+    #[test]
+    fn metadata_only_child_uids_participate_in_usage_high_water_and_normalization() {
+        let mut parent = identity_stack(100, 1, ItemContainer::Bag1, 1);
+        parent.socket_slots = 1;
+        let child = user_item_from_item_state(&identity_socket(9_000, 0, ItemContainer::Bag1, 1));
+        let mut parent_metadata = metadata(1);
+        parent_metadata.slots = vec![Some(child)];
+        parent.user_item_metadata = Some(parent_metadata);
+
+        let mut resources = InventoryResource::new(BASE_STORAGE_SLOTS);
+        resources.inventory_items.push(parent);
+        assert!(inventory_unique_id_is_used(&resources, 9_000));
+        assert!(allocate_item_unique_id(&resources, ItemContainer::Bag1, 100) > 9_000);
+
+        let mut incoming = identity_stack(101, 2, ItemContainer::Bag1, 1);
+        incoming.socket_slots = 1;
+        let mut incoming_metadata = metadata(2);
+        incoming_metadata.slots = vec![Some(user_item_from_item_state(&identity_socket(
+            9_000,
+            0,
+            ItemContainer::Bag1,
+            1,
+        )))];
+        incoming.user_item_metadata = Some(incoming_metadata);
+        normalize_incoming_item_tree_unique_ids(&resources, &mut incoming, &[]);
+        let incoming_child_uid = incoming
+            .user_item_metadata
+            .as_ref()
+            .and_then(|metadata| metadata.slots[0].as_ref())
+            .expect("metadata-only child remains present")
+            .unique_id;
+        assert_ne!(incoming_child_uid, 9_000);
+        assert!(incoming_child_uid > 9_000);
+
+        resources.inventory_items.push(incoming);
+        normalize_inventory_unique_ids(&mut resources);
+        let mut all_ids = BTreeSet::new();
+        collect_inventory_unique_ids(&resources, &mut all_ids);
+        assert_eq!(
+            all_ids.len(),
+            4,
+            "two roots and two metadata-only children must remain globally unique"
+        );
+    }
+
+    #[test]
+    fn fresh_and_equipment_metadata_only_children_cannot_reuse_existing_uids() {
+        let mut equipment = equipped_item_with_root_uid(EquipmentSlot::Weapon, Some(44));
+        equipment.socket_slots = 1;
+        let mut equipment_metadata = metadata(1);
+        equipment_metadata.slots = vec![Some(user_item_from_item_state(&identity_socket(
+            46,
+            0,
+            ItemContainer::Bag1,
+            1,
+        )))];
+        equipment.user_item_metadata = Some(equipment_metadata);
+
+        let mut resources = InventoryResource::new(BASE_STORAGE_SLOTS);
+        resources.equipment_items.push(equipment);
+        assert!(inventory_unique_id_is_used(&resources, 46));
+
+        let mut fresh = identity_stack(46, 3, ItemContainer::Bag1, 1);
+        fresh.socket_slots = 1;
+        let mut fresh_metadata = metadata(2);
+        fresh_metadata.slots = vec![Some(user_item_from_item_state(&identity_socket(
+            46,
+            0,
+            ItemContainer::Bag1,
+            1,
+        )))];
+        fresh.user_item_metadata = Some(fresh_metadata);
+        normalize_fresh_item_tree_unique_ids(&resources, &mut fresh, &[]);
+
+        let fresh_child_uid = fresh
+            .user_item_metadata
+            .as_ref()
+            .and_then(|metadata| metadata.slots[0].as_ref())
+            .expect("fresh metadata-only child remains present")
+            .unique_id;
+        assert_ne!(fresh.unique_id, 0);
+        assert_ne!(fresh.unique_id, 44);
+        assert_ne!(fresh.unique_id, 46);
+        assert_ne!(fresh_child_uid, 0);
+        assert_ne!(fresh_child_uid, 44);
+        assert_ne!(fresh_child_uid, 46);
+        assert_ne!(fresh_child_uid, fresh.unique_id);
+    }
 }

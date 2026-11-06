@@ -103,6 +103,7 @@ import type {
   SelectCharacterEntry,
 } from "./original-client-types";
 import {
+  crystalMountedPlayerActionForPresentation,
   crystalPlayerAnimationMeta,
   type CrystalPlayerActionKey,
 } from "./original-client-player-frames";
@@ -300,12 +301,16 @@ export function buildViewportEntitySprite(
   const mountLibraryKey = sprite.mountLibrary
     ? normalizeSceneSpriteLibraryKey(sprite.mountLibrary)
     : null;
-  const mountFrameIndex =
-    (animation.mountFrameBaseOffset ?? sprite.mountFrameOffset ?? 0) +
-    directionIndex(presentationDirection) * animation.directionStride +
-    frameCycle;
+  // A mount layer exists only for actions with an explicit Crystal mount
+  // frame range. Die/Dead/Revive use ordinary player frames below 416, so
+  // DrawFrame - 416 is negative and Crystal draws no mount for those actions.
+  const mountFrameIndex = animation.mountFrameBaseOffset === undefined
+    ? null
+    : animation.mountFrameBaseOffset +
+      directionIndex(presentationDirection) * animation.directionStride +
+      frameCycle;
   const fallbackMountFrameIndex = directionIndex(presentationDirection) * 4;
-  const mountFrame = mountLibraryKey
+  const mountFrame = mountLibraryKey && mountFrameIndex !== null
     ? frameMetaForIndexWithFallback(libraries[mountLibraryKey], mountFrameIndex, fallbackMountFrameIndex)
     : null;
   const preloadAnimations = atlasPreloadAnimationsForEntity(
@@ -953,19 +958,11 @@ function spriteAnimationMetaForEntity(
   }
 
   if (sprite.mountLibrary) {
-    switch (animationState) {
-      case "walking":
-        return playerAnimationMetaForAction(sprite, "mountWalking", false);
-      case "running":
-        return playerAnimationMetaForAction(sprite, "mountRunning", false);
-      case "struck":
-        return playerAnimationMetaForAction(sprite, "mountStruck", false);
-      case "attackMelee":
-      case "attackRange":
-        return playerAnimationMetaForAction(sprite, "mountAttack", false);
-      default:
-        return playerAnimationMetaForAction(sprite, "mountStanding", false);
-    }
+    return playerAnimationMetaForAction(
+      sprite,
+      crystalMountedPlayerActionForPresentation(animationState),
+      false,
+    );
   }
 
   const archerAlt =

@@ -30,7 +30,12 @@ new Function("exports", "module", "require", compiled.outputText)(
   () => ({}),
 );
 
-const { crystalMountFrameIndex, crystalPlayerAnimationMeta, crystalPlayerFrameIndex } = module.exports;
+const {
+  crystalMountFrameIndex,
+  crystalMountedPlayerActionForPresentation,
+  crystalPlayerAnimationMeta,
+  crystalPlayerFrameIndex,
+} = module.exports;
 const entityFrameModulePath = new URL(
   "../app/components/original-client-entity-frames.ts",
   import.meta.url,
@@ -80,6 +85,18 @@ assert.deepEqual(crystalPlayerAnimationMeta("spell", 0, 0), {
   frameIntervalMs: 100,
   reverse: undefined,
 });
+assert.equal(crystalMountedPlayerActionForPresentation("struck"), "mountStruck");
+assert.equal(crystalMountedPlayerActionForPresentation("dying"), "dying");
+assert.equal(crystalMountedPlayerActionForPresentation("dead"), "dead");
+assert.equal(crystalMountedPlayerActionForPresentation("reviving"), "reviving");
+for (const state of ["dying", "dead", "reviving"]) {
+  const action = crystalMountedPlayerActionForPresentation(state);
+  assert.equal(
+    crystalPlayerAnimationMeta(action, 0, 0, false).mountFrameBaseOffset,
+    undefined,
+    `mounted ${state} must construct no mount layer`,
+  );
+}
 
 assert.deepEqual(
   Array.from({ length: 8 }, (_, phase) => crystalPlayerFrameIndex("mountWalking", right, phase)),
@@ -127,7 +144,23 @@ assert.deepEqual(crystalEntityAnimationMeta(frameSetFor("Monster/000"), "walking
   reverse: undefined,
   blend: undefined,
 });
+assert.deepEqual(crystalEntityAnimationMeta(frameSetFor("Monster/005"), "walking"), {
+  frameBaseOffset: 32,
+  frameCount: 6,
+  directionStride: 6,
+  frameIntervalMs: 100,
+  reverse: undefined,
+  blend: undefined,
+});
 assert.equal(crystalEntityAnimationMeta(frameSetFor("Monster/003"), "reviving").reverse, true);
+assert.deepEqual(crystalEntityAnimationMeta(frameSetFor("Monster/005"), "reviving"), {
+  frameBaseOffset: 144,
+  frameCount: 10,
+  directionStride: 10,
+  frameIntervalMs: 100,
+  reverse: true,
+  blend: undefined,
+});
 assert.equal(crystalEntityAnimationMeta(frameSetFor("Dragon"), "standing").directionStride, 0);
 assert.equal(crystalEntityAnimationMeta(frameSetFor("Monster/182"), "standing").blend, true);
 assert.deepEqual(crystalEntityAnimationMeta(frameSetFor("NPC/155"), "standing").effect, {
@@ -156,6 +189,16 @@ assert.match(
   renderingSource,
   /frameLayersForIndices\(libraries\[mountLibraryKey\], mountFrameIndices, fallbackMountFrameIndex\)/,
   "mounted phases must be included in the preload frame set",
+);
+assert.match(
+  renderingSource,
+  /animation\.mountFrameBaseOffset === undefined[\s\S]*?\? null[\s\S]*?mountLibraryKey && mountFrameIndex !== null/,
+  "Die, Dead and Revive must not fall back to a standing mount frame",
+);
+assert.doesNotMatch(
+  renderingSource,
+  /animation\.mountFrameBaseOffset \?\? sprite\.mountFrameOffset/,
+  "actions without a Crystal mount range must not synthesize a mount layer",
 );
 assert.match(
   renderingSource,

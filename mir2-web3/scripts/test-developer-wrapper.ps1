@@ -12,12 +12,17 @@ $FakeDocker = Join-Path $FakeBin "docker.cmd"
 $FakeGh = Join-Path $FakeBin "gh.cmd"
 $ReleaseLock = Join-Path $ProjectRoot "config\developer-release.json"
 $ReleaseBackup = Join-Path $TestRoot "developer-release.json"
+$DockerLog = Join-Path $TestRoot "docker.log"
+$RuntimeSentinel = Join-Path $TestRoot "runtime-fetch-failed"
 $EnvironmentKeys = @(
     "PATH",
     "DOCKER_CONFIG",
     "GH_TOKEN",
     "MIR2_FAKE_GH_FORBIDDEN",
     "MIR2_FAKE_PULL_FAIL",
+    "MIR2_FAKE_RUNTIME_FETCH_FAIL",
+    "MIR2_FAKE_DOCKER_LOG",
+    "MIR2_FAKE_RUNTIME_SENTINEL",
     "MIR2_DEV_IMAGE",
     "MIR2_DEVELOPER_IMAGE_REVISION",
     "MIR2_WEB_PORT",
@@ -37,6 +42,15 @@ New-Item -ItemType Directory -Path $FakeBin | Out-Null
     $FakeDocker,
 @"
 @echo off
+if not "%MIR2_FAKE_DOCKER_LOG%"=="" echo %*>>"%MIR2_FAKE_DOCKER_LOG%"
+if "%MIR2_FAKE_RUNTIME_FETCH_FAIL%"=="1" if exist "%MIR2_FAKE_RUNTIME_SENTINEL%" exit /b 0
+if "%MIR2_FAKE_RUNTIME_FETCH_FAIL%"=="1" (
+  echo %* | findstr /C:"fetch-prebuilt-bevy-runtime.mjs" >nul
+  if not errorlevel 1 (
+    type nul >"%MIR2_FAKE_RUNTIME_SENTINEL%"
+    exit /b 1
+  )
+)
 if "%MIR2_FAKE_PULL_FAIL%"=="1" if "%~1"=="pull" goto :forced_pull_failure
 if "%MIR2_FAKE_PULL_FAIL%"=="1" if "%~1"=="image" if "%~2"=="inspect" goto :forced_pull_failure
 if "%~1"=="info" (
@@ -182,6 +196,28 @@ try {
     }
     Write-Host ($FallbackOutput.Trim())
 
+    $env:MIR2_DEV_IMAGE = "mir2-web3-developer:wrapper-test"
+    $env:MIR2_FAKE_RUNTIME_FETCH_FAIL = "1"
+    $env:MIR2_FAKE_DOCKER_LOG = $DockerLog
+    $env:MIR2_FAKE_RUNTIME_SENTINEL = $RuntimeSentinel
+    $RuntimeFallbackOutput = (
+        & (Join-Path $ProjectRoot "scripts\dev.ps1") -Command verify *>&1 |
+            Out-String
+    )
+    Remove-Item Env:MIR2_FAKE_RUNTIME_FETCH_FAIL -ErrorAction SilentlyContinue
+    Remove-Item Env:MIR2_FAKE_DOCKER_LOG -ErrorAction SilentlyContinue
+    Remove-Item Env:MIR2_FAKE_RUNTIME_SENTINEL -ErrorAction SilentlyContinue
+    $DockerCalls = Get-Content -LiteralPath $DockerLog -Raw
+    if ($RuntimeFallbackOutput -notmatch
+        "Pinned Bevy runtime is unavailable; rebuilding it from current source\.") {
+        throw "Developer Windows runtime fallback fixture failed:`n$RuntimeFallbackOutput`n$DockerCalls"
+    }
+    if ($DockerCalls -notmatch
+        "MIR2_USE_PREBUILT_BEVY_RUNTIME=0 node apps/web/scripts/build-bevy-runtime.mjs release") {
+        throw "Developer Windows runtime fallback did not invoke the source build."
+    }
+    Write-Host ($RuntimeFallbackOutput.Trim())
+
     $env:MIR2_DEV_IMAGE =
         "ghcr.io/example/evil@sha256:" + ("b" * 64)
     $Rejected = $false
@@ -211,7 +247,13 @@ finally {
             Set-Item -Path "Env:$Key" -Value $Value
         }
     }
-    foreach ($Path in @($FakeDocker, $FakeGh, $ReleaseBackup)) {
+    foreach ($Path in @(
+        $FakeDocker,
+        $FakeGh,
+        $ReleaseBackup,
+        $DockerLog,
+        $RuntimeSentinel
+    )) {
         if (Test-Path -LiteralPath $Path) {
             Remove-Item -LiteralPath $Path -Force
         }

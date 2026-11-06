@@ -57,8 +57,10 @@ const sceneTypes = loadTsModule(new URL("../lib/scene-types.ts", import.meta.url
 const types = loadTsModule(new URL("types.ts", BASE), {
   "../scene-types": sceneTypes,
 });
+const actorCombatState = loadTsModule(new URL("actor-combat-state.ts", BASE));
 const storeModule = loadTsModule(new URL("store.ts", BASE), {
   "./types": types,
+  "./actor-combat-state": actorCombatState,
 });
 const emitterModule = loadTsModule(new URL("snapshot-emitter.ts", BASE), {
   "./store": storeModule,
@@ -224,13 +226,33 @@ test("updates mapTitle and mapFileName without clearing", () => {
 
 test("mapChanged clears entities (except self)", () => {
   const store = createWorldStore({ playerObjectId: "self" });
-  store.upsertEntity(makeEntity("self", { kind: "selfPlayer", disposition: "friendly" }));
+  store.upsertEntity(makeEntity("self", {
+    kind: "selfPlayer",
+    disposition: "friendly",
+    attackAnimation: "melee1",
+    attackStartedAt: 900,
+    attackUntil: 1_500,
+    struckStartedAt: 1_000,
+    struckUntil: 1_300,
+    pendingStruck: { attackerId: "monster-2", durationMs: 300 },
+    dieStartedAt: 1_100,
+    dieUntil: 1_500,
+    deathHandled: true,
+    reviveStartedAt: 1_200,
+    reviveUntil: 1_600,
+  }));
   store.upsertEntity(makeEntity("npc1", { kind: "npc" }));
   store.upsertGroundDrop(makeDrop("d1"));
   store.setMap({ mapFileName: "1", mapChanged: true });
   // self preserved, npc cleared
   assert.equal(store.getState().entities.length, 1);
   assert.equal(store.getState().entities[0].objectId, "self");
+  assert.equal(store.getState().entities[0].attackUntil, undefined);
+  assert.equal(store.getState().entities[0].struckUntil, undefined);
+  assert.equal(store.getState().entities[0].pendingStruck, undefined);
+  assert.equal(store.getState().entities[0].dieUntil, undefined);
+  assert.equal(store.getState().entities[0].reviveUntil, undefined);
+  assert.equal(store.getState().entities[0].deathHandled, false);
   assert.deepEqual(store.getState().groundDrops, []);
 });
 

@@ -19,6 +19,7 @@ import type {
   DamageFloater,
 } from "./types";
 import { DEFAULT_WORLD_STATE } from "./types";
+import { clearActorActionFeed } from "./actor-combat-state";
 
 // ---------------------------------------------------------------------------
 // Internal helpers
@@ -303,6 +304,9 @@ export function createWorldStore(initial?: Partial<WorldState>): WorldStore {
           mapChanged && current.playerObjectId
             ? current.entities.find((e) => e.objectId === current.playerObjectId)
             : undefined;
+        const resetSelfEntity = preservedSelfEntity
+          ? clearActorActionFeed(preservedSelfEntity)
+          : undefined;
 
         return {
           ...current,
@@ -313,8 +317,8 @@ export function createWorldStore(initial?: Partial<WorldState>): WorldStore {
           selectedObjectId: mapChanged ? null : current.selectedObjectId,
           activeNpcDialog: mapChanged ? null : current.activeNpcDialog,
           entities: mapChanged
-            ? preservedSelfEntity
-              ? [preservedSelfEntity]
+            ? resetSelfEntity
+              ? [resetSelfEntity]
               : []
             : current.entities,
           groundDrops: mapChanged ? [] : current.groundDrops,

@@ -1,0 +1,102 @@
+{
+  "schemaVersion": 1,
+  "kind": "mir2-windows-vis02-great-fireball-transcript",
+  "source": {
+    "spell": "GreatFireBall",
+    "actorActionDurationMs": 600,
+    "cast": {
+      "library": "Magic",
+      "base": 400,
+      "count": 10,
+      "durationMs": 600
+    },
+    "projectile": {
+      "library": "Magic",
+      "base": 410,
+      "directionCount": 16,
+      "directionStride": 10,
+      "count": 6,
+      "sourceIntervalMs": 30,
+      "tileTravelMs": 50
+    },
+    "impact": {
+      "library": "Magic",
+      "base": 570,
+      "count": 10,
+      "durationMs": 600
+    },
+    "audio": [
+      {
+        "cue": "GreatFireBall.cast",
+        "file": "M34-0.wav",
+        "sourceBytes": 430124,
+        "sha256": "0f25bb7cd8556726c8758c48cbf0bd2d1d3d4c205be36c6cae39251de9d3068b"
+      },
+      {
+        "cue": "GreatFireBall.projectile",
+        "file": "M34-1.wav",
+        "sourceBytes": 319532,
+        "sha256": "895c3855f35bb8ba543b2717f682617a85bbe5a6ea15170d1d5eb4196914429c"
+      },
+      {
+        "cue": "GreatFireBall.impact",
+        "file": "M34-2.wav",
+        "sourceBytes": 229420,
+        "sha256": "4482367380fff4edb7e1cd605add6ead984b45497b254ecb3941ab6d6cc0dbab"
+      }
+    ]
+  },
+  "timeline": [
+    {
+      "atMs": 0,
+      "event": {
+        "type": "packet",
+        "packet": "ObjectMagic",
+        "payload": {
+          "objectId": 1000,
+          "location": { "x": 288, "y": 616 },
+          "direction": "Up",
+          "spell": "GreatFireBall",
+          "targetId": 2034,
+          "target": { "x": 288, "y": 611 },
+          "cast": true,
+          "level": 1,
+          "selfBroadcast": false,
+          "secondaryTargetIds": []
+        }
+      }
+    },
+    {
+      "atMs": 0,
+      "compatibilityEvent": {
+        "type": "packet",
+        "packet": "ObjectProjectile",
+        "payload": {
+          "spell": "GreatFireBall",
+          "sourceId": 1000,
+          "destinationId": 2034
+        }
+      }
+    },
+    {
+      "atMs": 1000,
+      "compatibilityOnly": true,
+      "event": {
+        "type": "packet",
+        "packet": "ObjectMagic",
+        "payload": {
+          "objectId": 1000,
+          "location": { "x": 288, "y": 616 },
+          "direction": "Up",
+          "spell": "GreatFireBall",
+          "targetId": 2034,
+          "target": { "x": 288, "y": 611 },
+          "cast": false,
+          "level": 1,
+          "selfBroadcast": false,
+          "secondaryTargetIds": []
+        }
+      }
+    }
+  ]
+}

@@ -146,13 +146,13 @@ export function GameShopWindow({
       </div>
       <img className="game-shop-filter-bg" src={ORIGINAL_UI.gameShop.filterBackground} alt="" draggable={false} />
       <div className="game-shop-scroll up">
-        <SpriteButton sprite={ORIGINAL_UI.gameShop.upButton} label={t("ui.up", [], "Up")} onClick={() => undefined} />
+        <SpriteButton sprite={ORIGINAL_UI.gameShop.upButton} label={t("ui.up", [], "Up")} onClick={() => setPage((current) => Math.max(0, current - 1))} disabled={currentPage <= 0} />
       </div>
       <div className="game-shop-scroll thumb">
-        <SpriteButton sprite={ORIGINAL_UI.gameShop.positionBar} label={t("ui.scroll", [], "Scroll")} onClick={() => undefined} />
+        <SpriteButton sprite={ORIGINAL_UI.gameShop.positionBar} label={t("ui.scroll", [], "Scroll")} disabled />
       </div>
       <div className="game-shop-scroll down">
-        <SpriteButton sprite={ORIGINAL_UI.gameShop.downButton} label={t("ui.down", [], "Down")} onClick={() => undefined} />
+        <SpriteButton sprite={ORIGINAL_UI.gameShop.downButton} label={t("ui.down", [], "Down")} onClick={() => setPage((current) => Math.min(pageCount - 1, current + 1))} disabled={currentPage >= pageCount - 1} />
       </div>
       <div className="game-shop-section all">
         <SpriteButton sprite={ORIGINAL_UI.gameShop.sectionTabs.all} label="All" active={sectionFilter === "all"} onClick={() => setSectionFilter("all")} />
@@ -232,10 +232,20 @@ export function GameShopWindow({
       </button>
       <div className="game-shop-page">{currentPage + 1} / {pageCount}</div>
       <div className="game-shop-page-button previous">
-        <SpriteButton sprite={ORIGINAL_UI.gameShop.previousButton} label={t("ui.previous", [], "Previous")} onClick={() => setPage((current) => Math.max(0, current - 1))} />
+        <SpriteButton
+          sprite={ORIGINAL_UI.gameShop.previousButton}
+          label={t("ui.previous", [], "Previous")}
+          onClick={() => setPage((current) => Math.max(0, current - 1))}
+          disabled={currentPage <= 0}
+        />
       </div>
       <div className="game-shop-page-button next">
-        <SpriteButton sprite={ORIGINAL_UI.gameShop.nextButton} label={t("ui.next", [], "Next")} onClick={() => setPage((current) => Math.min(pageCount - 1, current + 1))} />
+        <SpriteButton
+          sprite={ORIGINAL_UI.gameShop.nextButton}
+          label={t("ui.next", [], "Next")}
+          onClick={() => setPage((current) => Math.min(pageCount - 1, current + 1))}
+          disabled={currentPage >= pageCount - 1}
+        />
       </div>
     </section>
   );

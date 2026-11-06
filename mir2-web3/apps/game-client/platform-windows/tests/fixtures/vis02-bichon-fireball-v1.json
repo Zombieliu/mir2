@@ -1,0 +1,101 @@
+{
+  "schemaVersion": 1,
+  "kind": "mir2-windows-vis02-fireball-transcript",
+  "source": {
+    "spell": "FireBall",
+    "actorActionDurationMs": 600,
+    "cast": {
+      "library": "Magic",
+      "base": 0,
+      "count": 10,
+      "durationMs": 600
+    },
+    "projectile": {
+      "library": "Magic",
+      "base": 10,
+      "directionCount": 16,
+      "directionStride": 10,
+      "count": 6,
+      "sourceIntervalMs": 30,
+      "tileTravelMs": 50
+    },
+    "impact": {
+      "library": "Magic",
+      "base": 170,
+      "count": 10,
+      "durationMs": 600
+    },
+    "audio": [
+      {
+        "cue": "FireBall.cast",
+        "file": "M31-0.wav",
+        "sourceBytes": 364024,
+        "sha256": "98c28fc920a35fe3c134607811760e4c49200239c2e3b9ccae36b42ee083aa3e"
+      },
+      {
+        "cue": "FireBall.projectile",
+        "file": "M31-1.wav",
+        "sourceBytes": 364028,
+        "sha256": "fcc49a68343db3e910a3a35f12cea227cbea058e199d048236a8d99831005a15"
+      },
+      {
+        "cue": "FireBall.impact",
+        "file": "M31-2.wav",
+        "sourceBytes": 128908,
+        "sha256": "8732fd9131e228712071aabfed542618b9d1d6f269d748ec9857ecbfa4e59b05"
+      }
+    ]
+  },
+  "timeline": [
+    {
+      "atMs": 0,
+      "event": {
+        "type": "packet",
+        "packet": "ObjectMagic",
+        "payload": {
+          "objectId": 1000,
+          "location": { "x": 288, "y": 616 },
+          "direction": "Up",
+          "spell": "FireBall",
+          "targetId": 2005,
+          "target": { "x": 288, "y": 611 },
+          "cast": true,
+          "level": 1,
+          "selfBroadcast": false,
+          "secondaryTargetIds": []
+        }
+      }
+    },
+    {
+      "atMs": 0,
+      "compatibilityEvent": {
+        "type": "packet",
+        "packet": "ObjectProjectile",
+        "payload": {
+          "spell": "FireBall",
+          "sourceId": 1000,
+          "destinationId": 2005
+        }
+      }
+    },
+    {
+      "atMs": 1000,
+      "event": {
+        "type": "packet",
+        "packet": "ObjectMagic",
+        "payload": {
+          "objectId": 1000,
+          "location": { "x": 288, "y": 616 },
+          "direction": "Up",
+          "spell": "FireBall",
+          "targetId": 2005,
+          "target": { "x": 288, "y": 611 },
+          "cast": false,
+          "level": 1,
+          "selfBroadcast": false,
+          "secondaryTargetIds": []
+        }
+      }
+    }
+  ]
+}

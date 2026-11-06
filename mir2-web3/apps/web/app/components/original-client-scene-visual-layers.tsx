@@ -571,7 +571,9 @@ function OriginalClientSceneVisualLayersInner({
   const persistentEffectAssetUrls = Array.from(
     new Set(
       resolvedEffectFrames.flatMap(({ effect, animation }) =>
-        effect.source === "spell" ? [] : sceneEffectAnimationAssetUrls(animation),
+        effect.source === "spell" || effect.source === "attackOverlay"
+          ? []
+          : sceneEffectAnimationAssetUrls(animation),
       ),
     ),
   );
@@ -601,7 +603,9 @@ function OriginalClientSceneVisualLayersInner({
     !persistentEffectAssetKey || readyPersistentEffectAssetKey === persistentEffectAssetKey;
   const displayResolvedEffectFrames = persistentEffectsReady
     ? resolvedEffectFrames
-    : resolvedEffectFrames.filter(({ effect }) => effect.source === "spell");
+    : resolvedEffectFrames.filter(
+        ({ effect }) => effect.source === "spell" || effect.source === "attackOverlay",
+      );
   const spellByCaster = new Map<string, string>();
   for (const resolved of resolvedEffectFrames) {
     if (resolved.effect.source === "spell" && resolved.effect.objectId) {
@@ -1068,6 +1072,7 @@ function OriginalClientSceneVisualLayersInner({
                   mixBlendMode: animation.blend
                     ? CRYSTAL_ADDITIVE_MIX_BLEND_MODE
                     : "normal",
+                  opacity: animation.opacity,
                   filter:
                     animation.light > 0
                       ? `drop-shadow(0 0 ${Math.min(animation.light * 2, 16)}px #fff)`
@@ -1116,6 +1121,7 @@ function OriginalClientSceneVisualLayersInner({
                     width: frame.maskWidth ?? frame.width,
                     height: frame.maskHeight ?? frame.height,
                     mixBlendMode: CRYSTAL_ADDITIVE_MIX_BLEND_MODE,
+                    opacity: animation.opacity,
                     pointerEvents: "none",
                     zIndex: viewportDepthForCell(
                       worldX,

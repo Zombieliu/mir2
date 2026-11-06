@@ -1927,6 +1927,7 @@ fn director_monster_spawns(
                 name_colour_argb: if boss_mutation { -65_281 } else { -1 },
                 image: template.image,
                 ai: template.ai,
+                disposition: Some(mir2_simulation::WorldEntityDisposition::Hostile),
                 level: template.level,
                 max_hp,
                 hp: max_hp,
@@ -1939,6 +1940,7 @@ fn director_monster_spawns(
                 position: position.clone(),
                 direction: *direction,
                 defense: ZoneMonsterDefense::from_crystal_template(&template),
+                respawn: None,
                 drops: Vec::new(),
             }
         })

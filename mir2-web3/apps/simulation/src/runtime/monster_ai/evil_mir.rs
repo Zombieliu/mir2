@@ -360,7 +360,7 @@ mod tests {
     use super::super::super::session::SimulationSession;
     use super::*;
     use crate::{SimulationConfig, WorldEntityDisposition};
-    use mir2_protocol::{ClientPacket, MirDirection, Point};
+    use mir2_protocol::{ClientPacket, MirDirection, Point, ServerPacket};
 
     /// Spawn a real "EvilMir" template (manifest AI == 52) the same way
     /// `spawn_crystal_monster_for_test` does, drive the AI through spawn → sleep
@@ -374,7 +374,14 @@ mod tests {
     #[test]
     fn evil_mir_sleeps_immobile_then_wakes_and_attacks() {
         let mut session = SimulationSession::new(SimulationConfig::default());
-        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        assert!(session
+            .handle_packet(ClientPacket::Login {
+                account_id: "demo".to_string(),
+                password: "demo".to_string(),
+            })
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::LoginSuccess { .. })));
+        let _ = session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
         let player = player_entity(session.app.world()).expect("player entity");
         let boss_origin = Point { x: 900, y: 900 };

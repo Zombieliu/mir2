@@ -95,9 +95,11 @@ export type QuestLogWindowProps = {
   onTrackQuest?: (questId: number) => void;
   onShareQuest?: (questId: number) => void;
   onAbandonQuest?: (questId: number) => void;
-  /** Crystal Quest Diary actions for quests which are not bound to a world NPC. */
+  /** Quest Diary actions; bound quests are enabled only by the active NPC dialog predicates. */
   onAcceptQuest?: (questId: number) => void;
   onFinishQuest?: (questId: number, selectedItemIndex?: number) => void;
+  canAcceptQuest?: (questId: number) => boolean;
+  canFinishQuest?: (questId: number, selectedItemIndex?: number) => boolean;
   onClose: () => void;
   /**
    * Lowercase class key of the local player. Rewrites class-blind onboarding copy
@@ -177,6 +179,8 @@ export function QuestLogWindow({
   onAbandonQuest,
   onAcceptQuest,
   onFinishQuest,
+  canAcceptQuest,
+  canFinishQuest,
   onClose,
   playerClass,
 }: QuestLogWindowProps) {
@@ -217,11 +221,18 @@ export function QuestLogWindow({
   }, [filtered, quests, selectedId, stageFilter, visible]);
   const selectedRewardIndex = selected ? selectedRewards[selected.questId] : undefined;
   const needsRewardSelection = Boolean(selected?.rewards?.selectItems?.length);
+  const canAcceptSelected = Boolean(
+    selected
+      && selected.stage === "available"
+      && onAcceptQuest
+      && (!canAcceptQuest || canAcceptQuest(selected.questId)),
+  );
   const canFinishSelected = Boolean(
     selected
       && selected.stage === "readyToTurnIn"
       && onFinishQuest
-      && (!needsRewardSelection || selectedRewardIndex !== undefined),
+      && (!needsRewardSelection || selectedRewardIndex !== undefined)
+      && (!canFinishQuest || canFinishQuest(selected.questId, selectedRewardIndex)),
   );
 
   useEffect(() => {
@@ -538,9 +549,20 @@ export function QuestLogWindow({
           <button
             type="button"
             data-testid="quest-accept-button"
-            disabled={!onAcceptQuest}
-            style={{ ...style.actionButton, ...(!onAcceptQuest ? style.actionButtonDisabled : null) }}
-            onClick={() => onAcceptQuest?.(selected.questId)}
+            disabled={!canAcceptSelected}
+            title={
+              !canAcceptSelected
+                ? t(
+                    "content.quest.generic.stage.available.objective",
+                    [],
+                    "Talk to the quest giver to accept this quest.",
+                  )
+                : undefined
+            }
+            style={{ ...style.actionButton, ...(!canAcceptSelected ? style.actionButtonDisabled : null) }}
+            onClick={() => {
+              if (canAcceptSelected) onAcceptQuest?.(selected.questId);
+            }}
           >
             {t("ui.questAccept", [], "Accept")}
           </button>
@@ -550,9 +572,17 @@ export function QuestLogWindow({
             type="button"
             data-testid="quest-finish-button"
             disabled={!canFinishSelected}
-            title={needsRewardSelection && selectedRewardIndex === undefined
-              ? t("client.YouMustSelectRewardItem", [], "Select a reward first.")
-              : undefined}
+            title={
+              needsRewardSelection && selectedRewardIndex === undefined
+                ? t("client.YouMustSelectRewardItem", [], "Select a reward first.")
+                : !canFinishSelected
+                  ? t(
+                      "content.quest.generic.stage.readyToTurnIn.objective",
+                      [],
+                      "Return to the quest NPC to turn in this quest.",
+                    )
+                  : undefined
+            }
             style={{ ...style.actionButton, ...(!canFinishSelected ? style.actionButtonDisabled : null) }}
             onClick={() => {
               if (canFinishSelected) onFinishQuest?.(selected.questId, selectedRewardIndex);

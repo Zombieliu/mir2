@@ -7,7 +7,7 @@
   "crystal": {
     "path": "Crystal",
     "repository": "Zombieliu/Crystal",
-    "commit": "484983404e3d6afa584e93801f8006ae3429bea9"
+    "commit": "92b4ce4ab488b11e65f63d3ad22de2e1f25ec08d"
   },
   "toolchains": {
     "node": "22.18.0",

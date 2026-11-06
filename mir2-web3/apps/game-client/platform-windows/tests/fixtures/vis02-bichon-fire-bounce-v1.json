@@ -1,0 +1,122 @@
+{
+  "schemaVersion": 1,
+  "kind": "mir2-windows-vis02-fire-bounce-transcript",
+  "contractScope": "shared-zone-to-windows-native",
+  "productionReachability": "shared-zone-player-cast",
+  "source": {
+    "spell": "FireBounce",
+    "actorActionDurationMs": 600,
+    "authoritativeFirstHitBaseDelayMs": 500,
+    "projectileTileTravelMs": 50,
+    "cast": {
+      "library": "Magic",
+      "base": 400,
+      "count": 10,
+      "durationMs": 600
+    },
+    "projectile": {
+      "library": "Magic",
+      "base": 410,
+      "directionCount": 16,
+      "directionStride": 10,
+      "count": 6,
+      "sourceIntervalMs": 30,
+      "tileTravelMs": 50
+    },
+    "impact": {
+      "library": "Magic",
+      "base": 570,
+      "count": 10,
+      "durationMs": 600,
+      "terminalActionGate": "Dead"
+    },
+    "audio": [
+      {
+        "cue": "FireBounce.cast",
+        "file": "M34-0.wav",
+        "sourceBytes": 430124,
+        "sha256": "0f25bb7cd8556726c8758c48cbf0bd2d1d3d4c205be36c6cae39251de9d3068b"
+      },
+      {
+        "cue": "FireBounce.projectile",
+        "file": "M34-1.wav",
+        "sourceBytes": 319532,
+        "sha256": "895c3855f35bb8ba543b2717f682617a85bbe5a6ea15170d1d5eb4196914429c"
+      },
+      {
+        "cue": "FireBounce.impact",
+        "file": "M34-2.wav",
+        "sourceBytes": 229420,
+        "sha256": "4482367380fff4edb7e1cd605add6ead984b45497b254ecb3941ab6d6cc0dbab"
+      }
+    ],
+    "provenance": [
+      "Crystal/Client/MirObjects/Frames.cs:166",
+      "Crystal/Client/MirObjects/PlayerObject.cs:2216-2218,3367-3378,3559-3578",
+      "Crystal/Client/MirScenes/GameScene.cs:4695-4710",
+      "Crystal/Server/MirObjects/HumanObject.cs:5811-5829,5936-5953"
+    ]
+  },
+  "timeline": [
+    {
+      "atMs": 0,
+      "event": {
+        "type": "packet",
+        "packet": "ObjectMagic",
+        "payload": {
+          "objectId": 1000,
+          "location": { "x": 288, "y": 616 },
+          "direction": "Up",
+          "spell": "FireBounce",
+          "targetId": 2154,
+          "target": { "x": 288, "y": 611 },
+          "cast": true,
+          "level": 2,
+          "selfBroadcast": false,
+          "secondaryTargetIds": []
+        }
+      },
+      "legacyCompatibilityEvent": {
+        "type": "packet",
+        "packet": "ObjectProjectile",
+        "payload": {
+          "spell": "FireBounce",
+          "sourceId": 1000,
+          "destinationId": 2154
+        }
+      }
+    },
+    {
+      "atMs": 750,
+      "event": {
+        "type": "packet",
+        "packet": "ObjectProjectile",
+        "payload": {
+          "spell": "FireBounce",
+          "sourceId": 2154,
+          "destinationId": 2155
+        }
+      }
+    },
+    {
+      "atMs": 1000,
+      "compatibilityOnly": true,
+      "event": {
+        "type": "packet",
+        "packet": "ObjectMagic",
+        "payload": {
+          "objectId": 1000,
+          "location": { "x": 288, "y": 616 },
+          "direction": "Up",
+          "spell": "FireBounce",
+          "targetId": 2154,
+          "target": { "x": 288, "y": 611 },
+          "cast": false,
+          "level": 2,
+          "selfBroadcast": false,
+          "secondaryTargetIds": []
+        }
+      }
+    }
+  ]
+}

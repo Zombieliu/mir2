@@ -1,41 +1,80 @@
-#!/bin/bash
-# Android compile gate for the native Android host.
+#!/usr/bin/env bash
+# Deterministic Android compile/package gate for the native Android host.
 #
-# Requires (macOS host):
-#   rustup target add --toolchain 1.95.0 aarch64-linux-android
-#   Android NDK (clang + llvm-ar). Point ANDROID_NDK_HOME at the NDK root or
-#   let the script discover ~/Library/Android/sdk/ndk/<version>.
-#
-# Real-device lifecycle/touch/GPU/memory/network gates are later M4 milestones.
+# This script never installs or downloads toolchains. It validates the local
+# Rust target and NDK first, then runs an offline Cargo check or cargo-apk
+# package build. Set MIR2_ANDROID_MODE=package to build an APK.
 
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+MANIFEST="${SCRIPT_DIR}/Cargo.toml"
 TOOLCHAIN="${MIR2_CLIENT_TOOLCHAIN:-1.95.0}"
 TARGET="${MIR2_ANDROID_TARGET:-aarch64-linux-android}"
-
-NDK_HOME="${ANDROID_NDK_HOME:-}"
-if [[ -z "${NDK_HOME}" ]]; then
-  NDK_HOME="$(ls -d "$HOME/Library/Android/sdk/ndk/"*/ 2>/dev/null | tail -1 | sed 's#/$##')"
-fi
-if [[ -z "${NDK_HOME}" || ! -d "${NDK_HOME}" ]]; then
-  echo "Android NDK not found. Set ANDROID_NDK_HOME." >&2
-  exit 1
-fi
-
-# API-level-suffixed clang, e.g. aarch64-linux-android26-clang.
 API_LEVEL="${MIR2_ANDROID_API_LEVEL:-26}"
-PREBUILT="$(ls -d "${NDK_HOME}/toolchains/llvm/prebuilt/"*/ | head -1)"
-export CARGO_TARGET_AARCH64_LINUX_ANDROID_LINKER="${PREBUILT}/bin/${TARGET}${API_LEVEL}-clang"
-export CARGO_TARGET_AARCH64_LINUX_ANDROID_AR="${PREBUILT}/bin/llvm-ar"
-# armv7 uses the same clang naming (armv7a prefix) but is out of scope for the
-# first gate; x86_64 emulator target follows the same pattern.
-export CC_aarch64_linux_android="${CARGO_TARGET_AARCH64_LINUX_ANDROID_LINKER}"
-export AR_aarch64_linux_android="${CARGO_TARGET_AARCH64_LINUX_ANDROID_AR}"
+MODE="${MIR2_ANDROID_MODE:-check}"
 
-echo "[platform-android] compile gate for ${TARGET} (${TOOLCHAIN}, NDK ${NDK_HOME})"
-cargo "+${TOOLCHAIN}" check \
-  --manifest-path "${SCRIPT_DIR}/Cargo.toml" \
-  --target "${TARGET}"
+fail() {
+  echo "[platform-android] error: $*" >&2
+  exit 1
+}
 
-echo "[platform-android] gate passed"
+require_command() {
+  command -v "$1" >/dev/null 2>&1 || fail "required command '$1' is not on PATH"
+}
+
+case "${MODE}" in
+  check|package) ;;
+  *) fail "MIR2_ANDROID_MODE must be 'check' or 'package'" ;;
+esac
+
+require_command cargo
+require_command rustup
+
+rustup run "${TOOLCHAIN}" rustc --version >/dev/null 2>&1 \
+  || fail "Rust toolchain '${TOOLCHAIN}' is unavailable; install it locally or set MIR2_CLIENT_TOOLCHAIN"
+
+if ! rustup target list --installed --toolchain "${TOOLCHAIN}" | grep -Fxq "${TARGET}"; then
+  fail "Rust target '${TARGET}' is not installed for '${TOOLCHAIN}'; run 'rustup target add --toolchain ${TOOLCHAIN} ${TARGET}'"
+fi
+
+NDK_HOME="${ANDROID_NDK_HOME:-${ANDROID_NDK_ROOT:-}}"
+SDK_ROOT="${ANDROID_SDK_ROOT:-${ANDROID_HOME:-}}"
+if [[ -z "${NDK_HOME}" && -n "${SDK_ROOT}" && -d "${SDK_ROOT}/ndk" ]]; then
+  NDK_HOME="$(find "${SDK_ROOT}/ndk" -mindepth 1 -maxdepth 1 -type d -print | sort -V | tail -n 1)"
+fi
+if [[ -z "${NDK_HOME}" && "$(uname -s)" == "Darwin" && -d "${HOME}/Library/Android/sdk/ndk" ]]; then
+  NDK_HOME="$(find "${HOME}/Library/Android/sdk/ndk" -mindepth 1 -maxdepth 1 -type d -print | sort -V | tail -n 1)"
+fi
+if [[ -z "${NDK_HOME}" && -d "${HOME}/Android/Sdk/ndk" ]]; then
+  NDK_HOME="$(find "${HOME}/Android/Sdk/ndk" -mindepth 1 -maxdepth 1 -type d -print | sort -V | tail -n 1)"
+fi
+[[ -d "${NDK_HOME}" ]] || fail "Android NDK not found; set ANDROID_NDK_HOME or ANDROID_NDK_ROOT"
+
+PREBUILT="$(find "${NDK_HOME}/toolchains/llvm/prebuilt" -mindepth 1 -maxdepth 1 -type d -print 2>/dev/null | head -n 1)"
+[[ -d "${PREBUILT}" ]] || fail "NDK LLVM prebuilt directory not found below '${NDK_HOME}'"
+
+case "${TARGET}" in
+  aarch64-linux-android) target_env="AARCH64_LINUX_ANDROID" ;;
+  x86_64-linux-android) target_env="X86_64_LINUX_ANDROID" ;;
+  armv7-linux-androideabi) target_env="ARMV7_LINUX_ANDROIDEABI" ;;
+  *) fail "unsupported Android target '${TARGET}' for this gate" ;;
+esac
+
+LINKER="${PREBUILT}/bin/${TARGET}${API_LEVEL}-clang"
+AR="${PREBUILT}/bin/llvm-ar"
+[[ -x "${LINKER}" || -x "${LINKER}.cmd" || -x "${LINKER}.exe" ]] \
+  || fail "NDK linker '${LINKER}' is missing for API ${API_LEVEL}"
+[[ -x "${AR}" || -x "${AR}.exe" ]] || fail "NDK llvm-ar '${AR}' is missing"
+
+export "CARGO_TARGET_${target_env}_LINKER=${LINKER}"
+export "CARGO_TARGET_${target_env}_AR=${AR}"
+
+echo "[platform-android] ${MODE} ${TARGET} with Rust ${TOOLCHAIN}, NDK ${NDK_HOME}, API ${API_LEVEL}"
+if [[ "${MODE}" == "package" ]]; then
+  require_command cargo-apk
+  cargo "+${TOOLCHAIN}" apk --manifest-path "${MANIFEST}" --target "${TARGET}" --release --locked --offline
+else
+  cargo "+${TOOLCHAIN}" check --manifest-path "${MANIFEST}" --target "${TARGET}" --locked --offline
+fi
+echo "[platform-android] ${MODE} gate passed"

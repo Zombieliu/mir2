@@ -1,0 +1,154 @@
+{
+  "schemaVersion": 1,
+  "kind": "mir2-windows-vis02-firewall-packet-event-projection",
+  "contractScope": "server_packet_to_event-projection",
+  "productionReachability": "not-asserted",
+  "source": {
+    "spell": "FireWall",
+    "spellId": 39,
+    "actorActionDurationMs": 600,
+    "serverGroundDelayMs": 500,
+    "cast": {
+      "library": "Magic",
+      "base": 1620,
+      "count": 10,
+      "durationMs": 600
+    },
+    "ground": {
+      "library": "Magic",
+      "base": 1630,
+      "count": 6,
+      "intervalMs": 120,
+      "repeat": true,
+      "light": 3,
+      "blend": true
+    },
+    "audio": [
+      {
+        "cue": "FireWall.cast",
+        "file": "M39-0.wav",
+        "sourceBytes": 246912,
+        "sha256": "464f33258ddd963a9d969ac1b439ea0fea0a39529b84d7cc6a762ff5b712f3af"
+      },
+      {
+        "cue": "FireWall.complete",
+        "file": "M39-1.wav",
+        "sourceBytes": 525980,
+        "sha256": "e6d5e62494da3d2f83073d7d17ff168b251d94aed8b054b3931e7a360894e6be"
+      }
+    ]
+  },
+  "timeline": [
+    {
+      "atMs": 0,
+      "event": {
+        "type": "packet",
+        "packet": "ObjectMagic",
+        "payload": {
+          "objectId": 1000,
+          "location": { "x": 288, "y": 616 },
+          "direction": "Up",
+          "spell": "FireWall",
+          "targetId": 0,
+          "target": { "x": 288, "y": 611 },
+          "cast": true,
+          "level": 1,
+          "selfBroadcast": false,
+          "secondaryTargetIds": []
+        }
+      }
+    },
+    {
+      "atMs": 500,
+      "event": {
+        "type": "packet",
+        "packet": "ObjectSpell",
+        "payload": {
+          "objectId": 81000,
+          "location": { "x": 288, "y": 611 },
+          "spell": 39,
+          "direction": "Up",
+          "param": false
+        }
+      }
+    },
+    {
+      "atMs": 500,
+      "event": {
+        "type": "packet",
+        "packet": "ObjectSpell",
+        "payload": {
+          "objectId": 81001,
+          "location": { "x": 288, "y": 610 },
+          "spell": 39,
+          "direction": "Up",
+          "param": false
+        }
+      }
+    },
+    {
+      "atMs": 500,
+      "event": {
+        "type": "packet",
+        "packet": "ObjectSpell",
+        "payload": {
+          "objectId": 81002,
+          "location": { "x": 289, "y": 611 },
+          "spell": 39,
+          "direction": "Up",
+          "param": false
+        }
+      }
+    },
+    {
+      "atMs": 500,
+      "event": {
+        "type": "packet",
+        "packet": "ObjectSpell",
+        "payload": {
+          "objectId": 81003,
+          "location": { "x": 288, "y": 612 },
+          "spell": 39,
+          "direction": "Up",
+          "param": false
+        }
+      }
+    },
+    {
+      "atMs": 500,
+      "event": {
+        "type": "packet",
+        "packet": "ObjectSpell",
+        "payload": {
+          "objectId": 81004,
+          "location": { "x": 287, "y": 611 },
+          "spell": 39,
+          "direction": "Up",
+          "param": false
+        }
+      }
+    }
+  ],
+  "compatibilityCases": {
+    "castFalse": {
+      "syntheticCompatibilityCase": true,
+      "productionReachability": "not-asserted",
+      "event": {
+        "type": "packet",
+        "packet": "ObjectMagic",
+        "payload": {
+          "objectId": 1000,
+          "location": { "x": 288, "y": 616 },
+          "direction": "Up",
+          "spell": "FireWall",
+          "targetId": 0,
+          "target": { "x": 288, "y": 611 },
+          "cast": false,
+          "level": 1,
+          "selfBroadcast": false,
+          "secondaryTargetIds": []
+        }
+      }
+    }
+  }
+}

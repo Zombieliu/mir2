@@ -46,7 +46,7 @@ jobs:
   cross-platform-release:
     name: Clean checkout (${{ matrix.os }})
     runs-on: ${{ matrix.os }}
-    timeout-minutes: 25
+    timeout-minutes: 60
     strategy:
       fail-fast: false
       matrix:
@@ -81,11 +81,48 @@ jobs:
           rustup toolchain install 1.89.0 --profile minimal --component rustfmt
           test "$(rustc +1.89.0 --version | awk '{print $2}')" = "1.89.0"
 
-      - name: Fetch pinned Bevy runtime
-        run: node mir2-web3/apps/web/scripts/fetch-prebuilt-bevy-runtime.mjs
+      - name: Install current Bevy runtime toolchain
+        shell: bash
+        working-directory: mir2-web3/apps/game-client/runtime
+        run: |
+          set -euo pipefail
+          rustup toolchain install 1.95.0 --profile minimal --component rustfmt
+          rustup target add --toolchain 1.95.0 wasm32-unknown-unknown
+          test "$(rustc +1.95.0 --version | awk '{print $2}')" = "1.95.0"
+          rustup target list --installed --toolchain 1.95.0 | grep -Fx wasm32-unknown-unknown
+          wasm_bindgen_version="$(node -e '
+            const fs = require("node:fs");
+            const lock = fs.readFileSync("Cargo.lock", "utf8");
+            const block = lock
+              .split(/\r?\n(?=\[\[package\]\]\r?\n)/)
+              .find((entry) => /^name = "wasm-bindgen"$/m.test(entry));
+            const version = block?.match(/^version = "([^"]+)"$/m)?.[1];
+            if (!version) process.exit(1);
+            process.stdout.write(version);
+          ')"
+          test -n "$wasm_bindgen_version"
+          cargo +1.95.0 install wasm-bindgen-cli --version "$wasm_bindgen_version" --locked
+          test "$(wasm-bindgen --version | awk '{print $2}')" = "$wasm_bindgen_version"
+
+      - name: Build pinned Bevy runtime from current source
+        working-directory: mir2-web3/apps/web
+        env:
+          MIR2_BEVY_CARGO_TARGET_ROOT: ${{ runner.temp }}/mir2-bevy-runtime-target
+        run: npm run runtime:build:release
 
       - name: Verify developer release locks and Starter resources
         run: node mir2-web3/scripts/check-developer-release.mjs
+
+      - name: Verify current-source Bevy runtime bundle
+        working-directory: mir2-web3/apps/web
+        run: npm run test:bevy-runtime-budget
+
+      - name: Restore tracked Bevy runtime release lock after source validation
+        shell: bash
+        run: |
+          set -euo pipefail
+          git restore --source=HEAD --worktree -- \
+            mir2-web3/apps/web/lib/generated/bevy_runtime_version.json
 
       - name: Parse developer PowerShell scripts
         shell: pwsh
@@ -203,8 +240,11 @@ jobs:
             test "$(node --version)" = "v22.18.0"
             test "$(npm --version)" = "11.13.0"
             rustc +1.89.0 --version | grep -E "^rustc 1\\.89\\.0 "
+            rustc +1.95.0 --version | grep -E "^rustc 1\\.95\\.0 "
+            wasm-bindgen --version | grep -F "wasm-bindgen 0.2.118"
             gh --version | head -n 1 | grep -F "gh version 2.96.0"
             rustup target list --installed --toolchain 1.89.0 | grep -Fx wasm32-unknown-unknown
+            rustup target list --installed --toolchain 1.95.0 | grep -Fx wasm32-unknown-unknown
             grep -Fx ID=debian /etc/os-release
           '
           test "$(
@@ -212,6 +252,34 @@ jobs:
               --format '{{ index .Config.Labels "org.opencontainers.image.revision" }}' \
               "$MIR2_DEV_IMAGE"
           )" = "$GITHUB_SHA"
+
+      - name: Verify host-private developer secret handoff
+        run: |
+          set -euo pipefail
+          secret_file="${RUNNER_TEMP}/mir2-save-recovery-mac-key.hex"
+          cleanup_secret() {
+            rm -f -- "$secret_file"
+          }
+          trap cleanup_secret EXIT
+
+          openssl rand -hex 32 >"$secret_file"
+          chmod 600 "$secret_file"
+          docker run --rm \
+            --mount "type=bind,source=${secret_file},target=/run/secrets/mir2_save_recovery_mac_key,readonly" \
+            "$MIR2_DEV_IMAGE" \
+            bash -lc '
+              set -euo pipefail
+              test "$(id -un)" = "node"
+              [[ "${MIR2_SAVE_RECOVERY_MAC_KEY:-}" =~ ^[0-9a-f]{64}$ ]]
+            '
+
+          printf 'invalid\n' >"$secret_file"
+          if docker run --rm \
+            --mount "type=bind,source=${secret_file},target=/run/secrets/mir2_save_recovery_mac_key,readonly" \
+            "$MIR2_DEV_IMAGE" true; then
+            echo "Developer entrypoint accepted an invalid save-recovery secret." >&2
+            exit 1
+          fi
 
       - name: Validate real Compose definitions
         env:

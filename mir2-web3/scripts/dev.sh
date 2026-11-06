@@ -221,11 +221,18 @@ prepare_bevy_runtime() {
   fi
 
   prepare_runtime_image
-  compose run --rm --no-deps \
-    --user "$(id -u):$(id -g)" \
-    --entrypoint node \
-    workspace \
-    apps/web/scripts/fetch-prebuilt-bevy-runtime.mjs
+  if ! compose run --rm --no-deps \
+      --user "$(id -u):$(id -g)" \
+      --entrypoint node \
+      workspace \
+      apps/web/scripts/fetch-prebuilt-bevy-runtime.mjs; then
+    echo "[dev] Pinned Bevy runtime is unavailable; rebuilding it from current source."
+    compose run --rm --no-deps \
+      --user "$(id -u):$(id -g)" \
+      --entrypoint bash \
+      workspace -lc \
+      'CARGO_HOME=/tmp/mir2-runtime-cargo MIR2_BEVY_CARGO_TARGET_ROOT=/tmp/mir2-runtime-target RUSTUP_TOOLCHAIN="${MIR2_BEVY_RUNTIME_RUST_TOOLCHAIN:?missing runtime toolchain lock}" MIR2_USE_PREBUILT_BEVY_RUNTIME=0 node apps/web/scripts/build-bevy-runtime.mjs release'
+  fi
   bevy_runtime_prepared=1
 }
 
@@ -481,6 +488,7 @@ case "${command}" in
     compose build workspace
     ;;
   up)
+    bash "${project_root}/scripts/Initialize-LocalSaveRecovery.sh" --project-root "${project_root}" --quiet
     release_lock_check
     if [[ "${full_assets}" -eq 1 ]]; then
       install_full_assets

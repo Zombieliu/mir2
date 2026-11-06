@@ -1,0 +1,203 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://mir2.local/schemas/crystal-semantic-parity-ledger-v1.json",
+  "title": "Crystal semantic parity ledger",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "crystalRevision",
+    "implementationRevision",
+    "inventoryComplete",
+    "inventoryEvidence",
+    "policySha256",
+    "releasePackageIdentity",
+    "capabilities"
+  ],
+  "properties": {
+    "schemaVersion": { "const": "crystal-semantic-parity-ledger-v1" },
+    "crystalRevision": { "$ref": "#/$defs/gitRevision" },
+    "implementationRevision": { "$ref": "#/$defs/gitRevision" },
+    "inventoryComplete": { "type": "boolean" },
+    "inventoryEvidence": { "$ref": "#/$defs/inventoryEvidence" },
+    "policySha256": { "$ref": "#/$defs/sha256" },
+    "releasePackageIdentity": {
+      "oneOf": [
+        { "type": "null" },
+        { "$ref": "#/$defs/nonEmpty" }
+      ]
+    },
+    "capabilities": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/capability" }
+    }
+  },
+  "$defs": {
+    "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "gitRevision": { "type": "string", "pattern": "^[0-9a-f]{40}$" },
+    "nonEmpty": { "type": "string", "minLength": 1 },
+    "safeRelativePath": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^(?!/)(?![A-Za-z]:)(?!.*\\\\)(?!.*(?:^|/)\\.\\.?(?:/|$))(?!.*//)[A-Za-z0-9._@+()\\- /]+$"
+    },
+    "sourceRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "symbol", "lineStart", "lineEnd"],
+      "properties": {
+        "path": { "$ref": "#/$defs/safeRelativePath" },
+        "symbol": { "$ref": "#/$defs/nonEmpty" },
+        "lineStart": { "type": "integer", "minimum": 1 },
+        "lineEnd": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "inventoryEvidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "sha256", "schemaVersion", "createdAt"],
+      "properties": {
+        "path": { "$ref": "#/$defs/safeRelativePath" },
+        "sha256": { "$ref": "#/$defs/sha256" },
+        "schemaVersion": { "const": "crystal-semantic-source-inventory-v2" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      }
+    },
+    "evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind",
+        "path",
+        "sha256",
+        "schemaVersion",
+        "createdAt",
+        "crystalRevision",
+        "implementationRevision",
+        "verifierVersion",
+        "policySha256"
+      ],
+      "properties": {
+        "kind": {
+          "enum": [
+            "CRYSTAL_TRACE",
+            "IMPLEMENTATION_TRACE",
+            "SEMANTIC_DIFF",
+            "PERSISTENCE",
+            "NEGATIVE_TEST",
+            "VISUAL_ORIGINAL",
+            "VISUAL_NATIVE",
+            "VISUAL_REVIEW",
+            "WEB_REGRESSION",
+            "PACKAGE",
+            "TEST_REPORT"
+          ]
+        },
+        "path": { "$ref": "#/$defs/safeRelativePath" },
+        "sha256": { "$ref": "#/$defs/sha256" },
+        "schemaVersion": { "$ref": "#/$defs/nonEmpty" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "crystalRevision": { "$ref": "#/$defs/gitRevision" },
+        "implementationRevision": { "$ref": "#/$defs/gitRevision" },
+        "verifierVersion": { "$ref": "#/$defs/nonEmpty" },
+        "policySha256": { "$ref": "#/$defs/sha256" },
+        "expiresAt": { "type": "string", "format": "date-time" },
+        "challenge": { "$ref": "#/$defs/nonEmpty" },
+        "signerPinSha256": { "$ref": "#/$defs/sha256" },
+        "packageIdentity": { "$ref": "#/$defs/nonEmpty" }
+      }
+    },
+    "contract": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "preconditions",
+        "inputs",
+        "clock",
+        "rng",
+        "stateDeltas",
+        "outbound",
+        "clientConsequences",
+        "persistence",
+        "negativeCases"
+      ],
+      "properties": {
+        "preconditions": { "type": "array", "items": { "$ref": "#/$defs/nonEmpty" } },
+        "inputs": { "type": "array", "items": { "$ref": "#/$defs/nonEmpty" }, "minItems": 1 },
+        "clock": { "$ref": "#/$defs/nonEmpty" },
+        "rng": { "$ref": "#/$defs/nonEmpty" },
+        "stateDeltas": { "type": "array", "items": { "$ref": "#/$defs/nonEmpty" } },
+        "outbound": { "type": "array", "items": { "$ref": "#/$defs/nonEmpty" } },
+        "clientConsequences": { "type": "array", "items": { "$ref": "#/$defs/nonEmpty" } },
+        "persistence": { "type": "array", "items": { "$ref": "#/$defs/nonEmpty" } },
+        "negativeCases": { "type": "array", "items": { "$ref": "#/$defs/nonEmpty" }, "minItems": 1 }
+      }
+    },
+    "capability": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "domain",
+        "description",
+        "severity",
+        "crystalSources",
+        "dataIdentifiers",
+        "contract",
+        "implementationSources",
+        "tests",
+        "evidence",
+        "knownDeviations",
+        "status"
+      ],
+      "properties": {
+        "id": { "type": "string", "pattern": "^[A-Z0-9_]+(\\.[A-Z0-9_]+){3,}$" },
+        "domain": { "type": "string", "pattern": "^[A-Z0-9_]+$" },
+        "description": { "$ref": "#/$defs/nonEmpty" },
+        "severity": { "enum": ["P0", "P1", "P2"] },
+        "crystalSources": { "type": "array", "items": { "$ref": "#/$defs/sourceRef" }, "minItems": 1 },
+        "dataIdentifiers": { "type": "array", "items": { "$ref": "#/$defs/nonEmpty" } },
+        "contract": { "$ref": "#/$defs/contract" },
+        "implementationSources": { "type": "array", "items": { "$ref": "#/$defs/sourceRef" } },
+        "tests": { "type": "array", "items": { "$ref": "#/$defs/nonEmpty" } },
+        "evidence": { "type": "array", "items": { "$ref": "#/$defs/evidence" } },
+        "knownDeviations": { "type": "array", "items": { "$ref": "#/$defs/nonEmpty" } },
+        "status": {
+          "enum": [
+            "UNMAPPED",
+            "MAPPED",
+            "CONTRACT_READY",
+            "IMPLEMENTED_UNVERIFIED",
+            "TRACE_MISMATCH",
+            "VERIFIED",
+            "BLOCKED_EXTERNAL"
+          ]
+        },
+        "verifiedRevision": { "$ref": "#/$defs/gitRevision" },
+        "packageIdentity": { "$ref": "#/$defs/nonEmpty" }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "status": { "const": "VERIFIED" } }, "required": ["status"] },
+          "then": {
+            "required": ["verifiedRevision", "packageIdentity"],
+            "properties": {
+              "implementationSources": { "minItems": 1 },
+              "tests": { "minItems": 1 },
+              "evidence": { "minItems": 4 },
+              "knownDeviations": { "maxItems": 0 }
+            }
+          },
+          "else": {
+            "not": {
+              "anyOf": [
+                { "required": ["verifiedRevision"] },
+                { "required": ["packageIdentity"] }
+              ]
+            }
+          }
+        }
+      ]
+    }
+  }
+}

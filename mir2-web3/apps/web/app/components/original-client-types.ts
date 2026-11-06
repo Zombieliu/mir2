@@ -130,6 +130,7 @@ export type DisplayEntity = {
   struckUntil?: number;
   dieStartedAt?: number;
   dieUntil?: number;
+  deathHandled?: boolean;
   reviveStartedAt?: number;
   reviveUntil?: number;
 };
@@ -160,7 +161,7 @@ export type DisplayProjectile = {
 
 export type DisplaySceneEffect = {
   key: string;
-  source: "spell" | "objectSpell" | "map" | "object";
+  source: "spell" | "attackOverlay" | "actorEffect" | "objectSpell" | "map" | "object";
   spellOrEffect: string | number;
   objectId?: string;
   x: number;

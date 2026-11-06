@@ -50,8 +50,10 @@ const sceneTypes = loadTsModule(new URL("../lib/scene-types.ts", import.meta.url
 const types = loadTsModule(new URL("types.ts", BASE), {
   "../scene-types": sceneTypes,
 });
+const actorCombatState = loadTsModule(new URL("actor-combat-state.ts", BASE));
 const storeModule = loadTsModule(new URL("store.ts", BASE), {
   "./types": types,
+  "./actor-combat-state": actorCombatState,
 });
 // use-world-selector imports "react" only inside the hook; the pure helpers
 // (createSelectorMemo / shallowEqual) never touch it. Stub `react` with throwing

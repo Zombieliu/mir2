@@ -1,0 +1,110 @@
+{
+  "schemaVersion": 1,
+  "ledgerId": "WN-VIS-PHASE-A-20260827",
+  "sourceRevision": "484983404e3d6afa584e93801f8006ae3429bea9",
+  "sourceRootClean": false,
+  "implementationBaseRevision": "67a55b37900ced07d66bd788cbe06ef429ede8aa",
+  "implementationRevision": "76f61ddabadd976f36c360fe2a942d4e67426dff",
+  "branch": "codex/windows-visual-parity",
+  "claims": {
+    "semanticLeafInventoryComplete": false,
+    "inventoryComplete": false,
+    "globalParityPercent": null,
+    "accepted": false,
+    "visualAccepted": false
+  },
+  "countingRule": {
+    "unit": "one source-visible stable slot, template, action record, direction-phase record, asset library, or explicit rendering rule",
+    "buttonStatesAreRequiredGatesNotLeaves": true,
+    "requiredButtonStates": [
+      "normal",
+      "hover",
+      "pressed",
+      "disabled"
+    ],
+    "unknownBlockedFailCountAsPass": false,
+    "requiredGateMayBeNotApplicable": false
+  },
+  "uiPhaseA": {
+    "knownFixedTemplateLeaves": 410,
+    "inventoryComplete": false,
+    "families": [
+      { "id": "main-hud", "leaves": 28 },
+      { "id": "chat", "leaves": 8 },
+      { "id": "chat-control", "leaves": 12 },
+      { "id": "skill-bar", "leaves": 28 },
+      { "id": "minimap", "leaves": 22 },
+      { "id": "inventory", "leaves": 141 },
+      { "id": "character", "leaves": 54, "equipmentCells": 14 },
+      { "id": "quest-family", "leaves": 95 },
+      { "id": "big-map", "leaves": 22 }
+    ]
+  },
+  "actors": {
+    "inventoryComplete": false,
+    "playerPixelLibraries": 477,
+    "playerPixelFrames": 541010,
+    "currentPlayerAtlasRoots": 7,
+    "currentPlayerAtlasFrames": 7360,
+    "monsterPixelLibraries": 546,
+    "monsterPixelFrames": 219607,
+    "currentMonsterAtlasLibraries": 8,
+    "currentMonsterAtlasFrames": 1742,
+    "playerActionRecords": 33,
+    "playerBodyDirectionPhaseLeaves": 1384,
+    "playerEffectWingDirectionPhaseLeaves": 1240,
+    "monsterExplicitLibraryContracts": 455,
+    "monsterExplicitActionRecords": 3332,
+    "monsterExplicitDirectionPhaseLeaves": 153416,
+    "monsterLibrariesWithoutExplicitContract": 91,
+    "visualRuleLeaves": 32
+  },
+  "effects": {
+    "inventoryComplete": false,
+    "nonNoneSpells": 129,
+    "nonNoneSpellEffects": 34,
+    "currentObjectEffectManifestEntries": 11,
+    "uniqueSpellObjectBranches": 29,
+    "groundEffectManifestEntries": 13,
+    "spellObjectBackedGroundEffectEntries": 7,
+    "mapEventSpells": 19,
+    "mapEventVisualEntries": 0,
+    "spellEffectMapManifestEntries": 2,
+    "nonNonePoisonTypes": 11,
+    "buffTypes": 59,
+    "worldObservableBuffBranches": 17,
+    "mirActions": 45,
+    "weatherFlags": 10,
+    "lightSettings": 5
+  },
+  "firstSlices": {
+    "actorScene": [
+      "live",
+      "combat",
+      "harvest",
+      "occlusion"
+    ],
+    "combatEffects": [
+      "FlamingSword",
+      "FireBall",
+      "Lightning",
+      "SoulFireBall",
+      "FireWall"
+    ],
+    "uiStates": [
+      "hud-normal",
+      "inventory-hover",
+      "inventory-pressed",
+      "bigmap-teleport-disabled"
+    ]
+  },
+  "externalGates": [
+    "clean-crystal-source-binding",
+    "same-exe-ui-live-wss",
+    "real-dpi-100-125-150",
+    "native-30-minute-soak",
+    "human-visual-animation-audio-feel",
+    "complete-legal-asset-pack",
+    "formal-publisher-signing"
+  ]
+}

@@ -1,6 +1,418 @@
 # Frontend 1:1 Gaps
 
-Last updated: 2026-08-18
+Last updated: 2026-08-29
+
+> 2026-08-29 Windows native login-notice implementation checkpoint: Crystal
+> runtime `StartGame` now emits a project-owned `UpdateNotice` only after a
+> successful gameplay entry; Gateway preserves the typed `{notice}` envelope;
+> the Windows adapter retains a monotonic connection-scoped update; and native
+> Bevy renders the source-sized `Prguse/961` panel with original close, scroll,
+> position-bar, and OK assets. Focused Simulation, Gateway, protocol, adapter,
+> and UI-state tests pass. Default startup chat fallbacks no longer inject the
+> unrelated LOMCN/Suprcode/JevLomcn/Net.8 copy previously seen by the user.
+> This is implementation evidence, not visual acceptance: exact same-EXE
+> capture, clickable/color span fidelity, persistent Crystal
+> `LastUpdate > LastLogoutDate` behavior, DPI, soak, and human acceptance remain
+> open.
+
+> 2026-08-29 Windows safe-zone regression repair checkpoint: revision
+> `aae9c2c7e06dbceb6f6539c7b29eba63ece293c4` restores the imported Crystal
+> server's `SafeZoneBorder=True` presentation path. The Simulation default now
+> derives from generated `TrapHexagon` boundary objects instead of suppressing
+> them, while an explicit opt-out remains. The existing Windows persistent
+> effect renderer is source-bound to `Magic 1390..1399`, 100 ms frames and
+> authoritative removal; `inSafeZone` is also retained in the shared read
+> model. Full Simulation 1482/1482 and focused Windows/read-model tests pass.
+> Exact-head packaging, timed capture and human comparison are still required,
+> so this does not close global visual parity or authorize a percentage.
+
+> 2026-08-29 Windows-native user-observed visual/UI backlog: the current
+> native Candidate is explicitly not visually accepted. Recent side-by-side
+> user checks against Crystal confirm several still-open gaps that must remain
+> tracked as unfinished work instead of being implied complete by narrower
+> automated leaves. Open items now include: an implemented but not yet
+> exact-Candidate-accepted login-to-game notice popup;
+> missing safe-zone indicator; substantial HUD/chat/button/layout drift versus
+> Crystal; missing or incomplete hover tooltips on the right-side function
+> strip, bottom-right action buttons, chat mini-buttons and inventory/item UI;
+> inventory/belt slot sizing differences; item tooltip/detail gaps; missing
+> Crystal-style monster/NPC cursor semantics in some remaining paths; native
+> world rendering that still reads softer or blurrier than Crystal on some
+> buildings; missing or unaccepted scene animations such as lamp flame/fire;
+> an incomplete quest/quest-diary flow; missing NPC-head available,
+> in-progress and turn-in guidance markers; and unresolved human-feel concerns
+> around movement cadence, click-to-move, run responsiveness and interaction
+> pacing. The right-side system menu, main-HUD buttons, and chat mini-button row
+> remain a functional denominator, not merely an asset-presence check. These
+> observations are retained as
+> open Windows visual-parity backlog, not as evidence of completion, and they
+> must be closed with exact same-EXE screenshots, bounded automation where
+> possible, and final human acceptance before any 1:1 completion claim.
+> The numbered denominator is recorded in
+> `docs/generated/player-qa/windows-visual-parity/VIS-03-USER-OBSERVED-UI-RENDER-BACKLOG-20260829.md`.
+
+> 2026-08-29 Windows-native P0 environment/quest-marker implementation
+> checkpoint: Type100 tile-animation bytes now survive parsing; tile, middle,
+> and front animation families are expanded only when every source frame is
+> packaged, then advanced by a local 100 ms clock using Crystal's frame/tick
+> dwell formula. Incomplete families fail closed to their stable base frame
+> instead of flashing transparent. Runtime tests pass 205/205 and focused map
+> parser tests pass 31/31. Separately, authoritative NPC `questIds` plus the
+> native `QuestTracker` now select Crystal's real `Prguse` `983..988`
+> question/exclamation pairs, advance them on the original 500 ms cadence, and
+> honor ready > available > in-progress priority, with focused overlay tests
+> passing 11/11. Neither item is visually accepted: exact NPC body-frame
+> anchoring, complete quest state transitions,
+> timed same-EXE fire/lamp captures, additive/blend fidelity, full animation
+> asset coverage, soak and human acceptance remain open.
+
+> 2026-08-29 Windows-native VIS-01 Type1 transfer regression checkpoint: the
+> user-provided GroceryStore screenshot is an explicit failure. Map identity
+> reached `0141` / `(5,12)`, but old Bichon pixels remained and player/NPC
+> bodies disappeared. Two independent causes are now covered: the Candidate's
+> native keyed-map assets were generated only from map `0`, omitting 307
+> `WemadeMir2/Objects2` frames referenced by Type1 map `0141`; and the map
+> boundary cleared the local actor presentation along with source-map actors.
+> The asset builder now parses Type1, builds `0,0141`, verifies immutable Full
+> Crystal content/library/page hashes and crops all 307 required frames with
+> exact source offsets. Windows render handoff identity includes the map file,
+> unavailable destination rendering clears stale terrain, and scene reset
+> preserves only the authoritative self actor while dropping old remote
+> population/transients. Native keyed-map tests pass, a real combined build
+> reports 4,957 emitted / 307 Full-Pack-derived / 2,508 known map-0 baseline
+> missing, and Windows passes 474/474. Exact clean Candidate
+> `WN-CANDIDATE-VIS01-TYPE1-MAP-TRANSFER-20260829` binds revision
+> `be6eed8d3767e4381f064f957413564e4cb78df0`, passes packaging and independent
+> final-directory verification, and is running as PID 290000 for the user's
+> GroceryStore retest. It has not yet been visually accepted. Other maps,
+> complete map/UI/VFX/actor denominators, live WSS, DPI,
+> soak, human acceptance and formal publisher signing remain open;
+> `globalParityPercent=null`, `visualAccepted=false`, `accepted=false`.
+
+> 2026-08-29 Windows-native VIS-01 direct-frame/run/chat follow-up: the user
+> visually rejected `02bb67874791c26e556fee88382d0e7d61287012` because the
+> actor still flickered; stable `TextureAtlasLayout` identity was therefore
+> insufficient. Revision `a3121ce487c93ff37f2ca94d7d60d8e12bf9e5ea`
+> removes ordinary animated sprites from the dynamic layout/index path and
+> updates a direct source `Sprite.rect` on one retained full-page image. Atlas
+> pages remain cached across animation page changes; additive UV-material
+> rendering is unchanged. The same revision fixes the extensionless chat frame
+> lookup (`original-ui/Prguse/2221.png`) and adds right-click empty-world Run
+> intent while leaving Zone validation authoritative. Shared runtime 197/197,
+> native-UI 430/430 and Windows 448/448 pass. Exact clean Candidate
+> `WN-CANDIDATE-VIS01-DIRECT-RECT-RUN-CHAT-20260829` passes final nonvisual
+> verification; its 67,430,912-byte EXE is SHA-256
+> `4EB134ABDA3CC4981A4268CF4501E2ABB5BEDCD3E1C0F2E23F653008C7F8D57A`.
+> PID 243288 is running against healthy plaintext loopback for a new user
+> check; no visual pass is recorded yet. Full mouse combat/click-to-path,
+> complete chat/UI, alternate classes, skills/VFX, map/monster/player semantic
+> denominators and the authenticated WSS/DPI/soak/human/publisher-signing gates
+> remain open. `globalParityPercent=null`, `visualAccepted=false`,
+> `accepted=false`.
+
+> 2026-08-28 Windows-native VIS-01 exact-head motion Candidate evidence:
+> clean revision `94f8e4f032643fdb826d6ef0ae82b360b4dcc83d` produced Candidate
+> `WN-CANDIDATE-VIS01-MOTION-20260828` from its attested 67,435,520-byte EXE
+> (SHA-256
+> `E40C5216A29DE870DA7898F0ACABE331E7310C583D249C2F66DC3210692050F4`).
+> The 32,594-file Candidate passes detached-CMS and final nonvisual
+> verification; payload aggregate SHA-256 is
+> `167EB82528CD5ADEDA5621B170233FA2B8314540F11A95E65EB812ECA8D5B726`.
+> This adds exact-head artifact evidence to the mounted-cadence and continuous-
+> locomotion leaves, but no visible acceptance: the EXE was not launched and
+> native keyed-map generation still has 2,508 missing source entries.
+> Same-EXE live WSS, mounted input, UI/chat, mouse combat, skills/VFX,
+> complete monster/map denominators, DPI, soak, human acceptance and formal
+> publisher signing remain open. `globalParityPercent=null`,
+> `visualAccepted=false`, `accepted=false`.
+
+> 2026-08-28 Windows-native VIS-01 mounted cadence/packet-clock bounded
+> checkpoint: revision `eb174e94eecde4a6e24f63d16616e2dfb9a03589`
+> closes the source/test portion of the mounted timing gap left by the prior
+> locomotion checkpoint. Windows now derives player movement phases from the
+> active Crystal catalog: mounted Walk is 8 x 100ms and mounted Run remains
+> 6 x 100ms. The same phase count drives pixel displacement, visible frame,
+> motion duration and self-camera cancellation. Active packet-carried start/
+> end timing is preferred over receipt time; invalid metadata falls back
+> without freezing or extending the actor, and explicit counts are bounded to
+> 1..8 like Web pose input. Focused 5/5 and Windows 446/446 pass; independent
+> reviews find P0=0/P1=0. No exact-head EXE/package, actual mounted input,
+> screenshot, DPI, soak or human-feel evidence was produced. Complete actions,
+> UI/chat, mouse combat, skills/VFX, monsters and final device/human/signing
+> gates remain open; `globalParityPercent=null` and
+> `visualAccepted=false`.
+
+> 2026-08-28 Windows-native VIS-01 continuous player-locomotion bounded
+> checkpoint: revision `532ddc6be0a0c38313fdd39fe9e0af82b883371b`
+> aligns ordinary overlapping Walk/Run presentation with the already-working
+> Web model: the next segment starts from the current fractional coordinate,
+> its animation sequence/phase starts atomically with the native motion
+> window, and a direction/source-bounded self echo cannot roll actor and
+> camera back. The opt-in runtime replacement applies only to player
+> locomotion with an empty queue, so waiting Attack/Struck/Die actions retain
+> FIFO semantics; monster/NPC presentation is excluded from the visible-frame
+> override. Runtime passes 194/194 and Windows passes 443/443; independent
+> player and Web/Crystal reviews report P0=0/P1=0. No exact-head EXE/package,
+> live screenshot, DPI, soak or human-feel evidence exists for this revision.
+> Mounted Walk still needs its Crystal eight-phase window and Windows still
+> does not consume packet-carried movement start/end timing. The complete
+> player/UI/VFX/monster semantic denominators and final device/human/signing
+> gates remain open; `globalParityPercent=null` and
+> `visualAccepted=false`.
+
+> 2026-08-28 Windows-native VIS-01 player-sprite geometry/package bounded
+> checkpoint: revision `7fa5369bcb6767ad5f1d1e1e0f07cac6bae8f7a6`
+> replaces the repository-only 48x64 atlas-miss placeholder with exact
+> `meta.json` geometry for canonical frames in the ten packaged player
+> families. Atlas pages remain preferred. Verified standalone player frames
+> retain transparent-pixel hit testing and atomic 30% selected/hover redraw
+> through a bounded 256-frame alpha cache; malformed identity, missing PNG or
+> metadata, half-atlas bindings and every non-player miss fail closed. This
+> narrowly supersedes the earlier selected-target note that every missing
+> atlas identity must suppress the clone: a complete verified standalone
+> player layer may now be cloned, while partial or non-player composites still
+> suppress. Package/verify close 10 families / 34 libraries / 22,944 declared
+> frames, Windows passes 441/441, and release-gate revision
+> `ef25aec83b8023003ae648b4a2955a4e9ec76362` produces a clean nonvisually
+> verified Candidate with EXE SHA-256
+> `1550B512930C54BA5356100B63976919A146E904F9A397D4EDE4CF653200FC3A`.
+> This does not close missing source-frame denominator differences, complete
+> player actions, UI/VFX, same-EXE live WSS, DPI, soak, human or publisher-
+> signing gates. `globalParityPercent=null` and `visualAccepted=false`.
+
+> 2026-08-28 Windows-native VIS-03 Character HUD additional bounded
+> checkpoint: revision `849f1f0b5120867d1358e0e7db9ba675e9866f9c`
+> verifies exact `Prguse/1900/1901/1902` at `(905,692,20,20)`, enabled
+> pointer-only ButtonA ordering and the source CharacterPage-aware callback.
+> A non-Character tab stays open and returns home; a visible CharacterPage
+> closes. C/F10 share the state machine while remaining silent and local.
+> Bevy 401/401, Windows 376/376, focused 4/4 and script self-tests pass; final
+> independent review is P0=0/P1=0 after fixing the initially found keyboard
+> gap. No package, EXE, live audio or screenshot was produced. Character
+> content, other controls, actual scaled hitboxes, same-EXE pixels/audio and
+> human feel remain open, so this is not HUD, UI or visual 100% and
+> `globalParityPercent` remains null.
+
+> 2026-08-28 Windows-native VIS-03 Inventory ButtonA additional bounded
+> checkpoint: revision `5b70511316b084ac677b5978f7f03e440241ca4c`
+> closes automated behavior for one local HUD interaction only. The enabled
+> InGame Inventory mouse press queues Crystal `ButtonA=10103 -> 103.wav`
+> exactly once before toggling the panel; held presses do not repeat,
+> subsequent presses do, and F9/I remains silent. UI/gameplay queues and
+> spawned-player cleanup are independent; missing source, disabled sound and
+> zero volume never fall back. The exact 26,546-byte sound is package/verify
+> required and SHA-256 bound. Windows 376/376, Bevy 397/397, focused 4/4 and
+> script self-tests pass, with final review P0=0/P1=0. No live audio,
+> same-EXE capture or package was produced. Character and every other
+> control's source binding, hover/pressed/disabled feel, real DPI and human
+> acceptance remain open, so this is not HUD, UI or visual 100% and
+> `globalParityPercent` remains null.
+
+> 2026-08-28 Windows-native VIS-01 selected-target additional bounded
+> checkpoint: revision `a58ab0aaa2202731a5c55e7a684261d6c15c2f8d`
+> redraws an explicitly selected remote player or monster's complete resolved
+> exact-atlas composite at Crystal opacity 0.3 after world rendering. Missing
+> atlas identity suppresses the whole clone; self/NPC/missing-kind objects do
+> not highlight, dead monsters remain eligible, Hidden and selected opacity
+> are independent, and Scarecrow's additive death effect is not duplicated.
+> World, target and foreground-effect depth bands now preserve ObjectEffect,
+> default MapEffect and actor/transient effects above the redraw while
+> Persistent ObjectSpell remains in-world. Windows 376/376, Bevy 393/393,
+> runtime 191/191, selected 3/3 and depth 1/1 pass; final review found no
+> P0/P1. No EXE/package/screenshot was produced. Hover highlight, the setting
+> toggle, general DrawBehind export, special composites, Web symmetry and all
+> live/GPU/DPI/soak/human/signing gates remain open; global parity stays
+> unreported.
+
+> 2026-08-28 Windows-native VIS-02 GreatFireBall additional bounded
+> checkpoint: revision `9457e5618449d22350baedd01e3775f5b1fe59c6`
+> implements immediate `Magic/400..409`, a 600 ms delayed 16-direction local
+> missile, bound `Magic/570..579` impact and exact M34-0/M34-1/M34-2 audio.
+> The compatibility projectile is ignored and lifecycle cleanup fails closed.
+> All 90 previously absent direction PNGs plus their source metadata and exact
+> WAVs are now committed and required by package/verify. Windows 372/372,
+> Bevy 393/393, focused 5/5, Gateway 1/1, Web full logic/type, exporter,
+> offline resources and script self-tests pass; review has no remaining P0/P1.
+> No EXE was launched or packaged from this head. Retained-dead target
+> suppression, live WSS, same-EXE/GPU/DPI/soak/human/signing and the semantic
+> denominator remain open; global parity stays unreported.
+
+> 2026-08-28 Windows-native VIS-02 FireWall bounded checkpoint: revision
+> `f6f78f3eddb813897cf4ce4c6056183130ab7f35` binds the source 600 ms
+> `Magic/1620..1629` cast, exact M39-0/M39-1 phase sounds and five persistent
+> center/cardinal `ObjectSpell` cells using repeating `Magic/1630..1635` and
+> light 3. Native 351/351, Bevy native-ui 393/393, focused FireWall 5/5,
+> Gateway projection 1/1, Web type/export/offline asset gates and package/
+> verifier self-tests pass. The fixture is serializer-only, with `cast=false`
+> labeled synthetic outside the canonical timeline; no EXE was launched or
+> packaged from this head. FlamingSword remains open in the first five-skill
+> slice, along with the full combat chain, backend negative/lifecycle matrix,
+> denominator and same-EXE/GPU/DPI/soak/human/signing gates. Global parity
+> stays unreported.
+
+> 2026-08-28 Windows-native VIS-02 SoulFireBall bounded checkpoint: revision
+> `19991af6ddb289dc2fb22569849599caabf9195e` implements the source audio-only
+> start, 600 ms local launch, all 16 three-frame missile directions, launch-
+> time target binding/direction lock, finite target-following flight, bound
+> impact and exact M64-0/1/2 assets. Compatibility `ObjectProjectile` is
+> ignored in every replay order. Native 346/346, Bevy native-ui 393/393,
+> focused SoulFireBall 6/6, FireBall regression 11/11, Gateway event projection
+> 1/1, Web/export/resource and package/verifier self-tests pass. No EXE was
+> launched or packaged from this head. The projection fixture is serializer-
+> only; production no-amulet `cast=false` is not proved. Target-dead impact
+> suppression, backend Soul timing/revalidation/PvP gaps, FlamingSword,
+> FireWall, the full denominator and all same-EXE/GPU/DPI/soak/human/signing
+> gates remain open; global parity stays unreported.
+
+> 2026-08-27 Windows-native VIS-02 FireBall bounded checkpoint: revision
+> `d85d7368119053e6b2609316c4f5c76faaa298cb` now renders the source cast,
+> 16-direction finite missile and bound impact from typed `ObjectMagic`, with
+> exact M31-0/1/2 audio and fail-closed package/verify frame closure. The
+> simulation compatibility projectile is deduplicated. Independent final
+> review found no P0/P1; effects pass 59/59, Windows 340/340, Bevy native-ui
+> 393/393, Gateway fixture 1/1, Web typecheck and the complete offline resource
+> gate pass. No EXE was launched and no GPU/same-EXE/DPI/human evidence was
+> created. Target-dead impact suppression, FlamingSword, SoulFireBall,
+> FireWall, the full semantic denominator and every final acceptance gate
+> remain open; global parity stays unreported.
+
+> 2026-08-27 Windows-native VIS-00 baseline / VIS-01 in-progress checkpoint:
+> the new visual contract binds
+> the current implementation base to Crystal source and records known Phase-A
+> registries without manufacturing a global percentage. The first repair
+> routes text through Arial, applies 8pt logical sizing to chat/nameplates, and
+> adds Crystal's exact four-pass black MirLabel outline, ordinary NameView
+> alive-only labels, Hidden alpha 0.5 and ordinary corpse alpha 1.0.
+> Gateway-to-native projection now retains remote class/gender/equipment and
+> normal/Transform body metadata; Harvest and Harvested packets drive Harvest,
+> CWeapon/01 and persistent Skeleton actions. The first VIS-01 increment now
+> recognizes the real no-sprite `ObjectMonster(image=10)` packet, plays
+> CannibalPlant `Monster/010` Show/Hide frames, hides only after completion,
+> restores on Show and avoids applying that lifecycle to other monster types.
+> Runtime 187/187, focused Windows 6/6,
+> typography 1/1 and Gateway projection 1/1 pass. The full Windows suite
+> against frozen Candidate assets is FAIL with 320/322 passing: the package
+> lacks the asserted Archer and Mount frames. No new same-EXE screenshot was
+> taken, so none of these leaves is visually Accepted yet; HUD/damage text
+> sizing/bold, hover corpse names, Scarecrow additive death, real-map
+> occlusion, the fixed VIS-01 scene/captures, additive weapon/wing layers,
+> actor/effect
+> assets, VFX/audio, UI states, DPI, soak and human feel remain open.
+
+> 2026-08-19 Windows-native alternate-class/combat checkpoint: Archer
+> `ARArmour`/`ARHair`/`ARWeapon` and Assassin
+> `AArmour`/`AHair`/directional-dual-`AWeapon*` resolution now follows the Web
+> library rules for their supported action families. Crystal combat packet
+> adaptation now correctly separates `ObjectStruck` pose state from numeric
+> `DamageIndicator` events; native overlays deduplicate and animate bounded
+> hit/miss/crit/heal floaters. Stale server selection can no longer make the F
+> key ignore a nearer live hostile. Live proof records Deer HP
+> `10/25 -> 9/25 -> 8/25` and a visible red `1` in
+> `native-windows-combat-overlay-round4/...1787122701585-1.png` (SHA-256
+> `0E24F11B963382F02C82F0DAEEE745F51794A01460175E92523AABE7DCBD49AA`).
+> Gates are Windows 104/104, runtime 133/133, Simulation 1183/1183, Release
+> SHA-256 `B6A7078173865DF3415B089DE4119EAA438886EF518AFD9DEC69054B445773D9`,
+> and Web typecheck. No starter entity record exposes a usable mask path or
+> nonzero shadow tuple; shadow/effect parity is therefore an exporter/pipeline
+> gap. Spell/projectile effects, lighting, exact text/overlap, broader class
+> action audit and final same-scene/Gemini/human acceptance remain open.
+
+> 2026-08-19 Windows-native entity-composition checkpoint: the producer now
+> consumes 697 valid Crystal per-library frame-set catalogs with exact
+> `start/count/skip/interval/reverse` metadata and Web-equivalent action
+> fallbacks. Stable layer construction covers body, hair, directional front/
+> rear weapon and mount composition, including mounted weapon suppression.
+> Native Bevy overlays consume the same authoritative entity payload for NPC/
+> monster/player labels, dead-state lines and the self HP bar. A live visible
+> run moved from `288,615` to `287,613` with actor/nameplate/camera/minimap
+> agreement; evidence SHA-256 is
+> `343B4B05A9E67EF7B687F0DFA9B5D8D2F34E222A7AD95BC03AD6D1E4569E8DC4`.
+> Windows 98/98, shared runtime 133/133, exact Release build and Web typecheck
+> pass. Remaining entity gaps are alternate class libraries, shadow/effect-mask
+> layers, combat effects, exact outlined text, overlap policy, lighting and
+> final same-scene/Gemini/human acceptance.
+
+> 2026-08-19 Windows-native animation-clock checkpoint: packet-authoritative
+> walk/run/attack/range/magic/struck/die/revive hints now drive a persistent
+> Windows-main-thread `AnimationWorld`; atlas rects continue advancing between
+> Gateway messages and duplicate action sequences do not restart them. A 254 ms
+> F12 pair changed 5,087 world-only pixels (rows 60..532), and live revive plus
+> movement returned to `18/18 @ 288,616` then `288,615`. Windows 90/90, shared
+> runtime 133/133, Release and Web typecheck pass. Remaining entity gaps are now
+> explicit: schema-v2 per-library frameSet metadata, correct class/equipment
+> libraries, body/hair/weapon/mount/shadow composite layers, nameplates/HP bars,
+> high-priority interruption semantics and final same-scene visual review.
+
+> 2026-08-19 Windows-native map/entity/vitals checkpoint: schema-v2 entity
+> atlases now route rects to all seven physical pages and preserve Crystal
+> `offsetX/offsetY`; packet-first `UserLocation` updates the real-map render
+> center, shared HUD coordinates and entities in one frame; and map atlas page
+> layouts are rebuilt when later camera viewports introduce additional rects,
+> eliminating the reproduced black floor rectangles. Native self vitals now
+> fold packet-authoritative `ObjectHealth`/`Death` over stale personal snapshots.
+> A real dead save rendered `0/18`, `V` completed TownRevive to `288,616` at
+> `18/18`, and later damage rendered `17/18` then `16/18`. Windows 83/83,
+> runtime 133/133, Release and Web typecheck pass. The complete offline asset
+> staging script also passed with 8,325 files / 269.91 MiB and all required
+> sentinels present; clean-checkout generation and repository-independent EXE
+> launch are not yet proven. Open
+> gaps are now narrower and explicit: full actor action/equipment/hair/weapon
+> composition, nameplates/health bars, lighting/effects, deterministic exact
+> `257,594` evidence, final HUD >=92, DPI execution, packaged-EXE launch and
+> human acceptance.
+
+> 2026-08-19 Windows-native HUD Candidate checkpoint: the native-only Bevy
+> presentation now uses Crystal `Prguse` MainDialog, bottom-clipped HP/MP orb,
+> horizontal belt, chat control/four-line frames, main buttons, and the Bichon
+> `MMap/101` crop with authoritative markers and coordinates. The fixed HUD-only
+> evidence review is Accepted 88/100 with `sameScene=true` and no P0/P1, clearing
+> the planned first-Candidate threshold of 85. Stable live evidence shows
+> authoritative `NativeHero`, HP/MP, Bichon title and coordinates after bootstrap;
+> the legacy fixed Combat Target panel is suppressed and the quest tracker uses
+> Crystal-style transparent top-left text. Shared Bevy native-ui tests pass 90/90,
+> Windows host tests 80/80, Release builds, and Web typecheck passes. Remaining
+> HUD gaps are authoritative EXP/weight fields and bitmap-style character text;
+> final HUD >=92, same-coordinate scene evidence, map/entity/effect coverage,
+> 125%/150% DPI, package verification and human acceptance remain open. The
+> model-reported minimap white shape is source artwork already baked into
+> `MMap/101.png` at the candidate crop, not a renderer overdraw artifact.
+
+> 2026-08-19 Windows-native visual implementation checkpoint: login and character
+> select are no longer open visual gaps at the fixed 1024x768 gate. Login remains
+> Accepted 100/100. WN-VIS-005 replaces the former 20/100 generic select card
+> with Crystal's dedicated background, four slots, selected class frame,
+> source-offset 16-frame class/gender preview, last-access row and five-button
+> footer. Empty-roster same-scene review is Accepted 100/100 with zero issues;
+> occupied-roster capture and real pointer StartGame additionally verify the
+> preview and transition to authoritative Bichon. Windows map routing retains
+> the Web-equivalent atlas plus black-keyed/additive standalone semantics.
+> Remaining P0/P1 work is explicit: in-game is still 12/100, 2,494 referenced
+> map source frames are unavailable, map animation/fixed-scene coverage is
+> incomplete, and exact Crystal HUD/entity layering, effects, 125%/150% DPI and
+> final human acceptance remain open. The next visual slice is the Crystal
+> in-game HUD/chat/shortcut/minimap composition.
+
+> 2026-08-19 Windows-native playable vertical-slice Candidate: the main branch
+> now has a real Bevy/Winit/WGPU `mir2-platform-windows.exe`, not a WebView or
+> browser wrapper. Its visible shell covers interactive login, account creation,
+> server-backed character select/create/delete/start, and a native Bichon HUD.
+> Gateway snapshots/packets drive NPC dialog, quest tracker, target HP, inventory,
+> movement, combat, death/revive and completion; the client does not synthesize
+> quest state, XP, gold or saved transforms. A fresh-account smoke completed q1
+> and q2 in one execution, including 20 authoritative Scarecrow hits, the
+> Crystal direct-Q `GainedItem(item_index=1112)` path, TownRevive, 30 quest EXP,
+> 200 Gold, GoldenPendant/CopperRing, logout/login and persistence. Six fixed
+> 1024x768 native screenshots plus the manual event checklist are indexed in
+> `docs/NATIVE-WINDOWS-PLAYER-QA.md`. Regression gates pass at Windows 73/73,
+> shared Bevy 22/22 without native UI and 56/56 with it, WASM WebGL2/WebGPU,
+> Web typecheck/runtime-policy, release build and Crystal map API 18/18.
+> This closes the native *playable slice*, not native Crystal 1:1: several
+> starter entity atlas body/action frames have incorrect anchors or incomplete
+> library coverage, the native HUD/chat/shortcut/minimap presentation is not
+> pixel-matched to Crystal, 125%/150% DPI and long reconnect/physical-device
+> feel still need human acceptance, and source quest text retains some malformed
+> placeholders. Those are explicit frontend gaps rather than hidden behind the
+> functional Candidate result.
 
 > 2026-08-18 4K stage-overlay and Chinese presentation closure: a user-supplied
 > 3840x2160 production capture showed that the 1024x768 Crystal stage itself was

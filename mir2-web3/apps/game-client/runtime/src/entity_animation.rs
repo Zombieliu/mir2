@@ -42,6 +42,8 @@ impl Direction {
 pub enum AnimationAction {
     Standing,
     Harvest,
+    Show,
+    Hide,
     Walking,
     Running,
     Attack1,
@@ -49,16 +51,23 @@ pub enum AnimationAction {
     Attack3,
     Attack4,
     AttackRange1,
+    AttackRange2,
+    DashAttack,
     Spell,
     Struck,
     Die,
     Dead,
+    Skeleton,
     Revive,
 }
 
 impl AnimationAction {
     fn is_interruptible_idle(self, kind: EntityKind) -> bool {
         self == Self::Standing || (kind == EntityKind::Npc && self == Self::Harvest)
+    }
+
+    fn is_locomotion(self) -> bool {
+        matches!(self, Self::Walking | Self::Running)
     }
 }
 
@@ -181,6 +190,14 @@ impl AnimationCatalog {
             FrameDescriptor::from_crystal(96, 8, 0, 100, false),
         );
         catalog.add_default(
+            AnimationAction::AttackRange2,
+            FrameDescriptor::from_crystal(160, 8, 0, 100, false),
+        );
+        catalog.add_default(
+            AnimationAction::DashAttack,
+            FrameDescriptor::from_crystal(80, 3, 3, 100, false),
+        );
+        catalog.add_default(
             AnimationAction::Spell,
             FrameDescriptor::from_crystal(296, 6, 0, 100, false),
         );
@@ -221,6 +238,13 @@ impl AnimationCatalog {
             AnimationAction::Attack1,
             FrameDescriptor::from_crystal(80, 6, 0, 100, false),
         );
+        // Library-specific monster catalogs replace this with their generated
+        // DashAttack descriptor when Crystal defines one. Generic monsters
+        // fail visually soft to Attack1 instead of dropping the packet action.
+        catalog.add_default(
+            AnimationAction::DashAttack,
+            FrameDescriptor::from_crystal(80, 6, 0, 100, false),
+        );
         catalog.add_default(
             AnimationAction::Struck,
             FrameDescriptor::from_crystal(128, 2, 0, 200, false),
@@ -231,6 +255,10 @@ impl AnimationCatalog {
         );
         catalog.add_default(
             AnimationAction::Dead,
+            FrameDescriptor::from_crystal(153, 1, 9, 1000, false),
+        );
+        catalog.add_default(
+            AnimationAction::Skeleton,
             FrameDescriptor::from_crystal(153, 1, 9, 1000, false),
         );
         catalog.add_default(
@@ -313,6 +341,8 @@ impl AnimationEvent {
 pub enum TransitionReason {
     Event(u64),
     IdleCycle,
+    ShowCompleted,
+    HideCompleted,
     DeathCompleted,
     ReviveCompleted,
 }
@@ -617,6 +647,46 @@ impl EntityAnimationState {
         })
     }
 
+    /// Apply a movement event as the latest authoritative player segment.
+    ///
+    /// Crystal's generic action feed remains FIFO, but a native presentation
+    /// may already have started the next authoritative motion window before a
+    /// previous walk/run cycle reaches its final frame. When no other action is
+    /// waiting, restart that player locomotion immediately so the internal
+    /// action and visible movement phase share the new segment. Every other
+    /// case preserves the ordinary [`Self::apply_event`] queue behavior.
+    pub fn apply_latest_locomotion_event(
+        &mut self,
+        event: AnimationEvent,
+        now_ms: u64,
+    ) -> Result<EventUpdate, AnimationError> {
+        let can_replace = self.kind == EntityKind::Player
+            && self.current_action.is_locomotion()
+            && event.action.is_locomotion()
+            && self.action_feed.is_empty();
+        if !can_replace {
+            return self.apply_event(event, now_ms);
+        }
+
+        let mut transitions = self.advance_to(now_ms)?;
+        self.catalog.validate_event(event.action)?;
+        if let Some(previous) = self.last_enqueued_event_sequence {
+            if event.sequence <= previous {
+                return Err(AnimationError::OutOfOrderEvent {
+                    previous,
+                    incoming: event.sequence,
+                });
+            }
+        }
+
+        self.last_enqueued_event_sequence = Some(event.sequence);
+        self.start_event(event, now_ms, &mut transitions)?;
+        Ok(EventUpdate {
+            disposition: QueueDisposition::Started,
+            transitions,
+        })
+    }
+
     pub fn advance_to(&mut self, now_ms: u64) -> Result<Vec<ActionTransition>, AnimationError> {
         if now_ms < self.last_update_at_ms {
             return Err(AnimationError::TimeWentBackwards {
@@ -649,6 +719,12 @@ impl EntityAnimationState {
         }
 
         match self.current_action {
+            AnimationAction::Show => {
+                self.enter_idle(at_ms, TransitionReason::ShowCompleted, transitions)?;
+            }
+            AnimationAction::Hide => {
+                self.enter_idle(at_ms, TransitionReason::HideCompleted, transitions)?;
+            }
             AnimationAction::Die => {
                 self.action_feed.clear();
                 self.start_action(
@@ -660,7 +736,7 @@ impl EntityAnimationState {
                     transitions,
                 )?;
             }
-            AnimationAction::Dead => {
+            AnimationAction::Dead | AnimationAction::Skeleton => {
                 self.next_motion_at_ms = None;
             }
             AnimationAction::Revive => {
@@ -684,11 +760,17 @@ impl EntityAnimationState {
         transitions: &mut Vec<ActionTransition>,
     ) -> Result<bool, AnimationError> {
         let can_start = self.current_action.is_interruptible_idle(self.kind)
-            || (self.current_action == AnimationAction::Dead
-                && self
-                    .action_feed
-                    .front()
-                    .is_some_and(|event| event.action == AnimationAction::Revive));
+            || self.action_feed.front().is_some_and(|event| {
+                (self.current_action == AnimationAction::Dead
+                    && matches!(
+                        event.action,
+                        AnimationAction::Skeleton | AnimationAction::Revive
+                    ))
+                    || (self.current_action == AnimationAction::Skeleton
+                        && event.action == AnimationAction::Revive)
+                    || (self.current_action == AnimationAction::Hide
+                        && event.action == AnimationAction::Show)
+            });
         if !can_start {
             return Ok(false);
         }
@@ -759,11 +841,12 @@ impl EntityAnimationState {
         self.direction = direction;
         self.frame_index = 0;
         self.last_started_event_sequence = event_sequence;
-        self.next_motion_at_ms = if action == AnimationAction::Dead {
-            None
-        } else {
-            Some(deadline(at_ms, descriptor.frame_interval_ms)?)
-        };
+        self.next_motion_at_ms =
+            if matches!(action, AnimationAction::Dead | AnimationAction::Skeleton) {
+                None
+            } else {
+                Some(deadline(at_ms, descriptor.frame_interval_ms)?)
+            };
         transitions.push(ActionTransition {
             key: self.key.clone(),
             at_ms,
@@ -890,6 +973,15 @@ impl AnimationWorld {
         now_ms: u64,
     ) -> Result<EventUpdate, AnimationError> {
         state_for_key_mut(&mut self.active, key)?.apply_event(event, now_ms)
+    }
+
+    pub fn apply_latest_locomotion_event(
+        &mut self,
+        key: &EntityKey,
+        event: AnimationEvent,
+        now_ms: u64,
+    ) -> Result<EventUpdate, AnimationError> {
+        state_for_key_mut(&mut self.active, key)?.apply_latest_locomotion_event(event, now_ms)
     }
 
     pub fn tick(&mut self, now_ms: u64) -> Result<Vec<ActionTransition>, AnimationError> {
@@ -1069,6 +1161,14 @@ mod tests {
             Some(&FrameDescriptor::from_crystal(80, 6, 0, 100, false))
         );
         assert_eq!(
+            player.descriptor(AnimationAction::DashAttack),
+            Some(&FrameDescriptor::from_crystal(80, 3, 3, 100, false))
+        );
+        assert_eq!(
+            player.descriptor(AnimationAction::AttackRange2),
+            Some(&FrameDescriptor::from_crystal(160, 8, 0, 100, false))
+        );
+        assert_eq!(
             player.descriptor(AnimationAction::Struck),
             Some(&FrameDescriptor::from_crystal(360, 3, 0, 100, false))
         );
@@ -1097,6 +1197,130 @@ mod tests {
         assert_eq!(world.state(&key).unwrap().frame_index, 0);
         assert_eq!(transitions.len(), 1);
         assert_eq!(transitions[0].reason, TransitionReason::IdleCycle);
+    }
+
+    #[test]
+    fn show_and_hide_use_source_frames_and_complete_deterministically() {
+        let mut catalog = AnimationCatalog::new();
+        for (action, descriptor) in [
+            (
+                AnimationAction::Standing,
+                FrameDescriptor::from_crystal(0, 4, -4, 500, false),
+            ),
+            (
+                AnimationAction::Show,
+                FrameDescriptor::from_crystal(4, 8, -8, 200, false),
+            ),
+            (
+                AnimationAction::Hide,
+                FrameDescriptor::from_crystal(12, 8, -8, 200, true),
+            ),
+        ] {
+            catalog.insert(action, descriptor).unwrap();
+        }
+
+        let mut world = AnimationWorld::new(0x10);
+        let key = world
+            .spawn(
+                "cannibal-plant",
+                EntityKind::Monster,
+                Direction::Down,
+                catalog,
+                0,
+            )
+            .unwrap();
+        world
+            .apply_event(
+                &key,
+                AnimationEvent::new(1, AnimationAction::Hide, Direction::Down),
+                0,
+            )
+            .unwrap();
+        assert_eq!(world.state(&key).unwrap().pose().draw_frame_index, 12);
+        assert!(world.tick(200).unwrap().is_empty());
+        assert_eq!(world.state(&key).unwrap().pose().draw_frame_index, 11);
+        assert!(world.tick(1_400).unwrap().is_empty());
+        assert_eq!(world.state(&key).unwrap().pose().draw_frame_index, 5);
+        assert!(world.tick(1_599).unwrap().is_empty());
+        assert_eq!(world.state(&key).unwrap().pose().draw_frame_index, 5);
+        let hidden = world.tick(1_600).unwrap();
+        assert!(hidden.iter().any(|transition| {
+            transition.from == AnimationAction::Hide
+                && transition.to == AnimationAction::Standing
+                && transition.reason == TransitionReason::HideCompleted
+        }));
+
+        world
+            .apply_event(
+                &key,
+                AnimationEvent::new(2, AnimationAction::Show, Direction::Down),
+                1_600,
+            )
+            .unwrap();
+        assert_eq!(world.state(&key).unwrap().pose().draw_frame_index, 4);
+        let shown = world.tick(3_200).unwrap();
+        assert!(shown.iter().any(|transition| {
+            transition.from == AnimationAction::Show
+                && transition.to == AnimationAction::Standing
+                && transition.reason == TransitionReason::ShowCompleted
+        }));
+    }
+
+    #[test]
+    fn show_interrupts_an_in_progress_hide_instead_of_stalling_in_the_queue() {
+        let mut catalog = AnimationCatalog::new();
+        for (action, descriptor) in [
+            (
+                AnimationAction::Standing,
+                FrameDescriptor::from_crystal(0, 4, -4, 500, false),
+            ),
+            (
+                AnimationAction::Show,
+                FrameDescriptor::from_crystal(4, 8, -8, 200, false),
+            ),
+            (
+                AnimationAction::Hide,
+                FrameDescriptor::from_crystal(12, 8, -8, 200, true),
+            ),
+        ] {
+            catalog.insert(action, descriptor).unwrap();
+        }
+
+        let mut world = AnimationWorld::new(0x10);
+        let key = world
+            .spawn(
+                "cannibal-plant",
+                EntityKind::Monster,
+                Direction::Down,
+                catalog,
+                0,
+            )
+            .unwrap();
+        world
+            .apply_event(
+                &key,
+                AnimationEvent::new(1, AnimationAction::Hide, Direction::Down),
+                0,
+            )
+            .unwrap();
+        let update = world
+            .apply_event(
+                &key,
+                AnimationEvent::new(2, AnimationAction::Show, Direction::Down),
+                800,
+            )
+            .unwrap();
+
+        assert_eq!(update.disposition, QueueDisposition::Started);
+        assert!(update.transitions.iter().any(|transition| {
+            transition.from == AnimationAction::Hide
+                && transition.to == AnimationAction::Show
+                && transition.reason == TransitionReason::Event(2)
+        }));
+        let state = world.state(&key).unwrap();
+        assert_eq!(state.pose().action, AnimationAction::Show);
+        assert_eq!(state.pose().draw_frame_index, 4);
+        assert_eq!(state.queue_depth(), 0);
     }
 
     #[test]
@@ -1214,6 +1438,80 @@ mod tests {
     }
 
     #[test]
+    fn latest_player_locomotion_restarts_without_stale_queueing() {
+        let mut world = AnimationWorld::new(11);
+        let key = spawn_default(&mut world, "player", EntityKind::Player, 0);
+        world
+            .apply_event(
+                &key,
+                AnimationEvent::new(1, AnimationAction::Walking, Direction::Right),
+                0,
+            )
+            .unwrap();
+        world.tick(250).unwrap();
+        assert_eq!(world.state(&key).unwrap().frame_index, 2);
+
+        let update = world
+            .apply_latest_locomotion_event(
+                &key,
+                AnimationEvent::new(2, AnimationAction::Running, Direction::DownRight),
+                250,
+            )
+            .unwrap();
+        assert_eq!(update.disposition, QueueDisposition::Started);
+        assert!(update.transitions.iter().any(|transition| {
+            transition.from == AnimationAction::Walking
+                && transition.to == AnimationAction::Running
+                && transition.reason == TransitionReason::Event(2)
+        }));
+        let state = world.state(&key).unwrap();
+        assert_eq!(state.current_action, AnimationAction::Running);
+        assert_eq!(state.direction, Direction::DownRight);
+        assert_eq!(state.frame_index, 0);
+        assert_eq!(state.next_motion_at_ms, Some(350));
+        assert_eq!(state.queue_depth(), 0);
+        assert_eq!(state.last_started_event_sequence(), Some(2));
+    }
+
+    #[test]
+    fn latest_player_locomotion_preserves_waiting_combat_fifo() {
+        let mut world = AnimationWorld::new(12);
+        let key = spawn_default(&mut world, "player", EntityKind::Player, 0);
+        world
+            .apply_event(
+                &key,
+                AnimationEvent::new(1, AnimationAction::Walking, Direction::Right),
+                0,
+            )
+            .unwrap();
+        world
+            .apply_event(
+                &key,
+                AnimationEvent::new(2, AnimationAction::Attack1, Direction::Right),
+                100,
+            )
+            .unwrap();
+
+        let update = world
+            .apply_latest_locomotion_event(
+                &key,
+                AnimationEvent::new(3, AnimationAction::Running, Direction::Right),
+                100,
+            )
+            .unwrap();
+        assert_eq!(update.disposition, QueueDisposition::Queued);
+        let state = world.state(&key).unwrap();
+        assert_eq!(state.current_action, AnimationAction::Walking);
+        assert_eq!(
+            state
+                .queued_actions()
+                .map(|event| event.action)
+                .collect::<Vec<_>>(),
+            vec![AnimationAction::Attack1, AnimationAction::Running]
+        );
+    }
+
+    #[test]
     fn die_clears_later_actions_and_holds_dead() {
         let mut world = AnimationWorld::new(2);
         let key = spawn_default(&mut world, "player", EntityKind::Player, 0);
@@ -1244,6 +1542,40 @@ mod tests {
         assert_eq!(
             world.state(&key).unwrap().current_action,
             AnimationAction::Dead
+        );
+    }
+
+    #[test]
+    fn harvested_monster_transitions_from_dead_to_persistent_skeleton() {
+        let mut world = AnimationWorld::new(22);
+        let key = spawn_default(&mut world, "deer", EntityKind::Monster, 0);
+        world
+            .apply_event(
+                &key,
+                AnimationEvent::new(1, AnimationAction::Die, Direction::Right),
+                0,
+            )
+            .unwrap();
+        world.tick(1_000).unwrap();
+        assert_eq!(
+            world.state(&key).unwrap().current_action,
+            AnimationAction::Dead
+        );
+
+        world
+            .apply_event(
+                &key,
+                AnimationEvent::new(2, AnimationAction::Skeleton, Direction::Right),
+                1_001,
+            )
+            .unwrap();
+        let state = world.state(&key).unwrap();
+        assert_eq!(state.current_action, AnimationAction::Skeleton);
+        assert_eq!(state.next_motion_at_ms, None);
+        world.tick(50_000).unwrap();
+        assert_eq!(
+            world.state(&key).unwrap().current_action,
+            AnimationAction::Skeleton
         );
     }
 

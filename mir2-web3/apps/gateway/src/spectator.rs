@@ -34,6 +34,7 @@ const MAX_EVENTS_PER_FRAME: usize = 512;
 #[derive(Debug, Clone)]
 pub struct SpectatorConfig {
     pub enabled: bool,
+    pub recording_enabled: bool,
     pub public_enabled: bool,
     pub public_maps: Vec<String>,
     pub director_token: Option<String>,
@@ -59,6 +60,7 @@ impl SpectatorConfig {
             .collect();
         Self {
             enabled: bool_env("MIR2_SPECTATOR_ENABLED", true),
+            recording_enabled: bool_env("MIR2_SPECTATOR_RECORDING_ENABLED", true),
             public_enabled: bool_env("MIR2_SPECTATOR_PUBLIC", true),
             public_maps,
             director_token: env::var("MIR2_SPECTATOR_DIRECTOR_TOKEN")
@@ -339,6 +341,7 @@ pub struct SpectatorRecording {
 pub struct SpectatorMetrics {
     pub active_viewers: usize,
     pub active_maps: usize,
+    pub recording_enabled: bool,
     pub buffered_frames: usize,
     pub published_frames_total: u64,
     pub persisted_frames_total: u64,
@@ -391,7 +394,7 @@ impl SpectatorHub {
     }
 
     pub fn new(config: SpectatorConfig) -> Self {
-        if config.enabled {
+        if config.enabled && config.recording_enabled {
             if let Err(error) = fs::create_dir_all(&config.data_dir) {
                 eprintln!(
                     "spectator recording directory {} unavailable: {error}",
@@ -522,11 +525,15 @@ impl SpectatorHub {
             stream.frames.pop_front();
         }
         state.published_frames_total = state.published_frames_total.saturating_add(1);
-        match append_frame(&self.config.data_dir, &frame) {
-            Ok(()) => state.persisted_frames_total = state.persisted_frames_total.saturating_add(1),
-            Err(error) => {
-                state.recording_errors_total = state.recording_errors_total.saturating_add(1);
-                eprintln!("spectator recording append failed: {error}");
+        if self.config.recording_enabled {
+            match append_frame(&self.config.data_dir, &frame) {
+                Ok(()) => {
+                    state.persisted_frames_total = state.persisted_frames_total.saturating_add(1)
+                }
+                Err(error) => {
+                    state.recording_errors_total = state.recording_errors_total.saturating_add(1);
+                    eprintln!("spectator recording append failed: {error}");
+                }
             }
         }
         Ok(Some(frame))
@@ -584,6 +591,9 @@ impl SpectatorHub {
     }
 
     pub fn recordings(&self, director: bool) -> Vec<SpectatorRecording> {
+        if !self.config.recording_enabled {
+            return Vec::new();
+        }
         let Ok(entries) = fs::read_dir(&self.config.data_dir) else {
             return Vec::new();
         };
@@ -623,6 +633,9 @@ impl SpectatorHub {
         director: bool,
         public_visible_at_ms: u64,
     ) -> Result<Vec<SpectatorFrame>, String> {
+        if !self.config.recording_enabled {
+            return Err("spectator recordings are disabled".to_string());
+        }
         validate_recording_id(recording_id)?;
         let map = map_from_recording_id(recording_id)
             .ok_or_else(|| "invalid spectator recording id".to_string())?;
@@ -659,6 +672,7 @@ impl SpectatorHub {
         SpectatorMetrics {
             active_viewers: self.active_viewers.load(Ordering::Relaxed),
             active_maps: state.maps.len(),
+            recording_enabled: self.config.recording_enabled,
             buffered_frames: state.maps.values().map(|stream| stream.frames.len()).sum(),
             published_frames_total: state.published_frames_total,
             persisted_frames_total: state.persisted_frames_total,
@@ -670,7 +684,7 @@ impl SpectatorHub {
 }
 
 fn sanitize_world(snapshot: &WorldSnapshot, max_entities: usize) -> Result<Value, String> {
-    let value = serde_json::to_value(snapshot)
+    let value = serde_json::to_value(snapshot.client_view())
         .map_err(|error| format!("encode world snapshot for spectator failed: {error}"))?;
     let source = value
         .as_object()
@@ -1133,12 +1147,71 @@ fn constant_time_eq(left: &[u8], right: &[u8]) -> bool {
 mod tests {
     use super::*;
     use crate::GatewayConfig;
-    use mir2_protocol::ClientPacket;
-    use mir2_simulation::SimulationSession;
+    use mir2_protocol::{ClientPacket, UserItem};
+    use mir2_simulation::{
+        GroundDropItemPayload, GroundDropLootSnapshot, GroundDropSnapshot, SimulationSession,
+    };
+
+    fn exact_ground_drop() -> GroundDropSnapshot {
+        GroundDropSnapshot {
+            object_id: 9_101,
+            name: "Dagger".to_string(),
+            name_colour_argb: -1,
+            icon: 1,
+            x: 10,
+            y: 20,
+            quantity: 1,
+            source_monster: "spectator-test".to_string(),
+            owner_object_id: None,
+            ownership_remaining_ticks: None,
+            loot: GroundDropLootSnapshot::InventoryItem {
+                key: "crystal-item-222".to_string(),
+                name: "Dagger".to_string(),
+                description: String::new(),
+                weight: 5,
+                durability_current: Some(1_000),
+                durability_max: Some(2_000),
+                added_attack: 0,
+                added_defence: 0,
+                added_stats: Vec::new(),
+                cursed: false,
+                socket_slots: 0,
+                show_group_pickup: false,
+                exact_item: Some(GroundDropItemPayload {
+                    uid_assigned: true,
+                    item: UserItem {
+                        unique_id: 88_101,
+                        item_index: 222,
+                        current_dura: 1_000,
+                        max_dura: 2_000,
+                        count: 1,
+                        soul_bound_id: -1,
+                        identified: true,
+                        cursed: false,
+                        slots: Vec::new(),
+                        gem_count: 0,
+                        added_stats: Vec::new(),
+                        awake_type: 3,
+                        awake_values: vec![9],
+                        refined_value: 0,
+                        refine_added: 0,
+                        refine_success_chance: 0,
+                        wedding_ring: -1,
+                        expire_info: None,
+                        rental_information: None,
+                        is_shop_item: false,
+                        sealed_info: None,
+                        gm_made: false,
+                    },
+                }),
+            },
+        }
+    }
 
     fn test_config(data_dir: PathBuf) -> SpectatorConfig {
         SpectatorConfig {
             enabled: true,
+            recording_enabled: true,
             public_enabled: true,
             public_maps: vec!["0".to_string()],
             director_token: Some("director-secret".to_string()),
@@ -1158,6 +1231,23 @@ mod tests {
         let path = env::temp_dir().join(format!("mir2-spectator-{name}-{}", now_ms()));
         fs::create_dir_all(&path).unwrap();
         path
+    }
+
+    fn started_demo_session() -> SimulationSession {
+        let mut session = SimulationSession::new(GatewayConfig::default());
+        let login = session.handle_packet(ClientPacket::Login {
+            account_id: "demo".to_string(),
+            password: "demo".to_string(),
+        });
+        assert!(login
+            .iter()
+            .any(|packet| matches!(packet, mir2_protocol::ServerPacket::LoginSuccess { .. })));
+        let start = session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        assert!(start.iter().any(|packet| matches!(
+            packet,
+            mir2_protocol::ServerPacket::StartGame { result: 4, .. }
+        )));
+        session
     }
 
     #[test]
@@ -1186,8 +1276,7 @@ mod tests {
     fn sanitized_recording_excludes_private_inventory_and_supports_replay() {
         let data_dir = temp_dir("recording");
         let hub = SpectatorHub::new(test_config(data_dir.clone()));
-        let mut session = SimulationSession::new(GatewayConfig::default());
-        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        let session = started_demo_session();
         let snapshot = session.world_snapshot();
         let frame = hub.publish(&snapshot).unwrap().unwrap();
         assert_eq!(frame.world["inventoryItems"], json!([]));
@@ -1204,11 +1293,61 @@ mod tests {
     }
 
     #[test]
+    fn spectator_live_and_replay_redact_exact_ground_item_identity() {
+        let data_dir = temp_dir("exact-ground-drop-redaction");
+        let hub = SpectatorHub::new(test_config(data_dir.clone()));
+        let mut snapshot = started_demo_session().world_snapshot();
+        snapshot.ground_drops.push(exact_ground_drop());
+        let frame = hub.publish(&snapshot).unwrap().unwrap();
+        assert!(frame.world["groundDrops"][0]["loot"]
+            .get("exactItem")
+            .is_none());
+        let replay = hub
+            .load_replay(&frame.recording_id, true, u64::MAX)
+            .unwrap();
+        assert!(replay[0].world["groundDrops"][0]["loot"]
+            .get("exactItem")
+            .is_none());
+        fs::remove_dir_all(data_dir).ok();
+    }
+
+    #[test]
+    fn recording_disabled_keeps_live_ring_but_does_not_touch_disk() {
+        let root = temp_dir("recording-disabled");
+        let data_dir = root.join("recordings");
+        let mut config = test_config(data_dir.clone());
+        config.recording_enabled = false;
+        let hub = SpectatorHub::new(config);
+        let session = started_demo_session();
+
+        let frame = hub.publish(&session.world_snapshot()).unwrap().unwrap();
+        let metrics = hub.metrics();
+        assert_eq!(metrics.recording_enabled, false);
+        assert_eq!(
+            serde_json::to_value(&metrics).unwrap()["recordingEnabled"],
+            false
+        );
+        assert_eq!(metrics.published_frames_total, 1);
+        assert_eq!(metrics.persisted_frames_total, 0);
+        assert_eq!(metrics.buffered_frames, 1);
+        assert!(!data_dir.exists());
+        assert!(hub.recordings(true).is_empty());
+        let error = hub
+            .load_replay(&frame.recording_id, true, u64::MAX)
+            .unwrap_err();
+        assert_eq!(error, "spectator recordings are disabled");
+        assert!(!root
+            .read_dir()
+            .unwrap()
+            .any(|entry| entry.unwrap().path().extension().is_some()));
+        fs::remove_dir_all(root).ok();
+    }
+
+    #[test]
     fn camera_or_target_becomes_the_only_self_player() {
         let data_dir = temp_dir("view");
         let hub = SpectatorHub::new(test_config(data_dir.clone()));
-        let mut session = SimulationSession::new(GatewayConfig::default());
-        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        let session = started_demo_session();
         let frame = hub.publish(&session.world_snapshot()).unwrap().unwrap();
         let target = frame.targets().first().unwrap().name.clone();
         let world = frame.world_for_view(Some(&target), false, None);

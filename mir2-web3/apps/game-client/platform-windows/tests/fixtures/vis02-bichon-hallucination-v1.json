@@ -1,0 +1,86 @@
+{
+  "schemaVersion": 1,
+  "kind": "mir2-windows-vis02-hallucination-packet-event-projection",
+  "contractScope": "server_packet_to_event-projection",
+  "productionReachability": "not-asserted",
+  "source": {
+    "spell": "Hallucination",
+    "actorActionDurationMs": 600,
+    "cast": null,
+    "projectile": {
+      "library": "Magic",
+      "base": 1160,
+      "directionCount": 16,
+      "directionStride": 10,
+      "count": 3,
+      "sourceIntervalMs": 48,
+      "tileTravelMs": 50
+    },
+    "impact": {
+      "library": "Magic2",
+      "base": 1110,
+      "count": 10,
+      "durationMs": 1000
+    },
+    "audio": [
+      {
+        "cue": "Hallucination.impact",
+        "file": "M76-0.wav",
+        "sourceBytes": 445740,
+        "sha256": "4eb43491b7360a8b55a5565dc19c98542deb36ebe10f101cd2c37473dc825744"
+      }
+    ]
+  },
+  "timeline": [
+    {
+      "atMs": 0,
+      "event": {
+        "type": "packet",
+        "packet": "ObjectMagic",
+        "payload": {
+          "objectId": 1000,
+          "location": { "x": 288, "y": 616 },
+          "direction": "Up",
+          "spell": "Hallucination",
+          "targetId": 2076,
+          "target": { "x": 288, "y": 611 },
+          "cast": true,
+          "level": 1,
+          "selfBroadcast": false,
+          "secondaryTargetIds": []
+        }
+      }
+    },
+    {
+      "atMs": 0,
+      "compatibilityEvent": {
+        "type": "packet",
+        "packet": "ObjectProjectile",
+        "payload": {
+          "spell": "Hallucination",
+          "sourceId": 1000,
+          "destinationId": 2076
+        }
+      }
+    },
+    {
+      "atMs": 1000,
+      "event": {
+        "type": "packet",
+        "packet": "ObjectMagic",
+        "payload": {
+          "objectId": 1000,
+          "location": { "x": 288, "y": 616 },
+          "direction": "Up",
+          "spell": "Hallucination",
+          "targetId": 0,
+          "target": { "x": 288, "y": 611 },
+          "cast": false,
+          "level": 1,
+          "selfBroadcast": false,
+          "secondaryTargetIds": []
+        }
+      }
+    }
+  ]
+}

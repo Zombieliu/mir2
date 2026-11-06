@@ -85,6 +85,9 @@ export const ORIGINAL_SOUND_IDS = {
   mountWalkL: 10176,
   mountWalkR: 10177,
   mountRun: 10178,
+  mountStruckTiger1: 10179,
+  mountStruckTiger2: 10180,
+  mountStruckWolf: 10193,
 
   // --- Fishing ---
   fishingThrow: 10184,

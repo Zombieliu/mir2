@@ -7,8 +7,7 @@ use mir2_game_data::{
     CrystalItemTemplate, EquipmentTemplate, LanguageCode,
 };
 use mir2_protocol::{
-    ChatType, MirClass, MirGender, MirGridType, ServerPacket, UserItem, UserItemSealedInfo,
-    UserItemStat,
+    ChatType, MirClass, MirGender, MirGridType, ServerPacket, UserItem, UserItemStat,
 };
 
 use super::buffs::{buff_attack_bonus, buff_defence_bonus};
@@ -18,21 +17,22 @@ use super::components::{
 };
 use super::crystal_compat::{
     CRYSTAL_BIND_DONT_REPAIR, CRYSTAL_BIND_DONT_STORE, CRYSTAL_BIND_NO_SREPAIR,
-    CRYSTAL_BIND_ON_EQUIP, CRYSTAL_STAT_MAX_AC, CRYSTAL_STAT_MAX_DC,
+    CRYSTAL_BIND_ON_EQUIP, CRYSTAL_ITEM_TYPE_BELLS, CRYSTAL_ITEM_TYPE_MOUNT, CRYSTAL_STAT_MAX_AC,
+    CRYSTAL_STAT_MAX_DC,
 };
 use super::inventory::{
-    collection_slot_occupied, equipment_index_for_client_reference,
-    item_index_for_client_reference, item_matches_inventory_unique_id, remove_item_destination,
+    collection_slot_occupied, item_matches_inventory_unique_id, remove_item_destination,
     storage_locked,
 };
 use super::items::{
     crystal_default_identified_for_item_key, crystal_item_has_bind_flag,
     crystal_item_needs_identify, crystal_item_requirement_rejection_key, crystal_item_stat_value,
     crystal_item_template_for_dynamic_key, crystal_item_template_for_item_key,
-    default_item_unique_id, equipment_has_crystal_or_rental_bind_flag, item_is_socket_type,
-    item_state_can_equip_to_slot, item_state_identified, item_state_soul_bound_id,
-    merged_user_item_stats, upsert_user_item_stat, user_item_from_item_state,
-    user_item_rental_information, ItemState,
+    default_item_unique_id, equipment_has_crystal_or_rental_bind_flag,
+    item_has_crystal_or_rental_bind_flag, item_is_socket_type, item_state_can_equip_to_slot,
+    item_state_identified, item_state_soul_bound_id, merged_user_item_stats,
+    try_item_state_from_user_item, try_user_item_from_item_state, upsert_user_item_stat,
+    user_item_from_item_state, ItemState, ItemStateUserItemMetadata,
 };
 use super::map::{current_map_disallows_mount, current_map_requires_bridle};
 use super::monsters::deterministic_roll;
@@ -83,6 +83,13 @@ pub(super) struct EquipmentState {
     pub(super) awake_type: u8,
     #[serde(default)]
     pub(super) awake_values: Vec<u8>,
+    /// UserItem-only identity data retained while the item is worn.
+    #[serde(default)]
+    pub(super) user_item_metadata: Option<ItemStateUserItemMetadata>,
+    /// Exact inventory/root protocol UID captured before this item was worn.
+    /// `None` is a legacy equipment save; `Some(0)` is exact zero.
+    #[serde(default)]
+    pub(super) user_item_unique_id: Option<u64>,
     #[serde(default)]
     pub(super) identified: Option<bool>,
     #[serde(default)]
@@ -272,7 +279,6 @@ pub(super) fn localized_equipment_base_key(key: &str) -> Option<&'static str> {
         "wood-bracelet-left" | "wood-bracelet-right" => Some("content.equipment.woodBracelet"),
         "straw-sandals" => Some("content.equipment.strawSandals"),
         "rope-belt" => Some("content.equipment.ropeBelt"),
-        "guide-ring-right" => Some("content.equipment.guideRing"),
         "bronze-helmet-equipment" => Some("content.item.bronzeHelmet"),
         "iron-helmet-equipment" => Some("content.item.ironHelmet"),
         _ => None,
@@ -288,7 +294,7 @@ pub(super) fn equipment_state_key(slot: EquipmentSlot, name: &str) -> String {
         (EquipmentSlot::Necklace, "Copper Necklace") => "copper-necklace".to_string(),
         (EquipmentSlot::BraceletLeft, "Wood Bracelet") => "wood-bracelet-left".to_string(),
         (EquipmentSlot::BraceletRight, "Wood Bracelet") => "wood-bracelet-right".to_string(),
-        (EquipmentSlot::RingRight, "Guide Ring") => "guide-ring-right".to_string(),
+        (EquipmentSlot::RingRight, "CopperRing") => "crystal-item-404".to_string(),
         (EquipmentSlot::Boots, "Straw Sandals") => "straw-sandals".to_string(),
         (EquipmentSlot::Belt, "Rope Belt") => "rope-belt".to_string(),
         _ => format!("{}-{}", equipment_slot_key(slot), slugify_name(name)),
@@ -421,6 +427,60 @@ pub(super) fn equipment_slot_unique_id(slot: EquipmentSlot) -> Option<u64> {
     equipment_slot_index(slot).and_then(|index| u64::try_from(index).ok())
 }
 
+fn validated_item_state_user_item(item: &ItemState) -> Option<UserItem> {
+    let user_item = try_user_item_from_item_state(item).ok()?;
+    mir2_game_data::crystal_item_by_index(user_item.item_index)?;
+    Some(user_item)
+}
+
+fn item_state_matches_protocol_reference(
+    item: &ItemState,
+    grid: MirGridType,
+    unique_id: u64,
+) -> bool {
+    let container_matches = match grid {
+        MirGridType::Inventory => {
+            matches!(item.container, ItemContainer::Bag1 | ItemContainer::Bag2)
+        }
+        MirGridType::Storage => item.container == ItemContainer::Storage,
+        _ => false,
+    };
+    container_matches
+        && validated_item_state_user_item(item)
+            .is_some_and(|user_item| user_item.unique_id == unique_id)
+}
+
+fn unique_item_index_for_protocol_reference(
+    items: &[ItemState],
+    grid: MirGridType,
+    unique_id: u64,
+) -> Option<usize> {
+    let mut matches = items.iter().enumerate().filter_map(|(index, item)| {
+        item_state_matches_protocol_reference(item, grid, unique_id).then_some(index)
+    });
+    let index = matches.next()?;
+    matches.next().is_none().then_some(index)
+}
+
+fn equipment_matches_protocol_reference(item: &EquipmentState, unique_id: u64) -> bool {
+    user_item_from_equipment_state(item).is_some_and(|user_item| user_item.unique_id == unique_id)
+}
+
+fn unique_equipment_index_for_protocol_reference(
+    resources: &InventoryResource,
+    unique_id: u64,
+) -> Option<usize> {
+    let mut matches = resources
+        .equipment_items
+        .iter()
+        .enumerate()
+        .filter_map(|(index, item)| {
+            equipment_matches_protocol_reference(item, unique_id).then_some(index)
+        });
+    let index = matches.next()?;
+    matches.next().is_none().then_some(index)
+}
+
 pub(super) fn slugify_name(name: &str) -> String {
     name.chars()
         .map(|ch| {
@@ -463,6 +523,8 @@ pub(super) fn equipment_template_to_state(template: &EquipmentTemplate) -> Equip
         gem_count: 0,
         awake_type: 0,
         awake_values: Vec::new(),
+        user_item_metadata: None,
+        user_item_unique_id: None,
         identified: None,
         soul_bound_id: None,
         sealed_expiry_time_binary_datetime: 0,
@@ -488,7 +550,7 @@ pub(super) fn equipment_icon_for_slot_and_name(slot: EquipmentSlot, name: &str) 
         (EquipmentSlot::Helmet, "Iron Helmet") => 107,
         (EquipmentSlot::Necklace, "Copper Necklace") => 205,
         (EquipmentSlot::BraceletLeft | EquipmentSlot::BraceletRight, "Wood Bracelet") => 204,
-        (EquipmentSlot::RingLeft | EquipmentSlot::RingRight, "Guide Ring") => 149,
+        (EquipmentSlot::RingLeft | EquipmentSlot::RingRight, "CopperRing") => 145,
         (EquipmentSlot::Boots, "Straw Sandals") => 219,
         (EquipmentSlot::Belt, "Rope Belt") => 180,
         _ => match slot {
@@ -593,6 +655,8 @@ fn crystal_start_equipment(item_index: i32, slot: EquipmentSlot) -> EquipmentSta
         gem_count: 0,
         awake_type: 0,
         awake_values: Vec::new(),
+        user_item_metadata: None,
+        user_item_unique_id: None,
         identified: None,
         soul_bound_id: None,
         sealed_expiry_time_binary_datetime: 0,
@@ -631,46 +695,20 @@ pub(super) fn seed_equipment_items() -> Vec<EquipmentState> {
 }
 
 pub(super) fn user_item_from_equipment_state(item: &EquipmentState) -> Option<UserItem> {
-    let template = crystal_item_template_for_item_key(&item.key)?;
-    let added_stats = merged_user_item_stats(
-        &item.added_stats,
-        item.added_defence,
-        item.added_attack,
-        Some(item.added_luck),
-    );
-
-    Some(UserItem {
-        unique_id: equipment_slot_unique_id(item.slot)?,
-        item_index: template.item_index,
-        current_dura: item.durability_current,
-        max_dura: item.durability_max,
-        count: item.quantity.min(u32::from(u16::MAX)) as u16,
-        soul_bound_id: equipment_state_soul_bound_id(item),
-        identified: equipment_state_identified(item),
-        cursed: item.cursed,
-        slots: vec![None; usize::from(item.socket_slots)],
-        gem_count: item.gem_count,
-        added_stats,
-        awake_type: item.awake_type,
-        awake_values: item.awake_values.clone(),
-        refined_value: 0,
-        refine_added: 0,
-        refine_success_chance: 0,
-        wedding_ring: -1,
-        expire_info: None,
-        rental_information: user_item_rental_information(
-            item.rental_binding_flags,
-            &item.rental_owner_name,
-            item.rental_expiry_binary_datetime,
-            item.rental_locked,
-        ),
-        is_shop_item: false,
-        sealed_info: (item.sealed_expiry_time_binary_datetime != 0).then_some(UserItemSealedInfo {
-            expiry_binary_datetime: item.sealed_expiry_time_binary_datetime,
-            next_seal_binary_datetime: item.sealed_next_time_binary_datetime,
-        }),
-        gm_made: false,
-    })
+    if let Some(item_index) = item
+        .user_item_metadata
+        .as_ref()
+        .and_then(|metadata| metadata.item_index)
+    {
+        mir2_game_data::crystal_item_by_index(item_index)?;
+    } else {
+        crystal_item_template_for_item_key(&item.key)?;
+    }
+    let slot = u8::try_from(equipment_slot_index(item.slot)?).ok()?;
+    // Bag1 is only a temporary carrier discriminator: exact UID is restored
+    // below, while the legacy fallback is the same zero-based slot index.
+    let carrier = item_state_from_equipment_state(item.clone(), ItemContainer::Bag1, slot);
+    try_user_item_from_item_state(&carrier).ok()
 }
 
 pub(super) fn replace_equipment(world: &mut World, next: EquipmentState) {
@@ -686,7 +724,37 @@ pub(super) fn replace_equipment(world: &mut World, next: EquipmentState) {
             resources.equipment_items.push(next);
         }
     }
+    refresh_mount_resource_from_equipment(world);
     super::stats::refresh_player_stats(world);
+}
+
+/// Rebuild Crystal `MountInfo.CanAttack` input from the authoritative equipped
+/// mount and its embedded `MountSlot.Bells` item. The client never supplies this
+/// predicate directly.
+pub(super) fn refresh_mount_resource_from_equipment(world: &mut World) {
+    let (mount_type, has_bells) = world
+        .resource::<InventoryResource>()
+        .equipment_items
+        .iter()
+        .find(|item| item.slot == EquipmentSlot::Mount)
+        .map(|mount| {
+            let mount_type = mount
+                .shape
+                .and_then(|shape| i16::try_from(shape).ok())
+                .unwrap_or_else(|| i16::try_from(mount.icon).unwrap_or(0));
+            let has_bells = mount.socketed.iter().any(|item| {
+                crystal_item_template_for_item_key(&item.key)
+                    .is_some_and(|template| template.item_type == CRYSTAL_ITEM_TYPE_BELLS)
+            });
+            (mount_type, has_bells)
+        })
+        .unwrap_or((-1, false));
+    let mut mount = world.resource_mut::<MountResource>();
+    mount.mount_type = mount_type;
+    mount.has_bells = has_bells;
+    if mount_type < 0 {
+        mount.riding_mount = false;
+    }
 }
 
 pub(super) fn item_state_from_equipment_state(
@@ -694,6 +762,37 @@ pub(super) fn item_state_from_equipment_state(
     container: ItemContainer,
     slot: u8,
 ) -> ItemState {
+    let user_item_unique_id = equipment.user_item_unique_id;
+    let mut user_item_metadata = equipment.user_item_metadata;
+    if let Some(metadata) = user_item_metadata.as_mut() {
+        // Awake is live while an item is worn, so it wins over an older
+        // protocol sidecar on unequip.
+        metadata.awake_type = equipment.awake_type;
+        metadata.awake_values = equipment.awake_values.clone();
+    } else if user_item_unique_id.is_some()
+        || equipment.awake_type != 0
+        || !equipment.awake_values.is_empty()
+    {
+        user_item_metadata = Some(ItemStateUserItemMetadata {
+            item_index: None,
+            awake_type: equipment.awake_type,
+            awake_values: equipment.awake_values.clone(),
+            refined_value: 0,
+            refine_added: 0,
+            refine_success_chance: 0,
+            wedding_ring: -1,
+            expire_info: None,
+            rental_information: None,
+            sealed_info: None,
+            slots: Vec::new(),
+            is_shop_item: false,
+            gm_made: false,
+            live_socketed_at_capture: false,
+            socket_layout_hydrated: false,
+            captured_socket_positions: None,
+            captured_socket_position: None,
+        });
+    }
     let mut added_stats = equipment.added_stats;
     upsert_user_item_stat(&mut added_stats, 15, equipment.added_luck);
 
@@ -702,7 +801,7 @@ pub(super) fn item_state_from_equipment_state(
         name: equipment.name,
         icon: equipment.icon,
         slot,
-        unique_id: default_item_unique_id(container, slot),
+        unique_id: user_item_unique_id.unwrap_or_else(|| default_item_unique_id(container, slot)),
         container,
         quantity: equipment.quantity,
         description: equipment.description,
@@ -715,6 +814,7 @@ pub(super) fn item_state_from_equipment_state(
         added_defence: equipment.added_defence,
         added_stats,
         socketed: equipment.socketed,
+        user_item_metadata,
         cursed: equipment.cursed,
         socket_slots: equipment.socket_slots,
         gem_count: equipment.gem_count,
@@ -739,6 +839,19 @@ pub(super) fn equipment_state_from_item_state(
 ) -> EquipmentState {
     let durability_current = item.durability_current.unwrap_or(10);
     let durability_max = item.durability_max.unwrap_or(durability_current);
+    let validated_user_item = validated_item_state_user_item(item);
+    let user_item_unique_id = validated_user_item.as_ref().map(|item| item.unique_id);
+    // Once a legacy sidecar-less bag item enters the exact equipment path, hydrate
+    // its Crystal item index into the retained carrier. Otherwise the equipment
+    // root UID would be exact while its metadata remained legacy/ambiguous, and
+    // the next strict save preflight would correctly reject it.
+    let user_item_metadata = item.user_item_metadata.clone().or_else(|| {
+        validated_user_item.as_ref().and_then(|user_item| {
+            try_item_state_from_user_item(item.clone(), user_item)
+                .ok()
+                .and_then(|state| state.user_item_metadata)
+        })
+    });
     EquipmentState {
         key: item.key.clone(),
         slot,
@@ -766,8 +879,14 @@ pub(super) fn equipment_state_from_item_state(
         cursed: item.cursed,
         socket_slots: item.socket_slots,
         gem_count: item.gem_count,
-        awake_type: 0,
-        awake_values: Vec::new(),
+        awake_type: user_item_metadata
+            .as_ref()
+            .map_or(0, |metadata| metadata.awake_type),
+        awake_values: user_item_metadata
+            .as_ref()
+            .map_or_else(Vec::new, |metadata| metadata.awake_values.clone()),
+        user_item_metadata,
+        user_item_unique_id,
         identified: item.identified,
         soul_bound_id: item.soul_bound_id,
         sealed_expiry_time_binary_datetime: item.sealed_expiry_time_binary_datetime,
@@ -849,28 +968,6 @@ pub(super) fn damage_equipment_item(item: &mut EquipmentState, amount: u16) -> b
 
     item.durability_current = item.durability_current.saturating_sub(amount);
     true
-}
-
-pub(super) fn repair_equipped_durability(world: &mut World) -> Vec<ServerPacket> {
-    let mut packets = Vec::new();
-    let mut resources = world.resource_mut::<InventoryResource>();
-
-    for item in resources.equipment_items.iter_mut() {
-        if !equipment_uses_durability(item) || item.durability_current >= item.durability_max {
-            continue;
-        }
-
-        item.durability_current = item.durability_max;
-        if let Some(unique_id) = equipment_slot_unique_id(item.slot) {
-            packets.push(ServerPacket::ItemRepaired {
-                unique_id,
-                max_dura: item.durability_max,
-                current_dura: item.durability_current,
-            });
-        }
-    }
-
-    packets
 }
 
 pub(super) fn repair_equipped_weapon_with_oil(
@@ -1132,8 +1229,9 @@ pub(super) fn try_equip_item(
             MirGridType::Storage => &resources.storage_items,
             _ => unreachable!("unsupported grids return early"),
         };
-        let index = item_index_for_client_reference(source_items, grid, unique_id)?;
+        let index = unique_item_index_for_protocol_reference(source_items, grid, unique_id)?;
         let mut item = source_items[index].clone();
+        validated_item_state_user_item(&item)?;
         if !item_state_can_equip_to_slot(&item, target_slot) {
             return None;
         }
@@ -1154,6 +1252,9 @@ pub(super) fn try_equip_item(
             .equipment_items
             .iter()
             .find(|item| item.slot == target_slot);
+        if replaced.is_some_and(|item| user_item_from_equipment_state(item).is_none()) {
+            return None;
+        }
         if replaced.is_some_and(|item| {
             item.cursed && !world.resource::<PlayerPermissionResource>().unlock_curse
         }) {
@@ -1233,6 +1334,7 @@ pub(super) fn try_equip_item(
             .resource_mut::<PlayerPermissionResource>()
             .unlock_curse = false;
     }
+    refresh_mount_resource_from_equipment(world);
 
     Some(EquipItemMutationResult { refresh_packets })
 }
@@ -1263,6 +1365,7 @@ pub(super) fn equip_item_impl(
         to,
         success: true,
     });
+    refresh_mount_resource_from_equipment(world);
     super::stats::refresh_player_stats(world);
     packets
 }
@@ -1300,16 +1403,22 @@ pub(super) fn remove_equipped_item_impl(
         if collection_slot_occupied(&resources, destination.0, destination.1) {
             return vec![failed_packet];
         }
-        let Some(index) = equipment_index_for_client_reference(&resources, unique_id) else {
+        let Some(index) = unique_equipment_index_for_protocol_reference(&resources, unique_id)
+        else {
             return vec![failed_packet];
         };
         let equipment = &resources.equipment_items[index];
-        if equipment.cursed && !world.resource::<PlayerPermissionResource>().unlock_curse {
+        let unequipped =
+            item_state_from_equipment_state(equipment.clone(), destination.0, destination.1);
+        if validated_item_state_user_item(&unequipped).is_none() {
             return vec![failed_packet];
         }
-        if matches!(grid, MirGridType::Storage)
-            && equipment_has_crystal_or_rental_bind_flag(equipment, CRYSTAL_BIND_DONT_STORE)
-        {
+        if !crystal_item_removal_allowed(
+            world,
+            equipment.cursed,
+            grid,
+            equipment_has_crystal_or_rental_bind_flag(equipment, CRYSTAL_BIND_DONT_STORE),
+        ) {
             return vec![failed_packet];
         }
         destination
@@ -1317,7 +1426,8 @@ pub(super) fn remove_equipped_item_impl(
 
     {
         let mut resources = world.resource_mut::<InventoryResource>();
-        let Some(index) = equipment_index_for_client_reference(&resources, unique_id) else {
+        let Some(index) = unique_equipment_index_for_protocol_reference(&resources, unique_id)
+        else {
             return vec![failed_packet];
         };
         let equipment = resources.equipment_items.remove(index);
@@ -1330,13 +1440,10 @@ pub(super) fn remove_equipped_item_impl(
             _ => {}
         }
         drop(resources);
-        if removed_cursed {
-            world
-                .resource_mut::<PlayerPermissionResource>()
-                .unlock_curse = false;
-        }
+        consume_curse_unlock_after_success(world, removed_cursed);
     }
 
+    refresh_mount_resource_from_equipment(world);
     super::stats::refresh_player_stats(world);
     vec![ServerPacket::RemoveItem {
         grid,
@@ -1346,11 +1453,272 @@ pub(super) fn remove_equipped_item_impl(
     }]
 }
 
-/// Insert a socket gem (Crystal `ItemType.Socket`) from the inventory into a
-/// free socket of an inventory host item, mirroring `PlayerObject.EquipSlotItem`.
-/// v1 targets inventory hosts; the socketed gems then travel onto the equipped
-/// `EquipmentState` via the equip carry-through and contribute to the wearer's
-/// stats (socketing an already-equipped item is the documented follow-on).
+fn crystal_item_removal_allowed(
+    world: &World,
+    cursed: bool,
+    destination_grid: MirGridType,
+    dont_store: bool,
+) -> bool {
+    (!cursed || world.resource::<PlayerPermissionResource>().unlock_curse)
+        && !(destination_grid == MirGridType::Storage && dont_store)
+}
+
+fn consume_curse_unlock_after_success(world: &mut World, removed_cursed: bool) {
+    if removed_cursed {
+        world
+            .resource_mut::<PlayerPermissionResource>()
+            .unlock_curse = false;
+    }
+}
+
+fn item_state_with_socket_inserted(
+    host: &ItemState,
+    socket_item: &ItemState,
+    to: i32,
+) -> Option<ItemState> {
+    let target = usize::try_from(to).ok()?;
+    let mut host_user_item = validated_item_state_user_item(host)?;
+    if target >= host_user_item.slots.len() || host_user_item.slots[target].is_some() {
+        return None;
+    }
+    host_user_item.slots[target] = Some(validated_item_state_user_item(socket_item)?);
+    let next = try_item_state_from_user_item(host.clone(), &host_user_item).ok()?;
+    validated_item_state_user_item(&next)?;
+    Some(next)
+}
+
+fn equipment_state_with_socket_inserted(
+    host: &EquipmentState,
+    socket_item: &ItemState,
+    to: i32,
+) -> Option<EquipmentState> {
+    let slot = host.slot;
+    let carrier_slot = u8::try_from(equipment_slot_index(slot)?).ok()?;
+    let carrier = item_state_from_equipment_state(host.clone(), ItemContainer::Bag1, carrier_slot);
+    let next = item_state_with_socket_inserted(&carrier, socket_item, to)?;
+    let next = equipment_state_from_item_state(&next, slot);
+    user_item_from_equipment_state(&next)?;
+    Some(next)
+}
+
+fn item_state_with_socket_removed(
+    host: &ItemState,
+    socket_unique_id: u64,
+    destination_container: ItemContainer,
+    destination_slot: u8,
+) -> Option<(ItemState, ItemState)> {
+    let mut host_user_item = validated_item_state_user_item(host)?;
+    let mut matching_slots = host_user_item
+        .slots
+        .iter()
+        .enumerate()
+        .filter_map(|(index, item)| {
+            item.as_ref()
+                .is_some_and(|item| item.unique_id == socket_unique_id)
+                .then_some(index)
+        });
+    let socket_position = matching_slots.next()?;
+    if matching_slots.next().is_some() {
+        return None;
+    }
+    let removed_user_item = host_user_item.slots[socket_position].take()?;
+
+    // Hydrate legacy sidecar-only saves before selecting the live child. This
+    // keeps old legal saves removable without accepting malformed carriers.
+    let hydrated_host =
+        try_item_state_from_user_item(host.clone(), &validated_item_state_user_item(host)?).ok()?;
+    let mut matching_children = hydrated_host.socketed.iter().filter(|item| {
+        validated_item_state_user_item(item).is_some_and(|candidate| {
+            candidate.unique_id == removed_user_item.unique_id
+                && candidate.item_index == removed_user_item.item_index
+        })
+    });
+    let mut removed = matching_children.next()?.clone();
+    if matching_children.next().is_some() {
+        return None;
+    }
+    removed.container = destination_container;
+    removed.slot = destination_slot;
+    let removed = try_item_state_from_user_item(removed, &removed_user_item).ok()?;
+    validated_item_state_user_item(&removed)?;
+
+    let next_host = try_item_state_from_user_item(hydrated_host, &host_user_item).ok()?;
+    validated_item_state_user_item(&next_host)?;
+    Some((next_host, removed))
+}
+
+fn equipment_state_with_socket_removed(
+    host: &EquipmentState,
+    socket_unique_id: u64,
+    destination_container: ItemContainer,
+    destination_slot: u8,
+) -> Option<(EquipmentState, ItemState)> {
+    let slot = host.slot;
+    let carrier_slot = u8::try_from(equipment_slot_index(slot)?).ok()?;
+    let carrier = item_state_from_equipment_state(host.clone(), ItemContainer::Bag1, carrier_slot);
+    let (next, removed) = item_state_with_socket_removed(
+        &carrier,
+        socket_unique_id,
+        destination_container,
+        destination_slot,
+    )?;
+    let next = equipment_state_from_item_state(&next, slot);
+    user_item_from_equipment_state(&next)?;
+    Some((next, removed))
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum SocketHostReference {
+    Inventory(usize),
+    Equipment(usize),
+}
+
+fn unique_socket_host_reference(
+    resources: &InventoryResource,
+    unique_id: u64,
+    inventory_only: bool,
+) -> Option<SocketHostReference> {
+    let inventory = unique_item_index_for_protocol_reference(
+        &resources.inventory_items,
+        MirGridType::Inventory,
+        unique_id,
+    )
+    .map(SocketHostReference::Inventory);
+    let equipment = (!inventory_only)
+        .then(|| unique_equipment_index_for_protocol_reference(resources, unique_id))
+        .flatten()
+        .map(SocketHostReference::Equipment);
+    match (inventory, equipment) {
+        (Some(reference), None) | (None, Some(reference)) => Some(reference),
+        _ => None,
+    }
+}
+
+enum SocketHostReplacement {
+    Inventory {
+        unique_id: u64,
+        item: ItemState,
+    },
+    Equipment {
+        slot: EquipmentSlot,
+        item: EquipmentState,
+    },
+}
+
+fn apply_socket_host_replacement(
+    resources: &mut InventoryResource,
+    replacement: SocketHostReplacement,
+) -> bool {
+    match replacement {
+        SocketHostReplacement::Inventory { unique_id, item } => {
+            let Some(index) = unique_item_index_for_protocol_reference(
+                &resources.inventory_items,
+                MirGridType::Inventory,
+                unique_id,
+            ) else {
+                return false;
+            };
+            resources.inventory_items[index] = item;
+            true
+        }
+        SocketHostReplacement::Equipment { slot, item } => {
+            let Some(index) = resources
+                .equipment_items
+                .iter()
+                .position(|candidate| candidate.slot == slot)
+            else {
+                return false;
+            };
+            resources.equipment_items[index] = item;
+            true
+        }
+    }
+}
+
+fn equip_mount_slot_item_impl(
+    world: &mut World,
+    grid: MirGridType,
+    unique_id: u64,
+    to: i32,
+    to_unique_id: u64,
+) -> bool {
+    if !matches!(grid, MirGridType::Inventory | MirGridType::Storage)
+        || to != 1
+        || (grid == MirGridType::Storage
+            && (!active_crystal_storage_service(world) || storage_locked(world)))
+    {
+        return false;
+    }
+
+    let Some((source_index, next_mount)) = (|| -> Option<(usize, EquipmentState)> {
+        let resources = world.resource::<InventoryResource>();
+        let source_items = match grid {
+            MirGridType::Inventory => &resources.inventory_items,
+            MirGridType::Storage => &resources.storage_items,
+            _ => unreachable!("mount accessory source was validated"),
+        };
+        let source_index = unique_item_index_for_protocol_reference(source_items, grid, unique_id)?;
+        let source = &source_items[source_index];
+        let source_template = crystal_item_template_for_item_key(&source.key)?;
+        if source_template.item_type != CRYSTAL_ITEM_TYPE_BELLS
+            || crystal_item_requirement_rejection_key(world, resources, &source_template).is_some()
+        {
+            return None;
+        }
+        let soul_bound_id = item_state_soul_bound_id(source);
+        if soul_bound_id != -1 && soul_bound_id != current_character_index(world).unwrap_or(-1) {
+            return None;
+        }
+        let mount = resources
+            .equipment_items
+            .iter()
+            .find(|item| item.slot == EquipmentSlot::Mount)?;
+        let mount_user_item = user_item_from_equipment_state(mount)?;
+        let legacy_mount_reference = equipment_slot_unique_id(EquipmentSlot::Mount);
+        if mount_user_item.unique_id != to_unique_id && legacy_mount_reference != Some(to_unique_id)
+        {
+            return None;
+        }
+        if !crystal_item_template_for_item_key(&mount.key)
+            .is_some_and(|template| template.item_type == CRYSTAL_ITEM_TYPE_MOUNT)
+        {
+            return None;
+        }
+        let next_mount = equipment_state_with_socket_inserted(mount, source, to)?;
+        Some((source_index, next_mount))
+    })() else {
+        return false;
+    };
+
+    let mut next_resources = world.resource::<InventoryResource>().clone();
+    let source_items = match grid {
+        MirGridType::Inventory => &mut next_resources.inventory_items,
+        MirGridType::Storage => &mut next_resources.storage_items,
+        _ => unreachable!("mount accessory source was validated"),
+    };
+    if source_index >= source_items.len()
+        || !item_state_matches_protocol_reference(&source_items[source_index], grid, unique_id)
+    {
+        return false;
+    }
+    source_items.remove(source_index);
+    let Some(mount_index) = next_resources
+        .equipment_items
+        .iter()
+        .position(|item| item.slot == EquipmentSlot::Mount)
+    else {
+        return false;
+    };
+    next_resources.equipment_items[mount_index] = next_mount;
+    *world.resource_mut::<InventoryResource>() = next_resources;
+    refresh_mount_resource_from_equipment(world);
+    super::stats::refresh_player_stats(world);
+    true
+}
+
+/// Insert a Crystal socket item into the exact protocol slot requested by the
+/// client. `Socket` is the canonical Crystal target grid; `Inventory` remains
+/// accepted for the earlier native-client envelope and only targets bag hosts.
 pub(super) fn equip_slot_item_impl(
     world: &mut World,
     grid: MirGridType,
@@ -1369,45 +1737,97 @@ pub(super) fn equip_slot_item_impl(
     if !super::resources::is_in_world(world) {
         return vec![failed];
     }
-    if grid != MirGridType::Inventory || grid_to != MirGridType::Inventory {
-        return vec![failed];
-    }
-    let mut inventory = world.resource_mut::<InventoryResource>();
-    let Some(gem_index) = inventory
-        .inventory_items
-        .iter()
-        .position(|item| item_matches_inventory_unique_id(item, unique_id))
-    else {
-        return vec![failed];
-    };
-    if !item_is_socket_type(&inventory.inventory_items[gem_index]) {
-        return vec![failed];
-    }
-    let Some(host_index) = inventory
-        .inventory_items
-        .iter()
-        .position(|item| item_matches_inventory_unique_id(item, to_unique_id))
-    else {
-        return vec![failed];
-    };
-    if host_index == gem_index {
-        return vec![failed];
-    }
-    {
-        let host = &inventory.inventory_items[host_index];
-        // Host must still have a free socket (Crystal checks `item.Slots[to] == null`).
-        if host.socketed.len() >= usize::from(host.socket_slots) {
+    if grid_to == MirGridType::Mount {
+        if !equip_mount_slot_item_impl(world, grid, unique_id, to, to_unique_id) {
             return vec![failed];
         }
+        return vec![ServerPacket::EquipSlotItem {
+            grid,
+            unique_id,
+            to,
+            grid_to,
+            success: true,
+        }];
     }
-    let gem = inventory.inventory_items.remove(gem_index);
-    // The host index may shift if the gem preceded it in the bag.
-    let host_index = inventory
-        .inventory_items
-        .iter()
-        .position(|item| item_matches_inventory_unique_id(item, to_unique_id))
-        .expect("host item is still present after removing the gem");
-    inventory.inventory_items[host_index].socketed.push(gem);
+    if !matches!(grid, MirGridType::Inventory | MirGridType::Storage)
+        || !matches!(grid_to, MirGridType::Socket | MirGridType::Inventory)
+        || (grid == MirGridType::Storage
+            && (!active_crystal_storage_service(world) || storage_locked(world)))
+    {
+        return vec![failed];
+    }
+
+    let inventory_only_host = grid_to == MirGridType::Inventory;
+    let (source_index, host_replacement) = {
+        let resources = world.resource::<InventoryResource>();
+        let source_items = match grid {
+            MirGridType::Inventory => &resources.inventory_items,
+            MirGridType::Storage => &resources.storage_items,
+            _ => unreachable!("socket source was validated"),
+        };
+        let Some(source_index) =
+            unique_item_index_for_protocol_reference(source_items, grid, unique_id)
+        else {
+            return vec![failed];
+        };
+        let socket_item = &source_items[source_index];
+        if !item_is_socket_type(socket_item) {
+            return vec![failed];
+        }
+        let Some(host_reference) =
+            unique_socket_host_reference(resources, to_unique_id, inventory_only_host)
+        else {
+            return vec![failed];
+        };
+        if matches!(host_reference, SocketHostReference::Inventory(index) if grid == MirGridType::Inventory && index == source_index)
+        {
+            return vec![failed];
+        }
+        let replacement = match host_reference {
+            SocketHostReference::Inventory(index) => {
+                let Some(next) = item_state_with_socket_inserted(
+                    &resources.inventory_items[index],
+                    socket_item,
+                    to,
+                ) else {
+                    return vec![failed];
+                };
+                SocketHostReplacement::Inventory {
+                    unique_id: to_unique_id,
+                    item: next,
+                }
+            }
+            SocketHostReference::Equipment(index) => {
+                let host = &resources.equipment_items[index];
+                let Some(next) = equipment_state_with_socket_inserted(host, socket_item, to) else {
+                    return vec![failed];
+                };
+                SocketHostReplacement::Equipment {
+                    slot: host.slot,
+                    item: next,
+                }
+            }
+        };
+        (source_index, replacement)
+    };
+
+    let mut next_resources = world.resource::<InventoryResource>().clone();
+    let source_items = match grid {
+        MirGridType::Inventory => &mut next_resources.inventory_items,
+        MirGridType::Storage => &mut next_resources.storage_items,
+        _ => unreachable!("socket source was validated"),
+    };
+    if source_index >= source_items.len()
+        || !item_state_matches_protocol_reference(&source_items[source_index], grid, unique_id)
+    {
+        return vec![failed];
+    }
+    source_items.remove(source_index);
+    if !apply_socket_host_replacement(&mut next_resources, host_replacement) {
+        return vec![failed];
+    }
+    *world.resource_mut::<InventoryResource>() = next_resources;
+    super::stats::refresh_player_stats(world);
     vec![ServerPacket::EquipSlotItem {
         grid,
         unique_id,
@@ -1432,63 +1852,137 @@ pub(super) fn remove_equipped_slot_item_impl(
         to,
         success: false,
     };
-    if matches!(
-        grid,
-        MirGridType::HeroEquipment | MirGridType::HeroInventory
-    ) || matches!(
-        grid_to,
-        MirGridType::HeroEquipment | MirGridType::HeroInventory
-    ) {
-        return vec![failed_packet];
-    }
-    // Extract a socketed gem from an inventory host back into the inventory
-    // (Crystal `PlayerObject.RemoveSlotItem`); cursed gems cannot be removed.
-    if super::resources::is_in_world(world)
-        && matches!(grid, MirGridType::Socket)
-        && matches!(grid_to, MirGridType::Inventory)
+    if !super::resources::is_in_world(world)
+        || matches!(
+            grid,
+            MirGridType::HeroEquipment | MirGridType::HeroInventory
+        )
+        || matches!(
+            grid_to,
+            MirGridType::HeroEquipment | MirGridType::HeroInventory
+        )
+        || !matches!(grid_to, MirGridType::Inventory | MirGridType::Storage)
+        || (grid_to == MirGridType::Storage
+            && (!active_crystal_storage_service(world) || storage_locked(world)))
     {
-        let mut inventory = world.resource_mut::<InventoryResource>();
-        if let Some(host_index) = inventory
-            .inventory_items
-            .iter()
-            .position(|item| item_matches_inventory_unique_id(item, from_unique_id))
-        {
-            if let Some(socket_pos) = inventory.inventory_items[host_index]
-                .socketed
-                .iter()
-                .position(|gem| gem.unique_id == unique_id)
-            {
-                if inventory.inventory_items[host_index].socketed[socket_pos].cursed {
-                    return vec![failed_packet];
-                }
-                let gem = inventory.inventory_items[host_index]
-                    .socketed
-                    .remove(socket_pos);
-                inventory.inventory_items.push(gem);
-                return vec![ServerPacket::RemoveSlotItem {
-                    grid,
-                    grid_to,
-                    unique_id,
-                    to,
-                    success: true,
-                }];
-            }
-        }
-        return vec![failed_packet];
-    }
-    if !matches!(
-        grid,
-        MirGridType::Mount | MirGridType::Fishing | MirGridType::Socket
-    ) {
-        return vec![failed_packet];
-    }
-    if !matches!(grid_to, MirGridType::Inventory | MirGridType::Storage) {
         return vec![failed_packet];
     }
 
-    // Mount/fishing embedded slot items are not modeled yet; keep Crystal's
-    // RemoveSlotItem envelope without falling through to whole-item removal.
-    vec![failed_packet]
+    let (destination_container, host_replacement, removed, removed_cursed) = {
+        let resources = world.resource::<InventoryResource>();
+        let Some(destination) = remove_item_destination(&resources, grid_to, to) else {
+            return vec![failed_packet];
+        };
+        if collection_slot_occupied(&resources, destination.0, destination.1) {
+            return vec![failed_packet];
+        }
+
+        let host_reference = match grid {
+            MirGridType::Mount => {
+                let Some(index) = resources
+                    .equipment_items
+                    .iter()
+                    .position(|item| item.slot == EquipmentSlot::Mount)
+                else {
+                    return vec![failed_packet];
+                };
+                let host = &resources.equipment_items[index];
+                let Some(host_user_item) = user_item_from_equipment_state(host) else {
+                    return vec![failed_packet];
+                };
+                if host_user_item.unique_id != from_unique_id
+                    && equipment_slot_unique_id(EquipmentSlot::Mount) != Some(from_unique_id)
+                {
+                    return vec![failed_packet];
+                }
+                SocketHostReference::Equipment(index)
+            }
+            MirGridType::Socket => {
+                let Some(reference) =
+                    unique_socket_host_reference(resources, from_unique_id, false)
+                else {
+                    return vec![failed_packet];
+                };
+                reference
+            }
+            // Fishing embedded slots remain a separate follow-on.
+            _ => return vec![failed_packet],
+        };
+
+        let (replacement, removed) = match host_reference {
+            SocketHostReference::Inventory(index) => {
+                let Some((next, removed)) = item_state_with_socket_removed(
+                    &resources.inventory_items[index],
+                    unique_id,
+                    destination.0,
+                    destination.1,
+                ) else {
+                    return vec![failed_packet];
+                };
+                (
+                    SocketHostReplacement::Inventory {
+                        unique_id: from_unique_id,
+                        item: next,
+                    },
+                    removed,
+                )
+            }
+            SocketHostReference::Equipment(index) => {
+                let host = &resources.equipment_items[index];
+                let Some((next, removed)) = equipment_state_with_socket_removed(
+                    host,
+                    unique_id,
+                    destination.0,
+                    destination.1,
+                ) else {
+                    return vec![failed_packet];
+                };
+                (
+                    SocketHostReplacement::Equipment {
+                        slot: host.slot,
+                        item: next,
+                    },
+                    removed,
+                )
+            }
+        };
+        let Some(removed_user_item) = validated_item_state_user_item(&removed) else {
+            return vec![failed_packet];
+        };
+        if removed_user_item.wedding_ring != -1
+            || !crystal_item_removal_allowed(
+                world,
+                removed.cursed,
+                grid_to,
+                item_has_crystal_or_rental_bind_flag(&removed, CRYSTAL_BIND_DONT_STORE),
+            )
+        {
+            return vec![failed_packet];
+        }
+        let removed_cursed = removed.cursed;
+        (destination.0, replacement, removed, removed_cursed)
+    };
+
+    let mut next_resources = world.resource::<InventoryResource>().clone();
+    if !apply_socket_host_replacement(&mut next_resources, host_replacement) {
+        return vec![failed_packet];
+    }
+    match destination_container {
+        ItemContainer::Bag1 | ItemContainer::Bag2 => next_resources.inventory_items.push(removed),
+        ItemContainer::Storage => next_resources.storage_items.push(removed),
+        _ => return vec![failed_packet],
+    }
+    *world.resource_mut::<InventoryResource>() = next_resources;
+    consume_curse_unlock_after_success(world, removed_cursed);
+    refresh_mount_resource_from_equipment(world);
+    super::stats::refresh_player_stats(world);
+    vec![ServerPacket::RemoveSlotItem {
+        grid,
+        grid_to,
+        unique_id,
+        to,
+        success: true,
+    }]
 }
 
 pub(super) fn active_crystal_repair_service(
@@ -1734,6 +2228,45 @@ pub(super) fn crystal_item_current_price(
 #[cfg(test)]
 mod native_start_equipment_tests {
     use super::*;
+    use crate::config::SimulationConfig;
+    use crate::runtime::inventory::{item_index_for_client_reference, move_item_impl};
+    use crate::runtime::resources::SessionResource;
+    use crate::runtime::session::SimulationSession;
+
+    fn identity_metadata(item_index: i32) -> ItemStateUserItemMetadata {
+        ItemStateUserItemMetadata {
+            item_index: Some(item_index),
+            awake_type: 2,
+            awake_values: vec![4, 5],
+            refined_value: 6,
+            refine_added: 7,
+            refine_success_chance: 88,
+            wedding_ring: 23,
+            expire_info: Some(mir2_protocol::UserItemExpireInfo {
+                expiry_binary_datetime: 123_456,
+            }),
+            rental_information: None,
+            sealed_info: None,
+            slots: Vec::new(),
+            is_shop_item: true,
+            gm_made: true,
+            live_socketed_at_capture: false,
+            socket_layout_hydrated: false,
+            captured_socket_positions: None,
+            captured_socket_position: None,
+        }
+    }
+
+    fn inventory_item_with_identity(unique_id: u64, item_index: i32) -> ItemState {
+        let mut item = item_state_from_equipment_state(
+            seed_equipment_items()[0].clone(),
+            ItemContainer::Bag1,
+            7,
+        );
+        item.unique_id = unique_id;
+        item.user_item_metadata = Some(identity_metadata(item_index));
+        item
+    }
 
     #[test]
     fn every_character_start_equipment_item_has_native_item_info() {
@@ -1763,10 +2296,463 @@ mod native_start_equipment_tests {
 
     #[test]
     fn unresolved_equipment_never_emits_a_dangling_native_user_item() {
-        let mut item = seed_equipment_items()[0].clone();
-        item.key = "web-only-equipment-without-crystal-item-info".to_string();
+        let mut unresolved_key = seed_equipment_items()[0].clone();
+        unresolved_key.key = "web-only-equipment-without-crystal-item-info".to_string();
+        assert!(user_item_from_equipment_state(&unresolved_key).is_none());
 
-        assert!(user_item_from_equipment_state(&item).is_none());
+        let mut unresolved_index = seed_equipment_items()[0].clone();
+        unresolved_index.user_item_metadata = Some(identity_metadata(i32::MIN));
+        assert!(user_item_from_equipment_state(&unresolved_index).is_none());
+    }
+
+    #[test]
+    fn exact_and_zero_uid_survive_equip_serde_reload_unequip() {
+        for exact_uid in [9_001, 0] {
+            let inventory_item = inventory_item_with_identity(exact_uid, 221);
+            let equipped = equipment_state_from_item_state(&inventory_item, EquipmentSlot::Weapon);
+            assert_eq!(equipped.user_item_unique_id, Some(exact_uid));
+
+            let reloaded: EquipmentState = serde_json::from_str(
+                &serde_json::to_string(&equipped).expect("equipment state should encode"),
+            )
+            .expect("equipment state should reload");
+            let unequipped =
+                item_state_from_equipment_state(reloaded.clone(), ItemContainer::Bag1, 8);
+
+            assert_eq!(reloaded.user_item_unique_id, Some(exact_uid));
+            assert_eq!(
+                user_item_from_equipment_state(&reloaded)
+                    .expect("equipped exact UID carrier should serialize")
+                    .unique_id,
+                exact_uid
+            );
+            assert_eq!(unequipped.unique_id, exact_uid);
+            assert_eq!(
+                try_user_item_from_item_state(&unequipped)
+                    .expect("exact UID carrier should serialize")
+                    .unique_id,
+                exact_uid
+            );
+        }
+
+        let exact = equipment_state_from_item_state(
+            &inventory_item_with_identity(0, 221),
+            EquipmentSlot::Weapon,
+        );
+        let mut old_json = serde_json::to_value(exact).expect("equipment state should encode");
+        old_json
+            .as_object_mut()
+            .expect("equipment state JSON should be an object")
+            .remove("user_item_unique_id");
+        let legacy: EquipmentState =
+            serde_json::from_value(old_json).expect("legacy equipment save should reload");
+        assert_eq!(legacy.user_item_unique_id, None);
+        assert_eq!(
+            item_state_from_equipment_state(legacy, ItemContainer::Bag1, 8).unique_id,
+            8
+        );
+    }
+
+    #[test]
+    fn shared_serializer_preserves_exact_fields_and_rejects_large_quantity() {
+        let item_index = crystal_item_template_for_item_key(&seed_equipment_items()[0].key)
+            .expect("starter projection template")
+            .item_index;
+        let mut inventory_item = inventory_item_with_identity(9_130, item_index);
+        let default_rental = mir2_protocol::UserItemRentalInformation {
+            owner_name: String::new(),
+            binding_flags: 0,
+            expiry_binary_datetime: 0,
+            rental_locked: false,
+        };
+        let default_sealed = mir2_protocol::UserItemSealedInfo {
+            expiry_binary_datetime: 0,
+            next_seal_binary_datetime: 0,
+        };
+        let metadata = inventory_item
+            .user_item_metadata
+            .as_mut()
+            .expect("identity fixture has metadata");
+        metadata.rental_information = Some(default_rental.clone());
+        metadata.sealed_info = Some(default_sealed.clone());
+
+        let equipped = equipment_state_from_item_state(&inventory_item, EquipmentSlot::Weapon);
+        let mut equipped: EquipmentState = serde_json::from_str(
+            &serde_json::to_string(&equipped).expect("equipment state should encode"),
+        )
+        .expect("equipment state should reload");
+        let wire = user_item_from_equipment_state(&equipped).unwrap_or_else(|| {
+            let carrier = item_state_from_equipment_state(equipped.clone(), ItemContainer::Bag1, 0);
+            panic!(
+                "valid exact equipment carrier should serialize: {:?}",
+                try_user_item_from_item_state(&carrier)
+            );
+        });
+        assert_eq!(wire.item_index, item_index);
+        assert_eq!(wire.rental_information, Some(default_rental));
+        assert_eq!(wire.sealed_info, Some(default_sealed));
+
+        equipped.quantity = u32::from(u16::MAX) + 1;
+        assert!(user_item_from_equipment_state(&equipped).is_none());
+    }
+
+    #[test]
+    fn unequip_live_awake_overrides_stale_sidecar_awake() {
+        let inventory_item = inventory_item_with_identity(9_140, 221);
+        let mut equipped = equipment_state_from_item_state(&inventory_item, EquipmentSlot::Weapon);
+        assert_eq!(equipped.awake_type, 2);
+        assert_eq!(equipped.awake_values, vec![4, 5]);
+
+        equipped.awake_type = 9;
+        equipped.awake_values = vec![3, 3, 3];
+        let unequipped = item_state_from_equipment_state(equipped, ItemContainer::Bag1, 8);
+        let metadata = unequipped
+            .user_item_metadata
+            .as_ref()
+            .expect("unequipped item retains metadata carrier");
+        assert_eq!(metadata.awake_type, 9);
+        assert_eq!(metadata.awake_values, vec![3, 3, 3]);
+        let wire = try_user_item_from_item_state(&unequipped)
+            .expect("live Awake carrier should serialize");
+        assert_eq!(wire.awake_type, 9);
+        assert_eq!(wire.awake_values, vec![3, 3, 3]);
+    }
+
+    #[test]
+    fn ordinary_socket_and_mount_bells_removal_do_not_revive_captured_slots() {
+        let stale_socket = try_user_item_from_item_state(&inventory_item_with_identity(9_151, 221))
+            .expect("socket fixture should serialize");
+        let mut ordinary = inventory_item_with_identity(9_150, 221);
+        ordinary.socket_slots = 2;
+        ordinary.socketed = vec![inventory_item_with_identity(9_151, 221)];
+        let ordinary_metadata = ordinary
+            .user_item_metadata
+            .as_mut()
+            .expect("ordinary host has metadata");
+        ordinary_metadata.slots = vec![Some(stale_socket), None];
+        ordinary_metadata.live_socketed_at_capture = true;
+        let mut ordinary_equipment =
+            equipment_state_from_item_state(&ordinary, EquipmentSlot::Weapon);
+        assert_eq!(
+            user_item_from_equipment_state(&ordinary_equipment)
+                .expect("ordinary socket carrier should serialize")
+                .slots[0]
+                .as_ref()
+                .map(|item| item.unique_id),
+            Some(9_151)
+        );
+        ordinary_equipment.socketed.clear();
+        assert_eq!(
+            user_item_from_equipment_state(&ordinary_equipment)
+                .expect("ordinary socket removal should serialize")
+                .slots,
+            vec![None, None]
+        );
+
+        let mount_template =
+            mir2_game_data::crystal_item_by_name("RedTiger").expect("RedTiger template");
+        let bells_template =
+            mir2_game_data::crystal_item_by_name("BronzeBell").expect("BronzeBell template");
+        let mut bells = inventory_item_with_identity(9_161, bells_template.item_index);
+        bells.key = format!("crystal-item-{}", bells_template.item_index);
+        bells.icon = bells_template.image;
+        let stale_bells = try_user_item_from_item_state(&bells)
+            .expect("Bells fixture should serialize through shared carrier");
+
+        let mut mount = inventory_item_with_identity(9_160, mount_template.item_index);
+        mount.key = format!("crystal-item-{}", mount_template.item_index);
+        mount.icon = mount_template.image;
+        mount.socket_slots = 2;
+        mount.socketed = vec![bells];
+        let mount_metadata = mount
+            .user_item_metadata
+            .as_mut()
+            .expect("mount host has metadata");
+        mount_metadata.slots = vec![None, Some(stale_bells)];
+        mount_metadata.live_socketed_at_capture = true;
+        let mut mount_equipment = equipment_state_from_item_state(&mount, EquipmentSlot::Mount);
+        assert_eq!(
+            user_item_from_equipment_state(&mount_equipment)
+                .expect("mount Bells carrier should serialize")
+                .slots[1]
+                .as_ref()
+                .map(|item| item.unique_id),
+            Some(9_161)
+        );
+        mount_equipment.socketed.clear();
+        assert_eq!(
+            user_item_from_equipment_state(&mount_equipment)
+                .expect("mount Bells removal should serialize")
+                .slots,
+            vec![None, None]
+        );
+    }
+    fn mutation_session() -> SimulationSession {
+        let config = SimulationConfig::default();
+        let selected_character = config.default_character.clone();
+        let mut session = SimulationSession::new(config);
+        session
+            .app
+            .world_mut()
+            .resource_mut::<SessionResource>()
+            .selected_character = Some(selected_character);
+        let mut resources = session.app.world_mut().resource_mut::<InventoryResource>();
+        resources.inventory_items.clear();
+        resources.storage_items.clear();
+        resources.equipment_items.clear();
+        drop(resources);
+        session
+    }
+
+    #[test]
+    fn actual_equip_reload_remove_preserves_exact_root_uid_including_zero() {
+        for exact_uid in [9_201, 0] {
+            let mut session = mutation_session();
+            session
+                .app
+                .world_mut()
+                .resource_mut::<InventoryResource>()
+                .inventory_items
+                .push(inventory_item_with_identity(exact_uid, 221));
+
+            let weapon_slot = i32::try_from(
+                equipment_slot_index(EquipmentSlot::Weapon).expect("weapon slot index"),
+            )
+            .expect("weapon slot fits i32");
+            assert!(try_equip_item(
+                session.app.world_mut(),
+                MirGridType::Inventory,
+                exact_uid,
+                weapon_slot,
+            )
+            .is_some());
+            {
+                let resources = session.app.world().resource::<InventoryResource>();
+                assert_eq!(resources.equipment_items.len(), 1);
+                assert_eq!(
+                    user_item_from_equipment_state(&resources.equipment_items[0])
+                        .expect("equipped item remains a valid carrier")
+                        .unique_id,
+                    exact_uid
+                );
+            }
+
+            let encoded = {
+                let resources = session.app.world().resource::<InventoryResource>();
+                serde_json::to_string(&resources.equipment_items)
+                    .expect("equipment save should encode")
+            };
+            session
+                .app
+                .world_mut()
+                .resource_mut::<InventoryResource>()
+                .equipment_items =
+                serde_json::from_str(&encoded).expect("equipment save should reload");
+
+            let packets = remove_equipped_item_impl(
+                session.app.world_mut(),
+                MirGridType::Inventory,
+                exact_uid,
+                8,
+            );
+            assert!(packets.iter().any(|packet| matches!(
+                packet,
+                ServerPacket::RemoveItem {
+                    unique_id,
+                    success: true,
+                    ..
+                } if *unique_id == exact_uid
+            )));
+            {
+                let resources = session.app.world().resource::<InventoryResource>();
+                assert!(resources.equipment_items.is_empty());
+                let returned = resources
+                    .inventory_items
+                    .iter()
+                    .find(|item| {
+                        validated_item_state_user_item(item)
+                            .is_some_and(|item| item.unique_id == exact_uid)
+                    })
+                    .expect("unequipped item returns with its exact root UID");
+                assert_eq!(returned.slot, 8);
+                assert_eq!(
+                    validated_item_state_user_item(returned)
+                        .expect("returned item remains valid")
+                        .unique_id,
+                    exact_uid
+                );
+            }
+
+            if exact_uid == 0 {
+                let packets = move_item_impl(session.app.world_mut(), MirGridType::Inventory, 8, 9);
+                assert!(packets.iter().any(|packet| matches!(
+                    packet,
+                    ServerPacket::MoveItem {
+                        grid: MirGridType::Inventory,
+                        from: 8,
+                        to: 9,
+                        success: true,
+                    }
+                )));
+
+                let resources = session.app.world().resource::<InventoryResource>();
+                let moved_index = item_index_for_client_reference(
+                    &resources.inventory_items,
+                    MirGridType::Inventory,
+                    0,
+                )
+                .expect("moved exact-zero item remains addressable by protocol UID 0");
+                let moved = &resources.inventory_items[moved_index];
+                assert_eq!(moved.slot, 9);
+                assert_eq!(moved.unique_id, 0);
+                assert!(item_matches_inventory_unique_id(moved, 0));
+                assert!(!item_matches_inventory_unique_id(moved, 9));
+            }
+        }
+    }
+
+    #[test]
+    fn actual_equip_swap_returns_replaced_item_without_reallocating_uid() {
+        let mut session = mutation_session();
+        let incoming = inventory_item_with_identity(9_211, 221);
+        let worn = equipment_state_from_item_state(
+            &inventory_item_with_identity(9_210, 221),
+            EquipmentSlot::Weapon,
+        );
+        {
+            let mut resources = session.app.world_mut().resource_mut::<InventoryResource>();
+            resources.inventory_items.push(incoming);
+            resources.equipment_items.push(worn);
+        }
+
+        assert!(try_equip_item(
+            session.app.world_mut(),
+            MirGridType::Inventory,
+            9_211,
+            i32::try_from(equipment_slot_index(EquipmentSlot::Weapon).unwrap()).unwrap(),
+        )
+        .is_some());
+        let resources = session.app.world().resource::<InventoryResource>();
+        assert_eq!(
+            user_item_from_equipment_state(&resources.equipment_items[0])
+                .expect("incoming item is equipped")
+                .unique_id,
+            9_211
+        );
+        let returned = resources
+            .inventory_items
+            .iter()
+            .find(|item| {
+                validated_item_state_user_item(item).is_some_and(|item| item.unique_id == 9_210)
+            })
+            .expect("replaced item returns to the source slot");
+        assert_eq!(returned.slot, 7);
+    }
+
+    #[test]
+    fn socket_mutation_uses_exact_target_and_restores_destination_metadata() {
+        let mut host = inventory_item_with_identity(9_220, 221);
+        host.socket_slots = 2;
+        let bells_template =
+            mir2_game_data::crystal_item_by_name("BronzeBell").expect("real Bells template");
+        let mut socket_item = inventory_item_with_identity(0, bells_template.item_index);
+        socket_item.key = format!("crystal-item-{}", bells_template.item_index);
+        socket_item.name = bells_template.name.clone();
+        socket_item.icon = bells_template.image;
+
+        assert!(item_state_with_socket_inserted(&host, &socket_item, -1).is_none());
+        assert!(item_state_with_socket_inserted(&host, &socket_item, 2).is_none());
+        let inserted = item_state_with_socket_inserted(&host, &socket_item, 1)
+            .expect("exact free socket accepts the item");
+        let inserted_wire = validated_item_state_user_item(&inserted)
+            .expect("inserted host remains a valid carrier");
+        assert!(inserted_wire.slots[0].is_none());
+        assert_eq!(
+            inserted_wire.slots[1].as_ref().map(|item| item.unique_id),
+            Some(0)
+        );
+        let host_metadata = inserted
+            .user_item_metadata
+            .as_ref()
+            .expect("host layout is hydrated");
+        assert!(host_metadata.socket_layout_hydrated);
+        assert_eq!(
+            host_metadata
+                .captured_socket_positions
+                .as_ref()
+                .expect("captured positions exist")
+                .len(),
+            2
+        );
+        assert_eq!(
+            inserted.socketed[0]
+                .user_item_metadata
+                .as_ref()
+                .and_then(|metadata| metadata.captured_socket_position),
+            Some(1)
+        );
+
+        let mut second = inventory_item_with_identity(9_221, bells_template.item_index);
+        second.key = format!("crystal-item-{}", bells_template.item_index);
+        assert!(item_state_with_socket_inserted(&inserted, &second, 1).is_none());
+
+        let (cleared, returned) =
+            item_state_with_socket_removed(&inserted, 0, ItemContainer::Bag2, 9)
+                .expect("exact socket item can be removed");
+        assert_eq!(
+            validated_item_state_user_item(&cleared)
+                .expect("cleared host remains valid")
+                .slots,
+            vec![None, None]
+        );
+        assert_eq!(returned.container, ItemContainer::Bag2);
+        assert_eq!(returned.slot, 9);
+        assert_eq!(
+            returned
+                .user_item_metadata
+                .as_ref()
+                .and_then(|metadata| metadata.captured_socket_position),
+            None
+        );
+        assert_eq!(
+            validated_item_state_user_item(&returned)
+                .expect("returned socket item remains valid")
+                .unique_id,
+            0
+        );
+    }
+
+    #[test]
+    fn actual_equip_rejects_invalid_root_carrier_without_mutation() {
+        for invalid_item_index in [i32::MIN, 658] {
+            let mut session = mutation_session();
+            let invalid = inventory_item_with_identity(9_230, invalid_item_index);
+            session
+                .app
+                .world_mut()
+                .resource_mut::<InventoryResource>()
+                .inventory_items
+                .push(invalid.clone());
+
+            assert!(try_equip_item(
+                session.app.world_mut(),
+                MirGridType::Inventory,
+                9_230,
+                i32::try_from(equipment_slot_index(EquipmentSlot::Weapon).unwrap()).unwrap(),
+            )
+            .is_none());
+            let resources = session.app.world().resource::<InventoryResource>();
+            assert!(resources.equipment_items.is_empty());
+            assert_eq!(resources.inventory_items.len(), 1);
+            assert_eq!(resources.inventory_items[0].unique_id, invalid.unique_id);
+            assert_eq!(
+                resources.inventory_items[0]
+                    .user_item_metadata
+                    .as_ref()
+                    .and_then(|metadata| metadata.item_index),
+                Some(invalid_item_index)
+            );
+        }
     }
 }
 

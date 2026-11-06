@@ -479,7 +479,9 @@ pub(super) fn update_special_monster_state(
         ),
         // Crystal `MonsterObject.GetMonster` cases 41 + 42 both return
         // `new YinDevilNode(info)` — immobile passive node.
-        41 | 42 => update_yin_devil_node_state(agent, tick),
+        41 | 42 => {
+            update_yin_devil_node_state(world, entity, agent, ai_state, position, tick, packets)
+        }
         60 => update_vampire_spider_state(world, entity, agent, position, tick, packets),
         61 => update_spitting_toad_state(world, entity, agent, position, tick, packets),
         62 => update_snake_totem_state(world, entity, agent, position, tick, packets),
@@ -589,9 +591,12 @@ pub(super) fn update_special_monster_state(
     }
 }
 
-pub(super) fn advance_world(world: &mut World) -> Vec<ServerPacket> {
+fn advance_world_tick_prelude(
+    world: &mut World,
+    include_local_world_authority: bool,
+) -> Option<(u64, Vec<ServerPacket>)> {
     if !is_in_world(world) {
-        return Vec::new();
+        return None;
     }
 
     let tick = advance_runtime_tick(world);
@@ -607,19 +612,52 @@ pub(super) fn advance_world(world: &mut World) -> Vec<ServerPacket> {
     tick_crystal_normal_potion_restore(world, &mut packets);
     tick_crystal_normal_hero_potion_restore(world, &mut packets);
     tick_stage5_hero_auto_pot(world, tick, &mut packets);
-    tick_stage5_hero_combat_ai(world, tick, &mut packets);
-    tick_ground_drop_expiry(world, tick);
-    tick_stage5_intelligent_creatures(world, tick, &mut packets);
+    if include_local_world_authority {
+        tick_stage5_hero_combat_ai(world, tick, &mut packets);
+        tick_ground_drop_expiry(world, tick);
+        tick_stage5_intelligent_creatures(world, tick, &mut packets);
+    } else {
+        tick_stage5_intelligent_creature_maintenance(world, tick, &mut packets);
+    }
     tick_fishing(world, &mut packets);
-    super::door::tick_doors(world, &mut packets);
-    super::hazard::tick_map_hazards(world, tick, &mut packets);
-    resolve_pending_combat_actions(world, tick, &mut packets);
-    tick_player_status_effects(world, tick, &mut packets);
-    tick_player_vital_regen(world, tick, &mut packets);
-    tick_ground_spell_actions(world, tick, &mut packets);
-    tick_monster_poisons(world, tick, &mut packets);
+    if include_local_world_authority {
+        super::door::tick_doors(world, &mut packets);
+        super::hazard::tick_map_hazards(world, tick, &mut packets);
+        resolve_pending_combat_actions(world, tick, &mut packets);
+        tick_player_status_effects(world, tick, &mut packets);
+        tick_player_vital_regen(world, tick, &mut packets);
+        tick_ground_spell_actions(world, tick, &mut packets);
+        tick_monster_poisons(world, tick, &mut packets);
+    }
     emit_due_trainer_average_chats(world, tick, &mut packets);
-    resolve_pending_monster_spawns(world, tick);
+    if include_local_world_authority {
+        resolve_pending_monster_spawns(world, tick);
+    }
+    Some((tick, packets))
+}
+
+/// Advance the personal compatibility state embedded in a shared-Zone
+/// Gateway session without creating a second autonomous map authority.
+///
+/// Personal buffs, inventory timers, potion restore, pet maintenance, fishing,
+/// and the private runtime clock still advance. Movement retries, hero combat,
+/// shared drops, doors, hazards, combat/status/vitals, ground spells, monster
+/// poisons, pending dynamic spawns, activation, and monster AI do not: the
+/// shared `ZoneRuntime` is their single writer and delivers authoritative
+/// packets and vitals through the Gateway's pending-Zone drain. The existing
+/// personal spawn table does not advance monster respawns: the shared Zone owns
+/// the wall-clock schedule, harvest gate, checkpoint and public incarnation.
+pub(super) fn advance_shared_zone_personal_world(world: &mut World) -> Vec<ServerPacket> {
+    let Some((_, packets)) = advance_world_tick_prelude(world, false) else {
+        return Vec::new();
+    };
+    packets
+}
+
+pub(super) fn advance_world(world: &mut World) -> Vec<ServerPacket> {
+    let Some((tick, mut packets)) = advance_world_tick_prelude(world, true) else {
+        return Vec::new();
+    };
     // On-demand monster pool (CrystalWorld): materialise monsters as the player
     // approaches and despawn ones left far behind, so the AI pass below only
     // iterates the live set around the player rather than the whole map roster.
@@ -1007,7 +1045,13 @@ pub(super) fn advance_world(world: &mut World) -> Vec<ServerPacket> {
                     let general_meow_meow_slam_branch =
                         agent.ai == 123 && distance <= 2 && tick % 9 == 0;
                     let manectric_claw_thrust_branch = agent.ai == 86 && distance > 1;
-                    let guardian_rock_pull_movement = if agent.ai == 48 && distance > 1 {
+                    // Crystal `GuardianRock.PullAttack`: MagicResist fully
+                    // shrugs the pull while the range-attack animation still
+                    // broadcasts after its normal 500 ms wind-up.
+                    let guardian_rock_pull_movement = if agent.ai == 48
+                        && distance > 1
+                        && crystal_player_magic_mitigated(world, 1) != 0
+                    {
                         direction_toward(&player_position, &position).map(|direction| {
                             PendingPlayerMovement {
                                 direction,
@@ -1594,7 +1638,10 @@ pub(super) fn advance_world(world: &mut World) -> Vec<ServerPacket> {
                             &mut packets,
                         );
                     }
-                    if khazard_pull_branch {
+                    // Crystal `Khazard.PullAttack`: the pull is completely
+                    // resisted when `Random(MagicResistWeight) < MagicResist`.
+                    // The range-attack animation still broadcasts on a resist.
+                    if khazard_pull_branch && crystal_player_magic_mitigated(world, 1) != 0 {
                         if let Some(pull_direction) = direction_toward(&player_position, &position)
                         {
                             let _ = push_player_in_direction(
@@ -2727,7 +2774,10 @@ fn tick_player_pk_decay(world: &mut World, packets: &mut Vec<ServerPacket>) {
 }
 
 impl SimulationSession {
-    pub fn tick(&mut self) -> Vec<ServerPacket> {
+    fn tick_with_world_advance(
+        &mut self,
+        advance: fn(&mut World) -> Vec<ServerPacket>,
+    ) -> Vec<ServerPacket> {
         if let Some(command) = take_crystal_movement_retry_if_ready(self.app.world_mut()) {
             mark_crystal_packet_action(
                 self.app.world_mut(),
@@ -2750,7 +2800,16 @@ impl SimulationSession {
             }
             return self.finalize_packets(Vec::new());
         }
-        let packets = advance_world(self.app.world_mut());
+        let packets = advance(self.app.world_mut());
+        self.finalize_packets(packets)
+    }
+
+    pub fn tick(&mut self) -> Vec<ServerPacket> {
+        self.tick_with_world_advance(advance_world)
+    }
+
+    pub(crate) fn tick_shared_zone_personal_state(&mut self) -> Vec<ServerPacket> {
+        let packets = advance_shared_zone_personal_world(self.app.world_mut());
         self.finalize_packets(packets)
     }
 }

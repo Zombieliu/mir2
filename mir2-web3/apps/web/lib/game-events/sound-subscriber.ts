@@ -38,13 +38,22 @@ export type AudioSink = {
   /** Loop background music by Crystal SoundList id (original-audio.ts `setOriginalMusicId`). */
   setOriginalMusicId(musicId: number | string | null | undefined): void;
   /** Entity attack sound (original-sound-triggers.ts `playEntityAttackSound`). */
-  playEntityAttackSound(entity: SoundEntityRef | null | undefined): void;
+  playEntityAttackSound(
+    entity: SoundEntityRef | null | undefined,
+    spell?: number | string | null,
+    objectId?: string | null,
+  ): void;
   /** Entity struck sound (original-sound-triggers.ts `playEntityStruckSound`). */
-  playEntityStruckSound(entity: SoundEntityRef | null | undefined): void;
-  /** Entity death sound (original-sound-triggers.ts `playEntityDieSound`). */
-  playEntityDieSound(entity: SoundEntityRef | null | undefined): void;
-  /** Magic cast sound by spell id (original-sound-triggers.ts `playMagicSoundId`). */
-  playMagicSoundId(spell: number | null | undefined): void;
+  playEntityStruckSound(
+    target: SoundEntityRef | null | undefined,
+    attacker?: SoundEntityRef | null,
+  ): void;
+  /** Schedule the death cry at Crystal PlayerObject Die frame 1 (100 ms). */
+  scheduleEntityDieSound(entity: SoundEntityRef | null | undefined, objectId?: string | null): void;
+  /** Revive cue (SoundList.Revive). */
+  playReviveSound(): void;
+  /** Magic phase sound by spell id (variant 0 = cast, variant 1 = target/effect). */
+  playMagicSoundId(spell: number | string | null | undefined, variantOne?: boolean): void;
   /** Look up a SoundEntityRef for a given objectId (from world state). */
   soundEntityRefFor(objectId: string | null | undefined): SoundEntityRef | null;
   /** Play the gold-gained sound (ORIGINAL_SOUND_IDS.gold). */
@@ -66,21 +75,30 @@ export function registerSoundSubscriber(bus: GameEventBus, audio: AudioSink): Un
   // entityAttack -> attack swing / roar
   unsubs.push(
     bus.on("entityAttack", (event) => {
-      audio.playEntityAttackSound(audio.soundEntityRefFor(event.objectId));
+      audio.playEntityAttackSound(audio.soundEntityRefFor(event.objectId), event.spell, event.objectId);
     }),
   );
 
   // entityStruck -> hit clang / body thud
   unsubs.push(
     bus.on("entityStruck", (event) => {
-      audio.playEntityStruckSound(audio.soundEntityRefFor(event.objectId));
+      audio.playEntityStruckSound(
+        audio.soundEntityRefFor(event.objectId),
+        audio.soundEntityRefFor(event.attackerId),
+      );
     }),
   );
 
   // entityDied -> death cry
   unsubs.push(
     bus.on("entityDied", (event) => {
-      audio.playEntityDieSound(audio.soundEntityRefFor(event.objectId));
+      audio.scheduleEntityDieSound(audio.soundEntityRefFor(event.objectId), event.objectId);
+    }),
+  );
+
+  unsubs.push(
+    bus.on("entityRevived", () => {
+      audio.playReviveSound();
     }),
   );
 
@@ -88,6 +106,17 @@ export function registerSoundSubscriber(bus: GameEventBus, audio: AudioSink): Un
   unsubs.push(
     bus.on("magicCast", (event) => {
       audio.playMagicSoundId(event.spell);
+    }),
+  );
+
+  // Crystal ObjectEffect.Healing -> 20000 + Spell.Healing*10 + 1.
+  // Other ObjectEffect families remain silent until their source branch has
+  // an independently-audited audio contract.
+  unsubs.push(
+    bus.on("magicEffect", (event) => {
+      if (event.effect === 3) {
+        audio.playMagicSoundId(61, true);
+      }
     }),
   );
 
@@ -151,7 +180,7 @@ export function makeRealAudioSink(
   const {
     playEntityAttackSound,
     playEntityStruckSound,
-    playEntityDieSound,
+    scheduleEntityDieSound,
     playMagicSoundId,
   } = require("../original-sound-triggers") as typeof import("../original-sound-triggers");
   const { ORIGINAL_SOUND_IDS } = require("../original-sound-events") as typeof import("../original-sound-events");
@@ -162,7 +191,10 @@ export function makeRealAudioSink(
     setOriginalMusicId,
     playEntityAttackSound,
     playEntityStruckSound,
-    playEntityDieSound,
+    scheduleEntityDieSound,
+    playReviveSound() {
+      playOriginalSoundId(ORIGINAL_SOUND_IDS.revive);
+    },
     playMagicSoundId,
     soundEntityRefFor,
     playGoldSound() {

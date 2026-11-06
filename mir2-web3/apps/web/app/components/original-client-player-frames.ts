@@ -33,6 +33,43 @@ export const CRYSTAL_PLAYER_ACTION_FRAMES = {
 
 export type CrystalPlayerActionKey = keyof typeof CRYSTAL_PLAYER_ACTION_FRAMES;
 
+export function crystalMountedPlayerActionForPresentation(
+  animationState:
+    | "standing"
+    | "harvesting"
+    | "walking"
+    | "running"
+    | "struck"
+    | "attackMelee"
+    | "attackRange"
+    | "dying"
+    | "dead"
+    | "reviving",
+): CrystalPlayerActionKey {
+  switch (animationState) {
+    case "walking":
+      return "mountWalking";
+    case "running":
+      return "mountRunning";
+    case "struck":
+      return "mountStruck";
+    case "attackMelee":
+    case "attackRange":
+      return "mountAttack";
+    // Crystal has no mounted death catalog. The body uses ordinary player
+    // frames 384/387 while DrawMount receives a negative relative index and
+    // therefore contributes no mount layer.
+    case "dying":
+      return "dying";
+    case "dead":
+      return "dead";
+    case "reviving":
+      return "reviving";
+    default:
+      return "mountStanding";
+  }
+}
+
 export function crystalPlayerDirectionStride(frame: CrystalPlayerActionFrame) {
   return frame.count + frame.skip;
 }
