@@ -1,6 +1,6 @@
 # Mir2 分支治理与恢复手册
 
-更新时间：2026-08-02
+更新时间：2026-09-30
 
 ## 主线规则
 
@@ -9,6 +9,85 @@
 - `main` 禁止删除、禁止非快进推送，所有变更必须通过 Pull Request。
 - 仅允许 Squash Merge；所有 Review Thread 必须解决。
 - 仓库已启用 `delete_branch_on_merge=true`，PR 合并后自动删除源分支。
+
+## 2026-09-30 仓库整理
+
+本轮仅整理 Git 引用、维护工具与文档，不合并 PR、不改游戏代码、不部署生产。原有脏工作区和所有既有本地 worktree 保留原样；维护变更在独立的 `codex/repository-hygiene` worktree 中完成。
+
+清理前远端有 14 个分支、70 个标签、5 个开放 PR。本批移除 2 个旧分支名，新增 2 个归档标签；12 个业务/历史分支和原有 70 个标签保留。维护分支与本 PR 另计。精确提交与检查结果见 [本轮维护记录](REPOSITORY-MAINTENANCE-20260930.json)。
+
+### 已归档的旧基线
+
+这两条分支关联已关闭、未合并的 [PR #228](https://github.com/Zombieliu/mir2/pull/228)；后续跨平台主线集成由已合并的 [PR #229](https://github.com/Zombieliu/mir2/pull/229) 承接。它们与当前 `main` 没有共同祖先，**不能宣称旧分支的每个改动均已被主线包含**。
+
+删除前完成：核验远端完整 HEAD、确认不是开放 PR 的 Head/Base、检查本地 worktree 引用、发布 Annotated Tag 并核验其提交。普通原子删除还使用命令级 pre-push 校验，若远端 HEAD 改变或出现计划外引用则拒绝推送；没有使用强推、reset、clean、stash 或覆盖标签。
+
+| 已删除分支 | 可恢复 Tag | 原 HEAD |
+|---|---|---|
+| `codex/cross-platform-win-android` | `archive/legacy-branches/2026-09-30/codex-cross-platform-win-android` | `f6e0625e98071388041ce6181b3fe82e631c3cc5` |
+| `fix/local-parity-and-i18n` | `archive/legacy-branches/2026-09-30/fix-local-parity-and-i18n` | `e65fca946a5ec208078497979f8946fc977d034e` |
+
+恢复时先获取精确标签、核对解引用提交，再在**新的目录**中审计，避免切换当前脏工作区。例如恢复第一条：
+
+```bash
+git fetch origin refs/tags/archive/legacy-branches/2026-09-30/codex-cross-platform-win-android:refs/tags/archive/legacy-branches/2026-09-30/codex-cross-platform-win-android
+git rev-parse 'refs/tags/archive/legacy-branches/2026-09-30/codex-cross-platform-win-android^{commit}'
+# 必须得到上表 f6e0625e... 的完整 SHA；若本地同名标签冲突，停止，不覆盖。
+git worktree add --detach <new-audit-path> 'refs/tags/archive/legacy-branches/2026-09-30/codex-cross-platform-win-android^{commit}'
+```
+
+归档用于恢复/审计，不是新开发基线。实际移植应从最新 `main` 新建 `codex/` 分支，选择必要补丁，重新验证。
+
+### 保留分支的用途
+
+| 分支 | 用途与本轮处理 |
+|---|---|
+| `main` | 受保护的默认主线；保持原提交，不直接推送。 |
+| `codex/windows-visual-parity` | [#249](https://github.com/Zombieliu/mir2/pull/249)，Windows 角色/效果/UI/怪物音效；同时是 #250 的 Base，保留。 |
+| `codex/windows-player-journey` | [#250](https://github.com/Zombieliu/mir2/pull/250)，Windows 玩家流程与共享状态/UI；同时是 #251 的 Base，保留。 |
+| `codex/android-player-journey` | [#251](https://github.com/Zombieliu/mir2/pull/251)，Android 共享 UI、原生宿主及阶段证据；保留，不等同真机验收完成。 |
+| `codex/wn-candidate-recovery` | [#248](https://github.com/Zombieliu/mir2/pull/248)，较早 Windows 候选恢复；相对当前 Windows 分支仍有 5 个独有历史提交，先查补丁等价性。 |
+| `codex/steam-main` | [#230](https://github.com/Zombieliu/mir2/pull/230)，Steam 服务端校验/SDK/打包，独立渠道；保留。 |
+| `codex/playtest-registration` | 报名失败提示、角色预览、DPI、多语言和 Windows 安装包等后续工作；包含当前 #250 HEAD，并多 12 个提交，无开放 PR，必须纳入 Windows 收口审阅。盘点期间该分支从 `a953243e...` 快进到 `f8800b9a...`，本轮未改动它。 |
+| `codex/game-website` | Numeron 官网与 explorer 实现；相对 `main` 有 1 个独有提交，无开放 PR，保留待独立审阅。 |
+| `codex/autonomous-quest-agent` | 自主任务代理实现/实验；有独有历史及本地 worktree，保留待等价审计。 |
+| `codex/autonomous-quest-agent-main` | 任务代理主线集成/后续工作；不能因历史关联 PR 已合并就删除当前 HEAD，保留待审计。 |
+| `codex/cross-platform-bevy-m0-m1-contract` | 早期 Bevy 跨平台契约/骨架；保留待与后续共享客户端实现比对。 |
+| `codex/pwa-mobile-fullscreen` | 历史 PWA/移动端及后续改动；当前 HEAD 不等于 8 月归档 HEAD，保留待审计。 |
+
+提交数量只表示历史差异，不等于功能仍缺失或已经迁移。上表是日期快照，当前提交以只读盘点结果为准。
+
+### 下一轮整合边界
+
+1. 先核对 #248 的 5 个独有提交，避免丢弃恢复工作。
+2. 审阅 #249、#250 和 `playtest-registration`，形成明确的 Windows 集成候选、差异范围和实测/CI 基线，不直接逐个点击合并。
+3. 当前 PR 依赖是 `main ← #249 ← #250 ← #251`，但这是 Head/Base 关系，**不是下游已经同步最新提交的证明**。`main` 仅允许 Squash Merge：收口后应重新核对下游 Base、差异及测试，必要时从新主线建立后续分支、按需移植独有补丁；不对现有工作分支自动强推。
+4. Android 独立推进共享 UI、真实网络与玩家流程。构建、模拟器画面、真实登录和真机验收分别记录，Windows gate 不替代 Android 验收。
+5. Steam、官网和四条实验线分别审阅；部署/回滚用途未确认前，不扩大删除范围。维护工具不替代游戏验收或生产变更授权。
+
+### 标签保留与告警
+
+原有标签全部保留：48 个 `developer-environment-starter-*`、1 个 `developer-image-*`、1 个 `developer-assets-*`、1 个 `repository-evidence-*`、19 个 `archive/*`；本轮新增 2 个 `archive/legacy-branches/*`。
+
+- `developer-assets-f71b89aa3850` 仍由当前主线开发资源锁引用；资源包及 QA 证据 Release 不动。体积管理继续遵守 [大文件策略](REPOSITORY-LARGE-FILE-POLICY.md)，不进行历史重写。
+- 49 个 Starter/镜像见证标签中，25 个名称内 SHA 与实际目标提交不一致。这里只告警；不能按名称认定是当前有效见证，也不能自动删除或重建它们。历史变化原因需要另行审计。
+- 当前主线对应的 `developer-environment-starter-119553ff6aabbe05e7bcb4ee977a5470b477a250` 名称/目标一致；这不表示全部资源、当前镜像、游戏或手机验收通过。
+- 下方 8 月归档表是当时记录。恢复历史归档时必须核对**当前远端标签解引用提交**；不要仅相信旧记录或标签名称内 SHA，也不要覆盖历史标签。
+
+### 可重复的只读盘点
+
+需要 Node.js 22+ 和已登录的 GitHub CLI。工具只调用 GET API，完整分页、按固定 SHA 比较；不会修改远端引用、Git 配置或工作文件，也不会输出凭据。
+
+```bash
+node mir2-web3/scripts/audit-repository.mjs --repo Zombieliu/mir2
+node --test mir2-web3/scripts/test-audit-repository.mjs
+# 可重放保存的 JSON 输出，不需要联网：
+node mir2-web3/scripts/audit-repository.mjs --snapshot <report.json>
+```
+
+报告区分受保护分支、开放 PR Head/Base、未整合提交、无共同祖先和未知状态。404/403/限流/网络失败或过期比较不会被当成“可删除”；即使已经被主线包含，也只标记“待审阅”，不自动清理。该工具不覆盖本地 worktree、部署和回滚引用，执行清理前仍须单独检查。
+
+本轮 16 项测试已在本地通过，但**没有新增自动 CI 工作流**：当前推送凭据缺少 GitHub `workflow` scope，包含新工作流的首次推送被拒绝。本轮因此仅发布工具、测试与文档，不改变凭据或权限。自动测试接入留待获得工作流变更授权后单独推进；本轮没有定时自动删除、远端维护或部署任务。
 
 ## 2026-08-02 第一批安全清理
 
@@ -53,7 +132,6 @@
 如确实需要恢复某个名称，可从上表 SHA 重建：
 
 ```bash
-git switch main
 git branch <branch-name> <full-sha>
 git push origin <branch-name>
 ```
@@ -112,14 +190,16 @@ PR #203 以 Squash 方式合并为 `2aead73e6e9cb69ed0e6d915e731e75b06f37988`。
 
 ```bash
 git fetch origin --tags
-git switch -c recovery/<name> <archive-tag>
+git worktree add --detach <new-audit-path> '<archive-tag>^{commit}'
 ```
 
 恢复分支仅用于审计或按需移植；新开发仍应从最新 `main` 创建分支。
 
 ## 后续分支处置标准
 
-- `branchOnly=0` 且无开放 PR：可删除。
-- 有开放 PR、被开放 PR 用作 Base、被生产部署或回滚引用：保留。
+- 经完整远端历史确认 `branchOnly=0`、无开放 PR 且无保护/部署/回滚/活跃工作依赖：经审阅后可删除，不自动清理。
+- 默认/受保护分支、有开放 PR、被开放 PR 用作 Base、被生产部署、回滚或活跃 worktree 引用：保留。
 - 存在独有提交但无 PR：先生成补丁等价性报告；选择移植、建立归档 Tag 或明确废弃后再删除。
+- 无共同祖先、浅克隆或查询失败：不得推断已经合并。必要清理必须先建立并验证远端可恢复归档，再核对精确 HEAD；并发变化则停止。
+- 不自动覆盖、移动或删除验证/资源/归档标签；不以标签名代替目标提交核验。
 - 禁止仅依据 `claude/`、`codex/`、`agent/` 前缀批量删除。

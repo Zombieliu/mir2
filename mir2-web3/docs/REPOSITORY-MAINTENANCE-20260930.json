@@ -1,0 +1,204 @@
+{
+  "kind": "mir2-repository-maintenance",
+  "schemaVersion": 1,
+  "repository": "Zombieliu/mir2",
+  "date": "2026-09-30",
+  "inventoryObservedAt": "2026-09-30T13:39:05.276Z",
+  "recordedAtUtc": "2026-09-30 13:52:12 UTC",
+  "phase": "after-legacy-cleanup-before-maintenance-branch-publication",
+  "defaultBranch": "main",
+  "mainSha": "119553ff6aabbe05e7bcb4ee977a5470b477a250",
+  "maintenanceBranch": "codex/repository-hygiene",
+  "counts": {
+    "before": {
+      "branches": 14,
+      "openPullRequests": 5,
+      "tags": 70
+    },
+    "afterLegacyCleanup": {
+      "branches": 12,
+      "openPullRequests": 5,
+      "tags": 72
+    },
+    "maintenanceBranchAndPrExcluded": true
+  },
+  "removedBranches": [
+    {
+      "name": "codex/cross-platform-win-android",
+      "originalSha": "f6e0625e98071388041ce6181b3fe82e631c3cc5",
+      "archiveTag": "archive/legacy-branches/2026-09-30/codex-cross-platform-win-android",
+      "annotatedTagObjectSha": "50dc1f738070466b929c0828857b124c7a51389f",
+      "archiveTargetCommitSha": "f6e0625e98071388041ce6181b3fe82e631c3cc5",
+      "formerPullRequest": 228,
+      "replacementIntegrationPullRequest": 229,
+      "patchEquivalenceClaimed": false
+    },
+    {
+      "name": "fix/local-parity-and-i18n",
+      "originalSha": "e65fca946a5ec208078497979f8946fc977d034e",
+      "archiveTag": "archive/legacy-branches/2026-09-30/fix-local-parity-and-i18n",
+      "annotatedTagObjectSha": "b0a120932059f1993c52b10ec7a86fa5842cd9e1",
+      "archiveTargetCommitSha": "e65fca946a5ec208078497979f8946fc977d034e",
+      "formerPullRequest": 228,
+      "replacementIntegrationPullRequest": 229,
+      "patchEquivalenceClaimed": false
+    }
+  ],
+  "retainedHeads": [
+    {
+      "name": "codex/android-player-journey",
+      "sha": "5d417ca75a5fe845a7d6f6d9e16c720d55e19b36",
+      "protected": false
+    },
+    {
+      "name": "codex/autonomous-quest-agent",
+      "sha": "54a4b01aed754fd9a783f8c5da6745cb1cc0c9ba",
+      "protected": false
+    },
+    {
+      "name": "codex/autonomous-quest-agent-main",
+      "sha": "a9684f14c4f6c9edbaa7a71efd6806772ea3c1cb",
+      "protected": false
+    },
+    {
+      "name": "codex/cross-platform-bevy-m0-m1-contract",
+      "sha": "6b0ac0101407ff6f61781b3e3437dc469e7bcb22",
+      "protected": false
+    },
+    {
+      "name": "codex/game-website",
+      "sha": "367bd9306b5318af6ad0dc343af503298ddd4374",
+      "protected": false
+    },
+    {
+      "name": "codex/playtest-registration",
+      "sha": "f8800b9a078fa3591b4b02bea9f70d642f08b709",
+      "protected": false
+    },
+    {
+      "name": "codex/pwa-mobile-fullscreen",
+      "sha": "0028f52ad1f22400c32e608460799305532cdef1",
+      "protected": false
+    },
+    {
+      "name": "codex/steam-main",
+      "sha": "6022f788f98c5d64a646e36b7c423937f0b42709",
+      "protected": false
+    },
+    {
+      "name": "codex/windows-player-journey",
+      "sha": "6ae080711fc7b3aaf06dd9c6bcf63f121682dbe4",
+      "protected": false
+    },
+    {
+      "name": "codex/windows-visual-parity",
+      "sha": "2176a71900b59c596be7b9061307ff5b15cfafb5",
+      "protected": false
+    },
+    {
+      "name": "codex/wn-candidate-recovery",
+      "sha": "4e6a9962fb574c91f4283b0413b7a829f7eac7bd",
+      "protected": false
+    },
+    {
+      "name": "main",
+      "sha": "119553ff6aabbe05e7bcb4ee977a5470b477a250",
+      "protected": true
+    }
+  ],
+  "openPullRequests": [
+    {
+      "number": 251,
+      "head": "codex/android-player-journey",
+      "base": "codex/windows-player-journey",
+      "draft": true
+    },
+    {
+      "number": 250,
+      "head": "codex/windows-player-journey",
+      "base": "codex/windows-visual-parity",
+      "draft": true
+    },
+    {
+      "number": 249,
+      "head": "codex/windows-visual-parity",
+      "base": "main",
+      "draft": true
+    },
+    {
+      "number": 248,
+      "head": "codex/wn-candidate-recovery",
+      "base": "main",
+      "draft": true
+    },
+    {
+      "number": 230,
+      "head": "codex/steam-main",
+      "base": "main",
+      "draft": false
+    }
+  ],
+  "verification": {
+    "archiveRefsAndPeeledCommitsVerified": true,
+    "atomicDeletionAndExactAdvertisedShaGuardPassed": true,
+    "forcePushUsed": false,
+    "mainShaUnchanged": true,
+    "retainedBranchesWithUnchangedSha": 11,
+    "concurrentAdvance": {
+      "branch": "codex/playtest-registration",
+      "previousSha": "a953243ea8d830743b5d77eb99a01e9605ecf622",
+      "newSha": "f8800b9a078fa3591b4b02bea9f70d642f08b709",
+      "relationship": "ahead",
+      "ahead": 1,
+      "behind": 0,
+      "message": "Fix NPC shop inventory placement and localized supply vendor names",
+      "modifiedByThisMaintenance": false
+    },
+    "registrationVsWindows": {
+      "baseSha": "6ae080711fc7b3aaf06dd9c6bcf63f121682dbe4",
+      "headSha": "f8800b9a078fa3591b4b02bea9f70d642f08b709",
+      "ahead": 12,
+      "behind": 0,
+      "status": "ahead"
+    },
+    "originalTagObjectReferencesUnchanged": 70,
+    "newAnnotatedArchiveTags": 2,
+    "openPullRequestHeadAndBaseReferencesUnchanged": 5,
+    "originalWorkingTreeBranchAndStatusPreserved": true,
+    "existingWorktreesRemoved": 0,
+    "offlineTests": {
+      "passed": 16,
+      "failed": 0
+    },
+    "commandLocalHookChecks": {
+      "exactPlanAccepted": true,
+      "changedShaRejected": true
+    },
+    "liveReadOnlyInventoryCompleted": true,
+    "offlineSnapshotReplayPassed": true,
+    "optionalCiIntegration": {
+      "status": "deferred-current-credential-lacks-workflow-scope",
+      "initialPushRejected": true,
+      "newRemoteWorkflowCreated": false,
+      "newWorkflowRemovedFromMaintenanceCommit": true,
+      "oauthScopesOrCredentialsChanged": false
+    },
+    "remoteCiNotIncludedInThisSnapshot": true
+  },
+  "warnings": {
+    "witnessTagsAudited": 49,
+    "witnessNameTargetShaMismatches": 25,
+    "failedComparisonsRetained": [
+      "codex/autonomous-quest-agent-main"
+    ],
+    "historicalTagNameOrOldLedgerNotAuthoritative": true,
+    "noGameBuildLoginSimulatorDeviceOrProductionAcceptanceClaimed": true
+  },
+  "deferredWork": [
+    "Audit the five unique historical commits in PR 248 before Windows consolidation.",
+    "Review Windows PRs 249 and 250 with the active playtest-registration branch; recalculate downstream diffs after squash-only main integration.",
+    "Keep PR 251 Android evidence and acceptance separate from Windows gates.",
+    "Audit patch equivalence before changing autonomous-quest-agent, autonomous-quest-agent-main, cross-platform-bevy-m0-m1-contract or pwa-mobile-fullscreen refs.",
+    "Investigate witness tag name/target mismatches without rewriting historical tags or images."
+  ]
+}
