@@ -5,7 +5,7 @@ import { notFound } from "next/navigation";
 import { MotionController } from "@/app/components/motion-controller";
 import { SiteFooter, SiteHeader } from "@/app/components/site-chrome";
 import { getDownloadCopy } from "@/lib/download-copy";
-import { getLocalizedAlternates, getCopy, isLocale, locales } from "@/lib/site-copy";
+import { getLocalizedAlternates, getCopy, isLocale, locales, publicGameClientUrl } from "@/lib/site-copy";
 
 type DownloadPageProps = { params: Promise<{ locale: string }> };
 
@@ -36,7 +36,6 @@ export default async function DownloadPage({ params }: DownloadPageProps) {
 
   const copy = getDownloadCopy(locale);
   const siteCopy = getCopy(locale);
-  const gameUrl = process.env.NEXT_PUBLIC_GAME_URL ?? "https://mir2.obelisk.build/game";
   const windowsUrl = publicHttpsUrl(process.env.NEXT_PUBLIC_WINDOWS_DOWNLOAD_URL);
   const androidUrl = publicHttpsUrl(process.env.NEXT_PUBLIC_ANDROID_DOWNLOAD_URL);
   const explorerUrl = process.env.NEXT_PUBLIC_EXPLORER_URL?.replace("{locale}", locale) ?? `/${locale}/explore`;
@@ -84,7 +83,7 @@ export default async function DownloadPage({ params }: DownloadPageProps) {
           <h1>{copy.title}</h1>
           <p>{copy.intro}</p>
           <div className="download-hero-actions">
-            <a className="button button-primary" href={gameUrl} target="_blank" rel="noreferrer" data-track="download_web_hero"><span>{copy.openWeb}</span><i>↗</i></a>
+            <a className="button button-primary" href={publicGameClientUrl} target="_blank" rel="noreferrer" data-track="download_web_hero"><span>{copy.openWeb}</span><i>↗</i></a>
             <Link className="button button-ghost" href="#requirements"><span>{copy.viewRequirements}</span><i>↓</i></Link>
           </div>
         </div>
@@ -100,7 +99,7 @@ export default async function DownloadPage({ params }: DownloadPageProps) {
             <h2>{platform.name}</h2>
             <p>{platform.body}</p>
             {platform.id === "web" ? (
-              <a className="download-action" href={gameUrl} target="_blank" rel="noreferrer" data-track="download_web"><span>{copy.openWeb}</span><i>↗</i></a>
+              <a className="download-action" href={publicGameClientUrl} target="_blank" rel="noreferrer" data-track="download_web"><span>{copy.openWeb}</span><i>↗</i></a>
             ) : platform.id === "windows" && windowsUrl ? (
               <a className="download-action" href={windowsUrl} rel="noreferrer" data-track="download_windows"><span>{copy.downloadWindows}</span><i>↓</i></a>
             ) : platform.id === "android" && androidUrl ? (

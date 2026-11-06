@@ -4,7 +4,7 @@ export const developerArticles: DocumentationArticle[] = [
   {
     slug: "overview", title: "产品与架构", description: "先分清游戏、通用工具与钱包，再选择接入范围。", status: "testing", environment: "Numeron 当前测试实现 / Dubhe 通用文档",
     sections: [
-      { id: "products", title: "三个产品，三个职责", table: { headers: ["产品", "职责"], rows: [["Numeron", "Obelisk Labs 旗下的游戏；负责本游戏的账号、角色、世界状态和玩法规则。"], ["Dubhe", "支持应用开发的通用引擎与工具体系；具体模块以各自文档和版本为准。"], ["Dubhe Wallet", "钱包与身份、交易确认入口；连接、登录与交易授权分别处理。"]] } },
+      { id: "products", title: "三个产品，三个职责", table: { headers: ["产品", "职责"], rows: [["Numeron", "由个人运营，Obelisk Labs, Inc. 受托开发。涵盖本游戏的账号、角色、世界状态和玩法规则。"], ["Dubhe", "支持应用开发的通用引擎与工具体系；具体模块以各自文档和版本为准。"], ["Dubhe Wallet", "钱包与身份、交易确认入口；连接、登录与交易授权分别处理。"]] } },
       { id: "authority", title: "本游戏的权威边界", paragraphs: ["客户端提交操作意图，游戏服务端验证身份与规则，并维护角色和共享世界状态。网页、钱包地址或链上资产本身，都不提供任意修改角色、道具或战斗结果的权限。", "官网、游戏入口和筹备中的推广合作说明属于同一官网体系，但应用有各自的构建与服务边界。部署官网页面，不等于部署游戏服务器或升级合约。"] },
       { id: "division", title: "避免重复维护通用教程", paragraphs: ["本组文档说明 Numeron 当前可用的流程与限制。Dubhe SDK、合约工具与通用授权模型，请阅读对应的 Dubhe 原文；不要把工具库提供的能力直接当成本游戏已经开放的接口。"], links: [{ label: "Dubhe 通用文档", href: "https://dubhe-docs.obelisk.build/" }, { label: "Numeron 开放边界", href: "developers/capabilities" }] },
     ],

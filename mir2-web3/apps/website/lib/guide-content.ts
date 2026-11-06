@@ -5,7 +5,7 @@ export const guideArticles: DocumentationArticle[] = [
   {
     slug: "world", title: "认识 Numeron", description: "在灾后的世界里，探索、生存，并寻找新的重生秩序。", status: "testing", environment: "原创世界观简介 / 内部验证内容",
     sections: [
-      { id: "a-world-to-discover", title: "一次从废墟开始的旅程", paragraphs: ["《Numeron - The Legend of Rebirth》是 Obelisk Labs 旗下、以原创世界观为方向的 2D MMORPG。灾难过后，人们在遗迹与聚落之间寻找资源、修复旧时代装置，也逐渐建立新的生活与秩序。", "你会从一个具体的角色开始：学习战斗、准备装备、探索地图，与其他玩家合作。世界的来历与重生的真相，留给你在旅途中发现。"] },
+      { id: "a-world-to-discover", title: "一次从废墟开始的旅程", paragraphs: ["《Numeron - The Legend of Rebirth》是一款以原创世界观为方向的 2D MMORPG，由个人运营，Obelisk Labs, Inc. 受托开发。灾难过后，人们在遗迹与聚落之间寻找资源、修复旧时代装置，也逐渐建立新的生活与秩序。", "你会从一个具体的角色开始：学习战斗、准备装备、探索地图，与其他玩家合作。世界的来历与重生的真相，留给你在旅途中发现。"] },
       { id: "human-abilities", title: "力量来自准备与选择", paragraphs: ["玩家可控的人类依靠训练、装备、装置与耗材获得战斗能力，没有天生异能，也不会通过生物变异获得力量。当前测试中的职业名称、技能表现和地图，是正在验证的游戏实现，不等于最终世界观的完整呈现。"] },
       { id: "what-to-expect", title: "先体验现在，再关注未来", items: ["当前重点是登录、角色、基础战斗与多人世界等测试流程。", "更大规模的势力战争、开放玩法和玩家经济是后续方向，具体开放范围随公告确认。", "开始游玩不需要先学习区块链、共识或代币经济；钱包只在需要登录或确认交易时出现。"], links: [{ label: "开始游戏", href: "guide/getting-started" }, { label: "了解测试规则", href: "guide/playtest" }] },
     ],

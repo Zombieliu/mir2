@@ -30,7 +30,7 @@ export const rechargeCopies = {
     "sections": [
       {
         "title": "点券用途",
-        "copy": "点券记录在游戏账户中。充值到账不会自动开通月卡；购买月卡需要另行确认游戏内消费。"
+        "copy": "付费点券记入充值账号的游戏余额，仅用于 Numeron 内消费。点券余额不可在玩家之间转让、提现或兑换法币和加密资产。充值不会自动开通月卡。玩家可用自己的点券在官方商城为指定角色购买月卡作为赠礼。"
       },
       {
         "title": "支付与钱包",
@@ -59,7 +59,7 @@ export const rechargeCopies = {
     "sections": [
       {
         "title": "Using credits",
-        "copy": "Credits are recorded in the game account. A top-up does not automatically activate a monthly card; that requires a separate in-game purchase confirmation."
+        "copy": "Paid credits go to the chosen game account for use within Numeron. Players cannot transfer their credit balance to each other, cash it out or exchange it for fiat currency or cryptoassets. A top-up does not activate a monthly card. Players can spend their own credits in the official shop to gift a monthly card to a selected character."
       },
       {
         "title": "Payments and wallets",
@@ -88,7 +88,7 @@ export const rechargeCopies = {
     "sections": [
       {
         "title": "Uso dos créditos",
-        "copy": "Os créditos são registrados na conta do jogo. Uma recarga não ativa automaticamente um passe mensal; isso exige uma confirmação de compra separada no jogo."
+        "copy": "Os créditos pagos são lançados na conta do jogo escolhida e usados apenas no Numeron. O saldo não pode ser transferido entre jogadores, sacado nem trocado por moeda fiduciária ou criptoativos. A recarga não ativa um passe mensal. Na loja oficial, os jogadores podem usar os próprios créditos para presentear um personagem escolhido com um passe mensal."
       },
       {
         "title": "Pagamentos e carteiras",
@@ -117,7 +117,7 @@ export const rechargeCopies = {
     "sections": [
       {
         "title": "Sử dụng điểm",
-        "copy": "Điểm được ghi trong tài khoản trò chơi. Nạp điểm không tự kích hoạt thẻ tháng; việc mua thẻ cần xác nhận tiêu dùng riêng trong trò chơi."
+        "copy": "Điểm nạp được ghi vào tài khoản đã chọn và chỉ dùng trong Numeron. Không thể chuyển số dư giữa người chơi, rút tiền hoặc đổi sang tiền pháp định hay tài sản mã hóa. Nạp điểm không tự kích hoạt thẻ tháng. Người chơi có thể dùng điểm của mình tại cửa hàng chính thức để tặng thẻ tháng cho nhân vật đã chọn."
       },
       {
         "title": "Thanh toán và ví",
@@ -146,7 +146,7 @@ export const rechargeCopies = {
     "sections": [
       {
         "title": "點數用途",
-        "copy": "點數記錄於遊戲帳號中。儲值入帳不會自動開通月卡；購買月卡須另行確認遊戲內消費。"
+        "copy": "付費點數記入儲值帳號的遊戲餘額，僅供 Numeron 內消費。點數餘額不可在玩家之間轉讓、提領或兌換法幣及加密資產。儲值不會自動開通月卡。玩家可使用自己的點數在官方商城購買月卡，贈送給指定角色。"
       },
       {
         "title": "付款與錢包",
@@ -175,7 +175,7 @@ export const rechargeCopies = {
     "sections": [
       {
         "title": "クレジットの用途",
-        "copy": "クレジットはゲームアカウントに記録されます。チャージだけで月額カードは有効にならず、ゲーム内で別途購入確認が必要です。"
+        "copy": "購入したクレジットは指定したゲームアカウントに付与され、Numeron 内でのみ使えます。プレイヤー間での残高の移転、出金、法定通貨や暗号資産への交換はできません。チャージだけでは月額カードは有効になりません。公式ショップでは自分のクレジットを使い、指定したキャラクターに月額カードを贈れます。"
       },
       {
         "title": "決済とウォレット",
@@ -204,7 +204,7 @@ export const rechargeCopies = {
     "sections": [
       {
         "title": "크레딧 사용",
-        "copy": "크레딧은 게임 계정에 기록됩니다. 충전만으로 월간 카드가 활성화되지 않으며 게임 내 별도 구매 확인이 필요합니다."
+        "copy": "유료 크레딧은 선택한 게임 계정에 적립되며 Numeron 안에서만 사용할 수 있습니다. 잔액을 다른 플레이어에게 이전하거나 출금하거나 법정화폐 및 암호화폐로 교환할 수 없습니다. 충전만으로 월간 카드는 활성화되지 않습니다. 공식 상점에서 자신의 크레딧으로 지정한 캐릭터에게 월간 카드를 선물할 수 있습니다."
       },
       {
         "title": "결제와 지갑",
@@ -233,7 +233,7 @@ export const rechargeCopies = {
     "sections": [
       {
         "title": "Uso de créditos",
-        "copy": "Los créditos se registran en la cuenta del juego. Una recarga no activa un pase mensual automáticamente; requiere una confirmación de compra independiente dentro del juego."
+        "copy": "Los créditos de pago se abonan en la cuenta de juego elegida y solo se usan en Numeron. El saldo no se puede transferir entre jugadores, retirar ni cambiar por dinero de curso legal o criptoactivos. La recarga no activa un pase mensual. En la tienda oficial puedes usar tus créditos para regalar un pase mensual a un personaje elegido."
       },
       {
         "title": "Pagos y billeteras",
@@ -262,7 +262,7 @@ export const rechargeCopies = {
     "sections": [
       {
         "title": "Guthaben verwenden",
-        "copy": "Guthaben wird im Spielkonto erfasst. Aufladen aktiviert keinen Monatspass automatisch; dafür ist eine separate Kaufbestätigung im Spiel erforderlich."
+        "copy": "Gekauftes Guthaben wird dem gewählten Spielkonto gutgeschrieben und kann nur in Numeron verwendet werden. Es lässt sich weder zwischen Spielern übertragen noch auszahlen oder gegen gesetzliche Währungen oder Kryptowerte tauschen. Eine Aufladung aktiviert keinen Monatspass. Im offiziellen Shop können Spieler mit ihrem eigenen Guthaben einem gewählten Charakter einen Monatspass schenken."
       },
       {
         "title": "Zahlungen und Wallets",
@@ -291,7 +291,7 @@ export const rechargeCopies = {
     "sections": [
       {
         "title": "Utilisation des crédits",
-        "copy": "Les crédits sont enregistrés sur le compte du jeu. Une recharge n'active pas automatiquement un pass mensuel : une confirmation d'achat distincte dans le jeu est nécessaire."
+        "copy": "Les crédits payants sont ajoutés au compte de jeu choisi et utilisables uniquement dans Numeron. Le solde ne peut être ni transféré entre joueurs, ni retiré, ni échangé contre de la monnaie légale ou des cryptoactifs. Une recharge n’active pas le pass mensuel. Dans la boutique officielle, les joueurs peuvent utiliser leurs crédits pour offrir un pass mensuel au personnage de leur choix."
       },
       {
         "title": "Paiements et portefeuilles",
@@ -320,7 +320,7 @@ export const rechargeCopies = {
     "sections": [
       {
         "title": "Использование кредитов",
-        "copy": "Кредиты учитываются в игровом аккаунте. Пополнение не активирует месячный пропуск автоматически: покупка отдельно подтверждается в игре."
+        "copy": "Платные кредиты зачисляются на выбранный игровой аккаунт и используются только в Numeron. Баланс нельзя передавать другим игрокам, выводить или обменивать на фиатные деньги и криптоактивы. Пополнение не активирует месячный пропуск. В официальном магазине можно потратить свои кредиты, чтобы подарить пропуск выбранному персонажу."
       },
       {
         "title": "Платежи и кошельки",
@@ -349,7 +349,7 @@ export const rechargeCopies = {
     "sections": [
       {
         "title": "Używanie kredytów",
-        "copy": "Kredyty są zapisywane na koncie gry. Doładowanie nie aktywuje automatycznie karnetu miesięcznego; wymaga on osobnego potwierdzenia zakupu w grze."
+        "copy": "Płatne kredyty trafiają na wybrane konto gry i można ich używać tylko w Numeron. Salda nie można przekazywać innym graczom, wypłacać ani wymieniać na waluty lub kryptoaktywa. Doładowanie nie aktywuje karnetu miesięcznego. W oficjalnym sklepie można wydać własne kredyty, aby podarować karnet wybranej postaci."
       },
       {
         "title": "Płatności i portfele",
@@ -378,7 +378,7 @@ export const rechargeCopies = {
     "sections": [
       {
         "title": "Kredilerin kullanımı",
-        "copy": "Krediler oyun hesabına kaydedilir. Yükleme aylık kartı otomatik etkinleştirmez; oyun içinde ayrı satın alma onayı gerekir."
+        "copy": "Ücretli krediler seçilen oyun hesabına yüklenir ve yalnızca Numeron içinde kullanılır. Kredi bakiyesi oyuncular arasında aktarılamaz, nakit olarak çekilemez ve itibari paraya veya kripto varlığa çevrilemez. Yükleme aylık kartı etkinleştirmez. Oyuncular resmî mağazada kendi kredileriyle seçtikleri bir karaktere aylık kart hediye edebilir."
       },
       {
         "title": "Ödemeler ve cüzdanlar",
@@ -407,7 +407,7 @@ export const rechargeCopies = {
     "sections": [
       {
         "title": "การใช้เครดิต",
-        "copy": "เครดิตบันทึกในบัญชีเกม การเติมไม่เปิดใช้บัตรรายเดือนอัตโนมัติ ต้องยืนยันการซื้อแยกในเกม"
+        "copy": "เครดิตที่ซื้อจะเข้าบัญชีเกมที่เลือกและใช้ได้เฉพาะใน Numeron ไม่สามารถโอนยอดเครดิตระหว่างผู้เล่น ถอนเงิน หรือแลกเป็นเงินตราหรือสินทรัพย์ดิจิทัลได้ การเติมเครดิตไม่เปิดใช้บัตรรายเดือน ผู้เล่นใช้เครดิตของตนในร้านค้าทางการเพื่อส่งบัตรรายเดือนเป็นของขวัญให้ตัวละครที่เลือกได้"
       },
       {
         "title": "การชำระเงินและกระเป๋า",
@@ -436,7 +436,7 @@ export const rechargeCopies = {
     "sections": [
       {
         "title": "Penggunaan kredit",
-        "copy": "Kredit dicatat di akun game. Isi ulang tidak otomatis mengaktifkan kartu bulanan; diperlukan konfirmasi pembelian terpisah di dalam game."
+        "copy": "Kredit berbayar masuk ke akun gim yang dipilih dan hanya dapat digunakan di Numeron. Saldo tidak dapat dipindahkan antar pemain, dicairkan, atau ditukar dengan uang fiat maupun aset kripto. Isi ulang tidak mengaktifkan kartu bulanan. Di toko resmi, pemain dapat memakai kredit sendiri untuk menghadiahkan kartu bulanan kepada karakter yang dipilih."
       },
       {
         "title": "Pembayaran dan dompet",
@@ -465,7 +465,7 @@ export const rechargeCopies = {
     "sections": [
       {
         "title": "استخدام الرصيد",
-        "copy": "يُسجل الرصيد في حساب اللعبة. لا يفعّل الشحن بطاقة شهرية تلقائيًا؛ إذ يلزم تأكيد شراء منفصل داخل اللعبة."
+        "copy": "يُضاف الرصيد المدفوع إلى حساب اللعبة المحدد ويُستخدم داخل Numeron فقط. لا يمكن تحويل الرصيد بين اللاعبين أو سحبه أو استبداله بعملة ورقية أو أصول مشفرة. لا يفعّل الشحن البطاقة الشهرية. يمكن للاعبين استخدام رصيدهم في المتجر الرسمي لإهداء بطاقة شهرية إلى شخصية يحددونها."
       },
       {
         "title": "الدفع والمحافظ",

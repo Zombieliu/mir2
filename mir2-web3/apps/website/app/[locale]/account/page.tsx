@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import { ProductPageShell } from "@/app/components/product-page-shell";
 import { getProductCopy } from "@/lib/product-copy";
 import { getRechargeCopy } from "@/lib/recharge-copy";
-import { getCopy, getLocalizedAlternates, isLocale } from "@/lib/site-copy";
+import { getCopy, getLocalizedAlternates, isLocale, publicGameClientUrl } from "@/lib/site-copy";
 
 type AccountPageProps = { params: Promise<{ locale: string }> };
 
@@ -23,7 +23,7 @@ export default async function AccountPage({ params }: AccountPageProps) {
   return (
     <ProductPageShell locale={locale} siteCopy={getCopy(locale)} productCopy={productCopy} currentPath="/account" eyebrow={copy.eyebrow} title={copy.title} copy={copy.copy} cards={[]}>
       <section className="account-preview section">
-        <div className="account-identity" data-reveal><span>{copy.preview}</span><h2>NUMERON ID</h2><p>{copy.copy}</p><a className="button button-primary" href={process.env.NEXT_PUBLIC_GAME_URL ?? "https://mir2.obelisk.build/game"} target="_blank" rel="noreferrer" data-track="account_sign_in"><span>{copy.signIn}</span><i>↗</i></a></div>
+        <div className="account-identity" data-reveal><span>{copy.preview}</span><h2>NUMERON ID</h2><p>{copy.copy}</p><a className="button button-primary" href={publicGameClientUrl} target="_blank" rel="noreferrer" data-track="account_sign_in"><span>{copy.signIn}</span><i>↗</i></a></div>
         <div className="account-usage" data-reveal><small>{copy.usageTitle}</small><h2>—</h2><i><b /></i><dl>{productCopy.ui.accountUsage.map((label) => <div key={label}><dt>{label}</dt><dd>—</dd></div>)}</dl></div>
         <div className="account-content" data-reveal><small>{copy.contentTitle}</small><p>{productCopy.watch.archiveCopy}</p><Link href={`/${locale}/recharge`}>{getRechargeCopy(locale).label} ↗</Link></div>
       </section>

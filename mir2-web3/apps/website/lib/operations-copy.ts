@@ -1,7 +1,7 @@
 import type { Locale } from "@/lib/site-copy";
 
-export const operationsUpdatedAt = "2026-11-06";
-export const operatorLegalName = "Obelisk Labs, Inc.";
+export const operationsUpdatedAt = "2026-11-07";
+export const commissionedDeveloperLegalName = "Obelisk Labs, Inc.";
 export const refundWindowDays = 14;
 export const operationSectionIds = ["refunds", "wallet", "privacy", "assets"] as const;
 type OperationSection = (typeof operationSectionIds)[number];
@@ -17,7 +17,7 @@ type OperationsCopy = {
 // Publishing these pre-sale rules does not enable payments or automated refunds.
 const operationsCopies = {
   "zh-CN": {
-    title: "服务方与政策摘要", operator: `开发与服务方：${operatorLegalName}`,
+    title: "服务方与政策摘要", operator: `Numeron 由个人运营，${commissionedDeveloperLegalName} 受托开发。`,
     notice: "当前未开放购买。以下为业务与预定销售规则摘要；完整中文政策草案和各语言法律文本仍须审校。",
     pricingNote: "目前仅确认下列档位。退款安排见本页和充值与退款说明；其他档位、税费、地区、有效期、清档与交付细节将在开放购买前确认。",
     sections: {
@@ -28,7 +28,7 @@ const operationsCopies = {
     },
   },
   en: {
-    title: "Service and policy overview", operator: `Developer and service provider: ${operatorLegalName}`,
+    title: "Service and policy overview", operator: `An individual operates Numeron. ${commissionedDeveloperLegalName} develops the game under contract.`,
     notice: "Purchases remain unavailable. This summarizes the service and planned sales rules; the Chinese policy draft and legal translations still require review.",
     pricingNote: "Only the package below is confirmed. See this page and the refund information for refund arrangements. Other packages, taxes, regions, validity, resets and delivery details will be confirmed before purchases open.",
     sections: {
@@ -39,7 +39,7 @@ const operationsCopies = {
     },
   },
   "zh-TW": {
-    title: "服務方與政策摘要", operator: `開發與服務方：${operatorLegalName}`,
+    title: "服務方與政策摘要", operator: `Numeron 由個人營運，${commissionedDeveloperLegalName} 受託開發。`,
     notice: "目前未開放購買。以下為業務與預定銷售規則摘要；完整中文政策草案及各語言法律文本仍須審校。",
     pricingNote: "目前僅確認下列方案。退款安排請見本頁與儲值退款說明；其他方案、稅費、地區、有效期、清檔與交付細節將於開放購買前確認。",
     sections: {
@@ -50,7 +50,7 @@ const operationsCopies = {
     },
   },
   ja: {
-    title: "サービスと方針の概要", operator: `開発・サービス提供者：${operatorLegalName}`,
+    title: "サービスと方針の概要", operator: `Numeron は個人が運営し、${commissionedDeveloperLegalName} が委託を受けて開発しています。`,
     notice: "購入はまだ利用できません。事業と販売予定ルールの概要です。中国語の方針草案と各言語の法的文書は審査が必要です。",
     pricingNote: "確定しているのは下記プランのみです。返金は本ページと返金案内をご覧ください。他のプラン、税、地域、有効期限、リセット、提供条件は購入開始前に確定します。",
     sections: {
@@ -61,7 +61,7 @@ const operationsCopies = {
     },
   },
   ko: {
-    title: "서비스 및 정책 개요", operator: `개발 및 서비스 제공자: ${operatorLegalName}`,
+    title: "서비스 및 정책 개요", operator: `Numeron은 개인이 운영하며 ${commissionedDeveloperLegalName}는 위탁을 받아 게임을 개발합니다.`,
     notice: "아직 구매할 수 없습니다. 서비스와 예정된 판매 규칙의 요약이며 중국어 정책 초안과 각 언어의 법률 문서는 검토가 필요합니다.",
     pricingNote: "아래 상품만 확정되었습니다. 환불은 이 페이지와 환불 안내를 확인하세요. 다른 상품, 세금, 지역, 유효기간, 초기화와 제공 조건은 구매 개시 전에 확정합니다.",
     sections: {
@@ -72,7 +72,7 @@ const operationsCopies = {
     },
   },
   es: {
-    title: "Servicio y políticas", operator: `Desarrollador y proveedor del servicio: ${operatorLegalName}`,
+    title: "Servicio y políticas", operator: `Numeron lo opera una persona física. ${commissionedDeveloperLegalName} desarrolla el juego por encargo.`,
     notice: "Las compras siguen sin estar disponibles. Este resumen describe el servicio y las reglas de venta previstas; el borrador chino y las traducciones jurídicas requieren revisión.",
     pricingNote: "Solo está confirmado el paquete indicado. Consulte aquí y en la información de reembolsos las condiciones previstas. Otros paquetes, impuestos, regiones, vigencia, reinicios y entrega se confirmarán antes de abrir las compras.",
     sections: {
@@ -83,7 +83,7 @@ const operationsCopies = {
     },
   },
   "pt-BR": {
-    title: "Serviço e políticas", operator: `Desenvolvedora e prestadora do serviço: ${operatorLegalName}`,
+    title: "Serviço e políticas", operator: `Numeron é operado por uma pessoa física. A ${commissionedDeveloperLegalName} desenvolve o jogo sob contrato.`,
     notice: "As compras continuam indisponíveis. Este é um resumo do serviço e das regras de venda previstas; o rascunho em chinês e as traduções jurídicas ainda precisam de revisão.",
     pricingNote: "Apenas o pacote abaixo está confirmado. Consulte esta página e as informações de reembolso para as regras previstas. Outros pacotes, tributos, regiões, validade, reinicializações e entrega serão confirmados antes das compras.",
     sections: {
@@ -94,7 +94,7 @@ const operationsCopies = {
     },
   },
   de: {
-    title: "Dienst und Richtlinien", operator: `Entwickler und Dienstanbieter: ${operatorLegalName}`,
+    title: "Dienst und Richtlinien", operator: `Eine Einzelperson betreibt Numeron. ${commissionedDeveloperLegalName} entwickelt das Spiel im Auftrag.`,
     notice: "Käufe sind weiterhin nicht verfügbar. Dies fasst den Dienst und die geplanten Verkaufsregeln zusammen. Der chinesische Entwurf und rechtliche Übersetzungen müssen noch geprüft werden.",
     pricingNote: "Nur das folgende Paket ist bestätigt. Erstattungsregeln stehen hier und in den Erstattungshinweisen. Weitere Pakete, Steuern, Regionen, Gültigkeit, Zurücksetzungen und Bereitstellung werden vor dem Kaufstart bestätigt.",
     sections: {
@@ -105,7 +105,7 @@ const operationsCopies = {
     },
   },
   fr: {
-    title: "Service et politiques", operator: `Développeur et prestataire du service : ${operatorLegalName}`,
+    title: "Service et politiques", operator: `Une personne physique exploite Numeron. ${commissionedDeveloperLegalName} développe le jeu sous contrat.`,
     notice: "Les achats restent indisponibles. Ce résumé présente le service et les règles de vente prévues ; le projet chinois et les traductions juridiques doivent encore être examinés.",
     pricingNote: "Seule l'offre ci-dessous est confirmée. Consultez cette page et les informations de remboursement. Les autres offres, taxes, régions, durées, réinitialisations et modalités de livraison seront confirmées avant les achats.",
     sections: {
@@ -116,7 +116,7 @@ const operationsCopies = {
     },
   },
   ru: {
-    title: "Сервис и правила", operator: `Разработчик и поставщик услуг: ${operatorLegalName}`,
+    title: "Сервис и правила", operator: `Игрой Numeron управляет частное лицо. ${commissionedDeveloperLegalName} разрабатывает игру по договору.`,
     notice: "Покупки пока недоступны. Это описание сервиса и планируемых правил продаж. Китайский проект и юридические переводы ещё требуют проверки.",
     pricingNote: "Подтверждён только указанный пакет. Правила возврата приведены здесь и в разделе о возвратах. Другие пакеты, налоги, регионы, сроки, сбросы и доставка будут уточнены до начала покупок.",
     sections: {
@@ -127,7 +127,7 @@ const operationsCopies = {
     },
   },
   pl: {
-    title: "Usługa i zasady", operator: `Twórca i usługodawca: ${operatorLegalName}`,
+    title: "Usługa i zasady", operator: `Numeron prowadzi osoba fizyczna. ${commissionedDeveloperLegalName} tworzy grę na zlecenie.`,
     notice: "Zakupy pozostają niedostępne. To podsumowanie usługi i planowanych zasad sprzedaży. Chiński projekt i tłumaczenia prawne wymagają jeszcze przeglądu.",
     pricingNote: "Potwierdzony jest tylko poniższy pakiet. Zasady zwrotów opisano tutaj i w informacji o zwrotach. Inne pakiety, podatki, regiony, ważność, resety i dostawa zostaną ustalone przed zakupami.",
     sections: {
@@ -138,7 +138,7 @@ const operationsCopies = {
     },
   },
   tr: {
-    title: "Hizmet ve politika özeti", operator: `Geliştirici ve hizmet sağlayıcı: ${operatorLegalName}`,
+    title: "Hizmet ve politika özeti", operator: `Numeron'u bir kişi işletir. ${commissionedDeveloperLegalName} oyunu sözleşme kapsamında geliştirir.`,
     notice: "Satın alma henüz açık değildir. Bu, hizmetin ve planlanan satış kurallarının özetidir. Çince taslak ve hukuki çeviriler hâlâ inceleme gerektirir.",
     pricingNote: "Yalnızca aşağıdaki paket onaylanmıştır. İade düzenlemeleri bu sayfada ve iade bilgilerindedir. Diğer paketler, vergiler, bölgeler, geçerlilik, sıfırlama ve teslim ayrıntıları satın alma açılmadan netleşecektir.",
     sections: {
@@ -149,7 +149,7 @@ const operationsCopies = {
     },
   },
   th: {
-    title: "ภาพรวมบริการและนโยบาย", operator: `ผู้พัฒนาและผู้ให้บริการ: ${operatorLegalName}`,
+    title: "ภาพรวมบริการและนโยบาย", operator: `Numeron ดำเนินงานโดยบุคคลธรรมดา ส่วน ${commissionedDeveloperLegalName} เป็นผู้รับจ้างพัฒนาเกม`,
     notice: "ยังไม่เปิดให้ซื้อ ข้อมูลนี้สรุปบริการและกฎการขายที่วางแผนไว้ ร่างภาษาจีนและคำแปลทางกฎหมายยังต้องตรวจทาน",
     pricingNote: "ยืนยันเฉพาะแพ็กเกจด้านล่าง โปรดดูการคืนเงินในหน้านี้และคำอธิบายการคืนเงิน แพ็กเกจอื่น ภาษี ภูมิภาค อายุการใช้งาน การรีเซ็ตและการส่งมอบจะยืนยันก่อนเปิดซื้อ",
     sections: {
@@ -160,7 +160,7 @@ const operationsCopies = {
     },
   },
   vi: {
-    title: "Tổng quan dịch vụ và chính sách", operator: `Đơn vị phát triển và cung cấp dịch vụ: ${operatorLegalName}`,
+    title: "Tổng quan dịch vụ và chính sách", operator: `Numeron do một cá nhân vận hành. ${commissionedDeveloperLegalName} phát triển trò chơi theo hợp đồng.`,
     notice: "Chưa mở mua hàng. Đây là bản tóm tắt dịch vụ và quy tắc bán hàng dự kiến; bản nháp tiếng Trung và các bản dịch pháp lý vẫn cần thẩm định.",
     pricingNote: "Chỉ gói dưới đây đã được xác nhận. Xem quy tắc hoàn tiền tại đây và trang hoàn tiền. Các gói khác, thuế, khu vực, thời hạn, đặt lại dữ liệu và giao hàng sẽ được xác nhận trước khi mở mua.",
     sections: {
@@ -171,7 +171,7 @@ const operationsCopies = {
     },
   },
   id: {
-    title: "Ringkasan layanan dan kebijakan", operator: `Pengembang dan penyedia layanan: ${operatorLegalName}`,
+    title: "Ringkasan layanan dan kebijakan", operator: `Numeron dioperasikan oleh perorangan. ${commissionedDeveloperLegalName} mengembangkan gim berdasarkan kontrak.`,
     notice: "Pembelian belum tersedia. Ini merangkum layanan dan rencana aturan penjualan. Draf berbahasa Mandarin dan terjemahan hukum masih perlu ditinjau.",
     pricingNote: "Hanya paket di bawah yang dikonfirmasi. Lihat pengaturan pengembalian dana di sini dan pada informasi pengembalian dana. Paket lain, pajak, wilayah, masa berlaku, reset dan pengiriman akan ditetapkan sebelum pembelian dibuka.",
     sections: {
@@ -182,7 +182,7 @@ const operationsCopies = {
     },
   },
   ar: {
-    title: "ملخص الخدمة والسياسات", operator: `المطور ومقدم الخدمة: ${operatorLegalName}`,
+    title: "ملخص الخدمة والسياسات", operator: `يتولى شخص بصفته الفردية تشغيل Numeron. وتطوّر ${commissionedDeveloperLegalName} اللعبة بموجب عقد.`,
     notice: "الشراء غير متاح حاليًا. هذا ملخص للخدمة وقواعد البيع المخططة؛ وما زالت المسودة الصينية والترجمات القانونية تحتاج إلى مراجعة.",
     pricingNote: "الحزمة أدناه وحدها مؤكدة. راجع ترتيبات الاسترداد هنا وفي صفحة الاسترداد. ستؤكد الحزم الأخرى والضرائب والمناطق والصلاحية وإعادة ضبط البيانات والتسليم قبل فتح الشراء.",
     sections: {

@@ -6,9 +6,8 @@ import { GameStatusPanel } from "@/app/components/game-status-panel";
 import { MotionController } from "@/app/components/motion-controller";
 import { SiteFooter, SiteHeader } from "@/app/components/site-chrome";
 import { getProductCopy } from "@/lib/product-copy";
-import { getCopy, getLocalizedAlternates, isLocale } from "@/lib/site-copy";
+import { getCopy, getLocalizedAlternates, isLocale, publicGameClientUrl } from "@/lib/site-copy";
 
-const gameUrl = process.env.NEXT_PUBLIC_GAME_URL ?? "https://mir2.obelisk.build/game";
 
 type PlayPageProps = { params: Promise<{ locale: string }> };
 
@@ -39,13 +38,13 @@ export default async function PlayPage({ params }: PlayPageProps) {
           <p>{copy.copy}</p>
           <GameStatusPanel labels={labels} />
           <div className="launch-actions">
-            <a className="button button-primary" href={gameUrl} target="_blank" rel="noreferrer" data-track="launch_browser_client"><span>{copy.launch}</span><i>↗</i></a>
+            <a className="button button-primary" href={publicGameClientUrl} target="_blank" rel="noreferrer" data-track="launch_browser_client"><span>{copy.launch}</span><i>↗</i></a>
             <Link className="button button-ghost" href="#requirements"><span>{copy.requirements}</span><i>↓</i></Link>
           </div>
         </div>
       </section>
       <section className="launch-options section">
-        <article data-reveal><span>01</span><small>{copy.candidate}</small><h2>{copy.browser}</h2><p>{copy.browserCopy}</p><a href={gameUrl} target="_blank" rel="noreferrer" data-track="launch_browser_option">{copy.launch} ↗</a></article>
+        <article data-reveal><span>01</span><small>{copy.candidate}</small><h2>{copy.browser}</h2><p>{copy.browserCopy}</p><a href={publicGameClientUrl} target="_blank" rel="noreferrer" data-track="launch_browser_option">{copy.launch} ↗</a></article>
         <article data-reveal><span>02</span><small>{copy.desktop} · {copy.candidate}</small><h2>{copy.desktop}</h2><p>{copy.desktopCopy}</p><b>{copy.candidate}</b></article>
       </section>
       <section className="launch-requirements section" id="requirements">
