@@ -36,7 +36,8 @@ Updated 2026-11-08 (Asia/Shanghai). Read [coordination](AGENT-ORCHESTRATION.md) 
 - [x] Windows canonical manifest／原锁 release/offline/locked 构建通过，仅同步3条既有WASM依赖边，不变更571包版本。
 - [x] 组队按新鲜悬停与当前 UI 几何选目标，普通邀请仅 AddMember，权威开关、发送末尾复核与名字级去重已接入。Node296／适配器507组／TS及两后端普通完整流程通过。[范围与失败](WEB-R16-PARITY-GOAL.zh-CN.md#组队悬停邀请与会话)
 - [x] 同进程 WebSocket 普通登录后的慢保存交接已修：锁外等待已断开旧连接，保存后按唯一连接标记消费一次，复核身份与原租约。103 项独立回归和两个后端的真实自动恢复通过，五角色130个人字段及坐标保持；原 persist7442ms 失败保留。隔离 dev/debug 候选未替换试玩包。[范围与证据](WEB-R16-PARITY-GOAL.zh-CN.md#慢保存与自动重连2026-11-08)
-- [ ] Native 凭证先行且旧档仍保存中的恢复继续核对；跨 Gateway／TCP 不由进程内 WebSocket 恢复库覆盖。窗口及同候选跨端实机暂缓。
+- [x] 同进程 WebSocket 的 Native 凭证先行恢复已补齐。十三存储层／两真实 File WS 与相邻回归合计118独立案例通过，含精确 token、最终消费时钟／连接围栏、取消重试、唯一代次及容量归还；Native14秒预算不改，候选仅 dev/debug。[范围和原失败](WEB-R16-PARITY-GOAL.zh-CN.md#凭证先行的保存交接2026-11-08)
+- [ ] 跨 Gateway／TCP 不由进程内 WebSocket 恢复库覆盖。Windows 窗口及同候选跨端同档暂缓；优先继续组队共用预算／ACK、交易和阿洛的无桌面检查。
 - [ ] 继续组队跨社交总预算及失败 ACK、交易与阿洛的代码／普通协议对齐。Windows 窗口及同候选跨端实机暂缓。
 - [x] 按三职业毕业档实读 30 级及 26 项任务，共用 Native 装备名称与 D605 地点接入通过。十语 960×720 窄窗、桌面／移动标题测试和 65 次关闭手势零移动通过。个人进度及资产 78 项相等，原在线服时钟差异及修复前九步误移动分别保留。
 - [x] 首次 Q 的即时 ref 与 HUD 快照同步已修。中、英、阿六次 WebGL2-shared 冷启动及中／阿两次默认 WebGPU 均只按一次 Q 后打开并保持；旧失败保留。

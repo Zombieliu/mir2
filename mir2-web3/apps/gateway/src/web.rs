@@ -995,6 +995,7 @@ enum ReconnectSessionCommitError {
     LeaseExpired,
     CredentialUnavailable,
     AuthorizationRevisionChanged,
+    TransportEnded,
 }
 
 /// Reversible, single-owner lease reservation for native resume preparation.
@@ -1780,9 +1781,19 @@ impl ReconnectSessionStore {
 
     fn commit_resume(
         &self,
+        reservation: ReconnectSessionReservation<'_>,
+        credential: &ResumeCredential,
+        now_ms: u64,
+    ) -> Result<(ReconnectSessionRestore, ResumeBinding), ReconnectSessionCommitError> {
+        self.commit_resume_if_live(reservation, credential, now_ms, || true)
+    }
+
+    fn commit_resume_if_live(
+        &self,
         mut reservation: ReconnectSessionReservation<'_>,
         credential: &ResumeCredential,
         now_ms: u64,
+        transport_is_live: impl FnOnce() -> bool,
     ) -> Result<(ReconnectSessionRestore, ResumeBinding), ReconnectSessionCommitError> {
         if !std::ptr::eq(self, reservation.store) {
             reservation.discard_and_revoke();
@@ -1836,6 +1847,16 @@ impl ReconnectSessionStore {
             drop(stale_lease);
             return Err(ReconnectSessionCommitError::AuthorizationRevisionChanged);
         }
+        if !transport_is_live() {
+            // This socket stopped before commit. Restore the exact reservation
+            // through the existing rollback checks without consuming its family.
+            drop(state);
+            drop(reservation);
+            return Err(ReconnectSessionCommitError::TransportEnded);
+        }
+        // The locked purge protects mutex contention. Refresh again here so
+        // scheduling after that purge cannot consume a now-expired credential.
+        let now_ms = gateway_unix_ms().max(now_ms);
         let Some(binding) =
             state
                 .credentials
@@ -6778,7 +6799,7 @@ async fn handle_socket_work(
                             }
                         };
                         let committed = tokio::task::block_in_place(|| {
-                            revalidate_and_commit_prepared_native_resume(
+                            revalidate_and_commit_prepared_native_resume_if_live(
                                 reconnect_sessions.as_ref(),
                                 session_cache.as_ref(),
                                 &identity,
@@ -6787,6 +6808,7 @@ async fn handle_socket_work(
                                 verified,
                                 prepared_zone_registration,
                                 gateway_unix_ms(),
+                                &terminal,
                             )
                         });
                         let Ok((restored, binding, verified, prepared_zone_registration)) =
@@ -11483,6 +11505,41 @@ fn validate_and_prepare_native_resume_with_handoff<'a, PreparedZone>(
     Ok((reservation, verified, prepared_zone))
 }
 
+fn revalidate_and_commit_prepared_native_resume_if_live<PreparedZone>(
+    reconnect_sessions: &ReconnectSessionStore,
+    session_cache: &dyn crate::cache::GatewaySessionCache,
+    identity: &IdentityService,
+    reservation: ReconnectSessionReservation<'_>,
+    credential: &ResumeCredential,
+    verified: VerifiedIdentitySession,
+    prepared_zone: PreparedZone,
+    now_ms: u64,
+    terminal: &transport::TransportSignal,
+) -> Result<
+    (
+        ReconnectSessionRestore,
+        ResumeBinding,
+        VerifiedIdentitySession,
+        PreparedZone,
+    ),
+    NativeResumeCommitError,
+> {
+    revalidate_and_commit_prepared_native_resume_with_hooks_and_transport(
+        reconnect_sessions,
+        session_cache,
+        identity,
+        reservation,
+        credential,
+        verified,
+        prepared_zone,
+        now_ms,
+        || {},
+        || {},
+        || !terminal.ended(),
+    )
+}
+
+#[cfg(test)]
 fn revalidate_and_commit_prepared_native_resume<PreparedZone>(
     reconnect_sessions: &ReconnectSessionStore,
     session_cache: &dyn crate::cache::GatewaySessionCache,
@@ -11493,24 +11550,12 @@ fn revalidate_and_commit_prepared_native_resume<PreparedZone>(
     prepared_zone: PreparedZone,
     now_ms: u64,
 ) -> Result<
-    (
-        ReconnectSessionRestore,
-        ResumeBinding,
-        VerifiedIdentitySession,
-        PreparedZone,
-    ),
+    (ReconnectSessionRestore, ResumeBinding, VerifiedIdentitySession, PreparedZone),
     NativeResumeCommitError,
 > {
-    revalidate_and_commit_prepared_native_resume_with_fence_hook(
-        reconnect_sessions,
-        session_cache,
-        identity,
-        reservation,
-        credential,
-        verified,
-        prepared_zone,
-        now_ms,
-        || {},
+    revalidate_and_commit_prepared_native_resume_with_hooks(
+        reconnect_sessions, session_cache, identity, reservation, credential,
+        verified, prepared_zone, now_ms, || {}, || {},
     )
 }
 
@@ -11567,6 +11612,28 @@ fn revalidate_and_commit_prepared_native_resume_with_hooks<PreparedZone>(
     ),
     NativeResumeCommitError,
 > {
+    revalidate_and_commit_prepared_native_resume_with_hooks_and_transport(
+        reconnect_sessions, session_cache, identity, reservation, credential,
+        verified, prepared_zone, now_ms, before_commit, after_local_commit, || true,
+    )
+}
+
+fn revalidate_and_commit_prepared_native_resume_with_hooks_and_transport<PreparedZone>(
+    reconnect_sessions: &ReconnectSessionStore,
+    session_cache: &dyn crate::cache::GatewaySessionCache,
+    identity: &IdentityService,
+    reservation: ReconnectSessionReservation<'_>,
+    credential: &ResumeCredential,
+    verified: VerifiedIdentitySession,
+    prepared_zone: PreparedZone,
+    now_ms: u64,
+    before_commit: impl FnOnce(),
+    after_local_commit: impl FnOnce(),
+    transport_is_live: impl FnOnce() -> bool,
+) -> Result<
+    (ReconnectSessionRestore, ResumeBinding, VerifiedIdentitySession, PreparedZone),
+    NativeResumeCommitError,
+> {
     if !native_resume_identity_is_active(session_cache, identity, &verified, now_ms)
         || !native_resume_monthly_card_is_active(
             reservation.session(),
@@ -11585,7 +11652,9 @@ fn revalidate_and_commit_prepared_native_resume_with_hooks<PreparedZone>(
     // a no-op; the auth revision check and consume still occur under the same
     // reconnect-store mutex.
     before_commit();
-    let (restore, binding) = match reconnect_sessions.commit_resume(reservation, credential, now_ms)
+    let (restore, binding) = match reconnect_sessions.commit_resume_if_live(
+        reservation, credential, now_ms, transport_is_live,
+    )
     {
         Ok(committed) => committed,
         Err(ReconnectSessionCommitError::AuthorizationRevisionChanged) => {
@@ -11594,7 +11663,8 @@ fn revalidate_and_commit_prepared_native_resume_with_hooks<PreparedZone>(
         Err(
             ReconnectSessionCommitError::ForeignReservation
             | ReconnectSessionCommitError::LeaseExpired
-            | ReconnectSessionCommitError::CredentialUnavailable,
+            | ReconnectSessionCommitError::CredentialUnavailable
+            | ReconnectSessionCommitError::TransportEnded,
         ) => return Err(NativeResumeCommitError::Unavailable),
     };
     after_local_commit();

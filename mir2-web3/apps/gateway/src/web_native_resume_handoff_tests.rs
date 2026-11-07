@@ -539,6 +539,284 @@ async fn credential_expiry_after_wait_cannot_reserve_a_ready_lease() {
         .is_none());
 }
 
+#[test]
+fn credential_expiry_while_commit_waits_for_store_mutex_cannot_authorize_activation() {
+    let mut f = Fixture::new();
+    f.close();
+    f.publish();
+
+    // Use the real registry's clock seam, keeping the production TTL untouched.
+    // Issue only after the ordinary account/role/publication setup has finished.
+    let issued_at = gateway_unix_ms()
+        .checked_sub(crate::resume::RESUME_CREDENTIAL_TTL_MS - 250)
+        .unwrap();
+    let short = {
+        let mut state = f.store.state.lock().unwrap();
+        state.credentials.issue(
+            Some(&f.issued.family_id),
+            ResumeIssueContext {
+                account_id: &f.issued.account_id,
+                character_index: f.issued.character_index,
+                gateway_session_id: &f.issued.gateway_session_id,
+                identity_session_id: &f.issued.identity_session_id,
+                identity_expires_at_ms: f.issued.identity_expires_at_ms,
+                source_connection_nonce: &f.issued.source_connection_nonce,
+            },
+            issued_at,
+            f.issued.generation + 1,
+            f.issued.auth_revision,
+        )
+    };
+    f.credential = short.credential;
+    f.issued = short.binding;
+    let expires_at = f.issued.expires_at_ms;
+    let (reservation, _, ()) = validate_and_prepare_native_resume(
+        &f.store,
+        &f.cache,
+        &f.identity,
+        &f.credential,
+        gateway_unix_ms(),
+        |_| Ok(()),
+        |_| Ok(()),
+    )
+    .expect("a still-live credential must reach the real prepared reservation");
+    assert_eq!(f.store.len(), 0);
+    assert_eq!(f.capacity.status().current_active_sessions, 1);
+    assert_eq!(f.capacity.status().current_reconnect_leases, 1);
+
+    let early_now = gateway_unix_ms();
+    assert!(
+        early_now < expires_at,
+        "the caller samples time before credential expiry"
+    );
+    let activation_authorized = Arc::new(std::sync::atomic::AtomicBool::new(false));
+    let verdict = std::thread::scope(|threads| {
+        // Keep the guard inside the scope closure, so a fixture panic releases
+        // the lock before the scope joins its worker rather than deadlocking.
+        let held = f.store.state.lock().unwrap();
+        let (started_tx, started_rx) = std::sync::mpsc::sync_channel(0);
+        let store = Arc::clone(&f.store);
+        let credential = &f.credential;
+        let authorized = Arc::clone(&activation_authorized);
+        let worker = threads.spawn(move || {
+            assert!(matches!(
+                store.state.try_lock(),
+                Err(std::sync::TryLockError::WouldBlock)
+            ));
+            started_tx.send(()).unwrap();
+            match store.commit_resume(reservation, credential, early_now) {
+                Ok((restored, binding)) => {
+                    // Success is the host's authority to activate. This fixture
+                    // deliberately sends no bootstrap and installs no Zone UI.
+                    authorized.store(true, Ordering::Release);
+                    drop(restored);
+                    Ok(binding)
+                }
+                Err(error) => Err(error),
+            }
+        });
+        started_rx
+            .recv_timeout(Duration::from_secs(5))
+            .expect("commit worker must observe the deliberately held store mutex");
+        while gateway_unix_ms() <= expires_at {
+            let remaining = expires_at.saturating_sub(gateway_unix_ms());
+            std::thread::sleep(Duration::from_millis(remaining.saturating_add(1).min(5)));
+        }
+        assert!(gateway_unix_ms() > expires_at);
+        assert!(
+            early_now < expires_at,
+            "the old timestamp must remain unchanged"
+        );
+        drop(held);
+        worker.join().expect("commit worker must not panic")
+    });
+    assert!(matches!(
+        verdict,
+        Err(ReconnectSessionCommitError::CredentialUnavailable)
+    ));
+    assert!(!activation_authorized.load(Ordering::Acquire));
+    assert_eq!(f.store.len(), 0);
+    assert_eq!(f.capacity.status().current_active_sessions, 0);
+    assert_eq!(f.capacity.status().current_reconnect_leases, 0);
+    assert!(f
+        .store
+        .resume_binding(&f.credential, gateway_unix_ms())
+        .is_none());
+}
+
+#[tokio::test]
+async fn terminal_end_at_commit_lock_rolls_back_without_consuming_then_live_retry_commits() {
+    let mut f = Fixture::new();
+    f.close();
+    let pending = f.pending();
+    f.publish();
+    let completed = pending.wait().await.unwrap();
+    let before = f.snapshot();
+    let token = f
+        .store
+        .state
+        .lock()
+        .unwrap()
+        .sessions
+        .get(&f.key)
+        .unwrap()
+        .handoff_token
+        .clone()
+        .unwrap();
+    let (reservation, _, ()) = f.prepared(&completed).unwrap();
+    let terminal = TransportSignal::new();
+    terminal.end(TransportEnd::Closed);
+    let checked = std::cell::Cell::new(false);
+    let verdict =
+        f.store
+            .commit_resume_if_live(reservation, &f.credential, gateway_unix_ms(), || {
+                assert!(matches!(
+                    f.store.state.try_lock(),
+                    Err(std::sync::TryLockError::WouldBlock)
+                ));
+                checked.set(true);
+                !terminal.ended()
+            });
+    assert!(checked.get());
+    assert!(matches!(
+        verdict,
+        Err(ReconnectSessionCommitError::TransportEnded)
+    ));
+    assert_eq!(f.store.len(), 1);
+    assert_eq!(f.snapshot(), before);
+    assert_eq!(f.capacity.status().current_active_sessions, 1);
+    assert_eq!(f.capacity.status().current_reconnect_leases, 1);
+    assert_eq!(
+        f.store.resume_binding(&f.credential, gateway_unix_ms()),
+        Some(f.issued.clone())
+    );
+    assert!(f
+        .store
+        .state
+        .lock()
+        .unwrap()
+        .sessions
+        .get(&f.key)
+        .unwrap()
+        .handoff_token
+        .as_ref()
+        .unwrap()
+        .same(&token));
+
+    let (reservation, _, ()) = f.prepared(&completed).unwrap();
+    let live = TransportSignal::new();
+    let (restored, binding) = f
+        .store
+        .commit_resume_if_live(reservation, &f.credential, gateway_unix_ms(), || {
+            assert!(matches!(
+                f.store.state.try_lock(),
+                Err(std::sync::TryLockError::WouldBlock)
+            ));
+            !live.ended()
+        })
+        .expect("the same rolled-back lease and unconsumed credential remain resumable");
+    assert_eq!(binding, f.issued);
+    assert_eq!(
+        serde_json::to_value(restored.session.world_snapshot()).unwrap(),
+        before
+    );
+    assert_eq!(f.store.len(), 0);
+    assert!(f
+        .store
+        .resume_binding(&f.credential, gateway_unix_ms())
+        .is_none());
+    assert_eq!(f.capacity.status().current_active_sessions, 1);
+    assert_eq!(f.capacity.status().current_reconnect_leases, 0);
+    drop(restored);
+    assert_eq!(f.capacity.status().current_active_sessions, 0);
+}
+
+#[test]
+fn credential_expiry_inside_final_live_guard_cannot_be_consumed() {
+    let mut f = Fixture::new();
+    f.close();
+    f.publish();
+
+    // The earlier mutex-contention case is already protected by the locked
+    // purge. Isolate the later interval: purge completes while this credential
+    // is live, then the final callback crosses its deadline before consume.
+    let issued_at = gateway_unix_ms()
+        .checked_sub(crate::resume::RESUME_CREDENTIAL_TTL_MS - 250)
+        .unwrap();
+    let short = {
+        let mut state = f.store.state.lock().unwrap();
+        state.credentials.issue(
+            Some(&f.issued.family_id),
+            ResumeIssueContext {
+                account_id: &f.issued.account_id,
+                character_index: f.issued.character_index,
+                gateway_session_id: &f.issued.gateway_session_id,
+                identity_session_id: &f.issued.identity_session_id,
+                identity_expires_at_ms: f.issued.identity_expires_at_ms,
+                source_connection_nonce: &f.issued.source_connection_nonce,
+            },
+            issued_at,
+            f.issued.generation + 1,
+            f.issued.auth_revision,
+        )
+    };
+    f.credential = short.credential;
+    f.issued = short.binding;
+    let expires_at = f.issued.expires_at_ms;
+    let (reservation, _, ()) = validate_and_prepare_native_resume(
+        &f.store,
+        &f.cache,
+        &f.identity,
+        &f.credential,
+        gateway_unix_ms(),
+        |_| Ok(()),
+        |_| Ok(()),
+    )
+    .expect("the short credential must still be live at reservation");
+    let early_now = gateway_unix_ms();
+    assert!(early_now < expires_at);
+    let live = TransportSignal::new();
+    let checked = std::cell::Cell::new(false);
+    let after_guard = std::cell::Cell::new(0_u64);
+    let verdict = f
+        .store
+        .commit_resume_if_live(reservation, &f.credential, early_now, || {
+            assert!(matches!(
+                f.store.state.try_lock(),
+                Err(std::sync::TryLockError::WouldBlock)
+            ));
+            assert!(
+                gateway_unix_ms() < expires_at,
+                "purge and the start of the final guard must precede expiry"
+            );
+            checked.set(true);
+            while gateway_unix_ms() <= expires_at {
+                let remaining = expires_at.saturating_sub(gateway_unix_ms());
+                std::thread::sleep(Duration::from_millis(remaining.saturating_add(1).min(5)));
+            }
+            after_guard.set(gateway_unix_ms());
+            assert!(!live.ended());
+            !live.ended()
+        });
+    assert!(checked.get());
+    assert!(early_now < expires_at);
+    assert!(after_guard.get() > expires_at);
+    assert!(f.verified.expires_at_ms > after_guard.get());
+    let activation_authorized = verdict.is_ok();
+    assert!(matches!(
+        verdict,
+        Err(ReconnectSessionCommitError::CredentialUnavailable)
+    ));
+    assert!(!activation_authorized);
+    assert_eq!(f.store.len(), 0);
+    assert_eq!(f.capacity.status().current_active_sessions, 0);
+    assert_eq!(f.capacity.status().current_reconnect_leases, 0);
+    assert!(f
+        .store
+        .resume_binding(&f.credential, gateway_unix_ms())
+        .is_none());
+}
+
 #[tokio::test]
 async fn changed_nonce_generation_or_family_cannot_match_the_completed_binding() {
     let mut f = Fixture::new();

@@ -1,0 +1,16 @@
+{
+  "schema": "mir2.native-resume-source.v1",
+  "head": "cc0cbf1a55bf80e1cc69b053f620a096d5d78af7",
+  "createdAt": "2026-11-07T19:51:39.801Z",
+  "pins": {
+    "apps/gateway/src/web.rs": "266943e27d7e674364437256325b39c381be8f006871f6ec7f4078ece0094579",
+    "apps/gateway/src/web_native_resume_handoff.rs": "be0a7476e7bf8d9217b469a4ba2a2848a8c4fb013e6a0981e3a6cc8f5d2b0307",
+    "apps/gateway/src/web_native_resume_handoff_tests.rs": "b9c7b90a9c2a9fb49dccee699088b5380907d37ab778974499f60dc9531266ff",
+    "apps/gateway/src/web_native_resume_handoff_ws_tests.rs": "d9d4a9df4ffcd0bb5e0c0142f6bb188ee791421de4ef5b7784153fa0f13dc8a1",
+    "apps/gateway/src/web_reconnect_handoff.rs": "3fe45ab5222b898d69c367ae2693f3178f204eaa6dcc2bf2ec79e3e0bb8875a3",
+    "apps/gateway/src/resume.rs": "172ed611ad16a68aefa79e9d7fb703ee21240e6b926bd4490495a70a5ad14168",
+    "apps/gateway/src/session.rs": "c4f7a6dc2aca6297ca0fbbfec18401eda47c865d18dd9633a180eb3efc059baf",
+    "apps/game-client/platform-windows/src/gateway.rs": "c29ea4c4ce0998087b71fd8d147c52fdee8272fa589ad4ba2e4ddcae3d60b37e",
+    "apps/game-client/platform-windows/src/session_config.rs": "0d6d4a04d0bbf83a478a3294044f43615d0995810af488bb616f7d47ed291a52"
+  }
+}

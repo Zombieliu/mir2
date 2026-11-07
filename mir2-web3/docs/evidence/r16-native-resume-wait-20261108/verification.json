@@ -1,0 +1,429 @@
+{
+  "schema": "mir2.r16.native-resume.verification.v1",
+  "createdAt": "2026-11-07T20:05:08.649Z",
+  "branch": "codex/windows-player-journey",
+  "testedHead": "cc0cbf1a55bf80e1cc69b053f620a096d5d78af7",
+  "sourcePins": {
+    "apps/gateway/src/web.rs": "b05bd051ed211c1627e8973bd3dc70cd4395c23d294771d099fd4b51e6fb5a0f",
+    "apps/gateway/src/web_native_resume_handoff.rs": "be0a7476e7bf8d9217b469a4ba2a2848a8c4fb013e6a0981e3a6cc8f5d2b0307",
+    "apps/gateway/src/web_native_resume_handoff_tests.rs": "b9c7b90a9c2a9fb49dccee699088b5380907d37ab778974499f60dc9531266ff",
+    "apps/gateway/src/web_native_resume_handoff_ws_tests.rs": "abdb9e02cd1874133075abf61980441a7b1f3e63925ffa56202d1d4f6f476503",
+    "apps/gateway/src/web_reconnect_handoff.rs": "3fe45ab5222b898d69c367ae2693f3178f204eaa6dcc2bf2ec79e3e0bb8875a3",
+    "apps/gateway/src/resume.rs": "172ed611ad16a68aefa79e9d7fb703ee21240e6b926bd4490495a70a5ad14168",
+    "apps/gateway/src/session.rs": "c4f7a6dc2aca6297ca0fbbfec18401eda47c865d18dd9633a180eb3efc059baf",
+    "apps/game-client/platform-windows/src/gateway.rs": "c29ea4c4ce0998087b71fd8d147c52fdee8272fa589ad4ba2e4ddcae3d60b37e",
+    "apps/game-client/platform-windows/src/session_config.rs": "0d6d4a04d0bbf83a478a3294044f43615d0995810af488bb616f7d47ed291a52"
+  },
+  "testedWorkingChanges": true,
+  "sourceStableBeforeTestsAndAfterBuild": true,
+  "previousGoalTurn": "progress: all staged/unstaged source saved in ce014ec06, integrated and remotely verified at cc0cbf1a5",
+  "scope": "Same Gateway process, WebSocket, credential-first Native ResumeSession while the old transport has ended but its real File checkpoint has not finished. No desktop control.",
+  "behavior": {
+    "onlyServerBoundEndedTransportWaits": true,
+    "waitOutsideWriterAndStoreLocks": true,
+    "issuedAuthRevisionAndSharedIdentityChecked": true,
+    "exactFullCredentialBindingAndSavedHandoffTokenComparedUnderReservationLock": true,
+    "existingRouteZoneMonthlyCardAndPostCommitIdentityChecksRetained": true,
+    "credentialConsumedAtMostOnce": true,
+    "terminalCheckedAtFinalCommitLock": true,
+    "cancelBeforeConsumeRollsBackExactLease": true,
+    "wallClockRefreshedImmediatelyBeforeConsume": true,
+    "lockedPurgeAlreadyProtectsMutexExpiry": true,
+    "readyWithoutWaitRetainsLegacyCredentialPath": true,
+    "noColdFallbackOrCommandReplay": true,
+    "nativeClientSourcesAnd14SecondBudgetUnchanged": true,
+    "noWireOrPersistentSchemaChange": true
+  },
+  "tests": {
+    "new": 15,
+    "newStore": 13,
+    "newRealWebSocket": 2,
+    "adjacentUnique": 103,
+    "combinedUnique": 118,
+    "failed": 0,
+    "ignored": 0,
+    "fullLibraryExecuted": false,
+    "alreadyQualifiedNewCasesSkippedDuringAdjacent": true,
+    "testExecutableSha256": "a9aadd4fa4f0d375ad0483b5bb7f7c2ce0364208c114f00d6c68312ddee2c2a2",
+    "testExecutableUnchangedDuringAdjacent": true,
+    "names": [
+      "beta::tests::readiness_fails_closed_without_finality_capacity_or_quorum",
+      "companion_supply::life::tests::companion_life_history_capacity_counts_parent_resume_cancel_and_child_without_eviction",
+      "companion_supply::tests::companion_supply_cancellation_capacity_counts_permanent_offline_tombstones",
+      "companion_supply::tests::companion_supply_capacity_never_evicts_history_to_make_room",
+      "consensus_log::tests::sui_finality_and_capacity_become_membership_only_after_commonware_quorum",
+      "control_plane::tests::expired_heartbeat_triggers_failover_and_capacity_is_enforced",
+      "control_plane::tests::registration_and_heartbeats_enforce_per_zone_capacity",
+      "economy::tests::durable_marked_pickup_bypasses_capacity_preflight_after_state_changes",
+      "hotspot::tests::hard_capacity_rejects_overflow_instead_of_overloading_a_line",
+      "node_security::tests::permissionless_admission_requires_sui_finality_and_trusted_capacity_issuer",
+      "operator::tests::remote_capacity_challenge_is_bounded_and_signed_by_node_identity",
+      "routing::shared_groups::tests::shared_party_rechecks_full_capacity_at_accept_and_obeys_invite_delay",
+      "routing::tests::pending_zone_packets_never_exceed_rpc_outbound_capacity",
+      "routing::tests::trade_completion_tests::receiver_capacity_rejection_refunds_both_sides_without_completion",
+      "routing::tests::trade_gold_tests::prepared_refund_overflow_retains_final_offer_until_capacity_allows_one_refund",
+      "session::abnormal_teardown_persistence_tests::abnormal_teardown_updates_the_next_character_roster_last_access",
+      "session::abnormal_teardown_persistence_tests::db_and_journal_failure_retain_frozen_authority_and_retry_same_checkpoint",
+      "session::abnormal_teardown_persistence_tests::db_failure_journals_the_exact_frozen_checkpoint_and_revokes_resume_eligibility",
+      "session::abnormal_teardown_persistence_tests::mismatched_or_switched_prepared_identity_is_rejected_without_persist_journal_or_cleanup",
+      "session::abnormal_teardown_persistence_tests::owner_lease_handoff_racing_prepare_is_rejected_before_cache_or_persistence",
+      "tcp::tcp_save_fail_closed_tests::persistence_admission_is_finite_and_releases_capacity",
+      "topology::tests::checked_adaptive_route_rejects_capacity_exhaustion",
+      "web::game_shop_gift_tests::gift_binding_preserves_nonce_tuple_identity_and_full_capacity_replays",
+      "web::reconnect_handoff::tests::a_closed_notification_channel_without_ready_is_failure",
+      "web::reconnect_handoff::tests::canceling_waiter_does_not_consume_pending_or_ready_for_another_waiter",
+      "web::reconnect_handoff::tests::close_waits_for_ready_without_holding_registry_lock",
+      "web::reconnect_handoff::tests::debug_and_failure_display_do_not_expose_identity_fields",
+      "web::reconnect_handoff::tests::live_and_unknown_tcp_or_foreign_owner_cannot_wait",
+      "web::reconnect_handoff::tests::poisoned_registry_cannot_announce_ready_or_register_waiters",
+      "web::reconnect_handoff::tests::ready_before_first_poll_is_retained",
+      "web::reconnect_handoff::tests::ready_broadcasts_to_all_existing_waiters_without_consuming_the_token",
+      "web::reconnect_handoff::tests::registration_conflict_never_replaces_live_or_closed_binding",
+      "web::reconnect_handoff::tests::registry_tokens_bindings_and_waiters_can_cross_executor_threads",
+      "web::reconnect_handoff::tests::same_key_and_owner_get_a_new_identity_and_old_waiter_cannot_complete_it",
+      "web::reconnect_handoff::tests::stale_guard_drop_cannot_remove_same_key_and_owner_successor",
+      "web::reconnect_handoff::tests::stale_guard_ready_fails_closed_and_cannot_complete_successor",
+      "web::reconnect_handoff::tests::unfinished_guard_drop_fails_every_waiter_and_removes_its_binding",
+      "web::tests::action_capacity_waits_for_a_released_slot",
+      "web::tests::capacity_state_rejects_websocket_connections_over_limit",
+      "web::tests::capacity_state_tracks_account_command_inflight_limits",
+      "web::tests::capacity_state_tracks_active_sessions_and_reconnect_leases",
+      "web::tests::development_capacity_policy_is_unlimited_unless_explicitly_configured",
+      "web::tests::explicit_logout_and_disconnect_revoke_native_resume_family_before_execution",
+      "web::tests::monthly_card_tests::monthly_card_expired_resume_discards_the_lease_and_capacity",
+      "web::tests::native_resume_atomically_restores_bound_session_and_replay_fails",
+      "web::tests::native_resume_auth_revision_overflow_blocks_issue_reserve_and_commit",
+      "web::tests::native_resume_commit_rechecks_lease_expiry_under_the_store_mutex",
+      "web::tests::native_resume_control_never_maps_to_simulation_auth_or_unsafe_actions",
+      "web::tests::native_resume_credential_and_lease_are_consumed_once_under_one_mutex",
+      "web::tests::native_resume_expired_credential_with_live_lease_is_terminal_and_releases_capacity",
+      "web::tests::native_resume_first_post_resume_action_rechecks_identity_before_execution",
+      "web::tests::native_resume_handler_reconnects_once_rotates_credential_and_replays_no_commands",
+      "web::tests::native_resume_identity_revoked_during_prepare_cannot_commit_or_retry_and_drops_resources",
+      "web::tests::native_resume_json_is_explicit_strict_and_secret_redacted",
+      "web::tests::native_resume_rejects_cache_revocation_without_consuming_the_lease",
+      "web::tests::native_resume_rejects_expired_identity_binding",
+      "web::tests::native_resume_rejects_revoked_identity_without_consuming_the_lease",
+      "web::tests::native_resume_rejects_wrong_gateway_session_and_character_bindings",
+      "web::tests::native_resume_remote_revocation_after_precheck_is_caught_by_post_commit_shared_revalidate",
+      "web::tests::native_resume_reservation_drop_and_explicit_rollback_restore_exact_lease",
+      "web::tests::native_resume_revocation_after_revalidate_before_commit_is_linearized_and_never_activates",
+      "web::tests::native_resume_route_failure_rolls_back_and_exact_token_retries_without_orphan_permits",
+      "web::tests::native_resume_server_event_contracts_are_exact_and_rejection_is_uniform",
+      "web::tests::native_resume_zone_failure_rolls_back_and_second_attempt_commits",
+      "web::tests::production_capacity_defaults_are_finite_and_environment_overrides_remain_explicit",
+      "web::tests::reconnect_grace_expiry_revokes_native_resume_credentials",
+      "web::tests::reconnect_session_store_discards_expired_sessions",
+      "web::tests::reconnect_session_store_restores_active_session_before_grace_expires",
+      "web::tests::reconnect_session_store_scheduled_purge_discards_expired_sessions",
+      "web::web_auth_peer_bucket_tests::auth_peer_bucket_changing_user_agent_cannot_bypass_peer_registration_limit",
+      "web::web_auth_peer_bucket_tests::auth_peer_bucket_global_account_limit_survives_peer_and_user_agent_changes",
+      "web::web_auth_peer_bucket_tests::auth_peer_bucket_login_pair_limit_survives_user_agent_changes",
+      "web::web_auth_peer_bucket_tests::auth_peer_bucket_same_native_or_unknown_user_agent_does_not_block_other_peers",
+      "web::web_explicit_leave_route_tests::explicit_leave_cache_failure_keeps_captured_owner_for_retry_without_reentering_world",
+      "web::web_explicit_leave_route_tests::explicit_leave_failed_save_preserves_identity_lease_and_refresh",
+      "web::web_explicit_leave_route_tests::explicit_leave_logout_failed_packet_never_claims_completed_leave",
+      "web::web_explicit_leave_route_tests::explicit_leave_old_owner_cannot_delete_new_lease_even_before_new_record_is_published",
+      "web::web_explicit_leave_route_tests::explicit_leave_old_owner_cannot_delete_new_record_or_refresh_it_back",
+      "web::web_explicit_leave_route_tests::explicit_leave_releases_captured_route_after_identity_cleared_before_relogin",
+      "web::web_native_resume_handoff_tests::canceled_waiter_does_not_consume_a_later_ready_lease",
+      "web::web_native_resume_handoff_tests::changed_nonce_generation_or_family_cannot_match_the_completed_binding",
+      "web::web_native_resume_handoff_tests::credential_expiry_after_wait_cannot_reserve_a_ready_lease",
+      "web::web_native_resume_handoff_tests::credential_expiry_inside_final_live_guard_cannot_be_consumed",
+      "web::web_native_resume_handoff_tests::credential_expiry_while_commit_waits_for_store_mutex_cannot_authorize_activation",
+      "web::web_native_resume_handoff_tests::live_socket_and_unknown_credential_do_not_acquire_waiters",
+      "web::web_native_resume_handoff_tests::pending_save_retains_credential_and_early_ready_allows_one_real_commit",
+      "web::web_native_resume_handoff_tests::revocation_during_wait_never_becomes_authority_when_ready_arrives",
+      "web::web_native_resume_handoff_tests::route_and_zone_prepare_failures_restore_the_exact_lease_and_credential",
+      "web::web_native_resume_handoff_tests::same_owner_successor_requires_its_own_handoff_token",
+      "web::web_native_resume_handoff_tests::terminal_end_at_commit_lock_rolls_back_without_consuming_then_live_retry_commits",
+      "web::web_native_resume_handoff_tests::two_ready_waiters_cannot_commit_the_same_family_twice",
+      "web::web_native_resume_handoff_tests::unfinished_guard_failure_does_not_consume_or_publish_the_credential",
+      "web::web_native_resume_handoff_ws_tests::cancelled_real_ws_waiter_does_not_consume_the_credential_or_another_resume_request",
+      "web::web_native_resume_handoff_ws_tests::native_resume_waits_inside_real_handler_for_pending_file_save_then_rejects_old_credential",
+      "web::web_reconnect_handoff_store_tests::a_fresh_socket_binding_can_publish_a_second_handoff_without_reusing_the_first_token",
+      "web::web_reconnect_handoff_store_tests::a_ready_notification_cannot_authorize_a_lease_without_its_bound_token",
+      "web::web_reconnect_handoff_store_tests::account_and_identity_revocation_fences_invalidate_the_old_revision_permanently",
+      "web::web_reconnect_handoff_store_tests::an_old_token_with_the_same_owner_cannot_consume_a_new_teardown",
+      "web::web_reconnect_handoff_store_tests::capacity_wait_does_not_preserve_authorization_revoked_after_consumption",
+      "web::web_reconnect_handoff_store_tests::expired_saved_lease_cannot_be_consumed_even_with_a_current_identity_and_token",
+      "web::web_reconnect_handoff_store_tests::identity_expiry_is_checked_at_capture_revalidation_and_consumption",
+      "web::web_reconnect_handoff_store_tests::identity_helper_observes_shared_cache_revocation_without_consuming_the_lease",
+      "web::web_reconnect_handoff_store_tests::identity_helper_rejects_auth_account_and_current_identity_changes",
+      "web::web_reconnect_handoff_store_tests::identity_helper_rejects_real_identity_revocation_without_mutating_the_saved_world",
+      "web::web_reconnect_handoff_store_tests::notification_follows_publication_consumes_once_and_preserves_the_world",
+      "web::web_reconnect_handoff_store_tests::overlapping_revocations_do_not_reopen_capture_when_only_one_fence_ends",
+      "web::web_reconnect_handoff_store_tests::shared_authority_revoked_after_local_consumption_cannot_authorize_bootstrap_or_restore_again",
+      "web::web_reconnect_handoff_store_tests::two_notified_waiters_compete_for_exactly_one_saved_session",
+      "web::web_reconnect_handoff_store_tests::wrong_key_account_owner_or_token_never_consumes_the_legitimate_lease",
+      "web::web_reconnect_persistence_wait_tests::reconnect_handoff_is_visible_while_committed_movement_drain_is_still_blocked",
+      "web::web_reconnect_persistence_wait_tests::reconnect_handoff_journaled_checkpoint_never_announces_ready_or_restores",
+      "web::web_reconnect_persistence_wait_tests::reconnect_handoff_live_role_still_denies_a_second_route_without_waiting",
+      "web::web_reconnect_persistence_wait_tests::reconnect_handoff_waits_for_real_checkpoint_persistence_and_replays_without_world_mutation",
+      "web::web_save_fail_closed_tests::persistence_admission_capacity_is_finite_and_permits_are_released",
+      "web::web_transport_close_tests::transport_close_first_signal_before_wait_is_not_lost",
+      "web::web_transport_close_tests::transport_close_preserves_only_actually_completed_explicit_leave",
+      "web::web_transport_close_tests::transport_close_reader_ends_stalled_real_socket_work",
+      "web::web_transport_close_tests::transport_close_signal_during_last_work_poll_preserves_first_reason"
+    ]
+  },
+  "realWebSocket": {
+    "actualAxumHandlerAndSharedRuntime": true,
+    "ordinaryNewAccountLoginCharacterAndStartGame": true,
+    "realFileCheckpointBlockedBeforeLeasePublication": true,
+    "handlerSubscriptionObservedWhileSaveBlocked": true,
+    "subscriptionCountIsNotClaimedAsFuturePoll": true,
+    "ackBeforeActiveSnapshot": true,
+    "sameCredentialAfterCancelledSocketSucceeds": true,
+    "generationIncrementsOnceAndOldReplayRejected": true,
+    "protectedPersonalFieldsAndSelfTransformCompared": true,
+    "noInheritedQueuedChat": true,
+    "logoutAndAllSocketSessionLeasePermitsReturnToZero": true,
+    "testListenersAbortedAndAwaited": true,
+    "successfulTempCleanupResolvedInsideTempRoot": true,
+    "failedFixturesRetained": true,
+    "modelCalls": 0,
+    "adminCommands": false,
+    "nativeGui": false
+  },
+  "candidate": {
+    "schema": "mir2.r16.native-resume.candidate.v1",
+    "createdAt": "2026-11-07T20:01:03.115Z",
+    "head": "cc0cbf1a55bf80e1cc69b053f620a096d5d78af7",
+    "sourcePins": {
+      "apps/gateway/src/web.rs": "b05bd051ed211c1627e8973bd3dc70cd4395c23d294771d099fd4b51e6fb5a0f",
+      "apps/gateway/src/web_native_resume_handoff.rs": "be0a7476e7bf8d9217b469a4ba2a2848a8c4fb013e6a0981e3a6cc8f5d2b0307",
+      "apps/gateway/src/web_native_resume_handoff_tests.rs": "b9c7b90a9c2a9fb49dccee699088b5380907d37ab778974499f60dc9531266ff",
+      "apps/gateway/src/web_native_resume_handoff_ws_tests.rs": "abdb9e02cd1874133075abf61980441a7b1f3e63925ffa56202d1d4f6f476503",
+      "apps/gateway/src/web_reconnect_handoff.rs": "3fe45ab5222b898d69c367ae2693f3178f204eaa6dcc2bf2ec79e3e0bb8875a3",
+      "apps/gateway/src/resume.rs": "172ed611ad16a68aefa79e9d7fb703ee21240e6b926bd4490495a70a5ad14168",
+      "apps/gateway/src/session.rs": "c4f7a6dc2aca6297ca0fbbfec18401eda47c865d18dd9633a180eb3efc059baf",
+      "apps/game-client/platform-windows/src/gateway.rs": "c29ea4c4ce0998087b71fd8d147c52fdee8272fa589ad4ba2e4ddcae3d60b37e",
+      "apps/game-client/platform-windows/src/session_config.rs": "0d6d4a04d0bbf83a478a3294044f43615d0995810af488bb616f7d47ed291a52"
+    },
+    "sourceStableBeforeAndAfter": true,
+    "fullReleaseSourceClosurePinned": false,
+    "command": [
+      "cargo",
+      "+1.95.0",
+      "build",
+      "-p",
+      "mir2-gateway",
+      "--bin",
+      "mir2-gateway",
+      "--offline",
+      "--locked",
+      "--target-dir",
+      "D:/mir2-builds/web-newcomer-30-20261107/cargo-gateway-fresh"
+    ],
+    "exitCode": 0,
+    "file": "D:\\mir2-builds\\r16-native-resume-wait-20261108/mir2-gateway-r16-native-resume.exe",
+    "sha256": "3666eb7e67b8c99ab45621fd5b320f5e0874869868a45f48e3a1414e3e6bd9c1",
+    "bytes": 144721920,
+    "profile": "dev/debug",
+    "releaseBuild": false,
+    "publicDeploy": false
+  },
+  "preservation": {
+    "schema": "mir2.r16.native-resume.preservation.v1",
+    "timeUtc": "2026-11-07T20:03:11.3286233Z",
+    "originalListeners": [
+      {
+        "LocalPort": 19235,
+        "OwningProcess": 129280
+      },
+      {
+        "LocalPort": 19232,
+        "OwningProcess": 128444
+      },
+      {
+        "LocalPort": 19231,
+        "OwningProcess": 126788
+      }
+    ],
+    "originalGatewayProcesses": [
+      {
+        "ProcessId": 129280,
+        "ExecutablePath": "D:\\mir2-builds\\web-newcomer-30-20261107\\mir2-gateway-v22-isolated.exe"
+      },
+      {
+        "ProcessId": 128444,
+        "ExecutablePath": "D:\\mir2-builds\\web-newcomer-30-20261107\\mir2-gateway-v22-isolated.exe"
+      },
+      {
+        "ProcessId": 126788,
+        "ExecutablePath": "D:\\mir2-builds\\web-newcomer-30-20261107\\mir2-gateway-v22-isolated.exe"
+      }
+    ],
+    "originalWindowsExeSha256": "d930618bc7cc461a4d03507a68fb28c0b15af6200de8f00946c463929f67d638",
+    "previousOrdinaryReconnectCandidateSha256": "e519dc7a6d0eb3f399fcb20c1145bb260418ec0c13e3d7ad44327610fc987c55",
+    "desktopControlUsed": false,
+    "publicDeploy": false,
+    "onlyIsolatedFixtureAccountsUsed": true,
+    "productionOriginalSaveByteComparisonClaimed": false
+  },
+  "failedPreparations": [
+    {
+      "artifact": "tests-initial.log",
+      "reason": "First WS fixture used name instead of packet in the actual packet envelope; ten store cases passed."
+    },
+    {
+      "artifact": "tests-ws-second.log",
+      "reason": "Fixture selected an older pre-StartGame world snapshot without a self player."
+    },
+    {
+      "artifact": "tests-pre-clock-fix.log",
+      "reason": "Fixture used shared wire id instead of the personal snapshot self id; twelve store cases passed, including expiry under mutex contention."
+    },
+    {
+      "artifact": "tests-pre-consume-clock.log",
+      "reason": "Precise post-purge/pre-consume expiry regression failed before the final clock refresh; two WS fixtures still used the wrong self id."
+    }
+  ],
+  "fixturePreparationCorrections": [
+    "Use a diverse synthetic recovery MAC accepted by the existing validator.",
+    "Read worldSnapshot.payload; select the first active snapshot after StartGame/sessionResumed.",
+    "Use playerObjectId within snapshot entities; selfZoneObjectId is a separate wire identity."
+  ],
+  "openWork": [
+    "Actual Windows window and same-candidate Web/Windows save roundtrip remain deferred.",
+    "Cross-Gateway/TCP resume is outside the process-local WebSocket store.",
+    "Group shared social budget/failure ACK, trade, Alo Web model settings and cross-client memory, release/cold-cache/size gates and final human acceptance remain."
+  ],
+  "publicArtifactCredentialScan": true,
+  "publicDeploy": false,
+  "releaseBuild": false,
+  "candidate100": false,
+  "humanAccepted": false,
+  "artifactPins": {
+    "tests-qualified.log": {
+      "sha256": "d8a2a349b2842b0716d35e3f2d9bfbc385f5b96e5e18ac96ee9135bf7e36b5eb",
+      "bytes": 62914
+    },
+    "tests-initial.log": {
+      "sha256": "55f039c8282d6857859fe6c2c06415f44f971eca55f8f4ac4248afced7380969",
+      "bytes": 66287
+    },
+    "tests-ws-second.log": {
+      "sha256": "43a841d264b4665a2f5523f21a113565694d8a4fe3f5d269032183428a33c194",
+      "bytes": 67803
+    },
+    "tests-pre-clock-fix.log": {
+      "sha256": "a49fc3296772f783018eb1e5bac36ebe21140b5597c8de7926564c4aa5384173",
+      "bytes": 69425
+    },
+    "tests-pre-consume-clock.log": {
+      "sha256": "9843a16d34b1ef4d69dc34f8a49379728285d9d57f4bc72b37bcd84c34a036cb",
+      "bytes": 70694
+    },
+    "pre-clock-source.json": {
+      "sha256": "a7b19cb1ece22413f12a31831c3f11df7f01a125db87597ff53f26b87b79260b",
+      "bytes": 753
+    },
+    "pre-consume-clock.json": {
+      "sha256": "1c2e781e81463bc2a7a4f362a2a8e0c7a4bf1a5e40e9c4a34d70ed269d347b71",
+      "bytes": 1214
+    },
+    "qualified-before.json": {
+      "sha256": "ca63e5fed79d01b0269f425ed1e790991cdf85b73b5b04e0e80f1256d1bea7b4",
+      "bytes": 1214
+    },
+    "first-attempt-source.json": {
+      "sha256": "62b7422e1f11a1b3fccd4f3fd0a4898c7bcb3031d7be46b5a36e660ff977f18a",
+      "bytes": 297
+    },
+    "candidate-build.json": {
+      "sha256": "64d7ac62c96af6ac8481f63b9632d680a3422b34b1d435852bf655416ecd6afd",
+      "bytes": 1843
+    },
+    "candidate-build.log": {
+      "sha256": "39fe356eced28785ec729f2704a2921525f0bffd784ca34e073a819ed62814df",
+      "bytes": 62005
+    },
+    "candidate-build.d": {
+      "sha256": "7d6fadd7a483423a52a81893c8d6c74397a0a00b91e1bdf2ff7dea1eeb4f21a3",
+      "bytes": 43244
+    },
+    "regression-result.json": {
+      "sha256": "906d49cbf7c476479ead3a1ef7f5c9096387fd7925067c6d66c91e96a9416fab",
+      "bytes": 11938
+    },
+    "preservation.json": {
+      "sha256": "e5ceea2081037a2410554b85cfb088089797c2a84d4a03f20d0789201a815a15",
+      "bytes": 1196
+    },
+    "regression-reconnect_handoff.log": {
+      "sha256": "3c789b31b2398c74128cf8b65cd1fc5121943b7a7301c04c3d80ba2b12e96dcd",
+      "bytes": 3965
+    },
+    "regression-native_resume.log": {
+      "sha256": "2b90d20b8463e3d2288b620f33d125660658150c8b4a43ddf2f94d459189963c",
+      "bytes": 2227
+    },
+    "regression-web_transport_close_tests.log": {
+      "sha256": "18c3c2df57843c82738fc5a8a86e059b17f2a0e838e0f95fd62762ded9426c2f",
+      "bytes": 531
+    },
+    "regression-web_explicit_leave_route_tests.log": {
+      "sha256": "a6b3057608e2884580e4e34d7d6a2eaf6f9abf6ff66a99973084639ca1be029e",
+      "bytes": 856
+    },
+    "regression-abnormal_teardown_persistence_tests.log": {
+      "sha256": "44b6a516c89aa7168b3c7239fd11dcbd9bdd957bcccddcc2351e7a0da7ed06bb",
+      "bytes": 785
+    },
+    "regression-web_auth_peer_bucket_tests.log": {
+      "sha256": "defda65ac980767e32dae3a5ecbba7d108bd4691822f136ab54054690ac61470",
+      "bytes": 586
+    },
+    "regression-reconnect_session_store.log": {
+      "sha256": "5277c3d4c6d077180d0a20d9bf5c9d7f2fb17ee99db9b3ae83de88cd1df47745",
+      "bytes": 373
+    },
+    "regression-capacity.log": {
+      "sha256": "8dfc920d721d20c1e231c92e14f58f1ef72cb614b7b50bb47611eff31d8fe82f",
+      "bytes": 2901
+    },
+    "tools/freeze-source.mjs": {
+      "sha256": "ec84fba3c7eee588fc4640fc3fe717265a87c13497222782299b8314c6b0f8a2",
+      "bytes": 1218
+    },
+    "tools/regression.mjs": {
+      "sha256": "347a9af82e851e51e428608d7a8c291d14d9228fd557ecd57ec4e070b81ea93f",
+      "bytes": 2013
+    },
+    "tools/build-candidate.mjs": {
+      "sha256": "fe75c6e8d61ba98d9e822bc12800e5617af23a14ebc05489a48689c6fcc4d326",
+      "bytes": 2035
+    },
+    "tools/publish.mjs": {
+      "sha256": "eebe2b501105b41de9106423371c4d264c0dabe141d9593e5230a048ee3b2689",
+      "bytes": 8644
+    },
+    "fixtures/ws-tests-first-attempt.rs": {
+      "sha256": "49c2ae5b4c5786a61cfbad6e3a4b540cbdac28b396851ada343d3009613a915e",
+      "bytes": 29080
+    },
+    "consume-clock.diff": {
+      "sha256": "8b2b2863396a325e990cda369bb8fdb6ed69f6c7dc0732bf6df2d7131257431f",
+      "bytes": 765
+    },
+    ".gitattributes": {
+      "sha256": "107ecdda0524f8061d95be7957f1989dcc829fd66032a5956fd87040acba4ffc",
+      "bytes": 77
+    }
+  },
+  "sourcePinBasis": "Windows worktree bytes; canonical Git blob IDs are recorded separately.",
+  "sourceGitBlobOids": {
+    "apps/gateway/src/web.rs": "30f302d5937c4d55729001d8f41b13cbfa304b53",
+    "apps/gateway/src/web_native_resume_handoff.rs": "032c3364d4f46e443f257772a1fe92b057996416",
+    "apps/gateway/src/web_native_resume_handoff_tests.rs": "9bd66714bad72e538ae33f596854e1ebadf65b5b",
+    "apps/gateway/src/web_native_resume_handoff_ws_tests.rs": "da1d5376a1b2748be1c6ba3cd328d8e5d0fb2d59",
+    "apps/gateway/src/web_reconnect_handoff.rs": "65e4d9639093bb53b7af0dd3c181e7cf6a935fcf",
+    "apps/gateway/src/resume.rs": "da701769695b17dcf5b1f034b807d85bd045631f",
+    "apps/gateway/src/session.rs": "ac9433d856d1bf518066605161af68339138b2d5",
+    "apps/game-client/platform-windows/src/gateway.rs": "722fc4d9869a686ad2920473e43dafd59f4bd348",
+    "apps/game-client/platform-windows/src/session_config.rs": "9ec0431d65c87bc68a236390a241a4474103a55f"
+  },
+  "artifactBytesPreservedInGit": true
+}

@@ -365,7 +365,9 @@ impl Fixture {
         let config = crate::GatewayConfig::default()
             .with_account_store_path(root.join("accounts.json"))
             .with_save_recovery_dir(root.join("recovery"))
-            .with_save_recovery_mac_key([0x67; 32])
+            .with_save_recovery_mac_key(std::array::from_fn::<u8, 32, _>(|index| {
+                0x67u8.wrapping_add(index as u8)
+            }))
             .unwrap();
         let (tx, rx) = oneshot::channel();
         let gate = Arc::new(SaveGate {
@@ -503,19 +505,19 @@ impl Fixture {
         .await;
         let (credential, mut events) =
             read_until(&mut socket, |e| e["type"] == "resumeCredential").await;
-        assert!(events
+        let started_at = events
             .iter()
-            .any(|e| packet(e, "StartGame") && e["payload"]["result"] == 4));
-        if !events.iter().any(|e| e["type"] == "worldSnapshot") {
-            events.extend(
-                read_until(&mut socket, |e| e["type"] == "worldSnapshot")
-                    .await
-                    .1,
-            );
+            .position(|e| packet(e, "StartGame") && e["payload"]["result"] == 4)
+            .expect("ordinary StartGame succeeded");
+        let active_snapshot =
+            |e: &Value| e["type"] == "worldSnapshot" && !e["payload"]["playerObjectId"].is_null();
+        if !events.iter().skip(started_at + 1).any(active_snapshot) {
+            events.extend(read_until(&mut socket, active_snapshot).await.1);
         }
         let snapshot = events
             .iter()
-            .find(|e| e["type"] == "worldSnapshot")
+            .skip(started_at + 1)
+            .find(|e| active_snapshot(e))
             .unwrap();
         Started {
             socket,
@@ -525,7 +527,7 @@ impl Fixture {
             },
             credential: credential["credential"].as_str().unwrap().to_owned(),
             generation: credential["generation"].as_u64().unwrap(),
-            protected: protected(&snapshot["snapshot"]),
+            protected: protected(&snapshot["payload"]),
         }
     }
     async fn block_old_save(&mut self, started: &mut Started) {
@@ -613,7 +615,7 @@ async fn send(socket: &mut Socket, value: Value) {
         .unwrap();
 }
 fn packet(event: &Value, name: &str) -> bool {
-    event["type"] == "packet" && event["name"] == name
+    event["type"] == "packet" && event["packet"] == name
 }
 async fn read_until(
     socket: &mut Socket,
@@ -672,6 +674,11 @@ fn protected(snapshot: &Value) -> Value {
         "questLog",
         "knownSkills",
         "playerExperience",
+        "playerMaxExperience",
+        "beltItems",
+        "storageItems",
+        "heroInventoryItems",
+        "heroEquipmentItems",
     ] {
         projection.insert(
             key.into(),
@@ -681,20 +688,54 @@ fn protected(snapshot: &Value) -> Value {
                 .clone(),
         );
     }
+    // Snapshot entities use the personal SelfPlayer id; selfZoneObjectId is
+    // the distinct shared-Zone wire identity, not a replacement snapshot id.
+    let self_id = &snapshot["playerObjectId"];
+    let self_player = snapshot["entities"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|entity| entity["objectId"] == *self_id)
+        .unwrap_or_else(|| {
+            panic!(
+                "authoritative self player entity: local={:?}, zone={:?}, entity ids={:?}",
+                snapshot["playerObjectId"],
+                snapshot["selfZoneObjectId"],
+                snapshot["entities"]
+                    .as_array()
+                    .unwrap()
+                    .iter()
+                    .map(|entity| entity["objectId"].clone())
+                    .collect::<Vec<_>>()
+            )
+        });
+    for key in ["x", "y", "direction", "class", "gender", "level"] {
+        projection.insert(
+            format!("self:{key}"),
+            self_player
+                .get(key)
+                .expect("self identity or transform")
+                .clone(),
+        );
+    }
     Value::Object(projection)
 }
 async fn assert_resumed(f: &Fixture, started: &Started, socket: &mut Socket) {
     let (rotated, mut events) = read_until(socket, |e| e["type"] == "resumeCredential").await;
-    if !events.iter().any(|e| e["type"] == "worldSnapshot") {
-        events.extend(read_until(socket, |e| e["type"] == "worldSnapshot").await.1);
-    }
     let resumed = events
         .iter()
         .position(|e| e["type"] == "sessionResumed")
         .expect("resume acknowledgment");
+    let active_snapshot =
+        |e: &Value| e["type"] == "worldSnapshot" && !e["payload"]["playerObjectId"].is_null();
+    if !events.iter().skip(resumed + 1).any(active_snapshot) {
+        events.extend(read_until(socket, active_snapshot).await.1);
+    }
     let snapshot = events
         .iter()
-        .position(|e| e["type"] == "worldSnapshot")
+        .enumerate()
+        .skip(resumed + 1)
+        .find_map(|(index, e)| active_snapshot(e).then_some(index))
         .expect("authoritative resume snapshot");
     assert!(resumed < snapshot);
     assert!(
@@ -703,7 +744,7 @@ async fn assert_resumed(f: &Fixture, started: &Started, socket: &mut Socket) {
     );
     assert_eq!(rotated["generation"].as_u64(), Some(started.generation + 1));
     assert!(
-        protected(&events[snapshot]["snapshot"]) == started.protected,
+        protected(&events[snapshot]["payload"]) == started.protected,
         "personal authoritative state is preserved"
     );
     assert!(!events
