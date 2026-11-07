@@ -8,6 +8,7 @@ import ts from "typescript";
 const sources = { nativeLocalization: "../lib/r16-native-localization.ts", nativeData: "../lib/generated/r16-native-localization.json", runtimeLanguage: "../lib/r16-runtime-language.ts", r16Auth:"../lib/r16-auth-layout.ts", npcPurchaseClient:"../lib/npc-purchase-client.ts", rankingInspectRequests:"../lib/ranking-inspect-requests.ts", pearlSource:"../lib/npc-pearl-buy-source.ts", crystalItem:"../lib/crystal-item-source.ts", repair:"../lib/npc-repair-service.ts", fishingSource: "../lib/world-fishing-source.ts", bagBeltMove: "../lib/bag-belt-move-dispatcher.ts", identity: "../lib/world-model/item-identity.ts",
   equipment: "../lib/equipment-gateway-adapter.ts", parcel: "../lib/mail-parcel-gateway-adapter.ts",
   storage: "../lib/storage-gateway-adapter.ts", social: "../lib/social-incoming-replies.ts", groupOperations: "../lib/group-operations.ts",
+  guildRankOperations: "../lib/guild-rank-operations.ts", guildRankProjection: "../lib/guild-rank-projection.ts",
   operations: "../lib/social-window-operations.ts", rental: "../lib/storage-rental-confirmation.ts",
   bag: "../lib/bevy-bag-model.ts", socialItems: "../lib/social-item-window-model.ts",
   stage5:"../lib/stage5-window-adapters.ts", tooltip:"../lib/shared-item-tooltip.ts", guildBuff:"../lib/guild-buff-ui.ts", socialActions: "../lib/social-parity-actions.ts", extended: "../lib/extended-server-packets.ts" };
@@ -15,6 +16,7 @@ const allow = { nativeLocalization: {"./generated/r16-native-localization.json":
   parcel: { "./equipment-gateway-adapter": "equipment" },
   storage: { "./equipment-gateway-adapter": "equipment", "./world-model/item-identity": "identity",
     "./mail-parcel-gateway-adapter": "parcel" }, social: {}, groupOperations: {}, operations: {},
+  guildRankOperations: { "./social-parity-actions": "socialActions" }, guildRankProjection: { "./social-parity-actions": "socialActions" },
   rental: { "./social-incoming-replies": "social", "./npc-purchase-client": "npcPurchaseClient" }, bag: { "./world-model/item-identity": "identity" },
   socialItems: { "./bevy-bag-model": "bag", "./world-model/item-identity": "identity" }, stage5:{}, tooltip:{"./crystal-item-source":"crystalItem"}, guildBuff:{}, socialActions: {}, extended: {"./npc-purchase-client":"npcPurchaseClient"} };
 const modules = new Map();
@@ -96,7 +98,9 @@ const names = ["worldFishingOwner", "cancelWorldFishingGesture", "retireWorldFis
   "confirmStorageRental", "observeEquipmentSnapshot", "syncEquipmentSnapshot", "suspendEquipmentConnection",
   "stringOrFallback", "numberOrUndefined", "numberOrZero", "mapClassKey", "rankingPageKey",
   "setShowGuild", "setShowGroup", "setShowBonds", "setShowRanking", "friendCharacterIndex", "removeFriendEntry", "editFriendMemo",
-  "changeGuildMemberRank", "saveGuildRank", "rankingRequestForTab", "issueRankingRequest", "requestRanking", "refreshRanking",
+  "changeGuildMemberRank", "readGuildRankEditSource", "scheduleGuildRankControls", "retireGuildRankControls",
+  "submitGuildRankEdit", "renameGuildRank", "toggleGuildRankPermission", "requestGuildRankRoster",
+  "rankingRequestForTab", "issueRankingRequest", "requestRanking", "refreshRanking",
   "moveRankingRows", "setRankingOnlineOnly", "applyRankingPacket", "refreshFriends", "setShowFriends",
   "currentRankingInspectSource", "closeRankingInspect", "groupHiddenTargetIds", "currentGroupHoverName", "currentGroupOperationSource",
   "submitGroupOperation", "groupInviteMember", "kickGroupMember", "groupLeave", "groupToggleAllowInvites",
@@ -272,6 +276,8 @@ const owner = { ...session, runGeneration: 0, ownerRevision: 1, owner: "react" }
 function harness({ identity = session, sequenceRef = { current: 1 }, pendingRef = { current: new Map() } } = {}) {
   const sent = [], errors = [], logs = [], terminations = [], npcWithdrawals = [], npcInventoryRetirements = [];
   let listener = null, socketThrows = false, socketThrowType = null, attempts = 0, actions = 0;
+  let clock = 1000, timerSequence = 0;
+  const timers = new Map();
   const socket = { readyState: 1, send(body) {
     attempts++; if (socketThrows && (!socketThrowType || JSON.parse(body).type === socketThrowType)) throw Error("controlled socket.send outcome unknown");
     sent.push(JSON.parse(body));
@@ -305,6 +311,7 @@ function harness({ identity = session, sequenceRef = { current: 1 }, pendingRef 
     observePreferenceRef:{current:null},observeBootstrapRef:{current:null},combatModeRawRef:{current:null},
     heroWindowEpochsRef:{current:{inventory:1,character:1,belt:1}},skillBarPointerHeldRef:{current:false},skillBarDocumentCacheRef:{current:null},
     ...pureAuth, ...loadPure("runtimeLanguage"), ...loadPure("stage5"), ...adapter, ...pureSocial, ...pureOperations, ...pureSocialItems, ...pureSocialActions, ...pureExtended,
+    ...loadPure("guildRankOperations"), ...loadPure("guildRankProjection"),
     companionContextEpochRef: {current: 1}, companionClientRef: {current: null}, setCompanionOpen() {},
     projectEquipmentGatewaySnapshot: pureEquipment.projectEquipmentGatewaySnapshot,
     authoritativeItemUniqueId: pureIdentity.authoritativeItemUniqueId,
@@ -365,6 +372,8 @@ function harness({ identity = session, sequenceRef = { current: 1 }, pendingRef 
     rankingInspectOpenRef: {current: false}, rankingInspectBindingRef: {current: null},
     setRankingInspectInfo: value => {scope.rankingInspectInfo=value;},
     guildRanksRef: {current: null}, socialFriendsRef: {current: null},
+    guildRankOperationsRef: {current: new (loadPure("guildRankOperations").GuildRankOperations)()},
+    guildRankScopeRef: {current: null}, guildRankWakeRef: {current: null}, guildRankReadRef: {current: null},
     socialRosterWindowsRef: {current: {friends: false}}, socialRosterRenderSources: {friend: null, guild: null},
     setShowFriendsState: value => { scope.friendsOpen = value; },
     socialItemOperationsRef: {current: new pureOperations.SocialWindowOperations()}, socialOwnTradeRef: {current: null},
@@ -386,6 +395,9 @@ function harness({ identity = session, sequenceRef = { current: 1 }, pendingRef 
     } },
     CustomEvent: class { constructor(type, options) { this.type = type; this.detail = options.detail; } },
     console: { error: (...args) => errors.push(args) }, Date, Math, JSON,
+    performance: {now: () => clock},
+    setTimeout: (callback, delay) => { const id = ++timerSequence; timers.set(id, {callback, at: clock + delay}); return id; },
+    clearTimeout: id => timers.delete(id),
     isSpectatorBrowserMode: () => false,
     isMovementPredictionBlockingCommand: () => false, isMovementCommand: () => false,
     isMovementConsoleCommand: () => false, isCombatResolutionCommand: () => false,
@@ -409,6 +421,17 @@ function harness({ identity = session, sequenceRef = { current: 1 }, pendingRef 
   return { ...functions, scope, sent, errors, logs, terminations, npcWithdrawals, npcInventoryRetirements, socket, liveOwner,
     get attempts() { return attempts; }, get actions() { return actions; },
     onAction(value) { listener = value; }, throwAtSocket(type = null) { socketThrows = true; socketThrowType = type; },
+    restoreSocketSend() { socketThrows = false; socketThrowType = null; },
+    get now() { return clock; },
+    setClock(value) {
+      assert.ok(Number.isSafeInteger(value) && value >= clock, "deterministic monotonic input clock"); clock = value;
+      for (let round = 0; round < 100; round++) {
+        const due = [...timers].filter(([, timer]) => timer.at <= clock).sort((a, b) => a[1].at - b[1].at)[0];
+        if (!due) return;
+        timers.delete(due[0]); due[1].callback();
+      }
+      throw Error("Guild rank timer did not settle");
+    },
     renderRoster() { Object.assign(scope.socialRosterRenderSources, functions.captureSocialRosterRender(Boolean(scope.friendsOpen), Boolean(scope.guildOpen))); },
     renderTrade() { Object.assign(scope.socialTradeUiLease, functions.captureSocialTradeUiLease()); },
     get pending() { return scope.pendingStorageRequestsRef.current; },
@@ -463,11 +486,14 @@ function openGuild(page, occupied = true) {
 }
 function openGuildRoster(page) {
   openGuild(page);
-  page.receive("GuildStatus", {guildName: "Guild", myOptions: 25, typed: true});
-  page.receive("GuildMemberChange", {name: "Self", rankIndex: 4, status: 2, typed: true,
-    ranks: [{index: 4, name: "Officer", options: 25, members: [{name: "Self", id: 7, online: true},
-      {name: "Member", id: 8, online: false}]}]});
+  page.receive("GuildStatus", {guildName: "Guild", myOptions: 25, myRankId: 4, typed: true});
+  page.receive("GuildMemberChange", guildRosterPacket());
   page.setShowGuild(true); page.renderRoster();
+}
+function guildRosterPacket(patch = {}) {
+  return {name: "Self", rankIndex: 4, status: 255, typed: true,
+    ranks: [{index: 4, name: "Officer", options: 25, members: [{name: "Self", id: 7, online: true},
+      {name: "Member", id: 8, online: false}]}], ...patch};
 }
 const guildChange = (changeType = 2, from = 3, to = 5, user = 7) => ({changeType, from, to, user,
   item: changeType >= 3 || changeType === 1 ? null : guildRow(), typed: true});
@@ -763,7 +789,7 @@ test("actual Page FriendUpdate rejects stale source and ambiguous target while c
 
 test("actual Page GuildMemberChange projects actual ranks and updates permissions only for the current self name and character ID", () => {
   const page = harness(); openGuild(page);
-  const payload = {name: "Self", rankIndex: 4, status: 2, typed: true, ranks: [
+  const payload = {name: "Self", rankIndex: 4, status: 255, typed: true, ranks: [
     {index: 4, name: "Store only", options: 8, members: [{name: "Self", id: 7, online: true, hasVoted: false, lastLoginBinaryDatetime: "0"}]},
     {index: 9, name: "Leader", options: 255, members: [{name: "Other", id: 8, online: false, hasVoted: false, lastLoginBinaryDatetime: "0"}]},
   ]};
@@ -774,22 +800,33 @@ test("actual Page GuildMemberChange projects actual ranks and updates permission
   assert.deepEqual(page.scope.worldRef.current.stage5Systems.guild.members, ["Self", "Other"]);
   const source = page.readSocialItemSurface("guild"); page.submitSocialItem("guild1", 3, 47, 66, source.sourceKey);
   assert.equal(page.attempts, 0, "a rank without retrieve permission cannot authorize the existing item");
+  const before = page.scope.guildRanksRef.current;
   page.receive("GuildMemberChange", {...payload, ranks: [{index: 4, name: "Bad", options: 256, members: []}]});
-  assert.equal(page.scope.guildRanksRef.current, null, "malformed rank options cannot become a projected rank");
+  assert.strictEqual(page.scope.guildRanksRef.current, before, "malformed rank options cannot replace the valid authoritative projection");
+  assert.deepEqual(page.scope.guildPermissionsRef.current.permissions, ["CanStoreItem"], "invalid rank payload cannot grant additional permissions");
 });
 
-test("actual Page Guild rank assignment saves type2 separately from type3 rename and exact eight type5 options", () => {
+test("actual Page Guild rank assignment type2, rename type3 and one option type5 are separate single commands", () => {
   const page = harness(); openGuildRoster(page); page.changeGuildMemberRank("  Member  ", 4);
   assert.deepEqual(page.sent, [{type: "editGuildMember", changeType: 2, rankIndex: 4, name: "Member", rankName: "Officer"}]);
-  page.saveGuildRank(4, "Officer", ["CanStoreItem"]);
-  assert.deepEqual(page.sent.slice(1), pureSocialActions.guildRankSaveCommands(4, "Officer", ["CanStoreItem"]));
-  for (const index of [-1, 1.5, 2147483648]) page.changeGuildMemberRank("Member", index);
-  page.saveGuildRank(4, "Officer", ["canStoreItem"]); assert.equal(page.attempts, 10);
+  assert.equal(page.renameGuildRank(4, "  Captain  "), true);
+  assert.equal(page.toggleGuildRankPermission(4, "CanKick", true), true);
+  assert.deepEqual(page.sent.slice(1), [pureSocialActions.guildRankRenameCommand(4, "  Captain  "),
+    pureSocialActions.guildRankPermissionCommand(4, "CanKick", true)]);
+  assert.equal(page.scope.guildRanksRef.current.value.ranks[0].name, "Officer", "rename send is not an authoritative rename");
+  assert.equal(page.scope.guildRanksRef.current.value.ranks[0].permissions.includes("CanKick"), false, "option send does not change checked state");
+  for (const index of [-1, 1.5, 256, 2147483648]) {
+    page.changeGuildMemberRank("Member", index);
+    assert.equal(page.renameGuildRank(index, "Captain"), false);
+    assert.equal(page.toggleGuildRankPermission(index, "CanKick", true), false);
+  }
+  assert.equal(page.toggleGuildRankPermission(4, "canStoreItem", true), false); assert.equal(page.attempts, 3);
   page.changeGuildMemberRank("Unknown member", 4); page.changeGuildMemberRank("Member", 99);
-  assert.equal(page.attempts, 10, "actual rank and member rows are required before type2 can enter");
+  assert.equal(page.attempts, 3, "actual rank and member rows are required before type2 can enter");
   page.setShowGuild(false); page.renderRoster();
   assert.deepEqual(page.scope.socialRosterRenderSources, {friend: null, guild: null}, "actual closed render captures no roster projection");
-  page.saveGuildRank(4, "Officer", ["CanStoreItem"]); assert.equal(page.attempts, 10);
+  assert.equal(page.renameGuildRank(4, "Another"), false);
+  assert.equal(page.toggleGuildRankPermission(4, "CanRecruit", false), false); assert.equal(page.attempts, 3);
 });
 
 const rankingPacket = (rankType = 3, count = 100) => ({rankType, count, myRank: 8, listings: [22, 33],
@@ -829,7 +866,7 @@ test("actual Page Guild roster final proof rejects synchronous owner guild rank 
       if (mode === "logout") page.suspendEquipmentConnection("logoutPending");
       if (mode === "scene") page.scope.socialSceneRevisionRef.current++;
       if (mode === "guild") page.scope.worldRef.current.stage5Systems.guild.name = "Another";
-      if (mode === "rank") page.receive("GuildMemberChange", {name: "Self", status: 2, rankIndex: 4, typed: true,
+      if (mode === "rank") page.receive("GuildMemberChange", {name: "Self", status: 7, rankIndex: 4, typed: true,
         ranks: [{index: 4, name: "Changed", options: 25, members: [{name: "Self", id: 7, online: true}]}]});
       if (mode === "permission") page.receive("GuildStatus", {guildName: "Guild", myOptions: 8});
       if (mode === "window") page.setShowGuild(false);
@@ -840,15 +877,213 @@ test("actual Page Guild roster final proof rejects synchronous owner guild rank 
   }
 });
 
-test("actual Page quiet nine-command Guild rank save rechecks the actual captured source at each socket boundary and stops on replacement", () => {
-  for (const stoppedAt of [1, 4, 9]) {
-    const page = harness(); openGuildRoster(page); let actions = 0;
-    page.onAction(() => { if (++actions === stoppedAt) page.receive("GuildStatus", {guildName: "Guild", myOptions: 8}); });
-    page.saveGuildRank(4, "Officer", ["CanStoreItem"]);
-    const expected = pureSocialActions.guildRankSaveCommands(4, "Officer", ["CanStoreItem"]);
-    assert.deepEqual(page.sent, expected.slice(0, stoppedAt - 1)); assert.equal(page.attempts, stoppedAt - 1);
-    assert.equal(actions, stoppedAt, "failed final proof stops the next option immediately");
-    assert.equal(page.logs.includes("log.sent"), false, "every actual command preserves quiet sending");
+test("actual Page quiet single Guild rank edits recheck owner, guild, role, rank and window at the final socket boundary", () => {
+  for (const kind of ["rename", "permission"]) for (const mode of ["logout", "scene", "map", "guild", "actor", "rank", "role", "permission", "window", "session", "socket", "scope"]) {
+    const page = harness(); openGuildRoster(page);
+    page.onAction(() => {
+      if (mode === "logout") page.suspendEquipmentConnection("logoutPending");
+      if (mode === "scene") page.scope.socialSceneRevisionRef.current++;
+      if (mode === "map") page.scope.worldRef.current.mapFileName = "D002";
+      if (mode === "guild") page.scope.worldRef.current.stage5Systems.guild.name = "Another";
+      if (mode === "actor") page.scope.worldRef.current.entities[0].name = "Changed";
+      if (mode === "rank") page.receive("GuildMemberChange", {name: "Self", status: 7, rankIndex: 4, typed: true,
+        ranks: [{index: 4, name: "Changed", options: 25, members: [{name: "Self", id: 7, online: true}, {name: "Member", id: 8, online: false}]}]});
+      if (mode === "role") page.receive("GuildStatus", {guildName: "Guild", myOptions: 25, myRankId: 5});
+      if (mode === "permission") page.receive("GuildStatus", {guildName: "Guild", myOptions: 8, myRankId: 4});
+      if (mode === "window") page.setShowGuild(false);
+      if (mode === "session") page.scope.equipmentSessionGenerationRef.current++;
+      if (mode === "socket") page.scope.socketRef.current = {readyState: 1};
+      if (mode === "scope") page.scope.guildRankScopeRef.current.key = Object.freeze({});
+    });
+    assert.equal(kind === "rename" ? page.renameGuildRank(4, "Captain") : page.toggleGuildRankPermission(4, "CanKick", true), false, kind + ":" + mode);
+    assert.deepEqual(page.sent, [], kind + ":" + mode); assert.equal(page.attempts, 0, kind + ":" + mode);
+    assert.equal(page.actions, 1, "one attempted action with no second batch command: " + kind + ":" + mode);
+    assert.equal(page.logs.includes("log.sent"), false, "actual rank commands remain quiet");
+  }
+});
+
+test("actual Page Guild rank edits require the local edit proof and cannot enter through ordinary raw DTOs", () => {
+  const page = harness(); openGuildRoster(page);
+  for (const command of [pureSocialActions.guildRankRenameCommand(4, "Captain"),
+    pureSocialActions.guildRankPermissionCommand(4, "CanKick", true)]) {
+    assert.equal(page.sendRaw(command), false);
+    assert.equal(page.sendSocialRosterCommand("guild", command, true), false);
+  }
+  assert.equal(page.attempts, 0); assert.equal(page.actions, 0);
+  assert.deepEqual(page.scope.guildRankOperationsRef.current.view(page.now), {renameRankIndices: [], permission: false});
+});
+
+test("actual Page definitely-unsent Guild rank edits release only their reservation and can retry without a clock advance", () => {
+  for (const kind of ["rename", "permission"]) {
+    const page = harness(); openGuildRoster(page);
+    const submit = () => kind === "rename" ? page.renameGuildRank(4, "Captain") : page.toggleGuildRankPermission(4, "CanKick", true);
+    page.onAction(() => page.setShowGuild(false));
+    assert.equal(submit(), false, kind); assert.equal(page.attempts, 0, kind);
+    assert.deepEqual(page.scope.guildRankOperationsRef.current.view(page.now), {renameRankIndices: [], permission: false}, kind);
+    page.onAction(null); page.setShowGuild(true); page.renderRoster();
+    assert.equal(submit(), true, kind); assert.equal(page.attempts, 1, kind);
+    assert.deepEqual(page.sent, [kind === "rename" ? pureSocialActions.guildRankRenameCommand(4, "Captain")
+      : pureSocialActions.guildRankPermissionCommand(4, "CanKick", true)], kind);
+  }
+});
+
+test("actual Page unknown rename send stays pending through Native's exact five-second boundary", () => {
+  const page = harness(); openGuildRoster(page); const began = page.now;
+  page.throwAtSocket("editGuildMember");
+  assert.equal(page.renameGuildRank(4, "Captain"), true, "entered socket has an unknown outcome, not a proven failure");
+  assert.equal(page.attempts, 1); assert.deepEqual(page.sent, []); assert.equal(page.errors.length, 1);
+  assert.deepEqual(page.scope.guildRankOperationsRef.current.view(page.now).renameRankIndices, [4]);
+  page.restoreSocketSend();
+  assert.equal(page.renameGuildRank(4, "Another"), false); assert.equal(page.attempts, 1);
+  page.setClock(began + 4999);
+  assert.equal(page.renameGuildRank(4, "Another"), false);
+  page.setClock(began + 5000);
+  assert.deepEqual(page.scope.guildRankOperationsRef.current.view(page.now).renameRankIndices, [4]);
+  assert.equal(page.renameGuildRank(4, "Another"), false, "Native permits retry strictly after five seconds");
+  page.setClock(began + 5001);
+  assert.deepEqual(page.scope.guildRankOperationsRef.current.view(page.now).renameRankIndices, []);
+  assert.equal(page.renameGuildRank(4, "Another"), true); assert.equal(page.attempts, 2);
+  assert.deepEqual(page.sent, [pureSocialActions.guildRankRenameCommand(4, "Another")]);
+  assert.equal(page.scope.guildRanksRef.current.value.ranks[0].name, "Officer", "expiry never fabricates rename success");
+});
+
+test("actual Page rename release requires the actual matching status7 actor, rank and name from the current socket", () => {
+  const page = harness(); openGuildRoster(page);
+  assert.equal(page.renameGuildRank(4, "Captain"), true);
+  const matching = guildRosterPacket({status: 7, ranks: [{index: 4, name: "Captain", options: 25,
+    members: [{name: "Self", id: 7, online: true}, {name: "Member", id: 8, online: false}]}]});
+  page.receive("GuildMemberChange", matching, 4);
+  page.receive("GuildMemberChange", matching, 3, {});
+  assert.deepEqual(page.scope.guildRankOperationsRef.current.view(page.now).renameRankIndices, [4]);
+  page.receive("GuildMemberChange", guildRosterPacket({status: 7, name: "Other"}));
+  page.receive("GuildMemberChange", guildRosterPacket({status: 7}));
+  assert.deepEqual(page.scope.guildRankOperationsRef.current.view(page.now).renameRankIndices, [4], "a different actor or name cannot release the edit");
+  page.receive("GuildStatus", {guildName: "Guild", myOptions: 25, myRankId: 4});
+  assert.deepEqual(page.scope.guildRankOperationsRef.current.view(page.now).renameRankIndices, [4], "GuildStatus is not the rename receipt");
+  page.receive("GuildMemberChange", matching);
+  assert.deepEqual(page.scope.guildRankOperationsRef.current.view(page.now).renameRankIndices, []);
+  assert.equal(page.scope.guildRanksRef.current.value.ranks[0].name, "Captain");
+  assert.equal(page.attempts, 1, "receipt processing never sends a second mutation");
+});
+
+test("actual Page one-option requests retain the server checkbox state and enforce the 300ms input boundary", () => {
+  const page = harness(); openGuildRoster(page); const began = page.now;
+  const before = [...page.scope.guildRanksRef.current.value.ranks[0].permissions];
+  assert.equal(page.toggleGuildRankPermission(4, "CanKick", true), true);
+  assert.deepEqual(page.scope.guildRankOperationsRef.current.view(page.now), {renameRankIndices: [], permission: true});
+  assert.deepEqual(page.scope.guildRanksRef.current.value.ranks[0].permissions, before);
+  assert.equal(page.toggleGuildRankPermission(4, "CanRecruit", true), false);
+  page.setClock(began + 299);
+  assert.equal(page.toggleGuildRankPermission(4, "CanRecruit", true), false); assert.equal(page.attempts, 1);
+  page.setClock(began + 300);
+  assert.equal(page.toggleGuildRankPermission(4, "CanRecruit", true), true); assert.equal(page.attempts, 2);
+  assert.deepEqual(page.sent, [pureSocialActions.guildRankPermissionCommand(4, "CanKick", true),
+    pureSocialActions.guildRankPermissionCommand(4, "CanRecruit", true)]);
+  assert.deepEqual(page.scope.guildRanksRef.current.value.ranks[0].permissions, before, "a throttle expiry is not an ACK");
+});
+
+test("actual Page only full status255 establishes complete edit authority; every valid delta remains partial", () => {
+  for (const status of [0, 1, 2, 3, 4, 5, 6, 7, 8]) {
+    const page = harness(); openGuild(page);
+    page.receive("GuildStatus", {guildName: "Guild", myOptions: 25, myRankId: 4});
+    page.setShowGuild(true); page.renderRoster();
+    const payload = status <= 5 ? guildRosterPacket({status, name: "Other", ranks: []})
+      : status === 6 ? guildRosterPacket({status, ranks: [{index: 1, name: "New rank", options: 0, members: []}]})
+      : guildRosterPacket({status});
+    page.receive("GuildMemberChange", payload);
+    assert.notEqual(page.scope.guildRanksRef.current?.complete, true, String(status));
+    assert.equal(page.readGuildRankEditSource(), null, String(status));
+    assert.equal(page.renameGuildRank(4, "Captain"), false, String(status));
+    assert.equal(page.toggleGuildRankPermission(4, "CanKick", true), false, String(status));
+    assert.equal(page.attempts, 0, String(status));
+    page.receive("GuildMemberChange", guildRosterPacket({ranks: [{index: 4, name: "Invalid", options: 256, members: []}]}));
+    assert.notEqual(page.scope.guildRanksRef.current?.complete, true, "malformed status255 cannot establish authority: " + status);
+    page.receive("GuildMemberChange", guildRosterPacket()); page.renderRoster();
+    assert.equal(page.scope.guildRanksRef.current.complete, true, String(status));
+    assert.equal(page.readGuildRankEditSource().actor, "Self", "world entity IDs remain the production string shape");
+  }
+});
+
+test("actual Page complete roster still cannot grant own role by matching only a name or only a character ID", () => {
+  for (const self of [{name: "Self", id: 99}, {name: "Foreign", id: 7}]) {
+    const page = harness(); openGuild(page);
+    page.receive("GuildStatus", {guildName: "Guild", myOptions: 25, myRankId: 4});
+    page.receive("GuildMemberChange", guildRosterPacket({ranks: [{index: 4, name: "Officer", options: 25,
+      members: [{...self, online: true}]}]}));
+    page.setShowGuild(true); page.renderRoster();
+    assert.equal(page.scope.guildRanksRef.current.complete, true);
+    assert.equal(page.scope.guildPermissionsRef.current, null);
+    assert.equal(page.readGuildRankEditSource(), null);
+    assert.equal(page.renameGuildRank(4, "Captain"), false); assert.equal(page.attempts, 0);
+  }
+});
+
+test("actual Page roster read is ordinary infoType1 only and GST or a delta cannot complete its read proof", () => {
+  const page = harness(); openGuild(page);
+  page.receive("GuildStatus", {guildName: "Guild", myOptions: 25, myRankId: 4});
+  page.setShowGuild(true); page.renderRoster();
+  for (const command of [{type: "requestGuildInfo", infoType: 0}, {type: "requestGuildInfo", infoType: 1},
+    {type: "requestGuildInfo", infoType: 2}, {type: "requestGuildInfo", infoType: 1, extra: true}]) {
+    assert.equal(page.sendRaw(command), false);
+    assert.equal(page.sendSocialRosterCommand("guild", command, true), false);
+  }
+  assert.equal(page.requestGuildRankRoster(), true);
+  const read = page.scope.guildRankReadRef.current, proof = read.proof;
+  assert.ok(proof); assert.equal(read.entered, true); assert.equal(read.needed, true);
+  assert.deepEqual(page.sent, [{type: "requestGuildInfo", infoType: 1}]);
+  page.receive("GuildStatus", {guildName: "Guild", myOptions: 25, myRankId: 4});
+  assert.strictEqual(page.scope.guildRankReadRef.current, read); assert.strictEqual(read.proof, proof);
+  page.receive("GuildMemberChange", guildRosterPacket({status: 8}));
+  assert.strictEqual(read.proof, proof); assert.equal(read.needed, true); assert.equal(read.entered, true);
+  assert.equal(page.scope.guildRanksRef.current.complete, false);
+  assert.equal(page.requestGuildRankRoster(true), false); assert.equal(page.attempts, 1);
+  page.receive("GuildMemberChange", guildRosterPacket());
+  assert.equal(read.proof, null); assert.equal(read.entered, false); assert.equal(read.needed, false);
+  assert.equal(page.scope.guildRanksRef.current.complete, true);
+  assert.equal(page.requestGuildRankRoster(), false);
+  assert.equal(page.requestGuildRankRoster(true), false, "the old rendered source cannot send after its roster was replaced");
+  page.renderRoster();
+  assert.equal(page.requestGuildRankRoster(true), true);
+  assert.deepEqual(page.sent, [{type: "requestGuildInfo", infoType: 1}, {type: "requestGuildInfo", infoType: 1}]);
+});
+
+test("actual Page roster read rolls back a definitely-unsent proof and retains an unknown socket entry until full status255", () => {
+  const page = harness(); openGuild(page); page.setShowGuild(true); page.renderRoster();
+  page.onAction(() => page.setShowGuild(false));
+  assert.equal(page.requestGuildRankRoster(), false); assert.equal(page.attempts, 0);
+  assert.equal(page.scope.guildRankReadRef.current.proof, null); assert.equal(page.scope.guildRankReadRef.current.entered, false);
+  assert.equal(page.scope.guildRankReadRef.current.needed, true);
+  page.onAction(null); page.setShowGuild(true); page.renderRoster(); page.throwAtSocket("requestGuildInfo");
+  assert.equal(page.requestGuildRankRoster(), true); assert.equal(page.attempts, 1);
+  const proof = page.scope.guildRankReadRef.current.proof;
+  assert.ok(proof); assert.equal(page.scope.guildRankReadRef.current.entered, true);
+  assert.equal(page.requestGuildRankRoster(true), false); assert.equal(page.attempts, 1);
+  page.receive("GuildStatus", {guildName: "Guild", myOptions: 24, myRankId: 1});
+  assert.strictEqual(page.scope.guildRankReadRef.current.proof, proof);
+  page.receive("GuildMemberChange", guildRosterPacket());
+  assert.equal(page.scope.guildRankReadRef.current.proof, null); assert.equal(page.scope.guildRankReadRef.current.needed, false);
+  page.restoreSocketSend(); page.renderRoster();
+  assert.equal(page.requestGuildRankRoster(true), true); assert.equal(page.attempts, 2);
+});
+
+test("actual Page roster read final proof rejects replacement or infoType tampering without consuming the read", () => {
+  for (const mode of ["window", "guild", "scene", "session", "socket", "scope", "infoType", "extra"]) {
+    const page = harness(); openGuild(page); page.setShowGuild(true); page.renderRoster();
+    page.onAction(() => {
+      if (mode === "window") page.setShowGuild(false);
+      if (mode === "guild") page.scope.worldRef.current.stage5Systems.guild.name = "Another";
+      if (mode === "scene") page.scope.socialSceneRevisionRef.current++;
+      if (mode === "session") page.scope.equipmentSessionGenerationRef.current++;
+      if (mode === "socket") page.scope.socketRef.current = {readyState: 1};
+      if (mode === "scope") page.scope.guildRankScopeRef.current.key = Object.freeze({});
+      if (mode === "infoType") page.scope.lastCommandRef.current.infoType = 0;
+      if (mode === "extra") page.scope.lastCommandRef.current.extra = true;
+    });
+    assert.equal(page.requestGuildRankRoster(), false, mode); assert.equal(page.attempts, 0, mode);
+    assert.deepEqual(page.sent, [], mode);
+    assert.equal(page.scope.guildRankReadRef.current.proof, null, mode);
+    assert.equal(page.scope.guildRankReadRef.current.entered, false, mode);
+    assert.equal(page.scope.guildRankReadRef.current.needed, true, mode);
   }
 });
 

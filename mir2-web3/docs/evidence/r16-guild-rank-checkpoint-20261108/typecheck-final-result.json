@@ -1,0 +1,7 @@
+{
+  "startedAt": "2026-11-07T21:32:33.9676858Z",
+  "completedAt": "2026-11-07T21:32:48.5271375Z",
+  "exitCode": 0,
+  "config": "tsconfig-source.json",
+  "log": "typecheck-final.log"
+}

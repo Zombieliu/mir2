@@ -209,7 +209,10 @@ export type ExtraWindowsProps = {
       | "onKickMember"
       | "onSendGuildChat"
       | "onChangeMemberRank"
-      | "onSaveRank"
+      | "onRenameRank"
+      | "onToggleRankPermission"
+      | "rankEditPending"
+      | "onRefreshRanks"
       | "onDepositGold"
       | "onWithdrawGold"
       | "inventoryItems"
@@ -457,7 +460,10 @@ function ExtraWindowsInner({
           onKickMember={guild.onKickMember}
           onSendGuildChat={guild.onSendGuildChat}
           onChangeMemberRank={guild.onChangeMemberRank}
-          onSaveRank={guild.onSaveRank}
+          onRenameRank={guild.onRenameRank}
+          onToggleRankPermission={guild.onToggleRankPermission}
+          rankEditPending={guild.rankEditPending}
+          onRefreshRanks={guild.onRefreshRanks}
           onDepositGold={guild.onDepositGold}
           onWithdrawGold={guild.onWithdrawGold}
           inventoryItems={guild.inventoryItems}

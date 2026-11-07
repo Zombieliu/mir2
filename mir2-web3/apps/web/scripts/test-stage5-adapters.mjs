@@ -1731,40 +1731,44 @@ check("storage rental cancel and exact once claim never let an old prompt cancel
   assert.equal(confirmation.allows(last, facts), false); assert.equal(confirmation.pending, null);
 });
 
-check("Guild rank save emits actual rename type3 then eight option type5 commands with exact ordinary fields", () => {
-  const commands = socialParityActions.guildRankSaveCommands(7, "  Officer  ", ["CanRecruit", "CanStoreItem", "CanActivateBuff"]);
-  assert.deepEqual(commands, [
-    {type: "editGuildMember", changeType: 3, rankIndex: 7, name: "", rankName: "Officer"},
-    {type: "editGuildMember", changeType: 5, rankIndex: 7, name: "false", rankName: "0"},
-    {type: "editGuildMember", changeType: 5, rankIndex: 7, name: "true", rankName: "1"},
-    {type: "editGuildMember", changeType: 5, rankIndex: 7, name: "false", rankName: "2"},
-    {type: "editGuildMember", changeType: 5, rankIndex: 7, name: "true", rankName: "3"},
-    {type: "editGuildMember", changeType: 5, rankIndex: 7, name: "false", rankName: "4"},
-    {type: "editGuildMember", changeType: 5, rankIndex: 7, name: "false", rankName: "5"},
-    {type: "editGuildMember", changeType: 5, rankIndex: 7, name: "false", rankName: "6"},
-    {type: "editGuildMember", changeType: 5, rankIndex: 7, name: "true", rankName: "7"},
-  ]);
-  assert.equal(commands.some(command => command.changeType === 2 || command.changeType === 4), false,
-    "saving a rank cannot assign a member or create a rank");
+check("Guild rank rename and each checkbox emit independent single ordinary type3/type5 commands", () => {
+  assert.deepEqual(socialParityActions.guildRankRenameCommand(7, "  Officer  "),
+    {type: "editGuildMember", changeType: 3, rankIndex: 7, name: "", rankName: "  Officer  "});
   assert.deepEqual(socialParityActions.GUILD_RANK_PERMISSION_KEYS,
     ["CanChangeRank", "CanRecruit", "CanKick", "CanStoreItem", "CanRetrieveItem", "CanAlterAlliance", "CanChangeNotice", "CanActivateBuff"]);
+  for (const [option, key] of socialParityActions.GUILD_RANK_PERMISSION_KEYS.entries()) {
+    for (const enabled of [false, true]) {
+      const command = socialParityActions.guildRankPermissionCommand(7, key, enabled);
+      assert.deepEqual(command, {type: "editGuildMember", changeType: 5, rankIndex: 7,
+        name: String(enabled), rankName: String(option)});
+      assert.equal(command.changeType === 2 || command.changeType === 4, false,
+        "editing one option cannot assign a member or create a rank");
+    }
+  }
+  assert.equal(Object.hasOwn(socialParityActions, "guildRankSaveCommands"), false,
+    "there is no rename-plus-eight-options batch export");
 });
 
-check("Guild rank save validates exact case-sensitive permissions and nonnegative i32 rank identity before emitting any command", () => {
-  for (const rankIndex of [-1, 2147483648, NaN, Infinity, 1.5, "7", null])
-    assert.equal(socialParityActions.guildRankSaveCommands(rankIndex, "Officer", []), null);
-  for (const name of ["", "   ", "x\0y", "x".repeat(21), "x".repeat(257), null, 7])
-    assert.equal(socialParityActions.guildRankSaveCommands(7, name, []), null);
-  for (const permissions of [null, "CanRecruit", ["canRecruit"], ["CanRecruit", "CanRecruit"],
-    ["CanUnknown"], [7], [...socialParityActions.GUILD_RANK_PERMISSION_KEYS, "extra"]])
-    assert.equal(socialParityActions.guildRankSaveCommands(7, "Officer", permissions), null);
-  for (const rankIndex of [0, 2147483647]) {
-    const commands = socialParityActions.guildRankSaveCommands(rankIndex, "x".repeat(20), []);
-    assert.equal(commands.length, 9); assert.equal(commands[0].rankIndex, rankIndex);
-    assert.deepEqual(commands.slice(1).map(command => command.name), Array(8).fill("false"));
+check("Guild rank single edits validate Native u8 identity, exact UTF16 rename rule and case-sensitive checkbox", () => {
+  for (const rankIndex of [-1, 256, 2147483647, 2147483648, NaN, Infinity, 1.5, "7", null]) {
+    assert.equal(socialParityActions.guildRankRenameCommand(rankIndex, "Officer"), null);
+    assert.equal(socialParityActions.guildRankPermissionCommand(rankIndex, "CanRecruit", true), null);
   }
-  const all = socialParityActions.guildRankSaveCommands(1, "All", socialParityActions.GUILD_RANK_PERMISSION_KEYS);
-  assert.deepEqual(all.slice(1).map(command => command.name), Array(8).fill("true"));
+  for (const name of ["", "ab", "a\\b", "x".repeat(21), "x".repeat(257), "😀".repeat(11), null, 7])
+    assert.equal(socialParityActions.guildRankRenameCommand(7, name), null);
+  for (const key of [null, "canRecruit", "CanUnknown", 7, ["CanRecruit"], ["CanRecruit", "CanRecruit"]])
+    assert.equal(socialParityActions.guildRankPermissionCommand(7, key, true), null);
+  for (const enabled of [null, "true", "false", 0, 1, {}, []])
+    assert.equal(socialParityActions.guildRankPermissionCommand(7, "CanRecruit", enabled), null);
+  for (const rankIndex of [0, 255]) {
+    for (const name of ["x".repeat(3), "x".repeat(20), "😀".repeat(10), "   ", "x\0y"]) {
+      assert.deepEqual(socialParityActions.guildRankRenameCommand(rankIndex, name),
+        {type: "editGuildMember", changeType: 3, rankIndex, name: "", rankName: name});
+    }
+    for (const [option, key] of socialParityActions.GUILD_RANK_PERMISSION_KEYS.entries())
+      assert.deepEqual(socialParityActions.guildRankPermissionCommand(rankIndex, key, true),
+        {type: "editGuildMember", changeType: 5, rankIndex, name: "true", rankName: String(option)});
+  }
 });
 
 const rankMember = (name = "Pat", id = 0, online = false) => ({name, id, online,
@@ -5664,8 +5668,18 @@ assert.ok(ts.isIfStatement(followingGroupEntry));
 assert.equal(followingGroupEntry.expression.getText(parityPageAst).replace(/\s+/g,""),
   'options?.groupProof&&(socketRef.current!==socket||socket.readyState!==WebSocket.OPEN||options.groupProof.owner.socket!==socket||!groupOperationsRef.current.claim(options.groupProof,currentGroupOperationSource(),wireCommand))');
 assert.equal(followingGroupEntry.thenStatement.getText(parityPageAst),'return false;');
-assert.equal(paritySendStatements.indexOf(bagBeltFollowingRankingInspectEntry)+3,paritySocketIndex,"only the exact disjoint character/group entry guards follow Ranking Inspect before the socket try");
-assert.equal(paritySendStatements.indexOf(bagBeltEntryNodes[0])+6,paritySocketIndex,"actual Bag entry retains the complete Fishing, Pearl, Ranking, character and group guard sequence before socket.send");
+const followingGuildRankEntry=paritySendStatements[paritySendStatements.indexOf(bagBeltFollowingRankingInspectEntry)+3];
+assert.ok(ts.isIfStatement(followingGuildRankEntry));
+assert.equal(followingGuildRankEntry.expression.getText(parityPageAst).replace(/\s+/g,""),
+  'options?.socialRosterProof?.rankProof&&(socketRef.current!==socket||socket.readyState!==WebSocket.OPEN||!guildRankOperationsRef.current.claim(options.socialRosterProof.rankProof,readGuildRankEditSource(),wireCommand,Math.floor(performance.now())))');
+assert.equal(followingGuildRankEntry.thenStatement.getText(parityPageAst),'return false;');
+const followingGuildRankReadEntry=paritySendStatements[paritySendStatements.indexOf(bagBeltFollowingRankingInspectEntry)+4];
+assert.ok(ts.isIfStatement(followingGuildRankReadEntry));
+assert.equal(followingGuildRankReadEntry.expression.getText(parityPageAst),'wireCommand.type === "requestGuildInfo"');
+assert.equal(followingGuildRankReadEntry.thenStatement.getText(parityPageAst).replace(/\s+/g,""),
+  '{constrow=guildRankReadRef.current,scope=guildRankScopeRef.current;if(!row||!scope||row.scope!==scope.key||row.entered||row.proof!==options?.socialRosterProof?.rankReadProof||!row.proof||socketRef.current!==socket||socket.readyState!==WebSocket.OPEN)returnfalse;row.entered=true;}');
+assert.equal(paritySendStatements.indexOf(bagBeltFollowingRankingInspectEntry)+5,paritySocketIndex,"only the exact disjoint character, group and guild-rank entry guards follow Ranking Inspect before the socket try");
+assert.equal(paritySendStatements.indexOf(bagBeltEntryNodes[0])+8,paritySocketIndex,"actual Bag entry retains the complete Fishing, Pearl, Ranking, character, group and guild-rank guard sequence before socket.send");
 // Retain whole actual serialization/DTO statements and the complete Bag-specific
 // entry through socket.send. All Bag-specific owner/source/mail/storage/social
 // guards execute in the actual bagBeltFinalCurrent; no gate is replaced by true.
@@ -6169,8 +6183,10 @@ assert.equal(fishingFollowingRankingInspectEntry.expression.getText(fishingPageA
   "same exact Ranking Inspect guard after the unchanged Fishing and Pearl claims");
 assert.equal(fishingSendStatements[fishingSendStatements.indexOf(fishingFollowingRankingInspectEntry)+1].getText(fishingPageAst),followingCreateEntry.getText(parityPageAst));
 assert.equal(fishingSendStatements[fishingSendStatements.indexOf(fishingFollowingRankingInspectEntry)+2].getText(fishingPageAst),followingGroupEntry.getText(parityPageAst));
-assert.equal(fishingSendStatements.indexOf(fishingFollowingRankingInspectEntry)+3,fishingSocketIndex,"Fishing retains only the same character/group guards between Ranking and the actual socket try");
-assert.equal(fishingSendStatements.indexOf(fishingSendEntry[0])+5,fishingSocketIndex,"WorldFishing retains the exact Pearl, Ranking, character and group guards before actual socket send");
+assert.equal(fishingSendStatements[fishingSendStatements.indexOf(fishingFollowingRankingInspectEntry)+3].getText(fishingPageAst),followingGuildRankEntry.getText(parityPageAst));
+assert.equal(fishingSendStatements[fishingSendStatements.indexOf(fishingFollowingRankingInspectEntry)+4].getText(fishingPageAst),followingGuildRankReadEntry.getText(parityPageAst));
+assert.equal(fishingSendStatements.indexOf(fishingFollowingRankingInspectEntry)+5,fishingSocketIndex,"Fishing retains only the same character, group and guild-rank guards between Ranking and the actual socket try");
+assert.equal(fishingSendStatements.indexOf(fishingSendEntry[0])+7,fishingSocketIndex,"WorldFishing retains the exact Pearl, Ranking, character, group and guild-rank guards before actual socket send");
 const fishingSerializeIndex=fishingSendStatements.findIndex(node=>ts.isVariableStatement(node)&&node.declarationList.declarations.some(decl=>decl.name.getText(fishingPageAst)==="serialized"));
 const fishingDtoIndex=fishingSendStatements.findIndex(node=>ts.isVariableStatement(node)&&node.declarationList.declarations.some(decl=>decl.name.getText(fishingPageAst)==="wireCommand"));
 const fishingPreflightGuards=fishingSendStatements.filter(node=>ts.isIfStatement(node)&&['command.type === "fishingCast" && command.castOut === true && !options?.worldFishingProof','options?.worldFishingProof && !worldFishingFinalCurrent(options.worldFishingProof, command)'].includes(node.expression.getText(fishingPageAst)));
@@ -7425,7 +7441,9 @@ check("Ranking actual Page inspect gesture sends exact four raw fields UID0 thro
 });
 check("Ranking actual Page raw Inspect requires proof and only disjoint create/group guards follow its final claim",()=>{
   const page=rankingPageFixture();assert.equal(page.api.finalRawSend({type:"inspect",objectId:0,ranking:true,hero:false}),false);
-  const finalIndex=paritySendStatements.indexOf(rankingFinalGuard);assert.equal(finalIndex+3,paritySocketIndex);
+  const finalIndex=paritySendStatements.indexOf(rankingFinalGuard);assert.equal(finalIndex+5,paritySocketIndex);
+  assert.equal(paritySendStatements[finalIndex+3].getText(parityPageAst),followingGuildRankEntry.getText(parityPageAst));
+  assert.equal(paritySendStatements[finalIndex+4].getText(parityPageAst),followingGuildRankReadEntry.getText(parityPageAst));
   assert.strictEqual(paritySendStatements[finalIndex+1],followingCreateEntry);
   assert.strictEqual(paritySendStatements[finalIndex+2],followingGroupEntry);
   const sends=[];(function visit(node){if(ts.isCallExpression(node)&&node.expression.getText(parityPageAst)==="socket.send")sends.push(node);ts.forEachChild(node,visit);})(paritySendStatements[paritySocketIndex]);

@@ -96,6 +96,8 @@ import { resolveSharedUiRequests, sharedCanvasUsesWebGl2, sharedUiCanvasId } fro
 import { projectBevyBagModel } from "../lib/bevy-bag-model";
 import { SocialIncomingReplies, socialReplyCommand, type SocialReplyOwner, type SocialReplyProof, type SocialRequestKind } from "../lib/social-incoming-replies";
 import { GroupOperations, groupOperationCommand, type GroupOperation, type GroupOperationProof, type GroupOperationSource } from "../lib/group-operations";
+import { GuildRankOperations, type GuildRankEditProof, type GuildRankEditSource } from "../lib/guild-rank-operations";
+import { applyGuildMemberChange } from "../lib/guild-rank-projection";
 import { readSharedItemTooltip, readSharedItemCatalogInfo, type CrystalTooltipRuntime, type CrystalTooltipDocument, type CrystalTooltipItem } from "../lib/shared-item-tooltip";
 import { readSharedCharacterStats, type CrystalStatsRuntime } from "../lib/shared-character-stats";
 import { readSharedSkillBarDocument, parseCrystalSkillBarPositions, serializeCrystalSkillBarPositions, CRYSTAL_SKILL_BAR_POSITIONS_STORAGE_KEY, DEFAULT_CRYSTAL_SKILL_BAR_POSITIONS, type CrystalSkillBarRuntime, type CrystalSkillBarRow, type CrystalSkillBarPositions } from "../lib/shared-skill-bar";
@@ -126,7 +128,7 @@ import { makeCreaturePlayerSource, upsertCreaturePlayerRecord, creaturePlayerCom
 import type { TradeItemSlot } from "./components/original-client-trade-window";
 import type { GuildStorageTooltipItem } from "./components/original-client-guild-window";
 import { GuildBuffAuthority, GuildBuffOperations, type GuildBuffActionDto, type GuildBuffProof } from "../lib/guild-buff-ui";
-import { guildRankSaveCommands, projectGuildRanks, resolveFriendCharacterIndex, RankingQueries, type RankingQuery, type RankingQueryProof, type ProjectedGuildRanks } from "../lib/social-parity-actions";
+import { resolveFriendCharacterIndex, RankingQueries, type GuildRankPermission, type RankingQuery, type RankingQueryProof, type ProjectedGuildRanks } from "../lib/social-parity-actions";
 import { rankingTabKey } from "../lib/stage5-window-adapters";
 import { RankingInspectRequests, type RankingInspectProof, type RankingInspectSource } from "../lib/ranking-inspect-requests";
 import { parseRankingPlayerInspect, type RankingPlayerInspect, type RankingInspectEquipment } from "../lib/shared-ranking-inspect";
@@ -1306,6 +1308,8 @@ type RankingState = {
 
 type SocialRosterSendProof = Readonly<{
   kind: "friend" | "guild"; owner: SocialReplyOwner; sourceKey: string; body: string;
+  rankProof?: GuildRankEditProof;
+  rankReadProof?: object;
 }>;
 
 type RankingRequestState = {
@@ -2224,8 +2228,16 @@ export default function HomePage() {
   const tradeLifecycleRef = useRef<{state: "requested" | "open" | "closed"; partner: string}>({state: "closed", partner: ""});
   const tradePartnerRef = useRef<{owner: SocialReplyOwner; incarnation: number; items?: ReturnType<typeof projectPartnerTradePacket>; itemsKnown?: boolean; gold?: number} | null>(null);
   const socialCatalogRef = useRef(new Map<number, {name: string; icon?: number; raw?: Readonly<Record<string, unknown>>}>());
-  const guildPermissionsRef = useRef<{owner: SocialReplyOwner; guildName: string; permissions: string[]} | null>(null);
-  const guildRanksRef = useRef<{owner: SocialReplyOwner; guildName: string; value: ProjectedGuildRanks} | null>(null);
+  const guildPermissionsRef = useRef<{owner: SocialReplyOwner; guildName: string; permissions: string[]; rankIndex: number | null} | null>(null);
+  const guildRanksRef = useRef<{owner: SocialReplyOwner; guildName: string; value: ProjectedGuildRanks; complete: boolean} | null>(null);
+  const guildRankOperationsRef = useRef(new GuildRankOperations());
+  const guildRankScopeRef = useRef<{owner: SocialReplyOwner; guildName: string; key: object} | null>(null);
+  const guildRankWakeRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const guildRankReadRef = useRef<{scope: object; needed: boolean; proof: object | null; entered: boolean} | null>(null);
+  useEffect(() => () => {
+    if (guildRankWakeRef.current !== null) clearTimeout(guildRankWakeRef.current);
+    guildRankWakeRef.current = null; guildRankOperationsRef.current.retire();
+  },[]);
   const socialFriendsRef = useRef<{owner: SocialReplyOwner; entries: ReturnType<typeof normalizeFriendList>} | null>(null);
   const rankingQueriesRef = useRef(new RankingQueries());
   const rankingInspectRequestsRef = useRef(new RankingInspectRequests());
@@ -6517,6 +6529,9 @@ export default function HomePage() {
     if (options?.cashProof && (!cashShopOpenRef.current || !cashPurchasesRef.current.allows(options.cashProof, currentCashGameShopSource(), command))) return false;
     if (options?.creatureProof && (!heroPetOpenRef.current || !creatureOperationsRef.current.allows(options.creatureProof, currentCreatureSource(), command))) return false;
     if (["removeFriend", "addMemo", "refreshFriends", "editGuildMember"].includes(String(command.type)) && !options?.socialRosterProof) return false;
+    if (command.type === "requestGuildInfo" && !options?.socialRosterProof?.rankReadProof) return false;
+    if (command.type === "editGuildMember" && (command.changeType === 3 || command.changeType === 5)
+      && !options?.socialRosterProof?.rankProof) return false;
     if (["addMember", "delMember"].includes(String(command.type)) && !options?.groupProof) return false;
     if (options?.groupProof && !groupOperationsRef.current.allows(options.groupProof, currentGroupOperationSource(), command)) return false;
     if (command.type === "getRanking" && !options?.rankingProof) return false;
@@ -6746,6 +6761,16 @@ export default function HomePage() {
     if (options?.groupProof && (socketRef.current !== socket || socket.readyState !== WebSocket.OPEN
       || options.groupProof.owner.socket !== socket
       || !groupOperationsRef.current.claim(options.groupProof, currentGroupOperationSource(), wireCommand))) return false;
+    if (options?.socialRosterProof?.rankProof && (socketRef.current !== socket || socket.readyState !== WebSocket.OPEN
+      || !guildRankOperationsRef.current.claim(options.socialRosterProof.rankProof, readGuildRankEditSource(),
+        wireCommand, Math.floor(performance.now())))) return false;
+    if (wireCommand.type === "requestGuildInfo") {
+      const row = guildRankReadRef.current, scope = guildRankScopeRef.current;
+      if (!row || !scope || row.scope !== scope.key || row.entered
+        || row.proof !== options?.socialRosterProof?.rankReadProof || !row.proof
+        || socketRef.current !== socket || socket.readyState !== WebSocket.OPEN) return false;
+      row.entered = true;
+    }
     try { socket.send(serialized); } catch (error) {
       if (options?.modeProof) combatModeHostRef.current?.outcomeUnknown(options.modeProof);
       if (options?.guildBuffProof) guildBuffOperationsRef.current.outcomeUnknown(options.guildBuffProof);
@@ -12530,10 +12555,72 @@ export default function HomePage() {
     if (!rank) return;
     sendSocialRosterCommand("guild", {type: "editGuildMember", changeType: 2, rankIndex, name: trimmed, rankName: rank.name});
   }
-  function saveGuildRank(rankIndex: number, name: string, permissions: string[]) {
-    const commands = guildRankSaveCommands(rankIndex, name, permissions);
-    if (!commands) return;
-    for (const command of commands) if (!sendSocialRosterCommand("guild", command, true)) break;
+  function readGuildRankEditSource(): GuildRankEditSource | null {
+    const owner = currentSocialReplyOwner(), scope = guildRankScopeRef.current;
+    const rights = guildPermissionsRef.current, ranks = guildRanksRef.current;
+    if (!owner || !scope || !rights || !ranks?.complete || rights.rankIndex === null
+      || !sameSocialPhysicalOwner(scope.owner,owner) || !sameSocialPhysicalOwner(rights.owner,owner)
+      || !sameSocialPhysicalOwner(ranks.owner,owner) || scope.guildName !== rights.guildName
+      || scope.guildName !== ranks.guildName || scope.guildName !== worldRef.current.stage5Systems.guild?.name) return null;
+    const actor = worldRef.current.entities.find(entity => String(entity.objectId) === String(owner.playerObjectId))?.name;
+    if (!actor) return null;
+    return {owner,scope:scope.key,guildName:scope.guildName,actor,ownRankIndex:rights.rankIndex,
+      permissions:rights.permissions,ranks:ranks.value.ranks};
+  }
+  function scheduleGuildRankControls() {
+    if (guildRankWakeRef.current !== null) clearTimeout(guildRankWakeRef.current);
+    guildRankWakeRef.current = null;
+    const now = Math.floor(performance.now());
+    guildRankOperationsRef.current.expire(now);
+    renderSocialItems(n => n + 1);
+    const wake = guildRankOperationsRef.current.nextWake(now);
+    if (wake !== null) guildRankWakeRef.current = setTimeout(() => {
+      guildRankWakeRef.current = null;
+      scheduleGuildRankControls();
+    },Math.max(1,wake - now));
+  }
+  function retireGuildRankControls() {
+    if (guildRankWakeRef.current !== null) clearTimeout(guildRankWakeRef.current);
+    guildRankWakeRef.current = null;
+    guildRankOperationsRef.current.retire(); guildRankScopeRef.current = null; guildRankReadRef.current = null;
+  }
+  function submitGuildRankEdit(proof: GuildRankEditProof | null): boolean {
+    if (!proof) return false;
+    try {
+      if (sendSocialRosterCommand("guild",proof.command,true,proof)) return true;
+      return guildRankOperationsRef.current.outcomeUnknown(proof);
+    } catch (error) {
+      const unknown = guildRankOperationsRef.current.outcomeUnknown(proof);
+      if (unknown) console.error("[mir2] Guild rank send outcome is unknown",error);
+      return unknown;
+    } finally {
+      guildRankOperationsRef.current.cancelDefinitelyUnsent(proof);
+      guildRankOperationsRef.current.finishPermissionAttempt(proof);
+      scheduleGuildRankControls();
+    }
+  }
+  function renameGuildRank(rankIndex: number, name: string): boolean {
+    return submitGuildRankEdit(guildRankOperationsRef.current.reserveRename(rankIndex,name,
+      readGuildRankEditSource(),Math.floor(performance.now())));
+  }
+  function toggleGuildRankPermission(rankIndex: number, key: GuildRankPermission, enabled: boolean): boolean {
+    return submitGuildRankEdit(guildRankOperationsRef.current.reservePermission(rankIndex,key,enabled,
+      readGuildRankEditSource(),Math.floor(performance.now())));
+  }
+  function requestGuildRankRoster(force = false): boolean {
+    const owner = currentSocialReplyOwner(), scope = guildRankScopeRef.current, row = guildRankReadRef.current;
+    if (!owner || !scope || !row || row.scope !== scope.key || row.proof
+      || !sameSocialPhysicalOwner(scope.owner,owner) || scope.guildName !== worldRef.current.stage5Systems.guild?.name) return false;
+    if (force) row.needed = true;
+    if (!row.needed) return false;
+    const proof = Object.freeze({}); row.proof = proof; row.entered = false;
+    try {
+      if (sendSocialRosterCommand("guild",{type:"requestGuildInfo",infoType:1},true,undefined,proof)) return true;
+      return row.entered;
+    } catch (error) {
+      if (row.entered) console.error("[mir2] Guild roster read outcome is unknown",error);
+      return row.entered;
+    } finally { if (row.proof === proof && !row.entered) row.proof = null; }
   }
 
   // Friend memo and removal use the same explicit protocol identity.
@@ -13456,6 +13543,7 @@ export default function HomePage() {
       && a.sessionGeneration === b.sessionGeneration && a.playerObjectId === b.playerObjectId;
   }
   function retireSocialItemConnection() {
+    retireGuildRankControls();
     socialItemOperationsRef.current.retire(); socialOwnTradeRef.current = null;
     tradeLifecycleRef.current = {state: "closed", partner: ""}; tradePartnerRef.current = null;
     guildStorageRawRef.current = null; guildPermissionsRef.current = null; guildRanksRef.current = null;
@@ -13562,6 +13650,15 @@ export default function HomePage() {
       || proof.owner.mapFileName !== source.owner.mapFileName || proof.sourceKey !== source.sourceKey || JSON.stringify(command) !== proof.body) return false;
     if (proof.kind === "friend") return socialRosterWindowsRef.current.friends
       && ["removeFriend", "addMemo", "refreshFriends"].includes(String(command.type));
+    if (command.type === "requestGuildInfo") {
+      const row = guildRankReadRef.current, scope = guildRankScopeRef.current;
+      return socialItemWindowsRef.current.guild && command.infoType === 1 && Object.keys(command).length === 2
+        && !!row && !!scope && row.scope === scope.key && !!proof.rankReadProof
+        && row.proof === proof.rankReadProof && !row.entered;
+    }
+    if ((command.changeType === 3 || command.changeType === 5)
+      && (!proof.rankProof || !guildRankOperationsRef.current.allows(proof.rankProof,
+        readGuildRankEditSource(),command,Math.floor(performance.now())))) return false;
     const option = command.changeType === 0 ? "CanRecruit" : command.changeType === 1 ? "CanKick" : "CanChangeRank";
     if (!socialItemWindowsRef.current.guild || command.type !== "editGuildMember" || !source.permissions.includes(option)) return false;
     if (command.changeType === 0 || command.changeType === 1) return true;
@@ -13570,10 +13667,12 @@ export default function HomePage() {
     if (command.changeType === 2) return ranks.members.some(member => member.name === command.name);
     return command.changeType === 3 || command.changeType === 5;
   }
-  function sendSocialRosterCommand(kind: "friend" | "guild", command: Record<string, unknown>, quiet = false): boolean {
+  function sendSocialRosterCommand(kind: "friend" | "guild", command: Record<string, unknown>, quiet = false,
+    rankProof?: GuildRankEditProof, rankReadProof?: object): boolean {
     const captured = socialRosterRenderSources[kind], source = readSocialRosterSource(kind);
     if (!captured || !source || captured.sourceKey !== source.sourceKey || !sameSocialPhysicalOwner(captured.owner, source.owner)) return false;
-    const proof: SocialRosterSendProof = Object.freeze({kind, owner: Object.freeze({...captured.owner}), sourceKey: captured.sourceKey, body: JSON.stringify(command)});
+    const proof: SocialRosterSendProof = Object.freeze({kind, owner: Object.freeze({...captured.owner}), sourceKey: captured.sourceKey,
+      body: JSON.stringify(command), ...(rankProof ? {rankProof} : {}), ...(rankReadProof ? {rankReadProof} : {})});
     return socialRosterProofCurrent(proof, command) && send(command, {quiet, socialRosterProof: proof});
   }
   function socialItemReceiptOwner(): SocialReplyOwner | null {
@@ -13633,10 +13732,18 @@ export default function HomePage() {
     const owner = currentSocialReceiveOwner(), guildName = payload.guildName;
     const permissions = guildPermissionsFromOptions(payload.myOptions);
     if (!owner || typeof guildName !== "string" || !guildName || !permissions) {
+      retireGuildRankControls();
       guildPermissionsRef.current = null; guildStorageRawRef.current = null; guildRanksRef.current = null;
     } else {
+      const scope = guildRankScopeRef.current;
+      if (!scope || !sameSocialPhysicalOwner(scope.owner,owner) || scope.guildName !== guildName) {
+        retireGuildRankControls(); guildRankScopeRef.current = {owner,guildName,key:Object.freeze({})};
+        guildRankReadRef.current = {scope:guildRankScopeRef.current.key,needed:true,proof:null,entered:false};
+      }
       if (guildPermissionsRef.current?.guildName !== guildName) { guildStorageRawRef.current = null; guildRanksRef.current = null; }
-      guildPermissionsRef.current = {owner, guildName, permissions};
+      guildPermissionsRef.current = {owner, guildName, permissions,
+        rankIndex: Number.isInteger(payload.myRankId) && Number(payload.myRankId) >= 0 && Number(payload.myRankId) <= 255
+          ? Number(payload.myRankId) : null};
     }
     renderSocialItems(n => n + 1);
   }
@@ -16134,27 +16241,49 @@ export default function HomePage() {
       case "GuildMemberChange": {
         const owner = currentSocialReceiveOwner(), guildName = worldRef.current.stage5Systems.guild?.name;
         if (!owner || !guildName) break;
-        const ranks = projectGuildRanks(payload.ranks);
-        if (!ranks) guildBuffAuthorityRef.current.invalidatePermissions(owner,guildName);
-        // A full rank roster that omits the current member cannot retain old permissions.
-        guildPermissionsRef.current = null;
-        guildRanksRef.current = ranks ? {owner, guildName, value: ranks} : null;
-        if (ranks) {
-          const selfName = worldRef.current.entities.find(entity => String(entity.objectId) === String(owner.playerObjectId))?.name;
-          const member = ranks.members.find(row => row.id === socialCharacterIndexRef.current.current && row.name === selfName);
-          const ownRank = member && ranks.ranks.find(row => row.index === member.rankIndex);
-          if (ownRank) guildPermissionsRef.current = {owner, guildName, permissions: ownRank.permissions};
-          const buffSource = guildBuffAuthorityRef.current.read(owner,guildName);
-          if (buffSource && (!ownRank || ownRank.index !== buffSource.myRankId
-            || ownRank.permissions.includes("CanActivateBuff") !== Boolean(buffSource.myOptions & 128))) guildBuffAuthorityRef.current.invalidatePermissions(owner,guildName);
+        const before = guildRanksRef.current;
+        const previous = before && before.guildName === guildName && sameSocialPhysicalOwner(before.owner,owner) ? before : null;
+        const selfName = worldRef.current.entities.find(entity => String(entity.objectId) === String(owner.playerObjectId))?.name;
+        const selfIndex = socialCharacterIndexRef.current.current;
+        const result = applyGuildMemberChange(previous?.value ?? null,payload,
+          selfName && selfIndex !== null ? {name:selfName,index:selfIndex} : null);
+        if (result.kind !== "applied") break;
+        const {projection:ranks,evidence} = result;
+        const scope = guildRankScopeRef.current;
+        if (scope && scope.guildName === guildName && sameSocialPhysicalOwner(scope.owner,owner)) {
+          guildRankOperationsRef.current.receipt(payload,owner,scope.key);
+          const read = guildRankReadRef.current;
+          if (read?.scope === scope.key) {
+            if (evidence.fullRoster) {read.needed = false; read.proof = null; read.entered = false;}
+            else if (evidence.needsFullRoster) read.needed = true;
+          }
         }
-        const name = stringOrFallback(payload.name, ""), status = numberOrZero(payload.status);
+        if (evidence.guildLeft) {
+          retireGuildRankControls(); guildRanksRef.current = null; guildPermissionsRef.current = null;
+          guildStorageRawRef.current = null; guildBuffAuthorityRef.current.invalidatePermissions(owner,guildName);
+        } else {
+          guildRanksRef.current = ranks ? {owner,guildName,value:ranks,
+            complete:evidence.fullRoster || previous?.complete === true && !evidence.needsFullRoster} : null;
+          const own = evidence.ownRank;
+          if (own.kind === "unknown" || own.kind === "left") {
+            guildPermissionsRef.current = null; guildBuffAuthorityRef.current.invalidatePermissions(owner,guildName);
+          } else if (own.kind === "confirmed") {
+            guildPermissionsRef.current = {owner,guildName,permissions:own.permissions,rankIndex:own.index};
+            const buffSource = guildBuffAuthorityRef.current.read(owner,guildName);
+            if (buffSource && (own.index !== buffSource.myRankId
+              || own.permissions.includes("CanActivateBuff") !== Boolean(buffSource.myOptions & 128))) {
+              guildBuffAuthorityRef.current.invalidatePermissions(owner,guildName);
+            }
+          }
+        }
         updateWorld(current => ({...current, stage5Systems: {...current.stage5Systems, guild: {
           ...(current.stage5Systems.guild ?? {}),
-          members: ranks ? ranks.members.map(member => member.name)
-            : name && (status === 0 || status === 1) ? groupMembersAfterChange(current.stage5Systems.guild?.members, status === 1 ? {remove: name} : {add: name})
-              : current.stage5Systems.guild?.members,
+          ...(evidence.guildLeft ? {name:"",rank:"",members:[]} : {
+            ...(ranks ? {members:ranks.members.map(member => member.name)} : {}),
+            ...(evidence.ownRank.kind === "confirmed" ? {rank:evidence.ownRank.name} : {}),
+          }),
         }}}));
+        scheduleGuildRankControls();
         break;
       }
       case "GuildNoticeChange": {
@@ -20369,6 +20498,13 @@ export default function HomePage() {
   bevySpellsSendGateRef.current=bevySpellsUi.allows;
   spellsIngressRef.current=bevySpellsUi;
   const socialRosterRenderSources = {friend: showFriends ? readSocialRosterSource("friend") : null, guild: showGuild ? readSocialRosterSource("guild") : null};
+  const guildRankUiSource = readGuildRankEditSource();
+  const guildRankControlState = {...guildRankOperationsRef.current.view(Math.floor(performance.now())),
+    editableRankIndices:guildRankUiSource?.permissions.includes("CanChangeRank")
+      ? guildRankUiSource.ranks.filter(rank => rank.index >= guildRankUiSource.ownRankIndex).map(rank => rank.index) : []};
+  useEffect(() => {
+    if (showGuild && guildRankReadRef.current?.needed) requestGuildRankRoster();
+  });
   const socialTradeRender = showTrade ? readSocialItemSurface("trade") : null, socialGuildRender = showGuild ? readSocialItemSurface("guild") : null;
   const socialItemsPending = socialItemOperationsRef.current.pending !== null;
   const socialTradeUiLease = {owner: currentSocialReplyOwner(), incarnation: tradeIncarnationRef.current,
@@ -20975,7 +21111,11 @@ export default function HomePage() {
         onRefreshStorage: refreshGuildStorage, onReadStorageItemTooltip:readGuildStorageItemTooltip,
         onDepositItem: (from, to, uid) => submitSocialItem("guild0", from, to, uid, socialGuildRender?.sourceKey ?? ""),
         onRetrieveItem: (from, to, uid) => submitSocialItem("guild1", from, to, uid, socialGuildRender?.sourceKey ?? ""),
-        onMoveItem: (from, to, uid) => submitSocialItem("guild2", from, to, uid, socialGuildRender?.sourceKey ?? ""), playerName: self?.name ?? null, onEditNotice: editGuildNotice, onInviteMember: inviteGuildMember, onKickMember: kickGuildMember, onSendGuildChat: sendGuildChat, onChangeMemberRank: changeGuildMemberRank, onSaveRank: saveGuildRank, onDepositGold: guildDepositGold, onWithdrawGold: guildWithdrawGold }}
+        onMoveItem: (from, to, uid) => submitSocialItem("guild2", from, to, uid, socialGuildRender?.sourceKey ?? ""), playerName: self?.name ?? null,
+        onEditNotice: editGuildNotice, onInviteMember: inviteGuildMember, onKickMember: kickGuildMember, onSendGuildChat: sendGuildChat,
+        onChangeMemberRank: changeGuildMemberRank, onRenameRank:renameGuildRank, onToggleRankPermission:toggleGuildRankPermission,
+        rankEditPending:guildRankControlState, onRefreshRanks:() => { requestGuildRankRoster(true); },
+        onDepositGold: guildDepositGold, onWithdrawGold: guildWithdrawGold }}
       group={{ open: showGroup, onClose: () => closeSocialReplyWindow("group"), incomingInvite: socialRepliesRef.current.list(currentSocialReplyOwner()).find(r => r.kind === "group") ?? null, onReplyInvite: (epoch, accept) => replySocialRequest("group", epoch, accept), group: extraWindowData.group, playerName: self?.name ?? null, onInviteMember: groupInviteMember, onKickMember: kickGroupMember, onLeaveGroup: groupLeave, onToggleAllowInvites: groupToggleAllowInvites }}
       friends={{ open: showFriends, onClose: () => setShowFriends(false), social: extraWindowData.friends, onAddFriend: addFriend, onBlockPlayer: blockPlayer, onRemoveFriend: removeFriendEntry, onUnblockPlayer: removeFriendEntry, onWhisper: whisperPlayer, onMail: openMailWindow, onEditMemo: editFriendMemo, onRefresh: refreshFriends }}
       bonds={{ open: showBonds, onClose: () => closeSocialReplyWindow("bonds"), incomingRequests: socialRepliesRef.current.list(currentSocialReplyOwner()).filter((r): r is typeof r & {kind: "marriage" | "divorce" | "mentor"} => r.kind === "marriage" || r.kind === "divorce" || r.kind === "mentor"), onReplyRequest: replySocialRequest, relationship: extraWindowData.relationship, mentor: extraWindowData.mentor, onMailPartner: spouseUiSource ? () => mailSpouse(spouseUiSource) : undefined, onWhisperPartner: spouseUiSource?.partnerMap ? () => whisperSpouse(spouseUiSource) : undefined, onProposeMarriage: proposeMarriage, onDivorce: divorce, onAllowMarriage: toggleAllowMarriage, onAddMentor: addMentor, onAllowMentor: allowMentor, onCancelMentor: cancelMentor }}

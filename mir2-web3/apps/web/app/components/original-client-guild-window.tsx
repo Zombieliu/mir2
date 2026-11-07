@@ -8,6 +8,7 @@ import { originalItemIconPath } from "./original-client-inventory-utils";
 import { SpriteButton } from "./original-client-overlays";
 import type { CrystalTooltipDocument } from "../../lib/shared-item-tooltip";
 import { OriginalCrystalItemTooltip } from "./original-client-crystal-item-tooltip";
+import { guildRankPermissionCommand, guildRankRenameCommand } from "../../lib/social-parity-actions";
 import { captureGuildBuffAction, guildBuffActionCurrent, guildBuffRows, guildBuffStatLabel,
   type GuildBuffActionDto, type GuildBuffActionPlan, type GuildBuffDefinition, type GuildBuffPending,
   type GuildBuffRow, type GuildBuffSource } from "../../lib/guild-buff-ui";
@@ -49,6 +50,13 @@ export type GuildRank = {
   /** Active permission flags for this rank. */
   permissions?: GuildPermissionKey[];
 };
+
+/** Host-owned Native rename and option cooldowns; the window never starts timers. */
+export type GuildRankEditPending = Readonly<{
+  editableRankIndices?: readonly number[];
+  renameRankIndices: readonly number[];
+  permission: boolean;
+}>;
 
 /** A single slot in the guild storage grid (item present or empty). */
 export type GuildStorageItem = {
@@ -120,8 +128,12 @@ export type GuildWindowProps = {
   // --- Additive, optional action callbacks (wired later in page.tsx) ---
   /** Change a member's rank by rank index. */
   onChangeMemberRank?: (name: string, rankIndex: number) => void;
-  /** Persist a rank's name + permission flag set. */
-  onSaveRank?: (rankIndex: number, name: string, permissions: GuildPermissionKey[]) => void;
+  /** Save only the exact rank-name draft. False preserves the draft for retry. */
+  onRenameRank?: (rankIndex: number, name: string) => boolean;
+  /** Submit one checkbox immediately; checked state remains server-owned. */
+  onToggleRankPermission?: (rankIndex: number, key: GuildPermissionKey, enabled: boolean) => boolean;
+  rankEditPending?: GuildRankEditPending;
+  onRefreshRanks?: () => void;
   /** Deposit gold into guild storage. */
   onDepositGold?: (amount: number) => void;
   /** Retrieve gold from guild storage. */
@@ -190,7 +202,10 @@ export function GuildWindow({
   onKickMember,
   onSendGuildChat,
   onChangeMemberRank,
-  onSaveRank,
+  onRenameRank,
+  onToggleRankPermission,
+  rankEditPending,
+  onRefreshRanks,
   onDepositGold,
   onWithdrawGold,
   inventoryItems,
@@ -211,6 +226,11 @@ export function GuildWindow({
   onClose,
 }: GuildWindowProps) {
   const [tab, setTab] = useState<GuildTab>("overview");
+  const refreshRanksRef = useRef(onRefreshRanks);
+  refreshRanksRef.current = onRefreshRanks;
+  useEffect(() => {
+    if (tab === "members" || tab === "ranks") refreshRanksRef.current?.();
+  },[tab,guild?.name]);
   const [selectedMember, setSelectedMember] = useState<string | null>(null);
   const [inviteName, setInviteName] = useState("");
   const [chatDraft, setChatDraft] = useState("");
@@ -760,7 +780,9 @@ export function GuildWindow({
           ) : (
             <div style={style.ranksScroll}>
               {ranks.map((rank) => (
-                <RankCard key={rank.index} t={t} rank={rank} disabled={!onSaveRank} onSaveRank={onSaveRank} />
+                <RankCard key={`${guild.name ?? ""}:${rank.index}`} t={t} rank={rank}
+                  onRenameRank={onRenameRank} onToggleRankPermission={onToggleRankPermission}
+                  rankEditPending={rankEditPending} />
               ))}
             </div>
           )}
@@ -928,31 +950,31 @@ function ActionButton({ label, disabled, onClick }: { label: string; disabled?: 
   );
 }
 
-/** Editable card for a single guild rank: name + permission flag toggles. */
+/** Name is a local draft. Each permission checkbox reflects only the server rank. */
 function RankCard({
   t,
   rank,
-  disabled,
-  onSaveRank,
+  onRenameRank,
+  onToggleRankPermission,
+  rankEditPending,
 }: {
   t: TranslateFn;
   rank: GuildRank;
-  disabled?: boolean;
-  onSaveRank?: (rankIndex: number, name: string, permissions: GuildPermissionKey[]) => void;
+  onRenameRank?: GuildWindowProps["onRenameRank"];
+  onToggleRankPermission?: GuildWindowProps["onToggleRankPermission"];
+  rankEditPending?: GuildRankEditPending;
 }) {
   const [name, setName] = useState(rank.name);
-  const [perms, setPerms] = useState<Set<GuildPermissionKey>>(() => new Set(rank.permissions ?? []));
 
   useEffect(() => {
     setName(rank.name);
-    setPerms(new Set(rank.permissions ?? []));
-  }, [rank.name, rank.permissions]);
+  }, [rank.name]);
 
-  const original = new Set(rank.permissions ?? []);
-  const dirty =
-    name !== rank.name ||
-    perms.size !== original.size ||
-    PERMISSION_KEYS.some((key) => perms.has(key) !== original.has(key));
+  const renamePending = rankEditPending?.renameRankIndices.includes(rank.index) === true;
+  const authorityDisabled = rankEditPending?.editableRankIndices !== undefined
+    && !rankEditPending.editableRankIndices.includes(rank.index);
+  const renameDisabled = !onRenameRank || renamePending || authorityDisabled
+    || guildRankRenameCommand(rank.index, name) === null;
 
   return (
     <div style={style.rankCard} data-rank-index={rank.index}>
@@ -963,24 +985,22 @@ function RankCard({
         aria-label={t("ui.guildRankName", [], "Rank Name")}
         spellCheck={false}
         maxLength={20}
-        disabled={disabled}
+        disabled={!onRenameRank || renamePending || authorityDisabled}
       />
       <div style={style.rankPerms}>
         {PERMISSION_KEYS.map((key) => {
-          const on = perms.has(key);
+          const on = rank.permissions?.includes(key) === true;
+          const disabled = !onToggleRankPermission || rankEditPending?.permission === true || authorityDisabled
+            || guildRankPermissionCommand(rank.index, key, !on) === null;
           return (
             <label key={key} style={{ ...style.permCheck, ...(on ? style.permCheckOn : null) }}>
               <input
                 type="checkbox"
                 checked={on}
                 disabled={disabled}
+                data-guild-rank-permission={key}
                 onChange={(event) => {
-                  setPerms((prev) => {
-                    const next = new Set(prev);
-                    if (event.target.checked) next.add(key);
-                    else next.delete(key);
-                    return next;
-                  });
+                  if (!disabled) onToggleRankPermission?.(rank.index, key, event.target.checked);
                 }}
                 style={style.checkbox}
               />
@@ -992,8 +1012,8 @@ function RankCard({
       <div style={style.actions}>
         <ActionButton
           label={t("ui.guildSaveRank", [], "Save Rank")}
-          disabled={disabled || !dirty}
-          onClick={() => onSaveRank?.(rank.index, name.trim() || rank.name, PERMISSION_KEYS.filter((key) => perms.has(key)))}
+          disabled={renameDisabled}
+          onClick={() => { if (!renameDisabled) onRenameRank?.(rank.index, name); }}
         />
       </div>
     </div>

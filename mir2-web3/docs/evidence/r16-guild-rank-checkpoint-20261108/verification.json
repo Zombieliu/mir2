@@ -1,0 +1,184 @@
+{
+  "schemaVersion": 1,
+  "recordedAt": "2026-11-07T21:34:23.816Z",
+  "purpose": "User-requested code preservation checkpoint; frontend acceptance pending",
+  "branch": "codex/windows-player-journey",
+  "parent": "424449e8fba2b4ded8919a260e1a065b9b4a95e2",
+  "sources": [
+    {
+      "path": "apps/web/app/components/original-client-extra-windows.tsx",
+      "sha256WindowsBytes": "9520987aeaa00b7630ece550de29547275abe42e0c36915813c3b38f98fc68b3",
+      "gitBlob": "9b226ea7707b4048338b27229097ccfad27eb109"
+    },
+    {
+      "path": "apps/web/app/components/original-client-guild-window.tsx",
+      "sha256WindowsBytes": "ea641d28bb74b665c78d7200d75079e6393077b35d4d8772c715ce462fcad68b",
+      "gitBlob": "dc8972a4f6dd9263cd54cbbfda9eac9e37d275b6"
+    },
+    {
+      "path": "apps/web/app/page.tsx",
+      "sha256WindowsBytes": "fc538357264fbf9bd89553d41b32804bdcd4390b30e22c7876539ff124812f5c",
+      "gitBlob": "8571b6af18ff550e551cd67948cfbe9f7e078d5d"
+    },
+    {
+      "path": "apps/web/lib/social-parity-actions.ts",
+      "sha256WindowsBytes": "c768dfcdbb1a7dd7c7b70609bca8d5bde8b10300d476917f718ec7dcbe8747a1",
+      "gitBlob": "6fdcb5c7a4a3b0af395a405ae1d3e1717536220a"
+    },
+    {
+      "path": "apps/web/lib/guild-rank-operations.ts",
+      "sha256WindowsBytes": "35fc9787dfedaf48f722c84fe902611632e77e3a6e75612a83ded0c56eb3c3f9",
+      "gitBlob": "d9e95363fc20363bd67067acc0307931870cd4d0"
+    },
+    {
+      "path": "apps/web/lib/guild-rank-projection.ts",
+      "sha256WindowsBytes": "a99fc44667181f75321fe12d4b2cde221613acf6aec4c90ba9abd9e83918c476",
+      "gitBlob": "a632b899f505fb9b4ab8f9af146e773849534911"
+    },
+    {
+      "path": "apps/web/scripts/test-stage5-adapters.mjs",
+      "sha256WindowsBytes": "8f4181008d311f35bf5b80cdd13f64418ac0069bfc84d58f4f77be861c15d8b6",
+      "gitBlob": "4796bb48dd6930f2fccddf72f03b231fd977253b"
+    },
+    {
+      "path": "apps/web/scripts/test-storage-page-gate.mjs",
+      "sha256WindowsBytes": "1ce3c79ba98de0a2cbcd17793b3ce0bb804290837be4a445332a6e812f87856a",
+      "gitBlob": "71b26af0d7c4793d7c3281d85422cdb27028daa3"
+    },
+    {
+      "path": "apps/web/scripts/test-guild-rank-operations.mjs",
+      "sha256WindowsBytes": "cb54527e658169492efd32a7efd9078806acfa5b7668cc968e8a86592aa23553",
+      "gitBlob": "d5ade4f7af9a7ea67c0b862f77d9c34bcb7636d0"
+    },
+    {
+      "path": "apps/web/scripts/test-guild-rank-projection.mjs",
+      "sha256WindowsBytes": "d65ac3a0d136c070167c37ccbdf38ef3531a3707a10f5aec03f1691313e1b6b1",
+      "gitBlob": "374ff08e90f0fced9d782d5a03bb10863f515630"
+    },
+    {
+      "path": "apps/web/scripts/test-social-parity-actions.mjs",
+      "sha256WindowsBytes": "92079424a79d4caae2f7bf50fd60bea76b9a8bf21701be8e44f316255d4d022b",
+      "gitBlob": "eb8acc8ba5082d1ec346a93b4a9cb1e4c82b89ef"
+    }
+  ],
+  "artifacts": [
+    {
+      "path": "focused-tests.log",
+      "bytes": 9385,
+      "sha256": "2cdbd6d8d158c996b413962d595db7520c96565b58dc51a809663eb69d3184bf"
+    },
+    {
+      "path": "storage-page-tests.log",
+      "bytes": 26273,
+      "sha256": "006b33d12b5d1ee007f40192861c4a3e5f477caaacb44dfd9bd07f84239559f7"
+    },
+    {
+      "path": "stage5-tests.log",
+      "bytes": 703,
+      "sha256": "1840002435be1751cc26a3ba28868257d1f5257cd35695c909682360f68e7acc"
+    },
+    {
+      "path": "stage5-tests-qualified.log",
+      "bytes": 700,
+      "sha256": "7d866c92006f5b491d99a6746168b454f6e1c8912d2931a478c911eb7b91dfb4"
+    },
+    {
+      "path": "stage5-tests-final.log",
+      "bytes": 42,
+      "sha256": "cf7b210b65431f5de202cff413967c4e90c1c676506d0a612ee259d7f54f799b"
+    },
+    {
+      "path": "typecheck-initial.log",
+      "bytes": 280,
+      "sha256": "02d0d22091996f1cdac30da5aac0b94c4b0f7f4fd037e81fde2582e4e93554da"
+    },
+    {
+      "path": "typecheck-final.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "typecheck-final-result.json",
+      "bytes": 191,
+      "sha256": "25341a978fe103bf785b40d45a8d147557ae1ae2443987e5610fd83e5ebf824d"
+    },
+    {
+      "path": "checkbox-fixture-initial.log",
+      "bytes": 1099,
+      "sha256": "c9da9ab08947b0b020176c6a9e3bb3e8c61c263533cdc8a87a51f45cf98f3829"
+    },
+    {
+      "path": "storage-page-tests-first-adapt.log",
+      "bytes": 26245,
+      "sha256": "30cc4775b0d37508ee6b123f737d30665e22512eb2f4810fd513068dbcab8d3e"
+    }
+  ],
+  "verification": [
+    {
+      "command": "node --test scripts/test-guild-rank-operations.mjs scripts/test-guild-rank-projection.mjs scripts/test-social-parity-actions.mjs",
+      "result": "pass",
+      "tests": 39,
+      "skipped": 0,
+      "log": "focused-tests.log"
+    },
+    {
+      "command": "node --test scripts/test-storage-page-gate.mjs",
+      "result": "pass",
+      "tests": 94,
+      "skipped": 0,
+      "log": "storage-page-tests.log"
+    },
+    {
+      "command": "node scripts/test-stage5-adapters.mjs",
+      "result": "pass",
+      "groups": 507,
+      "log": "stage5-tests-final.log",
+      "note": "Group count is not added to distinct test counts; overlapping coverage is possible."
+    },
+    {
+      "command": "node node_modules/typescript/bin/tsc --project <run>/tsconfig-source.json",
+      "result": "pass",
+      "exitCode": 0,
+      "log": "typecheck-final.log",
+      "note": "Scoped to canonical app/lib/types; excludes prepared copies and generated Next output."
+    }
+  ],
+  "initialFailures": [
+    {
+      "log": "stage5-tests.log",
+      "cause": "Existing AST harness assumed no guards after group; new guild guards require explicit sequence assertions."
+    },
+    {
+      "log": "stage5-tests-qualified.log",
+      "cause": "Adjacent fishing harness retained the same old guard sequence assumption; exact guard assertions subsequently updated."
+    },
+    {
+      "log": "typecheck-initial.log",
+      "cause": "Actual world entity IDs are strings; current product normalizes both compared IDs."
+    },
+    {
+      "log": "checkbox-fixture-initial.log",
+      "cause": "Fixture assumed valid unchanged rename should be disabled; Native permits the valid same name."
+    },
+    {
+      "log": "storage-page-tests-first-adapt.log",
+      "cause": "Initial expanded fixture surfaced the string object-ID mismatch; current actual Page tests pass."
+    }
+  ],
+  "pending": [
+    "Actual headless browser rank rename, permission delta, hierarchy and relogin screenshots/packet verification",
+    "Native non-7 guild delta handling and missing changeType ACK compatibility",
+    "Common social pending budget and reliable failure acknowledgements",
+    "Native member display cap versus shared valid guild capacity",
+    "Windows desktop, cross-client, release and final human acceptance"
+  ],
+  "scope": {
+    "backendChanged": false,
+    "serviceStarted": false,
+    "desktopControlled": false,
+    "modelCalled": false,
+    "publicDeployment": false,
+    "candidate100": false,
+    "accepted": false
+  }
+}

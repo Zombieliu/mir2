@@ -16,6 +16,8 @@ working tree, services, release packages, source snapshots or parity percentages
 
 ## Last recorded decisions and open work
 
+User requested immediate code commit/push. Current guild-rank increment is a source checkpoint with 39 focused tests, 94 actual Page tests, 507 adapter groups and scoped TypeScript checks; browser packet/UI qualification remains pending. Do not count it as completed frontend parity. See [checkpoint scope](CODE-CHECKPOINT-20261108.zh-CN.md).
+
 Active Goal is Windows R16 to Web 1:1. Use the [feature and evidence ledger](WEB-R16-PARITY-GOAL.zh-CN.md). User priority remains code, shared rules, protocol, headless browser and builds without desktop input. Group and ordinary recovery passed both render backends. Native credential-first pending-save recovery now passes13 store/2 real WS cases plus103 adjacent unique cases (118 total), including exact binding/token, cancellation rollback and final expiry. Native client14s budget stays unchanged. Source checkpoint1485 files was pushed and verified at cc0cbf1a5; preserve that history and keep later verified slices committed. Continue group common gaps, trade, Alo and release gates; keep failures and Candidate/Accepted separate.
 
 | Topic | Recorded state and next scope | Detailed reference |

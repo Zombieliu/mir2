@@ -24,17 +24,31 @@ export function resolveFriendCharacterIndex(
   return entries.filter(entry => entry.index === index).length === 1 ? index : null;
 }
 
-/** Rename is type 3; type 2 assigns a member and type 4 creates a rank. */
-export function guildRankSaveCommands(rankIndex: number, name: string, permissions: readonly string[]): Record<string, unknown>[] | null {
-  if (!nonNegativeI32(rankIndex) || !validName(name) || name.trim().length > 20 || !Array.isArray(permissions)
-    || permissions.length > 8 || new Set(permissions).size !== permissions.length
-    || permissions.some(key => !(GUILD_RANK_PERMISSION_KEYS as readonly string[]).includes(key))) return null;
-  const enabled = new Set(permissions);
-  return [{type: "editGuildMember", changeType: 3, rankIndex, name: "", rankName: name.trim()},
-    ...GUILD_RANK_PERMISSION_KEYS.map((key, option) => ({
-      type: "editGuildMember", changeType: 5, rankIndex,
-      name: enabled.has(key) ? "true" : "false", rankName: String(option),
-    }))];
+export type GuildRankRenameCommand = Readonly<{
+  type: "editGuildMember"; changeType: 3; rankIndex: number; name: ""; rankName: string;
+}>;
+export type GuildRankPermissionCommand = Readonly<{
+  type: "editGuildMember"; changeType: 5; rankIndex: number; name: "true" | "false"; rankName: string;
+}>;
+const validGuildRankIndex = (value: unknown): value is number =>
+  nonNegativeI32(value) && value <= 255;
+
+/** Native valid_rank_rename_name counts UTF-16 units and preserves the exact draft. */
+export function guildRankRenameCommand(rankIndex: number, name: string): GuildRankRenameCommand | null {
+  if (!validGuildRankIndex(rankIndex) || typeof name !== "string"
+    || name.length < 3 || name.length > 20 || name.includes("\\")) return null;
+  return {type: "editGuildMember", changeType: 3, rankIndex, name: "", rankName: name};
+}
+
+/** One checkbox sends one type-5 option; neither rename nor a full options rewrite. */
+export function guildRankPermissionCommand(
+  rankIndex: number, key: GuildRankPermission, enabled: boolean,
+): GuildRankPermissionCommand | null {
+  if (!validGuildRankIndex(rankIndex) || typeof enabled !== "boolean") return null;
+  const option = (GUILD_RANK_PERMISSION_KEYS as readonly unknown[]).indexOf(key);
+  if (option < 0) return null;
+  return {type: "editGuildMember", changeType: 5, rankIndex,
+    name: enabled ? "true" : "false", rankName: String(option)};
 }
 
 export type ProjectedGuildRanks = {
