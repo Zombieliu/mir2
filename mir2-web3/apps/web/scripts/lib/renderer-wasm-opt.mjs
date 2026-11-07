@@ -56,13 +56,13 @@ export function assertClientCoreStagingRoot(stagingRoot, temporaryRoot) {
 // These profiles are private and fixed. A caller cannot select different
 // basenames, limits, arguments or a cleanup prefix through its options.
 const RENDERER_PROFILE = Object.freeze({ label: "renderer", subject: "Renderer",
-  optimizationArgs: Object.freeze(["-O1"]),
+  optimizationStages: Object.freeze([Object.freeze(["-O1"]), Object.freeze(["--merge-similar-functions"])]),
   wasmName: "mir2_bevy_runtime_bg.wasm", jsName: "mir2_bevy_runtime.js",
   temporaryPrefix: ".mir2-bevy-opt-", temporaryPattern: /^\.mir2-bevy-opt-\d+-[a-f0-9]{12}\.wasm$/,
   resolveConfig: tool => resolveRendererWasmOptConfig({ MIR2_BEVY_WASM_OPT_BIN: tool?.bin, MIR2_BEVY_WASM_OPT_SHA256: tool?.sha256 }),
   assertBudget: assertRendererReleaseBudget });
 const CLIENT_CORE_PROFILE = Object.freeze({ label: "client-core", subject: "Client-core",
-  optimizationArgs: Object.freeze(["-Oz", "--flatten", "--rereloop", "-Oz", "--converge"]),
+  optimizationStages: Object.freeze([Object.freeze(["-Oz", "--flatten", "--rereloop", "-Oz", "--converge"])]),
   wasmName: "mir2_platform_web_bg.wasm", jsName: "mir2_platform_web.js",
   temporaryPrefix: ".mir2-client-core-opt-", temporaryPattern: /^\.mir2-client-core-opt-\d+-[a-f0-9]{12}\.wasm$/,
   resolveConfig: tool => resolveClientCoreWasmOptConfig({ MIR2_CLIENT_CORE_WASM_OPT_BIN: tool?.bin, MIR2_CLIENT_CORE_WASM_OPT_SHA256: tool?.sha256 }),
@@ -206,8 +206,8 @@ function optimizeReleaseWasm(profile, { wasmPath, jsPath, stagingRoot, toolConfi
   const toolBefore = filePin(config.bin), inputBefore = filePin(input), jsBefore = filePin(js);
   if (toolBefore.sha256 !== config.sha256) throw new Error("wasm-opt executable SHA256 mismatch");
   const originalMetadata = moduleMetadata(regularBytes(input), "Original " + label);
-  const output = path.join(path.dirname(input), profile.temporaryPrefix + process.pid + "-" + crypto.randomBytes(6).toString("hex") + ".wasm");
-  assertRendererOutputAbsent(output);
+  const outputs = profile.optimizationStages.map(() => path.join(path.dirname(input), profile.temporaryPrefix + process.pid + "-" + crypto.randomBytes(6).toString("hex") + ".wasm"));
+  for (const output of outputs) assertRendererOutputAbsent(output);
   const env = {};
   for (const key of Object.keys(sourceEnv)) if (SYSTEM_ENV_NAMES.includes(key.toLowerCase())) env[key] = sourceEnv[key];
   env.BINARYEN_CORES = "1";
@@ -215,7 +215,7 @@ function optimizeReleaseWasm(profile, { wasmPath, jsPath, stagingRoot, toolConfi
     stdio: ["ignore", "pipe", "pipe"], timeout: 600000, killSignal: "SIGTERM", maxBuffer: 1024 * 1024 };
   let failure = null, record = null;
   try {
-    function runPinned(args, label) {
+    function runPinned(args, label, intermediatePins = []) {
       let commandError = null;
       try {
         return checkedResult(run(config.bin, args, options), label);
@@ -225,7 +225,7 @@ function optimizeReleaseWasm(profile, { wasmPath, jsPath, stagingRoot, toolConfi
       } finally {
         // Every individual command attempts all three pins before a next command.
         const pinErrors = [];
-        for (const before of [toolBefore, inputBefore, jsBefore]) {
+        for (const before of [toolBefore, inputBefore, jsBefore, ...intermediatePins]) {
           try { assertSamePin(before, filePin(before.path)); }
           catch (error) { pinErrors.push(error); }
         }
@@ -235,28 +235,39 @@ function optimizeReleaseWasm(profile, { wasmPath, jsPath, stagingRoot, toolConfi
     }
     const version = runPinned(["--version"], "version");
     if (!/^wasm-opt version 131(?:[ \t].*)?$/.test(version.stdout.trim())) throw new Error("Expected Binaryen wasm-opt version131");
-    assertRendererOutputAbsent(output);
-    const optimization = runPinned([input, ...profile.optimizationArgs, "--strip-debug", "-o", output], "optimization");
-    const optimizedBytes = regularBytes(output);
-    const optimizedMetadata = moduleMetadata(optimizedBytes, "Optimized " + label);
-    if (JSON.stringify(optimizedMetadata) !== JSON.stringify(originalMetadata)) {
-      throw new Error("wasm-opt changed import/export metadata");
+    const intermediatePins = [], stages = [];
+    for (const [index, args] of profile.optimizationStages.entries()) {
+      const source = index === 0 ? input : outputs[index - 1], output = outputs[index];
+      assertRendererOutputAbsent(output);
+      const command = runPinned([source, ...args, "--strip-debug", "-o", output], index === 0 ? "optimization" : "optimization stage " + (index + 1), intermediatePins);
+      const metadata = moduleMetadata(regularBytes(output), "Optimized " + label);
+      if (JSON.stringify(metadata) !== JSON.stringify(originalMetadata)) {
+        throw new Error("wasm-opt changed import/export metadata");
+      }
+      const pin = filePin(output);
+      intermediatePins.push(pin);
+      stages.push({ args: [...args, "--strip-debug"], command, output: pin, metadataMatched: true });
     }
+    const output = outputs.at(-1), optimizedBytes = regularBytes(output);
+    // A private intermediate may be larger than the final release cap. Every
+    // stage must retain the original interface; only the final pair is eligible
+    // for publication and must satisfy all existing byte budgets.
     const budget = profile.assertBudget({ wasmBytes: optimizedBytes, jsBytes: regularBytes(js), label });
     const outputPin = filePin(output);
     // Recheck immediately before the only mutation of the staged input.
     assertSamePin(toolBefore, filePin(config.bin));
     assertSamePin(inputBefore, filePin(input));
     assertSamePin(jsBefore, filePin(js));
+    for (const pin of intermediatePins) assertSamePin(pin, filePin(pin.path));
     ordinaryDirectory(root);
     ordinaryDirectory(path.dirname(input));
     assertSamePin(outputPin, filePin(output));
     fs.renameSync(output, input);
     record = { tool: toolBefore, input: inputBefore, output: { ...outputPin, path: input },
-      budget, version, optimization, metadataMatched: true, rendererInstantiated: false };
+      budget, version, optimization: stages[0].command, stages, metadataMatched: true, rendererInstantiated: false };
   } catch (error) { failure = error; }
   finally {
-    try {
+    for (const output of outputs) try {
       // Check ancestry again after the child; a replaced ancestor must never be followed.
       assertOwnedTemporaryOutput(root, input, output, profile);
       try { fs.unlinkSync(output); }

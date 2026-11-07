@@ -17,14 +17,22 @@ export class PortalError extends Error {
 function requireValue(condition, code = "invalidResponse") {
   if (!condition) throw new PortalError(code);
 }
-export function checkedCheckoutUrl(raw) {
+export const PAYMENT_PROVIDERS = Object.freeze({stripe: "Stripe", waffo: "WAFFO"});
+function checkedProvider(provider, code = "invalidIntent") {
+  requireValue(typeof provider === "string" && Object.hasOwn(PAYMENT_PROVIDERS, provider), code);
+  return provider;
+}
+export function checkedCheckoutUrl(raw, provider = "stripe") {
+  checkedProvider(provider, "invalidCheckoutUrl");
   requireValue(typeof raw === "string" && raw.length <= 4096
     && !/[\s\\\u0000-\u001f\u007f]/u.test(raw), "invalidCheckoutUrl");
   let url;
   try { url = new URL(raw); } catch { throw new PortalError("invalidCheckoutUrl"); }
-  requireValue(url.protocol === "https:" && url.hostname === "checkout.stripe.com"
-    && !url.username && !url.password && (!url.port || url.port === "443")
-    && url.pathname.startsWith("/c/pay/") && url.pathname.length > 7, "invalidCheckoutUrl");
+  const providerUrl = provider === "stripe"
+    ? url.hostname === "checkout.stripe.com" && url.pathname.startsWith("/c/pay/") && url.pathname.length > 7
+    : url.hostname === "cashier.waffo.com" && url.pathname.length > 1;
+  requireValue(url.protocol === "https:" && providerUrl
+    && !url.username && !url.password && (!url.port || url.port === "443"), "invalidCheckoutUrl");
   return url.href;
 }
 export function checkedCharacters(raw) {
@@ -83,15 +91,10 @@ export function checkedActivities(raw) {
   });
   return {...raw, characters, rewards, carryover:{...carryover, records}};
 }
-export function checkedStatus(raw) {
-  requireValue(raw && typeof raw.checkoutEnabled === "boolean"
-    && typeof raw.enabled === "boolean" && Number.isInteger(raw.credit) && raw.credit >= 0
-    && raw.credit <= 4294967295 && Number.isInteger(raw.pendingCredit)
-    && raw.pendingCredit >= 0 && raw.pendingCredit <= 4294967295);
-  requireValue(Array.isArray(raw.offers) && raw.offers.length <= 12
-    && Array.isArray(raw.orders) && raw.orders.length <= 20 && raw.monthlyCard);
+function checkedOffers(raw) {
+  requireValue(Array.isArray(raw) && raw.length <= 12);
   const seen = new Set();
-  const offers = raw.offers.map(offer => {
+  return raw.map(offer => {
     requireValue(offer && typeof offer.id === "string" && /^[A-Za-z0-9_-]{1,64}$/.test(offer.id)
       && !seen.has(offer.id) && /^[a-z]{3}$/.test(offer.currency)
       && Number.isSafeInteger(offer.amountMinor) && offer.amountMinor > 0
@@ -101,27 +104,55 @@ export function checkedStatus(raw) {
       amountLabel: typeof offer.amountLabel === "string" ? offer.amountLabel : "",
       credits: offer.credits};
   });
+}
+export function checkedStatus(raw) {
+  requireValue(raw && typeof raw.checkoutEnabled === "boolean"
+    && typeof raw.enabled === "boolean" && Number.isInteger(raw.credit) && raw.credit >= 0
+    && raw.credit <= 4294967295 && Number.isInteger(raw.pendingCredit)
+    && raw.pendingCredit >= 0 && raw.pendingCredit <= 4294967295);
+  requireValue(Array.isArray(raw.offers) && raw.offers.length <= 12
+    && Array.isArray(raw.orders) && raw.orders.length <= 20 && raw.monthlyCard);
+  const offers = checkedOffers(raw.offers), advertisedProviders = raw.paymentProviders !== undefined;
+  let paymentProviders;
+  if (advertisedProviders) {
+    requireValue(Array.isArray(raw.paymentProviders) && raw.paymentProviders.length <= 12);
+    const seen = new Set();
+    paymentProviders = raw.paymentProviders.map(provider => {
+      checkedProvider(provider?.id, "invalidResponse");
+      requireValue(!seen.has(provider.id) && typeof provider.livemode === "boolean"
+        && typeof provider.label === "string" && provider.label.length > 0 && provider.label.length <= 64
+        && !/[\u0000-\u001f\u007f]/u.test(provider.label));
+      seen.add(provider.id);
+      return {id: provider.id, label: PAYMENT_PROVIDERS[provider.id], livemode: provider.livemode,
+        offers: checkedOffers(provider.offers)};
+    });
+  } else {
+    // A legacy status snapshot has only Stripe. Network requests still require
+    // the matching server's explicit payment-provider opt-in support.
+    paymentProviders = raw.checkoutEnabled ? [{id: "stripe", label: "Stripe", livemode: !CONFIG.testMode, offers}] : [];
+  }
   const states = new Set(["prepared", "checkoutBound", "paidPending", "applied", "review"]);
   const orders = raw.orders.map(order => {
     requireValue(order && typeof order.id === "string" && order.id.length <= 160
       && states.has(order.state));
-    return {id: order.id, state: order.state};
+    return {id: order.id, state: order.state, provider: checkedProvider(order.provider ?? "stripe", "invalidResponse")};
   });
   const monthly = raw.monthlyCard;
   requireValue(typeof monthly.active === "boolean" && Number.isSafeInteger(monthly.serverNowMs)
     && monthly.serverNowMs > 0 && (monthly.expiresAtMs === null
       || Number.isSafeInteger(monthly.expiresAtMs) && monthly.expiresAtMs > 0));
   return {enabled: raw.enabled, checkoutEnabled: raw.checkoutEnabled,
-    credit: raw.credit, pendingCredit: raw.pendingCredit, offers, orders,
+    credit: raw.credit, pendingCredit: raw.pendingCredit, offers, orders, paymentProviders, advertisedProviders,
     monthlyCardCreditPrice: Number.isInteger(raw.monthlyCardCreditPrice) ? raw.monthlyCardCreditPrice : null,
     monthlyCard: {active: monthly.active, serverNowMs: monthly.serverNowMs, expiresAtMs: monthly.expiresAtMs}};
 }
-export function checkoutBody(characterIndex, offerId, orderRequestId, requestId) {
+export function checkoutBody(characterIndex, offerId, orderRequestId, requestId, provider = "stripe") {
   requireValue(Number.isInteger(characterIndex) && characterIndex >= 0
     && characterIndex <= 2147483647 && /^[A-Za-z0-9_-]{1,64}$/.test(offerId)
     && /^web-[a-f0-9-]{36}$/.test(orderRequestId)
     && Number.isSafeInteger(requestId) && requestId > 0, "invalidIntent");
-  return {characterIndex, requestId, orderRequestId, offerId};
+  checkedProvider(provider);
+  return {characterIndex, requestId, orderRequestId, offerId, provider, includePaymentProviders: true};
 }
 export async function accountScope(accountId, origin = CONFIG.websocket) {
   requireValue(typeof accountId === "string" && accountId.length > 0);
@@ -132,21 +163,31 @@ export async function accountScope(accountId, origin = CONFIG.websocket) {
 // Checkout URL, claimed amount or payment state. Failed requests retain the ID.
 export class IntentJournal {
   constructor(storage, uuid = () => crypto.randomUUID()) { this.storage = storage; this.uuid = uuid; }
-  key(scope, characterIndex, offerId) { return `numeron-checkout-v1:${scope}:${characterIndex}:${offerId}`; }
-  getOrCreate(scope, characterIndex, offerId) {
-    const key = this.key(scope, characterIndex, offerId);
+  key(scope, characterIndex, offerId, provider = "stripe") {
+    checkedProvider(provider);
+    return `numeron-checkout-v2:${scope}:${characterIndex}:${provider}:${offerId}`;
+  }
+  legacyKey(scope, characterIndex, offerId) { return `numeron-checkout-v1:${scope}:${characterIndex}:${offerId}`; }
+  getOrCreate(scope, characterIndex, offerId, provider = "stripe") {
+    const key = this.key(scope, characterIndex, offerId, provider);
     let value;
-    try { value = this.storage.getItem(key); } catch { throw new PortalError("storageUnavailable"); }
+    try {
+      value = this.storage.getItem(key);
+      if (value === null && provider === "stripe") value = this.storage.getItem(this.legacyKey(scope, characterIndex, offerId));
+    } catch { throw new PortalError("storageUnavailable"); }
     if (value !== null && !/^web-[a-f0-9-]{36}$/.test(value)) throw new PortalError("invalidIntent");
     if (!value) {
       value = `web-${this.uuid()}`;
       requireValue(/^web-[a-f0-9-]{36}$/.test(value), "invalidIntent");
-      try { this.storage.setItem(key, value); } catch { throw new PortalError("storageUnavailable"); }
     }
+    try { this.storage.setItem(key, value); } catch { throw new PortalError("storageUnavailable"); }
     return value;
   }
-  clear(scope, characterIndex, offerId) {
-    try { this.storage.removeItem(this.key(scope, characterIndex, offerId)); }
+  clear(scope, characterIndex, offerId, provider = "stripe") {
+    try {
+      this.storage.removeItem(this.key(scope, characterIndex, offerId, provider));
+      if (provider === "stripe") this.storage.removeItem(this.legacyKey(scope, characterIndex, offerId));
+    }
     catch { throw new PortalError("storageUnavailable"); }
   }
 }
@@ -245,7 +286,7 @@ export class PortalSession {
   }
   async status(characterIndex) {
     this.owned(characterIndex);
-    return checkedStatus(await this.api(`/status?characterIndex=${characterIndex}&requestId=${++this.requestId}`));
+    return checkedStatus(await this.api(`/status?characterIndex=${characterIndex}&requestId=${++this.requestId}&includePaymentProviders=true`));
   }
   async activities() {
     return checkedActivities(await this.api(`/status?requestId=${++this.requestId}`, {}, CONFIG.activities));
@@ -263,15 +304,17 @@ export class PortalSession {
     return new Promise((resolve, reject) => {
       const timeout = setTimeout(() => { this.waiters.delete(requestId); reject(new PortalError("connectionTimeout")); }, 25000);
       this.waiters.set(requestId, {resolve, reject, timeout, characterIndex});
-      this.socket.send(JSON.stringify({type: "billingStatus", characterIndex, requestId}));
+      this.socket.send(JSON.stringify({type: "billingStatus", characterIndex, requestId, includePaymentProviders: true}));
     });
   }
-  async checkout(characterIndex, offerId, orderRequestId) {
+  async checkout(characterIndex, offerId, orderRequestId, provider) {
     this.owned(characterIndex);
-    const body = checkoutBody(characterIndex, offerId, orderRequestId, ++this.requestId);
+    const body = checkoutBody(characterIndex, offerId, orderRequestId, ++this.requestId, provider);
     const result = await this.api("/checkout", {method: "POST", body: JSON.stringify(body)});
-    requireValue(typeof result.orderId === "string" && result.orderId.length <= 160);
-    return {orderId: result.orderId, checkoutUrl: result.checkoutUrl === null ? null : checkedCheckoutUrl(result.checkoutUrl)};
+    const selected = provider ?? "stripe", returned = result.provider ?? "stripe";
+    requireValue(typeof result.orderId === "string" && result.orderId.length <= 160 && returned === selected);
+    return {orderId: result.orderId, provider: selected,
+      checkoutUrl: result.checkoutUrl === null ? null : checkedCheckoutUrl(result.checkoutUrl, selected)};
   }
   async close() {
     const token = this.token, sessionId = this.sessionId, socket = this.socket;

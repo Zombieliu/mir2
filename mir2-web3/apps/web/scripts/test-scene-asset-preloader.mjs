@@ -24,6 +24,36 @@ new Function("exports", "module", compiled.outputText)(loadedModule.exports, loa
 
 const { preloadSceneAssetUrls } = loadedModule.exports;
 
+test("the actual scene collector stops raw entity requests only after the complete GPU atlas is presented", () => {
+  const shellText = readFileSync(new URL("../app/original-client-shell.tsx", import.meta.url), "utf8");
+  const file = ts.createSourceFile("shell.tsx", shellText, ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);
+  const functions = [], flags = [];
+  const visit = node => {
+    if (ts.isFunctionDeclaration(node) && ["collectVisibleSceneAssetUrls", "sceneMapSpritePreloadPriority"].includes(node.name?.text)) functions.push(node.getText(file));
+    if (ts.isPropertyAssignment(node) && node.name.getText(file) === "includeEntitySprites") flags.push(node.initializer.getText(file));
+    ts.forEachChild(node, visit);
+  };
+  visit(file); assert.equal(functions.length, 2); assert.equal(flags.length, 1);
+  const code = ts.transpileModule(functions.join("\n"), { compilerOptions: { target: ts.ScriptTarget.ES2022 } }).outputText;
+  const collect = new Function("SCENE_INTERACTION_PRELOAD_URL_LIMIT", "SCENE_INTERACTION_ENTITY_PRELOAD_PATHS_PER_SPRITE",
+    "SCENE_INTERACTION_ENTITY_PRELOAD_URL_LIMIT", "mapSpriteRenderPath", code + "\nreturn collectVisibleSceneAssetUrls;")(64, 8, 32, path => path);
+  const shouldInclude = new Function("hideDomEntitySpritesForBevy", "useBevyEntityAtlas", "activeBevyEntityAtlasCoversAllSources", "webGl2EntityTextureReady", "return (" + flags[0] + ");");
+  const map = { floor: [{ path: "/map-floor.png", left: 0, top: 0, width: 48, height: 32 }], objects: [] };
+  const entities = [{ sprite: { body: { path: "/body.png" }, hair: { path: "/hair.png" },
+    rearWeapons: [{ path: "/rear.png" }], frontWeapons: [{ path: "/front.png" }], preloadPaths: ["/next-body.png", "/body.png"] } }];
+  const viewportLayout = { stageWidth: 1024, stageHeight: 768 };
+  for (let mask = 0; mask < 16; mask++) {
+    const values = [0, 1, 2, 3].map(bit => !!(mask & 1 << bit));
+    const includeEntitySprites = shouldInclude(...values);
+    const urls = collect(map, entities, { includeEntitySprites, includeEntityPreloadPaths: true, viewportLayout });
+    assert.ok(urls.includes("/map-floor.png"), "GPU entity ownership never drops map dependencies");
+    if (mask === 15) assert.deepEqual(urls, ["/map-floor.png"], "the presented, complete atlas owns all entity imagery");
+    else for (const path of ["/body.png", "/hair.png", "/rear.png", "/front.png", "/next-body.png"]) assert.ok(urls.includes(path), "warming, uncovered or fallback imagery stays available");
+    assert.equal(new Set(urls).size, urls.length);
+  }
+  assert.ok(collect(map, entities, { viewportLayout }).includes("/body.png"), "other callers retain the DOM default");
+});
+
 test("scene preload caps concurrency and stops queued work after interaction readiness", async () => {
   let active = 0;
   let maxActive = 0;

@@ -1,4 +1,17 @@
+/* Same local font files as Windows R16; no third-party font request. */
+@font-face { font-family: "Noto Sans"; src: url("/original-ui/fonts/NotoSans-Regular.ttf") format("truetype"); font-weight: 400; font-display: swap; }
+@font-face { font-family: "Noto Sans"; src: url("/original-ui/fonts/NotoSans-Bold.ttf") format("truetype"); font-weight: 700; font-display: swap; }
+@font-face { font-family: "Noto Sans TC"; src: url("/original-ui/fonts/NotoSansTC.ttf") format("truetype"); font-weight: 400; font-display: swap; }
+@font-face { font-family: "Noto Sans CJK SC"; src: url("/original-ui/fonts/NotoSansCJKsc-Regular.otf") format("opentype"); font-weight: 400; font-display: swap; }
+@font-face { font-family: "Noto Sans Devanagari"; src: url("/original-ui/fonts/NotoSansDevanagari-Regular.ttf") format("truetype"); font-weight: 400; font-display: swap; }
+@font-face { font-family: "Noto Sans Devanagari"; src: url("/original-ui/fonts/NotoSansDevanagari-Bold.ttf") format("truetype"); font-weight: 700; font-display: swap; }
+@font-face { font-family: "Noto Sans Thai"; src: url("/original-ui/fonts/NotoSansThai-Regular.ttf") format("truetype"); font-weight: 400; font-display: swap; }
+@font-face { font-family: "Noto Sans Thai"; src: url("/original-ui/fonts/NotoSansThai-Bold.ttf") format("truetype"); font-weight: 700; font-display: swap; }
+@font-face { font-family: "Noto Sans Arabic"; src: url("/original-ui/fonts/NotoSansArabic-Regular.ttf") format("truetype"); font-weight: 400; font-display: swap; }
+@font-face { font-family: "Noto Sans Arabic"; src: url("/original-ui/fonts/NotoSansArabic-Bold.ttf") format("truetype"); font-weight: 700; font-display: swap; }
+
 :root {
+  --mir2-ui-font: "Noto Sans", sans-serif;
   color-scheme: dark;
   --bg: #070503;
   --ink: #e8dbc2;
@@ -28,8 +41,15 @@ body {
   min-height: 100%;
   background: #000;
   color: var(--ink);
-  font-family: Georgia, "Times New Roman", serif;
+  font-family: var(--mir2-ui-font);
 }
+
+html:lang(zh-CN), html:lang(zh-SG), html:lang(zh-Hans) { --mir2-ui-font: "Noto Sans CJK SC", sans-serif; }
+html:lang(zh-TW), html:lang(zh-HK), html:lang(zh-Hant) { --mir2-ui-font: "Noto Sans TC", sans-serif; }
+html:lang(hi) { --mir2-ui-font: "Noto Sans Devanagari", "Noto Sans", sans-serif; }
+html:lang(th) { --mir2-ui-font: "Noto Sans Thai", "Noto Sans", sans-serif; }
+html:lang(ar) { --mir2-ui-font: "Noto Sans Arabic", "Noto Sans", sans-serif; }
+[data-r16-auth], [data-r16-auth] button, [data-r16-auth] input { font-family: var(--mir2-ui-font); }
 
 body {
   overflow: hidden;
@@ -375,7 +395,8 @@ body:has([data-shared-touch-quest-open="true"], [data-shared-touch-bag-open="tru
 
 .login-transition-overlay {
   z-index: 19;
-  pointer-events: none;
+  pointer-events: auto;
+  touch-action: none;
 }
 
 .client-scene-background {
@@ -477,8 +498,10 @@ body:has([data-shared-touch-quest-open="true"], [data-shared-touch-bag-open="tru
 .viewport-drop-overlay {
   /* Ground-item labels must remain physically clickable even when a corpse or
      live actor occupies the same tile. Keep the full overlay pass-through so
-     map/entity input is unchanged outside the actual marker buttons. */
-  z-index: 32762;
+     map/entity input is unchanged outside the actual marker buttons. Crystal's
+     camera-relative object depth reaches 3,083,120; this label-only pass stays
+     above it, inside the isolated world (and below the separate game UI). */
+  z-index: 4000000;
   pointer-events: none;
 }
 
@@ -891,6 +914,7 @@ body:has([data-shared-touch-quest-open="true"], [data-shared-touch-bag-open="tru
 .game-ui-scene .chat-filter-bar,
 .game-ui-scene .belt-dialog,
 .game-ui-scene .mini-map-panel,
+.game-ui-scene .big-map-viewport,
 .game-ui-scene .dura-panel,
 .game-ui-scene .dura-status-panel,
 .game-ui-scene .npc-dialog-panel,

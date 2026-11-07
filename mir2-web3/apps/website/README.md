@@ -23,6 +23,10 @@ The site is served at `http://localhost:3080` and redirects to `/zh-CN`.
 - `NEXT_PUBLIC_WINDOWS_DOWNLOAD_URL`: optional HTTPS URL for the signed Windows
   installer. Without it, the localized Download page truthfully keeps Windows
   unavailable instead of linking a development artifact.
+  The checked-in `.env.production` supplies the current public Windows TEST
+  installer as the production-build default. A deployment variable can override
+  it. Replace this default only after the new installer passes acceptance; the
+  download button does not certify a 5–10 minute cold start.
 - `NEXT_PUBLIC_ANDROID_DOWNLOAD_URL`: optional HTTPS URL for a signed Android
   package or store listing. Without it, Android points to the supported PWA
   installation path and identifies the Capacitor APK as Candidate-only.

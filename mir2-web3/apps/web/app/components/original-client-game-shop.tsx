@@ -16,6 +16,8 @@ import { OriginalCrystalItemTooltip } from "./original-client-crystal-item-toolt
 import type { NpcGoldBuyQuote } from "../../lib/bevy-npc-shop-buy";
 import type { NpcRepairView, NpcRepairSelection } from "../../lib/npc-repair-service";
 import { SpriteButton } from "./original-client-overlays";
+import { R16_NPC_SELL_LAYOUT, r16NpcSellCapture, r16NpcSellQuantity, r16NpcSellSourceKey, r16NpcSellTarget, r16NpcSellTotal,
+  type R16NpcSellSelection, type R16NpcShopRect } from "../../lib/r16-npc-shop-layout";
 
 type TranslateFn = (
   key: string,
@@ -843,6 +845,14 @@ export function NpcShopWindow({
     : sharedBuy || pearlBuy ? npcShopBuyBlockedTitle(t, buyQuote, pearlBuy, pearlsKnown)
     : !affordable ? t("client.LowGold", [], "Not enough gold.") : t("client.Unavailable", [], "Unavailable");
 
+  if (tab === "sell") return <NpcSellServiceWindow t={t} npcName={npcName} items={sellItems ?? []} tabs={tabs}
+    blocked={blocked} inputBlocked={inputBlocked} onSell={onSell} onClose={onClose}
+    onBuy={() => {
+      if (blocked()) return;
+      if (controlledTab !== undefined) onTabChange?.("buy"); else setLocalTab("buy");
+      setSelectedId(null); setRepairSelection(null); setQuantity(1); setShowBuyBack(false);
+    }} />;
+
   if (repairTab) {
     const targetSelection = repairTargetSelection?.stamp === repairView?.stamp ? repairTargetSelection : null;
     const target = targetSelection ? repairView?.rows.find(row => row.uniqueId === targetSelection.uniqueId) : null;
@@ -1098,6 +1108,118 @@ export function NpcShopWindow({
       </div>
     </section>
   );
+}
+
+/** A sale target uses original UID/price facts; it never owns transport or receipts. */
+function NpcSellServiceWindow({ t, npcName, items, tabs, blocked, inputBlocked, onSell, onBuy, onClose }: {
+  t: TranslateFn; npcName?: string; items: readonly NpcShopOwnedItem[]; tabs: readonly NpcShopTab[];
+  blocked(): boolean; inputBlocked: boolean; onSell?: (id: number | string, quantity: number) => void; onBuy(): void; onClose(): void;
+}) {
+  const layout = R16_NPC_SELL_LAYOUT, sourceKey = r16NpcSellSourceKey(npcName, tabs, items);
+  const [selection, setSelection] = useState<R16NpcSellSelection | null>(null);
+  const [draft, setDraft] = useState("1");
+  const [pickerSource, setPickerSource] = useState<string | null>(null), [page, setPage] = useState(0);
+  const target = r16NpcSellTarget(selection, sourceKey, items), pickerOpen = pickerSource === sourceKey;
+  const quantity = target ? r16NpcSellQuantity(draft, target.count) : null, total = target ? r16NpcSellTotal(target, quantity) : null;
+  const renderRef = useRef<object | null>(null), edge = {};
+  renderRef.current = edge;
+  useLayoutEffect(() => { renderRef.current = edge; return () => { if (renderRef.current === edge) renderRef.current = null; }; }, [edge]);
+  useEffect(() => { setSelection(null); setDraft("1"); setPickerSource(null); setPage(0); }, [sourceKey]);
+  const live = () => renderRef.current === edge && !blocked();
+  const targetRef = useRef<HTMLButtonElement | null>(null), pickerRef = useRef<HTMLElement | null>(null);
+  useEffect(() => { if (pickerOpen) pickerRef.current?.querySelector<HTMLButtonElement>("button:not(:disabled)")?.focus(); }, [pickerOpen]);
+  const closePicker = () => { setPickerSource(null); targetRef.current?.focus(); };
+  const choose = (id: number | string) => {
+    if (!live()) return;
+    const next = r16NpcSellCapture(sourceKey, items, id);
+    if (!next) return;
+    setSelection(next); setDraft("1"); closePicker();
+  };
+  const confirmSale = () => {
+    if (!live() || !onSell) return;
+    const current = r16NpcSellTarget(selection, sourceKey, items), count = current ? r16NpcSellQuantity(draft, current.count) : null;
+    if (!current || current.disabled || count === null || r16NpcSellTotal(current, count) === null || !live()) return;
+    onSell(current.id, count);
+  };
+  const sprite = (base: number, hover: number, pressed: number) => ({ base: originalAssetPath(`/original-ui/Title/${base}.png`),
+    hover: originalAssetPath(`/original-ui/Title/${hover}.png`), pressed: originalAssetPath(`/original-ui/Title/${pressed}.png`) });
+  const artButton = (rect: R16NpcShopRect, art: { base: string; hover?: string; pressed?: string }): CSSProperties => ({
+    position: "absolute", ...rect, border: 0, padding: 0, backgroundColor: "transparent", cursor: "pointer",
+    "--r16-sell-art": `url(${JSON.stringify(art.base)})`, "--r16-sell-hover": `url(${JSON.stringify(art.hover ?? art.base)})`,
+    "--r16-sell-pressed": `url(${JSON.stringify(art.pressed ?? art.hover ?? art.base)})`,
+  } as CSSProperties);
+  const actionLabel = t("ui.shopSell", [], "Sell"), chooseLabel = t("ui.npcSellChooseBagItem", [], "选择背包物品");
+  const pageCount = Math.max(1, Math.ceil(items.length / layout.pickerRows)), currentPage = Math.min(page, pageCount - 1);
+  const canConfirm = !blocked() && !!onSell && !!target && !target.disabled && total !== null;
+  return <section className="npc-shop-window r16-npc-sell-service" data-ui-interactive="true" data-shop-tab="sell" aria-label={npcName || actionLabel}
+    aria-disabled={inputBlocked} aria-busy={inputBlocked} inert={inputBlocked || undefined}
+    style={{ position: "absolute", ...layout.panel, zIndex: 30, color: "#f4ecd6", font: "10px Arial, 'Microsoft YaHei', sans-serif", textShadow: "1px 1px #000" }}
+    onPointerDown={event => event.stopPropagation()} onClick={event => event.stopPropagation()}
+    onKeyDown={event => {
+      event.stopPropagation();
+      if (event.nativeEvent.isComposing || event.keyCode === 229) return;
+      if (event.key === "Escape") { event.preventDefault(); if (event.repeat || !live()) return; if (pickerOpen) closePicker(); else onClose(); }
+      if (pickerOpen && event.key === "Tab") {
+        const fields = Array.from(pickerRef.current?.querySelectorAll<HTMLElement>("button:not(:disabled)") ?? []);
+        if (!fields.length) return;
+        const index = fields.indexOf(document.activeElement as HTMLElement), next = (index + (event.shiftKey ? -1 : 1) + fields.length) % fields.length;
+        event.preventDefault(); fields[next].focus();
+      }
+    }}>
+    <style>{`.r16-npc-sell-service .r16-npc-sell-sprite{background-image:var(--r16-sell-art);background-size:100% 100%;background-repeat:no-repeat;color:transparent;font-size:0}
+      .r16-npc-sell-service .r16-npc-sell-sprite:not(:disabled):hover{background-image:var(--r16-sell-hover)}
+      .r16-npc-sell-service .r16-npc-sell-sprite:not(:disabled):active{background-image:var(--r16-sell-pressed)}
+      .r16-npc-sell-service button:disabled{cursor:default;opacity:.45}
+      .r16-npc-sell-service :is(button,input):focus-visible{outline:1px solid #ffd966;outline-offset:1px}`}</style>
+    <img src={originalAssetPath("/original-ui/Prguse2/351.png")} alt="" draggable={false}
+      style={{ position: "absolute", inset: 0, width: 176, height: 147, pointerEvents: "none", imageRendering: "pixelated" }} />
+    <div style={{ position: "absolute", ...layout.quote }}>{actionLabel}: {total === null ? "—" : formatGold(total)}</div>
+    <button ref={targetRef} type="button" data-r16-npc-sell-open="true" aria-label={target ? `${chooseLabel}: ${target.name}` : chooseLabel}
+      title={target?.name || chooseLabel} disabled={blocked()} data-item-id={target ? String(target.id) : undefined} data-unit-price={target?.price}
+      style={{ position: "absolute", ...layout.target, padding: 0, border: target ? "1px solid transparent" : "1px dashed #b99d66", background: "transparent", color: "#f4ecd6", font: "inherit", cursor: "pointer" }}
+      onClick={() => { if (live()) { setPickerSource(sourceKey); setPage(0); } }}>
+      {target ? <><img src={originalItemIconPath(target.icon)} alt={target.name} draggable={false}
+        style={{ position: "absolute", left: layout.item.left - layout.target.left, top: layout.item.top - layout.target.top, width: 36, height: 32, objectFit: "contain", imageRendering: "pixelated", pointerEvents: "none" }} />
+        {(target.count ?? 1) > 1 ? <span style={{ position: "absolute", left: 18, top: 35, width: 36, textAlign: "right", color: "#ffff00" }}>{quantity ?? "—"}</span> : null}</> : chooseLabel}
+    </button>
+    {target && (target.count ?? 1) > 1 ? <input type="text" inputMode="numeric" pattern="[0-9]*" value={draft} aria-label={t("ui.shopQuantity", [], "Quantity")}
+      title={t("ui.shopQuantity", [], "Quantity")} disabled={blocked()} style={{ position: "absolute", ...layout.quantity, boxSizing: "border-box", background: "#17130d", border: "1px solid #a58d5c", color: "#fff", textAlign: "center" }}
+      onChange={event => { if (live()) setDraft(event.target.value); }}
+      onKeyDown={event => { if (event.key === "Enter" && !event.nativeEvent.isComposing && event.keyCode !== 229) { event.preventDefault(); event.stopPropagation(); if (!event.repeat) confirmSale(); } }} /> : null}
+    <button type="button" className="npc-shop-confirm r16-npc-sell-sprite" data-shop-tab-key="sell" aria-label={actionLabel}
+      title={canConfirm ? target?.name : t("client.Unavailable", [], "Unavailable")} disabled={!canConfirm}
+      style={artButton(layout.confirm, sprite(290, 291, 292))} onClick={confirmSale}>{actionLabel}</button>
+    {tabs.includes("buy") ? <button type="button" data-shop-tab-key="buy" aria-label={t("ui.shopBuy", [], "Buy")}
+      style={{ position: "absolute", ...layout.buy, padding: 0, border: "1px solid #a58d5c", background: "#21180f", color: "#f4ecd6", font: "inherit" }}
+      disabled={blocked()} onClick={() => { if (live()) onBuy(); }}>{t("ui.shopBuy", [], "Buy")}</button> : null}
+    <button type="button" className="npc-shop-close r16-npc-sell-sprite" aria-label={t("ui.close", [], "Close")} title={t("ui.close", [], "Close")}
+      style={artButton(layout.close, ORIGINAL_UI.inventory.closeButton)} disabled={blocked()} onClick={() => { if (live()) onClose(); }}>{t("ui.close", [], "Close")}</button>
+    <div role="status" style={{ position: "absolute", left: 14, top: 132, width: 148, overflow: "hidden", whiteSpace: "nowrap", textOverflow: "ellipsis" }}>
+      {blocked() ? t("ui.questActionPending", [], "Waiting for the current request.") : target?.name ?? chooseLabel}
+    </div>
+    {pickerOpen ? <section ref={pickerRef} role="dialog" aria-label={chooseLabel} data-r16-npc-sell-picker="true" data-ui-interactive="true"
+      style={{ position: "absolute", ...layout.picker, boxSizing: "border-box", padding: 0, border: "1px solid #a58d5c", background: "#17120d", color: "#f4ecd6", pointerEvents: "auto", zIndex: 32 }}>
+      <strong style={{ position: "absolute", left: 10, top: 9, fontSize: 12 }}>{chooseLabel}</strong>
+      <button type="button" aria-label={t("ui.close", [], "Close")} data-r16-npc-sell-picker-close="true" style={{ position: "absolute", left: 321, top: 5, width: 30, height: 24 }}
+        onClick={() => { if (live()) closePicker(); }}>×</button>
+      {items.slice(currentPage * layout.pickerRows, (currentPage + 1) * layout.pickerRows).map((item, index) => <button key={`${typeof item.id}:${item.id}`} type="button"
+        className="npc-shop-row" data-item-id={String(item.id)} data-item-name={item.name} data-unit-price={item.price} aria-label={item.name}
+        disabled={blocked() || !r16NpcSellCapture(sourceKey, items, item.id)}
+        style={{ position: "absolute", left: 8, top: 34 + index * 33, width: 342, height: 32, padding: 0, border: "1px solid #574a31", background: "#21180f", color: "#f4ecd6", cursor: "pointer", textAlign: "left", font: "11px Arial, 'Microsoft YaHei', sans-serif" }}
+        onClick={() => choose(item.id)}>
+        <img src={originalItemIconPath(item.icon)} alt="" draggable={false} style={{ position: "absolute", left: 0, top: 0, width: 36, height: 32, objectFit: "contain", imageRendering: "pixelated" }} />
+        <span style={{ position: "absolute", left: 42, top: 1, width: 194, overflow: "hidden", whiteSpace: "nowrap", textOverflow: "ellipsis" }}>{item.name}</span>
+        <span style={{ position: "absolute", left: 42, top: 16, width: 194, color: "#b8aa89" }}>×{item.count ?? 1}</span>
+        <span style={{ position: "absolute", right: 5, top: 8, width: 94, textAlign: "right", color: "#ffd966" }}>{formatGold(item.price)}</span>
+      </button>)}
+      {!items.length ? <div style={{ position: "absolute", left: 12, top: 50 }}>{t("ui.shopEmpty", [], "Nothing available.")}</div> : null}
+      <button type="button" aria-label={t("ui.previous", [], "Previous")} disabled={blocked() || currentPage === 0}
+        style={{ position: "absolute", left: 10, top: 304, width: 66, height: 23 }} onClick={() => { if (live()) setPage(currentPage - 1); }}>‹</button>
+      <span style={{ position: "absolute", left: 84, top: 309 }}>{currentPage + 1} / {pageCount}</span>
+      <button type="button" aria-label={t("ui.next", [], "Next")} disabled={blocked() || currentPage + 1 >= pageCount}
+        style={{ position: "absolute", right: 10, top: 304, width: 66, height: 23 }} onClick={() => { if (live()) setPage(currentPage + 1); }}>›</button>
+    </section> : null}
+  </section>;
 }
 
 function confirmEnabledFor(

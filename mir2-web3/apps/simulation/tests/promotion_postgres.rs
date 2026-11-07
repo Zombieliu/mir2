@@ -176,6 +176,7 @@ fn seed_paid_monthly(client: &mut Client, account: &str) -> SandboxMonthlyRevenu
     let order_id = format!("rch_{}", "a".repeat(64));
     let order = RechargeOrder {
         id: order_id.clone(),
+        provider: Default::default(),
         request_id: "recharge-fixture".into(),
         character_index: 1,
         offer: RechargeOffer {
@@ -187,6 +188,7 @@ fn seed_paid_monthly(client: &mut Client, account: &str) -> SandboxMonthlyRevenu
         },
         created_at_ms: START + 2000,
         livemode: false,
+        provider_request_started_at_ms: None,
         checkout_session_id: Some("cs_fixture".into()),
         payment_intent_id: Some("pi_fixture".into()),
         state: RechargeOrderState::Applied,

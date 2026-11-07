@@ -55,9 +55,9 @@ test('V2 training footholds are data-defined, bounded, and separate from importe
   ];
   for (const [kill, ids] of expected) {
     assert.deepEqual(kill.spawnCandidates.map(row => row.respawnIndex).sort(), ids,
-      'V2 searches three separated authored groups instead of the broad imported spread');
-    assert.ok(kill.spawnCandidates.every(row => row.count === 3 && row.spread === 3 && row.delayMinutes === 0));
-    assert.equal(kill.spawnCandidates.reduce((count, row) => count + row.count, 0), 9);
+      'V2 searches three separated authored points instead of the broad imported spread');
+    assert.ok(kill.spawnCandidates.every(row => row.count === 1 && row.spread === 0 && row.delayMinutes === 0));
+    assert.equal(kill.spawnCandidates.reduce((count, row) => count + row.count, 0), kill.count);
   }
   assert.ok([...soldier.spawnCandidates, ...fighter.spawnCandidates].every(row => row.maxHp === 120));
   const footholds = expected.flatMap(([kill]) => kill.spawnCandidates.map(row => row.position));
@@ -80,29 +80,28 @@ test('N21 class practice selects the authored training actor over a closer impor
     entities: [
       { kind: 'selfPlayer', objectId: 1, x: 299, y: 385, hp: 90, dead: false },
       { kind: 'monster', objectId: 294325, name: 'WoomaFighter', x: 298, y: 385, hp: 285, dead: false },
-      { kind: 'monster', objectId: 1202100, name: 'WoomaFighter', x: 300, y: 385, hp: 120, dead: false },
+      { kind: 'monster', objectId: 210021, name: 'WoomaFighter', x: 300, y: 385, hp: 120, dead: false },
     ],
   };
   const target = await approachPracticeTarget({ snapshot }, quest, async () => ({ reached: true }), 1, () => {});
-  assert.equal(target.objectId, 1202100);
+  assert.equal(target.objectId, 210021);
 });
 
-test('N19 practice can acquire each real multi-actor Dung slot from the captured training group', async () => {
+test('N19 practice acquires the fixed training actor at each authored Dung point', async () => {
   const route = await loadNewcomerV2Route({ className: 'Wizard', gender: 'Male' });
   const quest = route.quests.find(row => row.questId === 2110019);
-  // Ordinary captured D022 group10023 exposes these three real IDs, rather
-  // than the one-actor/no-spread legacy ID210023 used by the stale controller.
-  for (const objectId of [1202300, 1202301, 1202302]) {
+  for (const { respawnIndex, position } of quest.objectives.kill[0].spawnCandidates) {
+    const objectId = 200_000 + respawnIndex;
     const client = { snapshot: { playerObjectId: 1, mapFileName: 'D022', entities: [
-      { kind: 'selfPlayer', objectId: 1, x: 336, y: 381, hp: 105, dead: false },
-      { kind: 'monster', objectId, name: 'Dung', x: 336, y: 380, hp: 155, maxHp: 155, dead: false },
+      { kind: 'selfPlayer', objectId: 1, x: position.x, y: position.y + 1, hp: 105, dead: false },
+      { kind: 'monster', objectId, name: 'Dung', ...position, hp: 155, maxHp: 155, dead: false },
     ] } };
     const target = await approachPracticeTarget(client, quest, async () => ({ reached: true }), 1, () => {});
     assert.equal(target.objectId, objectId);
   }
 });
 
-test('all three D022 training footholds have a static walk path from the ordinary entry', async () => {
+test('all nine D022 training footholds have a static walk path from the ordinary entry', async () => {
   const map = await loadProtocolCollisionMap('D022');
   const blockedTransfers = [{ x: 338, y: 354 }, { x: 251, y: 207 }, { x: 251, y: 206 }];
   for (const target of [
@@ -118,7 +117,7 @@ test('all three D022 training footholds have a static walk path from the ordinar
             !blockedTransfers.some(tile => tile.x === x && tile.y === y)) freeTiles += 1;
       }
     }
-    assert.ok(freeTiles >= 3, `training group needs three free tiles near ${target.x},${target.y}`);
+    assert.ok(freeTiles >= 3, `training foothold needs room to reposition near ${target.x},${target.y}`);
     assert.ok(findProtocolWalkPath({
       map, start: { x: 338, y: 356 }, target, dynamicObstacles: blockedTransfers,
     }), `D022 entry cannot reach ${target.x},${target.y}`);

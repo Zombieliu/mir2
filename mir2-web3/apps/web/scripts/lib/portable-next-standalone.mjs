@@ -921,11 +921,12 @@ function isSensitivePath(candidate) {
   });
 }
 
-export function selectThinPublicEntry(relativePath, isDirectory, { runtimeVersion, runtimeFiles, mapAtlasFiles = null, localMapFiles = new Set(), coreVersion = null, coreFiles = new Set() }) {
+export function selectThinPublicEntry(relativePath, isDirectory, { runtimeVersion, runtimeFiles, mapAtlasFiles = null, localMapFiles = new Set(), coreVersion = null, coreFiles = new Set(), r16PlayableFiles = new Set() }) {
   const segments = segmentsOf(relativePath);
   if (segments.length === 0) return isDirectory;
   const normalized = segments.join("/");
   if (isSensitivePath(normalized)) return false;
+  if (isDirectory ? [...r16PlayableFiles].some(file => file.startsWith(`${normalized}/`)) : r16PlayableFiles.has(normalized)) return true;
   const [root, second] = segments;
   if (root === "client-core") {
     return isDirectory
@@ -989,7 +990,7 @@ export function classifyPortableStandalonePath(relativePath, appRelativePath, is
   return { copy: true, reason: null };
 }
 
-export async function copyPortableStandalone({ sourceRoot, destinationRoot, appRelativePath, publicSelection }) {
+export async function copyPortableStandalone({ sourceRoot, destinationRoot, appRelativePath, publicSelection, preservePublicFiles = new Set() }) {
   if (!path.isAbsolute(sourceRoot) || !path.isAbsolute(destinationRoot)) throw new Error("Portable copy roots must be absolute");
   if (inside(sourceRoot, destinationRoot) || inside(destinationRoot, sourceRoot)) {
     throw new Error("Portable copy roots must not overlap");
@@ -1018,8 +1019,8 @@ export async function copyPortableStandalone({ sourceRoot, destinationRoot, appR
         await visit(source, destination, relative);
       } else if (stat.isFile()) {
         const compact = relative.slice(appRelativePath.length + 1).replaceAll("\\", "/");
-        const outcome = await copySelectedFile(source, destination,
-          compact.startsWith("public/") ? compact.slice("public/".length) : null);
+        const publicRelative = compact.startsWith("public/") ? compact.slice("public/".length) : null;
+        const outcome = await copySelectedFile(source, destination, publicRelative, preservePublicFiles.has(publicRelative));
         if (outcome.compaction) result.jsonCompactions.push(outcome.compaction);
         result.files += 1;
         result.bytes += outcome.outputBytes;
@@ -1033,7 +1034,7 @@ export async function copyPortableStandalone({ sourceRoot, destinationRoot, appR
   return result;
 }
 
-export async function copySelectedPublic({ sourceRoot, destinationRoot, selection }) {
+export async function copySelectedPublic({ sourceRoot, destinationRoot, selection, preservePublicFiles = new Set() }) {
   if (!path.isAbsolute(sourceRoot) || !path.isAbsolute(destinationRoot)) throw new Error("Public copy roots must be absolute");
   if (inside(sourceRoot, destinationRoot) || inside(destinationRoot, sourceRoot)) {
     throw new Error("Public copy roots must not overlap");
@@ -1058,7 +1059,7 @@ export async function copySelectedPublic({ sourceRoot, destinationRoot, selectio
         await visit(source, destination, relative);
       } else if (stat.isFile()) {
         await fs.mkdir(path.dirname(destination), { recursive: true });
-        const outcome = await copySelectedFile(source, destination, relative);
+        const outcome = await copySelectedFile(source, destination, relative, preservePublicFiles.has(relative));
         if (outcome.collision) collisions += 1;
         if (outcome.compaction) jsonCompactions.push(outcome.compaction);
         files += 1;
@@ -1097,10 +1098,10 @@ export function compactJsonWhitespace(source) {
   return output.subarray(0, length);
 }
 
-async function copySelectedFile(source, destination, publicRelative) {
-  const compact = publicRelative === "original-asset-manifest.generated.json" ||
+async function copySelectedFile(source, destination, publicRelative, preserveBytes = false) {
+  const compact = !preserveBytes && (publicRelative === "original-asset-manifest.generated.json" ||
     publicRelative === "bevy-entity-atlases/manifest.json" ||
-    (publicRelative?.startsWith("original-ui/") && publicRelative.endsWith(".json"));
+    (publicRelative?.startsWith("original-ui/") && publicRelative.endsWith(".json")));
   const sourceBytes = compact ? await fs.readFile(source) : null;
   const outputBytes = compact ? compactJsonWhitespace(sourceBytes) : null;
   const compaction = compact ? {

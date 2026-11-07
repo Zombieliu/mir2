@@ -4853,7 +4853,7 @@ mod tests {
     }
 
     #[test]
-    fn crystal_selected_monster_redraw_stays_between_real_front_tiles_and_effects() {
+    fn crystal_selected_monster_redraw_follows_row_front_tiles_and_precedes_effects() {
         let manifest = crate::atlas::routing_atlas_manifest_fixture(&[
             "/original-ui/Monster/005/136.png",
             "/original-ui/Monster/005/164.png",
@@ -4893,7 +4893,7 @@ mod tests {
             })
             .expect("VIS-01 source coordinate is a real 0.map front tile");
         let front_z = f64::from(crate::atlas::map_tile_draw_z_for_test(
-            front.x, front.y, front.z,
+            &payload, front.x, front.y, front.z,
         ));
 
         for (frame, action, expected_body, expected_effect) in [
@@ -4934,8 +4934,9 @@ mod tests {
             assert_eq!(highlight["path"], normal["path"]);
             assert_eq!(highlight["opacity"], json!(0.3));
             assert_eq!(highlight["additive"], json!(true));
-            assert!(normal["z"].as_f64().unwrap() < front_z);
-            assert!(front_z < highlight["z"].as_f64().unwrap());
+            assert!(front_z < normal["z"].as_f64().unwrap(),
+                "Crystal draws the whole row's map before same-row actors");
+            assert!(normal["z"].as_f64() < highlight["z"].as_f64());
 
             let effects = layers
                 .iter()
@@ -5331,7 +5332,7 @@ mod tests {
                             && draw.layer == crate::map_parser::TileLayer::Front
                     })
                     .expect("fixture coordinate is an actual 0.map front cell");
-                let front_z = crate::atlas::map_tile_draw_z_for_test(front.x, front.y, front.z);
+                let front_z = crate::atlas::map_tile_draw_z_for_test(&payload, front.x, front.y, front.z);
                 let body_z = state["entities"]
                     .as_array()
                     .into_iter()
@@ -5343,10 +5344,13 @@ mod tests {
                     .find(|layer| layer["key"] == json!("2010:body"))
                     .and_then(|layer| layer["z"].as_f64())
                     .expect("CannibalPlant body z") as f32;
-                assert!(
-                    front_z > body_z,
-                    "real front cell must occlude same-cell body"
+                assert!(front_z < body_z,
+                    "a real same-cell front is drawn before its row's live body");
+                let next_row_front_z = crate::atlas::map_tile_draw_z_for_test(
+                    &payload, front.x, front.y + 1, front.z,
                 );
+                assert!(body_z < next_row_front_z,
+                    "later-row buildings retain ordinary occlusion");
                 checked_real_occlusion = true;
             }
         }

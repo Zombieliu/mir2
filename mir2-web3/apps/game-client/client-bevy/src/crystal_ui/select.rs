@@ -278,9 +278,11 @@ pub fn spawn_character_select_screen(
     );
 
     if let Some(notice) = &model.notice {
+        let message = crate::native_shell_ui::character_creation_rejection_notice(&notice.message)
+            .unwrap_or_else(|| native_i18n::tr(&notice.message));
         spawn_text(
             parent,
-            &native_i18n::tr(&notice.message),
+            &message,
             CrystalRect::new(262.0, 678.0, 500.0, 22.0),
             12.0,
             ERROR,

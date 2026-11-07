@@ -1,0 +1,564 @@
+{
+  "schema": "mir2.r16.newcomer-web-ui-scoped.v1",
+  "passed": true,
+  "proofSha256": "243821959037e472d7f92cbc00bf512a5a81a708ed619804f44e781c348a7c28",
+  "scope": {
+    "ordinaryWebUiOnly": true,
+    "validationRole": "Wizard",
+    "validationMode": "revive",
+    "isolatedRealm": true,
+    "sameControllerRole": true,
+    "ordinaryLoginAndLogout": true,
+    "noQuestGrantOrSaveWrite": true
+  },
+  "renderer": {
+    "expected": "bevy-a46905128c316656",
+    "observedPublicReleases": [
+      "bevy-a46905128c316656"
+    ]
+  },
+  "saveReadback": {
+    "map": "0",
+    "hp": 10,
+    "maxHp": 111,
+    "mp": 442,
+    "maxMp": 452,
+    "dead": false,
+    "position": {
+      "x": 328,
+      "y": 264
+    },
+    "progression": {
+      "level": 27,
+      "experience": 11937,
+      "maxExperience": 1000000
+    },
+    "className": "Wizard",
+    "gold": 16830,
+    "completedQuestIds": [
+      2110001,
+      2110002,
+      2110003,
+      2110004,
+      2110005,
+      2110006,
+      2110007,
+      2110008,
+      2110009,
+      2110010,
+      2110011,
+      2110012,
+      2110013,
+      2110014,
+      2110015,
+      2110016,
+      2110017,
+      2110018,
+      2110019,
+      2120015,
+      2120020,
+      2120025
+    ],
+    "equipment": [
+      {
+        "name": "Candle",
+        "slot": "torch"
+      },
+      {
+        "name": "FireMagicRobe(M)",
+        "slot": "armour"
+      },
+      {
+        "name": "SolidBronzeStaff",
+        "slot": "weapon"
+      }
+    ],
+    "skills": [
+      {
+        "spell": "FireBall",
+        "index": 0,
+        "level": 0
+      },
+      {
+        "spell": "GreatFireBall",
+        "index": 1,
+        "level": 0
+      },
+      {
+        "spell": "FireWall",
+        "index": 2,
+        "level": 0
+      },
+      {
+        "spell": "Lightning",
+        "index": 3,
+        "level": 0
+      }
+    ],
+    "questLog": [
+      {
+        "questId": 2110001,
+        "stage": "completed",
+        "current": 1,
+        "required": 1,
+        "objectives": [
+          {
+            "label": "Report to Assistant Jane",
+            "current": 1,
+            "required": 1,
+            "done": true
+          }
+        ]
+      },
+      {
+        "questId": 2110002,
+        "stage": "completed",
+        "current": 1,
+        "required": 1,
+        "objectives": [
+          {
+            "label": "Equip a weapon you can use",
+            "current": 1,
+            "required": 1,
+            "done": true
+          }
+        ]
+      },
+      {
+        "questId": 2110003,
+        "stage": "completed",
+        "current": 4,
+        "required": 4,
+        "objectives": [
+          {
+            "label": "Defeat 2 Scarecrow.",
+            "current": 2,
+            "required": 2,
+            "done": true
+          },
+          {
+            "label": "Defeat 2 RakingCat.",
+            "current": 2,
+            "required": 2,
+            "done": true
+          }
+        ]
+      },
+      {
+        "questId": 2110004,
+        "stage": "completed",
+        "current": 3,
+        "required": 3,
+        "objectives": [
+          {
+            "label": "Defeat 2 Oma.",
+            "current": 2,
+            "required": 2,
+            "done": true
+          },
+          {
+            "label": "Complete your class practice",
+            "current": 1,
+            "required": 1,
+            "done": true
+          }
+        ]
+      },
+      {
+        "questId": 2110005,
+        "stage": "completed",
+        "current": 1,
+        "required": 1,
+        "objectives": [
+          {
+            "label": "Reach a Bichon safe area",
+            "current": 1,
+            "required": 1,
+            "done": true
+          }
+        ]
+      },
+      {
+        "questId": 2110006,
+        "stage": "completed",
+        "current": 1,
+        "required": 1,
+        "objectives": [
+          {
+            "label": "Buy a small HP or MP potion from a normal shop",
+            "current": 1,
+            "required": 1,
+            "done": true
+          }
+        ]
+      },
+      {
+        "questId": 2110007,
+        "stage": "completed",
+        "current": 4,
+        "required": 4,
+        "objectives": [
+          {
+            "label": "Defeat 4 ForestYeti.",
+            "current": 4,
+            "required": 4,
+            "done": true
+          }
+        ]
+      },
+      {
+        "questId": 2120015,
+        "stage": "completed",
+        "current": 1,
+        "required": 1,
+        "objectives": []
+      },
+      {
+        "questId": 2110008,
+        "stage": "completed",
+        "current": 3,
+        "required": 3,
+        "objectives": [
+          {
+            "label": "Defeat 2 Oma.",
+            "current": 2,
+            "required": 2,
+            "done": true
+          },
+          {
+            "label": "Complete your class practice",
+            "current": 1,
+            "required": 1,
+            "done": true
+          }
+        ]
+      },
+      {
+        "questId": 2110009,
+        "stage": "completed",
+        "current": 1,
+        "required": 1,
+        "objectives": [
+          {
+            "label": "Reach the Oma Cave entrance",
+            "current": 1,
+            "required": 1,
+            "done": true
+          }
+        ]
+      },
+      {
+        "questId": 2110010,
+        "stage": "completed",
+        "current": 4,
+        "required": 4,
+        "objectives": [
+          {
+            "label": "Defeat 4 Skeleton.",
+            "current": 4,
+            "required": 4,
+            "done": true
+          }
+        ]
+      },
+      {
+        "questId": 2110011,
+        "stage": "completed",
+        "current": 4,
+        "required": 4,
+        "objectives": [
+          {
+            "label": "Defeat 3 Skeleton.",
+            "current": 3,
+            "required": 3,
+            "done": true
+          },
+          {
+            "label": "Complete your class practice",
+            "current": 1,
+            "required": 1,
+            "done": true
+          }
+        ]
+      },
+      {
+        "questId": 2110012,
+        "stage": "completed",
+        "current": 2,
+        "required": 2,
+        "objectives": [
+          {
+            "label": "Defeat 1 Skeleton.",
+            "current": 1,
+            "required": 1,
+            "done": true
+          },
+          {
+            "label": "Complete your class practice",
+            "current": 1,
+            "required": 1,
+            "done": true
+          }
+        ]
+      },
+      {
+        "questId": 2120020,
+        "stage": "completed",
+        "current": 1,
+        "required": 1,
+        "objectives": []
+      },
+      {
+        "questId": 2110013,
+        "stage": "completed",
+        "current": 1,
+        "required": 1,
+        "objectives": [
+          {
+            "label": "Reach the Dead Mine entrance",
+            "current": 1,
+            "required": 1,
+            "done": true
+          }
+        ]
+      },
+      {
+        "questId": 2110014,
+        "stage": "completed",
+        "current": 5,
+        "required": 5,
+        "objectives": [
+          {
+            "label": "Defeat 3 Zombie2.",
+            "current": 3,
+            "required": 3,
+            "done": true
+          },
+          {
+            "label": "Defeat 2 Zombie3.",
+            "current": 2,
+            "required": 2,
+            "done": true
+          }
+        ]
+      },
+      {
+        "questId": 2110015,
+        "stage": "completed",
+        "current": 2,
+        "required": 2,
+        "objectives": [
+          {
+            "label": "Defeat 1 Zombie2.",
+            "current": 1,
+            "required": 1,
+            "done": true
+          },
+          {
+            "label": "Complete your class practice",
+            "current": 1,
+            "required": 1,
+            "done": true
+          }
+        ]
+      },
+      {
+        "questId": 2110016,
+        "stage": "completed",
+        "current": 4,
+        "required": 4,
+        "objectives": [
+          {
+            "label": "Defeat 3 Zombie2.",
+            "current": 3,
+            "required": 3,
+            "done": true
+          },
+          {
+            "label": "Complete your class practice",
+            "current": 1,
+            "required": 1,
+            "done": true
+          }
+        ]
+      },
+      {
+        "questId": 2120025,
+        "stage": "completed",
+        "current": 1,
+        "required": 1,
+        "objectives": []
+      },
+      {
+        "questId": 2110017,
+        "stage": "completed",
+        "current": 2,
+        "required": 2,
+        "objectives": [
+          {
+            "label": "Equip armour for your class and level",
+            "current": 1,
+            "required": 1,
+            "done": true
+          },
+          {
+            "label": "Report to the Bichon Wall Board",
+            "current": 1,
+            "required": 1,
+            "done": true
+          }
+        ]
+      },
+      {
+        "questId": 2110018,
+        "stage": "completed",
+        "current": 2,
+        "required": 2,
+        "objectives": [
+          {
+            "label": "Reach the Wooma Temple entrance",
+            "current": 1,
+            "required": 1,
+            "done": true
+          },
+          {
+            "label": "Complete your class practice",
+            "current": 1,
+            "required": 1,
+            "done": true
+          }
+        ]
+      },
+      {
+        "questId": 2110019,
+        "stage": "completed",
+        "current": 3,
+        "required": 3,
+        "objectives": [
+          {
+            "label": "Defeat 3 Dung.",
+            "current": 3,
+            "required": 3,
+            "done": true
+          }
+        ]
+      },
+      {
+        "questId": 2110020,
+        "stage": "inProgress",
+        "current": 0,
+        "required": 3,
+        "objectives": [
+          {
+            "label": "Defeat 3 WoomaSoldier.",
+            "current": 0,
+            "required": 3,
+            "done": false
+          }
+        ]
+      }
+    ],
+    "hpLarge": 0
+  },
+  "diaryReadback": {
+    "nativeReady": true,
+    "ordinaryQ": true,
+    "level": 27,
+    "displayedLocale": "zh-CN",
+    "completedQuestIds": [
+      2110001,
+      2110002,
+      2110003,
+      2110004,
+      2110005,
+      2110006,
+      2110007,
+      2110008,
+      2110009,
+      2110010,
+      2110011,
+      2110012,
+      2110013,
+      2110014,
+      2110015,
+      2110016,
+      2110017,
+      2110018,
+      2110019,
+      2120015,
+      2120020,
+      2120025
+    ]
+  },
+  "skillHover": {
+    "spell": "GreatFireBall",
+    "learnedLevel": 0,
+    "sourceKey": "content.magic.GreatFireBall.description",
+    "sourceComplete": true,
+    "ordinaryMouseHover": true,
+    "text": "大火球\n\n瞬发技能\n法力消耗 5\n\n火球术的高级版，大火球术对目标造成更高的伤害。\n\n当前技能等级 0\n下一级 15",
+    "hostFrame": 110,
+    "previousFrame": 99,
+    "clearedOnClose": true
+  },
+  "cleanup": {
+    "ordinaryLogout": true,
+    "browserClosed": true
+  },
+  "after": {
+    "map": "0",
+    "hp": 22,
+    "maxHp": 111,
+    "mp": 442,
+    "maxMp": 452,
+    "dead": false,
+    "position": {
+      "x": 328,
+      "y": 264
+    },
+    "gold": 16830,
+    "hpLarge": 0
+  },
+  "gameplayPassed": true,
+  "networkClean": true,
+  "publicMapSceneResponses": [
+    {
+      "phase": "ordinary-owned-qa-character-relogin",
+      "map": "0",
+      "missing": 0,
+      "sourceSprites": 903
+    },
+    {
+      "phase": "ordinary-owned-qa-character-relogin",
+      "map": "0",
+      "missing": 0,
+      "sourceSprites": 768
+    }
+  ],
+  "functionalRecovery": {
+    "before": {
+      "hp": 10,
+      "maxHp": 111,
+      "mp": 442,
+      "maxMp": 452,
+      "dead": false,
+      "position": {
+        "x": 328,
+        "y": 264
+      }
+    },
+    "priorStrictRunRetained": true,
+    "normalTownReviveRequested": false,
+    "after": {
+      "hp": 10,
+      "maxHp": 111,
+      "mp": 442,
+      "maxMp": 452,
+      "dead": false,
+      "position": {
+        "x": 328,
+        "y": 264
+      }
+    }
+  }
+}

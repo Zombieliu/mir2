@@ -1,0 +1,54 @@
+{
+  "phase": "cave",
+  "publicOnly": true,
+  "privateLogsCopied": false,
+  "rawNativeScreenshotCopied": false,
+  "privateIdentityMatches": 0,
+  "knownSecretPatternMatches": 0,
+  "files": 7,
+  "bytes": 1549208,
+  "entries": [
+    {
+      "path": "cave/ordinary-map-passage-receipt.json",
+      "source": "D:/mir2-builds/forest-quest-driver-20261106/forest-cave-v18-ordinary-map-passage-receipt.json",
+      "bytes": 2454,
+      "sha256": "7a38744721f6ad8902b4587053a92335f52c45cd8217f3702271b26fe68409d1"
+    },
+    {
+      "path": "cave/r1/onboarding-forest-browser-proof.json",
+      "source": "D:/mir2-builds/forest-quest-driver-20261106/forest-cave-map-v18-r1/onboarding-forest-browser-proof.json",
+      "bytes": 210869,
+      "sha256": "3627345a1eb03754bb936d736711405b228a40b281430f84cbfc7299f7cd138e"
+    },
+    {
+      "path": "cave/r2/onboarding-forest-browser-proof.json",
+      "source": "D:/mir2-builds/forest-quest-driver-20261106/forest-cave-map-v18-r2/onboarding-forest-browser-proof.json",
+      "bytes": 167675,
+      "sha256": "e539ffa523c4bf276e43f28b891cde94ae2968300aa473bfefd8efc1141effc8"
+    },
+    {
+      "path": "cave/r3/03-d001-first-real-map-entry.png",
+      "source": "D:/mir2-builds/forest-quest-driver-20261106/forest-cave-map-v18-r3/03-d001-first-real-map-entry.png",
+      "bytes": 381300,
+      "sha256": "450d27e2ce7d1d21d9326dbdfd88d5829b02ab4b58a6b397b9cb1db80e2b3e43"
+    },
+    {
+      "path": "cave/r3/04-d001-after-trusted-interior-walking.png",
+      "source": "D:/mir2-builds/forest-quest-driver-20261106/forest-cave-map-v18-r3/04-d001-after-trusted-interior-walking.png",
+      "bytes": 333781,
+      "sha256": "7f1261c0ef85e8c02a4ac31653df6b26ecb0cd1121f2a956d6c0640d7f84ed69"
+    },
+    {
+      "path": "cave/r3/05-ordinary-d001-exit-map0-landing.png",
+      "source": "D:/mir2-builds/forest-quest-driver-20261106/forest-cave-map-v18-r3/05-ordinary-d001-exit-map0-landing.png",
+      "bytes": 409451,
+      "sha256": "1bcc050f5469347f01e553f672b2b31b389b092e9b9f144861ca9367f143a8ce"
+    },
+    {
+      "path": "cave/r3/onboarding-forest-browser-proof.json",
+      "source": "D:/mir2-builds/forest-quest-driver-20261106/forest-cave-map-v18-r3/onboarding-forest-browser-proof.json",
+      "bytes": 43678,
+      "sha256": "7c549870a2cd05a85553276713201ace5f6339c1a5574faa19dbd3dc6549f520"
+    }
+  ]
+}

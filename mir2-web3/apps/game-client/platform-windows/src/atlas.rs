@@ -19,19 +19,18 @@ const STAGE_WIDTH: f32 = 1024.0;
 const STAGE_HEIGHT: f32 = 768.0;
 const CELL_WIDTH: f32 = 48.0;
 const CELL_HEIGHT: f32 = 32.0;
-// Runtime map tiles multiply their cell depth by ten before converting to
-// world-z. Entity layers must use the same band, with order 5 between the map
-// middle (0) and front (10) layers for the same cell.
-const ENTITY_DEPTH_GAIN: f32 = 10.0;
+// Crystal draws all map columns before the objects in that row. The native
+// producers share viewport-relative row/pass depths; runtime map layers apply
+// the same tenfold gain before converting to world-z.
+const ENTITY_DEPTH_GAIN: f32 = crate::world_depth::MAP_DEPTH_GAIN;
 const ENTITY_MOUNT_ORDER: f32 = 2.0;
 const ENTITY_REAR_WEAPON_ORDER: f32 = 4.0;
 const ENTITY_BODY_ORDER: f32 = 5.0;
 const ENTITY_HAIR_ORDER: f32 = 6.0;
 const ENTITY_FRONT_WEAPON_ORDER: f32 = 7.0;
 const MAP_FRONT_ORDER: f32 = crate::map_parser::MAP_FRONT_DEPTH_ORDER * ENTITY_DEPTH_GAIN;
-// Crystal draws each cell's front map image before its ItemObject. Keep the
-// floor item just above that front image while leaving later rows in front.
-const GROUND_ITEM_ORDER: f32 = MAP_FRONT_ORDER + 1.0;
+// CellInfo.Sort places ItemObject before live actors in the object pass.
+const GROUND_ITEM_ORDER: f32 = 1.0;
 const POST_WORLD_BAND_GAP: f32 = 20.0;
 const TARGET_HIGHLIGHT_OPACITY: f64 = 0.3;
 const ORIGINAL_FRAME_PIXEL_CACHE_LIMIT: usize = 256;
@@ -768,8 +767,15 @@ fn original_frame_pixels(frame_path: &str) -> Option<Arc<StarterAtlasPixelPage>>
         }
     }
 
-    let loaded = assets::read_bytes(&cache_key)
-        .and_then(|bytes: Vec<u8>| decode_png_rgba(&bytes))
+    // Preserve the result of this particular read. Re-probing availability
+    // after None races a just-completed download and could cache None forever.
+    let bytes = match assets::read_bytes_status(&cache_key) {
+        assets::AssetBytes::Ready(bytes) => Some(bytes),
+        assets::AssetBytes::Pending => return None,
+        assets::AssetBytes::Unavailable => None,
+    };
+    let loaded = bytes
+        .and_then(|bytes| decode_png_rgba(&bytes))
         .map(|(width, height, rgba)| {
             Arc::new(StarterAtlasPixelPage {
                 width,
@@ -1262,7 +1268,7 @@ fn build_entity_render_state_with_index(
                     // Match Crystal's split CurrentLocation/MapLocation model:
                     // screen placement is destination-relative, while an
                     // unfinished move remains sorted at its source cell.
-                    let z_base = entity_z_base(sort_x, sort_y);
+                    let z_base = entity_z_base(payload, sort_x, sort_y);
                     let mut layers = Vec::new();
 
                     let mount_library = resolved_sprite.mount_library.as_ref();
@@ -1408,6 +1414,7 @@ fn build_entity_render_state_with_index(
                         "harvestable": native_entity_is_harvestable(entity),
                         "gridX": x,
                         "gridY": y,
+                        "sortZ": z_base,
                         "_nativeTargetable": entity
                             .get("kind")
                             .and_then(Value::as_str)
@@ -1522,7 +1529,7 @@ fn build_entity_render_state_with_index(
                 "left": entity_origin_x + (x-center_x) as f32 * CELL_WIDTH + ((CELL_WIDTH as i32 - true_width as i32) / 2) as f32,
                 "top": entity_origin_y + (y-center_y) as f32 * CELL_HEIGHT + ((CELL_HEIGHT as i32 - true_height as i32) / 2) as f32,
                 "width": width, "height": height,
-                "z": entity_z_base(x,y) + GROUND_ITEM_ORDER,
+                "z": entity_z_base(payload, x,y) + GROUND_ITEM_ORDER,
             }]
         }));
     }
@@ -1656,8 +1663,9 @@ pub(crate) fn build_entity_render_state_with_manifest_and_pixels_for_test(
     )
 }
 
-fn entity_z_base(x: i64, y: i64) -> f32 {
-    y.saturating_mul(1_000).saturating_add(x.saturating_mul(10)) as f32 * ENTITY_DEPTH_GAIN
+fn entity_z_base(payload: &Value, x: i64, y: i64) -> f32 {
+    let (center_x, center_y) = scene_center(payload);
+    crate::world_depth::object_depth(center_x, center_y, x, y)
 }
 
 fn visible_pixel_size(pixels: &StarterAtlasPixelPage) -> Option<(u32, u32)> {
@@ -2053,9 +2061,9 @@ fn body_visible_pixel(
 }
 
 #[cfg(test)]
-pub(crate) fn map_tile_draw_z_for_test(x: i32, y: i32, layer_z: f32) -> f32 {
-    ((y.saturating_mul(1_000).saturating_add(x.saturating_mul(10))) as f32 + layer_z)
-        * ENTITY_DEPTH_GAIN
+pub(crate) fn map_tile_draw_z_for_test(payload: &Value, x: i32, y: i32, layer_z: f32) -> f32 {
+    let (center_x, center_y) = scene_center(payload);
+    crate::world_depth::map_depth(center_x, center_y, i64::from(x), i64::from(y), layer_z)
 }
 
 /// Crystal redraws the hovered object and then the selected object at 30%
@@ -2067,15 +2075,16 @@ pub(crate) fn post_world_depth_bounds(payload: &Value) -> (f32, f32) {
     let start_x = viewport.center_x.saturating_sub(viewport.draw_margin_x());
     let start_y = viewport.center_y.saturating_sub(viewport.draw_margin_y());
     let end_x = viewport.center_x.saturating_add(viewport.draw_margin_x());
-    let end_y = viewport.center_y.saturating_add(viewport.draw_margin_y());
+    let end_y = viewport.center_y.saturating_add(viewport.object_draw_bottom_margin_y());
 
-    let mut min_world_z = entity_z_base(i64::from(start_x), i64::from(start_y));
-    let mut max_world_z = entity_z_base(i64::from(end_x), i64::from(end_y)) + MAP_FRONT_ORDER;
+    let mut min_world_z = entity_z_base(payload, i64::from(start_x), i64::from(start_y));
+    // Tall fronts are retained farther south than the normal actor AOI.
+    let mut max_world_z = entity_z_base(payload, i64::from(end_x), i64::from(end_y)) + MAP_FRONT_ORDER;
     if let Some(entities) = payload.get("entities").and_then(Value::as_array) {
         for entity in entities {
             let x = entity.get("x").and_then(Value::as_i64).unwrap_or(0);
             let y = entity.get("y").and_then(Value::as_i64).unwrap_or(0);
-            let z = entity_z_base(x, y);
+            let z = entity_z_base(payload, x, y);
             min_world_z = min_world_z.min(z);
             max_world_z = max_world_z.max(z + MAP_FRONT_ORDER);
         }
@@ -2122,7 +2131,7 @@ pub(crate) fn post_world_highlight_band_ceiling((min_world_z, max_world_z): (f32
 fn post_world_effect_z(payload: &Value, object_x: i64, object_y: i64) -> f32 {
     post_world_effect_z_from_bounds(
         post_world_depth_bounds(payload),
-        entity_z_base(object_x, object_y),
+        entity_z_base(payload, object_x, object_y),
     )
 }
 
@@ -2678,8 +2687,9 @@ mod tests {
         assert_eq!(item["layers"][0]["path"], "/original-ui/DNItems/30.png");
         assert!(item["layers"][0]["width"].as_u64().unwrap() > 0);
         let item_z = item["layers"][0]["z"].as_f64().unwrap() as f32;
-        assert!(item_z > entity_z_base(11, 20) + MAP_FRONT_ORDER);
-        assert!(item_z < entity_z_base(11, 21));
+        assert!(item_z > map_tile_draw_z_for_test(&payload, 11, 20, crate::map_parser::MAP_FRONT_DEPTH_ORDER));
+        assert!(item_z < entity_z_base(&payload, 11, 20) + ENTITY_BODY_ORDER);
+        assert!(item_z < entity_z_base(&payload, 11, 21));
         assert!(render["hoveredObjectId"].is_null());
         payload["groundDrops"] = json!([]);
         assert!(
@@ -2815,7 +2825,8 @@ mod tests {
         let layer = &state["entities"][0]["layers"][0];
         assert_eq!(layer["left"], json!(484.0));
         assert_eq!(layer["top"], json!(344.0));
-        assert_eq!(layer["z"], json!(70_905.0));
+        assert_eq!(layer["z"], json!(1_544_565.0));
+        assert_eq!(state["entities"][0]["sortZ"], json!(1_544_560.0));
         assert_eq!(layer["key"], json!("2001:body"));
         assert_eq!(layer["atlasKey"], json!("starter-bichon-base:p6"));
         assert!(layer["atlasRectKey"]
@@ -2879,7 +2890,7 @@ mod tests {
         );
         assert_eq!(
             body["z"],
-            json!(60_805.0),
+            json!(1_532_545.0),
             "an active move keeps Crystal's source-cell sort depth"
         );
     }
@@ -3012,11 +3023,9 @@ mod tests {
                     && viewport.retains_cell(draw.x, draw.y)
             })
             .expect("actual map parser retains the deepest guard-band front tile");
-        let deepest_visible_front_z = f64::from(
-            ((deepest_margin_front.y * 1_000 + deepest_margin_front.x * 10) as f32
-                + deepest_margin_front.z)
-                * ENTITY_DEPTH_GAIN,
-        );
+        let deepest_visible_front_z = f64::from(map_tile_draw_z_for_test(
+            &payload, deepest_margin_front.x, deepest_margin_front.y, deepest_margin_front.z,
+        ));
         assert!(effect_z > deeper_body_z);
         assert!(effect_z > deepest_visible_front_z);
 

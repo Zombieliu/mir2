@@ -173,10 +173,13 @@ function createReleaseCapabilities(version: string, inputs: ManifestInputState[]
   );
   const localHash = normalizeSha256(localFullPack?.contentSha256);
   const contentHash = pinnedHash ?? localHash;
-  const indexPath = normalizeFullPackIndexPath(
+  const pinnedIndexPath = normalizeFullPackIndexPath(
     process.env.MIR2_PINNED_CRYSTAL_FULL_PACK_PATH,
-  ) ?? (localFullPack?.exists ? "/generated/crystal-packs/full/index.json" : null);
-  const verified = (pinnedEnabled && pinnedVerified) || Boolean(localFullPack?.exists && localHash);
+  );
+  const indexPath = pinnedIndexPath ?? (localFullPack?.exists ? "/generated/crystal-packs/full/index.json" : null);
+  // Finite clients retain this index for maps and cache versioning while shipping
+  // only selected libraries. Its presence does not verify the full payload.
+  const verified = pinnedEnabled && pinnedVerified && Boolean(pinnedHash && pinnedIndexPath);
   const enabled = verified && Boolean(contentHash && indexPath);
   const pinnedMapAtlasEnabled = process.env.MIR2_PINNED_MAP_ATLAS_ENABLED === "1";
   const pinnedMapAtlasVerified = process.env.MIR2_PINNED_MAP_ATLAS_VERIFIED === "1";

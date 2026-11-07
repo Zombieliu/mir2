@@ -1,0 +1,18 @@
+{
+  "schema": "mir2.r16.v13.final-publication-validation.v1",
+  "passed": true,
+  "checkedCopiedFiles": 48,
+  "checkedCopiedBytes": 13551169,
+  "imagesVisuallyInspectedByRoot": 14,
+  "localMarkdownTargetsChecked": 112,
+  "startupDocLines": {
+    "current": 76,
+    "orchestration": 114
+  },
+  "currentPackageManifestSha256": "d76902197e69e166f325a3b59804601b2f40684bd0407da5353f5552a615d0d9",
+  "healthStatus": 200,
+  "releaseSourceChangedAfterIntegrityAudit": false,
+  "originalFailureReceiptsPreserved": true,
+  "initialSummaryAndLaterContinuationScopesSeparate": true,
+  "externalHandoffMatchesRepository": true
+}

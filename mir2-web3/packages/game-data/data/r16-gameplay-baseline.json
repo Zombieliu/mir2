@@ -1,0 +1,8 @@
+{
+  "schema": 1,
+  "id": "r16-platinum-fiveclass-newcomer-v2",
+  "contentProfile": "platinum_fiveclass",
+  "questGuidance": "newcomer-v2",
+  "questCadence": "newcomer-v2",
+  "onboarding": "native"
+}

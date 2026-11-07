@@ -1,0 +1,61 @@
+{
+  "RepeatLaunches": [
+    {
+      "Attempt": 1,
+      "ExitCode": 0
+    },
+    {
+      "Attempt": 2,
+      "ExitCode": 0
+    }
+  ],
+  "NodeBusyCode": 20,
+  "ServiceProcessesUnchanged": true,
+  "IdentityStateUnchanged": true,
+  "LauncherSha256": "D86FF602AF1AA1BE9868D1911676A346997CD177E6C623232E2D10258AE7A9BB",
+  "schema": "mir2-alo-launcher-startup-repair/2",
+  "verifiedAt": "2026-11-02T23:36:00.777598+00:00",
+  "nodeTests": {
+    "passed": 174,
+    "failed": 0,
+    "skipped": 0
+  },
+  "windowsUiLifecycleTests": {
+    "passed": 1,
+    "failed": 0
+  },
+  "windowsPathMatchTests": {
+    "passed": 1,
+    "failed": 0
+  },
+  "gameAndGatewayRebuilt": false,
+  "userGameStopped": false,
+  "memoryReset": false,
+  "originalSourceSnapshot": "source-inputs.json",
+  "sourceDelta": [
+    {
+      "path": "apps/ai-player/src/archive-guard.mjs",
+      "sha256": "14cd4da3a24f73ab715aad9436912e904b1f16d7d74ec1a4e22aaabb6444c6cc"
+    },
+    {
+      "path": "apps/ai-player/src/local-playtest.mjs",
+      "sha256": "71688184be90011772cb1aa0ccf1dc0773bdd51dc539aff2c0a680964a3db8c3"
+    },
+    {
+      "path": "apps/ai-player/tests/archive-guard.test.mjs",
+      "sha256": "e17c58ccd4e311b87a4f82b49d4ea28af8edbd10714ac7adc4975e23c0a733db"
+    },
+    {
+      "path": "apps/ai-player/native-launcher/main.rs",
+      "sha256": "ee4b4a53593e30b87308b88e59c81d871cf449466928cc23b6328965d5915f46"
+    },
+    {
+      "path": "apps/ai-player/native-launcher/windows.rs",
+      "sha256": "b3a8a9f8c82275cff79ca8a86152929d77226f562e60988570d0d382e7e50b8f"
+    },
+    {
+      "path": "apps/ai-player/README.md",
+      "sha256": "47ff19424598a8a535cda16774bb0fb83e52f67981b8101104d6b23e26fc0bc0"
+    }
+  ]
+}

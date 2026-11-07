@@ -3,7 +3,7 @@ use std::fmt;
 use std::mem;
 use std::panic::{catch_unwind, AssertUnwindSafe};
 use std::sync::atomic::{AtomicU64, Ordering};
-use std::sync::Arc;
+use std::sync::{Arc, Mutex};
 use std::time::{Instant, SystemTime, UNIX_EPOCH};
 
 use mir2_protocol::{ChatType, ClientPacket, Point, ServerPacket};
@@ -25,7 +25,7 @@ use crate::routing::{
     shared_zone_movement_ingress, sync_zone_movement_transform, GlobalZoneMessageBus,
     GlobalZoneMessageRegistration, InProcessZoneOwnerCommandClient, PreparedZoneTeardown,
     RpcZoneOwnerCommandClient, SessionRouteRequest, SharedZoneLiveOutboundRegistration,
-    SharedZoneLiveOutboundSender, SharedZoneMovementIngress, SharedZoneOwnerCommandClient,
+    SharedZoneLiveOutboundSender, SharedZoneMovementIngress, SharedZonePlayerSafety, SharedZoneOwnerCommandClient,
     SharedZoneOwnerLeaseAuthority, ZoneId, ZoneLiveOutboundRegistration, ZoneOwnerCommandRequest,
     ZoneOwnerLease, ZoneRegistry,
 };
@@ -101,6 +101,13 @@ pub(crate) struct GatewayZoneMovementIngress {
 }
 
 impl GatewayZoneMovementIngress {
+    pub(crate) fn player_object_id(&self) -> Option<u32> {
+        if let Some(authority) = &self.zone_owner_lease_authority {
+            authority.validate_owner_lease(&self.zone_owner_lease).ok()?;
+        }
+        self.ingress.player_object_id()
+    }
+
     pub(crate) fn try_execute(
         &self,
         packet: ClientPacket,
@@ -169,6 +176,18 @@ pub struct GatewaySession {
     handoff_generation: u64,
     active_identity_binding: Option<ActiveSessionIdentity>,
     teardown_checkpoint: Option<PreparedZoneTeardown>,
+    companion_safety_identity: Option<ActiveSessionIdentity>,
+    companion_safety_actor: Result<bool, String>,
+    companion_safety_snapshot_sent: Mutex<Option<CompanionSafetySnapshot>>,
+}
+
+/// Presentation baseline only. No credentials or authority are carried here.
+#[derive(Clone, PartialEq, Eq)]
+pub(crate) struct CompanionSafetySnapshot {
+    identity: ActiveSessionIdentity,
+    owner_lease: ZoneOwnerLease,
+    handoff_generation: u64,
+    safety: SharedZonePlayerSafety,
 }
 
 #[derive(Clone)]
@@ -367,6 +386,9 @@ impl GatewaySession {
             handoff_generation: 0,
             active_identity_binding,
             teardown_checkpoint: None,
+            companion_safety_identity: None,
+            companion_safety_actor: Ok(false),
+            companion_safety_snapshot_sent: Mutex::new(None),
         })
     }
 
@@ -458,6 +480,8 @@ impl GatewaySession {
         global_message_bus.register_session(&self.session_id, self.zone_id.clone());
         self.routing_context = Some(GatewaySessionRoutingContext { config, registry });
         self.global_message_bus = Some(global_message_bus);
+        let identity = self.active_identity_binding.clone();
+        self.refresh_companion_safety_enrollment(identity.as_ref());
         self
     }
 
@@ -728,6 +752,13 @@ impl GatewaySession {
                 "NPC purchase requires authentication",
             ));
         }
+        if matches!(action, NpcPurchaseOwnerAction::Purchase { .. })
+            && self.is_companion_purchase_actor().map_err(crate::npc_purchase_owner_route::before)?
+        {
+            return Err(crate::npc_purchase_owner_route::before(
+                "Enrolled companion purchases require the host's bounded durable operation.",
+            ));
+        }
         let mut known = None;
         let result = catch_gateway_panic("durable NPC gateway owner route", || {
             if !self.supports_durable_npc_purchase_owner() {
@@ -752,7 +783,7 @@ impl GatewaySession {
             known = crate::npc_purchase_owner_route::terminal_receipt(&routed.reply);
             // Control/read-only actions do not publish gameplay mutation events
             // or drain an unrelated global bus into their recovery response.
-            if matches!(action, NpcPurchaseOwnerAction::Purchase { .. }) {
+            if action.is_purchase() {
                 let execution = &mut routed.execution;
                 self.publish_gameplay_event(execution);
                 self.active_identity_binding = execution.outcome.active_identity.clone();
@@ -800,6 +831,13 @@ impl GatewaySession {
                     NpcGoldBuyBeforeExecution::NotAuthenticated,
                 ),
             ));
+        }
+        if self.is_companion_purchase_actor()
+            .map_err(|detail| NpcGoldBuyRouteError::BeforeExecution { detail })?
+        {
+            return Err(NpcGoldBuyRouteError::BeforeExecution {
+                detail: "Enrolled companion purchases require the host's bounded durable operation.".into(),
+            });
         }
         let mut processing_outcome = None;
         let result = catch_gateway_panic("typed NPC gateway owner route", || {
@@ -1080,6 +1118,62 @@ impl GatewaySession {
             .expect("zone owner active identity should not fail")
     }
 
+    /// Ordinary players return before any shared-Zone query or cache lock.
+    /// An Actor's safety is compared with the last *successfully sent* full
+    /// snapshot, never with inferred coordinates or the personal mirror.
+    pub(crate) fn observes_companion_safety(&self) -> Result<bool, String> {
+        self.companion_safety_actor.as_ref().copied().map_err(Clone::clone)
+    }
+
+    pub(crate) fn companion_safety_snapshot_pending(&self) -> Result<bool, String> {
+        if !self.observes_companion_safety()? {
+            return Ok(false);
+        }
+        let Some(current) = self.companion_safety_snapshot_stamp(None)? else {
+            return Ok(false);
+        };
+        let sent = self.companion_safety_snapshot_sent.lock()
+            .map_err(|_| "companion safety presentation cache is unavailable".to_string())?;
+        Ok(sent.as_ref() != Some(&current))
+    }
+
+    /// Capture the actual snapshot's flag before the asynchronous send. A Zone
+    /// step may happen during sending; that later flag must remain pending.
+    pub(crate) fn companion_safety_snapshot_stamp(
+        &self,
+        snapshot: Option<&WorldSnapshot>,
+    ) -> Result<Option<CompanionSafetySnapshot>, String> {
+        if !self.observes_companion_safety()? {
+            return Ok(None);
+        }
+        let Some(identity) = self.active_identity_binding.as_ref() else { return Ok(None); };
+        let Some(ingress) = shared_zone_movement_ingress(&self.runtime) else { return Ok(None); };
+        let Some(mut safety) = ingress.player_safety(identity)? else { return Ok(None); };
+        if let Some(snapshot) = snapshot {
+            if snapshot.map_file_name.as_deref() != Some(safety.map_file_name.as_str()) {
+                return Ok(None);
+            }
+            safety.in_safe_zone = snapshot.in_safe_zone;
+        }
+        Ok(Some(CompanionSafetySnapshot {
+            identity: identity.clone(),
+            owner_lease: self.zone_owner_lease.clone(),
+            handoff_generation: self.handoff_generation,
+            safety,
+        }))
+    }
+
+    pub(crate) fn note_companion_safety_snapshot_sent(
+        &self,
+        stamp: Option<CompanionSafetySnapshot>,
+    ) -> Result<(), String> {
+        if let Some(stamp) = stamp {
+            *self.companion_safety_snapshot_sent.lock()
+                .map_err(|_| "companion safety presentation cache is unavailable".to_string())? = Some(stamp);
+        }
+        Ok(())
+    }
+
     pub fn save_active_character(&mut self) -> Result<(), String> {
         let owner_lease = self.zone_owner_lease.clone();
         self.validate_zone_owner_lease(&owner_lease)?;
@@ -1239,6 +1333,11 @@ impl GatewaySession {
             .map(PreparedZoneTeardown::checkpoint)
     }
 
+    #[cfg(test)]
+    pub(crate) fn replace_teardown_owner_for_test(&mut self, client: SharedZoneOwnerCommandClient) {
+        self.zone_owner_command_client = client;
+    }
+
     pub(crate) fn prepare_standard_login_recovery(
         &mut self,
         account_id: &str,
@@ -1321,6 +1420,56 @@ impl GatewaySession {
         require_typed_game_shop_purchase_outcome: bool,
     ) -> Result<WorldCommandExecution, String> {
         self.validate_zone_owner_lease(request.owner_lease())?;
+        if let WorldCommand::ClientPacket(packet) = request.command() {
+            if self.is_companion_purchase_actor()? {
+                use crate::routing::companion_life_boundary::{forbidden_during_life, mandatory_receive_only};
+                if mandatory_receive_only(packet) {
+                    return Err("Enrolled companions may receive a gift but cannot offer gold or items.".into());
+                }
+                if forbidden_during_life(packet) || matches!(packet, ClientPacket::UseItem { .. }) {
+                    let restricted = self.routing_context.as_ref().zip(self.active_identity().as_ref())
+                        .map(|(routing, identity)| routing.registry.companion_life_restricted(identity)).transpose()?.unwrap_or(false);
+                    if restricted {
+                        let owned_hp_medicine = if let ClientPacket::UseItem { unique_id, .. } = packet {
+                            let snapshot = self.world_snapshot();
+                            snapshot.inventory_items.iter().chain(snapshot.belt_items.iter()).any(|item| item.unique_id == *unique_id
+                                && item.quantity > 0 && matches!(item.name.as_str(), "(HP)DrugSmall" | "(HP)DrugMedium" | "(HP)DrugLarge" | "(HP)DrugXL"))
+                        } else { false };
+                        let permitted_npc = if let ClientPacket::CallNpc { object_id, key } = packet {
+                            self.companion_life_npc_allowed(Some(*object_id), key)
+                        } else { false };
+                        if !owned_hp_medicine && !permitted_npc { return Err("This action is outside the companion life permission.".into()); }
+                    }
+                }
+            }
+        }
+        if matches!(request.command(), WorldCommand::UseItem { .. } | WorldCommand::DropItem { .. }
+            | WorldCommand::Interact { .. } | WorldCommand::SelectNpcDialog { .. } | WorldCommand::SubmitNpcInput { .. }
+            | WorldCommand::CastSkill { .. } | WorldCommand::TransferMap { .. } | WorldCommand::MoveTo { .. }
+            | WorldCommand::NativeGameShopPurchase(_) | WorldCommand::NativeGameShopGift(_))
+            && self.is_companion_purchase_actor()?
+        {
+            let restricted = self.routing_context.as_ref().zip(self.active_identity().as_ref())
+                .map(|(routing, identity)| routing.registry.companion_life_restricted(identity)).transpose()?.unwrap_or(false);
+            if restricted {
+                let allowed = match request.command() {
+                    WorldCommand::UseItem { key } => {
+                        let snapshot = self.world_snapshot();
+                        snapshot.inventory_items.iter().chain(snapshot.belt_items.iter()).any(|item| item.key == *key && item.quantity > 0
+                            && matches!(item.name.as_str(), "(HP)DrugSmall" | "(HP)DrugMedium" | "(HP)DrugLarge" | "(HP)DrugXL"))
+                    }
+                    WorldCommand::Interact { object_id } => self.companion_life_npc_allowed(Some(*object_id), ""),
+                    WorldCommand::SelectNpcDialog { target } => self.companion_life_npc_allowed(None, target),
+                    _ => false,
+                };
+                if !allowed { return Err("This command is outside the companion life permission.".into()); }
+            }
+        }
+        if matches!(request.command(), WorldCommand::ClientPacket(ClientPacket::BuyItem { .. }))
+            && self.is_companion_purchase_actor()?
+        {
+            return Err("Enrolled companion purchases require the host's bounded durable operation.".into());
+        }
         // Native purchases/gifts must never reach the generic transport method. This
         // is a session-level invariant as well as an RPC transport invariant,
         // so alternate/custom command clients cannot bypass typed/capability-gated execution.
@@ -1360,7 +1509,43 @@ impl GatewaySession {
         Ok(execution)
     }
 
-    fn refresh_global_message_identity(&self, identity: Option<&ActiveSessionIdentity>) {
+    fn companion_life_npc_allowed(&self, requested: Option<u32>, target: &str) -> bool {
+        if !matches!(target.to_ascii_lowercase().as_str(), "" | "@main" | "@buy" | "@buysell") { return false; }
+        let snapshot = self.world_snapshot();
+        if snapshot.map_file_name.as_deref() != Some("0") { return false; }
+        let object_id = requested.or_else(|| snapshot.active_npc_dialog.as_ref().map(|dialog| dialog.npc_object_id));
+        let Some(npc) = snapshot.entities.iter().find(|entity| Some(entity.object_id) == object_id && entity.kind == WorldEntityKind::Npc
+            && entity.name == "Merchant_Ruben" && entity.x == 288 && entity.y == 608) else { return false; };
+        snapshot.entities.iter().find(|entity| entity.kind == WorldEntityKind::SelfPlayer).is_some_and(|player|
+            (i64::from(player.x) - i64::from(npc.x)).abs().max((i64::from(player.y) - i64::from(npc.y)).abs()) <= 1)
+    }
+
+    fn is_companion_purchase_actor(&self) -> Result<bool, String> {
+        let Some(routing) = self.routing_context.as_ref() else {
+            return Ok(false);
+        };
+        match self
+            .zone_owner_command_client
+            .active_identity(&self.runtime)?
+        {
+            Some(identity) => routing.registry.is_companion_purchase_actor(&identity),
+            None => Ok(false),
+        }
+    }
+    fn refresh_companion_safety_enrollment(&mut self, identity: Option<&ActiveSessionIdentity>) {
+        if self.companion_safety_identity.as_ref() == identity { return; }
+        self.companion_safety_actor = match (self.routing_context.as_ref(), identity) {
+            (Some(routing), Some(identity)) => routing.registry.is_companion_purchase_actor(identity),
+            _ => Ok(false),
+        };
+        self.companion_safety_identity = identity.cloned();
+        // Even the same account may enter with a new character/admission. Do
+        // not carry a previous character's presentation baseline across it.
+        if let Ok(sent) = self.companion_safety_snapshot_sent.get_mut() { *sent = None; }
+    }
+
+    fn refresh_global_message_identity(&mut self, identity: Option<&ActiveSessionIdentity>) {
+        self.refresh_companion_safety_enrollment(identity);
         if let Some(bus) = self.global_message_bus.as_ref() {
             bus.update_session(&self.session_id, self.zone_id.clone(), identity.is_some());
         }
@@ -1721,6 +1906,330 @@ fn gateway_now_ms() -> u64 {
         .unwrap_or(0)
 }
 
+#[cfg(test)]
+mod companion_purchase_guard_tests {
+    use super::*;
+    use crate::companion_relay::{CharacterBinding, CompanionPolicy, Enrollment};
+    use crate::routing::{SharedInProcessZoneRuntimeFactory, SharedZoneRuntimeFactory};
+    use mir2_protocol::MirDirection;
+    use mir2_simulation::npc_purchase_journal::NpcPurchaseOperation;
+    use mir2_simulation::{
+        NpcPurchaseCurrency, NpcPurchaseGoldLimit, NpcPurchaseOwnerReply,
+        NpcPurchaseProcessingOutcome, NpcPurchaseRequest, NpcPurchaseSource, VisibleNpcRecord,
+        WorldCommandKind,
+    };
+    use std::{fs, io::Write, path::PathBuf};
+
+    const NPC: u32 = 4990;
+    fn policy(enrolled: bool) -> CompanionPolicy {
+        CompanionPolicy {
+            schema_version: 1,
+            realm_id: "purchase-guard-test".into(),
+            world_epoch: "purchase-guard-epoch".into(),
+            enrollments: vec![Enrollment {
+                resident_id: "guard-alo".into(),
+                archive_id: "guard-archive".into(),
+                display_name: "阿洛".into(),
+                owner: CharacterBinding {
+                    account_id: "guard-owner".into(),
+                    character_index: 0,
+                },
+                actor: CharacterBinding {
+                    account_id: if enrolled { "demo" } else { "another-actor" }.into(),
+                    character_index: 0,
+                },
+            }],
+        }
+    }
+    fn fixture(
+        label: &str,
+        enrolled: bool,
+    ) -> (GatewaySession, ZoneRegistry, PathBuf, NpcPurchaseRequest) {
+        let root = std::env::temp_dir()
+            .canonicalize()
+            .expect("guarded TEMP exists");
+        let directory = root.join(format!(
+            "mir2-companion-purchase-guard-{label}-{}-{}",
+            gateway_now_ms(),
+            NEXT_GATEWAY_SESSION_SEQUENCE.fetch_add(1, Ordering::Relaxed)
+        ));
+        assert!(directory.starts_with(&root));
+        fs::create_dir(&directory).unwrap();
+        let path = directory.join("accounts.json");
+        let mut config = GatewayConfig::default()
+            .with_save_recovery_mac_key(std::array::from_fn::<u8, 32, _>(|index| index as u8 ^ 0x53))
+            .unwrap();
+        assert!(config.account_store_path.is_none());
+        assert!(config.account_store_database_url.is_none());
+        config.save_recovery_dir = None;
+        config.visible_monsters.clear();
+        config.map_hazards.clear();
+        config.visible_npcs.push(VisibleNpcRecord {
+            object_id: NPC,
+            name: "Supply Merchant".into(),
+            image: 1,
+            colour_argb: -1,
+            position: Point {
+                x: config.spawn.x + 1,
+                y: config.spawn.y,
+            },
+            direction: MirDirection::Left,
+            quest_ids: vec![],
+            script_key: Some("BichonProvince/BorderVillage/Grocery".into()),
+        });
+        {
+            let mut accounts = config.account_store.lock().unwrap();
+            let save = accounts
+                .accounts
+                .get_mut("demo")
+                .unwrap()
+                .saves
+                .get_mut(&0)
+                .unwrap();
+            save.position = config.spawn.clone();
+            save.gold = 200;
+            save.inventory_capacity = 86;
+            save.inventory_items_json.clear();
+            save.belt_items_json.clear();
+            save.equipment_items_json.clear();
+            save.equipment_items_explicit_empty = true;
+        }
+        let mut file = fs::OpenOptions::new()
+            .write(true)
+            .create_new(true)
+            .open(&path)
+            .unwrap();
+        file.write_all(&serde_json::to_vec(&*config.account_store.lock().unwrap()).unwrap())
+            .unwrap();
+        drop(file);
+        config = config.with_account_store_path(&path);
+        let zone = ZoneId::primary();
+        let factory =
+            Arc::new(SharedInProcessZoneRuntimeFactory::without_background_owner_for_test(&zone));
+        let registry = ZoneRegistry::new(zone, factory as SharedZoneRuntimeFactory);
+        registry
+            .configure_companion_owner_fences(&policy(enrolled))
+            .unwrap();
+        let mut session = GatewaySession::try_new_with_zone_registry(config, &registry).unwrap();
+        assert!(session
+            .try_handle_packet(ClientPacket::Login {
+                account_id: "demo".into(),
+                password: "demo".into()
+            })
+            .unwrap()
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::LoginSuccess { .. })));
+        session
+            .try_handle_packet(ClientPacket::StartGame { character_index: 0 })
+            .unwrap();
+        session
+            .execute_with_outcome(WorldCommand::Interact { object_id: NPC })
+            .unwrap();
+        let goods = session
+            .execute_with_outcome(WorldCommand::SelectNpcDialog {
+                target: "@BuySell".into(),
+            })
+            .unwrap();
+        let item_index = goods
+            .packets
+            .iter()
+            .find_map(|packet| match packet {
+                ServerPacket::NPCGoods { list, .. } => list
+                    .iter()
+                    .find(|item| item.item_index == 658 && item.count == 1)
+                    .map(|item| item.unique_id),
+                _ => None,
+            })
+            .expect("real grocery selector");
+        session.save_active_character().unwrap();
+        (
+            session,
+            registry,
+            path,
+            NpcPurchaseRequest {
+                item_index,
+                count: 1,
+                panel_type: 0,
+            },
+        )
+    }
+    fn operation(
+        session: &mut GatewaySession,
+        request: NpcPurchaseRequest,
+    ) -> NpcPurchaseOperation {
+        let begun = session
+            .execute_npc_purchase_owner(true, NpcPurchaseOwnerAction::Begin)
+            .unwrap();
+        let NpcPurchaseOwnerReply::Producer { producer } = begun.reply else {
+            panic!("real producer");
+        };
+        let quoted = session
+            .execute_npc_purchase_owner(true, NpcPurchaseOwnerAction::Quote { request })
+            .unwrap();
+        let NpcPurchaseOwnerReply::Quote { intent } = quoted.reply else {
+            panic!("real quote");
+        };
+        NpcPurchaseOperation {
+            actor: producer.actor,
+            request_scope: producer.producer_scope,
+            sequence: 1,
+            intent,
+        }
+    }
+    fn buy(request: NpcPurchaseRequest) -> ClientPacket {
+        ClientPacket::BuyItem {
+            item_index: request.item_index,
+            count: request.count,
+            panel_type: request.panel_type,
+        }
+    }
+
+    #[test]
+    fn companion_safety_snapshot_baseline_is_scoped_to_route_and_owner_epoch() {
+        let (mut session, _, _, _) = fixture("safety-epoch", true);
+        let acknowledge = |session: &GatewaySession| {
+            let snapshot = session.world_snapshot();
+            let stamp = session.companion_safety_snapshot_stamp(Some(&snapshot)).unwrap();
+            session.note_companion_safety_snapshot_sent(stamp).unwrap();
+            assert!(!session.companion_safety_snapshot_pending().unwrap());
+        };
+        acknowledge(&session);
+        session.handoff_generation += 1;
+        assert!(session.companion_safety_snapshot_pending().unwrap());
+        acknowledge(&session);
+        let original_lease = session.zone_owner_lease.clone();
+        session.zone_owner_lease = ZoneOwnerLease::new(
+            session.zone_id.clone(), "safety-next-owner", session.zone_owner_lease.fencing_token() + 1,
+        );
+        assert!(session.companion_safety_snapshot_pending().unwrap());
+        session.zone_owner_lease = original_lease;
+    }
+
+    #[test]
+    fn companion_purchase_guard_covers_raw_tcp_ws_generic_typed_and_unbounded_owner_routes() {
+        let (mut session, _, path, request) = fixture("enrolled", true);
+        let operation = operation(&mut session, request);
+        let before = serde_json::to_value(session.world_snapshot()).unwrap();
+        let file = fs::read(&path).unwrap();
+        // TCP's decoded packet and WS's production command converge here; no
+        // endpoint-specific flag or fallback can grant an unbounded purchase.
+        assert!(session.try_handle_packet(buy(request)).is_err());
+        assert!(session
+            .execute_production_player_command(true, WorldCommand::ClientPacket(buy(request)))
+            .is_err());
+        assert!(session
+            .execute_with_outcome(WorldCommand::ClientPacket(buy(request)))
+            .is_err());
+        assert!(matches!(
+            session.execute_production_npc_gold_buy_requiring_typed_outcome(true, request.into()),
+            Err(NpcGoldBuyRouteError::BeforeExecution { .. })
+        ));
+        assert!(matches!(
+            session
+                .execute_npc_purchase_owner(true, NpcPurchaseOwnerAction::Purchase { operation }),
+            Err(NpcPurchaseDurableError::BeforeExecution { .. })
+        ));
+        let after = serde_json::to_value(session.world_snapshot()).unwrap();
+        let changed = before.as_object().unwrap().keys()
+            .filter(|key| before[*key] != after[*key]).collect::<Vec<_>>();
+        assert!(changed.is_empty(), "replay changed world fields: {changed:?}");
+        assert_eq!(fs::read(&path).unwrap(), file);
+        let queried = session
+            .execute_npc_purchase_owner(true, NpcPurchaseOwnerAction::Query { operation })
+            .unwrap();
+        assert!(matches!(
+            queried.reply,
+            NpcPurchaseOwnerReply::Recovery { receipt: None }
+        ));
+    }
+
+    #[test]
+    fn companion_purchase_guard_allows_only_the_host_bounded_action_through_shared_durable_publication(
+    ) {
+        let (mut session, _, path, request) = fixture("bounded", true);
+        let operation = operation(&mut session, request);
+        let action = NpcPurchaseOwnerAction::PurchaseBounded {
+            operation,
+            limit: NpcPurchaseGoldLimit {
+                max_gold: 50,
+                max_count: 1,
+                item_template_index: 658,
+                npc_index: 9,
+            },
+        };
+        let purchased = session.execute_npc_purchase_owner(true, action).unwrap();
+        assert_eq!(
+            purchased.execution.outcome.command_kind,
+            WorldCommandKind::NpcPurchaseOwner("purchase")
+        );
+        assert!(purchased.authority.is_some());
+        assert!(purchased.snapshot.is_some());
+        assert!(matches!(
+            purchased.reply,
+            NpcPurchaseOwnerReply::Purchase {
+                replayed: false,
+                receipt: mir2_simulation::NpcPurchaseReceipt {
+                    entry: mir2_simulation::npc_purchase_journal::NpcPurchaseJournalEntry {
+                        outcome: NpcPurchaseProcessingOutcome::Committed {
+                            currency: NpcPurchaseCurrency::Gold,
+                            source: NpcPurchaseSource::Trade,
+                            charged: 40,
+                            admitted_count: 1,
+                            ..
+                        },
+                        ..
+                    },
+                    ..
+                }
+            }
+        ));
+        let before = serde_json::to_value(session.world_snapshot()).unwrap();
+        let file = fs::read(&path).unwrap();
+        let replay = session.execute_npc_purchase_owner(true, action).unwrap();
+        assert!(matches!(
+            replay.reply,
+            NpcPurchaseOwnerReply::Purchase { replayed: true, .. }
+        ));
+        let mut after = serde_json::to_value(session.world_snapshot()).unwrap();
+        // An ordinary command advances the authoritative observation clock,
+        // including a receipt replay. Every gameplay field and persisted byte
+        // must stay identical; only that clock is allowed to advance.
+        assert!(after["tick"].as_u64().unwrap() >= before["tick"].as_u64().unwrap());
+        after["tick"] = before["tick"].clone();
+        let changed = before.as_object().unwrap().keys()
+            .filter(|key| before[*key] != after[*key]).collect::<Vec<_>>();
+        assert!(changed.is_empty(), "bounded replay changed gameplay fields: {changed:?}");
+        assert_eq!(fs::read(&path).unwrap(), file);
+    }
+
+    #[test]
+    fn companion_purchase_guard_preserves_non_enrolled_purchases_and_shared_immutable_policy() {
+        let (mut ordinary, registry, _, request) = fixture("ordinary", false);
+        assert!(!ordinary.is_companion_purchase_actor().unwrap());
+        assert!(ordinary
+            .try_handle_packet(buy(request))
+            .unwrap()
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::LoseGold { gold: 40 })));
+        assert!(ordinary
+            .execute_production_npc_gold_buy_requiring_typed_outcome(true, request.into())
+            .is_ok());
+        let operation = operation(&mut ordinary, request);
+        assert!(ordinary
+            .execute_npc_purchase_owner(true, NpcPurchaseOwnerAction::Purchase { operation })
+            .is_ok());
+        let clone = registry.clone();
+        clone
+            .configure_companion_owner_fences(&policy(false))
+            .unwrap();
+        assert!(clone
+            .configure_companion_owner_fences(&policy(true))
+            .is_err());
+        assert!(!registry
+            .is_companion_purchase_actor(&ordinary.active_identity().unwrap())
+            .unwrap());
+    }
+}
 #[cfg(test)]
 mod tests {
     #[test]

@@ -23,7 +23,7 @@ export type AuthUiRuntime = {
 // These are UI labels for the shared Rust error codes, not local validators.
 const authErrors: ReadonlyArray<readonly [string, string]> = [
   ["", ""], ["accountId", "account ID must be 3-15 alphanumeric characters"],
-  ["password", "password must be 5-15 alphanumeric characters"],
+  ["password", "registration password must be 10-15 alphanumeric characters, distinct from the account and not a common password"],
   ["confirmPassword", "password confirmation does not match"],
   ["confirmPassword", "password confirmation must be 5-15 alphanumeric characters"],
   ["userName", "user name must be at most 20 characters"],

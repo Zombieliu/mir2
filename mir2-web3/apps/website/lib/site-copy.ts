@@ -4,6 +4,14 @@ import { applySiteFacts } from "@/lib/release-facts";
 // Public SEO URLs are product identity, not a deployment-specific origin.
 export const publicSiteUrl = "https://numeron.obelisk.build";
 
+const defaultGameClientUrl = "https://mir2.obelisk.build/";
+const configuredGameClientUrl = process.env.NEXT_PUBLIC_GAME_URL?.trim();
+// Existing website builds may still configure the retired /game route.
+export const publicGameClientUrl =
+  !configuredGameClientUrl || configuredGameClientUrl.replace(/\/$/, "") === `${defaultGameClientUrl}game`
+    ? defaultGameClientUrl
+    : configuredGameClientUrl;
+
 export const locales = ["zh-CN", "en", "ja", "ko", ...additionalLocales] as const;
 
 export type Locale = (typeof locales)[number];

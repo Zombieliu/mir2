@@ -323,6 +323,7 @@ export function adaptGroup(
         members?: Array<string | RawGroupMember>;
         memberInfos?: Array<string | RawGroupMember>;
         lootMode?: string;
+        allowGroup?: boolean;
         leaderName?: string;
       }
     | null
@@ -369,6 +370,7 @@ export function adaptGroup(
   return {
     members,
     lootMode: typeof group.lootMode === "string" ? group.lootMode : undefined,
+    allowInvites: typeof group.allowGroup === "boolean" ? group.allowGroup : group.lootMode === "group" ? true : group.lootMode === "solo" ? false : undefined,
   };
 }
 

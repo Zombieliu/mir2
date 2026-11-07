@@ -1042,6 +1042,11 @@ struct EntityRenderEntry {
     motion_sort_x: Option<i32>,
     #[serde(default)]
     motion_sort_y: Option<i32>,
+    /// Native producer's row/pass depth. Optional so existing Web producers
+    /// retain their depth contract. Required when moving a retained native
+    /// composite while replacement atlas frames are still loading.
+    #[serde(default)]
+    sort_z: Option<f32>,
     #[serde(default)]
     layers: Vec<EntityRenderLayer>,
     // Opt-in (`?bevyEntityInterp=1`) per-entity sub-cell motion window, in CSS-px
@@ -1873,6 +1878,30 @@ impl RuntimeWindowSpec {
 /// selector or wasm API is assumed here.
 pub fn build_runtime_app(spec: RuntimeWindowSpec) -> App {
     build_runtime_app_with_asset_source(spec, None)
+}
+
+/// Cross-crate regression harness for the real native owner queue/FIFO.
+/// Production registration stays in `build_runtime_app_with_asset_source`.
+/// No models, acknowledgements or readiness are manufactured by this helper.
+#[doc(hidden)]
+#[cfg(not(target_arch = "wasm32"))]
+pub fn install_native_owner_ingest_regression_systems(app: &mut App) {
+    if !app.is_plugin_added::<Mir2NativeSessionBoundaryPlugin>() {
+        app.add_plugins(Mir2NativeSessionBoundaryPlugin);
+    }
+    app.add_systems(
+        Update,
+        (
+            ingest_pending_ui_read_model,
+            ingest_pending_map_model,
+            ingest_pending_entity_model_set,
+            ingest_pending_skill_model,
+            npc_purchase_economy::apply_pending_native_npc_economy,
+        )
+            .chain()
+            .after(ingest_pending_game_shop_receipt)
+            .in_set(PendingLifecycleSet::Ingest),
+    );
 }
 
 pub fn build_runtime_app_with_asset_source(
@@ -6153,11 +6182,14 @@ fn entity_render_actor_root(
     let root_top = origin_y + (i64::from(grid_y) - i64::from(center_y)) as f32 * CELL_HEIGHT;
     let sort_x = entity.motion_sort_x.unwrap_or(grid_x);
     let sort_y = entity.motion_sort_y.unwrap_or(grid_y);
-    let depth = i64::from(sort_y)
+    let legacy_depth = i64::from(sort_y)
         .saturating_mul(1_000)
         .saturating_add(i64::from(sort_x).saturating_mul(10))
         .saturating_mul(ENTITY_DEPTH_GAIN) as f32
         / WORLD_DEPTH_DIVISOR;
+    let depth = entity.sort_z.filter(|z| z.is_finite())
+        .map(|z| z / WORLD_DEPTH_DIVISOR)
+        .unwrap_or(legacy_depth);
 
     Some(Vec3::new(
         root_left + offset.x - snapshot.stage_width * 0.5,
@@ -7404,6 +7436,25 @@ mod entity_atlas_tests {
         assert_eq!(root.x, -32.0, "X placement follows the destination grid");
         assert_eq!(root.y, 32.0, "Y placement follows the destination grid");
         assert_eq!(root.z, 0.608, "depth follows the source sort grid");
+    }
+
+    #[test]
+    fn retained_native_actor_root_uses_producer_row_pass_depth_across_camera_moves() {
+        let mut snapshot: EntityRenderState = serde_json::from_value(serde_json::json!({
+            "enabled": true, "stageWidth": 1024.0, "stageHeight": 768.0,
+            "centerX": 289, "centerY": 611,
+            "entities": [{"objectId": "npc", "gridX": 290, "gridY": 611,
+                "motionSortX": 289, "motionSortY": 610, "sortZ": 1532560.0}]
+        })).unwrap();
+        let before = entity_render_actor_root(&snapshot, &snapshot.entities[0], Vec2::ZERO).unwrap();
+        assert_eq!(before.z, 15.3256);
+        snapshot.center_x = Some(290);
+        snapshot.center_y = Some(612);
+        snapshot.entities[0].sort_z = Some(1520540.0);
+        let after = entity_render_actor_root(&snapshot, &snapshot.entities[0], Vec2::ZERO).unwrap();
+        assert!(((after - before).z - (-0.1202)).abs() < 0.000002,
+            "retained layers must move by the new native row depth, not the old absolute formula");
+        assert_eq!((after - before).truncate(), Vec2::new(-48.0, 32.0));
     }
 
     #[test]

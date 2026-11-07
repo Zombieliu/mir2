@@ -1,0 +1,253 @@
+{
+  "sourceSha": "00858ce9b850218dd07ea96daea4bbfe6b68035b",
+  "branch": "codex/windows-player-journey",
+  "project": "prj_Q14gZuvjxkfqOCExhqOrYiR2UbxA",
+  "baseline": "dpl_5Tt9YxztUDSbFKgQQTCdkZG3myhx",
+  "preview": "dpl_FTB6QDoZGPWwbyDYVdkdRnpuT2q4",
+  "firstProduction": "dpl_hWjYRfuavCfkfGaDuypf7n4sRFLs",
+  "firstAttempt": {
+    "routes": [
+      {
+        "path": "/zh-CN/guide",
+        "status": 200,
+        "hasContent": true,
+        "canonicalCorrect": true,
+        "privateLeak": false,
+        "passed": true
+      },
+      {
+        "path": "/zh-CN/guide/world",
+        "status": 200,
+        "hasContent": true,
+        "canonicalCorrect": true,
+        "privateLeak": false,
+        "passed": true
+      },
+      {
+        "path": "/zh-CN/guide/getting-started",
+        "status": 200,
+        "hasContent": true,
+        "canonicalCorrect": true,
+        "privateLeak": false,
+        "passed": true
+      },
+      {
+        "path": "/zh-CN/guide/controls",
+        "status": 200,
+        "hasContent": true,
+        "canonicalCorrect": true,
+        "privateLeak": false,
+        "passed": true
+      },
+      {
+        "path": "/zh-CN/guide/classes-equipment",
+        "status": 200,
+        "hasContent": true,
+        "canonicalCorrect": true,
+        "privateLeak": false,
+        "passed": true
+      },
+      {
+        "path": "/zh-CN/guide/exploration",
+        "status": 200,
+        "hasContent": true,
+        "canonicalCorrect": true,
+        "privateLeak": false,
+        "passed": true
+      },
+      {
+        "path": "/zh-CN/guide/death",
+        "status": 200,
+        "hasContent": true,
+        "canonicalCorrect": true,
+        "privateLeak": false,
+        "passed": true
+      },
+      {
+        "path": "/zh-CN/guide/payments",
+        "status": 200,
+        "hasContent": true,
+        "canonicalCorrect": true,
+        "privateLeak": false,
+        "passed": true
+      },
+      {
+        "path": "/zh-CN/guide/playtest",
+        "status": 200,
+        "hasContent": true,
+        "canonicalCorrect": true,
+        "privateLeak": false,
+        "passed": true
+      },
+      {
+        "path": "/zh-CN/guide/faq",
+        "status": 200,
+        "hasContent": true,
+        "canonicalCorrect": true,
+        "privateLeak": false,
+        "passed": true
+      },
+      {
+        "path": "/zh-CN/developers",
+        "status": 200,
+        "hasContent": true,
+        "canonicalCorrect": true,
+        "privateLeak": false,
+        "passed": true
+      },
+      {
+        "path": "/zh-CN/developers/overview",
+        "status": 200,
+        "hasContent": true,
+        "canonicalCorrect": true,
+        "privateLeak": false,
+        "passed": true
+      },
+      {
+        "path": "/zh-CN/developers/capabilities",
+        "status": 200,
+        "hasContent": true,
+        "canonicalCorrect": true,
+        "privateLeak": false,
+        "passed": true
+      },
+      {
+        "path": "/zh-CN/developers/environment",
+        "status": 200,
+        "hasContent": true,
+        "canonicalCorrect": true,
+        "privateLeak": false,
+        "passed": true
+      },
+      {
+        "path": "/zh-CN/developers/quickstart",
+        "status": 200,
+        "hasContent": true,
+        "canonicalCorrect": true,
+        "privateLeak": false,
+        "passed": true
+      },
+      {
+        "path": "/zh-CN/developers/identity",
+        "status": 200,
+        "hasContent": true,
+        "canonicalCorrect": true,
+        "privateLeak": false,
+        "passed": true
+      },
+      {
+        "path": "/zh-CN/developers/interfaces",
+        "status": 200,
+        "hasContent": true,
+        "canonicalCorrect": true,
+        "privateLeak": false,
+        "passed": true
+      },
+      {
+        "path": "/zh-CN/developers/testing",
+        "status": 200,
+        "hasContent": true,
+        "canonicalCorrect": true,
+        "privateLeak": false,
+        "passed": true
+      },
+      {
+        "path": "/zh-CN/developers/security",
+        "status": 200,
+        "hasContent": true,
+        "canonicalCorrect": true,
+        "privateLeak": false,
+        "passed": true
+      },
+      {
+        "path": "/zh-CN/developers/contributing",
+        "status": 200,
+        "hasContent": true,
+        "canonicalCorrect": true,
+        "privateLeak": false,
+        "passed": true
+      },
+      {
+        "path": "/zh-CN/developers/roadmap",
+        "status": 200,
+        "hasContent": true,
+        "canonicalCorrect": true,
+        "privateLeak": false,
+        "passed": true
+      }
+    ],
+    "checks": [
+      {
+        "path": "/zh-CN/download",
+        "status": 200,
+        "length": 59220,
+        "installerLinksUnchanged": false,
+        "installerCount": 0
+      },
+      {
+        "path": "/zh-CN/docs-examples/read-status.mjs",
+        "status": 200,
+        "length": 1376,
+        "exactExample": true
+      },
+      {
+        "path": "/version",
+        "status": 200,
+        "length": 55,
+        "revision": "3a52daef5c3fe92e1e738d6656b9fdbf54de56c3",
+        "unchanged": true
+      },
+      {
+        "path": "/api/game-status",
+        "status": 200,
+        "length": 89,
+        "validSchema": true,
+        "health": true
+      },
+      {
+        "path": "/manifest.webmanifest",
+        "status": 200,
+        "length": 574,
+        "gameStart": "/game"
+      },
+      {
+        "path": "/promotions?lang=zh-CN",
+        "status": 200,
+        "length": 15988
+      },
+      {
+        "path": "/en/developers/quickstart",
+        "status": 200,
+        "length": 57502,
+        "unreviewedTranslationMarked": true
+      },
+      {
+        "path": "/docs/NUMERON-WEBSITE-DOCS-20261102.zh-CN.md",
+        "status": 404,
+        "length": 9759
+      },
+      {
+        "path": "/.env.production",
+        "status": 404,
+        "length": 9759
+      },
+      {
+        "path": "/marketing-assets/_next/static/immutable/chunks/3u24ozxuy0o-9.css",
+        "status": 200,
+        "length": 90993,
+        "assetNotHtml": true
+      },
+      {
+        "path": "/marketing-assets/_next/static/immutable/chunks/2vvdhlcbegha5.js",
+        "status": 200,
+        "length": 5596,
+        "assetNotHtml": true
+      }
+    ],
+    "result": "Rolled back: existing installer URL was missing from inherited production environment."
+  },
+  "restoredBaseline": true,
+  "correctedCandidate": "dpl_4dXyLJo6QFudTXzKNS6kbuEMFJd4",
+  "gameRevisionBefore": "3a52daef5c3fe92e1e738d6656b9fdbf54de56c3",
+  "status": "awaiting_corrected_candidate"
+}

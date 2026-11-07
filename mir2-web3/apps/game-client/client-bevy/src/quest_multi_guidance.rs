@@ -512,7 +512,7 @@ pub(super) fn render(
                     format!(
                         "{} · {}",
                         crate::player_text::text(&journey.chapter_title),
-                        crate::player_text::text(&journey.progress_label())
+                        journey.progress_label()
                     ),
                     PANEL_TEXT,
                 );
@@ -521,8 +521,12 @@ pub(super) fn render(
                 line(
                     card,
                     match definition.cadence {
-                        mir2_game_data::periodic_quests::PeriodicCadence::Daily => "Daily Tasks",
-                        mir2_game_data::periodic_quests::PeriodicCadence::Weekly => "Weekly Tasks",
+                        mir2_game_data::periodic_quests::PeriodicCadence::Daily => {
+                            crate::native_i18n::key("periodic.copy.0", "Daily Tasks")
+                        }
+                        mir2_game_data::periodic_quests::PeriodicCadence::Weekly => {
+                            crate::native_i18n::key("periodic.copy.1", "Weekly Tasks")
+                        }
                     },
                     PANEL_HIGHLIGHT,
                 );

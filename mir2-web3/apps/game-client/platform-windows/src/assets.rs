@@ -10,6 +10,77 @@ pub fn install_packed_store(
 ) -> Result<(), String> {
     crate::packed_assets::install(store)
 }
+
+/// Check authenticated pack bytes before mounting. A complete loose directory
+/// or an unsigned asset-root override cannot substitute for any missing entry.
+pub(crate) fn verify_packed_startup_assets(
+    store: &mir2_resource_pack::PackStore,
+) -> Result<(), String> {
+    verify_startup_assets(|path| store.read(path).map_err(|error| error.to_string()))
+}
+
+fn verify_startup_assets(read: impl Fn(&str) -> Result<Vec<u8>, String>) -> Result<(), String> {
+    if ![
+        "crystal-map-pack/0.map.gz",
+        "generated/crystal-map-pack/0.map.gz",
+    ]
+    .iter()
+    .any(|path| read(path).is_ok())
+    {
+        return Err("packed initial map bytes failed verification".into());
+    }
+    for path in [
+        "bevy-entity-atlases/manifest.json",
+        "generated/map-atlas/manifest.json",
+        "generated/native-map-keyed/manifest.json",
+        "original-effects/effects.generated.json",
+        "original-ui/Items/meta.json",
+        "original-ui/Items/0.png",
+        "original-ui/Items/3792.png",
+        "original-ui/StateItem/meta.json",
+        "original-ui/StateItem/30.png",
+        "original-ui/StateItem/5152.png",
+        "original-ui/Prguse2/meta.json",
+        "original-ui/Prguse2/1202.png",
+        "original-ui/Prguse2/1203.png",
+        "original-ui/Prguse2/1204.png",
+        "original-ui/Prguse2/1205.png",
+        "original-ui/Cursors/Cursor_Default.png",
+        "original-ui/Cursors/Cursor_Normal_Atk.png",
+        "original-ui/Cursors/Cursor_Compulsion_Atk.png",
+        "original-ui/Cursors/Cursor_Npc.png",
+    ] {
+        read(path).map_err(|_| format!("packed required resource failed verification: {path}"))?;
+    }
+    Ok(())
+}
+
+/// Legacy synchronous consumers include one-shot metadata, audio and atlas
+/// initialization. Until those consumers become asynchronous, their complete
+/// declared inputs must be ready before they can install a permanent fallback.
+/// Deferred PNGs are handled by the Bevy reader or retryable pixel reads.
+pub(crate) fn verify_progressive_startup_assets(
+    store: &mir2_resource_pack::ScopedPackStore,
+) -> Result<(), String> {
+    let read = |path: &str| match store.read(path) {
+        Ok(mir2_resource_pack::ScopedRead::Ready(bytes)) => Ok(bytes),
+        Ok(mir2_resource_pack::ScopedRead::Pending(_)) => {
+            Err(format!("startup resource is pending: {path}"))
+        }
+        Err(error) => Err(format!("startup resource {path}: {error:#}")),
+    };
+    verify_startup_assets(read)?;
+    for path in store
+        .catalog()
+        .resources
+        .keys()
+        .filter(|path| !path.ends_with(".png") || path.starts_with("bevy-entity-atlases/"))
+    {
+        read(path)?;
+    }
+    Ok(())
+}
+
 pub fn packed_mode() -> bool {
     crate::packed_assets::store().is_some()
 }
@@ -17,18 +88,39 @@ pub fn packed_error() -> Option<String> {
     crate::packed_assets::failure()
 }
 pub fn packed_login_ready(world: &bevy::prelude::World) -> bool {
-    packed_mode() && packed_error().is_none() && crate::packed_assets::login_ready(world)
+    packed_mode()
+        && packed_error().is_none()
+        && !crate::packed_assets::waiting()
+        && crate::packed_assets::login_ready(world)
 }
 pub fn packed_asset_source() -> Option<bevy::asset::io::AssetSourceBuilder> {
     crate::packed_assets::source()
 }
+pub(crate) enum AssetBytes {
+    Ready(Vec<u8>),
+    Pending,
+    Unavailable,
+}
 pub fn read_bytes(web_path: &str) -> Option<Vec<u8>> {
-    if packed_mode() {
-        return crate::packed_assets::read(web_path)
-            .map_err(|e| eprintln!("[assets] {e}"))
-            .ok();
+    match read_bytes_status(web_path) {
+        AssetBytes::Ready(bytes) => Some(bytes),
+        AssetBytes::Pending | AssetBytes::Unavailable => None,
     }
-    std::fs::read(asset_path(web_path)?).ok()
+}
+pub(crate) fn read_bytes_status(web_path: &str) -> AssetBytes {
+    if packed_mode() {
+        return match crate::packed_assets::try_read(web_path) {
+            Ok(mir2_resource_pack::ScopedRead::Ready(bytes)) => AssetBytes::Ready(bytes),
+            Ok(mir2_resource_pack::ScopedRead::Pending(_)) => AssetBytes::Pending,
+            Err(error) => {
+                eprintln!("[assets] {error}");
+                AssetBytes::Unavailable
+            }
+        };
+    }
+    asset_path(web_path)
+        .and_then(|path| std::fs::read(path).ok())
+        .map_or(AssetBytes::Unavailable, AssetBytes::Ready)
 }
 pub fn read_text(web_path: &str) -> Option<String> {
     String::from_utf8(read_bytes(web_path)?).ok()

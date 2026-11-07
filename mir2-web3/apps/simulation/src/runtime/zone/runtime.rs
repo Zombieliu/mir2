@@ -64,6 +64,8 @@ use crate::runtime::map_events::{
 
 pub(super) mod armadillo_ai;
 mod checkpoint;
+#[path = "action_boundary.rs"]
+pub(super) mod action_boundary;
 mod combat_random;
 #[cfg(any(test, feature = "test-support"))]
 mod crowded_fixture;
@@ -368,6 +370,7 @@ pub(super) struct ZonePlayerFiniteControlPoisonClock {
 // (the derive was vestigial). See docs/L2-ECS-ZONE-DESIGN.md.
 #[derive(Debug)]
 pub struct ZoneRuntime {
+    action_boundary: Option<std::sync::Arc<dyn action_boundary::ZoneActionBoundary>>,
     // One replayable business-random stream; never a client-selected seed.
     combat_random: combat_random::AuthoritativeCombatRandom,
     five_class_skills: five_class_skills::FiveClassSkillState,
@@ -744,6 +747,7 @@ impl ZoneRuntime {
         combat_random: combat_random::AuthoritativeCombatRandom,
     ) -> Self {
         Self {
+            action_boundary: None,
             combat_random,
             mining: mining::ZoneMiningState::default(),
             five_class_skills: five_class_skills::FiveClassSkillState::default(),
@@ -822,6 +826,7 @@ impl ZoneRuntime {
             self.npc_teleport_config.clone(),
             self.combat_random.clone(),
         );
+        fork.action_boundary = self.action_boundary.clone();
         fork.players = self.players.clone();
         fork.five_class_skills = self.five_class_skills.clone();
         fork.five_class_pvp = self.five_class_pvp.clone();
@@ -1230,6 +1235,13 @@ impl ZoneRuntime {
         self.players
             .get(session_id)
             .map(|player| player.chat_profile.clone())
+    }
+
+    /// The authoritative retained flag, without cloning social/profile state.
+    pub fn player_in_safe_zone(&self, session_id: &SessionId) -> Option<bool> {
+        self.players
+            .get(session_id)
+            .map(|player| player.chat_profile.in_safe_zone)
     }
 
     /// Returns the remaining authoritative shared-Zone cooldown for one spell.
@@ -1926,6 +1938,20 @@ impl ZoneRuntime {
 
     pub fn handle(&mut self, command: ZoneCommand) -> Vec<ZoneOutbound> {
         self.refresh_local_online_presence();
+        // Reject denied combat before pet focus, mana or action-clock effects.
+        // The attack consumers repeat this against their actual retained target.
+        let boundary_intent = match &command {
+            ZoneCommand::PlayerAttackObject { session_id, object_id, now_ms, .. }
+            | ZoneCommand::PlayerAttackMaterializedObject { session_id, object_id, now_ms, .. }
+            | ZoneCommand::PlayerRangeAttackObject { session_id, object_id, now_ms, .. }
+            | ZoneCommand::PlayerRangeAttackMaterializedObject { session_id, object_id, now_ms, .. }
+            | ZoneCommand::PlayerCastMagic { session_id, object_id, now_ms, .. }
+            | ZoneCommand::PlayerCastMagicWithItem { session_id, object_id, now_ms, .. } => Some((session_id, *object_id, *now_ms)),
+            _ => None,
+        };
+        if let Some((session, target, now)) = boundary_intent {
+            if !self.boundary_attack_allows(session, target, None, now) { return self.owner_location_correction(session); }
+        }
         let pet_focus = match &command {
             ZoneCommand::PlayerAttackObject {
                 session_id,
@@ -3161,6 +3187,7 @@ impl ZoneRuntime {
         self.ecs
             .upsert_player(&session_id, object_id, &player.position);
         self.players.insert(session_id.clone(), player);
+        self.refresh_crystal_safe_zone_profile_after_accepted_step(&session_id);
         self.refresh_local_online_presence();
         if let Some(clock) = previous_clock {
             self.restore_player_vital_clock(&session_id, clock);
@@ -3469,6 +3496,10 @@ impl ZoneRuntime {
         let path = (1..=steps)
             .map(|amount| offset_point(&origin, action.direction, amount))
             .collect::<Vec<_>>();
+        // Consume-time policy: a buffered intent can be revoked after ingress.
+        if !self.boundary_move_allows(session_id, &path, action.direction, now_ms) {
+            return self.owner_location_correction(session_id);
+        }
         let map_coordinate_packets = {
             let player = self
                 .players
@@ -3595,6 +3626,11 @@ impl ZoneRuntime {
         action: ZoneMovementAction,
         now_ms: u64,
     ) -> Vec<ZoneOutbound> {
+        if let Some(position) = self.players.get(session_id).map(|p| p.position.clone()) {
+            if !self.boundary_move_allows(session_id, &[position], action.direction, now_ms) {
+                return self.owner_location_correction(session_id);
+            }
+        }
         let Some(player) = self.players.get_mut(session_id) else {
             return Vec::new();
         };
@@ -3712,6 +3748,7 @@ impl ZoneRuntime {
             .get(session_id)
             .is_some_and(|player| player.position == destination && player.direction == direction);
         if already_synced {
+            self.refresh_crystal_safe_zone_profile_after_accepted_step(session_id);
             return Vec::new();
         }
 
@@ -3733,6 +3770,7 @@ impl ZoneRuntime {
             self.ecs.move_player(session_id, &moved_position);
         }
 
+        self.refresh_crystal_safe_zone_profile_after_accepted_step(session_id);
         let mut outbounds = self.diff_visibility_for(session_id);
         outbounds.extend(self.diff_zone_object_visibility_for(session_id));
         let player = self
@@ -3757,6 +3795,9 @@ impl ZoneRuntime {
         object_id: u32,
         available_gold: u32,
     ) -> Vec<ZoneOutbound> {
+        if !self.boundary_allows(session_id, action_boundary::ZoneActionKind::MapTransfer, &[], self.visibility_now_ms, true) {
+            return self.owner_location_correction(session_id);
+        }
         if object_id == 0
             || !self
                 .npc_teleport_config
@@ -3862,6 +3903,7 @@ impl ZoneRuntime {
         if let Some(player) = self.players.get_mut(session_id) {
             player.chat_profile = profile;
         }
+        self.refresh_crystal_safe_zone_profile_after_accepted_step(session_id);
         if self
             .players
             .get(session_id)
@@ -4770,6 +4812,9 @@ impl ZoneRuntime {
         damage: i32,
         now_ms: u64,
     ) -> Vec<ZoneOutbound> {
+        if !self.boundary_attack_allows(session_id, object_id, None, now_ms) {
+            return self.owner_location_correction(session_id);
+        }
         let Some(player) = self.players.get(session_id) else {
             return Vec::new();
         };
@@ -5270,6 +5315,9 @@ impl ZoneRuntime {
         fallback_damage: i32,
         now_ms: u64,
     ) -> Vec<ZoneOutbound> {
+        if !self.boundary_attack_allows(session_id, self.players.get(target_session_id).map_or(0, |p| p.object_id), None, now_ms) {
+            return self.owner_location_correction(session_id);
+        }
         let Some(attacker) = self.players.get(session_id).cloned() else {
             return Vec::new();
         };
@@ -5680,6 +5728,9 @@ impl ZoneRuntime {
         damage: i32,
         now_ms: u64,
     ) -> Vec<ZoneOutbound> {
+        if !self.boundary_attack_allows(session_id, object_id, Some(&target), now_ms) {
+            return self.owner_location_correction(session_id);
+        }
         let Some(player) = self.players.get(session_id) else {
             return Vec::new();
         };
@@ -14616,6 +14667,9 @@ impl ZoneRuntime {
             x: stored.drop.x,
             y: stored.drop.y,
         };
+        if !self.boundary_allows(session_id, action_boundary::ZoneActionKind::Pickup, std::slice::from_ref(&drop_location), now_ms, false) {
+            return expiry_outbounds;
+        }
         let in_pickup_range = if requested_object_id.is_some() {
             zone_tile_distance(target, &drop_location) <= 1
         } else {
@@ -19180,6 +19234,18 @@ mod pvp_tests {
                     )))));
         assert_eq!(zone.players[&target].hp, 100);
 
+        // Real map 0 safety comes from manifest geometry. Keep the same
+        // attack/HP assertions, but enter the actual safe area before testing it.
+        zone.handle(ZoneCommand::SyncPlayerTransform {
+            session_id: attacker.clone(),
+            position: Point { x: 288, y: 616 },
+            direction: MirDirection::Right,
+        });
+        zone.handle(ZoneCommand::SyncPlayerTransform {
+            session_id: target.clone(),
+            position: Point { x: 289, y: 616 },
+            direction: MirDirection::Right,
+        });
         zone.handle(ZoneCommand::UpdateChatProfile {
             session_id: attacker.clone(),
             profile: ZoneChatProfile {

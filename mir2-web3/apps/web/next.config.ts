@@ -154,6 +154,9 @@ const nextConfig: NextConfig = {
   // secret, and capturing it here keeps /version trustworthy even when a host
   // does not expose its system variables to server functions at runtime.
   env: {
+    // Standalone delivery verifies the endpoint actually compiled into the UI;
+    // setting a public variable only when starting Node cannot change a bundle.
+    NEXT_PUBLIC_MIR2_GATEWAY_WS_URL: process.env.NEXT_PUBLIC_MIR2_GATEWAY_WS_URL?.trim() ?? "",
     MIR2_BEVY_RUNTIME_BUILD_MANIFEST: compiledRuntimeManifest,
     MIR2_CLIENT_CORE_BUILD_MANIFEST: compiledCoreManifest,
     MIR2_BUILD_REVISION: buildRevision,

@@ -1,0 +1,29 @@
+{
+  "schema": "mir2.r16.reconnect.cleanup.v1",
+  "timeUtc": "2026-11-07T18:04:59.9215200Z",
+  "ownedPortsClosed": [
+    19252,
+    19282,
+    19352
+  ],
+  "originalListeners": [
+    {
+      "LocalPort": 19235,
+      "OwningProcess": 129280
+    },
+    {
+      "LocalPort": 19232,
+      "OwningProcess": 128444
+    },
+    {
+      "LocalPort": 19231,
+      "OwningProcess": 126788
+    }
+  ],
+  "originalWindowsExeSha256": "d930618bc7cc461a4d03507a68fb28c0b15af6200de8f00946c463929f67d638",
+  "oldGatewayCandidateSha256": "3dd4f2b5c053f0d35c0ba172130a5731eb8944afd4b78e7605c03a9271fcad3e",
+  "originalCopiesPreserved": true,
+  "desktopControlUsed": false,
+  "publicDeploy": false,
+  "ownServicesGracefullyStopped": true
+}

@@ -673,6 +673,7 @@ mod tests {
             )
             .unwrap(),
             channel_identity: crate::ChannelIdentityRegistry::in_memory(),
+            companions: None,
         };
         let fixture = LocalWss::start(
             axum::Router::new()

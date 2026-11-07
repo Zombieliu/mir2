@@ -912,7 +912,7 @@ fn durable_library_host_dispatch_fences_auth_version_lease_and_records_only_repl
     };
     assert!(head
         .build_id
-        .starts_with("mir2-zone/npc-handoff-account-v2/"));
+        .starts_with("mir2-zone/v5-durable-drop-admission/"));
     assert_eq!(head.build_id, zone_replication_build_id());
     assert_ne!(
         head.build_id,

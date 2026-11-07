@@ -169,6 +169,7 @@ fn manifest() -> GenerationManifest {
         signed_config: entry("mir2-client.toml", b"config"),
         catalog: entry("catalog.json", b"{}"),
         packs: vec![pack],
+        required_scope: None,
     }
 }
 fn feed(manifest: &GenerationManifest) -> PackFeed {
@@ -656,7 +657,14 @@ fn failed_parallel_pack_download_joins_all_writers_and_keeps_active_and_personal
     safe::write_new(&root.path().join("game/logs/personal.log"), b"witness").unwrap();
     save_record(root.path(), &pending()).unwrap();
     let before = fs::read(root.path().join(SELECTOR)).unwrap();
-    assert!(download_packs(&source, &m, root.path(), &TestStatus, &AtomicU64::new(0)).is_err());
+    assert!(download_packs(
+        &source,
+        &m.packs,
+        root.path(),
+        &TestStatus,
+        &AtomicU64::new(0)
+    )
+    .is_err());
     assert_eq!(source.active.load(Ordering::SeqCst), 0);
     let finished = source.finished.load(Ordering::SeqCst);
     std::thread::sleep(Duration::from_millis(15));
@@ -694,7 +702,9 @@ fn generation_plan_requires_consent_for_missing_objects_and_cached_new_activatio
     };
     // These policy inputs stand for the already authenticated manifest; real
     // CMS integration checks that unauthenticated input cannot reach this gate.
-    assert!(confirm_generation_update(root.path(), &generation, &m, true, &consent).is_err());
+    assert!(
+        confirm_generation_update(root.path(), &generation, &m, &m.packs, true, &consent).is_err()
+    );
     let expected = m.exe.size + m.signed_config.size + m.catalog.size + m.packs[0].size;
     assert_eq!(*consent.prompts.borrow(), [("r100".into(), expected)]);
     assert!(!generation.exists() && !root.path().join(SELECTOR).exists());
@@ -708,12 +718,14 @@ fn generation_plan_requires_consent_for_missing_objects_and_cached_new_activatio
     }
     safe::write_new(&root.path().join(&m.packs[0].path), b"pack").unwrap();
     consent.prompts.borrow_mut().clear();
-    confirm_generation_update(root.path(), &generation, &m, true, &consent).unwrap();
+    confirm_generation_update(root.path(), &generation, &m, &m.packs, true, &consent).unwrap();
     assert!(
         consent.prompts.borrow().is_empty(),
         "unchanged installed generation needs no update click"
     );
-    assert!(confirm_generation_update(root.path(), &generation, &m, false, &consent).is_err());
+    assert!(
+        confirm_generation_update(root.path(), &generation, &m, &m.packs, false, &consent).is_err()
+    );
     assert_eq!(*consent.prompts.borrow(), [("r100".into(), 0)]);
     assert!(!root.path().join(SELECTOR).exists());
     assert_eq!(
@@ -793,7 +805,7 @@ fn parallel_pack_stage_reports_live_bytes_before_first_pack_finishes_and_exclude
     };
     let wire = AtomicU64::new(123);
     assert_eq!(
-        download_packs(&source, &m, root.path(), &status, &wire).unwrap(),
+        download_packs(&source, &m.packs, root.path(), &status, &wire).unwrap(),
         1
     );
     assert_eq!(status.rows.borrow()[0], (0, bytes.len() as u64));

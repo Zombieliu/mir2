@@ -3,7 +3,7 @@ use std::sync::atomic::{AtomicU64, Ordering};
 use web_time::{SystemTime, UNIX_EPOCH};
 
 use bevy::prelude::*;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 
 use crate::native_monthly_card::MonthlyCardStatus;
 use crate::native_shell::{NativeShellModel, NativeShellScreen};
@@ -39,6 +39,80 @@ pub struct BillingOffer {
     pub credits: u32,
 }
 
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "lowercase")]
+pub enum BillingProviderId {
+    #[default]
+    Stripe,
+    Waffo,
+}
+
+impl BillingProviderId {
+    pub fn is_stripe(&self) -> bool {
+        *self == Self::Stripe
+    }
+
+    pub fn label(self) -> &'static str {
+        match self {
+            Self::Stripe => "Stripe",
+            Self::Waffo => "WAFFO",
+        }
+    }
+}
+
+/// Only official hosted checkout origins may leave the application. The pending
+/// purchase chooses the provider; a returned URL cannot switch that choice.
+pub fn valid_fiat_checkout_url(url: &str, provider: BillingProviderId) -> bool {
+    if url.len() > 4096
+        || !url.is_ascii()
+        || url.bytes().any(|b| {
+            b.is_ascii_control()
+                || b.is_ascii_whitespace()
+                || matches!(
+                    b,
+                    b'\\' | b'"' | b'`' | b'<' | b'>' | b'|' | b'^' | b'{' | b'}'
+                )
+        })
+    {
+        return false;
+    }
+    let Some(remainder) = url.strip_prefix("https://") else {
+        return false;
+    };
+    let Some((authority, path)) = remainder.split_once('/') else {
+        return false;
+    };
+    let path = path.split(['?', '#']).next().unwrap_or_default();
+    match provider {
+        BillingProviderId::Stripe => {
+            matches!(authority, "checkout.stripe.com" | "checkout.stripe.com:443")
+                && path.strip_prefix("c/pay/").is_some_and(|id| !id.is_empty())
+        }
+        BillingProviderId::Waffo => authority == "cashier.waffo.com" && !path.is_empty(),
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct BillingPaymentProvider {
+    pub id: BillingProviderId,
+    pub label: String,
+    pub livemode: bool,
+    pub offers: Vec<BillingOffer>,
+}
+
+fn valid_fiat_offer(offer: &BillingOffer) -> bool {
+    !offer.id.is_empty()
+        && offer.id.len() <= 96
+        && offer
+            .id
+            .bytes()
+            .all(|b| b.is_ascii_alphanumeric() || b"-_.:".contains(&b))
+        && offer.label.len() <= 256
+        && offer.amount_label.len() <= 128
+        && offer.currency.len() <= 16
+}
+
 #[derive(Debug, Clone, PartialEq, Eq, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct OwnedMonthlyCard {
@@ -64,6 +138,8 @@ impl OwnedMonthlyCard {
 pub struct BillingOrder {
     pub id: String,
     pub state: String,
+    #[serde(default)]
+    pub provider: BillingProviderId,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Deserialize)]
@@ -153,6 +229,8 @@ pub struct BillingStatus {
     pub credit: u32,
     pub pending_credit: u32,
     pub offers: Vec<BillingOffer>,
+    #[serde(default)]
+    pub payment_providers: Option<Vec<BillingPaymentProvider>>,
     pub monthly_card_credit_price: Option<u32>,
     pub owned_monthly_cards: Vec<OwnedMonthlyCard>,
     pub monthly_card: MonthlyCardStatus,
@@ -168,8 +246,48 @@ pub struct BillingStatus {
 }
 
 impl BillingStatus {
+    fn fiat_providers(&self) -> Vec<BillingProviderId> {
+        match &self.payment_providers {
+            Some(providers) => providers.iter().map(|provider| provider.id).collect(),
+            None if self.checkout_enabled => vec![BillingProviderId::Stripe],
+            None => vec![],
+        }
+    }
+
+    fn fiat_offers(&self, provider: BillingProviderId) -> &[BillingOffer] {
+        match &self.payment_providers {
+            Some(providers) => providers
+                .iter()
+                .find(|p| p.id == provider)
+                .map_or(&[], |p| p.offers.as_slice()),
+            None if provider == BillingProviderId::Stripe && self.checkout_enabled => &self.offers,
+            None => &[],
+        }
+    }
+
+    fn fiat_livemode(&self, provider: BillingProviderId) -> Option<bool> {
+        self.payment_providers
+            .as_ref()?
+            .iter()
+            .find(|p| p.id == provider)
+            .map(|p| p.livemode)
+    }
+
     pub fn is_valid(&self) -> bool {
         self.offers.len() <= 64
+            && self.payment_providers.as_ref().is_none_or(|providers| {
+                providers.len() <= 8
+                    && providers.iter().enumerate().all(|(index, provider)| {
+                        !provider.label.is_empty()
+                            && provider.label.len() <= 64
+                            && !provider.label.chars().any(char::is_control)
+                            && provider.offers.len() <= 64
+                            && provider.offers.iter().all(valid_fiat_offer)
+                            && !providers[..index]
+                                .iter()
+                                .any(|prior| prior.id == provider.id)
+                    })
+            })
             && self.owned_monthly_cards.len() <= 256
             && self.orders.len() <= 256
             && self.sui_usdc_offers.len() <= 64
@@ -199,16 +317,7 @@ impl BillingStatus {
                             && d.bytes().all(|b| b.is_ascii_alphanumeric())
                     })
             })
-            && self.offers.iter().all(|o| {
-                !o.id.is_empty()
-                    && o.id.len() <= 96
-                    && o.id
-                        .bytes()
-                        .all(|b| b.is_ascii_alphanumeric() || b"-_.:".contains(&b))
-                    && o.label.len() <= 256
-                    && o.amount_label.len() <= 128
-                    && o.currency.len() <= 16
-            })
+            && self.offers.iter().all(valid_fiat_offer)
             && self
                 .owned_monthly_cards
                 .iter()
@@ -236,6 +345,8 @@ pub struct BillingReply {
     pub checkout_url: Option<String>,
     pub error: Option<String>,
     pub replayed: Option<bool>,
+    #[serde(default)]
+    pub provider: Option<BillingProviderId>,
 }
 
 impl std::fmt::Debug for BillingReply {
@@ -256,6 +367,7 @@ impl std::fmt::Debug for BillingReply {
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum BillingPurchase {
     Checkout {
+        provider: BillingProviderId,
         offer_id: String,
         order_request_id: String,
     },
@@ -294,6 +406,7 @@ impl BillingRequest {
 #[derive(Debug, Clone, PartialEq, Eq, Component)]
 pub enum BillingAction {
     Refresh,
+    SelectProvider(BillingProviderId),
     Checkout(String),
     UsdcCheckout(String),
     UsdcReopen(String),
@@ -338,6 +451,7 @@ pub struct BillingPanel {
     pub offer_page: usize,
     pub card_page: usize,
     pub page: BillingPage,
+    pub provider: BillingProviderId,
     pub usdc_offer_page: usize,
     pub usdc_order_page: usize,
     account: String,
@@ -502,6 +616,12 @@ impl BillingPanel {
         {
             return false;
         }
+        if reply.error.is_none()
+            && matches!(&pending.purchase, Some(BillingPurchase::Checkout { provider, .. })
+                if reply.provider.unwrap_or_default() != *provider)
+        {
+            return false;
+        }
         // URLs are allowed only on a successful, current Checkout result.
         if reply.checkout_url.as_ref().is_some_and(|url| {
             url.len() > 4096
@@ -510,6 +630,13 @@ impl BillingPanel {
                     BillingOperation::Checkout | BillingOperation::UsdcCheckout
                 )
                 || reply.error.is_some()
+                || match pending.purchase.as_ref() {
+                    Some(BillingPurchase::Checkout { provider, .. }) => {
+                        !valid_fiat_checkout_url(url, *provider)
+                    }
+                    Some(BillingPurchase::UsdcCheckout { .. }) => false,
+                    _ => true,
+                }
         }) {
             return false;
         }
@@ -517,9 +644,15 @@ impl BillingPanel {
         let has_status = reply.status.is_some();
         if let Some(status) = reply.status {
             self.last_status_at_ms = now;
+            let providers = status.fiat_providers();
+            if !self.retry_required && !providers.contains(&self.provider) {
+                if let Some(provider) = providers.first() {
+                    self.provider = *provider;
+                }
+            }
             self.offer_page = self
                 .offer_page
-                .min(status.offers.len().saturating_sub(1) / PAGE_SIZE);
+                .min(status.fiat_offers(self.provider).len().saturating_sub(1) / PAGE_SIZE);
             self.card_page = self
                 .card_page
                 .min(status.owned_monthly_cards.len().saturating_sub(1) / PAGE_SIZE);
@@ -576,6 +709,10 @@ impl BillingPanel {
                     self.checkout_to_open = Some(url);
                     self.retry_required = false;
                     self.message = Some("billing.waiting");
+                } else if reply.replayed == Some(true) && has_status {
+                    self.last_purchase = None;
+                    self.retry_required = false;
+                    self.message = Some("billing.updated");
                 } else {
                     self.retry_required = true;
                     self.message = Some("billing.unconfirmed");
@@ -618,6 +755,23 @@ impl BillingPanel {
                 self.focus = 0;
                 self.message = self.retry_required.then_some("billing.unconfirmed");
             }
+            BillingAction::SelectProvider(provider)
+                if self.page == BillingPage::Fiat
+                    && self.pending.is_none()
+                    && !self.retry_required
+                    && self
+                        .status
+                        .as_ref()
+                        .is_some_and(|s| s.fiat_providers().contains(&provider)) =>
+            {
+                if provider != self.provider {
+                    self.provider = provider;
+                    self.offer_page = 0;
+                    self.focus = 0;
+                    self.checkout_to_open = None;
+                    self.last_purchase = None;
+                }
+            }
             BillingAction::UsdcOffersPage(next)
                 if self.page == BillingPage::Usdc && self.pending.is_none() =>
             {
@@ -640,7 +794,10 @@ impl BillingPanel {
             }
             BillingAction::Retry if self.retry_required && self.pending.is_none() => {
                 self.page = match &self.last_purchase {
-                    Some(BillingPurchase::Checkout { .. }) => BillingPage::Fiat,
+                    Some(BillingPurchase::Checkout { provider, .. }) => {
+                        self.provider = *provider;
+                        BillingPage::Fiat
+                    }
                     Some(BillingPurchase::UsdcCheckout { .. }) => BillingPage::Usdc,
                     _ => BillingPage::MonthlyCard,
                 };
@@ -652,7 +809,9 @@ impl BillingPanel {
                 self.offer_page = page(
                     self.offer_page,
                     next,
-                    self.status.as_ref().map_or(0, |s| s.offers.len()),
+                    self.status
+                        .as_ref()
+                        .map_or(0, |s| s.fiat_offers(self.provider).len()),
                 );
                 self.focus = 0;
             }
@@ -672,11 +831,12 @@ impl BillingPanel {
                 if self.page == BillingPage::Fiat
                     && self.can_purchase()
                     && self.status.as_ref().is_some_and(|s| {
-                        s.checkout_enabled && s.offers.iter().any(|o| o.id == id)
+                        s.fiat_offers(self.provider).iter().any(|o| o.id == id)
                     }) =>
             {
                 self.begin(
                     Some(BillingPurchase::Checkout {
+                        provider: self.provider,
                         offer_id: id,
                         order_request_id: new_order_id(now),
                     }),
@@ -818,17 +978,25 @@ impl BillingPanel {
                 return actions;
             }
             if self.page == BillingPage::Fiat {
-                if self.can_purchase() && status.checkout_enabled {
+                if !self.retry_required {
                     actions.extend(
                         status
-                            .offers
+                            .fiat_providers()
+                            .into_iter()
+                            .map(BillingAction::SelectProvider),
+                    );
+                }
+                let offers = status.fiat_offers(self.provider);
+                if self.can_purchase() {
+                    actions.extend(
+                        offers
                             .iter()
                             .skip(self.offer_page * PAGE_SIZE)
                             .take(PAGE_SIZE)
                             .map(|o| BillingAction::Checkout(o.id.clone())),
                     );
                 }
-                if status.offers.len() > PAGE_SIZE {
+                if offers.len() > PAGE_SIZE {
                     actions.extend([
                         BillingAction::OffersPage(false),
                         BillingAction::OffersPage(true),
@@ -1000,7 +1168,8 @@ mod ui {
         let actions = panel.actions();
         let enabled = actions.contains(&action);
         let focused = actions.get(panel.focus % actions.len().max(1)) == Some(&action);
-        let selected = matches!(&action, BillingAction::SelectPage(page) if *page == panel.page);
+        let selected = matches!(&action, BillingAction::SelectPage(page) if *page == panel.page)
+            || matches!(&action, BillingAction::SelectProvider(provider) if *provider == panel.provider);
         let mut bounds = rect(x, y, w, 30.0);
         bounds.border = UiRect::all(Val::Px(1.0));
         parent
@@ -1178,20 +1347,40 @@ mod ui {
 
     fn render_fiat(p: &mut ChildSpawnerCommands, panel: &BillingPanel, s: &BillingStatus) {
         use crate::native_i18n::tr;
+        let offers = s.fiat_offers(panel.provider);
+        for (index, provider) in s.fiat_providers().into_iter().enumerate() {
+            button(
+                p,
+                panel,
+                BillingAction::SelectProvider(provider),
+                provider.label(),
+                20.0 + index as f32 * 170.0,
+                225.0,
+                160.0,
+            );
+        }
+        let mode = match s.fiat_livemode(panel.provider) {
+            Some(false) => " · TEST",
+            Some(true) | None => "",
+        };
         text(
             p,
-            tr(if s.checkout_enabled {
-                "billing.fiatOffers"
-            } else {
-                "billing.fiatUnavailable"
-            }),
+            format!(
+                "{}{}",
+                tr(if !offers.is_empty() {
+                    "billing.fiatOffers"
+                } else {
+                    "billing.fiatUnavailable"
+                }),
+                mode
+            ),
             20.0,
-            230.0,
+            264.0,
             500.0,
             35.0,
             14.0,
         );
-        if s.offers.len() > PAGE_SIZE {
+        if offers.len() > PAGE_SIZE {
             button(
                 p,
                 panel,
@@ -1211,14 +1400,13 @@ mod ui {
                 88.0,
             );
         }
-        for (i, offer) in s
-            .offers
+        for (i, offer) in offers
             .iter()
             .skip(panel.offer_page * PAGE_SIZE)
             .take(PAGE_SIZE)
             .enumerate()
         {
-            let y = 264.0 + i as f32 * 48.0;
+            let y = 300.0 + i as f32 * 48.0;
             text(
                 p,
                 format!(
@@ -1474,6 +1662,7 @@ mod ui {
             BillingStatus {
                 enabled,
                 checkout_enabled: true,
+                payment_providers: None,
                 credit: 900,
                 pending_credit: 0,
                 offers: vec![BillingOffer {
@@ -1510,6 +1699,7 @@ mod ui {
                 checkout_url: None,
                 error: None,
                 replayed: None,
+                provider: None,
             }
         }
         fn usdc_status() -> BillingStatus {
@@ -1524,6 +1714,225 @@ mod ui {
                 network: "testnet".into(),
             }];
             s
+        }
+
+        fn multichannel_status() -> BillingStatus {
+            let mut s = status(true);
+            let stripe_offers = s.offers.clone();
+            let mut waffo_offer = stripe_offers[0].clone();
+            waffo_offer.label = "WAFFO package".into();
+            waffo_offer.credits = 250;
+            s.payment_providers = Some(vec![
+                BillingPaymentProvider {
+                    id: BillingProviderId::Stripe,
+                    label: "Stripe".into(),
+                    livemode: false,
+                    offers: stripe_offers,
+                },
+                BillingPaymentProvider {
+                    id: BillingProviderId::Waffo,
+                    label: "WAFFO".into(),
+                    livemode: false,
+                    offers: vec![waffo_offer],
+                },
+            ]);
+            s
+        }
+
+        #[test]
+        fn fiat_registry_preserves_old_stripe_status_and_rejects_duplicate_channels() {
+            let mut legacy = status(true);
+            assert_eq!(legacy.fiat_providers(), vec![BillingProviderId::Stripe]);
+            assert_eq!(legacy.fiat_offers(BillingProviderId::Stripe), legacy.offers);
+            assert!(legacy.fiat_offers(BillingProviderId::Waffo).is_empty());
+            legacy.payment_providers = Some(vec![]);
+            assert!(legacy.fiat_providers().is_empty());
+            assert!(legacy.fiat_offers(BillingProviderId::Stripe).is_empty());
+            let order: BillingOrder = serde_json::from_value(serde_json::json!({
+                "id":"old-order","state":"applied"
+            }))
+            .unwrap();
+            assert_eq!(order.provider, BillingProviderId::Stripe);
+            assert!(
+                serde_json::from_value::<BillingProviderId>(serde_json::json!("unknown")).is_err()
+            );
+            let mut s = multichannel_status();
+            assert!(s.is_valid());
+            let providers = s.payment_providers.as_mut().unwrap();
+            providers.push(providers[0].clone());
+            assert!(!s.is_valid());
+        }
+
+        #[test]
+        fn fiat_selection_uses_channel_offers_and_retry_freezes_original_provider() {
+            let mut panel = BillingPanel::default();
+            panel.open_for("alice", 7, 1);
+            panel.pending = None;
+            panel.status = Some(multichannel_status());
+            panel.offer_page = 10;
+            panel.action(BillingAction::SelectProvider(BillingProviderId::Waffo), 2);
+            assert_eq!(panel.provider, BillingProviderId::Waffo);
+            assert_eq!(panel.offer_page, 0);
+            assert_eq!(
+                panel.status.as_ref().unwrap().fiat_offers(panel.provider)[0].credits,
+                250
+            );
+            panel.action(BillingAction::Checkout("small".into()), 3);
+            let original = panel.pending.clone().unwrap();
+            assert!(matches!(
+                original.purchase,
+                Some(BillingPurchase::Checkout {
+                    provider: BillingProviderId::Waffo,
+                    ..
+                })
+            ));
+            panel.mark_sent(original.request_id);
+            panel.expire_request(15_003);
+            panel.action(
+                BillingAction::SelectProvider(BillingProviderId::Stripe),
+                15_004,
+            );
+            assert_eq!(panel.provider, BillingProviderId::Waffo);
+            panel.action(BillingAction::Retry, 15_005);
+            let retry = panel.pending.clone().unwrap();
+            assert_eq!(retry.purchase, original.purchase);
+            assert_ne!(retry.request_id, original.request_id);
+            panel.mark_sent(retry.request_id);
+            let mut result = reply(&retry);
+            result.checkout_url = Some("https://checkout.stripe.com/c/pay/other-provider".into());
+            assert!(!panel.accept(result.clone(), "alice", Some(7), 15_006));
+            result.checkout_url = Some("https://cashier.waffo.com/order-key".into());
+            result.provider = Some(BillingProviderId::Stripe);
+            assert!(!panel.accept(result.clone(), "alice", Some(7), 15_006));
+            result.provider = Some(BillingProviderId::Waffo);
+            assert!(panel.accept(result, "alice", Some(7), 15_006));
+            assert_eq!(
+                panel.take_checkout_url().as_deref(),
+                Some("https://cashier.waffo.com/order-key")
+            );
+            assert!(panel.take_checkout_url().is_none());
+        }
+
+        #[test]
+        fn terminal_waffo_replay_uses_confirmed_status_and_never_reopens_checkout() {
+            let mut panel = BillingPanel::default();
+            panel.open_for("alice", 7, 1);
+            panel.pending = None;
+            panel.status = Some(multichannel_status());
+            panel.action(BillingAction::SelectProvider(BillingProviderId::Waffo), 2);
+            panel.action(BillingAction::Checkout("small".into()), 3);
+            let request = panel.pending.clone().unwrap();
+            panel.mark_sent(request.request_id);
+            let mut result = reply(&request);
+            result.replayed = Some(true);
+            result.status = Some(multichannel_status());
+            result.provider = Some(BillingProviderId::Stripe);
+            assert!(!panel.accept(result.clone(), "alice", Some(7), 4));
+            result.provider = Some(BillingProviderId::Waffo);
+            assert!(panel.accept(result, "alice", Some(7), 4));
+            assert!(!panel.retry_required);
+            assert!(panel.last_purchase.is_none());
+            assert!(panel.take_checkout_url().is_none());
+            assert_eq!(panel.message, Some("billing.updated"));
+            panel.action(BillingAction::Retry, 5);
+            assert!(panel.pending.is_none());
+        }
+
+        #[test]
+        fn waffo_only_status_can_recharge_without_legacy_stripe_checkout() {
+            let mut panel = BillingPanel::default();
+            panel.open_for("alice", 7, 1);
+            let request = panel.pending.clone().unwrap();
+            panel.mark_sent(request.request_id);
+            let mut s = multichannel_status();
+            s.checkout_enabled = false;
+            s.offers.clear();
+            s.payment_providers
+                .as_mut()
+                .unwrap()
+                .retain(|p| p.id == BillingProviderId::Waffo);
+            let mut result = reply(&request);
+            result.status = Some(s);
+            assert!(panel.accept(result, "alice", Some(7), 2));
+            assert_eq!(panel.provider, BillingProviderId::Waffo);
+            panel.action(BillingAction::Checkout("small".into()), 3);
+            assert!(matches!(
+                panel.pending.unwrap().purchase,
+                Some(BillingPurchase::Checkout {
+                    provider: BillingProviderId::Waffo,
+                    ..
+                })
+            ));
+        }
+
+        #[test]
+        fn fiat_url_allowlist_is_provider_bound_and_rejects_unverified_waffo_origins() {
+            assert!(valid_fiat_checkout_url(
+                "https://cashier.waffo.com/order-key?token=opaque",
+                BillingProviderId::Waffo
+            ));
+            assert!(!valid_fiat_checkout_url(
+                "https://cashier.waffo.com/order-key",
+                BillingProviderId::Stripe
+            ));
+            for url in [
+                "http://cashier.waffo.com/order-key",
+                "https://cashier.waffo.com/",
+                "https://cashier.waffo.com/?token=opaque",
+                "https://cashier.waffo.com:443/order-key",
+                "https://cashier.waffo.com.evil.invalid/order-key",
+                "https://user@cashier.waffo.com/order-key",
+                "https://checkout.waffo.com/order-key",
+                "https://sandbox-cashier.waffo.com/order-key",
+                "https://cashier.waffo.com/order-key\n",
+                "https://cashier.waffo.com/order-key#opaque\"arg",
+                "https://cashier.waffo.com\\@evil.invalid/order-key",
+            ] {
+                assert!(
+                    !valid_fiat_checkout_url(url, BillingProviderId::Waffo),
+                    "{url}"
+                );
+            }
+        }
+
+        #[test]
+        fn fiat_channel_render_uses_selected_offer_and_exposes_both_channel_buttons() {
+            crate::native_i18n::with_locale(crate::native_i18n::Locale::English, || {
+                let mut panel = BillingPanel::default();
+                panel.open_for("alice", 7, 1);
+                panel.pending = None;
+                panel.provider = BillingProviderId::Waffo;
+                let s = multichannel_status();
+                panel.status = Some(s.clone());
+                let mut world = World::new();
+                let mut queue = bevy::ecs::world::CommandQueue::default();
+                Commands::new(&mut queue, &world)
+                    .spawn_empty()
+                    .with_children(|parent| {
+                        render_fiat(parent, &panel, &s);
+                    });
+                queue.apply(&mut world);
+                let labels = world
+                    .query::<&Text>()
+                    .iter(&world)
+                    .map(|text| text.0.clone())
+                    .collect::<Vec<_>>();
+                assert!(labels.iter().any(|label| label == "Stripe"));
+                assert!(labels.iter().any(|label| label == "WAFFO"));
+                assert!(labels
+                    .iter()
+                    .any(|label| label.contains("WAFFO package") && label.contains("250")));
+                assert!(!labels.iter().any(|label| label.contains("Small")));
+                let actions = world
+                    .query::<&BillingButton>()
+                    .iter(&world)
+                    .filter(|button| button.enabled)
+                    .map(|button| button.action.clone())
+                    .collect::<Vec<_>>();
+                assert!(actions.contains(&BillingAction::SelectProvider(BillingProviderId::Stripe)));
+                assert!(actions.contains(&BillingAction::SelectProvider(BillingProviderId::Waffo)));
+                assert!(actions.contains(&BillingAction::Checkout("small".into())));
+            });
         }
 
         #[test]
@@ -1802,6 +2211,8 @@ mod ui {
                 native_i18n::activate(locale);
                 for (label, page, order_page, fiat_enabled, usdc_enabled) in [
                     ("fiat", BillingPage::Fiat, 0, true, true),
+                    ("fiat-waffo", BillingPage::Fiat, 0, true, true),
+                    ("waffo-only", BillingPage::Fiat, 0, false, true),
                     ("usdc-preparing", BillingPage::Usdc, 0, true, true),
                     ("usdc-confirmation", BillingPage::Usdc, 1, true, true),
                     ("usdc-expired-review", BillingPage::Usdc, 2, true, true),
@@ -1834,7 +2245,22 @@ mod ui {
                     }
                     model.billing.page = page;
                     model.billing.usdc_order_page = order_page;
+                    let waffo = matches!(label, "fiat-waffo" | "waffo-only");
+                    model.billing.provider = if waffo {
+                        BillingProviderId::Waffo
+                    } else {
+                        BillingProviderId::Stripe
+                    };
                     let status = model.billing.status.as_mut().unwrap();
+                    status.payment_providers = if waffo {
+                        let mut providers = multichannel_status().payment_providers.unwrap();
+                        if label == "waffo-only" {
+                            providers.retain(|provider| provider.id == BillingProviderId::Waffo);
+                        }
+                        Some(providers)
+                    } else {
+                        None
+                    };
                     status.enabled = label != "all-sales-disabled-owned-card";
                     status.checkout_enabled = fiat_enabled;
                     status.sui_usdc_enabled = usdc_enabled;
@@ -1887,6 +2313,12 @@ mod ui {
                     assert!(layouts
                         .iter()
                         .any(|row| row["text"] == native_i18n::tr(instructions)));
+                    if waffo {
+                        assert!(layouts.iter().any(|row| row["text"] == "WAFFO"));
+                        assert!(layouts.iter().any(|row| row["text"]
+                            .as_str()
+                            .is_some_and(|text| text.contains("WAFFO package"))));
+                    }
                     if page == BillingPage::MonthlyCard {
                         assert!(!layouts.iter().any(|row| row["text"]
                             == native_i18n::tr("billing.fiatInstructions")
@@ -2173,6 +2605,7 @@ mod ui {
             p.pending = None;
             p.begin(
                 Some(BillingPurchase::Checkout {
+                    provider: BillingProviderId::Stripe,
                     offer_id: "small".into(),
                     order_request_id: "native-stable-order".into(),
                 }),
@@ -2197,6 +2630,7 @@ mod ui {
             p.open_for("alice", 7, 1);
             p.pending = None;
             let purchase = BillingPurchase::Checkout {
+                provider: BillingProviderId::Stripe,
                 offer_id: "small".into(),
                 order_request_id: "native-stable-order".into(),
             };

@@ -1,0 +1,392 @@
+{
+  "schema": 1,
+  "passed": true,
+  "failures": [],
+  "startedAt": "2026-11-05T12:40:07.876Z",
+  "finishedAt": "2026-11-05T12:50:20.873Z",
+  "scope": "Read-only independent complete v14 staging release-integrity audit; no cutover, runtime or UI acceptance",
+  "artifactRoot": "F:\\mir2-builds\\Numeron-Web-R16-20261104-v14",
+  "previousRoot": "F:\\mir2-builds\\Numeron-Web-R16-20261104",
+  "manifest": {
+    "manifestSha256": "4b93b6621f0249d7d5895e13888b3eb90b8b27aaaea083a9730ba895519cd2f2",
+    "manifestBytes": 6865452,
+    "checkedFiles": 29681,
+    "checkedBytes": 923715254,
+    "recordsSha256": "532d461e98e27d131ad48371798d49e82c180f3167c9e4e9eaf7e31abbe114bc",
+    "allRegular": true,
+    "noSymlinksOrJunctions": true,
+    "noHardLinks": true,
+    "manifestUnchanged": true
+  },
+  "windowsMetadata": {
+    "reparsePoints": 0,
+    "checkedFiles": 29682,
+    "checkedAncestorDirectories": 996,
+    "checkedPaths": 30678,
+    "directoryEnumerationCalls": 0,
+    "metadataOnly": true,
+    "privateRead": false
+  },
+  "uniqueAncestorDirectories": 1010,
+  "comparison": {
+    "previousManifestSha256": "d76902197e69e166f325a3b59804601b2f40684bd0407da5353f5552a615d0d9",
+    "unchangedFiles": 29552,
+    "changedFiles": 116,
+    "addedFiles": 13,
+    "removedFiles": 13,
+    "unexpectedDifferences": [],
+    "allowedChangedOrAddedNonNext": [
+      {
+        "path": "web/mir2-web3/apps/web/lib/generated/bevy_runtime_version.json",
+        "oldBytes": 1711,
+        "bytes": 1711,
+        "oldSha256": "69d4a6b2a428ac9943798d8484aa3c55b3fa3d217de09b633f04b93116deab06",
+        "sha256": "c5b650393b0795bdc4d5513ba3e2ee2c407002fe26c2e67f4d4e0e8603b41973"
+      },
+      {
+        "path": "web/mir2-web3/apps/web/lib/generated/r16-native-localization.json",
+        "oldBytes": 6301532,
+        "bytes": 6301605,
+        "oldSha256": "e8d8bf99c8e109a0e6e5fc028ec8ce97b6d927c47c8edbf329fe2ba7bc17c259",
+        "sha256": "d42c1568e3a6fa2798f30038f7a553f4fb4cb3f04abfb44672dc9cab37185938"
+      },
+      {
+        "path": "web/mir2-web3/apps/web/public/bevy-runtime/runtime-manifest.json",
+        "oldBytes": 1711,
+        "bytes": 1711,
+        "oldSha256": "69d4a6b2a428ac9943798d8484aa3c55b3fa3d217de09b633f04b93116deab06",
+        "sha256": "c5b650393b0795bdc4d5513ba3e2ee2c407002fe26c2e67f4d4e0e8603b41973"
+      },
+      {
+        "path": "web/mir2-web3/apps/web/server.js",
+        "oldBytes": 14530,
+        "bytes": 14497,
+        "oldSha256": "8063489a286bb6314b0f680c6927766fd8568f039977d00bb8586f0f81db053e",
+        "sha256": "d6829d852540965665b2b962c426a681cfe30ff1a9b0e2eeee673ff6b09d01e6"
+      },
+      {
+        "path": "web/mir2-web3/apps/web/public/bevy-runtime-releases/bevy-e7afab3714b4abba/pkg-webgl2-shared/mir2_bevy_runtime_bg.wasm",
+        "kind": "prepared-next",
+        "bytes": 32141325,
+        "sha256": "cd9b11780b60e5e3fd0b129a753ddeea0d0a50c15a26ff198b447605ceee9ed9"
+      },
+      {
+        "path": "web/mir2-web3/apps/web/public/bevy-runtime-releases/bevy-e7afab3714b4abba/pkg-webgl2-shared/mir2_bevy_runtime.js",
+        "kind": "prepared-next",
+        "bytes": 139092,
+        "sha256": "e55158e5843a3f2920964401ef2e2ae56e3459af720f17a55bb87deff016177d"
+      },
+      {
+        "path": "web/mir2-web3/apps/web/public/bevy-runtime-releases/bevy-e7afab3714b4abba/pkg-webgl2/mir2_bevy_runtime_bg.wasm",
+        "kind": "prepared-next",
+        "bytes": 16402208,
+        "sha256": "44e1fe130faccba3fe53f5adb4e3aec49a5155201db43ca5e5f2ba6478a32531"
+      },
+      {
+        "path": "web/mir2-web3/apps/web/public/bevy-runtime-releases/bevy-e7afab3714b4abba/pkg-webgl2/mir2_bevy_runtime.js",
+        "kind": "prepared-next",
+        "bytes": 117176,
+        "sha256": "2e4c58270f49998063cf64b3605b412edce725f5df73254ce4bbf764b282998d"
+      },
+      {
+        "path": "web/mir2-web3/apps/web/public/bevy-runtime-releases/bevy-e7afab3714b4abba/pkg-webgpu/mir2_bevy_runtime_bg.wasm",
+        "kind": "prepared-next",
+        "bytes": 31212731,
+        "sha256": "75ac8526619cec0fa3c4a08de51c4d719ebb81ebf6891e4b05ae48b598a0fd07"
+      },
+      {
+        "path": "web/mir2-web3/apps/web/public/bevy-runtime-releases/bevy-e7afab3714b4abba/pkg-webgpu/mir2_bevy_runtime.js",
+        "kind": "prepared-next",
+        "bytes": 141118,
+        "sha256": "5fa12cbcb4f140f8c8c258357805226633cf978fb4e329c644702fe835edfdd0"
+      },
+      {
+        "path": "web/mir2-web3/apps/web/public/bevy-runtime-releases/bevy-e7afab3714b4abba/runtime-manifest.json",
+        "kind": "prepared-next",
+        "bytes": 1711,
+        "sha256": "c5b650393b0795bdc4d5513ba3e2ee2c407002fe26c2e67f4d4e0e8603b41973"
+      }
+    ],
+    "removedRendererPaths": [
+      "web/mir2-web3/apps/web/public/bevy-runtime-releases/bevy-07bd13d63fcbbd3a/pkg-webgl2-shared/mir2_bevy_runtime_bg.wasm",
+      "web/mir2-web3/apps/web/public/bevy-runtime-releases/bevy-07bd13d63fcbbd3a/pkg-webgl2-shared/mir2_bevy_runtime.js",
+      "web/mir2-web3/apps/web/public/bevy-runtime-releases/bevy-07bd13d63fcbbd3a/pkg-webgl2/mir2_bevy_runtime_bg.wasm",
+      "web/mir2-web3/apps/web/public/bevy-runtime-releases/bevy-07bd13d63fcbbd3a/pkg-webgl2/mir2_bevy_runtime.js",
+      "web/mir2-web3/apps/web/public/bevy-runtime-releases/bevy-07bd13d63fcbbd3a/pkg-webgpu/mir2_bevy_runtime_bg.wasm",
+      "web/mir2-web3/apps/web/public/bevy-runtime-releases/bevy-07bd13d63fcbbd3a/pkg-webgpu/mir2_bevy_runtime.js",
+      "web/mir2-web3/apps/web/public/bevy-runtime-releases/bevy-07bd13d63fcbbd3a/runtime-manifest.json"
+    ],
+    "nextChangedCount": 112,
+    "nextAddedCount": 6,
+    "nextRemovedCount": 6,
+    "nextChangedExamples": [
+      "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/app-path-routes-manifest.json",
+      "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/BUILD_ID",
+      "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/build-manifest.json",
+      "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/react-loadable-manifest.json",
+      "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/required-server-files.json",
+      "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app-paths-manifest.json",
+      "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/_global-error.html",
+      "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/_global-error.rsc",
+      "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/_global-error.segments/_full.segment.rsc",
+      "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/_global-error.segments/_global-error.segment.rsc",
+      "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/_global-error.segments/_global-error/__PAGE__.segment.rsc",
+      "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/_global-error.segments/_head.segment.rsc"
+    ],
+    "runtimeOutsideWebFiles": 165,
+    "allGatewayNodeActorWalletServicePinsUnchanged": true,
+    "totalByteDelta": 2538584
+  },
+  "r16Closure": {
+    "manifestSha256": "e7e13ea2aeb9cde489f6bc2a3d23927bcb72e0e4eb0a0ddfdbdc2289a7fdeb18",
+    "files": 21056,
+    "bytes": 281159572,
+    "allEntriesListedAndHashed": true,
+    "allV13AssetPinsRetained": true,
+    "requiredCategories": {
+      "ui": 4274,
+      "map0": 8483,
+      "map0141": 8,
+      "monsters": 2624,
+      "firstplay": 5667
+    }
+  },
+  "localizationCatalog": {
+    "path": "web/mir2-web3/apps/web/lib/generated/r16-native-localization.json",
+    "bytes": 6301605,
+    "sha256": "d42c1568e3a6fa2798f30038f7a553f4fb4cb3f04abfb44672dc9cab37185938",
+    "matchesCanonicalSource": true
+  },
+  "compiledPins": {
+    "passed": true,
+    "rendererVersion": "bevy-e7afab3714b4abba",
+    "rendererImmutableDigestMatches": true,
+    "aliasAndSavedManifestMatch": true,
+    "rendererLimits": {
+      "wasmBytes": 32505856,
+      "gzipBytes": 7340032,
+      "jsBytes": 204800
+    },
+    "coreLimits": {
+      "wasmBytesExclusive": 262144,
+      "jsBytes": 204800
+    },
+    "packages": [
+      {
+        "id": "webgpu",
+        "wasmBytes": 31212731,
+        "gzipBytes": 6526506,
+        "jsBytes": 141118,
+        "wasmSha256": "75ac8526619cec0fa3c4a08de51c4d719ebb81ebf6891e4b05ae48b598a0fd07",
+        "jsSha256": "5fa12cbcb4f140f8c8c258357805226633cf978fb4e329c644702fe835edfdd0",
+        "questUiAbiVersion": 1,
+        "bagUiAbiVersion": 1,
+        "primarySharedUiCompiled": false,
+        "importCount": 491,
+        "exportCount": 151,
+        "abiMetadataSha256": "d61f9da847f7e7515fdb02fdeaf2d85d836b8771bf081b3b3db21c2833eb78f9",
+        "exactAbiMatchesV13": true,
+        "glueContainsAllImports": true,
+        "questLocalUiCompiled": true,
+        "displayLanguageCompiled": true
+      },
+      {
+        "id": "webgl2",
+        "wasmBytes": 16402208,
+        "gzipBytes": 4213570,
+        "jsBytes": 117176,
+        "wasmSha256": "44e1fe130faccba3fe53f5adb4e3aec49a5155201db43ca5e5f2ba6478a32531",
+        "jsSha256": "2e4c58270f49998063cf64b3605b412edce725f5df73254ce4bbf764b282998d",
+        "questUiAbiVersion": 0,
+        "bagUiAbiVersion": 0,
+        "primarySharedUiCompiled": false,
+        "importCount": 445,
+        "exportCount": 79,
+        "abiMetadataSha256": "1ac615d95986d0d79fd73a2a85a69bd38954640814d6b132f9619baddffabaf1",
+        "exactAbiMatchesV13": true,
+        "glueContainsAllImports": true,
+        "questLocalUiCompiled": false,
+        "displayLanguageCompiled": false
+      },
+      {
+        "id": "webgl2-shared",
+        "wasmBytes": 32141325,
+        "gzipBytes": 6863281,
+        "jsBytes": 139092,
+        "wasmSha256": "cd9b11780b60e5e3fd0b129a753ddeea0d0a50c15a26ff198b447605ceee9ed9",
+        "jsSha256": "e55158e5843a3f2920964401ef2e2ae56e3459af720f17a55bb87deff016177d",
+        "questUiAbiVersion": 1,
+        "bagUiAbiVersion": 1,
+        "primarySharedUiCompiled": true,
+        "importCount": 450,
+        "exportCount": 149,
+        "abiMetadataSha256": "fd019f2fdb1418191f1f12df82803861af4e6e4032769d81d2c7eaf3202b877a",
+        "exactAbiMatchesV13": true,
+        "glueContainsAllImports": true,
+        "questLocalUiCompiled": true,
+        "displayLanguageCompiled": true
+      }
+    ],
+    "coreBundles": [
+      {
+        "name": "core",
+        "version": "81dd599a887e9338a888672a19a1d5ecc4cc1b6d9b90a9bb41c61d5f8c210974",
+        "sourceSha256": "43fed2e1d71d79d57c0b8331d3eeb411b1074dc8ed6a7419d60267feca0d7f86",
+        "jsBytes": 24393,
+        "wasmBytes": 250136,
+        "unchangedFromV13": true,
+        "immutableDigestMatches": true
+      },
+      {
+        "name": "presentation",
+        "version": "08bc05f41551a7f01fd0edf3a7e639df847dad88ef605fc55b764e9bab901bbc",
+        "sourceSha256": "43fed2e1d71d79d57c0b8331d3eeb411b1074dc8ed6a7419d60267feca0d7f86",
+        "jsBytes": 24721,
+        "wasmBytes": 261983,
+        "unchangedFromV13": true,
+        "immutableDigestMatches": true
+      },
+      {
+        "name": "npcPurchase",
+        "version": "78c4de3cdd6f97897ad39c7f6e1a61a76a6f02343c0be8d570b616155a7fc58f",
+        "sourceSha256": "43fed2e1d71d79d57c0b8331d3eeb411b1074dc8ed6a7419d60267feca0d7f86",
+        "jsBytes": 8332,
+        "wasmBytes": 165791,
+        "unchangedFromV13": true,
+        "immutableDigestMatches": true
+      }
+    ],
+    "noModuleInstantiated": true,
+    "noNetworkOrGPUInitialized": true,
+    "buildId": "q_eeLwnGRft79WfX_QD8C",
+    "requiredServerFilesManifestBindingsMatch": true
+  },
+  "compiledJavaScript": {
+    "passed": true,
+    "buildId": "q_eeLwnGRft79WfX_QD8C",
+    "requiredServerFilesManifestBindingsMatch": true,
+    "standaloneEnvironmentExactlyMatchesRequiredServerFiles": true,
+    "standaloneConfigMatchesAfterDistDirNormalization": true,
+    "distDirNormalization": {
+      "standalone": "./.next-r16-delivery-physical-v2",
+      "required": ".next-r16-delivery-physical-v2"
+    },
+    "reports": [
+      {
+        "path": "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/chunks/7255.js",
+        "bytes": 2306019,
+        "sha256": "9204d04ce410edb171caf00369eb41bf0bb81818ade3874c836c2057ea4b980c",
+        "rendererLiteralExactMatch": true,
+        "rendererLiteralPassedToJsonParser": true,
+        "compiledCoreTripleMetadata": null,
+        "compiledGuidanceContainsV2": true
+      },
+      {
+        "path": "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/static/chunks/7458-20b2b6935744e75b.js",
+        "bytes": 2662804,
+        "sha256": "970b3093edb688584e10eb7e0d83a7148e3ec35a17fc08e0ae69608f575d021c",
+        "rendererLiteralExactMatch": true,
+        "rendererLiteralPassedToJsonParser": true,
+        "compiledCoreTripleMetadata": {
+          "binding": "cO",
+          "fieldMapping": {
+            "abiVersion": "HC",
+            "version": "rE",
+            "sourceSha256": "T4",
+            "presentation": "f5",
+            "npcPurchase": "FZ"
+          },
+          "boundReferenceCounts": {
+            "abiVersion": 1,
+            "version": 3,
+            "sourceSha256": 2,
+            "presentation": 1,
+            "npcPurchase": 1
+          },
+          "usesTypeScriptSymbolResolution": true,
+          "fullChildMetadataExact": true,
+          "coreFilesTreeShaken": true,
+          "publishedCoreFilePinsVerifiedSeparately": true
+        },
+        "compiledGuidanceContainsV2": true
+      }
+    ],
+    "featureReports": [
+      {
+        "path": "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/static/chunks/1650.b108aec87eee4f24.js",
+        "bytes": 495347,
+        "sha256": "40d06e5bf06b1e382ac4f2420fee70e071717a312fa311c3cdb0f25433d1ffae",
+        "displayLanguage": false,
+        "beltDiagnostic": true,
+        "shopEconomicDiagnostic": false,
+        "questLocalUi": false
+      },
+      {
+        "path": "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/static/chunks/7458-20b2b6935744e75b.js",
+        "bytes": 2662804,
+        "sha256": "970b3093edb688584e10eb7e0d83a7148e3ec35a17fc08e0ae69608f575d021c",
+        "displayLanguage": true,
+        "beltDiagnostic": false,
+        "shopEconomicDiagnostic": true,
+        "questLocalUi": true
+      }
+    ],
+    "canonicalBaseline": {
+      "schema": 1,
+      "id": "r16-platinum-fiveclass-newcomer-v2",
+      "contentProfile": "platinum_fiveclass",
+      "questGuidance": "newcomer-v2",
+      "questCadence": "newcomer-v2",
+      "onboarding": "native"
+    },
+    "catalogTopKeys": [
+      "schemaVersion",
+      "languages",
+      "counts",
+      "sourcePins",
+      "slotExceptions",
+      "entries"
+    ],
+    "noNextModuleExecuted": true,
+    "noGameActionOrNetworkExecuted": true
+  },
+  "canonicalBaseline": {
+    "schema": 1,
+    "id": "r16-platinum-fiveclass-newcomer-v2",
+    "contentProfile": "platinum_fiveclass",
+    "questGuidance": "newcomer-v2",
+    "questCadence": "newcomer-v2",
+    "onboarding": "native"
+  },
+  "thinGate": {
+    "passed": false,
+    "limitBytes": 377487360,
+    "preparedReportedByRoot": "686 MB",
+    "independentlyRecomputed": false,
+    "status": "Existing failed 360 MiB prepared thin gate retained; distribution integrity is a separate result"
+  },
+  "privateDirectoriesEnumerated": false,
+  "privateFilesOpened": false,
+  "runtimeDataDirectoriesEnumerated": false,
+  "runtimeDataFilesOpened": false,
+  "httpRequests": 0,
+  "browserSessions": 0,
+  "serviceActions": 0,
+  "sessionsCreated": 0,
+  "modelCalls": 0,
+  "sourceFilesChanged": 0,
+  "artifactFilesChanged": 0,
+  "overallUiResult": "Not assessed; Root owns ordinary UI QA, persistence preservation and cutover",
+  "historicalProofsPreserved": true,
+  "limitations": [
+    "Only package manifests, explicitly listed distribution files and their ancestor metadata, plus the canonical public localization catalog were read. No private/.data/.mir2-data directory was enumerated or opened.",
+    "All 29681 package entries were checked for size, SHA-256, ordinary-file status, single-link count and non-reparse ancestors. Windows metadata used explicit paths and no directory enumeration.",
+    "WASM modules were compiled only for import/export inspection; none was instantiated. All three interfaces exactly match v13 and all original budgets are unchanged.",
+    "Compiled binding checks parsed the two relevant renderer chunks as data. Webpack-mangled Core ABI/version/source/Presentation/NPC exports were traced with TypeScript symbol resolution. No Next or game module was executed.",
+    "Standalone configuration and required-server-files match exactly after normalizing the sole leading './' on distDir; their environment objects match exactly without normalization.",
+    "The localization catalog is the confirmed 6301605-byte canonical projection. Finite v13 asset manifest and all 21056 asset pins remain unchanged.",
+    "No new connector is included in this Web package: all 165 external runtime/launcher/service/Actor/Gateway/Node files retain their v13 pins. The separately installed Native client-only entry has its own installation receipt.",
+    "Early auditor classification/literal assumptions were corrected in memory; their stdout diagnostics remain in the session. No package files or previous failed proofs were changed.",
+    "This result does not pass the existing 360 MiB thin gate or qualify gameplay, ten-language completeness, shared-world Native UI or final human acceptance."
+  ]
+}

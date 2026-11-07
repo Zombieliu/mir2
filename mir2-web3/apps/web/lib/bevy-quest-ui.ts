@@ -7,6 +7,7 @@ import type { HudBarPlanCommit, HudBarPlanRuntime } from "./bevy-hud-bar-draw-pl
 import type { Mir2Language } from "./localization";
 import { sameQuestWorldStamp, type QuestWorldContext, type QuestWorldStamp } from "./bevy-quest-world-context";
 import type { QuestRouteTarget } from "./bevy-quest-world-actions";
+import { nativeLanguageInfo, nativeNpcDisplayText, type R16NativeLanguage } from "./r16-native-localization";
 
 /** Versioned browser host boundary; no transport or game-state mutation lives here. */
 export type BevyQuestReward =
@@ -101,6 +102,8 @@ export type BevyQuestUiSnapshot = {
   generation: number;
   revision: number;
   language?: Mir2Language;
+  /** Presentation only; never forwarded to the four-language game protocol. */
+  displayLanguage?: R16NativeLanguage;
   inGame: boolean;
   hostVisible: boolean;
   questLogOpen: boolean;
@@ -134,6 +137,8 @@ export type BevyQuestUiSnapshot = {
 export type BevyQuestUiStatus = {
   questLocaleVersion?: number;
   language?: Mir2Language;
+  displayLocaleVersion?: number;
+  displayLanguage?: R16NativeLanguage | null;
   frame: number;
   ready: boolean;
   error: string | null;
@@ -284,14 +289,15 @@ export function projectBevyQuests(
   });
 }
 
-export function projectBevyQuestDialog(dialog: BevyQuestDialogSource | null): BevyQuestUiSnapshot["dialog"] {
+export function projectBevyQuestDialog(dialog: BevyQuestDialogSource | null, displayLanguage?: R16NativeLanguage): BevyQuestUiSnapshot["dialog"] {
   const npc = dialog && /^[1-9][0-9]*$/.test(dialog.npcObjectId) ? questEndpoint(Number(dialog.npcObjectId)) : undefined;
+  const display = (text: string) => displayLanguage ? nativeNpcDisplayText(displayLanguage, text) : text;
   return {
     isOpen: dialog !== null && npc !== undefined,
     npcObjectId: npc ?? null,
     npcName: dialog?.npcName ?? null,
-    lines: dialog ? [dialog.title, ...dialog.body, dialog.footer].filter(Boolean) : [],
-    options: (dialog?.links ?? []).map((link) => ({ optionId: link.target, label: link.text, enabled: link.enabled !== false })),
+    lines: dialog ? [dialog.title, ...dialog.body, dialog.footer].filter(Boolean).map(display) : [],
+    options: (dialog?.links ?? []).map((link) => ({ optionId: link.target, label: display(link.text), enabled: link.enabled !== false })),
     hasInput: Boolean(dialog?.input),
   };
 }
@@ -300,10 +306,24 @@ export function isBevyQuestLanguage(value: unknown): value is Mir2Language {
   return value === "en" || value === "zh-CN" || value === "es" || value === "pt-BR";
 }
 
+export function questDisplayLanguage(value: string): R16NativeLanguage | undefined {
+  return nativeLanguageInfo(value)?.code;
+}
+
 /** Probe the version independently of readiness; malformed v1 status cannot become ready. */
 export function supportsBevyQuestLocale(runtime: BevyQuestUiRuntime | null): boolean {
   try { return JSON.parse(runtime?.getMir2QuestUiStatus?.() ?? "null")?.questLocaleVersion === 1; }
   catch { return false; }
+}
+
+export function supportsBevyQuestDisplayLocale(runtime: BevyQuestUiRuntime | null): boolean {
+  try { return JSON.parse(runtime?.getMir2QuestUiStatus?.() ?? "null")?.displayLocaleVersion === 1; }
+  catch { return false; }
+}
+
+export function stripUnsupportedQuestDisplayLocale<T extends { displayLanguage?: R16NativeLanguage }>(snapshot: T, supported: boolean): T {
+  if (supported) return snapshot;
+  const result = { ...snapshot }; delete result.displayLanguage; return result;
 }
 
 export function stripUnsupportedQuestLocale<T extends { language?: Mir2Language }>(snapshot: T, supported: boolean): T {
@@ -314,10 +334,11 @@ export function stripUnsupportedQuestLocale<T extends { language?: Mir2Language 
 }
 
 export function currentBevyQuestLocale(status: BevyQuestUiStatus | null, requested: Mir2Language | undefined,
-  minimumRevision: number): boolean {
+  minimumRevision: number, requestedDisplay?: R16NativeLanguage): boolean {
   return Boolean(status && status.revision >= minimumRevision
     && (status.questLocaleVersion !== 1 || (isBevyQuestLanguage(status.language)
-      && status.language === (requested ?? "zh-CN"))));
+      && status.language === (requested ?? "zh-CN")))
+    && (requestedDisplay === undefined || (status.displayLocaleVersion === 1 && status.displayLanguage === requestedDisplay)));
 }
 
 export function readBevyQuestUiStatus(runtime: BevyQuestUiRuntime | null, generation: number): BevyQuestUiStatus | null {
@@ -328,7 +349,9 @@ export function readBevyQuestUiStatus(runtime: BevyQuestUiRuntime | null, genera
       || typeof status.capturesPointer !== "boolean" || typeof status.questLogOpen !== "boolean"
       || !Number.isSafeInteger(status.frame) || status.frame < 0
       || !Number.isSafeInteger(status.revision) || !Number.isSafeInteger(status.openRevision)
-      || (status.questLocaleVersion === 1 && !isBevyQuestLanguage(status.language))) return null;
+      || (status.questLocaleVersion === 1 && !isBevyQuestLanguage(status.language))
+      || (status.displayLocaleVersion !== undefined && (status.displayLocaleVersion !== 1
+        || status.displayLanguage !== null && (typeof status.displayLanguage !== "string" || !nativeLanguageInfo(status.displayLanguage))))) return null;
     return status;
   } catch { return null; }
 }

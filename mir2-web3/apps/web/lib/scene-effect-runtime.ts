@@ -16,8 +16,8 @@ import type { DisplaySceneEffect } from "../app/components/original-client-types
 // direct bounded equivalent once additive source texels are alpha-normalized.
 export const CRYSTAL_ADDITIVE_MIX_BLEND_MODE = "plus-lighter" as const;
 
-const CRYSTAL_GROUND_EFFECT_LAYER_OFFSET = 48;
-const CRYSTAL_TRANSIENT_SPELL_LAYER_OFFSET = 90;
+const CRYSTAL_GROUND_EFFECT_LAYER_OFFSET = 3;
+const CRYSTAL_TRANSIENT_SPELL_LAYER_OFFSET = 10;
 export const FLAMING_SWORD_SPELL_ID = 8;
 export const FLAMING_SWORD_ATTACK_DURATION_MS = 600;
 
@@ -35,7 +35,7 @@ const CRYSTAL_ATTACK_DIRECTIONS = [
 /**
  * Crystal sorts persistent ObjectSpell instances before actors in each map
  * cell. Keep their optional mask adjacent to the body without lifting either
- * above the entity layer (64).
+ * above the entity body layer (5). All offsets stay within the 20-unit column.
  */
 export function crystalSceneEffectLayerOffset(
   source: DisplaySceneEffect["source"],

@@ -1,0 +1,360 @@
+{
+  "schema": "mir2.r19.windows-cold-start-acceptance.v1",
+  "passed": false,
+  "coldAcceptance": false,
+  "coldMeasurementPerformed": true,
+  "failurePhase": "download",
+  "failureReason": "The unique native HTTPS GET naturally reached the original 480s max-time, curl exit28, incomplete body. No retry or partial execution.",
+  "runtimeSourceRevision": "24a50f865679cfb81c9edf6c95632c4389187dac",
+  "sourceRevision": "24a50f865679cfb81c9edf6c95632c4389187dac",
+  "installerRecipe": {
+    "runtimeSourceRevision": "24a50f865679cfb81c9edf6c95632c4389187dac",
+    "installerSourceRevision": "10a5c4fadec8f8911732fef2ddb7cd71df800021",
+    "recipeSha256": "b9e030190cc42d97683e3ffd4462d14c8d6ba8426600f41a5f926c9b6d987967",
+    "builderSha256": "92e668ec36b0789a13cb3ff65b8bf4507edb64d066c30e317638371c2c977093",
+    "sourceLock": {
+      "path": "E:\\mir2-release\\windows-cold-start-20261101\\r19\\INSTALLER-RECIPE-SOURCE-LOCK.json",
+      "sha256": "6ec086d2f86891d62d99b245b9c33e1ed083686d313c0ed084a9b489f3ac92ed"
+    },
+    "buildReceipt": {
+      "path": "E:\\mir2-release\\windows-cold-start-20261101\\r19\\installer-normal-r19\\BUILD-PACKED-INSTALLER.json",
+      "sha256": "9679fe94a7276ad33fe8b1676c4d513dc85f7bd71f9740c166c70582702dbec5"
+    }
+  },
+  "candidate": "WN-CANDIDATE-20261101-unified-19",
+  "version": "2026.11.1.19",
+  "engineSequence": 2026110109,
+  "packedSequence": 2026110110,
+  "manifestSha256Expected": "aed057b4515a6e045ebee0c36c1ebbaa6f7a21e3a6296ee1e8ab3b440eb73e47",
+  "installerSha256Expected": "859f18bd68f3968fd24af3aead32a6ab53ca1d12b72fcce380a5a90782fafe8e",
+  "installerBytesExpected": 1040065902,
+  "completeDownloadedInstallerSha256": null,
+  "partialFile": {
+    "path": "E:\\mir2-release\\windows-cold-start-20261101\\r19\\acceptance-audit\\windows-https\\r19-cold-01\\downloads\\NumeronSetup.exe",
+    "sha256": "904e82b8dc7a0ea890c672a4a2a9b108ee2ea218f0ffaed24e89a50a2a5c390e",
+    "bytes": 400858816,
+    "localOnly": true
+  },
+  "nativeCurlFooter": {
+    "schema": "mir2.windows.https-download.v1",
+    "http_code": "200",
+    "remote_ip": "104.18.17.68",
+    "remote_port": 443,
+    "size_download": 400858816,
+    "time_namelookup": 0.122584,
+    "time_connect": 0.300374,
+    "time_appconnect": 0.716673,
+    "time_starttransfer": 1.579361,
+    "time_total": 480.003216,
+    "num_redirects": 0,
+    "ssl_verify_result": 0,
+    "proxy_used": 0,
+    "exitcode": 28
+  },
+  "uniqueGetStarts": 1,
+  "retries": 0,
+  "firstChunkCache": "MISS",
+  "cloudflareColo": "LAX",
+  "configuredLimitBytesPerSecond": 2500000,
+  "configuredMaxTimeSeconds": 480,
+  "actualPayloadMbpsObserved": 6.6809355043987875,
+  "minimumWanCapacityProvenByThisAttempt": false,
+  "normalTls": true,
+  "clientProxyUsed": false,
+  "globalNetworkProxyCertificateSecuritySettingsChanged": false,
+  "timing": {
+    "D0": {
+      "event": "external-mark",
+      "utc": "2026-11-01T12:59:29.521501+00:00",
+      "monotonicNs": 83623978598600,
+      "mark": {
+        "event": "D0",
+        "evidence_id": "R19-COLD-UNIQUE-PUBLIC-GET",
+        "captured_utc": "2026-11-01T12:59:29.520Z",
+        "screenshot_sha256": null
+      },
+      "timingBasis": "receipt monotonic time; external timestamp is recorded, never subtracted",
+      "screenshotBytesVerifiedByHelper": false
+    },
+    "D1": null,
+    "I0": null,
+    "U0": null,
+    "X0": null,
+    "totalD0ToU0Seconds": null,
+    "clockReset": false,
+    "delaysDeducted": false,
+    "note": "No successful completion marks fabricated. X0 API requires successful root exitcodes, so omitted for exit28. Original clock/evidence retained."
+  },
+  "installerStarted": false,
+  "gameLaunched": false,
+  "interactiveNativeLoginVisibleThisColdAttempt": false,
+  "realReadyConfirmedThisColdAttempt": false,
+  "selectedHealthyThisColdAttempt": false,
+  "sameByteNormalLocalSmokePassedSeparately": true,
+  "job": {
+    "final": {
+      "ok": true,
+      "operation": "close",
+      "runRoot": "E:\\mir2-release\\windows-cold-start-20261101\\r19\\acceptance-audit\\windows-https\\r19-cold-01",
+      "fixtureMode": false,
+      "cpu": {
+        "availableMask": "0xffffffff",
+        "selectedMask": "0x55",
+        "selectedLogicalCpuCount": 4,
+        "representedPhysicalCoreCount": 4,
+        "processorGroup": 0
+      },
+      "controllerOutsideInheritedJob": true,
+      "actualLimits": {
+        "flags": 528,
+        "affinityMask": "0x55",
+        "logicalCpuCount": 4,
+        "jobMemoryBytes": 8589934592,
+        "memoryMeaning": "aggregate process committed virtual memory; not physical RAM",
+        "peakJobMemoryBytes": 2035712,
+        "killOnJobClose": false,
+        "breakawayAllowed": false,
+        "limitsMatch": true
+      },
+      "accounting": {
+        "activeProcesses": 0,
+        "totalProcesses": 1,
+        "terminatedProcesses": 0,
+        "jobCpuUser100ns": 3750000,
+        "jobCpuKernel100ns": 5312500
+      },
+      "jobProcesses": [],
+      "startedTargets": [
+        {
+          "target": "downloader",
+          "pid": 44140,
+          "exited": true,
+          "exitCode": 28
+        }
+      ],
+      "marks": {
+        "D0": {
+          "event": "external-mark",
+          "utc": "2026-11-01T12:59:29.521501+00:00",
+          "monotonicNs": 83623978598600,
+          "mark": {
+            "event": "D0",
+            "evidence_id": "R19-COLD-UNIQUE-PUBLIC-GET",
+            "captured_utc": "2026-11-01T12:59:29.520Z",
+            "screenshot_sha256": null
+          },
+          "timingBasis": "receipt monotonic time; external timestamp is recorded, never subtracted",
+          "screenshotBytesVerifiedByHelper": false
+        }
+      },
+      "phaseSeconds": {
+        "download": null,
+        "normalOpen": null,
+        "installToLauncher": null,
+        "launcherToGame": null,
+        "gameToInteractiveUi": null,
+        "normalExitAfterUi": null
+      },
+      "totalD0ToU0Seconds": null,
+      "within600Seconds": null,
+      "externalUiEvidenceVerifiedByHelper": false,
+      "overallAcceptanceAsserted": false
+    },
+    "controllerExitCode": 0,
+    "downloadExitCode": 28,
+    "allProcessesEndedNaturally": true,
+    "processesForceKilled": false,
+    "resourceMeaning": "4 logical CPUs /8GiB aggregate committed-memory Job on higher-spec host; not physical low-spec PC emulation"
+  },
+  "restoration": {
+    "schema": "mir2.r19.restoration-result.v1",
+    "passed": true,
+    "utc": "2026-11-01T13:08:44.3485718+00:00",
+    "registryByteSha256": "4385ce165e941ccf8a378966de19f0362f562ae7278ae1a74815a18845460bb2",
+    "registryExportMatchesOriginal": true,
+    "restoredOwnedLinks": 3,
+    "unchangedLinks": 6,
+    "links": [
+      {
+        "path": "C:\\Users\\Administrator\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs\\Mir2 联网试玩版\\安装与试玩说明.lnk",
+        "sha256": "2daca5f83ed4ee959d239d97d48ab2eaf8e32efb397daf0af2c1435de778c077",
+        "bytes": 700,
+        "matchesBaseline": true
+      },
+      {
+        "path": "C:\\Users\\Administrator\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs\\Mir2 联网试玩版\\安裝與試玩說明.lnk",
+        "sha256": "6ddac0e14de26a012c400e23d181cbb3326bd52cd156024fe9cb811cdbd894a9",
+        "bytes": 608,
+        "matchesBaseline": true
+      },
+      {
+        "path": "C:\\Users\\Administrator\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs\\Mir2 联网试玩版\\解除安裝 Numeron - Legend of Rebirth.lnk",
+        "sha256": "4a946e8a0be5f20fe90b2cf7c8d750e56d2465f0b38483b00d85d0e674a8da93",
+        "bytes": 718,
+        "matchesBaseline": true
+      },
+      {
+        "path": "C:\\Users\\Administrator\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs\\Mir2 联网试玩版\\卸载 Mir2 联网试玩版.lnk",
+        "sha256": "24152ae4a1247379067d12418bcbc430d2d7dd3abf4925ddc2f2a781a495e53d",
+        "bytes": 814,
+        "matchesBaseline": true
+      },
+      {
+        "path": "C:\\Users\\Administrator\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs\\Mir2 联网试玩版\\Installation and playtest guide.lnk",
+        "sha256": "76fceaf0da236113983d2d5c52a221ab46b708c6bbe6cee6f1748748f8a7f165",
+        "bytes": 1275,
+        "matchesBaseline": true
+      },
+      {
+        "path": "C:\\Users\\Administrator\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs\\Mir2 联网试玩版\\Mir2 联网试玩版.lnk",
+        "sha256": "cdb4e9036216dbac0d9e2d70da26be33ce95d25135d224a6b4bf915500ddbaea",
+        "bytes": 760,
+        "matchesBaseline": true
+      },
+      {
+        "path": "C:\\Users\\Administrator\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs\\Mir2 联网试玩版\\Numeron - Legend of Rebirth.lnk",
+        "sha256": "dfd4417a5eafe85e9820bf7b13e1223967bdb0a602956e9520dc9832e683c44c",
+        "bytes": 670,
+        "matchesBaseline": true
+      },
+      {
+        "path": "C:\\Users\\Administrator\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs\\Mir2 联网试玩版\\Uninstall Numeron - Legend of Rebirth.lnk",
+        "sha256": "5a71e5df7fd192d9df879265dfe18ee1753f2b6ee06a4fc2773183467a18bc79",
+        "bytes": 1412,
+        "matchesBaseline": true
+      },
+      {
+        "path": "C:\\Users\\Administrator\\Desktop\\Numeron - Legend of Rebirth.lnk",
+        "sha256": "8ea497bfe682b59b43763113b19bb5df519564a29b3c938c143db5c994d03970",
+        "bytes": 608,
+        "matchesBaseline": true
+      }
+    ],
+    "menuGroup": "C:\\Users\\Administrator\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs\\Mir2 联网试玩版",
+    "menuCount": 8,
+    "publicDesktopRemainsAbsent": true,
+    "oldGameFilesTouched": false,
+    "forensicInstallAndPartialPreserved": true,
+    "baselineMeaning": "Actual original registration restored after R18; R18 pre-smoke repaired menu baseline, not recovery of the two lost pre-R17 link bytes"
+  },
+  "authenticationPerformed": false,
+  "browserAcceptanceClaimed": false,
+  "promotionPerformedByThisAgent": false,
+  "recordedUtc": "2026-11-01T13:11:12.201945+00:00",
+  "evidence": {
+    "controllerRaw": {
+      "path": "E:\\mir2-release\\windows-cold-start-20261101\\r19\\acceptance-audit\\windows-https\\cold-01.controller.raw.jsonl",
+      "sha256": "54974f6a319eb585e2fd6698aff36619c484f8712cda3e376ec022489973f4bc",
+      "bytes": 9234,
+      "localOnly": true
+    },
+    "controllerStderr": {
+      "path": "E:\\mir2-release\\windows-cold-start-20261101\\r19\\acceptance-audit\\windows-https\\cold-01.controller.stderr.log",
+      "sha256": "2a65cd28a1654666e5dec5ac547bb88e15074c17aea639ea327d7af8f0a66fcc",
+      "bytes": 233,
+      "localOnly": true
+    },
+    "controllerIntent": {
+      "path": "E:\\mir2-release\\windows-cold-start-20261101\\r19\\acceptance-audit\\windows-https\\controller-start-r19-cold-01.json",
+      "sha256": "1e3c6f42e6433bd987d7094d4b8803f443c52ef25738549f6f517a3711123997",
+      "bytes": 672,
+      "localOnly": true
+    },
+    "policy": {
+      "path": "E:\\mir2-release\\windows-cold-start-20261101\\r19\\acceptance-audit\\windows-https\\https-policy.r19-cold.json",
+      "sha256": "2f01e7b7be8ed7d7df3e42aefee56cae2234bb1fe8c8b06991e882544a775153",
+      "bytes": 2429,
+      "localOnly": true
+    },
+    "helper": {
+      "path": "E:\\mir2-release\\windows-cold-start-20261101\\r19\\acceptance-audit\\windows-https\\windows-job-observer-downloader.py",
+      "sha256": "e4db5e2103e2a341f4f1a14894084ec30ae88657853a573a7f8477307a93852b",
+      "bytes": 29848,
+      "localOnly": true
+    },
+    "wrapper": {
+      "path": "E:\\mir2-release\\windows-cold-start-20261101\\r19\\acceptance-audit\\windows-https\\start-windows-https-r19.py",
+      "sha256": "889f9f7c6ca5c50683958b308435e6b80379342265efc850770b38024df5e050",
+      "bytes": 5527,
+      "localOnly": true
+    },
+    "jobAudit": {
+      "path": "E:\\mir2-release\\windows-cold-start-20261101\\r19\\acceptance-audit\\windows-https\\r19-cold-01\\events.jsonl",
+      "sha256": "df929731274eaf7dbb30b032bcc5aaab88427bbb36a8d874622092cb152e6664",
+      "bytes": 2950,
+      "localOnly": true
+    },
+    "nativeFooter": {
+      "path": "E:\\mir2-release\\windows-cold-start-20261101\\r19\\acceptance-audit\\windows-https\\r19-cold-01\\logs\\downloader.stdout.log",
+      "sha256": "83e1974879b21309c400e7d9dfc5c224137093228f3dbeb49bf93ca48c633672",
+      "bytes": 337,
+      "localOnly": true
+    },
+    "nativeProgress": {
+      "path": "E:\\mir2-release\\windows-cold-start-20261101\\r19\\acceptance-audit\\windows-https\\r19-cold-01\\logs\\downloader.stderr.log",
+      "sha256": "4e9a30667a8696c7e9576cee8945abd4ee0264020ae3f3758f172ec0722a69a0",
+      "bytes": 34820,
+      "localOnly": true
+    },
+    "headers": {
+      "path": "E:\\mir2-release\\windows-cold-start-20261101\\r19\\acceptance-audit\\windows-https\\r19-cold-01\\logs\\curl-response.headers",
+      "sha256": "bba1aae576b7be917c2d0a57ddf4975abe906d1e48a78201b8e51bf0b997b608",
+      "bytes": 793,
+      "localOnly": true
+    },
+    "initialSockets": {
+      "path": "E:\\mir2-release\\windows-cold-start-20261101\\r19\\acceptance-audit\\windows-https\\r19-cold-01\\download-socket-samples.jsonl",
+      "sha256": "9bc08bd91d7493eda280b5f0ec6c71e04ead363366cf194019b73be0c308fe5a",
+      "bytes": 4554,
+      "localOnly": true
+    },
+    "lateSockets": {
+      "path": "E:\\mir2-release\\windows-cold-start-20261101\\r19\\acceptance-audit\\windows-https\\r19-cold-01\\download-late-socket-samples.jsonl",
+      "sha256": "f14e7f5109c500fa6e3e84574340adc43a9a18153e5dbc86490db282c2262150",
+      "bytes": 3036,
+      "localOnly": true
+    },
+    "physicalRoute": {
+      "path": "E:\\mir2-release\\windows-cold-start-20261101\\r19\\acceptance-audit\\windows-https\\r19-cold-01\\actual-download-route.json",
+      "sha256": "3ffcda1c6c4cb8f9af7df1a1c293dad9f9b9ce161946d1335d5992bd3b130d7a",
+      "bytes": 1048,
+      "localOnly": true
+    },
+    "comparison": {
+      "path": "E:\\mir2-release\\windows-cold-start-20261101\\r19\\acceptance-audit\\windows-https\\r19-cold-01\\R18-R19-DOWNLOAD-COMPARISON.json",
+      "sha256": "e5fa52474ff8855b79f7d23a6599d46c4fc28bc6632627ea32c0e202fe1344ca",
+      "bytes": 13673,
+      "localOnly": true
+    },
+    "restoration": {
+      "path": "E:\\mir2-release\\windows-cold-start-20261101\\r19\\acceptance-audit\\windows-https\\r19-cold-01\\restoration\\RESTORATION-RESULT.json",
+      "sha256": "bb315abcc3695f2f1ddc13140e1ba932f04d139669db8d2ae765d96c7feccf31",
+      "bytes": 3475,
+      "localOnly": true
+    },
+    "originalPreservation": {
+      "path": "E:\\mir2-release\\windows-cold-start-20261101\\r19\\acceptance-audit\\windows-https\\preservation-before-smoke\\PRESERVATION-R19-BEFORE.json",
+      "sha256": "70600dc1c512cee9c77a95d4df1c2633b322ea0d09356d81ba33203d745083da",
+      "bytes": 6953,
+      "localOnly": true
+    },
+    "localSmoke": {
+      "path": "E:\\mir2-release\\windows-cold-start-20261101\\r19\\acceptance-audit\\windows-https\\r19-smoke-01\\SMOKE-RESULT.json",
+      "sha256": "d9fe3194f33a8076ed0b401e84a070e6a0962f71f47b1d7bcce800432db65704",
+      "bytes": 12639,
+      "localOnly": true
+    },
+    "LOCAL": {
+      "path": "E:\\mir2-release\\windows-cold-start-20261101\\r19\\LOCAL-ARTIFACTS.json",
+      "sha256": "34dfda01774e11f61a7fe34573c59b5da5d2a2b17391c4b407f59cece7045b69",
+      "bytes": 7334,
+      "localOnly": true
+    }
+  },
+  "limitations": [
+    "20Mbps is the configured maximum; observed payload averaged about 6.68Mbps, and no independent WAN capacity test was performed.",
+    "Physical Ethernet/public TCP/TLS/proxy_used0 are observed; they do not identify the throughput bottleneck or rule out transparent upstream infrastructure.",
+    "R18 timing FAIL and R19 local normal smoke PASS remain separate unchanged facts.",
+    "Partial bytes preserved for forensics; no second GET, resume, cache preheat or new test performed."
+  ]
+}

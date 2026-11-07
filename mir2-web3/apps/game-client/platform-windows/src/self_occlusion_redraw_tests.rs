@@ -28,7 +28,7 @@ fn self_occlusion_redraw_keeps_source_pose_and_crystal_parts_in_all_directions()
             json!({
                 "key":format!("1001:{role}"), "atlasKey":"actor-page",
                 "atlasRectKey":format!("frame-{i}"), "left":42+i,"top":83+i,
-                "width":48,"height":96,"z":entity_z_base(19,156)+i as f32,
+                "width":48,"height":96,"z":entity_z_base(&payload,19,156)+i as f32,
                 "path":format!("/original-ui/Actor/{i}.png")
             })
         })

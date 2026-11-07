@@ -1,0 +1,21 @@
+{
+  "appliedPersonal": true,
+  "appliedStamp": true,
+  "appliedWorld": true,
+  "connected": true,
+  "currentActor": true,
+  "currentPersonal": true,
+  "entitiesMatches": false,
+  "fencePresent": true,
+  "mapMatches": false,
+  "pendingProducer": false,
+  "pendingProducerCurrent": false,
+  "resourceWaiting": false,
+  "skillActorMatches": false,
+  "skillExpected": false,
+  "skillLearnedMatches": false,
+  "skillResource": true,
+  "skillSerialReady": false,
+  "skillSessionMatches": false,
+  "uiMatches": false
+}

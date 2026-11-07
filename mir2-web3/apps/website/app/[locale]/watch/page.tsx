@@ -63,7 +63,7 @@ export default async function WatchPage({ params }: WatchPageProps) {
           <dl>
             <div><dt>{copy.nav.pulse}</dt><dd>—</dd></div>
             <div><dt>{productCopy.chrome.privacy}</dt><dd>{productCopy.common.draft}</dd></div>
-            <div><dt>{copy.nav.watch}</dt><dd>AI</dd></div>
+            <div><dt>{copy.nav.watch}</dt><dd>{copy.watch.demo}</dd></div>
           </dl>
           <div className="live-actions">
             {liveUrl ? <a className="button button-primary" href={liveUrl} target="_blank" rel="noreferrer"><span>{copy.watch.live}</span><i>↗</i></a> : null}

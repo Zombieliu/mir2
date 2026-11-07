@@ -23,6 +23,21 @@ function loadTs(relative, dependencies = {}) {
   });
   return loaded.exports;
 }
+const questWorldContext = loadTs("../lib/bevy-quest-world-context.ts", {
+  "./bevy-bag-model": loadTs("../lib/bevy-bag-model.ts", {
+    "./world-model/item-identity": loadTs("../lib/world-model/item-identity.ts"),
+  }),
+});
+const questWorldDependencies = {
+  "./bevy-quest-world-context": questWorldContext,
+  "./bevy-quest-world-actions": loadTs("../lib/bevy-quest-world-actions.ts", {
+    "./bevy-quest-world-context": questWorldContext,
+  }),
+  "./bevy-quest-world-controls": loadTs("../lib/bevy-quest-world-controls.ts", {
+    "./bevy-quest-world-context": questWorldContext,
+  }),
+};
+const { projectSelfAppearance } = loadTs("../lib/world-model/character-appearance.ts");
 const presentation = { logicalWidth: 1024, logicalHeight: 768, stageCssScale: 0.5, touch: false };
 const expSlot = { left: 9, top: 759, width: 1004, height: 8 };
 const weightSlot = { left: 919, top: 721, width: 76, height: 12 };
@@ -181,8 +196,9 @@ test("actual hook sends raw fields only behind exact plan capability and keeps s
       useState(value) { state ??= value; return [state, next => {
         state = typeof next === "function" ? next(state) : next;
       }]; } };
-    const host = loadTs("../lib/bevy-quest-ui.ts", { "./quest-action-policy": { questEndpoint: value => value } });
-    const hook = loadTs("../lib/use-bevy-quest-ui.ts", { react, "./bevy-quest-ui": host,
+    const host = loadTs("../lib/bevy-quest-ui.ts", { "./quest-action-policy": { questEndpoint: value => value },
+      "./bevy-quest-world-context": questWorldContext });
+    const hook = loadTs("../lib/use-bevy-quest-ui.ts", { react, ...questWorldDependencies, "./bevy-quest-ui": host,
       "./bevy-hp-orb": loadTs("../lib/bevy-hp-orb.ts"),
       "./bevy-experience-bar": loadTs("../lib/bevy-experience-bar.ts"),
       "./bevy-weight-bar": loadTs("../lib/bevy-weight-bar.ts"),
@@ -324,6 +340,22 @@ function actualPacketClause(name, scope) {
   } }).outputText;
   return new Function(...Object.keys(scope), `${code}\nactualPacketClause();`)(...Object.values(scope));
 }
+function progressionIdentityFixture() {
+  const connectionGeneration = 3;
+  const source = {};
+  return {
+    equipmentConnectionGenerationRef: { current: connectionGeneration },
+    equipmentSessionGenerationRef: { current: 1 },
+    selfAppearanceAuthorityRef: { current: null }, projectSelfAppearance,
+    connectionGeneration, source,
+    captureObservePreference(value, playerObjectId, generation, socket) {
+      assert.equal(value, undefined, "bar fixtures carry no observe preference authority");
+      assert.equal(Number.isSafeInteger(playerObjectId) && playerObjectId > 0, true);
+      assert.equal(generation, connectionGeneration);
+      assert.equal(socket, source);
+    },
+  };
+}
 function emptyPlan(name) {
   const slot = name === "experience" ? expSlot : weightSlot;
   return { token: name === "experience" ? "e1" : "w1", sequence: 1, state: "known-empty",
@@ -440,7 +472,7 @@ test("actual progression packet clauses withdraw synchronously, only for affecte
         if (event.detail.experience) controller.withdraw("experience");
         if (event.detail.weight) controller.withdraw("weight");
       } };
-      const scope = { payload: packet === "UserInformation" ? { objectId: "1001", experience: 0,
+      const scope = { ...progressionIdentityFixture(), payload: packet === "UserInformation" ? { objectId: "1001", experience: 0,
           maxExperience: 1, location: { x: 1, y: 2 } } : packet === "GainExperience"
           ? { amount: 1 } : { experience: 0, maxExperience: 2, level: 2 },
         worldRef, bevyQuestGenerationRef, experienceAuthorityRef,
@@ -489,7 +521,7 @@ test("actual direct packet clauses preserve unchanged bars and retire partial or
       const worldRef = { current: { playerObjectId: "1000", playerExperience: 0, playerMaxExperience: 1 } };
       const experienceAuthorityRef = { current: unknownAuthority ? null
         : experience.experienceAuthorityFromPacket(5, "1000", 0, 1) };
-      actualPacketClause(packet, { payload, worldRef, experienceAuthorityRef,
+      actualPacketClause(packet, { ...progressionIdentityFixture(), payload, worldRef, experienceAuthorityRef,
         bevyQuestGenerationRef: { current: 5 },
         experienceAuthorityFromPacket: experience.experienceAuthorityFromPacket,
         advanceExperienceAuthority: experience.advanceExperienceAuthority,
@@ -529,8 +561,9 @@ test("real hook, shell mapping and controller validate host freshness and live o
         useState(value) { state ??= value; return [state, next => {
           state = typeof next === "function" ? next(state) : next;
         }]; } };
-      const host = loadTs("../lib/bevy-quest-ui.ts", { "./quest-action-policy": { questEndpoint: value => value } });
-      const hook = loadTs("../lib/use-bevy-quest-ui.ts", { react, "./bevy-quest-ui": host,
+      const host = loadTs("../lib/bevy-quest-ui.ts", { "./quest-action-policy": { questEndpoint: value => value },
+        "./bevy-quest-world-context": questWorldContext });
+      const hook = loadTs("../lib/use-bevy-quest-ui.ts", { react, ...questWorldDependencies, "./bevy-quest-ui": host,
         "./bevy-hp-orb": loadTs("../lib/bevy-hp-orb.ts"),
         "./bevy-experience-bar": loadTs("../lib/bevy-experience-bar.ts"),
         "./bevy-weight-bar": loadTs("../lib/bevy-weight-bar.ts"),
@@ -616,8 +649,9 @@ test("an old hook cleanup cannot erase the successor's live plan reader", () => 
       useState(value) { state ??= value; return [state, next => {
         state = typeof next === "function" ? next(state) : next;
       }]; } };
-    const host = loadTs("../lib/bevy-quest-ui.ts", { "./quest-action-policy": { questEndpoint: value => value } });
-    const hook = loadTs("../lib/use-bevy-quest-ui.ts", { react, "./bevy-quest-ui": host,
+    const host = loadTs("../lib/bevy-quest-ui.ts", { "./quest-action-policy": { questEndpoint: value => value },
+      "./bevy-quest-world-context": questWorldContext });
+    const hook = loadTs("../lib/use-bevy-quest-ui.ts", { react, ...questWorldDependencies, "./bevy-quest-ui": host,
       "./bevy-hp-orb": loadTs("../lib/bevy-hp-orb.ts"),
       "./bevy-experience-bar": loadTs("../lib/bevy-experience-bar.ts"),
       "./bevy-weight-bar": loadTs("../lib/bevy-weight-bar.ts"),

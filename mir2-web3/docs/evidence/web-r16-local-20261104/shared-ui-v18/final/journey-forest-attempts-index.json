@@ -1,0 +1,72 @@
+{
+  "phase": "journey-forest-attempts",
+  "publicOnly": true,
+  "privateLogsCopied": false,
+  "rawNativeScreenshotCopied": false,
+  "privateIdentityMatches": 0,
+  "knownSecretPatternMatches": 0,
+  "files": 10,
+  "bytes": 7526622,
+  "entries": [
+    {
+      "path": "journey-forest-attempts/forest-forest-v18-r1/01-current-native-task-card-before-measured-readiness.png",
+      "source": "D:/mir2-builds/forest-quest-driver-20261106/forest-forest-v18-r1/01-current-native-task-card-before-measured-readiness.png",
+      "bytes": 1085570,
+      "sha256": "e5a43eeba92d750ea2f1dae3a2d5f2d24c9d13876840c28336d3751f09fdc11b"
+    },
+    {
+      "path": "journey-forest-attempts/forest-forest-v18-r1/02-fresh-v2-native-task-card.png",
+      "source": "D:/mir2-builds/forest-quest-driver-20261106/forest-forest-v18-r1/02-fresh-v2-native-task-card.png",
+      "bytes": 1090177,
+      "sha256": "0bd21ac63f9c5eadc84d7b8a8ce6619eb44d4f9ee46c923ad4c8c1ffaf64bfe2"
+    },
+    {
+      "path": "journey-forest-attempts/forest-forest-v18-r1/03-before-acceptQuest-2110007.png",
+      "source": "D:/mir2-builds/forest-quest-driver-20261106/forest-forest-v18-r1/03-before-acceptQuest-2110007.png",
+      "bytes": 1058873,
+      "sha256": "b7ad5f359b153e603bcd21c6b8e9f1ad2be1bf141811593a295a8ed6a87eb00d"
+    },
+    {
+      "path": "journey-forest-attempts/forest-forest-v18-r1/04-failure-safe-masked.png",
+      "source": "D:/mir2-builds/forest-quest-driver-20261106/forest-forest-v18-r1/04-failure-safe-masked.png",
+      "bytes": 798504,
+      "sha256": "1eb27684bacbf4ac696217803ad8b7bb427dd606fe16d8162fa0fccf05a0541f"
+    },
+    {
+      "path": "journey-forest-attempts/forest-forest-v18-r1/onboarding-forest-browser-proof.json",
+      "source": "D:/mir2-builds/forest-quest-driver-20261106/forest-forest-v18-r1/onboarding-forest-browser-proof.json",
+      "bytes": 263345,
+      "sha256": "3a4cf39cc6556357f5528c45b63d24571f27b6e7db823e1aec14196623a1757a"
+    },
+    {
+      "path": "journey-forest-attempts/forest-reconcile-v18-r2/01-q7-r2-fresh-ordinary-login-authority.png",
+      "source": "D:/mir2-builds/forest-quest-driver-20261106/forest-reconcile-v18-r2/01-q7-r2-fresh-ordinary-login-authority.png",
+      "bytes": 1077672,
+      "sha256": "74ced50981b263a919adde6197e432d86942c00fbcfbf2dd88ed515a814e0699"
+    },
+    {
+      "path": "journey-forest-attempts/forest-reconcile-v18-r2/onboarding-forest-browser-proof.json",
+      "source": "D:/mir2-builds/forest-quest-driver-20261106/forest-reconcile-v18-r2/onboarding-forest-browser-proof.json",
+      "bytes": 19010,
+      "sha256": "a5d1a56cc6b1a93282c2294063532302187b28dac5e58d021bee9e0a1bb1ce30"
+    },
+    {
+      "path": "journey-forest-attempts/forest-recovery-v18-r1/01-recovered-owned-bag-and-quest-state.png",
+      "source": "D:/mir2-builds/forest-quest-driver-20261106/forest-recovery-v18-r1/01-recovered-owned-bag-and-quest-state.png",
+      "bytes": 1032582,
+      "sha256": "7fdeae6d9467bdbdeecd5f3d94bf2749a155f34aae14ccc22d13596713f92af5"
+    },
+    {
+      "path": "journey-forest-attempts/forest-recovery-v18-r1/02-q7-recovered-town-before-logout.png",
+      "source": "D:/mir2-builds/forest-quest-driver-20261106/forest-recovery-v18-r1/02-q7-recovered-town-before-logout.png",
+      "bytes": 1073532,
+      "sha256": "967ac30c94397acfda30f37526f8052a0fdb05a439dbbe698dd48a168a500b64"
+    },
+    {
+      "path": "journey-forest-attempts/forest-recovery-v18-r1/onboarding-forest-browser-proof.json",
+      "source": "D:/mir2-builds/forest-quest-driver-20261106/forest-recovery-v18-r1/onboarding-forest-browser-proof.json",
+      "bytes": 27357,
+      "sha256": "c5a0b781092b4a2028a9077c753757beb6f8830069e93c29bb4e83a099fe728d"
+    }
+  ]
+}

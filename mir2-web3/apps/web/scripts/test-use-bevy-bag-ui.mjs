@@ -26,6 +26,7 @@ test("actual hook StrictMode cleanup/restart retires sink, monotonic owner, fram
   try {
     const refs = []; let refIndex = 0, effect, state;
     const react = { useRef(value) { return refs[refIndex++] ??= { current: value }; },
+      useCallback(fn) { return fn; },
       useEffect(fn) { effect = fn; }, useState(value) { state ??= value; return [state, (value) => { state = typeof value === "function" ? value(state) : value; }]; } };
     const { useBevyBagUi } = load("../lib/use-bevy-bag-ui.ts", (id) => id === "react" ? react : bag);
     const input = { connectionGeneration: 1, sessionGeneration: 2, ownerRevision: 0, eligible: true,

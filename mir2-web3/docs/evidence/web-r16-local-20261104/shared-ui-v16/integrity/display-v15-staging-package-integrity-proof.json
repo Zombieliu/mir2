@@ -1,0 +1,313 @@
+{
+  "schema": 1,
+  "passed": true,
+  "startedAt": "2026-11-05T13:28:27.985Z",
+  "finishedAt": "2026-11-05T13:33:39.540Z",
+  "artifactRoot": "F:\\mir2-builds\\Numeron-Web-R16-20261104-v15",
+  "previousRoot": "F:\\mir2-builds\\Numeron-Web-R16-20261104",
+  "manifest": {
+    "manifestSha256": "0a5c3e7c74a990bfeeaefc93ff21ac5569348492a8b125e4b6e9bdf6fa8c819b",
+    "manifestBytes": 6865452,
+    "checkedFiles": 29681,
+    "checkedBytes": 923715292,
+    "recordsSha256": "62a970211ff933ab9951eaa02f2803e759895faef7f2181a56b7939d99f0cc9c",
+    "allRegular": true,
+    "noSymlinksOrJunctions": true,
+    "noHardLinks": true,
+    "manifestUnchanged": true
+  },
+  "uniqueAncestorDirectories": 1005,
+  "comparison": {
+    "previousManifestSha256": "4b93b6621f0249d7d5895e13888b3eb90b8b27aaaea083a9730ba895519cd2f2",
+    "changedFiles": 108,
+    "addedFiles": 3,
+    "removedFiles": 3,
+    "unchangedFiles": 29570,
+    "totalByteDelta": 38,
+    "allChangesInsideNextBuildOrStandaloneServer": true,
+    "outsideNextUnchangedFiles": 29374,
+    "allRendererCoreGatewayNodeActorWalletFiniteAndCatalogPinsUnchanged": true,
+    "deltaRecordSha256": "c27b110bac84d3e74626077e7216407332501ed43108255296d1ba72290067d2",
+    "deltaExamples": [
+      {
+        "path": "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/app-path-routes-manifest.json",
+        "oldBytes": 2410,
+        "bytes": 2410,
+        "oldSha256": "f0f39dd5a59b63e9024572ab84aeb9dca6966e857f264becd8a6cae68a644f9c",
+        "sha256": "e24bc1f6d5ccefc92d7cdae82852a3f9cb38bac1914bb1089d92e50dabd01842"
+      },
+      {
+        "path": "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/BUILD_ID",
+        "oldBytes": 21,
+        "bytes": 21,
+        "oldSha256": "097f03abfd77acbd6fb043c2655bdbcb09f91cbe43a5ae8f91da9b43edfe28f7",
+        "sha256": "7557284ee68e8ddfe11a1a129c9f180e57e3359314e47fd1e7cc58f1be8f0afc"
+      },
+      {
+        "path": "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/build-manifest.json",
+        "oldBytes": 511,
+        "bytes": 511,
+        "oldSha256": "01aa5b682fded95bf025c22df10881cd607d1982463318bad65caf03492c5c66",
+        "sha256": "9664bca29011a4750b5dd31acfae0407ae8e03460d5f9d988015faa81171c1e3"
+      },
+      {
+        "path": "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/required-server-files.json",
+        "oldBytes": 18964,
+        "bytes": 19032,
+        "oldSha256": "5dc72544dfa426a9359cc5a831a30306d61f674b67c557a48851b842412d018c",
+        "sha256": "d7a81522a47333277fb16d3cdba43fbca91dc0114b848178578c0d0169790493"
+      },
+      {
+        "path": "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app-paths-manifest.json",
+        "oldBytes": 2912,
+        "bytes": 2912,
+        "oldSha256": "5ba7f995784b353b2c4610d56867a38a0ddc642785745509dac5eab548c0b50f",
+        "sha256": "4c1288f288840348529ad0ce86e1882bd31fb968516d1e8c8bc815872ffc8a16"
+      },
+      {
+        "path": "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/_global-error.html",
+        "oldBytes": 8916,
+        "bytes": 8916,
+        "oldSha256": "bef8837db10304b968b8ea20286263f743ed5840e9ad02513bb62015483a4c2f",
+        "sha256": "e881939cc6569020d95aaec05964abd396b3236b0596933bec985d8807629462"
+      },
+      {
+        "path": "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/_global-error.rsc",
+        "oldBytes": 4735,
+        "bytes": 4735,
+        "oldSha256": "045c83b437dba787ab283558ee238bfbf1c9bf58566f5e62643d5162cbe7eb42",
+        "sha256": "37a5e305f2002c5c85b3654115f710e9ee8aa33ba391f0a4009b2439f97b6c3d"
+      },
+      {
+        "path": "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/_global-error.segments/_full.segment.rsc",
+        "oldBytes": 4735,
+        "bytes": 4735,
+        "oldSha256": "045c83b437dba787ab283558ee238bfbf1c9bf58566f5e62643d5162cbe7eb42",
+        "sha256": "37a5e305f2002c5c85b3654115f710e9ee8aa33ba391f0a4009b2439f97b6c3d"
+      }
+    ],
+    "addedPaths": [
+      "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/static/chunks/7458-be6d7a03209e9378.js",
+      "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/static/txvakN-896bVWfMw41XmS/_buildManifest.js",
+      "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/static/txvakN-896bVWfMw41XmS/_ssgManifest.js"
+    ],
+    "removedPaths": [
+      "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/static/chunks/7458-20b2b6935744e75b.js",
+      "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/static/q_eeLwnGRft79WfX_QD8C/_buildManifest.js",
+      "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/static/q_eeLwnGRft79WfX_QD8C/_ssgManifest.js"
+    ]
+  },
+  "r16Closure": {
+    "manifestSha256": "e7e13ea2aeb9cde489f6bc2a3d23927bcb72e0e4eb0a0ddfdbdc2289a7fdeb18",
+    "files": 21056,
+    "bytes": 281159572,
+    "allEntriesListedAndHashed": true,
+    "allV13AssetPinsRetained": true,
+    "requiredCategories": {
+      "ui": 4274,
+      "map0": 8483,
+      "map0141": 8,
+      "monsters": 2624,
+      "firstplay": 5667
+    },
+    "allV14AssetPinsRetained": true
+  },
+  "localizationCatalog": {
+    "path": "web/mir2-web3/apps/web/lib/generated/r16-native-localization.json",
+    "bytes": 6301605,
+    "sha256": "d42c1568e3a6fa2798f30038f7a553f4fb4cb3f04abfb44672dc9cab37185938",
+    "matchesCanonicalSource": true,
+    "unchangedFromV14": true
+  },
+  "compiledPins": {
+    "passed": true,
+    "rendererVersion": "bevy-e7afab3714b4abba",
+    "rendererImmutableDigestMatches": true,
+    "aliasAndSavedManifestMatch": true,
+    "rendererLimits": {
+      "wasmBytes": 32505856,
+      "gzipBytes": 7340032,
+      "jsBytes": 204800
+    },
+    "coreLimits": {
+      "wasmBytesExclusive": 262144,
+      "jsBytes": 204800
+    },
+    "packages": [
+      {
+        "id": "webgpu",
+        "wasmBytes": 31212731,
+        "gzipBytes": 6526506,
+        "jsBytes": 141118,
+        "wasmSha256": "75ac8526619cec0fa3c4a08de51c4d719ebb81ebf6891e4b05ae48b598a0fd07",
+        "jsSha256": "5fa12cbcb4f140f8c8c258357805226633cf978fb4e329c644702fe835edfdd0",
+        "questUiAbiVersion": 1,
+        "bagUiAbiVersion": 1,
+        "primarySharedUiCompiled": false,
+        "importCount": 491,
+        "exportCount": 151,
+        "abiMetadataSha256": "d61f9da847f7e7515fdb02fdeaf2d85d836b8771bf081b3b3db21c2833eb78f9",
+        "exactAbiMatchesV13": true,
+        "glueContainsAllImports": true,
+        "questLocalUiCompiled": true,
+        "displayLanguageCompiled": true
+      },
+      {
+        "id": "webgl2",
+        "wasmBytes": 16402208,
+        "gzipBytes": 4213570,
+        "jsBytes": 117176,
+        "wasmSha256": "44e1fe130faccba3fe53f5adb4e3aec49a5155201db43ca5e5f2ba6478a32531",
+        "jsSha256": "2e4c58270f49998063cf64b3605b412edce725f5df73254ce4bbf764b282998d",
+        "questUiAbiVersion": 0,
+        "bagUiAbiVersion": 0,
+        "primarySharedUiCompiled": false,
+        "importCount": 445,
+        "exportCount": 79,
+        "abiMetadataSha256": "1ac615d95986d0d79fd73a2a85a69bd38954640814d6b132f9619baddffabaf1",
+        "exactAbiMatchesV13": true,
+        "glueContainsAllImports": true,
+        "questLocalUiCompiled": false,
+        "displayLanguageCompiled": false
+      },
+      {
+        "id": "webgl2-shared",
+        "wasmBytes": 32141325,
+        "gzipBytes": 6863281,
+        "jsBytes": 139092,
+        "wasmSha256": "cd9b11780b60e5e3fd0b129a753ddeea0d0a50c15a26ff198b447605ceee9ed9",
+        "jsSha256": "e55158e5843a3f2920964401ef2e2ae56e3459af720f17a55bb87deff016177d",
+        "questUiAbiVersion": 1,
+        "bagUiAbiVersion": 1,
+        "primarySharedUiCompiled": true,
+        "importCount": 450,
+        "exportCount": 149,
+        "abiMetadataSha256": "fd019f2fdb1418191f1f12df82803861af4e6e4032769d81d2c7eaf3202b877a",
+        "exactAbiMatchesV13": true,
+        "glueContainsAllImports": true,
+        "questLocalUiCompiled": true,
+        "displayLanguageCompiled": true
+      }
+    ],
+    "coreBundles": [
+      {
+        "name": "core",
+        "version": "81dd599a887e9338a888672a19a1d5ecc4cc1b6d9b90a9bb41c61d5f8c210974",
+        "sourceSha256": "43fed2e1d71d79d57c0b8331d3eeb411b1074dc8ed6a7419d60267feca0d7f86",
+        "jsBytes": 24393,
+        "wasmBytes": 250136,
+        "unchangedFromV13": true,
+        "immutableDigestMatches": true
+      },
+      {
+        "name": "presentation",
+        "version": "08bc05f41551a7f01fd0edf3a7e639df847dad88ef605fc55b764e9bab901bbc",
+        "sourceSha256": "43fed2e1d71d79d57c0b8331d3eeb411b1074dc8ed6a7419d60267feca0d7f86",
+        "jsBytes": 24721,
+        "wasmBytes": 261983,
+        "unchangedFromV13": true,
+        "immutableDigestMatches": true
+      },
+      {
+        "name": "npcPurchase",
+        "version": "78c4de3cdd6f97897ad39c7f6e1a61a76a6f02343c0be8d570b616155a7fc58f",
+        "sourceSha256": "43fed2e1d71d79d57c0b8331d3eeb411b1074dc8ed6a7419d60267feca0d7f86",
+        "jsBytes": 8332,
+        "wasmBytes": 165791,
+        "unchangedFromV13": true,
+        "immutableDigestMatches": true
+      }
+    ],
+    "noModuleInstantiated": true,
+    "noNetworkOrGPUInitialized": true,
+    "buildId": "txvakN-896bVWfMw41XmS",
+    "requiredServerFilesManifestBindingsMatch": true,
+    "abiAndBudgetReusedFromExactBytes": true,
+    "newModuleCompilationOrBudgetRecomputation": false
+  },
+  "reusedProof": {
+    "path": "F:/mir2-builds/web-r16-20261104/display-v14-staging-package-integrity-proof.json",
+    "sha256": "55ec24d1219675218066329edb88c4949a75ef4659958bf8fbe36e38c4379b42",
+    "passed": true,
+    "allNonNextFilePinsVerifiedExact": true
+  },
+  "thinGate": {
+    "passed": false,
+    "limitBytes": 377487360,
+    "preparedReportedByRoot": "686 MB",
+    "independentlyRecomputed": false,
+    "status": "Existing failed 360 MiB prepared thin gate retained; distribution integrity is a separate result"
+  },
+  "scope": "Independent read-only v15 staging integrity and configured Gateway binding audit",
+  "failures": [],
+  "gatewayBuildBinding": {
+    "passed": true,
+    "buildId": "txvakN-896bVWfMw41XmS",
+    "expectedPublicGateway": "ws://127.0.0.1:19040/ws",
+    "standalonePublicEnvMatches": true,
+    "requiredPublicEnvMatches": true,
+    "standaloneAndRequiredEnvExact": true,
+    "standaloneConfigMatchesAfterStandardDistDirNormalization": true,
+    "actualNewPackagerGuardPassed": true,
+    "packagerGuard": "assertPreparedNextGateway",
+    "compiledManifestEnvironmentBindingsMatch": true,
+    "clientConsumption": {
+      "path": "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/static/chunks/7458-be6d7a03209e9378.js",
+      "bytes": 2662790,
+      "sha256": "28b331d95a5534bf6e1b95f65a8c955029f73f465f7bb75f591b4717af29f2d9",
+      "constantBinding": "f9",
+      "constantValue": "ws://127.0.0.1:19040/ws",
+      "constantInitializer": "static URL literal .trim()",
+      "defaultResolver": "du",
+      "defaultAssignmentOffset": 2051698,
+      "boundDefaultUsesConfiguredConstant": true,
+      "configuredValueIsNonemptySo7110FallbackIsNotSelected": true,
+      "webSocketConstructorConsumers": [
+        {
+          "offset": 2163368,
+          "constructor": "WebSocket",
+          "urlBinding": "a",
+          "resolverCallOffset": 2163132
+        }
+      ],
+      "usesTypeScriptSymbolResolution": true,
+      "parsedOnlyThisRelevantClientBundle": true
+    },
+    "noQueryOverrideUsed": true,
+    "noNextModuleExecuted": true,
+    "noSocketOrBrowserCreated": true,
+    "newWasmCompilation": false
+  },
+  "fileMetadata": {
+    "method": "Node lstat for every manifest file and its explicit ancestor directories",
+    "checkedDistributionFiles": 29681,
+    "checkedManifestFile": true,
+    "allRegular": true,
+    "noSymbolicLinksOrJunctions": true,
+    "noHardLinks": true,
+    "directoryEnumerationCalls": 0
+  },
+  "privateDirectoriesEnumerated": false,
+  "privateFilesOpened": false,
+  "runtimeDataDirectoriesEnumerated": false,
+  "runtimeDataFilesOpened": false,
+  "httpRequests": 0,
+  "browserSessions": 0,
+  "serviceActions": 0,
+  "sessionsCreated": 0,
+  "modelCalls": 0,
+  "newWasmCompilation": false,
+  "sourceFilesChanged": 0,
+  "artifactFilesChanged": 0,
+  "overallUiResult": "Not assessed; Root must perform ordinary v15 login and gameplay QA",
+  "nativeUiResult": "Open: coordinator reports only background visible and normal close; no Native credentials, selection, city or cross-platform shared-save acceptance",
+  "limitations": [
+    "All 29681 distribution files were freshly checked against the v15 manifest for size, SHA-256, ordinary-file status, single-link count and non-link ancestors. No package directory enumeration or private runtime data access was performed.",
+    "Every file outside the Next build and its standalone entry is byte-identical to the v14 manifest verified by the sealed v14 proof. Its exact Renderer/Core ABI and budget results are reused; no WASM was recompiled, instantiated or optimized.",
+    "The new packager static AST guard was executed against the actual packaged server.js. Its public Gateway build value is exactly ws://127.0.0.1:19040/ws, and the complete environment matches required-server-files.",
+    "Only the relevant client chunk was parsed to bind its static 19040 literal through the configured default resolver to the actual WebSocket constructor argument. No client code, WebSocket or browser was executed, and no query override was used.",
+    "The previous v14 integrity proof and its separate real-login failure remain preserved. A package-integrity pass does not establish successful v15 authentication or gameplay.",
+    "The pre-existing failed 360 MiB thin gate is retained from v14. This audit does not increase budgets or claim thin release qualification.",
+    "Native client-only installation remains separate from actual Native login/UI/cross-platform save acceptance, which the coordinator explicitly reports as incomplete. Private/journal preservation and cutover belong to Root."
+  ]
+}

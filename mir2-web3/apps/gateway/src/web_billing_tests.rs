@@ -71,6 +71,56 @@ fn strict_requests_accept_server_catalogue_identifiers_and_exact_u64_ids() {
 }
 
 #[test]
+fn payment_provider_capability_is_explicit_and_legacy_checkout_defaults_to_stripe() {
+    for operation in OPERATIONS {
+        let legacy = decode_request(operation, request_json(operation)).unwrap();
+        assert!(!legacy.include_payment_providers());
+        let mut modern = request_json(operation);
+        modern["includePaymentProviders"] = json!(true);
+        assert!(decode_request(operation, modern).unwrap().include_payment_providers());
+    }
+    let Request::Checkout(legacy) = decode_request("checkout", request_json("checkout")).unwrap() else { panic!() };
+    assert_eq!(legacy.provider, FiatPaymentProvider::Stripe);
+    let mut selected = request_json("checkout");
+    selected["provider"] = json!("waffo");
+    let Request::Checkout(waffo) = decode_request("checkout", selected.clone()).unwrap() else { panic!() };
+    assert_eq!(waffo.provider, FiatPaymentProvider::Waffo);
+    selected["provider"] = json!("untrusted-provider");
+    assert!(decode_request("checkout", selected).is_err());
+}
+
+#[test]
+fn payment_provider_registry_and_order_identity_do_not_break_shipped_status_shape() {
+    let config = GatewayConfig::default().with_billing_monthly_card_credit_price(Some(1000)).unwrap();
+    let character = config.default_character.index;
+    config.prepare_recharge_order_for_provider("demo", character, "status-provider-shape",
+        &mir2_simulation::billing::RechargeOffer{id:"waffo-offer".into(),label:"Credits".into(),currency:"usd".into(),amount_minor:100,credits:100},
+        monthly_card_now_ms(),false,FiatPaymentProvider::Waffo).unwrap();
+    let legacy = status_value(&config,"demo",character,None,false).unwrap();
+    assert!(legacy.get("paymentProviders").is_none());
+    assert!(legacy["orders"][0].get("provider").is_none());
+    let modern = status_value(&config,"demo",character,None,true).unwrap();
+    assert!(modern["paymentProviders"].is_array());
+    assert_eq!(modern["orders"][0]["provider"],"waffo");
+    let mut restored = modern;
+    restored.as_object_mut().unwrap().remove("paymentProviders");
+    for order in restored["orders"].as_array_mut().unwrap() { order.as_object_mut().unwrap().remove("provider"); }
+    // Monthly timestamps are evaluated separately; compare the preserved fields.
+    restored["monthlyCard"] = legacy["monthlyCard"].clone();
+    assert_eq!(restored,legacy);
+}
+
+#[tokio::test]
+async fn waffo_webhook_route_rejects_unsigned_delivery_before_configuration_or_store() {
+    let http=local_http(web_state(GatewayConfig::default())).await;
+    let response=http.client.post(format!("{}/v1/billing/waffo/webhook",http.url))
+        .json(&json!({"eventType":"PAYMENT_NOTIFICATION","result":{}})).send().await.unwrap();
+    assert_eq!(response.status(),StatusCode::BAD_REQUEST);
+    assert_eq!(response.headers()[CACHE_CONTROL],"no-store");
+    assert_eq!(response.json::<Value>().await.unwrap(),json!({"message":"failed"}));
+}
+
+#[test]
 fn strict_requests_reject_client_account_and_financial_authority() {
     for operation in OPERATIONS {
         for field in [
@@ -496,6 +546,7 @@ fn web_state(config: GatewayConfig) -> WebState {
         ))
         .expect("disabled local AI hub"),
         channel_identity: crate::ChannelIdentityRegistry::in_memory(),
+        companions: None,
     }
 }
 

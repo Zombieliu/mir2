@@ -1,0 +1,301 @@
+{
+  "schema": "mir2.r16.stable-shortcut.verification.v1",
+  "createdAt": "2026-11-07T12:40:13.575Z",
+  "branch": "codex/windows-player-journey",
+  "baseRevision": "c404bde8a5190534f6bc83ec8a4fe78fffc8cb50",
+  "sourcePins": {
+    "apps/web/app/page.tsx": "48fee82ec41d4e83abd2394a832b32a8d5036122f0635185e3746f938936fd4e",
+    "apps/web/app/original-client-shell.tsx": "d26d5916f31da81287adaf08a25e5504550e1d32ff96baeb039f8c2fc9b63329",
+    "apps/web/lib/use-window-keydown.ts": "8149b087c0fa1ec32b04224bfc8dc5f1b4389fd0a93fed123580f6ef294be7ce",
+    "apps/web/scripts/test-use-window-keydown.mjs": "d6264bec1c09f1c3d2de845731a84b6fe8f9f855f8e9f1838fabb5ca32397f3c",
+    "apps/web/scripts/test-bevy-combat-input.mjs": "afdbf47304c1c7cc4e76c8be7cb2bb60edb02cd5a0aa05868b9527a13a2dd821",
+    "apps/web/scripts/test-storage-surface-integration.mjs": "aaabaf677160a2bd8030916928e56e6bc0ae59d80ab09c65c43443968e046125",
+    "apps/web/scripts/lib/window-keydown-test-fixture.mjs": "6ec564922d6cc187544721005da6fb1a13d8a062e739fb54647d770425bd4262",
+    "apps/game-client/platform-windows/Cargo.lock": "1e9b8d4c7d4caf951b7b16bef72b2851b3443684fcbc66a2e905faed6825673d",
+    "apps/game-client/runtime/Cargo.toml": "8aa5dc760d2ed6d142e586d250d1e107a455ece5a528950dfea910a65e70b749"
+  },
+  "sourceDevStagingMatches": true,
+  "temporaryProductProbesRemoved": true,
+  "unchangedShortcutDeclarationSha256": "8dc71745b96ff57afcc72261645eb335133765f2979319dee1b6ba1f2e20da40",
+  "previousGoalTurn": "progress: reproduced missing shortcut entry, built external-lock Native candidate and added tested hook; Windows computer-use stopped by physical Escape",
+  "priority": "Continue code, shared logic, protocol, headless browser and build work; defer desktop/Windows window control per latest user instruction",
+  "tests": {
+    "node": 133,
+    "skip": 0,
+    "typeScript": true,
+    "typeScriptScope": "Copied Web app/lib and generated types; no full production Web build",
+    "realDomControl": true
+  },
+  "qualifiedBrowsers": [
+    {
+      "label": "qualified-webgl",
+      "path": "shortcut-qualified-webgl.json",
+      "entries": 4,
+      "returns": 4,
+      "registrationCheckpoints": [
+        {
+          "entry": 1,
+          "registrations": 3,
+          "adds": 2,
+          "removes": 1
+        },
+        {
+          "entry": 2,
+          "registrations": 3,
+          "adds": 2,
+          "removes": 1
+        },
+        {
+          "entry": 3,
+          "registrations": 3,
+          "adds": 2,
+          "removes": 1
+        },
+        {
+          "entry": 4,
+          "registrations": 3,
+          "adds": 2,
+          "removes": 1
+        }
+      ],
+      "runtime": {
+        "requestedBackend": "webgl2",
+        "selectedBackend": "webgl2",
+        "packageId": "webgl2-shared",
+        "compiledBackend": "webgl2",
+        "fallbackFrom": null,
+        "webgpuSupported": true,
+        "webgl2Supported": true,
+        "runtimeVersion": "bevy-db5e53a91f4d11de"
+      },
+      "networkErrors": 0
+    },
+    {
+      "label": "qualified-webgpu",
+      "path": "shortcut-qualified-webgpu.json",
+      "entries": 4,
+      "returns": 4,
+      "registrationCheckpoints": [
+        {
+          "entry": 1,
+          "registrations": 3,
+          "adds": 2,
+          "removes": 1
+        },
+        {
+          "entry": 2,
+          "registrations": 3,
+          "adds": 2,
+          "removes": 1
+        },
+        {
+          "entry": 3,
+          "registrations": 3,
+          "adds": 2,
+          "removes": 1
+        },
+        {
+          "entry": 4,
+          "registrations": 3,
+          "adds": 2,
+          "removes": 1
+        }
+      ],
+      "runtime": {
+        "requestedBackend": null,
+        "selectedBackend": "webgpu",
+        "packageId": "webgpu",
+        "compiledBackend": "webgpu",
+        "fallbackFrom": null,
+        "webgpuSupported": true,
+        "webgl2Supported": true,
+        "runtimeVersion": "bevy-db5e53a91f4d11de"
+      },
+      "networkErrors": 0
+    }
+  ],
+  "initialObserverLimitation": "stable-webgl/webgpu proved four entries and logouts each, but exact function-name observer recorded zero events; strengthened nonempty observer used for both qualified trials",
+  "mechanismScope": "Real Chrome proves the prior handler-rebind pattern can drop a trusted edge during same-target microtask commit. The exact original fourth key has no historical add/remove trace.",
+  "native": {
+    "canonicalBuildProof": "shortcut-native-canonical/native-canonical-build-result.json",
+    "canonicalLockedOfflineReleaseBuildPassed": true,
+    "candidate": {
+      "path": "D:/mir2-builds/r16-shortcut-20261107/native-game-canonical/mir2-platform-windows.exe",
+      "bytes": 135006208,
+      "sha256": "bc3bde1d0f063f3c52abe790424249a983f298f4941245a5b6c2c0081dd5190a"
+    },
+    "sourceCount": 608,
+    "actualCanonicalDependencies": 395,
+    "lockAddedEdges": 3,
+    "lockVersionsChanged": 0,
+    "originalExeSha256": "d930618bc7cc461a4d03507a68fb28c0b15af6200de8f00946c463929f67d638",
+    "canonicalCandidateWindowTested": false,
+    "priorExternalCandidateAutoLoginOnly": true,
+    "priorExternalCandidateStartGameCount": 0,
+    "computerUseStoppedByPhysicalEscape": true
+  },
+  "preservation": {
+    "immutableSourceBaseline": true,
+    "sourceUsedReadOnly": true,
+    "originalLiveFileBytesClaimedUnchanged": false,
+    "allBaselineAccountsRetained": true,
+    "unrelatedAccountsEqual": true,
+    "protectedFields": {
+      "character": true,
+      "experience": true,
+      "max_experience": true,
+      "gold": true,
+      "credit": true,
+      "city_currencies": true,
+      "inventory_capacity": true,
+      "inventory_items_json": true,
+      "belt_items_json": true,
+      "equipment_items_json": true,
+      "equipment_items_explicit_empty": true,
+      "storage_items_json": true,
+      "hero_inventory_items_json": true,
+      "hero_equipment_items_json": true,
+      "hero_inventory_capacity": true,
+      "hero_inventory_legacy_40": true,
+      "hero_vitals": true,
+      "hero_registry_attachment": true,
+      "quest_states_json": true,
+      "skill_states_json": true,
+      "npc_flag_states_json": true,
+      "npc_saved_values_json": true,
+      "npc_purchase_journal": true,
+      "guild_experience_journal": true,
+      "item_rental_records_json": true,
+      "has_rented_item": true
+    },
+    "all26ProtectedEqual": true,
+    "oldRoleLevel": 30,
+    "oldRoleTransformEqual": true,
+    "saveFieldCount": 44,
+    "saveDifferingFields": [
+      "default_npc_events",
+      "revision"
+    ],
+    "ordinaryCreatedCloneRolesAdded": 1,
+    "originalRoleRetained": true
+  },
+  "originalInstalledClientChanged": false,
+  "existingWebPlayableEntryReplaced": false,
+  "mainnetDeployed": false,
+  "candidate100": false,
+  "goalActive": true,
+  "remaining": [
+    "Code and protocol parity for Group/Trade/Alo and other queue items",
+    "Windows actual windows and cross-client same-candidate gameplay",
+    "Historical old headless-shell long task",
+    "Production Web package/resource/360 MiB gates and formal deployment prerequisites",
+    "Final human Accepted"
+  ],
+  "files": [
+    {
+      "path": "shortcut-shortcut-diag-1.json",
+      "bytes": 17992,
+      "sha256": "03ef7dd42743f78a9ce5cab0359dce6b2675e15de939949e40c539ffae493f96"
+    },
+    {
+      "path": "shortcut-shortcut-diag-2.json",
+      "bytes": 22845,
+      "sha256": "47d9829d2ffe7c812008c509dcfe1d5d25667f2af3f51af1277d414d7bcbcf83"
+    },
+    {
+      "path": "shortcut-shortcut-listener-trace.json",
+      "bytes": 19450,
+      "sha256": "fcfc85fc7897bc68e5623597fa8b369e7174d1bed7b17d414a28f82e1f6727ae"
+    },
+    {
+      "path": "shortcut-stable-webgl.json",
+      "bytes": 16770,
+      "sha256": "2b6c273b86ade3e870497b6f4aa654887d011edf8af7012c6b0f88db6de0a778"
+    },
+    {
+      "path": "shortcut-stable-webgpu.json",
+      "bytes": 16867,
+      "sha256": "0ed21eacfe0c5e772e5d27c4814be2ff358ec92e7921a0e3e452f7b4c91a769a"
+    },
+    {
+      "path": "shortcut-qualified-webgl.json",
+      "bytes": 17169,
+      "sha256": "094d7bf65e0cca211f6d6670f0273adcafd62d5a393b52f51998d180a9100160"
+    },
+    {
+      "path": "shortcut-qualified-webgpu.json",
+      "bytes": 17492,
+      "sha256": "fbf94d3c12a0c458c83d922b6e0c9c1f434922b8d70738fb469df0148d3f773d"
+    },
+    {
+      "path": "shortcut-selection.png",
+      "bytes": 268129,
+      "sha256": "bae3686bca92e066c7a6ce1a75a97253d02c74d8662927c00bcb9ae159c00dec"
+    },
+    {
+      "path": "shortcut-first-q.png",
+      "bytes": 118178,
+      "sha256": "ed9a9aea9ed6c5d8d1d2c920a2fdf417df2a9205646fd54bb6484f0a045965e0"
+    },
+    {
+      "path": "shortcut-dom-control.json",
+      "bytes": 7133,
+      "sha256": "258ab25f78b893f83f506f3ed9afad1e1dbaea5de607a05b12917c6ba82a8793"
+    },
+    {
+      "path": "shortcut-dom-control-receipt.json",
+      "bytes": 278,
+      "sha256": "cb16d7ad1519c81e8c02d0f6b83aaaa5f80bcee6f5aeebfbb6f7dc284f458aac"
+    },
+    {
+      "path": "shortcut-stable-keydown-node-final.log",
+      "bytes": 34778,
+      "sha256": "5ed66e2351c952366cff6f7cfe5f1abfe75eb97c139c26896af6f78909f337bd"
+    },
+    {
+      "path": "shortcut-native-lock-sync.json",
+      "bytes": 452,
+      "sha256": "d05a85a9318bb646e279b9c3e0f8c4f6c699f88517c978021219a89dafd41d0b"
+    },
+    {
+      "path": "shortcut-native-canonical-lock-tree.log",
+      "bytes": 141,
+      "sha256": "a1fbd8bc9ee8b187f5eed13df7e5f7811f5dfeea8aef0200c01077da43ffeaef"
+    },
+    {
+      "path": "shortcut-cleanup-final.json",
+      "bytes": 652,
+      "sha256": "a0faf64c0cd6977a8e2d10538ce4355a9a068082a18de283115656a510f69bf5"
+    },
+    {
+      "path": "shortcut-native-canonical/native-canonical-build-result.json",
+      "bytes": 2462,
+      "sha256": "ba6855ae6233a67f251c20fd7b10cb018cbb2dad329a8f98369f67f7c54001f6"
+    },
+    {
+      "path": "shortcut-native-canonical/native-canonical-source-before.json",
+      "bytes": 137096,
+      "sha256": "098f6f20181451bce80af3ff8128794a26277ebec9c4ad0fbaa4a62dea23854b"
+    },
+    {
+      "path": "shortcut-native-canonical/native-canonical-source-after.json",
+      "bytes": 136659,
+      "sha256": "e631ed3907423287db823c9125b90b8d1db3f753d71a1e2562ba948d5c043624"
+    },
+    {
+      "path": "shortcut-native-canonical/native-canonical-build-command-receipt.json",
+      "bytes": 618,
+      "sha256": "b19aa7dbbcb762522fa502b4172eec66b402df799305d3e8a691e11901d36bd7"
+    },
+    {
+      "path": "shortcut-native-canonical/native-canonical-release.log",
+      "bytes": 54431,
+      "sha256": "689dcc8824fee0d9fe94a4831db1acd658be636b9608d7d47cb8109c3c201ae0"
+    },
+    {
+      "path": "shortcut-native-canonical/mir2-platform-windows.d",
+      "bytes": 36078,
+      "sha256": "2540906b7f958e386506cad07434c26e28e570b3c890f76373a076c8312c843e"
+    }
+  ]
+}

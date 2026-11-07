@@ -7,6 +7,7 @@ import { fileURLToPath } from "node:url";
 import { readImmutableBevyRuntimeRelease } from "./lib/bevy-runtime-release-files.mjs";
 import { readClientCoreRelease, assertCompiledClientCoreManifest } from "./lib/client-core-release-files.mjs";
 import { assertCompiledBevyRuntimeManifest, resolveNextBuildDistDirectory } from "./lib/bevy-runtime-build-identity.mjs";
+import { selectR16PlayableAssetsClosure, verifyR16PlayableAssetFiles } from "./lib/r16-playable-assets.mjs";
 import {
   auditPortableTree, copyPortableStandalone, copySelectedPublic, copyVerifiedRequiredServerFiles,
   materializeStandaloneDependencies,
@@ -64,6 +65,9 @@ const mapAtlasClosure = await selectMapAtlasClosure(publicRoot, {
 const localMapClosure = await selectLocalMapClosure(publicRoot, {
   sourcePath: args.localMapClosure ?? "", sourceSha256: args.localMapClosureSha256 ?? "",
 });
+const r16PlayableClosure = await selectR16PlayableAssetsClosure(publicRoot, {
+  manifestPath: args.r16PlayableAssetsManifest ?? "", manifestSha256: args.r16PlayableAssetsManifestSha256 ?? "",
+});
 const runtimeReleasePrefix = `bevy-runtime-releases/${runtimeManifest.version}`;
 const runtimeFilePaths = new Set(runtimeManifest.files.map((entry) =>
   entry.path.replace(/^public\/bevy-runtime/, runtimeReleasePrefix)));
@@ -92,6 +96,8 @@ let publicCopyStats = null;
 let jsonCompaction = null;
 let packagedCoreClosure = null;
 let packagedLocalMapClosure = null;
+let packagedR16PlayableClosure = null;
+let r16PublicCopyStats = null;
 
 if (!reportOnly) {
   const standaloneRoot = path.join(nextRoot, "standalone");
@@ -109,6 +115,7 @@ if (!reportOnly) {
   copyStats = await copyPortableStandalone({
     sourceRoot: standaloneRoot, destinationRoot: outputRoot, appRelativePath,
     publicSelection,
+    preservePublicFiles: r16PlayableClosure.files,
   });
   const appRoot = path.join(outputRoot, appRelativePath);
   const copiedNextRoot = resolveNextBuildDistDirectory(sourceRequiredServerFiles, appRoot);
@@ -133,7 +140,19 @@ if (!reportOnly) {
   await copyTree(path.join(nextRoot, "static"), path.join(copiedNextRoot, "static"));
   publicCopyStats = await copySelectedPublic({
     sourceRoot: publicRoot, destinationRoot: path.join(appRoot, "public"), selection: publicSelection,
+    preservePublicFiles: r16PlayableClosure.files,
   });
+  if (r16PlayableClosure.manifest) {
+    r16PublicCopyStats = await copySelectedPublic({
+      sourceRoot: r16PlayableClosure.sourceRoot, destinationRoot: path.join(appRoot, "public"),
+      selection: (relative, isDirectory) => isDirectory
+        ? [...r16PlayableClosure.files].some(file => file.startsWith(`${relative}/`))
+        : r16PlayableClosure.files.has(relative),
+      preservePublicFiles: r16PlayableClosure.files,
+    });
+    packagedR16PlayableClosure = await verifyR16PlayableAssetFiles(path.join(appRoot, "public"), r16PlayableClosure.manifest);
+    await fs.writeFile(path.join(outputRoot, "R16-PLAYABLE-ASSETS-MANIFEST.json"), r16PlayableClosure.manifestBytes);
+  }
   if (localMapClosure.files.size) {
     const copiedMap = await selectLocalMapClosure(path.join(appRoot, "public"), {
       sourcePath: args.localMapClosure, sourceSha256: args.localMapClosureSha256,
@@ -224,6 +243,10 @@ const report = {
   ...(localMapClosure.files.size ? { localMapSelection: {
     sourceSha256: localMapClosure.sourceSha256, selectedPaths: localMapClosure.frames,
     bytes: localMapClosure.bytes, packagedClosure: packagedLocalMapClosure,
+  } } : {}),
+  ...(r16PlayableClosure.manifest ? { r16PlayableAssetSelection: {
+    manifestSha256: r16PlayableClosure.manifestSha256, selectedPaths: r16PlayableClosure.entries,
+    bytes: r16PlayableClosure.bytes, packagedClosure: packagedR16PlayableClosure, copy: r16PublicCopyStats,
   } } : {}),
   jsonCompaction,
   coreSelection: { compiledManifest: compiledCoreManifest, selectedPaths: [...coreFilePaths],

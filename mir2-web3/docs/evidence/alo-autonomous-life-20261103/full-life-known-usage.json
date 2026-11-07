@@ -1,0 +1,37 @@
+{
+  "schema": "mir2-life-known-usage/1",
+  "source": "persisted-usage-episodes",
+  "attemptedCalls": 4,
+  "measuredCalls": 4,
+  "unmeasuredAttempts": 0,
+  "records": [
+    {
+      "episodeIdHash": "1e9b9233f38c4829b721a3f9315d9958887fe2fa97fb091427166b4fea13b475",
+      "model": "gpt-6-luna",
+      "inputTokens": 2573,
+      "outputTokens": 113
+    },
+    {
+      "episodeIdHash": "67436f35429da662d5054744a70245df94ecd1033da111a446d5f373e03387a2",
+      "model": "gpt-6-luna",
+      "inputTokens": 1687,
+      "outputTokens": 59
+    },
+    {
+      "episodeIdHash": "452a4d490d1df228733246c3155ece9ffdbb28eae1c168369dd58c6de55a9dea",
+      "model": "gpt-6-luna",
+      "inputTokens": 2726,
+      "outputTokens": 113
+    },
+    {
+      "episodeIdHash": "bd264d72f1c32acd6adacbfefecb3a715f026e8fb981b9af705b551d4037dade",
+      "model": "gpt-6-luna",
+      "inputTokens": 2609,
+      "outputTokens": 151
+    }
+  ],
+  "knownInputTokens": 9595,
+  "knownOutputTokens": 436,
+  "unmeasuredCostIsNotZero": true,
+  "providerBillReconciliation": false
+}

@@ -63,15 +63,57 @@ pub struct RechargeReviewReceipt {
     pub event_id: String,
     pub at_ms: u64,
 }
+/// Frozen on the server before contacting a payment service. Legacy records
+/// omit this field and remain Stripe records, including on serialization.
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize)]
+#[serde(rename_all = "lowercase")]
+pub enum FiatPaymentProvider {
+    #[default]
+    Stripe,
+    Waffo,
+}
+impl FiatPaymentProvider {
+    pub fn as_str(self) -> &'static str {
+        match self {
+            Self::Stripe => "stripe",
+            Self::Waffo => "waffo",
+        }
+    }
+    pub fn is_stripe(&self) -> bool {
+        *self == Self::Stripe
+    }
+    pub fn valid_checkout_id(self, id: &str) -> bool {
+        match self {
+            Self::Stripe => valid_provider_id(id, "cs_"),
+            Self::Waffo => valid_key(id, 255) && !id.contains("_secret_"),
+        }
+    }
+    pub fn valid_payment_id(self, id: &str) -> bool {
+        match self {
+            Self::Stripe => valid_provider_id(id, "pi_"),
+            Self::Waffo => self.valid_checkout_id(id),
+        }
+    }
+    pub fn valid_event_id(self, id: &str) -> bool {
+        match self {
+            Self::Stripe => valid_provider_id(id, "evt_"),
+            Self::Waffo => valid_key(id, 255),
+        }
+    }
+}
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct RechargeOrder {
     pub id: String,
+    #[serde(default, skip_serializing_if = "FiatPaymentProvider::is_stripe")]
+    pub provider: FiatPaymentProvider,
     pub request_id: String,
     pub character_index: i32,
     pub offer: RechargeOffer,
     pub created_at_ms: u64,
     pub livemode: bool,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub provider_request_started_at_ms: Option<u64>,
     pub checkout_session_id: Option<String>,
     pub payment_intent_id: Option<String>,
     pub state: RechargeOrderState,
@@ -175,12 +217,16 @@ impl BillingLedger {
                 return Err("billingLedgerInvalid".into());
             }
             if let Some(session) = &order.checkout_session_id {
-                if !valid_provider_id(session, "cs_") || !sessions.insert(session) {
+                if !order.provider.valid_checkout_id(session)
+                    || !sessions.insert((order.provider, session))
+                {
                     return Err("billingCheckoutBindingInvalid".into());
                 }
             }
             if let Some(payment) = &order.payment_intent_id {
-                if !valid_provider_id(payment, "pi_") || !payments.insert(payment) {
+                if !order.provider.valid_payment_id(payment)
+                    || !payments.insert((order.provider, payment))
+                {
                     return Err("billingPaymentBindingInvalid".into());
                 }
             }
@@ -189,6 +235,14 @@ impl BillingLedger {
                 || order.paid_at_ms.is_some_and(|at| at < order.created_at_ms)
             {
                 return Err("billingPaymentReceiptInvalid".into());
+            }
+            if order.provider_request_started_at_ms.is_some_and(|at| {
+                order.provider != FiatPaymentProvider::Waffo || at < order.created_at_ms
+            }) || (order.provider == FiatPaymentProvider::Waffo
+                && order.checkout_session_id.is_some()
+                && order.provider_request_started_at_ms.is_none())
+            {
+                return Err("billingCheckoutBindingInvalid".into());
             }
             if let Some(applied) = &order.applied {
                 if applied.character_index != order.character_index
@@ -203,7 +257,7 @@ impl BillingLedger {
             }
             for (event, review) in &order.review_events {
                 if event != &review.event_id
-                    || !valid_provider_id(event, "evt_")
+                    || !order.provider.valid_event_id(event)
                     || !valid_review_kind(&review.kind)
                     || review.at_ms < order.created_at_ms
                 {
@@ -342,11 +396,11 @@ pub(crate) fn validate_complete_store(store: &AccountStore) -> Result<(), String
                 || order
                     .checkout_session_id
                     .as_ref()
-                    .is_some_and(|id| !sessions.insert(id))
+                    .is_some_and(|id| !sessions.insert((order.provider, id)))
                 || order
                     .payment_intent_id
                     .as_ref()
-                    .is_some_and(|id| !payments.insert(id))
+                    .is_some_and(|id| !payments.insert((order.provider, id)))
             {
                 return Err("billingProviderBindingAlreadyUsed".into());
             }
@@ -570,6 +624,26 @@ impl SimulationConfig {
         now_ms: u64,
         livemode: bool,
     ) -> Result<RechargeOrder, String> {
+        self.prepare_recharge_order_for_provider(
+            account_id,
+            character_index,
+            request_id,
+            offer,
+            now_ms,
+            livemode,
+            FiatPaymentProvider::Stripe,
+        )
+    }
+    pub fn prepare_recharge_order_for_provider(
+        &self,
+        account_id: &str,
+        character_index: i32,
+        request_id: &str,
+        offer: &RechargeOffer,
+        now_ms: u64,
+        livemode: bool,
+        provider: FiatPaymentProvider,
+    ) -> Result<RechargeOrder, String> {
         offer.validate()?;
         if !valid_key(request_id, 128) {
             return Err("billingRequestIdInvalid".into());
@@ -594,6 +668,7 @@ impl SimulationConfig {
                 if existing.character_index != character_index
                     || &existing.offer != offer
                     || existing.livemode != livemode
+                    || existing.provider != provider
                 {
                     return Err("billingRequestIdReused".into());
                 }
@@ -628,11 +703,13 @@ impl SimulationConfig {
                 .ok_or("billingCreditCapacityExceeded")?;
             let order = RechargeOrder {
                 id: new_order_id()?,
+                provider,
                 request_id: request_id.into(),
                 character_index,
                 offer: offer.clone(),
                 created_at_ms: now_ms,
                 livemode,
+                provider_request_started_at_ms: None,
                 checkout_session_id: None,
                 payment_intent_id: None,
                 state: RechargeOrderState::Prepared,
@@ -644,6 +721,39 @@ impl SimulationConfig {
             Ok(order)
         })
     }
+    /// Durable single sender for providers whose unknown create result must be
+    /// recovered by inquiry. Claiming survives crashes before the HTTP result.
+    pub fn begin_recharge_provider_request(
+        &self,
+        account_id: &str,
+        order_id: &str,
+        provider: FiatPaymentProvider,
+        now_ms: u64,
+    ) -> Result<bool, String> {
+        if provider != FiatPaymentProvider::Waffo {
+            return Err("billingProviderInvalid".into());
+        }
+        self.refresh_account_store_account(account_id)?;
+        self.commit_account_store_transaction(&[account_id.to_owned()], |store| {
+            let order = store
+                .accounts
+                .get_mut(account_id)
+                .and_then(|a| a.billing.as_mut())
+                .and_then(|b| b.orders.get_mut(order_id))
+                .ok_or("billingOrderMissing")?;
+            if order.provider != provider || now_ms < order.created_at_ms {
+                return Err("billingPaymentBindingMismatch".into());
+            }
+            if order.provider_request_started_at_ms.is_some() {
+                return Ok(false);
+            }
+            if order.state != RechargeOrderState::Prepared {
+                return Err("billingOrderTerminal".into());
+            }
+            order.provider_request_started_at_ms = Some(now_ms);
+            Ok(true)
+        })
+    }
     pub fn bind_recharge_checkout(
         &self,
         account_id: &str,
@@ -651,7 +761,23 @@ impl SimulationConfig {
         session_id: &str,
         now_ms: u64,
     ) -> Result<RechargeOrder, String> {
-        if !valid_provider_id(session_id, "cs_") {
+        self.bind_recharge_provider_checkout(
+            account_id,
+            order_id,
+            FiatPaymentProvider::Stripe,
+            session_id,
+            now_ms,
+        )
+    }
+    pub fn bind_recharge_provider_checkout(
+        &self,
+        account_id: &str,
+        order_id: &str,
+        provider: FiatPaymentProvider,
+        session_id: &str,
+        now_ms: u64,
+    ) -> Result<RechargeOrder, String> {
+        if !provider.valid_checkout_id(session_id) {
             return Err("billingCheckoutIdInvalid".into());
         }
         self.refresh_account_store_account(account_id)?;
@@ -659,7 +785,8 @@ impl SimulationConfig {
             for (owner, account) in &store.accounts {
                 if let Some(ledger) = &account.billing {
                     if ledger.orders.values().any(|order| {
-                        order.checkout_session_id.as_deref() == Some(session_id)
+                        order.provider == provider
+                            && order.checkout_session_id.as_deref() == Some(session_id)
                             && (owner != account_id || order.id != order_id)
                     }) {
                         return Err("billingProviderBindingAlreadyUsed".into());
@@ -672,6 +799,9 @@ impl SimulationConfig {
                 .and_then(|a| a.billing.as_mut())
                 .and_then(|b| b.orders.get_mut(order_id))
                 .ok_or("billingOrderMissing")?;
+            if order.provider != provider {
+                return Err("billingPaymentBindingMismatch".into());
+            }
             if now_ms < order.created_at_ms {
                 return Err("billingClockBeforeOrder".into());
             }
@@ -696,8 +826,24 @@ impl SimulationConfig {
         payment: &VerifiedRechargePayment,
         now_ms: u64,
     ) -> Result<RechargeOrder, String> {
-        if !valid_provider_id(&payment.session_id, "cs_")
-            || !valid_provider_id(&payment.payment_intent_id, "pi_")
+        self.confirm_recharge_provider_payment(
+            account_id,
+            order_id,
+            FiatPaymentProvider::Stripe,
+            payment,
+            now_ms,
+        )
+    }
+    pub fn confirm_recharge_provider_payment(
+        &self,
+        account_id: &str,
+        order_id: &str,
+        provider: FiatPaymentProvider,
+        payment: &VerifiedRechargePayment,
+        now_ms: u64,
+    ) -> Result<RechargeOrder, String> {
+        if !provider.valid_checkout_id(&payment.session_id)
+            || !provider.valid_payment_id(&payment.payment_intent_id)
             || !valid_currency(&payment.currency)
         {
             return Err("billingPaymentInvalid".into());
@@ -707,9 +853,10 @@ impl SimulationConfig {
             for (owner, account) in &store.accounts {
                 if let Some(ledger) = &account.billing {
                     if ledger.orders.values().any(|order| {
-                        (order.checkout_session_id.as_deref() == Some(&payment.session_id)
-                            || order.payment_intent_id.as_deref()
-                                == Some(&payment.payment_intent_id))
+                        order.provider == provider
+                            && (order.checkout_session_id.as_deref() == Some(&payment.session_id)
+                                || order.payment_intent_id.as_deref()
+                                    == Some(&payment.payment_intent_id))
                             && (owner != account_id || order.id != order_id)
                     }) {
                         return Err("billingProviderBindingAlreadyUsed".into());
@@ -722,7 +869,8 @@ impl SimulationConfig {
                 .and_then(|a| a.billing.as_mut())
                 .and_then(|b| b.orders.get_mut(order_id))
                 .ok_or("billingOrderMissing")?;
-            if payment.amount_minor != order.offer.amount_minor
+            if order.provider != provider
+                || payment.amount_minor != order.offer.amount_minor
                 || payment.currency != order.offer.currency
                 || payment.livemode != order.livemode
                 || order
@@ -760,7 +908,25 @@ impl SimulationConfig {
         event_id: &str,
         now_ms: u64,
     ) -> Result<(), String> {
-        if !valid_review_kind(kind) || !valid_provider_id(event_id, "evt_") {
+        self.mark_recharge_provider_review(
+            account_id,
+            order_id,
+            FiatPaymentProvider::Stripe,
+            kind,
+            event_id,
+            now_ms,
+        )
+    }
+    pub fn mark_recharge_provider_review(
+        &self,
+        account_id: &str,
+        order_id: &str,
+        provider: FiatPaymentProvider,
+        kind: &str,
+        event_id: &str,
+        now_ms: u64,
+    ) -> Result<(), String> {
+        if !valid_review_kind(kind) || !provider.valid_event_id(event_id) {
             return Err("billingReviewEventInvalid".into());
         }
         self.refresh_account_store_account(account_id)?;
@@ -771,6 +937,9 @@ impl SimulationConfig {
                 .and_then(|a| a.billing.as_mut())
                 .and_then(|b| b.orders.get_mut(order_id))
                 .ok_or("billingOrderMissing")?;
+            if order.provider != provider {
+                return Err("billingPaymentBindingMismatch".into());
+            }
             if now_ms < order.created_at_ms {
                 return Err("billingClockBeforeOrder".into());
             }

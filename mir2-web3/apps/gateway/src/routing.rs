@@ -2545,8 +2545,24 @@ impl ZoneOwnerLeaseAuthority for InMemoryZoneOwnerLeaseAuthority {
     }
 }
 
+#[path = "companion_life_boundary.rs"]
+pub(crate) mod companion_life_boundary;
+use companion_life_boundary::CompanionLifeBoundary;
+
 pub trait ZoneRuntimeFactory: Send + Sync {
+    fn configure_companion_life_projection(&self, _policy: &crate::companion_relay::CompanionPolicy, _handle: crate::companion_supply::LifeProjectionHandle) -> Result<(), String> {
+        Err("This Zone factory does not support authoritative companion life boundaries.".into())
+    }
     fn create_runtime(&self, config: GatewayConfig, zone_id: &ZoneId) -> ZoneRuntimeHandle;
+    fn supports_shared_groups(&self) -> bool {
+        false
+    }
+    fn configure_companion_owner_fences(
+        &self,
+        _policy: &crate::companion_relay::CompanionPolicy,
+    ) -> Result<(), String> {
+        Err("This Zone factory does not support companion owner fences.".into())
+    }
     fn owner_lease(&self, zone_id: &ZoneId) -> ZoneOwnerLease {
         ZoneOwnerLease::in_process(zone_id)
     }
@@ -4228,6 +4244,7 @@ fn pending_owned_kill_proof_key(key: &ZonePresenceKey, award: &ZoneMonsterKillAw
 
 #[derive(Debug)]
 struct SharedInProcessZoneState {
+    companion_boundary: Option<Arc<CompanionLifeBoundary>>,
     // Crystal warm Info.Pets retains tame time; binary/durable PetInfo does not.
     // This process-local cache is intentionally excluded from checkpoints.
     warm_pet_snapshots: BTreeMap<ZonePresenceKey, mir2_simulation::ZoneSavedPetSnapshot>,
@@ -4563,6 +4580,7 @@ struct ZoneNativePlayerAttack {
 impl SharedInProcessZoneState {
     fn new() -> Self {
         Self {
+            companion_boundary: None,
             experience_authority: None,
             next_zone_object_id: 50_000,
             next_live_outbound_registration_id: 0,
@@ -4940,6 +4958,7 @@ impl SharedInProcessZoneState {
             );
         }
         Ok(Self {
+            companion_boundary: None,
             next_zone_object_id: checkpoint.next_zone_object_id,
             warm_pet_snapshots: BTreeMap::new(),
             experience_authority: None,
@@ -8164,6 +8183,7 @@ impl fmt::Debug for SharedZoneMutationCapture {
 
 #[derive(Clone)]
 pub struct SharedInProcessZoneRuntimeFactory {
+    companion_boundary: Arc<Mutex<Option<Arc<CompanionLifeBoundary>>>>,
     shared_mentors: Arc<Mutex<shared_mentor::SharedMentorCoordinator>>,
     zones: Arc<Mutex<BTreeMap<ZoneId, SharedInProcessZoneResources>>>,
     account_inventory_service: SharedAccountInventoryServiceHandle,
@@ -8192,6 +8212,7 @@ impl fmt::Debug for SharedInProcessZoneRuntimeFactory {
 impl SharedInProcessZoneRuntimeFactory {
     pub fn new() -> Self {
         Self {
+            companion_boundary: Arc::new(Mutex::new(None)),
             shared_mentors: Arc::new(Mutex::new(
                 crate::routing::shared_mentor::SharedMentorCoordinator::default(),
             )),
@@ -8211,6 +8232,7 @@ impl SharedInProcessZoneRuntimeFactory {
         tick_cadences: BTreeMap<ZoneId, Duration>,
     ) -> Self {
         Self {
+            companion_boundary: Arc::new(Mutex::new(None)),
             shared_mentors: Arc::new(Mutex::new(
                 crate::routing::shared_mentor::SharedMentorCoordinator::default(),
             )),
@@ -8231,6 +8253,7 @@ impl SharedInProcessZoneRuntimeFactory {
         account_inventory_service: SharedAccountInventoryServiceHandle,
     ) -> Self {
         Self {
+            companion_boundary: Arc::new(Mutex::new(None)),
             shared_mentors: Arc::new(Mutex::new(
                 crate::routing::shared_mentor::SharedMentorCoordinator::default(),
             )),
@@ -8247,6 +8270,7 @@ impl SharedInProcessZoneRuntimeFactory {
 
     pub fn fresh(&self) -> Self {
         Self {
+            companion_boundary: self.companion_boundary.clone(),
             shared_mentors: Arc::new(Mutex::new(
                 crate::routing::shared_mentor::SharedMentorCoordinator::default(),
             )),
@@ -8268,6 +8292,7 @@ impl SharedInProcessZoneRuntimeFactory {
 
     pub(crate) fn fresh_replica(&self) -> Self {
         Self {
+            companion_boundary: self.companion_boundary.clone(),
             shared_mentors: Arc::new(Mutex::new(
                 crate::routing::shared_mentor::SharedMentorCoordinator::default(),
             )),
@@ -8567,6 +8592,7 @@ impl SharedInProcessZoneRuntimeFactory {
         let mut restored_states = BTreeMap::new();
         for (zone_id, zone_checkpoint) in checkpoint.zones {
             let mut restored = SharedInProcessZoneState::restore(zone_checkpoint)?;
+            self.bind_companion_boundary(&mut restored)?;
             partition_directory::bind_manager_world(&mut restored.zone_manager, &zone_id)?;
             restored_states.insert(zone_id, restored);
         }
@@ -8650,6 +8676,7 @@ impl SharedInProcessZoneRuntimeFactory {
         let mut restored_states = BTreeMap::new();
         for (zone_id, zone_checkpoint) in checkpoint.zones {
             let mut restored = SharedInProcessZoneState::restore(zone_checkpoint)?;
+            self.bind_companion_boundary(&mut restored)?;
             partition_directory::bind_manager_world(&mut restored.zone_manager, &zone_id)?;
             restored_states.insert(zone_id, restored);
         }
@@ -8686,6 +8713,10 @@ impl SharedInProcessZoneRuntimeFactory {
         let Some(resources) = resources else {
             return Ok(false);
         };
+        {
+            let mut state = resources.zone_state.lock().map_err(|_| "Adopted companion Zone unavailable.".to_string())?;
+            self.bind_companion_boundary(&mut state)?;
+        }
         self.zones
             .lock()
             .map_err(|_| "shared Zone factory mutex was poisoned".to_string())?
@@ -8697,6 +8728,7 @@ impl SharedInProcessZoneRuntimeFactory {
         account_inventory_service: SharedAccountInventoryServiceHandle,
     ) -> Self {
         Self {
+            companion_boundary: Arc::new(Mutex::new(None)),
             shared_mentors: Arc::new(Mutex::new(
                 crate::routing::shared_mentor::SharedMentorCoordinator::default(),
             )),
@@ -8716,6 +8748,7 @@ impl SharedInProcessZoneRuntimeFactory {
         npc_world_service: SharedNpcWorldServiceHandle,
     ) -> Self {
         Self {
+            companion_boundary: Arc::new(Mutex::new(None)),
             shared_mentors: Arc::new(Mutex::new(
                 crate::routing::shared_mentor::SharedMentorCoordinator::default(),
             )),
@@ -8750,7 +8783,7 @@ impl SharedInProcessZoneRuntimeFactory {
             .zones
             .lock()
             .expect("shared zone factory mutex should not be poisoned");
-        zones
+        let resources = zones
             .entry(zone_id.clone())
             .or_insert_with(|| {
                 SharedInProcessZoneResources::new(
@@ -8760,7 +8793,10 @@ impl SharedInProcessZoneRuntimeFactory {
                     autonomous_ticks_enabled,
                 )
             })
-            .clone()
+            .clone();
+        self.bind_companion_boundary(&mut resources.zone_state.lock().expect("shared Zone companion boundary state unavailable"))
+            .expect("shared Zone companion boundary configuration unavailable");
+        resources
     }
 
     pub fn active_zone_count(&self) -> usize {
@@ -10257,6 +10293,25 @@ fn shared_trade_offer_fits(free_bag_slots: u16, offer: &SharedTradeOffer) -> boo
 }
 
 impl ZoneRuntimeFactory for SharedInProcessZoneRuntimeFactory {
+    fn configure_companion_life_projection(&self, policy: &crate::companion_relay::CompanionPolicy, handle: crate::companion_supply::LifeProjectionHandle) -> Result<(), String> {
+        self.configure_companion_boundary(policy, Some(handle))
+    }
+    fn supports_shared_groups(&self) -> bool {
+        true
+    }
+
+    fn configure_companion_owner_fences(
+        &self,
+        policy: &crate::companion_relay::CompanionPolicy,
+    ) -> Result<(), String> {
+        self.shared_mentors
+            .lock()
+            .map_err(|_| "Companion party coordinator is unavailable.".to_string())?
+            .groups
+            .configure_companion_owner_fences(policy)?;
+        self.configure_companion_boundary(policy, None)
+    }
+
     fn create_runtime(&self, config: GatewayConfig, zone_id: &ZoneId) -> ZoneRuntimeHandle {
         let resources = self.resources_for_zone(zone_id);
         Box::new(SharedInProcessZoneSessionRuntime {
@@ -10336,6 +10391,8 @@ struct SharedZoneMovementRequest {
 #[derive(Debug, Default)]
 struct SharedZoneMovementSessionState {
     presence_key: Option<ZonePresenceKey>,
+    // Runtime admission only: never persisted into a checkpoint or character save.
+    admitted_public_object_id: Option<u32>,
     presence_epoch: u64,
     zone_move_seq: u64,
     pending_zone_player_movement: bool,
@@ -10355,14 +10412,27 @@ impl SharedZoneMovementSessionState {
             || self.cached_map_file_name.as_deref() != Some(map_file_name.as_str())
         {
             self.presence_epoch = self.presence_epoch.saturating_add(1);
+            self.admitted_public_object_id = None;
         }
         self.presence_key = Some(key);
         self.cached_map_file_name = Some(map_file_name);
         self.cached_map_transfers = map_transfers;
     }
 
+    fn activate_with_public_object_id(
+        &mut self,
+        key: ZonePresenceKey,
+        map_file_name: String,
+        map_transfers: Vec<CachedMapTransfer>,
+        public_object_id: u32,
+    ) {
+        self.activate(key, map_file_name, map_transfers);
+        self.admitted_public_object_id = Some(public_object_id);
+    }
+
     fn deactivate(&mut self) -> Option<ZonePresenceKey> {
         let key = self.presence_key.take();
+        self.admitted_public_object_id = None;
         if key.is_some() {
             self.presence_epoch = self.presence_epoch.saturating_add(1);
         }
@@ -10425,7 +10495,66 @@ pub(crate) struct SharedZoneMovementIngress {
     session_state: Arc<Mutex<SharedZoneMovementSessionState>>,
 }
 
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub(crate) struct SharedZonePlayerSafety {
+    pub map_file_name: String,
+    pub in_safe_zone: bool,
+    pub presence_epoch: u64,
+    pub object_id: u32,
+}
+
 impl SharedZoneMovementIngress {
+    /// Read only this admitted canonical player's authoritative safety. This
+    /// deliberately neither ticks the personal world nor composes a snapshot.
+    pub(crate) fn player_safety(
+        &self,
+        identity: &ActiveSessionIdentity,
+    ) -> Result<Option<SharedZonePlayerSafety>, String> {
+        // Match movement's lock order: shared Zone, then admission state.
+        let state = self.zone_state.lock()
+            .map_err(|_| "shared zone presence mutex is poisoned".to_string())?;
+        let admission = self.session_state.lock()
+            .map_err(|_| "shared zone movement session mutex is poisoned".to_string())?;
+        let key = ZonePresenceKey::from_identity(identity);
+        if admission.presence_key.as_ref() != Some(&key) || state.teardown_fenced(&key) {
+            return Ok(None);
+        }
+        let (Some(presence), Some(session_id)) =
+            (state.players.get(&key), state.zone_sessions.get(&key)) else { return Ok(None); };
+        let zone_key = ZoneKey::for_map(&presence.map_file_name);
+        if state.zone_session_keys.get(session_id) != Some(&key)
+            || admission.cached_map_file_name.as_deref() != Some(presence.map_file_name.as_str())
+            || admission.admitted_public_object_id != Some(presence.zone_object_id)
+            || state.zone_manager.zone_key_for_session(session_id).as_ref() != Some(&zone_key)
+        { return Ok(None); }
+        let Some(zone) = state.zone_manager.zone(&zone_key) else { return Ok(None); };
+        if zone.player_object_id(session_id).map(|id| id.0) != Some(presence.zone_object_id) {
+            return Ok(None);
+        }
+        Ok(zone.player_in_safe_zone(session_id).map(|in_safe_zone| SharedZonePlayerSafety {
+            map_file_name: presence.map_file_name.clone(),
+            in_safe_zone,
+            presence_epoch: admission.presence_epoch,
+            object_id: presence.zone_object_id,
+        }))
+    }
+
+    /// Public ID for this current admission only; never an arbitrary player lookup.
+    pub(crate) fn player_object_id(&self) -> Option<u32> {
+        let zone = self.zone_state.lock().ok()?;
+        let movement = self.session_state.lock().ok()?;
+        let key = movement.presence_key.as_ref()?;
+        if zone.teardown_fenced(key) {
+            return None;
+        }
+        let session_id = zone.zone_sessions.get(key)?;
+        if zone.zone_session_keys.get(session_id) != Some(key) {
+            return None;
+        }
+        let id = zone.players.get(key)?.zone_object_id;
+        (movement.admitted_public_object_id == Some(id)).then_some(id)
+    }
+
     fn new(
         movement_sender: SyncSender<SharedZoneMovementRequest>,
         zone_state: Arc<Mutex<SharedInProcessZoneState>>,
@@ -11686,7 +11815,7 @@ impl SharedInProcessZoneSessionRuntime {
             })
             .collect::<Vec<_>>();
         let key = ZonePresenceKey::from_identity(&identity);
-        let last_seen_move_seq = {
+        let (last_seen_move_seq, public_object_id) = {
             let mut zone_state = self
                 .zone_state
                 .lock()
@@ -11704,17 +11833,18 @@ impl SharedInProcessZoneSessionRuntime {
             join.object_id = player.zone_object_id;
             zone_state.zone_manager.readmit_restored_player(&identity, &join)?;
             zone_state.experience_authority = self.inner.shared_mentor_config();
-            zone_state
+            let last_seen_move_seq = zone_state
                 .zone_manager
                 .player_last_seen_move_seq(&session_id)
-                .unwrap_or_default()
+                .unwrap_or_default();
+            (last_seen_move_seq, join.object_id)
         };
         let mut movement = self
             .movement_ingress
             .session_state
             .lock()
             .map_err(|_| "shared zone movement session mutex is poisoned".to_string())?;
-        movement.activate(key, map_file_name, cached_map_transfers);
+        movement.activate_with_public_object_id(key, map_file_name, cached_map_transfers, public_object_id);
         movement.zone_move_seq = last_seen_move_seq;
         Ok(())
     }
@@ -12553,7 +12683,7 @@ impl SharedInProcessZoneSessionRuntime {
             .session_state
             .lock()
             .expect("shared zone movement session mutex should not be poisoned")
-            .activate(key.clone(), map_file_name, cached_map_transfers);
+            .activate_with_public_object_id(key.clone(), map_file_name, cached_map_transfers, zone_object_id);
         let echoes_installed_transform = transform.as_ref().is_some_and(|(position, direction)| {
             self.inner.local_player_position().as_ref() == Some(position)
                 && snapshot
@@ -17176,6 +17306,9 @@ impl SharedInProcessZoneSessionRuntime {
         else {
             return Vec::new();
         };
+        if state.companion_boundary.as_ref().is_some_and(|boundary| !boundary.pair_allowed(&key, &peer_key)) {
+            return Vec::new();
+        }
         if state.teardown_fences.contains(&peer_key)
             || peer.allow_trade == Some(false)
             || state.trade_partner(&peer_key).is_some()
@@ -17222,6 +17355,9 @@ impl SharedInProcessZoneSessionRuntime {
             return Vec::new();
         };
         let (_, peer) = state.trade_links.invitations.remove(index);
+        if state.companion_boundary.as_ref().is_some_and(|boundary| !boundary.pair_allowed(&key, &peer.key)) {
+            return Vec::new();
+        }
         if !state.valid_trade_peer(&key, &peer)
             || state.teardown_fences.contains(&key)
             || state.teardown_fences.contains(&peer.key)
@@ -17398,6 +17534,9 @@ impl SharedInProcessZoneSessionRuntime {
                 .zone_state
                 .lock()
                 .expect("shared zone presence mutex should not be poisoned");
+            if amount > 0 && state.companion_boundary.as_ref().is_some_and(|boundary| boundary.actor(&key)) {
+                return Vec::new();
+            }
             let Some(partner) = state.trade_partner(&key) else {
                 return Vec::new();
             };
@@ -17497,6 +17636,13 @@ impl SharedInProcessZoneSessionRuntime {
         let Some(offer) = offer else {
             return packets;
         };
+        let offer_allowed = self.zone_state.lock().expect("shared Zone trade boundary unavailable")
+            .companion_boundary.as_ref().is_none_or(|boundary| boundary.offer_allowed(&offer));
+        if !offer_allowed {
+            packets.extend(self.inner.rollback_shared_trade_offer(&offer));
+            packets.extend(self.cancel_pending_shared_trade_offers());
+            return packets;
+        }
         let Some(self_key) = self.current_presence_key() else {
             packets.extend(self.inner.rollback_shared_trade_offer(&offer));
             return packets;
@@ -17540,7 +17686,9 @@ impl SharedInProcessZoneSessionRuntime {
                         .get(&partner_key)
                         .map(|presence| presence.free_bag_slots)
                         .unwrap_or_default();
-                    if shared_trade_offer_fits(self_free_bag_slots, &partner_offer)
+                    if zone_state.companion_boundary.as_ref().is_none_or(|boundary| boundary.pair_allowed(&self_key, &partner_key)
+                        && boundary.offer_allowed(&offer) && boundary.offer_allowed(&partner_offer))
+                        && shared_trade_offer_fits(self_free_bag_slots, &partner_offer)
                         && shared_trade_offer_fits(partner_free_bag_slots, &offer)
                     {
                         matched_offer = Some((partner_key, partner_offer));
@@ -18751,8 +18899,28 @@ impl SharedInProcessZoneSessionRuntime {
             self.normalize_owner_state_packets(&mut packets);
             return Ok(packets);
         }
+        let mut npc_script_relocated_player = false;
         if let Some(before) = shared_npc_entity_baseline.as_ref() {
             let after = self.inner.world_snapshot();
+            // A successful NPC MOVE can change coordinates without changing the
+            // map key. Publish the server-owned relocation to the shared Zone
+            // before its previous transform can overwrite the owner's save.
+            npc_script_relocated_player = command_packets
+                .iter()
+                .any(|packet| matches!(packet, ServerPacket::MapInformation { .. }))
+                && before.map_file_name == after.map_file_name
+                && before.player_object_id == after.player_object_id
+                && after.player_object_id.is_some_and(|owner| {
+                    let old = before.entities.iter().find(|entity| entity.object_id == owner);
+                    let new = after.entities.iter().find(|entity| entity.object_id == owner);
+                    old.zip(new).is_some_and(|(old, new)| {
+                        (old.x, old.y) != (new.x, new.y)
+                            && command_packets.iter().any(|packet| {
+                                matches!(packet, ServerPacket::UserLocation { location }
+                                    if (location.position.x, location.position.y) == (new.x, new.y))
+                            })
+                    })
+                });
             let side_effect_packets = shared_npc_entity_side_effect_packets(
                 before,
                 &after,
@@ -18835,6 +19003,7 @@ impl SharedInProcessZoneSessionRuntime {
             || is_handoff_transform
             || applies_native_state
             || item_use_relocated_player
+            || npc_script_relocated_player
         {
             self.force_next_zone_transform_sync = true;
             self.owner_dead_entity_ids.clear();
@@ -19172,7 +19341,7 @@ impl WorldRuntime for SharedInProcessZoneSessionRuntime {
         }
         self.validate_durable_npc_actor()
             .map_err(crate::npc_purchase_owner_route::before)?;
-        if !matches!(action, NpcPurchaseOwnerAction::Purchase { .. }) {
+        if !action.is_purchase() {
             return self
                 .inner
                 .execute_npc_purchase_owner(authenticated, owner_epoch, action);
@@ -19430,8 +19599,8 @@ impl WorldRuntime for SharedInProcessZoneSessionRuntime {
                     .zone_manager
                     .zone(&ZoneKey::for_map(map_file_name))
                 {
-                    if let Some(profile) = zone.player_chat_profile(session_id) {
-                        snapshot.in_safe_zone = profile.in_safe_zone;
+                    if let Some(in_safe_zone) = zone.player_in_safe_zone(session_id) {
+                        snapshot.in_safe_zone = in_safe_zone;
                     }
                     // Personal ticks can advance through packet processing.
                     // Shared casts are admitted by the Zone wall clock, so
@@ -19802,14 +19971,85 @@ impl fmt::Debug for RoutedZoneRuntime {
 
 #[derive(Clone)]
 pub struct ZoneRegistry {
+    companion_life_projection: Arc<Mutex<Option<crate::companion_supply::LifeProjectionHandle>>>,
     default_zone_id: ZoneId,
     runtime_factory: SharedZoneRuntimeFactory,
     session_router: SharedSessionRouter,
     owner_lease_authority: SharedZoneOwnerLeaseAuthority,
     global_message_bus: Arc<GlobalZoneMessageBus>,
+    companion_purchase_policy: Arc<Mutex<Option<Arc<crate::companion_relay::CompanionPolicy>>>>,
 }
 
 impl ZoneRegistry {
+    pub fn configure_companion_life_projection(&self, policy: &crate::companion_relay::CompanionPolicy, handle: crate::companion_supply::LifeProjectionHandle) -> Result<(), String> {
+        self.configure_companion_owner_fences(policy)?;
+        let mut current = self.companion_life_projection.lock().map_err(|_| "Companion life projection configuration unavailable.".to_string())?;
+        if current.as_ref().is_some_and(|configured| !Arc::ptr_eq(configured, &handle)) { return Err("Companion life projection cannot change during this process.".into()); }
+        self.runtime_factory.configure_companion_life_projection(policy, handle.clone())?;
+        *current = Some(handle);
+        Ok(())
+    }
+    pub(crate) fn companion_life_restricted(&self, identity: &ActiveSessionIdentity) -> Result<bool, String> {
+        let slot = self.companion_life_projection.lock().map_err(|_| "Companion life projection unavailable.".to_string())?;
+        let Some(handle) = slot.as_ref() else { return Ok(false); };
+        let projection = handle.read().map_err(|_| "Companion life projection unavailable.".to_string())?;
+        Ok(projection.poisoned || projection.actors.contains_key(&crate::companion_relay::CharacterBinding { account_id: identity.account_id.clone(), character_index: identity.character_index }))
+    }
+    pub(crate) fn supports_shared_groups(&self) -> bool {
+        self.runtime_factory.supports_shared_groups()
+    }
+
+    pub(crate) fn configure_companion_owner_fences(
+        &self,
+        policy: &crate::companion_relay::CompanionPolicy,
+    ) -> Result<(), String> {
+        let bytes = serde_json::to_vec(policy)
+            .map_err(|_| "Invalid companion purchase policy.".to_string())?;
+        let validated = crate::companion_relay::CompanionPolicy::parse(&bytes, &policy.realm_id)?;
+        let mut current = self
+            .companion_purchase_policy
+            .lock()
+            .map_err(|_| "Companion purchase policy is unavailable.".to_string())?;
+        if let Some(existing) = current.as_ref() {
+            let configured = serde_json::to_vec(existing.as_ref())
+                .map_err(|_| "Companion purchase policy is unavailable.".to_string())?;
+            if configured != bytes {
+                return Err("Companion purchase policy cannot change during this process.".into());
+            }
+        }
+        self.runtime_factory
+            .configure_companion_owner_fences(&validated)?;
+        *current = Some(Arc::new(validated));
+        Ok(())
+    }
+
+    /// Uses the same immutable startup enrollment as party fencing. Never read
+    /// process environment on a request or treat poisoned policy as no policy.
+    pub(crate) fn is_companion_purchase_actor(
+        &self,
+        identity: &ActiveSessionIdentity,
+    ) -> Result<bool, String> {
+        let policy = self
+            .companion_purchase_policy
+            .lock()
+            .map_err(|_| "Companion purchase policy is unavailable.".to_string())?;
+        let binding = crate::companion_relay::CharacterBinding {
+            account_id: identity.account_id.clone(),
+            character_index: identity.character_index,
+        };
+        Ok(policy
+            .as_ref()
+            .is_some_and(|policy| policy.actor_owner(&binding).is_some()))
+    }
+    /// Call before serving either TCP or WS. The default remote factory rejects
+    /// configured enrollment instead of silently accepting unenforced parties.
+    pub fn configure_companion_owner_fences_from_env(&self) -> Result<(), String> {
+        if let Some(policy) = crate::companion_relay::CompanionPolicy::from_env()? {
+            self.configure_companion_owner_fences(&policy)?;
+        }
+        Ok(())
+    }
+
     pub fn in_process() -> Self {
         Self::new(
             ZoneId::primary(),
@@ -19864,6 +20104,8 @@ impl ZoneRegistry {
             session_router,
             owner_lease_authority,
             global_message_bus: Arc::new(GlobalZoneMessageBus::default()),
+            companion_purchase_policy: Arc::new(Mutex::new(None)),
+            companion_life_projection: Arc::new(Mutex::new(None)),
         }
     }
 
@@ -19928,6 +20170,33 @@ impl Default for ZoneRegistry {
     }
 }
 
+#[cfg(test)]
+mod companion_purchase_policy_tests {
+    use super::*;
+
+    #[test]
+    fn companion_purchase_guard_poisoned_registry_policy_is_an_error_for_every_clone() {
+        let registry = ZoneRegistry::in_process();
+        let identity = ActiveSessionIdentity {
+            account_id: "demo".into(),
+            character_index: 0,
+            character_name: "Fixture".into(),
+        };
+        assert!(!registry.is_companion_purchase_actor(&identity).unwrap());
+        let clone = registry.clone();
+        assert!(std::thread::spawn(move || {
+            let _guard = clone.companion_purchase_policy.lock().unwrap();
+            panic!("controlled companion policy poison");
+        })
+        .join()
+        .is_err());
+        assert!(registry.is_companion_purchase_actor(&identity).is_err());
+        assert!(registry
+            .clone()
+            .is_companion_purchase_actor(&identity)
+            .is_err());
+    }
+}
 impl fmt::Debug for ZoneRegistry {
     fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
         formatter
@@ -19942,6 +20211,8 @@ impl fmt::Debug for ZoneRegistry {
 
 #[cfg(test)]
 mod tests {
+    #[path = "safety_profile_projection_tests.rs"]
+    mod safety_profile_projection_tests;
     #[path = "zone_economy_adapter_tests.rs"]
     mod zone_economy_adapter_tests;
     #[path = "cadence_map_transfer_tests.rs"]
@@ -19973,6 +20244,8 @@ mod tests {
     mod live_owner_wire_ids_tests;
     #[path = "map_transfer_availability_tests.rs"]
     mod map_transfer_availability_tests;
+    #[path = "npc_script_transform_tests.rs"]
+    mod npc_script_transform_tests;
     #[path = "map_transfer_poison_tests.rs"]
     mod map_transfer_poison_tests;
     #[path = "mining_tests.rs"]
@@ -28867,6 +29140,53 @@ mod tests {
     }
 
     #[test]
+    fn companion_public_zone_alias_is_current_admission_only() {
+        let factory = SharedInProcessZoneRuntimeFactory::new();
+        let zone_id = ZoneId::new("companion-alias");
+        let mut runtime = factory.create_runtime(GatewayConfig::default(), &zone_id);
+        start_new_runtime_handle(&mut runtime, "companion-alias-owner", "AliasOwner");
+        let ingress = shared_zone_movement_ingress(&runtime).unwrap();
+        let original = ingress.player_object_id().expect("ordinary admission has a public alias");
+        let resources = factory.resources_for_zone(&zone_id);
+        let key = ingress.session_state.lock().unwrap().presence_key.clone().unwrap();
+        let session_id = resources.zone_state.lock().unwrap().zone_sessions[&key].clone();
+        // A malformed reverse mapping or a teardown capability cannot disclose an alias.
+        resources.zone_state.lock().unwrap().zone_session_keys.remove(&session_id);
+        assert_eq!(ingress.player_object_id(), None);
+        resources.zone_state.lock().unwrap().zone_session_keys.insert(session_id, key.clone());
+        resources.zone_state.lock().unwrap().teardown_fences.insert(key.clone());
+        assert_eq!(ingress.player_object_id(), None);
+        resources.zone_state.lock().unwrap().teardown_fences.remove(&key);
+        // Same-admission map activation may preserve the public ID.
+        ingress.session_state.lock().unwrap().activate_with_public_object_id(key.clone(), "1".into(), Vec::new(), original);
+        assert_eq!(ingress.player_object_id(), Some(original));
+        // A replacement admission/map allocation must not become the old runtime's alias.
+        let replacement = original.checked_add(10_000).unwrap();
+        resources.zone_state.lock().unwrap().players.get_mut(&key).unwrap().zone_object_id = replacement;
+        assert_eq!(ingress.player_object_id(), None);
+        let new_ingress = SharedZoneMovementIngress::new(ingress.movement_sender.clone(), resources.zone_state.clone());
+        new_ingress.session_state.lock().unwrap().activate_with_public_object_id(key.clone(), "1".into(), Vec::new(), replacement);
+        assert_eq!(new_ingress.player_object_id(), Some(replacement));
+        assert_eq!(ingress.player_object_id(), None);
+        new_ingress.session_state.lock().unwrap().deactivate();
+        assert_eq!(new_ingress.player_object_id(), None);
+        resources.zone_state.lock().unwrap().players.get_mut(&key).unwrap().zone_object_id = original;
+        runtime.execute(WorldCommand::ClientPacket(ClientPacket::LogOut)).unwrap();
+        assert_eq!(ingress.player_object_id(), None);
+    }
+
+    #[test]
+    fn companion_policy_rejects_unsupported_factory_without_changing_default_behavior() {
+        let registry = ZoneRegistry::new(ZoneId::primary(), Arc::new(InProcessZoneRuntimeFactory));
+        assert!(!registry.supports_shared_groups());
+        let policy = crate::companion_relay::CompanionPolicy {
+            schema_version: 1, realm_id: "trial".into(), world_epoch: "epoch-1".into(), enrollments: Vec::new(),
+        };
+        assert!(registry.configure_companion_owner_fences(&policy).is_err());
+        assert!(ZoneRegistry::in_process().configure_companion_owner_fences(&policy).is_ok());
+    }
+
+    #[test]
     fn shared_zone_movement_ingress_returns_fallback_when_queue_is_full() {
         let session_state = Arc::new(Mutex::new(super::SharedZoneMovementSessionState {
             presence_key: Some(ZonePresenceKey {
@@ -35099,6 +35419,64 @@ mod tests {
             (after_player.x, after_player.y, after_player.direction),
             (before_player.x, before_player.y, before_player.direction)
         );
+    }
+
+    #[test]
+    fn companion_receive_only_shared_trade_credits_owner_gift_once_and_blocks_outgoing() {
+        // Ordinary shared sessions with public synthetic fixture accounts.
+        // Funding uses the demo fixture's existing wallet, not a new asset API.
+        let registry = ZoneRegistry::in_process();
+        let config = GatewayConfig::default();
+        let mut owner = GatewaySession::new_with_zone_registry(config.clone(), &registry);
+        let mut actor = GatewaySession::new_with_zone_registry(config.clone(), &registry);
+        start_demo_character(&mut owner);
+        start_new_character(&mut actor, "gift-actor-fixture", "GiftActor");
+        let owner_id = owner.active_identity().unwrap();
+        let actor_id = actor.active_identity().unwrap();
+        let policy = crate::companion_relay::CompanionPolicy {
+            schema_version: 1, realm_id: "gift:test".into(), world_epoch: "gift:epoch".into(),
+            enrollments: vec![crate::companion_relay::Enrollment {
+                resident_id: "alo".into(), archive_id: "archive:gift".into(), display_name: "Alo".into(),
+                owner: crate::companion_relay::CharacterBinding { account_id: owner_id.account_id, character_index: owner_id.character_index },
+                actor: crate::companion_relay::CharacterBinding { account_id: actor_id.account_id, character_index: actor_id.character_index },
+            }],
+        };
+        // Bind the observed stable fixture identities on a fresh server before
+        // admitting anyone. Production intentionally rejects late enrollment.
+        owner.save_active_character().unwrap(); actor.save_active_character().unwrap();
+        owner.handle_packet(ClientPacket::LogOut); actor.handle_packet(ClientPacket::LogOut);
+        drop(owner); drop(actor);
+        let registry = ZoneRegistry::in_process();
+        registry.configure_companion_owner_fences(&policy).unwrap();
+        let mut owner = GatewaySession::new_with_zone_registry(config.clone(), &registry);
+        let mut actor = GatewaySession::new_with_zone_registry(config.clone(), &registry);
+        start_demo_character(&mut owner);
+        actor.handle_packet(ClientPacket::Login { account_id: "gift-actor-fixture".into(), password: "gift-actor-fixture".into() });
+        actor.handle_packet(ClientPacket::StartGame { character_index: policy.enrollments[0].actor.character_index });
+        let owner_gold = owner.world_snapshot().gold; let actor_gold = actor.world_snapshot().gold;
+        assert!(owner_gold >= 30);
+        open_shared_trade_pair(&mut owner, &mut actor);
+        let inventory = actor.world_snapshot().inventory_items;
+        actor.handle_packet(ClientPacket::TradeGold { amount: 1 });
+        actor.handle_packet(ClientPacket::DepositTradeItem { from: 0, to: 0 });
+        assert_eq!(actor.world_snapshot().gold, actor_gold);
+        assert_eq!(actor.world_snapshot().inventory_items, inventory);
+        owner.handle_packet(ClientPacket::TradeGold { amount: 30 });
+        owner.handle_packet(ClientPacket::TradeConfirm { locked: true });
+        actor.handle_packet(ClientPacket::TradeConfirm { locked: true });
+        owner.handle_packet(ClientPacket::KeepAlive { time: 1001 });
+        assert_eq!(owner.world_snapshot().gold, owner_gold - 30);
+        assert_eq!(actor.world_snapshot().gold, actor_gold + 30);
+        actor.handle_packet(ClientPacket::TradeConfirm { locked: true });
+        assert_eq!(actor.world_snapshot().gold, actor_gold + 30);
+
+        let mut outsider = GatewaySession::new_with_zone_registry(config, &registry);
+        start_new_character(&mut outsider, "gift-outsider-fixture", "GiftOutsider");
+        face_shared_trade_pair(&mut actor, &mut outsider);
+        actor.handle_packet(ClientPacket::TradeRequest);
+        let received = outsider.handle_packet(ClientPacket::KeepAlive { time: 1002 });
+        assert!(!received.iter().any(|packet| matches!(packet, ServerPacket::TradeRequest { .. })));
+        assert_eq!(actor.world_snapshot().gold, actor_gold + 30);
     }
 
     fn face_shared_trade_pair(first: &mut GatewaySession, second: &mut GatewaySession) {

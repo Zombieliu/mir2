@@ -1,0 +1,43 @@
+{
+  "schema": "mir2.r16.login-door-and-labels-verification.v1",
+  "branch": "codex/windows-player-journey",
+  "head": "c404bde8a5190534f6bc83ec8a4fe78fffc8cb50",
+  "gatewaySha256": "3dd4f2b5c053f0d35c0ba172130a5731eb8944afd4b78e7605c03a9271fcad3e",
+  "scope": "Current worktree, isolated File, real browser inputs plus compiled Windows client tests",
+  "browser": {
+    "measuredAfterFrameOneMs": 1818,
+    "inputs": [
+      "Tab",
+      "Enter",
+      "Space",
+      "Escape",
+      "Start coordinates",
+      "New coordinates",
+      "Delete coordinates",
+      "Exit coordinates",
+      "held pointer released after reveal"
+    ],
+    "classicViewport": "960x720",
+    "fiveClassViewport": "1280x960",
+    "firstRepetition": "test compared caption strings in reverse DOM order, actual Portuguese strings present",
+    "finalSourceRerun": "all opening, localization, reentry and missing frame checks passed; holding two packet types did not isolate exit scenario",
+    "exitProof": "withheld all packets other than the actual StartGame result 4, exit restored login"
+  },
+  "regressions": {
+    "webFocused": 56,
+    "webAdjacent": 11,
+    "typeScriptPassed": true,
+    "nativeFocused": 6,
+    "nativeScope": "compiled Rust tests, same source tree with isolated manifest"
+  },
+  "sourcePins": {
+    "apps/web/app/page.tsx": "81a8aa29105f4851c72ffde87a30604f7cb1923788dc045d6acdf859668d5b20",
+    "apps/web/app/original-client-shell.tsx": "6f5523728c01e51f8f6ba093703941e0b88a1bd3e058a3acee5eb98684bd567a",
+    "apps/web/app/components/r16-login-door.tsx": "b042f6b8f3cc6b55bf53b2382598faecfe94b6789c4f746bb03a215be7a466f8",
+    "apps/web/app/components/original-client-shell-flow.ts": "71af4ae2d07bfe90ed533ec5d831c41fa06d96727502c0b20f2d2e97963df9a7",
+    "apps/web/app/components/original-client-stage-presentation.ts": "c02ff77fa623dc35ce3e133ca7370d6b5675a61d6ad477b0686208cdd2843bb8",
+    "apps/web/app/components/original-client-overlays.tsx": "0e49c98c1c81775a578349aa73b6aa5119db21cf9a507202c121ac7ab380d806",
+    "apps/web/lib/r16-auth-layout.ts": "83961a71c0f99e5b81d6a90420733ec37e5c9911aedbd0f66100ecfbc49d9e37",
+    "apps/game-client/client-bevy/src/native_shell_ui.rs": "6fa91c3e57088eb3b0bd9ccc6fe8d2d01191bef5267f63ba843b40479d875c53"
+  }
+}

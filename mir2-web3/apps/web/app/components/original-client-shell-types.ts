@@ -17,6 +17,8 @@ import type { SkillBarsProps, SkillBarLease } from "./original-client-skill-bars
 import type { CombatModeControls } from "./original-client-combat-mode-controls";
 import type { CashGameShopSource, CashGameShopConfirmation, CashGameShopEntry } from "../../lib/cash-game-shop-ui";
 import type { SuiWalletSummary, LoginAuthControls } from "../../lib/client-login-runtime";
+import type { CharacterCreateControls } from "../../lib/character-create";
+import type { LoginDoorOutcome } from "./original-client-shell-flow";
 import type { DubheQrLoginState } from "../../lib/dubhe-wallet-login";
 import type { Mir2InputProfile } from "./original-client-device-profile";
 import type { Mir2GamepadFamily } from "./original-client-gamepad-input";
@@ -28,7 +30,6 @@ import type {
   DisplayLogLine,
   DisplayNpcShopService,
   DisplayWorld,
-  CreateCharacterDraft,
   EntityKind,
   EquipmentActionRef,
   EquipmentSlot,
@@ -96,6 +97,10 @@ export type BevyEntityRenderState = {
     // handshake. The runtime only applies a remote segment once these match.
     gridX?: number;
     gridY?: number;
+    // Camera-relative Crystal row/pass depth; also used by retained composites.
+    sortZ?: number;
+    motionSortX?: number;
+    motionSortY?: number;
     // Opt-in (?bevyEntityInterp=1) per-entity motion window — present only for
     // NON-self entities under the flag. Lets the Bevy runtime interpolate the
     // sub-cell glide at display Hz instead of the producer folding it into each
@@ -277,6 +282,8 @@ export type OriginalClientShellProps = BagBeltCallbacks & WorldFishingCallbacks 
   loginBusy: boolean;
   loginError: string | null;
   loginAuth: LoginAuthControls;
+  loginDoorToken: number | null;
+  onLoginDoorOpened: (token: number, outcome: LoginDoorOutcome) => void;
   suiWallets: SuiWalletSummary[];
   walletPickerOpen: boolean;
   dubheQr: DubheQrLoginState | null;
@@ -317,6 +324,7 @@ export type OriginalClientShellProps = BagBeltCallbacks & WorldFishingCallbacks 
   onIdentityLinkWallet: (walletId?: string) => void;
   onQuickEnter: () => void;
   onResetClient: () => void;
+  onOpenAccountSecurity?: () => void;
   onExitSelect: () => void;
   onSendChat: (message: string) => void;
   onRequestTrade: () => void;
@@ -325,7 +333,7 @@ export type OriginalClientShellProps = BagBeltCallbacks & WorldFishingCallbacks 
   onConfirmStorageRental?: (id: number) => void;
   onCancelStorageRental?: (id: number) => void;
   onLogout: () => void;
-  onCreateCharacter: (draft: CreateCharacterDraft) => void;
+  characterCreate: CharacterCreateControls;
   onDeleteCharacter: () => void;
   onUseItem: (item: ItemActionRef) => void;
   onReadItemTooltip?: (item: Readonly<DisplayItem>) => CrystalTooltipDocument | null;

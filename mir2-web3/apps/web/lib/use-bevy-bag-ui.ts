@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import { BevyBagHost, type BagCommandToken, type BagHostOptions, type BagHostState, type BagPointerEdge, type BevyBagUiRuntime } from "./bevy-bag-ui";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { BevyBagHost, readBagStatus, type BagCommandToken, type BagHostOptions, type BagHostState, type BagPointerEdge, type BevyBagUiRuntime } from "./bevy-bag-ui";
 
 type Options = Omit<BagHostOptions, "runtime" | "now" | "onState"> & {
   requested: boolean;
@@ -46,10 +46,17 @@ export function useBevyBagUi(options: Options) {
       current.stop();
     };
   }, [options.requested, options.runtimeGeneration]);
-  return { ...state,
-    pointerContext: () => host.current?.pointerContext() ?? null,
-    pointer: (edge: BagPointerEdge) => host.current?.pointer(edge) ?? false,
-    allows: (token: BagCommandToken) => host.current?.allows(token) ?? false,
-    yieldToReact: () => host.current?.yieldToReact(),
-  };
+  // A held Canvas/Bag-to-Belt gesture records these exact callback identities.
+  // React renders may update the live host without retiring that physical
+  // gesture; changing closures mid-down/up used to quarantine ordinary clicks.
+  const pointerContext = useCallback(() => host.current?.pointerContext() ?? null, []);
+  const pointer = useCallback((edge: BagPointerEdge) => host.current?.pointer(edge) ?? false, []);
+  const allows = useCallback((token: BagCommandToken) => host.current?.allows(token) ?? false, []);
+  const yieldToReact = useCallback(() => host.current?.yieldToReact(), []);
+  const readStatus = useCallback(() => {
+    const runtime = latest.current.runtimeRef.current;
+    return runtime ? readBagStatus(runtime) : null;
+  }, []);
+  const diagnostic = useCallback(() => host.current?.diagnostic() ?? null, []);
+  return { ...state, pointerContext, pointer, allows, yieldToReact, readStatus, diagnostic };
 }

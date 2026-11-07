@@ -86,6 +86,49 @@ fn zone() -> ZoneRuntime {
     ZoneRuntime::new_with_collision(ZoneKey::for_map("0"), ZoneCollision::unbounded())
 }
 
+// Combat-only fixtures carry no Crystal map geometry. Real map 0 safety is
+// tested separately; its towns must not silently protect these combat actors.
+const COMBAT_TEST_MAP: &str = "shared-zone-combat-fixture";
+
+fn combat_test_zone() -> ZoneRuntime {
+    ZoneRuntime::new_with_collision(
+        ZoneKey::for_map(COMBAT_TEST_MAP),
+        ZoneCollision::unbounded(),
+    )
+}
+
+fn combat_test_join(session_id: &str, object_id: u32, name: &str, x: i32, y: i32) -> ZoneJoin {
+    let mut player = join(session_id, object_id, name, x, y);
+    player.map_file_name = COMBAT_TEST_MAP.to_string();
+    player
+}
+
+fn combat_test_join_with_profile(
+    session_id: &str,
+    object_id: u32,
+    name: &str,
+    x: i32,
+    y: i32,
+    configure: impl FnOnce(&mut mir2_simulation::ZoneChatProfile),
+) -> ZoneJoin {
+    let mut player = combat_test_join(session_id, object_id, name, x, y);
+    configure(&mut player.chat_profile);
+    player
+}
+
+fn combat_test_join_with_combat_stats(
+    session_id: &str,
+    object_id: u32,
+    name: &str,
+    x: i32,
+    y: i32,
+    combat_stats: ZonePlayerCombatStats,
+) -> ZoneJoin {
+    let mut player = combat_test_join(session_id, object_id, name, x, y);
+    player.combat_stats = combat_stats;
+    player
+}
+
 fn ground_drop_claim_ticket(
     outbounds: &[ZoneOutbound],
     expected_session: &SessionId,
@@ -1149,9 +1192,9 @@ fn synchronized_native_monsters_never_spawn_with_overlapping_hitboxes() {
 
 #[test]
 fn zone_native_monster_preserves_crystal_move_speed_in_real_milliseconds() {
-    let mut zone = zone();
+    let mut zone = combat_test_zone();
     let first = session("first");
-    zone.handle(ZoneCommand::Join(join("first", 101, "Scout", 330, 270)));
+    zone.handle(ZoneCommand::Join(combat_test_join("first", 101, "Scout", 330, 270)));
     let mut spawn = native_monster_spawn(9_100, 336, 270);
     spawn.name = "Scarecrow".to_string();
     spawn.ai = 0;
@@ -5421,9 +5464,9 @@ fn harvested_deer_late_join_still_waits_for_wall_clock_due() {
 #[test]
 fn zone_wall_clock_respawn_waits_for_every_crystal_harvest_ai() {
     for (offset, ai) in [1_u8, 2, 4, 5, 7, 9, 28, 35, 153].into_iter().enumerate() {
-        let mut zone = zone();
+        let mut zone = combat_test_zone();
         let first = session("first");
-        zone.handle(ZoneCommand::Join(join("first", 101, "Scout", 330, 270)));
+        zone.handle(ZoneCommand::Join(combat_test_join("first", 101, "Scout", 330, 270)));
         admit_melee(&mut zone, &first);
         let object_id = 9_200 + offset as u32;
         let mut spawn =
@@ -7337,11 +7380,11 @@ fn zone_native_player_fire_bounce_chains_projectiles_and_damage() {
 
 #[test]
 fn zone_native_player_fire_bounce_cancels_when_target_moves_beyond_crystal_tolerance() {
-    let mut zone = zone();
+    let mut zone = combat_test_zone();
     let first = session("first");
     let second = session("second");
-    zone.handle(ZoneCommand::Join(join("first", 101, "Scout", 324, 270)));
-    zone.handle(ZoneCommand::Join(join("second", 102, "Blade", 326, 270)));
+    zone.handle(ZoneCommand::Join(combat_test_join("first", 101, "Scout", 324, 270)));
+    zone.handle(ZoneCommand::Join(combat_test_join("second", 102, "Blade", 326, 270)));
 
     let mut target = native_monster_spawn(9100, 334, 270);
     target.move_speed_ms = 300;
@@ -8876,9 +8919,9 @@ fn zone_native_player_magic_respects_spell_action_window_across_spells() {
 
 #[test]
 fn zone_native_player_magic_control_stops_monster_ai_until_expiry() {
-    let mut zone = zone();
+    let mut zone = combat_test_zone();
     let first = session("first");
-    zone.handle(ZoneCommand::Join(join("first", 101, "Scout", 330, 270)));
+    zone.handle(ZoneCommand::Join(combat_test_join("first", 101, "Scout", 330, 270)));
     zone.handle(ZoneCommand::SpawnMonster {
         session_id: first.clone(),
         monster: native_monster_spawn(9100, 334, 270),
@@ -9032,11 +9075,11 @@ fn zone_native_player_buff_stats_authoritatively_modify_damage_until_expiry() {
 
 #[test]
 fn zone_native_player_magic_shield_adds_zone_buff_and_mitigates_hits() {
-    let mut zone = zone();
+    let mut zone = combat_test_zone();
     let first = session("first");
     let second = session("second");
-    zone.handle(ZoneCommand::Join(join("first", 101, "Scout", 330, 270)));
-    zone.handle(ZoneCommand::Join(join("second", 102, "Blade", 332, 270)));
+    zone.handle(ZoneCommand::Join(combat_test_join("first", 101, "Scout", 330, 270)));
+    zone.handle(ZoneCommand::Join(combat_test_join("second", 102, "Blade", 332, 270)));
 
     let cast = zone.handle(ZoneCommand::PlayerCastMagic {
         session_id: first.clone(),
@@ -9082,7 +9125,7 @@ fn zone_native_player_magic_shield_adds_zone_buff_and_mitigates_hits() {
     )));
 
     let third = session("third");
-    let join_packets = zone.handle(ZoneCommand::Join(join("third", 103, "Late", 334, 270)));
+    let join_packets = zone.handle(ZoneCommand::Join(combat_test_join("third", 103, "Late", 334, 270)));
     assert!(has_packet(&join_packets, &third, |packet| matches!(
         packet,
         ServerPacket::ObjectPlayer { info }
@@ -10868,9 +10911,9 @@ fn zone_native_player_range_attack_rejects_invalid_target() {
 
 #[test]
 fn zone_native_monster_tick_walks_toward_visible_player() {
-    let mut zone = zone();
+    let mut zone = combat_test_zone();
     let first = session("first");
-    zone.handle(ZoneCommand::Join(join("first", 101, "Scout", 330, 270)));
+    zone.handle(ZoneCommand::Join(combat_test_join("first", 101, "Scout", 330, 270)));
     zone.handle(ZoneCommand::SpawnMonster {
         session_id: first.clone(),
         monster: native_monster_spawn(9100, 333, 270),
@@ -10890,9 +10933,9 @@ fn zone_native_monster_tick_walks_toward_visible_player() {
 
 #[test]
 fn living_native_monsters_do_not_walk_onto_the_same_tile() {
-    let mut zone = zone();
+    let mut zone = combat_test_zone();
     let first = session("first");
-    zone.handle(ZoneCommand::Join(join("first", 101, "Scout", 330, 270)));
+    zone.handle(ZoneCommand::Join(combat_test_join("first", 101, "Scout", 330, 270)));
     zone.handle(ZoneCommand::SpawnMonster {
         session_id: first.clone(),
         monster: native_monster_spawn(9101, 332, 270),
@@ -10968,9 +11011,9 @@ fn zone_native_neutral_guards_do_not_follow_player() {
 
 #[test]
 fn zone_native_monster_tick_attacks_adjacent_player_with_delayed_hit() {
-    let mut zone = zone();
+    let mut zone = combat_test_zone();
     let first = session("first");
-    zone.handle(ZoneCommand::Join(join("first", 101, "Scout", 330, 270)));
+    zone.handle(ZoneCommand::Join(combat_test_join("first", 101, "Scout", 330, 270)));
     zone.handle(ZoneCommand::SpawnMonster {
         session_id: first.clone(),
         monster: native_monster_spawn(9100, 331, 270),
@@ -11020,10 +11063,10 @@ fn zone_native_monster_tick_attacks_adjacent_player_with_delayed_hit() {
 
 #[test]
 fn conquest_archer_guard_ignores_defender_guild_and_attacks_enemy_guild() {
-    let mut zone = zone();
+    let mut zone = combat_test_zone();
     let defender = session("defender");
     let attacker = session("attacker");
-    zone.handle(ZoneCommand::Join(join_with_profile(
+    zone.handle(ZoneCommand::Join(combat_test_join_with_profile(
         "defender",
         101,
         "WolfBlade",
@@ -11031,7 +11074,7 @@ fn conquest_archer_guard_ignores_defender_guild_and_attacks_enemy_guild() {
         270,
         |profile| profile.guild_name = Some("Wolves".to_string()),
     )));
-    zone.handle(ZoneCommand::Join(join_with_profile(
+    zone.handle(ZoneCommand::Join(combat_test_join_with_profile(
         "attacker",
         102,
         "TigerBlade",
@@ -11067,13 +11110,13 @@ fn conquest_archer_guard_ignores_defender_guild_and_attacks_enemy_guild() {
 
 #[test]
 fn zone_native_monster_paralysis_blocks_movement_until_status_expires() {
-    let mut zone = zone();
+    let mut zone = combat_test_zone();
     let first = session("first");
     let mut spawn = native_monster_spawn(9004, 331, 270);
     spawn.name = "CaveMaggot".to_string();
     spawn.ai = 7;
 
-    zone.handle(ZoneCommand::Join(join("first", 101, "Scout", 330, 270)));
+    zone.handle(ZoneCommand::Join(combat_test_join("first", 101, "Scout", 330, 270)));
     zone.handle(ZoneCommand::SpawnMonster {
         session_id: first.clone(),
         monster: spawn,
@@ -11140,13 +11183,13 @@ fn zone_native_monster_paralysis_blocks_movement_until_status_expires() {
 
 #[test]
 fn zone_native_monster_green_poison_does_not_block_movement() {
-    let mut zone = zone();
+    let mut zone = combat_test_zone();
     let first = session("first");
     let mut spawn = native_monster_spawn(9001, 331, 270);
     spawn.name = "ToxicGhoul".to_string();
     spawn.ai = 28;
 
-    zone.handle(ZoneCommand::Join(join("first", 101, "Scout", 330, 270)));
+    zone.handle(ZoneCommand::Join(combat_test_join("first", 101, "Scout", 330, 270)));
     zone.handle(ZoneCommand::SpawnMonster {
         session_id: first.clone(),
         monster: spawn,
@@ -11181,13 +11224,13 @@ fn zone_native_monster_green_poison_does_not_block_movement() {
 
 #[test]
 fn zone_native_ranged_monster_attacks_without_chasing_when_target_not_adjacent() {
-    let mut zone = zone();
+    let mut zone = combat_test_zone();
     let first = session("first");
     let mut spawn = native_monster_spawn(9100, 333, 270);
     spawn.name = "OmaMage".to_string();
     spawn.ai = 19;
 
-    zone.handle(ZoneCommand::Join(join("first", 101, "Scout", 330, 270)));
+    zone.handle(ZoneCommand::Join(combat_test_join("first", 101, "Scout", 330, 270)));
     zone.handle(ZoneCommand::SpawnMonster {
         session_id: first.clone(),
         monster: spawn,
@@ -11235,9 +11278,9 @@ fn zone_native_ranged_monster_attacks_without_chasing_when_target_not_adjacent()
 
 #[test]
 fn zone_native_player_defence_buff_mitigates_monster_damage_until_expiry() {
-    let mut zone = zone();
+    let mut zone = combat_test_zone();
     let first = session("first");
-    zone.handle(ZoneCommand::Join(join("first", 101, "Scout", 330, 270)));
+    zone.handle(ZoneCommand::Join(combat_test_join("first", 101, "Scout", 330, 270)));
     zone.handle(ZoneCommand::BroadcastPackets {
         session_id: first.clone(),
         owner_local_object_id: 1001,
@@ -13194,12 +13237,12 @@ fn zone_update_player_combat_stats_promotes_to_authoritative_damage() {
 fn zone_native_monster_melee_damage_is_data_driven_from_crystal_stats() {
     // A monster present in the Crystal combat manifest deals its authoritative
     // melee damage (CaveMaggot DC = 6..=8), not the old fixed placeholder.
-    let mut zone = zone();
+    let mut zone = combat_test_zone();
     let first = session("first");
     let mut spawn = native_monster_spawn(9300, 331, 270);
     spawn.name = "CaveMaggot".to_string();
     spawn.ai = 7;
-    zone.handle(ZoneCommand::Join(join("first", 101, "Scout", 330, 270)));
+    zone.handle(ZoneCommand::Join(combat_test_join("first", 101, "Scout", 330, 270)));
     zone.handle(ZoneCommand::SpawnMonster {
         session_id: first.clone(),
         monster: spawn,
@@ -13223,9 +13266,9 @@ fn zone_native_monster_melee_damage_is_data_driven_from_crystal_stats() {
 fn zone_player_base_armour_mitigates_incoming_monster_melee() {
     // A player carrying authoritative AC takes reduced melee damage from a
     // monster: Field Wasp melee 7 minus AC 5 = 2.
-    let mut zone = zone();
+    let mut zone = combat_test_zone();
     let first = session("first");
-    zone.handle(ZoneCommand::Join(join_with_combat_stats(
+    zone.handle(ZoneCommand::Join(combat_test_join_with_combat_stats(
         "first",
         101,
         "Scout",
@@ -13257,9 +13300,9 @@ fn zone_player_base_armour_mitigates_incoming_monster_melee() {
 
 #[test]
 fn zone_starter_armour_can_fully_block_scarecrow_damage() {
-    let mut zone = zone();
+    let mut zone = combat_test_zone();
     let first = session("first");
-    zone.handle(ZoneCommand::Join(join_with_combat_stats(
+    zone.handle(ZoneCommand::Join(combat_test_join_with_combat_stats(
         "first",
         101,
         "Scout",
@@ -13295,9 +13338,9 @@ fn zone_player_physical_armour_does_not_reduce_incoming_magic_damage() {
     // Magic monster damage is mitigated by MAC, not AC. A player with huge AC
     // but zero MAC takes the full magic hit (Field Wasp fallback magic = 7),
     // proving the zone applies the correct armour channel per damage type.
-    let mut zone = zone();
+    let mut zone = combat_test_zone();
     let first = session("first");
-    zone.handle(ZoneCommand::Join(join_with_combat_stats(
+    zone.handle(ZoneCommand::Join(combat_test_join_with_combat_stats(
         "first",
         101,
         "Scout",
@@ -13676,9 +13719,9 @@ fn level50_warrior_melee_skills_keep_crystal_range_shapes_and_hit_timing() {
 
 #[test]
 fn level50_warrior_entrapment_pulls_and_counterattack_closes_shared_combat_loop() {
-    let mut entrapment_zone = zone();
+    let mut entrapment_zone = combat_test_zone();
     let warrior = session("warrior");
-    let mut warrior_join = join("warrior", 101, "Warrior", 330, 270);
+    let mut warrior_join = combat_test_join("warrior", 101, "Warrior", 330, 270);
     warrior_join.level = 50;
     entrapment_zone.handle(ZoneCommand::Join(warrior_join));
     entrapment_zone.handle(ZoneCommand::SpawnMonster {
@@ -13729,8 +13772,8 @@ fn level50_warrior_entrapment_pulls_and_counterattack_closes_shared_combat_loop(
         }
     )));
 
-    let mut counter_zone = zone();
-    let mut counter_join = join_with_combat_stats(
+    let mut counter_zone = combat_test_zone();
+    let mut counter_join = combat_test_join_with_combat_stats(
         "warrior",
         101,
         "Warrior",
@@ -14582,23 +14625,23 @@ fn level50_taoist_control_debuff_and_revelation_paths_are_shared() {
 
 #[test]
 fn level50_taoist_purification_clears_shared_poison_and_curse_state() {
-    let mut purification_zone = zone();
+    let mut purification_zone = combat_test_zone();
     let poisoner = session("poisoner");
     let taoist = session("taoist");
     let friend = session("friend");
 
-    let mut poisoner_join = join_with_profile("poisoner", 101, "Poisoner", 330, 270, |profile| {
+    let mut poisoner_join = combat_test_join_with_profile("poisoner", 101, "Poisoner", 330, 270, |profile| {
         profile.attack_mode = 5;
     });
     poisoner_join.class = MirClass::Taoist;
     poisoner_join.level = 50;
     purification_zone.handle(ZoneCommand::Join(poisoner_join));
 
-    let mut friend_join = join("friend", 102, "Friend", 332, 270);
+    let mut friend_join = combat_test_join("friend", 102, "Friend", 332, 270);
     friend_join.level = 50;
     purification_zone.handle(ZoneCommand::Join(friend_join));
 
-    let mut taoist_join = join("taoist", 103, "Taoist", 334, 270);
+    let mut taoist_join = combat_test_join("taoist", 103, "Taoist", 334, 270);
     taoist_join.class = MirClass::Taoist;
     taoist_join.level = 50;
     purification_zone.handle(ZoneCommand::Join(taoist_join));
@@ -14705,7 +14748,7 @@ fn level50_taoist_purification_clears_shared_poison_and_curse_state() {
     )));
 
     let observer = session("observer");
-    let joined = purification_zone.handle(ZoneCommand::Join(join(
+    let joined = purification_zone.handle(ZoneCommand::Join(combat_test_join(
         "observer", 104, "Observer", 335, 270,
     )));
     assert!(has_packet(&joined, &observer, |packet| matches!(

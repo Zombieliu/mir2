@@ -143,7 +143,7 @@ function EntityHealthBars({
             style={{
               left: `${origin.left + centerOffset}px`,
               top: `${origin.top + bounds.top - 8}px`,
-              zIndex: viewportDepthForCell(entity.x, entity.y, player ?? entity, 70),
+              zIndex: viewportDepthForCell(entity.x, entity.y, player ?? entity, 8),
             }}
           >
             <span style={{ width: `${healthRatio * 100}%`, background: healthBarColor(healthRatio) }} />
@@ -204,7 +204,7 @@ function SceneChatBubbles({
               left: `${origin.left + centerOffset}px`,
               top: `${origin.top + bounds.top - 22}px`,
               opacity,
-              zIndex: viewportDepthForCell(entry.entity.x, entry.entity.y, player ?? entry.entity, 96),
+              zIndex: viewportDepthForCell(entry.entity.x, entry.entity.y, player ?? entry.entity, 12),
             }}
           >
             <span className="scene-chat-bubble-text">{bubble.text}</span>
@@ -268,7 +268,7 @@ function DamageFloaters({
               left: `${origin.left + centerOffset}px`,
               top: `${origin.top + bounds.top - 6}px`,
               animationDuration: `${lifeMs}ms`,
-              zIndex: viewportDepthForCell(entry.entity.x, entry.entity.y, player ?? entry.entity, 98),
+              zIndex: viewportDepthForCell(entry.entity.x, entry.entity.y, player ?? entry.entity, 14),
             }}
           >
             {floater.text}
@@ -333,7 +333,7 @@ function HitFlashes({
               width: `${Math.max(0, bounds.right - bounds.left)}px`,
               height: `${Math.max(0, bounds.bottom - bounds.top)}px`,
               opacity,
-              zIndex: viewportDepthForCell(entity.x, entity.y, player ?? entity, 97),
+              zIndex: viewportDepthForCell(entity.x, entity.y, player ?? entity, 13),
             }}
             aria-hidden="true"
           />
@@ -419,7 +419,8 @@ function SelectedTargetReadout({
     <div className="scene-target-readout" role="status" aria-live="polite">
       <div className="scene-target-readout-head">
         <strong style={{ color: nameColor }}>
-          {localizeCrystalEntityName(selectedEntity.name, t).replace(/_/g, " ")}
+          {selectedEntity.kind === "npc" || selectedEntity.kind === "monster"
+            ? localizeCrystalEntityName(selectedEntity.name, t).replace(/_/g, " ") : selectedEntity.name}
         </strong>
         {selectedEntity.level !== undefined ? (
           <span className="scene-target-readout-level">

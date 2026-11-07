@@ -1,0 +1,23 @@
+*** Begin Patch
+*** Update File: apps/web/app/original-client-shell.tsx
+@@
+ "use client";
++import { crystalEntityDepth, crystalEntityLayerDepth } from "../lib/crystal-world-depth";
+@@
+-  viewportDepthForCell,
+@@
+-      const depth = viewportDepthForCell(entity.x, entity.y, viewportDepthPlayer, 64);
++      const depth = crystalEntityDepth(
++        entity, viewportDepthPlayer, entityMotionSnapshots[entity.objectId], motionNow,
++      );
+@@
+-          ].map(({ layer, role, index }, order) => {
++          ].map(({ layer, role, index }) => {
+@@
+-              z: depth * 10 + order,
++              z: crystalEntityLayerDepth(depth.sortZ, role),
+@@
+         gridX: entity.x,
+         gridY: entity.y,
++        ...depth,
+*** End Patch

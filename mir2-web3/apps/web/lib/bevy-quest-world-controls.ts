@@ -1,12 +1,15 @@
 import { sameQuestWorldStamp, type QuestWorldStamp } from "./bevy-quest-world-context";
 
-export type QuestWorldControlRect = Readonly<{ type: string; left: number; top: number; width: number; height: number }>;
+const controlTypes = ["navigateQuestRoute", "attackTarget", "attackQuestTarget", "pickUpObject", "pickUpTile",
+  "toggleSupplies", "selectSupplyVendor", "showSupplyInventory", "openDestinationMap", "questLocalUi"] as const;
+/** Pointer regions include Native local UI; these types do not authorize Quest world actions. */
+export type QuestWorldControlType = typeof controlTypes[number];
+export type QuestWorldControlRect = Readonly<{ type: QuestWorldControlType; left: number; top: number; width: number; height: number }>;
 export type QuestWorldControls = Readonly<{ version: 1; stamp: QuestWorldStamp;
   logicalWidth: number; logicalHeight: number; rects: readonly QuestWorldControlRect[] }>;
 const object = (value: unknown): value is Record<string, unknown> => typeof value === "object" && value !== null && !Array.isArray(value);
 const keys = (value: Record<string, unknown>, expected: readonly string[]) => Object.keys(value).sort().join() === [...expected].sort().join();
-const types = new Set(["navigateQuestRoute", "attackTarget", "attackQuestTarget", "pickUpObject", "pickUpTile",
-  "toggleSupplies", "selectSupplyVendor", "showSupplyInventory", "openDestinationMap"]);
+const types: ReadonlySet<string> = new Set(controlTypes);
 
 /** Only actual current Bevy button rectangles may claim a world pointer. */
 export function readQuestWorldControls(runtime: { getMir2QuestWorldControlRects?: () => string },

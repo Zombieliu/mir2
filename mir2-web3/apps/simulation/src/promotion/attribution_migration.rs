@@ -175,7 +175,9 @@ fn payments(raw: &Value) -> Result<Vec<Payment>, String> {
     let mut result = Vec::new();
     for order in ledger.orders.values() {
         if let Some(at) = order.paid_at_ms {
-            if order.livemode {
+            // This reviewed legacy migration is pinned to its original
+            // Stripe/Sui evidence. New providers cannot impersonate Stripe.
+            if order.livemode || order.provider != crate::billing::FiatPaymentProvider::Stripe {
                 return Err("promotionMigrationPolicyDenied".into());
             }
             let id = order.payment_intent_id.clone().ok_or_else(invalid)?;

@@ -1,0 +1,18 @@
+{
+  "schema": "mir2-alo-native-export-verification/1",
+  "verifiedAt": "2026-11-02T22:48:48.316Z",
+  "source": "actual Windows GUI export",
+  "archiveId": "00a545f0-9084-4c66-a54c-ec91acb4e223",
+  "policyVersion": 4,
+  "bytes": 7460,
+  "sha256": "cb1aaa1cb7b22355212135f09ab8d878a236ad51e6a2b84edc9d40f5c7a78412",
+  "signatureVerified": true,
+  "allThreeTaughtHabits": true,
+  "revokedFeedback": 1,
+  "activeFeedback": 1,
+  "feedbackRecords": 2,
+  "episodeRecords": 13,
+  "runtimeSettingsIncluded": false,
+  "credentialsIncluded": false,
+  "privateExportPublished": false
+}

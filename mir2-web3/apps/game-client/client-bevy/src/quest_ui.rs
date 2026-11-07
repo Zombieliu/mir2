@@ -34,6 +34,16 @@ pub use turn_in::{
 
 pub use crate::quest_intents::{QuestUiIntent, QuestUiIntentQueue, MAX_QUEUED_INTENTS};
 use crate::quest_presentation_text::{QuestPresentationLocale, QuestRenderText};
+
+#[cfg(all(test, feature = "portable-quest-ui"))]
+#[path = "quest_ui_caption_tests.rs"]
+mod caption_tests;
+#[cfg(all(test, feature = "portable-quest-ui"))]
+#[path = "quest_ui_footer_caption_tests.rs"]
+mod footer_caption_tests;
+#[cfg(all(test, feature = "portable-quest-ui"))]
+#[path = "quest_ui_display_tests.rs"]
+mod display_tests;
 use bevy::ecs::system::SystemParam;
 use bevy::prelude::*;
 use bevy::text::{Justify, LineBreak, TextLayout};
@@ -904,7 +914,8 @@ impl GuidedDiaryTab {
             Self::Main => "periodic.diary.tab.main",
             Self::Ready => "periodic.diary.tab.ready",
             Self::Side => "periodic.diary.tab.side",
-            Self::Daily | Self::Weekly => return fallback,
+            Self::Daily => "periodic.copy.0",
+            Self::Weekly => "periodic.copy.1",
         };
         crate::native_i18n::key(key, &fallback)
     }
@@ -1276,6 +1287,7 @@ pub struct QuestUiRoot;
 #[derive(Component, Debug, Clone, Copy, PartialEq)]
 struct QuestCompactStamp {
     locale: QuestPresentationLocale,
+    display_language: Option<crate::quest_presentation_text::QuestDisplayLanguage>,
     generation: u64,
     revision: u64,
     open_revision: u64,
@@ -1347,7 +1359,14 @@ pub enum QuestCompactObservationSet {
 // Compare the authority and visibility values instead of their ECS dirty flag.
 struct QuestCompactLastBuild(
     Option<QuestCompactStamp>,
-    Option<(u64, u64, bool, bool, bool)>,
+    Option<(
+        u64,
+        u64,
+        bool,
+        bool,
+        bool,
+        Option<crate::quest_presentation_text::QuestDisplayLanguage>,
+    )>,
 );
 
 #[cfg(not(feature = "native-ui"))]
@@ -1399,6 +1418,7 @@ fn compact_expected_stamp(
     };
     Some(QuestCompactStamp {
         locale,
+        display_language: context.display_language,
         generation: context.generation,
         revision: context.revision,
         open_revision: context.open_revision,
@@ -2692,6 +2712,7 @@ pub(crate) fn process_quest_ui_input(
 
     // The independent procurement confirmation owns its keys. In particular,
     // editing a gold price with Backspace must not navigate the underlying NPC.
+    #[cfg(feature = "native-ui")]
     if player_ui.procurement_open || player_ui.procurement_input_consumed {
         return;
     }
@@ -3512,8 +3533,18 @@ pub(crate) fn process_quest_ui_input(
                                     selected_item_index,
                                 },
                             ) {
-                                quest_state
-                                    .set_feedback(format!("Delivering {}", quest.title), false);
+                                let text = QuestRenderText {
+                                    locale: *models.locale,
+                                };
+                                let title = text.title(quest.quest_index, &quest.title);
+                                quest_state.set_feedback(
+                                    text.named(
+                                        "quest.feedback.32",
+                                        "Delivering {title}",
+                                        &[("title", &title)],
+                                    ),
+                                    false,
+                                );
                             } else if queue_full {
                                 quest_state.set_feedback("Connection busy; try again", true);
                             } else {
@@ -4073,6 +4104,7 @@ fn render_quest_ui(
             host.in_game,
             host.host_visible,
             host.layout_preparing,
+            host.display_language,
         )
     });
     #[cfg(not(feature = "native-ui"))]
@@ -4959,10 +4991,19 @@ fn render_quest_tracker_panel(
         let journey_text_size = 10.0;
         quest_log_text_at_raw(
             parent,
-            &format!(
-                "{}级  {}",
-                journey.level_range,
-                crate::player_text::text(&journey.chapter_title)
+            &render_text.named(
+                "quest.ui.levelChapter",
+                "{level}级  {chapter}",
+                &[
+                    (
+                        "level",
+                        journey
+                            .level_range
+                            .strip_prefix("Lv")
+                            .unwrap_or(&journey.level_range),
+                    ),
+                    ("chapter", &crate::player_text::text(&journey.chapter_title)),
+                ],
             ),
             QuestLogRect::new(5.0, 20.0, 300.0, 15.0),
             journey_text_size,
@@ -4980,9 +5021,13 @@ fn render_quest_tracker_panel(
         if let Some(next) = &journey.next {
             quest_log_text_at_raw(
                 parent,
-                &format!(
-                    "下一步：{}",
-                    truncate_chars(&render_text.title(next.quest_id, &next.title), 38)
+                &render_text.named(
+                    "quest.ui.next",
+                    "下一步：{title}",
+                    &[(
+                        "title",
+                        &truncate_chars(&render_text.title(next.quest_id, &next.title), 38),
+                    )],
                 ),
                 QuestLogRect::new(5.0, 50.0, 300.0, 15.0),
                 journey_text_size,
@@ -5061,9 +5106,13 @@ fn render_quest_tracker_panel(
             if !reward.trim().is_empty() {
                 quest_log_text_at_raw(
                     parent,
-                    &format!(
-                        "   奖励：{}",
-                        truncate_chars(&crate::player_text::text(reward), 32)
+                    &render_text.named(
+                        "quest.ui.reward",
+                        "   奖励：{reward}",
+                        &[(
+                            "reward",
+                            &truncate_chars(&crate::player_text::text(reward), 32),
+                        )],
                     ),
                     QuestLogRect::new(5.0, 95.0 + detail_offset + target_offset, 300.0, 15.0),
                     journey_text_size,
@@ -5074,7 +5123,7 @@ fn render_quest_tracker_panel(
         } else if journey.graduated {
             quest_log_text_at_raw(
                 parent,
-                "新手旅程已完成",
+                &render_text.keyed("quest.ui.journeyDone", "新手旅程已完成"),
                 QuestLogRect::new(5.0, 50.0, 300.0, 15.0),
                 journey_text_size,
                 Color::srgb(0.20, 1.0, 0.10),
@@ -5083,9 +5132,13 @@ fn render_quest_tracker_panel(
         } else {
             quest_log_text_at_raw(
                 parent,
-                &format!(
-                    "下一步：{}",
-                    truncate_chars(&crate::player_text::text(&journey.goal), 38)
+                &render_text.named(
+                    "quest.ui.next",
+                    "下一步：{title}",
+                    &[(
+                        "title",
+                        &truncate_chars(&crate::player_text::text(&journey.goal), 38),
+                    )],
                 ),
                 QuestLogRect::new(5.0, 50.0, 300.0, 15.0),
                 journey_text_size,
@@ -5094,7 +5147,7 @@ fn render_quest_tracker_panel(
             );
             quest_log_text_at_raw(
                 parent,
-                "   请查看任务日志或前往任务人物处",
+                &render_text.keyed("quest.ui.nextGiver", "   请查看任务日志或前往任务人物处"),
                 QuestLogRect::new(5.0, 65.0, 300.0, 15.0),
                 journey_text_size,
                 Color::WHITE,
@@ -5108,10 +5161,19 @@ fn render_quest_tracker_panel(
             {
                 quest_log_text_at_raw(
                     parent,
-                    &format!(
-                        "后续目标：{} · {}",
-                        crate::player_text::text(option.direction.label()),
-                        truncate_chars(&crate::player_text::text(&option.title), 23)
+                    &render_text.named(
+                        "quest.ui.followup",
+                        "后续目标：{direction} · {title}",
+                        &[
+                            (
+                                "direction",
+                                &crate::player_text::text(option.direction.label()),
+                            ),
+                            (
+                                "title",
+                                &truncate_chars(&crate::player_text::text(&option.title), 23),
+                            ),
+                        ],
                     ),
                     QuestLogRect::new(5.0, 65.0, 300.0, 15.0),
                     journey_text_size,
@@ -5129,7 +5191,10 @@ fn render_quest_tracker_panel(
             } else {
                 quest_log_text_at_raw(
                     parent,
-                    "后续目标：在任务日志选择装备、技能或挑战",
+                    &render_text.keyed(
+                        "quest.ui.chooseGoal",
+                        "后续目标：在任务日志选择装备、技能或挑战",
+                    ),
                     QuestLogRect::new(5.0, 65.0, 300.0, 15.0),
                     journey_text_size,
                     PANEL_HIGHLIGHT,
@@ -5166,9 +5231,13 @@ fn render_quest_tracker_panel(
         if let Some(class_hint) = &journey.class_hint {
             quest_log_text_at_raw(
                 parent,
-                &format!(
-                    "   提示：{}",
-                    truncate_chars(&crate::player_text::text(class_hint), 38)
+                &render_text.named(
+                    "quest.ui.hint",
+                    "   提示：{hint}",
+                    &[(
+                        "hint",
+                        &truncate_chars(&crate::player_text::text(class_hint), 38),
+                    )],
                 ),
                 QuestLogRect::new(
                     5.0,
@@ -5197,9 +5266,13 @@ fn render_quest_tracker_panel(
         if let Some(optional) = journey.optional.first() {
             quest_log_text_at_raw(
                 parent,
-                &format!(
-                    "可选任务：{}",
-                    truncate_chars(&render_text.title(optional.quest_id, &optional.title), 34)
+                &render_text.named(
+                    "quest.ui.optional",
+                    "可选任务：{title}",
+                    &[(
+                        "title",
+                        &truncate_chars(&render_text.title(optional.quest_id, &optional.title), 34),
+                    )],
                 ),
                 QuestLogRect::new(
                     5.0,
@@ -5479,11 +5552,7 @@ fn npc_dialog_rows(dialog: &NpcDialogModel) -> Vec<(String, Option<String>, bool
         {
             continue;
         }
-        let display = if crate::native_i18n::active() {
-            crate::native_i18n::npc_text(&line.text)
-        } else {
-            line.text.clone()
-        };
+        let display = crate::native_i18n::npc_display_text(&line.text);
         for line in npc_dialog_wrap(&display) {
             rows.push((line, None, false));
         }
@@ -5493,11 +5562,7 @@ fn npc_dialog_rows(dialog: &NpcDialogModel) -> Vec<(String, Option<String>, bool
         .iter()
         .filter(|option| !is_quest_dialog_operation_target(&option.option_id))
     {
-        let display = if crate::native_i18n::active() {
-            crate::native_i18n::npc_text(&option.label)
-        } else {
-            option.label.clone()
-        };
+        let display = crate::native_i18n::npc_display_text(&option.label);
         for line in npc_dialog_wrap(&display) {
             rows.push((line, Some(option.option_id.clone()), option.enabled));
         }
@@ -6632,10 +6697,14 @@ fn render_guided_quest_diary_panel(
         Justify::Left,
     );
     let count_label = journey.map_or_else(
-        || "主线进度 --/--".to_owned(),
+        || render_text.keyed("quest.ui.mainSyncing", "主线进度 --/--"),
         |view| match (view.completed_count, view.quest_count) {
-            (Some(done), Some(total)) => format!("本章 {done}/{total}"),
-            _ => "本章 --/--".to_owned(),
+            (Some(done), Some(total)) => render_text.named(
+                "quest.ui.chapterProgress",
+                "本章 {done}/{total}",
+                &[("done", &done.to_string()), ("total", &total.to_string())],
+            ),
+            _ => render_text.keyed("quest.ui.chapterSyncing", "本章 --/--"),
         },
     );
     quest_log_text_at_raw(
@@ -6695,14 +6764,22 @@ fn render_guided_quest_diary_panel(
     let heading = match state.diary_tab {
         GuidedDiaryTab::Main => journey
             .map(|view| {
-                format!(
-                    "当前章节 · {}",
-                    truncate_chars(&crate::player_text::text(&view.chapter_title), 20)
+                render_text.named(
+                    "quest.ui.chapter",
+                    "当前章节 · {chapter}",
+                    &[(
+                        "chapter",
+                        &truncate_chars(&crate::player_text::text(&view.chapter_title), 20),
+                    )],
                 )
             })
-            .unwrap_or_else(|| "当前主线".to_owned()),
-        GuidedDiaryTab::Ready => "已完成目标 · 可前往交付".to_owned(),
-        GuidedDiaryTab::Side => "其他任务 · 可自行选择完成".to_owned(),
+            .unwrap_or_else(|| render_text.keyed("quest.ui.main", "当前主线")),
+        GuidedDiaryTab::Ready => {
+            render_text.keyed("quest.ui.deliverable", "已完成目标 · 可前往交付")
+        }
+        GuidedDiaryTab::Side => {
+            render_text.keyed("quest.ui.optionalTasks", "其他任务 · 可自行选择完成")
+        }
         GuidedDiaryTab::Daily => {
             crate::native_i18n::key("periodic.diary.reset.daily", "Daily, 00:00 (UTC+8)")
         }
@@ -6712,7 +6789,7 @@ fn render_guided_quest_diary_panel(
     };
     quest_log_text_at_raw(
         parent,
-        &render_text.body(&heading),
+        &heading,
         QuestLogRect::new(19.0, 92.0, 276.0, 15.0),
         9.0,
         PANEL_HIGHLIGHT,
@@ -6720,7 +6797,7 @@ fn render_guided_quest_diary_panel(
     );
     quest_log_text_at_raw(
         parent,
-        &render_text.legacy_copy("左键查看详情 · 右键跟踪任务"),
+        &render_text.keyed("quest.ui.clickHelp", "左键查看详情 · 右键跟踪任务"),
         QuestLogRect::new(19.0, 111.0, 276.0, 15.0),
         8.0,
         PANEL_TEXT,
@@ -6758,9 +6835,13 @@ fn render_guided_quest_diary_panel(
             );
         }
         let status = match quest.status {
-            crate::quest_model::QuestStatus::NotStarted => "待领取",
-            crate::quest_model::QuestStatus::ReadyToTurnIn => "可交付",
-            _ => "进行中",
+            crate::quest_model::QuestStatus::NotStarted => {
+                render_text.keyed("quest.ui.pendingClaim", "待领取")
+            }
+            crate::quest_model::QuestStatus::ReadyToTurnIn => {
+                render_text.keyed("ui.questStage.readyToTurnIn", "可交付")
+            }
+            _ => render_text.keyed("ui.questStage.inProgress", "进行中"),
         };
         let area = if state.diary_tab == GuidedDiaryTab::Main {
             journey
@@ -6769,11 +6850,14 @@ fn render_guided_quest_diary_panel(
         } else {
             quest.group.as_deref().unwrap_or("其他地图")
         };
-        let subtitle = format!(
-            "{}级 · {} · {}",
-            quest.min_level_needed.max(0),
-            crate::player_text::text(status),
-            truncate_chars(&crate::player_text::text(area), 24)
+        let subtitle = render_text.named(
+            "quest.ui.levelStatus",
+            "{level}级 · {status} · {area}",
+            &[
+                ("level", &quest.min_level_needed.max(0).to_string()),
+                ("status", &status),
+                ("area", &truncate_chars(&crate::player_text::text(area), 24)),
+            ],
         );
         parent
             .spawn((
@@ -6804,7 +6888,7 @@ fn render_guided_quest_diary_panel(
                 if current {
                     quest_log_text_at_raw(
                         row,
-                        &render_text.legacy_copy("当前"),
+                        &render_text.keyed("quest.ui.current", "当前"),
                         QuestLogRect::new(225.0, 0.0, 40.0, 15.0),
                         8.0,
                         FEEDBACK_OK,
@@ -6869,7 +6953,7 @@ fn render_guided_quest_diary_panel(
         {
             quest_log_text_at_raw(
                 parent,
-                "暂无可显示的主线，完成前置任务后刷新。",
+                &render_text.keyed("quest.ui.noMain", "暂无可显示的主线，完成前置任务后刷新。"),
                 QuestLogRect::new(22.0, 133.0, 274.0, 32.0),
                 9.0,
                 PANEL_TEXT,
@@ -6877,7 +6961,7 @@ fn render_guided_quest_diary_panel(
             );
         }
     }
-    quest_log_text_button_at_raw(
+    quest_log_narrow_navigation_button_at_raw(
         parent,
         QuestLogRect::new(22.0, 408.0, 62.0, 22.0),
         render_text.chrome("ui.previous", "Previous"),
@@ -6892,7 +6976,7 @@ fn render_guided_quest_diary_panel(
         PANEL_TEXT,
         Justify::Center,
     );
-    quest_log_text_button_at_raw(
+    quest_log_narrow_navigation_button_at_raw(
         parent,
         QuestLogRect::new(228.0, 408.0, 62.0, 22.0),
         render_text.chrome("ui.next", "Next"),
@@ -7038,9 +7122,13 @@ fn render_quest_diary_panel(
             }
 
             let level = quest.min_level_needed.max(0);
-            let quest_label = format!(
-                "{level}级 {}",
-                render_text.title(quest.quest_index, &quest.title)
+            let quest_label = render_text.named(
+                "quest.ui.levelTitle",
+                "{level}级 {title}",
+                &[
+                    ("level", &level.to_string()),
+                    ("title", &render_text.title(quest.quest_index, &quest.title)),
+                ],
             );
             let state_label = quest_diary_status_label(quest, render_text);
             let quest_index = quest.quest_index;
@@ -9862,6 +9950,52 @@ fn quest_log_text_button_at_sized_raw(
     enabled: bool,
     font_size: f32,
 ) {
+    quest_log_text_button_with_layout_raw(
+        parent,
+        rect,
+        text,
+        action,
+        enabled,
+        font_size,
+        LineBreak::WordOrCharacter,
+    );
+}
+
+// Only the fixed 62px diary navigation footers use this typography. Preserve
+// the literal caption and the existing 3px side padding/action/hit rectangle;
+// long server-owned NPC options keep their normal wrapping painter above.
+const QUEST_TEXT_BUTTON_SIDE_PADDING: f32 = 3.0;
+
+fn quest_log_narrow_navigation_button_at_raw(
+    parent: &mut ChildSpawnerCommands,
+    rect: QuestLogRect,
+    text: &str,
+    action: QuestUiButton,
+    enabled: bool,
+) {
+    let columns = unicode_width::UnicodeWidthStr::width(text).max(1) as f32;
+    let available_width = (rect.width - 2.0 * QUEST_TEXT_BUTTON_SIDE_PADDING).max(1.0);
+    let font_size = (available_width / (columns * 0.7)).clamp(8.0, 10.0);
+    quest_log_text_button_with_layout_raw(
+        parent,
+        rect,
+        text,
+        action,
+        enabled,
+        font_size,
+        LineBreak::NoWrap,
+    );
+}
+
+fn quest_log_text_button_with_layout_raw(
+    parent: &mut ChildSpawnerCommands,
+    rect: QuestLogRect,
+    text: &str,
+    action: QuestUiButton,
+    enabled: bool,
+    font_size: f32,
+    linebreak: LineBreak,
+) {
     let mut button = parent.spawn((
         Node {
             position_type: PositionType::Absolute,
@@ -9872,7 +10006,7 @@ fn quest_log_text_button_at_sized_raw(
             display: Display::Flex,
             justify_content: JustifyContent::Center,
             align_items: AlignItems::Center,
-            padding: UiRect::axes(Val::Px(3.0), Val::Px(2.0)),
+            padding: UiRect::axes(Val::Px(QUEST_TEXT_BUTTON_SIDE_PADDING), Val::Px(2.0)),
             ..default()
         },
         BackgroundColor(if enabled { BUTTON_BG } else { BUTTON_DISABLED }),
@@ -9897,7 +10031,7 @@ fn quest_log_text_button_at_sized_raw(
                 ..default()
             },
             TextColor(if enabled { PANEL_TEXT } else { DISABLED_TEXT }),
-            TextLayout::new(Justify::Center, LineBreak::WordOrCharacter),
+            TextLayout::new(Justify::Center, linebreak),
             TextShadow {
                 offset: Vec2::splat(1.0),
                 color: Color::BLACK,
@@ -11764,6 +11898,78 @@ mod tests {
     }
 
     #[test]
+    fn graduation_titles_render_in_desktop_and_mobile_diaries_in_all_locales() {
+        use crate::native_i18n::{self, Locale};
+
+        let profile: serde_json::Value = serde_json::from_str(include_str!(
+            "../../../../config/quest-guidance/newcomer-v2-graduation.json"
+        ))
+        .unwrap();
+        let mut completed = CompletedQuestTracker::default();
+        completed.replace_authoritative(
+            profile["requiredCompletionIds"]
+                .as_array()
+                .unwrap()
+                .iter()
+                .map(|id| id.as_i64().unwrap() as i32),
+        );
+        let guidance = QuestGuidance::from_profile_name("newcomer-v2");
+        let catalog = NewcomerJourneyCatalog::from_guidance(&guidance);
+        for locale in Locale::ALL {
+            native_i18n::with_locale(locale, || {
+                for (class, item_index) in [("Warrior", 244), ("Wizard", 259), ("Taoist", 272)] {
+                    let player = crate::read_model::PlayerStats {
+                        level: 30,
+                        class_name: Some(class.into()),
+                        ..Default::default()
+                    };
+                    let tracker = QuestTracker::default();
+                    let journey = catalog.derive(&guidance, &tracker, &completed, &player).unwrap();
+                    let title = native_i18n::key(&format!("content.item.{item_index}.name"), "missing");
+                    for mobile in [false, true] {
+                        let mut world = World::new();
+                        let mut queue = bevy::ecs::world::CommandQueue::default();
+                        Commands::new(&mut queue, &world)
+                            .spawn_empty()
+                            .with_children(|parent| {
+                                if mobile {
+                                    render_mobile_diary_panel(
+                                        parent,
+                                        MobileQuestLayout {
+                                            panel: QuestLogRect::new(0.0, 0.0, 500.0, 600.0),
+                                            css_scale: 1.0,
+                                            compact: false,
+                                        },
+                                        &tracker,
+                                        &guidance,
+                                        Some(&journey),
+                                        &QuestUiState::default(),
+                                        QuestRenderText::default(),
+                                    );
+                                } else {
+                                    render_guided_quest_diary_panel(
+                                        parent,
+                                        &tracker,
+                                        &guidance,
+                                        Some(&journey),
+                                        &QuestUiState::default(),
+                                        None,
+                                        QuestRenderText::default(),
+                                    );
+                                }
+                            });
+                        queue.apply(&mut world);
+                        assert!(
+                            world.query::<&Text>().iter(&world).any(|text| text.0 == format!("+ {title}")),
+                            "{locale:?}/{class}, mobile={mobile}"
+                        );
+                    }
+                }
+            });
+        }
+    }
+
+    #[test]
     fn graduation_target_selection_is_local_and_clears_with_the_session() {
         let mut state = QuestUiState::default();
         assert!(state.toggle_graduation_direction(GraduationDirection::Challenge));
@@ -13088,23 +13294,38 @@ mod tests {
             for consumed in [false, true] {
                 let mut app = App::new();
                 app.init_resource::<QuestPresentationLocale>();
-                app.insert_resource(NativeShellModel { screen: NativeShellScreen::InGame, ..default() });
+                app.insert_resource(NativeShellModel {
+                    screen: NativeShellScreen::InGame,
+                    ..default()
+                });
                 let mut player = NativePlayerUiState::default();
                 player.procurement_open = !consumed;
                 player.procurement_input_consumed = consumed;
                 app.insert_resource(player);
                 app.insert_resource(QuestTracker::default());
-                app.insert_resource(NpcDialogModel { is_open: true, npc_object_id: Some(12), ..default() });
-                app.init_resource::<NpcDialogNav>().init_resource::<QuestUiState>()
-                    .init_resource::<QuestUiIntentQueue>().init_resource::<PendingOperations>()
-                    .init_resource::<NearbyNpcModel>().init_resource::<CombatTargetModel>()
+                app.insert_resource(NpcDialogModel {
+                    is_open: true,
+                    npc_object_id: Some(12),
+                    ..default()
+                });
+                app.init_resource::<NpcDialogNav>()
+                    .init_resource::<QuestUiState>()
+                    .init_resource::<QuestUiIntentQueue>()
+                    .init_resource::<PendingOperations>()
+                    .init_resource::<NearbyNpcModel>()
+                    .init_resource::<CombatTargetModel>()
                     .init_resource::<GroundPickupModel>();
                 let mut keys = ButtonInput::<KeyCode>::default();
                 keys.press(key);
-                app.insert_resource(keys).add_systems(Update, process_quest_ui_input);
+                app.insert_resource(keys)
+                    .add_systems(Update, process_quest_ui_input);
                 app.update();
                 assert!(app.world().resource::<NpcDialogModel>().is_open);
-                assert!(app.world_mut().resource_mut::<QuestUiIntentQueue>().drain_intents().is_empty());
+                assert!(app
+                    .world_mut()
+                    .resource_mut::<QuestUiIntentQueue>()
+                    .drain_intents()
+                    .is_empty());
             }
         }
     }

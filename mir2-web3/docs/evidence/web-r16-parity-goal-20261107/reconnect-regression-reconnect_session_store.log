@@ -1,0 +1,8 @@
+
+running 3 tests
+test web::tests::reconnect_session_store_discards_expired_sessions ... ok
+test web::tests::reconnect_session_store_restores_active_session_before_grace_expires ... ok
+test web::tests::reconnect_session_store_scheduled_purge_discards_expired_sessions ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 1762 filtered out; finished in 1.86s
+

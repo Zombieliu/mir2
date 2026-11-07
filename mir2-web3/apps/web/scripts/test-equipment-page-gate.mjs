@@ -141,7 +141,9 @@ function harness({ item = bagItem(4), worldState = world(item), cachedSnapshot =
   const window = { dispatchEvent(event) { actionListener?.(event); }, __mir2CommandHistory: [] };
   class CustomEvent { constructor(type, options) { this.type = type; this.detail = options.detail; } }
   const spellsWithdrawalsRef = { current: 0 };
+  const companionRetirementsRef = { current: 0 };
   const scope = {
+    equipmentCommandDiagnosticsRef: {current:null},
     // These surfaces are dormant, with the same initial ownership facts as Page.
     // The real selected source functions still perform every cancellation/gate.
     npcPearlSendEpochRef: {current:0}, npcPearlBuyProofsRef: {current:new WeakMap()},
@@ -175,6 +177,7 @@ function harness({ item = bagItem(4), worldState = world(item), cachedSnapshot =
     storageTransferStillCurrent:storageAdapter.storageTransferStillCurrent,
     spellsIngressRef: { current: { withdraw: () => { spellsWithdrawalsRef.current++; } } },
     spellsRawSnapshotRef: { current: null }, spellsWithdrawalsRef,
+    retirePrivateCompanion: () => { companionRetirementsRef.current++; }, companionRetirementsRef,
     equipmentControllerRef, equipmentConnectionGenerationRef, equipmentSessionGenerationRef,
     equipmentStartGameRef, equipmentSnapshotRef, equipmentHostSuspendReasonRef,
     equipmentRenderConnectionGeneration: renderConnection,
@@ -324,6 +327,7 @@ test("synchronous action listener logout prevents outer Equip bytes and releases
   assert.deepEqual(page.sent, [{ type: "logOut" }]);
   assert.equal(page.scope.equipmentHostSuspendReasonRef.current, "logoutPending");
   assert.equal(page.scope.spellsWithdrawalsRef.current, 1);
+  assert.equal(page.scope.companionRetirementsRef.current, 1);
   assert.equal(controller.status().pending, 0);
 });
 
@@ -335,6 +339,7 @@ test("synchronous action listener logout also prevents outer Move bytes", () => 
   assert.equal(page.send({ type: "moveItem", grid: "inventory", from: 0, to: 4 }), false);
   assert.deepEqual(page.sent, [{ type: "logOut" }]);
   assert.equal(page.scope.equipmentHostSuspendReasonRef.current, "logoutPending");
+  assert.equal(page.scope.companionRetirementsRef.current, 1);
 });
 
 test("cross-page move keeps the actual WASM ledger target reservation and sends only explicit destination cells", () => {
@@ -383,6 +388,7 @@ test("cross-page move rechecks the socket, connection, session, and logout gate 
     });
     assert.equal(page.moveItem(source, 4, "bag2"), false, change);
     assert.deepEqual(page.sent, change === "logout" ? [{ type: "logOut" }] : [], change);
+    assert.equal(page.scope.companionRetirementsRef.current, change === "logout" ? 1 : 0, change);
   }
 });
 
@@ -403,6 +409,7 @@ test("late WASM installation cannot establish a baseline across a pre-existing l
   page.syncEquipmentSnapshot();
   assert.equal(controller.status().ready, false);
   assert.equal(page.scope.equipmentHostSuspendReasonRef.current, "logoutPending");
+  assert.equal(page.scope.companionRetirementsRef.current, 1);
 });
 
 test("actual page rejects old rendered owners and keeps the real WASM pending across handoff and ACK", () => {
@@ -563,6 +570,7 @@ test("actual Character source replacement, full bag and final synchronous logout
     if(mode==="logout")page.onAction(e=>{if(e.detail.type==="removeItem")page.suspendEquipmentConnection("logoutPending");});
     assert.equal(page.dispatchBevyCharacterIntent(intent,proof),false);assert.equal(page.sent.length,0);
     assert.equal(controller.hasPendingInstance(0).reserved,false);
+    assert.equal(page.scope.companionRetirementsRef.current,mode==="logout"?1:0,mode);
   }
 });
 test("actual Character unknown send keeps the existing pending reservation",()=>{

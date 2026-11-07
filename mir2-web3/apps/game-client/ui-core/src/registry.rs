@@ -287,6 +287,7 @@ const SHELL_ACTIONS: &[&str] = &[
     "ExitApplication",
 ];
 const CORE_ACTIONS: &[&str] = &[
+    "OpenCompanion",
     "OpenCharacter",
     "OpenInventory",
     "OpenSkill",
@@ -329,6 +330,7 @@ const CORE_ACTIONS: &[&str] = &[
     "ResetPlatformSettingsToDefaults",
 ];
 const OVERLAY_ACTIONS: &[&str] = &[
+    "CompanionControl",
     "InspectBag",
     "InspectEquip",
     "UseInspected",
@@ -562,7 +564,8 @@ pub fn typed_action_contract(action: &str) -> Option<TypedActionContract> {
         | "PickUpObject"
         | "PickUpTile"
         | "SendChat"
-        | "TownRevive" => RepeatPolicy::HostAcknowledged,
+        | "TownRevive"
+        | "CompanionControl" => RepeatPolicy::HostAcknowledged,
         _ => RepeatPolicy::NotASubmission,
     };
 
@@ -1336,6 +1339,19 @@ pub fn all_controls() -> Vec<ControlEntry> {
             false
         ),
     ]);
+    let companion_sources = &[
+        "apps/game-client/client-bevy/src/companion.rs",
+        "apps/game-client/client-bevy/src/crystal_ui/companion.rs",
+        "apps/game-client/platform-windows/src/companion.rs",
+        "apps/game-client/platform-windows/src/native_protocol.rs",
+    ];
+    controls.extend([
+        c!("COMPANION.ENTRY", "InGame", "Companion", "OpenCompanion", "伙伴 Companion", "button", rect(872.0,174.0,140.0,29.0), "single", 1, "authenticated InGame without a covering modal", "OpenCompanion", "Lists only authorized companions", "ClosePanel/Escape", "implemented_runtime_adapter", companion_sources, None, false),
+        c!("COMPANION.CONTROL", "InGame", "Companion", "ControlButtons", "Teach/Recall/Resume", "dynamic_button_family", None, "authorized selected companion", 3, "committed owner view and no pending/unknown mutation", "CompanionControl", "Versioned owner control; success follows matching receipt", "ClosePanel/Escape", "implemented_authoritative_request", companion_sources, None, false),
+        c!("COMPANION.MEMORY", "InGame", "Companion", "MemoryButtons", "Revoke/Delete/Clear", "dynamic_button_family", None, "bounded current page", 1, "authorized row and explicit confirmation", "CompanionControl", "Recomputes habits only after commit", "CancelConfirm/Escape", "implemented_authoritative_request", companion_sources, None, false),
+        c!("COMPANION.EXPORT", "InGame", "Companion", "ExportButton", "Export full identity and growth", "button", None, "single", 1, "authorized owner view", "CompanionControl", "Full immutable chunks, exact size/SHA, new per-user file", "ClosePanel/Escape", "implemented_authoritative_request", companion_sources, None, false),
+        c!("COMPANION.TRIAL", "InGame", "Companion", "TrialButtons", "Experience/choice/intent", "dynamic_button_family", None, "configured experiment", 1, "authorized view; configured offer required for purchase intent", "CompanionControl", "Explicit self-report, never payment or completed service", "ClosePanel/Escape", "implemented_authoritative_request", companion_sources, None, false),
+    ]);
     controls
 }
 
@@ -1425,7 +1441,7 @@ mod tests {
         let controls = all_controls();
         assert_eq!(
             controls.len(),
-            188,
+            193,
             "the Candidate control inventory changed; update its typed-action contract deliberately"
         );
         validate_registry(&controls).unwrap_or_else(|errors| panic!("{errors:?}"));

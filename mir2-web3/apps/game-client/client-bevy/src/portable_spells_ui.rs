@@ -1,6 +1,6 @@
 use crate::{
     crystal_ui::{
-        skill_page_shared::{SkillPageAction, SkillPagePlan},
+        skill_page_shared::{SkillPageAction, SkillPagePlan, SkillTooltipDocument},
         spec::CrystalRect,
     },
     portable_bag_ui::BagUiPresentation,
@@ -146,6 +146,7 @@ pub struct SpellsUiState {
     pub render_revision: u64,
     pub clock: SkillCooldownClock,
     pub exhausted: bool,
+    pub hovered_tooltip: Option<SkillTooltipDocument>,
     identity: SpellsIdentity,
     namespace: Option<PortableRequestNamespace>,
     highest_request_run: u64,
@@ -159,10 +160,12 @@ fn inside(r: CrystalRect, x: f32, y: f32) -> bool {
 impl SpellsUiState {
     pub fn invalidate_input(&mut self) {
         self.held = None;
+        self.hovered_tooltip = None;
     }
     pub fn close(&mut self) {
         self.held = None;
         self.draft = Default::default();
+        self.hovered_tooltip = None;
     }
     /// Retire a rejected/cleared host snapshot without recycling burned IDs.
     pub fn clear_snapshot(&mut self) {
@@ -224,6 +227,25 @@ impl SpellsUiState {
             self.clock.remaining_ms(id, &self.view, now)
         })
     }
+    /// Read-only hover observation; never burns a request or changes a render
+    /// stamp, draft, cast clock, binding or authoritative learned skill.
+    pub fn observe_hover(&mut self, c: &SpellsUiContext, skill_id: Option<u32>) {
+        self.hovered_tooltip = if self.identity == c.identity
+            && c.active
+            && c.ready
+            && c.input_enabled
+            && !self.exhausted
+            && !self.draft.valid(&self.view)
+        {
+            self.plan(c.now_ms)
+                .rows
+                .into_iter()
+                .find(|row| Some(row.id) == skill_id)
+                .and_then(|row| row.tooltip)
+        } else {
+            None
+        };
+    }
     pub fn update_render(&mut self, _now: u64) {
         let key = format!(
             "{}:{}:{:?}",
@@ -269,7 +291,7 @@ impl SpellsUiState {
         }
         self.sequence = e.sequence;
         if e.phase == "cancel" {
-            self.held = None;
+            self.invalidate_input();
             return true;
         }
         if self.exhausted
@@ -283,7 +305,7 @@ impl SpellsUiState {
             || !e.y.is_finite()
             || e.button != 0
         {
-            self.held = None;
+            self.invalidate_input();
             return false;
         }
         let action = self
@@ -292,6 +314,7 @@ impl SpellsUiState {
             .find(|(_, r)| inside(*r, e.x, e.y))
             .map(|(a, _)| a);
         if e.phase == "down" {
+            self.hovered_tooltip = None;
             if self.held.is_some() {
                 self.held = None;
                 return false;

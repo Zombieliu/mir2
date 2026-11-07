@@ -17,6 +17,17 @@ Resolve all project paths relative to the repository root and `mir2-web3`.
   counts and toolchain choices are historical snapshots; confirm only what the
   present task needs. They are not startup commands or current environment facts.
 
+## Shared Windows R16 gameplay baseline
+
+- User direction (2026-11-04): Windows R16 is the common foundation for Web,
+  Windows and future platforms. `packages/game-data/data/r16-gameplay-baseline.json`
+  owns content profile, Quest cadence/guidance and Native onboarding. Regenerate
+  Node/Web projections with `packages/tooling/scripts/generate-r16-gameplay-baseline.mjs`.
+- Reuse shared server rules and the shared Bevy Quest UI. Device input may differ;
+  platforms must not introduce separate task chains, rewards or completion rules.
+- Quest progress comes from authoritative packets/ACKs, never browser action
+  counts or tutorial storage. Preserve existing saves and document actual deltas.
+
 ## Ownership and useful parallelism
 
 - Coordinator chooses scope, assigns bounded write sets, integrates and verifies.

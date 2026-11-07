@@ -1,0 +1,227 @@
+{
+  "schema": "mir2.web-r16-taoist-scoped-acceptance/1",
+  "checkedAt": "2026-11-06T11:25:24.700Z",
+  "className": "Taoist",
+  "scope": "v20 platinum_fiveclass/newcomer-v2 local normal WebSocket functional route",
+  "gatewaySha256": "c70aef2d2733635964a44c5973ad48cdb87919e4758a6336058106af3a51c063",
+  "protocolFunctionalPassed": true,
+  "mainCompleted": 22,
+  "growthCompleted": 4,
+  "level": 30,
+  "uniqueFinishAckChangeQuestCompleteQuestChains": 26,
+  "allExpectedItemRewardRowsVerified": 36,
+  "learnedSkills": [
+    "Healing",
+    "SpiritSword",
+    "Poisoning",
+    "SoulFireBall",
+    "SummonSkeleton"
+  ],
+  "normalRunnerLogouts": 4,
+  "savedReadbackMatched": true,
+  "normalFinalReadbackLogout": true,
+  "finalSavedState": {
+    "level": 30,
+    "map": "0",
+    "x": 318,
+    "y": 256,
+    "direction": "Right",
+    "gold": 65395,
+    "experience": 21815,
+    "completed": [
+      2110001,
+      2110002,
+      2110003,
+      2110004,
+      2110005,
+      2110006,
+      2110007,
+      2110008,
+      2110009,
+      2110010,
+      2110011,
+      2110012,
+      2110013,
+      2110014,
+      2110015,
+      2110016,
+      2110017,
+      2110018,
+      2110019,
+      2110020,
+      2110021,
+      2110022,
+      2120015,
+      2120020,
+      2120025,
+      2120030
+    ]
+  },
+  "segments": [
+    {
+      "segment": 1,
+      "finishedQuestIds": [
+        2110001,
+        2110002,
+        2110003,
+        2110004,
+        2110005,
+        2110006,
+        2110007,
+        2120015,
+        2110008,
+        2110009,
+        2110010
+      ],
+      "expectedItemRewardRows": 19,
+      "normalLogoutAck": true,
+      "freshCreation": true,
+      "pauseReason": "awaitingObjectiveTarget"
+    },
+    {
+      "segment": 2,
+      "finishedQuestIds": [
+        2110011,
+        2110012,
+        2120020,
+        2110013,
+        2110014,
+        2110015,
+        2110016,
+        2120025,
+        2110017,
+        2110018,
+        2110019
+      ],
+      "expectedItemRewardRows": 16,
+      "normalLogoutAck": true,
+      "freshCreation": false,
+      "pauseReason": "awaitingSafeSupplies"
+    },
+    {
+      "segment": 3,
+      "finishedQuestIds": [],
+      "expectedItemRewardRows": 0,
+      "normalLogoutAck": true,
+      "freshCreation": false,
+      "pauseReason": "deadline"
+    },
+    {
+      "segment": 4,
+      "finishedQuestIds": [
+        2110020,
+        2110021,
+        2110022,
+        2120030
+      ],
+      "expectedItemRewardRows": 1,
+      "normalLogoutAck": true,
+      "freshCreation": false,
+      "pauseReason": null
+    }
+  ],
+  "ordinary": {
+    "startedAt": "2026-11-06T09:10:31.293Z",
+    "deadlineAt": "2026-11-06T11:10:31.293Z",
+    "elapsedMs": 7200413,
+    "completed": false,
+    "paused": "deadline",
+    "mainCompleted": 19,
+    "growthCompleted": 3,
+    "q20ProgressAtDeadline": 1,
+    "revives": 3
+  },
+  "functionalRecheck": {
+    "startedAt": "2026-11-06T11:11:51.391Z",
+    "elapsedMs": 610306,
+    "newlyCompletedIds": [
+      2110020,
+      2110021,
+      2110022,
+      2120030
+    ],
+    "ordinaryClockAndRevivesPreserved": true,
+    "continuousOrdinaryRun": false
+  },
+  "ordinaryCommandKinds": [
+    "acceptQuest",
+    "attack",
+    "buyItem",
+    "clientVersion",
+    "equipItem",
+    "finishQuest",
+    "interact",
+    "keepAlive",
+    "logOut",
+    "login",
+    "magic",
+    "moveItem",
+    "newAccount",
+    "newCharacter",
+    "run",
+    "selectNpcDialog",
+    "startGame",
+    "townRevive",
+    "useItem",
+    "walk"
+  ],
+  "browserAcceptanceSeparate": true,
+  "ownedGateway": {
+    "endpoint": "ws://127.0.0.1:19133/ws",
+    "pid": 106016,
+    "leftRunning": true
+  },
+  "inputReceipts": [
+    {
+      "file": "taoist-ordinary-result.json",
+      "bytes": 6671,
+      "sha256": "86c3abade22a4927bc929f5f208b14b83eb8047e06086fabb04e1061ff6d44af"
+    },
+    {
+      "file": "taoist-ordinary-result-r2.json",
+      "bytes": 15601,
+      "sha256": "eb95c620c66657d82f69e85f0be7029854a80b900003312df28d8e6d367498f1"
+    },
+    {
+      "file": "taoist-ordinary-result-r3.json",
+      "bytes": 15789,
+      "sha256": "6cd13a058442848da9491e3ade28392215e7326ba28c7879d296e88a39874d79"
+    },
+    {
+      "file": "taoist-functional-recheck-result.json",
+      "bytes": 17476,
+      "sha256": "8cf77392077e7b3f27e14a85bfe220769f8ae5d4db4c155155ed6e623847f521"
+    },
+    {
+      "file": "taoist-q11-target-diagnostic.json",
+      "bytes": 1655,
+      "sha256": "3b2072aa7c213fcdf579d509a6401d2b8d35032ef168944eddbc60ae1a15073c"
+    },
+    {
+      "file": "taoist-q20-supply-and-encounter-diagnostic.json",
+      "bytes": 2750,
+      "sha256": "48c48c32dac8ec71f9dc5ac75a5a1f1f4f9bd42a02d69e4325ce49cbb1466287"
+    },
+    {
+      "file": "taoist-browser-handoff.json",
+      "bytes": 917,
+      "sha256": "0e9dedd18dbfbfcb31f7f97c9ed4e1e69821c87b4ed6956958c5f94f4e8dd438"
+    },
+    {
+      "file": "taoist-browser-handoff-stock-v2.json",
+      "bytes": 2474,
+      "sha256": "3969afce6c90aa6ee57a58f975d79bc896e0789bfd8897a651861d4e5ea5fe9c"
+    },
+    {
+      "file": "taoist-ordinary-supply-r3.json",
+      "bytes": 869,
+      "sha256": "e96d65a0a56732f4aeba024f20b1fcbe0c7cf8e6bccf0eea9c4f9421a5d1f653"
+    },
+    {
+      "file": "taoist-functional-supply.json",
+      "bytes": 792,
+      "sha256": "4cba941f1c6f5f4bde10fb0e06870fe258a1d10c511ee491d5fa89177a11ace0"
+    }
+  ],
+  "publicReceiptExactPrivateMatches": 0
+}

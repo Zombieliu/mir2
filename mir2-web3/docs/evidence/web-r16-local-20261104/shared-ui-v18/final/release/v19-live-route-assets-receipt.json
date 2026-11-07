@@ -1,0 +1,161 @@
+{
+  "schema": "mir2.r16.v19-route-assets-live/1",
+  "passed": true,
+  "ordinaryPublicHttp": true,
+  "playerActions": 0,
+  "assetSamples": 22,
+  "rows": [
+    {
+      "path": "debug/map-samples/smtile-104.png",
+      "status": 200,
+      "bytes": 2268,
+      "sha256": "f9c9856ad3d462a29ed37cd0436f09de3479dabc281f02fea1f50f470d09e516"
+    },
+    {
+      "path": "debug/map-samples/smtile-32.png",
+      "status": 200,
+      "bytes": 3068,
+      "sha256": "3be246ad2b2e7024ae357ccc39acdf8b33addf26b3d8a2ba73f5f227d724702e"
+    },
+    {
+      "path": "debug/map-samples/smtile-52.png",
+      "status": 200,
+      "bytes": 2933,
+      "sha256": "a9d125a60d3033f3cbb98ee07bca3664351760be3ac908c6f6df7f6e637c5794"
+    },
+    {
+      "path": "debug/map-samples/smtile-72.png",
+      "status": 200,
+      "bytes": 2417,
+      "sha256": "7104016771889156e80d1fd085fbab12d618cc47d5b55cdb0d9eab2d987414d8"
+    },
+    {
+      "path": "debug/map-samples/smtile-80.png",
+      "status": 200,
+      "bytes": 2500,
+      "sha256": "d86ebfffd9a71869422913da8bfdb17f95c633c492c4049fefe5930f155c0d02"
+    },
+    {
+      "path": "debug/map-samples/tiles-0.png",
+      "status": 200,
+      "bytes": 5475,
+      "sha256": "b16a7c57eb8a90f4762f8fe68092711b9bf8eb4ed658fc86da2689b94537b3b4"
+    },
+    {
+      "path": "debug/map-samples/tiles-1.png",
+      "status": 200,
+      "bytes": 5666,
+      "sha256": "5fd25227e503278b3219c851ae058f7596eb4a45b861724cd6369e08f5a0accb"
+    },
+    {
+      "path": "original-ui/Monster/015/0.png",
+      "status": 200,
+      "bytes": 3621,
+      "sha256": "ba65392916bc9f7bdbb4f99ab877c4f27b19dd3c26d632ae28826392f7da4c5b"
+    },
+    {
+      "path": "original-ui/Monster/015/1.png",
+      "status": 200,
+      "bytes": 3621,
+      "sha256": "ba65392916bc9f7bdbb4f99ab877c4f27b19dd3c26d632ae28826392f7da4c5b"
+    },
+    {
+      "path": "original-ui/Monster/015/2.png",
+      "status": 200,
+      "bytes": 3621,
+      "sha256": "ba65392916bc9f7bdbb4f99ab877c4f27b19dd3c26d632ae28826392f7da4c5b"
+    },
+    {
+      "path": "original-ui/Monster/015/3.png",
+      "status": 200,
+      "bytes": 3621,
+      "sha256": "ba65392916bc9f7bdbb4f99ab877c4f27b19dd3c26d632ae28826392f7da4c5b"
+    },
+    {
+      "path": "original-ui/Monster/015/7.png",
+      "status": 200,
+      "bytes": 3621,
+      "sha256": "ba65392916bc9f7bdbb4f99ab877c4f27b19dd3c26d632ae28826392f7da4c5b"
+    },
+    {
+      "path": "original-ui/Monster/019/0.png",
+      "status": 200,
+      "bytes": 1655,
+      "sha256": "8f312c7ed490a9d61eda51152f668f9e76fbe45de48934b356fca743b2711683"
+    },
+    {
+      "path": "original-ui/Monster/019/meta.json",
+      "status": 200,
+      "bytes": 106569,
+      "sha256": "d6c3b8ff4a64856d8f917d0f52f7b052f6b15ea8da63a8bf4ee218f9731a39fc"
+    },
+    {
+      "path": "original-ui/Monster/020/0.png",
+      "status": 200,
+      "bytes": 1040,
+      "sha256": "8e717a569748cdce88a9bbed9603f9c0ec8d70f618d9ea5cd3a2b69c51331789"
+    },
+    {
+      "path": "original-ui/Monster/020/meta.json",
+      "status": 200,
+      "bytes": 105012,
+      "sha256": "343d6fb19562deafcc0a3c89d1ed46d874bb96a700b45c7dfd92b58c114d9ada"
+    },
+    {
+      "path": "original-ui/Monster/021/0.png",
+      "status": 200,
+      "bytes": 3351,
+      "sha256": "a35f0f3a425bc7bb7a062804e364993f8250011f84b9d5e1f2f1d3c0525d9fb1"
+    },
+    {
+      "path": "original-ui/Monster/021/meta.json",
+      "status": 200,
+      "bytes": 129345,
+      "sha256": "9411936e62740562bc7dda73cb51d4292ebe3928e6a00f189e144fb5c4ef6f63"
+    },
+    {
+      "path": "original-ui/Monster/022/0.png",
+      "status": 200,
+      "bytes": 3550,
+      "sha256": "71a9af953e5776dd2b5f3d638873ecf740ad5da17c4f9f40fecd70c313df8f0d"
+    },
+    {
+      "path": "original-ui/Monster/022/meta.json",
+      "status": 200,
+      "bytes": 116167,
+      "sha256": "100454e29da824c50e32265aa0360fe4e446bee2ba0a02e2de2561b5e5bb910a"
+    },
+    {
+      "path": "original-ui/Monster/023/0.png",
+      "status": 200,
+      "bytes": 4450,
+      "sha256": "d0f73741764187370d21d0d9a772beb631b5fe5d59b863f764f8b25f86745ddc"
+    },
+    {
+      "path": "original-ui/Monster/023/meta.json",
+      "status": 200,
+      "bytes": 107010,
+      "sha256": "d620db8d3c88b30568a0d4053f8c340da4c0f46ee42e435efbd7efdb04d68085"
+    }
+  ],
+  "d001Scene": {
+    "status": 200,
+    "missing": 0,
+    "sprites": 390,
+    "cells": 5050
+  },
+  "oldAndNewManifestAccepted": true,
+  "alteredManifestCasesRejected": [
+    "missingMushroomFrame",
+    "missingCaveBatFrame",
+    "missingSkeletonMeta",
+    "missingTransition",
+    "changedRawMetaHash",
+    "changedOldFileHash",
+    "changedOldSourcePin",
+    "extraMap",
+    "extraLibrary",
+    "wrongBaseManifest",
+    "legacyCannotUseRouteScope"
+  ]
+}

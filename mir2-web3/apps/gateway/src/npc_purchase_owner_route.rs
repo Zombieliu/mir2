@@ -62,7 +62,8 @@ pub(crate) fn action_kind(action: NpcPurchaseOwnerAction) -> WorldCommandKind {
         NpcPurchaseOwnerAction::Begin => "begin",
         NpcPurchaseOwnerAction::Quote { .. } => "quote",
         NpcPurchaseOwnerAction::Query { .. } => "query",
-        NpcPurchaseOwnerAction::Purchase { .. } => "purchase",
+        NpcPurchaseOwnerAction::Purchase { .. }
+        | NpcPurchaseOwnerAction::PurchaseBounded { .. } => "purchase",
     })
 }
 

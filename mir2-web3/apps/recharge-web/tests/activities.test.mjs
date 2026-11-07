@@ -31,7 +31,7 @@ test("public activity authentication and ban errors end the portal session with 
 
 test("revocation clears personal snapshots immediately and rejects results from an earlier login", () => {
   const active={epoch:4,loggedIn:true,busy:false,scope:"private-account",characterIndex:7,
-    activities:value,status:{credit:500},activitiesFailed:true,offerId:"usd-5",
+    activities:value,status:{credit:500},activitiesFailed:true,offerId:"usd-5",providerId:"waffo",intent:{provider:"waffo",offerId:"usd-5"},
     checkout:{orderId:"private-order",checkoutUrl:"https://checkout.stripe.com/c/pay/test"},tab:"player"};
   assert.equal(currentPortalResult(active,4),true);
   for (const code of ["activitiesAuthenticationRequired","activitiesAccountBanned"]) {
@@ -39,7 +39,7 @@ test("revocation clears personal snapshots immediately and rejects results from 
     const signedOut=clearedPortalSession(active);
     assert.equal(signedOut.epoch,5);assert.equal(signedOut.loggedIn,false);
     assert.equal(signedOut.activitiesFailed,false);assert.equal(signedOut.tab,"player");
-    for (const key of ["scope","characterIndex","activities","status","offerId","checkout"])
+    for (const key of ["scope","characterIndex","activities","status","offerId","checkout","providerId","intent"])
       assert.equal(signedOut[key],null,key);
     assert.equal(currentPortalResult(signedOut,4),false);
     assert.equal(currentPortalResult(signedOut,5),false);

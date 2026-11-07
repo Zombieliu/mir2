@@ -16,6 +16,7 @@ export type DocumentationSection = {
 
 export type DocumentationArticle = {
   slug: string;
+  updated?: string;
   title: string;
   description: string;
   status: "live" | "testing" | "planned";

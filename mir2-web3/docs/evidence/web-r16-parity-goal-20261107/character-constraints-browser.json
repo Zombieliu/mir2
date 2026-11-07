@@ -1,0 +1,37 @@
+{
+  "schema": "mir2.r16.character-create-ui.v1",
+  "branch": "codex/windows-player-journey",
+  "scope": "isolated File, real browser controls and Gateway",
+  "gatewaySha256": "3dd4f2b5c053f0d35c0ba172130a5731eb8944afd4b78e7605c03a9271fcad3e",
+  "primaryRealm": "platinum_fiveclass",
+  "passed": true,
+  "checks": {
+    "name": {
+      "result": 5,
+      "caseVariant": true,
+      "draftKept": true,
+      "nameFocus": true,
+      "previousRoleKept": true,
+      "notice": "已存在同名角色。"
+    },
+    "retry": {
+      "createdOnce": true,
+      "selectedByServerIndex": true,
+      "oldSlotKept": true
+    },
+    "slots": {
+      "result": 4,
+      "formClosed": true,
+      "actualStaleRoster": true,
+      "notice": "您不能创建超过 4 个角色。",
+      "extraCreation": false
+    },
+    "relogin": {
+      "sameFourIndices": true,
+      "newDisabled": true,
+      "retryEnteredWorld": true,
+      "ordinaryLogout": true
+    }
+  },
+  "pageErrors": []
+}

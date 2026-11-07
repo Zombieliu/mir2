@@ -1,0 +1,116 @@
+{
+  "schema": 1,
+  "passed": true,
+  "provider": "explicit-test-double-no-http",
+  "liveModelValidated": false,
+  "model": "gpt-6-luna",
+  "acknowledgementMs": 18,
+  "actualModelCalls": 0,
+  "mockProviderCalls": 1,
+  "gatewaySha256": "165eba1719866912d2b7da28ad430164bd1a9a8ef704fe976400d0b232dccc7b",
+  "contentProfile": "platinum_fiveclass",
+  "checks": [
+    "real authenticated owner invitation and shared-zone membership; policy version 2",
+    "private natural instruction acknowledged before execution, producing one constrained model goal",
+    "model-selected ordinary attack, own-strike then death progress 2/2, no pickup, real return within two tiles",
+    "observed objectives and source hashes committed in the durable character archive before ordinary logout"
+  ],
+  "commands": {
+    "clientVersion": 1,
+    "login": 1,
+    "startGame": 1,
+    "changeAMode": 1,
+    "equipItem": 2,
+    "switchGroup": 1,
+    "companionRuntimeRegister": 1,
+    "keepAlive": 3,
+    "companionRuntimeReply": 23,
+    "groupInvite": 1,
+    "dropItem": 1,
+    "attackDirection": 9,
+    "walk": 3,
+    "logOut": 1
+  },
+  "archiveIdentityHash": "0f54b3485355ade9c502350111cb8a16529b1582b4ece6198068499893403513",
+  "remembered": [
+    {
+      "episodeId": "goal:e2227e41799d8d5c7f1537fb9c3afaf84a31abce97ae7292bc89d0aadd3e0cde:kill:1",
+      "payloadHash": "9b85ec97c4ca59fa6af6acb0f1b4bdcd6cf3916df947b0ec9cae58091aba3eca"
+    },
+    {
+      "episodeId": "goal:e2227e41799d8d5c7f1537fb9c3afaf84a31abce97ae7292bc89d0aadd3e0cde:kill:2",
+      "payloadHash": "8aa16113f07a95ac5094e27e8a0bab3683c1ce77b1ec756f22c1b99ef349c766"
+    },
+    {
+      "episodeId": "goal:e2227e41799d8d5c7f1537fb9c3afaf84a31abce97ae7292bc89d0aadd3e0cde:completed",
+      "payloadHash": "d5cbb01ba5f011b2ec68f48aeee28bc6844174cf13b4676cc3080c947150c525"
+    }
+  ],
+  "evidence": [
+    {
+      "at": 1793667436937,
+      "packet": "ObjectStruck",
+      "objectId": 206641,
+      "attackerId": 1000
+    },
+    {
+      "at": 1793667437737,
+      "packet": "ObjectStruck",
+      "objectId": 206641,
+      "attackerId": 1000
+    },
+    {
+      "at": 1793667438452,
+      "packet": "ObjectStruck",
+      "objectId": 206641,
+      "attackerId": 1000
+    },
+    {
+      "at": 1793667439210,
+      "packet": "ObjectStruck",
+      "objectId": 206641,
+      "attackerId": 1000
+    },
+    {
+      "at": 1793667440003,
+      "packet": "ObjectStruck",
+      "objectId": 206641,
+      "attackerId": 1000
+    },
+    {
+      "at": 1793667440710,
+      "packet": "ObjectStruck",
+      "objectId": 206641,
+      "attackerId": 1000
+    },
+    {
+      "at": 1793667441452,
+      "packet": "ObjectStruck",
+      "objectId": 206641,
+      "attackerId": 1000
+    },
+    {
+      "at": 1793667441454,
+      "packet": "ObjectDied",
+      "objectId": 206641
+    },
+    {
+      "at": 1793667443650,
+      "packet": "ObjectStruck",
+      "objectId": 271801,
+      "attackerId": 1000
+    },
+    {
+      "at": 1793667444420,
+      "packet": "ObjectStruck",
+      "objectId": 271801,
+      "attackerId": 1000
+    },
+    {
+      "at": 1793667444423,
+      "packet": "ObjectDied",
+      "objectId": 271801
+    }
+  ],
+  "humanTrial": false
+}

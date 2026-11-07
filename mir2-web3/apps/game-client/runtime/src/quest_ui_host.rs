@@ -66,7 +66,14 @@ use mir2_client_bevy::quest_model::{
     CompletedQuestTracker, NpcDialogLine, NpcDialogModel, NpcDialogOption, Quest, QuestDetailText,
     QuestObjective, QuestReward, QuestStatus, QuestTracker,
 };
-use mir2_client_bevy::quest_presentation_text::QuestPresentationLocale;
+use mir2_client_bevy::quest_presentation_text::{QuestDisplayLanguage, QuestPresentationLocale};
+
+#[path = "portable_ui_fonts.rs"]
+pub(crate) mod portable_fonts;
+
+#[cfg(test)]
+#[path = "quest_ui_host_display_tests.rs"]
+mod display_tests;
 use mir2_client_bevy::quest_ui::QuestUiPresentation;
 #[cfg(target_arch = "wasm32")]
 use mir2_client_bevy::quest_ui::{NpcDialogNav, QuestUiState};
@@ -84,6 +91,8 @@ pub(crate) struct WebQuestUiSnapshot {
     pub revision: u64,
     #[serde(default)]
     pub language: QuestPresentationLocale,
+    #[serde(default)]
+    pub display_language: Option<QuestDisplayLanguage>,
     pub in_game: bool,
     pub host_visible: bool,
     pub quest_log_open: bool,
@@ -483,12 +492,8 @@ pub(crate) struct QuestUiModels {
 }
 
 #[cfg(target_arch = "wasm32")]
-const QUEST_FONT_ASSET: &str = "original-ui/fonts/NotoSansCJKsc-Regular.otf";
-
-#[cfg(target_arch = "wasm32")]
 #[derive(Resource)]
 struct QuestUiHostAssets {
-    font: Option<Handle<Font>>,
     skins: Vec<Handle<Image>>,
     requested: bool,
 }
@@ -499,6 +504,7 @@ struct AppliedQuestUiSnapshot {
     generation: u64,
     revision: u64,
     language: QuestPresentationLocale,
+    display_language: Option<QuestDisplayLanguage>,
     open_revision: u64,
     has_snapshot: bool,
     has_input: bool,
@@ -683,6 +689,7 @@ fn ui_target_camera(app: &mut App, ui_window: Entity, shared_webgl2: bool) -> En
     ))
 ))]
 fn install_supported(app: &mut App, shared_webgl2: bool) {
+    portable_fonts::install(app);
     let ui_window = ui_target_window(app, shared_webgl2);
     let ui_camera = ui_target_camera(app, ui_window, shared_webgl2);
     app.insert_resource(QuestUiTargetCamera(ui_camera));
@@ -702,7 +709,6 @@ fn install_supported(app: &mut App, shared_webgl2: bool) {
     // explicit browser opt-in snapshot requests all UI assets together.
     app.insert_resource(QuestUiFont(Handle::default()));
     app.insert_resource(QuestUiHostAssets {
-        font: None,
         skins: Vec::new(),
         requested: false,
     });
@@ -805,9 +811,13 @@ fn ingest_quest_ui_snapshot(
     mut dialog_nav: ResMut<NpcDialogNav>,
     mut player_ui: ResMut<NativePlayerUiState>,
     asset_server: Res<AssetServer>,
-    mut assets: ResMut<QuestUiHostAssets>,
+    assets: (
+        ResMut<QuestUiHostAssets>,
+        ResMut<portable_fonts::PortableUiFonts>,
+    ),
     mut packaged_font: ResMut<QuestUiFont>,
 ) {
+    let (mut assets, mut fonts) = assets;
     let (mut read_model, mut read_ingress) = read_authority;
     let (mut quest_state, mut world_context, mut presentation_actions, mut routes, mut route_stamp) =
         quest_interaction;
@@ -857,6 +867,13 @@ fn ingest_quest_ui_snapshot(
         *locale = snapshot.language;
     }
     applied.language = snapshot.language;
+    applied.display_language = snapshot.display_language;
+    context.display_language = snapshot.display_language;
+    // Only a newly accepted snapshot activates this presentation. Retained
+    // context cannot reactivate a language after the intent sink is retired.
+    mir2_client_bevy::native_i18n::set_portable_display_language(
+        snapshot.display_language.map(|value| value.0),
+    );
     if new_generation {
         pending.release_all_quest_operations();
         intents.clear();
@@ -869,14 +886,17 @@ fn ingest_quest_ui_snapshot(
         *guidance = QuestGuidance::from_profile_name(&snapshot.profile);
         *catalog = NewcomerJourneyCatalog::from_guidance(&guidance);
     }
+    if snapshot.host_visible {
+        fonts.request(&asset_server, snapshot.display_language);
+        if let Some(font) = fonts.primary(snapshot.display_language) {
+            packaged_font.0 = font;
+        }
+    }
     if snapshot.host_visible && !assets.requested {
-        let font = asset_server.load::<Font>(QUEST_FONT_ASSET);
         assets.skins = PORTABLE_QUEST_REQUIRED_SKINS
             .iter()
             .map(|path| asset_server.load::<Image>(*path))
             .collect();
-        packaged_font.0 = font.clone();
-        assets.font = Some(font);
         assets.requested = true;
     }
     // The host's open/close revision changes only for an explicit external
@@ -1084,26 +1104,36 @@ fn sync_quest_hint_surface(
     font: Res<QuestUiFont>,
     bag: Res<mir2_client_bevy::portable_bag_ui::BagUiHostContext>,
     hero: Res<mir2_client_bevy::portable_hero_ui::HeroUiContext>,
+    spells: Res<mir2_client_bevy::portable_spells_ui::SpellsUiContext>,
     hud: Res<mir2_client_bevy::crystal_ui::hud::SharedHudSurface>,
     assets: Res<AssetServer>,
     mut surface: ResMut<CrystalHintSurface>,
 ) {
+    let hud_font_ready = matches!(
+        assets.get_load_state(hud.font.id()),
+        Some(bevy::asset::LoadState::Loaded)
+    );
     let hero_hint_owner = hero.active
         && hero.ready
         && hero.input_enabled
-        && matches!(
-            assets.get_load_state(hud.font.id()),
-            Some(bevy::asset::LoadState::Loaded)
-        );
+        && hud_font_ready;
+    // Skill hover uses the shared HUD font and retires with its current owner,
+    // including the frames where a modal disables the page's input surface.
+    let spells_hint_owner = spells.active
+        && spells.ready
+        && spells.input_enabled
+        && spells.identity.valid()
+        && hud_font_ready;
     let active = (context.in_game
         && context.host_visible
         && quest_ui_has_open_surface(&player_ui, &quest_state, &dialog))
         || (bag.bag_open && bag.input_enabled && bag.presentation_ready)
-        || hero_hint_owner;
+        || hero_hint_owner
+        || spells_hint_owner;
     if surface.active != active {
         surface.active = active;
     }
-    let hint_font = if hero_hint_owner { &hud.font } else { &font.0 };
+    let hint_font = if hero_hint_owner || spells_hint_owner { &hud.font } else { &font.0 };
     if surface.font != *hint_font {
         surface.font = hint_font.clone();
     }
@@ -1140,6 +1170,7 @@ fn publish_quest_ui_status(
         Res<WeightBarHostContext>,
     ),
     assets: Res<QuestUiHostAssets>,
+    fonts: Res<portable_fonts::PortableUiFonts>,
     server: Res<AssetServer>,
     roots: Query<Entity, With<mir2_client_bevy::quest_ui::QuestUiRoot>>,
     quest_world: (
@@ -1185,17 +1216,12 @@ fn publish_quest_ui_status(
     });
     let (experience_bar, weight_bar, experience_bar_context, weight_bar_context) = bar_inputs;
     let asset_state = assets
-        .font
+        .skins
         .iter()
-        .map(|font| server.get_load_state(font.id()))
-        .chain(
-            assets
-                .skins
-                .iter()
-                .map(|handle| server.get_load_state(handle.id())),
-        );
-    let mut loading = !assets.requested;
-    let mut asset_error = false;
+        .map(|handle| server.get_load_state(handle.id()));
+    let font_state = fonts.readiness(&server, applied.display_language);
+    let mut loading = !assets.requested || font_state.loading;
+    let mut asset_error = font_state.error;
     for state in asset_state {
         match state {
             Some(LoadState::Loaded) => {}
@@ -1212,6 +1238,7 @@ fn publish_quest_ui_status(
         status.generation = applied.generation;
         status.revision = applied.revision;
         status.language = applied.language;
+        status.display_language = applied.display_language;
         status.open_revision = context.open_revision;
         status.quest_log_open = player_ui.quest_open();
         let hp_ready = hp_orb.ready
@@ -2014,6 +2041,8 @@ impl QuestNameTargets {
 struct WebQuestUiStatus {
     quest_locale_version: u8,
     language: QuestPresentationLocale,
+    display_locale_version: u8,
+    display_language: Option<QuestDisplayLanguage>,
     ready: bool,
     error: Option<String>,
     captures_pointer: bool,
@@ -2193,6 +2222,8 @@ impl Default for WebQuestUiStatus {
         Self {
             quest_locale_version: 1,
             language: QuestPresentationLocale::default(),
+            display_locale_version: 1,
+            display_language: None,
             ready: false,
             error: None,
             captures_pointer: false,
@@ -2336,6 +2367,7 @@ pub fn set_mir2_quest_ui_intent_sink(sink: Function) {
 #[wasm_bindgen(js_name = clearMir2QuestUiIntentSink)]
 pub fn clear_mir2_quest_ui_intent_sink() {
     INTENT_SINK.with(|current| *current.borrow_mut() = None);
+    mir2_client_bevy::native_i18n::set_portable_display_language(None);
 }
 
 #[cfg(target_arch = "wasm32")]

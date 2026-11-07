@@ -1,0 +1,382 @@
+TAP version 13
+# Subtest: generic queued batching, lazy state, Object.is, callback deps and cleanup-before-setup
+ok 1 - generic queued batching, lazy state, Object.is, callback deps and cleanup-before-setup
+  ---
+  duration_ms: 2.3265
+  type: 'test'
+  ...
+# Subtest: generic Provider value propagation and independent consumer fibers
+ok 2 - generic Provider value propagation and independent consumer fibers
+  ---
+  duration_ms: 0.5903
+  type: 'test'
+  ...
+# Subtest: frozen 24 copy values unchanged; canonical mapping observed via actual rendered fields
+ok 3 - frozen 24 copy values unchanged; canonical mapping observed via actual rendered fields
+  ---
+  duration_ms: 17.0748
+  type: 'test'
+  ...
+# Subtest: SSR initialization without navigator or effect commit
+ok 4 - SSR initialization without navigator or effect commit
+  ---
+  duration_ms: 0.7035
+  type: 'test'
+  ...
+# Subtest: capture without consumer retains prompt; locale and consumer changes duplicate no listeners/timer
+ok 5 - capture without consumer retains prompt; locale and consumer changes duplicate no listeners/timer
+  ---
+  duration_ms: 2.0159
+  type: 'test'
+  ...
+# Subtest: install both real await boundaries and accepted
+ok 6 - install both real await boundaries and accepted
+  ---
+  duration_ms: 2.8824
+  type: 'test'
+  ...
+# Subtest: install both real await boundaries and dismissed
+ok 7 - install both real await boundaries and dismissed
+  ---
+  duration_ms: 1.7159
+  type: 'test'
+  ...
+# Subtest: fullscreen unsupported and deferred rejection render latest copy from semantic status
+ok 8 - fullscreen unsupported and deferred rejection render latest copy from semantic status
+  ---
+  duration_ms: 2.3415
+  type: 'test'
+  ...
+# Subtest: fullscreen request and landscape-lock awaits; advisory resolve
+ok 9 - fullscreen request and landscape-lock awaits; advisory resolve
+  ---
+  duration_ms: 2.4783
+  type: 'test'
+  ...
+# Subtest: fullscreen request and landscape-lock awaits; advisory reject
+ok 10 - fullscreen request and landscape-lock awaits; advisory reject
+  ---
+  duration_ms: 1.9838
+  type: 'test'
+  ...
+# Subtest: display and appinstalled events during consumer absence use root callbacks
+ok 11 - display and appinstalled events during consumer absence use root callbacks
+  ---
+  duration_ms: 1.3875
+  type: 'test'
+  ...
+# Subtest: game aliases retain one capture while marketing and promotion routes stay outside the PWA shell
+ok 12 - game aliases retain one capture while marketing and promotion routes stay outside the PWA shell
+  ---
+  duration_ms: 2.3149
+  type: 'test'
+  ...
+# Subtest: route gate detaches original seven listeners; retains state and reattaches once
+ok 13 - route gate detaches original seven listeners; retains state and reattaches once
+  ---
+  duration_ms: 1.2183
+  type: 'test'
+  ...
+# Subtest: 4999/5000 hint, 349/350 orientation, portrait/standalone and pointer suppression
+ok 14 - 4999/5000 hint, 349/350 orientation, portrait/standalone and pointer suppression
+  ---
+  duration_ms: 1.4527
+  type: 'test'
+  ...
+# Subtest: storage dismissal exact key; denied storage has no added page-lifetime suppression
+ok 15 - storage dismissal exact key; denied storage has no added page-lifetime suppression
+  ---
+  duration_ms: 2.2774
+  type: 'test'
+  ...
+# Subtest: cleanup preserves original uncanceled350 timeout and cancels only owned hint
+ok 16 - cleanup preserves original uncanceled350 timeout and cancels only owned hint
+  ---
+  duration_ms: 0.8774
+  type: 'test'
+  ...
+# Subtest: Page/layout actual AST: one owner/mount/required language and persistent root placement
+ok 17 - Page/layout actual AST: one owner/mount/required language and persistent root placement
+  ---
+  duration_ms: 227.1887
+  type: 'test'
+  ...
+# Subtest: entry/panel/six tabs and fixed-teaching hit boxes match actual R16 source
+ok 18 - entry/panel/six tabs and fixed-teaching hit boxes match actual R16 source
+  ---
+  duration_ms: 93.058
+  type: 'test'
+  ...
+# Subtest: actual rendered controls perform teaching, memory read, explicit supply confirmation and revocation
+ok 19 - actual rendered controls perform teaching, memory read, explicit supply confirmation and revocation
+  ---
+  duration_ms: 50.6667
+  type: 'test'
+  ...
+# Subtest: confirmation uses an opaque rendered lease and cannot authorize a changed view
+ok 20 - confirmation uses an opaque rendered lease and cannot authorize a changed view
+  ---
+  duration_ms: 28.4451
+  type: 'test'
+  ...
+# Subtest: memory revoke/delete requires confirmation and pending/unknown buttons cannot send
+ok 21 - memory revoke/delete requires confirmation and pending/unknown buttons cannot send
+  ---
+  duration_ms: 30.9275
+  type: 'test'
+  ...
+# Subtest: party invitation uses current lease and server character name, while absent hosts disable real actions
+ok 22 - party invitation uses current lease and server character name, while absent hosts disable real actions
+  ---
+  duration_ms: 22.5127
+  type: 'test'
+  ...
+# Subtest: model text Enter respects IME and uses existing propose/confirm/cancel operations
+ok 23 - model text Enter respects IME and uses existing propose/confirm/cancel operations
+  ---
+  duration_ms: 34.1153
+  type: 'test'
+  ...
+# Subtest: new content never paints an old private draft, even before passive cleanup
+ok 24 - new content never paints an old private draft, even before passive cleanup
+  ---
+  duration_ms: 31.8801
+  type: 'test'
+  ...
+# Subtest: Escape cancels confirmation first, focus wraps inside modal, and timers clean up
+ok 25 - Escape cancels confirmation first, focus wraps inside modal, and timers clean up
+  ---
+  duration_ms: 21.6933
+  type: 'test'
+  ...
+# Subtest: life duration selection and confirmation send the real fixed-budget permission
+ok 26 - life duration selection and confirmation send the real fixed-budget permission
+  ---
+  duration_ms: 15.7802
+  type: 'test'
+  ...
+# Subtest: open window polls planning to a current proposal every 2.5s using reads only, and close removes that timer
+ok 27 - open window polls planning to a current proposal every 2.5s using reads only, and close removes that timer
+  ---
+  duration_ms: 19.7805
+  type: 'test'
+  ...
+# Subtest: editing/composition and nonempty drafts pause polling; unchanged explicit views preserve the draft
+ok 28 - editing/composition and nonempty drafts pause polling; unchanged explicit views preserve the draft
+  ---
+  duration_ms: 21.8761
+  type: 'test'
+  ...
+# Subtest: a confirmation keeps its original live lease because polling pauses until dismissal
+ok 29 - a confirmation keeps its original live lease because polling pauses until dismissal
+  ---
+  duration_ms: 13.112
+  type: 'test'
+  ...
+# Subtest: invisible format input cannot enable or dispatch a model action
+ok 30 - invisible format input cannot enable or dispatch a model action
+  ---
+  duration_ms: 17.2273
+  type: 'test'
+  ...
+# Subtest: actual movement handlers leave panel/nonmovement keys untouched before every world blocker
+ok 31 - actual movement handlers leave panel/nonmovement keys untouched before every world blocker
+  ---
+  duration_ms: 454.7872
+  type: 'test'
+  ...
+# Subtest: actual Arrow handlers retain every modal, capture, scene, identity and modifier guard
+ok 32 - actual Arrow handlers retain every modal, capture, scene, identity and modifier guard
+  ---
+  duration_ms: 54.6942
+  type: 'test'
+  ...
+# Subtest: the installed capture effect preserves Arrow edges, held cadence, Shift, diagonal and release semantics
+ok 33 - the installed capture effect preserves Arrow edges, held cadence, Shift, diagonal and release semantics
+  ---
+  duration_ms: 6.044
+  type: 'test'
+  ...
+# Subtest: the installed effect withdraws on modal mount and dynamic parity still denies Arrow while yielding F9
+ok 34 - the installed effect withdraws on modal mount and dynamic parity still denies Arrow while yielding F9
+  ---
+  duration_ms: 37.7829
+  type: 'test'
+  ...
+# Subtest: a transient live guard at mount cannot prevent listener installation or require a prop rerender to accept a later gesture
+ok 35 - a transient live guard at mount cannot prevent listener installation or require a prop rerender to accept a later gesture
+  ---
+  duration_ms: 18.3963
+  type: 'test'
+  ...
+# Subtest: actual Page JSX forwarders keep identity across rerenders and invoke only the latest intent/stop closures
+ok 36 - actual Page JSX forwarders keep identity across rerenders and invoke only the latest intent/stop closures
+  ---
+  duration_ms: 122.8748
+  type: 'test'
+  ...
+# Subtest: 50ms Page rerenders cannot starve the real 100ms held interval and each tick reaches the latest Page closure
+ok 37 - 50ms Page rerenders cannot starve the real 100ms held interval and each tick reaches the latest Page closure
+  ---
+  duration_ms: 239.2944
+  type: 'test'
+  ...
+# Subtest: actual Page JSX Step forwarder keeps identity and preserves arguments and return values from the latest closure
+ok 38 - actual Page JSX Step forwarder keeps identity and preserves arguments and return values from the latest closure
+  ---
+  duration_ms: 94.5733
+  type: 'test'
+  ...
+# Subtest: 50ms Page renders retain the real mouse-hold interval and every 100ms Step calls the latest Page closure
+ok 39 - 50ms Page renders retain the real mouse-hold interval and every 100ms Step calls the latest Page closure
+  ---
+  duration_ms: 168.8194
+  type: 'test'
+  ...
+# Subtest: actual window and control rectangles match independent native R16 definitions
+ok 40 - actual window and control rectangles match independent native R16 definitions
+  ---
+  duration_ms: 16.609
+  type: 'test'
+  ...
+# Subtest: trade slots use column-major locations without changing their protocol IDs
+ok 41 - trade slots use column-major locations without changing their protocol IDs
+  ---
+  duration_ms: 0.3987
+  type: 'test'
+  ...
+# Subtest: source window/button art is present, including both independent trade backgrounds
+ok 42 - source window/button art is present, including both independent trade backgrounds
+  ---
+  duration_ms: 210.5259
+  type: 'test'
+  ...
+# Subtest: group add/remove open real name dialogs and submit only the entered name
+ok 43 - group add/remove open real name dialogs and submit only the entered name
+  ---
+  duration_ms: 1.9644
+  type: 'test'
+  ...
+# Subtest: non-leaders and a full party cannot dispatch a new add through the visible UI
+ok 44 - non-leaders and a full party cannot dispatch a new add through the visible UI
+  ---
+  duration_ms: 0.6667
+  type: 'test'
+  ...
+# Subtest: group replies keep the captured invitation epoch and preserve the real allow-invites callback
+ok 45 - group replies keep the captured invitation epoch and preserve the real allow-invites callback
+  ---
+  duration_ms: 0.477
+  type: 'test'
+  ...
+# Subtest: real bag selection deposits the same UID into a selected column-major protocol slot
+ok 46 - real bag selection deposits the same UID into a selected column-major protocol slot
+  ---
+  duration_ms: 14.4155
+  type: 'test'
+  ...
+# Subtest: offer retrieval keeps both original slot identities and stale/pending sources cannot edit
+ok 47 - offer retrieval keeps both original slot identities and stale/pending sources cannot edit
+  ---
+  duration_ms: 0.9709
+  type: 'test'
+  ...
+# Subtest: gold entry dispatches only on confirmation and drops a stale owner/source prompt
+ok 48 - gold entry dispatches only on confirmation and drops a stale owner/source prompt
+  ---
+  duration_ms: 1.2147
+  type: 'test'
+  ...
+# Subtest: locked/pending/unknown-partner controls preserve the original confirm/unlock/cancel gates
+ok 49 - locked/pending/unknown-partner controls preserve the original confirm/unlock/cancel gates
+  ---
+  duration_ms: 0.3239
+  type: 'test'
+  ...
+# Subtest: incoming trade uses a separate modal and waits for the real host state to open windows
+ok 50 - incoming trade uses a separate modal and waits for the real host state to open windows
+  ---
+  duration_ms: 0.1732
+  type: 'test'
+  ...
+# Subtest: actual native button uses 520/521/522 for unlocked, locked and pressed confirm states
+ok 51 - actual native button uses 520/521/522 for unlocked, locked and pressed confirm states
+  ---
+  duration_ms: 0.1859
+  type: 'test'
+  ...
+# Subtest: modal consumes Enter/Escape, ignores IME/repeat and cycles Tab inside the dialog
+ok 52 - modal consumes Enter/Escape, ignores IME/repeat and cycles Tab inside the dialog
+  ---
+  duration_ms: 0.3231
+  type: 'test'
+  ...
+# Subtest: modal focuses its real field and restores the prior connected element on close
+ok 53 - modal focuses its real field and restores the prior connected element on close
+  ---
+  duration_ms: 0.1409
+  type: 'test'
+  ...
+# Subtest: independent window drag respects stage scaling and clamps the complete panel
+ok 54 - independent window drag respects stage scaling and clamps the complete panel
+  ---
+  duration_ms: 0.2579
+  type: 'test'
+  ...
+# Subtest: real stage capture retains a Canvas-underlay Gold marker and compatibility mouse/up cannot duplicate it
+ok 55 - real stage capture retains a Canvas-underlay Gold marker and compatibility mouse/up cannot duplicate it
+  ---
+  duration_ms: 41.8497
+  type: 'test'
+  ...
+# Subtest: an unadmitted second pointer cannot replace the first retained world marker
+ok 56 - an unadmitted second pointer cannot replace the first retained world marker
+  ---
+  duration_ms: 22.1683
+  type: 'test'
+  ...
+# Subtest: the actual legacy stage mouse path preserves the visible Gold target instead of the offset tile
+ok 57 - the actual legacy stage mouse path preserves the visible Gold target instead of the offset tile
+  ---
+  duration_ms: 12.0391
+  type: 'test'
+  ...
+# Subtest: removing only the new legacy mouse property in memory reproduces zero pickup and wrong-tile fallback
+ok 58 - removing only the new legacy mouse property in memory reproduces zero pickup and wrong-tile fallback
+  ---
+  duration_ms: 24.9723
+  type: 'test'
+  ...
+# Subtest: NPC nameplate and interactive sprite-hit underlays activate exactly once through either real owner path
+ok 59 - NPC nameplate and interactive sprite-hit underlays activate exactly once through either real owner path
+  ---
+  duration_ms: 53.1262
+  type: 'test'
+  ...
+# Subtest: foreign frames, non-Canvas top layers, missing markers and noninteractive entity markers never acquire object authority
+ok 60 - foreign frames, non-Canvas top layers, missing markers and noninteractive entity markers never acquire object authority
+  ---
+  duration_ms: 37.161
+  type: 'test'
+  ...
+# Subtest: foreground UI, Native modal/foreground ownership and unavailable scene keep world object callbacks blocked
+ok 61 - foreground UI, Native modal/foreground ownership and unavailable scene keep world object callbacks blocked
+  ---
+  duration_ms: 60.7609
+  type: 'test'
+  ...
+# Subtest: focus blur, owner generation change and Page rejection never replay or turn a retained marker into a tile click
+ok 62 - focus blur, owner generation change and Page rejection never replay or turn a retained marker into a tile click
+  ---
+  duration_ms: 25.5496
+  type: 'test'
+  ...
+1..62
+# tests 62
+# suites 0
+# pass 62
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 1813.4343

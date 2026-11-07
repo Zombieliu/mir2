@@ -224,6 +224,7 @@ mod item_identity_reservation;
 
 #[path = "config_file_authority.rs"]
 mod file_authority;
+pub(crate) mod character_creation;
 #[path = "config_guild_clock.rs"]
 pub(crate) mod guild_clock;
 #[path = "config_guild_clock_driver.rs"]
@@ -800,6 +801,7 @@ fn validate_account_store_transaction_scope(
 
 #[derive(Debug, Clone)]
 struct AccountStoreMutationPlan {
+    character_creation_account: Option<String>,
     zone_save_fence: Option<zone_save_fence::ZoneSaveFence>,
     zone_save_operation: Option<zone_save_operation::ZoneSaveOperation>,
     #[cfg(test)]
@@ -1024,6 +1026,7 @@ fn build_account_store_mutation_plan(
     };
 
     AccountStoreMutationPlan {
+        character_creation_account: None,
         zone_save_fence: None,
         zone_save_operation: None,
         #[cfg(test)]
@@ -5300,6 +5303,7 @@ impl SimulationConfig {
             permit,
             transaction,
             |_| Ok(()),
+            None,
         )
     }
 
@@ -5326,6 +5330,7 @@ impl SimulationConfig {
             permit,
             transaction,
             post,
+            None,
         )
     }
 
@@ -5335,6 +5340,7 @@ impl SimulationConfig {
         permit: Option<&guild_experience::GuildExperienceCommitPermit>,
         transaction: F,
         post: P,
+        character_creation_account: Option<&str>,
     ) -> Result<T, String>
     where
         F: FnOnce(&mut AccountStore) -> Result<T, String>,
@@ -5452,9 +5458,17 @@ impl SimulationConfig {
         // Preserve campaign progress alongside the authoritative account/save
         // commit. HTTP claims touch only this ledger, never an active save.
         if matches!(scope, AccountStoreMutationScope::FullRestore) {
-            // A world backup cannot roll back externally committed money.
+            // A world backup cannot roll back externally committed money or
+            // an in-flight WAFFO request whose provider result is still unknown.
             for (account_id, original) in &original_store.accounts {
-                if original.billing.as_ref().is_some_and(|v| !v.provenance.is_empty() || !v.sui_usdc_orders.is_empty()) {
+                if original.billing.as_ref().is_some_and(|v| {
+                    !v.provenance.is_empty()
+                        || !v.sui_usdc_orders.is_empty()
+                        || v.orders.values().any(|order| {
+                            order.provider == crate::billing::FiatPaymentProvider::Waffo
+                                && order.provider_request_started_at_ms.is_some()
+                        })
+                }) {
                     let restored=staged_store.accounts.get(account_id).ok_or("billingFinancialRestoreRequiresReconciliation")?;
                     let money_unchanged=serde_json::to_value(&original.billing).ok()==serde_json::to_value(&restored.billing).ok()
                         && serde_json::to_value(&original.monthly_card).ok()==serde_json::to_value(&restored.monthly_card).ok()
@@ -5536,6 +5550,7 @@ impl SimulationConfig {
             .map_err(|error| error.to_string())?;
         let mut mutation_plan =
             build_account_store_mutation_plan(&original_store, &staged_store, scope, false);
+        mutation_plan.character_creation_account = character_creation_account.map(str::to_owned);
         self.bind_zone_save_fence_to_plan(&mut mutation_plan);
 
         #[cfg(any(test, feature = "test-support"))]
@@ -6496,6 +6511,7 @@ fn save_account_store_mutation_plan_to_postgres_with_pool(
     plan: AccountStoreMutationPlan,
     mode: AccountStoreDatabaseMode,
 ) -> Result<AccountStoreSourceVersions, String> {
+    let creates_character = plan.character_creation_account.is_some();
     let carries_zone_fence = plan.zone_save_fence.is_some();
     let carries_clock = plan.clock.is_some();
     let carries_guilds = !plan.guilds.is_empty() || plan.carries_guild_experience_source();
@@ -6523,6 +6539,8 @@ fn save_account_store_mutation_plan_to_postgres_with_pool(
     .map_err(|_| {
         if carries_zone_fence {
             zone_save_fence::commit_outcome_unknown("transaction worker panicked")
+        } else if creates_character {
+            format!("{ACCOUNT_STORE_COMMIT_OUTCOME_UNKNOWN}: character creation worker panicked")
         } else if carries_mail {
             "MAIL_ITEM_TRANSFER_COMMIT_OUTCOME_UNKNOWN: postgres mail worker panicked".into()
         } else if carries_billing {
@@ -6568,9 +6586,17 @@ fn write_account_store_mutation_plan_to_postgres(
     } else {
         mode
     };
-    let mut transaction = client
-        .transaction()
-        .map_err(|error| format!("postgres account-store transaction failed: {error}"))?;
+    let mut transaction = if plan.character_creation_account.is_some() {
+        // The name check must see the preceding creator's commit after waiting
+        // on the advisory lock, even if the database defaults to another level.
+        client
+            .build_transaction()
+            .isolation_level(postgres::IsolationLevel::ReadCommitted)
+            .start()
+    } else {
+        client.transaction()
+    }
+    .map_err(|error| format!("postgres account-store transaction failed: {error}"))?;
     let source_versions =
         write_account_store_mutation_plan_in_transaction(&mut transaction, plan, mode)?;
     transaction
@@ -6578,6 +6604,12 @@ fn write_account_store_mutation_plan_to_postgres(
         .map_err(|error| {
             if plan.zone_save_fence.is_some() {
                 zone_save_fence::classify_commit_error(error)
+            } else if plan.character_creation_account.is_some()
+                && error.as_db_error().is_none_or(|db_error| {
+                    matches!(db_error.code().code(), "40003" | "08007")
+                })
+            {
+                format!("{ACCOUNT_STORE_COMMIT_OUTCOME_UNKNOWN}: character creation commit response unavailable: {error}")
             } else if mode == AccountStoreDatabaseMode::SourceOfTruth
                 && mail_transfer::carries_source(plan)
             {
@@ -6624,6 +6656,9 @@ fn write_account_store_mutation_plan_in_transaction(
     plan: &AccountStoreMutationPlan,
     mode: AccountStoreDatabaseMode,
 ) -> Result<AccountStoreSourceVersions, String> {
+    if plan.character_creation_account.is_some() {
+        character_creation::lock_postgres(transaction)?;
+    }
     if let Some(fence) = plan.zone_save_fence.as_ref() {
         fence.lock_and_validate(transaction, mode)?;
     }
@@ -6698,6 +6733,7 @@ fn write_account_store_mutation_plan_in_transaction(
                     account_id,
                     mutation,
                     account_mode,
+                    plan.character_creation_account.as_deref() == Some(account_id),
                 )
             }
         })?;
@@ -6717,6 +6753,7 @@ fn write_account_store_account_mutation(
     account_id: &str,
     mutation: &AccountStoreAccountMutation,
     mode: AccountStoreDatabaseMode,
+    creating_character: bool,
 ) -> Result<AccountStoreMutationOperationResult, String> {
     let current_account_version = transaction
         .query_opt(
@@ -6725,6 +6762,14 @@ fn write_account_store_account_mutation(
         )
         .map_err(|error| format!("postgres account lock failed for {account_id}: {error}"))?
         .map(|row| row.get::<_, i64>("store_version"));
+    if creating_character {
+        let character = mutation
+            .desired_account
+            .as_ref()
+            .and_then(|account| account.characters.last())
+            .ok_or("creation transaction has no appended character")?;
+        character_creation::validate_postgres(transaction, account_id, character)?;
+    }
     let current_save_versions = transaction
         .query(
             "SELECT character_index, save_version FROM character_saves \

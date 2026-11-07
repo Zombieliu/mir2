@@ -20,6 +20,7 @@ mod billing_browser;
 mod branding;
 mod capture;
 mod clipboard;
+mod companion;
 mod cursor;
 mod effects;
 mod entity_health;
@@ -35,6 +36,7 @@ mod hero_wire;
 mod input;
 mod lifecycle;
 mod map_parser;
+mod world_depth;
 mod movement_trace;
 mod native_display;
 mod native_fonts;
@@ -46,6 +48,7 @@ mod npc_purchase_client;
 mod npc_purchase_projection;
 mod packed_assets;
 mod refine_wire;
+mod resource_status;
 mod session_config;
 mod shell_bridge;
 mod social_bond_wire;
@@ -262,7 +265,11 @@ fn run_native_client() -> bevy::app::AppExit {
     // Persist the matching server's presentation profile in the package, so
     // opening the EXE directly also enables Diary accept/finish actions.
     let guidance = session.quest_guidance.as_deref().map_or_else(
-        mir2_client_bevy::quest_guidance::QuestGuidance::from_environment,
+        || {
+            mir2_client_bevy::quest_guidance::QuestGuidance::from_profile_name(
+                &mir2_game_data::r16_gameplay_baseline::r16_gameplay_baseline().quest_guidance,
+            )
+        },
         mir2_client_bevy::quest_guidance::QuestGuidance::from_profile_name,
     );
     app.insert_resource(
@@ -333,6 +340,7 @@ fn run_native_client() -> bevy::app::AppExit {
     // F12 and optional state-triggered PNG capture are disabled unless an
     // explicit capture directory is configured for native acceptance.
     app.add_plugins(capture::Mir2NativeScreenshotPlugin);
+    app.add_plugins(companion::NativeCompanionHostPlugin);
     // Native input: WASD / arrows → walk/run intents forwarded to the gateway.
     let mut shell = shell_bridge::initial_shell_model(session.auto_login.as_ref());
     shell.set_character_creation_classes(session.character_creation_classes.clone());
@@ -384,6 +392,7 @@ fn run_native_client() -> bevy::app::AppExit {
             gameplay_bridge::withdraw_invalid_native_world_producers,
             gameplay_bridge::drain_gameplay_events,
             entity_presentation::tick_native_entity_presentation,
+            input::suppress_pending_resource_input,
             input::sanitize_native_hud_pointer_input,
             input::mouse_world_interaction_system,
             input::keyboard_movement_system,

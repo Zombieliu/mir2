@@ -18,6 +18,7 @@ export const MAX_POINTER = 4096;
 export const MAX_PACKED_CATALOG = 128 * 1024 * 1024;
 export const MAX_PACKED_OBJECT = 64 * 1024 * 1024;
 export const MAX_PACKED_MANIFEST = 4 * 1024 * 1024;
+export const MAX_PACKED_REQUIRED_SCOPE = 4 * 1024 * 1024;
 export const MAX_PACKED_SMALL = 32768;
 const IMMUTABLE = "public, max-age=31536000, immutable";
 const POINTER_SCHEMA = "mir2.windows.r2-channel.v1";
@@ -27,6 +28,7 @@ const GENERATION_CONTROLS = new Map([
   ["GENERATION.json", MAX_PACKED_MANIFEST], ["GENERATION.p7s", MAX_PACKED_SMALL],
   ["catalog.json", MAX_PACKED_CATALOG], ["mir2-platform-windows.exe", MAX_ARTIFACT],
   ["mir2-client.toml", MAX_PACKED_SMALL],
+  ["required-scope.json", MAX_PACKED_REQUIRED_SCOPE],
 ]);
 
 function packedObjectLimit(path) {

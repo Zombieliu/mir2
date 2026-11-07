@@ -1,0 +1,7714 @@
+{
+  "schema": "r16-onboarding-forest-cave-entry-browser-smoke/1",
+  "startedAt": "2026-11-06T01:54:25.010Z",
+  "passed": false,
+  "villageFirstTwoCompleted": false,
+  "scope": {
+    "freshOrdinaryAccount": false,
+    "reusedOwnOrdinaryQaAccount": true,
+    "primaryUiOnly": true,
+    "rootPrivateFilesRead": false,
+    "rootSecretValuesPassedToBrowser": false,
+    "credentialsOnlyUsedForNormalUiFill": true,
+    "readOnlyRuntimeGetters": [
+      "getMir2QuestUiStatus",
+      "getMir2QuestWorldControlRects",
+      "getMir2NpcShopUiStatus",
+      "getMir2HudUiStatus"
+    ],
+    "mockedRoutes": false,
+    "hiddenActions": false,
+    "qaCommands": 0,
+    "saveDataEdits": false,
+    "modelCallsRequested": 0,
+    "walletOpened": false,
+    "originalOwnerOrAloOpened": false,
+    "trustedKeyObservation": "game-screen-Digit1-or-Digit3-keydown-up-only",
+    "mapOnlyCave": true,
+    "caveQuestActionsAuthorizedByCurrentProgress": false
+  },
+  "sourceHashes": {
+    "quests": "fd35732d9356fcf5aeb4c06d639261a816626a54ccaf33f8cc6d461e98c93182",
+    "journeyUi": "e52630f84ee09e3e2d3abd821db00dde01b62e7d803d18972c8fd906db38c747",
+    "questLayout": "0c37a0082782be781376ccb452fda18ea6f4235a29fbbd678e7db066b81049ac",
+    "keys": "ebfd4f283523f658d33793f604e697a5c4e4b0430fc5d63586ec8597bf31d208",
+    "bag": "10a1dd118f66e6924de84ac611fdd0f7473e255e9f5b31063027f72a411d83c7",
+    "panel": "d6436a807c81b42525aa7e74b6bb6288819ed8bf4db9cdda914e2ad58a264fd8",
+    "npcShop": "6112790ba0b9a57fb529fbbf85d25dd20c3d8b98a63884a9098267badb42c5a1",
+    "shopPaint": "b7279b5d15b7c27960afeddf8ece13b37cb58c795817f74edeec3170b63c85d6",
+    "spawns": "907db052030a97036e404429373dd3ad3e0e838e279613080e92c3be28bf3ff2",
+    "leveling": "f873b9be24c3d6e151d7eee614ad1a805492dc2cbb8a28514279035e39e9eed6",
+    "questBridge": "1b94c42c228bbd0a757dd1c91f3771f9c70de07d595db31e9960e46ad83f832c",
+    "questActionPolicy": "5a8042d691109178c59cecdab3d5bb7c6a6c955049fa05a44519218e2c2e0570",
+    "nativeLocalization": "712f58b1f747d371dd511dadb7f5d3d76c5c91b4341bd7da96cfe1a1efdaad57",
+    "nativeLocalizationData": "d42c1568e3a6fa2798f30038f7a553f4fb4cb3f04abfb44672dc9cab37185938"
+  },
+  "plan": {
+    "profile": "newcomer-v2",
+    "scope": "growth15/q8 when eligible, and ordinary D001 entry/interior/exit with q9 only when eligible",
+    "segment": "cave",
+    "ordinaryCaveGates": [
+      {
+        "from": "0",
+        "to": "d001",
+        "gate": {
+          "x": 147,
+          "y": 33
+        },
+        "landing": {
+          "x": 151,
+          "y": 362
+        },
+        "otherGates": [
+          {
+            "x": 148,
+            "y": 34
+          }
+        ],
+        "bounds": {
+          "minX": 134,
+          "maxX": 160,
+          "minY": 23,
+          "maxY": 50
+        }
+      },
+      {
+        "from": "d001",
+        "to": "0",
+        "gate": {
+          "x": 148,
+          "y": 365
+        },
+        "landing": {
+          "x": 143,
+          "y": 40
+        },
+        "otherGates": [
+          {
+            "x": 148,
+            "y": 366
+          },
+          {
+            "x": 149,
+            "y": 366
+          }
+        ],
+        "bounds": {
+          "minX": 136,
+          "maxX": 166,
+          "minY": 347,
+          "maxY": 377
+        }
+      }
+    ],
+    "quests": [
+      {
+        "id": 2110009,
+        "minLevel": 16,
+        "startNpcId": 0,
+        "finishNpcId": 0,
+        "gold": 500,
+        "experience": 0,
+        "kills": [],
+        "flags": [
+          {
+            "number": 2210091,
+            "message": "Reach the Oma Cave entrance",
+            "kind": "serverEvent",
+            "conditions": [
+              "omaCaveEntryReached"
+            ]
+          }
+        ]
+      }
+    ],
+    "finalReloginCheck": true,
+    "ordinaryLogoutEachSegment": true,
+    "jane": {
+      "map": "0",
+      "x": 284,
+      "y": 606
+    },
+    "diaryKeyRequested": "KeyQ",
+    "diaryKeyFromCurrentSharedDefaults": "KeyQ",
+    "readOnlyGetters": [
+      "getMir2QuestUiStatus",
+      "getMir2QuestWorldControlRects",
+      "getMir2NpcShopUiStatus",
+      "getMir2HudUiStatus"
+    ],
+    "coldEntryWaitMs": 45000
+  },
+  "checks": [
+    {
+      "name": "town-has-no-old-tour-and-current-shared-native-quest-host",
+      "passed": true
+    }
+  ],
+  "phases": [
+    "ordinary-owned-qa-character-relogin",
+    "d001-ordinary-physical-map0-gate-approach"
+  ],
+  "screenshots": [
+    "01-current-native-task-card-before-measured-readiness.png",
+    "02-fresh-v2-native-task-card.png",
+    "03-failure-safe-masked.png"
+  ],
+  "packetEvidence": [
+    {
+      "sequence": 13,
+      "method": "LoginSuccess",
+      "phase": "ordinary-owned-qa-character-relogin"
+    },
+    {
+      "sequence": 17,
+      "method": "StartGame",
+      "phase": "ordinary-owned-qa-character-relogin",
+      "result": 4
+    },
+    {
+      "sequence": 23,
+      "method": "MapInformation",
+      "phase": "ordinary-owned-qa-character-relogin"
+    },
+    {
+      "sequence": 24,
+      "method": "UserInformation",
+      "phase": "ordinary-owned-qa-character-relogin",
+      "gold": 440,
+      "hp": 99,
+      "maxHp": 99,
+      "mp": 49,
+      "maxMp": 49,
+      "objectId": 1000,
+      "direction": "Left"
+    },
+    {
+      "sequence": 446,
+      "method": "CompleteQuest",
+      "phase": "ordinary-owned-qa-character-relogin",
+      "completedQuestIds": [
+        2110001,
+        2110002,
+        2110003,
+        2110004,
+        2110005,
+        2110006
+      ]
+    },
+    {
+      "sequence": 556,
+      "method": "ObjectHealth",
+      "phase": "ordinary-owned-qa-character-relogin",
+      "percent": 100,
+      "objectId": 200702
+    },
+    {
+      "sequence": 557,
+      "method": "ObjectHealth",
+      "phase": "ordinary-owned-qa-character-relogin",
+      "percent": 100,
+      "objectId": 200706
+    },
+    {
+      "sequence": 558,
+      "method": "ObjectHealth",
+      "phase": "ordinary-owned-qa-character-relogin",
+      "percent": 100,
+      "objectId": 201417
+    },
+    {
+      "sequence": 559,
+      "method": "ObjectHealth",
+      "phase": "ordinary-owned-qa-character-relogin",
+      "percent": 100,
+      "objectId": 210801
+    },
+    {
+      "sequence": 590,
+      "method": "ObjectAttack",
+      "phase": "ordinary-owned-qa-character-relogin",
+      "objectId": 200700,
+      "direction": "Left"
+    },
+    {
+      "sequence": 591,
+      "method": "ObjectAttack",
+      "phase": "ordinary-owned-qa-character-relogin",
+      "objectId": 200702,
+      "direction": "UpRight"
+    },
+    {
+      "sequence": 592,
+      "method": "ObjectAttack",
+      "phase": "ordinary-owned-qa-character-relogin",
+      "objectId": 200706,
+      "direction": "DownLeft"
+    },
+    {
+      "sequence": 593,
+      "method": "ObjectAttack",
+      "phase": "ordinary-owned-qa-character-relogin",
+      "objectId": 200700,
+      "direction": "Left"
+    },
+    {
+      "sequence": 594,
+      "method": "ObjectAttack",
+      "phase": "ordinary-owned-qa-character-relogin",
+      "objectId": 200702,
+      "direction": "UpRight"
+    },
+    {
+      "sequence": 595,
+      "method": "ObjectAttack",
+      "phase": "ordinary-owned-qa-character-relogin",
+      "objectId": 200706,
+      "direction": "DownLeft"
+    },
+    {
+      "sequence": 598,
+      "method": "ObjectAttack",
+      "phase": "ordinary-owned-qa-character-relogin",
+      "objectId": 200700,
+      "direction": "Left"
+    },
+    {
+      "sequence": 599,
+      "method": "ObjectAttack",
+      "phase": "ordinary-owned-qa-character-relogin",
+      "objectId": 200702,
+      "direction": "UpRight"
+    },
+    {
+      "sequence": 600,
+      "method": "ObjectAttack",
+      "phase": "ordinary-owned-qa-character-relogin",
+      "objectId": 200706,
+      "direction": "DownLeft"
+    },
+    {
+      "sequence": 601,
+      "method": "ObjectAttack",
+      "phase": "ordinary-owned-qa-character-relogin",
+      "objectId": 200700,
+      "direction": "Left"
+    },
+    {
+      "sequence": 602,
+      "method": "ObjectAttack",
+      "phase": "ordinary-owned-qa-character-relogin",
+      "objectId": 200702,
+      "direction": "UpRight"
+    },
+    {
+      "sequence": 603,
+      "method": "ObjectAttack",
+      "phase": "ordinary-owned-qa-character-relogin",
+      "objectId": 200706,
+      "direction": "DownLeft"
+    },
+    {
+      "sequence": 605,
+      "method": "UserLocation",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "direction": "Left"
+    },
+    {
+      "sequence": 609,
+      "method": "UserLocation",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "direction": "Left"
+    },
+    {
+      "sequence": 610,
+      "method": "ObjectAttack",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "objectId": 200702,
+      "direction": "UpLeft"
+    },
+    {
+      "sequence": 614,
+      "method": "UserLocation",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "direction": "Down"
+    },
+    {
+      "sequence": 615,
+      "method": "ObjectAttack",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "objectId": 200700,
+      "direction": "DownLeft"
+    },
+    {
+      "sequence": 618,
+      "method": "UserLocation",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "direction": "Left"
+    },
+    {
+      "sequence": 621,
+      "method": "ObjectAttack",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "objectId": 200706,
+      "direction": "DownLeft"
+    },
+    {
+      "sequence": 623,
+      "method": "UserLocation",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "direction": "Left"
+    },
+    {
+      "sequence": 629,
+      "method": "UserLocation",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "direction": "Left"
+    },
+    {
+      "sequence": 634,
+      "method": "UserLocation",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "direction": "Left"
+    },
+    {
+      "sequence": 639,
+      "method": "UserLocation",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "direction": "Left"
+    },
+    {
+      "sequence": 641,
+      "method": "ObjectHealth",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "percent": 100,
+      "objectId": 206901
+    },
+    {
+      "sequence": 645,
+      "method": "UserLocation",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "direction": "Left"
+    },
+    {
+      "sequence": 650,
+      "method": "UserLocation",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "direction": "Left"
+    },
+    {
+      "sequence": 655,
+      "method": "UserLocation",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "direction": "Left"
+    },
+    {
+      "sequence": 660,
+      "method": "UserLocation",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "direction": "Left"
+    },
+    {
+      "sequence": 664,
+      "method": "UserLocation",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "direction": "Left"
+    },
+    {
+      "sequence": 667,
+      "method": "UserLocation",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "direction": "Left"
+    },
+    {
+      "sequence": 672,
+      "method": "UserLocation",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "direction": "Left"
+    },
+    {
+      "sequence": 677,
+      "method": "UserLocation",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "direction": "Left"
+    },
+    {
+      "sequence": 682,
+      "method": "UserLocation",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "direction": "Left"
+    },
+    {
+      "sequence": 686,
+      "method": "UserLocation",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "direction": "Left"
+    },
+    {
+      "sequence": 689,
+      "method": "UserLocation",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "direction": "Left"
+    },
+    {
+      "sequence": 694,
+      "method": "ObjectHealth",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "percent": 100,
+      "objectId": 200708
+    },
+    {
+      "sequence": 695,
+      "method": "UserLocation",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "direction": "Left"
+    },
+    {
+      "sequence": 703,
+      "method": "UserLocation",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "direction": "Left"
+    },
+    {
+      "sequence": 708,
+      "method": "UserLocation",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "direction": "Left"
+    },
+    {
+      "sequence": 710,
+      "method": "ObjectHealth",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "percent": 100,
+      "objectId": 200801
+    },
+    {
+      "sequence": 714,
+      "method": "UserLocation",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "direction": "Up"
+    },
+    {
+      "sequence": 717,
+      "method": "UserLocation",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "direction": "Left"
+    },
+    {
+      "sequence": 722,
+      "method": "UserLocation",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "direction": "Left"
+    },
+    {
+      "sequence": 724,
+      "method": "ObjectHealth",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "percent": 100,
+      "objectId": 200905
+    },
+    {
+      "sequence": 729,
+      "method": "UserLocation",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "direction": "Left"
+    },
+    {
+      "sequence": 734,
+      "method": "UserLocation",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "direction": "Left"
+    },
+    {
+      "sequence": 738,
+      "method": "UserLocation",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "direction": "Left"
+    },
+    {
+      "sequence": 741,
+      "method": "UserLocation",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "direction": "Left"
+    },
+    {
+      "sequence": 747,
+      "method": "UserLocation",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "direction": "Left"
+    },
+    {
+      "sequence": 753,
+      "method": "UserLocation",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "direction": "Left"
+    },
+    {
+      "sequence": 760,
+      "method": "UserLocation",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "direction": "Down"
+    },
+    {
+      "sequence": 768,
+      "method": "UserLocation",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "direction": "Down"
+    },
+    {
+      "sequence": 773,
+      "method": "UserLocation",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "direction": "Down"
+    },
+    {
+      "sequence": 778,
+      "method": "UserLocation",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "direction": "Left"
+    },
+    {
+      "sequence": 781,
+      "method": "UserLocation",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "direction": "Up"
+    },
+    {
+      "sequence": 782,
+      "method": "ObjectAttack",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "objectId": 200708,
+      "direction": "UpRight"
+    },
+    {
+      "sequence": 787,
+      "method": "UserLocation",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "direction": "Left"
+    },
+    {
+      "sequence": 793,
+      "method": "UserLocation",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "direction": "Up"
+    },
+    {
+      "sequence": 799,
+      "method": "UserLocation",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "direction": "Up"
+    },
+    {
+      "sequence": 802,
+      "method": "ObjectAttack",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "objectId": 200801,
+      "direction": "UpRight"
+    },
+    {
+      "sequence": 804,
+      "method": "ObjectAttack",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "objectId": 200700,
+      "direction": "UpLeft"
+    },
+    {
+      "sequence": 805,
+      "method": "ObjectAttack",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "objectId": 200706,
+      "direction": "Left"
+    },
+    {
+      "sequence": 807,
+      "method": "UserLocation",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "direction": "Left"
+    },
+    {
+      "sequence": 812,
+      "method": "ObjectAttack",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "objectId": 200708,
+      "direction": "UpLeft"
+    },
+    {
+      "sequence": 814,
+      "method": "UserLocation",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "direction": "Left"
+    },
+    {
+      "sequence": 816,
+      "method": "ObjectHealth",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "percent": 100,
+      "objectId": 200805
+    },
+    {
+      "sequence": 821,
+      "method": "ObjectAttack",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "objectId": 200801,
+      "direction": "UpLeft"
+    },
+    {
+      "sequence": 824,
+      "method": "UserLocation",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "direction": "Down"
+    },
+    {
+      "sequence": 825,
+      "method": "ObjectAttack",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "objectId": 200702,
+      "direction": "UpLeft"
+    },
+    {
+      "sequence": 829,
+      "method": "ObjectAttack",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "objectId": 200708,
+      "direction": "DownLeft"
+    },
+    {
+      "sequence": 831,
+      "method": "UserLocation",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "direction": "Left"
+    },
+    {
+      "sequence": 836,
+      "method": "UserLocation",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "direction": "Down"
+    },
+    {
+      "sequence": 840,
+      "method": "ObjectAttack",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "objectId": 200801,
+      "direction": "Left"
+    },
+    {
+      "sequence": 842,
+      "method": "ObjectAttack",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "objectId": 200702,
+      "direction": "DownLeft"
+    },
+    {
+      "sequence": 844,
+      "method": "HealthChanged",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "hp": 98,
+      "mp": 49
+    },
+    {
+      "sequence": 846,
+      "method": "ObjectStruck",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "objectId": 1000,
+      "attackerId": 200801,
+      "direction": "Down"
+    },
+    {
+      "sequence": 848,
+      "method": "ObjectHealth",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "percent": 98,
+      "objectId": 1000
+    },
+    {
+      "sequence": 849,
+      "method": "UserLocation",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "direction": "Down"
+    },
+    {
+      "sequence": 858,
+      "method": "UserLocation",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "direction": "Down"
+    },
+    {
+      "sequence": 861,
+      "method": "ObjectHealth",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "percent": 100,
+      "objectId": 200903
+    },
+    {
+      "sequence": 862,
+      "method": "ObjectHealth",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "percent": 100,
+      "objectId": 214900
+    },
+    {
+      "sequence": 866,
+      "method": "ObjectAttack",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "objectId": 200905,
+      "direction": "DownRight"
+    },
+    {
+      "sequence": 868,
+      "method": "UserLocation",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "direction": "Left"
+    },
+    {
+      "sequence": 869,
+      "method": "HealthChanged",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "hp": 97,
+      "mp": 49
+    },
+    {
+      "sequence": 870,
+      "method": "ObjectStruck",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "objectId": 1000,
+      "attackerId": 200905,
+      "direction": "Left"
+    },
+    {
+      "sequence": 872,
+      "method": "ObjectHealth",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "percent": 97,
+      "objectId": 1000
+    },
+    {
+      "sequence": 874,
+      "method": "ObjectAttack",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "objectId": 200801,
+      "direction": "DownLeft"
+    },
+    {
+      "sequence": 875,
+      "method": "ObjectAttack",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "objectId": 200700,
+      "direction": "DownRight"
+    },
+    {
+      "sequence": 879,
+      "method": "UserLocation",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "direction": "Left"
+    },
+    {
+      "sequence": 882,
+      "method": "ObjectAttack",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "objectId": 200905,
+      "direction": "DownLeft"
+    },
+    {
+      "sequence": 884,
+      "method": "UserLocation",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "direction": "Left"
+    },
+    {
+      "sequence": 886,
+      "method": "ObjectAttack",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "objectId": 200706,
+      "direction": "Down"
+    },
+    {
+      "sequence": 887,
+      "method": "HealthChanged",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "hp": 95,
+      "mp": 49
+    },
+    {
+      "sequence": 888,
+      "method": "ObjectStruck",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "objectId": 1000,
+      "attackerId": 200905,
+      "direction": "Left"
+    },
+    {
+      "sequence": 890,
+      "method": "ObjectHealth",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "percent": 95,
+      "objectId": 1000
+    },
+    {
+      "sequence": 895,
+      "method": "UserLocation",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "direction": "Left"
+    },
+    {
+      "sequence": 901,
+      "method": "UserLocation",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "direction": "Up"
+    },
+    {
+      "sequence": 905,
+      "method": "ObjectAttack",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "objectId": 200700,
+      "direction": "UpLeft"
+    },
+    {
+      "sequence": 906,
+      "method": "ObjectAttack",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "objectId": 200706,
+      "direction": "Left"
+    },
+    {
+      "sequence": 909,
+      "method": "HealthChanged",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "hp": 98,
+      "mp": 49
+    },
+    {
+      "sequence": 910,
+      "method": "ObjectHealth",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "percent": 98,
+      "objectId": 1000
+    },
+    {
+      "sequence": 912,
+      "method": "UserLocation",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "direction": "Up"
+    },
+    {
+      "sequence": 918,
+      "method": "ObjectHealth",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "percent": 100,
+      "objectId": 214801
+    },
+    {
+      "sequence": 919,
+      "method": "UserLocation",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "direction": "Left"
+    },
+    {
+      "sequence": 925,
+      "method": "ObjectAttack",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "objectId": 200700,
+      "direction": "UpLeft"
+    },
+    {
+      "sequence": 927,
+      "method": "UserLocation",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "direction": "Left"
+    },
+    {
+      "sequence": 929,
+      "method": "ObjectHealth",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "percent": 100,
+      "objectId": 200704
+    },
+    {
+      "sequence": 933,
+      "method": "ObjectAttack",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "objectId": 200905,
+      "direction": "UpLeft"
+    },
+    {
+      "sequence": 934,
+      "method": "HealthChanged",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "hp": 99,
+      "mp": 49
+    },
+    {
+      "sequence": 935,
+      "method": "ObjectHealth",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "percent": 100,
+      "objectId": 1000
+    },
+    {
+      "sequence": 940,
+      "method": "UserLocation",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "direction": "Left"
+    },
+    {
+      "sequence": 949,
+      "method": "UserLocation",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "direction": "Down"
+    },
+    {
+      "sequence": 950,
+      "method": "ObjectAttack",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "objectId": 200700,
+      "direction": "DownLeft"
+    },
+    {
+      "sequence": 952,
+      "method": "ObjectAttack",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "objectId": 200905,
+      "direction": "Left"
+    },
+    {
+      "sequence": 957,
+      "method": "UserLocation",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "direction": "Up"
+    },
+    {
+      "sequence": 958,
+      "method": "HealthChanged",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "hp": 97,
+      "mp": 49
+    },
+    {
+      "sequence": 959,
+      "method": "ObjectStruck",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "objectId": 1000,
+      "attackerId": 200905,
+      "direction": "Up"
+    },
+    {
+      "sequence": 961,
+      "method": "ObjectHealth",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "percent": 97,
+      "objectId": 1000
+    },
+    {
+      "sequence": 968,
+      "method": "ObjectAttack",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "objectId": 200706,
+      "direction": "Down"
+    },
+    {
+      "sequence": 969,
+      "method": "UserLocation",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "direction": "Left"
+    },
+    {
+      "sequence": 975,
+      "method": "UserLocation",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "direction": "Up"
+    },
+    {
+      "sequence": 978,
+      "method": "ObjectAttack",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "objectId": 200700,
+      "direction": "UpLeft"
+    },
+    {
+      "sequence": 980,
+      "method": "HealthChanged",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "hp": 99,
+      "mp": 49
+    },
+    {
+      "sequence": 981,
+      "method": "ObjectHealth",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "percent": 100,
+      "objectId": 1000
+    },
+    {
+      "sequence": 982,
+      "method": "ObjectAttack",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "objectId": 200708,
+      "direction": "DownLeft"
+    },
+    {
+      "sequence": 985,
+      "method": "UserLocation",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "direction": "Up"
+    },
+    {
+      "sequence": 986,
+      "method": "ObjectAttack",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "objectId": 200706,
+      "direction": "UpLeft"
+    },
+    {
+      "sequence": 993,
+      "method": "UserLocation",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "direction": "Left"
+    },
+    {
+      "sequence": 996,
+      "method": "ObjectAttack",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "objectId": 200805,
+      "direction": "Right"
+    },
+    {
+      "sequence": 998,
+      "method": "ObjectAttack",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "objectId": 200700,
+      "direction": "UpLeft"
+    },
+    {
+      "sequence": 1000,
+      "method": "ObjectAttack",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "objectId": 200905,
+      "direction": "Up"
+    },
+    {
+      "sequence": 1001,
+      "method": "UserLocation",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "direction": "Up"
+    },
+    {
+      "sequence": 1002,
+      "method": "HealthChanged",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "hp": 98,
+      "mp": 49
+    },
+    {
+      "sequence": 1003,
+      "method": "ObjectStruck",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "objectId": 1000,
+      "attackerId": 200805,
+      "direction": "Up"
+    },
+    {
+      "sequence": 1005,
+      "method": "ObjectHealth",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "percent": 98,
+      "objectId": 1000
+    },
+    {
+      "sequence": 1008,
+      "method": "HealthChanged",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "hp": 97,
+      "mp": 49
+    },
+    {
+      "sequence": 1009,
+      "method": "ObjectStruck",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "objectId": 1000,
+      "attackerId": 200905,
+      "direction": "Up"
+    },
+    {
+      "sequence": 1011,
+      "method": "ObjectHealth",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "percent": 97,
+      "objectId": 1000
+    },
+    {
+      "sequence": 1012,
+      "method": "ObjectAttack",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "objectId": 200706,
+      "direction": "UpLeft"
+    },
+    {
+      "sequence": 1013,
+      "method": "ObjectAttack",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "objectId": 200708,
+      "direction": "Left"
+    },
+    {
+      "sequence": 1017,
+      "method": "UserLocation",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1021,
+      "method": "ObjectAttack",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "objectId": 200805,
+      "direction": "Up"
+    },
+    {
+      "sequence": 1023,
+      "method": "ObjectAttack",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "objectId": 200700,
+      "direction": "UpLeft"
+    },
+    {
+      "sequence": 1025,
+      "method": "UserLocation",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1027,
+      "method": "ObjectHealth",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "percent": 100,
+      "objectId": 200809
+    },
+    {
+      "sequence": 1028,
+      "method": "HealthChanged",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "hp": 95,
+      "mp": 49
+    },
+    {
+      "sequence": 1029,
+      "method": "ObjectStruck",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "objectId": 1000,
+      "attackerId": 200805,
+      "direction": "Left"
+    },
+    {
+      "sequence": 1031,
+      "method": "ObjectHealth",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "percent": 95,
+      "objectId": 1000
+    },
+    {
+      "sequence": 1038,
+      "method": "ObjectAttack",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "objectId": 200905,
+      "direction": "Up"
+    },
+    {
+      "sequence": 1039,
+      "method": "UserLocation",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "direction": "Down"
+    },
+    {
+      "sequence": 1042,
+      "method": "UserLocation",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "direction": "DownLeft"
+    },
+    {
+      "sequence": 1043,
+      "method": "HealthChanged",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "hp": 94,
+      "mp": 49
+    },
+    {
+      "sequence": 1044,
+      "method": "ObjectStruck",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "objectId": 1000,
+      "attackerId": 200905,
+      "direction": "DownLeft"
+    },
+    {
+      "sequence": 1046,
+      "method": "ObjectHealth",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "percent": 94,
+      "objectId": 1000
+    },
+    {
+      "sequence": 1049,
+      "method": "ObjectAttack",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "objectId": 200801,
+      "direction": "UpLeft"
+    },
+    {
+      "sequence": 1052,
+      "method": "HealthChanged",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "hp": 93,
+      "mp": 49
+    },
+    {
+      "sequence": 1054,
+      "method": "ObjectStruck",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "objectId": 1000,
+      "attackerId": 200801,
+      "direction": "DownLeft"
+    },
+    {
+      "sequence": 1056,
+      "method": "ObjectHealth",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "percent": 93,
+      "objectId": 1000
+    },
+    {
+      "sequence": 1058,
+      "method": "UserLocation",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "direction": "Down"
+    },
+    {
+      "sequence": 1061,
+      "method": "ObjectAttack",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "objectId": 200905,
+      "direction": "DownLeft"
+    },
+    {
+      "sequence": 1065,
+      "method": "UserLocation",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1069,
+      "method": "ObjectAttack",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "objectId": 200700,
+      "direction": "DownLeft"
+    },
+    {
+      "sequence": 1074,
+      "method": "UserLocation",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1078,
+      "method": "HealthChanged",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "hp": 96,
+      "mp": 49
+    },
+    {
+      "sequence": 1079,
+      "method": "ObjectHealth",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "percent": 96,
+      "objectId": 1000
+    },
+    {
+      "sequence": 1085,
+      "method": "UserLocation",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1094,
+      "method": "UserLocation",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1101,
+      "method": "HealthChanged",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "hp": 99,
+      "mp": 49
+    },
+    {
+      "sequence": 1103,
+      "method": "ObjectHealth",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "percent": 100,
+      "objectId": 1000
+    },
+    {
+      "sequence": 1104,
+      "method": "UserLocation",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "direction": "Up"
+    },
+    {
+      "sequence": 1112,
+      "method": "ObjectAttack",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "objectId": 200700,
+      "direction": "UpLeft"
+    },
+    {
+      "sequence": 1114,
+      "method": "UserLocation",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1121,
+      "method": "UserLocation",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "direction": "Down"
+    },
+    {
+      "sequence": 1124,
+      "method": "ObjectAttack",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "objectId": 200704,
+      "direction": "DownRight"
+    },
+    {
+      "sequence": 1126,
+      "method": "ObjectAttack",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "objectId": 200801,
+      "direction": "Left"
+    },
+    {
+      "sequence": 1128,
+      "method": "UserLocation",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1133,
+      "method": "HealthChanged",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "hp": 98,
+      "mp": 49
+    },
+    {
+      "sequence": 1134,
+      "method": "ObjectStruck",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "objectId": 1000,
+      "attackerId": 200801,
+      "direction": "Left"
+    },
+    {
+      "sequence": 1136,
+      "method": "ObjectHealth",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "percent": 98,
+      "objectId": 1000
+    },
+    {
+      "sequence": 1141,
+      "method": "UserLocation",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1142,
+      "method": "ObjectAttack",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "objectId": 200704,
+      "direction": "DownLeft"
+    },
+    {
+      "sequence": 1152,
+      "method": "UserLocation",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "direction": "Up"
+    },
+    {
+      "sequence": 1153,
+      "method": "ObjectAttack",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "objectId": 200805,
+      "direction": "UpLeft"
+    },
+    {
+      "sequence": 1158,
+      "method": "HealthChanged",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "hp": 99,
+      "mp": 49
+    },
+    {
+      "sequence": 1160,
+      "method": "ObjectHealth",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "percent": 100,
+      "objectId": 1000
+    },
+    {
+      "sequence": 1161,
+      "method": "ObjectAttack",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "objectId": 200700,
+      "direction": "DownLeft"
+    },
+    {
+      "sequence": 1163,
+      "method": "UserLocation",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "direction": "Up"
+    },
+    {
+      "sequence": 1165,
+      "method": "ObjectAttack",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "objectId": 200704,
+      "direction": "UpLeft"
+    },
+    {
+      "sequence": 1173,
+      "method": "UserLocation",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1175,
+      "method": "ObjectHealth",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "percent": 100,
+      "objectId": 200505
+    },
+    {
+      "sequence": 1179,
+      "method": "ObjectAttack",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "objectId": 200805,
+      "direction": "UpLeft"
+    },
+    {
+      "sequence": 1181,
+      "method": "UserLocation",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "direction": "Up"
+    },
+    {
+      "sequence": 1184,
+      "method": "ObjectAttack",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "objectId": 200700,
+      "direction": "UpLeft"
+    },
+    {
+      "sequence": 1192,
+      "method": "UserLocation",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "direction": "Up"
+    },
+    {
+      "sequence": 1203,
+      "method": "UserLocation",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1207,
+      "method": "ObjectHealth",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "percent": 100,
+      "objectId": 200912
+    },
+    {
+      "sequence": 1208,
+      "method": "ObjectAttack",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "objectId": 200700,
+      "direction": "UpLeft"
+    },
+    {
+      "sequence": 1209,
+      "method": "ObjectAttack",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "objectId": 200809,
+      "direction": "UpRight"
+    },
+    {
+      "sequence": 1213,
+      "method": "ObjectAttack",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "objectId": 200801,
+      "direction": "Up"
+    },
+    {
+      "sequence": 1216,
+      "method": "UserLocation",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "direction": "Up"
+    },
+    {
+      "sequence": 1221,
+      "method": "HealthChanged",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "hp": 98,
+      "mp": 49
+    },
+    {
+      "sequence": 1222,
+      "method": "ObjectStruck",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "objectId": 1000,
+      "attackerId": 200801,
+      "direction": "Up"
+    },
+    {
+      "sequence": 1224,
+      "method": "ObjectHealth",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "percent": 98,
+      "objectId": 1000
+    },
+    {
+      "sequence": 1230,
+      "method": "UserLocation",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1235,
+      "method": "ObjectAttack",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "objectId": 200700,
+      "direction": "UpLeft"
+    },
+    {
+      "sequence": 1236,
+      "method": "ObjectAttack",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "objectId": 200809,
+      "direction": "Up"
+    },
+    {
+      "sequence": 1239,
+      "method": "UserLocation",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "direction": "Up"
+    },
+    {
+      "sequence": 1242,
+      "method": "HealthChanged",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "hp": 97,
+      "mp": 49
+    },
+    {
+      "sequence": 1243,
+      "method": "ObjectStruck",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "objectId": 1000,
+      "attackerId": 200809,
+      "direction": "Up"
+    },
+    {
+      "sequence": 1245,
+      "method": "ObjectHealth",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "percent": 97,
+      "objectId": 1000
+    },
+    {
+      "sequence": 1251,
+      "method": "ObjectAttack",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "objectId": 200801,
+      "direction": "UpLeft"
+    },
+    {
+      "sequence": 1253,
+      "method": "UserLocation",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1260,
+      "method": "UserLocation",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "direction": "Up"
+    },
+    {
+      "sequence": 1269,
+      "method": "HealthChanged",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "hp": 99,
+      "mp": 49
+    },
+    {
+      "sequence": 1270,
+      "method": "ObjectHealth",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "percent": 100,
+      "objectId": 1000
+    },
+    {
+      "sequence": 1271,
+      "method": "UserLocation",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1273,
+      "method": "ObjectHealth",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "percent": 100,
+      "objectId": 210900
+    },
+    {
+      "sequence": 1276,
+      "method": "ObjectAttack",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "objectId": 200700,
+      "direction": "UpLeft"
+    },
+    {
+      "sequence": 1277,
+      "method": "ObjectAttack",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "objectId": 200809,
+      "direction": "Up"
+    },
+    {
+      "sequence": 1282,
+      "method": "UserLocation",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "direction": "Up"
+    },
+    {
+      "sequence": 1287,
+      "method": "ObjectAttack",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "objectId": 200801,
+      "direction": "UpLeft"
+    },
+    {
+      "sequence": 1290,
+      "method": "UserLocation",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1294,
+      "method": "ObjectAttack",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "objectId": 200805,
+      "direction": "UpLeft"
+    },
+    {
+      "sequence": 1298,
+      "method": "ObjectAttack",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "objectId": 200809,
+      "direction": "Up"
+    },
+    {
+      "sequence": 1299,
+      "method": "HealthChanged",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "hp": 98,
+      "mp": 49
+    },
+    {
+      "sequence": 1300,
+      "method": "ObjectStruck",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "objectId": 1000,
+      "attackerId": 200805,
+      "direction": "Left"
+    },
+    {
+      "sequence": 1303,
+      "method": "ObjectHealth",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "percent": 98,
+      "objectId": 1000
+    },
+    {
+      "sequence": 1304,
+      "method": "UserLocation",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "direction": "Up"
+    },
+    {
+      "sequence": 1305,
+      "method": "HealthChanged",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "hp": 97,
+      "mp": 49
+    },
+    {
+      "sequence": 1307,
+      "method": "ObjectHealth",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "percent": 97,
+      "objectId": 1000
+    },
+    {
+      "sequence": 1313,
+      "method": "ObjectAttack",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "objectId": 200801,
+      "direction": "UpLeft"
+    },
+    {
+      "sequence": 1317,
+      "method": "UserLocation",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1324,
+      "method": "ObjectAttack",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "objectId": 200809,
+      "direction": "UpLeft"
+    },
+    {
+      "sequence": 1325,
+      "method": "UserLocation",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1330,
+      "method": "HealthChanged",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "hp": 96,
+      "mp": 49
+    },
+    {
+      "sequence": 1331,
+      "method": "ObjectStruck",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "objectId": 1000,
+      "attackerId": 200809,
+      "direction": "Left"
+    },
+    {
+      "sequence": 1333,
+      "method": "ObjectHealth",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "percent": 96,
+      "objectId": 1000
+    },
+    {
+      "sequence": 1336,
+      "method": "ObjectAttack",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "objectId": 200805,
+      "direction": "UpLeft"
+    },
+    {
+      "sequence": 1338,
+      "method": "ObjectAttack",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "objectId": 200706,
+      "direction": "Up"
+    },
+    {
+      "sequence": 1341,
+      "method": "UserLocation",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1342,
+      "method": "HealthChanged",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "hp": 95,
+      "mp": 49
+    },
+    {
+      "sequence": 1343,
+      "method": "ObjectStruck",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "objectId": 1000,
+      "attackerId": 200805,
+      "direction": "Left"
+    },
+    {
+      "sequence": 1345,
+      "method": "ObjectHealth",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "percent": 95,
+      "objectId": 1000
+    },
+    {
+      "sequence": 1352,
+      "method": "UserLocation",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "direction": "Up"
+    },
+    {
+      "sequence": 1361,
+      "method": "UserLocation",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "direction": "Up"
+    },
+    {
+      "sequence": 1366,
+      "method": "HealthChanged",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "hp": 98,
+      "mp": 49
+    },
+    {
+      "sequence": 1367,
+      "method": "ObjectHealth",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "percent": 98,
+      "objectId": 1000
+    },
+    {
+      "sequence": 1371,
+      "method": "UserLocation",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1374,
+      "method": "ObjectAttack",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "objectId": 200805,
+      "direction": "UpLeft"
+    },
+    {
+      "sequence": 1376,
+      "method": "ObjectAttack",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "objectId": 200708,
+      "direction": "Up"
+    },
+    {
+      "sequence": 1380,
+      "method": "UserLocation",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "direction": "Up"
+    },
+    {
+      "sequence": 1389,
+      "method": "UserLocation",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1390,
+      "method": "HealthChanged",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "hp": 99,
+      "mp": 49
+    },
+    {
+      "sequence": 1391,
+      "method": "ObjectHealth",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "percent": 100,
+      "objectId": 1000
+    },
+    {
+      "sequence": 1398,
+      "method": "ObjectAttack",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "objectId": 200708,
+      "direction": "UpLeft"
+    },
+    {
+      "sequence": 1400,
+      "method": "UserLocation",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "direction": "Up"
+    },
+    {
+      "sequence": 1408,
+      "method": "ObjectAttack",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "objectId": 200805,
+      "direction": "UpLeft"
+    },
+    {
+      "sequence": 1410,
+      "method": "UserLocation",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1412,
+      "method": "HealthChanged",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "hp": 98,
+      "mp": 49
+    },
+    {
+      "sequence": 1413,
+      "method": "ObjectStruck",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "objectId": 1000,
+      "attackerId": 200805,
+      "direction": "Left"
+    },
+    {
+      "sequence": 1415,
+      "method": "ObjectHealth",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "percent": 98,
+      "objectId": 1000
+    },
+    {
+      "sequence": 1417,
+      "method": "ObjectAttack",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "objectId": 200706,
+      "direction": "Up"
+    },
+    {
+      "sequence": 1421,
+      "method": "ObjectAttack",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "objectId": 200708,
+      "direction": "UpLeft"
+    },
+    {
+      "sequence": 1422,
+      "method": "UserLocation",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "direction": "Up"
+    },
+    {
+      "sequence": 1432,
+      "method": "UserLocation",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "direction": "UpLeft"
+    },
+    {
+      "sequence": 1438,
+      "method": "ObjectAttack",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "objectId": 200912,
+      "direction": "Up"
+    },
+    {
+      "sequence": 1439,
+      "method": "HealthChanged",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "hp": 99,
+      "mp": 49
+    },
+    {
+      "sequence": 1441,
+      "method": "ObjectHealth",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "percent": 100,
+      "objectId": 1000
+    },
+    {
+      "sequence": 1442,
+      "method": "UserLocation",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1450,
+      "method": "UserLocation",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "direction": "Up"
+    },
+    {
+      "sequence": 1457,
+      "method": "ObjectAttack",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "objectId": 200805,
+      "direction": "UpLeft"
+    },
+    {
+      "sequence": 1462,
+      "method": "UserLocation",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1465,
+      "method": "ObjectHealth",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "percent": 100,
+      "objectId": 200508
+    },
+    {
+      "sequence": 1467,
+      "method": "ObjectAttack",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "objectId": 200912,
+      "direction": "UpLeft"
+    },
+    {
+      "sequence": 1468,
+      "method": "ObjectAttack",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "objectId": 200700,
+      "direction": "Up"
+    },
+    {
+      "sequence": 1471,
+      "method": "UserLocation",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1478,
+      "method": "ObjectAttack",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "objectId": 200704,
+      "direction": "Up"
+    },
+    {
+      "sequence": 1480,
+      "method": "UserLocation",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1490,
+      "method": "UserLocation",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "direction": "Up"
+    },
+    {
+      "sequence": 1492,
+      "method": "ObjectAttack",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "objectId": 200700,
+      "direction": "UpLeft"
+    },
+    {
+      "sequence": 1499,
+      "method": "UserLocation",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1502,
+      "method": "ObjectAttack",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "objectId": 200704,
+      "direction": "UpLeft"
+    },
+    {
+      "sequence": 1505,
+      "method": "UserLocation",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "direction": "Up"
+    },
+    {
+      "sequence": 1513,
+      "method": "ObjectAttack",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "objectId": 200700,
+      "direction": "UpLeft"
+    },
+    {
+      "sequence": 1515,
+      "method": "UserLocation",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1516,
+      "method": "ObjectAttack",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "objectId": 200706,
+      "direction": "UpLeft"
+    },
+    {
+      "sequence": 1525,
+      "method": "UserLocation",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "direction": "Up"
+    },
+    {
+      "sequence": 1534,
+      "method": "UserLocation",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1536,
+      "method": "ObjectHealth",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "percent": 100,
+      "objectId": 211001
+    },
+    {
+      "sequence": 1538,
+      "method": "ObjectAttack",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "objectId": 200706,
+      "direction": "UpLeft"
+    },
+    {
+      "sequence": 1539,
+      "method": "ObjectAttack",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "objectId": 200801,
+      "direction": "Up"
+    },
+    {
+      "sequence": 1543,
+      "method": "UserLocation",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "direction": "Up"
+    },
+    {
+      "sequence": 1548,
+      "method": "ObjectAttack",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "objectId": 200700,
+      "direction": "UpLeft"
+    },
+    {
+      "sequence": 1551,
+      "method": "UserLocation",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "direction": "Up"
+    },
+    {
+      "sequence": 1562,
+      "method": "UserLocation",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "direction": "Up"
+    },
+    {
+      "sequence": 1574,
+      "method": "UserLocation",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1578,
+      "method": "ObjectAttack",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "objectId": 200700,
+      "direction": "UpLeft"
+    },
+    {
+      "sequence": 1581,
+      "method": "ObjectAttack",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "objectId": 200706,
+      "direction": "Up"
+    },
+    {
+      "sequence": 1583,
+      "method": "UserLocation",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "direction": "Up"
+    },
+    {
+      "sequence": 1591,
+      "method": "UserLocation",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1594,
+      "method": "ObjectAttack",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "objectId": 200801,
+      "direction": "UpLeft"
+    },
+    {
+      "sequence": 1596,
+      "method": "HealthChanged",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "hp": 98,
+      "mp": 49
+    },
+    {
+      "sequence": 1598,
+      "method": "ObjectStruck",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "objectId": 1000,
+      "attackerId": 200801,
+      "direction": "Left"
+    },
+    {
+      "sequence": 1600,
+      "method": "ObjectHealth",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "percent": 98,
+      "objectId": 1000
+    },
+    {
+      "sequence": 1601,
+      "method": "UserLocation",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "direction": "Up"
+    },
+    {
+      "sequence": 1610,
+      "method": "ObjectAttack",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "objectId": 200700,
+      "direction": "UpLeft"
+    },
+    {
+      "sequence": 1611,
+      "method": "UserLocation",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1612,
+      "method": "ObjectAttack",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "objectId": 200809,
+      "direction": "UpLeft"
+    },
+    {
+      "sequence": 1615,
+      "method": "ObjectAttack",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "objectId": 200706,
+      "direction": "Up"
+    },
+    {
+      "sequence": 1621,
+      "method": "UserLocation",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "direction": "Up"
+    },
+    {
+      "sequence": 1623,
+      "method": "HealthChanged",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "hp": 99,
+      "mp": 49
+    },
+    {
+      "sequence": 1624,
+      "method": "ObjectHealth",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "percent": 100,
+      "objectId": 1000
+    },
+    {
+      "sequence": 1632,
+      "method": "UserLocation",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1635,
+      "method": "ObjectAttack",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "objectId": 200706,
+      "direction": "UpLeft"
+    },
+    {
+      "sequence": 1638,
+      "method": "ObjectAttack",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "objectId": 200805,
+      "direction": "Up"
+    },
+    {
+      "sequence": 1639,
+      "method": "UserLocation",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1644,
+      "method": "HealthChanged",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "hp": 97,
+      "mp": 49
+    },
+    {
+      "sequence": 1645,
+      "method": "ObjectStruck",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "objectId": 1000,
+      "attackerId": 200805,
+      "direction": "Left"
+    },
+    {
+      "sequence": 1647,
+      "method": "ObjectHealth",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "percent": 97,
+      "objectId": 1000
+    },
+    {
+      "sequence": 1651,
+      "method": "UserLocation",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1656,
+      "method": "ObjectAttack",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "objectId": 200801,
+      "direction": "UpLeft"
+    },
+    {
+      "sequence": 1659,
+      "method": "HealthChanged",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "hp": 96,
+      "mp": 49
+    },
+    {
+      "sequence": 1661,
+      "method": "ObjectStruck",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "objectId": 1000,
+      "attackerId": 200801,
+      "direction": "Left"
+    },
+    {
+      "sequence": 1663,
+      "method": "ObjectHealth",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "percent": 96,
+      "objectId": 1000
+    },
+    {
+      "sequence": 1664,
+      "method": "UserLocation",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1667,
+      "method": "ObjectAttack",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "objectId": 200912,
+      "direction": "UpLeft"
+    },
+    {
+      "sequence": 1670,
+      "method": "ObjectAttack",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "objectId": 200708,
+      "direction": "Up"
+    },
+    {
+      "sequence": 1672,
+      "method": "HealthChanged",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "hp": 95,
+      "mp": 49
+    },
+    {
+      "sequence": 1674,
+      "method": "ObjectStruck",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "objectId": 1000,
+      "attackerId": 200912,
+      "direction": "Left"
+    },
+    {
+      "sequence": 1676,
+      "method": "ObjectHealth",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "percent": 95,
+      "objectId": 1000
+    },
+    {
+      "sequence": 1677,
+      "method": "UserLocation",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "direction": "Up"
+    },
+    {
+      "sequence": 1683,
+      "method": "ObjectAttack",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "objectId": 200805,
+      "direction": "UpLeft"
+    },
+    {
+      "sequence": 1687,
+      "method": "UserLocation",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1696,
+      "method": "UserLocation",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1702,
+      "method": "HealthChanged",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "hp": 98,
+      "mp": 49
+    },
+    {
+      "sequence": 1703,
+      "method": "ObjectHealth",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "percent": 98,
+      "objectId": 1000
+    },
+    {
+      "sequence": 1707,
+      "method": "ObjectAttack",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "objectId": 200912,
+      "direction": "UpLeft"
+    },
+    {
+      "sequence": 1708,
+      "method": "UserLocation",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "direction": "Up"
+    },
+    {
+      "sequence": 1709,
+      "method": "ObjectAttack",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "objectId": 200708,
+      "direction": "UpLeft"
+    },
+    {
+      "sequence": 1711,
+      "method": "HealthChanged",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "hp": 97,
+      "mp": 49
+    },
+    {
+      "sequence": 1712,
+      "method": "ObjectStruck",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "objectId": 1000,
+      "attackerId": 200912,
+      "direction": "Up"
+    },
+    {
+      "sequence": 1714,
+      "method": "ObjectHealth",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "percent": 97,
+      "objectId": 1000
+    },
+    {
+      "sequence": 1721,
+      "method": "UserLocation",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "direction": "Up"
+    },
+    {
+      "sequence": 1731,
+      "method": "UserLocation",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1734,
+      "method": "ObjectAttack",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "objectId": 200708,
+      "direction": "UpLeft"
+    },
+    {
+      "sequence": 1735,
+      "method": "HealthChanged",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "hp": 99,
+      "mp": 49
+    },
+    {
+      "sequence": 1736,
+      "method": "ObjectHealth",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "percent": 100,
+      "objectId": 1000
+    },
+    {
+      "sequence": 1739,
+      "method": "ObjectAttack",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "objectId": 200912,
+      "direction": "Up"
+    },
+    {
+      "sequence": 1740,
+      "method": "UserLocation",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "direction": "Up"
+    },
+    {
+      "sequence": 1745,
+      "method": "HealthChanged",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "hp": 98,
+      "mp": 49
+    },
+    {
+      "sequence": 1746,
+      "method": "ObjectStruck",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "objectId": 1000,
+      "attackerId": 200912,
+      "direction": "Up"
+    },
+    {
+      "sequence": 1748,
+      "method": "ObjectHealth",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "percent": 98,
+      "objectId": 1000
+    },
+    {
+      "sequence": 1753,
+      "method": "UserLocation",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "direction": "Up"
+    },
+    {
+      "sequence": 1763,
+      "method": "UserLocation",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "direction": "Up"
+    },
+    {
+      "sequence": 1769,
+      "method": "HealthChanged",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "hp": 99,
+      "mp": 49
+    },
+    {
+      "sequence": 1771,
+      "method": "ObjectHealth",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "percent": 100,
+      "objectId": 1000
+    },
+    {
+      "sequence": 1773,
+      "method": "UserLocation",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "direction": "Up"
+    },
+    {
+      "sequence": 1779,
+      "method": "UserLocation",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "direction": "Up"
+    },
+    {
+      "sequence": 1787,
+      "method": "UserLocation",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "direction": "Up"
+    },
+    {
+      "sequence": 1795,
+      "method": "UserLocation",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "direction": "Up"
+    },
+    {
+      "sequence": 1802,
+      "method": "UserLocation",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "direction": "Up"
+    },
+    {
+      "sequence": 1810,
+      "method": "UserLocation",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "direction": "Up"
+    },
+    {
+      "sequence": 1814,
+      "method": "UserLocation",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "direction": "Up"
+    },
+    {
+      "sequence": 1820,
+      "method": "UserLocation",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "direction": "Up"
+    },
+    {
+      "sequence": 1825,
+      "method": "UserLocation",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "direction": "Up"
+    },
+    {
+      "sequence": 1831,
+      "method": "UserLocation",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "direction": "Up"
+    },
+    {
+      "sequence": 1836,
+      "method": "UserLocation",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "direction": "Up"
+    },
+    {
+      "sequence": 1842,
+      "method": "UserLocation",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "direction": "Up"
+    },
+    {
+      "sequence": 1847,
+      "method": "UserLocation",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "direction": "Up"
+    },
+    {
+      "sequence": 1851,
+      "method": "UserLocation",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "direction": "Up"
+    },
+    {
+      "sequence": 1856,
+      "method": "UserLocation",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "direction": "Right"
+    },
+    {
+      "sequence": 1861,
+      "method": "UserLocation",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "direction": "Right"
+    },
+    {
+      "sequence": 1866,
+      "method": "UserLocation",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "direction": "Right"
+    },
+    {
+      "sequence": 1872,
+      "method": "UserLocation",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "direction": "Right"
+    },
+    {
+      "sequence": 1876,
+      "method": "UserLocation",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "direction": "Right"
+    },
+    {
+      "sequence": 1881,
+      "method": "UserLocation",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "direction": "Right"
+    },
+    {
+      "sequence": 1885,
+      "method": "UserLocation",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "direction": "Right"
+    },
+    {
+      "sequence": 1890,
+      "method": "UserLocation",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "direction": "Right"
+    },
+    {
+      "sequence": 1895,
+      "method": "UserLocation",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "direction": "Up"
+    },
+    {
+      "sequence": 1900,
+      "method": "UserLocation",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "direction": "Right"
+    },
+    {
+      "sequence": 1905,
+      "method": "UserLocation",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "direction": "Up"
+    },
+    {
+      "sequence": 1907,
+      "method": "ObjectAttack",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "objectId": 200708,
+      "direction": "UpRight"
+    },
+    {
+      "sequence": 1910,
+      "method": "UserLocation",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "direction": "Up"
+    },
+    {
+      "sequence": 1915,
+      "method": "UserLocation",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "direction": "Right"
+    },
+    {
+      "sequence": 1919,
+      "method": "ObjectAttack",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "objectId": 200708,
+      "direction": "UpRight"
+    },
+    {
+      "sequence": 1920,
+      "method": "UserLocation",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "direction": "Right"
+    },
+    {
+      "sequence": 1922,
+      "method": "ObjectAttack",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "objectId": 200912,
+      "direction": "UpRight"
+    },
+    {
+      "sequence": 1924,
+      "method": "HealthChanged",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "hp": 98,
+      "mp": 49
+    },
+    {
+      "sequence": 1925,
+      "method": "ObjectStruck",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "objectId": 1000,
+      "attackerId": 200912,
+      "direction": "Right"
+    },
+    {
+      "sequence": 1928,
+      "method": "ObjectHealth",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "percent": 98,
+      "objectId": 1000
+    },
+    {
+      "sequence": 1929,
+      "method": "UserLocation",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "direction": "Up"
+    },
+    {
+      "sequence": 1934,
+      "method": "MapInformation",
+      "phase": "d001-ordinary-physical-map0-gate-approach"
+    },
+    {
+      "sequence": 1935,
+      "method": "UserLocation",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "direction": "Down"
+    },
+    {
+      "sequence": 1942,
+      "method": "HealthChanged",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "hp": 99,
+      "mp": 49
+    },
+    {
+      "sequence": 1943,
+      "method": "ObjectHealth",
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "percent": 100,
+      "objectId": 1000
+    }
+  ],
+  "questOperations": [],
+  "movement": [
+    {
+      "from": {
+        "x": 218,
+        "y": 82
+      },
+      "position": {
+        "x": 217,
+        "y": 82
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 428,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 605,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 217,
+        "y": 82
+      },
+      "position": {
+        "x": 216,
+        "y": 82
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 430,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 609,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 216,
+        "y": 82
+      },
+      "position": {
+        "x": 216,
+        "y": 83
+      },
+      "direction": "Down",
+      "outcome": "moved",
+      "heldForMs": 418,
+      "keys": [
+        "ArrowDown"
+      ],
+      "sequence": 614,
+      "ackDirection": "Down",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 216,
+        "y": 83
+      },
+      "position": {
+        "x": 215,
+        "y": 83
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 344,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 618,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 215,
+        "y": 83
+      },
+      "position": {
+        "x": 214,
+        "y": 83
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 447,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 623,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 214,
+        "y": 83
+      },
+      "position": {
+        "x": 213,
+        "y": 83
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 429,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 629,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 213,
+        "y": 83
+      },
+      "position": {
+        "x": 212,
+        "y": 83
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 418,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 634,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 212,
+        "y": 83
+      },
+      "position": {
+        "x": 211,
+        "y": 83
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 274,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 639,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 211,
+        "y": 83
+      },
+      "position": {
+        "x": 210,
+        "y": 83
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 346,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 645,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 210,
+        "y": 83
+      },
+      "position": {
+        "x": 209,
+        "y": 83
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 342,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 650,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 209,
+        "y": 83
+      },
+      "position": {
+        "x": 208,
+        "y": 83
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 416,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 655,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 208,
+        "y": 83
+      },
+      "position": {
+        "x": 207,
+        "y": 83
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 561,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 660,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 207,
+        "y": 83
+      },
+      "position": {
+        "x": 206,
+        "y": 83
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 352,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 664,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 206,
+        "y": 83
+      },
+      "position": {
+        "x": 205,
+        "y": 83
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 417,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 667,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 205,
+        "y": 83
+      },
+      "position": {
+        "x": 204,
+        "y": 83
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 333,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 672,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 204,
+        "y": 83
+      },
+      "position": {
+        "x": 203,
+        "y": 83
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 420,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 677,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 203,
+        "y": 83
+      },
+      "position": {
+        "x": 202,
+        "y": 83
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 420,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 682,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 202,
+        "y": 83
+      },
+      "position": {
+        "x": 201,
+        "y": 83
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 430,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 686,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 201,
+        "y": 83
+      },
+      "position": {
+        "x": 200,
+        "y": 83
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 434,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 689,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 200,
+        "y": 83
+      },
+      "position": {
+        "x": 199,
+        "y": 83
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 439,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 695,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 199,
+        "y": 83
+      },
+      "position": {
+        "x": 198,
+        "y": 83
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 431,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 703,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 198,
+        "y": 83
+      },
+      "position": {
+        "x": 197,
+        "y": 83
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 431,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 708,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 197,
+        "y": 83
+      },
+      "position": {
+        "x": 197,
+        "y": 82
+      },
+      "direction": "Up",
+      "outcome": "moved",
+      "heldForMs": 353,
+      "keys": [
+        "ArrowUp"
+      ],
+      "sequence": 714,
+      "ackDirection": "Up",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 197,
+        "y": 82
+      },
+      "position": {
+        "x": 196,
+        "y": 82
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 344,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 717,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 196,
+        "y": 82
+      },
+      "position": {
+        "x": 195,
+        "y": 82
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 434,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 722,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 195,
+        "y": 82
+      },
+      "position": {
+        "x": 194,
+        "y": 82
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 423,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 729,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 194,
+        "y": 82
+      },
+      "position": {
+        "x": 193,
+        "y": 82
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 422,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 734,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 193,
+        "y": 82
+      },
+      "position": {
+        "x": 192,
+        "y": 82
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 345,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 738,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 192,
+        "y": 82
+      },
+      "position": {
+        "x": 191,
+        "y": 82
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 354,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 741,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 191,
+        "y": 82
+      },
+      "position": {
+        "x": 190,
+        "y": 82
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 432,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 747,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 190,
+        "y": 82
+      },
+      "position": {
+        "x": 189,
+        "y": 82
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 427,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 753,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 189,
+        "y": 82
+      },
+      "position": {
+        "x": 189,
+        "y": 83
+      },
+      "direction": "Down",
+      "outcome": "moved",
+      "heldForMs": 346,
+      "keys": [
+        "ArrowDown"
+      ],
+      "sequence": 760,
+      "ackDirection": "Down",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 189,
+        "y": 83
+      },
+      "position": {
+        "x": 189,
+        "y": 84
+      },
+      "direction": "Down",
+      "outcome": "moved",
+      "heldForMs": 345,
+      "keys": [
+        "ArrowDown"
+      ],
+      "sequence": 768,
+      "ackDirection": "Down",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 189,
+        "y": 84
+      },
+      "position": {
+        "x": 189,
+        "y": 84
+      },
+      "direction": "Left",
+      "outcome": "blocked-at-source-no-displacement",
+      "heldForMs": 696,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 773,
+      "ackDirection": "Down",
+      "outboundMovementCommands": 2
+    },
+    {
+      "from": {
+        "x": 189,
+        "y": 84
+      },
+      "position": {
+        "x": 189,
+        "y": 83
+      },
+      "direction": "Up",
+      "outcome": "moved",
+      "heldForMs": 350,
+      "keys": [
+        "ArrowUp"
+      ],
+      "sequence": 781,
+      "ackDirection": "Up",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 189,
+        "y": 83
+      },
+      "position": {
+        "x": 188,
+        "y": 83
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 425,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 787,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 188,
+        "y": 83
+      },
+      "position": {
+        "x": 188,
+        "y": 82
+      },
+      "direction": "Up",
+      "outcome": "moved",
+      "heldForMs": 274,
+      "keys": [
+        "ArrowUp"
+      ],
+      "sequence": 793,
+      "ackDirection": "Up",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 188,
+        "y": 82
+      },
+      "position": {
+        "x": 188,
+        "y": 81
+      },
+      "direction": "Up",
+      "outcome": "moved",
+      "heldForMs": 424,
+      "keys": [
+        "ArrowUp"
+      ],
+      "sequence": 799,
+      "ackDirection": "Up",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 188,
+        "y": 81
+      },
+      "position": {
+        "x": 187,
+        "y": 81
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 420,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 807,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 187,
+        "y": 81
+      },
+      "position": {
+        "x": 186,
+        "y": 81
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 349,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 814,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 186,
+        "y": 81
+      },
+      "position": {
+        "x": 186,
+        "y": 82
+      },
+      "direction": "Down",
+      "outcome": "moved",
+      "heldForMs": 431,
+      "keys": [
+        "ArrowDown"
+      ],
+      "sequence": 824,
+      "ackDirection": "Down",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 186,
+        "y": 82
+      },
+      "position": {
+        "x": 185,
+        "y": 82
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 423,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 831,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 185,
+        "y": 82
+      },
+      "position": {
+        "x": 185,
+        "y": 83
+      },
+      "direction": "Down",
+      "outcome": "moved",
+      "heldForMs": 410,
+      "keys": [
+        "ArrowDown"
+      ],
+      "sequence": 836,
+      "ackDirection": "Down",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 185,
+        "y": 83
+      },
+      "position": {
+        "x": 185,
+        "y": 84
+      },
+      "direction": "Down",
+      "outcome": "moved",
+      "heldForMs": 447,
+      "keys": [
+        "ArrowDown"
+      ],
+      "sequence": 849,
+      "ackDirection": "Down",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 185,
+        "y": 84
+      },
+      "position": {
+        "x": 185,
+        "y": 85
+      },
+      "direction": "Down",
+      "outcome": "moved",
+      "heldForMs": 383,
+      "keys": [
+        "ArrowDown"
+      ],
+      "sequence": 858,
+      "ackDirection": "Down",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 185,
+        "y": 85
+      },
+      "position": {
+        "x": 184,
+        "y": 85
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 265,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 868,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 184,
+        "y": 85
+      },
+      "position": {
+        "x": 183,
+        "y": 85
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 359,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 879,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 183,
+        "y": 85
+      },
+      "position": {
+        "x": 182,
+        "y": 85
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 347,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 884,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 182,
+        "y": 85
+      },
+      "position": {
+        "x": 181,
+        "y": 85
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 351,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 895,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 181,
+        "y": 85
+      },
+      "position": {
+        "x": 181,
+        "y": 84
+      },
+      "direction": "Up",
+      "outcome": "moved",
+      "heldForMs": 443,
+      "keys": [
+        "ArrowUp"
+      ],
+      "sequence": 901,
+      "ackDirection": "Up",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 181,
+        "y": 84
+      },
+      "position": {
+        "x": 181,
+        "y": 83
+      },
+      "direction": "Up",
+      "outcome": "moved",
+      "heldForMs": 346,
+      "keys": [
+        "ArrowUp"
+      ],
+      "sequence": 912,
+      "ackDirection": "Up",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 181,
+        "y": 83
+      },
+      "position": {
+        "x": 180,
+        "y": 83
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 432,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 919,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 180,
+        "y": 83
+      },
+      "position": {
+        "x": 179,
+        "y": 83
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 455,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 927,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 179,
+        "y": 83
+      },
+      "position": {
+        "x": 178,
+        "y": 83
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 420,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 940,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 178,
+        "y": 83
+      },
+      "position": {
+        "x": 178,
+        "y": 84
+      },
+      "direction": "Down",
+      "outcome": "moved",
+      "heldForMs": 341,
+      "keys": [
+        "ArrowDown"
+      ],
+      "sequence": 949,
+      "ackDirection": "Down",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 178,
+        "y": 84
+      },
+      "position": {
+        "x": 178,
+        "y": 84
+      },
+      "direction": "Up",
+      "outcome": "turned-only",
+      "heldForMs": 430,
+      "keys": [
+        "ArrowUp"
+      ],
+      "sequence": 957,
+      "ackDirection": "Up",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 178,
+        "y": 84
+      },
+      "position": {
+        "x": 177,
+        "y": 84
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 274,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 969,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 177,
+        "y": 84
+      },
+      "position": {
+        "x": 177,
+        "y": 83
+      },
+      "direction": "Up",
+      "outcome": "moved",
+      "heldForMs": 437,
+      "keys": [
+        "ArrowUp"
+      ],
+      "sequence": 975,
+      "ackDirection": "Up",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 177,
+        "y": 83
+      },
+      "position": {
+        "x": 177,
+        "y": 82
+      },
+      "direction": "Up",
+      "outcome": "moved",
+      "heldForMs": 347,
+      "keys": [
+        "ArrowUp"
+      ],
+      "sequence": 985,
+      "ackDirection": "Up",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 177,
+        "y": 82
+      },
+      "position": {
+        "x": 176,
+        "y": 82
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 442,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 993,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 176,
+        "y": 82
+      },
+      "position": {
+        "x": 176,
+        "y": 81
+      },
+      "direction": "Up",
+      "outcome": "moved",
+      "heldForMs": 430,
+      "keys": [
+        "ArrowUp"
+      ],
+      "sequence": 1001,
+      "ackDirection": "Up",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 176,
+        "y": 81
+      },
+      "position": {
+        "x": 175,
+        "y": 81
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 345,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 1017,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 175,
+        "y": 81
+      },
+      "position": {
+        "x": 174,
+        "y": 81
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 376,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 1025,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 174,
+        "y": 81
+      },
+      "position": {
+        "x": 173,
+        "y": 82
+      },
+      "direction": "DownLeft",
+      "outcome": "moved",
+      "heldForMs": 1114,
+      "keys": [
+        "ArrowDown",
+        "ArrowLeft"
+      ],
+      "sequence": 1042,
+      "ackDirection": "DownLeft",
+      "outboundMovementCommands": 2
+    },
+    {
+      "from": {
+        "x": 173,
+        "y": 82
+      },
+      "position": {
+        "x": 173,
+        "y": 83
+      },
+      "direction": "Down",
+      "outcome": "moved",
+      "heldForMs": 447,
+      "keys": [
+        "ArrowDown"
+      ],
+      "sequence": 1058,
+      "ackDirection": "Down",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 173,
+        "y": 83
+      },
+      "position": {
+        "x": 172,
+        "y": 83
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 353,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 1065,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 172,
+        "y": 83
+      },
+      "position": {
+        "x": 171,
+        "y": 83
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 344,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 1074,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 171,
+        "y": 83
+      },
+      "position": {
+        "x": 170,
+        "y": 83
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 348,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 1085,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 170,
+        "y": 83
+      },
+      "position": {
+        "x": 169,
+        "y": 83
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 386,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 1094,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 169,
+        "y": 83
+      },
+      "position": {
+        "x": 169,
+        "y": 82
+      },
+      "direction": "Up",
+      "outcome": "moved",
+      "heldForMs": 275,
+      "keys": [
+        "ArrowUp"
+      ],
+      "sequence": 1104,
+      "ackDirection": "Up",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 169,
+        "y": 82
+      },
+      "position": {
+        "x": 168,
+        "y": 82
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 420,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 1114,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 168,
+        "y": 82
+      },
+      "position": {
+        "x": 168,
+        "y": 83
+      },
+      "direction": "Down",
+      "outcome": "moved",
+      "heldForMs": 346,
+      "keys": [
+        "ArrowDown"
+      ],
+      "sequence": 1121,
+      "ackDirection": "Down",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 168,
+        "y": 83
+      },
+      "position": {
+        "x": 167,
+        "y": 83
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 418,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 1128,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 167,
+        "y": 83
+      },
+      "position": {
+        "x": 166,
+        "y": 83
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 420,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 1141,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 166,
+        "y": 83
+      },
+      "position": {
+        "x": 166,
+        "y": 82
+      },
+      "direction": "Up",
+      "outcome": "moved",
+      "heldForMs": 333,
+      "keys": [
+        "ArrowUp"
+      ],
+      "sequence": 1152,
+      "ackDirection": "Up",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 166,
+        "y": 82
+      },
+      "position": {
+        "x": 166,
+        "y": 81
+      },
+      "direction": "Up",
+      "outcome": "moved",
+      "heldForMs": 381,
+      "keys": [
+        "ArrowUp"
+      ],
+      "sequence": 1163,
+      "ackDirection": "Up",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 166,
+        "y": 81
+      },
+      "position": {
+        "x": 165,
+        "y": 81
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 346,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 1173,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 165,
+        "y": 81
+      },
+      "position": {
+        "x": 165,
+        "y": 80
+      },
+      "direction": "Up",
+      "outcome": "moved",
+      "heldForMs": 350,
+      "keys": [
+        "ArrowUp"
+      ],
+      "sequence": 1181,
+      "ackDirection": "Up",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 165,
+        "y": 80
+      },
+      "position": {
+        "x": 165,
+        "y": 79
+      },
+      "direction": "Up",
+      "outcome": "moved",
+      "heldForMs": 427,
+      "keys": [
+        "ArrowUp"
+      ],
+      "sequence": 1192,
+      "ackDirection": "Up",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 165,
+        "y": 79
+      },
+      "position": {
+        "x": 164,
+        "y": 79
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 350,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 1203,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 164,
+        "y": 79
+      },
+      "position": {
+        "x": 164,
+        "y": 78
+      },
+      "direction": "Up",
+      "outcome": "moved",
+      "heldForMs": 350,
+      "keys": [
+        "ArrowUp"
+      ],
+      "sequence": 1216,
+      "ackDirection": "Up",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 164,
+        "y": 78
+      },
+      "position": {
+        "x": 163,
+        "y": 78
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 432,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 1230,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 163,
+        "y": 78
+      },
+      "position": {
+        "x": 163,
+        "y": 77
+      },
+      "direction": "Up",
+      "outcome": "moved",
+      "heldForMs": 350,
+      "keys": [
+        "ArrowUp"
+      ],
+      "sequence": 1239,
+      "ackDirection": "Up",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 163,
+        "y": 77
+      },
+      "position": {
+        "x": 162,
+        "y": 77
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 346,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 1253,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 162,
+        "y": 77
+      },
+      "position": {
+        "x": 162,
+        "y": 76
+      },
+      "direction": "Up",
+      "outcome": "moved",
+      "heldForMs": 422,
+      "keys": [
+        "ArrowUp"
+      ],
+      "sequence": 1260,
+      "ackDirection": "Up",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 162,
+        "y": 76
+      },
+      "position": {
+        "x": 161,
+        "y": 76
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 392,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 1271,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 161,
+        "y": 76
+      },
+      "position": {
+        "x": 161,
+        "y": 75
+      },
+      "direction": "Up",
+      "outcome": "moved",
+      "heldForMs": 427,
+      "keys": [
+        "ArrowUp"
+      ],
+      "sequence": 1282,
+      "ackDirection": "Up",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 161,
+        "y": 75
+      },
+      "position": {
+        "x": 160,
+        "y": 75
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 370,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 1290,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 160,
+        "y": 75
+      },
+      "position": {
+        "x": 160,
+        "y": 74
+      },
+      "direction": "Up",
+      "outcome": "moved",
+      "heldForMs": 330,
+      "keys": [
+        "ArrowUp"
+      ],
+      "sequence": 1304,
+      "ackDirection": "Up",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 160,
+        "y": 74
+      },
+      "position": {
+        "x": 159,
+        "y": 74
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 343,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 1317,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 159,
+        "y": 74
+      },
+      "position": {
+        "x": 158,
+        "y": 74
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 357,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 1325,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 158,
+        "y": 74
+      },
+      "position": {
+        "x": 157,
+        "y": 74
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 353,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 1341,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 157,
+        "y": 74
+      },
+      "position": {
+        "x": 157,
+        "y": 73
+      },
+      "direction": "Up",
+      "outcome": "moved",
+      "heldForMs": 430,
+      "keys": [
+        "ArrowUp"
+      ],
+      "sequence": 1352,
+      "ackDirection": "Up",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 157,
+        "y": 73
+      },
+      "position": {
+        "x": 157,
+        "y": 72
+      },
+      "direction": "Up",
+      "outcome": "moved",
+      "heldForMs": 467,
+      "keys": [
+        "ArrowUp"
+      ],
+      "sequence": 1361,
+      "ackDirection": "Up",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 157,
+        "y": 72
+      },
+      "position": {
+        "x": 156,
+        "y": 72
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 347,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 1371,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 156,
+        "y": 72
+      },
+      "position": {
+        "x": 156,
+        "y": 71
+      },
+      "direction": "Up",
+      "outcome": "moved",
+      "heldForMs": 357,
+      "keys": [
+        "ArrowUp"
+      ],
+      "sequence": 1380,
+      "ackDirection": "Up",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 156,
+        "y": 71
+      },
+      "position": {
+        "x": 155,
+        "y": 71
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 441,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 1389,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 155,
+        "y": 71
+      },
+      "position": {
+        "x": 155,
+        "y": 70
+      },
+      "direction": "Up",
+      "outcome": "moved",
+      "heldForMs": 428,
+      "keys": [
+        "ArrowUp"
+      ],
+      "sequence": 1400,
+      "ackDirection": "Up",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 155,
+        "y": 70
+      },
+      "position": {
+        "x": 154,
+        "y": 70
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 431,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 1410,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 154,
+        "y": 70
+      },
+      "position": {
+        "x": 154,
+        "y": 69
+      },
+      "direction": "Up",
+      "outcome": "moved",
+      "heldForMs": 432,
+      "keys": [
+        "ArrowUp"
+      ],
+      "sequence": 1422,
+      "ackDirection": "Up",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 154,
+        "y": 69
+      },
+      "position": {
+        "x": 153,
+        "y": 68
+      },
+      "direction": "UpLeft",
+      "outcome": "blocked-at-source-no-displacement",
+      "heldForMs": 342,
+      "keys": [
+        "ArrowUp",
+        "ArrowLeft"
+      ],
+      "sequence": 1432,
+      "ackDirection": "UpLeft",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 153,
+        "y": 68
+      },
+      "position": {
+        "x": 152,
+        "y": 68
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 275,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 1442,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 152,
+        "y": 68
+      },
+      "position": {
+        "x": 152,
+        "y": 67
+      },
+      "direction": "Up",
+      "outcome": "moved",
+      "heldForMs": 419,
+      "keys": [
+        "ArrowUp"
+      ],
+      "sequence": 1450,
+      "ackDirection": "Up",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 152,
+        "y": 67
+      },
+      "position": {
+        "x": 151,
+        "y": 67
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 344,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 1462,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 151,
+        "y": 67
+      },
+      "position": {
+        "x": 150,
+        "y": 67
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 423,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 1471,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 150,
+        "y": 67
+      },
+      "position": {
+        "x": 149,
+        "y": 67
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 296,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 1480,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 149,
+        "y": 67
+      },
+      "position": {
+        "x": 149,
+        "y": 66
+      },
+      "direction": "Up",
+      "outcome": "moved",
+      "heldForMs": 434,
+      "keys": [
+        "ArrowUp"
+      ],
+      "sequence": 1490,
+      "ackDirection": "Up",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 149,
+        "y": 66
+      },
+      "position": {
+        "x": 148,
+        "y": 66
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 288,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 1499,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 148,
+        "y": 66
+      },
+      "position": {
+        "x": 148,
+        "y": 65
+      },
+      "direction": "Up",
+      "outcome": "moved",
+      "heldForMs": 429,
+      "keys": [
+        "ArrowUp"
+      ],
+      "sequence": 1505,
+      "ackDirection": "Up",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 148,
+        "y": 65
+      },
+      "position": {
+        "x": 147,
+        "y": 65
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 341,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 1515,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 147,
+        "y": 65
+      },
+      "position": {
+        "x": 147,
+        "y": 64
+      },
+      "direction": "Up",
+      "outcome": "moved",
+      "heldForMs": 454,
+      "keys": [
+        "ArrowUp"
+      ],
+      "sequence": 1525,
+      "ackDirection": "Up",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 147,
+        "y": 64
+      },
+      "position": {
+        "x": 146,
+        "y": 64
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 362,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 1534,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 146,
+        "y": 64
+      },
+      "position": {
+        "x": 146,
+        "y": 63
+      },
+      "direction": "Up",
+      "outcome": "moved",
+      "heldForMs": 349,
+      "keys": [
+        "ArrowUp"
+      ],
+      "sequence": 1543,
+      "ackDirection": "Up",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 146,
+        "y": 63
+      },
+      "position": {
+        "x": 146,
+        "y": 62
+      },
+      "direction": "Up",
+      "outcome": "moved",
+      "heldForMs": 428,
+      "keys": [
+        "ArrowUp"
+      ],
+      "sequence": 1551,
+      "ackDirection": "Up",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 146,
+        "y": 62
+      },
+      "position": {
+        "x": 146,
+        "y": 61
+      },
+      "direction": "Up",
+      "outcome": "moved",
+      "heldForMs": 432,
+      "keys": [
+        "ArrowUp"
+      ],
+      "sequence": 1562,
+      "ackDirection": "Up",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 146,
+        "y": 61
+      },
+      "position": {
+        "x": 145,
+        "y": 61
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 433,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 1574,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 145,
+        "y": 61
+      },
+      "position": {
+        "x": 145,
+        "y": 60
+      },
+      "direction": "Up",
+      "outcome": "moved",
+      "heldForMs": 450,
+      "keys": [
+        "ArrowUp"
+      ],
+      "sequence": 1583,
+      "ackDirection": "Up",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 145,
+        "y": 60
+      },
+      "position": {
+        "x": 144,
+        "y": 60
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 340,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 1591,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 144,
+        "y": 60
+      },
+      "position": {
+        "x": 144,
+        "y": 59
+      },
+      "direction": "Up",
+      "outcome": "moved",
+      "heldForMs": 398,
+      "keys": [
+        "ArrowUp"
+      ],
+      "sequence": 1601,
+      "ackDirection": "Up",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 144,
+        "y": 59
+      },
+      "position": {
+        "x": 143,
+        "y": 59
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 419,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 1611,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 143,
+        "y": 59
+      },
+      "position": {
+        "x": 143,
+        "y": 58
+      },
+      "direction": "Up",
+      "outcome": "moved",
+      "heldForMs": 426,
+      "keys": [
+        "ArrowUp"
+      ],
+      "sequence": 1621,
+      "ackDirection": "Up",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 143,
+        "y": 58
+      },
+      "position": {
+        "x": 142,
+        "y": 58
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 434,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 1632,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 142,
+        "y": 58
+      },
+      "position": {
+        "x": 141,
+        "y": 58
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 347,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 1639,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 141,
+        "y": 58
+      },
+      "position": {
+        "x": 140,
+        "y": 58
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 435,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 1651,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 140,
+        "y": 58
+      },
+      "position": {
+        "x": 139,
+        "y": 58
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 277,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 1664,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 139,
+        "y": 58
+      },
+      "position": {
+        "x": 139,
+        "y": 57
+      },
+      "direction": "Up",
+      "outcome": "moved",
+      "heldForMs": 362,
+      "keys": [
+        "ArrowUp"
+      ],
+      "sequence": 1677,
+      "ackDirection": "Up",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 139,
+        "y": 57
+      },
+      "position": {
+        "x": 138,
+        "y": 57
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 352,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 1687,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 138,
+        "y": 57
+      },
+      "position": {
+        "x": 137,
+        "y": 57
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 358,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 1696,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 137,
+        "y": 57
+      },
+      "position": {
+        "x": 137,
+        "y": 56
+      },
+      "direction": "Up",
+      "outcome": "moved",
+      "heldForMs": 285,
+      "keys": [
+        "ArrowUp"
+      ],
+      "sequence": 1708,
+      "ackDirection": "Up",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 137,
+        "y": 56
+      },
+      "position": {
+        "x": 137,
+        "y": 55
+      },
+      "direction": "Up",
+      "outcome": "moved",
+      "heldForMs": 356,
+      "keys": [
+        "ArrowUp"
+      ],
+      "sequence": 1721,
+      "ackDirection": "Up",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 137,
+        "y": 55
+      },
+      "position": {
+        "x": 136,
+        "y": 55
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 431,
+      "keys": [
+        "ArrowLeft"
+      ],
+      "sequence": 1731,
+      "ackDirection": "Left",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 136,
+        "y": 55
+      },
+      "position": {
+        "x": 136,
+        "y": 54
+      },
+      "direction": "Up",
+      "outcome": "moved",
+      "heldForMs": 344,
+      "keys": [
+        "ArrowUp"
+      ],
+      "sequence": 1740,
+      "ackDirection": "Up",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 136,
+        "y": 54
+      },
+      "position": {
+        "x": 136,
+        "y": 53
+      },
+      "direction": "Up",
+      "outcome": "moved",
+      "heldForMs": 357,
+      "keys": [
+        "ArrowUp"
+      ],
+      "sequence": 1753,
+      "ackDirection": "Up",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 136,
+        "y": 53
+      },
+      "position": {
+        "x": 136,
+        "y": 52
+      },
+      "direction": "Up",
+      "outcome": "moved",
+      "heldForMs": 423,
+      "keys": [
+        "ArrowUp"
+      ],
+      "sequence": 1763,
+      "ackDirection": "Up",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 136,
+        "y": 52
+      },
+      "position": {
+        "x": 136,
+        "y": 51
+      },
+      "direction": "Up",
+      "outcome": "moved",
+      "heldForMs": 279,
+      "keys": [
+        "ArrowUp"
+      ],
+      "sequence": 1773,
+      "ackDirection": "Up",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 136,
+        "y": 51
+      },
+      "position": {
+        "x": 136,
+        "y": 50
+      },
+      "direction": "Up",
+      "outcome": "moved",
+      "heldForMs": 292,
+      "keys": [
+        "ArrowUp"
+      ],
+      "sequence": 1779,
+      "ackDirection": "Up",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 136,
+        "y": 50
+      },
+      "position": {
+        "x": 136,
+        "y": 49
+      },
+      "direction": "Up",
+      "outcome": "moved",
+      "heldForMs": 348,
+      "keys": [
+        "ArrowUp"
+      ],
+      "sequence": 1787,
+      "ackDirection": "Up",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 136,
+        "y": 49
+      },
+      "position": {
+        "x": 136,
+        "y": 48
+      },
+      "direction": "Up",
+      "outcome": "moved",
+      "heldForMs": 340,
+      "keys": [
+        "ArrowUp"
+      ],
+      "sequence": 1795,
+      "ackDirection": "Up",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 136,
+        "y": 48
+      },
+      "position": {
+        "x": 136,
+        "y": 47
+      },
+      "direction": "Up",
+      "outcome": "moved",
+      "heldForMs": 343,
+      "keys": [
+        "ArrowUp"
+      ],
+      "sequence": 1802,
+      "ackDirection": "Up",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 136,
+        "y": 47
+      },
+      "position": {
+        "x": 136,
+        "y": 46
+      },
+      "direction": "Up",
+      "outcome": "moved",
+      "heldForMs": 345,
+      "keys": [
+        "ArrowUp"
+      ],
+      "sequence": 1810,
+      "ackDirection": "Up",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 136,
+        "y": 46
+      },
+      "position": {
+        "x": 136,
+        "y": 45
+      },
+      "direction": "Up",
+      "outcome": "moved",
+      "heldForMs": 425,
+      "keys": [
+        "ArrowUp"
+      ],
+      "sequence": 1814,
+      "ackDirection": "Up",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 136,
+        "y": 45
+      },
+      "position": {
+        "x": 136,
+        "y": 44
+      },
+      "direction": "Up",
+      "outcome": "moved",
+      "heldForMs": 431,
+      "keys": [
+        "ArrowUp"
+      ],
+      "sequence": 1820,
+      "ackDirection": "Up",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 136,
+        "y": 44
+      },
+      "position": {
+        "x": 136,
+        "y": 43
+      },
+      "direction": "Up",
+      "outcome": "moved",
+      "heldForMs": 422,
+      "keys": [
+        "ArrowUp"
+      ],
+      "sequence": 1825,
+      "ackDirection": "Up",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 136,
+        "y": 43
+      },
+      "position": {
+        "x": 136,
+        "y": 42
+      },
+      "direction": "Up",
+      "outcome": "moved",
+      "heldForMs": 379,
+      "keys": [
+        "ArrowUp"
+      ],
+      "sequence": 1831,
+      "ackDirection": "Up",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 136,
+        "y": 42
+      },
+      "position": {
+        "x": 136,
+        "y": 41
+      },
+      "direction": "Up",
+      "outcome": "moved",
+      "heldForMs": 425,
+      "keys": [
+        "ArrowUp"
+      ],
+      "sequence": 1836,
+      "ackDirection": "Up",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 136,
+        "y": 41
+      },
+      "position": {
+        "x": 136,
+        "y": 40
+      },
+      "direction": "Up",
+      "outcome": "moved",
+      "heldForMs": 434,
+      "keys": [
+        "ArrowUp"
+      ],
+      "sequence": 1842,
+      "ackDirection": "Up",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 136,
+        "y": 40
+      },
+      "position": {
+        "x": 136,
+        "y": 39
+      },
+      "direction": "Up",
+      "outcome": "moved",
+      "heldForMs": 424,
+      "keys": [
+        "ArrowUp"
+      ],
+      "sequence": 1847,
+      "ackDirection": "Up",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 136,
+        "y": 39
+      },
+      "position": {
+        "x": 136,
+        "y": 38
+      },
+      "direction": "Up",
+      "outcome": "moved",
+      "heldForMs": 422,
+      "keys": [
+        "ArrowUp"
+      ],
+      "sequence": 1851,
+      "ackDirection": "Up",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 136,
+        "y": 38
+      },
+      "position": {
+        "x": 137,
+        "y": 38
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 344,
+      "keys": [
+        "ArrowRight"
+      ],
+      "sequence": 1856,
+      "ackDirection": "Right",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 137,
+        "y": 38
+      },
+      "position": {
+        "x": 138,
+        "y": 38
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 438,
+      "keys": [
+        "ArrowRight"
+      ],
+      "sequence": 1861,
+      "ackDirection": "Right",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 138,
+        "y": 38
+      },
+      "position": {
+        "x": 139,
+        "y": 38
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 340,
+      "keys": [
+        "ArrowRight"
+      ],
+      "sequence": 1866,
+      "ackDirection": "Right",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 139,
+        "y": 38
+      },
+      "position": {
+        "x": 140,
+        "y": 38
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 424,
+      "keys": [
+        "ArrowRight"
+      ],
+      "sequence": 1872,
+      "ackDirection": "Right",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 140,
+        "y": 38
+      },
+      "position": {
+        "x": 141,
+        "y": 38
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 420,
+      "keys": [
+        "ArrowRight"
+      ],
+      "sequence": 1876,
+      "ackDirection": "Right",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 141,
+        "y": 38
+      },
+      "position": {
+        "x": 142,
+        "y": 38
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 428,
+      "keys": [
+        "ArrowRight"
+      ],
+      "sequence": 1881,
+      "ackDirection": "Right",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 142,
+        "y": 38
+      },
+      "position": {
+        "x": 143,
+        "y": 38
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 424,
+      "keys": [
+        "ArrowRight"
+      ],
+      "sequence": 1885,
+      "ackDirection": "Right",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 143,
+        "y": 38
+      },
+      "position": {
+        "x": 144,
+        "y": 38
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 421,
+      "keys": [
+        "ArrowRight"
+      ],
+      "sequence": 1890,
+      "ackDirection": "Right",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 144,
+        "y": 38
+      },
+      "position": {
+        "x": 144,
+        "y": 37
+      },
+      "direction": "Up",
+      "outcome": "moved",
+      "heldForMs": 423,
+      "keys": [
+        "ArrowUp"
+      ],
+      "sequence": 1895,
+      "ackDirection": "Up",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 144,
+        "y": 37
+      },
+      "position": {
+        "x": 145,
+        "y": 37
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 438,
+      "keys": [
+        "ArrowRight"
+      ],
+      "sequence": 1900,
+      "ackDirection": "Right",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 145,
+        "y": 37
+      },
+      "position": {
+        "x": 145,
+        "y": 36
+      },
+      "direction": "Up",
+      "outcome": "moved",
+      "heldForMs": 422,
+      "keys": [
+        "ArrowUp"
+      ],
+      "sequence": 1905,
+      "ackDirection": "Up",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 145,
+        "y": 36
+      },
+      "position": {
+        "x": 145,
+        "y": 35
+      },
+      "direction": "Up",
+      "outcome": "moved",
+      "heldForMs": 423,
+      "keys": [
+        "ArrowUp"
+      ],
+      "sequence": 1910,
+      "ackDirection": "Up",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 145,
+        "y": 35
+      },
+      "position": {
+        "x": 146,
+        "y": 35
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 436,
+      "keys": [
+        "ArrowRight"
+      ],
+      "sequence": 1915,
+      "ackDirection": "Right",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 146,
+        "y": 35
+      },
+      "position": {
+        "x": 147,
+        "y": 35
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 415,
+      "keys": [
+        "ArrowRight"
+      ],
+      "sequence": 1920,
+      "ackDirection": "Right",
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 147,
+        "y": 35
+      },
+      "position": {
+        "x": 147,
+        "y": 34
+      },
+      "direction": "Up",
+      "outcome": "moved",
+      "heldForMs": 354,
+      "keys": [
+        "ArrowUp"
+      ],
+      "sequence": 1929,
+      "ackDirection": "Up",
+      "outboundMovementCommands": 1
+    }
+  ],
+  "native": [
+    {
+      "name": "fresh-v2-chapter-task-card",
+      "ready": true,
+      "generation": 2,
+      "revision": 1,
+      "frame": 49,
+      "questLogOpen": false,
+      "capturesPointer": false,
+      "owner": "bevy",
+      "currentWorldContext": true,
+      "rects": [
+        {
+          "type": "navigateQuestRoute",
+          "left": 19,
+          "top": 215,
+          "width": 282,
+          "height": 25
+        },
+        {
+          "type": "questLocalUi",
+          "left": 19,
+          "top": 244,
+          "width": 282,
+          "height": 25
+        },
+        {
+          "type": "openDestinationMap",
+          "left": 19,
+          "top": 273,
+          "width": 282,
+          "height": 25
+        },
+        {
+          "type": "toggleSupplies",
+          "left": 19,
+          "top": 302,
+          "width": 282,
+          "height": 25
+        }
+      ],
+      "compact": null
+    }
+  ],
+  "errors": [
+    {
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "name": "ORDINARY_PORTAL_LANDING_AUTHORITY_NOT_ACKNOWLEDGED",
+      "hash": "52a039f5162590c8b0889de3be35f5ecdd84c35a9c57fb008316b8ce00204a55"
+    }
+  ],
+  "network": {
+    "failed": [],
+    "httpErrors": [],
+    "cancelled": [
+      {
+        "phase": "ordinary-owned-qa-character-relogin",
+        "method": "GET",
+        "pathHash": "9eeb5fa233df82531dffea86ffb49fa4f48ac32bcba5fb5d93a58ab367fe0e40",
+        "successfulResponseObserved": true
+      },
+      {
+        "phase": "ordinary-owned-qa-character-relogin",
+        "method": "GET",
+        "pathHash": "59b575174e75b5bd4afcfbd6f7f338462fb173fabd1e9572382da322fe3dffef",
+        "successfulResponseObserved": true
+      },
+      {
+        "phase": "ordinary-owned-qa-character-relogin",
+        "method": "GET",
+        "pathHash": "53989ff9528e82aa2a028efc04876d457be552529befdb83e6b2053a5a28f7f7",
+        "successfulResponseObserved": true
+      },
+      {
+        "phase": "ordinary-owned-qa-character-relogin",
+        "method": "GET",
+        "pathHash": "dc5a78c0e8a3a61269c6286a64095e636b9b6ac21157c8409ee63f2a3a72847c",
+        "successfulResponseObserved": true
+      },
+      {
+        "phase": "ordinary-owned-qa-character-relogin",
+        "method": "GET",
+        "pathHash": "64a0cb80cf3026dd57d8caabe00ab9385079fd2d67862a79954102f7cac6092b",
+        "successfulResponseObserved": true
+      },
+      {
+        "phase": "ordinary-owned-qa-character-relogin",
+        "method": "GET",
+        "pathHash": "148eaa12b1bdc9ddf5a754442e92f4597a2cac1a1bf6075dda391d75f4cc2327",
+        "successfulResponseObserved": true
+      },
+      {
+        "phase": "ordinary-owned-qa-character-relogin",
+        "method": "GET",
+        "pathHash": "420b1fd3a7c0a8ae24b75a3309c3f24a309ef11ab7a84f3d2ab1fc4da92eb32e",
+        "successfulResponseObserved": true
+      },
+      {
+        "phase": "ordinary-owned-qa-character-relogin",
+        "method": "GET",
+        "pathHash": "03bb09746ec40c7b379d95233ce6beb6db65cd505805e0277995f12f7e4c4608",
+        "successfulResponseObserved": true
+      },
+      {
+        "phase": "ordinary-owned-qa-character-relogin",
+        "method": "GET",
+        "pathHash": "afdfd9cf44f2e82bbf40ad15fe70f1bcc5d921e94cb9177ddd72b3103d2d1e33",
+        "successfulResponseObserved": true
+      },
+      {
+        "phase": "ordinary-owned-qa-character-relogin",
+        "method": "GET",
+        "pathHash": "8a5677f88ede4076455278b49c4e45ec8e41f6998e140ad5cb99ff00b7d4cd73",
+        "successfulResponseObserved": true
+      },
+      {
+        "phase": "ordinary-owned-qa-character-relogin",
+        "method": "GET",
+        "pathHash": "b2909ca8abc30f6d63b065e6fbe273218963d2cc3f4970d6c5a981e6663ce88d",
+        "successfulResponseObserved": true
+      },
+      {
+        "phase": "ordinary-owned-qa-character-relogin",
+        "method": "GET",
+        "pathHash": "942dcd67d2814a25b870835fb54a692777d8d2d7c357410dbf5f9d3974b2f8fb",
+        "successfulResponseObserved": true
+      },
+      {
+        "phase": "ordinary-owned-qa-character-relogin",
+        "method": "GET",
+        "pathHash": "af0d57a6af06e1ab74f3e986ca536afd7c894585792c13ac24854ff7fa373d82",
+        "successfulResponseObserved": true
+      },
+      {
+        "phase": "ordinary-owned-qa-character-relogin",
+        "method": "GET",
+        "pathHash": "b8471fdefde0b070e79c6a8f02aa95b2916c01c280a84179faa781df3bcc5a44",
+        "successfulResponseObserved": true
+      },
+      {
+        "phase": "ordinary-owned-qa-character-relogin",
+        "method": "GET",
+        "pathHash": "b8471fdefde0b070e79c6a8f02aa95b2916c01c280a84179faa781df3bcc5a44",
+        "successfulResponseObserved": true
+      },
+      {
+        "phase": "ordinary-owned-qa-character-relogin",
+        "method": "GET",
+        "pathHash": "b5a477466acb573db09051484a348dc305a615e912e5fd4fb8cdfc59b6aa0454",
+        "successfulResponseObserved": true
+      },
+      {
+        "phase": "d001-ordinary-physical-map0-gate-approach",
+        "method": "GET",
+        "pathHash": "97683e5d28b7b86f34f3df98f875ec51309a939de1e225fe69b1924831338295",
+        "successfulResponseObserved": true
+      }
+    ]
+  },
+  "webSockets": [
+    {
+      "phase": "ordinary-owned-qa-character-relogin",
+      "endpoint": "ws://127.0.0.1:19040/ws",
+      "pathHash": "0c65a812b078db6795486113db0a40a60e82b36e6bcc9ecbaff9ac00e404f5ff",
+      "loopback": true,
+      "hasQuery": false,
+      "handshakeStatus": 101,
+      "closed": false,
+      "closeCode": null,
+      "closeFrames": []
+    }
+  ],
+  "console": {
+    "errorCount": 0,
+    "warningCount": 7,
+    "hashes": [
+      {
+        "phase": "ordinary-owned-qa-character-relogin",
+        "name": "warning",
+        "hash": "175c73d54d8d443a965a16a38ac036c2de536a3920f173064fd6837866b00186"
+      },
+      {
+        "phase": "ordinary-owned-qa-character-relogin",
+        "name": "warning",
+        "hash": "da88c7184a1fa0f4fe740d77e53367ea31fb4b1448c4058b0f36f3a9cb23a9c3"
+      },
+      {
+        "phase": "ordinary-owned-qa-character-relogin",
+        "name": "warning",
+        "hash": "d437566d9fcf7f4e55f94f9c50595cdd5b15eed64f3502760b00458a0c6fae6d"
+      },
+      {
+        "phase": "ordinary-owned-qa-character-relogin",
+        "name": "warning",
+        "hash": "db1c2684a7d3ef8e96a3d0c2e140781e64cae7c058db983dfa80fef595b6880f"
+      },
+      {
+        "phase": "ordinary-owned-qa-character-relogin",
+        "name": "warning",
+        "hash": "db1c2684a7d3ef8e96a3d0c2e140781e64cae7c058db983dfa80fef595b6880f"
+      },
+      {
+        "phase": "ordinary-owned-qa-character-relogin",
+        "name": "warning",
+        "hash": "db1c2684a7d3ef8e96a3d0c2e140781e64cae7c058db983dfa80fef595b6880f"
+      },
+      {
+        "phase": "ordinary-owned-qa-character-relogin",
+        "name": "warning",
+        "hash": "7e228f092d3448e1c0dba5fb6668025662f8f7037260b04cb28b8e61c35c3b35"
+      }
+    ]
+  },
+  "commands": {
+    "clientCapabilities": 2,
+    "setLanguage": 1,
+    "clientVersion": 1,
+    "login": 1,
+    "startGame": 1,
+    "npcPurchaseOwner": 1,
+    "keepAlive": 15,
+    "walk": 163,
+    "turn": 3
+  },
+  "unknownCommandCount": 0,
+  "unknownTypeHashes": [],
+  "cleanup": {
+    "ordinaryLogout": false,
+    "browserClosed": true
+  },
+  "vitals": [
+    {
+      "sequence": 3,
+      "receivedAtMs": 1793930068563,
+      "method": "realmInfo",
+      "hp": null,
+      "maxHp": null,
+      "mp": null,
+      "maxMp": null,
+      "dead": false,
+      "position": null
+    },
+    {
+      "sequence": 24,
+      "receivedAtMs": 1793930077836,
+      "method": "UserInformation",
+      "hp": 99,
+      "maxHp": 99,
+      "mp": 49,
+      "maxMp": 49,
+      "dead": false,
+      "position": {
+        "x": 218,
+        "y": 82
+      }
+    },
+    {
+      "sequence": 844,
+      "receivedAtMs": 1793930141422,
+      "method": "HealthChanged",
+      "hp": 98,
+      "maxHp": 99,
+      "mp": 49,
+      "maxMp": 49,
+      "dead": false,
+      "position": {
+        "x": 185,
+        "y": 83
+      }
+    },
+    {
+      "sequence": 869,
+      "receivedAtMs": 1793930144148,
+      "method": "HealthChanged",
+      "hp": 97,
+      "maxHp": 99,
+      "mp": 49,
+      "maxMp": 49,
+      "dead": false,
+      "position": {
+        "x": 184,
+        "y": 85
+      }
+    },
+    {
+      "sequence": 887,
+      "receivedAtMs": 1793930146780,
+      "method": "HealthChanged",
+      "hp": 95,
+      "maxHp": 99,
+      "mp": 49,
+      "maxMp": 49,
+      "dead": false,
+      "position": {
+        "x": 182,
+        "y": 85
+      }
+    },
+    {
+      "sequence": 909,
+      "receivedAtMs": 1793930149948,
+      "method": "HealthChanged",
+      "hp": 98,
+      "maxHp": 99,
+      "mp": 49,
+      "maxMp": 49,
+      "dead": false,
+      "position": {
+        "x": 181,
+        "y": 84
+      }
+    },
+    {
+      "sequence": 934,
+      "receivedAtMs": 1793930153115,
+      "method": "HealthChanged",
+      "hp": 99,
+      "maxHp": 99,
+      "mp": 49,
+      "maxMp": 49,
+      "dead": false,
+      "position": {
+        "x": 179,
+        "y": 83
+      }
+    },
+    {
+      "sequence": 958,
+      "receivedAtMs": 1793930156626,
+      "method": "HealthChanged",
+      "hp": 97,
+      "maxHp": 99,
+      "mp": 49,
+      "maxMp": 49,
+      "dead": false,
+      "position": {
+        "x": 178,
+        "y": 84
+      }
+    },
+    {
+      "sequence": 980,
+      "receivedAtMs": 1793930159657,
+      "method": "HealthChanged",
+      "hp": 99,
+      "maxHp": 99,
+      "mp": 49,
+      "maxMp": 49,
+      "dead": false,
+      "position": {
+        "x": 177,
+        "y": 83
+      }
+    },
+    {
+      "sequence": 1002,
+      "receivedAtMs": 1793930162874,
+      "method": "HealthChanged",
+      "hp": 98,
+      "maxHp": 99,
+      "mp": 49,
+      "maxMp": 49,
+      "dead": false,
+      "position": {
+        "x": 176,
+        "y": 81
+      }
+    },
+    {
+      "sequence": 1008,
+      "receivedAtMs": 1793930163409,
+      "method": "HealthChanged",
+      "hp": 97,
+      "maxHp": 99,
+      "mp": 49,
+      "maxMp": 49,
+      "dead": false,
+      "position": {
+        "x": 176,
+        "y": 81
+      }
+    },
+    {
+      "sequence": 1028,
+      "receivedAtMs": 1793930165612,
+      "method": "HealthChanged",
+      "hp": 95,
+      "maxHp": 99,
+      "mp": 49,
+      "maxMp": 49,
+      "dead": false,
+      "position": {
+        "x": 174,
+        "y": 81
+      }
+    },
+    {
+      "sequence": 1043,
+      "receivedAtMs": 1793930167286,
+      "method": "HealthChanged",
+      "hp": 94,
+      "maxHp": 99,
+      "mp": 49,
+      "maxMp": 49,
+      "dead": false,
+      "position": {
+        "x": 173,
+        "y": 82
+      }
+    },
+    {
+      "sequence": 1052,
+      "receivedAtMs": 1793930168410,
+      "method": "HealthChanged",
+      "hp": 93,
+      "maxHp": 99,
+      "mp": 49,
+      "maxMp": 49,
+      "dead": false,
+      "position": {
+        "x": 173,
+        "y": 82
+      }
+    },
+    {
+      "sequence": 1078,
+      "receivedAtMs": 1793930171570,
+      "method": "HealthChanged",
+      "hp": 96,
+      "maxHp": 99,
+      "mp": 49,
+      "maxMp": 49,
+      "dead": false,
+      "position": {
+        "x": 171,
+        "y": 83
+      }
+    },
+    {
+      "sequence": 1101,
+      "receivedAtMs": 1793930174603,
+      "method": "HealthChanged",
+      "hp": 99,
+      "maxHp": 99,
+      "mp": 49,
+      "maxMp": 49,
+      "dead": false,
+      "position": {
+        "x": 169,
+        "y": 83
+      }
+    },
+    {
+      "sequence": 1133,
+      "receivedAtMs": 1793930178927,
+      "method": "HealthChanged",
+      "hp": 98,
+      "maxHp": 99,
+      "mp": 49,
+      "maxMp": 49,
+      "dead": false,
+      "position": {
+        "x": 167,
+        "y": 83
+      }
+    },
+    {
+      "sequence": 1158,
+      "receivedAtMs": 1793930182020,
+      "method": "HealthChanged",
+      "hp": 99,
+      "maxHp": 99,
+      "mp": 49,
+      "maxMp": 49,
+      "dead": false,
+      "position": {
+        "x": 166,
+        "y": 82
+      }
+    },
+    {
+      "sequence": 1221,
+      "receivedAtMs": 1793930188958,
+      "method": "HealthChanged",
+      "hp": 98,
+      "maxHp": 99,
+      "mp": 49,
+      "maxMp": 49,
+      "dead": false,
+      "position": {
+        "x": 164,
+        "y": 78
+      }
+    },
+    {
+      "sequence": 1242,
+      "receivedAtMs": 1793930191353,
+      "method": "HealthChanged",
+      "hp": 97,
+      "maxHp": 99,
+      "mp": 49,
+      "maxMp": 49,
+      "dead": false,
+      "position": {
+        "x": 163,
+        "y": 77
+      }
+    },
+    {
+      "sequence": 1269,
+      "receivedAtMs": 1793930194626,
+      "method": "HealthChanged",
+      "hp": 99,
+      "maxHp": 99,
+      "mp": 49,
+      "maxMp": 49,
+      "dead": false,
+      "position": {
+        "x": 162,
+        "y": 76
+      }
+    },
+    {
+      "sequence": 1299,
+      "receivedAtMs": 1793930198252,
+      "method": "HealthChanged",
+      "hp": 98,
+      "maxHp": 99,
+      "mp": 49,
+      "maxMp": 49,
+      "dead": false,
+      "position": {
+        "x": 160,
+        "y": 75
+      }
+    },
+    {
+      "sequence": 1305,
+      "receivedAtMs": 1793930198755,
+      "method": "HealthChanged",
+      "hp": 97,
+      "maxHp": 99,
+      "mp": 49,
+      "maxMp": 49,
+      "dead": false,
+      "position": {
+        "x": 160,
+        "y": 74
+      }
+    },
+    {
+      "sequence": 1330,
+      "receivedAtMs": 1793930201672,
+      "method": "HealthChanged",
+      "hp": 96,
+      "maxHp": 99,
+      "mp": 49,
+      "maxMp": 49,
+      "dead": false,
+      "position": {
+        "x": 158,
+        "y": 74
+      }
+    },
+    {
+      "sequence": 1342,
+      "receivedAtMs": 1793930202561,
+      "method": "HealthChanged",
+      "hp": 95,
+      "maxHp": 99,
+      "mp": 49,
+      "maxMp": 49,
+      "dead": false,
+      "position": {
+        "x": 157,
+        "y": 74
+      }
+    },
+    {
+      "sequence": 1366,
+      "receivedAtMs": 1793930205769,
+      "method": "HealthChanged",
+      "hp": 98,
+      "maxHp": 99,
+      "mp": 49,
+      "maxMp": 49,
+      "dead": false,
+      "position": {
+        "x": 157,
+        "y": 72
+      }
+    },
+    {
+      "sequence": 1390,
+      "receivedAtMs": 1793930208648,
+      "method": "HealthChanged",
+      "hp": 99,
+      "maxHp": 99,
+      "mp": 49,
+      "maxMp": 49,
+      "dead": false,
+      "position": {
+        "x": 155,
+        "y": 71
+      }
+    },
+    {
+      "sequence": 1412,
+      "receivedAtMs": 1793930211635,
+      "method": "HealthChanged",
+      "hp": 98,
+      "maxHp": 99,
+      "mp": 49,
+      "maxMp": 49,
+      "dead": false,
+      "position": {
+        "x": 154,
+        "y": 70
+      }
+    },
+    {
+      "sequence": 1439,
+      "receivedAtMs": 1793930214865,
+      "method": "HealthChanged",
+      "hp": 99,
+      "maxHp": 99,
+      "mp": 49,
+      "maxMp": 49,
+      "dead": false,
+      "position": {
+        "x": 153,
+        "y": 68
+      }
+    },
+    {
+      "sequence": 1596,
+      "receivedAtMs": 1793930236060,
+      "method": "HealthChanged",
+      "hp": 98,
+      "maxHp": 99,
+      "mp": 49,
+      "maxMp": 49,
+      "dead": false,
+      "position": {
+        "x": 144,
+        "y": 60
+      }
+    },
+    {
+      "sequence": 1623,
+      "receivedAtMs": 1793930239115,
+      "method": "HealthChanged",
+      "hp": 99,
+      "maxHp": 99,
+      "mp": 49,
+      "maxMp": 49,
+      "dead": false,
+      "position": {
+        "x": 143,
+        "y": 58
+      }
+    },
+    {
+      "sequence": 1644,
+      "receivedAtMs": 1793930241889,
+      "method": "HealthChanged",
+      "hp": 97,
+      "maxHp": 99,
+      "mp": 49,
+      "maxMp": 49,
+      "dead": false,
+      "position": {
+        "x": 141,
+        "y": 58
+      }
+    },
+    {
+      "sequence": 1659,
+      "receivedAtMs": 1793930243696,
+      "method": "HealthChanged",
+      "hp": 96,
+      "maxHp": 99,
+      "mp": 49,
+      "maxMp": 49,
+      "dead": false,
+      "position": {
+        "x": 140,
+        "y": 58
+      }
+    },
+    {
+      "sequence": 1672,
+      "receivedAtMs": 1793930244856,
+      "method": "HealthChanged",
+      "hp": 95,
+      "maxHp": 99,
+      "mp": 49,
+      "maxMp": 49,
+      "dead": false,
+      "position": {
+        "x": 139,
+        "y": 58
+      }
+    },
+    {
+      "sequence": 1702,
+      "receivedAtMs": 1793930247946,
+      "method": "HealthChanged",
+      "hp": 98,
+      "maxHp": 99,
+      "mp": 49,
+      "maxMp": 49,
+      "dead": false,
+      "position": {
+        "x": 137,
+        "y": 57
+      }
+    },
+    {
+      "sequence": 1711,
+      "receivedAtMs": 1793930249267,
+      "method": "HealthChanged",
+      "hp": 97,
+      "maxHp": 99,
+      "mp": 49,
+      "maxMp": 49,
+      "dead": false,
+      "position": {
+        "x": 137,
+        "y": 56
+      }
+    },
+    {
+      "sequence": 1735,
+      "receivedAtMs": 1793930252138,
+      "method": "HealthChanged",
+      "hp": 99,
+      "maxHp": 99,
+      "mp": 49,
+      "maxMp": 49,
+      "dead": false,
+      "position": {
+        "x": 136,
+        "y": 55
+      }
+    },
+    {
+      "sequence": 1745,
+      "receivedAtMs": 1793930252833,
+      "method": "HealthChanged",
+      "hp": 98,
+      "maxHp": 99,
+      "mp": 49,
+      "maxMp": 49,
+      "dead": false,
+      "position": {
+        "x": 136,
+        "y": 54
+      }
+    },
+    {
+      "sequence": 1769,
+      "receivedAtMs": 1793930255979,
+      "method": "HealthChanged",
+      "hp": 99,
+      "maxHp": 99,
+      "mp": 49,
+      "maxMp": 49,
+      "dead": false,
+      "position": {
+        "x": 136,
+        "y": 52
+      }
+    },
+    {
+      "sequence": 1924,
+      "receivedAtMs": 1793930291152,
+      "method": "HealthChanged",
+      "hp": 98,
+      "maxHp": 99,
+      "mp": 49,
+      "maxMp": 49,
+      "dead": false,
+      "position": {
+        "x": 147,
+        "y": 35
+      }
+    },
+    {
+      "sequence": 1942,
+      "receivedAtMs": 1793930296469,
+      "method": "HealthChanged",
+      "hp": 99,
+      "maxHp": 99,
+      "mp": 49,
+      "maxMp": 49,
+      "dead": false,
+      "position": null
+    }
+  ],
+  "medicine": [],
+  "trustedBeltKeyEvents": [],
+  "npcPurchaseEvidence": [
+    {
+      "sequence": 589,
+      "action": "begin",
+      "reply": "producer",
+      "completeSnapshot": true,
+      "matchingRequestAndOperation": true,
+      "bootstrapObserverNotGated": true
+    }
+  ],
+  "inventoryClose": {
+    "method": "visible-native-x",
+    "shortcutRetested": false,
+    "priorUnconfirmedF9Run": "onboarding-v12-browser-r5"
+  },
+  "budgets": {
+    "maxHuntMs": 360000,
+    "maxSteps": 2400
+  },
+  "publicMapSceneResponses": [
+    {
+      "phase": "ordinary-owned-qa-character-relogin",
+      "map": "0",
+      "missing": 0,
+      "sourceSprites": 284
+    },
+    {
+      "phase": "ordinary-owned-qa-character-relogin",
+      "map": "0",
+      "missing": 0,
+      "sourceSprites": 768
+    },
+    {
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "map": "0",
+      "missing": 0,
+      "sourceSprites": 339
+    },
+    {
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "map": "0",
+      "missing": 0,
+      "sourceSprites": 293
+    },
+    {
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "map": "0",
+      "missing": 0,
+      "sourceSprites": 339
+    },
+    {
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "map": "0",
+      "missing": 0,
+      "sourceSprites": 345
+    },
+    {
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "map": "0",
+      "missing": 0,
+      "sourceSprites": 303
+    },
+    {
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "map": "0",
+      "missing": 0,
+      "sourceSprites": 244
+    },
+    {
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "map": "d001",
+      "missing": 0,
+      "sourceSprites": 330
+    },
+    {
+      "phase": "d001-ordinary-physical-map0-gate-approach",
+      "map": "d001",
+      "missing": 0,
+      "sourceSprites": 413
+    }
+  ],
+  "resumeState": {
+    "hp": 99,
+    "maxHp": 99,
+    "mp": 49,
+    "maxMp": 49,
+    "dead": false,
+    "position": {
+      "x": 218,
+      "y": 82
+    },
+    "progression": {
+      "level": 11,
+      "experience": 522,
+      "maxExperience": 8000
+    },
+    "gold": 440,
+    "smallHpMedicine": 9,
+    "equipment": [
+      {
+        "name": "WoodenSword",
+        "slot": "weapon",
+        "durabilityCurrent": 4000,
+        "durabilityMax": 4000
+      },
+      {
+        "name": "BaseDress(M)",
+        "slot": "armour",
+        "durabilityCurrent": 5000,
+        "durabilityMax": 5000
+      }
+    ],
+    "playerLevel": 11,
+    "knownFencing": true,
+    "fencingBooks": 0,
+    "bagEquipment": [],
+    "clothingInBag": [],
+    "clothingEquipped": [
+      {
+        "name": "BaseDress(M)",
+        "slot": "armour"
+      }
+    ],
+    "hpMedicineOnBelt": [
+      {
+        "slot": 2,
+        "quantity": 9,
+        "key": "Digit3"
+      }
+    ],
+    "completedQuestIds": [
+      2110001,
+      2110002,
+      2110003,
+      2110004,
+      2110005,
+      2110006
+    ],
+    "questLog": [
+      {
+        "questId": 2110001,
+        "stage": "completed",
+        "current": 1,
+        "required": 1,
+        "objectives": [
+          {
+            "label": "Report to Assistant Jane",
+            "current": 1,
+            "required": 1,
+            "done": true
+          }
+        ]
+      },
+      {
+        "questId": 2110002,
+        "stage": "completed",
+        "current": 1,
+        "required": 1,
+        "objectives": [
+          {
+            "label": "Equip a weapon you can use",
+            "current": 1,
+            "required": 1,
+            "done": true
+          }
+        ]
+      },
+      {
+        "questId": 2110003,
+        "stage": "completed",
+        "current": 4,
+        "required": 4,
+        "objectives": [
+          {
+            "label": "Defeat 2 Scarecrow.",
+            "current": 2,
+            "required": 2,
+            "done": true
+          },
+          {
+            "label": "Defeat 2 RakingCat.",
+            "current": 2,
+            "required": 2,
+            "done": true
+          }
+        ]
+      },
+      {
+        "questId": 2110004,
+        "stage": "completed",
+        "current": 3,
+        "required": 3,
+        "objectives": [
+          {
+            "label": "Defeat 2 Oma.",
+            "current": 2,
+            "required": 2,
+            "done": true
+          },
+          {
+            "label": "Complete your class practice",
+            "current": 1,
+            "required": 1,
+            "done": true
+          }
+        ]
+      },
+      {
+        "questId": 2110005,
+        "stage": "completed",
+        "current": 1,
+        "required": 1,
+        "objectives": [
+          {
+            "label": "Reach a Bichon safe area",
+            "current": 1,
+            "required": 1,
+            "done": true
+          }
+        ]
+      },
+      {
+        "questId": 2110006,
+        "stage": "completed",
+        "current": 1,
+        "required": 1,
+        "objectives": [
+          {
+            "label": "Buy a small HP or MP potion from a normal shop",
+            "current": 1,
+            "required": 1,
+            "done": true
+          }
+        ]
+      },
+      {
+        "questId": 2110007,
+        "stage": "inProgress",
+        "current": 2,
+        "required": 4,
+        "objectives": [
+          {
+            "label": "Defeat 4 ForestYeti.",
+            "current": 2,
+            "required": 4,
+            "done": false
+          }
+        ]
+      }
+    ]
+  },
+  "renderer": {
+    "expected": "bevy-a46905128c316656",
+    "observedPublicReleases": [
+      "bevy-a46905128c316656"
+    ]
+  },
+  "initialNativeReadiness": [
+    {
+      "ready": true,
+      "frame": 49,
+      "generation": 2,
+      "revision": 1,
+      "rectCount": 4,
+      "worldCurrent": true,
+      "genericNativeActionsRequireNonemptyWorldRects": false
+    }
+  ],
+  "keyboardPanelChecks": [
+    {
+      "phase": "ordinary-owned-qa-character-relogin",
+      "visibleShopWindows": 0,
+      "nativeShop": null,
+      "bag": {
+        "active": false
+      },
+      "quest": {
+        "capturesPointer": false
+      }
+    }
+  ],
+  "fieldResume": {
+    "map": "0",
+    "hp": 99,
+    "maxHp": 99,
+    "mp": 49,
+    "maxMp": 49,
+    "dead": false,
+    "position": {
+      "x": 218,
+      "y": 82
+    },
+    "threats": 3,
+    "scrollInBag": false,
+    "observedBeltSlot": null
+  },
+  "eightDirectionRouteChecks": [
+    {
+      "position": {
+        "x": 174,
+        "y": 81
+      },
+      "neighbours": [
+        {
+          "direction": "Up",
+          "tile": {
+            "x": 174,
+            "y": 80
+          },
+          "staticBlocked": true,
+          "entities": []
+        },
+        {
+          "direction": "UpRight",
+          "tile": {
+            "x": 175,
+            "y": 80
+          },
+          "staticBlocked": true,
+          "entities": []
+        },
+        {
+          "direction": "Right",
+          "tile": {
+            "x": 175,
+            "y": 81
+          },
+          "staticBlocked": false,
+          "entities": [
+            {
+              "objectId": 200700,
+              "kind": "monster",
+              "monster": "Scarecrow",
+              "hp": 20
+            }
+          ]
+        },
+        {
+          "direction": "DownRight",
+          "tile": {
+            "x": 175,
+            "y": 82
+          },
+          "staticBlocked": false,
+          "entities": [
+            {
+              "objectId": 200805,
+              "kind": "monster",
+              "monster": "HookingCat",
+              "healthPercent": 100
+            }
+          ]
+        },
+        {
+          "direction": "Down",
+          "tile": {
+            "x": 174,
+            "y": 82
+          },
+          "staticBlocked": false,
+          "entities": [
+            {
+              "objectId": 200905,
+              "kind": "monster",
+              "monster": "RakingCat",
+              "healthPercent": 100
+            }
+          ]
+        },
+        {
+          "direction": "DownLeft",
+          "tile": {
+            "x": 173,
+            "y": 82
+          },
+          "staticBlocked": false,
+          "entities": []
+        },
+        {
+          "direction": "Left",
+          "tile": {
+            "x": 173,
+            "y": 81
+          },
+          "staticBlocked": true,
+          "entities": []
+        },
+        {
+          "direction": "UpLeft",
+          "tile": {
+            "x": 173,
+            "y": 80
+          },
+          "staticBlocked": true,
+          "entities": []
+        }
+      ],
+      "chosen": "DownLeft"
+    },
+    {
+      "position": {
+        "x": 154,
+        "y": 69
+      },
+      "neighbours": [
+        {
+          "direction": "Up",
+          "tile": {
+            "x": 154,
+            "y": 68
+          },
+          "staticBlocked": true,
+          "entities": []
+        },
+        {
+          "direction": "UpRight",
+          "tile": {
+            "x": 155,
+            "y": 68
+          },
+          "staticBlocked": true,
+          "entities": []
+        },
+        {
+          "direction": "Right",
+          "tile": {
+            "x": 155,
+            "y": 69
+          },
+          "staticBlocked": true,
+          "entities": []
+        },
+        {
+          "direction": "DownRight",
+          "tile": {
+            "x": 155,
+            "y": 70
+          },
+          "staticBlocked": false,
+          "entities": [
+            {
+              "objectId": 200805,
+              "kind": "monster",
+              "monster": "HookingCat",
+              "healthPercent": 100
+            }
+          ]
+        },
+        {
+          "direction": "Down",
+          "tile": {
+            "x": 154,
+            "y": 70
+          },
+          "staticBlocked": false,
+          "entities": [
+            {
+              "objectId": 200706,
+              "kind": "monster",
+              "monster": "Scarecrow",
+              "hp": 20
+            }
+          ]
+        },
+        {
+          "direction": "DownLeft",
+          "tile": {
+            "x": 153,
+            "y": 70
+          },
+          "staticBlocked": false,
+          "entities": []
+        },
+        {
+          "direction": "Left",
+          "tile": {
+            "x": 153,
+            "y": 69
+          },
+          "staticBlocked": false,
+          "entities": [
+            {
+              "objectId": 200912,
+              "kind": "monster",
+              "monster": "RakingCat",
+              "healthPercent": 100
+            }
+          ]
+        },
+        {
+          "direction": "UpLeft",
+          "tile": {
+            "x": 153,
+            "y": 68
+          },
+          "staticBlocked": false,
+          "entities": []
+        }
+      ],
+      "chosen": "UpLeft"
+    }
+  ],
+  "failureNative": {
+    "status": {
+      "questLocaleVersion": 1,
+      "language": "zh-CN",
+      "displayLocaleVersion": 1,
+      "displayLanguage": "zh-CN",
+      "ready": true,
+      "error": null,
+      "capturesPointer": false,
+      "questLogOpen": false,
+      "frame": 2550,
+      "generation": 2,
+      "revision": 650,
+      "openRevision": 1,
+      "hpOrb": {
+        "supported": true,
+        "ready": false,
+        "generation": 2,
+        "revision": 650,
+        "hp": null,
+        "maxHp": null,
+        "hpOnly": null,
+        "slot": null,
+        "image": null,
+        "source": null,
+        "destination": null,
+        "layout": null
+      },
+      "mpOrb": {
+        "supported": true,
+        "ready": false,
+        "generation": 2,
+        "revision": 650,
+        "mp": null,
+        "maxMp": null,
+        "hpOnly": null,
+        "slot": null,
+        "image": null,
+        "source": null,
+        "destination": null,
+        "layout": null
+      },
+      "experienceBar": {
+        "supported": false,
+        "ready": false,
+        "generation": 2,
+        "revision": 650,
+        "experience": null,
+        "maxExperience": null,
+        "slot": null,
+        "image": null,
+        "source": null,
+        "destination": null,
+        "layout": null
+      },
+      "weightBar": {
+        "supported": false,
+        "ready": false,
+        "generation": 2,
+        "revision": 650,
+        "currentWeight": null,
+        "maxWeight": null,
+        "slot": null,
+        "image": null,
+        "source": null,
+        "destination": null,
+        "layout": null
+      },
+      "hudBarDrawPlan": {
+        "version": 1,
+        "generation": 2,
+        "revision": 650,
+        "lifetime": "r1-g2-p1000",
+        "experience": {
+          "token": "e-1",
+          "sequence": 1,
+          "state": "draw",
+          "current": 522,
+          "maximum": 8000,
+          "slot": {
+            "left": 9,
+            "top": 759,
+            "width": 1004,
+            "height": 8
+          },
+          "image": "original-ui/Prguse/8.png",
+          "source": {
+            "left": 0,
+            "top": 0,
+            "width": 65,
+            "height": 8
+          },
+          "destination": {
+            "left": 9,
+            "top": 759,
+            "width": 65,
+            "height": 8
+          }
+        },
+        "weight": {
+          "token": "w-1",
+          "sequence": 1,
+          "state": "draw",
+          "current": 11,
+          "maximum": 90,
+          "slot": {
+            "left": 919,
+            "top": 719,
+            "width": 76,
+            "height": 12
+          },
+          "image": "original-ui/Prguse/76.png",
+          "source": {
+            "left": 0,
+            "top": 0,
+            "width": 9,
+            "height": 12
+          },
+          "destination": {
+            "left": 919,
+            "top": 719,
+            "width": 9,
+            "height": 12
+          }
+        }
+      }
+    },
+    "worldCurrent": false,
+    "controls": {
+      "version": 1,
+      "stamp": null,
+      "logicalWidth": 0,
+      "logicalHeight": 0,
+      "rects": []
+    }
+  },
+  "failureBag": {
+    "active": false,
+    "error": null,
+    "owner": {
+      "owner": "react",
+      "runGeneration": 1,
+      "ownerRevision": 1,
+      "connectionGeneration": 1,
+      "sessionGeneration": 1
+    },
+    "status": {
+      "runGeneration": 1,
+      "connectionGeneration": 1,
+      "sessionGeneration": 1,
+      "ownerRevision": 1,
+      "frame": 2506,
+      "ready": false,
+      "inputEnabled": false,
+      "appliedRevision": 42,
+      "appliedModelRevision": 1,
+      "appliedPresentationRevision": 1,
+      "supportsBagToBelt": true,
+      "appliedBeltGeometryRevision": 0,
+      "inputRegions": [],
+      "diagnostics": {
+        "modelVisibleItems": 0,
+        "treeContentComplete": false,
+        "touchActionsComplete": null,
+        "scopedActionCount": null,
+        "expectedActionCount": null,
+        "minCssHitWidth": null,
+        "minCssHitHeight": null,
+        "firstActionFailure": null,
+        "layoutMatchesWindow": true,
+        "assetsLoading": true,
+        "layoutRegionCount": 0,
+        "sinkPresent": true,
+        "treeIdentity": null,
+        "treeModelRevision": null,
+        "treePage": null,
+        "treeVisibleItems": null,
+        "treeMatchesModel": false,
+        "gridCells": 0,
+        "itemCells": 0,
+        "occupiedCells": 0,
+        "iconNodes": 0,
+        "visibleIcons": 0,
+        "laidOutIcons": 0,
+        "stackTextNodes": 0,
+        "visibleStackTexts": 0,
+        "laidOutStackTexts": 0
+      },
+      "error": null
+    },
+    "diagnostic": {
+      "phase": "prepare",
+      "transitions": [],
+      "intentVerdicts": []
+    },
+    "hudNavigation": []
+  },
+  "failureNpcShop": {
+    "host": null,
+    "diagnostic": null,
+    "action": {
+      "route": "none",
+      "stage": "idle",
+      "reason": null
+    },
+    "status": {
+      "runGeneration": 0,
+      "connectionGeneration": 0,
+      "sessionGeneration": 0,
+      "ownerRevision": 0,
+      "playerObjectId": 0,
+      "frame": 2554,
+      "ready": false,
+      "inputEnabled": false,
+      "appliedRevision": 0,
+      "appliedModelRevision": 0,
+      "appliedPresentationRevision": 0,
+      "appliedServiceRevision": 0,
+      "appliedCatalogRevision": 0,
+      "coreAuthorityRevision": null,
+      "controlRevision": null,
+      "selectedId": null,
+      "quantity": 1,
+      "startIndex": 0,
+      "feedback": {
+        "phase": null,
+        "pending": false,
+        "canReserve": false,
+        "previousUnknown": 0
+      },
+      "inputRegions": [],
+      "error": null
+    }
+  },
+  "failureBeltInput": {
+    "keyboard": null,
+    "host": {
+      "shortcut": null,
+      "equipment": null
+    }
+  },
+  "failureMovement": {
+    "keyboard": {
+      "lastKey": {
+        "direction": "up",
+        "at": 1793930292511,
+        "defaultPrevented": false,
+        "editable": false,
+        "modifiers": false,
+        "sceneInteractionReady": true,
+        "reason": "received"
+      },
+      "lastDispatch": {
+        "reason": "no-held-direction",
+        "source": "held",
+        "at": 1793930300571,
+        "sceneInteractionReady": true,
+        "bevyQuestUiCapturesPointer": false
+      },
+      "lastShortcut": null
+    },
+    "pointer": null,
+    "host": {
+      "connectionGeneration": 1,
+      "sessionGeneration": 1,
+      "suspended": null,
+      "sceneDeferred": false,
+      "lastIntent": {
+        "direction": "Up",
+        "at": 1793930293552,
+        "discrete": false
+      },
+      "lastAttempt": {
+        "reason": "cadence",
+        "at": 1793930293553
+      },
+      "lastPickup": null,
+      "self": {
+        "x": 151,
+        "y": 362,
+        "direction": "Down",
+        "dead": false
+      },
+      "queued": null,
+      "controller": {
+        "canSend": true,
+        "sendDelayMs": 0,
+        "blockedMs": 0,
+        "pending": null
+      },
+      "target": {
+        "x": 151,
+        "y": 361
+      },
+      "targetMapBlocked": false,
+      "targetMapCell": null,
+      "nearbyEntities": []
+    }
+  },
+  "finishedAt": "2026-11-06T01:58:22.083Z",
+  "finalQuestLog": [
+    {
+      "questId": 2110001,
+      "stage": "completed",
+      "current": 1,
+      "required": 1,
+      "objectives": [
+        {
+          "label": "Report to Assistant Jane",
+          "current": 1,
+          "required": 1,
+          "done": true
+        }
+      ]
+    },
+    {
+      "questId": 2110002,
+      "stage": "completed",
+      "current": 1,
+      "required": 1,
+      "objectives": [
+        {
+          "label": "Equip a weapon you can use",
+          "current": 1,
+          "required": 1,
+          "done": true
+        }
+      ]
+    },
+    {
+      "questId": 2110003,
+      "stage": "completed",
+      "current": 4,
+      "required": 4,
+      "objectives": [
+        {
+          "label": "Defeat 2 Scarecrow.",
+          "current": 2,
+          "required": 2,
+          "done": true
+        },
+        {
+          "label": "Defeat 2 RakingCat.",
+          "current": 2,
+          "required": 2,
+          "done": true
+        }
+      ]
+    },
+    {
+      "questId": 2110004,
+      "stage": "completed",
+      "current": 3,
+      "required": 3,
+      "objectives": [
+        {
+          "label": "Defeat 2 Oma.",
+          "current": 2,
+          "required": 2,
+          "done": true
+        },
+        {
+          "label": "Complete your class practice",
+          "current": 1,
+          "required": 1,
+          "done": true
+        }
+      ]
+    },
+    {
+      "questId": 2110005,
+      "stage": "completed",
+      "current": 1,
+      "required": 1,
+      "objectives": [
+        {
+          "label": "Reach a Bichon safe area",
+          "current": 1,
+          "required": 1,
+          "done": true
+        }
+      ]
+    },
+    {
+      "questId": 2110006,
+      "stage": "completed",
+      "current": 1,
+      "required": 1,
+      "objectives": [
+        {
+          "label": "Buy a small HP or MP potion from a normal shop",
+          "current": 1,
+          "required": 1,
+          "done": true
+        }
+      ]
+    },
+    {
+      "questId": 2110007,
+      "stage": "inProgress",
+      "current": 2,
+      "required": 4,
+      "objectives": [
+        {
+          "label": "Defeat 4 ForestYeti.",
+          "current": 2,
+          "required": 4,
+          "done": false
+        }
+      ]
+    }
+  ],
+  "completedQuestIds": [
+    2110001,
+    2110002,
+    2110003,
+    2110004,
+    2110005,
+    2110006
+  ],
+  "lastFullSnapshot": {
+    "sequence": 587,
+    "receivedAtMs": 1793930078110,
+    "position": {
+      "x": 218,
+      "y": 82
+    },
+    "inSafeZone": false,
+    "mapFileName": "0",
+    "hp": 99,
+    "maxHp": 99,
+    "progression": {
+      "level": 11,
+      "experience": 522,
+      "maxExperience": 8000
+    },
+    "gold": 440,
+    "dead": false
+  },
+  "lastUserLocation": {
+    "sequence": 1935,
+    "packet": "UserLocation",
+    "position": {
+      "x": 151,
+      "y": 362
+    },
+    "direction": "Down",
+    "connectionEpoch": 1,
+    "characterEpoch": 1,
+    "mapFileName": "D001"
+  },
+  "movementSteps": 164,
+  "finalVitals": {
+    "hp": 99,
+    "maxHp": 99,
+    "mp": 49,
+    "maxMp": 49,
+    "dead": false,
+    "position": null
+  }
+}

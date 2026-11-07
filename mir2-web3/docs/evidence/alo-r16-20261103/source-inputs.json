@@ -1,0 +1,683 @@
+{
+  "schema": "mir2-alo-r16-source-inputs/1",
+  "recordedAt": "2026-11-02T22:54:52.047276+00:00",
+  "sourceBranch": "codex/windows-player-journey",
+  "sourceBaseRevision": "1ef125e01e628511399cede342ff6bb8e17a8b93",
+  "includesR16Ancestor": "e9117b6691e3f7ec238ff1c1eb77b699b0646c2f",
+  "uncommittedIntegration": true,
+  "scope": "all current dirty/untracked files under affected source workspaces plus pinned toolchain/lock/navigation inputs; includes preserved user resource WIP",
+  "credentialsAndPrivateDataIncluded": false,
+  "digest": "49f9b1f9cc023076de6e8f7eb8dd562b119a6a2c45087f5d16aa7e0cbc454e7e",
+  "files": [
+    {
+      "path": "Cargo.lock",
+      "bytes": 250762,
+      "sha256": "4569349e470d448c645eeecef8fc6219d9e3e525d8c7d355a784ee694398291f"
+    },
+    {
+      "path": "Cargo.toml",
+      "bytes": 365,
+      "sha256": "6de1c26df325285aa51515e99abe32677775b3396aa6e8a83a0983deee3500ac"
+    },
+    {
+      "path": "apps/ai-player/.gitignore",
+      "bytes": 39,
+      "sha256": "963faa4caeccb8326207b24ffd1b3b4eb8f77cbd956dba8509241d54ef0c3af8"
+    },
+    {
+      "path": "apps/ai-player/README.md",
+      "bytes": 7428,
+      "sha256": "c5d71b652c0a2cc1e528dac4f2ff9626602e9ec4bc9b72b24ad1440bdf202cba"
+    },
+    {
+      "path": "apps/ai-player/native-launcher/main.rs",
+      "bytes": 2062,
+      "sha256": "42dc408603a9f165e03ed1efde277088270597463adc79ef0ccbd8edcecf6baa"
+    },
+    {
+      "path": "apps/ai-player/native-launcher/package.mjs",
+      "bytes": 8277,
+      "sha256": "be3b2db60ac6c6ba09bdedefb616b9d33e3b80a9ea224f5ba0054d74a893647f"
+    },
+    {
+      "path": "apps/ai-player/package.json",
+      "bytes": 540,
+      "sha256": "b18daa74e9c0702091b8e1952213144c8846266effa8887b9db518eb184d1eba"
+    },
+    {
+      "path": "apps/ai-player/profiles/alo-companion.example.json",
+      "bytes": 377,
+      "sha256": "d24e04c4065fa6c18df3d2f340eed04a7c0cc0697e43ce7a5a58c86bf613157e"
+    },
+    {
+      "path": "apps/ai-player/profiles/alo-experience.example.json",
+      "bytes": 1125,
+      "sha256": "351a9e4c0eed36d3fb7a65e6ad8c0ada4613e7877718cdd442884e1745f32647"
+    },
+    {
+      "path": "apps/ai-player/profiles/bichon-warrior.example.json",
+      "bytes": 177,
+      "sha256": "9ce13e95a845e33d3ad4cdd909ba91463796c9e2166e8129b19dcd64018fe6ef"
+    },
+    {
+      "path": "apps/ai-player/scripts/companion-fixture.mjs",
+      "bytes": 4323,
+      "sha256": "452cb5889d22047c854be11e7b7cf7d99a0c219a306a9b0128d0ca7446832de4"
+    },
+    {
+      "path": "apps/ai-player/scripts/companion-trial-fixture.mjs",
+      "bytes": 10852,
+      "sha256": "b04772be8f6785bee01fd0f91ce09483648e50454a5179c85323d513c53f9c7e"
+    },
+    {
+      "path": "apps/ai-player/scripts/field-encounter.mjs",
+      "bytes": 1717,
+      "sha256": "5457a88918f7663bf0e1252ea35b73f369aa95235a7f23d47ba93cb826423022"
+    },
+    {
+      "path": "apps/ai-player/scripts/fixture-support.test.mjs",
+      "bytes": 14010,
+      "sha256": "2f000cf08191ff66cf07c3e425e6673812ccae86870d9f86b18225afd308d49c"
+    },
+    {
+      "path": "apps/ai-player/scripts/local-gateway.mjs",
+      "bytes": 8663,
+      "sha256": "907a81f0e11b4a57983d0f4389b3c6faf856bd775d26a8173920f3fb303a40ac"
+    },
+    {
+      "path": "apps/ai-player/scripts/native-resource-input.mjs",
+      "bytes": 12544,
+      "sha256": "fc22debb68e3b2f50f64cb05f75d0db53624fd7e7a9f403805eb3f035079fe63"
+    },
+    {
+      "path": "apps/ai-player/scripts/run-local-acceptance.mjs",
+      "bytes": 7606,
+      "sha256": "5ce8f8955ae739216daa653c96c303657cf08b3aacd8b4cdc2141c607687da96"
+    },
+    {
+      "path": "apps/ai-player/scripts/run-local-companion-acceptance.mjs",
+      "bytes": 28721,
+      "sha256": "6734436f88ee73e9b1bc9f4b493bcb4e4680156adc031969f1812fe5ad256950"
+    },
+    {
+      "path": "apps/ai-player/scripts/run-local-experience-acceptance.mjs",
+      "bytes": 26341,
+      "sha256": "1fc54900b537bb40aa27ca367ec5e0d6888b2eaca2209ce06b5d161357a9d422"
+    },
+    {
+      "path": "apps/ai-player/scripts/run-native-experience-fixture.mjs",
+      "bytes": 9052,
+      "sha256": "059f076584c281f545bca147083ecc3d9620bd64079ef355aa4d4296eabc1bf1"
+    },
+    {
+      "path": "apps/ai-player/scripts/trial-actor-fixture.mjs",
+      "bytes": 4879,
+      "sha256": "64a0e972a880bbf5cc9fa9e30b384fc6595fd2c9f6ac347e1af50b43d6ccc088"
+    },
+    {
+      "path": "apps/ai-player/src/archive-guard.mjs",
+      "bytes": 981,
+      "sha256": "dc8a477c25b7bb3139d6d5ff57d086f0fe583d92ac97b0216f255ea8412b9c35"
+    },
+    {
+      "path": "apps/ai-player/src/companion-control.mjs",
+      "bytes": 1280,
+      "sha256": "b73f0de8bccdc9a572e692326f4516ebafe45dae1cd0de1df949cf4f81eeb176"
+    },
+    {
+      "path": "apps/ai-player/src/companion-controller.mjs",
+      "bytes": 13246,
+      "sha256": "6a1a8efe33d5e09798856de2ccc3497fc0f7c6ee3df3c049f7129e6bcabc0d96"
+    },
+    {
+      "path": "apps/ai-player/src/companion-policy.mjs",
+      "bytes": 10208,
+      "sha256": "128921b862b3ef4f4471157de37f6b3ec71bfd133195bbaf4c00417a603d1329"
+    },
+    {
+      "path": "apps/ai-player/src/companion-runtime-service.mjs",
+      "bytes": 14833,
+      "sha256": "b57e7600c2a59cce01dc483662e9fc3b5f49041398e4845e4ba23dee40ad33ac"
+    },
+    {
+      "path": "apps/ai-player/src/experience-cli.mjs",
+      "bytes": 3211,
+      "sha256": "3232ec6460d4c678a7a52e24fb6c003f4fe3de3ffef75b3e228bc83c6793ed67"
+    },
+    {
+      "path": "apps/ai-player/src/experience/experience-ledger.mjs",
+      "bytes": 23381,
+      "sha256": "0456ce2681045392b95debaecd1a140e1e626f1be8b0f25769664991c5a57c53"
+    },
+    {
+      "path": "apps/ai-player/src/gateway-client.mjs",
+      "bytes": 24734,
+      "sha256": "76e302f3f8a7258ddc1ac1b8573d7c765338df4ee6feac586fa51a633c2a567d"
+    },
+    {
+      "path": "apps/ai-player/src/local-playtest.mjs",
+      "bytes": 8925,
+      "sha256": "ba7ab1fad58a6d84014d23ca5d50d081cfe8dc707758a3f1c4d92d2d25e9ab0e"
+    },
+    {
+      "path": "apps/ai-player/src/lossless-json.mjs",
+      "bytes": 1361,
+      "sha256": "d6812269b535bbc36070c813abc8bacb9d9b4b7d83b0cf848ee8e6174714a478"
+    },
+    {
+      "path": "apps/ai-player/src/main.mjs",
+      "bytes": 4198,
+      "sha256": "63ed49b6b4b384cc2e55422d1823b1c3d8552f36aea9b5b3e673f867174b8d81"
+    },
+    {
+      "path": "apps/ai-player/src/memory-cli.mjs",
+      "bytes": 4702,
+      "sha256": "3ebfb757619cea66b0d9df72a7eba57e241646e9abcafd997b51c469298ae0a6"
+    },
+    {
+      "path": "apps/ai-player/src/memory/archive-codec.mjs",
+      "bytes": 4316,
+      "sha256": "68271c96dfba6ae56cae940aec79674de4090b75a576d5e6b0ba80389cac5a0b"
+    },
+    {
+      "path": "apps/ai-player/src/memory/companion-store.mjs",
+      "bytes": 41432,
+      "sha256": "85f36a3598b9db009f12f5b7bad496bbc973f87b94c542037bd6bc8e67af738e"
+    },
+    {
+      "path": "apps/ai-player/src/observation.mjs",
+      "bytes": 23703,
+      "sha256": "e3b2f12550461152de7fb3617b4438c5a384f9470001ade1cab1eef05d9d0a73"
+    },
+    {
+      "path": "apps/ai-player/src/resident-actor.mjs",
+      "bytes": 9489,
+      "sha256": "f7500f58dac9e2422f03e1af978989d359c161f385b2cd2e6382dc74858168b5"
+    },
+    {
+      "path": "apps/ai-player/src/skills/conversation.mjs",
+      "bytes": 1305,
+      "sha256": "011a8eecfe6f87e634e0f94cec6dca670756bc6ea28b73bbe8432a21da5358d2"
+    },
+    {
+      "path": "apps/ai-player/src/skills/navigation.mjs",
+      "bytes": 4137,
+      "sha256": "db48d652943e7cff9a260ddda44ba6cff3e1f2154013aa07d309e464fbf50ab1"
+    },
+    {
+      "path": "apps/ai-player/tests/archive-guard.test.mjs",
+      "bytes": 5241,
+      "sha256": "584868c87269668fb7e14f49c6e35baf270374187fb764b3c24b29d15b366ff8"
+    },
+    {
+      "path": "apps/ai-player/tests/companion-archive.test.mjs",
+      "bytes": 20545,
+      "sha256": "9fdf2251c1cbfabaa67da4beb9dacc33d06606d0b0022ace289eee34fd194879"
+    },
+    {
+      "path": "apps/ai-player/tests/companion-control.test.mjs",
+      "bytes": 1200,
+      "sha256": "b817bfe43848e56d8731cc17b057363e7d4052221e1edbc3fefc4fb582c485ed"
+    },
+    {
+      "path": "apps/ai-player/tests/companion-controller.test.mjs",
+      "bytes": 19829,
+      "sha256": "33227853b086e5f8316b6f55687e70d236e00619b62df6fddc70d5af39410454"
+    },
+    {
+      "path": "apps/ai-player/tests/companion-policy.test.mjs",
+      "bytes": 13062,
+      "sha256": "e92a9451fc9d2f401b5fd7bc55e3e09c49b47ff19884f2d5340a43f1bd3e46d4"
+    },
+    {
+      "path": "apps/ai-player/tests/companion-store.test.mjs",
+      "bytes": 10275,
+      "sha256": "0d5fecf6bf4198dc442ce0284aab965bdad9696017b5a79c6c78238514286a75"
+    },
+    {
+      "path": "apps/ai-player/tests/conversation.test.mjs",
+      "bytes": 1996,
+      "sha256": "119be29ff504688a08295fc8255342ca2952ad5655501900c97caa181de94559"
+    },
+    {
+      "path": "apps/ai-player/tests/experience-ledger.test.mjs",
+      "bytes": 13859,
+      "sha256": "0d9302fc4e43cd3d290367633ebce8e955ffce62f05ffca6f956d26cde398fa8"
+    },
+    {
+      "path": "apps/ai-player/tests/gateway-client.test.mjs",
+      "bytes": 8580,
+      "sha256": "bd879b09d86e7bfb13a18ac9a8aa3a0e33ef7d82d0e9a949c51a440ffd824bc2"
+    },
+    {
+      "path": "apps/ai-player/tests/gateway-companion.test.mjs",
+      "bytes": 8160,
+      "sha256": "af8b1d7730f7134eee641631aac89e851de491a9f2137559099e9d016c0c4b7a"
+    },
+    {
+      "path": "apps/ai-player/tests/gateway-control.test.mjs",
+      "bytes": 12241,
+      "sha256": "c3e61a036f430f314b61b8ceaab1a1f9bd5e4a6366aa8b3991b6d388925fb2b8"
+    },
+    {
+      "path": "apps/ai-player/tests/local-playtest.test.mjs",
+      "bytes": 4266,
+      "sha256": "1e041ad9132aeb3a6a90b37f88bdd5c81ce6ad410b69e4861ac687f5a97313fb"
+    },
+    {
+      "path": "apps/ai-player/tests/lossless-json.test.mjs",
+      "bytes": 1749,
+      "sha256": "fee176f9d9bd2eb12745d9e4ba5f9048ec98a430ac5315e23c5d41a07ffa7682"
+    },
+    {
+      "path": "apps/ai-player/tests/memory-cli.test.mjs",
+      "bytes": 9832,
+      "sha256": "8706a7e89c3d297e777e066203f51127526bff4bfc140944e88bedeb3152f4d3"
+    },
+    {
+      "path": "apps/ai-player/tests/navigation.test.mjs",
+      "bytes": 3766,
+      "sha256": "215f9ad91c5dd693590b4ab9d2b3f93dbbc8795b761753f04833c56507222168"
+    },
+    {
+      "path": "apps/ai-player/tests/observation.test.mjs",
+      "bytes": 28050,
+      "sha256": "c07d64932729ad4c6af5e58bd1a7adbd621fa05dd7ab0520bed7682b4610f5c7"
+    },
+    {
+      "path": "apps/ai-player/tests/resident-actor.test.mjs",
+      "bytes": 3975,
+      "sha256": "9b93c7df72f7ccfd063bc85a94db29414ceb671c04fdf1b3db96b1a3c69f80ef"
+    },
+    {
+      "path": "apps/ai-player/tests/runtime-service.test.mjs",
+      "bytes": 10881,
+      "sha256": "531bab6c7a5cbb0016621f4a8ec85cd585541fef3e6fdec9245f24365afa5d2e"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/companion.rs",
+      "bytes": 32285,
+      "sha256": "ac44d3aa5e01e22848c62bbd4f1eb41c8d25e1b56e3ef9f4f6bd0cd4f2be1d86"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/companion.rs",
+      "bytes": 56896,
+      "sha256": "94c4e8db0edd4e0f5d1fe8d5dd0d34e2e0e79a66e58c3c8e5e6c3e16ea2b48f4"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/mod.rs",
+      "bytes": 2788,
+      "sha256": "4910166ca5b42311c1c883b5585caea1ed560330721434b43743d3e0d2415146"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/overlays.rs",
+      "bytes": 954205,
+      "sha256": "4308e5ec0a54951a62479469c5b6904911b0f6ae45560509c8cb03eb7edbd983"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/lib.rs",
+      "bytes": 5662,
+      "sha256": "7d835120e275a8e1895911d44ff95154eda9bce99b32b815bf6c4871d542aacc"
+    },
+    {
+      "path": "apps/game-client/platform-windows/scripts/invited-installer/Mir2-Invite.iss",
+      "bytes": 41774,
+      "sha256": "b9e030190cc42d97683e3ffd4462d14c8d6ba8426600f41a5f926c9b6d987967"
+    },
+    {
+      "path": "apps/game-client/platform-windows/scripts/invited-installer/README.md",
+      "bytes": 16494,
+      "sha256": "a5cd61cca64dc53eae903487d724045301e7029346648e063964b43cb7adb0e8"
+    },
+    {
+      "path": "apps/game-client/platform-windows/scripts/invited-installer/build-packed-installer.ps1",
+      "bytes": 21575,
+      "sha256": "10f54936ffeb21586cf1d4148a199a3f5df71a97c4efa18925280a5531420e97"
+    },
+    {
+      "path": "apps/game-client/platform-windows/scripts/invited-installer/prepare-packed-installer-input.py",
+      "bytes": 18843,
+      "sha256": "c7e6bd0e624c269499a4107fbd789edb84966d4a8e5022c7f6c154e93ccacb0f"
+    },
+    {
+      "path": "apps/game-client/platform-windows/scripts/invited-installer/test-packed-installer-input.py",
+      "bytes": 27309,
+      "sha256": "d0d80834a6359c870e3d25fa0f0bb6c0504656abcc882600ad3f5e3c6c905b10"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/assets.rs",
+      "bytes": 43578,
+      "sha256": "a59751fd7c005239c9e483fd3eb3772a66e88f2bcf510392d8d2562a484c0383"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/atlas.rs",
+      "bytes": 150844,
+      "sha256": "4385027584ae0e90afb5eae4111eb2732a1e9b426c99e8be3792095aa5b7be91"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/capture.rs",
+      "bytes": 75995,
+      "sha256": "6a3f388c5a21b5c45ec260a76381595f0495d74b6bf957ef4056d9106e6c9994"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/capture/resource_reads.rs",
+      "bytes": 4578,
+      "sha256": "3a538f9c7116629b6fd507b04baee3506c338555fa81781a925821406331e617"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/capture/resource_reads_tests.rs",
+      "bytes": 9298,
+      "sha256": "4ad16154d1a52a6afe45e719af56350130e7f719ccb9d27e7a139a052fdbf639"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/companion.rs",
+      "bytes": 19690,
+      "sha256": "5abe4b94a37754d8915c1c5cc5ca5e095d7f49c3a31e1308a988f6507b8f2864"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/gameplay_bridge.rs",
+      "bytes": 418916,
+      "sha256": "6140db78276860d89035043376c769d635fc0295fcf66f4aa827d03830181eb6"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/gateway.rs",
+      "bytes": 829180,
+      "sha256": "46998ddf79d649e0175e0446a8c21b785bab73d22ec7911cd9c0561257759025"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/generation_launch.rs",
+      "bytes": 11888,
+      "sha256": "6d728035ae15bdf8c4be3919d77a5ba0bcc7c6ea7181eff094ac322805465eaa"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/generation_launch_tests.rs",
+      "bytes": 13700,
+      "sha256": "b9b136fa0e502284212ce3e1e246f5b10648575b276ade602a461bb71b260b28"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/input.rs",
+      "bytes": 494392,
+      "sha256": "e16b60a7129cc2b9313b6952f5ef4a6381e898c77da31a3d3a3988e08817eb66"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/main.rs",
+      "bytes": 22787,
+      "sha256": "49f7f5ac3684a8fcd7f40670366fe4d160810a4f1e0259ef1c9f0e231ac8a6f0"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/native_protocol.rs",
+      "bytes": 101341,
+      "sha256": "3b8ebe4ef0a9b59090d0ce69ec1ab494b184dd2e2ef866eba8d7dd2c072f34a0"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/npc_purchase_gateway.rs",
+      "bytes": 97821,
+      "sha256": "b4bec86a49222ab637b9cd726e16c7bfd5ecbc056a1c4491e59cf62cad2bba69"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/packed_assets.rs",
+      "bytes": 17523,
+      "sha256": "7b81d9137d3338495b629c3a5e8216946c5b2bfb3c33ac679062d0268673db12"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/resource_status.rs",
+      "bytes": 10579,
+      "sha256": "0d9dafef04967e75eb0069c3e3a459d07fa507f9210557b730e9773b4e1a29fa"
+    },
+    {
+      "path": "apps/game-client/resource-pack/README.md",
+      "bytes": 7514,
+      "sha256": "1eb4e90742ffcc22c455ac72524925713f7f9f2ba47f905ae86ee42859ba6b26"
+    },
+    {
+      "path": "apps/game-client/resource-pack/examples/repack.rs",
+      "bytes": 1231,
+      "sha256": "d7d7e6fa8b1902ce06a8ac3fdffd53e28c71d3ae534875cd8667d5131817f63d"
+    },
+    {
+      "path": "apps/game-client/resource-pack/src/lib.rs",
+      "bytes": 35773,
+      "sha256": "7f4b1f8a01d7296760cb9881ab8c83dd43aa25bfef02f0dfb5c1fcd57d66b165"
+    },
+    {
+      "path": "apps/game-client/resource-pack/src/read_profile.rs",
+      "bytes": 2936,
+      "sha256": "fcddd1264c3ed9093a75e1dc24f83ec0edf5af96bb332ec382ea9b03f043f61f"
+    },
+    {
+      "path": "apps/game-client/resource-pack/src/repack.rs",
+      "bytes": 19677,
+      "sha256": "1678fe390ad552d78e5ae568b76a79461c6ca688cce2b4d276f672c14d715cbf"
+    },
+    {
+      "path": "apps/game-client/resource-pack/src/scoped.rs",
+      "bytes": 11470,
+      "sha256": "88847f8483320cd2be659bc3fd8341eea6647ce724b410c4b918f95eac3a8e14"
+    },
+    {
+      "path": "apps/game-client/resource-pack/tests/read_profile.rs",
+      "bytes": 4095,
+      "sha256": "16d232bd0af2df31daff4bb4f33c620e91363ed5ffe5451c9ee25905cdf4b83d"
+    },
+    {
+      "path": "apps/game-client/resource-pack/tests/repack.rs",
+      "bytes": 13282,
+      "sha256": "7f6486ae1a6d136aeb37ccdf21adf46df553d55e1c4aa3e17d3ed0ce5720c0cd"
+    },
+    {
+      "path": "apps/game-client/resource-pack/tests/scoped.rs",
+      "bytes": 18932,
+      "sha256": "f969bd8f3cfe05987b31f07f811fc55d6feb818e8875f3cf101bd5782de773d0"
+    },
+    {
+      "path": "apps/game-client/runtime/src/lib.rs",
+      "bytes": 441190,
+      "sha256": "c80e6d9395b641ae5c5d1a8cdf372fc4426103128c80c1b4c26da14c5b55d74e"
+    },
+    {
+      "path": "apps/game-client/ui-core/src/action.rs",
+      "bytes": 6774,
+      "sha256": "74ae40956b3055afe3b79c30539d0afed4b226f1a9c3c2b806b191f667f5bdcd"
+    },
+    {
+      "path": "apps/game-client/ui-core/src/reducer.rs",
+      "bytes": 73372,
+      "sha256": "cd259efbd513314b34411ebdc1bd2d344fb796902c43b38a3a3530fcc052fe1a"
+    },
+    {
+      "path": "apps/game-client/ui-core/src/registry.rs",
+      "bytes": 90747,
+      "sha256": "50b97009ee2e0f27e985e695d4e98886d8171597293d33c976ce9a9c57aff543"
+    },
+    {
+      "path": "apps/game-client/ui-core/src/state.rs",
+      "bytes": 25366,
+      "sha256": "a9a62c22642181123b0d7e072f4236df6ad21fb9761b08fd1a0679ebb455d5fa"
+    },
+    {
+      "path": "apps/game-client/windows-updater/README.md",
+      "bytes": 8678,
+      "sha256": "c19be39506762982abd3da5bb1ccf333cfea15b83a963bd404f2a79243a78ac8"
+    },
+    {
+      "path": "apps/game-client/windows-updater/scripts/prepare-packed-generation.py",
+      "bytes": 34189,
+      "sha256": "011c386b518fcaf74d9344566b6fd7f300cc894315d7e04737617d1ec7a7a8a3"
+    },
+    {
+      "path": "apps/game-client/windows-updater/scripts/prepare-progressive-resource-scope.py",
+      "bytes": 10301,
+      "sha256": "a254efd3506e0434a562516d524f821b695a67bb87080d1847be5e55858da98a"
+    },
+    {
+      "path": "apps/game-client/windows-updater/scripts/test-prepare-packed-generation.py",
+      "bytes": 28193,
+      "sha256": "7d90fd23127c60fff1edde879297b0cc9fcf9aae0ef783c0bf6a6dfb03204f64"
+    },
+    {
+      "path": "apps/game-client/windows-updater/scripts/test-prepare-progressive-resource-scope.py",
+      "bytes": 6502,
+      "sha256": "2eddcfa8aa25fd76934387f46f4add9de7f3a6de7a23a34c648e66e32ce814d5"
+    },
+    {
+      "path": "apps/game-client/windows-updater/src/bin/launcher.rs",
+      "bytes": 5803,
+      "sha256": "264f2e84854750398ef4fa4893e4510a1c3764b5d2806837d76b3ff2d4aead0d"
+    },
+    {
+      "path": "apps/game-client/windows-updater/src/bin/updater.rs",
+      "bytes": 33513,
+      "sha256": "c42eb989f8ab709143a62e1a2060197c848045031b7b8a782e8e11b1e233065c"
+    },
+    {
+      "path": "apps/game-client/windows-updater/src/generation.rs",
+      "bytes": 51354,
+      "sha256": "132dace22e1ac2bf1f74f3b553db045a9069a0adbf6a96c9e392652201b8a2bd"
+    },
+    {
+      "path": "apps/game-client/windows-updater/src/generation_install_seed.rs",
+      "bytes": 8093,
+      "sha256": "851f507eab02afa786adeffa906e9a70722b1e99efc3d6c14aeb20dd132dc0c0"
+    },
+    {
+      "path": "apps/game-client/windows-updater/src/generation_progressive.rs",
+      "bytes": 6475,
+      "sha256": "9cb24657e3c8cc9655b866e6d63c30d20998ba55bf9d9a03e9a138d3f658ddda"
+    },
+    {
+      "path": "apps/game-client/windows-updater/src/generation_progressive_tests.rs",
+      "bytes": 19163,
+      "sha256": "87c6f708dcf6384bcbbc9a76a69fc65192f84a1c02aa8d7e0f46c1308490cc69"
+    },
+    {
+      "path": "apps/game-client/windows-updater/src/generation_tests.rs",
+      "bytes": 31185,
+      "sha256": "2c8c7961c687cdd73ec0471f7c757c6d9a37ab87d405c507708ab428d34a395c"
+    },
+    {
+      "path": "apps/game-client/windows-updater/src/lib.rs",
+      "bytes": 8808,
+      "sha256": "2220c9a5349e872b2a0eceb46e11ec926980c59c10e4652f123d1dcbcc0b35c8"
+    },
+    {
+      "path": "apps/game-client/windows-updater/src/progressive.rs",
+      "bytes": 19977,
+      "sha256": "8835eead326c83ff0a3786187ef8537e90c7408affb4bc14b268e0532ce3278f"
+    },
+    {
+      "path": "apps/game-client/windows-updater/src/progressive_tests.rs",
+      "bytes": 18283,
+      "sha256": "e973495ffc0130095c5d5f4b4ad6bce376fa40be2b4b4830aeb228354b00a2b6"
+    },
+    {
+      "path": "apps/gateway/src/companion_relay.rs",
+      "bytes": 52496,
+      "sha256": "98c7d13ee1b350b603a46864d72c5f36a27dfc01456867a7c175a9e5140ea835"
+    },
+    {
+      "path": "apps/gateway/src/lib.rs",
+      "bytes": 11430,
+      "sha256": "46dfeffc362ac8a8136af85cbc3d55e9e371cad67b199bd843afc80ae4428a4e"
+    },
+    {
+      "path": "apps/gateway/src/main.rs",
+      "bytes": 13742,
+      "sha256": "72f0197fcd246f41998663135201031c4f279432b82520f8979ee245c6af5dad"
+    },
+    {
+      "path": "apps/gateway/src/routing.rs",
+      "bytes": 1465892,
+      "sha256": "8f8a56de6d833e8c97a8021fefbb8c917cb8757f8170df21efb5c8bb78b4260a"
+    },
+    {
+      "path": "apps/gateway/src/routing/tests/safety_profile_projection_tests.rs",
+      "bytes": 3399,
+      "sha256": "d12ea055200049067b8dcab8b9e20ad4e30d80434ea26ebd07690899dfc73028"
+    },
+    {
+      "path": "apps/gateway/src/session.rs",
+      "bytes": 116526,
+      "sha256": "39ec0ff533189366d512bc4485e608ccc14b6e71a070baa98b9ce337b7856da2"
+    },
+    {
+      "path": "apps/gateway/src/shared_groups.rs",
+      "bytes": 51930,
+      "sha256": "78323de4170c2e483cbb85fd140f519f0e2360869ac3dfbcf833cc9f507bc433"
+    },
+    {
+      "path": "apps/gateway/src/web.rs",
+      "bytes": 936769,
+      "sha256": "72627d6d9cb546ccc46c8059101bb6e475b3f544eafdc02453090417a798d42d"
+    },
+    {
+      "path": "apps/gateway/src/web/catalog_transport.rs",
+      "bytes": 31625,
+      "sha256": "256952d07dd2badd421224e60d66ee40a9d42a6329be214e4c6de545614222e1"
+    },
+    {
+      "path": "apps/gateway/src/web_activities_tests.rs",
+      "bytes": 11057,
+      "sha256": "07dec9d7be5fdae5e39197edce8152cb1226bc33ec0337723952109a77b8ad5c"
+    },
+    {
+      "path": "apps/gateway/src/web_billing_tests.rs",
+      "bytes": 49346,
+      "sha256": "4628ebf64aaafaf3781c0bbb246614d37341d536c2ce6f2a785793af322ff574"
+    },
+    {
+      "path": "apps/gateway/src/web_game_shop_gift_tests.rs",
+      "bytes": 34724,
+      "sha256": "b84c8ff48b96f4c5c107f10475b44387438839c8715d3ba66c82fecf3b9f65d2"
+    },
+    {
+      "path": "apps/gateway/src/web_mining_tests.rs",
+      "bytes": 15008,
+      "sha256": "9d65aae180355ea9beadda20a6becaafa8a26b948e0e9f87933c867163fcb3e9"
+    },
+    {
+      "path": "apps/gateway/src/web_monthly_card_tests.rs",
+      "bytes": 17773,
+      "sha256": "51ac330cb0d11278d7ebf7fd80292eeb4c16ec309c6d452ecfd60c6aa6b83189"
+    },
+    {
+      "path": "apps/simulation/src/runtime/zone/runtime.rs",
+      "bytes": 773034,
+      "sha256": "e726ea2e6fe30462215cf0145b2c02e7315791c845f2f559ac8d9784bee58c68"
+    },
+    {
+      "path": "apps/simulation/src/runtime/zone/runtime/safe_zone_profile_tests.rs",
+      "bytes": 13226,
+      "sha256": "f6173d8d72d692a67078d2e3767c4c32999462a9d853fa6663b138cd8f254a17"
+    },
+    {
+      "path": "apps/simulation/tests/shared_zone.rs",
+      "bytes": 514378,
+      "sha256": "4e78c3eabce311b334ad746bdba4d3e657f333975b6cc377f9354a9fa309b7e9"
+    },
+    {
+      "path": "apps/web/lib/generated/crystal-map-pack/0.map.gz",
+      "bytes": 512762,
+      "sha256": "bbd02c7d0125fe78983e2dea5f4aecc73b53d4b91517bde6fdbee9853bb183a5"
+    },
+    {
+      "path": "apps/web/lib/generated/crystal-map-pack/0141.map.gz",
+      "bytes": 942,
+      "sha256": "e2a82b005ac4622ac55c835f282dab72c8a4ba7753400b7e10c09ef0907c091e"
+    },
+    {
+      "path": "apps/web/lib/generated/crystal_respawn_manifest.json",
+      "bytes": 6799671,
+      "sha256": "907db052030a97036e404429373dd3ad3e0e838e279613080e92c3be28bf3ff2"
+    },
+    {
+      "path": "apps/web/scripts/quest-agent/policy.mjs",
+      "bytes": 87501,
+      "sha256": "b36a72ddbfcaa2cf19d6656ab53387f4161b2be0b4904342abf0ca1a87450506"
+    },
+    {
+      "path": "rust-toolchain.toml",
+      "bytes": 113,
+      "sha256": "08d0bbe28ff9055f31501c6232ce50c3ae19a59cc50f99cd7e6435f49e797bc6"
+    }
+  ]
+}

@@ -2427,20 +2427,7 @@ pub(super) fn add_character_to_account(
     let mut save = crystal_new_character_save(config, character);
     starter_uid_planning::prepare_new_character(config, account_id, &mut save)?;
     validate_character_save_record(&save)?;
-    let account_id = account_id.to_string();
-    let touched_accounts = vec![account_id.clone()];
-    config.commit_account_store_transaction(&touched_accounts, move |store| {
-        save.character.index = store.allocate_character_index();
-        validate_character_save_record(&save)?;
-        let character = save.character.clone();
-        let account = store
-            .accounts
-            .get_mut(&account_id)
-            .ok_or_else(|| "character creation requires an existing account".to_string())?;
-        account.saves.insert(character.index, save);
-        account.characters.push(character.clone());
-        Ok(character)
-    })
+    config.commit_character_creation(account_id, &save)
 }
 
 pub(super) fn delete_character_from_account(
@@ -3286,7 +3273,7 @@ fn decode_and_validate_character_save(
     })
 }
 
-pub(super) fn validate_character_save_record(save: &CharacterSaveRecord) -> Result<(), String> {
+pub(crate) fn validate_character_save_record(save: &CharacterSaveRecord) -> Result<(), String> {
     decode_and_validate_character_save(save)?;
     Ok(())
 }

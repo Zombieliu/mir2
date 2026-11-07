@@ -356,6 +356,12 @@ pub fn reduce(state: &UiState, action: UiAction) -> Transition {
                 panel(&mut next, UiPanel::Group);
             }
         }
+        UiAction::OpenCompanion => {
+            if in_game(state) {
+                next.chat_focused = false;
+                panel(&mut next, UiPanel::Companion);
+            }
+        }
         UiAction::OpenGuild => {
             if in_game(state) {
                 panel(&mut next, UiPanel::Guild);

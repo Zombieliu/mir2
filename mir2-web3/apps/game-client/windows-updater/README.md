@@ -7,6 +7,17 @@ a separately attested launcher/updater bundle. It preserves the stable AppId.
 Desktop/start-menu shortcut -> app/Mir2Launcher.exe -> authenticated engine copy
 in app/.update -> signed HTTPS update -> app/game/mir2-platform-windows.exe.
 
+The packed full installer instead installs signed generation controls and pack
+files directly. Its unsigned `updater/packed-install.json` is only a locator.
+On the first normal start, the updater checks the CMS chain, exact engine source,
+catalog/pack closure, content hashes and signed sequence floors locally, then
+records a first-launch obligation. It downloads no copy of installed resources.
+Only the real game readiness handshake plus ten seconds alive marks it healthy.
+A failed initial launch has no proven predecessor: it remains pending and is
+quarantined for repair. Existing healthy/rollback selections remain authoritative.
+The game and updater must both be built with this SDK for the new first-install
+record; an older game binary cannot be relabelled as a compatible new build.
+
 Normal interactive startup verifies the installed game locally and opens Home
 with **Start game** enabled when that verification succeeds. An independent
 background worker checks authenticated version metadata; pending or failed

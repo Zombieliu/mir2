@@ -1,0 +1,8 @@
+{
+  "url": "ws://127.0.0.1:7010/ws",
+  "realmId": "bichon-local-ai",
+  "characterName": "AchuanAI",
+  "guardPort": 17341,
+  "allowedMaps": ["0", "0141"],
+  "timeoutMs": 20000
+}

@@ -1,0 +1,475 @@
+{
+  "schema": "mir2.windows.300s.updater-streaming-audit.v1",
+  "auditedUtc": "2026-11-01T14:56:15Z",
+  "scope": {
+    "kind": "read-only architecture audit",
+    "canonicalRoot": "E:/mir2-player-journey",
+    "head": "e45f36420d1a4241a1e96fed58a86345f97e36e5",
+    "workingTreeDirty": true,
+    "preservedExistingWork": true,
+    "onlyNewArtifact": "E:/mir2-release/windows-five-minute-20261101/UPDATER-STREAMING-AUDIT.json",
+    "productModeDecisionPending": true,
+    "authorizedNow": "G0 opt-in diagnostics/trace only; implementation slices need separate assignment",
+    "notPerformed": [
+      "product code edits",
+      "game payload downloads",
+      "SSH",
+      "builds",
+      "installer execution",
+      "publication",
+      "new production keys"
+    ]
+  },
+  "target": {
+    "seconds": 300,
+    "endpoint": "empty-client download through normal installation, authenticated real map rendered and normal action acknowledged",
+    "laterUpdates": "same end-to-end endpoint after an actual required update, not launcher/login-only",
+    "baseline": {
+      "linkMbpsDecimal": 20,
+      "logicalCpuCount": 4,
+      "memoryGiB": 8,
+      "storage": "SSD"
+    },
+    "globalMeaning": "Qualify a declared region/ISP matrix with measured throughput; not an unconditional guarantee for arbitrarily slow or disconnected networks. Human authorization delay must be recorded; it cannot be silently removed from a claimed end-to-end pass."
+  },
+  "conclusions": [
+    "Current full Setup cannot meet300s at20Mbps: payload transfer alone is416.026s.",
+    "Allowing missing V1 packs is neither a safe change nor sufficient: only40 explicitly identified startup/login resources already touch26packs860.7MB.",
+    "Full install and progressive install are different products. No progressive mode or300s acceptance is implemented or approved by this audit.",
+    "Minimum progressive design is a signed versioned required-scope contract, dependency-local repacking, verified PartialStore, persistent transport jobs, and actual map readiness gates. V1 strict full-store behavior remains unchanged.",
+    "Immediate independent work is provenance/phase tracing and measured release-profile/lossless sizing; neither implies a new product-mode decision."
+  ],
+  "evidence": {
+    "retainedRuntimeRevision": "24a50f865679cfb81c9edf6c95632c4389187dac",
+    "retainedInstallerRecipeRevision": "10a5c4fadec8f8911732fef2ddb7cd71df800021",
+    "r19LocalArtifacts": "E:/mir2-release/windows-cold-start-20261101/r19/LOCAL-ARTIFACTS.json",
+    "gameAudit": {
+      "path": "E:/mir2-release/windows-five-minute-20261101/GAME-STREAMING-AUDIT.json",
+      "sha256": "a4a4994cfc418b5d8f0329bf44021242a7a0f58d1c42776c3aa15c65cb5570b5",
+      "producer": "independent backend/Game read-only audit; startup/login lists are lower bounds, not complete scene closure"
+    },
+    "losslessSizing": {
+      "path": "E:/mir2-release/windows-five-minute-20261101/transport-sizing/RESULT.json",
+      "sha256": "32e2e52c5e9a46edc4f1dbbac4d312953ba7d5038f3d04c899c4362a33d05fe2",
+      "producer": "Root actual offline gzip6 encode/decode roundtrip; workstation timings only; no protocol integration/signature/publication"
+    },
+    "primaryReferences": [
+      {
+        "title": "Cargo profiles/default release/LTO/strip",
+        "url": "https://doc.rust-lang.org/cargo/reference/profiles.html"
+      },
+      {
+        "title": "HTTP Range/Content-Range/If-Range semantics",
+        "url": "https://www.rfc-editor.org/rfc/rfc9110.html#name-range-requests"
+      }
+    ],
+    "sourceSnapshots": [
+      [
+        "mir2-web3/apps/game-client/platform-windows/Cargo.toml",
+        "5f65904d0fbdf4a98e02c097463ce57c4aa3424e938c3792fa90c5f7e7e88180"
+      ],
+      [
+        "mir2-web3/apps/game-client/windows-updater/Cargo.toml",
+        "4f14ef174aafba062871a2a9ad65b9c9ba2e0b39bb0f726440006f40f785becb"
+      ],
+      [
+        "mir2-web3/apps/game-client/windows-updater/src/generation.rs",
+        "9a88550f137b0a93d704e6b9f113ce43691ad3654c1bc5f8ba2cde56ada62d79"
+      ],
+      [
+        "mir2-web3/apps/game-client/windows-updater/src/generation_install_seed.rs",
+        "ae0f653ee31c61b9c653e3dbc14844debc712517f096963a355eaec1fb0453fc"
+      ],
+      [
+        "mir2-web3/apps/game-client/windows-updater/src/download.rs",
+        "5539e85f0c141904ee3df2b379379db307099190ab4fba89bd744cd11433e8c7"
+      ],
+      [
+        "mir2-web3/apps/game-client/windows-updater/src/update.rs",
+        "0c1d073f2e435b8a4a924d3626d6c49b9710812bd6e0eff5bcd8a54276091ca1"
+      ],
+      [
+        "mir2-web3/apps/game-client/resource-pack/src/lib.rs",
+        "c4ed87266709a2e44ce4ea9147f33bedf960d2413a4778fe0b8818f92d9fe56a"
+      ],
+      [
+        "mir2-web3/apps/game-client/platform-windows/scripts/invited-installer/Mir2-Invite.iss",
+        "b9e030190cc42d97683e3ffd4462d14c8d6ba8426600f41a5f926c9b6d987967"
+      ]
+    ],
+    "snapshotBoundary": "Working-tree snapshots, not clean-HEAD certification. Root is adding default-off resource profiling concurrently; strict open semantics must remain unchanged."
+  },
+  "measuredBytesAndLowerBounds": {
+    "formula": "seconds = bytes * 8 / (20 * 1000000); payload goodput planning assumes80%=2000000B/s",
+    "setupBytes": 1040065902,
+    "setupNominalNetworkSeconds": 416.0263608,
+    "setupAt80PercentSeconds": 520.032951,
+    "fullPacksBytes": 1069036665,
+    "packCount": 34,
+    "resourceCount": 255063,
+    "catalogBytes": 68666544,
+    "gameExeBytes": 133801984,
+    "startup20": {
+      "logicalBytes": 16643468,
+      "residentPacks": 16,
+      "residentPackBytes": 532993731,
+      "withRawGameAndCatalogBytes": 735462259,
+      "networkSeconds": 294.1849036,
+      "completeClosure": false
+    },
+    "startupAndLogin40": {
+      "logicalBytes": 19218225,
+      "residentPacks": 26,
+      "residentPackBytes": 860708220,
+      "withRawGameAndCatalogBytes": 1063176748,
+      "networkSeconds": 425.2706992,
+      "withExperimentalCompressedControlsNetworkSeconds": 371.6953628,
+      "completeClosure": false
+    },
+    "r19FailedPublicPath": {
+      "partialBytes": 400858816,
+      "elapsedSeconds": 480,
+      "partialAverageMbps": 6.6809802666666664,
+      "qualified20MbpsPath": false,
+      "note": "Partial-run observation, not a completed-transfer capacity guarantee."
+    },
+    "noOverhead300sByteCeiling": 750000000,
+    "suggestedMandatoryWireCeiling": 400000000,
+    "fullSetupLinkMbpsFor200sTransferAt80Percent": 52.0032951,
+    "evenHypotheticallyRemovingEntireRawExeFromSetupNetworkSeconds": 362.5055672
+  },
+  "releaseProfileAudit": {
+    "actualAttestation": "C:/m2c17/mir2-web3/target-attested-windows-candidate/BUILD-ATTESTATION.json",
+    "actualBuild": "cargo +1.95.0 build --locked --release --manifest-path apps/game-client/platform-windows/Cargo.toml --bin mir2-platform-windows --target x86_64-pc-windows-msvc",
+    "actualExeSha256": "a0f28413dce9362ecfb1a10a414f45f5572520a13289731831152d8858d0d4b2",
+    "gameIsDevBuild": false,
+    "gameWorkspace": "platform-windows/Cargo.toml declares its own [workspace]; only profile.dev overrides are present",
+    "effectiveReleaseDefaultsInferredFromManifestAndCargo": {
+      "optLevel": 3,
+      "debug": false,
+      "strip": "none",
+      "lto": false,
+      "ltoMeaning": "local thin LTO only, not cross-crate LTO",
+      "codegenUnits": 16,
+      "panic": "unwind"
+    },
+    "configChecks": "C17/.cargo absent; C17/mir2-web3/.cargo/config.toml present with no release profile/build rustflags override; user .cargo/config[.toml] absent. Official attested build rejects compiler-affecting environment overrides and supplies path-remap RUSTFLAGS.",
+    "updaterAlreadyOptimized": {
+      "independentWorkspace": true,
+      "optLevel": "s",
+      "lto": true,
+      "codegenUnits": 1,
+      "strip": true,
+      "panic": "abort"
+    },
+    "boundedProposal": "After assignment, compare explicit Game [profile.release] opt3+thin-LTO+codegen1+strip=symbols against current release, using the official --release attestation pipeline. Keep panic semantics initially; test startup/frame time/normal exit and preserve symbols separately. Do not patch/strip a previously signed EXE.",
+    "notClaimed": "No size reduction or runtime improvement has been measured for a new Game profile; PE size alone does not prove optimization."
+  },
+  "losslessTransportProposal": {
+    "independentOfProductMode": true,
+    "implemented": false,
+    "actualOfflineRows": [
+      {
+        "name": "catalog",
+        "rawBytes": 68666544,
+        "gzip6Bytes": 16591384
+      },
+      {
+        "name": "Game EXE",
+        "rawBytes": 133801984,
+        "gzip6Bytes": 51938803
+      }
+    ],
+    "rawTotal": 202468528,
+    "encodedTotal": 68530187,
+    "savedIdentityTransferBytes": 133938341,
+    "nominal20MbpsSecondsSaved": 53.5753364,
+    "criticalLimit": "Existing1.04GB Inno Setup is already compressed. Do not subtract133.94MB from Setup or claim the experiment speeds that existing package. Savings apply to separately downloaded identity Game/catalog objects in a new signed transport path.",
+    "allFullPacksPlusCompressedControlsNetworkSeconds": 455.0267408,
+    "minimalContract": "Optional CMS-signed per-generation transport sidecar binds generation digest, original path/raw size/raw SHA, codec=gzip-single-v1, encoded size/SHA and immutable encoded key. Existing GEN raw object identity remains authoritative; absent sidecar uses unchanged identity transport. Old clients ignore the sidecar.",
+    "decoderGates": [
+      "Accept-Encoding: identity even for the .gz object; Range offsets refer to encoded bytes",
+      "Verify exact encoded length/SHA before decoding",
+      "Bound decoded output by signed raw size, verify exact raw SHA, reject trailing/extra members and decode errors",
+      "Decode into private scratch, fsync and promote_new only after complete verification",
+      "Retain original signed PE bytes and metadata; no post-attestation mutation, executable packing or TLS/CMS bypass"
+    ]
+  },
+  "currentReusableCode": [
+    {
+      "file": "mir2-web3/apps/game-client/windows-updater/src/generation.rs",
+      "symbols": [
+        "GenerationManifest::parse",
+        "read_generation",
+        "verify_selection",
+        "ensure_object_inner",
+        "download_packs",
+        "check_update",
+        "save_record",
+        "begin_launch",
+        "accept",
+        "recover",
+        "rollback"
+      ],
+      "observedLines": [
+        140,
+        440,
+        565,
+        819,
+        931,
+        1195,
+        623,
+        611,
+        634,
+        668
+      ],
+      "reuse": "CMS/manifest closure, content-addressed targets, final size/SHA+sync_all+create-only promotion, four download workers, atomic selector, nonce health and retained rollback"
+    },
+    {
+      "file": "mir2-web3/apps/game-client/windows-updater/src/download.rs",
+      "symbols": [
+        "open_at",
+        "content_range",
+        "resume"
+      ],
+      "observedLines": [
+        76,
+        47,
+        173
+      ],
+      "reuse": "identity encoding, bounded single-range206, 200 reset, checked416 restart, durable partial prefix, cancellation and exact final object hash"
+    },
+    {
+      "file": "mir2-web3/apps/game-client/windows-updater/src/update.rs",
+      "symbols": [
+        "HttpsSource::pinned_base",
+        "HttpsSource::object_url",
+        "Source::download_resuming"
+      ],
+      "observedLines": [
+        179,
+        191,
+        331
+      ],
+      "reuse": "two compiled HTTPS origins, no redirects/userinfo/query/fragment, encoded path containment; source adapter seam"
+    },
+    {
+      "file": "mir2-web3/apps/game-client/windows-updater/src/generation_install_seed.rs",
+      "symbols": [
+        "verified",
+        "verify_installed_seed",
+        "adopt_installed_seed"
+      ],
+      "observedLines": [
+        35,
+        81,
+        90
+      ],
+      "reuse": "locator is not authority, source/floor/quarantine checks, durable floor before selection, FirstLaunchPending without invented previous version"
+    },
+    {
+      "file": "mir2-web3/apps/game-client/resource-pack/src/lib.rs",
+      "symbols": [
+        "Catalog::parse",
+        "PackStore::open",
+        "PackStore::read",
+        "build(previous, options)"
+      ],
+      "reuse": "logical path/case/index/extent bounds, real Windows directory/file leases, full object SHA and each resource SHA; previous content locators/pack IDs reused unchanged"
+    },
+    {
+      "file": "mir2-web3/apps/game-client/resource-pack/examples/build.rs",
+      "symbols": [
+        "main"
+      ],
+      "reuse": "existing optional authenticated previous catalog input; next builds only new content"
+    },
+    {
+      "file": "mir2-web3/apps/game-client/windows-updater/src/fs_safe.rs",
+      "symbols": [
+        "open_download",
+        "regular",
+        "FileLease",
+        "write_new",
+        "target"
+      ],
+      "reuse": "no reparse/hard-link/alternate-stream unsafe writes and verified same-handle IO"
+    },
+    {
+      "file": "mir2-web3/apps/game-client/windows-updater/src/platform.rs",
+      "symbols": [
+        "InstallLock",
+        "promote_new",
+        "replace_file",
+        "free_bytes"
+      ],
+      "reuse": "short exclusive commit lock, durable create-only/atomic filesystem boundaries and disk preflight"
+    },
+    {
+      "file": "mir2-web3/apps/game-client/windows-updater/src/bin/updater.rs",
+      "symbols": [
+        "packed_health",
+        "launch_selected",
+        "run_installed_attempt"
+      ],
+      "reuse": "real child PID/attempt/generation Ready and10s liveness; --play-installed remains local-only"
+    },
+    {
+      "file": "mir2-web3/apps/game-client/platform-windows/scripts/invited-installer/Mir2-Invite.iss",
+      "symbols": [
+        "PrepareToInstall",
+        "RunFinishChoices",
+        "PackedDesktopIconSelected"
+      ],
+      "reuse": "same AppId/locale, single confirmed page, original-user launch, runtime/restart/silent/busy guards"
+    }
+  ],
+  "actualGaps": [
+    "V1 read_generation requires catalog pack set exactly equal manifest packs; verify_selection/seed adoption/accept and Game PackStore::open require every pack.",
+    "GenerationManifest has no signed mandatory/optional scope semantics; changing open to skip missing files would weaken the contract.",
+    "Current32MiB fresh content-hash grouping disperses small boot dependencies across huge unrelated packs; previous-aware incremental reuse already exists but cannot repair first-generation boot locality.",
+    "Current .part files preserve payload bytes, but no durable target/scope/retry/mirror job ledger exists.",
+    "Current downloader has no ETag/If-Range contract or multi-mirror planning/health persistence; it retries only two compiled origins and a stream failure needs a later retry.",
+    "Current check_update caller holds InstallLock/GameLease across download and activation; background immutable staging needs separation from the short selector commit.",
+    "Game existing Option/poison paths and login-only Ready cannot prove actual operational map completeness; use the independent Game audit for required changes.",
+    "Current resource-pack bounds are300000 resources,256 packs,64MiB per pack,4GiB total and128MiB catalog; target pack size32MiB. Repeated incremental additions/fragmentation must not silently exceed those bounds. Any V2 limit change needs explicit bounded validation; V1 limits stay unchanged."
+  ],
+  "minimalProgressiveProposal": {
+    "status": "OPTION ONLY — product choice pending; no implementation in this audit",
+    "firstVersionScope": "One full signed catalog retained, explicit boot + chosen initial-map + common-appearance dependency closures. Catalog sharding/per-resource range CAS are later options.",
+    "signedV2Fields": [
+      "new generation/feed schema discriminator",
+      "same immutable EXE/config/catalog raw identities",
+      "bounded complete pack inventory",
+      "scope IDs and exact logical dependency/required pack sets",
+      "boot scope plus selected-map closure rule",
+      "explicit optional materialization semantics",
+      "required supporting engine source/EXE identity"
+    ],
+    "store": "Keep V1 PackStore::open strict. Add a separate verified subset/PartialStore path that authenticates full catalog, checks exact required-set membership, opens/hashes every required local pack/index, keeps leases, and preserves resource SHA checks. MissingLocal(required) is Pending/Blocked, not Option None or successful mount.",
+    "repacking": "Build the initial V2 boot/domain layout offline from exact existing255063 logical size/SHA pairs; group by boot/shared/map/library affinity with bounded ~8MiB packs. Reuse BuildOptions and previous locators on subsequent releases. No changed art/economy or lossy asset removal. Verify actual boot/world closure size before selecting the400MB budget.",
+    "sceneGate": "Obtain normal authenticated target-map info before StartGame where possible; otherwise MapChange enters explicit loading with input/combat presentation blocked until signed closure and actual initial AOI resources are ready. Server supplies no arbitrary resource URL. Preserve authoritative position, liveness and reconnect semantics; do not use empty maps/placeholder actors to fake the target.",
+    "firstInstaller": "Separate opt-in streaming/bootstrap mode; preserve full offline repair package. New explicit bootstrap-download action may fetch content; do not redefine strict --play-installed into a network operation. Do not fabricate legacy game metadata/history to admit a fresh V2 install.",
+    "readiness": "Keep authenticated Ready/PID/nonce plus10s liveness. V2 health explicitly means its signed required install set, not all optional assets. Materialization completeness is separate. A300s claim additionally requires rendered actual map, required initial AOI and a normal authoritative action ACK; login screenshot alone is insufficient."
+  },
+  "engineCompatibilityBlocker": {
+    "currentConstraint": "Old Game SDK Engine::parse rejects engine.version > ENGINE_VERSION2; globally switching active engine to3 can break old healthy play and rollback.",
+    "minimalRecommendedPath": "Retain the compatible Engine2 metadata envelope/numeric version initially. First deliver a signed engine-only update supporting both V1 and V2; V2 generation has a new schema and explicit required engine code/source SHA binding. Old engines reject unknown V2 and retain verified V1. Retained old Game SDKs still see compatible Engine2 metadata. Require real old15/16/19 V1 launch and rollback tests with the new engine.",
+    "ifNumeric3Required": "Implement a separately signed V2 engine slot/selection while keeping the old active.txt/Engine2 view for old SDKs, or migrate retained SDKs first. Prove both views and leases; do not merely relax new parse and assume old binaries changed.",
+    "releaseBlockedUntil": "Known old Game + new controller + failed V2 health rollback works; no all-clients/global pointer bump before that evidence."
+  },
+  "persistentDownloadAndMirrorContract": {
+    "storage": "One bounded create-only plan + atomic progress checkpoint per authenticated generation/scope job; existing SHA-named .part/CAS object layout remains. A job receipt is never asset authority.",
+    "persistedFields": [
+      "schema/jobId",
+      "generation manifest digest and signed source-policy digest",
+      "required scope IDs/closure digest",
+      "object key, raw/encoded SHA+size and codec",
+      "actual flushed part length",
+      "attempt/deadline/retry classification",
+      "selected origin ID and per-origin strong ETag when provided",
+      "verified/promoted object status, revalidated from files after restart"
+    ],
+    "recovery": "Recover actual part length; treat all partial bytes as untrusted. Reauthenticate target/floors, rehash full final object, fsync and create-only promote. Interrupted/cancelled jobs retain safely bounded scratch; no selector/Healthy write until complete required-set verification.",
+    "mirrors": "Compiled or separately signed HTTPS origin/prefix allowlist only, immutable identical object keys, TLS verification and redirects disabled. No user-supplied URL, credentials, query alias, captcha/JS challenge or unsigned fallback. Choose using small useful object ranges and measured progress; count probe/retry bodies inside the budget. Preserve same discovery JSON/signature pair identity and downgrade floors.",
+    "http": "Retain exact206 Content-Range/total validation,200 restart rather than append,416 checked restart,identity encoding and duplicate-header/body bounds. Per-origin strong ETag may support If-Range; do not compare opaque ETags across providers. Final signed SHA remains mandatory.",
+    "boundedScheduling": "Reuse max4 workers, boot/current-scope priority; defer optional work until required readiness. Bound each origin retry/backoff and total deadline; switching mirror does not reset D0. No unlimited concurrency or integrity-error downgrade fallback.",
+    "currentMirrorLimitation": "Two pinned origins are not a qualified global throughput service. Existing measured failed path is below baseline; source mirrors and payload locality both need evidence."
+  },
+  "atomicIncrementalUpdate": {
+    "stage": "Plan only missing hashes, reuse prior catalog locators and immutable local objects. Download/verify new objects while the old generation remains selected; no in-place pack/EXE overwrite.",
+    "commit": "After all mandatory code/catalog/scope objects are durable, take short InstallLock + exclusive GameLease, require normal old Game save/close, recheck target/floors/previous healthy identity, then atomically commit pending selector and attempt nonce.",
+    "acceptOrRollback": "Launch selected generation; require the same strong Ready/liveness. On failure preserve quarantine/unknown recovery semantics and restore only a fully verified retained previous generation. A fresh install has no invented healthy rollback.",
+    "activeStreaming": "A separate immutable object-fetch worker can add packs for the current signed generation without rewriting its selector; game mounts only fully verified scope sets and never consumes .part files.",
+    "gc": "No early deletion to make space. Pin active, previous healthy, in-flight jobs/scopes and real game leases; delete only unreferenced objects under a separately audited GC transaction after health. Disk preflight includes encoded scratch, decoded scratch/new objects and preserved rollback footprint. Track pack-count/physical-byte fragmentation; a compaction that changes mandatory pack hashes must still satisfy the same400MB/update deadline budget, not be hidden as free background work.",
+    "timeLimit": "300s updates require bounded mandatory delta. Unlimited new content cannot fit a finite20Mbps budget; reject an oversized300s qualification plan rather than label a full repair or hidden background download as a passed update."
+  },
+  "proposed300sBudget": {
+    "status": "engineering budget, not measured acceptance",
+    "requiredWireCeilingBytes": 400000000,
+    "assumedPayloadGoodputBytesPerSecond": 2000000,
+    "phases": [
+      {
+        "phase": "bootstrap local opening/confirmed choices",
+        "seconds": 10
+      },
+      {
+        "phase": "signed discovery/mirror establishment",
+        "seconds": 10
+      },
+      {
+        "phase": "all network bodies including bootstrap/probes/retries",
+        "seconds": 200
+      },
+      {
+        "phase": "integrity/decode/durable promotion/install",
+        "seconds": 30
+      },
+      {
+        "phase": "Game/authenticated scene startup and normal action",
+        "seconds": 25
+      },
+      {
+        "phase": "strong Ready liveness",
+        "seconds": 10
+      },
+      {
+        "phase": "margin",
+        "seconds": 15
+      }
+    ],
+    "totalSeconds": 300,
+    "notes": [
+      "Stages are conservative budgets; pipelined hashing may overlap network, but actual end-to-end D0 never resets.",
+      "Metadata/control transport gzip sizing helps; initial-world closure remains unproven.",
+      "Full mode currently fails its physical bound. Progressive mode may qualify only after explicit product selection and complete dependency evidence."
+    ]
+  },
+  "boundedImplementationOrder": [
+    {
+      "step": "G0",
+      "modeDecisionRequired": false,
+      "scope": "Default-off phase/IO trace; explicit official Game release-profile audit and measured opt3+thin-LTO+strip comparison after assignment",
+      "gate": "No asset behavior change; report actual signed artifact size/source and4CPU8GiB startup/frame metrics"
+    },
+    {
+      "step": "G1",
+      "modeDecisionRequired": false,
+      "scope": "Persistent transfer job + qualified mirror adapter + signed bounded lossless control transport, each separately assigned",
+      "gate": "Resume/cancel/crash/200/206/416/malformed headers/bad SHA/bad codec/expired target tests; original decoded bytes exact; no activation changes"
+    },
+    {
+      "step": "G2",
+      "modeDecisionRequired": false,
+      "scope": "Use authenticated previous catalogs in release builds; compute changed-byte/disk plan and preserve old object IDs",
+      "gate": "One-resource change downloads only truly fresh packs; no full rebuild claim when previous reuse is absent"
+    },
+    {
+      "step": "G3",
+      "modeDecisionRequired": true,
+      "scope": "If progressive chosen, signed V2 scope contract, boot/domain layout and strict PartialStore + Game scene loading gate for one bounded initial-map profile",
+      "gate": "Complete observed+static dependency closure, no Option-silenced missing critical assets, no unsupported old-SDK activation"
+    },
+    {
+      "step": "G4",
+      "modeDecisionRequired": true,
+      "scope": "Scoped install/update transaction, current-scope streaming and rollback/repair/GC integration",
+      "gate": "Crash at every durability/selector/Ready boundary; corrupted/missing scopes block safely; old15/16/19 rollback compatibility"
+    },
+    {
+      "step": "G5",
+      "modeDecisionRequired": true,
+      "scope": "Normal Windows empty-cache download/install to real map + latest/same/older update matrix across declared global regions/ISPs",
+      "gate": "D0 to actual map/action <=300s at qualified20Mbps profile, all retry bytes counted; cold/warm/full/progressive/repair outcomes separately reported"
+    }
+  ],
+  "releaseBlockers": [
+    "Product choice full versus progressive remains pending; do not rename one as the other.",
+    "No complete boot/initial-world/AOI closure or<=400MB target is yet proven.",
+    "No released V2 partial-install contract or signed lossless transport implementation exists.",
+    "Old-SDK engine-version compatibility must be proved before any engine pointer transition.",
+    "Global mirrors have no fresh region/ISP throughput qualification in this audit.",
+    "Windows publisher trust/runtime/user authorization can block or delay normal startup; preserve protection and record those outcomes rather than bypassing them.",
+    "Current profiling and offline compression are diagnostic evidence, not a cold/playable/update300s pass."
+  ]
+}

@@ -1,0 +1,161 @@
+{
+  "schema": "mir2-life-incomplete-run/1",
+  "passed": false,
+  "failurePhase": "observe-real-expiry-and-safe-return",
+  "reason": "A bounded ordinary life observation did not arrive.",
+  "gatewaySha256": "3cadee8d70793892b01db654a88c6e6f5b1ca1d5ac4f163d6ca83c31854febbf",
+  "realElapsedWallMs": 1554449,
+  "realLifeDurationSeconds": 1200,
+  "gift": {
+    "ownerBeforeGold": 85,
+    "ownerAfterGold": 35,
+    "actorBeforeGold": 0,
+    "actorAfterGold": 50,
+    "receivedGold": 50,
+    "giftTaskCompleted": true,
+    "ownerFinalTradeObserved": true,
+    "actorPaidAssets": false,
+    "modelCallsBeforeLife": 0
+  },
+  "activation": {
+    "lifeIdHash": "8abd0b89d754bf1c219cc58429a314e0d8badb963b577068b3909028f45b733f",
+    "startedAtMs": 1793722327580,
+    "expiresAtMs": 1793723527580,
+    "durationSeconds": 1200,
+    "budgetGold": 50,
+    "ownerWasOutsideActorView": true,
+    "actorPositionAtActivation": {
+      "x": 288,
+      "y": 616
+    },
+    "modelEnabled": true
+  },
+  "restart": {
+    "firstPid": 78820,
+    "secondPid": 78668,
+    "differentProcess": true,
+    "actualLeaseWaitMs": 31000,
+    "sameMemoryPath": true,
+    "sameLifeIdHash": "8abd0b89d754bf1c219cc58429a314e0d8badb963b577068b3909028f45b733f",
+    "sameOriginalDeadline": true,
+    "childSupplyClaimed": true,
+    "spentGoldBeforeResume": 40,
+    "modelCallsBeforeResume": 2,
+    "pausedObservationMs": 5000,
+    "noAutomaticNewSpending": true,
+    "noAutomaticModelCall": true,
+    "ownerExplicitlyResumed": true
+  },
+  "observedKills": 16,
+  "model": {
+    "attempts": 4,
+    "knownUsage": [
+      {
+        "inputTokens": 1693,
+        "outputTokens": 65
+      },
+      {
+        "inputTokens": 2657,
+        "outputTokens": 118
+      }
+    ],
+    "unmeasuredAttempts": 2,
+    "automaticRetry": false
+  },
+  "lastCheckpoint": {
+    "label": "expiry-return",
+    "phase": "observe-real-expiry-and-safe-return",
+    "snapshot": {
+      "ready": true,
+      "mapFileName": "0",
+      "position": {
+        "x": 289,
+        "y": 626
+      },
+      "hp": 30,
+      "maxHp": 30,
+      "dead": false,
+      "gold": 36,
+      "hpPotions": 2,
+      "freeBagSlots": 35,
+      "currentWeight": 13,
+      "maxWeight": 53,
+      "inventoryCurrent": true,
+      "inSafeZone": true,
+      "ownerVisible": false,
+      "tradeActive": false,
+      "tradeUncertain": false
+    },
+    "life": {
+      "startedAtMs": 1793722327580,
+      "expiresAtMs": 1793723527580,
+      "durationSeconds": 1200,
+      "status": "returning",
+      "phase": "returning-home",
+      "activationPending": false,
+      "budgetGold": 50,
+      "maxPurchasedQuantity": 1,
+      "spentGold": 40,
+      "purchasedQuantity": 1,
+      "childSupplyClaimed": true,
+      "killsObserved": 16,
+      "modelDecisionsUsed": 4,
+      "expired": true,
+      "lifeIdHash": "8abd0b89d754bf1c219cc58429a314e0d8badb963b577068b3909028f45b733f",
+      "childSupplyIdHash": "b201931813c513ad1c2600c70312311ca3d562fee9a2cca1dd6a8ea986b37604"
+    },
+    "receipts": [
+      {
+        "operationHash": "f63d8dfff72ed1eebee094bfd1aa894e7c99834d82d8abd9700cf458a82caa12",
+        "attempted": true,
+        "receiptRevision": "14",
+        "committed": true,
+        "chargedGold": 40,
+        "quantity": 1,
+        "currency": "gold",
+        "source": "trade",
+        "incomingUniqueIdHash": "13953bc251a58f86fee3f7329ec4ffa74c71f197296014d5724e4f39b83a9e44",
+        "permitIdHash": "b201931813c513ad1c2600c70312311ca3d562fee9a2cca1dd6a8ea986b37604"
+      }
+    ],
+    "model": {
+      "configured": true,
+      "provider": "openai",
+      "model": "gpt-6-luna",
+      "modelCalls": 4,
+      "lifePlanStatus": "proposed",
+      "reply": "血量满且资源信息完整，包裹空间充足；附近有可狩猎的稻草人和鹿，可继续独立狩猎。记忆记录了此前实际击杀累计13。",
+      "ordinal": 4,
+      "lastCall": {
+        "model": "gpt-6-luna",
+        "status": "completed",
+        "requestId": "req_90bc55bf8e4e45daa1aea83a01251302",
+        "responseId": "resp_0258665d08a5e641016aea09f7dc4c87d2bcf24d1e1bb29a1c",
+        "inputTokens": 2657,
+        "outputTokens": 118
+      }
+    }
+  },
+  "cleanup": {
+    "attempted": true,
+    "returned": true,
+    "fixtureClosed": true,
+    "ownerClosed": true,
+    "actors": [
+      {
+        "pid": 78820,
+        "exited": true
+      },
+      {
+        "pid": 78668,
+        "exited": true
+      }
+    ],
+    "actorPids": [
+      78820,
+      78668
+    ],
+    "originalUserStateTouched": false
+  },
+  "remaining": "Patrol and final return were blocked; full loop did not pass. Corrections and a new run are separate."
+}

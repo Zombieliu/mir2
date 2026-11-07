@@ -1,0 +1,28 @@
+{
+  "schema": "mir2.r16.group.cleanup.v1",
+  "timeUtc": "2026-11-07T15:18:23.6153963Z",
+  "ownedPortsClosed": [
+    19250,
+    19280,
+    19351
+  ],
+  "originalListeners": [
+    {
+      "LocalPort": 19235,
+      "OwningProcess": 129280
+    },
+    {
+      "LocalPort": 19232,
+      "OwningProcess": 128444
+    },
+    {
+      "LocalPort": 19231,
+      "OwningProcess": 126788
+    }
+  ],
+  "originalInstalledExeSha256": "d930618bc7cc461a4d03507a68fb28c0b15af6200de8f00946c463929f67d638",
+  "originalInstalledExePreserved": true,
+  "desktopControlUsed": false,
+  "published": false,
+  "ownServicesGracefullyStopped": true
+}

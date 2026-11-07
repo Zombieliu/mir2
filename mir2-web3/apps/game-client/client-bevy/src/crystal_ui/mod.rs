@@ -17,6 +17,8 @@ pub mod character_stats_portable;
 #[cfg(feature = "native-ui")]
 pub mod chat;
 #[cfg(feature = "native-ui")]
+pub mod companion;
+#[cfg(feature = "native-ui")]
 pub mod guild_storage;
 #[cfg(feature = "native-ui")]
 mod guild_pixel_text;

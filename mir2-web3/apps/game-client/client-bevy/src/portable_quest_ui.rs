@@ -89,6 +89,7 @@ pub use crate::quest_ui::PORTABLE_QUEST_REQUIRED_SKINS;
 pub struct QuestUiHostContext {
     pub generation: u64,
     pub revision: u64,
+    pub display_language: Option<crate::quest_presentation_text::QuestDisplayLanguage>,
     pub host_visible: bool,
     /// Allows the compact tree to complete UI layout while input remains blocked.
     pub layout_preparing: bool,
@@ -106,6 +107,7 @@ impl Default for QuestUiHostContext {
         Self {
             generation: 0,
             revision: 0,
+            display_language: None,
             host_visible: false,
             layout_preparing: false,
             in_game: false,
@@ -394,13 +396,18 @@ impl Plugin for Mir2PortableQuestUiPlugin {
             )
             .add_systems(
                 PostUpdate,
-                apply_packaged_quest_font.before(bevy::ui::UiSystems::Layout),
+                apply_packaged_quest_font
+                    .before(bevy::ui::UiSystems::Content)
+                    .before(bevy::ui::UiSystems::Layout),
             );
         #[cfg(not(feature = "native-ui"))]
         app.add_systems(
             PostUpdate,
             observe_world_control_rects
                 .after(bevy::ui::UiSystems::Layout)
+                // Rebuilt buttons begin with false InheritedVisibility. Hit
+                // blockers must describe the visibility of this same frame.
+                .after(bevy::camera::visibility::VisibilitySystems::VisibilityPropagate)
                 .in_set(QuestWorldControlObservationSet::Observe),
         );
     }
@@ -544,6 +551,12 @@ fn observe_world_control_rects(
             ButtonAction::SelectSupplyVendor(_) => "selectSupplyVendor",
             ButtonAction::ShowSupplyInventory => "showSupplyInventory",
             ButtonAction::OpenDestinationMap => "openDestinationMap",
+            // These tracker buttons change the existing Native Quest UI only.
+            // Their measured rectangles block platform world gestures; they
+            // neither encode nor authorize a Quest/world/network operation.
+            ButtonAction::SelectQuest { .. }
+            | ButtonAction::MakePrimary { .. }
+            | ButtonAction::PrepareQuestFinish { .. } => "questLocalUi",
             _ => continue,
         };
         let mut ancestor = entity;
@@ -690,12 +703,12 @@ fn apply_packaged_quest_font(
     font: Option<Res<QuestUiFont>>,
     roots: Query<Entity, With<crate::quest_ui::QuestUiRoot>>,
     parents: Query<&ChildOf>,
-    mut texts: Query<(Entity, &mut TextFont)>,
+    mut texts: Query<(Entity, &mut TextFont, Option<&mut TextLayout>)>,
 ) {
     let Some(font) = font else {
         return;
     };
-    for (entity, mut text_font) in texts.iter_mut() {
+    for (entity, mut text_font, layout) in texts.iter_mut() {
         let mut current = entity;
         let mut belongs_to_quest = false;
         for _ in 0..24 {
@@ -712,6 +725,13 @@ fn apply_packaged_quest_font(
             let source = FontSource::Handle(font.0.clone());
             if text_font.font != source {
                 text_font.font = source;
+            }
+            if crate::native_i18n::active() {
+                if let Some(mut layout) = layout {
+                    if layout.justify == Justify::Left {
+                        layout.justify = Justify::Start;
+                    }
+                }
             }
         }
     }
@@ -1507,3 +1527,7 @@ mod tests {
         );
     }
 }
+
+#[cfg(all(test, not(feature = "native-ui")))]
+#[path = "portable_quest_ui/observer_tests.rs"]
+mod observer_tests;

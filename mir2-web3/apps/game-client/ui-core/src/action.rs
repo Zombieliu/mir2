@@ -59,6 +59,7 @@ pub enum UiAction {
     OpenBigMap,
     OpenStorage,
     OpenGroup,
+    OpenCompanion,
     OpenGuild,
     /// Requests the authoritative guild-storage listing. The Android and
     /// other hosts serialize the resulting typed gateway command; no local

@@ -1,0 +1,4859 @@
+{
+  "schema": "r16-onboarding-v11-browser-smoke/1",
+  "startedAt": "2026-11-04T16:07:12.838Z",
+  "passed": false,
+  "villageFirstTwoCompleted": true,
+  "scope": {
+    "freshOrdinaryAccount": false,
+    "reusedOwnOrdinaryQaAccount": true,
+    "primaryUiOnly": true,
+    "rootPrivateFilesRead": false,
+    "rootSecretValuesPassedToBrowser": false,
+    "credentialsOnlyUsedForNormalUiFill": true,
+    "readOnlyRuntimeGetters": [
+      "getMir2QuestUiStatus",
+      "getMir2QuestWorldControlRects"
+    ],
+    "mockedRoutes": false,
+    "hiddenActions": false,
+    "qaCommands": 0,
+    "saveDataEdits": false,
+    "modelCallsRequested": 0,
+    "walletOpened": false,
+    "originalOwnerOrAloOpened": false
+  },
+  "sourceHashes": {
+    "quests": "fd35732d9356fcf5aeb4c06d639261a816626a54ccaf33f8cc6d461e98c93182",
+    "journeyUi": "e52630f84ee09e3e2d3abd821db00dde01b62e7d803d18972c8fd906db38c747",
+    "questLayout": "57c00b606dd1d63cde0db984489fa3073a5afe5756092061f2edbc8c99358c92",
+    "keys": "ebfd4f283523f658d33793f604e697a5c4e4b0430fc5d63586ec8597bf31d208",
+    "bag": "10a1dd118f66e6924de84ac611fdd0f7473e255e9f5b31063027f72a411d83c7",
+    "panel": "d6436a807c81b42525aa7e74b6bb6288819ed8bf4db9cdda914e2ad58a264fd8",
+    "spawns": "907db052030a97036e404429373dd3ad3e0e838e279613080e92c3be28bf3ff2"
+  },
+  "plan": {
+    "profile": "newcomer-v2",
+    "quests": [
+      {
+        "id": 2110001,
+        "startNpcId": 3,
+        "finishNpcId": 3,
+        "gold": 100,
+        "experience": 100,
+        "kills": []
+      },
+      {
+        "id": 2110002,
+        "startNpcId": 0,
+        "finishNpcId": 0,
+        "gold": 100,
+        "experience": 200,
+        "kills": []
+      },
+      {
+        "id": 2110003,
+        "startNpcId": 0,
+        "finishNpcId": 0,
+        "gold": 150,
+        "experience": 2200,
+        "kills": [
+          {
+            "monster": "Scarecrow",
+            "monsterIndex": 39,
+            "count": 2,
+            "message": "Defeat 2 Scarecrow."
+          },
+          {
+            "monster": "RakingCat",
+            "monsterIndex": 44,
+            "count": 2,
+            "message": "Defeat 2 RakingCat."
+          }
+        ]
+      }
+    ],
+    "jane": {
+      "map": "0",
+      "x": 284,
+      "y": 606
+    },
+    "diaryKeyRequested": "KeyQ",
+    "diaryKeyFromCurrentSharedDefaults": "KeyQ",
+    "readOnlyGetters": [
+      "getMir2QuestUiStatus",
+      "getMir2QuestWorldControlRects"
+    ],
+    "coldEntryWaitMs": 45000
+  },
+  "checks": [
+    {
+      "name": "town-has-no-old-tour-and-current-shared-native-quest-host",
+      "passed": true
+    },
+    {
+      "name": "server-history-retains-completed-2110001-without-reclaim",
+      "passed": true
+    },
+    {
+      "name": "2110002-native-diary-ordinary-equip-and-complete",
+      "passed": true
+    }
+  ],
+  "phases": [
+    "ordinary-owned-qa-character-relogin",
+    "diary-real-weapon-equip-and-deliver-2110002",
+    "review-current-native-detail-acceptQuest-2110002-attempt-1",
+    "review-current-native-detail-finishQuest-2110002-attempt-1",
+    "diary-ordinary-accept-village-hunt-2110003",
+    "review-current-native-detail-acceptQuest-2110003-attempt-1"
+  ],
+  "screenshots": [
+    "01-village-native-task-card-before-measured-readiness.png",
+    "02-fresh-village-native-task-card.png",
+    "03-review-acceptQuest-2110002-attempt-1.png",
+    "04-review-finishQuest-2110002-attempt-1.png",
+    "05-second-quest-equipped-and-completed.png",
+    "06-review-acceptQuest-2110003-attempt-1.png",
+    "07-failure-safe-masked.png"
+  ],
+  "packetEvidence": [
+    {
+      "sequence": 13,
+      "method": "LoginSuccess",
+      "phase": "ordinary-owned-qa-character-relogin"
+    },
+    {
+      "sequence": 17,
+      "method": "StartGame",
+      "phase": "ordinary-owned-qa-character-relogin",
+      "result": 4
+    },
+    {
+      "sequence": 25,
+      "method": "MapInformation",
+      "phase": "ordinary-owned-qa-character-relogin"
+    },
+    {
+      "sequence": 26,
+      "method": "UserInformation",
+      "phase": "ordinary-owned-qa-character-relogin",
+      "gold": 100,
+      "hp": 24,
+      "maxHp": 24,
+      "objectId": 1000,
+      "direction": "Up"
+    },
+    {
+      "sequence": 447,
+      "method": "CompleteQuest",
+      "phase": "ordinary-owned-qa-character-relogin",
+      "completedQuestIds": [
+        2110001
+      ]
+    },
+    {
+      "sequence": 602,
+      "method": "ObjectHealth",
+      "phase": "ordinary-owned-qa-character-relogin",
+      "objectId": 206007
+    },
+    {
+      "sequence": 603,
+      "method": "ObjectHealth",
+      "phase": "ordinary-owned-qa-character-relogin",
+      "objectId": 206013
+    },
+    {
+      "sequence": 604,
+      "method": "ObjectHealth",
+      "phase": "ordinary-owned-qa-character-relogin",
+      "objectId": 206302
+    },
+    {
+      "sequence": 605,
+      "method": "ObjectHealth",
+      "phase": "ordinary-owned-qa-character-relogin",
+      "objectId": 206316
+    },
+    {
+      "sequence": 606,
+      "method": "ObjectHealth",
+      "phase": "ordinary-owned-qa-character-relogin",
+      "objectId": 206320
+    },
+    {
+      "sequence": 607,
+      "method": "ObjectHealth",
+      "phase": "ordinary-owned-qa-character-relogin",
+      "objectId": 206324
+    },
+    {
+      "sequence": 608,
+      "method": "ObjectHealth",
+      "phase": "ordinary-owned-qa-character-relogin",
+      "objectId": 206339
+    },
+    {
+      "sequence": 609,
+      "method": "ObjectHealth",
+      "phase": "ordinary-owned-qa-character-relogin",
+      "objectId": 206515
+    },
+    {
+      "sequence": 610,
+      "method": "ObjectHealth",
+      "phase": "ordinary-owned-qa-character-relogin",
+      "objectId": 206524
+    },
+    {
+      "sequence": 611,
+      "method": "ObjectHealth",
+      "phase": "ordinary-owned-qa-character-relogin",
+      "objectId": 206530
+    },
+    {
+      "sequence": 612,
+      "method": "ObjectHealth",
+      "phase": "ordinary-owned-qa-character-relogin",
+      "objectId": 206536
+    },
+    {
+      "sequence": 613,
+      "method": "ObjectHealth",
+      "phase": "ordinary-owned-qa-character-relogin",
+      "objectId": 206545
+    },
+    {
+      "sequence": 614,
+      "method": "ObjectHealth",
+      "phase": "ordinary-owned-qa-character-relogin",
+      "objectId": 206604
+    },
+    {
+      "sequence": 615,
+      "method": "ObjectHealth",
+      "phase": "ordinary-owned-qa-character-relogin",
+      "objectId": 206610
+    },
+    {
+      "sequence": 616,
+      "method": "ObjectHealth",
+      "phase": "ordinary-owned-qa-character-relogin",
+      "objectId": 206619
+    },
+    {
+      "sequence": 617,
+      "method": "ObjectHealth",
+      "phase": "ordinary-owned-qa-character-relogin",
+      "objectId": 206631
+    },
+    {
+      "sequence": 618,
+      "method": "ObjectHealth",
+      "phase": "ordinary-owned-qa-character-relogin",
+      "objectId": 206641
+    },
+    {
+      "sequence": 619,
+      "method": "ObjectHealth",
+      "phase": "ordinary-owned-qa-character-relogin",
+      "objectId": 206644
+    },
+    {
+      "sequence": 620,
+      "method": "ObjectHealth",
+      "phase": "ordinary-owned-qa-character-relogin",
+      "objectId": 206711
+    },
+    {
+      "sequence": 621,
+      "method": "ObjectHealth",
+      "phase": "ordinary-owned-qa-character-relogin",
+      "objectId": 206714
+    },
+    {
+      "sequence": 622,
+      "method": "ObjectHealth",
+      "phase": "ordinary-owned-qa-character-relogin",
+      "objectId": 271801
+    },
+    {
+      "sequence": 623,
+      "method": "ObjectHealth",
+      "phase": "ordinary-owned-qa-character-relogin",
+      "objectId": 271806
+    },
+    {
+      "sequence": 704,
+      "method": "ChangeQuest",
+      "phase": "review-current-native-detail-acceptQuest-2110002-attempt-1",
+      "questId": 2110002,
+      "current": 0,
+      "required": 1,
+      "taken": true,
+      "completed": false
+    },
+    {
+      "sequence": 707,
+      "method": "UserLocation",
+      "phase": "review-current-native-detail-acceptQuest-2110002-attempt-1",
+      "direction": "Up"
+    },
+    {
+      "sequence": 709,
+      "method": "EquipItem",
+      "phase": "review-current-native-detail-acceptQuest-2110002-attempt-1",
+      "success": true,
+      "uniqueId": 0
+    },
+    {
+      "sequence": 710,
+      "method": "ChangeQuest",
+      "phase": "review-current-native-detail-acceptQuest-2110002-attempt-1",
+      "questId": 2110002,
+      "taken": true,
+      "completed": true
+    },
+    {
+      "sequence": 734,
+      "method": "ChangeQuest",
+      "phase": "review-current-native-detail-finishQuest-2110002-attempt-1",
+      "questId": 2110002,
+      "taken": false,
+      "completed": true
+    },
+    {
+      "sequence": 735,
+      "method": "CompleteQuest",
+      "phase": "review-current-native-detail-finishQuest-2110002-attempt-1",
+      "completedQuestIds": [
+        2110001,
+        2110002
+      ]
+    },
+    {
+      "sequence": 744,
+      "method": "UserLocation",
+      "phase": "review-current-native-detail-finishQuest-2110002-attempt-1",
+      "direction": "Up"
+    },
+    {
+      "sequence": 754,
+      "method": "ChangeQuest",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "questId": 2110003,
+      "current": 0,
+      "required": 4,
+      "taken": true,
+      "completed": false
+    },
+    {
+      "sequence": 757,
+      "method": "UserLocation",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "direction": "Up"
+    },
+    {
+      "sequence": 759,
+      "method": "UserLocation",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "direction": "Down"
+    },
+    {
+      "sequence": 762,
+      "method": "ObjectHealth",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "objectId": 200716
+    },
+    {
+      "sequence": 765,
+      "method": "UserLocation",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "direction": "Down"
+    },
+    {
+      "sequence": 768,
+      "method": "UserLocation",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "direction": "Down"
+    },
+    {
+      "sequence": 771,
+      "method": "UserLocation",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "direction": "Down"
+    },
+    {
+      "sequence": 773,
+      "method": "ObjectHealth",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "objectId": 206632
+    },
+    {
+      "sequence": 775,
+      "method": "UserLocation",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "direction": "Down"
+    },
+    {
+      "sequence": 778,
+      "method": "ObjectHealth",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "objectId": 200325
+    },
+    {
+      "sequence": 779,
+      "method": "ObjectHealth",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "objectId": 206717
+    },
+    {
+      "sequence": 781,
+      "method": "UserLocation",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "direction": "Down"
+    },
+    {
+      "sequence": 784,
+      "method": "UserLocation",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "direction": "Right"
+    },
+    {
+      "sequence": 788,
+      "method": "UserLocation",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "direction": "Down"
+    },
+    {
+      "sequence": 791,
+      "method": "UserLocation",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "direction": "Right"
+    },
+    {
+      "sequence": 795,
+      "method": "UserLocation",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "direction": "Right"
+    },
+    {
+      "sequence": 797,
+      "method": "UserLocation",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "direction": "Down"
+    },
+    {
+      "sequence": 799,
+      "method": "UserLocation",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "direction": "Right"
+    },
+    {
+      "sequence": 802,
+      "method": "UserLocation",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "direction": "Right"
+    },
+    {
+      "sequence": 806,
+      "method": "UserLocation",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "direction": "Right"
+    },
+    {
+      "sequence": 809,
+      "method": "UserLocation",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "direction": "Down"
+    },
+    {
+      "sequence": 810,
+      "method": "ObjectHealth",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "objectId": 206626
+    },
+    {
+      "sequence": 813,
+      "method": "UserLocation",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "direction": "Down"
+    },
+    {
+      "sequence": 818,
+      "method": "UserLocation",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "direction": "Down"
+    },
+    {
+      "sequence": 820,
+      "method": "ObjectStruck",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "objectId": 206644,
+      "attackerId": 1000,
+      "direction": "Left"
+    },
+    {
+      "sequence": 822,
+      "method": "ObjectHealth",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "objectId": 206644
+    },
+    {
+      "sequence": 826,
+      "method": "UserLocation",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "direction": "Down"
+    },
+    {
+      "sequence": 828,
+      "method": "ObjectStruck",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "objectId": 206644,
+      "attackerId": 1000,
+      "direction": "Left"
+    },
+    {
+      "sequence": 830,
+      "method": "ObjectHealth",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "objectId": 206644
+    },
+    {
+      "sequence": 836,
+      "method": "UserLocation",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "direction": "Down"
+    },
+    {
+      "sequence": 838,
+      "method": "ObjectStruck",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "objectId": 206644,
+      "attackerId": 1000,
+      "direction": "Left"
+    },
+    {
+      "sequence": 840,
+      "method": "ObjectHealth",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "objectId": 206644
+    },
+    {
+      "sequence": 844,
+      "method": "UserLocation",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "direction": "Down"
+    },
+    {
+      "sequence": 846,
+      "method": "ObjectStruck",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "objectId": 206644,
+      "attackerId": 1000,
+      "direction": "Left"
+    },
+    {
+      "sequence": 848,
+      "method": "ObjectHealth",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "objectId": 206644
+    },
+    {
+      "sequence": 853,
+      "method": "UserLocation",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "direction": "Down"
+    },
+    {
+      "sequence": 855,
+      "method": "ObjectStruck",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "objectId": 206644,
+      "attackerId": 1000,
+      "direction": "Left"
+    },
+    {
+      "sequence": 857,
+      "method": "ObjectHealth",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "objectId": 206644
+    },
+    {
+      "sequence": 862,
+      "method": "UserLocation",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "direction": "Down"
+    },
+    {
+      "sequence": 864,
+      "method": "ObjectStruck",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "objectId": 206644,
+      "attackerId": 1000,
+      "direction": "Left"
+    },
+    {
+      "sequence": 866,
+      "method": "ObjectHealth",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "objectId": 206644
+    },
+    {
+      "sequence": 867,
+      "method": "ObjectDied",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "objectId": 206644,
+      "direction": "Left"
+    },
+    {
+      "sequence": 869,
+      "method": "ChangeQuest",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "questId": 2110003,
+      "current": 1,
+      "required": 4,
+      "taken": true,
+      "completed": false
+    },
+    {
+      "sequence": 870,
+      "method": "GainExperience",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "amount": 30
+    },
+    {
+      "sequence": 874,
+      "method": "UserLocation",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "direction": "Down"
+    },
+    {
+      "sequence": 878,
+      "method": "UserLocation",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "direction": "Left"
+    },
+    {
+      "sequence": 880,
+      "method": "ObjectHealth",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "objectId": 206711
+    },
+    {
+      "sequence": 882,
+      "method": "UserLocation",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "direction": "Left"
+    },
+    {
+      "sequence": 885,
+      "method": "ObjectHealth",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "objectId": 206604
+    },
+    {
+      "sequence": 886,
+      "method": "ObjectHealth",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "objectId": 206714
+    },
+    {
+      "sequence": 888,
+      "method": "UserLocation",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "direction": "Down"
+    },
+    {
+      "sequence": 890,
+      "method": "UserLocation",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "direction": "Left"
+    },
+    {
+      "sequence": 892,
+      "method": "UserLocation",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "direction": "Left"
+    },
+    {
+      "sequence": 895,
+      "method": "UserLocation",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "direction": "Left"
+    },
+    {
+      "sequence": 901,
+      "method": "UserLocation",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "direction": "DownLeft"
+    },
+    {
+      "sequence": 903,
+      "method": "ObjectStruck",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "objectId": 206641,
+      "attackerId": 1000,
+      "direction": "DownLeft"
+    },
+    {
+      "sequence": 905,
+      "method": "ObjectHealth",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "objectId": 206641
+    },
+    {
+      "sequence": 910,
+      "method": "UserLocation",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "direction": "DownLeft"
+    },
+    {
+      "sequence": 912,
+      "method": "ObjectStruck",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "objectId": 206641,
+      "attackerId": 1000,
+      "direction": "DownLeft"
+    },
+    {
+      "sequence": 914,
+      "method": "ObjectHealth",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "objectId": 206641
+    },
+    {
+      "sequence": 919,
+      "method": "UserLocation",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "direction": "DownLeft"
+    },
+    {
+      "sequence": 921,
+      "method": "ObjectStruck",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "objectId": 206641,
+      "attackerId": 1000,
+      "direction": "DownLeft"
+    },
+    {
+      "sequence": 923,
+      "method": "ObjectHealth",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "objectId": 206641
+    },
+    {
+      "sequence": 928,
+      "method": "UserLocation",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "direction": "DownLeft"
+    },
+    {
+      "sequence": 930,
+      "method": "ObjectStruck",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "objectId": 206641,
+      "attackerId": 1000,
+      "direction": "DownLeft"
+    },
+    {
+      "sequence": 932,
+      "method": "ObjectHealth",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "objectId": 206641
+    },
+    {
+      "sequence": 937,
+      "method": "UserLocation",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "direction": "DownLeft"
+    },
+    {
+      "sequence": 939,
+      "method": "ObjectStruck",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "objectId": 206641,
+      "attackerId": 1000,
+      "direction": "DownLeft"
+    },
+    {
+      "sequence": 941,
+      "method": "ObjectHealth",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "objectId": 206641
+    },
+    {
+      "sequence": 946,
+      "method": "UserLocation",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "direction": "DownLeft"
+    },
+    {
+      "sequence": 948,
+      "method": "ObjectStruck",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "objectId": 206641,
+      "attackerId": 1000,
+      "direction": "DownLeft"
+    },
+    {
+      "sequence": 950,
+      "method": "ObjectHealth",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "objectId": 206641
+    },
+    {
+      "sequence": 955,
+      "method": "UserLocation",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "direction": "DownLeft"
+    },
+    {
+      "sequence": 957,
+      "method": "ObjectStruck",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "objectId": 206641,
+      "attackerId": 1000,
+      "direction": "DownLeft"
+    },
+    {
+      "sequence": 959,
+      "method": "ObjectHealth",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "objectId": 206641
+    },
+    {
+      "sequence": 960,
+      "method": "ObjectDied",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "objectId": 206641,
+      "direction": "DownLeft"
+    },
+    {
+      "sequence": 962,
+      "method": "ChangeQuest",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "questId": 2110003,
+      "current": 2,
+      "required": 4,
+      "taken": true,
+      "completed": false
+    },
+    {
+      "sequence": 963,
+      "method": "GainExperience",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "amount": 30
+    },
+    {
+      "sequence": 968,
+      "method": "UserLocation",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "direction": "Down"
+    },
+    {
+      "sequence": 971,
+      "method": "UserLocation",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "direction": "Down"
+    },
+    {
+      "sequence": 974,
+      "method": "UserLocation",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "direction": "Down"
+    },
+    {
+      "sequence": 976,
+      "method": "UserLocation",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "direction": "Down"
+    },
+    {
+      "sequence": 981,
+      "method": "UserLocation",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "direction": "Down"
+    },
+    {
+      "sequence": 986,
+      "method": "UserLocation",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "direction": "Down"
+    },
+    {
+      "sequence": 990,
+      "method": "UserLocation",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "direction": "Down"
+    },
+    {
+      "sequence": 993,
+      "method": "UserLocation",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "direction": "Left"
+    },
+    {
+      "sequence": 996,
+      "method": "UserLocation",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "direction": "Left"
+    },
+    {
+      "sequence": 998,
+      "method": "UserLocation",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1000,
+      "method": "UserLocation",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1002,
+      "method": "UserLocation",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1004,
+      "method": "UserLocation",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1007,
+      "method": "UserLocation",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "direction": "Down"
+    },
+    {
+      "sequence": 1011,
+      "method": "UserLocation",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1013,
+      "method": "UserLocation",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "direction": "Down"
+    },
+    {
+      "sequence": 1015,
+      "method": "UserLocation",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1017,
+      "method": "UserLocation",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "direction": "Down"
+    },
+    {
+      "sequence": 1023,
+      "method": "UserLocation",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1029,
+      "method": "UserLocation",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1032,
+      "method": "UserLocation",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1035,
+      "method": "ObjectHealth",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "objectId": 206706
+    },
+    {
+      "sequence": 1039,
+      "method": "UserLocation",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1042,
+      "method": "UserLocation",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1045,
+      "method": "UserLocation",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1050,
+      "method": "UserLocation",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1052,
+      "method": "UserLocation",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1054,
+      "method": "ObjectHealth",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "objectId": 206500
+    },
+    {
+      "sequence": 1057,
+      "method": "UserLocation",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "direction": "Right"
+    },
+    {
+      "sequence": 1059,
+      "method": "UserLocation",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "direction": "Right"
+    },
+    {
+      "sequence": 1062,
+      "method": "UserLocation",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "direction": "Right"
+    },
+    {
+      "sequence": 1066,
+      "method": "ObjectHealth",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "objectId": 200716
+    },
+    {
+      "sequence": 1067,
+      "method": "ObjectHealth",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "objectId": 271801
+    },
+    {
+      "sequence": 1070,
+      "method": "UserLocation",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "direction": "Right"
+    },
+    {
+      "sequence": 1071,
+      "method": "ObjectHealth",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "objectId": 271806
+    },
+    {
+      "sequence": 1075,
+      "method": "UserLocation",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "direction": "Right"
+    },
+    {
+      "sequence": 1077,
+      "method": "ObjectHealth",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "objectId": 206644
+    },
+    {
+      "sequence": 1080,
+      "method": "UserLocation",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "direction": "Right"
+    },
+    {
+      "sequence": 1086,
+      "method": "UserLocation",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "direction": "Right"
+    },
+    {
+      "sequence": 1087,
+      "method": "ObjectHealth",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "objectId": 200325
+    },
+    {
+      "sequence": 1089,
+      "method": "UserLocation",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "direction": "Right"
+    },
+    {
+      "sequence": 1094,
+      "method": "UserLocation",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "direction": "Up"
+    },
+    {
+      "sequence": 1098,
+      "method": "UserLocation",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "direction": "Right"
+    },
+    {
+      "sequence": 1100,
+      "method": "UserLocation",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "direction": "Up"
+    },
+    {
+      "sequence": 1102,
+      "method": "UserLocation",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "direction": "Right"
+    },
+    {
+      "sequence": 1105,
+      "method": "UserLocation",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "direction": "Up"
+    },
+    {
+      "sequence": 1108,
+      "method": "ObjectHealth",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "objectId": 206524
+    },
+    {
+      "sequence": 1110,
+      "method": "UserLocation",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "direction": "Right"
+    },
+    {
+      "sequence": 1113,
+      "method": "UserLocation",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "direction": "Up"
+    },
+    {
+      "sequence": 1117,
+      "method": "UserLocation",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "direction": "Up"
+    },
+    {
+      "sequence": 1118,
+      "method": "ObjectHealth",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "objectId": 206324
+    },
+    {
+      "sequence": 1121,
+      "method": "UserLocation",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "direction": "Up"
+    },
+    {
+      "sequence": 1125,
+      "method": "ObjectHealth",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "objectId": 206530
+    },
+    {
+      "sequence": 1126,
+      "method": "ObjectHealth",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "objectId": 206711
+    },
+    {
+      "sequence": 1130,
+      "method": "UserLocation",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "direction": "Up"
+    },
+    {
+      "sequence": 1132,
+      "method": "UserLocation",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "direction": "Up"
+    },
+    {
+      "sequence": 1135,
+      "method": "UserLocation",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "direction": "Up"
+    },
+    {
+      "sequence": 1137,
+      "method": "ObjectHealth",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "objectId": 206536
+    },
+    {
+      "sequence": 1138,
+      "method": "ObjectHealth",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "objectId": 206604
+    },
+    {
+      "sequence": 1140,
+      "method": "UserLocation",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "direction": "Up"
+    },
+    {
+      "sequence": 1142,
+      "method": "ObjectHealth",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "objectId": 206700
+    },
+    {
+      "sequence": 1144,
+      "method": "UserLocation",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "direction": "Up"
+    },
+    {
+      "sequence": 1146,
+      "method": "UserLocation",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "direction": "Up"
+    },
+    {
+      "sequence": 1148,
+      "method": "UserLocation",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "direction": "Up"
+    },
+    {
+      "sequence": 1151,
+      "method": "ObjectHealth",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "objectId": 206320
+    },
+    {
+      "sequence": 1152,
+      "method": "ObjectHealth",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "objectId": 206545
+    },
+    {
+      "sequence": 1155,
+      "method": "UserLocation",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "direction": "Up"
+    },
+    {
+      "sequence": 1157,
+      "method": "UserLocation",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "direction": "Up"
+    },
+    {
+      "sequence": 1159,
+      "method": "UserLocation",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "direction": "Up"
+    },
+    {
+      "sequence": 1161,
+      "method": "ObjectHealth",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "objectId": 206619
+    },
+    {
+      "sequence": 1163,
+      "method": "UserLocation",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "direction": "Up"
+    },
+    {
+      "sequence": 1166,
+      "method": "UserLocation",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "direction": "Up"
+    },
+    {
+      "sequence": 1170,
+      "method": "UserLocation",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "direction": "Right"
+    },
+    {
+      "sequence": 1171,
+      "method": "ObjectHealth",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "objectId": 206610
+    },
+    {
+      "sequence": 1175,
+      "method": "UserLocation",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "direction": "Right"
+    },
+    {
+      "sequence": 1177,
+      "method": "ObjectHealth",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "objectId": 206013
+    },
+    {
+      "sequence": 1179,
+      "method": "UserLocation",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "direction": "Up"
+    },
+    {
+      "sequence": 1182,
+      "method": "ObjectHealth",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "objectId": 206007
+    },
+    {
+      "sequence": 1184,
+      "method": "UserLocation",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "direction": "Up"
+    },
+    {
+      "sequence": 1186,
+      "method": "UserLocation",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "direction": "Up"
+    },
+    {
+      "sequence": 1189,
+      "method": "ObjectHealth",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "objectId": 206316
+    },
+    {
+      "sequence": 1190,
+      "method": "ObjectHealth",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "objectId": 206631
+    },
+    {
+      "sequence": 1193,
+      "method": "UserLocation",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "direction": "Up"
+    },
+    {
+      "sequence": 1197,
+      "method": "UserLocation",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "direction": "Up"
+    },
+    {
+      "sequence": 1200,
+      "method": "UserLocation",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "direction": "Right"
+    },
+    {
+      "sequence": 1202,
+      "method": "UserLocation",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "direction": "Up"
+    },
+    {
+      "sequence": 1205,
+      "method": "UserLocation",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "direction": "Up"
+    },
+    {
+      "sequence": 1207,
+      "method": "UserLocation",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "direction": "Right"
+    },
+    {
+      "sequence": 1211,
+      "method": "UserLocation",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "direction": "Right"
+    },
+    {
+      "sequence": 1214,
+      "method": "UserLocation",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "direction": "Up"
+    },
+    {
+      "sequence": 1217,
+      "method": "ObjectHealth",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "objectId": 206643
+    },
+    {
+      "sequence": 1220,
+      "method": "UserLocation",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "direction": "Right"
+    },
+    {
+      "sequence": 1224,
+      "method": "ObjectHealth",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "objectId": 206508
+    },
+    {
+      "sequence": 1225,
+      "method": "ObjectHealth",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "objectId": 206628
+    },
+    {
+      "sequence": 1229,
+      "method": "UserLocation",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "direction": "Up"
+    },
+    {
+      "sequence": 1232,
+      "method": "ObjectHealth",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "objectId": 206511
+    },
+    {
+      "sequence": 1236,
+      "method": "UserLocation",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "direction": "Up"
+    },
+    {
+      "sequence": 1238,
+      "method": "UserLocation",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "direction": "Right"
+    },
+    {
+      "sequence": 1241,
+      "method": "UserLocation",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "direction": "Right"
+    },
+    {
+      "sequence": 1243,
+      "method": "ObjectHealth",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "objectId": 206020
+    },
+    {
+      "sequence": 1246,
+      "method": "UserLocation",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "direction": "Up"
+    },
+    {
+      "sequence": 1249,
+      "method": "ObjectHealth",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "objectId": 271805
+    },
+    {
+      "sequence": 1254,
+      "method": "UserLocation",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "direction": "Right"
+    },
+    {
+      "sequence": 1257,
+      "method": "ObjectHealth",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "objectId": 206111
+    },
+    {
+      "sequence": 1261,
+      "method": "UserLocation",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "direction": "Up"
+    },
+    {
+      "sequence": 1263,
+      "method": "ObjectHealth",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "objectId": 206014
+    },
+    {
+      "sequence": 1268,
+      "method": "UserLocation",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "direction": "Right"
+    },
+    {
+      "sequence": 1271,
+      "method": "UserLocation",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "direction": "Up"
+    },
+    {
+      "sequence": 1275,
+      "method": "ObjectHealth",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "objectId": 206718
+    },
+    {
+      "sequence": 1280,
+      "method": "UserLocation",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "direction": "Right"
+    },
+    {
+      "sequence": 1283,
+      "method": "ObjectHealth",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "objectId": 206202
+    },
+    {
+      "sequence": 1288,
+      "method": "UserLocation",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "direction": "Up"
+    },
+    {
+      "sequence": 1292,
+      "method": "ObjectHealth",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "objectId": 206523
+    },
+    {
+      "sequence": 1295,
+      "method": "ObjectStruck",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "objectId": 1000,
+      "attackerId": 206007,
+      "direction": "Up"
+    },
+    {
+      "sequence": 1297,
+      "method": "ObjectHealth",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "objectId": 1000
+    },
+    {
+      "sequence": 1300,
+      "method": "UserLocation",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "direction": "Right"
+    },
+    {
+      "sequence": 1303,
+      "method": "UserLocation",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "direction": "Up"
+    },
+    {
+      "sequence": 1305,
+      "method": "ObjectHealth",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "objectId": 206526
+    },
+    {
+      "sequence": 1313,
+      "method": "UserLocation",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "direction": "Right"
+    },
+    {
+      "sequence": 1315,
+      "method": "ObjectStruck",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "objectId": 1000,
+      "attackerId": 206610,
+      "direction": "Right"
+    },
+    {
+      "sequence": 1317,
+      "method": "ObjectHealth",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "objectId": 1000
+    },
+    {
+      "sequence": 1320,
+      "method": "ObjectStruck",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "objectId": 1000,
+      "attackerId": 206007,
+      "direction": "Right"
+    },
+    {
+      "sequence": 1322,
+      "method": "ObjectHealth",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "objectId": 1000
+    },
+    {
+      "sequence": 1326,
+      "method": "ObjectStruck",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "objectId": 1000,
+      "attackerId": 206013,
+      "direction": "Right"
+    },
+    {
+      "sequence": 1328,
+      "method": "ObjectHealth",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "objectId": 1000
+    },
+    {
+      "sequence": 1332,
+      "method": "UserLocation",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "direction": "Right"
+    },
+    {
+      "sequence": 1334,
+      "method": "ObjectStruck",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "objectId": 206013,
+      "attackerId": 1000,
+      "direction": "Left"
+    },
+    {
+      "sequence": 1336,
+      "method": "ObjectHealth",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "objectId": 206013
+    },
+    {
+      "sequence": 1338,
+      "method": "ObjectStruck",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "objectId": 1000,
+      "attackerId": 206610,
+      "direction": "Right"
+    },
+    {
+      "sequence": 1340,
+      "method": "ObjectHealth",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "objectId": 1000
+    },
+    {
+      "sequence": 1345,
+      "method": "UserLocation",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "direction": "Right"
+    },
+    {
+      "sequence": 1347,
+      "method": "ObjectStruck",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "objectId": 206013,
+      "attackerId": 1000,
+      "direction": "Left"
+    },
+    {
+      "sequence": 1349,
+      "method": "ObjectHealth",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "objectId": 206013
+    },
+    {
+      "sequence": 1352,
+      "method": "ObjectStruck",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "objectId": 1000,
+      "attackerId": 206007,
+      "direction": "Right"
+    },
+    {
+      "sequence": 1354,
+      "method": "ObjectHealth",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "objectId": 1000
+    },
+    {
+      "sequence": 1358,
+      "method": "ObjectStruck",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "objectId": 1000,
+      "attackerId": 206013,
+      "direction": "Right"
+    },
+    {
+      "sequence": 1360,
+      "method": "ObjectHealth",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "objectId": 1000
+    },
+    {
+      "sequence": 1363,
+      "method": "ObjectStruck",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "objectId": 1000,
+      "attackerId": 206610,
+      "direction": "Right"
+    },
+    {
+      "sequence": 1365,
+      "method": "ObjectHealth",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "objectId": 1000
+    },
+    {
+      "sequence": 1368,
+      "method": "UseItem",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "success": true,
+      "uniqueId": 2
+    },
+    {
+      "sequence": 1370,
+      "method": "ObjectHealth",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "objectId": 1000
+    },
+    {
+      "sequence": 1372,
+      "method": "ObjectHealth",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "objectId": 1000
+    },
+    {
+      "sequence": 1374,
+      "method": "ObjectHealth",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "objectId": 1000
+    },
+    {
+      "sequence": 1376,
+      "method": "ObjectStruck",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "objectId": 1000,
+      "attackerId": 206007,
+      "direction": "Right"
+    },
+    {
+      "sequence": 1378,
+      "method": "ObjectHealth",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "objectId": 1000
+    },
+    {
+      "sequence": 1381,
+      "method": "ObjectStruck",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "objectId": 1000,
+      "attackerId": 206013,
+      "direction": "Right"
+    },
+    {
+      "sequence": 1383,
+      "method": "ObjectHealth",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "objectId": 1000
+    },
+    {
+      "sequence": 1386,
+      "method": "ObjectStruck",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "objectId": 1000,
+      "attackerId": 206610,
+      "direction": "Right"
+    },
+    {
+      "sequence": 1388,
+      "method": "ObjectHealth",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "objectId": 1000
+    },
+    {
+      "sequence": 1391,
+      "method": "ObjectStruck",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "objectId": 1000,
+      "attackerId": 206007,
+      "direction": "Right"
+    },
+    {
+      "sequence": 1393,
+      "method": "ObjectHealth",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "objectId": 1000
+    },
+    {
+      "sequence": 1396,
+      "method": "ObjectStruck",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "objectId": 1000,
+      "attackerId": 206013,
+      "direction": "Right"
+    },
+    {
+      "sequence": 1398,
+      "method": "ObjectHealth",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "objectId": 1000
+    },
+    {
+      "sequence": 1401,
+      "method": "ObjectStruck",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "objectId": 1000,
+      "attackerId": 206610,
+      "direction": "Right"
+    },
+    {
+      "sequence": 1403,
+      "method": "ObjectHealth",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "objectId": 1000
+    },
+    {
+      "sequence": 1406,
+      "method": "ObjectStruck",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "objectId": 1000,
+      "attackerId": 206007,
+      "direction": "Right"
+    },
+    {
+      "sequence": 1408,
+      "method": "ObjectHealth",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "objectId": 1000
+    },
+    {
+      "sequence": 1411,
+      "method": "ObjectStruck",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "objectId": 1000,
+      "attackerId": 206013,
+      "direction": "Right"
+    },
+    {
+      "sequence": 1413,
+      "method": "ObjectHealth",
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "objectId": 1000
+    }
+  ],
+  "questOperations": [
+    {
+      "questId": 2110002,
+      "operation": "acceptQuest",
+      "requestIdPresent": true,
+      "matchingAck": true,
+      "success": true,
+      "sentSequence": 703,
+      "ackSequence": 706,
+      "completeQuestObserved": false,
+      "questLog": [
+        {
+          "questId": 2110001,
+          "stage": "completed",
+          "current": 1,
+          "required": 1,
+          "objectives": [
+            {
+              "label": "Report to Assistant Jane",
+              "current": 1,
+              "required": 1,
+              "done": true
+            }
+          ]
+        },
+        {
+          "questId": 2110002,
+          "stage": "inProgress",
+          "current": 0,
+          "required": 1,
+          "objectives": [
+            {
+              "label": "Equip a weapon you can use",
+              "current": 0,
+              "required": 1,
+              "done": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "questId": 2110002,
+      "operation": "finishQuest",
+      "requestIdPresent": true,
+      "matchingAck": true,
+      "success": true,
+      "sentSequence": 733,
+      "ackSequence": 743,
+      "completeQuestObserved": true,
+      "questLog": [
+        {
+          "questId": 2110001,
+          "stage": "completed",
+          "current": 1,
+          "required": 1,
+          "objectives": [
+            {
+              "label": "Report to Assistant Jane",
+              "current": 1,
+              "required": 1,
+              "done": true
+            }
+          ]
+        },
+        {
+          "questId": 2110002,
+          "stage": "completed",
+          "current": 1,
+          "required": 1,
+          "objectives": [
+            {
+              "label": "Equip a weapon you can use",
+              "current": 1,
+              "required": 1,
+              "done": true
+            }
+          ]
+        },
+        {
+          "questId": 2110003,
+          "stage": "available",
+          "current": 0,
+          "required": 4,
+          "objectives": [
+            {
+              "label": "Defeat 2 Scarecrow.",
+              "current": 0,
+              "required": 2,
+              "done": false
+            },
+            {
+              "label": "Defeat 2 RakingCat.",
+              "current": 0,
+              "required": 2,
+              "done": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "questId": 2110003,
+      "operation": "acceptQuest",
+      "requestIdPresent": true,
+      "matchingAck": true,
+      "success": true,
+      "sentSequence": 753,
+      "ackSequence": 756,
+      "completeQuestObserved": false,
+      "questLog": [
+        {
+          "questId": 2110001,
+          "stage": "completed",
+          "current": 1,
+          "required": 1,
+          "objectives": [
+            {
+              "label": "Report to Assistant Jane",
+              "current": 1,
+              "required": 1,
+              "done": true
+            }
+          ]
+        },
+        {
+          "questId": 2110002,
+          "stage": "completed",
+          "current": 1,
+          "required": 1,
+          "objectives": [
+            {
+              "label": "Equip a weapon you can use",
+              "current": 1,
+              "required": 1,
+              "done": true
+            }
+          ]
+        },
+        {
+          "questId": 2110003,
+          "stage": "inProgress",
+          "current": 0,
+          "required": 4,
+          "objectives": [
+            {
+              "label": "Defeat 2 Scarecrow.",
+              "current": 0,
+              "required": 2,
+              "done": false
+            },
+            {
+              "label": "Defeat 2 RakingCat.",
+              "current": 0,
+              "required": 2,
+              "done": false
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "movement": [
+    {
+      "from": {
+        "x": 287,
+        "y": 603
+      },
+      "position": {
+        "x": 287,
+        "y": 604
+      },
+      "direction": "Down",
+      "outcome": "moved",
+      "heldForMs": 244,
+      "sequence": 759
+    },
+    {
+      "from": {
+        "x": 287,
+        "y": 604
+      },
+      "position": {
+        "x": 287,
+        "y": 605
+      },
+      "direction": "Down",
+      "outcome": "moved",
+      "heldForMs": 273,
+      "sequence": 765
+    },
+    {
+      "from": {
+        "x": 287,
+        "y": 605
+      },
+      "position": {
+        "x": 287,
+        "y": 606
+      },
+      "direction": "Down",
+      "outcome": "moved",
+      "heldForMs": 247,
+      "sequence": 768
+    },
+    {
+      "from": {
+        "x": 287,
+        "y": 606
+      },
+      "position": {
+        "x": 287,
+        "y": 607
+      },
+      "direction": "Down",
+      "outcome": "moved",
+      "heldForMs": 347,
+      "sequence": 771
+    },
+    {
+      "from": {
+        "x": 287,
+        "y": 607
+      },
+      "position": {
+        "x": 287,
+        "y": 608
+      },
+      "direction": "Down",
+      "outcome": "moved",
+      "heldForMs": 182,
+      "sequence": 775
+    },
+    {
+      "from": {
+        "x": 287,
+        "y": 608
+      },
+      "position": {
+        "x": 287,
+        "y": 609
+      },
+      "direction": "Down",
+      "outcome": "moved",
+      "heldForMs": 266,
+      "sequence": 781
+    },
+    {
+      "from": {
+        "x": 287,
+        "y": 609
+      },
+      "position": {
+        "x": 288,
+        "y": 609
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 346,
+      "sequence": 784
+    },
+    {
+      "from": {
+        "x": 288,
+        "y": 609
+      },
+      "position": {
+        "x": 288,
+        "y": 610
+      },
+      "direction": "Down",
+      "outcome": "moved",
+      "heldForMs": 259,
+      "sequence": 788
+    },
+    {
+      "from": {
+        "x": 288,
+        "y": 610
+      },
+      "position": {
+        "x": 289,
+        "y": 610
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 174,
+      "sequence": 791
+    },
+    {
+      "from": {
+        "x": 289,
+        "y": 610
+      },
+      "position": {
+        "x": 290,
+        "y": 610
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 173,
+      "sequence": 795
+    },
+    {
+      "from": {
+        "x": 290,
+        "y": 610
+      },
+      "position": {
+        "x": 290,
+        "y": 611
+      },
+      "direction": "Down",
+      "outcome": "moved",
+      "heldForMs": 168,
+      "sequence": 797
+    },
+    {
+      "from": {
+        "x": 290,
+        "y": 611
+      },
+      "position": {
+        "x": 291,
+        "y": 611
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 167,
+      "sequence": 799
+    },
+    {
+      "from": {
+        "x": 291,
+        "y": 611
+      },
+      "position": {
+        "x": 292,
+        "y": 611
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 267,
+      "sequence": 802
+    },
+    {
+      "from": {
+        "x": 292,
+        "y": 611
+      },
+      "position": {
+        "x": 293,
+        "y": 611
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 343,
+      "sequence": 806
+    },
+    {
+      "from": {
+        "x": 293,
+        "y": 611
+      },
+      "position": {
+        "x": 293,
+        "y": 612
+      },
+      "direction": "Down",
+      "outcome": "moved",
+      "heldForMs": 398,
+      "sequence": 809
+    },
+    {
+      "from": {
+        "x": 293,
+        "y": 612
+      },
+      "position": {
+        "x": 293,
+        "y": 613
+      },
+      "direction": "Down",
+      "outcome": "moved",
+      "heldForMs": 347,
+      "sequence": 813
+    },
+    {
+      "from": {
+        "x": 293,
+        "y": 613
+      },
+      "position": {
+        "x": 293,
+        "y": 614
+      },
+      "direction": "Down",
+      "outcome": "moved",
+      "heldForMs": 456,
+      "sequence": 874
+    },
+    {
+      "from": {
+        "x": 293,
+        "y": 614
+      },
+      "position": {
+        "x": 292,
+        "y": 614
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 254,
+      "sequence": 878
+    },
+    {
+      "from": {
+        "x": 292,
+        "y": 614
+      },
+      "position": {
+        "x": 291,
+        "y": 614
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 244,
+      "sequence": 882
+    },
+    {
+      "from": {
+        "x": 291,
+        "y": 614
+      },
+      "position": {
+        "x": 291,
+        "y": 615
+      },
+      "direction": "Down",
+      "outcome": "moved",
+      "heldForMs": 249,
+      "sequence": 888
+    },
+    {
+      "from": {
+        "x": 291,
+        "y": 615
+      },
+      "position": {
+        "x": 290,
+        "y": 615
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 360,
+      "sequence": 890
+    },
+    {
+      "from": {
+        "x": 290,
+        "y": 615
+      },
+      "position": {
+        "x": 289,
+        "y": 615
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 182,
+      "sequence": 892
+    },
+    {
+      "from": {
+        "x": 289,
+        "y": 615
+      },
+      "position": {
+        "x": 288,
+        "y": 615
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 653,
+      "sequence": 895
+    },
+    {
+      "from": {
+        "x": 288,
+        "y": 615
+      },
+      "position": {
+        "x": 288,
+        "y": 616
+      },
+      "direction": "Down",
+      "outcome": "moved",
+      "heldForMs": 513,
+      "sequence": 968
+    },
+    {
+      "from": {
+        "x": 288,
+        "y": 616
+      },
+      "position": {
+        "x": 288,
+        "y": 617
+      },
+      "direction": "Down",
+      "outcome": "moved",
+      "heldForMs": 442,
+      "sequence": 971
+    },
+    {
+      "from": {
+        "x": 288,
+        "y": 617
+      },
+      "position": {
+        "x": 288,
+        "y": 618
+      },
+      "direction": "Down",
+      "outcome": "moved",
+      "heldForMs": 173,
+      "sequence": 974
+    },
+    {
+      "from": {
+        "x": 288,
+        "y": 618
+      },
+      "position": {
+        "x": 288,
+        "y": 619
+      },
+      "direction": "Down",
+      "outcome": "moved",
+      "heldForMs": 243,
+      "sequence": 976
+    },
+    {
+      "from": {
+        "x": 288,
+        "y": 619
+      },
+      "position": {
+        "x": 288,
+        "y": 620
+      },
+      "direction": "Down",
+      "outcome": "moved",
+      "heldForMs": 431,
+      "sequence": 981
+    },
+    {
+      "from": {
+        "x": 288,
+        "y": 620
+      },
+      "position": {
+        "x": 288,
+        "y": 621
+      },
+      "direction": "Down",
+      "outcome": "moved",
+      "heldForMs": 174,
+      "sequence": 986
+    },
+    {
+      "from": {
+        "x": 288,
+        "y": 621
+      },
+      "position": {
+        "x": 288,
+        "y": 622
+      },
+      "direction": "Down",
+      "outcome": "moved",
+      "heldForMs": 333,
+      "sequence": 990
+    },
+    {
+      "from": {
+        "x": 288,
+        "y": 622
+      },
+      "position": {
+        "x": 287,
+        "y": 622
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 173,
+      "sequence": 993
+    },
+    {
+      "from": {
+        "x": 287,
+        "y": 622
+      },
+      "position": {
+        "x": 286,
+        "y": 622
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 252,
+      "sequence": 996
+    },
+    {
+      "from": {
+        "x": 286,
+        "y": 622
+      },
+      "position": {
+        "x": 285,
+        "y": 622
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 240,
+      "sequence": 998
+    },
+    {
+      "from": {
+        "x": 285,
+        "y": 622
+      },
+      "position": {
+        "x": 284,
+        "y": 622
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 256,
+      "sequence": 1000
+    },
+    {
+      "from": {
+        "x": 284,
+        "y": 622
+      },
+      "position": {
+        "x": 283,
+        "y": 622
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 248,
+      "sequence": 1002
+    },
+    {
+      "from": {
+        "x": 283,
+        "y": 622
+      },
+      "position": {
+        "x": 282,
+        "y": 622
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 173,
+      "sequence": 1004
+    },
+    {
+      "from": {
+        "x": 282,
+        "y": 622
+      },
+      "position": {
+        "x": 282,
+        "y": 623
+      },
+      "direction": "Down",
+      "outcome": "moved",
+      "heldForMs": 420,
+      "sequence": 1007
+    },
+    {
+      "from": {
+        "x": 282,
+        "y": 623
+      },
+      "position": {
+        "x": 281,
+        "y": 623
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 253,
+      "sequence": 1011
+    },
+    {
+      "from": {
+        "x": 281,
+        "y": 623
+      },
+      "position": {
+        "x": 281,
+        "y": 624
+      },
+      "direction": "Down",
+      "outcome": "moved",
+      "heldForMs": 162,
+      "sequence": 1013
+    },
+    {
+      "from": {
+        "x": 281,
+        "y": 624
+      },
+      "position": {
+        "x": 280,
+        "y": 624
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 249,
+      "sequence": 1015
+    },
+    {
+      "from": {
+        "x": 280,
+        "y": 624
+      },
+      "position": {
+        "x": 280,
+        "y": 625
+      },
+      "direction": "Down",
+      "outcome": "moved",
+      "heldForMs": 253,
+      "sequence": 1017
+    },
+    {
+      "from": {
+        "x": 280,
+        "y": 625
+      },
+      "position": {
+        "x": 279,
+        "y": 625
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 162,
+      "sequence": 1023
+    },
+    {
+      "from": {
+        "x": 279,
+        "y": 625
+      },
+      "position": {
+        "x": 278,
+        "y": 625
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 352,
+      "sequence": 1029
+    },
+    {
+      "from": {
+        "x": 278,
+        "y": 625
+      },
+      "position": {
+        "x": 277,
+        "y": 625
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 344,
+      "sequence": 1032
+    },
+    {
+      "from": {
+        "x": 277,
+        "y": 625
+      },
+      "position": {
+        "x": 276,
+        "y": 625
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 337,
+      "sequence": 1039
+    },
+    {
+      "from": {
+        "x": 276,
+        "y": 625
+      },
+      "position": {
+        "x": 275,
+        "y": 625
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 341,
+      "sequence": 1042
+    },
+    {
+      "from": {
+        "x": 275,
+        "y": 625
+      },
+      "position": {
+        "x": 274,
+        "y": 625
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 433,
+      "sequence": 1045
+    },
+    {
+      "from": {
+        "x": 274,
+        "y": 625
+      },
+      "position": {
+        "x": 273,
+        "y": 625
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 245,
+      "sequence": 1050
+    },
+    {
+      "from": {
+        "x": 273,
+        "y": 625
+      },
+      "position": {
+        "x": 272,
+        "y": 625
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 239,
+      "sequence": 1052
+    },
+    {
+      "from": {
+        "x": 272,
+        "y": 625
+      },
+      "position": {
+        "x": 273,
+        "y": 625
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 331,
+      "sequence": 1057
+    },
+    {
+      "from": {
+        "x": 273,
+        "y": 625
+      },
+      "position": {
+        "x": 274,
+        "y": 625
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 247,
+      "sequence": 1059
+    },
+    {
+      "from": {
+        "x": 274,
+        "y": 625
+      },
+      "position": {
+        "x": 275,
+        "y": 625
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 333,
+      "sequence": 1062
+    },
+    {
+      "from": {
+        "x": 275,
+        "y": 625
+      },
+      "position": {
+        "x": 276,
+        "y": 625
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 333,
+      "sequence": 1070
+    },
+    {
+      "from": {
+        "x": 276,
+        "y": 625
+      },
+      "position": {
+        "x": 277,
+        "y": 625
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 340,
+      "sequence": 1075
+    },
+    {
+      "from": {
+        "x": 277,
+        "y": 625
+      },
+      "position": {
+        "x": 278,
+        "y": 625
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 336,
+      "sequence": 1080
+    },
+    {
+      "from": {
+        "x": 278,
+        "y": 625
+      },
+      "position": {
+        "x": 279,
+        "y": 625
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 332,
+      "sequence": 1086
+    },
+    {
+      "from": {
+        "x": 279,
+        "y": 625
+      },
+      "position": {
+        "x": 280,
+        "y": 625
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 240,
+      "sequence": 1089
+    },
+    {
+      "from": {
+        "x": 280,
+        "y": 625
+      },
+      "position": {
+        "x": 280,
+        "y": 624
+      },
+      "direction": "Up",
+      "outcome": "moved",
+      "heldForMs": 247,
+      "sequence": 1094
+    },
+    {
+      "from": {
+        "x": 280,
+        "y": 624
+      },
+      "position": {
+        "x": 281,
+        "y": 624
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 250,
+      "sequence": 1098
+    },
+    {
+      "from": {
+        "x": 281,
+        "y": 624
+      },
+      "position": {
+        "x": 281,
+        "y": 623
+      },
+      "direction": "Up",
+      "outcome": "moved",
+      "heldForMs": 250,
+      "sequence": 1100
+    },
+    {
+      "from": {
+        "x": 281,
+        "y": 623
+      },
+      "position": {
+        "x": 282,
+        "y": 623
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 241,
+      "sequence": 1102
+    },
+    {
+      "from": {
+        "x": 282,
+        "y": 623
+      },
+      "position": {
+        "x": 282,
+        "y": 622
+      },
+      "direction": "Up",
+      "outcome": "moved",
+      "heldForMs": 338,
+      "sequence": 1105
+    },
+    {
+      "from": {
+        "x": 282,
+        "y": 622
+      },
+      "position": {
+        "x": 283,
+        "y": 622
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 243,
+      "sequence": 1110
+    },
+    {
+      "from": {
+        "x": 283,
+        "y": 622
+      },
+      "position": {
+        "x": 283,
+        "y": 621
+      },
+      "direction": "Up",
+      "outcome": "moved",
+      "heldForMs": 345,
+      "sequence": 1113
+    },
+    {
+      "from": {
+        "x": 283,
+        "y": 621
+      },
+      "position": {
+        "x": 283,
+        "y": 620
+      },
+      "direction": "Up",
+      "outcome": "moved",
+      "heldForMs": 332,
+      "sequence": 1117
+    },
+    {
+      "from": {
+        "x": 283,
+        "y": 620
+      },
+      "position": {
+        "x": 283,
+        "y": 619
+      },
+      "direction": "Up",
+      "outcome": "moved",
+      "heldForMs": 342,
+      "sequence": 1121
+    },
+    {
+      "from": {
+        "x": 283,
+        "y": 619
+      },
+      "position": {
+        "x": 283,
+        "y": 618
+      },
+      "direction": "Up",
+      "outcome": "moved",
+      "heldForMs": 263,
+      "sequence": 1130
+    },
+    {
+      "from": {
+        "x": 283,
+        "y": 618
+      },
+      "position": {
+        "x": 283,
+        "y": 617
+      },
+      "direction": "Up",
+      "outcome": "moved",
+      "heldForMs": 251,
+      "sequence": 1132
+    },
+    {
+      "from": {
+        "x": 283,
+        "y": 617
+      },
+      "position": {
+        "x": 283,
+        "y": 616
+      },
+      "direction": "Up",
+      "outcome": "moved",
+      "heldForMs": 345,
+      "sequence": 1135
+    },
+    {
+      "from": {
+        "x": 283,
+        "y": 616
+      },
+      "position": {
+        "x": 283,
+        "y": 615
+      },
+      "direction": "Up",
+      "outcome": "moved",
+      "heldForMs": 261,
+      "sequence": 1140
+    },
+    {
+      "from": {
+        "x": 283,
+        "y": 615
+      },
+      "position": {
+        "x": 283,
+        "y": 614
+      },
+      "direction": "Up",
+      "outcome": "moved",
+      "heldForMs": 244,
+      "sequence": 1144
+    },
+    {
+      "from": {
+        "x": 283,
+        "y": 614
+      },
+      "position": {
+        "x": 283,
+        "y": 613
+      },
+      "direction": "Up",
+      "outcome": "moved",
+      "heldForMs": 232,
+      "sequence": 1146
+    },
+    {
+      "from": {
+        "x": 283,
+        "y": 613
+      },
+      "position": {
+        "x": 283,
+        "y": 612
+      },
+      "direction": "Up",
+      "outcome": "moved",
+      "heldForMs": 252,
+      "sequence": 1148
+    },
+    {
+      "from": {
+        "x": 283,
+        "y": 612
+      },
+      "position": {
+        "x": 283,
+        "y": 611
+      },
+      "direction": "Up",
+      "outcome": "moved",
+      "heldForMs": 346,
+      "sequence": 1155
+    },
+    {
+      "from": {
+        "x": 283,
+        "y": 611
+      },
+      "position": {
+        "x": 283,
+        "y": 610
+      },
+      "direction": "Up",
+      "outcome": "moved",
+      "heldForMs": 245,
+      "sequence": 1157
+    },
+    {
+      "from": {
+        "x": 283,
+        "y": 610
+      },
+      "position": {
+        "x": 283,
+        "y": 609
+      },
+      "direction": "Up",
+      "outcome": "moved",
+      "heldForMs": 251,
+      "sequence": 1159
+    },
+    {
+      "from": {
+        "x": 283,
+        "y": 609
+      },
+      "position": {
+        "x": 283,
+        "y": 608
+      },
+      "direction": "Up",
+      "outcome": "moved",
+      "heldForMs": 243,
+      "sequence": 1163
+    },
+    {
+      "from": {
+        "x": 283,
+        "y": 608
+      },
+      "position": {
+        "x": 283,
+        "y": 607
+      },
+      "direction": "Up",
+      "outcome": "moved",
+      "heldForMs": 420,
+      "sequence": 1166
+    },
+    {
+      "from": {
+        "x": 283,
+        "y": 607
+      },
+      "position": {
+        "x": 284,
+        "y": 607
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 342,
+      "sequence": 1170
+    },
+    {
+      "from": {
+        "x": 284,
+        "y": 607
+      },
+      "position": {
+        "x": 285,
+        "y": 607
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 252,
+      "sequence": 1175
+    },
+    {
+      "from": {
+        "x": 285,
+        "y": 607
+      },
+      "position": {
+        "x": 285,
+        "y": 606
+      },
+      "direction": "Up",
+      "outcome": "moved",
+      "heldForMs": 296,
+      "sequence": 1179
+    },
+    {
+      "from": {
+        "x": 285,
+        "y": 606
+      },
+      "position": {
+        "x": 285,
+        "y": 605
+      },
+      "direction": "Up",
+      "outcome": "moved",
+      "heldForMs": 253,
+      "sequence": 1184
+    },
+    {
+      "from": {
+        "x": 285,
+        "y": 605
+      },
+      "position": {
+        "x": 285,
+        "y": 604
+      },
+      "direction": "Up",
+      "outcome": "moved",
+      "heldForMs": 256,
+      "sequence": 1186
+    },
+    {
+      "from": {
+        "x": 285,
+        "y": 604
+      },
+      "position": {
+        "x": 285,
+        "y": 603
+      },
+      "direction": "Up",
+      "outcome": "moved",
+      "heldForMs": 345,
+      "sequence": 1193
+    },
+    {
+      "from": {
+        "x": 285,
+        "y": 603
+      },
+      "position": {
+        "x": 285,
+        "y": 602
+      },
+      "direction": "Up",
+      "outcome": "moved",
+      "heldForMs": 339,
+      "sequence": 1197
+    },
+    {
+      "from": {
+        "x": 285,
+        "y": 602
+      },
+      "position": {
+        "x": 286,
+        "y": 602
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 255,
+      "sequence": 1200
+    },
+    {
+      "from": {
+        "x": 286,
+        "y": 602
+      },
+      "position": {
+        "x": 286,
+        "y": 601
+      },
+      "direction": "Up",
+      "outcome": "moved",
+      "heldForMs": 253,
+      "sequence": 1202
+    },
+    {
+      "from": {
+        "x": 286,
+        "y": 601
+      },
+      "position": {
+        "x": 286,
+        "y": 600
+      },
+      "direction": "Up",
+      "outcome": "moved",
+      "heldForMs": 338,
+      "sequence": 1205
+    },
+    {
+      "from": {
+        "x": 286,
+        "y": 600
+      },
+      "position": {
+        "x": 287,
+        "y": 600
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 242,
+      "sequence": 1207
+    },
+    {
+      "from": {
+        "x": 287,
+        "y": 600
+      },
+      "position": {
+        "x": 288,
+        "y": 600
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 449,
+      "sequence": 1211
+    },
+    {
+      "from": {
+        "x": 288,
+        "y": 600
+      },
+      "position": {
+        "x": 288,
+        "y": 599
+      },
+      "direction": "Up",
+      "outcome": "moved",
+      "heldForMs": 339,
+      "sequence": 1214
+    },
+    {
+      "from": {
+        "x": 288,
+        "y": 599
+      },
+      "position": {
+        "x": 289,
+        "y": 599
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 336,
+      "sequence": 1220
+    },
+    {
+      "from": {
+        "x": 289,
+        "y": 599
+      },
+      "position": {
+        "x": 289,
+        "y": 598
+      },
+      "direction": "Up",
+      "outcome": "moved",
+      "heldForMs": 353,
+      "sequence": 1229
+    },
+    {
+      "from": {
+        "x": 289,
+        "y": 598
+      },
+      "position": {
+        "x": 289,
+        "y": 597
+      },
+      "direction": "Up",
+      "outcome": "moved",
+      "heldForMs": 338,
+      "sequence": 1236
+    },
+    {
+      "from": {
+        "x": 289,
+        "y": 597
+      },
+      "position": {
+        "x": 290,
+        "y": 597
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 357,
+      "sequence": 1238
+    },
+    {
+      "from": {
+        "x": 290,
+        "y": 597
+      },
+      "position": {
+        "x": 291,
+        "y": 597
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 287,
+      "sequence": 1241
+    },
+    {
+      "from": {
+        "x": 291,
+        "y": 597
+      },
+      "position": {
+        "x": 291,
+        "y": 596
+      },
+      "direction": "Up",
+      "outcome": "moved",
+      "heldForMs": 291,
+      "sequence": 1246
+    },
+    {
+      "from": {
+        "x": 291,
+        "y": 596
+      },
+      "position": {
+        "x": 292,
+        "y": 596
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 348,
+      "sequence": 1254
+    },
+    {
+      "from": {
+        "x": 292,
+        "y": 596
+      },
+      "position": {
+        "x": 292,
+        "y": 595
+      },
+      "direction": "Up",
+      "outcome": "moved",
+      "heldForMs": 254,
+      "sequence": 1261
+    },
+    {
+      "from": {
+        "x": 292,
+        "y": 595
+      },
+      "position": {
+        "x": 293,
+        "y": 595
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 276,
+      "sequence": 1268
+    },
+    {
+      "from": {
+        "x": 293,
+        "y": 595
+      },
+      "position": {
+        "x": 293,
+        "y": 594
+      },
+      "direction": "Up",
+      "outcome": "moved",
+      "heldForMs": 166,
+      "sequence": 1271
+    },
+    {
+      "from": {
+        "x": 293,
+        "y": 594
+      },
+      "position": {
+        "x": 294,
+        "y": 594
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 272,
+      "sequence": 1280
+    },
+    {
+      "from": {
+        "x": 294,
+        "y": 594
+      },
+      "position": {
+        "x": 294,
+        "y": 593
+      },
+      "direction": "Up",
+      "outcome": "moved",
+      "heldForMs": 279,
+      "sequence": 1288
+    },
+    {
+      "from": {
+        "x": 294,
+        "y": 593
+      },
+      "position": {
+        "x": 294,
+        "y": 593
+      },
+      "direction": "Right",
+      "outcome": "turned-only",
+      "heldForMs": 175,
+      "sequence": 1300
+    },
+    {
+      "from": {
+        "x": 294,
+        "y": 593
+      },
+      "position": {
+        "x": 294,
+        "y": 592
+      },
+      "direction": "Up",
+      "outcome": "moved",
+      "heldForMs": 242,
+      "sequence": 1303
+    },
+    {
+      "from": {
+        "x": 294,
+        "y": 592
+      },
+      "position": {
+        "x": 295,
+        "y": 592
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 349,
+      "sequence": 1313
+    }
+  ],
+  "native": [
+    {
+      "name": "fresh-v2-chapter-task-card",
+      "ready": true,
+      "generation": 2,
+      "revision": 1,
+      "frame": 45,
+      "questLogOpen": false,
+      "capturesPointer": false,
+      "owner": "bevy",
+      "currentWorldContext": true,
+      "rects": [
+        {
+          "type": "questLocalUi",
+          "left": 19,
+          "top": 215,
+          "width": 282,
+          "height": 25
+        },
+        {
+          "type": "openDestinationMap",
+          "left": 19,
+          "top": 244,
+          "width": 282,
+          "height": 25
+        },
+        {
+          "type": "toggleSupplies",
+          "left": 19,
+          "top": 273,
+          "width": 282,
+          "height": 25
+        }
+      ],
+      "compact": null
+    }
+  ],
+  "errors": [
+    {
+      "phase": "review-current-native-detail-acceptQuest-2110003-attempt-1",
+      "name": "BAG_CLOSE_NOT_ACKNOWLEDGED",
+      "hash": "a2e6fadcd6d9fe4f996b8d638a83ef8a457b9d4be346fd8c4002ce7cd166b8e1"
+    }
+  ],
+  "network": {
+    "failed": [],
+    "httpErrors": [],
+    "cancelled": [
+      {
+        "phase": "ordinary-owned-qa-character-relogin",
+        "method": "GET",
+        "pathHash": "9eeb5fa233df82531dffea86ffb49fa4f48ac32bcba5fb5d93a58ab367fe0e40",
+        "successfulResponseObserved": true
+      },
+      {
+        "phase": "ordinary-owned-qa-character-relogin",
+        "method": "GET",
+        "pathHash": "59b575174e75b5bd4afcfbd6f7f338462fb173fabd1e9572382da322fe3dffef",
+        "successfulResponseObserved": true
+      },
+      {
+        "phase": "review-current-native-detail-acceptQuest-2110002-attempt-1",
+        "method": "GET",
+        "pathHash": "b5a477466acb573db09051484a348dc305a615e912e5fd4fb8cdfc59b6aa0454",
+        "successfulResponseObserved": true
+      }
+    ]
+  },
+  "console": {
+    "errorCount": 0,
+    "warningCount": 7,
+    "hashes": [
+      {
+        "phase": "ordinary-owned-qa-character-relogin",
+        "name": "warning",
+        "hash": "175c73d54d8d443a965a16a38ac036c2de536a3920f173064fd6837866b00186"
+      },
+      {
+        "phase": "ordinary-owned-qa-character-relogin",
+        "name": "warning",
+        "hash": "5c96194cf54ce35f886786c7d0b79840fa57401ff6048a774c55b0eadac1c014"
+      },
+      {
+        "phase": "ordinary-owned-qa-character-relogin",
+        "name": "warning",
+        "hash": "66911ac2564797381385f8e0af7b1817bb6dfac38b2942b1f0e75e28b5b4fd1d"
+      },
+      {
+        "phase": "ordinary-owned-qa-character-relogin",
+        "name": "warning",
+        "hash": "d2a9e1c44ad0a90ad86c6c6d7624fd8f569ddbac42b3bb3e398e03da8642df6b"
+      },
+      {
+        "phase": "ordinary-owned-qa-character-relogin",
+        "name": "warning",
+        "hash": "d2a9e1c44ad0a90ad86c6c6d7624fd8f569ddbac42b3bb3e398e03da8642df6b"
+      },
+      {
+        "phase": "ordinary-owned-qa-character-relogin",
+        "name": "warning",
+        "hash": "d2a9e1c44ad0a90ad86c6c6d7624fd8f569ddbac42b3bb3e398e03da8642df6b"
+      },
+      {
+        "phase": "ordinary-owned-qa-character-relogin",
+        "name": "warning",
+        "hash": "759e82b8dcf7f1352f61f5421e9ad230b615ea574d7ebe32fe21e1853e894ba0"
+      }
+    ]
+  },
+  "commands": {
+    "clientCapabilities": 2,
+    "setLanguage": 1,
+    "clientVersion": 1,
+    "login": 1,
+    "startGame": 1,
+    "npcPurchaseOwner": 1,
+    "keepAlive": 31,
+    "acceptQuest": 2,
+    "equipItem": 1,
+    "finishQuest": 1,
+    "walk": 105,
+    "attack": 15,
+    "tick": 28,
+    "turn": 1,
+    "useItem": 1
+  },
+  "unknownCommandCount": 0,
+  "unknownTypeHashes": [],
+  "cleanup": {
+    "ordinaryLogout": false,
+    "browserClosed": true
+  },
+  "budgets": {
+    "maxHuntMs": 360000,
+    "maxSteps": 420
+  },
+  "renderer": {
+    "expected": null,
+    "observedPublicReleases": [
+      "bevy-07bd13d63fcbbd3a"
+    ]
+  },
+  "initialNativeReadiness": [
+    {
+      "ready": true,
+      "frame": 45,
+      "generation": 2,
+      "revision": 1,
+      "rectCount": 3,
+      "worldCurrent": true,
+      "genericNativeActionsRequireNonemptyWorldRects": false
+    }
+  ],
+  "resumedCompletedQuestIds": [
+    2110001
+  ],
+  "firstQuestRewardNotReclaimed": true,
+  "uiReviews": [
+    {
+      "questId": 2110002,
+      "operation": "acceptQuest",
+      "attempt": 1,
+      "decision": "proceed",
+      "screenshot": "03-review-acceptQuest-2110002-attempt-1.png"
+    },
+    {
+      "questId": 2110002,
+      "operation": "finishQuest",
+      "attempt": 1,
+      "decision": "proceed",
+      "screenshot": "04-review-finishQuest-2110002-attempt-1.png"
+    },
+    {
+      "questId": 2110003,
+      "operation": "acceptQuest",
+      "attempt": 1,
+      "decision": "proceed",
+      "screenshot": "06-review-acceptQuest-2110003-attempt-1.png"
+    }
+  ],
+  "equippedWeaponSource": "current-authoritative-owned-inventory-after-resumed-q1",
+  "secondReward": {
+    "goldDelta": 100,
+    "equippedWoodenSword": true,
+    "completeQuest": true
+  },
+  "hunt": {
+    "required": {
+      "Scarecrow": 2,
+      "RakingCat": 2
+    },
+    "deaths": [
+      {
+        "objectId": 206644,
+        "name": "Scarecrow",
+        "lastOwnHitSequence": 864,
+        "deathSequence": 867,
+        "authoritativeQuestLog": [
+          {
+            "questId": 2110001,
+            "stage": "completed",
+            "current": 1,
+            "required": 1,
+            "objectives": [
+              {
+                "label": "Report to Assistant Jane",
+                "current": 1,
+                "required": 1,
+                "done": true
+              }
+            ]
+          },
+          {
+            "questId": 2110002,
+            "stage": "completed",
+            "current": 1,
+            "required": 1,
+            "objectives": [
+              {
+                "label": "Equip a weapon you can use",
+                "current": 1,
+                "required": 1,
+                "done": true
+              }
+            ]
+          },
+          {
+            "questId": 2110003,
+            "stage": "inProgress",
+            "current": 1,
+            "required": 4,
+            "objectives": [
+              {
+                "current": 1,
+                "required": 2,
+                "done": false
+              },
+              {
+                "current": 0,
+                "required": 2,
+                "done": false
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "objectId": 206641,
+        "name": "Scarecrow",
+        "lastOwnHitSequence": 957,
+        "deathSequence": 960,
+        "authoritativeQuestLog": [
+          {
+            "questId": 2110001,
+            "stage": "completed",
+            "current": 1,
+            "required": 1,
+            "objectives": [
+              {
+                "label": "Report to Assistant Jane",
+                "current": 1,
+                "required": 1,
+                "done": true
+              }
+            ]
+          },
+          {
+            "questId": 2110002,
+            "stage": "completed",
+            "current": 1,
+            "required": 1,
+            "objectives": [
+              {
+                "label": "Equip a weapon you can use",
+                "current": 1,
+                "required": 1,
+                "done": true
+              }
+            ]
+          },
+          {
+            "questId": 2110003,
+            "stage": "inProgress",
+            "current": 2,
+            "required": 4,
+            "objectives": [
+              {
+                "current": 2,
+                "required": 2,
+                "done": true
+              },
+              {
+                "current": 0,
+                "required": 2,
+                "done": false
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "waypoints": [
+      {
+        "x": 270,
+        "y": 625
+      },
+      {
+        "x": 313,
+        "y": 592
+      },
+      {
+        "x": 340,
+        "y": 550
+      }
+    ],
+    "targetsObserved": [
+      {
+        "position": {
+          "x": 287,
+          "y": 603
+        },
+        "hp": 30,
+        "targets": [
+          {
+            "objectId": 206644,
+            "name": "Scarecrow",
+            "x": 293,
+            "y": 614,
+            "hp": 20,
+            "dead": false
+          },
+          {
+            "objectId": 206604,
+            "name": "Scarecrow",
+            "x": 275,
+            "y": 600,
+            "hp": 20,
+            "dead": false
+          },
+          {
+            "objectId": 206007,
+            "name": "RakingCat",
+            "x": 299,
+            "y": 590,
+            "hp": 32,
+            "dead": false
+          },
+          {
+            "objectId": 206610,
+            "name": "Scarecrow",
+            "x": 300,
+            "y": 597,
+            "hp": 20,
+            "dead": false
+          },
+          {
+            "objectId": 206641,
+            "name": "Scarecrow",
+            "x": 287,
+            "y": 616,
+            "hp": 20,
+            "dead": false
+          },
+          {
+            "objectId": 206013,
+            "name": "RakingCat",
+            "x": 301,
+            "y": 596,
+            "hp": 32,
+            "dead": false
+          },
+          {
+            "objectId": 206619,
+            "name": "Scarecrow",
+            "x": 273,
+            "y": 593,
+            "hp": 20,
+            "dead": false
+          },
+          {
+            "objectId": 206631,
+            "name": "Scarecrow",
+            "x": 277,
+            "y": 588,
+            "hp": 20,
+            "dead": false
+          }
+        ]
+      },
+      {
+        "position": {
+          "x": 293,
+          "y": 613
+        },
+        "hp": 30,
+        "targets": [
+          {
+            "objectId": 206641,
+            "name": "Scarecrow",
+            "x": 287,
+            "y": 616,
+            "hp": 20,
+            "dead": false
+          },
+          {
+            "objectId": 206632,
+            "name": "Scarecrow",
+            "x": 286,
+            "y": 623,
+            "hp": 20,
+            "dead": false
+          },
+          {
+            "objectId": 206626,
+            "name": "Scarecrow",
+            "x": 286,
+            "y": 628,
+            "hp": 20,
+            "dead": false
+          },
+          {
+            "objectId": 206610,
+            "name": "Scarecrow",
+            "x": 300,
+            "y": 597,
+            "hp": 20,
+            "dead": false
+          }
+        ]
+      },
+      {
+        "position": {
+          "x": 288,
+          "y": 615
+        },
+        "hp": 30,
+        "targets": []
+      },
+      {
+        "position": {
+          "x": 288,
+          "y": 616
+        },
+        "hp": 30,
+        "targets": []
+      },
+      {
+        "position": {
+          "x": 288,
+          "y": 617
+        },
+        "hp": 30,
+        "targets": []
+      },
+      {
+        "position": {
+          "x": 288,
+          "y": 618
+        },
+        "hp": 30,
+        "targets": []
+      },
+      {
+        "position": {
+          "x": 288,
+          "y": 619
+        },
+        "hp": 30,
+        "targets": []
+      },
+      {
+        "position": {
+          "x": 288,
+          "y": 620
+        },
+        "hp": 30,
+        "targets": []
+      },
+      {
+        "position": {
+          "x": 288,
+          "y": 621
+        },
+        "hp": 30,
+        "targets": []
+      },
+      {
+        "position": {
+          "x": 288,
+          "y": 622
+        },
+        "hp": 30,
+        "targets": []
+      },
+      {
+        "position": {
+          "x": 287,
+          "y": 622
+        },
+        "hp": 30,
+        "targets": []
+      },
+      {
+        "position": {
+          "x": 286,
+          "y": 622
+        },
+        "hp": 30,
+        "targets": []
+      },
+      {
+        "position": {
+          "x": 285,
+          "y": 622
+        },
+        "hp": 30,
+        "targets": []
+      },
+      {
+        "position": {
+          "x": 284,
+          "y": 622
+        },
+        "hp": 30,
+        "targets": []
+      },
+      {
+        "position": {
+          "x": 283,
+          "y": 622
+        },
+        "hp": 30,
+        "targets": []
+      },
+      {
+        "position": {
+          "x": 282,
+          "y": 622
+        },
+        "hp": 30,
+        "targets": []
+      },
+      {
+        "position": {
+          "x": 282,
+          "y": 623
+        },
+        "hp": 30,
+        "targets": []
+      },
+      {
+        "position": {
+          "x": 281,
+          "y": 623
+        },
+        "hp": 30,
+        "targets": []
+      },
+      {
+        "position": {
+          "x": 281,
+          "y": 624
+        },
+        "hp": 30,
+        "targets": []
+      },
+      {
+        "position": {
+          "x": 280,
+          "y": 624
+        },
+        "hp": 30,
+        "targets": []
+      },
+      {
+        "position": {
+          "x": 280,
+          "y": 625
+        },
+        "hp": 30,
+        "targets": []
+      },
+      {
+        "position": {
+          "x": 279,
+          "y": 625
+        },
+        "hp": 30,
+        "targets": []
+      },
+      {
+        "position": {
+          "x": 278,
+          "y": 625
+        },
+        "hp": 30,
+        "targets": []
+      },
+      {
+        "position": {
+          "x": 277,
+          "y": 625
+        },
+        "hp": 30,
+        "targets": []
+      },
+      {
+        "position": {
+          "x": 276,
+          "y": 625
+        },
+        "hp": 30,
+        "targets": []
+      },
+      {
+        "position": {
+          "x": 275,
+          "y": 625
+        },
+        "hp": 30,
+        "targets": []
+      },
+      {
+        "position": {
+          "x": 274,
+          "y": 625
+        },
+        "hp": 30,
+        "targets": []
+      },
+      {
+        "position": {
+          "x": 273,
+          "y": 625
+        },
+        "hp": 30,
+        "targets": []
+      },
+      {
+        "position": {
+          "x": 272,
+          "y": 625
+        },
+        "hp": 30,
+        "targets": []
+      },
+      {
+        "position": {
+          "x": 272,
+          "y": 625
+        },
+        "hp": 30,
+        "targets": []
+      },
+      {
+        "position": {
+          "x": 273,
+          "y": 625
+        },
+        "hp": 30,
+        "targets": []
+      },
+      {
+        "position": {
+          "x": 274,
+          "y": 625
+        },
+        "hp": 30,
+        "targets": []
+      },
+      {
+        "position": {
+          "x": 275,
+          "y": 625
+        },
+        "hp": 30,
+        "targets": []
+      },
+      {
+        "position": {
+          "x": 276,
+          "y": 625
+        },
+        "hp": 30,
+        "targets": []
+      },
+      {
+        "position": {
+          "x": 277,
+          "y": 625
+        },
+        "hp": 30,
+        "targets": []
+      },
+      {
+        "position": {
+          "x": 278,
+          "y": 625
+        },
+        "hp": 30,
+        "targets": []
+      },
+      {
+        "position": {
+          "x": 279,
+          "y": 625
+        },
+        "hp": 30,
+        "targets": []
+      },
+      {
+        "position": {
+          "x": 280,
+          "y": 625
+        },
+        "hp": 30,
+        "targets": []
+      },
+      {
+        "position": {
+          "x": 280,
+          "y": 624
+        },
+        "hp": 30,
+        "targets": []
+      },
+      {
+        "position": {
+          "x": 281,
+          "y": 624
+        },
+        "hp": 30,
+        "targets": []
+      },
+      {
+        "position": {
+          "x": 281,
+          "y": 623
+        },
+        "hp": 30,
+        "targets": []
+      },
+      {
+        "position": {
+          "x": 282,
+          "y": 623
+        },
+        "hp": 30,
+        "targets": []
+      },
+      {
+        "position": {
+          "x": 282,
+          "y": 622
+        },
+        "hp": 30,
+        "targets": []
+      },
+      {
+        "position": {
+          "x": 283,
+          "y": 622
+        },
+        "hp": 30,
+        "targets": []
+      },
+      {
+        "position": {
+          "x": 283,
+          "y": 621
+        },
+        "hp": 30,
+        "targets": []
+      },
+      {
+        "position": {
+          "x": 283,
+          "y": 620
+        },
+        "hp": 30,
+        "targets": []
+      },
+      {
+        "position": {
+          "x": 283,
+          "y": 619
+        },
+        "hp": 30,
+        "targets": []
+      },
+      {
+        "position": {
+          "x": 283,
+          "y": 618
+        },
+        "hp": 30,
+        "targets": []
+      },
+      {
+        "position": {
+          "x": 283,
+          "y": 617
+        },
+        "hp": 30,
+        "targets": []
+      },
+      {
+        "position": {
+          "x": 283,
+          "y": 616
+        },
+        "hp": 30,
+        "targets": []
+      },
+      {
+        "position": {
+          "x": 283,
+          "y": 615
+        },
+        "hp": 30,
+        "targets": []
+      },
+      {
+        "position": {
+          "x": 283,
+          "y": 614
+        },
+        "hp": 30,
+        "targets": []
+      },
+      {
+        "position": {
+          "x": 283,
+          "y": 613
+        },
+        "hp": 30,
+        "targets": []
+      },
+      {
+        "position": {
+          "x": 283,
+          "y": 612
+        },
+        "hp": 30,
+        "targets": []
+      },
+      {
+        "position": {
+          "x": 283,
+          "y": 611
+        },
+        "hp": 30,
+        "targets": []
+      },
+      {
+        "position": {
+          "x": 283,
+          "y": 610
+        },
+        "hp": 30,
+        "targets": []
+      },
+      {
+        "position": {
+          "x": 283,
+          "y": 609
+        },
+        "hp": 30,
+        "targets": []
+      },
+      {
+        "position": {
+          "x": 283,
+          "y": 608
+        },
+        "hp": 30,
+        "targets": []
+      },
+      {
+        "position": {
+          "x": 283,
+          "y": 607
+        },
+        "hp": 30,
+        "targets": []
+      },
+      {
+        "position": {
+          "x": 284,
+          "y": 607
+        },
+        "hp": 30,
+        "targets": []
+      },
+      {
+        "position": {
+          "x": 285,
+          "y": 607
+        },
+        "hp": 30,
+        "targets": [
+          {
+            "objectId": 206013,
+            "name": "RakingCat",
+            "x": 301,
+            "y": 596,
+            "dead": false
+          }
+        ]
+      }
+    ],
+    "completed": false
+  },
+  "failureNative": {
+    "status": {
+      "questLocaleVersion": 1,
+      "language": "zh-CN",
+      "ready": true,
+      "error": null,
+      "capturesPointer": false,
+      "questLogOpen": false,
+      "frame": 5340,
+      "generation": 2,
+      "revision": 185,
+      "openRevision": 1,
+      "hpOrb": {
+        "supported": true,
+        "ready": false,
+        "generation": 2,
+        "revision": 185,
+        "hp": null,
+        "maxHp": null,
+        "hpOnly": null,
+        "slot": null,
+        "image": null,
+        "source": null,
+        "destination": null,
+        "layout": null
+      },
+      "mpOrb": {
+        "supported": true,
+        "ready": false,
+        "generation": 2,
+        "revision": 185,
+        "mp": null,
+        "maxMp": null,
+        "hpOnly": null,
+        "slot": null,
+        "image": null,
+        "source": null,
+        "destination": null,
+        "layout": null
+      },
+      "experienceBar": {
+        "supported": false,
+        "ready": false,
+        "generation": 2,
+        "revision": 185,
+        "experience": null,
+        "maxExperience": null,
+        "slot": null,
+        "image": null,
+        "source": null,
+        "destination": null,
+        "layout": null
+      },
+      "weightBar": {
+        "supported": false,
+        "ready": false,
+        "generation": 2,
+        "revision": 185,
+        "currentWeight": null,
+        "maxWeight": null,
+        "slot": null,
+        "image": null,
+        "source": null,
+        "destination": null,
+        "layout": null
+      },
+      "hudBarDrawPlan": {
+        "version": 1,
+        "generation": 2,
+        "revision": 185,
+        "lifetime": "r1-g2-p1000",
+        "experience": {
+          "token": "e-4",
+          "sequence": 4,
+          "state": "draw",
+          "current": 60,
+          "maximum": 300,
+          "slot": {
+            "left": 9,
+            "top": 759,
+            "width": 1004,
+            "height": 8
+          },
+          "image": "original-ui/Prguse/8.png",
+          "source": {
+            "left": 0,
+            "top": 0,
+            "width": 200,
+            "height": 8
+          },
+          "destination": {
+            "left": 9,
+            "top": 759,
+            "width": 200,
+            "height": 8
+          }
+        },
+        "weight": {
+          "token": "w-4",
+          "sequence": 4,
+          "state": "draw",
+          "current": 20,
+          "maximum": 53,
+          "slot": {
+            "left": 919,
+            "top": 719,
+            "width": 76,
+            "height": 12
+          },
+          "image": "original-ui/Prguse/76.png",
+          "source": {
+            "left": 0,
+            "top": 0,
+            "width": 27,
+            "height": 12
+          },
+          "destination": {
+            "left": 919,
+            "top": 719,
+            "width": 27,
+            "height": 12
+          }
+        }
+      }
+    },
+    "worldCurrent": true,
+    "controls": {
+      "version": 1,
+      "stamp": {
+        "generation": 2,
+        "revision": 185,
+        "connectionGeneration": 1,
+        "sessionGeneration": 1,
+        "sceneRevision": 3,
+        "playerObjectId": 1000,
+        "mapFileName": "0"
+      },
+      "logicalWidth": 1024,
+      "logicalHeight": 768,
+      "rects": [
+        {
+          "type": "navigateQuestRoute",
+          "left": 19,
+          "top": 237,
+          "width": 282,
+          "height": 25
+        },
+        {
+          "type": "questLocalUi",
+          "left": 19,
+          "top": 266,
+          "width": 282,
+          "height": 25
+        },
+        {
+          "type": "openDestinationMap",
+          "left": 19,
+          "top": 295,
+          "width": 282,
+          "height": 25
+        },
+        {
+          "type": "toggleSupplies",
+          "left": 19,
+          "top": 324,
+          "width": 282,
+          "height": 25
+        }
+      ]
+    }
+  },
+  "failureBag": {
+    "active": true,
+    "error": null,
+    "owner": {
+      "owner": "bevy",
+      "runGeneration": 1,
+      "ownerRevision": 4,
+      "connectionGeneration": 1,
+      "sessionGeneration": 1
+    },
+    "status": {
+      "runGeneration": 1,
+      "connectionGeneration": 1,
+      "sessionGeneration": 1,
+      "ownerRevision": 4,
+      "frame": 5336,
+      "ready": true,
+      "inputEnabled": true,
+      "appliedRevision": 27,
+      "appliedModelRevision": 4,
+      "appliedPresentationRevision": 7,
+      "supportsBagToBelt": true,
+      "appliedBeltGeometryRevision": 2,
+      "inputRegions": [
+        {
+          "left": 410,
+          "top": 86,
+          "width": 316,
+          "height": 236
+        },
+        {
+          "left": 736,
+          "top": 86,
+          "width": 122,
+          "height": 124
+        }
+      ],
+      "diagnostics": {
+        "modelVisibleItems": 4,
+        "treeContentComplete": true,
+        "touchActionsComplete": null,
+        "scopedActionCount": null,
+        "expectedActionCount": null,
+        "minCssHitWidth": null,
+        "minCssHitHeight": null,
+        "firstActionFailure": null,
+        "layoutMatchesWindow": true,
+        "assetsLoading": false,
+        "layoutRegionCount": 2,
+        "sinkPresent": true,
+        "treeIdentity": {
+          "runGeneration": 1,
+          "connectionGeneration": 1,
+          "sessionGeneration": 1,
+          "ownerRevision": 4
+        },
+        "treeModelRevision": 4,
+        "treePage": "bag1",
+        "treeVisibleItems": 4,
+        "treeMatchesModel": true,
+        "gridCells": 40,
+        "itemCells": 4,
+        "occupiedCells": 4,
+        "iconNodes": 4,
+        "visibleIcons": 4,
+        "laidOutIcons": 4,
+        "stackTextNodes": 1,
+        "visibleStackTexts": 1,
+        "laidOutStackTexts": 1
+      },
+      "error": null
+    },
+    "diagnostic": {
+      "phase": "active",
+      "transitions": [
+        {
+          "reason": null,
+          "phase": "active",
+          "at": 160805.19999998808,
+          "status": {
+            "runGeneration": 1,
+            "connectionGeneration": 1,
+            "sessionGeneration": 1,
+            "ownerRevision": 2,
+            "frame": 1747,
+            "ready": true,
+            "inputEnabled": true,
+            "appliedRevision": 6,
+            "appliedModelRevision": 2,
+            "appliedPresentationRevision": 3,
+            "supportsBagToBelt": true,
+            "appliedBeltGeometryRevision": 1,
+            "inputRegions": [
+              {
+                "left": 410,
+                "top": 86,
+                "width": 316,
+                "height": 236
+              },
+              {
+                "left": 736,
+                "top": 86,
+                "width": 122,
+                "height": 60
+              }
+            ],
+            "diagnostics": {
+              "modelVisibleItems": 4,
+              "treeContentComplete": true,
+              "touchActionsComplete": null,
+              "scopedActionCount": null,
+              "expectedActionCount": null,
+              "minCssHitWidth": null,
+              "minCssHitHeight": null,
+              "firstActionFailure": null,
+              "layoutMatchesWindow": true,
+              "assetsLoading": false,
+              "layoutRegionCount": 2,
+              "sinkPresent": true,
+              "treeIdentity": {
+                "runGeneration": 1,
+                "connectionGeneration": 1,
+                "sessionGeneration": 1,
+                "ownerRevision": 2
+              },
+              "treeModelRevision": 2,
+              "treePage": "bag1",
+              "treeVisibleItems": 4,
+              "treeMatchesModel": true,
+              "gridCells": 40,
+              "itemCells": 4,
+              "occupiedCells": 4,
+              "iconNodes": 4,
+              "visibleIcons": 4,
+              "laidOutIcons": 4,
+              "stackTextNodes": 1,
+              "visibleStackTexts": 1,
+              "laidOutStackTexts": 1
+            },
+            "error": null
+          }
+        }
+      ],
+      "intentVerdicts": [
+        {
+          "type": "equipItem",
+          "hostModelRevision": 1,
+          "nativeModelRevision": 1,
+          "hostPresentationRevision": 3,
+          "nativePresentationRevision": 3,
+          "intentSequence": 1,
+          "verdict": "accepted"
+        },
+        {
+          "type": "useItem",
+          "hostModelRevision": 3,
+          "nativeModelRevision": 3,
+          "hostPresentationRevision": 7,
+          "nativePresentationRevision": 7,
+          "intentSequence": 2,
+          "verdict": "accepted"
+        }
+      ]
+    },
+    "hudNavigation": [
+      {
+        "action": "bag",
+        "accepted": true,
+        "fresh": true,
+        "generation": 2,
+        "revision": 1,
+        "snapshotMatches": true,
+        "appliedPending": false,
+        "ready": true,
+        "errorPresent": false,
+        "navigationSourceMatches": true,
+        "nativeBaseline": true,
+        "navigationFresh": true
+      },
+      {
+        "action": "bag",
+        "accepted": true,
+        "fresh": true,
+        "generation": 2,
+        "revision": 2,
+        "snapshotMatches": true,
+        "appliedPending": false,
+        "ready": true,
+        "errorPresent": false,
+        "navigationSourceMatches": true,
+        "nativeBaseline": true,
+        "navigationFresh": true
+      },
+      {
+        "action": "bag",
+        "accepted": true,
+        "fresh": true,
+        "generation": 2,
+        "revision": 11,
+        "snapshotMatches": true,
+        "appliedPending": false,
+        "ready": true,
+        "errorPresent": false,
+        "navigationSourceMatches": true,
+        "nativeBaseline": true,
+        "navigationFresh": true
+      }
+    ]
+  },
+  "finishedAt": "2026-11-04T16:15:13.938Z",
+  "finalQuestLog": [
+    {
+      "questId": 2110001,
+      "stage": "completed",
+      "current": 1,
+      "required": 1,
+      "objectives": [
+        {
+          "label": "Report to Assistant Jane",
+          "current": 1,
+          "required": 1,
+          "done": true
+        }
+      ]
+    },
+    {
+      "questId": 2110002,
+      "stage": "completed",
+      "current": 1,
+      "required": 1,
+      "objectives": [
+        {
+          "label": "Equip a weapon you can use",
+          "current": 1,
+          "required": 1,
+          "done": true
+        }
+      ]
+    },
+    {
+      "questId": 2110003,
+      "stage": "inProgress",
+      "current": 2,
+      "required": 4,
+      "objectives": [
+        {
+          "label": "Defeat 2 Scarecrow.",
+          "current": 2,
+          "required": 2,
+          "done": true
+        },
+        {
+          "label": "Defeat 2 RakingCat.",
+          "current": 0,
+          "required": 2,
+          "done": false
+        }
+      ]
+    }
+  ],
+  "completedQuestIds": [
+    2110001,
+    2110002
+  ],
+  "lastFullSnapshot": {
+    "sequence": 1369,
+    "receivedAtMs": 1793808906628,
+    "position": {
+      "x": 295,
+      "y": 592
+    },
+    "inSafeZone": false,
+    "mapFileName": "0"
+  },
+  "lastUserLocation": {
+    "sequence": 1345,
+    "packet": "UserLocation",
+    "position": {
+      "x": 295,
+      "y": 592
+    },
+    "direction": "Right",
+    "connectionEpoch": 1,
+    "characterEpoch": 1,
+    "mapFileName": "0"
+  },
+  "movementSteps": 106
+}

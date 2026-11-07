@@ -72,8 +72,9 @@ type PwaGameShellState = {
 
 const PwaGameShellContext = createContext<PwaGameShellState | null>(null);
 
-// Spanish currently uses the existing English copy.
-const COPY_BY_LANGUAGE: Record<Mir2Language, PwaCopy> = {
+// The optional mobile install guide has its own smaller copy set. Keep an
+// explicit English fallback while the game presentation locale remains intact.
+const COPY_BY_LANGUAGE: Partial<Record<Mir2Language, PwaCopy>> = {
   en: COPY.en,
   "zh-CN": COPY.zh,
   "pt-BR": COPY.pt,
@@ -218,7 +219,7 @@ export function PwaGameShell({ language }: { language: Mir2Language }) {
     pathname, mobileBrowser, standalone, guideOpen, fullscreenActive, ios,
     status, install, enterFullscreen, dismissGuide,
   } = state;
-  const copy = COPY_BY_LANGUAGE[language];
+  const copy = COPY_BY_LANGUAGE[language] ?? COPY.en;
 
   const isGamePath = pathname === "/" || pathname === "/game" || pathname === "/game/";
   if (!isGamePath || !mobileBrowser || standalone || fullscreenActive) return null;

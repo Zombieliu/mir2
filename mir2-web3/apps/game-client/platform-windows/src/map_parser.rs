@@ -1194,7 +1194,7 @@ impl MapViewport {
             .max(CRYSTAL_VIEW_RANGE_Y + CRYSTAL_FLOOR_LOOKAHEAD_ROWS)
     }
 
-    fn object_draw_bottom_margin_y(self) -> i32 {
+    pub(crate) fn object_draw_bottom_margin_y(self) -> i32 {
         self.draw_margin_y()
             .max(CRYSTAL_VIEW_RANGE_Y + CRYSTAL_OBJECT_LOOKAHEAD_ROWS)
     }
@@ -1422,7 +1422,13 @@ fn build_map_render_state_with_indexes(
         let animated = effective_frame_count > 1;
         let cell_left = tile_origin_x + (draw.x - viewport.center_x) as f32 * CELL_WIDTH;
         let cell_top = tile_origin_y + (draw.y - viewport.center_y) as f32 * CELL_HEIGHT;
-        let cell_depth = (draw.y * 1_000 + draw.x * 10) as f32 + draw.z;
+        let cell_depth = crate::world_depth::map_depth(
+            i64::from(viewport.center_x),
+            i64::from(viewport.center_y),
+            i64::from(draw.x),
+            i64::from(draw.y),
+            draw.z,
+        ) / crate::world_depth::MAP_DEPTH_GAIN;
         let layer_key = match draw.layer {
             TileLayer::Back => "back",
             TileLayer::TileAnimation => "tile-animation",
@@ -2660,11 +2666,29 @@ mod tests {
         let atlas = atlas_index_for(&rect_key, 48, 64);
         let state = build_map_render_state_with_indexes(&map, viewport(), &atlas, None)
             .expect("ordinary front object");
-        assert_eq!(
-            state["tiles"][0]["z"],
-            json!(MAP_FRONT_DEPTH_ORDER),
-            "a tall front object must remain in the y-sorted object band"
-        );
+        let front_depth = state["tiles"][0]["z"].as_f64().unwrap() as f32
+            * crate::world_depth::MAP_DEPTH_GAIN;
+        assert!(front_depth > 0.0, "a tall front stays above the floor pass");
+        assert!(front_depth < crate::world_depth::object_depth(0, 0, 0, 0),
+            "the entire row's front pass precedes that row's objects");
+    }
+
+    #[test]
+    fn map_producer_orders_right_hand_buildings_before_left_hand_npcs() {
+        let mut cells = vec![front_cell(-1, 0); 6];
+        cells[4] = front_cell(0, 1); // x=2, y=0, right of the NPC
+        cells[1] = front_cell(0, 1); // x=0, y=1, on the next row
+        let map = ParsedMap { width: 3, height: 2, cells };
+        let atlas = atlas_index_for(&atlas_rect_key("WemadeMir2/Tiles", 1), 48, 64);
+        let state = build_map_render_state_with_indexes(&map, viewport(), &atlas, None).unwrap();
+        let tiles = state["tiles"].as_array().unwrap();
+        let tile_depth = |key: &str| tiles.iter().find(|v| v["key"] == key)
+            .unwrap()["z"].as_f64().unwrap() as f32 * crate::world_depth::MAP_DEPTH_GAIN;
+        let npc_body = crate::world_depth::object_depth(0, 0, 0, 0) + 5.0;
+        assert!(tile_depth("front:2:0") < npc_body,
+            "a right-hand building must not hide an NPC on the same row");
+        assert!(npc_body < tile_depth("front:0:1"),
+            "the next row's building still covers an NPC behind it");
     }
 
     #[test]

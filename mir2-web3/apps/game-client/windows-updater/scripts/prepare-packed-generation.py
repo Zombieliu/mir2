@@ -27,6 +27,7 @@ sys.modules[SPEC.name] = a
 SPEC.loader.exec_module(a)
 require = a.require
 MAX_CATALOG = 128 * 1024**2
+MAX_REQUIRED_SCOPE = 4 * 1024**2
 MAX_PACK = 64 * 1024**2
 MAX_TOTAL = 4 * 1024**3
 MAX_SEQUENCE = 9007199254740991
@@ -313,13 +314,18 @@ def resource_binding(manifest_path, report_path, expected_report_sha, catalog):
 
 
 def validate_manifest(value):
-    exact(value, {"schema", "sequence", "minEngine", "gameSourceRevision", "engineSourceRevision", "protocol", "contentProfile", "exe", "signedConfig", "catalog", "packs"}, "generation manifest fields")
-    require(value["schema"] == "mir2.windows.generation.v1" and value["minEngine"] == 2
+    fields = {"schema", "sequence", "minEngine", "gameSourceRevision", "engineSourceRevision", "protocol", "contentProfile", "exe", "signedConfig", "catalog", "packs"}
+    progressive = isinstance(value, dict) and value.get("schema") == "mir2.windows.generation.v2"
+    exact(value, fields | ({"requiredScope"} if progressive else set()), "generation manifest fields")
+    require(value["schema"] in ("mir2.windows.generation.v1", "mir2.windows.generation.v2") and value["minEngine"] == 2
             and type(value["minEngine"]) is int and value["protocol"] == "crystal-mir2-v1", "generation compatibility")
     uint(value["sequence"], MAX_SEQUENCE, "generation sequence", True)
     revision(value["gameSourceRevision"]); revision(value["engineSourceRevision"])
     require(isinstance(value["contentProfile"], str) and re.fullmatch(r"[A-Za-z0-9_]{1,64}", value["contentProfile"]), "content profile")
-    for name, path, limit in [("exe", "mir2-platform-windows.exe", a.MAX_FILE), ("signedConfig", "mir2-client.toml", 32768), ("catalog", "catalog.json", MAX_CATALOG)]:
+    controls = [("exe", "mir2-platform-windows.exe", a.MAX_FILE), ("signedConfig", "mir2-client.toml", 32768), ("catalog", "catalog.json", MAX_CATALOG)]
+    if progressive:
+        controls.append(("requiredScope", "required-scope.json", MAX_REQUIRED_SCOPE))
+    for name, path, limit in controls:
         item = value[name]
         exact(item, {"path", "size", "sha256"}, "control descriptor fields")
         require(item["path"] == path and item["sha256"] == digest(item["sha256"]), "control name/digest binding")
@@ -336,9 +342,34 @@ def validate_manifest(value):
     require(total <= MAX_TOTAL, "generation pack total")
 
 
+def validate_required_scope(data, expected_sha, catalog, catalog_sha):
+    """Same metadata contract as RequiredResourceScope; no closure/CMS claim."""
+    require(0 < len(data) <= MAX_REQUIRED_SCOPE and a.sha256(data) == digest(expected_sha),
+            "required scope size/SHA mismatch")
+    scope = decoded(data)
+    exact(scope, {"schema", "catalogSha256", "id", "requiredPaths"}, "required scope fields")
+    require(scope["schema"] == "mir2.native.required-resource-scope.v1" and
+            digest(scope["catalogSha256"]) == digest(catalog_sha), "required scope/catalog binding")
+    require(isinstance(scope["id"], str) and re.fullmatch(r"[\x21-\x7e]{1,64}", scope["id"]),
+            "required scope id")
+    paths = scope["requiredPaths"]
+    require(isinstance(paths, list) and 0 < len(paths) <= 300_000, "required path count")
+    folded = set()
+    for path in paths:
+        logical(path)
+        require(path.lower() not in folded and path in catalog["resources"],
+                "required path duplicate/case collision or absent from full catalog")
+        folded.add(path.lower())
+    require(paths == sorted(paths), "required paths must be sorted")
+    return scope
+
+
 def prepare(*, native_exe, source_root, source_revision, engine_source_root, engine_revision, config,
             catalog_path, objects_root, resource_manifest, resource_strict_report, resource_report_sha256,
-            sequence, output_root, created_unix=None, expires_unix=None, content_profile=None):
+            sequence, output_root, created_unix=None, expires_unix=None, content_profile=None,
+            required_scope_path=None, required_scope_sha256=None):
+    require((required_scope_path is None) == (required_scope_sha256 is None),
+            "required scope path and reviewed SHA must be supplied together")
     game_source = source_snapshot(source_root, source_revision)
     engine_source = source_snapshot(engine_source_root, engine_revision)
     uint(sequence, MAX_SEQUENCE, "sequence", True)
@@ -357,11 +388,19 @@ def prepare(*, native_exe, source_root, source_revision, engine_source_root, eng
     provenance = resource_binding(resource_manifest, resource_strict_report, resource_report_sha256, catalog)
     profile = provenance["contentProfile"] if content_profile is None else content_profile
     require(profile == provenance["contentProfile"], "resource content profile differs from admitted report")
-    manifest = {"schema": "mir2.windows.generation.v1", "sequence": sequence, "minEngine": 2,
+    controls = [exe, config_entry, catalog_entry]
+    if required_scope_path is not None:
+        scope_entry = file_entry(required_scope_path, "required-scope.json", MAX_REQUIRED_SCOPE)
+        require(scope_entry.sha256 == digest(required_scope_sha256), "reviewed required scope SHA differs")
+        validate_required_scope(read(scope_entry, MAX_REQUIRED_SCOPE), scope_entry.sha256, catalog, catalog_entry.sha256)
+        controls.append(scope_entry)
+    manifest = {"schema": "mir2.windows.generation.v2" if required_scope_path is not None else "mir2.windows.generation.v1", "sequence": sequence, "minEngine": 2,
                 "gameSourceRevision": source_revision, "engineSourceRevision": engine_revision,
                 "protocol": "crystal-mir2-v1", "contentProfile": profile,
                 "exe": entry_dict(exe), "signedConfig": entry_dict(config_entry), "catalog": entry_dict(catalog_entry),
                 "packs": [entry_dict(packs[sha]) for sha in sorted(packs)]}
+    if required_scope_path is not None:
+        manifest["requiredScope"] = entry_dict(scope_entry)
     validate_manifest(manifest)
     manifest_bytes = compact(manifest)
     require(len(manifest_bytes) <= 4 * 1024**2, "generation metadata bound")
@@ -376,7 +415,7 @@ def prepare(*, native_exe, source_root, source_revision, engine_source_root, eng
     (output / directory).mkdir()
     for entry in packs.values():
         copy_new(entry, output / entry.path)
-    for entry in (exe, config_entry, catalog_entry):
+    for entry in controls:
         copy_new(entry, output / directory / entry.path)
     put(output / directory / "GENERATION.json", manifest_bytes)
     draft = {"schema": "mir2.windows.pack-feed-draft.v1", "channel": "invited", "platform": "windows-x64",
@@ -388,9 +427,11 @@ def prepare(*, native_exe, source_root, source_revision, engine_source_root, eng
              "sourceClean": True, "gameSource": game_source, "engineSource": engine_source,
              "manifestSha256": manifest_sha, "generationDirectory": directory,
              "feedDraftSha256": a.sha256(compact(draft)), "createdUnix": created, "expiresUnix": expires,
-             "inputBindings": [{**entry_dict(entry), "source": str(entry.source)} for entry in (exe, config_entry, catalog_entry)],
+             "inputBindings": [{**entry_dict(entry), "source": str(entry.source)} for entry in controls],
              "resourceProvenance": provenance, "stats": stats,
-             "artifactBinding": "exact EXE/config/catalog SHA and clean declared source; reproducible compilation is not certified"}
+             "artifactBinding": ("exact EXE/config/catalog/scope SHA and clean declared source; reproducible compilation is not certified"
+                                 if required_scope_path is not None else
+                                 "exact EXE/config/catalog SHA and clean declared source; reproducible compilation is not certified")}
     put(output / "PREPARED.json", compact(proof))
     verify_draft(output)
     return proof
@@ -413,12 +454,13 @@ def verify_draft(output_root):
     validate_manifest(manifest)
     require(manifest["gameSourceRevision"] == proof["gameSource"]["revision"]
             and manifest["engineSourceRevision"] == proof["engineSource"]["revision"], "source/artifact revision binding")
-    for field in ("exe", "signedConfig", "catalog"):
+    controls = ("exe", "signedConfig", "catalog") + (("requiredScope",) if manifest["schema"] == "mir2.windows.generation.v2" else ())
+    for field in controls:
         item = manifest[field]
         entry = file_entry(directory / item["path"], item["path"], item["size"])
         require(entry_dict(entry) == item, "generation control bytes differ")
-    require(len(proof["inputBindings"]) == 3, "input binding set")
-    for binding, field in zip(proof["inputBindings"], ("exe", "signedConfig", "catalog")):
+    require(len(proof["inputBindings"]) == len(controls), "input binding set")
+    for binding, field in zip(proof["inputBindings"], controls):
         exact(binding, {"path", "size", "sha256", "source"}, "input binding fields")
         require({k: binding[k] for k in ("path", "size", "sha256")} == manifest[field], "input/control binding")
         actual = file_entry(binding["source"], binding["path"], binding["size"])
@@ -426,6 +468,10 @@ def verify_draft(output_root):
     catalog_bytes = read(file_entry(directory / "catalog.json", "catalog.json", MAX_CATALOG), MAX_CATALOG)
     catalog, packs, stats = verify_catalog(catalog_bytes, root / "objects/packs")
     require(manifest["packs"] == [entry_dict(packs[sha]) for sha in sorted(packs)] and stats == proof["stats"], "generation/catalog closure or stats mismatch")
+    if "requiredScope" in manifest:
+        scope_entry = manifest["requiredScope"]
+        scope_bytes = read(file_entry(directory / scope_entry["path"], scope_entry["path"], MAX_REQUIRED_SCOPE), MAX_REQUIRED_SCOPE)
+        validate_required_scope(scope_bytes, scope_entry["sha256"], catalog, manifest["catalog"]["sha256"])
     provenance = proof["resourceProvenance"]
     require(resource_binding(provenance["manifestPath"], provenance["reportPath"], provenance["reportSha256"], catalog) == provenance,
             "resource provenance changed")
@@ -469,7 +515,7 @@ def verify_release(output_root, expected_manifest_sha=None, now=None):
     now = int(time.time()) if now is None else now
     require(feed["createdUnix"] <= now + 300 and feed["expiresUnix"] >= now, "expired/future release")
     feed_signature = file_entry(root / "latest.p7s", "latest.p7s", 32768)
-    return {"schema": "mir2.windows.packed-generation-byte-verification.v1", "byteVerified": True,
+    result = {"schema": "mir2.windows.packed-generation-byte-verification.v1", "byteVerified": True,
             "cmsVerified": False, "metadataOnly": False, "sourceClean": True,
             "manifestSha256": proof["manifestSha256"], "generationDirectory": proof["generationDirectory"],
             "gameSourceRevision": manifest["gameSourceRevision"], "engineSourceRevision": manifest["engineSourceRevision"],
@@ -477,6 +523,9 @@ def verify_release(output_root, expected_manifest_sha=None, now=None):
             "manifest": feed["manifest"], "manifestSignature": feed["signature"],
             "feed": entry_dict(feed_entry), "feedSignature": entry_dict(feed_signature),
             "catalogSha256": manifest["catalog"]["sha256"], **proof["stats"]}
+    if "requiredScope" in manifest:
+        result["requiredScope"] = manifest["requiredScope"]
+    return result
 
 
 def main():
@@ -491,6 +540,8 @@ def main():
     p.add_argument("--created-unix", type=int)
     p.add_argument("--expires-unix", type=int)
     p.add_argument("--content-profile")
+    p.add_argument("--required-scope-path", type=Path)
+    p.add_argument("--required-scope-sha256")
     for name in ("verify-draft", "finalize-feed", "verify-release"):
         p = commands.add_parser(name)
         p.add_argument("--output-root", type=Path, required=True)

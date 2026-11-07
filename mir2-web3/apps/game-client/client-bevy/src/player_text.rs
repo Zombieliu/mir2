@@ -116,6 +116,7 @@ pub fn quest_section(id: i32, field: &str, source: &[String]) -> Vec<String> {
         .collect()
 }
 
+#[cfg(any(feature = "native-ui", feature = "portable-quest-ui"))]
 pub fn quest_reward(reward: &crate::quest_model::QuestReward) -> String {
     use crate::quest_model::QuestReward;
     if !crate::native_i18n::active() {
@@ -148,6 +149,7 @@ pub fn quest_reward(reward: &crate::quest_model::QuestReward) -> String {
     }
 }
 
+#[cfg(any(feature = "native-ui", feature = "portable-quest-ui"))]
 pub fn quest_rewards(quest: &crate::quest_model::Quest) -> String {
     if !crate::native_i18n::active() {
         return quest.rewards_label();
@@ -175,7 +177,6 @@ pub fn supply_size(source: &str) -> String {
 
 /// Exact system-name matching only. A catalog key is never edited in place.
 pub fn name(source: &str) -> String {
-    #[cfg(any(feature = "native-ui", test))]
     if crate::native_i18n::active() {
         return crate::native_i18n::tr(source);
     }

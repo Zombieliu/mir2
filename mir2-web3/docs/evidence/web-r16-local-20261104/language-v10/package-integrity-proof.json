@@ -1,0 +1,1130 @@
+{
+  "schema": "mir2-language-v10-package-integrity/1",
+  "startedAt": "2026-11-04T09:01:06.619Z",
+  "artifactRoot": "F:/mir2-builds/Numeron-Web-R16-20261104",
+  "previousRoot": "F:/mir2-builds/Numeron-Web-R16-20261104-before-language-v10",
+  "scope": "Manifest-listed release files only; no directory enumeration, private or runtime-data files.",
+  "passed": true,
+  "failures": [],
+  "windowsMetadata": {
+    "Files": 29658,
+    "BytesIncludingManifest": 927178563,
+    "AncestorDirectories": 996,
+    "ReparsePoints": 0,
+    "ForbiddenPaths": 0,
+    "DirectoryEnumerationCalls": 0
+  },
+  "privateDirectoriesEnumerated": 0,
+  "privateFilesOpened": 0,
+  "runtimeDataDirectoriesEnumerated": 0,
+  "runtimeDataFilesOpened": 0,
+  "httpRequests": 0,
+  "sessionsCreated": 0,
+  "overallUiPassed": false,
+  "uiAcceptanceStatus": "Outside this static integrity audit; browser QA is separate.",
+  "manifest": {
+    "path": "package-manifest.json",
+    "sha256": "7cb80da52a2445a71f0706157e60a23b21e71366544f769716c9c9c61a261e43",
+    "bytes": 6860024,
+    "files": 29657,
+    "totalFileBytes": 920318539,
+    "oldManifestSha256": "bcaa0de531823758f1e5eb8a5d86d2c6f4c745b1904acb545566e8e96a9749bb",
+    "oldFiles": 29642,
+    "oldTotalFileBytes": 886885915
+  },
+  "listedFileIntegrity": {
+    "passed": true,
+    "checkedFiles": 29657,
+    "checkedBytes": 920318539,
+    "allRegular": true,
+    "noSymlinksOrJunctions": true,
+    "noHardLinks": true,
+    "explicitWindowsReparseScanPassed": true,
+    "ancestorDirectoriesCheckedWithoutEnumeration": 996,
+    "checkedRecordsSha256": "f68ec1ef1b1897a81b0024e93519132ea7fb119e039e89bc5f4288f46da60cd0"
+  },
+  "compiledPins": {
+    "passed": true,
+    "buildId": "zk9hlA8LYTLrEX-WIO7SK",
+    "distDir": ".next-r16-delivery-physical-v2",
+    "tripleCoreCompiledEqualsPackagedGenerated": true,
+    "coreBundles": [
+      {
+        "name": "core",
+        "version": "81dd599a887e9338a888672a19a1d5ecc4cc1b6d9b90a9bb41c61d5f8c210974",
+        "sourceSha256": "43fed2e1d71d79d57c0b8331d3eeb411b1074dc8ed6a7419d60267feca0d7f86",
+        "files": [
+          {
+            "path": "web/mir2-web3/apps/web/public/client-core/81dd599a887e9338a888672a19a1d5ecc4cc1b6d9b90a9bb41c61d5f8c210974/mir2_platform_web.js",
+            "bytes": 24393,
+            "sha256": "875090fd42d891cb003f63e46aaed848ead048f322e86ad5338db9a088fa01e7"
+          },
+          {
+            "path": "web/mir2-web3/apps/web/public/client-core/81dd599a887e9338a888672a19a1d5ecc4cc1b6d9b90a9bb41c61d5f8c210974/mir2_platform_web_bg.wasm",
+            "bytes": 250136,
+            "sha256": "c8f6c8e30166807aadab41321efdcb9bc86e13a657ffa14b5adf6889f6913bc0"
+          }
+        ],
+        "immutableVersionMatched": true
+      },
+      {
+        "name": "presentation",
+        "version": "08bc05f41551a7f01fd0edf3a7e639df847dad88ef605fc55b764e9bab901bbc",
+        "sourceSha256": "43fed2e1d71d79d57c0b8331d3eeb411b1074dc8ed6a7419d60267feca0d7f86",
+        "files": [
+          {
+            "path": "web/mir2-web3/apps/web/public/client-core/08bc05f41551a7f01fd0edf3a7e639df847dad88ef605fc55b764e9bab901bbc/mir2_platform_web.js",
+            "bytes": 24721,
+            "sha256": "8bbff9179937703b7fff70bbf3ea8136b46da027470427036a9bee11605c810c"
+          },
+          {
+            "path": "web/mir2-web3/apps/web/public/client-core/08bc05f41551a7f01fd0edf3a7e639df847dad88ef605fc55b764e9bab901bbc/mir2_platform_web_bg.wasm",
+            "bytes": 261983,
+            "sha256": "a65ce72e278cbb31999922dafe629c0b1c57ce0e9be3bc8c859de7012798e0da"
+          }
+        ],
+        "immutableVersionMatched": true
+      },
+      {
+        "name": "npcPurchase",
+        "version": "78c4de3cdd6f97897ad39c7f6e1a61a76a6f02343c0be8d570b616155a7fc58f",
+        "sourceSha256": "43fed2e1d71d79d57c0b8331d3eeb411b1074dc8ed6a7419d60267feca0d7f86",
+        "files": [
+          {
+            "path": "web/mir2-web3/apps/web/public/client-core/78c4de3cdd6f97897ad39c7f6e1a61a76a6f02343c0be8d570b616155a7fc58f/mir2_platform_web.js",
+            "bytes": 8332,
+            "sha256": "b6a3e9848e46934dd5187120ea543da5d174bf97f1a34d63ca9be714e0b18218"
+          },
+          {
+            "path": "web/mir2-web3/apps/web/public/client-core/78c4de3cdd6f97897ad39c7f6e1a61a76a6f02343c0be8d570b616155a7fc58f/mir2_platform_web_bg.wasm",
+            "bytes": 165791,
+            "sha256": "cdf685efc345dc45b389463947a1685c9632888e85f062d3fe14dba4f0c973dc"
+          }
+        ],
+        "immutableVersionMatched": true
+      }
+    ],
+    "rendererCompiledEqualsPackagedGeneratedAndSavedManifests": true,
+    "rendererVersion": "bevy-ebebc42dff6639fb",
+    "rendererImmutableCapabilitiesVersionMatched": true,
+    "rendererPackages": [
+      {
+        "id": "webgpu",
+        "backend": "webgpu",
+        "packageDir": "pkg-webgpu",
+        "questUiAbiVersion": 1,
+        "bagUiAbiVersion": 1,
+        "primarySharedUiCompiled": false
+      },
+      {
+        "id": "webgl2",
+        "backend": "webgl2",
+        "packageDir": "pkg-webgl2",
+        "questUiAbiVersion": 0,
+        "bagUiAbiVersion": 0,
+        "primarySharedUiCompiled": false
+      },
+      {
+        "id": "webgl2-shared",
+        "backend": "webgl2",
+        "packageDir": "pkg-webgl2-shared",
+        "questUiAbiVersion": 1,
+        "bagUiAbiVersion": 1,
+        "primarySharedUiCompiled": true
+      }
+    ],
+    "rendererFiles": [
+      {
+        "path": "web/mir2-web3/apps/web/public/bevy-runtime-releases/bevy-ebebc42dff6639fb/pkg-webgpu/mir2_bevy_runtime.js",
+        "bytes": 141118,
+        "sha256": "afa9d0d67e6fcc05bef3f506a5b3cb6d8e42becd28e65e63f3dd1c1e3653bf5e"
+      },
+      {
+        "path": "web/mir2-web3/apps/web/public/bevy-runtime-releases/bevy-ebebc42dff6639fb/pkg-webgpu/mir2_bevy_runtime_bg.wasm",
+        "bytes": 29947465,
+        "sha256": "494101bd32bf92f8df5829d8b4879ecf61503b088709c2eb3534c2211296d79f"
+      },
+      {
+        "path": "web/mir2-web3/apps/web/public/bevy-runtime-releases/bevy-ebebc42dff6639fb/pkg-webgl2/mir2_bevy_runtime.js",
+        "bytes": 117176,
+        "sha256": "2e4c58270f49998063cf64b3605b412edce725f5df73254ce4bbf764b282998d"
+      },
+      {
+        "path": "web/mir2-web3/apps/web/public/bevy-runtime-releases/bevy-ebebc42dff6639fb/pkg-webgl2/mir2_bevy_runtime_bg.wasm",
+        "bytes": 16402082,
+        "sha256": "105f6bb1f8965fe0273dc8b25569b4b377fb308fa795cb4c091e2020766730a5"
+      },
+      {
+        "path": "web/mir2-web3/apps/web/public/bevy-runtime-releases/bevy-ebebc42dff6639fb/pkg-webgl2-shared/mir2_bevy_runtime.js",
+        "bytes": 139092,
+        "sha256": "5498a896f7968937053dc5fc8b9d7cfb729484c75918bcac1ef8231fdec4fdff"
+      },
+      {
+        "path": "web/mir2-web3/apps/web/public/bevy-runtime-releases/bevy-ebebc42dff6639fb/pkg-webgl2-shared/mir2_bevy_runtime_bg.wasm",
+        "bytes": 30876146,
+        "sha256": "29350a0ab88768a53c79d39eb7a7a36ab89d5e0d0bd5e989a81baea6552e1112"
+      }
+    ],
+    "canonicalCurrentSourceRecomputed": false
+  },
+  "r16Closure": {
+    "passed": true,
+    "manifestPath": "web/R16-PLAYABLE-ASSETS-MANIFEST.json",
+    "manifestSha256": "fd12f95caf241009c5f2f12e9c97547efe599c6f3a9f83a0a77668e8c4c5bcca",
+    "manifestBytes": 4457985,
+    "files": 21033,
+    "bytes": 280303200,
+    "allResourceEntriesManifestListedAndHashed": true,
+    "oldV5All21019SizeAndShaRetained": true,
+    "oldV5ManifestSha256": "c0eb872342c2040256df8e55c31b14c803ad435de03b3d8b98c77f18b0688b90",
+    "oldV5Files": 21019,
+    "requiredCategoryCounts": {
+      "ui": 4274,
+      "map0": 8483,
+      "map0141": 8,
+      "monsters": 2624,
+      "firstplay": 5644
+    },
+    "addedFontAndLicenseFiles": [
+      {
+        "path": "original-ui/fonts/NotoSans-Bold.ttf",
+        "bytes": 631484,
+        "sha256": "1df075a380fc7cb898acf64c1f7b3b4dd780de3caa860178bf929de35817a913"
+      },
+      {
+        "path": "original-ui/fonts/NotoSans-Regular.ttf",
+        "bytes": 621572,
+        "sha256": "478c558ea716033cd60c03438f628dfa75694dcf6b5f6d505a2f05fd2b4f3823"
+      },
+      {
+        "path": "original-ui/fonts/NotoSansArabic-Bold.ttf",
+        "bytes": 261460,
+        "sha256": "4e5462d2e8be880317b9f49b5b2da109ddb6a3563d91cc604b67f3535832a555"
+      },
+      {
+        "path": "original-ui/fonts/NotoSansArabic-Regular.ttf",
+        "bytes": 234892,
+        "sha256": "bdff3e5659d67e67def05b33f749683b9376ae819d65d3dd62ac4640b3aaef48"
+      },
+      {
+        "path": "original-ui/fonts/NotoSansDevanagari-Bold.ttf",
+        "bytes": 250176,
+        "sha256": "6a09c8d797cfc803d32cdc731e809424d74cbaff59f503de34ade421a08e5bc2"
+      },
+      {
+        "path": "original-ui/fonts/NotoSansDevanagari-Regular.ttf",
+        "bytes": 243520,
+        "sha256": "4e3c66638958c3e2ab5d37f47a8deb89fffeb7be9985c665a519bbc7ba762313"
+      },
+      {
+        "path": "original-ui/fonts/NotoSansTC.ttf",
+        "bytes": 11941968,
+        "sha256": "864727d210d54f2537bbe23b3a839436c3992af72de9322af5270897246bd44f"
+      },
+      {
+        "path": "original-ui/fonts/NotoSansThai-Bold.ttf",
+        "bytes": 37824,
+        "sha256": "2ac6c6e8a478e23b15f76e4894af1fa2210f8f350e4e6e54aad530bec03efbfb"
+      },
+      {
+        "path": "original-ui/fonts/NotoSansThai-Regular.ttf",
+        "bytes": 37780,
+        "sha256": "61cf814eec46b294d6ea4401ac295d0cecd5207bd2331dcc5a15e7301d30ee44"
+      },
+      {
+        "path": "original-ui/fonts/OFL-NotoSans.txt",
+        "bytes": 4396,
+        "sha256": "cee9892f9f0cc8fe882c9e9537ee6a89621d86ee7ceaf70b02e2b2b1c25c061a"
+      },
+      {
+        "path": "original-ui/fonts/OFL-NotoSansArabic.txt",
+        "bytes": 4382,
+        "sha256": "a7a5a25eb188bf1cd96982030d53e23c33485c69b1044a562254226857ee13af"
+      },
+      {
+        "path": "original-ui/fonts/OFL-NotoSansDevanagari.txt",
+        "bytes": 4386,
+        "sha256": "a216f6f8d85c7228093e0ee5e258d9d377e6671f68acb4db1930b29583d0f331"
+      },
+      {
+        "path": "original-ui/fonts/OFL-NotoSansTC.txt",
+        "bytes": 4388,
+        "sha256": "1c05c68c34f9708415aada51f17e1b0092d2cea709bf4a94cd38114f9e73d7d9"
+      },
+      {
+        "path": "original-ui/fonts/OFL-NotoSansThai.txt",
+        "bytes": 4380,
+        "sha256": "dad6e6abc2bf3fc37cc698af7607c3f4d4235039695713b222e5a034fb5b9b1c"
+      }
+    ],
+    "addedFiles": 14,
+    "addedBytes": 14282608,
+    "addedEntriesSha256": "6e63046e965afd1bb0243dfe2009ceb8887fe72f285bf7b6395f25735e7bb9a4",
+    "allOtherCategoriesAndSourcePinsUnchanged": true,
+    "finiteBudget": {
+      "maxFiles": 22000,
+      "maxAssetBytes": 377487360,
+      "maxManifestBytes": 8388608,
+      "unchanged": true,
+      "fileCountPassed": true,
+      "assetBytesPassed": true,
+      "manifestBytesPassed": true
+    }
+  },
+  "v9Comparison": {
+    "passed": true,
+    "basis": "Pinned archived v9 package-manifest and newly verified v10 physical file hashes.",
+    "unchangedFiles": 29517,
+    "changedFiles": [
+      {
+        "path": "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/app-path-routes-manifest.json",
+        "oldBytes": 2410,
+        "bytes": 2410,
+        "sha256": "c69f5480872fd61411e72b81fb31d3062ae99659edb53402bdde08d188fa1d14"
+      },
+      {
+        "path": "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/BUILD_ID",
+        "oldBytes": 21,
+        "bytes": 21,
+        "sha256": "5fc722f16892abe2c4680e10ecb614f435bee80a0972dc4d0fd7038878d91dd5"
+      },
+      {
+        "path": "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/build-manifest.json",
+        "oldBytes": 511,
+        "bytes": 511,
+        "sha256": "dcc639b6e78b7bcfa5d805bebdedd5d3d3dc65867256e22f079f329bf52e1aca"
+      },
+      {
+        "path": "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/react-loadable-manifest.json",
+        "oldBytes": 1967,
+        "bytes": 1967,
+        "sha256": "6464123117ab1841d5f0ed8f63019406fd9179c4099983c0cbd9a8cd800699d8"
+      },
+      {
+        "path": "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/required-server-files.json",
+        "oldBytes": 18986,
+        "bytes": 18989,
+        "sha256": "613cba061b8cbf058cf8adb92cf24aa14b05577c5fe6bd0f56fc6f56e7f30238"
+      },
+      {
+        "path": "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app-paths-manifest.json",
+        "oldBytes": 2912,
+        "bytes": 2912,
+        "sha256": "73bef2ffa4505743b56e0d4e3d3f7ee5d9b9a859f56b31a498faf374203fff92"
+      },
+      {
+        "path": "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/_global-error.html",
+        "oldBytes": 8916,
+        "bytes": 8916,
+        "sha256": "bef03c7bf11209617177c4de44d86809ce456f335eeb99904a6460524a524139"
+      },
+      {
+        "path": "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/_global-error.rsc",
+        "oldBytes": 4735,
+        "bytes": 4735,
+        "sha256": "0af5441e9a66e455319f4227ddfbf6a53df09bc7888e566a4c74100349e583a4"
+      },
+      {
+        "path": "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/_global-error.segments/_full.segment.rsc",
+        "oldBytes": 4735,
+        "bytes": 4735,
+        "sha256": "0af5441e9a66e455319f4227ddfbf6a53df09bc7888e566a4c74100349e583a4"
+      },
+      {
+        "path": "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/_global-error.segments/_global-error.segment.rsc",
+        "oldBytes": 271,
+        "bytes": 271,
+        "sha256": "03d6085a09e9ce5d0e82b3f6c081f31a97c5d704ec7239153ee543e2dedf5911"
+      },
+      {
+        "path": "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/_global-error.segments/_global-error/__PAGE__.segment.rsc",
+        "oldBytes": 3336,
+        "bytes": 3336,
+        "sha256": "8ecbd3c7b296eeb6b688fd0a6cbe73b7df52d1fd650ab7fb97ddff48ac00f940"
+      },
+      {
+        "path": "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/_global-error.segments/_head.segment.rsc",
+        "oldBytes": 523,
+        "bytes": 523,
+        "sha256": "e0f1639daae38651626efc2cb01ddee35256a56172af171da1cc42d2bba1060d"
+      },
+      {
+        "path": "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/_global-error.segments/_index.segment.rsc",
+        "oldBytes": 271,
+        "bytes": 271,
+        "sha256": "03d6085a09e9ce5d0e82b3f6c081f31a97c5d704ec7239153ee543e2dedf5911"
+      },
+      {
+        "path": "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/_global-error.segments/_tree.segment.rsc",
+        "oldBytes": 266,
+        "bytes": 266,
+        "sha256": "200f874df048301a40a534ea7c50383697683d5668f497b7939a583f700fb118"
+      },
+      {
+        "path": "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/_global-error/page_client-reference-manifest.js",
+        "oldBytes": 8828,
+        "bytes": 8828,
+        "sha256": "10af0f5133b1c6ec990f1705e57ccdb2eea7f4fdfcb440e34aab5ecbffad297a"
+      },
+      {
+        "path": "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/_not-found.html",
+        "oldBytes": 9257,
+        "bytes": 9257,
+        "sha256": "17917aae4ff80a0e0b22e7f1607b97debf2534a69d26db97fb2e1b6e52bf76cf"
+      },
+      {
+        "path": "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/_not-found.rsc",
+        "oldBytes": 5221,
+        "bytes": 5221,
+        "sha256": "13414670b1fc0a7ffa8a1766a15ad89e8980357fdb5c8e372724ea069d085855"
+      },
+      {
+        "path": "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/_not-found.segments/_full.segment.rsc",
+        "oldBytes": 5221,
+        "bytes": 5221,
+        "sha256": "13414670b1fc0a7ffa8a1766a15ad89e8980357fdb5c8e372724ea069d085855"
+      },
+      {
+        "path": "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/_not-found.segments/_head.segment.rsc",
+        "oldBytes": 1653,
+        "bytes": 1653,
+        "sha256": "2bd03d9f47827c1b8d7c1aebd28145566c324b4b068a2480bc3fb29c507193af"
+      },
+      {
+        "path": "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/_not-found.segments/_index.segment.rsc",
+        "oldBytes": 1427,
+        "bytes": 1427,
+        "sha256": "89a14ca536865141320a0c050e6bfa34e43a590da38efadcf0764466bb492801"
+      },
+      {
+        "path": "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/_not-found.segments/_not-found.segment.rsc",
+        "oldBytes": 271,
+        "bytes": 271,
+        "sha256": "03d6085a09e9ce5d0e82b3f6c081f31a97c5d704ec7239153ee543e2dedf5911"
+      },
+      {
+        "path": "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/_not-found.segments/_not-found/__PAGE__.segment.rsc",
+        "oldBytes": 1381,
+        "bytes": 1381,
+        "sha256": "c4b788f56fb5270cd3e7c4a3efd043559f82d0c55a23c127020df1e0961f736a"
+      },
+      {
+        "path": "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/_not-found.segments/_tree.segment.rsc",
+        "oldBytes": 372,
+        "bytes": 372,
+        "sha256": "9b178c53c099dd46e304d167f60d7df4d8ad50485fa3270504e3ecf2d75a57c0"
+      },
+      {
+        "path": "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/_not-found/page_client-reference-manifest.js",
+        "oldBytes": 8822,
+        "bytes": 8822,
+        "sha256": "c1c94034aca09c704627bac505f77d80c49cffc81b9749e82a33cb884d542ceb"
+      },
+      {
+        "path": "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/ai-live.html",
+        "oldBytes": 14304,
+        "bytes": 14304,
+        "sha256": "722b144402dd10f250ae0abde8b3878f8efc61e7b59be3558d76df7a5543c6d2"
+      },
+      {
+        "path": "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/ai-live.rsc",
+        "oldBytes": 5484,
+        "bytes": 5484,
+        "sha256": "dda9191e8ced6da6d71edd1a7d057a3edf8b3319439ff66e39e1efaff66a2988"
+      },
+      {
+        "path": "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/ai-live.segments/_full.segment.rsc",
+        "oldBytes": 5484,
+        "bytes": 5484,
+        "sha256": "dda9191e8ced6da6d71edd1a7d057a3edf8b3319439ff66e39e1efaff66a2988"
+      },
+      {
+        "path": "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/ai-live.segments/_head.segment.rsc",
+        "oldBytes": 1602,
+        "bytes": 1602,
+        "sha256": "f9edec717edeac86cfdd9c64052bd348e4e24d72f504e98caab22d0761d4ca4f"
+      },
+      {
+        "path": "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/ai-live.segments/_index.segment.rsc",
+        "oldBytes": 2521,
+        "bytes": 2521,
+        "sha256": "194ce123becb4d99eae148cf412e645c924c64a31ae694963e2f5ce6059fd1ad"
+      },
+      {
+        "path": "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/ai-live.segments/_tree.segment.rsc",
+        "oldBytes": 369,
+        "bytes": 369,
+        "sha256": "5c650ffd60b138e732e82cd1149be6c513caad7dda130f4dfc4b126d583dcdc8"
+      },
+      {
+        "path": "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/ai-live.segments/ai-live.segment.rsc",
+        "oldBytes": 271,
+        "bytes": 271,
+        "sha256": "03d6085a09e9ce5d0e82b3f6c081f31a97c5d704ec7239153ee543e2dedf5911"
+      },
+      {
+        "path": "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/ai-live.segments/ai-live/__PAGE__.segment.rsc",
+        "oldBytes": 597,
+        "bytes": 597,
+        "sha256": "998af397e6e0b1fcc4fd6a6cb84d2a6f55a06a5ba5ad09640482f414be6f4559"
+      },
+      {
+        "path": "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/ai-live/page_client-reference-manifest.js",
+        "oldBytes": 8875,
+        "bytes": 8875,
+        "sha256": "5215170e44cbe0e01222523c9f176376f0c3f9324bca1f29d335091007cbe926"
+      },
+      {
+        "path": "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/game.html",
+        "oldBytes": 9200,
+        "bytes": 9200,
+        "sha256": "fa776b0b7a3dc66a23191a1538ff3eb4e628eddb28df21916b32129f5e799bef"
+      },
+      {
+        "path": "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/game.rsc",
+        "oldBytes": 5711,
+        "bytes": 5711,
+        "sha256": "ed9602ba07daa94875dcc7d9e6e21a4024c529da40a4e49fe32c0b0d3eb992a0"
+      },
+      {
+        "path": "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/game.segments/_full.segment.rsc",
+        "oldBytes": 5711,
+        "bytes": 5711,
+        "sha256": "ed9602ba07daa94875dcc7d9e6e21a4024c529da40a4e49fe32c0b0d3eb992a0"
+      },
+      {
+        "path": "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/game.segments/_head.segment.rsc",
+        "oldBytes": 1602,
+        "bytes": 1602,
+        "sha256": "f9edec717edeac86cfdd9c64052bd348e4e24d72f504e98caab22d0761d4ca4f"
+      },
+      {
+        "path": "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/game.segments/_index.segment.rsc",
+        "oldBytes": 2521,
+        "bytes": 2521,
+        "sha256": "194ce123becb4d99eae148cf412e645c924c64a31ae694963e2f5ce6059fd1ad"
+      },
+      {
+        "path": "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/game.segments/_tree.segment.rsc",
+        "oldBytes": 366,
+        "bytes": 366,
+        "sha256": "97b4a8b3bf62b5427cc1dd311ded79a7cdc31f5c4464b5e682c0268aa9b55b18"
+      },
+      {
+        "path": "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/game.segments/game.segment.rsc",
+        "oldBytes": 271,
+        "bytes": 271,
+        "sha256": "03d6085a09e9ce5d0e82b3f6c081f31a97c5d704ec7239153ee543e2dedf5911"
+      },
+      {
+        "path": "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/game.segments/game/__PAGE__.segment.rsc",
+        "oldBytes": 830,
+        "bytes": 830,
+        "sha256": "57ed78d7c9ae4ea4faafc02a56325b86058a3443796a821e971c2438e39fff79"
+      },
+      {
+        "path": "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/game/page_client-reference-manifest.js",
+        "oldBytes": 8814,
+        "bytes": 8814,
+        "sha256": "669a0d6893bc3cc996d17257a6230060a64c24fce0807f9ec1021107b2dfba4d"
+      },
+      {
+        "path": "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/game/page.js",
+        "oldBytes": 24011,
+        "bytes": 24011,
+        "sha256": "ce1ad4724e97a662f07f5b63378b8751338f44112b0e9d3770241f81bfc04789"
+      },
+      {
+        "path": "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/index.html",
+        "oldBytes": 8709,
+        "bytes": 8709,
+        "sha256": "8d471c564a60328d6ea8bdd0ea9ede113ad614c8e15146e66045cddaeaf3d7df"
+      },
+      {
+        "path": "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/index.rsc",
+        "oldBytes": 5291,
+        "bytes": 5291,
+        "sha256": "812ab7c1893b9046415bac38fa3bb9abf40320b711e12ab3bf4ef0bb1bfb6058"
+      },
+      {
+        "path": "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/index.segments/__PAGE__.segment.rsc",
+        "oldBytes": 826,
+        "bytes": 826,
+        "sha256": "38fd099860635de4534c417ab1c1d20b25eb60b71bbe0ae38d0cd665244182b4"
+      },
+      {
+        "path": "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/index.segments/_full.segment.rsc",
+        "oldBytes": 5291,
+        "bytes": 5291,
+        "sha256": "812ab7c1893b9046415bac38fa3bb9abf40320b711e12ab3bf4ef0bb1bfb6058"
+      },
+      {
+        "path": "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/index.segments/_head.segment.rsc",
+        "oldBytes": 1602,
+        "bytes": 1602,
+        "sha256": "f9edec717edeac86cfdd9c64052bd348e4e24d72f504e98caab22d0761d4ca4f"
+      },
+      {
+        "path": "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/index.segments/_index.segment.rsc",
+        "oldBytes": 2521,
+        "bytes": 2521,
+        "sha256": "194ce123becb4d99eae148cf412e645c924c64a31ae694963e2f5ce6059fd1ad"
+      },
+      {
+        "path": "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/index.segments/_tree.segment.rsc",
+        "oldBytes": 298,
+        "bytes": 298,
+        "sha256": "f9ea3888a97305de587b48ea668c4bfa8f88b067e27d0828e0b535ca06a507e9"
+      },
+      {
+        "path": "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/page_client-reference-manifest.js",
+        "oldBytes": 8737,
+        "bytes": 8737,
+        "sha256": "8dacba5dc11a03e45a63d1366ecdb3788fa4704b4380ce5500bef7ed8f2ea6c0"
+      },
+      {
+        "path": "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/page.js",
+        "oldBytes": 23742,
+        "bytes": 23742,
+        "sha256": "098d86da92286ad2625eb3e2499f30aec0acac73d355b1106a13c4875e3d35f7"
+      },
+      {
+        "path": "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/promotions.html",
+        "oldBytes": 15241,
+        "bytes": 15241,
+        "sha256": "e70b2e959e92ffaf102d86ea158267eb718ab274ef9f4c266db02503230aba05"
+      },
+      {
+        "path": "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/promotions.rsc",
+        "oldBytes": 5655,
+        "bytes": 5655,
+        "sha256": "ad84884ba8b77d6fead312c5e73328b6a60d90cd9642bc43e97d0bf6e3012104"
+      },
+      {
+        "path": "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/promotions.segments/_full.segment.rsc",
+        "oldBytes": 5655,
+        "bytes": 5655,
+        "sha256": "ad84884ba8b77d6fead312c5e73328b6a60d90cd9642bc43e97d0bf6e3012104"
+      },
+      {
+        "path": "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/promotions.segments/_head.segment.rsc",
+        "oldBytes": 1700,
+        "bytes": 1700,
+        "sha256": "68316ba6cc4b17530e5ceae157c3e1c2ec1e5e341dcb7a83c8bcfd27eaa55e04"
+      },
+      {
+        "path": "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/promotions.segments/_index.segment.rsc",
+        "oldBytes": 2521,
+        "bytes": 2521,
+        "sha256": "194ce123becb4d99eae148cf412e645c924c64a31ae694963e2f5ce6059fd1ad"
+      },
+      {
+        "path": "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/promotions.segments/_tree.segment.rsc",
+        "oldBytes": 426,
+        "bytes": 426,
+        "sha256": "cd3eb7996386e8a2a9ce46948daec057a875fbe50d081d6ff470a67ad5295884"
+      },
+      {
+        "path": "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/promotions.segments/promotions.segment.rsc",
+        "oldBytes": 265,
+        "bytes": 265,
+        "sha256": "dd3d6a6c1216b53ff577e62b45489c02cd8ec20b67600196ed92118d5f7decc9"
+      },
+      {
+        "path": "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/promotions.segments/promotions/__PAGE__.segment.rsc",
+        "oldBytes": 666,
+        "bytes": 666,
+        "sha256": "272ea288ee2cb18b1f45fc8a45ef773712900335aab906d2eede23aca9109391"
+      },
+      {
+        "path": "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/promotions/invite/[code]/page_client-reference-manifest.js",
+        "oldBytes": 9294,
+        "bytes": 9294,
+        "sha256": "b064ddae8e7b1cca6f90228a99ef4e7751e1673eaa8d4a4d2ff47fc273781a35"
+      },
+      {
+        "path": "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/promotions/page_client-reference-manifest.js",
+        "oldBytes": 9114,
+        "bytes": 9114,
+        "sha256": "d634792eebfed3eb7e7710994953b544b7d779690982356bfb4bca495c696c24"
+      },
+      {
+        "path": "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/promotions/play.html",
+        "oldBytes": 10805,
+        "bytes": 10805,
+        "sha256": "5238a004e1a21fa55d36d82c0c0a508726a3c071fc064d88da42794792e9c68e"
+      },
+      {
+        "path": "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/promotions/play.rsc",
+        "oldBytes": 6256,
+        "bytes": 6256,
+        "sha256": "822b833f0f55bf07a67d51fb720f2392d8523d713cd2dafaab79bdc42e3c603c"
+      },
+      {
+        "path": "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/promotions/play.segments/_full.segment.rsc",
+        "oldBytes": 6256,
+        "bytes": 6256,
+        "sha256": "822b833f0f55bf07a67d51fb720f2392d8523d713cd2dafaab79bdc42e3c603c"
+      },
+      {
+        "path": "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/promotions/play.segments/_head.segment.rsc",
+        "oldBytes": 1700,
+        "bytes": 1700,
+        "sha256": "68316ba6cc4b17530e5ceae157c3e1c2ec1e5e341dcb7a83c8bcfd27eaa55e04"
+      },
+      {
+        "path": "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/promotions/play.segments/_index.segment.rsc",
+        "oldBytes": 2521,
+        "bytes": 2521,
+        "sha256": "194ce123becb4d99eae148cf412e645c924c64a31ae694963e2f5ce6059fd1ad"
+      },
+      {
+        "path": "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/promotions/play.segments/_tree.segment.rsc",
+        "oldBytes": 494,
+        "bytes": 494,
+        "sha256": "fa5a04b767f473707d77feec94f527d8320a34457bb3dd6ad98de7308b5b502e"
+      },
+      {
+        "path": "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/promotions/play.segments/promotions.segment.rsc",
+        "oldBytes": 265,
+        "bytes": 265,
+        "sha256": "dd3d6a6c1216b53ff577e62b45489c02cd8ec20b67600196ed92118d5f7decc9"
+      },
+      {
+        "path": "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/promotions/play.segments/promotions/play.segment.rsc",
+        "oldBytes": 271,
+        "bytes": 271,
+        "sha256": "03d6085a09e9ce5d0e82b3f6c081f31a97c5d704ec7239153ee543e2dedf5911"
+      },
+      {
+        "path": "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/promotions/play.segments/promotions/play/__PAGE__.segment.rsc",
+        "oldBytes": 859,
+        "bytes": 859,
+        "sha256": "ac5e3d7089e252c236ca819fc39cb7311254d654be712a114a58b36b1a2061a0"
+      },
+      {
+        "path": "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/promotions/play/page_client-reference-manifest.js",
+        "oldBytes": 9607,
+        "bytes": 9607,
+        "sha256": "fdd8fd7523c4a1c8eb4bcb9a28afc036ce6759a85ae03acc10f342b70c644a01"
+      },
+      {
+        "path": "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/promotions/play/page.js",
+        "oldBytes": 25878,
+        "bytes": 25878,
+        "sha256": "4733deee2435ef510a035f7614662e794fb082c1aa1258d2ca1a3f6f6e6a88fe"
+      },
+      {
+        "path": "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/qa/button-sounds.html",
+        "oldBytes": 15522,
+        "bytes": 15522,
+        "sha256": "46f07baf3a72bdf248b9dacc453cd8f69bc20843cb21b20179208599e8e3821c"
+      },
+      {
+        "path": "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/qa/button-sounds.rsc",
+        "oldBytes": 5996,
+        "bytes": 5996,
+        "sha256": "a8dc01f8fc35be3262557d99c3450d122c35030f9cbca59c160ff8ee221cde20"
+      },
+      {
+        "path": "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/qa/button-sounds.segments/_full.segment.rsc",
+        "oldBytes": 5996,
+        "bytes": 5996,
+        "sha256": "a8dc01f8fc35be3262557d99c3450d122c35030f9cbca59c160ff8ee221cde20"
+      },
+      {
+        "path": "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/qa/button-sounds.segments/_head.segment.rsc",
+        "oldBytes": 1602,
+        "bytes": 1602,
+        "sha256": "f9edec717edeac86cfdd9c64052bd348e4e24d72f504e98caab22d0761d4ca4f"
+      },
+      {
+        "path": "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/qa/button-sounds.segments/_index.segment.rsc",
+        "oldBytes": 2521,
+        "bytes": 2521,
+        "sha256": "194ce123becb4d99eae148cf412e645c924c64a31ae694963e2f5ce6059fd1ad"
+      },
+      {
+        "path": "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/qa/button-sounds.segments/_tree.segment.rsc",
+        "oldBytes": 441,
+        "bytes": 441,
+        "sha256": "21a664f6c7c3f6df50db9dabd99578411154dbd86e2d576facb38eb67075d569"
+      },
+      {
+        "path": "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/qa/button-sounds.segments/qa.segment.rsc",
+        "oldBytes": 271,
+        "bytes": 271,
+        "sha256": "03d6085a09e9ce5d0e82b3f6c081f31a97c5d704ec7239153ee543e2dedf5911"
+      },
+      {
+        "path": "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/qa/button-sounds.segments/qa/button-sounds.segment.rsc",
+        "oldBytes": 271,
+        "bytes": 271,
+        "sha256": "03d6085a09e9ce5d0e82b3f6c081f31a97c5d704ec7239153ee543e2dedf5911"
+      },
+      {
+        "path": "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/qa/button-sounds.segments/qa/button-sounds/__PAGE__.segment.rsc",
+        "oldBytes": 699,
+        "bytes": 699,
+        "sha256": "3ea4af2c275a81faf57d00a35366da5e40cdef0a0ef84a8b34bd22759deba089"
+      },
+      {
+        "path": "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/qa/button-sounds/page_client-reference-manifest.js",
+        "oldBytes": 8995,
+        "bytes": 8995,
+        "sha256": "e5b87d9e4dc73bccf2faea2fa249bfadf88766f5bdc629eec94778335dd4952d"
+      },
+      {
+        "path": "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/qa/map-monsters/page_client-reference-manifest.js",
+        "oldBytes": 8833,
+        "bytes": 8833,
+        "sha256": "be60cbdb936c4805b053b4a81fd3f639743e0fb76daaa699de93165eae010b57"
+      },
+      {
+        "path": "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/qa/webgl2-entity-renderer.html",
+        "oldBytes": 9502,
+        "bytes": 9502,
+        "sha256": "f7cca6fdb147498079e480448651dd58d826e34c37846ad7eb8500ac77d95cce"
+      },
+      {
+        "path": "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/qa/webgl2-entity-renderer.rsc",
+        "oldBytes": 5931,
+        "bytes": 5931,
+        "sha256": "35e18c5f9259fc6aeb04d4138ae2dbb9f5f2d298d505d054a25ee3f233f29af7"
+      },
+      {
+        "path": "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/qa/webgl2-entity-renderer.segments/_full.segment.rsc",
+        "oldBytes": 5931,
+        "bytes": 5931,
+        "sha256": "35e18c5f9259fc6aeb04d4138ae2dbb9f5f2d298d505d054a25ee3f233f29af7"
+      },
+      {
+        "path": "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/qa/webgl2-entity-renderer.segments/_head.segment.rsc",
+        "oldBytes": 1602,
+        "bytes": 1602,
+        "sha256": "f9edec717edeac86cfdd9c64052bd348e4e24d72f504e98caab22d0761d4ca4f"
+      },
+      {
+        "path": "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/qa/webgl2-entity-renderer.segments/_index.segment.rsc",
+        "oldBytes": 2521,
+        "bytes": 2521,
+        "sha256": "194ce123becb4d99eae148cf412e645c924c64a31ae694963e2f5ce6059fd1ad"
+      },
+      {
+        "path": "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/qa/webgl2-entity-renderer.segments/_tree.segment.rsc",
+        "oldBytes": 450,
+        "bytes": 450,
+        "sha256": "1ee036bce9c6e89ea33dcb4d74a6f216b77c59dcc95dce06ee8e47248096de62"
+      },
+      {
+        "path": "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/qa/webgl2-entity-renderer.segments/qa.segment.rsc",
+        "oldBytes": 271,
+        "bytes": 271,
+        "sha256": "03d6085a09e9ce5d0e82b3f6c081f31a97c5d704ec7239153ee543e2dedf5911"
+      },
+      {
+        "path": "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/qa/webgl2-entity-renderer.segments/qa/webgl2-entity-renderer.segment.rsc",
+        "oldBytes": 271,
+        "bytes": 271,
+        "sha256": "03d6085a09e9ce5d0e82b3f6c081f31a97c5d704ec7239153ee543e2dedf5911"
+      },
+      {
+        "path": "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/qa/webgl2-entity-renderer.segments/qa/webgl2-entity-renderer/__PAGE__.segment.rsc",
+        "oldBytes": 616,
+        "bytes": 616,
+        "sha256": "fa7eec615ec21962565e3bd033170e2dedf537390e94bad00dd58048cc028abe"
+      },
+      {
+        "path": "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/qa/webgl2-entity-renderer/page_client-reference-manifest.js",
+        "oldBytes": 8930,
+        "bytes": 8930,
+        "sha256": "4afa85fe5f7dc41ceb1f1799f1be7a64ef5ed0a4fedc11aac27354b64fa1fa89"
+      },
+      {
+        "path": "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/spectate.html",
+        "oldBytes": 8892,
+        "bytes": 8892,
+        "sha256": "399f0f3ed347f658c10284d05289398144594efa7dbd8fdab219cc075246c041"
+      },
+      {
+        "path": "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/spectate.rsc",
+        "oldBytes": 5488,
+        "bytes": 5488,
+        "sha256": "1a4523104deaa468d34f70d06145589907bbad4cb46e5f19f33fda199a315a3d"
+      },
+      {
+        "path": "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/spectate.segments/_full.segment.rsc",
+        "oldBytes": 5488,
+        "bytes": 5488,
+        "sha256": "1a4523104deaa468d34f70d06145589907bbad4cb46e5f19f33fda199a315a3d"
+      },
+      {
+        "path": "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/spectate.segments/_head.segment.rsc",
+        "oldBytes": 1602,
+        "bytes": 1602,
+        "sha256": "f9edec717edeac86cfdd9c64052bd348e4e24d72f504e98caab22d0761d4ca4f"
+      },
+      {
+        "path": "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/spectate.segments/_index.segment.rsc",
+        "oldBytes": 2521,
+        "bytes": 2521,
+        "sha256": "194ce123becb4d99eae148cf412e645c924c64a31ae694963e2f5ce6059fd1ad"
+      },
+      {
+        "path": "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/spectate.segments/_tree.segment.rsc",
+        "oldBytes": 370,
+        "bytes": 370,
+        "sha256": "bd3c5ac947c2fbb3d45eba4b594636d8cab7a65f2633b39067f11f1625c0fa16"
+      },
+      {
+        "path": "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/spectate.segments/spectate.segment.rsc",
+        "oldBytes": 271,
+        "bytes": 271,
+        "sha256": "03d6085a09e9ce5d0e82b3f6c081f31a97c5d704ec7239153ee543e2dedf5911"
+      },
+      {
+        "path": "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/spectate.segments/spectate/__PAGE__.segment.rsc",
+        "oldBytes": 599,
+        "bytes": 599,
+        "sha256": "eba834c745b2c307a36fb74396a43995907342bd102841e79b08fc08357ad944"
+      },
+      {
+        "path": "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/spectate/page_client-reference-manifest.js",
+        "oldBytes": 8878,
+        "bytes": 8878,
+        "sha256": "a2441cfba09f89df624823429be6dc8749c4be396e5f3ca7a0542692036961ba"
+      },
+      {
+        "path": "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/version/route.js",
+        "oldBytes": 8072,
+        "bytes": 8075,
+        "sha256": "72e3c8be5b7dbf91d01f37ae40e8d05b0eeb5df163ec56af358fdb7e85baff43"
+      },
+      {
+        "path": "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/world-report/page_client-reference-manifest.js",
+        "oldBytes": 8954,
+        "bytes": 8954,
+        "sha256": "676dfadb5686fa09f4f3fe92ef0ab25a41056eac355d5159d24f0dcc210e024c"
+      },
+      {
+        "path": "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/chunks/20.js",
+        "oldBytes": 919300,
+        "bytes": 7341815,
+        "sha256": "24b70cebec102e50ca26b773d43d82129da6758462235111dc4c4cd803788a31"
+      },
+      {
+        "path": "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/chunks/8132.js",
+        "oldBytes": 38188,
+        "bytes": 38191,
+        "sha256": "c78df361900e3178bf49dec5feb4e70b3d42f8b1d5e69c1f57c3c60e4650e2b5"
+      },
+      {
+        "path": "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/middleware-build-manifest.js",
+        "oldBytes": 450,
+        "bytes": 450,
+        "sha256": "939a1d5570a32faa8de43675e6197305203af48d86c4282e024886a66eea0fcc"
+      },
+      {
+        "path": "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/middleware-react-loadable-manifest.js",
+        "oldBytes": 1660,
+        "bytes": 1660,
+        "sha256": "12593cf82fd483fc0a96e86ad4cdf123e293bdddfefad490ef2342ee11ab750b"
+      },
+      {
+        "path": "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/pages/404.html",
+        "oldBytes": 9257,
+        "bytes": 9257,
+        "sha256": "17917aae4ff80a0e0b22e7f1607b97debf2534a69d26db97fb2e1b6e52bf76cf"
+      },
+      {
+        "path": "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/pages/500.html",
+        "oldBytes": 8916,
+        "bytes": 8916,
+        "sha256": "bef03c7bf11209617177c4de44d86809ce456f335eeb99904a6460524a524139"
+      },
+      {
+        "path": "web/mir2-web3/apps/web/server.js",
+        "oldBytes": 14519,
+        "bytes": 14522,
+        "sha256": "936a93d6b112309cab59b118db1f23cf4ae72e5a9bba9e538abc71c37ac99631"
+      },
+      {
+        "path": "web/R16-PLAYABLE-ASSETS-MANIFEST.json",
+        "oldBytes": 4454825,
+        "bytes": 4457985,
+        "sha256": "fd12f95caf241009c5f2f12e9c97547efe599c6f3a9f83a0a77668e8c4c5bcca"
+      }
+    ],
+    "addedFiles": [
+      {
+        "path": "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/chunks/8901.js",
+        "bytes": 2303098,
+        "sha256": "a5cb6b38a57c070459e7471a21342475e6188ccd61a354d108cf12a8f9c78578"
+      },
+      {
+        "path": "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/static/chunks/1650.1a87843bf9e35006.js",
+        "bytes": 494790,
+        "sha256": "431f7808cadd8b07e9162429a7ee07fa23f6e60fc1b2e0901cb7064a67124ff4"
+      },
+      {
+        "path": "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/static/chunks/5166-9fc64998f6aff0a8.js",
+        "bytes": 11749,
+        "sha256": "75d83a2e890e5fec51d34dc2d64c0571ab9c44dc8e7316b0828aa998063fd20c"
+      },
+      {
+        "path": "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/static/chunks/81-3b44ab2bc0bc1a88.js",
+        "bytes": 7467549,
+        "sha256": "1a1f0c54d4086b1f34410710586f6b28648c8512a8a1db78bd56b7a50929db29"
+      },
+      {
+        "path": "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/static/chunks/8240-cf7716bb9d8ac3fc.js",
+        "bytes": 2659366,
+        "sha256": "38c44dbd88358e331f844666f5506025336bfd910946b18a6ed4513387596317"
+      },
+      {
+        "path": "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/static/chunks/app/game/page-0a4666ab2a66feb4.js",
+        "bytes": 200,
+        "sha256": "b5782eedb716bd01c7d9a60bd9feb43c6317ed1821abcfb34d51adf358497592"
+      },
+      {
+        "path": "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/static/chunks/app/page-a7a460befeda5b5d.js",
+        "bytes": 201,
+        "sha256": "65bc66916200d2c2a19e64b508b72e959e09adf9b72dab164650ddad972e438d"
+      },
+      {
+        "path": "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/static/chunks/app/promotions/play/page-1d9bb62229367c24.js",
+        "bytes": 2282,
+        "sha256": "e82a4b8fb658ee70a223816687cc3a559db6504cc045bb1e065659e64b5fb8f1"
+      },
+      {
+        "path": "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/static/chunks/webpack-1873a26d5bac4012.js",
+        "bytes": 3719,
+        "sha256": "6404e44721cd1c3f899d614b66f916c29565c0f3ff3be47dbbd058d1b4e35354"
+      },
+      {
+        "path": "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/static/css/c159d091c92906ea.css",
+        "bytes": 108250,
+        "sha256": "25fdfb9d09b8949ab5bd93f2f5bcaf5ddb2733b0728cc36d21603be7fe9e7a21"
+      },
+      {
+        "path": "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/static/zk9hlA8LYTLrEX-WIO7SK/_buildManifest.js",
+        "bytes": 2425,
+        "sha256": "75e4deab36c83d51b5ff645a941406c737304deb03fee9616d62831475d0cca4"
+      },
+      {
+        "path": "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/static/zk9hlA8LYTLrEX-WIO7SK/_ssgManifest.js",
+        "bytes": 80,
+        "sha256": "678f6ce2cb80b1fe72fc67e7412be6e2ab6ada083111b64f7c40d35e3cba5e00"
+      },
+      {
+        "path": "web/mir2-web3/apps/web/lib/generated/r16-native-localization.json",
+        "bytes": 6301532,
+        "sha256": "e8d8bf99c8e109a0e6e5fc028ec8ce97b6d927c47c8edbf329fe2ba7bc17c259"
+      },
+      {
+        "path": "web/mir2-web3/apps/web/public/original-ui/fonts/NotoSans-Bold.ttf",
+        "bytes": 631484,
+        "sha256": "1df075a380fc7cb898acf64c1f7b3b4dd780de3caa860178bf929de35817a913"
+      },
+      {
+        "path": "web/mir2-web3/apps/web/public/original-ui/fonts/NotoSans-Regular.ttf",
+        "bytes": 621572,
+        "sha256": "478c558ea716033cd60c03438f628dfa75694dcf6b5f6d505a2f05fd2b4f3823"
+      },
+      {
+        "path": "web/mir2-web3/apps/web/public/original-ui/fonts/NotoSansArabic-Bold.ttf",
+        "bytes": 261460,
+        "sha256": "4e5462d2e8be880317b9f49b5b2da109ddb6a3563d91cc604b67f3535832a555"
+      },
+      {
+        "path": "web/mir2-web3/apps/web/public/original-ui/fonts/NotoSansArabic-Regular.ttf",
+        "bytes": 234892,
+        "sha256": "bdff3e5659d67e67def05b33f749683b9376ae819d65d3dd62ac4640b3aaef48"
+      },
+      {
+        "path": "web/mir2-web3/apps/web/public/original-ui/fonts/NotoSansDevanagari-Bold.ttf",
+        "bytes": 250176,
+        "sha256": "6a09c8d797cfc803d32cdc731e809424d74cbaff59f503de34ade421a08e5bc2"
+      },
+      {
+        "path": "web/mir2-web3/apps/web/public/original-ui/fonts/NotoSansDevanagari-Regular.ttf",
+        "bytes": 243520,
+        "sha256": "4e3c66638958c3e2ab5d37f47a8deb89fffeb7be9985c665a519bbc7ba762313"
+      },
+      {
+        "path": "web/mir2-web3/apps/web/public/original-ui/fonts/NotoSansTC.ttf",
+        "bytes": 11941968,
+        "sha256": "864727d210d54f2537bbe23b3a839436c3992af72de9322af5270897246bd44f"
+      },
+      {
+        "path": "web/mir2-web3/apps/web/public/original-ui/fonts/NotoSansThai-Bold.ttf",
+        "bytes": 37824,
+        "sha256": "2ac6c6e8a478e23b15f76e4894af1fa2210f8f350e4e6e54aad530bec03efbfb"
+      },
+      {
+        "path": "web/mir2-web3/apps/web/public/original-ui/fonts/NotoSansThai-Regular.ttf",
+        "bytes": 37780,
+        "sha256": "61cf814eec46b294d6ea4401ac295d0cecd5207bd2331dcc5a15e7301d30ee44"
+      },
+      {
+        "path": "web/mir2-web3/apps/web/public/original-ui/fonts/OFL-NotoSans.txt",
+        "bytes": 4396,
+        "sha256": "cee9892f9f0cc8fe882c9e9537ee6a89621d86ee7ceaf70b02e2b2b1c25c061a"
+      },
+      {
+        "path": "web/mir2-web3/apps/web/public/original-ui/fonts/OFL-NotoSansArabic.txt",
+        "bytes": 4382,
+        "sha256": "a7a5a25eb188bf1cd96982030d53e23c33485c69b1044a562254226857ee13af"
+      },
+      {
+        "path": "web/mir2-web3/apps/web/public/original-ui/fonts/OFL-NotoSansDevanagari.txt",
+        "bytes": 4386,
+        "sha256": "a216f6f8d85c7228093e0ee5e258d9d377e6671f68acb4db1930b29583d0f331"
+      },
+      {
+        "path": "web/mir2-web3/apps/web/public/original-ui/fonts/OFL-NotoSansTC.txt",
+        "bytes": 4388,
+        "sha256": "1c05c68c34f9708415aada51f17e1b0092d2cea709bf4a94cd38114f9e73d7d9"
+      },
+      {
+        "path": "web/mir2-web3/apps/web/public/original-ui/fonts/OFL-NotoSansThai.txt",
+        "bytes": 4380,
+        "sha256": "dad6e6abc2bf3fc37cc698af7607c3f4d4235039695713b222e5a034fb5b9b1c"
+      }
+    ],
+    "removedFiles": [
+      "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/chunks/6818.js",
+      "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/static/chunks/1650.8c83fdd5f578b54d.js",
+      "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/static/chunks/3662-7726519042b82b84.js",
+      "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/static/chunks/5166-0ff19efe5915c5ce.js",
+      "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/static/chunks/81-8af17f5a5676a369.js",
+      "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/static/chunks/app/game/page-365fc824d70a3e9e.js",
+      "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/static/chunks/app/page-e9e056abbf7b896f.js",
+      "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/static/chunks/app/promotions/play/page-862087cdea869352.js",
+      "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/static/chunks/webpack-2969871bd68c1052.js",
+      "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/static/css/ec0de9df798f398a.css",
+      "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/static/kH3yQjxYAuzF2nvUWQtzS/_buildManifest.js",
+      "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/static/kH3yQjxYAuzF2nvUWQtzS/_ssgManifest.js"
+    ],
+    "originalPublicFilesRetained": 25460,
+    "allOriginalPublicAssetSizeAndShaRetained": true,
+    "nonNextRuntimeAndBinariesUnchanged": true,
+    "unchangedRuntimeFiles": 164,
+    "unchangedRuntimeKinds": {
+      "launcher": 9,
+      "undici-7.30.1": 115,
+      "runtime-module": 35,
+      "actor-navigation": 3,
+      "gateway": 1,
+      "node-22.18.0": 1
+    }
+  },
+  "manifestUnchangedAfterAudit": true,
+  "finishedAt": "2026-11-04T09:01:09.222Z",
+  "limitations": [
+    "No running service action, browser input, session creation, wallet operation or gameplay QA.",
+    "No private/ or .mir2-data enumeration, file reads or runtime-state hashing.",
+    "Compiled and packaged identities are verified; no assertion that the 2026 canonical source tree is byte-identical to the older recorded sourceSha256.",
+    "Package/resource integrity does not satisfy the separately failed original 360MiB thin-package gate or establish human acceptance."
+  ]
+}

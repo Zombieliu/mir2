@@ -46,6 +46,50 @@ fn edge(
     }
 }
 #[test]
+fn skills_hover_is_read_only_and_clears_on_leave_close_owner_or_unready() {
+    let (mut c, mut s) = fixture();
+    let before_model = serde_json::to_string(&s.view).unwrap();
+    let before_render = s.render_revision;
+    let before_sequence = s.sequence;
+    s.observe_hover(&c, Some(0));
+    assert!(s
+        .hovered_tooltip
+        .as_ref()
+        .unwrap()
+        .text
+        .contains("Instant Casting"));
+    assert_eq!(s.render_revision, before_render);
+    assert_eq!(s.sequence, before_sequence);
+    assert_eq!(serde_json::to_string(&s.view).unwrap(), before_model);
+    assert!(!s.draft.open);
+    s.observe_hover(&c, None);
+    assert!(s.hovered_tooltip.is_none());
+    s.observe_hover(&c, Some(0));
+    s.close();
+    assert!(s.hovered_tooltip.is_none());
+    s.observe_hover(&c, Some(999));
+    assert!(s.hovered_tooltip.is_none());
+    s.observe_hover(&c, Some(0));
+    c.identity.owner_revision += 1;
+    s.observe_hover(&c, Some(0));
+    assert!(s.hovered_tooltip.is_none());
+    c.identity.owner_revision -= 1;
+    c.ready = false;
+    s.observe_hover(&c, Some(0));
+    assert!(s.hovered_tooltip.is_none());
+    c.ready = true;
+    c.input_enabled = false;
+    s.observe_hover(&c, Some(0));
+    assert!(s.hovered_tooltip.is_none());
+    c.input_enabled = true;
+    s.draft.show(0, &s.view);
+    s.observe_hover(&c, Some(0));
+    assert!(
+        s.hovered_tooltip.is_none(),
+        "assignment modal supersedes a hint"
+    );
+}
+#[test]
 fn m10_portable_pointer_crossing_second_pointer_and_revision_retire_save() {
     let (c, mut s) = fixture();
     let mut q = SpellsIntentQueue::default();

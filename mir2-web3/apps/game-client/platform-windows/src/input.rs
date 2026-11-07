@@ -251,6 +251,10 @@ impl GatewayCommands {
     ) -> bool {
         use mir2_client_bevy::npc_gold_buy_attempt::NpcGoldBuyAttemptOutcome;
         let gate = queue.npc_gold_buy_gate();
+        if crate::packed_assets::waiting() {
+            gate.reject_unpublished(token);
+            return false;
+        }
         let Some(revision) = gate.source_revision(token) else {
             gate.reject_unpublished(token);
             return false;
@@ -289,6 +293,10 @@ impl GatewayCommands {
         queue: &mut mir2_client_bevy::crystal_ui::overlays::NativePlayerUiIntentQueue,
         pending: &mut mir2_client_bevy::pending_operations::PendingOperations,
     ) -> bool {
+        if crate::packed_assets::waiting() {
+            queue.reject_unpublished_mail_send(token);
+            return false;
+        }
         let stamp = self.world_stamp.lock().ok().and_then(|stamp| *stamp);
         let mut prepared = None;
         let result = self.sender.send_mail_send_with_bind(
@@ -319,6 +327,10 @@ impl GatewayCommands {
         token: mir2_client_bevy::crystal_ui::overlays::NativeQuoteToken,
         queue: &mut mir2_client_bevy::crystal_ui::overlays::NativePlayerUiIntentQueue,
     ) -> bool {
+        if crate::packed_assets::waiting() {
+            queue.reject_unpublished_mail_quote(token);
+            return false;
+        }
         let stamp = self.world_stamp.lock().ok().and_then(|stamp| *stamp);
         let mut prepared = None;
         let result = self.sender.send_mail_quote_with_bind(
@@ -356,6 +368,9 @@ impl GatewayCommands {
     }
 
     pub fn send_command(&self, command: GatewayCommand) -> bool {
+        if !resource_gate_allows(crate::packed_assets::waiting(), &command) {
+            return false;
+        }
         if matches!(
             &command,
             GatewayCommand::Wire(
@@ -420,6 +435,14 @@ impl GatewayCommands {
             Ok(None) => true,
             Err(()) => false,
         }
+    }
+
+    pub(crate) fn companion_stamp(&self) -> Option<crate::gateway::NativeCommandStamp> {
+        let stamp = self.world_stamp.lock().ok().and_then(|stamp| *stamp)?;
+        self.sender
+            .ownership_fence()?
+            .accepts_companion_stamp(stamp)
+            .then_some(stamp)
     }
 
     pub(crate) fn bind_transport_operation(
@@ -515,6 +538,60 @@ impl GatewayCommands {
 
     fn send_town_revive(&self) {
         self.send_command(GatewayCommand::Wire(NativeOutboundCommand::TownRevive));
+    }
+}
+
+/// Asset waiting only suppresses local gameplay production. Transport health,
+/// authentication, logout and shutdown remain available; world authority is
+/// unchanged and no command is retained here for a later burst.
+pub(crate) fn resource_gate_allows(waiting: bool, command: &GatewayCommand) -> bool {
+    use crate::gateway::NativeCommandScope as Scope;
+    !waiting
+        || matches!(
+            crate::gateway::native_command_scope(command),
+            Scope::Procedure | Scope::Leave | Scope::Shutdown
+        )
+}
+
+pub(crate) fn suppress_pending_resource_input(
+    mut keys: Option<ResMut<ButtonInput<KeyCode>>>,
+    mut mouse: Option<ResMut<ButtonInput<MouseButton>>>,
+    mut keyboard_events: Option<
+        ResMut<bevy::ecs::message::Messages<bevy::input::keyboard::KeyboardInput>>,
+    >,
+    mut mouse_events: Option<
+        ResMut<bevy::ecs::message::Messages<bevy::input::mouse::MouseButtonInput>>,
+    >,
+    mut movement: Option<ResMut<WorldPointerMovementState>>,
+    time: Option<Res<Time>>,
+    real_time: Option<Res<Time<bevy::time::Real>>>,
+) {
+    if !crate::packed_assets::waiting() {
+        return;
+    }
+    if keys
+        .as_deref()
+        .is_some_and(|keys| keys.just_pressed(KeyCode::F5))
+    {
+        crate::packed_assets::retry();
+    }
+    if let Some(keys) = keys.as_deref_mut() {
+        keys.reset_all();
+    }
+    if let Some(mouse) = mouse.as_deref_mut() {
+        mouse.reset_all();
+    }
+    if let Some(events) = keyboard_events.as_deref_mut() {
+        events.clear();
+    }
+    if let Some(events) = mouse_events.as_deref_mut() {
+        events.clear();
+    }
+    if let Some(movement) = movement.as_deref_mut() {
+        movement.reset_controller(
+            movement_now_ms(time.as_deref(), real_time.as_deref()),
+            "resourceDownload",
+        );
     }
 }
 
@@ -1254,6 +1331,7 @@ pub(crate) struct NativeQuestPointerUi<'w, 's> {
             With<NpcQuestListPanel>,
             With<QuestConfirmationPanel>,
             With<CrystalChatRoot>,
+            With<mir2_client_bevy::crystal_ui::companion::CompanionPointerCapture>,
         )>,
     >,
     nodes: Query<
@@ -2530,6 +2608,21 @@ pub fn mouse_world_interaction_system(
     // Drain even idle/menu frames so a press without new motion retains its
     // real down position instead of borrowing the final cursor of this frame.
     let press_origins = pointer_edges.read(windows.single().ok().map(|(entity, _)| entity));
+    if crate::packed_assets::waiting() {
+        // Drain raw WindowEvent edges before refusing input. A press received
+        // behind the shield must not reopen an old hold or route on readiness.
+        movement.reset_controller(
+            movement_now_ms(time.as_deref(), real_time.as_deref()),
+            "resourceDownload",
+        );
+        if let Some(queue) = queue.as_deref_mut() {
+            queue.clear_attack_intents();
+        }
+        if let Some(routes) = route_navigation.as_deref_mut() {
+            routes.clear();
+        }
+        return;
+    }
     let keys = keyboard.keys();
     let modifiers = keyboard.modifiers();
     let mut left_pressed = mouse.just_pressed(MouseButton::Left);
@@ -9486,6 +9579,48 @@ mod tests {
                 receiver.try_recv().is_err(),
                 "tracker {button:?} leaked a walk"
             );
+        }
+    }
+
+    #[test]
+    fn companion_entry_captures_only_its_button_and_not_the_transparent_stage() {
+        use bevy::prelude::Vec2;
+        use mir2_client_bevy::crystal_ui::companion::CompanionPointerCapture;
+        for (cursor, blocked) in [
+            (Vec2::new(900.0, 185.0), true),
+            (Vec2::new(700.0, 400.0), false),
+        ] {
+            let (mut app, receiver) = quest_pointer_test_app(cursor);
+            app.world_mut().spawn((
+                Node::default(),
+                ComputedNode {
+                    size: Vec2::new(1024.0, 768.0),
+                    ..Default::default()
+                },
+                UiGlobalTransform::from_xy(512.0, 384.0),
+                InheritedVisibility::VISIBLE,
+                bevy::ui::FocusPolicy::Pass,
+            ));
+            app.world_mut().spawn((
+                CompanionPointerCapture,
+                Button,
+                Node::default(),
+                ComputedNode {
+                    size: Vec2::new(140.0, 29.0),
+                    ..Default::default()
+                },
+                UiGlobalTransform::from_xy(942.0, 188.5),
+                InheritedVisibility::VISIBLE,
+            ));
+            app.world_mut()
+                .resource_mut::<ButtonInput<MouseButton>>()
+                .press(MouseButton::Left);
+            app.update();
+            let walked = matches!(
+                receiver.try_recv(),
+                Ok(GatewayCommand::Player(PlayerIntent::Walk { .. }))
+            );
+            assert_eq!(walked, !blocked, "entry capture at {cursor:?}");
         }
     }
 

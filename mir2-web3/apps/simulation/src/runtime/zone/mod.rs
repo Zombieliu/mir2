@@ -53,6 +53,7 @@ pub use runtime::conquest::{
 pub use runtime::mining::{ZoneMinedOre, ZoneMiningSwing, ZoneMiningTool};
 pub use runtime::owned_pet_combat::{ZonePetExperienceAdmission, ZoneSavedPetSnapshot};
 pub use runtime::ZoneRuntime;
+pub use runtime::action_boundary::{ZoneActionBoundary, ZoneActionBoundaryRequest, ZoneActionKind, ZoneMovementOccupancy};
 pub use types::{
     GroundDropClaimTicket, PlayerId, SessionId, ZoneBossRewardAudit, ZoneChatItem, ZoneChatProfile,
     ZoneCommand, ZoneJoin, ZoneJourneyEventKind, ZoneJourneyEventReceipt,

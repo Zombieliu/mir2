@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { test } from "node:test";
 import ts from "typescript";
+import { createShellKeydownFixture } from "./lib/window-keydown-test-fixture.mjs";
 
 // Compile only the explicit pure TypeScript dependency graph, never a renderer/Core module.
 const cache = new Map();
@@ -472,6 +473,8 @@ test("actual Shell active or arming storage stops held keyboard movement even wi
   for (const [active, transitioning] of [[true, false], [false, true]]) {
     let stops = 0;
     const scope = { parityUiBlocksGameplay: undefined, bevyStorageUiActive: active, bevyStorageUiTransitioning: transitioning,
+      keyboardMovementDiagnosticsRef: { current: { lastKey: null, lastDispatch: null } },
+      sceneInteractionReady: true, bevyQuestUiCapturesPointer: false,
       storagePointerCallbacksRef: { current: { getBevyStoragePointerContext: () => null } },
       heldKeyboardMoveKeysRef: { current: new Set(["right"]) }, heldKeyboardRunModeRef: { current: true },
       onViewportDirectionStop: () => { stops++; }, onViewportDirectionIntent() { assert.fail("storage cannot move the world"); } };
@@ -487,21 +490,55 @@ test("actual Shell active or arming storage stops held keyboard movement even wi
   }
 });
 
-test("actual Shell keyboard effects include storage transitions in their dependency roster", () => {
+test("actual Shell movement watches storage transitions and committed shortcut gates update without resubscribing", () => {
   const ast = sourceFile("app/original-client-shell.tsx"), effects = [];
   function visit(n) {
     if (ts.isCallExpression(n) && n.expression.getText(ast) === "useEffect"
-      && ["function handleKeyboardMoveDown", "function handleShortcutKey"].some(marker => n.arguments[0]?.getText(ast).includes(marker))) effects.push(n);
+      && n.arguments[0]?.getText(ast).includes("function handleKeyboardMoveDown")) effects.push(n);
     ts.forEachChild(n, visit);
   }
   visit(ast);
-  // Movement and combat listeners must be recreated when either storage phase changes.
-  assert.equal(effects.length, 2);
+  // Movement retains its existing effect dependencies. Shortcuts now retain
+  // one listener and acquire both storage phases from the committed handler.
+  assert.equal(effects.length, 1);
   for (const n of effects) {
     assert.ok(ts.isArrayLiteralExpression(n.arguments[1]));
     const deps = n.arguments[1].elements.map(e => e.getText(ast));
     assert.ok(deps.includes("bevyStorageUiActive")); assert.ok(deps.includes("bevyStorageUiTransitioning"));
   }
+  let listener = null, additions = 0, removals = 0, combat = 0, prevented = 0;
+  const scope = {
+    screen: "game", crystalKeyBindings: null, crystalKeyNameFromBrowserEvent: () => null,
+    keyboardMovementDiagnosticsRef: { current: { lastShortcut: null } }, combatTildeRef: { current: false },
+    HTMLElement: class {}, HTMLInputElement: class {}, HTMLTextAreaElement: class {}, HTMLSelectElement: class {},
+    document: { visibilityState: "visible", hasFocus: () => true }, getKeybindCaptureActive: undefined,
+    npcShopBlocksWorldInput: () => false, heroBlocksWorldInput: () => false,
+    heroPointerCallbacksRef: { current: {} }, onHeroShortcut: undefined,
+    bevyStorageUiActive: false, bevyStorageUiTransitioning: false,
+    bevyMailComposeReady: false, bevyMailComposePending: false,
+    spellsPointerCallbacksRef: { current: { getBevySpellsPointerContext: () => null } },
+    bevyQuestUiCapturesPointer: false,
+    onCombatKey() { combat++; return { handled: true }; },
+    window: {
+      addEventListener(type, fn, capture) { assert.equal(type, "keydown"); assert.equal(capture, true); listener = fn; additions++; },
+      removeEventListener(type, fn, capture) { assert.equal(type, "keydown"); assert.equal(capture, true); assert.equal(fn, listener); listener = null; removals++; },
+    },
+  };
+  const keyboard = createShellKeydownFixture(scope), key = () => listener({ key: "F1", preventDefault() { prevented++; } });
+  keyboard.render(); keyboard.commit(); const originalListener = listener;
+  key(); assert.equal(combat, 1); assert.equal(prevented, 1);
+  keyboard.render({ bevyStorageUiActive: true });
+  key(); assert.equal(combat, 2, "an uncommitted storage render cannot replace the current handler");
+  keyboard.commit(); key(); assert.equal(combat, 2, "active Storage still rejects combat");
+  keyboard.render({ bevyStorageUiActive: false, bevyStorageUiTransitioning: true }); keyboard.commit();
+  key(); assert.equal(combat, 2, "arming Storage still rejects combat");
+  keyboard.render({ bevyStorageUiTransitioning: false }); keyboard.commit();
+  key(); assert.equal(combat, 3, "ending Storage restores the existing shortcut route");
+  assert.equal(prevented, 5); assert.equal(listener, originalListener);
+  assert.equal(additions, 1); assert.equal(removals, 0);
+  keyboard.render({ screen: "select" }); keyboard.commit(); key();
+  assert.equal(combat, 3); assert.equal(prevented, 5, "the real Shell null binding disables game shortcuts");
+  keyboard.unmount(); assert.equal(listener, null); assert.equal(removals, 1);
 });
 
 test("actual Shell window blur/resize/unmount withdraw Storage and remove its own terminal listeners", () => {
@@ -566,12 +603,18 @@ test("actual Shell layout owner/geometry replacement cancels Storage before clea
 });
 
 function hookHarness(name) {
-  const refs = [], effects = [], state = [], listeners = new Map(); let refCursor = 0, stateCursor = 0, interval = 0;
+  const refs = [], effects = [], state = [], callbacks = [], listeners = new Map(); let refCursor = 0, stateCursor = 0, callbackCursor = 0, interval = 0;
   const react = {
     useRef(initial) { const i = refCursor++; return refs[i] ??= { current: initial }; },
     useState(initial) { const i = stateCursor++; if (!(i in state)) state[i] = initial;
       return [state[i], value => { state[i] = typeof value === "function" ? value(state[i]) : value; }]; },
     useEffect(callback) { effects.push(callback); },
+    useCallback(callback, deps) {
+      const index = callbackCursor++, old = callbacks[index];
+      if (!old || !deps || !old.deps || old.deps.length !== deps.length || !deps.every((value, i) => Object.is(value, old.deps[i])))
+        callbacks[index] = { callback, deps: deps && [...deps] };
+      return callbacks[index].callback;
+    },
   };
   const dom = { addEventListener(type, fn) { const set = listeners.get(type) ?? new Set(); set.add(fn); listeners.set(type, set); },
     removeEventListener(type, fn) { listeners.get(type)?.delete(fn); },
@@ -582,7 +625,7 @@ function hookHarness(name) {
   new Function("exports", "module", "require", "window", "document", "performance", js)(module.exports, module,
     request => request === "react" ? react : load(request.replace(/^\.\//, "")), dom, dom, { now: () => 100 });
   return { refs, effects, state, listeners,
-    render(options) { refCursor = 0; stateCursor = 0; return module.exports[name === "use-bevy-bag-ui" ? "useBevyBagUi" : "useBevyStorageUi"](options); } };
+    render(options) { refCursor = 0; stateCursor = 0; callbackCursor = 0; return module.exports[name === "use-bevy-bag-ui" ? "useBevyBagUi" : "useBevyStorageUi"](options); } };
 }
 
 test("actual Bag hook first construction publishes its initial owner without a TDZ and retired cleanup cannot rewrite replacement", () => {
@@ -668,16 +711,17 @@ test("actual Shell arming shortcut listener swallows combat/item keys before the
   for (const [active, transitioning] of [[true, false], [false, true]]) {
     let listener, prevented = 0;
     const scope = { screen: "game", bevyStorageUiActive: active, bevyStorageUiTransitioning: transitioning,
+      HTMLElement: class {}, crystalKeyBindings: null, crystalKeyNameFromBrowserEvent: () => null,
       getKeybindCaptureActive: undefined, parityUiBlocksGameplay: undefined, document: {visibilityState:"visible",hasFocus:()=>true},
-      window: { addEventListener(type, callback) { assert.equal(type, "keydown"); listener = callback; },
-        removeEventListener(type, callback) { assert.equal(type, "keydown"); assert.equal(callback, listener); listener = null; } },
+      window: { addEventListener(type, callback, capture) { assert.equal(type, "keydown"); assert.equal(capture, true); listener = callback; },
+        removeEventListener(type, callback, capture) { assert.equal(type, "keydown"); assert.equal(capture, true); assert.equal(callback, listener); listener = null; } },
       onCombatKey() { assert.fail("no combat callback while Storage owns/arms"); },
       onUseItem() { assert.fail("no item callback while Storage owns/arms"); } };
     scope.npcShopPointerCallbacksRef = { current: { getBevyNpcShopInputBlocked: () => false } };
     Object.assign(scope, functions("app/original-client-shell.tsx", ["npcShopBlocksWorldInput"], scope));
-    const cleanup = effect("app/original-client-shell.tsx", "useEffect", "function handleShortcutKey", scope)();
+    const keyboard = createShellKeydownFixture(scope); keyboard.render(); keyboard.commit();
     assert.equal(typeof listener, "function");
     for (const key of ["Enter", "F1", "1"]) listener({ key, preventDefault() { prevented++; } });
-    assert.equal(prevented, 3); cleanup(); assert.equal(listener, null);
+    assert.equal(prevented, 3); keyboard.unmount(); assert.equal(listener, null);
   }
 });

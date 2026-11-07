@@ -37,6 +37,8 @@ pub enum UiPanel {
     BigMap,
     Storage,
     Group,
+    /// Owner-only native extension; unrelated to Crystal's summoned pets.
+    Companion,
     Guild,
     Trade,
     Minimap,
@@ -774,7 +776,7 @@ impl UiState {
     }
 
     pub fn blocks_gameplay_keys(&self) -> bool {
-        self.chat_focused
+        self.chat_focused || self.panel == UiPanel::Companion
     }
 
     pub fn blocks_world_click(&self) -> bool {

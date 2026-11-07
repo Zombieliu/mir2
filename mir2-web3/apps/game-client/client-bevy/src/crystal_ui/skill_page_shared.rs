@@ -10,6 +10,7 @@ use crate::{
 };
 use bevy::prelude::*;
 use bevy::ui::FocusPolicy;
+use serde::Serialize;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Component)]
 pub enum SkillPageAction {
@@ -96,6 +97,84 @@ pub fn experience_label(level: u8, b: &SkillBinding) -> String {
         _ => String::new(),
     }
 }
+/// Crystal SkillButton.Hint, sourced by stable Spell rather than display name.
+/// Only the authoritative learned list can produce a document.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct SkillTooltipDocument {
+    pub skill_id: u32,
+    pub text: String,
+    pub source_key: Option<String>,
+    pub source_complete: bool,
+}
+#[derive(Debug, Clone, Copy, Component)]
+pub struct SkillTooltipTarget(pub u32);
+
+pub fn skill_tooltip_document(skills: &SkillModel, id: u32) -> Option<SkillTooltipDocument> {
+    let skill = skills.skills.iter().find(|skill| skill.id == id)?;
+    let fallback = || SkillTooltipDocument {
+        skill_id: id,
+        text: format!("{} ({})", crate::native_i18n::tr(&skill.name), skill.level),
+        source_key: None,
+        source_complete: false,
+    };
+    let binding = skills.binding_for(id);
+    let Some(spell) = binding.spell.as_deref() else {
+        return Some(fallback());
+    };
+    let Some(magic) = mir2_game_data::crystal_magic_manifest_ref()
+        .magics
+        .iter()
+        .find(|magic| magic.spell == spell)
+    else {
+        return Some(fallback());
+    };
+    let next = match skill.level {
+        0 => magic.level1,
+        1 => magic.level2,
+        2 => magic.level3,
+        3 => 0,
+        _ => return Some(fallback()),
+    };
+    let key = format!("content.magic.{spell}.description");
+    let english = crate::native_i18n::for_locale(crate::native_i18n::Locale::English, &key, "");
+    if english.is_empty() {
+        return Some(fallback());
+    }
+    let level = skill.level.to_string();
+    let next = next.to_string();
+    let cost = magic.base_cost.to_string();
+    let args = [
+        ("0", level.as_str()),
+        ("1", next.as_str()),
+        ("2", cost.as_str()),
+    ];
+    let mut text = crate::native_i18n::format_key(&key, &english, &args);
+    // Some imported localized rows contain a neighbouring source-key fragment.
+    // Preserve the verified English source instead of displaying implementation
+    // tokens or inventing a repaired translation.
+    if text.contains("SkillDescription") || text.contains('{') || text.contains('}') {
+        text = crate::native_i18n::format_for(
+            crate::native_i18n::Locale::English,
+            &key,
+            &english,
+            &args,
+        );
+    }
+    if text.is_empty()
+        || text.contains("SkillDescription")
+        || text.contains('{')
+        || text.contains('}')
+    {
+        return Some(fallback());
+    }
+    Some(SkillTooltipDocument {
+        skill_id: id,
+        text,
+        source_key: Some(key),
+        source_complete: true,
+    })
+}
 #[derive(Debug, Clone)]
 pub struct SkillRowPlan {
     pub id: u32,
@@ -106,6 +185,7 @@ pub struct SkillRowPlan {
     pub key: String,
     pub cooldown: Option<u16>,
     pub y: f32,
+    pub tooltip: Option<SkillTooltipDocument>,
 }
 #[derive(Debug, Clone)]
 pub struct SkillPagePlan {
@@ -141,6 +221,7 @@ impl SkillPagePlan {
                     cooldown: (rem >= 100 && delay >= 34)
                         .then(|| 1290 + 34 - (rem / (delay / 34)).min(34) as u16),
                     y: 8. + row as f32 * 33.,
+                    tooltip: skill_tooltip_document(skills, s.id),
                 }
             })
             .collect();
@@ -287,7 +368,16 @@ pub fn paint_page<B: Bundle, M: Bundle>(
                             [index, index, index + 1],
                             CrystalRect::new(x + 36., y, 36., 34.),
                             [36., 34.],
-                            map(SkillPageAction::Select(row.id)),
+                            (
+                                map(SkillPageAction::Select(row.id)),
+                                SkillTooltipTarget(row.id),
+                                super::widget::CrystalHint::new(
+                                    row.tooltip
+                                        .as_ref()
+                                        .map(|doc| doc.text.as_str())
+                                        .unwrap_or_default(),
+                                ),
+                            ),
                             true,
                         );
                         if let Some(frame) = row.cooldown {
@@ -324,6 +414,24 @@ pub fn paint_page<B: Bundle, M: Bundle>(
                     font,
                     32. / 3.,
                 );
+                // The name is also a hover target, never an assignment/cast
+                // action. Pass-through preserves the existing icon hit area.
+                if let Some(document) = &row.tooltip {
+                    rows.spawn((
+                        Node {
+                            position_type: PositionType::Absolute,
+                            left: Val::Px(x + 109.),
+                            top: Val::Px(y + 2.),
+                            width: Val::Px(131.),
+                            height: Val::Px(14.),
+                            ..default()
+                        },
+                        Interaction::None,
+                        FocusPolicy::Pass,
+                        SkillTooltipTarget(row.id),
+                        super::widget::CrystalHint::new(document.text.clone()),
+                    ));
+                }
                 text(
                     rows,
                     &row.exp,

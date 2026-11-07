@@ -1,0 +1,486 @@
+{
+  "schema": "r16-v17-public-image-manifest/1",
+  "count": 80,
+  "images": [
+    {
+      "language": "zh-CN",
+      "path": "display-v17-r2/01-quest-diary-zh-CN.png",
+      "bytes": 105165,
+      "sha256": "ddeb7e20c5b912db68a4105ee0aa3e8afaf6e0e949886c66cf79ebc0c3af6f7a"
+    },
+    {
+      "language": "zh-CN",
+      "path": "display-v17-r2/02-character-character-zh-CN.png",
+      "bytes": 77635,
+      "sha256": "d8d08da170f17196139468cd33808f13061507df6be8cb823b366e53f15cf0df"
+    },
+    {
+      "language": "zh-CN",
+      "path": "display-v17-r2/03-character-stats1-zh-CN.png",
+      "bytes": 65560,
+      "sha256": "7c11775e48c245d06c6ee709950c5a73593a4c7b97a15cbb35741d71433a0181"
+    },
+    {
+      "language": "zh-CN",
+      "path": "display-v17-r2/04-character-stats2-zh-CN.png",
+      "bytes": 65946,
+      "sha256": "8b340a7799fd7d2692eeb1f472fa8ef6c0a91dcd9471f5584f946147871b364b"
+    },
+    {
+      "language": "zh-CN",
+      "path": "display-v17-r2/05-character-spells-zh-CN.png",
+      "bytes": 67255,
+      "sha256": "31927f605da68bc0d0693a9c845280dfcc64ab198617a17079479c0b3fda73de"
+    },
+    {
+      "language": "zh-CN",
+      "path": "display-v17-r2/06-fencing-hover-full-description-zh-CN.png",
+      "bytes": 969427,
+      "sha256": "002fb4efca8a7167ce8913ed4e7fbd4ca894a2249ae8a2effaa2e8a98cf36233"
+    },
+    {
+      "language": "zh-CN",
+      "path": "display-v17-r2/07-fencing-hover-left-zh-CN.png",
+      "bytes": 963729,
+      "sha256": "df2020971ddae47b0eb4dd92750db337a61be8a945be888b54c429861fad028e"
+    },
+    {
+      "language": "zh-CN",
+      "path": "display-v17-r2/08-fencing-window-closed-zh-CN.png",
+      "bytes": 1054729,
+      "sha256": "cd22dd1be6f6c792e8ce42a6df682abce13edb7613a7409dd39fd191b94da1ad"
+    },
+    {
+      "language": "zh-TW",
+      "path": "display-v17-r2/09-quest-diary-zh-TW.png",
+      "bytes": 105122,
+      "sha256": "44d630ee3d1091a73f9053af6108d3290e0357321724c696ffd86bd96008770d"
+    },
+    {
+      "language": "zh-TW",
+      "path": "display-v17-r2/10-character-character-zh-TW.png",
+      "bytes": 77523,
+      "sha256": "9d636fdddee2b1361f76c2f3093d04c9ae86322cb2674ba42b94a9e195939756"
+    },
+    {
+      "language": "zh-TW",
+      "path": "display-v17-r2/11-character-stats1-zh-TW.png",
+      "bytes": 65943,
+      "sha256": "a92548e8ed7ac6a232131ed3036d06761afb9808d0502b9ac55c072a50f39048"
+    },
+    {
+      "language": "zh-TW",
+      "path": "display-v17-r2/12-character-stats2-zh-TW.png",
+      "bytes": 66168,
+      "sha256": "0e32478eebc36f501f65af2caaa440475492e5d9787cae9e6a02a22181f74030"
+    },
+    {
+      "language": "zh-TW",
+      "path": "display-v17-r2/13-character-spells-zh-TW.png",
+      "bytes": 67316,
+      "sha256": "8d94519084cceb7efd906d6c1cadd6abf45beb7e798b81d432b89c7004c7eca2"
+    },
+    {
+      "language": "zh-TW",
+      "path": "display-v17-r2/14-fencing-hover-full-description-zh-TW.png",
+      "bytes": 973346,
+      "sha256": "d80b7c6e98a07e1a42801aff962f127ff0354022b95efad53f57a44bbbb37994"
+    },
+    {
+      "language": "zh-TW",
+      "path": "display-v17-r2/15-fencing-hover-left-zh-TW.png",
+      "bytes": 968420,
+      "sha256": "921bb83073490bfc7a5156d99b1b869e9a03b91ec35965cf6a450c47ff308167"
+    },
+    {
+      "language": "zh-TW",
+      "path": "display-v17-r2/16-fencing-window-closed-zh-TW.png",
+      "bytes": 1055120,
+      "sha256": "09c0bb5da79522d40df1f3a441dcc08aeb394c91517b3f26ef1e74a083a28215"
+    },
+    {
+      "language": "en",
+      "path": "display-v17-r2/17-quest-diary-en.png",
+      "bytes": 105049,
+      "sha256": "8378ed8fb03921de9f43dcaf12d8b66003d998deee4c90ba530ddb4dbc5cef25"
+    },
+    {
+      "language": "en",
+      "path": "display-v17-r2/18-character-character-en.png",
+      "bytes": 76841,
+      "sha256": "7ddc7dfbc5ce77cc44343a88084f4a032c024b55415f8c1087eba9ae6c350295"
+    },
+    {
+      "language": "en",
+      "path": "display-v17-r2/19-character-stats1-en.png",
+      "bytes": 64840,
+      "sha256": "c49e873f8d4f6dd50681742f86ee274a7e85728b81fcecdd170c3605b58eacec"
+    },
+    {
+      "language": "en",
+      "path": "display-v17-r2/20-character-stats2-en.png",
+      "bytes": 65146,
+      "sha256": "45af93076bcf32b4aff4d2d6b4d5d2888a8638825f879c2019243ec36d636208"
+    },
+    {
+      "language": "en",
+      "path": "display-v17-r2/21-character-spells-en.png",
+      "bytes": 66135,
+      "sha256": "8ef6fe4a067e372dbc93ab052c027bf3c6510484e6e995573e8e3b7d3b3548ad"
+    },
+    {
+      "language": "en",
+      "path": "display-v17-r2/22-fencing-hover-full-description-en.png",
+      "bytes": 973239,
+      "sha256": "4f239426ae83803b83d2d6dd0272cfb1cd4b32a38fa72df37ada063fbde51014"
+    },
+    {
+      "language": "en",
+      "path": "display-v17-r2/23-fencing-hover-left-en.png",
+      "bytes": 961290,
+      "sha256": "a4cece776b3a4967002970f6576f07373e353686e600d2342ccdb3a3b2a0a181"
+    },
+    {
+      "language": "en",
+      "path": "display-v17-r2/24-fencing-window-closed-en.png",
+      "bytes": 1057165,
+      "sha256": "8242c62925a3b68109d63a4197eda956ccb8ade5ba9767bfcbf2c47b66c477e9"
+    },
+    {
+      "language": "pt-BR",
+      "path": "display-v17-r2/25-quest-diary-pt-BR.png",
+      "bytes": 106527,
+      "sha256": "c1a02aa3c105cd009ef27eafaf77b1c3bac2acdae5e4fa721464b3e1673dcfc7"
+    },
+    {
+      "language": "pt-BR",
+      "path": "display-v17-r2/26-character-character-pt-BR.png",
+      "bytes": 77120,
+      "sha256": "330a60fd56f3778be9c46f3838f6588d2e2a119266c2e06a708d4c7bfca5c0a3"
+    },
+    {
+      "language": "pt-BR",
+      "path": "display-v17-r2/27-character-stats1-pt-BR.png",
+      "bytes": 65090,
+      "sha256": "5dea54a63783c920cef98605855682fbd16317bd143a2a10552963334ccbfb6d"
+    },
+    {
+      "language": "pt-BR",
+      "path": "display-v17-r2/28-character-stats2-pt-BR.png",
+      "bytes": 65363,
+      "sha256": "f57d195a0f111825dafaabf16a22d0e3d411ee25fcf023235160676d940e4170"
+    },
+    {
+      "language": "pt-BR",
+      "path": "display-v17-r2/29-character-spells-pt-BR.png",
+      "bytes": 66417,
+      "sha256": "3e35a7aecac7315697d5318cea38d2396c347499d1a45170d5e0a0cab2fbb645"
+    },
+    {
+      "language": "pt-BR",
+      "path": "display-v17-r2/30-fencing-hover-full-description-pt-BR.png",
+      "bytes": 970602,
+      "sha256": "016aac9dfbcf6f034466c775a67b1a9c29205ecb2d980ed7a557799387dc4217"
+    },
+    {
+      "language": "pt-BR",
+      "path": "display-v17-r2/31-fencing-hover-left-pt-BR.png",
+      "bytes": 960248,
+      "sha256": "fba4a0fee777e572c3efef9fc21618550a09c9d9a0da4ae6aa631d966da2d2c8"
+    },
+    {
+      "language": "pt-BR",
+      "path": "display-v17-r2/32-fencing-window-closed-pt-BR.png",
+      "bytes": 1054640,
+      "sha256": "a5d25254afe6594dbf4f814122e48a2f815b48e1e265219755a56fdac0c6da54"
+    },
+    {
+      "language": "ru",
+      "path": "display-v17-r2/33-quest-diary-ru.png",
+      "bytes": 107644,
+      "sha256": "3c6519ca6b1dbb6b8001596665c8781170913296399de64408b2568a7e14c9d5"
+    },
+    {
+      "language": "ru",
+      "path": "display-v17-r2/34-character-character-ru.png",
+      "bytes": 77390,
+      "sha256": "c36f3aabcf8d8a6014dd24e1147110bb1a47ecf3348d76a2f8dc7faad167bd31"
+    },
+    {
+      "language": "ru",
+      "path": "display-v17-r2/35-character-stats1-ru.png",
+      "bytes": 65384,
+      "sha256": "4357c196ab661ee0c05d76c683acf568396d2a577e0dd19cadd384f69704b0e4"
+    },
+    {
+      "language": "ru",
+      "path": "display-v17-r2/36-character-stats2-ru.png",
+      "bytes": 65671,
+      "sha256": "8c665b1d16c94d8264555177cceb804605cfdafe9b7979ec0929662788990f09"
+    },
+    {
+      "language": "ru",
+      "path": "display-v17-r2/37-character-spells-ru.png",
+      "bytes": 66956,
+      "sha256": "c18af08b7c08a744cb3a992e4482385f66e430532ccba82819c4ac0d1a983cac"
+    },
+    {
+      "language": "ru",
+      "path": "display-v17-r2/38-fencing-hover-full-description-ru.png",
+      "bytes": 969254,
+      "sha256": "30da42dae05383105fe50f89004d63db3b677824d2e70db70af87b69b061237c"
+    },
+    {
+      "language": "ru",
+      "path": "display-v17-r2/39-fencing-hover-left-ru.png",
+      "bytes": 960479,
+      "sha256": "09e469076e4eeab1358ecaf9b236f2c229a0f285c6ae3f60d45bae1d93e3b0f1"
+    },
+    {
+      "language": "ru",
+      "path": "display-v17-r2/40-fencing-window-closed-ru.png",
+      "bytes": 1055750,
+      "sha256": "99bbf1629caf732e66be79c9bbe63db6742a0e5719887097609ef35d8756dbbf"
+    },
+    {
+      "language": "hi",
+      "path": "display-v17-r2/41-quest-diary-hi.png",
+      "bytes": 104943,
+      "sha256": "1307dd9a5c77e7c20d755ed33c8716176d0deb9cf0a169215da6e729679ddd96"
+    },
+    {
+      "language": "hi",
+      "path": "display-v17-r2/42-character-character-hi.png",
+      "bytes": 77283,
+      "sha256": "f8a4ba179d2ba1a744637cb8bca74b517eae401c29e4041c710c2943d0721e05"
+    },
+    {
+      "language": "hi",
+      "path": "display-v17-r2/43-character-stats1-hi.png",
+      "bytes": 65282,
+      "sha256": "74ca6ff6226a2b343ed606241dbbb3d0ded610ef8dbc38199c1f922dc21d4549"
+    },
+    {
+      "language": "hi",
+      "path": "display-v17-r2/44-character-stats2-hi.png",
+      "bytes": 65569,
+      "sha256": "274f1d55e6cbb7451e872be6cdcb33f3dd0ffc90a49f4a0cb78ee19aaac285c5"
+    },
+    {
+      "language": "hi",
+      "path": "display-v17-r2/45-character-spells-hi.png",
+      "bytes": 66734,
+      "sha256": "6d335b05593c9357e9211b2ab0517d665ec1402afb90eed42b8096d0df46146c"
+    },
+    {
+      "language": "hi",
+      "path": "display-v17-r2/46-fencing-hover-full-description-hi.png",
+      "bytes": 973759,
+      "sha256": "dd2e9198aff6ce1f6c7a18af0aab61f378bb27f041ab08311fdce6b3040197eb"
+    },
+    {
+      "language": "hi",
+      "path": "display-v17-r2/47-fencing-hover-left-hi.png",
+      "bytes": 963564,
+      "sha256": "9ac28d5289ac80f5c341f37458d95f3c41430059d6cc4e9798c44578cc9b9ec6"
+    },
+    {
+      "language": "hi",
+      "path": "display-v17-r2/48-fencing-window-closed-hi.png",
+      "bytes": 1046154,
+      "sha256": "8add3962a64ac0a0e62d01896b1305c56ef0ff4868d599f3c3216a5b68ac1456"
+    },
+    {
+      "language": "id",
+      "path": "display-v17-r3/01-quest-diary-id.png",
+      "bytes": 105439,
+      "sha256": "9ed242b74d2be5dccbe1c67cc1771cf4e412e145b1572a90eb7ba004e90db7d3"
+    },
+    {
+      "language": "id",
+      "path": "display-v17-r3/02-character-character-id.png",
+      "bytes": 77173,
+      "sha256": "27f340a03396f2d96381e8340930d001f80f43785b69b81af0b33d513bfbcce8"
+    },
+    {
+      "language": "id",
+      "path": "display-v17-r3/03-character-stats1-id.png",
+      "bytes": 65180,
+      "sha256": "68105f48dce3572af136fd5a19d1fc62a65b2fcf6a2a2574f78d7bcec1f110a2"
+    },
+    {
+      "language": "id",
+      "path": "display-v17-r3/04-character-stats2-id.png",
+      "bytes": 65456,
+      "sha256": "d694982bdf34441eebaf12dfe083c80899ad0de5aa0a26418a8a87bdc026236a"
+    },
+    {
+      "language": "id",
+      "path": "display-v17-r3/05-character-spells-id.png",
+      "bytes": 66651,
+      "sha256": "c2a35e6cbcaf3844883e6c95cc2f5ff416eccd3595cfeec53767f11655bf6ff1"
+    },
+    {
+      "language": "id",
+      "path": "display-v17-r3/06-fencing-hover-full-description-id.png",
+      "bytes": 968601,
+      "sha256": "707827399e8d834d9e464c1e1fc2e1d9c5c1c9e2e075bc37b0e60b8164ef8cdc"
+    },
+    {
+      "language": "id",
+      "path": "display-v17-r3/07-fencing-hover-left-id.png",
+      "bytes": 963475,
+      "sha256": "5750cff084bddb5c769967c57bffa5d2e88cef7f476bd1e9acb2f8d61a7aa12b"
+    },
+    {
+      "language": "id",
+      "path": "display-v17-r3/08-fencing-window-closed-id.png",
+      "bytes": 1058737,
+      "sha256": "7ec38b39361e4bfb0674e20e5f401044ccc6bea7068a79275cc74cc9e9ae5fa1"
+    },
+    {
+      "language": "vi",
+      "path": "display-v17-r3/09-quest-diary-vi.png",
+      "bytes": 105107,
+      "sha256": "104722aca672a5c5dfb62b677ff1d4dfc10cd96551005f7abe543ce7f3010622"
+    },
+    {
+      "language": "vi",
+      "path": "display-v17-r3/10-character-character-vi.png",
+      "bytes": 77003,
+      "sha256": "10c8e0204af77978bf2f4018b01b60a474cc0f4421fe72f15e6bf0f3137fdc74"
+    },
+    {
+      "language": "vi",
+      "path": "display-v17-r3/11-character-stats1-vi.png",
+      "bytes": 64967,
+      "sha256": "3d6367ead79944b4ce957b48968775131c19f06648d88c0fb73e445efef58d3a"
+    },
+    {
+      "language": "vi",
+      "path": "display-v17-r3/12-character-stats2-vi.png",
+      "bytes": 65188,
+      "sha256": "4aa1c1f7b969ad9509d984bf6601e5771cb8bfbacfc39f788f672c818ff7f5e8"
+    },
+    {
+      "language": "vi",
+      "path": "display-v17-r3/13-character-spells-vi.png",
+      "bytes": 66531,
+      "sha256": "65f509634b3335efe3a781329cf68c6a53bee445893808441670f54c814575c4"
+    },
+    {
+      "language": "vi",
+      "path": "display-v17-r3/14-fencing-hover-full-description-vi.png",
+      "bytes": 971213,
+      "sha256": "0337b67ad2058b768640e6010229fcd83760368bd7e2b242bf59106b48c049f2"
+    },
+    {
+      "language": "vi",
+      "path": "display-v17-r3/15-fencing-hover-left-vi.png",
+      "bytes": 960728,
+      "sha256": "f290c254a0a7321763ef7d12c4c910a3f6317dfc5c2dc18f845d4756bb8d2508"
+    },
+    {
+      "language": "vi",
+      "path": "display-v17-r3/16-fencing-window-closed-vi.png",
+      "bytes": 1057343,
+      "sha256": "da73560f3f16fb9ee4f27b7264ede36c3b0940c14064df4bedca9bbdf94a904a"
+    },
+    {
+      "language": "th",
+      "path": "display-v17-r4/01-quest-diary-th.png",
+      "bytes": 102502,
+      "sha256": "593b4840118f4fd12be21700dabeba337c0c8237d04304e1df63505cd3d9dbd5"
+    },
+    {
+      "language": "th",
+      "path": "display-v17-r4/02-character-character-th.png",
+      "bytes": 76650,
+      "sha256": "82e6d2674badc531a82c4aacc3895f763088ac250cc6b1ae30ce0a6617e444b7"
+    },
+    {
+      "language": "th",
+      "path": "display-v17-r4/03-character-stats1-th.png",
+      "bytes": 64705,
+      "sha256": "16dc715d35fd262d42cc61dcace150cdbe1a7f9413ef7137c8fcf71b42da04cf"
+    },
+    {
+      "language": "th",
+      "path": "display-v17-r4/04-character-stats2-th.png",
+      "bytes": 64936,
+      "sha256": "f8f59b207b2944355632b6056ce5c073f63123eb2d7e318b9163603bd16aaa62"
+    },
+    {
+      "language": "th",
+      "path": "display-v17-r4/05-character-spells-th.png",
+      "bytes": 65924,
+      "sha256": "f450620e3c673e9edcfe00d265b3316df3f2e7a23733a18ff394948453a83719"
+    },
+    {
+      "language": "th",
+      "path": "display-v17-r4/06-fencing-hover-full-description-th.png",
+      "bytes": 966247,
+      "sha256": "fc8bb729000c291965a2c21c04000f6722a5c17c4972b162672c5048867734bf"
+    },
+    {
+      "language": "th",
+      "path": "display-v17-r4/07-fencing-hover-left-th.png",
+      "bytes": 964346,
+      "sha256": "375b819933a98b569de9765358f3f7a9a0b64c58a931bacd7ede4358f34e7622"
+    },
+    {
+      "language": "th",
+      "path": "display-v17-r4/08-fencing-window-closed-th.png",
+      "bytes": 1058041,
+      "sha256": "1aa5eb0ffed983e9aa251205c28a09f5b25f9d3211a718280f9314d8fce4c1a0"
+    },
+    {
+      "language": "ar",
+      "path": "display-v17-r4/09-quest-diary-ar.png",
+      "bytes": 103435,
+      "sha256": "96ad8a9833c464d7c2970841161534b8b880a915d0211193c394f8d68f375a99"
+    },
+    {
+      "language": "ar",
+      "path": "display-v17-r4/10-character-character-ar.png",
+      "bytes": 76849,
+      "sha256": "b6ed45c713334d43d1cff99325d8e44a247316f724cb751f013f370b8dec2d80"
+    },
+    {
+      "language": "ar",
+      "path": "display-v17-r4/11-character-stats1-ar.png",
+      "bytes": 64878,
+      "sha256": "3618244a722dcde19189b35eda0e3593c4b64957e67e67ba01dc397a395ae8dd"
+    },
+    {
+      "language": "ar",
+      "path": "display-v17-r4/12-character-stats2-ar.png",
+      "bytes": 65154,
+      "sha256": "e7166f95d5d9ed718f6b5f68982b2efb25f660e1a4647414a4a40c21f6043ba8"
+    },
+    {
+      "language": "ar",
+      "path": "display-v17-r4/13-character-spells-ar.png",
+      "bytes": 66160,
+      "sha256": "6eabed87f1e0a5d80d412db3d534989b6524ef9f2c9fe7483b424c7369e4a817"
+    },
+    {
+      "language": "ar",
+      "path": "display-v17-r4/14-fencing-hover-full-description-ar.png",
+      "bytes": 958764,
+      "sha256": "8a0b6fbb8b0f899b5c86c892022c2bc75c0cd5a897711e7010a5e32d26fbf16f"
+    },
+    {
+      "language": "ar",
+      "path": "display-v17-r4/15-fencing-hover-left-ar.png",
+      "bytes": 967848,
+      "sha256": "c7c320ac81fb39848b46db68a2b37781582b4a10ddfc51a79238108c9dd5e0df"
+    },
+    {
+      "language": "ar",
+      "path": "display-v17-r4/16-fencing-window-closed-ar.png",
+      "bytes": 1056354,
+      "sha256": "78b1e3253766ede3ad8e7b3e5d6d2a99db3fd1cf178f91c2c5b488719fa6f6e8"
+    }
+  ]
+}

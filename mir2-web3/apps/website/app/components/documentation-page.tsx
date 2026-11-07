@@ -37,7 +37,7 @@ function SectionContent({ section, locale }: { section: DocumentationSection; lo
       {section.table ? <div className="docs-table-wrap" role="region" aria-label={section.title} tabIndex={0}><table><thead><tr>{section.table.headers.map((header) => <th key={header} scope="col">{header}</th>)}</tr></thead><tbody>{section.table.rows.map((row) => <tr key={row[0]}>{row.map((cell, index) => index === 0 ? <th key={index} scope="row">{cell}</th> : <td key={index}>{cell}</td>)}</tr>)}</tbody></table></div> : null}
       {section.code ? <figure className="docs-code"><figcaption>{section.code.language}</figcaption><pre tabIndex={0}><code>{section.code.value}</code></pre></figure> : null}
       {section.note ? <aside className="docs-note"><strong>请留意</strong><p>{section.note}</p></aside> : null}
-      {section.links ? <ul className="docs-related-links">{section.links.map((link) => <li key={link.href}>{link.href === "@promotions" || link.href.startsWith("http") || link.href.startsWith("/") ? <a href={documentationHref(locale, link.href)}>{link.label}<span aria-hidden="true"> ↗</span></a> : <Link href={documentationHref(locale, link.href)}>{link.label}<span aria-hidden="true"> →</span></Link>}</li>)}</ul> : null}
+      {section.links ? <ul className="docs-related-links">{section.links.map((link) => <li key={link.href}>{link.href.startsWith("http") || link.href.startsWith("/") ? <a href={documentationHref(locale, link.href)}>{link.label}<span aria-hidden="true"> ↗</span></a> : <Link href={documentationHref(locale, link.href)}>{link.label}<span aria-hidden="true"> →</span></Link>}</li>)}</ul> : null}
     </>
   );
 }
@@ -67,7 +67,7 @@ export function DocumentationPage({ locale: candidateLocale, area, slug }: { loc
           <details className="docs-mobile-navigation"><summary>浏览文档目录</summary><nav aria-label="移动端文档导航"><DirectoryNavigation locale={locale} area={area} slug={slug} /></nav></details>
           <nav className="docs-breadcrumb" aria-label="面包屑"><Link href={`/${locale}`}>官网</Link><span aria-hidden="true">/</span><Link href={`/${locale}/${area}`} aria-current={article ? undefined : "page"}>{collection.title}</Link>{article ? <><span aria-hidden="true">/</span><span aria-current="page">{article.title}</span></> : null}</nav>
           {locale !== "zh-CN" ? <aside className="docs-language-note"><p lang="en">This first edition is available in Simplified Chinese. Translations are pending review.</p><p>当前正文为简体中文核实稿，其他语言尚待审核；不作为已审核的翻译条款。</p><Link href={`/zh-CN${path}`}>切换至中文入口 →</Link></aside> : null}
-          <header className="docs-hero"><div className="eyebrow"><span />{collection.eyebrow}</div><h1>{article?.title ?? collection.title}</h1><p className="docs-lead">{article?.description ?? collection.description}</p><div className="docs-meta"><span>更新于 <time dateTime={documentationUpdated}>{documentationUpdated}</time></span><span>中文指南 · 测试版本</span></div></header>
+          <header className="docs-hero"><div className="eyebrow"><span />{collection.eyebrow}</div><h1>{article?.title ?? collection.title}</h1><p className="docs-lead">{article?.description ?? collection.description}</p><div className="docs-meta"><span>更新于 <time dateTime={article?.updated ?? documentationUpdated}>{article?.updated ?? documentationUpdated}</time></span><span>中文指南 · 测试版本</span></div></header>
           {article ? (
             <>
               <div className="docs-article-status"><span className={`docs-badge docs-badge-${article.status}`}>{documentationStatus[article.status]}</span><p>{article.environment}</p></div>

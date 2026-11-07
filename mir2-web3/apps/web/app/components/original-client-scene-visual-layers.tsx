@@ -1,5 +1,7 @@
 "use client";
 
+import { crystalEntityDepth } from "../../lib/crystal-world-depth";
+
 import { Fragment, memo, useEffect, useRef, useState, type CSSProperties, type MouseEvent } from "react";
 
 import type { ClientScreen } from "../../lib/original-ui";
@@ -435,7 +437,7 @@ function FallbackVfxNode({
     return null;
   }
   const palette = paletteForElement(effect.element);
-  const zIndex = viewportDepthForCell(effect.worldX, effect.worldY, viewportDepthPlayer, 90);
+  const zIndex = viewportDepthForCell(effect.worldX, effect.worldY, viewportDepthPlayer, 10);
 
   if (effect.kind === "streak") {
     // Coloured trail along the projectile path (origin -> target), drawn as a thin rotated bar.
@@ -742,7 +744,7 @@ function OriginalClientSceneVisualLayersInner({
               style={{
                 left: `${VIEWPORT_TILE_CENTER_X + drop.dx * VIEWPORT_CELL_WIDTH + playerCameraMotionOffset.x + dropStackOffsetX}px`,
                 top: `${VIEWPORT_TILE_CENTER_Y + drop.dy * VIEWPORT_CELL_HEIGHT + playerCameraMotionOffset.y - 12 + dropStackOffsetY}px`,
-                zIndex: viewportDepthForCell(drop.x, drop.y, viewportDepthPlayer, 16),
+                zIndex: viewportDepthForCell(drop.x, drop.y, viewportDepthPlayer, 1),
               }}
               onClick={() => onPickGroundDrop(drop.objectId)}
               data-ui-interactive="true"
@@ -817,6 +819,9 @@ function OriginalClientSceneVisualLayersInner({
         })}
         {viewportEntitySprites.map(({ entity, sprite }) => {
           const isPlayer = player?.objectId === entity.objectId;
+          const entityDepth = crystalEntityDepth(
+            entity, viewportDepthPlayer, entityMotionSnapshots[entity.objectId], motionNow,
+          );
           const isInteractiveEntity = !isPlayer;
           // In the imperative path the sub-tile glide is written by the motion driver
           // (display Hz) onto this stack's transform; render at the cell base here.
@@ -850,7 +855,7 @@ function OriginalClientSceneVisualLayersInner({
               style={{
                 left: `${VIEWPORT_ENTITY_LEFT_ORIGIN + entity.dx * VIEWPORT_CELL_WIDTH + cameraOffset.x + entityMotionOffset.x}px`,
                 top: `${VIEWPORT_ENTITY_TOP_ORIGIN + entity.dy * VIEWPORT_CELL_HEIGHT + cameraOffset.y + entityMotionOffset.y}px`,
-                zIndex: viewportDepthForCell(entity.x, entity.y, viewportDepthPlayer, 64),
+                zIndex: entityDepth.sortZ + 5,
               }}
               data-ui-interactive={isInteractiveEntity ? "true" : "false"}
               data-object-id={entity.objectId}
@@ -973,7 +978,7 @@ function OriginalClientSceneVisualLayersInner({
                           ? `drop-shadow(0 0 ${Math.min(animation.light * 2, 16)}px #fff)`
                           : undefined,
                       pointerEvents: "none",
-                      zIndex: viewportDepthForCell(worldX, worldY, viewportDepthPlayer, 80),
+                      zIndex: viewportDepthForCell(worldX, worldY, viewportDepthPlayer, 9),
                     }}
                   />
                 ))}
@@ -1002,7 +1007,7 @@ function OriginalClientSceneVisualLayersInner({
                 left: currentLeft,
                 top: currentTop,
                 transform: `translate(-50%, -50%) rotate(${angle}rad)`,
-                zIndex: viewportDepthForCell(projectile.toX, projectile.toY, viewportDepthPlayer, 80),
+                zIndex: viewportDepthForCell(projectile.toX, projectile.toY, viewportDepthPlayer, 9),
               }}
             />
           );
@@ -1307,7 +1312,7 @@ function OriginalClientSceneVisualLayersInner({
                       style={{
                         left: `${VIEWPORT_ENTITY_LEFT_ORIGIN + entity.dx * VIEWPORT_CELL_WIDTH + cameraOffset.x + entityMotionOffset.x + entityQuestIconLeftOffset(entity, sprite)}px`,
                         top: `${VIEWPORT_ENTITY_TOP_ORIGIN + entity.dy * VIEWPORT_CELL_HEIGHT + cameraOffset.y + entityMotionOffset.y + entityQuestIconTopOffset(sprite)}px`,
-                        zIndex: viewportDepthForCell(entity.x, entity.y, viewportDepthPlayer, 96),
+                        zIndex: viewportDepthForCell(entity.x, entity.y, viewportDepthPlayer, 12),
                       }}
                     />
                   ) : null}
@@ -1410,14 +1415,14 @@ function OriginalClientSceneVisualLayersInner({
 export const OriginalClientSceneVisualLayers = memo(OriginalClientSceneVisualLayersInner);
 
 function entityDisplayName(entity: DisplayEntity, t: TranslateFn): string {
-  return localizeCrystalEntityName(entity.name, t);
+  return entity.kind === "npc" || entity.kind === "monster" ? localizeCrystalEntityName(entity.name, t) : entity.name;
 }
 
 function entityDisplayLabelLines(
   entity: DisplayEntity,
   t: TranslateFn,
 ): Array<{ text: string; role: "primary" | "secondary" }> {
-  const displayName = localizeCrystalEntityName(entity.name, t);
+  const displayName = entityDisplayName(entity, t);
   if (entity.ownerName) {
     return [
       { text: displayName, role: "primary" },

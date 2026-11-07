@@ -5,7 +5,7 @@ import { notFound } from "next/navigation";
 import { MotionController } from "@/app/components/motion-controller";
 import { SiteFooter, SiteHeader } from "@/app/components/site-chrome";
 import { getDownloadCopy } from "@/lib/download-copy";
-import { getLocalizedAlternates, getCopy, isLocale, locales } from "@/lib/site-copy";
+import { getLocalizedAlternates, getCopy, isLocale, locales, publicGameClientUrl } from "@/lib/site-copy";
 
 type DownloadPageProps = { params: Promise<{ locale: string }> };
 
@@ -36,7 +36,6 @@ export default async function DownloadPage({ params }: DownloadPageProps) {
 
   const copy = getDownloadCopy(locale);
   const siteCopy = getCopy(locale);
-  const gameUrl = process.env.NEXT_PUBLIC_GAME_URL ?? "https://mir2.obelisk.build/game";
   const windowsUrl = publicHttpsUrl(process.env.NEXT_PUBLIC_WINDOWS_DOWNLOAD_URL);
   const androidUrl = publicHttpsUrl(process.env.NEXT_PUBLIC_ANDROID_DOWNLOAD_URL);
   const explorerUrl = process.env.NEXT_PUBLIC_EXPLORER_URL?.replace("{locale}", locale) ?? `/${locale}/explore`;
@@ -44,8 +43,8 @@ export default async function DownloadPage({ params }: DownloadPageProps) {
 
   const platforms = [
     { id: "web", index: "01", name: "WEB", format: "BROWSER · PWA", status: copy.live, body: copy.webCopy },
-    { id: "windows", index: "02", name: "WINDOWS", format: "X64 · TAURI / BEVY", status: windowsUrl ? copy.candidate : copy.unavailable, body: copy.windowsCopy },
-    { id: "android", index: "03", name: "ANDROID", format: "PWA · CAPACITOR", status: androidUrl ? copy.candidate : copy.pwa, body: copy.androidCopy },
+    { id: "windows", index: "02", name: "WINDOWS", format: "X64 · TEST", status: windowsUrl ? copy.candidate : copy.unavailable, body: copy.windowsCopy },
+    { id: "android", index: "03", name: "ANDROID", format: "ANDROID", status: androidUrl ? copy.candidate : copy.pwa, body: copy.androidCopy },
   ] as const;
 
   const requirements = [
@@ -84,7 +83,7 @@ export default async function DownloadPage({ params }: DownloadPageProps) {
           <h1>{copy.title}</h1>
           <p>{copy.intro}</p>
           <div className="download-hero-actions">
-            <a className="button button-primary" href={gameUrl} target="_blank" rel="noreferrer" data-track="download_web_hero"><span>{copy.openWeb}</span><i>↗</i></a>
+            <a className="button button-primary" href={publicGameClientUrl} target="_blank" rel="noreferrer" data-track="download_web_hero"><span>{copy.openWeb}</span><i>↗</i></a>
             <Link className="button button-ghost" href="#requirements"><span>{copy.viewRequirements}</span><i>↓</i></Link>
           </div>
         </div>
@@ -100,13 +99,13 @@ export default async function DownloadPage({ params }: DownloadPageProps) {
             <h2>{platform.name}</h2>
             <p>{platform.body}</p>
             {platform.id === "web" ? (
-              <a className="download-action" href={gameUrl} target="_blank" rel="noreferrer" data-track="download_web"><span>{copy.openWeb}</span><i>↗</i></a>
+              <a className="download-action" href={publicGameClientUrl} target="_blank" rel="noreferrer" data-track="download_web"><span>{copy.openWeb}</span><i>↗</i></a>
             ) : platform.id === "windows" && windowsUrl ? (
               <a className="download-action" href={windowsUrl} rel="noreferrer" data-track="download_windows"><span>{copy.downloadWindows}</span><i>↓</i></a>
-            ) : platform.id === "android" ? (
-              <a className="download-action" href={androidUrl ?? gameUrl} target="_blank" rel="noreferrer" data-track={androidUrl ? "download_android" : "install_android_pwa"}><span>{copy.installAndroid}</span><i>{androidUrl ? "↓" : "↗"}</i></a>
+            ) : platform.id === "android" && androidUrl ? (
+              <a className="download-action" href={androidUrl} target="_blank" rel="noreferrer" data-track="download_android"><span>{copy.installAndroid}</span><i>↓</i></a>
             ) : (
-              <span className="download-action is-disabled" aria-disabled="true"><span>{copy.unavailable}</span><i>—</i></span>
+              <span className="download-action is-disabled" aria-disabled="true"><span>{platform.status}</span><i>—</i></span>
             )}
           </article>
         ))}
@@ -147,7 +146,7 @@ export default async function DownloadPage({ params }: DownloadPageProps) {
           <div className="truth-statuses">
             <span><i className="is-live" />WEB · {copy.live}</span>
             <span><i />WINDOWS · {windowsUrl ? copy.candidate : copy.unavailable}</span>
-            <span><i className={androidUrl ? "" : "is-live"} />ANDROID · {androidUrl ? copy.candidate : copy.pwa}</span>
+            <span><i />ANDROID · {androidUrl ? copy.candidate : copy.pwa}</span>
           </div>
           <Link className="button button-ghost" href={`/${locale}/support`}><span>{copy.support}</span><i>↗</i></Link>
         </div>

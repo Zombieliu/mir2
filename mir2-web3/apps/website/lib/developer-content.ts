@@ -4,8 +4,8 @@ export const developerArticles: DocumentationArticle[] = [
   {
     slug: "overview", title: "产品与架构", description: "先分清游戏、通用工具与钱包，再选择接入范围。", status: "testing", environment: "Numeron 当前测试实现 / Dubhe 通用文档",
     sections: [
-      { id: "products", title: "三个产品，三个职责", table: { headers: ["产品", "职责"], rows: [["Numeron", "Obelisk Labs 旗下的游戏；负责本游戏的账号、角色、世界状态和玩法规则。"], ["Dubhe", "支持应用开发的通用引擎与工具体系；具体模块以各自文档和版本为准。"], ["Dubhe Wallet", "钱包与身份、交易确认入口；连接、登录与交易授权分别处理。"]] } },
-      { id: "authority", title: "本游戏的权威边界", paragraphs: ["客户端提交操作意图，游戏服务端验证身份与规则，并维护角色和共享世界状态。网页、钱包地址或链上资产本身，都不提供任意修改角色、道具或战斗结果的权限。", "官网、游戏入口和推广活动属于同一官网体系，但应用有各自的构建与服务边界。部署官网页面，不等于部署游戏服务器或升级合约。"] },
+      { id: "products", title: "三个产品，三个职责", table: { headers: ["产品", "职责"], rows: [["Numeron", "由个人运营，Obelisk Labs, Inc. 受托开发。涵盖本游戏的账号、角色、世界状态和玩法规则。"], ["Dubhe", "支持应用开发的通用引擎与工具体系；具体模块以各自文档和版本为准。"], ["Dubhe Wallet", "钱包与身份、交易确认入口；连接、登录与交易授权分别处理。"]] } },
+      { id: "authority", title: "本游戏的权威边界", paragraphs: ["客户端提交操作意图，游戏服务端验证身份与规则，并维护角色和共享世界状态。网页、钱包地址或链上资产本身，都不提供任意修改角色、道具或战斗结果的权限。", "官网、游戏入口和筹备中的推广合作说明属于同一官网体系，但应用有各自的构建与服务边界。部署官网页面，不等于部署游戏服务器或升级合约。"] },
       { id: "division", title: "避免重复维护通用教程", paragraphs: ["本组文档说明 Numeron 当前可用的流程与限制。Dubhe SDK、合约工具与通用授权模型，请阅读对应的 Dubhe 原文；不要把工具库提供的能力直接当成本游戏已经开放的接口。"], links: [{ label: "Dubhe 通用文档", href: "https://dubhe-docs.obelisk.build/" }, { label: "Numeron 开放边界", href: "developers/capabilities" }] },
     ],
   },
@@ -54,7 +54,7 @@ export const developerArticles: DocumentationArticle[] = [
     slug: "testing", title: "测试环境与测试资产", description: "把本地、游戏测试服和链上测试网分别核对。", status: "testing", environment: "本地官网 / 指定 TEST 环境 / Sui Testnet",
     sections: [
       { id: "environments", title: "环境名称不能代替核实", table: { headers: ["环境", "用途与边界"], rows: [["本地官网", "文档与只读示例预览；上游健康地址按本地服务端配置。"], ["游戏 TEST 环境", "验证账号、角色与具体游戏流程；功能开关按该环境配置。"], ["Sui Testnet", "测试链上签名、Gas 与测试 USDC 等资产；不是主网。"], ["正式商业环境", "本组测试文档不构成真实收费或资金操作的验收。"]] } },
-      { id: "assets", title: "测试资产的含义", paragraphs: ["测试 SUI 支付测试网络 Gas，测试 USDC 用于指定充值或付款验收。测试资产没有真实货币价值，不能据此宣传收益或可兑换保证。", "月卡、充值和推广活动是不同业务步骤。只有核实身份、订单来源、消费与活动规则后，才能对具体计佣或结算作出判断。只读状态示例不验证这些步骤。"] },
+      { id: "assets", title: "测试资产的含义", paragraphs: ["测试 SUI 支付测试网络 Gas，测试 USDC 用于指定充值或付款验收。测试资产没有真实货币价值，不能据此宣传收益或可兑换保证。", "月卡、充值和推广合作是不同业务步骤。推广合作仍在筹备，参与资格、支持地区、佣金与结算规则尚待审核。只读状态示例不验证计佣资格或付款，也不代表可领取佣金。"] },
       { id: "fixtures", title: "先在隔离环境验证失败情况", items: ["读取示例应覆盖 healthy、degraded、网络超时、非成功 HTTP 与响应结构变化。", "不要为文档演示调用真实收费、签名交易或账号写入。", "未来需要测试写入时，先确认环境、测试账号、授权范围和可恢复的数据边界。"], links: [{ label: "玩家测试与数据说明", href: "guide/playtest" }] },
     ],
   },

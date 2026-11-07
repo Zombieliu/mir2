@@ -1,0 +1,162 @@
+{
+  "schema": "mir2.r16.final-web-companion-ui.v1",
+  "origin": "http://127.0.0.1:19041",
+  "buildId": "kH3yQjxYAuzF2nvUWQtzS",
+  "scope": {
+    "realBrowserUi": true,
+    "realGateway": true,
+    "networkMock": false,
+    "adminCommands": false,
+    "savesEdited": false,
+    "modelKeyInBrowser": false,
+    "humanAccepted": false
+  },
+  "naturalLanguageTeaching": {
+    "provider": "openai",
+    "model": "gpt-6-luna",
+    "beforeVersion": 1,
+    "afterVersion": 2,
+    "allThreeHabits": true,
+    "unchangedBeforeConfirmation": true,
+    "feedbackBefore": 0,
+    "feedbackAfter": 1,
+    "firstCall": {
+      "status": "completed",
+      "inputTokens": 2271,
+      "outputTokens": 139
+    },
+    "cancelledProposal": {
+      "status": "cancelled",
+      "versionUnchanged": true,
+      "habitsUnchanged": true,
+      "feedbackUnchanged": true
+    },
+    "modelCalls": 2
+  },
+  "memoryExport": {
+    "bytes": 37791,
+    "sha256": "eff1dc3a7fa69d197cee14e03e571e4a1ad6c52d5847ef067c6e10804e725793",
+    "sha256Matched": true,
+    "bytesMatched": true,
+    "chunks": 3
+  },
+  "mouseHold": {
+    "input": "trusted right-pointer hold",
+    "durationMs": 1450,
+    "from": {
+      "x": 287,
+      "y": 616
+    },
+    "to": {
+      "x": 287,
+      "y": 621
+    },
+    "commands": [
+      "walk",
+      "run",
+      "run"
+    ],
+    "commandsAfterRelease": 0
+  },
+  "party": {
+    "serverMembers": 2,
+    "followActionRecorded": true,
+    "actorPositionChanged": true
+  },
+  "combat": {
+    "policyVersion": 2,
+    "ownerAttackCommands": 4,
+    "actorAttackPackets": 5,
+    "monsterDied": true,
+    "actorAttacksBeforeDeath": 5,
+    "ownerAlive": true
+  },
+  "ordinaryFunding": {
+    "successfulNpcSaleGold": 60,
+    "soldOwnedDress": true,
+    "rubenRefusalPreservedAssets": {
+      "serverSuccess": false,
+      "goldUnchanged": true,
+      "dressRetained": true
+    }
+  },
+  "passed": true,
+  "gift": {
+    "ordinaryTrade": true,
+    "ownerBefore": 60,
+    "ownerAfter": 10,
+    "actorBefore": 0,
+    "actorAfter": 50,
+    "receivedGold": 50,
+    "status": "completed",
+    "actorOutgoingGold": 0,
+    "actorOutgoingItems": 0
+  },
+  "supply": {
+    "authorizedLimits": {
+      "gold": 50,
+      "quantity": 1,
+      "validSeconds": 300
+    },
+    "status": "completed",
+    "receiptKnown": true,
+    "chargedGold": 40,
+    "acquiredQuantity": 1,
+    "returnedToAnchor": true,
+    "actorGoldBefore": 50,
+    "actorGoldAfter": 10,
+    "potionsBefore": 1,
+    "potionsAfter": 2,
+    "ownerGoldAfter": 10
+  },
+  "observedAssetFailure": {
+    "uniqueMissing": [
+      "404 /original-ui/Monster/007/29.png",
+      "404 /original-ui/Monster/007/30.png",
+      "404 /original-ui/Monster/007/31.png",
+      "404 /original-ui/Monster/007/28.png"
+    ],
+    "failureBeforeRepair": true,
+    "httpErrors": 6597,
+    "consoleErrors": 6597
+  },
+  "memoryRecordBeforeRestart": {
+    "foundThroughOrdinaryUi": true,
+    "olderPageReads": 3,
+    "policyVersion": 2
+  },
+  "restart": {
+    "wholeServiceStoppedAndStarted": true,
+    "oldServicePid": 77820,
+    "newServicePid": 73476,
+    "newGatewayPid": 80176,
+    "newActorPid": 75780,
+    "sameArchive": true,
+    "sameResident": true,
+    "policyVersion": 2,
+    "allThreeHabits": true,
+    "originalActiveTeachingFound": true,
+    "memoryOlderPageReads": 3,
+    "giftStatus": "completed",
+    "supplyStatus": "completed",
+    "chargeRetained": true,
+    "quantityRetained": true,
+    "returnReceiptRetained": true,
+    "actorGold": 10,
+    "actorPotions": 2,
+    "ownerGold": 10,
+    "modelEnabled": true,
+    "partyMembers": 2,
+    "nextAdventureFollowRecordedWithPolicy2": true,
+    "extraTeachingRequired": false
+  },
+  "finalResourceRepair": {
+    "manifestSha256": "c0eb872342c2040256df8e55c31b14c803ad435de03b3d8b98c77f18b0688b90",
+    "fullRawMonsterLibraries": 13,
+    "rawFrames": 2602,
+    "freshV7BrowserHttpErrors": 0,
+    "freshV7BrowserConsoleErrors": 0,
+    "oldFailuresRetained": true
+  },
+  "finishedAt": "2026-11-04T05:21:20.524Z"
+}

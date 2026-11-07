@@ -324,5 +324,135 @@ class PackedPreparationTests(unittest.TestCase):
         with self.assertRaises(ValueError): self.f.prepare()
 
 
+class ProgressivePackedPreparationTests(unittest.TestCase):
+    setUp = PackedPreparationTests.setUp
+
+    def scope_input(self, **changes):
+        value = {"schema": "mir2.native.required-resource-scope.v1",
+                 "catalogSha256": sha(self.f.catalog.read_bytes()), "id": "synthetic-required",
+                 "requiredPaths": ["images/a.png"]}
+        value.update(changes)
+        path = self.f.root / "required-scope-source.json"
+        write_json(path, value)
+        return path, sha(path.read_bytes())
+
+    def test_v1_optional_scope_omitted_preserves_exact_legacy_manifest(self):
+        first = self.f.prepare("legacy")
+        repeat = self.f.prepare("legacy-explicit-none", required_scope_path=None, required_scope_sha256=None)
+        self.assertEqual(first["manifestSha256"], repeat["manifestSha256"])
+        root = self.f.root / "legacy"
+        manifest = json.loads((root / first["generationDirectory"] / "GENERATION.json").read_bytes())
+        self.assertEqual(manifest["schema"], "mir2.windows.generation.v1")
+        self.assertNotIn("requiredScope", manifest)
+        self.assertEqual(len(first["inputBindings"]), 3)
+        self.assertFalse((root / first["generationDirectory"] / "required-scope.json").exists())
+
+    def test_v2_roundtrip_keeps_all_packs_in_release_including_deferred(self):
+        data = b"synthetic deferred resource, never game execution"
+        key = sha(data)
+        index = struct.pack("<32sQQQ8s", bytes.fromhex(key), 96, len(data), len(data), b"\0" * 8)
+        pack = struct.pack("<8sIIQQ", b"M2PACK01", 1, 1, 64, len(data)) + index + data
+        pack_sha = sha(pack)
+        (self.f.objects / (pack_sha.lower() + ".m2p")).write_bytes(pack)
+        self.f.catalog_value["packs"].append({"sha256": pack_sha, "size": len(pack)})
+        self.f.catalog_value["resources"]["later/deferred.png"] = {
+            "sha256": key, "size": len(data), "packSha256": pack_sha, "offset": 96,
+            "storedSize": len(data), "codec": "stored"}
+        write_json(self.f.catalog, self.f.catalog_value)
+        self.f.manifest_value["files"].append({"path": "mir2-assets/later/deferred.png", "size": len(data), "sha256": key})
+        self.f.update_resource_proof()
+        scope, scope_sha = self.scope_input()
+        proof = self.f.prepare(required_scope_path=scope, required_scope_sha256=scope_sha)
+        root = self.f.root / "packed"
+        _, manifest, _ = p.verify_draft(root)
+        self.assertEqual(manifest["schema"], "mir2.windows.generation.v2")
+        self.assertEqual(manifest["requiredScope"], {"path": "required-scope.json", "size": scope.stat().st_size, "sha256": scope_sha})
+        self.assertEqual(len(proof["inputBindings"]), 4)
+        self.assertEqual(proof["inputBindings"][2]["path"], "catalog.json")
+        self.assertEqual(proof["inputBindings"][3]["path"], "required-scope.json")
+        self.assertEqual(len(manifest["packs"]), 2)
+        directory = root / proof["generationDirectory"]
+        self.assertEqual((directory / "required-scope.json").read_bytes(), scope.read_bytes())
+        (directory / "GENERATION.p7s").write_bytes(b"synthetic NOT a CMS signature")
+        feed = p.finalize_feed(root, proof["manifestSha256"])
+        (root / "latest.p7s").write_bytes(b"also NOT a CMS signature")
+        report = p.verify_release(root, proof["manifestSha256"], now=self.f.created)
+        self.assertEqual(feed["minEngine"], 2)
+        self.assertEqual(report["requiredScope"], manifest["requiredScope"])
+        self.assertEqual(report["packCount"], 2)
+        self.assertFalse(report["cmsVerified"])
+        (root / "objects/packs" / (pack_sha.lower() + ".m2p")).unlink()
+        with self.assertRaises((ValueError, FileNotFoundError)):
+            p.verify_release(root, proof["manifestSha256"], now=self.f.created)
+
+    def test_v2_scope_pair_catalog_pin_and_body_contract_fail_before_output(self):
+        scope, pin = self.scope_input()
+        with self.assertRaisesRegex(ValueError, "supplied together"):
+            self.f.prepare(required_scope_path=scope)
+        with self.assertRaisesRegex(ValueError, "supplied together"):
+            self.f.prepare(required_scope_sha256=pin)
+        with self.assertRaisesRegex(ValueError, "reviewed required scope SHA"):
+            self.f.prepare(required_scope_path=scope, required_scope_sha256="0" * 64)
+        scope, pin = self.scope_input(catalogSha256="0" * 64)
+        with self.assertRaisesRegex(ValueError, "scope/catalog"):
+            self.f.prepare(required_scope_path=scope, required_scope_sha256=pin)
+        self.assertFalse((self.f.root / "packed").exists())
+        base = {"schema": "mir2.native.required-resource-scope.v1", "catalogSha256": sha(self.f.catalog.read_bytes()),
+                "id": "id", "requiredPaths": ["images/a.png"]}
+        cases = []
+        for paths in ([], ["missing.png"], ["images/a.png", "images/a.png"], ["maps/a.map.gz", "images/a.png"], ["../unsafe"]):
+            item = copy.deepcopy(base); item["requiredPaths"] = paths; cases.append(item)
+        for changes in ({"id": "space id"}, {"id": "x" * 65}, {"unknown": True}, {"schema": "wrong"}):
+            item = copy.deepcopy(base); item.update(changes); cases.append(item)
+        for value in cases:
+            data = p.compact(value)
+            with self.subTest(value=value), self.assertRaises(ValueError):
+                p.validate_required_scope(data, sha(data), self.f.catalog_value, sha(self.f.catalog.read_bytes()))
+        data = b" " * (p.MAX_REQUIRED_SCOPE + 1)
+        with self.assertRaises(ValueError):
+            p.validate_required_scope(data, sha(data), self.f.catalog_value, sha(self.f.catalog.read_bytes()))
+
+    def test_v2_scope_original_and_copied_tampering_and_downgrade_rejected(self):
+        scope, pin = self.scope_input()
+        original = scope.read_bytes()
+        proof = self.f.prepare(required_scope_path=scope, required_scope_sha256=pin)
+        root = self.f.root / "packed"; copied = root / proof["generationDirectory"] / "required-scope.json"
+        scope.write_bytes(b"X" + original[1:])
+        with self.assertRaisesRegex(ValueError, "original input changed"):
+            p.verify_draft(root)
+        scope.write_bytes(original)
+        copied.write_bytes(b"X" + original[1:])
+        with self.assertRaisesRegex(ValueError, "control bytes differ"):
+            p.verify_draft(root)
+        copied.write_bytes(original)
+        _, manifest, _ = p.verify_draft(root)
+        for changes in ({"schema": "mir2.windows.generation.v1"}, {"requiredScope": None},
+                        {"schema": "mir2.windows.generation.v3"}):
+            value = copy.deepcopy(manifest); value.update(changes)
+            with self.subTest(changes=changes), self.assertRaises(ValueError):
+                p.validate_manifest(value)
+        value = copy.deepcopy(manifest); del value["requiredScope"]
+        with self.assertRaises(ValueError): p.validate_manifest(value)
+        for changes in ({"path": "other-scope.json"}, {"size": 0}, {"size": p.MAX_REQUIRED_SCOPE + 1}):
+            value = copy.deepcopy(manifest); value["requiredScope"].update(changes)
+            with self.subTest(changes=changes), self.assertRaises(ValueError):
+                p.validate_manifest(value)
+        value = copy.deepcopy(manifest); value["schema"] = "mir2.windows.generation.v1"; value["requiredScope"] = None
+        with self.assertRaises(ValueError): p.validate_manifest(value)
+
+    def test_v2_scope_cli_reaches_normal_preparation(self):
+        scope, pin = self.scope_input()
+        args = [sys.executable, "-I", "-S", "-B", str(Path(p.__file__).resolve()), "prepare"]
+        for name, value in self.f.arguments("cli-v2").items():
+            args += ["--" + name.replace("_", "-"), str(value)]
+        args += ["--required-scope-path", str(scope), "--required-scope-sha256", pin]
+        result = subprocess.run(args, capture_output=True, check=False)
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        proof = json.loads(result.stdout)
+        self.assertEqual(len(proof["inputBindings"]), 4)
+        _, manifest, _ = p.verify_draft(self.f.root / "cli-v2")
+        self.assertEqual(manifest["schema"], "mir2.windows.generation.v2")
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

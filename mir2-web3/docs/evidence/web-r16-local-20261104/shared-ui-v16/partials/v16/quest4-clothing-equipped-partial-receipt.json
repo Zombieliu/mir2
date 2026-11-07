@@ -1,0 +1,472 @@
+{
+  "schema": "r16-v16-quest4-clothing-equip-partial/1",
+  "passed": false,
+  "sourceProof": "onboarding-v11-browser-proof.json",
+  "sourceProofSha256": "76af6276d09df33798339b844583e9aa35233d19782cc4f292357b3d6116abb7",
+  "ordinaryPurchases": [
+    {
+      "itemName": "BaseDress(M)",
+      "bought": true,
+      "quantity": 1,
+      "observedUnitGold": 120,
+      "chargedGold": 120,
+      "goldBefore": 150,
+      "goldAfter": 30,
+      "quantityBefore": 0,
+      "quantityAfter": 1,
+      "ownedUidHashes": [
+        "31a7104f686c7bea0dd8cc6e2578a18301161d37155fefdec45d368aefe7de37"
+      ],
+      "onePurchaseCommand": true,
+      "matchingDurableReceipt": true,
+      "incomingUidHash": "31a7104f686c7bea0dd8cc6e2578a18301161d37155fefdec45d368aefe7de37",
+      "receiptSequence": 670
+    }
+  ],
+  "equip": {
+    "oneRequest": true,
+    "successfulAck": [
+      {
+        "sequence": 674,
+        "method": "EquipItem",
+        "phase": "fourth-quest-native-diary-and-passive-fencing",
+        "success": true,
+        "uniqueId": 43122690
+      }
+    ],
+    "equippedOwnedDressConfirmedBeforeCloseHelper": true
+  },
+  "firstFailure": {
+    "phase": "fourth-quest-native-diary-and-passive-fencing",
+    "name": "NATIVE_BAG_X_NOT_READY",
+    "hash": "762b5b181c377fdebad9938d014ea83fd1d66fbad7ea0436bbcda9bb00bc9bbf"
+  },
+  "failureBag": {
+    "active": false,
+    "error": null,
+    "owner": {
+      "owner": "react",
+      "runGeneration": 1,
+      "ownerRevision": 3,
+      "connectionGeneration": 1,
+      "sessionGeneration": 1
+    },
+    "status": {
+      "runGeneration": 1,
+      "connectionGeneration": 1,
+      "sessionGeneration": 1,
+      "ownerRevision": 3,
+      "frame": 258,
+      "ready": false,
+      "inputEnabled": false,
+      "appliedRevision": 7,
+      "appliedModelRevision": 3,
+      "appliedPresentationRevision": 4,
+      "supportsBagToBelt": true,
+      "appliedBeltGeometryRevision": 1,
+      "inputRegions": [],
+      "diagnostics": {
+        "modelVisibleItems": 0,
+        "treeContentComplete": false,
+        "touchActionsComplete": null,
+        "scopedActionCount": null,
+        "expectedActionCount": null,
+        "minCssHitWidth": null,
+        "minCssHitHeight": null,
+        "firstActionFailure": null,
+        "layoutMatchesWindow": true,
+        "assetsLoading": false,
+        "layoutRegionCount": 0,
+        "sinkPresent": true,
+        "treeIdentity": {
+          "runGeneration": 1,
+          "connectionGeneration": 1,
+          "sessionGeneration": 1,
+          "ownerRevision": 2
+        },
+        "treeModelRevision": 2,
+        "treePage": "bag1",
+        "treeVisibleItems": 1,
+        "treeMatchesModel": false,
+        "gridCells": 40,
+        "itemCells": 1,
+        "occupiedCells": 1,
+        "iconNodes": 0,
+        "visibleIcons": 0,
+        "laidOutIcons": 0,
+        "stackTextNodes": 0,
+        "visibleStackTexts": 0,
+        "laidOutStackTexts": 0
+      },
+      "error": null
+    },
+    "diagnostic": {
+      "phase": "prepare",
+      "transitions": [
+        {
+          "reason": null,
+          "phase": "active",
+          "at": 52397.80000001192,
+          "status": {
+            "runGeneration": 1,
+            "connectionGeneration": 1,
+            "sessionGeneration": 1,
+            "ownerRevision": 2,
+            "frame": 255,
+            "ready": true,
+            "inputEnabled": true,
+            "appliedRevision": 6,
+            "appliedModelRevision": 2,
+            "appliedPresentationRevision": 3,
+            "supportsBagToBelt": true,
+            "appliedBeltGeometryRevision": 1,
+            "inputRegions": [
+              {
+                "left": 410,
+                "top": 86,
+                "width": 316,
+                "height": 236
+              },
+              {
+                "left": 736,
+                "top": 86,
+                "width": 122,
+                "height": 156
+              }
+            ],
+            "diagnostics": {
+              "modelVisibleItems": 1,
+              "treeContentComplete": true,
+              "touchActionsComplete": null,
+              "scopedActionCount": null,
+              "expectedActionCount": null,
+              "minCssHitWidth": null,
+              "minCssHitHeight": null,
+              "firstActionFailure": null,
+              "layoutMatchesWindow": true,
+              "assetsLoading": false,
+              "layoutRegionCount": 2,
+              "sinkPresent": true,
+              "treeIdentity": {
+                "runGeneration": 1,
+                "connectionGeneration": 1,
+                "sessionGeneration": 1,
+                "ownerRevision": 2
+              },
+              "treeModelRevision": 2,
+              "treePage": "bag1",
+              "treeVisibleItems": 1,
+              "treeMatchesModel": true,
+              "gridCells": 40,
+              "itemCells": 1,
+              "occupiedCells": 1,
+              "iconNodes": 1,
+              "visibleIcons": 1,
+              "laidOutIcons": 1,
+              "stackTextNodes": 0,
+              "visibleStackTexts": 0,
+              "laidOutStackTexts": 0
+            },
+            "error": null
+          }
+        }
+      ],
+      "intentVerdicts": [
+        {
+          "type": "equipItem",
+          "hostModelRevision": 2,
+          "nativeModelRevision": 2,
+          "hostPresentationRevision": 3,
+          "nativePresentationRevision": 3,
+          "intentSequence": 1,
+          "verdict": "accepted"
+        }
+      ]
+    },
+    "hudNavigation": [
+      {
+        "action": "closeCharacter",
+        "accepted": true,
+        "fresh": true,
+        "generation": 2,
+        "revision": 1,
+        "snapshotMatches": true,
+        "appliedPending": false,
+        "ready": true,
+        "errorPresent": false,
+        "navigationSourceMatches": true,
+        "nativeBaseline": true,
+        "navigationFresh": true
+      },
+      {
+        "action": "closeBag",
+        "accepted": true,
+        "fresh": true,
+        "generation": 2,
+        "revision": 1,
+        "snapshotMatches": true,
+        "appliedPending": false,
+        "ready": true,
+        "errorPresent": false,
+        "navigationSourceMatches": true,
+        "nativeBaseline": true,
+        "navigationFresh": true
+      },
+      {
+        "action": "closeCharacter",
+        "accepted": true,
+        "fresh": true,
+        "generation": 2,
+        "revision": 1,
+        "snapshotMatches": true,
+        "appliedPending": false,
+        "ready": true,
+        "errorPresent": false,
+        "navigationSourceMatches": true,
+        "nativeBaseline": true,
+        "navigationFresh": true
+      },
+      {
+        "action": "closeBag",
+        "accepted": true,
+        "fresh": true,
+        "generation": 2,
+        "revision": 1,
+        "snapshotMatches": true,
+        "appliedPending": false,
+        "ready": true,
+        "errorPresent": false,
+        "navigationSourceMatches": true,
+        "nativeBaseline": true,
+        "navigationFresh": true
+      },
+      {
+        "action": "closeCharacter",
+        "accepted": true,
+        "fresh": true,
+        "generation": 2,
+        "revision": 1,
+        "snapshotMatches": true,
+        "appliedPending": false,
+        "ready": true,
+        "errorPresent": false,
+        "navigationSourceMatches": true,
+        "nativeBaseline": true,
+        "navigationFresh": true
+      },
+      {
+        "action": "bag",
+        "accepted": true,
+        "fresh": true,
+        "generation": 2,
+        "revision": 3,
+        "snapshotMatches": true,
+        "appliedPending": false,
+        "ready": true,
+        "errorPresent": false,
+        "navigationSourceMatches": true,
+        "nativeBaseline": true,
+        "navigationFresh": true
+      },
+      {
+        "action": "closeBag",
+        "accepted": true,
+        "fresh": false,
+        "generation": 2,
+        "revision": 3,
+        "snapshotMatches": false,
+        "appliedPending": false,
+        "ready": true,
+        "errorPresent": false,
+        "navigationSourceMatches": true,
+        "nativeBaseline": true,
+        "navigationFresh": true
+      },
+      {
+        "action": "closeCharacter",
+        "accepted": true,
+        "fresh": false,
+        "generation": 2,
+        "revision": 3,
+        "snapshotMatches": false,
+        "appliedPending": false,
+        "ready": true,
+        "errorPresent": false,
+        "navigationSourceMatches": true,
+        "nativeBaseline": true,
+        "navigationFresh": true
+      }
+    ]
+  },
+  "failureNpcShop": {
+    "host": {
+      "active": true,
+      "transitioning": false,
+      "blocksInput": true,
+      "errorPresent": false,
+      "errorCode": null
+    },
+    "diagnostic": {
+      "source": null,
+      "preview": null,
+      "renderServiceCurrent": true,
+      "plannerPresent": true,
+      "corePresent": true,
+      "host": {
+        "active": true,
+        "transitioning": false,
+        "blocksInput": true,
+        "errorPresent": false,
+        "errorCode": null
+      }
+    },
+    "action": {
+      "route": "durable",
+      "stage": "quoteSent",
+      "reason": null
+    },
+    "status": {
+      "runGeneration": 2,
+      "connectionGeneration": 1,
+      "sessionGeneration": 1,
+      "ownerRevision": 3,
+      "playerObjectId": 1000,
+      "frame": 301,
+      "ready": true,
+      "inputEnabled": true,
+      "appliedRevision": 2,
+      "appliedModelRevision": 1,
+      "appliedPresentationRevision": 1,
+      "appliedServiceRevision": 15,
+      "appliedCatalogRevision": 3,
+      "coreAuthorityRevision": "8",
+      "controlRevision": "16",
+      "selectedId": null,
+      "quantity": 1,
+      "startIndex": 0,
+      "feedback": {
+        "phase": null,
+        "pending": false,
+        "canReserve": true,
+        "previousUnknown": 0
+      },
+      "inputRegions": [
+        {
+          "left": 220,
+          "top": 217,
+          "width": 244,
+          "height": 334
+        },
+        {
+          "left": 474,
+          "top": 251,
+          "width": 330,
+          "height": 80
+        }
+      ],
+      "error": null
+    }
+  },
+  "medicineStepReached": false,
+  "quest4": {
+    "questId": 2110004,
+    "stage": "inProgress",
+    "current": 1,
+    "required": 3,
+    "objectives": [
+      {
+        "label": "Defeat 2 Oma.",
+        "current": 0,
+        "required": 2,
+        "done": false
+      },
+      {
+        "label": "Complete your class practice",
+        "current": 1,
+        "required": 1,
+        "done": true
+      }
+    ]
+  },
+  "finalObservedVitals": {
+    "hp": 60,
+    "maxHp": 60,
+    "mp": 35,
+    "maxMp": 35,
+    "dead": false,
+    "position": {
+      "x": 304,
+      "y": 609
+    }
+  },
+  "cleanup": {
+    "ordinaryLogout": false,
+    "browserClosed": true
+  },
+  "network": {
+    "failed": 0,
+    "httpErrors": 0,
+    "consoleErrors": 0
+  },
+  "scope": {
+    "freshOrdinaryAccount": false,
+    "reusedOwnOrdinaryQaAccount": true,
+    "primaryUiOnly": true,
+    "rootPrivateFilesRead": false,
+    "rootSecretValuesPassedToBrowser": false,
+    "credentialsOnlyUsedForNormalUiFill": true,
+    "readOnlyRuntimeGetters": [
+      "getMir2QuestUiStatus",
+      "getMir2QuestWorldControlRects",
+      "getMir2NpcShopUiStatus"
+    ],
+    "mockedRoutes": false,
+    "hiddenActions": false,
+    "qaCommands": 0,
+    "saveDataEdits": false,
+    "modelCallsRequested": 0,
+    "walletOpened": false,
+    "originalOwnerOrAloOpened": false,
+    "trustedKeyObservation": "game-screen-Digit1-keydown-up-only",
+    "stageFourOnly": true
+  },
+  "evidence": [
+    {
+      "name": "onboarding-v11-browser-proof.json",
+      "bytes": 45835,
+      "sha256": "76af6276d09df33798339b844583e9aa35233d19782cc4f292357b3d6116abb7"
+    },
+    {
+      "name": "01-village-native-task-card-before-measured-readiness.png",
+      "bytes": 1327391,
+      "sha256": "69408ab521fc4b8de3b8875ca04cdc8fe5e6aa83914fde7d1aee9af9e6746d39"
+    },
+    {
+      "name": "02-fresh-village-native-task-card.png",
+      "bytes": 1327046,
+      "sha256": "fa8d840f5bd18f62b77ee51dd842a1d58ab0b1c7515d8fe157e295d59d88bb71"
+    },
+    {
+      "name": "03-ordinary-merchant-before-buy-link.png",
+      "bytes": 1177135,
+      "sha256": "2a15a7bf3a09f1eb7b3b5455af04fac525a227113c85a301e62522836487df08"
+    },
+    {
+      "name": "04-ordinary-merchant-before-real-gold-purchase.png",
+      "bytes": 1233347,
+      "sha256": "3a6639c948e10466d961d3dfbb07db54f4e08b979b57c12184cae97a89ec5748"
+    },
+    {
+      "name": "05-failure-safe-masked.png",
+      "bytes": 1226697,
+      "sha256": "f89e4da8b67d717152a99f75d715aeb33c26c6467a53b7ebfdc8c561bc5ca9e8"
+    }
+  ],
+  "secretScan": {
+    "ownQaAndRealmMatches": 0
+  },
+  "runner": {
+    "name": "runner.executed.mjs",
+    "sha256": "39adfb9a869359430c516494d35433d7d352fadf74307e54bfc07870dab93b57"
+  }
+}

@@ -136,7 +136,7 @@ export function currentPortalResult(state, epoch) {
 // even while the old server grant is still being revoked asynchronously.
 export function clearedPortalSession(state) {
   return {...state, epoch:state.epoch + 1, loggedIn:false, scope:null,
-    status:null, activities:null, activitiesFailed:false, characterIndex:null,
+    status:null, activities:null, activitiesFailed:false, characterIndex:null, providerId:null, intent:null,
     offerId:null, checkout:null};
 }
 export function classText(locale, value) {

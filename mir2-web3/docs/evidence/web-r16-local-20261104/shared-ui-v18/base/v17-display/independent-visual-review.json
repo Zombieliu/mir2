@@ -1,0 +1,859 @@
+{
+  "schema": "mir2.web-r16-independent-static-visual-review/1",
+  "createdAt": "2026-11-05T21:04:23.596Z",
+  "method": "Direct view_image(detail=original) inspection of the thirty existing requested screenshots; no browser, account, OCR scoring or source execution.",
+  "reviewedImageCount": 30,
+  "questDiaryImages": 10,
+  "characterCharacterImages": 10,
+  "characterStats2Images": 0,
+  "fencingFullDescriptionImages": 10,
+  "languages": [
+    "zh-CN",
+    "en",
+    "zh-TW",
+    "pt-BR",
+    "ru",
+    "hi",
+    "id",
+    "vi",
+    "th",
+    "ar"
+  ],
+  "sourceRuns": [
+    {
+      "run": "display-v17-r1",
+      "sourcePresent": true,
+      "passed": false,
+      "finished": true,
+      "sessionLanguages": [
+        "zh-CN"
+      ],
+      "bytes": 19382,
+      "sha256": "ac70de4c57d2b545f9292c5003df594671ff7e5e654312bc10de196061c4a68d"
+    },
+    {
+      "run": "display-v17-r2",
+      "sourcePresent": true,
+      "passed": false,
+      "finished": true,
+      "sessionLanguages": [
+        "zh-CN",
+        "zh-TW",
+        "en",
+        "pt-BR",
+        "ru",
+        "hi"
+      ],
+      "bytes": 218332,
+      "sha256": "86587b94fed0534f34d416ac9a07553ec47bc20f14440794a5c7dad51d33b862"
+    },
+    {
+      "run": "display-v17-r3",
+      "sourcePresent": true,
+      "passed": false,
+      "finished": true,
+      "sessionLanguages": [
+        "id",
+        "vi"
+      ],
+      "bytes": 92367,
+      "sha256": "09fd81418fca7186aba41bf15f35500476e3816ff4b450a56e7ac6f750ec62e7"
+    },
+    {
+      "run": "display-v17-r4",
+      "sourcePresent": true,
+      "passed": true,
+      "finished": true,
+      "sessionLanguages": [
+        "th",
+        "ar"
+      ],
+      "bytes": 102666,
+      "sha256": "6ca710b2e835adf0e71a8bd517d2d817bb2b84aa5b437b6c1d51ac5495de850b"
+    }
+  ],
+  "positiveImageScopes": [
+    {
+      "run": "display-v17-r2",
+      "languages": [
+        "zh-CN",
+        "zh-TW",
+        "en",
+        "pt-BR",
+        "ru",
+        "hi"
+      ]
+    },
+    {
+      "run": "display-v17-r3",
+      "languages": [
+        "id",
+        "vi"
+      ]
+    },
+    {
+      "run": "display-v17-r4",
+      "languages": [
+        "th",
+        "ar"
+      ]
+    }
+  ],
+  "singleFailureFreeAllLanguageRun": false,
+  "originalR1R2R3OverallFalsePreserved": true,
+  "sourceProofsModified": false,
+  "result": "reviewed-with-long-button-label-layout-findings",
+  "allRequestedVisualChecksUnconditionallyPassed": false,
+  "findings": [
+    {
+      "language": "ru",
+      "file": "display-v17-r2/33-quest-diary-ru.png",
+      "kind": "long-button-label-wrap",
+      "severity": "layout-review-required",
+      "region": "bottom previous/next buttons",
+      "observed": "上一页文字明确折为Предыдущ / ее两行；下一页长词也挤到下沿。末字的完整边界不够清晰，不能判作无裁切。"
+    },
+    {
+      "language": "id",
+      "file": "display-v17-r3/01-quest-diary-id.png",
+      "kind": "long-button-label-wrap",
+      "severity": "layout-review-required",
+      "region": "bottom previous button",
+      "observed": "Sebelumnya明确折为Sebelumny / a两行，第二行贴近按钮下沿；未确认字母缺失，但不应当作单行完整布局通过。"
+    }
+  ],
+  "confirmedCharacterLossOrCrop": false,
+  "confirmedIncorrectOverlay": false,
+  "summary": {
+    "targetPreviousNextCloseNoClearlyVisibleUnexpectedEnglishResidue": true,
+    "chapterAndLevelNotUniversallyFixedToSimplifiedChinese": true,
+    "fourTabsNoClearlyVisibleDoubleEnglishText": true,
+    "noClearlyVisibleTofuBoxes": true,
+    "allTenFencingImagesContainDescriptionBeyondName": true,
+    "fullTranslationAccepted": false
+  },
+  "reviews": [
+    {
+      "language": "zh-CN",
+      "run": "display-v17-r2",
+      "quest": "01-quest-diary-zh-CN.png",
+      "character": "02-character-character-zh-CN.png",
+      "questObserved": {
+        "title": "任务",
+        "chapter": "本章 0/5；当前章节·比奇森林",
+        "level": "8级·待领取",
+        "controls": [
+          "上一页",
+          "下一页",
+          "关闭"
+        ]
+      },
+      "tabsObserved": [
+        "装备",
+        "状态",
+        "属性",
+        "技能"
+      ],
+      "questIssues": [],
+      "characterIssues": [],
+      "note": "标题、章节、等级和三个控件可读；四标签为单层中文，无可见英文底字或缺字方框。截图有局部黑色隐私遮罩，未遮住本次检查文字。",
+      "fencing": {
+        "language": "zh-CN",
+        "run": "display-v17-r2",
+        "file": "06-fencing-hover-full-description-zh-CN.png",
+        "bodyVisible": true,
+        "observedBody": "基础剑术；被动技能；命中率会根据练习等级提高；当前技能等级0、下一级7。",
+        "issues": [],
+        "limits": [
+          "技能行仍显示Lv/Exp缩写。",
+          "本图仅证明可见正文及布局，未逐句核对原Windows术语。"
+        ]
+      },
+      "visibleChecks": {
+        "targetControlsUseExpectedLanguage": true,
+        "chapterAndLevelNotForcedSimplifiedChinese": true,
+        "fourTabsHaveNoClearlyVisibleDuplicateEnglishUnderlay": true,
+        "noClearlyVisibleTofuBoxes": true,
+        "fencingDescriptionBodyObserved": true
+      },
+      "stats2BodyReviewed": false
+    },
+    {
+      "language": "en",
+      "run": "display-v17-r2",
+      "quest": "17-quest-diary-en.png",
+      "character": "18-character-character-en.png",
+      "questObserved": {
+        "title": "Quest",
+        "chapter": "This chapter 0/5; Current chapter · Bichon Forest",
+        "level": "Lv 8 · Awaiting claim",
+        "controls": [
+          "Previous",
+          "Next",
+          "Close"
+        ]
+      },
+      "tabsObserved": [
+        "Equipment",
+        "Status",
+        "Statistics",
+        "Skills"
+      ],
+      "questIssues": [],
+      "characterIssues": [],
+      "note": "英文为目标语言；四标签单层，文字完整落在标签区域，未见重复底字。",
+      "fencing": {
+        "language": "en",
+        "run": "display-v17-r2",
+        "file": "22-fencing-hover-full-description-en.png",
+        "bodyVisible": true,
+        "observedBody": "Fencing; Passive Skill; Hitting accuracy will be increased in accordance with practice level.; Current Skill Level 0; Next Level 7.",
+        "issues": [],
+        "limits": [
+          "正文换为两行，未见被popover边框截去。",
+          "全屏顶部及世界区域仍可见中文内容；不构成全屏英文翻译合格。"
+        ]
+      },
+      "visibleChecks": {
+        "targetControlsUseExpectedLanguage": true,
+        "chapterAndLevelNotForcedSimplifiedChinese": true,
+        "fourTabsHaveNoClearlyVisibleDuplicateEnglishUnderlay": true,
+        "noClearlyVisibleTofuBoxes": true,
+        "fencingDescriptionBodyObserved": true
+      },
+      "stats2BodyReviewed": false
+    },
+    {
+      "language": "zh-TW",
+      "run": "display-v17-r2",
+      "quest": "09-quest-diary-zh-TW.png",
+      "character": "10-character-character-zh-TW.png",
+      "questObserved": {
+        "title": "任務",
+        "chapter": "本章 0/5；當前章節·比奇森林",
+        "level": "8級·待領取",
+        "controls": [
+          "上一頁",
+          "下一頁",
+          "關閉"
+        ]
+      },
+      "tabsObserved": [
+        "裝備",
+        "狀態",
+        "屬性",
+        "技能"
+      ],
+      "questIssues": [],
+      "characterIssues": [],
+      "note": "可见繁体章节/等级与控件；未见固定简体标题覆盖或英文底字、方框。",
+      "fencing": {
+        "language": "zh-TW",
+        "run": "display-v17-r2",
+        "file": "14-fencing-hover-full-description-zh-TW.png",
+        "bodyVisible": true,
+        "observedBody": "基礎劍術；被動技能；命中率會根據練習等級提高；當前技能等級0、下一等級7。",
+        "issues": [],
+        "limits": [
+          "技能行Lv/Exp缩写仍可见。",
+          "未把名称和字形显示当成整个繁体词条库已验收。"
+        ]
+      },
+      "visibleChecks": {
+        "targetControlsUseExpectedLanguage": true,
+        "chapterAndLevelNotForcedSimplifiedChinese": true,
+        "fourTabsHaveNoClearlyVisibleDuplicateEnglishUnderlay": true,
+        "noClearlyVisibleTofuBoxes": true,
+        "fencingDescriptionBodyObserved": true
+      },
+      "stats2BodyReviewed": false
+    },
+    {
+      "language": "pt-BR",
+      "run": "display-v17-r2",
+      "quest": "25-quest-diary-pt-BR.png",
+      "character": "26-character-character-pt-BR.png",
+      "questObserved": {
+        "title": "Missão",
+        "chapter": "Este capítulo 0/5; Capítulo atual · Floresta de Bichon",
+        "level": "Nv 8 · Aguardando resgate",
+        "controls": [
+          "Anterior",
+          "Próxima",
+          "Fechar"
+        ]
+      },
+      "tabsObserved": [
+        "Equipamento",
+        "Estado",
+        "Atributos",
+        "Habilidades"
+      ],
+      "questIssues": [],
+      "characterIssues": [],
+      "note": "章节/等级和控件为葡语；Equipamento与Habilidades较密但整词可见，未见相邻英文底字或按钮遮挡。",
+      "fencing": {
+        "language": "pt-BR",
+        "run": "display-v17-r2",
+        "file": "30-fencing-hover-full-description-pt-BR.png",
+        "bodyVisible": true,
+        "observedBody": "Esgrima; Habilidade passiva; A precisão dos seus golpes aumenta conforme o nível de prática.; Nível atual da habilidade 0; Próximo nível 7.",
+        "issues": [],
+        "limits": [
+          "正文两行和等级两行均在popover内；不是只有Esgrima名称。",
+          "全屏顶部中文提示仍存在，不代表全屏葡语化完成。"
+        ]
+      },
+      "visibleChecks": {
+        "targetControlsUseExpectedLanguage": true,
+        "chapterAndLevelNotForcedSimplifiedChinese": true,
+        "fourTabsHaveNoClearlyVisibleDuplicateEnglishUnderlay": true,
+        "noClearlyVisibleTofuBoxes": true,
+        "fencingDescriptionBodyObserved": true
+      },
+      "stats2BodyReviewed": false
+    },
+    {
+      "language": "ru",
+      "run": "display-v17-r2",
+      "quest": "33-quest-diary-ru.png",
+      "character": "34-character-character-ru.png",
+      "questObserved": {
+        "title": "Задание",
+        "chapter": "Эта глава 0/5; Текущая глава · Лес Бичона",
+        "level": "Ур. 8 · Ожидает получения",
+        "controls": [
+          "Предыдущее",
+          "Следующий",
+          "Закрыть"
+        ]
+      },
+      "tabsObserved": [
+        "Снаряжение",
+        "Состояние",
+        "Характеристики",
+        "Умения"
+      ],
+      "questIssues": [
+        {
+          "kind": "long-button-label-wrap",
+          "severity": "layout-review-required",
+          "region": "bottom previous/next buttons",
+          "observed": "上一页文字明确折为Предыдущ / ее两行；下一页长词也挤到下沿。末字的完整边界不够清晰，不能判作无裁切。"
+        }
+      ],
+      "characterIssues": [],
+      "note": "目标控件已为俄文，未见英文底字或方框；Характеристики字号显著小于相邻标签，但可辨认，未确认文字丢失。",
+      "fencing": {
+        "language": "ru",
+        "run": "display-v17-r2",
+        "file": "38-fencing-hover-full-description-ru.png",
+        "bodyVisible": true,
+        "observedBody": "Фехтование; Пассивный навык; Каждый уровень навыка повышает точность попадания.; Текущий уровень навыка 0; Следующий уровень 7.",
+        "issues": [],
+        "limits": [
+          "长描述接近右边框，但截图中末尾仍可见，未确认截字。",
+          "这是技能正文可见证据，不替代俄语术语准确性/长字普适布局验收。"
+        ]
+      },
+      "visibleChecks": {
+        "targetControlsUseExpectedLanguage": true,
+        "chapterAndLevelNotForcedSimplifiedChinese": true,
+        "fourTabsHaveNoClearlyVisibleDuplicateEnglishUnderlay": true,
+        "noClearlyVisibleTofuBoxes": true,
+        "fencingDescriptionBodyObserved": true
+      },
+      "stats2BodyReviewed": false
+    },
+    {
+      "language": "hi",
+      "run": "display-v17-r2",
+      "quest": "41-quest-diary-hi.png",
+      "character": "42-character-character-hi.png",
+      "questObserved": {
+        "title": "कार्य",
+        "chapter": "इस अध्याय में 0/5；वर्तमान अध्याय · Bichon वन",
+        "level": "स्तर 8",
+        "controls": [
+          "पिछला",
+          "अगला",
+          "बंद करें"
+        ]
+      },
+      "tabsObserved": [
+        "उपकरण",
+        "स्थिति",
+        "आंकड़े",
+        "कौशल"
+      ],
+      "questIssues": [],
+      "characterIssues": [],
+      "note": "天城文字可见，无缺字方框；章节和等级为印地语，Bichon作为专名保留拉丁字母，不算Previous/Next/Close残留。",
+      "fencing": {
+        "language": "hi",
+        "run": "display-v17-r2",
+        "file": "46-fencing-hover-full-description-hi.png",
+        "bodyVisible": true,
+        "observedBody": "天城文名称、被动技能、随技能等级提高命中精度的句子，以及当前等级0/下一等级7均可见。",
+        "issues": [],
+        "limits": [
+          "未见缺字方框或popover末行被挡；并非只有技能名称。",
+          "未进行逐字符印地语排印或术语审核。"
+        ]
+      },
+      "visibleChecks": {
+        "targetControlsUseExpectedLanguage": true,
+        "chapterAndLevelNotForcedSimplifiedChinese": true,
+        "fourTabsHaveNoClearlyVisibleDuplicateEnglishUnderlay": true,
+        "noClearlyVisibleTofuBoxes": true,
+        "fencingDescriptionBodyObserved": true
+      },
+      "stats2BodyReviewed": false
+    },
+    {
+      "language": "id",
+      "run": "display-v17-r3",
+      "quest": "01-quest-diary-id.png",
+      "character": "02-character-character-id.png",
+      "questObserved": {
+        "title": "Misi",
+        "chapter": "Bab ini 0/5; Bab saat ini · Hutan Bichon",
+        "level": "Lv 8 · Menunggu diambil",
+        "controls": [
+          "Sebelumnya",
+          "Berikutnya",
+          "Tutup"
+        ]
+      },
+      "tabsObserved": [
+        "Perlengkapan",
+        "Status",
+        "Statistik",
+        "Keahlian"
+      ],
+      "questIssues": [
+        {
+          "kind": "long-button-label-wrap",
+          "severity": "layout-review-required",
+          "region": "bottom previous button",
+          "observed": "Sebelumnya明确折为Sebelumny / a两行，第二行贴近按钮下沿；未确认字母缺失，但不应当作单行完整布局通过。"
+        }
+      ],
+      "characterIssues": [],
+      "note": "控件为印尼语，无旧英文Previous/Next/Close；首标签较密但全词可见，无重复底字或方框。",
+      "fencing": {
+        "language": "id",
+        "run": "display-v17-r3",
+        "file": "06-fencing-hover-full-description-id.png",
+        "bodyVisible": true,
+        "observedBody": "Ilmu Pedang; Keterampilan Pasif; Setiap tingkat keterampilan meningkatkan akurasi serangan.; Tingkat Keterampilan Saat Ini 0; Tingkat Berikutnya 7.",
+        "issues": [],
+        "limits": [
+          "长正文与末行等级在边框内可见，没有只显示名称。",
+          "本图不推翻diary上一页按钮Sebelumnya折行的问题。"
+        ]
+      },
+      "visibleChecks": {
+        "targetControlsUseExpectedLanguage": true,
+        "chapterAndLevelNotForcedSimplifiedChinese": true,
+        "fourTabsHaveNoClearlyVisibleDuplicateEnglishUnderlay": true,
+        "noClearlyVisibleTofuBoxes": true,
+        "fencingDescriptionBodyObserved": true
+      },
+      "stats2BodyReviewed": false
+    },
+    {
+      "language": "vi",
+      "run": "display-v17-r3",
+      "quest": "09-quest-diary-vi.png",
+      "character": "10-character-character-vi.png",
+      "questObserved": {
+        "title": "Nhiệm vụ",
+        "chapter": "Chương này 0/5; Chương hiện tại · Rừng Bichon",
+        "level": "Cấp 8 · Chờ nhận",
+        "controls": [
+          "Lùi",
+          "Tiếp theo",
+          "Đóng"
+        ]
+      },
+      "tabsObserved": [
+        "Trang bị",
+        "Trạng thái",
+        "Chỉ số",
+        "Kỹ năng"
+      ],
+      "questIssues": [],
+      "characterIssues": [],
+      "note": "可见越语附加符号；控件/章节/等级未保留固定简中或英文控件，四标签单层，未见裁切/方框。",
+      "fencing": {
+        "language": "vi",
+        "run": "display-v17-r3",
+        "file": "14-fencing-hover-full-description-vi.png",
+        "bodyVisible": true,
+        "observedBody": "Kiếm thuật; Kỹ năng bị động; Mỗi cấp kỹ năng tăng độ chính xác khi đánh.; Cấp kỹ năng hiện tại 0; Cấp tiếp theo 7.",
+        "issues": [],
+        "limits": [
+          "正文和等级完整可辨，越语附加符号可见；未发现本图正文被边框裁去。",
+          "popover区域仍可见部分世界文字/透景，未确认遮去正文，静态图不覆盖所有重叠场景。"
+        ]
+      },
+      "visibleChecks": {
+        "targetControlsUseExpectedLanguage": true,
+        "chapterAndLevelNotForcedSimplifiedChinese": true,
+        "fourTabsHaveNoClearlyVisibleDuplicateEnglishUnderlay": true,
+        "noClearlyVisibleTofuBoxes": true,
+        "fencingDescriptionBodyObserved": true
+      },
+      "stats2BodyReviewed": false
+    },
+    {
+      "language": "th",
+      "run": "display-v17-r4",
+      "quest": "01-quest-diary-th.png",
+      "character": "02-character-character-th.png",
+      "questObserved": {
+        "title": "ภารกิจ",
+        "chapter": "บทที่ 0/5；บทปัจจุบัน · ป่า Bichon",
+        "level": "ระดับ 8",
+        "controls": [
+          "ก่อนหน้า",
+          "ถัดไป",
+          "ปิด"
+        ]
+      },
+      "tabsObserved": [
+        "อุปกรณ์",
+        "สถานะ",
+        "ค่าสถานะ",
+        "ทักษะ"
+      ],
+      "questIssues": [],
+      "characterIssues": [],
+      "note": "泰文控件、章节和等级可见；四标签仅一层泰文，未见方框/英文底字。文字较小，不能据此认证全部附加符号的语义正确性。",
+      "fencing": {
+        "language": "th",
+        "run": "display-v17-r4",
+        "file": "06-fencing-hover-full-description-th.png",
+        "bodyVisible": true,
+        "observedBody": "泰文技能名、被动类型、随等级提高命中精度的正文和当前等级0/下一等级7均可见。",
+        "issues": [],
+        "limits": [
+          "popover行距较密、正文接近右边框；未确认字形被裁去。",
+          "泰文排印/词义仍需专门语言审阅，不能仅以无方框判定全部合格。"
+        ]
+      },
+      "visibleChecks": {
+        "targetControlsUseExpectedLanguage": true,
+        "chapterAndLevelNotForcedSimplifiedChinese": true,
+        "fourTabsHaveNoClearlyVisibleDuplicateEnglishUnderlay": true,
+        "noClearlyVisibleTofuBoxes": true,
+        "fencingDescriptionBodyObserved": true
+      },
+      "stats2BodyReviewed": false
+    },
+    {
+      "language": "ar",
+      "run": "display-v17-r4",
+      "quest": "09-quest-diary-ar.png",
+      "character": "10-character-character-ar.png",
+      "questObserved": {
+        "title": "مهمة",
+        "chapter": "هذا الفصل 0/5；الفصل الحالي",
+        "level": "المستوى 8",
+        "controls": [
+          "ما قبل",
+          "التالي",
+          "إغلاق"
+        ]
+      },
+      "tabsObserved": [
+        "المعدات",
+        "الحالة",
+        "الإحصاءات",
+        "المهارات"
+      ],
+      "questIssues": [],
+      "characterIssues": [],
+      "note": "阿语连写及右向对齐可见，控件/章节/等级没有固定简中或英文底字；Bichon作为专名为拉丁字母。未发现可确认的缺字方框；完整RTL语义/顺序仍需语言审阅。",
+      "fencing": {
+        "language": "ar",
+        "run": "display-v17-r4",
+        "file": "14-fencing-hover-full-description-ar.png",
+        "bodyVisible": true,
+        "observedBody": "阿语技能名、被动类型、随技能等级提高命中精度的描述和等级0/7均可见。",
+        "issues": [],
+        "limits": [
+          "阿语连写可见；未发现本图正文缺失，但未认证整个RTL对齐和词序。",
+          "技能行Lv/Exp仍为既有缩写；全屏顶部仍有中文提示。"
+        ]
+      },
+      "visibleChecks": {
+        "targetControlsUseExpectedLanguage": true,
+        "chapterAndLevelNotForcedSimplifiedChinese": true,
+        "fourTabsHaveNoClearlyVisibleDuplicateEnglishUnderlay": true,
+        "noClearlyVisibleTofuBoxes": true,
+        "fencingDescriptionBodyObserved": true
+      },
+      "stats2BodyReviewed": false
+    }
+  ],
+  "remainingVisibleOrUnverified": {
+    "russianAndIndonesianPreviousButtonWordWrapping": "Confirmed; see the two specific diary findings. The Russian next label also sits against its lower edge. Exact terminal-glyph loss is not confirmed at the supplied resolution.",
+    "outsideScopedControls": "Full-screen tooltip images still show Chinese top-bar game text; some proper names and Lv/Exp remain. Those areas are not accepted as fully localized.",
+    "complexScripts": "Thai, Devanagari and connected Arabic glyphs are visible; this is not a per-character typography, RTL correctness or native-language semantic certification.",
+    "characterCoverage": "The ten character-character images were chosen under the requested either/or scope. Statistics2 body labels, other Character tabs, numerical stat rows and all tooltip placements were not reviewed.",
+    "staticEvidence": "Cannot establish live hit testing, hidden text, hover persistence, keyboard navigation, screen-reader behavior, every DPI or every long translation. No claim of global parity, complete language acceptance or HumanAccepted."
+  },
+  "operations": {
+    "browserOpened": 0,
+    "accountsUsed": 0,
+    "gameCommands": 0,
+    "servicesStartedOrStopped": 0,
+    "privateFilesRead": 0,
+    "sourceFilesChanged": 0,
+    "imagesEdited": 0
+  },
+  "imagePins": [
+    {
+      "language": "zh-CN",
+      "kind": "quest-diary",
+      "file": "display-v17-r2/01-quest-diary-zh-CN.png",
+      "bytes": 105165,
+      "sha256": "ddeb7e20c5b912db68a4105ee0aa3e8afaf6e0e949886c66cf79ebc0c3af6f7a",
+      "viewedAtOriginalResolution": true
+    },
+    {
+      "language": "zh-CN",
+      "kind": "character-character",
+      "file": "display-v17-r2/02-character-character-zh-CN.png",
+      "bytes": 77635,
+      "sha256": "d8d08da170f17196139468cd33808f13061507df6be8cb823b366e53f15cf0df",
+      "viewedAtOriginalResolution": true
+    },
+    {
+      "language": "zh-CN",
+      "kind": "fencing-full-description",
+      "file": "display-v17-r2/06-fencing-hover-full-description-zh-CN.png",
+      "bytes": 969427,
+      "sha256": "002fb4efca8a7167ce8913ed4e7fbd4ca894a2249ae8a2effaa2e8a98cf36233",
+      "viewedAtOriginalResolution": true
+    },
+    {
+      "language": "en",
+      "kind": "quest-diary",
+      "file": "display-v17-r2/17-quest-diary-en.png",
+      "bytes": 105049,
+      "sha256": "8378ed8fb03921de9f43dcaf12d8b66003d998deee4c90ba530ddb4dbc5cef25",
+      "viewedAtOriginalResolution": true
+    },
+    {
+      "language": "en",
+      "kind": "character-character",
+      "file": "display-v17-r2/18-character-character-en.png",
+      "bytes": 76841,
+      "sha256": "7ddc7dfbc5ce77cc44343a88084f4a032c024b55415f8c1087eba9ae6c350295",
+      "viewedAtOriginalResolution": true
+    },
+    {
+      "language": "en",
+      "kind": "fencing-full-description",
+      "file": "display-v17-r2/22-fencing-hover-full-description-en.png",
+      "bytes": 973239,
+      "sha256": "4f239426ae83803b83d2d6dd0272cfb1cd4b32a38fa72df37ada063fbde51014",
+      "viewedAtOriginalResolution": true
+    },
+    {
+      "language": "zh-TW",
+      "kind": "quest-diary",
+      "file": "display-v17-r2/09-quest-diary-zh-TW.png",
+      "bytes": 105122,
+      "sha256": "44d630ee3d1091a73f9053af6108d3290e0357321724c696ffd86bd96008770d",
+      "viewedAtOriginalResolution": true
+    },
+    {
+      "language": "zh-TW",
+      "kind": "character-character",
+      "file": "display-v17-r2/10-character-character-zh-TW.png",
+      "bytes": 77523,
+      "sha256": "9d636fdddee2b1361f76c2f3093d04c9ae86322cb2674ba42b94a9e195939756",
+      "viewedAtOriginalResolution": true
+    },
+    {
+      "language": "zh-TW",
+      "kind": "fencing-full-description",
+      "file": "display-v17-r2/14-fencing-hover-full-description-zh-TW.png",
+      "bytes": 973346,
+      "sha256": "d80b7c6e98a07e1a42801aff962f127ff0354022b95efad53f57a44bbbb37994",
+      "viewedAtOriginalResolution": true
+    },
+    {
+      "language": "pt-BR",
+      "kind": "quest-diary",
+      "file": "display-v17-r2/25-quest-diary-pt-BR.png",
+      "bytes": 106527,
+      "sha256": "c1a02aa3c105cd009ef27eafaf77b1c3bac2acdae5e4fa721464b3e1673dcfc7",
+      "viewedAtOriginalResolution": true
+    },
+    {
+      "language": "pt-BR",
+      "kind": "character-character",
+      "file": "display-v17-r2/26-character-character-pt-BR.png",
+      "bytes": 77120,
+      "sha256": "330a60fd56f3778be9c46f3838f6588d2e2a119266c2e06a708d4c7bfca5c0a3",
+      "viewedAtOriginalResolution": true
+    },
+    {
+      "language": "pt-BR",
+      "kind": "fencing-full-description",
+      "file": "display-v17-r2/30-fencing-hover-full-description-pt-BR.png",
+      "bytes": 970602,
+      "sha256": "016aac9dfbcf6f034466c775a67b1a9c29205ecb2d980ed7a557799387dc4217",
+      "viewedAtOriginalResolution": true
+    },
+    {
+      "language": "ru",
+      "kind": "quest-diary",
+      "file": "display-v17-r2/33-quest-diary-ru.png",
+      "bytes": 107644,
+      "sha256": "3c6519ca6b1dbb6b8001596665c8781170913296399de64408b2568a7e14c9d5",
+      "viewedAtOriginalResolution": true
+    },
+    {
+      "language": "ru",
+      "kind": "character-character",
+      "file": "display-v17-r2/34-character-character-ru.png",
+      "bytes": 77390,
+      "sha256": "c36f3aabcf8d8a6014dd24e1147110bb1a47ecf3348d76a2f8dc7faad167bd31",
+      "viewedAtOriginalResolution": true
+    },
+    {
+      "language": "ru",
+      "kind": "fencing-full-description",
+      "file": "display-v17-r2/38-fencing-hover-full-description-ru.png",
+      "bytes": 969254,
+      "sha256": "30da42dae05383105fe50f89004d63db3b677824d2e70db70af87b69b061237c",
+      "viewedAtOriginalResolution": true
+    },
+    {
+      "language": "hi",
+      "kind": "quest-diary",
+      "file": "display-v17-r2/41-quest-diary-hi.png",
+      "bytes": 104943,
+      "sha256": "1307dd9a5c77e7c20d755ed33c8716176d0deb9cf0a169215da6e729679ddd96",
+      "viewedAtOriginalResolution": true
+    },
+    {
+      "language": "hi",
+      "kind": "character-character",
+      "file": "display-v17-r2/42-character-character-hi.png",
+      "bytes": 77283,
+      "sha256": "f8a4ba179d2ba1a744637cb8bca74b517eae401c29e4041c710c2943d0721e05",
+      "viewedAtOriginalResolution": true
+    },
+    {
+      "language": "hi",
+      "kind": "fencing-full-description",
+      "file": "display-v17-r2/46-fencing-hover-full-description-hi.png",
+      "bytes": 973759,
+      "sha256": "dd2e9198aff6ce1f6c7a18af0aab61f378bb27f041ab08311fdce6b3040197eb",
+      "viewedAtOriginalResolution": true
+    },
+    {
+      "language": "id",
+      "kind": "quest-diary",
+      "file": "display-v17-r3/01-quest-diary-id.png",
+      "bytes": 105439,
+      "sha256": "9ed242b74d2be5dccbe1c67cc1771cf4e412e145b1572a90eb7ba004e90db7d3",
+      "viewedAtOriginalResolution": true
+    },
+    {
+      "language": "id",
+      "kind": "character-character",
+      "file": "display-v17-r3/02-character-character-id.png",
+      "bytes": 77173,
+      "sha256": "27f340a03396f2d96381e8340930d001f80f43785b69b81af0b33d513bfbcce8",
+      "viewedAtOriginalResolution": true
+    },
+    {
+      "language": "id",
+      "kind": "fencing-full-description",
+      "file": "display-v17-r3/06-fencing-hover-full-description-id.png",
+      "bytes": 968601,
+      "sha256": "707827399e8d834d9e464c1e1fc2e1d9c5c1c9e2e075bc37b0e60b8164ef8cdc",
+      "viewedAtOriginalResolution": true
+    },
+    {
+      "language": "vi",
+      "kind": "quest-diary",
+      "file": "display-v17-r3/09-quest-diary-vi.png",
+      "bytes": 105107,
+      "sha256": "104722aca672a5c5dfb62b677ff1d4dfc10cd96551005f7abe543ce7f3010622",
+      "viewedAtOriginalResolution": true
+    },
+    {
+      "language": "vi",
+      "kind": "character-character",
+      "file": "display-v17-r3/10-character-character-vi.png",
+      "bytes": 77003,
+      "sha256": "10c8e0204af77978bf2f4018b01b60a474cc0f4421fe72f15e6bf0f3137fdc74",
+      "viewedAtOriginalResolution": true
+    },
+    {
+      "language": "vi",
+      "kind": "fencing-full-description",
+      "file": "display-v17-r3/14-fencing-hover-full-description-vi.png",
+      "bytes": 971213,
+      "sha256": "0337b67ad2058b768640e6010229fcd83760368bd7e2b242bf59106b48c049f2",
+      "viewedAtOriginalResolution": true
+    },
+    {
+      "language": "th",
+      "kind": "quest-diary",
+      "file": "display-v17-r4/01-quest-diary-th.png",
+      "bytes": 102502,
+      "sha256": "593b4840118f4fd12be21700dabeba337c0c8237d04304e1df63505cd3d9dbd5",
+      "viewedAtOriginalResolution": true
+    },
+    {
+      "language": "th",
+      "kind": "character-character",
+      "file": "display-v17-r4/02-character-character-th.png",
+      "bytes": 76650,
+      "sha256": "82e6d2674badc531a82c4aacc3895f763088ac250cc6b1ae30ce0a6617e444b7",
+      "viewedAtOriginalResolution": true
+    },
+    {
+      "language": "th",
+      "kind": "fencing-full-description",
+      "file": "display-v17-r4/06-fencing-hover-full-description-th.png",
+      "bytes": 966247,
+      "sha256": "fc8bb729000c291965a2c21c04000f6722a5c17c4972b162672c5048867734bf",
+      "viewedAtOriginalResolution": true
+    },
+    {
+      "language": "ar",
+      "kind": "quest-diary",
+      "file": "display-v17-r4/09-quest-diary-ar.png",
+      "bytes": 103435,
+      "sha256": "96ad8a9833c464d7c2970841161534b8b880a915d0211193c394f8d68f375a99",
+      "viewedAtOriginalResolution": true
+    },
+    {
+      "language": "ar",
+      "kind": "character-character",
+      "file": "display-v17-r4/10-character-character-ar.png",
+      "bytes": 76849,
+      "sha256": "b6ed45c713334d43d1cff99325d8e44a247316f724cb751f013f370b8dec2d80",
+      "viewedAtOriginalResolution": true
+    },
+    {
+      "language": "ar",
+      "kind": "fencing-full-description",
+      "file": "display-v17-r4/14-fencing-hover-full-description-ar.png",
+      "bytes": 958764,
+      "sha256": "8a0b6fbb8b0f899b5c86c892022c2bc75c0cd5a897711e7010a5e32d26fbf16f",
+      "viewedAtOriginalResolution": true
+    }
+  ]
+}

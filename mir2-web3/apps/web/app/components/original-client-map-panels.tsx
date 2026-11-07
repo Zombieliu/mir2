@@ -414,7 +414,15 @@ export function MiniMapPanel({
   }, [world.miniMapIndex, hasRasterMiniMap]);
 
   return (
-    <section className={`mini-map-panel ${smallMode ? "small" : "large"}`}>
+    <section
+      className={`mini-map-panel ${smallMode ? "small" : "large"}`}
+      onMouseDown={(event) => {
+        if (event.button !== 0 && event.button !== 2) return;
+        if (!(event.target instanceof Element) || event.target.closest(".mini-map-scene, button")) return;
+        consumeMapImageClick(event);
+        onImageRoutePress?.(routeSource);
+      }}
+    >
       <img
         className="mini-map-bg"
         src={panelFrame}

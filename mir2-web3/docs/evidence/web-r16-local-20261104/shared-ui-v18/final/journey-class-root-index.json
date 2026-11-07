@@ -1,0 +1,42 @@
+{
+  "phase": "journey-class-root",
+  "publicOnly": true,
+  "privateLogsCopied": false,
+  "rawNativeScreenshotCopied": false,
+  "privateIdentityMatches": 0,
+  "knownSecretPatternMatches": 0,
+  "files": 5,
+  "bytes": 1123996,
+  "entries": [
+    {
+      "path": "journey-class-root/forest-class-v19-root-r2/01-current-native-task-card-before-measured-readiness.png",
+      "source": "D:/mir2-builds/forest-quest-driver-20261106/forest-class-v19-root-r2/01-current-native-task-card-before-measured-readiness.png",
+      "bytes": 269219,
+      "sha256": "fbab50083c77f504a6ea6f1af53b10b347c743df5acfc5284f8173585caeb5ef"
+    },
+    {
+      "path": "journey-class-root/forest-class-v19-root-r2/02-fresh-v2-native-task-card.png",
+      "source": "D:/mir2-builds/forest-quest-driver-20261106/forest-class-v19-root-r2/02-fresh-v2-native-task-card.png",
+      "bytes": 268664,
+      "sha256": "a29c0aeb7ae026e1171682343612ef0260e300267f852abc9e26b933b0ef7104"
+    },
+    {
+      "path": "journey-class-root/forest-class-v19-root-r2/03-saved-death-before-normal-town-revive.png",
+      "source": "D:/mir2-builds/forest-quest-driver-20261106/forest-class-v19-root-r2/03-saved-death-before-normal-town-revive.png",
+      "bytes": 191787,
+      "sha256": "86782f61291f5834a021f95fa168fcf8392732958d45fb8e523e83673e68cb7b"
+    },
+    {
+      "path": "journey-class-root/forest-class-v19-root-r2/04-segment-complete-before-normal-logout.png",
+      "source": "D:/mir2-builds/forest-quest-driver-20261106/forest-class-v19-root-r2/04-segment-complete-before-normal-logout.png",
+      "bytes": 255062,
+      "sha256": "f139e1478d5b33111611dcb96263616847610f625a3d7893bf4a6a63f85b121f"
+    },
+    {
+      "path": "journey-class-root/forest-class-v19-root-r2/onboarding-forest-browser-proof.json",
+      "source": "D:/mir2-builds/forest-quest-driver-20261106/forest-class-v19-root-r2/onboarding-forest-browser-proof.json",
+      "bytes": 139264,
+      "sha256": "7efe0f24eca76a552c6f459351a2f45be4c5bbf0f0757ba63da6eab17abe3411"
+    }
+  ]
+}

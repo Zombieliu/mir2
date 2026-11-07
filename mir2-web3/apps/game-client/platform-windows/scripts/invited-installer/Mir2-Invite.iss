@@ -10,6 +10,11 @@
 #endif
 #define AppExe "mir2-platform-windows.exe"
 #define LauncherExe "Mir2Launcher.exe"
+#ifdef Mir2Packed
+  #ifdef Mir2Bootstrap
+    #error Mir2Packed and Mir2Bootstrap are separate install layouts
+  #endif
+#endif
 #ifndef Mir2IconFile
   #define Mir2IconFile "..\..\resources\numeron.ico"
 #endif
@@ -38,6 +43,11 @@ AppVersion={#AppVersion}
 AppPublisher=Numeron - Legend of Rebirth
 DisableProgramGroupPage=yes
 DisableDirPage=no
+#ifdef Mir2Packed
+DisableWelcomePage=yes
+DisableReadyPage=yes
+DisableFinishedPage=yes
+#endif
 PrivilegesRequired=lowest
 SetupArchitecture=x64
 ArchitecturesAllowed=x64compatible
@@ -51,7 +61,11 @@ UninstallDisplayName={#AppName}
 #ifdef Mir2Bootstrap
 UninstallDisplayIcon={app}\{#LauncherExe}
 #else
+#ifdef Mir2Packed
+UninstallDisplayIcon={app}\{#LauncherExe}
+#else
 UninstallDisplayIcon={app}\game\{#AppExe}
+#endif
 #endif
 UninstallFilesDir={app}\uninstall
 WizardStyle=modern
@@ -74,7 +88,11 @@ SignedUninstaller=yes
 #else
 SignedUninstaller=no
 #endif
+#ifdef Mir2Packed
+ShowLanguageDialog=auto
+#else
 ShowLanguageDialog=yes
+#endif
 LanguageDetectionMethod=uilanguage
 
 [Languages]
@@ -267,9 +285,13 @@ Name: "{app}\game\logs"
 Name: "{group}\{#AppName}"; Filename: "{app}\{#LauncherExe}"; WorkingDir: "{app}"; IconFilename: "{app}\{#LauncherExe}"; IconIndex: 0
 Name: "{group}\{cm:ReadmeTitle}"; Filename: "{app}\{cm:ReadmeFile}"
 Name: "{group}\{cm:UninstallTitle}"; Filename: "{uninstallexe}"
+#ifdef Mir2Packed
+Name: "{userdesktop}\{#AppName}"; Filename: "{app}\{#LauncherExe}"; WorkingDir: "{app}"; IconFilename: "{app}\{#LauncherExe}"; IconIndex: 0; Check: PackedDesktopIconSelected
+#else
 Name: "{userdesktop}\{#AppName}"; Filename: "{app}\{#LauncherExe}"; WorkingDir: "{app}"; IconFilename: "{app}\{#LauncherExe}"; IconIndex: 0; Tasks: desktopicon
+#endif
 
-; Finish-page choices are executed in Pascal code so Windows launch errors
+; Post-install choices are executed in Pascal code so Windows launch errors
 ; can be reported without security-policy workarounds. Silent installs never launch.
 
 #ifdef Mir2Bootstrap
@@ -281,6 +303,10 @@ var
   RuntimeRestartRequired: Boolean;
   FinishChoices: TNewCheckListBox;
   FinishActionsDone: Boolean;
+#ifdef Mir2Packed
+  PackedChoicesConfirmed: Boolean;
+  PackedInstallationCompleted: Boolean;
+#endif
   InstallLockHandle: NativeUInt;
   InstallLockRoot: String;
 
@@ -297,6 +323,9 @@ function SafeLocalePath(Path: String): Boolean; forward;
 
 #ifdef Mir2Bootstrap
 #include "verified-bootstrap-guard.iss"
+#endif
+#ifdef Mir2Packed
+#include "verified-packed-guard.iss"
 #endif
 
 function HoldInstallLock: Boolean;
@@ -386,6 +415,15 @@ begin
     exit;
   end;
 #endif
+#ifdef Mir2Packed
+  { Unknown existing gameplay, state or recovery history is retained and refused.
+    The generated inputs never assert a selected or healthy generation. }
+  if not PackedInstallCanInstall then
+  begin
+    Result := CustomMessage('GameBusy');
+    exit;
+  end;
+#endif
   if VCRuntimeReady then
   begin
     Log('Microsoft Visual C++ x64 runtime meets 14.44.35211.0 minimum; no runtime changes.');
@@ -440,23 +478,77 @@ begin
   Result := True;
 end;
 
+#ifdef Mir2Packed
+function PackedDesktopIconSelected: Boolean;
+begin
+  { Inno populates TasksList after the directory page. Interactive consent must
+    therefore come directly from our confirmed checkbox, not the task API. }
+  Result := False;
+  if WizardSilent then
+  begin
+    Result := WizardIsTaskSelected('desktopicon');
+    exit;
+  end;
+  if not PackedChoicesConfirmed then exit;
+  Result := FinishChoices.Checked[2];
+end;
+#endif
+
 procedure InitializeWizard;
 begin
   FinishChoices := TNewCheckListBox.Create(WizardForm);
+#ifdef Mir2Packed
+  { Keep the directory editable and confirm all optional actions on this page. }
+  FinishChoices.Parent := WizardForm.SelectDirPage;
+  FinishChoices.SetBounds(WizardForm.DirEdit.Left,
+    WizardForm.DirEdit.Top + WizardForm.DirEdit.Height + ScaleY(12),
+    WizardForm.SelectDirPage.ClientWidth - WizardForm.DirEdit.Left, ScaleY(96));
+#else
   FinishChoices.Parent := WizardForm.FinishedPage;
   FinishChoices.SetBounds(WizardForm.RunList.Left, WizardForm.RunList.Top,
     WizardForm.RunList.Width, ScaleY(96));
+#endif
   FinishChoices.BorderStyle := bsNone;
   FinishChoices.ParentColor := True;
   FinishChoices.Flat := True;
   FinishChoices.MinItemHeight := ScaleY(28);
   FinishChoices.AddCheckBox(CustomMessage('LaunchGame'), '', 0, True, True, False, False, nil);
   FinishChoices.AddCheckBox(CustomMessage('OpenReadme'), '', 0, False, True, False, False, nil);
+#ifdef Mir2Packed
+  FinishChoices.AddCheckBox(CustomMessage('DesktopIcon'), '', 0,
+    False, True, False, False, nil);
+#endif
   FinishChoices.Visible := False;
 end;
 
+#ifdef Mir2Packed
+function ShouldSkipPage(PageID: Integer): Boolean;
+begin
+  { Guides remain installed and can be opened by the user's directory-page choice. }
+  Result := (PageID = wpInfoBefore) or (PageID = wpSelectTasks);
+end;
+
+function NextButtonClick(CurPageID: Integer): Boolean;
+begin
+  Result := True;
+  if (CurPageID = wpSelectDir) and not WizardSilent then
+  begin
+    PackedChoicesConfirmed := True;
+  end;
+end;
+#endif
+
 procedure CurPageChanged(CurPageID: Integer);
 begin
+#ifdef Mir2Packed
+  FinishChoices.Visible := (CurPageID = wpSelectDir) and not WizardSilent;
+  if CurPageID = wpSelectDir then
+  begin
+    PackedChoicesConfirmed := False;
+    WizardForm.SelectDirBrowseLabel.Caption := SetupMessage(msgReadyLabel2b);
+    WizardForm.NextButton.Caption := SetupMessage(msgButtonInstall);
+  end;
+#else
   if CurPageID = wpFinished then
   begin
     WizardForm.RunList.Visible := False;
@@ -465,6 +557,7 @@ begin
   end
   else
     FinishChoices.Visible := False;
+#endif
 end;
 
 function SaveLaunchFailure(ResultCode: Integer): String;
@@ -498,13 +591,24 @@ var
   MessageText, DiagnosticPath: String;
 begin
   if FinishActionsDone or WizardSilent or RuntimeRestartRequired then exit;
+#ifdef Mir2Packed
+  { The finished page is intentionally absent. Never treat its visibility as
+    permission, and never launch after cancellation, failure or a restart prompt. }
+  if not PackedChoicesConfirmed or not PackedInstallationCompleted or
+    WizardForm.YesRadio.Visible then exit;
+#else
   if not FinishChoices.Visible then exit;
+#endif
   FinishActionsDone := True;
   if FinishChoices.Checked[0] then
   begin
     { Original-user execution is the same privilege boundary as Inno's normal
       postinstall entry. Do not retry elevated or disable application control. }
+#ifdef Mir2Packed
+    if not ExecAsOriginalUser(ExpandConstant('{app}\{#LauncherExe}'), '--play-installed',
+#else
     if not ExecAsOriginalUser(ExpandConstant('{app}\{#LauncherExe}'), '',
+#endif
       ExpandConstant('{app}'), SW_SHOWNORMAL, ewNoWait, ResultCode) then
     begin
       Log('Game launch failed; Windows error ' + IntToStr(ResultCode));
@@ -619,9 +723,14 @@ begin
   if CurStep = ssPostInstall then
   begin
 #ifndef Mir2Bootstrap
+#ifndef Mir2Packed
     RetirePreviousUpdateTransaction;
 #endif
+#endif
     SeedInitialLocale;
+#ifdef Mir2Packed
+    PackedInstallationCompleted := True;
+#endif
   end;
   if CurStep = ssDone then
   begin

@@ -1,0 +1,173 @@
+{
+  "schema": 1,
+  "provider": "openai-real-http",
+  "model": "gpt-6-luna",
+  "apiCalls": 2,
+  "events": [
+    {
+      "type": "nativeFixtureModelStatus",
+      "provider": "openai",
+      "model": "gpt-6-luna",
+      "configured": true,
+      "modelEnabled": true,
+      "modelCalls": 0,
+      "modelTask": {
+        "status": "idle"
+      }
+    },
+    {
+      "type": "nativeFixtureModelStatus",
+      "provider": "openai",
+      "model": "gpt-6-luna",
+      "configured": true,
+      "modelEnabled": true,
+      "modelCalls": 1,
+      "modelTask": {
+        "status": "planning",
+        "goalId": "goal:1b1e3e41de28123cae9745c71b2e2eb689246757aae4d194c15696c5a3d945c2",
+        "instruction": "在附近打两只怪,再回来找我,途中别捡东西。",
+        "reply": "正在读取当前观察和经历，等待模型计划。",
+        "step": "planning",
+        "completedKills": 0,
+        "requestedKills": 0,
+        "references": [],
+        "lastCall": {
+          "model": "gpt-6-luna",
+          "status": "in-flight"
+        }
+      }
+    },
+    {
+      "type": "nativeFixtureModelStatus",
+      "provider": "openai",
+      "model": "gpt-6-luna",
+      "configured": true,
+      "modelEnabled": true,
+      "modelCalls": 1,
+      "modelTask": {
+        "status": "completed",
+        "goalId": "goal:1b1e3e41de28123cae9745c71b2e2eb689246757aae4d194c15696c5a3d945c2",
+        "instruction": "在附近打两只怪,再回来找我,途中别捡东西。",
+        "reply": "我会在主人附近击杀两只普通怪后返回；按你的要求不拾取物品。目标尚未执行。",
+        "step": "completed",
+        "completedKills": 2,
+        "requestedKills": 2,
+        "references": [
+          {
+            "episodeId": "goal:1b1e3e41de28123cae9745c71b2e2eb689246757aae4d194c15696c5a3d945c2",
+            "summary": "在附近打两只怪,再回来找我,途中别捡东西。"
+          }
+        ],
+        "lastCall": {
+          "model": "gpt-6-luna",
+          "status": "completed",
+          "providerModel": "gpt-6-luna",
+          "responseId": "resp_0b02d597168273be016ae98b9b5e8087d29d1c3beac9b0989a",
+          "requestId": "req_3e2f69bbaf394affa8d6eaa8fb9c5817",
+          "inputTokens": 2044,
+          "outputTokens": 121
+        }
+      }
+    },
+    {
+      "type": "nativeFixtureActorRestarted",
+      "oldPid": 51972,
+      "newPid": 61988,
+      "differentProcess": true,
+      "archiveId": "c2f6e877-3fce-4de6-9bc5-63672ca8c962",
+      "worldEpoch": "5abb1892-12e1-4e78-8b1f-d6388f092398",
+      "characterIndex": 2,
+      "policyVersion": 2,
+      "party": {
+        "assistBeforeLoot": true,
+        "lootOnlyAfterCombat": true,
+        "askBeforeLeaving": true
+      },
+      "growthRevision": 22,
+      "feedback": [
+        {
+          "feedbackId": "cr:3236395024495fa9eb9f1fe7ee95cc9dda06455a5153a7a5558745bc6cb6365d",
+          "status": "active"
+        }
+      ],
+      "episodeCount": 22
+    },
+    {
+      "type": "nativeFixtureModelStatus",
+      "provider": "openai",
+      "model": "gpt-6-luna",
+      "configured": true,
+      "modelEnabled": true,
+      "modelCalls": 1,
+      "modelTask": {
+        "status": "paused",
+        "goalId": "goal:1b1e3e41de28123cae9745c71b2e2eb689246757aae4d194c15696c5a3d945c2",
+        "instruction": "在附近打两只怪,再回来找我,途中别捡东西。",
+        "reply": "上次委托和实际经历已保留。重启后请重新委托，确认后再行动。",
+        "step": "awaiting-new-instruction",
+        "completedKills": 2,
+        "requestedKills": 2,
+        "references": []
+      }
+    },
+    {
+      "type": "nativeFixtureModelStatus",
+      "provider": "openai",
+      "model": "gpt-6-luna",
+      "configured": true,
+      "modelEnabled": true,
+      "modelCalls": 2,
+      "modelTask": {
+        "status": "planning",
+        "goalId": "goal:e13cc9484324dca4e41b2dcfdd706a0b456f25f258a0b9a738f2034636fe8401",
+        "instruction": "回想上次完成的怪物数量,引用真实的击杀记录,然后只跟着我,不拾取。",
+        "reply": "正在读取当前观察和经历，等待模型计划。",
+        "step": "planning",
+        "completedKills": 0,
+        "requestedKills": 0,
+        "references": [],
+        "lastCall": {
+          "model": "gpt-6-luna",
+          "status": "in-flight"
+        }
+      }
+    },
+    {
+      "type": "nativeFixtureModelStatus",
+      "provider": "openai",
+      "model": "gpt-6-luna",
+      "configured": true,
+      "modelEnabled": true,
+      "modelCalls": 2,
+      "modelTask": {
+        "status": "running",
+        "goalId": "goal:e13cc9484324dca4e41b2dcfdd706a0b456f25f258a0b9a738f2034636fe8401",
+        "instruction": "回想上次完成的怪物数量,引用真实的击杀记录,然后只跟着我,不拾取。",
+        "reply": "上次的真实击杀记录显示完成了2只（1/2、2/2）；现在只跟随你，不拾取。",
+        "step": "following",
+        "completedKills": 0,
+        "requestedKills": 0,
+        "references": [
+          {
+            "episodeId": "goal:1b1e3e41de28123cae9745c71b2e2eb689246757aae4d194c15696c5a3d945c2:kill:1",
+            "summary": "服务器观察:阿洛实际命中目标后收到了其死亡事件;本委托参战击杀进度 1/2。"
+          },
+          {
+            "episodeId": "goal:1b1e3e41de28123cae9745c71b2e2eb689246757aae4d194c15696c5a3d945c2:kill:2",
+            "summary": "服务器观察:阿洛实际命中目标后收到了其死亡事件;本委托参战击杀进度 2/2。"
+          }
+        ],
+        "lastCall": {
+          "model": "gpt-6-luna",
+          "status": "completed",
+          "providerModel": "gpt-6-luna",
+          "responseId": "resp_0d40db86d333a785016ae98c6f25c087d29ad51fbb6e2fc16f",
+          "requestId": "req_3ab631824dbf4e66a82350348e3c96da",
+          "inputTokens": 2610,
+          "outputTokens": 173
+        }
+      }
+    }
+  ],
+  "originalGameStopped": false
+}

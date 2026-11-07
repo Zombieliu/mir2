@@ -44,7 +44,8 @@ function fixture(t) {
 function runner(bytes = EMPTY, onOptimize = null, optimizationArgs = ["-O1"]) {
   return (bin, args, options) => {
     if (args.length === 1 && args[0] === "--version") return ok("wasm-opt version 131 (version_131)\n");
-    assert.deepEqual(args.slice(1, -1), [...optimizationArgs, "--strip-debug", "-o"]);
+    const stage = args[1] === "--merge-similar-functions" ? ["--merge-similar-functions"] : optimizationArgs;
+    assert.deepEqual(args.slice(1, -1), [...stage, "--strip-debug", "-o"]);
     fs.writeFileSync(args.at(-1), bytes, { flag: "wx" });
     return onOptimize ? onOptimize(bin, args, options) : ok();
   };
@@ -96,15 +97,17 @@ test("renderer optimizer refuses version command status signal and error failure
   }
 });
 
-test("renderer optimization uses only fixed conservative arguments and bounded hidden child options", (t) => {
+test("renderer optimization uses fixed size arguments and bounded hidden child options", (t) => {
   const f = fixture(t), calls = [], injected = runner();
-  const result = optimizeRendererReleaseWasm({ ...f, optimizationFlag: "-Oz", sourceEnv: { SystemRoot: "fixture-system", NODE_OPTIONS: "forbidden", PATH: "untrusted", BINARYEN_CORES: "9" },
+  const result = optimizeRendererReleaseWasm({ ...f, optimizationFlag: "-O1", optimizationArgs: ["--untrusted-pass"], sourceEnv: { SystemRoot: "fixture-system", NODE_OPTIONS: "forbidden", PATH: "untrusted", BINARYEN_CORES: "9" },
     run: (bin, args, options) => { calls.push({ bin, args, options }); return injected(bin, args, options); } });
-  assert.equal(calls.length, 2);
+  assert.equal(calls.length, 3);
   assert.equal(calls[0].bin, f.bin); assert.deepEqual(calls[0].args, ["--version"]);
   assert.equal(calls[1].bin, f.bin); assert.equal(calls[1].args[0], f.wasmPath);
-  assert.deepEqual(calls[1].args.slice(1, 4), ["-O1", "--strip-debug", "-o"]);
-  assert.equal(path.dirname(calls[1].args[4]), f.packageDir);
+  assert.deepEqual(calls[1].args.slice(1, -1), ["-O1", "--strip-debug", "-o"]);
+  assert.deepEqual(calls[2].args.slice(1, -1), ["--merge-similar-functions", "--strip-debug", "-o"]);
+  assert.equal(calls[2].args[0], calls[1].args.at(-1));
+  assert.equal(path.dirname(calls[1].args.at(-1)), f.packageDir);
   for (const call of calls) {
     assert.equal(call.options.cwd, f.stagingRoot); assert.equal(call.options.shell, false);
     assert.equal(call.options.windowsHide, true); assert.equal(call.options.timeout, 600000);
@@ -115,6 +118,7 @@ test("renderer optimization uses only fixed conservative arguments and bounded h
   assert.equal(result.input.sha256, sha(NOTE)); assert.equal(result.output.sha256, sha(EMPTY));
   assert.equal(result.tool.sha256, f.toolConfig.sha256); assert.equal(result.metadataMatched, true);
   assert.equal(result.version.status, 0); assert.equal(result.optimization.status, 0);
+  assert.equal(result.stages.length, 2);
   assert.equal(result.rendererInstantiated, false); assert.equal(result.budget.wasmBytes, EMPTY.length);
   assert.equal(fs.readFileSync(f.canonical, "utf8"), "published pointer remains independent");
   assert.deepEqual(fs.readdirSync(f.packageDir).sort(), ["mir2_bevy_runtime.js", "mir2_bevy_runtime_bg.wasm"]);
@@ -126,6 +130,33 @@ test("renderer optimization lifecycle failure never renames staged input or publ
     assert.throws(() => optimizeRendererReleaseWasm({ ...f, run: runner(EMPTY, () => outcome) }), /optimization failed/);
     unchanged(f);
   }
+});
+
+test("renderer second-stage failure leaves original bytes and cleans both owned outputs", (t) => {
+  const f = fixture(t);
+  const run = runner(EMPTY, (_bin, args) => args[1] === "--merge-similar-functions" ? { ...ok(), status: 2 } : ok());
+  assert.throws(() => optimizeRendererReleaseWasm({ ...f, run }), /optimization stage 2 failed/);
+  unchanged(f);
+});
+
+test("renderer second stage must retain the original interface too", (t) => {
+  const f = fixture(t);
+  const run = runner(EMPTY, (_bin, args) => {
+    if (args[1] === "--merge-similar-functions") fs.writeFileSync(args.at(-1), EXPORTED);
+    return ok();
+  });
+  assert.throws(() => optimizeRendererReleaseWasm({ ...f, run }), /import\/export metadata/);
+  unchanged(f);
+});
+
+test("renderer pins first-stage bytes across the second command", (t) => {
+  const f = fixture(t);
+  const run = runner(EMPTY, (_bin, args) => {
+    if (args[1] === "--merge-similar-functions") fs.writeFileSync(args[0], NAMED);
+    return ok();
+  });
+  assert.throws(() => optimizeRendererReleaseWasm({ ...f, run }), /post-pins failed/);
+  unchanged(f);
 });
 
 test("renderer synchronous runner IO throws are propagated with staged input intact", (t) => {
@@ -221,7 +252,7 @@ test("renderer temp output symlink is refused without following its target", (t)
   }
   const run = (bin, args) => {
     if (args[0] === "--version") return ok("wasm-opt version 131\n");
-    fs.symlinkSync(target, args[4], "file");
+    fs.symlinkSync(target, args.at(-1), "file");
     return ok();
   };
   assert.throws(() => optimizeRendererReleaseWasm({ ...f, run }), /linked or irregular/);
@@ -316,7 +347,7 @@ test("renderer cleanup refuses retargeted package ancestry and preserves outside
   try {
     optimizeRendererReleaseWasm({ ...f, run: (bin, args) => {
       if (args[0] === "--version") return ok("wasm-opt version 131\n");
-      generated = args[4];
+      generated = args.at(-1);
       fs.writeFileSync(generated, EMPTY, { flag: "wx" });
       fs.renameSync(f.packageDir, saved);
       outsideLeaf = path.join(outside, path.basename(generated));

@@ -200,6 +200,7 @@ impl HudUiSnapshot {
 #[cfg(target_arch = "wasm32")]
 mod web {
     use super::*;
+    use crate::quest_ui_host::portable_fonts::{self, PortableUiFonts};
     use bevy::asset::LoadState;
     use bevy::prelude::*;
     use bevy::ui::UiSystems;
@@ -213,7 +214,6 @@ mod web {
     use mir2_client_bevy::pending_operations::PendingLifecycleSet;
     use std::cell::RefCell;
     use wasm_bindgen::prelude::*;
-    const FONT: &str = "original-ui/fonts/NotoSansCJKsc-Regular.otf";
     #[derive(Default, Serialize)]
     #[serde(rename_all = "camelCase")]
     struct Status {
@@ -232,7 +232,7 @@ mod web {
     #[derive(Resource, Default)]
     struct Applied {
         snapshot: Option<HudUiSnapshot>,
-        font: Option<Handle<Font>>,
+        requested: bool,
         images: Vec<Handle<Image>>,
         frame: u64,
     }
@@ -299,6 +299,7 @@ mod web {
         valid
     }
     pub(crate) fn install(app: &mut App, window: Entity, camera: Entity) {
+        portable_fonts::install(app);
         app.init_resource::<UiReadModelIngress>()
             .init_resource::<PanelNavigation>()
             .init_resource::<Applied>()
@@ -333,6 +334,7 @@ mod web {
         mut nav: ResMut<PanelNavigation>,
         mut preferences: ResMut<mir2_client_bevy::crystal_ui::hud::SharedHudPreferences>,
         server: Res<AssetServer>,
+        mut fonts: ResMut<PortableUiFonts>,
         windows: Query<&Window>,
         mut quest: ResMut<mir2_client_bevy::portable_quest_ui::QuestUiHostContext>,
         mut orb: ResMut<mir2_client_bevy::portable_hp_orb_ui::HpOrbHostContext>,
@@ -348,21 +350,27 @@ mod web {
                 }
                 surface.generation = generation;
                 surface.revision = revision;
-                if snapshot.host_visible && applied.font.is_none() {
-                    applied.font = Some(server.load(FONT));
+                if snapshot.host_visible && !applied.requested {
                     let mut paths = mir2_client_bevy::crystal_ui::shared_hud::required_assets();
                     paths.extend(
                         mir2_client_bevy::crystal_ui::character_stats_portable::required_assets(),
                     );
                     applied.images = paths.into_iter().map(|p| server.load::<Image>(p)).collect();
+                    applied.requested = true;
                 }
                 applied.snapshot = Some(snapshot);
             }
         }
-        let loaded = applied
-            .font
-            .as_ref()
-            .is_some_and(|f| matches!(server.get_load_state(f.id()), Some(LoadState::Loaded)))
+        let display = portable_fonts::display_language();
+        if applied.snapshot.as_ref().is_some_and(|s| s.host_visible) {
+            fonts.request(&server, display);
+        }
+        if let Some(font) = fonts.primary(display) {
+            if surface.font != font {
+                surface.font = font;
+            }
+        }
+        let loaded = fonts.readiness(&server, display).ready()
             && applied
                 .images
                 .iter()
@@ -383,9 +391,6 @@ mod web {
                 .snapshot
                 .as_ref()
                 .is_some_and(|s| s.in_game && s.host_visible && s.player.is_some());
-        if let Some(f) = applied.font.as_ref() {
-            surface.font = f.clone();
-        }
         // The complete HUD owns orb data/geometry too. Quest cleanup only
         // withdraws the Quest surface, not the player's persistent main HUD.
         if ingress.has_complete_generation(surface.generation) {
@@ -423,6 +428,8 @@ mod web {
     }
     fn publish(
         mut applied: ResMut<Applied>,
+        fonts: Res<PortableUiFonts>,
+        server: Res<AssetServer>,
         surface: Res<SharedHudSurface>,
         nav: Res<PanelNavigation>,
         model: Res<UiReadModel>,
@@ -452,7 +459,10 @@ mod web {
     ) {
         applied.frame = applied.frame.saturating_add(1);
         let ready = complete_frame_ready(
-            surface.active,
+            surface.active
+                && fonts
+                    .readiness(&server, portable_fonts::display_language())
+                    .ready(),
             surface.generation,
             &model,
             &hp,

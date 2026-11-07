@@ -1,0 +1,22 @@
+{
+  "schema": "mir2.r19.source-lock.v1",
+  "sourceRevision": "24a50f865679cfb81c9edf6c95632c4389187dac",
+  "parentSourceRevision": "0f5351f9299263fcdb2b5b8d64e9ca9abb6870e2",
+  "sourceTree": "5e22299f8535ba9d95e9554e6db0f605339e9404",
+  "candidate": "WN-CANDIDATE-20261101-unified-19",
+  "version": "2026.11.1.19",
+  "engineSequence": 2026110109,
+  "packedSequence": 2026110110,
+  "canonicalBranch": "codex/windows-player-journey",
+  "canonicalExpectedHead": "e45f36420d1a4241a1e96fed58a86345f97e36e5",
+  "frozenFileSha256": {
+    "mir2-web3/apps/game-client/platform-windows/scripts/invited-installer/Mir2-Invite.iss": "f3bf3e97718509348c9768be173ac5f89f707fbe3a2ee8493019bdb80e82a6dc",
+    "mir2-web3/apps/game-client/platform-windows/scripts/invited-installer/README.md": "cdef862b31658ac0dd5ed26d902fd229ecf5677e8357f8bbedc488935400e9d1",
+    "mir2-web3/apps/game-client/windows-updater/src/bin/launcher.rs": "264f2e84854750398ef4fa4893e4510a1c3764b5d2806837d76b3ff2d4aead0d",
+    "mir2-web3/apps/game-client/windows-updater/src/bin/updater.rs": "c42eb989f8ab709143a62e1a2060197c848045031b7b8a782e8e11b1e233065c"
+  },
+  "frozenAtUtc": "2026-11-01T11:42:49.722752+00:00",
+  "privateCommitOnly": true,
+  "canonicalRefMoved": false,
+  "pushed": false
+}

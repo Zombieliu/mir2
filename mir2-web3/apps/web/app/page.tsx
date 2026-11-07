@@ -24,6 +24,9 @@ import {
   type MailComposeDraft,
 } from "./components/original-client-extra-windows";
 import dynamic from "next/dynamic";
+import { R16CompanionWindow } from "./components/r16-companion-window";
+import { R16CompanionClient, sameR16CompanionSource, type R16CompanionFrame, type R16CompanionSource, type R16CompanionRenderLease } from "../lib/r16-companion-client";
+import { readR16CompanionPrivateFrame } from "../lib/r16-companion-private-frame";
 import {
   SpectatorOverlay,
   type SpectatorStatus,
@@ -38,13 +41,15 @@ import {
   buildTranslator,
   formatRuntimeMessage,
   languageLocale,
-  normalizeLanguage,
+  preferredLanguage,
   text,
   type Mir2Language,
 } from "../lib/localization";
+import { commerceRuntimeLanguage, questRuntimeLanguage } from "../lib/r16-runtime-language";
+import { r16QuestGuidanceProfile, shouldAutoStartR16Tutorial } from "../lib/r16-gameplay-baseline";
 import { localizeQuestLog } from "../lib/quest-localization";
 import { withQuestRewardTooltipSources, type QuestRewardsPresentation } from "../lib/quest-reward-presentation";
-import { nextQuestRequestId, nextQuestUiGeneration, projectBevyQuestDialog, projectBevyQuests, readBevyQuestPresentation, readBevyQuestUiStatus,
+import { nextQuestRequestId, nextQuestUiGeneration, projectBevyQuestDialog, projectBevyQuests, questDisplayLanguage, readBevyQuestPresentation, readBevyQuestUiStatus,
   type BevyQuestUiIntent, type BevyQuestUiIntentResult, type BevyQuestUiRuntime } from "../lib/bevy-quest-ui";
 import { useBevyHudUi } from "../lib/use-bevy-hud-ui";
 import { useBevyCharacterUi } from "../lib/use-bevy-character-ui";
@@ -90,6 +95,7 @@ import { useBevyBagUi } from "../lib/use-bevy-bag-ui";
 import { resolveSharedUiRequests, sharedCanvasUsesWebGl2, sharedUiCanvasId } from "../lib/bevy-shared-canvas-mode";
 import { projectBevyBagModel } from "../lib/bevy-bag-model";
 import { SocialIncomingReplies, socialReplyCommand, type SocialReplyOwner, type SocialReplyProof, type SocialRequestKind } from "../lib/social-incoming-replies";
+import { GroupOperations, groupOperationCommand, type GroupOperation, type GroupOperationProof, type GroupOperationSource } from "../lib/group-operations";
 import { readSharedItemTooltip, readSharedItemCatalogInfo, type CrystalTooltipRuntime, type CrystalTooltipDocument, type CrystalTooltipItem } from "../lib/shared-item-tooltip";
 import { readSharedCharacterStats, type CrystalStatsRuntime } from "../lib/shared-character-stats";
 import { readSharedSkillBarDocument, parseCrystalSkillBarPositions, serializeCrystalSkillBarPositions, CRYSTAL_SKILL_BAR_POSITIONS_STORAGE_KEY, DEFAULT_CRYSTAL_SKILL_BAR_POSITIONS, type CrystalSkillBarRuntime, type CrystalSkillBarRow, type CrystalSkillBarPositions } from "../lib/shared-skill-bar";
@@ -185,7 +191,6 @@ import { prepareStorageTransfer, storageMutationAllowed, storageTransferStillCur
 import {
   questActionInput,
   questEndpoint,
-  questGuidanceProfile,
   hasPendingQuestAction,
   matchingQuestOperationAck,
   resolveQuestHostAction,
@@ -285,6 +290,10 @@ import {
   type RegistrationDraft,
   type ChangePasswordDraft,
 } from "../lib/client-login-runtime";
+import { characterCreateClasses, matchesCreatedCharacter, type CharacterCreateStatus } from "../lib/character-create";
+import { R16_AUTH_LAYOUT } from "../lib/r16-auth-layout";
+import type { LoginDoorOutcome } from "./components/original-client-shell-flow";
+import type { CreateCharacterDraft } from "./components/original-client-types";
 import { requestDubheWalletLoginToken, type DubheQrLoginState } from "../lib/dubhe-wallet-login";
 import {
   channelGameplayStart,
@@ -570,9 +579,21 @@ type CrystalBootstrapChatLine = {
   channel: UiLogChannel;
 };
 
+type CharacterSelectionOwner = Readonly<{ socket: WebSocket; generation: number }>;
+type LoginDoorLease = CharacterSelectionOwner & Readonly<{ token: number }>;
+type CharacterCreateAttempt = {
+  owner: CharacterSelectionOwner;
+  command: Readonly<Record<string, unknown>>;
+  draft: Readonly<CreateCharacterDraft>;
+  entered: boolean;
+  timer: number | null;
+};
+
 type GatewayRealmInfo = {
   schema: string;
   realmId: string;
+  worldEpoch?: string | null;
+  features?: { companionControl?: boolean; sharedParty?: boolean };
   profileId: string;
   profileVersion: number;
   acceptanceLevel: number | null;
@@ -1413,6 +1434,7 @@ const WALK_STEP_INTERVAL_MS = CRYSTAL_MOVE_DELAY_MS;
 const RUN_STEP_INTERVAL_MS = CRYSTAL_MOVE_DELAY_MS;
 const CRYSTAL_GAMEPLAY_TICK_MS = 1200;
 const CRYSTAL_KEEPALIVE_INTERVAL_MS = 15_000;
+const CHARACTER_CREATE_REPLY_TIMEOUT_MS = 15_000;
 const CRYSTAL_INPUT_CORRECTION_DELAY_MS = 400;
 const CRYSTAL_ENTITY_MOVE_ACTION_MS = CRYSTAL_MOVE_DELAY_MS;
 const CRYSTAL_MOVE_FRAME_INTERVAL_MS = 100;
@@ -2152,6 +2174,8 @@ export default function HomePage() {
   }
   const socketRef = useRef<WebSocket | null>(null);
   const socialRepliesRef = useRef(new SocialIncomingReplies());
+  const groupOperationsRef = useRef(new GroupOperations());
+  const groupHiddenTargetsRef = useRef<{ scope: string; ids: Set<string> }>({ scope: "", ids: new Set() });
   const guildBuffAuthorityRef = useRef(new GuildBuffAuthority());
   const guildBuffOperationsRef = useRef(new GuildBuffOperations());
   const heroRawIngressRef = useRef<HeroRawIngress | null>(null);
@@ -2280,6 +2304,15 @@ export default function HomePage() {
   const equipmentSnapshotRef = useRef<{
     connectionGeneration: number; sessionGeneration: number; snapshot: EquipmentGatewaySnapshot;
   } | null>(null);
+  type BeltInputGate = "scene" | "playerMode" | "owner" | "referenceWindows" | "heroUi" | "heroPet" | "cashShop" | "equipment" | "focus" | "visible";
+  type BeltInputDiagnostic = {
+    stage: "received" | "repeat" | "blocked" | "item" | "use" | "hero";
+    reason: BeltInputGate | "received" | "repeat" | "itemMissing" | "heroMissing" | "heroActionMissing" | "accepted" | "useRejected";
+    slot: number; repeat: boolean; gates: Record<BeltInputGate, boolean | null>;
+    itemPresent: boolean | null; identityValid: boolean | null; useAccepted: boolean | null;
+  };
+  const beltShortcutDiagnosticsRef = useRef<BeltInputDiagnostic | null>(null);
+  const equipmentCommandDiagnosticsRef = useRef<{ stage: "rejected"; reason: string } | null>(null);
   const npcGoldBuyInventoryRef = useRef(new NpcGoldBuyInventoryReadiness());
   const storageRequestSequenceRef = useRef(1);
   const pendingStorageRequestsRef = useRef<
@@ -2509,6 +2542,14 @@ export default function HomePage() {
   const accountIdRef = useRef("");
   const passwordRef = useRef("");
   const charactersRef = useRef<SelectCharacterEntry[]>([]);
+  const loginDoorRef = useRef<LoginDoorLease | null>(null);
+  const characterSelectionRef = useRef<CharacterSelectionOwner | null>(null);
+  const characterCreateRef = useRef<CharacterCreateAttempt | null>(null);
+  const [characterCreateStatus, setCharacterCreateStatus] = useState<CharacterCreateStatus>("idle");
+  useEffect(() => () => {
+    const timer = characterCreateRef.current?.timer;
+    if (timer != null) window.clearTimeout(timer);
+  }, []);
   const selectedCharacterIndexRef = useRef(0);
   const uploadedBevyEntityAtlasKeysRef = useRef<Set<string>>(new Set());
   const lastBevyEntityRenderStateJsonRef = useRef<string | null>(null);
@@ -2679,6 +2720,19 @@ export default function HomePage() {
   // Commercial identity bearer stays in React memory only. It is never written
   // to localStorage/sessionStorage, so closing or reloading the tab discards it.
   const [identitySessionToken, setIdentitySessionToken] = useState<string | null>(null);
+  const [identitySecurityOpen, setIdentitySecurityOpen] = useState(false);
+  const companionClientRef = useRef<R16CompanionClient | null>(null);
+  const [companionClient, setCompanionClient] = useState<R16CompanionClient | null>(null);
+  const [companionOpen, setCompanionOpen, companionOpenRef] = useImmediateUiState(false);
+  const companionContextEpochRef = useRef(0);
+  const companionRealmRef = useRef<{ socket: WebSocket; generation: number; info: GatewayRealmInfo } | null>(null);
+  useEffect(() => {
+    const client = new R16CompanionClient({ captureSource: captureCompanionSource, sendPrivate: sendPrivateCompanion });
+    companionClientRef.current = client; setCompanionClient(client);
+    return () => { if (companionClientRef.current === client) companionClientRef.current = null; client.retire(); };
+    // The private host uses current socket/session refs, never render captures.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   // ── On-chain smart mine state (M4, WF-6) — inert unless NEXT_PUBLIC_ONCHAIN_MINE=1.
   const [onchainMine, setOnchainMine] = useState(() => createOnchainMineState());
   const [onchainWallet, setOnchainWallet] = useState<ActiveSuiWalletSession | null>(null);
@@ -2844,7 +2898,7 @@ export default function HomePage() {
     | "sendRouteBlocked" | "sendSerializationRejected" | "sendSocialBlocked" | "sendSocketUnavailable" | "sendUnknown"
     | "serviceChanged" | "serviceUnavailable" | "sessionChanged" | "socialMutationBlocked" | "socialPending"
     | "socketChanged" | "socketUnavailable" | "spectatorBlocked" | "storageMutationBlocked" | "tabChanged"
-    | "transportException" | "uiProofRejected" | "worldChanged";
+    | "transportException" | "uiHostChanged" | "uiStatusChanged" | "uiProofChanged" | "uiProofRejected" | "worldChanged";
   type NpcPurchaseActionStatus = { route: "none" | "durable" | "gold" | "pearls" | "legacy";
     stage: "idle" | "requested" | "rejected" | "quoteSent" | "transportReturned"; reason: NpcPurchaseActionReason | null };
   const [npcPurchaseActionStatus, setNpcPurchaseActionStatus] = useState<NpcPurchaseActionStatus>({ route: "none", stage: "idle", reason: null });
@@ -3166,6 +3220,7 @@ export default function HomePage() {
     input: TutorialInputProfile,
     gamepadFamily: TutorialGamepadFamily = "generic",
   ) => {
+    if (!shouldAutoStartR16Tutorial()) { setShowHelp(true); return; }
     if (input === "touch") closeTouchSecondaryWindows(undefined, true);
     setTutorialInput(input);
     setTutorialGamepadFamily(gamepadFamily);
@@ -3177,6 +3232,7 @@ export default function HomePage() {
   // suppresses only the keyboard/mouse tour; touch and gamepad users still see
   // their new control guide even if they completed the old desktop tutorial.
   useEffect(() => {
+    if (!shouldAutoStartR16Tutorial()) return;
     if (screen !== "game" || spectatorMode) return;
     let alreadySeen = false;
     try {
@@ -3254,7 +3310,9 @@ export default function HomePage() {
     markMir2CacheMilestone("htmlReady", {
       href: window.location.href,
     });
-    setLanguage(normalizeLanguage(window.localStorage.getItem("mir2-language")));
+    let savedLanguage: string | null = null;
+    try { savedLanguage = window.localStorage.getItem("mir2-language"); } catch { /* Session-only preference when storage is unavailable. */ }
+    setLanguage(preferredLanguage(savedLanguage, navigator.languages?.length ? navigator.languages : [navigator.language]));
     setIsClientReady(true);
   }, []);
 
@@ -3266,12 +3324,12 @@ export default function HomePage() {
   }, [accountId, characters, password, selectedCharacterIndex]);
 
   useEffect(() => {
-    if (typeof window === "undefined") return;
-    window.localStorage.setItem("mir2-language", language);
+    if (typeof window === "undefined" || !isClientReady) return;
+    try { window.localStorage.setItem("mir2-language", language); } catch { /* Keep the current session usable. */ }
     setCharacters((current) =>
       current.length === 1 && isFallbackCharacter(current[0]) ? [fallbackCharacter(language)] : current,
     );
-  }, [language]);
+  }, [language, isClientReady]);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -6232,6 +6290,7 @@ export default function HomePage() {
   }
 
   function suspendEquipmentConnection(reason: "socketClosed" | "logoutPending" | "connectionUnavailable") {
+    retirePrivateCompanion();
     if (npcPurchaseClientRef.current) npcPurchaseUnavailableRef.current = true;
     npcPurchaseClientRef.current?.client.withdraw(reason === "socketClosed");
     npcPurchaseEconomicSourceRef.current = null;
@@ -6255,6 +6314,9 @@ export default function HomePage() {
   }
 
   function retireEquipmentSession() {
+    groupOperationsRef.current.retire();
+    groupHiddenTargetsRef.current = { scope: "", ids: new Set() };
+    retirePrivateCompanion();
     npcPurchaseClientRef.current?.client.withdraw();
     npcPurchaseEconomicSourceRef.current = null;
     npcPurchaseDisplaySourceRef.current = null;
@@ -6301,6 +6363,10 @@ export default function HomePage() {
   }
 
   function rejectEquipmentCommand(reason: string) {
+    // A fixed local label only; no selected instance, account or arbitrary error
+    // text enters the public diagnostic. This does not change the rejection.
+    equipmentCommandDiagnosticsRef.current = { stage: "rejected", reason:
+      ["staleSession", "invalidIdentity", "notReady", "instanceBusy", "invalidMetadata", "equipmentSlotBusy", "sendOutcomeUnknown"].includes(reason) ? reason : "other" };
     const pending = reason === "instanceBusy" || reason === "equipmentSlotBusy";
     appendLog(pending
       ? t("ui.itemActionPending", [], "An equipment change is still waiting for the server.")
@@ -6323,7 +6389,7 @@ export default function HomePage() {
   }
 
   /** Every UI and compatibility command enters this session-owned send gate. */
-  function send(command: Record<string, unknown>, options?: { authProof?: PreauthProof; guildBuffProof?: GuildBuffProof; heroProof?: HeroOperationProof; cashProof?: CashGameShopProof; creatureProof?: CreaturePlayerProof; quiet?: boolean; ownerToken?: EquipmentOwnerProof; reservedCharacterSource?: number; storageProof?: StorageTransferProof; socialReplyProof?: SocialReplyProof; storageRentalProof?: StorageRentalProof; socialItemProof?: SocialWindowOperationProof; socialTradeProof?: SocialTradeSendProof; guildListProof?: Readonly<{owner: SocialReplyOwner; guildName: string}>; rankingProof?: RankingQueryProof; rankingInspectProof?: RankingInspectProof; socialRosterProof?: SocialRosterSendProof }): boolean {
+  function send(command: Record<string, unknown>, options?: { authProof?: PreauthProof; guildBuffProof?: GuildBuffProof; heroProof?: HeroOperationProof; cashProof?: CashGameShopProof; creatureProof?: CreaturePlayerProof; quiet?: boolean; ownerToken?: EquipmentOwnerProof; reservedCharacterSource?: number; storageProof?: StorageTransferProof; socialReplyProof?: SocialReplyProof; storageRentalProof?: StorageRentalProof; socialItemProof?: SocialWindowOperationProof; socialTradeProof?: SocialTradeSendProof; guildListProof?: Readonly<{owner: SocialReplyOwner; guildName: string}>; rankingProof?: RankingQueryProof; rankingInspectProof?: RankingInspectProof; socialRosterProof?: SocialRosterSendProof; groupProof?: GroupOperationProof }): boolean {
     // Supported ordinary combat enters through Rust outputs with a live local proof.
     if(combatIngressRef.current?.supported()&&["attack","rangeAttack","magic","spellToggle"].includes(String(command.type)))return false;
     // Preserve the original callback/intent token through every synchronous
@@ -6406,7 +6472,8 @@ export default function HomePage() {
     return sendRaw(command, options);
   }
 
-  function sendRaw(command: Record<string, unknown>, options?: { authProof?: PreauthProof; modeProof?: CombatModeProof; guildBuffProof?: GuildBuffProof; heroProof?: HeroOperationProof; cashProof?: CashGameShopProof; creatureProof?: CreaturePlayerProof; quiet?: boolean; ownerToken?: EquipmentOwnerProof; reservedCharacterSource?: number; storageProof?: StorageTransferProof; socialReplyProof?: SocialReplyProof; storageRentalProof?: StorageRentalProof; socialItemProof?: SocialWindowOperationProof; socialTradeProof?: SocialTradeSendProof; guildListProof?: Readonly<{owner: SocialReplyOwner; guildName: string}>; rankingProof?: RankingQueryProof; rankingInspectProof?: RankingInspectProof; socialRosterProof?: SocialRosterSendProof; skillProof?:SpellsProof;combatProof?:CombatProof;combatBody?:string;mailProof?:MailSendProof;mailQuoteProof?:MailQuoteProof;mailLockProof?:MailLockProof;npcBuyProof?:NpcGoldBuyProof;npcPearlBuyProof?:NpcPearlBuyProof;npcLegacyBuyProof?:object;npcUi?:NpcShopSendProof;npcRepairProof?:NpcRepairProof;bagBeltProof?:BagBeltFinalProof;worldFishingProof?:WorldFishingFinalProof }) {
+  function sendRaw(command: Record<string, unknown>, options?: { authProof?: PreauthProof; modeProof?: CombatModeProof; guildBuffProof?: GuildBuffProof; heroProof?: HeroOperationProof; cashProof?: CashGameShopProof; creatureProof?: CreaturePlayerProof; quiet?: boolean; ownerToken?: EquipmentOwnerProof; reservedCharacterSource?: number; storageProof?: StorageTransferProof; socialReplyProof?: SocialReplyProof; storageRentalProof?: StorageRentalProof; socialItemProof?: SocialWindowOperationProof; socialTradeProof?: SocialTradeSendProof; guildListProof?: Readonly<{owner: SocialReplyOwner; guildName: string}>; rankingProof?: RankingQueryProof; rankingInspectProof?: RankingInspectProof; socialRosterProof?: SocialRosterSendProof; groupProof?: GroupOperationProof; skillProof?:SpellsProof;combatProof?:CombatProof;combatBody?:string;mailProof?:MailSendProof;mailQuoteProof?:MailQuoteProof;mailLockProof?:MailLockProof;npcBuyProof?:NpcGoldBuyProof;npcPearlBuyProof?:NpcPearlBuyProof;npcLegacyBuyProof?:object;npcUi?:NpcShopSendProof;npcRepairProof?:NpcRepairProof;bagBeltProof?:BagBeltFinalProof;worldFishingProof?:WorldFishingFinalProof }) {
+    if (command.type === "companionControl" || command.type === "companionRuntimeRegister" || command.type === "companionRuntimeReply") return false;
     const rejectNpcPurchaseSendGate = (reason: NpcPurchaseActionReason): false => {
       if (command.type === "buyItem") recordNpcPurchaseAction(npcPurchaseSendActionRef.current, "rejected", reason);
       return false;
@@ -6450,6 +6517,8 @@ export default function HomePage() {
     if (options?.cashProof && (!cashShopOpenRef.current || !cashPurchasesRef.current.allows(options.cashProof, currentCashGameShopSource(), command))) return false;
     if (options?.creatureProof && (!heroPetOpenRef.current || !creatureOperationsRef.current.allows(options.creatureProof, currentCreatureSource(), command))) return false;
     if (["removeFriend", "addMemo", "refreshFriends", "editGuildMember"].includes(String(command.type)) && !options?.socialRosterProof) return false;
+    if (["addMember", "delMember"].includes(String(command.type)) && !options?.groupProof) return false;
+    if (options?.groupProof && !groupOperationsRef.current.allows(options.groupProof, currentGroupOperationSource(), command)) return false;
     if (command.type === "getRanking" && !options?.rankingProof) return false;
     if (command.type === "inspect" && !options?.rankingInspectProof
       || options?.rankingInspectProof && command.type !== "inspect") return false;
@@ -6668,6 +6737,15 @@ export default function HomePage() {
     if (wireCommand.type === "inspect" && (!options?.rankingInspectProof
       ||socketRef.current!==socket||socket.readyState!==WebSocket.OPEN||options.rankingInspectProof.owner.socket!==socket
       ||!rankingInspectRequestsRef.current.claim(options.rankingInspectProof,currentRankingInspectSource(),wireCommand,Math.floor(performance.now())))) return false;
+    if (wireCommand.type === "newCharacter") {
+      const attempt = characterCreateRef.current;
+      if (!attempt || attempt.command !== command || attempt.entered || attempt.owner !== currentCharacterSelection()
+        || !currentCharacterCreateClasses(attempt.owner).includes(attempt.draft.classKey)) return false;
+      attempt.entered = true;
+    }
+    if (options?.groupProof && (socketRef.current !== socket || socket.readyState !== WebSocket.OPEN
+      || options.groupProof.owner.socket !== socket
+      || !groupOperationsRef.current.claim(options.groupProof, currentGroupOperationSource(), wireCommand))) return false;
     try { socket.send(serialized); } catch (error) {
       if (options?.modeProof) combatModeHostRef.current?.outcomeUnknown(options.modeProof);
       if (options?.guildBuffProof) guildBuffOperationsRef.current.outcomeUnknown(options.guildBuffProof);
@@ -6688,6 +6766,66 @@ export default function HomePage() {
     }
     if (!options?.quiet && !isSensitiveGatewayCommand(command)) appendLog(t("log.sent", [JSON.stringify(command)]), "network");
     return true;
+  }
+
+  function captureCompanionSource(): R16CompanionSource | null {
+    if (typeof window === "undefined" || screenRef.current !== "game" || isSpectatorBrowserMode()
+      || equipmentHostSuspendReasonRef.current !== null || !worldRef.current.connected
+      || companionContextEpochRef.current >= Number.MAX_SAFE_INTEGER) return null;
+    const socket = socketRef.current, session = equipmentStartGameRef.current, realm = companionRealmRef.current;
+    const index = socialCharacterIndexRef.current.current, objectId = worldRef.current.playerObjectId;
+    if (!socket || socket.readyState !== WebSocket.OPEN || !session || !realm || realm.socket !== socket
+      || realm.generation !== equipmentConnectionGenerationRef.current || realm.info.features?.companionControl !== true
+      || session.connectionGeneration !== equipmentConnectionGenerationRef.current
+      || session.sessionGeneration !== equipmentSessionGenerationRef.current || !Number.isSafeInteger(index) || index === null || index < 0
+      || typeof objectId !== "string" || !/^[1-9][0-9]{0,9}$/.test(objectId) || Number(objectId) > 0xffff_ffff
+      || !worldRef.current.entities.some(entity => entity.kind === "selfPlayer" && entity.objectId === objectId)) return null;
+    const { realmId, worldEpoch } = realm.info;
+    if (!/^[A-Za-z0-9._:-]{1,100}$/.test(realmId) || typeof worldEpoch !== "string" || !/^[A-Za-z0-9._:-]{1,100}$/.test(worldEpoch)) return null;
+    return Object.freeze({ socket, socketGeneration: session.connectionGeneration,
+      sessionId: `session:${session.connectionGeneration}:${session.sessionGeneration}`,
+      roleId: `character:${index}:${objectId}`, realmId, worldEpoch, contextEpoch: companionContextEpochRef.current });
+  }
+
+  function retirePrivateCompanion() {
+    if (companionContextEpochRef.current < Number.MAX_SAFE_INTEGER) companionContextEpochRef.current += 1;
+    companionClientRef.current?.retire();
+    setCompanionOpen(false);
+  }
+
+  function sendPrivateCompanion(source: R16CompanionSource, frame: R16CompanionFrame): "sent" | "not-sent" | "unknown" {
+    if (!sameR16CompanionSource(source, captureCompanionSource()) || !companionClientRef.current?.acceptsSource(source)) return "not-sent";
+    let body: string;
+    try { body = JSON.stringify(frame); } catch { return "not-sent"; }
+    if (body.length > 16 * 1024 || !sameR16CompanionSource(source, captureCompanionSource())) return "not-sent";
+    const socket = socketRef.current;
+    if (!socket || socket !== source.socket || socket.readyState !== WebSocket.OPEN) return "not-sent";
+    // Deliberately bypass general send/history, CustomEvent, World and logs.
+    try { socket.send(body); return "sent"; } catch { return "unknown"; }
+  }
+
+  function receivePrivateCompanionFrame(data: unknown, socket: WebSocket, generation: number): boolean {
+    const privateFrame = readR16CompanionPrivateFrame(data);
+    if (!privateFrame.private) return false;
+    const source = captureCompanionSource();
+    if (source && source.socket === socket && source.socketGeneration === generation && privateFrame.event !== null) {
+      try { companionClientRef.current?.receive(source, privateFrame.event); } catch { /* Private malformed input never enters the ordinary error logger. */ }
+    }
+    return true;
+  }
+
+  function changeCompanionOpen(open: boolean) {
+    if (open && !captureCompanionSource()) return;
+    if (open) cancelPlayerUiWorldIntent();
+    setCompanionOpen(open);
+  }
+
+  function inviteCompanionToParty(lease: R16CompanionRenderLease, characterName: string): boolean {
+    const client = companionClientRef.current, source = captureCompanionSource();
+    if (!client || !source || client.invitation(lease)?.characterName !== characterName) return false;
+    if (!send({ type: "switchGroup", allowGroup: true }, { quiet: true })) return false;
+    return sameR16CompanionSource(source, captureCompanionSource())
+      && client.invitation(lease)?.characterName === characterName && groupInviteMember(characterName);
   }
 
   function sendSpectatorControl(command: Record<string, unknown>) {
@@ -7247,7 +7385,7 @@ export default function HomePage() {
   }, []);
 
   function flushGatewayProtocolQueue() {
-    send({ type: "setLanguage", language }, { quiet: true });
+    send({ type: "setLanguage", language: questRuntimeLanguage(language) }, { quiet: true });
     const pendingAction = pendingGatewayProtocolActionRef.current;
     pendingGatewayProtocolActionRef.current = null;
     const reconnectSnapshot = reconnectSnapshotRef.current;
@@ -7296,6 +7434,11 @@ export default function HomePage() {
     manualSocketCloseRef.current = false;
     gatewayProtocolReadyRef.current = false;
     const socket = new WebSocket(gatewayUrl);
+    retireCharacterSelection();
+    if (screenRef.current === "openingLogin") {
+      screenRef.current = "login";
+      setScreen("login");
+    }
     suspendEquipmentConnection("connectionUnavailable");
     pendingStorageRequestsRef.current.clear();
     const connectionGeneration = ++equipmentConnectionGenerationRef.current;
@@ -7303,6 +7446,8 @@ export default function HomePage() {
     equipmentStartGameRef.current = null;
     equipmentSnapshotRef.current = null;
     socketRef.current = socket;
+    companionRealmRef.current = null;
+    retirePrivateCompanion();
     cashCatalogRef.current = null; creatureSourceRef.current = null; creatureRenameRef.current = null;
     mailCollectBarrierRef.current = null;
     setWsState("connecting");
@@ -7327,6 +7472,10 @@ export default function HomePage() {
 
     socket.addEventListener("close", () => {
       if (socketRef.current !== socket) return;
+      if (screenRef.current === "select" || screenRef.current === "openingLogin") {
+        leaveCharacterSelection(characterCreateRef.current?.entered ? "ui.characterCreateUnconfirmed" : "shell.notice.closed");
+        return;
+      }
       suspendEquipmentConnection("socketClosed");
       cancelPendingEntitySounds();
       const closedManually = manualSocketCloseRef.current;
@@ -7368,6 +7517,7 @@ export default function HomePage() {
 
     socket.addEventListener("message", (event) => {
       if (socketRef.current !== socket || connectionGeneration !== equipmentConnectionGenerationRef.current) return;
+      if (receivePrivateCompanionFrame(event.data, socket, connectionGeneration)) return;
       const receivedAtMs=performance.now();
       syncHeroRawIngress();
       const physical = currentHeroRawPhysical();
@@ -7526,7 +7676,7 @@ export default function HomePage() {
 
   useEffect(() => {
     if (socketRef.current?.readyState === WebSocket.OPEN && gatewayProtocolReadyRef.current) {
-      send({ type: "setLanguage", language }, { quiet: true });
+      send({ type: "setLanguage", language: questRuntimeLanguage(language) }, { quiet: true });
     }
   }, [language]);
 
@@ -7862,11 +8012,11 @@ export default function HomePage() {
   }
 
   function startSelectedCharacter() {
+    if (!currentCharacterSelection() || characterCreateRef.current) return;
     const selected = characters[selectedCharacterIndex] ?? characters[0];
-    markMir2CacheMilestone("startGameSubmit", {
-      characterIndex: selected?.index ?? 0,
-    });
-    send({ type: "startGame", characterIndex: selected?.index ?? 0 });
+    if (!selected || selected.synthetic) return;
+    markMir2CacheMilestone("startGameSubmit", { characterIndex: selected.index });
+    send({ type: "startGame", characterIndex: selected.index });
   }
 
   function quickEnterWorld() {
@@ -7882,6 +8032,7 @@ export default function HomePage() {
   }
 
   function resetClient() {
+    retireCharacterSelection();
     retireEquipmentSession();
     cancelPendingEntitySounds();
     const socketToClose = socketRef.current;
@@ -7892,6 +8043,8 @@ export default function HomePage() {
     );
     resetGatewayReconnectState();
     activeReconnectAuthRef.current = null;
+    setIdentitySessionToken(null);
+    setIdentitySecurityOpen(false);
     pendingGatewayProtocolActionRef.current = null;
     gatewayProtocolReadyRef.current = false;
     pendingTransferRef.current = null;
@@ -8296,6 +8449,7 @@ export default function HomePage() {
       return false;
     }
     if (sceneInputDeferredForInitialAssets()) {
+      lastQueuedMovementAttemptRef.current = { reason: "scene-assets", at: now };
       return false;
     }
     observeQuestWorldActions();
@@ -8335,6 +8489,7 @@ export default function HomePage() {
       return false;
     }
     if (!canSendMovement(readSelfMovementControllerState(), now)) {
+      lastQueuedMovementAttemptRef.current = { reason: "cadence", at: now };
       scheduleMovementConfirmTick();
       return false;
     }
@@ -8343,6 +8498,7 @@ export default function HomePage() {
     const maxIntentAge =
       queued.kind === "target" ? MOVEMENT_PENDING_ACTION_MAX_AGE_MS * 4 : MOVEMENT_QUEUED_DIRECTION_MAX_AGE_MS;
     if (!ownedQuestRoute && !ownedMapRoute && intentAge > maxIntentAge) {
+      lastQueuedMovementAttemptRef.current = { reason: "intent-expired", at: now };
       queuedMoveIntentRef.current = null;
       return false;
     }
@@ -8381,6 +8537,7 @@ export default function HomePage() {
           : null;
 
     if (!nextAction) {
+      lastQueuedMovementAttemptRef.current = { reason: "no-route", at: now };
       if (ownedMapRoute && mapImageRouteRef.current === ownedMapRoute && ownedMapRoute.planning) {
         scheduleMovementConfirmTick(); return false;
       }
@@ -8390,6 +8547,7 @@ export default function HomePage() {
 
     const nextPoint = nextAction.point;
     if (nextPoint.x === serverSelf.x && nextPoint.y === serverSelf.y) {
+      lastQueuedMovementAttemptRef.current = { reason: "blocked-at-source", at: now };
       if (nextAction.direction && nextAction.direction !== serverSelf.direction) {
         if (queued.consumeAfterSend || queued.kind === "target") {
           queuedMoveIntentRef.current = null;
@@ -8976,22 +9134,98 @@ export default function HomePage() {
     }
   }
 
-  function createCharacter(draft: {
-    name: string;
-    classKey: SelectCharacterEntry["classKey"];
-    gender: SelectCharacterEntry["gender"];
-  }) {
-    send({
-      type: "newCharacter",
-      name: draft.name,
-      gender: draft.gender,
-      class: draft.classKey,
-    });
+  function currentCharacterSelection(): CharacterSelectionOwner | null {
+    const owner = characterSelectionRef.current;
+    return owner && screenRef.current === "select" && socketRef.current === owner.socket
+      && owner.socket.readyState === WebSocket.OPEN && gatewayProtocolReadyRef.current
+      && equipmentConnectionGenerationRef.current === owner.generation ? owner : null;
+  }
+
+  function currentCharacterCreateClasses(owner: CharacterSelectionOwner | null) {
+    const realm = companionRealmRef.current;
+    return characterCreateClasses(owner && realm?.socket === owner.socket && realm.generation === owner.generation
+      ? realm.info : null);
+  }
+
+  function settleCharacterCreate(status: CharacterCreateStatus) {
+    const attempt = characterCreateRef.current;
+    characterCreateRef.current = null;
+    if (attempt?.timer != null) window.clearTimeout(attempt.timer);
+    setCharacterCreateStatus(status);
+  }
+
+  function retireCharacterSelection() {
+    loginDoorRef.current = null;
+    characterSelectionRef.current = null;
+    settleCharacterCreate("idle");
+  }
+
+  const finishLoginDoor = useCallback((token: number, outcome: LoginDoorOutcome) => {
+    const opening = loginDoorRef.current;
+    if (!opening || opening.token !== token || screenRef.current !== "openingLogin"
+      || socketRef.current !== opening.socket || opening.socket.readyState !== WebSocket.OPEN
+      || equipmentConnectionGenerationRef.current !== opening.generation || !gatewayProtocolReadyRef.current) return;
+    loginDoorRef.current = null;
+    characterSelectionRef.current = opening;
+    screenRef.current = "select";
+    setScreen("select");
+    markMir2CacheMilestone("selectReady", { loginDoor: outcome });
+  }, []);
+
+  function leaveCharacterSelection(notice: string | null) {
+    const socket = socketRef.current;
+    // The old close listener must not retire a new login or replay creation.
+    socketRef.current = null;
+    socket?.close();
+    resetClient();
+    if (notice) setLoginErrorKey(notice);
+  }
+
+  function createCharacter(draft: CreateCharacterDraft, renderedOwner: CharacterSelectionOwner | null) {
+    const owner = currentCharacterSelection();
+    if (!owner || owner !== renderedOwner || characterCreateRef.current) return;
+    const name = draft.name.trim();
+    const roster = charactersRef.current.filter(character => !character.synthetic);
+    // The form handles names already in its roster. A stale click after an
+    // authoritative success must not replace that success with an error.
+    if (roster.some(character => character.name.toLowerCase() === name.toLowerCase())) return;
+    if (!name || name.length > R16_AUTH_LAYOUT.create.maxNameLength || roster.length >= 4
+      || !currentCharacterCreateClasses(owner).includes(draft.classKey)) {
+      setCharacterCreateStatus("failed");
+      return;
+    }
+    const command = Object.freeze({ type: "newCharacter", name, gender: draft.gender, class: draft.classKey });
+    const attempt: CharacterCreateAttempt = {
+      owner, command, draft: Object.freeze({ ...draft, name }), entered: false, timer: null,
+    };
+    characterCreateRef.current = attempt;
+    setCharacterCreateStatus("pending");
+    try {
+      if (!send(command, { quiet: true })) {
+        if (characterCreateRef.current === attempt) settleCharacterCreate("failed");
+        return;
+      }
+    } catch {
+      if (characterCreateRef.current === attempt) {
+        if (attempt.entered) leaveCharacterSelection("ui.characterCreateUnconfirmed");
+        else settleCharacterCreate("failed");
+      }
+      return;
+    }
+    if (characterCreateRef.current !== attempt) return;
+    // Legacy creation has no request ID. After an ambiguous result, refresh
+    // the authoritative roster on a new authenticated socket before retry.
+    attempt.timer = window.setTimeout(() => {
+      if (characterCreateRef.current === attempt && currentCharacterSelection() === owner) {
+        leaveCharacterSelection("ui.characterCreateUnconfirmed");
+      }
+    }, CHARACTER_CREATE_REPLY_TIMEOUT_MS);
   }
 
   function deleteSelectedCharacter() {
+    if (!currentCharacterSelection() || characterCreateRef.current) return;
     const selected = characters[selectedCharacterIndex] ?? characters[0];
-    if (!selected) return;
+    if (!selected || selected.synthetic) return;
     send({ type: "deleteCharacter", characterIndex: selected.index });
   }
 
@@ -9581,13 +9815,14 @@ export default function HomePage() {
       && display.snapshot.playerObjectId === source.snapshot.playerObjectId
       && display.snapshot.playerObjectId === Number(current.playerObjectId)
       && display.fingerprint === npcPurchaseDisplayFingerprint(current)
-      && (!service || !!catalog && sameNpcPurchaseData(display.snapshot.nativeNpcShop, catalog));
+      && (!service || !!catalog && sameNpcPurchaseData(display.snapshot.nativeNpcShop, catalog) && npcPurchaseShopMatches(service, catalog));
   }
 
   function npcPurchaseDisplayFingerprint(current: WorldState): string {
-    // Retain the complete modeled economy, including raw item/tooltip/date,
-    // mail and Stage5 domains. Only movement and presentation fields are absent.
-    const keys = ["playerObjectId", "playerName", "mapFileName", "inSafeZone", "playerHp", "playerMaxHp", "playerMp", "playerMaxMp",
+    // Compare economic/eligibility facts with the original complete witness.
+    // Positive current HP/MP and unrelated actors' vitals are display updates;
+    // they neither replace that raw witness nor grant a new Applied receipt.
+    const keys = ["playerObjectId", "playerName", "mapFileName", "inSafeZone", "playerMaxHp", "playerMaxMp",
       "playerCrystalStats", "playerWeights", "playerPkPoints", "playerExperience", "playerMaxExperience", "gold", "credit", "cityCurrencies",
       "currentWeight", "maxWeight", "freeBagSlots", "maxBagSlots", "inventoryCapacity", "npcGoldTradeCapacity", "storageSize",
       "hasExpandedStorage", "hasStoragePassword", "requireStoragePassword", "storageSessionUnlocked", "storagePasswordLastSetBinaryDatetime",
@@ -9597,13 +9832,20 @@ export default function HomePage() {
     const record = current as unknown as Record<string, unknown>;
     const economy = Object.fromEntries(keys.map(key => [key, record[key]]));
     const self = current.entities.find(entity => entity.objectId === current.playerObjectId);
+    const service = npcShopServiceRef.current;
+    const catalog = service && npcPurchaseCatalogSourceRef.current.get(service);
     return JSON.stringify({ economy, hero: currentHeroModel()?.sourceKey ?? null,
-      entities: current.entities.map(entity => ({ objectId: entity.objectId, kind: entity.kind, name: entity.name,
+      vitals: {
+        hp: typeof current.playerHp === "number" && Number.isSafeInteger(current.playerHp) && current.playerHp > 0 ? "alive" : current.playerHp,
+        mp: typeof current.playerMp === "number" && Number.isSafeInteger(current.playerMp) && current.playerMp >= 0 ? "known" : current.playerMp,
+      },
+      entities: current.entities.filter(entity => entity.objectId === current.playerObjectId
+        || catalog && entity.objectId === String(catalog.npcObjectId)).map(entity => ({ objectId: entity.objectId, kind: entity.kind, name: entity.name,
         ownerName: entity.ownerName, classKey: entity.classKey, genderKey: entity.genderKey, level: entity.level,
-        hp: entity.hp, maxHp: entity.maxHp, dead: entity.dead, canTeleportTo: entity.canTeleportTo })),
+        maxHp: entity.maxHp, dead: entity.dead, canTeleportTo: entity.canTeleportTo })),
       groundDrops: (current.groundDrops ?? []).map(drop => { const { x: _x, y: _y, ...economicDrop } = drop; return economicDrop; }),
       self: self && { objectId: self.objectId, name: self.name, classKey: self.classKey,
-      genderKey: self.genderKey, level: self.level, dead: self.dead, hp: self.hp, maxHp: self.maxHp } }, (_key, value) =>
+      genderKey: self.genderKey, level: self.level, dead: self.dead, maxHp: self.maxHp } }, (_key, value) =>
       value && typeof value === "object" && !Array.isArray(value)
         ? Object.fromEntries(Object.keys(value).sort().map(key => [key, value[key]])) : value);
   }
@@ -9946,10 +10188,11 @@ export default function HomePage() {
     const captured = readNpcBuyCurrent(), ui = npcShopUiIngressRef.current;
     if (!captured) return reject("captureUnavailable");
     if (captured.blocked) return reject("captureBlocked");
+    const capturedHost = intent ? ui?.readHostIdentity() ?? null : null;
     const json = JSON.stringify(captured), session = npcPurchaseSessionKey();
     const current = () => {
       try {
-        const live = readNpcBuyCurrent(), status = ui?.readStatus();
+        const live = readNpcBuyCurrent(), status = npcShopUiIngressRef.current?.readStatus();
         const guardWire = { type: "buyItem", itemIndex: id, count: quantity, panelType: 0 };
         const guardWorld = worldRef.current;
         let safeReason: NpcPurchaseActionReason = "mutationBlocked";
@@ -9971,11 +10214,12 @@ export default function HomePage() {
           && check(npcPurchaseSelectorsRef.current.get(service)?.get(id) === itemIndex, "selectorChanged") && check(npcBuySelectedRef.current === id, "selectionChanged")
           && check(worldRef.current === guardWorld, "worldChanged") && check(safe, safeReason) && check(currentNpcShopTab(service) === "buy", "tabChanged")
           && check(!!live, "liveUnavailable") && check(!live!.blocked, "liveBlocked") && check(JSON.stringify(live) === json, "captureChanged")
-          && (!intent || npcShopUiIngressRef.current === ui && !!status?.ready && status.inputEnabled
-            && status.error === null && status.runGeneration === intent.proof.runGeneration
-            && status.connectionGeneration === intent.proof.connectionGeneration && status.sessionGeneration === intent.proof.sessionGeneration
-            && status.appliedServiceRevision === intent.proof.serviceRevision && status.appliedCatalogRevision === intent.proof.catalogRevision
-            && status.selectedId === id && status.quantity === quantity && status.startIndex === intent.startIndex);
+          && (!intent || check(capturedHost !== null && npcShopUiIngressRef.current?.readHostIdentity() === capturedHost, "uiHostChanged")
+            && check(!!status?.ready && status.inputEnabled && status.error === null, "uiStatusChanged")
+            && check(status!.runGeneration === intent.proof.runGeneration
+            && status!.connectionGeneration === intent.proof.connectionGeneration && status!.sessionGeneration === intent.proof.sessionGeneration
+            && status!.appliedServiceRevision === intent.proof.serviceRevision && status!.appliedCatalogRevision === intent.proof.catalogRevision
+            && status!.selectedId === id && status!.quantity === quantity && status!.startIndex === intent.startIndex, "uiProofChanged"));
       } catch { return reject("currentException"); }
     };
     if (!current() || intent && (!ui?.allows(intent) || !ui.claim(intent))) return reject("uiProofRejected");
@@ -10073,7 +10317,8 @@ export default function HomePage() {
             sessionGeneration: owner.sessionGeneration, playerObjectId }, inventory.model) ? "inventoryNotReady"
           : equipmentHostSuspendReasonRef.current !== null ? "equipmentSuspended"
           : !equipmentStartGameRef.current ? "sessionUnavailable"
-          : !ledger || !ledger.ready && !npcPurchaseFullEconomyCurrent(current) ? "economyNotReady"
+          : !ledger || (npcPurchaseClientRef.current || socketRef.current && npcPurchaseOptInSocketsRef.current.has(socketRef.current)
+            ? !npcPurchaseFullEconomyCurrent(current) : !ledger.ready && !npcPurchaseFullEconomyCurrent(current)) ? "economyNotReady"
           : ledger.pending > 0 ? "equipmentPending"
           : pendingStorageRequestsRef.current.size > 0 ? "storagePending"
           : (mailParcelRef.current?.state?.blockedUniqueIds.length ?? 0) > 0 ? "mailPending" : null;
@@ -10132,7 +10377,7 @@ export default function HomePage() {
         gender: player?.genderKey ?? null, hair: player?.hair ?? null, wingEffect: player?.wingEffect ?? null,
         guildName: null, guildRankName: null, mapName: current.mapTitle, inSafeZone: current.inSafeZone,
       },
-      language, coreStatus: observeCore ? dispatcher?.status() ?? null : null,
+      language: commerceRuntimeLanguage(language), coreStatus: observeCore ? dispatcher?.status() ?? null : null,
     };
   }
 
@@ -10167,30 +10412,42 @@ export default function HomePage() {
   }
 
   function dispatchBevyNpcShopIntent(intent: NpcShopIntent): boolean {
+    const action: NpcPurchaseActionStatus | null = intent.action.type === "buy"
+      ? { route: socketRef.current && npcPurchaseOptInSocketsRef.current.has(socketRef.current) ? "durable" : "gold", stage: "requested", reason: null } : null;
+    if (action) { npcPurchaseActionRef.current = action; setNpcPurchaseActionStatus({ ...action }); }
+    const reject = (reason: NpcPurchaseActionReason): false => { recordNpcPurchaseAction(action, "rejected", reason); return false; };
     const ui = npcShopUiIngressRef.current, dispatcher = npcBuyDispatcherRef.current, service = npcShopServiceRef.current;
     if (!ui || !dispatcher || !service || currentNpcShopTab(service) !== "buy" || !ui.allows(intent)
-      || !npcShopIntentMatchesStatus(intent, ui.readStatus())) return false;
+      || !npcShopIntentMatchesStatus(intent, ui.readStatus())) return reject("uiProofRejected");
     // Selection/quantity/page remain in Rust. This adapter reads its current selection for the existing planner.
     npcBuySelectedRef.current = intent.selectedId;
     const captured = readNpcGoldBuyCurrent();
-    if (!captured || captured.blocked || captured.serviceRevision !== intent.proof.serviceRevision
+    if (!captured) return reject("captureUnavailable");
+    if (captured.blocked) return reject(npcGoldBuySourceFailureRef.current === "economyNotReady" ? "economySourceChanged" : "captureBlocked");
+    if (captured.serviceRevision !== intent.proof.serviceRevision
       || captured.catalogRevision !== intent.proof.catalogRevision || captured.owner.connectionGeneration !== intent.proof.connectionGeneration
       || captured.owner.sessionGeneration !== intent.proof.sessionGeneration || captured.owner.ownerRevision !== intent.proof.ownerRevision
-      || captured.owner.playerObjectId !== intent.proof.playerObjectId) return false;
+      || captured.owner.playerObjectId !== intent.proof.playerObjectId) return reject("captureChanged");
     const currentJson = JSON.stringify(captured), source = readNpcShopUiInput(false);
-    if (!source.eligible || !source.presentation || !source.open || !source.showBuy) return false;
+    if (!source.eligible || !source.presentation || !source.open || !source.showBuy) return reject("inputBlocked");
     if (intent.action.type === "buy") {
-      if (!intent.command || !npcShopIntentMatchesCommand(intent, intent.command)) return false;
-      if (socketRef.current && npcPurchaseOptInSocketsRef.current.has(socketRef.current)) return dispatchDurableNpcPurchase(intent.selectedId!, intent.quantity, intent);
-      if (npcPurchaseUnavailableRef.current) return false;
+      if (!intent.command || !npcShopIntentMatchesCommand(intent, intent.command)) return reject("requestContextRejected");
+      if (socketRef.current && npcPurchaseOptInSocketsRef.current.has(socketRef.current)) {
+        const sent = dispatchDurableNpcPurchase(intent.selectedId!, intent.quantity, intent, action!);
+        recordNpcPurchaseAction(action, sent ? "quoteSent" : "rejected", sent ? null : "durableRejected");
+        return sent;
+      }
+      if (npcPurchaseUnavailableRef.current) return reject("purchaseUnavailable");
       retireWorldFishingGesture();
       const prepared = dispatcher.prepare(captured, intent.quantity);
-      if (!prepared) return false;
+      if (!prepared) return reject("prepareRejected");
       try {
-        if (!npcShopIntentMatchesCommand(intent, prepared.wire)) return false;
-        return sendRaw(prepared.wire, { npcBuyProof: prepared.proof,
+        if (!npcShopIntentMatchesCommand(intent, prepared.wire)) return reject("requestContextRejected");
+        const sent = sendRaw(prepared.wire, { npcBuyProof: prepared.proof,
           npcUi: { intent, currentJson, sourceJson: JSON.stringify(source), presentation: source.presentation } });
-      } catch (error) { console.error("[mir2] Shared NPC purchase rejected", error); return false; }
+        recordNpcPurchaseAction(action, sent ? "transportReturned" : "rejected", sent ? null : "sendRejected");
+        return sent;
+      } catch (error) { console.error("[mir2] Shared NPC purchase rejected", error); return reject("transportException"); }
       finally { dispatcher.rejectIfUnentered(prepared.proof); }
     }
     if (!intent.preentryWithdraw || intent.command !== null || !dispatcher.withdrawAt(intent.proof.coreAuthorityRevision)
@@ -10656,7 +10913,7 @@ export default function HomePage() {
   }
   function referenceWindowsBlockGameplay() {
     const windows = playerReferenceWindowsRef.current;
-    return windows.help || windows.hotkeys || windows.options || windows.capture || rankingInspectOpenRef.current;
+    return companionOpenRef.current || windows.help || windows.hotkeys || windows.options || windows.capture || rankingInspectOpenRef.current;
   }
   function cancelPlayerUiWorldIntent() {
     retireWorldFishingGesture();
@@ -10732,22 +10989,43 @@ export default function HomePage() {
     return true;
   }
   function handleCrystalGameplayShortcut(functionId: string, repeat: boolean): boolean {
+    const beltSlot = crystalBeltShortcutSlot(functionId);
+    const diagnostic: BeltInputDiagnostic | null = beltSlot === null ? null : {
+      stage: "received", reason: "received", slot: beltSlot, repeat,
+      gates: { scene: null, playerMode: null, owner: null, referenceWindows: null, heroUi: null, heroPet: null, cashShop: null, equipment: null, focus: null, visible: null },
+      itemPresent: null, identityValid: null, useAccepted: null,
+    };
+    if (diagnostic) { beltShortcutDiagnosticsRef.current = diagnostic; equipmentCommandDiagnosticsRef.current = null; }
+    const gate = (name: BeltInputGate, allowed: boolean): boolean => {
+      if (diagnostic) { diagnostic.gates[name] = allowed; if (!allowed) { diagnostic.stage = "blocked"; diagnostic.reason = name; } }
+      return allowed;
+    };
     if (isCrystalCombatModeFunction(functionId)) {
       if (!repeat) combatModeHostRef.current?.request(functionId);
       return true;
     }
-    if (repeat) return true;
-    if (screenRef.current !== "game" || isSpectatorBrowserMode() || !currentSocialReplyOwner()
-      || referenceWindowsBlockGameplay() || heroUiBlocksGameplay() || heroPetOpenRef.current || cashShopOpenRef.current
-      || equipmentHostSuspendReasonRef.current !== null || !document.hasFocus() || document.visibilityState !== "visible") return false;
-    const beltSlot = crystalBeltShortcutSlot(functionId);
+    if (repeat) { if (diagnostic) { diagnostic.stage = "repeat"; diagnostic.reason = "repeat"; } return true; }
+    if (!gate("scene", screenRef.current === "game") || !gate("playerMode", !isSpectatorBrowserMode()) || !gate("owner", !!currentSocialReplyOwner())
+      || !gate("referenceWindows", !referenceWindowsBlockGameplay()) || !gate("heroUi", !heroUiBlocksGameplay())
+      || !gate("heroPet", !heroPetOpenRef.current) || !gate("cashShop", !cashShopOpenRef.current)
+      || !gate("equipment", equipmentHostSuspendReasonRef.current === null) || !gate("focus", document.hasFocus())
+      || !gate("visible", document.visibilityState === "visible")) return false;
     if (beltSlot !== null) {
       if (beltSlot >= 6) {
         const model = currentHeroModel(), dto = model ? captureHeroAction(model, { kind: "use", slot: beltSlot - 6 }) : null;
-        if (dto) submitHeroAction(dto, true);
+        if (diagnostic) { diagnostic.stage = "hero"; diagnostic.reason = model ? "heroActionMissing" : "heroMissing"; diagnostic.itemPresent = dto !== null; }
+        if (dto) {
+          const accepted = submitHeroAction(dto, true);
+          if (diagnostic) { diagnostic.useAccepted = accepted; diagnostic.reason = accepted ? "accepted" : "useRejected"; }
+        }
       } else {
         const item = worldRef.current.beltItems.find(entry => entry.slot === beltSlot);
-        if (item) useItem(item);
+        if (diagnostic) { diagnostic.stage = "item"; diagnostic.reason = "itemMissing"; diagnostic.itemPresent = !!item; }
+        if (item) {
+          if (diagnostic) diagnostic.identityValid = authoritativeItemUniqueId(item.authoritativeUniqueId) !== undefined;
+          const accepted = useItem(item);
+          if (diagnostic) { diagnostic.stage = "use"; diagnostic.reason = accepted ? "accepted" : "useRejected"; diagnostic.useAccepted = accepted; }
+        }
       }
       return true;
     }
@@ -10755,11 +11033,22 @@ export default function HomePage() {
     if (functionId === "Pickup") { pickUpUnderfoot(); return true; }
     if (functionId === "Trade") { send({ type: "tradeRequest" }); return true; }
     if (functionId === "AddGroupMember") {
-      const target = worldRef.current.entities.find(entry => entry.objectId === worldRef.current.selectedObjectId && entry.kind === "player" && !entry.dead);
-      if (target?.name) groupInviteMember(target.name);
+      const name = currentGroupHoverName();
+      if (name) groupInviteMember(name);
       return true;
     }
     return false;
+  }
+  function readBeltInputDiagnostics() {
+    const value = beltShortcutDiagnosticsRef.current, equipment = equipmentCommandDiagnosticsRef.current;
+    return {
+      shortcut: value && { stage: value.stage, reason: value.reason, slot: value.slot, repeat: value.repeat,
+        gates: { scene: value.gates.scene, playerMode: value.gates.playerMode, owner: value.gates.owner, referenceWindows: value.gates.referenceWindows,
+          heroUi: value.gates.heroUi, heroPet: value.gates.heroPet, cashShop: value.gates.cashShop, equipment: value.gates.equipment,
+          focus: value.gates.focus, visible: value.gates.visible },
+        itemPresent: value.itemPresent, identityValid: value.identityValid, useAccepted: value.useAccepted },
+      equipment: equipment && { stage: equipment.stage, reason: equipment.reason },
+    };
   }
   function changeDropViewHeld(held: boolean) {
     if (held === dropViewHeldRef.current) return;
@@ -11566,21 +11855,54 @@ export default function HomePage() {
     setChatMessage(`/${trimmed} `);
   }
 
-  // Group invite rides the real protocol: AddMember requires grouping to be
-  // enabled first, so SwitchGroup(true) precedes AddMember (matching
-  // stage5_group_add_member_packet in apps/simulation/.../runtime/packets.rs).
-  function groupInviteMember(name: string) {
-    const trimmed = name.trim();
-    if (!trimmed) return;
-    send({ type: "switchGroup", allowGroup: true }, { quiet: true });
-    send({ type: "addMember", name: trimmed });
+  function groupHiddenTargetIds(): Set<string> {
+    const current = worldRef.current;
+    const scope = `${equipmentConnectionGenerationRef.current}:${equipmentSessionGenerationRef.current}:${socialSceneRevisionRef.current}:${current.playerObjectId}:${current.mapFileName}`;
+    if (groupHiddenTargetsRef.current.scope !== scope) groupHiddenTargetsRef.current = { scope, ids: new Set() };
+    return groupHiddenTargetsRef.current.ids;
+  }
+
+  function currentGroupHoverName(): string | null {
+    const current = worldRef.current, objectId = combatPointerRef.current.hovered;
+    if (!objectId || objectId === current.playerObjectId || groupHiddenTargetIds().has(objectId)) return null;
+    // Resolve again against current AOI: selection and stale marker DOM never supply an invitation target.
+    const target = current.entities.find(entry => entry.objectId === objectId && entry.kind === "player" && !entry.dead);
+    return target?.name?.trim() || null;
+  }
+
+  function currentGroupOperationSource(): GroupOperationSource {
+    const current = worldRef.current, group = current.stage5Systems.group;
+    const rawMembers = group?.members !== undefined ? group.members : group?.memberInfos !== undefined ? group.memberInfos : [];
+    const names = Array.isArray(rawMembers) ? rawMembers.map(member => typeof member === "string" ? member
+      : member && typeof member === "object" ? member.name : null) : null;
+    const members = names?.every((name): name is string => typeof name === "string") ? names : null;
+    return { owner: members ? currentSocialReplyOwner() : null,
+      playerName: current.entities.find(entry => entry.objectId === current.playerObjectId)?.name ?? null, members: members ?? [] };
+  }
+
+  function submitGroupOperation(op: GroupOperation, name: string): boolean {
+    const proof = groupOperationsRef.current.reserve(op, name, currentGroupOperationSource());
+    if (!proof) return false;
+    try {
+      if (send(groupOperationCommand(proof), { groupProof: proof })) return true;
+    } catch (error) {
+      // A socket exception after entry is not evidence that the invitation was never sent.
+      if (groupOperationsRef.current.outcomeUnknown(proof)) console.error("[mir2] Group send outcome is unknown", error);
+    }
+    if (groupOperationsRef.current.outcomeUnknown(proof)) return true;
+    groupOperationsRef.current.cancelDefinitelyUnsent(proof);
+    return false;
+  }
+
+  // Native GroupDialog sends only AddMember. The shared server enables the sender
+  // after admission; accepting invitations is the target's separate SwitchGroup preference.
+  function groupInviteMember(name: string): boolean {
+    return submitGroupOperation("addMember", name);
   }
 
   // Kicking a member rides ClientPacket::DelMember.
-  function kickGroupMember(name: string) {
-    const trimmed = name.trim();
-    if (!trimmed) return;
-    send({ type: "delMember", name: trimmed });
+  function kickGroupMember(name: string): boolean {
+    return submitGroupOperation("delMember", name);
   }
 
   // Leaving / disbanding the group rides ClientPacket::SwitchGroup with
@@ -11654,7 +11976,7 @@ export default function HomePage() {
       : null;
     const input = questActionInput({
       action,
-      profile: questGuidanceProfile(process.env.NEXT_PUBLIC_MIR2_QUEST_GUIDANCE),
+      profile: r16QuestGuidanceProfile(),
       questId,
       quest,
       dialog: worldRef.current.activeNpcDialog,
@@ -11726,7 +12048,7 @@ export default function HomePage() {
       runtimeGeneration: questRuntimeLifetimeRef.current, socket,
       questSource: JSON.stringify({ quests: worldRef.current.questLog,
         stages: [...questAuthoritativeStageByIdRef.current], completed: completedQuestHistoryRef.current,
-        profile: questGuidanceProfile(process.env.NEXT_PUBLIC_MIR2_QUEST_GUIDANCE) }) };
+        profile: r16QuestGuidanceProfile() }) };
   }
 
   function currentMapImageSource(): MapImageRouteSource | null {
@@ -12514,8 +12836,12 @@ export default function HomePage() {
     const drop = currentWorld.groundDrops.find((entry) => entry.objectId === objectId);
     const serverSelf = currentAuthoritativeSelf(currentWorld);
     const lifetime = currentQuestWorldLifetime();
+    lastPickupInputRef.current = { at: Date.now(), stage: "received", dropFound: !!drop, selfFound: !!serverSelf, lifetimeFound: !!lifetime };
     if (!drop || !serverSelf || !lifetime || questObjectId(objectId) === null
-      || !questCoordinate(drop.x) || !questCoordinate(drop.y)) return false;
+      || !questCoordinate(drop.x) || !questCoordinate(drop.y)) {
+      lastPickupInputRef.current.stage = "invalid-source";
+      return false;
+    }
     retireQuestWorldActions(); cancelLockedMonsterAttack();
     if (pointTileDistance(serverSelf, drop) > 1) {
       stopOnchainMining();
@@ -12525,9 +12851,12 @@ export default function HomePage() {
         sourceMonster: drop.sourceMonster, acceptedAt: Date.now(), queued };
       crystalRunPrimedUntilRef.current = Math.max(crystalRunPrimedUntilRef.current, Date.now() + CRYSTAL_RUN_PRIME_MS);
       queueCrystalMoveIntent(queued);
+      lastPickupInputRef.current.stage = "queued-move";
       return true;
     }
-    return send({ type: "pickUp", objectId: Number(objectId) });
+    const sent = send({ type: "pickUp", objectId: Number(objectId) });
+    lastPickupInputRef.current.stage = sent ? "sent" : "send-rejected";
+    return sent;
   }
 
   function selectEntity(objectId: string) {
@@ -12906,11 +13235,36 @@ export default function HomePage() {
     }, gesture);
   }
 
+  const lastViewportDirectionIntentRef = useRef<{ direction: string; at: number; discrete: boolean } | null>(null);
+  const lastQueuedMovementAttemptRef = useRef<{ reason: string; at: number } | null>(null);
+  const lastPickupInputRef = useRef<{ at: number; stage: string; dropFound: boolean; selfFound: boolean; lifetimeFound: boolean } | null>(null);
+  function readMovementInputDiagnostics() {
+    const now = Date.now(), current = worldRef.current, self = currentAuthoritativeSelf(current);
+    const intent = lastViewportDirectionIntentRef.current, queued = queuedMoveIntentRef.current;
+    const target = self && intent ? pointMoveInDirection(self, intent.direction, 1) : null;
+    return { connectionGeneration: equipmentConnectionGenerationRef.current, sessionGeneration: equipmentSessionGenerationRef.current,
+      suspended: equipmentHostSuspendReasonRef.current,
+      sceneDeferred: screenRef.current === "game" && !firstPlayableFrameMarkedRef.current && !initialSceneAssetsReadyRef.current,
+      lastIntent: intent, lastAttempt: lastQueuedMovementAttemptRef.current, lastPickup: lastPickupInputRef.current,
+      self: self ? { x: self.x, y: self.y, direction: self.direction, dead: self.dead } : null,
+      queued: queued ? { kind: queued.kind, direction: queued.direction, ageMs: now - queued.requestedAt, consumeAfterSend: queued.consumeAfterSend } : null,
+      controller: { canSend: canSendMovement(readSelfMovementControllerState(), now),
+        sendDelayMs: Math.max(0, nextMoveSendAtRef.current - now), blockedMs: Math.max(0, movementInputBlockedUntilRef.current - now),
+        pending: pendingSelfMoveRef.current ? { from: pendingSelfMoveRef.current.from, to: pendingSelfMoveRef.current.to,
+          ageMs: now - pendingSelfMoveRef.current.sentAt } : null },
+      target, targetMapBlocked: !!target && originalMapCellBlocksMovement(current.originalMapRegion, target.x, target.y),
+      targetMapCell: target ? current.originalMapRegion?.cells.find(cell => cell.x === target.x && cell.y === target.y) ?? null : null,
+      nearbyEntities: self ? current.entities.filter(entity => entity.objectId !== current.playerObjectId
+        && Math.abs(entity.x - self.x) <= 2 && Math.abs(entity.y - self.y) <= 2).slice(0, 24)
+        .map(entity => ({ objectId: entity.objectId, kind: entity.kind, x: entity.x, y: entity.y, dead: entity.dead })) : [] };
+  }
+
   function handleViewportDirectionIntent(
     direction: string,
     mode: "walk" | "run",
     options?: { discrete?: boolean },
   ) {
+    lastViewportDirectionIntentRef.current = { direction, at: Date.now(), discrete: options?.discrete === true };
     if (sceneInputDeferredForInitialAssets()) {
       return;
     }
@@ -13843,6 +14197,12 @@ export default function HomePage() {
     }
     if (event.type === "realmInfo") {
       const info = event.payload as GatewayRealmInfo;
+      const previous = companionRealmRef.current;
+      if (!previous || previous.socket !== source || previous.generation !== connectionGeneration
+        || previous.info.realmId !== info.realmId || previous.info.worldEpoch !== info.worldEpoch
+        || previous.info.features?.companionControl !== info.features?.companionControl) retirePrivateCompanion();
+      companionRealmRef.current = { socket: source, generation: connectionGeneration, info };
+      companionClientRef.current?.syncSource();
       setRealmInfo(info);
       (
         window as typeof window & {
@@ -13927,6 +14287,10 @@ export default function HomePage() {
         }
         break;
       case "Disconnect":
+        if (screenRef.current === "select" || screenRef.current === "openingLogin") {
+          leaveCharacterSelection(characterCreateRef.current?.entered ? "ui.characterCreateUnconfirmed" : "shell.notice.closed");
+          break;
+        }
         retireEquipmentSession();
         questDefinitionByIdRef.current.clear();
         questAuthoritativeStageByIdRef.current.clear();
@@ -13998,29 +14362,34 @@ export default function HomePage() {
         updateLoginAuth(emptyLoginAuthState(loginAuthRef.current.epoch + 1, accountIdRef.current));
         break;
       }
-      case "NewCharacterSuccess":
-        setCharacters((current) => {
-          // Drop the synthesized placeholder before appending the real character,
-          // otherwise the account-named phantom lingers alongside real slots.
-          const realCurrent = current.filter((entry) => !entry.synthetic);
-          const nextCharacters = parseCharacters({ characters: [...realCurrent, payload.character] }, accountId, language);
-          const visibleCharacters = nextCharacters.slice(0, 4);
-          const createdIndex = numberOrUndefined(
-            (payload.character as Record<string, unknown> | undefined)?.index ??
-              (payload.character as Record<string, unknown> | undefined)?.Index,
-          );
-          const visibleIndex = visibleCharacters.findIndex((character) => character.index === createdIndex);
-          if (visibleIndex >= 0) {
-            setSelectedCharacterIndex(visibleIndex);
-          }
-          return visibleCharacters;
-        });
-        appendLog(t("ui.newCharacterCreated", [], "Character created."), "system");
+      case "NewCharacterSuccess": {
+        const attempt = characterCreateRef.current;
+        if (!attempt?.entered || attempt.owner !== currentCharacterSelection()) break;
+        const created = matchesCreatedCharacter(payload.character, attempt.draft)
+          ? toCharacterEntry(payload.character, 0, language) : null;
+        if (!created) {
+          leaveCharacterSelection("ui.characterCreateUnconfirmed");
+          break;
+        }
+        const roster = [created, ...charactersRef.current.filter(entry => !entry.synthetic && entry.index !== created.index)];
+        charactersRef.current = roster;
+        selectedCharacterIndexRef.current = 0;
+        setCharacters(roster);
+        setSelectedCharacterIndex(0);
+        settleCharacterCreate("created");
         gameBusRef.current!.emit({ type: "uiSound", event: "characterCreated" });
         break;
-      case "NewCharacter":
-        appendLog(t("ui.newCharacterFailed", [], "Character creation failed."), "system");
+      }
+      case "NewCharacter": {
+        const attempt = characterCreateRef.current;
+        if (!attempt?.entered || attempt.owner !== currentCharacterSelection()) break;
+        if (typeof payload.result !== "number" || !Number.isInteger(payload.result)
+          || payload.result < 0 || payload.result > 255) leaveCharacterSelection("ui.characterCreateUnconfirmed");
+        else if (payload.result === 4) settleCharacterCreate("slotsFull");
+        else if (payload.result === 5) settleCharacterCreate("nameTaken");
+        else settleCharacterCreate("failed");
         break;
+      }
       case "DeleteCharacterSuccess":
         setCharacters((current) => {
           const removedIndex = numberOrUndefined(payload.characterIndex);
@@ -14033,14 +14402,18 @@ export default function HomePage() {
       case "DeleteCharacter":
         appendLog(t("ui.characterDeleteFailed", [], "Character deletion failed."), "system");
         break;
-      case "LoginSuccess":
+      case "LoginSuccess": {
         if (!Array.isArray(payload.characters) || !consumePreauthReply("login", source, connectionGeneration)) break;
-        updateLoginAuth(emptyLoginAuthState(loginAuthRef.current.epoch + 1, accountIdRef.current));
+        const token = loginAuthRef.current.epoch + 1;
+        updateLoginAuth(emptyLoginAuthState(token, accountIdRef.current));
+        passwordRef.current = "";
+        setPassword("");
         setLoginBusy(false);
         setLoginErrorKey(null);
         {
           const nextCharacters = parseCharacters(payload, accountIdRef.current, language);
           const reconnectSnapshot = reconnectSnapshotRef.current;
+          charactersRef.current = nextCharacters;
           setCharacters(nextCharacters);
           if (reconnectSnapshot) {
             const reconnectCharacterPosition = nextCharacters.findIndex(
@@ -14048,18 +14421,19 @@ export default function HomePage() {
             );
             setSelectedCharacterIndex(reconnectCharacterPosition >= 0 ? reconnectCharacterPosition : 0);
           } else {
+            retireCharacterSelection();
+            loginDoorRef.current = { token, socket: source, generation: connectionGeneration };
+            selectedCharacterIndexRef.current = 0;
             setSelectedCharacterIndex(0);
-            screenRef.current = "select";
-            setScreen("select");
+            screenRef.current = "openingLogin";
+            setScreen("openingLogin");
           }
         }
         markMir2CacheMilestone("loginSuccess", {
           characterCount: Array.isArray(payload.characters) ? payload.characters.length : undefined,
         });
-        if (!reconnectSnapshotRef.current) {
-          markMir2CacheMilestone("selectReady");
-        }
         break;
+      }
       case "StartGame":
         markMir2CacheMilestone("startGamePacket", {
           result: numberOrZero(payload.result),
@@ -14078,8 +14452,11 @@ export default function HomePage() {
             "system",
           );
         } else {
+          retireCharacterSelection();
           suspendEquipmentConnection("connectionUnavailable");
           pendingStorageRequestsRef.current.clear();
+          groupOperationsRef.current.retire();
+          groupHiddenTargetsRef.current = { scope: "", ids: new Set() };
           equipmentStartGameRef.current = {
             connectionGeneration,
             sessionGeneration: ++equipmentSessionGenerationRef.current,
@@ -14447,6 +14824,7 @@ export default function HomePage() {
       case "ObjectRemove":
       case "ObjectHide": {
         const removedObjectId = stringifyId(payload.objectId);
+        groupHiddenTargetIds().delete(removedObjectId);
         cancelPendingEntitySounds(removedObjectId);
         if (removedObjectId !== worldRef.current.playerObjectId) {
           observeBevyMovementShadow({
@@ -14786,24 +15164,47 @@ export default function HomePage() {
         appendLog(storageResizeMessage(size, hasExpandedStorage), "system");
         break;
       }
-      case "LogOutSuccess":
+      case "LogOutSuccess": {
+        const session = equipmentStartGameRef.current;
+        if (screenRef.current !== "game" || source.readyState !== WebSocket.OPEN || !gatewayProtocolReadyRef.current
+          || !session || session.connectionGeneration !== connectionGeneration
+          || session.sessionGeneration !== equipmentSessionGenerationRef.current
+          || equipmentHostSuspendReasonRef.current !== "logoutPending" || !Array.isArray(payload.characters)) break;
+        const indices = payload.characters.map(character => character?.index ?? character?.Index);
+        if (indices.some(index => !Number.isSafeInteger(index) || index < 0)
+          || new Set(indices).size !== indices.length
+          || payload.characters.some(character => typeof (character?.name ?? character?.Name) !== "string")) break;
+        const previousCharacterIndex = socialCharacterIndexRef.current.current
+          ?? charactersRef.current[selectedCharacterIndexRef.current]?.index;
+        retireCharacterSelection();
         retireEquipmentSession();
         questDefinitionByIdRef.current.clear();
         questAuthoritativeStageByIdRef.current.clear();
         clearPendingQuestActions();
         cancelPendingEntitySounds();
-        setIdentitySessionToken(null);
         resetGatewayReconnectState();
-        activeReconnectAuthRef.current = null;
-        screenRef.current = "login";
-        setScreen("login");
+        hudProjectionRef.current = true;
+        try {
+          closeTouchSecondaryWindows(undefined, true);
+          setActiveInventoryTab("bag1");
+          setActiveCharacterTab("char");
+        }
+        finally { hudProjectionRef.current = false; }
+        setIdentitySecurityOpen(false);
         setLoginBusy(false);
         setLoginErrorKey(null);
         {
-          const nextCharacters = parseCharacters(payload, accountId, language);
+          const nextCharacters = parseCharacters(payload, accountIdRef.current, language);
+          const previousPosition = nextCharacters.findIndex(character => character.index === previousCharacterIndex);
+          const selectedPosition = previousPosition >= 0 ? previousPosition : 0;
+          charactersRef.current = nextCharacters;
+          selectedCharacterIndexRef.current = selectedPosition;
           setCharacters(nextCharacters);
-          setSelectedCharacterIndex(0);
+          setSelectedCharacterIndex(selectedPosition);
         }
+        characterSelectionRef.current = { socket: source, generation: connectionGeneration };
+        screenRef.current = "select";
+        setScreen("select");
         updateWorld((current) => ({
           ...DEFAULT_WORLD_STATE,
           connected: true,
@@ -14818,6 +15219,7 @@ export default function HomePage() {
           originalMapRegion: current.originalMapRegion,
         }));
         break;
+      }
       case "LogOutFailed":
         {
           const session = equipmentStartGameRef.current;
@@ -14831,6 +15233,7 @@ export default function HomePage() {
         appendLog(t("ui.logoutFailed", [], "Log out failed."), "system");
         break;
       case "StartGameBanned":
+        if (screenRef.current === "openingLogin") break;
         if (reconnectSnapshotRef.current) {
           failGatewayReconnect();
         }
@@ -14869,6 +15272,7 @@ export default function HomePage() {
       case "ObjectHidden": {
         const objectId = stringifyId(payload.objectId);
         const hidden = payload.hidden === true;
+        if (hidden) groupHiddenTargetIds().add(objectId); else groupHiddenTargetIds().delete(objectId);
         // Hidden mobs (e.g. sneaking/stealth) stay tracked but lose selection focus.
         updateWorld((current) =>
           hidden && current.selectedObjectId === objectId
@@ -15224,6 +15628,7 @@ export default function HomePage() {
             ...current.stage5Systems,
             group: {
               ...(current.stage5Systems.group ?? {}),
+              allowGroup: payload.allowGroup === true,
               lootMode: payload.allowGroup === true ? "group" : "solo",
             },
           },
@@ -15231,6 +15636,7 @@ export default function HomePage() {
         break;
       case "AddMember":
       case "DeleteMember": {
+        groupOperationsRef.current.receipt(event.packet, payload, currentSocialReceiveOwner());
         const name = stringOrFallback(payload.name, "");
         if (name) {
           updateWorld((current) => ({
@@ -15250,6 +15656,7 @@ export default function HomePage() {
         break;
       }
       case "GroupMemberInfo": {
+        groupOperationsRef.current.receipt(event.packet, payload, currentSocialReceiveOwner());
         // Enriched full party roster (level/class/hp/online + leader), emitted
         // alongside AddMember/DeleteMember. Stored in `memberInfos` (separate from
         // the incremental name list) so the existing path stays intact; adaptGroup
@@ -15387,6 +15794,7 @@ export default function HomePage() {
         const tradeOwner = currentSocialReceiveOwner();
         tradePartnerRef.current = tradeOwner ? {owner: tradeOwner, incarnation: tradeIncarnationRef.current} : null;
         socialItemWindowsRef.current.trade = true; setShowTrade(true);
+        if (event.packet === "TradeAccept") setShowInventory(true);
         updateWorld((current) => ({
           ...current,
           stage5Systems: {
@@ -16095,6 +16503,7 @@ export default function HomePage() {
         }
         break;
       case "ReturnToLogin":
+        retireCharacterSelection();
         retireEquipmentSession();
         pendingStorageRequestsRef.current.clear();
         screenRef.current = "login";
@@ -19738,6 +20147,14 @@ export default function HomePage() {
     [],
   );
 
+  const viewportDirectionCallbacksRef = useRef({ intent: handleViewportDirectionIntent, step: handleViewportDirectionStep, stop: handleViewportDirectionStop });
+  viewportDirectionCallbacksRef.current = { intent: handleViewportDirectionIntent, step: handleViewportDirectionStep, stop: handleViewportDirectionStop };
+  const onViewportDirectionIntentStable = useCallback((...args: Parameters<typeof handleViewportDirectionIntent>) =>
+    viewportDirectionCallbacksRef.current.intent(...args), []);
+  const onViewportDirectionStepStable = useCallback((...args: Parameters<typeof handleViewportDirectionStep>) =>
+    viewportDirectionCallbacksRef.current.step(...args), []);
+  const onViewportDirectionStopStable = useCallback(() => viewportDirectionCallbacksRef.current.stop(), []);
+
   const bevyHeroUi = useBevyHeroUi({
     requested: bevyQuestUiRequested, runtimeGeneration: bevyRuntimeGeneration, runtimeRef,
     read: () => {
@@ -19828,7 +20245,7 @@ export default function HomePage() {
         player: { hp: current.playerHp, maxHp: current.playerMaxHp, mp: current.playerMp, maxMp: current.playerMaxMp,
           gold: current.gold, credit: current.credit, level: player?.level, name: player?.name,
           className: player?.classKey, gender: player?.genderKey, currentWeightKnown: false },
-        blockedUniqueIds: [...blockedUniqueIds], pendingCells, language,
+        blockedUniqueIds: [...blockedUniqueIds], pendingCells, language: commerceRuntimeLanguage(language),
       };
     },
     onOwner: (owner, runGeneration, ownerRevision) => {
@@ -20090,7 +20507,8 @@ export default function HomePage() {
       return {
         generation: bevyQuestGenerationRef.current,
         worldDraft: inGame ? currentQuestWorldDraft() : null,
-        language,
+        language: questRuntimeLanguage(language),
+        displayLanguage: questDisplayLanguage(language),
         hudBarPlayerObjectId: current.playerObjectId,
         hudBarRuntimeLifetime: bevyRuntimeGeneration,
         inGame,
@@ -20107,11 +20525,11 @@ export default function HomePage() {
         weightBarSlot: mainHudSupported && inGame && weightPair ? mainHudGeometry!.weightBar : inGame && weightPair && !hpOrbPageBlocked && !current.activeNpcDialog
           ? readBevyWeightBarSlot(frame,
             frame?.querySelector<HTMLElement>(".main-hud-shell .hud-weight-bar") ?? null, presentation) : null,
-        profile: questGuidanceProfile(process.env.NEXT_PUBLIC_MIR2_QUEST_GUIDANCE),
+        profile: r16QuestGuidanceProfile(),
         quests: projectBevyQuests(localizeQuestLog(current.questLog, t), questAuthoritativeStageByIdRef.current),
         completedKnown: completedQuestHistoryRef.current.known,
         completedQuestIds: completedQuestHistoryRef.current.ids,
-        dialog: projectBevyQuestDialog(current.activeNpcDialog),
+        dialog: projectBevyQuestDialog(current.activeNpcDialog, questDisplayLanguage(language)),
         player: { hp: current.playerHp ?? player?.hp ?? 0, maxHp: current.playerMaxHp ?? player?.maxHp ?? 0,
           mp: current.playerMp, maxMp: current.playerMaxMp,
           experience: experiencePair?.experience ?? null,
@@ -20132,6 +20550,17 @@ export default function HomePage() {
     requested: bevyQuestUiRequested,
     runtimeGeneration: bevyRuntimeGeneration,
     runtimeRef,
+    navigationSource: () => {
+      const owner = currentSocialReplyOwner(), index = socialCharacterIndexRef.current.current;
+      if (!owner || isSpectatorBrowserMode() || equipmentHostSuspendReasonRef.current !== null
+        || !Number.isSafeInteger(index) || index === null || index < 0
+        || !worldRef.current.entities.some(entity => entity.kind === "selfPlayer" && Number(entity.objectId) === owner.playerObjectId)) return null;
+      const realm = companionRealmRef.current;
+      if (realm && (realm.socket !== owner.socket || realm.generation !== owner.connectionGeneration)) return null;
+      return JSON.stringify([owner.connectionGeneration, owner.sessionGeneration, owner.playerObjectId, index,
+        owner.sceneRevision, owner.mapFileName, realm?.info.realmId ?? null, realm?.info.worldEpoch ?? null,
+        companionContextEpochRef.current]);
+    },
     snapshot: () => {
       const current = worldRef.current;
       const player = current.entities.find(entity => entity.objectId === current.playerObjectId) ?? null;
@@ -20142,8 +20571,10 @@ export default function HomePage() {
         hostVisible: bevyQuestUiRequested && initialSceneAssetsReadyRef.current && document.visibilityState === "visible",
         player: projectAuthoritativeHudPlayer(current, player),
         ...(runtimeRef.current?.getMir2HudPreferencesVersion?.() === 1 ? { hpView: playerUiPreferencesRef.current.hpView } : {}),
-        navigation: { characterOpen: showCharacter, characterPage: activeCharacterTab === "char" ? "character" : activeCharacterTab,
-          bagOpen: showInventory, questOpen: showQuestLog }, navigationRevision: fallbackHudNavigationRevisionRef.current, ...presentation };
+        navigation: { characterOpen: characterOpenRef.current,
+          characterPage: activeCharacterTabRef.current === "char" ? "character" : activeCharacterTabRef.current,
+          bagOpen: bagOpenRef.current, questOpen: questLogOpenRef.current },
+        navigationRevision: fallbackHudNavigationRevisionRef.current, ...presentation };
     },
     onNavigation: navigation => {
       hudProjectionRef.current = true;
@@ -20172,6 +20603,7 @@ export default function HomePage() {
   const renderedMapImageSource = currentMapImageSource();
   const renderedCashPreviewSource = currentCashPreviewSource();
   const authRenderEpoch = loginAuthState.epoch;
+  const renderedCharacterSelection = currentCharacterSelection();
   const loginAuthControls: LoginAuthControls = {
     state: loginAuthState, ready: authCoreReady, pending: loginBusy,
     open: surface => openLoginAuth(surface, authRenderEpoch), close: () => closeLoginAuth(authRenderEpoch),
@@ -20189,7 +20621,12 @@ export default function HomePage() {
     <OriginalClientShell
       language={language}
       screen={screen}
+      readMovementInputDiagnostics={readMovementInputDiagnostics}
+      readBeltInputDiagnostics={readBeltInputDiagnostics}
       storageUiDiagnostics={JSON.stringify(bevyStorageUi.diagnostic)}
+      bagUiDiagnostics={JSON.stringify({ active: bevyBagUi.active, error: bevyBagUi.error,
+        owner: equipmentBagOwnerRef.current, status: bevyBagUi.readStatus(), diagnostic: bevyBagUi.diagnostic(),
+        hudNavigation: bevyHudUi.diagnostic() })}
       spellsUiDiagnostics={JSON.stringify(bevySpellsUi.diagnostic)}
       npcPurchaseActionDiagnostics={JSON.stringify(npcPurchaseActionStatus)}
       npcShopInputDiagnostics={npcShopService?.supportsBuy ? JSON.stringify({
@@ -20199,7 +20636,7 @@ export default function HomePage() {
         plannerPresent: typeof runtimeRef.current?.getMir2NpcGoldBuyPlan === "function",
         corePresent: questCoreRuntimeRef.current !== null,
         host: { active: bevyNpcShopUi.active, transitioning: bevyNpcShopUi.transitioning,
-          blocksInput: bevyNpcShopUi.blocksInput(), errorPresent: bevyNpcShopUi.error !== null },
+          blocksInput: bevyNpcShopUi.blocksInput(), errorPresent: bevyNpcShopUi.error !== null, errorCode: bevyNpcShopUi.errorCode },
       }) : undefined}
             combatInputDiagnostics={JSON.stringify({...bevyCombatInput.diagnostics(),baseline:{sourcePresent:combatBaselineSourceRef.current!==null,
               sourceCurrent:readCurrentCombatBaseline()!==null,cachedOwnerMatches:Boolean(combatRawRef.current&&sameSpellsOwner(combatRawRef.current.owner,currentSpellsOwner(Number(worldRef.current.playerObjectId))??{} as CombatOwner)),
@@ -20352,6 +20789,8 @@ export default function HomePage() {
       loginBusy={loginBusy}
       loginAuth={loginAuthControls}
       loginError={loginErrorKey ? t(loginErrorKey) : null}
+      loginDoorToken={screen === "openingLogin" ? loginDoorRef.current?.token ?? null : null}
+      onLoginDoorOpened={finishLoginDoor}
       suiWallets={suiWallets}
       walletPickerOpen={walletPickerOpen}
       dubheQr={dubheQr}
@@ -20392,6 +20831,7 @@ export default function HomePage() {
       onIdentityLinkWallet={(walletId) => void linkCurrentSuiIdentity("wallet", walletId)}
       onQuickEnter={quickEnterWorld}
       onResetClient={resetClient}
+      onOpenAccountSecurity={() => setIdentitySecurityOpen(true)}
       onSendChat={(message) => send({ type: "chat", message })}
       onRequestTrade={() => send({ type: "tradeRequest" })}
       onRentExpandedStorage={rentExpandedStorage}
@@ -20399,9 +20839,22 @@ export default function HomePage() {
       onConfirmStorageRental={confirmStorageRental}
       onCancelStorageRental={cancelStorageRental}
       onLogout={() => send({ type: "logOut" })}
-      onCreateCharacter={createCharacter}
+      characterCreate={{
+        classes: currentCharacterCreateClasses(renderedCharacterSelection),
+        status: characterCreateStatus,
+        submit: draft => createCharacter(draft, renderedCharacterSelection),
+        clearNotice: () => {
+          if (renderedCharacterSelection === currentCharacterSelection() && !characterCreateRef.current) {
+            setCharacterCreateStatus("idle");
+          }
+        },
+      }}
       onDeleteCharacter={deleteSelectedCharacter}
-      onExitSelect={() => setScreen("login")}
+      onExitSelect={() => {
+        if (screenRef.current === "select") {
+          leaveCharacterSelection(characterCreateRef.current?.entered ? "ui.characterCreateUnconfirmed" : null);
+        }
+      }}
       onReadItemTooltip={ownedItemTooltipReaders.readItem}
       {...bagBeltStableCallbacks}
       onReadEquipmentItemTooltip={ownedItemTooltipReaders.readEquipment}
@@ -20473,9 +20926,9 @@ export default function HomePage() {
       onViewportTileSecondaryAction={onViewportTileSecondaryAction}
       onViewportTileStepClick={onViewportTileStepClick}
       onViewportTileStepSecondaryAction={onViewportTileStepSecondaryAction}
-      onViewportDirectionStep={handleViewportDirectionStep}
-      onViewportDirectionIntent={handleViewportDirectionIntent}
-      onViewportDirectionStop={handleViewportDirectionStop}
+      onViewportDirectionStep={onViewportDirectionStepStable}
+      onViewportDirectionIntent={onViewportDirectionIntentStable}
+      onViewportDirectionStop={onViewportDirectionStopStable}
       onPickGroundDrop={pickGroundDrop}
       onSelectEntity={selectEntity}
       onActivateEntity={activateEntity}
@@ -20533,7 +20986,7 @@ export default function HomePage() {
       inspect={{open:rankingInspectOpenRef.current,info:rankingInspectInfo,onClose:closeRankingInspect,onReadItemTooltip:readRankingInspectTooltip}}
       market={{ open: showMarket, onClose: () => setShowMarket(false), listings: extraWindowData.marketListings, gold: world.gold, cityCurrencies: world.cityCurrencies, onBuy: marketBuyListing, onCancel: marketCancelListing, onSearch: marketSearch, onRefresh: marketRefresh, onCollect: marketCancelListing }}
       conquest={{ open: showConquest, onClose: () => setShowConquest(false), conquest: extraWindowData.conquest, territory: extraWindowData.guildTerritory, guildName: world.stage5Systems?.guild?.name ?? null }}
-      trade={{ open: showTrade, onClose: () => { if (tradeLifecycleRef.current.state === "closed") setShowTrade(false); else cancelTrade(); }, trade: socialTradeSummary,
+      trade={{ open: showTrade, playerName: self?.name ?? null, onClose: () => { if (tradeLifecycleRef.current.state === "closed") setShowTrade(false); else cancelTrade(); }, trade: socialTradeSummary,
         myGold: typeof socialTradeRender?.trade?.offeredGold === "number" ? socialTradeRender.trade.offeredGold : 0, availableGold: world.gold,
         myItems: socialTradeRender?.slots.map(i => i ? ownTradeTooltipItem(i) : null), onReadItemTooltip: readTradeItemTooltip, myItemCount: socialTradeRender?.slots.filter(i => i !== null).length,
         myConfirmed: socialTradeRender?.trade?.locked === true, inventoryItems: socialTradeRender?.inventoryItems, emptyInventorySlots: socialTradeRender?.inventory.emptySlots,
@@ -20586,7 +21039,24 @@ export default function HomePage() {
       <AiLiveGameHighlight status={aiLiveStatus} />
     ) : null}
     <OriginalClientStagePortal>
+      {screen === "game" && !spectatorMode && companionClient ? <R16CompanionWindow
+        client={companionClient} open={companionOpen} onOpenChange={changeCompanionOpen}
+        entryVisible={!showCharacter}
+        partyMember={(extraWindowData.group?.members ?? []).some(member => (typeof member === "string" ? member : member.name)
+          === companionClient.snapshot().view?.archive.characterName)}
+        onInviteParty={inviteCompanionToParty}
+      /> : null}
+      {screen === "game" && showOptions ? <button type="button" data-r16-account-security="true" data-ui-interactive="true"
+        style={{ position: "absolute", left: 382, top: 565, width: 259, height: 29, zIndex: 46,
+          border: "1px solid #b99b5f", background: "#21190e", color: "#efd697", pointerEvents: "auto" }}
+        onPointerDown={event => event.stopPropagation()}
+        onClick={() => { changeReferenceWindow("options", false); setIdentitySecurityOpen(true); }}>
+        {t("ui.accountSecurity", [], language === "zh-CN" ? "账号与恢复" : "Account & recovery")}
+      </button> : null}
       <IdentitySecurityPanel
+        open={identitySecurityOpen}
+        onOpenChange={setIdentitySecurityOpen}
+        hideTrigger
         token={identitySessionToken}
         accountId={accountId}
         language={language}
@@ -20637,7 +21107,7 @@ export default function HomePage() {
     {screen === "game" && showTutorial ? (
       <OriginalClientTutorialOverlay
         key={`${tutorialInput}:${tutorialGamepadFamily}:${tutorialRunId}`}
-        language={language}
+        language={questRuntimeLanguage(language)}
         input={tutorialInput}
         gamepadFamily={tutorialGamepadFamily}
         windows={{
@@ -22343,7 +22813,7 @@ function fallbackCharacter(language: Mir2Language, fallbackName = ""): SelectCha
 }
 
 function isFallbackCharacter(entry: SelectCharacterEntry) {
-  return entry.index === 0 && entry.level === 1 && entry.classKey === "warrior";
+  return entry.synthetic === true;
 }
 
 function mapClassKey(value: unknown): SelectCharacterEntry["classKey"] {

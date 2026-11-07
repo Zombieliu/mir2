@@ -1,0 +1,36 @@
+{
+  "schema": "mir2-life-ui-acceptance/1",
+  "passed": true,
+  "nativeSha256": "d930618bc7cc461a4d03507a68fb28c0b15af6200de8f00946c463929f67d638",
+  "gatewaySha256": "399520a3d57a5ab07292254007217b82458a8acc2057ca0b0177d2de90df6032",
+  "verifiedResources": 255063,
+  "observed": [
+    "six companion tabs",
+    "actual wallet zero distinct from fifty-gold authorization cap",
+    "actual HP18/18 potion1 freeBag38 weight2/50",
+    "20-minute fixed-scope confirmation",
+    "30-minute same cumulative fifty-gold and one-potion confirmation",
+    "cancel both previews without activation or model call",
+    "three-line decision source and observed result summary"
+  ],
+  "modelCalls": 0,
+  "lifeActivated": false,
+  "realPurchaseInThisWindow": false,
+  "screenshots": [
+    {
+      "path": "windows-ui/life-resources.png",
+      "sha256": "c08de3ace8e39f2171e119bfc67bfc0262f0a8a868282bda3fac5355f4ac50df"
+    },
+    {
+      "path": "windows-ui/life-confirm-20m.png",
+      "sha256": "1100102355059d672e0e48d723b3a69f1f5b6232b09d756ffe4d739df5f9a320"
+    },
+    {
+      "path": "windows-ui/life-confirm-30m.png",
+      "sha256": "8bbcb79c77495f81abb4b60b007036d0a4939a370c53cfd13a13d75e7932ece8"
+    }
+  ],
+  "ownedFixtureStopped": true,
+  "syntheticPrivateWorld": true,
+  "realHumanTrial": false
+}

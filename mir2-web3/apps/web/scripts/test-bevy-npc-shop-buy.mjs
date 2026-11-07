@@ -21,6 +21,7 @@ const actualCrystalItem=loadPearlBuyDependency("../lib/crystal-item-source.ts");
 const actualPearlSource=loadPearlBuyDependency("../lib/npc-pearl-buy-source.ts",{"./crystal-item-source":actualCrystalItem});
 const actualPearlBuy=loadPearlBuyDependency("../lib/npc-pearl-buy.ts",{"./npc-pearl-buy-source":actualPearlSource});
 const actualDurableNpc=loadPearlBuyDependency("../lib/npc-purchase-client.ts");
+const actualNpcRuntimeLanguage=loadPearlBuyDependency("../lib/r16-runtime-language.ts");
 test("Source30 durable receiver and retained facade pass strict no-emit type checking", () => {
   const files = ["../lib/npc-purchase-client.ts", "../lib/npc-purchase-receipt.ts"]
     .map(relative => fileURLToPath(new URL(relative, import.meta.url)));
@@ -535,7 +536,8 @@ const npcPageNames = ["npcGoldBuyCurrent", "readNpcGoldBuyCurrent", "quoteNpcSho
   "npcPurchaseFullEconomyCurrent", "npcPurchaseDisplayFingerprint", "npcPurchaseSnapshotEconomics", "receiveNpcPurchaseGatewayFrame", "applyNpcPurchaseOrdinarySnapshot", "npcPurchaseSessionKey",
   "npcPurchaseShopMatches", "applyNpcPurchaseShopSnapshot", "applyNpcShopCatalogPacket", "dispatchDurableNpcPurchase", "currentNpcShopTab",
   "sendClientCapabilities", "observeNpcPurchaseSocket", "retireNpcPurchaseClient",
-  "closeNpcRepairService", "cancelWorldFishingGesture", "retireWorldFishingGesture", "retainNpcPurchaseSelectors"];
+  "closeNpcRepairService", "cancelWorldFishingGesture", "retireWorldFishingGesture", "retainNpcPurchaseSelectors",
+  "readNpcShopUiInput", "npcShopIntentMatchesStatus", "npcShopIntentMatchesCommand", "dispatchBevyNpcShopIntent"];
 const npcPageDeclarations = new Map();
 const npcPageDispatcherCreations = [];
 const npcResponseClauses = [];
@@ -617,6 +619,13 @@ function npcPageHarness({ protocol = protocolOracle(), documentOwner = {}, coreV
   const legacyMap = new WeakMap(), realSet = legacyMap.set.bind(legacyMap);
   legacyMap.set = (proof, lease) => { legacyProofs.push(proof); return realSet(proof, lease); };
   const scope = {
+    bevyQuestReactModalOpen:false,showQuestLog:false,showCharacter:false,heroManagementPage:null,cashShopOpenRef:{current:false},
+    showHeroPet:false,showGuild:false,showGroup:false,showFriends:false,showBonds:false,showRanking:false,showMarket:false,
+    showConquest:false,showTrade:false,showBuffs:false,showMail:false,showWorldMap:false,showChatSettings:false,npcRepairService:null,
+    referenceWindowsBlockGameplay:()=>false,bevyQuestUiRequested:true,bevyRuntimeBackend:"webgpu",webGl2SharedCanvasPrototype:false,
+    initialSceneAssetsReadyRef:{current:true},clientProfile:{input:"mouse"},language:"en",commerceRuntimeLanguage:actualNpcRuntimeLanguage.commerceRuntimeLanguage,
+    readBevyQuestPresentation:()=>({logicalWidth:1024,logicalHeight:768,stageCssScale:1,touch:false}),
+    sharedCanvasUsesWebGl2:()=>false,sharedUiCanvasId:()=>"shared-ui",
     npcPurchaseActionRef:{current:null},npcPurchaseSendActionRef:{current:null},
     setNpcPurchaseActionStatus:()=>{},
     npcPurchaseUnavailableRef:{current:false},npcPurchaseApplyingEconomyRef:{current:false},npcPurchaseOptInSocketsRef:{current:new WeakSet()},
@@ -663,7 +672,7 @@ function npcPageHarness({ protocol = protocolOracle(), documentOwner = {}, coreV
     ...npcAuthSelectors, npcPearlJson:actualPearlSource.npcPearlJson,parseNpcPearlBuyPlan:actualPearlBuy.parseNpcPearlBuyPlan,
     npcPearlShopSourceRef:{current:new actualPearlSource.NpcPearlShopSource()},
     npcPearlBuyProofsRef:{current:new WeakMap()},npcPearlSendEpochRef:{current:0},
-    socialSceneRevisionRef:{current:0}, document:{visibilityState:"visible",hasFocus:()=>true},
+    socialSceneRevisionRef:{current:0}, document:{visibilityState:"visible",hasFocus:()=>true,querySelector:()=>null},
     bagBeltMovesRef:{current:new (loadPagePure("belt").BagBeltMoveDispatcher)()},
     bagBeltInventoryReadyRef:{current:null}, equipmentSnapshotRef:{current:null},
     storageRentalRef:{current:{pending:null}},
@@ -2734,7 +2743,7 @@ test("Source31 ordinary declared storage dates reuse exact signed codec and unsu
 // Execute the real Page socket/client constructor, owner apply callback, catalog
 // reducers, current readers and final durable dispatcher. Only the existing
 // world-model boundary and Core ABI are fixtures; this does not start WASM/UI.
-function s31PageOwner(service="BUYUSED"){
+function s31PageOwner(service="BUYUSED",configureSnapshot=()=>{}){
   const page=npcPageHarness(),abi=s30Harness();
   const core={...page.scope.questCoreRuntimeRef.current,getNpcPurchaseReceiptHost:()=>abi.host,
     getMir2NpcPearlBuyPlan:json=>JSON.stringify({version:1,ok:true,maxQuantity:99,quote:JSON.parse(json).unitPrice,admittedCount:null,denial:4})};
@@ -2745,6 +2754,7 @@ function s31PageOwner(service="BUYUSED"){
   snapshot.entities.push({objectId:50,name:"Actual shop",x:11,y:10,direction:"Down",dead:false});
   snapshot.inventoryItems=[s31WorldItem()];snapshot.npcGoldTradeCapacity={rosterValid:true,freshCompatibleUniqueIds:[s31Max]};
   snapshot.stage5Systems.intelligentCreaturePearls=100;
+  configureSnapshot(snapshot);
   const raw=(reply,view=null,authority=null,id=ownerWires().at(-1).requestId)=>s31OriginalFrame({
     sent:[{requestId:id}],frame:(requestId,_reply,_snapshot,_authority)=>abi.frame(requestId,reply,view,authority)},view);
   const begin=view=>client.receive(raw({kind:"producer",producer:s30Authority},view,s30Authority));
@@ -2905,6 +2915,201 @@ test("Source31 ordinary raw world preserves full UID signed dates equipment mail
   for(const invalid of [raw.replace('"gold":100','"gold":18446744073709551615'),
     raw.replace('"tick":0','"tick":9007199254740993'),raw.replace('"type":"worldSnapshot"','"type":"worldSnapshot","type":"worldSnapshot"')])
     assert.throws(()=>actualDurableNpc.parseNpcPurchaseWorldFrame(invalid));
+});
+
+// These regressions retain the original, complete raw owner witness. A health
+// packet changes only the visible world, never the raw source or its custody.
+function s32PageOwner(){
+  return s31PageOwner("BUYSELL",snapshot=>{
+    snapshot.inventoryItems=[s31WorldItem(100)];snapshot.npcGoldTradeCapacity={rosterValid:true,freshCompatibleUniqueIds:[100]};
+    snapshot.playerHp=53;snapshot.playerMp=39;snapshot.entities[0].hp=53;snapshot.entities[0].maxHp=100;
+    snapshot.entities.push({objectId:900,name:"Unrelated monster",kind:"Monster",hp:20,maxHp:20,
+      x:12,y:11,direction:"Down",dead:false});
+  });
+}
+function s32ChangeDisplay(f,change){
+  const next=copy(f.page.scope.worldRef.current);change(next,f.page.scope);f.page.scope.worldRef.current=next;return next;
+}
+test("Source32 actual Page positive HP MP and unrelated monster damage retain the original complete economic witness",()=>{
+  const f=s32PageOwner(),p=f.page,source=p.scope.npcPurchaseEconomicSourceRef.current,display=p.scope.npcPurchaseDisplaySourceRef.current;
+  assert(actualDurableNpc.completeNpcPurchaseSnapshot(source.snapshot));assert(Object.isFrozen(source));assert(Object.isFrozen(display));
+  s32ChangeDisplay(f,w=>{w.playerHp=34;w.playerMp=0;w.entities[0].hp=34;w.entities.find(e=>e.objectId==="900").hp=1;});
+  assert.equal(p.npcPurchaseFullEconomyCurrent(p.scope.worldRef.current),true,"vitals-only packets cannot stale a complete economic witness");
+  assert.equal(p.readNpcGoldBuyCurrent().blocked,false);
+  assert.equal(p.scope.npcPurchaseEconomicSourceRef.current,source);assert.equal(p.scope.npcPurchaseDisplaySourceRef.current,display);
+  assert.equal(source.snapshot.playerHp,53);assert.equal(source.snapshot.playerMp,39,"no partial snapshot is recertified");
+  p.scope.npcBuySelectedRef.current=77;assert.equal(p.dispatchDurableNpcPurchase(77,1),true);
+  assert.deepEqual(f.ownerWires().map(w=>w.action.kind),["begin","quote"]);assert.equal(f.abi.ops("reserve").length,0);
+  f.quote();assert.equal(f.ownerWires().filter(w=>w.action.kind==="purchase").length,1);assert.equal(f.abi.ops("reserve").length,1);
+});
+
+test("Source32 actual Page durable eligibility fences economic role death and real NPC source changes before quote",()=>{
+  const changes={
+    gold:w=>{w.gold++;},credit:w=>{w.credit++;},bagQuantity:w=>{w.inventoryItems[0].quantity++;},
+    bagUid:w=>{w.inventoryItems[0].exactUniqueId="9007199254740994";},
+    equipment:w=>{w.equipmentItems=[copy(w.inventoryItems[0])];},belt:w=>{w.beltItems=[copy(w.inventoryItems[0])];},
+    capacity:w=>{w.inventoryCapacity--;},weight:w=>{w.currentWeight++;},maxWeight:w=>{w.maxWeight--;},
+    level:w=>{w.entities[0].level++;},class:w=>{w.entities[0].classKey="Wizard";},
+    dead:w=>{w.entities[0].dead=true;},zeroHp:w=>{w.playerHp=0;},negativeHp:w=>{w.playerHp=-1;},
+    invalidHp:w=>{w.playerHp=Infinity;},negativeMp:w=>{w.playerMp=-1;},missingMp:w=>{delete w.playerMp;},
+    map:w=>{w.mapFileName="other";},
+    npcName:w=>{w.entities.find(e=>e.objectId==="50").name="Other NPC";},
+    npcMissing:w=>{w.entities=w.entities.filter(e=>e.objectId!=="50");},
+    mail:w=>{w.stage5Systems.mail=[{gold:999}];},
+    session:(_w,s)=>{s.equipmentSessionGenerationRef.current++;},
+    connection:(_w,s)=>{s.equipmentConnectionGenerationRef.current++;},
+    account:(_w,s)=>{s.accountIdRef.current="foreign";},
+    character:(_w,s)=>{s.socialCharacterIndexRef.current.current++;},
+    socket:(_w,s)=>{s.socketRef.current={readyState:1,send:()=>assert.fail("foreign socket")};},
+    catalog:(_w,s)=>{s.npcShopServiceRef.current.buyItems[0].price++;},
+    stock:(_w,s)=>{s.npcShopServiceRef.current.buyItems[0].count--;},
+  };
+  for(const [name,change] of Object.entries(changes)){
+    const f=s32PageOwner(),p=f.page,source=p.scope.npcPurchaseEconomicSourceRef.current,display=p.scope.npcPurchaseDisplaySourceRef.current;
+    s32ChangeDisplay(f,change);p.scope.npcBuySelectedRef.current=77;
+    const current=p.readNpcGoldBuyCurrent();assert(current===null||current.blocked,name+" cannot advertise durable eligibility");
+    assert.equal(p.dispatchDurableNpcPurchase(77,1),false,name);assert.equal(f.ownerWires().length,1,name);
+    assert.equal(f.abi.ops("reserve").length,0,name);assert.equal(f.ownerWires().some(w=>w.action.kind==="purchase"),false,name);
+    assert.equal(p.scope.npcPurchaseEconomicSourceRef.current,source,name+" cannot retag a witness");
+    assert.equal(p.scope.npcPurchaseDisplaySourceRef.current,display,name+" cannot create a partial witness");
+  }
+});
+
+const s32BagUi=loadPearlBuyDependency("../lib/bevy-bag-ui.ts",{
+  "./world-model/item-identity":npcPureIdentity,"./bag-belt-gesture":loadPearlBuyDependency("../lib/bag-belt-gesture.ts")});
+const s32NpcUi=loadPearlBuyDependency("../lib/bevy-npc-shop-ui.ts",{"./bevy-bag-ui":s32BagUi});
+function s32NativePage(){
+  const f=s32PageOwner(),p=f.page,snapshots=[],edges=[];let status=null,sink=null,onStatus=null;
+  const runtime={getMir2NpcShopUiCapabilities:()=>JSON.stringify({schemaVersion:1,npcShopUiAbiVersion:1,npcShopIntentAbiVersion:1,compiled:true,startup:true}),
+    setMir2NpcShopUiSnapshot:json=>{snapshots.push(JSON.parse(json));return true;},
+    getMir2NpcShopUiStatus:()=>{onStatus?.();return JSON.stringify(status??{runGeneration:0});},
+    setMir2NpcShopUiIntentSink:callback=>{sink=callback;},clearMir2NpcShopUiIntentSink:()=>{sink=null;},
+    setMir2NpcShopUiPointerEdge:json=>{edges.push(JSON.parse(json));return true;},withdrawMir2NpcShopUiSnapshot:()=>true};
+  const host=new s32NpcUi.NpcShopHost({runtime,read:()=>p.readNpcShopUiInput(),now:()=>100,onOwner:()=>{},onState:()=>{},
+    onIntent:intent=>p.dispatchBevyNpcShopIntent(intent)});
+  // Match the hook's render wrapper while retaining the real production Host.
+  const ui={readHostIdentity:()=>host};
+  for(const key of ["blocksInput","readStatus","pointerContext","pointer","allows","claim","claimCurrent","deferRetirement","withdraw"])
+    ui[key]=host[key].bind(host);
+  p.scope.npcShopUiIngressRef.current=ui;
+  const router=new s32NpcUi.NpcShopPointerRouter();
+  function echo(){
+    const s=snapshots.at(-1);assert(s,"only actually published snapshots are painted");
+    status={...Object.fromEntries(["runGeneration","connectionGeneration","sessionGeneration","ownerRevision","playerObjectId"].map(k=>[k,s[k]])),
+      frame:(status?.frame??0)+1,ready:true,inputEnabled:s.inputEnabled,appliedRevision:s.revision,appliedModelRevision:s.modelRevision,
+      appliedPresentationRevision:s.presentationRevision,appliedServiceRevision:s.serviceRevision,appliedCatalogRevision:s.catalogRevision,
+      coreAuthorityRevision:s.coreAuthorityRevision,controlRevision:"7",selectedId:77,quantity:1,startIndex:0,feedback:copy(s.feedback),
+      inputRegions:[{left:220,top:217,width:244,height:334},{left:474,top:251,width:330,height:80}],error:null};
+  }
+  function paint(){host.tick();echo();host.tick();echo();host.tick();assert(host.pointerContext());}
+  function buy(up){const c=host.pointerContext();assert(c);return {proof:c.proof,
+    gesture:{pointerId:up.pointerId,downSequence:up.downSequence,sequence:up.sequence,origin:up.origin,button:up.button},
+    intentSequence:1,action:{type:"buy"},selectedId:77,quantity:1,startIndex:0,preentryWithdraw:false,
+    command:{type:"buyItem",itemIndex:77,count:1,panelType:0}};}
+  return {...f,host,ui,router,edges,snapshots,paint,buy,get status(){return status;},set onStatus(fn){onStatus=fn;},emit:intent=>sink(JSON.stringify(intent))};
+}
+test("Source32 actual Native stale HP gesture cancels and a fresh painted click sends exactly one durable quote",()=>{
+  const f=s32NativePage();f.paint();const old=f.host.pointerContext(),down=f.router.down(old,1,0,337,533);assert(down);assert(f.host.pointer(down));
+  s32ChangeDisplay(f,w=>{w.playerHp=34;w.playerMp=0;w.entities[0].hp=34;w.entities.find(e=>e.objectId==="900").hp=1;});
+  assert.equal(f.host.pointerContext(),null,"old HP model must not admit a stale terminal");
+  const staleUp=f.router.edge("up",1,337,533);assert(staleUp);assert(f.host.pointer(staleUp));assert.equal(f.edges.at(-1).phase,"cancel");
+  assert.equal(f.ownerWires().length,1);assert.equal(f.abi.ops("reserve").length,0);
+  f.paint();const fresh=f.host.pointerContext();assert.notEqual(fresh.proof.modelRevision,old.proof.modelRevision);
+  const nextDown=f.router.down(fresh,2,0,337,533);assert(nextDown);assert(f.host.pointer(nextDown));
+  const nextUp=f.router.edge("up",2,337,533);assert(nextUp);assert(f.host.pointer(nextUp));
+  assert.equal(f.emit(f.buy(nextUp)),true);assert.deepEqual(f.ownerWires().map(w=>w.action.kind),["begin","quote"]);
+  assert.deepEqual(f.page.scope.npcPurchaseActionRef.current,{route:"durable",stage:"quoteSent",reason:null});
+});
+
+test("Source32 actual Native records the first changed-source refusal without quote or raw source diagnostics",()=>{
+  for(const [name,change,reason] of [
+    ["currency",w=>{w.credit++;},"economySourceChanged"],
+    ["inventory",w=>{w.inventoryItems[0].quantity++;},"captureBlocked"],
+    ["death",w=>{w.playerHp=0;w.entities[0].dead=true;},"captureBlocked"],
+  ]){
+    const f=s32NativePage();f.paint();const c=f.host.pointerContext(),down=f.router.down(c,1,0,337,533);assert(down);assert(f.host.pointer(down));
+    const up=f.router.edge("up",1,337,533);assert(up);assert(f.host.pointer(up));const intent=f.buy(up);
+    // A readonly runtime getter may synchronously deliver an ordinary packet.
+    // Change the display after the first UI source read, before Page captures it.
+    let changed=false;f.onStatus=()=>{if(!changed&&f.page.scope.npcPurchaseActionRef.current?.stage==="requested"){
+      changed=true;s32ChangeDisplay(f,change);
+    }};
+    assert.equal(f.emit(intent),false,name);assert(changed,name);assert.equal(f.ownerWires().length,1,name);
+    assert.equal(f.abi.ops("reserve").length,0,name);
+    assert.deepEqual(f.page.scope.npcPurchaseActionRef.current,{route:"durable",stage:"rejected",reason},name);
+    assert.deepEqual(Object.keys(f.page.scope.npcPurchaseActionRef.current).sort(),["reason","route","stage"]);
+  }
+});
+
+test("Source32 actual durable quote continuation still refuses changed position economy role and death before reserve",()=>{
+  for(const [name,change] of [
+    ["range",w=>{w.entities[0].x+=100;}],["gold",w=>{w.gold++;}],
+    ["uid",w=>{w.inventoryItems[0].exactUniqueId="9007199254740994";}],
+    ["death",w=>{w.playerHp=0;w.entities[0].dead=true;}],
+    ["role",(_w,s)=>{s.socialCharacterIndexRef.current.current++;}],
+    ["service",(_w,s)=>{s.npcShopServiceRef.current={...s.npcShopServiceRef.current};}],
+  ]){
+    const f=s32PageOwner(),p=f.page;p.scope.npcBuySelectedRef.current=77;assert(p.dispatchDurableNpcPurchase(77,1));
+    s32ChangeDisplay(f,change);f.quote();
+    assert.deepEqual(f.ownerWires().map(w=>w.action.kind),["begin","quote"],name);
+    assert.equal(f.abi.ops("reserve").length,0,name);assert.equal(f.abi.ops("enter").length,0,name);
+  }
+});
+
+function s33SendNativeQuote(f){
+  f.paint();const c=f.host.pointerContext(),down=f.router.down(c,2,0,337,533);assert(down);assert(f.host.pointer(down));
+  const up=f.router.edge("up",2,337,533);assert(up);assert(f.host.pointer(up));assert.equal(f.emit(f.buy(up)),true);
+  assert.deepEqual(f.ownerWires().map(w=>w.action.kind),["begin","quote"]);
+}
+test("Source33 actual Native quote continuation survives render wrappers of the same Host only",()=>{
+  const f=s32NativePage();s33SendNativeQuote(f);
+  const before=f.ui;f.page.scope.npcShopUiIngressRef.current={...before};
+  assert.notEqual(f.page.scope.npcShopUiIngressRef.current,before);
+  assert.equal(f.page.scope.npcShopUiIngressRef.current.readStatus,before.readStatus);
+  assert.equal(f.page.scope.npcShopUiIngressRef.current.readHostIdentity(),f.host);
+  f.quote(copy(f.snapshot));
+  assert.equal(f.abi.ops("reserve").length,1);assert.equal(f.abi.ops("enter").length,1);
+  assert.equal(f.ownerWires().filter(w=>w.action.kind==="purchase").length,1);
+});
+test("Source33 actual Native quote continuation rejects a replaced or cleaned up Host with a finite reason",()=>{
+  for(const identity of [{},null]){
+    const f=s32NativePage();s33SendNativeQuote(f);
+    f.page.scope.npcShopUiIngressRef.current={...f.ui,readHostIdentity:()=>identity};
+    f.quote(copy(f.snapshot));
+    assert.equal(f.abi.ops("reserve").length,0);assert.equal(f.abi.ops("enter").length,0);
+    assert.equal(f.ownerWires().filter(w=>w.action.kind==="purchase").length,0);
+    assert.deepEqual(f.page.scope.npcPurchaseActionRef.current,{route:"durable",stage:"rejected",reason:"uiHostChanged"});
+  }
+});
+test("Source33 actual Native quote continuation records every existing UI status and proof refusal",()=>{
+  for(const [key,value,reason] of [
+    ["ready",false,"uiStatusChanged"],["inputEnabled",false,"uiStatusChanged"],["error","controlled renderer error","uiStatusChanged"],
+    ["runGeneration",999,"uiStatusChanged"],["connectionGeneration",999,"uiStatusChanged"],["sessionGeneration",999,"uiStatusChanged"],
+    ["ownerRevision",999,"uiStatusChanged"],["playerObjectId",999,"uiStatusChanged"],
+    ["appliedRevision",999,"uiStatusChanged"],["appliedModelRevision",999,"uiStatusChanged"],
+    ["appliedPresentationRevision",999,"uiStatusChanged"],["appliedServiceRevision",999,"uiStatusChanged"],
+    ["appliedCatalogRevision",999,"uiStatusChanged"],["coreAuthorityRevision","999","uiStatusChanged"],
+    ["selectedId",78,"uiProofChanged"],["quantity",2,"uiProofChanged"],["startIndex",1,"uiProofChanged"],
+  ]){
+    const f=s32NativePage();s33SendNativeQuote(f);f.status[key]=value;f.quote(copy(f.snapshot));
+    assert.equal(f.abi.ops("reserve").length,0,key);assert.equal(f.abi.ops("enter").length,0,key);
+    assert.equal(f.ownerWires().filter(w=>w.action.kind==="purchase").length,0,key);
+    assert.deepEqual(f.page.scope.npcPurchaseActionRef.current,{route:"durable",stage:"rejected",reason},key);
+  }
+});
+test("Source33 actual Native same Host wrappers cannot preserve a changed socket session full witness or selection",()=>{
+  for(const [key,change] of [
+    ["socket",f=>{f.page.scope.socketRef.current={...f.page.socket};}],
+    ["session",f=>{f.page.scope.equipmentSessionGenerationRef.current++;}],
+    ["gold",f=>s32ChangeDisplay(f,w=>{w.gold++;})],
+    ["uid",f=>s32ChangeDisplay(f,w=>{w.inventoryItems[0].exactUniqueId="9007199254740994";})],
+    ["death",f=>s32ChangeDisplay(f,w=>{w.playerHp=0;w.entities[0].dead=true;})],
+    ["selection",f=>{f.page.scope.npcBuySelectedRef.current=78;}],
+  ]){
+    const f=s32NativePage();s33SendNativeQuote(f);f.page.scope.npcShopUiIngressRef.current={...f.ui};change(f);f.quote();
+    assert.equal(f.abi.ops("reserve").length,0,key);assert.equal(f.abi.ops("enter").length,0,key);
+    assert.equal(f.ownerWires().filter(w=>w.action.kind==="purchase").length,0,key);
+  }
 });
 
 test("Source31 actual Page equal periodic source and HP XP full fallback preserve first and second buy custody",()=>{
@@ -3300,6 +3505,9 @@ function pageNpcActivationFixture() {
   const sent = [], moves = [], trace = [], attacks = []; let now = 1000;
   const scope = {
     self, world: initial, worldRef: { current: initial },
+    combatForceAttackRef: { current: false },
+    appendLog: () => undefined,
+    t: key => key,
     pendingNpcInteractRef: { current: null }, npcCallGuardRef: { current: null },
     queuedMoveIntentRef: { current: null }, movementPlanRef: { current: null },
     stopOnchainMining: () => trace.push("stopMining"),

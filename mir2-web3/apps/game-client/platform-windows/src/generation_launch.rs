@@ -1,8 +1,10 @@
 //! Authenticated generation mounting and real interactive-login readiness.
 //! This path never selects a catalog from an unsigned environment override.
 use bevy::prelude::*;
-use mir2_resource_pack::PackStore;
-use mir2_windows_updater::{fs_safe, generation, generation_runtime, platform::GameGuard};
+use mir2_resource_pack::{PackStore, ScopedPackStore};
+use mir2_windows_updater::{
+    fs_safe, generation, generation_runtime, platform::GameGuard, progressive::ProgressiveDownloads,
+};
 use std::{
     collections::BTreeMap,
     path::{Path, PathBuf},
@@ -16,8 +18,8 @@ struct PackedLaunch {
     // These actual handles quarantine the running generation even if the
     // launcher exits unexpectedly. They live until the app itself is dropped.
     _lease: generation_runtime::GameLease,
-    _legacy_guard: GameGuard,
-    _store: Arc<PackStore>,
+    _legacy_guard: Option<GameGuard>,
+    _store: Arc<crate::packed_assets::MountedStore>,
     _generation_directory: fs_safe::DirectoryLease,
     _config: fs_safe::FileLease,
     attempt: String,
@@ -131,22 +133,44 @@ fn load_inner() -> anyhow::Result<LaunchContext> {
                 .canonicalize()?,
         "wrong executable for generation"
     );
-    let mut legacy_guard = GameGuard::new(&install_root.join("game/mir2-platform-windows.exe"))?;
-    ensure!(!legacy_guard.is_running()?, "legacy game is running");
-    ensure!(
-        legacy_guard.excluded(),
-        "legacy executable could not be excluded while packed game runs"
-    );
+    let legacy_guard = legacy_exclusion_for_selected_generation(
+        &install_root,
+        &digest,
+        verified.manifest.sequence,
+        &attempt,
+    )?;
     // NativeSessionConfig will read this exact file after mounting. Retain a
     // compatible read lease rather than trusting an earlier pathname hash.
     let config_path = supplied_root.join(&verified.manifest.signed_config.path);
     let config = fs_safe::FileLease::verified(&config_path, &verified.manifest.signed_config)?;
-    let store = Arc::new(PackStore::open(
-        install_root.join("objects/packs"),
-        &verified.catalog_bytes,
-        &verified.manifest.catalog.sha256,
-    )?);
-    crate::assets::install_packed_store(store.clone()).map_err(anyhow::Error::msg)?;
+    let store = if let Some(scope_bytes) = &verified.required_scope_bytes {
+        let scope_entry = verified
+            .manifest
+            .required_scope
+            .as_ref()
+            .context("missing signed required scope")?;
+        let scoped = Arc::new(ScopedPackStore::open(
+            install_root.join("objects/packs"),
+            &verified.catalog_bytes,
+            &verified.manifest.catalog.sha256,
+            scope_bytes,
+            &scope_entry.sha256,
+        )?);
+        crate::assets::verify_progressive_startup_assets(&scoped).map_err(anyhow::Error::msg)?;
+        Arc::new(crate::packed_assets::MountedStore::Progressive(
+            ProgressiveDownloads::start(&install_root, &verified, scoped)?,
+        ))
+    } else {
+        Arc::new(crate::packed_assets::MountedStore::Complete(Arc::new(
+            open_resource_store(
+                install_root.join("objects/packs"),
+                &verified.catalog_bytes,
+                &verified.manifest.catalog.sha256,
+                crate::capture::resource_read_profiling_requested(),
+            )?,
+        )))
+    };
+    crate::packed_assets::install_mounted(store.clone()).map_err(anyhow::Error::msg)?;
     crate::capture::install_verified_packed_provenance(crate::capture::VerifiedPackedProvenance {
         generation_manifest_sha256: verified.manifest_sha256.clone(),
         catalog_sha256: verified.manifest.catalog.sha256.clone(),
@@ -175,11 +199,81 @@ fn load_inner() -> anyhow::Result<LaunchContext> {
     })))
 }
 
+/// Diagnostics are opt-in, but both paths authenticate every pack before the
+/// same required startup reads. Enable before those reads so the observation
+/// does not lose dependencies loaded before Bevy/capture plugin construction.
+fn open_resource_store(
+    objects: impl AsRef<Path>,
+    catalog_bytes: &[u8],
+    catalog_sha256: &str,
+    profile_requested: bool,
+) -> anyhow::Result<PackStore> {
+    let store = if profile_requested {
+        PackStore::open_profiled(objects, catalog_bytes, catalog_sha256)?
+    } else {
+        PackStore::open(objects, catalog_bytes, catalog_sha256)?
+    };
+    crate::assets::verify_packed_startup_assets(&store).map_err(anyhow::Error::msg)?;
+    Ok(store)
+}
+
+/// Called only after the generation CMS/catalog/executable/attempt checks.
+/// A packed-only installation has no legacy image to exclude. Any actual old
+/// image still requires its lifetime write/share-zero guard; a retained legacy
+/// rollback target may never silently disappear. No selector is created here.
+fn legacy_exclusion_for_selected_generation(
+    install_root: &Path,
+    digest: &str,
+    sequence: u64,
+    attempt: &str,
+) -> anyhow::Result<Option<GameGuard>> {
+    use anyhow::{ensure, Context};
+    let record = generation::active_record(install_root)?.context("missing generation selector")?;
+    ensure!(
+        matches!(&record.active, generation::Selection::Generation { manifest_sha256, sequence: selected }
+            if manifest_sha256 == digest && *selected == sequence)
+            && record.attempt == attempt,
+        "generation selector changed during launch"
+    );
+    let quarantine = fs_safe::target(install_root, &format!("state/quarantine/{digest}.json"))?;
+    match std::fs::symlink_metadata(quarantine) {
+        Ok(_) => anyhow::bail!("generation is quarantined"),
+        Err(error) if error.kind() == std::io::ErrorKind::NotFound => {}
+        Err(error) => return Err(error.into()),
+    }
+    let legacy_exe = fs_safe::target(install_root, "game/mir2-platform-windows.exe")?;
+    match std::fs::symlink_metadata(&legacy_exe) {
+        Err(error) if error.kind() == std::io::ErrorKind::NotFound => {
+            ensure!(
+                !matches!(
+                    record.previous,
+                    Some(generation::Selection::LegacyV4 { .. })
+                ),
+                "retained legacy rollback executable is missing"
+            );
+            return Ok(None);
+        }
+        Err(error) => return Err(error.into()),
+        Ok(_) => {
+            fs_safe::regular(&legacy_exe)?;
+        }
+    }
+    let mut guard = GameGuard::new(&legacy_exe)?;
+    ensure!(!guard.is_running()?, "legacy game is running");
+    ensure!(
+        guard.excluded(),
+        "legacy executable could not be excluded while packed game runs"
+    );
+    guard.verify_excluded()?;
+    Ok(Some(guard))
+}
+
 impl LaunchContext {
     pub(crate) fn configure_app(self, app: &mut App) {
         if let Some(context) = self.0 {
             app.insert_resource(context)
                 .add_systems(Update, report_interactive_login);
+            crate::resource_status::install(app);
         }
     }
 }
@@ -188,13 +282,18 @@ fn report_interactive_login(world: &mut World) {
     let Some(context) = world.get_resource::<PackedLaunch>() else {
         return;
     };
-    if context.ready_sent || context.failed {
+    if context.failed {
         return;
     }
     if let Some(error) = crate::assets::packed_error() {
         eprintln!("Packed generation resource failure: {error}");
         world.resource_mut::<PackedLaunch>().failed = true;
         world.write_message(AppExit::error());
+        return;
+    }
+    // Ready is a one-time login handshake, not permission to ignore later
+    // authenticated-resource corruption during a longer gameplay session.
+    if context.ready_sent {
         return;
     }
     if !crate::assets::packed_login_ready(world) {
@@ -214,3 +313,7 @@ fn report_interactive_login(world: &mut World) {
         }
     }
 }
+
+#[cfg(all(test, windows))]
+#[path = "generation_launch_tests.rs"]
+mod tests;

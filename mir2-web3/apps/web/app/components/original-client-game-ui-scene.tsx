@@ -604,7 +604,7 @@ function GameUiSceneInner({
           onClose={() => changeGameShopOpen(false)}
         />
       ) : null}
-      {npcShopService && !(bevyNpcShopUiActive && npcShopTab === "buy") ? (
+      {npcShopService && !((bevyNpcShopUiActive || bevyNpcShopUiTransitioning) && npcShopTab === "buy") ? (
         <NpcShopWindow
           key={`${npcShopService.serviceRevision}:${npcShopService.catalogRevision}`}
           t={t}

@@ -96,6 +96,18 @@ pub(crate) fn zone_map_collision_data(map_file_name: &str) -> Option<ZoneMapColl
     } else {
         runtime_map_collision_data(map_file_name)?
     };
+    Some(project_zone_collision_data(map_file_name, collision))
+}
+
+/// Select the activated world's real terrain in an isolated fixture without
+/// mutating the process-wide starter/full-world switch used by other tests.
+#[cfg(any(test, feature = "test-support"))]
+pub(crate) fn zone_full_world_collision_for_test(map_file_name: &str) -> Option<ZoneMapCollisionData> {
+    let collision = runtime_world_map_collision_data(map_file_name)?;
+    Some(project_zone_collision_data(map_file_name, (*collision).clone()))
+}
+
+fn project_zone_collision_data(map_file_name: &str, collision: RuntimeMapCollisionData) -> ZoneMapCollisionData {
     // The Zone merges doors into this set and mutates it when they open/close.
     // Keep its owned projection separate from the cached immutable terrain.
     let mut blocked_cells = collision.blocked_set.as_ref().clone();
@@ -110,12 +122,12 @@ pub(crate) fn zone_map_collision_data(map_file_name: &str) -> Option<ZoneMapColl
             entry.push(cell);
         }
     }
-    Some(ZoneMapCollisionData {
+    ZoneMapCollisionData {
         bounds: collision.collision.region_bounds,
         blocked_cells,
         transfer_source_cells,
         doors,
-    })
+    }
 }
 
 pub(super) fn is_safe_zone_point(

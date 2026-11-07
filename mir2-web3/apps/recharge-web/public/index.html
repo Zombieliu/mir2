@@ -28,7 +28,7 @@
       <p class="eyebrow"><span class="tiny-star">✦</span> <span id="hero-eyebrow">YOUR JOURNEY, REMEMBERED</span></p>
       <h1 id="hero-headline">Build a legacy.<br>Carry it forward.</h1>
       <p id="hero-description" class="hero-description">Reach milestones in the test server and register your rewards for public launch.</p>
-      <div class="mode-note"><span class="mode-dot"></span><strong data-i18n="testMode">Test payments</strong><span data-i18n="testDetail">No real money is charged.</span></div>
+      <div id="payment-mode" class="mode-note" hidden><span class="mode-dot"></span><strong id="payment-mode-label"></strong><span id="payment-mode-detail"></span></div>
       <span class="hero-seal" aria-hidden="true">N</span>
     </section>
     <div class="portal-grid">
@@ -54,12 +54,13 @@
       <section id="activities-view" class="panel activities-panel" aria-labelledby="nav-activities"><div id="activity-content"></div></section>
       <section id="player-view" class="panel player-panel" aria-labelledby="nav-player" hidden><div id="player-content"></div></section>
       <section id="recharge-view" class="recharge-panel panel" aria-labelledby="nav-recharge" hidden>
-        <div class="section-heading"><div><div class="section-number">02 <span></span></div><h2 data-i18n="rechargeTitle">Choose your Credits</h2></div><span class="stripe-badge" data-i18n="safePayment">Payment with Stripe</span></div>
+        <div class="section-heading"><div><div class="section-number">02 <span></span></div><h2 data-i18n="rechargeTitle">Choose your Credits</h2></div><span id="payment-badge" class="stripe-badge" hidden></span></div>
         <p class="muted" data-i18n="serverPrices">Prices and Credits are confirmed by the game server.</p>
+        <div class="payment-channel"><label for="payment-provider" data-i18n="paymentChannel">Payment channel</label><select id="payment-provider" disabled><option value="" data-i18n="chooseChannel">Choose a payment channel</option></select></div>
         <div id="offers" class="offers" aria-busy="false"><p class="login-placeholder" data-i18n="loginFirst">Sign in to view the available recharge amounts.</p></div>
         <div id="checkout-panel" class="checkout-panel" hidden>
           <p id="checkout-message"></p>
-          <a id="checkout-link" class="primary" target="_blank" rel="noopener noreferrer" data-i18n="continuePay" hidden>Continue to Stripe</a>
+          <a id="checkout-link" class="primary" target="_blank" rel="noopener noreferrer" hidden></a>
           <button id="new-order" type="button" class="text-button" data-i18n="newOrder" hidden>Start another recharge</button>
         </div>
         <div class="monthly-note"><div class="card-symbol" aria-hidden="true">30<small>DAYS</small></div><div><strong data-i18n="monthlyTitle">30-day monthly card</strong><p id="monthly-price" data-i18n="monthlyNote">Buy the monthly card with Credits in the game shop. Collect it from mail and use it to activate.</p></div></div>

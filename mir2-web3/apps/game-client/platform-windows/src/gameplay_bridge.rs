@@ -3121,6 +3121,23 @@ fn release_unsent_guild_rank_rename(
     }
 }
 
+/// Resource waiting is an explicit local refusal, not a transport retry.
+/// Release only an unsent operation; never release one accepted by transport.
+fn retain_unsent_quest_intent(
+    intent: QuestUiIntent,
+    resources_waiting: bool,
+    pending: Option<&mut PendingOperations>,
+    retry: &mut Vec<QuestUiIntent>,
+) {
+    if resources_waiting {
+        if let (Some(pending), Some(key)) = (pending, intent.pending_key()) {
+            pending.release(&key);
+        }
+    } else {
+        retry.push(intent);
+    }
+}
+
 pub fn forward_quest_ui_intents(
     shell: Res<NativeShellModel>,
     mut procurement: Option<ResMut<mir2_client_bevy::native_procurement::ProcurementModel>>,
@@ -3724,7 +3741,8 @@ pub fn forward_quest_ui_intents(
                 QuestUiIntent::AttackTarget { .. } | QuestUiIntent::AttackDirection { .. }
             )
         {
-            retry_intents.push(retry_intent);
+            retain_unsent_quest_intent(retry_intent, crate::packed_assets::waiting(),
+                operation_pending.as_deref_mut(), &mut retry_intents);
         }
     }
     let dropped = intents.retain_failed_intents(retry_intents);
@@ -5493,6 +5511,21 @@ mod guild_creation_tests;
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn asset_wait_discards_unsent_quest_and_releases_key_without_erasing_transport_retry() {
+        let intent = QuestUiIntent::AcceptQuest { npc_index: 12, quest_index: 7 };
+        let key = intent.pending_key().unwrap();
+        let mut pending = PendingOperations::default();
+        let mut retry = Vec::new();
+        assert!(pending.try_begin(key.clone()));
+        retain_unsent_quest_intent(intent.clone(), true, Some(&mut pending), &mut retry);
+        assert!(!pending.contains(&key));
+        assert!(retry.is_empty(), "readiness must not release a stale request burst");
+        assert!(pending.try_begin(key.clone()));
+        retain_unsent_quest_intent(intent, false, Some(&mut pending), &mut retry);
+        assert!(pending.contains(&key), "ordinary network failure retains its operation");
+        assert_eq!(retry.len(), 1);
+    }
     #[test]
     fn procurement_npc_entry_requires_current_enabled_dialog_and_authenticated_character() {
         use bevy::prelude::{App,Update};

@@ -1,6 +1,7 @@
 import type { Locale } from "@/lib/site-copy";
 import { createMarketProductCopies } from "@/lib/market-copy";
 import { applyProductFacts } from "@/lib/release-facts";
+import { getLegalPresentation, legalSourceDocuments } from "@/lib/legal-content";
 
 export const productSections = ["updates", "roadmap", "community", "press", "support", "status"] as const;
 export type ProductSection = (typeof productSections)[number];
@@ -9,6 +10,7 @@ export const legalDocuments = ["privacy", "terms", "refunds", "ai-data"] as cons
 export type LegalDocument = (typeof legalDocuments)[number];
 
 export type ProductCard = {
+  id?: "website" | "game-client" | "atlas" | "ai-services";
   eyebrow: string;
   title: string;
   copy: string;
@@ -268,10 +270,10 @@ const zhCN: ProductCopy = {
       title: "把可用性和产品完成度分开说明。",
       copy: "服务在线不等于所有候选功能已完成。这里分别展示官网、游戏入口、世界数据与 AI 服务状态。",
       cards: [
-        { eyebrow: "PUBLIC SITE", title: "官网", copy: "四语言官网与核心内容页面。" },
-        { eyebrow: "GAME CLIENT", title: "浏览器客户端", copy: "公开候选版本；首次进入需要加载资源。" },
-        { eyebrow: "ATLAS", title: "天机阁", copy: "原型公开数据；真实索引服务尚未接入。" },
-        { eyebrow: "AI SERVICES", title: "AI 与结算", copy: "产品设计阶段；不会在未确认前自动扣款。" },
+        { id: "website", eyebrow: "PUBLIC SITE", title: "官网", copy: "16 种语言官网与核心内容页面。" },
+        { id: "game-client", eyebrow: "GAME CLIENT", title: "浏览器客户端", copy: "开发中的邀请测试入口；首次进入需要加载资源。" },
+        { id: "atlas", eyebrow: "ATLAS", title: "天机阁", copy: "原型公开数据；真实索引服务尚未接入。" },
+        { id: "ai-services", eyebrow: "AI SERVICES", title: "AI 与结算", copy: "产品设计阶段；不会在未确认前自动扣款。" },
       ],
     },
   },
@@ -437,8 +439,8 @@ const en: ProductCopy = {
       { eyebrow: "BILLING", title: "Billing and refunds", copy: "When payments open, billing, cancellation and refunds live in Account and the Refund Policy." },
     ] },
     status: { eyebrow: "SERVICE STATUS", title: "Availability is not the same as completion.", copy: "The website, client, public data and AI services report status separately.", cards: [
-      { eyebrow: "PUBLIC SITE", title: "Website", copy: "Sixteen market locales and core product pages." }, { eyebrow: "GAME CLIENT", title: "Browser client", copy: "Public Candidate; first entry downloads assets." },
-      { eyebrow: "ATLAS", title: "Atlas", copy: "Prototype public data; production index is not connected." }, { eyebrow: "AI SERVICES", title: "AI and billing", copy: "Product stage; no automatic charge before confirmation." },
+      { id: "website", eyebrow: "PUBLIC SITE", title: "Website", copy: "Sixteen market locales and core product pages." }, { id: "game-client", eyebrow: "GAME CLIENT", title: "Browser client", copy: "In-development invited testing; first entry downloads assets." },
+      { id: "atlas", eyebrow: "ATLAS", title: "Atlas", copy: "Prototype public data; production index is not connected." }, { id: "ai-services", eyebrow: "AI SERVICES", title: "AI and billing", copy: "Product stage; no automatic charge before confirmation." },
     ] },
   },
   updates: [
@@ -599,8 +601,9 @@ const ko: ProductCopy = {
 
 const productTranslations: Record<Locale, ProductCopy> = Object.assign({ "zh-CN": zhCN, en, ja, ko }, createMarketProductCopies(en));
 
-export function getProductCopy(locale: Locale) {
-  return applyProductFacts(locale, productTranslations[locale]);
+export function getProductCopy(locale: Locale): ProductCopy {
+  const copy = applyProductFacts(locale, productTranslations[locale]);
+  return { ...copy, chrome: { ...copy.chrome, ...getLegalPresentation(locale).labels }, legal: legalSourceDocuments };
 }
 
 export function isProductSection(value: string): value is ProductSection {

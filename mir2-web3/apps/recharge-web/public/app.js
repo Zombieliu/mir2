@@ -1,4 +1,4 @@
-import {CONFIG, IntentJournal, PortalError, PortalSession, accountScope} from "./core.js";
+import {CONFIG, PAYMENT_PROVIDERS, IntentJournal, PortalError, PortalSession, accountScope} from "./core.js";
 import {LOCALES, normalizeLocale} from "./locales.js";
 import {activityText, clearedPortalSession, currentPortalResult, portalTab, rewardView,
   renderActivities, renderCampaignRules, renderPlayerCenter, sessionEndNotice} from "./activities.js";
@@ -9,13 +9,15 @@ try { savedLocale = localStorage.getItem("numeron-language"); } catch { /* Prefe
 let locale = normalizeLocale(savedLocale || navigator.language);
 const state = {epoch: 0, loggedIn: false, busy: false, scope: null, characterIndex: null,
   status: null, activities: null, activitiesFailed: false, tab: portalTab(location.hash),
-  offerId: null, checkout: null, notice: null, poll: null, checks: 0, lastRefresh: 0};
+  providerId: null, offerId: null, intent: null, checkout: null, notice: null, poll: null, checks: 0, lastRefresh: 0};
 const session = new PortalSession({onDisconnect: () => signOut(false)});
 // A storage getter may itself throw in privacy modes. Fail closed on checkout.
 let journal;
 try { journal = new IntentJournal(sessionStorage); } catch { journal = null; }
-const t = key => LOCALES[locale][key] || activityText(locale, key) || LOCALES[locale].serviceUnavailable;
+const t = key => (LOCALES[locale][key] || activityText(locale, key) || LOCALES[locale].serviceUnavailable)
+  .replaceAll("{provider}", PAYMENT_PROVIDERS[state.intent?.provider ?? state.providerId] ?? "");
 const number = value => new Intl.NumberFormat(locale).format(value);
+const selectedProvider = () => state.status?.paymentProviders.find(provider => provider.id === state.providerId);
 function node(tag, className, text) {
   const element = document.createElement(tag);
   if (className) element.className = className;
@@ -42,7 +44,9 @@ function setBusy(busy) {
   byId("offers").setAttribute("aria-busy", String(busy));
   byId("new-order").disabled = busy;
   byId("logout").disabled = busy;
-  for (const button of byId("offers").querySelectorAll("button")) button.disabled = busy || !state.status?.checkoutEnabled;
+  byId("payment-provider").disabled = busy || !!state.intent || !state.status || state.status.paymentProviders.length < 2;
+  for (const button of byId("offers").querySelectorAll("button"))
+    button.disabled = busy || !state.loggedIn || !selectedProvider() || !!state.intent && state.intent.offerId !== button.dataset.offerId;
   renderPortal();
 }
 function renderPortal() {
@@ -58,6 +62,10 @@ function renderPortal() {
   byId("campaign-rules").setAttribute("aria-label", t("phaseUnknown"));
   byId("recharge-help").hidden = state.tab !== "recharge";
   byId("order-section").hidden = state.tab !== "recharge" || !state.status;
+  const provider = state.intent ? {id:state.intent.provider, label:PAYMENT_PROVIDERS[state.intent.provider], livemode:state.intent.livemode} : selectedProvider();
+  byId("payment-mode").hidden = state.tab !== "recharge" || !provider;
+  byId("payment-mode-label").textContent = provider ? `${provider.label} · ${t(provider.livemode ? "liveMode" : "testMode")}` : "";
+  byId("payment-mode-detail").textContent = provider ? t(provider.livemode ? "liveDetail" : "testDetail") : "";
   const prefix = state.tab === "player" ? "player" : "activity";
   byId("hero-eyebrow").textContent = t(state.tab === "recharge" ? "eyebrow" : `${prefix}Eyebrow`);
   byId("hero-headline").textContent = t(state.tab === "recharge" ? "headline" : `${prefix}Headline`);
@@ -78,7 +86,7 @@ function syncActivityCharacters(characters) {
   }
   state.characterIndex = characters.some(character => character.index === previous) ? previous : characters[0]?.index ?? null;
   if (state.characterIndex !== previous) {
-    stopPoll(); state.status = null; state.offerId = null; state.checkout = null;
+    stopPoll(); state.status = null; state.providerId = null; state.offerId = null; state.intent = null; state.checkout = null;
     renderStatus();
   }
   if (state.characterIndex !== null) byId("character").value = String(state.characterIndex);
@@ -88,16 +96,30 @@ function selectCharacter(index) {
   if (state.busy || !state.activities?.characters.some(character => character.index === index)) return;
   byId("character").value = String(index); byId("character").dispatchEvent(new Event("change"));
 }
+function renderChannels() {
+  const providers = state.status?.paymentProviders ?? [], select = byId("payment-provider");
+  if (state.intent) state.providerId = state.intent.provider;
+  else if (!providers.some(provider => provider.id === state.providerId)) state.providerId = providers.length === 1 ? providers[0].id : null;
+  const placeholder = node("option", null, t("chooseChannel")); placeholder.value = ""; select.replaceChildren(placeholder);
+  for (const provider of providers) {
+    const option = node("option", null, `${provider.label} · ${t(provider.livemode ? "liveMode" : "testMode")}`);
+    option.value = provider.id; select.append(option);
+  }
+  select.value = state.providerId ?? "";
+  byId("payment-badge").hidden = !selectedProvider();
+  byId("payment-badge").textContent = t("safePayment");
+}
 function renderOffers() {
   const container = byId("offers"); container.replaceChildren();
-  if (state.loggedIn && !state.status?.offers.length) {
-    container.append(node("p", "login-placeholder", t(state.loggedIn ? "serviceUnavailable" : "loginFirst"))); return;
+  const provider = selectedProvider();
+  if (state.loggedIn && !provider?.offers.length) {
+    container.append(node("p", "login-placeholder", t(state.status?.paymentProviders.length && !provider ? "chooseChannel" : "serviceUnavailable"))); return;
   }
-  for (const offer of state.status?.offers ?? CONFIG.previewOffers) {
+  for (const offer of provider?.offers ?? CONFIG.previewOffers) {
     const button = node("button", "offer"); button.type = "button";
     button.dataset.offerId = offer.id;
     button.classList.toggle("selected", offer.id === state.offerId);
-    button.disabled = state.busy || !state.loggedIn || !state.status?.checkoutEnabled;
+    button.disabled = state.busy || !state.loggedIn || !provider || !!state.intent && state.intent.offerId !== offer.id;
     button.setAttribute("aria-pressed", String(offer.id === state.offerId));
     button.append(node("span", "offer-label", t("credits")), node("strong", "offer-credits", number(offer.credits)));
     const bottom = node("span", "offer-bottom");
@@ -125,19 +147,22 @@ function renderStatus() {
     const list = node("ul", "order-list");
     for (const order of value.orders) {
       const row = node("li", "order-row");
-      row.append(node("span", "order-id", order.id), node("span", `order-state ${order.state}`, t(order.state))); list.append(row);
+      const meta = node("span", "order-meta");
+      meta.append(node("span", "order-provider", PAYMENT_PROVIDERS[order.provider]), node("span", "order-id", order.id));
+      row.append(meta, node("span", `order-state ${order.state}`, t(order.state))); list.append(row);
     }
     orders.append(list);
   }
-  renderOffers(); renderCheckout(); setBusy(state.busy);
+  renderChannels(); renderOffers(); renderCheckout(); setBusy(state.busy);
 }
 function renderCheckout() {
-  byId("checkout-panel").hidden = !state.checkout;
+  byId("checkout-panel").hidden = !state.intent;
   byId("checkout-link").hidden = !state.checkout?.checkoutUrl;
   byId("checkout-link").removeAttribute("href");
   if (state.checkout?.checkoutUrl) byId("checkout-link").href = state.checkout.checkoutUrl;
-  byId("checkout-message").textContent = t(state.checkout?.checkoutUrl ? "checkoutReady" : "completed");
-  byId("new-order").hidden = !state.checkout;
+  byId("checkout-message").textContent = t(!state.checkout ? "unknown" : state.checkout.checkoutUrl ? "checkoutReady" : "completed");
+  byId("checkout-link").textContent = t("continuePay");
+  byId("new-order").hidden = !state.intent;
 }
 function renderLocale() {
   document.documentElement.lang = locale; document.documentElement.dir = locale === "ar" ? "rtl" : "ltr";
@@ -180,7 +205,7 @@ async function refresh(showNotice = true, includeActivities = true) {
     if (!currentPortalResult(state, epoch)) return;
     state.status = value; renderStatus();
     if (online) notice("onlinePending"); else if (showNotice) notice("refreshDone");
-    const current = value.orders.find(order => order.id === state.checkout?.orderId);
+    const current = value.orders.find(order => order.id === state.checkout?.orderId && order.provider === state.checkout?.provider);
     if (current && ["applied", "review"].includes(current.state)) {
       stopPoll(); state.checkout.checkoutUrl = null; renderCheckout();
     }
@@ -195,15 +220,17 @@ function pollAfterCheckout() {
   }, 15000);
 }
 async function createCheckout(offerId) {
-  if (state.busy || state.characterIndex === null || !state.status?.checkoutEnabled) return;
+  const provider = selectedProvider();
+  if (state.busy || state.characterIndex === null || !provider?.offers.some(offer => offer.id === offerId)
+    || state.intent && (state.intent.provider !== provider.id || state.intent.offerId !== offerId)) return;
   const epoch = state.epoch, index = state.characterIndex;
   setBusy(true); notice("creating");
   try {
     if (!journal) throw new PortalError("storageUnavailable");
     // Persist the nonce before sending. Clicking again after a timeout uses it.
-    const intent = journal.getOrCreate(state.scope, index, offerId);
-    state.offerId = offerId; renderOffers();
-    const result = await session.checkout(index, offerId, intent);
+    const intent = journal.getOrCreate(state.scope, index, offerId, provider.id);
+    state.offerId = offerId; state.intent = {provider: provider.id, offerId, livemode: provider.livemode}; renderStatus();
+    const result = await session.checkout(index, offerId, intent, provider.id);
     if (epoch !== state.epoch) return;
     state.checkout = result; renderCheckout(); notice(result.checkoutUrl ? "checkoutReady" : "completed");
     pollAfterCheckout();
@@ -268,15 +295,21 @@ byId("login-form").addEventListener("submit", async event => {
 });
 byId("character").addEventListener("change", async () => {
   ++state.epoch; stopPoll(); state.characterIndex = Number(byId("character").value);
-  state.status = null; state.offerId = null; state.checkout = null; renderStatus(); await refresh();
+  state.status = null; state.providerId = null; state.offerId = null; state.intent = null; state.checkout = null; renderStatus(); await refresh();
+});
+byId("payment-provider").addEventListener("change", () => {
+  if (state.busy || state.intent) { renderChannels(); return; }
+  state.providerId = state.status?.paymentProviders.some(provider => provider.id === byId("payment-provider").value)
+    ? byId("payment-provider").value : null;
+  state.offerId = null; renderStatus();
 });
 byId("refresh").addEventListener("click", () => refresh());
 byId("logout").addEventListener("click", () => signOut());
 byId("new-order").addEventListener("click", () => {
-  if (state.busy || !state.checkout || !window.confirm(t("newOrderConfirm"))) return;
+  if (state.busy || !state.intent || !window.confirm(t("newOrderConfirm"))) return;
   try {
-    journal.clear(state.scope, state.characterIndex, state.offerId);
-    state.checkout = null; state.offerId = null; stopPoll(); renderStatus();
+    journal.clear(state.scope, state.characterIndex, state.intent.offerId, state.intent.provider);
+    state.checkout = null; state.intent = null; state.offerId = null; stopPoll(); renderStatus();
   } catch (error) { errorNotice(error, true); }
 });
 byId("language").addEventListener("change", () => {

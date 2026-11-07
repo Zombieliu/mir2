@@ -299,6 +299,575 @@ pub(crate) enum NativeCommandScope {
     Shutdown,
 }
 
+#[cfg(test)]
+mod companion_scope_tests {
+    use super::*;
+    #[test]
+    fn companion_controls_require_personal_authority_and_preserve_resource_gate() {
+        let request = mir2_client_bevy::companion::CompanionRequest {
+            request_id: "request-1".into(),
+            resident_id: Some("alo-1".into()),
+            operation: mir2_client_bevy::companion::CompanionOperation::View,
+            payload: json!({}),
+        };
+        let command = GatewayCommand::Wire(NativeOutboundCommand::CompanionControl { request });
+        assert_eq!(native_command_scope(&command), NativeCommandScope::Personal);
+        assert!(!crate::input::resource_gate_allows(true, &command));
+        assert!(crate::input::resource_gate_allows(false, &command));
+        let fence = NativeCommandFence::new();
+        assert!(fence.companion_stamp().is_none());
+        let first = fence.test_world_ready(10, 0);
+        assert!(fence.accepts_companion_stamp(first));
+        let mut same_person_new_scene = first;
+        same_person_new_scene.scene_epoch += 1;
+        same_person_new_scene.map = Some(1);
+        assert!(first.same_companion_owner(same_person_new_scene));
+        let next = fence.test_owner_change(11, 0);
+        assert!(!first.same_companion_owner(next));
+        assert!(!fence.accepts_companion_stamp(first));
+        assert!(fence.accepts_companion_stamp(next));
+    }
+    #[test]
+    fn companion_receipts_never_publish_into_the_world_or_shell_models() {
+        let (shell_sender, shell_receiver) = std::sync::mpsc::channel();
+        let (gameplay_sender, gameplay_receiver) = std::sync::mpsc::channel();
+        let mut adapter = NativeGameplayAdapter::default();
+        let public_world = json!({"mapFileName":"0","entities":[]});
+        let mut retained_world = Some(public_world.clone());
+        let mut count = 0;
+        let mut wallet = None;
+        let mut map = NativeMapPacketCursor::default();
+        let mut ui = NativeUiPlayerCursor::default();
+        let mut claim = None;
+        let mut send_mail = false;
+        let mut mail_feedback = VecDeque::new();
+        let mut skill = SkillPacketCursor::default();
+        let mut social = SocialModel::default();
+        let receipt = json!({"type":"companionResult","payload":{
+            "requestId":"private-request","residentId":"alo-1",
+            "operation":"view","status":"ok",
+            "result":{"summary":"PRIVATE MEMORY MUST NOT ENTER WORLD"}
+        }});
+        let outcome = handle_gateway_text_with_world_ingest(
+            &receipt.to_string(),
+            &mut count,
+            &GatewaySessionContext::default(),
+            &shell_sender,
+            &mut adapter,
+            &gameplay_sender,
+            &mut retained_world,
+            &mut wallet,
+            &mut map,
+            &mut ui,
+            &mut claim,
+            &mut send_mail,
+            &mut mail_feedback,
+            &mut skill,
+            &mut social,
+            |_| panic!("private receipt reached public world ingest"),
+        )
+        .unwrap();
+        assert_eq!(outcome, WorldSnapshotIngestOutcome::NotSnapshot);
+        assert_eq!(retained_world, Some(public_world));
+        assert!(shell_receiver.try_recv().is_err());
+        assert!(gameplay_receiver.try_recv().is_err());
+        assert_eq!(count, 0);
+    }
+    #[test]
+    fn native_owner_checkpoint_replaces_cursor_skill_authority_even_for_empty_skills() {
+        use mir2_bevy_runtime::npc_purchase_economy::{
+            NativeNpcEconomyGate, apply_native_npc_economy_bundle,
+        };
+        use mir2_client_core::npc_purchase_host::NpcPurchaseReceiptHost;
+        use mir2_client_core::npc_purchase_receipt::{ActorKey, OwnerScope, SnapshotWitness};
+        let owner = crate::npc_purchase_projection::tests::owner();
+        assert!(owner.get("_nativeSkillAuthority").is_none());
+        let projection = crate::npc_purchase_projection::project_owner(&owner).unwrap();
+        let mut host = NpcPurchaseReceiptHost::new().unwrap();
+        let connection = host.open_connection().unwrap();
+        let ticket = host.request_begin(connection).unwrap();
+        let binding = host
+            .bind(
+                ticket,
+                ActorKey::from_server_bytes([1; 32]).unwrap(),
+                OwnerScope::from_server_bytes([2; 32]).unwrap(),
+            )
+            .unwrap();
+        let gate = NativeNpcEconomyGate::new(binding);
+        let witness = SnapshotWitness {
+            actor: binding.actor(),
+            producer_scope: binding.producer_scope(),
+            server_revision: 7,
+            complete: true,
+        };
+        let mut world = bevy::prelude::World::new();
+        let original: mir2_client_bevy::skill_model::SkillModel = serde_json::from_value(json!({"authority":{"sessionEpoch":71,"snapshotSerial":2,"playerObjectId":3},"skills":[]})).unwrap();
+        world.insert_resource(original);
+        assert!(apply_native_npc_economy_bundle(
+            &mut world,
+            gate.prepare(witness, projection).unwrap()
+        ));
+        let applied = world.resource::<mir2_client_bevy::skill_model::SkillModel>();
+        assert!(applied.skills.is_empty());
+        assert_eq!(
+            applied.authority,
+            mir2_client_bevy::skill_model::SkillModelAuthority::default()
+        );
+    }
+
+    struct OwnerIngestScenario {
+        app: bevy::prelude::App,
+        gateway: npc_purchase_gateway::NativeNpcPurchaseGateway,
+        receiver: GatewayCommandReceiver,
+        fence: NativeCommandFence,
+        stamp: NativeCommandStamp,
+        cursor: SkillPacketCursor,
+        adapter: NativeGameplayAdapter,
+        events: std::sync::mpsc::Sender<NativeGameplaySnapshot>,
+        receipts: OwnerProducerReceipts,
+        ui_cursor: NativeUiPlayerCursor,
+        map_cursor: NativeMapPacketCursor,
+        owner: Value,
+    }
+    impl OwnerIngestScenario {
+        fn new(learned: bool) -> Self {
+            Self::with_bootstrap(learned, true)
+        }
+        fn with_bootstrap(learned: bool, bootstrap: bool) -> Self {
+            use bevy::prelude::*;
+            use mir2_client_bevy::crystal_ui::overlays::NativePlayerUiSet;
+            use mir2_client_bevy::native_shell::{NativeShellModel, NativeShellScreen};
+            use mir2_client_bevy::quest_model::*;
+            let (sender, receiver) = command_channel(32);
+            let fence = sender.ownership_fence().unwrap();
+            let stamp = fence.test_world_ready(3, 0);
+            let (events, inbox) = std::sync::mpsc::channel();
+            let mut app = App::new();
+            app.add_plugins(MinimalPlugins);
+            mir2_bevy_runtime::install_native_owner_ingest_regression_systems(&mut app);
+            app.insert_resource(crate::input::GatewayCommands::new(sender))
+                .insert_resource(NativeShellModel {
+                    screen: NativeShellScreen::InGame,
+                    ..Default::default()
+                })
+                .insert_resource(crate::gameplay_bridge::GameplayEventInbox::new(inbox))
+                .init_resource::<crate::gameplay_bridge::NativeWorldProducerStamp>()
+                .init_resource::<QuestTracker>()
+                .init_resource::<CompletedQuestTracker>()
+                .init_resource::<NpcDialogModel>()
+                .init_resource::<NearbyNpcModel>()
+                .init_resource::<CombatTargetModel>()
+                .init_resource::<GroundPickupModel>()
+                .init_resource::<mir2_client_bevy::crystal_ui::notice::NoticeDialogState>()
+                .init_resource::<crate::entity_presentation::NativeEntityPresentation>()
+                .init_resource::<crate::entity_overlays::NativeEntityOverlays>()
+                .init_resource::<crate::effects::NativeEffects>()
+                .add_systems(
+                    PreUpdate,
+                    (
+                        crate::gameplay_bridge::withdraw_invalid_native_world_producers,
+                        crate::gameplay_bridge::drain_gameplay_events,
+                    )
+                        .chain(),
+                )
+                .add_systems(
+                    Update,
+                    crate::gameplay_bridge::activate_native_command_provenance
+                        .after(mir2_client_bevy::pending_operations::PendingLifecycleSet::Ingest)
+                        .before(NativePlayerUiSet::Mutate),
+                )
+                .add_plugins(crate::companion::NativeCompanionHostPlugin);
+            let mut owner = crate::npc_purchase_projection::tests::owner();
+            if learned {
+                owner["entities"][0]["class"] = json!("Wizard");
+                owner["knownSkills"] = json!([{"id":1,"name":"FireBall","key":"fireball","spell":"FireBall","level":1,"hotkey":1,"castKind":"target","offensive":true,"canUse":true,"delayMs":1000,"mpCost":5}]);
+            }
+            let mut cursor = SkillPacketCursor::default();
+            let mut ordinary = owner.clone();
+            cursor.observe_snapshot(&mut ordinary);
+            assert!(cursor.queue_skill_model(&ordinary).unwrap());
+            app.update();
+            assert_eq!(
+                app.world()
+                    .resource::<mir2_client_bevy::skill_model::SkillModel>()
+                    .authority
+                    .snapshot_serial,
+                1
+            );
+            assert!(fence.prepare_hero_owner(stamp, &owner).unwrap().is_some());
+            let mut adapter = NativeGameplayAdapter::default();
+            adapter.command_fence = Some(fence.clone());
+            adapter.set_generation(1);
+            let mut initial = adapter.snapshot(&ordinary);
+            attach_native_producer_provenance(
+                &mut initial,
+                &adapter,
+                &ordinary,
+                &transform_ui_read_model(&ordinary),
+                &transform_map_model(&ordinary),
+                &transform_entity_model_set(&ordinary),
+                Some(&transform_skill_model(&ordinary)),
+                true,
+            )
+            .unwrap();
+            adapter.last_full_producer_stamp = initial.command_stamp;
+            adapter.last_full_producer_models = initial.producer_models.clone();
+            if bootstrap {
+                events.send(initial).unwrap();
+            }
+            let mut gateway = npc_purchase_gateway::NativeNpcPurchaseGateway::new().unwrap();
+            gateway.open_connection().unwrap();
+            gateway.after_ordinary_frame(
+                r#"{"type":"packet","packet":"StartGame","payload":{"result":4}}"#,
+                ConnectionPhase::Normal,
+                false,
+            );
+            gateway.after_ordinary_frame(
+                r#"{"type":"worldSnapshot","payload":{}}"#,
+                ConnectionPhase::Normal,
+                true,
+            );
+            let (dispatch, _) = gateway
+                .begin_if_ready(
+                    Some(&fence),
+                    Some(stamp),
+                    ConnectionPhase::Normal,
+                    true,
+                    Some("0"),
+                )
+                .unwrap()
+                .unwrap();
+            let producer = mir2_client_wire::Producer {
+                actor: mir2_client_wire::Opaque32::from_bytes([1; 32]).unwrap(),
+                producer_scope: mir2_client_wire::Opaque32::from_bytes([2; 32]).unwrap(),
+                server_revision: mir2_client_wire::U64::new(7),
+            };
+            let raw = mir2_client_wire::encode_server_frame(
+                &mir2_client_wire::ServerFrame::new(
+                    dispatch.request.request_id,
+                    mir2_client_wire::ServerReply::Producer {
+                        producer: producer.clone(),
+                    },
+                    Some(owner),
+                    Some(producer),
+                )
+                .unwrap(),
+            )
+            .unwrap();
+            let owner = gateway.receive(&raw, &fence).unwrap().unwrap();
+            let mut ui_cursor = NativeUiPlayerCursor::default();
+            ui_cursor.observe_world_snapshot(&owner);
+            let mut receipts = OwnerProducerReceipts::default();
+            receipts.received(stamp, &owner, &cursor, &fence).unwrap();
+            Self {
+                app,
+                gateway,
+                receiver,
+                fence,
+                stamp,
+                cursor,
+                adapter,
+                events,
+                receipts,
+                ui_cursor,
+                map_cursor: NativeMapPacketCursor::default(),
+                owner,
+            }
+        }
+        fn applied(&self) -> Option<NativeCommandStamp> {
+            self.app
+                .world()
+                .resource::<crate::input::GatewayCommands>()
+                .applied_world_stamp()
+        }
+        fn publish_completed(&mut self) -> usize {
+            let sources = self.gateway.drain_applied(&self.fence).unwrap();
+            let mut count = 0;
+            for (stamp, projection) in sources {
+                let Some(watermark) = self.receipts.take_current(stamp, &projection) else {
+                    continue;
+                };
+                let original = projection.clone();
+                assert!(
+                    publish_applied_owner_producer(
+                        stamp,
+                        &projection,
+                        watermark,
+                        &self.ui_cursor,
+                        &mut self.map_cursor,
+                        Some(&self.owner),
+                        &mut self.cursor,
+                        &mut self.adapter,
+                        &self.events
+                    )
+                    .unwrap()
+                );
+                count += 1;
+                assert_eq!(
+                    projection, original,
+                    "sealed source bytes must remain unchanged"
+                );
+            }
+            count
+        }
+    }
+
+    #[test]
+    fn applied_owner_checkpoint_uses_real_ingest_before_companion_and_keeps_late_receipts() {
+        let _queue_guard = native_queue_test_guard();
+        use mir2_client_bevy::companion::{CompanionControls, CompanionOperation};
+        use mir2_client_bevy::skill_model::{SkillModel, SkillModelReceipts};
+        for learned in [false, true] {
+            let mut s = OwnerIngestScenario::new(learned);
+            assert_eq!(s.publish_completed(), 0, "enqueued is not Applied");
+            assert!(s.applied().is_none());
+            s.app.world_mut().resource_mut::<CompanionControls>().begin(
+                CompanionOperation::List,
+                json!({}),
+                0,
+            );
+            s.app.update(); // Actual Runtime consumers commit the sealed bundle.
+            assert_eq!(
+                s.app
+                    .world()
+                    .resource::<SkillModel>()
+                    .authority
+                    .session_epoch,
+                0
+            );
+            assert!(s.applied().is_none());
+            assert!(s.receiver.try_recv().is_err());
+            if learned {
+                let mut old = s.owner.clone();
+                old["_nativeSkillAuthority"] = json!({"sessionEpoch":s.cursor.session_epoch,"snapshotSerial":1,"playerObjectId":3});
+                old["skillKeyAck"] =
+                    json!({"requestId":73,"spell":"FireBall","key":1,"oldKey":0,"accepted":true});
+                s.cursor.pending_receipt_model = Some(transform_skill_model(&old).to_string());
+            }
+            assert_eq!(s.publish_completed(), 1);
+            assert!(
+                s.applied().is_none(),
+                "publication cannot grant an unconsumed model"
+            );
+            assert_eq!(s.cursor.snapshot_serial, 2);
+            s.app.update(); // Actual SkillModel FIFO consumer, then the existing bridge.
+            assert_eq!(s.applied(), Some(s.stamp));
+            let skills = s.app.world().resource::<SkillModel>();
+            assert_eq!(skills.authority.snapshot_serial, 2);
+            assert_eq!(skills.authority.session_epoch, s.cursor.session_epoch);
+            assert_eq!(skills.skills.len(), usize::from(learned));
+            if learned {
+                assert_eq!(
+                    s.app
+                        .world()
+                        .resource::<SkillModelReceipts>()
+                        .0
+                        .front()
+                        .unwrap()
+                        .skill_key_ack
+                        .as_ref()
+                        .unwrap()
+                        .request_id,
+                    73
+                );
+                assert_eq!(s.publish_completed(), 0);
+                assert_eq!(s.cursor.snapshot_serial, 2);
+            }
+            assert!(
+                s.receiver.try_recv().is_err(),
+                "uncertain/unsent controls are never replayed"
+            );
+            s.app.world_mut().resource_mut::<CompanionControls>().begin(
+                CompanionOperation::List,
+                json!({}),
+                1,
+            );
+            s.app.update();
+            let GatewayCommand::Owned(command) = s.receiver.try_recv().unwrap() else {
+                panic!("owned control required");
+            };
+            assert_eq!(command.stamp, s.stamp);
+            assert!(
+                matches!(&command.command, GatewayCommand::Wire(NativeOutboundCommand::CompanionControl { request }) if request.operation==CompanionOperation::List)
+            );
+        }
+    }
+
+    #[test]
+    fn failed_or_retired_owner_checkpoints_never_release_a_producer() {
+        let _queue_guard = native_queue_test_guard();
+        for boundary in ["failed", "owner", "scene"] {
+            let mut s = OwnerIngestScenario::with_bootstrap(false, false);
+            assert_eq!(s.publish_completed(), 0);
+            if boundary == "failed" {
+                s.fence
+                    .0
+                    .lock()
+                    .unwrap()
+                    .npc_economy_gate
+                    .as_ref()
+                    .unwrap()
+                    .retire();
+            }
+            s.app.update();
+            if boundary == "owner" {
+                s.fence.test_owner_change(4, 0);
+            }
+            if boundary == "scene" {
+                s.fence.test_scene_boundary(1);
+            }
+            assert_eq!(s.publish_completed(), 0, "{boundary}");
+            assert_eq!(s.cursor.snapshot_serial, 1);
+            assert_eq!(s.adapter.last_full_producer_stamp, Some(s.stamp));
+            s.app.update();
+            assert!(s.applied().is_none());
+            assert!(s.receiver.try_recv().is_err());
+        }
+    }
+    #[test]
+    fn receive_then_later_skill_vitals_location_and_full_source_survive_applied_fifo() {
+        let _queue_guard = native_queue_test_guard();
+        use mir2_client_bevy::skill_model::{SkillModel, SkillModelReceipts};
+        for mode in ["delta", "receipt", "full"] {
+            let mut s = OwnerIngestScenario::new(true);
+            let mut latest = s.owner.clone();
+            latest["gold"] = json!(111);
+            latest["playerHp"] = json!(7);
+            latest["playerMp"] = json!(2);
+            latest["entities"][0]["hp"] = json!(7);
+            latest["entities"][0]["x"] = json!(8);
+            latest["entities"][0]["y"] = json!(9);
+            latest["sceneView"] = json!({"center":{"x":8,"y":9}});
+            if mode == "full" {
+                latest["knownSkills"][0]["level"] = json!(2);
+                s.cursor.observe_snapshot(&mut latest);
+            } else {
+                assert!(
+                    s.cursor
+                        .apply_packet("MagicCast", &json!({"spell":"FireBall"}), 7)
+                );
+                assert!(s.cursor.apply_packet(
+                    "MagicDelay",
+                    &json!({"objectId":3,"spell":"FireBall","delay":2200}),
+                    7
+                ));
+                assert!(s.cursor.apply_packet(
+                    "UserInformation",
+                    &json!({"objectId":3,"mp":2,"maxMp":10}),
+                    7
+                ));
+                s.cursor.apply_active_patches(&mut latest, 7);
+            }
+            if mode == "receipt" {
+                latest["knownSkills"][0]["hotkey"] = json!(2);
+                latest["skillKeyAck"] =
+                    json!({"requestId":74,"spell":"FireBall","key":2,"oldKey":1,"accepted":true});
+            }
+            assert!(s.cursor.queue_skill_model(&latest).unwrap());
+            let serial = s.cursor.snapshot_serial;
+            let revision = s.cursor.observation_revision;
+            s.ui_cursor.observe_world_snapshot(&latest);
+            let ui = s.ui_cursor.to_read_model_json();
+            let map = transform_map_model(&latest);
+            let entities = transform_entity_model_set(&latest);
+            assert!(mir2_bevy_runtime::native_ingest::push_native_ui_read_model(
+                ui.to_string()
+            ));
+            assert!(mir2_bevy_runtime::native_ingest::push_native_map_model(
+                map.to_string()
+            ));
+            assert!(
+                mir2_bevy_runtime::native_ingest::push_native_entity_model_set(
+                    entities.to_string()
+                )
+            );
+            let mut observed = s.adapter.snapshot(&latest);
+            attach_native_producer_provenance(
+                &mut observed,
+                &s.adapter,
+                &latest,
+                &ui,
+                &map,
+                &entities,
+                Some(&transform_skill_model(&latest)),
+                mode == "full",
+            )
+            .unwrap();
+            if mode == "full" {
+                s.adapter.last_full_producer_stamp = observed.command_stamp;
+                s.adapter.last_full_producer_models = observed.producer_models.clone();
+            }
+            s.events.send(observed).unwrap();
+            s.owner = latest;
+            s.app.update(); // Bundle first; later observations stay behind its FIFO barrier.
+            assert_eq!(
+                s.app
+                    .world()
+                    .resource::<SkillModel>()
+                    .authority
+                    .session_epoch,
+                0
+            );
+            assert!(s.applied().is_none());
+            assert_eq!(s.publish_completed(), 1);
+            assert_eq!(
+                s.cursor.snapshot_serial, serial,
+                "old owner must not mint a newer serial"
+            );
+            assert_eq!(
+                s.cursor.observation_revision, revision,
+                "state republish is not a new observation"
+            );
+            if mode != "full" {
+                assert!(s.cursor.vitals.is_some());
+            }
+            s.app.update();
+            assert_eq!(s.applied(), Some(s.stamp));
+            let actual = s.app.world().resource::<SkillModel>();
+            assert_eq!(actual.authority.snapshot_serial, serial);
+            if mode == "full" {
+                assert_eq!(actual.skills[0].level, 2);
+            } else {
+                assert_eq!(actual.bindings[0].cast_sequence, 1);
+                assert_eq!(actual.bindings[0].delay_ms, Some(2200));
+            }
+            let ui = s
+                .app
+                .world()
+                .resource::<mir2_client_bevy::read_model::UiReadModel>();
+            assert_eq!(ui.player.gold, 111);
+            assert_eq!(ui.player.hp, 7);
+            assert_eq!(ui.player.mp, 2);
+            let map = s.app.world().resource::<mir2_client_bevy::map::MapModel>();
+            assert_eq!((map.center_x, map.center_y), (8, 9));
+            let click = s
+                .app
+                .world()
+                .resource::<crate::gameplay_bridge::NativeWorldClickState>();
+            assert_eq!((click.player_x, click.player_y), (8, 9));
+            let receipts = &s.app.world().resource::<SkillModelReceipts>().0;
+            assert_eq!(receipts.len(), usize::from(mode == "receipt"));
+            if mode == "receipt" {
+                assert_eq!(receipts[0].skill_key_ack.as_ref().unwrap().request_id, 74);
+            }
+        }
+    }
+    #[test]
+    fn a_later_owner_receipt_supersedes_an_older_applied_callback() {
+        let _queue_guard = native_queue_test_guard();
+        let mut s = OwnerIngestScenario::new(false);
+        // Receive markers are captured only after the authenticated receiver
+        // admitted a bundle. Exercise its bounded, local supersession rule.
+        s.receipts
+            .received(s.stamp, &s.owner, &s.cursor, &s.fence)
+            .unwrap();
+        s.app.update();
+        assert_eq!(s.publish_completed(), 0);
+        assert_eq!(s.cursor.snapshot_serial, 1);
+        assert!(s.applied().is_none());
+    }
+}
+
 /// Exhaustive local classification. This does not change any wire field.
 pub(crate) fn native_command_scope(command: &GatewayCommand) -> NativeCommandScope {
     use NativeCommandScope as S;
@@ -311,6 +880,7 @@ pub(crate) fn native_command_scope(command: &GatewayCommand) -> NativeCommandSco
         GatewayCommand::Shutdown => S::Shutdown,
         GatewayCommand::Player(_) => S::World,
         GatewayCommand::Wire(wire) => match wire {
+            C::CompanionControl { .. } => S::Personal,
             C::Procurement { .. } => S::World,
             C::BillingStatus { .. }
             | C::BillingCheckout { .. }
@@ -440,6 +1010,11 @@ pub(crate) fn native_command_scope(command: &GatewayCommand) -> NativeCommandSco
 }
 
 impl NativeCommandStamp {
+    pub(crate) fn same_companion_owner(self, other: Self) -> bool {
+        self.same_owner(other)
+            && self.procedure == other.procedure
+            && self.cancellation == other.cancellation
+    }
     #[cfg(test)]
     pub(crate) fn test_mail_epoch(self) -> mir2_client_bevy::mail_service::MailServiceStreamEpoch {
         mir2_client_bevy::mail_service::MailServiceStreamEpoch {
@@ -735,6 +1310,9 @@ pub(crate) fn native_transport_key(command: &NativeOutboundCommand) -> Option<St
 
 #[derive(Debug)]
 struct NativeCommandFenceState {
+    // Latest scoped presentation observation; never an application/readiness proof.
+    observed_producer_revision: u64,
+    observed_presentation: Option<(NativeCommandStamp, Value, Value)>,
     current: NativeCommandStamp,
     connected: bool,
     connection_entry_revision: Option<u64>,
@@ -1176,11 +1754,72 @@ impl NativeCommandFence {
             npc_economy_gate: None,
             hero_owner_gate: None,
             npc_entry_pending: false,
+            observed_producer_revision: 0,
+            observed_presentation: None,
         })))
     }
     pub(crate) fn stamp(&self) -> Option<NativeCommandStamp> {
         let state = self.0.lock().ok()?;
         (!state.retired).then_some(state.current)
+    }
+    pub(crate) fn companion_stamp(&self) -> Option<NativeCommandStamp> {
+        let state = self.0.lock().ok()?;
+        Self::matches(&state, state.current, NativeCommandScope::Personal).then_some(state.current)
+    }
+    pub(crate) fn accepts_companion_stamp(&self, stamp: NativeCommandStamp) -> bool {
+        self.0.lock().ok().is_some_and(|state| {
+            Self::matches(&state, stamp, NativeCommandScope::Personal)
+        })
+    }
+    pub(crate) fn companion_diagnostic(
+        &self,
+        applied: Option<NativeCommandStamp>,
+    ) -> (bool, bool, bool, bool, bool) {
+        self.0
+            .lock()
+            .ok()
+            .map_or((false, false, false, false, false), |state| {
+                (
+                    state.connected,
+                    state.current.actor.is_some(),
+                    Self::matches(&state, state.current, NativeCommandScope::Personal),
+                    applied.is_some_and(|stamp| {
+                        Self::matches(&state, stamp, NativeCommandScope::Personal)
+                    }),
+                    applied.is_some_and(|stamp| {
+                        Self::matches(&state, stamp, NativeCommandScope::World)
+                    }),
+                )
+            })
+    }
+    fn record_observed_producer(
+        &self,
+        stamp: NativeCommandStamp,
+        models: &crate::gameplay_bridge::NativeProducerModels,
+    ) {
+        let Ok(mut state) = self.0.lock() else {
+            return;
+        };
+        if !Self::matches(&state, stamp, NativeCommandScope::World) {
+            return;
+        }
+        let Some(revision) = state.observed_producer_revision.checked_add(1) else {
+            state.observed_presentation = None;
+            return;
+        };
+        state.observed_producer_revision = revision;
+        state.observed_presentation = Some((stamp, models.map.clone(), models.entities.clone()));
+    }
+    fn observed_presentation(&self, stamp: NativeCommandStamp) -> Option<(u64, Value, Value)> {
+        let state = self.0.lock().ok()?;
+        let (observed, map, entities) = state.observed_presentation.as_ref()?;
+        (Self::matches(&state, stamp, NativeCommandScope::World) && *observed == stamp).then(|| {
+            (
+                state.observed_producer_revision,
+                map.clone(),
+                entities.clone(),
+            )
+        })
     }
     fn matches(
         state: &NativeCommandFenceState,
@@ -3747,6 +4386,8 @@ struct SkillRemovalPatch {
 /// is accepted as the new authority and retires the patch.
 #[derive(Debug)]
 struct SkillPacketCursor {
+    observation_revision: u64,
+    latest_observed_model: Option<Value>,
     hero: mir2_client_bevy::hero_model::HeroModel,
     pending_hero_model: Option<String>,
     pending_hero_receipts: std::collections::VecDeque<String>,
@@ -3769,6 +4410,8 @@ impl Default for SkillPacketCursor {
     fn default() -> Self {
         static NEXT: std::sync::atomic::AtomicU64 = std::sync::atomic::AtomicU64::new(1);
         Self {
+            observation_revision: 0,
+            latest_observed_model: None,
             hero: Default::default(),
             pending_hero_model: None,
             pending_hero_receipts: Default::default(),
@@ -3849,6 +4492,11 @@ impl SkillPacketCursor {
             }
         }
         let json = serde_json::to_string(&model).map_err(|e| e.to_string())?;
+        self.observation_revision = self
+            .observation_revision
+            .checked_add(1)
+            .ok_or("native skill observation sequence exhausted")?;
+        self.latest_observed_model = Some(model);
         if is_receipt {
             self.pending_receipt_model = Some(json);
             self.pending_latest_model = None;
@@ -5643,6 +6291,7 @@ where
     let mut gameplay_adapter = NativeGameplayAdapter::default();
     gameplay_adapter.set_generation(generation);
     gameplay_adapter.command_fence = commands.ownership_fence();
+    crate::companion::reset_private_transport();
     // Every WebSocket generation owns an isolated lighting lifecycle. A
     // reconnect must never retain the previous map's darkness or emitters.
     let mut lighting_publisher = NativeLightingPublisher::for_connection(generation);
@@ -5652,6 +6301,7 @@ where
     let mut map_packet_cursor = NativeMapPacketCursor::default();
     let mut ui_cursor = NativeUiPlayerCursor::default();
     let mut skill_cursor = SkillPacketCursor::default();
+    let mut owner_producer_receipts = OwnerProducerReceipts::default();
     let mut social_cursor = SocialModel::default();
     let mut in_flight_claim_mail_id: Option<u64> = None;
     let mut send_mail_in_flight = false;
@@ -5705,7 +6355,13 @@ where
                     }
                     // This consumes only the Runtime's sealed completion after
                     // every model and the entire owner source changed in World.
-                    npc_purchases.drain_applied(&fence)?;
+                    for (stamp, projection) in npc_purchases.drain_applied(&fence)? {
+                        if let Some(watermark) = owner_producer_receipts.take_current(stamp, &projection) {
+                            publish_applied_owner_producer(stamp, &projection, watermark,
+                                &ui_cursor, &mut map_packet_cursor, last_world_payload.as_ref(), &mut skill_cursor,
+                                &mut gameplay_adapter, gameplay_events)?;
+                        }
+                    }
                     if let Some((dispatch,stamp)) = npc_purchases.recovery_if_ready()? {
                         match npc_purchase_gateway::commit_control(&mut socket,&fence,stamp,dispatch).await {
                             NativeSinkCommit::Flushed | NativeSinkCommit::DefinitelyUnsent => {},
@@ -5910,6 +6566,9 @@ where
                                         // never merge an older packet's wallet/XP.
                                         ui_cursor = NativeUiPlayerCursor::default();
                                         ui_cursor.observe_world_snapshot(&owner);
+                                        if let Some(stamp) = fence.stamp().filter(|stamp|fence.accepts(*stamp,true)) {
+                                            owner_producer_receipts.received(stamp,&owner,&skill_cursor,fence)?;
+                                        }
                                     }
                                     return Ok(InboundDisposition::Applied);
                                 }
@@ -6017,11 +6676,19 @@ fn billing_command_matches(
     request: &mir2_client_bevy::native_billing::BillingRequest,
     command: &NativeOutboundCommand,
 ) -> bool {
-    use mir2_client_bevy::native_billing::BillingOperation;
+    use mir2_client_bevy::native_billing::{BillingOperation, BillingPurchase};
+    if let NativeOutboundCommand::BillingCheckout { provider, offer_id, order_request_id, .. } = command {
+        if !matches!(&request.purchase, Some(BillingPurchase::Checkout {
+            provider: expected_provider, offer_id: expected_offer, order_request_id: expected_order,
+        }) if provider == expected_provider && offer_id == expected_offer && order_request_id == expected_order) {
+            return false;
+        }
+    }
     let scope = match command {
         NativeOutboundCommand::BillingStatus {
             character_index,
             request_id,
+            ..
         } => (BillingOperation::Status, *character_index, *request_id),
         NativeOutboundCommand::BillingCheckout {
             character_index,
@@ -6133,6 +6800,7 @@ fn mail_command_allowed(
 }
 
 fn reset_native_data_models() {
+    crate::companion::reset_private_transport();
     let _ = mir2_bevy_runtime::native_ingest::push_native_data_reset();
 }
 
@@ -6550,6 +7218,17 @@ where
         }
     }
     let mut parsed = parse_inbound_event(text).map_err(|error| error.to_string())?;
+    if let InboundEvent::CompanionResult(reply) = parsed {
+        if let Some(stamp) = gameplay_adapter
+            .command_fence
+            .as_ref()
+            .and_then(NativeCommandFence::companion_stamp)
+        {
+            crate::companion::push_private_reply(stamp, reply);
+        }
+        // Owner memory never enters public world/render/spectator payloads.
+        return Ok(WorldSnapshotIngestOutcome::NotSnapshot);
+    }
     if let InboundEvent::Packet(packet) = &mut parsed {
         add_packet_item_tooltip_sources(packet, ui_cursor);
     }
@@ -7687,6 +8366,198 @@ fn normalized_producer_model<T: serde::de::DeserializeOwned + serde::Serialize>(
     let model: T = serde_json::from_value(value.clone()).map_err(|e| e.to_string())?;
     serde_json::to_value(model).map_err(|e| e.to_string())
 }
+
+#[derive(Clone, Copy)]
+struct OwnerProducerWatermark {
+    stamp: NativeCommandStamp,
+    owner_hash: [u8; 32],
+    receive_sequence: u64,
+    skill_revision: u64,
+    producer_revision: u64,
+}
+#[derive(Default)]
+struct OwnerProducerReceipts {
+    sequence: u64,
+    pending: VecDeque<OwnerProducerWatermark>,
+}
+fn owner_source_hash(bytes: &[u8]) -> [u8; 32] {
+    use sha2::{Digest, Sha256};
+    Sha256::digest(bytes).into()
+}
+impl OwnerProducerReceipts {
+    fn received(
+        &mut self,
+        stamp: NativeCommandStamp,
+        owner: &Value,
+        skills: &SkillPacketCursor,
+        fence: &NativeCommandFence,
+    ) -> Result<(), String> {
+        if !fence.accepts(stamp, true) {
+            return Ok(());
+        }
+        self.pending.retain(|entry| entry.stamp == stamp);
+        if self.pending.len() >= 64 {
+            return Err("native owner producer source capacity".into());
+        }
+        self.sequence = self
+            .sequence
+            .checked_add(1)
+            .ok_or("native owner receipt sequence exhausted")?;
+        self.pending.push_back(OwnerProducerWatermark {
+            stamp,
+            owner_hash: owner_source_hash(owner.to_string().as_bytes()),
+            receive_sequence: self.sequence,
+            skill_revision: skills.observation_revision,
+            producer_revision: fence
+                .observed_presentation(stamp)
+                .map_or(0, |entry| entry.0),
+        });
+        Ok(())
+    }
+    fn take_current(
+        &mut self,
+        stamp: NativeCommandStamp,
+        projection: &mir2_bevy_runtime::npc_purchase_economy::NativeNpcEconomyProjection,
+    ) -> Option<OwnerProducerWatermark> {
+        let hash = owner_source_hash(projection.owner_json.as_bytes());
+        let index = self
+            .pending
+            .iter()
+            .position(|entry| entry.stamp == stamp && entry.owner_hash == hash)?;
+        let entry = self.pending.remove(index)?;
+        (entry.receive_sequence == self.sequence).then_some(entry)
+    }
+}
+/// Rebind presentation only after the exact sealed owner bundle was Applied.
+/// Later observations keep their original authority, timing and receipt order.
+/// The economic projection and its original JSON remain byte-for-byte intact.
+fn publish_applied_owner_producer(
+    stamp: NativeCommandStamp,
+    projection: &mir2_bevy_runtime::npc_purchase_economy::NativeNpcEconomyProjection,
+    watermark: OwnerProducerWatermark,
+    ui_cursor: &NativeUiPlayerCursor,
+    map_cursor: &mut NativeMapPacketCursor,
+    current_world: Option<&Value>,
+    skills: &mut SkillPacketCursor,
+    adapter: &mut NativeGameplayAdapter,
+    gameplay_events: &std::sync::mpsc::Sender<NativeGameplaySnapshot>,
+) -> Result<bool, String> {
+    let Some(fence) = adapter.command_fence.as_ref() else {
+        return Ok(false);
+    };
+    if watermark.stamp != stamp || !fence.accepts(stamp, true) {
+        return Ok(false);
+    }
+    let mut owner: Value = serde_json::from_str(&projection.owner_json)
+        .map_err(|_| "invalid applied owner producer".to_owned())?;
+    let actor = value_u32(owner.get("playerObjectId"));
+    let self_actor = owner
+        .get("entities")
+        .and_then(Value::as_array)
+        .and_then(|rows| {
+            rows.iter()
+                .find(|row| row.get("kind").and_then(Value::as_str) == Some("selfPlayer"))
+        })
+        .and_then(|row| value_u32(row.get("objectId")));
+    if actor.is_none()
+        || actor != stamp.actor
+        || self_actor != actor
+        || skills.player_object_id != actor
+    {
+        return Ok(false);
+    }
+    let later_skill = skills.observation_revision != watermark.skill_revision;
+    let mut skill_model = if later_skill {
+        let Some(model) = skills.latest_observed_model.clone() else {
+            return Ok(false);
+        };
+        model
+    } else {
+        let serial = skills
+            .snapshot_serial
+            .checked_add(1)
+            .ok_or("native skill producer sequence exhausted")?;
+        owner["_nativeSkillAuthority"] = json!({"sessionEpoch":skills.session_epoch,"snapshotSerial":serial,"playerObjectId":actor.unwrap()});
+        skills.snapshot_serial = serial;
+        // The watermark proves that no later skill/vitals observation exists.
+        skills.patches.clear();
+        skills.removals.clear();
+        skills.vitals = None;
+        transform_skill_model(&owner)
+    };
+    // Republish current state after the bundle, never a second receipt event.
+    if let Some(object) = skill_model.as_object_mut() {
+        object.remove("skillKeyAck");
+        object.remove("skill_key_ack");
+    }
+    let expected =
+        normalized_producer_model::<mir2_client_bevy::skill_model::SkillModel>(&skill_model)?;
+    let authority = expected
+        .get("authority")
+        .ok_or("missing native skill source authority")?;
+    if value_u32(authority.get("playerObjectId")) != actor
+        || authority.get("sessionEpoch").and_then(Value::as_u64) != Some(skills.session_epoch)
+    {
+        return Ok(false);
+    }
+    // Only presentation metadata is merged. The sealed owner/projection is untouched.
+    map_cursor.merge_into_same_map_snapshot(&mut owner);
+    let later_world = fence
+        .observed_presentation(stamp)
+        .filter(|entry| entry.0 > watermark.producer_revision);
+    let (map, entities) = if let Some((_, map, entities)) = later_world {
+        (map, entities)
+    } else {
+        (
+            transform_map_model(&owner),
+            transform_entity_model_set(&owner),
+        )
+    };
+    let models = crate::gameplay_bridge::NativeProducerModels {
+        ui: normalized_producer_model::<mir2_client_bevy::read_model::UiReadModel>(
+            &ui_cursor.to_read_model_json(),
+        )?,
+        map: normalized_producer_model::<mir2_client_bevy::map::MapModel>(&map)?,
+        entities: normalized_producer_model::<mir2_client_bevy::entities::EntityModelSet>(
+            &entities,
+        )?,
+        skills: Some(expected),
+    };
+    if !later_skill {
+        skills.observation_revision = skills
+            .observation_revision
+            .checked_add(1)
+            .ok_or("native skill observation sequence exhausted")?;
+        skills.latest_observed_model = Some(skill_model.clone());
+    }
+    skills.pending_latest_model = Some(skill_model.to_string());
+    let _queued =
+        skills.flush_skill_models_with(mir2_bevy_runtime::native_ingest::push_native_skill_model);
+    // Presentation follows the latest ordinary packet-folded world, never the
+    // older sealed economy checkpoint. It cannot change that checkpoint.
+    let presentation = current_world.unwrap_or(&owner);
+    if value_u32(presentation.get("playerObjectId")) != actor
+        || value_i32(presentation.get("mapIndex")).is_some_and(|map| Some(map) != stamp.map)
+    {
+        return Ok(false);
+    }
+    let mut snapshot = adapter.snapshot(presentation);
+    // This is a model renewal, not a replay of old world poses/movement ACKs.
+    snapshot.entity_render_payload = None;
+    snapshot.command_stamp = Some(stamp);
+    snapshot.producer_models = Some(models.clone());
+    if !fence.accepts(stamp, true) {
+        return Ok(false);
+    }
+    gameplay_events
+        .send(snapshot)
+        .map_err(|_| "native owner producer consumer unavailable")?;
+    fence.record_observed_producer(stamp, &models);
+    adapter.last_full_producer_stamp = Some(stamp);
+    adapter.last_full_producer_models = Some(models);
+    Ok(true)
+}
+
 fn attach_native_producer_provenance(
     snapshot: &mut NativeGameplaySnapshot,
     adapter: &NativeGameplayAdapter,
@@ -7758,6 +8629,9 @@ fn attach_native_producer_provenance(
             .map(normalized_producer_model::<mir2_client_bevy::skill_model::SkillModel>)
             .transpose()?,
     });
+    if let Some(models) = snapshot.producer_models.as_ref() {
+        fence.record_observed_producer(stamp, models);
+    }
     Ok(())
 }
 
@@ -8037,9 +8911,14 @@ fn dispatch_shell_event(
         // bootstrap only after an Applied worldSnapshot.
         InboundEvent::Packet(PacketEvent::UserInformation(_)) => None,
         InboundEvent::Packet(PacketEvent::Other { packet, payload }) => match packet.as_str() {
-            "NewCharacter" => Some(ShellGatewayEvent::OperationFailure {
-                message: "character creation failed".to_owned(),
-            }),
+            "NewCharacter" => match payload.get("result").and_then(Value::as_u64) {
+                Some(result @ (4 | 5)) => {
+                    Some(ShellGatewayEvent::CharacterCreationRejected { result: result as u8 })
+                }
+                _ => Some(ShellGatewayEvent::OperationFailure {
+                    message: "character creation failed".to_owned(),
+                }),
+            },
             "DeleteCharacter" => Some(ShellGatewayEvent::OperationFailure {
                 message: "character deletion failed".to_owned(),
             }),
@@ -14952,10 +15831,12 @@ mod tests {
             checkout_url: None,
             error: None,
             replayed: None,
+            provider: None,
         };
         assert!(billing_command_matches(
             &request,
             &NativeOutboundCommand::BillingStatus {
+                include_payment_providers: true,
                 character_index: 7,
                 request_id: request.request_id
             }
@@ -14963,6 +15844,7 @@ mod tests {
         assert!(!billing_command_matches(
             &request,
             &NativeOutboundCommand::BillingStatus {
+                include_payment_providers: true,
                 character_index: 8,
                 request_id: request.request_id
             }
@@ -15321,6 +16203,23 @@ mod tests {
                 } => assert_eq!(actual, accepted),
                 other => panic!("unexpected event: {other:?}"),
             }
+        }
+    }
+
+    #[test]
+    fn shell_dispatch_keeps_character_creation_slot_and_name_results() {
+        let context = GatewaySessionContext::default();
+        let (sender, receiver) = std::sync::mpsc::channel();
+        for result in [4, 5] {
+            let event = parse_inbound_event(&format!(
+                r#"{{"type":"packet","packet":"NewCharacter","payload":{{"result":{result}}}}}"#
+            ))
+            .expect("creation rejection event");
+            dispatch_shell_event(&event, &context, &sender);
+            assert_eq!(
+                receiver.try_recv().expect("creation rejection"),
+                ShellGatewayEvent::CharacterCreationRejected { result }
+            );
         }
     }
 

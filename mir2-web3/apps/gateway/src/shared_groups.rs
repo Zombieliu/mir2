@@ -34,6 +34,8 @@ fn clear_cold_group_notifications(state: &mut SharedInProcessZoneState, key: &Zo
 pub(super) struct SharedGroupCoordinator {
     next_registration: u64,
     players: BTreeMap<ZonePresenceKey, GroupPlayer>,
+    companion_policy_fingerprint: Option<Vec<u8>>,
+    companion_owner_fences: BTreeMap<ZonePresenceKey, ZonePresenceKey>,
 }
 
 #[derive(Debug)]
@@ -86,6 +88,46 @@ enum GroupAction<'a> {
 }
 
 impl SharedGroupCoordinator {
+    /// One trusted startup policy for the existing group writer. This is not a
+    /// second roster or a client command, and applies equally to TCP and WS.
+    pub(super) fn configure_companion_owner_fences(
+        &mut self,
+        policy: &crate::companion_relay::CompanionPolicy,
+    ) -> Result<(), String> {
+        let bytes = serde_json::to_vec(policy)
+            .map_err(|_| "Invalid companion owner fence policy.".to_string())?;
+        let policy = crate::companion_relay::CompanionPolicy::parse(&bytes, &policy.realm_id)?;
+        let fingerprint = Sha256::digest(&bytes).to_vec();
+        if let Some(current) = &self.companion_policy_fingerprint {
+            return if current == &fingerprint {
+                Ok(())
+            } else {
+                Err("Companion owner fences cannot change during this process.".into())
+            };
+        }
+        if !self.players.is_empty() {
+            return Err("Configure companion owner fences before admitting players.".into());
+        }
+        self.companion_owner_fences = policy
+            .enrollments
+            .into_iter()
+            .map(|enrollment| {
+                (
+                    ZonePresenceKey {
+                        account_id: enrollment.actor.account_id,
+                        character_index: enrollment.actor.character_index,
+                    },
+                    ZonePresenceKey {
+                        account_id: enrollment.owner.account_id,
+                        character_index: enrollment.owner.character_index,
+                    },
+                )
+            })
+            .collect();
+        self.companion_policy_fingerprint = Some(fingerprint);
+        Ok(())
+    }
+
     /// The caller holds the social coordinator before entering the Zone and
     /// keeps that guard through chat publication. A private mirror read before
     /// a peer's accepted invitation cannot overwrite the current typed roster.
@@ -282,6 +324,20 @@ impl SharedGroupCoordinator {
                     effects.packet(key, message("server.CouldNotBeFound", &[name.into()]));
                     return;
                 };
+                if self
+                    .companion_owner_fences
+                    .get(&target.live.key)
+                    .is_some_and(|expected| expected != key)
+                {
+                    // Only enrolled synthetic actors have this additional
+                    // restriction. A foreign pending invite must not keep the
+                    // configured owner's ordinary invitation from reaching it.
+                    effects.packet(
+                        key,
+                        message("server.NotAllowGroup", &[target.live.entity.name.clone()]),
+                    );
+                    return;
+                }
                 let Some(peer) = self.players.get(&target.live.key) else {
                     effects.packet(key, message("server.CouldNotBeFound", &[name.into()]));
                     return;
@@ -355,6 +411,17 @@ impl SharedGroupCoordinator {
                     effects.packet(key, message("server.NotInvitedToGroup", &[]));
                     return;
                 };
+                if accept
+                    && self
+                        .companion_owner_fences
+                        .get(key)
+                        .is_some_and(|expected| expected != &invite.inviter)
+                {
+                    // The real pending inviter, not a display name, is checked
+                    // in the same coordinator transaction that consumes it.
+                    effects.packet(key, message("server.CannotJoinGroup", &[]));
+                    return;
+                }
                 let Some(inviter) = self.players.get(&invite.inviter).filter(|player| {
                     player.session == invite.inviter_session
                         && player.registration == invite.inviter_registration
@@ -565,6 +632,109 @@ mod tests {
             GroupAction::Reply(true),
             index as u64 * GROUP_INVITE_DELAY_MS,
         );
+    }
+
+    #[test]
+    fn companion_group_owner_fence_rejects_real_foreign_inviter_and_accepts_owner() {
+        let mut online = presences(3);
+        // An authenticated second character of the same account is still not the owner.
+        online[2].live.key.account_id = online[0].live.key.account_id.clone();
+        let policy = companion_policy(&online);
+        let mut groups = SharedGroupCoordinator::default();
+        groups.configure_companion_owner_fences(&policy).unwrap();
+        for presence in &online {
+            groups.register(presence, true).unwrap();
+        }
+        let rejected_add = execute(&mut groups, &online, 2, GroupAction::Add("Party1"), 2_000);
+        assert!(groups.players[&online[1].live.key].invitation.is_none());
+        assert!(!rejected_add
+            .packets
+            .values()
+            .flatten()
+            .any(|packet| matches!(
+                packet,
+                ServerPacket::GroupInvite { .. } | ServerPacket::AddMember { .. }
+            )));
+        for presence in &online {
+            assert!(groups.names(&presence.live.key).is_empty());
+        }
+        // Defense in depth for a pre-existing/legacy pending invitation. This
+        // reducer fixture cannot be supplied through the ordinary wire path.
+        groups
+            .players
+            .get_mut(&online[1].live.key)
+            .unwrap()
+            .invitation = Some(GroupInvitation {
+            inviter: online[2].live.key.clone(),
+            inviter_session: online[2].live.session.clone(),
+            inviter_registration: groups.players[&online[2].live.key].registration,
+            inviter_name: online[2].live.entity.name.clone(),
+            recipient_registration: groups.players[&online[1].live.key].registration,
+        });
+        let rejected = execute(&mut groups, &online, 1, GroupAction::Reply(true), 2_000);
+        assert!(rejected.packets[&online[1].live.key].iter().any(|packet|
+            matches!(packet, ServerPacket::Chat { message, .. } if message == "server.CannotJoinGroup")));
+        for presence in &online {
+            assert!(groups.names(&presence.live.key).is_empty());
+        }
+        assert!(groups.players[&online[1].live.key].invitation.is_none());
+        execute(&mut groups, &online, 0, GroupAction::Add("Party1"), 2_000);
+        execute(&mut groups, &online, 1, GroupAction::Reply(true), 2_000);
+        assert_eq!(groups.names(&online[1].live.key), ["Party0", "Party1"]);
+        assert_eq!(groups.names(&online[0].live.key), ["Party0", "Party1"]);
+    }
+
+    fn companion_policy(online: &[GroupPresence]) -> crate::companion_relay::CompanionPolicy {
+        use crate::companion_relay::{CharacterBinding, CompanionPolicy, Enrollment};
+        let binding = |index: usize| CharacterBinding {
+            account_id: online[index].live.key.account_id.clone(),
+            character_index: online[index].live.key.character_index,
+        };
+        CompanionPolicy {
+            schema_version: 1,
+            realm_id: "trial".into(),
+            world_epoch: "epoch-1".into(),
+            enrollments: vec![Enrollment {
+                resident_id: "alo".into(),
+                archive_id: "archive-1".into(),
+                display_name: "Alo".into(),
+                owner: binding(0),
+                actor: binding(1),
+            }],
+        }
+    }
+
+    #[test]
+    fn companion_group_owner_fence_is_startup_only_immutable_and_idempotent() {
+        let online = presences(2);
+        let policy = companion_policy(&online);
+        let mut groups = SharedGroupCoordinator::default();
+        groups.configure_companion_owner_fences(&policy).unwrap();
+        groups.register(&online[0], true).unwrap();
+        groups.configure_companion_owner_fences(&policy).unwrap();
+        let mut changed = policy.clone();
+        changed.world_epoch = "epoch-2".into();
+        assert!(groups.configure_companion_owner_fences(&changed).is_err());
+        assert!(registered(&online)
+            .configure_companion_owner_fences(&policy)
+            .is_err());
+    }
+
+    #[test]
+    fn companion_group_owner_fence_retains_cold_registration_check() {
+        let online = presences(2);
+        let mut groups = SharedGroupCoordinator::default();
+        groups
+            .configure_companion_owner_fences(&companion_policy(&online))
+            .unwrap();
+        for presence in &online {
+            groups.register(presence, true).unwrap();
+        }
+        execute(&mut groups, &online, 0, GroupAction::Add("Party1"), 2_000);
+        groups.register(&online[0], true).unwrap();
+        execute(&mut groups, &online, 1, GroupAction::Reply(true), 2_000);
+        assert!(groups.names(&online[0].live.key).is_empty());
+        assert!(groups.names(&online[1].live.key).is_empty());
     }
 
     #[test]

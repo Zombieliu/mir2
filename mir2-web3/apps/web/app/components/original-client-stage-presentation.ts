@@ -1,6 +1,8 @@
+import type { ClientScreen } from "../../lib/original-ui";
+
 export type Mir2StageLayout = "desktop" | "touch" | "tv";
 export type Mir2StageInput = "keyboardMouse" | "touch" | "gamepad";
-export type Mir2StageScreen = "login" | "select" | "game";
+export type Mir2StageScreen = ClientScreen;
 
 export type Mir2StagePresentationInput = {
   cssWidth: number;

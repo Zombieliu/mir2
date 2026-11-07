@@ -402,11 +402,13 @@ mod tests {
     fn applied_recharge(livemode: bool) -> RechargeOrder {
         RechargeOrder {
             id: "recharge-source".into(),
+            provider: Default::default(),
             request_id: "request-source".into(),
             character_index: 3,
             offer: offer("existing", 1000, 1000),
             created_at_ms: 10,
             livemode,
+            provider_request_started_at_ms: None,
             checkout_session_id: Some("cs_verified".into()),
             payment_intent_id: Some("pi_verified".into()),
             state: RechargeOrderState::Applied,

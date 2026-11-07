@@ -23,6 +23,7 @@ PUBLIC_LINE = b"            @mir2_playtest_public path /ws /health /spectator/ma
 PREVIOUS_API_ADDITION = b" /v1/billing/status /v1/billing/checkout"
 API_ADDITION = PREVIOUS_API_ADDITION + b" /v1/identity/sessions/revoke"
 ACTIVITY_API_ADDITION = API_ADDITION + b" /v1/activities/status /v1/activities/claim"
+WAFFO_WEBHOOK_ADDITION = b" /v1/billing/waffo/webhook"
 MARKER = b"    # BEGIN isolated Mir2 invited playtest 20260929"
 ROOT = Path("/srv/mir2-recharge")
 CADDY = Path("/etc/caddy/Caddyfile")
@@ -60,8 +61,10 @@ def write_verified_release(release, content):
         (release / name).chmod(0o644)
 
 def proxy_candidate(original, snippet, updating, enable_logout_route=False,
-                    enable_activities_routes=False):
-    need(not (enable_logout_route and enable_activities_routes), "routeUpgradeAmbiguous")
+                    enable_activities_routes=False, enable_waffo_webhook=False):
+    need(sum((enable_logout_route, enable_activities_routes, enable_waffo_webhook)) <= 1,
+         "routeUpgradeAmbiguous")
+    need(not enable_waffo_webhook or updating, "waffoWebhookRequiresExistingSite")
     # Windows checkout/upload can use CRLF. Only normalize the incoming snippet;
     # the existing configuration and its compare-and-swap witness stay exact.
     uploaded_snippet = snippet
@@ -75,6 +78,13 @@ def proxy_candidate(original, snippet, updating, enable_logout_route=False,
         variants = {uploaded_snippet, snippet, snippet.replace(b"\n", b"\r\n")}
         need(sum(original.count(variant) for variant in variants) == 1,
              "existingSiteRoutesChanged")
+        if enable_waffo_webhook:
+            old = PUBLIC_LINE + ACTIVITY_API_ADDITION + b"\n"
+            new = PUBLIC_LINE + ACTIVITY_API_ADDITION + WAFFO_WEBHOOK_ADDITION + b"\n"
+            need(original.count(old) == 1, "previousAuthenticatedRoutesNotExpected")
+            candidate = original.replace(old, new, 1)
+            need(candidate.replace(new, old, 1) == original, "unrelatedRouteBytesChanged")
+            return candidate
         if enable_logout_route:
             need(original.count(PUBLIC_LINE + PREVIOUS_API_ADDITION + b"\n") == 1,
                  "previousAuthenticatedRoutesNotExpected")
@@ -89,7 +99,8 @@ def proxy_candidate(original, snippet, updating, enable_logout_route=False,
                              PUBLIC_LINE + API_ADDITION + b"\n", 1) == original,
                  "unrelatedRouteBytesChanged")
             return new
-        need(original.count(PUBLIC_LINE + ACTIVITY_API_ADDITION + b"\n") == 1,
+        need(original.count(PUBLIC_LINE + ACTIVITY_API_ADDITION + b"\n")
+             + original.count(PUBLIC_LINE + ACTIVITY_API_ADDITION + WAFFO_WEBHOOK_ADDITION + b"\n") == 1,
              "existingSiteRoutesChanged")
         return original
     need(original.count(PUBLIC_LINE + b"\n") == 1 and original.count(MARKER) == 1
@@ -133,9 +144,11 @@ def main():
     parser.add_argument("--expected-site-sha256")
     parser.add_argument("--enable-logout-route", action="store_true")
     parser.add_argument("--enable-activities-routes", action="store_true")
+    parser.add_argument("--enable-waffo-webhook", action="store_true")
     parser.add_argument("--apply", action="store_true")
     args = parser.parse_args()
-    need(not (args.enable_logout_route and args.enable_activities_routes), "routeUpgradeAmbiguous")
+    need(sum((args.enable_logout_route, args.enable_activities_routes, args.enable_waffo_webhook)) <= 1,
+         "routeUpgradeAmbiguous")
     stage = Path(args.staging)
     need(stage.resolve() == stage and stage.parent == Path("/home/ubuntu")
          and stage.name.startswith("numeron-recharge-"), "stagingPathRejected")
@@ -155,7 +168,8 @@ def main():
              and sha((previous_site / "release.json").read_bytes()) == args.expected_site_sha256,
              "previousSiteCompareAndSwapRejected")
     new = proxy_candidate(original, snippet, previous_site is not None,
-                          args.enable_logout_route, args.enable_activities_routes)
+                          args.enable_logout_route, args.enable_activities_routes,
+                          args.enable_waffo_webhook)
     env = dict(os.environ)
     process_env = Path("/proc/" + before["caddy"]["MainPID"] + "/environ").read_bytes()
     for entry in process_env.split(b"\0"):

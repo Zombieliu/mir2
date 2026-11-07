@@ -1,0 +1,279 @@
+{
+  "schema": "mir2.r19.local-normal-installer-smoke.v1",
+  "passed": true,
+  "recordedUtc": "2026-11-01T12:51:10.112681+00:00",
+  "sourceRevision": "24a50f865679cfb81c9edf6c95632c4389187dac",
+  "runtimeSourceRevision": "24a50f865679cfb81c9edf6c95632c4389187dac",
+  "installerRecipe": {
+    "runtimeSourceRevision": "24a50f865679cfb81c9edf6c95632c4389187dac",
+    "installerSourceRevision": "10a5c4fadec8f8911732fef2ddb7cd71df800021",
+    "recipeSha256": "b9e030190cc42d97683e3ffd4462d14c8d6ba8426600f41a5f926c9b6d987967",
+    "builderSha256": "92e668ec36b0789a13cb3ff65b8bf4507edb64d066c30e317638371c2c977093",
+    "sourceLock": {
+      "path": "E:\\mir2-release\\windows-cold-start-20261101\\r19\\INSTALLER-RECIPE-SOURCE-LOCK.json",
+      "sha256": "6ec086d2f86891d62d99b245b9c33e1ed083686d313c0ed084a9b489f3ac92ed"
+    },
+    "buildReceipt": {
+      "path": "E:\\mir2-release\\windows-cold-start-20261101\\r19\\installer-normal-r19\\BUILD-PACKED-INSTALLER.json",
+      "sha256": "9679fe94a7276ad33fe8b1676c4d513dc85f7bd71f9740c166c70582702dbec5"
+    }
+  },
+  "installerSha256": "859f18bd68f3968fd24af3aead32a6ab53ca1d12b72fcce380a5a90782fafe8e",
+  "installerBytes": 1040065902,
+  "manifestSha256": "aed057b4515a6e045ebee0c36c1ebbaa6f7a21e3a6296ee1e8ab3b440eb73e47",
+  "engineSequence": 2026110109,
+  "packedSequence": 2026110110,
+  "version": "2026.11.1.19",
+  "candidate": "WN-CANDIDATE-20261101-unified-19",
+  "interactiveNativeLoginVisible": true,
+  "realReadyConfirmed": true,
+  "selectedHealthy": true,
+  "normalExitVerified": true,
+  "normalSinglePageObserved": true,
+  "installClickedOnce": true,
+  "defaultAutomaticLocalPlay": true,
+  "enginePlayInstalledTokenVerified": true,
+  "manualLauncherStarts": 0,
+  "manualStartGameClicks": 0,
+  "desktopDefaultUnchecked": true,
+  "desktopOriginalHashUnchanged": true,
+  "coldAcceptance": false,
+  "localSameByteFunctionalSmokeOnly": true,
+  "httpSetupDownloads": 0,
+  "publicColdStarted": false,
+  "allObservedRuntimeProcessesWithin4Cpu8GiBJob": true,
+  "finalJob": {
+    "ok": true,
+    "operation": "close",
+    "runRoot": "E:\\mir2-release\\windows-cold-start-20261101\\r19\\acceptance-audit\\windows-https\\r19-smoke-01",
+    "fixtureMode": false,
+    "cpu": {
+      "availableMask": "0xffffffff",
+      "selectedMask": "0x55",
+      "selectedLogicalCpuCount": 4,
+      "representedPhysicalCoreCount": 4,
+      "processorGroup": 0
+    },
+    "controllerOutsideInheritedJob": true,
+    "actualLimits": {
+      "flags": 528,
+      "affinityMask": "0x55",
+      "logicalCpuCount": 4,
+      "jobMemoryBytes": 8589934592,
+      "memoryMeaning": "aggregate process committed virtual memory; not physical RAM",
+      "peakJobMemoryBytes": 2331197440,
+      "killOnJobClose": false,
+      "breakawayAllowed": false,
+      "limitsMatch": true
+    },
+    "accounting": {
+      "activeProcesses": 0,
+      "totalProcesses": 5,
+      "terminatedProcesses": 0,
+      "jobCpuUser100ns": 2227968750,
+      "jobCpuKernel100ns": 369375000
+    },
+    "jobProcesses": [],
+    "startedTargets": [
+      {
+        "target": "installer",
+        "pid": 36980,
+        "exited": true,
+        "exitCode": 0
+      }
+    ],
+    "marks": {
+      "D0": {
+        "event": "external-mark",
+        "utc": "2026-11-01T12:46:56.600304+00:00",
+        "monotonicNs": 82871128143200,
+        "mark": {
+          "event": "D0",
+          "evidence_id": "R19-LOCAL-SMOKE-NOT-COLD",
+          "captured_utc": "2026-11-01T12:46:56.598Z",
+          "screenshot_sha256": null
+        },
+        "timingBasis": "receipt monotonic time; external timestamp is recorded, never subtracted",
+        "screenshotBytesVerifiedByHelper": false
+      },
+      "U0": {
+        "event": "external-mark",
+        "utc": "2026-11-01T12:49:30.808299+00:00",
+        "monotonicNs": 83025320131500,
+        "mark": {
+          "event": "U0",
+          "evidence_id": "R19-HEALTHY-NATIVE-LOGIN",
+          "captured_utc": "2026-11-01T12:49:30.793Z",
+          "screenshot_sha256": "7bf0c8ebc2ea7c31f13d636edf9d4aafb7ff17a4d0d262f7d756a56bc2db7583"
+        },
+        "timingBasis": "receipt monotonic time; external timestamp is recorded, never subtracted",
+        "screenshotBytesVerifiedByHelper": false
+      },
+      "X0": {
+        "event": "external-mark",
+        "utc": "2026-11-01T12:51:09.163206+00:00",
+        "monotonicNs": 83123664828300,
+        "mark": {
+          "event": "X0",
+          "evidence_id": "R19-LOCAL-SMOKE-NORMAL-EXIT",
+          "captured_utc": "2026-11-01T12:51:09.162Z",
+          "screenshot_sha256": null
+        },
+        "timingBasis": "receipt monotonic time; external timestamp is recorded, never subtracted",
+        "screenshotBytesVerifiedByHelper": false
+      }
+    },
+    "phaseSeconds": {
+      "download": null,
+      "normalOpen": null,
+      "installToLauncher": null,
+      "launcherToGame": null,
+      "gameToInteractiveUi": null,
+      "normalExitAfterUi": 98.3446968
+    },
+    "totalD0ToU0Seconds": 154.1919883,
+    "within600Seconds": true,
+    "externalUiEvidenceVerifiedByHelper": false,
+    "overallAcceptanceAsserted": false
+  },
+  "controllerExitCode": 0,
+  "gameExitCode": 0,
+  "binaries": {
+    "game": {
+      "path": "E:\\mir2-release\\windows-cold-start-20261101\\r19\\acceptance-audit\\windows-https\\r19-smoke-01\\installed\\generations\\aed057b4515a6e045ebee0c36c1ebbaa6f7a21e3a6296ee1e8ab3b440eb73e47\\mir2-platform-windows.exe",
+      "sha256": "a0f28413dce9362ecfb1a10a414f45f5572520a13289731831152d8858d0d4b2",
+      "bytes": 133801984,
+      "localOnly": true
+    },
+    "engine": {
+      "path": "E:\\mir2-release\\windows-cold-start-20261101\\r19\\acceptance-audit\\windows-https\\r19-smoke-01\\installed\\updater\\engines\\E564B3F1223715050BCF7C153E5ADB68C26B0EF250496D8217031DAD432D9DC9\\Mir2Updater.exe",
+      "sha256": "e564b3f1223715050bcf7c153e5adb68c26b0ef250496d8217031dad432d9dc9",
+      "bytes": 4973568,
+      "localOnly": true
+    },
+    "launcher": {
+      "path": "E:\\mir2-release\\windows-cold-start-20261101\\r19\\acceptance-audit\\windows-https\\r19-smoke-01\\installed\\Mir2Launcher.exe",
+      "sha256": "51dc1f2d7e10e808bbc970ff38d79be367b66620104ec0e851f6f5505c22db29",
+      "bytes": 570880,
+      "localOnly": true
+    }
+  },
+  "evidence": {
+    "jobAudit": {
+      "path": "E:\\mir2-release\\windows-cold-start-20261101\\r19\\acceptance-audit\\windows-https\\r19-smoke-01\\events.jsonl",
+      "sha256": "b0fdb200b09a4611fce99dae90657dba4a18ca99a12257b8287c33a0e8fc4560",
+      "bytes": 3753,
+      "localOnly": true
+    },
+    "controllerRaw": {
+      "path": "E:\\mir2-release\\windows-cold-start-20261101\\r19\\acceptance-audit\\windows-https\\smoke-01.controller.raw.jsonl",
+      "sha256": "895f0c0362a4e4b5f30da4a8ec5c2186023d7ebcc9f69245166c03e5a53eaf4e",
+      "bytes": 23411,
+      "localOnly": true
+    },
+    "controllerStderr": {
+      "path": "E:\\mir2-release\\windows-cold-start-20261101\\r19\\acceptance-audit\\windows-https\\smoke-01.controller.stderr.log",
+      "sha256": "2a65cd28a1654666e5dec5ac547bb88e15074c17aea639ea327d7af8f0a66fcc",
+      "bytes": 233,
+      "localOnly": true
+    },
+    "policy": {
+      "path": "E:\\mir2-release\\windows-cold-start-20261101\\r19\\acceptance-audit\\windows-https\\https-policy.r19-smoke.json",
+      "sha256": "18b7dd31b02523f2ccffafee6d1615f0f3bdc221fb2c80c79cd31be34e275e98",
+      "bytes": 2431,
+      "localOnly": true
+    },
+    "localCopy": {
+      "path": "E:\\mir2-release\\windows-cold-start-20261101\\r19\\acceptance-audit\\windows-https\\r19-smoke-01\\local-setup-copy.json",
+      "sha256": "272f8a83d40406adf82c0362dc5e0862911fe70e4ecd7569407c71406a55e17a",
+      "bytes": 637,
+      "localOnly": true
+    },
+    "normalPage": {
+      "path": "E:\\mir2-release\\windows-cold-start-20261101\\r19\\acceptance-audit\\windows-https\\r19-smoke-01\\normal-single-page-defaults.jpg",
+      "sha256": "27996f342cf5473300be0725bca9ce0489b6d5cce576ec79c1bd6a68718954b2",
+      "bytes": 36559,
+      "localOnly": true
+    },
+    "normalPageCapture": {
+      "path": "E:\\mir2-release\\windows-cold-start-20261101\\r19\\acceptance-audit\\windows-https\\r19-smoke-01\\normal-single-page-defaults.json",
+      "sha256": "4c20bf4bdedb7d3f57b48153d47a9916234907a42d230e75c34aca6c391ea5a1",
+      "bytes": 564,
+      "localOnly": true
+    },
+    "normalInstallAction": {
+      "path": "E:\\mir2-release\\windows-cold-start-20261101\\r19\\acceptance-audit\\windows-https\\r19-smoke-01\\normal-install-action.json",
+      "sha256": "6c69591349db595b1b2bd2d826e4bda685df443941e51179bca3f4c977ebdc21",
+      "bytes": 255,
+      "localOnly": true
+    },
+    "firstUi": {
+      "path": "E:\\mir2-release\\windows-cold-start-20261101\\r19\\acceptance-audit\\windows-https\\r19-smoke-01\\first-native-login-observed.jpg",
+      "sha256": "7ed623ebaf357965f775c09d691918b6737c0ffb4f76b0277cbef1eec473f237",
+      "bytes": 318118,
+      "localOnly": true
+    },
+    "healthyScreenshot": {
+      "path": "E:\\mir2-release\\windows-cold-start-20261101\\r19\\acceptance-audit\\windows-https\\r19-smoke-01\\healthy-u0-candidate.jpg",
+      "sha256": "7bf0c8ebc2ea7c31f13d636edf9d4aafb7ff17a4d0d262f7d756a56bc2db7583",
+      "bytes": 318153,
+      "localOnly": true
+    },
+    "healthyCapture": {
+      "path": "E:\\mir2-release\\windows-cold-start-20261101\\r19\\acceptance-audit\\windows-https\\r19-smoke-01\\healthy-u0-candidate.json",
+      "sha256": "ca41dbbad35908822de25e61aeae718168c80196039aed3c7102b5dd08b65ae6",
+      "bytes": 952,
+      "localOnly": true
+    },
+    "healthySelector": {
+      "path": "E:\\mir2-release\\windows-cold-start-20261101\\r19\\acceptance-audit\\windows-https\\r19-smoke-01\\healthy-u0-candidate.selector.json",
+      "sha256": "035c6a3135ab8629229be16451e84e6fad55aa6bbc4d684c66a498755fec1ab8",
+      "bytes": 317,
+      "localOnly": true
+    },
+    "visualReview": {
+      "path": "E:\\mir2-release\\windows-cold-start-20261101\\r19\\acceptance-audit\\windows-https\\r19-smoke-01\\U0-VISUAL-REVIEW.json",
+      "sha256": "9d169360b7cc84089014bd8c9ad447846b7150e79cff166d53c101874596cfcc",
+      "bytes": 330,
+      "localOnly": true
+    },
+    "autoPlayWitness": {
+      "path": "E:\\mir2-release\\windows-cold-start-20261101\\r19\\acceptance-audit\\windows-https\\r19-smoke-01\\AUTO-PLAY-WITNESS.json",
+      "sha256": "2c867ae9c28218b8d2cab5c190b81d931f536c64aecae37f780f7ad98565d8d4",
+      "bytes": 969,
+      "localOnly": true
+    },
+    "runtimeLog": {
+      "path": "E:\\mir2-release\\windows-cold-start-20261101\\r19\\acceptance-audit\\windows-https\\r19-smoke-01\\installed-last-run.jsonl",
+      "sha256": "ac7f138a4449eeec945ff0b93b092dd17d60cde269dad28112ef8d18ce50722f",
+      "bytes": 361,
+      "localOnly": true
+    },
+    "finalSelector": {
+      "path": "E:\\mir2-release\\windows-cold-start-20261101\\r19\\acceptance-audit\\windows-https\\r19-smoke-01\\installed-active-generation.json",
+      "sha256": "035c6a3135ab8629229be16451e84e6fad55aa6bbc4d684c66a498755fec1ab8",
+      "bytes": 317,
+      "localOnly": true
+    },
+    "preservation": {
+      "path": "E:\\mir2-release\\windows-cold-start-20261101\\r19\\acceptance-audit\\windows-https\\preservation-before-smoke\\PRESERVATION-R19-BEFORE.json",
+      "sha256": "70600dc1c512cee9c77a95d4df1c2633b322ea0d09356d81ba33203d745083da",
+      "bytes": 6953,
+      "localOnly": true
+    },
+    "LOCAL": {
+      "path": "E:\\mir2-release\\windows-cold-start-20261101\\r19\\LOCAL-ARTIFACTS.json",
+      "sha256": "34dfda01774e11f61a7fe34573c59b5da5d2a2b17391c4b407f59cece7045b69",
+      "bytes": 7334,
+      "localOnly": true
+    }
+  },
+  "notes": [
+    "Healthy is exact same-attempt real engine Ready plus >=10s liveness gate; no independent Ready-success log claimed.",
+    "Initial screenshot showed Desktop unchecked; actual Desktop bytes still match original. Inno registry Selected Tasks retained old desktopicon string; this is recorded and not treated as proof of a new shortcut.",
+    "Original AppID registry/menu baseline retained for final restoration after cold; old game files untouched.",
+    "Helper timing fields in this local smoke are not public cold acceptance.",
+    "No account login, QR challenge or authentication was performed; full screenshots/runtime remain local only.",
+    "4 logical CPUs /8GiB aggregate committed-memory Job is not physical low-spec PC emulation."
+  ]
+}

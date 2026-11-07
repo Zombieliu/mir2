@@ -4,12 +4,17 @@ Public site: <https://165.154.65.136.sslip.io/recharge/>.
 
 This independent, buildless website lives alongside `apps/web` in the same
 repository. It uses the invited Windows realm's existing game accounts,
-characters, Stripe Checkout and durable recharge ledger. It doesn't create
+characters, enabled payment checkouts and durable recharge ledger. It doesn't create
 another account database or collect card details. The existing game website
 link is a separate browser client; log in here with your invited Windows game
 account and select the character that should receive Credits.
 
-Current mode is **Stripe TEST**. The public UI labels it explicitly. Approved
+The original deployment documented here uses **Stripe TEST**. The portal now
+also supports an optional **WAFFO Merchant** channel. The authenticated status
+lists enabled channels and each channel's actual test/live mode and offers;
+players choose a channel before choosing an amount. An absent WAFFO channel is
+not advertised or used automatically. This source change does not enable or
+deploy a merchant account. The original Stripe approved
 offers are USD1/5/10/20 for100/500/1000/2000 Credits. The30-day monthly item costs
 1000 Credits in the in-game shop; claim its parcel and use the item to activate
 it. Website payment never activates monthly time directly. Mandatory monthly
@@ -30,8 +35,10 @@ activity/player copy is in `public/activities.js`.
 ## Player flow
 
 1. Log in with the game account and password, and select the receiving character.
-2. Pick an amount. The authenticated server supplies the actual offer and quote.
-3. Open Stripe in a new tab. If Stripe offers another currency, select USD.
+2. Choose an enabled payment channel and an amount. The authenticated server
+   supplies that channel's actual offer and quote.
+3. Open the selected channel's checkout in a new tab. Use the currency shown in
+   the order.
 4. Keep the portal open and refresh after payment. A verified server callback
    records payment; the server issues pending Credits, and the portal displays
    the actual order state. Returning with `?paid` doesn't award anything.
@@ -39,6 +46,33 @@ activity/player copy is in `public/activities.js`.
 When a character is playing, the website reports its saved wallet and explains
 that the game handles pending Credits. It never steals the active character's
 lease or interrupts play. Website sign-out revokes only the website grant.
+
+## Payment channel contract
+
+`paymentProviders` in billing status contains `{id, label, livemode, offers}`
+for enabled channels. Supported IDs are `stripe` and `waffo`. The old
+`checkoutEnabled` / `offers` fields can still be interpreted as the original
+Stripe test catalogue when `paymentProviders` is absent. An explicit empty
+provider list disables new checkouts. This portal requires the matching updated
+server: status queries and WebSocket status requests send
+`includePaymentProviders=true`, and checkout bodies send
+`includePaymentProviders: true` plus the selected `provider`. The server keeps
+its original response schema for shipped clients that do not opt in, including
+clients whose parsers reject unknown response fields.
+
+New checkout requests include the selected `provider`, and checkout responses
+must echo that provider. Recent orders display their stored provider. The
+session retry journal isolates account, character, provider and offer; existing
+Stripe journal IDs are retained during upgrade. Once an attempt starts, its
+channel and offer stay fixed through an uncertain result and retry. The player
+must explicitly choose **Start another recharge** to create a separate intent.
+
+Checkout URLs are validated for the selected channel: Stripe keeps its exact
+`https://checkout.stripe.com/c/pay/` rule, and WAFFO uses only
+`https://cashier.waffo.com/` with a nonempty order path. Credentials, other hosts,
+other schemes and nonstandard ports are rejected. This follows the official
+[WAFFO hosted Checkout integration](https://waffo.com/docs/en/developer-docs/integration/checkout/steps).
+Other sandbox checkout hosts require a separately verified allowlist change.
 
 ## Development and tests
 
@@ -82,6 +116,11 @@ invoke the identical arguments plus `--apply`. Later static updates use
 `--expected-site-sha256`; Caddy isn't reloaded when its bytes remain identical.
 `--enable-logout-route` is only the guarded migration from the initial two-route
 portal to the existing authenticated self-session revocation endpoint.
+`--enable-waffo-webhook` is a separate, explicit migration for an existing
+activity-enabled site: it adds only the signed `/v1/billing/waffo/webhook` public
+callback. Ordinary updates preserve its exact existing matcher. Merchant setup,
+paired service versions and local evidence are in
+[WAFFO recharge](../../docs/WAFFO-RECHARGE-20261105.zh-CN.md).
 `repair_redirect.py` is the historical guarded repair for the initial relative
 redirect ambiguity; it isn't part of routine updates.
 

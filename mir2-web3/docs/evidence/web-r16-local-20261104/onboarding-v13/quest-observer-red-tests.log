@@ -1,0 +1,349 @@
+   Compiling mir2-client-bevy v0.1.0 (E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy)
+warning: unnecessary parentheses around type
+  --> src\crystal_ui\skill_page_shared.rs:67:20
+   |
+67 |     let mut rects: (Vec<(SkillPageAction, CrystalRect)>) = (1..=16)
+   |                    ^                                   ^
+   |
+   = note: `#[warn(unused_parens)]` (part of `#[warn(unused)]`) on by default
+help: remove these parentheses
+   |
+67 -     let mut rects: (Vec<(SkillPageAction, CrystalRect)>) = (1..=16)
+67 +     let mut rects: Vec<(SkillPageAction, CrystalRect)> = (1..=16)
+   |
+
+warning: unused imports: `NativeShellModel` and `NativeShellScreen`
+ --> src\native_billing.rs:9:27
+  |
+9 | use crate::native_shell::{NativeShellModel, NativeShellScreen};
+  |                           ^^^^^^^^^^^^^^^^  ^^^^^^^^^^^^^^^^^
+  |
+  = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+
+warning: unnecessary parentheses around method argument
+   --> src\portable_character_ui.rs:514:25
+    |
+514 |                         (Node {
+    |                         ^
+...
+523 |                         }),
+    |                          ^
+    |
+help: remove these parentheses
+    |
+514 ~                         Node {
+515 |                             position_type: PositionType::Absolute,
+...
+522 |                             ..default()
+523 ~                         },
+    |
+
+warning: variable does not need to be mutable
+  --> src\crystal_ui\item_tooltip.rs:75:22
+   |
+75 | fn localize_document(mut document: CrystalItemTooltipDocument) -> CrystalItemTooltipDocument {
+   |                      ----^^^^^^^^
+   |                      |
+   |                      help: remove this `mut`
+   |
+   = note: `#[warn(unused_mut)]` (part of `#[warn(unused)]`) on by default
+
+warning: variable does not need to be mutable
+   --> src\crystal_ui\mail_editor_tests.rs:166:9
+    |
+166 |     let mut draft = draft("abcd");
+    |         ----^^^^^
+    |         |
+    |         help: remove this `mut`
+
+warning: variable does not need to be mutable
+   --> src\crystal_ui\mail_editor_tests.rs:217:9
+    |
+217 |     let mut draft = draft("letter body");
+    |         ----^^^^^
+    |         |
+    |         help: remove this `mut`
+
+warning: variable does not need to be mutable
+   --> src\crystal_ui\mail_editor_tests.rs:234:9
+    |
+234 |     let mut draft = draft(&message);
+    |         ----^^^^^
+    |         |
+    |         help: remove this `mut`
+
+warning: unused variable: `native_stage`
+    --> src\crystal_ui\widget.rs:1075:5
+     |
+1075 |     native_stage: bool,
+     |     ^^^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_native_stage`
+     |
+     = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused variable: `guidance`
+   --> src\quest_turn_in.rs:503:13
+    |
+503 |         let guidance = QuestGuidance::from_profile_name("newcomer-v2");
+    |             ^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_guidance`
+
+warning: unused variable: `nearby`
+    --> src\quest_ui.rs:2674:5
+     |
+2674 |     nearby: Option<Res<NearbyNpcModel>>,
+     |     ^^^^^^ help: if this is intentional, prefix it with an underscore: `_nearby`
+
+warning: constant `TEXT` is never used
+ --> src\crystal_ui\mail_editor.rs:8:7
+  |
+8 | const TEXT: Color = Color::srgb(0.95, 0.92, 0.82);
+  |       ^^^^
+  |
+  = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: constant `MAIL_PARCEL_BODY_RECT` is never used
+  --> src\crystal_ui\mail_editor.rs:17:18
+   |
+17 | pub(crate) const MAIL_PARCEL_BODY_RECT: CrystalRect = CrystalRect::new(15.0, 98.0, 202.0, 165.0);
+   |                  ^^^^^^^^^^^^^^^^^^^^^
+
+warning: methods `set_selecting`, `selecting`, `render`, and `render_at` are never used
+   --> src\crystal_ui\mail_editor.rs:609:19
+    |
+ 80 | impl MailLetterEditor {
+    | --------------------- methods in this implementation
+...
+609 |     pub(crate) fn set_selecting(&mut self, selecting: bool) {
+    |                   ^^^^^^^^^^^^^
+...
+613 |     pub(crate) fn selecting(&self) -> bool {
+    |                   ^^^^^^^^^
+...
+644 |     pub(crate) fn render(&self, parent: &mut ChildSpawnerCommands) {
+    |                   ^^^^^^
+...
+648 |     pub(crate) fn render_at(&self, parent: &mut ChildSpawnerCommands, body_rect: CrystalRect) {
+    |                   ^^^^^^^^^
+
+warning: function `item` is never used
+  --> src\crystal_ui\hero_cross_inventory.rs:44:4
+   |
+44 | fn item<'a>(cell: Cell, player: &'a InventoryModel, hero: &'a HeroModel) -> Option<&'a ItemModel> {
+   |    ^^^^
+
+warning: function `spawn_original_crystal_image_button` is never used
+   --> src\crystal_ui\widget.rs:415:15
+    |
+415 | pub(crate) fn spawn_original_crystal_image_button<T: Bundle>(
+    |               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: method `display_label` is never used
+  --> src\native_billing.rs:50:8
+   |
+49 | impl OwnedMonthlyCard {
+   | --------------------- method in this implementation
+50 |     fn display_label(&self) -> String {
+   |        ^^^^^^^^^^^^^
+
+warning: method `label` is never used
+  --> src\native_billing.rs:93:8
+   |
+92 | impl SuiUsdcOrderState {
+   | ---------------------- method in this implementation
+93 |     fn label(self) -> &'static str {
+   |        ^^^^^
+
+warning: associated items `ALL` and `label` are never used
+   --> src\native_billing.rs:320:11
+    |
+319 | impl BillingPage {
+    | ---------------- associated items in this implementation
+320 |     const ALL: [Self; 3] = [Self::Fiat, Self::Usdc, Self::MonthlyCard];
+    |           ^^^
+321 |
+322 |     fn label(self) -> &'static str {
+    |        ^^^^^
+
+warning: method `actions` is never used
+   --> src\native_billing.rs:764:8
+    |
+364 | impl BillingPanel {
+    | ----------------- method in this implementation
+...
+764 |     fn actions(&self) -> Vec<BillingAction> {
+    |        ^^^^^^^
+
+warning: function `captures` is never used
+   --> src\native_i18n.rs:725:4
+    |
+725 | fn captures<'a>(pattern: &str, source: &'a str) -> Option<Vec<(String, &'a str)>> {
+    |    ^^^^^^^^
+
+warning: constant `QUEST_LOG_BG` is never used
+  --> src\quest_ui.rs:88:7
+   |
+88 | const QUEST_LOG_BG: Color = Color::srgba(0.08, 0.06, 0.04, 0.96);
+   |       ^^^^^^^^^^^^
+
+warning: method `display_label` is never used
+   --> src\quest_ui.rs:932:8
+    |
+913 | impl QuestStageFilter {
+    | --------------------- method in this implementation
+...
+932 |     fn display_label(self) -> String {
+    |        ^^^^^^^^^^^^^
+
+warning: variants `SelectQuestFilter` and `QuestHelp` are never constructed
+    --> src\quest_ui.rs:1530:5
+     |
+1481 | pub(crate) enum QuestUiButton {
+     |                 ------------- variants in this enum
+...
+1530 |     SelectQuestFilter {
+     |     ^^^^^^^^^^^^^^^^^
+...
+1533 |     QuestHelp,
+     |     ^^^^^^^^^
+     |
+     = note: `QuestUiButton` has derived impls for the traits `Debug` and `Clone`, but these are intentionally ignored during dead code analysis
+
+warning: fields `map` and `big_map` are never read
+    --> src\quest_ui.rs:2382:5
+     |
+2368 | pub(crate) struct QuestInputModels<'w> {
+     |                   ---------------- fields in this struct
+...
+2382 |     map: Option<Res<'w, MapModel>>,
+     |     ^^^
+...
+2390 |     big_map: Option<Res<'w, crate::big_map::BigMapModel>>,
+     |     ^^^^^^^
+
+warning: function `explicit_quest_dialog_button` is never used
+    --> src\quest_ui.rs:6176:4
+     |
+6176 | fn explicit_quest_dialog_button(target: &str, npc_index: u32) -> Option<QuestUiButton> {
+     |    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `wrap_guidance_hint` is never used
+    --> src\quest_ui.rs:7185:4
+     |
+7185 | fn wrap_guidance_hint(hint: &str, max_chars: usize) -> Vec<String> {
+     |    ^^^^^^^^^^^^^^^^^^
+
+warning: function `quest_list_message_lines` is never used
+    --> src\quest_ui.rs:7490:4
+     |
+7490 | fn quest_list_message_lines(
+     |    ^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `render_quest_detail_panel` is never used
+    --> src\quest_ui.rs:8877:4
+     |
+8877 | fn render_quest_detail_panel(
+     |    ^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `tracker_quest_block` is never used
+     --> src\quest_ui.rs:10115:4
+      |
+10115 | fn tracker_quest_block(
+      |    ^^^^^^^^^^^^^^^^^^^
+
+warning: function `tracker_title_line` is never used
+     --> src\quest_ui.rs:10356:4
+      |
+10356 | fn tracker_title_line(parent: &mut ChildSpawnerCommands, text: &str) {
+      |    ^^^^^^^^^^^^^^^^^^
+
+warning: function `tracker_title_line_raw` is never used
+     --> src\quest_ui.rs:10366:4
+      |
+10366 | fn tracker_title_line_raw(parent: &mut ChildSpawnerCommands, text: &str) {
+      |    ^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `tracker_body_line_raw` is never used
+     --> src\quest_ui.rs:10380:4
+      |
+10380 | fn tracker_body_line_raw(parent: &mut ChildSpawnerCommands, text: &str) {
+      |    ^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `intent_from_button` is never used
+     --> src\quest_ui.rs:10534:4
+      |
+10534 | fn intent_from_button(action: &QuestUiButton) -> Option<QuestUiIntent> {
+      |    ^^^^^^^^^^^^^^^^^^
+
+warning: method `normalize_bindings` is never used
+   --> src\skill_binding_ui.rs:331:8
+    |
+133 | impl SkillBindingUi {
+    | ------------------- method in this implementation
+...
+331 |     fn normalize_bindings(&mut self) {
+    |        ^^^^^^^^^^^^^^^^^^
+
+warning: function `avoiding_bag_origin` is never used
+   --> src\stone_workshop_ui.rs:113:15
+    |
+113 | pub(crate) fn avoiding_bag_origin(sidebar: QuestLogRect, p: QuestUiPresentation,
+    |               ^^^^^^^^^^^^^^^^^^^
+
+warning: `mir2-client-bevy` (lib test) generated 35 warnings (run `cargo fix --lib -p mir2-client-bevy --tests` to apply 10 suggestions)
+    Finished `test` profile [unoptimized] target(s) in 24.76s
+     Running unittests src\lib.rs (F:/mir2-builds/web-r16-20261104/cargo-quest-observer-tests\debug\deps\mir2_client_bevy-d8ac3d768229f2e4.exe)
+
+running 14 tests
+test portable_quest_ui::observer_tests::hidden_display_none_wrong_camera_and_stale_source_never_publish_controls ... ok
+test portable_quest_ui::observer_tests::local_card_blockers_do_not_reclassify_other_controls_or_wire_actions ... FAILED
+test portable_quest_ui::observer_tests::production_observer_requires_both_layout_and_visibility_schedule_barriers ... FAILED
+test portable_quest_ui::observer_tests::rebuilt_buttons_publish_same_frame_after_real_visibility_and_old_phase_is_empty ... FAILED
+test portable_quest_ui::tests::ingested_session_exit_applies_before_portable_context_and_input ... ok
+test portable_quest_ui::tests::portable_route_is_stamped_single_slot_and_hidden_or_changed_authority_clears_actions ... ok
+test portable_quest_ui::tests::portable_supply_buttons_use_current_quest_context_and_map_stays_local ... ok
+test portable_quest_ui::tests::portable_tracker_requires_current_quest_authority_and_hides_missing_context ... FAILED
+test portable_quest_ui::tests::portable_world_buttons_preserve_origin_and_coordinates_without_wire_intents ... ok
+test portable_quest_ui::tests::quest_world_context_requires_matching_applied_revision_and_local_map_queue_is_single_slot ... ok
+test portable_quest_ui::tests::quest_world_control_rects_keep_fractional_measured_geometry_and_reject_unknown_bounds ... ok
+test portable_quest_ui::tests::quest_world_raw_life_unknown_map_and_pickup_coordinates_stay_authoritative ... ok
+test portable_quest_ui::tests::shared_diary_nodes_target_the_ui_camera_and_emit_the_native_intent ... ok
+test portable_quest_ui::tests::temporary_surface_handoff_preserves_detail_scroll_and_pending_without_input ... ok
+
+failures:
+
+---- portable_quest_ui::observer_tests::local_card_blockers_do_not_reclassify_other_controls_or_wire_actions stdout ----
+
+thread 'portable_quest_ui::observer_tests::local_card_blockers_do_not_reclassify_other_controls_or_wire_actions' (81496) panicked at src\portable_quest_ui\observer_tests.rs:371:5:
+assertion `left == right` failed
+  left: 0
+ right: 3
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+---- portable_quest_ui::observer_tests::production_observer_requires_both_layout_and_visibility_schedule_barriers stdout ----
+
+thread 'portable_quest_ui::observer_tests::production_observer_requires_both_layout_and_visibility_schedule_barriers' (87404) panicked at src\portable_quest_ui\observer_tests.rs:162:9:
+the production observer must explicitly wait for VisibilityPropagate
+
+---- portable_quest_ui::observer_tests::rebuilt_buttons_publish_same_frame_after_real_visibility_and_old_phase_is_empty stdout ----
+
+thread 'portable_quest_ui::observer_tests::rebuilt_buttons_publish_same_frame_after_real_visibility_and_old_phase_is_empty' (87420) panicked at src\portable_quest_ui\observer_tests.rs:258:9:
+assertion `left == right` failed
+  left: []
+ right: ["openDestinationMap", "questLocalUi", "toggleSupplies"]
+
+---- portable_quest_ui::tests::portable_tracker_requires_current_quest_authority_and_hides_missing_context stdout ----
+
+thread 'portable_quest_ui::tests::portable_tracker_requires_current_quest_authority_and_hides_missing_context' (50740) panicked at src\portable_quest_ui.rs:891:9:
+assertion `left == right` failed
+  left: {43v0, 83v0, 78v0, 79v0, 54v0, 81v0}
+ right: {73v0, 43v0, 69v0, 68v0, 71v0, 54v0}
+
+
+failures:
+    portable_quest_ui::observer_tests::local_card_blockers_do_not_reclassify_other_controls_or_wire_actions
+    portable_quest_ui::observer_tests::production_observer_requires_both_layout_and_visibility_schedule_barriers
+    portable_quest_ui::observer_tests::rebuilt_buttons_publish_same_frame_after_real_visibility_and_old_phase_is_empty
+    portable_quest_ui::tests::portable_tracker_requires_current_quest_authority_and_hides_missing_context
+
+test result: FAILED. 10 passed; 4 failed; 0 ignored; 0 measured; 801 filtered out; finished in 0.11s
+
+error: test failed, to rerun pass `--lib`

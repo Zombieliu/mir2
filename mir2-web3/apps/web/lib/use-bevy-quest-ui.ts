@@ -11,6 +11,7 @@ import { createHudBarVisualClock, nextHudBarPlanCommit, readHudBarDrawPlan,
   currentHudBarPlans, supportsHudBarDrawPlan, type CurrentHudBarPlans } from "./bevy-hud-bar-draw-plan";
 import {
   currentBevyQuestLocale, supportsBevyQuestLocale, stripUnsupportedQuestLocale,
+  supportsBevyQuestDisplayLocale, stripUnsupportedQuestDisplayLocale,
   readBevyQuestUiStatus, readBevyQuestNameTargets,
   type BevyQuestUiIntent,
   type BevyQuestUiIntentResult,
@@ -138,7 +139,8 @@ export function useBevyQuestUi(options: Options) {
           !== JSON.stringify({quests:acknowledgedSnapshot?.quests,completedKnown:acknowledgedSnapshot?.completedKnown,completedQuestIds:acknowledgedSnapshot?.completedQuestIds,profile:acknowledgedSnapshot?.profile})) return null;
       const status = readBevyQuestUiStatus(runtime, live.generation), now = performance.now();
       if (!status?.ready || !Number.isFinite(now) || status.frame < lastFrame
-        || status.revision !== context.revision || !currentBevyQuestLocale(status, live.language, requiredPresentationRevision)) return null;
+        || status.revision !== context.revision || !currentBevyQuestLocale(status, live.language, requiredPresentationRevision,
+          supportsBevyQuestDisplayLocale(runtime) ? live.displayLanguage : undefined)) return null;
       if (status.frame > lastFrame) { lastFrame = status.frame; lastFrameAt = now; }
       if (now < lastFrameAt || now - lastFrameAt > 2000) return null;
       return readQuestWorldControls(runtime, context, live.presentation.logicalWidth, live.presentation.logicalHeight);
@@ -199,7 +201,9 @@ export function useBevyQuestUi(options: Options) {
           || !live.presentation || !currentSnapshot?.presentation
           || JSON.stringify(live.presentation) !== JSON.stringify(currentSnapshot.presentation)
           || (supportsBevyQuestLocale(runtime) && live.language !== currentSnapshot.language)
-          || !currentBevyQuestLocale(currentStatus, live.language, requiredPresentationRevision)
+          || (supportsBevyQuestDisplayLocale(runtime) && live.displayLanguage !== currentSnapshot.displayLanguage)
+          || !currentBevyQuestLocale(currentStatus, live.language, requiredPresentationRevision,
+            supportsBevyQuestDisplayLocale(runtime) ? live.displayLanguage : undefined)
           || currentStatus.revision < requiredPresentationRevision || intent.generation !== live.generation
           || intent.generation !== currentSnapshot.generation || typeof intent.type !== "string") {
           return JSON.stringify({ accepted: false, error: "The game session changed." });
@@ -236,6 +240,7 @@ export function useBevyQuestUi(options: Options) {
         const weightSupported = supportsBevyWeightBar(runtime);
         const drawPlanSupported = supportsHudBarDrawPlan(runtime);
         const localeSupported = supportsBevyQuestLocale(runtime);
+        const displayLocaleSupported = supportsBevyQuestDisplayLocale(runtime);
         const worldContextSupported = supportsBevyQuestWorldContext(runtime);
         const { hudBarPlayerObjectId, hudBarRuntimeLifetime, worldDraft, ...hostSnapshot } = liveSnapshot;
         const player = { ...liveSnapshot.player };
@@ -244,11 +249,11 @@ export function useBevyQuestUi(options: Options) {
           ? nextHudBarPlanCommit(hudBarClock.current, hudBarRuntimeLifetime, hudBarPlayerObjectId ?? null,
             { ...hostSnapshot, player, presentation: hostSnapshot.presentation as BevyQuestUiSnapshot["presentation"] })
           : null;
-        currentSnapshot = stripUnsupportedQuestLocale(stripUnsupportedWeightBar(stripUnsupportedExperienceBar({ ...hostSnapshot, player,
+        currentSnapshot = stripUnsupportedQuestDisplayLocale(stripUnsupportedQuestLocale(stripUnsupportedWeightBar(stripUnsupportedExperienceBar({ ...hostSnapshot, player,
           hpOrbSlot: hpSupported || mpSupported ? liveSnapshot.hpOrbSlot : undefined,
           experienceBarSlot: liveSnapshot.experienceBarSlot,
           weightBarSlot: liveSnapshot.weightBarSlot,
-          ...(hudBarPlan ? { hudBarPlan } : {}) }, experienceSupported || drawPlanSupported), weightSupported || drawPlanSupported), localeSupported);
+          ...(hudBarPlan ? { hudBarPlan } : {}) }, experienceSupported || drawPlanSupported), weightSupported || drawPlanSupported), localeSupported), displayLocaleSupported);
         if (generation !== currentSnapshot.generation) {
           generation = currentSnapshot.generation;
           lastSnapshot = "";
@@ -298,7 +303,8 @@ export function useBevyQuestUi(options: Options) {
           // HP/quest/NPC updates keep the same renderer owner while Bevy consumes
           // the model on its next frame; switching to React on each update
           // would visibly replace panels for an entire polling interval.
-          const presentation = JSON.stringify({ presentation: currentSnapshot.presentation, language: currentSnapshot.language });
+          const presentation = JSON.stringify({ presentation: currentSnapshot.presentation, language: currentSnapshot.language,
+            displayLanguage: currentSnapshot.displayLanguage });
           if (presentation !== lastPresentation) {
             requiredPresentationRevision = sentRevision;
             lastPresentation = presentation;
@@ -315,7 +321,7 @@ export function useBevyQuestUi(options: Options) {
         // not proof that its event loop still draws or consumes input.
         const stalled = Boolean(status?.ready && (status.frame < lastFrame || now - lastFrameAt > 2000));
         rendererHealthy = Boolean(status?.ready && !stalled
-          && currentBevyQuestLocale(status, currentSnapshot.language, requiredPresentationRevision));
+          && currentBevyQuestLocale(status, currentSnapshot.language, requiredPresentationRevision, currentSnapshot.displayLanguage));
         const ready = Boolean(rendererHealthy && currentSnapshot.inGame && currentSnapshot.hostVisible && !currentSnapshot.dialog.hasInput);
         // Lock world input as soon as the host asks to display a window. The
         // prior Bevy frame can still report no dialog until its next update.

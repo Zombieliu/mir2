@@ -98,6 +98,13 @@ mod packet_batch;
 mod procurement;
 #[path = "web_transport.rs"]
 mod transport;
+#[path = "web_reconnect_handoff.rs"]
+mod reconnect_handoff;
+use reconnect_handoff::{HandoffBinding, HandoffRegistry, HandoffToken};
+#[path = "web_native_resume_handoff.rs"]
+mod native_resume_handoff;
+use native_resume_handoff::{prepare_native_resume_handoff, CompletedNativeResumeHandoff};
+type SocketReconnectBinding = Option<(GatewaySessionCacheKey, HandoffBinding)>;
 type WebSocketReceiver = futures_util::stream::SplitStream<WebSocket>;
 type SharedZoneMovementIngressSlot = Arc<RwLock<Option<GatewayZoneMovementIngress>>>;
 type SharedSerialExecutionGate = Arc<AsyncRwLock<()>>;
@@ -168,7 +175,14 @@ impl SkillKeyRequest {
     }
 }
 
+enum CompanionSocketCommand {
+    Control(crate::companion_relay::OwnerRequest),
+    Register(crate::companion_relay::RuntimeRegister),
+    Reply(crate::companion_relay::RuntimeReply),
+}
+
 enum ParsedSocketInput {
+    Companion(CompanionSocketCommand),
     Action {
         action: SessionAction,
         quest_operation_request: Option<QuestOperationRequest>,
@@ -595,6 +609,7 @@ struct WebState {
     spectator: SpectatorHub,
     ai_live: AiLiveHub,
     channel_identity: ChannelIdentityRegistry,
+    companions: Option<crate::companion_relay::CompanionRelay>,
 }
 
 #[derive(Debug, Clone, Deserialize)]
@@ -939,6 +954,7 @@ impl Drop for GatewayCapacityPermit {
 #[derive(Debug, Default)]
 struct ReconnectSessionStore {
     state: Mutex<ReconnectSessionState>,
+    handoffs: Arc<HandoffRegistry>,
 }
 
 #[derive(Debug, Default)]
@@ -957,7 +973,14 @@ struct ReconnectSessionLease {
     active_session_permit: Option<GatewayCapacityPermit>,
     _reconnect_lease_permit: GatewayCapacityPermit,
     resume_family_id: Option<ResumeFamilyId>,
+    handoff_token: Option<HandoffToken>,
     expires_at: Instant,
+}
+
+#[derive(Clone)]
+struct HandoffAuthorization {
+    identity: VerifiedIdentitySession,
+    revision: ResumeAuthRevision,
 }
 
 #[derive(Debug)]
@@ -1532,6 +1555,7 @@ impl ReconnectSessionStore {
         self.begin_identity_session_revocations([identity_session_id.to_string()])
     }
 
+    #[cfg(test)]
     fn store(
         &self,
         key: GatewaySessionCacheKey,
@@ -1541,6 +1565,20 @@ impl ReconnectSessionStore {
         resume_family_id: Option<ResumeFamilyId>,
         ttl: Duration,
     ) {
+        self.store_with_handoff(key, session, active_session_permit, reconnect_lease_permit, resume_family_id, ttl, None);
+    }
+
+    fn store_with_handoff(
+        &self,
+        key: GatewaySessionCacheKey,
+        session: GatewaySession,
+        active_session_permit: Option<GatewayCapacityPermit>,
+        reconnect_lease_permit: GatewayCapacityPermit,
+        resume_family_id: Option<ResumeFamilyId>,
+        ttl: Duration,
+        handoff_binding: Option<HandoffBinding>,
+    ) {
+        let handoff_token = handoff_binding.as_ref().map(HandoffBinding::token);
         let expires_at = Instant::now() + ttl.max(Duration::from_millis(1));
         let mut state = self
             .state
@@ -1554,12 +1592,16 @@ impl ReconnectSessionStore {
                 active_session_permit,
                 _reconnect_lease_permit: reconnect_lease_permit,
                 resume_family_id,
+                handoff_token,
                 expires_at,
             },
         );
         if let Some(family_id) = replaced.and_then(|lease| lease.resume_family_id) {
             state.credentials.revoke_family(&family_id);
         }
+        // Complete before releasing the store commit lock. A restore cannot bind
+        // the next physical socket while the old registry entry is still present.
+        if let Some(binding) = handoff_binding { binding.ready(); }
     }
 
     fn take(&self, key: &GatewaySessionCacheKey) -> Option<ReconnectSessionRestore> {
@@ -1579,6 +1621,43 @@ impl ReconnectSessionStore {
             session: lease.session,
             active_session_permit: lease.active_session_permit,
         })
+    }
+
+    fn capture_handoff_authorization(&self, verified: &VerifiedIdentitySession, now_ms: u64) -> Option<HandoffAuthorization> {
+        let state = self.state.lock().ok()?;
+        if verified.expires_at_ms <= now_ms
+            || Self::auth_revocation_in_progress_locked(&state, &verified.account_id, &verified.session_id)
+            || Self::auth_revision_blocked_locked(&state, &verified.account_id, &verified.session_id) { return None; }
+        Some(HandoffAuthorization { identity: verified.clone(),
+            revision: Self::auth_revision_locked(&state, &verified.account_id, &verified.session_id) })
+    }
+
+    fn handoff_authorization_current(&self, authorization: &HandoffAuthorization, now_ms: u64) -> bool {
+        let Ok(state) = self.state.lock() else { return false; };
+        let verified = &authorization.identity;
+        verified.expires_at_ms > now_ms
+            && !Self::auth_revocation_in_progress_locked(&state, &verified.account_id, &verified.session_id)
+            && !Self::auth_revision_blocked_locked(&state, &verified.account_id, &verified.session_id)
+            && Self::auth_revision_locked(&state, &verified.account_id, &verified.session_id) == authorization.revision
+    }
+
+    /// The wait notification grants nothing. Consume only the same saved teardown,
+    /// while the authorization revision and one-use lease share this commit lock.
+    fn take_after_handoff(&self, key: &GatewaySessionCacheKey, token: &HandoffToken,
+        authorization: &HandoffAuthorization, now_ms: u64) -> Option<ReconnectSessionRestore> {
+        let mut state = self.state.lock().ok()?;
+        let verified = &authorization.identity;
+        if key.account_id != verified.account_id || verified.expires_at_ms <= now_ms
+            || Self::auth_revocation_in_progress_locked(&state, &verified.account_id, &verified.session_id)
+            || Self::auth_revision_blocked_locked(&state, &verified.account_id, &verified.session_id)
+            || Self::auth_revision_locked(&state, &verified.account_id, &verified.session_id) != authorization.revision { return None; }
+        Self::purge_expired_locked(&mut state);
+        let lease = state.sessions.get(key)?;
+        if lease.expires_at <= Instant::now() || lease.session.session_id() != token.owner()
+            || !lease.handoff_token.as_ref().is_some_and(|saved| saved.same(token)) { return None; }
+        let lease = state.sessions.remove(key)?;
+        if let Some(family_id) = lease.resume_family_id.as_ref() { state.credentials.revoke_family(family_id); }
+        Some(ReconnectSessionRestore { session: lease.session, active_session_permit: lease.active_session_permit })
     }
 
     fn issue_resume_credential(
@@ -1634,6 +1713,16 @@ impl ReconnectSessionStore {
         expected: &ResumeBinding,
         now_ms: u64,
     ) -> Option<ReconnectSessionReservation<'a>> {
+        self.reserve_by_credential_after_handoff(credential, expected, now_ms, None)
+    }
+
+    fn reserve_by_credential_after_handoff<'a>(
+        &'a self,
+        credential: &ResumeCredential,
+        expected: &ResumeBinding,
+        now_ms: u64,
+        handoff: Option<&CompletedNativeResumeHandoff>,
+    ) -> Option<ReconnectSessionReservation<'a>> {
         let mut state = self
             .state
             .lock()
@@ -1650,6 +1739,7 @@ impl ReconnectSessionStore {
             || active_identity.account_id != expected.account_id
             || active_identity.character_index != expected.character_index
             || lease.resume_family_id.as_ref() != Some(&expected.family_id)
+            || handoff.is_some_and(|handoff| !handoff.matches_lease(expected, lease))
         {
             return None;
         }
@@ -1906,6 +1996,9 @@ impl ReconnectSessionStore {
 #[derive(Debug, Deserialize)]
 #[serde(tag = "type", rename_all = "camelCase")]
 enum BrowserCommand {
+    CompanionControl(crate::companion_relay::OwnerRequest),
+    CompanionRuntimeRegister(crate::companion_relay::RuntimeRegister),
+    CompanionRuntimeReply(crate::companion_relay::RuntimeReply),
     Procurement(mir2_protocol::procurement::ProcurementRequest),
     BillingStatus(billing::StatusRequest),
     BillingCheckout(billing::CheckoutRequest),
@@ -3059,6 +3152,17 @@ pub async fn serve_web_gateway_with_zone_registry(
         IdentityService::from_env(identity_database_url)
     })
     .await?;
+    let companions = crate::companion_relay::CompanionRelay::from_env()
+        .map_err(|error| io::Error::new(io::ErrorKind::InvalidInput, error))?;
+    if let Some(relay) = &companions {
+        zone_registry.configure_companion_owner_fences(relay.policy())
+            .map_err(|error| io::Error::new(io::ErrorKind::InvalidInput, error))?;
+        if let Some(ledger) = relay.supply_ledger() {
+            let projection = ledger.lock().map_err(|_| io::Error::new(io::ErrorKind::Other, "Life authority unavailable."))?.projection_handle();
+            zone_registry.configure_companion_life_projection(relay.policy(), projection)
+                .map_err(|error| io::Error::new(io::ErrorKind::InvalidInput, error))?;
+        }
+    }
     let state = WebState {
         config: Arc::new(config),
         deploy_revision: deploy_revision_from_env(),
@@ -3075,6 +3179,7 @@ pub async fn serve_web_gateway_with_zone_registry(
         spectator,
         ai_live,
         channel_identity,
+        companions,
     };
 
     let app = Router::new()
@@ -4997,7 +5102,8 @@ async fn handle_socket(
     peer_address: String,
     user_agent: String,
 ) {
-    let realm_info = realm_info_event(state.config.as_ref());
+    let realm_info = companion_realm_info(realm_info_event(state.config.as_ref()),
+        state.companions.as_ref(), state.zone_registry.supports_shared_groups());
     let admission_state = state.clone();
     let admission =
         tokio::task::spawn_blocking(move || new_gateway_session_for_web(&admission_state))
@@ -5027,7 +5133,9 @@ async fn handle_socket(
     let mut route_refresh = WebSessionRouteRefresh::new(GatewayRouteRefreshConfig::from_env());
     let mut native_resume = NativeResumeConnectionState::new();
     let mut explicit_world_leave = ExplicitWorldLeaveState::default();
-    {
+    // Kept outside the cancelable transport future, so every return fences pending controls.
+    let mut companion_admission = None;
+    let reconnect_binding = {
         let _stage = crate::session::GatewayLifecycleStage::start(&session_id, "transport.work");
         handle_socket_inner(
             socket,
@@ -5042,6 +5150,8 @@ async fn handle_socket(
             &mut route_refresh,
             &mut native_resume,
             &mut explicit_world_leave,
+            state.companions.clone(),
+            &mut companion_admission,
             state.injector.clone(),
             realm_info,
             state.chat_hub.clone(),
@@ -5051,7 +5161,10 @@ async fn handle_socket(
             peer_address,
             user_agent,
         )
-        .await;
+        .await
+    };
+    if let (Some(hub), Some(admission)) = (&state.companions, companion_admission.take()) {
+        hub.detach(&admission.id).await;
     }
     if explicit_world_leave.completed {
         native_resume.disable_and_revoke(state.reconnect_sessions.as_ref());
@@ -5130,7 +5243,7 @@ async fn handle_socket(
         };
         let log_account_id = key.account_id.clone();
         let log_character_index = key.character_index;
-        state.reconnect_sessions.store(
+        state.reconnect_sessions.store_with_handoff(
             key,
             session,
             active_session_permit.take(),
@@ -5140,6 +5253,7 @@ async fn handle_socket(
                 .then_some(native_resume.family_id)
                 .flatten(),
             Duration::from_secs(grace_seconds),
+            reconnect_binding.map(|(_, binding)| binding),
         );
         schedule_reconnect_session_purge(
             Arc::clone(&state.reconnect_sessions),
@@ -5826,6 +5940,8 @@ fn invalid_browser_command_input(message: &str, error: &serde_json::Error) -> Pa
                 .map(str::to_string)
         });
     match recognized_type.as_deref() {
+        Some("companionControl" | "companionRuntimeRegister" | "companionRuntimeReply") =>
+            ParsedSocketInput::ProtocolError("invalid companion control request".into()),
         Some("resumeSession") => ParsedSocketInput::ResumeRejected,
         Some("attackV2") => ParsedSocketInput::ProtocolError("invalid attackV2 request".into()),
         _ => ParsedSocketInput::ProtocolError(format!("invalid command: {error}")),
@@ -5902,6 +6018,16 @@ fn spawn_socket_reader(
                     {
                         return;
                     }
+                    continue;
+                }
+            };
+            let command = match companion_browser_command(command) {
+                Ok(command) => command,
+                Err(command) => {
+                    if input_tx.send(SocketInbound::Queued(QueuedSocketInput::new(
+                        ParsedSocketInput::Companion(command), Arc::clone(&reader_pending_count),
+                        message_permit, received_at, &diagnostics,
+                    ))).await.is_err() { return; }
                     continue;
                 }
             };
@@ -6137,6 +6263,8 @@ async fn handle_socket_inner(
     route_refresh: &mut WebSessionRouteRefresh,
     native_resume: &mut NativeResumeConnectionState,
     explicit_world_leave: &mut ExplicitWorldLeaveState,
+    companions: Option<crate::companion_relay::CompanionRelay>,
+    companion_admission: &mut Option<crate::companion_relay::Admission>,
     injector: crate::inject::LiveSessionInjector,
     realm_info: Value,
     chat_hub: ChatBroadcastHub,
@@ -6145,12 +6273,13 @@ async fn handle_socket_inner(
     tcp_peer_ip: IpAddr,
     peer_address: String,
     user_agent: String,
-) {
+) -> SocketReconnectBinding {
     let session_id = session.session_id().to_owned();
     let (overload_tx, overload_rx) = tokio::sync::watch::channel(0);
     let active_registration_id = Arc::new(AtomicU64::new(0));
     let terminal = transport::TransportSignal::new();
     let movement_drain = Arc::new(transport::MovementDrain::default());
+    let mut reconnect_binding = None;
     let work = handle_socket_work(
         socket,
         session,
@@ -6164,6 +6293,8 @@ async fn handle_socket_inner(
         route_refresh,
         native_resume,
         explicit_world_leave,
+        companions,
+        companion_admission,
         injector,
         realm_info,
         chat_hub,
@@ -6176,6 +6307,7 @@ async fn handle_socket_inner(
         Arc::clone(&active_registration_id),
         terminal.clone(),
         Arc::clone(&movement_drain),
+        &mut reconnect_binding,
     );
     if let Err(reason) =
         run_until_transport_end(work, overload_rx, active_registration_id, terminal.clone()).await
@@ -6190,6 +6322,7 @@ async fn handle_socket_inner(
     terminal.end(transport::TransportEnd::ReaderStopped);
     let _stage = crate::session::GatewayLifecycleStage::start(&session_id, "movement.drain");
     movement_drain.close_and_wait().await;
+    reconnect_binding
 }
 
 async fn run_until_transport_end<T>(
@@ -6257,6 +6390,8 @@ async fn handle_socket_work(
     route_refresh: &mut WebSessionRouteRefresh,
     native_resume: &mut NativeResumeConnectionState,
     explicit_world_leave: &mut ExplicitWorldLeaveState,
+    companions: Option<crate::companion_relay::CompanionRelay>,
+    companion_admission: &mut Option<crate::companion_relay::Admission>,
     injector: crate::inject::LiveSessionInjector,
     realm_info: Value,
     chat_hub: ChatBroadcastHub,
@@ -6269,6 +6404,7 @@ async fn handle_socket_work(
     active_zone_outbound_registration_id: Arc<AtomicU64>,
     terminal: transport::TransportSignal,
     movement_drain: Arc<transport::MovementDrain>,
+    reconnect_binding: &mut SocketReconnectBinding,
 ) {
     let diagnostics = allocate_socket_diagnostics(
         gateway_slow_stage_threshold().is_some(),
@@ -6374,13 +6510,14 @@ async fn handle_socket_work(
     );
     let mut _zone_live_outbound_registration: Option<Box<dyn ZoneLiveOutboundRegistration>> = None;
     let mut chat_presence: Option<ChatPresence> = None;
+    let (companion_tx, mut companion_rx) = mpsc::channel::<crate::companion_relay::RelayDelivery>(crate::companion_relay::OUTPUT_CAPACITY);
     let (mut socket_inputs, _socket_reader_task, pending_socket_actions) = spawn_socket_reader(
         receiver,
         Arc::clone(&sender),
         Arc::clone(&movement_ingress),
         Arc::clone(&serial_execution_gate),
         Arc::clone(&socket_authenticated),
-        terminal,
+        terminal.clone(),
         movement_drain,
         session.session_id().to_owned(),
         diagnostics.clone(),
@@ -6389,6 +6526,33 @@ async fn handle_socket_work(
     loop {
         tokio::select! {
             biased;
+
+            Some(delivery) = companion_rx.recv(), if companions.is_some() => {
+                let _serial_execution = serial_execution_gate.write().await;
+                let hub = companions.as_ref().expect("companion branch enabled");
+                let authorized = tokio::task::block_in_place(|| {
+                    companion_socket_is_authorized(session, authenticated, authenticated_account_id.as_deref(),
+                        active_identity_session.as_ref(), session_cache.as_ref(), &identity)
+                });
+                if !authorized || companion_admission.as_ref() != Some(&delivery.recipient)
+                    || !companion_admission_matches(&delivery.recipient, session, authenticated, active_identity_session.as_ref()) {
+                    hub.detach(&delivery.recipient.id).await;
+                    continue;
+                }
+                if let Some(owner) = &delivery.authorizing_owner {
+                    let owner_verified = VerifiedIdentitySession {
+                        account_id: owner.character.account_id.clone(),
+                        session_id: owner.identity_session_id.clone(), expires_at_ms: owner.expires_at_ms,
+                    };
+                    if !tokio::task::block_in_place(|| native_resume_identity_is_active(
+                        session_cache.as_ref(), &identity, &owner_verified, gateway_unix_ms())) {
+                        hub.detach(&owner.id).await;
+                        continue;
+                    }
+                }
+                if !hub.delivery_is_current(&delivery).await { continue; }
+                if send_companion_event(&sender, delivery.event).await.is_err() { return; }
+            }
 
             socket_input = socket_inputs.recv() => {
                 let _input_turn = SocketDiagnosticPhaseGuard::enter(
@@ -6412,7 +6576,7 @@ async fn handle_socket_work(
                     &diagnostics, SocketDiagnosticPhase::InputGate, None,
                 );
                 let serial_gate_wait = GatewaySlowStage::for_socket("serial_gate.input_wait", &diagnostics);
-                let _serial_execution = serial_execution_gate.write().await;
+                let mut _serial_execution = serial_execution_gate.write().await;
                 drop(serial_gate_wait);
                 drop(input_gate_phase);
                 let input_owner_heartbeat = SocketDiagnosticPhaseGuard::enter(
@@ -6429,9 +6593,70 @@ async fn handle_socket_work(
                 }
                 drop(input_owner_heartbeat);
                 let parsed_input = queued_input.take_input();
+                let parsed_input = match parsed_input {
+                    ParsedSocketInput::Companion(command) => {
+                        let first_identity_valid = tokio::task::block_in_place(|| {
+                            enforce_first_post_resume_action_identity(
+                                &mut first_post_resume_identity_check_pending,
+                                reconnect_sessions.as_ref(), native_resume, session_cache.as_ref(),
+                                &identity, session, authenticated_account_id.as_deref(),
+                                active_identity_session.as_ref(), gateway_unix_ms(),
+                            )
+                        });
+                        if !first_identity_valid {
+                            socket_authenticated.store(false, Ordering::Release);
+                            let _ = send_resume_rejected(&sender).await;
+                            return;
+                        }
+                        let authorized = tokio::task::block_in_place(|| {
+                            companion_socket_is_authorized(session, authenticated, authenticated_account_id.as_deref(),
+                                active_identity_session.as_ref(), session_cache.as_ref(), &identity)
+                        });
+                        if !authorized || companions.is_none() {
+                            if let (Some(hub), Some(old)) = (&companions, companion_admission.take()) {
+                                hub.detach(&old.id).await;
+                            }
+                            let event = companion_rejection(&command, crate::companion_relay::ReplyStatus::Denied);
+                            if send_companion_event(&sender, event).await.is_err() { return; }
+                            continue;
+                        }
+                        socket_authenticated.store(authenticated, Ordering::Release);
+                        let hub = companions.as_ref().expect("checked companion feature");
+                        if ensure_companion_admission(hub, companion_admission, session,
+                            active_identity_session.as_ref().expect("authorized identity"), &companion_tx).await.is_err() {
+                            let event = companion_rejection(&command, crate::companion_relay::ReplyStatus::Error);
+                            if send_companion_event(&sender, event).await.is_err() { return; }
+                            continue;
+                        }
+                        let admission_id = &companion_admission.as_ref().expect("attached admission").id;
+                        let result = match command {
+                            CompanionSocketCommand::Control(request) => {
+                                let anchor = if matches!(request.operation, crate::companion_relay::Operation::AuthorizeSupply | crate::companion_relay::Operation::RequestLifeSupply) {
+                                    let snapshot = tokio::task::block_in_place(|| session.world_snapshot());
+                                    snapshot.player_object_id.and_then(|id| snapshot.entities.iter().find(|entity| entity.object_id == id))
+                                        .map(|entity| crate::companion_relay::SupplyAnchor {
+                                            map_file_name: snapshot.map_file_name.clone().unwrap_or_default(),
+                                            point: crate::companion_supply::SupplyPoint { x: entity.x, y: entity.y },
+                                        })
+                                } else { None };
+                                hub.control_at(admission_id, request, anchor).await
+                            }
+                            CompanionSocketCommand::Register(request) => hub.register(admission_id, request).await,
+                            CompanionSocketCommand::Reply(reply) => hub.reply(admission_id, reply).await,
+                        };
+                        if result.is_err() {
+                            // The Hub may have accepted a request before its acknowledgement was lost.
+                            // Closing fences this admission; never automatically replay a mutation.
+                            return;
+                        }
+                        continue;
+                    }
+                    other => other,
+                };
                 let mut npc_purchase_request = None;
                 let mut native_attack_request = None;
                 let (action, quest_operation_request, skill_key_request) = match parsed_input {
+                    ParsedSocketInput::Companion(_) => unreachable!("handled dedicated private control input"),
                     ParsedSocketInput::ClientCapabilities(capabilities) => {
                         let attack_capability_requested = capabilities.iter()
                             .any(|capability| capability == "nativeAttackOutcomeV1");
@@ -6471,14 +6696,54 @@ async fn handle_socket_work(
                             && !authenticated
                             && active_session_permit.is_none()
                             && tokio::task::block_in_place(|| session.active_identity()).is_none();
+                        let mut completed_handoff = None;
+                        if eligible {
+                            let pending = tokio::task::block_in_place(|| prepare_native_resume_handoff(
+                                reconnect_sessions.as_ref(), session_cache.as_ref(), &identity,
+                                &credential, gateway_unix_ms(),
+                            ));
+                            let pending = match pending {
+                                Ok(pending) => pending,
+                                Err(_) => {
+                                    if send_resume_rejected(&sender).await.is_err() { return; }
+                                    continue;
+                                }
+                            };
+                            if let Some(pending) = pending {
+                                // Teardown's movement drain and save must make
+                                // progress without this connection's writer gate.
+                                drop(_serial_execution);
+                                let completed = {
+                                    let _stage = crate::session::GatewayLifecycleStage::start(
+                                        session.session_id(), "native_resume.handoff.wait",
+                                    );
+                                    pending.wait().await
+                                };
+                                _serial_execution = serial_execution_gate.write().await;
+                                let still_eligible = native_resume.opted_in
+                                    && native_resume.resume_allowed && !authenticated
+                                    && active_session_permit.is_none() && !terminal.ended()
+                                    && tokio::task::block_in_place(|| session.active_identity()).is_none();
+                                let Ok(completed) = completed else {
+                                    if send_resume_rejected(&sender).await.is_err() { return; }
+                                    continue;
+                                };
+                                if !still_eligible {
+                                    if send_resume_rejected(&sender).await.is_err() { return; }
+                                    continue;
+                                }
+                                completed_handoff = Some(completed);
+                            }
+                        }
                         let prepared = if eligible {
                             tokio::task::block_in_place(|| {
-                                validate_and_prepare_native_resume(
+                                validate_and_prepare_native_resume_with_handoff(
                                     reconnect_sessions.as_ref(),
                                     session_cache.as_ref(),
                                     &identity,
                                     &credential,
                                     gateway_unix_ms(),
+                                    completed_handoff.as_ref(),
                                     |reserved_session| {
                                         route_refresh
                                             .maybe_refresh(
@@ -6535,6 +6800,9 @@ async fn handle_socket_work(
 
                         *session = restored.session;
                         *active_session_permit = restored.active_session_permit;
+                        if tokio::task::block_in_place(|| synchronize_socket_reconnect_binding(
+                            session, reconnect_sessions.as_ref(), terminal.clone(), reconnect_binding,
+                        )).is_err() { return; }
                         authenticated = true;
                         authenticated_account_id = Some(binding.account_id.clone());
                         active_identity_session = Some(verified);
@@ -6681,9 +6949,12 @@ async fn handle_socket_work(
                             .is_some_and(|(verified, account_id)| verified.account_id == account_id
                                 && native_resume_identity_is_active(
                                     session_cache.as_ref(), &identity, verified, gateway_unix_ms()));
-                        crate::npc_purchase_browser::execute_browser_npc_purchase(
+                        let qualified_admission = companion_admission.as_ref().filter(|admission| companion_admission_matches(
+                            admission, session, identity_valid, active_identity_session.as_ref()));
+                        crate::npc_purchase_browser::execute_companion_npc_purchase(
                             session, &mut npc_purchase, authenticated_account_id.as_deref(),
-                            identity_valid, &request,
+                            identity_valid, &request, companions.as_ref(),
+                            qualified_admission, gateway_unix_ms(),
                         )
                     });
                     let dispatch = match dispatch {
@@ -6835,6 +7106,7 @@ async fn handle_socket_work(
                 }
                 let start_game_character_index = start_game_character_index_for_action(&action);
                 let mut restored_from_reconnect = false;
+                let mut restored_handoff_authorization = None;
                 if let (true, Some(account_id), Some(character_index)) = (
                     authenticated,
                     authenticated_account_id.as_deref(),
@@ -6844,10 +7116,64 @@ async fn handle_socket_work(
                         account_id: account_id.to_string(),
                         character_index,
                     };
-                    if let Some(restored) = reconnect_sessions.take(&key) {
+                    // A published live binding can be waited on only after its
+                    // real transport ended. Never infer teardown from a busy lease.
+                    let handoff_waiter = if tokio::task::block_in_place(|| session.active_identity()).is_none() {
+                        tokio::task::block_in_place(|| session_cache.get(&key))
+                            .and_then(|record| record.route_lease_owner)
+                            .and_then(|owner| reconnect_sessions.handoffs.waiter(&key, &owner))
+                    } else { None };
+                    let mut waited_authorization = None;
+                    if let Some(waiter) = handoff_waiter {
+                        let authorization = active_identity_session.as_ref()
+                            .filter(|verified| verified.account_id == key.account_id)
+                            .and_then(|verified| reconnect_sessions.capture_handoff_authorization(verified, gateway_unix_ms()));
+                        let Some(authorization) = authorization else {
+                            socket_authenticated.store(false, Ordering::Release);
+                            let _ = send_error_message(&sender, "Connection recovery unavailable. Please sign in again.").await;
+                            return;
+                        };
+                        let token = waiter.token();
+                        // Movement drain and persistence need other owner work to
+                        // run. No session/world/cache/store gate crosses this wait.
+                        drop(_serial_execution);
+                        let completed = {
+                            let _stage = crate::session::GatewayLifecycleStage::start(session.session_id(), "resume.handoff.wait");
+                            tokio::time::timeout(Duration::from_secs(30), waiter.wait()).await
+                        };
+                        _serial_execution = serial_execution_gate.write().await;
+                        let identity_current = authenticated
+                            && authenticated_account_id.as_deref() == Some(authorization.identity.account_id.as_str())
+                            && active_identity_session.as_ref() == Some(&authorization.identity)
+                            && terminal.reason().is_none()
+                            && tokio::task::block_in_place(|| native_resume_identity_is_active(
+                                session_cache.as_ref(), &identity, &authorization.identity, gateway_unix_ms()));
+                        if !matches!(&completed, Ok(Ok(ready)) if ready.same(&token)) || !identity_current {
+                            socket_authenticated.store(false, Ordering::Release);
+                            let _ = send_error_message(&sender, "Connection recovery unavailable. Please sign in again.").await;
+                            return;
+                        }
+                        waited_authorization = Some((authorization, token));
+                    }
+                    let restored = if let Some((authorization, token)) = waited_authorization.as_ref() {
+                        let restored = reconnect_sessions.take_after_handoff(&key, token, authorization, gateway_unix_ms());
+                        if restored.is_none() {
+                            // A competing restore, changed authorization or old
+                            // notification cannot fall through to a cold login.
+                            socket_authenticated.store(false, Ordering::Release);
+                            let _ = send_error_message(&sender, "Connection recovery unavailable. Please sign in again.").await;
+                            return;
+                        }
+                        restored
+                    } else { reconnect_sessions.take(&key) };
+                    if let Some(restored) = restored {
                         let restored_session_id = restored.session.session_id().to_string();
                         *session = restored.session;
                         *active_session_permit = restored.active_session_permit;
+                        if tokio::task::block_in_place(|| synchronize_socket_reconnect_binding(
+                            session, reconnect_sessions.as_ref(), terminal.clone(), reconnect_binding,
+                        )).is_err() { return; }
+                        restored_handoff_authorization = waited_authorization.map(|(authorization, _)| authorization);
                         restored_from_reconnect = true;
                         eprintln!(
                             "web reconnect grace restored session {restored_session_id} for {}/{}",
@@ -6984,6 +7310,11 @@ async fn handle_socket_work(
                     {
                         Ok(permit) => Some(permit),
                         Err(error) => {
+                            if !tokio::task::block_in_place(|| handoff_identity_still_current(
+                                restored_handoff_authorization.as_ref(), reconnect_sessions.as_ref(),
+                                authenticated, authenticated_account_id.as_deref(), active_identity_session.as_ref(),
+                                session_cache.as_ref(), &identity, gateway_unix_ms(),
+                            )) { socket_authenticated.store(false, Ordering::Release); let _ = send_error_message(&sender, "Connection recovery unavailable. Please sign in again.").await; return; }
                             release_pending_start_game_route_lease(
                                 session_cache.as_ref(),
                                 session,
@@ -7011,6 +7342,13 @@ async fn handle_socket_work(
                     },
                     None => None,
                 };
+                // Capacity admission may itself await. Re-read shared identity
+                // authority after that final wait, before bootstrap or error snapshots.
+                if !tokio::task::block_in_place(|| handoff_identity_still_current(
+                    restored_handoff_authorization.as_ref(), reconnect_sessions.as_ref(),
+                    authenticated, authenticated_account_id.as_deref(), active_identity_session.as_ref(),
+                    session_cache.as_ref(), &identity, gateway_unix_ms(),
+                )) { socket_authenticated.store(false, Ordering::Release); let _ = send_error_message(&sender, "Connection recovery unavailable. Please sign in again.").await; return; }
                 let mut pending_active_session_permit = None;
                 if start_game_character_index.is_some()
                     && tokio::task::block_in_place(|| session.active_identity()).is_none()
@@ -7165,6 +7503,9 @@ async fn handle_socket_work(
                     }
                 };
                 let (responses, native_game_shop_post_execution) = execution_result;
+                if (starts_game || leaves_world) && tokio::task::block_in_place(|| {
+                    synchronize_socket_reconnect_binding(session, reconnect_sessions.as_ref(), terminal.clone(), reconnect_binding)
+                }).is_err() { return; }
                 if leaves_world {
                     let release = tokio::task::block_in_place(|| explicit_world_leave.finish(
                         session_cache.as_ref(), session, leaving_route, &responses,
@@ -7353,6 +7694,8 @@ async fn handle_socket_work(
                     _injection_registration = None;
                 }
                 authenticated = next_authenticated;
+                detach_changed_companion_admission(&companions, companion_admission, session,
+                    authenticated, active_identity_session.as_ref()).await;
                 let send_monthly_status = authenticated && (login_identity_context.is_some() || starts_game || responses.iter().any(|p| matches!(p, ServerPacket::LogOutSuccess { .. })));
                 socket_authenticated.store(authenticated, Ordering::Release);
                 // Keep the live registration stable for the lifetime of one
@@ -7795,6 +8138,8 @@ async fn handle_socket_work(
                         return;
                     }
                 };
+                detach_changed_companion_admission(&companions, companion_admission, session,
+                    authenticated, active_identity_session.as_ref()).await;
                 let monthly_logged_out = monthly_expiry_route.is_some()
                     && responses.iter().any(|packet| matches!(packet, ServerPacket::LogOutSuccess { .. }));
                 if monthly_logged_out {
@@ -7827,6 +8172,10 @@ async fn handle_socket_work(
                     }
                 }
                 if responses.is_empty() {
+                    if let Err(error) = send_companion_safety_snapshot_if_changed(&sender, session).await {
+                        let _ = send_error_message(&sender, &error).await;
+                        return;
+                    }
                     let checkpoint_result = {
                         let _slow_stage = GatewaySlowStage::for_socket("runtime_tick.save_checkpoint", &diagnostics);
                         save_queue.checkpoint(now, || {
@@ -8020,6 +8369,8 @@ async fn flush_session_updates_with_deferred_snapshot(
         // Calendar/kill progress and committed player progression are folded
         // from the authoritative snapshot by the native client. Keep ordinary
         // movement and world deltas on the packet-only fast path.
+        let low_latency_response_requires_snapshot = low_latency_response_requires_snapshot
+            || companion_safety_snapshot_pending(session)?;
         if low_latency_response_requires_snapshot && !defer_snapshot {
             send_world_snapshot_with_quest_ack(sender, session, quest_operation_ack).await?;
         }
@@ -8579,6 +8930,26 @@ fn keep_alive_time_for_action(action: &SessionAction) -> Option<i64> {
         SessionAction::Packet(ClientPacket::KeepAlive { time }) => Some(*time),
         _ => None,
     }
+}
+
+fn synchronize_socket_reconnect_binding(
+    session: &GatewaySession,
+    reconnect_sessions: &ReconnectSessionStore,
+    terminal: transport::TransportSignal,
+    binding: &mut SocketReconnectBinding,
+) -> Result<(), &'static str> {
+    let Some(key) = session_cache_key(session) else {
+        binding.take();
+        return Ok(());
+    };
+    if binding.as_ref().is_some_and(|(current, guard)| {
+        current == &key && guard.token().owner() == session.session_id()
+    }) { return Ok(()); }
+    binding.take();
+    let guard = reconnect_sessions.handoffs.bind(key.clone(), session.session_id().to_owned(), terminal)
+        .ok_or("socket reconnect binding is unavailable")?;
+    *binding = Some((key, guard));
+    Ok(())
 }
 
 fn try_acquire_start_game_route_lease(
@@ -9172,7 +9543,10 @@ fn browser_command_to_action(command: BrowserCommand) -> Result<SessionAction, S
         BrowserCommand::ClientVersion => Ok(SessionAction::Packet(ClientPacket::ClientVersion {
             version_hash: Vec::new(),
         })),
-        BrowserCommand::ClientCapabilities { .. }
+        BrowserCommand::CompanionControl(_)
+        | BrowserCommand::CompanionRuntimeRegister(_)
+        | BrowserCommand::CompanionRuntimeReply(_)
+        | BrowserCommand::ClientCapabilities { .. }
         | BrowserCommand::ResumeSession(_)
         | BrowserCommand::AttackV2 { .. }
         | BrowserCommand::NpcPurchaseOwner { .. } => Err(
@@ -10197,12 +10571,18 @@ fn responses_change_player_progression(responses: &[ServerPacket]) -> bool {
     })
 }
 
+fn responses_change_trade_state(responses: &[ServerPacket]) -> bool {
+    responses.iter().any(|packet| matches!(packet,
+        ServerPacket::TradeAccept { .. } | ServerPacket::TradeGold { .. } |
+        ServerPacket::TradeItem { .. } | ServerPacket::TradeConfirm | ServerPacket::TradeCancel { .. }))
+}
+
 fn low_latency_responses_require_world_snapshot(responses: &[ServerPacket]) -> bool {
-    responses_change_quest_state(responses) || responses_change_player_progression(responses)
+    responses_change_quest_state(responses) || responses_change_player_progression(responses) || responses_change_trade_state(responses)
 }
 
 fn responses_require_world_snapshot(responses: &[ServerPacket]) -> bool {
-    responses.iter().any(|packet| {
+    responses_change_trade_state(responses) || responses.iter().any(|packet| {
         matches!(
             packet,
             ServerPacket::StartGame { .. }
@@ -10231,6 +10611,23 @@ async fn send_world_snapshot(
     session: &GatewaySession,
 ) -> Result<(), String> {
     send_world_snapshot_with_quest_ack(sender, session, None).await
+}
+
+async fn send_companion_safety_snapshot_if_changed(
+    sender: &SharedWebSocketSender,
+    session: &GatewaySession,
+) -> Result<(), String> {
+    if companion_safety_snapshot_pending(session)? {
+        send_world_snapshot(sender, session).await?;
+    }
+    Ok(())
+}
+
+fn companion_safety_snapshot_pending(session: &GatewaySession) -> Result<bool, String> {
+    // Keep ordinary sockets on their existing async packet-only path: even
+    // entering Tokio's blocking region is unnecessary for non-Actors.
+    if !session.observes_companion_safety()? { return Ok(false); }
+    tokio::task::block_in_place(|| session.companion_safety_snapshot_pending())
 }
 
 async fn send_world_snapshot_with_quest_ack(
@@ -10264,8 +10661,16 @@ async fn send_world_snapshot_with_receipts(
     let snapshot = catch_gateway_panic("web world_snapshot", || {
         tokio::task::block_in_place(|| session.world_snapshot())
     })?;
+    let companion_safety_stamp = if session.observes_companion_safety()? { tokio::task::block_in_place(|| {
+        session.companion_safety_snapshot_stamp(Some(&snapshot))
+    })? } else { None };
     let mut payload =
         serde_json::to_value(snapshot.client_view()).map_err(|error| error.to_string())?;
+    if let Some(id) = session.zone_movement_ingress().and_then(|ingress| ingress.player_object_id()) {
+        if let Some(object) = payload.as_object_mut() {
+            object.insert("selfZoneObjectId".into(), json!(id));
+        }
+    }
     project_known_skill_icons(&mut payload);
     if let Some((request, processed)) = skill_key_ack {
         let ack = request.receipt(&payload, processed);
@@ -10293,7 +10698,8 @@ async fn send_world_snapshot_with_receipts(
             .into(),
         ))
         .await
-        .map_err(|error| error.to_string())
+        .map_err(|error| error.to_string())?;
+    session.note_companion_safety_snapshot_sent(companion_safety_stamp)
 }
 
 fn project_known_skill_icons(payload: &mut Value) {
@@ -10317,6 +10723,158 @@ fn project_known_skill_icons(payload: &mut Value) {
             .entry("magicName")
             .or_insert_with(|| json!(definition.name));
     }
+}
+
+fn companion_browser_command(
+    command: BrowserCommand,
+) -> Result<BrowserCommand, CompanionSocketCommand> {
+    match command {
+        BrowserCommand::CompanionControl(request) => Err(CompanionSocketCommand::Control(request)),
+        BrowserCommand::CompanionRuntimeRegister(request) => {
+            Err(CompanionSocketCommand::Register(request))
+        }
+        BrowserCommand::CompanionRuntimeReply(reply) => Err(CompanionSocketCommand::Reply(reply)),
+        other => Ok(other),
+    }
+}
+
+fn companion_rejection(
+    command: &CompanionSocketCommand,
+    status: crate::companion_relay::ReplyStatus,
+) -> Value {
+    let (request_id, resident, operation) = match command {
+        CompanionSocketCommand::Control(request) => (
+            &request.request_id,
+            request.resident_id.as_deref(),
+            serde_json::to_value(request.operation).ok(),
+        ),
+        CompanionSocketCommand::Register(request) => (
+            &request.request_id,
+            Some(request.resident_id.as_str()),
+            Some(json!("register")),
+        ),
+        CompanionSocketCommand::Reply(reply) => (&reply.request_id, None, Some(json!("reply"))),
+    };
+    let request_id = if crate::companion_relay::valid_ref(request_id) {
+        request_id.as_str()
+    } else {
+        "invalid-request"
+    };
+    crate::companion_relay::result_event(
+        request_id,
+        resident.filter(|id| crate::companion_relay::valid_ref(id)),
+        operation
+            .as_ref()
+            .and_then(Value::as_str)
+            .unwrap_or("invalid"),
+        status,
+        json!({}),
+    )
+}
+
+async fn send_companion_event(
+    sender: &SharedWebSocketSender,
+    event: Value,
+) -> Result<(), axum::Error> {
+    sender
+        .send(Message::Text(event.to_string().into()))
+        .await
+}
+
+fn companion_socket_is_authorized(
+    session: &GatewaySession,
+    authenticated: bool,
+    account_id: Option<&str>,
+    verified: Option<&VerifiedIdentitySession>,
+    cache: &dyn crate::cache::GatewaySessionCache,
+    identity: &IdentityService,
+) -> bool {
+    let (Some(active), Some(verified)) = (session.active_identity(), verified) else {
+        return false;
+    };
+    authenticated
+        && account_id == Some(active.account_id.as_str())
+        && verified.account_id == active.account_id
+        && native_resume_identity_is_active(cache, identity, verified, gateway_unix_ms())
+}
+
+fn companion_admission_matches(
+    admission: &crate::companion_relay::Admission,
+    session: &GatewaySession,
+    authenticated: bool,
+    verified: Option<&VerifiedIdentitySession>,
+) -> bool {
+    let (Some(active), Some(verified)) = (session.active_identity(), verified) else {
+        return false;
+    };
+    authenticated
+        && verified.expires_at_ms > gateway_unix_ms()
+        && admission.character.account_id == active.account_id
+        && admission.character.character_index == active.character_index
+        && verified.account_id == active.account_id
+        && admission.identity_session_id == verified.session_id
+        && admission.expires_at_ms == verified.expires_at_ms
+}
+
+async fn ensure_companion_admission(
+    hub: &crate::companion_relay::CompanionRelay,
+    registered: &mut Option<crate::companion_relay::Admission>,
+    session: &GatewaySession,
+    verified: &VerifiedIdentitySession,
+    sender: &mpsc::Sender<crate::companion_relay::RelayDelivery>,
+) -> Result<(), String> {
+    if registered
+        .as_ref()
+        .is_some_and(|old| companion_admission_matches(old, session, true, Some(verified)))
+    {
+        return Ok(());
+    }
+    if let Some(old) = registered.take() {
+        hub.detach(&old.id).await;
+    }
+    let active = session
+        .active_identity()
+        .ok_or("Companion control requires an active character.")?;
+    let mut nonce = [0_u8; 24];
+    OsRng.fill_bytes(&mut nonce);
+    let admission = crate::companion_relay::Admission {
+        id: format!("companion:{}", URL_SAFE_NO_PAD.encode(nonce)),
+        character: crate::companion_relay::CharacterBinding {
+            account_id: active.account_id,
+            character_index: active.character_index,
+        },
+        identity_session_id: verified.session_id.clone(),
+        expires_at_ms: verified.expires_at_ms,
+    };
+    hub.attach(admission.clone(), sender.clone()).await?;
+    *registered = Some(admission);
+    Ok(())
+}
+
+async fn detach_changed_companion_admission(
+    hub: &Option<crate::companion_relay::CompanionRelay>,
+    registered: &mut Option<crate::companion_relay::Admission>,
+    session: &GatewaySession,
+    authenticated: bool,
+    verified: Option<&VerifiedIdentitySession>,
+) {
+    if registered
+        .as_ref()
+        .is_some_and(|old| !companion_admission_matches(old, session, authenticated, verified))
+    {
+        if let (Some(hub), Some(old)) = (hub, registered.take()) {
+            hub.detach(&old.id).await;
+        }
+    }
+}
+
+fn companion_realm_info(mut event: Value, relay: Option<&crate::companion_relay::CompanionRelay>, shared_groups: bool) -> Value {
+    event["payload"]["features"]["sharedParty"] = json!(shared_groups);
+    event["payload"]["features"]["companionControl"] = json!(relay.is_some());
+    if let Some(relay) = relay {
+        event["payload"]["worldEpoch"] = json!(relay.policy().world_epoch);
+    }
+    event
 }
 
 fn realm_info_event(config: &GatewayConfig) -> Value {
@@ -10823,6 +11381,24 @@ enum NativeResumeCommitError {
     Unavailable,
 }
 
+fn handoff_identity_still_current(
+    authorization: Option<&HandoffAuthorization>,
+    store: &ReconnectSessionStore,
+    authenticated: bool,
+    account_id: Option<&str>,
+    current_identity: Option<&VerifiedIdentitySession>,
+    cache: &dyn crate::cache::GatewaySessionCache,
+    identity: &IdentityService,
+    now_ms: u64,
+) -> bool {
+    let Some(authorization) = authorization else { return true; };
+    authenticated && account_id == Some(authorization.identity.account_id.as_str())
+        && current_identity == Some(&authorization.identity)
+        && store.handoff_authorization_current(authorization, now_ms)
+        && native_resume_identity_is_active(cache, identity, &authorization.identity, now_ms)
+        && store.handoff_authorization_current(authorization, gateway_unix_ms())
+}
+
 fn native_resume_identity_is_active(
     session_cache: &dyn crate::cache::GatewaySessionCache,
     identity: &IdentityService,
@@ -10864,6 +11440,25 @@ fn validate_and_prepare_native_resume<'a, PreparedZone>(
     ),
     NativeResumePrepareError,
 > {
+    validate_and_prepare_native_resume_with_handoff(
+        reconnect_sessions, session_cache, identity, credential, now_ms, None,
+        prepare_route, prepare_zone,
+    )
+}
+
+fn validate_and_prepare_native_resume_with_handoff<'a, PreparedZone>(
+    reconnect_sessions: &'a ReconnectSessionStore,
+    session_cache: &dyn crate::cache::GatewaySessionCache,
+    identity: &IdentityService,
+    credential: &ResumeCredential,
+    now_ms: u64,
+    handoff: Option<&CompletedNativeResumeHandoff>,
+    prepare_route: impl FnOnce(&GatewaySession) -> Result<(), String>,
+    prepare_zone: impl FnOnce(&GatewaySession) -> Result<PreparedZone, String>,
+) -> Result<
+    (ReconnectSessionReservation<'a>, VerifiedIdentitySession, PreparedZone),
+    NativeResumePrepareError,
+> {
     let binding = reconnect_sessions
         .resume_binding(credential, now_ms)
         .ok_or(NativeResumePrepareError::Unavailable)?;
@@ -10876,7 +11471,7 @@ fn validate_and_prepare_native_resume<'a, PreparedZone>(
         return Err(NativeResumePrepareError::Unavailable);
     }
     let reservation = reconnect_sessions
-        .reserve_by_credential(credential, &binding, now_ms)
+        .reserve_by_credential_after_handoff(credential, &binding, now_ms, handoff)
         .ok_or(NativeResumePrepareError::Unavailable)?;
     if !native_resume_monthly_card_is_active(reservation.session(), &binding.account_id, now_ms) {
         reservation.discard_and_revoke();
@@ -14135,6 +14730,22 @@ mod game_shop_gift_tests;
 mod web_transport_close_tests;
 
 #[cfg(test)]
+#[path = "web_reconnect_handoff_store_tests.rs"]
+mod web_reconnect_handoff_store_tests;
+
+#[cfg(test)]
+#[path = "web_reconnect_persistence_wait_tests.rs"]
+mod web_reconnect_persistence_wait_tests;
+
+#[cfg(test)]
+#[path = "web_native_resume_handoff_tests.rs"]
+mod web_native_resume_handoff_tests;
+
+#[cfg(test)]
+#[path = "web_native_resume_handoff_ws_tests.rs"]
+mod web_native_resume_handoff_ws_tests;
+
+#[cfg(test)]
 mod tests {
     use super::{
         realm_info_event, responses_require_world_snapshot, should_send_world_snapshot_for_action,
@@ -15332,6 +15943,7 @@ mod tests {
             )
             .expect("test AI live hub"),
             channel_identity: crate::ChannelIdentityRegistry::in_memory(),
+            companions: None,
         };
 
         let Json(receipt) = super::admin_system_mail(
@@ -15395,6 +16007,7 @@ mod tests {
             )
             .expect("test AI live hub"),
             channel_identity: crate::ChannelIdentityRegistry::in_memory(),
+            companions: None,
         };
 
         let Json(response) = super::health(State(state)).await;
@@ -15487,6 +16100,7 @@ mod tests {
             )
             .expect("test AI live hub"),
             channel_identity: crate::ChannelIdentityRegistry::in_memory(),
+            companions: None,
         };
 
         let Json(sessions) = super::admin_sessions(State(state.clone())).await;
@@ -15541,6 +16155,139 @@ mod tests {
         .expect_err("dev gateway should not execute stop");
         assert_eq!(stop_error.0, axum::http::StatusCode::CONFLICT);
     }
+
+    #[test]
+    fn companion_control_frames_are_strict_and_never_become_world_actions() {
+        for input in [
+            json!({"type":"companionControl","requestId":"req-1","operation":"list","payload":{}}),
+            json!({"type":"companionRuntimeRegister","requestId":"reg-1","residentId":"alo","archiveId":"archive-1"}),
+            json!({"type":"companionRuntimeReply","requestId":"cr:abc","generation":1,"status":"ok","result":{}}),
+        ] {
+            let command: BrowserCommand = serde_json::from_value(input.clone()).unwrap();
+            assert!(super::companion_browser_command(command).is_err());
+            let command: BrowserCommand = serde_json::from_value(input.clone()).unwrap();
+            assert!(super::browser_command_to_action(command).is_err());
+            let mut forged = input;
+            forged["accountId"] = json!("someone-else");
+            assert!(serde_json::from_value::<BrowserCommand>(forged).is_err());
+        }
+    }
+
+    #[test]
+    fn companion_control_requires_current_verified_authentication_and_active_character() {
+        let session = demo_game_session();
+        let identity = crate::identity::IdentityService::local_for_tests();
+        let grant = identity
+            .issue_session("demo", "password", "demo", "127.0.0.1", "companion-test")
+            .unwrap();
+        let verified = identity.verify_session_token(&grant.token).unwrap();
+        let cache = crate::InMemoryGatewaySessionCache::default();
+        assert!(super::companion_socket_is_authorized(
+            &session,
+            true,
+            Some("demo"),
+            Some(&verified),
+            &cache,
+            &identity
+        ));
+        assert!(!super::companion_socket_is_authorized(
+            &session,
+            false,
+            Some("demo"),
+            Some(&verified),
+            &cache,
+            &identity
+        ));
+        assert!(!super::companion_socket_is_authorized(
+            &session,
+            true,
+            Some("foreign"),
+            Some(&verified),
+            &cache,
+            &identity
+        ));
+        assert!(!super::companion_socket_is_authorized(
+            &crate::GatewaySession::new(SimulationConfig::default()),
+            true,
+            Some("demo"),
+            Some(&verified),
+            &cache,
+            &identity
+        ));
+        identity
+            .revoke_session(&verified, &verified.session_id, "test")
+            .unwrap();
+        assert!(!super::companion_socket_is_authorized(
+            &session,
+            true,
+            Some("demo"),
+            Some(&verified),
+            &cache,
+            &identity
+        ));
+    }
+
+    #[tokio::test]
+    async fn companion_control_logout_restart_fences_same_character_old_admission() {
+        use crate::companion_relay::{CharacterBinding, CompanionPolicy, CompanionRelay};
+        let policy = CompanionPolicy {
+            schema_version: 1,
+            realm_id: "trial".into(),
+            world_epoch: "epoch-1".into(),
+            enrollments: vec![],
+        };
+        let hub = CompanionRelay::new(policy);
+        let mut session = demo_game_session();
+        let verified = crate::identity::VerifiedIdentitySession {
+            account_id: "demo".into(),
+            session_id: "verified-test".into(),
+            expires_at_ms: super::gateway_unix_ms() + 60_000,
+        };
+        let (sender, _receiver) =
+            tokio::sync::mpsc::channel(crate::companion_relay::OUTPUT_CAPACITY);
+        let mut registered = None;
+        super::ensure_companion_admission(&hub, &mut registered, &session, &verified, &sender)
+            .await
+            .unwrap();
+        let old = registered.clone().unwrap();
+        assert_eq!(
+            old.character,
+            CharacterBinding {
+                account_id: "demo".into(),
+                character_index: 0
+            }
+        );
+        session.try_handle_packet(ClientPacket::LogOut).unwrap();
+        super::detach_changed_companion_admission(
+            &Some(hub.clone()),
+            &mut registered,
+            &session,
+            true,
+            Some(&verified),
+        )
+        .await;
+        assert!(registered.is_none());
+        session
+            .try_handle_packet(ClientPacket::StartGame { character_index: 0 })
+            .unwrap();
+        super::ensure_companion_admission(&hub, &mut registered, &session, &verified, &sender)
+            .await
+            .unwrap();
+        assert_ne!(registered.as_ref().unwrap().id, old.id);
+        let delayed = crate::companion_relay::RelayDelivery {
+            recipient: old,
+            authorizing_owner: None,
+            event: json!({"type":"companionResult","payload":{}}),
+        };
+        assert!(!hub.delivery_is_current(&delayed).await);
+        let realm = super::companion_realm_info(json!({"payload":{"features":{}}}), Some(&hub), true);
+        assert_eq!(realm["payload"]["worldEpoch"], "epoch-1");
+        assert_eq!(realm["payload"]["features"]["companionControl"], true);
+        let disabled = super::companion_realm_info(json!({"payload":{"features":{}}}), None, false);
+        assert!(disabled["payload"].get("worldEpoch").is_none());
+        assert_eq!(disabled["payload"]["features"]["companionControl"], false);
+    }
+
 
     #[test]
     fn admin_session_trace_requires_configured_gateway_operator_token() {
@@ -15810,6 +16557,23 @@ mod tests {
     }
 
     #[test]
+    fn shared_trade_observer_receives_complete_owner_state_while_idle() {
+        for packet in [
+            ServerPacket::TradeAccept { name: "Owner".into() },
+            ServerPacket::TradeGold { amount: 50 },
+            ServerPacket::TradeItem { trade_items: Vec::new() },
+            ServerPacket::TradeConfirm,
+            ServerPacket::TradeCancel { unlock: false },
+        ] {
+            let responses = vec![packet];
+            assert!(super::responses_require_world_snapshot(&responses));
+            assert!(super::low_latency_responses_require_world_snapshot(&responses));
+        }
+        assert!(!super::low_latency_responses_require_world_snapshot(&[ServerPacket::TradeRequest { name: "Owner".into() }]));
+        assert!(!super::low_latency_responses_require_world_snapshot(&[ServerPacket::KeepAlive { time: 0 }]));
+    }
+
+    #[test]
     fn low_latency_xp_only_kill_and_level_up_force_authoritative_snapshot() {
         let xp_only_kill = [ServerPacket::GainExperience { amount: 18 }];
         assert!(super::responses_change_player_progression(&xp_only_kill));
@@ -15843,6 +16607,14 @@ mod tests {
                 },
             },
         ]));
+    }
+
+    #[tokio::test(flavor = "current_thread")]
+    async fn ordinary_companion_safety_fast_path_never_enters_blocking_region() {
+        // block_in_place panics in a current-thread runtime. This exercises
+        // the actual web predicate and proves its ordinary-player early exit.
+        let session = demo_game_session();
+        assert!(!super::companion_safety_snapshot_pending(&session).unwrap());
     }
 
     #[test]
@@ -17607,6 +18379,7 @@ mod tests {
             )
             .expect("test AI live hub"),
             channel_identity: crate::ChannelIdentityRegistry::in_memory(),
+            companions: None,
         };
         let app = axum::Router::new()
             .route("/ws", axum::routing::get(super::ws_upgrade))
@@ -17944,6 +18717,7 @@ mod tests {
             )
             .expect("test AI live hub"),
             channel_identity: crate::ChannelIdentityRegistry::in_memory(),
+            companions: None,
         };
         let app = axum::Router::new()
             .route("/ws", axum::routing::get(super::ws_upgrade))
@@ -20873,6 +21647,7 @@ mod tests {
                     active_session_permit: Some(active_session_permit),
                     _reconnect_lease_permit: reconnect_lease_permit,
                     resume_family_id: None,
+                    handoff_token: None,
                     expires_at: std::time::Instant::now() - std::time::Duration::from_secs(1),
                 },
             );

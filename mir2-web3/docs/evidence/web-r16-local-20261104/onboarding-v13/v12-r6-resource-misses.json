@@ -1,0 +1,59 @@
+{
+  "schema": "r16-public-static-miss-map/1",
+  "source": "passive-browser-http-status-and-exact-pathname-sha256-match",
+  "allUniqueMissesMapped": true,
+  "entries": [
+    {
+      "path": "original-ui/Monster/016/0.png",
+      "pathHash": "8c0c75e64912c063d566d69a325fe8430b47d4fbbc7cd574942b9f5b42b9710b",
+      "event": "HTTP_GET_404",
+      "occurrences": 4,
+      "phases": [
+        "ordinary-owned-qa-character-relogin",
+        "ordinary-visible-town-revive-after-saved-death"
+      ],
+      "sourceRegularFile": true,
+      "sourceBytes": 37969,
+      "sourceSha256": "4a866c41b6739c11b310d82a40c2edf521f0ca6526a16c2fc2c1c7ea44994d95"
+    },
+    {
+      "path": "original-ui/Monster/016/1.png",
+      "pathHash": "089c57413bcd6863bfe82fc31c2d8b9a47275f669b024c134ce3256862cad627",
+      "event": "HTTP_GET_404",
+      "occurrences": 5,
+      "phases": [
+        "ordinary-owned-qa-character-relogin",
+        "ordinary-visible-town-revive-after-saved-death"
+      ],
+      "sourceRegularFile": true,
+      "sourceBytes": 38277,
+      "sourceSha256": "113c73c2ea58c1adf76538690956717854524c59fc240065cdfc32ee4f0e9bcf"
+    },
+    {
+      "path": "original-ui/Monster/016/2.png",
+      "pathHash": "5d4af940e9fb5cf6abb55b861e1ec37df47ef54e387071a986d32afbdd59c7f4",
+      "event": "HTTP_GET_404",
+      "occurrences": 4,
+      "phases": [
+        "ordinary-owned-qa-character-relogin",
+        "ordinary-visible-town-revive-after-saved-death"
+      ],
+      "sourceRegularFile": true,
+      "sourceBytes": 38374,
+      "sourceSha256": "9ee65567e062010847d89f5c94f30c3c7f0360fd8a42d1ce023d9dea5fcc6afa"
+    },
+    {
+      "path": "original-ui/Monster/016/3.png",
+      "pathHash": "2e49a51475e0bb7793c5a22b07ea85d056b07ff76255d41ea73c4699eeba01ad",
+      "event": "HTTP_GET_404",
+      "occurrences": 3,
+      "phases": [
+        "ordinary-owned-qa-character-relogin",
+        "ordinary-visible-town-revive-after-saved-death"
+      ],
+      "sourceRegularFile": true,
+      "sourceBytes": 38383,
+      "sourceSha256": "78257f37c1e0175f2fc132b7097b9e7324503e5229ef9757a3e875e628c7f8de"
+    }
+  ]
+}

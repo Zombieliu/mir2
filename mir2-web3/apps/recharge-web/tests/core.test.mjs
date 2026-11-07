@@ -16,6 +16,35 @@ test("payment links cannot change provider, protocol, port or authority", () => 
     "https://checkout.stripe.com\\@evil.example/c/pay/x"," https://checkout.stripe.com/c/pay/x"])
     assert.throws(() => checkedCheckoutUrl(url), /invalidCheckoutUrl/);
 });
+
+test("WAFFO checkout links are confined to the official merchant cashier and selected channel", () => {
+  const url = "https://cashier.waffo.com/merchant-order-key?token=opaque";
+  assert.equal(checkedCheckoutUrl(url, "waffo"), url);
+  assert.throws(() => checkedCheckoutUrl(url), /invalidCheckoutUrl/);
+  for (const value of ["http://cashier.waffo.com/order", "https://cashier.waffo.com.evil.example/order",
+    "https://user@cashier.waffo.com/order", "https://cashier.waffo.com:444/order", "https://cashier.waffo.com/",
+    "https://checkout.waffo.com/order", "https://pay.waffo.ai/order", "https://checkout.stripe.com/c/pay/other",
+    "https://cashier.waffo.com/order\n", "https://cashier.waffo.com\\@evil.example/order"])
+    assert.throws(() => checkedCheckoutUrl(value, "waffo"), /invalidCheckoutUrl/);
+  assert.throws(() => checkedCheckoutUrl(url, "unconfigured"), /invalidCheckoutUrl/);
+});
+
+test("only advertised providers are offered and their quotes and modes stay independent", () => {
+  const providers = [{id:"stripe",label:"Stripe",livemode:true,offers:status.offers},
+    {id:"waffo",label:"WAFFO",livemode:false,offers:[{...status.offers[0],amountMinor:900}]}];
+  const checked = checkedStatus({...status,paymentProviders:providers,orders:[{id:"waffo-order",provider:"waffo",state:"paidPending"}]});
+  assert.deepEqual(checked.paymentProviders.map(provider => [provider.id,provider.livemode,provider.offers[0].amountMinor]),
+    [["stripe",true,1000],["waffo",false,900]]);
+  assert.equal(checked.orders[0].provider,"waffo");
+  assert.equal(checked.advertisedProviders,true);
+  assert.deepEqual(checkedStatus({...status,paymentProviders:[]}).paymentProviders,[]);
+  assert.equal(checkedStatus(status).paymentProviders[0].id,"stripe");
+  assert.equal(checkedStatus(status).advertisedProviders,false);
+  assert.deepEqual(checkedStatus({...status,checkoutEnabled:false}).paymentProviders,[]);
+  for (const paymentProviders of [[...providers,providers[0]], [{...providers[1],livemode:"false"}],
+    [{...providers[1],id:"unknown"}], [{...providers[1],offers:[...status.offers,...status.offers]}]])
+    assert.throws(() => checkedStatus({...status,paymentProviders}), /invalidResponse/);
+});
 test("catalogue rejects mixed order states, duplicate offers and invalid balances", () => {
   assert.equal(checkedStatus(status).credit,0);
   for (const patch of [{credit:-1},{credit:2**32},{credit:"1000"},{pendingCredit:0.5},
@@ -31,8 +60,31 @@ test("only the current authenticated character can become an order recipient", a
 });
 test("checkout sends identifiers only, never client price, identity or paid claims", () => {
   const body = checkoutBody(26,"usd10","web-00000000-0000-0000-0000-000000000001",1);
-  assert.deepEqual(Object.keys(body).sort(),["characterIndex","offerId","orderRequestId","requestId"]);
+  assert.deepEqual(Object.keys(body).sort(),["characterIndex","includePaymentProviders","offerId","orderRequestId","provider","requestId"]);
+  assert.equal(body.includePaymentProviders,true);assert.equal(body.provider,"stripe");
   assert.throws(() => checkoutBody(26,"usd10","foreign nonce",1), /invalidIntent/);
+  assert.deepEqual(checkoutBody(26,"usd10","web-00000000-0000-0000-0000-000000000001",1,"waffo"),
+    {...body,provider:"waffo"});
+  assert.throws(() => checkoutBody(26,"usd10","web-00000000-0000-0000-0000-000000000001",1,"unknown"), /invalidIntent/);
+});
+
+test("checkout verifies the selected provider before returning a payment link", async () => {
+  let response = {orderId:"waffo-order",provider:"waffo",checkoutUrl:"https://cashier.waffo.com/order-key"}, request;
+  const session = new PortalSession({fetcher:async (url,options) => {
+    request={url,...options}; return {ok:true,text:async()=>JSON.stringify(response)};
+  }});
+  session.token="owned-session";session.characters=[{index:26}];
+  const nonce="web-00000000-0000-0000-0000-000000000001";
+  assert.equal((await session.checkout(26,"usd10",nonce,"waffo")).provider,"waffo");
+  assert.equal(JSON.parse(request.body).provider,"waffo");
+  response={...response,provider:"stripe"};
+  await assert.rejects(session.checkout(26,"usd10",nonce,"waffo"), /invalidResponse/);
+  delete response.provider;
+  await assert.rejects(session.checkout(26,"usd10",nonce,"waffo"), /invalidResponse/);
+  response={orderId:"legacy-stripe",checkoutUrl:"https://checkout.stripe.com/c/pay/legacy"};
+  assert.equal((await session.checkout(26,"usd10",nonce)).provider,"stripe");
+  assert.equal(JSON.parse(request.body).provider,"stripe");
+  assert.equal(JSON.parse(request.body).includePaymentProviders,true);
 });
 test("lost reply and reload keep the same nonce and isolate accounts, characters and offers", async () => {
   const data=new Map(),storage={getItem:key=>data.get(key)??null,setItem:(key,value)=>data.set(key,value),removeItem:key=>data.delete(key)};
@@ -53,6 +105,21 @@ test("unavailable or corrupt storage stops financial requests", () => {
   assert.throws(()=>journal.getOrCreate("scope",26,"usd10"), /storageUnavailable/);
   assert.throws(()=>new IntentJournal({getItem:()=>"invalid"}).getOrCreate("scope",26,"usd10"), /invalidIntent/);
 });
+
+test("channel-specific retry intents preserve legacy Stripe orders and never reuse WAFFO nonces", () => {
+  const data=new Map(), storage={getItem:key=>data.get(key)??null,setItem:(key,value)=>data.set(key,value),removeItem:key=>data.delete(key)};
+  const old="web-00000000-0000-0000-0000-000000000001", fresh="00000000-0000-0000-0000-000000000002";
+  data.set("numeron-checkout-v1:scope:26:usd10",old);
+  const journal=new IntentJournal(storage,()=>fresh);
+  assert.equal(journal.getOrCreate("scope",26,"usd10","stripe"),old);
+  const waffo=journal.getOrCreate("scope",26,"usd10","waffo");
+  assert.notEqual(waffo,old);
+  assert.equal(new IntentJournal(storage).getOrCreate("scope",26,"usd10","waffo"),waffo);
+  journal.clear("scope",26,"usd10","stripe");
+  assert.equal(data.has("numeron-checkout-v1:scope:26:usd10"),false);
+  assert.equal(journal.getOrCreate("scope",26,"usd10","waffo"),waffo);
+  assert.ok([...data.keys()].some(key=>key.includes(":waffo:")));
+});
 test("HTTP billing uses a memory bearer, no cookies, redirects or cached personal data", async () => {
   let request;
   const session=new PortalSession({fetcher:async (url,options)=>{
@@ -63,6 +130,7 @@ test("HTTP billing uses a memory bearer, no cookies, redirects or cached persona
   assert.equal(request.options.headers.Authorization,"Bearer owned-bearer");
   assert.equal(request.options.credentials,"omit"); assert.equal(request.options.cache,"no-store");
   assert.equal(request.options.redirect,"error"); assert.match(request.url,/characterIndex=26/);
+  assert.match(request.url,/includePaymentProviders=true/);
   assert.ok(!request.url.includes("owned-bearer"));
 });
 test("a reply received after sign-out cannot revive the old account", async () => {

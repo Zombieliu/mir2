@@ -26,8 +26,15 @@ pub const MAX_CATALOG: u64 = mir2_resource_pack::MAX_CATALOG_BYTES as u64;
 pub const MAX_PACK: u64 = mir2_resource_pack::MAX_PACK_BYTES;
 pub const MAX_PACKS: usize = mir2_resource_pack::MAX_PACKS;
 pub const MAX_GENERATION_TOTAL: u64 = mir2_resource_pack::MAX_TOTAL_BYTES;
+pub const MAX_REQUIRED_SCOPE: u64 = mir2_resource_pack::scoped::MAX_SCOPE_BYTES as u64;
 const SELECTOR: &str = "state/active-generation.json";
 const HIGHEST: &str = "state/pack-highest.txt";
+
+#[path = "generation_install_seed.rs"]
+mod install_seed;
+pub use install_seed::{adopt_installed_seed, verify_installed_seed};
+#[path = "generation_progressive.rs"]
+mod progressive_generation;
 
 /// A fresh, authenticated pack feed from an older release line is not a
 /// migration for an installation with a newer signed v4 seed. Only this exact
@@ -131,6 +138,8 @@ pub struct GenerationManifest {
     pub signed_config: FileEntry,
     pub catalog: FileEntry,
     pub packs: Vec<FileEntry>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub required_scope: Option<FileEntry>,
 }
 impl GenerationManifest {
     pub fn parse(bytes: &[u8]) -> Result<Self> {
@@ -140,13 +149,35 @@ impl GenerationManifest {
         );
         let value: Self = serde_json::from_slice(bytes)?;
         ensure!(
-            value.schema == "mir2.windows.generation.v1"
-                && value.sequence > 0
+            matches!(
+                value.schema.as_str(),
+                "mir2.windows.generation.v1" | "mir2.windows.generation.v2"
+            ) && value.sequence > 0
                 && value.min_engine >= 2
                 && value.min_engine <= crate::ENGINE_VERSION
                 && value.protocol == "crystal-mir2-v1",
             "incompatible generation"
         );
+        // Explicit null is also presence. A v1 envelope must never acquire
+        // progressive semantics through an optional deserialization default.
+        let raw: serde_json::Value = serde_json::from_slice(bytes)?;
+        let scope_present = raw
+            .as_object()
+            .context("generation object required")?
+            .contains_key("requiredScope");
+        match (value.schema.as_str(), scope_present, &value.required_scope) {
+            ("mir2.windows.generation.v1", false, None) => {}
+            ("mir2.windows.generation.v2", true, Some(scope)) => {
+                scope.validate()?;
+                ensure!(
+                    scope.path == "required-scope.json"
+                        && scope.size > 0
+                        && scope.size <= MAX_REQUIRED_SCOPE,
+                    "invalid required-scope control object"
+                );
+            }
+            _ => anyhow::bail!("generation schema/required-scope authority differs"),
+        }
         for revision in [&value.game_source_revision, &value.engine_source_revision] {
             ensure!(
                 revision.len() == 40
@@ -197,6 +228,12 @@ impl GenerationManifest {
         }
         ensure!(total <= MAX_GENERATION_TOTAL, "generation total bound");
         Ok(value)
+    }
+
+    fn control_entries(&self) -> impl Iterator<Item = &FileEntry> {
+        [&self.exe, &self.signed_config, &self.catalog]
+            .into_iter()
+            .chain(self.required_scope.iter())
     }
 }
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -306,7 +343,14 @@ pub enum Selection {
 #[serde(rename_all = "camelCase")]
 pub enum Health {
     Pending,
+    /// Verified initial installation; no authenticated rollback target exists.
+    FirstLaunchPending,
     Healthy,
+}
+impl Health {
+    pub fn is_pending(&self) -> bool {
+        matches!(self, Self::Pending | Self::FirstLaunchPending)
+    }
 }
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(deny_unknown_fields, rename_all = "camelCase")]
@@ -366,6 +410,11 @@ pub fn active_record(root: &Path) -> Result<Option<ActiveRecord>> {
         "pending generation lost rollback selector"
     );
     ensure!(
+        record.health != Health::FirstLaunchPending
+            || (record.previous.is_none() && matches!(record.active, Selection::Generation { .. })),
+        "invalid first-install pending selector"
+    );
+    ensure!(
         record.health != Health::Healthy || !record.launch_started,
         "healthy generation has unfinished launch"
     );
@@ -421,10 +470,17 @@ pub(crate) fn immutable_bytes(path: &Path, bytes: &[u8]) -> Result<()> {
     }
     Ok(())
 }
-fn read_generation(
-    root: &Path,
-    digest: &str,
-) -> Result<(GenerationManifest, PathBuf, Vec<u8>, String)> {
+type GenerationData = (
+    GenerationManifest,
+    PathBuf,
+    Vec<u8>,
+    Option<Vec<u8>>,
+    String,
+);
+
+/// Metadata-only authentication is used for release-floor/discovery checks so
+/// a missing required object can still be repaired by the normal update path.
+fn read_generation_metadata(root: &Path, digest: &str) -> Result<GenerationData> {
     let generation = safe::target(root, &directory(digest)?)?;
     let bytes = safe::read_bounded(&generation.join("GENERATION.json"), MAX_GENERATION_METADATA)?;
     ensure!(
@@ -456,31 +512,40 @@ fn read_generation(
         engine.version >= manifest.min_engine,
         "generation engine capability mismatch"
     );
-    for entry in [&manifest.exe, &manifest.signed_config, &manifest.catalog] {
+    for entry in manifest.control_entries() {
         ensure!(
             safe::matches(&safe::target(&generation, &entry.path)?, entry)?,
             "generation control object hash mismatch"
         );
     }
     let catalog = safe::read_bounded(&generation.join(&manifest.catalog.path), MAX_CATALOG)?;
-    let parsed = Catalog::parse(&catalog, &manifest.catalog.sha256)?;
-    let expected: BTreeSet<_> = manifest
-        .packs
-        .iter()
-        .map(|p| (p.sha256.clone(), p.size))
-        .collect();
-    let found: BTreeSet<_> = parsed
-        .objects()
-        .iter()
-        .map(|p| (p.sha256.clone(), p.size))
-        .collect();
-    ensure!(expected == found, "generation/catalog pack closure differs");
-    Ok((manifest, generation, catalog, model::hash(&feed_bytes)))
+    let required_scope = manifest
+        .required_scope
+        .as_ref()
+        .map(|entry| safe::read_bounded(&generation.join(&entry.path), MAX_REQUIRED_SCOPE))
+        .transpose()?;
+    progressive_generation::required_pack_entries(&manifest, &catalog, required_scope.as_deref())?;
+    Ok((
+        manifest,
+        generation,
+        catalog,
+        required_scope,
+        model::hash(&feed_bytes),
+    ))
+}
+
+/// An installed generation is launchable only with its entire authenticated
+/// required availability set. v1 continues to require every catalog object.
+fn read_generation(root: &Path, digest: &str) -> Result<GenerationData> {
+    let data = read_generation_metadata(root, digest)?;
+    let _lease = progressive_generation::open_packs(root, &data.0, &data.2, data.3.as_deref())?;
+    Ok(data)
 }
 pub struct VerifiedGeneration {
     pub manifest: GenerationManifest,
     pub root: PathBuf,
     pub catalog_bytes: Vec<u8>,
+    pub required_scope_bytes: Option<Vec<u8>>,
     pub manifest_sha256: String,
     pub attempt: String,
 }
@@ -493,7 +558,8 @@ pub fn verify_generation_for_launch(
         matches!(&record.active,Selection::Generation{manifest_sha256,..} if manifest_sha256==manifest_sha),
         "launch does not match active generation"
     );
-    let (manifest, root, catalog_bytes, _) = read_generation(install_root, manifest_sha)?;
+    let (manifest, root, catalog_bytes, required_scope_bytes, _) =
+        read_generation(install_root, manifest_sha)?;
     ensure!(
         matches!(record.active,Selection::Generation{sequence,..} if sequence==manifest.sequence),
         "active generation sequence differs"
@@ -502,6 +568,7 @@ pub fn verify_generation_for_launch(
         manifest,
         root,
         catalog_bytes,
+        required_scope_bytes,
         manifest_sha256: manifest_sha.into(),
         attempt: record.attempt,
     })
@@ -552,16 +619,11 @@ fn verify_selection(root: &Path, selection: &Selection) -> Result<()> {
             manifest_sha256,
             sequence,
         } => {
-            let (manifest, _, catalog, _) = read_generation(root, manifest_sha256)?;
+            let (manifest, _, _, _, _) = read_generation(root, manifest_sha256)?;
             ensure!(
                 manifest.sequence == *sequence,
                 "previous generation sequence differs"
             );
-            let _lease = PackStore::open(
-                safe::target(root, "objects/packs")?,
-                &catalog,
-                &manifest.catalog.sha256,
-            )?;
         }
         Selection::LegacyV4 {
             candidate,
@@ -595,7 +657,7 @@ fn legacy_selection(root: &Path) -> Result<Selection> {
 pub fn accept(root: &Path, attempt: &str) -> Result<()> {
     let mut record = active_record(root)?.context("no pending generation")?;
     ensure!(
-        record.attempt == attempt && record.health == Health::Pending && record.launch_started,
+        record.attempt == attempt && record.health.is_pending() && record.launch_started,
         "generation health attempt mismatch"
     );
     verify_selection(root, &record.active)?;
@@ -607,7 +669,7 @@ pub fn accept(root: &Path, attempt: &str) -> Result<()> {
 pub fn begin_launch(root: &Path, attempt: &str) -> Result<()> {
     let mut record = active_record(root)?.context("no selected generation")?;
     ensure!(record.attempt == attempt, "launch attempt changed");
-    if record.health == Health::Pending {
+    if record.health.is_pending() {
         record.launch_started = true;
         save_record(root, &record)?;
     }
@@ -619,7 +681,7 @@ pub fn recover(root: &Path) -> Result<bool> {
     let Some(record) = active_record(root)? else {
         return Ok(false);
     };
-    if record.health == Health::Pending {
+    if record.health.is_pending() {
         let quarantined = match &record.active {
             Selection::Generation {
                 manifest_sha256, ..
@@ -651,9 +713,23 @@ pub fn recover(root: &Path) -> Result<bool> {
 pub fn rollback(root: &Path, attempt: &str) -> Result<()> {
     let record = active_record(root)?.context("no pending generation")?;
     ensure!(
-        record.attempt == attempt && record.health == Health::Pending,
+        record.attempt == attempt && record.health.is_pending(),
         "generation rollback attempt mismatch"
     );
+    if record.health == Health::FirstLaunchPending {
+        // Preserve the pending selector and signed floor. There is no proven
+        // previous version, so a failed initial start must stop for repair.
+        if let Selection::Generation {
+            manifest_sha256, ..
+        } = &record.active
+        {
+            immutable_bytes(
+                &safe::target(root, &format!("state/quarantine/{manifest_sha256}.json"))?,
+                &serde_json::to_vec(&record.active)?,
+            )?;
+        }
+        anyhow::bail!("initial game launch failed; repair the installed client");
+    }
     let previous = record.previous.context("no previous generation")?;
     verify_selection(root, &previous)?;
     let mut legacy_guard =
@@ -710,7 +786,7 @@ pub(crate) fn signed_sequence_floor(root: &Path) -> Result<u64> {
         ..
     }) = active_record(root)?
     {
-        let (manifest, _, _, _) = read_generation(root, &manifest_sha256)?;
+        let (manifest, _, _, _, _) = read_generation_metadata(root, &manifest_sha256)?;
         ensure!(
             manifest.sequence == sequence,
             "selected signed sequence differs"
@@ -732,6 +808,15 @@ fn fetch_checked(
     status: &impl Status,
     wire: &AtomicU64,
 ) -> Result<Vec<u8>> {
+    fetch_checked_progress(source, entry, status, wire, |_| {})
+}
+fn fetch_checked_progress(
+    source: &impl Source,
+    entry: &FileEntry,
+    status: &impl Status,
+    wire: &AtomicU64,
+    mut progress: impl FnMut(u64),
+) -> Result<Vec<u8>> {
     ensure!(!status.cancelled(), "packed update cancelled");
     let mut counted = 0;
     let bytes = source.get(&entry.path, entry.size, &mut |count| {
@@ -741,6 +826,7 @@ fn fetch_checked(
         );
         wire.fetch_add(count.saturating_sub(counted), Ordering::Relaxed);
         counted = counted.max(count);
+        progress(counted);
         ensure!(!status.cancelled(), "packed update cancelled");
         Ok(())
     })?;
@@ -752,6 +838,7 @@ fn fetch_checked(
         bytes.len() as u64 == entry.size && model::hash(&bytes) == entry.sha256,
         "packed metadata hash differs"
     );
+    progress(bytes.len() as u64);
     Ok(bytes)
 }
 pub(crate) fn ensure_object(
@@ -900,12 +987,13 @@ fn ensure_object_inner(
 }
 fn download_packs(
     source: &impl PackSource,
-    manifest: &GenerationManifest,
+    required_packs: &[FileEntry],
     root: &Path,
     status: &impl Status,
     wire: &AtomicU64,
 ) -> Result<usize> {
-    let total = manifest.packs.iter().try_fold(0u64, |sum, entry| {
+    ensure!(!required_packs.is_empty(), "empty required pack closure");
+    let total = required_packs.iter().try_fold(0u64, |sum, entry| {
         let target = safe::target(root, &entry.path)?;
         Ok::<_, anyhow::Error>(sum + if target.exists() { 0 } else { entry.size })
     })?;
@@ -913,8 +1001,7 @@ fn download_packs(
     status.set_final("downloading", 10);
     status.transfer(0, total);
     let queue = Mutex::new(
-        manifest
-            .packs
+        required_packs
             .iter()
             .collect::<std::collections::VecDeque<_>>(),
     );
@@ -924,7 +1011,7 @@ fn download_packs(
     std::thread::scope(|scope| -> Result<usize> {
         let (sender, receiver) = mpsc::channel();
         let mut handles = vec![];
-        for _ in 0..manifest.packs.len().min(4) {
+        for _ in 0..required_packs.len().min(4) {
             let sender = sender.clone();
             let queue = &queue;
             let cancelled = &cancelled;
@@ -971,7 +1058,7 @@ fn download_packs(
                     completed += 1;
                     status.set(
                         "downloading",
-                        10 + (completed as u32 * 65 / manifest.packs.len() as u32),
+                        10 + (completed as u32 * 65 / required_packs.len() as u32),
                     );
                 }
                 Ok(Err(error)) => {
@@ -993,7 +1080,7 @@ fn download_packs(
             return Err(error);
         }
         ensure!(
-            completed == manifest.packs.len(),
+            completed == required_packs.len(),
             "packed object closure incomplete"
         );
         Ok(downloaded.load(Ordering::Relaxed) as usize)
@@ -1003,18 +1090,19 @@ fn confirm_generation_update(
     root: &Path,
     generation: &Path,
     manifest: &GenerationManifest,
+    required_packs: &[FileEntry],
     already_selected: bool,
     status: &impl Status,
 ) -> Result<()> {
     // Presence plans an upper bound without hashing each immutable pack twice.
     // ensure_object and PackStore still verify the same objects before commit.
     let mut missing_bytes = 0;
-    for entry in [&manifest.exe, &manifest.signed_config, &manifest.catalog] {
+    for entry in manifest.control_entries() {
         if !safe::target(generation, &entry.path)?.exists() {
             missing_bytes += entry.size;
         }
     }
-    for entry in &manifest.packs {
+    for entry in required_packs {
         if !safe::target(root, &entry.path)?.exists() {
             missing_bytes += entry.size;
         }
@@ -1093,7 +1181,7 @@ fn discover_generation(
         ..
     }) = &record
     {
-        let (installed, _, _, feed_identity) = read_generation(root, manifest_sha256)?;
+        let (installed, _, _, _, feed_identity) = read_generation_metadata(root, manifest_sha256)?;
         ensure!(
             installed.sequence == *sequence,
             "installed generation sequence differs"
@@ -1170,7 +1258,7 @@ pub fn check_update(
     let started = Instant::now();
     let record = active_record(root)?;
     if let Some(record) = &record {
-        if record.health == Health::Pending {
+        if record.health.is_pending() {
             verify_selection(root, &record.active)?;
             let Selection::Generation {
                 manifest_sha256,
@@ -1206,7 +1294,35 @@ pub fn check_update(
     let digest = feed.manifest.sha256.clone();
     remember_highest(root, &feed_bytes, &feed_sig)?;
     let generation = safe::target(root, &directory(&digest)?)?;
-    confirm_generation_update(root, &generation, &manifest, already_selected, status)?;
+    // v2 plans only from authenticated full-catalog/scope metadata. This bounded
+    // metadata traffic precedes consent; it is not a pre-consent payload write.
+    let progressive = if manifest.required_scope.is_some() {
+        let mut phase = Phase::new(root, "progressive-control-metadata", &wire);
+        let plan = progressive_generation::fetch_metadata(
+            root,
+            &generation,
+            &digest,
+            source,
+            &manifest,
+            status,
+            &wire,
+        )?;
+        phase.finish();
+        Some(plan)
+    } else {
+        None
+    };
+    let required_packs = progressive
+        .as_ref()
+        .map_or(manifest.packs.as_slice(), |plan| plan.packs.as_slice());
+    confirm_generation_update(
+        root,
+        &generation,
+        &manifest,
+        required_packs,
+        already_selected,
+        status,
+    )?;
     immutable_bytes(&generation.join("GENERATION.json"), &manifest_bytes)?;
     immutable_bytes(&generation.join("GENERATION.p7s"), &signature)?;
     immutable_bytes(&generation.join("PACK-FEED.json"), &feed_bytes)?;
@@ -1216,8 +1332,15 @@ pub fn check_update(
     let parts = safe::target(root, ".update/pack-downloads")?;
     let cancelled = AtomicBool::new(false);
     let mut controls_phase = Phase::new(root, "control-objects", &wire);
-    for entry in [&manifest.exe, &manifest.signed_config, &manifest.catalog] {
+    for entry in manifest.control_entries() {
         ensure!(!status.cancelled(), "packed update cancelled");
+        if let Some(bytes) = progressive
+            .as_ref()
+            .and_then(|plan| plan.control_bytes(entry))
+        {
+            immutable_bytes(&safe::target(&generation, &entry.path)?, bytes)?;
+            continue;
+        }
         ensure_object_observed(
             source,
             &format!("{}/{}", directory(&digest)?, entry.path),
@@ -1232,17 +1355,14 @@ pub fn check_update(
     controls_phase.finish();
     drop(controls_phase);
     let mut packs_phase = Phase::new(root, "pack-download-and-hash", &wire);
-    let packs = download_packs(source, &manifest, root, status, &wire)?;
+    let packs = download_packs(source, required_packs, root, status, &wire)?;
     packs_phase.finish();
     drop(packs_phase);
     let mut verification_phase = Phase::new(root, "catalog-and-pack-validation", &wire);
     status.set_final("verifying", 80);
-    let (_, _, catalog, _) = read_generation(root, &digest)?;
-    let _pack_lease = PackStore::open(
-        safe::target(root, "objects/packs")?,
-        &catalog,
-        &manifest.catalog.sha256,
-    )?;
+    let (_, _, catalog, required_scope, _) = read_generation_metadata(root, &digest)?;
+    let _pack_lease =
+        progressive_generation::open_packs(root, &manifest, &catalog, required_scope.as_deref())?;
     verification_phase.finish();
     drop(verification_phase);
     ensure!(
@@ -1298,6 +1418,17 @@ pub fn check_update(
         elapsed_ms: started.elapsed().as_millis(),
     };
     crate::update::log(root, "packed-update", &outcome);
+    if progressive.is_some() {
+        crate::update::log(
+            root,
+            "packed-required-scope-ready",
+            serde_json::json!({
+                "requiredPackCount": required_packs.len(),
+                "deferredPackCount": manifest.packs.len() - required_packs.len(),
+                "fullAssetCompletionClaimed": false,
+            }),
+        );
+    }
     status.set_final("launching", 100);
     Ok(Some(outcome))
 }

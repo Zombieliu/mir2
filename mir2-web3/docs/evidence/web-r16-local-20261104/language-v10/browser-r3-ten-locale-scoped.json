@@ -1,0 +1,389 @@
+{
+  "schema": "r16-language-browser-smoke/1",
+  "startedAt": "2026-11-04T09:01:42.531Z",
+  "passed": false,
+  "scope": {
+    "realUi": true,
+    "originalOrdinaryOwner": true,
+    "credentialSource": "friendly/private/world/state.local.json",
+    "walletOpened": false,
+    "privateQrCaptured": false,
+    "gameDataEdited": false,
+    "lessonsSent": 0,
+    "economicCommands": 0,
+    "modelInstructionsSent": 0,
+    "fullNativeWasmTenLanguageClaim": false
+  },
+  "phases": [
+    "local-public-expectations-and-private-owner",
+    "fresh-zh-CN-login",
+    "login-and-browser-settings-zh-CN",
+    "login-and-browser-settings-zh-TW",
+    "login-and-browser-settings-en",
+    "login-and-browser-settings-pt-BR",
+    "login-and-browser-settings-ru",
+    "login-and-browser-settings-hi",
+    "login-and-browser-settings-id",
+    "login-and-browser-settings-vi",
+    "login-and-browser-settings-th",
+    "login-and-browser-settings-ar",
+    "russian-preference-reload",
+    "fresh-zh-HK-traditional-default",
+    "close-fresh-zh-HK-context",
+    "original-owner-ordinary-login-and-selection-languages",
+    "russian-presentation-real-city-native-windows"
+  ],
+  "checks": [
+    {
+      "name": "ten-complete-browser-dictionaries",
+      "passed": true,
+      "languages": 10,
+      "entriesPerLanguage": 32
+    },
+    {
+      "name": "fresh-browser-zh-CN-default-and-native-menu-order-font-geometry",
+      "passed": true
+    },
+    {
+      "name": "all-ten-login-wallet-title-and-browser-settings-ui",
+      "passed": true
+    },
+    {
+      "name": "russian-preference-persists-through-real-reload",
+      "passed": true
+    },
+    {
+      "name": "fresh-browser-zh-HK-defaults-to-zh-TW",
+      "passed": true
+    },
+    {
+      "name": "original-owner-login-and-opaque-character-names-retained",
+      "passed": true
+    }
+  ],
+  "languages": [
+    {
+      "language": "zh-CN",
+      "nativeLoginCaptions": true,
+      "walletEntryTitle": true,
+      "browserSettingsCaptions": true,
+      "dictionaryComplete": true
+    },
+    {
+      "language": "zh-TW",
+      "nativeLoginCaptions": true,
+      "walletEntryTitle": true,
+      "browserSettingsCaptions": true,
+      "dictionaryComplete": true
+    },
+    {
+      "language": "en",
+      "nativeLoginCaptions": true,
+      "walletEntryTitle": true,
+      "browserSettingsCaptions": true,
+      "dictionaryComplete": true
+    },
+    {
+      "language": "pt-BR",
+      "nativeLoginCaptions": true,
+      "walletEntryTitle": true,
+      "browserSettingsCaptions": true,
+      "dictionaryComplete": true
+    },
+    {
+      "language": "ru",
+      "nativeLoginCaptions": true,
+      "walletEntryTitle": true,
+      "browserSettingsCaptions": true,
+      "dictionaryComplete": true
+    },
+    {
+      "language": "hi",
+      "nativeLoginCaptions": true,
+      "walletEntryTitle": true,
+      "browserSettingsCaptions": true,
+      "dictionaryComplete": true
+    },
+    {
+      "language": "id",
+      "nativeLoginCaptions": true,
+      "walletEntryTitle": true,
+      "browserSettingsCaptions": true,
+      "dictionaryComplete": true
+    },
+    {
+      "language": "vi",
+      "nativeLoginCaptions": true,
+      "walletEntryTitle": true,
+      "browserSettingsCaptions": true,
+      "dictionaryComplete": true
+    },
+    {
+      "language": "th",
+      "nativeLoginCaptions": true,
+      "walletEntryTitle": true,
+      "browserSettingsCaptions": true,
+      "dictionaryComplete": true
+    },
+    {
+      "language": "ar",
+      "nativeLoginCaptions": true,
+      "walletEntryTitle": true,
+      "browserSettingsCaptions": true,
+      "dictionaryComplete": true
+    }
+  ],
+  "screenshots": [
+    "01-native-ten-language-menu.png",
+    "02-settings-zh-CN.png",
+    "03-settings-zh-TW.png",
+    "04-settings-en.png",
+    "05-settings-pt-BR.png",
+    "06-settings-ru.png",
+    "07-settings-hi.png",
+    "08-settings-id.png",
+    "09-settings-vi.png",
+    "10-settings-th.png",
+    "11-settings-ar.png",
+    "12-russian-preference-after-reload.png",
+    "13-fresh-zh-HK-default-traditional.png",
+    "14-original-character-selection-ru.png",
+    "15-original-character-selection-zh-CN.png",
+    "16-original-character-selection-ru.png",
+    "17-failure-safe-masked.png"
+  ],
+  "errors": [
+    {
+      "phase": "russian-presentation-real-city-native-windows",
+      "name": "TimeoutError",
+      "hash": "0408d5b596782a348e6b3f4fefa0f73637a81902c21c7f61d89e92c13cec1767"
+    }
+  ],
+  "network": {
+    "failed": [
+      {
+        "phase": "russian-preference-reload",
+        "method": "GET",
+        "status": "failed",
+        "pathHash": "9eeb5fa233df82531dffea86ffb49fa4f48ac32bcba5fb5d93a58ab367fe0e40",
+        "hash": "7ba7a1709a2d7d220e120c927e0a7e90adf45c88b09ba912b237d705090d1d4e"
+      },
+      {
+        "phase": "original-owner-ordinary-login-and-selection-languages",
+        "method": "GET",
+        "status": "failed",
+        "pathHash": "9eeb5fa233df82531dffea86ffb49fa4f48ac32bcba5fb5d93a58ab367fe0e40",
+        "hash": "7ba7a1709a2d7d220e120c927e0a7e90adf45c88b09ba912b237d705090d1d4e"
+      },
+      {
+        "phase": "original-owner-ordinary-login-and-selection-languages",
+        "method": "GET",
+        "status": "failed",
+        "pathHash": "59b575174e75b5bd4afcfbd6f7f338462fb173fabd1e9572382da322fe3dffef",
+        "hash": "7ba7a1709a2d7d220e120c927e0a7e90adf45c88b09ba912b237d705090d1d4e"
+      }
+    ],
+    "httpErrors": [],
+    "abortedDuringClose": 0
+  },
+  "console": {
+    "errorCount": 0,
+    "warningCount": 0,
+    "hashes": []
+  },
+  "commands": {
+    "setLanguage": 3,
+    "login": 1,
+    "startGame": 1
+  },
+  "companionReadCounts": {
+    "list": 0,
+    "view": 0
+  },
+  "wireLanguages": [
+    "en",
+    "zh-CN"
+  ],
+  "unknownCommandCount": 3,
+  "runtimeWindows": [],
+  "hostErrors": [],
+  "cleanup": {
+    "browserClosed": true,
+    "ordinaryLogout": false,
+    "chineseRestored": false
+  },
+  "source": {
+    "nativeCatalogSha256": "e8d8bf99c8e109a0e6e5fc028ec8ce97b6d927c47c8edbf329fe2ba7bc17c259",
+    "browserDictionarySha256": "66bff4eb7ecca9c3115333f1920648e78ab149e8ba31cb1442954e34dcc47a2f",
+    "browserDictionaryLanguages": 10,
+    "browserDictionaryEntries": 32
+  },
+  "menu": {
+    "root": {
+      "x": 900,
+      "y": 823,
+      "width": 240,
+      "height": 29
+    },
+    "rootLogicalWidth": 240,
+    "menu": {
+      "x": 900,
+      "y": 517,
+      "width": 240,
+      "height": 302
+    },
+    "toggle": {
+      "x": 900,
+      "y": 823,
+      "width": 240,
+      "height": 29
+    },
+    "viewport": {
+      "width": 1280,
+      "height": 960
+    },
+    "buttons": [
+      {
+        "code": "zh-CN",
+        "label": "简体中文",
+        "pressed": true,
+        "rect": {
+          "x": 905,
+          "y": 522,
+          "width": 230,
+          "height": 27
+        },
+        "fontFamily": "\"Noto Sans CJK SC\", sans-serif",
+        "fontSize": "13px",
+        "fits": true
+      },
+      {
+        "code": "zh-TW",
+        "label": "繁體中文",
+        "pressed": false,
+        "rect": {
+          "x": 905,
+          "y": 551,
+          "width": 230,
+          "height": 27
+        },
+        "fontFamily": "\"Noto Sans TC\", sans-serif",
+        "fontSize": "13px",
+        "fits": true
+      },
+      {
+        "code": "en",
+        "label": "English",
+        "pressed": false,
+        "rect": {
+          "x": 905,
+          "y": 580,
+          "width": 230,
+          "height": 25
+        },
+        "fontFamily": "\"Noto Sans\", sans-serif",
+        "fontSize": "13px",
+        "fits": true
+      },
+      {
+        "code": "pt-BR",
+        "label": "Português (Brasil)",
+        "pressed": false,
+        "rect": {
+          "x": 905,
+          "y": 607,
+          "width": 230,
+          "height": 25
+        },
+        "fontFamily": "\"Noto Sans\", sans-serif",
+        "fontSize": "13px",
+        "fits": true
+      },
+      {
+        "code": "ru",
+        "label": "Русский",
+        "pressed": false,
+        "rect": {
+          "x": 905,
+          "y": 634,
+          "width": 230,
+          "height": 25
+        },
+        "fontFamily": "\"Noto Sans\", sans-serif",
+        "fontSize": "13px",
+        "fits": true
+      },
+      {
+        "code": "hi",
+        "label": "हिन्दी",
+        "pressed": false,
+        "rect": {
+          "x": 905,
+          "y": 661,
+          "width": 230,
+          "height": 27
+        },
+        "fontFamily": "\"Noto Sans Devanagari\", sans-serif",
+        "fontSize": "13px",
+        "fits": true
+      },
+      {
+        "code": "id",
+        "label": "Bahasa Indonesia",
+        "pressed": false,
+        "rect": {
+          "x": 905,
+          "y": 690,
+          "width": 230,
+          "height": 25
+        },
+        "fontFamily": "\"Noto Sans\", sans-serif",
+        "fontSize": "13px",
+        "fits": true
+      },
+      {
+        "code": "vi",
+        "label": "Tiếng Việt",
+        "pressed": false,
+        "rect": {
+          "x": 905,
+          "y": 717,
+          "width": 230,
+          "height": 25
+        },
+        "fontFamily": "\"Noto Sans\", sans-serif",
+        "fontSize": "13px",
+        "fits": true
+      },
+      {
+        "code": "th",
+        "label": "ไทย",
+        "pressed": false,
+        "rect": {
+          "x": 905,
+          "y": 744,
+          "width": 230,
+          "height": 30
+        },
+        "fontFamily": "\"Noto Sans Thai\", sans-serif",
+        "fontSize": "13px",
+        "fits": true
+      },
+      {
+        "code": "ar",
+        "label": "العربية",
+        "pressed": false,
+        "rect": {
+          "x": 905,
+          "y": 776,
+          "width": 230,
+          "height": 38
+        },
+        "fontFamily": "\"Noto Sans Arabic\", sans-serif",
+        "fontSize": "13px",
+        "fits": true
+      }
+    ]
+  },
+  "finishedAt": "2026-11-04T09:01:59.797Z"
+}

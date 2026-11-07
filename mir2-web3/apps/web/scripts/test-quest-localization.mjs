@@ -235,10 +235,13 @@ assert.equal(butcherHunt.rewards.items[0].name, "旧铜戒指");
 
 assert.equal(zhT("ui.questAccept"), "接受");
 assert.equal(zhT("ui.questComplete"), "完成");
-for (const language of Object.values(localizationBundle.languages)) {
+// Task feedback is browser chrome: test the actual combined adapter rather
+// than requiring newly supported locales to exist in the legacy wire bundle.
+const browserLocalization = loadTypeScriptModule(new URL("../lib/r16-browser-localization.ts", import.meta.url));
+for (const language of browserLocalization.R16_BROWSER_LANGUAGES) {
   for (const key of ["ui.questClientLoading", "ui.questClientUnavailable", "ui.questActionPending",
     "ui.questActionRewardRequired", "ui.questActionTalkToNpc", "ui.questActionStateChanged", "ui.retry"]) {
-    assert.ok(language.texts[key], `missing quest feedback: ${language.locale} ${key}`);
+    assert.ok(browserLocalization.browserText(language, key), `missing quest feedback: ${language} ${key}`);
   }
 }
 assert.equal(zhT("ui.questActionPending"), "请求处理中，请稍候。");

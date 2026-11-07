@@ -10461,7 +10461,11 @@ impl SimulationSession {
                     },
                 ) {
                     Ok(character) => character,
-                    Err(_) => return vec![ServerPacket::NewCharacter { result: 1 }],
+                    Err(error) => {
+                        return vec![ServerPacket::NewCharacter {
+                            result: crate::config::character_creation::rejection_code(&error),
+                        }];
+                    }
                 };
                 self.app
                     .world_mut()

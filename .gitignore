@@ -67,6 +67,8 @@ mir2-web3/docs/generated/player-qa/movement-jitter/
 /work/
 /.codex/tmp/
 /mir2-web3/apps/web/.mir2-thin-*/
+# Local playable preparation copies; source and public verification stay tracked.
+/mir2-web3/apps/web/.mir2-r16-web-prepared*/
 /mir2-web3/apps/web/tsconfig.native-wallet-test.*.json
 /mir2-web3/apps/web/tsconfig.promotion-preview-*.json
 /mir2-web3/apps/web/tsconfig.source*-build*.json

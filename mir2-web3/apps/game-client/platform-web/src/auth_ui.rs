@@ -73,7 +73,7 @@ mod tests {
         assert_eq!(auth_ui_abi_version(), 1);
         assert_eq!(
             auth_ui_validate_registration(
-                "hero", "secret", "secret", "Hero", "2000-01-01", "Q", "A", "",
+                "hero", "ValidPass42", "ValidPass42", "Hero", "2000-01-01", "Q", "A", "",
             ),
             "630822816000000000"
         );
@@ -83,6 +83,14 @@ mod tests {
         );
         assert_eq!(auth_ui_validate_password("hero", "oldpw", "newpw", "newpw"), 0);
         assert_eq!(auth_ui_validate_password("hero", "", "newpw", "newpw"), 10);
+        assert_eq!(
+            auth_ui_validate_registration("hero", "secret", "secret", "", "", "", "", ""),
+            "e2"
+        );
+        assert_eq!(
+            auth_ui_validate_registration("NewAccount9", "newaccount9", "newaccount9", "", "", "", "", ""),
+            "e2"
+        );
     }
 
     #[test]

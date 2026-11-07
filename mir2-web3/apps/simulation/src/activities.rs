@@ -188,6 +188,11 @@ pub struct ActivityClaimRecord {
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct ActivityRechargeRecord {
     pub order_id: String,
+    #[serde(
+        default,
+        skip_serializing_if = "crate::billing::FiatPaymentProvider::is_stripe"
+    )]
+    pub provider: crate::billing::FiatPaymentProvider,
     pub character_index: i32,
     pub amount_usd_minor: u64,
     pub credits: u32,
@@ -281,15 +286,17 @@ impl ActivityLedger {
                 || record.paid_at_ms < record.created_at_ms
                 || phase.end_ms.is_some_and(|end| record.paid_at_ms >= end)
                 || record.recorded_at_ms < record.paid_at_ms
-                || !valid_provider_id(&record.checkout_session_id, "cs_")
-                || !valid_provider_id(&record.payment_intent_id, "pi_")
-                || !sessions.insert(&record.checkout_session_id)
-                || !payments.insert(&record.payment_intent_id)
+                || !record
+                    .provider
+                    .valid_checkout_id(&record.checkout_session_id)
+                || !record.provider.valid_payment_id(&record.payment_intent_id)
+                || !sessions.insert((record.provider, &record.checkout_session_id))
+                || !payments.insert((record.provider, &record.payment_intent_id))
                 || record.review_events.len() > 128
                 || record
                     .review_events
                     .iter()
-                    .any(|id| !valid_provider_id(id, "evt_"))
+                    .any(|id| !record.provider.valid_event_id(id))
             {
                 return Err("activityLedgerInvalid".into());
             }
@@ -304,16 +311,6 @@ fn valid_order_id(id: &str) -> bool {
         && id[4..]
             .bytes()
             .all(|b| b.is_ascii_digit() || (b'a'..=b'f').contains(&b))
-}
-
-fn valid_provider_id(id: &str, prefix: &str) -> bool {
-    id.starts_with(prefix)
-        && id.len() > prefix.len()
-        && id.len() <= 255
-        && !id.contains("_secret_")
-        && id
-            .bytes()
-            .all(|b| b.is_ascii_alphanumeric() || b"-_.:".contains(&b))
 }
 
 fn owned_save(account: &AccountRecord, index: i32) -> Result<&CharacterSaveRecord, String> {
@@ -432,6 +429,7 @@ pub fn observe_account(
         for record in ledger.recharge_records.values_mut() {
             if let Some(order) = billing.orders.get(&record.order_id) {
                 if !order.livemode
+                    || order.provider != record.provider
                     || order.offer.currency != "usd"
                     || order.character_index != record.character_index
                     || order.offer.amount_minor != record.amount_usd_minor
@@ -486,6 +484,7 @@ pub fn observe_account(
                 };
                 let record = ActivityRechargeRecord {
                     order_id: order.id.clone(),
+                    provider: order.provider,
                     character_index: order.character_index,
                     amount_usd_minor: order.offer.amount_minor,
                     credits: order.offer.credits,

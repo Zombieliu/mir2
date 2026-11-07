@@ -11,6 +11,12 @@ use std::{
     path::{Component, Path},
 };
 
+mod read_profile;
+pub use read_profile::ReadProfileSnapshot;
+pub mod repack;
+pub mod scoped;
+pub use scoped::{ScopedPackStore, ScopedRead};
+
 pub const CATALOG_SCHEMA: &str = "mir2.native.resource-catalog.v1";
 pub const MAX_RESOURCES: usize = 300_000;
 pub const MAX_PACKS: usize = 256;
@@ -447,6 +453,31 @@ struct PackFile {
     file: File,
     entries: BTreeMap<String, Extent>,
 }
+impl PackFile {
+    fn validate_locator(&self, entry: &ResourceRef) -> Result<()> {
+        let extent = self
+            .entries
+            .get(&entry.sha256)
+            .context("resource absent from pack index")?;
+        ensure!(
+            extent.offset == entry.offset && extent.size == entry.size,
+            "catalog/index locator mismatch"
+        );
+        Ok(())
+    }
+
+    fn read_resource(&self, entry: &ResourceRef) -> Result<Vec<u8>> {
+        handle_check(&self.file, false)?;
+        let mut bytes = vec![0; usize::try_from(entry.size)?];
+        read_at(&self.file, entry.offset, &mut bytes)?;
+        ensure!(
+            sha256(&bytes) == entry.sha256,
+            "resource content SHA mismatch"
+        );
+        handle_check(&self.file, false)?;
+        Ok(bytes)
+    }
+}
 fn read_pack(root: &Path, object: &PackObject) -> Result<PackFile> {
     let file = open_file(&root.join(object.file_name()))?;
     ensure!(
@@ -511,6 +542,7 @@ pub struct PackStore {
     catalog_sha: String,
     files: BTreeMap<String, PackFile>,
     _directory_leases: Vec<File>,
+    read_profile: Option<read_profile::ReadProfile>,
 }
 impl PackStore {
     pub fn open(
@@ -526,21 +558,37 @@ impl PackStore {
             files.insert(object.sha256.clone(), read_pack(root, object)?);
         }
         for entry in catalog.resources.values() {
-            let extent = files[&entry.pack_sha256]
-                .entries
-                .get(&entry.sha256)
-                .context("resource absent from pack index")?;
-            ensure!(
-                extent.offset == entry.offset && extent.size == entry.size,
-                "catalog/index locator mismatch"
-            );
+            files[&entry.pack_sha256].validate_locator(entry)?;
         }
         Ok(Self {
             catalog,
             catalog_sha: sha256(catalog_bytes),
             files,
             _directory_leases: leases,
+            read_profile: None,
         })
+    }
+
+    /// Opt-in dependency diagnostics, with exactly the same complete catalog,
+    /// pack hashes, indexes and lifetime leases as `open`. No pack is optional.
+    /// Profiling never reads an unsigned manifest or changes asset selection.
+    pub fn open_profiled(
+        objects_root: impl AsRef<Path>,
+        catalog_bytes: &[u8],
+        expected_catalog_sha: &str,
+    ) -> Result<Self> {
+        let mut store = Self::open(objects_root, catalog_bytes, expected_catalog_sha)?;
+        store.read_profile = Some(read_profile::ReadProfile::default());
+        Ok(store)
+    }
+
+    /// A bounded, point-in-time observation of successful verified reads, not
+    /// a certificate that these paths cover every possible screen or gameplay.
+    /// Ordinary stores allocate no profile and return `None`.
+    pub fn read_profile_snapshot(&self) -> Option<ReadProfileSnapshot> {
+        self.read_profile
+            .as_ref()
+            .map(|profile| profile.snapshot(&self.catalog_sha))
     }
     pub fn catalog(&self) -> &Catalog {
         &self.catalog
@@ -576,22 +624,21 @@ impl PackStore {
             .collect())
     }
     pub fn read(&self, path: &str) -> Result<Vec<u8>> {
+        let result = self.read_verified(path);
+        if let Some(profile) = &self.read_profile {
+            profile.record(path, result.is_ok());
+        }
+        result
+    }
+
+    fn read_verified(&self, path: &str) -> Result<Vec<u8>> {
         validate_logical_path(path)?;
         let entry = self
             .catalog
             .resources
             .get(path)
             .context("resource absent from generation catalog")?;
-        let object = &self.files[&entry.pack_sha256];
-        handle_check(&object.file, false)?;
-        let mut bytes = vec![0; usize::try_from(entry.size)?];
-        read_at(&object.file, entry.offset, &mut bytes)?;
-        ensure!(
-            sha256(&bytes) == entry.sha256,
-            "resource content SHA mismatch"
-        );
-        handle_check(&object.file, false)?;
-        Ok(bytes)
+        self.files[&entry.pack_sha256].read_resource(entry)
     }
 }
 fn directory_prefix(path: &str) -> Result<String> {
@@ -635,6 +682,10 @@ pub struct BuildOutput {
 /// create-new handle use the same no-reparse/no-hardlink policy as pack objects.
 pub fn write_catalog_new(path: &Path, bytes: &[u8], expected_sha: &str) -> Result<()> {
     Catalog::parse(bytes, expected_sha)?;
+    write_bytes_new(path, bytes, expected_sha)
+}
+
+fn write_bytes_new(path: &Path, bytes: &[u8], expected_sha: &str) -> Result<()> {
     absolute_plain_path(path)?;
     let _leases = directories(path.parent().context("catalog parent")?)?;
     let mut options = OpenOptions::new();
@@ -653,7 +704,7 @@ pub fn write_catalog_new(path: &Path, bytes: &[u8], expected_sha: &str) -> Resul
     file.sync_all()?;
     ensure!(
         hash_file(&file, bytes.len() as u64)? == digest(expected_sha)?,
-        "catalog write readback mismatch"
+        "create-only write readback mismatch"
     );
     Ok(())
 }
@@ -696,6 +747,32 @@ fn pack_bytes(
     source_root: &Path,
     group: &[ResourceInput],
 ) -> Result<(Vec<u8>, BTreeMap<String, Extent>)> {
+    pack_bytes_with(group, |input, target| {
+        let file = open_file(&source_root.join(&input.path))?;
+        ensure!(
+            hash_file(&file, input.size)? == input.sha256,
+            "source resource SHA mismatch"
+        );
+        read_at(&file, 0, target)?;
+        handle_check(&file, false)?;
+        Ok(())
+    })
+}
+
+/// The source adapter retains its own handle/lease policy. Both adapters share
+/// the same format and hash the exact loaded bytes before creating any object.
+fn pack_bytes_with(
+    group: &[ResourceInput],
+    mut load: impl FnMut(&ResourceInput, &mut [u8]) -> Result<()>,
+) -> Result<(Vec<u8>, BTreeMap<String, Extent>)> {
+    ensure!(
+        !group.is_empty() && group.len() <= MAX_RESOURCES,
+        "pack resource count bound"
+    );
+    ensure!(
+        group.windows(2).all(|pair| pair[0].sha256 < pair[1].sha256),
+        "pack content digests must be unique and sorted"
+    );
     let data_start = HEADER + group.len() as u64 * RECORD;
     let payload = group.iter().try_fold(0u64, |sum, input| {
         sum.checked_add(input.size).context("pack payload overflow")
@@ -728,19 +805,13 @@ fn pack_bytes(
         cursor += input.size;
     }
     for input in group {
-        let file = open_file(&source_root.join(&input.path))?;
-        ensure!(
-            hash_file(&file, input.size)? == input.sha256,
-            "source resource SHA mismatch"
-        );
         let start = bytes.len();
         bytes.resize(start + input.size as usize, 0);
-        read_at(&file, 0, &mut bytes[start..])?;
+        load(input, &mut bytes[start..])?;
         ensure!(
             sha256(&bytes[start..]) == input.sha256,
             "source changed during pack construction"
         );
-        handle_check(&file, false)?;
     }
     Ok((bytes, entries))
 }

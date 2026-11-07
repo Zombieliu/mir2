@@ -267,6 +267,9 @@ impl StripeBilling {
         account: &str,
         order: &RechargeOrder,
     ) -> Result<String, String> {
+        if order.provider != mir2_simulation::billing::FiatPaymentProvider::Stripe {
+            return Err("billingPaymentMismatch".into());
+        }
         self.validate_store(config)?;
         let session = if let Some(id) = &order.checkout_session_id {
             self.checkout_session(id).await?
@@ -369,7 +372,8 @@ impl StripeBilling {
         order: &RechargeOrder,
     ) -> Result<(), String> {
         let metadata = &session["metadata"];
-        if field(session, "object")? != "checkout.session"
+        if order.provider != mir2_simulation::billing::FiatPaymentProvider::Stripe
+            || field(session, "object")? != "checkout.session"
             || field(session, "mode")? != "payment"
             || field(session, "client_reference_id")? != order.id
             || field(metadata, "mir2_order_id")? != order.id

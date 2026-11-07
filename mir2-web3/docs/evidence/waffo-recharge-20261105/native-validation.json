@@ -1,0 +1,68 @@
+{
+  "schema": "mir2.waffo.native-validation.v1",
+  "baseHead": "c404bde8a5190534f6bc83ec8a4fe78fffc8cb50",
+  "sourceState": "uncommitted shared working tree; unrelated pre-existing WIP preserved",
+  "sourceSha256": {
+    "apps/game-client/client-bevy/src/native_billing.rs": "368a8a572aabd37eb10c113803548f34e632e9393c9167846230aa1365f12b6a",
+    "apps/game-client/platform-windows/src/native_protocol.rs": "6e6c3025228c9679b2ea9d27a38dfd487a9f8defc1f8557a019d1b5d92981bed",
+    "apps/game-client/platform-windows/src/billing_browser.rs": "45a26471ffdaaac08f0031964adebe8d151f42e5b882df55359c26328d967d5d",
+    "apps/game-client/platform-windows/src/shell_bridge.rs": "28f7c6ef74dad2e28d273e9b865d27f35806c5061f4efbcebb7c71a2c68b44e3",
+    "apps/game-client/platform-windows/src/gateway.rs": "74d65d795ac5deeba53208ca4d8b55395ed49944b4ba990b3c5be8a70f6cef7f"
+  },
+  "sharedNativeLogic": {
+    "passed": 26,
+    "failed": 0,
+    "ignored": 1,
+    "log": "native-billing-final-tests.log"
+  },
+  "nativeTransportAndBrowser": {
+    "passed": 7,
+    "failed": 0,
+    "log": "native-transport-tests.log",
+    "harness": "check-native-transport.py",
+    "scope": "exact source modules native_protocol.rs and billing_browser.rs referenced directly; no game build"
+  },
+  "nativeGpu": {
+    "passed": true,
+    "screenshots": 45,
+    "locales": [
+      "en",
+      "zh-TW",
+      "zh-CN"
+    ],
+    "missingGlyphs": 0,
+    "overflowingTextNodes": 0,
+    "outsideViewportNodes": 0,
+    "report": "native-gpu/billing-entry-native-gpu.json",
+    "scope": "offline mocked server data, actual shared renderer and bundled fonts; rendering code unchanged by subsequent terminal-replay state fix"
+  },
+  "fullWindowsHostCheck": {
+    "passed": true,
+    "exitCode": 0,
+    "report": "native-host-validation.json",
+    "log": "native-host-check-offline.log",
+    "harness": "check-native-host.py",
+    "scope": "actual platform-windows host --tests compilation, including shell_bridge.rs and gateway.rs payment mapping",
+    "lockMode": "temporary workspace-only offline lock update; compile locked against generated snapshot; original lock restored byte-identically",
+    "originalAndFinalLockSha256": "16a4204573038f56ee1e036c7392f3ff3ea43319ccbeb6d3c5aed393f1a3b9d9",
+    "runtimeManifestAndLockUnchanged": true,
+    "onlineFetchUsed": false
+  },
+  "limitations": [
+    "no packaged game artifact, public deployment, WAFFO API request or payment, or human acceptance",
+    "unmodified Windows host lock remains stale relative to existing runtime WIP; host validation intentionally used a guarded temporary lock"
+  ],
+  "priorAttempt": {
+    "unseededOfflineHarness": {
+      "scope": "unseeded isolated offline harness resolution",
+      "result": "cached async-executor was yanked; using the existing client-bevy lock as seed only in temp harness allowed the successful 7-test run",
+      "log": "native-transport-offline-unseeded.log"
+    },
+    "originalWindowsLockedCheck": {
+      "passed": false,
+      "exitCode": 101,
+      "log": "native-windows-check.log",
+      "reason": "existing platform-windows/Cargo.lock requires an update; --locked stopped before compilation; original locks unchanged"
+    }
+  }
+}

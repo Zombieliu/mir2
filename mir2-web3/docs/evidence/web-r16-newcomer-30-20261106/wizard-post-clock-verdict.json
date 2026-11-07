@@ -1,0 +1,178 @@
+{
+  "schema": "mir2.r16.wizard-post-clock-verdict.v1",
+  "release": "v21-r3",
+  "functionalLevel30Passed": false,
+  "finalClass": "Wizard",
+  "level": 27,
+  "mainCompleted": 19,
+  "growthCompleted": 3,
+  "q20": {
+    "current": 0,
+    "required": 3
+  },
+  "originalClockAndFirstRecheckRetained": true,
+  "segments": [
+    {
+      "run": "2026-11-06T15-39-11-327Z",
+      "reportSha256": "e45c6307f4d262b81f6c89efaf9f742adbe2fd6a1b6ccfcc853ac1f1a58f2d30",
+      "arrival": {
+        "map": "D022",
+        "x": 339,
+        "y": 355,
+        "hp": 107
+      },
+      "westernSamples": [
+        {
+          "x": 333,
+          "y": 363,
+          "hp": 111,
+          "mp": 60
+        },
+        {
+          "x": 325,
+          "y": 369,
+          "hp": 111,
+          "mp": 60
+        },
+        {
+          "x": 317,
+          "y": 372,
+          "hp": 111,
+          "mp": 60
+        },
+        {
+          "x": 309,
+          "y": 380,
+          "hp": 111,
+          "mp": 60
+        },
+        {
+          "x": 304,
+          "y": 388,
+          "hp": 111,
+          "mp": 60
+        },
+        {
+          "x": 310,
+          "y": 394,
+          "hp": 111,
+          "mp": 60
+        },
+        {
+          "x": 312,
+          "y": 394,
+          "hp": 111,
+          "mp": 60
+        }
+      ],
+      "easternSamples": [],
+      "kitingMoves": 0,
+      "ordinaryCasts": 1,
+      "matchedDamage": 0,
+      "actualKillReceipts": 0,
+      "paused": "target 1202402 left the authoritative snapshot before attack"
+    },
+    {
+      "run": "2026-11-06T15-47-08-246Z",
+      "reportSha256": "7c6c682b2dfbac7e62f974502cee91a42d7ee1795cfda2404b85fcccb66ce7af",
+      "arrival": {
+        "map": "D022",
+        "x": 339,
+        "y": 355,
+        "hp": 111
+      },
+      "westernSamples": [
+        {
+          "x": 333,
+          "y": 363,
+          "hp": 111,
+          "mp": 26
+        },
+        {
+          "x": 325,
+          "y": 369,
+          "hp": 111,
+          "mp": 26
+        },
+        {
+          "x": 317,
+          "y": 372,
+          "hp": 111,
+          "mp": 26
+        },
+        {
+          "x": 309,
+          "y": 380,
+          "hp": 111,
+          "mp": 26
+        },
+        {
+          "x": 304,
+          "y": 389,
+          "hp": 111,
+          "mp": 46
+        }
+      ],
+      "easternSamples": [],
+      "kitingMoves": 0,
+      "ordinaryCasts": 2,
+      "matchedDamage": 2,
+      "actualKillReceipts": 0,
+      "paused": "D022 q20 still requires ordinary kills"
+    },
+    {
+      "run": "2026-11-06T16-05-41-612Z",
+      "reportSha256": "2f7587ea2e78278c7a40f97223c99208f88b46aec0ed4ac36e1160c62bb4344c",
+      "arrival": {
+        "map": "D022",
+        "x": 339,
+        "y": 355,
+        "hp": 111
+      },
+      "westernSamples": [],
+      "easternSamples": [
+        {
+          "x": 344,
+          "y": 356,
+          "hp": 111,
+          "mp": 452
+        },
+        {
+          "x": 347,
+          "y": 358,
+          "hp": 111,
+          "mp": 452
+        },
+        {
+          "x": 349,
+          "y": 359,
+          "hp": 111,
+          "mp": 452
+        }
+      ],
+      "kitingMoves": 8,
+      "ordinaryCasts": 2,
+      "matchedDamage": 2,
+      "actualKillReceipts": 0,
+      "paused": "Navigation successful step budget exceeded (1)"
+    }
+  ],
+  "lastCombatCheckpoint": {
+    "map": "0",
+    "hp": 6,
+    "gold": 16830,
+    "ordinaryLogout": true,
+    "fileMatches": true
+  },
+  "browserReadback": {
+    "map": "0",
+    "level": 27,
+    "gold": 16830,
+    "ordinaryQ": true,
+    "skill": "GreatFireBall",
+    "sourceComplete": true,
+    "networkClean": true,
+    "normalReviveRequested": false,
+    "ordinaryLogout": true
+  }
+}

@@ -1,0 +1,589 @@
+{
+  "schema": "r16-v17-native-display-browser-smoke/1",
+  "startedAt": "2026-11-05T20:17:27.142Z",
+  "passed": false,
+  "scope": {
+    "ordinaryQaOnly": true,
+    "realUi": true,
+    "languages": [
+      "zh-CN",
+      "zh-TW",
+      "en",
+      "pt-BR",
+      "ru",
+      "hi",
+      "id",
+      "vi",
+      "th",
+      "ar"
+    ],
+    "newAccounts": 0,
+    "newCharacters": 0,
+    "economicCommands": 0,
+    "gameplayCommands": 0,
+    "questMutations": 0,
+    "skillLearnOrBindOrCast": 0,
+    "originalOwner": false,
+    "companionOpened": false,
+    "modelInstructions": 0,
+    "privateCredentialsNodeOnlyExceptNormalAuthFill": true,
+    "privateValuesInBrowserSelectorsOrEvaluate": false,
+    "catalogExpectedTextAndRawWasmTooltipCompared": true,
+    "wholeUiTenLanguageClaim": false,
+    "visualGlyphReviewRequired": true
+  },
+  "phases": [
+    "ordinary-production-navigation",
+    "language-zh-CN",
+    "normal-login-zh-CN",
+    "cold-native-entry-zh-CN",
+    "native-q-diary-zh-CN",
+    "native-c-four-tabs-zh-CN"
+  ],
+  "checks": [],
+  "sessions": [
+    {
+      "language": "zh-CN",
+      "normalUiLoginAndSelectedOriginalRole": true,
+      "realmMatched": true,
+      "authority": {
+        "fingerprint": "11aab500d17bbf2ffe766d8052b04960bec262cccbbd85a536d889d9bb4a4f12",
+        "position": {
+          "x": 289,
+          "y": 616
+        },
+        "map": "0",
+        "level": 8,
+        "gold": 180,
+        "completedQuestIds": [
+          2110001,
+          2110002,
+          2110003,
+          2110004
+        ],
+        "chapter": {
+          "id": "forest",
+          "done": 0,
+          "total": 5
+        },
+        "sequence": 691
+      },
+      "screenshots": [
+        "01-quest-diary-zh-CN.png"
+      ],
+      "tabs": [],
+      "diary": {
+        "expectedChapter": {
+          "id": "forest",
+          "done": 0,
+          "total": 5
+        },
+        "expectedChapterText": "本章 0/5",
+        "expectedChrome": {
+          "ui.previous": "上一页",
+          "ui.next": "下一页",
+          "ui.close": "关闭"
+        },
+        "rawStatus": {
+          "screen": "game",
+          "documentVisible": true,
+          "canvasVisible": true,
+          "questOwner": "bevy",
+          "quest": {
+            "displayLocaleVersion": 1,
+            "displayLanguage": "zh-CN",
+            "language": "zh-CN",
+            "ready": true,
+            "error": false,
+            "questLogOpen": true,
+            "capturesPointer": true,
+            "frame": 26,
+            "generation": 2,
+            "revision": 2,
+            "openRevision": 2,
+            "compact": null
+          },
+          "hud": {
+            "ready": true,
+            "characterStatsReady": false,
+            "error": false,
+            "frame": 26,
+            "generation": 2,
+            "revision": 1,
+            "navigation": {
+              "characterOpen": false,
+              "characterPage": "character",
+              "bagOpen": false,
+              "questOpen": true
+            }
+          },
+          "skills": {
+            "ready": false,
+            "inputEnabled": false,
+            "modal": false,
+            "pending": false,
+            "error": false,
+            "frame": 26,
+            "appliedRevision": 2,
+            "appliedModelRevision": 1,
+            "appliedPresentationRevision": 2,
+            "renderRevision": 2,
+            "hudGeneration": 2,
+            "tooltip": null,
+            "ownerFieldsPresent": true
+          },
+          "skillsDiagnostic": {
+            "ready": false,
+            "reason": "ineligible"
+          }
+        },
+        "visualReviewPending": true,
+        "next": {
+          "actualMouseClick": true,
+          "beforePage": null,
+          "afterPage": null,
+          "pageChanged": null,
+          "noGameplayCommand": true
+        },
+        "previous": {
+          "actualMouseClick": true,
+          "beforePage": null,
+          "afterPage": null,
+          "pageChanged": null,
+          "noGameplayCommand": true
+        }
+      }
+    }
+  ],
+  "commands": {
+    "clientCapabilities": 2,
+    "setLanguage": 1,
+    "clientVersion": 1,
+    "login": 1,
+    "startGame": 1,
+    "keepAlive": 3,
+    "logOut": 1
+  },
+  "packets": [
+    {
+      "phase": "normal-login-zh-CN",
+      "method": "LoginSuccess",
+      "sequence": 8
+    },
+    {
+      "phase": "cold-native-entry-zh-CN",
+      "method": "StartGame",
+      "sequence": 11,
+      "result": 4
+    },
+    {
+      "phase": "native-c-four-tabs-zh-CN",
+      "method": "LogOutSuccess",
+      "sequence": 701
+    }
+  ],
+  "wireLanguages": [
+    "zh-CN"
+  ],
+  "screenshots": [
+    {
+      "file": "01-quest-diary-zh-CN.png",
+      "sha256": "85c8f655511b5ed5e9785eca99832ebd6dc26703c9ea83273c79d10b04bdc636",
+      "canonicalCrop": {
+        "left": 192,
+        "top": 60,
+        "width": 316,
+        "height": 466
+      },
+      "publicStatus": {
+        "screen": "game",
+        "documentVisible": true,
+        "canvasVisible": true,
+        "questOwner": "bevy",
+        "quest": {
+          "displayLocaleVersion": 1,
+          "displayLanguage": "zh-CN",
+          "language": "zh-CN",
+          "ready": true,
+          "error": false,
+          "questLogOpen": true,
+          "capturesPointer": true,
+          "frame": 37,
+          "generation": 2,
+          "revision": 2,
+          "openRevision": 2,
+          "compact": null
+        },
+        "hud": {
+          "ready": true,
+          "characterStatsReady": false,
+          "error": false,
+          "frame": 37,
+          "generation": 2,
+          "revision": 1,
+          "navigation": {
+            "characterOpen": false,
+            "characterPage": "character",
+            "bagOpen": false,
+            "questOpen": true
+          }
+        },
+        "skills": {
+          "ready": false,
+          "inputEnabled": false,
+          "modal": false,
+          "pending": false,
+          "error": false,
+          "frame": 37,
+          "appliedRevision": 2,
+          "appliedModelRevision": 1,
+          "appliedPresentationRevision": 2,
+          "renderRevision": 2,
+          "hudGeneration": 2,
+          "tooltip": null,
+          "ownerFieldsPresent": true
+        },
+        "skillsDiagnostic": {
+          "ready": false,
+          "reason": "ineligible"
+        }
+      },
+      "visualReviewPending": true
+    }
+  ],
+  "network": {
+    "failed": [],
+    "httpErrors": [],
+    "cancelled": [
+      {
+        "phase": "normal-login-zh-CN",
+        "pathHash": "9eeb5fa233df82531dffea86ffb49fa4f48ac32bcba5fb5d93a58ab367fe0e40"
+      },
+      {
+        "phase": "normal-login-zh-CN",
+        "pathHash": "59b575174e75b5bd4afcfbd6f7f338462fb173fabd1e9572382da322fe3dffef"
+      },
+      {
+        "phase": "cold-native-entry-zh-CN",
+        "pathHash": "9eeb5fa233df82531dffea86ffb49fa4f48ac32bcba5fb5d93a58ab367fe0e40"
+      },
+      {
+        "phase": "cold-native-entry-zh-CN",
+        "pathHash": "ed168fbf1560be0cfb323455b45b387b298d9dcb5f4441964f39c65e418036e5"
+      },
+      {
+        "phase": "native-c-four-tabs-zh-CN",
+        "pathHash": "b5a477466acb573db09051484a348dc305a615e912e5fd4fb8cdfc59b6aa0454"
+      }
+    ],
+    "abortedDuringClose": 0,
+    "runtimeResponses": [
+      {
+        "pathHash": "acadddaf12de53de2411e747ce2a678acdaab2077f1a2650f341edb48917bc66",
+        "status": 200
+      }
+    ]
+  },
+  "console": {
+    "errors": 0,
+    "warnings": 7,
+    "hashes": [
+      {
+        "phase": "cold-native-entry-zh-CN",
+        "type": "warning",
+        "hash": "175c73d54d8d443a965a16a38ac036c2de536a3920f173064fd6837866b00186"
+      },
+      {
+        "phase": "cold-native-entry-zh-CN",
+        "type": "warning",
+        "hash": "f3ef2504bb8bfd8e5b9a672b116a25c7783570ab11ba64158f89aa7223d263d2"
+      },
+      {
+        "phase": "cold-native-entry-zh-CN",
+        "type": "warning",
+        "hash": "7e165ee92d3865cf680af989a12129cbe2d200d4b2be0988694c4f15e1a730db"
+      },
+      {
+        "phase": "cold-native-entry-zh-CN",
+        "type": "warning",
+        "hash": "46eb9da0efb333cbee27b5c026f7f070943658c482c8e7bf12f09f04a87ecfbf"
+      },
+      {
+        "phase": "cold-native-entry-zh-CN",
+        "type": "warning",
+        "hash": "46eb9da0efb333cbee27b5c026f7f070943658c482c8e7bf12f09f04a87ecfbf"
+      },
+      {
+        "phase": "cold-native-entry-zh-CN",
+        "type": "warning",
+        "hash": "46eb9da0efb333cbee27b5c026f7f070943658c482c8e7bf12f09f04a87ecfbf"
+      },
+      {
+        "phase": "cold-native-entry-zh-CN",
+        "type": "warning",
+        "hash": "f0634c5f022d689a01424d30230132ec23c65046e8afa0252ec2d3398e49f604"
+      }
+    ]
+  },
+  "errors": [
+    {
+      "phase": "native-c-four-tabs-zh-CN",
+      "name": "Error",
+      "code": "NATIVE_C_EQUIPMENT_NOT_CURRENT",
+      "hash": "40e16f6e5612e097ddd49b96efccce1367c91ae96f04c6514d28bbaae9b6f0e5"
+    }
+  ],
+  "cleanup": {
+    "ordinaryLogouts": 0,
+    "chineseRestored": true,
+    "browserClosed": true,
+    "failureNormalLogoutAcknowledged": true
+  },
+  "source": {
+    "driverSha256": "5ee1c10bbde695de00e2d4b26167225e6443def0ff82050c81bf375805eb13d3",
+    "files": {
+      "apps/web/lib/generated/r16-native-localization.json": "d42c1568e3a6fa2798f30038f7a553f4fb4cb3f04abfb44672dc9cab37185938",
+      "packages/game-data/data/generated/portable-native-i18n.json": "8f76f2d49ad6da9ddf396ea1a977c2040b240da367a5d87d1d9d9d171aebc4ad",
+      "packages/game-data/data/generated/crystal_magic_manifest.json": "ccbb31513c006860790a4c374b3f788665902cfa3fffe810695199882860153d",
+      "apps/game-client/client-bevy/src/crystal_ui/keyboard_defaults.json": "ebfd4f283523f658d33793f604e697a5c4e4b0430fc5d63586ec8597bf31d208",
+      "apps/game-client/client-bevy/src/quest_ui.rs": "f3a795d5ef0fce991ff061c6c37a5df991487addfa15e327cd3c41f6f36d6800",
+      "config/quest-guidance/newcomer-journey-v2-ui.json": "e52630f84ee09e3e2d3abd821db00dde01b62e7d803d18972c8fd906db38c747",
+      "apps/game-client/client-bevy/src/crystal_ui/panel_navigation.rs": "6e003eba04b7f2b24639b20f1e2731f8d7b6658f25071235b7d1df1f9a7e7a2a",
+      "apps/game-client/client-bevy/src/crystal_ui/character_stats.rs": "8563b962df0f9f8d6b2f4c4a44e68d7bfe8b6f9204d722b24f6f6e80fdb59ddf",
+      "apps/game-client/client-bevy/src/crystal_ui/character_stats_portable.rs": "cb68373ac7f9887a29828513d505eb2a6280d9bfa1f0da57e7ea2052bbb8219a",
+      "apps/game-client/client-bevy/src/crystal_ui/skill_page_shared.rs": "81464c466b31abc2f2f36d8695d9b7984220aa2d8b93fac78b5833e0e10cc41d",
+      "apps/game-client/runtime/src/spells_ui_host.rs": "9ab231becfd2c80dc3da20fb0cfedd77b5d6421cdeea5d03d1cba6be064f35d3"
+    },
+    "canonicalKeys": {
+      "quests": "KeyQ",
+      "character": "KeyC",
+      "skills": "F11",
+      "logout": "Alt+KeyX"
+    },
+    "crops": {
+      "diary": {
+        "left": 192,
+        "top": 60,
+        "width": 316,
+        "height": 466
+      },
+      "character": {
+        "left": 760,
+        "top": 70,
+        "width": 264,
+        "height": 310
+      },
+      "hover": {
+        "left": 0,
+        "top": 70,
+        "width": 1024,
+        "height": 550
+      }
+    },
+    "tabKeys": [
+      "game.006",
+      "game.008",
+      "game.009",
+      "game.007"
+    ],
+    "expectedText": {
+      "zh-CN": {
+        "content.magic.Fencing.name": "基本剑术",
+        "content.magic.Fencing.description": "基本剑术\n\n被动技能\n\n命中率会根据练习等级提高。\n\n当前技能等级 {0}\n下一级 {1}",
+        "quest.ui.chapterProgress": "本章 {done}/{total}",
+        "ui.previous": "上一页",
+        "ui.next": "下一页",
+        "ui.close": "关闭",
+        "game.006": "装备",
+        "game.008": "状态",
+        "game.009": "属性",
+        "game.007": "技能"
+      },
+      "zh-TW": {
+        "content.magic.Fencing.name": "基本劍術",
+        "content.magic.Fencing.description": "基本劍術\n\n被動技能\n\n命中率會根據練習等級提高。\n\n當前技能等級 {0}\n下一等級 {1}",
+        "quest.ui.chapterProgress": "本章 {done}/{total}",
+        "ui.previous": "上一頁",
+        "ui.next": "下一頁",
+        "ui.close": "關閉",
+        "game.006": "裝備",
+        "game.008": "狀態",
+        "game.009": "屬性",
+        "game.007": "技能"
+      },
+      "en": {
+        "content.magic.Fencing.name": "Fencing",
+        "content.magic.Fencing.description": "Fencing\n\nPassive Skill\n\nHitting accuracy will be increased in accordance\nwith practice level.\n\nCurrent Skill Level {0}\nNext Level {1}",
+        "quest.ui.chapterProgress": "This chapter {done}/{total}",
+        "ui.previous": "Previous",
+        "ui.next": "Next",
+        "ui.close": "Close",
+        "game.006": "Equipment",
+        "game.008": "Status",
+        "game.009": "Statistics",
+        "game.007": "Skills"
+      },
+      "pt-BR": {
+        "content.magic.Fencing.name": "Esgrima",
+        "content.magic.Fencing.description": "Esgrima\n\nHabilidade passiva\n\nA precisão dos seus golpes aumenta\nconforme o nível de prática.\n\nNível atual da habilidade {0}\nPróximo nível {1}",
+        "quest.ui.chapterProgress": "Este capítulo {done}/{total}",
+        "ui.previous": "Anterior",
+        "ui.next": "Próxima",
+        "ui.close": "Fechar",
+        "game.006": "Equipamento",
+        "game.008": "Estado",
+        "game.009": "Atributos",
+        "game.007": "Habilidades"
+      },
+      "ru": {
+        "content.magic.Fencing.name": "Фехтование",
+        "content.magic.Fencing.description": "Фехтование\n\nПассивный навык\n\nКаждый уровень навыка повышает точность попадания.\n\nТекущий уровень навыка {0}\nСледующий уровень {1}",
+        "quest.ui.chapterProgress": "Эта глава {done}/{total}",
+        "ui.previous": "Предыдущее",
+        "ui.next": "Следующий",
+        "ui.close": "Закрыть",
+        "game.006": "Снаряжение",
+        "game.008": "Состояние",
+        "game.009": "Характеристики",
+        "game.007": "Умения"
+      },
+      "hi": {
+        "content.magic.Fencing.name": "तलवारबाज़ी",
+        "content.magic.Fencing.description": "तलवारबाज़ी\n\nनिष्क्रिय कौशल\n\nकौशल के प्रत्येक स्तर के साथ प्रहार की सटीकता बढ़ती है।\n\nवर्तमान कौशल स्तर {0}\nअगला स्तर {1}",
+        "quest.ui.chapterProgress": "इस अध्याय में {done}/{total}",
+        "ui.previous": "पिछला",
+        "ui.next": "अगला",
+        "ui.close": "बंद करें",
+        "game.006": "उपकरण",
+        "game.008": "स्थिति",
+        "game.009": "आँकड़े",
+        "game.007": "कौशल"
+      },
+      "id": {
+        "content.magic.Fencing.name": "Ilmu Pedang",
+        "content.magic.Fencing.description": "Ilmu Pedang\n\nKeterampilan Pasif\n\nSetiap tingkat keterampilan meningkatkan akurasi serangan.\n\nTingkat Keterampilan Saat Ini {0}\nTingkat Berikutnya {1}",
+        "quest.ui.chapterProgress": "Bab ini {done}/{total}",
+        "ui.previous": "Sebelumnya",
+        "ui.next": "Berikutnya",
+        "ui.close": "Tutup",
+        "game.006": "Perlengkapan",
+        "game.008": "Status",
+        "game.009": "Statistik",
+        "game.007": "Keahlian"
+      },
+      "vi": {
+        "content.magic.Fencing.name": "Kiếm thuật",
+        "content.magic.Fencing.description": "Kiếm thuật\n\nKỹ năng bị động\n\nMỗi cấp kỹ năng tăng độ chính xác khi đánh.\n\nCấp kỹ năng hiện tại {0}\nCấp tiếp theo {1}",
+        "quest.ui.chapterProgress": "Chương này {done}/{total}",
+        "ui.previous": " Lùi",
+        "ui.next": " Tiếp theo",
+        "ui.close": "Đóng",
+        "game.006": "Trang bị",
+        "game.008": "Trạng thái",
+        "game.009": "Chỉ số",
+        "game.007": "Kỹ năng"
+      },
+      "th": {
+        "content.magic.Fencing.name": "วิชาดาบ",
+        "content.magic.Fencing.description": "วิชาดาบ\n\nวิชาติดตัว\n\nความแม่นยำในการโจมตีเพิ่มขึ้นตามระดับวิชา\n\nระดับวิชาปัจจุบัน {0}\nระดับถัดไป {1}",
+        "quest.ui.chapterProgress": "บทนี้ {done}/{total}",
+        "ui.previous": "ก่อนหน้า",
+        "ui.next": " ต่อไป",
+        "ui.close": "ปิด",
+        "game.006": "อุปกรณ์",
+        "game.008": "สถานะ",
+        "game.009": "ค่าสถานะ",
+        "game.007": "ทักษะ"
+      },
+      "ar": {
+        "content.magic.Fencing.name": "المبارزة",
+        "content.magic.Fencing.description": "المبارزة\n\nمهارة سلبية\n\nتزداد دقة الإصابة مع كل مستوى للمهارة.\n\nمستوى المهارة الحالي {0}\nالمستوى التالي {1}",
+        "quest.ui.chapterProgress": "هذا الفصل {done}/{total}",
+        "ui.previous": "ما قبل",
+        "ui.next": "التالي",
+        "ui.close": "إغلاق",
+        "game.006": "المعدات",
+        "game.008": "الحالة",
+        "game.009": "الإحصاءات",
+        "game.007": "المهارات"
+      }
+    },
+    "fencingThresholds": [
+      7,
+      9,
+      12,
+      0
+    ]
+  },
+  "offlineChecks": {
+    "currentAndStaleOwnerStatus": true,
+    "learnedSkillRequired": true,
+    "mutationScope": true,
+    "fullDescriptionTenLocalesFourLevels": true
+  },
+  "bootstrapCustodyDeclarations": 1,
+  "failureStatus": {
+    "screen": "game",
+    "documentVisible": true,
+    "canvasVisible": true,
+    "questOwner": "bevy",
+    "quest": {
+      "displayLocaleVersion": 1,
+      "displayLanguage": "zh-CN",
+      "language": "zh-CN",
+      "ready": true,
+      "error": false,
+      "questLogOpen": false,
+      "capturesPointer": false,
+      "frame": 407,
+      "generation": 2,
+      "revision": 5,
+      "openRevision": 4,
+      "compact": null
+    },
+    "hud": {
+      "ready": true,
+      "characterStatsReady": false,
+      "error": false,
+      "frame": 407,
+      "generation": 2,
+      "revision": 1,
+      "navigation": {
+        "characterOpen": true,
+        "characterPage": "character",
+        "bagOpen": false,
+        "questOpen": false
+      }
+    },
+    "skills": {
+      "ready": false,
+      "inputEnabled": false,
+      "modal": false,
+      "pending": false,
+      "error": false,
+      "frame": 407,
+      "appliedRevision": 2,
+      "appliedModelRevision": 1,
+      "appliedPresentationRevision": 2,
+      "renderRevision": 2,
+      "hudGeneration": 2,
+      "tooltip": null,
+      "ownerFieldsPresent": true
+    },
+    "skillsDiagnostic": {
+      "ready": false,
+      "reason": "closed"
+    }
+  },
+  "failureScreenshot": {
+    "file": "failure-public-window-body.png",
+    "sha256": "c6b499d02ddf9229a09292f21e774c972514efcc2aff0ce1c42baaa5058b123c",
+    "canonicalCrop": {
+      "left": 0,
+      "top": 70,
+      "width": 1024,
+      "height": 550
+    }
+  },
+  "finishedAt": "2026-11-05T20:18:22.605Z"
+}

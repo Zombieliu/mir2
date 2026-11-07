@@ -3,6 +3,32 @@ fn value() -> serde_json::Value {
     serde_json::json!({"requestRun":7,"connectionGeneration":1,"sessionGeneration":2,"ownerRevision":0,"hudGeneration":3,"playerObjectId":4,"revision":1,"modelRevision":1,"presentationRevision":1,"open":true,"inputEnabled":true,"presentation":{"logicalWidth":1024,"logicalHeight":768,"stageCssScale":1,"touch":false},"player":PlayerStats::default(),"learned":[{"spell":"FireBall","magicName":"火球","icon":0,"need1":0,"need2":null,"hotkey":1}],"receipts":[],"timing":[],"nowMs":10,"iconMetadata":{"version":3,"frames":[{"index":0,"x":0,"y":0,"width":36,"height":34},{"index":1,"x":0,"y":0,"width":36,"height":34}]}})
 }
 #[test]
+fn skills_description_derivation_does_not_mutate_raw_owner_model_or_cast_fields() {
+    let mut raw = value();
+    raw["learned"][0]["spell"] = "Fencing".into();
+    raw["learned"][0]["magicName"] = "Fencing".into();
+    raw["learned"][0]["level"] = 1.into();
+    let snapshot = SpellsSnapshot::parse(&raw.to_string()).unwrap();
+    let (model, _) = snapshot.models().unwrap();
+    let before = serde_json::to_string(&model).unwrap();
+    let hint =
+        mir2_client_bevy::crystal_ui::skill_page_shared::skill_tooltip_document(&model, 0).unwrap();
+    assert!(hint.source_complete);
+    assert!(hint.text.contains("Hitting accuracy"));
+    assert!(hint.text.contains("Next Level 9"));
+    assert_eq!(serde_json::to_string(&model).unwrap(), before);
+    assert_eq!(
+        model.authority.session_epoch,
+        snapshot.identity.session_generation
+    );
+    assert_eq!(
+        model.authority.player_object_id,
+        snapshot.identity.player_object_id
+    );
+    assert_eq!(model.binding_for(0).cast_sequence, 0);
+    assert!(model.skill_key_ack.is_none());
+}
+#[test]
 fn m10_spells_host_exact_raw_zero_null_and_sparse_metadata() {
     let s = SpellsSnapshot::parse(&value().to_string()).unwrap();
     let (m, _) = s.models().unwrap();

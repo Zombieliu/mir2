@@ -46,6 +46,13 @@ export type BevyBagUiIntent = BagIdentity & {
   | { type: "handoff"; mode: "fullInventory" | "delete" }
 );
 export type BevyBagUiIntentResult = { accepted: boolean; error?: string };
+type BagIntentVerdict = {
+  verdict: "host-rejected" | "page-rejected" | "accepted";
+  type: BevyBagUiIntent["type"] | null;
+  hostModelRevision: number; nativeModelRevision: number | null;
+  hostPresentationRevision: number; nativePresentationRevision: number | null;
+  intentSequence: number | null;
+};
 export type BagPointerEdge = BagIdentity & {
   sequence: number; presentationRevision: number; pointerId: number;
   phase: "down" | "move" | "up" | "cancel" | "blur";
@@ -93,6 +100,13 @@ const identityValid = (v: Record<string, unknown>) =>
   && integer(v.ownerRevision);
 const sourceValid = (v: unknown): v is BagSource => record(v) && v.container === 0
   && integer(v.slot) && v.slot < 80 && integer(v.uniqueId);
+function resourceInputState(value: number | undefined) {
+  // PlayerStats uses signed i32 resources. Preserve unknown/malformed values
+  // without making a positive display delta replace an otherwise identical
+  // input model. Zero/nonpositive and unknown remain distinct boundaries.
+  const known = typeof value === "number" && Number.isInteger(value) && value >= -0x8000_0000 && value <= 0x7fff_ffff;
+  return known ? { known: true, positive: value > 0 } : { known: false, value };
+}
 
 export function parseBagIntent(json: string): BevyBagUiIntent | null {
   try {
@@ -209,6 +223,8 @@ export class BevyBagHost {
   private intentSequence = 0;
   private stopped = false;
   private readonly capable: boolean;
+  private readonly transitionHistory: Array<{ reason: string | null; phase: string; at: number; status: BevyBagUiStatus | null }> = [];
+  private readonly intentVerdicts: BagIntentVerdict[] = [];
 
   constructor(private readonly options: BagHostOptions) {
     this.ownerRevision = options.read().ownerRevision;
@@ -224,10 +240,17 @@ export class BevyBagHost {
   }
 
   private fallback(error: string | null) {
+    if (this.phase !== "prepare") {
+      this.transitionHistory.push({ reason: error, phase: this.phase, at: this.options.now(), status: readBagStatus(this.options.runtime) });
+      if (this.transitionHistory.length > 12) this.transitionHistory.shift();
+    }
     if (this.phase !== "prepare") this.changeOwner("react");
     this.phase = "prepare";
     this.options.onState({ active: false, ownerRevision: this.ownerRevision, error });
   }
+
+  /** Bounded, read-only readiness evidence. Contains no item or account data. */
+  diagnostic() { return { phase: this.phase, transitions: [...this.transitionHistory], intentVerdicts: this.intentVerdicts.map(row => ({ ...row })) }; }
 
   private eligible(input: BagHostInput): boolean {
     return input.eligible && input.bagOpen && input.connectionGeneration > 0 && input.sessionGeneration > 0
@@ -238,7 +261,8 @@ export class BevyBagHost {
   private modelFingerprint(input: BagHostInput) {
     // Reservation flags may change during our own reserve -> send sequence.
     // The one ledger checks those flags; they are not a replacement item model.
-    return JSON.stringify([input.model, input.player]);
+    const { hp, mp, ...player } = input.player;
+    return JSON.stringify([input.model, { ...player, hp: resourceInputState(hp), mp: resourceInputState(mp) }]);
   }
 
   private layoutFingerprint(input: BagHostInput) {
@@ -384,18 +408,31 @@ export class BevyBagHost {
 
   private intent(json: string): BevyBagUiIntentResult {
     const intent = parseBagIntent(json);
+    // Evidence is taken from this received Native token and existing Host
+    // revisions only. It never reads another renderer status or grants input.
+    const evidence = { type: intent?.type ?? null, hostModelRevision: this.modelRevision,
+      nativeModelRevision: intent?.modelRevision ?? null, hostPresentationRevision: this.presentationRevision,
+      nativePresentationRevision: intent?.presentationRevision ?? null, intentSequence: intent?.intentSequence ?? null };
+    const verdict = (stage: BagIntentVerdict["verdict"], result: BevyBagUiIntentResult) => {
+      this.intentVerdicts.push({ ...evidence, verdict: stage });
+      if (this.intentVerdicts.length > 8) this.intentVerdicts.shift();
+      return result;
+    };
     const context = this.pointerContext();
     const input = this.options.read();
     if (!intent || !context || !sameBagIdentity(intent, context) || intent.intentSequence <= this.intentSequence
       || intent.presentationRevision !== this.presentationRevision || intent.modelRevision !== this.modelRevision
-      || this.modelFingerprint(input) !== this.modelKey) return { accepted: false, error: "The bag selection changed." };
+      || this.modelFingerprint(input) !== this.modelKey) return verdict("host-rejected", { accepted: false, error: "The bag selection changed." });
     if (intent.type === "moveToBelt") {
       const geometry = context.beltDropGeometry;
       if (!validBagBeltDropGeometry(geometry) || intent.beltGeometryRevision !== geometry.revision
-        || !geometry.targets.some(t => t.slot === intent.target.slot && t.uniqueId === intent.target.uniqueId)) return { accepted: false, error: "The Belt layout changed." };
+        || !geometry.targets.some(t => t.slot === intent.target.slot && t.uniqueId === intent.target.uniqueId)) return verdict("host-rejected", { accepted: false, error: "The Belt layout changed." });
     }
     this.intentSequence = intent.intentSequence;
-    try { return this.options.onIntent(intent); } catch { return { accepted: false, error: "The item action could not be sent." }; }
+    try {
+      const result = this.options.onIntent(intent);
+      return verdict(result.accepted === true ? "accepted" : "page-rejected", result);
+    } catch { return verdict("page-rejected", { accepted: false, error: "The item action could not be sent." }); }
   }
 
   /** Local modal/close handoff invalidates queues before React exposes the replacement. */

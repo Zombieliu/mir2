@@ -5,23 +5,27 @@ import { fileURLToPath } from "node:url";
 import ts from "typescript";
 
 // Strictly pure source dependencies; no WASM/runtime loader or filesystem fixture writes.
-const sources = { npcPurchaseClient:"../lib/npc-purchase-client.ts", rankingInspectRequests:"../lib/ranking-inspect-requests.ts", pearlSource:"../lib/npc-pearl-buy-source.ts", crystalItem:"../lib/crystal-item-source.ts", repair:"../lib/npc-repair-service.ts", fishingSource: "../lib/world-fishing-source.ts", bagBeltMove: "../lib/bag-belt-move-dispatcher.ts", identity: "../lib/world-model/item-identity.ts",
+const sources = { nativeLocalization: "../lib/r16-native-localization.ts", nativeData: "../lib/generated/r16-native-localization.json", runtimeLanguage: "../lib/r16-runtime-language.ts", r16Auth:"../lib/r16-auth-layout.ts", npcPurchaseClient:"../lib/npc-purchase-client.ts", rankingInspectRequests:"../lib/ranking-inspect-requests.ts", pearlSource:"../lib/npc-pearl-buy-source.ts", crystalItem:"../lib/crystal-item-source.ts", repair:"../lib/npc-repair-service.ts", fishingSource: "../lib/world-fishing-source.ts", bagBeltMove: "../lib/bag-belt-move-dispatcher.ts", identity: "../lib/world-model/item-identity.ts",
   equipment: "../lib/equipment-gateway-adapter.ts", parcel: "../lib/mail-parcel-gateway-adapter.ts",
-  storage: "../lib/storage-gateway-adapter.ts", social: "../lib/social-incoming-replies.ts",
+  storage: "../lib/storage-gateway-adapter.ts", social: "../lib/social-incoming-replies.ts", groupOperations: "../lib/group-operations.ts",
   operations: "../lib/social-window-operations.ts", rental: "../lib/storage-rental-confirmation.ts",
   bag: "../lib/bevy-bag-model.ts", socialItems: "../lib/social-item-window-model.ts",
   stage5:"../lib/stage5-window-adapters.ts", tooltip:"../lib/shared-item-tooltip.ts", guildBuff:"../lib/guild-buff-ui.ts", socialActions: "../lib/social-parity-actions.ts", extended: "../lib/extended-server-packets.ts" };
-const allow = { npcPurchaseClient:{}, rankingInspectRequests:{}, pearlSource:{"./crystal-item-source":"crystalItem"}, crystalItem:{}, repair:{"./equipment-gateway-adapter":"equipment"}, fishingSource: {}, bagBeltMove: { "./mail-parcel-gateway-adapter": "parcel" }, identity: {}, equipment: { "./world-model/item-identity": "identity" },
+const allow = { nativeLocalization: {"./generated/r16-native-localization.json": "nativeData"}, nativeData: {}, runtimeLanguage: {}, r16Auth:{"./r16-native-localization": "nativeLocalization"}, npcPurchaseClient:{}, rankingInspectRequests:{}, pearlSource:{"./crystal-item-source":"crystalItem"}, crystalItem:{}, repair:{"./equipment-gateway-adapter":"equipment"}, fishingSource: {}, bagBeltMove: { "./mail-parcel-gateway-adapter": "parcel" }, identity: {}, equipment: { "./world-model/item-identity": "identity" },
   parcel: { "./equipment-gateway-adapter": "equipment" },
   storage: { "./equipment-gateway-adapter": "equipment", "./world-model/item-identity": "identity",
-    "./mail-parcel-gateway-adapter": "parcel" }, social: {}, operations: {},
+    "./mail-parcel-gateway-adapter": "parcel" }, social: {}, groupOperations: {}, operations: {},
   rental: { "./social-incoming-replies": "social", "./npc-purchase-client": "npcPurchaseClient" }, bag: { "./world-model/item-identity": "identity" },
   socialItems: { "./bevy-bag-model": "bag", "./world-model/item-identity": "identity" }, stage5:{}, tooltip:{"./crystal-item-source":"crystalItem"}, guildBuff:{}, socialActions: {}, extended: {"./npc-purchase-client":"npcPurchaseClient"} };
 const modules = new Map();
+sources.browserLocalization = "../lib/r16-browser-localization.ts";
+allow.browserLocalization = {};
+allow.r16Auth["./r16-browser-localization"] = "browserLocalization";
 function loadPure(name) {
   assert(Object.hasOwn(sources, name), "module outside pure allowlist");
   if (modules.has(name)) return modules.get(name);
   const url = new URL(sources[name], import.meta.url);
+  if (name === "nativeData") return {default: JSON.parse(readFileSync(url, "utf8"))};
   const code = ts.transpileModule(readFileSync(url, "utf8"), { fileName: fileURLToPath(url),
     compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 } }).outputText;
   const module = { exports: {} };
@@ -83,7 +87,7 @@ const names = ["worldFishingOwner", "cancelWorldFishingGesture", "retireWorldFis
   "quickEnterWorld", "captureIdentityIntent", "identityIntentCurrent", "linkCurrentSuiIdentity", "setIdentityLinkBusy",
   "clearGatewayReconnectTimer", "setGatewayReconnectStatus", "resetGatewayReconnectState", "createIdleReconnectStatus", "flushGatewayProtocolQueue", "captureSpouseUiSource", "spouseUiSourceCurrent", "mailSpouse", "whisperSpouse", "openMailWindow",
   "submitStorageTransfer", "storeItem", "takeBackItem", "send", "sendRaw", "recordNpcPurchaseAction",
-  "itemCommandRequiresOwner", "retireEquipmentSession", "advanceHeroWindowEpochs", "mailParcelItemsIdle", "endStorageService", "closeNpcRepairService", "retireNpcShopService",
+  "itemCommandRequiresOwner", "retireEquipmentSession", "retirePrivateCompanion", "advanceHeroWindowEpochs", "mailParcelItemsIdle", "endStorageService", "closeNpcRepairService", "retireNpcShopService",
   "currentSpellsOwner", "currentSocialReplyOwner", "currentSocialReceiveOwner", "sameSocialPhysicalOwner",
   "socialReplyWindowOpen", "captureSocialRequest", "closeSocialReplyWindow", "replySocialRequest", "retireSocialRequests",
   "retireSocialItemConnection", "socialItemMutationAllowed", "parityItemMutationAllowed", "readSocialItemSurface", "socialItemProofCurrent",
@@ -94,18 +98,32 @@ const names = ["worldFishingOwner", "cancelWorldFishingGesture", "retireWorldFis
   "setShowGuild", "setShowGroup", "setShowBonds", "setShowRanking", "friendCharacterIndex", "removeFriendEntry", "editFriendMemo",
   "changeGuildMemberRank", "saveGuildRank", "rankingRequestForTab", "issueRankingRequest", "requestRanking", "refreshRanking",
   "moveRankingRows", "setRankingOnlineOnly", "applyRankingPacket", "refreshFriends", "setShowFriends",
-  "currentRankingInspectSource", "closeRankingInspect",
+  "currentRankingInspectSource", "closeRankingInspect", "groupHiddenTargetIds", "currentGroupHoverName", "currentGroupOperationSource",
+  "submitGroupOperation", "groupInviteMember", "kickGroupMember", "groupLeave", "groupToggleAllowInvites",
   "readSocialRosterSource", "socialRosterProofCurrent", "sendSocialRosterCommand", "projectPartnerTradePacket", "sendTradeUiCommand", "confirmTrade"];
 const declarations = new Map();
 const ackCases = [];
 const socialCases = new Map();
 const socialPacketNames = ["GroupInvite", "MarriageRequest", "DivorceRequest", "MentorRequest", "GuildStatus", "GuildStorageList",
   "GuildStorageItemChange", "DepositTradeItem", "RetrieveTradeItem", "LogOutFailed", "FriendUpdate", "GuildInvite", "GuildMemberChange", "Rankings",
-  "TradeItem", "NewItemInfo", "NewRecipeInfo", "Connected", "NewAccount", "Login", "LoginBanned", "ChangePassword"];
+  "TradeItem", "NewItemInfo", "NewRecipeInfo", "Connected", "NewAccount", "Login", "LoginBanned", "ChangePassword",
+  "SwitchGroup", "AddMember", "DeleteMember", "GroupMemberInfo", "DeleteGroup", "ObjectHidden"];
 let authControlsInitializer;
+let groupStartResetCondition, groupStartResetStatements;
 let spouseRenderInitializer, spouseRenderCallbacks;
 let gatewayGuard, snapshotStatements, snapshotRevision, socialSnapshotFriends, socialWindowRender, rosterRenderInitializer, tradeLeaseInitializer;
 function visit(node) {
+  if (ts.isCaseClause(node) && ts.isStringLiteral(node.expression) && node.expression.text === "StartGame") {
+    const branch = node.statements.find(statement => ts.isIfStatement(statement) && statement.elseStatement
+      && statement.expression.getText(pageAst).includes("payload.result"));
+    assert.ok(branch);
+    groupStartResetCondition = branch.expression.getText(pageAst);
+    const statements = branch.elseStatement.statements;
+    const reset = statements.filter(statement => /^(groupOperationsRef|groupHiddenTargetsRef)\./.test(statement.getText(pageAst)));
+    assert.equal(reset.length, 2, "the actual successful session branch resets group requests and hidden-target history");
+    assert(statements.indexOf(reset[1]) < statements.findIndex(statement => statement.getText(pageAst).startsWith("equipmentStartGameRef.current =")));
+    groupStartResetStatements = reset.map(statement => statement.getText(pageAst)).join("\n");
+  }
   if (ts.isVariableDeclaration(node) && node.name.getText(pageAst) === "loginAuthControls") {
     assert.equal(authControlsInitializer, undefined, "sole actual Auth controls lease");
     authControlsInitializer = node.initializer.getText(pageAst);
@@ -191,6 +209,7 @@ function visitAuthClose(node) {
 visitAuthClose(pageAst);assert.ok(authCloseStatements);
 
 const actualFunctions = names.map(name => declarations.get(name)).join("\n")
+  + "\nfunction applyGroupStartGame(payload) { if (" + groupStartResetCondition + ") {} else {" + groupStartResetStatements + "} }"
   + "\nfunction applyAuthSocketClose(socket) {" + authCloseStatements + "\n}"
   + '\nfunction applyStorageAck(event) { const payload=event.payload??{}; switch(event.packet) { case "StoreItemV2":\n'
   + ackCase.getText(pageAst) + "\n} }\n"
@@ -285,7 +304,8 @@ function harness({ identity = session, sequenceRef = { current: 1 }, pendingRef 
     bagBeltInventoryReadyRef: {current: null}, bagBeltGeometryRef: {current: null},
     observePreferenceRef:{current:null},observeBootstrapRef:{current:null},combatModeRawRef:{current:null},
     heroWindowEpochsRef:{current:{inventory:1,character:1,belt:1}},skillBarPointerHeldRef:{current:false},skillBarDocumentCacheRef:{current:null},
-    ...pureAuth, ...loadPure("stage5"), ...adapter, ...pureSocial, ...pureOperations, ...pureSocialItems, ...pureSocialActions, ...pureExtended,
+    ...pureAuth, ...loadPure("runtimeLanguage"), ...loadPure("stage5"), ...adapter, ...pureSocial, ...pureOperations, ...pureSocialItems, ...pureSocialActions, ...pureExtended,
+    companionContextEpochRef: {current: 1}, companionClientRef: {current: null}, setCompanionOpen() {},
     projectEquipmentGatewaySnapshot: pureEquipment.projectEquipmentGatewaySnapshot,
     authoritativeItemUniqueId: pureIdentity.authoritativeItemUniqueId,
     currentEquipmentCommandItem: pureEquipment.currentEquipmentCommandItem,
@@ -321,7 +341,8 @@ function harness({ identity = session, sequenceRef = { current: 1 }, pendingRef 
     currentEquipmentOwner: token => token != null && Object.keys(owner).every(key => token[key] === liveOwner.current[key]),
     rejectEquipmentCommand: reason => { logs.push(reason); return false; },
     combatIngressRef: { current: null }, combatRawRef: { current: null }, combatBaselineSourceRef: { current: null },
-    combatMastersRef: { current: new Map() }, combatPointerRef: { current: null },
+    combatMastersRef: { current: new Map() }, combatPointerRef: { current: {cursor: null, hovered: null, lock: false} },
+    combatForceAttackRef: {current: false},
     spellsIngressRef: { current: null }, spellsRawSnapshotRef: { current: null },
     mailParcelRef: { current: null }, mailIngressRef: { current: null },
     mailDispatcherRef: { current: null }, mailRawRef: { current: null },
@@ -332,6 +353,9 @@ function harness({ identity = session, sequenceRef = { current: 1 }, pendingRef 
     syncMailParcel: () => { throw Error("unexpected live Mail projection in idle fixture"); },
     sameMailOwner: () => false,
     socialRepliesRef: {current: new pureSocial.SocialIncomingReplies()}, socialReplyWindowsRef: {current: {group: false, bonds: false, guild: false}},
+    groupOperationsRef: {current: new (loadPure("groupOperations").GroupOperations)()},
+    groupOperationCommand: loadPure("groupOperations").groupOperationCommand,
+    groupHiddenTargetsRef: {current: {scope: "", ids: new Set()}}, stringifyId: value => String(value),
     socialSceneRevisionRef: {current: 1}, renderSocialRequests: () => {},
     bondsWindowLeaseRef: {current: {open: false, epoch: 0}},
     setShowGroupState: value => { scope.groupOpen = value; }, setShowBondsState: value => { scope.bondsOpen = value; },
@@ -380,7 +404,7 @@ function harness({ identity = session, sequenceRef = { current: 1 }, pendingRef 
   scope.updateWorld = updater => { scope.worldRef.current = updater(scope.worldRef.current); };
   const keys = Object.keys(scope);
   const functions = new Function(...keys, pageJavaScript + "\nreturn {"
-    + names.join(",") + ",applyAuthSocketClose,applyStorageAck,applySocialEvent,applySocialSnapshot,projectSocialSnapshotFriends,applySocialWindowRender,captureSocialRosterRender,captureSocialTradeUiLease,captureSpouseRender,captureLoginAuthControls};")(...keys.map(key => scope[key]));
+    + names.join(",") + ",applyGroupStartGame,applyAuthSocketClose,applyStorageAck,applySocialEvent,applySocialSnapshot,projectSocialSnapshotFriends,applySocialWindowRender,captureSocialRosterRender,captureSocialTradeUiLease,captureSpouseRender,captureLoginAuthControls};")(...keys.map(key => scope[key]));
   scope.loginAuthRef.current = functions.emptyLoginAuthState(1);
   return { ...functions, scope, sent, errors, logs, terminations, npcWithdrawals, npcInventoryRetirements, socket, liveOwner,
     get attempts() { return attempts; }, get actions() { return actions; },
@@ -1729,8 +1753,9 @@ function actualAuthDom() {
     +"\nfunction actualNormalGate(loginAuth,loginBusy,onSubmitLogin){"+gates.map(n=>n.getText(ast)).join("\n")
     +";return {loginBlocked,authBlocked,onSubmit:"+nodes.normalSubmit+",onEnter:["+normalEnter.join(",")+"]};}",
     {compilerOptions:{target:ts.ScriptTarget.ES2022,jsx:ts.JsxEmit.React}}).outputText;
-  const compiled=new Function("React","document","ORIGINAL_UI","SpriteButton",js+"\nreturn {LoginAuthDialog,actualOpenButtons,actualNormalGate,actualFocus};")(
-    React,doc,{login:{dialog:"fixture-asset",buttons:{}}},"SpriteButton");
+  const r16=loadPure("r16Auth");
+  const compiled=new Function("React","document","ORIGINAL_UI","SpriteButton","r16AuthCaption","r16AuthRelativeRect","R16_AUTH_LAYOUT","R16_AUTH_ASSETS","r16AuthSafeKeyRect","language",js+"\nreturn {LoginAuthDialog,actualOpenButtons,actualNormalGate,actualFocus};")(
+    React,doc,{login:{dialog:"fixture-asset",buttons:{}}},"SpriteButton",r16.r16AuthCaption,r16.r16AuthRelativeRect,r16.R16_AUTH_LAYOUT,r16.R16_AUTH_ASSETS,r16.r16AuthSafeKeyRect,"en");
   const flatten=node=>node&&typeof node==="object"?[node,...node.children.flatMap(flatten)]:[];
   function render(page) {
     const controls=page.controls(),gates=compiled.actualNormalGate(controls,page.scope.loginBusyRef.current,()=>page.submitLogin());
@@ -1795,20 +1820,21 @@ test("actual Page Shell Overlay bridge opens registration password and SafeKey c
       for(const field of view.fields)field.props.onChange({target:{value:draft[field.props.name]}});
       assert.deepEqual(next.scope.loginAuthRef.current[surface==="registration"?"registration":"changePassword"],draft);
     }
-    const account=view.fields.find(n=>n.props.name==="accountId");assert.equal(account.props.maxLength,24);
-    for(const field of view.fields.filter(n=>n.props.type==="password"))assert.equal(field.props.maxLength,32);
+    const account=view.fields.find(n=>n.props.name==="accountId");assert.equal(account.props.maxLength,surface==="safeKey"?24:15);
+    for(const field of view.fields.filter(n=>n.props.type==="password"))assert.equal(field.props.maxLength,surface==="safeKey"?32:15);
   }
 });
-test("actual auth DOM field Enter advances to Submit without sending and pending normal login ignores optional ready",()=>{
+test("actual auth DOM registration Enter advances, password Enter waits, and pending normal login ignores optional ready",()=>{
   const dom=actualAuthDom();
   for(const surface of ["registration","changePassword"]) {
     const page=authPage(surface);if(surface==="registration")fillRegistration(page);else fillPassword(page);
     const view=dom.render(page);
     for(let i=0;i<view.fields.length;i++) {
+      view.fields[i].focus();
       let prevented=0;
       view.form.props.onKeyDown({key:"Enter",nativeEvent:{isComposing:false},currentTarget:view.form,target:view.fields[i],
         preventDefault(){prevented++;},stopPropagation(){}});
-      assert.equal(prevented,1);assert.equal(dom.doc.activeElement,view.fields[i+1]??view.submit);assert.equal(page.sent.length,0);
+      assert.equal(prevented,1);assert.equal(dom.doc.activeElement,surface==="registration"?view.fields[i+1]??view.submit:view.fields[i]);assert.equal(page.sent.length,0);
     }
     view.form.props.onSubmit({preventDefault(){}});
     assert.equal(page.sent.at(-1).type,surface==="registration"?"newAccount":"changePassword");
@@ -1865,4 +1891,183 @@ test("Pearl foreign or mixed buy proof cannot enter actual Storage sendRaw on an
     assert.equal(page.sendRaw(command,options),false);
     assert.equal(page.attempts,before);assert.equal(page.sent.length,0);
   }
+});
+
+test("Group actual Page sends only AddMember, preserves authority until the named server receipt and deduplicates", () => {
+  const page = harness(), initial = structuredClone(page.scope.worldRef.current);
+  assert.equal(page.groupInviteMember("  Friend  "), true);
+  assert.deepEqual(page.sent, [{type: "addMember", name: "Friend"}]);
+  assert.deepEqual(page.scope.worldRef.current, initial, "no local roster or SwitchGroup mutation");
+  assert.equal(page.groupInviteMember("Friend"), false);
+  assert.equal(page.attempts, 1);
+  page.receive("AddMember", {name: "SomeoneElse"});
+  assert.equal(page.groupInviteMember("Friend"), false);
+  page.receive("AddMember", {name: "Friend"});
+  assert.equal(page.scope.groupOperationsRef.current.pending.length, 0);
+});
+
+test("Group raw add/remove commands require the current local proof and cannot borrow an unrelated proof", () => {
+  const page = harness();
+  for (const type of ["addMember", "delMember"]) {
+    assert.equal(page.sendRaw({type, name: "Friend"}), false);
+    assert.equal(page.sendRaw({type, name: "Friend"}, {groupProof: {}}), false);
+  }
+  const proof = page.scope.groupOperationsRef.current.reserve("addMember", "Friend", page.currentGroupOperationSource());
+  assert(proof);
+  assert.equal(page.sendRaw({type: "chat", message: "hello"}, {groupProof: proof}), false);
+  assert.equal(page.sendRaw({type: "addMember", name: "Other"}, {groupProof: proof}), false);
+  assert.equal(page.attempts, 0);
+});
+
+test("Group actual Page checks the current legacy roster before stale enriched rows", () => {
+  for (const group of [
+    {members: ["OtherLeader", "Self"], memberInfos: [{name: "Self"}]},
+    {members: ["Self", ...Array.from({length: 14}, (_, i) => "Member" + i)], memberInfos: [{name: "Self"}]},
+    {members: null}, {members: [null]}, {members: [{level: 1}]}, {memberInfos: "invalid"},
+  ]) {
+    const page = harness(); page.scope.worldRef.current.stage5Systems.group = group;
+    assert.equal(page.groupInviteMember("Friend"), false);
+    assert.equal(page.attempts, 0);
+  }
+  const page = harness(); page.scope.worldRef.current.stage5Systems.group = {memberInfos: [{name: "Self"}, {name: "Member"}]};
+  assert.equal(page.kickGroupMember("Member"), true);
+  assert.deepEqual(page.sent, [{type: "delMember", name: "Member"}]);
+});
+
+test("Group actual final socket boundary rejects listener-time owner, scene, leader and capacity changes", () => {
+  const changes = [
+    page => {page.scope.socketRef.current = {...page.socket};},
+    page => {page.socket.readyState = 3;},
+    page => {page.scope.equipmentSessionGenerationRef.current++;},
+    page => {page.scope.socialSceneRevisionRef.current++;},
+    page => {page.scope.worldRef.current.mapFileName = "D002";},
+    page => {page.scope.worldRef.current.entities[0].name = "Renamed";},
+    page => {page.scope.worldRef.current.stage5Systems.group = {members: ["OtherLeader", "Self"]};},
+    page => {page.scope.worldRef.current.stage5Systems.group = {members: ["Self", ...Array.from({length: 14}, (_, i) => "Member" + i)]};},
+  ];
+  for (const change of changes) {
+    const page = harness(); page.onAction(() => change(page));
+    assert.equal(page.groupInviteMember("Friend"), false);
+    assert.equal(page.attempts, 0);
+    assert.equal(page.scope.groupOperationsRef.current.pending.length, 0, "definitely unsent reservation is reusable");
+  }
+});
+
+test("Group listener reentry cannot send the same request twice", () => {
+  const page = harness(); let nested;
+  page.onAction(() => {nested = page.groupInviteMember("Friend");});
+  assert.equal(page.groupInviteMember("Friend"), true);
+  assert.equal(nested, false);
+  assert.equal(page.attempts, 1);
+  assert.equal(page.scope.groupOperationsRef.current.pending.length, 1);
+});
+
+test("Group different names use the bounded group subqueue without a single global in-flight lock", () => {
+  const page = harness();
+  for (let index = 0; index < 8; index++) assert.equal(page.groupInviteMember("Friend" + index), true);
+  assert.equal(page.groupInviteMember("Ninth"), false);
+  assert.equal(page.attempts, 8);
+  assert.equal(page.scope.groupOperationsRef.current.pending.length, 8);
+});
+
+test("Group socket outcome unknown remains pending and never automatically retries", () => {
+  const page = harness(); page.throwAtSocket("addMember");
+  assert.equal(page.groupInviteMember("Friend"), true, "the attempted operation is already entered");
+  assert.equal(page.attempts, 1); assert.equal(page.errors.length, 1);
+  assert.equal(page.scope.groupOperationsRef.current.pending[0].entered, true);
+  assert.equal(page.groupInviteMember("Friend"), false);
+  assert.equal(page.attempts, 1);
+});
+
+test("Group closed transport does not reserve or leave a false pending request", () => {
+  const page = harness(); page.socket.readyState = 3;
+  assert.equal(page.groupInviteMember("Friend"), false);
+  assert.equal(page.scope.groupOperationsRef.current.pending.length, 0);
+  page.socket.readyState = 1;
+  assert.equal(page.groupInviteMember("Friend"), true);
+});
+
+test("Group only current physical-owner named or full roster receipts release pending across map changes", () => {
+  const page = harness(); assert.equal(page.groupInviteMember("Friend"), true);
+  const pending = page.scope.groupOperationsRef.current;
+  page.receive("AddMember", {name: "Friend"}, 99);
+  page.receive("AddMember", {name: "Friend"}, undefined, {});
+  assert.equal(pending.pending.length, 1);
+  page.retireSocialRequests(); page.scope.worldRef.current.mapFileName = "D002";
+  assert.equal(pending.pending.length, 1, "map/scene retirement preserves Native pending work");
+  page.receive("GroupMemberInfo", {members: [{name: "Self"}], leaderName: "Self"});
+  assert.equal(pending.pending.length, 1, "unchanged roster is not an invite failure receipt");
+  page.receive("GroupMemberInfo", {members: [{name: "Self"}, {name: "Friend"}], leaderName: "Self"});
+  assert.equal(pending.pending.length, 0);
+  assert.equal(page.groupInviteMember("Friend"), true);
+});
+
+test("Group SwitchGroup and DeleteGroup are not fabricated add-member acknowledgements", () => {
+  const page = harness(); assert.equal(page.groupInviteMember("Friend"), true);
+  page.receive("SwitchGroup", {allowGroup: true});
+  page.receive("DeleteGroup", {});
+  assert.equal(page.scope.groupOperationsRef.current.pending.length, 1);
+  assert.equal(page.groupInviteMember("Friend"), false);
+  assert.deepEqual(page.sent, [{type: "addMember", name: "Friend"}]);
+});
+
+test("Group removal completes only on its matching DeleteMember or authoritative absence", () => {
+  const page = harness(); page.scope.worldRef.current.stage5Systems.group = {members: ["Self", "Friend"]};
+  assert.equal(page.kickGroupMember("Friend"), true);
+  page.receive("DeleteMember", {name: "SomeoneElse"});
+  assert.equal(page.scope.groupOperationsRef.current.pending.length, 1);
+  page.receive("GroupMemberInfo", {members: [{name: "Self"}, {name: "Friend"}], leaderName: "Self"});
+  assert.equal(page.scope.groupOperationsRef.current.pending.length, 1);
+  page.receive("GroupMemberInfo", {members: [{name: "Self"}], leaderName: "Self"});
+  assert.equal(page.scope.groupOperationsRef.current.pending.length, 0);
+});
+
+test("Group hover invitation uses the current visible player instead of selection and rejects invalid AOI targets", () => {
+  const page = harness(), world = page.scope.worldRef.current;
+  const selected = {objectId: "10", kind: "player", name: "Selected", dead: false};
+  const hovered = {objectId: "20", kind: "player", name: "Hovered", dead: false};
+  world.entities.push(selected, hovered); world.selectedObjectId = selected.objectId;
+  page.scope.combatPointerRef.current.hovered = hovered.objectId;
+  assert.equal(page.currentGroupHoverName(), "Hovered");
+  assert.equal(page.groupInviteMember(page.currentGroupHoverName()), true);
+  assert.deepEqual(page.sent, [{type: "addMember", name: "Hovered"}]);
+  page.receive("ObjectHidden", {objectId: 20, hidden: true});
+  assert.equal(page.currentGroupHoverName(), null);
+  page.receive("ObjectHidden", {objectId: 20, hidden: false});
+  assert.equal(page.currentGroupHoverName(), "Hovered");
+  hovered.dead = true; assert.equal(page.currentGroupHoverName(), null); hovered.dead = false;
+  hovered.kind = "monster"; assert.equal(page.currentGroupHoverName(), null); hovered.kind = "player";
+  hovered.name = " "; assert.equal(page.currentGroupHoverName(), null); hovered.name = "Hovered";
+  world.entities = world.entities.filter(row => row !== hovered); assert.equal(page.currentGroupHoverName(), null);
+  page.scope.combatPointerRef.current.hovered = world.playerObjectId; assert.equal(page.currentGroupHoverName(), null);
+  page.scope.combatPointerRef.current.hovered = null; assert.equal(page.currentGroupHoverName(), null);
+});
+
+test("Group confirmed session retirement clears pending operations and group-only hidden target history", () => {
+  const page = harness(); assert.equal(page.groupInviteMember("Friend"), true);
+  page.groupHiddenTargetIds().add("FriendId");
+  page.retireEquipmentSession();
+  assert.equal(page.scope.groupOperationsRef.current.pending.length, 0);
+  assert.equal(page.scope.groupHiddenTargetsRef.current.ids.size, 0);
+});
+
+test("Group a successful new StartGame retires old pending after physical reconnect while a rejected StartGame does not", () => {
+  const page = harness(); assert.equal(page.groupInviteMember("Friend"), true);
+  page.groupHiddenTargetIds().add("FriendId");
+  page.applyGroupStartGame({result: 3});
+  assert.equal(page.scope.groupOperationsRef.current.pending.length, 1);
+  assert.equal(page.scope.groupHiddenTargetsRef.current.ids.size, 1);
+  page.applyGroupStartGame({result: 4});
+  assert.equal(page.scope.groupOperationsRef.current.pending.length, 0);
+  assert.equal(page.scope.groupHiddenTargetsRef.current.ids.size, 0);
+  assert.equal(page.groupInviteMember("Friend"), true, "explicit same-name input is admitted only in the newly confirmed session");
+});
+
+test("Group explicit allow toggle and leave retain their separate real SwitchGroup commands", () => {
+  const page = harness(); page.groupToggleAllowInvites(true); page.groupLeave();
+  assert.deepEqual(page.sent, [{type: "switchGroup", allowGroup: true}, {type: "switchGroup", allowGroup: false}]);
+  page.receive("SwitchGroup", {allowGroup: false});
+  assert.equal(loadPure("stage5").adaptGroup(page.scope.worldRef.current.stage5Systems.group).allowInvites, false);
+  page.receive("SwitchGroup", {allowGroup: true});
+  assert.equal(loadPure("stage5").adaptGroup(page.scope.worldRef.current.stage5Systems.group).allowInvites, true);
 });

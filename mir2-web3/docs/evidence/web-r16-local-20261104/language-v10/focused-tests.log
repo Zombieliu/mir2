@@ -1,0 +1,403 @@
+TAP version 13
+# {"fixture":"actual-source TypeScript transpile + controlled hook seams","compilerPath":"E:\\\\mir2-player-journey\\\\mir2-web3\\\\apps\\\\web\\\\node_modules\\\\typescript\\\\lib\\\\typescript.js","compilerRealPath":"E:\\\\mir2-player-journey\\\\mir2-web3\\\\apps\\\\web\\\\node_modules\\\\typescript\\\\lib\\\\typescript.js","bytes":9112572,"sha256":"3ae902c92cc44dace175c0e69e13a4b0899f6983c6121d76b9ab8dd5795e7675","version":"5.9.3"}
+# {"actualUsedSources":[{"actualPath":"/E:/mir2-player-journey/mir2-web3/apps/web/lib/quest-action-policy.ts","realPath":"E:\\\\mir2-player-journey\\\\mir2-web3\\\\apps\\\\web\\\\lib\\\\quest-action-policy.ts","bytes":5467,"sha256":"5a8042d691109178c59cecdab3d5bb7c6a6c955049fa05a44519218e2c2e0570"},{"actualPath":"/E:/mir2-player-journey/mir2-web3/apps/web/lib/world-model/item-identity.ts","realPath":"E:\\\\mir2-player-journey\\\\mir2-web3\\\\apps\\\\web\\\\lib\\\\world-model\\\\item-identity.ts","bytes":8874,"sha256":"955d61e3f08d0d5a512bd50ca31dec6238ee0b0c21dde450ddfda794c20ac431"},{"actualPath":"/E:/mir2-player-journey/mir2-web3/apps/web/lib/bevy-bag-model.ts","realPath":"E:\\\\mir2-player-journey\\\\mir2-web3\\\\apps\\\\web\\\\lib\\\\bevy-bag-model.ts","bytes":17534,"sha256":"7d9df5bd7c8161f2080e782f2a9d10c4fd853107c1578562dd1810d69112db47"},{"actualPath":"/E:/mir2-player-journey/mir2-web3/apps/web/lib/bevy-quest-world-context.ts","realPath":"E:\\\\mir2-player-journey\\\\mir2-web3\\\\apps\\\\web\\\\lib\\\\bevy-quest-world-context.ts","bytes":14646,"sha256":"ab8e5ee6c040d401557f96ef0d9816b083bfafaa75d5f96466c73e28e0a860d5"},{"actualPath":"/E:/mir2-player-journey/mir2-web3/apps/web/lib/bevy-quest-ui.ts","realPath":"E:\\\\mir2-player-journey\\\\mir2-web3\\\\apps\\\\web\\\\lib\\\\bevy-quest-ui.ts","bytes":14845,"sha256":"5d331f501c944f735274e3f17e9128c1bd1d260df5ed47502ac7a4f223b9adc8"},{"actualPath":"/E:/mir2-player-journey/mir2-web3/apps/web/lib/bevy-hp-orb.ts","realPath":"E:\\\\mir2-player-journey\\\\mir2-web3\\\\apps\\\\web\\\\lib\\\\bevy-hp-orb.ts","bytes":8881,"sha256":"12ccf1c06876e8edc964f60500c36992916f6b4aeec113020aabe84980bcb149"},{"actualPath":"/E:/mir2-player-journey/mir2-web3/apps/web/lib/bevy-experience-bar.ts","realPath":"E:\\\\mir2-player-journey\\\\mir2-web3\\\\apps\\\\web\\\\lib\\\\bevy-experience-bar.ts","bytes":8912,"sha256":"ecbdce984cd9a2bab67e702052de22ca4cb5d7585f6981c73874d38a6456b687"},{"actualPath":"/E:/mir2-player-journey/mir2-web3/apps/web/lib/bevy-weight-bar.ts","realPath":"E:\\\\mir2-player-journey\\\\mir2-web3\\\\apps\\\\web\\\\lib\\\\bevy-weight-bar.ts","bytes":9645,"sha256":"60b356b14ebf720c7496d6c9a73e22050b67d648e57edd72da13e508f2732576"},{"actualPath":"/E:/mir2-player-journey/mir2-web3/apps/web/lib/bevy-hud-bar-draw-plan.ts","realPath":"E:\\\\mir2-player-journey\\\\mir2-web3\\\\apps\\\\web\\\\lib\\\\bevy-hud-bar-draw-plan.ts","bytes":20639,"sha256":"1edbebaa847964a2d7b182f257debb9a12f940334a95d7c14b8de834df44083f"},{"actualPath":"/E:/mir2-player-journey/mir2-web3/apps/web/lib/bevy-quest-world-actions.ts","realPath":"E:\\\\mir2-player-journey\\\\mir2-web3\\\\apps\\\\web\\\\lib\\\\bevy-quest-world-actions.ts","bytes":4179,"sha256":"9c3c33b42efda96d1b9cc8704f489c648ed6a9b604d7aff9cd6966ad5748f554"},{"actualPath":"/E:/mir2-player-journey/mir2-web3/apps/web/lib/bevy-quest-world-controls.ts","realPath":"E:\\\\mir2-player-journey\\\\mir2-web3\\\\apps\\\\web\\\\lib\\\\bevy-quest-world-controls.ts","bytes":2846,"sha256":"c779c1b7dff93849cf78494686f1d6f91005acf39dd92199308ac410693a1a9f"},{"actualPath":"/E:/mir2-player-journey/mir2-web3/apps/web/lib/use-bevy-quest-ui.ts","realPath":"E:\\\\mir2-player-journey\\\\mir2-web3\\\\apps\\\\web\\\\lib\\\\use-bevy-quest-ui.ts","bytes":24747,"sha256":"5da7ad6d50c4755e4ac1578d1d61eabadd58b42e24c1d479855da8c3a66f0c21"}]}
+# Subtest: exact capability probes independently of initial readiness; malformed v1 status fails closed
+ok 1 - exact capability probes independently of initial readiness; malformed v1 status fails closed
+  ---
+  duration_ms: 0.832
+  type: 'test'
+  ...
+# Subtest: real hook requires live language and its newest revision before polling or input acknowledgement
+ok 2 - real hook requires live language and its newest revision before polling or input acknowledgement
+  ---
+  duration_ms: 212.7722
+  type: 'test'
+  ...
+# Subtest: older and unknown capability keep omitted DTO and their existing readiness shape
+ok 3 - older and unknown capability keep omitted DTO and their existing readiness shape
+  ---
+  duration_ms: 406.8802
+  type: 'test'
+  ...
+# Subtest: actual used source bindings are disclosed
+ok 4 - actual used source bindings are disclosed
+  ---
+  duration_ms: 0.199
+  type: 'test'
+  ...
+# Subtest: Dubhe approval exchanges the proof once for the canonical channel account
+ok 5 - Dubhe approval exchanges the proof once for the canonical channel account
+  ---
+  duration_ms: 78.7534
+  type: 'test'
+  ...
+# Subtest: wallet rejection and expiry never exchange an identity proof
+ok 6 - wallet rejection and expiry never exchange an identity proof
+  ---
+  duration_ms: 27.3581
+  type: 'test'
+  ...
+# Subtest: aborted or superseded create, poll, approved callback, and exchange cannot return a login
+ok 7 - aborted or superseded create, poll, approved callback, and exchange cannot return a login
+  ---
+  duration_ms: 64.5836
+  type: 'test'
+  ...
+# Subtest: local expiry stops polling without an extra request
+ok 8 - local expiry stops polling without an extra request
+  ---
+  duration_ms: 5.0689
+  type: 'test'
+  ...
+# Subtest: same-device hidden tabs wait for return before polling or claiming an approved login
+ok 9 - same-device hidden tabs wait for return before polling or claiming an approved login
+  ---
+  duration_ms: 6.5861
+  type: 'test'
+  ...
+# Subtest: hidden tabs expire without polling and cancellation stops a hidden wait
+ok 10 - hidden tabs expire without polling and cancellation stops a hidden wait
+  ---
+  duration_ms: 15.7008
+  type: 'test'
+  ...
+# Subtest: malformed create, status, and approved proof responses fail without exchange
+ok 11 - malformed create, status, and approved proof responses fail without exchange
+  ---
+  duration_ms: 62.989
+  type: 'test'
+  ...
+# Subtest: actual page submits the canonical channel session once
+ok 12 - actual page submits the canonical channel session once
+  ---
+  duration_ms: 5.5975
+  type: 'test'
+  ...
+# Subtest: actual page cancel and retry retire old requests without clearing the newer busy flag
+ok 13 - actual page cancel and retry retire old requests without clearing the newer busy flag
+  ---
+  duration_ms: 4.0323
+  type: 'test'
+  ...
+# Subtest: actual page QR retry also ignores an older rejected promise
+ok 14 - actual page QR retry also ignores an older rejected promise
+  ---
+  duration_ms: 3.9155
+  type: 'test'
+  ...
+# Subtest: actual page identity leases reject epoch, socket, generation, auth, screen, and intent changes
+ok 15 - actual page identity leases reject epoch, socket, generation, auth, screen, and intent changes
+  ---
+  duration_ms: 26.1462
+  type: 'test'
+  ...
+# Subtest: actual page lifecycle aborts retired QR and prevents old completion from clearing newer busy
+ok 16 - actual page lifecycle aborts retired QR and prevents old completion from clearing newer busy
+  ---
+  duration_ms: 2.9798
+  type: 'test'
+  ...
+# quest localization tests passed; 22 authoritative V2 task definitions checked
+# Subtest: scripts\\test-quest-localization.mjs
+ok 3 - scripts\\test-quest-localization.mjs
+  ---
+  duration_ms: 427.7012
+  type: 'test'
+  ...
+# Subtest: browser auth hit rectangles match the independent R16 native source
+ok 18 - browser auth hit rectangles match the independent R16 native source
+  ---
+  duration_ms: 2.2503
+  type: 'test'
+  ...
+# Subtest: bounded English/Simplified/Portuguese captions remain exact native catalog projections
+ok 19 - bounded English/Simplified/Portuguese captions remain exact native catalog projections
+  ---
+  duration_ms: 6.4358
+  type: 'test'
+  ...
+# Subtest: registration and change-password helpers preserve the actual native fields, bounds and Title art
+ok 20 - registration and change-password helpers preserve the actual native fields, bounds and Title art
+  ---
+  duration_ms: 1.2924
+  type: 'test'
+  ...
+# Subtest: SafeKey uses the native 10-then-26 split and all 36 hit boxes clear its tools
+ok 21 - SafeKey uses the native 10-then-26 split and all 36 hit boxes clear its tools
+  ---
+  duration_ms: 0.8599
+  type: 'test'
+  ...
+# Subtest: four-slot availability never starts synthetic characters or exceeds the native cap
+ok 22 - four-slot availability never starts synthetic characters or exceeds the native cap
+  ---
+  duration_ms: 0.1717
+  type: 'test'
+  ...
+# Subtest: Wizard additive frames use the canonical R16 offsets and local source art
+ok 23 - Wizard additive frames use the canonical R16 offsets and local source art
+  ---
+  duration_ms: 2.5148
+  type: 'test'
+  ...
+# Subtest: actual auxiliary forms place all 8/4 fields and action hit boxes at Native stage coordinates
+ok 24 - actual auxiliary forms place all 8/4 fields and action hit boxes at Native stage coordinates
+  ---
+  duration_ms: 166.6004
+  type: 'test'
+  ...
+# Subtest: actual registration Enter advances, change-password Enter waits, and both Tab boundaries wrap
+ok 25 - actual registration Enter advances, change-password Enter waits, and both Tab boundaries wrap
+  ---
+  duration_ms: 97.1956
+  type: 'test'
+  ...
+# Subtest: actual SafeKey stays beside the original login, preserves shared key order and routes physical keys
+ok 26 - actual SafeKey stays beside the original login, preserves shared key order and routes physical keys
+  ---
+  duration_ms: 38.9432
+  type: 'test'
+  ...
+# Subtest: auxiliary pending gates and IME cannot dispatch while Escape can retire an auth surface
+ok 27 - auxiliary pending gates and IME cannot dispatch while Escape can retire an auth surface
+  ---
+  duration_ms: 90.4255
+  type: 'test'
+  ...
+# Subtest: actual login fields use R16 geometry and Enter advances focus without authenticating
+ok 28 - actual login fields use R16 geometry and Enter advances focus without authenticating
+  ---
+  duration_ms: 34.0844
+  type: 'test'
+  ...
+# Subtest: actual R16 login Tab order, F8 and Escape obey pending and modal gates
+ok 29 - actual R16 login Tab order, F8 and Escape obey pending and modal gates
+  ---
+  duration_ms: 32.753
+  type: 'test'
+  ...
+# Subtest: actual select buttons and localized slot preserve native availability and opaque player names
+ok 30 - actual select buttons and localized slot preserve native availability and opaque player names
+  ---
+  duration_ms: 31.5078
+  type: 'test'
+  ...
+# Subtest: actual create dialog uses R16 modal, 18-character field and distinct class/gender choices
+ok 31 - actual create dialog uses R16 modal, 18-character field and distinct class/gender choices
+  ---
+  duration_ms: 28.6892
+  type: 'test'
+  ...
+# Subtest: native caption rendering is opt-in and disabled controls cannot activate
+ok 32 - native caption rendering is opt-in and disabled controls cannot activate
+  ---
+  duration_ms: 27.839
+  type: 'test'
+  ...
+# Subtest: auth language footer uses native geometry and all ten Windows choices, leaving the game default inline
+ok 33 - auth language footer uses native geometry and all ten Windows choices, leaving the game default inline
+  ---
+  duration_ms: 31.0833
+  type: 'test'
+  ...
+# Subtest: browser-only login actions and diagnostics mount only inside the collapsed footer without losing callbacks
+ok 34 - browser-only login actions and diagnostics mount only inside the collapsed footer without losing callbacks
+  ---
+  duration_ms: 26.3223
+  type: 'test'
+  ...
+# Subtest: select footer clears Start/Exit hit targets and Escape closes browser settings before logout
+ok 35 - select footer clears Start/Exit hit targets and Escape closes browser settings before logout
+  ---
+  duration_ms: 25.7394
+  type: 'test'
+  ...
+# Subtest: language popup closes on an outside capture event and releases its listener
+ok 36 - language popup closes on an outside capture event and releases its listener
+  ---
+  duration_ms: 26.7966
+  type: 'test'
+  ...
+# Subtest: stacked auth audio bounds sliders and supplies missing Chinese labels without changing channel updates
+ok 37 - stacked auth audio bounds sliders and supplies missing Chinese labels without changing channel updates
+  ---
+  duration_ms: 4.036
+  type: 'test'
+  ...
+# Subtest: browser dictionaries use the ten native languages in the native order
+ok 38 - browser dictionaries use the ten native languages in the native order
+  ---
+  duration_ms: 1.4183
+  type: 'test'
+  ...
+# Subtest: zh-CN supplies all 32 browser controls without blank values
+ok 39 - zh-CN supplies all 32 browser controls without blank values
+  ---
+  duration_ms: 0.3592
+  type: 'test'
+  ...
+# Subtest: zh-TW supplies all 32 browser controls without blank values
+ok 40 - zh-TW supplies all 32 browser controls without blank values
+  ---
+  duration_ms: 0.117
+  type: 'test'
+  ...
+# Subtest: en supplies all 32 browser controls without blank values
+ok 41 - en supplies all 32 browser controls without blank values
+  ---
+  duration_ms: 0.0854
+  type: 'test'
+  ...
+# Subtest: pt-BR supplies all 32 browser controls without blank values
+ok 42 - pt-BR supplies all 32 browser controls without blank values
+  ---
+  duration_ms: 0.0727
+  type: 'test'
+  ...
+# Subtest: ru supplies all 32 browser controls without blank values
+ok 43 - ru supplies all 32 browser controls without blank values
+  ---
+  duration_ms: 0.0577
+  type: 'test'
+  ...
+# Subtest: hi supplies all 32 browser controls without blank values
+ok 44 - hi supplies all 32 browser controls without blank values
+  ---
+  duration_ms: 0.1159
+  type: 'test'
+  ...
+# Subtest: id supplies all 32 browser controls without blank values
+ok 45 - id supplies all 32 browser controls without blank values
+  ---
+  duration_ms: 0.0629
+  type: 'test'
+  ...
+# Subtest: vi supplies all 32 browser controls without blank values
+ok 46 - vi supplies all 32 browser controls without blank values
+  ---
+  duration_ms: 0.4904
+  type: 'test'
+  ...
+# Subtest: th supplies all 32 browser controls without blank values
+ok 47 - th supplies all 32 browser controls without blank values
+  ---
+  duration_ms: 0.4194
+  type: 'test'
+  ...
+# Subtest: ar supplies all 32 browser controls without blank values
+ok 48 - ar supplies all 32 browser controls without blank values
+  ---
+  duration_ms: 0.2061
+  type: 'test'
+  ...
+# Subtest: unknown languages and keys preserve the caller's fallback
+ok 49 - unknown languages and keys preserve the caller's fallback
+  ---
+  duration_ms: 0.1894
+  type: 'test'
+  ...
+# Subtest: native wallet captions are not redefined by the browser dictionary
+ok 50 - native wallet captions are not redefined by the browser dictionary
+  ---
+  duration_ms: 0.21
+  type: 'test'
+  ...
+# Subtest: browser settings explain the extra volume/account/sign-in scope
+ok 51 - browser settings explain the extra volume/account/sign-in scope
+  ---
+  duration_ms: 0.1063
+  type: 'test'
+  ...
+# Subtest: type-only native compatibility does not pull a runtime dependency
+ok 52 - type-only native compatibility does not pull a runtime dependency
+  ---
+  duration_ms: 0.1161
+  type: 'test'
+  ...
+# Subtest: quest feedback covers every language without exposing implementation terms
+ok 53 - quest feedback covers every language without exposing implementation terms
+  ---
+  duration_ms: 0.4143
+  type: 'test'
+  ...
+# Subtest: real combined translator exposes exactly Windows choices and native shell/wallet copy
+ok 54 - real combined translator exposes exactly Windows choices and native shell/wallet copy
+  ---
+  duration_ms: 2.1258
+  type: 'test'
+  ...
+# Subtest: saved choices win; initial choice follows supported browser locale, with canonical aliases
+ok 55 - saved choices win; initial choice follows supported browser locale, with canonical aliases
+  ---
+  duration_ms: 0.2862
+  type: 'test'
+  ...
+# Subtest: new presentation locales cannot leak unsupported codes into strict wire/WASM hosts
+ok 56 - new presentation locales cannot leak unsupported codes into strict wire/WASM hosts
+  ---
+  duration_ms: 3.9332
+  type: 'test'
+  ...
+# Subtest: single-pass placeholders and unknown-key fallbacks preserve opaque player content
+ok 57 - single-pass placeholders and unknown-key fallbacks preserve opaque player content
+  ---
+  duration_ms: 98.2719
+  type: 'test'
+  ...
+# Subtest: real nameplate display boundary localizes only NPCs and monsters
+ok 58 - real nameplate display boundary localizes only NPCs and monsters
+  ---
+  duration_ms: 23.9375
+  type: 'test'
+  ...
+# Subtest: the generator deterministically projects every Native key and all ten locales, with current source pins
+ok 59 - the generator deterministically projects every Native key and all ten locales, with current source pins
+  ---
+  duration_ms: 653.8403
+  type: 'test'
+  ...
+# Subtest: missing, empty, duplicate, foreign overlay and placeholder/command changes fail instead of filling from English
+ok 60 - missing, empty, duplicate, foreign overlay and placeholder/command changes fail instead of filling from English
+  ---
+  duration_ms: 1016.0094
+  type: 'test'
+  ...
+# Subtest: only the eight exact existing Native Simplified slot exceptions are preserved and excluded from system matching
+ok 61 - only the eight exact existing Native Simplified slot exceptions are preserved and excluded from system matching
+  ---
+  duration_ms: 836.289
+  type: 'test'
+  ...
+# Subtest: metadata and keyed display match the generated Native source, and unknown languages/keys have explicit fallbacks
+ok 62 - metadata and keyed display match the generated Native source, and unknown languages/keys have explicit fallbacks
+  ---
+  duration_ms: 11.4828
+  type: 'test'
+  ...
+# Subtest: system aliases match complete owned strings only, preserve unknown text, and keep NPC/context ambiguity separate
+ok 63 - system aliases match complete owned strings only, preserve unknown text, and keep NPC/context ambiguity separate
+  ---
+  duration_ms: 7.8069
+  type: 'test'
+  ...
+# Subtest: bounded whole-template matching inserts opaque names once, retains color markup and numeric format captures
+ok 64 - bounded whole-template matching inserts opaque names once, retains color markup and numeric format captures
+  ---
+  duration_ms: 7.1142
+  type: 'test'
+  ...
+# Subtest: real authored NPC prose, fixed canonical aliases and embedded monthly-card names use the same generated source
+ok 65 - real authored NPC prose, fixed canonical aliases and embedded monthly-card names use the same generated source
+  ---
+  duration_ms: 68.97
+  type: 'test'
+  ...
+1..65
+# tests 65
+# suites 0
+# pass 65
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 3133.6607

@@ -1,10 +1,15 @@
 # Main website and game entry points
 
-The canonical public origin is `https://mir2.obelisk.build`:
+The public marketing origin is `https://numeron.obelisk.build`. The existing
+game and promotion-service origin remains `https://mir2.obelisk.build`:
 
 - `/` and the 16 locale paths serve the marketing website in this directory.
 - `/game` serves the browser game from `apps/web`.
-- `/promotions` and `/api/promotions` stay in `apps/web` on their existing origin.
+- On the marketing origin, `/<locale>/promotions` is a localized preparation
+  notice. `/promotions?lang=<locale>` redirects to that notice; unsupported or
+  missing languages fall back to `zh-CN`.
+- Existing nested `/promotions/...` links still forward to `apps/web`. Its
+  promotion service and `/api/promotions` are unchanged.
 
 The two applications share this repository but build separately. The existing
 `numeron-legend-of-rebirth` Vercel project still serves the marketing application;
@@ -13,11 +18,13 @@ the marketing route allowlist. `/marketing-assets/_next/static` separates the
 marketing bundles from the game's `/_next` bundles. Public marketing images are
 served without the shared Next image optimizer.
 
-Desktop navigation, mobile navigation and the footer use a normal link to
-`/promotions?lang=<locale>`. Crossing application boundaries requires a full
-navigation so each application loads its own root layout. The promotion page
-maps the requested language to its supported languages and preserves campaign
-selection when its language changes.
+Desktop navigation, mobile navigation, the footer and guide links use
+`/<locale>/promotions` with a localized "in preparation" label. Language menus
+retain this page when switching locales. The preparation notice has no signup,
+wallet connection, commission collection or withdrawal controls. It explains
+the planned single referral level, separate player/promoter roles, unsettled
+eligibility and payout rules, and the third-party scope of wallet exchange
+services. It does not enable or disable game, login, wallet or payment services.
 
 `RECOVERY-MANIFEST.json` records the immutable Vercel deployment and hashes of
 the recovered original source, before integration edits. It is provenance, not

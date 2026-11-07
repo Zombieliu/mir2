@@ -9,6 +9,7 @@ pub mod model;
 #[cfg(test)]
 mod model_regression;
 pub mod platform;
+pub mod progressive;
 pub mod transaction;
 pub mod ui;
 pub mod update;

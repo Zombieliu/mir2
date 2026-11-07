@@ -1,0 +1,67 @@
+{
+  "schema": "mir2.r16.wallet-browser-smoke.v1",
+  "origin": "http://127.0.0.1:19041",
+  "passed": true,
+  "scope": {
+    "realBrowser": true,
+    "realRelay": true,
+    "networkMock": false,
+    "walletApproved": false,
+    "userWalletSigned": false,
+    "walletBindingChanged": false,
+    "modelCallsRequested": 0,
+    "privateValuesPublished": false
+  },
+  "ordinaryLoginVisibleOnOpen": true,
+  "qr": {
+    "createHttp200": true,
+    "pollHttp200": true,
+    "realQrImage": true,
+    "approvalHost": "wallet.dubhe.obelisk.build",
+    "intentNotInQrUrl": true,
+    "statusText": "等待钱包确认登录"
+  },
+  "cancel": {
+    "qrClosed": true,
+    "accountVisibleAndEnabled": true,
+    "pollStopped": true,
+    "noWalletLoginBeforeApproval": true
+  },
+  "originalCharacterStillPresent": true,
+  "originalAlo": {
+    "enteredGame": true,
+    "sameArchive": true,
+    "sameResident": true,
+    "policyVersion": 2,
+    "allThreeHabits": true,
+    "gold": 10,
+    "potions": 2,
+    "supplyStatus": "completed",
+    "chargedGold": 40,
+    "acquiredQuantity": 1,
+    "modelEnabled": true
+  },
+  "deniedOrigins": [
+    {
+      "origin": null,
+      "status": 403
+    },
+    {
+      "origin": "http://localhost:19041",
+      "status": 403
+    },
+    {
+      "origin": "http://127.0.0.1:19141",
+      "status": 403
+    },
+    {
+      "origin": "https://unrelated.invalid",
+      "status": 403
+    }
+  ],
+  "errors": {
+    "page": 0,
+    "console": 0
+  },
+  "finishedAt": "2026-11-04T07:35:02.036Z"
+}

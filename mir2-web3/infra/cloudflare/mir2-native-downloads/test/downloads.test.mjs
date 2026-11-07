@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { handle, OBJECT_PREFIX, POINTER_KEY, PUBLIC_BASE, MAX_ARTIFACT, MAX_METADATA, MAX_FIVE_CLASS_METADATA, FIVE_CLASS_OBJECT_PREFIX, FIVE_CLASS_POINTER_KEY, FIVE_CLASS_PUBLIC_BASE, MAX_POINTER, feedDirectory,
-  PACKED_OBJECT_PREFIX, PACKED_POINTER_KEY, PACKED_PUBLIC_BASE, MAX_PACKED_CATALOG, MAX_PACKED_OBJECT, MAX_PACKED_MANIFEST, MAX_PACKED_SMALL,
+  PACKED_OBJECT_PREFIX, PACKED_POINTER_KEY, PACKED_PUBLIC_BASE, MAX_PACKED_CATALOG, MAX_PACKED_OBJECT, MAX_PACKED_MANIFEST, MAX_PACKED_SMALL, MAX_PACKED_REQUIRED_SCOPE,
   UNIFIED_OBJECT_PREFIX, UNIFIED_POINTER_KEY, UNIFIED_PUBLIC_BASE } from "../src/index.mjs";
 
 const bytes = (text) => new TextEncoder().encode(text);
@@ -626,7 +626,7 @@ test("packed absent or invalid discovery cannot fall back to another channel", a
 });
 
 test("packed exact generation controls and content addressed objects are immutable streams", async () => {
-  const paths = ["GENERATION.json", "GENERATION.p7s", "catalog.json", "mir2-platform-windows.exe", "mir2-client.toml"].map((name) => packedGeneration + name);
+  const paths = ["GENERATION.json", "GENERATION.p7s", "catalog.json", "mir2-platform-windows.exe", "mir2-client.toml", "required-scope.json"].map((name) => packedGeneration + name);
   paths.push(packPath);
   for (const path of paths) {
     const f = setup(); putPacked(f, path, "same-authenticated-bytes");
@@ -676,6 +676,7 @@ test("packed object specific bounds do not expand either legacy metadata limit",
     [packedGeneration + "catalog.json", MAX_PACKED_CATALOG], [packPath, MAX_PACKED_OBJECT],
     [packedGeneration + "GENERATION.json", MAX_PACKED_MANIFEST],
     [packedGeneration + "GENERATION.p7s", MAX_PACKED_SMALL],
+    [packedGeneration + "required-scope.json", MAX_PACKED_REQUIRED_SCOPE],
     [packedGeneration + "mir2-client.toml", MAX_PACKED_SMALL],
     [packedGeneration + "mir2-platform-windows.exe", MAX_ARTIFACT],
   ]) {
@@ -701,7 +702,7 @@ test("packed reader refuses extra files private pointers scope escapes and nonlo
     "packed/channels/invited.json", "packed/feeds/s1-a/latest.json", "packed/releases/r1/a.gz", "packed/installers/setup.exe",
     "packed/generations", "packed/generations/" + generationDigest,
     "packed/generations/" + "C".repeat(64) + "/catalog.json", "packed/generations/short/catalog.json",
-    ...["PACK-FEED.json", "PACK-FEED.p7s", "BUILD-ATTESTATION.json", "VERSION.json", "PACKAGE-MANIFEST.json", "provenance.json", "catalog.json/child", "catalog.json.", "catalog.json%20", "extra.txt"].map((name) => "packed/" + packedGeneration + name),
+    ...["PACK-FEED.json", "PACK-FEED.p7s", "BUILD-ATTESTATION.json", "VERSION.json", "PACKAGE-MANIFEST.json", "provenance.json", "catalog.json/child", "catalog.json.", "catalog.json%20", "required_scope.json", "required-scope.json/child", "required-scope.json.", "extra.txt"].map((name) => "packed/" + packedGeneration + name),
     "packed/objects/packs/" + "D".repeat(64) + ".m2p", "packed/objects/packs/" + "d".repeat(63) + ".m2p",
     "packed/" + packPath + "/extra", "packed/objects/packs/" + "d".repeat(64) + ".M2P",
     "packed/objects/packs//" + "d".repeat(64) + ".m2p", "packed/objects/packs/%2e%2e%2fprivate",

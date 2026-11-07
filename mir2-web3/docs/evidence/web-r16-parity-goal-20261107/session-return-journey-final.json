@@ -1,0 +1,155 @@
+{
+  "schema": "mir2.r16.session-return.browser.v1",
+  "mode": "journey",
+  "locale": "zh-CN",
+  "passed": false,
+  "renderer": "bevy-db5e53a91f4d11de",
+  "startedAt": "2026-11-07T08:09:27.408Z",
+  "phases": [
+    "normal-login",
+    "cold-entry-single-q",
+    "normal-logout-to-selection",
+    "ordinary-second-character",
+    "same-connection-entry",
+    "normal-logout-to-selection",
+    "same-connection-entry"
+  ],
+  "commands": {
+    "clientCapabilities": 2,
+    "setLanguage": 1,
+    "clientVersion": 1,
+    "login": 1,
+    "startGame": 3,
+    "keepAlive": 5,
+    "npcPurchaseOwner": 3,
+    "logOut": 2,
+    "newCharacter": 1
+  },
+  "sockets": [
+    {
+      "id": 1,
+      "closed": false
+    }
+  ],
+  "coldKeys": [
+    {
+      "trusted": true,
+      "repeat": false,
+      "focused": true,
+      "activeTag": "DIV",
+      "questReady": false,
+      "questOpen": false,
+      "hudReady": false,
+      "hudQuestOpen": null
+    }
+  ],
+  "entries": [
+    {
+      "role": "original",
+      "index": 1,
+      "level": 30,
+      "completedMainAndGrowth": 26,
+      "characterPage": "character",
+      "characterOpen": false,
+      "position": {
+        "x": 328,
+        "y": 264
+      },
+      "stamp": {
+        "generation": 2,
+        "revision": 1,
+        "connectionGeneration": 1,
+        "sessionGeneration": 1,
+        "sceneRevision": 3,
+        "playerObjectId": 1000,
+        "mapFileName": "0"
+      },
+      "socketId": 1
+    },
+    {
+      "role": "new",
+      "index": 4,
+      "level": 1,
+      "completedMainAndGrowth": 0,
+      "characterPage": "character",
+      "characterOpen": false,
+      "position": {
+        "x": 288,
+        "y": 616
+      },
+      "stamp": {
+        "generation": 4,
+        "revision": 14,
+        "connectionGeneration": 1,
+        "sessionGeneration": 2,
+        "sceneRevision": 7,
+        "playerObjectId": 1000,
+        "mapFileName": "0"
+      },
+      "socketId": 1
+    }
+  ],
+  "returns": [
+    {
+      "index": 1,
+      "selectedPosition": 0,
+      "roster": [
+        1,
+        2,
+        3
+      ],
+      "sourceSocketUnchanged": true,
+      "loginCountUnchanged": true
+    },
+    {
+      "index": 4,
+      "selectedPosition": 3,
+      "roster": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "sourceSocketUnchanged": true,
+      "loginCountUnchanged": true
+    }
+  ],
+  "screenshots": [
+    "01-first-q-native-diary.png",
+    "02-logout-selection.png",
+    "03-logout-selection.png",
+    "04-failure.png"
+  ],
+  "network": {
+    "errors": [],
+    "failed": []
+  },
+  "pageErrors": [],
+  "releases": [
+    "bevy-db5e53a91f4d11de"
+  ],
+  "errors": [
+    {
+      "phase": "same-connection-entry",
+      "code": "NATIVE_UI_NOT_READY",
+      "detail": "NATIVE_UI_NOT_READY"
+    }
+  ],
+  "coldOpen": {
+    "singlePhysicalQ": true,
+    "trigger": "visible-world",
+    "before": {
+      "questReady": false,
+      "hudReady": false,
+      "questOpen": false
+    },
+    "after": {
+      "questReady": true,
+      "hudReady": false,
+      "questOpen": true,
+      "locale": "zh-CN"
+    },
+    "elapsedMs": 4242
+  },
+  "finishedAt": "2026-11-07T08:12:08.530Z"
+}

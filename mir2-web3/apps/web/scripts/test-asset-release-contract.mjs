@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
+import { createRequire } from "node:module";
 import test from "node:test";
 import { fileURLToPath } from "node:url";
 
@@ -23,7 +24,10 @@ function loadTypeScriptModule(url) {
   );
   assert.deepEqual(errors, []);
   const loadedModule = { exports: {} };
-  new Function("exports", "module", compiled.outputText)(loadedModule.exports, loadedModule);
+  // Resolve actual Worker dependencies from the source module, not this test.
+  new Function("exports", "module", "require", compiled.outputText)(
+    loadedModule.exports, loadedModule, createRequire(sourcePath),
+  );
   return loadedModule.exports;
 }
 

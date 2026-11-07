@@ -105,7 +105,8 @@ The installer holds the same exclusive per-install file lock as the launcher
 for fresh and existing installations. After all verified files are installed,
 an older update journal/backup/staging is preserved under
 `.update/installer-retired/`; signed highest-release receipts remain in place.
-The installer releases its lock before the finish page starts the launcher.
+The installer releases its lock before its optional post-install action starts
+the launcher (the finish page for full/bootstrap, the directory-page choice for packed).
 An interrupted installer still requires repair; journaled automatic-update
 recovery is not a claim of whole-installer power-loss recovery.
 
@@ -149,7 +150,8 @@ back to English when a required localized message is missing.
 Windows 10+ x64, per-user installation and optional desktop shortcut remain.
 Only Microsoft runtime installation requests elevation. Runtime restart requests
 suppress game launch. Silent installation never starts the game or guide.
-The finish-page choices execute via `ExecAsOriginalUser` / `ShellExecAsOriginalUser`.
+The optional post-install choices execute via `ExecAsOriginalUser` /
+`ShellExecAsOriginalUser`.
 Windows error 4551/1260/577 gets localized application-protection guidance; other
 launch failures retain their error code. A single bounded ASCII failure record
 is saved under `%LOCALAPPDATA%/mir2-web3/installer-last-launch.txt` only when its
@@ -162,3 +164,91 @@ never installs a trusted root, and never retries the game elevated. Client
 uninstallation preserves language preferences and never removes server accounts.
 A successful compiler-only fixture does not establish clean-PC installation,
 application-control acceptance, human ten-language gameplay or capacity.
+
+## Packed full installation (opt-in)
+
+`build-packed-installer.ps1` is the release entry point for `/DMir2Packed=1`.
+It runs the actual clean Candidate/CMS gate from an explicit Candidate source
+checkout, the signed updater-bundle gate and the full pinned-CMS/PackStore gate
+before generating literal inputs. `prepare-packed-installer-input.py` is only
+the supplementary byte/closure helper, not a signature verifier. The game and
+engine source revisions are explicit and may differ; both must match the
+signed packed generation and updater bundle. No key is selected and no package
+is signed or published by these tools.
+
+`InstallerSourceRevision` defaults to `EngineSourceRevision`. An explicitly
+different installer revision must be a clean descendant checkout of that exact
+engine commit, with game and engine revisions equal. The complete commit delta
+may change only this directory's `Mir2-Invite.iss`, `README.md` and
+`build-packed-installer.ps1`; every other path is rejected. The Candidate source
+checkout stays on its exact game/engine commit. Runtime verifiers are executed
+from that original engine checkout, and all full Candidate, resource, pack and
+pinned CMS checks remain mandatory. The build proof records the installer
+revision separately, both tree IDs, ancestry, changed paths and the three raw
+recipe file hashes. It rechecks clean checkouts and recipe bytes after building.
+This supports a reviewed recipe correction without relabelling existing game or
+engine artifacts as if they had been rebuilt from the recipe-only descendant.
+
+This layout installs the exact generation controls and content-addressed packs,
+the nine-file updater bundle, ten guides and their required licenses. Public
+signed feed bytes are copied unchanged to the generation's local `PACK-FEED.*`.
+`updater/packed-install.json` is an unsigned locator containing only the schema
+`mir2.windows.packed-install.v1` and the lowercase manifest SHA-256. The updater
+must verify and adopt its local signed generation; no selector, highest receipt
+or Healthy state is installed. Loose game EXE and asset files are not included.
+All four `game/` signature metadata files, the two updater seed files, generation
+files, packs and locator use `onlyifdoesntexist`.
+
+The initial guard admits fresh directories or retries whose existing managed
+files all match this exact input closure. Unlisted legacy gameplay, other
+generations, state, recovery or active game-lease files cause refusal and remain
+untouched. Existing managed files must be ordinary single-link files with no
+alternate streams. This conservative mode does not claim general in-place
+migration of a healthy older installation; existing players retain the ordinary
+launcher update and full repair modes. The original full and bootstrap defaults,
+production AppId, separate validation identity, icons, runtime handling and
+ten-language preference behavior remain unchanged. A packed install does not
+retire an old update transaction as if it had replaced a full loose game.
+
+Packed mode uses one directory/installation confirmation page. It retains the
+directory chooser and places the desktop shortcut, launch-after-installation and
+open-installed-guide choices there. Launch defaults to checked and may be
+disabled; the guide and desktop shortcut default to unchecked. Interactive packed
+desktop creation reads the confirmed checkbox directly, rather than Inno's
+TasksList, which is populated after this page. Silent mode retains the original
+`/TASKS` selection at icon-processing time and never starts the game or guide.
+The welcome, mandatory guide, tasks,
+ready and ordinary finish pages are omitted only in packed mode. The guide still
+ships in all ten languages and opens after installation when selected. The
+localized Install button makes the directory-page confirmation explicit.
+Its instruction uses Inno's complete, localized `ReadyLabel2b` ("Click Install
+to continue with the installation"), rather than the old Next-button wording.
+
+Only packed mode uses `ShowLanguageDialog=auto`: Inno shows the language dialog
+when it cannot match a language identifier; supported system-language detection
+and Inno's previous installer language remain in effect. Explicit `/LANG` is
+still supported. This does not remove any translation or overwrite game locale
+preferences. See the official [language-dialog semantics](https://jrsoftware.org/ishelp/topic_setup_showlanguagedialog.htm)
+and [previous-language preference](https://jrsoftware.org/ishelp/topic_setup_usepreviouslanguage.htm).
+
+After successful installation, the confirmed launch choice invokes the original
+user's `Mir2Launcher.exe --play-installed`, rather than asking for Start game a
+second time. That launcher operation must retain installed-content verification,
+game leases and the authenticated Ready plus ten-second liveness requirement; it
+does not authorize network installation or mark a generation Healthy. Ordinary
+launcher use retains its Home screen. Unchecked launch, cancellation, failure,
+silent mode and a required restart never automatically start the game. Inno
+still displays a necessary restart page even with `DisableFinishedPage=yes`.
+Full/bootstrap retain their existing wizard and finish-page behavior.
+
+Local supplementary regressions (synthetic signatures are never release proof):
+
+```text
+python -B apps/game-client/platform-windows/scripts/invited-installer/test-packed-installer-input.py
+python -B apps/game-client/windows-updater/scripts/test-bootstrap-installer.py
+```
+
+The ordinary empty-cache Windows download, actual installation, offline seed
+adoption and real game readiness must be timed separately before claiming the
+5–10 minute cold-start target. Reducing resource file count is not evidence of
+network speed or complete frontend acceptance.

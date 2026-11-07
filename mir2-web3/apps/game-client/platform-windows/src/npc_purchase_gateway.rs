@@ -505,7 +505,11 @@ impl NativeNpcPurchaseGateway {
         }
         Ok(accepted_owner)
     }
-    pub(super) fn drain_applied(&mut self, fence: &NativeCommandFence) -> Result<(), String> {
+    pub(super) fn drain_applied(
+        &mut self,
+        fence: &NativeCommandFence,
+    ) -> Result<Vec<(NativeCommandStamp, NativeNpcEconomyProjection)>, String> {
+        let mut completed = Vec::new();
         for _ in 0..MAX_PENDING_SOURCES {
             let Some(applied) = self
                 .gate
@@ -528,16 +532,14 @@ impl NativeNpcPurchaseGateway {
                 return Err("Native purchase applied source custody missing".into());
             };
             let source = self.sources.remove(index).expect("sealed applied source");
-            publish_applied_ui_source(
-                fence,
-                self.binding_stamp.expect("current source stamp"),
-                &source.projection,
-            )?;
+            let stamp = self.binding_stamp.expect("current source stamp");
+            publish_applied_ui_source(fence, stamp, &source.projection)?;
             self.applied = Some(applied.witness());
             let observation = self.client.applied(applied.binding(), applied.witness());
             self.observe(observation);
+            completed.push((stamp, source.projection));
         }
-        Ok(())
+        Ok(completed)
     }
     pub(super) fn recovery_if_ready(
         &mut self,

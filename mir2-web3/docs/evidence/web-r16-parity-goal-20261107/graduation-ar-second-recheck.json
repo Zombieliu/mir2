@@ -1,0 +1,1569 @@
+{
+  "schema": "r16-onboarding-forest-cave-entry-browser-smoke/1",
+  "startedAt": "2026-11-07T05:13:45.105Z",
+  "passed": true,
+  "villageFirstTwoCompleted": false,
+  "scope": {
+    "ordinaryWebUiOnly": true,
+    "validationRole": "Warrior",
+    "validationMode": "final",
+    "isolatedRealm": true,
+    "sameControllerRole": true,
+    "ordinaryLoginAndLogout": true,
+    "noQuestGrantOrSaveWrite": true
+  },
+  "sourceHashes": {
+    "quests": "59b4e1b8a0dcc9f95de7871a178f715d6ce1baefe96e263f38e5d4328d4dccf7",
+    "journeyUi": "e52630f84ee09e3e2d3abd821db00dde01b62e7d803d18972c8fd906db38c747",
+    "questLayout": "a07818a33e778410c617449a1c35892da315a3c05cf617d4112d5ea6f2ed7214",
+    "keys": "ebfd4f283523f658d33793f604e697a5c4e4b0430fc5d63586ec8597bf31d208",
+    "bag": "10a1dd118f66e6924de84ac611fdd0f7473e255e9f5b31063027f72a411d83c7",
+    "panel": "d6436a807c81b42525aa7e74b6bb6288819ed8bf4db9cdda914e2ad58a264fd8",
+    "npcShop": "6112790ba0b9a57fb529fbbf85d25dd20c3d8b98a63884a9098267badb42c5a1",
+    "shopPaint": "b7279b5d15b7c27960afeddf8ece13b37cb58c795817f74edeec3170b63c85d6",
+    "spawns": "907db052030a97036e404429373dd3ad3e0e838e279613080e92c3be28bf3ff2",
+    "leveling": "f873b9be24c3d6e151d7eee614ad1a805492dc2cbb8a28514279035e39e9eed6",
+    "questBridge": "1b94c42c228bbd0a757dd1c91f3771f9c70de07d595db31e9960e46ad83f832c",
+    "questActionPolicy": "5a8042d691109178c59cecdab3d5bb7c6a6c955049fa05a44519218e2c2e0570",
+    "nativeLocalization": "712f58b1f747d371dd511dadb7f5d3d76c5c91b4341bd7da96cfe1a1efdaad57",
+    "nativeLocalizationData": "d42c1568e3a6fa2798f30038f7a553f4fb4cb3f04abfb44672dc9cab37185938"
+  },
+  "plan": {
+    "profile": "newcomer-v2",
+    "scope": "growth15/q8 when eligible, and ordinary D001 entry/interior/exit with q9 only when eligible",
+    "segment": "cave",
+    "ordinaryCaveGates": [
+      {
+        "from": "0",
+        "to": "d001",
+        "gate": {
+          "x": 147,
+          "y": 33
+        },
+        "landing": {
+          "x": 151,
+          "y": 362
+        },
+        "otherGates": [
+          {
+            "x": 148,
+            "y": 34
+          }
+        ],
+        "bounds": {
+          "minX": 134,
+          "maxX": 160,
+          "minY": 23,
+          "maxY": 50
+        }
+      },
+      {
+        "from": "d001",
+        "to": "0",
+        "gate": {
+          "x": 148,
+          "y": 365
+        },
+        "landing": {
+          "x": 143,
+          "y": 40
+        },
+        "otherGates": [
+          {
+            "x": 148,
+            "y": 366
+          },
+          {
+            "x": 149,
+            "y": 366
+          }
+        ],
+        "bounds": {
+          "minX": 136,
+          "maxX": 166,
+          "minY": 347,
+          "maxY": 377
+        }
+      }
+    ],
+    "quests": [
+      {
+        "id": 2110009,
+        "minLevel": 16,
+        "startNpcId": 0,
+        "finishNpcId": 0,
+        "gold": 500,
+        "experience": 0,
+        "kills": [],
+        "flags": [
+          {
+            "number": 2210091,
+            "message": "Reach the Oma Cave entrance",
+            "kind": "serverEvent",
+            "conditions": [
+              "omaCaveEntryReached"
+            ]
+          }
+        ]
+      }
+    ],
+    "finalReloginCheck": true,
+    "ordinaryLogoutEachSegment": true,
+    "jane": {
+      "map": "0",
+      "x": 284,
+      "y": 606
+    },
+    "diaryKeyRequested": "KeyQ",
+    "diaryKeyFromCurrentSharedDefaults": "KeyQ",
+    "readOnlyGetters": [
+      "getMir2QuestUiStatus",
+      "getMir2QuestWorldControlRects",
+      "getMir2NpcShopUiStatus",
+      "getMir2HudUiStatus"
+    ],
+    "coldEntryWaitMs": 45000
+  },
+  "checks": [
+    {
+      "name": "web-ordinary-login-and-authoritative-class-save-readback",
+      "passed": true
+    }
+  ],
+  "phases": [
+    "ordinary-owned-qa-character-relogin",
+    "web-real-q-diary",
+    "web-real-f11-class-skill",
+    "complete"
+  ],
+  "screenshots": [
+    "01-web-quest-diary.png",
+    "02-graduation-equipment-selected.png",
+    "03-graduation-d605-selected.png",
+    "04-web-class-skill-tooltip.png"
+  ],
+  "packetEvidence": [
+    {
+      "sequence": 13,
+      "method": "LoginSuccess",
+      "phase": "ordinary-owned-qa-character-relogin"
+    },
+    {
+      "sequence": 17,
+      "method": "StartGame",
+      "phase": "ordinary-owned-qa-character-relogin",
+      "result": 4
+    },
+    {
+      "sequence": 29,
+      "method": "MapInformation",
+      "phase": "ordinary-owned-qa-character-relogin"
+    },
+    {
+      "sequence": 30,
+      "method": "UserInformation",
+      "phase": "ordinary-owned-qa-character-relogin",
+      "gold": 76360,
+      "hp": 419,
+      "maxHp": 419,
+      "mp": 116,
+      "maxMp": 116,
+      "objectId": 1000,
+      "direction": "Up"
+    },
+    {
+      "sequence": 451,
+      "method": "CompleteQuest",
+      "phase": "ordinary-owned-qa-character-relogin",
+      "completedQuestIds": [
+        2110001,
+        2110002,
+        2110003,
+        2110004,
+        2110005,
+        2110006,
+        2110007,
+        2110008,
+        2110009,
+        2110010,
+        2110011,
+        2110012,
+        2110013,
+        2110014,
+        2110015,
+        2110016,
+        2110017,
+        2110018,
+        2110019,
+        2110020,
+        2110021,
+        2110022,
+        2120015,
+        2120020,
+        2120025,
+        2120030
+      ]
+    },
+    {
+      "sequence": 694,
+      "method": "LogOutSuccess",
+      "phase": "web-real-f11-class-skill"
+    }
+  ],
+  "questOperations": [],
+  "movement": [],
+  "native": [],
+  "errors": [],
+  "network": {
+    "failed": [],
+    "httpErrors": [],
+    "cancelled": [
+      {
+        "phase": "ordinary-owned-qa-character-relogin",
+        "method": "GET",
+        "pathHash": "9eeb5fa233df82531dffea86ffb49fa4f48ac32bcba5fb5d93a58ab367fe0e40",
+        "successfulResponseObserved": true
+      },
+      {
+        "phase": "ordinary-owned-qa-character-relogin",
+        "method": "GET",
+        "pathHash": "59b575174e75b5bd4afcfbd6f7f338462fb173fabd1e9572382da322fe3dffef",
+        "successfulResponseObserved": true
+      },
+      {
+        "phase": "ordinary-owned-qa-character-relogin",
+        "method": "GET",
+        "pathHash": "9eeb5fa233df82531dffea86ffb49fa4f48ac32bcba5fb5d93a58ab367fe0e40",
+        "successfulResponseObserved": true
+      },
+      {
+        "phase": "web-real-q-diary",
+        "method": "GET",
+        "pathHash": "b5a477466acb573db09051484a348dc305a615e912e5fd4fb8cdfc59b6aa0454",
+        "successfulResponseObserved": true
+      }
+    ]
+  },
+  "webSockets": [
+    {
+      "phase": "ordinary-owned-qa-character-relogin",
+      "endpoint": "ws://127.0.0.1:19348/_next/webpack-hmr",
+      "pathHash": "68afb58f2f69cbe61316909dcbdce8f92609c4684fdd5bb4b13545255cb8dbc9",
+      "loopback": true,
+      "hasQuery": true,
+      "handshakeStatus": 101,
+      "closed": false,
+      "closeCode": null,
+      "closeFrames": []
+    },
+    {
+      "phase": "ordinary-owned-qa-character-relogin",
+      "endpoint": "ws://127.0.0.1:19244/ws",
+      "pathHash": "0c65a812b078db6795486113db0a40a60e82b36e6bcc9ecbaff9ac00e404f5ff",
+      "loopback": true,
+      "hasQuery": false,
+      "handshakeStatus": 101,
+      "closed": false,
+      "closeCode": null,
+      "closeFrames": []
+    }
+  ],
+  "console": {
+    "errorCount": 0,
+    "warningCount": 7,
+    "hashes": [
+      {
+        "phase": "ordinary-owned-qa-character-relogin",
+        "name": "warning",
+        "hash": "175c73d54d8d443a965a16a38ac036c2de536a3920f173064fd6837866b00186"
+      },
+      {
+        "phase": "ordinary-owned-qa-character-relogin",
+        "name": "warning",
+        "hash": "028f3f9f2caaf142d315979e46e18af2d6430a0294f54665270daae193804d26"
+      },
+      {
+        "phase": "ordinary-owned-qa-character-relogin",
+        "name": "warning",
+        "hash": "34c894744e40e258bbc64404aa3f9eae3d2e1131c69b28a85f51b13a9044597f"
+      },
+      {
+        "phase": "ordinary-owned-qa-character-relogin",
+        "name": "warning",
+        "hash": "2f943bf8ff3b6c5f556b44f4a433f22b17a5170fbe1aad611a81a1f013214f70"
+      },
+      {
+        "phase": "ordinary-owned-qa-character-relogin",
+        "name": "warning",
+        "hash": "2f943bf8ff3b6c5f556b44f4a433f22b17a5170fbe1aad611a81a1f013214f70"
+      },
+      {
+        "phase": "ordinary-owned-qa-character-relogin",
+        "name": "warning",
+        "hash": "2f943bf8ff3b6c5f556b44f4a433f22b17a5170fbe1aad611a81a1f013214f70"
+      },
+      {
+        "phase": "ordinary-owned-qa-character-relogin",
+        "name": "warning",
+        "hash": "95ccaf15054a28e089f80d2fc97f26b964e944e761a119511fb2bfa848b41b25"
+      }
+    ]
+  },
+  "commands": {
+    "clientCapabilities": 2,
+    "setLanguage": 1,
+    "clientVersion": 1,
+    "login": 1,
+    "startGame": 1,
+    "npcPurchaseOwner": 1,
+    "keepAlive": 2,
+    "logOut": 1
+  },
+  "unknownCommandCount": 0,
+  "unknownTypeHashes": [],
+  "cleanup": {
+    "ordinaryLogout": true,
+    "browserClosed": true
+  },
+  "vitals": [
+    {
+      "sequence": 3,
+      "receivedAtMs": 1794028429496,
+      "method": "realmInfo",
+      "hp": null,
+      "maxHp": null,
+      "mp": null,
+      "maxMp": null,
+      "dead": false,
+      "position": null
+    },
+    {
+      "sequence": 30,
+      "receivedAtMs": 1794028440988,
+      "method": "UserInformation",
+      "hp": 419,
+      "maxHp": 419,
+      "mp": 116,
+      "maxMp": 116,
+      "dead": false,
+      "position": {
+        "x": 328,
+        "y": 255
+      }
+    },
+    {
+      "sequence": 694,
+      "receivedAtMs": 1794028466091,
+      "method": "LogOutSuccess",
+      "hp": null,
+      "maxHp": null,
+      "mp": null,
+      "maxMp": null,
+      "dead": false,
+      "position": null
+    }
+  ],
+  "medicine": [],
+  "trustedBeltKeyEvents": [],
+  "npcPurchaseEvidence": [
+    {
+      "sequence": 684,
+      "action": "begin",
+      "reply": "producer",
+      "completeSnapshot": true,
+      "matchingRequestAndOperation": true,
+      "bootstrapObserverNotGated": true
+    }
+  ],
+  "inventoryClose": {
+    "method": "visible-native-x",
+    "shortcutRetested": false,
+    "priorUnconfirmedF9Run": "onboarding-v12-browser-r5"
+  },
+  "budgets": {
+    "maxHuntMs": 360000,
+    "maxSteps": 420
+  },
+  "publicMapSceneResponses": [
+    {
+      "phase": "ordinary-owned-qa-character-relogin",
+      "map": "0",
+      "missing": 0,
+      "sourceSprites": 903
+    }
+  ],
+  "saveReadback": {
+    "map": "0",
+    "hp": 419,
+    "maxHp": 419,
+    "mp": 116,
+    "maxMp": 116,
+    "dead": false,
+    "position": {
+      "x": 328,
+      "y": 255
+    },
+    "progression": {
+      "level": 30,
+      "experience": 19497,
+      "maxExperience": 2000000
+    },
+    "className": "Warrior",
+    "gold": 76360,
+    "completedQuestIds": [
+      2110001,
+      2110002,
+      2110003,
+      2110004,
+      2110005,
+      2110006,
+      2110007,
+      2110008,
+      2110009,
+      2110010,
+      2110011,
+      2110012,
+      2110013,
+      2110014,
+      2110015,
+      2110016,
+      2110017,
+      2110018,
+      2110019,
+      2110020,
+      2110021,
+      2110022,
+      2120015,
+      2120020,
+      2120025,
+      2120030
+    ],
+    "equipment": [
+      {
+        "name": "Candle",
+        "slot": "torch"
+      },
+      {
+        "name": "ThickArmour(M)",
+        "slot": "armour"
+      },
+      {
+        "name": "SolidGreatAxe",
+        "slot": "weapon"
+      }
+    ],
+    "skills": [
+      {
+        "spell": "Fencing",
+        "index": 0,
+        "level": 2
+      },
+      {
+        "spell": "Slaying",
+        "index": 1,
+        "level": 0
+      },
+      {
+        "spell": "Thrusting",
+        "index": 2,
+        "level": 0
+      },
+      {
+        "spell": "HalfMoon",
+        "index": 3,
+        "level": 0
+      }
+    ],
+    "questLog": [
+      {
+        "questId": 2110001,
+        "stage": "completed",
+        "current": 1,
+        "required": 1,
+        "objectives": [
+          {
+            "label": "Report to Assistant Jane",
+            "current": 1,
+            "required": 1,
+            "done": true
+          }
+        ]
+      },
+      {
+        "questId": 2110002,
+        "stage": "completed",
+        "current": 1,
+        "required": 1,
+        "objectives": [
+          {
+            "label": "Equip a weapon you can use",
+            "current": 1,
+            "required": 1,
+            "done": true
+          }
+        ]
+      },
+      {
+        "questId": 2110003,
+        "stage": "completed",
+        "current": 4,
+        "required": 4,
+        "objectives": [
+          {
+            "label": "Defeat 2 Scarecrow.",
+            "current": 2,
+            "required": 2,
+            "done": true
+          },
+          {
+            "label": "Defeat 2 RakingCat.",
+            "current": 2,
+            "required": 2,
+            "done": true
+          }
+        ]
+      },
+      {
+        "questId": 2110004,
+        "stage": "completed",
+        "current": 3,
+        "required": 3,
+        "objectives": [
+          {
+            "label": "Defeat 2 Oma.",
+            "current": 2,
+            "required": 2,
+            "done": true
+          },
+          {
+            "label": "Complete your class practice",
+            "current": 1,
+            "required": 1,
+            "done": true
+          }
+        ]
+      },
+      {
+        "questId": 2110005,
+        "stage": "completed",
+        "current": 1,
+        "required": 1,
+        "objectives": [
+          {
+            "label": "Reach a Bichon safe area",
+            "current": 1,
+            "required": 1,
+            "done": true
+          }
+        ]
+      },
+      {
+        "questId": 2110006,
+        "stage": "completed",
+        "current": 1,
+        "required": 1,
+        "objectives": [
+          {
+            "label": "Buy a small HP or MP potion from a normal shop",
+            "current": 1,
+            "required": 1,
+            "done": true
+          }
+        ]
+      },
+      {
+        "questId": 2110007,
+        "stage": "completed",
+        "current": 4,
+        "required": 4,
+        "objectives": [
+          {
+            "label": "Defeat 4 ForestYeti.",
+            "current": 4,
+            "required": 4,
+            "done": true
+          }
+        ]
+      },
+      {
+        "questId": 2120015,
+        "stage": "completed",
+        "current": 1,
+        "required": 1,
+        "objectives": []
+      },
+      {
+        "questId": 2110008,
+        "stage": "completed",
+        "current": 3,
+        "required": 3,
+        "objectives": [
+          {
+            "label": "Defeat 2 Oma.",
+            "current": 2,
+            "required": 2,
+            "done": true
+          },
+          {
+            "label": "Complete your class practice",
+            "current": 1,
+            "required": 1,
+            "done": true
+          }
+        ]
+      },
+      {
+        "questId": 2110009,
+        "stage": "completed",
+        "current": 1,
+        "required": 1,
+        "objectives": [
+          {
+            "label": "Reach the Oma Cave entrance",
+            "current": 1,
+            "required": 1,
+            "done": true
+          }
+        ]
+      },
+      {
+        "questId": 2110010,
+        "stage": "completed",
+        "current": 4,
+        "required": 4,
+        "objectives": [
+          {
+            "label": "Defeat 4 Skeleton.",
+            "current": 4,
+            "required": 4,
+            "done": true
+          }
+        ]
+      },
+      {
+        "questId": 2110011,
+        "stage": "completed",
+        "current": 4,
+        "required": 4,
+        "objectives": [
+          {
+            "label": "Defeat 3 Skeleton.",
+            "current": 3,
+            "required": 3,
+            "done": true
+          },
+          {
+            "label": "Complete your class practice",
+            "current": 1,
+            "required": 1,
+            "done": true
+          }
+        ]
+      },
+      {
+        "questId": 2110012,
+        "stage": "completed",
+        "current": 2,
+        "required": 2,
+        "objectives": [
+          {
+            "label": "Defeat 1 Skeleton.",
+            "current": 1,
+            "required": 1,
+            "done": true
+          },
+          {
+            "label": "Complete your class practice",
+            "current": 1,
+            "required": 1,
+            "done": true
+          }
+        ]
+      },
+      {
+        "questId": 2120020,
+        "stage": "completed",
+        "current": 1,
+        "required": 1,
+        "objectives": []
+      },
+      {
+        "questId": 2110013,
+        "stage": "completed",
+        "current": 1,
+        "required": 1,
+        "objectives": [
+          {
+            "label": "Reach the Dead Mine entrance",
+            "current": 1,
+            "required": 1,
+            "done": true
+          }
+        ]
+      },
+      {
+        "questId": 2110014,
+        "stage": "completed",
+        "current": 5,
+        "required": 5,
+        "objectives": [
+          {
+            "label": "Defeat 3 Zombie2.",
+            "current": 3,
+            "required": 3,
+            "done": true
+          },
+          {
+            "label": "Defeat 2 Zombie3.",
+            "current": 2,
+            "required": 2,
+            "done": true
+          }
+        ]
+      },
+      {
+        "questId": 2110015,
+        "stage": "completed",
+        "current": 2,
+        "required": 2,
+        "objectives": [
+          {
+            "label": "Defeat 1 Zombie2.",
+            "current": 1,
+            "required": 1,
+            "done": true
+          },
+          {
+            "label": "Complete your class practice",
+            "current": 1,
+            "required": 1,
+            "done": true
+          }
+        ]
+      },
+      {
+        "questId": 2110016,
+        "stage": "completed",
+        "current": 4,
+        "required": 4,
+        "objectives": [
+          {
+            "label": "Defeat 3 Zombie2.",
+            "current": 3,
+            "required": 3,
+            "done": true
+          },
+          {
+            "label": "Complete your class practice",
+            "current": 1,
+            "required": 1,
+            "done": true
+          }
+        ]
+      },
+      {
+        "questId": 2120025,
+        "stage": "completed",
+        "current": 1,
+        "required": 1,
+        "objectives": []
+      },
+      {
+        "questId": 2110017,
+        "stage": "completed",
+        "current": 2,
+        "required": 2,
+        "objectives": [
+          {
+            "label": "Equip armour for your class and level",
+            "current": 1,
+            "required": 1,
+            "done": true
+          },
+          {
+            "label": "Report to the Bichon Wall Board",
+            "current": 1,
+            "required": 1,
+            "done": true
+          }
+        ]
+      },
+      {
+        "questId": 2110018,
+        "stage": "completed",
+        "current": 2,
+        "required": 2,
+        "objectives": [
+          {
+            "label": "Reach the Wooma Temple entrance",
+            "current": 1,
+            "required": 1,
+            "done": true
+          },
+          {
+            "label": "Complete your class practice",
+            "current": 1,
+            "required": 1,
+            "done": true
+          }
+        ]
+      },
+      {
+        "questId": 2110019,
+        "stage": "completed",
+        "current": 3,
+        "required": 3,
+        "objectives": [
+          {
+            "label": "Defeat 3 Dung.",
+            "current": 3,
+            "required": 3,
+            "done": true
+          }
+        ]
+      },
+      {
+        "questId": 2110020,
+        "stage": "completed",
+        "current": 3,
+        "required": 3,
+        "objectives": [
+          {
+            "label": "Defeat 3 WoomaSoldier.",
+            "current": 3,
+            "required": 3,
+            "done": true
+          }
+        ]
+      },
+      {
+        "questId": 2110021,
+        "stage": "completed",
+        "current": 4,
+        "required": 4,
+        "objectives": [
+          {
+            "label": "Defeat 3 WoomaFighter.",
+            "current": 3,
+            "required": 3,
+            "done": true
+          },
+          {
+            "label": "Complete your class practice",
+            "current": 1,
+            "required": 1,
+            "done": true
+          }
+        ]
+      },
+      {
+        "questId": 2110022,
+        "stage": "completed",
+        "current": 1,
+        "required": 1,
+        "objectives": [
+          {
+            "label": "Return to the Bichon Wall Board",
+            "current": 1,
+            "required": 1,
+            "done": true
+          }
+        ]
+      },
+      {
+        "questId": 2120030,
+        "stage": "completed",
+        "current": 1,
+        "required": 1,
+        "objectives": []
+      }
+    ],
+    "hpLarge": 0
+  },
+  "diaryReadback": {
+    "nativeReady": true,
+    "ordinaryQ": true,
+    "level": 30,
+    "displayedLocale": "ar",
+    "completedQuestIds": [
+      2110001,
+      2110002,
+      2110003,
+      2110004,
+      2110005,
+      2110006,
+      2110007,
+      2110008,
+      2110009,
+      2110010,
+      2110011,
+      2110012,
+      2110013,
+      2110014,
+      2110015,
+      2110016,
+      2110017,
+      2110018,
+      2110019,
+      2110020,
+      2110021,
+      2110022,
+      2120015,
+      2120020,
+      2120025,
+      2120030
+    ]
+  },
+  "lastPhysicalNativeInput": {
+    "phase": "web-real-f11-class-skill",
+    "logical": {
+      "x": 1013,
+      "y": 13.5
+    },
+    "css": {
+      "x": 949.6875,
+      "y": 12.65625
+    },
+    "clickCount": 1,
+    "delayMs": 80,
+    "quest": {
+      "questLocaleVersion": 1,
+      "language": "en",
+      "displayLocaleVersion": 1,
+      "displayLanguage": "ar",
+      "ready": true,
+      "error": null,
+      "capturesPointer": false,
+      "questLogOpen": false,
+      "frame": 179,
+      "generation": 2,
+      "revision": 5,
+      "openRevision": 4,
+      "hpOrb": {
+        "supported": true,
+        "ready": false,
+        "generation": 2,
+        "revision": 5,
+        "hp": null,
+        "maxHp": null,
+        "hpOnly": null,
+        "slot": null,
+        "image": null,
+        "source": null,
+        "destination": null,
+        "layout": null
+      },
+      "mpOrb": {
+        "supported": true,
+        "ready": false,
+        "generation": 2,
+        "revision": 5,
+        "mp": null,
+        "maxMp": null,
+        "hpOnly": null,
+        "slot": null,
+        "image": null,
+        "source": null,
+        "destination": null,
+        "layout": null
+      },
+      "experienceBar": {
+        "supported": false,
+        "ready": false,
+        "generation": 2,
+        "revision": 5,
+        "experience": null,
+        "maxExperience": null,
+        "slot": null,
+        "image": null,
+        "source": null,
+        "destination": null,
+        "layout": null
+      },
+      "weightBar": {
+        "supported": false,
+        "ready": false,
+        "generation": 2,
+        "revision": 5,
+        "currentWeight": null,
+        "maxWeight": null,
+        "slot": null,
+        "image": null,
+        "source": null,
+        "destination": null,
+        "layout": null
+      },
+      "hudBarDrawPlan": {
+        "version": 1,
+        "generation": 2,
+        "revision": 5,
+        "lifetime": "r1-g2-p1000",
+        "experience": {
+          "token": "e-1",
+          "sequence": 1,
+          "state": "draw",
+          "current": 19497,
+          "maximum": 2000000,
+          "slot": {
+            "left": 9,
+            "top": 759,
+            "width": 1004,
+            "height": 8
+          },
+          "image": "original-ui/Prguse/8.png",
+          "source": {
+            "left": 0,
+            "top": 0,
+            "width": 9,
+            "height": 8
+          },
+          "destination": {
+            "left": 9,
+            "top": 759,
+            "width": 9,
+            "height": 8
+          }
+        },
+        "weight": {
+          "token": "w-1",
+          "sequence": 1,
+          "state": "draw",
+          "current": 52,
+          "maximum": 350,
+          "slot": {
+            "left": 919,
+            "top": 719,
+            "width": 76,
+            "height": 12
+          },
+          "image": "original-ui/Prguse/76.png",
+          "source": {
+            "left": 0,
+            "top": 0,
+            "width": 23,
+            "height": 12
+          },
+          "destination": {
+            "left": 919,
+            "top": 719,
+            "width": 23,
+            "height": 12
+          }
+        }
+      }
+    },
+    "receivedSequenceBefore": 692
+  },
+  "graduation": {
+    "ordinaryQ": true,
+    "equipmentAndChallengeSelectedByMouse": true,
+    "localSelectionOnly": true,
+    "expectedItem": "الحكم ماك",
+    "expectedMapTitle": "N 2f of dungeon",
+    "viewport": {
+      "width": 960,
+      "height": 720
+    },
+    "logicalViewport": {
+      "width": 1024,
+      "height": 768
+    },
+    "expectedMapIdentity": "D605",
+    "expectedRenderer": "bevy-db5e53a91f4d11de",
+    "selectedLocale": "ar"
+  },
+  "skillHover": {
+    "spell": "HalfMoon",
+    "learnedLevel": 0,
+    "sourceKey": "content.magic.HalfMoon.description",
+    "sourceComplete": true,
+    "ordinaryMouseHover": true,
+    "text": "الهلال\n\nمهارة قابلة للتبديل\nتكلفة MP: 3 لكل هجوم\n\nتولد أرجحة السلاح السريعة موجات صدمة تضر بالأعداء في نصف دائرة حولك.\n\nمستوى المهارة الحالي 0\nالمستوى التالي 26",
+    "hostFrame": 162,
+    "previousFrame": 152,
+    "clearedOnClose": true
+  },
+  "after": {
+    "map": "0",
+    "hp": 419,
+    "maxHp": 419,
+    "mp": 116,
+    "maxMp": 116,
+    "dead": false,
+    "position": {
+      "x": 328,
+      "y": 255
+    },
+    "gold": 76360,
+    "hpLarge": 0
+  },
+  "renderer": {
+    "expected": "bevy-db5e53a91f4d11de",
+    "observedPublicReleases": [
+      "bevy-db5e53a91f4d11de"
+    ]
+  },
+  "presentationChecksPassed": true,
+  "gameplayPassed": true,
+  "networkClean": true,
+  "incompleteReason": null,
+  "finishedAt": "2026-11-07T05:14:26.213Z",
+  "finalQuestLog": [
+    {
+      "questId": 2110001,
+      "stage": "completed",
+      "current": 1,
+      "required": 1,
+      "objectives": [
+        {
+          "label": "Report to Assistant Jane",
+          "current": 1,
+          "required": 1,
+          "done": true
+        }
+      ]
+    },
+    {
+      "questId": 2110002,
+      "stage": "completed",
+      "current": 1,
+      "required": 1,
+      "objectives": [
+        {
+          "label": "Equip a weapon you can use",
+          "current": 1,
+          "required": 1,
+          "done": true
+        }
+      ]
+    },
+    {
+      "questId": 2110003,
+      "stage": "completed",
+      "current": 4,
+      "required": 4,
+      "objectives": [
+        {
+          "label": "Defeat 2 Scarecrow.",
+          "current": 2,
+          "required": 2,
+          "done": true
+        },
+        {
+          "label": "Defeat 2 RakingCat.",
+          "current": 2,
+          "required": 2,
+          "done": true
+        }
+      ]
+    },
+    {
+      "questId": 2110004,
+      "stage": "completed",
+      "current": 3,
+      "required": 3,
+      "objectives": [
+        {
+          "label": "Defeat 2 Oma.",
+          "current": 2,
+          "required": 2,
+          "done": true
+        },
+        {
+          "label": "Complete your class practice",
+          "current": 1,
+          "required": 1,
+          "done": true
+        }
+      ]
+    },
+    {
+      "questId": 2110005,
+      "stage": "completed",
+      "current": 1,
+      "required": 1,
+      "objectives": [
+        {
+          "label": "Reach a Bichon safe area",
+          "current": 1,
+          "required": 1,
+          "done": true
+        }
+      ]
+    },
+    {
+      "questId": 2110006,
+      "stage": "completed",
+      "current": 1,
+      "required": 1,
+      "objectives": [
+        {
+          "label": "Buy a small HP or MP potion from a normal shop",
+          "current": 1,
+          "required": 1,
+          "done": true
+        }
+      ]
+    },
+    {
+      "questId": 2110007,
+      "stage": "completed",
+      "current": 4,
+      "required": 4,
+      "objectives": [
+        {
+          "label": "Defeat 4 ForestYeti.",
+          "current": 4,
+          "required": 4,
+          "done": true
+        }
+      ]
+    },
+    {
+      "questId": 2120015,
+      "stage": "completed",
+      "current": 1,
+      "required": 1,
+      "objectives": []
+    },
+    {
+      "questId": 2110008,
+      "stage": "completed",
+      "current": 3,
+      "required": 3,
+      "objectives": [
+        {
+          "label": "Defeat 2 Oma.",
+          "current": 2,
+          "required": 2,
+          "done": true
+        },
+        {
+          "label": "Complete your class practice",
+          "current": 1,
+          "required": 1,
+          "done": true
+        }
+      ]
+    },
+    {
+      "questId": 2110009,
+      "stage": "completed",
+      "current": 1,
+      "required": 1,
+      "objectives": [
+        {
+          "label": "Reach the Oma Cave entrance",
+          "current": 1,
+          "required": 1,
+          "done": true
+        }
+      ]
+    },
+    {
+      "questId": 2110010,
+      "stage": "completed",
+      "current": 4,
+      "required": 4,
+      "objectives": [
+        {
+          "label": "Defeat 4 Skeleton.",
+          "current": 4,
+          "required": 4,
+          "done": true
+        }
+      ]
+    },
+    {
+      "questId": 2110011,
+      "stage": "completed",
+      "current": 4,
+      "required": 4,
+      "objectives": [
+        {
+          "label": "Defeat 3 Skeleton.",
+          "current": 3,
+          "required": 3,
+          "done": true
+        },
+        {
+          "label": "Complete your class practice",
+          "current": 1,
+          "required": 1,
+          "done": true
+        }
+      ]
+    },
+    {
+      "questId": 2110012,
+      "stage": "completed",
+      "current": 2,
+      "required": 2,
+      "objectives": [
+        {
+          "label": "Defeat 1 Skeleton.",
+          "current": 1,
+          "required": 1,
+          "done": true
+        },
+        {
+          "label": "Complete your class practice",
+          "current": 1,
+          "required": 1,
+          "done": true
+        }
+      ]
+    },
+    {
+      "questId": 2120020,
+      "stage": "completed",
+      "current": 1,
+      "required": 1,
+      "objectives": []
+    },
+    {
+      "questId": 2110013,
+      "stage": "completed",
+      "current": 1,
+      "required": 1,
+      "objectives": [
+        {
+          "label": "Reach the Dead Mine entrance",
+          "current": 1,
+          "required": 1,
+          "done": true
+        }
+      ]
+    },
+    {
+      "questId": 2110014,
+      "stage": "completed",
+      "current": 5,
+      "required": 5,
+      "objectives": [
+        {
+          "label": "Defeat 3 Zombie2.",
+          "current": 3,
+          "required": 3,
+          "done": true
+        },
+        {
+          "label": "Defeat 2 Zombie3.",
+          "current": 2,
+          "required": 2,
+          "done": true
+        }
+      ]
+    },
+    {
+      "questId": 2110015,
+      "stage": "completed",
+      "current": 2,
+      "required": 2,
+      "objectives": [
+        {
+          "label": "Defeat 1 Zombie2.",
+          "current": 1,
+          "required": 1,
+          "done": true
+        },
+        {
+          "label": "Complete your class practice",
+          "current": 1,
+          "required": 1,
+          "done": true
+        }
+      ]
+    },
+    {
+      "questId": 2110016,
+      "stage": "completed",
+      "current": 4,
+      "required": 4,
+      "objectives": [
+        {
+          "label": "Defeat 3 Zombie2.",
+          "current": 3,
+          "required": 3,
+          "done": true
+        },
+        {
+          "label": "Complete your class practice",
+          "current": 1,
+          "required": 1,
+          "done": true
+        }
+      ]
+    },
+    {
+      "questId": 2120025,
+      "stage": "completed",
+      "current": 1,
+      "required": 1,
+      "objectives": []
+    },
+    {
+      "questId": 2110017,
+      "stage": "completed",
+      "current": 2,
+      "required": 2,
+      "objectives": [
+        {
+          "label": "Equip armour for your class and level",
+          "current": 1,
+          "required": 1,
+          "done": true
+        },
+        {
+          "label": "Report to the Bichon Wall Board",
+          "current": 1,
+          "required": 1,
+          "done": true
+        }
+      ]
+    },
+    {
+      "questId": 2110018,
+      "stage": "completed",
+      "current": 2,
+      "required": 2,
+      "objectives": [
+        {
+          "label": "Reach the Wooma Temple entrance",
+          "current": 1,
+          "required": 1,
+          "done": true
+        },
+        {
+          "label": "Complete your class practice",
+          "current": 1,
+          "required": 1,
+          "done": true
+        }
+      ]
+    },
+    {
+      "questId": 2110019,
+      "stage": "completed",
+      "current": 3,
+      "required": 3,
+      "objectives": [
+        {
+          "label": "Defeat 3 Dung.",
+          "current": 3,
+          "required": 3,
+          "done": true
+        }
+      ]
+    },
+    {
+      "questId": 2110020,
+      "stage": "completed",
+      "current": 3,
+      "required": 3,
+      "objectives": [
+        {
+          "label": "Defeat 3 WoomaSoldier.",
+          "current": 3,
+          "required": 3,
+          "done": true
+        }
+      ]
+    },
+    {
+      "questId": 2110021,
+      "stage": "completed",
+      "current": 4,
+      "required": 4,
+      "objectives": [
+        {
+          "label": "Defeat 3 WoomaFighter.",
+          "current": 3,
+          "required": 3,
+          "done": true
+        },
+        {
+          "label": "Complete your class practice",
+          "current": 1,
+          "required": 1,
+          "done": true
+        }
+      ]
+    },
+    {
+      "questId": 2110022,
+      "stage": "completed",
+      "current": 1,
+      "required": 1,
+      "objectives": [
+        {
+          "label": "Return to the Bichon Wall Board",
+          "current": 1,
+          "required": 1,
+          "done": true
+        }
+      ]
+    },
+    {
+      "questId": 2120030,
+      "stage": "completed",
+      "current": 1,
+      "required": 1,
+      "objectives": []
+    }
+  ],
+  "completedQuestIds": [
+    2110001,
+    2110002,
+    2110003,
+    2110004,
+    2110005,
+    2110006,
+    2110007,
+    2110008,
+    2110009,
+    2110010,
+    2110011,
+    2110012,
+    2110013,
+    2110014,
+    2110015,
+    2110016,
+    2110017,
+    2110018,
+    2110019,
+    2110020,
+    2110021,
+    2110022,
+    2120015,
+    2120020,
+    2120025,
+    2120030
+  ],
+  "lastFullSnapshot": {
+    "sequence": 695,
+    "receivedAtMs": 1794028466128,
+    "position": null,
+    "inSafeZone": false,
+    "mapFileName": null,
+    "hp": null,
+    "maxHp": null,
+    "progression": {
+      "level": null,
+      "experience": 19497,
+      "maxExperience": 2000000
+    },
+    "gold": 76360,
+    "dead": false
+  },
+  "lastUserLocation": null,
+  "movementSteps": 0,
+  "finalVitals": {
+    "hp": null,
+    "maxHp": null,
+    "mp": null,
+    "maxMp": null,
+    "dead": false,
+    "position": null
+  }
+}

@@ -1,0 +1,121 @@
+# Windows R16 与 Web 1:1 验收
+
+2026-11-07 建立持续 Goal。基准为 `codex/windows-player-journey` 在 `mir2-player-journey` 工作树的 Windows R16。复核时本地基点为 `c404bde8a`，远端为 `a7dc19d385b8`。远端额外七个提交只涉及官网和 Atlas。当前工作树中游戏、Windows、Web 的未提交内容继续保留，代码和已运行包分别标记。[分支比较](https://github.com/Zombieliu/mir2/compare/c404bde8a5190534f6bc83ec8a4fe78fffc8cb50...a7dc19d385b85a8205f1f29dea25a54a1dbd85ba)
+
+`r16-gameplay-baseline.json` 定义两端共用的五职业、`newcomer-v2` 和 Native 引导。对齐按同一内容和 Gateway 下可观察的界面、动作、结果、失败反馈与重登状态逐项验收。每项记录源代码位置、候选构建和实际证据。键鼠、浏览器系统能力等输入和宿主差异单列。项目的 100% Candidate、真人 Accepted 和正式发布分别核对。[共享配置](../packages/game-data/data/r16-gameplay-baseline.json) · [门槛](AGENT-ORCHESTRATION.md)
+
+| 范围 | 已核对 | 未完成及验收要求 |
+| --- | --- | --- |
+| 登录、选角、创角 | Web 过场、重名重试、断线重登和四槽权威已验。两端创角标签已对齐布局。Web 注销按 Native 返回已认证选角。快捷键改用稳定订阅，两后端各四进四出且导航期间不重绑 | Windows 窗口实机、旧超额档访问和钱包扫码签名进城继续核对。原 Alt+X 失败及其观测边界保留；当前优先无需桌面控制的工作 |
+| 布局、语言、设置 | Native 十语和字体共用。毕业装备与 D605 名称、十语窄窗和 65 次关闭零移动有证据。首次 Q 的渲染间隙覆盖已修，中、英、阿八次独立冷启动和角色默认页签复测通过 | 旧 headless-shell 的约 61 秒主线程停顿待兼容调查。继续核对任务详情、交付地、奖励、追踪、NPC 遮挡、设置和键位。既有 Native 译文仍需校对 |
+| 移动、地图、遮挡 | 两端共用碰撞原数据与行深度规则。Web 大地图有普通位移回执。小地图左右键、缩放、标题停止和 Q 日记拦截已复测 | 继续核对小地图长路线、占位、旧地图和重连输入，以及场景叠放 |
+| 战斗、技能、药与拾取 | 共用服务端和部分战斗决策。既有 Web 记录包含天然击杀、拾取、Digit1 用药及三职业技能说明 | 同角色比较按键分配和施放、追击时序、野外抢焦用药、目标消失和自然掉落归属。Web 背包兼容窗与 Bevy 窗口切换需验重叠和点击归属 |
+| 任务、地图和同档 | 三职业各 22 主线及 4 成长至 30 级，Web 重登读回。Windows → Web 有普通移动保存回环 | 道士原 120 分钟到 27 级，同档另续至 30。需复验矿洞 14–16 项限时，以及同候选 Web → Windows 读回、其他两职业与后续区域的独立范围 |
+| 组队与交易 | Web 已按 Native 使用新鲜悬停目标，只发 AddMember；两后端普通邀请、拒绝、组队、移除和注销重进通过。普通登录后的慢保存自动恢复已复验。原交易取消、成交一次与重登记录保留 | Native 凭证先行且旧档仍保存中的恢复、组队共用失败 ACK／跨社交总预算仍欠。继续交易朝向、取消、同模板成交和双方重登；Windows 窗口暂缓 |
+| 阿洛 | 两端有普通入队、自然语言教学、取消及重启读回。Web 采购有一次真实扣款及返程记录 | Windows 有本地模型设置，Web 同一按钮缺接线。继续验同一阿洛跨端教学、重启、导出，及从实际 UI 授权后完整离线生活、原期限、扣款与返家 |
+| Crystal 原英雄 | 两端已有英雄窗口及部分普通协议适配 | 当前两端都缺完整的普通创建与召退闭环，槽位切换也欠权威存档证据。列为共用缺口，分别验普通权限和跨端读回 |
+| 资源与发行 | v21-r3 的本机有限资源 42,724 项，v22 共享服已做三职业功能验收。有限包完整索引误宣告能力已修，默认 WebGPU 进出和中／阿首次 Q 均无资源错误 | 同一发行构建验证冷缓存、CDN 路径和 360 MiB 门槛。正式 Gateway 为 `platinum_176`，Linux 签发、正式库旧档恢复和 R16 配置迁移另验 |
+
+来源与已有实测见 [本机试玩](WEB-R16-PLAYABLE-HANDOFF-20261104.zh-CN.md)、[十语与跨端同档](WEB-R16-FOREST-SHARED-SAVE-20261106.zh-CN.md)、[三职业 v22](WEB-R16-NEWCOMER-V22-20261107.zh-CN.md)、[阿洛自主生活](ALO-AUTONOMOUS-LIFE-20261103.zh-CN.md)、[原生验收](NATIVE-WINDOWS-PLAYER-QA.md)。
+
+## 小地图标题和边框
+
+Windows 的小地图框架消费左右键，先结束已有路线。Web v21-r3 用相同比奇存档启动 13 格路线，点击标题后仍发出五次 Run，并到达原目标。Web 在小地图框架接入既有路线取消，图像点击和地图按钮各由原入口处理。回归直接执行实际 JSX 事件，覆盖左右键、图像子节点、按钮和中键。
+
+在隔离的 v22 File 存档副本，通过新源码的本机 Next 页面，1280×960、1024×768、960×720 的六次普通图像点击均有 Walk/Run 和指定格的权威坐标。窄窗口实际将小地图视图缩为 112.5×101.25。左右键分别点标题，后续移动指令均为零，路线停在目标之前。Q 日记打开时点击为零移动。结束有正常注销和干净的浏览器网络检查。首次窄窗脚本用了分数坐标，事件量化落到邻格，后续用实际可点的整数坐标复测。Web 相关 24 项回归通过。[前后对照收据](evidence/web-r16-parity-goal-20261107/minimap-web.json) · [窄窗截图](evidence/web-r16-parity-goal-20261107/minimap-web.png)
+
+已验证比奇近距离短路线、标题和 Q 日记场景。历史远距离点击未起步的记录继续单列，其他地图切换、占位和旧图输入待核对。修复以源码验证记录，当前试玩入口仍是此前的包。
+
+## Web 创角回执
+
+Windows R16 等待服务端回执后才切回选角，失败保留窗口。Web 按当前 Gateway 会话提供允许的职业，保留单笔提交直到收到对应回执。成功以服务端索引插入并选中新角色，支持 R16 预览回执的 `level=0`。失败保留名字、职业和性别。回执超过 15 秒或提交后断线时，提示重新登录检查角色列表，随后由玩家决定是否重试。
+
+空白 File 服使用 v22 Gateway 和当前 Web 源码，通过普通账号实测。五职业服在写档被拒后保留草稿，编辑后延迟回执期间双击和 Enter 无重复发送；选中新角色、进城和正常注销通过。隐藏表单时仍保留请求，迟到成功回执能选中第四个角色。分别丢弃成功回执和在成功后关闭连接，浏览器重登均只看到一条对应新角色；旧三职业服提供三种选择且实际创角通过。53 项选定回归和 TypeScript 检查通过。截图使用独立复验，在登录过场退场后截取，角色名字已遮罩。[浏览器收据](evidence/web-r16-parity-goal-20261107/character-create-web.json) · [失败保留草稿](evidence/web-r16-parity-goal-20261107/character-create-rejected.png) · [等待回执](evidence/web-r16-parity-goal-20261107/character-create-pending.png)
+
+原 v22 的负向实测确认跨账号重名及第五槽均能在 File 落盘。过场期间可点击下层选角，五职业性别标签被遮挡。各项修复与复测见下文。
+
+## 共享创角校验
+
+正常创角先检查四槽，再检查全服在册角色名，ASCII 字母忽略大小写。File 在现有持久化事务中检查，PG 在事务中锁住创角与账号写入边界，防止两个网关同时占名、占最后一槽或使用同一新索引。只重试提交前确认的索引冲突。普通删除沿用 R16 的释放名字行为，Crystal 原版软删保留名字另列。旧重名和超额档保留，无数据库迁移。隔离旧档中第五个角色经正常协议可进游戏，界面仍按四槽显示。
+
+File 和原生 PostgreSQL 17.11 的并发、重开、旧档等级与金币、释放名字各有验证。两种回执共用 Native 词库。Web 收到 `5` 保留草稿并聚焦名字，收到 `4` 关窗并在选角显示满槽。实际浏览器中另一个普通会话补满剩余槽，旧页面创角收到 `4`，重登精确读回四个原索引，改名角色可进城及正常注销。首次复验的拒绝流程通过，进城回执超出 12 秒观察窗口。相同 Gateway 二次用 90 秒窗口完整通过。Windows 回执、状态和防重共四项测试通过，平台锁文件的依赖差异在外置测试副本离线解析，正式锁定构建与窗口取证待验。Web 54 项选定回归和 TypeScript 通过。[测试和源文件摘要](evidence/web-r16-parity-goal-20261107/character-constraints-verification.json) · [首次收据](evidence/web-r16-parity-goal-20261107/character-constraints-browser-first.json) · [完整收据](evidence/web-r16-parity-goal-20261107/character-constraints-browser.json) · [重名截图](evidence/web-r16-parity-goal-20261107/character-constraints-name.png) · [满槽截图](evidence/web-r16-parity-goal-20261107/character-constraints-slots.png)
+
+## 登录开门与创角标签
+
+修复前用普通账号实测，门帧播放中点击旧创建坐标就打开了下层创角窗。五职业的职业和性别标签均与按钮相交。当前 Web 收到有效 `LoginSuccess` 后进入独立开门状态。19 张原帧准备时停在第 0 帧，随后按 Windows 的 100 毫秒间隔播放 1–18，结束后才为当前 socket 和 generation 开放选角。断线、换连接和回登录使旧完成信号失效。浏览器单帧加载失败或等待达到 30 秒时使用已认证角色列表进入选角，缺帧路径独立记录。
+
+相同隔离 Gateway 的浏览器复测扣住第 8 帧，Tab、Enter、空格、Esc 和四个旧按钮坐标都未发选角命令。重送一份原登录回执未提前开放，压住鼠标跨过退场时释放也未触发创角。从第 1 帧到选角测得 1818 毫秒。关连接后迟到资源未揭开旧列表，重新登录由新连接读回原角色。故意拒绝一张门帧时，已认证列表仍可用。另一次实测只转发真实 `StartGame(4)` 并暂扣后续启动包，点击退出正常回登录。前一次仅扣两种包时进城先发生，保留为测试边界记录。[退出回执](evidence/web-r16-parity-goal-20261107/login-door-exit.json) · [最终源码复测](evidence/web-r16-parity-goal-20261107/login-door-browser-final-source.json)
+
+两端将本地化标签移到各按钮行之前，提示移到 Windows 原提示坐标。Web 1280×960 简中五职业及 960×720 葡语三职业均验标签完整与实际创角，五职业新角正常进城和注销。第一次复验因脚本把葡语两个标签的 DOM 顺序写反而停止，修正断言后完整通过。Web 67 项选定回归及 TypeScript 通过，Native 6 项开门、音频及创角测试通过。Native 窗口及发行包另验。[缺陷复现](evidence/web-r16-parity-goal-20261107/login-door-before.json) · [首次复测](evidence/web-r16-parity-goal-20261107/login-door-browser-first.json) · [完整复测](evidence/web-r16-parity-goal-20261107/login-door-browser.json) · [源文件摘要](evidence/web-r16-parity-goal-20261107/login-door-verification.json) · [开门](evidence/web-r16-parity-goal-20261107/login-door-cold.png) · [修复前布局](evidence/web-r16-parity-goal-20261107/create-labels-before.png) · [五职业](evidence/web-r16-parity-goal-20261107/create-labels-five-zh-CN.png) · [窄屏三职业](evidence/web-r16-parity-goal-20261107/create-labels-classic-pt-BR.png)
+
+## 毕业建议、十语与关闭手势
+
+毕业日记按装备索引和导入地图索引读取共用 Native 名称。战士使用 `244` 的“裁决之杖”，法师使用 `259` 的“战法法杖”，道士使用 `272` 的“灵泉魔杖”。D605 对应导入地图 `186`，简中显示“地牢二层北部”，挑战标题继续使用毕业配置中的“清剿昆虫洞穴北二层”。展示与原有获取说明一同进入共用日记。Web 有限词库补入这四个既有词条，生成结果为 2,237 条、1,187,023 字节，通过现有 1.25 MiB 预算。[源码、构建及结果收据](evidence/web-r16-parity-goal-20261107/graduation-final-verification.json)
+
+共用 Rust 测试覆盖十语、三职业，以及桌面和移动日记的 60 组标题。7 项 Native 测试、104 项 Node 回归和 TypeScript 检查通过。完整重建 WebGPU、WebGL2 和 WebGL2-shared 包，版本为 `bevy-db5e53a91f4d11de`，六个文件和不可变副本的 SHA256 相符，三套体积检查通过。浏览器实测使用 WebGL2-shared 的共享 UI。[Native 测试](evidence/web-r16-parity-goal-20261107/graduation-final-native.log) · [有限词库测试](evidence/web-r16-parity-goal-20261107/graduation-final-node.log)
+
+修复前，阿语一次复测关闭日记后发出九次 Walk，战士副本从 `(328,264)` 走到 `(328,255)`。此前脚本只约束资产与任务，仍将该次标为通过。首条位移发生在 Q 阶段，终点与关闭按钮下方的地图格吻合。Shell 现在利用已有 Quest 指针记录保留整个关闭手势的归属，覆盖窗口在按下时消失、前景矩形尚未同步的情况，并保留未遮挡 HUD 的交互。对应真实处理函数的负向回归先失败，修复后覆盖 up、cancel、两个画布和后续世界点击。[误移动原收据](evidence/web-r16-parity-goal-20261107/graduation-final-ar-unintended-walk.json) · [修复前回归](evidence/web-r16-parity-goal-20261107/graduation-final-pointer-before.log) · [修复后回归](evidence/web-r16-parity-goal-20261107/graduation-final-pointer-after.log)
+
+最终以三份既有 30 级毕业档独立登录，均实读 22 项主线与 4 项成长，打开 Q、选择装备和挑战、查看 F11 技能并正常注销。另以 `960×720` 浏览器窗口逐一通过十语。每次分别用 80／200 毫秒按住日记 X，再从 HUD 关闭，共 13 次独立登录、65 次关闭手势，整场 walk、run、turn 及战斗、用药、任务操作均为零，位置保持一致。[战士](evidence/web-r16-parity-goal-20261107/graduation-final-warrior-zh-CN.png) · [法师](evidence/web-r16-parity-goal-20261107/graduation-final-wizard-zh-CN.png) · [道士](evidence/web-r16-parity-goal-20261107/graduation-final-taoist-zh-CN.png) · [俄语窄窗](evidence/web-r16-parity-goal-20261107/graduation-final-narrow-ru.png) · [阿语窄窗](evidence/web-r16-parity-goal-20261107/graduation-final-narrow-ar.png)
+
+原三台 v22 Gateway 持续在线并更新世界时钟。本轮 Gateway 使用独立复制的 File 数据，逐职业比较等级、经验、金币、背包、装备、任务、技能等 26 项个人字段，78 项相等。事件、revision 与坐标差异分别保留，战士副本保留修复前九步移动的结果，最终复验从该位置开始。最早一次阿语冷启动按 Q 无回执，后续独立复测及最终加强复测通过，首次输入问题继续排查。现有 Native 译文的夹杂英文继续列入文案校对。[字段比较与范围](evidence/web-r16-parity-goal-20261107/graduation-final-verification.json) · [首次 Q 失败](evidence/web-r16-parity-goal-20261107/graduation-final-ar-first.json)
+
+本轮通过隔离的 Next 源码环境验证新渲染包。验后关闭本轮 `19348` 与 `19244–19246` 服务，保留构建、测试副本和证据。Windows 窗口、正式发行构建、360 MiB 资源门槛和真人验收继续按各自范围推进。[清理收据](evidence/web-r16-parity-goal-20261107/graduation-final-cleanup.json)
+
+## 注销选角、首次 Q 与资源能力
+
+Windows R16 的 `LoggedOut` 保留账号和连接，按稳定角色 ID 在服务端列表中恢复选择；`SessionReset` 恢复角色第一页和背包第一页。Web 现按相同规则处理当前会话已申请的注销回执：先撤销旧角色的窗口、请求和私有状态，再用权威列表返回选角，保留认证。点击选角的离开按钮才关闭连接和清除认证。旧连接、旧 generation、未申请、重复及无效列表不能获得新选角权限。[源文件、测试和完整结果](evidence/web-r16-parity-goal-20261107/session-return-verification.json) · [原角色注销后选角](evidence/web-r16-parity-goal-20261107/session-return-selection-original.png) · [第四槽角色返回](evidence/web-r16-parity-goal-20261107/session-return-selection-nonfirst.png)
+
+首次 Q 的竞态来自 HUD 导航快照：按键已同步修改 ref 和导航版本，但 React 尚未重绘，快照仍提交旧的关闭状态；后来的 Native 回投又将已打开的日记关掉。快照现读取即时 ref，覆盖 Q、背包、角色窗口和技能页。四项回归执行实际 Page setter、快照、hook 和回投，在旧实现下失败。171 项选定 Node 回归、4 项 Native 注销／选角测试和 Web TypeScript 检查通过；Native 为编译测试，窗口实机另验。[Node](evidence/web-r16-parity-goal-20261107/session-return-node-final.log) · [Native 返回选角](evidence/web-r16-parity-goal-20261107/session-return-native-return-selection.log)
+
+Chrome 156 下先以 WebGL2-shared 完成中、英、阿六次独立冷启动，分别在世界可见及 Quest 首次 ready 时只按一次可信 Q，保持一秒后从 X 关闭。随后正常注销和选角离开，均无移动、战斗、用药或任务变更。中、阿在默认 WebGPU 又各通过一次。两个完整轮分别使用 WebGL2-shared 和默认渲染路径，实读原 30 级／26 项任务、切换到普通创建的 1 级角色、打开技能页、注销并重进检查默认页签，离开后正常重新登录原角色，各四进四出。中间返回不增加 login 或更换 socket，明确离开才换连接。[六次冷启动之一](evidence/web-r16-parity-goal-20261107/session-return-cold-chrome-ar-ready-2.json) · [阿语首次 Q](evidence/web-r16-parity-goal-20261107/session-return-first-q-ar.png) · [英文首次 Q](evidence/web-r16-parity-goal-20261107/session-return-first-q-en.png) · [WebGL2 完整轮](evidence/web-r16-parity-goal-20261107/session-return-journey-chrome-final.json) · [默认路径完整轮](evidence/web-r16-parity-goal-20261107/session-return-journey-webgpu-fixed.json)
+
+默认 WebGPU 的首次对照虽完成四进四出，仍出现 52 次 404，对应 23 份未封装的实体／角色 shard。有限包仅保留完整索引及选定地图、原图和预构建资源，API 却仅凭索引存在和哈希宣告完整包已验证。现由发行端明确的启用、验证、哈希和路径共同授权完整包，有限索引继续参与版本元数据，默认实体路径使用已有预构建／原图回退。正向测试保留已验证远端完整包和独立地图 atlas。新增五项回归修前四项失败，修后全部通过；相关 24 项测试和 8 项 standalone tracing 通过。首次相邻测试因旧 loader 缺相对 require、未提供 trace fixture 失败，修复 loader 并指定独立 fixture 后通过，原日志保留。[修前浏览器](evidence/web-r16-parity-goal-20261107/session-return-journey-chrome-1.json) · [修前回归](evidence/web-r16-parity-goal-20261107/session-return-asset-capability-before.log) · [最终回归](evidence/web-r16-parity-goal-20261107/session-return-asset-capability-final.log) · [实际 WebGPU 包和关闭的完整包能力](evidence/web-r16-parity-goal-20261107/session-return-cold-webgpu-fixed-zh.json)
+
+23 份浏览器记录连同失败全部保留。早期两次脚本等待隐藏的旧 canvas，后改为实际舞台焦点；旧 headless-shell 出现约 61 秒无法归属 JS 的主线程长任务，当前 Chrome 的两个后端未复现相同停顿。另有几次 Alt+X 可信按键后没有发出 logOut；加入只读诊断和最终普通源码完整轮均通过，原因尚未确定，继续列开放。不能把后续通过解释成这些失败均已修复。阿语截图仍可见既有 Native 英文夹杂，文案校对状态不变。[停顿剖析对应记录](evidence/web-r16-parity-goal-20261107/session-return-journey-perf-1.json) · [未发注销指令](evidence/web-r16-parity-goal-20261107/session-return-journey-chrome-webgl-1.json)
+
+本轮从原在线战士服一次复制为隔离 File 副本。对不可变基线比较，原角色 44 项存档字段只有世界 NPC 事件和 revision 不同，26 项成长／资产字段及位置、朝向一致；两个原账号保留，其他账号内容一致。副本通过普通创角界面新增的三个 1 级角色保留。原三服持续在线，不声称其文件字节不变。取证后关闭本轮 19247／19277／19349，保留原三服。本轮为源码环境验证，原试玩入口、发行包和正式环境尚未替换。[比较和分阶段源码范围](evidence/web-r16-parity-goal-20261107/session-return-verification.json) · [清理](evidence/web-r16-parity-goal-20261107/session-return-cleanup-final.json)
+
+## 稳定快捷键与 Windows 原锁构建
+
+继续复现旧失败：第四次可信 Alt+X 已到浏览器，Shell 函数首行和 Page 入口探针却仍是上一次会话的记录，未进入游戏快捷键处理。Shell 原来随回调和界面状态变化卸载、重装 window capture listener。前序同目标监听器在浏览器回调间的微任务中提交界面更新时，这种模式可能让旧监听器被移除，而新监听器赶不上当前事件。独立 Chrome 156 的真实 DOM 对照各只按一次可信 Alt+X：旧模式调用零次，实际新 hook 调用最新处理器一次；仅 React 提交阶段用 fixture，未连接账号或 Gateway。原第四次没有完整的历史 add/remove trace，不把机制对照当成它的精确时序记录。[失败入口探针](evidence/web-r16-parity-goal-20261107/shortcut-shortcut-diag-2.json) · [真实 DOM 对照](evidence/web-r16-parity-goal-20261107/shortcut-dom-control.json)
+
+Web 现由 `useWindowKeydown` 固定 capture 订阅，layout commit 才切换处理器，离开游戏和卸载会退休处理器。原快捷键函数逐字相同，焦点、模态、所有权、重复按键等判定完整保留。133 项选定 Node 回归和 TypeScript 通过，覆盖实际 Shell、hook、Storage、技能模态和注销；已有测试 fixture 的 useCallback 缺失也已修正。最初两次功能复测的监听器观测器只匹配精确函数名，记录为空，不能证明订阅次数；最终改为非空断言后重新取证。[源码及测试范围](evidence/web-r16-parity-goal-20261107/shortcut-verification.json) · [133 项回归](evidence/web-r16-parity-goal-20261107/shortcut-stable-keydown-node-final.log)
+
+最终 WebGL2-shared 与默认 WebGPU 各完整四进四出，包含 30 级／26 项读回、另一角色、技能窗口、注销重进和明确离开后的重新登录。两个运行从首次进城到第四次进城均保持开发 Strict Mode 初始两次 add、一次 remove，实际存活订阅始终一个，导航中没有重绑。各四次 LogOutSuccess，网络和页面错误为零。26 项个人成长／资产、位置和朝向与隔离基线相同，44 项存档仅 NPC 事件和 revision 不同；副本一个普通创建的 1 级角色保留。[WebGL2](evidence/web-r16-parity-goal-20261107/shortcut-qualified-webgl.json) · [WebGPU](evidence/web-r16-parity-goal-20261107/shortcut-qualified-webgpu.json) · [选角截图](evidence/web-r16-parity-goal-20261107/shortcut-selection.png)
+
+Windows 原锁未跟上共享 runtime 既有 wasm32 getrandom(js) 依赖。仅同步三个依赖边，571 个包的版本、来源和 checksum 不变，CRLF 保留。当前 canonical manifest 和该锁的 `release --offline --locked` 构建通过；608 项源／数据／资源在构建前后稳定，395 项实际编译输入均有前置 pins。新候选 SHA256 为 `bc3bde1d0f063f3c52abe790424249a983f298f4941245a5b6c2c0081dd5190a`，保留此前外置锁候选和原安装 EXE。[锁同步](evidence/web-r16-parity-goal-20261107/shortcut-native-lock-sync.json) · [原锁构建](evidence/web-r16-parity-goal-20261107/shortcut-native-canonical/native-canonical-build-result.json)
+
+原外置锁候选仅通过测试专用自动登录收到 LoginSuccess，尚未 StartGame；桌面自动化被用户物理 Esc 中止。此后用户明确优先不控制电脑的部分，Windows 窗口点击及跨端实机暂缓，不因编译成功而计入窗口验收。停止的是本轮已核对路径和哈希、仍在选角的测试客户端。19248／19249／19278／19350 均已关闭，原三服继续在线，原试玩包及正式环境未替换。[完整边界与保全](evidence/web-r16-parity-goal-20261107/shortcut-verification.json) · [清理](evidence/web-r16-parity-goal-20261107/shortcut-cleanup-final.json)
+
+## 组队悬停、邀请与会话
+
+Native 的普通组队窗与快捷键只提交 AddMember；共享网关检查被邀请者是否接受邀请，成功后才打开邀请方的开关。Web 去掉普通邀请前的 SwitchGroup，并将 Ctrl+G 从已选中对象改为鼠标下的玩家。每次按键按当前 DOM、共享 UI 几何和真实鼠标位置重新判断；背包、任务、模态窗、编辑框和已按住的手势不能穿透。当前自体、死亡、隐藏及已离开 AOI 的对象不能提供邀请名字。阿洛专用入口保留 Native 已有的显式开关路径，不据此改写所有邀请入口。[源码与完整范围](evidence/web-r16-parity-goal-20261107/group-verification.json)
+
+组队开关显示服务端实际值。发送前复核当前角色、物理连接、地图、队长及十五人上限，同名同操作不重复发送。只有匹配名字的 AddMember／DeleteMember 或完整权威名单解除待确认状态；换图保留，成功的新 StartGame 与角色会话结束才清理。发送结果未知时不自动重试，本地确定未发送则保留姓名草稿。296 项 Node、507 组适配器和限定 Web 源码 TypeScript 检查通过；旧 fixture 的依赖及发送末尾断言同步到实际源码，未删除原保护。[Node](evidence/web-r16-parity-goal-20261107/group-node-qualified.log) · [适配器](evidence/web-r16-parity-goal-20261107/group-stage5-qualified.log)
+
+最终 Chrome 156 在 WebGL2-shared 与 WebGPU 各用一个既有一级副本及两个普通注册账号，实际验证：被邀请者关闭时拒绝且邀请方仍关闭；背包和编辑框阻挡；选中 A、悬停 B 时只邀请 B；接受后显示真实两人名单；移除和两次正常注销重进。两场均零移动、战斗、物品操作、页面和资源错误。没有使用管理员命令、传送或模型调用。[WebGL2](evidence/web-r16-parity-goal-20261107/group-browser-webgl.json) · [WebGPU](evidence/web-r16-parity-goal-20261107/group-browser-webgpu.json) · [组队](evidence/web-r16-parity-goal-20261107/group-webgpu-party-established.png) · [背包阻挡](evidence/web-r16-parity-goal-20261107/group-webgl-bag-blocked.png)
+
+三份基线角色的 78 项成长／资产比较相同；未进入的原三十级角色及另一角色全部保存字段相同。参与组队的一级副本在首次入场已收到 `(287,617)`，与复制档的 `(288,616)` 不同，后续各场起止相同；最终差异为该坐标、NPC 事件和 revision，另行保留。新增两个账号来自普通注册。原三服继续在线、原安装 EXE 哈希保持；本轮服务已关闭，未替换试玩包或部署正式环境。[存档](evidence/web-r16-parity-goal-20261107/group-preservation.json) · [清理](evidence/web-r16-parity-goal-20261107/group-cleanup.json)
+
+该轮自动断线恢复未通过。前两次 Playwright 路由使用浏览器 close API 不接受的 1001，错误被测试工具吞掉，不能认定真实关闭；修正为 3001 后，实际日志显示旧连接已结束，但保存耗时 7442 毫秒，新连接约一秒就发送 StartGame，在旧会话进入 resume store 前被路由租约拒绝。原失败继续保留，后续修复与复验见下节。[合法关闭失败](evidence/web-r16-parity-goal-20261107/group-reconnect-valid-close-failed.json) · [脱敏日志](evidence/web-r16-parity-goal-20261107/group-resume-sanitized-log.json)
+
+本轮只限制组队子队列八项，尚未对齐 Native 跨所有社交操作的总八项预算。Native 对拒绝、错误聊天和静默限流也缺名字级失败 ACK，不增加臆造的超时重发。隐藏对象仅补齐组队资格，完整隐藏渲染另验。Windows 窗口、交易、阿洛、发行和真人验收仍开放，`Candidate100=false`。
+
+## 慢保存与自动重连（2026-11-08）
+
+同一 Gateway 进程内，WebSocket 的普通登录／StartGame 现在只等待已确认断开的旧连接。匹配同账号、角色、服务端租约持有者及唯一连接标记后，在会话单写者锁外等待；旧会话真实保存、解冻并存入恢复库后才通知。恢复仅消费一次，等待和容量准入后再次核对身份有效期、撤销与版本。失败、取消、过期及竞争消费均不降级成冷启动，原在线租约、恢复日志与保存围栏保持。[源码摘要、构建、测试和范围](evidence/web-r16-parity-goal-20261107/reconnect-verification.json)
+
+33 项新回归覆盖通知、一次消费、身份撤销、实际 checkpoint 阻塞／失败及移动排空；相邻回归去重后合计 103 项通过。新 Gateway 为隔离的 dev/debug 候选，SHA256 `e519dc7a6d0eb3f399fcb20c1145bb260418ec0c13e3d7ad44327610fc987c55`，九项直接源码在构建前后稳定；未据此宣称完整发行源闭包或 release 构建通过。[测试](evidence/web-r16-parity-goal-20261107/reconnect-test-summary.json) · [候选构建](evidence/web-r16-parity-goal-20261107/reconnect-candidate-build.json)
+
+Chrome 156 无界面运行 WebGL2-shared 与 WebGPU，复用既有普通账号与角色，均完成合法 3001 断线、唯一自动 StartGame 恢复旧会话、同名邀请、遮挡、接受、移除及正常注销重进。两次保存分别 7412／7728 毫秒，新请求等待 861／1009 毫秒后恢复，租约拒绝为零；整场零移动、战斗、物品及页面／网络错误，无管理员命令和模型调用。五份基线角色的 130 项成长／资产、位置及朝向相同；活跃角色仅 NPC 事件和 revision 不同，原三十级及未使用角色全部字段相同。[WebGL2](evidence/web-r16-parity-goal-20261107/reconnect-browser-webgl.json) · [WebGPU](evidence/web-r16-parity-goal-20261107/reconnect-browser-webgpu.json) · [生命周期](evidence/web-r16-parity-goal-20261107/reconnect-lifecycle.json) · [存档](evidence/web-r16-parity-goal-20261107/reconnect-preservation.json) · [组队截图](evidence/web-r16-parity-goal-20261107/reconnect-webgpu-party.png)
+
+本轮服务已正常关闭，原三服、原 Windows EXE、旧候选和未提交工作保留；未替换当前试玩包或部署正式环境。此恢复存储只覆盖本进程 WebSocket，跨 Gateway／TCP、Native 凭证先行且旧档仍保存中的恢复、Windows 窗口及同候选跨端实机另验。组队共用未结项、交易、阿洛与发行门槛继续开放，`Candidate100=false`。[清理与原件](evidence/web-r16-parity-goal-20261107/reconnect-cleanup.json)
+
+## 当前执行顺序
+
+1. 已在真实存档副本完成小地图标题及框架输入修复、缩放和前景 Q 日记复测。
+2. 已完成 Web 创角回执、共享网关四槽和重名、登录过场输入及标签的本机验证。Windows 窗口和超额旧档访问继续追踪。
+3. 已将三职业毕业装备建议和 D605 的既有 Native 名称接进共用日记，完成三职业读档、十语窄窗、65 次关闭零移动与存档个人字段比较。
+4. 组队普通流程及普通登录后的慢保存自动恢复已在两后端通过。继续无需桌面控制的 Native 凭证恢复边界、组队共用未结项、交易、阿洛，以及冷缓存、发行构建和体积门槛。
+5. 无界面浏览器与普通协议测试继续。Windows 窗口及同候选跨端实机暂缓，保留旧 headless 长任务和最终真人验收边界。

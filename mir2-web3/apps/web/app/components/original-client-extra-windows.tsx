@@ -331,6 +331,7 @@ export type ExtraWindowsProps = {
     Pick<
       TradeWindowProps,
       | "trade"
+      | "playerName"
       | "myGold"
       | "myItemCount"
       | "myConfirmed"
@@ -602,6 +603,7 @@ function ExtraWindowsInner({
         <TradeWindow
           t={t}
           trade={trade.trade}
+          playerName={trade.playerName}
           myGold={trade.myGold}
           myItemCount={trade.myItemCount}
           myConfirmed={trade.myConfirmed}

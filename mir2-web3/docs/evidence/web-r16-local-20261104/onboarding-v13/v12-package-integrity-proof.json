@@ -1,0 +1,541 @@
+{
+  "schema": "mir2.r16.onboarding-input-v12-independent-package-integrity.v1",
+  "startedAt": "2026-11-04T14:54:11.987Z",
+  "finishedAt": "2026-11-04T14:59:31.697Z",
+  "passed": true,
+  "failures": [],
+  "scope": "Independent static release-integrity audit of v12 Web plus the existing Windows launcher baseline update",
+  "artifactRoot": "F:/mir2-builds/Numeron-Web-R16-20261104",
+  "previousRoot": "F:/mir2-builds/Numeron-Web-R16-20261104-before-onboarding-input-v12",
+  "manifest": {
+    "root": "F:/mir2-builds/Numeron-Web-R16-20261104",
+    "manifest": "package-manifest.json",
+    "manifestSha256": "b2e19927e3ae5713ae95250fbaebb1894a0633f168beb44de4042ce7471ff8e6",
+    "manifestBytes": 6860468,
+    "checkedFiles": 29659,
+    "checkedBytes": 920319726,
+    "allRegular": true,
+    "noSymlinksOrJunctions": true,
+    "noHardLinks": true,
+    "manifestUnchangedAfterScan": true,
+    "recordsSha256": "711c1a5fd55d01b67d1ca197958f9f8b667f6a3489c223994d048a00088f0b18"
+  },
+  "windowsMetadata": {
+    "reparsePoints": 0,
+    "checkedPaths": 31199,
+    "directoryEnumerationCalls": 0,
+    "encoding": "UTF-8"
+  },
+  "uniqueAncestorDirectories": 1063,
+  "compiledPins": {
+    "passed": true,
+    "buildId": "VRH5ore7ii7q6CEqo5c0y",
+    "rendererVersion": "bevy-07bd13d63fcbbd3a",
+    "rendererImmutableDigestMatches": true,
+    "requiredServerFilesManifestBindingsMatch": true,
+    "aliasAndSavedManifestMatch": true,
+    "rendererLimits": {
+      "wasmBytes": 32505856,
+      "gzipBytes": 7340032,
+      "jsBytes": 204800
+    },
+    "packages": [
+      {
+        "id": "webgpu",
+        "wasmBytes": 29947594,
+        "gzipBytes": 6201011,
+        "jsBytes": 141118,
+        "wasmSha256": "ceb8c77bc136e7e4db639b2cf431b2df4cdaa5d5a73ba6d1b8db9fa2a54046e3",
+        "jsSha256": "afa9d0d67e6fcc05bef3f506a5b3cb6d8e42becd28e65e63f3dd1c1e3653bf5e",
+        "questUiAbiVersion": 1,
+        "bagUiAbiVersion": 1,
+        "primarySharedUiCompiled": false,
+        "importCount": 491,
+        "exportCount": 151,
+        "abiMetadataSha256": "f7819ee80dbda6f3fb7b15b76a94418c01e98b512af3e8791e392d8a21c17279",
+        "exactAbiMatchesV11": true,
+        "jsGlueMatchesV11": true,
+        "questLocalUiCompiled": true,
+        "uiExports": [
+          "getMir2QuestWorldControlRects"
+        ]
+      },
+      {
+        "id": "webgl2",
+        "wasmBytes": 16402211,
+        "gzipBytes": 4213563,
+        "jsBytes": 117176,
+        "wasmSha256": "05df4aa2cbb4c09175066c740cd3040a1e39421e6ea484bf40ad77968b505029",
+        "jsSha256": "2e4c58270f49998063cf64b3605b412edce725f5df73254ce4bbf764b282998d",
+        "questUiAbiVersion": 0,
+        "bagUiAbiVersion": 0,
+        "primarySharedUiCompiled": false,
+        "importCount": 445,
+        "exportCount": 79,
+        "abiMetadataSha256": "3191f5fc455e413d4204e42980d5a03741cfd3a3497848446044d1f1a2df0a5d",
+        "exactAbiMatchesV11": true,
+        "jsGlueMatchesV11": true,
+        "questLocalUiCompiled": false,
+        "uiExports": []
+      },
+      {
+        "id": "webgl2-shared",
+        "wasmBytes": 30876276,
+        "gzipBytes": 6541928,
+        "jsBytes": 139092,
+        "wasmSha256": "bd05616de9fbb1b7d4ece0861bdba03a2b3cf4f8b17d701466feaacd9a139f95",
+        "jsSha256": "5498a896f7968937053dc5fc8b9d7cfb729484c75918bcac1ef8231fdec4fdff",
+        "questUiAbiVersion": 1,
+        "bagUiAbiVersion": 1,
+        "primarySharedUiCompiled": true,
+        "importCount": 450,
+        "exportCount": 149,
+        "abiMetadataSha256": "e3c0373762a28260b16dae22b9986eb339741a4f5053a0bdba38a18c5067c668",
+        "exactAbiMatchesV11": true,
+        "jsGlueMatchesV11": true,
+        "questLocalUiCompiled": true,
+        "uiExports": [
+          "getMir2QuestWorldControlRects"
+        ]
+      }
+    ],
+    "coreBundles": [
+      {
+        "name": "core",
+        "version": "81dd599a887e9338a888672a19a1d5ecc4cc1b6d9b90a9bb41c61d5f8c210974",
+        "wasmBytes": 250136,
+        "jsBytes": 24393,
+        "immutableDigestMatches": true,
+        "unchangedFromV11": true
+      },
+      {
+        "name": "presentation",
+        "version": "08bc05f41551a7f01fd0edf3a7e639df847dad88ef605fc55b764e9bab901bbc",
+        "wasmBytes": 261983,
+        "jsBytes": 24721,
+        "immutableDigestMatches": true,
+        "unchangedFromV11": true
+      },
+      {
+        "name": "npcPurchase",
+        "version": "78c4de3cdd6f97897ad39c7f6e1a61a76a6f02343c0be8d570b616155a7fc58f",
+        "wasmBytes": 165791,
+        "jsBytes": 8332,
+        "immutableDigestMatches": true,
+        "unchangedFromV11": true
+      }
+    ],
+    "noModuleInstantiated": true,
+    "noCurrentSourceFingerprintRecomputed": true
+  },
+  "compiledJavaScript": {
+    "passed": true,
+    "reports": [
+      {
+        "path": "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/chunks/7255.js",
+        "bytes": 2303086,
+        "sha256": "b64b9d1c8353d42ccccffe81412d733f26caf054cae0d9295d1a564c0f9dc319",
+        "rendererLiteralExactMatch": true,
+        "baselineBinding": "eN",
+        "baselineUsesTypeScriptSymbolResolution": true,
+        "compiledProfile": "newcomer-v2",
+        "compiledOnboarding": "native",
+        "boundProfileConsumers": [
+          {
+            "offset": 2096000,
+            "field": "rk"
+          },
+          {
+            "offset": 2097989,
+            "field": "rk"
+          },
+          {
+            "offset": 2218641,
+            "field": "rk"
+          }
+        ],
+        "nativePolicyReferences": 1
+      },
+      {
+        "path": "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/static/chunks/7458-aa5bd902e620abf5.js",
+        "bytes": 2659372,
+        "sha256": "8afcdd7064b4af103f4b4c3f37dfb6f855591e1111779c49de0d6786a627121f",
+        "rendererLiteralExactMatch": true,
+        "baselineBinding": "n$",
+        "baselineUsesTypeScriptSymbolResolution": true,
+        "compiledProfile": "newcomer-v2",
+        "compiledOnboarding": "native",
+        "boundProfileConsumers": [
+          {
+            "offset": 2337975,
+            "field": "rk"
+          },
+          {
+            "offset": 2339874,
+            "field": "rk"
+          },
+          {
+            "offset": 2471675,
+            "field": "rk"
+          }
+        ],
+        "nativePolicyReferences": 1,
+        "compiledCoreTripleMetadataMatches": true,
+        "compiledLocalUi": {
+          "controlType": "questLocalUi",
+          "strictControlTypes": [
+            "navigateQuestRoute",
+            "attackTarget",
+            "attackQuestTarget",
+            "pickUpObject",
+            "pickUpTile",
+            "toggleSupplies",
+            "selectSupplyVendor",
+            "showSupplyInventory",
+            "openDestinationMap",
+            "questLocalUi"
+          ],
+          "getterName": "c",
+          "getterWhitelistReferenceBound": true,
+          "worldActionTypes": [
+            "openDestinationMap",
+            "navigateQuestRoute",
+            "attackTarget",
+            "attackQuestTarget",
+            "pickUpObject",
+            "pickUpTile"
+          ],
+          "actualCompiledWorldPredicateRejectsLocalUi": true,
+          "predicateName": "ij",
+          "purePredicateOnlyExecuted": true
+        }
+      }
+    ],
+    "noNextModuleExecuted": true,
+    "noGameActionOrNetworkExecuted": true
+  },
+  "r16Closure": {
+    "manifestSha256": "fd12f95caf241009c5f2f12e9c97547efe599c6f3a9f83a0a77668e8c4c5bcca",
+    "files": 21033,
+    "bytes": 280303200,
+    "allPinsManifestListedAndVerified": true,
+    "oldV5Subset": 21019,
+    "allOldV5PinsRetained": true
+  },
+  "canonicalBaseline": {
+    "canonical": {
+      "schema": 1,
+      "id": "r16-platinum-fiveclass-newcomer-v2",
+      "contentProfile": "platinum_fiveclass",
+      "questGuidance": "newcomer-v2",
+      "questCadence": "newcomer-v2",
+      "onboarding": "native"
+    },
+    "packagedProjectionMatches": true,
+    "nodeLeafMatchesSource": true,
+    "nodeLeafSha256": "b18c4900a96ebebed9d1a43b7b770d699f641b27b8cf9f157c732ef68d98ba52"
+  },
+  "v11Comparison": {
+    "oldManifestSha256": "db3d48f14486521adc8b91ca90b65da9300c97ef2d6588e850ecf7705ae0bfb1",
+    "oldFiles": 29659,
+    "unchanged": 29540,
+    "changedPaths": [
+      "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/app-path-routes-manifest.json",
+      "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/BUILD_ID",
+      "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/build-manifest.json",
+      "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/required-server-files.json",
+      "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app-paths-manifest.json",
+      "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/_global-error.html",
+      "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/_global-error.rsc",
+      "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/_global-error.segments/_full.segment.rsc",
+      "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/_global-error.segments/_global-error.segment.rsc",
+      "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/_global-error.segments/_global-error/__PAGE__.segment.rsc",
+      "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/_global-error.segments/_head.segment.rsc",
+      "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/_global-error.segments/_index.segment.rsc",
+      "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/_global-error.segments/_tree.segment.rsc",
+      "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/_global-error/page_client-reference-manifest.js",
+      "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/_not-found.html",
+      "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/_not-found.rsc",
+      "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/_not-found.segments/_full.segment.rsc",
+      "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/_not-found.segments/_head.segment.rsc",
+      "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/_not-found.segments/_index.segment.rsc",
+      "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/_not-found.segments/_not-found.segment.rsc",
+      "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/_not-found.segments/_not-found/__PAGE__.segment.rsc",
+      "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/_not-found.segments/_tree.segment.rsc",
+      "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/_not-found/page_client-reference-manifest.js",
+      "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/ai-live.html",
+      "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/ai-live.rsc",
+      "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/ai-live.segments/_full.segment.rsc",
+      "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/ai-live.segments/_head.segment.rsc",
+      "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/ai-live.segments/_index.segment.rsc",
+      "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/ai-live.segments/_tree.segment.rsc",
+      "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/ai-live.segments/ai-live.segment.rsc",
+      "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/ai-live.segments/ai-live/__PAGE__.segment.rsc",
+      "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/ai-live/page_client-reference-manifest.js",
+      "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/game.html",
+      "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/game.rsc",
+      "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/game.segments/_full.segment.rsc",
+      "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/game.segments/_head.segment.rsc",
+      "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/game.segments/_index.segment.rsc",
+      "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/game.segments/_tree.segment.rsc",
+      "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/game.segments/game.segment.rsc",
+      "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/game.segments/game/__PAGE__.segment.rsc",
+      "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/game/page_client-reference-manifest.js",
+      "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/index.html",
+      "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/index.rsc",
+      "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/index.segments/__PAGE__.segment.rsc",
+      "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/index.segments/_full.segment.rsc",
+      "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/index.segments/_head.segment.rsc",
+      "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/index.segments/_index.segment.rsc",
+      "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/index.segments/_tree.segment.rsc",
+      "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/page_client-reference-manifest.js",
+      "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/promotions.html",
+      "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/promotions.rsc",
+      "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/promotions.segments/_full.segment.rsc",
+      "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/promotions.segments/_head.segment.rsc",
+      "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/promotions.segments/_index.segment.rsc",
+      "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/promotions.segments/_tree.segment.rsc",
+      "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/promotions.segments/promotions.segment.rsc",
+      "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/promotions.segments/promotions/__PAGE__.segment.rsc",
+      "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/promotions/invite/[code]/page_client-reference-manifest.js",
+      "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/promotions/page_client-reference-manifest.js",
+      "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/promotions/play.html",
+      "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/promotions/play.rsc",
+      "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/promotions/play.segments/_full.segment.rsc",
+      "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/promotions/play.segments/_head.segment.rsc",
+      "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/promotions/play.segments/_index.segment.rsc",
+      "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/promotions/play.segments/_tree.segment.rsc",
+      "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/promotions/play.segments/promotions.segment.rsc",
+      "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/promotions/play.segments/promotions/play.segment.rsc",
+      "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/promotions/play.segments/promotions/play/__PAGE__.segment.rsc",
+      "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/promotions/play/page_client-reference-manifest.js",
+      "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/qa/button-sounds.html",
+      "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/qa/button-sounds.rsc",
+      "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/qa/button-sounds.segments/_full.segment.rsc",
+      "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/qa/button-sounds.segments/_head.segment.rsc",
+      "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/qa/button-sounds.segments/_index.segment.rsc",
+      "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/qa/button-sounds.segments/_tree.segment.rsc",
+      "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/qa/button-sounds.segments/qa.segment.rsc",
+      "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/qa/button-sounds.segments/qa/button-sounds.segment.rsc",
+      "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/qa/button-sounds.segments/qa/button-sounds/__PAGE__.segment.rsc",
+      "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/qa/button-sounds/page_client-reference-manifest.js",
+      "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/qa/map-monsters/page_client-reference-manifest.js",
+      "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/qa/webgl2-entity-renderer.html",
+      "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/qa/webgl2-entity-renderer.rsc",
+      "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/qa/webgl2-entity-renderer.segments/_full.segment.rsc",
+      "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/qa/webgl2-entity-renderer.segments/_head.segment.rsc",
+      "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/qa/webgl2-entity-renderer.segments/_index.segment.rsc",
+      "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/qa/webgl2-entity-renderer.segments/_tree.segment.rsc",
+      "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/qa/webgl2-entity-renderer.segments/qa.segment.rsc",
+      "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/qa/webgl2-entity-renderer.segments/qa/webgl2-entity-renderer.segment.rsc",
+      "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/qa/webgl2-entity-renderer.segments/qa/webgl2-entity-renderer/__PAGE__.segment.rsc",
+      "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/qa/webgl2-entity-renderer/page_client-reference-manifest.js",
+      "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/spectate.html",
+      "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/spectate.rsc",
+      "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/spectate.segments/_full.segment.rsc",
+      "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/spectate.segments/_head.segment.rsc",
+      "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/spectate.segments/_index.segment.rsc",
+      "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/spectate.segments/_tree.segment.rsc",
+      "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/spectate.segments/spectate.segment.rsc",
+      "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/spectate.segments/spectate/__PAGE__.segment.rsc",
+      "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/spectate/page_client-reference-manifest.js",
+      "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/version/route.js",
+      "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/app/world-report/page_client-reference-manifest.js",
+      "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/chunks/7255.js",
+      "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/middleware-build-manifest.js",
+      "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/middleware.js",
+      "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/pages/404.html",
+      "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/server/pages/500.html",
+      "web/mir2-web3/apps/web/lib/generated/bevy_runtime_version.json",
+      "web/mir2-web3/apps/web/public/bevy-runtime/runtime-manifest.json",
+      "web/mir2-web3/apps/web/server.js"
+    ],
+    "addedPaths": [
+      "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/static/chunks/7458-aa5bd902e620abf5.js",
+      "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/static/VRH5ore7ii7q6CEqo5c0y/_buildManifest.js",
+      "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/static/VRH5ore7ii7q6CEqo5c0y/_ssgManifest.js",
+      "web/mir2-web3/apps/web/public/bevy-runtime-releases/bevy-07bd13d63fcbbd3a/pkg-webgl2-shared/mir2_bevy_runtime_bg.wasm",
+      "web/mir2-web3/apps/web/public/bevy-runtime-releases/bevy-07bd13d63fcbbd3a/pkg-webgl2-shared/mir2_bevy_runtime.js",
+      "web/mir2-web3/apps/web/public/bevy-runtime-releases/bevy-07bd13d63fcbbd3a/pkg-webgl2/mir2_bevy_runtime_bg.wasm",
+      "web/mir2-web3/apps/web/public/bevy-runtime-releases/bevy-07bd13d63fcbbd3a/pkg-webgl2/mir2_bevy_runtime.js",
+      "web/mir2-web3/apps/web/public/bevy-runtime-releases/bevy-07bd13d63fcbbd3a/pkg-webgpu/mir2_bevy_runtime_bg.wasm",
+      "web/mir2-web3/apps/web/public/bevy-runtime-releases/bevy-07bd13d63fcbbd3a/pkg-webgpu/mir2_bevy_runtime.js",
+      "web/mir2-web3/apps/web/public/bevy-runtime-releases/bevy-07bd13d63fcbbd3a/runtime-manifest.json"
+    ],
+    "removedPaths": [
+      "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/static/chunks/7458-5ebf3be430d1a43b.js",
+      "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/static/Keb4DzZQkkVZuUjxLFsRb/_buildManifest.js",
+      "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/static/Keb4DzZQkkVZuUjxLFsRb/_ssgManifest.js",
+      "web/mir2-web3/apps/web/public/bevy-runtime-releases/bevy-ebebc42dff6639fb/pkg-webgl2-shared/mir2_bevy_runtime_bg.wasm",
+      "web/mir2-web3/apps/web/public/bevy-runtime-releases/bevy-ebebc42dff6639fb/pkg-webgl2-shared/mir2_bevy_runtime.js",
+      "web/mir2-web3/apps/web/public/bevy-runtime-releases/bevy-ebebc42dff6639fb/pkg-webgl2/mir2_bevy_runtime_bg.wasm",
+      "web/mir2-web3/apps/web/public/bevy-runtime-releases/bevy-ebebc42dff6639fb/pkg-webgl2/mir2_bevy_runtime.js",
+      "web/mir2-web3/apps/web/public/bevy-runtime-releases/bevy-ebebc42dff6639fb/pkg-webgpu/mir2_bevy_runtime_bg.wasm",
+      "web/mir2-web3/apps/web/public/bevy-runtime-releases/bevy-ebebc42dff6639fb/pkg-webgpu/mir2_bevy_runtime.js",
+      "web/mir2-web3/apps/web/public/bevy-runtime-releases/bevy-ebebc42dff6639fb/runtime-manifest.json"
+    ],
+    "protectedRuntimeFiles": 156,
+    "allRuntimeSizeAndShaUnchanged": true,
+    "oldNonRendererPublicFiles": 25466,
+    "oldNonRendererPublicPinsRetained": true
+  },
+  "nativeUpdate": {
+    "root": "F:/mir2-builds/alo-r16-20261103",
+    "manifest": "BUILD.json",
+    "manifestSha256": "fa1a3fa0d9a545c5d1501c7c4f2d0e4e99d34c7c8a1a5ca0ce456c5125b84a84",
+    "manifestBytes": 83767,
+    "checkedFiles": 475,
+    "checkedBytes": 404504592,
+    "allRegular": true,
+    "noSymlinksOrJunctions": true,
+    "noHardLinks": true,
+    "manifestUnchangedAfterScan": true,
+    "recordsSha256": "d85c78aabeb436e88fcece6fc86929b7d693a2bb387ce712b6a765743c17f54b",
+    "oldBuildSha256": "21d3f5f33a7d4ff7874bb89f0539c3a7de3a035cbce5c6724807362e04d6a1fe",
+    "newBuildSha256": "fa1a3fa0d9a545c5d1501c7c4f2d0e4e99d34c7c8a1a5ca0ce456c5125b84a84",
+    "oldFiles": 474,
+    "newFiles": 475,
+    "unchangedOldFiles": 472,
+    "changedFiles": [
+      "apps/ai-player/scripts/local-gateway.mjs",
+      "apps/ai-player/src/local-playtest.mjs"
+    ],
+    "addedFiles": [
+      "apps/ai-player/src/generated-gameplay-baseline.mjs"
+    ],
+    "noRemovedFiles": true,
+    "modules": [
+      {
+        "path": "apps/ai-player/scripts/local-gateway.mjs",
+        "bytes": 11559,
+        "sha256": "bfd2f8d13a182e4bc4caa727631442a5b9e21d7d9bfa1a254ee80c2efde2ed0b",
+        "imports": [
+          "node:child_process",
+          "node:crypto",
+          "node:fs",
+          "node:fs/promises",
+          "node:net",
+          "node:path",
+          "node:url",
+          "node:timers/promises",
+          "../src/local-supply-server-config.mjs",
+          "../src/generated-gameplay-baseline.mjs"
+        ],
+        "sourceMatches": true
+      },
+      {
+        "path": "apps/ai-player/src/local-playtest.mjs",
+        "bytes": 12274,
+        "sha256": "bb82fc0719849d87dc6b5f370dd1557ef7da9f56c4f3d461287607cdfecb6a6b",
+        "imports": [
+          "node:child_process",
+          "node:crypto",
+          "node:events",
+          "node:fs",
+          "node:fs/promises",
+          "node:path",
+          "node:url",
+          "./archive-guard.mjs",
+          "./local-model-settings.mjs",
+          "./model-runtime-environment.mjs",
+          "./local-supply-server-config.mjs",
+          "./generated-gameplay-baseline.mjs",
+          "../scripts/companion-trial-fixture.mjs",
+          "../scripts/local-gateway.mjs"
+        ],
+        "sourceMatches": true
+      },
+      {
+        "path": "apps/ai-player/src/generated-gameplay-baseline.mjs",
+        "bytes": 387,
+        "sha256": "b18c4900a96ebebed9d1a43b7b770d699f641b27b8cf9f157c732ef68d98ba52",
+        "imports": [],
+        "sourceMatches": true
+      }
+    ],
+    "preservedBinaryPins": [
+      {
+        "path": "game/mir2-platform-windows.exe",
+        "sha256": "d930618bc7cc461a4d03507a68fb28c0b15af6200de8f00946c463929f67d638"
+      },
+      {
+        "path": "gateway/mir2-gateway.exe",
+        "sha256": "7d0f109717150ebfacb205db403c19bccf58ad9eec296e78bb63e0e221c6070a"
+      },
+      {
+        "path": "runtime/node.exe",
+        "sha256": "c22d1c59a1f767a1ed0178445a027f2257d318c55430fc819d48f269586822b7"
+      },
+      {
+        "path": "Numeron-Alo.exe",
+        "sha256": "d86ff602af1aa1be9868d1911676a346997cd177e6c623232e2d10258ae7a9bb"
+      },
+      {
+        "path": "Numeron-Alo-Settings.exe",
+        "sha256": "a54695ff7ece98eb270cb94a27e462c6f71dfabeba2d9aec59363f3459f6e7a2"
+      }
+    ],
+    "resourceInputMetadataUnchanged": true,
+    "resourceInputPins": {
+      "candidate": "WN-CANDIDATE-20261101-unified-16",
+      "root": "C:\\m2r16\\mir2-web3\\dist\\mir2-windows-candidate\\WN-CANDIDATE-20261101-unified-16",
+      "assetRoot": "C:\\m2r16\\mir2-web3\\dist\\mir2-windows-candidate\\WN-CANDIDATE-20261101-unified-16\\mir2-assets",
+      "contentProfile": "platinum_fiveclass",
+      "generationManifestSha256": "56ddd5417a09a2515fece9a36be2607282084ec89058c412d2edd7a7dcb21bc8",
+      "receiptSha256": "07b2d572fe8303a881a67bc69b9abe688503fbeea4fcdeabe4cf5e8e2cffa739",
+      "versionSha256": "85606530619c3df66cd338e7ae6fb43b59dbf90debcc2872a10687b147dc6084",
+      "manifestSha256": "619370d04d19540e45426bebcae36935f0032704ebd3bd79c22b5a175381f3a9",
+      "signatureSha256": "6f6622657d3bd31a9966fd128085abec7968e4816a8040f3b21be38b6f199669",
+      "cmsVerified": true,
+      "verifiedResourceCount": 255063
+    },
+    "externalSignedResourceTreeTraversed": false,
+    "oldModuleBackupsMatch": true,
+    "noExecutableRebuild": true,
+    "activation": "next-normal-launch",
+    "canonicalBaseline": {
+      "contentProfile": "platinum_fiveclass",
+      "profileVersion": 1,
+      "generationManifestSha256": "56ddd5417a09a2515fece9a36be2607282084ec89058c412d2edd7a7dcb21bc8",
+      "schema": 1,
+      "id": "r16-platinum-fiveclass-newcomer-v2",
+      "questGuidance": "newcomer-v2",
+      "questCadence": "newcomer-v2",
+      "onboarding": "native"
+    },
+    "noModulesExecuted": true
+  },
+  "historicalProofsPreserved": [
+    {
+      "path": "F:/mir2-builds/web-r16-20261104/onboarding-v11-package-integrity-proof.json",
+      "sha256": "284d7ab9934b04e696356a0fc9bb3859bbf2da67b6e3fa355798486bbd13ccc7",
+      "passed": false
+    },
+    {
+      "path": "F:/mir2-builds/web-r16-20261104/onboarding-v11-package-integrity-complete-proof.json",
+      "sha256": "67f2d14e9554c6ebf4c4b74ff7c8d46c3f5e38888cd3103e4161872c139501b3",
+      "passed": true
+    }
+  ],
+  "privateDirectoriesEnumerated": 0,
+  "privateFilesOpened": 0,
+  "runtimeDataDirectoriesEnumerated": 0,
+  "runtimeDataFilesOpened": 0,
+  "httpRequests": 0,
+  "browserSessions": 0,
+  "serviceActions": 0,
+  "sessionsCreated": 0,
+  "modelCalls": 0,
+  "sourceFilesChanged": 0,
+  "overallUiResult": "not assessed",
+  "limitations": [
+    "Only public manifests and explicitly listed distribution files were hashed. No private/.data/.mir2-data entries or contents were read or enumerated.",
+    "No service, browser, gameplay session, QR session or model was started, stopped or contacted.",
+    "The compiled pure world-action type predicate was evaluated in isolation with a Set; no Next module, Native module or WASM instance was executed.",
+    "The existing Native executable was not rebuilt. Only its three launcher modules and BUILD.json changed; activation is recorded as next normal launch.",
+    "Native external signed-resource identity fields match the preserved BUILD.before.json; the separate 255063-resource tree and signature were not reverified.",
+    "Compiled historical Core sourceSha256 is preserved; this audit does not certify the entire current canonical source tree.",
+    "The prior 360MiB thin-package gate remains failed and unchanged. Package integrity is distinct from gameplay, multilingual completeness and human UI acceptance.",
+    "The first metadata bridge attempt used Windows PowerShell's default input encoding and rejected a mojibake Chinese filename. Explicit UTF-8 fixed this audit-only transport issue; the final full scan and metadata scan both passed."
+  ]
+}

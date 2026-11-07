@@ -1,0 +1,1061 @@
+{
+  "schema": "mir2.web-r16-public-evidence-base-index/1",
+  "createdAt": "2026-11-06T00:29:51.873Z",
+  "scope": "v17 display and city proof, scoped Native-to-Web same save, v17/v18 release integrity, and q6/footer source verification; no final v18 gameplay claim.",
+  "relativeRoot": "docs/evidence/web-r16-local-20261104/shared-ui-v18",
+  "summary": {
+    "files": 129,
+    "bytes": 55393691,
+    "sha256OfSortedPathSizeHashRecords": "6933af73bc8757c34b1cd625317b5b612b3138afc598e698263a0c29b80a9abf",
+    "textFiles": 30,
+    "pngFiles": 99,
+    "displayMatrixImages": 80,
+    "displayFailureRunImages": 4,
+    "maskedWebSameSaveImages": 1,
+    "cityImages": 14
+  },
+  "verification": {
+    "sourceAndDestinationRegularNoLinks": true,
+    "readbackByteHashesMatched": true,
+    "genericKnownSecretPatternMatches": 0,
+    "scannedTextFiles": 30,
+    "scannedPngTextChunks": 0,
+    "pngRedactionFromPreviouslySealedPublicSources": true,
+    "privateFilesOpened": 0,
+    "unmaskedNativeScreenshotOpened": false,
+    "finiteManifestBodyCopied": false,
+    "existingEvidenceOverwritten": false
+  },
+  "v17Display": {
+    "sourceRuns": [
+      {
+        "run": 1,
+        "passed": false,
+        "path": "base/v17-display/display-v17-r1/display-v17-browser-proof.json"
+      },
+      {
+        "run": 2,
+        "passed": false,
+        "path": "base/v17-display/display-v17-r2/display-v17-browser-proof.json"
+      },
+      {
+        "run": 3,
+        "passed": false,
+        "path": "base/v17-display/display-v17-r3/display-v17-browser-proof.json"
+      },
+      {
+        "run": 4,
+        "passed": true,
+        "path": "base/v17-display/display-v17-r4/display-v17-browser-proof.json"
+      }
+    ],
+    "scopedTenLanguageCombination": true,
+    "singleContinuousAllLanguageRun": false
+  },
+  "q6": {
+    "tests": [
+      {
+        "path": "base/q6/q6-file-and-purchase-regression-r2.log",
+        "kind": "canonical-green",
+        "passed": 50,
+        "failed": 0
+      },
+      {
+        "path": "base/q6/q6-newcomer-regression-r2.log",
+        "kind": "canonical-green",
+        "passed": 28,
+        "failed": 0
+      },
+      {
+        "path": "base/q6/q6-file-and-purchase-regression.log",
+        "kind": "canonical-red"
+      },
+      {
+        "path": "base/q6/q6-file-rename-backtrace-r1.log",
+        "kind": "canonical-red"
+      },
+      {
+        "path": "base/q6/gateway-q6-isolated-purchase-tests-r3.log",
+        "kind": "isolated-green",
+        "passed": 23,
+        "failed": 0
+      },
+      {
+        "path": "base/q6/gateway-q6-isolated-companion-tests-r3.log",
+        "kind": "isolated-green",
+        "passed": 133,
+        "failed": 0
+      },
+      {
+        "path": "base/q6/gateway-q6-isolated-file-tests-r3.log",
+        "kind": "isolated-green",
+        "passed": 7,
+        "failed": 0
+      },
+      {
+        "path": "base/q6/gateway-q6-isolated-purchase-tests.log",
+        "kind": "isolated-compile-red"
+      },
+      {
+        "path": "base/q6/gateway-q6-isolated-purchase-tests-r2.log",
+        "kind": "isolated-route-red"
+      },
+      {
+        "path": "base/q6/gateway-q6-isolated-build.log",
+        "kind": "isolated-production-build"
+      }
+    ],
+    "postBuildFixtureChanges": {
+      "productionGatewaySha256": "7fe8beb407429d3bee04f98d099d659144abe6f680cb08994bb99db59decc4c5",
+      "productionBinaryUnchangedAcrossTestRunsReportedByCoordinator": true,
+      "changes": [
+        {
+          "file": "apps/gateway/src/web_billing_tests.rs",
+          "testOnly": true,
+          "change": "Add companions: None, to the WebState test initializer.",
+          "prepareSha256": "b500a38868b235075d4b22fa5a7cfdfc0f9c6e695d914f0769182a26c89668bc",
+          "afterSha256": "9165c417ad7bf2d9a6aabbd984a00a1a4106cc35e2cbf786548cbac9bbdca3bd",
+          "oneLineReversalMatchesPrepareBytes": true
+        },
+        {
+          "file": "apps/gateway/src/npc_purchase_owner_route_tests.rs",
+          "testOnly": true,
+          "change": "Replace stale expected mir2-zone/npc-handoff-account-v2/ with mir2-zone/v5-durable-drop-admission/ in the route test.",
+          "prepareSha256": "b13257b80ea781a49999633b41969b5bf3fd3f686f022a3fec547271e7856772",
+          "afterSha256": "204935d5835b4de331aa6787e5e57878cd4c7081a7fc7a3b6520b823f778089b",
+          "oneLineReversalMatchesPrepareBytes": true,
+          "prepareToAfterByteDelta": 3
+        }
+      ],
+      "fixtureSourcesCopied": false
+    }
+  },
+  "footer": {
+    "greenGroups": [
+      3,
+      4,
+      4,
+      1
+    ],
+    "greenTotal": 12,
+    "redFailureCount": 2
+  },
+  "cityV17": {
+    "firstRunPassed": false,
+    "readOnlyReconciliationPassed": true,
+    "stagePassed": false,
+    "quest5Completed": true,
+    "quest6Completed": false
+  },
+  "limits": {
+    "v18FinalGameplayIncluded": false,
+    "humanAccepted": false,
+    "thin360MiBGatePassed": false,
+    "notTranslationCompletenessOrNewNativeBuild": true
+  },
+  "files": [
+    {
+      "relativePath": "base/city-v17/forest-city-v17-r1/01-village-native-task-card-before-measured-readiness.png",
+      "sourcePath": "D:/mir2-builds/forest-quest-driver-20261106/forest-city-v17-r1/01-village-native-task-card-before-measured-readiness.png",
+      "bytes": 1209184,
+      "sha256": "9f25b83eef08bd6013312549e290b272c7f6f4193195d831c335f69fdb201d7d",
+      "category": "city-v17-masked-screenshot"
+    },
+    {
+      "relativePath": "base/city-v17/forest-city-v17-r1/02-fresh-village-native-task-card.png",
+      "sourcePath": "D:/mir2-builds/forest-quest-driver-20261106/forest-city-v17-r1/02-fresh-village-native-task-card.png",
+      "bytes": 1211919,
+      "sha256": "2f860bc59054a4839bb469bbab0c31f9cd8640ff373c510d4ba24c9cdcd95869",
+      "category": "city-v17-masked-screenshot"
+    },
+    {
+      "relativePath": "base/city-v17/forest-city-v17-r1/03-before-acceptQuest-2110005.png",
+      "sourcePath": "D:/mir2-builds/forest-quest-driver-20261106/forest-city-v17-r1/03-before-acceptQuest-2110005.png",
+      "bytes": 1117538,
+      "sha256": "175c322af2eee1e4bf10f0f2665c3800259741c0692db4f7d9938ed32929a2a6",
+      "category": "city-v17-masked-screenshot"
+    },
+    {
+      "relativePath": "base/city-v17/forest-city-v17-r1/04-ordinary-merchant-before-buy-link.png",
+      "sourcePath": "D:/mir2-builds/forest-quest-driver-20261106/forest-city-v17-r1/04-ordinary-merchant-before-buy-link.png",
+      "bytes": 1067568,
+      "sha256": "9844e560e84294a0252173ad7bc63f021a25e9f86110015984a8c068627ce97c",
+      "category": "city-v17-masked-screenshot"
+    },
+    {
+      "relativePath": "base/city-v17/forest-city-v17-r1/05-ordinary-merchant-before-real-gold-purchase.png",
+      "sourcePath": "D:/mir2-builds/forest-quest-driver-20261106/forest-city-v17-r1/05-ordinary-merchant-before-real-gold-purchase.png",
+      "bytes": 1148603,
+      "sha256": "bffd2ffc4b77d1746a58114e3710ed35d94bd4590762ae8ffbd204dc49b3ccd1",
+      "category": "city-v17-masked-screenshot"
+    },
+    {
+      "relativePath": "base/city-v17/forest-city-v17-r1/06-before-finishQuest-2110005.png",
+      "sourcePath": "D:/mir2-builds/forest-quest-driver-20261106/forest-city-v17-r1/06-before-finishQuest-2110005.png",
+      "bytes": 919703,
+      "sha256": "9c27221cbbe9e293ebd48250845abc4843822ab7bab2fcf7049d00d6d2503a5c",
+      "category": "city-v17-masked-screenshot"
+    },
+    {
+      "relativePath": "base/city-v17/forest-city-v17-r1/07-next-quest-2110005-completed.png",
+      "sourcePath": "D:/mir2-builds/forest-quest-driver-20261106/forest-city-v17-r1/07-next-quest-2110005-completed.png",
+      "bytes": 926074,
+      "sha256": "b7b9e6cfe542408d31453cce74e5518a580ba27e413df2882b5ede7c027ac355",
+      "category": "city-v17-masked-screenshot"
+    },
+    {
+      "relativePath": "base/city-v17/forest-city-v17-r1/08-before-acceptQuest-2110006.png",
+      "sourcePath": "D:/mir2-builds/forest-quest-driver-20261106/forest-city-v17-r1/08-before-acceptQuest-2110006.png",
+      "bytes": 914249,
+      "sha256": "33697774c896414a8eb9f9ae566016b4aa853b357135166e39849a8c42379917",
+      "category": "city-v17-masked-screenshot"
+    },
+    {
+      "relativePath": "base/city-v17/forest-city-v17-r1/09-ordinary-merchant-before-buy-link.png",
+      "sourcePath": "D:/mir2-builds/forest-quest-driver-20261106/forest-city-v17-r1/09-ordinary-merchant-before-buy-link.png",
+      "bytes": 1107929,
+      "sha256": "aa94e8ddea9cb8a88c4ad96721e7b04af9b210858b64ea9c36b98f4d26a0d7cf",
+      "category": "city-v17-masked-screenshot"
+    },
+    {
+      "relativePath": "base/city-v17/forest-city-v17-r1/10-ordinary-merchant-before-real-gold-purchase.png",
+      "sourcePath": "D:/mir2-builds/forest-quest-driver-20261106/forest-city-v17-r1/10-ordinary-merchant-before-real-gold-purchase.png",
+      "bytes": 1121531,
+      "sha256": "9423215700951d0cc6f14bcdb347ecd031224f88f153c6bd19ef25f1ccda12d5",
+      "category": "city-v17-masked-screenshot"
+    },
+    {
+      "relativePath": "base/city-v17/forest-city-v17-r1/11-failure-safe-masked.png",
+      "sourcePath": "D:/mir2-builds/forest-quest-driver-20261106/forest-city-v17-r1/11-failure-safe-masked.png",
+      "bytes": 1221141,
+      "sha256": "51dce86ad37891eb6a6ffb8c2768c525a4a228332861af7c392ee2f52ee1682f",
+      "category": "city-v17-masked-screenshot"
+    },
+    {
+      "relativePath": "base/city-v17/forest-city-v17-r1/onboarding-forest-browser-proof.json",
+      "sourcePath": "D:/mir2-builds/forest-quest-driver-20261106/forest-city-v17-r1/onboarding-forest-browser-proof.json",
+      "bytes": 315636,
+      "sha256": "f0ef61f13afe3c0d1dc23aa5aaa81dc328ae47d36a469638f9282bd3b1999969",
+      "category": "city-v17-public-run"
+    },
+    {
+      "relativePath": "base/city-v17/forest-city-v17-reconcile-r2/01-city-native-task-card-before-measured-readiness.png",
+      "sourcePath": "D:/mir2-builds/forest-quest-driver-20261106/forest-city-v17-reconcile-r2/01-city-native-task-card-before-measured-readiness.png",
+      "bytes": 1218794,
+      "sha256": "3f685a2b14963cf4becad271442c6f9261ce25f56bb4bd78d4345117f76ab748",
+      "category": "city-v17-masked-screenshot"
+    },
+    {
+      "relativePath": "base/city-v17/forest-city-v17-reconcile-r2/02-fresh-city-native-task-card.png",
+      "sourcePath": "D:/mir2-builds/forest-quest-driver-20261106/forest-city-v17-reconcile-r2/02-fresh-city-native-task-card.png",
+      "bytes": 1218851,
+      "sha256": "64d352f651b55843aa3a472fdaacdb45f81b358f3c52a4d31f7b67122b1eb4a7",
+      "category": "city-v17-masked-screenshot"
+    },
+    {
+      "relativePath": "base/city-v17/forest-city-v17-reconcile-r2/03-q6-read-only-reconcile-after-confirmed-purchase.png",
+      "sourcePath": "D:/mir2-builds/forest-quest-driver-20261106/forest-city-v17-reconcile-r2/03-q6-read-only-reconcile-after-confirmed-purchase.png",
+      "bytes": 1104983,
+      "sha256": "218ac216ee96d8be60c4dd093a98fb8ea576997c540c57caf9694a16f61c8ee0",
+      "category": "city-v17-masked-screenshot"
+    },
+    {
+      "relativePath": "base/city-v17/forest-city-v17-reconcile-r2/onboarding-forest-browser-proof.json",
+      "sourcePath": "D:/mir2-builds/forest-quest-driver-20261106/forest-city-v17-reconcile-r2/onboarding-forest-browser-proof.json",
+      "bytes": 17248,
+      "sha256": "125d960759694db1dc7d713a25e6b567d3a76046b9b8c0e7b8a0f28e8d7745fa",
+      "category": "city-v17-public-run"
+    },
+    {
+      "relativePath": "base/city-v17/forest-city-v17-stage-result.json",
+      "sourcePath": "D:/mir2-builds/forest-quest-driver-20261106/forest-city-v17-stage-result.json",
+      "bytes": 4201,
+      "sha256": "2164a65fcadd8a0cae8debd2820150cd37b56aefceec70727d67e12b4e6df425",
+      "category": "city-v17-stage-result"
+    },
+    {
+      "relativePath": "base/finite-assets/r16-playable-assets-v17-receipt.json",
+      "sourcePath": "D:/mir2-builds/forest-quest-driver-20261106/r16-playable-assets-v17-receipt.json",
+      "bytes": 1479,
+      "sha256": "f3090a1e2fe25099b4aad3ef5c26fc3d379f5f13604703157fa0233323cc6a2f",
+      "category": "finite-manifest-receipt"
+    },
+    {
+      "relativePath": "base/finite-assets/v17-assets-negative-verification.json",
+      "sourcePath": "D:/mir2-builds/web-r16-20261106/v17-assets-negative-verification.json",
+      "bytes": 1180,
+      "sha256": "2618e14cb98023529c66b8b7ab087e648c1d3db97835a2cdb420563dd62eae30",
+      "category": "finite-manifest-negative-validation"
+    },
+    {
+      "relativePath": "base/footer-tests/quest-footer-final-and-adjacent.log",
+      "sourcePath": "D:/mir2-builds/web-r16-20261106/ui-evidence/quest-footer-final-and-adjacent.log",
+      "bytes": 56033,
+      "sha256": "d9f78e45345da168bcf4a7c8307852b456dacf0d6d3e08ec892384dc112f1c80",
+      "category": "footer-green"
+    },
+    {
+      "relativePath": "base/footer-tests/quest-footer-red.log",
+      "sourcePath": "D:/mir2-builds/web-r16-20261106/ui-evidence/quest-footer-red.log",
+      "bytes": 16575,
+      "sha256": "185864efe2554b6a44435ef0b8a023a580990808c15d359b29505e4caea22774",
+      "category": "footer-red"
+    },
+    {
+      "relativePath": "base/q6/gateway-q6-isolated-build.log",
+      "sourcePath": "D:/mir2-builds/web-r16-20261106/gateway-q6-isolated-build.log",
+      "bytes": 68829,
+      "sha256": "f8d8a9587df7322d23635a31a9cf712cc7b2b76832fd359008a459f2382184d0",
+      "category": "isolated-production-build"
+    },
+    {
+      "relativePath": "base/q6/gateway-q6-isolated-companion-tests-r3.log",
+      "sourcePath": "D:/mir2-builds/web-r16-20261106/gateway-q6-isolated-companion-tests-r3.log",
+      "bytes": 75296,
+      "sha256": "fc887fb2b57f20cc07410466d83cf32a40c54a4405d2585041fb4656bd2d72a4",
+      "category": "isolated-green"
+    },
+    {
+      "relativePath": "base/q6/gateway-q6-isolated-file-tests-r3.log",
+      "sourcePath": "D:/mir2-builds/web-r16-20261106/gateway-q6-isolated-file-tests-r3.log",
+      "bytes": 46145,
+      "sha256": "5b96b2aa15f449a060967575d7b6a16ceb1d1eb31b127d56a4da0cf457093f74",
+      "category": "isolated-green"
+    },
+    {
+      "relativePath": "base/q6/gateway-q6-isolated-purchase-tests-r2.log",
+      "sourcePath": "D:/mir2-builds/web-r16-20261106/gateway-q6-isolated-purchase-tests-r2.log",
+      "bytes": 62665,
+      "sha256": "cb208fd03a5d62fc4d566b32f58b2b4c32a79c347cbac1ad07474748d9f92e58",
+      "category": "isolated-route-red"
+    },
+    {
+      "relativePath": "base/q6/gateway-q6-isolated-purchase-tests-r3.log",
+      "sourcePath": "D:/mir2-builds/web-r16-20261106/gateway-q6-isolated-purchase-tests-r3.log",
+      "bytes": 61789,
+      "sha256": "666cede1a1d9626f82f3695e5887831cde489e1ae7a186fdde7025c1df73f37b",
+      "category": "isolated-green"
+    },
+    {
+      "relativePath": "base/q6/gateway-q6-isolated-purchase-tests.log",
+      "sourcePath": "D:/mir2-builds/web-r16-20261106/gateway-q6-isolated-purchase-tests.log",
+      "bytes": 56154,
+      "sha256": "c2b27aed4f704ea7121ce1d6425cfd93460e8946102d50c16d70b253526627aa",
+      "category": "isolated-compile-red"
+    },
+    {
+      "relativePath": "base/q6/gateway-q6-isolated-source-prepare-receipt.json",
+      "sourcePath": "D:/mir2-builds/web-r16-20261106/gateway-q6-isolated-source-prepare-receipt.json",
+      "bytes": 280324,
+      "sha256": "2e3ec7d57d121f8ce22e1b062d4930381c09d7607e000d3deb4d3c7270de4efc",
+      "category": "isolated-source-receipt"
+    },
+    {
+      "relativePath": "base/q6/q6-file-and-purchase-regression-r2.log",
+      "sourcePath": "D:/mir2-builds/web-r16-20261106/q6-file-and-purchase-regression-r2.log",
+      "bytes": 51860,
+      "sha256": "3e039fe3863c2d73a6c559661d5db6fa3d5f7861d70dd1994be47689ac1e3d5a",
+      "category": "canonical-green"
+    },
+    {
+      "relativePath": "base/q6/q6-file-and-purchase-regression.log",
+      "sourcePath": "D:/mir2-builds/web-r16-20261106/q6-file-and-purchase-regression.log",
+      "bytes": 53183,
+      "sha256": "9595d0d819a43812407001e799b8a7628e76016af3ba4207a72a8b734f1b18d2",
+      "category": "canonical-red"
+    },
+    {
+      "relativePath": "base/q6/q6-file-rename-backtrace-r1.log",
+      "sourcePath": "D:/mir2-builds/web-r16-20261106/q6-file-rename-backtrace-r1.log",
+      "bytes": 47413,
+      "sha256": "e23a9242a12c1e166c8dc31897fd180f9c9416672ff1a956f7ec5e6a1aedfe0b",
+      "category": "canonical-red"
+    },
+    {
+      "relativePath": "base/q6/q6-newcomer-regression-r2.log",
+      "sourcePath": "D:/mir2-builds/web-r16-20261106/q6-newcomer-regression-r2.log",
+      "bytes": 48401,
+      "sha256": "5328c3a39ad6b4b03f339654e58d9fc856e5163651bbcdb79f48089d085a63a8",
+      "category": "canonical-green"
+    },
+    {
+      "relativePath": "base/release/v17-independent-package-audit.json",
+      "sourcePath": "D:/mir2-builds/web-r16-20261106/v17-independent-package-audit.json",
+      "bytes": 16633,
+      "sha256": "ef635fa2d1dd90274c5918f194b082bf8ec9909fb3700c2d71ec28a56d28a903",
+      "category": "release-or-preservation-receipt"
+    },
+    {
+      "relativePath": "base/release/v17-runtime-preservation-proof.json",
+      "sourcePath": "D:/mir2-builds/web-r16-20261106/v17-runtime-preservation-proof.json",
+      "bytes": 966,
+      "sha256": "654398e983346340eef66f1a2afa07164d5c4ebfcb033c3fa987993a328c9da1",
+      "category": "release-or-preservation-receipt"
+    },
+    {
+      "relativePath": "base/release/v18-independent-package-audit.json",
+      "sourcePath": "D:/mir2-builds/web-r16-20261106/v18-independent-package-audit.json",
+      "bytes": 8402,
+      "sha256": "2d485211fab24065169ed48b0c38fdb8e47bbea378af48563a0a52c8b9dc1243",
+      "category": "release-or-preservation-receipt"
+    },
+    {
+      "relativePath": "base/same-save/native-same-save-receipt.json",
+      "sourcePath": "D:/mir2-builds/native-shared-ui-20261106/evidence/native-same-save-receipt.json",
+      "bytes": 5654,
+      "sha256": "9b62ffdbb9fd8e1ebcff9e35532e08c4178eb31b78ed0b8caffae74af8f1fbff",
+      "category": "native-same-save-receipt"
+    },
+    {
+      "relativePath": "base/same-save/web-same-save-readback-r1/01-native-to-web-authoritative-same-save.png",
+      "sourcePath": "D:/mir2-builds/native-shared-ui-20261106/evidence/web-same-save-readback-r1/01-native-to-web-authoritative-same-save.png",
+      "bytes": 1206044,
+      "sha256": "160f213036123097c74c54e82c560f3a58178d003121e2df5b1b73093bc7739c",
+      "category": "masked-web-readback-image"
+    },
+    {
+      "relativePath": "base/same-save/web-same-save-readback-r1/web-same-save-readback-receipt.json",
+      "sourcePath": "D:/mir2-builds/native-shared-ui-20261106/evidence/web-same-save-readback-r1/web-same-save-readback-receipt.json",
+      "bytes": 3439,
+      "sha256": "8caf4778e4fc15fda3edc436c37760aae8c021adf36ecef3e9de262b60a818fe",
+      "category": "masked-web-readback-receipt"
+    },
+    {
+      "relativePath": "base/v17-display/display-v17-r1/01-quest-diary-zh-CN.png",
+      "sourcePath": "D:/mir2-builds/web-r16-20261106/ui-evidence/display-v17-r1/01-quest-diary-zh-CN.png",
+      "bytes": 105176,
+      "sha256": "85c8f655511b5ed5e9785eca99832ebd6dc26703c9ea83273c79d10b04bdc636",
+      "category": "v17-public-failed-run-image"
+    },
+    {
+      "relativePath": "base/v17-display/display-v17-r1/display-v17-browser-proof.json",
+      "sourcePath": "D:/mir2-builds/web-r16-20261106/ui-evidence/display-v17-r1/display-v17-browser-proof.json",
+      "bytes": 19382,
+      "sha256": "ac70de4c57d2b545f9292c5003df594671ff7e5e654312bc10de196061c4a68d",
+      "category": "v17-source-run"
+    },
+    {
+      "relativePath": "base/v17-display/display-v17-r1/failure-public-window-body.png",
+      "sourcePath": "D:/mir2-builds/web-r16-20261106/ui-evidence/display-v17-r1/failure-public-window-body.png",
+      "bytes": 976702,
+      "sha256": "c6b499d02ddf9229a09292f21e774c972514efcc2aff0ce1c42baaa5058b123c",
+      "category": "v17-public-failed-run-image"
+    },
+    {
+      "relativePath": "base/v17-display/display-v17-r2/01-quest-diary-zh-CN.png",
+      "sourcePath": "D:/mir2-builds/web-r16-20261106/ui-evidence/display-v17-r2/01-quest-diary-zh-CN.png",
+      "bytes": 105165,
+      "sha256": "ddeb7e20c5b912db68a4105ee0aa3e8afaf6e0e949886c66cf79ebc0c3af6f7a",
+      "category": "v17-matrix-image"
+    },
+    {
+      "relativePath": "base/v17-display/display-v17-r2/02-character-character-zh-CN.png",
+      "sourcePath": "D:/mir2-builds/web-r16-20261106/ui-evidence/display-v17-r2/02-character-character-zh-CN.png",
+      "bytes": 77635,
+      "sha256": "d8d08da170f17196139468cd33808f13061507df6be8cb823b366e53f15cf0df",
+      "category": "v17-matrix-image"
+    },
+    {
+      "relativePath": "base/v17-display/display-v17-r2/03-character-stats1-zh-CN.png",
+      "sourcePath": "D:/mir2-builds/web-r16-20261106/ui-evidence/display-v17-r2/03-character-stats1-zh-CN.png",
+      "bytes": 65560,
+      "sha256": "7c11775e48c245d06c6ee709950c5a73593a4c7b97a15cbb35741d71433a0181",
+      "category": "v17-matrix-image"
+    },
+    {
+      "relativePath": "base/v17-display/display-v17-r2/04-character-stats2-zh-CN.png",
+      "sourcePath": "D:/mir2-builds/web-r16-20261106/ui-evidence/display-v17-r2/04-character-stats2-zh-CN.png",
+      "bytes": 65946,
+      "sha256": "8b340a7799fd7d2692eeb1f472fa8ef6c0a91dcd9471f5584f946147871b364b",
+      "category": "v17-matrix-image"
+    },
+    {
+      "relativePath": "base/v17-display/display-v17-r2/05-character-spells-zh-CN.png",
+      "sourcePath": "D:/mir2-builds/web-r16-20261106/ui-evidence/display-v17-r2/05-character-spells-zh-CN.png",
+      "bytes": 67255,
+      "sha256": "31927f605da68bc0d0693a9c845280dfcc64ab198617a17079479c0b3fda73de",
+      "category": "v17-matrix-image"
+    },
+    {
+      "relativePath": "base/v17-display/display-v17-r2/06-fencing-hover-full-description-zh-CN.png",
+      "sourcePath": "D:/mir2-builds/web-r16-20261106/ui-evidence/display-v17-r2/06-fencing-hover-full-description-zh-CN.png",
+      "bytes": 969427,
+      "sha256": "002fb4efca8a7167ce8913ed4e7fbd4ca894a2249ae8a2effaa2e8a98cf36233",
+      "category": "v17-matrix-image"
+    },
+    {
+      "relativePath": "base/v17-display/display-v17-r2/07-fencing-hover-left-zh-CN.png",
+      "sourcePath": "D:/mir2-builds/web-r16-20261106/ui-evidence/display-v17-r2/07-fencing-hover-left-zh-CN.png",
+      "bytes": 963729,
+      "sha256": "df2020971ddae47b0eb4dd92750db337a61be8a945be888b54c429861fad028e",
+      "category": "v17-matrix-image"
+    },
+    {
+      "relativePath": "base/v17-display/display-v17-r2/08-fencing-window-closed-zh-CN.png",
+      "sourcePath": "D:/mir2-builds/web-r16-20261106/ui-evidence/display-v17-r2/08-fencing-window-closed-zh-CN.png",
+      "bytes": 1054729,
+      "sha256": "cd22dd1be6f6c792e8ce42a6df682abce13edb7613a7409dd39fd191b94da1ad",
+      "category": "v17-matrix-image"
+    },
+    {
+      "relativePath": "base/v17-display/display-v17-r2/09-quest-diary-zh-TW.png",
+      "sourcePath": "D:/mir2-builds/web-r16-20261106/ui-evidence/display-v17-r2/09-quest-diary-zh-TW.png",
+      "bytes": 105122,
+      "sha256": "44d630ee3d1091a73f9053af6108d3290e0357321724c696ffd86bd96008770d",
+      "category": "v17-matrix-image"
+    },
+    {
+      "relativePath": "base/v17-display/display-v17-r2/10-character-character-zh-TW.png",
+      "sourcePath": "D:/mir2-builds/web-r16-20261106/ui-evidence/display-v17-r2/10-character-character-zh-TW.png",
+      "bytes": 77523,
+      "sha256": "9d636fdddee2b1361f76c2f3093d04c9ae86322cb2674ba42b94a9e195939756",
+      "category": "v17-matrix-image"
+    },
+    {
+      "relativePath": "base/v17-display/display-v17-r2/11-character-stats1-zh-TW.png",
+      "sourcePath": "D:/mir2-builds/web-r16-20261106/ui-evidence/display-v17-r2/11-character-stats1-zh-TW.png",
+      "bytes": 65943,
+      "sha256": "a92548e8ed7ac6a232131ed3036d06761afb9808d0502b9ac55c072a50f39048",
+      "category": "v17-matrix-image"
+    },
+    {
+      "relativePath": "base/v17-display/display-v17-r2/12-character-stats2-zh-TW.png",
+      "sourcePath": "D:/mir2-builds/web-r16-20261106/ui-evidence/display-v17-r2/12-character-stats2-zh-TW.png",
+      "bytes": 66168,
+      "sha256": "0e32478eebc36f501f65af2caaa440475492e5d9787cae9e6a02a22181f74030",
+      "category": "v17-matrix-image"
+    },
+    {
+      "relativePath": "base/v17-display/display-v17-r2/13-character-spells-zh-TW.png",
+      "sourcePath": "D:/mir2-builds/web-r16-20261106/ui-evidence/display-v17-r2/13-character-spells-zh-TW.png",
+      "bytes": 67316,
+      "sha256": "8d94519084cceb7efd906d6c1cadd6abf45beb7e798b81d432b89c7004c7eca2",
+      "category": "v17-matrix-image"
+    },
+    {
+      "relativePath": "base/v17-display/display-v17-r2/14-fencing-hover-full-description-zh-TW.png",
+      "sourcePath": "D:/mir2-builds/web-r16-20261106/ui-evidence/display-v17-r2/14-fencing-hover-full-description-zh-TW.png",
+      "bytes": 973346,
+      "sha256": "d80b7c6e98a07e1a42801aff962f127ff0354022b95efad53f57a44bbbb37994",
+      "category": "v17-matrix-image"
+    },
+    {
+      "relativePath": "base/v17-display/display-v17-r2/15-fencing-hover-left-zh-TW.png",
+      "sourcePath": "D:/mir2-builds/web-r16-20261106/ui-evidence/display-v17-r2/15-fencing-hover-left-zh-TW.png",
+      "bytes": 968420,
+      "sha256": "921bb83073490bfc7a5156d99b1b869e9a03b91ec35965cf6a450c47ff308167",
+      "category": "v17-matrix-image"
+    },
+    {
+      "relativePath": "base/v17-display/display-v17-r2/16-fencing-window-closed-zh-TW.png",
+      "sourcePath": "D:/mir2-builds/web-r16-20261106/ui-evidence/display-v17-r2/16-fencing-window-closed-zh-TW.png",
+      "bytes": 1055120,
+      "sha256": "09c0bb5da79522d40df1f3a441dcc08aeb394c91517b3f26ef1e74a083a28215",
+      "category": "v17-matrix-image"
+    },
+    {
+      "relativePath": "base/v17-display/display-v17-r2/17-quest-diary-en.png",
+      "sourcePath": "D:/mir2-builds/web-r16-20261106/ui-evidence/display-v17-r2/17-quest-diary-en.png",
+      "bytes": 105049,
+      "sha256": "8378ed8fb03921de9f43dcaf12d8b66003d998deee4c90ba530ddb4dbc5cef25",
+      "category": "v17-matrix-image"
+    },
+    {
+      "relativePath": "base/v17-display/display-v17-r2/18-character-character-en.png",
+      "sourcePath": "D:/mir2-builds/web-r16-20261106/ui-evidence/display-v17-r2/18-character-character-en.png",
+      "bytes": 76841,
+      "sha256": "7ddc7dfbc5ce77cc44343a88084f4a032c024b55415f8c1087eba9ae6c350295",
+      "category": "v17-matrix-image"
+    },
+    {
+      "relativePath": "base/v17-display/display-v17-r2/19-character-stats1-en.png",
+      "sourcePath": "D:/mir2-builds/web-r16-20261106/ui-evidence/display-v17-r2/19-character-stats1-en.png",
+      "bytes": 64840,
+      "sha256": "c49e873f8d4f6dd50681742f86ee274a7e85728b81fcecdd170c3605b58eacec",
+      "category": "v17-matrix-image"
+    },
+    {
+      "relativePath": "base/v17-display/display-v17-r2/20-character-stats2-en.png",
+      "sourcePath": "D:/mir2-builds/web-r16-20261106/ui-evidence/display-v17-r2/20-character-stats2-en.png",
+      "bytes": 65146,
+      "sha256": "45af93076bcf32b4aff4d2d6b4d5d2888a8638825f879c2019243ec36d636208",
+      "category": "v17-matrix-image"
+    },
+    {
+      "relativePath": "base/v17-display/display-v17-r2/21-character-spells-en.png",
+      "sourcePath": "D:/mir2-builds/web-r16-20261106/ui-evidence/display-v17-r2/21-character-spells-en.png",
+      "bytes": 66135,
+      "sha256": "8ef6fe4a067e372dbc93ab052c027bf3c6510484e6e995573e8e3b7d3b3548ad",
+      "category": "v17-matrix-image"
+    },
+    {
+      "relativePath": "base/v17-display/display-v17-r2/22-fencing-hover-full-description-en.png",
+      "sourcePath": "D:/mir2-builds/web-r16-20261106/ui-evidence/display-v17-r2/22-fencing-hover-full-description-en.png",
+      "bytes": 973239,
+      "sha256": "4f239426ae83803b83d2d6dd0272cfb1cd4b32a38fa72df37ada063fbde51014",
+      "category": "v17-matrix-image"
+    },
+    {
+      "relativePath": "base/v17-display/display-v17-r2/23-fencing-hover-left-en.png",
+      "sourcePath": "D:/mir2-builds/web-r16-20261106/ui-evidence/display-v17-r2/23-fencing-hover-left-en.png",
+      "bytes": 961290,
+      "sha256": "a4cece776b3a4967002970f6576f07373e353686e600d2342ccdb3a3b2a0a181",
+      "category": "v17-matrix-image"
+    },
+    {
+      "relativePath": "base/v17-display/display-v17-r2/24-fencing-window-closed-en.png",
+      "sourcePath": "D:/mir2-builds/web-r16-20261106/ui-evidence/display-v17-r2/24-fencing-window-closed-en.png",
+      "bytes": 1057165,
+      "sha256": "8242c62925a3b68109d63a4197eda956ccb8ade5ba9767bfcbf2c47b66c477e9",
+      "category": "v17-matrix-image"
+    },
+    {
+      "relativePath": "base/v17-display/display-v17-r2/25-quest-diary-pt-BR.png",
+      "sourcePath": "D:/mir2-builds/web-r16-20261106/ui-evidence/display-v17-r2/25-quest-diary-pt-BR.png",
+      "bytes": 106527,
+      "sha256": "c1a02aa3c105cd009ef27eafaf77b1c3bac2acdae5e4fa721464b3e1673dcfc7",
+      "category": "v17-matrix-image"
+    },
+    {
+      "relativePath": "base/v17-display/display-v17-r2/26-character-character-pt-BR.png",
+      "sourcePath": "D:/mir2-builds/web-r16-20261106/ui-evidence/display-v17-r2/26-character-character-pt-BR.png",
+      "bytes": 77120,
+      "sha256": "330a60fd56f3778be9c46f3838f6588d2e2a119266c2e06a708d4c7bfca5c0a3",
+      "category": "v17-matrix-image"
+    },
+    {
+      "relativePath": "base/v17-display/display-v17-r2/27-character-stats1-pt-BR.png",
+      "sourcePath": "D:/mir2-builds/web-r16-20261106/ui-evidence/display-v17-r2/27-character-stats1-pt-BR.png",
+      "bytes": 65090,
+      "sha256": "5dea54a63783c920cef98605855682fbd16317bd143a2a10552963334ccbfb6d",
+      "category": "v17-matrix-image"
+    },
+    {
+      "relativePath": "base/v17-display/display-v17-r2/28-character-stats2-pt-BR.png",
+      "sourcePath": "D:/mir2-builds/web-r16-20261106/ui-evidence/display-v17-r2/28-character-stats2-pt-BR.png",
+      "bytes": 65363,
+      "sha256": "f57d195a0f111825dafaabf16a22d0e3d411ee25fcf023235160676d940e4170",
+      "category": "v17-matrix-image"
+    },
+    {
+      "relativePath": "base/v17-display/display-v17-r2/29-character-spells-pt-BR.png",
+      "sourcePath": "D:/mir2-builds/web-r16-20261106/ui-evidence/display-v17-r2/29-character-spells-pt-BR.png",
+      "bytes": 66417,
+      "sha256": "3e35a7aecac7315697d5318cea38d2396c347499d1a45170d5e0a0cab2fbb645",
+      "category": "v17-matrix-image"
+    },
+    {
+      "relativePath": "base/v17-display/display-v17-r2/30-fencing-hover-full-description-pt-BR.png",
+      "sourcePath": "D:/mir2-builds/web-r16-20261106/ui-evidence/display-v17-r2/30-fencing-hover-full-description-pt-BR.png",
+      "bytes": 970602,
+      "sha256": "016aac9dfbcf6f034466c775a67b1a9c29205ecb2d980ed7a557799387dc4217",
+      "category": "v17-matrix-image"
+    },
+    {
+      "relativePath": "base/v17-display/display-v17-r2/31-fencing-hover-left-pt-BR.png",
+      "sourcePath": "D:/mir2-builds/web-r16-20261106/ui-evidence/display-v17-r2/31-fencing-hover-left-pt-BR.png",
+      "bytes": 960248,
+      "sha256": "fba4a0fee777e572c3efef9fc21618550a09c9d9a0da4ae6aa631d966da2d2c8",
+      "category": "v17-matrix-image"
+    },
+    {
+      "relativePath": "base/v17-display/display-v17-r2/32-fencing-window-closed-pt-BR.png",
+      "sourcePath": "D:/mir2-builds/web-r16-20261106/ui-evidence/display-v17-r2/32-fencing-window-closed-pt-BR.png",
+      "bytes": 1054640,
+      "sha256": "a5d25254afe6594dbf4f814122e48a2f815b48e1e265219755a56fdac0c6da54",
+      "category": "v17-matrix-image"
+    },
+    {
+      "relativePath": "base/v17-display/display-v17-r2/33-quest-diary-ru.png",
+      "sourcePath": "D:/mir2-builds/web-r16-20261106/ui-evidence/display-v17-r2/33-quest-diary-ru.png",
+      "bytes": 107644,
+      "sha256": "3c6519ca6b1dbb6b8001596665c8781170913296399de64408b2568a7e14c9d5",
+      "category": "v17-matrix-image"
+    },
+    {
+      "relativePath": "base/v17-display/display-v17-r2/34-character-character-ru.png",
+      "sourcePath": "D:/mir2-builds/web-r16-20261106/ui-evidence/display-v17-r2/34-character-character-ru.png",
+      "bytes": 77390,
+      "sha256": "c36f3aabcf8d8a6014dd24e1147110bb1a47ecf3348d76a2f8dc7faad167bd31",
+      "category": "v17-matrix-image"
+    },
+    {
+      "relativePath": "base/v17-display/display-v17-r2/35-character-stats1-ru.png",
+      "sourcePath": "D:/mir2-builds/web-r16-20261106/ui-evidence/display-v17-r2/35-character-stats1-ru.png",
+      "bytes": 65384,
+      "sha256": "4357c196ab661ee0c05d76c683acf568396d2a577e0dd19cadd384f69704b0e4",
+      "category": "v17-matrix-image"
+    },
+    {
+      "relativePath": "base/v17-display/display-v17-r2/36-character-stats2-ru.png",
+      "sourcePath": "D:/mir2-builds/web-r16-20261106/ui-evidence/display-v17-r2/36-character-stats2-ru.png",
+      "bytes": 65671,
+      "sha256": "8c665b1d16c94d8264555177cceb804605cfdafe9b7979ec0929662788990f09",
+      "category": "v17-matrix-image"
+    },
+    {
+      "relativePath": "base/v17-display/display-v17-r2/37-character-spells-ru.png",
+      "sourcePath": "D:/mir2-builds/web-r16-20261106/ui-evidence/display-v17-r2/37-character-spells-ru.png",
+      "bytes": 66956,
+      "sha256": "c18af08b7c08a744cb3a992e4482385f66e430532ccba82819c4ac0d1a983cac",
+      "category": "v17-matrix-image"
+    },
+    {
+      "relativePath": "base/v17-display/display-v17-r2/38-fencing-hover-full-description-ru.png",
+      "sourcePath": "D:/mir2-builds/web-r16-20261106/ui-evidence/display-v17-r2/38-fencing-hover-full-description-ru.png",
+      "bytes": 969254,
+      "sha256": "30da42dae05383105fe50f89004d63db3b677824d2e70db70af87b69b061237c",
+      "category": "v17-matrix-image"
+    },
+    {
+      "relativePath": "base/v17-display/display-v17-r2/39-fencing-hover-left-ru.png",
+      "sourcePath": "D:/mir2-builds/web-r16-20261106/ui-evidence/display-v17-r2/39-fencing-hover-left-ru.png",
+      "bytes": 960479,
+      "sha256": "09e469076e4eeab1358ecaf9b236f2c229a0f285c6ae3f60d45bae1d93e3b0f1",
+      "category": "v17-matrix-image"
+    },
+    {
+      "relativePath": "base/v17-display/display-v17-r2/40-fencing-window-closed-ru.png",
+      "sourcePath": "D:/mir2-builds/web-r16-20261106/ui-evidence/display-v17-r2/40-fencing-window-closed-ru.png",
+      "bytes": 1055750,
+      "sha256": "99bbf1629caf732e66be79c9bbe63db6742a0e5719887097609ef35d8756dbbf",
+      "category": "v17-matrix-image"
+    },
+    {
+      "relativePath": "base/v17-display/display-v17-r2/41-quest-diary-hi.png",
+      "sourcePath": "D:/mir2-builds/web-r16-20261106/ui-evidence/display-v17-r2/41-quest-diary-hi.png",
+      "bytes": 104943,
+      "sha256": "1307dd9a5c77e7c20d755ed33c8716176d0deb9cf0a169215da6e729679ddd96",
+      "category": "v17-matrix-image"
+    },
+    {
+      "relativePath": "base/v17-display/display-v17-r2/42-character-character-hi.png",
+      "sourcePath": "D:/mir2-builds/web-r16-20261106/ui-evidence/display-v17-r2/42-character-character-hi.png",
+      "bytes": 77283,
+      "sha256": "f8a4ba179d2ba1a744637cb8bca74b517eae401c29e4041c710c2943d0721e05",
+      "category": "v17-matrix-image"
+    },
+    {
+      "relativePath": "base/v17-display/display-v17-r2/43-character-stats1-hi.png",
+      "sourcePath": "D:/mir2-builds/web-r16-20261106/ui-evidence/display-v17-r2/43-character-stats1-hi.png",
+      "bytes": 65282,
+      "sha256": "74ca6ff6226a2b343ed606241dbbb3d0ded610ef8dbc38199c1f922dc21d4549",
+      "category": "v17-matrix-image"
+    },
+    {
+      "relativePath": "base/v17-display/display-v17-r2/44-character-stats2-hi.png",
+      "sourcePath": "D:/mir2-builds/web-r16-20261106/ui-evidence/display-v17-r2/44-character-stats2-hi.png",
+      "bytes": 65569,
+      "sha256": "274f1d55e6cbb7451e872be6cdcb33f3dd0ffc90a49f4a0cb78ee19aaac285c5",
+      "category": "v17-matrix-image"
+    },
+    {
+      "relativePath": "base/v17-display/display-v17-r2/45-character-spells-hi.png",
+      "sourcePath": "D:/mir2-builds/web-r16-20261106/ui-evidence/display-v17-r2/45-character-spells-hi.png",
+      "bytes": 66734,
+      "sha256": "6d335b05593c9357e9211b2ab0517d665ec1402afb90eed42b8096d0df46146c",
+      "category": "v17-matrix-image"
+    },
+    {
+      "relativePath": "base/v17-display/display-v17-r2/46-fencing-hover-full-description-hi.png",
+      "sourcePath": "D:/mir2-builds/web-r16-20261106/ui-evidence/display-v17-r2/46-fencing-hover-full-description-hi.png",
+      "bytes": 973759,
+      "sha256": "dd2e9198aff6ce1f6c7a18af0aab61f378bb27f041ab08311fdce6b3040197eb",
+      "category": "v17-matrix-image"
+    },
+    {
+      "relativePath": "base/v17-display/display-v17-r2/47-fencing-hover-left-hi.png",
+      "sourcePath": "D:/mir2-builds/web-r16-20261106/ui-evidence/display-v17-r2/47-fencing-hover-left-hi.png",
+      "bytes": 963564,
+      "sha256": "9ac28d5289ac80f5c341f37458d95f3c41430059d6cc4e9798c44578cc9b9ec6",
+      "category": "v17-matrix-image"
+    },
+    {
+      "relativePath": "base/v17-display/display-v17-r2/48-fencing-window-closed-hi.png",
+      "sourcePath": "D:/mir2-builds/web-r16-20261106/ui-evidence/display-v17-r2/48-fencing-window-closed-hi.png",
+      "bytes": 1046154,
+      "sha256": "8add3962a64ac0a0e62d01896b1305c56ef0ff4868d599f3c3216a5b68ac1456",
+      "category": "v17-matrix-image"
+    },
+    {
+      "relativePath": "base/v17-display/display-v17-r2/display-v17-browser-proof.json",
+      "sourcePath": "D:/mir2-builds/web-r16-20261106/ui-evidence/display-v17-r2/display-v17-browser-proof.json",
+      "bytes": 218332,
+      "sha256": "86587b94fed0534f34d416ac9a07553ec47bc20f14440794a5c7dad51d33b862",
+      "category": "v17-source-run"
+    },
+    {
+      "relativePath": "base/v17-display/display-v17-r2/failure-public-window-body.png",
+      "sourcePath": "D:/mir2-builds/web-r16-20261106/ui-evidence/display-v17-r2/failure-public-window-body.png",
+      "bytes": 1041358,
+      "sha256": "a8ce9014ea4cf1c60058c384a60213a17f5dae67248727775bb283dedab2533c",
+      "category": "v17-public-failed-run-image"
+    },
+    {
+      "relativePath": "base/v17-display/display-v17-r3/01-quest-diary-id.png",
+      "sourcePath": "D:/mir2-builds/web-r16-20261106/ui-evidence/display-v17-r3/01-quest-diary-id.png",
+      "bytes": 105439,
+      "sha256": "9ed242b74d2be5dccbe1c67cc1771cf4e412e145b1572a90eb7ba004e90db7d3",
+      "category": "v17-matrix-image"
+    },
+    {
+      "relativePath": "base/v17-display/display-v17-r3/02-character-character-id.png",
+      "sourcePath": "D:/mir2-builds/web-r16-20261106/ui-evidence/display-v17-r3/02-character-character-id.png",
+      "bytes": 77173,
+      "sha256": "27f340a03396f2d96381e8340930d001f80f43785b69b81af0b33d513bfbcce8",
+      "category": "v17-matrix-image"
+    },
+    {
+      "relativePath": "base/v17-display/display-v17-r3/03-character-stats1-id.png",
+      "sourcePath": "D:/mir2-builds/web-r16-20261106/ui-evidence/display-v17-r3/03-character-stats1-id.png",
+      "bytes": 65180,
+      "sha256": "68105f48dce3572af136fd5a19d1fc62a65b2fcf6a2a2574f78d7bcec1f110a2",
+      "category": "v17-matrix-image"
+    },
+    {
+      "relativePath": "base/v17-display/display-v17-r3/04-character-stats2-id.png",
+      "sourcePath": "D:/mir2-builds/web-r16-20261106/ui-evidence/display-v17-r3/04-character-stats2-id.png",
+      "bytes": 65456,
+      "sha256": "d694982bdf34441eebaf12dfe083c80899ad0de5aa0a26418a8a87bdc026236a",
+      "category": "v17-matrix-image"
+    },
+    {
+      "relativePath": "base/v17-display/display-v17-r3/05-character-spells-id.png",
+      "sourcePath": "D:/mir2-builds/web-r16-20261106/ui-evidence/display-v17-r3/05-character-spells-id.png",
+      "bytes": 66651,
+      "sha256": "c2a35e6cbcaf3844883e6c95cc2f5ff416eccd3595cfeec53767f11655bf6ff1",
+      "category": "v17-matrix-image"
+    },
+    {
+      "relativePath": "base/v17-display/display-v17-r3/06-fencing-hover-full-description-id.png",
+      "sourcePath": "D:/mir2-builds/web-r16-20261106/ui-evidence/display-v17-r3/06-fencing-hover-full-description-id.png",
+      "bytes": 968601,
+      "sha256": "707827399e8d834d9e464c1e1fc2e1d9c5c1c9e2e075bc37b0e60b8164ef8cdc",
+      "category": "v17-matrix-image"
+    },
+    {
+      "relativePath": "base/v17-display/display-v17-r3/07-fencing-hover-left-id.png",
+      "sourcePath": "D:/mir2-builds/web-r16-20261106/ui-evidence/display-v17-r3/07-fencing-hover-left-id.png",
+      "bytes": 963475,
+      "sha256": "5750cff084bddb5c769967c57bffa5d2e88cef7f476bd1e9acb2f8d61a7aa12b",
+      "category": "v17-matrix-image"
+    },
+    {
+      "relativePath": "base/v17-display/display-v17-r3/08-fencing-window-closed-id.png",
+      "sourcePath": "D:/mir2-builds/web-r16-20261106/ui-evidence/display-v17-r3/08-fencing-window-closed-id.png",
+      "bytes": 1058737,
+      "sha256": "7ec38b39361e4bfb0674e20e5f401044ccc6bea7068a79275cc74cc9e9ae5fa1",
+      "category": "v17-matrix-image"
+    },
+    {
+      "relativePath": "base/v17-display/display-v17-r3/09-quest-diary-vi.png",
+      "sourcePath": "D:/mir2-builds/web-r16-20261106/ui-evidence/display-v17-r3/09-quest-diary-vi.png",
+      "bytes": 105107,
+      "sha256": "104722aca672a5c5dfb62b677ff1d4dfc10cd96551005f7abe543ce7f3010622",
+      "category": "v17-matrix-image"
+    },
+    {
+      "relativePath": "base/v17-display/display-v17-r3/10-character-character-vi.png",
+      "sourcePath": "D:/mir2-builds/web-r16-20261106/ui-evidence/display-v17-r3/10-character-character-vi.png",
+      "bytes": 77003,
+      "sha256": "10c8e0204af77978bf2f4018b01b60a474cc0f4421fe72f15e6bf0f3137fdc74",
+      "category": "v17-matrix-image"
+    },
+    {
+      "relativePath": "base/v17-display/display-v17-r3/11-character-stats1-vi.png",
+      "sourcePath": "D:/mir2-builds/web-r16-20261106/ui-evidence/display-v17-r3/11-character-stats1-vi.png",
+      "bytes": 64967,
+      "sha256": "3d6367ead79944b4ce957b48968775131c19f06648d88c0fb73e445efef58d3a",
+      "category": "v17-matrix-image"
+    },
+    {
+      "relativePath": "base/v17-display/display-v17-r3/12-character-stats2-vi.png",
+      "sourcePath": "D:/mir2-builds/web-r16-20261106/ui-evidence/display-v17-r3/12-character-stats2-vi.png",
+      "bytes": 65188,
+      "sha256": "4aa1c1f7b969ad9509d984bf6601e5771cb8bfbacfc39f788f672c818ff7f5e8",
+      "category": "v17-matrix-image"
+    },
+    {
+      "relativePath": "base/v17-display/display-v17-r3/13-character-spells-vi.png",
+      "sourcePath": "D:/mir2-builds/web-r16-20261106/ui-evidence/display-v17-r3/13-character-spells-vi.png",
+      "bytes": 66531,
+      "sha256": "65f509634b3335efe3a781329cf68c6a53bee445893808441670f54c814575c4",
+      "category": "v17-matrix-image"
+    },
+    {
+      "relativePath": "base/v17-display/display-v17-r3/14-fencing-hover-full-description-vi.png",
+      "sourcePath": "D:/mir2-builds/web-r16-20261106/ui-evidence/display-v17-r3/14-fencing-hover-full-description-vi.png",
+      "bytes": 971213,
+      "sha256": "0337b67ad2058b768640e6010229fcd83760368bd7e2b242bf59106b48c049f2",
+      "category": "v17-matrix-image"
+    },
+    {
+      "relativePath": "base/v17-display/display-v17-r3/15-fencing-hover-left-vi.png",
+      "sourcePath": "D:/mir2-builds/web-r16-20261106/ui-evidence/display-v17-r3/15-fencing-hover-left-vi.png",
+      "bytes": 960728,
+      "sha256": "f290c254a0a7321763ef7d12c4c910a3f6317dfc5c2dc18f845d4756bb8d2508",
+      "category": "v17-matrix-image"
+    },
+    {
+      "relativePath": "base/v17-display/display-v17-r3/16-fencing-window-closed-vi.png",
+      "sourcePath": "D:/mir2-builds/web-r16-20261106/ui-evidence/display-v17-r3/16-fencing-window-closed-vi.png",
+      "bytes": 1057343,
+      "sha256": "da73560f3f16fb9ee4f27b7264ede36c3b0940c14064df4bedca9bbdf94a904a",
+      "category": "v17-matrix-image"
+    },
+    {
+      "relativePath": "base/v17-display/display-v17-r3/display-v17-browser-proof.json",
+      "sourcePath": "D:/mir2-builds/web-r16-20261106/ui-evidence/display-v17-r3/display-v17-browser-proof.json",
+      "bytes": 92367,
+      "sha256": "09fd81418fca7186aba41bf15f35500476e3816ff4b450a56e7ac6f750ec62e7",
+      "category": "v17-source-run"
+    },
+    {
+      "relativePath": "base/v17-display/display-v17-r3/failure-public-window-body.png",
+      "sourcePath": "D:/mir2-builds/web-r16-20261106/ui-evidence/display-v17-r3/failure-public-window-body.png",
+      "bytes": 1057127,
+      "sha256": "c2d533bcb859d74edc5106a8468b611b4b2a4a4e9478b3614443058ffe4b2b5e",
+      "category": "v17-public-failed-run-image"
+    },
+    {
+      "relativePath": "base/v17-display/display-v17-r4/01-quest-diary-th.png",
+      "sourcePath": "D:/mir2-builds/web-r16-20261106/ui-evidence/display-v17-r4/01-quest-diary-th.png",
+      "bytes": 102502,
+      "sha256": "593b4840118f4fd12be21700dabeba337c0c8237d04304e1df63505cd3d9dbd5",
+      "category": "v17-matrix-image"
+    },
+    {
+      "relativePath": "base/v17-display/display-v17-r4/02-character-character-th.png",
+      "sourcePath": "D:/mir2-builds/web-r16-20261106/ui-evidence/display-v17-r4/02-character-character-th.png",
+      "bytes": 76650,
+      "sha256": "82e6d2674badc531a82c4aacc3895f763088ac250cc6b1ae30ce0a6617e444b7",
+      "category": "v17-matrix-image"
+    },
+    {
+      "relativePath": "base/v17-display/display-v17-r4/03-character-stats1-th.png",
+      "sourcePath": "D:/mir2-builds/web-r16-20261106/ui-evidence/display-v17-r4/03-character-stats1-th.png",
+      "bytes": 64705,
+      "sha256": "16dc715d35fd262d42cc61dcace150cdbe1a7f9413ef7137c8fcf71b42da04cf",
+      "category": "v17-matrix-image"
+    },
+    {
+      "relativePath": "base/v17-display/display-v17-r4/04-character-stats2-th.png",
+      "sourcePath": "D:/mir2-builds/web-r16-20261106/ui-evidence/display-v17-r4/04-character-stats2-th.png",
+      "bytes": 64936,
+      "sha256": "f8f59b207b2944355632b6056ce5c073f63123eb2d7e318b9163603bd16aaa62",
+      "category": "v17-matrix-image"
+    },
+    {
+      "relativePath": "base/v17-display/display-v17-r4/05-character-spells-th.png",
+      "sourcePath": "D:/mir2-builds/web-r16-20261106/ui-evidence/display-v17-r4/05-character-spells-th.png",
+      "bytes": 65924,
+      "sha256": "f450620e3c673e9edcfe00d265b3316df3f2e7a23733a18ff394948453a83719",
+      "category": "v17-matrix-image"
+    },
+    {
+      "relativePath": "base/v17-display/display-v17-r4/06-fencing-hover-full-description-th.png",
+      "sourcePath": "D:/mir2-builds/web-r16-20261106/ui-evidence/display-v17-r4/06-fencing-hover-full-description-th.png",
+      "bytes": 966247,
+      "sha256": "fc8bb729000c291965a2c21c04000f6722a5c17c4972b162672c5048867734bf",
+      "category": "v17-matrix-image"
+    },
+    {
+      "relativePath": "base/v17-display/display-v17-r4/07-fencing-hover-left-th.png",
+      "sourcePath": "D:/mir2-builds/web-r16-20261106/ui-evidence/display-v17-r4/07-fencing-hover-left-th.png",
+      "bytes": 964346,
+      "sha256": "375b819933a98b569de9765358f3f7a9a0b64c58a931bacd7ede4358f34e7622",
+      "category": "v17-matrix-image"
+    },
+    {
+      "relativePath": "base/v17-display/display-v17-r4/08-fencing-window-closed-th.png",
+      "sourcePath": "D:/mir2-builds/web-r16-20261106/ui-evidence/display-v17-r4/08-fencing-window-closed-th.png",
+      "bytes": 1058041,
+      "sha256": "1aa5eb0ffed983e9aa251205c28a09f5b25f9d3211a718280f9314d8fce4c1a0",
+      "category": "v17-matrix-image"
+    },
+    {
+      "relativePath": "base/v17-display/display-v17-r4/09-quest-diary-ar.png",
+      "sourcePath": "D:/mir2-builds/web-r16-20261106/ui-evidence/display-v17-r4/09-quest-diary-ar.png",
+      "bytes": 103435,
+      "sha256": "96ad8a9833c464d7c2970841161534b8b880a915d0211193c394f8d68f375a99",
+      "category": "v17-matrix-image"
+    },
+    {
+      "relativePath": "base/v17-display/display-v17-r4/10-character-character-ar.png",
+      "sourcePath": "D:/mir2-builds/web-r16-20261106/ui-evidence/display-v17-r4/10-character-character-ar.png",
+      "bytes": 76849,
+      "sha256": "b6ed45c713334d43d1cff99325d8e44a247316f724cb751f013f370b8dec2d80",
+      "category": "v17-matrix-image"
+    },
+    {
+      "relativePath": "base/v17-display/display-v17-r4/11-character-stats1-ar.png",
+      "sourcePath": "D:/mir2-builds/web-r16-20261106/ui-evidence/display-v17-r4/11-character-stats1-ar.png",
+      "bytes": 64878,
+      "sha256": "3618244a722dcde19189b35eda0e3593c4b64957e67e67ba01dc397a395ae8dd",
+      "category": "v17-matrix-image"
+    },
+    {
+      "relativePath": "base/v17-display/display-v17-r4/12-character-stats2-ar.png",
+      "sourcePath": "D:/mir2-builds/web-r16-20261106/ui-evidence/display-v17-r4/12-character-stats2-ar.png",
+      "bytes": 65154,
+      "sha256": "e7166f95d5d9ed718f6b5f68982b2efb25f660e1a4647414a4a40c21f6043ba8",
+      "category": "v17-matrix-image"
+    },
+    {
+      "relativePath": "base/v17-display/display-v17-r4/13-character-spells-ar.png",
+      "sourcePath": "D:/mir2-builds/web-r16-20261106/ui-evidence/display-v17-r4/13-character-spells-ar.png",
+      "bytes": 66160,
+      "sha256": "6eabed87f1e0a5d80d412db3d534989b6524ef9f2c9fe7483b424c7369e4a817",
+      "category": "v17-matrix-image"
+    },
+    {
+      "relativePath": "base/v17-display/display-v17-r4/14-fencing-hover-full-description-ar.png",
+      "sourcePath": "D:/mir2-builds/web-r16-20261106/ui-evidence/display-v17-r4/14-fencing-hover-full-description-ar.png",
+      "bytes": 958764,
+      "sha256": "8a0b6fbb8b0f899b5c86c892022c2bc75c0cd5a897711e7010a5e32d26fbf16f",
+      "category": "v17-matrix-image"
+    },
+    {
+      "relativePath": "base/v17-display/display-v17-r4/15-fencing-hover-left-ar.png",
+      "sourcePath": "D:/mir2-builds/web-r16-20261106/ui-evidence/display-v17-r4/15-fencing-hover-left-ar.png",
+      "bytes": 967848,
+      "sha256": "c7c320ac81fb39848b46db68a2b37781582b4a10ddfc51a79238108c9dd5e0df",
+      "category": "v17-matrix-image"
+    },
+    {
+      "relativePath": "base/v17-display/display-v17-r4/16-fencing-window-closed-ar.png",
+      "sourcePath": "D:/mir2-builds/web-r16-20261106/ui-evidence/display-v17-r4/16-fencing-window-closed-ar.png",
+      "bytes": 1056354,
+      "sha256": "78b1e3253766ede3ad8e7b3e5d6d2a99db3fd1cf178f91c2c5b488719fa6f6e8",
+      "category": "v17-matrix-image"
+    },
+    {
+      "relativePath": "base/v17-display/display-v17-r4/display-v17-browser-proof.json",
+      "sourcePath": "D:/mir2-builds/web-r16-20261106/ui-evidence/display-v17-r4/display-v17-browser-proof.json",
+      "bytes": 102666,
+      "sha256": "6ca710b2e835adf0e71a8bd517d2d817bb2b84aa5b437b6c1d51ac5495de850b",
+      "category": "v17-source-run"
+    },
+    {
+      "relativePath": "base/v17-display/independent-visual-review.json",
+      "sourcePath": "D:/mir2-builds/web-r16-20261106/ui-evidence/independent-visual-review.json",
+      "bytes": 31216,
+      "sha256": "f17ea5e5418400d2de69d45ea65c65e4d3694292deabab71daf1da5c86857cfb",
+      "category": "v17-visual-receipt"
+    },
+    {
+      "relativePath": "base/v17-display/v17-display-scoped-receipt.json",
+      "sourcePath": "D:/mir2-builds/web-r16-20261106/ui-evidence/v17-display-scoped-receipt.json",
+      "bytes": 41685,
+      "sha256": "79259a4e01278e07497b7210203e5b200523d3f8b615851bea23e2529e662488",
+      "category": "v17-visual-receipt"
+    },
+    {
+      "relativePath": "base/v17-display/v17-public-image-manifest.json",
+      "sourcePath": "D:/mir2-builds/web-r16-20261106/ui-evidence/v17-public-image-manifest.json",
+      "bytes": 16547,
+      "sha256": "ef41b692aa868576699e48ab69a0a93d8cf450ff7d542afcc19a25e7ef021ddf",
+      "category": "v17-visual-receipt"
+    }
+  ]
+}

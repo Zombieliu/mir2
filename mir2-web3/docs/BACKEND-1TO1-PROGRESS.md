@@ -1,5 +1,59 @@
 # Backend 1:1 Progress
 
+## R16 断线保存与会话交接（2026-11-08）
+
+WebSocket 普通 StartGame 仅等待同角色、旧租约持有者和唯一连接标记的已断开会话，等待不持单写者锁；真实保存并发布恢复会话后才通知。竞争消费、失败、过期和撤销不回退冷启动，容量等待后复核共享身份。新回归 33 项、相邻用例合计去重 103 项通过，两后端普通自动恢复实测零租约拒绝。进程内边界、原失败、隔离 dev/debug 候选及未结项见[本轮记录](WEB-R16-PARITY-GOAL.zh-CN.md#慢保存与自动重连2026-11-08)。
+
+## R16 创角槽位与名字并发（2026-11-07）
+
+File 与 PG 源均在创角事务中检查四槽及全服在册名，PG 对独立写者序列化并复核新角色索引。原生 PG 17.11 与 File 各实测同名、不同名、最后一槽竞争，旧重名及超额档重开保留，普通删除后名字可再次使用。权限、保存故障和职业创建相邻回归通过。[测试摘要](evidence/web-r16-parity-goal-20261107/character-constraints-verification.json)
+
+## R16 V2 沃玛独立训练点（2026-11-07）
+
+D022 的九个 V2 训练点各保留一只，既有坐标和击杀数保持。新构建的网关隔离了其他任务节奏和原版刷怪合同。回归通过，三职业都核对了实际击杀、职业旗标和最终 30 级存档。道士的原计时结果和同档续验分别留证。[候选与服务端证据](WEB-R16-NEWCOMER-V22-20261107.zh-CN.md)
+
+## R16 同地图 NPC 传送存档（2026-11-06）
+
+Gilbert 普通菜单在 v19 实际扣费并落地，但共享 Zone 旧位置在注销时覆盖个人存档。v20 只在受信 NPC 脚本结果同时确认换图信息、同地图同角色的坐标实际变化及匹配位置回执时更新 Zone 坐标。真实脚本集成测试验证扣 2000、即时新位置、正常注销后位置和余额保存；相邻换图 7 项通过。原实机车费不重放。[实证与修复](WEB-R16-FOREST-SHARED-SAVE-20261106.zh-CN.md#后续主线与地图)。
+
+## R16 普通补给与任务同提交（2026-11-06）
+
+真实 Web 买药已扣款交付而第 6 项停在 `0/1`，重登复现。新成交的既有 NPC durable purchase 将任务条件、金币、库存及原交易收据写入同一 CAS 检查点。查询／重放不再记录进度；旧 `BuyItem` 的同步观察规则、任务奖励和 bounded 预算保持。Canonical 50 个交易及 28 个新手用例通过，隔离 Gateway 普通采购 23、伙伴 133、Simulation File 7 分组通过。v18 普通买一瓶扣 40，权威 `1/1`、唯一交付及重登保留已验。详见[实机与文件恢复](WEB-R16-FOREST-SHARED-SAVE-20261106.zh-CN.md#补给与任务保存)。
+
+## R16跨端共用任务节奏（2026-11-05）
+
+两端本地服务统一读取公共五职业/V2基线，复用现有服务器任务、奖励及保存规则；未新增Web完成计数或修改战斗经济。V2任务23项与旧持久化3项通过，普通UI首3项交付/奖励/重登completed及3药120、2药80的独立采购提交有实证。切换前Web12份旧存档任务行均空、身份资产18类未变；该环境事实不代表其它V1任务可无迁移切换。Native仅公共启动模块更新、无新EXE/私有迁移；见[限定交付](WEB-R16-PLAYABLE-HANDOFF-20261104.zh-CN.md#v12-v13-windows-与-web-共用新手基础)。全局parity未晋级。
+
+## 阿洛自主生活与动态占位返程（2026-11-04）
+
+服务端签名生活总账和持久唯一采购名额限制会话累计50游戏金币/一瓶；激活前不执行，重启暂停后明确恢复原期限/支出。只收不付沿用真实共享交易；动作边界在共享Zone消费移动时裁定。到期返程复用真实碰撞/动态占位的可走距离，解决绕楼及对象挡路；安全区变化补Actor快照，普通玩家不新增该Zone查询。
+
+最终二十分钟普通本地联机、真实Node重启、40金币/一瓶与安全返家通过。Node461，最终Simulation242/Gateway141按target案例去重383；UI组另计。完整证据、四轮失败及交付范围只在[本轮主题](ALO-AUTONOMOUS-LIFE-20261103.zh-CN.md)维护。不据此提升全局parity、多人容量或Accepted。
+
+## 阿洛培养提案与服务器受限补给（2026-11-03）
+
+新增 `proposeTeaching/confirmTeaching/cancelTeaching`，仅接受三项可为 false 的部分软习惯修改；SQLite schema3、归档v2及严格旧v1导入沿用既有角色绑定。补给由服务器 prepare、运行器校验版本并 ACK 后 activate；持久化预算 reservation 先于普通 bounded 交易，取消幂等，未知订单只查询原操作，迁移记忆不能重置预算。Node310、Gateway78、Simulation bounded6／transaction37／wire11分组通过，详细日志见[公开测试证据](evidence/alo-cultivation-supply-20261103/tests.json)。
+
+新 Gateway `cd35f1f8…` 的独立普通 `/ws` 补给7项通过：50游戏金币上限内实际扣40、药+1，主人在 actor AOI 外且占住授权点时返邻格，并完成撤销及第二笔真实 commit 后的方法结果丢失注入/Node 重启仅Query。该恢复不是实际断网或 Gateway 重启。[真实模型教学重启](evidence/alo-cultivation-supply-20261103/model-ui/teaching-ui-outcome.json)另证59820→56204同archive/v2三项习惯保留、2次调用未增加，不声称该新世界教学后战斗。上一阶段原本地入口已更新并验证存档保留；[本轮主题](ALO-CULTIVATION-SUPPLY-20261103.zh-CN.md)维护最终交付。保留 R16/WIP 与原游戏裁定，不提升整体 parity，`Candidate100=false`／Accepted 未晋级。
+
+## 阿洛真实模型执行与重启（2026-11-03）
+
+真实OpenAI三次请求及Windows端2/2击杀／返队、新进程记忆引用通过；仅模型Actor继承标准代理，独立Undici dispatcher使用可信系统CA并保留TLS校验。Node227／fixture18通过，原Gateway/Zone裁定不变。[调用回执和存档证据](ALO-OPENAI-20261103.zh-CN.md#同日真实模型验收已完成)。
+
+## 阿洛有限模型目标与私人协议（2026-11-03）
+
+新增 `instruct` 复用原 owner admission／generation／deadline，异步模型规划不占用控制队列。
+结构化目标受普通视野、队伍、碰撞及逐步距离限制，死亡或记忆变化中断；实际命中及死亡才累计进度。
+Node214与Gateway伙伴20通过，两次独立本地联机替身闭环通过；无资产或数据库schema变更、无公网部署。
+真实API、Windows截图及交付状态见[本轮记录](ALO-OPENAI-20261103.zh-CN.md)。
+
+## R16 阿洛私人控制与安全区资料一致性（2026-11-03）
+
+私人 relay 仅绑定真实账号／角色，复用 R16 单写者组队；外人邀请不会占用已登记伙伴的待确认状态。
+已知地图的 Join、authoritative transform 与 chat profile 更新以实际 manifest 位置恢复安全区资料，
+未知自定义图保留可信输入。各组 Rust 回归与完整网络复测见[本轮记录](ALO-R16-MIGRATION-20261103.zh-CN.md)。
+未修改伤害、用药、资产、数据库 schema 或部署公网；不提高全项目进度和容量资格。
+
 ## 普通用药 Tick 唤醒（2026-10-27，北京时间）
 
 `ee06c05f3` 将正常 UID/槽位/key 用药接入原短 Tick 唤醒，实际32项 Rust 回归、828项工具检查及新 Release 构建通过。第四次普通准备中，第5人190.544ms内取得扣药1与精确HP12→18，随后正常购药12；回村寻路失败仍使本轮仅prepared4/100、无CCU测量。P0未通过、P2未启动，详见[本轮证据](generated/cell-p0-p1-completion-20261024/capacity-ordinary-economic-v1/README.md)。

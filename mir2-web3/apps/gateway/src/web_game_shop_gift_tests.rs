@@ -86,6 +86,7 @@ async fn local_gateway() -> LocalGateway {
         ))
         .expect("disabled fixture AI hub"),
         channel_identity: crate::ChannelIdentityRegistry::in_memory(),
+        companions: None,
     };
     let listener = tokio::net::TcpListener::bind("127.0.0.1:0").await.unwrap();
     let address = listener.local_addr().unwrap();

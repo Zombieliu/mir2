@@ -1,0 +1,23 @@
+{
+  "base": "00858ce9b850218dd07ea96daea4bbfe6b68035b",
+  "checkedAt": "2026-11-02T00:32:05.535432+00:00",
+  "files": {
+    "mir2-web3/apps/website/app/[locale]/layout.tsx": "55f0246c5cccb10b3712ddab493c06608c0531a674b16054c3d353df438bd099",
+    "mir2-web3/apps/website/app/[locale]/page.tsx": "0691c2895d1f5324cd6839c7acd148881491c5617ef0c76e7c9a57ea7cf84f49",
+    "mir2-web3/apps/website/app/components/documentation-page.tsx": "48d270c288bd83b4ef0cdc7022fc28890bed6ecbbe684ada738548881e26d1b6",
+    "mir2-web3/apps/website/app/components/site-chrome.tsx": "ac8adb4ffafbef01397b4f3e7f7293b71727dc708fb55ee50db05ba2dfb2a724",
+    "mir2-web3/apps/website/app/documentation.css": "e1daf3722154f65e6ae853c9fac2f8ae503ba891402ba3d22f18198072ff0495",
+    "mir2-web3/apps/website/app/globals.css": "ad19cef1730acf1334020c45bae67a25c1ec24f160e13a7e37224b39ef391173",
+    "mir2-web3/apps/website/app/robots.ts": "b68279752b510c20e9958d29c5104eceb9024dec38cd4055b9e7d0fd0f47d48b",
+    "mir2-web3/apps/website/app/sitemap.ts": "8930d2e06a40473400914379f8b08856aaee3fedab8930d63186a3fb8731af9f",
+    "mir2-web3/apps/website/lib/developer-content.ts": "f06a825970628091f7e4c568e493c8aaa803d24f1db91c935ff205cb94b8a5b2",
+    "mir2-web3/apps/website/lib/documentation-types.ts": "f0e2c30cc7d9e1d68652b5f32572b72fc780a07a3c7fe96915ae82635a90c639",
+    "mir2-web3/apps/website/lib/guide-content.ts": "2c21de4fa106d7be2e4366f6f534042407f3b28c1a2931376ca46130be112301",
+    "mir2-web3/apps/website/lib/product-copy.ts": "ab43db970410ae04ab3932b845fe698e12201e5a98f8bf77210941a5134b0086",
+    "mir2-web3/apps/website/lib/site-copy.ts": "d4bf845839f475caf45f1f63d03687520feb181dc54b51f8e05380c128327325",
+    "mir2-web3/apps/website/next.config.mjs": "7b8617558694b9ce5bfa6c1af813c11ddeafb7ee1d6097e8f33a68277462ea4a",
+    "mir2-web3/apps/website/scripts/check-documentation.mjs": "dd3e346ee37630e36d2434ca3ab260164e48403169944022340e8805fbb411e5",
+    "mir2-web3/apps/website/public/zh-CN/guide-media/windows-login-r16.jpg": "86cb745c7c65832cc2ba1054b2f334e8e670c5a6054d4aefc599418562131a89",
+    "mir2-web3/apps/website/public/zh-CN/guide-media/wallet-qr-expired-r16.jpg": "cfbdabdc47b4fedcdd5574f847670ac92f0104cb5e222cb0197a96063338f0fd"
+  }
+}

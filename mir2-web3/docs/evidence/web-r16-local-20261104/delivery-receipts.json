@@ -1,0 +1,196 @@
+{
+  "schema": "mir2.r16.final-delivery-public-receipts.v1",
+  "localDate": "2026-11-04",
+  "branch": "codex/windows-player-journey",
+  "head": "c404bde8a5190534f6bc83ec8a4fe78fffc8cb50",
+  "worktreeContainsPreservedWip": true,
+  "localOrigin": "http://127.0.0.1:19041",
+  "packageVersion": "v7",
+  "buildId": "kH3yQjxYAuzF2nvUWQtzS",
+  "mainJourney": {
+    "origin": "http://127.0.0.1:19141",
+    "gateway": "ws://127.0.0.1:19040/ws",
+    "passed": true,
+    "checks": [
+      {
+        "name": "ordinary-reused-test-account-login-through-ui",
+        "passed": true
+      },
+      {
+        "name": "ordinary-new-character-through-ui",
+        "passed": true
+      },
+      {
+        "name": "login-selection-startgame-town",
+        "passed": true
+      },
+      {
+        "name": "real-monster-combat-and-owned-potion",
+        "passed": true
+      },
+      {
+        "name": "server-reported-hp-recovery-after-potion",
+        "passed": true
+      },
+      {
+        "name": "real-monster-drop-ui-pickup-and-repeat-stability",
+        "passed": true
+      },
+      {
+        "name": "two-ordinary-players-shared-party-through-ui",
+        "passed": true
+      },
+      {
+        "name": "ui-trade-cancel-returns-exact-gold-and-item",
+        "passed": true
+      },
+      {
+        "name": "ui-trade-owned-candle-and-gold-delivery-once",
+        "passed": true
+      },
+      {
+        "name": "ordinary-save-relogin-retains-exact-settled-assets",
+        "passed": true
+      }
+    ],
+    "screenshots": 10,
+    "httpErrors": 0,
+    "consoleErrors": 0,
+    "peer": "ordinary authenticated GatewayClient",
+    "humanOperators": 0,
+    "primaryRegistrations": 0,
+    "peerRegistrations": 1,
+    "naturalGold": 26,
+    "potionConsumed": 1,
+    "goldTransfer": 1,
+    "recipientOldCandleUid": 3,
+    "recipientNewCandleUid": 4,
+    "bothReloginAssetsMatched": true
+  },
+  "finalCompanionPassed": true,
+  "finalBrowserHttpErrors": 0,
+  "finalBrowserConsoleErrors": 0,
+  "release": {
+    "files": 29640,
+    "bytes": 886874624,
+    "manifestSha256": "f27eee2abd6beab6bbf42fbec057ae77d43d602d5d625460550153fdac478cf4",
+    "privateDataExcluded": true,
+    "oldJsAndWasmUnchangedBetweenV6V7": true
+  },
+  "budgets": {
+    "preparedBytes": 648920036,
+    "thinBudgetBytes": 377487360,
+    "thinPassed": false,
+    "byteBudgetsRaised": false,
+    "finiteResourceFileBoundOld": 20000,
+    "finiteResourceFileBoundNew": 22000,
+    "finiteResourceFiles": 21019
+  },
+  "tests": {
+    "inputDepthBagHud": "79/79",
+    "serviceSocialCompanion": "85/85",
+    "all13RawAssets": "18/18",
+    "countsOverlapNotAdded": true
+  },
+  "humanAccepted": false,
+  "candidate100": false,
+  "publicDeployment": false,
+  "preservedFailureEvidence": "Initial receipts and failed browser runs remain in place; v6 four-path raw Monster007 failure retained in source logs and final companion proof.",
+  "copiedFiles": [
+    {
+      "path": "final-alo-web-proof.json",
+      "bytes": 3986,
+      "sha256": "f35b0e6940c63c6e8111981bdedf38f4b5ce4a27145746a0378e0231e18316c4"
+    },
+    {
+      "path": "final-package-integrity-v7-proof.json",
+      "bytes": 16177,
+      "sha256": "cc879c06d1b9accec5f5cc7ce26a5b36cc12b2722a82d226c372e541a9e53800"
+    },
+    {
+      "path": "final-v7-update-preservation-proof.json",
+      "bytes": 918,
+      "sha256": "d43d22fc3490067911e0d933c77e886400999b7416c97bf66854fe2088bd218a"
+    },
+    {
+      "path": "all13-resource-expansion-proof.json",
+      "bytes": 1247,
+      "sha256": "069a8c56de336602d205b4c52cbcb683f465f5d2e483b5ee83d18c3042537ae7"
+    },
+    {
+      "path": "v6-build-source-pins.json",
+      "bytes": 2322,
+      "sha256": "e3c20e1646161c7cc3a90eb39187b507f42509fa52f46fdc1ec96e76035a9e77"
+    },
+    {
+      "path": "final-alo-model-proposal-before-confirm.png",
+      "bytes": 638356,
+      "sha256": "f94288f17ceaedbcaa49e12ed940cc162ab90c6fc6ed858173cc446fa9dcadf6"
+    },
+    {
+      "path": "final-alo-supply-completed.png",
+      "bytes": 573275,
+      "sha256": "1333a196aa7649a0a1c6083073bbbba1bc5321c1080c7cfa9115635fbf568271"
+    },
+    {
+      "path": "final-v7-alo-memory-fresh-connection.png",
+      "bytes": 612769,
+      "sha256": "5d879b389dd45ce195378d3e6b7610d0ed3a8ac340dfa59ea019094313e3fb86"
+    },
+    {
+      "path": "final-v7-alo-action-memory.png",
+      "bytes": 596930,
+      "sha256": "f0eadb7ee6d42260164df777575f54b570ab454f603798151e30fad0b7991849"
+    },
+    {
+      "path": "journey-01-ordinary-town-entry.png",
+      "bytes": 942945,
+      "sha256": "adb709ad84b31f7dec9351b618a83536e3e4ca493fb4cc276ac22b617c10b999"
+    },
+    {
+      "path": "journey-02-owned-sword-equipped.png",
+      "bytes": 904316,
+      "sha256": "3357c360ecf9af265c1e25b22d072a233d170f665b105c695fe718da95b17c3a"
+    },
+    {
+      "path": "journey-03-real-owned-potion-consumed.png",
+      "bytes": 944384,
+      "sha256": "6d1f76f02876546d342c870ccfc0f09c5f0d69746240ac9b28e2b3a61f1046ea"
+    },
+    {
+      "path": "journey-04-real-monster-death.png",
+      "bytes": 942828,
+      "sha256": "dd3d32b28c755ab76d1c2a354628afea50cf7d933bde9d824c64cf10b79a29ee"
+    },
+    {
+      "path": "journey-05-real-monster-drop-picked-up.png",
+      "bytes": 967541,
+      "sha256": "710690f07aeccd11003e1b3834ec81d51318af36cac309b14f1cee1f3e01b860"
+    },
+    {
+      "path": "journey-06-real-shared-party.png",
+      "bytes": 918320,
+      "sha256": "7b446c0a814032da460c570b4b56a3d1790b49724148cf8400a6868389cc2672"
+    },
+    {
+      "path": "journey-07-real-trade-offer-before-cancel.png",
+      "bytes": 819651,
+      "sha256": "8045baaf84a467f7f0120509ae7323bbd08833d0166ce98265cfa859d002b65f"
+    },
+    {
+      "path": "journey-08-real-trade-cancelled.png",
+      "bytes": 893806,
+      "sha256": "7bee45d2e633692a66ac62dd318091f031f556c26e44cfb7f38a55684bd2cd1a"
+    },
+    {
+      "path": "journey-09-real-trade-settled.png",
+      "bytes": 896405,
+      "sha256": "a0865a1f6a28cdb269ef3e975a25873e944ab858c9da42d134bf8aa7acbdc56a"
+    },
+    {
+      "path": "journey-10-saved-trade-assets-after-relogin.png",
+      "bytes": 928694,
+      "sha256": "752ef53bceaef92aaab01a2863b7511951a0f80345e4d720ad2b0e7a4d3e0247"
+    }
+  ]
+}

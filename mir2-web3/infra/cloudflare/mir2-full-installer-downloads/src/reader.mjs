@@ -5,6 +5,7 @@ const SHA256 = /^[0-9a-f]{64}$/;
 const FILE_NAMES = ["release.json", "release.p7s", "SHA256SUMS.txt", "README.zh-CN.txt"];
 const IMMUTABLE = "public, max-age=31536000, immutable, no-transform";
 const CACHE_MARKER = "mir2-full-installer-v1";
+const CACHE_QUEUE_LIMIT = 1024 * 1024;
 
 function invariant(condition, message) {
   if (!condition) throw new TypeError(message);
@@ -140,8 +141,21 @@ function identityEncoding(value) {
   return value === undefined || value === null || (typeof value === "string" && value.trim().toLowerCase() === "identity");
 }
 
-function verifyObject(object, expected, release) {
-  invariant(object && object.size === expected.bytes && !object.range
+function exactRange(range, span) {
+  if (!range || typeof range !== "object" || Array.isArray(range)) return false;
+  const keys = Reflect.ownKeys(range);
+  return (keys.length === 2 || (keys.length === 3 && keys.includes("suffix") && range.suffix === undefined))
+    && keys.includes("offset") && keys.includes("length")
+    && range.offset === span.offset && range.length === span.length;
+}
+
+function verifyObject(object, expected, release, span = null) {
+  // R2's stored native checksum authenticates the WHOLE object, including when
+  // get(range) restricts its body. It is not a checksum of the returned slice.
+  invariant(object && object.key === expected.key && object.size === expected.bytes
+    && (span ? exactRange(object.range, span) : !object.range)
+    && typeof object.version === "string" && object.version.length > 0
+    && typeof object.httpEtag === "string" && /^"[^"\u0000-\u0020\u007f]+"$/.test(object.httpEtag)
     && object.customMetadata?.sha256 === expected.sha256
     && object.customMetadata?.sourceInstaller === release.sha256
     && checksumHex(object.checksums?.sha256) === expected.sha256
@@ -158,16 +172,18 @@ function cacheHeaders(expected, release) {
   });
 }
 
-function verifyCached(response, expected, release) {
-  invariant(response.status === 200 && response.body
-    && response.headers.get("Content-Length") === String(expected.bytes)
+function verifyCached(response, expected, release, span = null) {
+  invariant(response.status === (span ? 206 : 200) && response.body
+    && response.headers.get("Content-Length") === String(span ? span.length : expected.bytes)
     && response.headers.get("Content-Type") === "application/octet-stream"
     && response.headers.get("ETag") === `"${expected.sha256}"`
     && response.headers.get("x-mir2-download-cache") === CACHE_MARKER
     && response.headers.get("x-mir2-sha256") === expected.sha256
     && response.headers.get("x-mir2-source-installer") === release.sha256
     && identityEncoding(response.headers.get("Content-Encoding"))
-    && !response.headers.has("Content-Range") && !response.headers.has("Set-Cookie"),
+    && response.headers.get("Content-Range") === (span
+      ? `bytes ${span.offset}-${span.offset + span.length - 1}/${expected.bytes}` : null)
+    && !response.headers.has("Set-Cookie"),
   "Untrusted installer cache entry");
 }
 
@@ -178,14 +194,21 @@ async function discard(body, reason) {
 async function stopPart(part, reason) {
   if (!part) return;
   if (!part.stopping) {
-    part.stopping = Promise.allSettled([
-      Promise.resolve().then(() => part.reader.cancel(reason)),
-      Promise.resolve().then(() => part.writer?.abort(reason)),
-    ]).then(() => {
+    dropCache(part.fill, reason);
+    part.stopping = Promise.resolve().then(() => part.reader.cancel(reason)).catch(() => {}).then(() => {
       try { part.reader.releaseLock(); } catch { /* An in-flight pull releases it after cancellation. */ }
     });
   }
   await part.stopping;
+}
+
+function dropCache(fill, reason) {
+  if (!fill || !fill.active) return;
+  fill.active = false;
+  // Do not accumulate another cache pipeline if a failed cache consumer leaves
+  // its fixed-length stream locked. One abandoned bounded fill is enough.
+  fill.operation.cacheDisabled = true;
+  try { fill.controller.error(reason); } catch { /* The cache may already be closed. */ }
 }
 
 function lengthBridge(length) {
@@ -204,51 +227,79 @@ function knownLengthBody(body, length, ctx) {
   return bridge.readable;
 }
 
-async function openPart(expected, release, env, ctx, cache, operation) {
-  const key = new Request(`${release.publicBase}__chunks/${expected.sha256}.bin`, { method: "GET" });
+function cacheFill(key, expected, release, ctx, cache, operation) {
+  // At most one bounded fill per request. A slow cache never backpressures the
+  // authenticated source/client or accumulates a queue for each later part.
+  if (operation.cacheFill || operation.cacheDisabled) return null;
+  const fill = { active: true, controller: null, operation };
+  operation.cacheFill = fill;
+  const input = new ReadableStream({
+    start(controller) { fill.controller = controller; },
+    cancel() { fill.active = false; },
+  }, { highWaterMark: CACHE_QUEUE_LIMIT, size(chunk) { return chunk.byteLength; } });
+  const bridge = lengthBridge(expected.bytes);
+  const pumping = input.pipeTo(bridge.writable);
+  const putting = Promise.resolve().then(() => cache.put(key,
+    new Response(bridge.readable, { headers: cacheHeaders(expected, release) })));
+  // Both promises have rejection handlers through Promise.all. A cache that
+  // rejects while leaving its response reader locked cannot delay this task or
+  // create further fills: dropCache disables caching for the rest of the request.
+  fill.task = Promise.all([pumping, putting]).catch((error) => {
+    dropCache(fill, error);
+  }).finally(() => {
+    fill.active = false;
+    if (operation.cacheFill === fill) operation.cacheFill = null;
+  });
+  try { ctx.waitUntil(fill.task); }
+  catch (error) { dropCache(fill, error); }
+  return fill;
+}
+
+function copyToCache(fill, bytes) {
+  if (!fill?.active) return;
+  if (fill.controller.desiredSize < bytes.byteLength || bytes.byteLength > CACHE_QUEUE_LIMIT) {
+    dropCache(fill, new Error("Installer cache exceeded its bounded queue"));
+    return;
+  }
+  // The client may receive a view of the source chunk. The cache owns a bounded
+  // independent copy, rather than sharing bytes with a downstream consumer.
+  fill.controller.enqueue(bytes.slice());
+}
+
+async function openPart(expected, span, release, env, ctx, cache, operation) {
+  const partial = span.offset !== 0 || span.length !== expected.bytes;
+  const key = new Request(`${release.publicBase}__chunks/${expected.sha256}.bin`, {
+    method: "GET", headers: partial ? { Range: `bytes=${span.offset}-${span.offset + span.length - 1}` } : {},
+  });
   const cached = await cache.match(key);
   if (operation.cancelled) throw new Error("Installer download cancelled");
   if (cached) {
-    try { verifyCached(cached, expected, release); }
+    try { verifyCached(cached, expected, release, partial ? span : null); }
     catch (error) { await discard(cached.body, error); throw error; }
-    return { expected, hit: true, reader: cached.body.getReader(), writer: null, seen: 0 };
+    return { expected, length: span.length, hit: true, reader: cached.body.getReader(), fill: null, seen: 0 };
   }
-  const object = await env.MIR2_ASSETS.get(expected.key);
-  try { verifyObject(object, expected, release); }
+  // Never fetch/drain the other 56 MiB for an 8 MiB range. The same native R2
+  // whole-object SHA/source/size identity remains mandatory on this ranged GET.
+  const object = await env.MIR2_ASSETS.get(expected.key, partial ? { range: span } : undefined);
+  try { verifyObject(object, expected, release, partial ? span : null); }
   catch (error) { await discard(object?.body, error); throw error; }
-  const bridge = lengthBridge(expected.bytes);
-  const part = { expected, hit: false, reader: object.body.getReader(), writer: bridge.writable.getWriter(), seen: 0, inputClosed: false };
-  // Client pulls drive this writer; unlike an unbounded tee, the faster cache
-  // consumer cannot run ahead and queue a whole part for a slow client.
-  part.cacheTask = Promise.resolve().then(() => cache.put(key,
-    new Response(bridge.readable, { headers: cacheHeaders(expected, release) })))
-    .then(() => {
-      if (!part.inputClosed && part.seen !== expected.bytes) {
-        throw new Error("Installer cache stopped consuming its stream");
-      }
-    }).catch(async (error) => {
-      part.failure = error;
-      operation.failure = error;
-      if (!operation.cancelled && !operation.closed) operation.controller?.error(error);
-      await stopPart(part, error);
-      throw error;
-    });
-  // Rejection is also reflected in the client stream, rather than becoming an
-  // unhandled background promise or silently falling through to another origin.
-  try { ctx.waitUntil(part.cacheTask.catch(() => {})); }
-  catch (error) { await stopPart(part, error); throw error; }
-  return part;
+  return { expected, length: span.length, hit: false, reader: object.body.getReader(), seen: 0,
+    fill: partial ? null : cacheFill(key, expected, release, ctx, cache, operation) };
 }
 
 async function installerBody(request, range, release, env, ctx, cache) {
   const first = release.parts.findIndex((part) => part.offset + part.bytes > range.start);
   const last = release.parts.findIndex((part) => part.offset + part.bytes > range.end);
-  const operation = { cancelled: false, closed: false, current: null, controller: null, failure: null };
-  operation.current = await openPart(release.parts[first], release, env, ctx, cache, operation);
-  await Promise.resolve();
-  if (operation.failure || request.signal?.aborted) {
-    await stopPart(operation.current, operation.failure);
-    throw operation.failure ?? new Error("Installer download cancelled");
+  const operation = { cancelled: false, closed: false, current: null, controller: null, cacheFill: null };
+  const open = (part) => {
+    const start = Math.max(range.start, part.offset);
+    const end = Math.min(range.end + 1, part.offset + part.bytes);
+    return openPart(part, { offset: start - part.offset, length: end - start }, release, env, ctx, cache, operation);
+  };
+  operation.current = await open(release.parts[first]);
+  if (request.signal?.aborted) {
+    await stopPart(operation.current, "Cancelled");
+    throw new Error("Installer download cancelled");
   }
   const firstHit = operation.current.hit;
   let index = first;
@@ -257,6 +308,7 @@ async function installerBody(request, range, release, env, ctx, cache) {
   const detach = () => request.signal?.removeEventListener("abort", abort);
   const abort = () => {
     operation.cancelled = true;
+    dropCache(operation.cacheFill, request.signal.reason);
     operation.controller?.error(new Error("Installer download cancelled"));
     ctx.waitUntil(stopPart(operation.current, request.signal.reason));
     detach();
@@ -267,7 +319,6 @@ async function installerBody(request, range, release, env, ctx, cache) {
     async pull(controller) {
       try {
         while (!operation.cancelled && !operation.closed) {
-          if (operation.failure) throw operation.failure;
           if (!operation.current) {
             if (index > last) {
               invariant(sent === wanted, "Installer response length mismatch");
@@ -276,71 +327,51 @@ async function installerBody(request, range, release, env, ctx, cache) {
               controller.close();
               return;
             }
-            operation.current = await openPart(release.parts[index], release, env, ctx, cache, operation);
+            operation.current = await open(release.parts[index]);
             if (operation.cancelled) { await stopPart(operation.current, "Cancelled"); return; }
           }
           const part = operation.current;
           const result = await part.reader.read();
           if (operation.cancelled) return;
-          if (operation.failure) throw operation.failure;
           if (result.done) {
-            invariant(part.seen === part.expected.bytes, "Installer chunk length mismatch");
-            if (part.writer) {
-              part.inputClosed = true;
-              await part.writer.close();
-              await part.cacheTask;
-            }
+            invariant(part.seen === part.length, "Installer chunk length mismatch");
+            if (part.fill?.active) part.fill.controller.close();
             part.reader.releaseLock();
             operation.current = null;
             index += 1;
             continue;
           }
           invariant(result.value instanceof Uint8Array, "Installer chunk is not bytes");
-          const before = part.seen;
           part.seen += result.value.byteLength;
-          invariant(part.seen <= part.expected.bytes, "Installer chunk exceeds its size");
-          if (part.writer) await part.writer.write(result.value);
-          if (operation.cancelled) return;
-          if (operation.failure) throw operation.failure;
-          const from = Math.max(before, range.start - part.expected.offset);
-          const to = Math.min(part.seen, range.end + 1 - part.expected.offset);
-          if (to > from) {
-            const selected = result.value.subarray(from - before, to - before);
-            sent += selected.byteLength;
-            controller.enqueue(selected);
-            if (sent === wanted) {
-              if (part.writer) {
-                // Complete only this current cache entry after the requested
-                // bytes have been emitted. A native fixed-length HTTP consumer
-                // need not ask for another pull after receiving its last byte.
-                while (true) {
-                  const rest = await part.reader.read();
-                  if (operation.cancelled) return;
-                  if (operation.failure) throw operation.failure;
-                  if (rest.done) break;
-                  invariant(rest.value instanceof Uint8Array, "Installer chunk is not bytes");
-                  part.seen += rest.value.byteLength;
-                  invariant(part.seen <= part.expected.bytes, "Installer chunk exceeds its size");
-                  await part.writer.write(rest.value);
-                }
-                invariant(part.seen === part.expected.bytes, "Installer chunk length mismatch");
-                part.inputClosed = true;
-                await part.writer.close();
-                await part.cacheTask;
-                part.reader.releaseLock();
-              } else {
-                await stopPart(part, "Requested range complete");
-              }
-              operation.current = null;
-              operation.closed = true;
-              detach();
-              controller.close();
+          invariant(part.seen <= part.length, "Installer chunk exceeds its size");
+          if (part.seen === part.length) {
+            // A ranged R2/cache stream must end at its exact bound. This checks
+            // only EOF, never drains an unrequested remainder of a whole part.
+            const end = await part.reader.read();
+            if (operation.cancelled) return;
+            invariant(end.done, "Installer chunk exceeds its size");
+            if (part.fill?.active) {
+              copyToCache(part.fill, result.value);
+              if (part.fill.active) part.fill.controller.close();
             }
-            return;
+            part.reader.releaseLock();
+            operation.current = null;
+            index += 1;
+          } else {
+            copyToCache(part.fill, result.value);
           }
+          sent += result.value.byteLength;
+          controller.enqueue(result.value);
+          if (sent === wanted) {
+            operation.closed = true;
+            detach();
+            controller.close();
+          }
+          return;
         }
       } catch (error) {
         operation.closed = true;
+        dropCache(operation.cacheFill, error);
         detach();
         await stopPart(operation.current, error);
         controller.error(error);
@@ -348,6 +379,7 @@ async function installerBody(request, range, release, env, ctx, cache) {
     },
     async cancel(reason) {
       operation.cancelled = true;
+      dropCache(operation.cacheFill, reason);
       detach();
       await stopPart(operation.current, reason);
     },
@@ -396,7 +428,6 @@ async function companion(file, release, env, ctx, cache) {
     const putting = Promise.resolve().then(() => cache.put(key,
       new Response(bytes, { headers: cacheHeaders(file, release) })));
     ctx.waitUntil(putting.catch(() => {}));
-    await putting;
   }
   return bytes;
 }

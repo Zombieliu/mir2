@@ -18,6 +18,7 @@ const { SpellsPointerRouter } = load("../lib/bevy-spells-ui.ts");
 const { MailPointerRouter } = load("../lib/bevy-mail-ui.ts",load("../lib/extended-server-packets.ts"));
 const { sharedUiCanvasId } = load("../lib/bevy-shared-canvas-mode.ts");
 const { questWorldControlAt } = load("../lib/bevy-quest-world-controls.ts");
+const { containsHudRect } = load("../lib/bevy-hud-ui.ts");
 const { NpcShopPointerRouter } = load("../lib/bevy-npc-shop-ui.ts");
 const { StoragePointerRouter } = load("../lib/bevy-storage-ui.ts");
 const shell = readFileSync(new URL("../app/original-client-shell.tsx", import.meta.url), "utf8");
@@ -60,7 +61,7 @@ const code = ts.transpileModule([...found.values()].join("\n") + `\nconst mountP
   compilerOptions: { module: ts.ModuleKind.None, target: ts.ScriptTarget.ES2022 },
 }).outputText;
 
-function fixture(webGl2SharedCanvasPrototype = false,channel="bag") {
+function fixture(webGl2SharedCanvasPrototype = false,channel="bag",questCapturesPointer=false) {
   const clicks = [], moves = [], edges = [];
   let stops = 0, fallback = 0;
   let context = { runGeneration: 1, connectionGeneration: 2, sessionGeneration: 3, ownerRevision: 4,
@@ -117,25 +118,26 @@ function fixture(webGl2SharedCanvasPrototype = false,channel="bag") {
     hudPointerRouterRef:{current:{held:null,cancel:()=>null}},mailPointerRouterRef:{current:new MailPointerRouter()},
     mailPointerCallbacksRef:{current:{getBevyMailPointerContext:()=>channel==="mail"?{...context,run:1,sceneRevision:1,hudGeneration:1,playerObjectId:6,modelRevision:1,renderRevision:1,modal:false}:null,onBevyMailPointer:edge=>{edges.push({...edge,channel:"mail"});return true;}}},
     spellsPointerRouterRef:{current:new SpellsPointerRouter()},spellsPointerCallbacksRef:{current:{getBevySpellsPointerContext:()=>channel==="spells"?{...context,requestRun:1,hudGeneration:1,playerObjectId:6,modelRevision:1,renderRevision:1,modal:false}:null,onBevySpellsPointer:edge=>{edges.push({...edge,channel:"spells"});return true;}}},
-    readBevyHudStatus:()=>null,bevyCharacterPageReady:channel==="character",bevyMailPageReady:channel==="mail",bevySpellsPageReady:channel==="spells",bevyHudUiReady:false,questLocalModalOpen:false,mobileMoreOpen:false,
+    hudStatus:null,readBevyHudStatus:()=>scope.hudStatus,bevyCharacterPageReady:channel==="character",bevyMailPageReady:channel==="mail",bevySpellsPageReady:channel==="spells",bevyHudUiReady:false,questLocalModalOpen:false,mobileMoreOpen:false,
     sharedUiCanvasId, webGl2SharedCanvasPrototype,
     stageFrameRef: { current: frame }, stagePresentation: { virtualWidth: 1024, virtualHeight: 768 },
     bagPointerRouterRef: { current: new BagPointerRouter() }, heldScenePointerRef: { current: null },
+    scenePointerDiagnosticsRef: { current: null },
     heldQuestControlPointersRef:{current:new Set()},questControls:null,questBlockers:null,
-    readBevyQuestWorldControls:()=>scope.questControls,readBevyQuestWorldControlBlockers:()=>scope.questBlockers,questWorldControlAt,
+    readBevyQuestWorldControls:()=>scope.questControls,readBevyQuestWorldControlBlockers:()=>scope.questBlockers,questWorldControlAt,containsHudRect,
     sharedBagPointerHandlerRef:{current:null},
     window:listenerTarget(""),
     bagPointerCallbacksRef: { current: { getBevyBagPointerContext: () => channel==="bag"?context:null,
       onBevyBagPointer: (edge) => { edges.push(edge); return true; } } },
     onViewportDirectionStop: () => stops++, onBevyBagTouchFallback: () => fallback++,
-    bevyBagUiActive: channel==="bag", bevyQuestUiCapturesPointer: false, sceneInteractionReady: true,
+    bevyBagUiActive: channel==="bag", bevyQuestUiCapturesPointer: questCapturesPointer, sceneInteractionReady: true,
     screen: "game", player: {}, latestMoveInputRef: { current: { screen: "game" } },
     tileFromScenePoint: (x, y) => ({ x, y }),
     onViewportTileClick: (x, y) => clicks.push({ x, y, mode: "walk" }),
     onViewportTileSecondaryAction: (x, y) => clicks.push({ x, y, mode: "run" }),
     onViewportDirectionStep: (x, y, mode) => moves.push({ x, y, mode }), Date,
   };
-  const api = new Function(...Object.keys(scope), `${code}\n${lostCaptureCode}\nreturn {${names.join(",")},lostCapture,mountPointerLifecycle};`)(...Object.values(scope));
+  const api = new Function(...Object.keys(scope), `${code}\n${lostCaptureCode}\nreturn {${names.join(",")},lostCapture,mountPointerLifecycle,setQuestCapture(value){bevyQuestUiCapturesPointer=value;}};`)(...Object.values(scope));
   scope.sharedBagPointerHandlerRef.current = api.handleSharedUiPointer;
   function event(x, y, button = 0, pointerType = "mouse", pointerId = 1) {
     // Browser PointerEvent coordinates are getters on the prototype, not
@@ -405,6 +407,52 @@ test("actual Shell skill DOM up and cancel retire the old Quest pointer before y
     f.handleSharedUiPointer(f.event(400,450,0,"mouse",1),"up");
     assert.deepEqual(f.clicks,[{x:400,y:450,mode:"walk"}],"same pointer ID is reusable after the real terminal");
   }
+});
+
+test("actual Shell modal Quest owns its closing gesture while foreground geometry is missing", () => {
+  for (const shared of [false, true]) {
+    for (const terminal of ["up", "cancel"]) {
+      for (const [x, y] of [[493, 73.5], [710, 90]]) {
+        const f = fixture(shared, "bag", true);
+        const down = f.event(x, y);
+        f.handleSharedUiPointer(down, "down");
+        assert.equal(down.defaultPrevented, true);
+        assert.equal(f.scope.heldQuestControlPointersRef.current.has(1), true);
+        assert.equal(f.scope.heldScenePointerRef.current, null);
+        assert.deepEqual(f.edges, [], "the modal Quest keeps the background Bag idle");
+
+        f.setQuestCapture(false);
+        const edge = f.event(x, y);
+        f.handleSharedUiPointer(edge, terminal);
+        f.stopHeldScenePointer();
+        assert.equal(edge.defaultPrevented, true);
+        assert.equal(f.scope.heldQuestControlPointersRef.current.size, 0);
+        assert.deepEqual(f.clicks, []);
+        assert.deepEqual(f.moves, []);
+
+        f.handleSharedUiPointer(f.event(400, 450), "down");
+        f.handleSharedUiPointer(f.event(400, 450), "up");
+        assert.deepEqual(f.clicks, [{ x: 400, y: 450, mode: "walk" }]);
+      }
+    }
+  }
+});
+
+test("actual Quest capture preserves uncovered Native HUD surfaces and blocks covered ones", () => {
+  const f = fixture(false, "bag", true);
+  f.scope.hudStatus = { ready: true, modal: false, foregroundRects: [], characterStatsReady: true,
+    plan: { main: { left: 0, top: 650, width: 1024, height: 118 },
+      characterRect: { left: 700, top: 0, width: 324, height: 620 } } };
+  for (const [x, y] of [[976, 694], [750, 500]]) {
+    assert.equal(f.handleSharedQuestWorldPointer(f.event(x, y), "down"), false);
+    assert.equal(f.scope.heldQuestControlPointersRef.current.size, 0);
+    f.scope.questBlockers = { version: 1, logicalWidth: 1024, logicalHeight: 768,
+      rects: [{ type: "questLocalUi", left: x - 5, top: y - 5, width: 10, height: 10 }] };
+    assert.equal(f.handleSharedQuestWorldPointer(f.event(x, y), "down"), true);
+    f.handleSharedQuestWorldPointer(f.event(x, y), "up");
+    f.scope.questBlockers = null;
+  }
+  assert.deepEqual(f.clicks, []);
 });
 
 test("actual Shell skill DOM terminals reach existing Bag Mail Spells and Character canvas leases", () => {

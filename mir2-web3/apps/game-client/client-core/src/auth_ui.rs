@@ -54,7 +54,7 @@ impl AuthUiError {
     pub const fn message(self) -> &'static str {
         match self {
             Self::Account => "account ID must be 3-15 alphanumeric characters",
-            Self::Password => "password must be 5-15 alphanumeric characters",
+            Self::Password => "registration password must be 10-15 alphanumeric characters, distinct from the account and not a common password",
             Self::ConfirmMismatch => "password confirmation does not match",
             Self::ConfirmInvalid => "password confirmation must be 5-15 alphanumeric characters",
             Self::UserName => "user name must be at most 20 characters",
@@ -84,6 +84,17 @@ fn valid_alphanumeric(value: &str, min: usize, max: usize) -> bool {
         && value
             .chars()
             .all(|character| character.is_ascii_alphanumeric())
+}
+
+// R16 registration is the intersection of Crystal's 15-character ASCII form
+// and the server's commercial identity policy. Existing-login and password
+// change compatibility remain separate from new-account validation.
+fn valid_registration_password(account_id: &str, password: &str) -> bool {
+    valid_alphanumeric(password, 10, MAX_PASSWORD_LENGTH)
+        && !password.eq_ignore_ascii_case(account_id)
+        && !["1234567890", "password123", "qwerty12345", "mir2password"]
+            .iter()
+            .any(|common| password.eq_ignore_ascii_case(common))
 }
 
 pub fn validate_change_password_fields(
@@ -269,7 +280,7 @@ pub fn validate_registration_fields(
     if !valid_alphanumeric(account_id, MIN_ACCOUNT_ID_LENGTH, MAX_ACCOUNT_ID_LENGTH) {
         return Err(AuthUiError::Account);
     }
-    if !valid_alphanumeric(password, MIN_PASSWORD_LENGTH, MAX_PASSWORD_LENGTH) {
+    if !valid_registration_password(account_id, password) {
         return Err(AuthUiError::Password);
     }
     if password != confirm_password {
@@ -381,8 +392,8 @@ mod tests {
     fn valid_registration() -> [&'static str; 8] {
         [
             "hero1",
-            "secret1",
-            "secret1",
+            "ValidPass42",
+            "ValidPass42",
             "A💠",
             "2000-02-29",
             "Q",
@@ -415,6 +426,29 @@ mod tests {
         values = valid_registration();
         values[3] = "123456789012345678901💠";
         assert_eq!(validate(values), Err(AuthUiError::UserName));
+    }
+
+    #[test]
+    fn registration_uses_r16_production_password_policy_without_restricting_login() {
+        for (password, accepted) in [
+            ("Alpha1234", false), ("Alpha12345", true),
+            ("Alpha1234567890", true), ("Alpha12345678901", false),
+            ("2468135790", true), ("Alpha1234!", false),
+            ("Alpha1234\n", false), ("密码Alpha12345", false),
+            ("1234567890", false), ("PASSWORD123", false),
+            ("Qwerty12345", false), ("Mir2Password", false),
+        ] {
+            let mut values = valid_registration();
+            values[1] = password;
+            values[2] = password;
+            assert_eq!(validate(values).is_ok(), accepted, "{password:?}");
+        }
+        let mut values = valid_registration();
+        values[0] = "NewAccount9";
+        values[1] = "newaccount9";
+        values[2] = values[1];
+        assert_eq!(validate(values), Err(AuthUiError::Password));
+        assert!(login_ready("legacy", "legacy password longer than fifteen"));
     }
 
     #[test]

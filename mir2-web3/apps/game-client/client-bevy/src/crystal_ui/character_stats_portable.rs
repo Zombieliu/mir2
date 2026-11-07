@@ -26,6 +26,8 @@ pub struct SharedCharacterStatsRoot {
 }
 #[derive(Resource, Default)]
 struct PaintedStats(Option<(u64, String)>);
+#[derive(Component)]
+struct LocalizedCharacterTabCaption(CharacterPage);
 pub struct Mir2PortableCharacterStatsPlugin;
 impl Plugin for Mir2PortableCharacterStatsPlugin {
     fn build(&self, app: &mut App) {
@@ -67,6 +69,66 @@ fn image(parent: &mut ChildSpawnerCommands, server: &AssetServer, path: String, 
         },
     ));
 }
+
+/// The Native character dialog uses these same four contextual captions. Cover
+/// only the baked lettering; its frame, action node and geometry stay intact.
+fn character_tab_caption(page: CharacterPage) -> String {
+    let (key, fallback) = match page {
+        CharacterPage::Character => ("game.006", "Equipment"),
+        CharacterPage::Stats1 => ("game.008", "Status"),
+        CharacterPage::Stats2 => ("game.009", "Statistics"),
+        CharacterPage::Spells => ("game.007", "Skills"),
+    };
+    crate::native_i18n::key(key, fallback)
+}
+
+fn localized_character_tab(
+    parent: &mut ChildSpawnerCommands,
+    page: CharacterPage,
+    rect: CrystalRect,
+    font: &Handle<Font>,
+) {
+    if !crate::native_i18n::active() {
+        return;
+    }
+    let caption = character_tab_caption(page);
+    let width = rect.width - 4.;
+    let columns = unicode_width::UnicodeWidthStr::width(caption.as_str()).max(1) as f32;
+    // A short tab remains one line in every script. Native's 9px face is kept
+    // unless a longer authored caption needs a bounded reduction to fit.
+    let size = (width / (columns * 0.6)).clamp(7., 9.);
+    parent
+        .spawn((
+            absolute_node(CrystalRect::new(
+                rect.left + 2.,
+                rect.top + 2.,
+                width,
+                rect.height - 4.,
+            )),
+            BackgroundColor(Color::srgb(0.055, 0.045, 0.03)),
+            FocusPolicy::Pass,
+        ))
+        .with_children(|label| {
+            label.spawn((
+                Node {
+                    width: Val::Percent(100.),
+                    height: Val::Percent(100.),
+                    overflow: Overflow::clip(),
+                    ..default()
+                },
+                Text::new(caption),
+                LocalizedCharacterTabCaption(page),
+                TextFont {
+                    font: font.clone().into(),
+                    font_size: FontSize::Px(size),
+                    ..default()
+                },
+                TextColor(Color::srgb(0.92, 0.87, 0.76)),
+                TextLayout::new(Justify::Center, LineBreak::NoWrap),
+                FocusPolicy::Pass,
+            ));
+        });
+}
 fn sync_stats(
     mut commands: Commands,
     surface: Res<SharedHudSurface>,
@@ -107,9 +169,11 @@ fn sync_stats(
         (
             surface.generation,
             format!(
-                "{:?}:{}:{}",
+                "{:?}:{}:{:?}:{:?}:{}",
                 nav.character_page,
                 serde_json::to_string(&model.player).unwrap_or_default(),
+                (crate::native_i18n::revision(), crate::native_i18n::locale()),
+                surface.font.id(),
                 if is_character {
                     format!(
                         "{}:{}:{:?}",
@@ -215,6 +279,7 @@ fn sync_stats(
                     rect,
                 );
             }
+            localized_character_tab(parent, page, rect, &surface.font);
             parent.spawn((
                 Button,
                 absolute_node(rect),
@@ -302,3 +367,11 @@ fn sync_stats(
         }
     }
 }
+
+#[cfg(test)]
+#[path = "character_stats_portable_fonts_tests.rs"]
+mod fonts_tests;
+
+#[cfg(test)]
+#[path = "character_stats_portable_caption_tests.rs"]
+mod caption_tests;

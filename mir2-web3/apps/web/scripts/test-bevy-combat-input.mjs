@@ -1,20 +1,16 @@
 import assert from 'node:assert/strict';import test from 'node:test';import {readFileSync,writeFileSync} from 'node:fs';import ts from 'typescript';
+import {createShellKeydownFixture} from './lib/window-keydown-test-fixture.mjs';
 const nativeKeyboardDefaults=JSON.parse(readFileSync(new URL('../../game-client/client-bevy/src/crystal_ui/keyboard_defaults.json',import.meta.url),'utf8'));
 const cache=new Map();function load(name){if(cache.has(name))return cache.get(name);const m={exports:{}};cache.set(name,m.exports);new Function('exports','module','require',ts.transpileModule(readFileSync(new URL(`../lib/${name}.ts`,import.meta.url),'utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText)(m.exports,m,n=>n==='../../game-client/client-bevy/src/crystal_ui/keyboard_defaults.json'?{default:nativeKeyboardDefaults}:load(n.replace('./','')));return m.exports;}
 const {CombatHost,supportsCombat,supportsForcedPlayerAttack,parseCombatProof}=load('bevy-combat-input');
 const {defaultCrystalKeyBindings}=load('player-ui-preferences');
 test('actual Shell shortcuts precede Winit canvas cancellation and preserve capture, modal, focus and editable gates',()=>{
- const source=readFileSync(new URL('../app/original-client-shell.tsx',import.meta.url),'utf8');
- const ast=ts.createSourceFile('shell.tsx',source,ts.ScriptTarget.Latest,true,ts.ScriptKind.TSX);let effect,editable;
- function visit(n){
-  if(ts.isCallExpression(n)&&n.expression.getText(ast)==='useEffect'&&n.arguments[0]?.getText(ast).includes('function handleShortcutKey'))effect=n.arguments[0];
-  if(ts.isFunctionDeclaration(n)&&n.name?.text==='keyboardInputTargetIsEditable')editable=n;
-  ts.forEachChild(n,visit);
- }visit(ast);assert.ok(effect);assert.ok(editable);
  const listeners=[],calls=[];
  class HTMLElement{isContentEditable=false;closest(){return null;}}class HTMLInputElement extends HTMLElement{}class HTMLTextAreaElement extends HTMLElement{}class HTMLSelectElement extends HTMLElement{}
  const flags={capture:false,focus:true,modal:false};
  const scope={HTMLElement,HTMLInputElement,HTMLTextAreaElement,HTMLSelectElement,screen:'game',selectedEntity:null,
+  keyboardMovementDiagnosticsRef:{current:{lastKey:null,lastDispatch:null,lastShortcut:null}},sceneInteractionReady:true,
+  bevyHeroUiActive:false,bevyHeroUiTransitioning:false,bevyHeroUiWorldBlocked:false,heroPointerLeaseRef:{current:null},
   world:{beltItems:[],knownSkills:[]},window:{addEventListener:(type,fn,capture)=>listeners.push({type,fn,capture:capture===true}),
    removeEventListener:(type,fn,capture)=>{const i=listeners.findIndex(x=>x.type===type&&x.fn===fn&&x.capture===(capture===true));assert.ok(i>=0);listeners.splice(i,1);}},
   document:{visibilityState:'visible',hasFocus:()=>flags.focus},getKeybindCaptureActive:()=>flags.capture,
@@ -25,8 +21,7 @@ test('actual Shell shortcuts precede Winit canvas cancellation and preserve capt
   ...load('crystal-shortcut-actions'),...load('player-ui-preferences'),...load('shared-combat-mode-keys'),
   onCrystalWindowShortcut:action=>calls.push(action),onCrystalGameplayShortcut:()=>false,onCombatKey:()=>({supported:true,handled:false}),
   isKeyboardMoveKey:()=>false,onPrimaryTargetAction:()=>{},revealDropView:()=>{}};
- const js=ts.transpileModule(editable.getText(ast)+'\nreturn ('+effect.getText(ast)+')();',{compilerOptions:{target:ts.ScriptTarget.ES2022}}).outputText;
- const cleanup=new Function('scope','with(scope){'+js+'}')(scope);
+ const keyboard=createShellKeydownFixture(scope);keyboard.render();keyboard.commit();
  function key(target=new HTMLElement(),options={}){const e={target,key:'i',code:'KeyI',altKey:false,ctrlKey:false,shiftKey:false,metaKey:false,repeat:false,
    defaultPrevented:false,preventDefault(){this.defaultPrevented=true;},...options};
   for(const l of listeners.filter(l=>l.type==='keydown'&&l.capture))l.fn(e);
@@ -38,7 +33,7 @@ test('actual Shell shortcuts precede Winit canvas cancellation and preserve capt
  key(new HTMLInputElement());key(new HTMLTextAreaElement());key(new HTMLSelectElement());assert.equal(calls.length,0);
  key(new HTMLElement(),{defaultPrevented:true});key(new HTMLElement(),{repeat:true});assert.equal(calls.length,0);
  scope.document.visibilityState='hidden';key();assert.equal(calls.length,0);
- cleanup();assert.equal(listeners.length,0,'capture listener is removed with the same phase');
+ keyboard.unmount();assert.equal(listeners.length,0,'capture listener is removed with the same phase');
 });
 const caps={schemaVersion:1,combatInputAbiVersion:1,combatIntentAbiVersion:1,compiled:true,startup:true};
 function mountActualCombatHook(options){
@@ -249,6 +244,7 @@ test('production integration captures raw before coalescing and final event proo
  assert.equal(actualSocketSend.getText(sendAst),'socket.send(serialized);');
  assert.equal(socketTry.finallyBlock,undefined);
  const rankingInspectCondition='wireCommand.type === "inspect" && (!options?.rankingInspectProof ||socketRef.current!==socket||socket.readyState!==WebSocket.OPEN||options.rankingInspectProof.owner.socket!==socket ||!rankingInspectRequestsRef.current.claim(options.rankingInspectProof,currentRankingInspectSource(),wireCommand,Math.floor(performance.now())))';
+ const groupCondition='options?.groupProof && (socketRef.current !== socket || socket.readyState !== WebSocket.OPEN || options.groupProof.owner.socket !== socket || !groupOperationsRef.current.claim(options.groupProof, currentGroupOperationSource(), wireCommand))';
  assert.deepEqual(statements.slice(claimIndex+1,socketIndex).map(n=>ts.isIfStatement(n)?normalized(n.expression):null),[
   'options?.mailProof','options?.mailQuoteProof','options?.mailLockProof',
   "options?.mailProof?.commandType==='sendMail'&&(!options.mailProof.compose||!mailDispatcherRef.current?.composer.enterSocket(options.mailProof.compose,serialized,socket))",
@@ -282,6 +278,8 @@ test('production integration captures raw before coalescing and final event proo
   'options?.worldFishingProof && !enterWorldFishingSend(options.worldFishingProof, wireCommand, socket)',
   'options?.npcPearlBuyProof && !npcBuyDispatcher?.claimPearl(options.npcPearlBuyProof,wireCommand,serialized,socket, () => npcPearlSendCurrent(options.npcPearlBuyProof!,wireCommand,socket))',
   rankingInspectCondition,
+  'wireCommand.type === "newCharacter"',
+  groupCondition,
  ]);
 
  // The original ordered parity suffix ends at the two additive Auth nodes.
@@ -347,17 +345,27 @@ test('production integration captures raw before coalescing and final event proo
  assert.ok(ts.isIfStatement(rankingInspectGate));assert.equal(normalized(rankingInspectGate.expression),rankingInspectCondition);
  assert.equal(rankingInspectGate.elseStatement,undefined);assert.ok(ts.isReturnStatement(rankingInspectGate.thenStatement));
  assert.equal(rankingInspectGate.thenStatement.expression.kind,ts.SyntaxKind.FalseKeyword);
- assert.equal(statements[authClaimIndex+7],socketTry,'no executable external callback between final Pearl Core entry and sole socket send');
- assert.equal(socketIndex,authClaimIndex+7);
+ const characterCreateGate=statements[authClaimIndex+7];
+ assert.ok(ts.isIfStatement(characterCreateGate));assert.equal(normalized(characterCreateGate.expression),'wireCommand.type === "newCharacter"');
+ assert.equal(characterCreateGate.elseStatement,undefined);
+ assert.equal(normalized(characterCreateGate.thenStatement),'{ const attempt = characterCreateRef.current; if (!attempt || attempt.command !== command || attempt.entered || attempt.owner !== currentCharacterSelection() || !currentCharacterCreateClasses(attempt.owner).includes(attempt.draft.classKey)) return false; attempt.entered = true; }');
+ assert.equal(statements[authClaimIndex+9],socketTry,'only the exact command-scoped creation and group guards follow the final Ranking entry');
+ const groupGate=statements[authClaimIndex+8];
+ assert.ok(ts.isIfStatement(groupGate));assert.equal(normalized(groupGate.expression),groupCondition);
+ assert.equal(groupGate.elseStatement,undefined);assert.ok(ts.isReturnStatement(groupGate.thenStatement));
+ assert.equal(groupGate.thenStatement.expression.kind,ts.SyntaxKind.FalseKeyword);
+ assert.equal(socketIndex,authClaimIndex+9);
  // Every pre-send statement after the combat claim is covered by the exact
  // ordered list above, including Repair/retire, Bag/Belt and final WorldFishing entry.
- assert.deepEqual(statements.slice(claimIndex+1,socketIndex).filter(n=>ts.isIfStatement(n)).map(n=>normalized(n.expression)).slice(-6),[
+ assert.deepEqual(statements.slice(claimIndex+1,socketIndex).filter(n=>ts.isIfStatement(n)).map(n=>normalized(n.expression)).slice(-8),[
   'options?.npcRepairProof',
   'isMailItemMutation(wireCommand) || ["dropGold", "tradeGold", "gameShopBuy", "sendMail", "collectParcel"].includes(String(wireCommand.type))',
   'options?.bagBeltProof',
   'options?.worldFishingProof && !enterWorldFishingSend(options.worldFishingProof, wireCommand, socket)',
   'options?.npcPearlBuyProof && !npcBuyDispatcher?.claimPearl(options.npcPearlBuyProof,wireCommand,serialized,socket, () => npcPearlSendCurrent(options.npcPearlBuyProof!,wireCommand,socket))',
-  rankingInspectCondition
+  rankingInspectCondition,
+  'wireCommand.type === "newCharacter"',
+  groupCondition,
  ]);
  // Execute the actual final Auth fragment with its actual durable gate and
  // Page surface check. Only socket writes and document facts are memory data.
@@ -510,7 +518,7 @@ test('actual Page HP overlay callback and combat producer block immediately befo
   socialItemWindowsRef:{current:{guild:false,trade:false}},socialReplyWindowsRef:{current:{group:false,bonds:false}},socialRosterWindowsRef:{current:{friends:false}},
   npcShopServiceRef:{current:null},npcRepairServiceRef:{current:null},npcShopUiIngressRef:{current:null},storageUiIngressRef:{current:null}});
  for(const key of ['questReactModalOpenRef','bagOpenRef','characterOpenRef','questLogOpenRef','heroPetOpenRef','rankingWindowRef','marketOpenRef','conquestOpenRef',
-  'buffsOpenRef','mailUiOpenRef','worldMapOpenRef','chatSettingsOpenRef','tutorialOpenRef','storageServiceActiveRef','rankingInspectOpenRef'])deps[key]={current:false};
+   'buffsOpenRef','mailUiOpenRef','worldMapOpenRef','chatSettingsOpenRef','tutorialOpenRef','storageServiceActiveRef','rankingInspectOpenRef','companionOpenRef'])deps[key]={current:false};
  assert.equal(deps.crystalKeyBindingsRef.current.length,96);assert.deepEqual(deps.crystalKeyBindingsRef.current,nativeKeyboardDefaults);
  for(const name of heroPageRefNames)assert.ok(heroPageRefInitializers.has(name),'actual Page Hero ref initializer '+name);
  const heroPageRefsJs=ts.transpileModule([...heroPageRefInitializers].map(([name,initializer])=>'const '+name+'={current:'+initializer+'};').join('\n'),{compilerOptions:{target:ts.ScriptTarget.ES2022}}).outputText;
@@ -584,6 +592,7 @@ function shellRoutingFixture(channel,configure=()=>{}){
 
  scope.npcRepairService=null;scope.npcRepairView=null;scope.activeInventoryTab='bag1';scope.showInventory=channel==='bag';
  scope.stagePresentation={virtualWidth:1024,virtualHeight:768,scale:1};scope.Element=Element;scope.Node=Element;
+ scope.containsHudRect=load('bevy-hud-ui').containsHudRect;
  scope.onBeginNpcRepairDrag=undefined;scope.onCancelNpcRepairDrag=undefined;scope.onDropNpcRepairDrag=undefined;scope.onConfirmNpcRepair=undefined;
  scope.setNpcRepairTargetSelection=selection=>{scope.npcRepairTargetSelection=selection;};scope.onOpenInventoryTab=tab=>{scope.activeInventoryTab=tab;};
  scope.getBevyHeroInputBlocked=undefined;scope.getBevyHeroPointerContext=undefined;scope.onBevyHeroPointer=undefined;scope.onBevyHeroKey=undefined;
@@ -819,7 +828,8 @@ function sharedCanvasWorldTargetFixture(){
  }
  visit(ast);assert.equal(declarations.length,names.length);assert.ok(capture);assert.ok(tick);
  class DomElement{
-  constructor(classes='',dataset={},parent=null,id=''){this.classes=new Set(classes.split(' ').filter(Boolean));this.dataset=dataset;this.parent=parent;this.id=id;this.classList={contains:x=>this.classes.has(x)};}
+   constructor(classes='',dataset={},parent=null,id=''){this.classes=new Set(classes.split(' ').filter(Boolean));this.dataset=dataset;this.parent=parent;this.id=id;this.tagName=id?'CANVAS':'DIV';this.classList={contains:x=>this.classes.has(x),[Symbol.iterator]:()=>this.classes.values()};}
+   getAttribute(name){return name==='data-object-id'?this.dataset.objectId??null:null;}
   closest(selector){for(let node=this;node;node=node.parent){if(selector.split(',').some(part=>[...part.matchAll(/\.([\w-]+)/g)].every(m=>node.classes.has(m[1]))&&[...part.matchAll(/\[data-([\w-]+)(?:=['"]([^'"]*)['"])?\]/g)].every(m=>{const key=m[1].replace(/-([a-z])/g,(_,c)=>c.toUpperCase());return Object.hasOwn(node.dataset,key)&&(m[2]===undefined||node.dataset[key]===m[2]);})))return node;}return null;}
   contains(target){for(let node=target;node;node=node.parent)if(node===this)return true;return false;}
   focus(){}setPointerCapture(){}
@@ -829,7 +839,7 @@ function sharedCanvasWorldTargetFixture(){
  const name=new DomElement('entity-nameplate',{objectId:'206644',uiInteractive:'true'},frame);
  const label=new DomElement('',{},name),sprite=new DomElement('entity-sprite-stack',{objectId:'206644',uiInteractive:'true'},frame),body=new DomElement('entity-sprite-hit',{},sprite);
  const drop=new DomElement('ground-drop-marker',{objectId:'300001'},frame),calls=[],hitReads=[];
- const scope={stageFrameRef:{current:frame},stagePresentation:{virtualWidth:1024,virtualHeight:768},webGl2SharedCanvasPrototype:false,sharedUiCanvasId:()=>canvas.id,
+  const scope={screen:'game',scenePointerDiagnosticsRef:{current:null},heroPointerLeaseRef:{current:null},storagePointerRouterRef:{current:{held:null}},stageFrameRef:{current:frame},stagePresentation:{virtualWidth:1024,virtualHeight:768},webGl2SharedCanvasPrototype:false,sharedUiCanvasId:()=>canvas.id,
   document:{elementsFromPoint:(x,y)=>{hitReads.push([x,y]);return scope.layers;}},layers:[canvas,label,name,body,frame],HTMLElement:DomElement,
   hudPointerRouterRef:{current:new (load('bevy-hud-ui').HudPointerRouter)()},bevyHudUiReady:true,sceneInteractionReady:true,bagPointerRouterRef:{current:{held:null}},
   characterPointerCallbacksRef:{current:{}},spellsPointerCallbacksRef:{current:{}},bagPointerCallbacksRef:{current:{}},questLocalModalOpen:false,mobileMoreOpen:false,bevyQuestUiCapturesPointer:false,
@@ -851,7 +861,10 @@ test('actual shared HUD canvas preserves nameplate and body identity without wal
  for(const kind of ['name','body']){
   const f=sharedCanvasWorldTargetFixture();if(kind==='body')f.scope.layers=[f.canvas,f.body,f.frame];
   const down=f.event();f.api.capture(down);const held=f.scope.heldScenePointerRef.current;
-  assert.deepEqual(held.worldTarget,{kind:'entity',objectId:'206644'});assert.deepEqual(f.hitReads,[[632.5,348.75]]);
+  assert.deepEqual(held.worldTarget,{kind:'entity',objectId:'206644'});
+  // One read resolves the world target; the second records the read-only
+  // pointer diagnostic. Neither is an additional gameplay dispatch.
+  assert.deepEqual(f.hitReads,[[632.5,348.75],[632.5,348.75]]);
   f.api.tick();f.api.dispatchSceneMoveInput(held);assert.equal(held.dispatched,false);assert.deepEqual(f.calls,[],'holding an entity never queues offset-tile movement');
   f.scope.layers=[f.canvas,f.drop,f.frame];f.api.handleSharedHudPointer(f.event(),'up');
   assert.deepEqual(f.calls,[['entity','206644']],'the down target survives crossing to another object before release');
@@ -871,7 +884,10 @@ test('actual surface router refuses world-target lookup under HUD, modal and for
   if(blocked==='hud'){down=f.event(632.5,680);f.scope.status.plan.buttons=[{action:'character',rect:{left:480,top:672,width:100,height:96}}];}
   if(blocked==='modal')f.scope.status.modal=true;
   if(blocked==='foreground')f.scope.status.foregroundRects=[{left:0,top:0,width:1024,height:672}];
-  f.api.capture(down);assert.equal(f.scope.heldScenePointerRef.current,null);assert.deepEqual(f.hitReads,[]);f.api.handleSharedHudPointer(down,'up');
+  f.api.capture(down);assert.equal(f.scope.heldScenePointerRef.current,null);
+  // Blocked owners may record the surface diagnostic, but must never resolve
+  // or dispatch a world target.
+  assert.deepEqual(f.hitReads,[[down.clientX,down.clientY]]);f.api.handleSharedHudPointer(down,'up');
   assert.equal(f.calls.some(([kind])=>kind==='entity'||kind==='drop'||kind==='tile'),false);
  }
 });

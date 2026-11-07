@@ -1,0 +1,30 @@
+{
+  "schema": "mir2.r16.group.final-checks.v1",
+  "createdAt": "2026-11-07T15:26:02.897Z",
+  "artifactHashesVerified": 28,
+  "sourceHashesVerified": 20,
+  "localDocumentLinksVerified": 511,
+  "documentPins": {
+    "docs/AGENT-CURRENT.md": {
+      "sha256": "261514969a9abeabbef3d9690ec6f5b460f5cb366269d64322a8dc2f2b3da5ec",
+      "lines": 79
+    },
+    "docs/AGENT-TASK-QUEUE.md": {
+      "sha256": "a8d97c32f5961624daa6020a69735d15d85cc9807c3529acd7ac62b8ffd3f7ec",
+      "lines": 72
+    },
+    "docs/FRONTEND-1TO1-GAPS.md": {
+      "sha256": "c27a5d4f1a96751f26b94a6e3cd085e6b81c6c3e9be9ed86d8d97cbd54ae9c43",
+      "lines": 6552
+    },
+    "docs/WEB-R16-PARITY-GOAL.zh-CN.md": {
+      "sha256": "12469f4b68c9f908de32044a503d1fdbabda20ca372ffa6230d4e5494ca2fb8b",
+      "lines": 112
+    }
+  },
+  "masterSha256": "3f6ef5564145fc9d53091855f090843d98554e2ec46f73d3a86f4496993c1e3e",
+  "diffWhitespaceCheckPassed": true,
+  "goalActive": true,
+  "candidate100": false,
+  "automaticReconnectRaceOpen": true
+}

@@ -1,0 +1,29 @@
+{
+  "schema": "mir2.r16.q6-footer-preservation.v1",
+  "stoppedBeforeCopy": true,
+  "oldDirectoryPreserved": true,
+  "privateBackupPreserved": true,
+  "journalHistoryMovedIntact": true,
+  "backupName": "Numeron-Web-R16-20261104-before-q6-footer-v18",
+  "runtime": [
+    {
+      "directory": "private",
+      "transfer": "copied",
+      "files": 25,
+      "bytes": 687977,
+      "beforeTreeSha256": "4ece8a1c50ee3e1ed4d0e30cb3e288ea420cc7a877d8db6f0b6ede3b6b55db23",
+      "afterTreeSha256": "4ece8a1c50ee3e1ed4d0e30cb3e288ea420cc7a877d8db6f0b6ede3b6b55db23",
+      "allFilesMatched": true
+    },
+    {
+      "directory": ".mir2-data",
+      "transfer": "moved-intact",
+      "files": 49,
+      "bytes": 22046890700,
+      "beforeTreeSha256": "0efda61620a853af24342a0071ae16544105a7cf7090c3e8df295deb9fa8fffa",
+      "afterTreeSha256": "0efda61620a853af24342a0071ae16544105a7cf7090c3e8df295deb9fa8fffa",
+      "allFilesMatched": true
+    }
+  ],
+  "allMatched": true
+}

@@ -26,6 +26,8 @@ pub mod chat;
 pub mod chat_settings_effects;
 pub mod combat_input;
 #[cfg(feature = "native-ui")]
+pub mod companion;
+#[cfg(feature = "native-ui")]
 pub use crystal_ui::overlays::combat_mode_keys;
 #[cfg(all(
     any(feature = "portable-quest-ui", feature = "item-tooltip"),

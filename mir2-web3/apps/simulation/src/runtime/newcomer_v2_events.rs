@@ -10,7 +10,7 @@ use super::super::resources::{
 use super::super::skills::crystal_magic_for_skill_key;
 use super::{
     crystal_flag_task_key, crystal_quest_update_packet, effective_crystal_quest_template_by_id,
-    newcomer_v2, recompute_crystal_quest_current,
+    newcomer_v2, recompute_crystal_quest_current, QuestState,
 };
 use crate::config::{EquipmentSlot, QuestStage};
 
@@ -19,6 +19,10 @@ const ACCEPTED_AT: &str = "v2:accepted_at:";
 #[cfg(test)]
 #[path = "newcomer_v2_event_tests.rs"]
 mod tests;
+
+#[cfg(test)]
+#[path = "newcomer_v2_purchase_projection_tests.rs"]
+mod purchase_projection_tests;
 
 fn now_ms() -> u64 {
     std::time::SystemTime::now()
@@ -63,6 +67,55 @@ pub(in crate::runtime) fn record_conditions(
     record_conditions_for(world, conditions, source_at_ms, None)
 }
 
+/// Pure condition projection shared by live legacy events and owned durable
+/// purchase plans. The caller chooses whether and when to publish this clone.
+fn project_condition_progress(
+    quest: &mut QuestState,
+    flags: &[newcomer_v2::V2FlagObjective],
+    template: &mir2_game_data::CrystalQuestPacketTemplate,
+    conditions: &[&str],
+    source_at_ms: Option<u64>,
+) -> bool {
+    if let Some(source_at_ms) = source_at_ms {
+        let accepted_at = quest
+            .task_progress
+            .keys()
+            .filter_map(|key| {
+                key.strip_prefix(ACCEPTED_AT)
+                    .and_then(|value| value.parse::<u64>().ok())
+            })
+            .max();
+        // An old purchase or an absent/malformed acceptance cannot create proof.
+        if accepted_at.is_none_or(|accepted| source_at_ms < accepted) {
+            return false;
+        }
+    }
+    let before = quest.task_progress.clone();
+    for flag in flags {
+        for condition in &flag.conditions {
+            if conditions.contains(&condition.as_str()) {
+                quest
+                    .task_progress
+                    .insert(format!("v2:condition:{}:{}", flag.number, condition), 1);
+            }
+        }
+        if !flag.conditions.is_empty()
+            && flag.conditions.iter().all(|condition| {
+                quest
+                    .task_progress
+                    .get(&format!("v2:condition:{}:{}", flag.number, condition))
+                    == Some(&1)
+            })
+        {
+            quest
+                .task_progress
+                .insert(crystal_flag_task_key(flag.number), 1);
+        }
+    }
+    recompute_crystal_quest_current(quest, template);
+    before != quest.task_progress
+}
+
 fn record_conditions_for(
     world: &mut World,
     conditions: &[&str],
@@ -93,44 +146,7 @@ fn record_conditions_for(
                 .iter_mut()
                 .find(|quest| quest.quest_id == id)
                 .unwrap();
-            if let Some(source_at_ms) = source_at_ms {
-                let accepted_at = quest
-                    .task_progress
-                    .keys()
-                    .filter_map(|key| {
-                        key.strip_prefix(ACCEPTED_AT)
-                            .and_then(|value| value.parse::<u64>().ok())
-                    })
-                    .max();
-                // Legacy/malformed V2 saves cannot invent action evidence.
-                if accepted_at.is_none_or(|accepted| source_at_ms < accepted) {
-                    continue;
-                }
-            }
-            let before = quest.task_progress.clone();
-            for flag in &flags {
-                for condition in &flag.conditions {
-                    if conditions.contains(&condition.as_str()) {
-                        quest
-                            .task_progress
-                            .insert(format!("v2:condition:{}:{}", flag.number, condition), 1);
-                    }
-                }
-                if !flag.conditions.is_empty()
-                    && flag.conditions.iter().all(|condition| {
-                        quest
-                            .task_progress
-                            .get(&format!("v2:condition:{}:{}", flag.number, condition))
-                            == Some(&1)
-                    })
-                {
-                    quest
-                        .task_progress
-                        .insert(crystal_flag_task_key(flag.number), 1);
-                }
-            }
-            recompute_crystal_quest_current(quest, &template);
-            before != quest.task_progress
+            project_condition_progress(quest, &flags, &template, conditions, source_at_ms)
         };
         if changed {
             if let Some(packet) = crystal_quest_update_packet(world, id) {
@@ -139,6 +155,75 @@ fn record_conditions_for(
         }
     }
     packets
+}
+
+fn committed_basic_potion_purchase(committed: &[ServerPacket]) -> bool {
+    committed
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::LoseGold { .. }))
+        && committed.iter().any(|packet| {
+            matches!(packet, ServerPacket::GainedItem { item } if item.count > 0
+                && mir2_game_data::crystal_item_by_index(item.item_index).is_some_and(|info|
+                    matches!(info.name.as_str(), "(HP)DrugSmall" | "(MP)DrugSmall")))
+        })
+}
+
+/// This owned projection must be included in the same complete checkpoint as
+/// the successful purchase. It neither changes World nor emits live events.
+pub(in crate::runtime) struct PreparedPotionPurchaseProgress {
+    pub(in crate::runtime) quests: QuestResource,
+    pub(in crate::runtime) changed_quest_ids: Vec<i32>,
+}
+
+pub(in crate::runtime) fn prepare_committed_potion_purchase(
+    world: &World,
+    committed: &[ServerPacket],
+) -> Option<PreparedPotionPurchaseProgress> {
+    prepare_committed_potion_purchase_at(world, committed, now_ms())
+}
+
+fn prepare_committed_potion_purchase_at(
+    world: &World,
+    committed: &[ServerPacket],
+    source_at_ms: u64,
+) -> Option<PreparedPotionPurchaseProgress> {
+    if !committed_basic_potion_purchase(committed) {
+        return None;
+    }
+    let ids = active_ids(world);
+    if ids.is_empty() {
+        return None;
+    }
+    let map = &world.resource::<MapRuntimeResource>().current_map.file_name;
+    let mut quests = world.resource::<QuestResource>().clone();
+    let mut changed_quest_ids = Vec::new();
+    for id in ids {
+        if !newcomer_v2::objective_map_matches(world, id, map) {
+            continue;
+        }
+        let flags = newcomer_v2::flag_objectives(world, id);
+        let Some(template) = effective_crystal_quest_template_by_id(world, id) else {
+            continue;
+        };
+        let quest = quests
+            .quests
+            .iter_mut()
+            .find(|quest| quest.quest_id == id)
+            .expect("active quest remains in its owned projection");
+        if project_condition_progress(
+            quest,
+            &flags,
+            &template,
+            &["ordinaryBasicPotionBought"],
+            Some(source_at_ms),
+        ) {
+            changed_quest_ids.push(id);
+        }
+    }
+    (!changed_quest_ids.is_empty()).then_some(PreparedPotionPurchaseProgress {
+        quests,
+        changed_quest_ids,
+    })
 }
 
 fn knows(world: &World, spell: &str) -> bool {
@@ -276,11 +361,9 @@ pub(in crate::runtime) fn observe_committed_command(
     }
     let mut packets = Vec::new();
     match context {
-        CommandContext::PotionPurchase if committed.iter().any(|packet|
-            matches!(packet, ServerPacket::LoseGold { .. })) && committed.iter().any(|packet|
-            matches!(packet, ServerPacket::GainedItem { item } if item.count > 0
-                && mir2_game_data::crystal_item_by_index(item.item_index).is_some_and(|info|
-                    matches!(info.name.as_str(), "(HP)DrugSmall" | "(MP)DrugSmall")))) =>
+        CommandContext::PotionPurchase if committed_basic_potion_purchase(committed) =>
+            // This legacy observer runs synchronously for the just-committed
+            // BuyItem command, including saves without an acceptance stamp.
             packets.extend(record_conditions(world, &["ordinaryBasicPotionBought"], None)),
         CommandContext::Accept(id) if committed.iter().any(|packet|
             matches!(packet, ServerPacket::ChangeQuest { quest_id, taken: true, .. } if *quest_id == id)) => {

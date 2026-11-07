@@ -144,6 +144,11 @@ async fn async_main() -> std::io::Result<()> {
             owner_authority,
         ),
     );
+    // Install trusted companion invitation boundaries before either listener
+    // can admit a player. Unsupported world authorities fail closed.
+    registry
+        .configure_companion_owner_fences_from_env()
+        .map_err(|error| io::Error::new(io::ErrorKind::InvalidInput, error))?;
     // Stable mode has no authoritative Gateway Zone. Its world clocks must be
     // hosted and verified on the owner topology before this opt-in is released.
     let _conquest_clock = if stable_owner_runtime.is_some() {

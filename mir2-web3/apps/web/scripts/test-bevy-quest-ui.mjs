@@ -19,6 +19,9 @@ function load(relative, dependencies = {}) {
         "./quest-world-lifecycle", "./quest-route-execution", "./bevy-quest-world-controls"].includes(name))
         return load(`../lib/${name.slice(2)}.ts`);
       if (name === "./bevy-bag-model") return load("../lib/bevy-bag-model.ts");
+      if (name === "./r16-native-localization") return load("../lib/r16-native-localization.ts");
+      if (name === "./generated/r16-native-localization.json")
+        return { default: JSON.parse(readFileSync(new URL("../lib/generated/r16-native-localization.json", import.meta.url), "utf8")) };
       if (name === "./world-model/item-identity") return load("../lib/world-model/item-identity.ts");
       throw new Error(`Unexpected dependency ${name}`);
     }, module.exports, module,
@@ -26,6 +29,38 @@ function load(relative, dependencies = {}) {
   return module.exports;
 }
 const host = load("../lib/bevy-quest-ui.ts");
+test("optional Native display locales are independent of four-language wire and require an exact capability", () => {
+  const old = { generation: 1, frame: 1, ready: true, capturesPointer: false, questLogOpen: false,
+    revision: 4, openRevision: 1, questLocaleVersion: 1, language: "en" };
+  const runtime = value => ({ getMir2QuestUiStatus: () => JSON.stringify(value) });
+  assert.equal(host.supportsBevyQuestDisplayLocale(runtime(old)), false);
+  assert.equal(host.questDisplayLanguage("ru"), "ru"); assert.equal(host.questDisplayLanguage("es"), undefined);
+  const requested = { displayLanguage: "ru", language: "en" };
+  assert.deepEqual(host.stripUnsupportedQuestDisplayLocale(requested, false), { language: "en" });
+  assert.deepEqual(requested, { displayLanguage: "ru", language: "en" });
+  const current = { ...old, displayLocaleVersion: 1, displayLanguage: "ru" };
+  assert.equal(host.supportsBevyQuestDisplayLocale(runtime(current)), true);
+  assert.equal(host.currentBevyQuestLocale(host.readBevyQuestUiStatus(runtime(current), 1), "en", 4, "ru"), true);
+  assert.equal(host.currentBevyQuestLocale(current, "en", 4, "ar"), false);
+  assert.equal(host.currentBevyQuestLocale(current, "en", 5, "ru"), false);
+  assert.equal(host.currentBevyQuestLocale(current, "zh-CN", 4, "ru"), false);
+  for (const bad of [{ ...current, displayLanguage: "xx" }, { ...current, displayLocaleVersion: 2 },
+    { ...current, language: "ru" }, { ...current, displayLanguage: 2 }])
+    assert.equal(host.readBevyQuestUiStatus(runtime(bad), 1), null);
+  assert(host.readBevyQuestUiStatus(runtime({ ...current, displayLanguage: null }), 1));
+});
+test("NPC display uses Native prose while target, input, name and disabled state remain opaque", () => {
+  const source = { npcObjectId: "658", npcName: "View{/CORAL}", title: "", body: ["Hello there! How may I help you?{/CORAL}"],
+    footer: "", links: [{ text: "View", target: "@BuySell", enabled: false }], input: { text: "View" } };
+  const before = structuredClone(source), result = host.projectBevyQuestDialog(source, "zh-CN");
+  assert.deepEqual(source, before);
+  assert.equal(result.npcName, source.npcName); assert.equal(result.options[0].optionId, "@BuySell");
+  assert.equal(result.options[0].enabled, false); assert.equal(result.hasInput, true);
+  assert.notEqual(result.options[0].label, "View");
+  assert(!result.lines[0].includes("{/CORAL}")); assert.notEqual(result.lines[0], source.body[0]);
+  const legacy = host.projectBevyQuestDialog(source);
+  assert.equal(legacy.lines[0], source.body[0]); assert.equal(legacy.options[0].label, "View");
+});
 const worldContext = load("../lib/bevy-quest-world-context.ts");
 const worldActions = load("../lib/bevy-quest-world-actions.ts");
 const routePlan = load("../lib/bevy-quest-route-plan.ts");
@@ -422,7 +457,8 @@ test("renderer restart, first NPC input capture and stopped-loop fallback preser
     assert.equal(context.revision, submitted.at(-1).revision);
     applied = { ...applied, frame: 4, revision: context.revision };
     tick();
-    let paintedRects = [{ type: "attackQuestTarget", left: 10, top: 20, width: 80, height: 30 }];
+    let paintedRects = [{ type: "attackQuestTarget", left: 10, top: 20, width: 80, height: 30 },
+      { type: "questLocalUi", left: 100, top: 20, width: 80, height: 30 }];
     runtime.getMir2QuestWorldControlRects = () => JSON.stringify({ version: 1,
       stamp: submitted.at(-1)?.worldContext ? stampOf(submitted.at(-1).worldContext) : null,
       logicalWidth: model.presentation?.logicalWidth ?? 0, logicalHeight: model.presentation?.logicalHeight ?? 0,
@@ -430,6 +466,8 @@ test("renderer restart, first NPC input capture and stopped-loop fallback preser
     tick();
     assert.equal(state.current.worldControlsReady, true);
     assert.equal(worldControls.questWorldControlAt(hookView.readLiveWorldControls(), 20, 30), true);
+    assert.equal(worldControls.questWorldControlAt(hookView.readLiveWorldControls(), 110, 30), true,
+      "the current Native detail button claims its actual rectangle without becoming a world action");
     assert.equal(worldControls.questWorldControlAt(hookView.readLiveWorldControls(), 500, 500), false,
       "a blank portion of the stage must stay available to ordinary world input");
     const measuredReader = runtime.getMir2QuestWorldControlRects;
@@ -442,6 +480,8 @@ test("renderer restart, first NPC input capture and stopped-loop fallback preser
     assert.equal(JSON.parse(sink(JSON.stringify(mapIntent))).accepted, true);
     model = { ...model, worldDraft: { ...draft, inventory: { ...draft.inventory, gold: 1 } } };
     assert.equal(hookView.readLiveWorldControls(), null, "a full live draft mutation retires old hit rectangles synchronously");
+    assert.equal(worldControls.questWorldControlAt(hookView.readLiveWorldControls(), 110, 30), false,
+      "Native local UI cannot use stale world-control authority");
     assert.equal(worldControls.questWorldControlAt(hookView.readLiveWorldControlBlockers(), 20, 30), true,
       "the last actually painted button still swallows a gesture while its action proof is stale");
     assert.equal(worldControls.questWorldControlAt(hookView.readLiveWorldControlBlockers(), 500, 500), false,
@@ -463,6 +503,8 @@ test("renderer restart, first NPC input capture and stopped-loop fallback preser
     globalThis.document.visibilityState = "hidden";
     assert.equal(hookView.readLiveWorldControls(), null);
     assert.equal(hookView.readLiveWorldControlBlockers(), null, "hidden paint cannot capture a new gesture");
+    assert.equal(worldControls.questWorldControlAt(hookView.readLiveWorldControlBlockers(), 110, 30), false,
+      "a hidden Native detail button cannot swallow or forward a new pointer");
     assert.equal(JSON.parse(sink(JSON.stringify(mapIntent))).accepted, false,
       "visibility blocks an old callback immediately, before either interval or listener runs");
     visibilityListener();
@@ -821,6 +863,57 @@ test("world control reader requires actual current stamped rectangles and claims
   assert.equal(worldControls.readQuestWorldControls({ getMir2QuestWorldControlRects: () => JSON.stringify({ ...empty,
     stamp: { ...stamp, revision: 10 } }) }, stamp, 1024, 768, true), null,
     "allowEmpty never relaxes the exact applied stamp");
+});
+
+test("Native Quest local UI has only current measured pointer rectangles, never inferred or stale controls", () => {
+  const stamp = stampOf(worldContext.stampBevyQuestWorldContext(completeQuestDraft(), 9));
+  const rect = { type: "questLocalUi", left: 100.25, top: 70.125, width: 80.5, height: 30.25 };
+  const snapshot = { version: 1, stamp, logicalWidth: 1024, logicalHeight: 768, rects: [rect] };
+  const read = value => worldControls.readQuestWorldControls({ getMir2QuestWorldControlRects: () => JSON.stringify(value) }, stamp, 1024, 768);
+  const controls = read(snapshot);
+  assert.deepEqual(controls, snapshot);
+  assert.equal(worldControls.questWorldControlAt(controls, 100.25, 70.125), true);
+  assert.equal(worldControls.questWorldControlAt(controls, 180.75, 75), false);
+  assert.equal(worldControls.questWorldControlAt(controls, 110, 100.375), false);
+  assert.equal(worldControls.questWorldControlAt(controls, 500, 500), false);
+  for (const field of ["generation", "revision", "connectionGeneration", "sessionGeneration", "sceneRevision", "playerObjectId"])
+    assert.equal(read({ ...snapshot, stamp: { ...stamp, [field]: stamp[field] + 1 } }), null, `stale ${field}`);
+  assert.equal(read({ ...snapshot, stamp: { ...stamp, mapFileName: "1" } }), null);
+  for (const type of ["questLocalUI", "selectQuest", "makePrimary", "prepareQuestFinish", "walk", "attack", "unknown"])
+    assert.equal(read({ ...snapshot, rects: [{ ...rect, type }] }), null, `unknown control type ${type}`);
+  assert.equal(read({ ...snapshot, rects: [{ ...rect, visible: false }] }), null, "no alternate visibility field may bypass the measured schema");
+  assert.equal(read({ ...snapshot, rects: [{ ...rect, width: 0 }] }), null);
+  assert.equal(read({ ...snapshot, rects: [] }), null, "hidden or removed buttons provide no interactive rectangle");
+});
+
+test("questLocalUi never parses as an authorized world action or sends through the actual Page dispatcher", () => {
+  const stamp = stampOf(worldContext.stampBevyQuestWorldContext(completeQuestDraft(), 9));
+  assert.equal(worldActions.isQuestWorldAction("questLocalUi"), false);
+  for (const fields of [{}, { questIndex: 2110002 }, { objectId: 44 }, { x: 1, y: 1 },
+    { questIndex: 2110002, resetEpoch: stamp.sceneRevision, mapIndex: 0, x: 1, y: 1, routeTarget: { type: "entrance" } }])
+    assert.equal(worldActions.parseQuestWorldAction({ ...stamp, type: "questLocalUi", ...fields }), null);
+  const source = readFileSync(new URL("../app/page.tsx", import.meta.url), "utf8");
+  const ast = ts.createSourceFile("page.tsx", source, ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);
+  const declarations = [];
+  function visit(node) {
+    if (ts.isFunctionDeclaration(node) && node.name?.text === "dispatchBevyQuestIntent") declarations.push(node.getText(ast));
+    ts.forEachChild(node, visit);
+  }
+  visit(ast);
+  assert.equal(declarations.length, 1);
+  const code = ts.transpileModule(declarations[0], { compilerOptions: { target: ts.ScriptTarget.ES2022 } }).outputText;
+  const gameActions = [];
+  const dispatch = new Function("bevyQuestGenerationRef", "screenRef", "isQuestWorldAction", "questAuthoritativeStageByIdRef",
+    "send", "submitQuestAction", "beginQuestRoute", "pickGroundDrop", "retireQuestWorldActions",
+    `${code}; return dispatchBevyQuestIntent;`)(
+    { current: stamp.generation }, { current: "game" }, worldActions.isQuestWorldAction,
+    { current: new Map([[2110002, "inProgress"]]) },
+    ...["send", "submitQuestAction", "beginQuestRoute", "pickGroundDrop", "retireQuestWorldActions"]
+      .map(type => (...args) => { gameActions.push({ type, args }); return true; }),
+  );
+  for (const fields of [{}, { questIndex: 2110002 }, { objectId: 44 }, { x: 1, y: 1 }])
+    assert.equal(dispatch({ ...stamp, type: "questLocalUi", ...fields }).accepted, false);
+  assert.deepEqual(gameActions, [], "UI-only pointer metadata must never authorize movement, combat, pickup or quest sends");
 });
 
 test("actual Page queued movement preserves replacement intent and retires stale Quest routes before ordinary A* or send", () => {

@@ -22,7 +22,7 @@ pub use player_drop::{
 };
 mod runtime;
 pub use npc_purchase_owner::{
-    NpcPurchaseOwnerAction, NpcPurchaseOwnerExecution, NpcPurchaseOwnerReply,
+    NpcPurchaseGoldLimit, NpcPurchaseOwnerAction, NpcPurchaseOwnerExecution, NpcPurchaseOwnerReply,
     NPC_PURCHASE_OWNER_PROTOCOL_VERSION,
 };
 pub mod user_item_uid;
@@ -35,6 +35,7 @@ pub use config::zone_save_operation::{
     ZoneSaveOperationReceipt,
 };
 pub use runtime::zone::ManagerAdmissionReceipt;
+pub use runtime::zone::{ZoneActionBoundary, ZoneActionBoundaryRequest, ZoneActionKind, ZoneMovementOccupancy};
 pub use runtime::zone::{
     EffectEnvelope, EffectReplayReceipt, EntityLifeRef, LogicalWorldId, PayloadDigest,
     StableActionId, WorldMapEffectOwner, WorldPartitionKey,

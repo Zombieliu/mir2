@@ -1,0 +1,805 @@
+{
+  "schema": "mir2-homeward-regression/1",
+  "passed": true,
+  "verificationMode": "ordinary-manual-staging-controller-cancel-return",
+  "realTime": true,
+  "fakeClock": false,
+  "syntheticPrivateWorld": true,
+  "humanTrial": false,
+  "automaticOutwardAdventureClaimed": false,
+  "fullTwentyMinuteExpiryClaimed": false,
+  "rulesOnlyRequired": true,
+  "modelConfigured": false,
+  "modelCalls": 0,
+  "fundingInjected": false,
+  "gatewaySha256": "7d0f109717150ebfacb205db403c19bccf58ad9eec296e78bb63e0e221c6070a",
+  "elapsedWallMs": 200628,
+  "maximumMinutes": 10,
+  "failure": null,
+  "cases": [
+    {
+      "index": 1,
+      "target": {
+        "x": 288,
+        "y": 637
+      },
+      "passed": true,
+      "manualWalks": 37,
+      "safetyTicks": 0,
+      "returnTicks": 37,
+      "startedAtMs": 1793734599603,
+      "expiresAtMs": 1793735799603,
+      "staged": {
+        "ready": true,
+        "mapFileName": "0",
+        "position": {
+          "x": 288,
+          "y": 637
+        },
+        "hp": 18,
+        "maxHp": 18,
+        "dead": false,
+        "gold": 0,
+        "inSafeZone": false,
+        "inventoryCurrent": true
+      },
+      "stagingDiagnostic": {
+        "position": {
+          "x": 288,
+          "y": 637
+        },
+        "entities": [
+          {
+            "x": 284,
+            "y": 615,
+            "kind": "npc",
+            "hp": null,
+            "dead": false
+          },
+          {
+            "x": 288,
+            "y": 637,
+            "kind": "selfPlayer",
+            "hp": 18,
+            "dead": false
+          },
+          {
+            "x": 300,
+            "y": 639,
+            "kind": "monster",
+            "hp": 25,
+            "dead": false
+          },
+          {
+            "x": 290,
+            "y": 635,
+            "kind": "monster",
+            "hp": 20,
+            "dead": false
+          },
+          {
+            "x": 289,
+            "y": 626,
+            "kind": "monster",
+            "hp": null,
+            "dead": false
+          },
+          {
+            "x": 295,
+            "y": 624,
+            "kind": "monster",
+            "hp": null,
+            "dead": false
+          },
+          {
+            "x": 288,
+            "y": 624,
+            "kind": "monster",
+            "hp": null,
+            "dead": false
+          }
+        ]
+      },
+      "final": {
+        "ready": true,
+        "mapFileName": "0",
+        "position": {
+          "x": 288,
+          "y": 617
+        },
+        "hp": 18,
+        "maxHp": 18,
+        "dead": false,
+        "gold": 0,
+        "inSafeZone": true,
+        "inventoryCurrent": true
+      },
+      "finalLife": {
+        "permitHash": "326a69787257f049c44d567758325fa4ca3d5411f3d82f94de95f6d16950c29d",
+        "status": "cancelled",
+        "phase": "cancelled",
+        "activationPending": false,
+        "startedAtMs": 1793734599603,
+        "expiresAtMs": 1793735799603,
+        "budgetGold": 50,
+        "maxPurchasedQuantity": 1,
+        "chargedGold": 0,
+        "purchasedQuantity": 0,
+        "modelDecisionsUsed": 0
+      },
+      "arrivalDistance": 1,
+      "permitHash": "326a69787257f049c44d567758325fa4ca3d5411f3d82f94de95f6d16950c29d"
+    },
+    {
+      "index": 2,
+      "target": {
+        "x": 290,
+        "y": 631
+      },
+      "passed": true,
+      "manualWalks": 44,
+      "safetyTicks": 0,
+      "returnTicks": 43,
+      "startedAtMs": 1793734649866,
+      "expiresAtMs": 1793735849866,
+      "staged": {
+        "ready": true,
+        "mapFileName": "0",
+        "position": {
+          "x": 290,
+          "y": 631
+        },
+        "hp": 18,
+        "maxHp": 18,
+        "dead": false,
+        "gold": 0,
+        "inSafeZone": false,
+        "inventoryCurrent": true
+      },
+      "stagingDiagnostic": {
+        "position": {
+          "x": 290,
+          "y": 631
+        },
+        "entities": [
+          {
+            "x": 284,
+            "y": 615,
+            "kind": "npc",
+            "hp": null,
+            "dead": false
+          },
+          {
+            "x": 290,
+            "y": 631,
+            "kind": "selfPlayer",
+            "hp": 18,
+            "dead": false
+          },
+          {
+            "x": 300,
+            "y": 639,
+            "kind": "monster",
+            "hp": 25,
+            "dead": false
+          },
+          {
+            "x": 290,
+            "y": 639,
+            "kind": "monster",
+            "hp": 20,
+            "dead": false
+          },
+          {
+            "x": 293,
+            "y": 631,
+            "kind": "monster",
+            "hp": 20,
+            "dead": false
+          },
+          {
+            "x": 295,
+            "y": 624,
+            "kind": "monster",
+            "hp": null,
+            "dead": false
+          },
+          {
+            "x": 288,
+            "y": 624,
+            "kind": "monster",
+            "hp": null,
+            "dead": false
+          },
+          {
+            "x": 291,
+            "y": 620,
+            "kind": "monster",
+            "hp": null,
+            "dead": false
+          },
+          {
+            "x": 294,
+            "y": 619,
+            "kind": "npc",
+            "hp": null,
+            "dead": null
+          },
+          {
+            "x": 287,
+            "y": 617,
+            "kind": "player",
+            "hp": null,
+            "dead": false
+          },
+          {
+            "x": 287,
+            "y": 616,
+            "kind": "monster",
+            "hp": null,
+            "dead": false
+          },
+          {
+            "x": 291,
+            "y": 616,
+            "kind": "monster",
+            "hp": null,
+            "dead": false
+          },
+          {
+            "x": 287,
+            "y": 615,
+            "kind": "npc",
+            "hp": null,
+            "dead": null
+          }
+        ]
+      },
+      "final": {
+        "ready": true,
+        "mapFileName": "0",
+        "position": {
+          "x": 288,
+          "y": 617
+        },
+        "hp": 18,
+        "maxHp": 18,
+        "dead": false,
+        "gold": 0,
+        "inSafeZone": true,
+        "inventoryCurrent": true
+      },
+      "finalLife": {
+        "permitHash": "df0d0a109076891e7ac7974544e6d69f27dc8d485b806f3670a01f326233d8d6",
+        "status": "cancelled",
+        "phase": "cancelled",
+        "activationPending": false,
+        "startedAtMs": 1793734649866,
+        "expiresAtMs": 1793735849866,
+        "budgetGold": 50,
+        "maxPurchasedQuantity": 1,
+        "chargedGold": 0,
+        "purchasedQuantity": 0,
+        "modelDecisionsUsed": 0
+      },
+      "arrivalDistance": 1,
+      "permitHash": "df0d0a109076891e7ac7974544e6d69f27dc8d485b806f3670a01f326233d8d6"
+    },
+    {
+      "index": 3,
+      "target": {
+        "x": 289,
+        "y": 626
+      },
+      "passed": true,
+      "manualWalks": 9,
+      "safetyTicks": 0,
+      "returnTicks": 10,
+      "startedAtMs": 1793734708903,
+      "expiresAtMs": 1793735908903,
+      "staged": {
+        "ready": true,
+        "mapFileName": "0",
+        "position": {
+          "x": 289,
+          "y": 626
+        },
+        "hp": 18,
+        "maxHp": 18,
+        "dead": false,
+        "gold": 0,
+        "inSafeZone": true,
+        "inventoryCurrent": true
+      },
+      "stagingDiagnostic": {
+        "position": {
+          "x": 289,
+          "y": 626
+        },
+        "entities": [
+          {
+            "x": 287,
+            "y": 615,
+            "kind": "npc",
+            "hp": null,
+            "dead": false
+          },
+          {
+            "x": 284,
+            "y": 615,
+            "kind": "npc",
+            "hp": null,
+            "dead": false
+          },
+          {
+            "x": 294,
+            "y": 619,
+            "kind": "npc",
+            "hp": null,
+            "dead": false
+          },
+          {
+            "x": 296,
+            "y": 613,
+            "kind": "npc",
+            "hp": null,
+            "dead": false
+          },
+          {
+            "x": 291,
+            "y": 610,
+            "kind": "npc",
+            "hp": null,
+            "dead": false
+          },
+          {
+            "x": 289,
+            "y": 626,
+            "kind": "selfPlayer",
+            "hp": 18,
+            "dead": false
+          },
+          {
+            "x": 287,
+            "y": 617,
+            "kind": "player",
+            "hp": null,
+            "dead": false
+          },
+          {
+            "x": 295,
+            "y": 624,
+            "kind": "monster",
+            "hp": 9999,
+            "dead": false
+          },
+          {
+            "x": 291,
+            "y": 620,
+            "kind": "monster",
+            "hp": 9999,
+            "dead": false
+          },
+          {
+            "x": 287,
+            "y": 611,
+            "kind": "monster",
+            "hp": 25,
+            "dead": false
+          },
+          {
+            "x": 284,
+            "y": 611,
+            "kind": "monster",
+            "hp": 25,
+            "dead": false
+          },
+          {
+            "x": 292,
+            "y": 629,
+            "kind": "monster",
+            "hp": 20,
+            "dead": false
+          },
+          {
+            "x": 287,
+            "y": 616,
+            "kind": "monster",
+            "hp": 20,
+            "dead": false
+          },
+          {
+            "x": 293,
+            "y": 614,
+            "kind": "monster",
+            "hp": 20,
+            "dead": false
+          },
+          {
+            "x": 275,
+            "y": 611,
+            "kind": "monster",
+            "hp": 25,
+            "dead": false
+          },
+          {
+            "x": 288,
+            "y": 624,
+            "kind": "monster",
+            "hp": 25,
+            "dead": false
+          },
+          {
+            "x": 291,
+            "y": 616,
+            "kind": "monster",
+            "hp": 5,
+            "dead": false
+          },
+          {
+            "x": 292,
+            "y": 613,
+            "kind": "monster",
+            "hp": 5,
+            "dead": false
+          },
+          {
+            "x": 300,
+            "y": 639,
+            "kind": "monster",
+            "hp": null,
+            "dead": false
+          }
+        ]
+      },
+      "final": {
+        "ready": true,
+        "mapFileName": "0",
+        "position": {
+          "x": 288,
+          "y": 617
+        },
+        "hp": 18,
+        "maxHp": 18,
+        "dead": false,
+        "gold": 0,
+        "inSafeZone": true,
+        "inventoryCurrent": true
+      },
+      "finalLife": {
+        "permitHash": "c4fdb0d8f74cf21d3292958c281428b722a6f0431a157968bb0d791c99b2810a",
+        "status": "cancelled",
+        "phase": "cancelled",
+        "activationPending": false,
+        "startedAtMs": 1793734708903,
+        "expiresAtMs": 1793735908903,
+        "budgetGold": 50,
+        "maxPurchasedQuantity": 1,
+        "chargedGold": 0,
+        "purchasedQuantity": 0,
+        "modelDecisionsUsed": 0
+      },
+      "arrivalDistance": 1,
+      "permitHash": "c4fdb0d8f74cf21d3292958c281428b722a6f0431a157968bb0d791c99b2810a"
+    }
+  ],
+  "durableCancelledExecutions": [
+    {
+      "caseIndex": 1,
+      "permitHash": "326a69787257f049c44d567758325fa4ca3d5411f3d82f94de95f6d16950c29d",
+      "expiresAtMs": 1793735799603,
+      "status": "cancelled",
+      "chargedGold": 0,
+      "purchasedQuantity": 0,
+      "modelDecisionsUsed": 0
+    },
+    {
+      "caseIndex": 2,
+      "permitHash": "df0d0a109076891e7ac7974544e6d69f27dc8d485b806f3670a01f326233d8d6",
+      "expiresAtMs": 1793735849866,
+      "status": "cancelled",
+      "chargedGold": 0,
+      "purchasedQuantity": 0,
+      "modelDecisionsUsed": 0
+    },
+    {
+      "caseIndex": 3,
+      "permitHash": "c4fdb0d8f74cf21d3292958c281428b722a6f0431a157968bb0d791c99b2810a",
+      "expiresAtMs": 1793735908903,
+      "status": "cancelled",
+      "chargedGold": 0,
+      "purchasedQuantity": 0,
+      "modelDecisionsUsed": 0
+    }
+  ],
+  "lastObserved": {
+    "label": "controller-cancelled-homeward",
+    "phase": "controller-only-homeward",
+    "snapshot": {
+      "ready": true,
+      "mapFileName": "0",
+      "position": {
+        "x": 288,
+        "y": 617
+      },
+      "hp": 18,
+      "maxHp": 18,
+      "dead": false,
+      "gold": 0,
+      "inSafeZone": true,
+      "inventoryCurrent": true
+    },
+    "life": {
+      "permitHash": "c4fdb0d8f74cf21d3292958c281428b722a6f0431a157968bb0d791c99b2810a",
+      "status": "cancelled",
+      "phase": "cancelled",
+      "activationPending": false,
+      "startedAtMs": 1793734708903,
+      "expiresAtMs": 1793735908903,
+      "budgetGold": 50,
+      "maxPurchasedQuantity": 1,
+      "chargedGold": 0,
+      "purchasedQuantity": 0,
+      "modelDecisionsUsed": 0
+    },
+    "diagnostic": {
+      "position": {
+        "x": 288,
+        "y": 617
+      },
+      "entities": [
+        {
+          "x": 287,
+          "y": 615,
+          "kind": "npc",
+          "hp": null,
+          "dead": false
+        },
+        {
+          "x": 284,
+          "y": 615,
+          "kind": "npc",
+          "hp": null,
+          "dead": false
+        },
+        {
+          "x": 294,
+          "y": 619,
+          "kind": "npc",
+          "hp": null,
+          "dead": false
+        },
+        {
+          "x": 296,
+          "y": 613,
+          "kind": "npc",
+          "hp": null,
+          "dead": false
+        },
+        {
+          "x": 291,
+          "y": 610,
+          "kind": "npc",
+          "hp": null,
+          "dead": false
+        },
+        {
+          "x": 288,
+          "y": 617,
+          "kind": "selfPlayer",
+          "hp": 18,
+          "dead": false
+        },
+        {
+          "x": 287,
+          "y": 617,
+          "kind": "player",
+          "hp": null,
+          "dead": false
+        },
+        {
+          "x": 295,
+          "y": 624,
+          "kind": "monster",
+          "hp": 9999,
+          "dead": false
+        },
+        {
+          "x": 291,
+          "y": 620,
+          "kind": "monster",
+          "hp": 9999,
+          "dead": false
+        },
+        {
+          "x": 287,
+          "y": 611,
+          "kind": "monster",
+          "hp": 25,
+          "dead": false
+        },
+        {
+          "x": 284,
+          "y": 611,
+          "kind": "monster",
+          "hp": 25,
+          "dead": false
+        },
+        {
+          "x": 292,
+          "y": 629,
+          "kind": "monster",
+          "hp": 20,
+          "dead": false
+        },
+        {
+          "x": 287,
+          "y": 616,
+          "kind": "monster",
+          "hp": 20,
+          "dead": false
+        },
+        {
+          "x": 293,
+          "y": 614,
+          "kind": "monster",
+          "hp": 20,
+          "dead": false
+        },
+        {
+          "x": 275,
+          "y": 611,
+          "kind": "monster",
+          "hp": 25,
+          "dead": false
+        },
+        {
+          "x": 288,
+          "y": 624,
+          "kind": "monster",
+          "hp": 25,
+          "dead": false
+        },
+        {
+          "x": 291,
+          "y": 616,
+          "kind": "monster",
+          "hp": 5,
+          "dead": false
+        },
+        {
+          "x": 292,
+          "y": 613,
+          "kind": "monster",
+          "hp": 5,
+          "dead": false
+        },
+        {
+          "x": 280,
+          "y": 609,
+          "kind": "monster",
+          "hp": null,
+          "dead": false
+        },
+        {
+          "x": 288,
+          "y": 608,
+          "kind": "npc",
+          "hp": null,
+          "dead": null
+        },
+        {
+          "x": 284,
+          "y": 606,
+          "kind": "npc",
+          "hp": null,
+          "dead": null
+        },
+        {
+          "x": 294,
+          "y": 606,
+          "kind": "monster",
+          "hp": null,
+          "dead": false
+        },
+        {
+          "x": 295,
+          "y": 605,
+          "kind": "npc",
+          "hp": null,
+          "dead": null
+        },
+        {
+          "x": 289,
+          "y": 604,
+          "kind": "monster",
+          "hp": null,
+          "dead": false
+        },
+        {
+          "x": 292,
+          "y": 603,
+          "kind": "npc",
+          "hp": null,
+          "dead": null
+        },
+        {
+          "x": 288,
+          "y": 603,
+          "kind": "monster",
+          "hp": null,
+          "dead": false
+        },
+        {
+          "x": 276,
+          "y": 603,
+          "kind": "monster",
+          "hp": null,
+          "dead": false
+        }
+      ]
+    },
+    "modelCalls": 0
+  },
+  "commands": {
+    "clientVersion": 1,
+    "login": 1,
+    "startGame": 1,
+    "keepAlive": 14,
+    "changeAMode": 1,
+    "equipItem": 2,
+    "switchGroup": 1,
+    "companionRuntimeRegister": 1,
+    "companionRuntimeReply": 199,
+    "walk": 177,
+    "logOut": 1
+  },
+  "proofCounts": {
+    "UserLocation": 177,
+    "ObjectAttack": 6
+  },
+  "sourceScripts": [
+    {
+      "path": "apps/ai-player/scripts/run-homeward-regression.mjs",
+      "sha256": "eabac7e5e75e264fca629be3508efd4a398dceba0aac1e3b0211ccba2248ab72"
+    },
+    {
+      "path": "apps/ai-player/scripts/companion-trial-fixture.mjs",
+      "sha256": "c6e35e62dad1740d08a2a520cb01e810b21f393660516f337db3049fee3f8bd7"
+    },
+    {
+      "path": "apps/ai-player/scripts/trial-actor-fixture.mjs",
+      "sha256": "2351f5ce60bbd6b33ec7eaef94af29181975ac42218b923496653fbb1c4c4c06"
+    },
+    {
+      "path": "apps/ai-player/scripts/local-gateway.mjs",
+      "sha256": "d6489acd201240c61dcbb26600e27240fd192d910443f597d8ae6bed0d45f97f"
+    },
+    {
+      "path": "apps/ai-player/src/skills/navigation.mjs",
+      "sha256": "6b9e9c64a5f60c55f64be8ed1046e57550b81a2c610314eef30c88c4e2b43585"
+    },
+    {
+      "path": "apps/ai-player/src/companion-controller.mjs",
+      "sha256": "cae20f0d9f15bdbdd43f5eaaf5a6f3fd0c9de862bc1272e39ddf6ce3e4fb9b8b"
+    },
+    {
+      "path": "apps/ai-player/src/life/life-controller.mjs",
+      "sha256": "b56bb8f0d2d2d28db819030f734f895639aacb26f5cc5f99bb90a8deabab21fe"
+    }
+  ],
+  "scope": "Ordinary Actor walk staging inside Bichon bounds, then only existing Controller ticks after owner cancellation. No funding, GM, teleport, fabricated clock, model call, autonomous outward-trip, expiry, restart or full-world claim.",
+  "cleanup": {
+    "returned": true,
+    "fixtureClosed": true,
+    "ownerClosed": true,
+    "actorExited": true,
+    "ownedActorProcesses": [
+      {
+        "pid": 69620,
+        "exited": true
+      }
+    ],
+    "originalUserStateTouched": false
+  }
+}

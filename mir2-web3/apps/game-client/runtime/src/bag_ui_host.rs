@@ -508,7 +508,15 @@ pub(crate) fn install(app: &mut App, window: Entity, _camera: Entity) {
                 .chain()
                 .in_set(PendingLifecycleSet::Ingest),
         )
-        .add_systems(PostUpdate, publish_status.after(UiSystems::Layout))
+        .add_systems(
+            PostUpdate,
+            // Selection rebuilds the shared tree. New nodes start with false
+            // InheritedVisibility; publishing between Layout and visibility
+            // propagation incorrectly retires an otherwise current Bag owner.
+            publish_status
+                .after(UiSystems::Layout)
+                .after(bevy::camera::visibility::VisibilitySystems::VisibilityPropagate),
+        )
         .add_systems(Last, forward_intents);
 }
 

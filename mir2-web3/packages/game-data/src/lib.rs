@@ -17,6 +17,7 @@ pub use crystal_npc_goods::{crystal_npc_goods_item_json, crystal_npc_goods_list_
 mod crystal_item_image;
 pub mod crystal_map_events;
 pub mod periodic_quests;
+pub mod r16_gameplay_baseline;
 pub use crystal_guild_settings::{
     crystal_guild_buff_definitions, crystal_guild_settings, CrystalGuildCreationCost,
     CrystalGuildSettings,

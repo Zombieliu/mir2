@@ -1375,3 +1375,6 @@ mod owner_tests;
 
 #[path = "npc_purchase_uid_tests.rs"]
 mod uid_tests;
+
+#[path = "npc_purchase_quest_progress_tests.rs"]
+mod quest_progress_tests;

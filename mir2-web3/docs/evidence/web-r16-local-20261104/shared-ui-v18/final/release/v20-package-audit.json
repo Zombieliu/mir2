@@ -1,0 +1,20 @@
+{
+  "passed": true,
+  "buildId": "cxoBD81Hi-E6yr5pTeyYD",
+  "files": 32879,
+  "bytes": 931738011,
+  "manifestSha256": "3955febe12381c8e3047b10fdb851d5010f75939465e78e8daa35a77455a0e50",
+  "gatewaySha256": "c70aef2d2733635964a44c5973ad48cdb87919e4758a6336058106af3a51c063",
+  "unchangedPublicBytes": true,
+  "unchangedActorNodeLauncher": true,
+  "privateDataPackaged": false,
+  "comparedTo": "v19",
+  "changed": 308,
+  "removed": 306,
+  "thinGate": {
+    "bytes": 693753630,
+    "limit": 377487360,
+    "passed": false
+  },
+  "finiteAssetsManifestSha256": "454f30224cdec496b0a5f9d69e1e4a51d29e80a8897b00c5c158baad9ece370a"
+}

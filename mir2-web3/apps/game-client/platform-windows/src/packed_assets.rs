@@ -3,20 +3,99 @@
 use bevy::asset::io::{
     AssetReader, AssetReaderError, AssetSourceBuilder, PathStream, Reader, VecReader,
 };
-use mir2_resource_pack::PackStore;
+use mir2_resource_pack::{Catalog, PackStore, ReadProfileSnapshot, ScopedRead};
+use mir2_windows_updater::progressive::{DownloadSnapshot, ProgressiveDownloads};
 use std::{
     path::{Path, PathBuf},
     sync::{Arc, Mutex, OnceLock},
 };
 
-static STORE: OnceLock<Arc<PackStore>> = OnceLock::new();
+/// The availability mode is chosen only by the authenticated launch loader.
+/// Logical membership always comes from the complete signed catalog.
+pub(crate) enum MountedStore {
+    Complete(Arc<PackStore>),
+    Progressive(Arc<ProgressiveDownloads>),
+}
+impl MountedStore {
+    pub(crate) fn catalog(&self) -> &Catalog {
+        match self {
+            Self::Complete(store) => store.catalog(),
+            Self::Progressive(downloads) => downloads.store().catalog(),
+        }
+    }
+    pub(crate) fn read_profile_snapshot(&self) -> Option<ReadProfileSnapshot> {
+        match self {
+            Self::Complete(store) => store.read_profile_snapshot(),
+            // Partial reads are not fabricated as a complete-store profile.
+            Self::Progressive(_) => None,
+        }
+    }
+    pub(crate) fn exists(&self, path: &str) -> bool {
+        self.catalog().resources.contains_key(path)
+    }
+    pub(crate) fn is_directory(&self, path: &str) -> bool {
+        let path = path.trim_end_matches('/');
+        if path.is_empty() {
+            return true;
+        }
+        let Ok(path) = logical_path(path) else {
+            return false;
+        };
+        let prefix = format!("{path}/");
+        self.catalog()
+            .resources
+            .range(prefix.clone()..)
+            .next()
+            .is_some_and(|(path, _)| path.starts_with(&prefix))
+    }
+    fn list_prefix(&self, prefix: &str) -> Result<Vec<String>, String> {
+        let prefix = prefix.trim_end_matches('/');
+        if !prefix.is_empty() {
+            logical_path(prefix)?;
+        }
+        let prefix = if prefix.is_empty() {
+            String::new()
+        } else {
+            format!("{prefix}/")
+        };
+        Ok(self
+            .catalog()
+            .resources
+            .range(prefix.clone()..)
+            .take_while(|(path, _)| path.starts_with(&prefix))
+            .map(|(path, _)| path.clone())
+            .collect())
+    }
+    fn read(&self, path: &str) -> Result<ScopedRead, String> {
+        match self {
+            Self::Complete(store) => store.read(path).map(ScopedRead::Ready),
+            Self::Progressive(downloads) => downloads.read(path),
+        }
+        .map_err(|error| format!("packed resource {path}: {error:#}"))
+    }
+    async fn read_async(&self, path: &str) -> Result<Vec<u8>, String> {
+        match self {
+            Self::Complete(store) => read_from(store, path),
+            Self::Progressive(downloads) => {
+                std::future::poll_fn(|cx| downloads.poll_read(path, cx))
+                    .await
+                    .map_err(|error| format!("packed resource {path}: {error:#}"))
+            }
+        }
+    }
+}
+
+static STORE: OnceLock<Arc<MountedStore>> = OnceLock::new();
 static FAILURE: OnceLock<Mutex<Option<String>>> = OnceLock::new();
 pub fn install(store: Arc<PackStore>) -> Result<(), String> {
+    install_mounted(Arc::new(MountedStore::Complete(store)))
+}
+pub(crate) fn install_mounted(store: Arc<MountedStore>) -> Result<(), String> {
     STORE
         .set(store)
         .map_err(|_| "a resource generation is already mounted".to_owned())
 }
-pub fn store() -> Option<&'static Arc<PackStore>> {
+pub(crate) fn store() -> Option<&'static Arc<MountedStore>> {
     STORE.get()
 }
 pub fn failure() -> Option<String> {
@@ -36,6 +115,9 @@ fn record(error: String) -> String {
     }
     error
 }
+pub(crate) fn record_failure(error: String) {
+    record(error);
+}
 pub fn logical_path(value: &str) -> Result<&str, String> {
     let value = value.trim_start_matches('/');
     mir2_resource_pack::validate_logical_path(value).map_err(|e| e.to_string())?;
@@ -47,12 +129,41 @@ pub fn read_from(store: &PackStore, path: &str) -> Result<Vec<u8>, String> {
         .read(key)
         .map_err(|e| format!("packed resource {key}: {e:#}"))
 }
+pub(crate) fn try_read(path: &str) -> Result<ScopedRead, String> {
+    let key = logical_path(path).map_err(record)?;
+    store()
+        .ok_or_else(|| "no packed generation mounted".to_owned())?
+        .read(key)
+        .map_err(record)
+}
 pub fn read(path: &str) -> Result<Vec<u8>, String> {
-    read_from(
-        store().ok_or_else(|| "no packed generation mounted".to_owned())?,
-        path,
-    )
-    .map_err(record)
+    match try_read(path)? {
+        ScopedRead::Ready(bytes) => Ok(bytes),
+        // Waiting is not a corrupt generation or an absent catalog resource.
+        ScopedRead::Pending(_) => Err("resource download pending".into()),
+    }
+}
+pub(crate) fn progress() -> Option<Result<DownloadSnapshot, String>> {
+    match store()?.as_ref() {
+        MountedStore::Complete(_) => None,
+        MountedStore::Progressive(downloads) => {
+            Some(downloads.snapshot().map_err(|e| format!("{e:#}")))
+        }
+    }
+}
+pub(crate) fn waiting() -> bool {
+    crate::resource_status::visual_waiting()
+        || progress()
+            .is_some_and(|result| result.map_or(true, |state| state.foreground_pending != 0))
+}
+pub(crate) fn retry() {
+    if let Some(store) = store() {
+        if let MountedStore::Progressive(downloads) = store.as_ref() {
+            if let Err(error) = downloads.retry() {
+                record(format!("resource retry failed: {error:#}"));
+            }
+        }
+    }
 }
 /// Audio has source-authored optional choices (Main.wav or Login2.wav). An
 /// absent catalog entry is only a probe; a declared entry that cannot be read
@@ -67,10 +178,15 @@ pub fn read_if_present(path: &str) -> Result<Vec<u8>, String> {
 }
 #[derive(Clone)]
 pub struct PackedAssetReader {
-    store: Arc<PackStore>,
+    store: Arc<MountedStore>,
 }
 impl PackedAssetReader {
     pub fn new(store: Arc<PackStore>) -> Self {
+        Self {
+            store: Arc::new(MountedStore::Complete(store)),
+        }
+    }
+    fn from_mounted(store: Arc<MountedStore>) -> Self {
         Self { store }
     }
     fn error(&self, message: String) -> AssetReaderError {
@@ -93,7 +209,10 @@ impl AssetReader for PackedAssetReader {
             .to_str()
             .ok_or_else(|| self.error("non-UTF8 resource path".into()))?;
         Ok(VecReader::new(
-            read_from(&self.store, key).map_err(|e| self.error(e))?,
+            self.store
+                .read_async(logical_path(key).map_err(|e| self.error(e))?)
+                .await
+                .map_err(|e| self.error(e))?,
         ))
     }
     async fn read_meta<'a>(&'a self, path: &'a Path) -> Result<impl Reader + 'a, AssetReaderError> {
@@ -241,7 +360,7 @@ pub fn login_ready(world: &bevy::prelude::World) -> bool {
 pub fn source() -> Option<AssetSourceBuilder> {
     let store = Arc::clone(store()?);
     Some(AssetSourceBuilder::new(move || {
-        Box::new(PackedAssetReader::new(Arc::clone(&store)))
+        Box::new(PackedAssetReader::from_mounted(Arc::clone(&store)))
     }))
 }
 

@@ -122,6 +122,26 @@ class ProxyCandidateTests(unittest.TestCase):
         original = self.existing(deploy.ACTIVITY_API_ADDITION)
         self.assertEqual(deploy.proxy_candidate(original, self.crlf_snippet, True), original)
 
+    def test_waffo_webhook_upgrade_changes_only_exact_public_matcher(self):
+        original = self.existing(deploy.ACTIVITY_API_ADDITION)
+        expected = self.existing(deploy.ACTIVITY_API_ADDITION + deploy.WAFFO_WEBHOOK_ADDITION)
+        self.assertEqual(deploy.proxy_candidate(original, self.snippet, True,
+                                               enable_waffo_webhook=True), expected)
+        self.assertTrue(expected.startswith(self.private_routes))
+        self.assertEqual(expected.replace(deploy.WAFFO_WEBHOOK_ADDITION, b"", 1), original)
+        self.assertEqual(deploy.proxy_candidate(expected, self.crlf_snippet, True), expected)
+
+    def test_waffo_upgrade_rejects_ambiguous_or_unexpected_existing_routes(self):
+        original = self.existing(deploy.ACTIVITY_API_ADDITION)
+        with self.assertRaisesRegex(RuntimeError, "routeUpgradeAmbiguous"):
+            deploy.proxy_candidate(original, self.snippet, True,
+                                   enable_activities_routes=True, enable_waffo_webhook=True)
+        with self.assertRaisesRegex(RuntimeError, "waffoWebhookRequiresExistingSite"):
+            deploy.proxy_candidate(original, self.snippet, False, enable_waffo_webhook=True)
+        with self.assertRaisesRegex(RuntimeError, "previousAuthenticatedRoutesNotExpected"):
+            deploy.proxy_candidate(self.existing(deploy.API_ADDITION), self.snippet, True,
+                                   enable_waffo_webhook=True)
+
     def test_existing_crlf_site_accepts_both_upload_endings_without_rewriting_it(self):
         original = self.existing(deploy.API_ADDITION, self.crlf_snippet)
         expected = self.existing(deploy.ACTIVITY_API_ADDITION, self.crlf_snippet)

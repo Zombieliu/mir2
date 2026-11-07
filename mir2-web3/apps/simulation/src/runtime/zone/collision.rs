@@ -1,4 +1,5 @@
 use std::collections::{BTreeMap, BTreeSet};
+use std::sync::Arc;
 
 use mir2_protocol::Point;
 use serde::Serialize;
@@ -42,24 +43,43 @@ pub struct ZoneCollision {
     // known-map and trusted unbounded checkpoint roots keep their original bytes.
     #[serde(skip_serializing_if = "std::ops::Not::not")]
     unavailable: bool,
+    // Host cache identity only. Arc<()> value equality stays true, so this
+    // neither changes terrain equality nor any checkpoint bytes. Holding a
+    // token prevents pointer reuse while a derived path map is cached.
+    #[serde(skip)]
+    static_path_revision: Arc<()>,
 }
 
 impl ZoneCollision {
     pub fn for_map(map_file_name: &str) -> Self {
         zone_map_collision_data(map_file_name)
-            .map(|data| Self {
-                bounds: Some(ZoneBounds::new(
-                    data.bounds.min_x,
-                    data.bounds.max_x,
-                    data.bounds.min_y,
-                    data.bounds.max_y,
-                )),
-                blocked_cells: data.blocked_cells,
-                transfer_source_cells: data.transfer_source_cells,
-                doors: data.doors,
-                unavailable: false,
-            })
+            .map(Self::from_map_data)
             .unwrap_or_else(Self::unavailable)
+    }
+
+    /// Exact activated Crystal-world terrain, without a global mode change or
+    /// the starter-slice fallback. Only available to isolated host fixtures.
+    #[cfg(any(test, feature = "test-support"))]
+    pub fn for_full_world_test(map_file_name: &str) -> Self {
+        crate::runtime::map::zone_full_world_collision_for_test(map_file_name)
+            .map(Self::from_map_data)
+            .unwrap_or_else(Self::unavailable)
+    }
+
+    fn from_map_data(data: crate::runtime::map::ZoneMapCollisionData) -> Self {
+        Self {
+            bounds: Some(ZoneBounds::new(
+                data.bounds.min_x,
+                data.bounds.max_x,
+                data.bounds.min_y,
+                data.bounds.max_y,
+            )),
+            blocked_cells: data.blocked_cells,
+            transfer_source_cells: data.transfer_source_cells,
+            doors: data.doors,
+            unavailable: false,
+            static_path_revision: Arc::new(()),
+        }
     }
 
     pub fn unbounded() -> Self {
@@ -69,6 +89,7 @@ impl ZoneCollision {
             transfer_source_cells: BTreeSet::new(),
             doors: BTreeMap::new(),
             unavailable: false,
+            static_path_revision: Arc::new(()),
         }
     }
 
@@ -83,6 +104,18 @@ impl ZoneCollision {
         !self.unavailable
     }
 
+    /// Stable across clones/forks; replaced by an actual collision edit.
+    /// Process-local and never a client capability or serialized identifier.
+    pub fn static_path_cache_token(&self) -> Arc<()> {
+        self.static_path_revision.clone()
+    }
+
+    /// Ordinary static terrain for a bounded return path. Unlike a player's
+    /// movement exception, a transfer source is never a safe return waypoint.
+    pub fn static_path_cell_walkable(&self, point: &Point) -> bool {
+        !self.is_ground_drop_blocked(point)
+    }
+
     /// Door index → cells, for building the zone's dynamic door state.
     pub(crate) fn doors(&self) -> &BTreeMap<u8, Vec<(i32, i32)>> {
         &self.doors
@@ -90,23 +123,28 @@ impl ZoneCollision {
 
     /// Unblock a door's cells (door opened). No-op for unknown indices.
     pub(crate) fn open_door(&mut self, index: u8) {
+        let mut changed = false;
         if let Some(cells) = self.doors.get(&index) {
             for cell in cells {
-                self.blocked_cells.remove(cell);
+                changed |= self.blocked_cells.remove(cell);
             }
         }
+        if changed { self.static_path_revision = Arc::new(()); }
     }
 
     /// Re-block a door's cells (door closed).
     pub(crate) fn close_door(&mut self, index: u8) {
+        let mut changed = false;
         if let Some(cells) = self.doors.get(&index) {
             for cell in cells {
-                self.blocked_cells.insert(*cell);
+                changed |= self.blocked_cells.insert(*cell);
             }
         }
+        if changed { self.static_path_revision = Arc::new(()); }
     }
 
     pub fn with_bounds(mut self, bounds: ZoneBounds) -> Self {
+        if self.bounds != Some(bounds) { self.static_path_revision = Arc::new(()); }
         self.bounds = Some(bounds);
         self
     }
@@ -115,8 +153,10 @@ impl ZoneCollision {
     where
         I: IntoIterator<Item = Point>,
     {
+        let before = self.blocked_cells.len();
         self.blocked_cells
             .extend(cells.into_iter().map(|point| (point.x, point.y)));
+        if self.blocked_cells.len() != before { self.static_path_revision = Arc::new(()); }
         self
     }
 
@@ -127,6 +167,7 @@ impl ZoneCollision {
             self.blocked_cells.insert(*cell);
         }
         self.doors.insert(index & 0x7F, cells);
+        self.static_path_revision = Arc::new(());
         self
     }
 
@@ -158,8 +199,10 @@ impl ZoneCollision {
         mut self,
         cells: impl IntoIterator<Item = Point>,
     ) -> Self {
+        let before = self.transfer_source_cells.len();
         self.transfer_source_cells
             .extend(cells.into_iter().map(|p| (p.x, p.y)));
+        if self.transfer_source_cells.len() != before { self.static_path_revision = Arc::new(()); }
         self
     }
 
@@ -277,5 +320,65 @@ mod unavailable_collision_tests {
             .unwrap()
             .get("unavailable")
             .is_none());
+    }
+}
+
+#[cfg(test)]
+mod static_path_cache_tests {
+    use super::*;
+
+    #[test]
+    fn static_path_cache_full_world_fixture_loads_real_bichon_and_never_falls_back_for_unknown_map() {
+        let real = ZoneCollision::for_full_world_test("0");
+        assert!(real.static_path_cell_walkable(&Point { x: 288, y: 616 }));
+        assert!(real.static_path_cell_walkable(&Point { x: 290, y: 631 }));
+        let missing = ZoneCollision::for_full_world_test("missing-full-world-homeward-fixture");
+        assert!(!missing.static_path_cell_walkable(&Point { x: 288, y: 616 }));
+    }
+
+    #[test]
+    fn static_path_cache_token_is_shared_by_forks_but_never_changes_equality_or_serialization() {
+        let original = ZoneCollision::unbounded();
+        let fork = original.clone();
+        let independent = ZoneCollision::unbounded();
+        assert!(Arc::ptr_eq(&original.static_path_cache_token(), &fork.static_path_cache_token()));
+        assert!(!Arc::ptr_eq(&original.static_path_cache_token(), &independent.static_path_cache_token()));
+        assert_eq!(original, independent);
+        assert_eq!(serde_json::to_vec(&original).unwrap(), serde_json::to_vec(&independent).unwrap());
+        assert_eq!(serde_json::to_string(&original).unwrap(), r#"{"bounds":null,"blocked_cells":[],"transfer_source_cells":[],"doors":{}}"#);
+    }
+
+    #[test]
+    fn static_path_cache_token_changes_on_real_bounds_blocked_or_transfer_mutation() {
+        let original = ZoneCollision::unbounded();
+        let bounded = original.clone().with_bounds(ZoneBounds::new(0, 20, 0, 20));
+        assert!(!Arc::ptr_eq(&original.static_path_cache_token(), &bounded.static_path_cache_token()));
+        let same = bounded.clone().with_bounds(ZoneBounds::new(0, 20, 0, 20));
+        assert!(Arc::ptr_eq(&bounded.static_path_cache_token(), &same.static_path_cache_token()));
+        let blocked = bounded.clone().with_blocked_cells([Point { x: 10, y: 10 }]);
+        assert!(!Arc::ptr_eq(&bounded.static_path_cache_token(), &blocked.static_path_cache_token()));
+        assert!(!blocked.static_path_cell_walkable(&Point { x: 10, y: 10 }));
+        let transfer = bounded.clone().with_transfer_source_cells_for_test([Point { x: 10, y: 10 }]);
+        assert!(!Arc::ptr_eq(&bounded.static_path_cache_token(), &transfer.static_path_cache_token()));
+        assert!(!transfer.static_path_cell_walkable(&Point { x: 10, y: 10 }));
+        assert!(!transfer.is_player_movement_blocked(&Point { x: 10, y: 10 }), "return geometry must not reuse a map-exit movement exception");
+    }
+
+    #[test]
+    fn static_path_cache_token_changes_when_a_door_opens_or_closes_without_affecting_old_fork() {
+        let mut collision = ZoneCollision::unbounded().with_door(7, vec![(10, 10)]);
+        let old_fork = collision.clone();
+        let closed = collision.static_path_cache_token();
+        collision.open_door(7);
+        let open = collision.static_path_cache_token();
+        assert!(!Arc::ptr_eq(&closed, &open));
+        assert!(collision.static_path_cell_walkable(&Point { x: 10, y: 10 }));
+        assert!(!old_fork.static_path_cell_walkable(&Point { x: 10, y: 10 }));
+        collision.open_door(7);
+        assert!(Arc::ptr_eq(&open, &collision.static_path_cache_token()), "a no-op cannot evict a valid map");
+        collision.close_door(7);
+        assert!(!Arc::ptr_eq(&open, &collision.static_path_cache_token()));
+        assert_eq!(collision, old_fork);
+        assert_eq!(serde_json::to_vec(&collision).unwrap(), serde_json::to_vec(&old_fork).unwrap());
     }
 }

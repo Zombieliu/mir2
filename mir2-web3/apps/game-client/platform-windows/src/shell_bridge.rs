@@ -504,13 +504,17 @@ fn forward_billing_request(
     let request_id = request.request_id;
     let wire = match request.purchase.clone() {
         None => NativeOutboundCommand::BillingStatus {
+            include_payment_providers: true,
             character_index,
             request_id,
         },
         Some(BillingPurchase::Checkout {
+            provider,
             offer_id,
             order_request_id,
         }) => NativeOutboundCommand::BillingCheckout {
+            provider,
+            include_payment_providers: true,
             character_index,
             offer_id,
             order_request_id,
@@ -520,6 +524,7 @@ fn forward_billing_request(
             offer_id,
             order_request_id,
         }) => NativeOutboundCommand::BillingUsdcCheckout {
+            include_payment_providers: true,
             character_index,
             offer_id,
             order_request_id,
@@ -527,6 +532,7 @@ fn forward_billing_request(
         },
         Some(BillingPurchase::BuyMonthlyCard { order_request_id }) => {
             NativeOutboundCommand::BillingBuyMonthlyCard {
+                include_payment_providers: true,
                 character_index,
                 order_request_id,
                 request_id,
@@ -534,6 +540,7 @@ fn forward_billing_request(
         }
         Some(BillingPurchase::ActivateMonthlyCard { item_unique_id }) => {
             NativeOutboundCommand::BillingActivateMonthlyCard {
+                include_payment_providers: true,
                 character_index,
                 item_unique_id,
                 request_id,
@@ -601,6 +608,7 @@ mod tests {
                 checkout_url: None,
                 error: Some("late-previous-account".into()),
                 replayed: Some(false),
+                provider: None,
             }))
         );
         let reply = mir2_protocol::procurement::ProcurementReply {

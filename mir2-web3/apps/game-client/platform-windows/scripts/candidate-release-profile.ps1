@@ -1,6 +1,54 @@
 # Shared release configuration and resource closure for the active classic profile.
 # This file does not sign, publish, mutate saves, or relax the Candidate gates.
+# Older verifier entry points explicitly use the classic resource closure and
+# only override this variable for five-class packages. Keep that compatibility
+# binding separate from the canonical defaults resolved by the new packager.
 $script:CandidateContentProfilePath = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot '../../../../packages/game-data/data/content_profiles/platinum_176.json'))
+$script:CandidateR16GameplayBaseline = $null
+
+function Get-R16GameplayBaseline {
+    if ($null -eq $script:CandidateR16GameplayBaseline) {
+        $path = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot '../../../../packages/game-data/data/r16-gameplay-baseline.json'))
+        $file = Get-Item -LiteralPath $path -Force
+        if ($file.PSIsContainer -or ($file.Attributes -band [IO.FileAttributes]::ReparsePoint) -ne 0 -or
+            $file.Length -lt 1 -or $file.Length -gt 16384) { throw 'invalid canonical R16 gameplay baseline file' }
+        $json = Get-Content -LiteralPath $path -Raw
+        $baseline = ConvertFrom-Json -InputObject $json
+        if ($null -eq $baseline) { throw 'invalid canonical R16 gameplay baseline' }
+        $names = @($baseline.PSObject.Properties.Name | Sort-Object)
+        if (($names -join '|') -cne 'contentProfile|id|onboarding|questCadence|questGuidance|schema') {
+            throw 'canonical R16 gameplay baseline has missing or undeclared fields'
+        }
+        foreach ($name in $names) {
+            if (([regex]::Matches($json, ('"' + [regex]::Escape($name) + '"\s*:'))).Count -ne 1) {
+                throw 'canonical R16 gameplay baseline has duplicate or noncanonical fields'
+            }
+            if ($name -cne 'schema' -and $baseline.$name -isnot [string]) { throw 'invalid canonical R16 gameplay baseline field type' }
+        }
+        if (($baseline.schema -isnot [int] -and $baseline.schema -isnot [long]) -or $baseline.schema -ne 1 -or
+            $baseline.id -cne 'r16-platinum-fiveclass-newcomer-v2' -or
+            $baseline.contentProfile -cne 'platinum_fiveclass' -or $baseline.questGuidance -cne 'newcomer-v2' -or
+            $baseline.questCadence -cne $baseline.questGuidance -or $baseline.onboarding -cne 'native') {
+            throw 'inconsistent canonical R16 gameplay baseline'
+        }
+        $script:CandidateR16GameplayBaseline = $baseline
+    }
+    return $script:CandidateR16GameplayBaseline.PSObject.Copy()
+}
+
+function Resolve-CandidateQuestGuidance {
+    param([AllowNull()][AllowEmptyString()][string]$Value)
+    if ([string]::IsNullOrEmpty($Value)) { $Value = (Get-R16GameplayBaseline).questGuidance }
+    if (@('crystal', 'newcomer-v1', 'newcomer-v2') -cnotcontains $Value) { throw 'unsupported Candidate quest guidance profile' }
+    return $Value
+}
+
+function Resolve-CandidateContentProfile {
+    param([AllowNull()][AllowEmptyString()][string]$Value)
+    if ([string]::IsNullOrEmpty($Value)) { $Value = (Get-R16GameplayBaseline).contentProfile }
+    if (@('platinum_176', 'platinum_fiveclass') -cnotcontains $Value) { throw 'unsupported Candidate content profile' }
+    return $Value
+}
 
 function Resolve-CandidateGatewayWsUrl {
     param([string]$Value, [switch]$AllowFixtureHost)
@@ -67,9 +115,9 @@ function Resolve-CandidateAllowedClasses {
 }
 
 function New-CandidateClientConfiguration {
-    param([string]$GatewayWsUrl, [string]$AuthHttpUrl = '', [string[]]$AllowedClasses = $null, [string]$QuestGuidance = 'newcomer-v2', [bool]$ForceDaylight = $true, [string]$BillingHttpOrigin = '')
+    param([string]$GatewayWsUrl, [string]$AuthHttpUrl = '', [string[]]$AllowedClasses = $null, [string]$QuestGuidance = '', [bool]$ForceDaylight = $true, [string]$BillingHttpOrigin = '')
     $endpoint = Resolve-CandidateGatewayWsUrl -Value $GatewayWsUrl
-    if (@('crystal', 'newcomer-v1', 'newcomer-v2') -cnotcontains $QuestGuidance) { throw 'unsupported Candidate quest guidance profile' }
+    $QuestGuidance = Resolve-CandidateQuestGuidance -Value $QuestGuidance
     $daylight = if ($ForceDaylight) { 'true' } else { 'false' }
     $auth = if ([string]::IsNullOrWhiteSpace($AuthHttpUrl)) { '' } else { 'auth_http_url = "' + (Resolve-CandidateAuthHttpUrl -Value $AuthHttpUrl) + "`"`n" }
     $billing = if ($BillingHttpOrigin -ceq '') { '' } else { 'billing_http_origin = "' + (Resolve-CandidateBillingHttpOrigin -Value $BillingHttpOrigin) + "`"`n" }

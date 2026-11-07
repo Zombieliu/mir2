@@ -879,3 +879,38 @@ body::before {
   .hero-art, .hero-content { opacity: 1; transform: translateY(-48%); }
   .hero-content { transform: none; }
 }
+
+/* Keep preparation labels readable in all marketing locales. */
+.primary-nav { gap: clamp(12px, 1.4vw, 22px); }
+.primary-nav .nav-recharge { max-width: 128px; white-space: normal; line-height: 1.5; letter-spacing: .06em; }
+.primary-nav .nav-promotion { max-width: 150px; white-space: normal; line-height: 1.5; letter-spacing: .06em; }
+.nav-promotion > span { flex-shrink: 0; }
+.promotion-page h1, .promotion-page .legal-sections h2, .promotion-page .legal-sections p { overflow-wrap: anywhere; }
+.promotion-page .legal-shell aside { margin-bottom: 30px; border-left: 0; border-inline-start: 2px solid var(--gold); }
+@media (max-width: 640px) {
+  .promotion-page .legal-shell h1 { font-size: clamp(32px, 9vw, 42px); line-height: 1.12; }
+  .promotion-page .header-play { display: none; }
+}
+
+.recharge-page h1 { overflow-wrap: anywhere; }
+.recharge-page .membership-example-grid h2 { margin: 24px 0 12px; font: 400 27px/1.2 Georgia, serif; }
+.recharge-page .usage-table th, .recharge-page .usage-table td { white-space: normal; overflow-wrap: anywhere; }
+.recharge-policy-links { margin-top: 32px; display: flex; flex-wrap: wrap; gap: 18px 28px; font-size: 13px; color: var(--gold); }
+.update-language-note { position: relative; z-index: 1; width: min(1100px, calc(100% - 40px)); margin: 135px auto -125px; padding: 18px 24px; border-inline-start: 2px solid var(--gold); background: #15130d; font-size: 13px; line-height: 1.7; }
+.update-language-note p { margin: 0 0 8px; }
+@media (max-width: 640px) {
+  .recharge-page .membership-hero h1 { font-size: clamp(34px, 10vw, 48px); }
+  .recharge-page .header-play, .legal-page .header-play { display: none; }
+  .update-language-note { margin-top: 100px; margin-bottom: -95px; }
+}
+/* Public business summaries stay static and readable in every writing direction. */
+.operations-disclosure { width: min(1200px, calc(100% - 48px)); margin: 48px auto 96px; padding: clamp(20px, 3vw, 40px); border: 1px solid var(--line, #3d3524); text-align: start; overflow-wrap: anywhere; }
+.operations-disclosure header h2 { font-size: clamp(24px, 3vw, 38px); line-height: 1.3; margin: 0 0 16px; }
+.operations-disclosure header p { margin: 0 0 28px; color: var(--gold, #d9b667); }
+.operations-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 28px; }
+.operations-grid article { min-width: 0; }
+.operations-grid h3 { font-size: 20px; line-height: 1.4; margin: 0 0 12px; }
+.operations-grid p, .operations-notice { line-height: 1.85; font-size: 14px; }
+.operations-notice { margin: 28px 0 18px; opacity: .8; }
+.operations-disclosure nav { display: flex; flex-wrap: wrap; gap: 16px 24px; font-size: 14px; }
+@media (max-width: 680px) { .operations-disclosure { width: calc(100% - 32px); margin-bottom: 64px; } .operations-grid { grid-template-columns: minmax(0, 1fr); gap: 22px; } }

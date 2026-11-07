@@ -295,5 +295,6 @@ fn web_state(config: GatewayConfig) -> WebState {
         ))
         .expect("disabled local AI hub"),
         channel_identity: crate::ChannelIdentityRegistry::in_memory(),
+        companions: None,
     }
 }

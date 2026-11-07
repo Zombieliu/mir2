@@ -227,3 +227,215 @@ fn real_damage_admission_blocks_after_entering_safe_area_then_allows_after_leavi
     assert!(zone.players[&target].hp < 100);
     assert!(admitted.iter().any(|outbound| matches!(outbound, ZoneOutbound::PlayerDamaged { session_id, damage, .. } if session_id == &target && *damage > 0)));
 }
+
+#[test]
+fn manifest_safety_join_uses_closed_geometry_instead_of_supplied_flag() {
+    for (point, expected) in [
+        (Point { x: 278, y: 606 }, true),
+        (Point { x: 298, y: 626 }, true),
+        (Point { x: 299, y: 626 }, false),
+        (Point { x: 298, y: 627 }, false),
+        (Point { x: 292, y: 629 }, false),
+    ] {
+        let mut zone =
+            ZoneRuntime::new_with_collision(ZoneKey::for_map("0"), ZoneCollision::unbounded());
+        let owner = join_player(
+            &mut zone,
+            "owner",
+            101,
+            point.clone(),
+            ZoneChatProfile {
+                in_safe_zone: !expected,
+                ..Default::default()
+            },
+            Default::default(),
+        );
+        assert_eq!(zone.players[&owner].position, point);
+        assert_eq!(zone.players[&owner].chat_profile.in_safe_zone, expected);
+    }
+}
+
+#[test]
+fn manifest_safety_join_uses_actual_occupancy_adjusted_position() {
+    let collision = ZoneCollision::unbounded().with_bounds(ZoneBounds::new(298, 299, 626, 626));
+    let mut zone = ZoneRuntime::new_with_collision(ZoneKey::for_map("0"), collision);
+    join_player(
+        &mut zone,
+        "blocker",
+        101,
+        Point { x: 298, y: 626 },
+        Default::default(),
+        Default::default(),
+    );
+    let owner = join_player(
+        &mut zone,
+        "owner",
+        102,
+        Point { x: 298, y: 626 },
+        ZoneChatProfile {
+            in_safe_zone: true,
+            ..Default::default()
+        },
+        Default::default(),
+    );
+    assert_eq!(zone.players[&owner].position, Point { x: 299, y: 626 });
+    assert!(!zone.players[&owner].chat_profile.in_safe_zone);
+}
+
+#[test]
+fn manifest_safety_rejects_both_stale_profile_directions_and_retains_other_fields() {
+    let mut zone =
+        ZoneRuntime::new_with_collision(ZoneKey::for_map("0"), ZoneCollision::unbounded());
+    let owner = join_player(
+        &mut zone,
+        "owner",
+        101,
+        Point { x: 292, y: 629 },
+        Default::default(),
+        Default::default(),
+    );
+    let output = zone.handle(ZoneCommand::UpdateChatProfile {
+        session_id: owner.clone(),
+        profile: ZoneChatProfile {
+            in_safe_zone: true,
+            free_server_shout: true,
+            group_members: vec!["Friend".into()],
+            pet_mode: 1,
+            ..Default::default()
+        },
+    });
+    assert!(
+        output.is_empty(),
+        "metadata repair must not introduce a world action or ACK"
+    );
+    assert!(!zone.players[&owner].chat_profile.in_safe_zone);
+    assert!(zone.players[&owner].chat_profile.free_server_shout);
+    assert_eq!(zone.players[&owner].chat_profile.group_members, ["Friend"]);
+    assert_eq!(zone.players[&owner].chat_profile.pet_mode, 1);
+    zone.handle(ZoneCommand::SyncPlayerTransform {
+        session_id: owner.clone(),
+        position: Point { x: 288, y: 626 },
+        direction: MirDirection::Up,
+    });
+    zone.handle(ZoneCommand::UpdateChatProfile {
+        session_id: owner.clone(),
+        profile: ZoneChatProfile {
+            in_safe_zone: false,
+            ..Default::default()
+        },
+    });
+    assert!(zone.players[&owner].chat_profile.in_safe_zone);
+    assert!(!zone.players[&owner].chat_profile.free_server_shout);
+}
+
+#[test]
+fn manifest_safety_sync_transform_repairs_changed_and_identical_positions() {
+    let mut zone =
+        ZoneRuntime::new_with_collision(ZoneKey::for_map("0"), ZoneCollision::unbounded());
+    let owner = join_player(
+        &mut zone,
+        "owner",
+        101,
+        Point { x: 288, y: 626 },
+        Default::default(),
+        Default::default(),
+    );
+    zone.handle(ZoneCommand::SyncPlayerTransform {
+        session_id: owner.clone(),
+        position: Point { x: 292, y: 629 },
+        direction: MirDirection::Down,
+    });
+    assert!(!zone.players[&owner].chat_profile.in_safe_zone);
+    // A same-position reconciliation must heal old metadata without resetting movement clocks.
+    zone.players
+        .get_mut(&owner)
+        .unwrap()
+        .chat_profile
+        .in_safe_zone = true;
+    zone.players.get_mut(&owner).unwrap().movement_ready_at_ms = 1234;
+    let output = zone.handle(ZoneCommand::SyncPlayerTransform {
+        session_id: owner.clone(),
+        position: Point { x: 292, y: 629 },
+        direction: MirDirection::Down,
+    });
+    assert!(output.is_empty());
+    assert!(!zone.players[&owner].chat_profile.in_safe_zone);
+    assert_eq!(zone.players[&owner].movement_ready_at_ms, 1234);
+}
+
+#[test]
+fn manifest_safety_queued_walk_cannot_be_reverted_by_delayed_profile() {
+    let mut zone =
+        ZoneRuntime::new_with_collision(ZoneKey::for_map("0"), ZoneCollision::unbounded());
+    let owner = join_player(
+        &mut zone,
+        "owner",
+        101,
+        Point { x: 288, y: 625 },
+        Default::default(),
+        Default::default(),
+    );
+    step(
+        &mut zone,
+        &owner,
+        ZoneMovementActionKind::Walk,
+        MirDirection::Down,
+        1,
+    );
+    assert_eq!(zone.players[&owner].position, Point { x: 288, y: 626 });
+    step(
+        &mut zone,
+        &owner,
+        ZoneMovementActionKind::Walk,
+        MirDirection::Down,
+        2,
+    );
+    assert_eq!(zone.players[&owner].position, Point { x: 288, y: 626 });
+    zone.handle(ZoneCommand::TickPlayerMovement {
+        session_id: owner.clone(),
+        now_ms: 1000,
+    });
+    assert_eq!(zone.players[&owner].position, Point { x: 288, y: 627 });
+    zone.handle(ZoneCommand::UpdateChatProfile {
+        session_id: owner.clone(),
+        profile: ZoneChatProfile {
+            in_safe_zone: true,
+            ..Default::default()
+        },
+    });
+    assert!(!zone.players[&owner].chat_profile.in_safe_zone);
+}
+
+#[test]
+fn manifest_safety_custom_map_profile_and_sync_keep_trusted_semantics() {
+    let mut zone =
+        ZoneRuntime::new_with_collision(ZoneKey::for_map("custom"), ZoneCollision::unbounded());
+    let owner = join_player(
+        &mut zone,
+        "owner",
+        101,
+        Point { x: 10, y: 10 },
+        ZoneChatProfile {
+            in_safe_zone: true,
+            ..Default::default()
+        },
+        Default::default(),
+    );
+    zone.handle(ZoneCommand::SyncPlayerTransform {
+        session_id: owner.clone(),
+        position: Point { x: 20, y: 20 },
+        direction: MirDirection::Down,
+    });
+    assert!(zone.players[&owner].chat_profile.in_safe_zone);
+    zone.handle(ZoneCommand::UpdateChatProfile {
+        session_id: owner.clone(),
+        profile: ZoneChatProfile::default(),
+    });
+    assert!(!zone.players[&owner].chat_profile.in_safe_zone);
+    zone.handle(ZoneCommand::SyncPlayerTransform {
+        session_id: owner.clone(),
+        position: Point { x: 20, y: 20 },
+        direction: MirDirection::Down,
+    });
+    assert!(!zone.players[&owner].chat_profile.in_safe_zone);
+}

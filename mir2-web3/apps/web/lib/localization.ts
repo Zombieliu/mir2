@@ -1,6 +1,10 @@
 import localizationBundle from "./generated/localization_bundle.json";
+import { R16_NATIVE_LANGUAGES, nativeLanguageInfo, nativeSystemText, nativeText, type R16NativeLanguage } from "./r16-native-localization";
+import { browserText } from "./r16-browser-localization";
 
-export type Mir2Language = "en" | "zh-CN" | "es" | "pt-BR";
+// Spanish remains a legacy internal type for older shared hosts and saved QA
+// fixtures. New player choices follow the canonical Windows locale catalog.
+export type Mir2Language = R16NativeLanguage | "es";
 
 type LocalizationTexts = Record<string, string>;
 
@@ -12,11 +16,13 @@ type LocalizationLanguageEntry = {
 
 type LocalizationBundle = {
   defaultLanguage: Mir2Language;
-  languages: Record<Mir2Language, LocalizationLanguageEntry>;
+  languages: Record<string, LocalizationLanguageEntry>;
 };
 
 const bundle = localizationBundle as LocalizationBundle;
 const defaultLanguage = bundle.defaultLanguage;
+// Only finite authored legacy keys are cached, never arbitrary player input.
+const projectedLegacyTexts = new Map<string, string>();
 const runtimeMessageKeyByValue: Record<string, string> = {
   "Runtime not booted": "runtime.notBooted",
   "Bevy runtime entry reached": "runtime.message.runtime-entered",
@@ -24,29 +30,37 @@ const runtimeMessageKeyByValue: Record<string, string> = {
   "Camera ready": "runtime.message.scene-ready",
 };
 
-export const SUPPORTED_LANGUAGES = Object.keys(bundle.languages) as Mir2Language[];
+export const SUPPORTED_LANGUAGES = R16_NATIVE_LANGUAGES;
+
+function supportedLanguage(value: string | null | undefined): R16NativeLanguage | null {
+  const normalized = value?.trim().replaceAll("_", "-").toLowerCase();
+  if (!normalized) return null;
+  if (/^zh-(?:tw|hk|mo|hant)(?:-|$)/.test(normalized)) return "zh-TW";
+  if (normalized === "zh" || /^zh-(?:cn|sg|hans)(?:-|$)/.test(normalized)) return "zh-CN";
+  const base = normalized.split("-")[0];
+  if (base === "pt") return "pt-BR";
+  return SUPPORTED_LANGUAGES.find(code => code.toLowerCase() === normalized || code === base) ?? null;
+}
 
 export function normalizeLanguage(value: string | null | undefined): Mir2Language {
-  if (!value) return defaultLanguage;
-  const normalized = value.toLowerCase();
-  if (normalized === "zh" || normalized === "zh-cn" || normalized === "zh-hans") {
-    return "zh-CN";
-  }
-  if (normalized === "es" || normalized === "es-es") {
-    return "es";
-  }
-  if (normalized === "pt" || normalized === "pt-br" || normalized === "pt-pt") {
-    return "pt-BR";
-  }
-  return SUPPORTED_LANGUAGES.includes(value as Mir2Language) ? (value as Mir2Language) : "en";
+  return supportedLanguage(value) ?? "en";
+}
+
+/** Saved preference wins; first use follows OS/browser languages, like Windows. */
+export function preferredLanguage(saved: string | null, browserLanguages: readonly string[] = []): R16NativeLanguage {
+  return supportedLanguage(saved) ?? browserLanguages.map(supportedLanguage).find(code => code !== null) ?? "en";
 }
 
 export function languageLocale(language: Mir2Language) {
-  return bundle.languages[language]?.locale ?? bundle.languages[defaultLanguage].locale;
+  return nativeLanguageInfo(language)?.locale ?? bundle.languages[language]?.locale ?? "en-US";
 }
 
 export function languageNativeName(language: Mir2Language) {
-  return bundle.languages[language]?.nativeName ?? language;
+  return nativeLanguageInfo(language)?.nativeName ?? bundle.languages[language]?.nativeName ?? language;
+}
+
+export function languageFontFamily(language: Mir2Language) {
+  return `"${nativeLanguageInfo(language)?.fontFamily ?? "Noto Sans"}", sans-serif`;
 }
 
 export function text(
@@ -55,15 +69,32 @@ export function text(
   args: Array<string | number> = [],
   fallback?: string,
 ): string {
-  const languageTexts = bundle.languages[language]?.texts ?? bundle.languages[defaultLanguage].texts;
+  const browser = browserText(language, key);
+  if (browser !== undefined) return formatTemplate(browser, args);
+  const native = nativeText(language, key);
+  if (native !== key) return formatTemplate(native, args);
+  const languageTexts = bundle.languages[language]?.texts;
   const defaultTexts = bundle.languages[defaultLanguage].texts;
-  const template = languageTexts[key] ?? defaultTexts[key] ?? fallback ?? key;
+  // Only known authored system templates enter alias translation. An unknown
+  // key's fallback may be a player's name or other opaque server text.
+  const authored = defaultTexts[key];
+  const cacheKey = `${language}\u0000${key}`;
+  let projected = authored === undefined ? undefined : projectedLegacyTexts.get(cacheKey);
+  if (authored !== undefined && projected === undefined) {
+    projected = nativeSystemText(language, authored);
+    projectedLegacyTexts.set(cacheKey, projected);
+  }
+  const template = projected !== undefined && projected !== authored ? projected
+    : languageTexts?.[key] ?? authored ?? fallback ?? key;
   return formatTemplate(String(template), args);
 }
 
 export function buildTranslator(language: Mir2Language) {
-  return (key: string, args: Array<string | number> = [], fallback?: string) =>
-    text(language, key, args, fallback);
+  const translate = (key: string, args: Array<string | number> = [], fallback?: string) => text(language, key, args, fallback);
+  // Callers opt in only at a known system-content display boundary. This is
+  // deliberately separate from arbitrary fallback, chat and character names.
+  translate.systemText = (value: string, domain: "system" | "npc" = "system") => nativeSystemText(language, value, domain);
+  return translate;
 }
 
 export function formatRuntimePhase(language: Mir2Language, runtimePhase: string) {
@@ -79,8 +110,5 @@ export function formatRuntimeMessage(language: Mir2Language, message: string) {
 }
 
 function formatTemplate(template: string, args: Array<string | number>) {
-  return args.reduce<string>(
-    (value, entry, index) => value.split(`{${index}}`).join(String(entry)),
-    template,
-  );
+  return template.replace(/\{(\d+)\}/g, (placeholder, index: string) => Number(index) < args.length ? String(args[Number(index)]) : placeholder);
 }

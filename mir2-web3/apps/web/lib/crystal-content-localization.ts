@@ -4,6 +4,10 @@ export type ContentTranslateFn = (
   fallback?: string,
 ) => string;
 
+function systemText(t: ContentTranslateFn, value: string): string {
+  return (t as ContentTranslateFn & { systemText?: (text: string) => string }).systemText?.(value) ?? value;
+}
+
 const MAP_KEY_BY_TITLE: Readonly<Record<string, string>> = {
   BichonProvince: "content.map.bichonProvince.name",
 };
@@ -57,17 +61,17 @@ export function localizeCrystalMapTitle(
 ): string | null {
   if (!mapTitle) return null;
   const key = MAP_KEY_BY_TITLE[mapTitle];
-  return key ? t(key, [], mapTitle) : mapTitle;
+  return key ? t(key, [], mapTitle) : systemText(t, mapTitle);
 }
 
 /** Localize canonical NPC/monster labels at the presentation edge only. */
 export function localizeCrystalEntityName(name: string, t: ContentTranslateFn): string {
   const key = ENTITY_KEY_BY_NAME[name];
-  return key ? t(key, [], name) : name;
+  return key ? t(key, [], name) : systemText(t, name);
 }
 
 /** Localize canonical Crystal item names used by structured quest rewards. */
 export function localizeCrystalItemName(name: string, t: ContentTranslateFn): string {
   const key = ITEM_KEY_BY_NAME[name];
-  return key ? t(key, [], name) : name;
+  return key ? t(key, [], name) : systemText(t, name);
 }

@@ -14,7 +14,7 @@ const { developerArticles } = await contentModule("developer-content");
 const { documentationGroups } = await contentModule("documentation-navigation");
 const collections = { guide: guideArticles, developers: developerArticles };
 const routes = Object.entries(collections).flatMap(([area, articles]) => [`/zh-CN/${area}`, ...articles.map(({ slug }) => `/zh-CN/${area}/${slug}`)]);
-const knownLinks = new Set(["download", "play", "support", "status", "updates"]);
+const knownLinks = new Set(["download", "play", "support", "status", "updates", "recharge"]);
 const publicText = JSON.stringify(collections);
 const privateSignals = /[A-Z]:\\|C:\/Users\/|BEGIN (?:RSA |EC )?PRIVATE KEY|sk-proj-[A-Za-z0-9]|NUMERON_INTERNAL_DOCS_EVIDENCE_20261102|GAME-DESIGN-CODEBASE/;
 assert.ok(!privateSignals.test(publicText), "Internal paths, economic proposals or private source material entered public content");
@@ -98,7 +98,8 @@ if (originIndex >= 0) {
     assert.match(response.headers.get("content-type") ?? "", /^image\/jpeg/);
   }
   const gettingStarted = await get("/zh-CN/guide/getting-started");
-  assert.ok(gettingStarted.includes("Windows 测试版本界面参考"));
+  assert.ok(gettingStarted.includes("/zh-CN/guide-media/windows-login-r16.jpg"), "Getting-started guide must retain the Windows login reference image");
+  assert.ok(gettingStarted.includes("内部验证截图 · Crystal 临时素材"), "Reference images must retain the current temporary-artwork disclosure");
   assert.ok(gettingStarted.indexOf('id="first-adventure"') < gettingStarted.indexOf('id="qr-expired"'), "Troubleshooting must follow the four main steps");
   assert.match(gettingStarted, /<details id="qr-expired"[^>]*>/);
   assert.doesNotMatch(gettingStarted, /<details id="qr-expired"[^>]*\bopen(?:=|\s|>)/);

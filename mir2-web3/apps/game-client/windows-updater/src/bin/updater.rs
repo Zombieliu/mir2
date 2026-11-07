@@ -16,6 +16,24 @@ use std::{
     thread,
     time::{Duration, Instant},
 };
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+enum UpdaterMode {
+    Home,
+    CheckOnly,
+    PlayInstalled,
+}
+impl UpdaterMode {
+    fn parse(args: &[String]) -> Result<Self> {
+        match args {
+            [] => Ok(Self::Home),
+            [arg] if arg == "--check-only" => Ok(Self::CheckOnly),
+            [arg] if arg == "--play-installed" => Ok(Self::PlayInstalled),
+            _ => anyhow::bail!("unsupported updater argument"),
+        }
+    }
+}
+
 struct Status {
     window: ui::ProgressWindow,
     locale: String,
@@ -229,7 +247,7 @@ fn launch_selected(root: &std::path::Path, status: &Status) -> Result<()> {
                     }
                     child.wait()?;
                 }
-                if record.health == generation::Health::Pending {
+                if record.health.is_pending() {
                     // The actual child exited before acquiring this lease.
                     // A live game or orphaned child must prevent rollback.
                     let rollback_lease = GameLease::acquire(root)?;
@@ -249,7 +267,7 @@ fn launch_selected(root: &std::path::Path, status: &Status) -> Result<()> {
                     )
                 }));
             }
-            if record.health == generation::Health::Pending {
+            if record.health.is_pending() {
                 generation::accept(root, &record.attempt)?;
             }
             status.window.close();
@@ -284,6 +302,7 @@ fn recover_local(root: &Path) -> Result<()> {
         generation::recover(root)?;
     }
     transaction::recover(root).context("local recovery failed; launch prevented")?;
+    generation::adopt_installed_seed(root)?;
     Ok(())
 }
 fn prepare_home(root: &Path) -> Result<Option<String>> {
@@ -359,10 +378,14 @@ fn background_probe(root: &Path, status: &Status) -> BackgroundProbe {
     }
     BackgroundProbe(stop)
 }
-fn run_installed_attempt(root: &Path, status: &Status) -> Result<()> {
-    let _lock = platform::InstallLock::acquire(root).map_err(anyhow::Error::msg)?;
+fn prepare_installed_launch(root: &Path) -> Result<platform::InstallLock> {
+    let lock = platform::InstallLock::acquire(root).map_err(anyhow::Error::msg)?;
     recover_local(root)?;
     update::verify_installed(root).context("installed game changed; launch prevented")?;
+    Ok(lock)
+}
+fn run_installed_attempt(root: &Path, status: &Status) -> Result<()> {
+    let _lock = prepare_installed_launch(root)?;
     if status.window.cancelled() {
         return Ok(());
     }
@@ -373,12 +396,20 @@ fn run_installed_attempt(root: &Path, status: &Status) -> Result<()> {
         launch_legacy(root, status, transaction::pending_activation(root)?)
     }
 }
-fn run_attempt(root: &Path, args: &[String], status: &Status) -> Result<()> {
-    // --check-only is a packaging/tooling operation, retaining its established
-    // download, activation and pending-health contract without a Home dialog.
-    if !status.interactive {
-        return run_update_attempt(root, args, status);
+fn run_attempt(root: &Path, mode: UpdaterMode, args: &[String], status: &Status) -> Result<()> {
+    match mode {
+        // Explicit installed play takes the same freshly verified local path as
+        // Home's Start action, before Home or its optional network probe exists.
+        // A local failure never falls through to an update or automatic repair.
+        UpdaterMode::PlayInstalled => {
+            status.window.set_stage("verifying", 0);
+            return run_installed_attempt(root, status);
+        }
+        // Preserve the tooling download/activation/pending-health contract.
+        UpdaterMode::CheckOnly => return run_update_attempt(root, args, status),
+        UpdaterMode::Home => {}
     }
+    status.window.set_stage("verifying", 0);
     let version = prepare_home(root)?;
     status.installed_available.set(version.is_some());
     status.window.installed_available(version.is_some());
@@ -616,16 +647,13 @@ fn run() -> Result<()> {
     );
     let root = safe::install_root(scratch.parent().context("installation directory")?)?;
     let args = std::env::args().skip(1).collect::<Vec<_>>();
-    ensure!(
-        args.is_empty() || args == ["--check-only"],
-        "unsupported updater argument"
-    );
+    let mode = UpdaterMode::parse(&args)?;
     loop {
         let locale = mir2_windows_updater::locale();
         let status = Status {
             window: ui::ProgressWindow::spawn(&locale),
             locale,
-            interactive: args.is_empty(),
+            interactive: mode != UpdaterMode::CheckOnly,
             fallback: Cell::new(false),
             retry_requested: Cell::new(false),
             launch_committed: Cell::new(false),
@@ -636,7 +664,7 @@ fn run() -> Result<()> {
             status.window.is_open(),
             "Windows could not open the game launcher window"
         );
-        match run_attempt(&root, &args, &status) {
+        match run_attempt(&root, mode, &args, &status) {
             Ok(()) if status.retry_requested.get() => continue,
             Ok(()) => return Ok(()),
             Err(_) if status.window.cancelled() => return Ok(()),
@@ -669,9 +697,88 @@ fn main() {
     }
 }
 
+#[cfg(test)]
+mod argument_tests {
+    use super::*;
+
+    fn args(values: &[&str]) -> Vec<String> {
+        values.iter().map(|value| (*value).into()).collect()
+    }
+
+    #[test]
+    fn updater_requires_explicit_installed_play_and_preserves_home_and_check() {
+        assert_eq!(UpdaterMode::parse(&[]).unwrap(), UpdaterMode::Home);
+        assert_eq!(
+            UpdaterMode::parse(&args(&["--check-only"])).unwrap(),
+            UpdaterMode::CheckOnly
+        );
+        assert_eq!(
+            UpdaterMode::parse(&args(&["--play-installed"])).unwrap(),
+            UpdaterMode::PlayInstalled
+        );
+    }
+
+    #[test]
+    fn updater_rejects_verify_only_combinations_and_arbitrary_commands() {
+        for input in [
+            vec!["--play-installed", "--check-only"],
+            vec!["--check-only", "--play-installed"],
+            vec!["--play-installed", "--play-installed"],
+            vec!["--verify-only"],
+            vec!["--play-installed=true"],
+            vec!["--unknown"],
+            vec![""],
+            vec!["game.exe"],
+            vec!["--play-installed", "game.exe"],
+        ] {
+            assert!(UpdaterMode::parse(&args(&input)).is_err(), "{input:?}");
+        }
+    }
+}
+
 #[cfg(all(test, windows))]
 mod tests {
     use super::*;
+    #[test]
+    fn explicit_installed_preparation_rejects_unsigned_game_and_releases_locks() {
+        let root = tempfile::tempdir().unwrap();
+        std::fs::create_dir(root.path().join("game")).unwrap();
+        std::fs::write(
+            root.path().join("game/mir2-platform-windows.exe"),
+            b"unsigned",
+        )
+        .unwrap();
+        assert!(prepare_installed_launch(root.path()).is_err());
+        assert!(!root.path().join("updater/active.txt").exists());
+        assert!(!root.path().join("state/active-generation.json").exists());
+        assert!(!root.path().join(".update/transaction.json").exists());
+        let path = root.path().to_owned();
+        let (can_lock, can_lease) = thread::spawn(move || {
+            (
+                platform::InstallLock::acquire(&path).is_ok(),
+                GameLease::acquire(&path).is_ok(),
+            )
+        })
+        .join()
+        .unwrap();
+        assert!(can_lock, "failed installed launch retained InstallLock");
+        assert!(can_lease, "failed installed launch retained GameLease");
+    }
+
+    #[test]
+    fn explicit_installed_preparation_does_not_repair_or_accept_an_invalid_seed() {
+        let root = tempfile::tempdir().unwrap();
+        std::fs::create_dir(root.path().join("updater")).unwrap();
+        let locator = root.path().join("updater/packed-install.json");
+        let invalid = br#"{"schema":"mir2.windows.packed-install.v1","manifestSha256":"invalid"}"#;
+        std::fs::write(&locator, invalid).unwrap();
+        assert!(prepare_installed_launch(root.path()).is_err());
+        assert_eq!(std::fs::read(&locator).unwrap(), invalid);
+        assert!(!root.path().join("state/active-generation.json").exists());
+        assert!(!root.path().join("state/pack-highest.txt").exists());
+        assert!(!root.path().join(".update/transaction.json").exists());
+    }
+
     #[test]
     fn home_preparation_disables_invalid_game_and_releases_its_local_locks() {
         let root = tempfile::tempdir().unwrap();

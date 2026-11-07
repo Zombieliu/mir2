@@ -71,14 +71,23 @@ const NEW_CHARACTER_CLASS_BUTTONS: [spec::CrystalRect; 5] = [
     spec::CrystalRect::new(741.0, 450.0, 44.0, 42.0),
 ];
 // Three labels on the first row, two on the second. The original icon slots
-// remain unchanged; translated class names get enough width in every locale.
+// remain unchanged. Captions occupy separate rows above their controls.
+const LOCALIZED_NEW_CHARACTER_CLASS_LABEL: spec::CrystalRect =
+    spec::CrystalRect::new(497.0, 446.0, 278.0, 18.0);
 const LOCALIZED_NEW_CHARACTER_CLASS_BUTTONS: [spec::CrystalRect; 5] = [
-    spec::CrystalRect::new(497.0, 450.0, 90.0, 30.0),
-    spec::CrystalRect::new(591.0, 450.0, 90.0, 30.0),
-    spec::CrystalRect::new(685.0, 450.0, 90.0, 30.0),
-    spec::CrystalRect::new(497.0, 489.0, 137.0, 30.0),
-    spec::CrystalRect::new(638.0, 489.0, 137.0, 30.0),
+    spec::CrystalRect::new(497.0, 465.0, 90.0, 25.0),
+    spec::CrystalRect::new(591.0, 465.0, 90.0, 25.0),
+    spec::CrystalRect::new(685.0, 465.0, 90.0, 25.0),
+    spec::CrystalRect::new(497.0, 493.0, 137.0, 25.0),
+    spec::CrystalRect::new(638.0, 493.0, 137.0, 25.0),
 ];
+const LOCALIZED_NEW_CHARACTER_GENDER_LABEL: spec::CrystalRect =
+    spec::CrystalRect::new(497.0, 519.0, 278.0, 18.0);
+const LOCALIZED_NEW_CHARACTER_GENDER_BUTTONS: [spec::CrystalRect; 2] = [
+    spec::CrystalRect::new(497.0, 539.0, 137.0, 27.0),
+    spec::CrystalRect::new(638.0, 539.0, 137.0, 27.0),
+];
+const NEW_CHARACTER_NOTICE: spec::CrystalRect = spec::CrystalRect::new(628.0, 610.0, 304.0, 28.0);
 const NEW_CHARACTER_GENDER_BUTTONS: [spec::CrystalRect; 2] = [
     spec::CrystalRect::new(541.0, 497.0, 44.0, 42.0),
     spec::CrystalRect::new(591.0, 497.0, 44.0, 42.0),
@@ -1687,15 +1696,15 @@ fn render_character_create(
             GOLD,
             Justify::Center,
         );
-        for (label, top) in [
-            ("Character Name", 399.0),
-            ("Class", 451.0),
-            ("Gender", 510.0),
+        for (label, rect) in [
+            ("Character Name", spec::CrystalRect::new(497.0, 399.0, 278.0, 19.0)),
+            ("Class", LOCALIZED_NEW_CHARACTER_CLASS_LABEL),
+            ("Gender", LOCALIZED_NEW_CHARACTER_GENDER_LABEL),
         ] {
             spawn_aux_text(
                 parent,
                 label,
-                spec::CrystalRect::new(497.0, top, 278.0, 19.0),
+                rect,
                 12.0,
                 GOLD,
                 Justify::Left,
@@ -1782,7 +1791,7 @@ fn render_character_create(
         if crate::native_i18n::active() {
             spawn_aux_text_button(
                 parent,
-                spec::CrystalRect::new(497.0 + index as f32 * 141.0, 533.0, 137.0, 30.0),
+                LOCALIZED_NEW_CHARACTER_GENDER_BUTTONS[index],
                 GENDERS[index].to_owned(),
                 NativeShellButton::SelectCreateGender(index as u8),
                 true,
@@ -1817,7 +1826,7 @@ fn render_character_create(
             parent,
             &create_notice_message(model, &notice.message),
             notice.kind,
-            spec::CrystalRect::new(628.0, 610.0, 304.0, 28.0),
+            NEW_CHARACTER_NOTICE,
         );
     }
     let create_spec =
@@ -1855,6 +1864,9 @@ fn render_character_create(
 }
 
 fn create_notice_message(model: &NativeShellModel, source: &str) -> String {
+    if let Some(message) = character_creation_rejection_notice(source) {
+        return message;
+    }
     let form = &model.character_create;
     let request = format!(
         "create character requested name={} class={} gender={}",
@@ -1876,6 +1888,18 @@ fn create_notice_message(model: &NativeShellModel, source: &str) -> String {
             ("gender_name", &gender),
         ],
     )
+}
+
+pub(crate) fn character_creation_rejection_notice(source: &str) -> Option<String> {
+    Some(match source {
+        "client.YouCannotMakeMoreCharacters" => native_i18n::format_key(
+            source,
+            "You cannot create more than {0} characters.",
+            &[("0", "4")],
+        ),
+        "client.CharacterNameExists" => native_i18n::key(source, "Character name already exists."),
+        _ => return None,
+    })
 }
 
 fn render_registration(
@@ -3782,6 +3806,16 @@ mod tests {
             .into_iter()
             .chain(NEW_CHARACTER_GENDER_BUTTONS)
             .all(|rect| NEW_CHARACTER_FRAME.contains(rect.left, rect.top)));
+        assert!(LOCALIZED_NEW_CHARACTER_CLASS_BUTTONS.into_iter().all(|rect| {
+            LOCALIZED_NEW_CHARACTER_CLASS_LABEL.top + LOCALIZED_NEW_CHARACTER_CLASS_LABEL.height
+                <= rect.top
+                && rect.top + rect.height <= LOCALIZED_NEW_CHARACTER_GENDER_LABEL.top
+        }));
+        assert!(LOCALIZED_NEW_CHARACTER_GENDER_BUTTONS.into_iter().all(|rect| {
+            LOCALIZED_NEW_CHARACTER_GENDER_LABEL.top + LOCALIZED_NEW_CHARACTER_GENDER_LABEL.height
+                <= rect.top
+                && rect.top + rect.height <= NEW_CHARACTER_CREATE.top
+        }));
         assert_eq!(
             spec::CrystalFrameSpec::new("Prguse", 73, NEW_CHARACTER_FRAME).asset_path(),
             "original-ui/Prguse/73.png"

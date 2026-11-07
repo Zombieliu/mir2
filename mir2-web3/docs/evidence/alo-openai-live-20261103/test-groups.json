@@ -1,0 +1,27 @@
+{
+  "groups": [
+    {
+      "name": "node-full",
+      "passed": 227,
+      "path": "F:/mir2-builds/alo-openai-20261103/checks/live-node-full.txt",
+      "sha256": "2be3189076c076e06583609e9653333a0a84219aa826b7a725a160006eeddb47"
+    },
+    {
+      "name": "fixture-support",
+      "passed": 18,
+      "path": "F:/mir2-builds/alo-openai-20261103/checks/live-fixture-support.txt",
+      "sha256": "4a1fac28d424d5e575b0093bf3c749a2879bb82a03c3ffa3d7fb1e9d8be1aeba"
+    }
+  ],
+  "modelTransportIncludedInFullSuite": {
+    "passed": 9
+  },
+  "helperRustTests": {
+    "passed": 8,
+    "path": "F:/mir2-builds/alo-openai-20261103/checks/live-settings-rust.txt",
+    "sha256": "5788541f9c16848505f5912923c4a829fe8ac811a26d4b24dedbd3b7de531083"
+  },
+  "helperReleaseNegativeChecks": 6,
+  "unchangedNativeAndGatewayChecks": "see prior alo-openai-20261103/test-groups.json",
+  "liveModelCallsAreSeparateFromMockUnitTests": true
+}

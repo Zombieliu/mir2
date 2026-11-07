@@ -63,7 +63,16 @@ class MemoryCache {
     this.matches.push(request);
     if (this.matchError) throw new Error("Cache lookup failed");
     const value = this.entries.get(request.url);
-    return value ? new Response(value.data, { status: value.status ?? 200, headers: value.headers }) : undefined;
+    if (!value) return undefined;
+    const fields = new Headers(value.headers);
+    const range = /^bytes=(\d+)-(\d+)$/.exec(request.headers.get("Range") ?? "");
+    if (range && (value.status ?? 200) === 200 && fields.get("Content-Length") === String(value.data.length)) {
+      const first = Number(range[1]); const last = Number(range[2]);
+      fields.set("Content-Range", `bytes ${first}-${last}/${value.data.length}`);
+      fields.set("Content-Length", String(last - first + 1));
+      return new Response(value.data.subarray(first, last + 1), { status: 206, headers: fields });
+    }
+    return new Response(value.data, { status: value.status ?? 200, headers: fields });
   }
   async put(request, response) {
     this.puts.push({ request, response });
@@ -83,9 +92,10 @@ function context() {
 }
 
 function storage(release, objects, events = []) {
-  const state = { gets: [], reads: [], cancels: [], active: 0, maxActive: 0, arrayBufferCalls: 0, overrides: new Map() };
-  state.get = async (key) => {
+  const state = { gets: [], calls: [], reads: [], bytesRead: 0, cancels: [], active: 0, maxActive: 0, arrayBufferCalls: 0, overrides: new Map() };
+  state.get = async (key, options) => {
     state.gets.push(key);
+    state.calls.push({ key, options });
     events.push(`get:${key}`);
     if (state.getError) throw new Error("R2 read failed");
     const source = objects.get(key);
@@ -95,7 +105,9 @@ function storage(release, objects, events = []) {
     let position = 0;
     let finished = false;
     const finish = () => { if (!finished) { finished = true; state.active -= 1; } };
-    const data = source.actualData ?? source.data;
+    const full = source.actualData ?? source.data;
+    const range = options?.range;
+    const data = range ? source.returnedRangeData ?? full.subarray(range.offset, range.offset + range.length) : full;
     const body = new ReadableStream({
       pull(controller) {
         state.reads.push(key);
@@ -106,6 +118,7 @@ function storage(release, objects, events = []) {
           return;
         }
         const end = Math.min(position + (source.chunkSize ?? 3), data.length);
+        state.bytesRead += end - position;
         controller.enqueue(data.subarray(position, end));
         position = end;
       },
@@ -113,7 +126,9 @@ function storage(release, objects, events = []) {
     }, { highWaterMark: 0 });
     body.tee = () => { throw new Error("Installer parts must not use an unbounded tee"); };
     return {
+      key, version: "native-version-1", httpEtag: `"${source.expected.sha256.slice(0, 32)}"`,
       size: source.expected.bytes,
+      ...(range ? { range: { ...range, suffix: undefined } } : {}),
       customMetadata: { sha256: source.expected.sha256, sourceInstaller: release.sha256 },
       checksums: { sha256: nativeSha(source.expected.sha256) },
       httpMetadata: {}, body,
@@ -151,20 +166,21 @@ test("full installer preserves raw MZ bytes and only caches complete independent
   await f.ctx.settle();
   assert.equal(f.bucket.maxActive, 1);
   assert.equal(f.bucket.arrayBufferCalls, 0);
-  assert.equal(f.cache.entries.size, f.release.parts.length);
+  assert.ok(f.cache.entries.size > 0 && f.cache.entries.size <= f.release.parts.length);
   for (const { request, response } of f.cache.puts) {
     assert.match(request.url, /\/__chunks\/[0-9a-f]{64}\.bin$/);
     assert.notEqual(Number(response.headers.get("Content-Length")), f.release.bytes);
     assert.equal(request.headers.size ?? [...request.headers].length, 0);
   }
   const reads = f.bucket.gets.length;
+  const uncached = f.release.parts.filter((part) => !f.cache.entries.has(`${f.release.publicBase}__chunks/${part.sha256}.bin`)).length;
   const cached = await f.run();
   assert.equal(cached.headers.get("x-mir2-first-chunk-cache"), "HIT");
   assert.deepEqual(Buffer.from(await collect(cached.body)), f.complete);
-  assert.equal(f.bucket.gets.length, reads);
+  assert.equal(f.bucket.gets.length, reads + uncached, "cache fill completion must not gate later parts");
   const firstCache = f.cache.events.findIndex((event) => event.includes("cache-complete:"));
   const secondGet = f.cache.events.indexOf(`get:${f.release.parts[1].key}`);
-  assert.ok(firstCache < secondGet, "the next R2 object must wait for the current cache writer");
+  assert.ok(firstCache >= 0 && secondGet >= 0, "cache completion is observed without making it a next-part prerequisite");
 });
 
 test("a range crossing a part boundary concatenates only the requested original bytes", async () => {
@@ -178,6 +194,11 @@ test("a range crossing a part boundary concatenates only the requested original 
   await f.ctx.settle();
   assert.deepEqual(f.bucket.gets, f.release.parts.slice(0, 2).map((part) => part.key));
   assert.equal(f.bucket.maxActive, 1);
+  assert.equal(f.bucket.bytesRead, 5, "only the requested R2 bytes are read, with no whole-part drain");
+  assert.deepEqual(f.bucket.calls.map(({ options }) => options.range), [
+    { offset: boundary - 2, length: 2 }, { offset: 0, length: 3 },
+  ]);
+  assert.equal(f.cache.puts.length, 0, "partial R2 bodies must never be published as complete cache entries");
 });
 
 test("suffix, open-ended and oversized end ranges follow single-byte-range semantics", async () => {
@@ -283,10 +304,10 @@ test("malformed manifest identities, gaps, overlaps, duplicate companions and ov
 });
 
 test("native SHA, custom SHA, source installer, size, encoding and whole-object shape all fail closed", async () => {
-  for (const target of ["part", "companion"]) {
-    for (const kind of ["size", "missing-native", "string-native", "wrong-native", "short-native", "custom-sha", "source", "gzip", "partial"]) {
+  for (const target of ["part", "partial", "companion"]) {
+    for (const kind of ["size", "missing-native", "string-native", "wrong-native", "short-native", "custom-sha", "source", "gzip", "partial", "key", "version", "etag"]) {
       const f = setup();
-      const expected = target === "part" ? f.release.parts[0] : f.release.files[0];
+      const expected = target !== "companion" ? f.release.parts[0] : f.release.files[0];
       const invalid = {
         size: { size: expected.bytes + 1 }, "missing-native": { checksums: {} },
         "string-native": { checksums: { sha256: expected.sha256 } },
@@ -295,9 +316,10 @@ test("native SHA, custom SHA, source installer, size, encoding and whole-object 
         "custom-sha": { customMetadata: { sha256: "0".repeat(64), sourceInstaller: f.release.sha256 } },
         source: { customMetadata: { sha256: expected.sha256, sourceInstaller: "0".repeat(64) } },
         gzip: { httpMetadata: { contentEncoding: "gzip" } }, partial: { range: { offset: 0, length: expected.bytes } },
+        key: { key: "private/another-object" }, version: { version: "" }, etag: { httpEtag: 'W/"weak"' },
       }[kind];
       f.bucket.overrides.set(expected.key, invalid);
-      const response = await f.run({}, "GET", target === "part" ? "Mir2Setup.exe" : expected.name);
+      const response = await f.run(target === "partial" ? { Range: "bytes=0-1" } : {}, "GET", target !== "companion" ? "Mir2Setup.exe" : expected.name);
       assert.equal(response.status, 503, `${target}/${kind}`);
       assert.equal(f.bucket.reads.length, 0);
       assert.equal(f.bucket.cancels.length, 1);
@@ -431,24 +453,26 @@ test("missing later parts error the response stream instead of returning a succe
   assert.equal(f.bucket.gets.length, 2);
 });
 
-test("cache failures propagate, cancel the source and do not become unhandled background rejections", async () => {
+test("cache write failures cannot block or fail authenticated HTTP bytes and stay observed", async () => {
   const f = setup();
   f.cache.putError = true;
   const response = await f.run();
-  if (response.status === 200) await assert.rejects(collect(response.body), /Cache write failed/);
-  else assert.equal(response.status, 503);
+  assert.equal(response.status, 200);
+  assert.deepEqual(Buffer.from(await collect(response.body)), f.complete);
   await f.ctx.settle();
   await turn();
-  assert.equal(f.bucket.gets.length, 1);
-  assert.equal(f.bucket.cancels.length, 1);
+  assert.equal(f.bucket.gets.length, f.release.parts.length);
+  assert.equal(f.bucket.cancels.length, 0);
   assert.equal(f.cache.entries.size, 0);
   const small = setup();
   small.cache.putError = true;
-  assert.equal((await small.run({}, "GET", small.release.files[0].name)).status, 503);
+  const companion = await small.run({}, "GET", small.release.files[0].name);
+  assert.equal(companion.status, 200);
+  assert.deepEqual(await collect(companion.body), small.objects.get(small.release.files[0].key).data);
   await small.ctx.settle();
 });
 
-test("a cache write rejected after consuming data errors the client stream and cancels R2", async () => {
+test("a cache write rejected after consuming data is abandoned without cancelling R2", async () => {
   const f = setup();
   f.cache.put = async (_request, response) => {
     const reader = response.body.getReader();
@@ -456,14 +480,14 @@ test("a cache write rejected after consuming data errors the client stream and c
     throw new Error("Cache stopped during ingestion");
   };
   const response = await f.run();
-  if (response.status === 200) await assert.rejects(collect(response.body), /Cache stopped during ingestion/);
-  else assert.equal(response.status, 503);
+  assert.equal(response.status, 200);
+  assert.deepEqual(Buffer.from(await collect(response.body)), f.complete);
   await f.ctx.settle();
-  assert.equal(f.bucket.cancels.length, 1);
-  assert.equal(f.bucket.gets.length, 1);
+  assert.equal(f.bucket.cancels.length, 0);
+  assert.equal(f.bucket.gets.length, f.release.parts.length);
 });
 
-test("a 1,026,815,762-byte manifest stays lazy, bounded by the current chunk and client/cache backpressure", async () => {
+test("a 1,026,815,762-byte manifest stays lazy and client-driven while the cache is stalled", async () => {
   const f = fixture();
   const limit = 64 * 1024 * 1024;
   f.release.bytes = 1_026_815_762;
@@ -477,7 +501,8 @@ test("a 1,026,815,762-byte manifest stays lazy, bounded by the current chunk and
   const bucket = { async get(key) {
     gets.push(key);
     const part = f.release.parts.find((part) => part.key === key);
-    return { size: part.bytes, checksums: { sha256: nativeSha(part.sha256) },
+    return { key, version: "virtual-native-version", httpEtag: `"${part.sha256.slice(0, 32)}"`,
+      size: part.bytes, checksums: { sha256: nativeSha(part.sha256) },
       customMetadata: { sha256: part.sha256, sourceInstaller: f.release.sha256 }, httpMetadata: {},
       arrayBuffer() { throw new Error("buffering a large R2 object is forbidden"); },
       body: new ReadableStream({
@@ -503,14 +528,14 @@ test("a 1,026,815,762-byte manifest stays lazy, bounded by the current chunk and
   const reader = response.body.getReader();
   const first = reader.read();
   await turn();
-  assert.equal(reads, 1, "blocked cache consumption must backpressure the R2 reader");
-  releaseCache();
+  assert.equal(reads, 1, "the client alone backpressures R2; a blocked cache cannot delay its chunk");
   const chunk = await first;
   assert.equal(chunk.value.length, 64 * 1024);
   assert.deepEqual([...chunk.value.subarray(0, 2)], [0x4d, 0x5a]);
   await turn();
   assert.equal(reads, 1, "a stalled client must backpressure the source even when cache is faster");
   await reader.cancel("bounded streaming proved");
+  releaseCache();
   await ctx.settle();
   assert.equal(cancelled, 1);
   assert.equal(gets.length, 1);
@@ -560,14 +585,14 @@ test("Workers FixedLengthStream is used for both HTTP length and each full-part 
     assert.deepEqual(Buffer.from(await collect(response.body)), f.complete);
     await f.ctx.settle();
     assert.ok(constructed.includes(f.release.bytes));
-    for (const part of f.release.parts) assert.ok(constructed.includes(part.bytes));
+    for (const { response } of f.cache.puts) assert.ok(constructed.includes(Number(response.headers.get("Content-Length"))));
 
     const short = setup();
     const partial = await short.run({ Range: "bytes=0-1" });
     assert.equal(Buffer.from(await collect(partial.body)).toString(), "MZ");
     await short.ctx.settle();
     assert.ok(constructed.includes(2));
-    assert.equal(short.cache.entries.size, 1);
+    assert.equal(short.cache.entries.size, 0, "a two-byte response does not drain/cache its full R2 part");
 
     const cancelled = setup();
     const reader = (await cancelled.run()).body.getReader();
@@ -579,5 +604,125 @@ test("Workers FixedLengthStream is used for both HTTP length and each full-part 
   } finally {
     if (previous === undefined) delete globalThis.FixedLengthStream;
     else globalThis.FixedLengthStream = previous;
+  }
+});
+
+test("a stalled cache is dropped at its bounded queue while the complete response and later part keep moving", async () => {
+  const input = fixture();
+  const data = [new Uint8Array(3 * 1024 * 1024).fill(0x5a), bytes("second-part")];
+  input.complete = Buffer.concat(data);
+  input.release.bytes = input.complete.length;
+  input.release.sha256 = sha(input.complete);
+  input.release.sourceInstaller = input.release.sha256;
+  input.release.publicBase = `https://assets.mir2.obelisk.build/client-updates/installers/${input.release.sha256}/`;
+  let offset = 0;
+  input.release.parts = data.map((raw, index) => {
+    const part = { offset, bytes: raw.length, sha256: sha(raw), key: `private/bounded-${index}.bin` };
+    offset += raw.length;
+    input.objects.set(part.key, { data: raw, expected: part, chunkSize: 65536 });
+    return part;
+  });
+  const f = setup(input);
+  let releaseCache;
+  f.cache.gate = new Promise((resolve) => { releaseCache = resolve; });
+  let alarm;
+  try {
+    const response = await f.run();
+    const received = await Promise.race([
+      collect(response.body),
+      new Promise((_resolve, reject) => { alarm = setTimeout(() => reject(new Error("slow cache blocked HTTP")), 1500); }),
+    ]);
+    assert.deepEqual(Buffer.from(received), input.complete);
+    assert.equal(f.bucket.bytesRead, input.complete.length);
+    assert.deepEqual(f.bucket.gets, input.release.parts.map((part) => part.key));
+    assert.equal(f.cache.entries.size, 0, "cache cannot publish before it has consumed the complete authenticated part");
+    assert.equal(f.cache.puts.length, 1, "a stalled abandoned fill retains its only slot; later parts never accumulate fills");
+  } finally { clearTimeout(alarm); releaseCache(); await f.ctx.settle(); }
+  assert.ok(!f.cache.entries.has(`${input.release.publicBase}__chunks/${input.release.parts[0].sha256}.bin`),
+    "the overflowing cache queue must be aborted, never buffered to the full part");
+});
+
+test("an 8 MiB request from a 64 MiB native object reads exactly 8 MiB and stores no partial cache entry", async () => {
+  const { release } = fixture();
+  const chunk = new Uint8Array(65536).fill(0x36);
+  const wholeHash = createHash("sha256");
+  for (let i = 0; i < 1024; i += 1) wholeHash.update(chunk);
+  const digest = wholeHash.digest("hex");
+  release.bytes = 64 * 1024 * 1024;
+  release.sha256 = release.sourceInstaller = digest;
+  release.publicBase = `https://assets.mir2.obelisk.build/client-updates/installers/${digest}/`;
+  release.parts = [{ offset: 0, bytes: release.bytes, sha256: digest, key: "private/native-64m.bin" }];
+  const first = 8 * 1024 * 1024; const length = 8 * 1024 * 1024;
+  let readBytes = 0; let cancels = 0;
+  const calls = [];
+  const bucket = { async get(key, options) {
+    calls.push({ key, options });
+    assert.deepEqual(options, { range: { offset: first, length } });
+    let position = 0;
+    return { key, version: "immutable-native-upload", httpEtag: '"native-etag"', size: release.bytes,
+      checksums: { sha256: nativeSha(digest) }, customMetadata: { sha256: digest, sourceInstaller: digest },
+      range: { offset: first, length, suffix: undefined }, httpMetadata: {},
+      body: new ReadableStream({ pull(controller) {
+        if (position === length) { controller.close(); return; }
+        position += chunk.length; readBytes += chunk.length; controller.enqueue(chunk);
+      }, cancel() { cancels += 1; } }, { highWaterMark: 0 }),
+    };
+  } };
+  const cache = new MemoryCache(); const ctx = context();
+  const response = await createDownloadHandler(release)(new Request(release.publicBase + "Mir2Setup.exe", {
+    headers: { Range: `bytes=${first}-${first + length - 1}`, "If-Range": `"${digest}"` },
+  }), { MIR2_ASSETS: bucket }, ctx, cache);
+  assert.equal(response.status, 206);
+  assert.equal(response.headers.get("Content-Length"), String(length));
+  assert.equal((await collect(response.body)).length, length);
+  await ctx.settle();
+  assert.equal(readBytes, length); assert.equal(calls.length, 1); assert.equal(cancels, 0);
+  assert.equal(cache.puts.length, 0);
+});
+
+test("range metadata shape is exact, including the real optional undefined suffix, and missing checksum is never admitted", async () => {
+  for (const invalid of [
+    { offset: 1, length: 2 }, { offset: 0, length: 3 }, { offset: 0, length: 2, suffix: null },
+    { offset: 0, length: 2, suffix: 2 }, { offset: 0, length: 2, extra: undefined },
+  ]) {
+    const f = setup(); f.bucket.overrides.set(f.release.parts[0].key, { range: invalid });
+    assert.equal((await f.run({ Range: "bytes=0-1" })).status, 503);
+    assert.equal(f.bucket.bytesRead, 0); assert.equal(f.bucket.cancels.length, 1);
+  }
+  const f = setup();
+  const response = await f.run({ Range: "bytes=0-1" });
+  assert.equal(response.status, 206); assert.equal(Buffer.from(await collect(response.body)).toString(), "MZ");
+  assert.equal(f.bucket.bytesRead, 2);
+});
+
+test("partial cached hits use native Cache API Range slicing and reject a full response or changed slice metadata", async () => {
+  for (const corrupt of [false, "full-response", "range", "etag"]) {
+    const f = setup(); await collect((await f.run()).body); await f.ctx.settle();
+    const getCount = f.bucket.gets.length;
+    const original = f.cache.match.bind(f.cache);
+    f.cache.match = async (request) => {
+      const result = await original(request);
+      if (result && request.headers.has("Range")) {
+        if (corrupt === "full-response") return new Response(result.body, { status: 200, headers: result.headers });
+        if (corrupt === "range") result.headers.set("Content-Range", "bytes 0-1/999");
+        if (corrupt === "etag") result.headers.set("ETag", '"other"');
+      }
+      return result;
+    };
+    const response = await f.run({ Range: "bytes=0-1" });
+    assert.equal(response.status, corrupt ? 503 : 206);
+    if (!corrupt) assert.equal(Buffer.from(await collect(response.body)).toString(), "MZ");
+    assert.equal(f.bucket.gets.length, getCount);
+  }
+});
+
+test("short and extra ranged bodies fail the stream contract without draining the rest of a full part", async () => {
+  for (const data of [bytes("M"), bytes("MZextra")]) {
+    const f = setup(); f.objects.get(f.release.parts[0].key).returnedRangeData = data;
+    const response = await f.run({ Range: "bytes=0-1" });
+    assert.equal(response.status, 206);
+    await assert.rejects(collect(response.body), /Installer chunk (length mismatch|exceeds its size)/);
+    await f.ctx.settle();
+    assert.equal(f.bucket.gets.length, 1); assert.equal(f.cache.puts.length, 0);
   }
 });

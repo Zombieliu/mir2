@@ -928,6 +928,9 @@ pub enum NativeGatewayEvent {
     CharacterCreated {
         character: CharacterSummary,
     },
+    CharacterCreationRejected {
+        result: u8,
+    },
     CharacterDeleted {
         character_index: i32,
     },
@@ -1475,6 +1478,26 @@ impl NativeShellModel {
                 self.screen = NativeShellScreen::CharacterSelect;
                 true
             }
+            (
+                NativeShellScreen::CharacterCreate | NativeShellScreen::CharacterSelect,
+                NativeGatewayEvent::CharacterCreationRejected { result },
+            ) if self.create_character_request_in_flight => {
+                self.create_character_request_in_flight = false;
+                match result {
+                    4 => {
+                        self.character_create.reset();
+                        self.screen = NativeShellScreen::CharacterSelect;
+                        self.set_error("client.YouCannotMakeMoreCharacters");
+                    }
+                    5 => {
+                        self.character_create.focus = CharacterCreateFocus::Name;
+                        self.set_error("client.CharacterNameExists");
+                    }
+                    _ => self.set_error("character creation failed"),
+                }
+                true
+            }
+            (_, NativeGatewayEvent::CharacterCreationRejected { .. }) => false,
             (screen, NativeGatewayEvent::CharacterDeleted { character_index }) => match screen {
                 NativeShellScreen::CharacterSelect
                 | NativeShellScreen::CharacterCreate
@@ -2385,6 +2408,30 @@ mod tests {
         assert!(model.apply_ui_intent(NativeUiIntent::CancelCharacterCreate));
         assert_eq!(model.screen, NativeShellScreen::CharacterSelect);
         assert!(model.character_create.name.is_empty());
+    }
+
+    #[test]
+    fn character_create_rejection_resolves_only_a_pending_request() {
+        let mut model = NativeShellModel::default();
+        model.screen = NativeShellScreen::CharacterSelect;
+        assert!(model.apply_ui_intent(NativeUiIntent::OpenCharacterCreate));
+        model.character_create.name = "OriginalDraft".to_owned();
+        model.character_create.focus = CharacterCreateFocus::CreateButton;
+        let taken = NativeGatewayEvent::CharacterCreationRejected { result: 5 };
+        assert!(!model.apply_gateway_event(taken.clone()));
+        model.create_character_request_in_flight = true;
+        assert!(model.apply_gateway_event(taken));
+        assert!(!model.create_character_request_in_flight);
+        assert_eq!(model.screen, NativeShellScreen::CharacterCreate);
+        assert_eq!(model.character_create.name, "OriginalDraft");
+        assert_eq!(model.character_create.focus, CharacterCreateFocus::Name);
+        assert_eq!(model.notice.as_ref().unwrap().message, "client.CharacterNameExists");
+
+        model.create_character_request_in_flight = true;
+        assert!(model.apply_gateway_event(NativeGatewayEvent::CharacterCreationRejected { result: 4 }));
+        assert!(!model.create_character_request_in_flight);
+        assert_eq!(model.screen, NativeShellScreen::CharacterSelect);
+        assert_eq!(model.notice.as_ref().unwrap().message, "client.YouCannotMakeMoreCharacters");
     }
 
     #[test]

@@ -13,6 +13,18 @@ use crate::runtime::{NpcPurchaseProducer, NpcPurchaseReceipt, NpcPurchaseRequest
 
 pub const NPC_PURCHASE_OWNER_PROTOCOL_VERSION: u16 = 1;
 
+/// Host-only scope for the first companion supply order. This is not a client
+/// quote or a portable role preference; the trusted host binds it to an already
+/// reserved original operation before dispatching PurchaseBounded.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct NpcPurchaseGoldLimit {
+    pub max_gold: u32,
+    pub max_count: u16,
+    pub item_template_index: i32,
+    pub npc_index: i32,
+}
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
 #[serde(
     tag = "kind",
@@ -22,9 +34,20 @@ pub const NPC_PURCHASE_OWNER_PROTOCOL_VERSION: u16 = 1;
 )]
 pub enum NpcPurchaseOwnerAction {
     Begin,
-    Quote { request: NpcPurchaseRequest },
-    Query { operation: NpcPurchaseOperation },
-    Purchase { operation: NpcPurchaseOperation },
+    Quote {
+        request: NpcPurchaseRequest,
+    },
+    Query {
+        operation: NpcPurchaseOperation,
+    },
+    Purchase {
+        operation: NpcPurchaseOperation,
+    },
+    /// Internal action only: deliberately absent from StrictOwnerAction below.
+    PurchaseBounded {
+        operation: NpcPurchaseOperation,
+        limit: NpcPurchaseGoldLimit,
+    },
 }
 
 // Serde's internally tagged unit variant can discard extra fields. Decode
@@ -56,15 +79,20 @@ impl<'de> Deserialize<'de> for NpcPurchaseOwnerAction {
 }
 
 impl NpcPurchaseOwnerAction {
+    pub fn is_purchase(&self) -> bool {
+        matches!(self, Self::Purchase { .. } | Self::PurchaseBounded { .. })
+    }
     /// Mutations require a single attempt on the selected authenticated owner.
     pub fn is_mutation(&self) -> bool {
-        matches!(self, Self::Begin | Self::Purchase { .. })
+        matches!(self, Self::Begin) || self.is_purchase()
     }
 
     /// Returns the unchanged original identity, including its request scope.
     pub fn operation(&self) -> Option<NpcPurchaseOperation> {
         match self {
-            Self::Query { operation } | Self::Purchase { operation } => Some(*operation),
+            Self::Query { operation }
+            | Self::Purchase { operation }
+            | Self::PurchaseBounded { operation, .. } => Some(*operation),
             Self::Begin | Self::Quote { .. } => None,
         }
     }

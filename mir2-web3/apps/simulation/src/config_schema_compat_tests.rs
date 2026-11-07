@@ -65,6 +65,7 @@ fn paid_ledger() -> BillingLedger {
     let id = format!("rch_{}", "a".repeat(64));
     let order = RechargeOrder {
         id: id.clone(),
+        provider: Default::default(),
         request_id: "legacy-paid-order".into(),
         character_index: 0,
         offer: RechargeOffer {
@@ -76,6 +77,7 @@ fn paid_ledger() -> BillingLedger {
         },
         created_at_ms: 1,
         livemode: false,
+        provider_request_started_at_ms: None,
         checkout_session_id: Some("cs_legacy".into()),
         payment_intent_id: Some("pi_legacy".into()),
         state: RechargeOrderState::PaidPending,

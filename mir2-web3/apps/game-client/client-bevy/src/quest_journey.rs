@@ -561,44 +561,59 @@ impl NewcomerGraduationCatalog {
             return None;
         }
         let class = case_insensitive_value(&self.classes, player.class_name.as_deref())?;
+        let challenge_summary = if crate::native_i18n::active() {
+            let map_name = mir2_game_data::crystal_map_respawns_ref(&self.challenge.map_file_name)
+                .map(|map| {
+                    crate::native_i18n::key(
+                        &format!("content.map.{}.name", map.map_index),
+                        &self.challenge.map_title,
+                    )
+                })
+                .unwrap_or_else(|| localized(&self.challenge.map_title));
+            crate::player_text::format_named(
+                "quest.feedback.83",
+                "{difficulty} difficulty · {map}",
+                &[
+                    ("difficulty", &localized(&self.challenge.difficulty)),
+                    ("map", &map_name),
+                ],
+            )
+        } else {
+            format!(
+                "{} difficulty · {}",
+                self.challenge.difficulty, self.challenge.map_title
+            )
+        };
         Some(GraduationView {
-            title: self.title.clone(),
+            title: localized(&self.title),
             options: vec![
                 GraduationOption {
                     direction: GraduationDirection::Equipment,
-                    title: class.equipment.title.clone(),
+                    title: crate::native_i18n::key(
+                        &format!("content.item.{}.name", class.equipment.item_index),
+                        &class.equipment.title,
+                    ),
                     summary: format!(
                         "{} {}",
                         localized(&class.equipment.requirements),
                         localized("Equipment target.")
                     ),
-                    instruction: class.equipment.normal_acquisition.clone(),
+                    instruction: localized(&class.equipment.normal_acquisition),
                 },
                 GraduationOption {
                     direction: GraduationDirection::Skill,
-                    title: class.skill.title.clone(),
+                    title: localized(&class.skill.title),
                     summary: format!(
                         "{} {}",
                         localized(&class.skill.requirements),
                         localized("Next skill goal.")
                     ),
-                    instruction: class.skill.normal_acquisition.clone(),
+                    instruction: localized(&class.skill.normal_acquisition),
                 },
                 GraduationOption {
                     direction: GraduationDirection::Challenge,
-                    title: self.challenge.title.clone(),
-                    summary: if crate::native_i18n::active() {
-                        crate::player_text::text(&format!(
-                            "{} difficulty · {}",
-                            localized(&self.challenge.difficulty),
-                            localized(&self.challenge.map_title)
-                        ))
-                    } else {
-                        format!(
-                            "{} difficulty · {}",
-                            self.challenge.difficulty, self.challenge.map_title
-                        )
-                    },
+                    title: localized(&self.challenge.title),
+                    summary: challenge_summary,
                     instruction: format!(
                         "{} {}",
                         localized(&self.challenge.normal_travel),
@@ -659,7 +674,17 @@ pub struct JourneyView {
 impl JourneyView {
     pub fn progress_label(&self) -> String {
         match (self.completed_count, self.quest_count) {
+            (Some(completed), Some(total)) if crate::native_i18n::active() => {
+                crate::native_i18n::format_key(
+                    "quest.chapter.progress",
+                    "Chapter {progress}",
+                    &[("progress", &format!("{completed}/{total}"))],
+                )
+            }
             (Some(completed), Some(total)) => format!("Chapter {completed}/{total}"),
+            _ if crate::native_i18n::active() => {
+                crate::native_i18n::key("quest.chapter.syncing", "Chapter progress syncing")
+            }
             _ => "Chapter progress syncing".to_owned(),
         }
     }
@@ -686,9 +711,10 @@ impl JourneyStep {
         max_objective_groups: usize,
     ) -> Self {
         let (action, location) = match quest.status {
-            QuestStatus::ReadyToTurnIn if route.is_some_and(|route| route.finish_in_diary) => {
-                ("Open Quest Diary to finish".to_owned(), None)
-            }
+            QuestStatus::ReadyToTurnIn if route.is_some_and(|route| route.finish_in_diary) => (
+                crate::native_i18n::key("quest.feedback.76", "Open Quest Diary to finish"),
+                None,
+            ),
             QuestStatus::ReadyToTurnIn => npc_action(
                 "Return to",
                 quest.npc_name.as_deref(),
@@ -696,9 +722,10 @@ impl JourneyStep {
                 "Turn in this quest",
             ),
             QuestStatus::InProgress => ("Continue this quest".to_owned(), None),
-            QuestStatus::NotStarted if route.is_some_and(|route| route.start_in_diary) => {
-                ("Open Quest Diary to accept".to_owned(), None)
-            }
+            QuestStatus::NotStarted if route.is_some_and(|route| route.start_in_diary) => (
+                crate::native_i18n::key("quest.feedback.79", "Open Quest Diary to accept"),
+                None,
+            ),
             QuestStatus::NotStarted => npc_action(
                 "Talk to",
                 quest.npc_name.as_deref(),
@@ -757,11 +784,25 @@ fn npc_action(
     location: Option<&JourneyNpcLocation>,
     fallback: &str,
 ) -> (String, Option<String>) {
+    let action = |name: &str| {
+        if !crate::native_i18n::active() {
+            return format!("{verb} {name}");
+        }
+        let key = match verb {
+            "Talk to" => "quest.action.talk",
+            "Return to" => "quest.action.return",
+            "Report to" => "quest.action.report",
+            _ => return localized(&format!("{verb} {name}")),
+        };
+        crate::player_text::format_named(
+            key,
+            &format!("{verb} {{name}}"),
+            &[("name", &crate::player_text::name(name))],
+        )
+    };
     let Some(location) = location else {
         return (
-            live_name
-                .map(|name| format!("{verb} {name}"))
-                .unwrap_or_else(|| fallback.to_owned()),
+            live_name.map(action).unwrap_or_else(|| fallback.to_owned()),
             None,
         );
     };
@@ -772,7 +813,7 @@ fn npc_action(
         location.map_name.as_str()
     };
     (
-        localized(&format!("{verb} {name}")),
+        action(name),
         Some(format!(
             "{} ({},{})",
             localized(map),

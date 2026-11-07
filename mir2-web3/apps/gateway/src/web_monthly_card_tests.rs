@@ -179,6 +179,7 @@ mod monthly_card_tests {
             )
             .unwrap(),
             channel_identity: crate::ChannelIdentityRegistry::in_memory(),
+            companions: None,
         };
         let app = axum::Router::new()
             .route("/ws", axum::routing::get(super::super::ws_upgrade))

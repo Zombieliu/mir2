@@ -1,7 +1,8 @@
 //! Authenticated billing seams. Gameplay never waits for the Stripe network.
 use super::*;
 use crate::stripe_billing::StripeBilling;
-use mir2_simulation::billing::RechargeOrderState;
+use crate::fiat_billing::FiatBilling;
+use mir2_simulation::billing::{FiatPaymentProvider, RechargeOrderState};
 use mir2_simulation::monthly_card::monthly_card_now_ms;
 #[path = "web_sui_usdc.rs"]
 mod sui_usdc;
@@ -9,12 +10,18 @@ mod sui_usdc;
 #[derive(Debug, Clone, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub(super) struct StatusRequest {
+    #[serde(default)]
+    pub include_payment_providers: bool,
     pub character_index: i32,
     pub request_id: u64,
 }
 #[derive(Debug, Clone, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub(super) struct CheckoutRequest {
+    #[serde(default)]
+    pub include_payment_providers: bool,
+    #[serde(default)]
+    pub provider: FiatPaymentProvider,
     pub character_index: i32,
     pub request_id: u64,
     pub order_request_id: String,
@@ -23,6 +30,8 @@ pub(super) struct CheckoutRequest {
 #[derive(Debug, Clone, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub(super) struct BuyRequest {
+    #[serde(default)]
+    pub include_payment_providers: bool,
     pub character_index: i32,
     pub request_id: u64,
     pub order_request_id: String,
@@ -30,6 +39,8 @@ pub(super) struct BuyRequest {
 #[derive(Debug, Clone, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub(super) struct ActivateRequest {
+    #[serde(default)]
+    pub include_payment_providers: bool,
     pub character_index: i32,
     pub request_id: u64,
     pub item_unique_id: String,
@@ -43,6 +54,14 @@ pub(super) enum Request {
     Activate(ActivateRequest),
 }
 impl Request {
+    fn include_payment_providers(&self) -> bool {
+        match self {
+            Self::Status(r) => r.include_payment_providers,
+            Self::Checkout(r) | Self::UsdcCheckout(r) => r.include_payment_providers,
+            Self::Buy(r) => r.include_payment_providers,
+            Self::Activate(r) => r.include_payment_providers,
+        }
+    }
     fn character(&self) -> i32 {
         match self {
             Self::Status(r) => r.character_index,
@@ -187,6 +206,7 @@ fn status_value(
     account: &str,
     character: i32,
     provider: Option<&StripeBilling>,
+    include_payment_providers: bool,
 ) -> Result<Value, String> {
     if let Some(provider) = provider {
         provider.validate_store(config)?;
@@ -202,7 +222,11 @@ fn status_value(
         .into_iter()
         .rev()
         .take(20)
-        .map(|order| json!({"id":order.id,"state":order.state}))
+        .map(|order| {
+            let mut value = json!({"id":order.id,"state":order.state});
+            if include_payment_providers { value["provider"] = json!(order.provider); }
+            value
+        })
         .collect::<Vec<_>>();
     let usdc = crate::sui_usdc_billing::UsdcBilling::from_env()?;
     if let Some(p) = &usdc {
@@ -216,8 +240,9 @@ fn status_value(
         .take(20)
         .map(crate::sui_usdc_billing::public_order)
         .collect::<Vec<_>>();
-    Ok(
-        json!({"enabled":provider.is_some()||usdc_enabled||config.billing_monthly_card_credit_price.is_some(),
+    let payment_providers = crate::fiat_billing::public_payment_providers(config, provider)?;
+    let mut value =
+        json!({"enabled":!payment_providers.is_empty()||usdc_enabled||config.billing_monthly_card_credit_price.is_some(),
         "checkoutEnabled":provider.is_some(),"credit":credit,"pendingCredit":pending,
         "offers":provider.map(StripeBilling::public_offers).unwrap_or_default(),
         "suiUsdcEnabled":usdc_enabled,
@@ -226,8 +251,10 @@ fn status_value(
         "suiUsdcOrders":usdc_orders,
         "monthlyCardCreditPrice":config.billing_monthly_card_credit_price,
         "ownedMonthlyCards":cards,"orders":orders,
-        "monthlyCard":config.refresh_monthly_card_status(account,monthly_card_now_ms())?}),
-    )
+        "monthlyCard":config.refresh_monthly_card_status(account,monthly_card_now_ms())?});
+    // Shipped clients deny unknown status/order fields. Registry is negotiated.
+    if include_payment_providers { value["paymentProviders"] = json!(payment_providers); }
+    Ok(value)
 }
 fn verified_account(
     identity: &IdentityService,
@@ -323,6 +350,7 @@ pub(super) async fn socket_action(
         }
     };
     let config = session.monthly_card_config()?.clone();
+    let include_payment_providers = request.include_payment_providers();
     let provider = StripeBilling::from_env()?;
     rate_limit(cache.as_ref(), &account, request.operation())?;
     if let Request::UsdcCheckout(checkout) = &request {
@@ -342,7 +370,7 @@ pub(super) async fn socket_action(
                     .map(|c| (c.credential_id.as_str(), c.credential_subject.as_str())),
             )?;
             Ok(
-                json!({"checkoutUrl":url,"status":status_value(&config,&account,checkout.character_index,provider.as_ref())?}),
+                json!({"checkoutUrl":url,"status":status_value(&config,&account,checkout.character_index,provider.as_ref(), include_payment_providers)?}),
             )
         });
         sender
@@ -355,24 +383,26 @@ pub(super) async fn socket_action(
         let permit = checkout_permit()?;
         let prepared: Result<_, String> = tokio::task::block_in_place(|| {
             durable(&config)?;
-            let provider = provider.as_ref().ok_or("billingUnavailable")?;
-            provider.validate_store(&config)?;
-            let offer = provider
-                .offers
+            let selected = FiatBilling::from_env(checkout.provider)?.ok_or("billingUnavailable")?;
+            selected.validate_store(&config)?;
+            let offer = selected
+                .offers()
                 .iter()
                 .find(|offer| offer.id == checkout.offer_id)
                 .ok_or("billingOfferMissing")?;
-            config.prepare_recharge_order(
+            let order = config.prepare_recharge_order_for_provider(
                 &account,
                 checkout.character_index,
                 &checkout.order_request_id,
                 offer,
                 monthly_card_now_ms(),
-                provider.livemode,
-            )
+                selected.livemode(),
+                selected.id(),
+            )?;
+            Ok((order, selected))
         });
-        let order = match prepared {
-            Ok(order) => order,
+        let (order, selected) = match prepared {
+            Ok(tuple) => tuple,
             Err(e) => {
                 sender
                     .send(Message::Text(reply(&request, Err(e)).to_string().into()))
@@ -381,7 +411,6 @@ pub(super) async fn socket_action(
                 return Ok(());
             }
         };
-        let provider = provider.expect("provider validated while preparing order");
         let verified = verified.cloned().ok_or("billingAuthenticationRequired")?;
         let captured_generation = generation.load(Ordering::Acquire);
         tokio::spawn(async move {
@@ -395,14 +424,20 @@ pub(super) async fn socket_action(
                 ) {
                     None
                 } else {
-                    Some(provider.checkout(&config, &account, &order).await?)
+                    selected.checkout(&config, &account, &order).await?
                 };
+                let selected_id = selected.id();
                 let status = tokio::task::spawn_blocking(move || {
-                    status_value(&config, &account, order.character_index, Some(&provider))
+                    status_value(&config, &account, order.character_index, provider.as_ref(), include_payment_providers)
                 })
                 .await
                 .map_err(|_| "billingResultUnconfirmed")??;
-                Ok(json!({"checkoutUrl":url,"status":status}))
+                let mut value = json!({"checkoutUrl":url,"status":status});
+                if include_payment_providers {
+                    value["provider"] = json!(selected_id);
+                    value["replayed"] = json!(value["checkoutUrl"].is_null());
+                }
+                Ok(value)
             }
             .await;
             if socket_authenticated.load(Ordering::Acquire)
@@ -468,7 +503,7 @@ pub(super) async fn socket_action(
                 }
                 _ => {}
             }
-            Ok(json!({"status":status_value(&config,&account,character,provider.as_ref())?}))
+            Ok(json!({"status":status_value(&config,&account,character,provider.as_ref(), include_payment_providers)?}))
         })();
         release_confirmed_lease(cache.as_ref(), lease, &operation)?;
         operation
@@ -487,6 +522,7 @@ pub(super) async fn socket_action(
 pub(super) fn router() -> Router<WebState> {
     Router::new()
         .route("/v1/billing/stripe/webhook", post(webhook))
+        .route("/v1/billing/waffo/webhook", post(waffo_webhook))
         .route("/v1/billing/status", get(http_status))
         .route("/v1/billing/refresh", post(http_refresh))
         .route("/v1/billing/monthly-card/buy", post(http_buy_monthly_card))
@@ -553,10 +589,38 @@ async fn webhook(
         }
     }
 }
+async fn waffo_webhook(
+    State(state): State<WebState>,
+    headers: HeaderMap,
+    body: axum::body::Bytes,
+) -> Response {
+    let signature = headers.get("x-signature").and_then(|h| h.to_str().ok());
+    let Some(signature) = signature.filter(|_| headers.get_all("x-signature").iter().count() == 1) else {
+        return private_response(StatusCode::BAD_REQUEST, json!({"message":"failed"}));
+    };
+    let provider = match crate::waffo_billing::WaffoBilling::from_env() {
+        Ok(Some(p)) => p,
+        _ => return private_response(StatusCode::SERVICE_UNAVAILABLE, json!({"message":"unknown"})),
+    };
+    let _permit = match checkout_permit() {
+        Ok(p) => p,
+        Err(_) => return private_response(StatusCode::TOO_MANY_REQUESTS, json!({"message":"unknown"})),
+    };
+    let (status, message) = match provider.webhook(&state.config, signature, &body, monthly_card_now_ms()).await {
+        Ok(()) => (StatusCode::OK, "success"),
+        Err(_) => (StatusCode::SERVICE_UNAVAILABLE, "failed"),
+    };
+    let raw = json!({"message":message}).to_string();
+    match provider.sign_ack(raw.as_bytes()) {
+        Ok(signature) => (status, [("cache-control", "no-store"), ("content-type", "application/json"), ("x-signature", signature.as_str())], raw).into_response(),
+        Err(_) => private_response(StatusCode::SERVICE_UNAVAILABLE, json!({"message":"unknown"})),
+    }
+}
 // These HTTP operations are for an inactive character only. The same shared
 // Redis owner lease used by character-select billing fences an online Source.
 // The underlying ordinary purchase/activation code owns all amounts and UIDs.
 async fn http_offline_operation(state: WebState, headers: HeaderMap, request: Request) -> Response {
+    let include_payment_providers = request.include_payment_providers();
     let identity = match http_identity(&state.identity, &headers).await {
         Ok(v) => v,
         Err(_) => {
@@ -586,7 +650,7 @@ async fn http_offline_operation(state: WebState, headers: HeaderMap, request: Re
                 _ => return Err("billingRequestInvalid".into()),
             };
             let provider = StripeBilling::from_env()?;
-            Ok(json!({"receipt":receipt,"delivery":{"granted":delivery.granted,"revision":delivery.revision},"status":status_value(&state.config,&account,character,provider.as_ref())?}))
+            Ok(json!({"receipt":receipt,"delivery":{"granted":delivery.granted,"revision":delivery.revision},"status":status_value(&state.config,&account,character,provider.as_ref(), include_payment_providers)?}))
         })();
         release_confirmed_lease(state.session_cache.as_ref(), Some(lease), &operation)?;
         operation
@@ -648,6 +712,7 @@ async fn http_status(
             &verified.account_id,
             request.character_index,
             provider.as_ref(),
+            request.include_payment_providers,
         )
     })
     .await;
@@ -672,6 +737,7 @@ async fn http_checkout(
     headers: HeaderMap,
     Json(request): Json<CheckoutRequest>,
 ) -> Response {
+    let include_payment_providers = request.include_payment_providers;
     let verified = match http_identity(&state.identity, &headers).await {
         Ok(v) => v,
         Err(_) => {
@@ -695,20 +761,21 @@ async fn http_checkout(
     let prepared = tokio::task::spawn_blocking(move || -> Result<_, String> {
         durable(&config)?;
         rate_limit(cache.as_ref(), &verified.account_id, "checkout")?;
-        let provider = StripeBilling::from_env()?.ok_or("billingUnavailable")?;
+        let provider = FiatBilling::from_env(request.provider)?.ok_or("billingUnavailable")?;
         provider.validate_store(&config)?;
         let offer = provider
-            .offers
+            .offers()
             .iter()
             .find(|offer| offer.id == request.offer_id)
             .ok_or("billingOfferMissing")?;
-        let order = config.prepare_recharge_order(
+        let order = config.prepare_recharge_order_for_provider(
             &verified.account_id,
             request.character_index,
             &request.order_request_id,
             offer,
             monthly_card_now_ms(),
-            provider.livemode,
+            provider.livemode(),
+            provider.id(),
         )?;
         Ok((config, provider, verified.account_id, order))
     })
@@ -736,16 +803,19 @@ async fn http_checkout(
         order.state,
         RechargeOrderState::PaidPending | RechargeOrderState::Applied | RechargeOrderState::Review
     ) {
+        let mut value = json!({"orderId":order.id,"checkoutUrl":Value::Null,"replayed":true});
+        if include_payment_providers { value["provider"] = json!(provider.id()); }
         return private_response(
             StatusCode::OK,
-            json!({"orderId":order.id,"checkoutUrl":Value::Null,"replayed":true}),
+            value,
         );
     }
     match provider.checkout(&config, &account, &order).await {
-        Ok(url) => private_response(
-            StatusCode::OK,
-            json!({"orderId":order.id,"checkoutUrl":url}),
-        ),
+        Ok(url) => {
+            let mut value = json!({"orderId":order.id,"checkoutUrl":url});
+            if include_payment_providers { value["provider"] = json!(provider.id()); }
+            private_response(StatusCode::OK, value)
+        },
         Err(e) => private_response(
             StatusCode::SERVICE_UNAVAILABLE,
             json!({"error":public_error(&e)}),

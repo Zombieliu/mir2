@@ -1,0 +1,84 @@
+{
+  "schema": "mir2.web-r16-public-evidence-final-mapping/1",
+  "sourceRoot": "F:/mir2-builds/web-r16-20261104",
+  "priorArchive": {
+    "initialFiles": 45,
+    "supplementFiles": 12,
+    "verifiedFiles": 57,
+    "verifiedBytes": 2724752,
+    "metadata": [
+      {
+        "file": "mapping.json",
+        "bytes": 14344,
+        "sha256": "223ef0a9cb7fc58c68197ec574723e3c47a36cc91fa8aec9b4580cb023a5fb09"
+      },
+      {
+        "file": "validation.json",
+        "bytes": 5105,
+        "sha256": "11adbc258e2cda555d44711eace610e26d589742054ebb8c4c8d33370b60ca87"
+      },
+      {
+        "file": "supplement-mapping.json",
+        "bytes": 4212,
+        "sha256": "a968aaaeae8f3cf4dd6abadb394fa75bb0f4d935ff1f0adc9e594dba1a4888a5"
+      },
+      {
+        "file": "supplement-validation.json",
+        "bytes": 6030,
+        "sha256": "ba6f895b797f7bd9392d8127bcfc7de41db22f90bad99378c29b4782f754d223"
+      }
+    ],
+    "allPinsVerified": true,
+    "unchanged": true
+  },
+  "files": [
+    {
+      "source": "display-v16-quest4-r8/quest4-complete-scoped-receipt.json",
+      "target": "final/display-v16-quest4-r8/quest4-complete-scoped-receipt.json",
+      "role": "completed-q4-across-ordinary-sessions",
+      "bytes": 23510,
+      "sha256": "8238255c21aa128fab18ae3d60f75d2ef4bb8a530c86c74bf6597d42aa75a9c9",
+      "type": "scanned-text"
+    },
+    {
+      "source": "display-v16-quest4-r8/onboarding-v11-browser-proof.json",
+      "target": "final/display-v16-quest4-r8/onboarding-v11-browser-proof.json",
+      "role": "passed-final-relogin-two-checks",
+      "bytes": 35504,
+      "sha256": "03abfddde2dfb9263675c5762ba807fd67385af1769908aa656c11927028a1e3",
+      "type": "scanned-text"
+    },
+    {
+      "source": "display-v16-quest4-r7/onboarding-v11-browser-proof.json",
+      "target": "final/display-v16-quest4-r7/onboarding-v11-browser-proof.json",
+      "role": "original-failed-gain-experience-helper-assumption",
+      "bytes": 72066,
+      "sha256": "182ac85b00622ea71d4b9cf20d6969864ddd0081644376233978093df2d1f5d9",
+      "type": "scanned-text"
+    },
+    {
+      "source": "display-v16-quest4-r5/quest4-first-oma-persisted-partial-receipt.json",
+      "target": "final/display-v16-quest4-r5/quest4-first-oma-persisted-partial-receipt.json",
+      "role": "sealed-first-natural-oma-persistence-partial",
+      "bytes": 21705,
+      "sha256": "4727f82e68c7dae9bf005d6b3a9d21a0133e1100f060c0264c22749f2fb76962",
+      "type": "scanned-text"
+    },
+    {
+      "source": "display-v16-quest4-r7/03-before-finishQuest-2110004.png",
+      "target": "final/display-v16-quest4-r7/03-before-finishQuest-2110004.png",
+      "role": "root-viewed-before-delivery-crop",
+      "bytes": 1073771,
+      "sha256": "ec0a68202bf0dfa4600039a7dc10c5ce2ed93fadda1998b4c216c71aabd6b43f",
+      "type": "approved-png"
+    },
+    {
+      "source": "display-v16-quest4-r8/03-saved-progress-native-diary.png",
+      "target": "final/display-v16-quest4-r8/03-saved-progress-native-diary.png",
+      "role": "root-viewed-relogin-completed-diary-crop",
+      "bytes": 1138915,
+      "sha256": "202d84735744110033e6e4d0e61e68a6b57077e9ea9d19a8c1cef115985643e0",
+      "type": "approved-png"
+    }
+  ]
+}

@@ -5,7 +5,7 @@ param(
     [string]$ReleaseExe = '',
     [string]$BuildAttestation = '',
     [string]$CandidateVersion = '',
-    [ValidateSet('platinum_176', 'platinum_fiveclass')][string]$ContentProfile = 'platinum_176',
+    [ValidateSet('', 'platinum_176', 'platinum_fiveclass')][string]$ContentProfile = '',
     [string]$SourceRevision = '',
     [string]$SignerThumbprint = '',
     [switch]$PublicRelease,
@@ -14,7 +14,7 @@ param(
     [string]$AuthHttpUrl = '',
     [string]$BillingHttpOrigin = '',
     [string[]]$AllowedClasses = $null,
-    [ValidateSet('crystal', 'newcomer-v1', 'newcomer-v2')][string]$QuestGuidance = 'newcomer-v2',
+    [ValidateSet('', 'crystal', 'newcomer-v1', 'newcomer-v2')][string]$QuestGuidance = '',
     [bool]$ForceDaylight = $true,
     [string[]]$NativeMapFileNames = @(),
     [string]$FullCrystalPackRoot = $env:MIR2_FULL_PACK_ROOT,
@@ -37,9 +37,9 @@ if (-not (Test-Path -LiteralPath $PlayerSpriteClosureScript -PathType Leaf)) { t
 $ReleaseProfileScript = Join-Path (Split-Path -Parent $PSCommandPath) 'candidate-release-profile.ps1'
 if (-not (Test-Path -LiteralPath $ReleaseProfileScript -PathType Leaf)) { throw 'Candidate release profile validator missing' }
 . $ReleaseProfileScript
-if ($ContentProfile -ceq 'platinum_fiveclass') {
-    $script:CandidateContentProfilePath = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot '../../../../packages/game-data/data/content_profiles/platinum_fiveclass.json'))
-}
+$ContentProfile = Resolve-CandidateContentProfile -Value $ContentProfile
+$QuestGuidance = Resolve-CandidateQuestGuidance -Value $QuestGuidance
+$script:CandidateContentProfilePath = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot ("../../../../packages/game-data/data/content_profiles/{0}.json" -f $ContentProfile)))
 . (Join-Path $PSScriptRoot 'five-class-asset-closure.ps1')
 $PetGuildClosureScript = Join-Path (Split-Path -Parent $PSCommandPath) 'pet-guild-asset-closure.ps1'
 if (-not (Test-Path -LiteralPath $PetGuildClosureScript -PathType Leaf)) { throw 'pet/guild closure validator missing' }

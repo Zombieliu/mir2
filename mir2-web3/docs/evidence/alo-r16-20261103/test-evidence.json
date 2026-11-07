@@ -1,0 +1,191 @@
+{
+  "schema": "mir2-alo-r16-test-evidence/1",
+  "recordedAt": "2026-11-02T22:53:54.737112+00:00",
+  "sourceBranch": "codex/windows-player-journey",
+  "sourceBaseRevision": "1ef125e01e628511399cede342ff6bb8e17a8b93",
+  "groups": [
+    {
+      "group": "node-full",
+      "log": "E:\\mir2-player-journey\\mir2-web3\\apps\\ai-player\\.data\\r16-verification\\node-tests-final.log",
+      "logSha256": "13987d28b6226fbfc46d0c329a370104b18f2a6b4b36782420e8d0455ceeb25f",
+      "results": [
+        "# tests 173",
+        "# pass 173",
+        "# fail 0",
+        "# cancelled 0",
+        "# skipped 0"
+      ]
+    },
+    {
+      "group": "gateway-companion",
+      "log": "F:\\mir2-builds\\canonical-companion-gateway\\companion-final-focused.log",
+      "logSha256": "541205f83eacef8c7fb15f22ca7426189fe0a3b931fbbed12435f30504435511",
+      "results": [
+        "ok. 19 passed; 0 failed; 0 ignored; 0 measured; 1582 filtered out; finished in 3.75s"
+      ]
+    },
+    {
+      "group": "gateway-adjacent",
+      "log": "F:\\mir2-builds\\canonical-companion-gateway\\companion-adjacent.log",
+      "logSha256": "aa35ea2be5d735ae4ddf8dde7d63fc64033840ee8177e6dab0cb6d06ffd462fc",
+      "results": [
+        "ok. 11 passed; 0 failed; 0 ignored; 0 measured; 1590 filtered out; finished in 3.67s",
+        "ok. 5 passed; 0 failed; 0 ignored; 0 measured; 1596 filtered out; finished in 0.01s"
+      ]
+    },
+    {
+      "group": "gateway-production",
+      "log": "E:\\mir2-player-journey\\mir2-web3\\apps\\ai-player\\.data\\r16-verification\\gateway-production-regression.log",
+      "logSha256": "490d37caa0d51d0c75e6ba40f8b2e73389b15330714b0b28377d21adc56e3013",
+      "results": [
+        "ok. 7 passed; 0 failed; 0 ignored; 0 measured; 1594 filtered out; finished in 0.86s"
+      ]
+    },
+    {
+      "group": "gateway-native-resume",
+      "log": "E:\\mir2-player-journey\\mir2-web3\\apps\\ai-player\\.data\\r16-verification\\gateway-resume-regression.log",
+      "logSha256": "24bbd329ef785aa9d9cf237c90e0dc2097936976b9cc50fc7a1edda810f68f47",
+      "results": [
+        "ok. 20 passed; 0 failed; 0 ignored; 0 measured; 1581 filtered out; finished in 7.90s"
+      ]
+    },
+    {
+      "group": "zone-focused",
+      "log": "F:\\mir2-builds\\canonical-companion-gateway\\safety-simulation-focused.log",
+      "logSha256": "f6ff2b390a436c28616705cf5be3a48324e5b54ecb1240b60a98792bc64e58ae",
+      "results": [
+        "ok. 10 passed; 0 failed; 0 ignored; 0 measured; 3348 filtered out; finished in 0.09s"
+      ]
+    },
+    {
+      "group": "zone-unit",
+      "log": "F:\\mir2-builds\\canonical-companion-gateway\\safety-zone-adjacent-final.log",
+      "logSha256": "dbb90e7694eeeaad88c93be9d4b5f9c3c74ccb5ba64610f034e043ba2e1a36f3",
+      "results": [
+        "ok. 455 passed; 0 failed; 0 ignored; 0 measured; 2903 filtered out; finished in 3.43s"
+      ]
+    },
+    {
+      "group": "shared-zone",
+      "log": "F:\\mir2-builds\\canonical-companion-gateway\\safety-shared-zone-final.log",
+      "logSha256": "5b1e4a7eb28388280d76e07687ca4c70f4deac6ac1c3c40b39bbcd06ffcdcad0",
+      "results": [
+        "ok. 209 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.72s"
+      ]
+    },
+    {
+      "group": "gateway-safe-projection",
+      "log": "F:\\mir2-builds\\canonical-companion-gateway\\safety-gateway-focused.log",
+      "logSha256": "0d2fa824f386da680e914623989395f17e986cb4de78c5efa12797c08ed4dcc4",
+      "results": [
+        "ok. 1 passed; 0 failed; 0 ignored; 0 measured; 1601 filtered out; finished in 1.33s"
+      ]
+    },
+    {
+      "group": "owner-health",
+      "log": "F:\\mir2-builds\\canonical-companion-gateway\\safety-owner-health-final.log",
+      "logSha256": "318e8bf89bbaed6317f96b31875f8a23ea2ce4a834ff9fc84067fe4df1114d8b",
+      "results": [
+        "ok. 25 passed; 0 failed; 0 ignored; 0 measured; 1577 filtered out; finished in 39.32s"
+      ]
+    },
+    {
+      "group": "final-native-companion-ui",
+      "log": "F:\\mir2-builds\\canonical-companion-native\\final-native-companion-ui.log",
+      "logSha256": "8db060fb2f7d4c97141d6b6239b9e04c918a881ae9a551ae8b6579f71cbe20bd",
+      "results": [
+        "ok. 22 passed; 0 failed; 0 ignored; 0 measured; 1669 filtered out; finished in 0.01s",
+        "ok. 0 passed; 0 failed; 0 ignored; 0 measured; 6 filtered out; finished in 0.00s",
+        "ok. 0 passed; 0 failed; 0 ignored; 0 measured; 6 filtered out; finished in 0.00s",
+        "ok. 0 passed; 0 failed; 0 ignored; 0 measured; 4 filtered out; finished in 0.00s"
+      ]
+    },
+    {
+      "group": "final-owner-companion",
+      "log": "F:\\mir2-builds\\canonical-companion-native\\final-owner-companion.log",
+      "logSha256": "87a1d3cc8f129e8bde88140eed879f5530c686dc6f755eb991a16b82b1998da6",
+      "results": [
+        "ok. 12 passed; 0 failed; 0 ignored; 0 measured; 1225 filtered out; finished in 0.05s"
+      ]
+    },
+    {
+      "group": "final-native-npc-gates",
+      "log": "F:\\mir2-builds\\canonical-companion-native\\final-native-npc-gates.log",
+      "logSha256": "c508baacce9ed5bf5b42bce5556f0be17ccbf313802eb1cb945995565a659062",
+      "results": [
+        "ok. 21 passed; 0 failed; 0 ignored; 0 measured; 1216 filtered out; finished in 0.18s"
+      ]
+    },
+    {
+      "group": "final-native-ownership",
+      "log": "F:\\mir2-builds\\canonical-companion-native\\final-native-ownership.log",
+      "logSha256": "8716f89d4bd99a5b260b6efb557a0909efbb24c69f2f1254fa4baf58032d4a47",
+      "results": [
+        "ok. 36 passed; 0 failed; 0 ignored; 0 measured; 1201 filtered out; finished in 0.11s"
+      ]
+    },
+    {
+      "group": "final-native-skills",
+      "log": "F:\\mir2-builds\\canonical-companion-native\\final-native-skills.log",
+      "logSha256": "da2c8fd8ea08c3247bcf7bcfb7be350fcbbdac7af5a183b88ff3f67a97e4ab2b",
+      "results": [
+        "ok. 26 passed; 0 failed; 0 ignored; 0 measured; 1211 filtered out; finished in 0.06s"
+      ]
+    },
+    {
+      "group": "client-crystal_ui-chat-tests",
+      "log": "F:\\mir2-builds\\canonical-companion-native\\client-crystal_ui-chat-tests.log",
+      "logSha256": "7521cc9dfb4392c602166b87c0d832ebced3691c730238a37ba827d638e997ef",
+      "results": [
+        "ok. 34 passed; 0 failed; 0 ignored; 0 measured; 1657 filtered out; finished in 0.10s"
+      ]
+    },
+    {
+      "group": "client-npc_gold_buy_attempt-tests",
+      "log": "F:\\mir2-builds\\canonical-companion-native\\client-npc_gold_buy_attempt-tests.log",
+      "logSha256": "9b5c687a1ee936dd089879314a90581af68ceac15d026b4bc3f976b904855758",
+      "results": [
+        "ok. 14 passed; 0 failed; 0 ignored; 0 measured; 1677 filtered out; finished in 0.00s"
+      ]
+    },
+    {
+      "group": "platform-chat_pointer_input_tests",
+      "log": "F:\\mir2-builds\\canonical-companion-native\\platform-chat_pointer_input_tests.log",
+      "logSha256": "a6cc6ad3b0844aa165205dbc610ffec78295a0b3c4e35db28dfdd2894ae7ef29",
+      "results": [
+        "ok. 4 passed; 0 failed; 0 ignored; 0 measured; 1227 filtered out; finished in 0.07s"
+      ]
+    },
+    {
+      "group": "platform-native_fonts-tests",
+      "log": "F:\\mir2-builds\\canonical-companion-native\\platform-native_fonts-tests.log",
+      "logSha256": "16fd53b2e5e57b687dfe00c8b219ffd9005b5a69a04ffe038f4ed0e15c2ffd5a",
+      "results": [
+        "ok. 7 passed; 0 failed; 0 ignored; 0 measured; 1224 filtered out; finished in 0.07s"
+      ]
+    },
+    {
+      "group": "platform-native_quest_pointer",
+      "log": "F:\\mir2-builds\\canonical-companion-native\\platform-native_quest_pointer.log",
+      "logSha256": "65ba8b8b565c9811429caa7499301b13cad61bdc5f780424372478e82efc3b72",
+      "results": [
+        "ok. 7 passed; 0 failed; 0 ignored; 0 measured; 1224 filtered out; finished in 0.06s"
+      ]
+    },
+    {
+      "group": "ui-core-tests",
+      "log": "F:\\mir2-builds\\canonical-companion-native\\ui-core-tests.log",
+      "logSha256": "8f5fbb11f506f12f477563842df0d59deab3fbaa30c738721d5cf6f78c5e095c",
+      "results": [
+        "ok. 48 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s",
+        "ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s"
+      ]
+    }
+  ],
+  "scopeNotes": [
+    "groups overlap; never add them into a single unique test total",
+    "ordinary network and GUI evidence are separate",
+    "earlier failed/intermediate runs remain in private .data and old logs",
+    "no real human retention, payment, LLM or public deployment qualification"
+  ]
+}

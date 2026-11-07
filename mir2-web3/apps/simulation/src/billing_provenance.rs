@@ -397,7 +397,7 @@ impl CreditWallet {
 }
 
 fn validate_payment(receipt: &VerifiedPaymentRevenue, order: &RechargeOrder) -> Result<(), String> {
-    if receipt.provider != "stripe"
+    if receipt.provider != order.provider.as_str()
         || !key(&receipt.source_event_id)
         || receipt.order_id != order.id
         || order.checkout_session_id.as_deref() != Some(&receipt.checkout_session_id)
@@ -422,14 +422,14 @@ fn validate_adverse(
     event: &VerifiedPaymentAdverseEvent,
     order: &RechargeOrder,
 ) -> Result<(), String> {
-    if event.provider != "stripe"
+    if event.provider != order.provider.as_str()
         || !key(&event.source_event_id)
         || event.order_id != order.id
         || order
             .payment_intent_id
             .as_ref()
             .is_some_and(|id| id != &event.payment_intent_id)
-        || !event.payment_intent_id.starts_with("pi_")
+        || !order.provider.valid_payment_id(&event.payment_intent_id)
         || event.livemode != order.livemode
         || event.currency != order.offer.currency
         || event.gross_amount_minor != order.offer.amount_minor

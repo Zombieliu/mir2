@@ -16,7 +16,7 @@ const bag = load("../lib/bevy-bag-ui.ts", path => path === "./bag-belt-gesture" 
 const model = () => ({ capacity: 46, gold: 200, items: [{ container: 0, slot: 0, uniqueId: 0 }] });
 const presentation = { logicalWidth: 1024, logicalHeight: 768, stageCssScale: 1, touch: false };
 
-function fixture(overrides = {}) {
+function fixture(overrides = {}, options = {}) {
   let now = 100;
   let input = { connectionGeneration: 3, sessionGeneration: 5, ownerRevision: 0,
     eligible: true, bagOpen: true, page: "bag1", presentation, model: model(), player: { level: 1 }, blockedUniqueIds: [] };
@@ -35,7 +35,7 @@ function fixture(overrides = {}) {
   };
   const host = new bag.BevyBagHost({ runtime, now: () => now, read: () => input,
     onOwner(owner, runGeneration, ownerRevision) { owners.push({ owner, runGeneration, ownerRevision }); input.ownerRevision = ownerRevision; },
-    onState(next) { state = next; }, onIntent(intent) { intents.push(intent); return { accepted: true }; },
+    onState(next) { state = next; }, onIntent(intent) { intents.push(intent); return options.onIntent?.(intent) ?? { accepted: true }; },
   });
   function echo(extra = {}) {
     const s = snapshots.at(-1);
@@ -260,4 +260,142 @@ test("NPC server-attested alias gate preserves ordinary Bag and validates each l
   assert(bag.validNpcGoldBuyBagModel(valid));
   assert.equal(bag.validNpcGoldBuyBagModel({...valid,items:[{container:2,slot:0,uniqueId:10}]}),false);
   assert.equal(bag.validNpcGoldBuyBagModel({...mixed,items:[{container:0,slot:0,uniqueId:0},{container:0,slot:1,uniqueId:0}]}),false);
+});
+
+function resourceFixture(options = {}) {
+  const f = fixture({}, options);
+  f.input.player = { hp: 18, maxHp: 18, mp: 4, maxMp: 8, level: 1, className: "Warrior", gender: "Male",
+    name: "private-player-name", gold: 200, credit: 0 };
+  f.input.model.items[0] = { ...f.input.model.items[0], key: "private-potion-key", name: "private-potion-name",
+    quantity: 2, tooltipSource: { info: { itemType: 13, shape: 0 } } };
+  return f;
+}
+
+test("real Host accepts a single already-painted Native intent after positive HP/MP changes before the next poll", () => {
+  for (const patch of [{ hp: 17 }, { hp: 1 }, { mp: 3 }, { mp: 7 }, { hp: 12, mp: 2 }]) {
+    const f = resourceFixture(); f.activate();
+    const painted = f.intent(), owner = f.owners.at(-1), prior = f.snapshots.at(-1);
+    f.input.player = { ...f.input.player, ...patch };
+    assert.equal(f.emit(painted).accepted, true, JSON.stringify(patch));
+    assert.equal(f.host.allows({ ...painted, owner: "bevy" }), true, "the final Page send gate retains the same model proof");
+    assert.equal(f.intents.length, 1); assert.equal(f.emit(painted).accepted, false, "the accepted physical intent is never replayed");
+    f.host.tick();
+    const display = f.snapshots.at(-1);
+    assert.equal(display.modelRevision, prior.modelRevision, "cosmetic resources do not replace the input model");
+    assert.ok(display.revision > prior.revision, "full resources still publish a new display snapshot");
+    assert.deepEqual(display.player, f.input.player); assert.equal(f.state.active, true); assert.deepEqual(f.owners.at(-1), owner);
+    f.echo(); f.host.tick(); assert.equal(f.intents.length, 1, "polling and echo never retry an item action");
+  }
+});
+
+test("real Host retains the current model gate while a positive-resource display snapshot is waiting for Native echo", () => {
+  for (const patch of [{ hp: 17 }, { mp: 3 }, { hp: 1, mp: 7 }]) {
+    const f = resourceFixture(); f.activate();
+    const painted = f.intent(), before = f.snapshots.at(-1), owner = f.owners.at(-1);
+    f.input.player = { ...f.input.player, ...patch }; f.host.tick();
+    const display = f.snapshots.at(-1);
+    assert.deepEqual(display.player, f.input.player, "the new HP/MP values are sent to the painter without an input-model bump");
+    assert.ok(display.revision > before.revision);
+    assert.equal(display.modelRevision, painted.modelRevision);
+    assert.equal(f.emit(painted).accepted, true, "old applied Native model is still the exact current input model");
+    assert.equal(f.intents.length, 1); assert.equal(f.emit(painted).accepted, false);
+    f.echo(); f.host.tick(); assert.equal(f.intents.length, 1); assert.deepEqual(f.owners.at(-1), owner);
+  }
+});
+
+test("life/mana known-positive boundaries and all material player, inventory, identity and layout changes reject old Native intents", () => {
+  const cases = [
+    ["HP zero", f => { f.input.player.hp = 0; }], ["HP unknown", f => { delete f.input.player.hp; }],
+    ["MP zero", f => { f.input.player.mp = 0; }], ["MP unknown", f => { delete f.input.player.mp; }],
+    ["HP unknown to known zero", f => { f.input.player.hp = 0; }, { hp: undefined }],
+    ["HP dead to alive", f => { f.input.player.hp = 1; }, { hp: 0 }],
+    ["HP unknown to alive", f => { f.input.player.hp = 1; }, { hp: undefined }],
+    ["MP unknown to known zero", f => { f.input.player.mp = 0; }, { mp: undefined }],
+    ["MP zero to positive", f => { f.input.player.mp = 1; }, { mp: 0 }],
+    ["MP unknown to positive", f => { f.input.player.mp = 1; }, { mp: undefined }],
+    ["HP invalid fraction", f => { f.input.player.hp = 1.5; }], ["MP invalid infinity", f => { f.input.player.mp = Infinity; }],
+    ["HP null", f => { f.input.player.hp = null; }], ["HP outside signed resource range", f => { f.input.player.hp = 0x8000_0000; }],
+    ["max HP", f => { f.input.player.maxHp++; }], ["max MP", f => { f.input.player.maxMp++; }],
+    ["level", f => { f.input.player.level++; }], ["class", f => { f.input.player.className = "Wizard"; }],
+    ["gender", f => { f.input.player.gender = "Female"; }], ["name", f => { f.input.player.name = "replacement-player"; }],
+    ["player gold", f => { f.input.player.gold++; }], ["credit", f => { f.input.player.credit++; }],
+    ["inventory gold", f => { f.input.model.gold++; }], ["item quantity", f => { f.input.model.items[0].quantity--; }],
+    ["item UID", f => { f.input.model.items[0].uniqueId = 10; }], ["item slot", f => { f.input.model.items[0].slot = 1; }],
+    ["item metadata", f => { f.input.model.items[0].tooltipSource.info.shape = 1; }],
+    ["owner", f => { f.input.ownerRevision++; }], ["connection", f => { f.input.connectionGeneration++; }],
+    ["session", f => { f.input.sessionGeneration++; }], ["presentation", f => { f.input.presentation = { ...presentation, stageCssScale: 0.8 }; }],
+    ["page", f => { f.input.page = "bag2"; }], ["hidden", f => { f.input.bagOpen = false; }],
+    ["host eligibility", f => { f.input.eligible = false; }]
+  ];
+  for (const [label, change, initial] of cases) for (const poll of [false, true]) {
+    const f = resourceFixture(); Object.assign(f.input.player, initial); f.activate();
+    const painted = f.intent(); change(f); if (poll) f.host.tick();
+    assert.equal(f.emit(painted).accepted, false, `${label}/${poll ? "pending snapshot" : "before poll"}`);
+    assert.equal(f.intents.length, 0, label);
+  }
+});
+
+test("intent verdict diagnostics are bounded, private-data-free, read-only and never invoke another runtime getter", () => {
+  let outcome = "accepted";
+  const f = resourceFixture({ onIntent: () => {
+    if (outcome === "throw") throw Error("private callback details");
+    return outcome === "accepted" ? { accepted: true } : { accepted: false, error: "private rejection details" };
+  } });
+  f.activate();
+  const native = f.intent(), getStatus = f.runtime.getMir2BagUiStatus;
+  let statusReads = 0;
+  f.runtime.getMir2BagUiStatus = () => { statusReads++; return getStatus(); };
+  const emit = sequence => {
+    const before = statusReads, result = f.emit({ ...native, intentSequence: sequence });
+    assert.equal(statusReads - before, 2, "only the existing healthyStatus and layout gate may read Native");
+    return result;
+  };
+  assert.equal(emit(1).accepted, true);
+  outcome = "rejected"; assert.equal(emit(2).accepted, false);
+  outcome = "throw"; assert.equal(emit(3).accepted, false);
+  outcome = "accepted"; assert.equal(emit(3).accepted, false, "Page failure still consumes that intent sequence");
+  const beforeRead = statusReads, evidence = f.host.diagnostic().intentVerdicts;
+  assert.equal(statusReads, beforeRead); assert.equal(evidence.length, 4);
+  assert.deepEqual(evidence.map(row => row.verdict), ["accepted", "page-rejected", "page-rejected", "host-rejected"]);
+  const fields = ["verdict", "type", "hostModelRevision", "nativeModelRevision", "hostPresentationRevision", "nativePresentationRevision", "intentSequence"].sort();
+  for (const row of evidence) {
+    assert.deepEqual(Object.keys(row).sort(), fields); assert.equal(row.type, "useItem");
+    assert.equal(row.hostModelRevision, native.modelRevision); assert.equal(row.nativeModelRevision, native.modelRevision);
+    assert.equal(row.hostPresentationRevision, native.presentationRevision); assert.equal(row.nativePresentationRevision, native.presentationRevision);
+  }
+  evidence[0].verdict = "tampered"; evidence.length = 0;
+  assert.equal(f.host.diagnostic().intentVerdicts[0].verdict, "accepted", "callers cannot mutate private evidence");
+  for (let i = 0; i < 10; i++) assert.equal(emit(3).accepted, false);
+  assert.equal(f.host.diagnostic().intentVerdicts.length, 8);
+  const json = JSON.stringify(f.host.diagnostic().intentVerdicts);
+  for (const privateText of ["private-player-name", "private-potion", "private callback", "private rejection", "uniqueId", "source", "raw"])
+    assert.equal(json.includes(privateText), false, privateText);
+  const frozen = statusReads; f.host.diagnostic(); f.host.diagnostic(); assert.equal(statusReads, frozen);
+  assert.equal(f.intents.length, 3, "the Page sink runs once per accepted Host sequence and is never retried");
+});
+
+test("positive resource updates preserve Page reservation rejection without replay after its block clears", () => {
+  const f = resourceFixture({ onIntent: intent => ({ accepted: !f.input.blockedUniqueIds.includes(intent.source.uniqueId) }) });
+  f.activate(); const painted = f.intent();
+  f.input.player.hp = 17; f.input.blockedUniqueIds = [0];
+  assert.equal(f.emit(painted).accepted, false); assert.equal(f.intents.length, 1, "the unchanged current model reaches the existing Page gate once");
+  assert.equal(f.host.diagnostic().intentVerdicts.at(-1).verdict, "page-rejected");
+  f.input.blockedUniqueIds = []; f.host.tick(); f.echo(); f.host.tick();
+  assert.equal(f.intents.length, 1, "unblocking and polling never retry a previously refused action");
+  assert.equal(f.emit(painted).accepted, false); assert.equal(f.intents.length, 1);
+  assert.equal(f.host.diagnostic().intentVerdicts.at(-1).verdict, "host-rejected");
+});
+
+test("malformed and retired sink evidence cannot retain raw payload or grant an item action", () => {
+  const f = resourceFixture(); f.activate();
+  const sink = f.sink, painted = f.intent();
+  const malformed = JSON.parse(sink(JSON.stringify({ type: "private-unknown-type", modelRevision: "private-token", source: { uniqueId: 999 } })));
+  assert.equal(malformed.accepted, false); assert.equal(f.intents.length, 0);
+  const evidence = f.host.diagnostic().intentVerdicts.at(-1);
+  assert.deepEqual(evidence, { verdict: "host-rejected", type: null, hostModelRevision: painted.modelRevision,
+    nativeModelRevision: null, hostPresentationRevision: painted.presentationRevision, nativePresentationRevision: null, intentSequence: null });
+  f.host.stop();
+  assert.equal(JSON.parse(sink(JSON.stringify(painted))).accepted, false);
+  assert.equal(f.intents.length, 0); assert.equal(f.host.diagnostic().intentVerdicts.at(-1).verdict, "host-rejected");
+  assert.equal(JSON.stringify(f.host.diagnostic().intentVerdicts).includes("private-"), false);
 });

@@ -3,6 +3,7 @@
 import { memo, type SyntheticEvent } from "react";
 
 import { ORIGINAL_UI } from "../../lib/original-ui";
+import { CRYSTAL_MAP_DEPTH_GAIN, crystalMapDepth } from "../../lib/crystal-world-depth";
 import blendFramesManifest from "../../public/generated/original-map-blend/blend-frames.json";
 import {
   type MapAtlasIndex,
@@ -28,7 +29,6 @@ import {
   VIEWPORT_CELL_HEIGHT,
   VIEWPORT_CELL_WIDTH,
   DEFAULT_VIEWPORT_LAYOUT,
-  viewportDepthForCell,
   viewportFloorDepthForCell,
   type SceneBackdropTile,
   type ViewportMapSprite,
@@ -46,6 +46,12 @@ const FLOOR_LAYER_ORDERS: Record<OriginalMapSpriteKind, number> = {
   middle: 1,
   front: 2,
   tileAnimation: 3,
+};
+const MAP_LAYER_ORDERS: Record<OriginalMapSpriteKind, number> = {
+  back: -2,
+  middle: 0,
+  front: 1,
+  tileAnimation: -0.5,
 };
 
 function GameSceneBackdropInner({
@@ -254,7 +260,7 @@ export function buildMapTileDrawList(
       top: sprite.top + cameraOffset.y,
       width: sprite.width,
       height: sprite.height,
-      z: sprite.zIndex,
+      z: sprite.zIndex / CRYSTAL_MAP_DEPTH_GAIN,
     });
   };
   for (const sprite of mapSprites.floor) add(sprite, uncoveredFloor);
@@ -326,7 +332,7 @@ export function buildStandaloneMapTiles(
       top: sprite.top + cameraOffset.y,
       width: sprite.width,
       height: sprite.height,
-      z: sprite.zIndex,
+      z: sprite.zIndex / CRYSTAL_MAP_DEPTH_GAIN,
       additive: additive || undefined,
     });
     imageKeyBySpriteKey.set(sprite.key, imageKey);
@@ -485,7 +491,7 @@ function appendViewportMapSprite(
             FLOOR_LAYER_ORDERS[sprite.kind],
             viewportLayout,
           )
-        : viewportDepthForCell(cell.x, cell.y, player, 1),
+        : crystalMapDepth(cell.x, cell.y, player, MAP_LAYER_ORDERS[sprite.kind]),
   });
 }
 

@@ -1,0 +1,894 @@
+{
+  "schema": "r16-shared-display-skills-browser-smoke/1",
+  "startedAt": "2026-11-05T15:49:58.968Z",
+  "passed": true,
+  "scope": {
+    "realUi": true,
+    "originalOwner": false,
+    "ownOrdinaryQa": true,
+    "alreadyLearnedFencingRequired": true,
+    "windows": [
+      "questDiary",
+      "skills"
+    ],
+    "locales": [
+      "ar"
+    ],
+    "privateStateNodeOnly": true,
+    "storageLanguageDirectWrites": 0,
+    "newCharacters": 0,
+    "economicCommands": 0,
+    "modelInstructions": 0,
+    "walletOpened": false,
+    "companionUiOpened": false,
+    "wholeUiTenLanguageClaim": false,
+    "glyphVisualReviewRequired": true,
+    "screenshotPolicy": "fixed-auth-identity-masks-and-canonical-window-body-crops"
+  },
+  "phases": [
+    "explicit-root-cutover-gate-passed",
+    "ordinary-qa-login-ar",
+    "language-overlay-wait-ar",
+    "language-toggle-wait-ar",
+    "language-toggle-open-ar",
+    "language-option-click-ar",
+    "ordinary-login-fill-ar",
+    "ordinary-login-submit-ar",
+    "ordinary-character-selection-wait-ar",
+    "native-quest-diary-ar",
+    "native-skills-ar",
+    "language-overlay-wait-zh-CN",
+    "language-toggle-wait-zh-CN",
+    "language-toggle-open-zh-CN",
+    "language-option-click-zh-CN",
+    "complete"
+  ],
+  "checks": [
+    {
+      "name": "native-quest-and-skills-ar",
+      "passed": true
+    }
+  ],
+  "sessions": [
+    {
+      "language": "ar",
+      "ordinaryQaLoginMatched": true,
+      "ordinaryQaCharacterIndexMatched": true,
+      "realmMatched": true,
+      "canonicalKeys": {
+        "diary": "KeyQ",
+        "skills": "F11"
+      },
+      "diary": {
+        "screen": "game",
+        "quest": {
+          "displayLocaleVersion": 1,
+          "displayLanguage": "ar",
+          "language": "en",
+          "ready": true,
+          "error": false,
+          "questLogOpen": true,
+          "capturesPointer": true,
+          "frame": 24,
+          "generation": 2,
+          "revision": 2,
+          "openRevision": 2
+        },
+        "hud": {
+          "ready": true,
+          "error": false,
+          "frame": 24,
+          "generation": 2,
+          "revision": 1,
+          "navigation": {
+            "characterOpen": false,
+            "characterPage": "character",
+            "bagOpen": false,
+            "questOpen": true
+          }
+        },
+        "skills": {
+          "ready": false,
+          "inputEnabled": false,
+          "modal": false,
+          "pending": false,
+          "error": false,
+          "frame": 24,
+          "appliedRevision": 2,
+          "appliedModelRevision": 1,
+          "appliedPresentationRevision": 2,
+          "renderRevision": 2,
+          "hudGeneration": 2,
+          "ownerFieldsPresent": true
+        },
+        "skillsDiagnostic": {
+          "ready": false,
+          "reason": "closed"
+        },
+        "questOwner": "bevy",
+        "documentVisible": true,
+        "canvasVisible": true,
+        "companionRootPresent": true,
+        "companionEntryVisibleCount": 1,
+        "skillTooltipVisibleCount": 0,
+        "geometry": {
+          "assetsPending": false,
+          "logicalWidth": 1024,
+          "logicalHeight": 768,
+          "width": 1024,
+          "height": 768
+        },
+        "entryQualification": {
+          "questClosedCurrent": false,
+          "hudReady": true
+        }
+      },
+      "skills": {
+        "screen": "game",
+        "quest": {
+          "displayLocaleVersion": 1,
+          "displayLanguage": "ar",
+          "language": "en",
+          "ready": true,
+          "error": false,
+          "questLogOpen": false,
+          "capturesPointer": false,
+          "frame": 61,
+          "generation": 2,
+          "revision": 4,
+          "openRevision": 2
+        },
+        "hud": {
+          "ready": true,
+          "error": false,
+          "frame": 61,
+          "generation": 2,
+          "revision": 1,
+          "navigation": {
+            "characterOpen": true,
+            "characterPage": "spells",
+            "bagOpen": false,
+            "questOpen": false
+          }
+        },
+        "skills": {
+          "ready": true,
+          "inputEnabled": true,
+          "modal": false,
+          "pending": false,
+          "error": false,
+          "frame": 61,
+          "appliedRevision": 3,
+          "appliedModelRevision": 1,
+          "appliedPresentationRevision": 3,
+          "renderRevision": 3,
+          "hudGeneration": 2,
+          "ownerFieldsPresent": true
+        },
+        "skillsDiagnostic": {
+          "ready": true,
+          "reason": "ready"
+        },
+        "questOwner": "bevy",
+        "documentVisible": true,
+        "canvasVisible": true,
+        "companionRootPresent": true,
+        "companionEntryVisibleCount": 0,
+        "skillTooltipVisibleCount": 0,
+        "geometry": {
+          "assetsPending": false,
+          "logicalWidth": 1024,
+          "logicalHeight": 768,
+          "width": 1024,
+          "height": 768
+        },
+        "entryQualification": {
+          "questClosedCurrent": true,
+          "hudReady": true
+        }
+      },
+      "skillsOwnerStableAcrossFrames": true,
+      "learnedFencing": {
+        "authoritativeSnapshot": true,
+        "knownBeforeAnyUiAction": true,
+        "level": 0,
+        "learnedCount": 1,
+        "visibleFirstPageRow": 0,
+        "expectedDisplayName": "المبارزة",
+        "nameVisualReviewPending": true,
+        "hoveredWithActualMouseOnly": true,
+        "hoverPoint": {
+          "x": 830,
+          "y": 115
+        },
+        "sharedDescriptionHoverImplemented": false,
+        "observedDomTooltipCount": 0,
+        "descriptionVerified": false
+      },
+      "companionEntryHiddenWhileCharacterOpen": true,
+      "companionClientMountedWhileHidden": true,
+      "screenshots": [
+        "01-quest-diary-ar.png",
+        "02-skills-body-ar.png"
+      ]
+    }
+  ],
+  "screenshots": [
+    {
+      "file": "01-quest-diary-ar.png",
+      "sha256": "3acf1023fda66a414637674ae92c5c6fe5c2110591e446a4a3152a364ddb2012",
+      "crop": {
+        "x": 320,
+        "y": 156,
+        "width": 316,
+        "height": 466
+      },
+      "canonicalCrop": {
+        "left": 192,
+        "top": 60,
+        "width": 316,
+        "height": 466
+      },
+      "fullScreenClaim": false,
+      "glyphReviewPending": true,
+      "statusBefore": {
+        "screen": "game",
+        "quest": {
+          "displayLocaleVersion": 1,
+          "displayLanguage": "ar",
+          "language": "en",
+          "ready": true,
+          "error": false,
+          "questLogOpen": true,
+          "capturesPointer": true,
+          "frame": 24,
+          "generation": 2,
+          "revision": 2,
+          "openRevision": 2
+        },
+        "hud": {
+          "ready": true,
+          "error": false,
+          "frame": 24,
+          "generation": 2,
+          "revision": 1,
+          "navigation": {
+            "characterOpen": false,
+            "characterPage": "character",
+            "bagOpen": false,
+            "questOpen": true
+          }
+        },
+        "skills": {
+          "ready": false,
+          "inputEnabled": false,
+          "modal": false,
+          "pending": false,
+          "error": false,
+          "frame": 24,
+          "appliedRevision": 2,
+          "appliedModelRevision": 1,
+          "appliedPresentationRevision": 2,
+          "renderRevision": 2,
+          "hudGeneration": 2,
+          "ownerFieldsPresent": true
+        },
+        "skillsDiagnostic": {
+          "ready": false,
+          "reason": "closed"
+        },
+        "questOwner": "bevy",
+        "documentVisible": true,
+        "canvasVisible": true,
+        "companionRootPresent": true,
+        "companionEntryVisibleCount": 1,
+        "skillTooltipVisibleCount": 0,
+        "geometry": {
+          "assetsPending": false,
+          "logicalWidth": 1024,
+          "logicalHeight": 768,
+          "width": 1024,
+          "height": 768
+        },
+        "entryQualification": {
+          "questClosedCurrent": false,
+          "hudReady": true
+        }
+      },
+      "statusAfter": {
+        "screen": "game",
+        "quest": {
+          "displayLocaleVersion": 1,
+          "displayLanguage": "ar",
+          "language": "en",
+          "ready": true,
+          "error": false,
+          "questLogOpen": true,
+          "capturesPointer": true,
+          "frame": 35,
+          "generation": 2,
+          "revision": 2,
+          "openRevision": 2
+        },
+        "hud": {
+          "ready": true,
+          "error": false,
+          "frame": 35,
+          "generation": 2,
+          "revision": 1,
+          "navigation": {
+            "characterOpen": false,
+            "characterPage": "character",
+            "bagOpen": false,
+            "questOpen": true
+          }
+        },
+        "skills": {
+          "ready": false,
+          "inputEnabled": false,
+          "modal": false,
+          "pending": false,
+          "error": false,
+          "frame": 35,
+          "appliedRevision": 2,
+          "appliedModelRevision": 1,
+          "appliedPresentationRevision": 2,
+          "renderRevision": 2,
+          "hudGeneration": 2,
+          "ownerFieldsPresent": true
+        },
+        "skillsDiagnostic": {
+          "ready": false,
+          "reason": "ineligible"
+        },
+        "questOwner": "bevy",
+        "documentVisible": true,
+        "canvasVisible": true,
+        "companionRootPresent": true,
+        "companionEntryVisibleCount": 1,
+        "skillTooltipVisibleCount": 0,
+        "geometry": {
+          "assetsPending": false,
+          "logicalWidth": 1024,
+          "logicalHeight": 768,
+          "width": 1024,
+          "height": 768
+        },
+        "entryQualification": {
+          "questClosedCurrent": false,
+          "hudReady": true
+        }
+      }
+    },
+    {
+      "file": "02-skills-body-ar.png",
+      "sha256": "c98e30157fe08a67fa999f2c1638d3c30a9bbd44790ba8c7ab3f1d0f5c2911e1",
+      "crop": {
+        "x": 888,
+        "y": 166,
+        "width": 264,
+        "height": 310
+      },
+      "canonicalCrop": {
+        "left": 760,
+        "top": 70,
+        "width": 264,
+        "height": 310
+      },
+      "fullScreenClaim": false,
+      "glyphReviewPending": true,
+      "statusBefore": {
+        "screen": "game",
+        "quest": {
+          "displayLocaleVersion": 1,
+          "displayLanguage": "ar",
+          "language": "en",
+          "ready": true,
+          "error": false,
+          "questLogOpen": false,
+          "capturesPointer": false,
+          "frame": 61,
+          "generation": 2,
+          "revision": 4,
+          "openRevision": 2
+        },
+        "hud": {
+          "ready": true,
+          "error": false,
+          "frame": 61,
+          "generation": 2,
+          "revision": 1,
+          "navigation": {
+            "characterOpen": true,
+            "characterPage": "spells",
+            "bagOpen": false,
+            "questOpen": false
+          }
+        },
+        "skills": {
+          "ready": true,
+          "inputEnabled": true,
+          "modal": false,
+          "pending": false,
+          "error": false,
+          "frame": 61,
+          "appliedRevision": 3,
+          "appliedModelRevision": 1,
+          "appliedPresentationRevision": 3,
+          "renderRevision": 3,
+          "hudGeneration": 2,
+          "ownerFieldsPresent": true
+        },
+        "skillsDiagnostic": {
+          "ready": true,
+          "reason": "ready"
+        },
+        "questOwner": "bevy",
+        "documentVisible": true,
+        "canvasVisible": true,
+        "companionRootPresent": true,
+        "companionEntryVisibleCount": 0,
+        "skillTooltipVisibleCount": 0,
+        "geometry": {
+          "assetsPending": false,
+          "logicalWidth": 1024,
+          "logicalHeight": 768,
+          "width": 1024,
+          "height": 768
+        },
+        "entryQualification": {
+          "questClosedCurrent": true,
+          "hudReady": true
+        }
+      },
+      "statusAfter": {
+        "screen": "game",
+        "quest": {
+          "displayLocaleVersion": 1,
+          "displayLanguage": "ar",
+          "language": "en",
+          "ready": true,
+          "error": false,
+          "questLogOpen": false,
+          "capturesPointer": false,
+          "frame": 72,
+          "generation": 2,
+          "revision": 4,
+          "openRevision": 2
+        },
+        "hud": {
+          "ready": true,
+          "error": false,
+          "frame": 72,
+          "generation": 2,
+          "revision": 1,
+          "navigation": {
+            "characterOpen": true,
+            "characterPage": "spells",
+            "bagOpen": false,
+            "questOpen": false
+          }
+        },
+        "skills": {
+          "ready": true,
+          "inputEnabled": true,
+          "modal": false,
+          "pending": false,
+          "error": false,
+          "frame": 72,
+          "appliedRevision": 3,
+          "appliedModelRevision": 1,
+          "appliedPresentationRevision": 3,
+          "renderRevision": 3,
+          "hudGeneration": 2,
+          "ownerFieldsPresent": true
+        },
+        "skillsDiagnostic": {
+          "ready": true,
+          "reason": "ready"
+        },
+        "questOwner": "bevy",
+        "documentVisible": true,
+        "canvasVisible": true,
+        "companionRootPresent": true,
+        "companionEntryVisibleCount": 0,
+        "skillTooltipVisibleCount": 0,
+        "geometry": {
+          "assetsPending": false,
+          "logicalWidth": 1024,
+          "logicalHeight": 768,
+          "width": 1024,
+          "height": 768
+        },
+        "entryQualification": {
+          "questClosedCurrent": true,
+          "hudReady": true
+        }
+      }
+    }
+  ],
+  "commands": {
+    "clientCapabilities": 2,
+    "setLanguage": 2,
+    "clientVersion": 1,
+    "login": 1,
+    "startGame": 1,
+    "keepAlive": 2,
+    "logOut": 1
+  },
+  "wireLanguages": [
+    "en",
+    "zh-CN"
+  ],
+  "packets": [
+    {
+      "phase": "ordinary-character-selection-wait-ar",
+      "packet": "LoginSuccess",
+      "sequence": 8
+    },
+    {
+      "phase": "ordinary-character-selection-wait-ar",
+      "packet": "StartGame",
+      "sequence": 12,
+      "result": 4
+    },
+    {
+      "phase": "native-skills-ar",
+      "packet": "LogOutSuccess",
+      "sequence": 692
+    }
+  ],
+  "network": {
+    "failed": [],
+    "httpErrors": [],
+    "cancelled": [
+      {
+        "phase": "ordinary-character-selection-wait-ar",
+        "pathHash": "ea0f53a994127e32f5f0e81ecffa7bfa94cc723f3605b50ab8b606a334668b0f"
+      },
+      {
+        "phase": "ordinary-character-selection-wait-ar",
+        "pathHash": "10779bcd7766258ee9db4a24840647515111bffec6ad14bbec19d45f4b333410"
+      },
+      {
+        "phase": "ordinary-character-selection-wait-ar",
+        "pathHash": "9eeb5fa233df82531dffea86ffb49fa4f48ac32bcba5fb5d93a58ab367fe0e40"
+      },
+      {
+        "phase": "ordinary-character-selection-wait-ar",
+        "pathHash": "59b575174e75b5bd4afcfbd6f7f338462fb173fabd1e9572382da322fe3dffef"
+      },
+      {
+        "phase": "native-skills-ar",
+        "pathHash": "b5a477466acb573db09051484a348dc305a615e912e5fd4fb8cdfc59b6aa0454"
+      }
+    ],
+    "abortedDuringClose": 0
+  },
+  "console": {
+    "errors": 0,
+    "warnings": 7,
+    "hashes": [
+      {
+        "phase": "ordinary-character-selection-wait-ar",
+        "type": "warning",
+        "category": "other",
+        "sha256": "175c73d54d8d443a965a16a38ac036c2de536a3920f173064fd6837866b00186"
+      },
+      {
+        "phase": "ordinary-character-selection-wait-ar",
+        "type": "warning",
+        "category": "graphics",
+        "sha256": "2a91355a0fedec439016b537012c6475a3340cb4668f3780bfb945b965111aa2"
+      },
+      {
+        "phase": "ordinary-character-selection-wait-ar",
+        "type": "warning",
+        "category": "graphics",
+        "sha256": "000eb01f9b5ccbba6ea197002cb51b4a09b9b5f39a3226e1847cf4cbc1467a81"
+      },
+      {
+        "phase": "ordinary-character-selection-wait-ar",
+        "type": "warning",
+        "category": "graphics",
+        "sha256": "83571ad96406a04fb22549813b78317c6714a55a6b237167d8fafe74cd52a2fd"
+      },
+      {
+        "phase": "ordinary-character-selection-wait-ar",
+        "type": "warning",
+        "category": "graphics",
+        "sha256": "83571ad96406a04fb22549813b78317c6714a55a6b237167d8fafe74cd52a2fd"
+      },
+      {
+        "phase": "ordinary-character-selection-wait-ar",
+        "type": "warning",
+        "category": "graphics",
+        "sha256": "83571ad96406a04fb22549813b78317c6714a55a6b237167d8fafe74cd52a2fd"
+      },
+      {
+        "phase": "ordinary-character-selection-wait-ar",
+        "type": "warning",
+        "category": "graphics",
+        "sha256": "00c0908787c9f5f142c5a0aa59f20da589fea28ef9e3a88a0bde1a07f10ade26"
+      }
+    ]
+  },
+  "errors": [],
+  "cleanup": {
+    "browserClosed": true,
+    "ordinaryLogouts": 1,
+    "chineseRestored": true
+  },
+  "sourcePinsSha256": "aed3312e470b5422e9fc95e96e711921c8998fddcdc85d9c8f4a5c130fc13485",
+  "source": {
+    "executedDriverSha256": "69335031ff0331e27b4d72ea91f10e330829124135863514e0a6087f61d287e8",
+    "packageManifestSha256": "4620930b42de82f60e82fc01f0beb5b405fd082439131bd982fefddfa4268cc3",
+    "files": {
+      "apps/web/lib/generated/r16-native-localization.json": "d42c1568e3a6fa2798f30038f7a553f4fb4cb3f04abfb44672dc9cab37185938",
+      "packages/game-data/data/generated/portable-native-i18n.json": "9d1d6e78a784647af47f76d4ccf032519cc5d177976788c80813bb24d75c7800",
+      "apps/game-client/client-bevy/src/crystal_ui/keyboard_defaults.json": "ebfd4f283523f658d33793f604e697a5c4e4b0430fc5d63586ec8597bf31d208",
+      "apps/game-client/client-bevy/src/quest_ui.rs": "d7553ff8ff873f63a98e576abc4efb805e65b251ebfe94f6b4b330cc21f6f9d8",
+      "apps/game-client/client-bevy/src/crystal_ui/panel_navigation.rs": "6e003eba04b7f2b24639b20f1e2731f8d7b6658f25071235b7d1df1f9a7e7a2a",
+      "apps/game-client/client-bevy/src/crystal_ui/character_stats.rs": "8563b962df0f9f8d6b2f4c4a44e68d7bfe8b6f9204d722b24f6f6e80fdb59ddf",
+      "apps/game-client/client-bevy/src/crystal_ui/skill_page_shared.rs": "eb12640795fdd126ab5a2f86ae9fdf4bc1dbf2ab435cf3b1d7314fdf95502c71",
+      "apps/game-client/client-bevy/src/portable_spells_ui.rs": "c858933be07fe1f994d2248ed3a5cf642ea421bae167efa67c51e484d172673a"
+    },
+    "canonicalKeys": {
+      "quests": "KeyQ",
+      "skills": "F11",
+      "skillsAlternative": "KeyS",
+      "logout": "Alt+KeyX",
+      "literalKFunction": "Ranking"
+    },
+    "crops": {
+      "questDiary": {
+        "left": 192,
+        "top": 60,
+        "width": 316,
+        "height": 466
+      },
+      "skillsBody": {
+        "left": 760,
+        "top": 70,
+        "width": 264,
+        "height": 310
+      }
+    },
+    "closePoints": {
+      "questDiary": {
+        "x": 493,
+        "y": 73.5
+      },
+      "skills": {
+        "x": 1013,
+        "y": 13.5
+      }
+    },
+    "learnedGeometry": {
+      "pageSize": 7,
+      "left": 812,
+      "top": 98,
+      "width": 36,
+      "height": 34,
+      "step": 33
+    },
+    "expectedFencingNames": {
+      "ar": "المبارزة"
+    },
+    "sharedDescriptionHoverImplemented": false
+  },
+  "bootstrapCustodyDeclarations": 1,
+  "runtimeResourceResponses": [
+    {
+      "requestPathHash": "a6a18b68cd16f6cc3c8775e1ab9c2a3293b40e336a012fa8080e5c8603cf0b06",
+      "releaseMarkerInUrl": true,
+      "status": 200
+    }
+  ],
+  "entryReadDiagnostics": [
+    {
+      "elapsedMs": 186,
+      "screen": "game",
+      "quest": {
+        "displayLocaleVersion": 1,
+        "displayLanguage": "ar",
+        "language": "en",
+        "ready": false,
+        "error": false,
+        "questLogOpen": false,
+        "capturesPointer": false,
+        "frame": 8,
+        "generation": 2,
+        "revision": 1,
+        "openRevision": 1
+      },
+      "hud": {
+        "ready": false,
+        "error": false,
+        "frame": 8,
+        "generation": 2,
+        "revision": 1,
+        "navigation": {
+          "characterOpen": false,
+          "characterPage": "character",
+          "bagOpen": false,
+          "questOpen": false
+        }
+      },
+      "skills": {
+        "ready": false,
+        "inputEnabled": false,
+        "modal": false,
+        "pending": false,
+        "error": false,
+        "frame": 8,
+        "appliedRevision": 2,
+        "appliedModelRevision": 1,
+        "appliedPresentationRevision": 2,
+        "renderRevision": 2,
+        "hudGeneration": 2,
+        "ownerFieldsPresent": true
+      },
+      "skillsDiagnostic": {
+        "ready": false,
+        "reason": "ineligible"
+      },
+      "questOwner": "react",
+      "documentVisible": true,
+      "canvasVisible": true,
+      "companionRootPresent": true,
+      "companionEntryVisibleCount": 1,
+      "skillTooltipVisibleCount": 0,
+      "geometry": {
+        "assetsPending": false,
+        "logicalWidth": 1024,
+        "logicalHeight": 768,
+        "width": 1024,
+        "height": 768
+      },
+      "entryQualification": {
+        "questClosedCurrent": false,
+        "hudReady": false
+      }
+    },
+    {
+      "elapsedMs": 814,
+      "screen": "game",
+      "quest": {
+        "displayLocaleVersion": 1,
+        "displayLanguage": "ar",
+        "language": "en",
+        "ready": true,
+        "error": false,
+        "questLogOpen": false,
+        "capturesPointer": false,
+        "frame": 11,
+        "generation": 2,
+        "revision": 1,
+        "openRevision": 1
+      },
+      "hud": {
+        "ready": true,
+        "error": false,
+        "frame": 11,
+        "generation": 2,
+        "revision": 1,
+        "navigation": {
+          "characterOpen": false,
+          "characterPage": "character",
+          "bagOpen": false,
+          "questOpen": false
+        }
+      },
+      "skills": {
+        "ready": false,
+        "inputEnabled": false,
+        "modal": false,
+        "pending": false,
+        "error": false,
+        "frame": 11,
+        "appliedRevision": 2,
+        "appliedModelRevision": 1,
+        "appliedPresentationRevision": 2,
+        "renderRevision": 2,
+        "hudGeneration": 2,
+        "ownerFieldsPresent": true
+      },
+      "skillsDiagnostic": {
+        "ready": false,
+        "reason": "ineligible"
+      },
+      "questOwner": "react",
+      "documentVisible": true,
+      "canvasVisible": true,
+      "companionRootPresent": true,
+      "companionEntryVisibleCount": 1,
+      "skillTooltipVisibleCount": 0,
+      "geometry": {
+        "assetsPending": false,
+        "logicalWidth": 1024,
+        "logicalHeight": 768,
+        "width": 1024,
+        "height": 768
+      },
+      "entryQualification": {
+        "questClosedCurrent": false,
+        "hudReady": true
+      }
+    },
+    {
+      "elapsedMs": 971,
+      "screen": "game",
+      "quest": {
+        "displayLocaleVersion": 1,
+        "displayLanguage": "ar",
+        "language": "en",
+        "ready": true,
+        "error": false,
+        "questLogOpen": false,
+        "capturesPointer": false,
+        "frame": 12,
+        "generation": 2,
+        "revision": 1,
+        "openRevision": 1
+      },
+      "hud": {
+        "ready": true,
+        "error": false,
+        "frame": 12,
+        "generation": 2,
+        "revision": 1,
+        "navigation": {
+          "characterOpen": false,
+          "characterPage": "character",
+          "bagOpen": false,
+          "questOpen": false
+        }
+      },
+      "skills": {
+        "ready": false,
+        "inputEnabled": false,
+        "modal": false,
+        "pending": false,
+        "error": false,
+        "frame": 12,
+        "appliedRevision": 2,
+        "appliedModelRevision": 1,
+        "appliedPresentationRevision": 2,
+        "renderRevision": 2,
+        "hudGeneration": 2,
+        "ownerFieldsPresent": true
+      },
+      "skillsDiagnostic": {
+        "ready": false,
+        "reason": "closed"
+      },
+      "questOwner": "bevy",
+      "documentVisible": true,
+      "canvasVisible": true,
+      "companionRootPresent": true,
+      "companionEntryVisibleCount": 1,
+      "skillTooltipVisibleCount": 0,
+      "geometry": {
+        "assetsPending": false,
+        "logicalWidth": 1024,
+        "logicalHeight": 768,
+        "width": 1024,
+        "height": 768
+      },
+      "entryQualification": {
+        "questClosedCurrent": true,
+        "hudReady": true
+      }
+    }
+  ],
+  "runtimeResponsesObserved": 1,
+  "browserRuntimeBodyHashVerified": false,
+  "fencing": {
+    "windows": "current native Quest locale/version/generation/revision and advancing frames; Skills owner/HUD generation and advancing frames; no setter/dispatch APIs",
+    "sessions": "each screenshot follows the existing QA role ordinary UI login and matching server LoginSuccess character index/realm; logged-out frames never qualify",
+    "language": "real logged-out language menu only; legacy wire enum retained; exact displayLanguage echo required",
+    "limitations": "only Quest Diary and learned Fencing Skills body captured; no use/assignment/cast, full UI translation, description tooltip or automated visual glyph acceptance claim"
+  },
+  "finishedAt": "2026-11-05T15:50:32.451Z"
+}

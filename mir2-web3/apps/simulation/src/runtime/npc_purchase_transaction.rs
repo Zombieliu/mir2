@@ -9,7 +9,8 @@ use super::npc_purchase_outcome::{
     NpcPurchaseSource,
 };
 use super::resources::{
-    is_in_world, InventoryResource, RuntimeConfigResource, SessionResource, Stage5SystemsResource,
+    is_in_world, InventoryResource, QuestResource, RuntimeConfigResource, SessionResource,
+    Stage5SystemsResource,
 };
 use super::save::{
     active_session_mutating_account_id, encode_state_vec, merge_persisted_mail_into_character_save,
@@ -22,6 +23,7 @@ use crate::config::{
 use crate::npc_purchase_journal::{
     NpcPurchaseIntent, NpcPurchaseJournal, NpcPurchaseJournalEntry, NpcPurchaseOperation,
 };
+use crate::npc_purchase_owner::NpcPurchaseGoldLimit;
 use bevy_ecs::prelude::World;
 use mir2_protocol::ServerPacket;
 use rand_core::{OsRng, RngCore};
@@ -231,6 +233,9 @@ pub(super) struct PreparedCheckpointMerge {
     max_experience: i64,
     player: bevy_ecs::entity::Entity,
     level_changed: bool,
+    /// Only the NPC purchase planner may attach its already-owned projection.
+    /// Other full-checkpoint merges neither decode nor publish Quest state.
+    npc_purchase_quests: Option<QuestResource>,
 }
 impl PreparedCheckpointMerge {
     pub(super) fn new(world: &World, save: &CharacterSaveRecord) -> Result<Self, String> {
@@ -270,9 +275,17 @@ impl PreparedCheckpointMerge {
             max_experience: save.max_experience,
             player,
             level_changed: body.level != save.character.level,
+            npc_purchase_quests: None,
         })
     }
+    fn with_npc_purchase_quests(mut self, quests: Option<&QuestResource>) -> Self {
+        self.npc_purchase_quests = quests.cloned();
+        self
+    }
     pub(super) fn apply(self, world: &mut World) {
+        if let Some(quests) = self.npc_purchase_quests {
+            *world.resource_mut::<QuestResource>() = quests;
+        }
         world.resource_mut::<Stage5SystemsResource>().stage5_systems = self.stage5;
         world.resource_mut::<InventoryResource>().equipment_items = self.equipment;
         {
@@ -305,6 +318,7 @@ impl PreparedCheckpointMerge {
 fn planned_checkpoint(
     mut save: CharacterSaveRecord,
     plan: &PreparedNpcPurchase,
+    quests: Option<&QuestResource>,
 ) -> Result<CharacterSaveRecord, String> {
     if let Some(gold) = plan.gold {
         save.gold = gold;
@@ -313,6 +327,9 @@ fn planned_checkpoint(
         save.inventory_capacity = inventory.inventory_capacity;
         save.inventory_items_json = encode_state_vec(&inventory.inventory_items);
         save.belt_items_json = encode_state_vec(&inventory.belt_items);
+    }
+    if let Some(quests) = quests {
+        save.quest_states_json = encode_state_vec(&quests.quests);
     }
     if let Some(npc) = &plan.npc {
         save.npc_buy_back_items_json = encode_state_vec(&npc.npc_buy_back_items);
@@ -404,6 +421,113 @@ pub(super) fn catalog_intent(
         source,
         service_catalog_proof,
     })
+}
+
+/// Re-read the authoritative selected service and raw catalogue item. A quote's
+/// label, template or price alone never establishes the spending boundary.
+fn bounded_purchase_cost(
+    world: &World,
+    operation: NpcPurchaseOperation,
+    scope: [u8; 32],
+    limit: NpcPurchaseGoldLimit,
+) -> Result<u32, String> {
+    validate_bounded_intent(operation, limit)?;
+    let service = npc::current_crystal_npc_service_in_range(world)
+        .filter(npc::active_crystal_buy_service)
+        .ok_or("bounded NPC purchase service is unavailable")?;
+    let vendor = mir2_game_data::crystal_npc_info_by_script_key(&service.script_key)
+        .ok_or("bounded NPC purchase vendor is unknown")?;
+    if vendor.npc_index != limit.npc_index || service.label_key == "PEARLBUY" {
+        return Err(
+            "bounded NPC purchase vendor or currency differs from its authorization".into(),
+        );
+    }
+    let goods = npc::staged_npc_goods(world);
+    let selected = npc::crystal_npc_service_item_for_purchase_with_state(
+        world,
+        &service,
+        operation.intent.request.item_index,
+        &goods,
+    )
+    .ok_or("bounded NPC purchase selected item is unavailable")?;
+    if !matches!(selected.source, CrystalNpcPurchaseSource::Trade)
+        || selected.item.item_index != limit.item_template_index
+    {
+        return Err(
+            "bounded NPC purchase source or template differs from its authorization".into(),
+        );
+    }
+    let template = mir2_game_data::crystal_item_by_index(selected.item.item_index)
+        .ok_or("bounded NPC purchase template is unavailable")?;
+    if catalog_intent(
+        &service,
+        &selected,
+        &template,
+        vendor.price_rate,
+        operation.intent.request,
+        operation.actor,
+        scope,
+    )? != operation.intent
+    {
+        return Err(
+            "bounded NPC purchase catalogue or price changed; original quote is no longer valid"
+                .into(),
+        );
+    }
+    let cost = npc::crystal_npc_purchase_cost(&template, 1, vendor.price_rate);
+    if cost > limit.max_gold {
+        return Err("bounded NPC purchase actual price exceeds the reserved gold limit".into());
+    }
+    Ok(cost)
+}
+
+fn validate_bounded_intent(
+    operation: NpcPurchaseOperation,
+    limit: NpcPurchaseGoldLimit,
+) -> Result<(), String> {
+    if limit.max_gold == 0
+        || limit.max_gold > 50
+        || limit.max_count != 1
+        || limit.item_template_index != 658
+        || limit.npc_index != 9
+        || operation.intent.request.count != 1
+        || operation.intent.request.panel_type != 0
+        || operation.intent.currency != NpcPurchaseCurrency::Gold
+        || operation.intent.source != NpcPurchaseSource::Trade
+    {
+        return Err(
+            "companion supply requires one permitted gold trade item within its fixed scope".into(),
+        );
+    }
+    Ok(())
+}
+
+fn validate_bounded_purchase_outcome(
+    outcome: &NpcPurchaseProcessingOutcome,
+    limit: NpcPurchaseGoldLimit,
+    actual_cost: Option<u32>,
+) -> Result<(), String> {
+    if let NpcPurchaseProcessingOutcome::Committed {
+        request,
+        currency,
+        source,
+        charged,
+        admitted_count,
+        ..
+    } = outcome
+    {
+        if *currency != NpcPurchaseCurrency::Gold
+            || *source != NpcPurchaseSource::Trade
+            || request.count != 1
+            || *admitted_count != 1
+            || *admitted_count > limit.max_count
+            || actual_cost.is_some_and(|actual_cost| *charged != actual_cost)
+            || *charged > limit.max_gold
+        {
+            return Err("bounded NPC purchase prepared result exceeds its authorization".into());
+        }
+    }
+    Ok(())
 }
 
 fn owner_economic_projection(save: &CharacterSaveRecord) -> Result<serde_json::Value, String> {
@@ -645,6 +769,19 @@ impl SimulationSession {
                     purchased.packets,
                 )
             }
+            Action::PurchaseBounded { operation, limit } => {
+                let purchased =
+                    self.run_durable_npc_purchase_with_limit(operation, Some(limit), |packets| {
+                        Ok(packets)
+                    })?;
+                (
+                    Reply::Purchase {
+                        receipt: purchased.receipt,
+                        replayed: purchased.replayed,
+                    },
+                    purchased.packets,
+                )
+            }
         };
         // A terminal receipt remains meaningful without a complete live witness.
         // In particular, a partial post-commit publication cannot certify the
@@ -868,6 +1005,20 @@ impl SimulationSession {
     where
         F: FnOnce(Vec<ServerPacket>) -> Result<Vec<ServerPacket>, String>,
     {
+        self.run_durable_npc_purchase_with_limit(operation, None, postprocess)
+    }
+    fn run_durable_npc_purchase_with_limit<F>(
+        &mut self,
+        operation: NpcPurchaseOperation,
+        limit: Option<NpcPurchaseGoldLimit>,
+        postprocess: F,
+    ) -> Result<NpcPurchaseDurableExecution, NpcPurchaseDurableError>
+    where
+        F: FnOnce(Vec<ServerPacket>) -> Result<Vec<ServerPacket>, String>,
+    {
+        if let Some(limit) = limit {
+            validate_bounded_intent(operation, limit).map_err(before)?;
+        }
         let (account, active) = authenticated_checkpoint(self.app.world()).map_err(before)?;
         let scope = self
             .app
@@ -896,6 +1047,10 @@ impl SimulationSession {
             ));
         }
         if let Some(receipt) = self.query_npc_purchase(operation)? {
+            if let Some(limit) = limit {
+                validate_bounded_purchase_outcome(&receipt.entry.outcome, limit, None)
+                    .map_err(before)?;
+            }
             // Read-only dedup precedes all new plans and every durable write.
             let packets =
                 std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| postprocess(Vec::new())))
@@ -924,6 +1079,10 @@ impl SimulationSession {
             .can_append()
             .map_err(|error| before(error.to_string()))?;
         next_revision(active.revision).map_err(before)?;
+        let actual_bounded_cost = limit
+            .map(|limit| bounded_purchase_cost(self.app.world(), operation, scope, limit))
+            .transpose()
+            .map_err(before)?;
         let mut receipt = None;
         let mut replayed = false;
         let packets = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| -> Result<Vec<ServerPacket>, String> {
@@ -932,7 +1091,17 @@ impl SimulationSession {
             // Plan once, without changing World. Strict CAS below prevents using
             // this plan against a newer character checkpoint.
             let plan = npc::prepare_npc_purchase_for_intent(self.app.world(), operation, scope);
-            let checkpoint = planned_checkpoint(active.clone(), &plan)?;
+            if let (Some(limit), Some(actual_cost)) = (limit, actual_bounded_cost) {
+                validate_bounded_purchase_outcome(&plan.outcome, limit, Some(actual_cost))?;
+            }
+            // Project only a real successful delivery. Both Quest evidence and
+            // the debit/delivery are saved by the one complete-checkpoint CAS;
+            // rejected plans and read-only replay never observe a new event.
+            let quest_progress = matches!(&plan.outcome, NpcPurchaseProcessingOutcome::Committed { .. })
+                .then(|| super::quests::newcomer_v2_events::prepare_committed_potion_purchase(self.app.world(), &plan.packets))
+                .flatten();
+            let planned_quests = quest_progress.as_ref().map(|progress| &progress.quests);
+            let checkpoint = planned_checkpoint(active.clone(), &plan, planned_quests)?;
             let (entry, committed_journal, committed_revision, publication) = super::shared_guild_experience::commit_source(self.app.world(), &config, &accounts, |store| {
                 let persisted = persisted_checkpoint(store, &account, &active)?;
                 let durable = persisted.npc_purchase_journal.as_ref().ok_or("NPC purchase durable actor missing")?;
@@ -952,7 +1121,8 @@ impl SimulationSession {
                 let entry = journal.lookup(&operation).map_err(|error| error.to_string())?.cloned().ok_or("NPC purchase terminal record missing")?;
                 save.npc_purchase_journal = Some(journal.clone()); save.revision = revision;
                 validate_character_save_record(&save)?;
-                let publication = PreparedCheckpointMerge::new(self.app.world(), &save)?;
+                let publication = PreparedCheckpointMerge::new(self.app.world(), &save)?
+                    .with_npc_purchase_quests(planned_quests);
                 let record = store.accounts.get_mut(&account).expect("validated account");
             let character = record.characters.iter_mut().find(|character| character.index == save.character.index)
                 .ok_or("NPC purchase durable character changed before publication")?;
@@ -964,12 +1134,18 @@ impl SimulationSession {
             // conversion can fail or unwind. A replay never reapplies delivery.
             receipt = Some(NpcPurchaseReceipt { producer_scope: scope, entry });
             replayed = false;
-            let packets = plan.apply(self.app.world_mut());
+            let mut packets = plan.apply(self.app.world_mut());
             publication.apply(self.app.world_mut());
             let session = &mut self.app.world_mut().resource_mut::<SessionResource>();
             session.npc_purchase_journal = Some(committed_journal);
             if !session.advance_active_save_revision(active.revision, committed_revision) {
                 return Err("NPC purchase committed but live checkpoint revision publication failed".into());
+            }
+            // Packet construction reads the state already saved and published.
+            // It must not observe an action or perform a second save here.
+            if let Some(progress) = quest_progress {
+                packets.extend(progress.changed_quest_ids.into_iter().filter_map(|id|
+                    super::quests::crystal_quest_update_packet(self.app.world(), id)));
             }
             let packets = self.finalize_packets(packets);
             postprocess(packets)
@@ -1008,3 +1184,7 @@ impl SimulationSession {
 #[cfg(test)]
 #[path = "npc_purchase_transaction_tests.rs"]
 mod tests;
+
+#[cfg(test)]
+#[path = "npc_purchase_bounded_tests.rs"]
+mod bounded_tests;

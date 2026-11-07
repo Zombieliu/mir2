@@ -1,5 +1,59 @@
 # Crystal Server Parity
 
+## R16 普通重连的保存先行（2026-11-08）
+
+Web 自动重新登录后的普通 StartGame 继续使用原服务器认证、租约和保存权威，仅补齐同进程 WebSocket 的断线保存交接等待；未增加协议字段、存档 schema 或客户端权限。103 项独立回归及两个渲染后端实际保存／恢复通过。Native 凭证先行且旧档仍保存中的恢复与跨 Gateway／TCP 不由此验收。[范围、原失败和证据](WEB-R16-PARITY-GOAL.zh-CN.md#慢保存与自动重连2026-11-08)
+
+## R16 创角结果 4 和 5（2026-11-07）
+
+参照 Crystal 的四槽先于重名判定，普通授权创角由权威存储回 `NewCharacter(4)` 或 `NewCharacter(5)`。File、PG 源和普通浏览器分别取证。匹配限在册角色及 ASCII 大小写折叠，R16 删除释放名字，原版保留软删名字和更窄的名字格式另列。[对照和回执](WEB-R16-PARITY-GOAL.zh-CN.md#共享创角校验)
+
+## R16 V2 后段任务场景（2026-11-07）
+
+单只训练怪配置只作用于 `newcomer-v2` 的 D022，原版刷怪配置和其他地图按隔离回归核对。普通攻击与施法、任务交付和保存依然由网关裁定。该教程候选的三职业和正式服门槛按独立记录追踪。[范围](WEB-R16-NEWCOMER-V22-20261107.zh-CN.md)
+
+## R16 同图 NPC 权威搬移（2026-11-06）
+
+已有普通菜单脚本成功在同图移动角色时，Gateway 将被真实位置回执证实的新坐标同步到共享 Zone，再由正常注销保存；不开放任何客户端传送坐标或额外命令。Gilbert 实际脚本扣费、即时位置、注销／重登回归通过，另有 7 项相邻地图转换测试；v20 已运行于本机。[范围](WEB-R16-FOREST-SHARED-SAVE-20261106.zh-CN.md#后续主线与地图)。
+
+## R16 普通采购完成后的新手任务（2026-11-06）
+
+Web durable 购买与 Native 普通购买共用既有小红／小蓝服务端条件。durable 路径在实际成交时用当前已接受的任务生成同次保存；旧回执、失败和非目标药无新进度，客户端不计数。v18 已复验普通购买、服务器 `1/1`、唯一交付及正常重登。原子文件故障／回查与伙伴受限购买回归详见[任务续验](WEB-R16-FOREST-SHARED-SAVE-20261106.zh-CN.md#补给与任务保存)。
+
+## R16共享任务基线与既有权威（2026-11-05）
+
+Windows/Web本机环境激活同一现有V2任务规则，完成/奖励仍以服务器ACK与CompleteQuest为准；新Quest本地按钮不增加WorldCommand或世界行动权限。V2任务23项、旧持久化3项通过；普通首3项真实击杀/交付/奖励及重登、既有普通采购协议的两次实扣有证据。后续整线与其它V1世界迁移未验收。环境、资产保留与前端旧失败见[本轮交付](WEB-R16-PLAYABLE-HANDOFF-20261104.zh-CN.md#v12-v13-windows-与-web-共用新手基础)，不提升全局1:1或Accepted。
+
+## 阿洛生活授权与到期边界（2026-11-04）
+
+比奇固定范围、真实资源及累计50游戏金币/一瓶由服务端持久授权限制；记忆迁移、请求ID或Node重启不能恢复额度。激活前无行动；到期/撤销只允许受限返程，不开放新攻击、拾取、传送或无上限购买。返程采用同一Zone真实动态占位与路径距离，允许必要绕行，未让模型决定资产或战斗结果。
+
+Node461与Simulation242/Gateway141共383独立案例通过，最终真实二十分钟普通联机含重启及自然到期安全返家通过。普通双向交易的相邻回归仍通过；四轮失败保留。[专题与证据](ALO-AUTONOMOUS-LIFE-20261103.zh-CN.md)记录实际版本及本地交付。此为Numeron扩展，不认定Crystal原英雄1:1或整体Accepted。
+
+## 阿洛受限授权与实际交易边界（2026-11-03）
+
+教学模型只生成待确认软偏好，不能扩大采购权限或裁定结果。服务器两阶段授权与持久预算限定鲁本658一瓶、最多50游戏金币/300秒；普通无上限购买路径不可绕过，未知原操作及重启恢复只Query。Node310、Gateway78、Simulation bounded6／transaction37／wire11分别通过；新网关独立普通 `/ws` 补给7项的40金币扣款、药+1、AOI外返邻格与取消有真实收据。
+
+第二笔 commit 后丢失的是刻意注入的 JS 方法返回值，随后换 Node 进程查询，不能称实际断网或 Gateway 重启。Windows 两次真实 Luna 教学与[不同Node重启记忆](evidence/alo-cultivation-supply-20261103/model-ui/teaching-ui-outcome.json)已核：同archive/v2三项true、未追加调用；该新世界教学后战斗未另验，上一阶段原本地入口已更新并验证存档保留。详见[主题](ALO-CULTIVATION-SUPPLY-20261103.zh-CN.md)和[分范围证据](evidence/alo-cultivation-supply-20261103/README.md)。这是 Numeron 附加能力，不认定原英雄系统1:1或整体 Accepted，`Candidate100=false`。
+
+## 阿洛真实模型计划验证（2026-11-03）
+
+OpenAI三次真实回执与普通服务器击杀确认、返队和重启后的来源记忆引用已关联；没有修改游戏规则或让模型裁定结果。Node227／fixture18通过，当前属于Numeron附加目标层，不认定原英雄系统或整体Accepted。[证据](ALO-OPENAI-20261103.zh-CN.md#同日真实模型验收已完成)。
+
+## 阿洛 OpenAI 目标层的权威边界（2026-11-03）
+
+新增私人 `instruct` 不进入 WorldCommand；模型无管理员、资产或结果裁定接口，继续通过普通客户端动作。
+Gateway伙伴20与Node214通过，独立本地联机替身跑通两只参战击杀／不拾取／返队；未改战斗结算或共享Zone规则。
+这属于Numeron附加功能，不作为Crystal原英雄系统或整体Accepted的完成证据。
+真实模型与交付验证范围见[本轮记录](ALO-OPENAI-20261103.zh-CN.md)。
+
+## R16 安全区来源修正与阿洛控制（2026-11-03）
+
+已知 Crystal 地图的安全区资料现在随 Join、权威坐标同步及 chat profile 更新按已有 manifest
+重算，防止旧个人会话标记覆盖真实 Zone 位置。安全区10、Zone455、共享 Zone209及 Gateway
+回归分组通过，原战斗断言保留；证据和伙伴功能边界见[本轮记录](ALO-R16-MIGRATION-20261103.zh-CN.md)。
+私人控制不进入 WorldCommand，不生成游戏事实；本地通过不等于公网部署或整体人类 Accepted。
+
 ## 普通用药 Tick 唤醒（2026-10-27，北京时间）
 
 正常用药沿原鉴权触发短 Tick 唤醒；32项 Rust 回归、828项工具检查与新 Release 构建通过，真实准备验证扣药1及精确HP12→18。回村寻路仍失败，本轮prepared4/100且无CCU测量，不提高整体Candidate/Accepted；详见[本轮证据](generated/cell-p0-p1-completion-20261024/capacity-ordinary-economic-v1/README.md)。

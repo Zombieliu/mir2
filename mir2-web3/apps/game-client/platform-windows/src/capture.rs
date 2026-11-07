@@ -4,8 +4,10 @@
 //! `MIR2_NATIVE_CAPTURE_DIR` is provided with a valid, non-empty value.
 
 mod provenance;
+mod resource_reads;
 
 use bevy::{
+    diagnostic::FrameCount,
     input::ButtonInput,
     prelude::{
         App, Image, KeyCode, On, Plugin, PostUpdate, Query, Res, ResMut, Resource, Window, With,
@@ -128,6 +130,12 @@ impl NativeCaptureConfig {
     }
 }
 
+/// Reuse the existing validated capture opt-in. This is queried before packed
+/// startup reads; it does not enable capture or discover an unsigned store.
+pub(crate) fn resource_read_profiling_requested() -> bool {
+    NativeCaptureConfig::from_env().is_some()
+}
+
 #[derive(Debug, Default, Resource)]
 struct NativeCaptureRuntime {
     capture_index: u64,
@@ -172,6 +180,8 @@ struct NativeCaptureRequest {
     ui_state: Option<String>,
     world: NativeCaptureWorld,
     build: NativeCaptureBuild,
+    request_frame: Option<u32>,
+    resource_reads: Option<resource_reads::FrozenResourceReads>,
 }
 
 #[derive(Debug, Clone, Default, Serialize)]
@@ -348,6 +358,7 @@ fn manual_capture_system(
     quest_ui: Option<Res<QuestUiState>>,
     windows: Query<&Window, With<PrimaryWindow>>,
     rendered: Option<Res<RenderedCaptureContext>>,
+    frame: Option<Res<FrameCount>>,
 ) {
     // Ctrl+Shift+F12 remains the explicit QA evidence shortcut. Ordinary
     // screenshots follow Crystal's configurable key-release binding.
@@ -384,6 +395,7 @@ fn manual_capture_system(
             quest_ui.as_deref(),
             primary_dpi_scale(&windows),
             rendered.as_deref(),
+            frame.as_deref().map(|value| value.0),
         ),
     );
 }
@@ -403,6 +415,7 @@ fn auto_capture_system(
     quest_ui: Option<Res<QuestUiState>>,
     windows: Query<&Window, With<PrimaryWindow>>,
     rendered: Option<Res<RenderedCaptureContext>>,
+    frame: Option<Res<FrameCount>>,
     wallet: Option<Res<NativeWalletLogin>>,
 ) {
     let Some(shell) = shell.as_deref() else {
@@ -505,6 +518,7 @@ fn auto_capture_system(
                 quest_ui.as_deref(),
                 primary_dpi_scale(&windows),
                 rendered.as_deref(),
+                frame.as_deref().map(|value| value.0),
             ),
         );
     }
@@ -533,6 +547,7 @@ fn capture_request(
     quest_ui: Option<&QuestUiState>,
     dpi_scale: Option<f32>,
     rendered: Option<&RenderedCaptureContext>,
+    request_frame: Option<u32>,
 ) -> NativeCaptureRequest {
     let is_world_scene = is_world_scene(scene);
     let map_name = is_world_scene
@@ -563,6 +578,15 @@ fn capture_request(
     }
     let ui_state = safe_ui_state_slug(shell, player_ui, quest_ui);
     let sidecar_path = png_path.with_extension("json");
+    let build = provenance::trusted_build_provenance();
+    let resource_reads = resource_reads::freeze(
+        crate::packed_assets::store().and_then(|store| store.read_profile_snapshot()),
+        build.packed_generation.as_ref(),
+    )
+    .unwrap_or_else(|error| {
+        eprintln!("[native-capture] resource-read diagnostics unavailable: {error}");
+        None
+    });
 
     NativeCaptureRequest {
         png_path,
@@ -575,7 +599,9 @@ fn capture_request(
         dpi_scale,
         ui_state,
         world,
-        build: provenance::trusted_build_provenance(),
+        build,
+        request_frame,
+        resource_reads,
     }
 }
 
@@ -649,7 +675,12 @@ fn write_capture_and_sidecar(image: &Image, request: &NativeCaptureRequest) -> i
     write_png_atomically(&request.png_path, width, height, rgba.as_raw())?;
 
     let image_sha256 = sha256_hex(&fs::read(&request.png_path)?);
-    let json = serialize_capture_sidecar(request, width, height, image_sha256)?;
+    let json = serialize_capture_sidecar(request, width, height, image_sha256.clone())?;
+    // Optional diagnostics never change the capture schema or its eligibility.
+    // The snapshot is from request time, not this later GPU completion callback.
+    if let Err(error) = resource_reads::write(request, &image_sha256) {
+        eprintln!("[native-capture] resource-read diagnostic was not written: {error}");
+    }
     // The sidecar is the capture-completion marker. It is deliberately
     // attempted only after the final PNG exists and hashes successfully; its
     // schema still decides whether it is acceptance-eligible or only a draft.
@@ -1748,6 +1779,7 @@ mod tests {
                 None,
                 Some(1.0),
                 None,
+                None,
             );
             let blockers = capture_acceptance_blockers(&request, 1024, 768);
             assert!(is_world_scene(scene));
@@ -1979,6 +2011,7 @@ mod tests {
             Some(&quest_ui),
             Some(1.25),
             None,
+            None,
         );
         let sidecar: serde_json::Value = serde_json::from_slice(
             &serialize_capture_sidecar(&request, 1024, 768, "a".repeat(64)).expect("sidecar"),
@@ -2026,6 +2059,7 @@ mod tests {
             Some(&NativePlayerUiState::default()),
             None,
             Some(1.0),
+            None,
             None,
         );
         request.run_id = Some("pair-001".to_owned());
@@ -2125,6 +2159,7 @@ mod tests {
                 None,
                 Some(1.0),
                 Some(value),
+                None,
             )
         };
         let draft = make(&rendered);

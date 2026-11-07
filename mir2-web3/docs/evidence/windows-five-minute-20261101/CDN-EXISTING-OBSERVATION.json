@@ -1,0 +1,24 @@
+{
+  "schema": "mir2.five-minute.g0-existing-cdn-observation.v1",
+  "observedUtc": "2026-11-01T15:04:38.506558+00:00",
+  "readOnly": true,
+  "newDeploymentOrConfigurationWritten": false,
+  "nativePublicRouteScript": "mir2-native-downloads",
+  "zoneCacheRulesetsFound": 0,
+  "workerCodeUsesExplicitCacheApi": true,
+  "returnedCompiledModuleTextSha256": "3cfa62eea41e08346ca433663b7c16772a66621c41ff949a38a8a802e580ed1b",
+  "rawApiTextLocalPath": "E:\\mir2-release\\windows-five-minute-20261101\\LIVE-NATIVE-DOWNLOADS-MODULE.json",
+  "sourceMapParsed": false,
+  "packHead": {
+    "status": 200,
+    "sizeBytes": 33551296,
+    "applicationCache": "MISS",
+    "colo": "LAX",
+    "normalTls": true,
+    "clientProxyUsed": false,
+    "responseBodyDownloadedBytes": 0
+  },
+  "interpretation": "Existing immutable pack route uses Worker Cache API. Absence of zone Cache Rules does not mean caching is disabled. A single HEAD MISS does not test cache-fill completion or bandwidth.",
+  "coldAcceptance": false,
+  "newCacheRuleRequiredFromThisEvidence": false
+}

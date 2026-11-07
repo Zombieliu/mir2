@@ -1,0 +1,890 @@
+{
+  "schema": "mir2.r16.session-return.browser.v1",
+  "mode": "journey",
+  "locale": "zh-CN",
+  "passed": false,
+  "renderer": "bevy-db5e53a91f4d11de",
+  "startedAt": "2026-11-07T09:53:57.386Z",
+  "phases": [
+    "normal-login",
+    "cold-entry-single-q",
+    "normal-logout-to-selection",
+    "same-connection-entry",
+    "normal-logout-to-selection",
+    "same-connection-entry"
+  ],
+  "commands": {
+    "clientCapabilities": 2,
+    "setLanguage": 1,
+    "clientVersion": 1,
+    "login": 1,
+    "startGame": 3,
+    "keepAlive": 7,
+    "npcPurchaseOwner": 3,
+    "logOut": 2
+  },
+  "sockets": [
+    {
+      "id": 1,
+      "closed": false
+    }
+  ],
+  "coldKeys": [
+    {
+      "code": "KeyQ",
+      "trusted": true,
+      "repeat": false,
+      "focused": true,
+      "visible": "visible",
+      "alt": false,
+      "control": false,
+      "defaultPrevented": false,
+      "activeTag": "DIV",
+      "questReady": false,
+      "questOpen": false,
+      "hudReady": false,
+      "hudQuestOpen": null,
+      "edge": "before"
+    }
+  ],
+  "keyboard": [
+    {
+      "code": "KeyQ",
+      "trusted": true,
+      "repeat": false,
+      "focused": true,
+      "visible": "visible",
+      "alt": false,
+      "control": false,
+      "defaultPrevented": false,
+      "activeTag": "DIV",
+      "questReady": false,
+      "questOpen": false,
+      "hudReady": false,
+      "hudQuestOpen": null,
+      "edge": "before",
+      "phase": "cold-entry-single-q"
+    },
+    {
+      "code": "KeyQ",
+      "trusted": true,
+      "repeat": false,
+      "focused": true,
+      "visible": "visible",
+      "alt": false,
+      "control": false,
+      "defaultPrevented": false,
+      "activeTag": "DIV",
+      "questReady": false,
+      "questOpen": false,
+      "hudReady": false,
+      "hudQuestOpen": null,
+      "edge": "after",
+      "phase": "cold-entry-single-q"
+    },
+    {
+      "code": "KeyX",
+      "trusted": true,
+      "repeat": false,
+      "focused": true,
+      "visible": "visible",
+      "alt": true,
+      "control": false,
+      "defaultPrevented": false,
+      "activeTag": "DIV",
+      "questReady": true,
+      "questOpen": false,
+      "hudReady": true,
+      "hudQuestOpen": false,
+      "edge": "before",
+      "phase": "normal-logout-to-selection"
+    },
+    {
+      "code": "KeyX",
+      "trusted": true,
+      "repeat": false,
+      "focused": true,
+      "visible": "visible",
+      "alt": true,
+      "control": false,
+      "defaultPrevented": false,
+      "activeTag": "DIV",
+      "questReady": true,
+      "questOpen": false,
+      "hudReady": true,
+      "hudQuestOpen": false,
+      "edge": "after",
+      "phase": "normal-logout-to-selection"
+    },
+    {
+      "code": "F11",
+      "trusted": true,
+      "repeat": false,
+      "focused": true,
+      "visible": "visible",
+      "alt": false,
+      "control": false,
+      "defaultPrevented": false,
+      "activeTag": "DIV",
+      "questReady": true,
+      "questOpen": false,
+      "hudReady": true,
+      "hudQuestOpen": false,
+      "edge": "before",
+      "phase": "same-connection-entry"
+    },
+    {
+      "code": "F11",
+      "trusted": true,
+      "repeat": false,
+      "focused": true,
+      "visible": "visible",
+      "alt": false,
+      "control": false,
+      "defaultPrevented": false,
+      "activeTag": "DIV",
+      "questReady": true,
+      "questOpen": false,
+      "hudReady": true,
+      "hudQuestOpen": false,
+      "edge": "after",
+      "phase": "same-connection-entry"
+    },
+    {
+      "code": "KeyX",
+      "trusted": true,
+      "repeat": false,
+      "focused": true,
+      "visible": "visible",
+      "alt": true,
+      "control": false,
+      "defaultPrevented": false,
+      "activeTag": "DIV",
+      "questReady": true,
+      "questOpen": false,
+      "hudReady": true,
+      "hudQuestOpen": false,
+      "edge": "before",
+      "phase": "normal-logout-to-selection"
+    },
+    {
+      "code": "KeyX",
+      "trusted": true,
+      "repeat": false,
+      "focused": true,
+      "visible": "visible",
+      "alt": true,
+      "control": false,
+      "defaultPrevented": false,
+      "activeTag": "DIV",
+      "questReady": true,
+      "questOpen": false,
+      "hudReady": true,
+      "hudQuestOpen": false,
+      "edge": "after",
+      "phase": "normal-logout-to-selection"
+    }
+  ],
+  "entries": [
+    {
+      "role": "original",
+      "index": 1,
+      "level": 30,
+      "completedMainAndGrowth": 26,
+      "characterPage": "character",
+      "characterOpen": false,
+      "position": {
+        "x": 328,
+        "y": 264
+      },
+      "stamp": {
+        "generation": 2,
+        "revision": 1,
+        "connectionGeneration": 1,
+        "sessionGeneration": 1,
+        "sceneRevision": 3,
+        "playerObjectId": 1000,
+        "mapFileName": "0"
+      },
+      "socketId": 1
+    },
+    {
+      "role": "new",
+      "index": 4,
+      "level": 1,
+      "completedMainAndGrowth": 0,
+      "characterPage": "character",
+      "characterOpen": false,
+      "position": {
+        "x": 288,
+        "y": 616
+      },
+      "stamp": {
+        "generation": 4,
+        "revision": 12,
+        "connectionGeneration": 1,
+        "sessionGeneration": 2,
+        "sceneRevision": 6,
+        "playerObjectId": 1000,
+        "mapFileName": "0"
+      },
+      "socketId": 1
+    }
+  ],
+  "returns": [
+    {
+      "index": 1,
+      "selectedPosition": 0,
+      "roster": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "sourceSocketUnchanged": true,
+      "loginCountUnchanged": true
+    },
+    {
+      "index": 4,
+      "selectedPosition": 3,
+      "roster": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "sourceSocketUnchanged": true,
+      "loginCountUnchanged": true
+    }
+  ],
+  "screenshots": [
+    "01-first-q-native-diary.png",
+    "02-logout-selection.png",
+    "03-logout-selection.png",
+    "04-failure.png"
+  ],
+  "network": {
+    "errors": [],
+    "failed": []
+  },
+  "pageErrors": [],
+  "releases": [
+    "bevy-db5e53a91f4d11de"
+  ],
+  "errors": [
+    {
+      "phase": "same-connection-entry",
+      "code": "NATIVE_UI_NOT_READY",
+      "detail": "NATIVE_UI_NOT_READY"
+    }
+  ],
+  "reusesOrdinaryCreatedRole": true,
+  "coldOpen": {
+    "singlePhysicalQ": true,
+    "trigger": "visible-world",
+    "before": {
+      "questReady": false,
+      "hudReady": false,
+      "questOpen": false
+    },
+    "after": {
+      "questReady": true,
+      "hudReady": true,
+      "questOpen": true,
+      "locale": "zh-CN"
+    },
+    "elapsedMs": 4411
+  },
+  "beforeLogout": [
+    {
+      "diagnosticMs": {
+        "snapshot": 0.19999992847442627,
+        "owner": 0,
+        "reference": 0,
+        "hero": 0,
+        "hud": 0.20000004768371582,
+        "total": 0.3999999761581421
+      },
+      "screen": "game",
+      "initialAssetsReady": true,
+      "connectionGeneration": 1,
+      "sessionGeneration": 1,
+      "activeSession": {
+        "connectionGeneration": 1,
+        "sessionGeneration": 1,
+        "afterSnapshotVersion": 4
+      },
+      "suspendReason": null,
+      "connected": true,
+      "playerId": "1000",
+      "map": "0",
+      "gameplay": {
+        "owner": true,
+        "referenceBlocked": false,
+        "heroBlocked": false,
+        "heroPet": false,
+        "cashShop": false
+      },
+      "hud": {
+        "current": true,
+        "snapshotPresent": true,
+        "playerPresent": true,
+        "generation": 2,
+        "hostVisible": true,
+        "inGame": true,
+        "navigation": {
+          "characterOpen": false,
+          "characterPage": "character",
+          "bagOpen": false,
+          "questOpen": false
+        },
+        "navigationRevision": 3
+      },
+      "navigation": [
+        {
+          "action": "closeQuest",
+          "accepted": true,
+          "fresh": true,
+          "generation": 2,
+          "revision": 1,
+          "snapshotMatches": true,
+          "appliedPending": false,
+          "ready": true,
+          "errorPresent": false,
+          "navigationSourceMatches": true,
+          "nativeBaseline": true,
+          "navigationFresh": true
+        }
+      ]
+    },
+    {
+      "diagnosticMs": {
+        "snapshot": 0.19999992847442627,
+        "owner": 0,
+        "reference": 0,
+        "hero": 0,
+        "hud": 0.20000004768371582,
+        "total": 0.3999999761581421
+      },
+      "screen": "game",
+      "initialAssetsReady": true,
+      "connectionGeneration": 1,
+      "sessionGeneration": 2,
+      "activeSession": {
+        "connectionGeneration": 1,
+        "sessionGeneration": 2,
+        "afterSnapshotVersion": 7
+      },
+      "suspendReason": null,
+      "connected": true,
+      "playerId": "1000",
+      "map": "0",
+      "gameplay": {
+        "owner": true,
+        "referenceBlocked": false,
+        "heroBlocked": false,
+        "heroPet": false,
+        "cashShop": false
+      },
+      "hud": {
+        "current": true,
+        "snapshotPresent": true,
+        "playerPresent": true,
+        "generation": 4,
+        "hostVisible": true,
+        "inGame": true,
+        "navigation": {
+          "characterOpen": true,
+          "characterPage": "spells",
+          "bagOpen": false,
+          "questOpen": false
+        },
+        "navigationRevision": 5
+      },
+      "navigation": [
+        {
+          "action": "closeQuest",
+          "accepted": true,
+          "fresh": true,
+          "generation": 2,
+          "revision": 1,
+          "snapshotMatches": true,
+          "appliedPending": false,
+          "ready": true,
+          "errorPresent": false,
+          "navigationSourceMatches": true,
+          "nativeBaseline": true,
+          "navigationFresh": true
+        },
+        {
+          "action": "selectCharacterPage",
+          "accepted": true,
+          "fresh": true,
+          "generation": 4,
+          "revision": 11,
+          "snapshotMatches": true,
+          "appliedPending": false,
+          "ready": true,
+          "errorPresent": false,
+          "navigationSourceMatches": true,
+          "nativeBaseline": true,
+          "navigationFresh": true
+        }
+      ]
+    }
+  ],
+  "readiness": [
+    {
+      "elapsedMs": 424,
+      "rawReadMs": 246,
+      "contextReadMs": 178,
+      "metrics": null,
+      "quest": {
+        "ready": true,
+        "generation": 4,
+        "revision": 12,
+        "frame": 843
+      },
+      "hud": {
+        "ready": true,
+        "generation": 4,
+        "revision": 11,
+        "frame": 843
+      },
+      "context": {
+        "diagnosticMs": {
+          "snapshot": 0.19999992847442627,
+          "owner": 0,
+          "reference": 0,
+          "hero": 0,
+          "hud": 0.20000004768371582,
+          "total": 0.3999999761581421
+        },
+        "screen": "game",
+        "initialAssetsReady": true,
+        "connectionGeneration": 1,
+        "sessionGeneration": 2,
+        "activeSession": {
+          "connectionGeneration": 1,
+          "sessionGeneration": 2,
+          "afterSnapshotVersion": 7
+        },
+        "suspendReason": null,
+        "connected": true,
+        "playerId": "1000",
+        "map": "0",
+        "gameplay": {
+          "owner": true,
+          "referenceBlocked": false,
+          "heroBlocked": false,
+          "heroPet": false,
+          "cashShop": false
+        },
+        "hud": {
+          "current": true,
+          "snapshotPresent": true,
+          "playerPresent": true,
+          "generation": 4,
+          "hostVisible": true,
+          "inGame": true,
+          "navigation": {
+            "characterOpen": false,
+            "characterPage": "character",
+            "bagOpen": false,
+            "questOpen": false
+          },
+          "navigationRevision": 5
+        },
+        "navigation": [
+          {
+            "action": "closeQuest",
+            "accepted": true,
+            "fresh": true,
+            "generation": 2,
+            "revision": 1,
+            "snapshotMatches": true,
+            "appliedPending": false,
+            "ready": true,
+            "errorPresent": false,
+            "navigationSourceMatches": true,
+            "nativeBaseline": true,
+            "navigationFresh": true
+          }
+        ]
+      }
+    },
+    {
+      "elapsedMs": 695,
+      "rawReadMs": 422,
+      "contextReadMs": 273,
+      "metrics": [
+        {
+          "name": "Nodes",
+          "value": 1541
+        },
+        {
+          "name": "LayoutDuration",
+          "value": 0.004754
+        },
+        {
+          "name": "ScriptDuration",
+          "value": 5.630064
+        },
+        {
+          "name": "TaskDuration",
+          "value": 6.426732
+        },
+        {
+          "name": "JSHeapUsedSize",
+          "value": 71319732
+        }
+      ],
+      "quest": {
+        "ready": false,
+        "generation": 6,
+        "revision": 20,
+        "frame": 1694
+      },
+      "hud": {
+        "ready": true,
+        "generation": 6,
+        "revision": 20,
+        "frame": 1694
+      },
+      "context": {
+        "diagnosticMs": {
+          "snapshot": 0.8999999761581421,
+          "owner": 0,
+          "reference": 0,
+          "hero": 0,
+          "hud": 0.2999999523162842,
+          "total": 1.1999999284744263
+        },
+        "screen": "game",
+        "initialAssetsReady": true,
+        "connectionGeneration": 1,
+        "sessionGeneration": 3,
+        "activeSession": {
+          "connectionGeneration": 1,
+          "sessionGeneration": 3,
+          "afterSnapshotVersion": 10
+        },
+        "suspendReason": null,
+        "connected": true,
+        "playerId": "1000",
+        "map": "0",
+        "gameplay": {
+          "owner": true,
+          "referenceBlocked": false,
+          "heroBlocked": false,
+          "heroPet": false,
+          "cashShop": false
+        },
+        "hud": {
+          "current": true,
+          "snapshotPresent": true,
+          "playerPresent": true,
+          "generation": 6,
+          "hostVisible": true,
+          "inGame": true,
+          "navigation": {
+            "characterOpen": false,
+            "characterPage": "character",
+            "bagOpen": false,
+            "questOpen": false
+          },
+          "navigationRevision": 7
+        },
+        "navigation": [
+          {
+            "action": "closeQuest",
+            "accepted": true,
+            "fresh": true,
+            "generation": 2,
+            "revision": 1,
+            "snapshotMatches": true,
+            "appliedPending": false,
+            "ready": true,
+            "errorPresent": false,
+            "navigationSourceMatches": true,
+            "nativeBaseline": true,
+            "navigationFresh": true
+          },
+          {
+            "action": "selectCharacterPage",
+            "accepted": true,
+            "fresh": true,
+            "generation": 4,
+            "revision": 11,
+            "snapshotMatches": true,
+            "appliedPending": false,
+            "ready": true,
+            "errorPresent": false,
+            "navigationSourceMatches": true,
+            "nativeBaseline": true,
+            "navigationFresh": true
+          }
+        ]
+      }
+    },
+    {
+      "elapsedMs": 62601,
+      "rawReadMs": 61672,
+      "contextReadMs": 176,
+      "metrics": [
+        {
+          "name": "Nodes",
+          "value": 1611
+        },
+        {
+          "name": "LayoutDuration",
+          "value": 0.006268
+        },
+        {
+          "name": "ScriptDuration",
+          "value": 6.07256
+        },
+        {
+          "name": "TaskDuration",
+          "value": 68.321334
+        },
+        {
+          "name": "JSHeapUsedSize",
+          "value": 77972320
+        }
+      ],
+      "quest": {
+        "ready": true,
+        "generation": 6,
+        "revision": 21,
+        "frame": 1696
+      },
+      "hud": {
+        "ready": false,
+        "generation": 6,
+        "revision": 22,
+        "frame": 1696
+      },
+      "context": {
+        "diagnosticMs": {
+          "snapshot": 0.10000002384185791,
+          "owner": 0,
+          "reference": 0,
+          "hero": 0,
+          "hud": 0.20000004768371582,
+          "total": 0.30000007152557373
+        },
+        "screen": "game",
+        "initialAssetsReady": true,
+        "connectionGeneration": 1,
+        "sessionGeneration": 3,
+        "activeSession": {
+          "connectionGeneration": 1,
+          "sessionGeneration": 3,
+          "afterSnapshotVersion": 10
+        },
+        "suspendReason": null,
+        "connected": true,
+        "playerId": "1000",
+        "map": "0",
+        "gameplay": {
+          "owner": true,
+          "referenceBlocked": false,
+          "heroBlocked": false,
+          "heroPet": false,
+          "cashShop": false
+        },
+        "hud": {
+          "current": true,
+          "snapshotPresent": true,
+          "playerPresent": true,
+          "generation": 6,
+          "hostVisible": true,
+          "inGame": true,
+          "navigation": {
+            "characterOpen": false,
+            "characterPage": "character",
+            "bagOpen": false,
+            "questOpen": false
+          },
+          "navigationRevision": 7
+        },
+        "navigation": [
+          {
+            "action": "closeQuest",
+            "accepted": true,
+            "fresh": true,
+            "generation": 2,
+            "revision": 1,
+            "snapshotMatches": true,
+            "appliedPending": false,
+            "ready": true,
+            "errorPresent": false,
+            "navigationSourceMatches": true,
+            "nativeBaseline": true,
+            "navigationFresh": true
+          },
+          {
+            "action": "selectCharacterPage",
+            "accepted": true,
+            "fresh": true,
+            "generation": 4,
+            "revision": 11,
+            "snapshotMatches": true,
+            "appliedPending": false,
+            "ready": true,
+            "errorPresent": false,
+            "navigationSourceMatches": true,
+            "nativeBaseline": true,
+            "navigationFresh": true
+          }
+        ]
+      }
+    }
+  ],
+  "failureUi": {
+    "quest": {
+      "ready": true,
+      "error": null,
+      "frame": 1698,
+      "generation": 6,
+      "revision": 21,
+      "questLogOpen": false,
+      "capturesPointer": false
+    },
+    "hud": {
+      "ready": true,
+      "error": null,
+      "frame": 1698,
+      "generation": 6,
+      "revision": 23,
+      "navigation": {
+        "characterOpen": false,
+        "characterPage": "character",
+        "bagOpen": false,
+        "questOpen": false
+      }
+    },
+    "stamp": {
+      "generation": 6,
+      "revision": 21,
+      "connectionGeneration": 1,
+      "sessionGeneration": 3,
+      "sceneRevision": 9,
+      "playerObjectId": 1000,
+      "mapFileName": "0"
+    }
+  },
+  "failureGeometry": {
+    "x": 128,
+    "y": 96,
+    "width": 1024,
+    "height": 768,
+    "logicalWidth": 1024,
+    "logicalHeight": 768,
+    "pending": false
+  },
+  "failureFocus": {
+    "focused": true,
+    "visible": "visible",
+    "activeTag": "DIV",
+    "sceneGate": {
+      "screen": "game",
+      "sceneInteractionReady": true,
+      "sceneSpriteLibrariesReady": true,
+      "pendingSceneSpriteLibraryCount": 0,
+      "pendingSceneSpriteLibraryKeys": [],
+      "desiredSceneSpriteLibraryCount": 16,
+      "preloadStatus": "timeout",
+      "preloadInteractionReady": true,
+      "preloadReady": true,
+      "preloadFailed": 0,
+      "hasRenderPlayer": true,
+      "hasMapRegion": true,
+      "gpuEntityRendererRuntimePending": false,
+      "useGpuEntityRenderer": false
+    }
+  },
+  "failureAuthority": {
+    "diagnosticMs": {
+      "snapshot": 0,
+      "owner": 0,
+      "reference": 0.10000002384185791,
+      "hero": 0,
+      "hud": 0.09999990463256836,
+      "total": 0.19999992847442627
+    },
+    "screen": "game",
+    "initialAssetsReady": true,
+    "connectionGeneration": 1,
+    "sessionGeneration": 3,
+    "activeSession": {
+      "connectionGeneration": 1,
+      "sessionGeneration": 3,
+      "afterSnapshotVersion": 10
+    },
+    "suspendReason": null,
+    "connected": true,
+    "playerId": "1000",
+    "map": "0",
+    "gameplay": {
+      "owner": true,
+      "referenceBlocked": false,
+      "heroBlocked": false,
+      "heroPet": false,
+      "cashShop": false
+    },
+    "hud": {
+      "current": true,
+      "snapshotPresent": true,
+      "playerPresent": true,
+      "generation": 6,
+      "hostVisible": true,
+      "inGame": true,
+      "navigation": {
+        "characterOpen": false,
+        "characterPage": "character",
+        "bagOpen": false,
+        "questOpen": false
+      },
+      "navigationRevision": 7
+    },
+    "navigation": [
+      {
+        "action": "closeQuest",
+        "accepted": true,
+        "fresh": true,
+        "generation": 2,
+        "revision": 1,
+        "snapshotMatches": true,
+        "appliedPending": false,
+        "ready": true,
+        "errorPresent": false,
+        "navigationSourceMatches": true,
+        "nativeBaseline": true,
+        "navigationFresh": true
+      },
+      {
+        "action": "selectCharacterPage",
+        "accepted": true,
+        "fresh": true,
+        "generation": 4,
+        "revision": 11,
+        "snapshotMatches": true,
+        "appliedPending": false,
+        "ready": true,
+        "errorPresent": false,
+        "navigationSourceMatches": true,
+        "nativeBaseline": true,
+        "navigationFresh": true
+      }
+    ]
+  },
+  "failureKeyboard": {
+    "movement": "{\"keyboard\":{\"lastKey\":null,\"lastDispatch\":{\"reason\":\"no-held-direction\",\"source\":\"held\",\"at\":1794045438595,\"sceneInteractionReady\":true,\"bevyQuestUiCapturesPointer\":false},\"lastShortcut\":{\"at\":1794045355010,\"actions\":[\"skills\"],\"stage\":\"dispatch\",\"reason\":\"window-action\",\"accepted\":true,\"repeat\":false,\"focused\":true,\"visible\":true,\"editable\":false,\"sceneInteractionReady\":true,\"gameplayCallbackPresent\":true,\"defaultPrevented\":false,\"heroActive\":false,\"heroTransitioning\":false,\"heroWorldBlocked\":false,\"heroLeaseHeld\":false}},\"pointer\":{\"at\":1794045274770,\"phase\":\"pointerdown\",\"held\":false,\"worldTarget\":null,\"hudHeld\":false,\"bagHeld\":false,\"heroHeld\":false,\"storageHeld\":false,\"layers\":[{\"tag\":\"CANVAS\",\"canvas\":true,\"classes\":[\"shared-quest-ui-visible\"],\"objectId\":null},{\"tag\":\"DIV\",\"canvas\":false,\"classes\":[\"game-world-composite\"],\"objectId\":null},{\"tag\":\"DIV\",\"canvas\":false,\"classes\":[\"client-stage-frame\"],\"objectId\":null},{\"tag\":\"SECTION\",\"canvas\":false,\"classes\":[\"mir-stage\"],\"objectId\":null},{\"tag\":\"MAIN\",\"canvas\":false,\"classes\":[\"mir-client-page\"],\"objectId\":null},{\"tag\":\"BODY\",\"canvas\":false,\"classes\":[\"notranslate\"],\"objectId\":null},{\"tag\":\"HTML\",\"canvas\":false,\"classes\":[\"notranslate\"],\"objectId\":null}]},\"host\":{\"connectionGeneration\":1,\"sessionGeneration\":3,\"suspended\":null,\"sceneDeferred\":false,\"lastIntent\":null,\"lastAttempt\":null,\"lastPickup\":null,\"self\":{\"x\":288,\"y\":616,\"direction\":\"Down\",\"dead\":false},\"queued\":null,\"controller\":{\"canSend\":true,\"sendDelayMs\":0,\"blockedMs\":0,\"pending\":null},\"target\":null,\"targetMapBlocked\":false,\"targetMapCell\":null,\"nearbyEntities\":[{\"objectId\":\"1\",\"kind\":\"npc\",\"x\":287,\"y\":615,\"dead\":false},{\"objectId\":\"206641\",\"kind\":\"monster\",\"x\":287,\"y\":616,\"dead\":false}]}}",
+    "belt": "{\"keyboard\":{\"at\":1794045355010,\"actions\":[\"skills\"],\"stage\":\"dispatch\",\"reason\":\"window-action\",\"accepted\":true,\"repeat\":false,\"focused\":true,\"visible\":true,\"editable\":false,\"sceneInteractionReady\":true,\"gameplayCallbackPresent\":true,\"defaultPrevented\":false,\"heroActive\":false,\"heroTransitioning\":false,\"heroWorldBlocked\":false,\"heroLeaseHeld\":false},\"host\":{\"shortcut\":null,\"equipment\":null}}"
+  },
+  "failureDom": {},
+  "cpuProfileRecorded": true,
+  "finishedAt": "2026-11-07T09:57:21.313Z"
+}

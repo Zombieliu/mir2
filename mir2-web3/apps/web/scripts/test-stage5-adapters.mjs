@@ -73,9 +73,13 @@ const socialItems = loadTypeScriptModule(new URL("../lib/social-item-window-mode
 });
 
 const questWorldDocument = loadTypeScriptModule(new URL("../lib/bevy-quest-world-context.ts", import.meta.url), { "./bevy-bag-model": bagModel });
+const nativeLocalization = loadTypeScriptModule(new URL("../lib/r16-native-localization.ts", import.meta.url), {
+  "./generated/r16-native-localization.json": {default: JSON.parse(readFileSync(new URL("../lib/generated/r16-native-localization.json", import.meta.url), "utf8"))},
+});
 const questNameDocument = loadTypeScriptModule(new URL("../lib/bevy-quest-ui.ts", import.meta.url), {
   "./bevy-quest-world-context": questWorldDocument,
   "./quest-action-policy": loadTypeScriptModule(new URL("../lib/quest-action-policy.ts", import.meta.url)),
+  "./r16-native-localization": nativeLocalization,
 });
 
 const {
@@ -310,6 +314,14 @@ check("adaptGroup marks the first member leader and passes lootMode", () => {
   assert.deepEqual(group.members[0], { name: "Alice", leader: true });
   assert.equal(group.members[1].leader, false);
   assert.equal(group.members[2].leader, false);
+});
+
+check("adaptGroup projects the actual invitation preference and preserves old explicit SwitchGroup projections", () => {
+  assert.equal(adaptGroup({members: [], allowGroup: false, lootMode: "group"}).allowInvites, false);
+  assert.equal(adaptGroup({members: [], allowGroup: true, lootMode: "solo"}).allowInvites, true);
+  assert.equal(adaptGroup({members: [], lootMode: "solo"}).allowInvites, false);
+  assert.equal(adaptGroup({members: [], lootMode: "group"}).allowInvites, true);
+  assert.equal(adaptGroup({members: []}).allowInvites, undefined);
 });
 
 check("adaptGroup enriches members but keeps canonical name", () => {
@@ -2897,6 +2909,7 @@ function parityPageFixture(owner, world = {}) {
     WebSocket:{OPEN:1}, document:{visibilityState:"visible",hasFocus:()=>true},
     isSpectatorBrowserMode:()=>false, initialSceneAssetsReadyRef:ref(true), queueMicrotask:callback=>microtasks.push(callback),
     playerReferenceWindowsRef:ref({help:false,hotkeys:false,options:false,capture:false}),
+    companionOpenRef:ref(false),
     rankingInspectOpenRef:ref(false),
     bevyHpLocalOverlayOpenRef:ref(false), questReactModalOpenRef:ref(false), bagOpenRef:ref(false), characterOpenRef:ref(false), questLogOpenRef:ref(false),
     socialReplyWindowsRef:ref({group:false,bonds:false}), socialRosterWindowsRef:ref({friends:false}), rankingWindowRef:ref(false),
@@ -5643,8 +5656,16 @@ assert.ok(ts.isIfStatement(bagBeltFollowingRankingInspectEntry));
 assert.equal(bagBeltFollowingRankingInspectEntry.expression.getText(parityPageAst).replace(/\s+/g,""),
   'wireCommand.type==="inspect"&&(!options?.rankingInspectProof||socketRef.current!==socket||socket.readyState!==WebSocket.OPEN||options.rankingInspectProof.owner.socket!==socket||!rankingInspectRequestsRef.current.claim(options.rankingInspectProof,currentRankingInspectSource(),wireCommand,Math.floor(performance.now())))',
   "actual Ranking Inspect claim follows the unchanged Bag Fishing and Pearl guards");
-assert.equal(paritySendStatements.indexOf(bagBeltFollowingRankingInspectEntry)+1,paritySocketIndex,"actual Ranking Inspect guard adjoins the socket try");
-assert.equal(paritySendStatements.indexOf(bagBeltEntryNodes[0])+4,paritySocketIndex,"actual Bag entry retains Fishing then Pearl entry immediately before socket.send");
+const followingCreateEntry=paritySendStatements[paritySendStatements.indexOf(bagBeltFollowingRankingInspectEntry)+1];
+assert.ok(ts.isIfStatement(followingCreateEntry));
+assert.equal(followingCreateEntry.expression.getText(parityPageAst),'wireCommand.type === "newCharacter"');
+const followingGroupEntry=paritySendStatements[paritySendStatements.indexOf(bagBeltFollowingRankingInspectEntry)+2];
+assert.ok(ts.isIfStatement(followingGroupEntry));
+assert.equal(followingGroupEntry.expression.getText(parityPageAst).replace(/\s+/g,""),
+  'options?.groupProof&&(socketRef.current!==socket||socket.readyState!==WebSocket.OPEN||options.groupProof.owner.socket!==socket||!groupOperationsRef.current.claim(options.groupProof,currentGroupOperationSource(),wireCommand))');
+assert.equal(followingGroupEntry.thenStatement.getText(parityPageAst),'return false;');
+assert.equal(paritySendStatements.indexOf(bagBeltFollowingRankingInspectEntry)+3,paritySocketIndex,"only the exact disjoint character/group entry guards follow Ranking Inspect before the socket try");
+assert.equal(paritySendStatements.indexOf(bagBeltEntryNodes[0])+6,paritySocketIndex,"actual Bag entry retains the complete Fishing, Pearl, Ranking, character and group guard sequence before socket.send");
 // Retain whole actual serialization/DTO statements and the complete Bag-specific
 // entry through socket.send. All Bag-specific owner/source/mail/storage/social
 // guards execute in the actual bagBeltFinalCurrent; no gate is replaced by true.
@@ -6146,8 +6167,10 @@ const fishingFollowingRankingInspectEntry=fishingSendStatements[fishingSendState
 assert.ok(ts.isIfStatement(fishingFollowingRankingInspectEntry));
 assert.equal(fishingFollowingRankingInspectEntry.expression.getText(fishingPageAst),bagBeltFollowingRankingInspectEntry.expression.getText(parityPageAst),
   "same exact Ranking Inspect guard after the unchanged Fishing and Pearl claims");
-assert.equal(fishingSendStatements.indexOf(fishingFollowingRankingInspectEntry)+1,fishingSocketIndex,"Fishing fixture Ranking Inspect guard adjoins actual socket try");
-assert.equal(fishingSendStatements.indexOf(fishingSendEntry[0])+3,fishingSocketIndex,"WorldFishing retains exact Pearl guard immediately before actual socket send");
+assert.equal(fishingSendStatements[fishingSendStatements.indexOf(fishingFollowingRankingInspectEntry)+1].getText(fishingPageAst),followingCreateEntry.getText(parityPageAst));
+assert.equal(fishingSendStatements[fishingSendStatements.indexOf(fishingFollowingRankingInspectEntry)+2].getText(fishingPageAst),followingGroupEntry.getText(parityPageAst));
+assert.equal(fishingSendStatements.indexOf(fishingFollowingRankingInspectEntry)+3,fishingSocketIndex,"Fishing retains only the same character/group guards between Ranking and the actual socket try");
+assert.equal(fishingSendStatements.indexOf(fishingSendEntry[0])+5,fishingSocketIndex,"WorldFishing retains the exact Pearl, Ranking, character and group guards before actual socket send");
 const fishingSerializeIndex=fishingSendStatements.findIndex(node=>ts.isVariableStatement(node)&&node.declarationList.declarations.some(decl=>decl.name.getText(fishingPageAst)==="serialized"));
 const fishingDtoIndex=fishingSendStatements.findIndex(node=>ts.isVariableStatement(node)&&node.declarationList.declarations.some(decl=>decl.name.getText(fishingPageAst)==="wireCommand"));
 const fishingPreflightGuards=fishingSendStatements.filter(node=>ts.isIfStatement(node)&&['command.type === "fishingCast" && command.castOut === true && !options?.worldFishingProof','options?.worldFishingProof && !worldFishingFinalCurrent(options.worldFishingProof, command)'].includes(node.expression.getText(fishingPageAst)));
@@ -6286,7 +6309,10 @@ const fishingShellJs=ts.transpileModule([...fishingShellDeclarations.values()].j
   "\nfunction commitWorldFishingShellContext(){return ("+fishingContextEffect+")();}\nfunction commitWorldFishingLayout(){return ("+fishingLayoutEffect+")();}\nconst worldFishingHeldTick="+fishingIntervalCallback+";",
   {compilerOptions:{target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.None}}).outputText;
 const fishingCanvasMode=loadTypeScriptModule(new URL("../lib/bevy-shared-canvas-mode.ts",import.meta.url));
-const fishingSceneLayout=loadTypeScriptModule(new URL("../app/components/original-client-scene-layout.ts",import.meta.url),{"../../lib/original-ui":loadTypeScriptModule(new URL("../lib/original-ui.ts",import.meta.url))});
+const fishingSceneLayout=loadTypeScriptModule(new URL("../app/components/original-client-scene-layout.ts",import.meta.url),{
+  "../../lib/original-ui":loadTypeScriptModule(new URL("../lib/original-ui.ts",import.meta.url)),
+  "../../lib/crystal-world-depth":loadTypeScriptModule(new URL("../lib/crystal-world-depth.ts",import.meta.url)),
+});
 function worldFishingShellFixture(){
   const page=worldFishingPageFixture(),handlers=new Map(),documentHandlers=new Map(),sinks=[],cancels=[],resolves=[];let now=1000,api,sinkEdge=null;
   class MemoryStageNode{constructor(id,rect){this.id=id;this.rect=rect;this.isConnected=true;this.dataset={};this.style={display:"block",visibility:"visible",opacity:"1"};this.children=[];}
@@ -6299,6 +6325,7 @@ function worldFishingShellFixture(){
   const actualRefs=new Function(fishingShellInitializersJs)();assert.equal(actualRefs.worldFishingPhysicalRef.current,null);assert.equal(actualRefs.worldFishingTerminalRef.current,null);assert.equal(actualRefs.worldFishingPointersRef.current.size,0);
   page.runtime.resolveMir2EntityAnimationPoses=json=>{const input=JSON.parse(json);resolves.push(input);return JSON.stringify({worldKey:input.worldKey,nowMs:input.nowMs,poses:[]});};
   const scope={...actualRefs,HTMLElement:MemoryStageNode,document,window,Date:{now:()=>now},stageFrameRef:ref(stage),stagePresentation:{virtualWidth:800,virtualHeight:600,scale:1},
+    scenePointerDiagnosticsRef:ref(null),
     bagPointerCallbacksRef:ref({}),npcShopPointerCallbacksRef:ref({}),parityUiBlocksGameplay:undefined,heroPointerLeaseRef:ref(null),heroPointerCallbacksRef:ref({}),
     heldKeyboardMoveKeysRef:ref(new Set()),heldKeyboardRunModeRef:ref(false),onViewportDirectionStop:()=>{},updateSceneCombatPointer:()=>{},
     latestMoveInputRef:ref({screen:"game",player:{x:0,y:1}}),viewportLayout:{offsetX:0,offsetY:0},...fishingSceneLayout,
@@ -7396,9 +7423,11 @@ check("Ranking actual Page inspect gesture sends exact four raw fields UID0 thro
   assert.deepEqual(page.sent,[{type:"inspect",objectId:0,ranking:true,hero:false}]);assert.equal(page.f.controller.pending,true);
   page.api.inspectRankingPlayer(0,"Actual target");assert.equal(page.sent.length,1);
 });
-check("Ranking actual Page raw Inspect requires proof and final claim directly precedes actual socket send",()=>{
+check("Ranking actual Page raw Inspect requires proof and only disjoint create/group guards follow its final claim",()=>{
   const page=rankingPageFixture();assert.equal(page.api.finalRawSend({type:"inspect",objectId:0,ranking:true,hero:false}),false);
-  const finalIndex=paritySendStatements.indexOf(rankingFinalGuard);assert.equal(finalIndex+1,paritySocketIndex);
+  const finalIndex=paritySendStatements.indexOf(rankingFinalGuard);assert.equal(finalIndex+3,paritySocketIndex);
+  assert.strictEqual(paritySendStatements[finalIndex+1],followingCreateEntry);
+  assert.strictEqual(paritySendStatements[finalIndex+2],followingGroupEntry);
   const sends=[];(function visit(node){if(ts.isCallExpression(node)&&node.expression.getText(parityPageAst)==="socket.send")sends.push(node);ts.forEachChild(node,visit);})(paritySendStatements[paritySocketIndex]);
   assert.equal(sends.length,1);assert.equal(sends[0].arguments[0].getText(parityPageAst),"serialized");
   const listeners=paritySendStatements.map((node,index)=>({node,index})).filter(({node})=>node.getText(parityPageAst).includes("window.dispatchEvent"));
@@ -7625,7 +7654,7 @@ check("Hero unsupported ABI and unsafe owner metadata cannot grant raw authority
     {...heroOpaque,serverRevision:"18446744073709551615"},{...heroOpaque,unknown:true}])assert.equal(heroIngressDocument.validVerifiedHeroOwner(bad),false);
   assert.equal(heroIngressDocument.verifiedHeroOwnerFromFrame('{"type":"npcPurchaseOwner"}'),null);
 });
-check("Hero original Page message captures first clock before synchronous ingress work",()=>{
+check("Hero ordinary Page message captures its first clock after private filtering and before Hero ingress work",()=>{
   const handlers=[];(function visit(node){if(ts.isCallExpression(node)&&node.expression.getText(parityPageAst)==='socket.addEventListener'
     &&node.arguments[0]?.getText(parityPageAst)==='"message"'&&node.arguments[1]?.getText(parityPageAst).includes('heroRawIngressRef.current?.capture'))handlers.push(node.arguments[1]);
     ts.forEachChild(node,visit);})(parityPageAst);assert.equal(handlers.length,1);
@@ -7633,6 +7662,7 @@ check("Hero original Page message captures first clock before synchronous ingres
     {compilerOptions:{module:ts.ModuleKind.None,target:ts.ScriptTarget.ES2022}}).outputText;
   const socket={},physical={socket,connectionGeneration:1,sessionGeneration:2},calls=[];let now=10.375;
   const scope={socket,socketRef:{current:socket},connectionGeneration:1,equipmentConnectionGenerationRef:{current:1},
+    receivePrivateCompanionFrame:data=>loadTypeScriptModule(new URL("../lib/r16-companion-private-frame.ts",import.meta.url)).readR16CompanionPrivateFrame(data).private,
     performance:{now(){calls.push("clock");return now;}},syncHeroRawIngress(){calls.push("sync");now=999;},
     currentHeroRawPhysical:()=>physical,heroRawIngressRef:{current:{capture(raw,p,at){calls.push({raw,p,at});return {raw,at};},reject(){throw Error("unexpected reject");}}},
     receiveNpcPurchaseGatewayFrame(event,generation,s,d){calls.push({received:d});},appendLog(){throw Error("unexpected Page log");},t:()=>"log"};

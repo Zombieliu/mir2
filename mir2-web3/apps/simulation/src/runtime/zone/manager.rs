@@ -14,6 +14,11 @@ use sha2::{Digest, Sha256};
 const PARALLEL_TICK_MIN_ZONES: usize = 4;
 const ZONE_MANAGER_CHECKPOINT_VERSION: u32 = 4;
 
+fn with_action_boundary(mut zone: ZoneRuntime, boundary: &Option<std::sync::Arc<dyn super::ZoneActionBoundary>>) -> ZoneRuntime {
+    if let Some(boundary) = boundary { zone.set_action_boundary(boundary.clone()); }
+    zone
+}
+
 use super::contract::LogicalWorldId;
 use super::partition::{PartitionId, PartitionKey, PartitionLocation, ZonePartitionDescriptor};
 use super::runtime::ZoneRuntime;
@@ -41,6 +46,7 @@ mod reconstructed_admission_tests;
 // non-cloneable `bevy_ecs::World`, and nothing cloned/defaulted the manager.
 #[derive(Debug)]
 pub struct ZoneManager {
+    action_boundary: Option<std::sync::Arc<dyn super::ZoneActionBoundary>>,
     zones: BTreeMap<ZoneKey, ZoneRuntime>,
     session_zones: BTreeMap<SessionId, ZoneKey>,
     online_identities: OnlineIdentityBook,
@@ -123,6 +129,11 @@ impl ZoneManagerCheckpoint {
 }
 
 impl ZoneManager {
+    /// Trusted host dependency, never admitted or encoded by checkpoints.
+    pub fn set_action_boundary(&mut self, boundary: std::sync::Arc<dyn super::ZoneActionBoundary>) {
+        self.action_boundary = Some(boundary.clone());
+        for zone in self.zones.values_mut() { zone.set_action_boundary(boundary.clone()); }
+    }
     /// In-process reference fork, not cold deserialization or owner admission.
     /// Retains the same online identity namespace and next-identity counters so
     /// execution strategies can compare full outputs and committed state.
@@ -135,6 +146,7 @@ impl ZoneManager {
     /// bytes. Live online, monster and pet authority remain in the same epoch.
     pub fn transaction_fork(&self) -> Self {
         Self {
+            action_boundary: self.action_boundary.clone(),
             zones: self
                 .zones
                 .iter()
@@ -534,7 +546,7 @@ impl ZoneManager {
         self.zones
             .entry(key.clone())
             .or_insert_with(|| {
-                ZoneRuntime::new_with_combat_seed(key.clone(), self.map_random_master.seed_for(key))
+                with_action_boundary(ZoneRuntime::new_with_combat_seed(key.clone(), self.map_random_master.seed_for(key)), &self.action_boundary)
             })
             .apply_committed_player_drop(proof, now_ms)
     }
@@ -559,7 +571,7 @@ impl ZoneManager {
         self.zones
             .entry(key.clone())
             .or_insert_with(|| {
-                ZoneRuntime::new_with_combat_seed(key.clone(), self.map_random_master.seed_for(key))
+                with_action_boundary(ZoneRuntime::new_with_combat_seed(key.clone(), self.map_random_master.seed_for(key)), &self.action_boundary)
             })
             .reconcile_committed_player_drops(proofs, now_ms)
     }
@@ -569,7 +581,7 @@ impl ZoneManager {
         self.zones
             .entry(key.clone())
             .or_insert_with(|| {
-                ZoneRuntime::new_with_combat_seed(key.clone(), self.map_random_master.seed_for(key))
+                with_action_boundary(ZoneRuntime::new_with_combat_seed(key.clone(), self.map_random_master.seed_for(key)), &self.action_boundary)
             })
             .set_player_drop_replica_mode(replica);
     }
@@ -1038,6 +1050,7 @@ impl ZoneManager {
     }
     pub fn new() -> Self {
         Self {
+            action_boundary: None,
             zones: BTreeMap::new(),
             session_zones: BTreeMap::new(),
             online_identities: OnlineIdentityBook::default(),
@@ -1170,6 +1183,7 @@ impl ZoneManager {
             checkpoint.map_random_master
         };
         Ok(Self {
+            action_boundary: None,
             zones,
             session_zones: checkpoint.session_zones,
             online_identities: OnlineIdentityBook::default(),
@@ -1541,7 +1555,7 @@ impl ZoneManager {
             self.session_zones.insert(session_id.clone(), key.clone());
             let master = &self.map_random_master;
             let zone = self.zones.entry(key.clone()).or_insert_with(|| {
-                ZoneRuntime::new_with_combat_seed(key.clone(), master.seed_for(&key))
+                with_action_boundary(ZoneRuntime::new_with_combat_seed(key.clone(), master.seed_for(&key)), &self.action_boundary)
             });
             zone.ingest_online_presence(snapshot, true);
             let mut joined = zone.handle(ZoneCommand::Join(join));
@@ -1608,7 +1622,7 @@ impl ZoneManager {
 
         let master = &self.map_random_master;
         let zone = self.zones.entry(key.clone()).or_insert_with(|| {
-            ZoneRuntime::new_with_combat_seed(key.clone(), master.seed_for(&key))
+            with_action_boundary(ZoneRuntime::new_with_combat_seed(key.clone(), master.seed_for(&key)), &self.action_boundary)
         });
         let outbounds = zone.handle(command);
         self.refresh_online_presence();
@@ -1700,11 +1714,12 @@ impl ZoneManager {
     /// Install caller-configured policy before any session joins the Zone.
     /// Used by deterministic fixtures and trusted bootstrap configuration;
     /// replacing an active Zone is deliberately rejected.
-    pub fn install_empty_zone(&mut self, zone: ZoneRuntime) -> bool {
+    pub fn install_empty_zone(&mut self, mut zone: ZoneRuntime) -> bool {
         let key = zone.key().clone();
         if self.session_zones.values().any(|active| active == &key) {
             return false;
         }
+        if let Some(boundary) = &self.action_boundary { zone.set_action_boundary(boundary.clone()); }
         self.zones.insert(key, zone);
         true
     }
@@ -1736,7 +1751,7 @@ impl ZoneManager {
         self.zones
             .entry(key.clone())
             .or_insert_with(|| {
-                ZoneRuntime::new_with_combat_seed(key.clone(), master.seed_for(&key))
+                with_action_boundary(ZoneRuntime::new_with_combat_seed(key.clone(), master.seed_for(&key)), &self.action_boundary)
             })
             .spawn_world_event_monster(spawn, now_ms)
     }

@@ -1528,7 +1528,7 @@ impl NativePlayerUiState {
             self.withdraw_bound_npc_gold_buy();
         }
     }
-    fn apply(&mut self, action: mir2_ui_core::action::UiAction) {
+    pub(crate) fn apply(&mut self, action: mir2_ui_core::action::UiAction) {
         let before = self.core.mail_compose.clone();
         let was_mail_open = self.mail_open();
         let replacement = matches!(
@@ -1550,6 +1550,7 @@ impl NativePlayerUiState {
                 | mir2_ui_core::action::UiAction::OpenBigMap
                 | mir2_ui_core::action::UiAction::OpenStorage
                 | mir2_ui_core::action::UiAction::OpenGroup
+                | mir2_ui_core::action::UiAction::OpenCompanion
                 | mir2_ui_core::action::UiAction::OpenGuild
                 | mir2_ui_core::action::UiAction::OpenTrade
                 | mir2_ui_core::action::UiAction::ClosePanel
@@ -1624,6 +1625,9 @@ impl NativePlayerUiState {
     }
     pub fn group_open(&self) -> bool {
         self.core.is_group_open()
+    }
+    pub fn companion_open(&self) -> bool {
+        self.core.panel == mir2_ui_core::state::UiPanel::Companion
     }
     pub fn guild_open(&self) -> bool {
         self.core.is_guild_open()
@@ -2486,6 +2490,7 @@ pub fn modal_priority_for_state(
         || state.npc_shop_open()
         || state.storage_open()
         || state.group_open()
+        || state.companion_open()
         || state.guild_open()
         || state.trade_open()
         || state.options_open()
@@ -4669,6 +4674,7 @@ pub fn native_mail_parcel_quote_state(world: &World) -> Option<NativeMailParcelQ
 
 impl Plugin for Mir2CrystalOverlayPlugin {
     fn build(&self, app: &mut App) {
+        app.add_plugins(super::companion::Mir2CompanionUiPlugin);
         app.add_plugins((
             Mir2NativeMailParcelServicePlugin,
             super::guild_pixel_text_view::GuildPixelTextPlugin,
@@ -8087,6 +8093,10 @@ pub(crate) fn process_overlay_keyboard(
         return;
     }
     state.bind_npc_gold_buy_gate(intents.npc_gold_buy_gate());
+    if state.companion_open() {
+        typed.clear();
+        return;
+    }
     if state.ime_frame_consumed {
         typed.clear();
         return;

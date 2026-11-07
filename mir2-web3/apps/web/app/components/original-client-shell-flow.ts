@@ -2,7 +2,13 @@ import type { ClientScreen } from "../../lib/original-ui";
 import type { DisplayEntity, EntityKind, TranslateFn } from "./original-client-types";
 
 export const LOGIN_STATIC_BACKGROUND_FRAME = 0;
-export const LOGIN_TRANSITION_FRAME_MS = 180;
+export const LOGIN_TRANSITION_FRAME_MS = 100;
+export type LoginDoorOutcome = "played" | "unavailable";
+
+export function loginDoorFrameAt(elapsedMs: number, frameCount: number): number | null {
+  const frame = Math.floor(elapsedMs / LOGIN_TRANSITION_FRAME_MS) + 1;
+  return frame < frameCount ? frame : null;
+}
 export const ORIGINAL_AUDIO = {
   loginMusic: "/original-ui/Sound/Login2.wav",
   loginEffect: "/original-ui/Sound/100.wav",
@@ -31,14 +37,10 @@ export function selectedTargetActionLabel(
   return t("ui.targetDistance", [actionLabel, targetDistance], `${actionLabel} · ${targetDistance} tiles`);
 }
 
-export function desiredMusicForScreen(screen: ClientScreen, loginTransitionActive: boolean) {
+export function desiredMusicForScreen(screen: ClientScreen) {
   // The transition retains Login2.wav until the select screen is actually
   // visible, matching the original client's audio boundary.
-  if (loginTransitionActive) {
-    return ORIGINAL_AUDIO.loginMusic;
-  }
-
-  if (screen === "login") {
+  if (screen === "login" || screen === "openingLogin") {
     return ORIGINAL_AUDIO.loginMusic;
   }
 

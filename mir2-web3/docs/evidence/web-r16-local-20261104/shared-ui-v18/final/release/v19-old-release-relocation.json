@@ -1,0 +1,20 @@
+[
+  {
+    "old": "F:\\mir2-builds\\Numeron-Web-R16-20261104-before-forest-ui-v17",
+    "archive": "D:\\mir2-builds\\web-r16-20261106\\preserved-releases\\Numeron-Web-R16-20261104-before-forest-ui-v17",
+    "files": 29707,
+    "bytes": 931233582.0,
+    "manifestSha256": "4620930b42de82f60e82fc01f0beb5b405fd082439131bd982fefddfa4268cc3",
+    "privateFileHashesVerified": 25,
+    "noLiveJournalMoved": true
+  },
+  {
+    "old": "F:\\mir2-builds\\Numeron-Web-R16-20261104-before-q6-footer-v18",
+    "archive": "D:\\mir2-builds\\web-r16-20261106\\preserved-releases\\Numeron-Web-R16-20261104-before-q6-footer-v18",
+    "files": 31937,
+    "bytes": 937052437.0,
+    "manifestSha256": "6b6f751bb330a6eaf29e60013539baf03917f48c13f0f08bcca39b4be6fea770",
+    "privateFileHashesVerified": 25,
+    "noLiveJournalMoved": true
+  }
+]

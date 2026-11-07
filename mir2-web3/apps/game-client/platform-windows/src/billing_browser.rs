@@ -109,33 +109,9 @@ pub(crate) fn valid_usdc_checkout_url(url: &str, trusted_origin: Option<&str>) -
 }
 
 pub(crate) fn valid_checkout_url(url: &str) -> bool {
-    if url.len() > 4096
-        || !url.is_ascii()
-        || url.bytes().any(|b| {
-            b.is_ascii_control()
-                || b.is_ascii_whitespace()
-                || matches!(
-                    b,
-                    b'\\' | b'"' | b'`' | b'<' | b'>' | b'|' | b'^' | b'{' | b'}'
-                )
-        })
-    {
-        return false;
-    }
-    // Hosted Checkout may include a fragment; it does not change the origin.
-    let origin_and_path = url.split_once('#').map_or(url, |(base, _)| base);
-    origin_and_path.parse::<Uri>().is_ok_and(|u| {
-        u.scheme_str() == Some("https")
-            && u.authority().is_some_and(|a| {
-                matches!(
-                    a.as_str(),
-                    "checkout.stripe.com" | "checkout.stripe.com:443"
-                )
-            })
-            && u.path()
-                .strip_prefix("/c/pay/")
-                .is_some_and(|id| !id.is_empty())
-    })
+    use mir2_client_bevy::native_billing::{valid_fiat_checkout_url, BillingProviderId};
+    valid_fiat_checkout_url(url, BillingProviderId::Stripe)
+        || valid_fiat_checkout_url(url, BillingProviderId::Waffo)
 }
 
 pub(crate) fn open_checkout_url(
@@ -346,12 +322,18 @@ mod tests {
         assert!(valid_checkout_url(
             "https://checkout.stripe.com:443/c/pay/cs_test_1#opaque"
         ));
+        assert!(valid_checkout_url("https://cashier.waffo.com/order-key"));
         for url in [
             "http://checkout.stripe.com/c/pay/x",
             "https://checkout.stripe.com.evil.invalid/x",
             "https://user@checkout.stripe.com/c/pay/x",
             "https://checkout.stripe.com:444/c/pay/x",
             "file:///x",
+            "https://cashier.waffo.com/",
+            "https://cashier.waffo.com:443/order-key",
+            "https://cashier.waffo.com.evil.invalid/order-key",
+            "https://pay.waffo.ai/order-key",
+            "https://user@cashier.waffo.com/order-key",
             "https://checkout.stripe.com/c/pay/x\n",
             "https://checkout.stripe.com\\@evil.invalid/x",
             "https://checkout.stripe.com/#/c/pay/x",

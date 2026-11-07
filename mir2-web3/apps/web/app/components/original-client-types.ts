@@ -91,6 +91,9 @@ export type EntityMotionSnapshot = {
   fromY: number;
   toX: number;
   toY: number;
+  // Authoritative source cell, independent of a fractional mid-glide fromX/Y.
+  sortX?: number;
+  sortY?: number;
   animationState: EntitySpriteAnimationState;
   frameCount?: number;
   startedAt: number;

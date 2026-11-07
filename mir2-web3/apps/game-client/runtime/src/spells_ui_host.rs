@@ -240,6 +240,7 @@ impl SpellsMailbox {
 #[cfg(target_arch = "wasm32")]
 mod web {
     use super::*;
+    use crate::quest_ui_host::portable_fonts::{self, PortableUiFonts};
     use bevy::{
         asset::LoadState,
         prelude::*,
@@ -250,7 +251,7 @@ mod web {
         crystal_ui::{
             hud::SharedHudSurface,
             panel_navigation::{CharacterPage, PanelNavigation},
-            skill_page_shared::SkillPageAction,
+            skill_page_shared::{SkillPageAction, SkillTooltipDocument, SkillTooltipTarget},
         },
         portable_spells_ui::*,
         read_model::{UiReadModel, UiReadModelIngress},
@@ -282,6 +283,7 @@ mod web {
         applied_model_revision: u64,
         applied_presentation_revision: u64,
         input_regions: Vec<mir2_client_bevy::crystal_ui::shared_hud::HudRect>,
+        tooltip: Option<SkillTooltipDocument>,
         error: Option<String>,
     }
     thread_local! {
@@ -438,6 +440,7 @@ mod web {
         mut c: ResMut<SpellsUiContext>,
         mut state: ResMut<SpellsUiState>,
         surface: Res<SharedHudSurface>,
+        fonts: Res<PortableUiFonts>,
         server: Res<AssetServer>,
         images: Res<Assets<Image>>,
         windows: Query<&Window>,
@@ -449,16 +452,21 @@ mod web {
             (With<SharedSpellsModalStage>, Without<SharedSpellsPageRoot>),
         >,
         buttons: Query<(&PortableSkillAction, &ComputedNode, &UiGlobalTransform)>,
+        hover_targets: Query<(&SkillTooltipTarget, &Interaction, &InheritedVisibility)>,
         mut intents: ResMut<SpellsIntentQueue>,
     ) {
         applied.frame = applied.frame.saturating_add(1).min(MAX_SAFE_ID);
-        let assets = matches!(
-            server.get_load_state(surface.font.id()),
-            Some(LoadState::Loaded)
-        ) && applied
-            .images
-            .iter()
-            .all(|h| matches!(server.get_load_state(h.id()), Some(LoadState::Loaded)));
+        let assets = fonts
+            .readiness(&server, portable_fonts::display_language())
+            .ready()
+            && matches!(
+                server.get_load_state(surface.font.id()),
+                Some(LoadState::Loaded)
+            )
+            && applied
+                .images
+                .iter()
+                .all(|h| matches!(server.get_load_state(h.id()), Some(LoadState::Loaded)));
         let icon_geometry = applied.snapshot.as_ref().is_some_and(|s| {
             state.view.bindings.iter().all(|b| {
                 b.icon.is_none_or(|i| {
@@ -521,6 +529,18 @@ mod web {
             && layout
             && controls;
         c.ready = ready;
+        let hovered = (ready && !modal)
+            .then(|| {
+                hover_targets
+                    .iter()
+                    .filter(|(_, interaction, visibility)| {
+                        **interaction == Interaction::Hovered && visibility.get()
+                    })
+                    .map(|(target, _, _)| target.0)
+                    .min()
+            })
+            .flatten();
+        state.observe_hover(&c, hovered);
         for (_, mut z) in &mut modals {
             z.0 = 1_200;
         }
@@ -564,6 +584,7 @@ mod web {
                 } else {
                     vec![]
                 },
+                tooltip: state.hovered_tooltip.clone(),
                 error: None,
             }
         });

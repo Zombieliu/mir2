@@ -16,6 +16,10 @@ const INVALID_PACKET_KIND: &str = "invalid";
 pub const GUILD_STORAGE_SLOT_COUNT: i32 = 112;
 const MAX_PROTOCOL_SLOT: i32 = u8::MAX as i32;
 
+fn false_flag(value: &bool) -> bool {
+    !*value
+}
+
 fn parse_default_selected_item_index() -> i32 {
     -1
 }
@@ -32,6 +36,10 @@ fn valid_protocol_slot(slot: i32) -> bool {
 #[derive(Clone, Serialize, Deserialize, PartialEq)]
 #[serde(tag = "type", rename_all = "camelCase")]
 pub enum NativeOutboundCommand {
+    CompanionControl {
+        #[serde(flatten)]
+        request: mir2_client_bevy::companion::CompanionRequest,
+    },
     Procurement {
         #[serde(flatten)]
         request: mir2_protocol::procurement::ProcurementRequest,
@@ -153,12 +161,18 @@ pub enum NativeOutboundCommand {
     },
     ClientVersion,
     BillingStatus {
+        #[serde(rename = "includePaymentProviders", default, skip_serializing_if = "false_flag")]
+        include_payment_providers: bool,
         #[serde(rename = "characterIndex")]
         character_index: i32,
         #[serde(rename = "requestId")]
         request_id: u64,
     },
     BillingCheckout {
+        #[serde(default, skip_serializing_if = "mir2_client_bevy::native_billing::BillingProviderId::is_stripe")]
+        provider: mir2_client_bevy::native_billing::BillingProviderId,
+        #[serde(rename = "includePaymentProviders", default, skip_serializing_if = "false_flag")]
+        include_payment_providers: bool,
         #[serde(rename = "characterIndex")]
         character_index: i32,
         #[serde(rename = "offerId")]
@@ -169,6 +183,8 @@ pub enum NativeOutboundCommand {
         request_id: u64,
     },
     BillingUsdcCheckout {
+        #[serde(rename = "includePaymentProviders", default, skip_serializing_if = "false_flag")]
+        include_payment_providers: bool,
         #[serde(rename = "characterIndex")]
         character_index: i32,
         #[serde(rename = "offerId")]
@@ -179,6 +195,8 @@ pub enum NativeOutboundCommand {
         request_id: u64,
     },
     BillingBuyMonthlyCard {
+        #[serde(rename = "includePaymentProviders", default, skip_serializing_if = "false_flag")]
+        include_payment_providers: bool,
         #[serde(rename = "characterIndex")]
         character_index: i32,
         #[serde(rename = "orderRequestId")]
@@ -187,6 +205,8 @@ pub enum NativeOutboundCommand {
         request_id: u64,
     },
     BillingActivateMonthlyCard {
+        #[serde(rename = "includePaymentProviders", default, skip_serializing_if = "false_flag")]
+        include_payment_providers: bool,
         #[serde(rename = "characterIndex")]
         character_index: i32,
         #[serde(rename = "itemUniqueId")]
@@ -702,6 +722,7 @@ impl NativeOutboundCommand {
 
     pub fn command_type(&self) -> &'static str {
         match self {
+            Self::CompanionControl { .. } => "companionControl",
             Self::Procurement { .. } => "procurement",
             Self::DepositRefineItem { .. } => "depositRefineItem",
             Self::RetrieveRefineItem { .. } => "retrieveRefineItem",
@@ -1060,6 +1081,7 @@ pub enum PacketEvent {
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum InboundEvent {
+    CompanionResult(mir2_client_bevy::companion::CompanionResult),
     Procurement(mir2_protocol::procurement::ProcurementReply),
     Billing(mir2_client_bevy::native_billing::BillingReply),
     MonthlyCard(mir2_client_bevy::native_monthly_card::MonthlyCardReply),
@@ -1080,6 +1102,35 @@ pub enum InboundEvent {
 pub enum ParseInboundError {
     InvalidJson(String),
     MissingEnvelopeField { field: &'static str, detail: String },
+}
+
+#[cfg(test)]
+mod companion_contract_tests {
+    use super::*;
+    use mir2_client_bevy::companion::{CompanionOperation, CompanionRequest};
+    #[test]
+    fn private_controls_have_exact_owner_wire_and_private_debug() {
+        let command = NativeOutboundCommand::CompanionControl {
+            request: CompanionRequest {
+                request_id: "request-1".into(),
+                resident_id: Some("alo-1".into()),
+                operation: CompanionOperation::Teach,
+                payload: json!({"expectedPolicyVersion":2}),
+            },
+        };
+        let wire = command.to_wire_json();
+        assert_eq!(
+            wire,
+            json!({"type":"companionControl","requestId":"request-1","residentId":"alo-1","operation":"teach","payload":{"expectedPolicyVersion":2}})
+        );
+        assert_eq!(
+            serde_json::from_value::<NativeOutboundCommand>(wire).unwrap(),
+            command
+        );
+        let event=parse_inbound_value(json!({"type":"companionResult","payload":{"requestId":"request-1","residentId":"alo-1","operation":"view","status":"ok","result":{"summary":"PRIVATE SENTINEL"}}})).unwrap();
+        assert!(matches!(event, InboundEvent::CompanionResult(_)));
+        assert!(!format!("{event:?}").contains("PRIVATE SENTINEL"));
+    }
 }
 
 impl std::fmt::Display for ParseInboundError {
@@ -1121,6 +1172,9 @@ pub fn parse_inbound_value(value: Value) -> Result<InboundEvent, ParseInboundErr
         .map(str::to_owned);
 
     match event_type.as_str() {
+        "companionResult" => serde_json::from_value(payload)
+            .map(InboundEvent::CompanionResult)
+            .map_err(|_| ParseInboundError::InvalidJson("invalid private companion receipt".into())),
         "procurement" => serde_json::from_value(payload)
             .map(InboundEvent::Procurement)
             .map_err(|_| ParseInboundError::InvalidJson("invalid procurement response".into())),
@@ -1633,12 +1687,13 @@ mod tests {
     #[test]
     fn billing_commands_use_only_server_owned_account_and_offer_identity() {
         assert_serialized(
-            NativeOutboundCommand::BillingUsdcCheckout { character_index:7, offer_id:"usdc-small".into(),
+            NativeOutboundCommand::BillingUsdcCheckout { include_payment_providers:false, character_index:7, offer_id:"usdc-small".into(),
                 order_request_id:"native-stable-usdc-order".into(), request_id:15 },
             serde_json::json!({"type":"billingUsdcCheckout","characterIndex":7,"offerId":"usdc-small","orderRequestId":"native-stable-usdc-order","requestId":15}),
         );
         assert_serialized(
             NativeOutboundCommand::BillingStatus {
+                include_payment_providers: false,
                 character_index: 7,
                 request_id: 11,
             },
@@ -1646,6 +1701,8 @@ mod tests {
         );
         assert_serialized(
             NativeOutboundCommand::BillingCheckout {
+                provider: mir2_client_bevy::native_billing::BillingProviderId::Stripe,
+                include_payment_providers: false,
                 character_index: 7,
                 offer_id: "small".into(),
                 order_request_id: "native-stable-order".into(),
@@ -1655,6 +1712,7 @@ mod tests {
         );
         assert_serialized(
             NativeOutboundCommand::BillingBuyMonthlyCard {
+                include_payment_providers: false,
                 character_index: 7,
                 order_request_id: "native-stable-month".into(),
                 request_id: 13,
@@ -1662,7 +1720,19 @@ mod tests {
             serde_json::json!({"type":"billingBuyMonthlyCard","characterIndex":7,"orderRequestId":"native-stable-month","requestId":13}),
         );
         assert_serialized(
+            NativeOutboundCommand::BillingCheckout {
+                provider: mir2_client_bevy::native_billing::BillingProviderId::Waffo,
+                include_payment_providers: true,
+                character_index: 7,
+                offer_id: "small".into(),
+                order_request_id: "native-stable-waffo-order".into(),
+                request_id: 15,
+            },
+            serde_json::json!({"type":"billingCheckout","provider":"waffo","includePaymentProviders":true,"characterIndex":7,"offerId":"small","orderRequestId":"native-stable-waffo-order","requestId":15}),
+        );
+        assert_serialized(
             NativeOutboundCommand::BillingActivateMonthlyCard {
+                include_payment_providers: false,
                 character_index: 7,
                 item_unique_id: "18446744073709551615".into(),
                 request_id: 14,

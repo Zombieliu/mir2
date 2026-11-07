@@ -10,6 +10,10 @@ use std::sync::OnceLock;
 
 use serde::Deserialize;
 
+#[cfg(any(not(feature = "native-ui"), test))]
+#[path = "portable_native_i18n.rs"]
+mod portable;
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum Locale {
     English,
@@ -120,23 +124,34 @@ impl Locale {
 // Zero preserves the existing renderer-neutral hosts until they opt in. The
 // native Windows host always calls activate, including on the very first run.
 static ACTIVE: AtomicU8 = AtomicU8::new(0);
+// Only an accepted portable host's explicit displayLanguage opts in. It is
+// independent of the Native launcher's activation and of the server language.
+static PORTABLE_ACTIVE: AtomicU8 = AtomicU8::new(0);
 static REVISION: AtomicU64 = AtomicU64::new(0);
 thread_local! { static SCOPED_LOCALE: Cell<Option<Locale>> = const { Cell::new(None) }; }
 
 pub fn active() -> bool {
-    #[cfg(any(feature = "native-ui", test))]
+    #[cfg(feature = "native-ui")]
     {
         SCOPED_LOCALE.get().is_some() || ACTIVE.load(Ordering::Relaxed) != 0
     }
-    #[cfg(not(any(feature = "native-ui", test)))]
+    #[cfg(not(feature = "native-ui"))]
     {
-        false
+        SCOPED_LOCALE.get().is_some() || PORTABLE_ACTIVE.load(Ordering::Acquire) != 0
     }
 }
 pub fn locale() -> Locale {
-    SCOPED_LOCALE
-        .get()
-        .unwrap_or_else(|| match ACTIVE.load(Ordering::Acquire) {
+    SCOPED_LOCALE.get().unwrap_or_else(|| {
+        match {
+            #[cfg(feature = "native-ui")]
+            {
+                ACTIVE.load(Ordering::Acquire)
+            }
+            #[cfg(not(feature = "native-ui"))]
+            {
+                PORTABLE_ACTIVE.load(Ordering::Acquire)
+            }
+        } {
             2 => Locale::TraditionalChinese,
             3 => Locale::BrazilianPortuguese,
             4 => Locale::Russian,
@@ -147,7 +162,24 @@ pub fn locale() -> Locale {
             9 => Locale::Arabic,
             10 => Locale::SimplifiedChinese,
             _ => Locale::English,
-        })
+        }
+    })
+}
+
+fn replace_portable_locale(state: &AtomicU8, value: Option<Locale>) -> bool {
+    let value = value.map_or(0, |locale| locale.index() as u8 + 1);
+    state.swap(value, Ordering::AcqRel) != value
+}
+
+/// Missing displayLanguage actively restores the renderer-neutral legacy path.
+/// A Native host cannot be deactivated by a portable presentation context.
+pub fn set_portable_display_language(value: Option<Locale>) {
+    #[cfg(not(feature = "native-ui"))]
+    if replace_portable_locale(&PORTABLE_ACTIVE, value) {
+        REVISION.fetch_add(1, Ordering::Release);
+    }
+    #[cfg(feature = "native-ui")]
+    let _ = value;
 }
 pub fn revision() -> u64 {
     REVISION.load(Ordering::Acquire)
@@ -172,10 +204,12 @@ pub fn with_locale<R>(value: Locale, f: impl FnOnce() -> R) -> R {
     f()
 }
 
+#[cfg(any(feature = "native-ui", test))]
 #[derive(Deserialize)]
 struct CatalogFile {
     entries: Vec<Entry>,
 }
+#[cfg(any(feature = "native-ui", test))]
 #[derive(Deserialize)]
 struct Entry {
     key: String,
@@ -190,10 +224,12 @@ struct Entry {
 
 /// New authored content supplies all nine locales together, independent of
 /// the generated legacy overlays. Missing languages fail catalog validation.
+#[cfg(any(feature = "native-ui", test))]
 #[derive(Deserialize)]
 struct FullLocaleCatalogFile {
     entries: Vec<FullLocaleEntry>,
 }
+#[cfg(any(feature = "native-ui", test))]
 #[derive(Deserialize)]
 struct FullLocaleEntry {
     key: String,
@@ -209,8 +245,10 @@ struct Catalog {
     templates: TemplateIndex,
     npc_exact: HashMap<String, usize>,
     npc_templates: TemplateIndex,
+    strict_matching: bool,
 }
 
+#[cfg(any(feature = "native-ui", test))]
 fn append_simplified(
     key: &str,
     base: [String; BASE_LOCALE_COUNT],
@@ -226,6 +264,20 @@ fn append_simplified(
 }
 
 fn catalog() -> &'static Catalog {
+    #[cfg(any(feature = "native-ui", test))]
+    {
+        full_catalog()
+    }
+    #[cfg(not(any(feature = "native-ui", test)))]
+    {
+        portable::catalog()
+    }
+}
+
+// The entire source loader, including every include_str!, is absent from a
+// portable production compile. LTO is not relied on to exclude the full data.
+#[cfg(any(feature = "native-ui", test))]
+fn full_catalog() -> &'static Catalog {
     static CATALOG: OnceLock<Catalog> = OnceLock::new();
     CATALOG.get_or_init(|| {
         let mut result = Catalog {
@@ -235,6 +287,7 @@ fn catalog() -> &'static Catalog {
             templates: TemplateIndex::default(),
             npc_exact: HashMap::new(),
             npc_templates: TemplateIndex::default(),
+            strict_matching: false,
         };
         let simplified: HashMap<String, String> = serde_json::from_str(include_str!(
             "../../../../packages/game-data/data/native-i18n/extra/zh-CN.json"
@@ -406,8 +459,11 @@ fn catalog() -> &'static Catalog {
 
 // Authored system vocabulary, in Locale::index order. Kept separate from
 // generated aliases such as Credits (the character scene's staff credits).
+#[cfg(any(feature = "native-ui", test))]
 const MONTHLY_CARD_ITEM_NAME: &str = "MonthlyCard30Days";
+#[cfg(any(feature = "native-ui", test))]
 const MONTHLY_CARD_ITEM_TOOLTIP: &str = "Adds 30 days of account-wide game access when used. Active access is extended from its current expiry. Offline time counts. Single use.";
+#[cfg(any(feature = "native-ui", test))]
 const BILLING_TRANSLATIONS: &[(&str, [&str; BASE_LOCALE_COUNT])] = &[
     ("npc.shop.synchronizing", ["Synchronizing shop data...", "正在同步商店資料……", "Sincronizando a loja...", "Синхронизация магазина...", "दुकान का डेटा सिंक हो रहा है...", "Menyinkronkan data toko...", "Đang đồng bộ cửa hàng...", "กำลังซิงค์ข้อมูลร้านค้า...", "تتم مزامنة بيانات المتجر..."]),
     ("game.npc.role.administrator", ["Administrator", "管理員", "Administrador", "Администратор", "प्रशासक", "Administrator", "Quản trị viên", "ผู้ดูแลระบบ", "المسؤول"]),
@@ -758,14 +814,51 @@ pub fn translate(language: Locale, source: &str) -> String {
 }
 
 fn translate_context(language: Locale, source: &str, npc: bool) -> String {
-    let c = catalog();
+    translate_context_display(language, source, npc, false)
+}
+
+fn translate_context_display(
+    language: Locale,
+    source: &str,
+    npc: bool,
+    display_markup: bool,
+) -> String {
+    translate_catalog(catalog(), language, source, npc, display_markup)
+}
+
+fn translate_catalog(
+    c: &Catalog,
+    language: Locale,
+    source: &str,
+    npc: bool,
+    display_markup: bool,
+) -> String {
+    if c.strict_matching && source.len() > 16_384 {
+        return source.to_owned();
+    }
     let (exact, templates) = if npc {
         (&c.npc_exact, &c.npc_templates)
     } else {
         (&c.exact, &c.templates)
     };
     if let Some(index) = exact.get(source) {
-        return c.values[*index][language.index()].clone();
+        let value = &c.values[*index][language.index()];
+        return if display_markup {
+            strip_npc_display_markup(value)
+        } else {
+            value.clone()
+        };
+    }
+    if display_markup {
+        let candidate = strip_npc_display_markup(source);
+        // A complete authored static alias may have a wire-only colour suffix.
+        // Never send normalized captures through template matching: that would
+        // reinterpret colour-like bytes belonging to a player-provided value.
+        if candidate != source {
+            if let Some(index) = exact.get(candidate.trim()) {
+                return strip_npc_display_markup(&c.values[*index][language.index()]);
+            }
+        }
     }
     // Preserve whitespace around system fragments; never normalize typed input.
     let trimmed = source.trim();
@@ -774,33 +867,56 @@ fn translate_context(language: Locale, source: &str, npc: bool) -> String {
         return format!(
             "{}{}{}",
             &source[..lead],
-            translate_context(language, trimmed, npc),
+            translate_catalog(c, language, trimmed, npc, display_markup),
             &source[lead + trimmed.len()..]
         );
     }
+    let mut matched = None::<String>;
     for index in templates.candidates(source) {
         let template = &templates.templates[index];
         if let Some(args) = template.captures(source) {
             let value = &c.values[template.entry][language.index()];
-            return substitute(
-                if template.trim_output {
-                    value.trim()
-                } else {
-                    value
-                },
-                &args,
-            );
+            let value = if template.trim_output {
+                value.trim()
+            } else {
+                value
+            };
+            // Decode only authored template markup before inserting opaque
+            // captures. A player's value containing braces is never reparsed.
+            let prepared;
+            let value = if display_markup {
+                prepared = strip_npc_display_markup(value);
+                &prepared
+            } else {
+                value
+            };
+            let translated = substitute(value, &args);
+            if !c.strict_matching {
+                return translated;
+            }
+            if matched
+                .as_ref()
+                .is_some_and(|previous| previous != &translated)
+            {
+                return source.to_owned();
+            }
+            matched = Some(translated);
         }
+    }
+    if let Some(translated) = matched {
+        return translated;
     }
     if source.contains('\n') {
         return source
             .split('\n')
-            .map(|line| translate_context(language, line, npc))
+            .map(|line| translate_catalog(c, language, line, npc, display_markup))
             .collect::<Vec<_>>()
             .join("\n");
     }
     if npc {
-        translate(language, source)
+        translate_catalog(c, language, source, false, display_markup)
+    } else if display_markup {
+        strip_npc_display_markup(source)
     } else {
         source.to_owned()
     }
@@ -814,6 +930,88 @@ pub fn npc_text(source: &str) -> String {
     } else {
         crate::player_text::text(source)
     }
+}
+
+/// Native/legacy raw display edge, without editing the authoritative model.
+/// Accepted portable display-language hosts already supply projected NPC copy.
+pub fn npc_display_text(source: &str) -> String {
+    if let Some(display) =
+        projected_portable_npc_text(&PORTABLE_ACTIVE, SCOPED_LOCALE.get(), source)
+    {
+        return display;
+    }
+    if active() {
+        translate_context_display(locale(), source, true, true)
+    } else {
+        strip_npc_display_markup(source)
+    }
+}
+
+fn projected_portable_npc_text(
+    accepted: &AtomicU8,
+    scoped: Option<Locale>,
+    source: &str,
+) -> Option<String> {
+    // An accepted portable displayLanguage means the browser already applied
+    // the complete NPC catalog to this display copy. The finite WASM catalog
+    // deliberately excludes prose, so another parse could strip an opaque
+    // capture from that already rendered sentence. Native and scoped raw
+    // fixtures continue through the ordinary raw presentation path.
+    if cfg!(feature = "native-ui") || scoped.is_some() || accepted.load(Ordering::Acquire) == 0 {
+        return None;
+    }
+    Some(source.to_owned())
+}
+
+pub fn strip_npc_display_markup(source: &str) -> String {
+    if source.len() > 16_384 || source.bytes().filter(|b| *b == b'{').take(65).count() > 64 {
+        return source.to_owned();
+    }
+    fn colour(value: &str) -> bool {
+        let value = value.trim();
+        if let Some(hex) = value.strip_prefix('#') {
+            return matches!(hex.len(), 3 | 4 | 6 | 8)
+                && hex.bytes().all(|b| b.is_ascii_hexdigit());
+        }
+        // Standard named colours used by Crystal. Unknown brace/slash prose is
+        // preserved; this is deliberately not a blanket brace/token stripper.
+        const NAMES: &str = "AliceBlue AntiqueWhite Aqua Aquamarine Azure Beige Bisque Black BlanchedAlmond Blue BlueViolet Brown BurlyWood CadetBlue Chartreuse Chocolate Coral CornflowerBlue Cornsilk Crimson Cyan DarkBlue DarkCyan DarkGoldenrod DarkGray DarkGrey DarkGreen DarkKhaki DarkMagenta DarkOliveGreen DarkOrange DarkOrchid DarkRed DarkSalmon DarkSeaGreen DarkSlateBlue DarkSlateGray DarkSlateGrey DarkTurquoise DarkViolet DeepPink DeepSkyBlue DimGray DimGrey DodgerBlue Firebrick FloralWhite ForestGreen Fuchsia Gainsboro GhostWhite Gold Goldenrod Gray Grey Green GreenYellow Honeydew HotPink IndianRed Indigo Ivory Khaki Lavender LavenderBlush LawnGreen LemonChiffon LightBlue LightCoral LightCyan LightGoldenrodYellow LightGray LightGrey LightGreen LightPink LightSalmon LightSeaGreen LightSkyBlue LightSlateGray LightSlateGrey LightSteelBlue LightYellow Lime LimeGreen Linen Magenta Maroon MediumAquamarine MediumBlue MediumOrchid MediumPurple MediumSeaGreen MediumSlateBlue MediumSpringGreen MediumTurquoise MediumVioletRed MidnightBlue MintCream MistyRose Moccasin NavajoWhite Navy OldLace Olive OliveDrab Orange OrangeRed Orchid PaleGoldenrod PaleGreen PaleTurquoise PaleVioletRed PapayaWhip PeachPuff Peru Pink Plum PowderBlue Purple RebeccaPurple Red RosyBrown RoyalBlue SaddleBrown Salmon SandyBrown SeaGreen SeaShell Sienna Silver SkyBlue SlateBlue SlateGray SlateGrey Snow SpringGreen SteelBlue Tan Teal Thistle Tomato Transparent Turquoise Violet Wheat White WhiteSmoke Yellow YellowGreen";
+        NAMES
+            .split_ascii_whitespace()
+            .any(|name| name.eq_ignore_ascii_case(value))
+    }
+    let mut result = String::with_capacity(source.len());
+    let mut rest = source;
+    while let Some(start) = rest.find('{') {
+        result.push_str(&rest[..start]);
+        let candidate = &rest[start..];
+        let mut depth = 0usize;
+        let mut end = None;
+        for (index, c) in candidate.char_indices() {
+            if c == '{' {
+                depth += 1;
+            } else if c == '}' {
+                depth -= 1;
+                if depth == 0 {
+                    end = Some(index);
+                    break;
+                }
+            }
+        }
+        let Some(end) = end else {
+            result.push_str(candidate);
+            return result;
+        };
+        let body = &candidate[1..end];
+        if let Some((text, name)) = body.rsplit_once('/').filter(|(_, name)| colour(name)) {
+            result.push_str(&strip_npc_display_markup(text));
+        } else {
+            result.push_str(&candidate[..=end]);
+        }
+        rest = &candidate[end + 1..];
+    }
+    result.push_str(rest);
+    result
 }
 pub fn tr(source: &str) -> String {
     if active() {
@@ -1286,17 +1484,23 @@ mod ui {
                 names
             };
             let mut keys = HashSet::new();
+            let allowed_key = |key: &str| {
+                [
+                    "billing.",
+                    "game.mail.",
+                    "game.shop.",
+                    "game.npc.role.",
+                    "game.quest.group.",
+                ]
+                .iter()
+                .any(|prefix| key.starts_with(prefix))
+                    || key == "npc.shop.synchronizing"
+            };
+            assert!(!allowed_key("npc.shop.unreviewed"));
+            assert!(!allowed_key("npc.unreviewed"));
             for (key, values) in BILLING_TRANSLATIONS {
                 assert!(
-                    [
-                        "billing.",
-                        "game.mail.",
-                        "game.shop.",
-                        "game.npc.role.",
-                        "game.quest.group."
-                    ]
-                    .iter()
-                    .any(|prefix| key.starts_with(prefix)),
+                    allowed_key(key),
                     "unsupported shop/mail/billing vocabulary key: {key}"
                 );
                 assert!(keys.insert(*key));

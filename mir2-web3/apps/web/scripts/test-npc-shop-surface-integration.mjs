@@ -211,6 +211,7 @@ pureFiles.bagBelt="../lib/bag-belt-gesture.ts";pureRequires.bagBelt={};
 pureFiles.bagBeltMove="../lib/bag-belt-move-dispatcher.ts";pureRequires.bagBeltMove={"./mail-parcel-gateway-adapter":"parcel"};
 const npcAuthSelectors=actualFunctions(tree(source("../lib/client-login-runtime.ts"),"actual-login-runtime.ts"),
   ["preauthCommandKind","isSensitiveGatewayCommand"],{});
+const npcRuntimeLanguage=actualFunctions(tree(source("../lib/r16-runtime-language.ts"),"actual-runtime-language.ts"),["commerceRuntimeLanguage"],{});
 const pageNames=["recordNpcPurchaseAction","sendNpcPurchaseAction","npcGoldBuyCurrent","readNpcGoldBuyCurrent","currentNpcShopTab","setNpcShopCompatibilityTab",
   "readNpcShopUiInput","npcShopIntentMatchesStatus","npcShopIntentMatchesCommand","npcShopUiSendCurrent",
   "dispatchBevyNpcShopIntent","retireNpcShopService","sendRaw","itemCommandRequiresOwner",
@@ -265,8 +266,8 @@ function pageFixture() {
   const inventoryOwner = { connectionGeneration:1, sessionGeneration:2, playerObjectId:1 };
   inventoryReadiness.finish(inventoryReadiness.begin(inventoryOwner), inventoryOwner, true, bagProjection(world).model);
   const scope={npcPurchaseActionRef:{current:null},npcPurchaseSendActionRef:{current:null},setNpcPurchaseActionStatus:()=>{},projectBevyBagModel:bagProjection,npcGoldBuyInventoryMutationPacket,
-    playerReferenceWindowsRef:{current:{help:false,hotkeys:false,options:false,capture:false}},rankingInspectOpenRef:{current:false},
-    npcPurchaseUnavailableRef:{current:false},npcPurchaseOptInSocketsRef:{current:new WeakSet()},
+    playerReferenceWindowsRef:{current:{help:false,hotkeys:false,options:false,capture:false}},rankingInspectOpenRef:{current:false},companionOpenRef:{current:false},
+    npcPurchaseUnavailableRef:{current:false},npcPurchaseOptInSocketsRef:{current:new WeakSet()},npcPurchaseClientRef:{current:null},
     npcPurchaseApplyingEconomyRef:{current:false},npcPurchaseEconomicSourceRef:{current:null},npcPurchaseDisplaySourceRef:{current:null},
     accountIdRef:{current:"finite-fixture-account"},socialCharacterIndexRef:{current:{requested:null,current:0}},
     npcPearlSendEpochRef:{current:0},npcPearlShopSourceRef:{current:new (loadPure("npcPearlSource").NpcPearlShopSource)()},
@@ -308,6 +309,7 @@ function pageFixture() {
     showBonds:false,showRanking:false,showMarket:false,showConquest:false,showTrade:false,showBuffs:false,showMail:false,showWorldMap:false,
     showHelp:false,showHotkeys:false,showChatSettings:false,npcRepairService:null,bevyQuestUiRequested:true,bevyRuntimeBackend:"webgpu",
     webGl2SharedCanvasPrototype:false,initialSceneAssetsReadyRef:{current:true},language:"en",clientProfile:{input:"mouse"},
+    commerceRuntimeLanguage:npcRuntimeLanguage.commerceRuntimeLanguage,
     document:{visibilityState:"visible",hasFocus:()=>true,querySelector:()=>null},
     readBevyQuestPresentation:()=>presentation,
     sharedCanvasUsesWebGl2:()=>false,sharedUiCanvasId:()=>"shared-ui",isSpectatorBrowserMode:()=>false,
@@ -461,6 +463,7 @@ function shellFixture() {
     bagPointerCallbacksRef:{current:{getBevyBagPointerContext:()=>null}},readBevyHudStatus:()=>null,
     readBevyQuestWorldControlBlockers:()=>null,readBevyQuestWorldControls:()=>null,
     questWorldControlAt:loadPure("questControls").questWorldControlAt,
+    keyboardMovementDiagnosticsRef:{current:{lastKey:null,lastDispatch:null}},
     heldKeyboardMoveKeysRef:{current:new Set(["right"])},heldKeyboardRunModeRef:{current:true},heldScenePointerRef:{current:{button:0}},
     onViewportDirectionStop:()=>stops++,onCombatPointer:(...args)=>combatPointers.push(args),
     combatUiHoldRef:{current:new Map()},onCombatUiHeld:(...args)=>holds.push(args),
