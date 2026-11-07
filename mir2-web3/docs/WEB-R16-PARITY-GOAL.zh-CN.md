@@ -122,9 +122,21 @@ Native 默认断线后以 250 毫秒基准退避，直接使用 `resumeSession` 
 
 首次工具将 packet 字段写成 name，随后误选入城前空快照，又混用了共享 wire ID 与个人 snapshot ID；对应失败原样保留，修正测试后通过。新 dev/debug Gateway 候选 SHA256 `3666eb7e67b8c99ab45621fd5b320f5e0874869868a45f48e3a1414e3e6bd9c1`，九项直接源码在测试前与构建后稳定，未声称完整发行源闭包。原三服、原 Windows EXE 及上一候选保持，未替换试玩入口。此轮未操作桌面或调用模型；Windows 窗口、同候选跨端同档、跨 Gateway／TCP 和正式发行仍另验，`Candidate100=false`。[候选](evidence/r16-native-resume-wait-20261108/candidate-build.json) · [原件保全](evidence/r16-native-resume-wait-20261108/preservation.json)
 
+## 公会职级普通流程（2026-11-08）
+
+在 `068fd0bd3` 保存的职级增量上，通过普通账号登录、选角、G 入口打开公会，独立执行一次改名和单项权限切换。会长的两次选项修改不会带出其他选项命令；未保存的名字草稿在权限回执后仍保留。另一真实成员只可编辑自身和更低职级，更高职级的名字、保存和八项选项均禁用。它的修改会在会长页面通过真实广播显示，无命令重放，三职级和三成员保留；正常注销后再入场读回相同结果。[两后端、源码与命令记录](evidence/r16-guild-ranks-20261108/verification.json) · [成员权限](evidence/r16-guild-ranks-20261108/webgl-officer-hierarchy-and-authoritative-options.png) · [默认路径重登](evidence/r16-guild-ranks-20261108/webgpu-owner-final-persisted-ranks.png)
+
+Chrome 156 的 WebGL2-shared 与默认 WebGPU 各完成十二项流程断言，均零移动／战斗／用药／拾取命令，页面、控制台和本机资源错误为零。当前 `bevy-a46905128c316656` 的六份可变资源与六份不可变副本逐项验证，八份直接前端源码摘要稳定；不声称全工作区闭包。选项、页签等选中态原先混用 `border` 与 `borderColor`，实际切换产生 React 样式冲突，现统一完整一像素边框。新鲜三十九项限定检查及限定 TS 通过；九十四项 Page 和五百零七组适配器是前一检查点结果，没有重复执行或加总。[修前错误轮](evidence/r16-guild-ranks-20261108/diagnostic-browser-failed.json) · [当前检查](evidence/r16-guild-ranks-20261108/focused-tests.log)
+
+测试使用独立 File 副本，启动前添加三人公会，仅此初始化不是普通创建公会的证明。最初 ID 不符合三十二位十六进制格式被服务端拒绝，修正后个人账户未变。首个有效轮在第二浏览器冷进入时，会长意外回登录且缺乏当时的关闭 trace；后续加强记录与最终两轮通过，不将其定因或判已修复。另一轮已到最终重登，检查器却在注销清空 player 后读取坐标，现改在每次注销前核对实际 transform。对应原失败一并保留。[失败、范围与原图](evidence/r16-guild-ranks-20261108/failures.json)
+
+五角色一百三十项个人字段比较中，一百二十九项精确相同；唯一变化是原本缺省的 `npc_purchase_journal` 在普通 `npcPurchaseOwner Begin` 时建立了空日志。严格检查版本、账号／角色绑定、非零三十二字节 actor 与零条采购记录，已有日志不变；这与一百二十五项成长／资产字段、五角色坐标和朝向均相同分别记录。原三服及 Windows EXE 保持，本轮服务 `19253/19283/19353` 已关，未控制桌面、调用模型或发布。[最初严格差异](evidence/r16-guild-ranks-20261108/preservation-first-differences.json) · [完整保存核对](evidence/r16-guild-ranks-20261108/preservation.json) · [服务保全](evidence/r16-guild-ranks-20261108/cleanup.json)
+
+公会像素布局、部分混合语言与输入边界、Native 非七号增量及 ACK 字段、成员显示上限和共同社交未结预算继续开放。此轮只完成所列普通操作，不提升整体 Candidate 或 Accepted。
+
 ## 当前执行顺序
 
-用户要求优先提交推送：当前公会职级增量按代码检查点保存，限定检查通过，浏览器界面与真实回执验收待续；不将保存提交视为功能验收。[范围、原失败和证据](CODE-CHECKPOINT-20261108.zh-CN.md)
+用户要求优先提交推送的代码检查点已保存；后续公会普通流程的限定资格见上节，仍保留原检查点时“浏览器未验”的历史范围。[原保存范围](CODE-CHECKPOINT-20261108.zh-CN.md)
 
 1. 已在真实存档副本完成小地图标题及框架输入修复、缩放和前景 Q 日记复测。
 2. 已完成 Web 创角回执、共享网关四槽和重名、登录过场输入及标签的本机验证。Windows 窗口和超额旧档访问继续追踪。

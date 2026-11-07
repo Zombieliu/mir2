@@ -1,0 +1,39 @@
+{
+  "recordedAt": "2026-11-07T22:11:20.558Z",
+  "rows": [
+    {
+      "ordinal": 1,
+      "level": 7,
+      "differences": []
+    },
+    {
+      "ordinal": 2,
+      "level": 1,
+      "differences": [
+        {
+          "key": "npc_purchase_journal",
+          "beforeType": "undefined",
+          "afterType": "object",
+          "semanticEqual": false,
+          "beforeSha256": "4bd0a6a19082ab4c147761194a77c8066f4b89725c09883822c7c72d20d211d1",
+          "afterSha256": "f5c7ab381492f2a86182b47c76251f93f2a590c26863e7f6608ea5e41fe46169"
+        }
+      ]
+    },
+    {
+      "ordinal": 3,
+      "level": 30,
+      "differences": []
+    },
+    {
+      "ordinal": 4,
+      "level": 1,
+      "differences": []
+    },
+    {
+      "ordinal": 5,
+      "level": 1,
+      "differences": []
+    }
+  ]
+}

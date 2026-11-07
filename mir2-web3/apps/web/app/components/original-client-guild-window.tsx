@@ -724,7 +724,7 @@ export function GuildWindow({
                 onFocus={() => setActiveStorageTooltip(item)} onBlur={() => setActiveStorageTooltip(null)}>
               <button type="button"
                 style={{ ...style.storageSlot, padding: 0, width:"100%", ...(selection?.source === "storage" && selection.item.slot === index
-                  ? { borderColor: "#f4dcaf" } : null) }}
+                  ? { border: "1px solid #f4dcaf" } : null) }}
                 data-storage-slot={index}
                 disabled={disabled}
                 aria-label={item?.name ?? t("ui.emptyStorageSlot", [index + 1], `Empty storage ${index + 1}`)}
@@ -1121,7 +1121,7 @@ const style: Record<string, CSSProperties> = {
   tabActive: {
     background: "linear-gradient(180deg, rgba(120, 74, 34, 0.96), rgba(70, 40, 20, 0.96))",
     color: "#f8e6bb",
-    borderColor: "rgba(214, 180, 110, 0.85)",
+    border: "1px solid rgba(214, 180, 110, 0.85)",
   },
   panel: {
     position: "absolute",
@@ -1286,7 +1286,7 @@ const style: Record<string, CSSProperties> = {
     padding: "3px 6px",
     cursor: "pointer",
   },
-  permCheckOn: { color: "#f0d69b", borderColor: "rgba(214, 180, 110, 0.6)", background: "rgba(52, 32, 18, 0.6)" },
+  permCheckOn: { color: "#f0d69b", border: "1px solid rgba(214, 180, 110, 0.6)", background: "rgba(52, 32, 18, 0.6)" },
   membersLayout: { flex: 1, display: "flex", gap: 10, minHeight: 0 },
   memberList: {
     flex: "1 1 60%",
@@ -1316,7 +1316,7 @@ const style: Record<string, CSSProperties> = {
     cursor: "pointer",
     fontSize: 12,
   },
-  memberRowSelected: { background: "rgba(95, 53, 24, 0.5)", borderColor: "rgba(214, 180, 110, 0.7)" },
+  memberRowSelected: { background: "rgba(95, 53, 24, 0.5)", border: "1px solid rgba(214, 180, 110, 0.7)" },
   memberRowSelf: { color: "#f8e6bb", fontWeight: 700 },
   memberColName: { flex: "1 1 auto", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" },
   memberColRank: { flex: "0 0 110px" },
