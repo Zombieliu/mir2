@@ -6,42 +6,37 @@ on:
       - .github/workflows/android-apk-r2-upload.yml
       - .github/scripts/android-apk-r2-v40/**
   workflow_dispatch:
-
 permissions:
-  # GitHub requires push access to retrieve an unpublished draft release.
-  # The script only downloads this pinned staging asset and never publishes it.
+  # GitHub requires push access to retrieve this unpublished staging draft.
   contents: write
-
 concurrency:
   group: mir2-android-v40-r2-upload
   cancel-in-progress: false
-
 jobs:
   publish-signed-apk:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
-      - name: Check out only the reviewed publication scripts
+      - name: Check out the reviewed scripts and existing asset uploader
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           ref: ${{ github.sha }}
           persist-credentials: false
-          sparse-checkout: .github/scripts/android-apk-r2-v40
-      - name: Verify fixed object, origin, checksum and overwrite guards without credentials
-        run: node --test .github/scripts/android-apk-r2-v40/worker.test.mjs
-      - name: Verify existing upload credentials without writing any object
+          sparse-checkout: |
+            .github/scripts/android-apk-r2-v40
+            mir2-web3/apps/web/scripts
+      - name: Download the exact draft APK and verify its SHA256 before credentials are available
         env:
           GH_TOKEN: ${{ github.token }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          MIR2_R2_ASSET_BUCKET: ${{ secrets.MIR2_R2_ASSET_BUCKET }}
-          MIR2_R2_BUCKET: ${{ secrets.MIR2_R2_BUCKET }}
+        run: node .github/scripts/android-apk-r2-v40/prepare.mjs
+      - name: Dry run exactly one immutable APK through the existing uploader
+        run: |
+          node mir2-web3/apps/web/scripts/upload-r2-assets.mjs --manifest "$RUNNER_TEMP/mir2-apk-r2-release.json" --driver worker --bucket mir2-web3-assets --includeReleaseManifest false --ensureBucket false --dryRun true
+      - name: Upload the APK through the existing authenticated service
+        env:
           MIR2_R2_UPLOAD_WORKER_URL: ${{ secrets.MIR2_R2_UPLOAD_WORKER_URL }}
           MIR2_R2_UPLOAD_SECRET: ${{ secrets.MIR2_R2_UPLOAD_SECRET }}
-        run: node .github/scripts/android-apk-r2-v40/probe-worker.mjs
-      - name: Ensure this run's temporary transfer Worker is removed
-        if: ${{ always() }}
-        env:
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-        run: python3 .github/scripts/android-apk-r2-v40/publish.py --cleanup
+        run: |
+          node mir2-web3/apps/web/scripts/upload-r2-assets.mjs --manifest "$RUNNER_TEMP/mir2-apk-r2-release.json" --driver worker --bucket mir2-web3-assets --includeReleaseManifest false --ensureBucket false --concurrency 1 --maxAttempts 3 --progressEvery 1
+      - name: Verify actual public APK bytes, type and Range fallback policy
+        run: node .github/scripts/android-apk-r2-v40/verify.mjs
