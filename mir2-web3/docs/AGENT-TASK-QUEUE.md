@@ -1,5 +1,51 @@
 # Agent Task Queue
 
+> 阿洛 P0 当前主线（2026-11-03，Windows EXE）：已实现原生主人入口、角色／成长可移植
+> 归档和真人体验台账，当前规则＋模板解释，不启用大模型。Node 163/163、Gateway
+> companion 15/15、PartyHub 15/15、ui-core 52/52（十项新增）、完整 Windows 平台
+> 325/325（隔离组合资源）、完整 native-ui 391/391（五项新增 ECS）、Release 构建与
+> locked check 已通过；普通真实网络 P0 12/12 也已通过，明确为 test 工程夹具。
+> 实际 EXE 已验证教学 v1→v2、普通邀请组队、撤销 v3、删除教学正文、再教 v4 和完整导出。
+> 原生 A→B 流程、成本页、最终中文调整及完整 Gateway lib 回归仍在进行，最终构建 hash
+> 待确认，不预写 GUI 全通过。统一证据目录 `generated/player-qa/alo-experience-2026-11-03/`。
+> Gateway enrollment 绑定已登录 owner／actor，私有控制不进入世界投影。schema 2 显式
+> 采用旧库，外部 HMAC key 验证完整成长；档案锁和在线 admission 共同限制并发。
+> `characterArchive`、`playerGrowth`、`runtimeService` 分离，不从导入包恢复资产或权限。
+> 真人试点准备为 6–10 人（包含非开发者）、每人三次约20–30分钟；两周窗口从首位真人
+> 实际开始算，未招募／未回访不补数据。价格未指定，offer:null，购买入口关闭。
+> [试点手册与空白表](ALO-REAL-PLAYER-TRIAL.zh-CN.md)说明真实回访、运营触达、付款／grant
+> 与实际服务观察的区别；同一参与者跨伙伴累计费用，当前伙伴选择数另列。自动测试不
+> 证明留存、付费、盈利、Sui 支持、完整生活或生产／全局视觉验收。先完成剩余 EXE 流程与回归证据。
+
+> 历史阿洛陪战 B2（2026-11-03，不能替代上面的 P0 验收）：按当时用户选择，完成真实组队、跟随、支援打怪、
+> 使用已有血药和危险撤退，再验证“组队先支援、战后拾取”的主人反馈改变下一场冒险，
+> 并由不同 Node 进程重启后保留。当前为规则执行器 + SQLite，本机主人在线教学／召回；
+> 模型规划、完整谋生、自动采购和长期熟人均后置。
+> Node 108/108、Gateway `shared_gateway_` 8/8（含五项药品桥接测试）、地图安全区
+> 4/4、Zone 安全区 5/5、`shared_zone` 196/196、`shared_party_projection` 2/2、
+> `security_lifecycle` 18/18 已通过。最终药品桥接二进制的真实网络陪战 12/12、
+> 同构建 B1 基础复验 4/4 已通过；完整 Gateway lib 686 项通过、0 项失败、1 项外部
+> Postgres 测试因未配置数据库而忽略（共 687 项，590.93 秒）。本轮有界 B2 本地工程／
+> 网络门槛已完成。[验证汇总](generated/player-qa/alo-companion-2026-11-03/verification.json)。
+> [脱敏证据](generated/player-qa/alo-companion-2026-11-03/summary.json)绑定二进制
+> `d8c2bd33ed1ab1acf976bebf42719e9492040cc671b8c67bede5c72c139fe17b`，
+> 证明培养版本 `1→2→2`、吃原生药前后的实际 HP `18→11→17→10` 与存活撤退。
+> 组队仅在单 Gateway 内、由默认关闭的
+> `MIR2_SHARED_PARTY_ENABLED=1` 启用；组队投影仅改元数据，不消费旧移动 ACK；
+> 安全区按权威移动重算，药品正向恢复量提交到最新 Zone 状态并保留伤害／死亡约束。
+> 真实验收保留 31 秒路由租约与 16 秒 bootstrap 等待。当时将游戏内主人入口列为下一步，
+> 现按上面的 P0 实施；完整独立生活继续后置。不认领模型、视觉、人类或生产验收，也不改变全局 Crystal
+> 完整度。[实现方案](AI-PLAYER-BICHON-MVP.zh-CN.md)。
+
+> 历史 B1 本地基础落地（2026-11-03，不能代替上面的 B2 验收）：新增
+> [独立普通客户端](../apps/ai-player/README.md)，Node 测试 35/35、当前 Gateway
+> 源码构建与隔离双客户端网络验收通过：普通账号／战士入场、双向 AOI 移动和
+> 附近聊天、控制命令拒绝、注销保存与新会话位置重载。现有路由租约在注销后
+> 可能保留到默认 30 秒 TTL；本次明确等待 31 秒，不认领即时重连。
+> [具体方案及证据](AI-PLAYER-BICHON-MVP.zh-CN.md)保留该次记录。该次 B1 未启用模型
+> 或长期记忆，也未改动 Rust 游戏运行逻辑或部署生产。原先列为下一项的独立谋生和
+> 补药闭环，现按用户要求排在阿洛陪战培养之后；不改变 Crystal 全局验收状态。
+
 > MAP-E0/E1 bounded closure (2026-08-26): the real `Server.MirDB` map records
 > now drive hazard/music packet metadata for all 464 source records, and all six
 > current `_MAPCOORD` entries are typed and one-to-one bound to `NeedMove`.

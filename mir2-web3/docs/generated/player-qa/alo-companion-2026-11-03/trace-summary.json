@@ -1,0 +1,522 @@
+{
+  "schema": "mir2-alo-observed-evidence/1",
+  "gatewayBinarySha256": "d8c2bd33ed1ab1acf976bebf42719e9492040cc671b8c67bede5c72c139fe17b",
+  "sourceTraceSha256": "31f96c4cd36a46e46adc59571130ff05504e63c1778f5dc7fdfe51de63a1b7ee",
+  "policyLifecycle": [
+    {
+      "at": "2026-11-02T20:17:18.331Z",
+      "type": "companionReady",
+      "policyVersion": 1
+    },
+    {
+      "at": "2026-11-02T20:17:34.988Z",
+      "type": "companionTaught",
+      "policyVersion": 2,
+      "party": {
+        "assistBeforeLoot": true,
+        "lootOnlyAfterCombat": true,
+        "askBeforeLeaving": true
+      }
+    },
+    {
+      "at": "2026-11-02T20:18:28.388Z",
+      "type": "companionReady",
+      "policyVersion": 2
+    }
+  ],
+  "actionResults": [
+    {
+      "at": "2026-11-02T20:17:18.611Z",
+      "kind": "acceptInvite",
+      "reason": "configured-leader-invited",
+      "policyVersion": 1,
+      "performed": true,
+      "confirmed": true
+    },
+    {
+      "at": "2026-11-02T20:17:18.644Z",
+      "kind": "wait",
+      "reason": "near-party-leader",
+      "policyVersion": 1,
+      "performed": false
+    },
+    {
+      "at": "2026-11-02T20:17:19.444Z",
+      "kind": "follow",
+      "reason": "stay-with-party-leader",
+      "policyVersion": 1,
+      "performed": true,
+      "moved": true
+    },
+    {
+      "at": "2026-11-02T20:17:20.168Z",
+      "kind": "follow",
+      "reason": "stay-with-party-leader",
+      "policyVersion": 1,
+      "performed": true,
+      "moved": true
+    },
+    {
+      "at": "2026-11-02T20:17:20.878Z",
+      "kind": "follow",
+      "reason": "stay-with-party-leader",
+      "policyVersion": 1,
+      "performed": true,
+      "moved": true
+    },
+    {
+      "at": "2026-11-02T20:17:21.586Z",
+      "kind": "follow",
+      "reason": "stay-with-party-leader",
+      "policyVersion": 1,
+      "performed": true,
+      "moved": true
+    },
+    {
+      "at": "2026-11-02T20:17:31.633Z",
+      "kind": "loot",
+      "reason": "collect-observed-allowed-drop",
+      "policyVersion": 1,
+      "performed": true,
+      "moved": true
+    },
+    {
+      "at": "2026-11-02T20:17:32.952Z",
+      "kind": "loot",
+      "reason": "collect-observed-allowed-drop",
+      "policyVersion": 1,
+      "performed": true,
+      "changed": true
+    },
+    {
+      "at": "2026-11-02T20:17:35.024Z",
+      "kind": "attack",
+      "reason": "assist-confirmed-party-engagement",
+      "policyVersion": 2,
+      "performed": true,
+      "moved": true
+    },
+    {
+      "at": "2026-11-02T20:17:35.565Z",
+      "kind": "attack",
+      "reason": "assist-confirmed-party-engagement",
+      "policyVersion": 2,
+      "performed": true,
+      "moved": true
+    },
+    {
+      "at": "2026-11-02T20:17:36.219Z",
+      "kind": "attack",
+      "reason": "assist-confirmed-party-engagement",
+      "policyVersion": 2,
+      "performed": true,
+      "confirmed": false
+    },
+    {
+      "at": "2026-11-02T20:17:36.875Z",
+      "kind": "attack",
+      "reason": "assist-confirmed-party-engagement",
+      "policyVersion": 2,
+      "performed": true,
+      "confirmed": false
+    },
+    {
+      "at": "2026-11-02T20:17:37.560Z",
+      "kind": "loot",
+      "reason": "collect-observed-allowed-drop",
+      "policyVersion": 2,
+      "performed": true,
+      "moved": true
+    },
+    {
+      "at": "2026-11-02T20:17:38.241Z",
+      "kind": "loot",
+      "reason": "collect-observed-allowed-drop",
+      "policyVersion": 2,
+      "performed": true,
+      "moved": true
+    },
+    {
+      "at": "2026-11-02T20:17:38.917Z",
+      "kind": "loot",
+      "reason": "collect-observed-allowed-drop",
+      "policyVersion": 2,
+      "performed": true,
+      "moved": true
+    },
+    {
+      "at": "2026-11-02T20:17:39.683Z",
+      "kind": "loot",
+      "reason": "collect-observed-allowed-drop",
+      "policyVersion": 2,
+      "performed": true,
+      "moved": true
+    },
+    {
+      "at": "2026-11-02T20:17:40.974Z",
+      "kind": "loot",
+      "reason": "collect-observed-allowed-drop",
+      "policyVersion": 2,
+      "performed": true,
+      "changed": true
+    },
+    {
+      "at": "2026-11-02T20:18:44.639Z",
+      "kind": "acceptInvite",
+      "reason": "configured-leader-invited",
+      "policyVersion": 2,
+      "performed": true,
+      "confirmed": true
+    },
+    {
+      "at": "2026-11-02T20:18:44.666Z",
+      "kind": "wait",
+      "reason": "party-combat-still-active",
+      "policyVersion": 2,
+      "performed": false
+    },
+    {
+      "at": "2026-11-02T20:18:45.353Z",
+      "kind": "wait",
+      "reason": "party-combat-still-active",
+      "policyVersion": 2,
+      "performed": false
+    },
+    {
+      "at": "2026-11-02T20:18:46.155Z",
+      "kind": "follow",
+      "reason": "stay-with-party-leader",
+      "policyVersion": 2,
+      "performed": true,
+      "moved": true
+    },
+    {
+      "at": "2026-11-02T20:18:46.865Z",
+      "kind": "follow",
+      "reason": "stay-with-party-leader",
+      "policyVersion": 2,
+      "performed": true,
+      "moved": true
+    },
+    {
+      "at": "2026-11-02T20:18:47.574Z",
+      "kind": "follow",
+      "reason": "stay-with-party-leader",
+      "policyVersion": 2,
+      "performed": true,
+      "moved": true
+    },
+    {
+      "at": "2026-11-02T20:18:52.210Z",
+      "kind": "attack",
+      "reason": "assist-confirmed-party-engagement",
+      "policyVersion": 2,
+      "performed": true,
+      "moved": true
+    },
+    {
+      "at": "2026-11-02T20:18:52.893Z",
+      "kind": "attack",
+      "reason": "assist-confirmed-party-engagement",
+      "policyVersion": 2,
+      "performed": true,
+      "moved": true
+    },
+    {
+      "at": "2026-11-02T20:18:53.565Z",
+      "kind": "attack",
+      "reason": "assist-confirmed-party-engagement",
+      "policyVersion": 2,
+      "performed": true,
+      "moved": true
+    },
+    {
+      "at": "2026-11-02T20:18:54.242Z",
+      "kind": "attack",
+      "reason": "assist-confirmed-party-engagement",
+      "policyVersion": 2,
+      "performed": true,
+      "moved": true
+    },
+    {
+      "at": "2026-11-02T20:18:54.925Z",
+      "kind": "attack",
+      "reason": "assist-confirmed-party-engagement",
+      "policyVersion": 2,
+      "performed": true,
+      "moved": true
+    },
+    {
+      "at": "2026-11-02T20:18:55.585Z",
+      "kind": "attack",
+      "reason": "assist-confirmed-party-engagement",
+      "policyVersion": 2,
+      "performed": true,
+      "confirmed": false
+    },
+    {
+      "at": "2026-11-02T20:18:55.616Z",
+      "kind": "attack",
+      "reason": "assist-confirmed-party-engagement",
+      "policyVersion": 2,
+      "performed": true,
+      "confirmed": false
+    },
+    {
+      "at": "2026-11-02T20:18:56.294Z",
+      "kind": "attack",
+      "reason": "assist-confirmed-party-engagement",
+      "policyVersion": 2,
+      "performed": true,
+      "confirmed": false
+    },
+    {
+      "at": "2026-11-02T20:18:56.977Z",
+      "kind": "attack",
+      "reason": "assist-confirmed-party-engagement",
+      "policyVersion": 2,
+      "performed": true,
+      "confirmed": false
+    },
+    {
+      "at": "2026-11-02T20:18:57.651Z",
+      "kind": "attack",
+      "reason": "assist-confirmed-party-engagement",
+      "policyVersion": 2,
+      "performed": true,
+      "confirmed": false
+    },
+    {
+      "at": "2026-11-02T20:18:58.336Z",
+      "kind": "attack",
+      "reason": "assist-confirmed-party-engagement",
+      "policyVersion": 2,
+      "performed": true,
+      "confirmed": false
+    },
+    {
+      "at": "2026-11-02T20:18:59.044Z",
+      "kind": "follow",
+      "reason": "stay-with-party-leader",
+      "policyVersion": 2,
+      "performed": true,
+      "moved": true
+    },
+    {
+      "at": "2026-11-02T20:19:00.054Z",
+      "kind": "follow",
+      "reason": "stay-with-party-leader",
+      "policyVersion": 2,
+      "performed": true,
+      "moved": true
+    },
+    {
+      "at": "2026-11-02T20:19:00.753Z",
+      "kind": "follow",
+      "reason": "stay-with-party-leader",
+      "policyVersion": 2,
+      "performed": true,
+      "moved": true
+    },
+    {
+      "at": "2026-11-02T20:19:01.445Z",
+      "kind": "loot",
+      "reason": "collect-observed-allowed-drop",
+      "policyVersion": 2,
+      "performed": true,
+      "moved": true
+    },
+    {
+      "at": "2026-11-02T20:19:02.121Z",
+      "kind": "loot",
+      "reason": "collect-observed-allowed-drop",
+      "policyVersion": 2,
+      "performed": true,
+      "moved": true
+    },
+    {
+      "at": "2026-11-02T20:19:02.800Z",
+      "kind": "loot",
+      "reason": "collect-observed-allowed-drop",
+      "policyVersion": 2,
+      "performed": true,
+      "moved": true
+    },
+    {
+      "at": "2026-11-02T20:19:04.153Z",
+      "kind": "loot",
+      "reason": "collect-observed-allowed-drop",
+      "policyVersion": 2,
+      "performed": true,
+      "changed": true
+    },
+    {
+      "at": "2026-11-02T20:19:04.833Z",
+      "kind": "follow",
+      "reason": "stay-with-party-leader",
+      "policyVersion": 2,
+      "performed": true,
+      "moved": true
+    },
+    {
+      "at": "2026-11-02T20:19:05.621Z",
+      "kind": "follow",
+      "reason": "stay-with-party-leader",
+      "policyVersion": 2,
+      "performed": true,
+      "moved": true
+    },
+    {
+      "at": "2026-11-02T20:19:06.293Z",
+      "kind": "follow",
+      "reason": "stay-with-party-leader",
+      "policyVersion": 2,
+      "performed": true,
+      "moved": true
+    },
+    {
+      "at": "2026-11-02T20:19:06.977Z",
+      "kind": "follow",
+      "reason": "stay-with-party-leader",
+      "policyVersion": 2,
+      "performed": true,
+      "moved": true
+    },
+    {
+      "at": "2026-11-02T20:19:07.668Z",
+      "kind": "retreat",
+      "reason": "owner-recall",
+      "policyVersion": 2,
+      "performed": true,
+      "moved": true
+    },
+    {
+      "at": "2026-11-02T20:19:40.117Z",
+      "kind": "usePotion",
+      "reason": "health-low-use-owned-potion",
+      "policyVersion": 2,
+      "performed": true,
+      "confirmed": true
+    },
+    {
+      "at": "2026-11-02T20:19:52.059Z",
+      "kind": "retreat",
+      "reason": "unsafe-withdraw",
+      "policyVersion": 2,
+      "performed": true,
+      "moved": true
+    },
+    {
+      "at": "2026-11-02T20:19:52.588Z",
+      "kind": "retreat",
+      "reason": "unsafe-withdraw",
+      "policyVersion": 2,
+      "performed": true,
+      "moved": true
+    },
+    {
+      "at": "2026-11-02T20:19:53.268Z",
+      "kind": "retreat",
+      "reason": "unsafe-withdraw",
+      "policyVersion": 2,
+      "performed": true,
+      "moved": true
+    },
+    {
+      "at": "2026-11-02T20:19:53.947Z",
+      "kind": "retreat",
+      "reason": "unsafe-withdraw",
+      "policyVersion": 2,
+      "performed": true,
+      "moved": true
+    }
+  ],
+  "observedCompanionHp": [
+    {
+      "at": "2026-11-02T20:17:18.610Z",
+      "hp": 18,
+      "maxHp": 18
+    },
+    {
+      "at": "2026-11-02T20:19:23.239Z",
+      "hp": 17,
+      "maxHp": 18
+    },
+    {
+      "at": "2026-11-02T20:19:25.570Z",
+      "hp": 16,
+      "maxHp": 18
+    },
+    {
+      "at": "2026-11-02T20:19:28.751Z",
+      "hp": 15,
+      "maxHp": 18
+    },
+    {
+      "at": "2026-11-02T20:19:31.224Z",
+      "hp": 14,
+      "maxHp": 18
+    },
+    {
+      "at": "2026-11-02T20:19:33.519Z",
+      "hp": 13,
+      "maxHp": 18
+    },
+    {
+      "at": "2026-11-02T20:19:36.691Z",
+      "hp": 12,
+      "maxHp": 18
+    },
+    {
+      "at": "2026-11-02T20:19:39.177Z",
+      "hp": 11,
+      "maxHp": 18
+    },
+    {
+      "at": "2026-11-02T20:19:41.341Z",
+      "hp": 17,
+      "maxHp": 18
+    },
+    {
+      "at": "2026-11-02T20:19:44.672Z",
+      "hp": 16,
+      "maxHp": 18
+    },
+    {
+      "at": "2026-11-02T20:19:47.105Z",
+      "hp": 14,
+      "maxHp": 18
+    },
+    {
+      "at": "2026-11-02T20:19:49.559Z",
+      "hp": 12,
+      "maxHp": 18
+    },
+    {
+      "at": "2026-11-02T20:19:51.914Z",
+      "hp": 10,
+      "maxHp": 18
+    }
+  ],
+  "medicineReceipts": [
+    {
+      "at": "2026-11-02T20:19:40.105Z",
+      "success": true,
+      "grid": "Inventory",
+      "uniqueId": "2"
+    }
+  ],
+  "packetCounts": {
+    "UserLocation": 46,
+    "GroupMemberInfo": 110,
+    "SendMemberLocation": 220,
+    "ObjectWalk": 128,
+    "ObjectItem": 9,
+    "ObjectStruck": 54,
+    "ObjectAttack": 33,
+    "GainedItem": 3,
+    "ObjectDied": 2,
+    "UseItem": 1
+  },
+  "traceScope": "Whitelisted lifecycle, action results, party-observed HP and owned medicine receipt; private accounts, credentials and SQLite are excluded."
+}

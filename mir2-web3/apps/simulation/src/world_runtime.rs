@@ -89,6 +89,13 @@ pub enum WorldCommand {
         hp: Option<i32>,
         mp: Option<i32>,
     },
+    /// Trusted shared-party authority projection, never a raw player command.
+    SyncPartyView {
+        account_id: String,
+        character_index: i32,
+        allow_group: bool,
+        members: Vec<String>,
+    },
     Stage5Command {
         action: String,
         args: Vec<String>,
@@ -133,6 +140,9 @@ pub fn validate_production_player_command(
         }
         WorldCommand::ApplyHandoffTransform { .. } => {
             Err("handoff transform is not allowed on the production player path".to_string())
+        }
+        WorldCommand::SyncPartyView { .. } => {
+            Err("shared party projection is not allowed on the production player path".to_string())
         }
         WorldCommand::Stage5Command { .. } => {
             Err("Stage5Command is not allowed on the production player path".to_string())
@@ -211,6 +221,7 @@ pub enum WorldCommandKind {
     CastSkill,
     TransferMap,
     ApplyHandoffTransform,
+    SyncPartyView,
     Stage5Command(String),
     GrantOnchainOre,
     CreditGoldFromOre,
@@ -239,6 +250,7 @@ impl WorldCommand {
             Self::CastSkill { .. } => WorldCommandKind::CastSkill,
             Self::TransferMap { .. } => WorldCommandKind::TransferMap,
             Self::ApplyHandoffTransform { .. } => WorldCommandKind::ApplyHandoffTransform,
+            Self::SyncPartyView { .. } => WorldCommandKind::SyncPartyView,
             Self::Stage5Command { action, .. } => WorldCommandKind::Stage5Command(action.clone()),
             Self::GrantOnchainOre { .. } => WorldCommandKind::GrantOnchainOre,
             Self::CreditGoldFromOre { .. } => WorldCommandKind::CreditGoldFromOre,
@@ -506,6 +518,10 @@ impl InProcessWorldRuntime {
         self.session.current_map_hazard_config()
     }
 
+    pub fn current_map_safe_zone_bounds(&self) -> Vec<mir2_game_data::MapBounds> {
+        self.session.current_map_safe_zone_bounds()
+    }
+
     /// Advance only the personal compatibility state for a session whose map
     /// monsters and hazards are owned by a shared Zone runtime.
     pub fn tick_shared_zone_personal_state(&mut self) -> Vec<ServerPacket> {
@@ -766,6 +782,20 @@ impl WorldRuntime for InProcessWorldRuntime {
                 self.session
                     .force_authoritative_player_transform(position, direction);
                 self.session.force_authoritative_player_vitals(hp, mp);
+                Vec::new()
+            }
+            WorldCommand::SyncPartyView {
+                account_id,
+                character_index,
+                allow_group,
+                members,
+            } => {
+                self.session.apply_authoritative_party_view(
+                    &account_id,
+                    character_index,
+                    allow_group,
+                    members,
+                )?;
                 Vec::new()
             }
             WorldCommand::Stage5Command { action, args } => {

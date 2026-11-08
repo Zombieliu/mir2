@@ -145,6 +145,7 @@ impl ZoneManager {
             | ZoneCommand::Turn { session_id, .. }
             | ZoneCommand::TeleportToNpc { session_id, .. }
             | ZoneCommand::UpdateChatProfile { session_id, .. }
+            | ZoneCommand::ConfigurePlayerSafetyZones { session_id, .. }
             | ZoneCommand::UpdatePlayerCombatStats { session_id, .. }
             | ZoneCommand::SyncPlayerCombatState { session_id, .. }
             | ZoneCommand::SyncPlayerTransform { session_id, .. }

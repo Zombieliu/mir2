@@ -5,6 +5,7 @@ pub mod beta;
 mod browser_commands;
 pub mod cache;
 pub mod channel_identity;
+pub mod companion_relay;
 pub mod consensus_log;
 pub mod control_plane;
 pub mod economy;
@@ -42,6 +43,7 @@ pub mod node_identity {
 }
 pub mod node_security;
 pub mod operator;
+pub mod party;
 pub mod regional;
 mod resume;
 pub mod rewards {

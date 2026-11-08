@@ -64,6 +64,15 @@ pub(crate) struct GatewayZoneMovementIngress {
 }
 
 impl GatewayZoneMovementIngress {
+    pub(crate) fn player_object_id(&self) -> Option<u32> {
+        if let Some(authority) = &self.zone_owner_lease_authority {
+            authority
+                .validate_owner_lease(&self.zone_owner_lease)
+                .ok()?;
+        }
+        self.ingress.player_object_id()
+    }
+
     pub(crate) fn try_execute(
         &self,
         packet: ClientPacket,

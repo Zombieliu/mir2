@@ -1,0 +1,53 @@
+{
+  "schema": "mir2-alo-companion-acceptance/1",
+  "ok": true,
+  "startedAt": "2026-11-02T20:16:48.159Z",
+  "finishedAt": "2026-11-02T20:20:00.803Z",
+  "realmId": "ai-companion-520f03eb-4e9d-47ad-937b-c1bce87ec386",
+  "gatewayBinarySha256": "d8c2bd33ed1ab1acf976bebf42719e9492040cc671b8c67bede5c72c139fe17b",
+  "normalClientOnly": true,
+  "modelEnabled": false,
+  "memoryScope": "local-owner-feedback-and-action-episodes",
+  "checks": [
+    "two ordinary equipped Warriors entered the same Bichon Zone",
+    "a pending invitation alone is not membership; acceptance updates both authoritative rosters",
+    "ordinary companion Walk intents are visible to the human observer and close the follow distance",
+    "before feedback, the real safe collection policy walks to and picks up the ordinary candle during a confirmed party engagement",
+    "the same ordinary drop/combat conflict selects support after local-owner feedback (policy 1 -> 2)",
+    "the observer confirms the companion's real monster strike; the taught companion resumes pickup after the fight",
+    "a different Node process reloads saved character position and policy version 2 without teaching again; stale party membership is cleared",
+    "a new real monster/drop encounter after process restart still chooses support, without new teaching",
+    "owner recall causes a real ordinary walk back toward the configured Bichon safe starting position",
+    "natural field damage triggers a successful exact-UID UseItem and consumes the original owned potion",
+    "the server subsequently reports actual HP recovery after the consumed potion",
+    "the low-health companion without another available potion automatically walks back into town safety alive"
+  ],
+  "commands": {
+    "clientVersion": 3,
+    "newAccount": 2,
+    "login": 3,
+    "newCharacter": 2,
+    "startGame": 3,
+    "changeAMode": 3,
+    "keepAlive": 30,
+    "equipItem": 4,
+    "switchGroup": 3,
+    "addMember": 2,
+    "groupInvite": 2,
+    "walk": 85,
+    "dropItem": 3,
+    "attackDirection": 17,
+    "pickUpTile": 3,
+    "logOut": 3,
+    "removeItem": 1,
+    "useItem": 1
+  },
+  "reloginSettleMs": 31000,
+  "bootstrapSettleMs": 16000,
+  "limitations": [
+    "single-Gateway shared party",
+    "local owner feedback control",
+    "existing route lease and bootstrap grace settle",
+    "no model planner or frontend visual acceptance"
+  ]
+}

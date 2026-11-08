@@ -601,6 +601,40 @@ impl SimulationSession {
         collect_current_map_shared_entity_snapshots(self.app.world())
     }
 
+    /// Inclusive safe-zone rectangles for the current map, matching
+    /// `map::is_safe_zone_point` without advancing the simulation or player.
+    pub fn current_map_safe_zone_bounds(&self) -> Vec<mir2_game_data::MapBounds> {
+        let world = self.app.world();
+        let config = &world.resource::<RuntimeConfigResource>().config;
+        let map = world.resource::<MapRuntimeResource>();
+        let current_map = normalize_map_file_name(&map.current_map.file_name);
+        let mut bounds = Vec::new();
+        for zone in &config.safe_zones {
+            if normalize_map_file_name(&zone.map_file_name) == current_map
+                && !bounds.contains(&zone.bounds)
+            {
+                bounds.push(zone.bounds);
+            }
+        }
+        if let Some(crystal_map) =
+            mir2_game_data::crystal_map_respawns_ref(&map.current_map.file_name)
+        {
+            for zone in &crystal_map.safe_zones {
+                let size = i32::from(zone.size);
+                let zone_bounds = mir2_game_data::MapBounds {
+                    min_x: zone.location.x - size,
+                    max_x: zone.location.x + size,
+                    min_y: zone.location.y - size,
+                    max_y: zone.location.y + size,
+                };
+                if !bounds.contains(&zone_bounds) {
+                    bounds.push(zone_bounds);
+                }
+            }
+        }
+        bounds
+    }
+
     pub fn local_player_object_id(&self) -> Option<u32> {
         let world = self.app.world();
         player_entity(world).and_then(|entity| entity_object_id(world, entity))
@@ -750,6 +784,43 @@ impl SimulationSession {
             },
             combat_stats: self.zone_player_combat_stats(),
         })
+    }
+
+    /// Apply a shared authority projection bound to this exact active character.
+    /// The Gateway only calls this through a trusted WorldCommand, not a client packet.
+    pub fn apply_authoritative_party_view(
+        &mut self,
+        account_id: &str,
+        character_index: i32,
+        allow_group: bool,
+        members: Vec<String>,
+    ) -> Result<(), String> {
+        let identity = self
+            .active_identity()
+            .ok_or_else(|| "shared party projection requires an active character".to_string())?;
+        if identity.account_id != account_id || identity.character_index != character_index {
+            return Err("shared party projection character binding mismatch".to_string());
+        }
+        let mut seen = std::collections::HashSet::new();
+        if members.len() > 15
+            || (!allow_group && !members.is_empty())
+            || members.iter().any(|name| {
+                name.trim().is_empty() || name.trim() != name || !seen.insert(name.to_lowercase())
+            })
+            || (!members.is_empty()
+                && !members
+                    .iter()
+                    .any(|name| name.eq_ignore_ascii_case(&identity.character_name)))
+        {
+            return Err("invalid shared party projection".to_string());
+        }
+        let world = self.app.world_mut();
+        {
+            let mut stage5 = world.resource_mut::<Stage5SystemsResource>();
+            stage5.stage5_systems.group.allow_group = allow_group;
+            stage5.stage5_systems.group.members = members;
+        }
+        Ok(())
     }
 
     pub fn force_authoritative_player_transform(

@@ -1,5 +1,66 @@
 # Backend 1:1 Progress
 
+> 2026-11-03 current Alo P0 backend slice: trusted policy enrollments bind the
+> authenticated owner and actor account/character, persistent world epoch,
+> archive identity and runtime admission. Bounded private requests use stable
+> operation IDs, generation/expiry fences and commit-aware unknown results;
+> owner payloads stay outside normal world/AOI/debug streams. Schema 2
+> preserves legacy growth with explicit owner/epoch adoption; HMAC keys and
+> runtime configuration are excluded from portable growth. Deletion/revocation
+> recomputes habits, keeps minimal tombstones and invalidates export caches.
+> Imported memories cannot grant assets, HP or permissions. Node 163/163 and
+> Gateway companion 15/15 + party 15/15 pass. Native ui-core 52/52, native-ui
+> 391/391, full Windows platform 325/325 (isolated combined resources) and
+> Release/locked builds pass. Ordinary real-network P0 acceptance passes
+> 12/12, including private authority and A-stop/B-fresh-import continuity;
+> these are synthetic test participants. Actual EXE teaching v1→v2, party
+> invitation, revoke v3, text deletion, new teaching v4 and full export pass.
+> Native A→B and costs-page checks, final Chinese text changes, full Gateway
+> lib regression and the final binary hash remain pending. Experience accounting distinguishes
+> participant self-report, manual operator confirmations and observed use;
+> unknown costs remain null and estimates/support time remain separate.
+> This is no evidence of real customers, payments, profit or Sui support.
+> [Pilot runbook](ALO-REAL-PLAYER-TRIAL.zh-CN.md); new evidence destination:
+> `generated/player-qa/alo-experience-2026-11-03/`. Full-life, cross-Gateway,
+> human/visual and production acceptance remain open.
+
+> Historical 2026-11-03 bounded companion/shared-world slice: the opt-in
+> `MIR2_SHARED_PARTY_ENABLED=1` path now owns actual online invitations,
+> acceptance, leader/member changes and disconnect cleanup in one Gateway
+> mailbox. Character-bound `SyncPartyView` updates personal group mirrors and
+> only the Zone's group membership; it neither advances time nor drains old
+> world/movement packets. Raw production player submission is rejected.
+>
+> Live companion work also exposed stale town safety after fast-path walking.
+> The session now exports its existing configured + Crystal safe rectangles;
+> trusted Zone configuration recomputes the safety flag on actual movement,
+> including queued steps and internal relocation. Legacy unconfigured
+> checkpoints keep their previous field shape. Normal personal potion timers
+> now contribute only their positive HP/MP recovery delta to the latest live
+> Zone state. The commit preserves concurrent damage, applies recovery caps,
+> cannot revive a dead player and does not drain or rebase pending damage/heal
+> inboxes; observer percentages reflect the committed authoritative vitals.
+> Only rejected recovery is rolled back, so pending lethal damage still
+> triggers the normal death penalty exactly once.
+> Focused evidence passes: current-map safety 4/4, Zone safety/checkpoint 5/5,
+> shared Zone 196/196, shared-party Simulation projection 2/2, security
+> lifecycle 18/18 and Gateway `shared_gateway_` 8/8, including five medicine
+> bridge regressions. Node companion tests pass 108/108. Final companion
+> network 12/12 and same-final-binary B1 baseline 4/4 pass;
+> [evidence](generated/player-qa/alo-companion-2026-11-03/summary.json) binds
+> SHA-256 `d8c2bd33ed1ab1acf976bebf42719e9492040cc671b8c67bede5c72c139fe17b`.
+> Policy `1→2→2`, actual medicine use/recovery and live no-potion withdrawal
+> are recorded. The final full Gateway library suite passes 686 tests, with
+> 0 failures and 1 ignored (687 total) in 590.93s. The ignored cross-instance
+> Postgres channel-identity test needs the unconfigured
+> `MIR2_CHANNEL_IDENTITY_TEST_DATABASE_URL`, so it is not counted as passed.
+> [Verification](generated/player-qa/alo-companion-2026-11-03/verification.json)
+> closes this bounded local engineering/network gate.
+> The actual 31s route-lease and 16s bootstrap waits remain unchanged. This is
+> a bounded local extension and safety/recovery correction,
+> not whole-game or complete social-system acceptance. See
+> [AI-player scope](AI-PLAYER-BICHON-MVP.zh-CN.md).
+
 > Windows verifiable vertical-slice evidence closeout (2026-08-26; packaged
 > runtime source `b5c0ecb60`): this round records only evidence that passed.
 > Simulation `vertical_slice` passes 8/8 in 283.03 seconds, including the

@@ -36,6 +36,12 @@ const OVERLAY: &[&str] = &[
     "apps/game-client/client-bevy/src/crystal_ui/overlays.rs",
     "apps/game-client/ui-core/src/action.rs",
 ];
+const COMPANION: &[&str] = &[
+    "apps/game-client/ui-core/src/companion.rs",
+    "apps/game-client/client-bevy/src/crystal_ui/companion.rs",
+    "apps/game-client/platform-windows/src/companion.rs",
+    "apps/game-client/platform-windows/src/native_protocol.rs",
+];
 const OPTIONS: &[&str] = &[
     "apps/game-client/client-bevy/src/crystal_ui/overlays.rs",
     "apps/game-client/client-bevy/src/options_effects.rs",
@@ -282,6 +288,7 @@ const SHELL_ACTIONS: &[&str] = &[
     "ExitApplication",
 ];
 const CORE_ACTIONS: &[&str] = &[
+    "OpenCompanion",
     "OpenCharacter",
     "OpenInventory",
     "OpenSkill",
@@ -321,6 +328,7 @@ const CORE_ACTIONS: &[&str] = &[
     "ResetPlatformSettingsToDefaults",
 ];
 const OVERLAY_ACTIONS: &[&str] = &[
+    "CompanionControl",
     "InspectBag",
     "InspectEquip",
     "UseInspected",
@@ -539,7 +547,8 @@ pub fn typed_action_contract(action: &str) -> Option<TypedActionContract> {
         | "PickUpObject"
         | "PickUpTile"
         | "SendChat"
-        | "TownRevive" => RepeatPolicy::HostAcknowledged,
+        | "TownRevive"
+        | "CompanionControl" => RepeatPolicy::HostAcknowledged,
         _ => RepeatPolicy::NotASubmission,
     };
 
@@ -1298,6 +1307,13 @@ pub fn all_controls() -> Vec<ControlEntry> {
             false
         ),
     ]);
+    controls.extend([
+        c!("COMPANION.ENTRY", "InGame", "Companion", "OpenCompanion", "伙伴 Companion", "button", rect(872.0,174.0,140.0,29.0), "single", 1, "authenticated InGame", "OpenCompanion", "Opens private owner controls; lists only authorized enrollments", "ClosePanel/Escape", "implemented_runtime_adapter", COMPANION, None, false),
+        c!("COMPANION.CONTROL", "InGame", "Companion", "ControlButtons", "Teach/Recall/Resume", "dynamic_button_family", None, "authorized selected companion", 3, "committed owner view and no pending/unknown mutation", "CompanionControl", "Correlated ordinary owner-only WS request; success follows receipt", "ClosePanel/Escape", "implemented_authoritative_request", COMPANION, None, false),
+        c!("COMPANION.MEMORY", "InGame", "Companion", "MemoryButtons", "Revoke/Delete/Clear", "dynamic_button_family", None, "bounded current page", 1, "authorized memory row and explicit confirmation", "CompanionControl", "Versioned revoke/delete/clear; no optimistic habit update", "CancelConfirm/Escape", "implemented_authoritative_request", COMPANION, None, false),
+        c!("COMPANION.EXPORT", "InGame", "Companion", "ExportButton", "Export full identity and growth", "button", None, "single", 1, "authorized committed owner view", "CompanionControl", "Downloads every immutable 16-KiB chunk and verifies size/SHA before a new user-directory file", "ClosePanel/Escape", "implemented_authoritative_request", COMPANION, None, false),
+        c!("COMPANION.TRIAL", "InGame", "Companion", "TrialButtons", "Self-reported experience/choice/intent", "dynamic_button_family", None, "configured experiment", 1, "authorized view; configured offer required for purchase intent", "CompanionControl", "Records explicit self-report and intent, never payment or completed service", "ClosePanel/Escape", "implemented_authoritative_request", COMPANION, None, false),
+    ]);
     controls
 }
 
@@ -1387,7 +1403,7 @@ mod tests {
         let controls = all_controls();
         assert_eq!(
             controls.len(),
-            173,
+            178,
             "the Candidate control inventory changed; update its typed-action contract deliberately"
         );
         validate_registry(&controls).unwrap_or_else(|errors| panic!("{errors:?}"));

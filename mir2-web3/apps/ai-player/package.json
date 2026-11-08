@@ -1,0 +1,16 @@
+{
+  "name": "mir2-ai-player",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "engines": { "node": "22.18.0" },
+  "scripts": {
+    "test": "node --test tests/*.test.mjs",
+    "start": "node src/main.mjs",
+    "memory": "node src/memory-cli.mjs",
+    "experience": "node src/experience-cli.mjs",
+    "acceptance:local": "node scripts/run-local-acceptance.mjs",
+    "acceptance:companion": "node scripts/run-local-companion-acceptance.mjs",
+    "acceptance:experience": "node scripts/run-local-experience-acceptance.mjs"
+  }
+}

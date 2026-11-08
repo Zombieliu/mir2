@@ -32,6 +32,10 @@ fn valid_protocol_slot(slot: i32) -> bool {
 #[derive(Clone, Serialize, Deserialize, PartialEq)]
 #[serde(tag = "type", rename_all = "camelCase")]
 pub enum NativeOutboundCommand {
+    CompanionControl {
+        #[serde(flatten)]
+        request: mir2_ui_core::companion::CompanionRequest,
+    },
     ClientVersion,
     ClientCapabilities {
         capabilities: Vec<String>,
@@ -442,6 +446,7 @@ impl NativeOutboundCommand {
 
     pub fn command_type(&self) -> &'static str {
         match self {
+            Self::CompanionControl { .. } => "companionControl",
             Self::ClientVersion => "clientVersion",
             Self::ClientCapabilities { .. } => "clientCapabilities",
             Self::ResumeSession { .. } => "resumeSession",
@@ -737,6 +742,7 @@ pub enum PacketEvent {
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum InboundEvent {
+    CompanionResult(mir2_ui_core::companion::CompanionResult),
     Packet(PacketEvent),
     Error(ErrorEvent),
     ResumeCredential(ResumeCredentialEvent),
@@ -754,6 +760,40 @@ pub enum InboundEvent {
 pub enum ParseInboundError {
     InvalidJson(String),
     MissingEnvelopeField { field: &'static str, detail: String },
+}
+
+#[cfg(test)]
+mod companion_contract_tests {
+    use super::*;
+    use mir2_ui_core::companion::{CompanionOperation, CompanionRequest};
+    #[test]
+    fn private_native_controls_use_the_exact_flattened_gateway_envelope() {
+        let command = NativeOutboundCommand::CompanionControl {
+            request: CompanionRequest {
+                request_id: "owner-request-1".into(),
+                resident_id: Some("alo-1".into()),
+                operation: CompanionOperation::Teach,
+                payload: json!({"expectedPolicyVersion":2}),
+            },
+        };
+        let wire = command.to_wire_json();
+        assert_eq!(
+            wire,
+            json!({"type":"companionControl","requestId":"owner-request-1","residentId":"alo-1","operation":"teach","payload":{"expectedPolicyVersion":2}})
+        );
+        assert_eq!(
+            serde_json::from_value::<NativeOutboundCommand>(wire).unwrap(),
+            command
+        );
+    }
+    #[test]
+    fn private_owner_reply_has_explicit_type_and_redacted_debug() {
+        let event=parse_inbound_value(json!({"type":"companionResult","payload":{"requestId":"owner-request-1","residentId":"alo-1","operation":"view","status":"ok",
+            "result":{"feedback":[{"summary":"PRIVATE MEMORY SENTINEL"}]}}})).unwrap();
+        assert!(matches!(event, InboundEvent::CompanionResult(_)));
+        assert!(!format!("{event:?}").contains("PRIVATE MEMORY SENTINEL"));
+        assert!(parse_inbound_value(json!({"type":"companionResult","payload":{"requestId":"x","operation":"invented","status":"ok"}})).is_err());
+    }
 }
 
 impl std::fmt::Display for ParseInboundError {
@@ -795,6 +835,12 @@ pub fn parse_inbound_value(value: Value) -> Result<InboundEvent, ParseInboundErr
         .map(str::to_owned);
 
     match event_type.as_str() {
+        "companionResult" => serde_json::from_value(payload)
+            .map(InboundEvent::CompanionResult)
+            .map_err(|_| ParseInboundError::MissingEnvelopeField {
+                field: "companionResult",
+                detail: "invalid private receipt".to_owned(),
+            }),
         "packet" => parse_packet(packet.as_deref(), payload),
         "error" => Ok(InboundEvent::Error(ErrorEvent {
             message: payload

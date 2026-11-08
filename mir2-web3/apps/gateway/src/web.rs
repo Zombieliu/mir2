@@ -97,12 +97,19 @@ static WEB_PERSISTENCE_SESSION_ADMISSION: OnceLock<Arc<Semaphore>> = OnceLock::n
 const AUTH_REVISION_BLOCKED: u64 = u64::MAX;
 const NATIVE_GAME_SHOP_RECEIPT_PROTOCOL: &str = "nativeGameShopReceiptV1";
 
+enum CompanionSocketCommand {
+    Control(crate::companion_relay::OwnerRequest),
+    Register(crate::companion_relay::RuntimeRegister),
+    Reply(crate::companion_relay::RuntimeReply),
+}
+
 enum ParsedSocketInput {
     Action {
         action: SessionAction,
         quest_operation_request: Option<QuestOperationRequest>,
     },
     ClientCapabilities(Vec<String>),
+    Companion(CompanionSocketCommand),
     ResumeSession(ResumeCredential),
     ResumeRejected,
     ProtocolError(String),
@@ -193,6 +200,8 @@ struct WebState {
     spectator: SpectatorHub,
     ai_live: AiLiveHub,
     channel_identity: ChannelIdentityRegistry,
+    parties: Option<crate::party::PartyHub>,
+    companions: Option<crate::companion_relay::CompanionRelay>,
 }
 
 #[derive(Debug, Clone, Deserialize)]
@@ -1459,6 +1468,9 @@ impl ReconnectSessionStore {
 #[serde(tag = "type", rename_all = "camelCase")]
 enum BrowserCommand {
     ClientVersion,
+    CompanionControl(crate::companion_relay::OwnerRequest),
+    CompanionRuntimeRegister(crate::companion_relay::RuntimeRegister),
+    CompanionRuntimeReply(crate::companion_relay::RuntimeReply),
     ClientCapabilities {
         capabilities: Vec<String>,
     },
@@ -2479,6 +2491,8 @@ pub async fn run_web_gateway(
         IdentityService::from_env(identity_database_url)
     })
     .await?;
+    let companions = crate::companion_relay::CompanionRelay::from_env()
+        .map_err(|error| io::Error::new(io::ErrorKind::InvalidInput, error))?;
     let state = WebState {
         config: Arc::new(config),
         deploy_revision: deploy_revision_from_env(),
@@ -2497,6 +2511,8 @@ pub async fn run_web_gateway(
         spectator,
         ai_live,
         channel_identity,
+        parties: shared_party_enabled().then(crate::party::PartyHub::new),
+        companions,
     };
 
     let app = Router::new()
@@ -4413,12 +4429,15 @@ async fn handle_socket(
     user_agent: String,
 ) {
     let realm_info = realm_info_event(state.config.as_ref());
+    let realm_info = companion_realm_info(realm_info, state.companions.as_ref());
     let mut session = new_gateway_session_for_web(&state);
     let mut active_session_permit: Option<GatewayCapacityPermit> = None;
     let mut save_queue = WebSessionSaveQueue::new(GatewaySaveQueueConfig::from_env());
     let mut route_refresh = WebSessionRouteRefresh::new(GatewayRouteRefreshConfig::from_env());
     let mut native_resume = NativeResumeConnectionState::new();
     let mut explicit_world_leave_completed = false;
+    let mut registered_party_session = None;
+    let mut companion_admission = None;
     handle_socket_inner(
         socket,
         &mut session,
@@ -4431,6 +4450,10 @@ async fn handle_socket(
         &mut route_refresh,
         &mut native_resume,
         &mut explicit_world_leave_completed,
+        state.parties.clone(),
+        &mut registered_party_session,
+        state.companions.clone(),
+        &mut companion_admission,
         state.injector.clone(),
         realm_info,
         state.chat_hub.clone(),
@@ -4441,6 +4464,12 @@ async fn handle_socket(
         user_agent,
     )
     .await;
+    if let (Some(hub), Some(admission)) = (&state.companions, companion_admission.take()) {
+        hub.detach(&admission.id).await;
+    }
+    if let (Some(hub), Some(registered)) = (&state.parties, registered_party_session.take()) {
+        hub.unregister(&registered).await;
+    }
     if explicit_world_leave_completed {
         native_resume.disable_and_revoke(state.reconnect_sessions.as_ref());
         let _ = remove_owned_session_cache(state.session_cache.as_ref(), &session);
@@ -4812,6 +4841,23 @@ fn spawn_socket_reader(
                     continue;
                 }
             };
+            let command = match companion_browser_command(command) {
+                Ok(command) => command,
+                Err(command) => {
+                    if input_tx
+                        .send(SocketInbound::Queued(QueuedSocketInput::new(
+                            ParsedSocketInput::Companion(command),
+                            Arc::clone(&reader_pending_count),
+                            message_permit,
+                        )))
+                        .await
+                        .is_err()
+                    {
+                        return;
+                    }
+                    continue;
+                }
+            };
             let command = match command {
                 BrowserCommand::ClientCapabilities { capabilities } => {
                     if input_tx
@@ -4963,6 +5009,10 @@ async fn handle_socket_inner(
     route_refresh: &mut WebSessionRouteRefresh,
     native_resume: &mut NativeResumeConnectionState,
     explicit_world_leave_completed: &mut bool,
+    parties: Option<crate::party::PartyHub>,
+    registered_party_session: &mut Option<String>,
+    companions: Option<crate::companion_relay::CompanionRelay>,
+    companion_admission: &mut Option<crate::companion_relay::Admission>,
     injector: crate::inject::LiveSessionInjector,
     realm_info: Value,
     chat_hub: ChatBroadcastHub,
@@ -5010,6 +5060,12 @@ async fn handle_socket_inner(
     let (inject_tx, mut inject_rx) =
         tokio::sync::mpsc::unbounded_channel::<crate::inject::InjectionMessage>();
     let mut _injection_registration: Option<crate::inject::InjectionRegistration> = None;
+    let (party_tx, mut party_rx) = tokio::sync::mpsc::channel::<crate::party::PartyUpdate>(64);
+    let (companion_tx, mut companion_rx) = mpsc::channel::<crate::companion_relay::RelayDelivery>(
+        crate::companion_relay::OUTPUT_CAPACITY,
+    );
+    let mut last_party_tick_presence: Option<crate::party::PartyPresence> = None;
+    let mut next_party_presence_refresh = Instant::now();
     let background_route_refresh_record: SharedBackgroundRouteRefreshRecord =
         Arc::new(Mutex::new(None));
     let _background_route_refresh = spawn_background_route_lease_refresh(
@@ -5066,6 +5122,39 @@ async fn handle_socket_inner(
         tokio::select! {
             biased;
 
+            Some(delivery) = companion_rx.recv(), if companions.is_some() => {
+                let _serial_execution = serial_execution_gate.write().await;
+                let hub = companions.as_ref().expect("companion branch enabled");
+                let authorized = tokio::task::block_in_place(|| {
+                    companion_socket_is_authorized(session, authenticated, authenticated_account_id.as_deref(),
+                        active_identity_session.as_ref(), session_cache.as_ref(), &identity)
+                });
+                if !authorized || companion_admission.as_ref() != Some(&delivery.recipient) {
+                    hub.detach(&delivery.recipient.id).await;
+                    continue;
+                }
+                if let Some(owner) = &delivery.authorizing_owner {
+                    let owner_verified = VerifiedIdentitySession {
+                        account_id: owner.character.account_id.clone(),
+                        session_id: owner.identity_session_id.clone(), expires_at_ms: owner.expires_at_ms,
+                    };
+                    if !tokio::task::block_in_place(|| native_resume_identity_is_active(
+                        session_cache.as_ref(), &identity, &owner_verified, gateway_unix_ms())) {
+                        hub.detach(&owner.id).await;
+                        continue;
+                    }
+                }
+                if !hub.delivery_is_current(&delivery).await { continue; }
+                if send_companion_event(&sender, delivery.event).await.is_err() { return; }
+            }
+
+            Some(update) = party_rx.recv(), if parties.is_some() => {
+                let _serial_execution = serial_execution_gate.write().await;
+                if apply_shared_party_update(&sender, session, registered_party_session, update).await.is_err() {
+                    let _ = send_fixed_error_event(&sender, "partyUnavailable", "Party state is temporarily unavailable.").await;
+                    return;
+                }
+            }
             socket_input = socket_inputs.recv() => {
                 let mut queued_input = match socket_input {
                     Some(SocketInbound::Queued(input)) => input,
@@ -5085,7 +5174,53 @@ async fn handle_socket_inner(
                     continue;
                 }
                 let parsed_input = queued_input.take_input();
+                let parsed_input = match parsed_input {
+                    ParsedSocketInput::Companion(command) => {
+                        let first_identity_valid = tokio::task::block_in_place(|| {
+                            enforce_first_post_resume_action_identity(
+                                &mut first_post_resume_identity_check_pending,
+                                reconnect_sessions.as_ref(), native_resume, session_cache.as_ref(),
+                                &identity, session, authenticated_account_id.as_deref(),
+                                active_identity_session.as_ref(), gateway_unix_ms(),
+                            )
+                        });
+                        let authorized = first_identity_valid && tokio::task::block_in_place(|| {
+                            companion_socket_is_authorized(session, authenticated, authenticated_account_id.as_deref(),
+                                active_identity_session.as_ref(), session_cache.as_ref(), &identity)
+                        });
+                        if !authorized || companions.is_none() {
+                            if let (Some(hub), Some(old)) = (&companions, companion_admission.take()) {
+                                hub.detach(&old.id).await;
+                            }
+                            let event = companion_rejection(&command, crate::companion_relay::ReplyStatus::Denied);
+                            if send_companion_event(&sender, event).await.is_err() { return; }
+                            continue;
+                        }
+                        socket_authenticated.store(authenticated, Ordering::Release);
+                        let hub = companions.as_ref().expect("checked companion feature");
+                        if ensure_companion_admission(hub, companion_admission, session,
+                            active_identity_session.as_ref().expect("authorized identity"), &companion_tx).await.is_err() {
+                            let event = companion_rejection(&command, crate::companion_relay::ReplyStatus::Error);
+                            if send_companion_event(&sender, event).await.is_err() { return; }
+                            continue;
+                        }
+                        let admission_id = &companion_admission.as_ref().expect("attached admission").id;
+                        let result = match command {
+                            CompanionSocketCommand::Control(request) => hub.control(admission_id, request).await,
+                            CompanionSocketCommand::Register(request) => hub.register(admission_id, request).await,
+                            CompanionSocketCommand::Reply(reply) => hub.reply(admission_id, reply).await,
+                        };
+                        if result.is_err() {
+                            // The Hub may have accepted a request before its acknowledgement was lost.
+                            // Closing fences this admission; never automatically replay a mutation.
+                            return;
+                        }
+                        continue;
+                    }
+                    other => other,
+                };
                 let (mut action, quest_operation_request) = match parsed_input {
+                    ParsedSocketInput::Companion(_) => unreachable!("handled dedicated control input"),
                     ParsedSocketInput::ClientCapabilities(capabilities) => {
                         match validate_native_client_capabilities(&capabilities) {
                             Ok(capabilities) => {
@@ -5279,6 +5414,51 @@ async fn handle_socket_inner(
                 }
                 if !first_post_resume_identity_check_pending {
                     socket_authenticated.store(authenticated, Ordering::Release);
+                }
+                if let Some(hub) = &parties {
+                    if refresh_shared_party_presence(hub, registered_party_session, session, &party_tx).await.is_err() {
+                        let _ = send_fixed_error_event(&sender, "partyUnavailable", "Party state is temporarily unavailable.").await;
+                        return;
+                    }
+                }
+                // Membership used by combat, chat and pickup comes only from
+                // shared authority, and pending revocations precede player actions.
+                while let Ok(update) = party_rx.try_recv() {
+                    if apply_shared_party_update(&sender, session, registered_party_session, update).await.is_err() {
+                        return;
+                    }
+                }
+                if parties.is_none() && enrolled_companion_owner(companions.as_ref(), session).is_some()
+                    && matches!(&action, SessionAction::Packet(ClientPacket::GroupInvite { accept_invite: true })) {
+                    let _ = send_fixed_error_event(&sender, "partyRejected", "The party request could not be completed.").await;
+                    continue;
+                }
+                if let (Some(hub), Some(mut command)) = (&parties, shared_party_command(&action)) {
+                    if matches!(command, crate::party::PartyCommand::Answer(true)) {
+                        if let Some(owner) = enrolled_companion_owner(companions.as_ref(), session) {
+                            command = crate::party::PartyCommand::AnswerExpectedOwner {
+                                account_id: owner.account_id, character_index: owner.character_index,
+                            };
+                        }
+                    }
+                    if !authenticated || tokio::task::block_in_place(|| session.active_identity()).is_none() {
+                        let _ = send_fixed_error_event(&sender, "partyAuthenticationRequired", "Enter the world before using party commands.").await;
+                        continue;
+                    }
+                    if refresh_shared_party_presence(hub, registered_party_session, session, &party_tx).await.is_err() {
+                        let _ = send_fixed_error_event(&sender, "partyUnavailable", "Party state is temporarily unavailable.").await;
+                        return;
+                    }
+                    let admission = registered_party_session.as_deref().unwrap_or_default();
+                    if hub.command(admission, command, gateway_unix_ms()).await.is_err() {
+                        let _ = send_fixed_error_event(&sender, "partyRejected", "The party request could not be completed.").await;
+                    }
+                    while let Ok(update) = party_rx.try_recv() {
+                        if apply_shared_party_update(&sender, session, registered_party_session, update).await.is_err() {
+                            return;
+                        }
+                    }
+                    continue;
                 }
                 let native_game_shop_request = if native_game_shop.opted_in {
                     match native_game_shop_request_from_action(&action) {
@@ -5799,6 +5979,8 @@ async fn handle_socket_inner(
                 }
                 authenticated = next_authenticated;
                 socket_authenticated.store(authenticated, Ordering::Release);
+                detach_changed_companion_admission(&companions, companion_admission, session,
+                    authenticated, active_identity_session.as_ref()).await;
                 let next_movement_ingress = session.zone_movement_ingress();
                 *movement_ingress
                     .write()
@@ -5859,6 +6041,20 @@ async fn handle_socket_inner(
                     )
                     .await;
                     return;
+                }
+                // Emit action receipts before the post-action party snapshot.
+                // Otherwise GainedItem/UseItem can arrive after a newer full
+                // inventory view and incorrectly make that view look stale.
+                if let Some(hub) = &parties {
+                    if refresh_shared_party_presence(hub, registered_party_session, session, &party_tx).await.is_err() {
+                        let _ = send_fixed_error_event(&sender, "partyUnavailable", "Party state is temporarily unavailable.").await;
+                        return;
+                    }
+                    while let Ok(update) = party_rx.try_recv() {
+                        if apply_shared_party_update(&sender, session, registered_party_session, update).await.is_err() {
+                            return;
+                        }
+                    }
                 }
                 if let (Some(request), Some(receipt)) = (
                     native_game_shop_request.as_ref(),
@@ -6032,6 +6228,28 @@ async fn handle_socket_inner(
             }
             _ = runtime_tick.tick() => {
                 let now = Instant::now();
+                // Fast-path movement and server-owned damage do not pass the
+                // serial command tail. Keep their party projection current at
+                // most once per second, with no unchanged-view broadcasts.
+                if let Some(hub) = &parties {
+                    if now >= next_party_presence_refresh {
+                        let _serial_execution = serial_execution_gate.write().await;
+                        let current = tokio::task::block_in_place(|| shared_party_presence(session));
+                        if current != last_party_tick_presence {
+                            if refresh_shared_party_presence(hub, registered_party_session, session, &party_tx).await.is_err() {
+                                let _ = send_fixed_error_event(&sender, "partyUnavailable", "Party state is temporarily unavailable.").await;
+                                return;
+                            }
+                            while let Ok(update) = party_rx.try_recv() {
+                                if apply_shared_party_update(&sender, session, registered_party_session, update).await.is_err() {
+                                    return;
+                                }
+                            }
+                            last_party_tick_presence = current;
+                        }
+                        next_party_presence_refresh = now + Duration::from_secs(1);
+                    }
+                }
                 if authenticated
                     && now.duration_since(last_identity_revocation_check) >= Duration::from_secs(5)
                 {
@@ -7175,7 +7393,11 @@ fn browser_command_to_action(command: BrowserCommand) -> Result<SessionAction, S
         BrowserCommand::ClientVersion => Ok(SessionAction::Packet(ClientPacket::ClientVersion {
             version_hash: Vec::new(),
         })),
-        BrowserCommand::ClientCapabilities { .. } | BrowserCommand::ResumeSession(_) => Err(
+        BrowserCommand::CompanionControl(_)
+        | BrowserCommand::CompanionRuntimeRegister(_)
+        | BrowserCommand::CompanionRuntimeReply(_)
+        | BrowserCommand::ClientCapabilities { .. }
+        | BrowserCommand::ResumeSession(_) => Err(
             "native resume control commands must be handled before gameplay dispatch".to_string(),
         ),
         BrowserCommand::Disconnect => Ok(SessionAction::Packet(ClientPacket::Disconnect)),
@@ -8144,6 +8366,14 @@ async fn send_world_snapshot_with_quest_ack(
     })?;
     let mut payload =
         serde_json::to_value(snapshot.client_view()).map_err(|error| error.to_string())?;
+    if let Some(id) = session
+        .zone_movement_ingress()
+        .and_then(|ingress| ingress.player_object_id())
+    {
+        if let Some(object) = payload.as_object_mut() {
+            object.insert("selfZoneObjectId".to_string(), json!(id));
+        }
+    }
     if let Some(ack) = quest_operation_ack {
         let object = payload
             .as_object_mut()
@@ -8168,6 +8398,321 @@ async fn send_world_snapshot_with_quest_ack(
         .map_err(|error| error.to_string())
 }
 
+fn companion_browser_command(
+    command: BrowserCommand,
+) -> Result<BrowserCommand, CompanionSocketCommand> {
+    match command {
+        BrowserCommand::CompanionControl(request) => Err(CompanionSocketCommand::Control(request)),
+        BrowserCommand::CompanionRuntimeRegister(request) => {
+            Err(CompanionSocketCommand::Register(request))
+        }
+        BrowserCommand::CompanionRuntimeReply(reply) => Err(CompanionSocketCommand::Reply(reply)),
+        other => Ok(other),
+    }
+}
+
+fn companion_rejection(
+    command: &CompanionSocketCommand,
+    status: crate::companion_relay::ReplyStatus,
+) -> Value {
+    let (request_id, resident, operation) = match command {
+        CompanionSocketCommand::Control(request) => (
+            &request.request_id,
+            request.resident_id.as_deref(),
+            serde_json::to_value(request.operation).ok(),
+        ),
+        CompanionSocketCommand::Register(request) => (
+            &request.request_id,
+            Some(request.resident_id.as_str()),
+            Some(json!("register")),
+        ),
+        CompanionSocketCommand::Reply(reply) => (&reply.request_id, None, Some(json!("reply"))),
+    };
+    let request_id = if crate::companion_relay::valid_ref(request_id) {
+        request_id.as_str()
+    } else {
+        "invalid-request"
+    };
+    crate::companion_relay::result_event(
+        request_id,
+        resident.filter(|id| crate::companion_relay::valid_ref(id)),
+        operation
+            .as_ref()
+            .and_then(Value::as_str)
+            .unwrap_or("invalid"),
+        status,
+        json!({}),
+    )
+}
+
+async fn send_companion_event(
+    sender: &SharedWebSocketSender,
+    event: Value,
+) -> Result<(), axum::Error> {
+    sender
+        .lock()
+        .await
+        .send(Message::Text(event.to_string().into()))
+        .await
+}
+
+fn companion_socket_is_authorized(
+    session: &GatewaySession,
+    authenticated: bool,
+    account_id: Option<&str>,
+    verified: Option<&VerifiedIdentitySession>,
+    cache: &dyn crate::cache::GatewaySessionCache,
+    identity: &IdentityService,
+) -> bool {
+    let (Some(active), Some(verified)) = (session.active_identity(), verified) else {
+        return false;
+    };
+    authenticated
+        && account_id == Some(active.account_id.as_str())
+        && verified.account_id == active.account_id
+        && native_resume_identity_is_active(cache, identity, verified, gateway_unix_ms())
+}
+
+fn companion_admission_matches(
+    admission: &crate::companion_relay::Admission,
+    session: &GatewaySession,
+    authenticated: bool,
+    verified: Option<&VerifiedIdentitySession>,
+) -> bool {
+    let (Some(active), Some(verified)) = (session.active_identity(), verified) else {
+        return false;
+    };
+    authenticated
+        && verified.expires_at_ms > gateway_unix_ms()
+        && admission.character.account_id == active.account_id
+        && admission.character.character_index == active.character_index
+        && verified.account_id == active.account_id
+        && admission.identity_session_id == verified.session_id
+        && admission.expires_at_ms == verified.expires_at_ms
+}
+
+async fn ensure_companion_admission(
+    hub: &crate::companion_relay::CompanionRelay,
+    registered: &mut Option<crate::companion_relay::Admission>,
+    session: &GatewaySession,
+    verified: &VerifiedIdentitySession,
+    sender: &mpsc::Sender<crate::companion_relay::RelayDelivery>,
+) -> Result<(), String> {
+    if registered
+        .as_ref()
+        .is_some_and(|old| companion_admission_matches(old, session, true, Some(verified)))
+    {
+        return Ok(());
+    }
+    if let Some(old) = registered.take() {
+        hub.detach(&old.id).await;
+    }
+    let active = session
+        .active_identity()
+        .ok_or("Companion control requires an active character.")?;
+    let mut nonce = [0_u8; 24];
+    OsRng.fill_bytes(&mut nonce);
+    let admission = crate::companion_relay::Admission {
+        id: format!("companion:{}", URL_SAFE_NO_PAD.encode(nonce)),
+        character: crate::companion_relay::CharacterBinding {
+            account_id: active.account_id,
+            character_index: active.character_index,
+        },
+        identity_session_id: verified.session_id.clone(),
+        expires_at_ms: verified.expires_at_ms,
+    };
+    hub.attach(admission.clone(), sender.clone()).await?;
+    *registered = Some(admission);
+    Ok(())
+}
+
+async fn detach_changed_companion_admission(
+    hub: &Option<crate::companion_relay::CompanionRelay>,
+    registered: &mut Option<crate::companion_relay::Admission>,
+    session: &GatewaySession,
+    authenticated: bool,
+    verified: Option<&VerifiedIdentitySession>,
+) {
+    if registered
+        .as_ref()
+        .is_some_and(|old| !companion_admission_matches(old, session, authenticated, verified))
+    {
+        if let (Some(hub), Some(old)) = (hub, registered.take()) {
+            hub.detach(&old.id).await;
+        }
+    }
+}
+
+fn enrolled_companion_owner(
+    hub: Option<&crate::companion_relay::CompanionRelay>,
+    session: &GatewaySession,
+) -> Option<crate::companion_relay::CharacterBinding> {
+    let identity = session.active_identity()?;
+    hub?.policy()
+        .actor_owner(&crate::companion_relay::CharacterBinding {
+            account_id: identity.account_id,
+            character_index: identity.character_index,
+        })
+        .cloned()
+}
+
+fn companion_realm_info(
+    mut event: Value,
+    relay: Option<&crate::companion_relay::CompanionRelay>,
+) -> Value {
+    event["payload"]["features"]["companionControl"] = json!(relay.is_some());
+    if let Some(relay) = relay {
+        event["payload"]["worldEpoch"] = json!(relay.policy().world_epoch);
+    }
+    event
+}
+
+fn shared_party_enabled() -> bool {
+    matches!(
+        env::var("MIR2_SHARED_PARTY_ENABLED").as_deref(),
+        Ok("1" | "true")
+    )
+}
+
+static NEXT_PARTY_ADMISSION_ID: AtomicU64 = AtomicU64::new(1);
+
+fn shared_party_command(action: &SessionAction) -> Option<crate::party::PartyCommand> {
+    use crate::party::PartyCommand;
+    match action {
+        SessionAction::Packet(ClientPacket::SwitchGroup { allow_group }) => {
+            Some(PartyCommand::SetAllow(*allow_group))
+        }
+        SessionAction::Packet(ClientPacket::AddMember { name }) => {
+            Some(PartyCommand::Invite(name.clone()))
+        }
+        SessionAction::Packet(ClientPacket::GroupInvite { accept_invite }) => {
+            Some(PartyCommand::Answer(*accept_invite))
+        }
+        SessionAction::Packet(ClientPacket::DelMember { name }) => {
+            Some(PartyCommand::Remove(name.clone()))
+        }
+        _ => None,
+    }
+}
+
+fn shared_party_presence(session: &GatewaySession) -> Option<crate::party::PartyPresence> {
+    let identity = session.active_identity()?;
+    let snapshot = session.world_snapshot();
+    let player = snapshot.entities.iter().find(|entity| {
+        entity.kind == mir2_simulation::WorldEntityKind::SelfPlayer
+            && Some(entity.object_id) == snapshot.player_object_id
+    })?;
+    let map_file_name = snapshot.map_file_name?;
+    Some(crate::party::PartyPresence {
+        session_id: session.session_id().to_string(),
+        account_id: identity.account_id,
+        character_index: identity.character_index,
+        name: identity.character_name,
+        map_title: snapshot.map_title.unwrap_or_else(|| map_file_name.clone()),
+        map_file_name,
+        position: Point {
+            x: player.x,
+            y: player.y,
+        },
+        class: player.class?,
+        level: player.level?,
+        hp: snapshot.player_hp?,
+        max_hp: snapshot.player_max_hp?,
+    })
+}
+
+async fn refresh_shared_party_presence(
+    hub: &crate::party::PartyHub,
+    registered: &mut Option<String>,
+    session: &mut GatewaySession,
+    sender: &tokio::sync::mpsc::Sender<crate::party::PartyUpdate>,
+) -> Result<(), String> {
+    let presence = tokio::task::block_in_place(|| shared_party_presence(session));
+    let Some(mut presence) = presence else {
+        if let Some(previous) = registered.take() {
+            hub.unregister(&previous).await;
+        }
+        return Ok(());
+    };
+    let prefix = format!("{}:party:", presence.session_id);
+    if !registered
+        .as_ref()
+        .is_some_and(|id| id.starts_with(&prefix))
+    {
+        if let Some(previous) = registered.take() {
+            hub.unregister(&previous).await;
+        }
+        // Saved session-local names are never trusted as live membership.
+        tokio::task::block_in_place(|| {
+            session.execute_with_outcome(WorldCommand::SyncPartyView {
+                account_id: presence.account_id.clone(),
+                character_index: presence.character_index,
+                allow_group: false,
+                members: Vec::new(),
+            })
+        })?;
+        let generation = NEXT_PARTY_ADMISSION_ID
+            .fetch_update(Ordering::SeqCst, Ordering::SeqCst, |value| {
+                value.checked_add(1)
+            })
+            .map_err(|_| "shared party admission ids exhausted".to_string())?;
+        presence.session_id = format!("{prefix}{generation}");
+        let session_id = presence.session_id.clone();
+        hub.register(presence, sender.clone()).await?;
+        *registered = Some(session_id);
+    } else {
+        presence.session_id = registered.clone().ok_or("shared party admission missing")?;
+        hub.update_presence(presence).await?;
+    }
+    Ok(())
+}
+
+async fn apply_shared_party_update(
+    sender: &SharedWebSocketSender,
+    session: &mut GatewaySession,
+    registered: &Option<String>,
+    update: crate::party::PartyUpdate,
+) -> Result<(), String> {
+    let projection = tokio::task::block_in_place(|| {
+        apply_shared_party_projection(session, registered, &update)
+    })?;
+    let Some(projection) = projection else {
+        return Ok(());
+    };
+    for packet in projection.iter().chain(update.packets.iter()) {
+        send_server_packet(sender, packet)
+            .await
+            .map_err(|error| error.to_string())?;
+    }
+    send_world_snapshot(sender, session).await
+}
+
+/// Apply only the trusted, admission-bound mirror before any network output.
+/// Kept separate so stale-delivery and pre-action barriers can be checked
+/// without manufacturing an Axum socket or granting a raw player command.
+fn apply_shared_party_projection(
+    session: &mut GatewaySession,
+    registered: &Option<String>,
+    update: &crate::party::PartyUpdate,
+) -> Result<Option<Vec<ServerPacket>>, String> {
+    let Some(identity) = session.active_identity() else {
+        return Ok(None);
+    };
+    if registered.as_deref() != Some(update.recipient_session_id.as_str())
+        || update.recipient_account_id != identity.account_id
+        || update.recipient_character_index != identity.character_index
+    {
+        return Ok(None);
+    }
+    let projection = session.execute_with_outcome(WorldCommand::SyncPartyView {
+        account_id: identity.account_id,
+        character_index: identity.character_index,
+        allow_group: update.allow_group,
+        members: update.members.clone(),
+    })?;
+    Ok(Some(projection.packets))
+}
+
 fn realm_info_event(config: &GatewayConfig) -> Value {
     let profile = config.content_profile.as_ref();
     let profile_id = profile
@@ -8182,6 +8727,7 @@ fn realm_info_event(config: &GatewayConfig) -> Value {
         "payload": {
             "schema": "mir2-realm-handshake/1",
             "realmId": realm_id,
+            "features": { "sharedParty": shared_party_enabled() },
             "profileId": profile_id,
             "profileVersion": profile.map(|profile| profile.version).unwrap_or(0),
             "acceptanceLevel": profile.map(|profile| profile.acceptance_level),
@@ -12072,6 +12618,527 @@ mod tests {
         session
     }
 
+    #[test]
+    fn companion_control_frames_are_strict_and_never_become_world_actions() {
+        for input in [
+            json!({"type":"companionControl","requestId":"req-1","operation":"list","payload":{}}),
+            json!({"type":"companionRuntimeRegister","requestId":"reg-1","residentId":"alo","archiveId":"archive-1"}),
+            json!({"type":"companionRuntimeReply","requestId":"cr:abc","generation":1,"status":"ok","result":{}}),
+        ] {
+            let command: BrowserCommand = serde_json::from_value(input.clone()).unwrap();
+            assert!(super::companion_browser_command(command).is_err());
+            let command: BrowserCommand = serde_json::from_value(input.clone()).unwrap();
+            assert!(super::browser_command_to_action(command).is_err());
+            let mut forged = input;
+            forged["accountId"] = json!("someone-else");
+            assert!(serde_json::from_value::<BrowserCommand>(forged).is_err());
+        }
+    }
+
+    #[test]
+    fn companion_control_requires_current_verified_authentication_and_active_character() {
+        let session = demo_game_session();
+        let identity = crate::identity::IdentityService::local_for_tests();
+        let grant = identity
+            .issue_session("demo", "password", "demo", "127.0.0.1", "companion-test")
+            .unwrap();
+        let verified = identity.verify_session_token(&grant.token).unwrap();
+        let cache = crate::InMemoryGatewaySessionCache::default();
+        assert!(super::companion_socket_is_authorized(
+            &session,
+            true,
+            Some("demo"),
+            Some(&verified),
+            &cache,
+            &identity
+        ));
+        assert!(!super::companion_socket_is_authorized(
+            &session,
+            false,
+            Some("demo"),
+            Some(&verified),
+            &cache,
+            &identity
+        ));
+        assert!(!super::companion_socket_is_authorized(
+            &session,
+            true,
+            Some("foreign"),
+            Some(&verified),
+            &cache,
+            &identity
+        ));
+        assert!(!super::companion_socket_is_authorized(
+            &crate::GatewaySession::new(SimulationConfig::default()),
+            true,
+            Some("demo"),
+            Some(&verified),
+            &cache,
+            &identity
+        ));
+        identity
+            .revoke_session(&verified, &verified.session_id, "test")
+            .unwrap();
+        assert!(!super::companion_socket_is_authorized(
+            &session,
+            true,
+            Some("demo"),
+            Some(&verified),
+            &cache,
+            &identity
+        ));
+    }
+
+    #[tokio::test]
+    async fn companion_control_logout_restart_fences_same_character_old_admission() {
+        use crate::companion_relay::{CharacterBinding, CompanionPolicy, CompanionRelay};
+        let policy = CompanionPolicy {
+            schema_version: 1,
+            realm_id: "trial".into(),
+            world_epoch: "epoch-1".into(),
+            enrollments: vec![],
+        };
+        let hub = CompanionRelay::new(policy);
+        let mut session = demo_game_session();
+        let verified = crate::identity::VerifiedIdentitySession {
+            account_id: "demo".into(),
+            session_id: "verified-test".into(),
+            expires_at_ms: super::gateway_unix_ms() + 60_000,
+        };
+        let (sender, _receiver) =
+            tokio::sync::mpsc::channel(crate::companion_relay::OUTPUT_CAPACITY);
+        let mut registered = None;
+        super::ensure_companion_admission(&hub, &mut registered, &session, &verified, &sender)
+            .await
+            .unwrap();
+        let old = registered.clone().unwrap();
+        assert_eq!(
+            old.character,
+            CharacterBinding {
+                account_id: "demo".into(),
+                character_index: 0
+            }
+        );
+        session.try_handle_packet(ClientPacket::LogOut).unwrap();
+        super::detach_changed_companion_admission(
+            &Some(hub.clone()),
+            &mut registered,
+            &session,
+            true,
+            Some(&verified),
+        )
+        .await;
+        assert!(registered.is_none());
+        session
+            .try_handle_packet(ClientPacket::StartGame { character_index: 0 })
+            .unwrap();
+        super::ensure_companion_admission(&hub, &mut registered, &session, &verified, &sender)
+            .await
+            .unwrap();
+        assert_ne!(registered.as_ref().unwrap().id, old.id);
+        let delayed = crate::companion_relay::RelayDelivery {
+            recipient: old,
+            authorizing_owner: None,
+            event: json!({"type":"companionResult","payload":{}}),
+        };
+        assert!(!hub.delivery_is_current(&delayed).await);
+        let realm = super::companion_realm_info(json!({"payload":{"features":{}}}), Some(&hub));
+        assert_eq!(realm["payload"]["worldEpoch"], "epoch-1");
+        assert_eq!(realm["payload"]["features"]["companionControl"], true);
+        let disabled = super::companion_realm_info(json!({"payload":{"features":{}}}), None);
+        assert!(disabled["payload"].get("worldEpoch").is_none());
+        assert_eq!(disabled["payload"]["features"]["companionControl"], false);
+    }
+
+    struct SharedPartyTestPlayer {
+        session: crate::GatewaySession,
+        admission: Option<String>,
+        updates: tokio::sync::mpsc::Receiver<crate::party::PartyUpdate>,
+    }
+
+    fn shared_party_test_session(
+        config: SimulationConfig,
+        registry: &crate::ZoneRegistry,
+        account_id: &str,
+        name: &str,
+    ) -> crate::GatewaySession {
+        let mut session = crate::GatewaySession::new_with_zone_registry(config, registry);
+        let created = session
+            .try_handle_packet(ClientPacket::NewAccount {
+                account_id: account_id.to_string(),
+                password: "shared-party-test-password".to_string(),
+                birth_date_binary: 0,
+                user_name: String::new(),
+                secret_question: String::new(),
+                secret_answer: String::new(),
+                email_address: String::new(),
+            })
+            .expect("ordinary party-test account registration");
+        assert!(created
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::NewAccount { result: 8 })));
+        let logged_in = session
+            .try_handle_packet(ClientPacket::Login {
+                account_id: account_id.to_string(),
+                password: "shared-party-test-password".to_string(),
+            })
+            .expect("ordinary party-test login");
+        assert!(logged_in
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::LoginSuccess { .. })));
+        let created = session
+            .try_handle_packet(ClientPacket::NewCharacter {
+                name: name.to_string(),
+                gender: MirGender::Male,
+                class: MirClass::Warrior,
+            })
+            .expect("ordinary party-test character creation");
+        let character_index = created
+            .iter()
+            .find_map(|packet| match packet {
+                ServerPacket::NewCharacterSuccess { char_info } => Some(char_info.index),
+                _ => None,
+            })
+            .expect("party-test character index");
+        let started = session
+            .try_handle_packet(ClientPacket::StartGame { character_index })
+            .expect("ordinary party-test StartGame");
+        assert!(started
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::StartGame { result: 4, .. })));
+        session
+    }
+
+    fn drain_shared_party_test_updates(
+        player: &mut SharedPartyTestPlayer,
+    ) -> Vec<crate::party::PartyUpdate> {
+        let mut received = Vec::new();
+        while let Ok(update) = player.updates.try_recv() {
+            super::apply_shared_party_projection(&mut player.session, &player.admission, &update)
+                .expect("trusted party projection must validate its active recipient");
+            received.push(update);
+        }
+        received
+    }
+
+    async fn shared_party_joined_test_pair() -> (
+        crate::party::PartyHub,
+        SharedPartyTestPlayer,
+        SharedPartyTestPlayer,
+    ) {
+        let (leader, companion) = tokio::task::block_in_place(|| {
+            let config = SimulationConfig::default();
+            let registry = crate::ZoneRegistry::in_process();
+            (
+                shared_party_test_session(
+                    config.clone(),
+                    &registry,
+                    "web-party-leader",
+                    "WebPartyLead",
+                ),
+                shared_party_test_session(config, &registry, "web-party-companion", "WebPartyAluo"),
+            )
+        });
+        let hub = crate::party::PartyHub::new();
+        let (leader_tx, leader_rx) = tokio::sync::mpsc::channel(64);
+        let (companion_tx, companion_rx) = tokio::sync::mpsc::channel(64);
+        let mut leader = SharedPartyTestPlayer {
+            session: leader,
+            admission: None,
+            updates: leader_rx,
+        };
+        let mut companion = SharedPartyTestPlayer {
+            session: companion,
+            admission: None,
+            updates: companion_rx,
+        };
+        super::refresh_shared_party_presence(
+            &hub,
+            &mut leader.admission,
+            &mut leader.session,
+            &leader_tx,
+        )
+        .await
+        .expect("register the server-derived leader presence");
+        super::refresh_shared_party_presence(
+            &hub,
+            &mut companion.admission,
+            &mut companion.session,
+            &companion_tx,
+        )
+        .await
+        .expect("register the server-derived companion presence");
+        tokio::task::block_in_place(|| {
+            drain_shared_party_test_updates(&mut leader);
+            drain_shared_party_test_updates(&mut companion);
+        });
+        hub.command(
+            leader.admission.as_deref().expect("leader admission"),
+            crate::party::PartyCommand::Invite("WebPartyAluo".to_string()),
+            super::gateway_unix_ms(),
+        )
+        .await
+        .expect("leader sends a real invitation");
+        let invitations =
+            tokio::task::block_in_place(|| drain_shared_party_test_updates(&mut companion));
+        assert!(invitations.iter().any(|update| update.packets.iter().any(
+            |packet| matches!(packet, ServerPacket::GroupInvite { name } if name == "WebPartyLead")
+        )));
+        assert!(
+            tokio::task::block_in_place(|| companion.session.world_snapshot())
+                .stage5_systems
+                .group
+                .members
+                .is_empty()
+        );
+        hub.command(
+            companion.admission.as_deref().expect("companion admission"),
+            crate::party::PartyCommand::Answer(true),
+            super::gateway_unix_ms(),
+        )
+        .await
+        .expect("companion accepts the pending invitation");
+        tokio::task::block_in_place(|| {
+            drain_shared_party_test_updates(&mut leader);
+            drain_shared_party_test_updates(&mut companion);
+            for player in [&leader, &companion] {
+                assert_eq!(
+                    player.session.world_snapshot().stage5_systems.group.members,
+                    ["WebPartyLead", "WebPartyAluo"]
+                );
+            }
+        });
+        // The registered Hub owns clones of these bounded senders. Tests can
+        // refresh through an unused sender once the admission is established.
+        (hub, leader, companion)
+    }
+
+    #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
+    async fn shared_party_projection_tracks_server_presence_after_an_ordinary_walk() {
+        let (hub, mut leader, mut companion) = shared_party_joined_test_pair().await;
+        let before = tokio::task::block_in_place(|| {
+            super::shared_party_presence(&leader.session).expect("active trusted presence")
+        });
+        assert_eq!(before.account_id, "web-party-leader");
+        assert_eq!(before.name, "WebPartyLead");
+        let mut moved = None;
+        for direction in [
+            MirDirection::Right,
+            MirDirection::Down,
+            MirDirection::Left,
+            MirDirection::Up,
+            MirDirection::UpRight,
+            MirDirection::DownRight,
+            MirDirection::DownLeft,
+            MirDirection::UpLeft,
+        ] {
+            let (packets, after) = tokio::task::block_in_place(|| {
+                let packets = leader
+                    .session
+                    .try_handle_packet(ClientPacket::Walk { direction })
+                    .expect("ordinary Walk must route through the Gateway");
+                let after = super::shared_party_presence(&leader.session)
+                    .expect("presence remains active after Walk");
+                (packets, after)
+            });
+            if after.position != before.position {
+                assert!(packets
+                    .iter()
+                    .any(|packet| matches!(packet, ServerPacket::UserLocation { .. })));
+                moved = Some(after);
+                break;
+            }
+        }
+        let moved = moved.expect("one normal adjacent walk must move the player");
+        let (unused_tx, _unused_rx) = tokio::sync::mpsc::channel(1);
+        super::refresh_shared_party_presence(
+            &hub,
+            &mut leader.admission,
+            &mut leader.session,
+            &unused_tx,
+        )
+        .await
+        .expect("refresh the existing server-derived presence");
+        let updates = tokio::task::block_in_place(|| {
+            drain_shared_party_test_updates(&mut leader);
+            drain_shared_party_test_updates(&mut companion)
+        });
+        assert!(updates
+            .iter()
+            .any(|update| update.packets.iter().any(|packet| matches!(
+                packet,
+                ServerPacket::SendMemberLocation { member_name, member_location }
+                    if member_name == "WebPartyLead" && member_location == &moved.position
+            ))));
+        assert_eq!(
+            tokio::task::block_in_place(|| companion.session.world_snapshot())
+                .stage5_systems
+                .group
+                .members,
+            ["WebPartyLead", "WebPartyAluo"]
+        );
+    }
+
+    #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
+    async fn shared_party_projection_rejects_old_admission_after_logout_and_same_character_restart()
+    {
+        let (hub, mut leader, mut companion) = shared_party_joined_test_pair().await;
+        let gateway_session_id = leader.session.session_id().to_string();
+        let identity = tokio::task::block_in_place(|| leader.session.active_identity())
+            .expect("active character before logout");
+        let (tx, fresh_updates) = tokio::sync::mpsc::channel(64);
+        super::refresh_shared_party_presence(&hub, &mut leader.admission, &mut leader.session, &tx)
+            .await
+            .unwrap();
+        let old_update =
+            tokio::task::block_in_place(|| drain_shared_party_test_updates(&mut leader))
+                .pop()
+                .expect("current full party view");
+        assert_eq!(old_update.members, ["WebPartyLead", "WebPartyAluo"]);
+        let logged_out = tokio::task::block_in_place(|| {
+            leader
+                .session
+                .try_handle_packet(ClientPacket::LogOut)
+                .expect("normal logout")
+        });
+        assert!(logged_out
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::LogOutSuccess { .. })));
+        super::refresh_shared_party_presence(&hub, &mut leader.admission, &mut leader.session, &tx)
+            .await
+            .unwrap();
+        assert!(leader.admission.is_none());
+        assert!(tokio::task::block_in_place(|| {
+            super::apply_shared_party_projection(
+                &mut leader.session,
+                &leader.admission,
+                &old_update,
+            )
+        })
+        .unwrap()
+        .is_none());
+        let restarted = tokio::task::block_in_place(|| {
+            leader
+                .session
+                .try_handle_packet(ClientPacket::StartGame {
+                    character_index: identity.character_index,
+                })
+                .expect("normal StartGame after Logout")
+        });
+        assert!(restarted
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::StartGame { result: 4, .. })));
+        assert_eq!(leader.session.session_id(), gateway_session_id);
+        leader.updates = fresh_updates;
+        super::refresh_shared_party_presence(&hub, &mut leader.admission, &mut leader.session, &tx)
+            .await
+            .unwrap();
+        assert_ne!(
+            leader.admission.as_deref(),
+            Some(old_update.recipient_session_id.as_str())
+        );
+        assert!(tokio::task::block_in_place(|| {
+            super::apply_shared_party_projection(
+                &mut leader.session,
+                &leader.admission,
+                &old_update,
+            )
+        })
+        .unwrap()
+        .is_none());
+        for wrong_character in [false, true] {
+            let mut wrong = old_update.clone();
+            wrong.recipient_session_id = leader.admission.clone().unwrap();
+            if wrong_character {
+                wrong.recipient_character_index += 1;
+            } else {
+                wrong.recipient_account_id = "another-account".to_string();
+            }
+            assert!(tokio::task::block_in_place(|| {
+                super::apply_shared_party_projection(&mut leader.session, &leader.admission, &wrong)
+            })
+            .unwrap()
+            .is_none());
+        }
+        tokio::task::block_in_place(|| {
+            drain_shared_party_test_updates(&mut leader);
+            drain_shared_party_test_updates(&mut companion);
+            assert!(leader
+                .session
+                .world_snapshot()
+                .stage5_systems
+                .group
+                .members
+                .is_empty());
+            assert!(
+                leader
+                    .session
+                    .world_snapshot()
+                    .stage5_systems
+                    .group
+                    .allow_group
+            );
+            assert!(companion
+                .session
+                .world_snapshot()
+                .stage5_systems
+                .group
+                .members
+                .is_empty());
+        });
+    }
+
+    #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
+    async fn shared_party_projection_pre_action_barrier_clears_an_undrained_kick() {
+        let (hub, leader, mut companion) = shared_party_joined_test_pair().await;
+        hub.command(
+            leader.admission.as_deref().unwrap(),
+            crate::party::PartyCommand::Remove("WebPartyAluo".to_string()),
+            super::gateway_unix_ms(),
+        )
+        .await
+        .expect("leader removes the companion through shared authority");
+        // Deliberately do not consume the companion's revocation notification.
+        assert_eq!(
+            tokio::task::block_in_place(|| companion.session.world_snapshot())
+                .stage5_systems
+                .group
+                .members,
+            ["WebPartyLead", "WebPartyAluo"]
+        );
+        let (unused_tx, _unused_rx) = tokio::sync::mpsc::channel(1);
+        super::refresh_shared_party_presence(
+            &hub,
+            &mut companion.admission,
+            &mut companion.session,
+            &unused_tx,
+        )
+        .await
+        .expect("refresh authorizes the next ordinary action from current membership");
+        let views = tokio::task::block_in_place(|| drain_shared_party_test_updates(&mut companion));
+        assert!(!views.is_empty());
+        assert!(views.iter().all(|update| update.members.is_empty()));
+        assert!(
+            tokio::task::block_in_place(|| companion.session.world_snapshot())
+                .stage5_systems
+                .group
+                .members
+                .is_empty()
+        );
+        // A lost Hub admission must not silently register again using its old
+        // personal roster when the next action reaches the same barrier.
+        hub.unregister(companion.admission.as_deref().unwrap())
+            .await;
+        assert!(super::refresh_shared_party_presence(
+            &hub,
+            &mut companion.admission,
+            &mut companion.session,
+            &unused_tx,
+        )
+        .await
+        .is_err());
+    }
+
     fn issue_test_identity() -> (
         crate::identity::IdentityService,
         crate::identity::VerifiedIdentitySession,
@@ -12186,6 +13253,8 @@ mod tests {
             )
             .expect("test AI live hub"),
             channel_identity: crate::ChannelIdentityRegistry::in_memory(),
+            parties: None,
+            companions: None,
         };
 
         let Json(receipt) = super::admin_system_mail(
@@ -12248,6 +13317,8 @@ mod tests {
             )
             .expect("test AI live hub"),
             channel_identity: crate::ChannelIdentityRegistry::in_memory(),
+            parties: None,
+            companions: None,
         };
 
         let Json(response) = super::health(State(state)).await;
@@ -12339,6 +13410,8 @@ mod tests {
             )
             .expect("test AI live hub"),
             channel_identity: crate::ChannelIdentityRegistry::in_memory(),
+            parties: None,
+            companions: None,
         };
 
         let Json(sessions) = super::admin_sessions(State(state.clone())).await;
@@ -14110,6 +15183,8 @@ mod tests {
             )
             .expect("test AI live hub"),
             channel_identity: crate::ChannelIdentityRegistry::in_memory(),
+            parties: None,
+            companions: None,
         };
         let app = axum::Router::new()
             .route("/ws", axum::routing::get(super::ws_upgrade))
@@ -14446,6 +15521,8 @@ mod tests {
             )
             .expect("test AI live hub"),
             channel_identity: crate::ChannelIdentityRegistry::in_memory(),
+            parties: None,
+            companions: None,
         };
         let app = axum::Router::new()
             .route("/ws", axum::routing::get(super::ws_upgrade))

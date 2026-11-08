@@ -1,4 +1,5 @@
 pub mod action;
+pub mod companion;
 pub mod effect;
 pub mod game_shop;
 pub mod reducer;

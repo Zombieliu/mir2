@@ -5338,6 +5338,12 @@ enum WireWorldCommand {
         #[serde(default)]
         mp: Option<i32>,
     },
+    SyncPartyView {
+        account_id: String,
+        character_index: i32,
+        allow_group: bool,
+        members: Vec<String>,
+    },
     Stage5Command {
         action: String,
         args: Vec<String>,
@@ -5402,6 +5408,17 @@ impl WireWorldCommand {
                 direction,
                 hp,
                 mp,
+            },
+            WorldCommand::SyncPartyView {
+                account_id,
+                character_index,
+                allow_group,
+                members,
+            } => Self::SyncPartyView {
+                account_id,
+                character_index,
+                allow_group,
+                members,
             },
             WorldCommand::Stage5Command { action, args } => Self::Stage5Command { action, args },
             WorldCommand::GrantOnchainOre {
@@ -5477,6 +5494,17 @@ impl WireWorldCommand {
                 direction,
                 hp,
                 mp,
+            },
+            Self::SyncPartyView {
+                account_id,
+                character_index,
+                allow_group,
+                members,
+            } => WorldCommand::SyncPartyView {
+                account_id,
+                character_index,
+                allow_group,
+                members,
             },
             Self::Stage5Command { action, args } => WorldCommand::Stage5Command { action, args },
             Self::GrantOnchainOre {

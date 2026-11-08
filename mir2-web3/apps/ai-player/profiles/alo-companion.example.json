@@ -1,0 +1,14 @@
+{
+  "url": "ws://127.0.0.1:7010/ws",
+  "realmId": "bichon-local-ai",
+  "characterName": "AloAI",
+  "guardPort": 17342,
+  "allowedMaps": ["0", "0141"],
+  "timeoutMs": 20000,
+  "companion": {
+    "residentId": "alo-bichon-01",
+    "leaderName": "YourCharacter",
+    "memoryPath": ".data/alo-bichon-01.sqlite",
+    "homePosition": { "x": 288, "y": 616, "mapFileName": "0" }
+  }
+}

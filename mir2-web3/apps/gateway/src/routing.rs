@@ -3002,6 +3002,7 @@ impl SharedInProcessZoneState {
             | ZoneCommand::Turn { session_id, .. }
             | ZoneCommand::TeleportToNpc { session_id, .. }
             | ZoneCommand::UpdateChatProfile { session_id, .. }
+            | ZoneCommand::ConfigurePlayerSafetyZones { session_id, .. }
             | ZoneCommand::UpdatePlayerCombatStats { session_id, .. }
             | ZoneCommand::SyncPlayerCombatState { session_id, .. }
             | ZoneCommand::SyncPlayerTransform { session_id, .. }
@@ -7030,6 +7031,16 @@ pub(crate) struct SharedZoneMovementIngress {
 }
 
 impl SharedZoneMovementIngress {
+    /// The calling player's current public Zone id; never a global player lookup.
+    pub(crate) fn player_object_id(&self) -> Option<u32> {
+        let zone = self.zone_state.lock().ok()?;
+        let state = self.session_state.lock().ok()?;
+        let key = state.presence_key.as_ref()?;
+        zone.players
+            .get(key)
+            .map(|presence| presence.zone_object_id)
+    }
+
     fn new(
         movement_sender: SyncSender<SharedZoneMovementRequest>,
         zone_state: Arc<Mutex<SharedInProcessZoneState>>,
@@ -7731,16 +7742,22 @@ impl SharedInProcessZoneSessionRuntime {
             .collect::<Vec<_>>();
         let key = ZonePresenceKey::from_identity(&identity);
         let last_seen_move_seq = {
-            let zone_state = self
+            let mut zone_state = self
                 .zone_state
                 .lock()
                 .map_err(|_| "shared zone presence mutex is poisoned".to_string())?;
-            let Some(session_id) = zone_state.zone_sessions.get(&key) else {
+            let Some(session_id) = zone_state.zone_sessions.get(&key).cloned() else {
                 return Ok(());
             };
             zone_state
                 .zone_manager
-                .player_last_seen_move_seq(session_id)
+                .handle(ZoneCommand::ConfigurePlayerSafetyZones {
+                    session_id: session_id.clone(),
+                    bounds: self.inner.current_map_safe_zone_bounds(),
+                });
+            zone_state
+                .zone_manager
+                .player_last_seen_move_seq(&session_id)
                 .unwrap_or_default()
         };
         let mut movement = self
@@ -7956,6 +7973,7 @@ impl SharedInProcessZoneSessionRuntime {
             return self.remove_presence();
         };
         let snapshot = self.inner.world_snapshot();
+        let safety_zone_bounds = self.inner.current_map_safe_zone_bounds();
         let Some(map_file_name) = snapshot.map_file_name.clone() else {
             return self.remove_presence();
         };
@@ -8096,6 +8114,12 @@ impl SharedInProcessZoneSessionRuntime {
                     .zone_session_keys
                     .insert(session_id.clone(), key.clone());
                 let mut outbounds = zone_state.zone_manager.join(join.clone());
+                outbounds.extend(zone_state.zone_manager.handle(
+                    ZoneCommand::ConfigurePlayerSafetyZones {
+                        session_id: session_id.clone(),
+                        bounds: safety_zone_bounds.clone(),
+                    },
+                ));
                 let now_ms = Self::zone_now_ms();
                 outbounds.extend(
                     zone_state
@@ -8157,6 +8181,12 @@ impl SharedInProcessZoneSessionRuntime {
             }
         } else if let Some(join) = join_snapshot.as_ref() {
             let mut outbounds = Vec::new();
+            outbounds.extend(zone_state.zone_manager.handle(
+                ZoneCommand::ConfigurePlayerSafetyZones {
+                    session_id: session_id.clone(),
+                    bounds: safety_zone_bounds,
+                },
+            ));
             let now_ms = Self::zone_now_ms();
             let zone_transform = zone_state.zone_manager.player_transform(&session_id);
             if allow_transform_sync
@@ -8759,6 +8789,150 @@ impl SharedInProcessZoneSessionRuntime {
         for amount in heals {
             self.inner.apply_zone_player_heal(amount);
         }
+    }
+
+    /// Personal timers own queued, already-paid potion recovery; Zone owns
+    /// current vitals. Commit only the recovery delta, against the latest live
+    /// Zone value under its single-writer lock, never a stale private snapshot.
+    fn commit_personal_timer_recovery(
+        &mut self,
+        before: &WorldSnapshot,
+        after: &WorldSnapshot,
+        packets: &mut Vec<ServerPacket>,
+    ) -> Vec<ServerPacket> {
+        let Some(owner_id) = before.player_object_id else {
+            return Vec::new();
+        };
+        if after.player_object_id != Some(owner_id)
+            || !before.player_hp.is_some_and(|hp| hp > 0)
+            || !after.player_hp.is_some_and(|hp| hp > 0)
+        {
+            return Vec::new();
+        }
+        let hp_delta = after
+            .player_hp
+            .zip(before.player_hp)
+            .map_or(0, |(after, before)| after.saturating_sub(before).max(0));
+        let mp_delta = after
+            .player_mp
+            .zip(before.player_mp)
+            .map_or(0, |(after, before)| after.saturating_sub(before).max(0));
+        if hp_delta == 0
+            && mp_delta == 0
+            && !packets.iter().any(|packet| match packet {
+                ServerPacket::ObjectHealth { info } => info.object_id == owner_id,
+                ServerPacket::ObjectMana { info } => info.object_id == owner_id,
+                _ => false,
+            })
+        {
+            return Vec::new();
+        }
+        let committed = (|| {
+            let identity = self.inner.active_identity()?;
+            let key = ZonePresenceKey::from_identity(&identity);
+            if self.current_presence_key().as_ref() != Some(&key) {
+                return None;
+            }
+            let mut state = self
+                .zone_state
+                .lock()
+                .expect("shared zone presence mutex should not be poisoned");
+            if state.teardown_fenced(&key) {
+                return None;
+            }
+            let session_id = state.zone_sessions.get(&key)?.clone();
+            let presence = state.players.get(&key)?;
+            let trusted_identity = state
+                .zone_manager
+                .zone(&ZoneKey::for_map(&presence.map_file_name))
+                .and_then(|zone| zone.player_identity(&session_id));
+            if trusted_identity
+                != Some((
+                    session_id.clone(),
+                    key.account_id.clone(),
+                    key.character_index,
+                ))
+            {
+                return None;
+            }
+            let (live_hp, max_hp, live_mp) = state.zone_manager.player_vitals(&session_id)?;
+            // A lethal hit during the personal tick must remain lethal. The
+            // ordinary pending death path and explicit TownRevive own revival.
+            let (hp, mp) = if live_hp <= 0 {
+                (live_hp, live_mp)
+            } else if hp_delta > 0 || mp_delta > 0 {
+                let hp = live_hp.saturating_add(hp_delta).min(max_hp);
+                let mp_room = after
+                    .player_max_mp
+                    .map_or(0, |max_mp| max_mp.saturating_sub(live_mp).max(0));
+                let mp = live_mp.saturating_add(mp_delta.min(mp_room));
+                state.zone_manager.handle(ZoneCommand::SyncPlayerVitals {
+                    session_id: session_id.clone(),
+                    hp,
+                    max_hp,
+                    mp,
+                });
+                (hp, mp)
+            } else {
+                (live_hp, live_mp)
+            };
+            let percent = |value: i32, maximum: i32| {
+                ((i64::from(value.max(0)) * 100) / i64::from(maximum.max(1))).clamp(0, 100) as u8
+            };
+            let mut observer_packets = Vec::new();
+            for packet in packets.iter_mut() {
+                match packet {
+                    ServerPacket::ObjectHealth { info } if info.object_id == owner_id => {
+                        info.percent = percent(hp, max_hp);
+                    }
+                    ServerPacket::ObjectMana { info } if info.object_id == owner_id => {
+                        info.percent = percent(mp, after.player_max_mp.unwrap_or(1));
+                    }
+                    _ => continue,
+                }
+                observer_packets.push(packet.clone());
+            }
+            // Publish under the same lock as the commit so later monster
+            // damage cannot reach observers before this older recovery. This
+            // dispatch never drains the pending inbox.
+            let outbounds = state.zone_manager.handle(ZoneCommand::BroadcastPackets {
+                session_id,
+                owner_local_object_id: owner_id,
+                packets: observer_packets,
+                now_ms: Self::zone_now_ms(),
+            });
+            Some((
+                hp.saturating_sub(live_hp).max(0),
+                mp.saturating_sub(live_mp).max(0),
+                state.dispatch_zone_outbounds(outbounds, Some(&key)).0,
+            ))
+        })();
+        let Some((accepted_hp, accepted_mp, owner_packets)) = committed else {
+            self.inner.force_authoritative_player_vitals(
+                after.player_hp.map(|hp| hp.saturating_sub(hp_delta)),
+                after.player_mp.map(|mp| mp.saturating_sub(mp_delta)),
+            );
+            packets.retain(|packet| match packet {
+                ServerPacket::ObjectHealth { info } => info.object_id != owner_id,
+                ServerPacket::ObjectMana { info } => info.object_id != owner_id,
+                _ => true,
+            });
+            return Vec::new();
+        };
+        // Undo only rejected recovery, not concurrent damage/heal: those
+        // deltas are still in the inbox. In particular a rejected potion must
+        // not mask the pending lethal hit and skip the normal death penalty.
+        if accepted_hp < hp_delta || accepted_mp < mp_delta {
+            self.inner.force_authoritative_player_vitals(
+                after
+                    .player_hp
+                    .map(|hp| hp.saturating_sub(hp_delta - accepted_hp)),
+                after
+                    .player_mp
+                    .map(|mp| mp.saturating_sub(mp_delta - accepted_mp)),
+            );
+        }
+        owner_packets
     }
 
     fn apply_zone_player_buff_packets(&mut self, packets: &[ServerPacket]) {
@@ -11458,6 +11632,41 @@ impl WorldRuntime for SharedInProcessZoneSessionRuntime {
         }) {
             return Err("shared Zone session is fenced for teardown".to_string());
         }
+        if let WorldCommand::SyncPartyView { members, .. } = &command {
+            let members = members.clone();
+            let session_id = self
+                .current_zone_session_id()
+                .ok_or("shared party projection requires an active Zone presence")?;
+            let map_file_name = self
+                .inner
+                .world_snapshot()
+                .map_file_name
+                .ok_or("shared party projection requires an active map")?;
+            // This trusted metadata projection must not consume pending world
+            // packets, synchronize stale personal vitals/transforms, or tick
+            // the world. In particular, old UserLocation packets must never be
+            // emitted as if they acknowledged the next movement intent.
+            let packets = self.inner.execute(command)?;
+            let mut state = self
+                .zone_state
+                .lock()
+                .map_err(|_| "shared Zone party projection lock is poisoned")?;
+            let mut profile = state
+                .zone_manager
+                .zone(&ZoneKey::for_map(map_file_name))
+                .and_then(|zone| zone.player_chat_profile(&session_id))
+                .ok_or("shared party projection lost its active Zone presence")?;
+            profile.group_members = members;
+            let outbounds = state.zone_manager.handle(ZoneCommand::UpdateChatProfile {
+                session_id,
+                profile,
+            });
+            debug_assert!(
+                outbounds.is_empty(),
+                "party metadata updates must not emit world packets"
+            );
+            return Ok(packets);
+        }
         let removes_presence = matches!(
             &command,
             WorldCommand::ClientPacket(ClientPacket::Disconnect | ClientPacket::LogOut)
@@ -11864,7 +12073,12 @@ impl WorldRuntime for SharedInProcessZoneSessionRuntime {
             // the full private world tick would create a second monster/hazard
             // authority that can move, kill, or damage the same objects and
             // player independently of the Zone.
-            self.inner.tick_shared_zone_personal_state()
+            let before = self.inner.world_snapshot();
+            let mut packets = self.inner.tick_shared_zone_personal_state();
+            let after = self.inner.world_snapshot();
+            let owner_packets = self.commit_personal_timer_recovery(&before, &after, &mut packets);
+            packets.extend(owner_packets);
+            packets
         } else if is_game_shop_buy {
             let execution = self.inner.execute_with_outcome(command)?;
             self.last_game_shop_purchase_outcome = execution.game_shop_purchase_outcome;
@@ -11954,7 +12168,19 @@ impl WorldRuntime for SharedInProcessZoneSessionRuntime {
                 .any(|packet| matches!(packet, ServerPacket::IntelligentCreaturePickup { .. }))
         {
             if let Some(owner_id) = self.local_self_object_id() {
-                self.dispatch_zone_observer_packets(owner_id, &command_packets)
+                // The timer bridge already published self vitals under the
+                // commit lock. Re-sending them after automatic pickup could
+                // overwrite a newer damage percentage at observers.
+                let pickup_packets = command_packets
+                    .iter()
+                    .filter(|packet| match packet {
+                        ServerPacket::ObjectHealth { info } => info.object_id != owner_id,
+                        ServerPacket::ObjectMana { info } => info.object_id != owner_id,
+                        _ => true,
+                    })
+                    .cloned()
+                    .collect::<Vec<_>>();
+                self.dispatch_zone_observer_packets(owner_id, &pickup_packets)
             } else {
                 Vec::new()
             }
@@ -12091,6 +12317,14 @@ impl WorldRuntime for SharedInProcessZoneSessionRuntime {
                 }
             }
             if let Some(session_id) = zone_state.zone_sessions.get(key) {
+                if let Some(profile) = zone_state
+                    .zone_manager
+                    .zone_key_for_session(session_id)
+                    .and_then(|key| zone_state.zone_manager.zone(&key))
+                    .and_then(|zone| zone.player_chat_profile(session_id))
+                {
+                    snapshot.in_safe_zone = profile.in_safe_zone;
+                }
                 if let Some((hp, max_hp, mp)) = zone_state.zone_manager.player_vitals(session_id) {
                     snapshot.player_hp = Some(hp);
                     snapshot.player_max_hp = Some(max_hp);
@@ -19166,6 +19400,72 @@ mod tests {
     }
 
     #[test]
+    fn shared_party_projection_is_metadata_only_and_preserves_pending_world_packets() {
+        let state = Arc::new(Mutex::new(SharedInProcessZoneState::new()));
+        let mut runtime = shared_session_runtime(Arc::clone(&state));
+        start_new_runtime(&mut runtime, "party-metadata-account", "PartyMetadata");
+        let identity = runtime.active_identity().unwrap();
+        let key = runtime.current_presence_key().unwrap();
+        let session_id = runtime.current_zone_session_id().unwrap();
+        let before = runtime.world_snapshot();
+        let marker = ServerPacket::UserLocation {
+            location: mir2_protocol::UserLocation {
+                position: Point { x: 287, y: 615 },
+                direction: MirDirection::Up,
+            },
+        };
+        let expected_profile = {
+            let mut state = state.lock().unwrap();
+            state
+                .pending_zone_packets
+                .insert(key.clone(), vec![marker.clone()]);
+            let mut profile = state
+                .zone_manager
+                .zone(&ZoneKey::for_map("0"))
+                .unwrap()
+                .player_chat_profile(&session_id)
+                .unwrap();
+            // Preserve Zone facts even when the private compatibility view is older.
+            profile.attack_mode = 3;
+            profile.free_server_shout = true;
+            state.zone_manager.handle(ZoneCommand::UpdateChatProfile {
+                session_id: session_id.clone(),
+                profile: profile.clone(),
+            });
+            profile.group_members = vec![identity.character_name.clone(), "Companion".to_string()];
+            profile
+        };
+        let packets = runtime
+            .execute(WorldCommand::SyncPartyView {
+                account_id: identity.account_id,
+                character_index: identity.character_index,
+                allow_group: true,
+                members: expected_profile.group_members.clone(),
+            })
+            .unwrap();
+        assert!(
+            packets.is_empty(),
+            "metadata must not drain an old movement ACK"
+        );
+        let after = runtime.world_snapshot();
+        assert_eq!(after.tick, before.tick);
+        assert_eq!(
+            after.stage5_systems.group.members,
+            expected_profile.group_members
+        );
+        let state = state.lock().unwrap();
+        assert_eq!(state.pending_zone_packets.get(&key), Some(&vec![marker]));
+        assert_eq!(
+            state
+                .zone_manager
+                .zone(&ZoneKey::for_map("0"))
+                .unwrap()
+                .player_chat_profile(&session_id),
+            Some(expected_profile)
+        );
+    }
+
+    #[test]
     fn shared_in_process_registry_routes_melee_pvp_and_accrues_unlawful_pk() {
         let zone_state = Arc::new(Mutex::new(SharedInProcessZoneState::new()));
         let mut first = shared_session_runtime(zone_state.clone());
@@ -19935,6 +20235,79 @@ mod tests {
         assert_eq!(state.presence_epoch, first_epoch + 1);
         state.deactivate();
         assert_eq!(state.presence_epoch, first_epoch + 2);
+    }
+
+    #[test]
+    fn shared_zone_movement_ingress_updates_safety_from_the_current_map_bounds() {
+        let factory = SharedInProcessZoneRuntimeFactory::new();
+        let zone_id = ZoneId::new("movement-safety-boundary");
+        let resources = factory.resources_for_zone(&zone_id);
+        let mut config = GatewayConfig::default();
+        config.safe_zones = vec![mir2_simulation::SafeZoneRecord {
+            map_file_name: "0".to_string(),
+            bounds: mir2_game_data::MapBounds {
+                min_x: 330,
+                max_x: 330,
+                min_y: 270,
+                max_y: 270,
+            },
+        }];
+        let mut runtime = factory.create_runtime(config, &zone_id);
+        start_new_runtime_handle(&mut runtime, "movement-safety", "SafetyScout");
+        runtime
+            .execute(WorldCommand::TransferMap {
+                key: "crystal:0:330:274".to_string(),
+            })
+            .unwrap();
+        assert!(runtime.world_snapshot().in_safe_zone);
+        let ingress = shared_zone_movement_ingress(&runtime).unwrap();
+        let execution = ingress
+            .try_execute(ClientPacket::Walk {
+                direction: MirDirection::Down,
+            })
+            .unwrap()
+            .unwrap();
+        let snapshot = runtime.world_snapshot();
+        let player = snapshot
+            .entities
+            .iter()
+            .find(|entity| entity.kind == WorldEntityKind::SelfPlayer)
+            .unwrap();
+        assert_eq!(
+            (player.x, player.y),
+            (330, 275),
+            "packets={:?}",
+            execution.packets
+        );
+        assert!(
+            !snapshot.in_safe_zone,
+            "ordinary fast-path walking must leave the configured safety boundary"
+        );
+        let identity = runtime.active_identity().unwrap();
+        let key = ZonePresenceKey::from_identity(&identity);
+        let state = resources.zone_state.lock().unwrap();
+        let session_id = state.zone_sessions.get(&key).unwrap();
+        assert!(
+            !state
+                .zone_manager
+                .zone(&ZoneKey::for_map("0"))
+                .unwrap()
+                .player_chat_profile(session_id)
+                .unwrap()
+                .in_safe_zone
+        );
+        drop(state);
+        std::thread::sleep(Duration::from_millis(650));
+        ingress
+            .try_execute(ClientPacket::Walk {
+                direction: MirDirection::Up,
+            })
+            .unwrap()
+            .unwrap();
+        assert!(
+            runtime.world_snapshot().in_safe_zone,
+            "returning through the same boundary restores real safety"
+        );
     }
 
     #[test]
@@ -21348,6 +21721,378 @@ mod tests {
                 .player_transform(&session_id)
                 .map(|(position, _)| position),
             Some(bind_position)
+        );
+    }
+
+    #[test]
+    fn shared_gateway_owned_potion_recovers_zone_vitals_and_observers() {
+        let zone_state = Arc::new(Mutex::new(SharedInProcessZoneState::new()));
+        let config = GatewayConfig::default()
+            .with_crystal_world_runtime()
+            .with_platinum_176_profile();
+        let mut runtime = shared_session_runtime(zone_state.clone());
+        runtime.inner = InProcessWorldRuntime::new(config.clone());
+        start_new_runtime(&mut runtime, "potion-live-owner", "PotionOwner");
+        let mut observer = shared_session_runtime(zone_state.clone());
+        observer.inner = InProcessWorldRuntime::new(config);
+        start_new_runtime(&mut observer, "potion-live-observer", "PotionWitness");
+        let snapshot = runtime.inner.world_snapshot();
+        let potion_id = snapshot
+            .inventory_items
+            .iter()
+            .find(|item| item.name == "(HP)DrugSmall")
+            .unwrap()
+            .unique_id;
+        let max_hp = snapshot.player_max_hp.unwrap();
+        assert_eq!(max_hp, 18);
+        let session_id = runtime.current_zone_session_id().unwrap();
+        let owner_id = runtime.local_self_object_id().unwrap();
+        let zone_id = runtime.current_zone_player_object_id().unwrap();
+        let observer_key = observer.current_presence_key().unwrap();
+        // Trusted unit fixture only; the network acceptance uses monster damage.
+        {
+            let mut state = zone_state.lock().unwrap();
+            let (_, _, mp) = state.zone_manager.player_vitals(&session_id).unwrap();
+            state.zone_manager.handle(ZoneCommand::SyncPlayerVitals {
+                session_id: session_id.clone(),
+                hp: 5,
+                max_hp,
+                mp,
+            });
+            state.take_pending_zone_packets(&observer_key);
+        }
+        let used = runtime
+            .execute(WorldCommand::ClientPacket(ClientPacket::UseItem {
+                unique_id: potion_id,
+                grid: mir2_protocol::MirGridType::Inventory,
+            }))
+            .unwrap();
+        assert!(used.iter().any(|packet| matches!(packet,
+            ServerPacket::UseItem { unique_id, success: true, .. } if *unique_id == potion_id)));
+        assert!(!runtime
+            .inner
+            .world_snapshot()
+            .inventory_items
+            .iter()
+            .any(|item| item.unique_id == potion_id));
+        for expected_hp in [15, 18, 18] {
+            let packets = runtime.execute(WorldCommand::Tick).unwrap();
+            assert_eq!(runtime.world_snapshot().player_hp, Some(expected_hp));
+            runtime
+                .execute(WorldCommand::ClientPacket(ClientPacket::KeepAlive {
+                    time: 1,
+                }))
+                .unwrap();
+            assert_eq!(runtime.inner.world_snapshot().player_hp, Some(expected_hp));
+            if expected_hp == 15 {
+                let expected_percent = (expected_hp * 100 / max_hp) as u8;
+                assert!(packets.iter().any(|packet| matches!(packet,
+                    ServerPacket::ObjectHealth { info }
+                        if info.object_id == owner_id && info.percent == expected_percent)));
+                let observer_packets = zone_state
+                    .lock()
+                    .unwrap()
+                    .take_pending_zone_packets(&observer_key);
+                assert!(observer_packets.iter().any(|packet| matches!(packet,
+                    ServerPacket::ObjectHealth { info }
+                        if info.object_id == zone_id && info.percent == expected_percent)));
+            }
+        }
+        // The consumed recovery must not be applied again after later damage.
+        {
+            let mut state = zone_state.lock().unwrap();
+            let (_, _, mp) = state.zone_manager.player_vitals(&session_id).unwrap();
+            state.zone_manager.handle(ZoneCommand::SyncPlayerVitals {
+                session_id,
+                hp: 5,
+                max_hp,
+                mp,
+            });
+        }
+        runtime.execute(WorldCommand::Tick).unwrap();
+        assert_eq!(runtime.world_snapshot().player_hp, Some(5));
+    }
+
+    #[test]
+    fn shared_gateway_potion_delta_preserves_concurrent_damage_and_pending_inbox() {
+        let zone_state = Arc::new(Mutex::new(SharedInProcessZoneState::new()));
+        let mut runtime = shared_session_runtime(zone_state.clone());
+        runtime.inner = InProcessWorldRuntime::new(
+            GatewayConfig::default()
+                .with_crystal_world_runtime()
+                .with_platinum_176_profile(),
+        );
+        start_new_runtime(&mut runtime, "potion-racing-hit", "PotionRace");
+        runtime
+            .inner
+            .force_authoritative_player_vitals(Some(10), None);
+        let before = runtime.inner.world_snapshot();
+        let potion_id = before
+            .inventory_items
+            .iter()
+            .find(|item| item.name == "(HP)DrugSmall")
+            .unwrap()
+            .unique_id;
+        runtime
+            .inner
+            .execute(WorldCommand::ClientPacket(ClientPacket::UseItem {
+                unique_id: potion_id,
+                grid: mir2_protocol::MirGridType::Inventory,
+            }))
+            .unwrap();
+        let mut packets = runtime.inner.tick_shared_zone_personal_state();
+        let after = runtime.inner.world_snapshot();
+        assert_eq!(after.player_hp, Some(18));
+        let key = runtime.current_presence_key().unwrap();
+        let session_id = runtime.current_zone_session_id().unwrap();
+        // Interleave a real Zone damage delta after the private timer has run.
+        {
+            let mut state = zone_state.lock().unwrap();
+            let (_, _, mp) = state.zone_manager.player_vitals(&session_id).unwrap();
+            state.zone_manager.handle(ZoneCommand::SyncPlayerVitals {
+                session_id: session_id.clone(),
+                hp: 2,
+                max_hp: 15,
+                mp,
+            });
+            state.dispatch_zone_outbounds(
+                vec![ZoneOutbound::PlayerDamaged {
+                    session_id,
+                    damage: 8,
+                }],
+                None,
+            );
+        }
+        runtime.commit_personal_timer_recovery(&before, &after, &mut packets);
+        assert_eq!(runtime.world_snapshot().player_hp, Some(10));
+        assert_eq!(runtime.world_snapshot().player_max_hp, Some(15));
+        // Do not rebase the private post-tick value while its damage is pending.
+        assert_eq!(runtime.inner.world_snapshot().player_hp, Some(18));
+        assert_eq!(
+            zone_state
+                .lock()
+                .unwrap()
+                .pending_zone_player_damages
+                .get(&key),
+            Some(&vec![8])
+        );
+        assert!(packets.iter().any(|packet| matches!(packet,
+            ServerPacket::ObjectHealth { info } if info.object_id == before.player_object_id.unwrap() && info.percent == 66)));
+        let drained = runtime
+            .execute(WorldCommand::ClientPacket(ClientPacket::KeepAlive {
+                time: 2,
+            }))
+            .unwrap();
+        assert_eq!(runtime.inner.world_snapshot().player_hp, Some(10));
+        assert!(!drained
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::Death { .. })));
+        assert!(!zone_state
+            .lock()
+            .unwrap()
+            .pending_zone_player_damages
+            .contains_key(&key));
+    }
+
+    #[test]
+    fn shared_gateway_rejected_potion_preserves_pending_lethal_hit_and_death_penalty() {
+        let zone_state = Arc::new(Mutex::new(SharedInProcessZoneState::new()));
+        let mut runtime = shared_session_runtime(zone_state.clone());
+        runtime.inner = InProcessWorldRuntime::new(
+            GatewayConfig::default()
+                .with_crystal_world_runtime()
+                .with_platinum_176_profile(),
+        );
+        start_new_runtime(&mut runtime, "potion-lethal-race", "PotionLethal");
+        // Unit-only trusted setup makes the existing death penalty deterministic.
+        runtime.inner.apply_zone_unlawful_player_kill(300);
+        runtime
+            .inner
+            .force_authoritative_player_vitals(Some(5), None);
+        let before = runtime.inner.world_snapshot();
+        let potion_id = before
+            .inventory_items
+            .iter()
+            .find(|item| item.name == "(HP)DrugSmall")
+            .unwrap()
+            .unique_id;
+        runtime
+            .inner
+            .execute(WorldCommand::ClientPacket(ClientPacket::UseItem {
+                unique_id: potion_id,
+                grid: mir2_protocol::MirGridType::Inventory,
+            }))
+            .unwrap();
+        let mut packets = runtime.inner.tick_shared_zone_personal_state();
+        let after = runtime.inner.world_snapshot();
+        assert_eq!(after.player_hp, Some(15));
+        let session_id = runtime.current_zone_session_id().unwrap();
+        let key = runtime.current_presence_key().unwrap();
+        {
+            let mut state = zone_state.lock().unwrap();
+            let (_, max_hp, mp) = state.zone_manager.player_vitals(&session_id).unwrap();
+            state.zone_manager.handle(ZoneCommand::SyncPlayerVitals {
+                session_id: session_id.clone(),
+                hp: 0,
+                max_hp,
+                mp,
+            });
+            state.dispatch_zone_outbounds(
+                vec![ZoneOutbound::PlayerDamaged {
+                    session_id,
+                    damage: 5,
+                }],
+                None,
+            );
+        }
+        runtime.commit_personal_timer_recovery(&before, &after, &mut packets);
+        assert_eq!(runtime.world_snapshot().player_hp, Some(0));
+        assert_eq!(runtime.inner.world_snapshot().player_hp, Some(5));
+        assert_eq!(
+            zone_state
+                .lock()
+                .unwrap()
+                .pending_zone_player_damages
+                .get(&key),
+            Some(&vec![5])
+        );
+        let inventory_count = runtime.inner.world_snapshot().inventory_items.len();
+        let death = runtime
+            .execute(WorldCommand::ClientPacket(ClientPacket::KeepAlive {
+                time: 3,
+            }))
+            .unwrap();
+        assert_eq!(runtime.inner.world_snapshot().player_hp, Some(0));
+        assert_eq!(
+            runtime.inner.world_snapshot().inventory_items.len(),
+            inventory_count - 2
+        );
+        assert_eq!(
+            death
+                .iter()
+                .filter(|packet| matches!(packet, ServerPacket::DeleteItem { count: 1, .. }))
+                .count(),
+            2
+        );
+        let second = runtime
+            .execute(WorldCommand::ClientPacket(ClientPacket::KeepAlive {
+                time: 4,
+            }))
+            .unwrap();
+        assert_eq!(
+            runtime.inner.world_snapshot().inventory_items.len(),
+            inventory_count - 2
+        );
+        assert!(!second
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::DeleteItem { .. })));
+    }
+
+    #[test]
+    fn shared_gateway_personal_recovery_respects_death_caps_and_teardown() {
+        for (case, live_hp, live_mp, fenced) in [
+            ("dead", 0, 2, false),
+            ("cap", 17, 3, false),
+            ("fenced", 5, 2, true),
+        ] {
+            let zone_state = Arc::new(Mutex::new(SharedInProcessZoneState::new()));
+            let mut runtime = shared_session_runtime(zone_state.clone());
+            runtime.inner = InProcessWorldRuntime::new(
+                GatewayConfig::default()
+                    .with_crystal_world_runtime()
+                    .with_platinum_176_profile(),
+            );
+            start_new_runtime(
+                &mut runtime,
+                &format!("potion-{case}"),
+                &format!("Potion{case}"),
+            );
+            let mut before = runtime.inner.world_snapshot();
+            before.player_hp = Some(5);
+            before.player_mp = Some(0);
+            let mut after = before.clone();
+            after.player_hp = Some(15);
+            after.player_mp = Some(10);
+            after.player_max_mp = Some(4);
+            let key = runtime.current_presence_key().unwrap();
+            let session_id = runtime.current_zone_session_id().unwrap();
+            {
+                let mut state = zone_state.lock().unwrap();
+                state.zone_manager.handle(ZoneCommand::SyncPlayerVitals {
+                    session_id: session_id.clone(),
+                    hp: live_hp,
+                    max_hp: 18,
+                    mp: live_mp,
+                });
+                if fenced {
+                    state.teardown_fences.insert(key);
+                }
+            }
+            let mut packets = vec![
+                ServerPacket::ObjectHealth {
+                    info: ObjectHealthInfo {
+                        object_id: before.player_object_id.unwrap(),
+                        percent: 83,
+                        expire: 0,
+                    },
+                },
+                ServerPacket::ObjectMana {
+                    info: mir2_protocol::ObjectManaInfo {
+                        object_id: before.player_object_id.unwrap(),
+                        percent: 100,
+                    },
+                },
+            ];
+            runtime.commit_personal_timer_recovery(&before, &after, &mut packets);
+            let expected = if fenced || live_hp == 0 {
+                (live_hp, 18, live_mp)
+            } else {
+                (18, 18, 4)
+            };
+            assert_eq!(
+                zone_state
+                    .lock()
+                    .unwrap()
+                    .zone_manager
+                    .player_vitals(&session_id),
+                Some(expected),
+                "{case}"
+            );
+            if !fenced {
+                assert!(
+                    matches!(&packets[0], ServerPacket::ObjectHealth { info } if info.percent == (expected.0 * 100 / 18) as u8)
+                );
+            }
+        }
+    }
+
+    #[test]
+    fn shared_gateway_full_health_potion_packet_uses_latest_zone_health() {
+        let zone_state = Arc::new(Mutex::new(SharedInProcessZoneState::new()));
+        let mut runtime = shared_session_runtime(zone_state.clone());
+        start_demo_runtime(&mut runtime);
+        let before = runtime.inner.world_snapshot();
+        let session_id = runtime.current_zone_session_id().unwrap();
+        let mut state = zone_state.lock().unwrap();
+        let (_, max_hp, mp) = state.zone_manager.player_vitals(&session_id).unwrap();
+        state.zone_manager.handle(ZoneCommand::SyncPlayerVitals {
+            session_id,
+            hp: 1,
+            max_hp,
+            mp,
+        });
+        drop(state);
+        let mut packets = vec![ServerPacket::ObjectHealth {
+            info: ObjectHealthInfo {
+                object_id: before.player_object_id.unwrap(),
+                percent: 100,
+                expire: 0,
+            },
+        }];
+        runtime.commit_personal_timer_recovery(&before, &before, &mut packets);
+        assert_eq!(runtime.world_snapshot().player_hp, Some(1));
+        assert!(
+            matches!(&packets[0], ServerPacket::ObjectHealth { info } if info.percent == (100 / max_hp) as u8)
         );
     }
 

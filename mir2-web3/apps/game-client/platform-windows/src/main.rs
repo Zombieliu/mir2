@@ -13,6 +13,7 @@ use mir2_bevy_runtime::{build_runtime_app, RuntimeWindowSpec};
 mod assets;
 mod atlas;
 mod capture;
+mod companion;
 mod effects;
 mod entity_overlays;
 mod entity_presentation;
@@ -110,6 +111,7 @@ fn main() {
     // F12 and optional state-triggered PNG capture are disabled unless an
     // explicit capture directory is configured for native acceptance.
     app.add_plugins(capture::Mir2NativeScreenshotPlugin);
+    app.add_plugins(companion::NativeCompanionHostPlugin);
     // Native input: WASD / arrows → walk/run intents forwarded to the gateway.
     app.insert_resource(shell_bridge::initial_shell_model(
         session.auto_login.as_ref(),

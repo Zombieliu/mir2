@@ -2242,6 +2242,7 @@ where
     let mut context = GatewaySessionContext::default();
     let mut gameplay_adapter = NativeGameplayAdapter::default();
     gameplay_adapter.set_generation(generation);
+    crate::companion::reset_private_transport();
     // Every WebSocket generation owns an isolated lighting lifecycle. A
     // reconnect must never retain the previous map's darkness or emitters.
     let mut lighting_publisher = NativeLightingPublisher::for_connection(generation);
@@ -2524,6 +2525,7 @@ fn mail_command_allowed(
 }
 
 fn reset_native_data_models() {
+    crate::companion::reset_private_transport();
     let _ = mir2_bevy_runtime::native_ingest::push_native_data_reset();
 }
 
@@ -2880,6 +2882,12 @@ where
     let event: GatewayEnvelope =
         serde_json::from_str(text).map_err(|error| format!("invalid gateway payload: {error}"))?;
     let parsed = parse_inbound_event(text).map_err(|error| error.to_string())?;
+    if let InboundEvent::CompanionResult(reply) = &parsed {
+        // Private owner replies never enter public world snapshots, render
+        // payloads, spectator state, or generic frame diagnostics.
+        crate::companion::push_private_reply(reply.clone());
+        return Ok(WorldSnapshotIngestOutcome::NotSnapshot);
+    }
     dispatch_shell_event(&parsed, context, shell_events);
     let packet_updates_world = if let InboundEvent::Packet(packet) = &parsed {
         gameplay_adapter.observe_packet(packet)

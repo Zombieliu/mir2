@@ -1,0 +1,114 @@
+{
+  "schema": "mir2-alo-verification/1",
+  "verifiedAt": "2026-11-02T20:27:03.712Z",
+  "status": "passed-bounded-local-engineering",
+  "gatewayBinarySha256": "d8c2bd33ed1ab1acf976bebf42719e9492040cc671b8c67bede5c72c139fe17b",
+  "build": {
+    "command": "cargo +1.89.0 build --locked -p mir2-gateway --bin mir2-gateway --target-dir target-ai-player",
+    "passed": true
+  },
+  "checks": [
+    {
+      "name": "Node ordinary client, policy, controller, SQLite and recovery tests",
+      "command": "node --test apps/ai-player/tests/*.test.mjs",
+      "passed": 108,
+      "failed": 0
+    },
+    {
+      "name": "Gateway complete library",
+      "command": "cargo +1.89.0 test --locked -p mir2-gateway --lib --target-dir target-ai-player",
+      "passed": 686,
+      "failed": 0,
+      "ignored": 1,
+      "elapsedSeconds": 590.93,
+      "ignoredTest": "channel_identity::tests::postgres_store_is_shared_across_gateway_instances",
+      "ignoredReason": "Requires MIR2_CHANNEL_IDENTITY_TEST_DATABASE_URL; external test database is not configured."
+    },
+    {
+      "name": "Gateway shared_gateway_ focused subset",
+      "command": "cargo +1.89.0 test --locked -p mir2-gateway --lib shared_gateway_ --target-dir target-ai-player",
+      "passed": 8,
+      "failed": 0,
+      "includedInGatewayCompleteLibrary": true
+    },
+    {
+      "name": "Simulation current_map_safety",
+      "command": "cargo +1.89.0 test --locked -p mir2-simulation --test current_map_safety --target-dir target-ai-player",
+      "passed": 4,
+      "failed": 0
+    },
+    {
+      "name": "Simulation shared_zone_safety",
+      "command": "cargo +1.89.0 test --locked -p mir2-simulation --test shared_zone_safety --target-dir target-ai-player",
+      "passed": 5,
+      "failed": 0
+    },
+    {
+      "name": "Simulation shared_zone",
+      "command": "cargo +1.89.0 test --locked -p mir2-simulation --test shared_zone --target-dir target-ai-player",
+      "passed": 196,
+      "failed": 0
+    },
+    {
+      "name": "Simulation shared_party_projection",
+      "command": "cargo +1.89.0 test --locked -p mir2-simulation --test shared_party_projection --target-dir target-ai-player",
+      "passed": 2,
+      "failed": 0
+    },
+    {
+      "name": "Simulation security_lifecycle",
+      "command": "cargo +1.89.0 test --locked -p mir2-simulation --test security_lifecycle --target-dir target-ai-player",
+      "passed": 18,
+      "failed": 0
+    }
+  ],
+  "actualNetwork": [
+    {
+      "name": "Companion full journey",
+      "command": "node apps/ai-player/scripts/run-local-companion-acceptance.mjs",
+      "passed": 12,
+      "failed": 0,
+      "report": "summary.json"
+    },
+    {
+      "name": "B1 ordinary player lifecycle on same binary",
+      "command": "node apps/ai-player/scripts/run-local-acceptance.mjs",
+      "passed": 4,
+      "failed": 0,
+      "report": "b1-summary.json"
+    }
+  ],
+  "consistency": {
+    "rustFormatPassed": true,
+    "gitDiffCheckPassed": true,
+    "sourceManifestFiles": 44,
+    "policyLifecycle": [
+      1,
+      2,
+      2
+    ],
+    "normalClientNetworkOnly": true
+  },
+  "medicalRegressionScope": [
+    "real owned item consumption and authoritative timed recovery",
+    "observer health propagation",
+    "concurrent damage and pending inbox preservation",
+    "death, HP/MP caps and teardown fencing",
+    "rejected recovery preserves lethal hit and exactly-once death penalty",
+    "zero-delta potion output reflects live health"
+  ],
+  "notValidated": [
+    "human window and visual/feel acceptance",
+    "continuous independent living or automated resupply",
+    "LLM planner or free-form conversation learning",
+    "cross-Gateway parties",
+    "commercial retention, real customer payments or developer profitability",
+    "production rollout"
+  ],
+  "remainingIntegrationLimits": [
+    "shared party opt-in/default-off",
+    "local-owner terminal teaching and recall",
+    "same-map observed follow/combat",
+    "31-second route lease settle and 16-second bootstrap settle in network harness"
+  ]
+}

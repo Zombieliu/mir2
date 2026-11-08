@@ -1,5 +1,67 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> 2026-11-03 current product extension: Alo P0 targets the Windows EXE private
+> owner panel, portable character identity/growth and a real-player experience
+> ledger. Node 163/163, Gateway companion 15/15 + party 15/15, ui-core 52/52
+> (10 additions), full Windows platform 325/325 (isolated combined resources),
+> native-ui 391/391 (5 new ECS), Release build and locked check pass. Ordinary
+> real-network P0 acceptance passes 12/12 with explicitly synthetic test users.
+> Actual EXE operations verified teaching v1→v2, party invitation, revoke v3,
+> text deletion, new teaching v4 and a complete export. Native A→B, costs-page
+> verification, final Chinese text changes and full Gateway lib regression
+> remain pending; no final binary hash or full GUI completion is claimed.
+> These are not human-trial or Web delivery acceptance. Schema 2, explicit legacy adoption,
+> external-key HMAC, private owner frames, archive-based local locking and
+> Gateway admission preserve identity without importing assets or budgets.
+> The current planner remains rules with template explanations. A 6–10-person
+> pilot is prepared, with no invented visits, payments or retention; pricing
+> is unspecified and offer:null. The two-week window begins with the first
+> actual player. [Runbook](ALO-REAL-PLAYER-TRIAL.zh-CN.md) and
+> [contract](COMPANION-CONTROL-CONTRACT.md) define the remaining work. New
+> evidence is consolidated under `generated/player-qa/alo-experience-2026-11-03/`.
+> Global Crystal parity, full life, LLM, human/visual and production gates
+> remain unchanged.
+
+> Historical 2026-11-03 product extension: Alo B2 implements the user's chosen
+> ordinary party/follow/combat, owned potion and retreat slice, followed by
+> local-owner support-before-loot teaching, post-combat pickup and durable
+> SQLite policy reload. It uses rules, with model planning and independent
+> living deferred. Single-Gateway party membership is opt-in/default-off;
+> metadata projection cannot drain movement ACKs or pending events. This
+> round also corrects authoritative safety refresh and commits normal positive
+> potion timer recovery against the latest live Zone vitals, with cap/death
+> and pending-event protection. Rejected recovery is undone without masking
+> pending lethal damage or duplicating the death penalty. Node 108/108,
+> Gateway focused bridge 8/8, map safety 4/4, Zone safety 5/5,
+> shared Zone 196/196, party projection 2/2
+> and security lifecycle 18/18 pass. Final-binary real-network companion 12/12
+> and same-binary B1 baseline 4/4 now pass. Full Gateway library regression
+> passes 686 with 0 failures and 1 external-Postgres test ignored (687 total,
+> 590.93s); its database URL was unconfigured and the ignored test is not a
+> pass. The bounded B2 local engineering/network gate is complete.
+> [Verification](generated/player-qa/alo-companion-2026-11-03/verification.json)
+> and [network evidence](generated/player-qa/alo-companion-2026-11-03/summary.json)
+> bind SHA-256 `d8c2bd33ed1ab1acf976bebf42719e9492040cc671b8c67bede5c72c139fe17b`,
+> policy reload `1→2→2` and actual potion recovery followed by live withdrawal.
+> The known 31s route-lease and 16s bootstrap waits are retained. This does not
+> change global Crystal parity,
+> visual/human acceptance, deployment or full-life status. See
+> [Alo scope and evidence](AI-PLAYER-BICHON-MVP.zh-CN.md) and
+> [client instructions](../apps/ai-player/README.md).
+
+> Historical 2026-11-03 B1 product-extension checkpoint: the Bichon AI-player B1 foundation
+> now exists in `apps/ai-player`. Its ordinary WS lifecycle, realm check,
+> self/AOI observation, safe text and movement boundaries pass 35 focused Node
+> tests. A current-source Gateway build and isolated two-client network run
+> verify Bichon entry, bidirectional movement/chat, logout AOI removal and
+> authoritative transform reload. The run explicitly waits 31 seconds for an
+> existing post-logout route lease; it is not immediate-reconnect evidence.
+> This adds a player client without changing Rust gameplay or Crystal parity.
+> That B1 run did not enable model planning or durable memory; autonomous
+> living and longer/device/visual acceptance remained open. Historical scope and evidence:
+> [AI player design](AI-PLAYER-BICHON-MVP.zh-CN.md) and
+> [client instructions](../apps/ai-player/README.md).
+
 > Windows verifiable vertical-slice closeout (2026-08-26; packaged runtime
 > source `b5c0ecb60`): the complete Simulation `vertical_slice` suite passes
 > 8/8, including the original Bichon newcomer quest 1-to-9 route; `shared_zone`

@@ -1,0 +1,30 @@
+{
+  "schema": "mir2-ai-player-b1-acceptance/1",
+  "ok": true,
+  "stage": "B1-body",
+  "startedAt": "2026-11-02T20:16:47.710Z",
+  "finishedAt": "2026-11-02T20:18:23.251Z",
+  "realmId": "ai-player-b1-c2fe6a23-e159-4648-9852-47daf716f726",
+  "gatewayBinarySha256": "d8c2bd33ed1ab1acf976bebf42719e9492040cc671b8c67bede5c72c139fe17b",
+  "normalClientOnly": true,
+  "modelEnabled": false,
+  "longTermMemoryEnabled": false,
+  "checks": [
+    "two ordinary accounts and Warriors entered Bichon",
+    "both observers received the other player's authoritative walk and nearby chat",
+    "a chat control command was rejected before network transmission",
+    "logout removed AOI presence and a fresh network session reloaded the saved transform"
+  ],
+  "commands": {
+    "clientVersion": 3,
+    "newAccount": 2,
+    "login": 3,
+    "newCharacter": 2,
+    "startGame": 3,
+    "keepAlive": 12,
+    "walk": 4,
+    "chat": 2,
+    "logOut": 3
+  },
+  "reloginSettleMs": 31000
+}

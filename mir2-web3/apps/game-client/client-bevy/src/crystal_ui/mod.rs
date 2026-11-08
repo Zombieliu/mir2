@@ -5,6 +5,7 @@
 
 pub mod assets;
 pub mod chat;
+pub mod companion;
 pub mod hud;
 pub mod login;
 pub mod metrics;

@@ -1,5 +1,58 @@
 # Crystal Server Parity
 
+> 2026-11-03 current Alo P0 checkpoint: the Windows EXE owner controls use
+> enrollment-bound private Gateway requests, not WorldCommands or chat-based
+> permissions. Owner/runtime generations, account/character admission and
+> explicit world epochs fence stale replies and foreign actors. Portable
+> schema-2 archives separate identity/growth from runtimeService, use external
+> HMAC trust keys and reconstruct fixed permissions; no game-state or budget
+> import is permitted. Node 163/163, focused companion 15/15 and party 15/15
+> pass. Native ui-core 52/52, full Windows platform 325/325 (isolated combined
+> resources), native-ui 391/391 and Release/locked builds pass. Ordinary real
+> P0 network acceptance passes 12/12 using explicitly synthetic test users;
+> actual EXE teaching v1→v2, party invitation, revoke v3, text deletion, new
+> teaching v4 and a full export also pass. Native A→B, the costs page, final
+> Chinese text changes, full Gateway lib and final binary hash remain pending.
+> Older B2 binary/network results below are historical,
+> not certificates for this new scope. [Runbook](ALO-REAL-PLAYER-TRIAL.zh-CN.md)
+> prepares actual human trials while keeping offer:null and no fabricated
+> payments, contacts or visits. New evidence is consolidated under
+> `generated/player-qa/alo-experience-2026-11-03/`. No whole-game, complete
+> social/economic, LLM, visual/human or production acceptance is claimed.
+
+> Historical 2026-11-03 shared-world companion checkpoint: ordinary clients can opt into
+> one-Gateway real party invitation/acceptance and synchronized membership.
+> The trusted projection is identity-bound and production-player-inaccessible;
+> it preserves pending movement/world events and unrelated Zone profile facts.
+> The companion consumes only regular client observations and action packets.
+>
+> The real-network route revealed that fast-path movement retained its previous
+> `in_safe_zone` value. Zone now uses the same inclusive configured + Crystal
+> rectangles as personal map checks and refreshes safety on authoritative
+> relocation; a stale personal profile cannot overwrite it. The new read-only
+> map query 4/4, safety/legacy-checkpoint 5/5, shared Zone 196/196 and Gateway
+> focused bridge 8/8 checks pass, including five normal medicine regressions.
+> Personal potion timers now add only positive recovery deltas to current
+> authoritative Zone vitals, respecting caps and lethal concurrent damage;
+> they neither restore a stale full HP snapshot nor consume pending event
+> inboxes. Observer HP/MP percentages use the committed live value.
+> Rejected recovery alone is undone, preserving the pending lethal hit and
+> the normal death penalty exactly once.
+> Node tests 108/108, Simulation party projection 2/2 and security lifecycle 18/18
+> also pass. Final-binary companion network 12/12 and the same-binary B1
+> baseline 4/4 pass; [the report](generated/player-qa/alo-companion-2026-11-03/summary.json)
+> binds SHA-256 `d8c2bd33ed1ab1acf976bebf42719e9492040cc671b8c67bede5c72c139fe17b`.
+> The final full Gateway library suite passes 686 tests, with 0 failures and
+> 1 ignored (687 total) in 590.93s. The ignored cross-instance Postgres test
+> requires the unconfigured `MIR2_CHANNEL_IDENTITY_TEST_DATABASE_URL`; it is
+> not a pass. [Verification](generated/player-qa/alo-companion-2026-11-03/verification.json)
+> closes this bounded B2 local engineering/network gate; older counts and
+> binaries remain historical evidence.
+> The network scenario retains real 31s lease and 16s bootstrap waits. This
+> does not close cross-Gateway party routing,
+> every Crystal group edge case, human UI/feel, or the complete parity ledger.
+> Scope and final evidence: [Alo implementation](AI-PLAYER-BICHON-MVP.zh-CN.md).
+
 > Windows verifiable vertical-slice server closeout (2026-08-26; packaged
 > runtime source `b5c0ecb60`): Simulation `vertical_slice` passes 8/8,
 > including the original Bichon quest 1-to-9 route, and `shared_zone` passes

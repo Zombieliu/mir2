@@ -1,5 +1,76 @@
 # Agent Run Log
 
+> 2026-11-03 Alo P0 Windows EXE, network passed and GUI partially verified:
+> native private-owner controls, schema-2 portable identity/growth and the
+> experience ledger are implemented. Node 163/163, focused Gateway companion
+> 15/15 and party 15/15, ui-core 52/52 (10 new), full Windows platform 325/325
+> (isolated combined resources), native-ui 391/391 (5 new ECS), Release build
+> and locked check pass. Ordinary real-network P0 acceptance passes 12/12;
+> its environment is test, with synthetic participants and no charge or LLM.
+> The actual EXE has verified teaching v1→v2, an ordinary party invitation,
+> revoke to v3, teaching-text deletion, new teaching to v4 and a complete export.
+> Native-window A→B migration, the costs page and final Chinese text changes
+> remain in progress, as does the full Gateway lib regression. The final
+> binary hash and full GUI completion remain unclaimed; no Web delivery is made.
+> `characterArchive`, `playerGrowth` and `runtimeService` are separated;
+> explicit legacy adoption, external HMAC keys, stable local archive locks
+> and trusted Gateway admission protect portability without granting assets
+> or budget. Private owner results bypass public world/AOI/debug history.
+> The current mode is rules + template explanation, with no LLM. A 6–10-person
+> pilot, including non-developers and three 20–30-minute sessions each, is
+> prepared in [the runbook](ALO-REAL-PLAYER-TRIAL.zh-CN.md); no real visits,
+> reminders, payments or renewals are inferred from engineering fixtures.
+> Its two-week window starts with the first actual participant. Price remains
+> unspecified and offer:null disables buying. Participant-wide costs/usage
+> across companions are separate from the selected-companion choice count;
+> intent, confirmed payment, grant and measured usage stay distinct. New
+> evidence is consolidated under `generated/player-qa/alo-experience-2026-11-03/`.
+
+> Historical 2026-11-03 Alo companion B2, bounded local engineering/network gate passed: the user selected
+> ordinary party/follow/combat, owned potions and retreat, then teachable
+> support-before-loot with actual post-combat pickup and a different Node
+> process retaining the learned policy on the next adventure. Rules + SQLite
+> and local owner controls implement this slice; no model planner is enabled.
+> The opt-in single-Gateway party bridge is identity-bound and metadata-only,
+> preserving pending world events and old movement ACKs. Authoritative
+> movement now refreshes configured + Crystal safety bounds. The potion
+> bridge commits only positive normal recovery deltas to current Zone vitals,
+> caps recovery, retains concurrent damage/death and leaves pending inboxes
+> untouched. Rejected recovery alone is undone before pending lethal damage
+> is consumed, preserving the ordinary death penalty exactly once. Node
+> 108/108, Gateway `shared_gateway_` 8/8, map safety 4/4,
+> Zone safety 5/5, `shared_zone` 196/196, Simulation party projection 2/2 and
+> security lifecycle 18/18 pass. Final-binary companion network 12/12 and
+> same-binary B1 baseline 4/4 pass. The run at
+> `2026-11-02T20:16:48.159Z`–`20:20:00.803Z` binds EXE SHA-256
+> `d8c2bd33ed1ab1acf976bebf42719e9492040cc671b8c67bede5c72c139fe17b`.
+> [Sanitized summary](generated/player-qa/alo-companion-2026-11-03/summary.json),
+> baseline, trace summary and 44-file source manifest are archived together;
+> the trace records policy `1→2→2`, actual HP `18→11→17→10`, then a live
+> safe retreat. The final full Gateway library command
+> `cargo +1.89.0 test --locked -p mir2-gateway --lib --target-dir target-ai-player`
+> passed 686 tests with 0 failures and 1 ignored (687 discovered) in 590.93s.
+> The ignored cross-instance Postgres channel-identity test needs the
+> unconfigured `MIR2_CHANNEL_IDENTITY_TEST_DATABASE_URL`; it is not a pass.
+> [Verification summary](generated/player-qa/alo-companion-2026-11-03/verification.json)
+> records actual checks. Actual reconnect/bootstrap waits remain 31s/16s.
+> No production, visual/human, full-life or global Crystal parity acceptance is
+> claimed. Scope: [Alo implementation](AI-PLAYER-BICHON-MVP.zh-CN.md).
+
+> Historical 2026-11-03 AI player B1 local foundation: added `apps/ai-player`, an independent
+> Node 22.18 ordinary `/ws` client with explicit realm binding, account/character
+> lifecycle, lossless u64 JSON, self/AOI observation, walk/turn, guarded nearby
+> text, a local singleton guard and explicit logout confirmation. Focused tests
+> pass 35/35. Current-source Gateway build passed; an isolated actual-network
+> run proves two ordinary Warriors in Bichon, bidirectional observed movement
+> and chat, pre-send command-prefix rejection, AOI removal and fresh-session
+> transform reload. Evidence is
+> `apps/ai-player/.data/acceptance-6a8811aa-5a05-43a2-91a5-835ab457d0bc/summary.json`.
+> The existing route lease can survive logout until the 30-second default TTL;
+> this run waited 31 seconds and makes no immediate-reconnect claim. Model,
+> long-term memory, autonomous living, production and visual acceptance remain
+> later gates. No existing Rust runtime or unrelated user files were changed.
+
 > Latest fresh-native visual parity sync: 2026-07-18. Logged the local Crystal
 > QA character into Bichon `0 @ 332,275` through the rebuilt Release Gateway,
 > confirmed Day setting 2 plus Lime/White NPC labels, and captured live r05

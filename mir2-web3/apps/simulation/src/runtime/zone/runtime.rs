@@ -785,6 +785,9 @@ impl ZoneRuntime {
                 session_id,
                 profile,
             } => self.update_chat_profile(&session_id, profile),
+            ZoneCommand::ConfigurePlayerSafetyZones { session_id, bounds } => {
+                self.configure_player_safety_zones(&session_id, bounds)
+            }
             ZoneCommand::UpdatePlayerCombatStats { session_id, stats } => {
                 self.update_player_combat_stats(&session_id, stats)
             }
@@ -1855,6 +1858,7 @@ impl ZoneRuntime {
                 .expect("action owner should still exist");
             self.occupancy.remove(&tile_key(&player.position));
             player.position = destination;
+            player.refresh_safety_zone();
             player.direction = action.direction;
             player.movement_ready_at_ms =
                 now_ms.saturating_add(zone_player_move_delay_ms(player, effective_running, now_ms));
@@ -2067,6 +2071,9 @@ impl ZoneRuntime {
             .get(session_id)
             .is_some_and(|player| player.position == destination && player.direction == direction);
         if already_synced {
+            if let Some(player) = self.players.get_mut(session_id) {
+                player.refresh_safety_zone();
+            }
             return Vec::new();
         }
 
@@ -2077,6 +2084,7 @@ impl ZoneRuntime {
                 .expect("sync transform player should exist");
             self.occupancy.remove(&tile_key(&player.position));
             player.position = destination;
+            player.refresh_safety_zone();
             player.direction = direction;
             player.movement_actions.clear();
             player.movement_ready_at_ms = 0;
@@ -2173,6 +2181,7 @@ impl ZoneRuntime {
                 .get_mut(session_id)
                 .expect("validated teleport player should still exist");
             player.position = destination;
+            player.refresh_safety_zone();
             player.movement_actions.clear();
             player.movement_ready_at_ms = 0;
             player.run_step_until_ms = 0;
@@ -2216,6 +2225,21 @@ impl ZoneRuntime {
     ) -> Vec<ZoneOutbound> {
         if let Some(player) = self.players.get_mut(session_id) {
             player.chat_profile = profile;
+            // Personal sessions may lag fast-path Zone movement. Once trusted
+            // map bounds exist, that mirror cannot overwrite spatial safety.
+            player.refresh_safety_zone();
+        }
+        Vec::new()
+    }
+
+    fn configure_player_safety_zones(
+        &mut self,
+        session_id: &SessionId,
+        bounds: Vec<mir2_game_data::MapBounds>,
+    ) -> Vec<ZoneOutbound> {
+        if let Some(player) = self.players.get_mut(session_id) {
+            player.safety_zone_bounds = Some(bounds);
+            player.refresh_safety_zone();
         }
         Vec::new()
     }
@@ -4209,6 +4233,7 @@ impl ZoneRuntime {
             self.occupancy.insert(tile_key(&target), session_id.clone());
             if let Some(live_player) = self.players.get_mut(session_id) {
                 live_player.position = target.clone();
+                live_player.refresh_safety_zone();
                 live_player.direction = direction;
             }
         }
@@ -6357,6 +6382,7 @@ impl ZoneRuntime {
             current = next.clone();
             if let Some(live_player) = self.players.get_mut(session_id) {
                 live_player.position = next.clone();
+                live_player.refresh_safety_zone();
                 live_player.direction = direction;
             }
             packets.push(ServerPacket::UserDash {
@@ -6531,6 +6557,7 @@ impl ZoneRuntime {
                     .insert(tile_key(&destination), target_session_id.clone());
                 if let Some(player) = self.players.get_mut(&target_session_id) {
                     player.position = destination.clone();
+                    player.refresh_safety_zone();
                     player.direction = reverse;
                 }
                 packets.push(ServerPacket::ObjectPushed {
@@ -11123,6 +11150,7 @@ impl ZoneRuntime {
                 .expect("action transform owner should exist");
             self.occupancy.remove(&tile_key(&player.position));
             player.position = position;
+            player.refresh_safety_zone();
             player.direction = direction;
             player.movement_actions.clear();
             self.occupancy

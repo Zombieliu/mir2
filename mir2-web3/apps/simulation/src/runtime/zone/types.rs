@@ -2,7 +2,7 @@ use std::collections::{BTreeMap, BTreeSet, VecDeque};
 
 use crate::config::{GroundDropSnapshot, WorldEntityDisposition};
 
-use mir2_game_data::{crystal_monster_by_name, CrystalMonsterTemplate};
+use mir2_game_data::{crystal_monster_by_name, CrystalMonsterTemplate, MapBounds};
 use mir2_protocol::{
     ChatItem, ClientBuff, MirClass, MirDirection, MirGender, ObjectHealthInfo, ObjectManaInfo,
     Point, ServerPacket, Spell, UserItem,
@@ -396,6 +396,11 @@ pub enum ZoneCommand {
     UpdateChatProfile {
         session_id: SessionId,
         profile: ZoneChatProfile,
+    },
+    /// Trusted map-data configuration; never derived from a raw player packet.
+    ConfigurePlayerSafetyZones {
+        session_id: SessionId,
+        bounds: Vec<MapBounds>,
     },
     /// Refresh the authoritative combat stat block for a player (e.g. after an
     /// equipment change or a buff recompute) so the zone keeps rolling damage
@@ -919,6 +924,10 @@ pub(crate) struct ZonePlayer {
     pub max_hp: i32,
     pub mp: i32,
     pub position: Point,
+    /// None preserves legacy trusted-profile semantics. Some(empty) explicitly
+    /// means no safe tiles. Omit None to preserve old checkpoint state roots.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub safety_zone_bounds: Option<Vec<MapBounds>>,
     pub direction: MirDirection,
     pub light: u8,
     pub weapon: i16,
@@ -973,6 +982,18 @@ pub(crate) struct ZoneReincarnationOffer {
 }
 
 impl ZonePlayer {
+    pub(crate) fn refresh_safety_zone(&mut self) {
+        let Some(bounds) = self.safety_zone_bounds.as_ref() else {
+            return;
+        };
+        self.chat_profile.in_safe_zone = bounds.iter().any(|bounds| {
+            self.position.x >= bounds.min_x
+                && self.position.x <= bounds.max_x
+                && self.position.y >= bounds.min_y
+                && self.position.y <= bounds.max_y
+        });
+    }
+
     pub fn from_join(join: ZoneJoin, object_id: u32) -> Self {
         Self {
             session_id: join.session_id,
@@ -988,6 +1009,7 @@ impl ZonePlayer {
             max_hp: join.max_hp.max(1),
             mp: join.mp.max(0),
             position: join.position,
+            safety_zone_bounds: None,
             direction: join.direction,
             light: 0,
             weapon: -1,
