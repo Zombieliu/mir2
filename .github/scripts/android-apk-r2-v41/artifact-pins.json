@@ -1,0 +1,74 @@
+{
+  "schemaVersion": 1,
+  "pinned": true,
+  "releaseId": 438562899,
+  "releaseTag": "android-playtest-v41-20261109-cc6ef80a",
+  "artifact": {
+    "filename": "Mir2-Android-Playtest-v41-20261109-arm64.apk",
+    "versionCode": 41,
+    "size": 527239715,
+    "sha256": "69d9ebd4f842624646b4b077a19bc39214dec4241b6428efad37527c388e658e"
+  },
+  "transferGzip": {
+    "size": 308179989,
+    "sha256": "021e012efc5a7df2edb54aeff4441ff5a22c0ff91613c58e4167a53bd2893e09",
+    "parts": [
+      {
+        "index": 0,
+        "assetId": 725549056,
+        "name": "Mir2-Android-Playtest-v41-20261109-arm64.apk.gz.part01",
+        "size": 41943040,
+        "sha256": "88d560e03f287136f09c484abfaf39a159129690af9721fc965f0703b86c502d"
+      },
+      {
+        "index": 1,
+        "assetId": 725549287,
+        "name": "Mir2-Android-Playtest-v41-20261109-arm64.apk.gz.part02",
+        "size": 41943040,
+        "sha256": "bc3f22344fff827033450bf98c46ab41c20c86ea572b6634801891c3cb8ef863"
+      },
+      {
+        "index": 2,
+        "assetId": 725549015,
+        "name": "Mir2-Android-Playtest-v41-20261109-arm64.apk.gz.part03",
+        "size": 41943040,
+        "sha256": "cfa11029161c7abebbcbe97c3358d051d9fc002a14c38aeb3b334abf96e190c8"
+      },
+      {
+        "index": 3,
+        "assetId": 725550948,
+        "name": "Mir2-Android-Playtest-v41-20261109-arm64.apk.gz.part04",
+        "size": 41943040,
+        "sha256": "46f68405bc3ca3ddedcd547761af0ac497e70d3854d7e294f746f1c39e604c24"
+      },
+      {
+        "index": 4,
+        "assetId": 725552786,
+        "name": "Mir2-Android-Playtest-v41-20261109-arm64.apk.gz.part05",
+        "size": 41943040,
+        "sha256": "6f522a4d28214607c76f059480e4555f6507c22c01804e5a4227ecdcb2b996d7"
+      },
+      {
+        "index": 5,
+        "assetId": 725552833,
+        "name": "Mir2-Android-Playtest-v41-20261109-arm64.apk.gz.part06",
+        "size": 41943040,
+        "sha256": "5aea030c4b662c6d2f66f16e224ddd7fc715e3b5ed1b5ef9b0910b46ec2e5dbd"
+      },
+      {
+        "index": 6,
+        "assetId": 725556556,
+        "name": "Mir2-Android-Playtest-v41-20261109-arm64.apk.gz.part07",
+        "size": 41943040,
+        "sha256": "7ec73ab196537bcff87b8feaaba9ea29f43249126a0c2888b96dd606c674cc90"
+      },
+      {
+        "index": 7,
+        "assetId": 725549242,
+        "name": "Mir2-Android-Playtest-v41-20261109-arm64.apk.gz.part08",
+        "size": 14578709,
+        "sha256": "e8858a5179b76e34d7fc629eb2a0ff5aab79891ee66ceb6b47b1f54dc18560c7"
+      }
+    ]
+  }
+}
