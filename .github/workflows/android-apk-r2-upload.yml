@@ -38,7 +38,7 @@ jobs:
           MIR2_R2_BUCKET: ${{ secrets.MIR2_R2_BUCKET }}
           MIR2_R2_UPLOAD_WORKER_URL: ${{ secrets.MIR2_R2_UPLOAD_WORKER_URL }}
           MIR2_R2_UPLOAD_SECRET: ${{ secrets.MIR2_R2_UPLOAD_SECRET }}
-        run: python3 .github/scripts/android-apk-r2-v40/probe-upload.py
+        run: node .github/scripts/android-apk-r2-v40/probe-worker.mjs
       - name: Ensure this run's temporary transfer Worker is removed
         if: ${{ always() }}
         env:
