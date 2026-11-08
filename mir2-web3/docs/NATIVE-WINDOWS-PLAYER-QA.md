@@ -2,7 +2,7 @@
 
 ## Windows PC UI 本地集成，尚非全套验收（2026-11-09）
 
-Windows opt-in 黑金 HUD 与钱包优先原生登录页已完成本地代码/开发 EXE 验证；实际窗口仅到简中空账户登录页并正常退出。钱包离屏测试、合成 HP/MP 空世界 HUD fixture 通过；Windows suite 为 **1254 通过 / 2 失败 / 9 忽略**，shared client pc_login 3 项通过，全套 1821 通过 / 2 失败 / 20 忽略。未登录、未钱包签名、未入世界、未正式打包发布。最新平面渲染稿官方导入仍失败，不能称渲染稿一致或全套完成。开发截图 `eligible=false`（`trusted-build-provenance-unavailable`），保持公开限制。基线 `6d30e0f9`，规范线 `8a8fd7a8` 待本地整合。详见 [本轮范围、哈希、失败原因与复验命令](PC-UI-INTEGRATION-20261109.zh-CN.md)。
+Windows opt-in 黑金 HUD 与钱包优先原生登录页已完成本地代码/开发 EXE 验证；实际窗口仅到简中空账户登录页并正常退出。钱包离屏测试、合成 HP/MP 空世界 HUD fixture 通过；Windows suite 为 **1254 通过 / 2 失败 / 9 忽略**，shared client pc_login 3 项通过，全套 1821 通过 / 2 失败 / 20 忽略。未登录、未钱包签名、未入世界、未正式打包发布。最新平面渲染稿官方导入仍失败，不能称渲染稿一致或全套完成。开发截图 `eligible=false`（`trusted-build-provenance-unavailable`），保持公开限制。基线 `6d30e0f9`，已在规范线 `8a8fd7a8` 上本地整合为 `6ffea13f2`，统一主线校验及受影响复验通过。详见 [本轮范围、哈希、失败原因与复验命令](PC-UI-INTEGRATION-20261109.zh-CN.md)。
 
 ## 公会增量与待处理请求，代码及构建通过（2026-11-08）
 

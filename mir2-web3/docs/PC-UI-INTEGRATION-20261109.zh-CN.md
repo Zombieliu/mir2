@@ -6,7 +6,7 @@
 
 最新平面渲染稿的官方导入仍失败，因此本轮不代表与该渲染稿一致，也不是全套 PC UI 完成。没有修改认证、安全签名、资源信任或正式发布准入规则。
 
-原始隔离分支基线为 `6d30e0f9`。规范线现为 `8a8fd7a8`，新增差异仅涉及 Web/website/docs，与本轮代码不重叠；本记录生成时仍待本地整合，不能据此声称已交付规范线。
+原始隔离分支基线为 `6d30e0f9`；本轮源码提交 `98386038d` 已无冲突 cherry-pick 至规范分支 `codex/windows-player-journey`，本地整合提交为 `6ffea13f2215b2d1f7fe8502eebaa696535a45f7`，其父为 `8a8fd7a8`。统一主线校验通过；受影响客户端及依赖源码与测试版本一致。未推送远端、未正式打包或部署。
 
 ## 已取得的证据
 
@@ -66,3 +66,8 @@ rustup run 1.95.0-x86_64-pc-windows-msvc cargo test --manifest-path $manifest --
 HUD fixture 模块/名称应以当前源码为准；离屏需要可用 GPU。运行全量测试须使用上述完整开发资源根，而非隔离 worktree 不完整的 public。已验证该根的必要 manifest、Items、StateItem、Prguse2、Cursors 文件存在；Bichon 地图来自受支持的相邻 `apps/web/lib/generated/crystal-map-pack/0.map.gz`。文件存在性检查不等于所有可选帧完整性认证。
 
 最终仍需真实登录、钱包批准、角色入世界与交互观察，以及独立正式打包/签名/发布验证；不得以离屏合成图替代。
+
+
+## 整合后复验
+
+在源码一致性核对后，使用本轮已编译测试二进制重新运行：Windows HUD 指针 10 通过，wallet_login 21 通过 / 1 忽略，shared crystal_ui 977 通过 / 6 忽略。日志为 `test-integration-focused.log`。验证归属于 `6ffea13f2`，其后其他任务的未提交改动不在本轮验收范围内。
