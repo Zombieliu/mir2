@@ -1,4 +1,4 @@
-export const KEY = "mir2/downloads/android/playtest/v40-20261107-cbee2d6a316e/Mir2-Android-Playtest-20261107-arm64.apk";
+export const KEY = "mir2/v/android-playtest-v40-20261107-cbee2d6a316e/Mir2-Android-Playtest-20261107-arm64.apk";
 export const SHA256 = "cbee2d6a316e37043395517c1c6ad082abad41f8e74bf399743aab476ac2417e";
 export const SIZE = 412322437;
 

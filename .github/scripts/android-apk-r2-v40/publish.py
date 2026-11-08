@@ -13,7 +13,7 @@ import urllib.request
 SHA256 = "cbee2d6a316e37043395517c1c6ad082abad41f8e74bf399743aab476ac2417e"
 SIZE = 412322437
 FILENAME = "Mir2-Android-Playtest-20261107-arm64.apk"
-KEY = f"mir2/downloads/android/playtest/v40-20261107-cbee2d6a316e/{FILENAME}"
+KEY = f"mir2/v/android-playtest-v40-20261107-cbee2d6a316e/{FILENAME}"
 PUBLIC_URL = f"https://assets.mir2.obelisk.build/{KEY}"
 TAG = "android-playtest-v40-20261107-cbee2d6a316e-staging"
 RELEASE_ID = 438412927
