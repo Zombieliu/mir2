@@ -1,0 +1,9 @@
+{
+  "screen": "select",
+  "loginVisible": false,
+  "selectVisible": true,
+  "doorFrame": null,
+  "selectExitVisible": true,
+  "systemMenuVisible": false,
+  "dialogs": []
+}

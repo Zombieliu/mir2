@@ -1,0 +1,9 @@
+{
+  "schema": 1,
+  "passed": true,
+  "jsonFilesChecked": 12,
+  "privateAccountOrPasswordMatches": 0,
+  "onlyQaCharacterNamesVisibleInManuallyInspectedScreenshots": true,
+  "browserClosed": true,
+  "allThreeAccountsNormallyLoggedOut": true
+}

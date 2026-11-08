@@ -2,7 +2,7 @@
 
 ## Numeron R16 Web 公开入口（2026-11-09）
 
-f2de已发布至`numeron.obelisk.build/game`，官网/下载/PWA保持，旧Mir2项目与Windows EXE不变。素材代理配置缺失已修，最终域名QR会话生成与pending通过；公开三职业首任务/重登是协议证据。浏览器Core/字体/登录画面与进城可信输入单列，保留本机网络冷载超时和外置driver过短等待，不把HTTP200或本机旧30级旅程当作本次公开画面验收。[本轮发布与证据](NUMERON-WEB-RELEASE-20261108.zh-CN.md)
+f2de已发布至`numeron.obelisk.build/game`，官网/下载/PWA保持，旧Mir2项目与Windows EXE不变。三职业实际普通登录/选角/进城、中文共享Q绘制、正常注销通过，战士另有两次键盘步进；六个Core及SC字体完成加载，三图已目视核对。QR生成/pending与三职业首任务/重登另有协议证据。冷载超时、注销后页签误判、三次已恢复的继承贴图404和console4均保留；不把缓存复用当冷启动、旧本机30级旅程当本次公开全流程验收。[实际结果与边界](NUMERON-WEB-RELEASE-20261108.zh-CN.md)
 
 ## R16 共用公会窗口与真实统计（2026-11-08）
 

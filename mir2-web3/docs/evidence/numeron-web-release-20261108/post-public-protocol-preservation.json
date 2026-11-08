@@ -1,0 +1,150 @@
+{
+  "schema": 1,
+  "kind": "r16-test-after-public-protocol-preservation",
+  "at": "2026-11-08T17:46:30.199542+00:00",
+  "service": {
+    "MainPID": "3422347",
+    "ExecMainStatus": "0",
+    "ActiveState": "active",
+    "SubState": "running"
+  },
+  "expectedBinary": true,
+  "contentProfile": "platinum_fiveclass",
+  "cadence": "newcomer-v2",
+  "requiredOriginsPresent": true,
+  "oldOriginPreserved": true,
+  "changedMir2Keys": [
+    "MIR2_ALLOWED_WEB_ORIGINS",
+    "MIR2_CONTENT_PROFILE",
+    "MIR2_CRYSTAL_MAP_PACK",
+    "MIR2_DEPLOY_REVISION"
+  ],
+  "keysPreservedExceptOverrides": true,
+  "allPriorEffectiveConfigsUnchanged": true,
+  "health": {
+    "7210": {
+      "status": 200,
+      "bytes": 6920
+    },
+    "7110": {
+      "status": 200,
+      "bytes": 1924
+    }
+  },
+  "countsBefore": {
+    "schema_migrations": 33,
+    "accounts": 129,
+    "characters": 43,
+    "character_saves": 43
+  },
+  "countsAfter": {
+    "schema_migrations": 33,
+    "accounts": 132,
+    "characters": 46,
+    "character_saves": 46
+  },
+  "originalRawRowsPreserved": {
+    "accounts": true,
+    "characters": true,
+    "character_saves": true
+  },
+  "deployedRevision": "d53f9e3b22e2b92c2dc86644b6ae370fc1acab53",
+  "tableDifferences": [
+    {
+      "table": "accounts",
+      "before": 129,
+      "after": 132
+    },
+    {
+      "table": "character_items",
+      "before": 250,
+      "after": 267
+    },
+    {
+      "table": "character_saves",
+      "before": 43,
+      "after": 46
+    },
+    {
+      "table": "character_state",
+      "before": 43,
+      "after": 46
+    },
+    {
+      "table": "characters",
+      "before": 43,
+      "after": 46
+    },
+    {
+      "table": "identity_audit_events",
+      "before": 511,
+      "after": 522
+    },
+    {
+      "table": "identity_credentials",
+      "before": 40,
+      "after": 43
+    },
+    {
+      "table": "identity_sessions",
+      "before": 460,
+      "after": 471
+    },
+    {
+      "table": "promotion_audit_log",
+      "before": 3181,
+      "after": 3202
+    },
+    {
+      "table": "promotion_game_facts",
+      "before": 15,
+      "after": 21
+    },
+    {
+      "table": "promotion_game_source_deliveries",
+      "before": 15,
+      "after": 21
+    },
+    {
+      "table": "promotion_game_source_events",
+      "before": 15,
+      "after": 21
+    },
+    {
+      "table": "promotion_outbox",
+      "before": 41,
+      "after": 47
+    },
+    {
+      "table": "promotion_revenue_source_holds",
+      "before": 2,
+      "after": 2
+    },
+    {
+      "table": "shared_conquests",
+      "before": 1,
+      "after": 1
+    },
+    {
+      "table": "shared_guild_clock",
+      "before": 1,
+      "after": 1
+    }
+  ],
+  "formal": {
+    "MainPID": "3855184",
+    "ExecMainStatus": "0",
+    "ActiveState": "active",
+    "SubState": "running"
+  },
+  "wallet": {
+    "MainPID": "1520883",
+    "ExecMainStatus": "0",
+    "ActiveState": "active",
+    "SubState": "running"
+  },
+  "backupValid": true,
+  "backupBytes": 1031278,
+  "credentialsRecorded": false,
+  "passed": true
+}

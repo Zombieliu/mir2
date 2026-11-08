@@ -1,0 +1,152 @@
+[
+  {
+    "relativePath": "generated/original-map-blend/WemadeMir2/Objects/1398.png",
+    "newPrefixMiss": {
+      "url": "https://assets.mir2.obelisk.build/hotlink-ok/mir2/v/20261108-r16-08ec86d5105c/generated/original-map-blend/WemadeMir2/Objects/1398.png",
+      "method": "GET",
+      "status": 404,
+      "bytes": 9,
+      "headers": {
+        "cache-control": "no-store",
+        "x-mir2-edge-cache": "MISS",
+        "access-control-allow-origin": "*",
+        "content-length": "9",
+        "content-type": "text/plain; charset=utf-8",
+        "server": "cloudflare"
+      }
+    },
+    "declaredFallback": {
+      "url": "https://assets.mir2.obelisk.build/hotlink-ok/mir2/v/20260818-main-97887dcd/generated/original-map-blend/WemadeMir2/Objects/1398.png",
+      "method": "GET",
+      "status": 200,
+      "bytes": 6966,
+      "headers": {
+        "etag": "\"05681e175757bc60f9f16985d90845d7\"",
+        "content-type": "image/png",
+        "cache-control": "public, max-age=31536000, immutable",
+        "x-mir2-edge-cache": "MISS",
+        "access-control-allow-origin": "*",
+        "content-length": "6966",
+        "server": "cloudflare"
+      },
+      "inheritedPrefixVerifiedByCoordinator": "mir2/v/20260818-main-97887dcd",
+      "sourceSha256ProvidedByCoordinator": "5464a20349fedbffe81c989dd988bec633e6716c139c67fc567f59dd2a69cbe5",
+      "browserBodySha256Captured": false
+    },
+    "subsequentSameOriginCacheGets": [
+      {
+        "url": "https://numeron.obelisk.build/generated/original-map-blend/WemadeMir2/Objects/1398.png",
+        "bytes": 6966,
+        "fromServiceWorker": true,
+        "durationMs": 55
+      },
+      {
+        "url": "https://numeron.obelisk.build/generated/original-map-blend/WemadeMir2/Objects/1398.png",
+        "bytes": 6966,
+        "fromServiceWorker": true,
+        "durationMs": 40
+      }
+    ],
+    "canonicalDirectUrlWasNotProbed": true
+  },
+  {
+    "relativePath": "generated/original-map-blend/WemadeMir2/Objects/7688.png",
+    "newPrefixMiss": {
+      "url": "https://assets.mir2.obelisk.build/hotlink-ok/mir2/v/20261108-r16-08ec86d5105c/generated/original-map-blend/WemadeMir2/Objects/7688.png",
+      "method": "GET",
+      "status": 404,
+      "bytes": 9,
+      "headers": {
+        "cache-control": "no-store",
+        "x-mir2-edge-cache": "MISS",
+        "access-control-allow-origin": "*",
+        "content-length": "9",
+        "content-type": "text/plain; charset=utf-8",
+        "server": "cloudflare"
+      }
+    },
+    "declaredFallback": {
+      "url": "https://assets.mir2.obelisk.build/hotlink-ok/mir2/v/20260818-main-97887dcd/generated/original-map-blend/WemadeMir2/Objects/7688.png",
+      "method": "GET",
+      "status": 200,
+      "bytes": 2927,
+      "headers": {
+        "etag": "\"839a17bb87aa581951791970ff86fd57\"",
+        "content-type": "image/png",
+        "cache-control": "public, max-age=31536000, immutable",
+        "x-mir2-edge-cache": "MISS",
+        "access-control-allow-origin": "*",
+        "content-length": "2927",
+        "server": "cloudflare"
+      },
+      "inheritedPrefixVerifiedByCoordinator": "mir2/v/20260818-main-97887dcd",
+      "sourceSha256ProvidedByCoordinator": "45297a3576ec03de9f05a0a81c60ec32f4d64f35250327dca2e57ce4a5faa2bf",
+      "browserBodySha256Captured": false
+    },
+    "subsequentSameOriginCacheGets": [
+      {
+        "url": "https://numeron.obelisk.build/generated/original-map-blend/WemadeMir2/Objects/7688.png",
+        "bytes": 2927,
+        "fromServiceWorker": true,
+        "durationMs": 54
+      },
+      {
+        "url": "https://numeron.obelisk.build/generated/original-map-blend/WemadeMir2/Objects/7688.png",
+        "bytes": 2927,
+        "fromServiceWorker": true,
+        "durationMs": 39
+      }
+    ],
+    "canonicalDirectUrlWasNotProbed": true
+  },
+  {
+    "relativePath": "generated/original-map-blend/WemadeMir2/Objects/7692.png",
+    "newPrefixMiss": {
+      "url": "https://assets.mir2.obelisk.build/hotlink-ok/mir2/v/20261108-r16-08ec86d5105c/generated/original-map-blend/WemadeMir2/Objects/7692.png",
+      "method": "GET",
+      "status": 404,
+      "bytes": 9,
+      "headers": {
+        "cache-control": "no-store",
+        "x-mir2-edge-cache": "MISS",
+        "access-control-allow-origin": "*",
+        "content-length": "9",
+        "content-type": "text/plain; charset=utf-8",
+        "server": "cloudflare"
+      }
+    },
+    "declaredFallback": {
+      "url": "https://assets.mir2.obelisk.build/hotlink-ok/mir2/v/20260818-main-97887dcd/generated/original-map-blend/WemadeMir2/Objects/7692.png",
+      "method": "GET",
+      "status": 200,
+      "bytes": 4644,
+      "headers": {
+        "etag": "\"c15042af07513f2f866635b66cfa9816\"",
+        "content-type": "image/png",
+        "cache-control": "public, max-age=31536000, immutable",
+        "x-mir2-edge-cache": "MISS",
+        "access-control-allow-origin": "*",
+        "content-length": "4644",
+        "server": "cloudflare"
+      },
+      "inheritedPrefixVerifiedByCoordinator": "mir2/v/20260818-main-97887dcd",
+      "sourceSha256ProvidedByCoordinator": "0a7ca2fae220f344af73451102982a009a2ad8143de95a749ca1e6a707a2b768",
+      "browserBodySha256Captured": false
+    },
+    "subsequentSameOriginCacheGets": [
+      {
+        "url": "https://numeron.obelisk.build/generated/original-map-blend/WemadeMir2/Objects/7692.png",
+        "bytes": 4644,
+        "fromServiceWorker": true,
+        "durationMs": 59
+      },
+      {
+        "url": "https://numeron.obelisk.build/generated/original-map-blend/WemadeMir2/Objects/7692.png",
+        "bytes": 4644,
+        "fromServiceWorker": true,
+        "durationMs": 41
+      }
+    ],
+    "canonicalDirectUrlWasNotProbed": true
+  }
+]

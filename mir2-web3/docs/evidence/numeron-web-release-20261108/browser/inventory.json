@@ -1,0 +1,62 @@
+[
+  {
+    "path": "receipt-summary.json",
+    "bytes": 2107,
+    "sha256": "982e09980568d0d9701db7d0c7cd5eaf43b975f8f8fa06d02b0c4c0add8a6d60"
+  },
+  {
+    "path": "receipt.json",
+    "bytes": 5694,
+    "sha256": "3e40409506725060c1070bd110423245f2644f32cefde5111672a47cdd9c3ed1"
+  },
+  {
+    "path": "resource-delivery.json",
+    "bytes": 5697,
+    "sha256": "635ea717ea292c4d5d29f4b885298aef7c92839e8c6a20cc8df01a24e94bed1d"
+  },
+  {
+    "path": "privacy-final.json",
+    "bytes": 241,
+    "sha256": "9ad2b7d2c804dfec9ea030706c0e4958f3dba3ce36b2c007428f0e526834d221"
+  },
+  {
+    "path": "progress.json",
+    "bytes": 4647,
+    "sha256": "4dfc8950b53be5820330aafa8caf6e59fa142488684526f630965b20512a59b7"
+  },
+  {
+    "path": "ui-proof.json",
+    "bytes": 4286,
+    "sha256": "5c5b51f5fb892b6ffc1b1e1956428270c683778b55ea58c1bbe9ef46ea287ccd"
+  },
+  {
+    "path": "warrior-reconciled.json",
+    "bytes": 356,
+    "sha256": "f55a18c0b21783be5e7c7bc1b71bc7d9daea51489b6a5a737db97e4692c08961"
+  },
+  {
+    "path": "after-logout-inspection.json",
+    "bytes": 172,
+    "sha256": "2d8ebd5a6f366e1a5ea52a41cdc1a335027a6abda2ed1082397542452b77d15e"
+  },
+  {
+    "path": "ui-remaining-proof.json",
+    "bytes": 5282,
+    "sha256": "9c47c69e2472c643bd7a7055d1f3bd215e79326d8dbe5701458d92239f955736"
+  },
+  {
+    "path": "role-1-Warrior-quest.png",
+    "bytes": 1281590,
+    "sha256": "bcbaf085f5f16ed7e36d47bad829d76ab60b47e12e2c08c69d7bb2d3752fb6a9"
+  },
+  {
+    "path": "role-2-Wizard-quest.png",
+    "bytes": 1314522,
+    "sha256": "bc7ea9fb03d9c39ada921d46a113ae5a99fb9cce83e7cbce7490c47c3cfc904a"
+  },
+  {
+    "path": "role-3-Taoist-quest.png",
+    "bytes": 1372346,
+    "sha256": "73c5de30ccf4762d5ef64041a83dde1e65f859c25db6ae22d7ad7d4fe9edf3b5"
+  }
+]
