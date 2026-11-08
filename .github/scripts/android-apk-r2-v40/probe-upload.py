@@ -15,9 +15,9 @@ requests=[
 url=urllib.parse.urlsplit(os.environ.get('MIR2_R2_UPLOAD_WORKER_URL',''))
 secret=os.environ.get('MIR2_R2_UPLOAD_SECRET','')
 allowed_host=url.hostname=='assets.mir2.obelisk.build' or bool(re.fullmatch(r'mir2-r2-bulk-upload\.[a-z0-9-]+\.workers\.dev',url.hostname or ''))
-if url.scheme!='https' or not allowed_host or url.path!='/upload' or url.username or url.password or url.port or not secret:
+if url.scheme!='https' or not allowed_host or url.path not in ('','/','/upload') or url.username or url.password or url.port or not secret:
     raise SystemExit('Existing upload service binding did not match reviewed origin/path')
-probe_url=urllib.parse.urlunsplit((url.scheme,url.netloc,url.path,urllib.parse.urlencode({'key':'invalid-probe-key-no-write'}),''))
+probe_url=urllib.parse.urlunsplit((url.scheme,url.netloc,'/upload',urllib.parse.urlencode({'key':'invalid-probe-key-no-write'}),''))
 requests.append(('existing_worker_auth_and_key_rejection',urllib.request.Request(probe_url,data=b'',method='PUT',headers={'Authorization':'Bearer '+secret,'Content-Type':'application/octet-stream'})))
 for label,req in requests:
     try:
