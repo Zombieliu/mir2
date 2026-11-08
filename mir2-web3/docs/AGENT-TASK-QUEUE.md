@@ -38,8 +38,9 @@ Updated 2026-11-09 (Asia/Shanghai). Read [coordination](AGENT-ORCHESTRATION.md) 
 - [x] 同进程 WebSocket 普通登录后的慢保存交接已修：锁外等待已断开旧连接，保存后按唯一连接标记消费一次，复核身份与原租约。103 项独立回归和两个后端的真实自动恢复通过，五角色130个人字段及坐标保持；原 persist7442ms 失败保留。隔离 dev/debug 候选未替换试玩包。[范围与证据](WEB-R16-PARITY-GOAL.zh-CN.md#慢保存与自动重连2026-11-08)
 - [x] 同进程 WebSocket 的 Native 凭证先行恢复已补齐。十三存储层／两真实 File WS 与相邻回归合计118独立案例通过，含精确 token、最终消费时钟／连接围栏、取消重试、唯一代次及容量归还；Native14秒预算不改，候选仅 dev/debug。[范围和原失败](WEB-R16-PARITY-GOAL.zh-CN.md#凭证先行的保存交接2026-11-08)
 - [ ] 跨 Gateway／TCP 不由进程内 WebSocket 恢复库覆盖。Windows 窗口及同候选跨端同档暂缓；优先继续组队共用预算／ACK、交易和阿洛的无桌面检查。
-- [ ] 继续组队跨社交总预算及失败 ACK、交易与阿洛的代码／普通协议对齐。Windows 窗口及同候选跨端实机暂缓。
-- [x] 交易自身物品待回执的取消及同owner/partner重复接受已完成限定代码修复；Page105/社交31/适配器507组/TS通过，原失败保留。实际隔离浏览器与公开发行单列；完整社交八项和其它Trade差距仍未完成。[本轮范围](evidence/r16-web-trade-20261109/README.md)
+- [x] Web共用社交预算复用完整Native20低层变体模型，原UI的Trade瞬时/拒绝/只读路径保持；预约与entered合计八项、真实ACK/scene/session规则及原经济屏障分开。Page116/host17、限定Web569/Stage5内部507组、TS、Native108/runtime9/投影5及完整三包实际WASM均通过，计数重叠不合并。[本轮证据](evidence/r16-social-budget-20261109/README.md)
+- [ ] 继续真实名字级失败ACK、Native招募/建职阶完成、无关Guild物品未决时TradeCancel、完整交易双方重登及阿洛普通界面对齐；不存在的回执不得用Chat/超时重发绕开。Windows窗口及同候选跨端实机暂缓。
+- [x] 交易自身物品待回执的取消及同owner/partner重复接受已完成限定代码修复；原Page105/社交31/适配器507组/TS及两场隔离浏览器证据保留。共用八项见后续独立记录，完整Trade与公开发行仍未完成。[原本轮范围](evidence/r16-web-trade-20261109/README.md)
 - [x] 公会职级改名／单项权限／草稿／层级／广播／重登已在 WebGL2-shared 和默认 WebGPU 的普通界面通过；新鲜限定39／TS通过，修正选中态边框冲突。[当前范围](WEB-R16-PARITY-GOAL.zh-CN.md#公会职级普通流程2026-11-08)
 - [x] Native 公会增量、真实身份接法、权限实际位回执及读请求生命周期完成限定代码验证；普通队列淘汰／真实bounded发送满载回归通过，198项独立检查及原锁release构建通过，未运行窗口。[范围](WEB-R16-PARITY-GOAL.zh-CN.md#native-公会增量与请求生命周期2026-11-08)
 - [ ] 首轮会长冷进入第二浏览器后意外回登录未定因；公会像素／输入、成员上限、Native招募／建职阶的精确回执、索引重编号并发及Web共用预算仍待续。

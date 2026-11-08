@@ -1,0 +1,14 @@
+{
+  "schema": "mir2.unified-codeline-verification.v1",
+  "branch": "codex/windows-player-journey",
+  "head": "9e76c17bc34e3bf49a8f015aa0e403870dd9e4b0",
+  "requiredAncestors": {
+    "windowsUiAndLauncher": "21c744ea1dd8dad51cd2b19b586b5080e5af32ec",
+    "capacityAuthority": "48abee4711930715f81447314d328b1c4cf8b8bc",
+    "walletUsdcPromotionBackend": "964825606dbbdc2ed1b0de599bc4f0ca6c297c67",
+    "websiteAndPromotionUi": "3a52daef5c3fe92e1e738d6656b9fdbf54de56c3",
+    "originalUncommittedWorkCheckpoint": "e4fab71b44e1da5045b75eb5cabce96cbc68c358"
+  },
+  "passed": true,
+  "errors": []
+}

@@ -21,6 +21,7 @@ mod interpolation;
 mod item_tooltip_query;
 mod lighting;
 mod local_motion;
+mod social_budget_host;
 #[cfg(test)]
 #[path = "mail_service_runtime_tests.rs"]
 mod mail_service_runtime_tests;
@@ -1468,6 +1469,12 @@ pub fn get_mir2_combat_mode_keys_version() -> u32 {
 #[wasm_bindgen(js_name = processMir2CombatModeKeys)]
 pub fn process_mir2_combat_mode_keys(input: &str) -> String {
     combat_modes_host::process_json(input)
+}
+
+/// Local Native social budget only; the final browser gate retains wire authority.
+#[wasm_bindgen(js_name = processMir2SocialBudget)]
+pub fn process_mir2_social_budget(input: &str) -> String {
+    social_budget_host::process_json(input)
 }
 
 /// Read-only Crystal item document, shared with the Native tooltip painter.

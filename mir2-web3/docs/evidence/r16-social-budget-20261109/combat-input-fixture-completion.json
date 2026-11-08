@@ -1,0 +1,50 @@
+{
+  "schema": 1,
+  "kind": "r16-social-budget-combat-fixture-completion",
+  "passed": true,
+  "createdAt": "2026-11-08T22:58:27.781Z",
+  "writeSet": [
+    "apps/web/scripts/test-bevy-combat-input.mjs"
+  ],
+  "sourcePin": {
+    "path": "apps/web/scripts/test-bevy-combat-input.mjs",
+    "bytes": 125544,
+    "sha256": "ed9ca4c1f0527c644539bf11c324c8dbb6ab83b26c85e34a8656fc2b74a0939d"
+  },
+  "baseline": {
+    "passed": 61,
+    "failed": 2,
+    "total": 63,
+    "log": "combat-input-baseline-fail.log"
+  },
+  "final": {
+    "passed": 63,
+    "failed": 0,
+    "total": 63,
+    "command": "node --test scripts/test-bevy-combat-input.mjs",
+    "log": "combat-input-final-r1.log"
+  },
+  "checks": {
+    "realGuildKeyboardHelperWithDomBinding": true,
+    "guildOwnedTargetBlocked": true,
+    "allPriorGuardAndNegativeAssertionsRetained": true,
+    "completeGuildRankReadAndTradeCancelSuffix": true,
+    "nativeReadonlyValidateBeforeEveryClaim": true,
+    "finalNativeEnterThenCancelSpendThenSocket": true,
+    "noCallbackAwaitOrConstructorAfterNativeEntry": true,
+    "productOrHelperChangedByThisWorker": false,
+    "serviceOrDesktopStarted": false
+  },
+  "artifacts": [
+    {
+      "path": "combat-input-baseline-fail.log",
+      "bytes": 28750,
+      "sha256": "3ff7538544c8f93d31d9edab68a7b4fb4cb0c802b4b06fdf834fd89dbf8a391d"
+    },
+    {
+      "path": "combat-input-final-r1.log",
+      "bytes": 15669,
+      "sha256": "e85ec906908f0d8226667d439312c97f9451e6052ecaf2207498735ee67aa7a4"
+    }
+  ]
+}

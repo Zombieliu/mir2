@@ -1,0 +1,183 @@
+{
+  "version": 1,
+  "exportName": "processMir2SocialBudget",
+  "featureCfg": null,
+  "availableInAllThreeRendererProfiles": true,
+  "maximumInputBytes": 8388608,
+  "owner": {
+    "generation": 1,
+    "connectionGeneration": 1,
+    "sessionGeneration": 2,
+    "playerObjectId": 1000,
+    "sceneRevision": 3,
+    "mapFileName": "0"
+  },
+  "ownerRules": {
+    "physicalFields": [
+      "generation",
+      "connectionGeneration",
+      "sessionGeneration",
+      "playerObjectId"
+    ],
+    "sceneFields": [
+      "sceneRevision",
+      "mapFileName"
+    ],
+    "newPhysicalRequires": "higher generation, or higher sessionGeneration on the same generation and connectionGeneration",
+    "sceneChange": "reset preserves pending; old reserved tokens fail validate and enter",
+    "retire": "actual session retirement clears all and tombstones the old physical owner"
+  },
+  "operations": {
+    "reset": {},
+    "retire": {},
+    "setViewer": {
+      "payload": "ordinary UserInformation payload with name and realId, optionally nested info"
+    },
+    "packet": {
+      "packet": "ordinary ServerPacket name",
+      "payload": "actual payload"
+    },
+    "snapshot": {
+      "snapshot": "raw authoritative snapshot",
+      "inventoryJson": "InventoryModel object from the shared projection, never a string or inventoryItems array"
+    },
+    "reserve": {
+      "command": "exact normal wire DTO",
+      "invite": "optional {name}; epoch is rejected",
+      "deadlineMs": "rename only: caller supplies the Native nowMs + 5000 deadline"
+    },
+    "validate": {
+      "token": "returned local safe integer",
+      "command": "the exact reserved DTO; readonly"
+    },
+    "enter": {
+      "token": "returned local safe integer",
+      "command": "exact reserved DTO; only at the final socket boundary"
+    },
+    "cancelUnsent": {
+      "token": "reserved token only; entered is never refunded"
+    },
+    "expire": {
+      "nowMs": "monotonic safe integer; only Native rename strictly-after-deadline expiry"
+    },
+    "inspect": {}
+  },
+  "response": {
+    "version": 1,
+    "ok": "boolean",
+    "handled": "boolean",
+    "token": "number or null",
+    "kind": "Native serde lowerCamel kind or null",
+    "pendingCount": "number",
+    "pending": "[{token,kind,entered}]",
+    "released": "local custody tokens retired by Native completion, scope retirement, expiry or session retirement; never an economic success ACK",
+    "error": "fixed finite code only when ok=false"
+  },
+  "entryOrder": [
+    "complete all source and immutable DTO checks",
+    "validate budget token before any irreversible domain claim",
+    "perform only synchronous callback-free domain claims",
+    "enter budget",
+    "spend local cancel eligibility",
+    "socket.send; transport throw retains entered custody"
+  ],
+  "staleAfterDomainClaim": "conservatively reject socket entry; budget token remains reserved and can cancelUnsent; do not clear another entered authority ledger or invent a receipt",
+  "invites": "Native inviter and epoch are always captured internally from real packets; UI proof epochs remain entirely outside this bridge",
+  "nativeUiTransients": [
+    {
+      "command": "tradeRequest",
+      "source": "overlays.rs keyboard push_intent and button push_transient_unique"
+    },
+    {
+      "command": "tradeReply",
+      "source": "trade_dialog.rs Invitation reply uses push_transient_unique for accept and decline"
+    },
+    {
+      "command": "tradeConfirm",
+      "source": "trade_dialog.rs toggle_lock uses push_transient_unique"
+    }
+  ],
+  "genericVariants": 20,
+  "ordinaryKinds": 19,
+  "legacyGuildInfo": "requestGuildInfo upgrades to GuildRosterRead, with no duplicate slot",
+  "smoke": [
+    {
+      "version": 1,
+      "operation": "reset",
+      "owner": {
+        "generation": 1,
+        "connectionGeneration": 1,
+        "sessionGeneration": 2,
+        "playerObjectId": 1000,
+        "sceneRevision": 3,
+        "mapFileName": "0"
+      }
+    },
+    {
+      "version": 1,
+      "operation": "reserve",
+      "owner": {
+        "generation": 1,
+        "connectionGeneration": 1,
+        "sessionGeneration": 2,
+        "playerObjectId": 1000,
+        "sceneRevision": 3,
+        "mapFileName": "0"
+      },
+      "command": {
+        "type": "addMember",
+        "name": "Peer"
+      }
+    },
+    {
+      "version": 1,
+      "operation": "validate",
+      "owner": {
+        "generation": 1,
+        "connectionGeneration": 1,
+        "sessionGeneration": 2,
+        "playerObjectId": 1000,
+        "sceneRevision": 3,
+        "mapFileName": "0"
+      },
+      "token": 1,
+      "command": {
+        "type": "addMember",
+        "name": "Peer"
+      }
+    },
+    {
+      "version": 1,
+      "operation": "enter",
+      "owner": {
+        "generation": 1,
+        "connectionGeneration": 1,
+        "sessionGeneration": 2,
+        "playerObjectId": 1000,
+        "sceneRevision": 3,
+        "mapFileName": "0"
+      },
+      "token": 1,
+      "command": {
+        "type": "addMember",
+        "name": "Peer"
+      }
+    },
+    {
+      "version": 1,
+      "operation": "packet",
+      "owner": {
+        "generation": 1,
+        "connectionGeneration": 1,
+        "sessionGeneration": 2,
+        "playerObjectId": 1000,
+        "sceneRevision": 3,
+        "mapFileName": "0"
+      },
+      "packet": "AddMember",
+      "payload": {
+        "name": "Peer"
+      }
+    }
+  ]
+}

@@ -22,6 +22,7 @@ const actualPearlSource=loadPearlBuyDependency("../lib/npc-pearl-buy-source.ts",
 const actualPearlBuy=loadPearlBuyDependency("../lib/npc-pearl-buy.ts",{"./npc-pearl-buy-source":actualPearlSource});
 const actualDurableNpc=loadPearlBuyDependency("../lib/npc-purchase-client.ts");
 const actualNpcRuntimeLanguage=loadPearlBuyDependency("../lib/r16-runtime-language.ts");
+const actualSocialBudget=loadPearlBuyDependency("../lib/social-operation-budget-host.ts");
 test("Source30 durable receiver and retained facade pass strict no-emit type checking", () => {
   const files = ["../lib/npc-purchase-client.ts", "../lib/npc-purchase-receipt.ts"]
     .map(relative => fileURLToPath(new URL(relative, import.meta.url)));
@@ -619,6 +620,9 @@ function npcPageHarness({ protocol = protocolOracle(), documentOwner = {}, coreV
   const legacyMap = new WeakMap(), realSet = legacyMap.set.bind(legacyMap);
   legacyMap.set = (proof, lease) => { legacyProofs.push(proof); return realSet(proof, lease); };
   const scope = {
+    // Buy is outside the Native social budget. Run the real host's covers path
+    // with no available runtime instead of replacing admission with a true stub.
+    socialBudgetRef:{current:new actualSocialBudget.SocialOperationBudgetHost(()=>null)},
     bevyQuestReactModalOpen:false,showQuestLog:false,showCharacter:false,heroManagementPage:null,cashShopOpenRef:{current:false},
     showHeroPet:false,showGuild:false,showGroup:false,showFriends:false,showBonds:false,showRanking:false,showMarket:false,
     showConquest:false,showTrade:false,showBuffs:false,showMail:false,showWorldMap:false,showChatSettings:false,npcRepairService:null,

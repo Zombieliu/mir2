@@ -1,5 +1,9 @@
 # Frontend 1:1 Gaps
 
+## Web共用Native社交预算（2026-11-09）
+
+完整20低层变体映射复用实际Rust SocialModel，共用八项包含预约及未知发送；实际UI保留Native三种Trade瞬时路径，legacy公会读不双占。readonly复核先于原proof claim，最后enter与socket相邻；真正packet/同帧own-offer才驱动完成，换图不清、旧物理owner不能复活，原经济ACK后完整snapshot屏障保持。Page116/host17、选定Web569/Stage5内部507组/TS与Native108/runtime9/投影5分层通过；三包全量构建及真实Chrome ABI通过，原体积与能力保持。普通组队已有新页面正证，交易续验分列；不认定全20真实流程、全局Candidate或公开发布。[证据与未结项](evidence/r16-social-budget-20261109/README.md)
+
 ## 交易待回执时取消（2026-11-09）
 
 Web自己的deposit/retrieve未决时允许一次经过完整上下文复核的取消，未知发送不重试；真实终结包只退役该交易的item pending，unlock/Guild保持。重复同owner/partner的TradeAccept按Native保留报价和取消资格。Page105、社交叶31、适配器507组及TypeScript通过；隔离浏览器两场真实ACK延迟取消、资产核对及迟到ACK不复活分别通过，已正常注销清理。使用已pin的v22隔离网关，非当前源新Gateway/Native窗口或公开部署。全社交共用八项及无关Guild未决下的取消仍开放，不认定完整Trade或全局Candidate。[证据](evidence/r16-web-trade-20261109/README.md)

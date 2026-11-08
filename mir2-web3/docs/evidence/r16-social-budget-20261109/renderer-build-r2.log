@@ -1,0 +1,947 @@
+[bevy-runtime] lock=D:\mir2-builds\r16-parity-20261109\social-budget-r1\candidate\apps\web\public\.bevy-runtime-build.lock pid=176120
+[bevy-runtime] profile=release
+[bevy-runtime] runtime=E:/mir2-player-journey/mir2-web3/apps/game-client/runtime
+[bevy-runtime] output=D:\mir2-builds\r16-parity-20261109\social-budget-r1\candidate\apps\web\public\bevy-runtime
+[bevy-runtime] staging=D:\mir2-builds\r16-parity-20261109\social-budget-r1\candidate\apps\web\public\.bevy-runtime-staging-176120-1794176240454-257ebef67969
+[bevy-runtime] cargo-target-root=D:\mir2-builds\web-r16-20261106\cargo-renderer\mir2-bevy-runtime
+[bevy-runtime] wasm-bindgen-rust-min-stack=67108864
+[bevy-runtime] cargo=1.95.0 pinned=1.95.0 toolchain=E:\mir2-player-journey\mir2-web3\apps\game-client\runtime\rust-toolchain.toml
+[bevy-runtime] package=webgpu backend=webgpu
+[bevy-runtime] backend-target=D:\mir2-builds\web-r16-20261106\cargo-renderer\mir2-bevy-runtime\webgpu
+[bevy-runtime] backend-wasm=D:\mir2-builds\web-r16-20261106\cargo-renderer\mir2-bevy-runtime\webgpu\wasm32-unknown-unknown\wasm-release\mir2_bevy_runtime.wasm
+[bevy-runtime] cargo-defaults jobs=1 incremental=0
+[bevy-runtime] cargo build (webgpu)
+   Compiling mir2-client-bevy v0.1.0 (E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy)
+warning: unnecessary parentheses around type
+  --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\crystal_ui\skill_page_shared.rs:68:20
+   |
+68 |     let mut rects: (Vec<(SkillPageAction, CrystalRect)>) = (1..=16)
+   |                    ^                                   ^
+   |
+   = note: `#[warn(unused_parens)]` (part of `#[warn(unused)]`) on by default
+help: remove these parentheses
+   |
+68 -     let mut rects: (Vec<(SkillPageAction, CrystalRect)>) = (1..=16)
+68 +     let mut rects: Vec<(SkillPageAction, CrystalRect)> = (1..=16)
+   |
+
+warning: unused imports: `NativeShellModel` and `NativeShellScreen`
+ --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\native_billing.rs:9:27
+  |
+9 | use crate::native_shell::{NativeShellModel, NativeShellScreen};
+  |                           ^^^^^^^^^^^^^^^^  ^^^^^^^^^^^^^^^^^
+  |
+  = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+
+warning: unnecessary parentheses around method argument
+   --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\portable_character_ui.rs:514:25
+    |
+514 |                         (Node {
+    |                         ^
+...
+523 |                         }),
+    |                          ^
+    |
+help: remove these parentheses
+    |
+514 ~                         Node {
+515 |                             position_type: PositionType::Absolute,
+...
+522 |                             ..default()
+523 ~                         },
+    |
+
+warning: variable does not need to be mutable
+  --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\crystal_ui\item_tooltip.rs:75:22
+   |
+75 | fn localize_document(mut document: CrystalItemTooltipDocument) -> CrystalItemTooltipDocument {
+   |                      ----^^^^^^^^
+   |                      |
+   |                      help: remove this `mut`
+   |
+   = note: `#[warn(unused_mut)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused variable: `native_stage`
+    --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\crystal_ui\widget.rs:1137:5
+     |
+1137 |     native_stage: bool,
+     |     ^^^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_native_stage`
+     |
+     = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused variable: `name`
+    --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\native_i18n.rs:1006:28
+     |
+1006 |         if let Some((text, name)) = body.rsplit_once('/').filter(|(_, name)| colour(name)) {
+     |                            ^^^^ help: if this is intentional, prefix it with an underscore: `_name`
+
+warning: unused variable: `nearby`
+    --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\quest_ui.rs:2694:5
+     |
+2694 |     nearby: Option<Res<NearbyNpcModel>>,
+     |     ^^^^^^ help: if this is intentional, prefix it with an underscore: `_nearby`
+
+warning: type `CrystalCodeOwnedButtonFace` is more private than the item `sync_crystal_image_buttons`
+    --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\crystal_ui\widget.rs:1192:1
+     |
+1192 | / pub fn sync_crystal_image_buttons(
+1193 | |     asset_server: Res<AssetServer>,
+1194 | |     buttons: Query<
+...    |
+1207 | |     mut sprites: Query<&mut ImageNode, With<CrystalImageButtonSprite>>,
+1208 | | ) {
+     | |_^ function `sync_crystal_image_buttons` is reachable at visibility `pub`
+     |
+note: but type `CrystalCodeOwnedButtonFace` is only usable at visibility `pub(crate)`
+    --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\crystal_ui\widget.rs:293:1
+     |
+ 293 | pub(crate) struct CrystalCodeOwnedButtonFace(ImageNode);
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     = note: `#[warn(private_interfaces)]` on by default
+
+warning: field `0` is never read
+  --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\crystal_ui\character_stats_portable.rs:30:37
+   |
+30 | struct LocalizedCharacterTabCaption(CharacterPage);
+   |        ---------------------------- ^^^^^^^^^^^^^
+   |        |
+   |        field in this struct
+   |
+   = help: consider removing this field
+   = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: constant `TEXT` is never used
+ --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\crystal_ui\mail_editor.rs:8:7
+  |
+8 | const TEXT: Color = Color::srgb(0.95, 0.92, 0.82);
+  |       ^^^^
+
+warning: constant `MAIL_PARCEL_BODY_RECT` is never used
+  --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\crystal_ui\mail_editor.rs:17:18
+   |
+17 | pub(crate) const MAIL_PARCEL_BODY_RECT: CrystalRect = CrystalRect::new(15.0, 98.0, 202.0, 165.0);
+   |                  ^^^^^^^^^^^^^^^^^^^^^
+
+warning: multiple methods are never used
+   --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\crystal_ui\mail_editor.rs:312:19
+    |
+ 80 | impl MailLetterEditor {
+    | --------------------- methods in this implementation
+...
+312 |     pub(crate) fn bind_draft_clock(
+    |                   ^^^^^^^^^^^^^^^^
+...
+609 |     pub(crate) fn set_selecting(&mut self, selecting: bool) {
+    |                   ^^^^^^^^^^^^^
+...
+613 |     pub(crate) fn selecting(&self) -> bool {
+    |                   ^^^^^^^^^
+...
+620 |     pub(crate) fn scroll_wheel_lines(&mut self, upward_lines: f32) -> bool {
+    |                   ^^^^^^^^^^^^^^^^^^
+...
+644 |     pub(crate) fn render(&self, parent: &mut ChildSpawnerCommands) {
+    |                   ^^^^^^
+...
+648 |     pub(crate) fn render_at(&self, parent: &mut ChildSpawnerCommands, body_rect: CrystalRect) {
+    |                   ^^^^^^^^^
+...
+859 |     fn visible_line_height(&self) -> Option<f32> {
+    |        ^^^^^^^^^^^^^^^^^^^
+
+warning: function `item` is never used
+  --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\crystal_ui\hero_cross_inventory.rs:44:4
+   |
+44 | fn item<'a>(cell: Cell, player: &'a InventoryModel, hero: &'a HeroModel) -> Option<&'a ItemModel> {
+   |    ^^^^
+
+warning: struct `ReferenceLabelBox` is never constructed
+   --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\crystal_ui\shared_hud.rs:509:19
+    |
+509 | pub(crate) struct ReferenceLabelBox(pub SharedLabel);
+    |                   ^^^^^^^^^^^^^^^^^
+
+warning: function `spawn_original_crystal_image_button` is never used
+   --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\crystal_ui\widget.rs:435:15
+    |
+435 | pub(crate) fn spawn_original_crystal_image_button<T: Bundle>(
+    |               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `spawn_code_owned_crystal_image_button` is never used
+   --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\crystal_ui\widget.rs:450:15
+    |
+450 | pub(crate) fn spawn_code_owned_crystal_image_button<T: Bundle>(
+    |               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: method `display_label` is never used
+   --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\native_billing.rs:124:8
+    |
+123 | impl OwnedMonthlyCard {
+    | --------------------- method in this implementation
+124 |     fn display_label(&self) -> String {
+    |        ^^^^^^^^^^^^^
+
+warning: method `label` is never used
+   --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\native_billing.rs:169:8
+    |
+168 | impl SuiUsdcOrderState {
+    | ---------------------- method in this implementation
+169 |     fn label(self) -> &'static str {
+    |        ^^^^^
+
+warning: method `fiat_livemode` is never used
+   --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\native_billing.rs:268:8
+    |
+248 | impl BillingStatus {
+    | ------------------ method in this implementation
+...
+268 |     fn fiat_livemode(&self, provider: BillingProviderId) -> Option<bool> {
+    |        ^^^^^^^^^^^^^
+
+warning: associated items `ALL` and `label` are never used
+   --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\native_billing.rs:433:11
+    |
+432 | impl BillingPage {
+    | ---------------- associated items in this implementation
+433 |     const ALL: [Self; 3] = [Self::Fiat, Self::Usdc, Self::MonthlyCard];
+    |           ^^^
+434 |
+435 |     fn label(self) -> &'static str {
+    |        ^^^^^
+
+warning: method `actions` is never used
+   --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\native_billing.rs:924:8
+    |
+478 | impl BillingPanel {
+    | ----------------- method in this implementation
+...
+924 |     fn actions(&self) -> Vec<BillingAction> {
+    |        ^^^^^^^
+
+warning: constant `BASE_LOCALE_COUNT` is never used
+  --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\native_i18n.rs:33:7
+   |
+33 | const BASE_LOCALE_COUNT: usize = 9;
+   |       ^^^^^^^^^^^^^^^^^
+
+warning: associated function `from_quest` is never used
+   --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\quest_journey.rs:704:8
+    |
+703 | impl JourneyStep {
+    | ---------------- associated function in this implementation
+704 |     fn from_quest(quest: &Quest, route: Option<&JourneyQuestOverride>) -> Self {
+    |        ^^^^^^^^^^
+
+warning: constant `QUEST_LOG_BG` is never used
+  --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\quest_ui.rs:98:7
+   |
+98 | const QUEST_LOG_BG: Color = Color::srgba(0.08, 0.06, 0.04, 0.96);
+   |       ^^^^^^^^^^^^
+
+warning: method `display_label` is never used
+   --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\quest_ui.rs:943:8
+    |
+924 | impl QuestStageFilter {
+    | --------------------- method in this implementation
+...
+943 |     fn display_label(self) -> String {
+    |        ^^^^^^^^^^^^^
+
+warning: variants `SelectQuestFilter` and `QuestHelp` are never constructed
+    --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\quest_ui.rs:1550:5
+     |
+1501 | pub(crate) enum QuestUiButton {
+     |                 ------------- variants in this enum
+...
+1550 |     SelectQuestFilter {
+     |     ^^^^^^^^^^^^^^^^^
+...
+1553 |     QuestHelp,
+     |     ^^^^^^^^^
+     |
+     = note: `QuestUiButton` has derived impls for the traits `Debug` and `Clone`, but these are intentionally ignored during dead code analysis
+
+warning: fields `map` and `big_map` are never read
+    --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\quest_ui.rs:2402:5
+     |
+2388 | pub(crate) struct QuestInputModels<'w> {
+     |                   ---------------- fields in this struct
+...
+2402 |     map: Option<Res<'w, MapModel>>,
+     |     ^^^
+...
+2410 |     big_map: Option<Res<'w, crate::big_map::BigMapModel>>,
+     |     ^^^^^^^
+
+warning: function `explicit_quest_dialog_button` is never used
+    --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\quest_ui.rs:6240:4
+     |
+6240 | fn explicit_quest_dialog_button(target: &str, npc_index: u32) -> Option<QuestUiButton> {
+     |    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `wrap_guidance_hint` is never used
+    --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\quest_ui.rs:7272:4
+     |
+7272 | fn wrap_guidance_hint(hint: &str, max_chars: usize) -> Vec<String> {
+     |    ^^^^^^^^^^^^^^^^^^
+
+warning: function `quest_detail_lines` is never used
+    --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\quest_ui.rs:7406:4
+     |
+7406 | fn quest_detail_lines(
+     |    ^^^^^^^^^^^^^^^^^^
+
+warning: function `quest_list_message_lines` is never used
+    --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\quest_ui.rs:7577:4
+     |
+7577 | fn quest_list_message_lines(
+     |    ^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `tracker_quest_block` is never used
+     --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\quest_ui.rs:10248:4
+      |
+10248 | fn tracker_quest_block(
+      |    ^^^^^^^^^^^^^^^^^^^
+
+warning: function `tracker_title_line` is never used
+     --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\quest_ui.rs:10489:4
+      |
+10489 | fn tracker_title_line(parent: &mut ChildSpawnerCommands, text: &str) {
+      |    ^^^^^^^^^^^^^^^^^^
+
+warning: function `tracker_title_line_raw` is never used
+     --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\quest_ui.rs:10499:4
+      |
+10499 | fn tracker_title_line_raw(parent: &mut ChildSpawnerCommands, text: &str) {
+      |    ^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `tracker_body_line_raw` is never used
+     --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\quest_ui.rs:10513:4
+      |
+10513 | fn tracker_body_line_raw(parent: &mut ChildSpawnerCommands, text: &str) {
+      |    ^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `intent_from_button` is never used
+     --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\quest_ui.rs:10667:4
+      |
+10667 | fn intent_from_button(action: &QuestUiButton) -> Option<QuestUiIntent> {
+      |    ^^^^^^^^^^^^^^^^^^
+
+warning: function `destination` is never used
+  --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\quest_turn_in.rs:54:15
+   |
+54 | pub(super) fn destination(quest: &Quest) -> Option<QuestNpcDestination> {
+   |               ^^^^^^^^^^^
+
+warning: method `normalize_bindings` is never used
+   --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\skill_binding_ui.rs:331:8
+    |
+133 | impl SkillBindingUi {
+    | ------------------- method in this implementation
+...
+331 |     fn normalize_bindings(&mut self) {
+    |        ^^^^^^^^^^^^^^^^^^
+
+warning: function `parse_guild_member` is never used
+    --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\social.rs:1447:4
+     |
+1447 | fn parse_guild_member(value: &Value) -> Option<GuildMemberModel> {
+     |    ^^^^^^^^^^^^^^^^^^
+
+warning: function `avoiding_bag_origin` is never used
+   --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\stone_workshop_ui.rs:113:15
+    |
+113 | pub(crate) fn avoiding_bag_origin(sidebar: QuestLogRect, p: QuestUiPresentation,
+    |               ^^^^^^^^^^^^^^^^^^^
+
+warning: `mir2-client-bevy` (lib) generated 40 warnings (run `cargo fix --lib -p mir2-client-bevy` to apply 7 suggestions)
+   Compiling mir2-bevy-runtime v0.1.0 (E:\mir2-player-journey\mir2-web3\apps\game-client\runtime)
+warning: unused import: `HeroUiIntent`
+  --> src\hero_ui_host.rs:10:9
+   |
+10 |         HeroUiIntent, HeroUiReadModel, HeroUiState, HeroWindows,
+   |         ^^^^^^^^^^^^
+   |
+   = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused import: `bevy::text::Font`
+  --> src\quest_ui_host.rs:23:5
+   |
+23 | use bevy::text::Font;
+   |     ^^^^^^^^^^^^^^^^
+
+warning: unused import: `SkillPageAction`
+   --> src\spells_ui_host.rs:254:33
+    |
+254 |             skill_page_shared::{SkillPageAction, SkillTooltipDocument, SkillTooltipTarget},
+    |                                 ^^^^^^^^^^^^^^^
+
+warning: unused import: `BTreeMap`
+  --> src\lib.rs:63:24
+   |
+63 | use std::collections::{BTreeMap, HashMap, HashSet};
+   |                        ^^^^^^^^
+
+warning: unused import: `wasm_bindgen::JsCast`
+  --> src\lib.rs:87:5
+   |
+87 | use wasm_bindgen::JsCast;
+   |     ^^^^^^^^^^^^^^^^^^^^
+
+warning: function `self_camera_offset_for_applied_center` is never used
+    --> src\lib.rs:6326:4
+     |
+6326 | fn self_camera_offset_for_applied_center(
+     |    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     |
+     = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: method `contains` is never used
+   --> src\bag_ui_host.rs:358:8
+    |
+351 | impl BagInputRegion {
+    | ------------------- method in this implementation
+...
+358 |     fn contains(self, x: f32, y: f32) -> bool {
+    |        ^^^^^^^^
+
+warning: struct `WebGl2SharedUiPrototype` is never constructed
+ --> src\webgl2_shared_ui.rs:8:19
+  |
+8 | pub(crate) struct WebGl2SharedUiPrototype;
+  |                   ^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: `mir2-bevy-runtime` (lib) generated 8 warnings (run `cargo fix --lib -p mir2-bevy-runtime` to apply 5 suggestions)
+    Finished `wasm-release` profile [optimized] target(s) in 1m 49s
+[bevy-runtime] wasm-bindgen (webgpu)
+[bevy-runtime] renderer-opt={"packageId":"webgpu","tool":{"path":"C:\\mir2-build\\binaryen131-integration-20261015\\binaryen-version_131\\bin\\wasm-opt.exe","bytes":10061312,"sha256":"a3e857e565f18773e24cb3d81d00baa70cee9be24efe775e1960565fea5e65b3"},"input":{"path":"D:\\mir2-builds\\r16-parity-20261109\\social-budget-r1\\candidate\\apps\\web\\public\\.bevy-runtime-staging-176120-1794176240454-257ebef67969\\bevy-runtime\\pkg-webgpu\\mir2_bevy_runtime_bg.wasm","bytes":35090384,"sha256":"2e6e7347f4a5bbddefb5890d5932816b798606911d42106bd6cc754b1e7445ca"},"output":{"path":"D:\\mir2-builds\\r16-parity-20261109\\social-budget-r1\\candidate\\apps\\web\\public\\.bevy-runtime-staging-176120-1794176240454-257ebef67969\\bevy-runtime\\pkg-webgpu\\mir2_bevy_runtime_bg.wasm","bytes":31429183,"sha256":"6536f5df619817ba4bc173461b7a6b4ee9765233fa2a8f1951bed579fc291b7e"},"budget":{"wasmBytes":31429183,"gzipBytes":6590584,"jsBytes":141747},"version":{"pid":184768,"status":0,"signal":null,"stdout":"wasm-opt version 131 (version_131)\r\n","stderr":""},"optimization":{"pid":178248,"status":0,"signal":null,"stdout":"","stderr":""},"stages":[{"args":["-O1","--strip-debug"],"command":{"pid":178248,"status":0,"signal":null,"stdout":"","stderr":""},"output":{"path":"D:\\mir2-builds\\r16-parity-20261109\\social-budget-r1\\candidate\\apps\\web\\public\\.bevy-runtime-staging-176120-1794176240454-257ebef67969\\bevy-runtime\\pkg-webgpu\\.mir2-bevy-opt-176120-20cba257af1b.wasm","bytes":33248579,"sha256":"c2d10b8c90be1f93d1168b16b26598d9ffd980fc2d7bdd1da25fe315745f4930"},"metadataMatched":true},{"args":["--merge-similar-functions","--strip-debug"],"command":{"pid":182988,"status":0,"signal":null,"stdout":"","stderr":""},"output":{"path":"D:\\mir2-builds\\r16-parity-20261109\\social-budget-r1\\candidate\\apps\\web\\public\\.bevy-runtime-staging-176120-1794176240454-257ebef67969\\bevy-runtime\\pkg-webgpu\\.mir2-bevy-opt-176120-08325c9c8592.wasm","bytes":31429183,"sha256":"6536f5df619817ba4bc173461b7a6b4ee9765233fa2a8f1951bed579fc291b7e"},"metadataMatched":true}],"metadataMatched":true,"rendererInstantiated":false}
+[bevy-runtime] package=webgl2 backend=webgl2
+[bevy-runtime] backend-target=D:\mir2-builds\web-r16-20261106\cargo-renderer\mir2-bevy-runtime\webgl2
+[bevy-runtime] backend-wasm=D:\mir2-builds\web-r16-20261106\cargo-renderer\mir2-bevy-runtime\webgl2\wasm32-unknown-unknown\wasm-release\mir2_bevy_runtime.wasm
+[bevy-runtime] cargo-defaults jobs=1 incremental=0
+[bevy-runtime] cargo build (webgl2)
+   Compiling mir2-client-bevy v0.1.0 (E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy)
+warning: variable does not need to be mutable
+  --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\crystal_ui\item_tooltip.rs:75:22
+   |
+75 | fn localize_document(mut document: CrystalItemTooltipDocument) -> CrystalItemTooltipDocument {
+   |                      ----^^^^^^^^
+   |                      |
+   |                      help: remove this `mut`
+   |
+   = note: `#[warn(unused_mut)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused variable: `name`
+    --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\native_i18n.rs:1006:28
+     |
+1006 |         if let Some((text, name)) = body.rsplit_once('/').filter(|(_, name)| colour(name)) {
+     |                            ^^^^ help: if this is intentional, prefix it with an underscore: `_name`
+     |
+     = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+
+warning: constant `BASE_LOCALE_COUNT` is never used
+  --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\native_i18n.rs:33:7
+   |
+33 | const BASE_LOCALE_COUNT: usize = 9;
+   |       ^^^^^^^^^^^^^^^^^
+   |
+   = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: method `normalize_bindings` is never used
+   --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\skill_binding_ui.rs:331:8
+    |
+133 | impl SkillBindingUi {
+    | ------------------- method in this implementation
+...
+331 |     fn normalize_bindings(&mut self) {
+    |        ^^^^^^^^^^^^^^^^^^
+
+warning: function `parse_guild_member` is never used
+    --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\social.rs:1447:4
+     |
+1447 | fn parse_guild_member(value: &Value) -> Option<GuildMemberModel> {
+     |    ^^^^^^^^^^^^^^^^^^
+
+warning: `mir2-client-bevy` (lib) generated 5 warnings (run `cargo fix --lib -p mir2-client-bevy` to apply 2 suggestions)
+   Compiling mir2-bevy-runtime v0.1.0 (E:\mir2-player-journey\mir2-web3\apps\game-client\runtime)
+warning: unused import: `BTreeMap`
+  --> src\lib.rs:63:24
+   |
+63 | use std::collections::{BTreeMap, HashMap, HashSet};
+   |                        ^^^^^^^^
+   |
+   = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused import: `wasm_bindgen::JsCast`
+  --> src\lib.rs:87:5
+   |
+87 | use wasm_bindgen::JsCast;
+   |     ^^^^^^^^^^^^^^^^^^^^
+
+warning: function `self_camera_offset_for_applied_center` is never used
+    --> src\lib.rs:6326:4
+     |
+6326 | fn self_camera_offset_for_applied_center(
+     |    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     |
+     = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: function `hero_auto_pot_catalog_view` is never used
+   --> src\item_tooltip_query.rs:437:15
+    |
+437 | pub(crate) fn hero_auto_pot_catalog_view(
+    |               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: struct `WebGl2SharedUiPrototype` is never constructed
+ --> src\webgl2_shared_ui.rs:8:19
+  |
+8 | pub(crate) struct WebGl2SharedUiPrototype;
+  |                   ^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `startup_ui_mode` is never used
+  --> src\webgl2_shared_ui.rs:24:15
+   |
+24 | pub(crate) fn startup_ui_mode(
+   |               ^^^^^^^^^^^^^^^
+
+warning: function `first_raw_value_is` is never used
+  --> src\webgl2_shared_ui.rs:53:4
+   |
+53 | fn first_raw_value_is(raw_search: &str, name: &str, expected: &str) -> bool {
+   |    ^^^^^^^^^^^^^^^^^^
+
+warning: function `first_raw_value` is never used
+  --> src\webgl2_shared_ui.rs:57:4
+   |
+57 | fn first_raw_value<'a>(raw_search: &'a str, name: &str) -> Option<(&'a str, &'a str)> {
+   |    ^^^^^^^^^^^^^^^
+
+warning: function `first_ui_request` is never used
+  --> src\webgl2_shared_ui.rs:71:4
+   |
+71 | fn first_ui_request(raw_search: &str, name: &str, strict_raw: bool) -> bool {
+   |    ^^^^^^^^^^^^^^^^
+
+warning: function `decoded_key_is` is never used
+  --> src\webgl2_shared_ui.rs:82:4
+   |
+82 | fn decoded_key_is(raw: &str, target: &str) -> bool {
+   |    ^^^^^^^^^^^^^^
+
+warning: function `hex` is never used
+   --> src\webgl2_shared_ui.rs:112:4
+    |
+112 | fn hex(value: u8) -> Option<u8> {
+    |    ^^^
+
+warning: `mir2-bevy-runtime` (lib) generated 11 warnings (run `cargo fix --lib -p mir2-bevy-runtime` to apply 2 suggestions)
+    Finished `wasm-release` profile [optimized] target(s) in 43.08s
+[bevy-runtime] wasm-bindgen (webgl2)
+[bevy-runtime] renderer-opt={"packageId":"webgl2","tool":{"path":"C:\\mir2-build\\binaryen131-integration-20261015\\binaryen-version_131\\bin\\wasm-opt.exe","bytes":10061312,"sha256":"a3e857e565f18773e24cb3d81d00baa70cee9be24efe775e1960565fea5e65b3"},"input":{"path":"D:\\mir2-builds\\r16-parity-20261109\\social-budget-r1\\candidate\\apps\\web\\public\\.bevy-runtime-staging-176120-1794176240454-257ebef67969\\bevy-runtime\\pkg-webgl2\\mir2_bevy_runtime_bg.wasm","bytes":19381786,"sha256":"bc1b639278419fbff418820c4b6d60c3fbc419e74aa4f7b41761fb2775570602"},"output":{"path":"D:\\mir2-builds\\r16-parity-20261109\\social-budget-r1\\candidate\\apps\\web\\public\\.bevy-runtime-staging-176120-1794176240454-257ebef67969\\bevy-runtime\\pkg-webgl2\\mir2_bevy_runtime_bg.wasm","bytes":16601428,"sha256":"5bf0298ee31262c7cc22cf8e77203f510037554a2bce3caa68945bedc46eb0f5"},"budget":{"wasmBytes":16601428,"gzipBytes":4272132,"jsBytes":117805},"version":{"pid":177792,"status":0,"signal":null,"stdout":"wasm-opt version 131 (version_131)\r\n","stderr":""},"optimization":{"pid":185192,"status":0,"signal":null,"stdout":"","stderr":""},"stages":[{"args":["-O1","--strip-debug"],"command":{"pid":185192,"status":0,"signal":null,"stdout":"","stderr":""},"output":{"path":"D:\\mir2-builds\\r16-parity-20261109\\social-budget-r1\\candidate\\apps\\web\\public\\.bevy-runtime-staging-176120-1794176240454-257ebef67969\\bevy-runtime\\pkg-webgl2\\.mir2-bevy-opt-176120-a3034868c068.wasm","bytes":17985383,"sha256":"8b793312bdaefeb8700db13af4c3e78deb7c5a81e28178df09027c2d4b8df675"},"metadataMatched":true},{"args":["--merge-similar-functions","--strip-debug"],"command":{"pid":184624,"status":0,"signal":null,"stdout":"","stderr":""},"output":{"path":"D:\\mir2-builds\\r16-parity-20261109\\social-budget-r1\\candidate\\apps\\web\\public\\.bevy-runtime-staging-176120-1794176240454-257ebef67969\\bevy-runtime\\pkg-webgl2\\.mir2-bevy-opt-176120-a627919249e1.wasm","bytes":16601428,"sha256":"5bf0298ee31262c7cc22cf8e77203f510037554a2bce3caa68945bedc46eb0f5"},"metadataMatched":true}],"metadataMatched":true,"rendererInstantiated":false}
+[bevy-runtime] package=webgl2-shared backend=webgl2
+[bevy-runtime] backend-target=D:\mir2-builds\web-r16-20261106\cargo-renderer\mir2-bevy-runtime\webgl2-shared
+[bevy-runtime] backend-wasm=D:\mir2-builds\web-r16-20261106\cargo-renderer\mir2-bevy-runtime\webgl2-shared\wasm32-unknown-unknown\wasm-release\mir2_bevy_runtime.wasm
+[bevy-runtime] cargo-defaults jobs=1 incremental=0
+[bevy-runtime] cargo build (webgl2)
+   Compiling mir2-client-bevy v0.1.0 (E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy)
+warning: unnecessary parentheses around type
+  --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\crystal_ui\skill_page_shared.rs:68:20
+   |
+68 |     let mut rects: (Vec<(SkillPageAction, CrystalRect)>) = (1..=16)
+   |                    ^                                   ^
+   |
+   = note: `#[warn(unused_parens)]` (part of `#[warn(unused)]`) on by default
+help: remove these parentheses
+   |
+68 -     let mut rects: (Vec<(SkillPageAction, CrystalRect)>) = (1..=16)
+68 +     let mut rects: Vec<(SkillPageAction, CrystalRect)> = (1..=16)
+   |
+
+warning: unused imports: `NativeShellModel` and `NativeShellScreen`
+ --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\native_billing.rs:9:27
+  |
+9 | use crate::native_shell::{NativeShellModel, NativeShellScreen};
+  |                           ^^^^^^^^^^^^^^^^  ^^^^^^^^^^^^^^^^^
+  |
+  = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+
+warning: unnecessary parentheses around method argument
+   --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\portable_character_ui.rs:514:25
+    |
+514 |                         (Node {
+    |                         ^
+...
+523 |                         }),
+    |                          ^
+    |
+help: remove these parentheses
+    |
+514 ~                         Node {
+515 |                             position_type: PositionType::Absolute,
+...
+522 |                             ..default()
+523 ~                         },
+    |
+
+warning: variable does not need to be mutable
+  --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\crystal_ui\item_tooltip.rs:75:22
+   |
+75 | fn localize_document(mut document: CrystalItemTooltipDocument) -> CrystalItemTooltipDocument {
+   |                      ----^^^^^^^^
+   |                      |
+   |                      help: remove this `mut`
+   |
+   = note: `#[warn(unused_mut)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused variable: `native_stage`
+    --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\crystal_ui\widget.rs:1137:5
+     |
+1137 |     native_stage: bool,
+     |     ^^^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_native_stage`
+     |
+     = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused variable: `name`
+    --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\native_i18n.rs:1006:28
+     |
+1006 |         if let Some((text, name)) = body.rsplit_once('/').filter(|(_, name)| colour(name)) {
+     |                            ^^^^ help: if this is intentional, prefix it with an underscore: `_name`
+
+warning: unused variable: `nearby`
+    --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\quest_ui.rs:2694:5
+     |
+2694 |     nearby: Option<Res<NearbyNpcModel>>,
+     |     ^^^^^^ help: if this is intentional, prefix it with an underscore: `_nearby`
+
+warning: type `CrystalCodeOwnedButtonFace` is more private than the item `sync_crystal_image_buttons`
+    --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\crystal_ui\widget.rs:1192:1
+     |
+1192 | / pub fn sync_crystal_image_buttons(
+1193 | |     asset_server: Res<AssetServer>,
+1194 | |     buttons: Query<
+...    |
+1207 | |     mut sprites: Query<&mut ImageNode, With<CrystalImageButtonSprite>>,
+1208 | | ) {
+     | |_^ function `sync_crystal_image_buttons` is reachable at visibility `pub`
+     |
+note: but type `CrystalCodeOwnedButtonFace` is only usable at visibility `pub(crate)`
+    --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\crystal_ui\widget.rs:293:1
+     |
+ 293 | pub(crate) struct CrystalCodeOwnedButtonFace(ImageNode);
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     = note: `#[warn(private_interfaces)]` on by default
+
+warning: field `0` is never read
+  --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\crystal_ui\character_stats_portable.rs:30:37
+   |
+30 | struct LocalizedCharacterTabCaption(CharacterPage);
+   |        ---------------------------- ^^^^^^^^^^^^^
+   |        |
+   |        field in this struct
+   |
+   = help: consider removing this field
+   = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: constant `TEXT` is never used
+ --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\crystal_ui\mail_editor.rs:8:7
+  |
+8 | const TEXT: Color = Color::srgb(0.95, 0.92, 0.82);
+  |       ^^^^
+
+warning: constant `MAIL_PARCEL_BODY_RECT` is never used
+  --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\crystal_ui\mail_editor.rs:17:18
+   |
+17 | pub(crate) const MAIL_PARCEL_BODY_RECT: CrystalRect = CrystalRect::new(15.0, 98.0, 202.0, 165.0);
+   |                  ^^^^^^^^^^^^^^^^^^^^^
+
+warning: multiple methods are never used
+   --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\crystal_ui\mail_editor.rs:312:19
+    |
+ 80 | impl MailLetterEditor {
+    | --------------------- methods in this implementation
+...
+312 |     pub(crate) fn bind_draft_clock(
+    |                   ^^^^^^^^^^^^^^^^
+...
+609 |     pub(crate) fn set_selecting(&mut self, selecting: bool) {
+    |                   ^^^^^^^^^^^^^
+...
+613 |     pub(crate) fn selecting(&self) -> bool {
+    |                   ^^^^^^^^^
+...
+620 |     pub(crate) fn scroll_wheel_lines(&mut self, upward_lines: f32) -> bool {
+    |                   ^^^^^^^^^^^^^^^^^^
+...
+644 |     pub(crate) fn render(&self, parent: &mut ChildSpawnerCommands) {
+    |                   ^^^^^^
+...
+648 |     pub(crate) fn render_at(&self, parent: &mut ChildSpawnerCommands, body_rect: CrystalRect) {
+    |                   ^^^^^^^^^
+...
+859 |     fn visible_line_height(&self) -> Option<f32> {
+    |        ^^^^^^^^^^^^^^^^^^^
+
+warning: function `item` is never used
+  --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\crystal_ui\hero_cross_inventory.rs:44:4
+   |
+44 | fn item<'a>(cell: Cell, player: &'a InventoryModel, hero: &'a HeroModel) -> Option<&'a ItemModel> {
+   |    ^^^^
+
+warning: struct `ReferenceLabelBox` is never constructed
+   --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\crystal_ui\shared_hud.rs:509:19
+    |
+509 | pub(crate) struct ReferenceLabelBox(pub SharedLabel);
+    |                   ^^^^^^^^^^^^^^^^^
+
+warning: function `spawn_original_crystal_image_button` is never used
+   --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\crystal_ui\widget.rs:435:15
+    |
+435 | pub(crate) fn spawn_original_crystal_image_button<T: Bundle>(
+    |               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `spawn_code_owned_crystal_image_button` is never used
+   --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\crystal_ui\widget.rs:450:15
+    |
+450 | pub(crate) fn spawn_code_owned_crystal_image_button<T: Bundle>(
+    |               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: method `display_label` is never used
+   --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\native_billing.rs:124:8
+    |
+123 | impl OwnedMonthlyCard {
+    | --------------------- method in this implementation
+124 |     fn display_label(&self) -> String {
+    |        ^^^^^^^^^^^^^
+
+warning: method `label` is never used
+   --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\native_billing.rs:169:8
+    |
+168 | impl SuiUsdcOrderState {
+    | ---------------------- method in this implementation
+169 |     fn label(self) -> &'static str {
+    |        ^^^^^
+
+warning: method `fiat_livemode` is never used
+   --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\native_billing.rs:268:8
+    |
+248 | impl BillingStatus {
+    | ------------------ method in this implementation
+...
+268 |     fn fiat_livemode(&self, provider: BillingProviderId) -> Option<bool> {
+    |        ^^^^^^^^^^^^^
+
+warning: associated items `ALL` and `label` are never used
+   --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\native_billing.rs:433:11
+    |
+432 | impl BillingPage {
+    | ---------------- associated items in this implementation
+433 |     const ALL: [Self; 3] = [Self::Fiat, Self::Usdc, Self::MonthlyCard];
+    |           ^^^
+434 |
+435 |     fn label(self) -> &'static str {
+    |        ^^^^^
+
+warning: method `actions` is never used
+   --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\native_billing.rs:924:8
+    |
+478 | impl BillingPanel {
+    | ----------------- method in this implementation
+...
+924 |     fn actions(&self) -> Vec<BillingAction> {
+    |        ^^^^^^^
+
+warning: constant `BASE_LOCALE_COUNT` is never used
+  --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\native_i18n.rs:33:7
+   |
+33 | const BASE_LOCALE_COUNT: usize = 9;
+   |       ^^^^^^^^^^^^^^^^^
+
+warning: associated function `from_quest` is never used
+   --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\quest_journey.rs:704:8
+    |
+703 | impl JourneyStep {
+    | ---------------- associated function in this implementation
+704 |     fn from_quest(quest: &Quest, route: Option<&JourneyQuestOverride>) -> Self {
+    |        ^^^^^^^^^^
+
+warning: constant `QUEST_LOG_BG` is never used
+  --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\quest_ui.rs:98:7
+   |
+98 | const QUEST_LOG_BG: Color = Color::srgba(0.08, 0.06, 0.04, 0.96);
+   |       ^^^^^^^^^^^^
+
+warning: method `display_label` is never used
+   --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\quest_ui.rs:943:8
+    |
+924 | impl QuestStageFilter {
+    | --------------------- method in this implementation
+...
+943 |     fn display_label(self) -> String {
+    |        ^^^^^^^^^^^^^
+
+warning: variants `SelectQuestFilter` and `QuestHelp` are never constructed
+    --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\quest_ui.rs:1550:5
+     |
+1501 | pub(crate) enum QuestUiButton {
+     |                 ------------- variants in this enum
+...
+1550 |     SelectQuestFilter {
+     |     ^^^^^^^^^^^^^^^^^
+...
+1553 |     QuestHelp,
+     |     ^^^^^^^^^
+     |
+     = note: `QuestUiButton` has derived impls for the traits `Debug` and `Clone`, but these are intentionally ignored during dead code analysis
+
+warning: fields `map` and `big_map` are never read
+    --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\quest_ui.rs:2402:5
+     |
+2388 | pub(crate) struct QuestInputModels<'w> {
+     |                   ---------------- fields in this struct
+...
+2402 |     map: Option<Res<'w, MapModel>>,
+     |     ^^^
+...
+2410 |     big_map: Option<Res<'w, crate::big_map::BigMapModel>>,
+     |     ^^^^^^^
+
+warning: function `explicit_quest_dialog_button` is never used
+    --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\quest_ui.rs:6240:4
+     |
+6240 | fn explicit_quest_dialog_button(target: &str, npc_index: u32) -> Option<QuestUiButton> {
+     |    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `wrap_guidance_hint` is never used
+    --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\quest_ui.rs:7272:4
+     |
+7272 | fn wrap_guidance_hint(hint: &str, max_chars: usize) -> Vec<String> {
+     |    ^^^^^^^^^^^^^^^^^^
+
+warning: function `quest_detail_lines` is never used
+    --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\quest_ui.rs:7406:4
+     |
+7406 | fn quest_detail_lines(
+     |    ^^^^^^^^^^^^^^^^^^
+
+warning: function `quest_list_message_lines` is never used
+    --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\quest_ui.rs:7577:4
+     |
+7577 | fn quest_list_message_lines(
+     |    ^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `tracker_quest_block` is never used
+     --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\quest_ui.rs:10248:4
+      |
+10248 | fn tracker_quest_block(
+      |    ^^^^^^^^^^^^^^^^^^^
+
+warning: function `tracker_title_line` is never used
+     --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\quest_ui.rs:10489:4
+      |
+10489 | fn tracker_title_line(parent: &mut ChildSpawnerCommands, text: &str) {
+      |    ^^^^^^^^^^^^^^^^^^
+
+warning: function `tracker_title_line_raw` is never used
+     --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\quest_ui.rs:10499:4
+      |
+10499 | fn tracker_title_line_raw(parent: &mut ChildSpawnerCommands, text: &str) {
+      |    ^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `tracker_body_line_raw` is never used
+     --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\quest_ui.rs:10513:4
+      |
+10513 | fn tracker_body_line_raw(parent: &mut ChildSpawnerCommands, text: &str) {
+      |    ^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `intent_from_button` is never used
+     --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\quest_ui.rs:10667:4
+      |
+10667 | fn intent_from_button(action: &QuestUiButton) -> Option<QuestUiIntent> {
+      |    ^^^^^^^^^^^^^^^^^^
+
+warning: function `destination` is never used
+  --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\quest_turn_in.rs:54:15
+   |
+54 | pub(super) fn destination(quest: &Quest) -> Option<QuestNpcDestination> {
+   |               ^^^^^^^^^^^
+
+warning: method `normalize_bindings` is never used
+   --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\skill_binding_ui.rs:331:8
+    |
+133 | impl SkillBindingUi {
+    | ------------------- method in this implementation
+...
+331 |     fn normalize_bindings(&mut self) {
+    |        ^^^^^^^^^^^^^^^^^^
+
+warning: function `parse_guild_member` is never used
+    --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\social.rs:1447:4
+     |
+1447 | fn parse_guild_member(value: &Value) -> Option<GuildMemberModel> {
+     |    ^^^^^^^^^^^^^^^^^^
+
+warning: function `avoiding_bag_origin` is never used
+   --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\stone_workshop_ui.rs:113:15
+    |
+113 | pub(crate) fn avoiding_bag_origin(sidebar: QuestLogRect, p: QuestUiPresentation,
+    |               ^^^^^^^^^^^^^^^^^^^
+
+warning: `mir2-client-bevy` (lib) generated 40 warnings (run `cargo fix --lib -p mir2-client-bevy` to apply 7 suggestions)
+   Compiling mir2-bevy-runtime v0.1.0 (E:\mir2-player-journey\mir2-web3\apps\game-client\runtime)
+warning: unused import: `HeroUiIntent`
+  --> src\hero_ui_host.rs:10:9
+   |
+10 |         HeroUiIntent, HeroUiReadModel, HeroUiState, HeroWindows,
+   |         ^^^^^^^^^^^^
+   |
+   = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused import: `bevy::text::Font`
+  --> src\quest_ui_host.rs:23:5
+   |
+23 | use bevy::text::Font;
+   |     ^^^^^^^^^^^^^^^^
+
+warning: unused import: `SkillPageAction`
+   --> src\spells_ui_host.rs:254:33
+    |
+254 |             skill_page_shared::{SkillPageAction, SkillTooltipDocument, SkillTooltipTarget},
+    |                                 ^^^^^^^^^^^^^^^
+
+warning: unused import: `BTreeMap`
+  --> src\lib.rs:63:24
+   |
+63 | use std::collections::{BTreeMap, HashMap, HashSet};
+   |                        ^^^^^^^^
+
+warning: unused import: `wasm_bindgen::JsCast`
+  --> src\lib.rs:87:5
+   |
+87 | use wasm_bindgen::JsCast;
+   |     ^^^^^^^^^^^^^^^^^^^^
+
+warning: function `self_camera_offset_for_applied_center` is never used
+    --> src\lib.rs:6326:4
+     |
+6326 | fn self_camera_offset_for_applied_center(
+     |    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     |
+     = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: method `contains` is never used
+   --> src\bag_ui_host.rs:358:8
+    |
+351 | impl BagInputRegion {
+    | ------------------- method in this implementation
+...
+358 |     fn contains(self, x: f32, y: f32) -> bool {
+    |        ^^^^^^^^
+
+warning: `mir2-bevy-runtime` (lib) generated 7 warnings (run `cargo fix --lib -p mir2-bevy-runtime` to apply 5 suggestions)
+    Finished `wasm-release` profile [optimized] target(s) in 1m 55s
+[bevy-runtime] wasm-bindgen (webgl2)
+[bevy-runtime] renderer-opt={"packageId":"webgl2-shared","tool":{"path":"C:\\mir2-build\\binaryen131-integration-20261015\\binaryen-version_131\\bin\\wasm-opt.exe","bytes":10061312,"sha256":"a3e857e565f18773e24cb3d81d00baa70cee9be24efe775e1960565fea5e65b3"},"input":{"path":"D:\\mir2-builds\\r16-parity-20261109\\social-budget-r1\\candidate\\apps\\web\\public\\.bevy-runtime-staging-176120-1794176240454-257ebef67969\\bevy-runtime\\pkg-webgl2-shared\\mir2_bevy_runtime_bg.wasm","bytes":36110318,"sha256":"e8955bdca5a83cfe9c135f4d2ce6617b502b172f783464ec9a8b5ef948d5547b"},"output":{"path":"D:\\mir2-builds\\r16-parity-20261109\\social-budget-r1\\candidate\\apps\\web\\public\\.bevy-runtime-staging-176120-1794176240454-257ebef67969\\bevy-runtime\\pkg-webgl2-shared\\mir2_bevy_runtime_bg.wasm","bytes":32357557,"sha256":"9b28bf2a5a0c366ea8463c765f1c7ba036d7a48e751d3b882190f51d36447ba0"},"budget":{"wasmBytes":32357557,"gzipBytes":6930974,"jsBytes":139721},"version":{"pid":175216,"status":0,"signal":null,"stdout":"wasm-opt version 131 (version_131)\r\n","stderr":""},"optimization":{"pid":179144,"status":0,"signal":null,"stdout":"","stderr":""},"stages":[{"args":["-O1","--strip-debug"],"command":{"pid":179144,"status":0,"signal":null,"stdout":"","stderr":""},"output":{"path":"D:\\mir2-builds\\r16-parity-20261109\\social-budget-r1\\candidate\\apps\\web\\public\\.bevy-runtime-staging-176120-1794176240454-257ebef67969\\bevy-runtime\\pkg-webgl2-shared\\.mir2-bevy-opt-176120-2dae96a7a712.wasm","bytes":34209859,"sha256":"6ff41e011d1191746e3d8b5be517638f1ef8a79e248a63c259288447f2ec1f48"},"metadataMatched":true},{"args":["--merge-similar-functions","--strip-debug"],"command":{"pid":183268,"status":0,"signal":null,"stdout":"","stderr":""},"output":{"path":"D:\\mir2-builds\\r16-parity-20261109\\social-budget-r1\\candidate\\apps\\web\\public\\.bevy-runtime-staging-176120-1794176240454-257ebef67969\\bevy-runtime\\pkg-webgl2-shared\\.mir2-bevy-opt-176120-6adcd275f99b.wasm","bytes":32357557,"sha256":"9b28bf2a5a0c366ea8463c765f1c7ba036d7a48e751d3b882190f51d36447ba0"},"metadataMatched":true}],"metadataMatched":true,"rendererInstantiated":false}
+[bevy-runtime] validated version=bevy-0cd68510886134e0
+[bevy-runtime] validated version=bevy-0cd68510886134e0
+[bevy-runtime] published transaction=176120-1794176240454-257ebef67969
+[bevy-runtime] wrote D:\mir2-builds\r16-parity-20261109\social-budget-r1\candidate\apps\web\public\bevy-runtime

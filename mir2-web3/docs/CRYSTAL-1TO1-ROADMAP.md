@@ -2,7 +2,7 @@
 
 ## Web / Windows R16持续Goal重启（2026-11-09）
 
-用户重新要求按R16共同基线继续完整Web对齐，优先不控制Windows桌面的工作。本轮交易取消及重复接受的限定代码和两场隔离延迟ACK UI已通过，剩余完整社交共用预算继续推进；既有公开发布和最终真人Accepted分别记录，不提升全局Candidate。[执行范围](WEB-R16-PARITY-GOAL.zh-CN.md) · [本轮与未结证据](evidence/r16-web-trade-20261109/README.md)
+用户重新要求按R16共同基线继续完整Web对齐，优先不控制Windows桌面的工作。交易取消及重复接受的原证据保持；Web已复用Native完整社交模型/共用八项预算，Page116、host17、限定Web569/Stage5内部507组、TS及三包实际WASM执行通过，分层不叠加。真实UI/未产出的失败ACK、交易后续和阿洛等继续分别验；未公开发布或提升全局Candidate/Accepted。[执行范围](WEB-R16-PARITY-GOAL.zh-CN.md) · [本轮与未结证据](evidence/r16-social-budget-20261109/README.md)
 
 ## Numeron新入口发布（2026-11-09）
 

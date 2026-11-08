@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';import test from 'node:test';import {readFileSync,writeFileSync} from 'node:fs';import ts from 'typescript';
 import {createShellKeydownFixture} from './lib/window-keydown-test-fixture.mjs';
+import {budgetedSendStatements} from './lib/social-budget-test-runtime.mjs';
 const nativeKeyboardDefaults=JSON.parse(readFileSync(new URL('../../game-client/client-bevy/src/crystal_ui/keyboard_defaults.json',import.meta.url),'utf8'));
 const cache=new Map();function load(name){if(cache.has(name))return cache.get(name);const m={exports:{}};cache.set(name,m.exports);new Function('exports','module','require',ts.transpileModule(readFileSync(new URL(`../lib/${name}.ts`,import.meta.url),'utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText)(m.exports,m,n=>n==='../../game-client/client-bevy/src/crystal_ui/keyboard_defaults.json'?{default:nativeKeyboardDefaults}:load(n.replace('./','')));return m.exports;}
 const {CombatHost,supportsCombat,supportsForcedPlayerAttack,parseCombatProof}=load('bevy-combat-input');
@@ -7,6 +8,9 @@ const {defaultCrystalKeyBindings}=load('player-ui-preferences');
 test('actual Shell shortcuts precede Winit canvas cancellation and preserve capture, modal, focus and editable gates',()=>{
  const listeners=[],calls=[];
  class HTMLElement{isContentEditable=false;closest(){return null;}}class HTMLInputElement extends HTMLElement{}class HTMLTextAreaElement extends HTMLElement{}class HTMLSelectElement extends HTMLElement{}
+ const guildKeyboard={};
+ new Function('exports','Element',ts.transpileModule(readFileSync(new URL('../lib/r16-guild-keyboard.ts',import.meta.url),'utf8'),
+  {compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText)(guildKeyboard,HTMLElement);
  const flags={capture:false,focus:true,modal:false};
  const scope={HTMLElement,HTMLInputElement,HTMLTextAreaElement,HTMLSelectElement,screen:'game',selectedEntity:null,
   keyboardMovementDiagnosticsRef:{current:{lastKey:null,lastDispatch:null,lastShortcut:null}},sceneInteractionReady:true,
@@ -17,7 +21,7 @@ test('actual Shell shortcuts precede Winit canvas cancellation and preserve capt
   npcShopBlocksWorldInput:()=>false,stopNpcShopWorldInput:()=>{},bevyStorageUiActive:false,bevyStorageUiTransitioning:false,
   bevyMailComposeReady:false,bevyMailComposePending:false,spellsPointerCallbacksRef:{current:{getBevySpellsPointerContext:()=>({modal:flags.modal})}},
   bevyQuestUiCapturesPointer:false,heroPointerCallbacksRef:{current:{onBevyHeroKey:()=>false}},heroBlocksWorldInput:()=>false,
-  crystalKeyBindings:defaultCrystalKeyBindings(),combatTildeRef:{current:false},
+  crystalKeyBindings:defaultCrystalKeyBindings(),combatTildeRef:{current:false},guildKeyboardOwnsEvent:guildKeyboard.guildKeyboardOwnsEvent,
   ...load('crystal-shortcut-actions'),...load('player-ui-preferences'),...load('shared-combat-mode-keys'),
   onCrystalWindowShortcut:action=>calls.push(action),onCrystalGameplayShortcut:()=>false,onCombatKey:()=>({supported:true,handled:false}),
   isKeyboardMoveKey:()=>false,onPrimaryTargetAction:()=>{},revealDropView:()=>{}};
@@ -31,6 +35,8 @@ test('actual Shell shortcuts precede Winit canvas cancellation and preserve capt
  key(new HTMLElement(),{key:'q',code:'KeyQ'});assert.equal(calls.length,1);calls.length=0;
  for(const gate of ['capture','focus','modal']){flags[gate]=gate!=='focus';key();assert.equal(calls.length,0,gate+' gate remains');flags[gate]=gate==='focus';}
  key(new HTMLInputElement());key(new HTMLTextAreaElement());key(new HTMLSelectElement());assert.equal(calls.length,0);
+ const guildTarget=new HTMLElement();guildTarget.closest=selector=>selector==='[data-guild-keyboard-owner]'?guildTarget:null;
+ key(guildTarget);assert.equal(calls.length,0,'the actual focused guild widget owns its keys before the game shortcut');
  key(new HTMLElement(),{defaultPrevented:true});key(new HTMLElement(),{repeat:true});assert.equal(calls.length,0);
  scope.document.visibilityState='hidden';key();assert.equal(calls.length,0);
  keyboard.unmount();assert.equal(listeners.length,0,'capture listener is removed with the same phase');
@@ -231,7 +237,7 @@ test('production integration captures raw before coalescing and final event proo
  assert.ok(send.indexOf('window.dispatchEvent')<send.indexOf('combatIngressRef.current.claim'));
  assert.match(send,/claim\(options.combatProof,serialized\)\)\)return false;\s*if\(options\?\.mailProof\)\{[\s\S]*?mailDispatcherRef\.current\.claim\(p\)/);
  const sendAst=ts.createSourceFile('send.tsx',send,ts.ScriptTarget.Latest,true,ts.ScriptKind.TSX);
- const statements=sendAst.statements.find(n=>ts.isFunctionDeclaration(n)&&n.name?.text==='sendRaw').body.statements;
+ const statements=budgetedSendStatements(ts,sendAst.statements.find(n=>ts.isFunctionDeclaration(n)&&n.name?.text==='sendRaw'),sendAst);
  const normalized=node=>node.getText(sendAst).replace(/\s+/g,' ');
  const claimIndex=statements.findIndex(n=>n.getText(sendAst).includes('combatIngressRef.current.claim'));
  const socketTries=statements.filter(n=>ts.isTryStatement(n)&&n.tryBlock.statements.some(statement=>statement.getText(sendAst)==='socket.send(serialized);'));
@@ -245,6 +251,10 @@ test('production integration captures raw before coalescing and final event proo
  assert.equal(socketTry.finallyBlock,undefined);
  const rankingInspectCondition='wireCommand.type === "inspect" && (!options?.rankingInspectProof ||socketRef.current!==socket||socket.readyState!==WebSocket.OPEN||options.rankingInspectProof.owner.socket!==socket ||!rankingInspectRequestsRef.current.claim(options.rankingInspectProof,currentRankingInspectSource(),wireCommand,Math.floor(performance.now())))';
  const groupCondition='options?.groupProof && (socketRef.current !== socket || socket.readyState !== WebSocket.OPEN || options.groupProof.owner.socket !== socket || !groupOperationsRef.current.claim(options.groupProof, currentGroupOperationSource(), wireCommand))';
+ const guildRankCondition='options?.socialRosterProof?.rankProof && (socketRef.current !== socket || socket.readyState !== WebSocket.OPEN || !guildRankOperationsRef.current.claim(options.socialRosterProof.rankProof, readGuildRankEditSource(), wireCommand, Math.floor(performance.now())))';
+ const tradeCancelCondition='options?.socialTradeProof && wireCommand.type === "tradeCancel"';
+ const budgetValidateCondition='socialBudgetTicket && !socialBudgetRef.current?.validate(socialBudgetTicket, currentSocialReplyOwner(), wireCommand)';
+ const budgetEnterCondition='socialBudgetTicket && !socialBudgetRef.current?.enter(socialBudgetTicket, currentSocialReplyOwner(), wireCommand)';
  assert.deepEqual(statements.slice(claimIndex+1,socketIndex).map(n=>ts.isIfStatement(n)?normalized(n.expression):null),[
   'options?.mailProof','options?.mailQuoteProof','options?.mailLockProof',
   "options?.mailProof?.commandType==='sendMail'&&(!options.mailProof.compose||!mailDispatcherRef.current?.composer.enterSocket(options.mailProof.compose,serialized,socket))",
@@ -257,7 +267,7 @@ test('production integration captures raw before coalescing and final event proo
   'options?.socialReplyProof && (!socialReplyWindowOpen(options.socialReplyProof.request.kind) || !socialRepliesRef.current.claim(options.socialReplyProof, currentSocialReplyOwner(), wireCommand))',
   'options?.storageRentalProof && !storageRentalRef.current.claim(options.storageRentalProof, currentStorageRentalFacts(), wireCommand)',
   'wireCommand.type === "guildStorageItemChange" && wireCommand.changeType === 3',
-  '!socialItemMutationAllowed(wireCommand, options?.socialItemProof)',
+  '!socialItemMutationAllowed(wireCommand, options?.socialItemProof, options?.socialTradeProof)',
   'options?.socialItemProof && (!socialItemProofCurrent(options.socialItemProof) || !socialItemOperationsRef.current.claim(options.socialItemProof, currentSocialReplyOwner(), readSocialItemSurface(options.socialItemProof.surface)?.sourceKey ?? "", wireCommand))',
   'options?.socialTradeProof && !socialTradeProofCurrent(options.socialTradeProof, wireCommand)',
   'options?.socialTradeProof && wireCommand.type === "tradeReply"',
@@ -280,11 +290,31 @@ test('production integration captures raw before coalescing and final event proo
   rankingInspectCondition,
   'wireCommand.type === "newCharacter"',
   groupCondition,
+  guildRankCondition,
+  'wireCommand.type === "requestGuildInfo"',
+  tradeCancelCondition,
+  budgetEnterCondition,
+  tradeCancelCondition,
  ]);
+
+ const budgetValidate=statements.filter(n=>ts.isIfStatement(n)&&normalized(n.expression)===budgetValidateCondition);
+ assert.equal(budgetValidate.length,1,'one readonly Native validation before all irreversible claims');
+ const budgetValidateIndex=statements.indexOf(budgetValidate[0]);
+ assert.equal(normalized(budgetValidate[0].thenStatement),'return false;');assert.equal(budgetValidate[0].elseStatement,undefined);
+ const irreversible=[];
+ function findClaims(node){
+  if(ts.isCallExpression(node)&&((ts.isPropertyAccessExpression(node.expression)&&['claim','claimPearl','enter','enterSocket'].includes(node.expression.name.text))
+   ||ts.isIdentifier(node.expression)&&node.expression.text==='enterWorldFishingSend'))irreversible.push(node);
+  ts.forEachChild(node,findClaims);
+ }
+ statements.slice(0,socketIndex).forEach(findClaims);
+ assert.ok(irreversible.length>10,'retain the actual independent domain claims');
+ assert.ok(irreversible.every(node=>node.getStart(sendAst)>budgetValidate[0].end),'readonly Native validation precedes every domain or transport entry');
+ assert.ok(budgetValidateIndex<claimIndex);
 
  // The original ordered parity suffix ends at the two additive Auth nodes.
  // Repair adds a command-scoped proof gate and a local inventory retire.
- // Bag/Belt entry follows both nodes; the additive WorldFishing entry is last before transport.
+ // Bag/Belt and WorldFishing retain their original entry order before the later typed claims.
  const authClaimIndex=statements.findIndex(n=>ts.isIfStatement(n)&&normalized(n.expression)==='authKind');
  const authDeclaration=statements[authClaimIndex-1],authClaim=statements[authClaimIndex];
  assert.ok(ts.isVariableStatement(authDeclaration));
@@ -349,15 +379,36 @@ test('production integration captures raw before coalescing and final event proo
  assert.ok(ts.isIfStatement(characterCreateGate));assert.equal(normalized(characterCreateGate.expression),'wireCommand.type === "newCharacter"');
  assert.equal(characterCreateGate.elseStatement,undefined);
  assert.equal(normalized(characterCreateGate.thenStatement),'{ const attempt = characterCreateRef.current; if (!attempt || attempt.command !== command || attempt.entered || attempt.owner !== currentCharacterSelection() || !currentCharacterCreateClasses(attempt.owner).includes(attempt.draft.classKey)) return false; attempt.entered = true; }');
- assert.equal(statements[authClaimIndex+9],socketTry,'only the exact command-scoped creation and group guards follow the final Ranking entry');
  const groupGate=statements[authClaimIndex+8];
  assert.ok(ts.isIfStatement(groupGate));assert.equal(normalized(groupGate.expression),groupCondition);
  assert.equal(groupGate.elseStatement,undefined);assert.ok(ts.isReturnStatement(groupGate.thenStatement));
  assert.equal(groupGate.thenStatement.expression.kind,ts.SyntaxKind.FalseKeyword);
- assert.equal(socketIndex,authClaimIndex+9);
+ const guildRankGate=statements[authClaimIndex+9];
+ assert.ok(ts.isIfStatement(guildRankGate));assert.equal(normalized(guildRankGate.expression),guildRankCondition);
+ assert.equal(normalized(guildRankGate.thenStatement),'return false;');assert.equal(guildRankGate.elseStatement,undefined);
+ const guildReadGate=statements[authClaimIndex+10];
+ assert.ok(ts.isIfStatement(guildReadGate));assert.equal(normalized(guildReadGate.expression),'wireCommand.type === "requestGuildInfo"');
+ assert.equal(normalized(guildReadGate.thenStatement),'{ const row = guildRankReadRef.current, scope = guildRankScopeRef.current; if (!row || !scope || row.scope !== scope.key || row.entered || row.proof !== options?.socialRosterProof?.rankReadProof || !row.proof || socketRef.current !== socket || socket.readyState !== WebSocket.OPEN) return false; row.entered = true; }');
+ assert.equal(guildReadGate.elseStatement,undefined);
+ const tradeCancelGate=statements[authClaimIndex+11];
+ assert.ok(ts.isIfStatement(tradeCancelGate));assert.equal(normalized(tradeCancelGate.expression),tradeCancelCondition);
+ assert.equal(normalized(tradeCancelGate.thenStatement),'{ if (socketRef.current !== socket || socket.readyState !== WebSocket.OPEN || !socialTradeProofCurrent(options.socialTradeProof, wireCommand)) return false; }');
+ assert.equal(tradeCancelGate.elseStatement,undefined);
+ const budgetEnter=statements[authClaimIndex+12],cancelSpent=statements[authClaimIndex+13];
+ assert.ok(ts.isIfStatement(budgetEnter));assert.equal(normalized(budgetEnter.expression),budgetEnterCondition);
+ assert.equal(normalized(budgetEnter.thenStatement),'return false;');assert.equal(budgetEnter.elseStatement,undefined);
+ assert.ok(ts.isIfStatement(cancelSpent));assert.equal(normalized(cancelSpent.expression),tradeCancelCondition);
+ assert.equal(normalized(cancelSpent.thenStatement),'socialTradeCancelSpentRef.current = options.socialTradeProof.incarnation;');
+ assert.equal(cancelSpent.elseStatement,undefined);
+ assert.equal(socketIndex,authClaimIndex+14,'all typed guild/read/cancel checks precede final Native entry, cancel spending and socket');
+ assert.deepEqual(statements.slice(statements.indexOf(budgetEnter)+1,socketIndex+1),[cancelSpent,socketTry],
+  'only the exact callback-free cancel assignment can follow Native entry before socket.send');
+ const afterEntryCalls=[];
+ (function visit(node){if(ts.isCallExpression(node)||ts.isAwaitExpression(node)||ts.isNewExpression(node))afterEntryCalls.push(node);ts.forEachChild(node,visit);})(cancelSpent);
+ assert.deepEqual(afterEntryCalls,[],'no callback, await or constructor after successful Native entry before transport');
  // Every pre-send statement after the combat claim is covered by the exact
  // ordered list above, including Repair/retire, Bag/Belt and final WorldFishing entry.
- assert.deepEqual(statements.slice(claimIndex+1,socketIndex).filter(n=>ts.isIfStatement(n)).map(n=>normalized(n.expression)).slice(-8),[
+ assert.deepEqual(statements.slice(claimIndex+1,socketIndex).filter(n=>ts.isIfStatement(n)).map(n=>normalized(n.expression)).slice(-13),[
   'options?.npcRepairProof',
   'isMailItemMutation(wireCommand) || ["dropGold", "tradeGold", "gameShopBuy", "sendMail", "collectParcel"].includes(String(wireCommand.type))',
   'options?.bagBeltProof',
@@ -366,6 +417,11 @@ test('production integration captures raw before coalescing and final event proo
   rankingInspectCondition,
   'wireCommand.type === "newCharacter"',
   groupCondition,
+  guildRankCondition,
+  'wireCommand.type === "requestGuildInfo"',
+  tradeCancelCondition,
+  budgetEnterCondition,
+  tradeCancelCondition,
  ]);
  // Execute the actual final Auth fragment with its actual durable gate and
  // Page surface check. Only socket writes and document facts are memory data.

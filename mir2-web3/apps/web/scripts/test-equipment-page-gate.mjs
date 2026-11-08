@@ -44,7 +44,7 @@ const mailUi = transpileModule(new URL("../lib/bevy-mail-ui.ts", import.meta.url
 // runtime import explicit; none of these entries imports a renderer/Core loader.
 const pureDependencies = {
   "bag-belt-move-dispatcher": { "./mail-parcel-gateway-adapter": "mail-parcel-gateway-adapter" },
-  "social-window-operations": {}, "social-incoming-replies": {}, "world-fishing-source": {},
+  "social-window-operations": {}, "social-incoming-replies": {}, "world-fishing-source": {}, "social-operation-budget-host": {},
   "storage-rental-confirmation": { "./social-incoming-replies": "social-incoming-replies", "./npc-purchase-client": "npc-purchase-client" },
   "npc-repair-service": { "./equipment-gateway-adapter": "equipment-gateway-adapter" },
   "crystal-item-source": {},
@@ -96,7 +96,7 @@ const pageSource = readFileSync(pageUrl, "utf8");
 const syntax = ts.createSourceFile(fileURLToPath(pageUrl), pageSource, ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);
 const names = ["cancelMailParcel","setMailboxOpen","syncEquipmentSnapshot", "suspendEquipmentConnection", "rejectEquipmentCommand", "currentEquipmentOwner", "itemCommandRequiresOwner", "send", "sendRaw", "moveItem", "useItem", "dispatchBevyBagIntent", "dispatchBevyCharacterIntent", "setShowInventory",
   "cancelWorldFishingGesture", "retireWorldFishingGesture", "parityItemMutationAllowed", "socialItemMutationAllowed",
-  "endStorageService", "retireNpcShopService", "closeNpcRepairService"];
+  "endStorageService", "retireNpcShopService", "closeNpcRepairService", "currentSocialReplyOwner"];
 const declarations = new Map();
 function visit(node) {
   if (ts.isFunctionDeclaration(node) && node.name && names.includes(node.name.text)) {
@@ -144,6 +144,9 @@ function harness({ item = bagItem(4), worldState = world(item), cachedSnapshot =
   const companionRetirementsRef = { current: 0 };
   const scope = {
     equipmentCommandDiagnosticsRef: {current:null},
+    // Equipment is outside the social pending enum. Exercise the real host's
+    // untracked path with no social WASM; it must never block ordinary medicine.
+    socialBudgetRef: {current:new (loadPure("social-operation-budget-host").SocialOperationBudgetHost)(() => null)},
     // These surfaces are dormant, with the same initial ownership facts as Page.
     // The real selected source functions still perform every cancellation/gate.
     npcPearlSendEpochRef: {current:0}, npcPearlBuyProofsRef: {current:new WeakMap()},

@@ -3,8 +3,10 @@ import { readFileSync } from "node:fs";
 import test from "node:test";
 import { fileURLToPath } from "node:url";
 import ts from "typescript";
+import { createSocialBudgetTestRuntime } from "./lib/social-budget-test-runtime.mjs";
 
-// Strictly pure source dependencies; no WASM/runtime loader or filesystem fixture writes.
+// Pure source dependencies plus the pinned, isolated Native WASM test runtime;
+// no renderer run, socket connection or filesystem fixture writes.
 const sources = { nativeLocalization: "../lib/r16-native-localization.ts", nativeData: "../lib/generated/r16-native-localization.json", runtimeLanguage: "../lib/r16-runtime-language.ts", r16Auth:"../lib/r16-auth-layout.ts", npcPurchaseClient:"../lib/npc-purchase-client.ts", rankingInspectRequests:"../lib/ranking-inspect-requests.ts", pearlSource:"../lib/npc-pearl-buy-source.ts", crystalItem:"../lib/crystal-item-source.ts", repair:"../lib/npc-repair-service.ts", fishingSource: "../lib/world-fishing-source.ts", bagBeltMove: "../lib/bag-belt-move-dispatcher.ts", identity: "../lib/world-model/item-identity.ts",
   equipment: "../lib/equipment-gateway-adapter.ts", parcel: "../lib/mail-parcel-gateway-adapter.ts",
   storage: "../lib/storage-gateway-adapter.ts", social: "../lib/social-incoming-replies.ts", groupOperations: "../lib/group-operations.ts",
@@ -20,6 +22,10 @@ const allow = { nativeLocalization: {"./generated/r16-native-localization.json":
   rental: { "./social-incoming-replies": "social", "./npc-purchase-client": "npcPurchaseClient" }, bag: { "./world-model/item-identity": "identity" },
   socialItems: { "./bevy-bag-model": "bag", "./world-model/item-identity": "identity" }, stage5:{}, tooltip:{"./crystal-item-source":"crystalItem"}, guildBuff:{}, socialActions: {}, extended: {"./npc-purchase-client":"npcPurchaseClient"} };
 const modules = new Map();
+sources.socialBudget = "../lib/social-operation-budget-host.ts";
+allow.socialBudget = {};
+sources.itemPresentation = "../lib/world-model/item-presentation.ts";
+allow.itemPresentation = {};
 sources.browserLocalization = "../lib/r16-browser-localization.ts";
 allow.browserLocalization = {};
 allow.r16Auth["./r16-browser-localization"] = "browserLocalization";
@@ -80,7 +86,8 @@ const requestId = seq => "st-" + String(seq).padStart(16, "0");
 
 
 // Extract complete, current nested Page declarations. No React, client-core
-// runtime, WASM, socket implementation, or renderer is imported/initialized.
+// loader, socket implementation or renderer is initialized. Social admission
+// and completion use the real Native WASM through the shared test helper.
 const pageUrl = new URL("../app/page.tsx", import.meta.url);
 const pageSource = readFileSync(pageUrl, "utf8");
 const pageAst = ts.createSourceFile(fileURLToPath(pageUrl), pageSource, ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);
@@ -92,7 +99,7 @@ const names = ["worldFishingOwner", "cancelWorldFishingGesture", "retireWorldFis
   "clearGatewayReconnectTimer", "setGatewayReconnectStatus", "resetGatewayReconnectState", "createIdleReconnectStatus", "flushGatewayProtocolQueue", "captureSpouseUiSource", "spouseUiSourceCurrent", "mailSpouse", "whisperSpouse", "openMailWindow",
   "submitStorageTransfer", "storeItem", "takeBackItem", "send", "sendRaw", "recordNpcPurchaseAction",
   "itemCommandRequiresOwner", "retireEquipmentSession", "retirePrivateCompanion", "advanceHeroWindowEpochs", "mailParcelItemsIdle", "endStorageService", "closeNpcRepairService", "retireNpcShopService",
-  "currentSpellsOwner", "currentSocialReplyOwner", "currentSocialReceiveOwner", "sameSocialPhysicalOwner",
+  "currentSpellsOwner", "currentSocialReplyOwner", "currentSocialReceiveOwner", "captureSocialBudgetGatewayEvent", "sameSocialPhysicalOwner",
   "socialReplyWindowOpen", "captureSocialRequest", "closeSocialReplyWindow", "replySocialRequest", "retireSocialRequests",
   "retireSocialItemConnection", "retireTerminalTradeItemOperation", "socialItemMutationAllowed", "parityItemMutationAllowed", "readSocialItemSurface", "socialItemProofCurrent",
   "submitSocialItem", "socialItemReceiptOwner", "observeSocialItemReceipt", "observeGuildPermissions", "observeGuildStorageChange",
@@ -106,18 +113,20 @@ const names = ["worldFishingOwner", "cancelWorldFishingGesture", "retireWorldFis
   "moveRankingRows", "setRankingOnlineOnly", "applyRankingPacket", "refreshFriends", "setShowFriends",
   "currentRankingInspectSource", "closeRankingInspect", "groupHiddenTargetIds", "currentGroupHoverName", "currentGroupOperationSource",
   "submitGroupOperation", "groupInviteMember", "kickGroupMember", "groupLeave", "groupToggleAllowInvites",
-  "readSocialRosterSource", "socialRosterProofCurrent", "sendSocialRosterCommand", "projectPartnerTradePacket", "sendTradeUiCommand", "confirmTrade", "cancelTrade"];
+  "readSocialRosterSource", "socialRosterProofCurrent", "sendSocialRosterCommand", "projectPartnerTradePacket", "sendTradeUiCommand", "confirmTrade", "cancelTrade",
+  "editGuildNotice", "guildDepositGold", "guildWithdrawGold", "setTradeGold", "acceptTrade"];
 const declarations = new Map();
 const ackCases = [];
 const socialCases = new Map();
 const socialPacketNames = ["GroupInvite", "MarriageRequest", "DivorceRequest", "MentorRequest", "GuildStatus", "GuildStorageList",
   "GuildStorageItemChange", "DepositTradeItem", "RetrieveTradeItem", "LogOutFailed", "FriendUpdate", "GuildInvite", "GuildMemberChange", "Rankings",
   "TradeItem", "TradeGold", "TradeRequest", "TradeAccept", "TradeConfirm", "TradeCancel", "NewItemInfo", "NewRecipeInfo", "Connected", "NewAccount", "Login", "LoginBanned", "ChangePassword",
-  "SwitchGroup", "AddMember", "DeleteMember", "GroupMemberInfo", "DeleteGroup", "ObjectHidden"];
+  "SwitchGroup", "AddMember", "DeleteMember", "GroupMemberInfo", "DeleteGroup", "ObjectHidden",
+  "GuildNoticeChange", "GuildStorageGoldChange"];
 let authControlsInitializer;
-let groupStartResetCondition, groupStartResetStatements;
+let groupStartResetCondition, groupStartResetStatements, groupStartSessionStatements, groupStartSuccessStatements;
 let spouseRenderInitializer, spouseRenderCallbacks;
-let gatewayGuard, snapshotStatements, snapshotRevision, socialSnapshotFriends, socialWindowRender, rosterRenderInitializer, tradeLeaseInitializer;
+let gatewayGuard, budgetCapture, snapshotStatements, snapshotRevision, socialSnapshotFriends, socialWindowRender, rosterRenderInitializer, tradeLeaseInitializer;
 function visit(node) {
   if (ts.isCaseClause(node) && ts.isStringLiteral(node.expression) && node.expression.text === "StartGame") {
     const branch = node.statements.find(statement => ts.isIfStatement(statement) && statement.elseStatement
@@ -129,6 +138,17 @@ function visit(node) {
     assert.equal(reset.length, 2, "the actual successful session branch resets group requests and hidden-target history");
     assert(statements.indexOf(reset[1]) < statements.findIndex(statement => statement.getText(pageAst).startsWith("equipmentStartGameRef.current =")));
     groupStartResetStatements = reset.map(statement => statement.getText(pageAst)).join("\n");
+    const sessionStatements = statements.filter(statement => statement.getText(pageAst) === 'suspendEquipmentConnection("connectionUnavailable");'
+      || statement.getText(pageAst).startsWith("equipmentStartGameRef.current =")
+      || statement.getText(pageAst) === "equipmentHostSuspendReasonRef.current = null;");
+    assert.equal(sessionStatements.length, 3, "the real successful branch retires the old connection and allocates a fresh authenticated session");
+    groupStartSessionStatements = sessionStatements.map(statement => statement.getText(pageAst)).join("\n");
+    const selected = new Set([...reset, ...sessionStatements]);
+    const ordered = statements.filter(statement => selected.has(statement));
+    assert.equal(ordered.length, 5, "retain all three session and both group statements in production order");
+    assert.match(ordered.find(statement => statement.getText(pageAst).startsWith("equipmentStartGameRef.current =")).getText(pageAst),
+      /sessionGeneration: \+\+equipmentSessionGenerationRef\.current/, "execute the real authenticated session increment");
+    groupStartSuccessStatements = ordered.map(statement => statement.getText(pageAst)).join("\n");
   }
   if (ts.isVariableDeclaration(node) && node.name.getText(pageAst) === "loginAuthControls") {
     assert.equal(authControlsInitializer, undefined, "sole actual Auth controls lease");
@@ -157,6 +177,7 @@ function visit(node) {
   }
   if (ts.isFunctionDeclaration(node) && node.name?.text === "handleGatewayEvent") {
     gatewayGuard = node.body.statements[0].getText(pageAst);
+    budgetCapture = node.body.statements.find(n => n.getText(pageAst) === "captureSocialBudgetGatewayEvent(event, connectionGeneration, source);").getText(pageAst);
     const snapshots = node.body.statements.find(n => ts.isIfStatement(n) && n.expression.getText(pageAst) === 'event.type === "worldSnapshot"');
     snapshotRevision = snapshots.thenStatement.statements[0].getText(pageAst);
   }
@@ -215,14 +236,14 @@ function visitAuthClose(node) {
 visitAuthClose(pageAst);assert.ok(authCloseStatements);
 
 const actualFunctions = names.map(name => declarations.get(name)).join("\n")
-  + "\nfunction applyGroupStartGame(payload) { if (" + groupStartResetCondition + ") {} else {" + groupStartResetStatements + "} }"
+  + "\nfunction applyGroupStartGame(payload) { const connectionGeneration = equipmentConnectionGenerationRef.current; if (" + groupStartResetCondition + ") {} else {" + groupStartSuccessStatements + "} }"
   + "\nfunction applyAuthSocketClose(socket) {" + authCloseStatements + "\n}"
   + '\nfunction applyStorageAck(event) { const payload=event.payload??{}; switch(event.packet) { case "StoreItemV2":\n'
   + ackCase.getText(pageAst) + "\n} }\n"
   + "function applySocialEvent(event, connectionGeneration, source) {" + gatewayGuard
-  + "\nconst payload=event.payload??{}; switch(event.packet) {\n" + socialPacketNames.map(n => socialCases.get(n)).join("\n") + "\n}}\n"
+  + "\nevent={type:'packet',...event};\n" + budgetCapture + "\nconst payload=event.payload??{}; switch(event.packet) {\n" + socialPacketNames.map(n => socialCases.get(n)).join("\n") + "\n}}\n"
   + "function applySocialSnapshot(snapshot, connectionGeneration, source) {" + gatewayGuard
-  + "\n" + snapshotRevision + "\n" + snapshotStatements + "\n}"
+  + "\n" + snapshotRevision + "\ncaptureSocialBudgetGatewayEvent({type:'worldSnapshot',payload:snapshot}, connectionGeneration, source);\n" + snapshotStatements + "\n}"
   + "\nfunction projectSocialSnapshotFriends(snapshot, current, socialOwner) {return " + socialSnapshotFriends + ";}"
   + "\nfunction applySocialWindowRender(showGroup, showBonds, showGuild) {" + socialWindowRender + "}"
   + "\nfunction captureSocialRosterRender(showFriends, showGuild) {return " + rosterRenderInitializer + ";}"
@@ -276,6 +297,8 @@ const session = { connectionGeneration: 3, sessionGeneration: 5 };
 const owner = { ...session, runGeneration: 0, ownerRevision: 1, owner: "react" };
 
 function harness({ identity = session, sequenceRef = { current: 1 }, pendingRef = { current: new Map() } } = {}) {
+  const budgetRuntime = createSocialBudgetTestRuntime();
+  const budget = new (loadPure("socialBudget").SocialOperationBudgetHost)(() => budgetRuntime);
   const sent = [], errors = [], logs = [], terminations = [], npcWithdrawals = [], npcInventoryRetirements = [];
   let listener = null, socketThrows = false, socketThrowType = null, attempts = 0, actions = 0;
   let clock = 1000, timerSequence = 0;
@@ -317,12 +340,15 @@ function harness({ identity = session, sequenceRef = { current: 1 }, pendingRef 
     companionContextEpochRef: {current: 1}, companionClientRef: {current: null}, setCompanionOpen() {},
     projectEquipmentGatewaySnapshot: pureEquipment.projectEquipmentGatewaySnapshot,
     authoritativeItemUniqueId: pureIdentity.authoritativeItemUniqueId,
+    projectInventoryItemIdentity: pureIdentity.projectInventoryItemIdentity,
+    projectItemPresentation: loadPure("itemPresentation").projectItemPresentation,
     currentEquipmentCommandItem: pureEquipment.currentEquipmentCommandItem,
     classifyEquipmentUse: pureEquipment.classifyEquipmentUse,
     equipmentGatewayOperation: pureEquipment.equipmentGatewayOperation,
     mailMutationAllowed: pureParcel.mailMutationAllowed,
     isMailItemMutation: pureParcel.isMailItemMutation,
     readSharedItemCatalogInfo:loadPure("tooltip").readSharedItemCatalogInfo, runtimeRef:{current:null},
+    socialBudgetRef:{current:budget}, socialBudgetBootstrapRef:{current:null}, projectBevyBagModel:loadPure("bag").projectBevyBagModel,
     worldRef: { current: world() }, socketRef: { current: socket },
     pendingStorageRequestsRef: pendingRef, storageRequestSequenceRef: sequenceRef,
     storageUiIngressRef: { current: null }, storageServiceActiveRef: { current: false }, storageCompatibilityRef: { current: false },
@@ -422,6 +448,10 @@ function harness({ identity = session, sequenceRef = { current: 1 }, pendingRef 
   const functions = new Function(...keys, pageJavaScript + "\nreturn {"
     + names.join(",") + ",applyGroupStartGame,applyAuthSocketClose,applyStorageAck,applySocialEvent,applySocialSnapshot,projectSocialSnapshotFriends,applySocialWindowRender,captureSocialRosterRender,captureSocialTradeUiLease,captureSpouseRender,captureLoginAuthControls};")(...keys.map(key => scope[key]));
   scope.loginAuthRef.current = functions.emptyLoginAuthState(1);
+  // Authenticated bootstrap packets for this controlled fixture. The production
+  // host never seeds Native state from the React guild/group projection.
+  budget.receive(functions.currentSocialReceiveOwner(), "UserInformation", {name:"Self",realId:7});
+  budget.receive(functions.currentSocialReceiveOwner(), "GuildStatus", {guildName:"Guild",guildRankName:"Leader",myRankId:0,myOptions:255});
   return { ...functions, scope, sent, errors, logs, terminations, npcWithdrawals, npcInventoryRetirements, socket, liveOwner,
     get attempts() { return attempts; }, get actions() { return actions; },
     onAction(value) { listener = value; }, throwAtSocket(type = null) { socketThrows = true; socketThrowType = type; },
@@ -827,6 +857,9 @@ test("actual Page Trade cancel spent custody retires with the actual session and
   assert.equal(page.scope.socialTradeCancelSpentRef.current, null);
   assert.equal(page.scope.socialTradeItemOperationRef.current, null);
   assert.equal(page.cancelTrade(), false, "retiring the session does not turn its rendered lease into new authority");
+  page.scope.equipmentSessionGenerationRef.current++;
+  page.scope.equipmentStartGameRef.current = {...page.scope.equipmentStartGameRef.current,
+    sessionGeneration:page.scope.equipmentSessionGenerationRef.current};
   openCurrentTrade(page); assert.equal(page.cancelTrade(), true); assert.equal(page.attempts, 2);
 });
 
@@ -889,17 +922,18 @@ test("actual Page duplicate TradeAccept cannot renew a sent or unknown cancellat
   }
 });
 
-test("actual Page duplicate TradeAccept rule does not coalesce new requests requested to open or a different partner", () => {
+test("actual Page distinct trade incarnations preserve Native unknown cancel custody until an actual qualifying scope transition", () => {
   const page = harness(); openCurrentTrade(page); assert.equal(page.cancelTrade(), true);
-  for (const [packet, name, state] of [["TradeRequest", "Partner", "requested"], ["TradeRequest", "Partner", "requested"],
-    ["TradeAccept", "Partner", "open"], ["TradeAccept", "Other", "open"]]) {
+  for (const [packet, name, state, mayCancel] of [["TradeRequest", "Partner", "requested", false], ["TradeRequest", "Partner", "requested", false],
+    ["TradeAccept", "Partner", "open", false], ["TradeAccept", "Other", "open", true]]) {
     const before = page.scope.tradeIncarnationRef.current;
     page.receive(packet, {name}); page.renderTrade();
     assert.equal(page.scope.tradeIncarnationRef.current, before + 1, packet + " " + name);
     assert.equal(page.scope.tradeLifecycleRef.current.state, state);
     assert.equal(page.scope.tradeLifecycleRef.current.partner, name);
     assert.equal(page.scope.socialOwnTradeRef.current, null, "new exchange requires a fresh authoritative own offer");
-    assert.equal(page.cancelTrade(), true, "new exchange gets its own one-time cancellation");
+    assert.equal(page.cancelTrade(), mayCancel, "a UI incarnation cannot fabricate the Native receipt that retires an entered cancel");
+    assert.equal(page.scope.socialBudgetRef.current.inspect(page.currentSocialReceiveOwner()).pendingCount, 1);
   }
 });
 
@@ -2571,4 +2605,258 @@ test("Group explicit allow toggle and leave retain their separate real SwitchGro
   assert.equal(loadPure("stage5").adaptGroup(page.scope.worldRef.current.stage5Systems.group).allowInvites, false);
   page.receive("SwitchGroup", {allowGroup: true});
   assert.equal(loadPure("stage5").adaptGroup(page.scope.worldRef.current.stage5Systems.group).allowInvites, true);
+});
+
+// Page integration over the real pinned Native budget. These helpers supply
+// ordinary synthetic server packets/data; they do not implement admission or
+// completion rules, bypass domain proofs or inject fields into outgoing DTOs.
+function pageBudget(page) {
+  const state = page.scope.socialBudgetRef.current.inspect(page.currentSocialReceiveOwner());
+  assert.equal(state?.ok, true, "the current authenticated Page owner reaches the actual Native reducer");
+  return state;
+}
+function openBudgetGuild(page) {
+  page.receive("GuildStatus", {guildName: "Guild", guildRankName: "Leader", level: 3, experience: 41,
+    maxExperience: 1000, gold: 1000, sparePoints: 2, memberCount: 3, maxMembers: 50,
+    voting: false, itemCount: 0, buffCount: 0, myOptions: 255, myRankId: 0});
+  page.receive("GuildMemberChange", {status: 255, name: "", rankIndex: 0, ranks: [
+    {index: 0, name: "Leader", options: 255, members: [{id: 7, name: "Self", online: true}]},
+    {index: 1, name: "Officer", options: 65, members: [{id: 9, name: "Officer", online: true}]},
+    {index: 2, name: "Members", options: 2, members: [{id: 8, name: "Member", online: true}]},
+  ]});
+  page.setShowGuild(true); page.renderRoster();
+}
+function openBudgetTrade(page) {
+  openCurrentTrade(page);
+  page.scope.worldRef.current.stage5Systems.trade.offeredCurrency = "gold";
+  page.snapshot(); page.renderTrade();
+  return page.readSocialItemSurface("trade");
+}
+function mixedEightPageOperations(page) {
+  openBudgetGuild(page); openBudgetTrade(page);
+  for (let index = 0; index < 3; index++) assert.equal(page.groupInviteMember("Mixed" + index), true);
+  page.groupToggleAllowInvites(true);
+  page.editGuildNotice("Budget notice");
+  page.guildDepositGold(25);
+  page.setTradeGold(25);
+  const source = page.readSocialItemSurface("trade"); assert.ok(source);
+  page.submitSocialItem("depositTrade", 43, 5, 22, source.sourceKey);
+  assert.equal(page.attempts, 8);
+  assert.equal(pageBudget(page).pendingCount, 8);
+}
+
+test("Page Native budget rejects a mixed ninth operation before action and domain claim, then exact failure returns one slot", () => {
+  const page = harness(); mixedEightPageOperations(page);
+  let rankClaims = 0;
+  const ranks = page.scope.guildRankOperationsRef.current, claim = ranks.claim.bind(ranks);
+  ranks.claim = (...args) => { rankClaims++; return claim(...args); };
+  const beforeActions = page.actions, beforeAttempts = page.attempts;
+  assert.equal(page.toggleGuildRankPermission(2, "CanStoreItem", true), false);
+  assert.equal(page.actions, beforeActions, "budget rejection precedes the real mir2:action callback");
+  assert.equal(page.attempts, beforeAttempts); assert.equal(rankClaims, 0);
+  assert.equal(ranks.view(page.now).permission, false, "a definitely-unsent refusal cannot spend the checkbox throttle");
+  page.receive("GuildStorageGoldChange", {changeType: 3, amount: 24});
+  assert.equal(pageBudget(page).pendingCount, 8, "another amount is not the deposit failure receipt");
+  page.receive("GuildStorageGoldChange", {changeType: 3, amount: 25});
+  assert.equal(pageBudget(page).pendingCount, 7);
+  assert.equal(page.toggleGuildRankPermission(2, "CanStoreItem", true), true, "same real proof path is eligible after actual capacity returns");
+  assert.equal(rankClaims, 1); assert.equal(page.attempts, beforeAttempts + 1);
+  assert.equal(page.actions, beforeActions + 1); assert.equal(pageBudget(page).pendingCount, 8);
+  assert.deepEqual(page.sent.at(-1), {type: "editGuildMember", changeType: 5, rankIndex: 2, name: "true", rankName: "3"});
+  for (const wire of page.sent) for (const field of ["token", "owner", "proof", "requestId", "epoch"])
+    assert.equal(Object.hasOwn(wire, field), false, "budget custody never adds wire fields");
+});
+
+test("Page synchronous cross-domain reentry sees the outer reservation occupying the eighth Native slot", () => {
+  const page = harness(); openBudgetGuild(page);
+  for (let index = 0; index < 7; index++) assert.equal(page.groupInviteMember("Held" + index), true);
+  let observed = false, reentry;
+  page.onAction(() => {
+    if (observed) return; observed = true;
+    const state = pageBudget(page);
+    assert.equal(state.pendingCount, 8);
+    assert.equal(state.pending.filter(row => !row.entered).length, 1, "the outer action has not entered its socket yet");
+    reentry = page.toggleGuildRankPermission(2, "CanStoreItem", true);
+  });
+  const actions = page.actions;
+  assert.equal(page.groupInviteMember("Outer"), true);
+  assert.equal(reentry, false); assert.equal(page.actions, actions + 1); assert.equal(page.attempts, 8);
+  assert.equal(pageBudget(page).pending.every(row => row.entered), true);
+  assert.equal(page.sent.some(command => command.type === "editGuildMember"), false);
+});
+
+test("Page action-time real packet publication invalidates an old reservation before the domain is claimed", () => {
+  const page = harness();
+  let claims = 0;
+  const groups = page.scope.groupOperationsRef.current, claim = groups.claim.bind(groups);
+  groups.claim = (...args) => { claims++; return claim(...args); };
+  page.onAction(() => page.receive("SwitchGroup", {allowGroup: true}));
+  assert.equal(page.groupInviteMember("Fresh"), false);
+  assert.equal(page.actions, 1); assert.equal(page.attempts, 0); assert.equal(claims, 0);
+  assert.equal(groups.pending.length, 0); assert.equal(pageBudget(page).pendingCount, 0);
+  page.onAction(null);
+  assert.equal(page.groupInviteMember("Fresh"), true);
+  assert.equal(claims, 1); assert.equal(page.attempts, 1); assert.equal(pageBudget(page).pendingCount, 1);
+});
+
+test("Page final socket refusal returns only unsent custody while a real socket throw preserves entered Native and domain barriers", () => {
+  const refused = harness(); refused.onAction(() => { refused.socket.readyState = 3; });
+  assert.equal(refused.groupInviteMember("Refused"), false);
+  assert.equal(refused.attempts, 0); assert.equal(refused.scope.groupOperationsRef.current.pending.length, 0);
+  refused.socket.readyState = 1; refused.onAction(null);
+  assert.equal(pageBudget(refused).pendingCount, 0);
+  assert.equal(refused.groupInviteMember("Refused"), true); assert.equal(refused.attempts, 1);
+
+  const unknown = harness(); unknown.throwAtSocket("addMember");
+  assert.equal(unknown.groupInviteMember("Unknown"), true);
+  assert.equal(unknown.attempts, 1); assert.equal(unknown.sent.length, 0);
+  assert.equal(unknown.scope.groupOperationsRef.current.pending[0].entered, true);
+  assert.equal(pageBudget(unknown).pending[0].entered, true);
+  unknown.restoreSocketSend();
+  assert.equal(unknown.groupInviteMember("Unknown"), false); assert.equal(unknown.attempts, 1);
+  unknown.receive("SwitchGroup", {allowGroup: false});
+  assert.equal(pageBudget(unknown).pendingCount, 1);
+  unknown.receive("AddMember", {name: "Unknown"});
+  assert.equal(pageBudget(unknown).pendingCount, 0);
+  assert.equal(unknown.scope.groupOperationsRef.current.pending.length, 0);
+});
+
+test("Page actual packet ingress rejects foreign socket and connection before Native ACK while matching authority releases once", () => {
+  const page = harness(); assert.equal(page.groupInviteMember("Receipt"), true);
+  page.receive("AddMember", {name: "Receipt"}, session.connectionGeneration + 1);
+  page.receive("AddMember", {name: "Receipt"}, undefined, {});
+  page.captureSocialBudgetGatewayEvent({type: "error", packet: "AddMember", payload: {name: "Receipt"}},
+    session.connectionGeneration, page.socket);
+  assert.equal(pageBudget(page).pendingCount, 1);
+  assert.equal(page.scope.groupOperationsRef.current.pending.length, 1);
+  page.receive("AddMember", {name: "Other"});
+  assert.equal(pageBudget(page).pendingCount, 1);
+  page.receive("AddMember", {name: "Receipt"});
+  assert.equal(pageBudget(page).pendingCount, 0);
+  assert.equal(page.scope.groupOperationsRef.current.pending.length, 0);
+  page.receive("AddMember", {name: "Receipt"});
+  assert.equal(pageBudget(page).pendingCount, 0, "repeat receipt cannot create or resurrect a pending operation");
+});
+
+test("Page raw own-offer gold deltas release Native custody while guest gold, foreign nonce and wrong frames do not", () => {
+  const page = harness(); openBudgetTrade(page);
+  page.setTradeGold(25); assert.equal(pageBudget(page).pendingCount, 1);
+  page.receive("TradeGold", {amount: 25});
+  assert.equal(pageBudget(page).pendingCount, 1, "the ordinary TradeGold packet describes the guest");
+  const raw = structuredClone(page.scope.worldRef.current);
+  raw.stage5Systems.trade.offeredGold = 25;
+  for (const [field, value] of [["settlementNonce", "foreign-nonce"], ["partner", "Other"]]) {
+    const wrong = structuredClone(raw); wrong.stage5Systems.trade[field] = value; page.snapshot(wrong);
+    assert.equal(pageBudget(page).pendingCount, 1, field);
+  }
+  const wrongOwner = {...raw, playerObjectId: 4};
+  page.captureSocialBudgetGatewayEvent({type: "worldSnapshot", payload: wrongOwner}, session.connectionGeneration, page.socket);
+  page.snapshot(raw, session.connectionGeneration + 1); page.snapshot(raw, undefined, {});
+  assert.equal(pageBudget(page).pendingCount, 1);
+  page.snapshot(raw); assert.equal(pageBudget(page).pendingCount, 0);
+  page.renderTrade(); page.setTradeGold(25); assert.equal(pageBudget(page).pendingCount, 1);
+  page.snapshot(raw); assert.equal(pageBudget(page).pendingCount, 1, "the old equal projection cannot acknowledge a successor increment");
+  raw.stage5Systems.trade.offeredGold = 50; page.snapshot(raw);
+  assert.equal(pageBudget(page).pendingCount, 0);
+  assert.deepEqual(page.sent, [{type: "tradeGold", amount: 25}, {type: "tradeGold", amount: 25}]);
+});
+
+test("Page own-offer projection uses one complete raw frame and physical Bag2 UID rather than earlier React aliases", () => {
+  const page = harness(); openBudgetTrade(page);
+  page.setTradeGold(25);
+  const raw = structuredClone(page.scope.worldRef.current);
+  raw.inventoryItems[1].uniqueId = 222; delete raw.inventoryItems[1].authoritativeUniqueId;
+  raw.stage5Systems.trade.offeredGold = 25;
+  raw.stage5Systems.trade.offeredSlots = {3: 43}; raw.stage5Systems.trade.offeredUniqueIds = {3: 222};
+  assert.equal(page.scope.worldRef.current.inventoryItems[1].uniqueId, 22);
+  for (const missing of ["inventoryCapacity", "maxBagSlots", "gold", "inventoryItems", "beltItems", "equipmentItems"]) {
+    const partial = structuredClone(raw); delete partial[missing]; page.snapshot(partial);
+    assert.equal(pageBudget(page).pendingCount, 1, "missing " + missing + " cannot become an invented empty model");
+  }
+  const localSlot = structuredClone(raw); localSlot.stage5Systems.trade.offeredSlots[3] = 3; page.snapshot(localSlot);
+  assert.equal(pageBudget(page).pendingCount, 1, "bag2 local3 is not the physical bag slot43");
+  const wrongUid = structuredClone(raw); wrongUid.stage5Systems.trade.offeredUniqueIds[3] = 22; page.snapshot(wrongUid);
+  assert.equal(pageBudget(page).pendingCount, 1, "old React UID is not this raw frame's inventory authority");
+  const duplicate = structuredClone(raw); duplicate.inventoryItems.push({...duplicate.inventoryItems[1], slot: 4}); page.snapshot(duplicate);
+  assert.equal(pageBudget(page).pendingCount, 1);
+  page.snapshot(raw);
+  assert.equal(pageBudget(page).pendingCount, 0, "real Native projection found UID222 at container0 physical43 in the same frame");
+  assert.equal(page.scope.worldRef.current.inventoryItems[1].uniqueId, 22, "the raw receive capture runs independently of React world reconstruction");
+});
+
+test("Page scene and closed-window retirement retain entered budget but successful new StartGame uses the real new session", () => {
+  const page = harness(); assert.equal(page.groupInviteMember("OldSession"), true);
+  const oldOwner = page.currentSocialReceiveOwner(), oldSession = page.scope.equipmentSessionGenerationRef.current;
+  page.retireSocialRequests(); page.scope.worldRef.current.mapFileName = "D002"; page.setShowGroup(false);
+  assert.equal(pageBudget(page).pendingCount, 1); assert.equal(page.scope.groupOperationsRef.current.pending.length, 1);
+  page.applyGroupStartGame({result: 3}); assert.equal(pageBudget(page).pendingCount, 1);
+  assert.equal(page.scope.equipmentSessionGenerationRef.current, oldSession);
+  page.retireEquipmentSession();
+  assert.equal(page.scope.groupOperationsRef.current.pending.length, 0);
+  assert.equal(page.scope.socialBudgetRef.current.inspect(oldOwner), null);
+  const before = page.scope.equipmentSessionGenerationRef.current;
+  page.applyGroupStartGame({result: 4});
+  assert.equal(page.scope.equipmentSessionGenerationRef.current, before + 1);
+  assert.equal(page.scope.equipmentStartGameRef.current.sessionGeneration, before + 1);
+  page.receive("UserInformation", {objectId: 3, realId: 7, name: "Self"});
+  assert.equal(page.groupInviteMember("NewSession"), true);
+  assert.equal(pageBudget(page).pendingCount, 1, "only the newly authenticated session's operation remains");
+});
+
+test("Page real transient trade paths, incoming declines and independent roster actions do not spend full Native slots", () => {
+  const page = harness();
+  for (let index = 0; index < 8; index++) assert.equal(page.groupInviteMember("LongLived" + index), true);
+  assert.equal(pageBudget(page).pendingCount, 8);
+  assert.equal(page.sendRaw({type: "tradeRequest"}), true);
+  openBudgetTrade(page); page.confirmTrade();
+  assert.deepEqual(page.sent.at(-1), {type: "tradeConfirm", locked: true});
+  page.receive("TradeRequest", {name: "Partner"}); page.renderTrade(); page.acceptTrade();
+  assert.deepEqual(page.sent.at(-1), {type: "tradeReply", acceptInvite: true});
+  const accepted = page.attempts; page.acceptTrade(); assert.equal(page.attempts, accepted, "transient keeps its existing once-only UI proof");
+  for (const [packet, kind] of [["GroupInvite", "group"], ["GuildInvite", "guild"]]) {
+    page.receive(packet, {name: "Inviter", level: 30});
+    const request = requests(page).find(row => row.kind === kind); assert.ok(request);
+    page.replySocialRequest(kind, request.epoch, false);
+    assert.deepEqual(page.sent.at(-1), {type: kind === "group" ? "groupInvite" : "guildInvite", acceptInvite: false});
+  }
+  page.receive("FriendUpdate", {friendRecords: [{name: "Friend", index: 42}]});
+  page.setShowFriends(true); page.renderRoster(); page.refreshFriends();
+  assert.deepEqual(page.sent.at(-1), {type: "refreshFriends"});
+  assert.equal(pageBudget(page).pendingCount, 8);
+  assert.equal(page.groupInviteMember("StillNinth"), false);
+});
+
+test("Page permission UI finally and input throttle never settle the Native request without its exact fresh typed ACK", () => {
+  const page = harness(); openBudgetGuild(page);
+  assert.equal(page.toggleGuildRankPermission(2, "CanStoreItem", true), true);
+  assert.equal(pageBudget(page).pendingCount, 1);
+  page.setClock(page.now + 301);
+  assert.equal(page.scope.guildRankOperationsRef.current.view(page.now).permission, false);
+  assert.equal(pageBudget(page).pendingCount, 1, "UI cleanup and elapsed throttle are not a permission result");
+  const rank = {index: 2, name: "Members", options: 10, members: [{id: 8, name: "Member", online: true}]};
+  page.receive("GuildMemberChange", {status: 7, name: "Officer", rankIndex: 0, ranks: [rank]});
+  assert.equal(pageBudget(page).pendingCount, 1);
+  const full = {status: 255, name: "", rankIndex: 0, ranks: [
+    {index: 0, name: "Leader", options: 255, members: [{id: 7, name: "Self", online: true}]},
+    {index: 1, name: "Officer", options: 65, members: [{id: 9, name: "Officer", online: true}]}, rank,
+  ]};
+  page.receive("GuildMemberChange", full); assert.equal(pageBudget(page).pendingCount, 1);
+  page.receive("GuildMemberChange", {status: 7, name: "Self", rankIndex: 0, ranks: [rank]});
+  assert.equal(pageBudget(page).pendingCount, 0);
+  assert.equal(page.attempts, 1, "no timer or receive event submitted another checkbox operation");
+});
+
+test("Page authenticated receive capture queues bootstrap before late WASM and never queues a refused outgoing action", () => {
+  const page = harness(); let runtime = null;
+  page.scope.socialBudgetRef.current = new (loadPure("socialBudget").SocialOperationBudgetHost)(() => runtime);
+  page.receive("UserInformation", {objectId: 3, realId: 7, name: "Self"});
+  page.receive("GuildStatus", {guildName: "Guild", guildRankName: "Leader", myRankId: 0, myOptions: 255});
+  assert.equal(page.groupInviteMember("BeforeWasm"), false);
+  assert.equal(page.actions, 0); assert.equal(page.attempts, 0);
+  assert.equal(page.scope.groupOperationsRef.current.pending.length, 0);
+  runtime = createSocialBudgetTestRuntime();
+  assert.equal(page.groupInviteMember("AfterWasm"), true);
+  assert.deepEqual(page.sent, [{type: "addMember", name: "AfterWasm"}]);
+  assert.equal(pageBudget(page).pendingCount, 1);
+  page.receive("AddMember", {name: "AfterWasm"}); assert.equal(pageBudget(page).pendingCount, 0);
 });

@@ -95,6 +95,7 @@ import { useBevyBagUi } from "../lib/use-bevy-bag-ui";
 import { resolveSharedUiRequests, sharedCanvasUsesWebGl2, sharedUiCanvasId } from "../lib/bevy-shared-canvas-mode";
 import { projectBevyBagModel } from "../lib/bevy-bag-model";
 import { SocialIncomingReplies, socialReplyCommand, type SocialReplyOwner, type SocialReplyProof, type SocialRequestKind } from "../lib/social-incoming-replies";
+import { SocialOperationBudgetHost, type SocialBudgetRuntime, type SocialBudgetTicket } from "../lib/social-operation-budget-host";
 import { GroupOperations, groupOperationCommand, type GroupOperation, type GroupOperationProof, type GroupOperationSource } from "../lib/group-operations";
 import { GuildRankOperations, type GuildRankEditProof, type GuildRankEditSource } from "../lib/guild-rank-operations";
 import { applyGuildMemberChange } from "../lib/guild-rank-projection";
@@ -496,7 +497,7 @@ function useImmediateUiState<T>(initial: T) {
   return [state, set, current] as const;
 }
 
-type RuntimeModule = CombatModeRuntime & CrystalSkillBarRuntime & CrystalStatsRuntime & CrystalTooltipRuntime & QuestRouteRuntime & BevyQuestUiRuntime & BevyBagUiRuntime & StorageRuntime & HudRuntime & CharacterRuntime & HeroRuntime & SpellsRuntime & MailRuntime & CombatRuntime & NpcGoldBuyRuntime & NpcShopRuntime & {
+type RuntimeModule = CombatModeRuntime & CrystalSkillBarRuntime & CrystalStatsRuntime & CrystalTooltipRuntime & QuestRouteRuntime & BevyQuestUiRuntime & BevyBagUiRuntime & StorageRuntime & HudRuntime & CharacterRuntime & HeroRuntime & SpellsRuntime & MailRuntime & CombatRuntime & NpcGoldBuyRuntime & NpcShopRuntime & SocialBudgetRuntime & {
   default?: (input?: { module_or_path: string | URL | Request } | string | URL | Request) => Promise<unknown>;
   bootMir2Runtime?: () => void;
   getMir2RendererBackend?: () => string;
@@ -2174,6 +2175,9 @@ export default function HomePage() {
     [wideMobileActive, wideMobileViewport.height, wideMobileViewport.width],
   );
   const runtimeRef = useRef<RuntimeModule | null>(null);
+  const socialBudgetRef = useRef<SocialOperationBudgetHost | null>(null);
+  if (socialBudgetRef.current === null) socialBudgetRef.current = new SocialOperationBudgetHost(() => runtimeRef.current);
+  const socialBudgetBootstrapRef = useRef<SocialReplyOwner | null>(null);
   const movementShadowBridgeRef = useRef<BevyMovementShadowBridge | null>(null);
   if (movementShadowBridgeRef.current === null) {
     movementShadowBridgeRef.current = createBevyMovementShadowBridge(() => runtimeRef.current);
@@ -6491,6 +6495,8 @@ export default function HomePage() {
 
   function sendRaw(command: Record<string, unknown>, options?: { authProof?: PreauthProof; modeProof?: CombatModeProof; guildBuffProof?: GuildBuffProof; heroProof?: HeroOperationProof; cashProof?: CashGameShopProof; creatureProof?: CreaturePlayerProof; quiet?: boolean; ownerToken?: EquipmentOwnerProof; reservedCharacterSource?: number; storageProof?: StorageTransferProof; socialReplyProof?: SocialReplyProof; storageRentalProof?: StorageRentalProof; socialItemProof?: SocialWindowOperationProof; socialTradeProof?: SocialTradeSendProof; guildListProof?: Readonly<{owner: SocialReplyOwner; guildName: string}>; rankingProof?: RankingQueryProof; rankingInspectProof?: RankingInspectProof; socialRosterProof?: SocialRosterSendProof; groupProof?: GroupOperationProof; skillProof?:SpellsProof;combatProof?:CombatProof;combatBody?:string;mailProof?:MailSendProof;mailQuoteProof?:MailQuoteProof;mailLockProof?:MailLockProof;npcBuyProof?:NpcGoldBuyProof;npcPearlBuyProof?:NpcPearlBuyProof;npcLegacyBuyProof?:object;npcUi?:NpcShopSendProof;npcRepairProof?:NpcRepairProof;bagBeltProof?:BagBeltFinalProof;worldFishingProof?:WorldFishingFinalProof }) {
     if (command.type === "companionControl" || command.type === "companionRuntimeRegister" || command.type === "companionRuntimeReply") return false;
+    let socialBudgetTicket: SocialBudgetTicket | null = null;
+    try {
     const rejectNpcPurchaseSendGate = (reason: NpcPurchaseActionReason): false => {
       if (command.type === "buyItem") recordNpcPurchaseAction(npcPurchaseSendActionRef.current, "rejected", reason);
       return false;
@@ -6565,6 +6571,12 @@ export default function HomePage() {
       if (options?.npcPearlBuyProof && !npcBuyDispatcher?.allowsPearl(options.npcPearlBuyProof, command)) return rejectNpcPurchaseSendGate("pearlProofRejected");
       if (options?.npcLegacyBuyProof && !legacyNpcBuyAllowed(options.npcLegacyBuyProof, command)) return rejectNpcPurchaseSendGate("legacyProofRejected");
     }
+    // Reserve before synchronous action listeners or any domain claim. The
+    // Native reducer counts reservations as well as entered requests toward eight.
+    const socialBudgetAdmission = socialBudgetRef.current?.reserve(JSON.parse(serialized),
+      currentSocialReplyOwner(), Math.floor(performance.now()));
+    if (!socialBudgetAdmission?.ok) return false;
+    socialBudgetTicket = socialBudgetAdmission.ticket;
     const diagnosticCommand = isSensitiveGatewayCommand(command) ? { type: command.type } : command;
     lastCommandRef.current = diagnosticCommand;
     const commandNow = Date.now();
@@ -6646,6 +6658,9 @@ export default function HomePage() {
       pendingStorageRequestsRef.current.values(), options?.storageProof)) return rejectNpcPurchaseSendGate("finalStorageMutationBlocked");
     if (options?.skillProof && (command.type!=="magicKey" || !bevySpellsSendGateRef.current(options.skillProof)
       || ["requestId","spell","key","oldKey"].some(key=>command[key]!==options.skillProof![key as keyof SpellsProof]))) return false;
+    // Readonly validation precedes irreversible domain claims. Native owns the
+    // publication cursor and invite epochs; UI epochs are never passed to it.
+    if (socialBudgetTicket && !socialBudgetRef.current?.validate(socialBudgetTicket, currentSocialReplyOwner(), wireCommand)) return false;
     if(options?.combatProof&&(!combatIngressRef.current?.allows(options.combatProof)
       ||!combatIngressRef.current.claim(options.combatProof,serialized)))return false;
     if(options?.mailProof){const p=options.mailProof;
@@ -6779,9 +6794,11 @@ export default function HomePage() {
     if (options?.socialTradeProof && wireCommand.type === "tradeCancel") {
       if (socketRef.current !== socket || socket.readyState !== WebSocket.OPEN
         || !socialTradeProofCurrent(options.socialTradeProof, wireCommand)) return false;
-      // Spend only at socket entry. A transport throw cannot prove this cancel was unsent.
-      socialTradeCancelSpentRef.current = options.socialTradeProof.incarnation;
     }
+    // No guard, listener or domain callback follows Native entry before send.
+    if (socialBudgetTicket && !socialBudgetRef.current?.enter(socialBudgetTicket, currentSocialReplyOwner(), wireCommand)) return false;
+    // Spend only at socket entry. A transport throw cannot prove this cancel was unsent.
+    if (options?.socialTradeProof && wireCommand.type === "tradeCancel") socialTradeCancelSpentRef.current = options.socialTradeProof.incarnation;
     try { socket.send(serialized); } catch (error) {
       if (options?.modeProof) combatModeHostRef.current?.outcomeUnknown(options.modeProof);
       if (options?.guildBuffProof) guildBuffOperationsRef.current.outcomeUnknown(options.guildBuffProof);
@@ -6802,6 +6819,11 @@ export default function HomePage() {
     }
     if (!options?.quiet && !isSensitiveGatewayCommand(command)) appendLog(t("log.sent", [JSON.stringify(command)]), "network");
     return true;
+    } finally {
+      // Reserved-only rejection is definitely unsent. Entered/throwing sends
+      // remain owned until a real Native receipt, scope end or session retirement.
+      if (socialBudgetTicket) socialBudgetRef.current?.cancelUnsent(socialBudgetTicket);
+    }
   }
 
   function captureCompanionSource(): R16CompanionSource | null {
@@ -13560,6 +13582,7 @@ export default function HomePage() {
       && a.sessionGeneration === b.sessionGeneration && a.playerObjectId === b.playerObjectId;
   }
   function retireSocialItemConnection() {
+    socialBudgetRef.current?.retire(); socialBudgetBootstrapRef.current = null;
     retireGuildRankControls();
     socialItemOperationsRef.current.retire(); socialOwnTradeRef.current = null;
     socialTradeItemOperationRef.current = null; socialTradeCancelSpentRef.current = null;
@@ -13844,6 +13867,54 @@ export default function HomePage() {
     // receive reducers and post-ACK snapshots; every new send still requires the strict owner.
     return {connectionGeneration: session.connectionGeneration, sessionGeneration: session.sessionGeneration,
       playerObjectId, sceneRevision: socialSceneRevisionRef.current, mapFileName: current.mapFileName, socket};
+  }
+  function captureSocialBudgetGatewayEvent(event: GatewayEvent, connectionGeneration: number, source: WebSocket) {
+    const session = equipmentStartGameRef.current;
+    if (socketRef.current !== source || connectionGeneration !== equipmentConnectionGenerationRef.current
+      || !session || session.connectionGeneration !== connectionGeneration
+      || session.sessionGeneration !== equipmentSessionGenerationRef.current) return;
+    // UserInformation is delivered before React exposes the in-game owner.
+    // Capture that real authenticated object, without granting any send authority.
+    if (event.type === "packet" && event.packet === "UserInformation") {
+      const id = (event.payload as Record<string, unknown> | null)?.objectId;
+      if (typeof id === "number" && Number.isSafeInteger(id) && id > 0 && id <= 0xffff_ffff && worldRef.current.mapFileName) {
+        socialBudgetBootstrapRef.current = { socket: source, connectionGeneration,
+          sessionGeneration: session.sessionGeneration, playerObjectId: id,
+          sceneRevision: socialSceneRevisionRef.current, mapFileName: worldRef.current.mapFileName };
+      }
+    }
+    const bootstrap = socialBudgetBootstrapRef.current;
+    const owner = event.type === "packet" && event.packet === "UserInformation" ? bootstrap
+      : currentSocialReceiveOwner() ?? (bootstrap?.socket === source && bootstrap.connectionGeneration === connectionGeneration
+        && bootstrap.sessionGeneration === session.sessionGeneration && worldRef.current.mapFileName
+        ? { ...bootstrap, sceneRevision: socialSceneRevisionRef.current, mapFileName: worldRef.current.mapFileName } : null);
+    if (!owner) return;
+    if (event.type === "packet" && event.packet) socialBudgetRef.current?.receive(owner, event.packet, event.payload ?? {});
+    if (event.type === "worldSnapshot") {
+      const snapshot = event.payload as GatewayWorldSnapshot;
+      if (snapshot.playerObjectId !== owner.playerObjectId || snapshot.mapFileName !== owner.mapFileName
+        || !snapshot.stage5Systems?.trade) return;
+      // One complete raw frame supplies both the offer and its inventory. Never
+      // pair an earlier React inventory with a later economic receipt.
+      if (typeof snapshot.inventoryCapacity !== "number" || typeof snapshot.maxBagSlots !== "number"
+        || typeof snapshot.gold !== "number" || !Array.isArray(snapshot.inventoryItems)
+        || !Array.isArray(snapshot.beltItems) || !Array.isArray(snapshot.equipmentItems)) return;
+      try {
+        // The Gateway's raw UID is authority; the display UID is not. Reuse the
+        // ordinary identity projection on this frame, without an older UI row.
+        const projectItem = (item: GatewayWorldItem) => ({ ...item, ...projectItemPresentation(item),
+          ...projectInventoryItemIdentity(item.uniqueId, item.container, item.slot),
+          stateImage: item.stateImage ?? undefined,
+          durabilityCurrent: item.durabilityCurrent ?? undefined, durabilityMax: item.durabilityMax ?? undefined });
+        const inventory = projectBevyBagModel({ inventoryCapacity: snapshot.inventoryCapacity,
+          maxBagSlots: snapshot.maxBagSlots, gold: snapshot.gold,
+          inventoryItems: snapshot.inventoryItems.map(projectItem), beltItems: snapshot.beltItems.map(projectItem),
+          equipmentItems: snapshot.equipmentItems.map(item => ({ ...item, ...projectItemPresentation(item),
+            uniqueId: authoritativeItemUniqueId(item.uniqueId), authoritativeUniqueId: authoritativeItemUniqueId(item.uniqueId),
+            stateImage: item.stateImage ?? undefined, shape: item.shape ?? undefined })) });
+        if (inventory.ok) socialBudgetRef.current?.snapshot(owner, snapshot, inventory.model);
+      } catch { /* A malformed frame cannot acknowledge an entered operation. */ }
+    }
   }
   function retireSocialRequests() {
     socialRepliesRef.current.retire();
@@ -14273,6 +14344,7 @@ export default function HomePage() {
       || event.packet?.startsWith("NPC") && event.packet !== "NPCRepair" && event.packet !== "NPCSRepair")) closeNpcRepairService();
     if (event.type === "packet" && event.packet === "MapChanged") npcRepairDialogSourceRef.current = null;
     if (event.type === "packet" && event.packet === "MapChanged") retireSocialRequests();
+    captureSocialBudgetGatewayEvent(event, connectionGeneration, source);
     invalidateNpcGoldBuyGatewayPacket(event);
     // Keep the complete raw learned/ACK snapshot before diagnostics, React or movement coalescing.
     captureQuestMapGatewayEvent(event,connectionGeneration);

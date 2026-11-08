@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import test from "node:test";
 import ts from "typescript";
+import { budgetedSendStatements } from "./lib/social-budget-test-runtime.mjs";
 
 const read = name => readFileSync(new URL(name, import.meta.url), "utf8");
 function compile(source, fileName, dependencies = {}) {
@@ -205,7 +206,7 @@ const visit=node=>{
   if(ts.isCaseClause(node)&&ts.isStringLiteral(node.expression)&&node.expression.text==="GuildMemberChange")memberCase=node;
   ts.forEachChild(node,visit);
 };visit(pageAst);
-const sendBody=functions.get("sendRaw").body.statements;
+const sendBody=budgetedSendStatements(ts,functions.get("sendRaw"),pageAst);
 const early=sendBody.find(node=>ts.isIfStatement(node)&&node.expression.getText(pageAst).includes('command.type === "editGuildMember"')
   &&node.expression.getText(pageAst).includes('options?.socialRosterProof?.rankProof'));
 const final=sendBody.find(node=>ts.isIfStatement(node)&&node.expression.getText(pageAst).includes('options?.socialRosterProof?.rankProof')

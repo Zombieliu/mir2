@@ -150,6 +150,8 @@ pub mod skill_binding_ui;
 pub mod skill_model;
 pub mod skill_page_state;
 pub mod social;
+pub mod social_operation_budget;
+pub mod social_trade_projection;
 #[cfg(any(feature = "native-ui", feature = "portable-quest-ui"))]
 pub mod stone_workshop_ui;
 pub mod storage;

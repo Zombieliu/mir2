@@ -109,3 +109,12 @@ product test or a server execution.
 The live Numeron site remains the earlier frozen f2de release until a later
 qualified publication. TEST, model calls, phone signing, payments, all-class
 level30 replay and final human Accepted are not inferred from this code increment.
+
+## Subsequent scoped implementation
+
+The later [shared Native budget increment](../r16-social-budget-20261109/README.md)
+implements the common eight-slot transport boundary. This directory retains
+the earlier source/test/UI snapshot and its nine-vs-eight pre-integration
+failure unchanged. Inspection of the actual Native UI also distinguishes its
+transient TradeRequest/TradeReply/TradeConfirm paths from the twenty low-level
+pending enum variants; the later record states that boundary explicitly.

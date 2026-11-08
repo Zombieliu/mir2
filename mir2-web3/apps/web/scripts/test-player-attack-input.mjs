@@ -178,6 +178,8 @@ test('actual ChangeAMode updates raw authority and visible world only for a vali
 test('actual session retirement clears held Shift and its raw combat source before another player can be targeted',()=>{
  const f=fixture(),ref=current=>({current});let withdrawn=0;
  Object.assign(f.scope,{npcPurchaseClientRef:ref(null),npcPurchaseEconomicSourceRef:ref(null),npcPurchaseDisplaySourceRef:ref(null),
+  groupOperationsRef:ref(new (load('group-operations').GroupOperations)()),groupHiddenTargetsRef:ref({scope:'',ids:new Set()}),
+  retirePrivateCompanion(){},
   npcPearlShopSourceRef:ref({retire(){}}),retireWorldFishingGesture(){},worldFishingSourceRef:ref({retire(){}}),worldFishingCommitRef:ref(null),
   retireSocialRequests(){},observePreferenceRef:ref(null),observeBootstrapRef:ref(null),advanceHeroWindowEpochs(){},skillBarDocumentCacheRef:ref(null),
   retireSocialItemConnection(){},npcGoldBuyInventoryRef:ref({invalidate(){}}),npcRepairAuthorityRef:ref({invalidateInventory(){}}),

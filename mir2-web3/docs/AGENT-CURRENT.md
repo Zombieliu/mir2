@@ -16,7 +16,7 @@ working tree, services, release packages, source snapshots or parity percentages
 
 ## Last recorded decisions and open work
 
-2026-11-09用户重新激活持续Goal：继续Web与Windows R16完整1:1对齐，优先代码/普通协议/无界面浏览器，适用门槛达到100% Candidate后再请求最终真人Accepted。沿canonical `codex/windows-player-journey`，保留其它工作树。交易待回执取消/重复接受已完成105 Page、31社交叶、507适配器组、TS及两场隔离延迟ACK UI验证；当前未公开发布。下一步按Native完整20变体接共用八项预算/真实ACK，再续交易/阿洛、语言输入及发行未结项。[执行范围与顺序](WEB-R16-PARITY-GOAL.zh-CN.md)。
+2026-11-09持续Goal保持active：以Windows R16共同基础推进Web完整1:1，优先代码/普通协议/headless。现已复用Native完整社交模型/共用八项，Page116/host17、选定Web569/Stage5内部507组、TS及三包真实WASM通过，分层不叠加；新runtime0cd本机安装、旧a469保留，未公开发布。接续真实UI证据、交易未结边界/双方回读、阿洛/语言输入及发行。并入的PC HUD/钱包优先opt-in独立记录，不由此认定Web外观或全局100% Candidate/Accepted。[范围与顺序](WEB-R16-PARITY-GOAL.zh-CN.md) · [新证据](evidence/r16-social-budget-20261109/README.md)。
 
 发布阶段已完成：`https://numeron.obelisk.build/game`为Web f2de/Linux d53、五职业/V2；42738素材、旧129账号/43角色/43档保全、公开三职业首任务/重登/中文Q进城分别有证。旧Mir2项目/正式服、钱包及Windows EXE保持；当前是TEST，阿洛云运行器、手机签名及全局Accepted未由发布完成。[发布结果与原失败](NUMERON-WEB-RELEASE-20261108.zh-CN.md)。
 

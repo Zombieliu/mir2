@@ -209,6 +209,7 @@ pureFiles.identity="../lib/world-model/item-identity.ts";pureRequires.identity={
 pureFiles.bag="../lib/bevy-bag-ui.ts";pureRequires.bag={"./world-model/item-identity":"identity","./bag-belt-gesture":"bagBelt"};
 pureFiles.bagBelt="../lib/bag-belt-gesture.ts";pureRequires.bagBelt={};
 pureFiles.bagBeltMove="../lib/bag-belt-move-dispatcher.ts";pureRequires.bagBeltMove={"./mail-parcel-gateway-adapter":"parcel"};
+pureFiles.socialBudgetHost="../lib/social-operation-budget-host.ts";pureRequires.socialBudgetHost={};
 const npcAuthSelectors=actualFunctions(tree(source("../lib/client-login-runtime.ts"),"actual-login-runtime.ts"),
   ["preauthCommandKind","isSensitiveGatewayCommand"],{});
 const npcRuntimeLanguage=actualFunctions(tree(source("../lib/r16-runtime-language.ts"),"actual-runtime-language.ts"),["commerceRuntimeLanguage"],{});
@@ -266,6 +267,7 @@ function pageFixture() {
   const inventoryOwner = { connectionGeneration:1, sessionGeneration:2, playerObjectId:1 };
   inventoryReadiness.finish(inventoryReadiness.begin(inventoryOwner), inventoryOwner, true, bagProjection(world).model);
   const scope={npcPurchaseActionRef:{current:null},npcPurchaseSendActionRef:{current:null},setNpcPurchaseActionStatus:()=>{},projectBevyBagModel:bagProjection,npcGoldBuyInventoryMutationPacket,
+    socialBudgetRef:{current:new (loadPure("socialBudgetHost").SocialOperationBudgetHost)(()=>null)},
     playerReferenceWindowsRef:{current:{help:false,hotkeys:false,options:false,capture:false}},rankingInspectOpenRef:{current:false},companionOpenRef:{current:false},
     npcPurchaseUnavailableRef:{current:false},npcPurchaseOptInSocketsRef:{current:new WeakSet()},npcPurchaseClientRef:{current:null},
     npcPurchaseApplyingEconomyRef:{current:false},npcPurchaseEconomicSourceRef:{current:null},npcPurchaseDisplaySourceRef:{current:null},

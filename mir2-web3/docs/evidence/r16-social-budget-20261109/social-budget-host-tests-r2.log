@@ -1,0 +1,113 @@
+TAP version 13
+# {"oracle":"real-renderer-wasm","backend":"webgl2-shared","version":"bevy-0cd68510886134e0","wasmSha256":"9b28bf2a5a0c366ea8463c765f1c7ba036d7a48e751d3b882190f51d36447ba0","hostSourceSha256":"0407c2f86651f941ef374b12675c4a149b595fffa8f2071e177abbeb61053977","nodeWithoutDOM":true,"servicesStarted":0,"networkConnections":0}
+# Subtest: the real Native WASM bridge initializes in Node without a DOM or renderer run
+ok 1 - the real Native WASM bridge initializes in Node without a DOM or renderer run
+  ---
+  duration_ms: 2.9337
+  type: 'test'
+  ...
+# Subtest: late runtime replays authenticated receives in order; it never buffers a covered outgoing command
+ok 2 - late runtime replays authenticated receives in order; it never buffers a covered outgoing command
+  ---
+  duration_ms: 11.6785
+  type: 'test'
+  ...
+# Subtest: late receive count and byte limits fail closed instead of dropping an ACK, and a new physical connection can start
+ok 3 - late receive count and byte limits fail closed instead of dropping an ACK, and a new physical connection can start
+  ---
+  duration_ms: 32.7898
+  type: 'test'
+  ...
+# Subtest: retiring before runtime arrival discards only the retired buffer and forbids that same physical owner
+ok 4 - retiring before runtime arrival discards only the retired buffer and forbids that same physical owner
+  ---
+  duration_ms: 6.5739
+  type: 'test'
+  ...
+# Subtest: scene changes retain entered Native work, reject stale scene tickets, and allow exact unsent capacity return
+ok 5 - scene changes retain entered Native work, reject stale scene tickets, and allow exact unsent capacity return
+  ---
+  duration_ms: 7.6362
+  type: 'test'
+  ...
+# Subtest: A to B to C to old A cannot launder a retired socket into a fresh Native generation
+ok 6 - A to B to C to old A cannot launder a retired socket into a fresh Native generation
+  ---
+  duration_ms: 7.8531
+  type: 'test'
+  ...
+# Subtest: invalid physical owners never establish a Native binding or spend a slot
+ok 7 - invalid physical owners never establish a Native binding or spend a slot
+  ---
+  duration_ms: 12.8501
+  type: 'test'
+  ...
+# Subtest: a renderer replacement cannot replace the module holding a physical session's Native ACK history
+ok 8 - a renderer replacement cannot replace the module holding a physical session's Native ACK history
+  ---
+  duration_ms: 1.1812
+  type: 'test'
+  ...
+# Subtest: exact unsent and forged-ticket fences return capacity, while entered socket-unknown work remains pending
+ok 9 - exact unsent and forged-ticket fences return capacity, while entered socket-unknown work remains pending
+  ---
+  duration_ms: 8.1681
+  type: 'test'
+  ...
+# Subtest: a reply before entry is not completion and invalidates that reservation instead of granting a late send
+ok 10 - a reply before entry is not completion and invalidates that reservation instead of granting a late send
+  ---
+  duration_ms: 6.9329
+  type: 'test'
+  ...
+# Subtest: real Native Group, Guild and Trade share eight slots; exact cross-domain ACKs free only matching work
+ok 11 - real Native Group, Guild and Trade share eight slots; exact cross-domain ACKs free only matching work
+  ---
+  duration_ms: 11.014
+  type: 'test'
+  ...
+# Subtest: real GuildNoticeChange and GroupMembersMap arrivals reach Native; map metadata is not a GroupAdd ACK
+ok 12 - real GuildNoticeChange and GroupMembersMap arrivals reach Native; map metadata is not a GroupAdd ACK
+  ---
+  duration_ms: 10.4882
+  type: 'test'
+  ...
+# Subtest: typed permission completion comes from the real Native actor, nested target and expected bit cursor
+ok 13 - typed permission completion comes from the real Native actor, nested target and expected bit cursor
+  ---
+  duration_ms: 7.2602
+  type: 'test'
+  ...
+# Subtest: real incoming UI epochs remain opaque and never become Native request data or wire fields
+ok 14 - real incoming UI epochs remain opaque and never become Native request data or wire fields
+  ---
+  duration_ms: 7.537
+  type: 'test'
+  ...
+# Subtest: actual transient UI commands, declines and independent domains never consume the long-lived eight slots
+ok 15 - actual transient UI commands, declines and independent domains never consume the long-lived eight slots
+  ---
+  duration_ms: 7.7215
+  type: 'test'
+  ...
+# Subtest: only Native's explicit rename expiry returns that slot; elapsed time does not clear group unknown
+ok 16 - only Native's explicit rename expiry returns that slot; elapsed time does not clear group unknown
+  ---
+  duration_ms: 7.4089
+  type: 'test'
+  ...
+# Subtest: bridge failure after real Native entry freezes the host without replaying or fabricating an unsent cancellation
+ok 17 - bridge failure after real Native entry freezes the host without replaying or fabricating an unsent cancellation
+  ---
+  duration_ms: 0.3307
+  type: 'test'
+  ...
+1..17
+# tests 17
+# suites 0
+# pass 17
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 667.5797

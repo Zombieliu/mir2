@@ -6,7 +6,14 @@ import { createShellKeydownFixture } from "./lib/window-keydown-test-fixture.mjs
 
 // Compile only the explicit pure TypeScript dependency graph, never a renderer/Core module.
 const cache = new Map();
-const pureModules = new Set(["world-model/item-identity", "bevy-bag-model", "bevy-storage-model", "bevy-bag-ui", "bevy-storage-ui", "equipment-gateway-adapter", "mail-parcel-gateway-adapter", "storage-gateway-adapter", "social-window-operations", "social-incoming-replies", "storage-rental-confirmation", "bag-belt-gesture", "npc-purchase-client", "bag-belt-move-dispatcher", "npc-repair-service"]);
+const guildKeyboardJs = ts.transpileModule(readFileSync(new URL("../lib/r16-guild-keyboard.ts", import.meta.url), "utf8"),
+  {compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText;
+function bindGuildKeyboard(scope) {
+  const exports = {};
+  new Function("exports", "Element", guildKeyboardJs)(exports, scope.HTMLElement);
+  scope.guildKeyboardOwnsEvent = exports.guildKeyboardOwnsEvent;
+}
+const pureModules = new Set(["world-model/item-identity", "bevy-bag-model", "bevy-storage-model", "bevy-bag-ui", "bevy-storage-ui", "equipment-gateway-adapter", "mail-parcel-gateway-adapter", "storage-gateway-adapter", "social-window-operations", "social-incoming-replies", "storage-rental-confirmation", "bag-belt-gesture", "npc-purchase-client", "bag-belt-move-dispatcher", "npc-repair-service", "social-operation-budget-host"]);
 function load(name, fresh = false) {
   assert.ok(pureModules.has(name), "unexpected non-pure import: " + name);
   if (!fresh && cache.has(name)) return cache.get(name);
@@ -141,6 +148,7 @@ function pageFixture() {
   const owner = f.owners.at(-1);
   const scope = {
     heroOperationsRef: {current:{pending:null}}, mailCollectBarrierRef: {current:null},
+    socialBudgetRef: {current:new (load("social-operation-budget-host").SocialOperationBudgetHost)(() => null)},
     npcPearlSendEpochRef: { current: 0 },
     bagBeltMovesRef: { current: new (load("bag-belt-move-dispatcher").BagBeltMoveDispatcher)() },
     bagBeltInventoryReadyRef: { current: null },
@@ -524,6 +532,7 @@ test("actual Shell movement watches storage transitions and committed shortcut g
       removeEventListener(type, fn, capture) { assert.equal(type, "keydown"); assert.equal(capture, true); assert.equal(fn, listener); listener = null; removals++; },
     },
   };
+  bindGuildKeyboard(scope);
   const keyboard = createShellKeydownFixture(scope), key = () => listener({ key: "F1", preventDefault() { prevented++; } });
   keyboard.render(); keyboard.commit(); const originalListener = listener;
   key(); assert.equal(combat, 1); assert.equal(prevented, 1);
@@ -719,6 +728,7 @@ test("actual Shell arming shortcut listener swallows combat/item keys before the
       onUseItem() { assert.fail("no item callback while Storage owns/arms"); } };
     scope.npcShopPointerCallbacksRef = { current: { getBevyNpcShopInputBlocked: () => false } };
     Object.assign(scope, functions("app/original-client-shell.tsx", ["npcShopBlocksWorldInput"], scope));
+    bindGuildKeyboard(scope);
     const keyboard = createShellKeydownFixture(scope); keyboard.render(); keyboard.commit();
     assert.equal(typeof listener, "function");
     for (const key of ["Enter", "F1", "1"]) listener({ key, preventDefault() { prevented++; } });

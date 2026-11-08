@@ -1,0 +1,14 @@
+{
+  "schema": 1,
+  "startedAt": "2026-11-08T22:17:20.425Z",
+  "finishedAt": "2026-11-08T22:24:58.277Z",
+  "result": {
+    "code": 0,
+    "signal": null
+  },
+  "buildSucceeded": true,
+  "sourceUnchanged": true,
+  "oldPublicationUnchanged": true,
+  "canonicalPublicationWritten": false,
+  "headlessExecutionPerformed": false
+}
