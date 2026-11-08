@@ -16,7 +16,9 @@ working tree, services, release packages, source snapshots or parity percentages
 
 ## Last recorded decisions and open work
 
-用户已清除持续Goal；本轮最新R16 Web已发布至`https://numeron.obelisk.build/game`：Web f2de、Linux Gateway d53（两者游戏源码相同）、五职业/newcomer-v2。42738素材公开复核、域名move、旧129账号/43角色/43档保全、公开三职业首任务与重登入档通过；实际浏览器画面/操作单独记录，不能以协议结果替代。旧Mir2项目/正式服、钱包和Windows EXE保持，当前连接TEST；阿洛云运行器、手机扫码签名及全局Accepted未由本次发布完成。[发布结果与证据](NUMERON-WEB-RELEASE-20261108.zh-CN.md)。
+2026-11-09用户重新激活持续Goal：继续Web与Windows R16完整1:1对齐，优先代码/普通协议/无界面浏览器，适用门槛达到100% Candidate后再请求最终真人Accepted。沿canonical `codex/windows-player-journey`，保留其它工作树。交易待回执取消/重复接受已完成105 Page、31社交叶、507适配器组、TS及两场隔离延迟ACK UI验证；当前未公开发布。下一步按Native完整20变体接共用八项预算/真实ACK，再续交易/阿洛、语言输入及发行未结项。[执行范围与顺序](WEB-R16-PARITY-GOAL.zh-CN.md)。
+
+发布阶段已完成：`https://numeron.obelisk.build/game`为Web f2de/Linux d53、五职业/V2；42738素材、旧129账号/43角色/43档保全、公开三职业首任务/重登/中文Q进城分别有证。旧Mir2项目/正式服、钱包及Windows EXE保持；当前是TEST，阿洛云运行器、手机签名及全局Accepted未由发布完成。[发布结果与原失败](NUMERON-WEB-RELEASE-20261108.zh-CN.md)。
 
 Checkpoints through85eecf4be were pushed/verified. Web guild ranks passed both render backends; first owner unexpected-login cold entry remains unexplained. Native now consumes actual guild deltas and typed UserInformation realId, matches option-specific cursor evidence, and handles definitely-unsent read/queue eviction.198 unique checks plus canonical locked/offline release build pass;2 real-asset GPU/GDI checks and native window/cross-client remain unrun. Candidatea63bd2a3 is a single EXE requiring existing R16 resources, not installed. Keep [scope and failures](WEB-R16-PARITY-GOAL.zh-CN.md#native-公会增量与请求生命周期2026-11-08) separate from global parity.
 

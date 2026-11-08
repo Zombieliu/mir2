@@ -1,0 +1,103 @@
+{
+  "schema": 1,
+  "kind": "r16-trade-cancel-bounded-checks",
+  "createdAt": "2026-11-08T19:32:07.201Z",
+  "head": "6d30e0f9e57dc2da410446b292810b22ef26ecc1",
+  "sourcePins": [
+    {
+      "path": "apps/web/app/page.tsx",
+      "bytes": 1132063,
+      "sha256": "77f08e3542c7b6511c960b593d483463c7006afa2de1229888d2bcc9b8058860"
+    },
+    {
+      "path": "apps/web/scripts/test-storage-page-gate.mjs",
+      "bytes": 183215,
+      "sha256": "edaaaca6400266ae882620651cf98d0bff16bc2f3340a215531fbf867afee3bb"
+    }
+  ],
+  "writeSet": [
+    "apps/web/app/page.tsx",
+    "apps/web/scripts/test-storage-page-gate.mjs"
+  ],
+  "results": {
+    "actualPageRed": {
+      "file": "red-fixture-complete.log",
+      "passed": 3,
+      "failed": 4
+    },
+    "actualPageFinal": {
+      "file": "page-gate-final.log",
+      "passed": 101,
+      "failed": 0
+    },
+    "socialLeaves": {
+      "file": "social-leaves-final.log",
+      "passed": 31,
+      "failed": 0
+    },
+    "typescript": {
+      "file": "typescript.log",
+      "command": "node node_modules/typescript/bin/tsc --noEmit --incremental false",
+      "exitCode": 0
+    },
+    "adjacentStage5": {
+      "file": "social-regression.log",
+      "passed": false,
+      "reason": "Existing exact final-entry sequence requires an explicit assertion for the added TradeCancel socket claim; file outside assigned write set."
+    }
+  },
+  "validationScope": {
+    "actualPageFunctions": true,
+    "actualReceiveSwitch": true,
+    "actualPureModules": true,
+    "serviceOrBrowserStarted": false,
+    "publicNetworkOrDeployment": false
+  },
+  "logs": [
+    {
+      "path": "red.log",
+      "bytes": 8118,
+      "sha256": "881e1982617bb29c0acbcb4166d10da766dbdad6b4dc16c57df1f91a64e7bd2b"
+    },
+    {
+      "path": "red-fixture-complete.log",
+      "bytes": 6080,
+      "sha256": "e67deac4f5bc6eca43d549841fc73eefcb1b6e8a436040a8b96ff1c6d56d4b56"
+    },
+    {
+      "path": "focused-green-1.log",
+      "bytes": 2115,
+      "sha256": "5d830c0966593a3453ad8d02a6761a1ba4a19435f4b0f75664078e8c2d951d1c"
+    },
+    {
+      "path": "page-gate-green.log",
+      "bytes": 27700,
+      "sha256": "7ee990b83cca0015b063f8e9f3c410e5451580503135a5d7a54be7bbd541f6b7"
+    },
+    {
+      "path": "page-gate-final.log",
+      "bytes": 27711,
+      "sha256": "d582c0e22795f470c3025e072f5a9456979c30b532f7836a2f25e9e7ac4c5554"
+    },
+    {
+      "path": "social-regression.log",
+      "bytes": 8486,
+      "sha256": "2100178fc2fbb3609b78dd9ee103b171118215023cb6d39b80b98cd3b3aaf86f"
+    },
+    {
+      "path": "social-leaves-final.log",
+      "bytes": 7410,
+      "sha256": "c7e15d276ecbcbcab90368bae76aba0157ed8cc59504c9e44bbb99fa5889de88"
+    },
+    {
+      "path": "typescript.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "bounded-source.patch",
+      "bytes": 31829,
+      "sha256": "4a106b56782428a1190391ded481cea86b38efed9f172b2f6bef7758cd9128eb"
+    }
+  ]
+}

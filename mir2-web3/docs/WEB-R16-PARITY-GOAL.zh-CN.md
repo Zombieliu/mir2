@@ -1,5 +1,7 @@
 # Windows R16 与 Web 1:1 验收
 
+2026-11-09用户重新激活持续Goal，沿`codex/windows-player-journey`继续全部未结范围，保留现有工作和历史失败。目标为适用代码/数据/测试/QA门槛的100% Candidate；最终真人Accepted仍需本人游戏与界面验收。优先无需控制Windows桌面的代码、普通协议、无界面浏览器和构建。本机三职业到30级与本次公开服三职业首任务/中文Q验证分开记录。
+
 2026-11-07 建立持续 Goal。基准为 `codex/windows-player-journey` 在 `mir2-player-journey` 工作树的 Windows R16。复核时本地基点为 `c404bde8a`，远端为 `a7dc19d385b8`。远端额外七个提交只涉及官网和 Atlas。当前工作树中游戏、Windows、Web 的未提交内容继续保留，代码和已运行包分别标记。[分支比较](https://github.com/Zombieliu/mir2/compare/c404bde8a5190534f6bc83ec8a4fe78fffc8cb50...a7dc19d385b85a8205f1f29dea25a54a1dbd85ba)
 
 `r16-gameplay-baseline.json` 定义两端共用的五职业、`newcomer-v2` 和 Native 引导。对齐按同一内容和 Gateway 下可观察的界面、动作、结果、失败反馈与重登状态逐项验收。每项记录源代码位置、候选构建和实际证据。键鼠、浏览器系统能力等输入和宿主差异单列。项目的 100% Candidate、真人 Accepted 和正式发布分别核对。[共享配置](../packages/game-data/data/r16-gameplay-baseline.json) · [门槛](AGENT-ORCHESTRATION.md)
@@ -148,14 +150,22 @@ Rust1.95使用 canonical manifest／原 lock 的 release、offline、locked 构�
 
 招募／建职阶的精确本地上下文和失败回执、职级索引重编号的并发边界、Native二百成员与共享一千上限差异、Web跨社交预算及全部窗口体验继续开放。此轮不关闭当前候选跨端同档或真人验收，也不把前轮 Web 会长冷进入时意外回登录判为已修复。
 
+## 交易取消与重复接受（2026-11-09）
+
+Web在自己的放入/取回物品未决时，通用物品屏障与交易proof均会吞掉仍可点击的取消；Native `trade_dialog::cancel`没有该物品屏障。现在只为当前owner、地图、交易代次及物品proof放行一次取消，在最终socket尝试前才消耗资格；明确未发送可重试，发送结果未知保持未决。真实终结交易包仅退役其绑定的trade物品操作，`unlock=true`、Guild屏障和其它资产保护保持。
+
+复核还发现重复同partner的`TradeAccept`会无条件新建Web交易，清报价并刷新取消资格；已按Native的同physical-owner/open合同保留现有报价、代次与未决绑定。真实新邀请、换partner/owner和终结后再打开仍是新交易。
+
+最终真实Page函数/receive harness105项、相关纯社交31项、精确发送边界适配器507组及Web TypeScript通过，分target记录不合计唯一案例。隔离浏览器两场分别延迟真实Deposit/Retrieve ACK744/661ms，实际取消、UID/数量/金币及预期slot保持，旧ACK原文释放后不复活；双方正常注销与自有服务清理通过。它们是两个分项证据，旧整体false保留；网关为已pin的v22旧隔离二进制，未冒称当前源重编、当前Native窗口或公开发布。取消时存在无关Guild物品未决仍阻挡，Native完整20变体共用八项预算与失败ACK尚未完成。[本轮证据与边界](evidence/r16-web-trade-20261109/README.md) · [共用预算未结审计](evidence/r16-web-trade-20261109/social-budget-audit.md)
+
 ## 当前执行顺序
 
-2026-11-08：用户已清除持续 Goal，当前明确任务为将最新候选发布到 `https://numeron.obelisk.build/game`。本文件保留原完整对齐范围和未结项，不代表重新启用 Goal。公会公共窗口/单选职级/真实新建/统计与只读仓库的最新限定证据见[本轮记录](evidence/r16-guild-layout-20261108/README.md)；部署、旧存档、域名及正式环境门槛分别验收。
+2026-11-09：用户重新激活完整Web/Windows R16对齐Goal。此前发布任务已完成：Web f2de、Linux d53、固定42738素材、新Numeron域名、旧129账号/43角色/43档保全、公开三职业首任务/重登及实际中文Q进城均有分源证据；见[发布结果](NUMERON-WEB-RELEASE-20261108.zh-CN.md)。本轮从已推送`6d30e0f9e`继续，旧正式服/Windows EXE/现有存档保留；不得据此勾完剩余范围或把TEST称为主网。
 
 用户要求优先提交推送的代码检查点已保存；后续公会普通流程的限定资格见上节，仍保留原检查点时“浏览器未验”的历史范围。[原保存范围](CODE-CHECKPOINT-20261108.zh-CN.md)
 
 1. 已在真实存档副本完成小地图标题及框架输入修复、缩放和前景 Q 日记复测。
 2. 已完成 Web 创角回执、共享网关四槽和重名、登录过场输入及标签的本机验证。Windows 窗口和超额旧档访问继续追踪。
 3. 已将三职业毕业装备建议和 D605 的既有 Native 名称接进共用日记，完成三职业读档、十语窄窗、65 次关闭零移动与存档个人字段比较。
-4. 组队普通流程及普通登录后的慢保存自动恢复已在两后端通过；凭证先行恢复另有真实 WebSocket 与一百一十八项独立回归。继续无需桌面控制的组队共用未结项、交易、阿洛，以及冷缓存、发行构建和体积门槛。
+4. 交易取消与重复接受的限定代码/两场隔离延迟ACK UI已通过。下一步按Native完整20变体映射推进共用八项预算及真实ACK，继续交易双方回读与阿洛接口。仅接组队与公会两类不能称总预算完成；不存在的失败ACK不能靠解析系统聊天或超时重发绕开。
 5. 无界面浏览器与普通协议测试继续。Windows 窗口及同候选跨端实机暂缓，保留旧 headless 长任务和最终真人验收边界。

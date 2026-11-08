@@ -1,0 +1,51 @@
+{
+  "schema": 1,
+  "passed": false,
+  "phase": "ordinary-primary-ui-registration",
+  "scope": {
+    "isolatedLoopback": true,
+    "freshOrdinaryAccounts": 2,
+    "primaryPhysicalUi": true,
+    "transparentRealServerWebSocket": true,
+    "onlyMatchingItemAckDelayed": true,
+    "modelCalls": 0,
+    "privilegedCommands": 0
+  },
+  "checks": [],
+  "events": [],
+  "commands": {
+    "primary": {},
+    "peer": {}
+  },
+  "screenshots": [
+    "failure.png"
+  ],
+  "errors": [
+    {
+      "phase": "ordinary-primary-ui-registration",
+      "name": "TimeoutError",
+      "code": null,
+      "messageHash": "ddfc4663874b0e2e393d15a88bd5a17a99e955e8b58b7564328bef693b732650",
+      "safeCode": null
+    }
+  ],
+  "httpErrors": [],
+  "pageErrors": [
+    {
+      "name": "Error",
+      "messageHash": "da61af77c34523b591dba77678176cf0d84ec1aaa42665abf89751477d7306ec"
+    },
+    {
+      "name": "Error",
+      "messageHash": "da61af77c34523b591dba77678176cf0d84ec1aaa42665abf89751477d7306ec"
+    }
+  ],
+  "consoleErrors": [],
+  "failureUi": {
+    "tradeVisible": false,
+    "bagInput": null,
+    "movement": null,
+    "focus": "NEXTJS-PORTAL"
+  },
+  "finalPrimary": null
+}

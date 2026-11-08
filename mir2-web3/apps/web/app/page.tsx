@@ -2227,6 +2227,8 @@ export default function HomePage() {
   const tradeIncarnationRef = useRef(0);
   const socialTradeSendingRef = useRef<SocialTradeSendProof | null>(null);
   const socialTradeReplySpentRef = useRef<number | null>(null);
+  const socialTradeCancelSpentRef = useRef<number | null>(null);
+  const socialTradeItemOperationRef = useRef<{proof: SocialWindowOperationProof; incarnation: number; partner: string} | null>(null);
   const tradeLifecycleRef = useRef<{state: "requested" | "open" | "closed"; partner: string}>({state: "closed", partner: ""});
   const tradePartnerRef = useRef<{owner: SocialReplyOwner; incarnation: number; items?: ReturnType<typeof projectPartnerTradePacket>; itemsKnown?: boolean; gold?: number} | null>(null);
   const socialCatalogRef = useRef(new Map<number, {name: string; icon?: number; raw?: Readonly<Record<string, unknown>>}>());
@@ -6542,7 +6544,7 @@ export default function HomePage() {
       || options?.rankingInspectProof && command.type !== "inspect") return false;
     if (["groupInvite", "guildInvite", "marriageReply", "divorceReply", "mentorReply"].includes(String(command.type)) && !options?.socialReplyProof) return false;
     if (command.type === "chat" && command.message === "@ADDSTORAGE" && !options?.storageRentalProof) return false;
-    if (!socialItemMutationAllowed(command, options?.socialItemProof)) return rejectNpcPurchaseSendGate("sendSocialBlocked");
+    if (!socialItemMutationAllowed(command, options?.socialItemProof, options?.socialTradeProof)) return rejectNpcPurchaseSendGate("sendSocialBlocked");
     if (["tradeReply", "tradeConfirm", "tradeCancel", "tradeGold"].includes(String(command.type)) && !options?.socialTradeProof) return false;
     const npcBuyDispatcher = options?.npcBuyProof || options?.npcPearlBuyProof ? npcBuyDispatcherRef.current : null;
     const socket = socketRef.current;
@@ -6684,7 +6686,7 @@ export default function HomePage() {
         || p.owner.mapFileName !== owner.mapFileName || p.guildName !== worldRef.current.stage5Systems.guild?.name
         || wireCommand.from !== 0 || wireCommand.to !== 0 || Object.keys(wireCommand).length !== 4) return false;
     }
-    if (!socialItemMutationAllowed(wireCommand, options?.socialItemProof)) return rejectNpcPurchaseSendGate("finalSocialBlocked");
+    if (!socialItemMutationAllowed(wireCommand, options?.socialItemProof, options?.socialTradeProof)) return rejectNpcPurchaseSendGate("finalSocialBlocked");
     if (options?.socialItemProof && (!socialItemProofCurrent(options.socialItemProof)
       || !socialItemOperationsRef.current.claim(options.socialItemProof, currentSocialReplyOwner(), readSocialItemSurface(options.socialItemProof.surface)?.sourceKey ?? "", wireCommand))) return false;
     if (options?.socialTradeProof && !socialTradeProofCurrent(options.socialTradeProof, wireCommand)) return false;
@@ -6773,6 +6775,12 @@ export default function HomePage() {
         || row.proof !== options?.socialRosterProof?.rankReadProof || !row.proof
         || socketRef.current !== socket || socket.readyState !== WebSocket.OPEN) return false;
       row.entered = true;
+    }
+    if (options?.socialTradeProof && wireCommand.type === "tradeCancel") {
+      if (socketRef.current !== socket || socket.readyState !== WebSocket.OPEN
+        || !socialTradeProofCurrent(options.socialTradeProof, wireCommand)) return false;
+      // Spend only at socket entry. A transport throw cannot prove this cancel was unsent.
+      socialTradeCancelSpentRef.current = options.socialTradeProof.incarnation;
     }
     try { socket.send(serialized); } catch (error) {
       if (options?.modeProof) combatModeHostRef.current?.outcomeUnknown(options.modeProof);
@@ -13554,6 +13562,7 @@ export default function HomePage() {
   function retireSocialItemConnection() {
     retireGuildRankControls();
     socialItemOperationsRef.current.retire(); socialOwnTradeRef.current = null;
+    socialTradeItemOperationRef.current = null; socialTradeCancelSpentRef.current = null;
     tradeLifecycleRef.current = {state: "closed", partner: ""}; tradePartnerRef.current = null;
     guildStorageRawRef.current = null; guildPermissionsRef.current = null; guildRanksRef.current = null;
     guildStatusPresentationRef.current = null;
@@ -13561,6 +13570,16 @@ export default function HomePage() {
     rankingInspectRequestsRef.current.retireConnection(); closeRankingInspect();
     socialCatalogRef.current.clear();
     socialCharacterIndexRef.current.current = null;
+    renderSocialItems(n => n + 1);
+  }
+  function retireTerminalTradeItemOperation() {
+    const pending = socialItemOperationsRef.current.pending, binding = socialTradeItemOperationRef.current;
+    const owner = currentSocialReceiveOwner(), lifecycle = tradeLifecycleRef.current;
+    if (!pending || pending.proof.surface !== "trade" || !binding || binding.proof !== pending.proof
+      || binding.incarnation !== tradeIncarnationRef.current || binding.partner !== lifecycle.partner
+      || lifecycle.state !== "open" || !sameSocialPhysicalOwner(pending.proof.owner, owner)) return;
+    // A real terminal packet ends this exchange's custody; it is not an item-success ACK.
+    socialItemOperationsRef.current.retire(); socialTradeItemOperationRef.current = null;
     renderSocialItems(n => n + 1);
   }
   function readSocialItemSurface(surface: "trade" | "guild") {
@@ -13602,7 +13621,8 @@ export default function HomePage() {
       || (mailParcelRef.current?.state?.blockedUniqueIds.length ?? 0) > 0 || storageRentalRef.current.pending) return false;
     const {kind, from, to, uniqueId} = proof;
     if (proof.surface === "trade") {
-      if (!source.trade || tradeLifecycleRef.current.state !== "open" || source.trade.locked !== false
+      if (socialTradeCancelSpentRef.current === tradeIncarnationRef.current
+        || !source.trade || tradeLifecycleRef.current.state !== "open" || source.trade.locked !== false
         || source.trade.escrowPrepared !== false || source.trade.completed !== false
         || worldRef.current.stage5Systems.trade?.confirmed === true) return false;
       if (kind === "depositTrade") return source.inventoryItems.some(item => item.slot === from && item.uniqueId === uniqueId)
@@ -13616,12 +13636,14 @@ export default function HomePage() {
     return kind === "guild2" && store && retrieve && from !== to && source.slots[from]?.uniqueId === uniqueId
       && to >= 0 && to < 112 && source.slots[to] === null;
   }
-  function socialItemMutationAllowed(command: Record<string, unknown>, proof?: SocialWindowOperationProof): boolean {
+  function socialItemMutationAllowed(command: Record<string, unknown>, proof?: SocialWindowOperationProof,
+    tradeProof?: SocialTradeSendProof): boolean {
     const type = String(command.type);
     if ((type === "depositTradeItem" || type === "retrieveTradeItem" || type === "guildStorageItemChange" && command.changeType !== 3) && !proof) return false;
     const pending = socialItemOperationsRef.current.pending;
     if (!pending) return !proof;
     if (proof) return pending.proof === proof && !pending.entered;
+    if (type === "tradeCancel" && tradeProof) return socialTradeProofCurrent(tradeProof, command);
     return !isMailItemMutation(command) && !["useItem", "equipItem", "removeItem", "moveItem", "dropItem", "mergeItem", "splitItem",
       "storeItemV2", "takeBackItemV2", "sellItem", "buyItem", "tradeReply", "tradeConfirm", "tradeCancel", "tradeGold"].includes(type);
   }
@@ -13632,12 +13654,17 @@ export default function HomePage() {
     const proof = socialItemOperationsRef.current.reserve({ owner: source.owner, surface, localSourceKey: capturedSourceKey,
       kind, from, to, uniqueId, ownCharacterIndex: characterIndex, beforeSnapshotRevision: worldSnapshotVersionRef.current });
     if (!proof) return;
+    if (surface === "trade") socialTradeItemOperationRef.current = {proof, incarnation: tradeIncarnationRef.current,
+      partner: tradeLifecycleRef.current.partner};
     try {
       if (!socialItemProofCurrent(proof) || !send(socialWindowItemCommand(proof), {socialItemProof: proof})) socialItemOperationsRef.current.cancelDefinitelyUnsent(proof);
     } catch (error) {
       socialItemOperationsRef.current.cancelDefinitelyUnsent(proof);
       socialItemOperationsRef.current.outcomeUnknown(proof);
       console.error("[mir2] social item send outcome is unknown", error);
+    } finally {
+      if (socialTradeItemOperationRef.current?.proof === proof && socialItemOperationsRef.current.pending?.proof !== proof)
+        socialTradeItemOperationRef.current = null;
     }
     renderSocialItems(n => n + 1);
   }
@@ -13716,12 +13743,21 @@ export default function HomePage() {
     if (socialTradeSendingRef.current !== proof || !owner || !sameSocialPhysicalOwner(proof.owner, owner)
       || proof.owner.sceneRevision !== owner.sceneRevision || proof.owner.mapFileName !== owner.mapFileName
       || proof.incarnation !== tradeIncarnationRef.current || proof.state !== lifecycle.state || proof.partner !== lifecycle.partner
-      || lifecycle.state === "closed" || !socialItemWindowsRef.current.trade || JSON.stringify(command) !== proof.body
-      || socialItemOperationsRef.current.pending) return false;
+      || lifecycle.state === "closed" || !socialItemWindowsRef.current.trade || JSON.stringify(command) !== proof.body) return false;
     const type = command.type;
+    const pending = socialItemOperationsRef.current.pending;
+    if (type === "tradeCancel") {
+      if (Object.keys(command).length !== 1 || socialTradeCancelSpentRef.current === proof.incarnation) return false;
+      if (!pending) return true;
+      const binding = socialTradeItemOperationRef.current;
+      return pending.proof.surface === "trade" && binding?.proof === pending.proof
+        && binding.incarnation === proof.incarnation && binding.partner === proof.partner
+        && sameSocialPhysicalOwner(pending.proof.owner, owner)
+        && pending.proof.owner.sceneRevision === owner.sceneRevision && pending.proof.owner.mapFileName === owner.mapFileName;
+    }
+    if (pending || socialTradeCancelSpentRef.current === proof.incarnation) return false;
     if (type === "tradeReply") return lifecycle.state === "requested" && command.acceptInvite === true
       && Object.keys(command).length === 2 && socialTradeReplySpentRef.current !== proof.incarnation;
-    if (type === "tradeCancel") return Object.keys(command).length === 1;
     const source = readSocialItemSurface("trade");
     if (!source || lifecycle.state !== "open" || source.trade?.escrowPrepared !== false || source.trade.completed !== false) return false;
     if (type === "tradeConfirm") return typeof command.locked === "boolean" && command.locked === !source.trade.locked
@@ -15906,9 +15942,14 @@ export default function HomePage() {
       case "TradeRequest":
       case "TradeAccept": {
         const name = stringOrFallback(payload.name, "?");
+        const tradeOwner = currentSocialReceiveOwner(), partner = tradePartnerRef.current;
+        // Native retains an already-open exchange on its same-owner duplicate Accept.
+        // A Request is always a new invitation, even for the same partner.
+        if (event.packet === "TradeAccept" && tradeLifecycleRef.current.state === "open"
+          && tradeLifecycleRef.current.partner === name && partner
+          && partner.incarnation === tradeIncarnationRef.current && sameSocialPhysicalOwner(partner.owner, tradeOwner)) break;
         tradeIncarnationRef.current += 1; socialOwnTradeRef.current = null;
         tradeLifecycleRef.current = {state: event.packet === "TradeAccept" ? "open" : "requested", partner: name};
-        const tradeOwner = currentSocialReceiveOwner();
         tradePartnerRef.current = tradeOwner ? {owner: tradeOwner, incarnation: tradeIncarnationRef.current} : null;
         socialItemWindowsRef.current.trade = true; setShowTrade(true);
         if (event.packet === "TradeAccept") setShowInventory(true);
@@ -15962,6 +16003,7 @@ export default function HomePage() {
         }));
         break;
       case "TradeConfirm":
+        retireTerminalTradeItemOperation();
         socialOwnTradeRef.current = null; tradeIncarnationRef.current += 1;
         tradeLifecycleRef.current = {state: "closed", partner: ""}; tradePartnerRef.current = null;
         socialItemWindowsRef.current.trade = false; setShowTrade(false);
@@ -15979,6 +16021,7 @@ export default function HomePage() {
             trade: current.stage5Systems.trade ? {...current.stage5Systems.trade, myConfirmed: false} : null}}));
           break;
         }
+        retireTerminalTradeItemOperation();
         socialOwnTradeRef.current = null; tradeIncarnationRef.current += 1;
         tradeLifecycleRef.current = {state: "closed", partner: ""}; tradePartnerRef.current = null;
         socialItemWindowsRef.current.trade = false; setShowTrade(false);
@@ -18418,7 +18461,8 @@ export default function HomePage() {
       socialOwnTradeRef.current = {owner: socialOwner, trade: snapshot.stage5Systems?.trade ?? null};
       const pending = socialItemOperationsRef.current.pending;
       if (pending && socialItemOperationsRef.current.markSnapshot(pending.proof, socialItemReceiptOwner(), worldSnapshotVersionRef.current)) {
-        socialItemOperationsRef.current.releaseAfterSnapshot(pending.proof, socialItemReceiptOwner());
+        if (socialItemOperationsRef.current.releaseAfterSnapshot(pending.proof, socialItemReceiptOwner())
+          && socialTradeItemOperationRef.current?.proof === pending.proof) socialTradeItemOperationRef.current = null;
         renderSocialItems(n => n + 1);
       }
     } else socialOwnTradeRef.current = null;

@@ -1,5 +1,9 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+## Web / Windows R16持续Goal重启（2026-11-09）
+
+用户重新要求按R16共同基线继续完整Web对齐，优先不控制Windows桌面的工作。本轮交易取消及重复接受的限定代码和两场隔离延迟ACK UI已通过，剩余完整社交共用预算继续推进；既有公开发布和最终真人Accepted分别记录，不提升全局Candidate。[执行范围](WEB-R16-PARITY-GOAL.zh-CN.md) · [本轮与未结证据](evidence/r16-web-trade-20261109/README.md)
+
 ## Numeron新入口发布（2026-11-09）
 
 Web f2de与Linux d53已部署至`numeron.obelisk.build/game`，连接既有TEST五职业/V2；原前端/正式服/钱包/EXE保留。Linux与资源/前端CI、43档克隆、旧数据保全、公开三职业首任务和重登、域名与QR生成通过；浏览器画面与可信操作另记，不提升全局Candidate/Accepted或主网状态。[实际结果与原失败](NUMERON-WEB-RELEASE-20261108.zh-CN.md)

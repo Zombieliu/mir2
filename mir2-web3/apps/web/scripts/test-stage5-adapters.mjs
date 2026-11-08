@@ -5678,8 +5678,16 @@ assert.ok(ts.isIfStatement(followingGuildRankReadEntry));
 assert.equal(followingGuildRankReadEntry.expression.getText(parityPageAst),'wireCommand.type === "requestGuildInfo"');
 assert.equal(followingGuildRankReadEntry.thenStatement.getText(parityPageAst).replace(/\s+/g,""),
   '{constrow=guildRankReadRef.current,scope=guildRankScopeRef.current;if(!row||!scope||row.scope!==scope.key||row.entered||row.proof!==options?.socialRosterProof?.rankReadProof||!row.proof||socketRef.current!==socket||socket.readyState!==WebSocket.OPEN)returnfalse;row.entered=true;}');
-assert.equal(paritySendStatements.indexOf(bagBeltFollowingRankingInspectEntry)+5,paritySocketIndex,"only the exact disjoint character, group and guild-rank entry guards follow Ranking Inspect before the socket try");
-assert.equal(paritySendStatements.indexOf(bagBeltEntryNodes[0])+8,paritySocketIndex,"actual Bag entry retains the complete Fishing, Pearl, Ranking, character, group and guild-rank guard sequence before socket.send");
+const followingTradeCancelEntry=paritySendStatements[paritySendStatements.indexOf(bagBeltFollowingRankingInspectEntry)+5];
+assert.ok(ts.isIfStatement(followingTradeCancelEntry));
+assert.equal(followingTradeCancelEntry.expression.getText(parityPageAst),'options?.socialTradeProof && wireCommand.type === "tradeCancel"');
+assert.ok(ts.isBlock(followingTradeCancelEntry.thenStatement));
+assert.equal(followingTradeCancelEntry.thenStatement.statements.map(node=>node.getText(parityPageAst)).join("").replace(/\s+/g,""),
+  'if(socketRef.current!==socket||socket.readyState!==WebSocket.OPEN||!socialTradeProofCurrent(options.socialTradeProof,wireCommand))returnfalse;socialTradeCancelSpentRef.current=options.socialTradeProof.incarnation;',
+  "the complete cancel body revalidates the current socket and immutable Trade proof before spending its incarnation");
+assert.equal(followingTradeCancelEntry.elseStatement,undefined);
+assert.equal(paritySendStatements.indexOf(bagBeltFollowingRankingInspectEntry)+6,paritySocketIndex,"only the exact disjoint character, group, guild-rank and TradeCancel entry guards follow Ranking Inspect before the socket try");
+assert.equal(paritySendStatements.indexOf(bagBeltEntryNodes[0])+9,paritySocketIndex,"actual Bag entry retains the complete Fishing, Pearl, Ranking, character, group, guild-rank and TradeCancel guard sequence before socket.send");
 // Retain whole actual serialization/DTO statements and the complete Bag-specific
 // entry through socket.send. All Bag-specific owner/source/mail/storage/social
 // guards execute in the actual bagBeltFinalCurrent; no gate is replaced by true.
@@ -6185,8 +6193,9 @@ assert.equal(fishingSendStatements[fishingSendStatements.indexOf(fishingFollowin
 assert.equal(fishingSendStatements[fishingSendStatements.indexOf(fishingFollowingRankingInspectEntry)+2].getText(fishingPageAst),followingGroupEntry.getText(parityPageAst));
 assert.equal(fishingSendStatements[fishingSendStatements.indexOf(fishingFollowingRankingInspectEntry)+3].getText(fishingPageAst),followingGuildRankEntry.getText(parityPageAst));
 assert.equal(fishingSendStatements[fishingSendStatements.indexOf(fishingFollowingRankingInspectEntry)+4].getText(fishingPageAst),followingGuildRankReadEntry.getText(parityPageAst));
-assert.equal(fishingSendStatements.indexOf(fishingFollowingRankingInspectEntry)+5,fishingSocketIndex,"Fishing retains only the same character, group and guild-rank guards between Ranking and the actual socket try");
-assert.equal(fishingSendStatements.indexOf(fishingSendEntry[0])+7,fishingSocketIndex,"WorldFishing retains the exact Pearl, Ranking, character, group and guild-rank guards before actual socket send");
+assert.equal(fishingSendStatements[fishingSendStatements.indexOf(fishingFollowingRankingInspectEntry)+5].getText(fishingPageAst),followingTradeCancelEntry.getText(parityPageAst));
+assert.equal(fishingSendStatements.indexOf(fishingFollowingRankingInspectEntry)+6,fishingSocketIndex,"Fishing retains only the same character, group, guild-rank and TradeCancel guards between Ranking and the actual socket try");
+assert.equal(fishingSendStatements.indexOf(fishingSendEntry[0])+8,fishingSocketIndex,"WorldFishing retains the exact Pearl, Ranking, character, group, guild-rank and TradeCancel guards before actual socket send");
 const fishingSerializeIndex=fishingSendStatements.findIndex(node=>ts.isVariableStatement(node)&&node.declarationList.declarations.some(decl=>decl.name.getText(fishingPageAst)==="serialized"));
 const fishingDtoIndex=fishingSendStatements.findIndex(node=>ts.isVariableStatement(node)&&node.declarationList.declarations.some(decl=>decl.name.getText(fishingPageAst)==="wireCommand"));
 const fishingPreflightGuards=fishingSendStatements.filter(node=>ts.isIfStatement(node)&&['command.type === "fishingCast" && command.castOut === true && !options?.worldFishingProof','options?.worldFishingProof && !worldFishingFinalCurrent(options.worldFishingProof, command)'].includes(node.expression.getText(fishingPageAst)));
@@ -7439,13 +7448,14 @@ check("Ranking actual Page inspect gesture sends exact four raw fields UID0 thro
   assert.deepEqual(page.sent,[{type:"inspect",objectId:0,ranking:true,hero:false}]);assert.equal(page.f.controller.pending,true);
   page.api.inspectRankingPlayer(0,"Actual target");assert.equal(page.sent.length,1);
 });
-check("Ranking actual Page raw Inspect requires proof and only disjoint create/group guards follow its final claim",()=>{
+check("Ranking actual Page raw Inspect requires proof and only disjoint create group guild-rank and trade-cancel guards follow its final claim",()=>{
   const page=rankingPageFixture();assert.equal(page.api.finalRawSend({type:"inspect",objectId:0,ranking:true,hero:false}),false);
-  const finalIndex=paritySendStatements.indexOf(rankingFinalGuard);assert.equal(finalIndex+5,paritySocketIndex);
+  const finalIndex=paritySendStatements.indexOf(rankingFinalGuard);assert.equal(finalIndex+6,paritySocketIndex);
   assert.equal(paritySendStatements[finalIndex+3].getText(parityPageAst),followingGuildRankEntry.getText(parityPageAst));
   assert.equal(paritySendStatements[finalIndex+4].getText(parityPageAst),followingGuildRankReadEntry.getText(parityPageAst));
   assert.strictEqual(paritySendStatements[finalIndex+1],followingCreateEntry);
   assert.strictEqual(paritySendStatements[finalIndex+2],followingGroupEntry);
+  assert.strictEqual(paritySendStatements[finalIndex+5],followingTradeCancelEntry);
   const sends=[];(function visit(node){if(ts.isCallExpression(node)&&node.expression.getText(parityPageAst)==="socket.send")sends.push(node);ts.forEachChild(node,visit);})(paritySendStatements[paritySocketIndex]);
   assert.equal(sends.length,1);assert.equal(sends[0].arguments[0].getText(parityPageAst),"serialized");
   const listeners=paritySendStatements.map((node,index)=>({node,index})).filter(({node})=>node.getText(parityPageAst).includes("window.dispatchEvent"));

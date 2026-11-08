@@ -1,0 +1,112 @@
+{
+  "schema": 1,
+  "kind": "r16-trade-duplicate-accept-supplement",
+  "createdAt": "2026-11-08T19:52:27.254Z",
+  "passed": true,
+  "writeSet": [
+    "apps/web/app/page.tsx",
+    "apps/web/scripts/test-storage-page-gate.mjs"
+  ],
+  "sourcePins": [
+    {
+      "path": "apps/web/app/page.tsx",
+      "bytes": 1132544,
+      "sha256": "97f600cb65f604b9e928077d8ec6a365126aae9376b7cf8d1ded95480b9fab77"
+    },
+    {
+      "path": "apps/web/scripts/test-storage-page-gate.mjs",
+      "bytes": 190199,
+      "sha256": "29c3653ca8d7880c815382e2ba4ed26d661e6cae2e33b5efb35b67f3a588a2d0"
+    }
+  ],
+  "priorReceipts": [
+    "bounded-checks.json",
+    "stage5-fixture-completion.json"
+  ],
+  "results": {
+    "red": {
+      "log": "duplicate-accept-red.log",
+      "passed": 2,
+      "failed": 2
+    },
+    "focused": {
+      "log": "duplicate-accept-focused-green.log",
+      "passed": 4,
+      "failed": 0
+    },
+    "actualPage": {
+      "log": "duplicate-accept-page-gate-final.log",
+      "passed": 105,
+      "failed": 0
+    },
+    "typescript": {
+      "log": "duplicate-accept-typescript.log",
+      "command": "node node_modules/typescript/bin/tsc --noEmit --incremental false",
+      "exitCode": 0
+    },
+    "stage5": {
+      "rerun": false,
+      "groupsPassed": 507,
+      "receipt": "stage5-fixture-completion.json",
+      "reason": "Supplement changes only the TradeRequest/TradeAccept receive case; final sendRaw boundary remains unchanged.",
+      "sourcePin": {
+        "path": "apps/web/scripts/test-stage5-adapters.mjs",
+        "bytes": 760989,
+        "sha256": "d20911462677cbaba566387fb7fcae76c37e400fce9a815091b319eca813a980"
+      }
+    }
+  },
+  "baseline": {
+    "source": "apps/game-client/client-bevy/src/social.rs:995",
+    "test": "apps/game-client/client-bevy/src/social_trade_tests.rs:189"
+  },
+  "scope": {
+    "duplicateAcceptPreserves": [
+      "samePhysicalOwner",
+      "openExchangeIncarnation",
+      "ownOffer",
+      "partnerOffer",
+      "tradeItemBinding",
+      "cancelSpent"
+    ],
+    "newExchangeOn": [
+      "everyTradeRequest",
+      "requestedToOpen",
+      "differentPartner",
+      "closedToOpen",
+      "differentPhysicalOwner"
+    ],
+    "cancelWithGuildItemPending": false,
+    "guildCustodyRetained": true,
+    "globalEightSocialBudgetComplete": false,
+    "completeTradeNativeParity": false,
+    "serviceBrowserDeploymentStarted": false
+  },
+  "evidence": [
+    {
+      "path": "duplicate-accept-red.log",
+      "bytes": 2753,
+      "sha256": "afea931fbda5bc4fb010f2a8d326163626b9b01cbb08e2805dfdc8f706ba0829"
+    },
+    {
+      "path": "duplicate-accept-focused-green.log",
+      "bytes": 1229,
+      "sha256": "bfaa6513571da0f564956e44b314b103ebaa0c9dc73bc22061ca29aef3e55c78"
+    },
+    {
+      "path": "duplicate-accept-page-gate-final.log",
+      "bytes": 28828,
+      "sha256": "3c28f44e907cd1312d1fcc6a001c067399dcdbda771ae3319092d8ecb8e8d522"
+    },
+    {
+      "path": "duplicate-accept-typescript.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "duplicate-accept-source.patch",
+      "bytes": 40141,
+      "sha256": "7f711c3f05da405939705ec069e8219e35bee3583496a297ac97836ef06f1031"
+    }
+  ]
+}

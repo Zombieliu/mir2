@@ -1,5 +1,9 @@
 # Frontend 1:1 Gaps
 
+## 交易待回执时取消（2026-11-09）
+
+Web自己的deposit/retrieve未决时允许一次经过完整上下文复核的取消，未知发送不重试；真实终结包只退役该交易的item pending，unlock/Guild保持。重复同owner/partner的TradeAccept按Native保留报价和取消资格。Page105、社交叶31、适配器507组及TypeScript通过；隔离浏览器两场真实ACK延迟取消、资产核对及迟到ACK不复活分别通过，已正常注销清理。使用已pin的v22隔离网关，非当前源新Gateway/Native窗口或公开部署。全社交共用八项及无关Guild未决下的取消仍开放，不认定完整Trade或全局Candidate。[证据](evidence/r16-web-trade-20261109/README.md)
+
 ## Numeron R16 Web 公开入口（2026-11-09）
 
 f2de已发布至`numeron.obelisk.build/game`，官网/下载/PWA保持，旧Mir2项目与Windows EXE不变。三职业实际普通登录/选角/进城、中文共享Q绘制、正常注销通过，战士另有两次键盘步进；六个Core及SC字体完成加载，三图已目视核对。QR生成/pending与三职业首任务/重登另有协议证据。冷载超时、注销后页签误判、三次已恢复的继承贴图404和console4均保留；不把缓存复用当冷启动、旧本机30级旅程当本次公开全流程验收。[实际结果与边界](NUMERON-WEB-RELEASE-20261108.zh-CN.md)

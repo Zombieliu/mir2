@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "status": "open",
+  "documentation": "docs/evidence/r16-web-trade-20261109/social-budget-audit.md",
+  "documentationSha256": "6ae98a719cac39002b08d70cd426f98b5abd8760cb909801d7c3b4c003650cde",
+  "documentationBytes": 19038,
+  "relativeSourceLinks": 28,
+  "invalidLinks": [],
+  "absoluteDriveReferences": false,
+  "trailingWhitespaceLines": 0,
+  "reproducerSyntaxChecked": true,
+  "reproducerExitCode": 1,
+  "parityPassed": false,
+  "observedUnresolved": 9,
+  "nativeMaxPending": 8,
+  "nativeVariants": 20,
+  "productFilesChangedByAudit": 0,
+  "servicesStarted": 0,
+  "networkConnections": 0,
+  "pins": {
+    "reproduce.mjs": "87b970bf1372563959c8927828f0873810b77dd843f6f6e9ee9a8f4ca9d93014",
+    "observation-r1.json": "b49317f9918bfb30eb6a1562aef457facde1a5e2f504e621b4192e287ecfad8e"
+  }
+}

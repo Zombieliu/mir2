@@ -1,0 +1,376 @@
+{
+  "schema": 1,
+  "passed": false,
+  "phase": "retrieve-ack-delay-ui-cancel",
+  "scope": {
+    "isolatedLoopback": true,
+    "plannedOrdinaryAccounts": 2,
+    "reusedExistingIsolatedAccounts": true,
+    "primaryPhysicalUi": true,
+    "transparentRealServerWebSocket": true,
+    "onlyMatchingItemAckDelayed": true,
+    "modelCalls": 0,
+    "privilegedCommands": 0
+  },
+  "checks": [
+    {
+      "name": "primary-ui-new-character-in-real-world",
+      "passed": true,
+      "position": {
+        "x": 288,
+        "y": 616
+      },
+      "map": "0"
+    },
+    {
+      "name": "second-ordinary-player-same-realm",
+      "passed": true,
+      "adjacentInitially": true
+    },
+    {
+      "name": "ordinary-peer-adjacent-facing",
+      "passed": true,
+      "primaryPosition": {
+        "x": 288,
+        "y": 616
+      },
+      "peerPosition": {
+        "x": 288,
+        "y": 617
+      },
+      "peerDirection": "Up"
+    },
+    {
+      "name": "deposit-pending-cancel-real-server-restores-assets",
+      "passed": true,
+      "heldPacket": "DepositTradeItem",
+      "heldMs": 744,
+      "realSuccess": true,
+      "terminalUnlock": false,
+      "exactUidSlotQuantityAndGoldRestored": true,
+      "lateAckReleasedUnmodified": true,
+      "noResurrection": true,
+      "noRepeatedEconomicCommands": true
+    }
+  ],
+  "events": [
+    {
+      "at": 1794170250558,
+      "type": "command",
+      "who": "primary",
+      "command": "clientCapabilities"
+    },
+    {
+      "at": 1794170250559,
+      "type": "command",
+      "who": "primary",
+      "command": "clientCapabilities"
+    },
+    {
+      "at": 1794170252483,
+      "type": "command",
+      "who": "primary",
+      "command": "setLanguage"
+    },
+    {
+      "at": 1794170252484,
+      "type": "command",
+      "who": "primary",
+      "command": "clientVersion"
+    },
+    {
+      "at": 1794170252484,
+      "type": "command",
+      "who": "primary",
+      "command": "login"
+    },
+    {
+      "at": 1794170255515,
+      "type": "command",
+      "who": "primary",
+      "command": "startGame"
+    },
+    {
+      "at": 1794170262202,
+      "type": "server-packet",
+      "packet": "StartGame",
+      "result": 4
+    },
+    {
+      "at": 1794170262235,
+      "type": "command",
+      "who": "primary",
+      "command": "npcPurchaseOwner"
+    },
+    {
+      "at": 1794170265771,
+      "type": "command",
+      "who": "primary",
+      "command": "keepAlive"
+    },
+    {
+      "at": 1794170265822,
+      "type": "command",
+      "who": "peer",
+      "command": "clientVersion"
+    },
+    {
+      "at": 1794170265835,
+      "type": "command",
+      "who": "peer",
+      "command": "login"
+    },
+    {
+      "at": 1794170266563,
+      "type": "command",
+      "who": "peer",
+      "command": "startGame"
+    },
+    {
+      "at": 1794170273391,
+      "type": "command",
+      "who": "peer",
+      "command": "walk"
+    },
+    {
+      "at": 1794170274058,
+      "type": "command",
+      "who": "peer",
+      "command": "turn"
+    },
+    {
+      "at": 1794170274076,
+      "type": "command",
+      "who": "peer",
+      "command": "tradeRequest"
+    },
+    {
+      "at": 1794170275842,
+      "type": "command",
+      "who": "peer",
+      "command": "keepAlive"
+    },
+    {
+      "at": 1794170277610,
+      "type": "server-packet",
+      "packet": "TradeRequest"
+    },
+    {
+      "at": 1794170277827,
+      "type": "command",
+      "who": "primary",
+      "command": "tradeReply"
+    },
+    {
+      "at": 1794170277882,
+      "type": "server-packet",
+      "packet": "TradeAccept"
+    },
+    {
+      "at": 1794170278480,
+      "type": "command",
+      "who": "primary",
+      "command": "depositTradeItem",
+      "from": 3,
+      "to": 0
+    },
+    {
+      "at": 1794170278557,
+      "type": "server-packet",
+      "packet": "DepositTradeItem",
+      "success": true,
+      "from": 3,
+      "to": 0
+    },
+    {
+      "at": 1794170278558,
+      "type": "real-ack-withheld",
+      "packet": "DepositTradeItem",
+      "from": 3,
+      "to": 0,
+      "success": true,
+      "rawSha256": "d103ad27c30c59d178abdf2f418408584eb48a504a75aae07332ddb796b845bf"
+    },
+    {
+      "at": 1794170278661,
+      "type": "pending-ui-before-cancel",
+      "operation": "deposit",
+      "ackWithheld": true,
+      "cancelEnabled": true,
+      "allItemControlsDisabled": true
+    },
+    {
+      "at": 1794170279090,
+      "type": "command",
+      "who": "primary",
+      "command": "tradeCancel"
+    },
+    {
+      "at": 1794170279152,
+      "type": "server-packet",
+      "packet": "TradeCancel",
+      "unlock": false
+    },
+    {
+      "at": 1794170279301,
+      "type": "held-ack-released",
+      "packet": "DepositTradeItem",
+      "rawSha256": "d103ad27c30c59d178abdf2f418408584eb48a504a75aae07332ddb796b845bf",
+      "heldForMs": 744
+    },
+    {
+      "at": 1794170280570,
+      "type": "command",
+      "who": "primary",
+      "command": "keepAlive"
+    },
+    {
+      "at": 1794170280817,
+      "type": "command",
+      "who": "peer",
+      "command": "tradeRequest"
+    },
+    {
+      "at": 1794170281113,
+      "type": "server-packet",
+      "packet": "TradeRequest"
+    },
+    {
+      "at": 1794170281346,
+      "type": "command",
+      "who": "primary",
+      "command": "tradeReply"
+    },
+    {
+      "at": 1794170281397,
+      "type": "server-packet",
+      "packet": "TradeAccept"
+    },
+    {
+      "at": 1794170281795,
+      "type": "command",
+      "who": "primary",
+      "command": "depositTradeItem",
+      "from": 3,
+      "to": 0
+    },
+    {
+      "at": 1794170281865,
+      "type": "server-packet",
+      "packet": "DepositTradeItem",
+      "success": true,
+      "from": 3,
+      "to": 0
+    },
+    {
+      "at": 1794170285853,
+      "type": "command",
+      "who": "peer",
+      "command": "keepAlive"
+    },
+    {
+      "at": 1794170295570,
+      "type": "command",
+      "who": "primary",
+      "command": "keepAlive"
+    },
+    {
+      "at": 1794170295863,
+      "type": "command",
+      "who": "peer",
+      "command": "keepAlive"
+    }
+  ],
+  "commands": {
+    "primary": {
+      "clientCapabilities": 2,
+      "setLanguage": 1,
+      "clientVersion": 1,
+      "login": 1,
+      "startGame": 1,
+      "npcPurchaseOwner": 1,
+      "keepAlive": 3,
+      "tradeReply": 2,
+      "depositTradeItem": 2,
+      "tradeCancel": 1
+    },
+    "peer": {
+      "clientVersion": 1,
+      "login": 1,
+      "startGame": 1,
+      "walk": 1,
+      "turn": 1,
+      "tradeRequest": 2,
+      "keepAlive": 3
+    }
+  },
+  "screenshots": [
+    "01-primary-in-town.png",
+    "deposit-pending-cancel-enabled.png",
+    "deposit-cancelled-after-old-ack.png",
+    "failure.png"
+  ],
+  "errors": [
+    {
+      "phase": "retrieve-ack-delay-ui-cancel",
+      "name": "Error",
+      "code": null,
+      "messageHash": "efd4ed386c72cb798f950fad668abc3ac411b34eeb2c5494503afb76c806da50",
+      "safeCode": "SERVER_OFFER_CUSTODY_NOT_SEEN"
+    }
+  ],
+  "httpErrors": [],
+  "pageErrors": [],
+  "consoleErrors": [],
+  "starter": {
+    "name": "Candle",
+    "quantity": 1,
+    "uidHash": "4e07408562bedb8b60ce05c1decfe3ad16b72230967de01f640b7e4729b49fce",
+    "slot": 3
+  },
+  "failureUi": {
+    "screen": "game",
+    "tradeVisible": true,
+    "bagInput": "{\"active\":false,\"error\":null,\"owner\":{\"owner\":\"react\",\"runGeneration\":1,\"ownerRevision\":3,\"connectionGeneration\":1,\"sessionGeneration\":1},\"status\":{\"runGeneration\":1,\"connectionGeneration\":1,\"sessionGeneration\":1,\"ownerRevision\":3,\"frame\":2549,\"ready\":false,\"inputEnabled\":false,\"appliedRevision\":6,\"appliedModelRevision\":1,\"appliedPresentationRevision\":3,\"supportsBagToBelt\":true,\"appliedBeltGeometryRevision\":1,\"inputRegions\":[],\"diagnostics\":{\"modelVisibleItems\":4,\"treeContentComplete\":false,\"touchActionsComplete\":null,\"scopedActionCount\":null,\"expectedActionCount\":null,\"minCssHitWidth\":null,\"minCssHitHeight\":null,\"firstActionFailure\":null,\"layoutMatchesWindow\":true,\"assetsLoading\":false,\"layoutRegionCount\":0,\"sinkPresent\":true,\"treeIdentity\":{\"runGeneration\":1,\"connectionGeneration\":1,\"sessionGeneration\":1,\"ownerRevision\":2},\"treeModelRevision\":1,\"treePage\":\"bag1\",\"treeVisibleItems\":4,\"treeMatchesModel\":false,\"gridCells\":40,\"itemCells\":4,\"occupiedCells\":4,\"iconNodes\":4,\"visibleIcons\":4,\"laidOutIcons\":0,\"stackTextNodes\":1,\"visibleStackTexts\":0,\"laidOutStackTexts\":0},\"error\":null},\"diagnostic\":{\"phase\":\"prepare\",\"transitions\":[{\"reason\":null,\"phase\":\"active\",\"at\":32703.100000023842,\"status\":{\"runGeneration\":1,\"connectionGeneration\":1,\"sessionGeneration\":1,\"ownerRevision\":2,\"frame\":1426,\"ready\":true,\"inputEnabled\":true,\"appliedRevision\":5,\"appliedModelRevision\":1,\"appliedPresentationRevision\":3,\"supportsBagToBelt\":true,\"appliedBeltGeometryRevision\":1,\"inputRegions\":[{\"left\":410,\"top\":86,\"width\":316,\"height\":236},{\"left\":736,\"top\":86,\"width\":122,\"height\":60}],\"diagnostics\":{\"modelVisibleItems\":4,\"treeContentComplete\":true,\"touchActionsComplete\":null,\"scopedActionCount\":null,\"expectedActionCount\":null,\"minCssHitWidth\":null,\"minCssHitHeight\":null,\"firstActionFailure\":null,\"layoutMatchesWindow\":true,\"assetsLoading\":false,\"layoutRegionCount\":2,\"sinkPresent\":true,\"treeIdentity\":{\"runGeneration\":1,\"connectionGeneration\":1,\"sessionGeneration\":1,\"ownerRevision\":2},\"treeModelRevision\":1,\"treePage\":\"bag1\",\"treeVisibleItems\":4,\"treeMatchesModel\":true,\"gridCells\":40,\"itemCells\":4,\"occupiedCells\":4,\"iconNodes\":4,\"visibleIcons\":4,\"laidOutIcons\":4,\"stackTextNodes\":1,\"visibleStackTexts\":1,\"laidOutStackTexts\":1},\"error\":null}}],\"intentVerdicts\":[]},\"hudNavigation\":[{\"action\":\"openBag\",\"accepted\":true,\"fresh\":true,\"generation\":2,\"revision\":1,\"snapshotMatches\":true,\"appliedPending\":false,\"ready\":true,\"errorPresent\":false,\"navigationSourceMatches\":true,\"nativeBaseline\":true,\"navigationFresh\":true},{\"action\":\"openBag\",\"accepted\":true,\"fresh\":true,\"generation\":2,\"revision\":1,\"snapshotMatches\":true,\"appliedPending\":false,\"ready\":true,\"errorPresent\":false,\"navigationSourceMatches\":true,\"nativeBaseline\":true,\"navigationFresh\":true}]}",
+    "movement": "{\"keyboard\":{\"lastKey\":null,\"lastDispatch\":{\"reason\":\"no-held-direction\",\"source\":\"held\",\"at\":1794170296982,\"sceneInteractionReady\":true,\"bevyQuestUiCapturesPointer\":false},\"lastShortcut\":null},\"pointer\":null,\"host\":{\"connectionGeneration\":1,\"sessionGeneration\":1,\"suspended\":null,\"sceneDeferred\":false,\"lastIntent\":null,\"lastAttempt\":null,\"lastPickup\":null,\"self\":{\"x\":288,\"y\":616,\"direction\":\"Down\",\"dead\":false},\"queued\":null,\"controller\":{\"canSend\":true,\"sendDelayMs\":0,\"blockedMs\":0,\"pending\":null},\"target\":null,\"targetMapBlocked\":false,\"targetMapCell\":null,\"nearbyEntities\":[{\"objectId\":\"1\",\"kind\":\"npc\",\"x\":287,\"y\":615,\"dead\":false},{\"objectId\":\"50003\",\"kind\":\"player\",\"x\":288,\"y\":617,\"dead\":false},{\"objectId\":\"206641\",\"kind\":\"monster\",\"x\":287,\"y\":616,\"dead\":false}]}}",
+    "focus": "BODY",
+    "frameClass": "client-stage-frame "
+  },
+  "finalPrimary": {
+    "economy": {
+      "gold": 0,
+      "inventory": [
+        {
+          "uidHash": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+          "slot": 0,
+          "count": 1,
+          "name": "WoodenSword"
+        },
+        {
+          "uidHash": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+          "slot": 1,
+          "count": 1,
+          "name": "BaseDress(M)"
+        },
+        {
+          "uidHash": "d4735e3a265e16eee03f59718b9b5d03019c07d8b6c51f90da3a666eec13ab35",
+          "slot": 2,
+          "count": 1,
+          "name": "(HP)DrugSmall"
+        },
+        {
+          "uidHash": "4e07408562bedb8b60ce05c1decfe3ad16b72230967de01f640b7e4729b49fce",
+          "slot": 3,
+          "count": 1,
+          "name": "Candle"
+        }
+      ],
+      "belt": []
+    },
+    "tradeActive": true,
+    "position": {
+      "x": 288,
+      "y": 616
+    }
+  }
+}

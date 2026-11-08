@@ -23,6 +23,8 @@ const modules = new Map();
 sources.browserLocalization = "../lib/r16-browser-localization.ts";
 allow.browserLocalization = {};
 allow.r16Auth["./r16-browser-localization"] = "browserLocalization";
+sources.guildStatusPresentation = "../lib/guild-status-presentation.ts";
+allow.guildStatusPresentation = {};
 function loadPure(name) {
   assert(Object.hasOwn(sources, name), "module outside pure allowlist");
   if (modules.has(name)) return modules.get(name);
@@ -92,7 +94,7 @@ const names = ["worldFishingOwner", "cancelWorldFishingGesture", "retireWorldFis
   "itemCommandRequiresOwner", "retireEquipmentSession", "retirePrivateCompanion", "advanceHeroWindowEpochs", "mailParcelItemsIdle", "endStorageService", "closeNpcRepairService", "retireNpcShopService",
   "currentSpellsOwner", "currentSocialReplyOwner", "currentSocialReceiveOwner", "sameSocialPhysicalOwner",
   "socialReplyWindowOpen", "captureSocialRequest", "closeSocialReplyWindow", "replySocialRequest", "retireSocialRequests",
-  "retireSocialItemConnection", "socialItemMutationAllowed", "parityItemMutationAllowed", "readSocialItemSurface", "socialItemProofCurrent",
+  "retireSocialItemConnection", "retireTerminalTradeItemOperation", "socialItemMutationAllowed", "parityItemMutationAllowed", "readSocialItemSurface", "socialItemProofCurrent",
   "submitSocialItem", "socialItemReceiptOwner", "observeSocialItemReceipt", "observeGuildPermissions", "observeGuildStorageChange",
   "socialTradeProofCurrent", "rentExpandedStorage", "currentStorageRentalFacts", "closeStorageRentalUi", "cancelStorageRental",
   "confirmStorageRental", "observeEquipmentSnapshot", "syncEquipmentSnapshot", "suspendEquipmentConnection",
@@ -104,13 +106,13 @@ const names = ["worldFishingOwner", "cancelWorldFishingGesture", "retireWorldFis
   "moveRankingRows", "setRankingOnlineOnly", "applyRankingPacket", "refreshFriends", "setShowFriends",
   "currentRankingInspectSource", "closeRankingInspect", "groupHiddenTargetIds", "currentGroupHoverName", "currentGroupOperationSource",
   "submitGroupOperation", "groupInviteMember", "kickGroupMember", "groupLeave", "groupToggleAllowInvites",
-  "readSocialRosterSource", "socialRosterProofCurrent", "sendSocialRosterCommand", "projectPartnerTradePacket", "sendTradeUiCommand", "confirmTrade"];
+  "readSocialRosterSource", "socialRosterProofCurrent", "sendSocialRosterCommand", "projectPartnerTradePacket", "sendTradeUiCommand", "confirmTrade", "cancelTrade"];
 const declarations = new Map();
 const ackCases = [];
 const socialCases = new Map();
 const socialPacketNames = ["GroupInvite", "MarriageRequest", "DivorceRequest", "MentorRequest", "GuildStatus", "GuildStorageList",
   "GuildStorageItemChange", "DepositTradeItem", "RetrieveTradeItem", "LogOutFailed", "FriendUpdate", "GuildInvite", "GuildMemberChange", "Rankings",
-  "TradeItem", "NewItemInfo", "NewRecipeInfo", "Connected", "NewAccount", "Login", "LoginBanned", "ChangePassword",
+  "TradeItem", "TradeGold", "TradeRequest", "TradeAccept", "TradeConfirm", "TradeCancel", "NewItemInfo", "NewRecipeInfo", "Connected", "NewAccount", "Login", "LoginBanned", "ChangePassword",
   "SwitchGroup", "AddMember", "DeleteMember", "GroupMemberInfo", "DeleteGroup", "ObjectHidden"];
 let authControlsInitializer;
 let groupStartResetCondition, groupStartResetStatements;
@@ -311,7 +313,7 @@ function harness({ identity = session, sequenceRef = { current: 1 }, pendingRef 
     observePreferenceRef:{current:null},observeBootstrapRef:{current:null},combatModeRawRef:{current:null},
     heroWindowEpochsRef:{current:{inventory:1,character:1,belt:1}},skillBarPointerHeldRef:{current:false},skillBarDocumentCacheRef:{current:null},
     ...pureAuth, ...loadPure("runtimeLanguage"), ...loadPure("stage5"), ...adapter, ...pureSocial, ...pureOperations, ...pureSocialItems, ...pureSocialActions, ...pureExtended,
-    ...loadPure("guildRankOperations"), ...loadPure("guildRankProjection"),
+    ...loadPure("guildRankOperations"), ...loadPure("guildRankProjection"), ...loadPure("guildStatusPresentation"),
     companionContextEpochRef: {current: 1}, companionClientRef: {current: null}, setCompanionOpen() {},
     projectEquipmentGatewaySnapshot: pureEquipment.projectEquipmentGatewaySnapshot,
     authoritativeItemUniqueId: pureIdentity.authoritativeItemUniqueId,
@@ -371,7 +373,7 @@ function harness({ identity = session, sequenceRef = { current: 1 }, pendingRef 
     rankingInspectRequestsRef: {current: new (loadPure("rankingInspectRequests").RankingInspectRequests)()},
     rankingInspectOpenRef: {current: false}, rankingInspectBindingRef: {current: null},
     setRankingInspectInfo: value => {scope.rankingInspectInfo=value;},
-    guildRanksRef: {current: null}, socialFriendsRef: {current: null},
+    guildRanksRef: {current: null}, guildStatusPresentationRef: {current: null}, socialFriendsRef: {current: null},
     guildRankOperationsRef: {current: new (loadPure("guildRankOperations").GuildRankOperations)()},
     guildRankScopeRef: {current: null}, guildRankWakeRef: {current: null}, guildRankReadRef: {current: null},
     socialRosterWindowsRef: {current: {friends: false}}, socialRosterRenderSources: {friend: null, guild: null},
@@ -379,7 +381,9 @@ function harness({ identity = session, sequenceRef = { current: 1 }, pendingRef 
     socialItemOperationsRef: {current: new pureOperations.SocialWindowOperations()}, socialOwnTradeRef: {current: null},
     socialItemWindowsRef: {current: {trade: true, guild: true}}, socialCharacterIndexRef: {current: {requested: 7, current: 7}},
     tradeLifecycleRef: {current: {state: "closed", partner: ""}}, tradePartnerRef: {current: null}, tradeIncarnationRef: {current: 1},
-    socialTradeSendingRef: {current: null}, socialTradeReplySpentRef: {current: null}, renderSocialItems: () => {},
+    socialTradeSendingRef: {current: null}, socialTradeReplySpentRef: {current: null},
+    socialTradeCancelSpentRef: {current: null}, socialTradeItemOperationRef: {current: null}, renderSocialItems: () => {},
+    setShowTrade: value => { scope.tradeOpen = value; }, setShowInventory: value => { scope.inventoryOpen = value; },
     socialTradeUiLease: {owner: null, incarnation: 0, partner: "", state: "closed"},
     guildStorageRawRef: {current: null}, guildPermissionsRef: {current: null}, guildStorageRevisionRef: {current: 0},
     socialCatalogRef: {current: new Map([[6, {name: "Guild item", icon: 1}]])}, worldSnapshotVersionRef: {current: 1},
@@ -660,6 +664,268 @@ test("actual Page social item unknown outcome remains pending across closed UI a
   page.snapshot(); assert.strictEqual(page.scope.socialItemOperationsRef.current.pending.proof, pending.proof);
   page.submitSocialItem("depositTrade", 43, 5, 22, source.sourceKey); assert.equal(page.attempts, 1);
   page.retireSocialItemConnection(); assert.equal(page.scope.socialItemOperationsRef.current.pending, null);
+});
+
+function openCurrentTrade(page, offered = false) {
+  page.receive("TradeAccept", {name: "Partner"});
+  const source = openTrade(page, offered); page.renderTrade(); return source;
+}
+
+test("actual Page Trade cancel permits one request during deposit or retrieve pending without releasing the item barrier", () => {
+  for (const offered of [false, true]) for (const unknown of [false, true]) {
+    const page = harness(), source = openCurrentTrade(page, offered);
+    const kind = offered ? "retrieveTrade" : "depositTrade", from = offered ? 3 : 43, to = offered ? 47 : 5;
+    if (unknown) page.throwAtSocket(offered ? "retrieveTradeItem" : "depositTradeItem");
+    page.submitSocialItem(kind, from, to, 22, source.sourceKey); page.restoreSocketSend();
+    const pending = page.scope.socialItemOperationsRef.current.pending; assert.ok(pending?.entered);
+    page.confirmTrade(); assert.equal(page.sendTradeUiCommand({type: "tradeGold", amount: 1}), false);
+    assert.equal(page.cancelTrade(), true, kind + (unknown ? " unknown" : ""));
+    assert.equal(page.cancelTrade(), false, "one cancel per exchange even after another React render");
+    page.renderTrade(); assert.equal(page.cancelTrade(), false);
+    assert.equal(page.sent.filter(row => row.type === "tradeCancel").length, 1);
+    assert.strictEqual(page.scope.socialItemOperationsRef.current.pending.proof, pending.proof, "send is not an ACK");
+    page.receive("TradeCancel", {unlock: true}); page.snapshot();
+    assert.strictEqual(page.scope.socialItemOperationsRef.current.pending.proof, pending.proof, "unlock and snapshot cannot retire the barrier");
+    page.scope.socialItemWindowsRef.current.trade = false; page.setClock(page.now + 60_000); page.snapshot();
+    assert.strictEqual(page.scope.socialItemOperationsRef.current.pending.proof, pending.proof, "closing and time cannot retire the barrier");
+    page.confirmTrade(); assert.equal(page.sendTradeUiCommand({type: "tradeGold", amount: 1}), false);
+    assert.equal(page.attempts, 2, "one item send and one cancellation; no confirm or gold");
+  }
+});
+
+test("actual Page Trade cancel unknown socket result is spent while a definitely unsent cancellation can retry", () => {
+  const unknown = harness(); openCurrentTrade(unknown); unknown.throwAtSocket("tradeCancel");
+  assert.equal(unknown.cancelTrade(), false); assert.equal(unknown.attempts, 1); assert.equal(unknown.errors.length, 1);
+  unknown.restoreSocketSend(); unknown.renderTrade(); assert.equal(unknown.cancelTrade(), false);
+  assert.equal(unknown.attempts, 1, "transport uncertainty cannot mint a second cancellation");
+  unknown.confirmTrade(); assert.equal(unknown.sendTradeUiCommand({type: "tradeGold", amount: 1}), false);
+  const source = unknown.readSocialItemSurface("trade");
+  unknown.submitSocialItem("depositTrade", 43, 5, 22, source.sourceKey);
+  assert.equal(unknown.attempts, 1, "a cancelled exchange cannot accept new item or gold changes while its result is unknown");
+  assert.equal(unknown.scope.socialItemOperationsRef.current.pending, null);
+
+  for (const mode of ["unavailable", "window", "socket"]) for (const itemPending of [false, true]) {
+    const page = harness(), source = openCurrentTrade(page);
+    if (itemPending) page.submitSocialItem("depositTrade", 43, 5, 22, source.sourceKey);
+    const before = page.attempts;
+    if (mode === "unavailable") page.socket.readyState = 0;
+    else page.onAction(() => {
+      if (mode === "window") page.scope.socialItemWindowsRef.current.trade = false;
+      else page.scope.socketRef.current = {readyState: 1};
+    });
+    assert.equal(page.cancelTrade(), false, mode); assert.equal(page.attempts, before);
+    assert.equal(page.scope.socialTradeCancelSpentRef.current, null, "no socket entry means no spent cancellation");
+    page.socket.readyState = 1; page.scope.socketRef.current = page.socket;
+    page.scope.socialItemWindowsRef.current.trade = true; page.onAction(null); page.renderTrade();
+    assert.equal(page.cancelTrade(), true, mode + " retry"); assert.equal(page.attempts, before + 1);
+  }
+});
+
+test("actual Page Trade cancel retains exact owner scene map exchange and DTO guards before the final socket entry", () => {
+  for (const mode of ["connection", "session", "scene", "map", "player", "socket", "window", "closed", "incarnation", "partner", "dto"]) {
+    const page = harness(), source = openCurrentTrade(page);
+    page.submitSocialItem("depositTrade", 43, 5, 22, source.sourceKey);
+    const pending = page.scope.socialItemOperationsRef.current.pending;
+    const command = {type: "tradeCancel"};
+    page.onAction(() => {
+      if (mode === "connection") page.scope.equipmentConnectionGenerationRef.current++;
+      if (mode === "session") page.scope.equipmentSessionGenerationRef.current++;
+      if (mode === "scene") page.scope.socialSceneRevisionRef.current++;
+      if (mode === "map") page.scope.worldRef.current.mapFileName = "Other";
+      if (mode === "player") page.scope.worldRef.current.playerObjectId = "99";
+      if (mode === "socket") page.scope.socketRef.current = {readyState: 1};
+      if (mode === "window") page.scope.socialItemWindowsRef.current.trade = false;
+      if (mode === "closed") page.scope.tradeLifecycleRef.current.state = "closed";
+      if (mode === "incarnation") page.scope.tradeIncarnationRef.current++;
+      if (mode === "partner") page.scope.tradeLifecycleRef.current.partner = "Other";
+      if (mode === "dto") command.unlock = true;
+    });
+    assert.equal(page.sendTradeUiCommand(command), false, mode);
+    assert.equal(page.attempts, 1, mode + " cannot reach the socket");
+    assert.equal(page.scope.socialTradeCancelSpentRef.current, null, mode + " cannot consume cancellation eligibility");
+    assert.strictEqual(page.scope.socialItemOperationsRef.current.pending.proof, pending.proof);
+  }
+  const malformed = harness(); openCurrentTrade(malformed);
+  assert.equal(malformed.sendTradeUiCommand({type: "tradeCancel", unlock: true}), false);
+  assert.equal(malformed.sendRaw({type: "tradeCancel"}), false, "a plain wire command cannot acquire the UI lease");
+  assert.equal(malformed.attempts, 0);
+  for (const mode of ["scene", "map"]) {
+    const page = harness(), source = openCurrentTrade(page);
+    page.submitSocialItem("depositTrade", 43, 5, 22, source.sourceKey);
+    if (mode === "scene") page.scope.socialSceneRevisionRef.current++;
+    else page.scope.worldRef.current.mapFileName = "Other";
+    page.renderTrade();
+    assert.equal(page.cancelTrade(), false, "a newly rendered lease cannot retag the pending item's " + mode);
+    assert.equal(page.attempts, 1);
+  }
+});
+
+test("actual Page Trade cancel resists synchronous event and socket reentry and withdraws an unentered item send", () => {
+  for (const mode of ["event", "socket"]) {
+    const page = harness(); openCurrentTrade(page); const nested = [];
+    if (mode === "event") page.onAction(() => nested.push(page.cancelTrade()));
+    else {
+      const original = page.socket.send;
+      page.socket.send = body => { nested.push(page.cancelTrade()); original(body); };
+    }
+    assert.equal(page.cancelTrade(), true, mode); assert.deepEqual(nested, [false]); assert.equal(page.attempts, 1);
+  }
+  const page = harness(), source = openCurrentTrade(page);
+  page.onAction(event => { if (event.detail.type === "depositTradeItem") assert.equal(page.cancelTrade(), true); });
+  page.submitSocialItem("depositTrade", 43, 5, 22, source.sourceKey);
+  assert.deepEqual(page.sent, [{type: "tradeCancel"}], "an item reserved before reentrant cancellation cannot enter afterward");
+  assert.equal(page.scope.socialItemOperationsRef.current.pending, null, "the item was definitely unsent");
+});
+
+test("actual Page Trade terminal packets retire only their current exchange item and late item ACKs cannot resurrect it", () => {
+  for (const offered of [false, true]) for (const packet of ["TradeConfirm", "TradeCancel"]) {
+    const page = harness(), source = openCurrentTrade(page, offered);
+    const from = offered ? 3 : 43, to = offered ? 47 : 5;
+    page.submitSocialItem(offered ? "retrieveTrade" : "depositTrade", from, to, 22, source.sourceKey);
+    const pending = page.scope.socialItemOperationsRef.current.pending; assert.ok(pending?.entered);
+    page.receive(packet, {unlock: false});
+    assert.equal(page.scope.socialItemOperationsRef.current.pending, null, packet);
+    assert.equal(pending.acked, false, "exchange termination retires custody without inventing an item success ACK");
+    assert.equal(page.scope.tradeLifecycleRef.current.state, "closed");
+    page.receive(offered ? "RetrieveTradeItem" : "DepositTradeItem", {from, to, success: true}); page.snapshot();
+    assert.equal(page.scope.socialItemOperationsRef.current.pending, null, "late receipt cannot recreate a retired operation");
+    openCurrentTrade(page, offered); assert.equal(page.cancelTrade(), true, "a new server exchange has independent cancellation eligibility");
+  }
+});
+
+test("actual Page Trade cancel terminal rejects foreign owners and stale exchanges and never retires Guild custody", () => {
+  for (const mode of ["connection", "socket", "player", "session", "exchange"]) {
+    const page = harness(), source = openCurrentTrade(page);
+    page.submitSocialItem("depositTrade", 43, 5, 22, source.sourceKey);
+    const pending = page.scope.socialItemOperationsRef.current.pending;
+    if (mode === "player") page.scope.worldRef.current.playerObjectId = "99";
+    if (mode === "session") page.scope.equipmentSessionGenerationRef.current++;
+    if (mode === "exchange") { page.receive("TradeAccept", {name: "Next partner"}); page.renderTrade(); }
+    page.receive("TradeCancel", {unlock: false}, mode === "connection" ? 99 : page.scope.equipmentConnectionGenerationRef.current,
+      mode === "socket" ? {} : page.socket);
+    assert.strictEqual(page.scope.socialItemOperationsRef.current.pending.proof, pending.proof, mode);
+  }
+  for (const packet of ["TradeConfirm", "TradeCancel"]) {
+    const page = harness(), old = openCurrentTrade(page);
+    page.submitSocialItem("depositTrade", 43, 5, 22, old.sourceKey);
+    page.receive("DepositTradeItem", {from: 43, to: 5, success: true}); page.snapshot();
+    const guild = openGuild(page); page.submitSocialItem("guild2", 3, 5, 66, guild.sourceKey);
+    const pending = page.scope.socialItemOperationsRef.current.pending; assert.ok(pending?.entered);
+    assert.equal(page.cancelTrade(), false, "Guild custody does not grant the trade-item cancellation exception");
+    page.receive(packet, {unlock: false});
+    assert.strictEqual(page.scope.socialItemOperationsRef.current.pending.proof, pending.proof, packet + " preserves Guild barrier");
+    assert.equal(page.scope.socialItemOperationsRef.current.pending.acked, false);
+    page.receive("DepositTradeItem", {from: 43, to: 5, success: true}); page.snapshot();
+    assert.strictEqual(page.scope.socialItemOperationsRef.current.pending.proof, pending.proof, "late trade ACK cannot acknowledge Guild custody");
+    assert.equal(page.scope.socialItemOperationsRef.current.pending.acked, false);
+  }
+});
+
+test("actual Page Trade cancel spent custody retires with the actual session and cannot authorize an old lease", () => {
+  const page = harness(); openCurrentTrade(page); assert.equal(page.cancelTrade(), true);
+  page.retireSocialItemConnection();
+  assert.equal(page.scope.socialTradeCancelSpentRef.current, null);
+  assert.equal(page.scope.socialTradeItemOperationRef.current, null);
+  assert.equal(page.cancelTrade(), false, "retiring the session does not turn its rendered lease into new authority");
+  openCurrentTrade(page); assert.equal(page.cancelTrade(), true); assert.equal(page.attempts, 2);
+});
+
+test("actual Page duplicate TradeAccept retains current own and partner offers and the pending exchange binding", () => {
+  for (const offered of [false, true]) for (const terminal of ["TradeConfirm", "TradeCancel"]) {
+    const page = harness(); openCurrentTrade(page, offered);
+    const items = Array(10).fill(null); items[2] = {unique_id: 77, item_index: 6, count: 2};
+    page.receive("TradeItem", {tradeItems: items}); page.receive("TradeGold", {amount: 83});
+    page.scope.worldRef.current.stage5Systems.trade.offeredGold = 17; page.snapshot();
+    const source = page.readSocialItemSurface("trade"); assert.ok(source);
+    page.submitSocialItem(offered ? "retrieveTrade" : "depositTrade", offered ? 3 : 43, offered ? 47 : 5, 22, source.sourceKey);
+    const pending = page.scope.socialItemOperationsRef.current.pending, binding = page.scope.socialTradeItemOperationRef.current;
+    const incarnation = page.scope.tradeIncarnationRef.current, own = page.scope.socialOwnTradeRef.current;
+    const partner = page.scope.tradePartnerRef.current, trade = page.scope.worldRef.current.stage5Systems.trade;
+    const lifecycle = page.scope.tradeLifecycleRef.current, beforeActions = page.actions;
+    assert.ok(pending?.entered); assert.equal(partner.gold, 83); assert.equal(partner.items[2].uniqueId, 77);
+    page.receive("TradeAccept", {name: "Partner"}); page.receive("TradeAccept", {name: "Partner"});
+    assert.equal(page.scope.tradeIncarnationRef.current, incarnation, "duplicate acceptance is the existing open exchange");
+    assert.strictEqual(page.scope.socialOwnTradeRef.current, own);
+    assert.strictEqual(page.scope.tradePartnerRef.current, partner);
+    assert.strictEqual(page.scope.worldRef.current.stage5Systems.trade, trade);
+    assert.strictEqual(page.scope.tradeLifecycleRef.current, lifecycle);
+    assert.strictEqual(page.scope.socialTradeItemOperationRef.current, binding);
+    assert.strictEqual(page.scope.socialItemOperationsRef.current.pending.proof, pending.proof);
+    assert.equal(page.readSocialItemSurface("trade").sourceKey, source.sourceKey, "normal offer custody is not reprojected as an empty trade");
+    assert.equal(page.actions, beforeActions, "a receive event cannot replay a UI send");
+    page.renderTrade(); assert.equal(page.cancelTrade(), true);
+    page.receive(terminal, {unlock: false});
+    assert.equal(page.scope.socialItemOperationsRef.current.pending, null, "real terminal still owns the preserved binding");
+    assert.equal(pending.acked, false);
+  }
+});
+
+test("actual Page duplicate TradeAccept cannot renew a sent or unknown cancellation but a real new exchange can", () => {
+  for (const unknown of [false, true]) for (const itemPending of [false, true]) {
+    const page = harness(), source = openCurrentTrade(page);
+    if (itemPending) page.submitSocialItem("depositTrade", 43, 5, 22, source.sourceKey);
+    if (unknown) page.throwAtSocket("tradeCancel");
+    assert.equal(page.cancelTrade(), !unknown); page.restoreSocketSend();
+    const incarnation = page.scope.tradeIncarnationRef.current, before = page.attempts;
+    const own = page.scope.socialOwnTradeRef.current, partner = page.scope.tradePartnerRef.current;
+    const binding = page.scope.socialTradeItemOperationRef.current;
+    assert.equal(page.scope.socialTradeCancelSpentRef.current, incarnation);
+    for (let repeat = 0; repeat < 3; repeat++) {
+      page.receive("TradeAccept", {name: "Partner"}); page.renderTrade();
+      assert.equal(page.cancelTrade(), false, unknown ? "unknown result stays spent" : "sent cancellation stays spent");
+    }
+    assert.equal(page.scope.tradeIncarnationRef.current, incarnation);
+    assert.equal(page.scope.socialTradeCancelSpentRef.current, incarnation);
+    assert.strictEqual(page.scope.socialOwnTradeRef.current, own);
+    assert.strictEqual(page.scope.tradePartnerRef.current, partner);
+    assert.strictEqual(page.scope.socialTradeItemOperationRef.current, binding);
+    assert.equal(page.attempts, before, "duplicate accepts never create another socket attempt");
+    page.receive("TradeCancel", {unlock: false});
+    assert.equal(page.scope.socialItemOperationsRef.current.pending, null);
+    page.receive("TradeAccept", {name: "Partner"}); page.renderTrade();
+    assert.ok(page.scope.tradeIncarnationRef.current > incarnation);
+    assert.equal(page.cancelTrade(), true, "closed to open is a new exchange even with the same partner");
+    assert.equal(page.attempts, before + 1);
+  }
+});
+
+test("actual Page duplicate TradeAccept rule does not coalesce new requests requested to open or a different partner", () => {
+  const page = harness(); openCurrentTrade(page); assert.equal(page.cancelTrade(), true);
+  for (const [packet, name, state] of [["TradeRequest", "Partner", "requested"], ["TradeRequest", "Partner", "requested"],
+    ["TradeAccept", "Partner", "open"], ["TradeAccept", "Other", "open"]]) {
+    const before = page.scope.tradeIncarnationRef.current;
+    page.receive(packet, {name}); page.renderTrade();
+    assert.equal(page.scope.tradeIncarnationRef.current, before + 1, packet + " " + name);
+    assert.equal(page.scope.tradeLifecycleRef.current.state, state);
+    assert.equal(page.scope.tradeLifecycleRef.current.partner, name);
+    assert.equal(page.scope.socialOwnTradeRef.current, null, "new exchange requires a fresh authoritative own offer");
+    assert.equal(page.cancelTrade(), true, "new exchange gets its own one-time cancellation");
+  }
+});
+
+test("actual Page duplicate TradeAccept requires the same physical socket connection session and player", () => {
+  for (const mode of ["socket", "connection", "session", "player"]) {
+    const page = harness(); openCurrentTrade(page); const before = page.scope.tradeIncarnationRef.current;
+    const previous = page.scope.tradePartnerRef.current;
+    if (mode === "socket") page.scope.socketRef.current = {...page.socket};
+    if (mode === "connection") {
+      page.scope.equipmentConnectionGenerationRef.current++;
+      page.scope.equipmentStartGameRef.current = {...page.scope.equipmentStartGameRef.current,
+        connectionGeneration: page.scope.equipmentConnectionGenerationRef.current};
+    }
+    if (mode === "session") {
+      page.scope.equipmentSessionGenerationRef.current++;
+      page.scope.equipmentStartGameRef.current = {...page.scope.equipmentStartGameRef.current,
+        sessionGeneration: page.scope.equipmentSessionGenerationRef.current};
+    }
+    if (mode === "player") page.scope.worldRef.current.playerObjectId = "99";
+    assert.ok(page.currentSocialReceiveOwner(), "new physical owner is a valid receive fixture");
+    page.receive("TradeAccept", {name: "Partner"});
+    assert.equal(page.scope.tradeIncarnationRef.current, before + 1, mode);
+    assert.notStrictEqual(page.scope.tradePartnerRef.current, previous);
+    assert.equal(page.scope.socialOwnTradeRef.current, null);
+    assert.deepEqual(page.scope.tradePartnerRef.current.owner, page.currentSocialReceiveOwner());
+  }
 });
 
 test("actual Page Guild typed change correlates user tuple UID and source before releasing a full snapshot barrier", () => {
