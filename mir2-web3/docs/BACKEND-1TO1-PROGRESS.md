@@ -1,5 +1,9 @@
 # Backend 1:1 Progress
 
+## R16 Linux 发布启动检查准备（2026-11-08）
+
+启动验证器默认读取共同五职业/V2基准并核对实际匿名realmInfo，历史三职业须显式选择；14项stdlib与语法检查通过。尚未执行新Linux/PG候选，普通认证、旧档与重登也不由该空库启动检查证明。[发布门与范围](NUMERON-WEB-RELEASE-20261108.zh-CN.md)
+
 ## R16 Native 凭证交接与提交围栏（2026-11-08）
 
 凭证先行恢复复用已断开旧连接的保存通知，完整 binding 与本次 handoff token 在预约锁内一致才继续原 prepare／commit。最终锁内取消保留未消费预约，消费前刷新时钟；互斥锁到期原清理保护另有正向回归。十五项新测试与相邻回归去重合计一百一十八项通过，包括保存阻塞和取消后的两个真实 File／WebSocket 案例。候选为 dev/debug，原三服与 EXE 保持。[源码、测试和实际范围](WEB-R16-PARITY-GOAL.zh-CN.md#凭证先行的保存交接2026-11-08)

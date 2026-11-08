@@ -3,6 +3,7 @@ import { lstatSync, readFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { rewriteStandaloneFullPackTrace } from "./lib/standalone-full-pack-tracing";
+import { loadProductionAssetConfig, productionAssetConfigName } from "./scripts/lib/production-asset-config.mjs";
 
 const isDevelopment = process.env.NODE_ENV === "development";
 const isStandaloneProduction = process.env.MIR2_NEXT_STANDALONE === "1" && !isDevelopment;
@@ -34,6 +35,9 @@ if (buildTsconfigPath !== undefined) {
   }
 }
 const monorepoRoot = path.resolve(configDir, "../../..");
+// Reject arbitrary path input even outside hosted production; only the two
+// reviewed public profiles can be selected by the build environment.
+productionAssetConfigName();
 const compiledRuntimeManifest = readFileSync(
   path.resolve(configDir, "lib/generated/bevy_runtime_version.json"), "utf8",
 );
@@ -42,33 +46,7 @@ const compiledCoreManifest = readFileSync(
   path.resolve(configDir, "lib/generated/client_core_runtime.json"), "utf8",
 );
 const productionAssetRelease = isVercelProduction
-  ? JSON.parse(
-      readFileSync(
-        path.resolve(configDir, "../../config/production-web-assets.json"),
-        "utf8",
-      ),
-    ) as {
-      version: string;
-      objectPrefix: string;
-      assetBaseUrl: string;
-      browserFallbackBaseUrls?: string[];
-      mapAtlas?: {
-        enabled?: boolean;
-        verified?: boolean;
-        manifestPath?: string;
-        contentHash?: string;
-        pageCount?: number;
-        maxPageBytes?: number;
-      };
-      fullCrystalPack?: {
-        enabled?: boolean;
-        verified?: boolean;
-        path?: string;
-        contentHash?: string;
-        libraryCount?: number;
-        pageCount?: number;
-      };
-    }
+  ? loadProductionAssetConfig(path.resolve(configDir, "../.."))
   : null;
 const bootstrapAssetCache = isDevelopment
   ? "public, max-age=0, must-revalidate"

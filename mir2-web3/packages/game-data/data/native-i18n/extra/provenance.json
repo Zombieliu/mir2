@@ -8,19 +8,19 @@
     "th",
     "ar"
   ],
-  "entriesPerLocale": 9421,
+  "entriesPerLocale": 9426,
   "sourceSha256": {
     "common.json": "9bcf22b9f4ea1b6f7f514a7b0176cb6ab896d98c9e6ce75aba0d4d3c93d2d19d",
     "content.json": "142e05e9e628be47c45eec257c8616f6e7f5c485588de8a0b25f36fc406222d1",
     "shell.json": "52ace631cb335840532fcfec6a37b144b829950e25bd5e909e69b1ec5af6d3b1",
     "quest.json": "47a5beaa6feb4277b33a8617b55966a56eec2856b80000d34083ee6e23f9a5d1",
-    "game.json": "cc70dfd7457968867e3690b6e0712bc0e2dcf44763ab161e36bffe87224c1557",
+    "game.json": "796127bf494ee354626f85cf25d2b4cdb68a633585481325b6adfaa7019f54be",
     "help.json": "5ce6fa52b935f528424c3963dc16c5e430387d3be2dac6d70d0701cf834b3b9e",
     "npc-menus.json": "fa9de6316a85177479bddf4f01c4010524f172f542df336b379548dd8f62f0d3",
-    "npc-prose.json": "f54665c416efe58b6dd40b7a657b0522da07b52ba0c208f2783b98c1a22a6bb0"
+    "npc-prose.json": "f19aa36581483663d2895abc8868b6196eee34ccb57179f1fe40b693053dd894"
   },
   "reviewedOverrideSha256": {
-    "ui-overrides.json": "ece851a475d9165bc068349151c9729f6cf1ecbf548232db8a298bcc1a9fa1a6",
+    "ui-overrides.json": "704d32ec417845c02e4060d35e8029f9de1eb59ef295ccd7f321a6f3a504235e",
     "content-overrides.json": "6e9ae9c7d0d910b848900cc7dc8ffcb2f34cac3f30b7b61f27b8e10ba87447d9",
     "review-overrides.json": "a7764c7a9e76bca45a25b47596c2e981a48517d8299b807d61a1c434ea89f93c",
     "npc-overrides.json": "5b38cf3f504db069d092113dbd5ce6382fee9bf0d45f54e41a6e8e7ec734a7f2",
@@ -28,41 +28,42 @@
     "other-names-overrides.json": "a874d4e07574880ec07043f3517c32cf8639206a47919ac1d72af8f44dd15076",
     "runtime-overrides.json": "c52f2d4d3f723302a62c921b48bf1a2b3f0fa9b1957608d0f6a939c6857e6166"
   },
+  "sharedKeyTranslationsSha256": "91f3182569ec40276db3f80dc1c961f57cf9c4010ffeefc9ef15c19c34537b71",
   "methods": {
     "ru": {
-      "keyedReview": 3147,
-      "exactSourceReview": 230,
-      "offlineDraft": 5972,
+      "keyedReview": 3152,
+      "exactSourceReview": 231,
+      "offlineDraft": 5998,
       "offlineNameDraft": 45
     },
     "hi": {
-      "keyedReview": 3193,
-      "exactSourceReview": 230,
-      "offlineDraft": 5804,
+      "keyedReview": 3198,
+      "exactSourceReview": 231,
+      "offlineDraft": 5830,
       "offlineNameDraft": 167
     },
     "id": {
-      "keyedReview": 3308,
+      "keyedReview": 3314,
       "exactSourceReview": 230,
-      "offlineDraft": 5106,
+      "offlineDraft": 5132,
       "offlineNameDraft": 750
     },
     "vi": {
-      "keyedReview": 3177,
+      "keyedReview": 3183,
       "exactSourceReview": 230,
-      "offlineDraft": 5836,
+      "offlineDraft": 5862,
       "offlineNameDraft": 151
     },
     "th": {
-      "keyedReview": 3118,
-      "exactSourceReview": 230,
-      "offlineDraft": 5978,
+      "keyedReview": 3123,
+      "exactSourceReview": 231,
+      "offlineDraft": 6004,
       "offlineNameDraft": 68
     },
     "ar": {
-      "keyedReview": 3357,
-      "exactSourceReview": 230,
-      "offlineDraft": 5014,
+      "keyedReview": 3362,
+      "exactSourceReview": 231,
+      "offlineDraft": 5040,
       "offlineNameDraft": 793
     }
   },
@@ -2602,65 +2603,23 @@
     }
   ],
   "draftSha256": {
-    "ru": "e414f89eb8cb2ff4cd4fc46a7952830a6a9c4ba0eac6cc4165489c831f3b7921",
-    "hi": "0c991e712915f8eac910c825b1cb21ea63d3b0429a1cd0cca4e661042958658f",
-    "id": "f7cc28c9d9901f82c75051f5921bdbf995f121bc799501c323de7e95198d7424",
-    "vi": "3ae13d136ca1539bcffba639a11e60f60f44c49c0ed04e59a7c1dcdd7abba21c",
-    "th": "849a2d43599562638d13e970befefd87b7376760a80a441332eac6913bce7235",
-    "ar": "1f5d24641f7597da1616caf8b632119abfd5d93c2e127ec2bf4ebb863966f66f"
+    "ru": "89abcdeb8498e1122830b70fa93b6f5d93ba0b34ecdda2bc15aed9f0cc8a9d42",
+    "hi": "d405fcd10b1c4eef53b73c72f9fb7332681c8c2f498e1da38acf0a5168751cf8",
+    "id": "75402f1e6fbb38f1c01264d259ecd004f76bd599fa0036450ce16751c8fdd853",
+    "vi": "3c5a55c931eb7ad4168dcdda30a63cea395bf22f4825c29de58e8fba8ddac5a8",
+    "th": "23c76e4b3a0051cfa63735cf0c1e748da0bc8ba96cfdccfefd2c85cab04dd3c2",
+    "ar": "18fb1af5d1741c2fb102ed7cb8e00c9e31599c25a47a274d9eaf2987a8b1a8a6"
   },
   "outputSha256": {
-    "ru": "c88e7b28d8690aa4e6fa789cfebfed3ea4fe48aa698e7df39da81e3514bfdb44",
-    "hi": "37f44d1746942c3fcae28810b7b6291d5de17d02767850acd0fb37b4baa7360f",
-    "id": "af8e138801c84cde116627d6e6f57eb52c510e5f36e4657478ca323765c96aa4",
-    "vi": "b53bc32c4cd78f56ed470d47ecff8fb5c32dd49fdf3650324b6279f02115e43c",
-    "th": "60ca5db30a16fce9cf6b4a65ba5d2789ba8d474ae348ad80254e3f5165102b0c",
-    "ar": "4dc325cbc3698791dd33e0d5c6a25a5dd2cc07caa41706f5c23ce6b0c775bd39"
+    "ru": "0760f45dc217f8aacf9ee0506a18407afcd50234733df0970ded8d3642662376",
+    "hi": "53a5267ceda25831c616ebea8040357783c49013eb7fc100a34ea988566c6759",
+    "id": "3daf140a32aa9273e11350a647b8c5d25df2ebefa8ff367df5da064af1e75b5d",
+    "vi": "c39c8c32c8374731b94e6dd0b2907f0376a44fc5c678a7dbadbdb3d3fd4d87cb",
+    "th": "a703fed4c3c4e6f01e760f1da7c4a2f11bc3da32f61ef3199d807410a9689f6f",
+    "ar": "f57f06e88d12a35efa5d82e4ff91cfa8d7ef81242dd385ac7d4e204621ab17fd"
   },
   "review": "Keyed overrides were authored/reviewed by the development team. Remaining prose uses offline translation drafts and requires native-speaker acceptance; no full linguistic acceptance is claimed.",
   "textHashNormalization": "UTF-8, CRLF normalized to LF for source and reviewed JSON",
   "identicalNeedsReview": [],
-  "nameDraftSha256": "87f0be6598da217f3dfa1c09cdacf89234ab0fad5ac881b3f220938f65b6a994",
-  "extensions": [
-    {
-      "scope": "published baseline catalogue reconciliation",
-      "existingAdditionalEntries": 19,
-      "note": "Existing source/overlay values retained from HEAD; old 9385 counter was stale, actual baseline had 9404 keys."
-    },
-    {
-      "scope": "five-class creation and actionable practice guides",
-      "newEntries": 6,
-      "authoring": "keyed translations in all nine locales; placeholder and exact legacy-value comparison checked; native-speaker acceptance still pending"
-    },
-    {
-      "scope": "five-class supplies: carried stock versus equipped PoisonSword material",
-      "newEntries": 2,
-      "keys": [
-        "quest.supply.assassinPoisonEquip",
-        "quest.supply.assassinPoisonEquipped"
-      ],
-      "source": "Crystal HumanObject.PoisonSword/GetPoison(1), equipment Amulet shapes 1/2; existing Source skill names retained",
-      "authoring": "keyed translations in all nine locales; original translations unchanged; native-speaker and native layout acceptance pending"
-    },
-    {
-      "scope": "merged shared quest headings and action feedback",
-      "newEntries": 9,
-      "keys": [
-        "ui.questProgressHeading",
-        "ui.questReturnHeading",
-        "ui.questClientLoading",
-        "ui.questClientUnavailable",
-        "ui.questActionPending",
-        "ui.questActionRewardRequired",
-        "ui.questActionTalkToNpc",
-        "ui.questActionStateChanged",
-        "ui.retry"
-      ],
-      "source": "packages/tooling/scripts/native-i18n-shared-translations.mjs",
-      "sourceSha256": "91f3182569ec40276db3f80dc1c961f57cf9c4010ffeefc9ef15c19c34537b71",
-      "preservedEntriesPerLocale": 9412,
-      "authoring": "keyed translations in all nine native locales; original catalogue and overlay values retained; native-speaker and layout acceptance pending"
-    }
-  ],
-  "sharedKeyTranslationsSha256": "91f3182569ec40276db3f80dc1c961f57cf9c4010ffeefc9ef15c19c34537b71"
+  "nameDraftSha256": "87f0be6598da217f3dfa1c09cdacf89234ab0fad5ac881b3f220938f65b6a994"
 }

@@ -5,22 +5,30 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { verifyBevyRuntimeVersion } from "./lib/bevy-runtime-version.mjs";
+import { resolveProductionAssetConfigPath, productionAssetConfigName, NUMERON_PRODUCTION_ASSET_CONFIG, assertNumeronFiniteProfile } from "./lib/production-asset-config.mjs";
 
 const scriptDir = path.dirname(fileURLToPath(import.meta.url));
 const webRoot = path.resolve(scriptDir, "..");
 const repoRoot = path.resolve(webRoot, "..", "..");
 const defaultManifestPath = path.join(webRoot, "lib", "generated", "bevy_runtime_version.json");
-const defaultConfigPath = path.join(repoRoot, "config", "production-web-assets.json");
 const defaultOutputDir = path.join(webRoot, "public", "bevy-runtime");
 
 export async function installPrebuiltRuntime(options = {}) {
   const manifestPath = path.resolve(options.manifestPath ?? defaultManifestPath);
-  const configPath = path.resolve(options.configPath ?? defaultConfigPath);
+  const selectedName = productionAssetConfigName();
+  const configPath = path.resolve(options.configPath ?? resolveProductionAssetConfigPath(repoRoot));
   const outputDir = path.resolve(options.outputDir ?? defaultOutputDir);
   const manifest = await readJson(manifestPath, "runtime version manifest");
   const records = validateRuntimeManifest(manifest, manifestPath);
+  const configuredOverride = options.assetBaseUrl ?? process.env.MIR2_BEVY_RUNTIME_BASE_URL;
+  const finiteBaseUrl = selectedName === NUMERON_PRODUCTION_ASSET_CONFIG
+    ? await readAssetBaseUrl(resolveProductionAssetConfigPath(repoRoot), manifest.version) : null;
+  if (finiteBaseUrl && (configPath !== resolveProductionAssetConfigPath(repoRoot)
+    || (configuredOverride !== undefined && normalizeBaseUrl(configuredOverride) !== finiteBaseUrl))) {
+    throw new Error("Numeron runtime download must use its selected fixed CDN root");
+  }
   const assetBaseUrl = normalizeBaseUrl(
-    options.assetBaseUrl ?? process.env.MIR2_BEVY_RUNTIME_BASE_URL ?? (await readAssetBaseUrl(configPath)),
+    finiteBaseUrl ?? configuredOverride ?? (await readAssetBaseUrl(configPath, manifest.version)),
   );
 
   if (await runtimeMatches(outputDir, records)) {
@@ -136,8 +144,15 @@ function verifyBytes(bytes, record, sourceUrl) {
   }
 }
 
-async function readAssetBaseUrl(configPath) {
+export async function readAssetBaseUrl(configPath = resolveProductionAssetConfigPath(repoRoot), expectedRuntimeVersion) {
   const config = await readJson(configPath, "production asset config");
+  if (path.basename(configPath) === NUMERON_PRODUCTION_ASSET_CONFIG) assertNumeronFiniteProfile(config);
+  if (config.bevyRuntime?.assetBaseUrl) {
+    if (config.bevyRuntime.version && config.bevyRuntime.version !== expectedRuntimeVersion) {
+      throw new Error("Selected production profile requires a different immutable Bevy runtime version");
+    }
+    return normalizeBaseUrl(config.bevyRuntime.assetBaseUrl);
+  }
   const assetBaseUrl = normalizeBaseUrl(config?.assetBaseUrl);
   const fallbackObjectPrefix = normalizeObjectPrefix(config?.fallbackObjectPrefix);
   if (!fallbackObjectPrefix) return assetBaseUrl;

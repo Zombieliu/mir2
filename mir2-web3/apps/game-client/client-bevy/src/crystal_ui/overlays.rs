@@ -122,6 +122,7 @@ use super::bag_paint::{
 };
 use super::guild_pixel_text_view::{spawn_guild_label, GuildTextAlign};
 use super::guild_storage::{self, GuildGoldAction, GuildGoldPrompt, GuildStorageUi};
+use super::r16_guild_layout as guild_layout;
 use super::hud::{free_inventory_slots, CrystalHudAction};
 #[cfg(test)]
 use super::item_image::OriginalItemImage;
@@ -431,7 +432,7 @@ pub const CRYSTAL_MENU_PANEL_RECT: CrystalRect = CrystalRect::new(988.0, 349.0, 
 pub const CRYSTAL_OPTIONS_PANEL_RECT: CrystalRect = CrystalRect::new(382.0, 207.0, 259.0, 354.0);
 pub const CRYSTAL_BIGMAP_PANEL_RECT: CrystalRect = CrystalRect::new(132.0, 134.0, 760.0, 500.0);
 pub const CRYSTAL_GROUP_PANEL_RECT: CrystalRect = CrystalRect::new(396.0, 259.0, 232.0, 249.0);
-pub const CRYSTAL_GUILD_PANEL_RECT: CrystalRect = CrystalRect::new(217.0, 168.0, 590.0, 432.0);
+pub const CRYSTAL_GUILD_PANEL_RECT: CrystalRect = guild_layout::WINDOW;
 pub const CRYSTAL_HELP_PANEL_RECT: CrystalRect = CrystalRect::new(244.0, 129.0, 536.0, 509.0);
 /// `CharacterDialog.Location = (ScreenWidth - 264, 0)` at Crystal's fixed
 /// 1024x768 stage.
@@ -15538,44 +15539,43 @@ pub(crate) fn render_guild_panel(
     spawn_guild_source_sprite(
         parent,
         asset_server,
-        "original-ui/Prguse/180.png".to_owned(),
+        guild_layout::ASSET_BACKGROUND.path.to_owned(),
         rect,
     );
     spawn_guild_source_sprite(
         parent,
         asset_server,
-        "original-ui/Title/25.png".to_owned(),
-        CrystalRect::new(rect.left + 18.0, rect.top + 9.0, 49.0, 15.0),
+        guild_layout::ASSET_TITLE.path.to_owned(),
+        guild_layout::at(rect, guild_layout::TITLE_RECT),
     );
     spawn_guild_source_button(
         parent,
         asset_server,
-        "Prguse2",
-        360,
-        361,
-        362,
-        CrystalRect::new(rect.left + 565.0, rect.top + 4.0, 24.0, 21.0),
-        (24.0, 21.0),
+        guild_layout::ASSET_CLOSE.normal.library,
+        guild_layout::ASSET_CLOSE.normal.frame,
+        guild_layout::ASSET_CLOSE.hover.frame,
+        guild_layout::ASSET_CLOSE.active.frame,
+        guild_layout::at(rect, guild_layout::CLOSE_RECT),
+        (
+            guild_layout::CLOSE_RECT.width,
+            guild_layout::CLOSE_RECT.height,
+        ),
         OverlayButton::CloseSocial,
         true,
     );
     spawn_guild_tab(
         parent,
         asset_server,
-        rect.left + 20.0,
-        rect.top + 38.0,
-        93,
-        94,
+        rect,
+        guild_layout::TAB_NOTICE,
         state.guild_left_page == GuildLeftPage::Notice,
         OverlayButton::SelectGuildLeftPage(GuildLeftPage::Notice),
     );
     spawn_guild_tab(
         parent,
         asset_server,
-        rect.left + 91.0,
-        rect.top + 38.0,
-        99,
-        100,
+        rect,
+        guild_layout::TAB_MEMBERS,
         state.guild_left_page == GuildLeftPage::Members,
         OverlayButton::SelectGuildLeftPage(GuildLeftPage::Members),
     );
@@ -15583,10 +15583,8 @@ pub(crate) fn render_guild_panel(
         spawn_guild_tab(
             parent,
             asset_server,
-            rect.left + 162.0,
-            rect.top + 38.0,
-            105,
-            106,
+            rect,
+            guild_layout::TAB_STORAGE,
             state.guild_left_page == GuildLeftPage::Storage,
             OverlayButton::SelectGuildLeftPage(GuildLeftPage::Storage),
         );
@@ -15595,10 +15593,8 @@ pub(crate) fn render_guild_panel(
         spawn_guild_tab(
             parent,
             asset_server,
-            rect.left + 233.0,
-            rect.top + 38.0,
-            101,
-            102,
+            rect,
+            guild_layout::TAB_RANKS,
             state.guild_left_page == GuildLeftPage::Ranks,
             OverlayButton::SelectGuildLeftPage(GuildLeftPage::Ranks),
         );
@@ -15606,10 +15602,8 @@ pub(crate) fn render_guild_panel(
     spawn_guild_tab(
         parent,
         asset_server,
-        rect.left + 501.,
-        rect.top + 38.,
-        103,
-        104,
+        rect,
+        guild_layout::TAB_STATUS,
         !state.guild_panel.right_buff,
         OverlayButton::SelectGuildRightBuff(false),
     );
@@ -15617,10 +15611,8 @@ pub(crate) fn render_guild_panel(
         spawn_guild_tab(
             parent,
             asset_server,
-            rect.left + 430.,
-            rect.top + 38.,
-            95,
-            96,
+            rect,
+            guild_layout::TAB_BUFF,
             state.guild_panel.right_buff,
             OverlayButton::SelectGuildRightBuff(true),
         );
@@ -15644,23 +15636,29 @@ pub(crate) fn render_guild_panel(
 fn spawn_guild_tab(
     parent: &mut ChildSpawnerCommands,
     asset_server: &AssetServer,
-    left: f32,
-    top: f32,
-    idle: u16,
-    active: u16,
+    window: CrystalRect,
+    tab: guild_layout::GuildTabLayout,
     selected: bool,
     action: OverlayButton,
 ) {
-    let normal = if selected { active } else { idle };
+    let normal = if selected {
+        tab.active.frame
+    } else {
+        tab.idle.frame
+    };
     spawn_guild_source_button(
         parent,
         asset_server,
-        "Title",
+        tab.idle.library,
         normal,
-        normal,                                    // Guild tabs have no HoverIndex in Crystal.
-        if idle == 101 { normal } else { active }, // Rank has no PressedIndex.
-        CrystalRect::new(left, top, 72.0, 24.0),
-        (72.0, 24.0),
+        normal, // Guild tabs have no HoverIndex in Crystal.
+        if tab.pressed_current {
+            normal
+        } else {
+            tab.active.frame
+        }, // Rank has no PressedIndex.
+        guild_layout::at(window, tab.rect),
+        (tab.rect.width, tab.rect.height),
         action,
         true,
     );
@@ -16058,13 +16056,14 @@ fn render_guild_ranks(
     state: &NativePlayerUiState,
     rect: CrystalRect,
 ) {
-    let x = rect.left;
-    let y = rect.top + 60.;
-    for (text, left) in [("Edit rank", 42.), ("Select rank", 198.)] {
+    for (text, local) in [
+        ("Edit rank", guild_layout::RANK_EDIT_LABEL_RECT),
+        ("Select rank", guild_layout::RANK_SELECT_LABEL_RECT),
+    ] {
         overlay_text_at(
             parent,
-            text,
-            CrystalRect::new(x + left, y + 18., 150., 20.),
+            &crate::native_i18n::tr(text),
+            guild_layout::at(rect, local),
             10.6667,
             Color::WHITE,
         );
@@ -16077,7 +16076,7 @@ fn render_guild_ranks(
     friend_dialog::view::render_editor_styled(
         parent,
         &state.guild_panel.rank_editor,
-        CrystalRect::new(x + 42., y + 36., 130., 16.),
+        guild_layout::at(rect, guild_layout::RANK_NAME_RECT),
         false,
         Color::srgb_u8(35, 35, 35),
     );
@@ -16085,7 +16084,7 @@ fn render_guild_ranks(
         parent,
         assets,
         selected.map(|r| r.name.as_str()).unwrap_or(""),
-        CrystalRect::new(x + 198., y + 36., 130., 16.),
+        guild_layout::at(rect, guild_layout::RANK_DROPDOWN_RECT),
         OverlayButton::GuildRankDropdown,
         true,
         25,
@@ -16093,11 +16092,11 @@ fn render_guild_ranks(
     spawn_overlay_crystal_button_enabled(
         parent,
         assets,
-        "Title",
-        90,
-        91,
-        92,
-        CrystalRect::new(x + 155., y + 290., 40., 25.),
+        guild_layout::ASSET_SAVE.normal.library,
+        guild_layout::ASSET_SAVE.normal.frame,
+        guild_layout::ASSET_SAVE.hover.frame,
+        guild_layout::ASSET_SAVE.active.frame,
+        guild_layout::at(rect, guild_layout::RANK_SAVE_RECT),
         OverlayButton::GuildRankNameSave,
         can_change && guild_panel::rank_name_available(state, guild),
     );
@@ -16114,31 +16113,30 @@ fn render_guild_ranks(
     .iter()
     .enumerate()
     {
-        let bx = x + if i % 2 == 0 { 42. } else { 202. };
-        let by = y + 120. + (i / 2) as f32 * 40.;
+        let permission = guild_layout::RANK_PERMISSIONS[i];
         spawn_overlay_crystal_button_enabled(
             parent,
             assets,
-            "Prguse",
-            1346,
-            1346,
-            1346,
-            CrystalRect::new(bx, by, 12., 12.),
-            OverlayButton::GuildRankTogglePermission(i as u8),
+            guild_layout::ASSET_PERMISSION_UNCHECKED.library,
+            guild_layout::ASSET_PERMISSION_UNCHECKED.frame,
+            guild_layout::ASSET_PERMISSION_UNCHECKED.frame,
+            guild_layout::ASSET_PERMISSION_UNCHECKED.frame,
+            guild_layout::at(rect, permission.rect),
+            OverlayButton::GuildRankTogglePermission(permission.bit),
             can_change,
         );
-        if selected.is_some_and(|r| r.options & (1 << i) != 0) {
+        if selected.is_some_and(|r| r.options & (1 << permission.bit) != 0) {
             spawn_static_overlay_sprite(
                 parent,
                 assets,
-                "original-ui/Prguse/1347.png".into(),
-                CrystalRect::new(bx, by, 16., 12.),
+                guild_layout::ASSET_PERMISSION_CHECKED.path.into(),
+                guild_layout::at(rect, permission.checked_rect),
             );
         }
         overlay_text_at(
             parent,
             &crate::native_i18n::tr(label),
-            CrystalRect::new(bx + 17., by - 2., 135., 20.),
+            guild_layout::at(rect, permission.label_rect),
             10.6667,
             Color::WHITE,
         );
@@ -16148,14 +16146,21 @@ fn render_guild_ranks(
             .ranks
             .iter()
             .skip(state.guild_panel.rank_scroll)
-            .take(5)
+            .take(guild_layout::RANK_DROPDOWN_MAX_ROWS)
             .enumerate()
         {
             if let Ok(id) = u8::try_from(rank.index) {
                 guild_panel::dropdown_row(
                     parent,
                     &rank.name,
-                    CrystalRect::new(x + 198., y + 51. + offset as f32 * 13., 114., 16.),
+                    guild_layout::at(
+                        rect,
+                        CrystalRect {
+                            top: guild_layout::RANK_DROPDOWN_ROWS_RECT.top
+                                + offset as f32 * guild_layout::RANK_DROPDOWN_ROW_STEP,
+                            ..guild_layout::RANK_DROPDOWN_ROWS_RECT
+                        },
+                    ),
                     OverlayButton::SelectGuildRank(id),
                     (state.guild_panel.cursor, state.guild_panel.left_down),
                 );
@@ -16165,32 +16170,57 @@ fn render_guild_ranks(
             .ranks
             .len()
             .saturating_sub(state.guild_panel.rank_scroll);
-        if new_row < 5 {
+        if new_row < guild_layout::RANK_DROPDOWN_MAX_ROWS {
             guild_panel::dropdown_row(
                 parent,
-                "New Rank",
-                CrystalRect::new(x + 198., y + 51. + new_row as f32 * 13., 114., 16.),
+                &crate::native_i18n::tr("New Rank"),
+                guild_layout::at(
+                    rect,
+                    CrystalRect {
+                        top: guild_layout::RANK_DROPDOWN_ROWS_RECT.top
+                            + new_row as f32 * guild_layout::RANK_DROPDOWN_ROW_STEP,
+                        ..guild_layout::RANK_DROPDOWN_ROWS_RECT
+                    },
+                ),
                 OverlayButton::GuildCreateRank,
                 (state.guild_panel.cursor, state.guild_panel.left_down),
             );
         }
-        let thumb_y =
-            22. + state.guild_panel.rank_scroll as f32 * 52. / guild.ranks.len().max(1) as f32;
+        let thumb_y = guild_layout::RANK_THUMB_RECT.top
+            + state.guild_panel.rank_scroll as f32 * guild_layout::RANK_THUMB_TRAVEL
+                / guild.ranks.len().max(1) as f32;
         spawn_static_overlay_sprite(
             parent,
             assets,
-            "original-ui/Prguse/2015.png".into(),
-            CrystalRect::new(x + 317., y + 36. + thumb_y, 8., 14.),
+            guild_layout::ASSET_DROPDOWN_THUMB.normal.path.into(),
+            guild_layout::at(
+                rect,
+                CrystalRect {
+                    top: thumb_y,
+                    ..guild_layout::RANK_THUMB_RECT
+                },
+            ),
         );
-        for (dy, frame, delta) in [(50., 2021, -1), (110., 2024, 1)] {
+        for (local, frames, delta) in [
+            (
+                guild_layout::RANK_SCROLL_UP_RECT,
+                guild_layout::ASSET_DROPDOWN_UP,
+                -1,
+            ),
+            (
+                guild_layout::RANK_SCROLL_DOWN_RECT,
+                guild_layout::ASSET_DROPDOWN_DOWN,
+                1,
+            ),
+        ] {
             spawn_overlay_crystal_button_enabled(
                 parent,
                 assets,
-                "Prguse",
-                frame,
-                frame + 1,
-                frame + 2,
-                CrystalRect::new(x + 316., y + dy, 12., 6.),
+                frames.normal.library,
+                frames.normal.frame,
+                frames.hover.frame,
+                frames.active.frame,
+                guild_layout::at(rect, local),
                 OverlayButton::GuildRankScroll(delta),
                 true,
             );
@@ -16208,14 +16238,14 @@ fn render_guild_status(
     spawn_static_overlay_sprite(
         parent,
         asset_server,
-        "original-ui/Prguse/1850.png".to_owned(),
-        CrystalRect::new(rect.left + 365.0, rect.top + 62.0, 208.0, 316.0),
+        guild_layout::ASSET_STATUS_BACKGROUND.path.to_owned(),
+        guild_layout::at(rect, guild_layout::STATUS_BACKGROUND_RECT),
     );
     if !guild_uses_original_art() {
         localized_art_label(
             parent,
             "Guild Statistics",
-            CrystalRect::new(rect.left + 373.0, rect.top + 66.0, 192.0, 26.0),
+            guild_layout::at(rect, guild_layout::STATUS_TITLE_RECT),
             10.0,
         );
     }
@@ -16223,26 +16253,26 @@ fn render_guild_status(
         guild_label_at(
             parent,
             &crate::native_i18n::tr("Recruit Member"),
-            CrystalRect::new(rect.left + 391., rect.top + 343., 150., 15.),
+            guild_layout::at(rect, guild_layout::STATUS_RECRUIT_LABEL_RECT),
             8.0,
             Color::WHITE,
         );
         friend_dialog::view::render_editor_styled(
             parent,
             &state.guild_panel.recruit_editor,
-            CrystalRect::new(rect.left + 395., rect.top + 360., 130., 21.),
+            guild_layout::at(rect, guild_layout::STATUS_RECRUIT_NAME_RECT),
             false,
             Color::srgb_u8(35, 35, 35),
         );
         spawn_guild_source_button(
             parent,
             asset_server,
-            "Title",
-            356,
-            357,
-            358,
-            CrystalRect::new(rect.left + 525., rect.top + 358., 24., 21.),
-            (24., 24.),
+            guild_layout::ASSET_RECRUIT.normal.library,
+            guild_layout::ASSET_RECRUIT.normal.frame,
+            guild_layout::ASSET_RECRUIT.hover.frame,
+            guild_layout::ASSET_RECRUIT.active.frame,
+            guild_layout::at(rect, guild_layout::STATUS_RECRUIT_BUTTON_RECT),
+            guild_layout::STATUS_RECRUIT_BUTTON_DRAW_SIZE,
             OverlayButton::GuildRecruitNameSubmit,
             true,
         );
@@ -16256,7 +16286,7 @@ fn render_guild_status(
     spawn_guild_label(
         parent,
         &headers,
-        CrystalRect::new(rect.left + 362., rect.top + 107., 75., 300.),
+        guild_layout::at(rect, guild_layout::STATUS_HEADERS_RECT),
         8.,
         Color::srgb_u8(128, 128, 128),
         GuildTextAlign::Right,
@@ -16267,14 +16297,14 @@ fn render_guild_status(
         guild_label_at(
             parent,
             guild.name.as_deref().unwrap_or(""),
-            CrystalRect::new(rect.left + 437., rect.top + 107., 120., 200.),
+            guild_layout::at(rect, guild_layout::STATUS_NAME_RECT),
             8.,
             Color::WHITE,
         );
         guild_label_at(
             parent,
             &guild.level.to_string(),
-            CrystalRect::new(rect.left + 437.0, rect.top + 133.0, 120.0, 200.0),
+            guild_layout::at(rect, guild_layout::STATUS_LEVEL_RECT),
             8.0,
             Color::WHITE,
         );
@@ -16289,7 +16319,7 @@ fn render_guild_status(
                     format!("/{}", guild.max_members)
                 }
             )),
-            CrystalRect::new(rect.left + 437.0, rect.top + 159.0, 120.0, 200.0),
+            guild_layout::at(rect, guild_layout::STATUS_MEMBERS_RECT),
             8.0,
             Color::WHITE,
         );
@@ -16299,17 +16329,19 @@ fn render_guild_status(
         spawn_static_overlay_sprite(
             parent,
             asset_server,
-            "original-ui/Prguse2/424.png".into(),
-            CrystalRect::new(rect.left + 322., rect.top + 403., 260., 22.),
+            guild_layout::ASSET_PROGRESS_BACKGROUND.path.into(),
+            guild_layout::at(rect, guild_layout::STATUS_PROGRESS_RECT),
         );
         if ratio > 0. {
             parent
                 .spawn(Node {
                     position_type: PositionType::Absolute,
-                    left: Val::Px(rect.left + 322.),
-                    top: Val::Px(rect.top + 403.),
-                    width: Val::Px((257. * ratio.min(1.)) as f32),
-                    height: Val::Px(22.),
+                    left: Val::Px(rect.left + guild_layout::STATUS_PROGRESS_RECT.left),
+                    top: Val::Px(rect.top + guild_layout::STATUS_PROGRESS_RECT.top),
+                    width: Val::Px(
+                        (guild_layout::STATUS_PROGRESS_FILL_WIDTH * ratio.min(1.)) as f32,
+                    ),
+                    height: Val::Px(guild_layout::STATUS_PROGRESS_RECT.height),
                     overflow: Overflow::clip(),
                     ..default()
                 })
@@ -16317,8 +16349,13 @@ fn render_guild_status(
                     spawn_static_overlay_sprite(
                         p,
                         asset_server,
-                        "original-ui/Prguse2/423.png".into(),
-                        CrystalRect::new(0., 0., 260., 22.),
+                        guild_layout::ASSET_PROGRESS.path.into(),
+                        CrystalRect::new(
+                            0.,
+                            0.,
+                            guild_layout::STATUS_PROGRESS_RECT.width,
+                            guild_layout::STATUS_PROGRESS_RECT.height,
+                        ),
                     );
                 });
         }
@@ -16327,7 +16364,7 @@ fn render_guild_status(
         spawn_guild_label(
             parent,
             &label,
-            CrystalRect::new(rect.left + 322., rect.top + 405., 260., 15.),
+            guild_layout::at(rect, guild_layout::STATUS_PROGRESS_TEXT_RECT),
             8.,
             Color::WHITE,
             GuildTextAlign::Center,

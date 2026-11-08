@@ -11,6 +11,7 @@
  */
 
 import type { QuestRewardsPresentation } from "../quest-reward-presentation";
+import type { GuildStatusPresentation } from "../guild-status-presentation";
 
 // ---------------------------------------------------------------------------
 // Re-exports from scene-types (subset used by WorldState)
@@ -350,7 +351,7 @@ export type Stage5SystemsState = {
     lootMode?: string;
     leaderName?: string;
   };
-  guild?: {
+  guild?: GuildStatusPresentation & {
     name?: string;
     members?: string[];
     rank?: string;

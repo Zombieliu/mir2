@@ -1,14 +1,16 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState, type CSSProperties, type KeyboardEvent } from "react";
+import { useEffect, useId, useMemo, useRef, useState, type CSSProperties, type KeyboardEvent } from "react";
 
-import { ORIGINAL_UI } from "../../lib/original-ui";
+import { R16_GUILD_LAYOUT as G } from "../../lib/r16-guild-layout";
+import { GuildConfirmation, GuildDropdown, GuildSourceButton, guildRect } from "./original-client-guild-controls";
 import { currentSocialItem, sameSocialItem, SOCIAL_GUILD_SLOT_COUNT, validSocialItem, validSocialItemSlot, type SocialItemSlot } from "../../lib/social-item-window-model";
 import { originalItemIconPath } from "./original-client-inventory-utils";
 import { SpriteButton } from "./original-client-overlays";
 import type { CrystalTooltipDocument } from "../../lib/shared-item-tooltip";
 import { OriginalCrystalItemTooltip } from "./original-client-crystal-item-tooltip";
 import { guildRankPermissionCommand, guildRankRenameCommand } from "../../lib/social-parity-actions";
+import type { GuildStatusPresentation } from "../../lib/guild-status-presentation";
 import { captureGuildBuffAction, guildBuffActionCurrent, guildBuffRows, guildBuffStatLabel,
   type GuildBuffActionDto, type GuildBuffActionPlan, type GuildBuffDefinition, type GuildBuffPending,
   type GuildBuffRow, type GuildBuffSource } from "../../lib/guild-buff-ui";
@@ -22,6 +24,7 @@ type TranslateFn = (
 export type GuildMember = {
   name: string;
   rank?: string;
+  rankIndex?: number;
   online?: boolean;
   /** Contribution / donation points. */
   contribution?: number;
@@ -56,6 +59,7 @@ export type GuildRankEditPending = Readonly<{
   editableRankIndices?: readonly number[];
   renameRankIndices: readonly number[];
   permission: boolean;
+  create?: boolean;
 }>;
 
 /** A single slot in the guild storage grid (item present or empty). */
@@ -84,24 +88,16 @@ export type GuildStorageTooltipItem = Readonly<SocialItemSlot & {
  * (`{ name, members, rank, permissions, chatLog }`) but accepts richer member
  * objects when the caller can provide them.
  */
-export type GuildSummary = {
+export type GuildSummary = GuildStatusPresentation & {
   name?: string;
   /** Viewer's own rank within the guild. */
   rank?: string;
-  level?: number;
-  experience?: number;
-  maxExperience?: number;
   notice?: string;
-  gold?: number;
   /** Members may be plain names (legacy payload) or detailed records. */
   members?: Array<string | GuildMember>;
   permissions?: string[];
   chatLog?: string[];
   // --- Additive, optional richer fields (rendered gracefully when absent) ---
-  /** Hard member cap; when present shows "N/Max" in the roster header. */
-  maxMembers?: number;
-  /** Unspent guild buff points (Crystal `SparePoints`). */
-  sparePoints?: number;
   /** Guilds this guild is at war with (Crystal `WarringGuilds`). */
   warGuilds?: string[];
   /** Allied guilds (Crystal `AllyGuilds`). */
@@ -121,6 +117,8 @@ export type GuildWindowProps = {
   onReplyInvite?: (epoch: number, acceptInvite: boolean) => void;
   /** Viewer name, used to highlight the player's own roster row. */
   playerName?: string | null;
+  viewerRankIndex?: number;
+  guildScope?: object;
   onEditNotice?: (notice: string) => void;
   onInviteMember?: (name: string) => void;
   onKickMember?: (name: string) => void;
@@ -134,6 +132,7 @@ export type GuildWindowProps = {
   onToggleRankPermission?: (rankIndex: number, key: GuildPermissionKey, enabled: boolean) => boolean;
   rankEditPending?: GuildRankEditPending;
   onRefreshRanks?: () => void;
+  onCreateRank?: () => boolean;
   /** Deposit gold into guild storage. */
   onDepositGold?: (amount: number) => void;
   /** Retrieve gold from guild storage. */
@@ -156,7 +155,7 @@ export type GuildWindowProps = {
   onClose: () => void;
 };
 
-type GuildTab = "overview" | "members" | "storage" | "ranks" | "notice" | "buffs";
+type GuildTab = "members" | "storage" | "ranks" | "notice";
 
 const PERMISSION_KEYS: GuildPermissionKey[] = [
   "CanChangeRank",
@@ -170,26 +169,23 @@ const PERMISSION_KEYS: GuildPermissionKey[] = [
 ];
 
 const PERMISSION_LABELS: Record<GuildPermissionKey, { key: string; fallback: string }> = {
-  CanChangeRank: { key: "ui.guildPermChangeRank", fallback: "Change Rank" },
-  CanRecruit: { key: "ui.guildPermRecruit", fallback: "Recruit" },
-  CanKick: { key: "ui.guildPermKick", fallback: "Kick" },
-  CanStoreItem: { key: "ui.guildPermStore", fallback: "Store Item" },
-  CanRetrieveItem: { key: "ui.guildPermRetrieve", fallback: "Retrieve Item" },
-  CanAlterAlliance: { key: "ui.guildPermAlliance", fallback: "Alter Alliance" },
-  CanChangeNotice: { key: "ui.guildPermNotice", fallback: "Change Notice" },
-  CanActivateBuff: { key: "ui.guildPermBuff", fallback: "Activate Buff" },
+  CanChangeRank: { key: "game.final.02", fallback: "Edit ranks" },
+  CanRecruit: { key: "game.final.03", fallback: "Recruit member" },
+  CanKick: { key: "game.final.04", fallback: "Kick member" },
+  CanStoreItem: { key: "game.final.05", fallback: "Store item" },
+  CanRetrieveItem: { key: "game.final.06", fallback: "Retrieve item" },
+  CanAlterAlliance: { key: "game.final.07", fallback: "Alter alliance" },
+  CanChangeNotice: { key: "game.final.08", fallback: "Change notice" },
+  CanActivateBuff: { key: "game.final.09", fallback: "Activate Buff" },
 };
 
-const FRAME = ORIGINAL_UI.gameShop;
-
-const GUILD_TABS: { key: GuildTab; labelKey: string; fallback: string }[] = [
-  { key: "overview", labelKey: "ui.guildOverview", fallback: "Overview" },
-  { key: "members", labelKey: "ui.guildMembers", fallback: "Members" },
-  { key: "storage", labelKey: "ui.guildStorage", fallback: "Storage" },
-  { key: "ranks", labelKey: "ui.guildRanks", fallback: "Ranks" },
-  { key: "notice", labelKey: "ui.guildNotice", fallback: "Notice" },
-  { key: "buffs", labelKey: "ui.guildSkills", fallback: "Skills" },
-];
+const FRAME = { width: G.window.width, height: G.window.height, frame: G.assets.background,
+  closeButton: { base: G.assets.close.normal, hover: G.assets.close.hover, pressed: G.assets.close.active } };
+const TAB_LABELS = {
+  notice: { key: "game.114", english: "Notice" }, members: { key: "game.110", english: "Members" },
+  storage: { key: "game.063", english: "Storage" }, ranks: { key: "game.115", english: "Ranks" },
+  status: { key: "game.guild.stats", english: "Stats" }, buff: { key: "game.complete.022", english: "Buffs" },
+} as const;
 
 export function GuildWindow({
   t,
@@ -197,6 +193,8 @@ export function GuildWindow({
   incomingInvite,
   onReplyInvite,
   playerName,
+  viewerRankIndex,
+  guildScope,
   onEditNotice,
   onInviteMember,
   onKickMember,
@@ -206,6 +204,7 @@ export function GuildWindow({
   onToggleRankPermission,
   rankEditPending,
   onRefreshRanks,
+  onCreateRank,
   onDepositGold,
   onWithdrawGold,
   inventoryItems,
@@ -225,15 +224,23 @@ export function GuildWindow({
   onBuffAction,
   onClose,
 }: GuildWindowProps) {
-  const [tab, setTab] = useState<GuildTab>("overview");
+  const [tab, setTab] = useState<GuildTab>("notice");
+  const [rightTab, setRightTab] = useState<"status" | "buff">("status");
+  const [windowPosition, setWindowPosition] = useState<{ left: number; top: number }>({ left: G.window.left, top: G.window.top });
+  const windowRef = useRef<HTMLElement>(null);
+  const windowDrag = useRef<{ pointer: number; x: number; y: number; left: number; top: number; scale: number } | null>(null);
+  const [selectedRankIndex, setSelectedRankIndex] = useState<{ index: number; structure: string } | null>(null);
+  const [createRank, setCreateRank] = useState(false);
+  const [noticeEditing, setNoticeEditing] = useState(false);
+  const [memberAction, setMemberAction] = useState<{ kind: "kick" | "rank"; name: string; rank?: number; rankName?: string; beforeRank?: number; scope?: object } | null>(null);
+  const recruitInputId = useId();
+  useEffect(() => { setSelectedRankIndex(null); setCreateRank(false); setMemberAction(null); setTab("notice"); setRightTab("status"); setNoticeEditing(false); }, [guild?.name, playerName, guildScope]);
   const refreshRanksRef = useRef(onRefreshRanks);
   refreshRanksRef.current = onRefreshRanks;
   useEffect(() => {
     if (tab === "members" || tab === "ranks") refreshRanksRef.current?.();
   },[tab,guild?.name]);
-  const [selectedMember, setSelectedMember] = useState<string | null>(null);
   const [inviteName, setInviteName] = useState("");
-  const [chatDraft, setChatDraft] = useState("");
   const [noticeDraft, setNoticeDraft] = useState(guild?.notice ?? "");
   const [showOffline, setShowOffline] = useState(true);
   const [goldDraft, setGoldDraft] = useState("");
@@ -326,20 +333,34 @@ export function GuildWindow({
 
   const members = useMemo(() => normalizeMembers(guild?.members), [guild?.members]);
   const ranks = guild?.ranks ?? [];
-  const warGuilds = guild?.warGuilds ?? [];
-  const allyGuilds = guild?.allyGuilds ?? [];
-  const onlineCount = members.filter((member) => member.online).length;
+  const hasPermission = (option: string, alias: string) => guild?.permissions?.some(value => value === option || value === alias) === true;
+  const mayEditRanks = hasPermission("CanChangeRank", "changeRank");
+  const mayRecruit = hasPermission("CanRecruit", "recruit");
+  const mayOpenStorage = hasPermission("CanStoreItem", "store") || hasPermission("CanRetrieveItem", "retrieve");
+  const mayKick = hasPermission("CanKick", "kick");
+  const mayEditNotice = hasPermission("CanChangeNotice", "notice");
+  const ownRankIndex = viewerRankIndex;
+  const memberMayBeManaged = (member: GuildMember) => ownRankIndex !== undefined && member.rankIndex !== undefined
+    && ranks.some(rank => rank.index === member.rankIndex && rank.index >= ownRankIndex);
+  const rankStructure = ranks.map(rank => rank.index).join(",");
+  const selectedRank = (selectedRankIndex?.structure === rankStructure
+    ? ranks.find(rank => rank.index === selectedRankIndex.index) : null) ?? ranks[0] ?? null;
+  const canCreateRank = mayEditRanks && !!onCreateRank && ranks.length > 0 && ranks.length < 255 && !rankEditPending?.create;
+  const rankChoices = [...ranks.map(rank => ({ index: rank.index, name: rank.name })),
+    ...(mayEditRanks && onCreateRank && ranks.length > 0 && ranks.length < 255 ? [{ index: -1, name: t("game.guild.newRank", [], "New Rank"), create: true, disabled: !canCreateRank }] : [])];
+  const memberActionCurrent = !!memberAction && memberAction.scope === guildScope
+    && members.some(member => member.name === memberAction.name && member.rankIndex === memberAction.beforeRank && memberMayBeManaged(member))
+    && (memberAction.kind === "kick" ? mayKick && memberAction.name !== playerName && !!onKickMember
+      : mayEditRanks && !!onChangeMemberRank && ranks.some(rank => rank.index === memberAction.rank && rank.name === memberAction.rankName && ownRankIndex !== undefined && rank.index >= ownRankIndex));
+  const experience = guild?.experience, maxExperience = guild?.maxExperience;
+  const guildExperienceRatio = typeof experience === "number" && Number.isSafeInteger(experience) && experience >= 0
+    && typeof maxExperience === "number" && Number.isSafeInteger(maxExperience) && maxExperience > 0
+    ? Math.max(0, Math.min(1, experience / maxExperience)) : null;
   const visibleMembers = useMemo(
     () => (showOffline ? members : members.filter((member) => member.online)),
     [members, showOffline],
   );
-  const selected = useMemo(() => {
-    if (selectedMember) {
-      const match = members.find((member) => member.name === selectedMember);
-      if (match) return match;
-    }
-    return visibleMembers[0] ?? members[0] ?? null;
-  }, [members, visibleMembers, selectedMember]);
+
 
   useEffect(() => {
     setNoticeDraft(guild?.notice ?? "");
@@ -352,9 +373,9 @@ export function GuildWindow({
 
   if (!guild || !guild.name || invite) {
     return (
-      <section aria-label={t("ui.guild", [], "Guild")} style={style.window}>
+      <section aria-label={t("game.111", [], "Guild")} data-ui-interactive="true" style={style.window}>
         <img style={style.frame} src={FRAME.frame} alt="" draggable={false} />
-        <div style={style.titleText}>{t("ui.guild", [], "Guild")}</div>
+        <div style={style.titleText}>{t("game.111", [], "Guild")}</div>
         <div style={style.close}>
           <SpriteButton sprite={FRAME.closeButton} label={t("ui.close", [], "Close")} onClick={onClose} />
         </div>
@@ -381,280 +402,88 @@ export function GuildWindow({
   }
 
   return (
-    <section
-      aria-label={t("ui.guild", [], "Guild")}
-      data-guild-name={guild.name}
-      data-guild-tab={tab}
-      style={style.window}
-    >
+    <section ref={windowRef} aria-label={t("game.111", [], "Guild")} data-ui-interactive="true" data-guild-name={guild.name}
+      data-guild-tab={tab} data-guild-right-tab={rightTab} style={{ ...style.window, ...windowPosition }}
+      onPointerDown={event => event.stopPropagation()} onPointerUp={event => event.stopPropagation()}>
       <style>{'[data-guild-storage-tooltip-cell] > .original-item-tooltip { opacity: 1; visibility: visible; transform: translateY(0); }'}</style>
-      <img style={style.frame} src={FRAME.frame} alt="" draggable={false} />
-      <div style={style.titleText}>{guild.name}</div>
-      <div style={style.subtitle}>
-        {guild.maxMembers
-          ? t(
-              "ui.guildMemberCountMax",
-              [members.length, guild.maxMembers, onlineCount],
-              `${members.length}/${guild.maxMembers} members · ${onlineCount} online`,
-            )
-          : t("ui.guildMemberCount", [members.length, onlineCount], `${members.length} members · ${onlineCount} online`)}
-      </div>
-      <div style={style.close}>
-        <SpriteButton sprite={FRAME.closeButton} label={t("ui.close", [], "Close")} onClick={onClose} />
-      </div>
-
-      <div style={style.tabs} role="tablist" aria-label={t("ui.guild", [], "Guild")}>
-        {GUILD_TABS.map((entry) => {
-          const active = entry.key === tab;
-          return (
-            <button
-              key={entry.key}
-              type="button"
-              role="tab"
-              aria-selected={active}
-              data-guild-tab={entry.key}
-              onClick={() => { setTab(entry.key); if (entry.key === "buffs" && !currentBuffSource?.catalogReady) requestBuffList(); }}
-              style={{ ...style.tab, ...(active ? style.tabActive : null) }}
-            >
-              {t(entry.labelKey, [], entry.fallback)}
-            </button>
-          );
+      <img style={style.frame} src={G.assets.background} alt="" draggable={false} />
+      <div style={{ ...guildRect(G.dragRect), cursor: "move", touchAction: "none" }} data-guild-drag-handle="true"
+        onPointerDown={event => {
+          if (event.button !== 0) return;
+          event.preventDefault(); event.stopPropagation(); event.currentTarget.setPointerCapture(event.pointerId);
+          windowDrag.current = { pointer: event.pointerId, x: event.clientX, y: event.clientY, ...windowPosition,
+            scale: G.window.width / Math.max(1, windowRef.current!.getBoundingClientRect().width) };
+        }} onPointerMove={event => {
+          const drag = windowDrag.current; if (!drag || drag.pointer !== event.pointerId) return;
+          event.stopPropagation(); setWindowPosition({ left: drag.left + (event.clientX - drag.x) * drag.scale,
+            top: drag.top + (event.clientY - drag.y) * drag.scale });
+        }} onPointerUp={() => { windowDrag.current = null; }} onLostPointerCapture={() => { windowDrag.current = null; }} />
+      <img style={{ ...guildRect(G.titleRect), pointerEvents: "none" }} src={G.assets.title} alt="" draggable={false} />
+      {t("game.111", [], "Guild") !== "Guild" ? <span style={style.nativeTitle}>{t("game.111", [], "Guild")}</span> : null}
+      <GuildSourceButton art={G.assets.close} rect={G.closeRect} label={t("ui.close", [], "Close")} onClick={onClose} />
+      {(["left", "right"] as const).map(side => <div key={side} role="tablist" aria-label={t(side === "left" ? "game.111" : "ui.guildStatus", [], side === "left" ? "Guild" : "Guild status")}>
+        {G.tabs.filter(entry => entry.side === side && (entry.key !== "storage" || mayOpenStorage)
+          && (entry.key !== "ranks" || mayEditRanks)).map(entry => {
+          const labels = TAB_LABELS[entry.key];
+          const active = entry.side === "left" ? entry.key === tab : entry.key === rightTab;
+          const label = t(labels.key, [], labels.english);
+          return <button key={entry.key} type="button" role="tab" aria-label={label} aria-selected={active} data-guild-tab={entry.key}
+            onClick={() => {
+              if (entry.side === "left") setTab(entry.key as GuildTab);
+              else { setRightTab(entry.key as "status" | "buff"); if (entry.key === "buff" && !currentBuffSource?.catalogReady) requestBuffList(); }
+            }} style={{ ...guildRect(entry.rect), border: 0, padding: 0, background: "transparent", color: "white", font: "inherit", cursor: "pointer" }}>
+            <img src={active ? entry.assets.active : entry.assets.idle} alt="" draggable={false} style={{ width: "100%", height: "100%", pointerEvents: "none" }} />
+            {label !== labels.english ? <span style={style.nativeTabCaption}>{label}</span> : null}
+          </button>;
         })}
-      </div>
+      </div>)}
 
-      {tab === "overview" ? (
-        <div style={style.panel}>
-          <div style={style.overviewGrid}>
-            <Info label={t("ui.guildName", [], "Name")} value={guild.name} />
-            <Info label={t("ui.guildRank", [], "Your Rank")} value={guild.rank ?? t("ui.guildMember", [], "Member")} />
-            <Info label={t("ui.guildLevel", [], "Level")} value={guild.level ? String(guild.level) : "1"} />
-            <Info label={t("ui.guildGold", [], "Guild Gold")} value={formatNumber(guild.gold ?? 0)} />
-            <Info
-              label={t("ui.guildMembers", [], "Members")}
-              value={guild.maxMembers ? `${members.length}/${guild.maxMembers}` : String(members.length)}
-            />
-            <Info label={t("ui.guildOnline", [], "Online")} value={String(onlineCount)} />
-            {typeof guild.sparePoints === "number" ? (
-              <Info label={t("ui.guildSparePoints", [], "Buff Points")} value={String(Math.max(0, guild.sparePoints))} />
-            ) : null}
-          </div>
-          {guild.maxExperience ? (
-            <div style={style.expBlock}>
-              <div style={style.gaugeHead}>
-                <span style={style.gaugeLabel}>{t("ui.experience", [], "Guild EXP")}</span>
-                <span style={style.gaugeValue}>{`${guild.experience ?? 0}/${guild.maxExperience}`}</span>
-              </div>
-              <div style={style.gaugeTrack}>
-                <span
-                  style={{
-                    ...style.gaugeFill,
-                    width: `${Math.min(100, Math.max(0, ((guild.experience ?? 0) / Math.max(guild.maxExperience, 1)) * 100))}%`,
-                  }}
-                />
-              </div>
-            </div>
-          ) : null}
-          <div style={style.noticeLabel}>{t("ui.guildNotice", [], "Notice")}</div>
-          <div style={style.noticeReadonly}>{guild.notice || t("ui.guildNoticeEmpty", [], "No notice posted.")}</div>
-          {guild.permissions?.length ? (
-            <>
-              <div style={style.noticeLabel}>{t("ui.guildPermissions", [], "Your Permissions")}</div>
-              <div style={style.permissions}>
-                {guild.permissions.map((permission) => (
-                  <span key={permission} style={style.permissionTag}>
-                    {permissionLabel(t, permission)}
-                  </span>
-                ))}
-              </div>
-            </>
-          ) : null}
-          <div style={style.diplomacyGrid}>
-            <div style={style.diplomacyCol}>
-              <div style={{ ...style.noticeLabel, color: "#d8552f" }}>
-                {t("ui.guildWars", [warGuilds.length], `At War (${warGuilds.length})`)}
-              </div>
-              <div style={style.diplomacyList} data-guild-wars={warGuilds.length}>
-                {warGuilds.length === 0 ? (
-                  <div style={style.empty}>{t("ui.guildNoWars", [], "No active wars.")}</div>
-                ) : (
-                  warGuilds.map((name) => (
-                    <div key={`war-${name}`} style={style.diplomacyRow}>
-                      <span style={{ ...style.diplomacyDot, background: "#d8552f" }} aria-hidden="true" />
-                      {name}
-                    </div>
-                  ))
-                )}
-              </div>
-            </div>
-            <div style={style.diplomacyCol}>
-              <div style={{ ...style.noticeLabel, color: "#8be07a" }}>
-                {t("ui.guildAllies", [allyGuilds.length], `Allies (${allyGuilds.length})`)}
-              </div>
-              <div style={style.diplomacyList} data-guild-allies={allyGuilds.length}>
-                {allyGuilds.length === 0 ? (
-                  <div style={style.empty}>{t("ui.guildNoAllies", [], "No allies.")}</div>
-                ) : (
-                  allyGuilds.map((name) => (
-                    <div key={`ally-${name}`} style={style.diplomacyRow}>
-                      <span style={{ ...style.diplomacyDot, background: "#8be07a" }} aria-hidden="true" />
-                      {name}
-                    </div>
-                  ))
-                )}
-              </div>
-            </div>
-          </div>
+      {tab === "notice" ? <div style={style.nativeNotice}>
+        <textarea aria-label={t("ui.guildNoticeEdit", [], "Edit Notice")} spellCheck={false} maxLength={400}
+          style={style.nativeNoticeText} readOnly={!noticeEditing || !onEditNotice || !mayEditNotice} value={noticeEditing ? noticeDraft : (guild.notice ?? "")}
+          onChange={event => setNoticeDraft(event.target.value)} />
+        {onEditNotice && mayEditNotice ? <div style={{ position: "absolute", left: 5, top: 340 }}>
+          <ActionButton label={noticeEditing ? t("ui.guildSaveNotice", [], "Save Notice") : t("ui.edit", [], "Edit")}
+            disabled={noticeEditing && noticeDraft === (guild.notice ?? "")}
+            onClick={() => noticeEditing ? onEditNotice(noticeDraft) : setNoticeEditing(true)} />
+        </div> : null}
+      </div> : null}
+
+      {tab === "members" ? <div style={style.nativeMembers}>
+        <img src="/original-ui/Prguse/1852.png" alt="" draggable={false} style={{ position: "absolute", inset: 0, width: 324, height: 332, pointerEvents: "none" }} />
+        <div style={{ position: "absolute", left: 11, top: 4, color: "#bbb", fontSize: 10.6667 }}>{t("ui.guildRank", [], "Rank")}</div>
+        <div style={{ position: "absolute", left: 112, top: 4, color: "#bbb", fontSize: 10.6667 }}>{t("common.dcd1d5223f73", [], "Name")}</div>
+        <div style={{ position: "absolute", left: 212, top: 4, color: "#bbb", fontSize: 10.6667 }}>{t("ui.guildOnline", [], "Status")}</div>
+        <div style={{ position: "absolute", left: 0, top: 28, width: 324, height: 270, overflowY: "auto", scrollbarWidth: "thin" }}
+          onScroll={() => setMemberAction(null)}>
+          {visibleMembers.map((member, row) => <div key={member.name} data-member-name={member.name}
+            style={{ position: "relative", height: 15, fontSize: 10.6667, lineHeight: "14px", color: member.online ? "#fff" : "#888" }}>
+            <select aria-label={`${t("ui.guildRank", [], "Rank")}: ${member.name}`} value={member.rankIndex ?? ""}
+              disabled={!onChangeMemberRank || !mayEditRanks || !memberMayBeManaged(member)} style={{ ...style.nativeMemberRank, color: member.online ? "white" : "#888" }}
+              onChange={event => {
+                const rank = ranks.find(entry => entry.index === Number(event.target.value));
+                if (rank) setMemberAction({ kind: "rank", name: member.name, rank: rank.index, rankName: rank.name, beforeRank: member.rankIndex, scope: guildScope });
+              }}>
+              {!ranks.some(rank => rank.index === member.rankIndex) ? <option value="">{member.rank ?? ""}</option> : null}
+              {ranks.map(rank => <option key={rank.index} value={rank.index} disabled={ownRankIndex === undefined || rank.index < ownRankIndex}>{rank.name}</option>)}
+            </select>
+            <span style={{ position: "absolute", left: 112, width: 84, overflow: "hidden", whiteSpace: "nowrap", background: member.name === playerName ? "#222" : "#0a0a0a" }}>{member.name}</span>
+            {onKickMember && mayKick && memberMayBeManaged(member) && member.name !== playerName ? <button type="button" aria-label={`${t("ui.guildKick", [], "Kick")}: ${member.name}`}
+              onClick={() => setMemberAction({ kind: "kick", name: member.name, beforeRank: member.rankIndex, scope: guildScope })} style={{ position: "absolute", left: 197, top: 0, width: 10, height: 12,
+                border: 0, padding: 0, background: "transparent", cursor: "pointer" }}><img src="/original-ui/Prguse/917.png" alt="" draggable={false} /></button> : null}
+            <span style={{ position: "absolute", left: 212, width: 100 }}>{member.online ? t("ui.guildStateOnline", [], "Online") : (member.lastSeen ?? t("ui.guildStateOffline", [], "Offline"))}</span>
+          </div>)}
         </div>
-      ) : null}
-
-      {tab === "members" ? (
-        <div style={style.panel}>
-          <div style={style.membersLayout}>
-            <div style={style.memberList} aria-label={t("ui.guildMembers", [], "Members")}>
-              <div style={style.memberListHead}>
-                <span style={style.memberColName}>{t("ui.guildName", [], "Name")}</span>
-                <span style={style.memberColRank}>{t("ui.guildRank", [], "Rank")}</span>
-                <span style={style.memberColState}>{t("ui.guildOnline", [], "State")}</span>
-              </div>
-              <div style={style.memberRows}>
-                {visibleMembers.length === 0 ? (
-                  <div style={style.empty}>
-                    {members.length === 0
-                      ? t("ui.guildNoMembers", [], "No members.")
-                      : t("ui.guildNoneOnline", [], "No members online.")}
-                  </div>
-                ) : (
-                  visibleMembers.map((member) => {
-                    const isSelected = selected?.name === member.name;
-                    const isSelf = playerName != null && member.name === playerName;
-                    return (
-                      <button
-                        key={member.name}
-                        type="button"
-                        data-member-name={member.name}
-                        data-member-online={member.online ? "1" : "0"}
-                        aria-pressed={isSelected}
-                        onClick={() => setSelectedMember(member.name)}
-                        style={{
-                          ...style.memberRow,
-                          ...(isSelected ? style.memberRowSelected : null),
-                          ...(isSelf ? style.memberRowSelf : null),
-                        }}
-                      >
-                        <span style={style.memberColName}>{member.name}</span>
-                        <span style={style.memberColRank}>{member.rank ?? "-"}</span>
-                        <span style={{ ...style.memberColState, color: member.online ? "#8be07a" : "#9c8d6f" }}>
-                          {member.online ? t("ui.guildStateOnline", [], "Online") : t("ui.guildStateOffline", [], "Offline")}
-                        </span>
-                      </button>
-                    );
-                  })
-                )}
-              </div>
-              <label style={style.showOfflineRow}>
-                <input
-                  type="checkbox"
-                  checked={showOffline}
-                  onChange={(event) => setShowOffline(event.target.checked)}
-                  style={style.checkbox}
-                />
-                {t("ui.guildShowOffline", [], "Show offline members")}
-              </label>
-            </div>
-
-            <div style={style.memberDetail} data-member-detail={selected?.name ?? ""}>
-              {selected ? (
-                <>
-                  <div style={style.memberDetailName}>{selected.name}</div>
-                  <Info label={t("ui.guildRank", [], "Rank")} value={selected.rank ?? t("ui.guildMember", [], "Member")} />
-                  <Info
-                    label={t("ui.guildOnline", [], "State")}
-                    value={selected.online ? t("ui.guildStateOnline", [], "Online") : t("ui.guildStateOffline", [], "Offline")}
-                  />
-                  <Info label={t("ui.guildContribution", [], "Contribution")} value={formatNumber(selected.contribution ?? 0)} />
-                  {selected.lastSeen ? <Info label={t("ui.guildLastSeen", [], "Last Seen")} value={selected.lastSeen} /> : null}
-                  {ranks.length > 0 ? (
-                    <label style={style.assignRankRow}>
-                      <span style={style.infoLabel}>{t("ui.guildAssignRank", [], "Assign Rank")}</span>
-                      <select
-                        value={ranks.find((rank) => rank.name === selected.rank)?.index ?? ""}
-                        disabled={!onChangeMemberRank || (playerName != null && selected.name === playerName)}
-                        onChange={(event) => {
-                          if (event.target.value === "") return;
-                          const idx = Number(event.target.value);
-                          if (Number.isFinite(idx)) onChangeMemberRank?.(selected.name, idx);
-                        }}
-                        aria-label={t("ui.guildAssignRank", [], "Assign Rank")}
-                        style={{
-                          ...style.select,
-                          ...(!onChangeMemberRank || (playerName != null && selected.name === playerName)
-                            ? style.actionButtonDisabled
-                            : null),
-                        }}
-                      >
-                        {ranks.find((rank) => rank.name === selected.rank) ? null : <option value="">-</option>}
-                        {ranks.map((rank) => (
-                          <option key={rank.index} value={rank.index}>
-                            {rank.name}
-                          </option>
-                        ))}
-                      </select>
-                    </label>
-                  ) : null}
-                  <div style={style.actions}>
-                    <ActionButton
-                      label={t("ui.guildKick", [], "Kick")}
-                      disabled={!onKickMember || (playerName != null && selected.name === playerName)}
-                      onClick={() => onKickMember?.(selected.name)}
-                    />
-                  </div>
-                </>
-              ) : (
-                <div style={style.empty}>{t("ui.guildSelectMember", [], "Select a member.")}</div>
-              )}
-            </div>
-          </div>
-
-          <form
-            style={style.inviteRow}
-            onSubmit={(event) => {
-              event.preventDefault();
-              const trimmed = inviteName.trim();
-              if (trimmed) {
-                onInviteMember?.(trimmed);
-                setInviteName("");
-              }
-            }}
-          >
-            <input
-              style={style.input}
-              value={inviteName}
-              onChange={(event) => setInviteName(event.target.value)}
-              placeholder={t("ui.guildInvitePlaceholder", [], "Player name")}
-              aria-label={t("ui.guildInvite", [], "Invite")}
-              autoComplete="off"
-              spellCheck={false}
-            />
-            <button
-              type="submit"
-              disabled={!onInviteMember || inviteName.trim().length === 0}
-              style={{
-                ...style.actionButton,
-                flex: "0 0 110px",
-                ...(!onInviteMember || inviteName.trim().length === 0 ? style.actionButtonDisabled : null),
-              }}
-            >
-              {t("ui.guildInvite", [], "Invite")}
-            </button>
-          </form>
-        </div>
-      ) : null}
+        <label style={{ position: "absolute", left: 11, top: 304, fontSize: 10.6667, display: "flex", alignItems: "center", gap: 4 }}>
+          <input type="checkbox" checked={showOffline} onChange={event => setShowOffline(event.target.checked)} />{t("ui.guildShowOffline", [], "Show offline members")}
+        </label>
+      </div> : null}
 
       {tab === "storage" ? (
         <div style={style.panel}>
           <div style={style.storageGoldRow}>
             <span style={style.storageGoldLabel}>{t("ui.guildGold", [], "Guild Gold")}</span>
-            <span style={style.storageGoldValue}>{formatNumber(guild.gold ?? 0)}</span>
+            <span style={style.storageGoldValue}>{formatNumber(guild.gold)}</span>
           </div>
           <form
             style={style.inviteRow}
@@ -773,91 +602,40 @@ export function GuildWindow({
         </div>
       ) : null}
 
-      {tab === "ranks" ? (
-        <div style={style.panel}>
-          {ranks.length === 0 ? (
-            <div style={style.empty}>{t("ui.guildNoRanks", [], "No ranks configured.")}</div>
-          ) : (
-            <div style={style.ranksScroll}>
-              {ranks.map((rank) => (
-                <RankCard key={`${guild.name ?? ""}:${rank.index}`} t={t} rank={rank}
-                  onRenameRank={onRenameRank} onToggleRankPermission={onToggleRankPermission}
-                  rankEditPending={rankEditPending} />
-              ))}
-            </div>
-          )}
-        </div>
-      ) : null}
 
-      {tab === "notice" ? (
-        <div style={style.panel}>
-          <div style={style.noticeLabel}>{t("ui.guildNoticeEdit", [], "Edit Notice")}</div>
-          <textarea
-            style={style.noticeTextarea}
-            value={noticeDraft}
-            onChange={(event) => setNoticeDraft(event.target.value)}
-            aria-label={t("ui.guildNoticeEdit", [], "Edit Notice")}
-            spellCheck={false}
-            maxLength={400}
-          />
-          <div style={style.actions}>
-            <ActionButton
-              label={t("ui.guildSaveNotice", [], "Save Notice")}
-              disabled={!onEditNotice || noticeDraft === (guild.notice ?? "")}
-              onClick={() => onEditNotice?.(noticeDraft.trim())}
-            />
-          </div>
 
-          <div style={style.noticeLabel}>{t("ui.guildChat", [], "Guild Chat")}</div>
-          <div style={style.chatLog} aria-label={t("ui.guildChat", [], "Guild Chat")}>
-            {guild.chatLog?.length ? (
-              guild.chatLog.slice(-30).map((line, index) => (
-                <div key={`chat-${index}`} style={style.chatLine}>
-                  {line}
-                </div>
-              ))
-            ) : (
-              <div style={style.empty}>{t("ui.guildChatEmpty", [], "No guild messages yet.")}</div>
-            )}
-          </div>
-          <form
-            style={style.inviteRow}
-            onSubmit={(event) => {
-              event.preventDefault();
-              const trimmed = chatDraft.trim();
-              if (trimmed) {
-                onSendGuildChat?.(trimmed);
-                setChatDraft("");
-              }
-            }}
-          >
-            <input
-              style={style.input}
-              value={chatDraft}
-              onChange={(event) => setChatDraft(event.target.value)}
-              placeholder={t("ui.guildChatPlaceholder", [], "Message guild...")}
-              aria-label={t("ui.guildChat", [], "Guild Chat")}
-              autoComplete="off"
-              spellCheck={false}
-            />
-            <button
-              type="submit"
-              disabled={!onSendGuildChat || chatDraft.trim().length === 0}
-              style={{
-                ...style.actionButton,
-                flex: "0 0 110px",
-                ...(!onSendGuildChat || chatDraft.trim().length === 0 ? style.actionButtonDisabled : null),
-              }}
-            >
-              {t("ui.send", [], "Send")}
-            </button>
-          </form>
-        </div>
-      ) : null}
-      {tab === "buffs" ? (
-        <div style={{ ...style.panel, overflowY: "auto" }} role="tabpanel" aria-label={t("ui.guildSkills", [], "Guild skills")}>
+      {tab === "ranks" ? <div data-guild-ranks-page="true">
+        <span style={style.rankEditLabel}>{t("game.guild.editRank", [], "Edit rank")}</span>
+        <span style={style.rankSelectLabel}>{t("game.guild.selectRank", [], "Select rank")}</span>
+        <GuildDropdown rect={G.ranks.dropdownRect} choices={rankChoices} selected={selectedRank?.index ?? null}
+          label={t("game.guild.selectRank", [], "Select rank")} onSelect={choice => choice.create
+            ? (canCreateRank && setCreateRank(true)) : setSelectedRankIndex({ index: choice.index, structure: rankStructure })} />
+        {selectedRank ? <RankCard key={`${guild.name}:${rankStructure}:${selectedRank.index}`} t={t} rank={selectedRank}
+          onRenameRank={mayEditRanks ? onRenameRank : undefined} onToggleRankPermission={mayEditRanks ? onToggleRankPermission : undefined} rankEditPending={rankEditPending} /> : null}
+        {rankEditPending?.create ? <span role="status" style={{ position: "absolute", left: 42, top: 132, width: 285, fontSize: 10.6667 }}>
+          {t("ui.waiting", [], "Waiting for the server…")}</span> : null}
+      </div> : null}
+
+      {rightTab === "status" ? <div data-guild-status="true">
+        <img src={G.assets.statusBackground} alt="" draggable={false} style={{ ...guildRect(G.pages.status.backgroundRect), pointerEvents: "none" }} />
+        {t("game.complete.048", [], "Guild Statistics") !== "Guild Statistics" ? <span style={style.nativeStatsTitle}>{t("game.complete.048", [], "Guild Statistics")}</span> : null}
+        <span style={{ ...guildRect(G.pages.status.headersRect), height: 75, color: "#808080", fontSize: 10.6667, lineHeight: "13px", textAlign: "right", whiteSpace: "pre" }}>
+          {[t("common.dcd1d5223f73", [], "Guild Name"), t("game.141", [], "Level"), t("game.110", [], "Members")].join("\n\n")}</span>
+        {[{ key: "name", rect: G.pages.status.nameRect, value: guild.name }, { key: "level", rect: G.pages.status.levelRect, value: formatNumber(guild.level) },
+          { key: "members", rect: G.pages.status.membersRect, value: `${formatNumber(guild.memberCount, false)}${guild.maxMembers === 0 ? "" : `/${formatNumber(guild.maxMembers, false)}`}` }].map((row, i) => <span key={i} data-guild-stat={row.key}
+            style={{ ...guildRect(row.rect), height: 15, fontSize: 10.6667, lineHeight: "13px", overflow: "hidden", whiteSpace: "nowrap" }}>{row.value}</span>)}
+        {onInviteMember && mayRecruit ? <form onSubmit={event => { event.preventDefault(); const name = inviteName.trim(); if (name) { onInviteMember(name); setInviteName(""); } }}>
+          <label htmlFor={recruitInputId} style={{ ...guildRect(G.pages.status.recruitLabelRect), fontSize: 10.6667 }}>{t("game.109", [], "Recruit Member")}</label>
+          <input id={recruitInputId} style={style.nativeRecruitInput} value={inviteName} maxLength={20} autoComplete="off" spellCheck={false}
+            aria-label={t("ui.guildInvite", [], "Invite")} onChange={event => setInviteName(event.target.value)} />
+          <GuildSourceButton art={G.assets.recruit} rect={G.pages.status.recruitButtonRect} label={t("shell.ok", [], "OK")} english="OK"
+            disabled={!inviteName.trim()} onClick={() => { if (inviteName.trim()) { onInviteMember(inviteName.trim()); setInviteName(""); } }} />
+        </form> : null}
+      </div> : null}
+      {rightTab === "buff" ? (
+        <div style={{ ...style.buffPanel, overflowY: "auto" }} role="tabpanel" aria-label={t("ui.guildSkills", [], "Guild skills")}>
           <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
-            <span>{t("ui.guildLevel", [], "Guild level")}: {currentBuffSource?.level ?? "—"}</span>
+            <span>{t("game.141", [], "Guild level")}: {currentBuffSource?.level ?? "—"}</span>
             <span>{t("ui.guildSparePoints", [], "Spare points")}: {currentBuffSource?.sparePoints ?? "—"}</span>
             <span>{t("ui.guildGold", [], "Guild gold")}: {currentBuffSource?.gold.toLocaleString() ?? "—"}</span>
             <button type="button" style={style.buffActionButton} disabled={!currentBuffSource || !!buffPending || !onBuffAction} onClick={requestBuffList}>{t("ui.refresh", [], "Refresh")}</button>
@@ -890,18 +668,37 @@ export function GuildWindow({
           </div>
         </div>
       ) : null}
+
+      <>
+        <img src={G.assets.progressBackground} alt="" draggable={false} style={guildRect(G.pages.status.progressRect)} />
+        {guildExperienceRatio !== null ? <div style={{ ...guildRect(G.pages.status.progressRect), width: G.pages.status.progressFillWidth * guildExperienceRatio, overflow: "hidden", pointerEvents: "none" }}>
+          <img src={G.assets.progress} alt="" draggable={false} style={{ width: G.pages.status.progressRect.width, height: G.pages.status.progressRect.height, maxWidth: "none" }} /></div> : null}
+        <span data-guild-stat="experience" style={{ ...guildRect(G.pages.status.progressTextRect), textAlign: "center", fontSize: 10.6667, lineHeight: "15px", pointerEvents: "none" }}>{guildExperienceRatio === null ? "—" : `${Number((guildExperienceRatio * 100).toFixed(2))}%`}</span>
+      </>
+      {createRank ? <GuildConfirmation title={t("game.guild.createRankConfirm", [], "Create new rank?")}
+        confirm={t("common.eebdd24a77d9", [], "Confirm")} cancel={t("common.19766ed6ccb2", [], "Cancel")} disabled={!canCreateRank}
+        onCancel={() => setCreateRank(false)} onConfirm={() => { if (canCreateRank && onCreateRank?.()) setCreateRank(false); }} /> : null}
+      {memberAction ? <GuildConfirmation title={memberAction.kind === "kick" ? `${t("ui.guildKick", [], "Kick")}: ${memberAction.name}?`
+        : `${memberAction.name} → ${memberAction.rankName}?`} confirm={t("common.eebdd24a77d9", [], "Confirm")} cancel={t("common.19766ed6ccb2", [], "Cancel")}
+        disabled={!memberActionCurrent} onCancel={() => setMemberAction(null)} onConfirm={() => {
+          if (!memberActionCurrent) return;
+          if (memberAction.kind === "kick") onKickMember?.(memberAction.name);
+          else onChangeMemberRank?.(memberAction.name, memberAction.rank!);
+          setMemberAction(null);
+        }} /> : null}
       {buffConfirmation ? <div style={style.buffModalBackdrop} onPointerDown={event => event.stopPropagation()} onPointerUp={event => event.stopPropagation()}>
-        <div ref={buffDialogRef} role="alertdialog" aria-modal="true" aria-label={t("ui.confirm", [], "Confirm")} onKeyDown={onBuffDialogKey} style={style.buffModal}>
+        <div ref={buffDialogRef} role="alertdialog" aria-modal="true" aria-label={t("common.eebdd24a77d9", [], "Confirm")} onKeyDown={onBuffDialogKey} style={style.buffModal}>
           <p>{buffConfirmation.dto.wire.action === 1
             ? t("ui.guildBuffAcquireConfirm", [buffConfirmation.definition.name], `Acquire ${buffConfirmation.definition.name}?`)
             : t("ui.guildBuffActivateConfirm", [buffConfirmation.definition.name], `Activate ${buffConfirmation.definition.name}?`)}</p>
           <p>{t("ui.guildSparePoints", [], "Spare points")}: {buffConfirmation.plan.pointsCost} · {t("ui.guildGold", [], "Guild gold")}: {buffConfirmation.plan.goldCost.toLocaleString()}</p>
           <div style={{ display: "flex", gap: 8 }}>
-            <button type="button" style={style.buffActionButton} disabled={!buffConfirmCurrent} onClick={confirmBuff}>{t("ui.confirm", [], "Confirm")}</button>
-            <button type="button" style={style.buffActionButton} onClick={() => setBuffConfirmation(null)}>{t("ui.cancel", [], "Cancel")}</button>
+            <button type="button" style={style.buffActionButton} disabled={!buffConfirmCurrent} onClick={confirmBuff}>{t("common.eebdd24a77d9", [], "Confirm")}</button>
+            <button type="button" style={style.buffActionButton} onClick={() => setBuffConfirmation(null)}>{t("common.19766ed6ccb2", [], "Cancel")}</button>
           </div>
         </div>
       </div> : null}
+
     </section>
   );
 }
@@ -917,7 +714,7 @@ function guildBuffError(t: TranslateFn, error: NonNullable<GuildBuffRow["error"]
 }
 function guildBuffHint(t: TranslateFn, buff: GuildBuffRow): string {
   const d = buff.definition;
-  const lines = [d.name, `${t("ui.guildLevel", [], "Guild level")}: ${d.levelRequirement}`,
+  const lines = [d.name, `${t("game.141", [], "Guild level")}: ${d.levelRequirement}`,
     `${t("ui.guildSparePoints", [], "Spare points")}: ${d.pointsRequirement}`,
     `${t("ui.guildGold", [], "Guild gold")}: ${d.activationCost}`];
   if (d.timeLimit > 0) lines.push(t("ui.minutes", [buff.state?.active ? buff.state.activeTimeRemaining : d.timeLimit], `${buff.state?.active ? buff.state.activeTimeRemaining : d.timeLimit} minutes`));
@@ -928,16 +725,9 @@ function guildBuffHint(t: TranslateFn, buff: GuildBuffRow): string {
   return lines.join("\n");
 }
 
-function Info({ label, value }: { label: string; value: string }) {
-  return (
-    <div style={style.info}>
-      <span style={style.infoLabel}>{label}</span>
-      <span style={style.infoValue}>{value}</span>
-    </div>
-  );
-}
-
-function ActionButton({ label, disabled, onClick }: { label: string; disabled?: boolean; onClick: () => void }) {
+function ActionButton({ label, disabled, onClick, nativeSave }: { label: string; disabled?: boolean; onClick: () => void; nativeSave?: boolean }) {
+  if (nativeSave) return <GuildSourceButton art={G.assets.save} rect={{ left: 0, top: 0, width: G.ranks.saveRect.width, height: G.ranks.saveRect.height }}
+    label={label} english="Save" disabled={disabled} onClick={onClick} />;
   return (
     <button
       type="button"
@@ -964,60 +754,45 @@ function RankCard({
   onToggleRankPermission?: GuildWindowProps["onToggleRankPermission"];
   rankEditPending?: GuildRankEditPending;
 }) {
-  const [name, setName] = useState(rank.name);
-
+  const [draft, setDraft] = useState({ value: rank.name, dirty: false });
   useEffect(() => {
-    setName(rank.name);
+    setDraft(current => current.value === rank.name ? { value: rank.name, dirty: false }
+      : current.dirty ? current : { value: rank.name, dirty: false });
   }, [rank.name]);
-
+  const name = draft.value;
   const renamePending = rankEditPending?.renameRankIndices.includes(rank.index) === true;
   const authorityDisabled = rankEditPending?.editableRankIndices !== undefined
     && !rankEditPending.editableRankIndices.includes(rank.index);
   const renameDisabled = !onRenameRank || renamePending || authorityDisabled
     || guildRankRenameCommand(rank.index, name) === null;
-
-  return (
-    <div style={style.rankCard} data-rank-index={rank.index}>
-      <input
-        style={style.rankNameInput}
-        value={name}
-        onChange={(event) => setName(event.target.value)}
-        aria-label={t("ui.guildRankName", [], "Rank Name")}
-        spellCheck={false}
-        maxLength={20}
-        disabled={!onRenameRank || renamePending || authorityDisabled}
-      />
-      <div style={style.rankPerms}>
-        {PERMISSION_KEYS.map((key) => {
-          const on = rank.permissions?.includes(key) === true;
-          const disabled = !onToggleRankPermission || rankEditPending?.permission === true || authorityDisabled
-            || guildRankPermissionCommand(rank.index, key, !on) === null;
-          return (
-            <label key={key} style={{ ...style.permCheck, ...(on ? style.permCheckOn : null) }}>
-              <input
-                type="checkbox"
-                checked={on}
-                disabled={disabled}
-                data-guild-rank-permission={key}
-                onChange={(event) => {
-                  if (!disabled) onToggleRankPermission?.(rank.index, key, event.target.checked);
-                }}
-                style={style.checkbox}
-              />
-              {permissionLabel(t, key)}
-            </label>
-          );
-        })}
-      </div>
-      <div style={style.actions}>
-        <ActionButton
-          label={t("ui.guildSaveRank", [], "Save Rank")}
-          disabled={renameDisabled}
-          onClick={() => { if (!renameDisabled) onRenameRank?.(rank.index, name); }}
-        />
-      </div>
-    </div>
-  );
+  return <div data-rank-index={rank.index}>
+    <input style={style.rankNameInput} value={name} aria-label={t("ui.guildRankName", [], "Rank Name")}
+      onChange={event => setDraft({ value: event.target.value, dirty: true })} spellCheck={false} maxLength={20}
+      disabled={!onRenameRank || renamePending || authorityDisabled}
+      onKeyDown={event => {
+        event.stopPropagation();
+        if (event.nativeEvent?.isComposing || event.keyCode === 229) return;
+        if (event.key === "Enter") { event.preventDefault(); if (!renameDisabled) onRenameRank?.(rank.index, name); }
+        else if (event.key === "Escape") { event.preventDefault(); setDraft({ value: "", dirty: true }); event.currentTarget.blur(); }
+      }} />
+    {PERMISSION_KEYS.map((key, bit) => {
+      const on = rank.permissions?.includes(key) === true;
+      const disabled = !onToggleRankPermission || rankEditPending?.permission === true || authorityDisabled
+        || guildRankPermissionCommand(rank.index, key, !on) === null;
+      const box = G.ranks.permissions[bit];
+      return <label key={key} style={{ ...guildRect(box.rect), width: 152, height: 20, fontSize: 10.6667, color: "white", cursor: disabled ? "default" : "pointer" }}>
+        <input type="checkbox" checked={on} disabled={disabled} data-guild-rank-permission={key}
+          onChange={event => { if (!disabled) onToggleRankPermission?.(rank.index, key, event.target.checked); }}
+          style={{ appearance: "none", position: "absolute", left: 0, top: 0, width: on ? box.checkedRect.width : box.rect.width,
+            height: box.rect.height, margin: 0, padding: 0, border: 0,
+            background: `url(${on ? G.assets.permissionChecked : G.assets.permissionUnchecked}) no-repeat`,
+            opacity: disabled ? 0.55 : 1, cursor: disabled ? "default" : "pointer" }} />
+        <span style={{ position: "absolute", left: 17, top: -2, width: 135, height: 20, lineHeight: "13px", overflow: "hidden" }}>{permissionLabel(t, key)}</span>
+      </label>;
+    })}
+    <div style={guildRect(G.ranks.saveRect)}><ActionButton label={t("game.complete.004", [], "Save")} nativeSave
+      disabled={renameDisabled} onClick={() => { if (!renameDisabled) onRenameRank?.(rank.index, name); }} /></div>
+  </div>;
 }
 
 /** Localise a permission key, falling back to the raw key for legacy strings. */
@@ -1065,314 +840,59 @@ function normalizeMembers(members?: Array<string | GuildMember>): GuildMember[] 
   );
 }
 
-function formatNumber(value: number) {
-  return value.toLocaleString("en-US");
+function formatNumber(value: number | undefined, grouping = true) {
+  return typeof value === "number" && Number.isSafeInteger(value) && value >= 0
+    ? grouping ? value.toLocaleString("en-US") : String(value) : "—";
 }
 
 const style: Record<string, CSSProperties> = {
-  incomingInvite: { position: "absolute", left: 22, top: 80, width: 652, padding: 16,
-    boxSizing: "border-box", border: "1px solid #9c8d6f", background: "rgba(20,13,7,0.95)" },
+  window: { position: "absolute", ...G.window, zIndex: 32, color: "white", fontSize: 10.6667, fontFamily: "inherit" },
+  frame: { position: "absolute", inset: 0, width: G.window.width, height: G.window.height, maxWidth: "none", pointerEvents: "none", imageRendering: "pixelated" },
+  titleText: { ...guildRect(G.titleRect), color: "white", fontSize: 10.6667 },
+  close: guildRect(G.closeRect),
+  nativeTitle: { ...guildRect(G.titleRect), background: "#17120a", color: "white", fontSize: 10.6667, pointerEvents: "none", whiteSpace: "nowrap" },
+  nativeTabCaption: { position: "absolute", inset: "3px 3px 4px", pointerEvents: "none", display: "grid", placeItems: "center", fontSize: 10.6667,
+    lineHeight: "13px", background: "linear-gradient(#322716,#19160e)", color: "white", overflow: "hidden", whiteSpace: "nowrap" },
+  nativeNotice: { position: "absolute", left: 13, top: 61, width: 322, height: 365 },
+  nativeNoticeText: { position: "absolute", left: 0, top: 0, width: 322, height: 330, padding: 0, margin: 0, resize: "none", boxSizing: "border-box",
+    background: "transparent", border: 0, color: "white", font: "inherit", fontSize: 10.6667, lineHeight: "13px", scrollbarWidth: "thin" },
+  nativeMembers: { position: "absolute", left: 13, top: 61, width: 324, height: 332 },
+  nativeMemberRank: { position: "absolute", left: 11, top: 0, width: 100, height: 14, font: "inherit", fontSize: 10.6667,
+    lineHeight: "14px", margin: 0, padding: "0 12px 0 0", border: "1px solid #303030", background: "#141414", appearance: "none",
+    backgroundImage: `url(${G.assets.dropdownArrow.normal})`, backgroundRepeat: "no-repeat", backgroundPosition: "right center", backgroundSize: "10px 10px" },
+  nativeRecruitInput: { ...guildRect(G.pages.status.recruitNameRect), minWidth: 0, boxSizing: "border-box", border: "1px solid #232323", padding: "1px 2px",
+    color: "white", font: "inherit", fontSize: 10.6667, background: "transparent" },
+  nativeStatsTitle: { ...guildRect(G.pages.status.titleRect), color: "#dfcfa9", background: "#080808", fontSize: 10.6667, textAlign: "center", lineHeight: "24px" },
+  rankEditLabel: { ...guildRect(G.ranks.editLabelRect), color: "white", fontSize: 10.6667, lineHeight: "13px" },
+  rankSelectLabel: { ...guildRect(G.ranks.selectLabelRect), color: "white", fontSize: 10.6667, lineHeight: "13px" },
+  rankNameInput: { ...guildRect(G.ranks.nameRect), minWidth: 0, boxSizing: "border-box", border: 0, padding: "0 2px", color: "white",
+    background: "#232323", font: "inherit", fontSize: 10.6667, lineHeight: "16px" },
+  panel: { position: "absolute", left: 13, top: 61, width: 324, height: 332, display: "flex", flexDirection: "column", gap: 6, overflowY: "auto", scrollbarWidth: "thin" },
+  buffPanel: { position: "absolute", left: 360, top: 61, width: 216, height: 332, display: "flex", flexDirection: "column", gap: 4, scrollbarWidth: "thin" },
+  noGuild: { position: "absolute", left: 22, top: 90, color: "#cbb38a", fontSize: 12 },
+  incomingInvite: { position: "absolute", left: 65, top: 110, width: 460, padding: 16,
+    boxSizing: "border-box", border: "1px solid #9c8d6f", background: "#17120a" },
   invitePrompt: { margin: "0 0 16px", whiteSpace: "pre-wrap", overflowWrap: "anywhere", color: "#f4dcaf" },
-  inviteReply: { minWidth: 120, minHeight: 44, border: "1px solid #9c8d6f", background: "#24180c",
-    color: "#f4dcaf", fontSize: 12, fontFamily: "inherit", cursor: "pointer" },
-  itemPicker: { flex: "0 0 auto", maxHeight: 100, overflowY: "auto", padding: 5,
-    border: "1px solid #9c8d6f", background: "rgba(20,13,7,0.85)" },
-  sideHint: { color: "#cbb38a", fontSize: 10 },
-  pickerCells: { display: "flex", flexWrap: "wrap", gap: 4, marginTop: 4 },
-  pickerButton: { display: "flex", alignItems: "center", gap: 3, minHeight: 28, maxWidth: 180,
-    border: "1px solid #9c8d6f", background: "#24180c", color: "#f0eee8", fontSize: 10, fontFamily: "inherit" },
-  window: {
-    position: "absolute",
-    left: 164,
-    top: 146,
-    width: FRAME.width,
-    height: FRAME.height,
-    zIndex: 32,
-    color: "#f0eee8",
-    fontSize: 12,
-    textShadow: "1px 1px 0 #000",
-    fontFamily: "inherit",
-  },
-  buffActionButton: { minWidth: 44, minHeight: 44, padding: "6px 10px", border: "1px solid #9c8d6f", background: "#24180c", color: "#f0eee8", fontSize: 12, fontFamily: "inherit", cursor: "pointer" },
-  buffModalBackdrop: { position: "absolute", inset: 0, zIndex: 4, background: "#000a", display: "grid", placeItems: "center", padding: 18 },
-  buffModal: { background: "#24180c", border: "2px solid #9c8d6f", padding: 18, maxWidth: 480 },
-  frame: { position: "absolute", inset: 0, width: FRAME.width, height: FRAME.height, pointerEvents: "none" },
-  titleText: {
-    position: "absolute",
-    left: 22,
-    top: 10,
-    fontSize: 14,
-    fontWeight: 700,
-    color: "#f4dcaf",
-    letterSpacing: 0.5,
-  },
-  subtitle: { position: "absolute", left: 22, top: 30, fontSize: 11, color: "#cbb38a" },
-  close: { position: "absolute", left: 666, top: 6 },
-  tabs: { position: "absolute", left: 22, top: 50, display: "flex", gap: 4 },
-  tab: {
-    minWidth: 96,
-    border: "1px solid rgba(190, 157, 99, 0.5)",
-    background: "linear-gradient(180deg, rgba(52, 32, 18, 0.92), rgba(28, 17, 9, 0.92))",
-    color: "#cbb38a",
-    padding: "4px 12px",
-    fontSize: 12,
-    cursor: "pointer",
-  },
-  tabActive: {
-    background: "linear-gradient(180deg, rgba(120, 74, 34, 0.96), rgba(70, 40, 20, 0.96))",
-    color: "#f8e6bb",
-    border: "1px solid rgba(214, 180, 110, 0.85)",
-  },
-  panel: {
-    position: "absolute",
-    left: 22,
-    top: 80,
-    width: 652,
-    height: 372,
-    display: "flex",
-    flexDirection: "column",
-    gap: 8,
-  },
-  noGuild: { position: "absolute", left: 22, top: 90, color: "#cbb38a", fontSize: 13 },
-  overviewGrid: { display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 8 },
-  info: {
-    display: "flex",
-    justifyContent: "space-between",
-    gap: 8,
-    border: "1px solid rgba(190, 157, 99, 0.32)",
-    background: "rgba(20, 13, 7, 0.45)",
-    padding: "5px 9px",
-    fontSize: 12,
-  },
-  infoLabel: { color: "#a89568" },
-  infoValue: { color: "#f0d69b", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" },
-  expBlock: { display: "flex", flexDirection: "column", gap: 3 },
-  gaugeHead: { display: "flex", justifyContent: "space-between", fontSize: 11, color: "#cbb38a" },
-  gaugeLabel: { color: "#a89568", textTransform: "uppercase", letterSpacing: 0.5 },
-  gaugeValue: { color: "#e3d3af" },
-  gaugeTrack: {
-    position: "relative",
-    height: 8,
-    background: "rgba(0, 0, 0, 0.55)",
-    border: "1px solid rgba(190, 157, 99, 0.4)",
-    overflow: "hidden",
-  },
-  gaugeFill: { position: "absolute", left: 0, top: 0, bottom: 0, display: "block", background: "#caa64a" },
-  noticeLabel: { fontSize: 10, color: "#a89568", textTransform: "uppercase", letterSpacing: 0.6 },
-  noticeReadonly: {
-    border: "1px solid rgba(190, 157, 99, 0.32)",
-    background: "rgba(11, 8, 5, 0.55)",
-    padding: "8px 10px",
-    fontSize: 12,
-    color: "#e3d3af",
-    minHeight: 48,
-    lineHeight: 1.35,
-    whiteSpace: "pre-wrap",
-  },
-  permissions: { display: "flex", flexWrap: "wrap", gap: 5 },
-  permissionTag: {
-    border: "1px solid rgba(190, 157, 99, 0.45)",
-    background: "rgba(52, 32, 18, 0.7)",
-    color: "#f0d69b",
-    padding: "2px 8px",
-    fontSize: 11,
-  },
-  diplomacyGrid: { display: "flex", gap: 10, minHeight: 0 },
-  diplomacyCol: { flex: 1, display: "flex", flexDirection: "column", gap: 3, minWidth: 0 },
-  diplomacyList: {
-    border: "1px solid rgba(190, 157, 99, 0.28)",
-    background: "rgba(11, 8, 5, 0.45)",
-    padding: "4px 8px",
-    maxHeight: 84,
-    overflowY: "auto",
-    display: "flex",
-    flexDirection: "column",
-    gap: 2,
-    fontSize: 12,
-    color: "#e3d3af",
-  },
-  diplomacyRow: { display: "flex", alignItems: "center", gap: 6, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" },
-  diplomacyDot: { width: 7, height: 7, borderRadius: "50%", flex: "0 0 auto" },
-  showOfflineRow: {
-    display: "flex",
-    alignItems: "center",
-    gap: 6,
-    padding: "4px 8px",
-    borderTop: "1px solid rgba(190, 157, 99, 0.28)",
-    fontSize: 11,
-    color: "#cbb38a",
-    cursor: "pointer",
-  },
-  checkbox: { accentColor: "#caa64a", cursor: "pointer" },
-  assignRankRow: { display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8, fontSize: 12 },
-  select: {
-    flex: "0 0 130px",
-    border: "1px solid rgba(190, 157, 99, 0.5)",
-    background: "rgba(11, 8, 5, 0.8)",
-    color: "#f0eee8",
-    padding: "3px 6px",
-    fontSize: 12,
-    fontFamily: "inherit",
-  },
-  storageGoldRow: {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-    border: "1px solid rgba(190, 157, 99, 0.4)",
-    background: "linear-gradient(180deg, rgba(95, 53, 24, 0.4), rgba(28, 17, 9, 0.55))",
-    padding: "6px 12px",
-  },
-  storageGoldLabel: { fontSize: 11, color: "#a89568", textTransform: "uppercase", letterSpacing: 0.5 },
-  storageGoldValue: { fontSize: 16, color: "#f4d979", fontWeight: 700 },
-  storageGrid: {
-    flex: 1,
-    minHeight: 0,
-    overflowY: "auto",
-    display: "grid",
-    gridTemplateColumns: "repeat(10, 1fr)",
-    gap: 3,
-    border: "1px solid rgba(190, 157, 99, 0.28)",
-    background: "rgba(11, 8, 5, 0.5)",
-    padding: 6,
-    alignContent: "start",
-  },
-  storageSlot: {
-    position: "relative",
-    aspectRatio: "1 / 1",
-    border: "1px solid rgba(190, 157, 99, 0.32)",
-    background: "rgba(0, 0, 0, 0.35)",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    overflow: "hidden",
-  },
+  inviteReply: { minWidth: 100, minHeight: 25, border: "1px solid #9c8d6f", background: "#24180c", color: "#f4dcaf", fontSize: 11, fontFamily: "inherit", cursor: "pointer" },
+  actions: { display: "flex", gap: 8, flexWrap: "wrap" },
+  actionButton: { border: "1px solid #9c8d6f", background: "linear-gradient(#49321a,#20170d)", color: "#f4dcaf", padding: "3px 6px", font: "inherit", cursor: "pointer", whiteSpace: "nowrap" },
+  actionButtonDisabled: { opacity: 0.45, cursor: "default" },
+  inviteRow: { display: "flex", gap: 4, alignItems: "center", flex: "0 0 auto" },
+  input: { flex: 1, minWidth: 0, color: "white", background: "#141414", border: "1px solid #555", font: "inherit", padding: "3px" },
+  noticeLabel: { fontSize: 10.6667, color: "#cbb38a" },
+  storageGoldRow: { display: "flex", justifyContent: "space-between", alignItems: "center", border: "1px solid #625236", padding: "3px 5px", flex: "0 0 auto" },
+  storageGoldLabel: { color: "#cbb38a" },
+  storageGoldValue: { color: "#f4dcaf" },
+  storageGrid: { display: "grid", gridTemplateColumns: "repeat(10, 1fr)", gap: 2, border: "1px solid #625236", background: "#080808", padding: 3, flex: "0 0 auto" },
+  storageSlot: { position: "relative", aspectRatio: "1 / 1", border: "1px solid #625236", background: "#141414", display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden" },
   storageIcon: { maxWidth: "100%", maxHeight: "100%", imageRendering: "pixelated" },
   storageName: { fontSize: 8, color: "#d6c6a5", textAlign: "center", lineHeight: 1.1, padding: 1, overflow: "hidden" },
-  storageCount: {
-    position: "absolute",
-    right: 1,
-    bottom: 0,
-    fontSize: 9,
-    color: "#f8e6bb",
-    textShadow: "1px 1px 0 #000",
-  },
-  ranksScroll: { flex: 1, minHeight: 0, overflowY: "auto", display: "flex", flexDirection: "column", gap: 8 },
-  rankCard: {
-    border: "1px solid rgba(190, 157, 99, 0.32)",
-    background: "rgba(20, 13, 7, 0.5)",
-    padding: "8px 10px",
-    display: "flex",
-    flexDirection: "column",
-    gap: 6,
-  },
-  rankNameInput: {
-    border: "1px solid rgba(190, 157, 99, 0.5)",
-    background: "rgba(11, 8, 5, 0.7)",
-    color: "#f8e6bb",
-    padding: "4px 8px",
-    fontSize: 13,
-    fontWeight: 700,
-    fontFamily: "inherit",
-  },
-  rankPerms: { display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 4 },
-  permCheck: {
-    display: "flex",
-    alignItems: "center",
-    gap: 5,
-    fontSize: 11,
-    color: "#cbb38a",
-    border: "1px solid rgba(190, 157, 99, 0.28)",
-    background: "rgba(0, 0, 0, 0.25)",
-    padding: "3px 6px",
-    cursor: "pointer",
-  },
-  permCheckOn: { color: "#f0d69b", border: "1px solid rgba(214, 180, 110, 0.6)", background: "rgba(52, 32, 18, 0.6)" },
-  membersLayout: { flex: 1, display: "flex", gap: 10, minHeight: 0 },
-  memberList: {
-    flex: "1 1 60%",
-    display: "flex",
-    flexDirection: "column",
-    border: "1px solid rgba(190, 157, 99, 0.32)",
-    background: "rgba(11, 8, 5, 0.45)",
-    minHeight: 0,
-  },
-  memberListHead: {
-    display: "flex",
-    padding: "4px 8px",
-    borderBottom: "1px solid rgba(190, 157, 99, 0.32)",
-    fontSize: 10,
-    color: "#a89568",
-    textTransform: "uppercase",
-    letterSpacing: 0.5,
-  },
-  memberRows: { flex: 1, overflowY: "auto", display: "flex", flexDirection: "column" },
-  memberRow: {
-    display: "flex",
-    padding: "4px 8px",
-    border: "1px solid transparent",
-    background: "transparent",
-    color: "#e3d3af",
-    textAlign: "left",
-    cursor: "pointer",
-    fontSize: 12,
-  },
-  memberRowSelected: { background: "rgba(95, 53, 24, 0.5)", border: "1px solid rgba(214, 180, 110, 0.7)" },
-  memberRowSelf: { color: "#f8e6bb", fontWeight: 700 },
-  memberColName: { flex: "1 1 auto", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" },
-  memberColRank: { flex: "0 0 110px" },
-  memberColState: { flex: "0 0 70px", textAlign: "right" },
-  memberDetail: {
-    flex: "1 1 40%",
-    display: "flex",
-    flexDirection: "column",
-    gap: 6,
-    border: "1px solid rgba(190, 157, 99, 0.32)",
-    background: "linear-gradient(180deg, rgba(27, 19, 10, 0.78), rgba(11, 8, 5, 0.7))",
-    padding: "8px 10px",
-  },
-  memberDetailName: { color: "#f8e6bb", fontSize: 13, fontWeight: 700, marginBottom: 2 },
-  empty: { color: "#cbb38a", padding: "8px 4px", fontSize: 11 },
-  inviteRow: { display: "flex", gap: 6 },
-  input: {
-    flex: 1,
-    border: "1px solid rgba(190, 157, 99, 0.5)",
-    background: "rgba(11, 8, 5, 0.7)",
-    color: "#f0eee8",
-    padding: "4px 8px",
-    fontSize: 12,
-  },
-  noticeTextarea: {
-    width: "100%",
-    height: 96,
-    resize: "none",
-    border: "1px solid rgba(190, 157, 99, 0.5)",
-    background: "rgba(11, 8, 5, 0.7)",
-    color: "#f0eee8",
-    padding: "6px 8px",
-    fontSize: 12,
-    lineHeight: 1.35,
-    fontFamily: "inherit",
-  },
-  chatLog: {
-    flex: 1,
-    minHeight: 80,
-    overflowY: "auto",
-    border: "1px solid rgba(190, 157, 99, 0.32)",
-    background: "rgba(11, 8, 5, 0.55)",
-    padding: "6px 8px",
-    fontSize: 12,
-    lineHeight: 1.4,
-    color: "#d6c6a5",
-  },
-  chatLine: { marginBottom: 2 },
-  actions: { display: "flex", gap: 6 },
-  actionButton: {
-    border: "1px solid rgba(190, 157, 99, 0.56)",
-    background: "linear-gradient(180deg, rgba(95, 53, 24, 0.95), rgba(45, 23, 12, 0.95))",
-    color: "#f4dcaf",
-    padding: "5px 16px",
-    fontSize: 12,
-    cursor: "pointer",
-  },
-  actionButtonDisabled: { opacity: 0.45, cursor: "default" },
+  storageCount: { position: "absolute", right: 1, bottom: 0, fontSize: 9, color: "#f8e6bb", textShadow: "1px 1px #000" },
+  itemPicker: { flex: "0 0 auto", maxHeight: 100, overflowY: "auto", padding: 4, border: "1px solid #625236", background: "#141414" },
+  sideHint: { color: "#cbb38a", fontSize: 10 },
+  pickerCells: { display: "flex", flexWrap: "wrap", gap: 4, marginTop: 4 },
+  pickerButton: { display: "flex", alignItems: "center", gap: 3, minHeight: 20, maxWidth: 180, border: "1px solid #625236", background: "#24180c", color: "white", fontSize: 10, fontFamily: "inherit" },
+  buffActionButton: { minWidth: 24, minHeight: 24, padding: "3px 4px", border: "1px solid #625236", background: "#24180c", color: "white", fontSize: 10.6667, fontFamily: "inherit", cursor: "pointer" },
+  buffModalBackdrop: { position: "absolute", inset: 0, zIndex: 15, background: "#000a", display: "grid", placeItems: "center", padding: 18 },
+  buffModal: { background: "#24180c", border: "2px solid #9c8d6f", padding: 18, maxWidth: 400 },
 };

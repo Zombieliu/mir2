@@ -10,14 +10,14 @@
     "content.json": 3913,
     "shell.json": 167,
     "quest.json": 404,
-    "game.json": 282,
+    "game.json": 287,
     "help.json": 124,
     "npc-menus.json": 607,
     "npc-prose.json": 1479
   },
-  "totalEntries": 9421,
+  "totalEntries": 9426,
   "errors": [],
-  "equivalentAliasCount": 1615,
+  "equivalentAliasCount": 1613,
   "aliasConflicts": [
     {
       "alias": "This account is banned.\n\nReason: {0}\nExpiryDate: {1}\nDuration: {2:#,##0} Hours, {3} Minutes, {4} Seconds",
@@ -2721,6 +2721,30 @@
             "en": "Dura Panel",
             "zh-TW": "持久面板",
             "pt-BR": "Durabilidade"
+          }
+        }
+      ]
+    },
+    {
+      "alias": "Editar cargo",
+      "classification": "context review required; all owner keys and values retained",
+      "owners": [
+        {
+          "file": "common.json",
+          "key": "client.EditRank",
+          "values": {
+            "en": "Edit Rank",
+            "zh-TW": "編輯職位",
+            "pt-BR": "Editar cargo"
+          }
+        },
+        {
+          "file": "game.json",
+          "key": "game.guild.editRank",
+          "values": {
+            "en": "Edit rank",
+            "zh-TW": "編輯職級",
+            "pt-BR": "Editar cargo"
           }
         }
       ]
@@ -6707,6 +6731,30 @@
       ]
     },
     {
+      "alias": "Selecionar cargo",
+      "classification": "context review required; all owner keys and values retained",
+      "owners": [
+        {
+          "file": "common.json",
+          "key": "client.SelectRank",
+          "values": {
+            "en": "Select Rank",
+            "zh-TW": "選擇職位",
+            "pt-BR": "Selecionar cargo"
+          }
+        },
+        {
+          "file": "game.json",
+          "key": "game.guild.selectRank",
+          "values": {
+            "en": "Select rank",
+            "zh-TW": "選擇職級",
+            "pt-BR": "Selecionar cargo"
+          }
+        }
+      ]
+    },
+    {
       "alias": "Selling",
       "classification": "context review required; all owner keys and values retained",
       "owners": [
@@ -7074,6 +7122,72 @@
             "en": "Statistics",
             "zh-TW": "屬性",
             "pt-BR": "Atributos"
+          }
+        },
+        {
+          "file": "npc-menus.json",
+          "key": "npc.menu.a656107e99c71dea",
+          "values": {
+            "en": "Statistics",
+            "zh-TW": "統計",
+            "pt-BR": "Estatísticas"
+          }
+        }
+      ]
+    },
+    {
+      "alias": "統計",
+      "classification": "NPC-domain isolation required; menu/prose aliases must not override global UI",
+      "owners": [
+        {
+          "file": "common.json",
+          "key": "client.Statistics",
+          "values": {
+            "en": "Statistics",
+            "zh-TW": "統計",
+            "pt-BR": "Estatísticas"
+          }
+        },
+        {
+          "file": "game.json",
+          "key": "game.guild.stats",
+          "values": {
+            "en": "Stats",
+            "zh-TW": "統計",
+            "pt-BR": "Estatísticas"
+          }
+        },
+        {
+          "file": "npc-menus.json",
+          "key": "npc.menu.a656107e99c71dea",
+          "values": {
+            "en": "Statistics",
+            "zh-TW": "統計",
+            "pt-BR": "Estatísticas"
+          }
+        }
+      ]
+    },
+    {
+      "alias": "Estatísticas",
+      "classification": "NPC-domain isolation required; menu/prose aliases must not override global UI",
+      "owners": [
+        {
+          "file": "common.json",
+          "key": "client.Statistics",
+          "values": {
+            "en": "Statistics",
+            "zh-TW": "統計",
+            "pt-BR": "Estatísticas"
+          }
+        },
+        {
+          "file": "game.json",
+          "key": "game.guild.stats",
+          "values": {
+            "en": "Stats",
+            "zh-TW": "統計",
+            "pt-BR": "Estatísticas"
           }
         },
         {
@@ -29372,6 +29486,30 @@
       ]
     },
     {
+      "alias": "編輯職級",
+      "classification": "context review required; all owner keys and values retained",
+      "owners": [
+        {
+          "file": "game.json",
+          "key": "game.final.02",
+          "values": {
+            "en": "Edit ranks",
+            "zh-TW": "編輯職級",
+            "pt-BR": "Editar cargos"
+          }
+        },
+        {
+          "file": "game.json",
+          "key": "game.guild.editRank",
+          "values": {
+            "en": "Edit rank",
+            "zh-TW": "編輯職級",
+            "pt-BR": "Editar cargo"
+          }
+        }
+      ]
+    },
+    {
       "alias": "價格：{amount} 顆珍珠",
       "classification": "context review required; all owner keys and values retained",
       "owners": [
@@ -32968,10 +33106,10 @@
     "content.json": "142e05e9e628be47c45eec257c8616f6e7f5c485588de8a0b25f36fc406222d1",
     "shell.json": "52ace631cb335840532fcfec6a37b144b829950e25bd5e909e69b1ec5af6d3b1",
     "quest.json": "47a5beaa6feb4277b33a8617b55966a56eec2856b80000d34083ee6e23f9a5d1",
-    "game.json": "cc70dfd7457968867e3690b6e0712bc0e2dcf44763ab161e36bffe87224c1557",
+    "game.json": "796127bf494ee354626f85cf25d2b4cdb68a633585481325b6adfaa7019f54be",
     "help.json": "5ce6fa52b935f528424c3963dc16c5e430387d3be2dac6d70d0701cf834b3b9e",
     "npc-menus.json": "fa9de6316a85177479bddf4f01c4010524f172f542df336b379548dd8f62f0d3",
-    "npc-prose.json": "f54665c416efe58b6dd40b7a657b0522da07b52ba0c208f2783b98c1a22a6bb0"
+    "npc-prose.json": "f19aa36581483663d2895abc8868b6196eee34ccb57179f1fe40b693053dd894"
   },
   "sharedSourceKeys": 2364,
   "missingSharedKeys": [],
@@ -33001,9 +33139,9 @@
     }
   },
   "aliasConflictClasses": {
-    "context review required; all owner keys and values retained": 342,
+    "context review required; all owner keys and values retained": 345,
     "context-bound; use the UI/NPC/quest stable key or domain lookup": 5,
-    "NPC-domain isolation required; menu/prose aliases must not override global UI": 663,
+    "NPC-domain isolation required; menu/prose aliases must not override global UI": 665,
     "terminology/style difference; use one reviewed UI term": 3,
     "English spelling/spacing or synonym only; localized outputs agree": 38,
     "canonical content priority; use stable content ID, preserving authored aliases": 114

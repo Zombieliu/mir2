@@ -44,7 +44,12 @@ const hooks = {
 };
 const jsx = { jsx: (type, props) => ({ type, props }), jsxs: (type, props) => ({ type, props }) };
 function ActionButton() { throw new Error("Inspect the actual RankCard button handler without replacing it"); }
-const scope = { ...hooks, ...actions, ActionButton, permissionLabel: (_t, key) => key,
+const { R16_GUILD_LAYOUT: G } = evaluate(read("../lib/r16-guild-layout.ts"), "r16-guild-layout.ts");
+const { guildRect } = evaluate(read("../app/components/original-client-guild-controls.tsx"), "original-client-guild-controls.tsx", {
+  react: hooks, "react/jsx-runtime": jsx, "../../lib/r16-guild-layout": { R16_GUILD_LAYOUT: G },
+  "./original-client-overlays": { SpriteButton() { throw new Error("The RankCard fixture never mounts the source-art button"); } },
+});
+const scope = { ...hooks, ...actions, G, guildRect, ActionButton, permissionLabel: (_t, key) => key,
   style: new Proxy({}, { get: () => ({}) }),
 };
 const cardOutput = ts.transpileModule(`const ${permissionDeclarations[0].getText(guildAst)};\n${rankFunctions[0].getText(guildAst)}`, {
@@ -90,6 +95,14 @@ const fixture = (extra = {}) => ({ t: (_key, _args, fallback) => fallback,
   rank: { index: 7, name: "Officer", permissions: ["CanRecruit"] },
   onRenameRank: () => true, onToggleRankPermission: () => true, ...extra });
 const editName = (card, value) => { nameInput(card.tree).props.onChange({ target: { value } }); card.render(); };
+function nameKey(card, key, extra = {}) {
+  const observed = { stopped: 0, prevented: 0, blurred: 0 };
+  const event = { key, keyCode: 0, nativeEvent: { isComposing: false },
+    stopPropagation() { observed.stopped++; }, preventDefault() { observed.prevented++; },
+    currentTarget: { blur() { observed.blurred++; } }, ...extra };
+  nameInput(card.tree).props.onKeyDown(event); card.render();
+  return observed;
+}
 
 test("rename emits one ordinary type3 preserving the exact Native UTF16 name", () => {
   for (const [rankIndex, name] of [[0, "All"], [255, "  Officer  "], [7, "😀".repeat(10)], [7, "   "], [7, "x\0y"]]) {
@@ -154,6 +167,77 @@ test("actual Save renames only and retains the untrimmed draft on local rejectio
   assert.equal(option(card.tree, "CanKick").props.checked, true);
 });
 
+test("actual Enter saves the exact untrimmed draft once and never submits any checkbox", () => {
+  const renames = [], options = [];
+  const card = mount(fixture({ onRenameRank: (...args) => { renames.push(args); return true; },
+    onToggleRankPermission: (...args) => { options.push(args); return true; } }));
+  editName(card, "  Leader  ");
+  assert.deepEqual(nameKey(card, "Enter"), { stopped: 1, prevented: 1, blurred: 0 });
+  assert.deepEqual(renames, [[7, "  Leader  "]]); assert.deepEqual(options, []);
+  assert.equal(nameInput(card.tree).props.value, "  Leader  ");
+  assert.equal(save(card.tree).props.nativeSave, true, "the selected editor requests the source Save skin");
+});
+
+test("actual composing and keyCode229 Enter/Escape neither save nor clear/blur the draft", () => {
+  const calls = [], card = mount(fixture({ onRenameRank: (...args) => { calls.push(args); return true; } }));
+  editName(card, "職級草稿");
+  for (const key of ["Enter", "Escape"]) for (const extra of [
+    { nativeEvent: { isComposing: true } }, { keyCode: 229 },
+  ]) {
+    assert.deepEqual(nameKey(card, key, extra), { stopped: 1, prevented: 0, blurred: 0 });
+    assert.equal(nameInput(card.tree).props.value, "職級草稿");
+  }
+  assert.deepEqual(calls, []);
+});
+
+test("actual Escape clears the Native draft and blurs, retains the cleared dirty value and sends nothing", () => {
+  const calls = [], card = mount(fixture({ onRenameRank: (...args) => { calls.push(args); return true; } }));
+  editName(card, "Veterans");
+  assert.deepEqual(nameKey(card, "Escape"), { stopped: 1, prevented: 1, blurred: 1 });
+  assert.equal(nameInput(card.tree).props.value, ""); assert.equal(save(card.tree).props.disabled, true);
+  card.render({ ...card.props, rank: { ...card.props.rank, name: "Other editor" } });
+  assert.equal(nameInput(card.tree).props.value, "", "an external same-rank rename cannot overwrite the cleared dirty draft");
+  nameKey(card, "Enter"); assert.deepEqual(calls, []);
+});
+
+test("actual Enter retains the Save validity and Host rename/authority barriers", () => {
+  const calls = [];
+  for (const extra of [
+    { onRenameRank: undefined }, { rankEditPending: { renameRankIndices: [7], permission: false } },
+    { rankEditPending: { renameRankIndices: [], permission: false, editableRankIndices: [8] } },
+    { rank: { index: 256, name: "Officer", permissions: [] } },
+  ]) {
+    const card = mount(fixture({ onRenameRank: (...args) => { calls.push(args); return true; }, ...extra }));
+    assert.deepEqual(nameKey(card, "Enter"), { stopped: 1, prevented: 1, blurred: 0 });
+  }
+  const card = mount(fixture({ onRenameRank: (...args) => { calls.push(args); return true; } }));
+  for (const value of ["", "ab", "A\\B", "x".repeat(21)]) { editName(card, value); nameKey(card, "Enter"); }
+  assert.deepEqual(calls, []);
+});
+
+test("actual dirty draft survives external same-rank names and options until an exact authoritative echo", () => {
+  const card = mount(fixture()); editName(card, "  Veterans  ");
+  card.render({ ...card.props, rank: { ...card.props.rank, name: "Other editor", permissions: ["CanKick"] } });
+  assert.equal(nameInput(card.tree).props.value, "  Veterans  ");
+  assert.equal(option(card.tree, "CanKick").props.checked, true);
+  card.render({ ...card.props, rank: { ...card.props.rank, name: "  Veterans  " } });
+  assert.equal(nameInput(card.tree).props.value, "  Veterans  ");
+  card.render({ ...card.props, rank: { ...card.props.rank, name: "New authoritative name" } });
+  assert.equal(nameInput(card.tree).props.value, "New authoritative name", "matching echo makes the draft clean again");
+});
+
+test("actual pristine editor follows authoritative names; local send success alone never clears dirty", () => {
+  const calls = [], card = mount(fixture({ onRenameRank: (...args) => { calls.push(args); return true; } }));
+  card.render({ ...card.props, rank: { ...card.props.rank, name: "Remote first" } });
+  assert.equal(nameInput(card.tree).props.value, "Remote first");
+  editName(card, "Mine next"); save(card.tree).props.onClick(); card.render();
+  assert.deepEqual(calls, [[7, "Mine next"]]);
+  card.render({ ...card.props, rank: { ...card.props.rank, name: "Remote after send" } });
+  assert.equal(nameInput(card.tree).props.value, "Mine next");
+  assert.deepEqual(nameKey(card, "ArrowLeft"), { stopped: 1, prevented: 0, blurred: 0 });
+  assert.equal(calls.length, 1, "editing/navigation keys do not emit another rename");
+});
+
 test("Host rename and option barriers are independent and generate no hidden action", () => {
   const renames = [], options = [];
   const props = fixture({ onRenameRank: (...args) => { renames.push(args); return true; },
@@ -207,7 +291,7 @@ test("ExtraWindows forwards the independent callbacks and Host barriers without 
   visit(ast); assert.equal(elements.length, 1);
   const attributes = new Map(elements[0].attributes.properties.filter(ts.isJsxAttribute)
     .map(node => [node.name.getText(ast), node.initializer?.getText(ast)]));
-  for (const key of ["onRenameRank", "onToggleRankPermission", "rankEditPending"])
+  for (const key of ["onRenameRank", "onToggleRankPermission", "onCreateRank", "rankEditPending", "viewerRankIndex", "guildScope"])
     assert.equal(attributes.get(key), `{guild.${key}}`);
   assert.equal(attributes.has("onSaveRank"), false);
 });

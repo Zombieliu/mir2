@@ -30,6 +30,9 @@ export type GuildRankRenameCommand = Readonly<{
 export type GuildRankPermissionCommand = Readonly<{
   type: "editGuildMember"; changeType: 5; rankIndex: number; name: "true" | "false"; rankName: string;
 }>;
+export type GuildRankCreateCommand = Readonly<{
+  type: "editGuildMember"; changeType: 4; rankIndex: 0; name: ""; rankName: string;
+}>;
 const validGuildRankIndex = (value: unknown): value is number =>
   nonNegativeI32(value) && value <= 255;
 
@@ -49,6 +52,12 @@ export function guildRankPermissionCommand(
   if (option < 0) return null;
   return {type: "editGuildMember", changeType: 5, rankIndex,
     name: enabled ? "true" : "false", rankName: String(option)};
+}
+
+/** Native confirm_create_rank's ordinary command; the server owns the actual new name/index. */
+export function guildRankCreateCommand(rankCount: number): GuildRankCreateCommand | null {
+  if (!Number.isInteger(rankCount) || rankCount < 1 || rankCount >= 255) return null;
+  return {type: "editGuildMember", changeType: 4, rankIndex: 0, name: "", rankName: `Rank-${rankCount - 1}`};
 }
 
 export type ProjectedGuildRanks = {

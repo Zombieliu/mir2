@@ -98,6 +98,8 @@ import { SocialIncomingReplies, socialReplyCommand, type SocialReplyOwner, type 
 import { GroupOperations, groupOperationCommand, type GroupOperation, type GroupOperationProof, type GroupOperationSource } from "../lib/group-operations";
 import { GuildRankOperations, type GuildRankEditProof, type GuildRankEditSource } from "../lib/guild-rank-operations";
 import { applyGuildMemberChange } from "../lib/guild-rank-projection";
+import { guildStatusPresentation, readGuildStatusPresentation,
+  type GuildStatusPresentation, type GuildStatusPresentationSource } from "../lib/guild-status-presentation";
 import { readSharedItemTooltip, readSharedItemCatalogInfo, type CrystalTooltipRuntime, type CrystalTooltipDocument, type CrystalTooltipItem } from "../lib/shared-item-tooltip";
 import { readSharedCharacterStats, type CrystalStatsRuntime } from "../lib/shared-character-stats";
 import { readSharedSkillBarDocument, parseCrystalSkillBarPositions, serializeCrystalSkillBarPositions, CRYSTAL_SKILL_BAR_POSITIONS_STORAGE_KEY, DEFAULT_CRYSTAL_SKILL_BAR_POSITIONS, type CrystalSkillBarRuntime, type CrystalSkillBarRow, type CrystalSkillBarPositions } from "../lib/shared-skill-bar";
@@ -811,7 +813,7 @@ type GatewayActiveBuff = {
 
 type Stage5SystemsState = {
   group?: { allowGroup?: boolean; members?: string[]; memberInfos?: Array<{ name: string; level?: number; class?: number; hp?: number; maxHp?: number; online?: boolean }>; lootMode?: string; leaderName?: string };
-  guild?: { name?: string; members?: string[]; rank?: string; permissions?: string[]; chatLog?: string[] };
+  guild?: GuildStatusPresentation & { name?: string; members?: string[]; rank?: string; permissions?: string[]; chatLog?: string[] };
   social?: { friends?: string[]; blocked?: string[]; friendInfos?: Array<{ name: string; index?: number; online?: boolean; memo?: string }>; blockedInfos?: Array<{ name: string; index?: number; memo?: string }> };
   relationship?: Record<string, unknown>;
   mentor?: Record<string, unknown>;
@@ -2229,7 +2231,8 @@ export default function HomePage() {
   const tradePartnerRef = useRef<{owner: SocialReplyOwner; incarnation: number; items?: ReturnType<typeof projectPartnerTradePacket>; itemsKnown?: boolean; gold?: number} | null>(null);
   const socialCatalogRef = useRef(new Map<number, {name: string; icon?: number; raw?: Readonly<Record<string, unknown>>}>());
   const guildPermissionsRef = useRef<{owner: SocialReplyOwner; guildName: string; permissions: string[]; rankIndex: number | null} | null>(null);
-  const guildRanksRef = useRef<{owner: SocialReplyOwner; guildName: string; value: ProjectedGuildRanks; complete: boolean} | null>(null);
+  const guildStatusPresentationRef = useRef<GuildStatusPresentationSource | null>(null);
+  const guildRanksRef = useRef<{owner: SocialReplyOwner; guildName: string; value: ProjectedGuildRanks; complete: boolean; revision?: number} | null>(null);
   const guildRankOperationsRef = useRef(new GuildRankOperations());
   const guildRankScopeRef = useRef<{owner: SocialReplyOwner; guildName: string; key: object} | null>(null);
   const guildRankWakeRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -6530,7 +6533,7 @@ export default function HomePage() {
     if (options?.creatureProof && (!heroPetOpenRef.current || !creatureOperationsRef.current.allows(options.creatureProof, currentCreatureSource(), command))) return false;
     if (["removeFriend", "addMemo", "refreshFriends", "editGuildMember"].includes(String(command.type)) && !options?.socialRosterProof) return false;
     if (command.type === "requestGuildInfo" && !options?.socialRosterProof?.rankReadProof) return false;
-    if (command.type === "editGuildMember" && (command.changeType === 3 || command.changeType === 5)
+    if (command.type === "editGuildMember" && (command.changeType === 3 || command.changeType === 4 || command.changeType === 5)
       && !options?.socialRosterProof?.rankProof) return false;
     if (["addMember", "delMember"].includes(String(command.type)) && !options?.groupProof) return false;
     if (options?.groupProof && !groupOperationsRef.current.allows(options.groupProof, currentGroupOperationSource(), command)) return false;
@@ -12565,7 +12568,9 @@ export default function HomePage() {
     const actor = worldRef.current.entities.find(entity => String(entity.objectId) === String(owner.playerObjectId))?.name;
     if (!actor) return null;
     return {owner,scope:scope.key,guildName:scope.guildName,actor,ownRankIndex:rights.rankIndex,
-      permissions:rights.permissions,ranks:ranks.value.ranks};
+      permissions:rights.permissions,ranks:ranks.value.ranks,
+      roster:{revision:ranks.revision ?? 0,complete:ranks.complete,
+        actorIndex:socialCharacterIndexRef.current.current ?? -1,members:ranks.value.members}};
   }
   function scheduleGuildRankControls() {
     if (guildRankWakeRef.current !== null) clearTimeout(guildRankWakeRef.current);
@@ -12605,6 +12610,10 @@ export default function HomePage() {
   }
   function toggleGuildRankPermission(rankIndex: number, key: GuildRankPermission, enabled: boolean): boolean {
     return submitGuildRankEdit(guildRankOperationsRef.current.reservePermission(rankIndex,key,enabled,
+      readGuildRankEditSource(),Math.floor(performance.now())));
+  }
+  function createGuildRank(): boolean {
+    return submitGuildRankEdit(guildRankOperationsRef.current.reserveCreate(
       readGuildRankEditSource(),Math.floor(performance.now())));
   }
   function requestGuildRankRoster(force = false): boolean {
@@ -13547,6 +13556,7 @@ export default function HomePage() {
     socialItemOperationsRef.current.retire(); socialOwnTradeRef.current = null;
     tradeLifecycleRef.current = {state: "closed", partner: ""}; tradePartnerRef.current = null;
     guildStorageRawRef.current = null; guildPermissionsRef.current = null; guildRanksRef.current = null;
+    guildStatusPresentationRef.current = null;
     socialFriendsRef.current = null; rankingQueriesRef.current.retire();
     rankingInspectRequestsRef.current.retireConnection(); closeRankingInspect();
     socialCatalogRef.current.clear();
@@ -13656,7 +13666,7 @@ export default function HomePage() {
         && !!row && !!scope && row.scope === scope.key && !!proof.rankReadProof
         && row.proof === proof.rankReadProof && !row.entered;
     }
-    if ((command.changeType === 3 || command.changeType === 5)
+    if ((command.changeType === 3 || command.changeType === 4 || command.changeType === 5)
       && (!proof.rankProof || !guildRankOperationsRef.current.allows(proof.rankProof,
         readGuildRankEditSource(),command,Math.floor(performance.now())))) return false;
     const option = command.changeType === 0 ? "CanRecruit" : command.changeType === 1 ? "CanKick" : "CanChangeRank";
@@ -13665,7 +13675,7 @@ export default function HomePage() {
     const ranks = guildRanksRef.current?.value;
     if (!ranks || !ranks.ranks.some(rank => rank.index === command.rankIndex)) return false;
     if (command.changeType === 2) return ranks.members.some(member => member.name === command.name);
-    return command.changeType === 3 || command.changeType === 5;
+    return command.changeType === 3 || command.changeType === 4 || command.changeType === 5;
   }
   function sendSocialRosterCommand(kind: "friend" | "guild", command: Record<string, unknown>, quiet = false,
     rankProof?: GuildRankEditProof, rankReadProof?: object): boolean {
@@ -16215,7 +16225,11 @@ export default function HomePage() {
         break;
 
       // Guild subsystem --------------------------------------------------------
-      case "GuildStatus":
+      case "GuildStatus": {
+        const owner = currentSocialReceiveOwner();
+        const presentation = guildStatusPresentation(payload);
+        guildStatusPresentationRef.current = owner && typeof payload.guildName === "string" && payload.guildName
+          ? {owner,guildName:payload.guildName,value:presentation} : null;
         observeGuildPermissions(payload);
         updateWorld((current) => ({
           ...current,
@@ -16223,6 +16237,7 @@ export default function HomePage() {
             ...current.stage5Systems,
             guild: {
               ...(current.stage5Systems.guild ?? {}),
+              ...presentation,
               // An empty GuildStatus name/rank is authoritative after leaving
               // or being kicked; treating it as a fallback kept stale guild
               // membership visible forever on the removed player's client.
@@ -16238,6 +16253,7 @@ export default function HomePage() {
           },
         }));
         break;
+      }
       case "GuildMemberChange": {
         const owner = currentSocialReceiveOwner(), guildName = worldRef.current.stage5Systems.guild?.name;
         if (!owner || !guildName) break;
@@ -16249,21 +16265,27 @@ export default function HomePage() {
           selfName && selfIndex !== null ? {name:selfName,index:selfIndex} : null);
         if (result.kind !== "applied") break;
         const {projection:ranks,evidence} = result;
+        const complete = evidence.fullRoster || previous?.complete === true && !evidence.needsFullRoster;
+        const revision = (previous?.revision ?? 0) + 1;
+        if (!Number.isSafeInteger(revision)) break;
         const scope = guildRankScopeRef.current;
         if (scope && scope.guildName === guildName && sameSocialPhysicalOwner(scope.owner,owner)) {
-          guildRankOperationsRef.current.receipt(payload,owner,scope.key);
+          guildRankOperationsRef.current.receipt(payload,owner,scope.key,
+            ranks ? {revision,complete,value:ranks} : undefined);
+          const createReadbackNeeded = guildRankOperationsRef.current.takeCreateReadbackRequest(owner,scope.key);
           const read = guildRankReadRef.current;
           if (read?.scope === scope.key) {
             if (evidence.fullRoster) {read.needed = false; read.proof = null; read.entered = false;}
-            else if (evidence.needsFullRoster) read.needed = true;
+            else if (evidence.needsFullRoster || createReadbackNeeded) read.needed = true;
           }
         }
         if (evidence.guildLeft) {
+          guildStatusPresentationRef.current = null;
           retireGuildRankControls(); guildRanksRef.current = null; guildPermissionsRef.current = null;
           guildStorageRawRef.current = null; guildBuffAuthorityRef.current.invalidatePermissions(owner,guildName);
         } else {
           guildRanksRef.current = ranks ? {owner,guildName,value:ranks,
-            complete:evidence.fullRoster || previous?.complete === true && !evidence.needsFullRoster} : null;
+            complete,revision} : null;
           const own = evidence.ownRank;
           if (own.kind === "unknown" || own.kind === "left") {
             guildPermissionsRef.current = null; guildBuffAuthorityRef.current.invalidatePermissions(owner,guildName);
@@ -20499,6 +20521,9 @@ export default function HomePage() {
   spellsIngressRef.current=bevySpellsUi;
   const socialRosterRenderSources = {friend: showFriends ? readSocialRosterSource("friend") : null, guild: showGuild ? readSocialRosterSource("guild") : null};
   const guildRankUiSource = readGuildRankEditSource();
+  const guildRankUiScope = guildRankScopeRef.current;
+  const guildScope = guildRankUiScope && guildRankUiScope.guildName === world.stage5Systems.guild?.name
+    && sameSocialPhysicalOwner(guildRankUiScope.owner,currentSocialReplyOwner(false)) ? guildRankUiScope.key : undefined;
   const guildRankControlState = {...guildRankOperationsRef.current.view(Math.floor(performance.now())),
     editableRankIndices:guildRankUiSource?.permissions.includes("CanChangeRank")
       ? guildRankUiSource.ranks.filter(rank => rank.index >= guildRankUiSource.ownRankIndex).map(rank => rank.index) : []};
@@ -21100,8 +21125,10 @@ export default function HomePage() {
       heroManagement={{open:screen === "game" && !bevyHeroUi.owned && !!currentHeroModel() && (heroManagementPage !== null || heroWindows.beltVisible), onClose:() => { if (heroReactCallbacksCurrent()) closeHeroManagement(); }, model:currentHeroModel(), pending:heroOperationsRef.current.pending, windows:heroWindows, windowEpochs:heroWindowEpochsRef.current, onWindowChange:next => { if (heroReactCallbacksCurrent()) changeHeroWindows(next); }, onReadStats:readHeroStats, initialPage:heroManagementPage ?? "inventory", onAction:(dto, lease) => submitHeroAction(dto, false, lease, renderedHeroRendererToken), onReadItemTooltip:readHeroItemTooltip}}
       heroPet={{ open: showHeroPet, onClose: () => {heroPetOpenRef.current = false; setShowHeroPet(false);}, creatureSource:currentCreatureSource(), petActionPending:Boolean(creatureOperationsRef.current.pending()), onPetAction:submitCreatureAction, onOpenHeroManagement:showHeroPet && currentHeroModel() ? openHeroManagement : undefined, hero: extraWindowData.hero, creatures: extraWindowData.creatures, onSummonHero: summonHero, onSummonCreature: summonCreature, onReleaseCreature: releaseCreature, onCyclePickupMode: cycleCreaturePickupMode, onSetHeroBehaviour: setHeroBehaviour, onRecallHero: recallHero }}
       guild={{ open: showGuild, onClose: () => setShowGuild(false), incomingInvite: socialRepliesRef.current.list(currentSocialReplyOwner()).find(r => r.kind === "guild") ?? null, onReplyInvite: (epoch, accept) => replySocialRequest("guild", epoch, accept),
+        viewerRankIndex:guildRankUiSource?.ownRankIndex, guildScope,
         buffSource:currentGuildBuffSource(), buffPending:guildBuffOperationsRef.current.pending, onBuffAction:submitGuildBuffAction,
         guild: world.stage5Systems?.guild ? {...world.stage5Systems.guild,
+          ...readGuildStatusPresentation(guildStatusPresentationRef.current,currentSocialReplyOwner(false),world.stage5Systems.guild.name),
           ...(guildRanksRef.current && guildRanksRef.current.guildName === world.stage5Systems.guild.name && sameSocialPhysicalOwner(guildRanksRef.current.owner, currentSocialReplyOwner())
             ? {ranks: guildRanksRef.current.value.ranks, members: guildRanksRef.current.value.members} : {}),
           permissions: guildPermissionsRef.current && guildPermissionsRef.current.guildName === world.stage5Systems.guild.name && sameSocialPhysicalOwner(guildPermissionsRef.current.owner, currentSocialReplyOwner()) ? guildPermissionsRef.current.permissions : undefined,
@@ -21114,6 +21141,7 @@ export default function HomePage() {
         onMoveItem: (from, to, uid) => submitSocialItem("guild2", from, to, uid, socialGuildRender?.sourceKey ?? ""), playerName: self?.name ?? null,
         onEditNotice: editGuildNotice, onInviteMember: inviteGuildMember, onKickMember: kickGuildMember, onSendGuildChat: sendGuildChat,
         onChangeMemberRank: changeGuildMemberRank, onRenameRank:renameGuildRank, onToggleRankPermission:toggleGuildRankPermission,
+        onCreateRank:createGuildRank,
         rankEditPending:guildRankControlState, onRefreshRanks:() => { requestGuildRankRoster(true); },
         onDepositGold: guildDepositGold, onWithdrawGold: guildWithdrawGold }}
       group={{ open: showGroup, onClose: () => closeSocialReplyWindow("group"), incomingInvite: socialRepliesRef.current.list(currentSocialReplyOwner()).find(r => r.kind === "group") ?? null, onReplyInvite: (epoch, accept) => replySocialRequest("group", epoch, accept), group: extraWindowData.group, playerName: self?.name ?? null, onInviteMember: groupInviteMember, onKickMember: kickGroupMember, onLeaveGroup: groupLeave, onToggleAllowInvites: groupToggleAllowInvites }}

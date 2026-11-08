@@ -259,9 +259,11 @@ pub(super) fn process(
                 info,
             );
         }
-        let local = cursor - Vec2::new(rect.left + 395., rect.top + 360.);
+        let recruit_rect = guild_layout::at(rect, guild_layout::STATUS_RECRUIT_NAME_RECT);
+        let local = cursor - Vec2::new(recruit_rect.left, recruit_rect.top);
         if mouse.just_pressed(MouseButton::Left) {
-            let focus = CrystalRect::new(0., 0., 130., 21.).contains(local.x, local.y);
+            let focus = CrystalRect::new(0., 0., recruit_rect.width, recruit_rect.height)
+                .contains(local.x, local.y);
             state.guild_recruit_focused = focus;
             state.guild_panel.recruit_editor.editor_focused = focus;
             if focus {
@@ -408,9 +410,11 @@ pub(super) fn process(
                 info,
             );
         }
-        let local = cursor - Vec2::new(rect.left + 42., rect.top + 96.);
+        let name_rect = guild_layout::at(rect, guild_layout::RANK_NAME_RECT);
+        let local = cursor - Vec2::new(name_rect.left, name_rect.top);
         if mouse.just_pressed(MouseButton::Left) {
-            let focus = CrystalRect::new(0., 0., 130., 16.).contains(local.x, local.y)
+            let focus = CrystalRect::new(0., 0., name_rect.width, name_rect.height)
+                .contains(local.x, local.y)
                 && rank_name_available(&state, &social.guild);
             state.guild_rank_name_focused = focus;
             state.guild_panel.rank_editor.editor_focused = focus;
@@ -427,36 +431,49 @@ pub(super) fn process(
         }
         if state.guild_panel.rank_dropdown {
             let count = social.guild.ranks.len() + 1;
-            let local = cursor - Vec2::new(rect.left + 198., rect.top + 96.);
-            let thumb_y = 22.
-                + state.guild_panel.rank_scroll as f32 * 52.
+            let dropdown_rect = guild_layout::at(rect, guild_layout::RANK_DROPDOWN_RECT);
+            let local = cursor - Vec2::new(dropdown_rect.left, dropdown_rect.top);
+            let thumb_y = guild_layout::RANK_THUMB_RECT.top - guild_layout::RANK_DROPDOWN_RECT.top
+                + state.guild_panel.rank_scroll as f32 * guild_layout::RANK_THUMB_TRAVEL
                     / count.saturating_sub(1).max(1) as f32;
             if mouse.just_pressed(MouseButton::Left)
-                && CrystalRect::new(119., thumb_y, 8., 14.).contains(local.x, local.y)
+                && CrystalRect::new(
+                    guild_layout::RANK_THUMB_RECT.left - guild_layout::RANK_DROPDOWN_RECT.left,
+                    thumb_y,
+                    guild_layout::RANK_THUMB_RECT.width,
+                    guild_layout::RANK_THUMB_RECT.height,
+                )
+                .contains(local.x, local.y)
             {
                 host.rank_thumb = Some(local.y - thumb_y);
             }
             if mouse.pressed(MouseButton::Left) {
                 if let Some(offset) = host.rank_thumb {
-                    state.guild_panel.rank_scroll = (((local.y - offset).clamp(20., 60.) - 15.)
-                        / (66. / count.saturating_sub(1).max(1) as f32))
+                    state.guild_panel.rank_scroll = (((local.y - offset).clamp(
+                        guild_layout::RANK_THUMB_DRAG_MIN_Y,
+                        guild_layout::RANK_THUMB_DRAG_MAX_Y,
+                    ) - guild_layout::RANK_THUMB_DRAG_OFFSET_Y)
+                        / (guild_layout::RANK_THUMB_DRAG_TRAVEL
+                            / count.saturating_sub(1).max(1) as f32))
                         as usize;
-                    state.guild_panel.rank_scroll =
-                        state.guild_panel.rank_scroll.min(count.saturating_sub(5));
+                    state.guild_panel.rank_scroll = state
+                        .guild_panel
+                        .rank_scroll
+                        .min(count.saturating_sub(guild_layout::RANK_DROPDOWN_MAX_ROWS));
                 }
             } else {
                 host.rank_thumb = None;
             }
         }
         if state.guild_panel.rank_dropdown
-            && !CrystalRect::new(rect.left + 198., rect.top + 96., 130., 82.)
+            && !guild_layout::at(rect, guild_layout::RANK_DROPDOWN_HIT_RECT)
                 .contains(cursor.x, cursor.y)
         {
             state.guild_panel.rank_dropdown = false;
         }
     }
     if mouse.just_pressed(MouseButton::Left)
-        && CrystalRect::new(rect.left, rect.top, 565., 30.).contains(cursor.x, cursor.y)
+        && guild_layout::at(rect, guild_layout::DRAG_RECT).contains(cursor.x, cursor.y)
     {
         host.drag = Some(cursor - Vec2::new(rect.left, rect.top));
     }
@@ -507,6 +524,7 @@ pub(super) fn process(
             .wheel(if wheel > 0. { 120 } else { -120 });
     }
 }
+
 pub(super) fn render_buff(
     parent: &mut ChildSpawnerCommands,
     assets: &AssetServer,
@@ -1278,10 +1296,10 @@ pub(super) fn closed_dropdown(
             spawn_overlay_crystal_button_enabled(
                 p,
                 assets,
-                "Prguse2",
-                207,
-                208,
-                209,
+                guild_layout::ASSET_DROPDOWN_ARROW.normal.library,
+                guild_layout::ASSET_DROPDOWN_ARROW.normal.frame,
+                guild_layout::ASSET_DROPDOWN_ARROW.hover.frame,
+                guild_layout::ASSET_DROPDOWN_ARROW.active.frame,
                 CrystalRect::new(rect.width - 18., 2., 12., 12.),
                 action,
                 true,

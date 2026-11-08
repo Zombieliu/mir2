@@ -1,0 +1,502 @@
+// Generated from packages/game-data/data/r16-guild-layout.json; run packages/tooling/scripts/generate-r16-guild-layout.mjs.
+export type R16GuildRect = Readonly<{left: number; top: number; width: number; height: number}>;
+export const R16_GUILD_LAYOUT = {
+  "schema": 1,
+  "id": "windows-r16-guild-layout",
+  "source": {
+    "native": "apps/game-client/client-bevy/src/crystal_ui/overlays.rs",
+    "crystal": "Crystal/Client/MirScenes/Dialogs/GuildDialog.cs",
+    "windowCoordinates": "crystal-stage-1024x768",
+    "controlCoordinates": "window-local"
+  },
+  "window": {
+    "left": 217,
+    "top": 168,
+    "width": 590,
+    "height": 432
+  },
+  "titleRect": {
+    "left": 18,
+    "top": 9,
+    "width": 49,
+    "height": 15
+  },
+  "closeRect": {
+    "left": 565,
+    "top": 4,
+    "width": 24,
+    "height": 21
+  },
+  "dragRect": {
+    "left": 0,
+    "top": 0,
+    "width": 565,
+    "height": 30
+  },
+  "tabs": [
+    {
+      "key": "notice",
+      "side": "left",
+      "rect": {
+        "left": 20,
+        "top": 38,
+        "width": 72,
+        "height": 24
+      },
+      "assets": {
+        "idle": "/original-ui/Title/93.png",
+        "active": "/original-ui/Title/94.png"
+      },
+      "pressed": "active"
+    },
+    {
+      "key": "members",
+      "side": "left",
+      "rect": {
+        "left": 91,
+        "top": 38,
+        "width": 72,
+        "height": 24
+      },
+      "assets": {
+        "idle": "/original-ui/Title/99.png",
+        "active": "/original-ui/Title/100.png"
+      },
+      "pressed": "active"
+    },
+    {
+      "key": "storage",
+      "side": "left",
+      "rect": {
+        "left": 162,
+        "top": 38,
+        "width": 72,
+        "height": 24
+      },
+      "assets": {
+        "idle": "/original-ui/Title/105.png",
+        "active": "/original-ui/Title/106.png"
+      },
+      "pressed": "active"
+    },
+    {
+      "key": "ranks",
+      "side": "left",
+      "rect": {
+        "left": 233,
+        "top": 38,
+        "width": 72,
+        "height": 24
+      },
+      "assets": {
+        "idle": "/original-ui/Title/101.png",
+        "active": "/original-ui/Title/102.png"
+      },
+      "pressed": "current"
+    },
+    {
+      "key": "status",
+      "side": "right",
+      "rect": {
+        "left": 501,
+        "top": 38,
+        "width": 72,
+        "height": 24
+      },
+      "assets": {
+        "idle": "/original-ui/Title/103.png",
+        "active": "/original-ui/Title/104.png"
+      },
+      "pressed": "active"
+    },
+    {
+      "key": "buff",
+      "side": "right",
+      "rect": {
+        "left": 430,
+        "top": 38,
+        "width": 72,
+        "height": 24
+      },
+      "assets": {
+        "idle": "/original-ui/Title/95.png",
+        "active": "/original-ui/Title/96.png"
+      },
+      "pressed": "active"
+    }
+  ],
+  "pages": {
+    "left": {
+      "rect": {
+        "left": 0,
+        "top": 60,
+        "width": 352,
+        "height": 372
+      }
+    },
+    "status": {
+      "rect": {
+        "left": 355,
+        "top": 60,
+        "width": 230,
+        "height": 372
+      },
+      "backgroundRect": {
+        "left": 365,
+        "top": 62,
+        "width": 208,
+        "height": 316
+      },
+      "titleRect": {
+        "left": 373,
+        "top": 66,
+        "width": 192,
+        "height": 26
+      },
+      "headersRect": {
+        "left": 362,
+        "top": 107,
+        "width": 75,
+        "height": 300
+      },
+      "nameRect": {
+        "left": 437,
+        "top": 107,
+        "width": 120,
+        "height": 200
+      },
+      "levelRect": {
+        "left": 437,
+        "top": 133,
+        "width": 120,
+        "height": 200
+      },
+      "membersRect": {
+        "left": 437,
+        "top": 159,
+        "width": 120,
+        "height": 200
+      },
+      "recruitLabelRect": {
+        "left": 391,
+        "top": 343,
+        "width": 150,
+        "height": 15
+      },
+      "recruitNameRect": {
+        "left": 395,
+        "top": 360,
+        "width": 130,
+        "height": 21
+      },
+      "recruitButtonRect": {
+        "left": 525,
+        "top": 358,
+        "width": 24,
+        "height": 21
+      },
+      "recruitButtonDrawSize": {
+        "width": 24,
+        "height": 24
+      },
+      "progressRect": {
+        "left": 322,
+        "top": 403,
+        "width": 260,
+        "height": 22
+      },
+      "progressFillWidth": 257,
+      "progressTextRect": {
+        "left": 322,
+        "top": 405,
+        "width": 260,
+        "height": 15
+      }
+    }
+  },
+  "ranks": {
+    "editLabelRect": {
+      "left": 42,
+      "top": 78,
+      "width": 150,
+      "height": 20
+    },
+    "selectLabelRect": {
+      "left": 198,
+      "top": 78,
+      "width": 150,
+      "height": 20
+    },
+    "nameRect": {
+      "left": 42,
+      "top": 96,
+      "width": 130,
+      "height": 16
+    },
+    "dropdownRect": {
+      "left": 198,
+      "top": 96,
+      "width": 130,
+      "height": 16
+    },
+    "saveRect": {
+      "left": 155,
+      "top": 350,
+      "width": 40,
+      "height": 25
+    },
+    "permissions": [
+      {
+        "bit": 0,
+        "rect": {
+          "left": 42,
+          "top": 180,
+          "width": 12,
+          "height": 12
+        },
+        "checkedRect": {
+          "left": 42,
+          "top": 180,
+          "width": 16,
+          "height": 12
+        },
+        "labelRect": {
+          "left": 59,
+          "top": 178,
+          "width": 135,
+          "height": 20
+        }
+      },
+      {
+        "bit": 1,
+        "rect": {
+          "left": 202,
+          "top": 180,
+          "width": 12,
+          "height": 12
+        },
+        "checkedRect": {
+          "left": 202,
+          "top": 180,
+          "width": 16,
+          "height": 12
+        },
+        "labelRect": {
+          "left": 219,
+          "top": 178,
+          "width": 135,
+          "height": 20
+        }
+      },
+      {
+        "bit": 2,
+        "rect": {
+          "left": 42,
+          "top": 220,
+          "width": 12,
+          "height": 12
+        },
+        "checkedRect": {
+          "left": 42,
+          "top": 220,
+          "width": 16,
+          "height": 12
+        },
+        "labelRect": {
+          "left": 59,
+          "top": 218,
+          "width": 135,
+          "height": 20
+        }
+      },
+      {
+        "bit": 3,
+        "rect": {
+          "left": 202,
+          "top": 220,
+          "width": 12,
+          "height": 12
+        },
+        "checkedRect": {
+          "left": 202,
+          "top": 220,
+          "width": 16,
+          "height": 12
+        },
+        "labelRect": {
+          "left": 219,
+          "top": 218,
+          "width": 135,
+          "height": 20
+        }
+      },
+      {
+        "bit": 4,
+        "rect": {
+          "left": 42,
+          "top": 260,
+          "width": 12,
+          "height": 12
+        },
+        "checkedRect": {
+          "left": 42,
+          "top": 260,
+          "width": 16,
+          "height": 12
+        },
+        "labelRect": {
+          "left": 59,
+          "top": 258,
+          "width": 135,
+          "height": 20
+        }
+      },
+      {
+        "bit": 5,
+        "rect": {
+          "left": 202,
+          "top": 260,
+          "width": 12,
+          "height": 12
+        },
+        "checkedRect": {
+          "left": 202,
+          "top": 260,
+          "width": 16,
+          "height": 12
+        },
+        "labelRect": {
+          "left": 219,
+          "top": 258,
+          "width": 135,
+          "height": 20
+        }
+      },
+      {
+        "bit": 6,
+        "rect": {
+          "left": 42,
+          "top": 300,
+          "width": 12,
+          "height": 12
+        },
+        "checkedRect": {
+          "left": 42,
+          "top": 300,
+          "width": 16,
+          "height": 12
+        },
+        "labelRect": {
+          "left": 59,
+          "top": 298,
+          "width": 135,
+          "height": 20
+        }
+      },
+      {
+        "bit": 7,
+        "rect": {
+          "left": 202,
+          "top": 300,
+          "width": 12,
+          "height": 12
+        },
+        "checkedRect": {
+          "left": 202,
+          "top": 300,
+          "width": 16,
+          "height": 12
+        },
+        "labelRect": {
+          "left": 219,
+          "top": 298,
+          "width": 135,
+          "height": 20
+        }
+      }
+    ],
+    "dropdownRowsRect": {
+      "left": 198,
+      "top": 111,
+      "width": 114,
+      "height": 16
+    },
+    "dropdownRowStep": 13,
+    "dropdownMaxRows": 5,
+    "dropdownHitRect": {
+      "left": 198,
+      "top": 96,
+      "width": 130,
+      "height": 82
+    },
+    "scrollUpRect": {
+      "left": 316,
+      "top": 110,
+      "width": 12,
+      "height": 6
+    },
+    "scrollDownRect": {
+      "left": 316,
+      "top": 170,
+      "width": 12,
+      "height": 6
+    },
+    "thumbRect": {
+      "left": 317,
+      "top": 118,
+      "width": 8,
+      "height": 14
+    },
+    "thumbTravel": 52,
+    "thumbDrag": {
+      "minY": 20,
+      "maxY": 60,
+      "offsetY": 15,
+      "travel": 66
+    }
+  },
+  "assets": {
+    "background": "/original-ui/Prguse/180.png",
+    "title": "/original-ui/Title/25.png",
+    "close": {
+      "normal": "/original-ui/Prguse2/360.png",
+      "hover": "/original-ui/Prguse2/361.png",
+      "active": "/original-ui/Prguse2/362.png"
+    },
+    "save": {
+      "normal": "/original-ui/Title/90.png",
+      "hover": "/original-ui/Title/91.png",
+      "active": "/original-ui/Title/92.png"
+    },
+    "permissionUnchecked": "/original-ui/Prguse/1346.png",
+    "permissionChecked": "/original-ui/Prguse/1347.png",
+    "statusBackground": "/original-ui/Prguse/1850.png",
+    "progressBackground": "/original-ui/Prguse2/424.png",
+    "progress": "/original-ui/Prguse2/423.png",
+    "recruit": {
+      "normal": "/original-ui/Title/356.png",
+      "hover": "/original-ui/Title/357.png",
+      "active": "/original-ui/Title/358.png"
+    },
+    "dropdownArrow": {
+      "normal": "/original-ui/Prguse2/207.png",
+      "hover": "/original-ui/Prguse2/208.png",
+      "active": "/original-ui/Prguse2/209.png"
+    },
+    "dropdownUp": {
+      "normal": "/original-ui/Prguse/2021.png",
+      "hover": "/original-ui/Prguse/2022.png",
+      "active": "/original-ui/Prguse/2023.png"
+    },
+    "dropdownDown": {
+      "normal": "/original-ui/Prguse/2024.png",
+      "hover": "/original-ui/Prguse/2025.png",
+      "active": "/original-ui/Prguse/2026.png"
+    },
+    "dropdownThumb": {
+      "normal": "/original-ui/Prguse/2015.png",
+      "hover": "/original-ui/Prguse/2016.png",
+      "active": "/original-ui/Prguse/2017.png"
+    }
+  }
+} as const;

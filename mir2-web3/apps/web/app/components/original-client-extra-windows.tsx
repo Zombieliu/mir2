@@ -204,6 +204,8 @@ export type ExtraWindowsProps = {
       GuildWindowProps,
       | "guild"
       | "playerName"
+      | "viewerRankIndex"
+      | "guildScope"
       | "onEditNotice"
       | "onInviteMember"
       | "onKickMember"
@@ -211,6 +213,7 @@ export type ExtraWindowsProps = {
       | "onChangeMemberRank"
       | "onRenameRank"
       | "onToggleRankPermission"
+      | "onCreateRank"
       | "rankEditPending"
       | "onRefreshRanks"
       | "onDepositGold"
@@ -455,6 +458,8 @@ function ExtraWindowsInner({
           incomingInvite={guild.incomingInvite}
           onReplyInvite={guild.onReplyInvite}
           playerName={guild.playerName}
+          viewerRankIndex={guild.viewerRankIndex}
+          guildScope={guild.guildScope}
           onEditNotice={guild.onEditNotice}
           onInviteMember={guild.onInviteMember}
           onKickMember={guild.onKickMember}
@@ -462,6 +467,7 @@ function ExtraWindowsInner({
           onChangeMemberRank={guild.onChangeMemberRank}
           onRenameRank={guild.onRenameRank}
           onToggleRankPermission={guild.onToggleRankPermission}
+          onCreateRank={guild.onCreateRank}
           rankEditPending={guild.rankEditPending}
           onRefreshRanks={guild.onRefreshRanks}
           onDepositGold={guild.onDepositGold}

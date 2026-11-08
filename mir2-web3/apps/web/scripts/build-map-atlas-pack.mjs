@@ -3,6 +3,7 @@ import { createHash } from "node:crypto";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import sharp from "sharp";
+import { resolveProductionAssetConfigPath, assertNumeronFiniteProfile, NUMERON_PRODUCTION_ASSET_CONFIG } from "./lib/production-asset-config.mjs";
 
 // Packs each Mir2 MAP LIBRARY's exported per-frame PNGs (public/original-map/<Lib>/<frame>.png)
 // into texture-atlas PAGES, mirroring Crystal's one-indexed-.Lib-per-library model. Collapses
@@ -16,13 +17,7 @@ const WEB_ROOT = path.resolve(SCRIPT_DIR, "..");
 const PUBLIC_ROOT = path.join(WEB_ROOT, "public");
 const ORIGINAL_MAP_ROOT = path.join(PUBLIC_ROOT, "original-map");
 const DEFAULT_OUT_DIR = path.join(PUBLIC_ROOT, "generated", "map-atlas");
-const PRODUCTION_ASSET_CONFIG = path.resolve(
-  WEB_ROOT,
-  "..",
-  "..",
-  "config",
-  "production-web-assets.json",
-);
+const PRODUCTION_ASSET_CONFIG = resolveProductionAssetConfigPath(path.resolve(WEB_ROOT, "../.."));
 
 const ATLAS_PADDING = 1;
 const INITIAL_WIDTH = 1024;
@@ -39,12 +34,12 @@ const onlyLibraries = parseListArg(args.libraries, null);
 
 async function main() {
   if (isRemoteReleaseBuild()) {
-    const pinned = await readVerifiedRemoteMapAtlasRelease();
+    const pinned = await readRemoteMapAtlasBuildPlan();
     console.log(
       JSON.stringify({
         ok: true,
         skipped: true,
-        reason: "verified remote map-atlas release is pinned",
+        reason: pinned.enabled === false ? "selected finite profile disables map atlas; no atlas build or budget acceptance performed" : "verified remote map-atlas release is pinned",
         ...pinned,
       }),
     );
@@ -417,6 +412,16 @@ export function mapAtlasLibrarySupportsRawUpload(libraryKey) {
 
 export function isRemoteReleaseBuild(environment = process.env) {
   return environment.MIR2_ORIGINAL_ASSET_MANIFEST_MODE === "remote-release";
+}
+
+export async function readRemoteMapAtlasBuildPlan(configPath = PRODUCTION_ASSET_CONFIG) {
+  if (path.basename(configPath) === NUMERON_PRODUCTION_ASSET_CONFIG) {
+    const release = JSON.parse(await fs.readFile(configPath, "utf8"));
+    assertNumeronFiniteProfile(release);
+    return { enabled: false, verified: false, atlasBudgetVerified: false, releaseVersion: release.version,
+      profile: "numeron-r16-finite" };
+  }
+  return { enabled: true, verified: true, atlasBudgetVerified: true, ...(await readVerifiedRemoteMapAtlasRelease(configPath)) };
 }
 
 export async function readVerifiedRemoteMapAtlasRelease(

@@ -105,6 +105,31 @@ test("clean checkouts fetch an overlay runtime from its pinned base release", as
   }
 });
 
+test("an explicit immutable runtime root fetches the candidate instead of its legacy asset fallback", async (context) => {
+  const tempRoot = await fs.mkdtemp(path.join(os.tmpdir(), "mir2-runtime-explicit-root-"));
+  context.after(async () => {
+    const resolved = await fs.realpath(tempRoot), root = await fs.realpath(os.tmpdir());
+    assert.equal(path.dirname(resolved), root); assert(path.basename(resolved).startsWith("mir2-runtime-explicit-root-"));
+    await fs.rm(resolved, { recursive: true, force: true });
+  });
+  const manifestPath = path.join(tempRoot, "runtime.json"), configPath = path.join(tempRoot, "production-web-assets.json");
+  const outputDir = path.join(tempRoot, "runtime"), candidate = "https://assets.example.test/mir2/v/candidate";
+  const config = { assetBaseUrl: candidate, fallbackObjectPrefix: "mir2/v/old-base",
+    bevyRuntime: { assetBaseUrl: candidate, version } };
+  await fs.writeFile(manifestPath, JSON.stringify(createManifest())); await fs.writeFile(configPath, JSON.stringify(config));
+  const requests = [];
+  const fetchImpl = async url => {
+    requests.push(url);
+    const prefix = `${candidate}/bevy-runtime/v/${version}/`; assert(url.startsWith(prefix));
+    return new Response(fixtureFiles.get(url.slice(prefix.length)));
+  };
+  const result = await installPrebuiltRuntime({ manifestPath, configPath, outputDir, fetchImpl, attempts: 1 });
+  assert.equal(result.fileCount, 4); assert.equal(requests.length, 4); assert.equal(result.reused, false);
+  config.bevyRuntime.version = "bevy-wrong"; await fs.writeFile(configPath, JSON.stringify(config));
+  await assert.rejects(installPrebuiltRuntime({ manifestPath, configPath, outputDir, fetchImpl, attempts: 1 }), /different immutable Bevy/);
+  assert.equal(requests.length, 4, "version mismatch fails before fetching or reusing the wrong profile");
+});
+
 test("rejects unexpected paths before making a request", async () => {
   const manifest = createManifest();
   manifest.files[0].path = "public/bevy-runtime/../../package.json";

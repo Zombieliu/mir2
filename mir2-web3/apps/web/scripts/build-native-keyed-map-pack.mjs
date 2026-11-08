@@ -8,6 +8,7 @@ import { gunzipSync } from "node:zlib";
 
 import sharp from "sharp";
 import ts from "typescript";
+import { resolveProductionAssetConfigPath, NUMERON_PRODUCTION_ASSET_CONFIG, assertNumeronFiniteProfile } from "./lib/production-asset-config.mjs";
 
 const SCRIPT_DIR = path.dirname(fileURLToPath(import.meta.url));
 const WEB_ROOT = path.resolve(SCRIPT_DIR, "..");
@@ -32,13 +33,7 @@ const FULL_CRYSTAL_PACK_ROOT = path.join(
   "crystal-packs",
   "full",
 );
-const PRODUCTION_ASSET_CONFIG_PATH = path.resolve(
-  WEB_ROOT,
-  "..",
-  "..",
-  "config",
-  "production-web-assets.json",
-);
+const PRODUCTION_ASSET_CONFIG_PATH = resolveProductionAssetConfigPath(path.resolve(WEB_ROOT, "../.."));
 const SAFE_TEMP_OUTPUT_PREFIXES = ["native-keyed-map-", "native-map-keyed-"];
 
 export const DEFAULT_MAP_FILE_NAME = "0";
@@ -719,10 +714,14 @@ async function fetchImmutableAsset(url, attempts = 3) {
   );
 }
 
-async function loadProductionFullPackConfig(
+export async function loadProductionFullPackConfig(
   configPath = PRODUCTION_ASSET_CONFIG_PATH,
 ) {
   const config = JSON.parse(await fs.readFile(configPath, "utf8"));
+  if (path.basename(configPath) === NUMERON_PRODUCTION_ASSET_CONFIG) {
+    assertNumeronFiniteProfile(config);
+    throw new Error("The selected Numeron finite profile does not enable verified Full Crystal map compilation");
+  }
   const assetBaseUrl = String(config?.assetBaseUrl ?? "").replace(/\/+$/, "");
   const indexPath = String(
     config?.fullCrystalPack?.path ?? "/generated/crystal-packs/full/index.json",

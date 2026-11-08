@@ -1,5 +1,9 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+## Numeron新入口发布候选（2026-11-08）
+
+当前具体任务为发布最新Web到`numeron.obelisk.build/game`，旧正式服/原前端保留。公会窗口已有分源限定验证；固定素材、受控新profile与Linux共同基准启动检查已准备，实际CI、旧库克隆和公开切换仍须执行，不提升全局Candidate。[门槛](NUMERON-WEB-RELEASE-20261108.zh-CN.md)
+
 ## R16 凭证先行恢复（2026-11-08）
 
 旧 WebSocket 仍保存时，Native 凭证恢复在锁外等待精确连接的交接；原认证／租约／月卡与一次消费保持，最终消费前复核新连接和时间。十三项存储层、两项真实 WebSocket 及相邻回归合计一百一十八项独立案例通过，dev/debug Gateway 构建通过。Native 客户端十四秒预算未改，窗口、跨端与正式发行继续开放。[范围与失败证据](WEB-R16-PARITY-GOAL.zh-CN.md#凭证先行的保存交接2026-11-08)

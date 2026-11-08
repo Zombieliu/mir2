@@ -150,6 +150,8 @@ Rust1.95使用 canonical manifest／原 lock 的 release、offline、locked 构�
 
 ## 当前执行顺序
 
+2026-11-08：用户已清除持续 Goal，当前明确任务为将最新候选发布到 `https://numeron.obelisk.build/game`。本文件保留原完整对齐范围和未结项，不代表重新启用 Goal。公会公共窗口/单选职级/真实新建/统计与只读仓库的最新限定证据见[本轮记录](evidence/r16-guild-layout-20261108/README.md)；部署、旧存档、域名及正式环境门槛分别验收。
+
 用户要求优先提交推送的代码检查点已保存；后续公会普通流程的限定资格见上节，仍保留原检查点时“浏览器未验”的历史范围。[原保存范围](CODE-CHECKPOINT-20261108.zh-CN.md)
 
 1. 已在真实存档副本完成小地图标题及框架输入修复、缩放和前景 Q 日记复测。

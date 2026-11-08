@@ -800,6 +800,7 @@ function assertControlledUploadCredentials(workflow) {
   const promote = "native-download-promote/Promote the verified stage once and check public aliases";
   const web = "build-web-assets/Publish Web assets to R2";
   const bevy = "build-web-assets/Publish immutable Bevy runtime to R2";
+  const fixed = "publish-fixed-r16-assets/Download, verify and review or publish the fixed draft payload";
   const scopes = { MIR2_R2_UPLOAD_SECRET: [], MIR2_R2_UPLOAD_WORKER_URL: [] };
   const steps = new Map();
   for (const [jobId, job] of jobs) {
@@ -820,19 +821,21 @@ function assertControlledUploadCredentials(workflow) {
       }
     }
   }
-  for (const [key, allowed] of [["MIR2_R2_UPLOAD_SECRET", [stage, promote, web, bevy]],
-    ["MIR2_R2_UPLOAD_WORKER_URL", [web, bevy]]]) {
+  for (const [key, allowed] of [["MIR2_R2_UPLOAD_SECRET", [stage, promote, web, bevy, fixed]],
+    ["MIR2_R2_UPLOAD_WORKER_URL", [web, bevy, fixed]]]) {
     assert.equal((source.match(new RegExp(`\\b${key}:`, "g")) ?? []).length, scopes[key].length,
       `${key} must be scoped to a named step env, never a job/global binding`);
     assert.deepEqual(scopes[key].sort(), allowed.sort(), `${key} controlled contexts changed`);
   }
-  for (const [jobId, operations] of [["native-download-stage", ["stage"]],
+  for (const [jobId, operations] of [["native-download-authority-probe", ["probe"]], ["native-download-stage", ["stage"]],
     ["native-download-promote", ["promote"]], ["native-download-tooling-check", ["verify", "stage", "promote"]],
     ["build-web-assets", ["", "off"]]]) {
     const header = jobs.get(jobId)?.split("    steps:\n")[0] ?? "";
     const operation = operations.map((value) => `inputs.native_delivery_operation == '${value}'`).join(" || ");
+    const fixedExcluded = ["fixed_release_tag", "fixed_bundle_sha256", "fixed_payload_sha256",
+      "fixed_manifest_sha256", "fixed_source_sha"].map((key) => `inputs.${key} == ''`).join(" && ");
     const expected = "${{ github.event_name == 'workflow_dispatch' && "
-      + (operations.length > 1 ? `(${operation})` : operation) + " }}";
+      + (operations.length > 1 ? `(${operation})` : operation) + ` && ${fixedExcluded} }}`;
     assert.equal(header.match(/^    if: (.+)$/m)?.[1], expected, `${jobId} must remain dispatch-only`);
     if (jobId === "native-download-stage" || jobId === "native-download-promote") {
       assert.match(header, /^    needs: native-download-tooling-check$/m, "publication requires offline tooling gates");
@@ -861,6 +864,25 @@ function assertControlledUploadCredentials(workflow) {
     "assert value['head_sha'] == os.environ['GITHUB_SHA']",
     '--stage-receipt "$RUNNER_TEMP/mir2-native-r17-promote/stage/receipt.json" --stage-sha256 "$MIR2_NATIVE_STAGE_SHA"',
   ]) assert.ok(promotion.includes(guard), "promotion must retain verified run/branch/SHA binding");
+  const fixedJob = jobs.get("publish-fixed-r16-assets");
+  assert.match(source.slice(0, jobsStart), /\npermissions:\n  contents: read\n/);
+  assert.match(fixedJob, /^    permissions:\n      contents: write$/m,
+    "only the fixed job needs push-access visibility for draft metadata");
+  for (const [jobId, job] of jobs) if (jobId !== "publish-fixed-r16-assets") {
+    assert.doesNotMatch(job, /^\s+contents:\s*write\s*$/m, `${jobId} must not gain draft publication authority`);
+  }
+  const fixedSelected = ["fixed_release_tag", "fixed_bundle_sha256", "fixed_payload_sha256",
+    "fixed_manifest_sha256", "fixed_source_sha"].map((key) => `inputs.${key} != ''`).join(" || ");
+  assert.equal(fixedJob?.match(/^    if: (.+)$/m)?.[1],
+    "${{ github.event_name == 'workflow_dispatch' && (" + fixedSelected + ") }}",
+    "fixed publication must be dispatch-only and exclude every legacy mode");
+  for (const guard of ['"$FIXED_SOURCE_SHA" == "$GITHUB_SHA"', 'ref: ${{ github.sha }}',
+    "persist-credentials: false", "mode=--dry-run", 'if [[ "$PUBLISH_R2" == true ]]; then mode=--publish; fi',
+    'node apps/web/scripts/publish-fixed-r16-assets.mjs "$mode"', "cancel-in-progress: false"]) {
+    assert.ok(fixedJob.includes(guard), "fixed publication must retain exact source, explicit publish and serialization");
+  }
+  assert.doesNotMatch(fixedJob, /(?:^|\n)\s+(?:run:\s*)?(?:npm (?:install|ci|run build)|cargo |(?:npx )?(?:wrangler|vercel) )/,
+    "fixed publication must not rebuild assets or deploy infrastructure");
   assert.match(steps.get(bevy), /MIR2_R2_UPLOAD_CONCURRENCY:\s*"1"/);
   assert.match(steps.get(bevy), /MIR2_R2_UPLOAD_ATTEMPTS:\s*"6"/);
   assert.match(source, /upload_driver:[\s\S]*?default:\s*worker/);
@@ -874,6 +896,11 @@ await test("immutable runtime workflow limits credentials to gated stage/promote
     (source) => source.replace("    needs: native-download-tooling-check", "    needs: []"),
     (source) => source.replace("assert value['head_branch'] == os.environ['GITHUB_REF_NAME']", "pass"),
     (source) => source.replace('--stage-sha256 "$MIR2_NATIVE_STAGE_SHA"', ""),
+    (source) => source.replace(" && inputs.fixed_release_tag == ''", ""),
+    (source) => source.replace('"$FIXED_SOURCE_SHA" == "$GITHUB_SHA"', "true"),
+    (source) => source.replace('if [[ "$PUBLISH_R2" == true ]]; then mode=--publish; fi', "mode=--publish"),
+    (source) => source.replace("\npermissions:\n  contents: read\n", "\npermissions:\n  contents: write\n"),
+    (source) => source.replace("  build-web-assets:\n", "  build-web-assets:\n    permissions:\n      contents: write\n"),
     (source) => source + "\n  unreviewed-upload:\n    steps:\n      - name: Unreviewed publication\n        env:\n"
       + "          MIR2_R2_UPLOAD_SECRET: ${{ secrets.FIXTURE }}\n        run: true\n",
     (source) => source.replace("\njobs:\n", "\nenv:\n  MIR2_R2_UPLOAD_SECRET: ${{ secrets.FIXTURE }}\njobs:\n"),

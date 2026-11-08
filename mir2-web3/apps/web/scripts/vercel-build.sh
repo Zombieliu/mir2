@@ -18,7 +18,7 @@ fi
 # overrides stale dashboard variables so a main-branch deployment cannot point
 # at an older R2 prefix than the commit that triggered it.
 if [ "${VERCEL:-}" = "1" ] && [ "${VERCEL_ENV:-}" = "production" ]; then
-  PRODUCTION_ASSET_CONFIG="$(pwd)/../../config/production-web-assets.json"
+  PRODUCTION_ASSET_CONFIG="$(node ./scripts/lib/production-asset-config.mjs --path)"
   if [ ! -f "$PRODUCTION_ASSET_CONFIG" ]; then
     echo "[vercel-build] Missing $PRODUCTION_ASSET_CONFIG." >&2
     exit 1
@@ -40,6 +40,7 @@ if [ "${VERCEL:-}" = "1" ] && [ "${VERCEL_ENV:-}" = "production" ]; then
   export MIR2_USE_PREBUILT_BEVY_RUNTIME="${MIR2_USE_PREBUILT_BEVY_RUNTIME:-1}"
   export MIR2_REUSE_ORIGINAL_ASSET_MANIFEST="${MIR2_REUSE_ORIGINAL_ASSET_MANIFEST:-1}"
 
+  node ./scripts/lib/production-asset-config.mjs --verify-remote
   npm run generate:original-asset-manifest
   echo "[vercel-build] Using production R2 assets $MIR2_ASSET_VERSION."
 fi

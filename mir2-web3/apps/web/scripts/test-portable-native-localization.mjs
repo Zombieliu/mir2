@@ -27,6 +27,12 @@ test("the shared vocabulary excludes NPC prose, credentials, user content and th
   assert(value.entries.some(row => row.key === "content.magic.Fencing.name"));
   for (const key of ["content.item.244.name", "content.item.259.name", "content.item.272.name", "content.map.186.name"])
     assert(value.entries.some(row => row.key === key), `graduation display key missing: ${key}`);
+  for (const key of ["game.guild.editRank", "game.guild.selectRank", "game.guild.newRank", "game.guild.createRankConfirm", "game.guild.stats"]) {
+    const row = value.entries.find(entry => entry.key === key);
+    assert(row, `shared guild system label missing: ${key}`);
+    assert.equal(row.values.length, 10, key);
+    assert(row.values.every((translation, index) => index === 0 || translation !== row.values[0]), `English fallback in ${key}`);
+  }
 });
 test("missing languages, duplicate keys, malformed selected values and oversized data fail instead of falling back", () => {
   const mutated = change => { const copy = structuredClone(native); change(copy); return copy; };

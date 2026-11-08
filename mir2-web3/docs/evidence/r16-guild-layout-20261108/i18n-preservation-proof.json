@@ -1,0 +1,106 @@
+{
+  "schema": 1,
+  "kind": "guild-system-phrase-append-preservation",
+  "passed": true,
+  "baselineCommit": "91fc453b70f3e28adc0a49ecdd3695963b160a1f",
+  "keys": [
+    "game.guild.createRankConfirm",
+    "game.guild.editRank",
+    "game.guild.newRank",
+    "game.guild.selectRank",
+    "game.guild.stats"
+  ],
+  "catalogs": [
+    {
+      "path": "packages/game-data/data/native-i18n/game.json",
+      "oldRows": 282,
+      "newRows": 287,
+      "changedOldRows": 0,
+      "addedRows": 5,
+      "sha256": "796127bf494ee354626f85cf25d2b4cdb68a633585481325b6adfaa7019f54be",
+      "bytes": 44478
+    },
+    {
+      "path": "packages/game-data/data/native-i18n/extra/ru.json",
+      "oldRows": 9421,
+      "newRows": 9426,
+      "changedOldRows": 0,
+      "addedRows": 5,
+      "sha256": "0760f45dc217f8aacf9ee0506a18407afcd50234733df0970ded8d3642662376",
+      "bytes": 895750
+    },
+    {
+      "path": "packages/game-data/data/native-i18n/extra/hi.json",
+      "oldRows": 9421,
+      "newRows": 9426,
+      "changedOldRows": 0,
+      "addedRows": 5,
+      "sha256": "53a5267ceda25831c616ebea8040357783c49013eb7fc100a34ea988566c6759",
+      "bytes": 1067190
+    },
+    {
+      "path": "packages/game-data/data/native-i18n/extra/id.json",
+      "oldRows": 9421,
+      "newRows": 9426,
+      "changedOldRows": 0,
+      "addedRows": 5,
+      "sha256": "3daf140a32aa9273e11350a647b8c5d25df2ebefa8ff367df5da064af1e75b5d",
+      "bytes": 652627
+    },
+    {
+      "path": "packages/game-data/data/native-i18n/extra/vi.json",
+      "oldRows": 9421,
+      "newRows": 9426,
+      "changedOldRows": 0,
+      "addedRows": 5,
+      "sha256": "c39c8c32c8374731b94e6dd0b2907f0376a44fc5c678a7dbadbdb3d3fd4d87cb",
+      "bytes": 729260
+    },
+    {
+      "path": "packages/game-data/data/native-i18n/extra/th.json",
+      "oldRows": 9421,
+      "newRows": 9426,
+      "changedOldRows": 0,
+      "addedRows": 5,
+      "sha256": "a703fed4c3c4e6f01e760f1da7c4a2f11bc3da32f61ef3199d807410a9689f6f",
+      "bytes": 1041623
+    },
+    {
+      "path": "packages/game-data/data/native-i18n/extra/ar.json",
+      "oldRows": 9421,
+      "newRows": 9426,
+      "changedOldRows": 0,
+      "addedRows": 5,
+      "sha256": "f57f06e88d12a35efa5d82e4ff91cfa8d7ef81242dd385ac7d4e204621ab17fd",
+      "bytes": 774821
+    },
+    {
+      "path": "packages/game-data/data/native-i18n/extra/zh-CN.json",
+      "oldRows": 9902,
+      "newRows": 9907,
+      "changedOldRows": 0,
+      "addedRows": 5,
+      "sha256": "33a8372065605d060590bdd433fbe4c8c7c03e7c8ce201a3107fae574c6e7097",
+      "bytes": 632236
+    },
+    {
+      "path": "apps/web/lib/generated/r16-native-localization.json",
+      "oldRows": 9902,
+      "newRows": 9907,
+      "changedOldRows": 0,
+      "addedRows": 5,
+      "sha256": "944f1639e3ac7822ddba4c81a6b2bd5416aef3ded46be35a9e5f75a2f37271ea",
+      "bytes": 6303071
+    },
+    {
+      "path": "packages/game-data/data/generated/portable-native-i18n.json",
+      "oldRows": 2237,
+      "newRows": 2242,
+      "changedOldRows": 0,
+      "addedRows": 5,
+      "sha256": "1c6f48a5e09577b4c01a1f674d990bd355e5adbb12c14b7925a16f8b74fa0c00",
+      "bytes": 1188489
+    }
+  ],
+  "scope": "Catalog-owned system labels only; no character names, rank names, editable drafts or player data translated. Structural/code checks, not human linguistic acceptance."
+}

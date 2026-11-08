@@ -1,0 +1,50 @@
+{
+  "schemaVersion": 3,
+  "profile": "numeron-r16-finite",
+  "version": "20261108-r16-08ec86d5105c",
+  "objectPrefix": "mir2/v/20261108-r16-08ec86d5105c",
+  "fallbackObjectPrefix": "mir2/v/20260818-main-97887dcd",
+  "fallbackObjectPrefixes": [
+    "mir2/v/20260818-main-97887dcd",
+    "mir2/v/20260730-fullcrystal-f71b89aa-gzip1"
+  ],
+  "assetBaseUrl": "https://assets.mir2.obelisk.build/mir2/v/20261108-r16-08ec86d5105c",
+  "browserFallbackBaseUrls": [
+    "https://assets.mir2.obelisk.build/hotlink-ok/mir2/v/20261108-r16-08ec86d5105c",
+    "https://assets.mir2.obelisk.build/hotlink-ok/mir2/v/20260818-main-97887dcd",
+    "https://assets.mir2.obelisk.build/hotlink-ok/mir2/v/20260730-fullcrystal-f71b89aa-gzip1",
+    "https://pub-72ec6e670a8346d1a6b2177df2643326.r2.dev/mir2/v/20260818-main-97887dcd",
+    "https://pub-72ec6e670a8346d1a6b2177df2643326.r2.dev/mir2/v/20260730-fullcrystal-f71b89aa-gzip1"
+  ],
+  "remoteReleaseUrl": "https://assets.mir2.obelisk.build/mir2/v/20261108-r16-08ec86d5105c/remote-asset-release.json",
+  "remoteReleaseSha256": "32255399aaae2dc9a133a5827252256ece782aaae5d237152ffebc2d8f272155",
+  "bevyRuntime": {
+    "enabled": true,
+    "version": "bevy-a46905128c316656",
+    "assetBaseUrl": "https://assets.mir2.obelisk.build/mir2/v/20261108-r16-08ec86d5105c"
+  },
+  "fullCrystalPack": {
+    "enabled": false,
+    "verified": false,
+    "path": "/generated/crystal-packs/full/index.json",
+    "contentHash": null,
+    "libraryCount": 0,
+    "pageCount": 0
+  },
+  "mapAtlas": {
+    "enabled": false,
+    "verified": false,
+    "manifestPath": null,
+    "contentHash": null,
+    "pageCount": 0,
+    "maxPageBytes": 0
+  },
+  "finiteCoverage": {
+    "files": 42724,
+    "bytes": 336156477,
+    "payloadFiles": 42738,
+    "payloadSha256": "08ec86d5105c7c00405c7342fff3392ba118216d780e22d50e716c47cccdd453",
+    "allMapsVerified": false,
+    "inheritedRemoteObjectsReverified": false
+  }
+}

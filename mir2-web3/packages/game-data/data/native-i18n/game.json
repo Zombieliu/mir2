@@ -1982,6 +1982,41 @@
       "zh-TW": "舊版",
       "pt-BR": "Antigo",
       "aliases": []
+    },
+    {
+      "key": "game.guild.editRank",
+      "en": "Edit rank",
+      "zh-TW": "編輯職級",
+      "pt-BR": "Editar cargo",
+      "aliases": []
+    },
+    {
+      "key": "game.guild.selectRank",
+      "en": "Select rank",
+      "zh-TW": "選擇職級",
+      "pt-BR": "Selecionar cargo",
+      "aliases": []
+    },
+    {
+      "key": "game.guild.newRank",
+      "en": "New Rank",
+      "zh-TW": "新職級",
+      "pt-BR": "Novo cargo",
+      "aliases": []
+    },
+    {
+      "key": "game.guild.createRankConfirm",
+      "en": "Create new rank?",
+      "zh-TW": "建立新職級？",
+      "pt-BR": "Criar novo cargo?",
+      "aliases": []
+    },
+    {
+      "key": "game.guild.stats",
+      "en": "Stats",
+      "zh-TW": "統計",
+      "pt-BR": "Estatísticas",
+      "aliases": []
     }
   ]
 }

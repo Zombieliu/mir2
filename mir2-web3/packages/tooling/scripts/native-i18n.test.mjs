@@ -27,7 +27,7 @@ test("six additional locales preserve gameplay numbers, opaque arguments and dis
 test("every additional native locale has the exact source key closure and safe substitutions", () => {
   const report = verifyExpansionFiles();
   assert.deepEqual(report.locales, ["ru", "hi", "id", "vi", "th", "ar"]);
-  assert.equal(report.entriesPerLocale, 9421);
+  assert.equal(report.entriesPerLocale, 9426);
   assert.deepEqual(report.errors, []);
 });
 

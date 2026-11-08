@@ -61,6 +61,7 @@ pub mod panel_navigation;
 #[cfg(feature = "native-ui")]
 pub mod preview_data;
 pub mod quest_targets;
+pub mod r16_guild_layout;
 #[cfg(feature = "native-ui")]
 pub mod select;
 pub mod shared_hud;

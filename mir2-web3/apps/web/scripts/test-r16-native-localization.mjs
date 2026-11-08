@@ -33,10 +33,10 @@ test("the generator deterministically projects every Native key and all ten loca
   const actual = buildR16NativeLocalization();
   assert.equal(encodeR16NativeLocalization(actual), generatedBytes);
   assert.deepEqual(actual.languages.map(language => language.code), order);
-  assert.equal(actual.entries.length, 9902); assert.equal(new Set(actual.entries.map(entry => entry.key)).size, 9902);
+  assert.equal(actual.entries.length, 9907); assert.equal(new Set(actual.entries.map(entry => entry.key)).size, 9907);
   assert.equal(Object.keys(actual.sourcePins).length, 20);
   assert.equal(Object.entries(actual.counts).filter(([file]) => !["periodic.json", "conquest.json", "wallet.json", "procurement.json", "native_i18n.rs::BILLING_TRANSLATIONS"].includes(file))
-    .reduce((sum, [, count]) => sum + count, 0), 9421);
+    .reduce((sum, [, count]) => sum + count, 0), 9426);
   assert.equal(actual.counts["native_i18n.rs::BILLING_TRANSLATIONS"], 89);
   for (const [file, sha] of Object.entries(actual.sourcePins))
     assert.equal(sha, createHash("sha256").update(read(file).replaceAll("\r\n", "\n")).digest("hex"), file);
@@ -44,6 +44,29 @@ test("the generator deterministically projects every Native key and all ten loca
     assert.equal(row.values.length, 10, row.key); assert(row.values.every(value => typeof value === "string" && value.trim()), row.key);
   }
   assert.equal(encodeR16NativeLocalization(buildR16NativeLocalization({ readSource: file => read(file).replaceAll("\r\n", "\n").replaceAll("\n", "\r\n") })), generatedBytes);
+});
+
+test("guild rank controls share five keyed system phrases in all ten locales without rewriting English or player drafts", () => {
+  const api = helper();
+  for (const [key, english] of [
+    ["game.guild.editRank", "Edit rank"],
+    ["game.guild.selectRank", "Select rank"],
+    ["game.guild.newRank", "New Rank"],
+    ["game.guild.createRankConfirm", "Create new rank?"],
+    ["game.guild.stats", "Stats"],
+  ]) {
+    const row = generated.entries.find(entry => entry.key === key);
+    assert(row, key); assert.equal(row.domain, "system");
+    assert.equal(api.nativeText("en", key), english, "the singular and original capitalization stay exact");
+    for (const code of order) {
+      const translated = row.values[order.indexOf(code)];
+      assert.equal(api.nativeText(code, key), translated, `${key}/${code}`);
+      assert.equal(api.nativeSystemText(code, english), translated, `system source ${key}/${code}`);
+      if (code !== "en") assert.notEqual(translated, english, `no English fallback ${key}/${code}`);
+      const opaqueDraft = `Officer's draft ${english} 21`;
+      assert.equal(api.nativeSystemText(code, opaqueDraft), opaqueDraft, `opaque rank draft ${code}`);
+    }
+  }
 });
 
 test("missing, empty, duplicate, foreign overlay and placeholder/command changes fail instead of filling from English", () => {

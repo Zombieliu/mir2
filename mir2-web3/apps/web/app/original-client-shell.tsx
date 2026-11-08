@@ -1,6 +1,7 @@
 "use client";
 import { crystalEntityDepth, crystalEntityLayerDepth } from "../lib/crystal-world-depth";
 import { useWindowKeydown } from "../lib/use-window-keydown";
+import { guildKeyboardOwnsEvent } from "../lib/r16-guild-keyboard";
 import { CharacterPointerRouter } from "../lib/bevy-character-ui";
 import { SpellsPointerRouter } from "../lib/bevy-spells-ui";
 import { MailPointerRouter,type MailPointerContext,type MailPointerEdge } from "../lib/bevy-mail-ui";
@@ -1479,6 +1480,7 @@ export function OriginalClientShell({
       diagnostic("received");
       // The Keybind capture listener owns propagation. Gameplay only yields.
       if (event.defaultPrevented) { diagnostic("prevented-before-shortcut"); return; }
+      if (guildKeyboardOwnsEvent(event.target)) return;
       if (getKeybindCaptureActive?.()) { diagnostic("keybind-capture"); return; }
       if (!(visible = document.visibilityState === "visible") || !(focused = document.hasFocus())) { diagnostic("document"); return; }
       if (event.target instanceof HTMLElement && event.target.closest(".original-combat-mode-controls")
@@ -1660,6 +1662,7 @@ export function OriginalClientShell({
     // renderer guard must not prevent installing listeners until a prop changes.
 
     function handleKeyboardMoveDown(event: KeyboardEvent) {
+      if (guildKeyboardOwnsEvent(event.target)) { stopNpcShopWorldInput(); return; }
       const diagnosticDirection = keyboardMoveDirectionForKey(event.key);
       // This capture listener owns movement only. Panel shortcuts must reach
       // their owner even while a window correctly blocks world movement.
@@ -1704,6 +1707,7 @@ export function OriginalClientShell({
     }
 
     function handleKeyboardMoveUp(event: KeyboardEvent) {
+      if (guildKeyboardOwnsEvent(event.target)) { stopNpcShopWorldInput(); return; }
       const direction = keyboardMoveDirectionForKey(event.key);
       if (!direction && event.key !== "Shift") return;
       if (npcShopBlocksWorldInput()) { stopNpcShopWorldInput(); event.preventDefault(); return; }

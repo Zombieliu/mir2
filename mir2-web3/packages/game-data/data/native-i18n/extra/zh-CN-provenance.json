@@ -8,7 +8,7 @@
     "content": 3913,
     "shell": 167,
     "quest": 404,
-    "game": 282,
+    "game": 287,
     "help": 124,
     "npc-menus": 607,
     "npc-prose": 1479,
@@ -17,10 +17,10 @@
     "wallet": 22,
     "procurement": 110,
     "embeddedVocabulary": 89,
-    "totalKeys": 9902
+    "totalKeys": 9907
   },
   "methods": {
-    "OpenCC-1.4.2-tw2sp": 7430,
+    "OpenCC-1.4.2-tw2sp": 7435,
     "authored-procurement-zh-CN": 110,
     "existing-shared-zh-CN": 2362
   },
@@ -81,10 +81,10 @@
     "packages/game-data/data/native-i18n/content.json": "142e05e9e628be47c45eec257c8616f6e7f5c485588de8a0b25f36fc406222d1",
     "packages/game-data/data/native-i18n/shell.json": "52ace631cb335840532fcfec6a37b144b829950e25bd5e909e69b1ec5af6d3b1",
     "packages/game-data/data/native-i18n/quest.json": "47a5beaa6feb4277b33a8617b55966a56eec2856b80000d34083ee6e23f9a5d1",
-    "packages/game-data/data/native-i18n/game.json": "cc70dfd7457968867e3690b6e0712bc0e2dcf44763ab161e36bffe87224c1557",
+    "packages/game-data/data/native-i18n/game.json": "796127bf494ee354626f85cf25d2b4cdb68a633585481325b6adfaa7019f54be",
     "packages/game-data/data/native-i18n/help.json": "5ce6fa52b935f528424c3963dc16c5e430387d3be2dac6d70d0701cf834b3b9e",
     "packages/game-data/data/native-i18n/npc-menus.json": "fa9de6316a85177479bddf4f01c4010524f172f542df336b379548dd8f62f0d3",
-    "packages/game-data/data/native-i18n/npc-prose.json": "f54665c416efe58b6dd40b7a657b0522da07b52ba0c208f2783b98c1a22a6bb0",
+    "packages/game-data/data/native-i18n/npc-prose.json": "f19aa36581483663d2895abc8868b6196eee34ccb57179f1fe40b693053dd894",
     "packages/game-data/data/native-i18n/periodic.json": "a6ade91e8ae348ed47336c851faa0e9ec41900178f779572f22c6ef5a6c76757",
     "packages/game-data/data/native-i18n/conquest.json": "1006ae4929e762440828d0b447defe3d763ff0436bb186ed540c5d6bf9f2549c",
     "packages/game-data/data/native-i18n/wallet.json": "ac7bb305751c7cd82b5b14909b2c0cd4071c10e4925bfae1c8219254c236ec64",
@@ -183,7 +183,7 @@
     "humanAccepted": false
   },
   "productTerminology": "Credits uses 点券; guild buff points remain 点数. 账号/账单/到账, 行会 and system labels use consistent Simplified copy. No rates, prices, identity or gameplay data change.",
-  "overlaySha256": "7682c61e0305e4d263b1554912bd376834b3d34fb9c9117fb4bd034fd64048c9",
+  "overlaySha256": "33a8372065605d060590bdd433fbe4c8c7c03e7c8ce201a3107fae574c6e7097",
   "scope": "All native base, item/monster/quest/NPC/help, periodic/conquest and embedded system-role/group/shop/mail/billing keys. Known system templates only; opaque player arguments, names, chat, notices and mail bodies are never converted at runtime.",
   "acceptance": "Offline coverage and placeholder/number/command preservation; native layout/glyph tests and human linguistic acceptance are separate."
 }

@@ -96,6 +96,26 @@ on:
         required: false
         default: false
         type: boolean
+      fixed_release_tag:
+        description: Same-repository draft release tag containing the reviewed R16 bundle; selects fixed mode
+        required: false
+        type: string
+      fixed_bundle_sha256:
+        description: Exact reviewed compressed bundle SHA256; required in fixed mode
+        required: false
+        type: string
+      fixed_payload_sha256:
+        description: Exact reviewed finite payload tree SHA256; required in fixed mode
+        required: false
+        type: string
+      fixed_manifest_sha256:
+        description: Exact reviewed public manifest SHA256; required in fixed mode
+        required: false
+        type: string
+      fixed_source_sha:
+        description: Full frozen CI source commit; must equal this dispatch github.sha and draft target
+        required: false
+        type: string
 
 permissions:
   contents: read
@@ -111,7 +131,7 @@ jobs:
           echo "Use workflow_dispatch with publish_r2/deploy_worker/deploy_vercel inputs to run the release chain."
 
   native-download-authority-probe:
-    if: ${{ github.event_name == 'workflow_dispatch' && inputs.native_delivery_operation == 'probe' }}
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.native_delivery_operation == 'probe' && inputs.fixed_release_tag == '' && inputs.fixed_bundle_sha256 == '' && inputs.fixed_payload_sha256 == '' && inputs.fixed_manifest_sha256 == '' && inputs.fixed_source_sha == '' }}
     runs-on: ubuntu-latest
     timeout-minutes: 3
     steps:
@@ -140,7 +160,7 @@ jobs:
           retention-days: 7
 
   native-download-tooling-check:
-    if: ${{ github.event_name == 'workflow_dispatch' && (inputs.native_delivery_operation == 'verify' || inputs.native_delivery_operation == 'stage' || inputs.native_delivery_operation == 'promote') }}
+    if: ${{ github.event_name == 'workflow_dispatch' && (inputs.native_delivery_operation == 'verify' || inputs.native_delivery_operation == 'stage' || inputs.native_delivery_operation == 'promote') && inputs.fixed_release_tag == '' && inputs.fixed_bundle_sha256 == '' && inputs.fixed_payload_sha256 == '' && inputs.fixed_manifest_sha256 == '' && inputs.fixed_source_sha == '' }}
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -247,7 +267,7 @@ jobs:
           retention-days: 7
 
   native-download-stage:
-    if: ${{ github.event_name == 'workflow_dispatch' && inputs.native_delivery_operation == 'stage' }}
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.native_delivery_operation == 'stage' && inputs.fixed_release_tag == '' && inputs.fixed_bundle_sha256 == '' && inputs.fixed_payload_sha256 == '' && inputs.fixed_manifest_sha256 == '' && inputs.fixed_source_sha == '' }}
     needs: native-download-tooling-check
     runs-on: ubuntu-latest
     timeout-minutes: 360
@@ -310,7 +330,7 @@ jobs:
           retention-days: 7
 
   native-download-promote:
-    if: ${{ github.event_name == 'workflow_dispatch' && inputs.native_delivery_operation == 'promote' }}
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.native_delivery_operation == 'promote' && inputs.fixed_release_tag == '' && inputs.fixed_bundle_sha256 == '' && inputs.fixed_payload_sha256 == '' && inputs.fixed_manifest_sha256 == '' && inputs.fixed_source_sha == '' }}
     needs: native-download-tooling-check
     runs-on: ubuntu-latest
     timeout-minutes: 10
@@ -387,8 +407,86 @@ jobs:
           if-no-files-found: error
           retention-days: 7
 
+  publish-fixed-r16-assets:
+    if: ${{ github.event_name == 'workflow_dispatch' && (inputs.fixed_release_tag != '' || inputs.fixed_bundle_sha256 != '' || inputs.fixed_payload_sha256 != '' || inputs.fixed_manifest_sha256 != '' || inputs.fixed_source_sha != '') }}
+    runs-on: ubuntu-latest
+    # Draft releases are visible only to an identity with push access. The fixed
+    # publisher still uses GET only; this token never reaches asset redirect hosts.
+    permissions:
+      contents: write
+    timeout-minutes: 90
+    # The existing Worker has no create-only PUT. Serialize this one immutable
+    # prefix and retain/read-verify any existing matching objects on a rerun.
+    concurrency:
+      group: fixed-r16-assets-${{ inputs.fixed_payload_sha256 }}
+      cancel-in-progress: false
+    steps:
+      - name: Require the frozen source and a single release operation
+        env:
+          FIXED_SOURCE_SHA: ${{ inputs.fixed_source_sha }}
+          NATIVE_OPERATION: ${{ inputs.native_delivery_operation }}
+          DEPLOY_UPLOAD_WORKER: ${{ inputs.deploy_upload_worker }}
+          DEPLOY_WORKER: ${{ inputs.deploy_worker }}
+          DEPLOY_VERCEL: ${{ inputs.deploy_vercel }}
+          RESUME_EXISTING: ${{ inputs.resume_existing_assets }}
+          USE_EXISTING: ${{ inputs.use_existing_release }}
+          FULL_CRYSTAL: ${{ inputs.require_full_crystal_pack }}
+        run: |
+          set -euo pipefail
+          [[ "$FIXED_SOURCE_SHA" =~ ^[a-f0-9]{40}$ && "$FIXED_SOURCE_SHA" == "$GITHUB_SHA" ]] || { echo "SOURCE_SHA_MISMATCH"; exit 1; }
+          [[ -z "$NATIVE_OPERATION" || "$NATIVE_OPERATION" == off ]] || { echo "FIXED_OPERATION_CONFLICT"; exit 1; }
+          for flag in "$DEPLOY_UPLOAD_WORKER" "$DEPLOY_WORKER" "$DEPLOY_VERCEL" "$RESUME_EXISTING" "$USE_EXISTING" "$FULL_CRYSTAL"; do
+            [[ "$flag" != true ]] || { echo "FIXED_OPERATION_CONFLICT"; exit 1; }
+          done
+
+      - name: Checkout exactly the dispatch commit without persisted credentials
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+
+      - name: Use the reviewed gzip toolchain
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22.18.0
+
+      - name: Check fixed-payload boundaries and manifest-last behavior
+        working-directory: mir2-web3
+        run: node apps/web/scripts/test-fixed-r16-assets.mjs
+
+      - name: Download, verify and review or publish the fixed draft payload
+        id: fixed_publish
+        working-directory: mir2-web3
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          FIXED_RELEASE_TAG: ${{ inputs.fixed_release_tag }}
+          FIXED_SOURCE_SHA: ${{ inputs.fixed_source_sha }}
+          FIXED_BUNDLE_SHA256: ${{ inputs.fixed_bundle_sha256 }}
+          FIXED_PAYLOAD_SHA256: ${{ inputs.fixed_payload_sha256 }}
+          FIXED_MANIFEST_SHA256: ${{ inputs.fixed_manifest_sha256 }}
+          PUBLISH_R2: ${{ inputs.publish_r2 }}
+          MIR2_R2_UPLOAD_WORKER_URL: ${{ secrets.MIR2_R2_UPLOAD_WORKER_URL }}
+          MIR2_R2_UPLOAD_SECRET: ${{ secrets.MIR2_R2_UPLOAD_SECRET }}
+        run: |
+          set -euo pipefail
+          mode=--dry-run
+          if [[ "$PUBLISH_R2" == true ]]; then mode=--publish; fi
+          node apps/web/scripts/publish-fixed-r16-assets.mjs "$mode" \
+            --release-tag "$FIXED_RELEASE_TAG" --source-sha "$FIXED_SOURCE_SHA" \
+            --bundle-sha256 "$FIXED_BUNDLE_SHA256" --payload-sha256 "$FIXED_PAYLOAD_SHA256" \
+            --manifest-sha256 "$FIXED_MANIFEST_SHA256" --output-dir "$RUNNER_TEMP/fixed-r16-output"
+
+      - name: Retain the safe fixed-payload receipt
+        if: ${{ always() && steps.fixed_publish.outcome != 'skipped' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: fixed-r16-assets-${{ github.run_id }}
+          path: ${{ runner.temp }}/fixed-r16-output/receipt.json
+          if-no-files-found: error
+          retention-days: 14
+
   build-web-assets:
-    if: ${{ github.event_name == 'workflow_dispatch' && (inputs.native_delivery_operation == '' || inputs.native_delivery_operation == 'off') }}
+    if: ${{ github.event_name == 'workflow_dispatch' && (inputs.native_delivery_operation == '' || inputs.native_delivery_operation == 'off') && inputs.fixed_release_tag == '' && inputs.fixed_bundle_sha256 == '' && inputs.fixed_payload_sha256 == '' && inputs.fixed_manifest_sha256 == '' && inputs.fixed_source_sha == '' }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout

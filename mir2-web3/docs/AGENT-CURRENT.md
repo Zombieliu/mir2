@@ -16,9 +16,11 @@ working tree, services, release packages, source snapshots or parity percentages
 
 ## Last recorded decisions and open work
 
+用户已清除持续Goal；当前明确任务是发布最新R16 Web到`https://numeron.obelisk.build/game`。该域名目前属于营销项目，旧/game跳转后404。已创建隔离新前端项目`numeron-r16-web`，旧mir2游戏项目/正式服保留。源码与资产候选仍在验证，未切域名或游戏服务。公会公共壳、真实职级流程、统计及只读仓库的限定证据见[本轮来源](evidence/r16-guild-layout-20261108/README.md)。
+
 Checkpoints through85eecf4be were pushed/verified. Web guild ranks passed both render backends; first owner unexpected-login cold entry remains unexplained. Native now consumes actual guild deltas and typed UserInformation realId, matches option-specific cursor evidence, and handles definitely-unsent read/queue eviction.198 unique checks plus canonical locked/offline release build pass;2 real-asset GPU/GDI checks and native window/cross-client remain unrun. Candidatea63bd2a3 is a single EXE requiring existing R16 resources, not installed. Keep [scope and failures](WEB-R16-PARITY-GOAL.zh-CN.md#native-公会增量与请求生命周期2026-11-08) separate from global parity.
 
-Active Goal is Windows R16 to Web 1:1. Use the [feature and evidence ledger](WEB-R16-PARITY-GOAL.zh-CN.md). User priority remains code, shared rules, protocol, headless browser and builds without desktop input. Group and ordinary recovery passed both render backends. Native credential-first pending-save recovery now passes13 store/2 real WS cases plus103 adjacent unique cases (118 total), including exact binding/token, cancellation rollback and final expiry. Native client14s budget stays unchanged. Source checkpoint1485 files was pushed and verified at cc0cbf1a5; preserve that history and keep later verified slices committed. Continue group common gaps, trade, Alo and release gates; keep failures and Candidate/Accepted separate.
+The Windows R16 to Web 1:1 scope remains in the [feature and evidence ledger](WEB-R16-PARITY-GOAL.zh-CN.md); the user cleared the persistent Goal before requesting this deployment. Prior group/recovery evidence and source checkpoint1485 files at cc0cbf1a5 remain. Preserve that history, keep verified slices committed, and keep failures, deployment gates and final human Accepted separate. Prefer code/protocol/headless work without desktop input.
 
 | Topic | Recorded state and next scope | Detailed reference |
 | --- | --- | --- |

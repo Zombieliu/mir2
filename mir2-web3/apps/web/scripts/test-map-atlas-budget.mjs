@@ -16,8 +16,10 @@ import {
   mapAtlasManifestFitsBudget,
   packIntoPages,
   readVerifiedRemoteMapAtlasRelease,
+  readRemoteMapAtlasBuildPlan,
   removeStaleMapAtlasArtifacts,
 } from "./build-map-atlas-pack.mjs";
+import { resolveProductionAssetConfigPath, LEGACY_PRODUCTION_ASSET_CONFIG } from "./lib/production-asset-config.mjs";
 
 const SCRIPT_DIR = path.dirname(fileURLToPath(import.meta.url));
 const MANIFEST_PATH = path.resolve(
@@ -159,7 +161,9 @@ test("ground-tile placeholders are actionable and non-ground placeholders stay n
 });
 
 test("remote production builds require a verified content-addressed map atlas", async () => {
-  const pinned = await readVerifiedRemoteMapAtlasRelease();
+  // This unchanged full-atlas contract belongs to the legacy production profile.
+  // Selecting the new finite profile must not weaken these original assertions.
+  const pinned = await readVerifiedRemoteMapAtlasRelease(resolveProductionAssetConfigPath(undefined, LEGACY_PRODUCTION_ASSET_CONFIG));
   assert.match(pinned.releaseVersion, /^[a-zA-Z0-9._-]+$/);
   assert.match(pinned.contentHash, /^[a-f0-9]{64}$/);
   assert.equal(
@@ -197,6 +201,15 @@ test("repeat builds remove only stale content-addressed atlas artifacts", async 
 });
 
 test("the generated map atlas never exceeds the WebGL2 compatibility budget", async (context) => {
+  if (requireManifest && isRemoteReleaseBuild()) {
+    const plan = await readRemoteMapAtlasBuildPlan();
+    if (plan.enabled === false) {
+      assert.equal(plan.profile, "numeron-r16-finite");
+      assert.equal(plan.verified, false); assert.equal(plan.atlasBudgetVerified, false);
+      context.skip("selected finite profile has no enabled atlas; atlas performance budget was not verified");
+      return;
+    }
+  }
   let manifest;
   try {
     manifest = JSON.parse(await fs.readFile(MANIFEST_PATH, "utf8"));

@@ -4,7 +4,7 @@ Updated 2026-11-08 (Asia/Shanghai). Read [coordination](AGENT-ORCHESTRATION.md) 
 
 ## Web 对齐 Windows R16
 
-持续 Goal 已启用，逐项对照代码和实际验收。[范围与下一项](WEB-R16-PARITY-GOAL.zh-CN.md)
+用户已清除持续Goal，当前具体任务是发布最新候选到`numeron.obelisk.build/game`。原完整对齐范围及未结项继续保留，不在当前发布任务外自动开工。[范围与证据](WEB-R16-PARITY-GOAL.zh-CN.md)
 
 最新优先级：先做无需桌面控制的代码对照、共享逻辑、普通协议、无界面浏览器和构建；Windows 窗口实机单列暂缓。
 
