@@ -94,6 +94,9 @@ export function validatePublicManifest(bytes, contract = FIXED_R16) {
 export function publicEnvironment(key, sha, config) {
   return key === 'main' ? {
     NEXT_PUBLIC_SITE_URL: ORIGIN, NEXT_PUBLIC_GAME_URL: `${ORIGIN}/game`,
+    // An explicit empty build/runtime value overrides the repository's .env.production.
+    // The current public marketing baseline has no available Windows installer.
+    NEXT_PUBLIC_WINDOWS_DOWNLOAD_URL: '',
     GAME_HEALTH_URL: 'https://165.154.65.136.sslip.io/playtest/health', EXPLORER_ORIGIN: 'https://numeron-explorer.vercel.app',
   } : {
     NEXT_PUBLIC_MIR2_GATEWAY_WS_URL: 'wss://165.154.65.136.sslip.io/playtest/ws',
@@ -103,6 +106,7 @@ export function publicEnvironment(key, sha, config) {
     MIR2_USE_PREBUILT_BEVY_RUNTIME: '1', MIR2_USE_PREBUILT_CLIENT_CORE: '1', MIR2_REUSE_ORIGINAL_ASSET_MANIFEST: '1',
     MIR2_PRODUCTION_ASSET_CONFIG: 'numeron-r16-web-assets.json',
     MIR2_DEPLOY_REVISION: sha, NEXT_PUBLIC_MIR2_ASSET_BASE_URL: config.assetBaseUrl, MIR2_ASSET_OBJECT_PREFIX: config.objectPrefix,
+    MIR2_R2_PROXY_BASE: config.assetBaseUrl, MIR2_ASSET_BASE_URL: config.assetBaseUrl,
   };
 }
 export function deploymentBody(key, sha, repoId, config, secret) {
@@ -115,7 +119,8 @@ export function deploymentBody(key, sha, repoId, config, secret) {
       installCommand: 'npm ci', outputDirectory: null, sourceFilesOutsideRootDirectory: true },
     env: { ...environment, ...(key === 'game' ? { MIR2_PASSKEY_AUTH_SECRET: secret } : {}) }, build: { env: environment },
     meta: { numeronR16SourceSha: sha, numeronR16Root: SITES[key].root, numeronR16AssetVersion: config.version,
-      numeronR16OriginalBaseline: SITES.original.baseline, numeronR16MainBaseline: SITES.main.baseline },
+      numeronR16OriginalBaseline: SITES.original.baseline, numeronR16MainBaseline: SITES.main.baseline,
+      ...(key === 'main' ? { numeronR16WindowsDownloadPolicy: 'unavailable-baseline' } : {}) },
   };
 }
 export function candidateGuard(key, candidate, snapshot, sha, config) {
@@ -134,11 +139,35 @@ export function candidateGuard(key, candidate, snapshot, sha, config) {
     && snapshot?.projectId === site.project && roots.every(root => root === site.root), 'candidateIdentitySourceRootMismatch');
   requireRelease(/^[a-z0-9][a-z0-9-]*\.vercel\.app$/.test(candidate.url || ''), 'candidateHostnameInvalid');
 }
-export function windowsDownloadLinks(html) {
-  const links = [...html.matchAll(/<a\b[^>]*>/g)].filter(match => /data-track=["']download_windows["']/.test(match[0]))
-    .map(match => /\bhref=["']([^"']+)["']/.exec(match[0])?.[1]?.replaceAll('&amp;', '&'));
-  requireRelease(links.length > 0 && links.every(link => {
-    try { const url = new URL(link); return url.protocol === 'https:' && !url.username && !url.password; } catch { return false; }
+function downloadMarkup(html) {
+  requireRelease(typeof html === 'string', 'downloadPageHtmlInvalid');
+  // Next's serialized data and script source do not establish rendered page identity.
+  return html.replace(/<!--[\s\S]*?-->|<(script|style)\b[^>]*>[\s\S]*?<\/\1\s*>/gi, '');
+}
+function trackedDownloadAnchors(markup, track) {
+  const marker = new RegExp(`\\sdata-track\\s*=\\s*(?:"${track}"|'${track}'|${track}(?=\\s|/?>))`, 'i');
+  return [...markup.matchAll(/<a\b[^>]*>/gi)].map(match => match[0]).filter(tag => marker.test(tag));
+}
+export function validateDownloadPage(html) {
+  const markup = downloadMarkup(html);
+  const page = [...markup.matchAll(/<main\b[^>]*>/gi)].some(match => {
+    const classes = /\sclass\s*=\s*(["'])(.*?)\1/i.exec(match[0]);
+    return classes?.[2].split(/\s+/).includes('download-page');
+  });
+  requireRelease(/<html\b/i.test(markup) && page
+    && ['download_web', 'navigation_promotions', 'footer_promotions'].every(track => trackedDownloadAnchors(markup, track).length > 0), 'downloadPageHtmlInvalid');
+}
+export function windowsDownloadLinks(html, { allowEmpty = false } = {}) {
+  // Empty is a page-specific policy, never the default for arbitrary missing markup.
+  if (allowEmpty === true) validateDownloadPage(html);
+  const links = trackedDownloadAnchors(downloadMarkup(html), 'download_windows').map(tag => {
+    if ([...tag.matchAll(/\shref\s*=/gi)].length !== 1) return undefined;
+    return /\shref\s*=\s*(["'])(.*?)\1/i.exec(tag)?.[2]?.replaceAll('&amp;', '&');
+  });
+  requireRelease((links.length > 0 || allowEmpty === true) && links.every(link => {
+    if (typeof link !== 'string' || !link || /[\u0000-\u0020\u007f<>"'\\]|&#|&[A-Za-z]+;/.test(link)) return false;
+    try { const url = new URL(link); return url.protocol === 'https:' && !url.username && !url.password
+      && !/^https:\/\/[^/?#]*@/i.test(link); } catch { return false; }
   }), 'windowsDownloadLinkMissing');
   return [...new Set(links)].sort();
 }
@@ -147,8 +176,11 @@ export function verifyPages(read, candidates, baselineMain, sha) {
   requireRelease(marketing.includes('/marketing-assets/_next/static/') && marketing.includes('navigation_promotions')
     && marketing.includes('footer_promotions'), 'marketingHtmlInvalid');
   const download = read(candidates.main, '/zh-CN/download');
+  const baselineDownload = read(baselineMain, '/zh-CN/download');
+  validateDownloadPage(download); validateDownloadPage(baselineDownload);
   requireRelease(download.includes(`${ORIGIN}/game`), 'marketingGameLinkInvalid');
-  requireRelease(JSON.stringify(windowsDownloadLinks(download)) === JSON.stringify(windowsDownloadLinks(read(baselineMain, '/zh-CN/download'))), 'windowsDownloadsChanged');
+  requireRelease(JSON.stringify(windowsDownloadLinks(download, { allowEmpty: true }))
+    === JSON.stringify(windowsDownloadLinks(baselineDownload, { allowEmpty: true })), 'windowsDownloadsChanged');
   requireRelease(read(candidates.main, '/en').includes('lang="en"'), 'marketingEnglishRouteInvalid');
   let version, manifest;
   try { version = JSON.parse(read(candidates.game, '/version')); manifest = JSON.parse(read(candidates.game, '/manifest.webmanifest')); }

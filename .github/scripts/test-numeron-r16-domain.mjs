@@ -8,6 +8,11 @@ const SHA = 'a'.repeat(40), TOOL_SHA = 'b'.repeat(40), TOKEN = 'synthetic-domain
 const IDS = { main: 'dpl_domainmain', game: 'dpl_domaingame' };
 const GAME = 'numeron-r16-web.vercel.app', MAIN = 'numeron-legend-of-rebirth.vercel.app';
 const json = value => Response.json(value);
+const WINDOWS = 'https://assets.mir2.obelisk.build/fixture/Mir2Setup.exe';
+const windowsAnchor = (href = WINDOWS) => `<a class="download-action" href="${href}" data-track="download_windows">Windows</a>`;
+const downloadHtml = (windows = '') => `<html><body><nav><a href="/zh-CN/promotions" data-track="navigation_promotions">Promotions</a></nav>
+  <main class="download-page"><a class="download-action" href="${ORIGIN}/game" data-track="download_web">Play</a>${windows || '<span class="download-action is-disabled" aria-disabled="true"><span>尚未公开</span><i>—</i></span>'}</main>
+  <footer><a href="/zh-CN/promotions" data-track="footer_promotions">Promotions</a></footer></body></html>`;
 
 function fixture() {
   const config = JSON.parse(readFileSync(new URL('../../mir2-web3/config/numeron-r16-web-assets.json', import.meta.url), 'utf8'));
@@ -57,7 +62,7 @@ function fixture() {
       if (u.pathname === '/manifest.webmanifest') return json({ start_url: '/game', scope: '/' });
       if (u.pathname === '/game') return new Response('<html><script src="/_next/static/game.js"></script></html>');
       if (['/', '/en', '/zh-CN'].includes(u.pathname)) return new Response('<html data-track="navigation_promotions" data-footer="footer_promotions"><script src="/marketing-assets/_next/static/site.js"></script></html>');
-      if (u.pathname === '/zh-CN/download') return new Response(`<a href="${ORIGIN}/game">Play</a><a href="https://assets.mir2.obelisk.build/fixture/Mir2Setup.exe" data-track="download_windows">Windows</a>`);
+      if (u.pathname === '/zh-CN/download') return new Response(downloadHtml());
       throw Error('unmocked public path');
     }
     assert.equal(u.searchParams.get('teamId'), TEAM); assert.equal(req.headers.Authorization, `Bearer ${TOKEN}`);
@@ -108,6 +113,36 @@ test('one exact move follows default alias body proofs and preserves all three p
   const at = r.calls.findIndex(call => call.method === 'POST');
   for (const pathname of ['/version', '/game', '/', '/zh-CN/download']) assert(r.calls.slice(0, at).some(call => call.url === `https://${GAME}${pathname}`));
   assert(writes(r).every(call => /\/v1\/projects\/[^/]+\/domains\/numeron\.obelisk\.build\/move$/.test(call.pathname)));
+});
+
+test('download pages on the new game proxy and main alias both preserve the unavailable Windows baseline', async () => {
+  const f = fixture(), result = await f.execute(); assert.ifError(result.error);
+  assert.equal(writes(result).length, 1);
+  for (const origin of [`https://${GAME}`, `https://${MAIN}`, ORIGIN])
+    assert(result.calls.some(req => req.url === `${origin}/zh-CN/download`));
+  const retained = fixture(); retained.state.onPublic = req => req.pathname === '/zh-CN/download' ? new Response(downloadHtml(windowsAnchor())) : undefined;
+  assert.ifError((await retained.execute()).error);
+});
+
+test('domain cannot match two empty Windows lists from SSO, 404, empty or incomplete HTML', async () => {
+  for (const origin of [`https://${GAME}`, `https://${MAIN}`]) for (const html of ['', '<html>Authentication required</html>', '<html>404</html>',
+    `<html><script>${downloadHtml()}</script></html>`, downloadHtml().replaceAll('download_web', 'absent')]) {
+    const f = fixture(); f.state.onPublic = req => req.url === `${origin}/zh-CN/download` ? new Response(html) : undefined;
+    const result = await f.execute(); failed(result, /downloadPageHtmlInvalid/); assert.equal(writes(result).length, 0);
+  }
+});
+
+test('domain refuses introduced, removed, changed or malformed Windows links before its first move', async () => {
+  for (const origin of [`https://${GAME}`, `https://${MAIN}`]) {
+    const f = fixture(); f.state.onPublic = req => req.url === `${origin}/zh-CN/download` ? new Response(downloadHtml(windowsAnchor())) : undefined;
+    const result = await f.execute(); failed(result, /domainWindowsDownloadsChanged/); assert.equal(writes(result).length, 0);
+  }
+  for (const anchor of [windowsAnchor('https://assets.mir2.obelisk.build/changed.exe'), '<a data-track="download_windows">Windows</a>',
+    windowsAnchor('http://example.com/setup.exe'), windowsAnchor('https://user:pass@example.com/setup.exe')]) {
+    const f = fixture(); f.state.onPublic = req => req.pathname === '/zh-CN/download'
+      ? new Response(downloadHtml(req.url.startsWith(`https://${MAIN}/`) ? windowsAnchor() : anchor)) : undefined;
+    const result = await f.execute(); failed(result, /domainWindowsDownloadsChanged|windowsDownloadLinkMissing/); assert.equal(writes(result).length, 0);
+  }
 });
 test('foreign/current project generations, candidate metadata and explicit wrong roots reject before mutation', async () => {
   for (const change of [f => { f.projects.original.targets.production.id = 'dpl_other'; },
@@ -241,7 +276,7 @@ test('404 is optional only for scoped domain and alias reads, never projects, ca
       if (path === '/manifest.webmanifest') return json({ start_url: '/game', scope: '/' });
       if (path === '/game') return new Response('<html><script src="/_next/static/game.js"></script></html>');
       if (path === '/') return new Response('<html data-track="navigation_promotions" data-footer="footer_promotions"><script src="/marketing-assets/_next/static/site.js"></script></html>');
-      if (path === '/zh-CN/download') return new Response(`<a href="${ORIGIN}/game">Play</a><a href="https://assets.mir2.obelisk.build/fixture/Mir2Setup.exe" data-track="download_windows">Windows</a>`);
+      if (path === '/zh-CN/download') return new Response(downloadHtml());
     }
   };
   const alternate = await fallback.execute(); assert.ifError(alternate.error); assert.equal(writes(alternate).length, 1);

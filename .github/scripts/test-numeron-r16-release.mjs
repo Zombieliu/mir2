@@ -4,7 +4,7 @@ import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import { FIXED_R16 } from '../../mir2-web3/apps/web/scripts/lib/fixed-r16-assets.mjs';
 import { TEAM, BRANCH, REPOSITORY, SITES, ORIGIN, runNumeronRelease, deploymentBody,
-  validateAssetReceipt, validatePublicManifest, childEnvironment } from './numeron-r16-release.mjs';
+  validateAssetReceipt, validatePublicManifest, childEnvironment, windowsDownloadLinks, validateDownloadPage } from './numeron-r16-release.mjs';
 
 const SHA = 'a'.repeat(40), TOKEN = 'synthetic-vercel-token', GH = 'synthetic-github-token';
 const SECRET = 'synthetic-gateway-secret-not-a-real-credential';
@@ -12,6 +12,13 @@ const IDS = { main: 'dpl_maincandidate', game: 'dpl_gamecandidate' };
 const digest = bytes => createHash('sha256').update(bytes).digest('hex');
 const clone = value => structuredClone(value);
 const json = value => Response.json(value);
+const WINDOWS = 'https://assets.mir2.obelisk.build/client-updates/installers/fixture/Mir2Setup.exe';
+// Exact public baseline element structure; a disabled Windows card is not an anchor.
+const disabledWindows = '<article class="download-platform platform-windows" data-reveal="true"><span class="download-action is-disabled" aria-disabled="true"><span>尚未公开</span><i>—</i></span></article>';
+const downloadHtml = (windows = '') => `<html><body><nav><a href="/zh-CN/promotions" data-track="navigation_promotions">Promotions</a></nav>
+  <main class="download-page"><a class="download-action" href="${ORIGIN}/game" data-track="download_web">Play</a>${windows || disabledWindows}</main>
+  <footer><a href="/zh-CN/promotions" data-track="footer_promotions">Promotions</a></footer></body></html>`;
+const windowsAnchor = (href = WINDOWS) => `<a class="download-action" href="${href}" data-track="download_windows">Windows</a>`;
 
 function fixture(operation = 'numeron-promote') {
   const manifest = Buffer.from(JSON.stringify({ schemaVersion: 1, kind: 'mir2-remote-asset-release',
@@ -96,7 +103,7 @@ function fixture(operation = 'numeron-promote') {
     const overridden = state.onRead?.(candidate, pathname, state);
     if (overridden !== undefined) return overridden;
     if (pathname === '/zh-CN') return '<html data-track="navigation_promotions" data-footer="footer_promotions"><script src="/marketing-assets/_next/static/site.js"></script></html>';
-    if (pathname === '/zh-CN/download') return `<a href="${ORIGIN}/game">Play</a><a data-track="download_windows" href="https://assets.mir2.obelisk.build/client-updates/installers/fixture/Mir2Setup.exe">Windows</a>`;
+    if (pathname === '/zh-CN/download') return downloadHtml();
     if (pathname === '/en') return '<html lang="en">';
     if (pathname === '/version') return JSON.stringify({ revision: SHA });
     if (pathname === '/manifest.webmanifest') return JSON.stringify({ start_url: '/game', scope: '/' });
@@ -144,14 +151,81 @@ test('stage creates two same-source production candidates with explicit roots, N
     assert.equal(body.build.env.MIR2_PASSKEY_AUTH_SECRET, undefined);
   }
   const main = writes(r)[0].body, game = writes(r)[1].body;
-  assert.deepEqual(Object.keys(main.env).sort(), ['EXPLORER_ORIGIN', 'GAME_HEALTH_URL', 'NEXT_PUBLIC_GAME_URL', 'NEXT_PUBLIC_SITE_URL']);
+  assert.deepEqual(Object.keys(main.env).sort(), ['EXPLORER_ORIGIN', 'GAME_HEALTH_URL', 'NEXT_PUBLIC_GAME_URL', 'NEXT_PUBLIC_SITE_URL', 'NEXT_PUBLIC_WINDOWS_DOWNLOAD_URL']);
+  assert.equal(main.env.NEXT_PUBLIC_WINDOWS_DOWNLOAD_URL, '');
+  assert.equal(main.build.env.NEXT_PUBLIC_WINDOWS_DOWNLOAD_URL, '');
+  assert.equal(main.meta.numeronR16WindowsDownloadPolicy, 'unavailable-baseline');
   assert.equal(game.env.MIR2_PASSKEY_AUTH_SECRET, SECRET); assert.equal(game.env.NEXT_PUBLIC_MIR2_GATEWAY_WS_URL, 'wss://165.154.65.136.sslip.io/playtest/ws');
   assert.equal(game.env.MIR2_RUNTIME_ENV, 'test'); assert.equal(game.env.NEXT_PUBLIC_MIR2_QUEST_GUIDANCE, 'newcomer-v2');
   assert.equal(game.env.MIR2_PRODUCTION_ASSET_CONFIG, 'numeron-r16-web-assets.json');
   assert.equal(game.build.env.MIR2_PRODUCTION_ASSET_CONFIG, 'numeron-r16-web-assets.json');
+  for (const field of ['MIR2_R2_PROXY_BASE', 'MIR2_ASSET_BASE_URL']) {
+    assert.equal(game.env[field], f.config.assetBaseUrl);
+    assert.equal(game.build.env[field], f.config.assetBaseUrl);
+    assert.equal(main.env[field], undefined);
+  }
+  assert(!JSON.stringify(main.build.env).includes(SECRET));
+  assert(!JSON.stringify(game.build.env).includes(SECRET));
   assert.equal(r.projects.original.targets.production.id, SITES.original.baseline);
   assert.equal(r.projects.main.targets.production.id, SITES.main.baseline); assert.equal(r.projects.game.targets.production.id, null);
   assert(!JSON.stringify(r.receipts).includes(SECRET)); assert(!JSON.stringify(r.receipts).includes(TOKEN));
+});
+
+test('Windows links default to required; explicit empty mode accepts only a real download page', () => {
+  assert.throws(() => windowsDownloadLinks(downloadHtml()), /windowsDownloadLinkMissing/);
+  assert.deepEqual(windowsDownloadLinks(downloadHtml(), { allowEmpty: true }), []);
+  assert.deepEqual(windowsDownloadLinks(downloadHtml(windowsAnchor()), { allowEmpty: true }), [WINDOWS]);
+  for (const html of ['', '<html>Authentication required</html>', '<html><title>404</title></html>',
+    `<html><script>download-page download_web navigation_promotions footer_promotions ${ORIGIN}/game</script></html>`]) {
+    assert.throws(() => windowsDownloadLinks(html, { allowEmpty: true }));
+  }
+});
+
+test('download identity follows the real website source markup and ignores serialized or commented markers', () => {
+  const source = readFileSync(new URL('../../mir2-web3/apps/website/app/[locale]/download/page.tsx', import.meta.url), 'utf8');
+  const chrome = readFileSync(new URL('../../mir2-web3/apps/website/app/components/site-chrome.tsx', import.meta.url), 'utf8');
+  assert(source.includes('<main className="download-page">'));
+  assert(source.includes('data-track="download_web"'));
+  assert(source.includes('platform.id === "windows" && windowsUrl'));
+  assert(source.includes('<span className="download-action is-disabled" aria-disabled="true">'));
+  assert(chrome.includes('data-track="navigation_promotions"') && chrome.includes('data-track="footer_promotions"'));
+  assert.doesNotThrow(() => validateDownloadPage(downloadHtml()));
+  for (const html of [`<html><script>${downloadHtml()}</script></html>`, `<html><!--${downloadHtml()}--></html>`,
+    ...['download-page', 'download_web', 'navigation_promotions', 'footer_promotions'].map(marker => downloadHtml().replaceAll(marker, 'absent'))]) {
+    assert.throws(() => validateDownloadPage(html), /downloadPageHtmlInvalid/);
+  }
+  assert.throws(() => windowsDownloadLinks(downloadHtml(), { allowEmpty: 'true' }), /windowsDownloadLinkMissing/);
+});
+
+test('Windows unavailable baseline cannot gain a link, and a previous real link cannot disappear', async () => {
+  const success = fixture(), same = await success.execute(); assert.ifError(same.error);
+  for (const introduced of [true, false]) {
+    const f = fixture();
+    f.state.onRead = (candidate, pathname) => pathname === '/zh-CN/download'
+      ? downloadHtml((candidate.id === SITES.main.baseline) !== introduced ? windowsAnchor() : '') : undefined;
+    const r = await f.execute(); failed(r, /windowsDownloadsChanged/); assert.equal(writes(r).length, 0);
+  }
+  const retained = fixture(); retained.state.onRead = (_candidate, pathname) => pathname === '/zh-CN/download' ? downloadHtml(windowsAnchor()) : undefined;
+  assert.ifError((await retained.execute()).error);
+});
+
+test('baseline and candidate download HTML must both be genuine, even with zero Windows links', async () => {
+  for (const baseline of [true, false]) for (const html of ['', '<html>Authentication required</html>', '<html>404</html>',
+    `<html><main class="download-page"><a href="${ORIGIN}/game" data-track="download_web">Play</a></main></html>`]) {
+    const f = fixture();
+    f.state.onRead = (candidate, pathname) => pathname === '/zh-CN/download' && (candidate.id === SITES.main.baseline) === baseline ? html : undefined;
+    const r = await f.execute(); failed(r, /downloadPageHtmlInvalid/); assert.equal(writes(r).length, 0);
+  }
+});
+
+test('empty Windows policy never tolerates missing, malformed or unsafe tracked hrefs', () => {
+  for (const anchor of ['<a data-track="download_windows">Windows</a>', '<a data-track="download_windows" href=unquoted>Windows</a>',
+    '<a data-track="download_windows" href="https://safe.example/a.exe" href="https://other.example/b.exe">Windows</a>',
+    ...['http://example.com/setup.exe', 'javascript:alert(1)', '//example.com/setup.exe', 'https://user:pass@example.com/setup.exe',
+      ' https://example.com/setup.exe', 'https://example.com/\\setup.exe', 'https://@example.com/setup.exe',
+      'https://example.com/&#x0a;setup.exe'].map(windowsAnchor)]) {
+    assert.throws(() => windowsDownloadLinks(downloadHtml(anchor), { allowEmpty: true }));
+  }
 });
 test('missing secret, old prefix, foreign asset run or skipped job cannot stage anything', async () => {
   const changes = [f => { f.env.MIR2_R16_PASSKEY_AUTH_SECRET = ''; }, f => { f.config.objectPrefix = 'mir2/v/old'; },

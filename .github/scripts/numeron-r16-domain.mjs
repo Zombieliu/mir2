@@ -3,7 +3,7 @@ import { createHash } from 'node:crypto';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { TEAM, SITES, ORIGIN, ReleaseError, validateIdentity,
-  validateProject, guardProjects, candidateGuard, validateAssetConfig, windowsDownloadLinks } from './numeron-r16-release.mjs';
+  validateProject, guardProjects, candidateGuard, validateAssetConfig, windowsDownloadLinks, validateDownloadPage } from './numeron-r16-release.mjs';
 
 export const DOMAIN = 'numeron.obelisk.build';
 const GAME_ALIASES = ['numeron-r16-web.vercel.app', 'numeron-r16-web-obelisk-labs.vercel.app'];
@@ -143,9 +143,11 @@ export async function runNumeronDomain({ env = process.env, fetchImpl = fetch,
       const home = await publicText(origin, '/', true);
       ensure(home.includes('/marketing-assets/_next/static/') && home.includes('navigation_promotions') && home.includes('footer_promotions'), 'domainPublicMarketingInvalid');
       const download = await publicText(origin, '/zh-CN/download');
+      validateDownloadPage(download);
       ensure(download.includes(`${ORIGIN}/game`), 'domainPublicGameLinkInvalid');
       const marketingDownload = await publicText(`https://${MAIN_ALIAS}`, '/zh-CN/download');
-      ensure(same(windowsDownloadLinks(download), windowsDownloadLinks(marketingDownload)), 'domainWindowsDownloadsChanged');
+      validateDownloadPage(marketingDownload);
+      ensure(same(windowsDownloadLinks(download, { allowEmpty: true }), windowsDownloadLinks(marketingDownload, { allowEmpty: true })), 'domainWindowsDownloadsChanged');
       return { revision: version.revision, gameHtmlSha256: sha256(game), marketingHtmlSha256: sha256(home), downloadHtmlSha256: sha256(download) };
     }
     receipt.defaultAliasProof = await pages(`https://${gameAlias}`);
