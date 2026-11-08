@@ -1,4 +1,52 @@
-# Numeron R16 Web 发布候选
+# Numeron R16 Web 发布记录
+
+## 2026-11-09 已发布结果
+
+最新候选已发布至 **https://numeron.obelisk.build/game**。本次为具体发布任务，持续1:1 Goal已清除；没有扩大为Sui主网、全局Candidate或最终真人Accepted。
+
+| 部分 | 实际版本与证据 |
+| --- | --- |
+| Web与营销 | `f2de762309768b51b39438c2437c14e819df9bf7`；[stage 42495986185](https://github.com/Zombieliu/mir2/actions/runs/42495986185)、[promotion 42498751311](https://github.com/Zombieliu/mir2/actions/runs/42498751311)成功 |
+| 用户域名 | [42503221364](https://github.com/Zombieliu/mir2/actions/runs/42503221364)成功；官方项目间move至`numeron-r16-web`，未改DNS、注册或旧Mir2项目 |
+| Linux TEST Gateway | `d53f9e3b22e2b92c2dc86644b6ae370fc1acab53`；[42483702437](https://github.com/Zombieliu/mir2/actions/runs/42483702437)整体通过。d53→f2de没有Rust/Gateway/游戏逻辑差异 |
+| 内容 | 共同基准`platinum_fiveclass` v1 / `newcomer-v2` / Native引导；真实realm bundleHash=`a7d5126c0418536e30a835667e101687a5f54700060985349205f6b93f7262da` |
+| 固定素材 | `mir2/v/20261108-r16-08ec86d5105c`，42738份；[f2de复核42494701555](https://github.com/Zombieliu/mir2/actions/runs/42494701555)全部公开读回一致、写入0；原完整发布42483702580成功 |
+
+新Game deployment为`dpl_Ech5Rehf78MG9FXH7fAV9wwFC7GZ`，营销为`dpl_56jyXmxzdtTfNYGpzy4MhofziJRt`。`/version`实际返回f2de；`/game`、官网首页、中文下载页均200，同源营销资源、PWA和Web按钮切换前后均核对。
+
+连接既有隔离 **TEST `/playtest`**。原`mir2.obelisk.build`项目、正式Gateway和钱包服务未替换；未更新或删除Windows EXE。旧Numeron官网Windows卡片原本不可下载，新部署保持这一状态，原Mir2下载不变。
+
+### 数据保留与切换
+
+正常停止TEST后，保留一致PG备份、原12个有效EnvironmentFiles、unit/drop-ins、进程配置、recovery树及顶层小状态文件。恢复树的空子目录与0B文件均保留。新Gateway运行后二次检查：原129账号、43角色、43档、33迁移保持，三类原始JSON行散列全相同；所有旧配置文件保持。原正式Gateway和钱包服务PID未变。
+
+原MIR2配置除明确的内容profile、地图包、追加Origin保持；`newcomer-v2`原已存在。另补齐`MIR2_DEPLOY_REVISION=d53…`元数据：停前连接/会话/登录计数均0，再次正常停止、备份和启动，health版本与实际二进制一致。没有重置签名key、钱包、计费或业务政策，没有恢复覆盖原数据库。
+
+切换后全表散列变化单列：`shared_conquests`、`shared_guild_clock`为运行时钟；`promotion_revenue_source_holds`两行通过最终备份与现库真实COPY逐列比较，**只有`updated_at_ms`变化**，金额、状态、关联字段保持。不能写成全库逐字不变。
+
+### 实际验收范围
+
+- 原43档真实simulation三轮129次StartGame成功；两个profile直接checkpoint/store/snapshot零差异。普通登录共同归一化及二次序列变化完整保留，严格原档逐字比较仍false。
+- 两个隔离低权限PG克隆，4个原有角色在e911/d53各8次普通认证/StartGame/正常注销；72组跨版本投影零差异。克隆凭证不证明原用户钱包所有权；全部临时Gateway/Redis和隧道已停止。
+- 公开TEST战士、法师、道士普通注册创角、进城、Walk/UserLocation、首项V2任务2110001唯一接交、准确奖励及密码重登入档通过，全部正常注销。仅新增三个人工QA账号/角色；没有GM、赠物、WorldCommand或链交易，不冒充公开服全26任务至30级复验。
+- 最终Numeron域名钱包会话创建200、合法Wallet批准URL、119秒有效期、pending查询200。未扫码、签名、付款或调用模型。
+- 本次浏览器画面与可信输入结果单独记录，不以HTTP200或协议成功替代。原本机三职业30级和战斗/吃药/拾取/组队/交易证据仍是本机范围。
+
+### 保留的失败与修复
+
+首轮资源取消后保留已有新prefix对象，续发逐项读回、最后manifest，未覆盖旧prefix。钱包打包错用Web锁，修复后clean-source CI整体通过。
+
+首轮frontend promotion因候选误暴露旧安装包链接被挡下，零promotion/域名写入；f2de显式清除构建时继承的Windows链接，确认真实下载页后再比较合法零链接基线。新项目素材代理缺失曾404，f2de补齐两个固定CDN服务器变量后，Title完整GET200。
+
+服务器r1只读计划被旧目录组权限检查挡下，未写入；r2在备份空恢复子目录时中止并恢复旧服务；r3完成PG/SQL/recovery备份后发现`systemctl show`重复EnvironmentFiles行被字典丢弃，在启动新服务前恢复旧服务。r2/r3配置备份均只覆盖末个env文件，不能称完整。**旧12个env文件从未被systemd reset**；r4聚合并备份全部12项，实际Linux ROOT41/41后切换成功。旧失败目录/隔离文件保留，无数据库回滚。
+
+候选浏览器短轮和五分钟冷载因本机到Vercel的间歇TTFB/正文等待未通过，失败保留。服务器侧同3资源完整GET：24KB Core约1.17秒、16.4MB中文字体约3.77秒、manifest约4.34秒；Windows curl同资源成功，Chrome HTTP/2有不稳定等待。没有放开域名保护或修改系统代理；后续UI使用任务内HTTP/1.1实例对照。
+
+安全收据见[发布证据索引](evidence/numeron-web-release-20261108/README.md)。凭证、PG原始导出、真实账号/物品UID、私钥和保护分享票据不入库。云端阿洛运行器未启用；手机签名、付款、全地图/Atlas性能、CCU和最终真人Accepted仍开放。
+
+## 以下为发布前的历史门槛记录
+
+以下“当前/待执行”均指切换前的记录，以本页上方2026-11-09结果为准，保留失败经过。
 
 用户本轮明确授权将新版本部署到 `https://numeron.obelisk.build/game`。持续1:1 Goal已由用户清除，本次为具体发布任务；原完整对齐范围和未结项保持，不宣称全部Candidate或最终真人Accepted。
 

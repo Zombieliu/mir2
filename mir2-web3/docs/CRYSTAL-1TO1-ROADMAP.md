@@ -1,8 +1,8 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
-## Numeron新入口发布候选（2026-11-08）
+## Numeron新入口发布（2026-11-09）
 
-当前具体任务为发布最新Web到`numeron.obelisk.build/game`，旧正式服/原前端保留。公会窗口已有分源限定验证；固定素材、受控新profile与Linux共同基准启动检查已准备，实际CI、旧库克隆和公开切换仍须执行，不提升全局Candidate。[门槛](NUMERON-WEB-RELEASE-20261108.zh-CN.md)
+Web f2de与Linux d53已部署至`numeron.obelisk.build/game`，连接既有TEST五职业/V2；原前端/正式服/钱包/EXE保留。Linux与资源/前端CI、43档克隆、旧数据保全、公开三职业首任务和重登、域名与QR生成通过；浏览器画面与可信操作另记，不提升全局Candidate/Accepted或主网状态。[实际结果与原失败](NUMERON-WEB-RELEASE-20261108.zh-CN.md)
 
 ## R16 凭证先行恢复（2026-11-08）
 

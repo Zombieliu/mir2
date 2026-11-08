@@ -1,0 +1,17 @@
+[
+  {
+    "path": "revision-alignment.json",
+    "bytes": 278,
+    "sha256": "ea295b932c313a884ef33195e95cd6b044d074a43de2efd6a3e4e98abfef32a2"
+  },
+  {
+    "path": "server-tools/align_playtest_revision.py",
+    "bytes": 4131,
+    "sha256": "2266672eff01318696d0116dc8bbb0bba046ba81af5d635bce6f357ea59dd686"
+  },
+  {
+    "path": "clone43/clone43-report-r1.json",
+    "bytes": 307832,
+    "sha256": "1db5b316fb3def3ac71a53306eaf68e5d7e84e96cf64c2934c5d75b5be143191"
+  }
+]

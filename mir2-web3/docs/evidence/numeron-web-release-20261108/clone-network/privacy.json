@@ -1,0 +1,18 @@
+{
+  "schema": 1,
+  "passed": true,
+  "checkedArtifacts": 3,
+  "forbiddenValuesChecked": 30,
+  "identitySecretOrUidMatches": 0,
+  "inputAndSourcePreservation": {
+    "connectionUnchanged": true,
+    "baselineDraftUnchanged": true,
+    "candidateDraftUnchanged": true,
+    "baselineConfigUnchanged": true,
+    "candidateConfigUnchanged": true,
+    "original43ExportUnchanged": true,
+    "driverSourceUnchanged": true,
+    "coreSourceUnchanged": true,
+    "signerSourceUnchanged": true
+  }
+}

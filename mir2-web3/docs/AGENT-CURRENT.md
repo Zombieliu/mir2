@@ -1,6 +1,6 @@
 # Agent Current Context
 
-Short routing summary, updated 2026-11-08 (Asia/Shanghai).
+Short routing summary, updated 2026-11-09 (Asia/Shanghai).
 This indexes recorded decisions and open work; it does not revalidate today's
 working tree, services, release packages, source snapshots or parity percentages.
 
@@ -16,7 +16,7 @@ working tree, services, release packages, source snapshots or parity percentages
 
 ## Last recorded decisions and open work
 
-用户已清除持续Goal；当前明确任务是发布最新R16 Web到`https://numeron.obelisk.build/game`。该域名目前属于营销项目，旧/game跳转后404。已创建隔离新前端项目`numeron-r16-web`，旧mir2游戏项目/正式服保留。源码与资产候选仍在验证，未切域名或游戏服务。公会公共壳、真实职级流程、统计及只读仓库的限定证据见[本轮来源](evidence/r16-guild-layout-20261108/README.md)。
+用户已清除持续Goal；本轮最新R16 Web已发布至`https://numeron.obelisk.build/game`：Web f2de、Linux Gateway d53（两者游戏源码相同）、五职业/newcomer-v2。42738素材公开复核、域名move、旧129账号/43角色/43档保全、公开三职业首任务与重登入档通过；实际浏览器画面/操作单独记录，不能以协议结果替代。旧Mir2项目/正式服、钱包和Windows EXE保持，当前连接TEST；阿洛云运行器、手机扫码签名及全局Accepted未由本次发布完成。[发布结果与证据](NUMERON-WEB-RELEASE-20261108.zh-CN.md)。
 
 Checkpoints through85eecf4be were pushed/verified. Web guild ranks passed both render backends; first owner unexpected-login cold entry remains unexplained. Native now consumes actual guild deltas and typed UserInformation realId, matches option-specific cursor evidence, and handles definitely-unsent read/queue eviction.198 unique checks plus canonical locked/offline release build pass;2 real-asset GPU/GDI checks and native window/cross-client remain unrun. Candidatea63bd2a3 is a single EXE requiring existing R16 resources, not installed. Keep [scope and failures](WEB-R16-PARITY-GOAL.zh-CN.md#native-公会增量与请求生命周期2026-11-08) separate from global parity.
 

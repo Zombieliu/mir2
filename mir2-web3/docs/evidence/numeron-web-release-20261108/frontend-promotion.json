@@ -1,0 +1,63 @@
+{
+  "schema": 1,
+  "kind": "numeron-r16-release",
+  "passed": true,
+  "domainMovePending": true,
+  "customDomainChanged": false,
+  "oldGameProjectMutatedByHelper": false,
+  "writes": [
+    {
+      "operation": "promote",
+      "site": "main",
+      "deployment": "dpl_56jyXmxzdtTfNYGpzy4MhofziJRt"
+    },
+    {
+      "operation": "promote",
+      "site": "game",
+      "deployment": "dpl_Ech5Rehf78MG9FXH7fAV9wwFC7GZ"
+    }
+  ],
+  "rollbacks": [],
+  "credentialsRecorded": false,
+  "operation": "numeron-promote",
+  "sourceSha": "f2de762309768b51b39438c2437c14e819df9bf7",
+  "implementationSha": "f2de762309768b51b39438c2437c14e819df9bf7",
+  "projects": {
+    "original": {
+      "project": "prj_Bl3ttB4PzcdCpJMYLRhzQjkdXyTz",
+      "production": "dpl_3NBhFUPKxNF4nccRnG94ZhDq1iz6",
+      "rootDirectory": "mir2-web3/apps/web",
+      "nodeVersion": "24.x"
+    },
+    "main": {
+      "project": "prj_Q14gZuvjxkfqOCExhqOrYiR2UbxA",
+      "production": "dpl_22qaP2Cn1my46GJk6xrS9tk8m4RK",
+      "rootDirectory": null,
+      "nodeVersion": "24.x"
+    },
+    "game": {
+      "project": "prj_QzS3a2wirTJCixU4tYRVY5nmvSjC",
+      "production": null,
+      "rootDirectory": "mir2-web3/apps/web",
+      "nodeVersion": "26.x"
+    }
+  },
+  "assetPublication": {
+    "runId": "42494701555",
+    "artifactId": 13622863928,
+    "manifestSha256": "32255399aaae2dc9a133a5827252256ece782aaae5d237152ffebc2d8f272155",
+    "manifestBytes": 15716826
+  },
+  "candidates": {
+    "main": {
+      "id": "dpl_56jyXmxzdtTfNYGpzy4MhofziJRt",
+      "url": "numeron-legend-of-rebirth-o5b8uzjlw-obelisk-labs.vercel.app",
+      "root": "mir2-web3/apps/website"
+    },
+    "game": {
+      "id": "dpl_Ech5Rehf78MG9FXH7fAV9wwFC7GZ",
+      "url": "numeron-r16-a3fwkmspx-obelisk-labs.vercel.app",
+      "root": "mir2-web3/apps/web"
+    }
+  }
+}
