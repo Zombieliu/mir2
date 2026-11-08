@@ -103,6 +103,7 @@ fn offscreen_app() -> (App, Handle<Image>, Entity) {
             .disable::<bevy::audio::AudioPlugin>()
             .disable::<bevy::app::TerminalCtrlCHandlerPlugin>(),
     );
+    app.insert_resource(mir2_client_bevy::native_shell_ui::NativePcUiTheme);
     app.add_plugins((Mir2NativeShellUiPlugin, NativeI18nPlugin))
         .insert_resource(NativeShellModel {
             screen: NativeShellScreen::Login,

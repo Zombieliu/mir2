@@ -17,6 +17,7 @@ use crate::native_shell::{NativeShellModel, NativeShellScreen};
 use mir2_ui_core::action::UiAction;
 use mir2_ui_core::state::{UiChatChannel, UiChatSettings};
 
+use super::hud_layout::{ChatGeometry, HudLayoutSpec};
 use super::spec;
 use super::spec::CrystalRect;
 use super::typography::{crystal_text_font, CRYSTAL_DEFAULT_FONT_SIZE_PX};
@@ -237,6 +238,14 @@ pub struct CrystalChatElement;
 #[derive(Component, Debug, Clone, Copy, PartialEq, Eq)]
 pub struct CrystalChatInput;
 
+/// A reference-layout clip viewport; the editable text child can scroll to
+/// the shaped caret without moving the logical input rectangle.
+#[derive(Component, Debug)]
+pub struct CrystalChatInputViewport;
+
+#[derive(Component)]
+struct ReferenceChatButton;
+
 /// A typed, presentation-only result of pressing a Crystal chat control.
 ///
 /// The plugin places these in [`CrystalChatActionQueue`]. Presentation actions
@@ -249,6 +258,7 @@ pub enum CrystalChatAction {
     Down,
     End,
     PositionBar,
+    FocusInput,
     FilterAll,
     FilterShout,
     FilterWhisper,
@@ -326,6 +336,7 @@ pub struct Mir2CrystalChatPlugin;
 impl Plugin for Mir2CrystalChatPlugin {
     fn build(&self, app: &mut App) {
         app.init_resource::<ChatModel>()
+            .init_resource::<crate::crystal_ui::overlays::NativeUiIoPolicy>()
             .init_resource::<CrystalChatActionQueue>()
             .init_resource::<CrystalChatState>()
             .init_resource::<NativePlayerUiState>()
@@ -336,7 +347,8 @@ impl Plugin for Mir2CrystalChatPlugin {
             .add_systems(Startup, spawn_chat_root)
             .add_systems(
                 Startup,
-                crate::chat_settings_effects::load_persisted_chat_settings,
+                crate::chat_settings_effects::load_persisted_chat_settings
+                    .run_if(crate::crystal_ui::overlays::native_ui_io_enabled),
             )
             .add_systems(
                 Update,
@@ -347,15 +359,456 @@ impl Plugin for Mir2CrystalChatPlugin {
                     // Capture presses before a changed snapshot rebuilds their entities.
                     consume_chat_button_interactions,
                     consume_chat_actions,
-                    crate::chat_settings_effects::consume_chat_settings_effects,
+                    (
+                        crate::chat_settings_effects::consume_chat_settings_effects
+                            .run_if(crate::crystal_ui::overlays::native_ui_io_enabled),
+                        consume_fixture_chat_settings_effects
+                            .run_if(crate::crystal_ui::overlays::native_ui_fixture),
+                    )
+                        .chain(),
                     auto_scroll_on_new_message,
                     render_crystal_chat,
                     sync_chat_button_visuals,
+                    sync_reference_chat_button_visuals,
                     sync_chat_settings_button_visuals,
                 )
                     .chain()
                     .after(crate::crystal_ui::overlays::NativePlayerUiSet::Mutate),
             );
+    }
+}
+
+fn consume_fixture_chat_settings_effects(
+    mut queue: ResMut<UiEffectQueue>,
+    mut state: ResMut<CrystalChatState>,
+) {
+    for effect in queue.drain_chat_settings_bounded(64) {
+        if let mir2_ui_core::effect::UiEffect::ApplyChatSettings { settings } = effect {
+            state.applied_settings = settings;
+        }
+    }
+}
+
+#[cfg(test)]
+mod reference_layout_tests {
+    use super::*;
+
+    #[test]
+    fn resolved_chat_sizes_share_one_input_and_keep_source_scroll_semantics() {
+        let original = HudLayoutSpec::default().resolve();
+        let reference = HudLayoutSpec::reference().resolve();
+        for size in [
+            CrystalChatWindowSize::Small,
+            CrystalChatWindowSize::Medium,
+            CrystalChatWindowSize::Large,
+        ] {
+            let geometry = reference.chat(size.line_count());
+            assert_eq!(geometry.input, CrystalRect::new(306.0, 727.0, 194.0, 18.0));
+            assert_eq!(
+                geometry.history.height,
+                size.line_count() as f32 * geometry.line_height
+            );
+            assert_eq!(
+                original.chat(size.line_count()).input,
+                chat_input_rect(size)
+            );
+            for index in [0, 3, 19] {
+                let knob = chat_scroll_knob(original.chat(size.line_count()), index, 20);
+                let expected = child_screen_origin_for(size, position_bar_origin(size, index, 20));
+                assert_eq!((knob.left, knob.top), expected);
+            }
+            let end = chat_scroll_knob(geometry, 19, 20);
+            assert_eq!(
+                end.top + end.height,
+                geometry.scroll_track.top + geometry.scroll_track.height
+            );
+        }
+    }
+
+    #[test]
+    fn compact_chat_keeps_all_channels_trade_resize_settings_and_click_focus() {
+        let mut app = App::new();
+        app.add_systems(Startup, |mut commands: Commands| {
+            commands.spawn(Node::default()).with_children(|parent| {
+                spawn_reference_chat(
+                    parent,
+                    &CrystalChatState::default(),
+                    HudLayoutSpec::reference().resolve().chat(4),
+                    &[],
+                    0,
+                    None,
+                    0.0,
+                    None,
+                );
+            });
+        });
+        app.update();
+        let actions = app
+            .world_mut()
+            .query::<&CrystalChatAction>()
+            .iter(app.world())
+            .copied()
+            .collect::<Vec<_>>();
+        for action in [
+            CrystalChatAction::FilterAll,
+            CrystalChatAction::FilterShout,
+            CrystalChatAction::FilterWhisper,
+            CrystalChatAction::FilterLover,
+            CrystalChatAction::FilterMentor,
+            CrystalChatAction::FilterGroup,
+            CrystalChatAction::FilterGuild,
+            CrystalChatAction::TradeRequest,
+            CrystalChatAction::Resize,
+            CrystalChatAction::Settings,
+            CrystalChatAction::FocusInput,
+        ] {
+            assert!(actions.contains(&action), "missing {action:?}");
+        }
+        assert_eq!(actions.len(), 16);
+    }
+
+    #[test]
+    fn fixture_chat_settings_apply_in_memory_without_consuming_gateway_intents() {
+        use mir2_ui_core::effect::{GatewayCommand, UiEffect};
+        let mut app = App::new();
+        app.init_resource::<UiEffectQueue>()
+            .init_resource::<CrystalChatState>()
+            .add_systems(Update, consume_fixture_chat_settings_effects);
+        let settings = UiChatSettings {
+            transparent: true,
+            ..Default::default()
+        };
+        let mut queue = app.world_mut().resource_mut::<UiEffectQueue>();
+        queue.push(UiEffect::ApplyChatSettings { settings });
+        queue.push(UiEffect::PersistChatSettings { settings });
+        queue.push(UiEffect::GatewayCommand(GatewayCommand::Logout));
+        drop(queue);
+        app.update();
+        assert_eq!(
+            app.world().resource::<CrystalChatState>().applied_settings,
+            settings
+        );
+        assert!(matches!(
+            app.world_mut()
+                .resource_mut::<UiEffectQueue>()
+                .drain()
+                .as_slice(),
+            [UiEffect::GatewayCommand(GatewayCommand::Logout)]
+        ));
+    }
+}
+
+#[cfg(test)]
+mod reference_idle_projection_tests {
+    use super::*;
+    use crate::crystal_ui::overlays::text_input::{process_ime, ImeState};
+    use bevy::window::{Ime, PrimaryWindow};
+
+    fn app() -> (App, Entity) {
+        let mut app = App::new();
+        app.add_plugins(MinimalPlugins)
+            .add_plugins(AssetPlugin::default())
+            .init_asset::<Image>()
+            .init_resource::<CrystalChatState>()
+            .init_resource::<CrystalChatActionQueue>()
+            .init_resource::<NativePlayerUiState>()
+            .init_resource::<UiEffectQueue>()
+            .init_resource::<NativePlayerUiIntentQueue>()
+            .init_resource::<crate::social::SocialModel>()
+            .init_resource::<ImeState>()
+            .init_resource::<crate::pending_operations::SessionResetRevision>()
+            .insert_resource(HudLayoutSpec::reference())
+            .insert_resource(ChatModel {
+                lines: (0..20)
+                    .map(|i| ChatLine {
+                        text: format!("原生聊天 {i}"),
+                        channel: if i % 2 == 0 { "guild" } else { "normal" }.into(),
+                    })
+                    .collect(),
+            })
+            .insert_resource(NativeShellModel {
+                screen: NativeShellScreen::InGame,
+                ..default()
+            })
+            .add_message::<Ime>()
+            .add_systems(Startup, spawn_chat_root)
+            .add_systems(
+                Update,
+                (
+                    process_ime,
+                    consume_chat_actions,
+                    consume_fixture_chat_settings_effects,
+                    auto_scroll_on_new_message,
+                    render_crystal_chat,
+                )
+                    .chain(),
+            );
+        // Locale scopes are thread-local. Keep this structural CPU fixture on
+        // the calling thread; no window runner or text/GPU renderer is added.
+        app.edit_schedule(Update, |schedule| {
+            schedule.set_executor(bevy::ecs::schedule::SingleThreadedExecutor::new());
+        });
+        app.world_mut()
+            .resource_mut::<NativePlayerUiState>()
+            .core
+            .screen = mir2_ui_core::state::UiScreen::InGame;
+        let window = app
+            .world_mut()
+            .spawn((
+                Window {
+                    focused: true,
+                    ..default()
+                },
+                PrimaryWindow,
+            ))
+            .id();
+        app.update();
+        (app, window)
+    }
+
+    fn children(app: &mut App) -> Vec<Entity> {
+        let world = app.world_mut();
+        let mut roots = world.query_filtered::<Option<&Children>, With<CrystalChatRoot>>();
+        roots
+            .single(world)
+            .unwrap()
+            .map(|children| children.iter().collect())
+            .unwrap_or_default()
+    }
+
+    fn changed_then_idle(app: &mut App, previous: &mut Vec<Entity>) {
+        app.update();
+        let next = children(app);
+        assert_ne!(
+            *previous, next,
+            "an actual display change must render immediately"
+        );
+        app.update();
+        assert_eq!(
+            next,
+            children(app),
+            "the changed display must settle on the next idle frame"
+        );
+        *previous = next;
+    }
+
+    fn action(app: &mut App, previous: &mut Vec<Entity>, action: CrystalChatAction) {
+        app.world_mut()
+            .resource_mut::<CrystalChatActionQueue>()
+            .push(action);
+        changed_then_idle(app, previous);
+    }
+
+    #[test]
+    fn idle_and_unrelated_host_changes_preserve_native_chat_entities() {
+        let (mut app, _) = app();
+        let initial = children(&mut app);
+        assert!(!initial.is_empty());
+        for _ in 0..4 {
+            app.world_mut()
+                .resource_mut::<NativePlayerUiState>()
+                .shop_quantity += 1;
+            app.world_mut().resource_mut::<ImeState>().set_changed();
+            app.world_mut().resource_mut::<ChatModel>().set_changed();
+            app.update();
+            assert_eq!(initial, children(&mut app));
+        }
+        app.world_mut()
+            .resource_mut::<CrystalChatActionQueue>()
+            .push(CrystalChatAction::PositionBar);
+        app.update();
+        assert_eq!(
+            initial,
+            children(&mut app),
+            "a position-bar action without pointer movement is not a display change"
+        );
+        app.world_mut()
+            .resource_mut::<CrystalChatActionQueue>()
+            .push(CrystalChatAction::TradeRequest);
+        app.update();
+        assert_eq!(initial, children(&mut app));
+        assert_eq!(
+            app.world_mut()
+                .resource_mut::<NativePlayerUiIntentQueue>()
+                .drain_intents(),
+            vec![NativePlayerUiIntent::TradeRequest],
+            "stable display must not suppress a real typed intent"
+        );
+    }
+
+    #[test]
+    fn history_filters_scroll_sizes_and_settings_still_update_through_real_consumers() {
+        let (mut app, _) = app();
+        let mut previous = children(&mut app);
+        app.world_mut().resource_mut::<ChatModel>().push(ChatLine {
+            text: "新消息".into(),
+            channel: "normal".into(),
+        });
+        changed_then_idle(&mut app, &mut previous);
+        for next in [
+            CrystalChatAction::FilterShout,
+            CrystalChatAction::FilterWhisper,
+            CrystalChatAction::FilterLover,
+            CrystalChatAction::FilterMentor,
+            CrystalChatAction::FilterGroup,
+            CrystalChatAction::FilterGuild,
+            CrystalChatAction::FilterAll,
+            CrystalChatAction::Home,
+            CrystalChatAction::Down,
+            CrystalChatAction::End,
+            CrystalChatAction::Resize,
+            CrystalChatAction::Resize,
+            CrystalChatAction::Resize,
+            CrystalChatAction::Settings,
+            CrystalChatAction::SettingsFilter(UiChatChannel::Guild),
+            CrystalChatAction::SettingsTransparency(true),
+            CrystalChatAction::SettingsTab(CrystalChatSettingsTab::Chat),
+            CrystalChatAction::SettingsApply,
+        ] {
+            action(&mut app, &mut previous, next);
+        }
+        let applied = app.world().resource::<CrystalChatState>().applied_settings;
+        assert!(applied.transparent);
+        assert!(app
+            .world()
+            .resource::<NativePlayerUiState>()
+            .core
+            .chat_settings_draft
+            .is_none());
+        for next in [
+            CrystalChatAction::Settings,
+            CrystalChatAction::SettingsDefaults,
+            CrystalChatAction::SettingsCancel,
+        ] {
+            action(&mut app, &mut previous, next);
+        }
+        assert_eq!(
+            app.world().resource::<CrystalChatState>().applied_settings,
+            applied,
+            "cancel must not apply the reset draft"
+        );
+    }
+
+    #[test]
+    fn ime_preedit_cursor_commit_and_focus_loss_remain_live() {
+        let (mut app, window) = app();
+        let mut previous = children(&mut app);
+        {
+            let mut ui = app.world_mut().resource_mut::<NativePlayerUiState>();
+            ui.core.chat_focused = true;
+            ui.chat_draft = "草稿".into();
+        }
+        changed_then_idle(&mut app, &mut previous);
+        app.world_mut().write_message(Ime::Enabled { window });
+        app.world_mut().write_message(Ime::Preedit {
+            window,
+            value: "治疗".into(),
+            cursor: Some((3, 3)),
+        });
+        changed_then_idle(&mut app, &mut previous);
+        assert_eq!(
+            app.world().resource::<NativePlayerUiState>().chat_draft,
+            "草稿"
+        );
+        app.world_mut().write_message(Ime::Preedit {
+            window,
+            value: "治疗".into(),
+            cursor: Some((3, 3)),
+        });
+        app.update();
+        assert_eq!(
+            previous,
+            children(&mut app),
+            "identical preedit does not recreate text"
+        );
+        app.world_mut().write_message(Ime::Preedit {
+            window,
+            value: "治疗".into(),
+            cursor: Some((6, 6)),
+        });
+        changed_then_idle(&mut app, &mut previous);
+        app.world_mut().write_message(Ime::Commit {
+            window,
+            value: "治疗".into(),
+        });
+        changed_then_idle(&mut app, &mut previous);
+        assert_eq!(
+            app.world().resource::<NativePlayerUiState>().chat_draft,
+            "草稿治疗"
+        );
+        assert!(app
+            .world_mut()
+            .resource_mut::<NativePlayerUiIntentQueue>()
+            .drain_intents()
+            .is_empty());
+        app.world_mut().write_message(Ime::Preedit {
+            window,
+            value: "未提交".into(),
+            cursor: None,
+        });
+        changed_then_idle(&mut app, &mut previous);
+        app.world_mut().get_mut::<Window>(window).unwrap().focused = false;
+        app.world_mut().write_message(Ime::Commit {
+            window,
+            value: "迟到提交".into(),
+        });
+        changed_then_idle(&mut app, &mut previous);
+        assert_eq!(
+            app.world().resource::<NativePlayerUiState>().chat_draft,
+            "草稿治疗"
+        );
+    }
+
+    #[test]
+    fn layout_locale_visibility_optional_model_and_replaced_root_invalidate_cache() {
+        let (mut app, _) = app();
+        crate::native_i18n::with_locale(crate::native_i18n::Locale::English, || {
+            app.update();
+            let mut previous = children(&mut app);
+            app.world_mut()
+                .resource_mut::<HudLayoutSpec>()
+                .select(super::super::hud_layout::HudLayoutMode::OriginalLayout);
+            changed_then_idle(&mut app, &mut previous);
+            app.world_mut()
+                .resource_mut::<HudLayoutSpec>()
+                .select(super::super::hud_layout::HudLayoutMode::ReferenceLayoutV1);
+            changed_then_idle(&mut app, &mut previous);
+            app.world_mut().resource_mut::<HudLayoutSpec>().revision += 1;
+            changed_then_idle(&mut app, &mut previous);
+            crate::native_i18n::with_locale(crate::native_i18n::Locale::SimplifiedChinese, || {
+                changed_then_idle(&mut app, &mut previous);
+            });
+            changed_then_idle(&mut app, &mut previous);
+            app.world_mut()
+                .resource_mut::<NativePlayerUiState>()
+                .local_keys
+                .camera_hidden = true;
+            changed_then_idle(&mut app, &mut previous);
+            assert!(previous.is_empty());
+            app.world_mut()
+                .resource_mut::<NativePlayerUiState>()
+                .local_keys
+                .camera_hidden = false;
+            changed_then_idle(&mut app, &mut previous);
+            app.world_mut().resource_mut::<NativeShellModel>().screen =
+                NativeShellModel::default().screen;
+            changed_then_idle(&mut app, &mut previous);
+            app.world_mut().resource_mut::<NativeShellModel>().screen = NativeShellScreen::InGame;
+            changed_then_idle(&mut app, &mut previous);
+            let model = app.world_mut().remove_resource::<ChatModel>().unwrap();
+            changed_then_idle(&mut app, &mut previous);
+            app.insert_resource(model);
+            changed_then_idle(&mut app, &mut previous);
+            let root = app
+                .world_mut()
+                .query_filtered::<Entity, With<CrystalChatRoot>>()
+                .single(app.world())
+                .unwrap();
+            app.world_mut().despawn(root);
+            app.world_mut()
+                .spawn((CrystalChatRoot, Visibility::Hidden, Node::default()));
+            changed_then_idle(&mut app, &mut previous);
+        });
     }
 }
 
@@ -535,7 +988,7 @@ pub fn apply_chat_action(
             let len = filtered_len;
             state.set_filter(CrystalChatFilter::Guild, len);
         }
-        CrystalChatAction::TradeRequest => {}
+        CrystalChatAction::TradeRequest | CrystalChatAction::FocusInput => {}
         CrystalChatAction::Resize => state.resize(filtered_len),
         CrystalChatAction::SettingsTab(tab) => state.settings_tab = tab,
         CrystalChatAction::Settings
@@ -582,6 +1035,7 @@ fn consume_chat_actions(
         }
         let settings_open = player_ui.core.chat_settings_open();
         let shared_action = match action {
+            CrystalChatAction::FocusInput if !settings_open => Some(UiAction::FocusChat),
             CrystalChatAction::Settings => Some(if settings_open {
                 UiAction::CloseChatSettings
             } else {
@@ -765,14 +1219,86 @@ fn auto_scroll_on_new_message(
         *last_filtered_len,
         *was_at_bottom,
     );
-    state.scroll = scroll;
+    if state.scroll != scroll {
+        state.scroll = scroll;
+    }
     *was_at_bottom = bottom;
     *last_filtered_len = Some(filtered_len);
 }
 
-/// Rebuild the small deterministic chat tree only when either source resource
-/// changes, or when the root is first added. This avoids frame-by-frame text
-/// churn while keeping the result independent of prior UI state.
+#[derive(Debug, Clone, PartialEq)]
+struct ChatInputProjection {
+    text: String,
+    // A commit can leave the same text while ending composition, and a
+    // preedit caret can move without changing its text. Keep both observable.
+    preedit: Option<crate::crystal_ui::overlays::text_input::Composition>,
+    scroll: f32,
+}
+
+/// The values actually consumed by the renderer, rather than the change tick
+/// of broad input/overlay resources. Input hosts can legitimately touch those
+/// resources while the displayed chat remains unchanged.
+#[derive(Debug, Clone, PartialEq)]
+struct ChatRenderProjection {
+    visible: bool,
+    rows: Option<Vec<ChatLine>>,
+    state: CrystalChatState,
+    settings: Option<UiChatSettings>,
+    input: Option<ChatInputProjection>,
+    layout: HudLayoutSpec,
+    locale: (u64, crate::native_i18n::Locale),
+}
+
+impl ChatRenderProjection {
+    fn new(
+        chat: Option<&ChatModel>,
+        state: Option<&CrystalChatState>,
+        player_ui: Option<&NativePlayerUiState>,
+        shell: Option<&NativeShellModel>,
+        layout: Option<&HudLayoutSpec>,
+        ime: Option<&crate::crystal_ui::overlays::text_input::ImeState>,
+        locale: (u64, crate::native_i18n::Locale),
+    ) -> Self {
+        let state = state.cloned().unwrap_or_default();
+        let layout = layout.cloned().unwrap_or_default();
+        let visible = shell.is_some_and(|shell| shell.screen == NativeShellScreen::InGame)
+            && !player_ui.is_some_and(|ui| ui.local_keys.camera_hidden);
+        let settings = player_ui
+            .filter(|ui| ui.core.chat_settings_open())
+            .map(|ui| ui.core.chat_settings_draft.unwrap_or(ui.core.chat_settings));
+        let input = player_ui.filter(|ui| ui.core.chat_focused()).map(|ui| {
+            let preedit = ime.and_then(|ime| ime.chat_composition()).cloned();
+            let mut text = ui.chat_draft.clone();
+            if let Some(preedit) = &preedit {
+                text.push_str(&preedit.value);
+            }
+            let scroll = if layout.resolve().is_reference() {
+                ime.map_or(0.0, |ime| ime.chat_text_scroll(&text))
+            } else {
+                0.0
+            };
+            ChatInputProjection {
+                text,
+                preedit,
+                scroll,
+            }
+        });
+        let rows = chat.map(|chat| display_chat_rows(chat, &state));
+        Self {
+            visible,
+            rows,
+            state,
+            settings,
+            input,
+            layout,
+            locale,
+        }
+    }
+}
+
+/// Preserve the native entities while the complete display projection is
+/// unchanged. Actual input, history, settings, locale and layout changes still
+/// rebuild through the same native rendering path.
 fn render_crystal_chat(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
@@ -780,35 +1306,32 @@ fn render_crystal_chat(
     chat_state: Option<Res<CrystalChatState>>,
     player_ui: Option<Res<NativePlayerUiState>>,
     shell: Option<Res<NativeShellModel>>,
+    layout: Option<Res<HudLayoutSpec>>,
+    ime: Option<Res<crate::crystal_ui::overlays::text_input::ImeState>>,
+    art: Option<Res<super::hud_layout::ReferenceHudArtwork>>,
     mut roots: Query<(Entity, &mut Visibility, Option<&Children>), With<CrystalChatRoot>>,
-    added_roots: Query<Entity, Added<CrystalChatRoot>>,
-    mut last_locale: Local<Option<(u64, crate::native_i18n::Locale)>>,
+    mut last_render: Local<Option<(Entity, ChatRenderProjection)>>,
 ) {
     let locale = (crate::native_i18n::revision(), crate::native_i18n::locale());
-    let locale_changed = *last_locale != Some(locale);
-    *last_locale = Some(locale);
-    let chat_changed = chat.as_ref().is_some_and(|resource| resource.is_changed());
-    let state_changed = chat_state
-        .as_ref()
-        .is_some_and(|resource| resource.is_changed());
-    let player_ui_changed = player_ui
-        .as_ref()
-        .is_some_and(|resource| resource.is_changed());
-    let shell_changed = shell.as_ref().is_some_and(|resource| resource.is_changed());
-    let first_render = !added_roots.is_empty();
-    if !first_render
-        && !chat_changed
-        && !shell_changed
-        && !state_changed
-        && !player_ui_changed
-        && !locale_changed
-    {
-        return;
-    }
-
     let Some((root, mut visibility, children)) = roots.iter_mut().next() else {
         return;
     };
+    let projection = ChatRenderProjection::new(
+        chat.as_deref(),
+        chat_state.as_deref(),
+        player_ui.as_deref(),
+        shell.as_deref(),
+        layout.as_deref(),
+        ime.as_deref(),
+        locale,
+    );
+    if last_render
+        .as_ref()
+        .is_some_and(|(entity, last)| *entity == root && *last == projection)
+    {
+        return;
+    }
+    *last_render = Some((root, projection.clone()));
 
     if let Some(children) = children {
         let previous_children: Vec<Entity> = children.iter().collect();
@@ -817,36 +1340,23 @@ fn render_crystal_chat(
         }
     }
 
-    let in_game = shell
-        .as_deref()
-        .is_some_and(|model| model.screen == NativeShellScreen::InGame);
-    if !in_game
-        || player_ui
-            .as_deref()
-            .is_some_and(|s| s.local_keys.camera_hidden)
-    {
+    if !projection.visible {
         *visibility = Visibility::Hidden;
         return;
     }
 
     *visibility = Visibility::Visible;
-    let Some(chat) = chat.as_deref() else {
+    let Some(projected) = projection.rows.as_deref() else {
         return;
     };
-    let state = chat_state.as_deref().cloned().unwrap_or_default();
-    let settings_open = player_ui
-        .as_deref()
-        .is_some_and(|ui| ui.core.chat_settings_open());
-    let settings_draft = player_ui
-        .as_deref()
-        .map(|ui| ui.core.chat_settings_draft.unwrap_or(ui.core.chat_settings));
-    let chat_input_draft = player_ui
-        .as_deref()
-        .filter(|ui| ui.core.chat_focused())
-        .map(|ui| ui.chat_draft.clone());
-    let projected = display_chat_rows(chat, &state);
+    let state = &projection.state;
+    let settings_open = projection.settings.is_some();
+    let settings_draft = projection.settings;
+    let chat_input_draft = projection.input.as_ref().map(|input| input.text.as_str());
     let filtered = projected.iter().collect::<Vec<_>>();
     let line_count = state.line_count();
+    let layout = projection.layout.resolve();
+    let geometry = layout.chat(line_count);
     let visible = visible_chat_slice(&filtered, state.scroll, line_count);
     let frame_spec = match state.window_size {
         CrystalChatWindowSize::Small => spec::hud::CHAT_FOUR_LINES,
@@ -854,6 +1364,27 @@ fn render_crystal_chat(
         CrystalChatWindowSize::Large => spec::hud::CHAT_ELEVEN_LINES,
     };
     commands.entity(root).with_children(|parent| {
+        if layout.is_reference() {
+            spawn_reference_chat(
+                parent,
+                &state,
+                geometry,
+                visible,
+                filtered.len(),
+                chat_input_draft,
+                projection.input.as_ref().map_or(0.0, |input| input.scroll),
+                art.as_deref(),
+            );
+            if settings_open {
+                spawn_chat_settings_panel(
+                    parent,
+                    &asset_server,
+                    &state,
+                    settings_draft.unwrap_or(state.applied_settings),
+                );
+            }
+            return;
+        }
         spawn_chat_control_bar(parent, &asset_server, state.window_size);
         spawn_chat_frame_with_spec(
             parent,
@@ -971,6 +1502,261 @@ fn spawn_chat_frame_with_spec(
             ..default()
         },
     ));
+}
+
+fn reference_chat_button(
+    parent: &mut ChildSpawnerCommands,
+    rect: CrystalRect,
+    label: &str,
+    action: CrystalChatAction,
+    art: Option<&super::hud_layout::ReferenceHudArtwork>,
+) {
+    let mut button = parent.spawn((
+        CrystalChatElement,
+        ReferenceChatButton,
+        Button,
+        action,
+        Node {
+            position_type: PositionType::Absolute,
+            left: Val::Px(rect.left),
+            top: Val::Px(rect.top),
+            width: Val::Px(rect.width),
+            height: Val::Px(rect.height),
+            overflow: Overflow::clip(),
+            justify_content: JustifyContent::Center,
+            align_items: AlignItems::Center,
+            ..default()
+        },
+        BackgroundColor(rgb8(33, 28, 21)),
+    ));
+    if let Some(art) = art {
+        button.insert(super::hud_art::frame_image(art, 0.014, 1.0));
+    }
+    if let Some(hint) = chat_hint(action) {
+        button.insert(CrystalHint::new(crate::native_i18n::tr(hint)));
+    }
+    button.with_children(|parent| {
+        parent.spawn((
+            Text::new(label),
+            crystal_text_font(10.0),
+            TextColor(rgb8(218, 190, 124)),
+            TextLayout::new(Justify::Center, bevy::text::LineBreak::NoWrap),
+        ));
+    });
+}
+
+/// Shared rendered/hit-tested knob. Original keeps the source 14px knob and
+/// count-minus-one scrolling semantics; Reference supplies its own track.
+pub fn chat_scroll_knob(geometry: ChatGeometry, index: usize, count: usize) -> CrystalRect {
+    let track = geometry.scroll_track;
+    let height = 14.0f32.min(track.height);
+    let travel = (track.height - height).max(0.0);
+    let offset = if count > 1 {
+        (travel / (count - 1) as f32 * index.min(count - 1) as f32).trunc()
+    } else {
+        0.0
+    };
+    CrystalRect::new(track.left, track.top + offset, track.width, height)
+}
+
+fn spawn_reference_chat(
+    parent: &mut ChildSpawnerCommands,
+    state: &CrystalChatState,
+    geometry: ChatGeometry,
+    lines: &[&ChatLine],
+    history_len: usize,
+    draft: Option<&str>,
+    input_scroll: f32,
+    art: Option<&super::hud_layout::ReferenceHudArtwork>,
+) {
+    let panel = geometry.panel;
+    let mut backdrop = parent.spawn((
+        CrystalChatElement,
+        Node {
+            position_type: PositionType::Absolute,
+            left: Val::Px(panel.left),
+            top: Val::Px(panel.top),
+            width: Val::Px(panel.width),
+            height: Val::Px(panel.height),
+            ..default()
+        },
+        BackgroundColor(if art.is_some() {
+            Color::NONE
+        } else {
+            chat_color(rgb8(13, 15, 19), state.applied_settings.transparent)
+        }),
+        bevy::ui::FocusPolicy::Pass,
+    ));
+    if let Some(art) = art {
+        backdrop.insert(super::hud_art::frame_image(
+            art,
+            0.12,
+            if state.applied_settings.transparent {
+                0.5
+            } else {
+                1.0
+            },
+        ));
+    }
+    // All seven channel selectors, TradeRequest, size and settings remain
+    // directly reachable in the compact bar. The labels are abbreviations;
+    // the existing translated hints keep their full names.
+    let controls = [
+        ("A", CrystalChatAction::FilterAll),
+        ("!", CrystalChatAction::FilterShout),
+        ("/", CrystalChatAction::FilterWhisper),
+        ("L", CrystalChatAction::FilterLover),
+        ("M", CrystalChatAction::FilterMentor),
+        ("G", CrystalChatAction::FilterGroup),
+        ("U", CrystalChatAction::FilterGuild),
+        ("T", CrystalChatAction::TradeRequest),
+        ("+", CrystalChatAction::Resize),
+        ("S", CrystalChatAction::Settings),
+    ];
+    let bar = geometry.control_bar;
+    let step = bar.width / controls.len() as f32;
+    for (index, (label, action)) in controls.into_iter().enumerate() {
+        reference_chat_button(
+            parent,
+            CrystalRect::new(
+                bar.left + index as f32 * step,
+                bar.top,
+                step - 1.0,
+                bar.height,
+            ),
+            label,
+            action,
+            art,
+        );
+    }
+    for (index, line) in lines.iter().enumerate() {
+        let colors = channel_colors(&line.channel);
+        parent.spawn((
+            CrystalChatElement,
+            Node {
+                position_type: PositionType::Absolute,
+                left: Val::Px(geometry.history.left),
+                top: Val::Px(geometry.history.top + index as f32 * geometry.line_height),
+                width: Val::Px(geometry.history.width),
+                height: Val::Px(geometry.line_height),
+                overflow: Overflow::clip(),
+                ..default()
+            },
+            BackgroundColor(chat_color(
+                colors.background,
+                state.applied_settings.transparent,
+            )),
+            Text::new(line.text.clone()),
+            crystal_text_font(CRYSTAL_DEFAULT_FONT_SIZE_PX),
+            TextLayout::new(Justify::Left, bevy::text::LineBreak::NoWrap),
+            TextColor(chat_color(
+                colors.foreground,
+                state.applied_settings.transparent,
+            )),
+        ));
+    }
+    let track = geometry.scroll_track;
+    for (label, top, height, action) in [
+        ("^", geometry.history.top, 8.0, CrystalChatAction::Home),
+        ("^", track.top - 6.0, 6.0, CrystalChatAction::Up),
+        ("v", track.top + track.height, 6.0, CrystalChatAction::Down),
+        (
+            "v",
+            track.top + track.height + 6.0,
+            8.0,
+            CrystalChatAction::End,
+        ),
+    ] {
+        reference_chat_button(
+            parent,
+            CrystalRect::new(track.left, top, track.width, height),
+            label,
+            action,
+            art,
+        );
+    }
+    parent.spawn((
+        CrystalChatElement,
+        Node {
+            position_type: PositionType::Absolute,
+            left: Val::Px(track.left),
+            top: Val::Px(track.top),
+            width: Val::Px(track.width),
+            height: Val::Px(track.height),
+            ..default()
+        },
+        BackgroundColor(rgb8(5, 7, 10)),
+    ));
+    reference_chat_button(
+        parent,
+        chat_scroll_knob(geometry, state.scroll, history_len),
+        "",
+        CrystalChatAction::PositionBar,
+        art,
+    );
+    {
+        let input = geometry.input;
+        let mut viewport = parent.spawn((
+            CrystalChatElement,
+            CrystalChatInputViewport,
+            Button,
+            CrystalChatAction::FocusInput,
+            Node {
+                position_type: PositionType::Absolute,
+                left: Val::Px(input.left),
+                top: Val::Px(input.top),
+                width: Val::Px(input.width),
+                height: Val::Px(input.height),
+                overflow: Overflow::clip(),
+                ..default()
+            },
+            BackgroundColor(rgb8(17, 20, 23)),
+        ));
+        if let Some(art) = art {
+            viewport.insert(super::hud_art::frame_image(art, 0.01, 1.0));
+        }
+        viewport.with_children(|parent| {
+            let Some(draft) = draft else {
+                return;
+            };
+            parent.spawn((
+                CrystalChatInput,
+                Node {
+                    position_type: PositionType::Absolute,
+                    left: Val::Px(-input_scroll),
+                    top: Val::Px(0.0),
+                    height: Val::Px(input.height),
+                    ..default()
+                },
+                Text::new(draft),
+                crystal_text_font(CRYSTAL_DEFAULT_FONT_SIZE_PX),
+                TextLayout::new(Justify::Left, bevy::text::LineBreak::NoWrap),
+                TextColor(rgb8(235, 220, 176)),
+            ));
+        });
+    }
+}
+
+fn sync_reference_chat_button_visuals(
+    mut buttons: Query<
+        (&Interaction, &mut BackgroundColor, Option<&mut ImageNode>),
+        (With<ReferenceChatButton>, Changed<Interaction>),
+    >,
+) {
+    for (interaction, mut color, image) in &mut buttons {
+        color.0 = match interaction {
+            Interaction::Pressed => rgb8(106, 81, 43),
+            Interaction::Hovered => rgb8(67, 54, 33),
+            Interaction::None => rgb8(33, 28, 21),
+        };
+        if let Some(mut image) = image {
+            image.color = match interaction {
+                Interaction::None => Color::WHITE,
+                Interaction::Hovered => rgb8(195, 255, 255),
+                Interaction::Pressed => rgb8(255, 203, 115),
+            };
+        }
+    }
 }
 
 fn spawn_chat_settings_panel(
@@ -1524,6 +2310,7 @@ pub const fn chat_hint(action: CrystalChatAction) -> Option<&'static str> {
         | CrystalChatAction::Down
         | CrystalChatAction::End
         | CrystalChatAction::PositionBar
+        | CrystalChatAction::FocusInput
         | CrystalChatAction::SettingsTab(_)
         | CrystalChatAction::SettingsFilterAll
         | CrystalChatAction::SettingsFilter(_)
@@ -1577,8 +2364,13 @@ fn consume_chat_button_interactions(
     buttons: Query<(&Interaction, &CrystalChatAction), (Changed<Interaction>, With<Button>)>,
     mut actions: ResMut<CrystalChatActionQueue>,
     player_ui: Res<NativePlayerUiState>,
+    layout_guard: Option<Res<crate::crystal_ui::overlays::HudLayoutInputGuard>>,
 ) {
-    if player_ui.amount_modal_open() {
+    if player_ui.amount_modal_open()
+        || layout_guard
+            .as_deref()
+            .is_some_and(|guard| guard.switched_this_frame)
+    {
         return;
     }
     for (interaction, button) in buttons {
@@ -2327,24 +3119,109 @@ mod tests {
 
     #[test]
     fn rendered_chat_pressed_trade_emits_once_before_rebuild() {
-        let mut app = rendered_chat_plugin_app();
-        let previous = press_rendered_chat_action(&mut app, CrystalChatAction::TradeRequest);
-        mark_chat_snapshot_changed(&mut app);
-        app.update();
-        assert!(app.world().get_entity(previous).is_err());
-        assert_eq!(
-            app.world_mut()
+        for layout in [HudLayoutSpec::default(), HudLayoutSpec::reference()] {
+            let mut app = rendered_chat_plugin_app();
+            app.insert_resource(layout);
+            app.update();
+            let previous = press_rendered_chat_action(&mut app, CrystalChatAction::TradeRequest);
+            // A dirty snapshot alone preserves the cached tree. Change visible
+            // history to exercise capture before a genuine same-frame rebuild.
+            app.world_mut().resource_mut::<ChatModel>().push(ChatLine {
+                text: "trade-rebuild-sentinel".into(),
+                channel: "normal".into(),
+            });
+            mark_chat_snapshot_changed(&mut app);
+            app.update();
+            assert!(
+                app.world().get_entity(previous).is_err(),
+                "a visible history change must replace the pressed control"
+            );
+            let world = app.world_mut();
+            assert!(world
+                .query::<&Text>()
+                .iter(world)
+                .any(|text| text.0 == "trade-rebuild-sentinel"));
+            assert_eq!(
+                world
+                    .resource_mut::<NativePlayerUiIntentQueue>()
+                    .drain_intents(),
+                vec![NativePlayerUiIntent::TradeRequest]
+            );
+            assert!(world.resource::<CrystalChatActionQueue>().is_empty());
+            app.update();
+            assert!(app
+                .world_mut()
                 .resource_mut::<NativePlayerUiIntentQueue>()
-                .drain_intents(),
-            vec![NativePlayerUiIntent::TradeRequest]
-        );
-        assert!(app.world().resource::<CrystalChatActionQueue>().is_empty());
-        app.update();
-        assert!(app
-            .world_mut()
-            .resource_mut::<NativePlayerUiIntentQueue>()
-            .drain_intents()
-            .is_empty());
+                .drain_intents()
+                .is_empty());
+        }
+    }
+
+    #[test]
+    fn rendered_chat_cached_trade_press_emits_once_and_accepts_next_click() {
+        for layout in [HudLayoutSpec::default(), HudLayoutSpec::reference()] {
+            let mut app = rendered_chat_plugin_app();
+            app.insert_resource(layout);
+            app.update();
+            let previous = press_rendered_chat_action(&mut app, CrystalChatAction::TradeRequest);
+            mark_chat_snapshot_changed(&mut app);
+            app.update();
+            assert!(
+                app.world().get_entity(previous).is_ok(),
+                "an unchanged snapshot must retain the production-rendered button"
+            );
+            assert_eq!(
+                app.world_mut()
+                    .resource_mut::<NativePlayerUiIntentQueue>()
+                    .drain_intents(),
+                vec![NativePlayerUiIntent::TradeRequest]
+            );
+            assert!(app.world().resource::<CrystalChatActionQueue>().is_empty());
+            for _ in 0..3 {
+                mark_chat_snapshot_changed(&mut app);
+                app.update();
+                assert_eq!(
+                    app.world().get::<Interaction>(previous),
+                    Some(&Interaction::Pressed),
+                    "the same held control must survive unrelated dirty ticks"
+                );
+                assert!(app
+                    .world_mut()
+                    .resource_mut::<NativePlayerUiIntentQueue>()
+                    .drain_intents()
+                    .is_empty());
+                assert!(app.world().resource::<CrystalChatActionQueue>().is_empty());
+            }
+            *app.world_mut()
+                .get_mut::<Interaction>(previous)
+                .expect("cached button interaction") = Interaction::Hovered;
+            app.update();
+            assert!(app
+                .world_mut()
+                .resource_mut::<NativePlayerUiIntentQueue>()
+                .drain_intents()
+                .is_empty());
+            assert!(app.world().resource::<CrystalChatActionQueue>().is_empty());
+
+            let second = press_rendered_chat_action(&mut app, CrystalChatAction::TradeRequest);
+            assert_eq!(previous, second, "a new click uses the retained control");
+            mark_chat_snapshot_changed(&mut app);
+            app.update();
+            assert_eq!(
+                app.world_mut()
+                    .resource_mut::<NativePlayerUiIntentQueue>()
+                    .drain_intents(),
+                vec![NativePlayerUiIntent::TradeRequest],
+                "draining the first intent must not suppress a later genuine click"
+            );
+            assert!(app.world().resource::<CrystalChatActionQueue>().is_empty());
+            app.update();
+            assert!(app
+                .world_mut()
+                .resource_mut::<NativePlayerUiIntentQueue>()
+                .drain_intents()
+                .is_empty());
+        }
     }
 
     #[test]
@@ -2977,9 +3854,17 @@ fn handle_chat_pointer_scroll(
     chat: Res<ChatModel>,
     shell: Option<Res<NativeShellModel>>,
     ui: Res<NativePlayerUiState>,
+    layout: Option<Res<HudLayoutSpec>>,
     mut grab: Local<Option<f32>>,
+    mut last_layout: Local<Option<(super::hud_layout::HudLayoutMode, u64, CrystalChatWindowSize)>>,
 ) {
     let deltas: Vec<_> = wheel.read().map(|e| (e.y, e.unit)).collect();
+    let layout = layout.as_deref().cloned().unwrap_or_default();
+    let identity = (layout.mode, layout.revision, state.window_size);
+    if *last_layout != Some(identity) {
+        *grab = None;
+        *last_layout = Some(identity);
+    }
     let (Some(mouse), Ok(window)) = (mouse, windows.single()) else {
         *grab = None;
         return;
@@ -3001,22 +3886,20 @@ fn handle_chat_pointer_scroll(
         window.resolution.height(),
     );
     let (x, y) = transform.physical_to_logical(cursor.x, cursor.y);
-    let panel = state.window_size.spec_rect();
-    let local = Vec2::new(x - panel.left, y - panel.top);
+    let geometry = layout.resolve().chat(state.line_count());
+    let panel = geometry.panel;
     let count = display_chat_rows(&chat, &state).len();
-    let origin = position_bar_origin(state.window_size, state.scroll, count);
-    let size = prguse_frame_size(2015);
-    if mouse.just_pressed(MouseButton::Left)
-        && CrystalRect::new(origin.0, origin.1, size.0, size.1).contains(local.x, local.y)
-    {
-        *grab = Some(local.y - origin.1);
+    let knob = chat_scroll_knob(geometry, state.scroll, count);
+    if mouse.just_pressed(MouseButton::Left) && knob.contains(x, y) {
+        *grab = Some(y - knob.top);
     }
     if !mouse.pressed(MouseButton::Left) {
         *grab = None;
     }
     if let Some(offset) = *grab {
-        let track = prguse_frame_size(state.window_size.count_bar_index()).1 - size.1;
-        state.scroll = chat_index_at_track(local.y, offset, track, count);
+        let travel = (geometry.scroll_track.height - knob.height).max(0.0);
+        state.scroll =
+            chat_index_at_track(y - geometry.scroll_track.top + 16.0, offset, travel, count);
     }
     if panel.contains(x, y) {
         for (delta, unit) in deltas {

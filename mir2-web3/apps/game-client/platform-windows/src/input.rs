@@ -16,9 +16,12 @@ use bevy::ui::UiGlobalTransform;
 use bevy::winit::RawWinitWindowEvent;
 use mir2_client_bevy::crystal_ui::chat::CrystalChatRoot;
 use mir2_client_bevy::crystal_ui::hud::CrystalHudAction;
+use mir2_client_bevy::crystal_ui::hud_layout::{
+    HudLayoutSpec, ReferenceHudPositions, ResolvedHudLayout,
+};
 use mir2_client_bevy::crystal_ui::notice::NoticeDialogState;
 use mir2_client_bevy::crystal_ui::overlays::{
-    belt_item_use_intent, NativePlayerUiIntent, NativePlayerUiState,
+    belt_item_use_intent, HudLayoutInputGuard, NativePlayerUiIntent, NativePlayerUiState,
 };
 use mir2_client_bevy::crystal_ui::spec;
 use mir2_client_bevy::entities::{EntityKind, EntityModelSet};
@@ -1269,29 +1272,44 @@ fn gameplay_input_enabled(
     true
 }
 
-/// Whether the current physical cursor is over a real, always-visible HUD
-/// button. The native world-input sender runs in `PreUpdate`, before Bevy has
-/// refreshed the HUD's `Interaction`, so the sender must use the same Crystal
-/// stage-fit and source rectangles for a press arriving in that frame.
-fn cursor_over_native_hud_button(window: &Window, minimap_expanded: bool) -> bool {
+/// Resolve the current cursor through the same stage fit as the displayed HUD.
+/// Pointer guards use actual rectangles rather than a cached UI `Interaction`,
+/// including a press that arrives in the first frame at its new position.
+fn native_hud_logical_cursor(window: &Window) -> Option<(f32, f32)> {
     if !window.focused {
-        return false;
+        return None;
     }
-    let Some(cursor) = window.cursor_position() else {
-        return false;
-    };
+    let cursor = window
+        .cursor_position()
+        .filter(|cursor| cursor.is_finite())?;
     let transform = mir2_client_bevy::crystal_ui::CrystalStageTransform::fit_native(
         window.resolution.width(),
         window.resolution.height(),
     );
     if !transform.contains_physical_point(cursor.x, cursor.y) {
-        return false;
+        return None;
     }
-    let (x, y) = transform.physical_to_logical(cursor.x, cursor.y);
-    if mir2_client_bevy::crystal_ui::shared_hud::main_buttons()
-        .into_iter()
-        .any(|(button, _, _)| button.rect.contains(x, y))
-    {
+    Some(transform.physical_to_logical(cursor.x, cursor.y))
+}
+
+#[cfg(test)]
+fn cursor_over_native_hud_button(window: &Window, minimap_expanded: bool) -> bool {
+    cursor_over_native_hud_button_with_layout(
+        window,
+        minimap_expanded,
+        HudLayoutSpec::default().resolve(),
+    )
+}
+
+fn cursor_over_native_hud_button_with_layout(
+    window: &Window,
+    minimap_expanded: bool,
+    layout: ResolvedHudLayout,
+) -> bool {
+    let Some((x, y)) = native_hud_logical_cursor(window) else {
+        return false;
+    };
+    if layout.actions.into_iter().any(|rect| rect.contains(x, y)) {
         return true;
     }
     let mut mail = spec::hud::MAIL.rect;
@@ -1427,53 +1445,63 @@ fn cursor_over_big_map_hud_button(window: &Window, minimap_expanded: bool) -> bo
     rect.contains(x, y)
 }
 
+#[cfg(test)]
 fn cursor_over_nonmodal_view_hud_button(window: &Window, minimap_expanded: bool) -> bool {
+    cursor_over_nonmodal_view_hud_button_with_layout(
+        window,
+        minimap_expanded,
+        HudLayoutSpec::default().resolve(),
+    )
+}
+
+fn cursor_over_nonmodal_view_hud_button_with_layout(
+    window: &Window,
+    minimap_expanded: bool,
+    layout: ResolvedHudLayout,
+) -> bool {
     if cursor_over_big_map_hud_button(window, minimap_expanded) {
         return true;
     }
-    let Some(cursor) = window.cursor_position().filter(|_| window.focused) else {
+    let Some((x, y)) = native_hud_logical_cursor(window) else {
         return false;
     };
-    let transform = mir2_client_bevy::crystal_ui::CrystalStageTransform::fit_native(
-        window.resolution.width(),
-        window.resolution.height(),
-    );
-    if !transform.contains_physical_point(cursor.x, cursor.y) {
-        return false;
-    }
-    let (x, y) = transform.physical_to_logical(cursor.x, cursor.y);
-    [
-        spec::hud::CHARACTER.rect,
-        spec::hud::INVENTORY.rect,
-        spec::hud::SKILL.rect,
-        spec::hud::OPTION.rect,
-        spec::hud::MENU.rect,
-        spec::hud::QUEST.rect,
-    ]
-    .into_iter()
-    .any(|rect| rect.contains(x, y))
+    // The shop keeps its existing cancellation semantics. The other six
+    // presentation entries remain nonmodal views at their resolved positions.
+    layout.actions[..6].iter().any(|rect| rect.contains(x, y))
 }
 
+#[cfg(test)]
 fn cursor_over_native_skill_bar(window: &Window, ui: &NativePlayerUiState) -> bool {
-    ui.core.options.skill_bar
-        && window.cursor_position().is_some_and(|cursor| {
-            let transform =
-                mir2_client_bevy::crystal_ui::metrics::CrystalStageTransform::fit_native(
-                    window.resolution.width(),
-                    window.resolution.height(),
-                );
-            let (x, y) = transform.physical_to_logical(cursor.x, cursor.y);
-            ui.skill_bars
-                .visible
-                .iter()
-                .enumerate()
-                .any(|(bar, visible)| {
-                    let p = ui.core.options.skill_bar_positions[bar];
-                    *visible
-                        && (p[0] as f32..p[0] as f32 + 216.).contains(&x)
-                        && (p[1] as f32..p[1] as f32 + 28.).contains(&y)
-                })
-        })
+    cursor_over_native_skill_bar_with_layout(
+        window,
+        ui,
+        HudLayoutSpec::default().resolve(),
+        &ReferenceHudPositions::default(),
+    )
+}
+
+fn cursor_over_native_skill_bar_with_layout(
+    window: &Window,
+    ui: &NativePlayerUiState,
+    layout: ResolvedHudLayout,
+    reference_positions: &ReferenceHudPositions,
+) -> bool {
+    if !ui.core.options.skill_bar {
+        return false;
+    }
+    let Some((x, y)) = native_hud_logical_cursor(window) else {
+        return false;
+    };
+    let positions = if layout.is_reference() {
+        reference_positions.skill_bars
+    } else {
+        ui.core.options.skill_bar_positions
+    };
+    ui.skill_bars
+        .visible
+        .iter()
+        .zip(positions)
+        .any(|(visible, position)| *visible && layout.skills.frame(position).contains(x, y))
 }
 
 fn cursor_over_native_hero_window(window: &Window, ui: &NativePlayerUiState) -> bool {
@@ -1500,6 +1528,7 @@ fn cursor_over_native_hero_window(window: &Window, ui: &NativePlayerUiState) -> 
 /// The current pointer still passes all ordinary gates. Every new world
 /// gesture also needs a world-owned down position, even when the button is
 /// still held after the pointer has moved away from its original UI surface.
+#[cfg(test)]
 fn press_origin_is_world(
     window: &Window,
     point: Option<bevy::prelude::Vec2>,
@@ -1507,6 +1536,29 @@ fn press_origin_is_world(
     quest_ui: &NativeQuestPointerUi,
     minimap_expanded: bool,
     minimap_frame_visible: bool,
+) -> bool {
+    press_origin_is_world_with_layout(
+        window,
+        point,
+        ui,
+        quest_ui,
+        minimap_expanded,
+        minimap_frame_visible,
+        HudLayoutSpec::default().resolve(),
+        &ReferenceHudPositions::default(),
+    )
+}
+
+#[allow(clippy::too_many_arguments)]
+fn press_origin_is_world_with_layout(
+    window: &Window,
+    point: Option<bevy::prelude::Vec2>,
+    ui: Option<&NativePlayerUiState>,
+    quest_ui: &NativeQuestPointerUi,
+    minimap_expanded: bool,
+    minimap_frame_visible: bool,
+    layout: ResolvedHudLayout,
+    reference_positions: &ReferenceHudPositions,
 ) -> bool {
     let Some(point) = point.filter(|point| point.is_finite()) else {
         return false;
@@ -1518,7 +1570,7 @@ fn press_origin_is_world(
         window.resolution.height(),
     );
     if !transform.contains_physical_point(point.x, point.y)
-        || cursor_over_native_hud_button(&press_window, minimap_expanded)
+        || cursor_over_native_hud_button_with_layout(&press_window, minimap_expanded, layout)
         || quest_ui.contains_cursor(&press_window)
         || minimap_input::frame_contains(&press_window, minimap_frame_visible)
     {
@@ -1526,7 +1578,7 @@ fn press_origin_is_world(
     }
     let (x, y) = transform.physical_to_logical(point.x, point.y);
     !ui.is_some_and(|ui| {
-        cursor_over_native_skill_bar(&press_window, ui)
+        cursor_over_native_skill_bar_with_layout(&press_window, ui, layout, reference_positions)
             || cursor_over_native_hero_window(&press_window, ui)
             || (ui.bigmap_open() && big_map_input::cursor_over_panel(&press_window))
             || ui.blocks_world_pointer_at(x, y)
@@ -2599,10 +2651,20 @@ pub fn mouse_world_interaction_system(
     commands: Option<Res<GatewayCommands>>,
     mut effects: Option<ResMut<NativeEffects>>,
     gameplay_inbox: Option<Res<GameplayEventInbox>>,
-    (quest_pointer_ui, mut movement, mut pointer_edges): (
+    (
+        quest_pointer_ui,
+        mut movement,
+        mut pointer_edges,
+        hud_layout,
+        reference_hud_positions,
+        hud_layout_input_guard,
+    ): (
         NativeQuestPointerUi,
         ResMut<WorldPointerMovementState>,
         NativePointerEdges,
+        Option<Res<HudLayoutSpec>>,
+        Option<Res<ReferenceHudPositions>>,
+        Option<Res<HudLayoutInputGuard>>,
     ),
 ) {
     // Drain even idle/menu frames so a press without new motion retains its
@@ -2623,6 +2685,35 @@ pub fn mouse_world_interaction_system(
         }
         return;
     }
+    let now_ms = movement_now_ms(time.as_deref(), real_time.as_deref());
+    // PreUpdate's layout transition guard runs before this Update sender. Old
+    // pointer edges/holds cannot be reinterpreted against the new rectangles.
+    // Preserve submitted movement, committed routes and automatic attack targets;
+    // keyboard movement has its own unchanged system and gates.
+    if hud_layout_input_guard
+        .as_deref()
+        .is_some_and(|guard| guard.switched_this_frame)
+    {
+        movement.stop_hold(now_ms, "hudLayoutChanged");
+        movement.harvest_target = None;
+        movement.harvest_direction = None;
+        movement.next_harvest_request_at_ms = 0.0;
+        if let Some(presentation) = presentation.as_deref_mut() {
+            presentation.clear_local_mining_request();
+        }
+        if let Some(queue) = queue.as_deref_mut() {
+            queue.clear_directional_attack_intents();
+        }
+        return;
+    }
+    let layout = hud_layout
+        .as_deref()
+        .map(HudLayoutSpec::resolve)
+        .unwrap_or_else(|| HudLayoutSpec::default().resolve());
+    let default_reference_positions = ReferenceHudPositions::default();
+    let reference_positions = reference_hud_positions
+        .as_deref()
+        .unwrap_or(&default_reference_positions);
     let keys = keyboard.keys();
     let modifiers = keyboard.modifiers();
     let mut left_pressed = mouse.just_pressed(MouseButton::Left);
@@ -2632,7 +2723,6 @@ pub fn mouse_world_interaction_system(
     let right_released = mouse.just_released(MouseButton::Right);
     let left_click_pulse = left_pressed && left_released && !mouse.pressed(MouseButton::Left);
     let right_click_pulse = right_pressed && right_released && !mouse.pressed(MouseButton::Right);
-    let now_ms = movement_now_ms(time.as_deref(), real_time.as_deref());
     let cancels_directional_attack = !mouse.pressed(MouseButton::Left)
         || mouse.pressed(MouseButton::Right)
         || modifiers.alt
@@ -2969,7 +3059,9 @@ pub fn mouse_world_interaction_system(
             )
         })
     });
-    if (left_pressed || right_pressed) && cursor_over_native_hud_button(window, minimap_expanded) {
+    if (left_pressed || right_pressed)
+        && cursor_over_native_hud_button_with_layout(window, minimap_expanded, layout)
+    {
         presentation.clear_local_mining_request();
         if let Some(queue) = queue.as_deref_mut() {
             queue.clear_directional_attack_intents();
@@ -2978,7 +3070,7 @@ pub fn mouse_world_interaction_system(
         // Crystal view buttons consume their own pointer edge. Opening the
         // Character/Spells/bag/options/menu view doesn't select a new world
         // target or discard an established automatic action.
-        if !cursor_over_nonmodal_view_hud_button(window, minimap_expanded) {
+        if !cursor_over_nonmodal_view_hud_button_with_layout(window, minimap_expanded, layout) {
             movement.attack_target = None;
             movement.harvest_target = None;
             movement.harvest_direction = None;
@@ -2987,12 +3079,11 @@ pub fn mouse_world_interaction_system(
         }
         return;
     }
-    // PreUpdate precedes the current frame's UI focus pass. Use actual current
-    // cursor geometry as well as captured interaction, so crossing onto a bar
+    // Use actual current cursor geometry as well as captured interaction, so crossing onto a bar
     // and pressing in the same frame cannot issue a world movement request.
-    let over_skill_bar = player_ui
-        .as_deref()
-        .is_some_and(|ui| cursor_over_native_skill_bar(window, ui));
+    let over_skill_bar = player_ui.as_deref().is_some_and(|ui| {
+        cursor_over_native_skill_bar_with_layout(window, ui, layout, reference_positions)
+    });
     let over_hero_window = player_ui
         .as_deref()
         .is_some_and(|ui| cursor_over_native_hero_window(window, ui));
@@ -3496,13 +3587,15 @@ pub fn mouse_world_interaction_system(
                 .as_deref()
                 .is_some_and(|view| view.displayed.is_some());
         let origin_is_world = |point| {
-            press_origin_is_world(
+            press_origin_is_world_with_layout(
                 window,
                 point,
                 player_ui.as_deref(),
                 &quest_pointer_ui,
                 minimap_expanded,
                 minimap_frame_visible,
+                layout,
+                reference_positions,
             )
         };
         if (left_pressed && !origin_is_world(press_origins.left))
@@ -5102,6 +5195,9 @@ mod tests {
     }
     mod quest_route_input_tests {
         include!("quest_route_input_tests.rs");
+    }
+    mod hud_layout_pointer_input_tests {
+        include!("hud_layout_pointer_input_tests.rs");
     }
     use super::*;
     use bevy::prelude::IntoScheduleConfigs;

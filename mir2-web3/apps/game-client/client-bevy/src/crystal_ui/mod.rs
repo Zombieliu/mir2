@@ -29,7 +29,12 @@ pub mod hud;
 #[cfg(not(feature = "native-ui"))]
 #[path = "hud_portable.rs"]
 pub mod hud;
+#[cfg(feature = "native-ui")]
+pub(crate) mod hud_art;
 pub mod hud_bar;
+pub mod hud_layout;
+#[cfg(feature = "native-ui")]
+pub(crate) mod hud_reference;
 pub mod hud_orb;
 pub mod item_image;
 pub mod item_tooltip;

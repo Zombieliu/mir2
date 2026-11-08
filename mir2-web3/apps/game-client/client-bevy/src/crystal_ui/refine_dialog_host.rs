@@ -36,11 +36,12 @@ fn inventory_cell(
     state: &NativePlayerUiState,
     cursor: Vec2,
     belt: Option<&super::super::super::hud::CrystalBeltPresentation>,
+    layout: crate::crystal_ui::hud_layout::ResolvedHudLayout,
 ) -> Option<u8> {
     if let Some(slot) = inventory_bag_slot_at_cursor(state, cursor) {
         return u8::try_from(slot.checked_add(6)?).ok();
     }
-    belt.and_then(|belt| belt_slot_at_cursor(*belt, cursor))
+    belt.and_then(|belt| belt_slot_at_cursor(layout, *belt, cursor))
 }
 
 fn press_at(
@@ -49,6 +50,7 @@ fn press_at(
     inventory: &InventoryModel,
     cursor: Vec2,
     belt: Option<&super::super::super::hud::CrystalBeltPresentation>,
+    layout: crate::crystal_ui::hud_layout::ResolvedHudLayout,
 ) {
     if !state.refine.open {
         return;
@@ -65,7 +67,7 @@ fn press_at(
                 state.refine.select_material(slot);
             }
             host.press = Some(Press::Item(cursor));
-        } else if let Some(cell) = inventory_cell(state, cursor, belt) {
+        } else if let Some(cell) = inventory_cell(state, cursor, belt, layout) {
             if matches!(
                 state.refine.selected,
                 Some(RefineSelection::Material { .. })
@@ -92,6 +94,7 @@ fn release_at(
     inventory: &InventoryModel,
     cursor: Vec2,
     belt: Option<&super::super::super::hud::CrystalBeltPresentation>,
+    layout: crate::crystal_ui::hud_layout::ResolvedHudLayout,
     queue: &mut NativePlayerUiIntentQueue,
 ) {
     let Some(press) = host.press.take() else {
@@ -115,7 +118,7 @@ fn release_at(
                 if let Some(packet) = state.refine.deposit_selected(inventory, slot) {
                     enqueue(state, queue, packet);
                 }
-            } else if let Some(cell) = inventory_cell(state, cursor, belt) {
+            } else if let Some(cell) = inventory_cell(state, cursor, belt, layout) {
                 if let Some(packet) = state.refine.retrieve_selected(inventory, cell) {
                     enqueue(state, queue, packet);
                 }
@@ -137,6 +140,8 @@ pub(in super::super) fn process(
     mut reader: Local<bevy::ecs::message::MessageCursor<bevy::window::WindowEvent>>,
     mut queue: ResMut<NativePlayerUiIntentQueue>,
     mut chat: Option<ResMut<crate::chat::ChatModel>>,
+    layout: Option<Res<crate::crystal_ui::hud_layout::HudLayoutSpec>>,
+    layout_guard: Option<Res<crate::crystal_ui::overlays::HudLayoutInputGuard>>,
 ) {
     state.refine.input_consumed = false;
     let ordered: Vec<_> = events
@@ -160,6 +165,16 @@ pub(in super::super) fn process(
             });
         }
     }
+    if layout_guard
+        .as_deref()
+        .is_some_and(|guard| guard.switched_this_frame)
+    {
+        host.press = None;
+        host.last_cursor = None;
+        state.refine.input_consumed = true;
+        return;
+    }
+    let layout = layout.as_deref().cloned().unwrap_or_default().resolve();
     let Ok((entity, window)) = windows.single() else {
         host.press = None;
         host.last_cursor = None;
@@ -200,7 +215,14 @@ pub(in super::super) fn process(
                 saw_buttons = true;
                 if let Some(cursor) = cursor {
                     if event.state == ButtonState::Pressed {
-                        press_at(&mut state, &mut host, &inventory, cursor, belt.as_deref());
+                        press_at(
+                            &mut state,
+                            &mut host,
+                            &inventory,
+                            cursor,
+                            belt.as_deref(),
+                            layout,
+                        );
                     } else {
                         release_at(
                             &mut state,
@@ -208,6 +230,7 @@ pub(in super::super) fn process(
                             &inventory,
                             cursor,
                             belt.as_deref(),
+                            layout,
                             &mut queue,
                         );
                     }
@@ -219,7 +242,14 @@ pub(in super::super) fn process(
     if !saw_buttons {
         if let (Some(mouse), Some(cursor)) = (mouse, cursor) {
             if mouse.just_pressed(MouseButton::Left) {
-                press_at(&mut state, &mut host, &inventory, cursor, belt.as_deref());
+                press_at(
+                    &mut state,
+                    &mut host,
+                    &inventory,
+                    cursor,
+                    belt.as_deref(),
+                    layout,
+                );
             }
             if mouse.just_released(MouseButton::Left) {
                 release_at(
@@ -228,6 +258,7 @@ pub(in super::super) fn process(
                     &inventory,
                     cursor,
                     belt.as_deref(),
+                    layout,
                     &mut queue,
                 );
             }
@@ -282,6 +313,81 @@ pub(in super::super) fn render_system(
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn reference_refine_belt_cells_follow_layout_in_both_orientations() {
+        use crate::crystal_ui::hud_layout::HudLayoutSpec;
+        let state = NativePlayerUiState::default();
+        for layout in [HudLayoutSpec::default(), HudLayoutSpec::reference()] {
+            let layout = layout.resolve();
+            for vertical in [false, true] {
+                let belt = crate::crystal_ui::hud::CrystalBeltPresentation {
+                    visible: true,
+                    vertical,
+                };
+                for slot in 0..6 {
+                    let rect = layout.belt.slot(slot, vertical);
+                    let cursor =
+                        Vec2::new(rect.left + rect.width * 0.5, rect.top + rect.height * 0.5);
+                    assert_eq!(
+                        inventory_cell(&state, cursor, Some(&belt), layout),
+                        Some(slot)
+                    );
+                }
+            }
+        }
+    }
+
+    #[test]
+    fn reference_refine_returns_held_material_to_current_belt_only_on_release() {
+        use crate::crystal_ui::hud_layout::HudLayoutSpec;
+        for layout in [HudLayoutSpec::default(), HudLayoutSpec::reference()] {
+            let (mut app, window, _, material) = app();
+            app.insert_resource(layout.clone());
+            let held = app.world().resource::<InventoryModel>().items[0].clone();
+            app.world_mut()
+                .resource_mut::<InventoryModel>()
+                .items
+                .clear();
+            app.world_mut()
+                .resource_mut::<NativePlayerUiState>()
+                .refine
+                .observe_custody(&RefineCustodyReadback {
+                    materials: vec![(0, held)],
+                    ..Default::default()
+                });
+            motion(&mut app, window, material);
+            button(&mut app, window, ButtonState::Pressed);
+            button(&mut app, window, ButtonState::Released);
+            app.update();
+            assert!(drain(&mut app).is_empty());
+            let rect = layout.resolve().belt.slot(5, false);
+            let destination = Vec2::new(rect.left + rect.width * 0.5, rect.top + rect.height * 0.5);
+            motion(&mut app, window, destination);
+            button(&mut app, window, ButtonState::Pressed);
+            app.update();
+            assert!(drain(&mut app).is_empty());
+            button(&mut app, window, ButtonState::Released);
+            app.update();
+            assert_eq!(
+                drain(&mut app),
+                vec![NativePlayerUiIntent::RefinePacket(
+                    ClientPacket::RetrieveRefineItem { from: 0, to: 5 }
+                )]
+            );
+            assert_eq!(
+                app.world()
+                    .resource::<NativePlayerUiState>()
+                    .refine
+                    .materials[0]
+                    .as_ref()
+                    .unwrap()
+                    .unique_id,
+                Some(7003),
+                "UI cannot assume server custody changed"
+            );
+        }
+    }
 
     fn app() -> (App, Entity, Vec2, Vec2) {
         let mut app = App::new();

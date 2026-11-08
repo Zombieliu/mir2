@@ -15,6 +15,8 @@ mod localized_help;
 mod npc_item_service;
 #[path = "npc_shop_scroll.rs"]
 mod npc_shop_scroll;
+#[path = "reference_menu_art.rs"]
+mod reference_menu_art;
 #[path = "refine_dialog.rs"]
 pub mod refine_dialog;
 #[path = "skill_bars.rs"]
@@ -585,6 +587,7 @@ struct InventoryBeltDiagnostics(bool);
 struct InventoryPointerControls<'w> {
     diagnostics: Option<Res<'w, InventoryBeltDiagnostics>>,
     settings: Option<Res<'w, hero_dialog::pointer::HeroPointerSettings>>,
+    layout: Option<Res<'w, super::hud_layout::HudLayoutSpec>>,
 }
 
 #[derive(Default, Resource)]
@@ -1799,6 +1802,9 @@ impl NativePlayerUiState {
         self.hero.modal() || self.hero.input_consumed || self.blocks_gameplay_keys_except_hero()
     }
     pub fn blocks_gameplay_keys_except_hero(&self) -> bool {
+        self.core.blocks_gameplay_keys() || self.blocks_nonchat_gameplay_keys_except_hero()
+    }
+    fn blocks_nonchat_gameplay_keys_except_hero(&self) -> bool {
         self.procurement_open
             || self.procurement_input_consumed
             || self.billing_open
@@ -1827,11 +1833,25 @@ impl NativePlayerUiState {
             || self.leave_game.blocks()
             || self.social_bonds.prompt.is_some()
             || equipment_creature_host::modal(self)
-            || self.core.blocks_gameplay_keys()
             || self.amount_modal_open_except_hero()
             || self.keyboard.open
             || self.keyboard.input_consumed
             || self.friends.modal.is_some()
+    }
+    /// Chat IME gets the same modal guards as the keyboard dispatcher. Its
+    /// own focus must be excluded from the gameplay-key blocking predicate.
+    pub fn chat_accepts_text_input(&self) -> bool {
+        self.chat_focused()
+            && !self.hero.modal()
+            && !self.hero.input_consumed
+            && !self.blocks_nonchat_gameplay_keys_except_hero()
+            && !self.core.chat_settings_open()
+            && !self.core.mail_compose_open()
+            && !(self.group_open() && self.group_invite_focused)
+            && !(self.guild_open()
+                && (self.guild_recruit_focused
+                    || self.guild_rank_name_focused
+                    || self.guild_notice_editing))
     }
     pub fn blocks_world_click(&self) -> bool {
         self.blocks_world_click_with_panel(self.core.blocks_world_click())
@@ -4644,6 +4664,8 @@ fn begin_mail_recipient_prompt(state: &mut NativePlayerUiState, compose: &mut Ma
 #[derive(SystemParam)]
 struct OverlayRenderModels<'w> {
     asset_server: Option<Res<'w, AssetServer>>,
+    hud_layout: Option<Res<'w, super::hud_layout::HudLayoutSpec>>,
+    hud_artwork: Option<Res<'w, super::hud_layout::ReferenceHudArtwork>>,
     wing_materials: Option<Res<'w, CrystalCharacterWingMaterials>>,
     game_shop_geometry: Option<Res<'w, game_shop_dialog::PreviewGeometry>>,
     shell: Option<Res<'w, NativeShellModel>>,
@@ -4670,6 +4692,212 @@ struct OverlayRenderModels<'w> {
     skill_persistence: Res<'w, SkillBindingPersistenceRuntime>,
     social: Res<'w, crate::social::SocialModel>,
     combat_target: Option<Res<'w, crate::quest_model::CombatTargetModel>>,
+}
+
+/// Host boundary for offline HUD fixtures. Insert before adding the overlay
+/// and chat plugins. Fixture mode reuses native UI systems without touching
+/// the player's configuration files or starting the native audio adapter.
+#[derive(Resource, Debug, Clone, Copy, Default, PartialEq, Eq)]
+pub enum NativeUiIoPolicy {
+    #[default]
+    Normal,
+    Fixture,
+}
+
+pub fn native_ui_io_enabled(policy: Option<Res<NativeUiIoPolicy>>) -> bool {
+    policy.as_deref().copied().unwrap_or_default() == NativeUiIoPolicy::Normal
+}
+
+pub fn native_ui_fixture(policy: Option<Res<NativeUiIoPolicy>>) -> bool {
+    !native_ui_io_enabled(policy)
+}
+
+/// Run layout selection before this set and pointer consumers after it.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, SystemSet)]
+pub struct HudLayoutTransitionSet;
+
+#[derive(Resource, Debug, Default)]
+pub struct HudLayoutInputGuard {
+    pub switched_this_frame: bool,
+}
+
+fn reset_hud_layout_interactions(
+    layout: Option<Res<super::hud_layout::HudLayoutSpec>>,
+    mut previous: Local<Option<(super::hud_layout::HudLayoutMode, u64)>>,
+    mut guard: ResMut<HudLayoutInputGuard>,
+    mut ui: ResMut<NativePlayerUiState>,
+    mut storage: Option<ResMut<StorageUiState>>,
+    mut chat_actions: Option<ResMut<super::chat::CrystalChatActionQueue>>,
+    mut buttons: Query<&mut Interaction, With<Button>>,
+) {
+    let layout = layout.as_deref().cloned().unwrap_or_default();
+    let identity = (layout.mode, layout.revision);
+    guard.switched_this_frame = previous.is_some() && *previous != Some(identity);
+    *previous = Some(identity);
+    if !guard.switched_this_frame {
+        return;
+    }
+    ui.skill_bars.armed_slot = None;
+    ui.skill_bars.dragging = None;
+    ui.skill_bars.hovered = false;
+    ui.skill_bars.cursor = None;
+    ui.status_hud.hovered = false;
+    ui.status_hud.pressed = None;
+    ui.status_hud.cursor = None;
+    ui.hero_buffs.rows.hovered = false;
+    ui.hero_buffs.rows.pressed = None;
+    ui.hero_buffs.rows.cursor = None;
+    ui.inventory_item_drag = None;
+    ui.equipment_item_drag = None;
+    ui.inventory_item_click = None;
+    ui.inventory_window.end_drag();
+    ui.inventory_window.clear_cursor();
+    if let Some(storage) = storage.as_deref_mut() {
+        storage.storage_item_drag = None;
+    }
+    if let Some(actions) = chat_actions.as_deref_mut() {
+        actions.actions.clear();
+    }
+    for mut interaction in &mut buttons {
+        if *interaction != Interaction::None {
+            *interaction = Interaction::None;
+        }
+    }
+}
+
+fn guard_fixture_keyboard_io(
+    policy: Res<NativeUiIoPolicy>,
+    mut host: ResMut<keyboard_dialog::host::KeyboardHost>,
+) {
+    if *policy == NativeUiIoPolicy::Fixture {
+        host.path = None;
+    }
+}
+
+fn discard_fixture_options_effects(mut effects: ResMut<UiEffectQueue>) {
+    // The core already applied the in-memory options. Do not resize the host
+    // window, start audio, or persist anything from the fixture.
+    let _ = effects.drain_options_bounded(64);
+}
+
+#[cfg(test)]
+mod reference_hud_layout_boundary_tests {
+    use super::*;
+    use crate::crystal_ui::hud_layout::{HudLayoutMode, HudLayoutSpec};
+
+    #[test]
+    fn layout_switch_cancels_pointer_leases_but_keeps_drafts_and_settings() {
+        let mut app = App::new();
+        app.init_resource::<NativePlayerUiState>()
+            .init_resource::<HudLayoutSpec>()
+            .init_resource::<HudLayoutInputGuard>()
+            .init_resource::<super::super::chat::CrystalChatActionQueue>()
+            .add_systems(PreUpdate, reset_hud_layout_interactions);
+        app.update();
+        let pressed = app.world_mut().spawn((Button, Interaction::Pressed)).id();
+        let settings = mir2_ui_core::state::UiChatSettings {
+            transparent: true,
+            ..Default::default()
+        };
+        let mut ui = app.world_mut().resource_mut::<NativePlayerUiState>();
+        ui.chat_draft = "尚未发送".into();
+        ui.core.chat_settings_draft = Some(settings);
+        ui.skill_bars.armed_slot = Some(2);
+        ui.skill_bars.dragging = Some((0, [5.0, 6.0]));
+        ui.skill_bars.hovered = true;
+        ui.status_hud.hovered = true;
+        ui.inventory_window.dragging = true;
+        drop(ui);
+        app.world_mut()
+            .resource_mut::<HudLayoutSpec>()
+            .select(HudLayoutMode::ReferenceLayoutV1);
+        app.update();
+        let ui = app.world().resource::<NativePlayerUiState>();
+        assert_eq!(ui.chat_draft, "尚未发送");
+        assert_eq!(ui.core.chat_settings_draft, Some(settings));
+        assert!(ui.skill_bars.armed_slot.is_none() && ui.skill_bars.dragging.is_none());
+        assert!(
+            !ui.skill_bars.hovered && !ui.status_hud.hovered && !ui.inventory_window.dragging()
+        );
+        assert_eq!(
+            app.world().get::<Interaction>(pressed),
+            Some(&Interaction::None)
+        );
+        assert!(
+            app.world()
+                .resource::<HudLayoutInputGuard>()
+                .switched_this_frame
+        );
+        app.update();
+        assert!(
+            !app.world()
+                .resource::<HudLayoutInputGuard>()
+                .switched_this_frame
+        );
+    }
+
+    #[test]
+    fn belt_drag_drop_uses_resolved_slots_in_both_layouts_and_orientations() {
+        for layout in [HudLayoutSpec::default(), HudLayoutSpec::reference()] {
+            for vertical in [false, true] {
+                let resolved = layout.resolve();
+                let belt = crate::crystal_ui::hud::CrystalBeltPresentation {
+                    visible: true,
+                    vertical,
+                };
+                for slot in 0..6 {
+                    let rect = resolved.belt.slot(slot, vertical);
+                    let cursor =
+                        Vec2::new(rect.left + rect.width * 0.5, rect.top + rect.height * 0.5);
+                    assert_eq!(belt_slot_at_cursor(resolved, belt, cursor), Some(slot));
+                }
+                assert_eq!(
+                    belt_slot_at_cursor(resolved, belt, Vec2::new(1023.0, 767.0)),
+                    None
+                );
+            }
+        }
+    }
+
+    #[test]
+    fn fixture_io_policy_is_opt_in_and_preserves_unrelated_effects() {
+        #[derive(Resource, Default)]
+        struct Counter(usize);
+        fn tick(mut counter: ResMut<Counter>) {
+            counter.0 += 1;
+        }
+        let mut app = App::new();
+        app.init_resource::<Counter>()
+            .add_systems(Update, tick.run_if(native_ui_io_enabled));
+        app.update();
+        assert_eq!(app.world().resource::<Counter>().0, 1);
+        app.insert_resource(NativeUiIoPolicy::Fixture);
+        app.update();
+        assert_eq!(app.world().resource::<Counter>().0, 1);
+        app.insert_resource(NativeUiIoPolicy::Normal);
+        app.update();
+        assert_eq!(app.world().resource::<Counter>().0, 2);
+        app.init_resource::<UiEffectQueue>()
+            .add_systems(Update, discard_fixture_options_effects);
+        let mut queue = app.world_mut().resource_mut::<UiEffectQueue>();
+        queue.push(mir2_ui_core::effect::UiEffect::PersistOptions {
+            options: Default::default(),
+        });
+        queue.push(mir2_ui_core::effect::UiEffect::GatewayCommand(
+            mir2_ui_core::effect::GatewayCommand::Logout,
+        ));
+        drop(queue);
+        app.update();
+        assert!(matches!(
+            app.world_mut()
+                .resource_mut::<UiEffectQueue>()
+                .drain()
+                .as_slice(),
+            [mir2_ui_core::effect::UiEffect::GatewayCommand(
+                mir2_ui_core::effect::GatewayCommand::Logout
+            )]
+        ));
+    }
 }
 
 pub struct Mir2CrystalOverlayPlugin;
@@ -4732,18 +4960,24 @@ pub fn native_mail_parcel_quote_state(world: &World) -> Option<NativeMailParcelQ
 impl Plugin for Mir2CrystalOverlayPlugin {
     fn build(&self, app: &mut App) {
         app.add_plugins(super::companion::Mir2CompanionUiPlugin);
-        app.add_plugins((
-            Mir2NativeMailParcelServicePlugin,
-            super::guild_pixel_text_view::GuildPixelTextPlugin,
-            crate::native_procurement::NativeProcurementPlugin,
-        ))
-        .configure_sets(
-            Update,
-            NativeMailParcelServiceSet
-                .after(sync_mail_letter_editor)
-                .before(consume_hud_buttons)
-                .before(process_overlay_keyboard),
-        );
+        app.init_resource::<NativeUiIoPolicy>()
+            .init_resource::<HudLayoutInputGuard>()
+            .add_systems(
+                PreUpdate,
+                reset_hud_layout_interactions.in_set(HudLayoutTransitionSet),
+            )
+            .add_plugins((
+                Mir2NativeMailParcelServicePlugin,
+                super::guild_pixel_text_view::GuildPixelTextPlugin,
+                crate::native_procurement::NativeProcurementPlugin,
+            ))
+            .configure_sets(
+                Update,
+                NativeMailParcelServiceSet
+                    .after(sync_mail_letter_editor)
+                    .before(consume_hud_buttons)
+                    .before(process_overlay_keyboard),
+            );
         register_crystal_additive_ui(app);
         app.init_resource::<NativePlayerUiState>()
             .init_resource::<localized_help::HelpScrollState>()
@@ -4843,7 +5077,8 @@ impl Plugin for Mir2CrystalOverlayPlugin {
                     crate::options_effects::load_persisted_options,
                     crate::audio::initialize_native_audio,
                 )
-                    .chain(),
+                    .chain()
+                    .run_if(native_ui_io_enabled),
             )
             .configure_sets(
                 Update,
@@ -4890,7 +5125,7 @@ impl Plugin for Mir2CrystalOverlayPlugin {
                         process_mail_letter_editor_wheel,
                     )
                         .chain(),
-                    keyboard_dialog::host::process,
+                    (guard_fixture_keyboard_io, keyboard_dialog::host::process).chain(),
                     (
                         equipment_creature_host::process,
                         social_bond_dialog::host::process,
@@ -4926,12 +5161,17 @@ impl Plugin for Mir2CrystalOverlayPlugin {
                         keyboard_dialog::host::sync_skill_mode,
                     )
                         .chain(),
-                    crate::audio::sync_native_ui_audio,
+                    crate::audio::sync_native_ui_audio.run_if(native_ui_io_enabled),
                     consume_exit_application,
                     crate::pending_operations::observe_native_session_boundary,
                     (reconcile_native_game_shop_ui_state, game_shop_dialog::sync).chain(),
-                    crate::options_effects::consume_options_effects,
-                    crate::audio::sync_native_audio,
+                    (
+                        crate::options_effects::consume_options_effects
+                            .run_if(native_ui_io_enabled),
+                        discard_fixture_options_effects.run_if(native_ui_fixture),
+                    )
+                        .chain(),
+                    crate::audio::sync_native_audio.run_if(native_ui_io_enabled),
                 )
                     .chain()
                     .in_set(NativePlayerUiSet::Mutate),
@@ -5882,8 +6122,12 @@ fn consume_hud_buttons(
     mut pending: Option<ResMut<PendingOperations>>,
     mut ui_audio: ResMut<crate::audio::NativeUiAudioQueue>,
     diagnostics: Option<Res<InventoryBeltDiagnostics>>,
+    layout_guard: Option<Res<HudLayoutInputGuard>>,
 ) {
-    if !shell.is_some_and(|model| model.screen == NativeShellScreen::InGame)
+    if layout_guard
+        .as_deref()
+        .is_some_and(|guard| guard.switched_this_frame)
+        || !shell.is_some_and(|model| model.screen == NativeShellScreen::InGame)
         || state.amount_modal_open()
         || state.storage_password_prompt.is_some()
         || state.storage_rental_confirmation.is_some()
@@ -6511,10 +6755,18 @@ fn inventory_bag_slot_at_cursor(state: &NativePlayerUiState, cursor: Vec2) -> Op
     })
 }
 
-fn belt_slot_at_cursor(belt: super::hud::CrystalBeltPresentation, cursor: Vec2) -> Option<u8> {
+fn belt_slot_at_cursor(
+    layout: super::hud_layout::ResolvedHudLayout,
+    belt: super::hud::CrystalBeltPresentation,
+    cursor: Vec2,
+) -> Option<u8> {
     belt.visible.then_some(())?;
-    (0..6)
-        .find(|slot| super::hud::belt_slot_rect(*slot, belt.vertical).contains(cursor.x, cursor.y))
+    (0..6).find(|slot| {
+        layout
+            .belt
+            .slot(*slot, belt.vertical)
+            .contains(cursor.x, cursor.y)
+    })
 }
 
 fn inventory_item_drag_at_cursor(
@@ -6906,6 +7158,7 @@ fn finish_inventory_item_drag(
     storage_ui: Option<&mut StorageUiState>,
     cursor: Option<Vec2>,
     belt: super::hud::CrystalBeltPresentation,
+    layout: super::hud_layout::ResolvedHudLayout,
     intents: &mut NativePlayerUiIntentQueue,
     pending: &mut PendingOperations,
     diagnostics: Option<&InventoryBeltDiagnostics>,
@@ -7060,7 +7313,7 @@ fn finish_inventory_item_drag(
                 to: to as i32,
             }
         }
-    } else if let Some(belt_slot) = belt_slot_at_cursor(belt, cursor) {
+    } else if let Some(belt_slot) = belt_slot_at_cursor(layout, belt, cursor) {
         let Some(intent) = inventory_bag_to_belt_move_intent(
             inventory.effective_capacity(),
             drag.source_slot,
@@ -7205,7 +7458,9 @@ fn process_inventory_item_drag(
     let InventoryPointerControls {
         diagnostics,
         settings,
+        layout,
     } = controls;
+    let layout = layout.as_deref().cloned().unwrap_or_default().resolve();
     let double_click_ms = settings
         .as_deref()
         .copied()
@@ -7394,6 +7649,7 @@ fn process_inventory_item_drag(
                                 storage_ui.as_deref_mut(),
                                 cursor,
                                 *belt,
+                                layout,
                                 &mut intents,
                                 &mut pending,
                                 diagnostics.as_deref(),
@@ -7485,6 +7741,7 @@ fn process_inventory_item_drag(
             storage_ui.as_deref_mut(),
             cursor,
             *belt,
+            layout,
             &mut intents,
             &mut pending,
             diagnostics.as_deref(),
@@ -13037,6 +13294,8 @@ fn render_overlays(
     }
     let OverlayRenderModels {
         asset_server,
+        hud_layout,
+        hud_artwork,
         wing_materials,
         game_shop_geometry,
         shell,
@@ -13119,7 +13378,17 @@ fn render_overlays(
             },
         );
         fill_panel(&mut commands, &mut all.p3(), state.menu_open(), |parent| {
-            render_menu(parent, asset_server.as_deref())
+            if let (Some(server), Some(artwork)) = (
+                asset_server.as_deref(),
+                reference_menu_art::selected_artwork(
+                    hud_layout.as_deref(),
+                    hud_artwork.as_deref(),
+                ),
+            ) {
+                reference_menu_art::render(parent, server, artwork);
+            } else {
+                render_menu(parent, asset_server.as_deref());
+            }
         });
         fill_panel(
             &mut commands,
@@ -23955,6 +24224,7 @@ mod tests {
         }
         assert_eq!(
             belt_slot_at_cursor(
+                crate::crystal_ui::hud_layout::HudLayoutSpec::default().resolve(),
                 *app.world()
                     .resource::<crate::crystal_ui::hud::CrystalBeltPresentation>(),
                 destination,

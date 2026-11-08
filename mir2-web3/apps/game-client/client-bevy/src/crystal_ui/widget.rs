@@ -287,6 +287,26 @@ pub struct CrystalImageButton {
 #[derive(Component, Debug, Clone, Copy, PartialEq, Eq)]
 pub struct CrystalImageButtonSprite;
 
+/// A code-owned face on the existing typed button. Stock controls omit this
+/// component and retain the original frame selection and image-node fields.
+#[derive(Component, Debug, Clone)]
+pub(crate) struct CrystalCodeOwnedButtonFace(ImageNode);
+
+fn paint_code_owned_button_face(
+    image: &mut ImageNode,
+    face: &CrystalCodeOwnedButtonFace,
+    state: CrystalButtonVisualState,
+) {
+    *image = face.0.clone();
+    let alpha = image.color.to_srgba().alpha;
+    image.color = match state {
+        CrystalButtonVisualState::Normal => image.color,
+        CrystalButtonVisualState::Hover => Color::srgba(1.0, 0.96, 0.82, alpha),
+        CrystalButtonVisualState::Pressed => Color::srgba(0.64, 0.60, 0.50, alpha),
+        CrystalButtonVisualState::Disabled => Color::srgba(0.43, 0.43, 0.41, alpha),
+    };
+}
+
 #[derive(Component)]
 struct LocalizedButtonFace;
 
@@ -407,7 +427,7 @@ pub fn spawn_crystal_image_button<T: Bundle>(
     focused: bool,
     enabled: bool,
 ) {
-    spawn_crystal_image_button_impl(parent, asset_server, spec, assets, action, focused, enabled, true);
+    spawn_crystal_image_button_impl(parent, asset_server, spec, assets, action, focused, enabled, true, None);
 }
 
 /// Preserve Crystal's baked caption pixels when the caller needs original art.
@@ -421,7 +441,27 @@ pub(crate) fn spawn_original_crystal_image_button<T: Bundle>(
     focused: bool,
     enabled: bool,
 ) {
-    spawn_crystal_image_button_impl(parent, asset_server, spec, assets, action, focused, enabled, false);
+    spawn_crystal_image_button_impl(parent, asset_server, spec, assets, action, focused, enabled, false, None);
+}
+
+/// Keep the ordinary button entity, hit rectangle, typed action, enabled flag
+/// and both existing visual-state painters. The stock PNG child is not created.
+#[allow(clippy::too_many_arguments)]
+pub(crate) fn spawn_code_owned_crystal_image_button<T: Bundle>(
+    parent: &mut ChildSpawnerCommands,
+    asset_server: &AssetServer,
+    spec: CrystalButtonSpec,
+    assets: CrystalButtonAssetSet,
+    action: T,
+    focused: bool,
+    enabled: bool,
+    image: ImageNode,
+    decorate: impl FnOnce(&mut ChildSpawnerCommands),
+) {
+    let button = spawn_crystal_image_button_impl(
+        parent, asset_server, spec, assets, action, focused, enabled, false, Some(image),
+    );
+    parent.commands().entity(button).with_children(decorate);
 }
 
 #[allow(clippy::too_many_arguments)]
@@ -434,7 +474,8 @@ fn spawn_crystal_image_button_impl<T: Bundle>(
     focused: bool,
     enabled: bool,
     localize: bool,
-) {
+    code_owned_face: Option<ImageNode>,
+) -> Entity {
     let (image_left, image_top) = button_image_offset(spec);
     let path = resolve_button_visual_state(None, focused, enabled)
         .asset_path(&assets)
@@ -463,7 +504,27 @@ fn spawn_crystal_image_button_impl<T: Bundle>(
         entity.insert(Button);
     }
 
+    let button_entity = entity.id();
+    if let Some(face) = code_owned_face.as_ref() {
+        entity.insert(CrystalCodeOwnedButtonFace(face.clone()));
+    }
     entity.with_children(|button| {
+        if let Some(face) = code_owned_face {
+            button.spawn((
+                CrystalImageButtonSprite,
+                Node {
+                    position_type: PositionType::Absolute,
+                    left: Val::Px(image_left),
+                    top: Val::Px(image_top),
+                    width: Val::Px(spec.image_width),
+                    height: Val::Px(spec.image_height),
+                    ..default()
+                },
+                face,
+                FocusPolicy::Pass,
+            ));
+            return;
+        }
         if localize && crate::native_i18n::active() {
             if let Some(caption) = crystal_button_caption(spec) {
                 let caption = match (spec.library, spec.normal) {
@@ -529,6 +590,7 @@ fn spawn_crystal_image_button_impl<T: Bundle>(
             },
         ));
     });
+    button_entity
 }
 
 fn spawn_crystal_hint_overlay(mut commands: Commands, surface: Option<Res<CrystalHintSurface>>) {
@@ -1130,7 +1192,12 @@ pub fn crystal_item_hint_position_for_bounds(cursor: Vec2, size: Vec2, bounds: V
 pub fn sync_crystal_image_buttons(
     asset_server: Res<AssetServer>,
     buttons: Query<
-        (&CrystalImageButton, Option<&Interaction>, &Children),
+        (
+            &CrystalImageButton,
+            Option<&Interaction>,
+            &Children,
+            Option<&CrystalCodeOwnedButtonFace>,
+        ),
         Or<(
             Added<CrystalImageButton>,
             Changed<CrystalImageButton>,
@@ -1139,15 +1206,21 @@ pub fn sync_crystal_image_buttons(
     >,
     mut sprites: Query<&mut ImageNode, With<CrystalImageButtonSprite>>,
 ) {
-    for (button, interaction, children) in &buttons {
+    for (button, interaction, children, code_owned_face) in &buttons {
         let state =
             resolve_button_visual_state(interaction.copied(), button.focused, button.enabled);
-        let image = asset_server.load(state.asset_path(&button.assets).to_owned());
+        let image = code_owned_face
+            .is_none()
+            .then(|| asset_server.load(state.asset_path(&button.assets).to_owned()));
         for child in children.iter() {
             let Ok(mut node) = sprites.get_mut(child) else {
                 continue;
             };
-            node.image = image.clone();
+            if let Some(face) = code_owned_face {
+                paint_code_owned_button_face(&mut node, face, state);
+            } else if let Some(image) = image.as_ref() {
+                node.image = image.clone();
+            }
         }
     }
 }
@@ -1193,7 +1266,12 @@ fn paint_rebuilt_crystal_buttons(
     )>,
     clipping: Query<(&ComputedNode, &bevy::ui::UiGlobalTransform, &Node)>,
     parents: Query<&ChildOf, Without<bevy::ui::OverrideClip>>,
-    buttons: Query<(Entity, &CrystalImageButton, &Children)>,
+    buttons: Query<(
+        Entity,
+        &CrystalImageButton,
+        &Children,
+        Option<&CrystalCodeOwnedButtonFace>,
+    )>,
     mut sprites: Query<&mut ImageNode, With<CrystalImageButtonSprite>>,
     mut faces: Query<&mut BackgroundColor, With<LocalizedButtonFace>>,
 ) {
@@ -1240,7 +1318,7 @@ fn paint_rebuilt_crystal_buttons(
             }
         }
     }
-    for (entity, button, children) in &buttons {
+    for (entity, button, children, code_owned_face) in &buttons {
         let interaction = if hovered.contains(&entity) {
             if mouse.pressed(MouseButton::Left) {
                 Interaction::Pressed
@@ -1251,14 +1329,20 @@ fn paint_rebuilt_crystal_buttons(
             Interaction::None
         };
         let state = resolve_button_visual_state(Some(interaction), button.focused, button.enabled);
-        let image = assets.load(state.asset_path(&button.assets).to_owned());
+        let image = code_owned_face
+            .is_none()
+            .then(|| assets.load(state.asset_path(&button.assets).to_owned()));
         for child in children.iter() {
             if let Ok(mut face) = faces.get_mut(child) {
                 face.0 = localized_button_colour(state);
             }
             if let Ok(mut sprite) = sprites.get_mut(child) {
-                if sprite.image != image {
-                    sprite.image = image.clone();
+                if let Some(face) = code_owned_face {
+                    paint_code_owned_button_face(&mut sprite, face, state);
+                } else if let Some(image) = image.as_ref() {
+                    if sprite.image != *image {
+                        sprite.image = image.clone();
+                    }
                 }
             }
         }

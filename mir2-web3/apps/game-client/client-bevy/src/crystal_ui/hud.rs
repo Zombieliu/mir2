@@ -19,6 +19,7 @@ use crate::read_model::UiReadModel;
 
 use super::assets::CrystalButtonAssetSet;
 use super::hud_bar::weight_bar_asset;
+use super::hud_layout::{HudLayoutMode, HudLayoutSpec, ReferenceHudArtwork, ReferenceHudPositions};
 pub use super::hud_orb::{
     crystal_hp_only, hp_only_orb_clip_geometry, orb_clip_geometry, orb_source_rect, HudSourceRect,
     OrbClipGeometry, OrbSide, ORB_HALF_WIDTH, ORB_HEIGHT, ORB_HP_ONLY_WIDTH, ORB_HP_SOURCE_LEFT,
@@ -58,6 +59,12 @@ pub use super::shared_hud::{
 /// Root marker for the native-only Crystal HUD.
 #[derive(Component, Debug)]
 pub struct CrystalHudRoot;
+
+#[derive(Component, Clone, Copy, Debug, PartialEq, Eq)]
+struct HudLayoutStamp {
+    mode: HudLayoutMode,
+    revision: u64,
+}
 
 #[derive(Component, Debug)]
 pub struct CrystalHudHpOrb;
@@ -228,6 +235,8 @@ pub struct Mir2CrystalHudPlugin;
 impl Plugin for Mir2CrystalHudPlugin {
     fn build(&self, app: &mut App) {
         app.init_resource::<UiReadModel>()
+            .init_resource::<HudLayoutSpec>()
+            .init_resource::<ReferenceHudPositions>()
             .init_resource::<InventoryModel>()
             .init_resource::<MailModel>()
             .init_resource::<CrystalNewMailBlink>()
@@ -237,6 +246,28 @@ impl Plugin for Mir2CrystalHudPlugin {
             .init_resource::<MapModel>()
             .init_resource::<NativeShellModel>()
             .add_systems(Startup, spawn_crystal_hud)
+            .add_systems(
+                Update,
+                rebuild_hud_layout
+                    .after(PendingLifecycleSet::UiReset)
+                    .before(NativePlayerUiSet::Mutate)
+                    .before(super::shared_hud::update_main_hud)
+                    .before(update_hud_read_model)
+                    .before(update_hud_inventory)
+                    .before(sync_belt_hit_targets)
+                    .before(update_hud_option_presentation)
+                    .before(update_hud_map_model),
+            )
+            .add_systems(
+                Update,
+                (
+                    super::hud_reference::sync_status,
+                    super::hud_reference::sync_belt,
+                    super::hud_reference::sync_buttons,
+                )
+                    .chain()
+                    .after(NativePlayerUiSet::Mutate),
+            )
             .add_systems(
                 Update,
                 super::shared_hud::update_main_hud.run_if(resource_changed::<UiReadModel>),
@@ -253,7 +284,7 @@ impl Plugin for Mir2CrystalHudPlugin {
             .add_systems(Update, update_hud_option_presentation)
             .add_systems(
                 Update,
-                sync_belt_hit_targets.run_if(resource_changed::<InventoryModel>),
+                sync_belt_hit_targets.run_if(inventory_or_layout_changed),
             )
             .add_systems(
                 Update,
@@ -300,6 +331,8 @@ fn spawn_crystal_hud(
     ui_model: Res<UiReadModel>,
     inventory: Res<InventoryModel>,
     map_model: Res<MapModel>,
+    layout: Res<HudLayoutSpec>,
+    art: Option<Res<ReferenceHudArtwork>>,
 ) {
     let display = if shell.screen == NativeShellScreen::InGame {
         Display::Flex
@@ -311,6 +344,10 @@ fn spawn_crystal_hud(
     commands
         .spawn((
             CrystalHudRoot,
+            HudLayoutStamp {
+                mode: layout.mode,
+                revision: layout.revision,
+            },
             Node {
                 position_type: PositionType::Absolute,
                 left: Val::Px(0.0),
@@ -323,78 +360,94 @@ fn spawn_crystal_hud(
             GlobalZIndex(HUD_Z_INDEX),
         ))
         .with_children(|root| {
-            super::shared_hud::spawn_main_hud(root, &asset_server, &ui_model, None);
+            if layout.resolve().is_reference() {
+                super::shared_hud::spawn_reference_main_hud(
+                    root,
+                    &ui_model,
+                    layout.resolve(),
+                    art.as_deref(),
+                );
+                super::hud_reference::spawn_belt(
+                    root,
+                    &asset_server,
+                    &inventory,
+                    layout.resolve(),
+                    art.as_deref(),
+                );
+            } else {
+                super::shared_hud::spawn_main_hud(root, &asset_server, &ui_model, None);
 
-            spawn_orb_half(
-                root,
-                &asset_server,
-                OrbSide::Hp,
-                ui_model.player.normalized_hp(),
-                hp_only,
-            );
-            spawn_orb_half(
-                root,
-                &asset_server,
-                OrbSide::Mp,
-                ui_model.player.normalized_mp(),
-                hp_only,
-            );
-            spawn_horizontal_bar(
-                root,
-                &asset_server,
-                CrystalHudExperienceBar,
-                "Prguse",
-                spec::EXPERIENCE_BAR.index,
-                spec::EXPERIENCE_BAR.rect,
-                ui_model.player.normalized_experience(),
-                3.0,
-            );
-            let (weight_library, weight_index) =
-                weight_bar_asset(ui_model.player.normalized_weight());
-            spawn_horizontal_bar(
-                root,
-                &asset_server,
-                CrystalHudWeightBar,
-                weight_library,
-                weight_index,
-                spec::WEIGHT_BAR.rect,
-                ui_model.player.normalized_weight(),
-                2.0,
-            );
+                spawn_orb_half(
+                    root,
+                    &asset_server,
+                    OrbSide::Hp,
+                    ui_model.player.normalized_hp(),
+                    hp_only,
+                );
+                spawn_orb_half(
+                    root,
+                    &asset_server,
+                    OrbSide::Mp,
+                    ui_model.player.normalized_mp(),
+                    hp_only,
+                );
+                spawn_horizontal_bar(
+                    root,
+                    &asset_server,
+                    CrystalHudExperienceBar,
+                    "Prguse",
+                    spec::EXPERIENCE_BAR.index,
+                    spec::EXPERIENCE_BAR.rect,
+                    ui_model.player.normalized_experience(),
+                    3.0,
+                );
+                let (weight_library, weight_index) =
+                    weight_bar_asset(ui_model.player.normalized_weight());
+                spawn_horizontal_bar(
+                    root,
+                    &asset_server,
+                    CrystalHudWeightBar,
+                    weight_library,
+                    weight_index,
+                    spec::WEIGHT_BAR.rect,
+                    ui_model.player.normalized_weight(),
+                    2.0,
+                );
 
-            spawn_text(
-                root,
-                CrystalHudSpaceText,
-                &free_inventory_slots(&inventory).to_string(),
-                spec::SPACE_LABEL,
-                CRYSTAL_DEFAULT_FONT_SIZE_PX,
-                WHITE,
-                Justify::Left,
-            );
+                spawn_text(
+                    root,
+                    CrystalHudSpaceText,
+                    &free_inventory_slots(&inventory).to_string(),
+                    spec::SPACE_LABEL,
+                    CRYSTAL_DEFAULT_FONT_SIZE_PX,
+                    WHITE,
+                    Justify::Left,
+                );
 
-            root.spawn((
-                CrystalHudBeltFrame,
-                absolute_node(BELT_FRAME),
-                ImageNode {
-                    image: asset_server.load("original-ui/Prguse/1932.png"),
-                    image_mode: NodeImageMode::Stretch,
-                    ..default()
-                },
-            ));
-            root.spawn((
-                CrystalHudBeltTint,
-                absolute_node(BELT_FRAME),
-                ImageNode {
-                    image: asset_server.load("original-ui/Prguse/1933.png"),
-                    color: Color::srgba(1.0, 1.0, 1.0, 0.5),
-                    image_mode: NodeImageMode::Stretch,
-                    ..default()
-                },
-            ));
-            for slot in 0..BELT_SLOT_COUNT {
-                spawn_belt_slot(root, &asset_server, &inventory, slot);
+                root.spawn((
+                    CrystalHudBeltFrame,
+                    absolute_node(BELT_FRAME),
+                    ImageNode {
+                        image: asset_server.load("original-ui/Prguse/1932.png"),
+                        image_mode: NodeImageMode::Stretch,
+                        ..default()
+                    },
+                ));
+                root.spawn((
+                    CrystalHudBeltTint,
+                    absolute_node(BELT_FRAME),
+                    ImageNode {
+                        image: asset_server.load("original-ui/Prguse/1933.png"),
+                        color: Color::srgba(1.0, 1.0, 1.0, 0.5),
+                        image_mode: NodeImageMode::Stretch,
+                        ..default()
+                    },
+                ));
+                for slot in 0..BELT_SLOT_COUNT {
+                    spawn_belt_slot(root, &asset_server, &inventory, slot);
+                }
+                spawn_belt_controls(root, &asset_server);
             }
-            spawn_belt_controls(root, &asset_server);
 
             spawn_minimap_frame(root, &asset_server);
             spawn_vertical_centered_text_with_container(
@@ -430,6 +483,297 @@ fn spawn_crystal_hud(
                 },
             ));
         });
+}
+
+/// Rebuild only the HUD-owned tree. The overlay plugin, panel authority and
+/// read models are retained, and no second OverlayPlugin is installed.
+fn rebuild_hud_layout(
+    mut commands: Commands,
+    asset_server: Res<AssetServer>,
+    shell: Res<NativeShellModel>,
+    ui_model: Res<UiReadModel>,
+    inventory: Res<InventoryModel>,
+    map_model: Res<MapModel>,
+    layout: Res<HudLayoutSpec>,
+    art: Option<Res<ReferenceHudArtwork>>,
+    roots: Query<(Entity, &HudLayoutStamp), With<CrystalHudRoot>>,
+) {
+    let current = HudLayoutStamp {
+        mode: layout.mode,
+        revision: layout.revision,
+    };
+    if roots.iter().all(|(_, stamp)| *stamp == current) {
+        return;
+    }
+    for (entity, _) in &roots {
+        commands.entity(entity).despawn();
+    }
+    spawn_crystal_hud(
+        commands,
+        asset_server,
+        shell,
+        ui_model,
+        inventory,
+        map_model,
+        layout,
+        art,
+    );
+}
+
+fn inventory_or_layout_changed(inventory: Res<InventoryModel>, layout: Res<HudLayoutSpec>) -> bool {
+    inventory.is_changed() || layout.is_changed()
+}
+
+#[cfg(test)]
+mod reference_layout_tests {
+    use super::super::hud_reference::{FillKind, ReferenceFill};
+    use super::*;
+    use crate::read_model::PlayerStats;
+    use bevy::asset::{
+        io::{memory::MemoryAssetReader, AssetSourceBuilder, AssetSourceId},
+        AssetApp, AssetPlugin,
+    };
+
+    fn app(mode: HudLayoutMode) -> App {
+        let mut app = App::new();
+        // Geometry/model tests deliberately have no real pixel source. An
+        // empty in-memory reader prevents accidental loose-file discovery.
+        app.register_asset_source(
+            AssetSourceId::Default,
+            AssetSourceBuilder::new(|| Box::new(MemoryAssetReader::default())),
+        );
+        app.add_plugins((MinimalPlugins, AssetPlugin::default()))
+            .init_asset::<Image>()
+            .init_asset::<Font>()
+            .insert_resource(HudLayoutSpec { mode, revision: 0 })
+            .init_resource::<ReferenceHudPositions>()
+            .insert_resource(NativeShellModel {
+                screen: NativeShellScreen::InGame,
+                ..default()
+            })
+            .insert_resource(UiReadModel {
+                player: PlayerStats {
+                    hp: 50,
+                    max_hp: 100,
+                    mp: 9,
+                    max_mp: 40,
+                    gold: u32::MAX,
+                    level: 26,
+                    class_name: Some("Warrior".into()),
+                    name: Some("HUD fixture".into()),
+                    experience: 1,
+                    max_experience: 2,
+                    current_weight: 50,
+                    current_weight_known: true,
+                    max_weight: 100,
+                    ..default()
+                },
+            })
+            .init_resource::<InventoryModel>()
+            .init_resource::<MapModel>()
+            .init_resource::<NativePlayerUiState>()
+            .init_resource::<CrystalBeltPresentation>()
+            .add_systems(Startup, spawn_crystal_hud)
+            .add_systems(
+                Update,
+                (
+                    rebuild_hud_layout,
+                    super::super::shared_hud::update_main_hud,
+                    update_hud_read_model,
+                    update_hud_option_presentation,
+                    update_hud_inventory,
+                    consume_belt_control_actions,
+                    sync_belt_presentation,
+                    super::super::hud_reference::sync_status,
+                    super::super::hud_reference::sync_belt,
+                )
+                    .chain(),
+            );
+        app
+    }
+
+    fn rect(node: &Node) -> (Val, Val, Val, Val) {
+        (node.left, node.top, node.width, node.height)
+    }
+    fn expected(r: CrystalRect) -> (Val, Val, Val, Val) {
+        (
+            Val::Px(r.left),
+            Val::Px(r.top),
+            Val::Px(r.width),
+            Val::Px(r.height),
+        )
+    }
+    fn assert_routes(app: &mut App, layout: super::super::hud_layout::ResolvedHudLayout) {
+        let world = app.world_mut();
+        let mut actions = world.query::<(&CrystalHudAction, &Node, &Button)>();
+        let rows = actions
+            .iter(world)
+            .map(|(a, n, _)| (*a, rect(n)))
+            .collect::<Vec<_>>();
+        for (i, (_, action, _)) in super::super::shared_hud::main_buttons()
+            .into_iter()
+            .enumerate()
+        {
+            assert_eq!(rows.iter().filter(|(a, _)| *a == action).count(), 1);
+            assert_eq!(
+                rows.iter().find(|(a, _)| *a == action).unwrap().1,
+                expected(layout.actions[i])
+            );
+        }
+        let mut targets =
+            world.query::<(&CrystalHudBeltHitTarget, &Node, &CrystalHudAction, &Button)>();
+        assert_eq!(targets.iter(world).count(), 6);
+        for (slot, node, action, _) in targets.iter(world) {
+            assert_eq!(*action, CrystalHudAction::BeltUse(slot.slot));
+            let r = layout.belt.slot(slot.slot, false);
+            assert_eq!(rect(node), expected(r));
+            assert!(r.contains(r.left + r.width - 0.5, r.top + r.height - 0.5));
+            assert!(!r.contains(r.left + r.width, r.top));
+        }
+    }
+
+    #[test]
+    fn reference_actual_spawn_and_idle_sync_keep_all_hit_rectangles() {
+        let mut app = app(HudLayoutMode::ReferenceLayoutV1);
+        app.update();
+        let layout = app.world().resource::<HudLayoutSpec>().resolve();
+        assert_routes(&mut app, layout);
+        app.update();
+        assert_routes(&mut app, layout);
+        let world = app.world_mut();
+        let mut cells = world.query_filtered::<&super::super::item_image::OriginalItemImage, With<CrystalHudBeltIcon>>();
+        assert_eq!(cells.iter(world).count(), 6);
+        assert!(cells
+            .iter(world)
+            .all(|c| (c.cell_width, c.cell_height) == (46, 50)));
+        let mut texts = world.query::<&Text>();
+        assert!(texts.iter(world).any(|t| t.0 == "Gold 4,294,967,295"));
+        assert!(texts.iter(world).any(|t| t.0 == "EXP 50%"));
+    }
+
+    #[test]
+    fn reference_mode_revision_rebuilds_once_and_original_assets_return() {
+        let mut app = app(HudLayoutMode::OriginalLayout);
+        app.update();
+        assert_routes(&mut app, HudLayoutSpec::default().resolve());
+        let before = {
+            let world = app.world_mut();
+            let mut q = world.query_filtered::<Entity, With<CrystalHudRoot>>();
+            q.single(world).unwrap()
+        };
+        app.world_mut()
+            .resource_mut::<HudLayoutSpec>()
+            .select(HudLayoutMode::ReferenceLayoutV1);
+        app.update();
+        assert_routes(&mut app, HudLayoutSpec::reference().resolve());
+        assert!(app.world().get_entity(before).is_err());
+        app.world_mut().resource_mut::<HudLayoutSpec>().revision += 1;
+        app.update();
+        app.world_mut()
+            .resource_mut::<HudLayoutSpec>()
+            .select(HudLayoutMode::OriginalLayout);
+        app.update();
+        assert_routes(&mut app, HudLayoutSpec::default().resolve());
+        let world = app.world_mut();
+        let mut roots = world.query_filtered::<Entity, With<CrystalHudRoot>>();
+        assert_eq!(roots.iter(world).count(), 1);
+        let mut fills = world.query::<&ReferenceFill>();
+        assert_eq!(fills.iter(world).count(), 0);
+        let mut images = world.query::<&ImageNode>();
+        assert!(images.iter(world).any(|i| i
+            .image
+            .path()
+            .is_some_and(|p| p.to_string() == "original-ui/Prguse/1.png")));
+    }
+
+    #[test]
+    fn reference_uses_current_read_model_for_orb_bars_hp_view_and_weight_thresholds() {
+        let mut app = app(HudLayoutMode::ReferenceLayoutV1);
+        app.update();
+        {
+            let mut ui = app.world_mut().resource_mut::<UiReadModel>();
+            ui.player.hp = 37;
+            ui.player.level = 25;
+            ui.player.current_weight = 51;
+        }
+        app.world_mut()
+            .resource_mut::<NativePlayerUiState>()
+            .core
+            .options
+            .hp_view = false;
+        app.update();
+        let world = app.world_mut();
+        let mut fills = world.query::<(&ReferenceFill, &Node, &BackgroundColor)>();
+        for (f, n, color) in fills.iter(world) {
+            match f.kind {
+                FillKind::Hp => assert_eq!(n.width, Val::Px(50.)),
+                FillKind::Mp => assert_eq!(n.display, Display::None),
+                FillKind::OrbStrip => {
+                    assert_eq!(n.display == Display::Flex, f.strip_y >= f.diameter * 0.63)
+                }
+                FillKind::Weight => assert_eq!(color.0, Color::srgb(0.66, 0.50, 0.24)),
+                _ => {}
+            }
+        }
+        let mut compact = world.query_filtered::<&Node, With<CrystalHudHpText>>();
+        assert!(compact.iter(world).all(|n| n.display == Display::None));
+        let mut alternate =
+            world.query_filtered::<(&Text, &Node), With<CrystalHudHpAlternateTopText>>();
+        assert!(alternate
+            .iter(world)
+            .any(|(t, n)| t.0 == "37" && n.display == Display::Flex));
+        app.world_mut().resource_mut::<UiReadModel>().player.level = 26;
+        app.update();
+        let world = app.world_mut();
+        let mut fills = world.query::<(&ReferenceFill, &Node)>();
+        assert!(fills
+            .iter(world)
+            .any(|(f, n)| f.kind == FillKind::Mp && n.display == Display::Flex));
+        let mut alternate = world.query_filtered::<&Text, With<CrystalHudHpAlternateTopText>>();
+        assert!(alternate
+            .iter(world)
+            .any(|t| t.0.contains("37") && t.0.contains('9') && !t.0.contains('\n')));
+    }
+
+    #[test]
+    fn reference_real_belt_controls_keep_native_rotation_close_and_empty_targets() {
+        let mut app = app(HudLayoutMode::ReferenceLayoutV1);
+        app.update();
+        {
+            let world = app.world_mut();
+            let mut controls = world.query::<(&CrystalBeltControlAction, &mut Interaction)>();
+            for (action, mut i) in controls.iter_mut(world) {
+                *i = if *action == CrystalBeltControlAction::Rotate {
+                    Interaction::Pressed
+                } else {
+                    Interaction::None
+                };
+            }
+        }
+        app.update();
+        assert!(app.world().resource::<CrystalBeltPresentation>().vertical);
+        let layout = app.world().resource::<HudLayoutSpec>().resolve();
+        {
+            let world = app.world_mut();
+            let mut targets = world.query::<(&CrystalHudBeltHitTarget, &Node, &Button)>();
+            for (s, n, _) in targets.iter(world) {
+                assert_eq!(rect(n), expected(layout.belt.slot(s.slot, true)));
+            }
+            let mut controls = world.query::<(&CrystalBeltControlAction, &mut Interaction)>();
+            for (a, mut i) in controls.iter_mut(world) {
+                *i = if *a == CrystalBeltControlAction::Close {
+                    Interaction::Pressed
+                } else {
+                    Interaction::None
+                };
+            }
+        }
+        app.update();
+        assert!(!app.world().resource::<CrystalBeltPresentation>().visible);
+        let world = app.world_mut();
+        let mut targets = world.query_filtered::<&Node, With<CrystalHudBeltHitTarget>>();
+        assert!(targets.iter(world).all(|n| n.display == Display::None));
+    }
 }
 
 fn spawn_frame(
@@ -1118,6 +1462,7 @@ fn sync_weight_bar<T>(
 
 fn update_hud_inventory(
     inventory: Res<InventoryModel>,
+    layout: Option<Res<HudLayoutSpec>>,
     asset_server: Res<AssetServer>,
     mut text_queries: ParamSet<(
         Query<(&CrystalHudBeltItem, &mut Text)>,
@@ -1128,9 +1473,17 @@ fn update_hud_inventory(
     for (marker, mut text) in &mut text_queries.p0() {
         text.0 = belt_item_label(&inventory, marker.slot);
     }
+    let free = free_inventory_slots(&inventory);
     set_text(
         &mut text_queries.p1(),
-        free_inventory_slots(&inventory).to_string(),
+        if layout
+            .as_deref()
+            .is_some_and(|l| l.resolve().is_reference())
+        {
+            format!("Free slots {free}")
+        } else {
+            free.to_string()
+        },
     );
     for (marker, mut image, mut node) in &mut icons {
         let handle = belt_slot_item(&inventory, marker.slot)
@@ -1239,6 +1592,7 @@ fn toggle_belt_from_keyboard(
 #[allow(clippy::type_complexity)]
 fn sync_belt_presentation(
     presentation: Res<CrystalBeltPresentation>,
+    layout: Option<Res<HudLayoutSpec>>,
     asset_server: Res<AssetServer>,
     mut node_queries: ParamSet<(
         Query<(&mut Node, &mut ImageNode), With<CrystalHudBeltFrame>>,
@@ -1255,6 +1609,14 @@ fn sync_belt_presentation(
         Query<&mut Node, With<super::widget::CrystalImageButtonSprite>>,
     )>,
 ) {
+    // Reference has code-native panels and a separate destination geometry;
+    // the Original PNG/state path below remains exact.
+    if layout
+        .as_deref()
+        .is_some_and(|l| l.resolve().is_reference())
+    {
+        return;
+    }
     let visible = if presentation.visible {
         Display::Flex
     } else {

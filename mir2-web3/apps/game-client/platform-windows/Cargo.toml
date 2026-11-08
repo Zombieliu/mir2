@@ -1,5 +1,6 @@
 [package]
 name = "mir2-platform-windows"
+default-run = "mir2-platform-windows"
 version = "0.1.0"
 edition = "2021"
 publish = false
@@ -13,6 +14,12 @@ license = "MIT"
 [[bin]]
 name = "mir2-platform-windows"
 path = "src/main.rs"
+
+[[bin]]
+name = "numeron-pc-hud-preview"
+path = "src/pc_ui_preview.rs"
+test = false
+bench = false
 
 [dependencies]
 anyhow = "1"

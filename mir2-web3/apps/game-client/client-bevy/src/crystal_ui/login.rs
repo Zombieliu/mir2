@@ -442,3 +442,7 @@ mod tests {
         assert_eq!(caret.timer.mode(), TimerMode::Repeating);
     }
 }
+
+#[path = "pc_login.rs"]
+mod pc_login;
+pub use pc_login::{spawn_pc_login_screen, sync_pc_login_buttons};

@@ -47,6 +47,9 @@ mod native_wallet_visual_tests;
 mod npc_purchase_client;
 mod npc_purchase_projection;
 mod packed_assets;
+mod pc_hud;
+#[cfg(test)]
+mod pc_hud_visual_tests;
 mod refine_wire;
 mod resource_status;
 mod session_config;
@@ -325,6 +328,11 @@ fn run_native_client() -> bevy::app::AppExit {
             },
         ),
     );
+    if let Err(error) = pc_hud::install(&mut app) {
+        eprintln!("[pc-ui] embedded HUD installation failed: {error:#}");
+        return bevy::app::AppExit::error();
+    }
+    app.insert_resource(mir2_client_bevy::native_shell_ui::NativePcUiTheme);
     app.add_plugins(mir2_client_bevy::native_shell_ui::Mir2NativeShellUiPlugin);
     // Native-only Crystal presentation consumes the existing authoritative
     // read models. It is registered only by this Windows host; Web/WASM keeps

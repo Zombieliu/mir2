@@ -1,5 +1,8 @@
 use super::super::*;
 use super::*;
+use crate::crystal_ui::hud_layout::{
+    HudLayoutMode, HudLayoutSpec, ReferenceHudPositions, SkillBarGeometry,
+};
 use crate::crystal_ui::widget::CrystalHint;
 use std::collections::HashMap;
 #[derive(Component)]
@@ -17,13 +20,33 @@ pub fn process(
     windows: Query<&Window, With<PrimaryWindow>>,
     hits: Query<(&SkillBarHit, &Interaction, Option<&SkillBarBackground>)>,
     mut effects: Option<ResMut<UiEffectQueue>>,
+    layout: Option<Res<HudLayoutSpec>>,
+    mut reference_positions: Option<ResMut<ReferenceHudPositions>>,
+    guard: Option<Res<crate::crystal_ui::overlays::HudLayoutInputGuard>>,
 ) {
+    let reference = layout
+        .as_deref()
+        .is_some_and(|s| s.mode == HudLayoutMode::ReferenceLayoutV1);
+    let positions = if reference {
+        reference_positions
+            .as_deref()
+            .cloned()
+            .unwrap_or_default()
+            .skill_bars
+    } else {
+        state.core.options.skill_bar_positions
+    };
     state.skill_bars.observe(&skills, Instant::now());
     state.skill_bars.visible = [
         SkillBarsUi::has_skill(&skills, 0),
         SkillBarsUi::has_skill(&skills, 1),
     ];
     state.skill_bars.hovered = false;
+    if guard.as_deref().is_some_and(|g| g.switched_this_frame) {
+        state.skill_bars.dragging = None;
+        state.skill_bars.armed_slot = None;
+        return;
+    }
     let focused = windows.single().is_ok_and(|w| w.focused);
     if shell.screen != NativeShellScreen::InGame || !focused || state.blocks_gameplay_keys() {
         state.skill_bars.dragging = None;
@@ -47,13 +70,8 @@ pub fn process(
         if let Some(slot) = state.skill_bars.armed_slot.take() {
             let bar = usize::from((slot - 1) / 8);
             let cell = usize::from((slot - 1) % 8);
-            let p = state.core.options.skill_bar_positions[bar];
-            let left = p[0] as f32 + cell as f32 * 25. + 15.;
-            let top = p[1] as f32 + 3.;
-            if state.skill_bars.hovered
-                && (left..left + 24.).contains(&cursor.x)
-                && (top..top + 22.).contains(&cursor.y)
-            {
+            let rect = SkillBarGeometry.cell(positions[bar], cell);
+            if state.skill_bars.hovered && rect.contains(cursor.x, cursor.y) {
                 state.skill_bars.queue_cast(slot);
             }
         }
@@ -66,23 +84,35 @@ pub fn process(
             .iter()
             .find(|(_, i, b)| **i == Interaction::Pressed && b.is_some())
         {
-            let p = state.core.options.skill_bar_positions[hit.0];
+            let p = positions[hit.0];
             state.skill_bars.dragging =
                 Some((hit.0, [cursor.x - p[0] as f32, cursor.y - p[1] as f32]));
         }
     }
     if let Some((bar, offset)) = state.skill_bars.dragging {
         state.skill_bars.hovered = true;
-        state.core.options.skill_bar_positions[bar] = [
-            ((cursor.x - offset[0]).round() as i32).clamp(0, 808),
-            ((cursor.y - offset[1]).round() as i32).clamp(0, 740),
-        ];
+        let next = SkillBarGeometry.clamp([
+            (cursor.x - offset[0]).round() as i32,
+            (cursor.y - offset[1]).round() as i32,
+        ]);
+        if reference {
+            if let Some(reference_positions) = reference_positions.as_deref_mut() {
+                if reference_positions.skill_bars[bar] != next {
+                    reference_positions.skill_bars[bar] = next;
+                    reference_positions.dirty = true;
+                }
+            }
+        } else {
+            state.core.options.skill_bar_positions[bar] = next;
+        }
         if mouse.just_released(MouseButton::Left) || !mouse.pressed(MouseButton::Left) {
             state.skill_bars.dragging = None;
-            if let Some(effects) = effects.as_deref_mut() {
-                effects.push(mir2_ui_core::effect::UiEffect::PersistOptions {
-                    options: state.core.options.clone(),
-                });
+            if !reference {
+                if let Some(effects) = effects.as_deref_mut() {
+                    effects.push(mir2_ui_core::effect::UiEffect::PersistOptions {
+                        options: state.core.options.clone(),
+                    });
+                }
             }
         }
     }
@@ -137,7 +167,12 @@ pub fn render(
     skills: Res<SkillModel>,
     shell: Res<NativeShellModel>,
     assets: Option<Res<AssetServer>>,
+    layout: Option<Res<HudLayoutSpec>>,
+    reference_positions: Option<Res<ReferenceHudPositions>>,
 ) {
+    let reference = layout
+        .as_deref()
+        .is_some_and(|s| s.mode == HudLayoutMode::ReferenceLayoutV1);
     for entity in &old {
         commands.entity(entity).despawn();
     }
@@ -152,7 +187,16 @@ pub fn render(
         if !SkillBarsUi::has_skill(&skills, bar) {
             continue;
         }
-        let p = state.core.options.skill_bar_positions[bar];
+        let p = if reference {
+            reference_positions
+                .as_deref()
+                .cloned()
+                .unwrap_or_default()
+                .skill_bars[bar]
+        } else {
+            state.core.options.skill_bar_positions[bar]
+        };
+        let frame = SkillBarGeometry.frame(p);
         commands.entity(root).with_children(|parent| {
             parent
                 .spawn((
@@ -161,13 +205,25 @@ pub fn render(
                     SkillBarBackground(bar),
                     Node {
                         position_type: PositionType::Absolute,
-                        left: Val::Px(p[0] as f32),
-                        top: Val::Px(p[1] as f32),
-                        width: Val::Px(216.),
-                        height: Val::Px(28.),
+                        left: Val::Px(frame.left),
+                        top: Val::Px(frame.top),
+                        width: Val::Px(frame.width),
+                        height: Val::Px(frame.height),
                         ..default()
                     },
-                    ImageNode::new(assets.load("original-ui/Prguse/2190.png")),
+                    if reference {
+                        ImageNode {
+                            color: Color::NONE,
+                            ..default()
+                        }
+                    } else {
+                        ImageNode::new(assets.load("original-ui/Prguse/2190.png"))
+                    },
+                    BackgroundColor(if reference {
+                        Color::srgb(0.10, 0.09, 0.075)
+                    } else {
+                        Color::NONE
+                    }),
                     Interaction::None,
                     bevy::ui::FocusPolicy::Block,
                     GlobalZIndex(40),
@@ -183,8 +239,16 @@ pub fn render(
                             ..default()
                         },
                         ImageNode {
-                            image: assets.load("original-ui/Prguse/2193.png"),
-                            color: Color::srgba(1., 1., 1., 0.5),
+                            image: if reference {
+                                Handle::default()
+                            } else {
+                                assets.load("original-ui/Prguse/2193.png")
+                            },
+                            color: if reference {
+                                Color::NONE
+                            } else {
+                                Color::srgba(1., 1., 1., 0.5)
+                            },
                             ..default()
                         },
                         bevy::ui::FocusPolicy::Pass,
@@ -196,7 +260,19 @@ pub fn render(
                             height: Val::Px(28.),
                             ..default()
                         },
-                        ImageNode::new(assets.load("original-ui/Prguse/2247.png")),
+                        if reference {
+                            ImageNode {
+                                color: Color::NONE,
+                                ..default()
+                            }
+                        } else {
+                            ImageNode::new(assets.load("original-ui/Prguse/2247.png"))
+                        },
+                        BackgroundColor(if reference {
+                            Color::srgb(0.6, 0.4, 0.18)
+                        } else {
+                            Color::NONE
+                        }),
                         Button,
                         OverlayButton::RefreshSkillBar,
                         SkillBarHit(bar),
@@ -209,6 +285,7 @@ pub fn render(
                         Color::WHITE,
                     );
                     for cell in 0..8 {
+                        let cell_rect = SkillBarGeometry.cell([0, 0], cell);
                         let slot = (bar * 8 + cell + 1) as u8;
                         let key = state
                             .keyboard
@@ -226,8 +303,8 @@ pub fn render(
                             parent.spawn((
                                 Node {
                                     position_type: PositionType::Absolute,
-                                    left: Val::Px(cell as f32 * 25. + 15.),
-                                    top: Val::Px(3.),
+                                    left: Val::Px(cell_rect.left),
+                                    top: Val::Px(cell_rect.top),
                                     width: Val::Px(size.x),
                                     height: Val::Px(size.y),
                                     ..default()
@@ -252,10 +329,10 @@ pub fn render(
                                 parent.spawn((
                                     Node {
                                         position_type: PositionType::Absolute,
-                                        left: Val::Px(cell as f32 * 25. + 15.),
-                                        top: Val::Px(3.),
-                                        width: Val::Px(24.),
-                                        height: Val::Px(22.),
+                                        left: Val::Px(cell_rect.left),
+                                        top: Val::Px(cell_rect.top),
+                                        width: Val::Px(cell_rect.width),
+                                        height: Val::Px(cell_rect.height),
                                         ..default()
                                     },
                                     ImageNode {
@@ -290,5 +367,66 @@ mod tests {
         assert_eq!(icon_size(0), Some(Vec2::new(24., 22.)));
         assert!(icon_size(224).is_none());
         assert_eq!(duration(2250), "2.2s");
+    }
+
+    #[test]
+    fn reference_drag_keeps_original_positions_and_uses_the_same_clamped_geometry() {
+        let mut app = App::new();
+        app.add_plugins(MinimalPlugins);
+        let mut ui = NativePlayerUiState::default();
+        ui.core.options.skill_bar = true;
+        ui.core.options.skill_bar_positions = [[20, 30], [40, 50]];
+        ui.skill_bars.dragging = Some((0, [0., 0.]));
+        let mut mouse = ButtonInput::<MouseButton>::default();
+        mouse.press(MouseButton::Left);
+        let mut window = Window {
+            focused: true,
+            resolution: (1024, 768).into(),
+            ..default()
+        };
+        window.resolution.set_scale_factor_override(Some(1.));
+        window.set_cursor_position(Some(Vec2::new(900., 760.)));
+        app.world_mut().spawn((window, PrimaryWindow));
+        app.insert_resource(ui)
+            .insert_resource(NativeShellModel {
+                screen: NativeShellScreen::InGame,
+                ..default()
+            })
+            .insert_resource(SkillModel::default())
+            .insert_resource(mouse)
+            .insert_resource(HudLayoutSpec::reference())
+            .init_resource::<ReferenceHudPositions>()
+            .add_systems(Update, process);
+        app.update();
+        let new = app.world().resource::<ReferenceHudPositions>();
+        assert_eq!(new.skill_bars[0], [808, 740]);
+        assert_eq!(
+            app.world()
+                .resource::<NativePlayerUiState>()
+                .core
+                .options
+                .skill_bar_positions,
+            [[20, 30], [40, 50]]
+        );
+        let cell = SkillBarGeometry.cell(new.skill_bars[0], 7);
+        assert_eq!(cell, CrystalRect::new(998., 743., 24., 22.));
+        assert!(cell.contains(1000., 750.));
+    }
+
+    #[test]
+    fn reference_keeps_transparent_final_cooldown_frame_and_sub_100ms_gate() {
+        let now = Instant::now();
+        let skills: SkillModel = serde_json::from_value(serde_json::json!({"skills":[{"id":1,"name":"Healing","spell":"Healing","hotkey":1,"icon":1,"cooldown_ms":6600,"castSequence":7}]})).unwrap();
+        let mut ui = SkillBarsUi::default();
+        ui.observe(&skills, now);
+        assert_eq!(ui.cooldown_frame(1, &skills, now), Some(1260));
+        assert_eq!(
+            ui.cooldown_frame(1, &skills, now + std::time::Duration::from_millis(6500)),
+            Some(1282)
+        );
+        assert_eq!(
+            ui.cooldown_frame(1, &skills, now + std::time::Duration::from_millis(6501)),
+            None
+        );
     }
 }

@@ -444,13 +444,104 @@ pub fn spawn_main_hud(
         );
     }
 }
+
+/// Reference changes presentation geometry, while retaining the shared values
+/// and the exact typed actions consumed by the native overlay host.
+#[cfg(feature = "native-ui")]
+pub(crate) fn spawn_reference_main_hud(
+    parent: &mut ChildSpawnerCommands,
+    model: &UiReadModel,
+    layout: super::hud_layout::ResolvedHudLayout,
+    art: Option<&super::hud_layout::ReferenceHudArtwork>,
+) {
+    let p = main_hud_plan(model);
+    let r = layout.labels;
+    if art.is_none() {
+        super::hud_reference::panel(parent, layout.main, None);
+    } else {
+        super::hud_reference::panel(
+            parent,
+            super::spec::CrystalRect::new(846.0, 660.0, 176.0, 100.0),
+            art,
+        );
+    }
+    super::hud_reference::spawn_status(parent, model, layout, art);
+    for (kind, text, rect) in [
+        (SharedLabel::Hp, p.hp, r.hp),
+        (SharedLabel::Mp, p.mp, r.mp),
+        (SharedLabel::Name, p.name, r.name),
+        (SharedLabel::Level, p.level, r.level),
+        (SharedLabel::Gold, p.gold, r.gold),
+        (SharedLabel::Experience, p.experience, r.experience),
+        (SharedLabel::Weight, p.weight, r.weight),
+        (
+            SharedLabel::AlternateTop,
+            reference_alternate_top(model),
+            r.alternate_top,
+        ),
+        (
+            SharedLabel::AlternateBottom,
+            hp_view_alternate_bottom(model),
+            r.alternate_bottom,
+        ),
+    ] {
+        let mut node = absolute_node(rect);
+        node.overflow = Overflow::clip();
+        parent
+            .spawn((node, ReferenceLabelBox(kind), FocusPolicy::Pass))
+            .with_children(|p| {
+                spawn_shared_text(
+                    p,
+                    kind,
+                    reference_label_value(kind, text),
+                    Node::default(),
+                    None,
+                    Justify::Left,
+                )
+            });
+    }
+    for (i, (_, action, _)) in main_buttons().into_iter().enumerate() {
+        super::hud_reference::action_button(parent, action, layout.actions[i], art);
+    }
+}
+
+#[derive(Component, Clone, Copy)]
+pub(crate) struct ReferenceLabelBox(pub SharedLabel);
+
+fn reference_alternate_top(model: &UiReadModel) -> String {
+    // The Original second line is a decorative separator. Reference has a
+    // single current-value row and a separate maximum-value row.
+    hp_view_alternate_top(model)
+        .lines()
+        .next()
+        .unwrap_or_default()
+        .to_owned()
+}
+
+fn reference_label_value(kind: SharedLabel, value: String) -> String {
+    let caption = match kind {
+        SharedLabel::Level => "Lv ",
+        SharedLabel::Gold => "Gold ",
+        SharedLabel::Weight => "Free wt ",
+        SharedLabel::Experience => "EXP ",
+        _ => "",
+    };
+    // An unknown authoritative weight remains unknown, including in Reference.
+    if value.is_empty() {
+        value
+    } else {
+        format!("{caption}{value}")
+    }
+}
+
 pub(crate) fn update_main_hud(
     model: Res<UiReadModel>,
+    layout: Option<Res<super::hud_layout::HudLayoutSpec>>,
     mut labels: Query<(&SharedLabel, &mut Text)>,
 ) {
     let p = main_hud_plan(&model);
     for (kind, mut text) in &mut labels {
-        text.0 = match kind {
+        let value = match kind {
             SharedLabel::Hp => p.hp.clone(),
             SharedLabel::Mp => p.mp.clone(),
             SharedLabel::Name => p.name.clone(),
@@ -458,8 +549,25 @@ pub(crate) fn update_main_hud(
             SharedLabel::Gold => p.gold.clone(),
             SharedLabel::Experience => p.experience.clone(),
             SharedLabel::Weight => p.weight.clone(),
-            SharedLabel::AlternateTop => hp_view_alternate_top(&model),
+            SharedLabel::AlternateTop => {
+                if layout
+                    .as_deref()
+                    .is_some_and(|l| l.resolve().is_reference())
+                {
+                    reference_alternate_top(&model)
+                } else {
+                    hp_view_alternate_top(&model)
+                }
+            }
             SharedLabel::AlternateBottom => hp_view_alternate_bottom(&model),
+        };
+        text.0 = if layout
+            .as_deref()
+            .is_some_and(|l| l.resolve().is_reference())
+        {
+            reference_label_value(*kind, value)
+        } else {
+            value
         };
     }
 }

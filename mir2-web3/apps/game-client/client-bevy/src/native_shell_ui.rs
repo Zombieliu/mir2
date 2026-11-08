@@ -15,7 +15,7 @@ use bevy::{
 use unicode_segmentation::UnicodeSegmentation;
 
 use crate::crystal_ui::assets::{safe_key_assets, CrystalButtonAssetSet};
-use crate::crystal_ui::login::{blink_login_caret, spawn_login_screen, CrystalLoginAction};
+use crate::crystal_ui::login::{blink_login_caret, spawn_login_screen, spawn_pc_login_screen, sync_pc_login_buttons, CrystalLoginAction};
 use crate::crystal_ui::select::{
     animate_character_previews, load_character_preview_materials, spawn_character_preview_at,
     spawn_character_select_screen, CrystalSelectAction,
@@ -36,6 +36,10 @@ use crate::native_wallet_login::{
     NativeWalletLogin, NativeWalletLoginAction, NativeWalletLoginActionQueue,
     NativeWalletLoginMessage, NativeWalletLoginStage,
 };
+
+/// Explicit Windows opt-in. Other native/Web hosts keep their current presentation.
+#[derive(Resource)]
+pub struct NativePcUiTheme;
 
 const ROOT_BG: Color = Color::srgba(0.06, 0.05, 0.03, 0.82);
 const PANEL_BG: Color = Color::srgba(0.16, 0.11, 0.07, 0.96);
@@ -491,6 +495,7 @@ impl Plugin for Mir2NativeShellUiPlugin {
                 Update,
                 (
                     sync_crystal_image_buttons,
+                    sync_pc_login_buttons,
                     blink_login_caret,
                     animate_character_previews,
                 )
@@ -1396,6 +1401,7 @@ fn render_wallet_login(
     parent: &mut ChildSpawnerCommands,
     wallet: &NativeWalletLogin,
     locale: NativeUiLocale,
+    pc_theme: bool,
 ) {
     parent
         .spawn((
@@ -1424,11 +1430,11 @@ fn render_wallet_login(
                         border: UiRect::all(Val::Px(1.0)),
                         ..default()
                     },
-                    BackgroundColor(PANEL_BG),
+                    BackgroundColor(if pc_theme { Color::srgb(0.07, 0.078, 0.082) } else { PANEL_BG }),
                     BorderColor::all(Color::srgb(0.67, 0.51, 0.24)),
                 ))
                 .with_children(|panel| {
-                    wallet_text(panel, &locale.wallet_title(), 22.0, GOLD);
+                    wallet_text(panel, &locale.wallet_title(), 22.0, if pc_theme { Color::srgb(0.75, 0.64, 0.42) } else { GOLD });
                     wallet_text(panel, &locale.wallet_instructions(), 14.0, CREAM);
                     panel
                         .spawn((
@@ -1542,6 +1548,7 @@ fn render_shell_ui(
     asset_server: Res<AssetServer>,
     aux_focus: Option<Res<NativeShellAuxFocus>>,
     wallet: Option<Res<NativeWalletLogin>>,
+    pc_theme: Option<Res<NativePcUiTheme>>,
     content_nodes: Query<Entity, With<NativeShellContent>>,
     mut last_rendered_model: Local<Option<NativeShellModel>>,
     mut last_rendered_aux_focus: Local<Option<NativeShellAuxFocus>>,
@@ -1601,6 +1608,9 @@ fn render_shell_ui(
                 });
             }
             NativeShellScreen::Login => {
+                if pc_theme.is_some() {
+                    spawn_pc_login_screen(screen, &model, &password_mask(&model.login.password), current_locale);
+                } else {
                 spawn_login_screen(
                     screen,
                     &asset_server,
@@ -1608,8 +1618,9 @@ fn render_shell_ui(
                     &password_mask(&model.login.password),
                     current_locale,
                 );
+                }
                 if current_wallet.visible {
-                    render_wallet_login(screen, &current_wallet, current_locale);
+                    render_wallet_login(screen, &current_wallet, current_locale, pc_theme.is_some());
                 }
             }
             NativeShellScreen::CharacterSelect => {
@@ -1626,6 +1637,9 @@ fn render_shell_ui(
                 render_change_password(screen, &asset_server, &model);
             }
             NativeShellScreen::SafeKey => {
+                if pc_theme.is_some() {
+                    spawn_pc_login_screen(screen, &model, &password_mask(&model.login.password), current_locale);
+                } else {
                 spawn_login_screen(
                     screen,
                     &asset_server,
@@ -1633,6 +1647,7 @@ fn render_shell_ui(
                     &password_mask(&model.login.password),
                     current_locale,
                 );
+                }
                 render_safe_key(screen, &asset_server, &model);
             }
             NativeShellScreen::DeleteConfirm { index } => {
