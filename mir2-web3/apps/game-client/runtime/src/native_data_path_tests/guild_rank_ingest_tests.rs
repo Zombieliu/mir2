@@ -148,3 +148,81 @@ fn guild_rank_ingest_session_reset_retires_old_queued_terminal_and_pending() {
         "retired terminal cannot confirm new-session work"
     );
 }
+
+#[test]
+fn guild_permission_ingest_actual_fifo_keeps_viewer_and_releases_only_fresh_bit_result() {
+    let _guard = native_ingest::native_queue_test_guard();
+    let mut app = ingest_app();
+    let mut network = seeded();
+    assert!(network.apply_network_packet(
+        "UserInformation",
+        &json!({"name":"Leader","realId":1,"objectId":9001})
+    ));
+    let mut local = network.clone();
+    let request = local
+        .guild_rank_permission_request("Leader", 2, 3, true)
+        .unwrap();
+    assert!(local.begin_pending(SocialPendingOperation::GuildRankPermission(request)));
+    let other = SocialPendingOperation::GroupAdd {
+        name: "Friend".into(),
+    };
+    assert!(local.begin_pending(other.clone()));
+    app.insert_resource(local);
+    let mut full_packet = full("Scouts");
+    full_packet["ranks"][2]["options"] = json!(9);
+    assert!(network.apply_network_packet("GuildMemberChange", &full_packet));
+    enqueue(&network);
+    app.update();
+    assert_eq!(
+        app.world().resource::<SocialModel>().pending.len(),
+        2,
+        "matching metadata alone is not a permission result"
+    );
+    let mut reply = terminal();
+    reply["ranks"][0]["name"] = json!("Scouts");
+    reply["ranks"][0]["options"] = json!(9);
+    assert!(network.apply_network_packet("GuildMemberChange", &reply));
+    enqueue(&network);
+    assert!(network.apply_network_packet("GuildMemberChange", &full_packet));
+    enqueue(&network);
+    app.update();
+    let local = app.world().resource::<SocialModel>();
+    assert_eq!(local.pending, vec![other]);
+    assert_eq!(local.viewer.as_ref().unwrap().character_index, 1);
+    assert_eq!(local.guild.ranks[2].options, 9);
+    assert_eq!(local.guild.rank_packet_status, Some(255));
+}
+
+#[test]
+fn guild_read_ingest_retains_real_full_receipt_when_next_delta_needs_another_read() {
+    let _guard = native_ingest::native_queue_test_guard();
+    let mut app = ingest_app();
+    let mut network = seeded();
+    assert!(network.apply_network_packet(
+        "UserInformation",
+        &json!({"name":"Leader","realId":1,"objectId":9001})
+    ));
+    let mut local = network.clone();
+    let request = local.guild_roster_read_request(1).unwrap();
+    assert!(local.begin_pending(SocialPendingOperation::GuildRosterRead(request)));
+    app.insert_resource(local);
+    assert!(network.apply_network_packet(
+        "GuildStatus",
+        &json!({"guildName":"Rank Guild","guildRankName":"Leader","myRankId":0,"myOptions":255})
+    ));
+    enqueue(&network);
+    app.update();
+    assert_eq!(app.world().resource::<SocialModel>().pending.len(), 1);
+    assert!(network.apply_network_packet("GuildMemberChange", &full("Scouts")));
+    assert!(network.apply_network_packet(
+        "GuildMemberChange",
+        &json!({"name":"New","status":2,"rankIndex":0,"ranks":[]})
+    ));
+    enqueue(&network);
+    app.update();
+    let local = app.world().resource::<SocialModel>();
+    assert!(local.pending.is_empty());
+    assert!(local.guild.roster_needs_refresh);
+    assert!(!local.guild.roster_complete);
+    assert_eq!(local.viewer.as_ref().unwrap().character_index, 1);
+}

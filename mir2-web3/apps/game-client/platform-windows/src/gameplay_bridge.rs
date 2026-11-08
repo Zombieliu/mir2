@@ -38,7 +38,10 @@ use mir2_client_bevy::quest_ui::{
     QuestUiIntentQueue, QuestUiState,
 };
 use mir2_client_bevy::read_model::UiReadModel;
-use mir2_client_bevy::social::{GuildRankRenameRequest, SocialModel, SocialPendingOperation};
+use mir2_client_bevy::social::{
+    GuildRankPermissionRequest, GuildRankRenameRequest, GuildRosterReadRequest, SocialModel,
+    SocialPendingOperation,
+};
 use serde_json::Value;
 
 use crate::gateway::GatewayCommand;
@@ -46,6 +49,9 @@ use crate::input::{
     native_input_trace_enabled, GatewayCommands, NativeKeyboardInput, WorldPointerMovementState,
 };
 use crate::native_protocol::{NativeOutboundCommand, PacketEvent};
+#[cfg(test)]
+#[path = "guild_permission_wire_tests.rs"]
+mod guild_permission_wire_tests;
 #[cfg(test)]
 #[path = "guild_rank_wire_tests.rs"]
 mod guild_rank_wire_tests;
@@ -3121,6 +3127,30 @@ fn release_unsent_guild_rank_rename(
     }
 }
 
+fn release_unsent_guild_rank_permission(
+    request: &GuildRankPermissionRequest,
+    social: Option<&mut SocialModel>,
+) {
+    if let Some(social) = social {
+        social.pending.retain(|pending| {
+            !matches!(pending,
+            SocialPendingOperation::GuildRankPermission(current) if current == request)
+        });
+    }
+}
+
+fn release_unsent_guild_roster_read(
+    request: &GuildRosterReadRequest,
+    social: Option<&mut SocialModel>,
+) {
+    if let Some(social) = social {
+        social.pending.retain(|pending| {
+            !matches!(pending,
+            SocialPendingOperation::GuildRosterRead(current) if current==request)
+        });
+    }
+}
+
 /// Resource waiting is an explicit local refusal, not a transport retry.
 /// Release only an unsent operation; never release one accepted by transport.
 fn retain_unsent_quest_intent(
@@ -3186,6 +3216,12 @@ pub fn forward_quest_ui_intents(
             }
         }
         for (intent, _, _, _) in &player_pending {
+            if let NativePlayerUiIntent::GuildRosterRead(request) = intent {
+                release_unsent_guild_roster_read(request, social.as_deref_mut());
+            }
+            if let NativePlayerUiIntent::GuildRankPermission(request) = intent {
+                release_unsent_guild_rank_permission(request, social.as_deref_mut());
+            }
             if let Some(request) = queued_guild_rank_rename(intent, social.as_deref()) {
                 release_unsent_guild_rank_rename(
                     &request,
@@ -3331,11 +3367,25 @@ pub fn forward_quest_ui_intents(
             QuestUiIntent::SelectNpcDialog { target } => {
                 if target == mir2_client_bevy::native_procurement::NPC_ENTRY {
                     if let (Some(model), Some(dialog), Some(account), Some(character)) = (
-                        procurement.as_deref_mut(), dialog.as_deref(), shell.last_account.as_deref(), shell.billing_character_index()) {
-                        if !dead && dialog.is_open && dialog.options.iter().any(|option|
-                            option.enabled && option.option_id == target) {
-                            if let Some(npc) = dialog.npc_object_id.filter(|id|*id>0) {
-                                model.open_for(account, character, npc, mir2_client_bevy::native_procurement::now_ms());
+                        procurement.as_deref_mut(),
+                        dialog.as_deref(),
+                        shell.last_account.as_deref(),
+                        shell.billing_character_index(),
+                    ) {
+                        if !dead
+                            && dialog.is_open
+                            && dialog
+                                .options
+                                .iter()
+                                .any(|option| option.enabled && option.option_id == target)
+                        {
+                            if let Some(npc) = dialog.npc_object_id.filter(|id| *id > 0) {
+                                model.open_for(
+                                    account,
+                                    character,
+                                    npc,
+                                    mir2_client_bevy::native_procurement::now_ms(),
+                                );
                             }
                         }
                     }
@@ -3528,9 +3578,13 @@ pub fn forward_quest_ui_intents(
                 let shift = modifiers.shift;
                 // A queued UI target must still have the live force-attack modifier.
                 let player_target = entities.as_deref().is_some_and(|entities| {
-                    entities.entities.iter().any(|entity| entity.kind == EntityKind::Player
-                        && entity.object_id.parse::<u32>().ok() == Some(object_id))
-                }) || click_state.as_deref().and_then(|state| state.targets.get(&object_id))
+                    entities.entities.iter().any(|entity| {
+                        entity.kind == EntityKind::Player
+                            && entity.object_id.parse::<u32>().ok() == Some(object_id)
+                    })
+                }) || click_state
+                    .as_deref()
+                    .and_then(|state| state.targets.get(&object_id))
                     .is_some_and(|target| target.kind == EntityKind::Player);
                 if player_target && (!shift || alt) {
                     continue;
@@ -3741,8 +3795,12 @@ pub fn forward_quest_ui_intents(
                 QuestUiIntent::AttackTarget { .. } | QuestUiIntent::AttackDirection { .. }
             )
         {
-            retain_unsent_quest_intent(retry_intent, crate::packed_assets::waiting(),
-                operation_pending.as_deref_mut(), &mut retry_intents);
+            retain_unsent_quest_intent(
+                retry_intent,
+                crate::packed_assets::waiting(),
+                operation_pending.as_deref_mut(),
+                &mut retry_intents,
+            );
         }
     }
     let dropped = intents.retain_failed_intents(retry_intents);
@@ -3766,6 +3824,49 @@ pub fn forward_quest_ui_intents(
                 None
             };
         let guild_rank_rename = queued_guild_rank_rename(&intent, social.as_deref());
+        let guild_roster_read = if let NativePlayerUiIntent::GuildRosterRead(request) = &intent {
+            let valid = social.as_deref().is_some_and(|social| {
+                social.guild_roster_read_current(request)
+                    && social
+                        .pending
+                        .contains(&SocialPendingOperation::GuildRosterRead(request.clone()))
+            });
+            if !valid {
+                release_unsent_guild_roster_read(request, social.as_deref_mut());
+                continue;
+            }
+            Some(request.clone())
+        } else {
+            None
+        };
+        let guild_rank_permission =
+            if let NativePlayerUiIntent::GuildRankPermission(request) = &intent {
+                let valid = social.as_deref().is_some_and(|social| {
+                    social.guild_rank_permission_current(request)
+                        && social
+                            .pending
+                            .contains(&SocialPendingOperation::GuildRankPermission(
+                                request.clone(),
+                            ))
+                }) && player_ui_state.as_deref().is_some_and(|ui| {
+                    ui.guild_panel.owner_name == request.requester.name
+                        && ui.guild_panel.guild_name.as_deref() == Some(request.guild_name.as_str())
+                });
+                if !valid {
+                    release_unsent_guild_rank_permission(request, social.as_deref_mut());
+                    continue;
+                }
+                Some(request.clone())
+            } else {
+                if matches!(
+                    &intent,
+                    NativePlayerUiIntent::GuildEditMember { change_type: 5, .. }
+                        | NativePlayerUiIntent::GuildRequestInfo { .. }
+                ) {
+                    continue;
+                }
+                None
+            };
         if matches!(
             &intent,
             NativePlayerUiIntent::GuildEditMember { change_type: 3, .. }
@@ -4150,6 +4251,11 @@ pub fn forward_quest_ui_intents(
             NativePlayerUiIntent::GuildRequestInfo { info_type } => {
                 NativeOutboundCommand::RequestGuildInfo { info_type }
             }
+            NativePlayerUiIntent::GuildRosterRead(request) => {
+                NativeOutboundCommand::RequestGuildInfo {
+                    info_type: request.info_type,
+                }
+            }
             NativePlayerUiIntent::GuildEditMember {
                 change_type,
                 rank_index,
@@ -4161,6 +4267,14 @@ pub fn forward_quest_ui_intents(
                 name,
                 rank_name,
             },
+            NativePlayerUiIntent::GuildRankPermission(request) => {
+                NativeOutboundCommand::EditGuildMember {
+                    change_type: 5,
+                    rank_index: request.rank_index,
+                    name: request.enabled.to_string(),
+                    rank_name: request.option.to_string(),
+                }
+            }
             NativePlayerUiIntent::GuildEditNotice { notice } => {
                 NativeOutboundCommand::EditGuildNotice { notice }
             }
@@ -4404,6 +4518,12 @@ pub fn forward_quest_ui_intents(
                 .transport_result(request_id, &spell, key, old_key, sent);
         }
         if !sent {
+            if let Some(request) = guild_roster_read.as_ref() {
+                release_unsent_guild_roster_read(request, social.as_deref_mut());
+            }
+            if let Some(request) = guild_rank_permission.as_ref() {
+                release_unsent_guild_rank_permission(request, social.as_deref_mut());
+            }
             if let (Some(pending), Some(key)) = (
                 operation_pending.as_deref_mut(),
                 legacy_buy_pending.as_ref(),
@@ -5513,43 +5633,97 @@ mod tests {
     use super::*;
     #[test]
     fn asset_wait_discards_unsent_quest_and_releases_key_without_erasing_transport_retry() {
-        let intent = QuestUiIntent::AcceptQuest { npc_index: 12, quest_index: 7 };
+        let intent = QuestUiIntent::AcceptQuest {
+            npc_index: 12,
+            quest_index: 7,
+        };
         let key = intent.pending_key().unwrap();
         let mut pending = PendingOperations::default();
         let mut retry = Vec::new();
         assert!(pending.try_begin(key.clone()));
         retain_unsent_quest_intent(intent.clone(), true, Some(&mut pending), &mut retry);
         assert!(!pending.contains(&key));
-        assert!(retry.is_empty(), "readiness must not release a stale request burst");
+        assert!(
+            retry.is_empty(),
+            "readiness must not release a stale request burst"
+        );
         assert!(pending.try_begin(key.clone()));
         retain_unsent_quest_intent(intent, false, Some(&mut pending), &mut retry);
-        assert!(pending.contains(&key), "ordinary network failure retains its operation");
+        assert!(
+            pending.contains(&key),
+            "ordinary network failure retains its operation"
+        );
         assert_eq!(retry.len(), 1);
     }
     #[test]
     fn procurement_npc_entry_requires_current_enabled_dialog_and_authenticated_character() {
-        use bevy::prelude::{App,Update};
-        use mir2_client_bevy::native_procurement::{ProcurementModel,NPC_ENTRY};
+        use bevy::prelude::{App, Update};
+        use mir2_client_bevy::native_procurement::{ProcurementModel, NPC_ENTRY};
         for case in 0..7 {
-            let (sender,receiver)=mpsc::channel();
-            let mut shell=NativeShellModel{screen:NativeShellScreen::InGame,last_account:Some("alice".into()),
-                active_character:Some(mir2_client_bevy::native_shell::CharacterSummary::new(0,"Buyer",22,"Warrior","Male")),..Default::default()};
-            let mut dialog=NpcDialogModel{is_open:true,npc_object_id:Some(12),options:vec![NpcDialogOption{
-                option_id:NPC_ENTRY.into(),label:"Personal procurement".into(),enabled:true}],..Default::default()};
-            let mut read=UiReadModel::default();
-            match case {1=>dialog.is_open=false,2=>dialog.options[0].enabled=false,3=>dialog.options[0].option_id="@other".into(),
-                4=>dialog.npc_object_id=Some(0),5=>shell.active_character=None,6=>{read.player.max_hp=1;read.player.hp=0;},_=>{}}
-            let mut app=App::new();app.insert_resource(shell).insert_resource(dialog).insert_resource(read)
-                .insert_resource(NativePlayerUiState::default()).insert_resource(QuestTracker::default())
-                .init_resource::<QuestUiIntentQueue>().init_resource::<NativePlayerUiIntentQueue>()
-                .init_resource::<PendingOperations>().init_resource::<ProcurementModel>()
-                .insert_resource(GatewayCommands::new(sender)).add_systems(Update,forward_quest_ui_intents);
-            for _ in 0..2 {app.world_mut().resource_mut::<QuestUiIntentQueue>().push_intent(QuestUiIntent::SelectNpcDialog{target:NPC_ENTRY.into()});}
+            let (sender, receiver) = mpsc::channel();
+            let mut shell = NativeShellModel {
+                screen: NativeShellScreen::InGame,
+                last_account: Some("alice".into()),
+                active_character: Some(mir2_client_bevy::native_shell::CharacterSummary::new(
+                    0, "Buyer", 22, "Warrior", "Male",
+                )),
+                ..Default::default()
+            };
+            let mut dialog = NpcDialogModel {
+                is_open: true,
+                npc_object_id: Some(12),
+                options: vec![NpcDialogOption {
+                    option_id: NPC_ENTRY.into(),
+                    label: "Personal procurement".into(),
+                    enabled: true,
+                }],
+                ..Default::default()
+            };
+            let mut read = UiReadModel::default();
+            match case {
+                1 => dialog.is_open = false,
+                2 => dialog.options[0].enabled = false,
+                3 => dialog.options[0].option_id = "@other".into(),
+                4 => dialog.npc_object_id = Some(0),
+                5 => shell.active_character = None,
+                6 => {
+                    read.player.max_hp = 1;
+                    read.player.hp = 0;
+                }
+                _ => {}
+            }
+            let mut app = App::new();
+            app.insert_resource(shell)
+                .insert_resource(dialog)
+                .insert_resource(read)
+                .insert_resource(NativePlayerUiState::default())
+                .insert_resource(QuestTracker::default())
+                .init_resource::<QuestUiIntentQueue>()
+                .init_resource::<NativePlayerUiIntentQueue>()
+                .init_resource::<PendingOperations>()
+                .init_resource::<ProcurementModel>()
+                .insert_resource(GatewayCommands::new(sender))
+                .add_systems(Update, forward_quest_ui_intents);
+            for _ in 0..2 {
+                app.world_mut()
+                    .resource_mut::<QuestUiIntentQueue>()
+                    .push_intent(QuestUiIntent::SelectNpcDialog {
+                        target: NPC_ENTRY.into(),
+                    });
+            }
             app.update();
-            let model=app.world().resource::<ProcurementModel>();
-            assert_eq!(model.open,case==0,"case {case}");
-            assert!(receiver.try_recv().is_err(),"NPC entry is not a forged generic target mutation");
-            if case==0 {assert!(matches!(model.unsent_request().unwrap().action,mir2_protocol::procurement::ProcurementAction::Status{npc_object_id:12}));}
+            let model = app.world().resource::<ProcurementModel>();
+            assert_eq!(model.open, case == 0, "case {case}");
+            assert!(
+                receiver.try_recv().is_err(),
+                "NPC entry is not a forged generic target mutation"
+            );
+            if case == 0 {
+                assert!(matches!(
+                    model.unsent_request().unwrap().action,
+                    mir2_protocol::procurement::ProcurementAction::Status { npc_object_id: 12 }
+                ));
+            }
         }
     }
     #[test]

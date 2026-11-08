@@ -2700,12 +2700,14 @@ pub enum NativePlayerUiIntent {
     GuildRequestInfo {
         info_type: u8,
     },
+    GuildRosterRead(crate::social::GuildRosterReadRequest),
     GuildEditMember {
         change_type: u8,
         rank_index: u8,
         name: String,
         rank_name: String,
     },
+    GuildRankPermission(crate::social::GuildRankPermissionRequest),
     GuildEditNotice {
         notice: Vec<String>,
     },
@@ -2876,7 +2878,9 @@ impl NativePlayerUiIntent {
             | Self::GroupRemoveMember { .. }
             | Self::GroupInvite { .. }
             | Self::GuildRequestInfo { .. }
+            | Self::GuildRosterRead(_)
             | Self::GuildEditMember { .. }
+            | Self::GuildRankPermission(_)
             | Self::GuildEditNotice { .. }
             | Self::GuildInvite { .. }
             | Self::GuildStorageGoldChange { .. }
@@ -3388,6 +3392,10 @@ impl NativePlayerUiIntentQueue {
                 intent,
                 NativePlayerUiIntent::MagicKey { .. }
                     | NativePlayerUiIntent::GuildBuffUpdate(_)
+                    | NativePlayerUiIntent::GuildRosterRead(_)
+                    | NativePlayerUiIntent::GuildRankPermission(_)
+                    | NativePlayerUiIntent::GuildRequestInfo { .. }
+                    | NativePlayerUiIntent::GuildEditMember { change_type: 3, .. }
                     | NativePlayerUiIntent::SocialBondPacket(_)
                     | NativePlayerUiIntent::RefinePacket(_)
                     | NativePlayerUiIntent::HeroPacket(_)
@@ -3408,6 +3416,10 @@ impl NativePlayerUiIntentQueue {
                     queued,
                     NativePlayerUiIntent::MagicKey { .. }
                         | NativePlayerUiIntent::GuildBuffUpdate(_)
+                        | NativePlayerUiIntent::GuildRosterRead(_)
+                        | NativePlayerUiIntent::GuildRankPermission(_)
+                        | NativePlayerUiIntent::GuildRequestInfo { .. }
+                        | NativePlayerUiIntent::GuildEditMember { change_type: 3, .. }
                         | NativePlayerUiIntent::SocialBondPacket(_)
                         | NativePlayerUiIntent::RefinePacket(_)
                         | NativePlayerUiIntent::HeroPacket(_)
@@ -3462,6 +3474,12 @@ impl NativePlayerUiIntentQueue {
         social: &mut crate::social::SocialModel,
         intent: NativePlayerUiIntent,
     ) -> bool {
+        if let NativePlayerUiIntent::GuildRequestInfo { info_type } = &intent {
+            let Some(request) = social.guild_roster_read_request(*info_type) else {
+                return false;
+            };
+            return self.push_guild_roster_read_pending(social, request);
+        }
         // Social operations are paired with a pending readback. A full queue
         // must reject the new operation before that pending state is created;
         // otherwise the generic queue's eviction policy could silently drop
@@ -3478,7 +3496,11 @@ impl NativePlayerUiIntentQueue {
         // generic method. Other social pending contracts stay unchanged.
         if matches!(
             &intent,
-            NativePlayerUiIntent::GuildEditMember { change_type: 3, .. }
+            NativePlayerUiIntent::GuildEditMember {
+                change_type: 3 | 5,
+                ..
+            } | NativePlayerUiIntent::GuildRankPermission(_)
+                | NativePlayerUiIntent::GuildRosterRead(_)
         ) {
             return false;
         }
@@ -3606,6 +3628,40 @@ impl NativePlayerUiIntentQueue {
             || !social.guild.rank_rename_scope_matches(&request)
             || !crate::social::valid_rank_rename_name(&request.rank_name)
             || !social.begin_pending(crate::social::SocialPendingOperation::GuildRankRename(
+                request,
+            ))
+        {
+            return false;
+        }
+        self.push_intent(intent)
+    }
+
+    pub fn push_guild_rank_permission_pending(
+        &mut self,
+        social: &mut crate::social::SocialModel,
+        request: crate::social::GuildRankPermissionRequest,
+    ) -> bool {
+        let intent = NativePlayerUiIntent::GuildRankPermission(request.clone());
+        if self.intents.len() >= MAX_QUEUED
+            || self.intents.iter().any(|queued| queued == &intent)
+            || !social.begin_pending(crate::social::SocialPendingOperation::GuildRankPermission(
+                request,
+            ))
+        {
+            return false;
+        }
+        self.push_intent(intent)
+    }
+
+    pub fn push_guild_roster_read_pending(
+        &mut self,
+        social: &mut crate::social::SocialModel,
+        request: crate::social::GuildRosterReadRequest,
+    ) -> bool {
+        let intent = NativePlayerUiIntent::GuildRosterRead(request.clone());
+        if self.intents.len() >= MAX_QUEUED
+            || self.intents.iter().any(|queued| queued == &intent)
+            || !social.begin_pending(crate::social::SocialPendingOperation::GuildRosterRead(
                 request,
             ))
         {
@@ -10458,6 +10514,7 @@ fn process_overlay_buttons(
                     continue;
                 };
                 if option > 7
+                    || state.guild_panel.guild_name != social.guild.name
                     || i32::from(rank_index) < social.guild.my_rank_id
                     || !social_has_permission(&social.guild, "changeRank")
                 {
@@ -10468,15 +10525,14 @@ fn process_overlay_buttons(
                 }
                 state.guild_panel.rank_option_ready_ms = state.guild_panel.now_ms + 300;
                 let enabled = rank.options & (1_u8 << option) != 0;
-                intents.push_social_pending(
-                    &mut social,
-                    NativePlayerUiIntent::GuildEditMember {
-                        change_type: 5,
-                        rank_index,
-                        name: (!enabled).to_string(),
-                        rank_name: option.to_string(),
-                    },
-                );
+                if let Some(request) = social.guild_rank_permission_request(
+                    &state.guild_panel.owner_name,
+                    rank_index,
+                    option,
+                    !enabled,
+                ) {
+                    intents.push_guild_rank_permission_pending(&mut social, request);
+                }
             }
             OverlayButton::TradeRequest => {
                 // The inviter receives no request acknowledgement; refusal can
@@ -20440,6 +20496,8 @@ mod tests {
                 ..Default::default()
             });
         init_overlay_button_test_resources(&mut app);
+        assert!(app.world_mut().resource_mut::<crate::social::SocialModel>().apply_network_packet(
+            "GuildStatus",&serde_json::json!({"guildName":"Guild","guildRankName":"Member","myRankId":1,"myOptions":0})));
         app.add_systems(Update, process_overlay_buttons);
 
         let button = app
@@ -20466,7 +20524,7 @@ mod tests {
             .iter()
             .any(|intent| matches!(
                 intent,
-                NativePlayerUiIntent::GuildRequestInfo { info_type: 1 }
+                NativePlayerUiIntent::GuildRosterRead(request) if request.info_type == 1
             )));
     }
 
@@ -20655,7 +20713,7 @@ mod tests {
             .iter()
             .any(|intent| matches!(
                 intent,
-                NativePlayerUiIntent::GuildRequestInfo { info_type: 0 }
+                NativePlayerUiIntent::GuildRosterRead(request) if request.info_type == 0
             )));
     }
 

@@ -1,5 +1,9 @@
 # Windows 原生可玩闭环验收清单
 
+## 公会增量与待处理请求，代码及构建通过（2026-11-08）
+
+Native 不再将成员在线／移除／换阶等空包当完整名册；普通 UserInformation 的真实角色身份接入社交游标，权限按实际七号包的操作者、嵌套职级及目标位确认。读请求确定未发时精确释放，已接受的读取继续等完整名册；队列满载不再淘汰受保护的公会请求。限定检查去重198项通过，另两项真实素材GPU/GDI测试未运行；canonical原锁离线release构建通过，十三项直接源码前后稳定。新单EXE候选未启动或安装，需要既有R16资源，不代表窗口或跨端验收。原安装和三服保持。[当前范围、失败与证据](WEB-R16-PARITY-GOAL.zh-CN.md#native-公会增量与请求生命周期2026-11-08)
+
 ## 当前原锁构建通过、窗口验收暂缓（2026-11-07）
 
 同步共享 runtime 既有 getrandom(js) 的三个依赖边后，canonical manifest／Cargo.lock 的 release、offline、locked 构建通过；包版本不变，608 项前后 source pins 与395项实际编译输入已核对。新候选 `bc3bde1d…dd5190a` 与原安装、先前外置锁候选分开保留。此前外置候选只收到普通 LoginSuccess，桌面操作被物理 Esc 中止，未进入世界。用户随后要求优先不控制电脑的工作，窗口重名／满槽、当前候选跨端和真实 UI 操作暂缓，不记为通过。[构建收据](evidence/web-r16-parity-goal-20261107/shortcut-native-canonical/native-canonical-build-result.json) · [完整范围](WEB-R16-PARITY-GOAL.zh-CN.md#稳定快捷键与-windows-原锁构建)

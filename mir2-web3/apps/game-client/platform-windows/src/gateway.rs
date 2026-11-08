@@ -376,7 +376,7 @@ mod companion_scope_tests {
     #[test]
     fn native_owner_checkpoint_replaces_cursor_skill_authority_even_for_empty_skills() {
         use mir2_bevy_runtime::npc_purchase_economy::{
-            NativeNpcEconomyGate, apply_native_npc_economy_bundle,
+            apply_native_npc_economy_bundle, NativeNpcEconomyGate,
         };
         use mir2_client_core::npc_purchase_host::NpcPurchaseReceiptHost;
         use mir2_client_core::npc_purchase_receipt::{ActorKey, OwnerScope, SnapshotWitness};
@@ -588,20 +588,18 @@ mod companion_scope_tests {
                     continue;
                 };
                 let original = projection.clone();
-                assert!(
-                    publish_applied_owner_producer(
-                        stamp,
-                        &projection,
-                        watermark,
-                        &self.ui_cursor,
-                        &mut self.map_cursor,
-                        Some(&self.owner),
-                        &mut self.cursor,
-                        &mut self.adapter,
-                        &self.events
-                    )
-                    .unwrap()
-                );
+                assert!(publish_applied_owner_producer(
+                    stamp,
+                    &projection,
+                    watermark,
+                    &self.ui_cursor,
+                    &mut self.map_cursor,
+                    Some(&self.owner),
+                    &mut self.cursor,
+                    &mut self.adapter,
+                    &self.events
+                )
+                .unwrap());
                 count += 1;
                 assert_eq!(
                     projection, original,
@@ -742,10 +740,9 @@ mod companion_scope_tests {
                 latest["knownSkills"][0]["level"] = json!(2);
                 s.cursor.observe_snapshot(&mut latest);
             } else {
-                assert!(
-                    s.cursor
-                        .apply_packet("MagicCast", &json!({"spell":"FireBall"}), 7)
-                );
+                assert!(s
+                    .cursor
+                    .apply_packet("MagicCast", &json!({"spell":"FireBall"}), 7));
                 assert!(s.cursor.apply_packet(
                     "MagicDelay",
                     &json!({"objectId":3,"spell":"FireBall","delay":2200}),
@@ -1767,9 +1764,10 @@ impl NativeCommandFence {
         Self::matches(&state, state.current, NativeCommandScope::Personal).then_some(state.current)
     }
     pub(crate) fn accepts_companion_stamp(&self, stamp: NativeCommandStamp) -> bool {
-        self.0.lock().ok().is_some_and(|state| {
-            Self::matches(&state, stamp, NativeCommandScope::Personal)
-        })
+        self.0
+            .lock()
+            .ok()
+            .is_some_and(|state| Self::matches(&state, stamp, NativeCommandScope::Personal))
     }
     pub(crate) fn companion_diagnostic(
         &self,
@@ -6677,10 +6675,17 @@ fn billing_command_matches(
     command: &NativeOutboundCommand,
 ) -> bool {
     use mir2_client_bevy::native_billing::{BillingOperation, BillingPurchase};
-    if let NativeOutboundCommand::BillingCheckout { provider, offer_id, order_request_id, .. } = command {
+    if let NativeOutboundCommand::BillingCheckout {
+        provider,
+        offer_id,
+        order_request_id,
+        ..
+    } = command
+    {
         if !matches!(&request.purchase, Some(BillingPurchase::Checkout {
             provider: expected_provider, offer_id: expected_offer, order_request_id: expected_order,
-        }) if provider == expected_provider && offer_id == expected_offer && order_request_id == expected_order) {
+        }) if provider == expected_provider && offer_id == expected_offer && order_request_id == expected_order)
+        {
             return false;
         }
     }
@@ -6696,8 +6701,14 @@ fn billing_command_matches(
             ..
         } => (BillingOperation::Checkout, *character_index, *request_id),
         NativeOutboundCommand::BillingUsdcCheckout {
-            character_index, request_id, ..
-        } => (BillingOperation::UsdcCheckout, *character_index, *request_id),
+            character_index,
+            request_id,
+            ..
+        } => (
+            BillingOperation::UsdcCheckout,
+            *character_index,
+            *request_id,
+        ),
         NativeOutboundCommand::BillingBuyMonthlyCard {
             character_index,
             request_id,
@@ -6749,8 +6760,11 @@ fn synchronize_billing_credit(
         || reply.status.as_ref().is_some_and(|s| !s.is_valid())
         || reply.checkout_url.as_ref().is_some_and(|url| {
             url.len() > 4096
-                || !matches!(reply.operation, mir2_client_bevy::native_billing::BillingOperation::Checkout
-                    | mir2_client_bevy::native_billing::BillingOperation::UsdcCheckout)
+                || !matches!(
+                    reply.operation,
+                    mir2_client_bevy::native_billing::BillingOperation::Checkout
+                        | mir2_client_bevy::native_billing::BillingOperation::UsdcCheckout
+                )
                 || reply.error.is_some()
         })
     {
@@ -7406,11 +7420,13 @@ where
             snapshot.hero_buff_event = Some(event);
             let _ = gameplay_events.send(snapshot);
         }
+    }
 
-        if social_cursor.apply_network_packet(packet, payload) {
-            let json = serde_json::to_string(social_cursor).map_err(|error| error.to_string())?;
-            let _ = mir2_bevy_runtime::native_ingest::push_native_social_model(json);
-        }
+    // UserInformation is a typed packet, so it does not enter the Other branch above.
+    // Bind the social viewer to the actual server realId, never the selected slot/ObjectId.
+    if apply_social_event(social_cursor, &parsed) {
+        let json = serde_json::to_string(social_cursor).map_err(|error| error.to_string())?;
+        let _ = mir2_bevy_runtime::native_ingest::push_native_social_model(json);
     }
 
     match event.kind.as_str() {
@@ -8912,9 +8928,9 @@ fn dispatch_shell_event(
         InboundEvent::Packet(PacketEvent::UserInformation(_)) => None,
         InboundEvent::Packet(PacketEvent::Other { packet, payload }) => match packet.as_str() {
             "NewCharacter" => match payload.get("result").and_then(Value::as_u64) {
-                Some(result @ (4 | 5)) => {
-                    Some(ShellGatewayEvent::CharacterCreationRejected { result: result as u8 })
-                }
+                Some(result @ (4 | 5)) => Some(ShellGatewayEvent::CharacterCreationRejected {
+                    result: result as u8,
+                }),
                 _ => Some(ShellGatewayEvent::OperationFailure {
                     message: "character creation failed".to_owned(),
                 }),
@@ -8944,7 +8960,9 @@ fn dispatch_shell_event(
             Some(ShellGatewayEvent::MonthlyCardReply(reply.clone()))
         }
         InboundEvent::Billing(reply) => Some(ShellGatewayEvent::BillingReply(reply.clone())),
-        InboundEvent::Procurement(reply) => Some(ShellGatewayEvent::ProcurementReply(reply.clone())),
+        InboundEvent::Procurement(reply) => {
+            Some(ShellGatewayEvent::ProcurementReply(reply.clone()))
+        }
         InboundEvent::Error(error) => Some(ShellGatewayEvent::OperationFailure {
             message: account_feedback::gateway_error_message(error),
         }),
@@ -10940,6 +10958,22 @@ fn transform_ui_read_model_from_user_information(payload: &Value) -> Value {
 #[cfg(test)]
 #[path = "gateway_map_identity_tests.rs"]
 mod map_identity_tests;
+
+fn apply_social_event(social: &mut SocialModel, event: &InboundEvent) -> bool {
+    match event {
+        InboundEvent::Packet(PacketEvent::UserInformation(info)) => {
+            social.apply_network_packet("UserInformation", &info.payload)
+        }
+        InboundEvent::Packet(PacketEvent::Other { packet, payload }) => {
+            social.apply_network_packet(packet, payload)
+        }
+        _ => false,
+    }
+}
+
+#[cfg(test)]
+#[path = "gateway_social_projection_tests.rs"]
+mod social_projection_tests;
 
 #[cfg(test)]
 #[path = "gateway_handshake_tests.rs"]

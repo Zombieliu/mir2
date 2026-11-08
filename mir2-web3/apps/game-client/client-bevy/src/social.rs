@@ -11,6 +11,12 @@ use serde_json::Value;
 
 use crate::inventory::CrystalItemTooltipSourceModel;
 
+#[path = "social_guild_projection.rs"]
+mod guild_projection;
+
+#[cfg(test)]
+#[path = "social_guild_pending_tests.rs"]
+mod guild_pending_tests;
 #[cfg(test)]
 #[path = "social_guild_rank_tests.rs"]
 pub(crate) mod guild_rank_native_tests;
@@ -94,6 +100,39 @@ pub struct GuildRankChange {
     pub actor: String,
     pub rank_index: u8,
     pub rank_name: String,
+    #[serde(default)]
+    pub options: Option<u8>,
+}
+
+/// Authenticated UserInformation identity. Object IDs and selected slots are not identities.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct SocialViewer {
+    pub name: String,
+    pub character_index: i32,
+}
+
+/// Local permission context; only the ordinary four EditGuildMember fields go on the wire.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct GuildRankPermissionRequest {
+    pub guild_name: String,
+    pub scope_epoch: u64,
+    pub requester: SocialViewer,
+    pub rank_index: u8,
+    pub option: u8,
+    pub enabled: bool,
+    pub observed_change_revision: u64,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct GuildRosterReadRequest {
+    pub guild_name: String,
+    pub scope_epoch: u64,
+    pub viewer: Option<SocialViewer>,
+    pub info_type: u8,
+    pub observed_member_revision: u64,
 }
 
 /// Exact local editor context. This is never sent as a server command or saved.
@@ -139,6 +178,10 @@ pub struct GuildModel {
     pub permissions: Vec<String>,
     pub ranks: Vec<GuildRankModel>,
     pub members: Vec<GuildMemberModel>,
+    pub roster_complete: bool,
+    pub roster_needs_refresh: bool,
+    pub member_packet_revision: u64,
+    pub full_roster_revision: u64,
     /// Authoritative 112-slot guild storage snapshot. `None` is an empty
     /// server slot; this is intentionally separate from personal storage.
     pub storage_items: Vec<Option<GuildStorageItemModel>>,
@@ -154,6 +197,25 @@ pub struct GuildModel {
 }
 
 impl GuildModel {
+    pub fn permission_scope_matches(&self, request: &GuildRankPermissionRequest) -> bool {
+        self.name.as_deref() == Some(request.guild_name.as_str())
+            && self.scope_epoch == request.scope_epoch
+    }
+
+    pub fn confirms_rank_permission(&self, request: &GuildRankPermissionRequest) -> bool {
+        request.option < 8
+            && self.permission_scope_matches(request)
+            && self.rank_change.as_ref().is_some_and(|change| {
+                change.scope_epoch == request.scope_epoch
+                    && change.revision > request.observed_change_revision
+                    && change.actor == request.requester.name
+                    && change.rank_index == request.rank_index
+                    && change.options.is_some_and(|options| {
+                        (options & (1_u8 << request.option) != 0) == request.enabled
+                    })
+            })
+    }
+
     pub fn rank_rename_scope_matches(&self, request: &GuildRankRenameRequest) -> bool {
         self.name.as_deref() == Some(request.guild_name.as_str())
             && self.scope_epoch == request.scope_epoch
@@ -253,12 +315,14 @@ pub enum SocialPendingOperation {
         invite_epoch: u64,
     },
     GuildInfo,
+    GuildRosterRead(GuildRosterReadRequest),
     GuildMember {
         change_type: u8,
         rank_index: u8,
         name: String,
     },
     GuildRankRename(GuildRankRenameRequest),
+    GuildRankPermission(GuildRankPermissionRequest),
     GuildNotice {
         notice: Vec<String>,
     },
@@ -295,6 +359,21 @@ pub enum SocialPendingOperation {
 }
 
 impl SocialPendingOperation {
+    pub fn is_guild(&self) -> bool {
+        matches!(
+            self,
+            Self::GuildInfo
+                | Self::GuildRosterRead(_)
+                | Self::GuildMember { .. }
+                | Self::GuildRankRename(_)
+                | Self::GuildRankPermission(_)
+                | Self::GuildNotice { .. }
+                | Self::GuildInviteAccept { .. }
+                | Self::GuildStorageGold { .. }
+                | Self::GuildStorageItem { .. }
+        )
+    }
+
     pub fn is_trade(&self) -> bool {
         matches!(
             self,
@@ -312,6 +391,7 @@ impl SocialPendingOperation {
 #[derive(Debug, Clone, Resource, PartialEq, Eq, Serialize, Deserialize, Default)]
 #[serde(rename_all = "camelCase", default)]
 pub struct SocialModel {
+    pub viewer: Option<SocialViewer>,
     pub group: GroupModel,
     pub guild: GuildModel,
     pub trade: TradeModel,
@@ -323,6 +403,36 @@ pub struct SocialModel {
 
 impl SocialModel {
     pub fn begin_pending(&mut self, operation: SocialPendingOperation) -> bool {
+        if matches!(operation, SocialPendingOperation::GuildInfo)
+            && self
+                .pending
+                .iter()
+                .any(|pending| matches!(pending, SocialPendingOperation::GuildRosterRead(_)))
+        {
+            return false;
+        }
+        if let SocialPendingOperation::GuildRosterRead(request) = &operation {
+            if !self.guild_roster_read_current(request) || self.pending.iter().any(|pending|
+                matches!(pending,SocialPendingOperation::GuildInfo)
+                    || matches!(pending,SocialPendingOperation::GuildRosterRead(existing)
+                        if existing.guild_name == request.guild_name && existing.scope_epoch == request.scope_epoch)) {
+                return false;
+            }
+        }
+        if let SocialPendingOperation::GuildRankPermission(request) = &operation {
+            if !self.guild_rank_permission_current(request)
+                || self.pending.iter().any(|pending| {
+                    matches!(pending,
+                    SocialPendingOperation::GuildRankPermission(existing)
+                    if existing.guild_name == request.guild_name
+                        && existing.scope_epoch == request.scope_epoch
+                        && existing.rank_index == request.rank_index
+                        && existing.option == request.option)
+                })
+            {
+                return false;
+            }
+        }
         if let SocialPendingOperation::GuildRankRename(request) = &operation {
             if self.pending.iter().any(|pending| {
                 matches!(pending,
@@ -342,6 +452,72 @@ impl SocialModel {
         }
         self.pending.push(operation);
         true
+    }
+
+    pub fn guild_rank_permission_request(
+        &self,
+        requester: &str,
+        rank_index: u8,
+        option: u8,
+        enabled: bool,
+    ) -> Option<GuildRankPermissionRequest> {
+        let viewer = self.viewer.as_ref()?;
+        if viewer.name != requester {
+            return None;
+        }
+        let request = GuildRankPermissionRequest {
+            guild_name: self.guild.name.clone()?,
+            scope_epoch: self.guild.scope_epoch,
+            requester: viewer.clone(),
+            rank_index,
+            option,
+            enabled,
+            observed_change_revision: self
+                .guild
+                .rank_change
+                .as_ref()
+                .map_or(0, |change| change.revision),
+        };
+        self.guild_rank_permission_current(&request)
+            .then_some(request)
+    }
+
+    pub fn guild_roster_read_request(&self, info_type: u8) -> Option<GuildRosterReadRequest> {
+        let request = GuildRosterReadRequest {
+            guild_name: self.guild.name.clone()?,
+            scope_epoch: self.guild.scope_epoch,
+            viewer: self.viewer.clone(),
+            info_type,
+            observed_member_revision: self.guild.member_packet_revision,
+        };
+        self.guild_roster_read_current(&request).then_some(request)
+    }
+
+    pub fn guild_roster_read_current(&self, request: &GuildRosterReadRequest) -> bool {
+        request.info_type <= 1
+            && self.guild.name.as_deref() == Some(request.guild_name.as_str())
+            && self.guild.scope_epoch == request.scope_epoch
+            && request
+                .viewer
+                .as_ref()
+                .is_none_or(|viewer| self.viewer.as_ref() == Some(viewer))
+            && self.guild.member_packet_revision >= request.observed_member_revision
+    }
+
+    /// Rechecked at queue admission and immediately before transport accepts the command.
+    pub fn guild_rank_permission_current(&self, request: &GuildRankPermissionRequest) -> bool {
+        request.option < 8
+            && self.guild.permission_scope_matches(request)
+            && self.viewer.as_ref() == Some(&request.requester)
+            && self.guild.roster_complete
+            && !self.guild.roster_needs_refresh
+            && self.guild.my_options & 1 != 0
+            && self.guild.my_rank_id >= 0
+            && self.guild.my_rank_id <= i32::from(request.rank_index)
+            && self.guild.ranks.iter().any(|rank| {
+                rank.index == i32::from(request.rank_index)
+                    && (rank.options & (1_u8 << request.option) != 0) != request.enabled
+            })
     }
 
     pub fn guild_rank_rename_request(
@@ -405,9 +581,22 @@ impl SocialModel {
     /// that has not been proven complete by the incoming packet/state.
     pub fn apply_authoritative(&mut self, mut incoming: SocialModel) {
         let old = self.clone();
-        let pending = std::mem::take(&mut self.pending);
+        let identity_changed = self
+            .viewer
+            .as_ref()
+            .zip(incoming.viewer.as_ref())
+            .is_some_and(|(old, new)| old != new);
+        let pending = if identity_changed {
+            self.pending.clear();
+            Vec::new()
+        } else {
+            std::mem::take(&mut self.pending)
+        };
         incoming.normalize();
         self.group = incoming.group;
+        if incoming.viewer.is_some() {
+            self.viewer = incoming.viewer;
+        }
         self.guild = incoming.guild;
         self.trade = incoming.trade;
         self.last_event = incoming.last_event;
@@ -432,6 +621,26 @@ impl SocialModel {
         let mut from = None;
         let mut to = None;
         match packet {
+            "UserInformation" => {
+                let info = payload.get("info").unwrap_or(payload);
+                let Some(name) = clean_name(info.get("name")) else {
+                    return false;
+                };
+                let Some(character_index) = value_u32(guild_field(info, "real_id", "realId"))
+                    .and_then(|id| i32::try_from(id).ok())
+                else {
+                    return false;
+                };
+                let viewer = SocialViewer {
+                    name,
+                    character_index,
+                };
+                if self.viewer.as_ref().is_some_and(|old| old != &viewer) {
+                    self.clear_session();
+                }
+                self.viewer = Some(viewer);
+                changed = true;
+            }
             "SwitchGroup" => {
                 let Some(allow) = payload.get("allowGroup").and_then(Value::as_bool) else {
                     return false;
@@ -578,9 +787,10 @@ impl SocialModel {
                     let Some(next) = self.guild.scope_epoch.checked_add(1) else {
                         return false;
                     };
-                    self.guild.scope_epoch = next;
-                    self.guild.rank_change = None;
-                    self.guild.rank_packet_status = None;
+                    self.guild = GuildModel {
+                        scope_epoch: next,
+                        ..Default::default()
+                    };
                 }
                 self.guild.name = Some(name);
                 self.guild.rank_name = Some(rank_name);
@@ -632,136 +842,15 @@ impl SocialModel {
                 changed = true;
             }
             "GuildMemberChange" => {
-                let Some(ranks) = payload.get("ranks").and_then(Value::as_array) else {
+                let Some(revision) = self.guild.member_packet_revision.checked_add(1) else {
                     return false;
                 };
-                if ranks.len() > MAX_GUILD_RANKS {
+                if !guild_projection::apply(&mut self.guild, payload, self.viewer.as_ref()) {
                     return false;
                 }
-                let status = value_u8(payload.get("status"));
-                let is_rank_delta = status == Some(7);
-                if is_rank_delta && (ranks.len() != 1 || self.guild.name.is_none()) {
-                    return false;
-                }
-                let mut all = Vec::new();
-                let mut parsed_ranks = Vec::new();
-                for rank in ranks {
-                    if is_rank_delta
-                        && (value_i32(rank.get("index"))
-                            .and_then(|index| u8::try_from(index).ok())
-                            .is_none()
-                            || value_u8(rank.get("options")).is_none()
-                            || !rank.get("members").is_some_and(Value::is_array))
-                    {
-                        return false;
-                    }
-                    let Some(name) = raw_rank_name(rank.get("name")) else {
-                        return false;
-                    };
-                    let members = rank
-                        .get("members")
-                        .and_then(Value::as_array)
-                        .map_or(&[][..], Vec::as_slice);
-                    if all.len() + members.len() > MAX_GUILD_MEMBERS {
-                        return false;
-                    }
-                    let mut parsed_members = Vec::new();
-                    for member in members {
-                        let Some(mut parsed) = parse_guild_member(member) else {
-                            return false;
-                        };
-                        parsed.rank_name = Some(name.clone());
-                        parsed.rank_index = value_u8(rank.get("index"));
-                        all.push(parsed.clone());
-                        parsed_members.push(parsed);
-                    }
-                    parsed_ranks.push(GuildRankModel {
-                        name,
-                        index: value_i32(rank.get("index")).unwrap_or(0),
-                        options: value_u8(rank.get("options")).unwrap_or(0),
-                        members: parsed_members,
-                    });
-                }
-                let had_members = !self.guild.members.is_empty();
-                if is_rank_delta {
-                    let updated = parsed_ranks.pop().expect("validated single rank");
-                    let Ok(rank_index) = u8::try_from(updated.index) else {
-                        return false;
-                    };
-                    let Some(actor) = clean_name(payload.get("name")) else {
-                        return false;
-                    };
-                    let matching = self
-                        .guild
-                        .ranks
-                        .iter()
-                        .enumerate()
-                        .filter(|(_, rank)| rank.index == updated.index)
-                        .map(|(index, _)| index)
-                        .collect::<Vec<_>>();
-                    if matching.len() != 1 {
-                        return false;
-                    }
-                    let target = matching[0];
-                    let count = self
-                        .guild
-                        .ranks
-                        .iter()
-                        .enumerate()
-                        .filter(|(index, _)| *index != target)
-                        .map(|(_, rank)| rank.members.len())
-                        .sum::<usize>()
-                        + updated.members.len();
-                    if count > MAX_GUILD_MEMBERS {
-                        return false;
-                    }
-                    let Some(revision) = self
-                        .guild
-                        .rank_change
-                        .as_ref()
-                        .map_or(0, |change| change.revision)
-                        .checked_add(1)
-                    else {
-                        return false;
-                    };
-                    self.guild.rank_change = Some(GuildRankChange {
-                        revision,
-                        scope_epoch: self.guild.scope_epoch,
-                        actor,
-                        rank_index,
-                        rank_name: updated.name.clone(),
-                    });
-                    self.guild.ranks[target] = updated;
-                    self.guild.members = self
-                        .guild
-                        .ranks
-                        .iter()
-                        .flat_map(|rank| rank.members.iter().cloned())
-                        .collect();
-                } else {
-                    self.guild.ranks = parsed_ranks;
-                    self.guild.members = all;
-                }
-                self.guild.rank_packet_status = status;
-                // GuildMemberChange carries the authoritative rank table. If
-                // the server included the viewer's rank, refresh permissions
-                // from that rank's options instead of retaining stale status
-                // bits. A missing rank is intentionally left unchanged: an
-                // incomplete roster is not evidence that permissions vanished.
-                if let Some(my_rank) = self
-                    .guild
-                    .ranks
-                    .iter()
-                    .find(|rank| rank.index == self.guild.my_rank_id)
-                {
-                    if is_rank_delta {
-                        self.guild.rank_name = Some(my_rank.name.clone());
-                    }
-                    self.guild.my_options = my_rank.options;
-                    self.guild.permissions = guild_permissions_from_options(my_rank.options);
-                }
-                if !had_members && !self.guild.members.is_empty() {
-                    self.guild.pending_invite_from = None;
+                self.guild.member_packet_revision = revision;
+                if self.guild.rank_packet_status == Some(255) {
+                    self.guild.full_roster_revision = revision;
                 }
                 changed = true;
             }
@@ -1019,7 +1108,7 @@ impl SocialModel {
                 from,
                 to,
                 change_type: value_u8(payload.get("changeType")),
-                rank_index: value_u8(payload.get("rankIndex")),
+                rank_index: value_u8(guild_field(payload, "rank_index", "rankIndex")),
                 amount: value_u32(payload.get("amount")),
             });
             self.normalize();
@@ -1057,6 +1146,20 @@ impl SocialModel {
         old: &SocialModel,
         current: &SocialModel,
     ) -> bool {
+        // Guild retirement cancels only that guild's work, not Group or Trade.
+        // This is not a successful operation receipt.
+        if operation.is_guild()
+            && event
+                .is_some_and(|event| event.packet == "GuildStatus" && current.guild.name.is_none())
+        {
+            return true;
+        }
+        if operation.is_guild()
+            && (old.guild.scope_epoch != current.guild.scope_epoch
+                || old.guild.name != current.guild.name)
+        {
+            return true;
+        }
         // Completion/cancellation ends every request owned by this exchange.
         // An Unlock=true packet merely unlocks and retains both offers.
         if operation.is_trade()
@@ -1112,23 +1215,77 @@ impl SocialModel {
                     && current.group.active;
                 explicit_result || superseded || revoked || joined
             }
-            SocialPendingOperation::GuildInfo => event
-                .is_some_and(|e| matches!(e.packet.as_str(), "GuildStatus" | "GuildMemberChange")),
+            SocialPendingOperation::GuildInfo => event.is_some_and(|e| {
+                e.packet == "GuildMemberChange"
+                    && current.guild.rank_packet_status == Some(255)
+                    && current.guild.roster_complete
+                    && current.guild.member_packet_revision > old.guild.member_packet_revision
+            }),
+            SocialPendingOperation::GuildRosterRead(request) => {
+                current.guild.name.as_deref() != Some(request.guild_name.as_str())
+                    || current.guild.scope_epoch != request.scope_epoch
+                    || request
+                        .viewer
+                        .as_ref()
+                        .zip(current.viewer.as_ref())
+                        .is_some_and(|(old, new)| old != new)
+                    || current.guild.full_roster_revision > request.observed_member_revision
+            }
             SocialPendingOperation::GuildMember {
                 change_type,
                 rank_index,
                 name,
             } => event.is_some_and(|event| {
-                event.packet == "GuildMemberChange"
-                    && event.change_type == Some(*change_type)
-                    && event.rank_index == Some(*rank_index)
-                    && (name.is_empty() || event.subject.as_deref() == Some(name.as_str()))
+                if event.packet != "GuildMemberChange"
+                    || name.is_empty()
+                    || current.guild.member_packet_revision <= old.guild.member_packet_revision
+                {
+                    return false;
+                }
+                match *change_type {
+                    1 => {
+                        current.guild.rank_packet_status == Some(3)
+                            && event.subject.as_deref() == Some(name.as_str())
+                            && !current
+                                .guild
+                                .members
+                                .iter()
+                                .any(|member| member.name == *name)
+                    }
+                    2 => {
+                        (current.guild.rank_packet_status == Some(5)
+                            && event.subject.as_deref() == Some(name.as_str())
+                            && event.rank_index == Some(*rank_index)
+                            && current.guild.members.iter().any(|member| {
+                                member.name == *name && member.rank_index == Some(*rank_index)
+                            }))
+                            || (current.guild.rank_packet_status == Some(8)
+                                && current.viewer.as_ref().is_some_and(|viewer| {
+                                    viewer.name == *name
+                                        && current.guild.members.iter().any(|member| {
+                                            member.name == *name
+                                                && member.id == viewer.character_index
+                                                && member.rank_index == Some(*rank_index)
+                                        })
+                                })
+                                && current.guild.my_rank_id == i32::from(*rank_index))
+                    }
+                    // Recruit/create-rank still need their own exact local request context.
+                    // In particular a legacy option request has lost its bit identity.
+                    _ => false,
+                }
             }),
             SocialPendingOperation::GuildRankRename(request) => {
                 !current.guild.rank_rename_scope_matches(request)
-                    || (event.is_some_and(|event| event.packet == "GuildMemberChange")
-                        && current.guild.rank_packet_status == Some(7)
-                        && current.guild.confirms_rank_rename(request))
+                    || current.guild.confirms_rank_rename(request)
+            }
+            SocialPendingOperation::GuildRankPermission(request) => {
+                !current.guild.permission_scope_matches(request)
+                    || current
+                        .viewer
+                        .as_ref()
+                        .is_some_and(|viewer| viewer != &request.requester)
+                    || current.guild.confirms_rank_permission(request)
             }
             SocialPendingOperation::GuildNotice { notice } => event.is_some_and(|event| {
                 (event.packet == "GuildNoticeChange" && event.success == Some(true))
@@ -1458,7 +1615,7 @@ mod tests {
         let member_change = serde_json::to_value(ServerPacket::GuildMemberChange {
             name: "Miner".into(),
             rank_index: 1,
-            status: 6,
+            status: 255,
             ranks: vec![rank],
         })
         .expect("GuildMemberChange serializes");
@@ -1590,7 +1747,7 @@ mod tests {
         let member_change = serde_json::to_value(ServerPacket::GuildMemberChange {
             name: "Me".into(),
             rank_index: 4,
-            status: 0,
+            status: 255,
             ranks: vec![rank],
         })
         .expect("GuildMemberChange serializes");
@@ -1609,15 +1766,14 @@ mod tests {
             ]
         );
 
-        // A roster that omits the viewer's rank is incomplete evidence; do
-        // not turn the missing row into a fabricated permission revocation.
+        // A name-only offline delta cannot replace the roster or revoke an unrelated rank.
         assert!(model.apply_packet(
             "GuildMemberChange",
             &json!({
                 "name": "Other",
                 "rankIndex": 3,
                 "status": 0,
-                "ranks": [{"name":"Other","index":3,"options":0,"members":[]}]
+                "ranks": []
             })
         ));
         assert_eq!(model.guild.my_options, 0b0101_1001);
@@ -1730,35 +1886,26 @@ mod tests {
     }
 
     #[test]
-    fn guild_rank_change_with_empty_member_name_releases_exact_pending() {
+    fn guild_unscoped_member_change_cannot_accept_a_fabricated_command_echo() {
         let mut model = SocialModel::default();
         assert!(model.begin_pending(SocialPendingOperation::GuildMember {
             change_type: 2,
             rank_index: 3,
             name: String::new(),
         }));
-        reconcile_packet(
-            &mut model,
-            "GuildMemberChange",
-            json!({
-                "changeType": 2,
-                "rankIndex": 2,
-                "name": "",
-                "ranks": [{"name":"Wrong","index":2,"options":0,"members":[]}]
-            }),
-        );
-        assert_eq!(model.pending.len(), 1);
-        reconcile_packet(
-            &mut model,
-            "GuildMemberChange",
-            json!({
-                "changeType": 2,
-                "rankIndex": 3,
-                "name": "",
-                "ranks": [{"name":"Renamed","index":3,"options":0,"members":[]}]
-            }),
-        );
-        assert!(model.pending.is_empty());
+        let before = model.clone();
+        for rank_index in [2, 3] {
+            assert!(!model.apply_packet(
+                "GuildMemberChange",
+                &json!({
+                    "changeType": 2,
+                    "rankIndex": rank_index,
+                    "name": "",
+                    "ranks": [{"name":"Wrong","index":2,"options":0,"members":[]}]
+                })
+            ));
+            assert_eq!(model, before);
+        }
     }
 
     #[test]
@@ -1828,31 +1975,43 @@ mod tests {
             "inactive-to-active authoritative membership transition resolves the invite"
         );
 
-        let mut guild_info = SocialModel::default();
+        let mut guild_info = guild_rank_native_tests::seeded(0);
         guild_info.begin_pending(SocialPendingOperation::GuildInfo);
         reconcile_packet(
             &mut guild_info,
             "GuildStatus",
-            json!({"guildName":"Guild","guildRankName":"Chief"}),
+            json!({"guildName":"Rank Guild","guildRankName":"Leader","myRankId":0,"myOptions":255}),
         );
+        assert_eq!(
+            guild_info.pending.len(),
+            1,
+            "GuildStatus is not a complete roster reply"
+        );
+        let mut incoming = guild_info.clone();
+        incoming.pending.clear();
+        assert!(guild_rank_native_tests::apply_typed(
+            &mut incoming,
+            guild_rank_native_tests::full("Scouts")
+        ));
+        guild_info.apply_authoritative(incoming);
         assert!(guild_info.pending.is_empty());
 
-        let mut member = SocialModel::default();
+        let mut member = guild_rank_native_tests::seeded(0);
         member.begin_pending(SocialPendingOperation::GuildMember {
-            change_type: 4,
-            rank_index: 2,
-            name: "Miner".into(),
+            change_type: 2,
+            rank_index: 1,
+            name: "Alice".into(),
         });
         reconcile_packet(
             &mut member,
             "GuildMemberChange",
-            json!({"changeType":4,"rankIndex":2,"name":"Other","ranks":[]}),
+            json!({"status":5,"rankIndex":1,"name":"Other","ranks":[]}),
         );
         assert_eq!(member.pending.len(), 1);
         reconcile_packet(
             &mut member,
             "GuildMemberChange",
-            json!({"changeType":4,"rankIndex":2,"name":"Miner","ranks":[]}),
+            json!({"status":5,"rankIndex":1,"name":"Alice","ranks":[]}),
         );
         assert!(member.pending.is_empty());
 
@@ -1974,14 +2133,14 @@ mod tests {
         reconcile_packet(
             &mut model,
             "GuildMemberChange",
-            json!({"name":"Me","ranks":[{"name":"Member","index":0,"members":[{"name":"Me"}]}]}),
+            json!({"name":"","status":255,"rankIndex":0,"ranks":[{"name":"Member","index":0,"options":0,"members":[{"name":"Me","id":7,"online":true}]}]}),
         );
         assert!(model.pending.is_empty());
         let members = model.guild.members.clone();
         reconcile_packet(
             &mut model,
             "GuildMemberChange",
-            json!({"name":"Me","ranks":[{"name":"Member","index":0,"members":[{"name":"Me"}]}]}),
+            json!({"name":"","status":255,"rankIndex":0,"ranks":[{"name":"Member","index":0,"options":0,"members":[{"name":"Me","id":7,"online":true}]}]}),
         );
         assert_eq!(model.guild.members, members);
         assert!(model.pending.is_empty());

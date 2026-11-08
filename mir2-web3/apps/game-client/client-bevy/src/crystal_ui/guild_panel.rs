@@ -1,6 +1,12 @@
 use super::*;
 use guild_buff_dialog::*;
 #[cfg(test)]
+#[path = "guild_pending_eviction_tests.rs"]
+mod guild_pending_eviction_tests;
+#[cfg(test)]
+#[path = "guild_permission_flow_tests.rs"]
+mod guild_permission_flow_tests;
+#[cfg(test)]
 #[path = "guild_rank_flow_tests.rs"]
 mod guild_rank_flow_tests;
 #[derive(Debug, Clone, Default, PartialEq)]
@@ -221,6 +227,12 @@ pub(super) fn process(
     if !state.guild_open() {
         *host = Default::default();
         return;
+    }
+    if social.guild.roster_needs_refresh && social.guild.name.is_some() {
+        intents.push_social_pending(
+            &mut social,
+            NativePlayerUiIntent::GuildRequestInfo { info_type: 1 },
+        );
     }
     let (Some(mouse), Ok(window)) = (mouse, windows.single()) else {
         return;

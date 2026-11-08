@@ -291,10 +291,23 @@ fn guild_rank_nonrename_status_does_not_ack_matching_text() {
         submit(&mut state, &mut local, &mut queue);
         let pending = local.pending.clone();
         let mut packet = wire::terminal("Leader", 2, "Veterans");
-        if let mir2_protocol::ServerPacket::GuildMemberChange { status: value, .. } = &mut packet {
+        if let mir2_protocol::ServerPacket::GuildMemberChange {
+            status: value,
+            ranks,
+            ..
+        } = &mut packet
+        {
             *value = status;
+            if status == 6 {
+                ranks[0].options = 0;
+                ranks[0].members.clear();
+            }
         }
-        assert!(wire::apply_typed(&mut network, packet));
+        assert_eq!(
+            wire::apply_typed(&mut network, packet),
+            status != 8,
+            "status8 requires the authenticated viewer identity, absent in this legacy fixture"
+        );
         local.apply_authoritative(network);
         assert_eq!(local.pending, pending);
     }
