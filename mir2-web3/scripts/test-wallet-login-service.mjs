@@ -8,9 +8,63 @@ import os from "node:os";
 import path from "node:path";
 import { test } from "node:test";
 import { fileURLToPath } from "node:url";
-import { buildEnvironment, inspectPayload, requireChild } from "./package-wallet-login-release.mjs";
+import { buildEnvironment, inspectPayload, requireChild, verifyWalletDependencyLock, verifyWalletReleaseDependencies } from "./package-wallet-login-release.mjs";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
+
+test("release dependencies use the exact independent wallet lock for every direct production and build package", async () => {
+  const manifest = JSON.parse(await readFile(path.join(root, "apps/wallet-login/package.json"), "utf8"));
+  const lock = JSON.parse(await readFile(path.join(root, "apps/wallet-login/package-lock.json"), "utf8"));
+  const dependencies = verifyWalletDependencyLock(manifest, lock);
+  const declared = { ...manifest.dependencies, ...manifest.devDependencies };
+  assert.deepEqual(Object.fromEntries(dependencies.map(({ name, version }) => [name, version])), declared);
+  assert.equal(dependencies.find(item => item.name === "next").version, manifest.dependencies.next);
+  for (const [change, expected] of [
+    [(p, l) => { p.dependencies.next = "16.0.0"; }, /not exactly pinned/],
+    [(p, l) => { l.packages[""].dependencies.next = "16.0.0"; }, /not exactly pinned/],
+    [(p, l) => { l.packages["node_modules/next"].version = "16.0.0"; }, /dependency record differs/],
+    [(p, l) => { delete l.packages["node_modules/react"]; }, /dependency record differs/],
+    [(p, l) => { delete l.packages["node_modules/@types/react"]; }, /dependency record differs/],
+    [(p, l) => { l.packages[""].dependencies.undeclared = "1.0.0"; }, /differs from its independent lock root/],
+    [(p, l) => { l.packages["node_modules/next"].link = true; }, /dependency record differs/],
+    [(p, l) => { delete l.packages["node_modules/next"].integrity; }, /dependency record differs/],
+    [(p, l) => { l.lockfileVersion = 2; }, /package metadata differs/],
+    [(p, l) => { l.packages[""].name = "another-app"; }, /package metadata differs/],
+    [(p, l) => { p.dependencies.next = l.packages[""].dependencies.next = "^16.0.0"; }, /not exactly pinned/],
+  ]) {
+    const p = structuredClone(manifest), l = structuredClone(lock); change(p, l);
+    assert.throws(() => verifyWalletDependencyLock(p, l), expected);
+  }
+});
+
+test("packaging rejects an installed framework or SDK that differs from the wallet's own lock", async () => {
+  const temporary = await mkdtemp(path.join(os.tmpdir(), "mir2-wallet-lock-test-"));
+  try {
+    const manifest = JSON.parse(await readFile(path.join(root, "apps/wallet-login/package.json"), "utf8"));
+    const lock = JSON.parse(await readFile(path.join(root, "apps/wallet-login/package-lock.json"), "utf8"));
+    await writeFile(path.join(temporary, "package.json"), JSON.stringify(manifest));
+    await writeFile(path.join(temporary, "package-lock.json"), JSON.stringify(lock));
+    const dependencies = verifyWalletDependencyLock(manifest, lock);
+    for (const dependency of dependencies) {
+      const packageFile = path.join(temporary, "node_modules", ...dependency.name.split("/"), "package.json");
+      await mkdir(path.dirname(packageFile), { recursive: true });
+      await writeFile(packageFile, JSON.stringify(dependency));
+    }
+    assert.deepEqual(await verifyWalletReleaseDependencies(temporary), dependencies);
+    for (const name of ["next", "@mysten/sui"]) {
+      const packageFile = path.join(temporary, "node_modules", ...name.split("/"), "package.json");
+      const original = await readFile(packageFile);
+      await writeFile(packageFile, JSON.stringify({ name, version: "0.0.0" }));
+      await assert.rejects(verifyWalletReleaseDependencies(temporary), /installed dependency differs/);
+      await writeFile(packageFile, original);
+    }
+    await rm(path.join(temporary, "node_modules/typescript/package.json"));
+    await assert.rejects(verifyWalletReleaseDependencies(temporary), /locked dependency is not installed/);
+  } finally {
+    requireChild(os.tmpdir(), temporary);
+    await rm(temporary, { recursive: true, force: true });
+  }
+});
 
 test("wallet service imports the verified shared handlers and exposes only required routes", async () => {
   const app = path.join(root, "apps/wallet-login/app");

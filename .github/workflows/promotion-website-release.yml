@@ -7,8 +7,29 @@ on:
         required: true
         type: string
       backend_source_sha:
-        required: true
+        required: false
         type: string
+      unified_source_sha:
+        required: false
+        type: string
+      asset_run_id:
+        required: false
+        type: string
+      deployment_id:
+        required: false
+        type: string
+      main_deployment_id:
+        required: false
+        type: string
+    secrets:
+      VERCEL_TOKEN:
+        required: false
+      VERCEL_ORG_ID:
+        required: false
+      VERCEL_PROJECT_ID:
+        required: false
+      MIR2_R16_PASSKEY_AUTH_SECRET:
+        required: false
   workflow_dispatch:
     inputs:
       operation:
@@ -16,7 +37,7 @@ on:
         required: true
         default: context
         type: choice
-        options: [context, discover-main-site, inspect-main-source, stage, promote, unified-context, unified-stage, unified-promote, realtime-context, realtime-stage, realtime-promote, windows-context, windows-config, windows-stage, windows-promote, numeron-context, numeron-stage, numeron-promote, backend-build]
+        options: [context, discover-main-site, inspect-main-source, stage, promote, unified-context, unified-stage, unified-promote, realtime-context, realtime-stage, realtime-promote, windows-context, windows-config, windows-stage, windows-promote, numeron-context, numeron-stage, numeron-promote, numeron-domain-move, backend-build]
       deployment_id:
         description: Exact accepted production candidate; required only for promote
         required: false
@@ -54,6 +75,29 @@ jobs:
         with:
           persist-credentials: false
           fetch-depth: 0
+      - name: Validate isolated Numeron inputs before any credential-bearing job
+        if: startsWith(inputs.operation, 'numeron-')
+        env:
+          NUMERON_OPERATION: ${{ inputs.operation }}
+          NUMERON_SOURCE_SHA: ${{ inputs.unified_source_sha }}
+          NUMERON_ASSET_RUN_ID: ${{ inputs.asset_run_id }}
+          NUMERON_DEPLOYMENT_ID: ${{ inputs.deployment_id }}
+          NUMERON_MAIN_DEPLOYMENT_ID: ${{ inputs.main_deployment_id }}
+          BACKEND_SOURCE_SHA: ${{ inputs.backend_source_sha }}
+        run: |
+          node --input-type=module <<'NODE'
+          const env = process.env, operation = env.NUMERON_OPERATION;
+          const fail = code => { throw Error(code); };
+          if (!['numeron-context', 'numeron-stage', 'numeron-promote', 'numeron-domain-move'].includes(operation)) fail('explicitNumeronOperationRequired');
+          if (env.BACKEND_SOURCE_SHA) fail('mixedReleaseModes');
+          if (env.GITHUB_REPOSITORY !== 'Zombieliu/mir2' || env.GITHUB_REF !== 'refs/heads/codex/windows-player-journey' || !/^[a-f0-9]{40}$/.test(env.GITHUB_SHA || '')) fail('sourceIdentityInvalid');
+          const source = env.NUMERON_SOURCE_SHA || env.GITHUB_SHA;
+          if (!/^[a-f0-9]{40}$/.test(source) || (operation === 'numeron-stage' && source !== env.GITHUB_SHA)) fail('sourceInputInvalid');
+          const paired = operation === 'numeron-promote' || operation === 'numeron-domain-move';
+          if (paired ? !/^dpl_[A-Za-z0-9]+$/.test(env.NUMERON_DEPLOYMENT_ID || '') || !/^dpl_[A-Za-z0-9]+$/.test(env.NUMERON_MAIN_DEPLOYMENT_ID || '') || env.NUMERON_DEPLOYMENT_ID === env.NUMERON_MAIN_DEPLOYMENT_ID : Boolean(env.NUMERON_DEPLOYMENT_ID || env.NUMERON_MAIN_DEPLOYMENT_ID)) fail('candidateInputInvalid');
+          const assets = operation === 'numeron-stage' || operation === 'numeron-promote';
+          if (assets ? !/^[1-9][0-9]*$/.test(env.NUMERON_ASSET_RUN_ID || '') : Boolean(env.NUMERON_ASSET_RUN_ID)) fail('assetRunInputInvalid');
+          NODE
       - name: Verify all integrated histories before any release operation
         run: python3 mir2-web3/scripts/verify_unified_codeline.py --require-clean
   website:
@@ -76,7 +120,7 @@ jobs:
           node-version: '22'
       - name: Verify bounded Numeron release guards without credentials or network
         if: startsWith(inputs.operation, 'numeron-')
-        run: node --test .github/scripts/test-numeron-r16-release.mjs
+        run: node --test .github/scripts/test-numeron-r16-release.mjs .github/scripts/test-numeron-r16-domain.mjs .github/scripts/test-numeron-release-entry.mjs
       - name: Inspect the three Numeron project identities without Gateway credentials
         if: inputs.operation == 'numeron-context'
         env:
@@ -101,11 +145,30 @@ jobs:
           RELEASE_ASSET_RUN_ID: ${{ inputs.asset_run_id }}
         run: node .github/scripts/numeron-r16-release.mjs
       - name: Retain bounded Numeron release metadata including failed attempts
-        if: always() && startsWith(inputs.operation, 'numeron-')
+        if: always() && startsWith(inputs.operation, 'numeron-') && inputs.operation != 'numeron-domain-move'
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: numeron-r16-release-${{ github.run_id }}
           path: numeron-r16-release.json
+          if-no-files-found: warn
+          retention-days: 14
+      - name: Move the Numeron custom domain only after independent paired-candidate checks
+        if: inputs.operation == 'numeron-domain-move'
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+          RELEASE_OPERATION: ${{ inputs.operation }}
+          RELEASE_SOURCE_SHA: ${{ inputs.unified_source_sha }}
+          RELEASE_DEPLOYMENT_ID: ${{ inputs.deployment_id }}
+          RELEASE_MAIN_DEPLOYMENT_ID: ${{ inputs.main_deployment_id }}
+        run: node .github/scripts/numeron-r16-domain.mjs
+      - name: Retain the separate bounded Numeron domain-move receipt
+        if: always() && inputs.operation == 'numeron-domain-move'
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: numeron-r16-domain-${{ github.run_id }}
+          path: numeron-r16-domain.json
           if-no-files-found: warn
           retention-days: 14
       - name: Stage or promote the two existing websites from one immutable source

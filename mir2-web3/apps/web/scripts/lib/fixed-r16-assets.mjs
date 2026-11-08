@@ -8,6 +8,10 @@ import { Transform, Writable } from "node:stream";
 import { pipeline } from "node:stream/promises";
 import { constants, createGunzip, createGzip } from "node:zlib";
 
+// Bound file operations, not individual requests: each file still verifies the
+// existing object, PUTs at most once when missing, then verifies the full body.
+export const FIXED_R16_FILE_CONCURRENCY = 32;
+
 // This publisher accepts one reviewed finite payload, not an arbitrary public tree.
 // sourceSha in the dispatch identifies the frozen CI implementation; the material
 // source below is retained separately because the archive predates that commit.
@@ -418,7 +422,7 @@ export async function publishValidated(validated, options = {}) {
     receipt.remoteWrites++;
   };
   const alreadyPublished = await verifyRemoteFile(manifest, contract, `manifest-before-${nonce}`, true);
-  await runBounded(files, 8, async file => {
+  await runBounded(files, FIXED_R16_FILE_CONCURRENCY, async file => {
     const exists = await verifyRemoteFile(file, contract, `before-${nonce}`, true);
     let representation = exists;
     if (exists) receipt.existingVerified++;

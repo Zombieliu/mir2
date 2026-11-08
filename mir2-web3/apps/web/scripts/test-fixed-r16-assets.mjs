@@ -9,8 +9,8 @@ import { pipeline } from "node:stream/promises";
 import { fileURLToPath } from "node:url";
 import { promisify } from "node:util";
 import { gzipSync, gunzipSync } from "node:zlib";
-import { FIXED_R16, METADATA_NAMES, extractFixedBundle, normalizeGzipHeader, publishValidated,
-  resolveDraftRelease, safeRelative, sha256, validateDispatch, validateExtracted, validateReleaseMetadata } from "./lib/fixed-r16-assets.mjs";
+import { FIXED_R16, FIXED_R16_FILE_CONCURRENCY, METADATA_NAMES, extractFixedBundle, normalizeGzipHeader, publishValidated,
+  resolveDraftRelease, runBounded, safeRelative, sha256, validateDispatch, validateExtracted, validateReleaseMetadata } from "./lib/fixed-r16-assets.mjs";
 
 let passed = 0;
 const roots = [];
@@ -37,17 +37,18 @@ function header(name, size, options = {}) {
   return block;
 }
 
-async function fixture(origin = "https://assets.example.test") {
+async function fixture(origin = "https://assets.example.test", extraImages = 0) {
   const directory = await fs.mkdtemp(path.join(os.tmpdir(), "mir2-fixed-test-")); roots.push(directory);
   const bodies = new Map([
     ["bevy-runtime/v/bevy-fixture/pkg-webgpu/mir2_bevy_runtime_bg.wasm", Buffer.from("real gzip fixture ".repeat(300))],
     ["original-ui/Libraries/Prguse/0000.png", Buffer.from("fixture-image")],
     ["original-ui/fonts/NotoSans-Regular.ttf", Buffer.from("fixture-font")],
   ]);
+  for (let index = 0; index < extraImages; index++) bodies.set(`original-ui/Libraries/Prguse/extra-${String(index).padStart(4, "0")}.png`, Buffer.from(`fixture-image-${index}`));
   const files = [...bodies].sort(([a], [b]) => a < b ? -1 : 1).map(([p, body]) => ({ p, s: body.length, h: sha256(body) }));
   const payloadSha256 = sha256(JSON.stringify(files));
   const contract = { ...FIXED_R16, version: "fixture-r16", prefix: "mir2/v/fixture-r16", publicOrigin: origin,
-    fileCount: files.length, payloadSha256, fontFiles: 1, finiteFiles: 2, runtimeVersion: "bevy-fixture",
+    fileCount: files.length, payloadSha256, fontFiles: 1, finiteFiles: 2 + extraImages, runtimeVersion: "bevy-fixture",
     maxExpandedBytes: 1024 * 1024, maxFileBytes: 128 * 1024 };
   const assetBaseUrl = `${origin}/${contract.prefix}`;
   const planFiles = files.map(pin => ({ path: `/${pin.p}`, relativePath: pin.p, stagePath: `payload/${pin.p}`,
@@ -125,6 +126,7 @@ async function localWorker() {
         response.writeHead(200, { "content-type": "application/json" }); response.end(JSON.stringify({ ok: true, key })); return;
       }
       const key = decodeURIComponent(url.pathname.slice(1)); events.push({ type: "get", key });
+      await state.beforeGet?.(key);
       const item = storage.get(key);
       if (!item) { response.writeHead(404); response.end(); return; }
       let bytes = item.bytes; const headers = { ...item.headers };
@@ -313,6 +315,64 @@ try {
       assert.equal(second.remoteWrites, 0); assert.equal(second.existingVerified, 3);
       assert.equal(worker.events.filter(event => event.type === "put").length, 4, "a completed rerun only reads existing bytes");
     } finally { await worker.close(); }
+  });
+
+  await test("the real publisher starts exactly32 file operations and retains full verification before manifest publication", async () => {
+    assert.equal(FIXED_R16_FILE_CONCURRENCY, 32);
+    const worker = await localWorker();
+    let release;
+    const gate = new Promise(resolve => { release = resolve; });
+    try {
+      const f = await fixture(worker.origin, 62), { root, extracted } = await f.unpack();
+      const validated = await validateExtracted(root, extracted, f.contract);
+      assert.equal(validated.files.length, 65);
+      let waiting = 0, notify;
+      const allStarted = new Promise(resolve => { notify = resolve; });
+      worker.state.beforeGet = async key => {
+        if (key === validated.manifest.objectKey || worker.storage.has(key)) return;
+        waiting++;
+        if (waiting === 32) notify();
+        await gate;
+      };
+      const pending = publishValidated(validated, { workerUrl: worker.origin, secret: "fixture-upload-secret", allowLoopback: true });
+      let timer;
+      try {
+        await Promise.race([allStarted, new Promise((_, reject) => { timer = setTimeout(() => reject(Error("32 file operations did not reach the server")), 5000); })]);
+        await new Promise(resolve => setImmediate(resolve));
+        assert.equal(waiting, 32, "the fixed bound is not exceeded while all file operations are blocked");
+        assert.equal(worker.events.filter(event => event.type === "get" && event.key !== validated.manifest.objectKey).length, 32);
+        assert.equal(worker.events.filter(event => event.type === "put").length, 0);
+      } finally { clearTimeout(timer); release(); }
+      const receipt = await pending;
+      assert.equal(receipt.verified, 65); assert.equal(receipt.unknownWriteOutcomes, 0);
+      assert.equal(receipt.remoteWrites, 66); assert.equal(receipt.putAttempts, 66);
+      const puts = worker.events.filter(event => event.type === "put");
+      assert.equal(puts.at(-1).key, validated.manifest.objectKey);
+      const manifestIndex = worker.events.findIndex(event => event.type === "put" && event.key === validated.manifest.objectKey);
+      for (const file of validated.files) {
+        const putIndex = worker.events.findIndex(event => event.type === "put" && event.key === file.objectKey);
+        assert.equal(puts.filter(event => event.key === file.objectKey).length, 1);
+        assert(worker.events.slice(0, putIndex).some(event => event.type === "get" && event.key === file.objectKey));
+        assert(worker.events.slice(putIndex + 1, manifestIndex).some(event => event.type === "get" && event.key === file.objectKey));
+      }
+    } finally { release?.(); await worker.close(); }
+  });
+
+  await test("a32-file batch stops new dispatch after the first failure and waits for every in-flight operation", async () => {
+    let release, started = 0, completed = 0, settled = false;
+    const gate = new Promise(resolve => { release = resolve; });
+    const failure = Error("fixture-first-failure");
+    const pending = runBounded(Array.from({ length: 65 }, (_, index) => index), FIXED_R16_FILE_CONCURRENCY, async index => {
+      started++;
+      if (index === 0) throw failure;
+      await gate; completed++;
+    }).finally(() => { settled = true; });
+    await new Promise(resolve => setImmediate(resolve));
+    assert.equal(started, 32); assert.equal(completed, 0); assert.equal(settled, false);
+    release();
+    await assert.rejects(pending, error => error === failure);
+    assert.equal(started, 32, "none of the remaining33 files were scheduled");
+    assert.equal(completed, 31, "failure is returned only after the other31 operations settle");
   });
 
   await test("the existing public Worker's decoded gzip semantics are explicit in the receipt", async () => {

@@ -17,29 +17,97 @@ on:
         required: false
         default: false
         type: boolean
+      numeron_operation:
+        description: Isolated Numeron website operation; off preserves the existing Gateway jobs
+        required: false
+        default: 'off'
+        type: choice
+        options: ['off', numeron-context, numeron-stage, numeron-promote, numeron-domain-move]
+      unified_source_sha:
+        description: Existing immutable Numeron candidate source; stage must equal the workflow commit
+        required: false
+        type: string
+      asset_run_id:
+        description: Exact successful fixed R16 asset run for Numeron stage or promote
+        required: false
+        type: string
+      deployment_id:
+        description: Exact accepted Numeron game candidate for promote or domain move
+        required: false
+        type: string
+      main_deployment_id:
+        description: Exact paired marketing candidate for promote or domain move
+        required: false
+        type: string
 
 permissions:
   contents: read
   actions: read
 
 jobs:
+  validate-numeron-entry:
+    if: ${{ (inputs.numeron_operation != '' && inputs.numeron_operation != 'off') || inputs.unified_source_sha != '' || inputs.asset_run_id != '' || inputs.deployment_id != '' || inputs.main_deployment_id != '' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 3
+    steps:
+      - name: Validate the isolated Numeron dispatch without credentials
+        env:
+          NUMERON_OPERATION: ${{ inputs.numeron_operation || 'off' }}
+          NUMERON_SOURCE_SHA: ${{ inputs.unified_source_sha }}
+          NUMERON_ASSET_RUN_ID: ${{ inputs.asset_run_id }}
+          NUMERON_DEPLOYMENT_ID: ${{ inputs.deployment_id }}
+          NUMERON_MAIN_DEPLOYMENT_ID: ${{ inputs.main_deployment_id }}
+          LEGACY_RELEASE_TAG: ${{ inputs.release_tag }}
+          LEGACY_PUBLISH_R2: ${{ inputs.publish_r2 }}
+          LEGACY_PLAYTEST_WALLET: ${{ inputs.playtest_wallet_no_docker }}
+        run: |
+          node --input-type=module <<'NODE'
+          const env = process.env, operation = env.NUMERON_OPERATION;
+          const fail = code => { throw Error(code); };
+          if (!['numeron-context', 'numeron-stage', 'numeron-promote', 'numeron-domain-move'].includes(operation)) fail('explicitNumeronOperationRequired');
+          if (env.LEGACY_RELEASE_TAG || env.LEGACY_PUBLISH_R2 === 'true' || env.LEGACY_PLAYTEST_WALLET === 'true') fail('mixedReleaseModes');
+          if (env.GITHUB_REPOSITORY !== 'Zombieliu/mir2' || env.GITHUB_REF !== 'refs/heads/codex/windows-player-journey' || !/^[a-f0-9]{40}$/.test(env.GITHUB_SHA || '')) fail('sourceIdentityInvalid');
+          const source = env.NUMERON_SOURCE_SHA || env.GITHUB_SHA;
+          if (!/^[a-f0-9]{40}$/.test(source) || (operation === 'numeron-stage' && source !== env.GITHUB_SHA)) fail('sourceInputInvalid');
+          const paired = operation === 'numeron-promote' || operation === 'numeron-domain-move';
+          if (paired ? !/^dpl_[A-Za-z0-9]+$/.test(env.NUMERON_DEPLOYMENT_ID || '') || !/^dpl_[A-Za-z0-9]+$/.test(env.NUMERON_MAIN_DEPLOYMENT_ID || '') || env.NUMERON_DEPLOYMENT_ID === env.NUMERON_MAIN_DEPLOYMENT_ID : Boolean(env.NUMERON_DEPLOYMENT_ID || env.NUMERON_MAIN_DEPLOYMENT_ID)) fail('candidateInputInvalid');
+          const assets = operation === 'numeron-stage' || operation === 'numeron-promote';
+          if (assets ? !/^[1-9][0-9]*$/.test(env.NUMERON_ASSET_RUN_ID || '') : Boolean(env.NUMERON_ASSET_RUN_ID)) fail('assetRunInputInvalid');
+          NODE
+
+  numeron-website:
+    needs: validate-numeron-entry
+    if: ${{ inputs.numeron_operation != '' && inputs.numeron_operation != 'off' }}
+    uses: ./.github/workflows/promotion-website-release.yml
+    with:
+      operation: ${{ inputs.numeron_operation }}
+      unified_source_sha: ${{ inputs.unified_source_sha }}
+      asset_run_id: ${{ inputs.asset_run_id }}
+      deployment_id: ${{ inputs.deployment_id }}
+      main_deployment_id: ${{ inputs.main_deployment_id }}
+    secrets:
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+      MIR2_R16_PASSKEY_AUTH_SECRET: ${{ inputs.numeron_operation == 'numeron-stage' && secrets.MIR2_R16_PASSKEY_AUTH_SECRET || '' }}
+
   build-playtest-promotion-backend:
-    if: ${{ inputs.playtest_wallet_no_docker }}
+    if: ${{ inputs.playtest_wallet_no_docker && (inputs.numeron_operation == '' || inputs.numeron_operation == 'off') && inputs.unified_source_sha == '' && inputs.asset_run_id == '' && inputs.deployment_id == '' && inputs.main_deployment_id == '' }}
     uses: ./.github/workflows/promotion-website-release.yml
     with:
       operation: backend-build
       backend_source_sha: ${{ github.sha }}
 
   activities-acceptance:
-    if: ${{ !inputs.playtest_wallet_no_docker }}
+    if: ${{ !inputs.playtest_wallet_no_docker && (inputs.numeron_operation == '' || inputs.numeron_operation == 'off') && inputs.unified_source_sha == '' && inputs.asset_run_id == '' && inputs.deployment_id == '' && inputs.main_deployment_id == '' }}
     uses: ./.github/workflows/activities-acceptance.yml
 
   siege-acceptance:
-    if: ${{ !inputs.playtest_wallet_no_docker }}
+    if: ${{ !inputs.playtest_wallet_no_docker && (inputs.numeron_operation == '' || inputs.numeron_operation == 'off') && inputs.unified_source_sha == '' && inputs.asset_run_id == '' && inputs.deployment_id == '' && inputs.main_deployment_id == '' }}
     uses: ./.github/workflows/sabuk-acceptance.yml
 
   build-linux-x64:
-    if: ${{ !inputs.playtest_wallet_no_docker }}
+    if: ${{ !inputs.playtest_wallet_no_docker && (inputs.numeron_operation == '' || inputs.numeron_operation == 'off') && inputs.unified_source_sha == '' && inputs.asset_run_id == '' && inputs.deployment_id == '' && inputs.main_deployment_id == '' }}
     runs-on: ubuntu-latest
     timeout-minutes: 105
     steps:
@@ -279,7 +347,7 @@ jobs:
           if-no-files-found: error
 
   build-playtest-wallet-gateway:
-    if: ${{ inputs.playtest_wallet_no_docker }}
+    if: ${{ inputs.playtest_wallet_no_docker && (inputs.numeron_operation == '' || inputs.numeron_operation == 'off') && inputs.unified_source_sha == '' && inputs.asset_run_id == '' && inputs.deployment_id == '' && inputs.main_deployment_id == '' }}
     # Match the playtest host's glibc baseline; ubuntu-latest can advance.
     runs-on: ubuntu-24.04
     timeout-minutes: 120
@@ -378,7 +446,7 @@ jobs:
           if-no-files-found: warn
 
   build-playtest-wallet-login:
-    if: ${{ inputs.playtest_wallet_no_docker }}
+    if: ${{ inputs.playtest_wallet_no_docker && (inputs.numeron_operation == '' || inputs.numeron_operation == 'off') && inputs.unified_source_sha == '' && inputs.asset_run_id == '' && inputs.deployment_id == '' && inputs.main_deployment_id == '' }}
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     defaults:

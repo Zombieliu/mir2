@@ -90,20 +90,62 @@ export function verifySourceRevision(revision) {
   }
 }
 
+export function verifyWalletDependencyLock(manifest, lock) {
+  const lockedRoot = lock?.packages?.[""];
+  if (lock?.lockfileVersion !== 3 || !lockedRoot || manifest?.name !== lockedRoot.name
+    || manifest.version !== lockedRoot.version || lock.name !== manifest.name || lock.version !== manifest.version) {
+    throw new Error("wallet-login package metadata differs from its independent lock");
+  }
+  const dependencies = new Map();
+  for (const kind of ["dependencies", "devDependencies", "optionalDependencies"]) {
+    const declared = manifest[kind] ?? {}, pinned = lockedRoot[kind] ?? {};
+    if (JSON.stringify(Object.keys(declared).sort()) !== JSON.stringify(Object.keys(pinned).sort())) {
+      throw new Error(`wallet-login ${kind} differs from its independent lock root`);
+    }
+    for (const [name, version] of Object.entries(declared)) {
+      if (!/^(?:@[a-z0-9][a-z0-9._-]*\/)?[a-z0-9][a-z0-9._-]*$/i.test(name)
+        || typeof version !== "string" || !/^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?(?:\+[0-9A-Za-z.-]+)?$/.test(version)
+        || pinned[name] !== version) {
+        throw new Error(`wallet-login dependency is not exactly pinned by its independent lock: ${name}`);
+      }
+      const record = lock.packages[`node_modules/${name}`];
+      if (record?.version !== version || record.link === true
+        || typeof record.integrity !== "string" || !/^sha512-[A-Za-z0-9+/]+={0,2}$/.test(record.integrity)) {
+        throw new Error(`wallet-login dependency record differs from its independent lock: ${name}`);
+      }
+      dependencies.set(name, version);
+    }
+  }
+  return [...dependencies].map(([name, version]) => ({ name, version }));
+}
+
+export async function verifyWalletReleaseDependencies(directory = appRoot) {
+  const manifest = JSON.parse(await readFile(path.join(directory, "package.json"), "utf8"));
+  const lock = JSON.parse(await readFile(path.join(directory, "package-lock.json"), "utf8"));
+  const dependencies = verifyWalletDependencyLock(manifest, lock);
+  for (const dependency of dependencies) {
+    let installed;
+    try {
+      installed = JSON.parse(await readFile(path.join(directory, "node_modules", ...dependency.name.split("/"), "package.json"), "utf8"));
+    } catch { throw new Error(`wallet-login locked dependency is not installed: ${dependency.name}`); }
+    if (installed.name !== dependency.name || installed.version !== dependency.version) {
+      throw new Error(`wallet-login installed dependency differs from its independent lock: ${dependency.name}`);
+    }
+  }
+  return dependencies;
+}
+
 export async function packageRelease(revision) {
   verifySourceRevision(revision);
   if (Number(process.versions.node.split(".")[0]) < 22) throw new Error("wallet-login packaging requires Node 22 or newer");
-  const lock = JSON.parse(await readFile(path.join(appRoot, "package-lock.json"), "utf8"));
-  const webLock = JSON.parse(await readFile(path.join(projectRoot, "apps/web/package-lock.json"), "utf8"));
-  for (const dependency of ["@mysten/sui", "next", "react", "react-dom", "typescript"]) {
-    if (lock.packages[`node_modules/${dependency}`]?.version !== webLock.packages[`node_modules/${dependency}`]?.version) {
-      throw new Error(`wallet-login dependency differs from shared Web lock: ${dependency}`);
-    }
-  }
+  // npm ci and Webpack both use this isolated service's own lock/modules. Shared
+  // handler source does not require unrelated Web framework versions to match.
+  await verifyWalletReleaseDependencies();
   command(process.execPath, [path.join(appRoot, "node_modules/next/dist/bin/next"), "build", "--webpack"], {
     cwd: appRoot, env: buildEnvironment(process.env, revision), stdio: "inherit",
   });
   verifySourceRevision(revision);
+  await verifyWalletReleaseDependencies();
   await mkdir(outputRoot, { recursive: true });
   const stageRoot = await mkdtemp(path.join(outputRoot, ".wallet-login-stage-"));
   requireChild(outputRoot, stageRoot);
