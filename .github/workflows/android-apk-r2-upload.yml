@@ -29,14 +29,16 @@ jobs:
           sparse-checkout: .github/scripts/android-apk-r2-v40
       - name: Verify fixed object, origin, checksum and overwrite guards without credentials
         run: node --test .github/scripts/android-apk-r2-v40/worker.test.mjs
-      - name: Transfer frozen staging APK and verify the public download
+      - name: Verify existing upload credentials without writing any object
         env:
           GH_TOKEN: ${{ github.token }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           MIR2_R2_ASSET_BUCKET: ${{ secrets.MIR2_R2_ASSET_BUCKET }}
           MIR2_R2_BUCKET: ${{ secrets.MIR2_R2_BUCKET }}
-        run: python3 .github/scripts/android-apk-r2-v40/publish.py
+          MIR2_R2_UPLOAD_WORKER_URL: ${{ secrets.MIR2_R2_UPLOAD_WORKER_URL }}
+          MIR2_R2_UPLOAD_SECRET: ${{ secrets.MIR2_R2_UPLOAD_SECRET }}
+        run: python3 .github/scripts/android-apk-r2-v40/probe-upload.py
       - name: Ensure this run's temporary transfer Worker is removed
         if: ${{ always() }}
         env:
