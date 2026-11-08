@@ -44,7 +44,7 @@ export default async function DownloadPage({ params }: DownloadPageProps) {
   const platforms = [
     { id: "web", index: "01", name: "WEB", format: "BROWSER · PWA", status: copy.live, body: copy.webCopy },
     { id: "windows", index: "02", name: "WINDOWS", format: "X64 · TEST", status: windowsUrl ? copy.candidate : copy.unavailable, body: copy.windowsCopy },
-    { id: "android", index: "03", name: "ANDROID", format: "ANDROID", status: androidUrl ? copy.candidate : copy.pwa, body: copy.androidCopy },
+    { id: "android", index: "03", name: "ANDROID", format: "APK · ARM64", status: androidUrl ? copy.candidate : copy.pwa, body: copy.androidCopy },
   ] as const;
 
   const requirements = [
