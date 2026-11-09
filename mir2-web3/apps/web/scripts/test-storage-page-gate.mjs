@@ -835,19 +835,42 @@ test("actual Page Trade cancel terminal rejects foreign owners and stale exchang
       mode === "socket" ? {} : page.socket);
     assert.strictEqual(page.scope.socialItemOperationsRef.current.pending.proof, pending.proof, mode);
   }
+  const invited = harness(), invitedGuild = openGuild(invited);
+  invited.submitSocialItem("guild2", 3, 5, 66, invitedGuild.sourceKey);
+  invited.receive("TradeRequest", {name: "Partner"}); invited.renderTrade();
+  assert.equal(invited.cancelTrade(), false, "the Guild exception applies only to an open trade");
+  assert.equal(pageBudget(invited).pendingCount, 1);
+
   for (const packet of ["TradeConfirm", "TradeCancel"]) {
     const page = harness(), old = openCurrentTrade(page);
     page.submitSocialItem("depositTrade", 43, 5, 22, old.sourceKey);
     page.receive("DepositTradeItem", {from: 43, to: 5, success: true}); page.snapshot();
     const guild = openGuild(page); page.submitSocialItem("guild2", 3, 5, 66, guild.sourceKey);
     const pending = page.scope.socialItemOperationsRef.current.pending; assert.ok(pending?.entered);
-    assert.equal(page.cancelTrade(), false, "Guild custody does not grant the trade-item cancellation exception");
+    assert.equal(pageBudget(page).pendingCount, 1);
+    page.confirmTrade();
+    assert.equal(page.sendTradeUiCommand({type: "tradeGold", amount: 1}), false);
+    assert.equal(page.send({type: "moveItem", grid: "inventory", from: 43, to: 47}), false);
+    assert.equal(page.cancelTrade(), true, "trade cancellation has its own custody while a Guild item is pending");
+    assert.equal(page.cancelTrade(), false, "the same exchange cannot cancel twice");
+    assert.deepEqual(page.sent.slice(-2), [{type: "guildStorageItemChange", changeType: 2, from: 3, to: 5}, {type: "tradeCancel"}]);
+    assert.equal(pageBudget(page).pendingCount, 2);
+    page.receive("TradeCancel", {unlock: true});
+    assert.equal(pageBudget(page).pendingCount, 2, "unlock is not a terminal receipt");
     page.receive(packet, {unlock: false});
+    assert.equal(pageBudget(page).pendingCount, 1, packet + " completes only the trade");
+    assert.equal(page.scope.tradeLifecycleRef.current.state, "closed");
     assert.strictEqual(page.scope.socialItemOperationsRef.current.pending.proof, pending.proof, packet + " preserves Guild barrier");
     assert.equal(page.scope.socialItemOperationsRef.current.pending.acked, false);
     page.receive("DepositTradeItem", {from: 43, to: 5, success: true}); page.snapshot();
     assert.strictEqual(page.scope.socialItemOperationsRef.current.pending.proof, pending.proof, "late trade ACK cannot acknowledge Guild custody");
     assert.equal(page.scope.socialItemOperationsRef.current.pending.acked, false);
+    page.receive("GuildStorageItemChange", guildChange());
+    assert.equal(pageBudget(page).pendingCount, 0, "only the matching Guild receipt completes the other budget entry");
+    assert.equal(page.scope.socialItemOperationsRef.current.pending.acked, true);
+    page.snapshot();
+    assert.equal(page.scope.socialItemOperationsRef.current.pending, null);
+    assert.equal(page.scope.guildStorageRawRef.current.items[5].item.unique_id, 66);
   }
 });
 

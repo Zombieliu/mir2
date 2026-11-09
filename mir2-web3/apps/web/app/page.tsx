@@ -13772,8 +13772,10 @@ export default function HomePage() {
     if (type === "tradeCancel") {
       if (Object.keys(command).length !== 1 || socialTradeCancelSpentRef.current === proof.incarnation) return false;
       if (!pending) return true;
+      // An open trade can end while Guild storage waits for its own receipt and snapshot.
+      if (pending.proof.surface === "guild") return lifecycle.state === "open";
       const binding = socialTradeItemOperationRef.current;
-      return pending.proof.surface === "trade" && binding?.proof === pending.proof
+      return binding?.proof === pending.proof
         && binding.incarnation === proof.incarnation && binding.partner === proof.partner
         && sameSocialPhysicalOwner(pending.proof.owner, owner)
         && pending.proof.owner.sceneRevision === owner.sceneRevision && pending.proof.owner.mapFileName === owner.mapFileName;
