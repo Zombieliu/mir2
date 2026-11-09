@@ -23,7 +23,7 @@ function block(source, name) {
 }
 function inputs(values = {}) {
   return { numeron_operation: 'off', unified_source_sha: '', asset_run_id: '', deployment_id: '', main_deployment_id: '',
-    release_tag: '', publish_r2: false, playtest_wallet_no_docker: false, ...values };
+    numeron_ingress_guard: '', release_tag: '', publish_r2: false, playtest_wallet_no_docker: false, ...values };
 }
 function admits(name, values) {
   const expression = block(gateway, name).match(/^    if: \$\{\{ (.+) \}\}$/m)?.[1];
@@ -42,7 +42,7 @@ function environment(values) {
   const value = inputs(values);
   return { NUMERON_OPERATION: value.numeron_operation, NUMERON_SOURCE_SHA: value.unified_source_sha,
     NUMERON_ASSET_RUN_ID: value.asset_run_id, NUMERON_DEPLOYMENT_ID: value.deployment_id,
-    NUMERON_MAIN_DEPLOYMENT_ID: value.main_deployment_id, LEGACY_RELEASE_TAG: value.release_tag,
+    NUMERON_MAIN_DEPLOYMENT_ID: value.main_deployment_id, NUMERON_INGRESS_GUARD: value.numeron_ingress_guard, LEGACY_RELEASE_TAG: value.release_tag,
     LEGACY_PUBLISH_R2: String(value.publish_r2), LEGACY_PLAYTEST_WALLET: String(value.playtest_wallet_no_docker),
     BACKEND_SOURCE_SHA: '', GITHUB_REPOSITORY: 'Zombieliu/mir2', GITHUB_REF: 'refs/heads/codex/windows-player-journey', GITHUB_SHA: SHA };
 }
@@ -79,7 +79,7 @@ test('each explicit Numeron operation selects only validation and the reusable w
 });
 
 test('orphan Numeron inputs fail closed rather than dispatching legacy jobs', () => {
-  for (const field of fields) for (const operation of ['off', '']) {
+  for (const field of [...fields, 'numeron_ingress_guard']) for (const operation of ['off', '']) {
     const values = inputs({ numeron_operation: operation, [field]: 'supplied' });
     assert.equal(admits('validate-numeron-entry', values), true);
     for (const name of Object.keys(legacyJobs)) assert.equal(admits(name, values), false);
@@ -90,6 +90,21 @@ test('orphan Numeron inputs fail closed rather than dispatching legacy jobs', ()
     for (const name of Object.keys(legacyJobs)) assert.equal(admits(name, values), false);
     assert.throws(() => execute(wrapperGuard, environment(values)), /explicitNumeronOperationRequired/);
   }
+});
+
+test('ingress operations only select the guarded DNS job and keep deployment inputs separate', () => {
+  for (const mode of ['inspect', 'proxy', 'restore']) {
+    const values = inputs({ numeron_operation: `numeron-ingress-${mode}`,
+      numeron_ingress_guard: mode === 'inspect' ? '' : `${'c'.repeat(64)}:300` });
+    assert.equal(admits('validate-numeron-entry', values), true);
+    assert.equal(admits('numeron-website', values), false);
+    assert.equal(admits('numeron-ingress', values), true);
+    for (const name of Object.keys(legacyJobs)) assert.equal(admits(name, values), false, name);
+    execute(wrapperGuard, environment(values));
+    for (const field of fields) assert.throws(() => execute(wrapperGuard, environment({ ...values, [field]: 'mixed' })), /InputInvalid/);
+    assert.throws(() => execute(wrapperGuard, environment({ ...values, numeron_ingress_guard: 'invalid' })), /ingressGuardInvalid/);
+  }
+  assert.doesNotMatch(block(gateway, 'numeron-ingress'), /VERCEL|PASSKEY|GH_TOKEN|MIR2_R2/);
 });
 
 test('legacy publishing and wallet switches cannot be mixed into Numeron dispatch', () => {
