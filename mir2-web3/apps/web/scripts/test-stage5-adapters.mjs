@@ -5718,7 +5718,8 @@ assert.equal(followingTradeEditEntry.thenStatement.statements.map(node=>node.get
   "cancel and gold revalidate the current socket and immutable Trade proof before Native budget entry");
 assert.equal(followingTradeEditEntry.elseStatement,undefined);
 const followingBudgetEntry=paritySendStatements[paritySendStatements.indexOf(bagBeltFollowingRankingInspectEntry)+7];
-assert.equal(followingBudgetEntry.getText(parityPageAst),'if (socialBudgetTicket && !socialBudgetRef.current?.enter(socialBudgetTicket, currentSocialReplyOwner(), wireCommand)) return false;');
+assert.equal(followingBudgetEntry.getText(parityPageAst).replace(/\s+/g,""),
+  'if(socialBudgetTicket&&!socialBudgetRef.current?.enter(socialBudgetTicket,currentSocialReplyOwner(),wireCommand)){if(options?.groupProof)groupOperationsRef.current.finishInviteAttempt(options.groupProof);returnfalse;}');
 const followingCancelSpend=paritySendStatements[paritySendStatements.indexOf(bagBeltFollowingRankingInspectEntry)+8];
 assert.equal(followingCancelSpend.getText(parityPageAst),'if (options?.socialTradeProof && wireCommand.type === "tradeCancel") socialTradeCancelSpentRef.current = options.socialTradeProof.incarnation;');
 assert.equal(paritySendStatements.indexOf(bagBeltFollowingRankingInspectEntry)+9,paritySocketIndex,"Native entry and cancel spend immediately precede the exact socket try");

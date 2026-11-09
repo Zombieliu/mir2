@@ -6829,7 +6829,10 @@ export default function HomePage() {
         || !socialTradeProofCurrent(options.socialTradeProof, wireCommand)) return false;
     }
     // No guard, listener or domain callback follows Native entry before send.
-    if (socialBudgetTicket && !socialBudgetRef.current?.enter(socialBudgetTicket, currentSocialReplyOwner(), wireCommand)) return false;
+    if (socialBudgetTicket && !socialBudgetRef.current?.enter(socialBudgetTicket, currentSocialReplyOwner(), wireCommand)) {
+      if (options?.groupProof) groupOperationsRef.current.finishInviteAttempt(options.groupProof);
+      return false;
+    }
     // Spend only at socket entry. A transport throw cannot prove this cancel was unsent.
     if (options?.socialTradeProof && wireCommand.type === "tradeCancel") socialTradeCancelSpentRef.current = options.socialTradeProof.incarnation;
     try { socket.send(serialized); } catch (error) {
@@ -11973,17 +11976,20 @@ export default function HomePage() {
   }
 
   function submitGroupOperation(op: GroupOperation, name: string): boolean {
-    const proof = groupOperationsRef.current.reserve(op, name, currentGroupOperationSource());
+    const operations = groupOperationsRef.current;
+    const proof = operations.reserve(op, name, currentGroupOperationSource());
     if (!proof) return false;
     try {
-      if (send(groupOperationCommand(proof), { groupProof: proof })) return true;
+      return send(groupOperationCommand(proof), { groupProof: proof }) || operations.outcomeUnknown(proof);
     } catch (error) {
-      // A socket exception after entry is not evidence that the invitation was never sent.
-      if (groupOperationsRef.current.outcomeUnknown(proof)) console.error("[mir2] Group send outcome is unknown", error);
+      if (!operations.outcomeUnknown(proof)) return false;
+      console.error("[mir2] Group send outcome is unknown", error);
+      return true;
+    } finally {
+      // Each new invite needs a new gesture; Crystal rate limits at the server.
+      operations.finishInviteAttempt(proof);
+      operations.cancelDefinitelyUnsent(proof);
     }
-    if (groupOperationsRef.current.outcomeUnknown(proof)) return true;
-    groupOperationsRef.current.cancelDefinitelyUnsent(proof);
-    return false;
   }
 
   // Native GroupDialog sends only AddMember. The shared server enables the sender

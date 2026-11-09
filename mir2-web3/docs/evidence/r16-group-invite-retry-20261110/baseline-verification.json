@@ -1,0 +1,161 @@
+{
+  "schema": "mir2.r16.group-manual-retry.baseline-index/1",
+  "commit": "62acffcba483df433c6ac3a28836f8c1106b917e",
+  "runtime": {
+    "gatewaySha256": "517328cd8d2badcf2a7fb9ae1532964435e703a40398838b540551c0a697867c",
+    "runtimeVersion": "bevy-81b7623f6e65d0ea",
+    "runtimeManifestSha256": "105d6db74f108c2441dbb9874b3ae3a16d738491bb56fcc2ef1e1693e471562e",
+    "source": {
+      "apps/game-client/runtime/src/lib.rs": "30c4a6c4c5ba43167e0dd9da142d2e53aa23b4c213c8912e06986d698d9e3905",
+      "apps/game-client/client-bevy/src/social.rs": "cc2a0165b74e71949a64002e7b9acfaa92f21857b8aa5368f4122e3e2aa4c1e3",
+      "apps/web/lib/group-operations.ts": "8990da258e79e83048f210da420438e0c37e0f85c0ce8f594750a6d468aed160",
+      "apps/web/app/page.tsx": "23c30db0f6fe81268c0f6c256dd9f22bbc10791c54f3fb392ea771a6e2698f6a",
+      "apps/web/app/components/original-client-group-window.tsx": "95230d7ee5f10b82b1e829670a0b17fd51cfd349b5244ef2a35db5c4aed91cd7",
+      "apps/web/app/components/original-client-trade-window.tsx": "f6de8fab3eef174d64ab09bbb5a8226536ddc03d37beae6e70ec93c72f55d384"
+    }
+  },
+  "scopes": [
+    {
+      "receiptSha256": "ba4202f7e9d73f8b44eabcaae8b786adc55b4d4f922466eeb63e87082a60a7ca",
+      "scope": "decline",
+      "checks": [
+        {
+          "stage": "decline-named-system-chat-no-party",
+          "packet": {
+            "at": 95837.9354,
+            "connection": 1,
+            "packet": "Chat",
+            "chatType": "System",
+            "message": "Blade has declined your group invite."
+          },
+          "domVisible": true
+        },
+        {
+          "stage": "manual-repeat-ui-and-wire",
+          "rawName": "bLaDe",
+          "clickedAfterMs": 2598,
+          "beforeSent": 1,
+          "afterSent": 1,
+          "editorVisible": true,
+          "addButtonEnabled": true,
+          "inputEnabled": true,
+          "submitEnabled": true,
+          "invitesBefore": 1,
+          "invitesAfter": 1,
+          "retainedDraft": "bLaDe"
+        }
+      ],
+      "sockets": {
+        "owner": {
+          "physical": 1,
+          "startGame": [
+            4
+          ],
+          "normalLogouts": 1
+        },
+        "recipient": {
+          "physical": 1,
+          "startGame": [
+            4
+          ],
+          "normalLogouts": 1
+        }
+      },
+      "screenshots": [
+        {
+          "name": "normal-recipient-decline",
+          "sha256": "28ec72089b00bf0ebd0c113fe46d4b48b48b3a250d8942be820ca677f0e9806b"
+        },
+        {
+          "name": "named-system-decline-and-empty-party",
+          "sha256": "29112c8fabec2a4715c5897175c8eb73e763c75adbedf10769a54d063f76e82d"
+        },
+        {
+          "name": "blocked-manual-retry-draft",
+          "sha256": "46cd0ad8c0f7ee08ffdd5534dd13437d390220a268d4df44328f6be66937aba4"
+        }
+      ],
+      "gracefulGateway": true,
+      "nextExited": true,
+      "networkErrors": [],
+      "pageErrors": []
+    },
+    {
+      "receiptSha256": "e667bbcc8265f216e407eda829a14e10ab2396530d0e35fefb170d821b7928bd",
+      "scope": "optout-cooldown",
+      "checks": [
+        {
+          "stage": "different-spelling-second-send",
+          "deltaMs": 362
+        },
+        {
+          "stage": "one-named-opt-out-and-no-second-chat-or-invite",
+          "packet": {
+            "at": 68785.1829,
+            "connection": 1,
+            "packet": "Chat",
+            "chatType": "System",
+            "message": "Blade is not allowing group."
+          },
+          "domVisible": true
+        },
+        {
+          "stage": "manual-repeat-ui-and-wire",
+          "rawName": "bLADe",
+          "clickedAfterMs": 2609,
+          "beforeSent": 2,
+          "afterSent": 2,
+          "editorVisible": true,
+          "addButtonEnabled": true,
+          "inputEnabled": true,
+          "submitEnabled": true,
+          "invitesBefore": 0,
+          "invitesAfter": 0,
+          "retainedDraft": "bLADe"
+        }
+      ],
+      "sockets": {
+        "owner": {
+          "physical": 1,
+          "startGame": [
+            4
+          ],
+          "normalLogouts": 1
+        },
+        "recipient": {
+          "physical": 1,
+          "startGame": [
+            4
+          ],
+          "normalLogouts": 1
+        }
+      },
+      "screenshots": [
+        {
+          "name": "opt-out-chat-with-silent-cooldown",
+          "sha256": "8f936ffe651b2c9d715efe7139b60e05e3f2261d6bda6ba827a58b4fbd980b1c"
+        },
+        {
+          "name": "blocked-manual-retry-draft",
+          "sha256": "123598c799088c4d45e92963fad5ea2f63d31a95448ac2eca90a70cfc550397e"
+        }
+      ],
+      "gracefulGateway": false,
+      "nextExited": true,
+      "networkErrors": [],
+      "pageErrors": []
+    }
+  ],
+  "cleanup": {
+    "portsChecked": [
+      20261,
+      20262,
+      20263,
+      20264,
+      20265,
+      20266
+    ],
+    "ownedListeners": 0,
+    "scopeNote": "Cooldown gateway received stdin shutdown and reached guild-clock settle. Harness ended only its owned process after the 15-second graceful window. Both players had already logged out normally."
+  }
+}

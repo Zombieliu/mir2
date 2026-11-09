@@ -39,7 +39,8 @@ console.log(JSON.stringify({ oracle: "real-renderer-wasm", backend, version: man
 
 const owner = (fields = {}) => ({ socket: {}, connectionGeneration: 1, sessionGeneration: 2,
   playerObjectId: 1000, sceneRevision: 3, mapFileName: "0", ...fields });
-const add = name => ({ type: "addMember", name });
+const invite = name => ({ type: "addMember", name });
+const remove = name => ({ type: "delMember", name });
 function runtime(module = createSocialBudgetTestRuntime()) {
   const calls = [];
   return { calls, processMir2SocialBudget(input) {
@@ -91,7 +92,7 @@ test("late runtime replays authenticated receives in order; it never buffers a c
   const transport = runtime(), source = owner();
   const host = new SocialOperationBudgetHost(() => current);
   seed(host, source);
-  assert.deepEqual(host.reserve(add("BeforeRuntime"), source, 1000), { ok: false });
+  assert.deepEqual(host.reserve(invite("BeforeRuntime"), source, 1000), { ok: false });
   assert.equal(transport.calls.length, 0);
   current = transport;
   assert.equal(pending(host, source).pendingCount, 0);
@@ -114,7 +115,7 @@ test("late receive count and byte limits fail closed instead of dropping an ACK,
     } else host.receive(source, "GuildStatus", { guildName: "x".repeat(8 * 1024 * 1024) });
     current = transport;
     assert.equal(host.inspect(source), null);
-    assert.deepEqual(host.reserve(add("Blocked"), source, 1000), { ok: false });
+    assert.deepEqual(host.reserve(remove("Blocked"), source, 1000), { ok: false });
     assert.equal(transport.calls.length, 0);
     const replacement = owner({ connectionGeneration: 2 });
     host.receive(replacement, "UserInformation", { name: "Leader", realId: 7, objectId: 1000 });
@@ -129,7 +130,7 @@ test("retiring before runtime arrival discards only the retired buffer and forbi
   const host = new SocialOperationBudgetHost(() => current);
   host.receive(source, "UserInformation", { name: "Retired", realId: 7, objectId: 1000 });
   host.retire(); current = transport;
-  assert.deepEqual(host.reserve(add("Old"), source, 1000), { ok: false });
+  assert.deepEqual(host.reserve(remove("Old"), source, 1000), { ok: false });
   const next = owner({ connectionGeneration: 2 });
   host.receive(next, "UserInformation", { name: "Current", realId: 8, objectId: 1000 });
   assert.equal(pending(host, next).pendingCount, 0);
@@ -138,34 +139,34 @@ test("retiring before runtime arrival discards only the retired buffer and forbi
 
 test("scene changes retain entered Native work, reject stale scene tickets, and allow exact unsent capacity return", () => {
   const { host, source } = setup();
-  entered(host, source, add("Waiting"));
-  const unsent = reserve(host, source, add("NotSent"));
+  entered(host, source, remove("Waiting"));
+  const unsent = reserve(host, source, remove("NotSent"));
   const nextScene = { ...source, sceneRevision: 4, mapFileName: "D001" };
   assert.equal(pending(host, nextScene).pendingCount, 2);
-  assert.equal(host.validate(unsent, nextScene, add("NotSent")), false);
-  assert.equal(host.enter(unsent, nextScene, add("NotSent")), false);
+  assert.equal(host.validate(unsent, nextScene, remove("NotSent")), false);
+  assert.equal(host.enter(unsent, nextScene, remove("NotSent")), false);
   host.cancelUnsent(unsent);
   assert.equal(pending(host, nextScene).pendingCount, 1);
-  host.receive(source, "AddMember", { name: "Waiting" });
+  host.receive(source, "DeleteMember", { name: "Waiting" });
   assert.equal(pending(host, nextScene).pendingCount, 1, "a stale source does not deliver the otherwise matching ACK");
   assert.equal(host.inspect({ ...nextScene, mapFileName: "WrongMapAtSameRevision" }), null);
-  host.receive(nextScene, "AddMember", { name: "Waiting" });
+  host.receive(nextScene, "DeleteMember", { name: "Waiting" });
   assert.equal(pending(host, nextScene).pendingCount, 0);
 });
 
 test("A to B to C to old A cannot launder a retired socket into a fresh Native generation", () => {
   const { host, source, transport } = setup();
-  const oldTicket = entered(host, source, add("OldA"));
+  const oldTicket = entered(host, source, remove("OldA"));
   const b = owner({ connectionGeneration: 2, sessionGeneration: 1, playerObjectId: 2000 });
   assert.equal(pending(host, b).pendingCount, 0);
   const c = owner({ connectionGeneration: 3, sessionGeneration: 4, playerObjectId: 3000 });
-  entered(host, c, add("CurrentC"));
+  entered(host, c, remove("CurrentC"));
   const before = transport.calls.length;
   for (const stale of [source, b, { ...c, socket: {} }, { ...c, sessionGeneration: 3 }, { ...c, playerObjectId: 999 }]) {
-    host.receive(stale, "AddMember", { name: "CurrentC" });
+    host.receive(stale, "DeleteMember", { name: "CurrentC" });
     assert.equal(host.inspect(stale), null);
-    assert.deepEqual(host.reserve(add("Stale"), stale, 1000), { ok: false });
-    assert.equal(host.enter(oldTicket, stale, add("OldA")), false);
+    assert.deepEqual(host.reserve(remove("Stale"), stale, 1000), { ok: false });
+    assert.equal(host.enter(oldTicket, stale, remove("OldA")), false);
   }
   assert.equal(transport.calls.length, before);
   assert.equal(pending(host, c).pendingCount, 1);
@@ -174,7 +175,7 @@ test("A to B to C to old A cannot launder a retired socket into a fresh Native g
   assert.equal(host.inspect(c), null);
   host.retire();
   assert.equal(host.inspect(nextRole), null);
-  assert.deepEqual(host.reserve(add("Retired"), nextRole, 1000), { ok: false });
+  assert.deepEqual(host.reserve(remove("Retired"), nextRole, 1000), { ok: false });
 });
 
 test("invalid physical owners never establish a Native binding or spend a slot", () => {
@@ -183,7 +184,7 @@ test("invalid physical owners never establish a Native binding or spend a slot",
     { ...source, sessionGeneration: 0 }, { ...source, playerObjectId: 0 },
     { ...source, playerObjectId: 0x1_0000_0000 }, { ...source, sceneRevision: -1 },
     { ...source, mapFileName: "" }, { ...source, mapFileName: "bad\0map" }]) {
-    assert.deepEqual(host.reserve(add("Bad"), bad, 1000), { ok: false });
+    assert.deepEqual(host.reserve(remove("Bad"), bad, 1000), { ok: false });
   }
   assert.equal(transport.calls.length, 0);
   assert.equal(pending(host, source).pendingCount, 0);
@@ -193,14 +194,14 @@ test("a renderer replacement cannot replace the module holding a physical sessio
   const first = runtime(nativeA), replacement = runtime(nativeB), source = owner();
   let current = first;
   const host = new SocialOperationBudgetHost(() => current);
-  entered(host, source, add("HeldByFirst"));
+  entered(host, source, remove("HeldByFirst"));
   current = replacement;
   assert.equal(pending(host, source).pendingCount, 1);
-  host.receive(source, "AddMember", { name: "HeldByFirst" });
+  host.receive(source, "DeleteMember", { name: "HeldByFirst" });
   assert.equal(pending(host, source).pendingCount, 0);
   assert.equal(replacement.calls.length, 0);
   current = null;
-  entered(host, source, add("StillFirst"));
+  entered(host, source, remove("StillFirst"));
   assert.equal(pending(host, source).pendingCount, 1);
   current = replacement;
   const next = owner({ connectionGeneration: 2 });
@@ -211,32 +212,50 @@ test("a renderer replacement cannot replace the module holding a physical sessio
 
 test("exact unsent and forged-ticket fences return capacity, while entered socket-unknown work remains pending", () => {
   const { host, source } = setup();
-  const command = add("Unsent"), ticket = reserve(host, source, command);
+  const command = remove("Unsent"), ticket = reserve(host, source, command);
   assert.equal(host.enter({ ...ticket }, source, command), false, "numeric token knowledge is not host custody");
-  assert.equal(host.validate(ticket, source, add("DifferentDTO")), false);
-  assert.equal(host.enter(ticket, source, add("DifferentDTO")), false);
+  assert.equal(host.validate(ticket, source, remove("DifferentDTO")), false);
+  assert.equal(host.enter(ticket, source, remove("DifferentDTO")), false);
   host.cancelUnsent(ticket);
   assert.equal(pending(host, source).pendingCount, 0);
   assert.equal(host.enter(ticket, source, command), false);
-  const unknown = entered(host, source, add("Unknown"));
+  const unknown = entered(host, source, remove("Unknown"));
   assert.throws(() => { throw new Error("simulated socket.send entered and threw"); }, /entered/);
   host.cancelUnsent(unknown);
   assert.equal(pending(host, source).pendingCount, 1);
-  assert.equal(host.enter(unknown, source, add("Unknown")), false);
-  assert.deepEqual(host.reserve(add("Unknown"), source, 1000), { ok: false });
+  assert.equal(host.enter(unknown, source, remove("Unknown")), false);
+  assert.deepEqual(host.reserve(remove("Unknown"), source, 1000), { ok: false });
   host.receive(source, "Chat", { message: "Unknown could not be found" });
   host.receive(source, "SwitchGroup", { allowGroup: false });
   assert.equal(pending(host, source).pendingCount, 1);
-  host.receive(source, "AddMember", { name: "Other" });
+  host.receive(source, "DeleteMember", { name: "Other" });
   assert.equal(pending(host, source).pendingCount, 1);
-  host.receive(source, "AddMember", { name: "Unknown" });
+  host.receive(source, "DeleteMember", { name: "Unknown" });
   assert.equal(pending(host, source).pendingCount, 0);
+});
+
+test("an ordinary AddMember spends one reservation and permits a new explicit invite without any receipt", () => {
+  const { host, source, transport } = setup();
+  const retained = entered(host, source, remove("Blade"));
+  const command = invite("bLaDe"), first = reserve(host, source, command);
+  assert.equal(first.kind, "groupAdd");
+  assert.equal(pending(host, source).pendingCount, 2);
+  assert.equal(host.enter(first, source, command), true);
+  assert.deepEqual(transport.calls.at(-1).response.released, [first.token]);
+  assert.deepEqual(pending(host, source).pending.map(row => row.token), [retained.token]);
+  assert.equal(host.enter(first, source, command), false);
+  host.receive(source, "Chat", { chatType: "System", message: "Blade has declined your group invite." });
+  assert.deepEqual(pending(host, source).pending.map(row => row.token), [retained.token]);
+  const second = entered(host, source, command);
+  assert.ok(second.token > first.token);
+  host.receive(source, "AddMember", { name: "Blade" });
+  assert.deepEqual(pending(host, source).pending.map(row => row.token), [retained.token]);
 });
 
 test("a reply before entry is not completion and invalidates that reservation instead of granting a late send", () => {
   const { host, source } = setup();
-  const command = add("Early"), ticket = reserve(host, source, command);
-  host.receive(source, "AddMember", { name: "Early" });
+  const command = remove("Early"), ticket = reserve(host, source, command);
+  host.receive(source, "DeleteMember", { name: "Early" });
   assert.equal(pending(host, source).pendingCount, 1);
   assert.equal(host.validate(ticket, source, command), false);
   assert.equal(host.enter(ticket, source, command), false);
@@ -246,19 +265,19 @@ test("a reply before entry is not completion and invalidates that reservation in
 
 test("real Native Group, Guild and Trade share eight slots; exact cross-domain ACKs free only matching work", () => {
   const { host, source } = setup(); seed(host, source); seed(host, source, "tradeOpen");
-  for (const name of ["Wait0", "Wait1", "Wait2"]) entered(host, source, add(name));
+  for (const name of ["Wait0", "Wait1", "Wait2"]) entered(host, source, remove(name));
   entered(host, source, { type: "switchGroup", allowGroup: true });
   entered(host, source, { type: "editGuildNotice", notice: ["Bounded notice"] });
   entered(host, source, { type: "guildStorageGoldChange", changeType: 0, amount: 25 });
   entered(host, source, { type: "tradeGold", amount: 25 });
   entered(host, source, { type: "depositTradeItem", from: 42, to: 1 });
   assert.equal(pending(host, source).pendingCount, 8);
-  assert.deepEqual(host.reserve(add("Ninth"), source, 1000), { ok: false });
+  assert.deepEqual(host.reserve(invite("Ninth"), source, 1000), { ok: false });
   host.receive(source, "GuildStorageGoldChange", { changeType: 3, amount: 24 });
   assert.equal(pending(host, source).pendingCount, 8);
   host.receive(source, "GuildStorageGoldChange", { changeType: 3, amount: 25 });
   assert.equal(pending(host, source).pendingCount, 7);
-  const ninth = reserve(host, source, add("Ninth"));
+  const ninth = reserve(host, source, invite("Ninth"));
   assert.equal(pending(host, source).pendingCount, 8); host.cancelUnsent(ninth);
   const offer = fixtures.snapshotFixtures[0];
   host.snapshot(source, offer.snapshot, offer.inventoryJson);
@@ -269,7 +288,7 @@ test("real Native Group, Guild and Trade share eight slots; exact cross-domain A
   assert.equal(pending(host, source).pendingCount, 6);
   host.receive(source, "DepositTradeItem", { from: 42, to: 1, success: false });
   assert.equal(pending(host, source).pendingCount, 5);
-  host.receive(source, "AddMember", { name: "Wait0" });
+  host.receive(source, "DeleteMember", { name: "Wait0" });
   assert.equal(pending(host, source).pendingCount, 4);
   host.receive(source, "GuildNoticeChange", { notice: [], update: -1 });
   assert.equal(pending(host, source).pendingCount, 3);
@@ -277,14 +296,14 @@ test("real Native Group, Guild and Trade share eight slots; exact cross-domain A
   assert.equal(pending(host, source).pendingCount, 2);
 });
 
-test("real GuildNoticeChange and GroupMembersMap arrivals reach Native; map metadata is not a GroupAdd ACK", () => {
+test("real GuildNoticeChange and GroupMembersMap arrivals reach Native; map metadata is not a GroupRemove ACK", () => {
   const { host, source, transport } = setup(); seed(host, source);
   entered(host, source, { type: "editGuildNotice", notice: ["New notice"] });
   host.receive(source, "GuildNoticeChange", { update: -1, notice: [] });
   assert.equal(transport.calls.at(-1).request.packet, "GuildNoticeChange");
   assert.equal(transport.calls.at(-1).response.handled, true);
   assert.equal(pending(host, source).pendingCount, 0);
-  entered(host, source, add("Peer"));
+  entered(host, source, remove("Peer"));
   host.receive(source, "GroupMembersMap", { playerName: "Peer", playerMap: "D001" });
   assert.equal(transport.calls.at(-1).request.packet, "GroupMembersMap");
   assert.equal(transport.calls.at(-1).response.handled, true);
@@ -338,7 +357,7 @@ test("real incoming UI epochs remain opaque and never become Native request data
 
 test("actual transient UI commands, declines and independent domains never consume the long-lived eight slots", () => {
   const { host, source, transport } = setup();
-  for (let index = 0; index < 8; index++) entered(host, source, add("Wait" + index));
+  for (let index = 0; index < 8; index++) entered(host, source, remove("Wait" + index));
   const outside = [{ type: "tradeRequest" }, { type: "tradeReply", acceptInvite: true },
     { type: "tradeReply", acceptInvite: false }, { type: "tradeConfirm", locked: true },
     { type: "tradeConfirm", locked: false }, { type: "groupInvite", acceptInvite: false },
@@ -351,19 +370,19 @@ test("actual transient UI commands, declines and independent domains never consu
   }
   assert.equal(transport.calls.length, before, "outside-budget is not a Native admission or authority decision");
   assert.equal(pending(host, source).pendingCount, 8);
-  assert.deepEqual(host.reserve(add("StillNinth"), source, 1000), { ok: false });
+  assert.deepEqual(host.reserve(invite("StillNinth"), source, 1000), { ok: false });
 });
 
-test("only Native's explicit rename expiry returns that slot; elapsed time does not clear group unknown", () => {
+test("only Native's explicit rename expiry returns that slot; elapsed time does not clear group removal", () => {
   const { host, source } = setup(); seed(host, source);
   entered(host, source, { type: "editGuildMember", changeType: 3, rankIndex: 2, name: "", rankName: "Scouts" });
-  entered(host, source, add("Unknown"));
-  const atDeadline = reserve(host, source, add("AtDeadline"), 6000);
+  entered(host, source, remove("Unknown"));
+  const atDeadline = reserve(host, source, remove("AtDeadline"), 6000);
   assert.equal(pending(host, source).pendingCount, 3); host.cancelUnsent(atDeadline);
-  const later = reserve(host, source, add("AfterDeadline"), 6001);
-  assert.deepEqual(pending(host, source).pending.map(row => row.kind), ["groupAdd", "groupAdd"]);
+  const later = reserve(host, source, remove("AfterDeadline"), 6001);
+  assert.deepEqual(pending(host, source).pending.map(row => row.kind), ["groupRemove", "groupRemove"]);
   host.cancelUnsent(later);
-  assert.deepEqual(host.reserve(add("ClockRegression"), source, 6000), { ok: false });
+  assert.deepEqual(host.reserve(remove("ClockRegression"), source, 6000), { ok: false });
   assert.equal(pending(host, source).pendingCount, 1);
 });
 
@@ -377,14 +396,14 @@ test("bridge failure after real Native entry freezes the host without replaying 
     return output;
   } };
   const host = new SocialOperationBudgetHost(() => transport);
-  const command = add("NativeEntered"), ticket = reserve(host, source, command);
+  const command = remove("NativeEntered"), ticket = reserve(host, source, command);
   assert.equal(host.enter(ticket, source, command), false);
   const lastOwner = trace.at(-1).owner;
   const actual = JSON.parse(nativeA.processMir2SocialBudget(JSON.stringify({ version: 1, operation: "inspect", owner: lastOwner })));
   assert.equal(actual.pendingCount, 1); assert.equal(actual.pending[0].entered, true);
   const before = trace.length;
   host.cancelUnsent(ticket);
-  assert.deepEqual(host.reserve(add("Retry"), source, 1000), { ok: false });
+  assert.deepEqual(host.reserve(remove("Retry"), source, 1000), { ok: false });
   assert.equal(host.inspect(source), null);
   assert.equal(trace.length, before, "the failed binding cannot issue any automatic recovery action");
 });

@@ -71,16 +71,16 @@ fn json_validate_is_a_readonly_preclaim_check_and_invite_epoch_cannot_enter_the_
 #[test]
 fn json_budget_reserve_exact_enter_and_unknown_transport_custody_use_native_completion() {
     let mut host = ready();
-    let command = json!({"type":"addMember","name":"Peer"});
+    let command = json!({"type":"delMember","name":"Peer"});
     let row = call(&mut host, "reserve", json!({"command":command}));
-    assert_eq!(row["kind"], "groupAdd");
+    assert_eq!(row["kind"], "groupRemove");
     assert_eq!(row["pendingCount"], 1);
     assert_eq!(row["pending"][0]["entered"], false);
     assert_eq!(
         call(
             &mut host,
             "enter",
-            json!({"token":row["token"],"command":{"type":"addMember","name":"Other"}})
+            json!({"token":row["token"],"command":{"type":"delMember","name":"Other"}})
         )["ok"],
         false
     );
@@ -104,14 +104,14 @@ fn json_budget_reserve_exact_enter_and_unknown_transport_custody_use_native_comp
         call(
             &mut host,
             "packet",
-            json!({"packet":"AddMember","payload":{"name":"Other"}})
+            json!({"packet":"DeleteMember","payload":{"name":"Other"}})
         )["pendingCount"],
         1
     );
     let receipt = call(
         &mut host,
         "packet",
-        json!({"packet":"AddMember","payload":{"name":"Peer"}}),
+        json!({"packet":"DeleteMember","payload":{"name":"Peer"}}),
     );
     assert_eq!(receipt["pendingCount"], 0);
     assert_eq!(receipt["released"], json!([row["token"]]));
@@ -119,7 +119,7 @@ fn json_budget_reserve_exact_enter_and_unknown_transport_custody_use_native_comp
         call(
             &mut host,
             "packet",
-            json!({"packet":"AddMember","payload":{"name":"Peer"}})
+            json!({"packet":"DeleteMember","payload":{"name":"Peer"}})
         )["released"],
         json!([])
     );

@@ -139,6 +139,11 @@ export class GroupOperations {
     return this.operations.get(proof)?.entered === true;
   }
 
+  /** An invitation send has no required terminal packet for the inviter. */
+  finishInviteAttempt(proof: GroupOperationProof): void {
+    if (proof.op === "addMember" && this.operations.get(proof)?.entered === true) this.operations.delete(proof);
+  }
+
   /** Only actual named packets/full rosters release entered operations, including after a map change. */
   receipt(packetName: unknown, payload: unknown, owner: SocialReplyOwner | null): boolean {
     if (packetName !== "AddMember" && packetName !== "DeleteMember" && packetName !== "GroupMemberInfo") return false;

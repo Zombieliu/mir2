@@ -485,7 +485,8 @@ test('production integration captures raw before coalescing and final event proo
  assert.equal(tradeEditGate.elseStatement,undefined);
  const budgetEnter=statements[authClaimIndex+13],cancelSpent=statements[authClaimIndex+14];
  assert.ok(ts.isIfStatement(budgetEnter));assert.equal(normalized(budgetEnter.expression),budgetEnterCondition);
- assert.equal(normalized(budgetEnter.thenStatement),'return false;');assert.equal(budgetEnter.elseStatement,undefined);
+ assert.equal(normalized(budgetEnter.thenStatement),'{ if (options?.groupProof) groupOperationsRef.current.finishInviteAttempt(options.groupProof); return false; }');
+ assert.equal(budgetEnter.elseStatement,undefined);
  assert.ok(ts.isIfStatement(cancelSpent));assert.equal(normalized(cancelSpent.expression),tradeCancelCondition);
  assert.equal(normalized(cancelSpent.thenStatement),'socialTradeCancelSpentRef.current = options.socialTradeProof.incarnation;');
  assert.equal(cancelSpent.elseStatement,undefined);

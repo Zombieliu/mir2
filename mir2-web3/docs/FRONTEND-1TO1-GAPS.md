@@ -1,8 +1,12 @@
 # Frontend 1:1 Gaps
 
+## R16 组队邀请手动重试（2026-11-10）
+
+Web 邀请占用结束于发送边界，Windows 结束于原生命令队列接收。服务器继续处理权限、拒绝消息、冷却和队伍名单。本机生产 Web 两次双开通过拒绝与静默后同名重邀、接受和正常注销。Windows 原生窗口与正式发行另验。 [普通流程和回归](evidence/r16-group-invite-retry-20261110/README.md)
+
 ## R16 组队邀请名字匹配（2026-11-10）
 
-成功回包和完整名单按共享服务端的 ASCII 大小写规则匹配。生产构建双浏览器两次发送 `bLaDe`，中间用原名移除，双方两次看到 `Blade`。组队拒绝后的手动重试及 Windows 窗口另验。 [普通界面、回执和回归](evidence/r16-group-canonical-name-20261110/README.md)
+成功回包和完整名单按共享服务端的 ASCII 大小写规则匹配。生产构建双浏览器两次发送 `bLaDe`，中间用原名移除，双方两次看到 `Blade`。后续手动重试见上节，Windows 窗口另验。 [普通界面、回执和回归](evidence/r16-group-canonical-name-20261110/README.md)
 
 ## R16 本方确认后的加价（2026-11-10）
 

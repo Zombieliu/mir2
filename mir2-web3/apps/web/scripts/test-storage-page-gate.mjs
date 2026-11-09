@@ -66,6 +66,7 @@ const pureAuth = extractPureDeclarations("../lib/client-login-runtime.ts",["Prea
   "persistentPreauthGate","preauthCommandKind","isSensitiveGatewayCommand","newAccountCommand",
   "sendNewAccountCommand","sendChangePasswordCommand","sendPasswordLoginCommand"]);
 const pureAuthCore = extractPureDeclarations("../lib/client-core-runtime.ts",["authErrors","authValidationError","createAuthUiRuntime","slotUtf8"]);
+const { CrystalChatType } = extractPureDeclarations("../lib/crystal-chat-history.ts", ["CrystalChatType"]);
 
 const adapter = loadPure("storage");
 const item = (id, container, slot) => ({ uniqueId: id, authoritativeUniqueId: id, container, slot,
@@ -106,6 +107,7 @@ const names = ["worldFishingOwner", "cancelWorldFishingGesture", "retireWorldFis
   "socialTradeProofCurrent", "rentExpandedStorage", "currentStorageRentalFacts", "closeStorageRentalUi", "cancelStorageRental",
   "confirmStorageRental", "observeEquipmentSnapshot", "syncEquipmentSnapshot", "suspendEquipmentConnection",
   "stringOrFallback", "numberOrUndefined", "numberOrZero", "mapClassKey", "rankingPageKey",
+  "gatewayChatTone", "gatewayChatChannel", "gatewayCrystalChatType",
   "setShowGuild", "setShowGroup", "setShowBonds", "setShowRanking", "friendCharacterIndex", "removeFriendEntry", "editFriendMemo",
   "changeGuildMemberRank", "readGuildRankEditSource", "scheduleGuildRankControls", "retireGuildRankControls",
   "submitGuildRankEdit", "renameGuildRank", "toggleGuildRankPermission", "requestGuildRankRoster",
@@ -121,7 +123,7 @@ const socialCases = new Map();
 const socialPacketNames = ["GroupInvite", "MarriageRequest", "DivorceRequest", "MentorRequest", "GuildStatus", "GuildStorageList",
   "GuildStorageItemChange", "DepositTradeItem", "RetrieveTradeItem", "LogOutFailed", "FriendUpdate", "GuildInvite", "GuildMemberChange", "Rankings",
   "TradeItem", "TradeGold", "TradeRequest", "TradeAccept", "TradeConfirm", "TradeCancel", "NewItemInfo", "NewRecipeInfo", "Connected", "NewAccount", "Login", "LoginBanned", "ChangePassword",
-  "SwitchGroup", "AddMember", "DeleteMember", "GroupMemberInfo", "DeleteGroup", "ObjectHidden",
+  "Chat", "SwitchGroup", "AddMember", "DeleteMember", "GroupMemberInfo", "DeleteGroup", "ObjectHidden",
   "GuildNoticeChange", "GuildStorageGoldChange"];
 let authControlsInitializer;
 let groupStartResetCondition, groupStartResetStatements, groupStartSessionStatements, groupStartSuccessStatements;
@@ -431,7 +433,7 @@ function harness({ identity = session, sequenceRef = { current: 1 }, pendingRef 
     isSpectatorBrowserMode: () => false,
     isMovementPredictionBlockingCommand: () => false, isMovementCommand: () => false,
     isMovementConsoleCommand: () => false, isCombatResolutionCommand: () => false,
-    recordDebugEvent: () => {}, appendLog: message => logs.push(message),
+    CrystalChatType, recordDebugEvent: () => {}, appendLog: message => logs.push(message),
     t: (key, _args, fallback) => fallback ?? key,
     setNpcPurchaseActionStatus: value => { scope.npcPurchaseActionStatus = value; },
   };
@@ -2553,17 +2555,19 @@ test("Pearl foreign or mixed buy proof cannot enter actual Storage sendRaw on an
   }
 });
 
-test("Group actual Page sends only AddMember, preserves authority until the named server receipt and deduplicates", () => {
+test("Group actual Page sends only AddMember and a new gesture can repeat it without a terminal packet", () => {
   const page = harness(), initial = structuredClone(page.scope.worldRef.current);
   assert.equal(page.groupInviteMember("  Friend  "), true);
   assert.deepEqual(page.sent, [{type: "addMember", name: "Friend"}]);
   assert.deepEqual(page.scope.worldRef.current, initial, "no local roster or SwitchGroup mutation");
-  assert.equal(page.groupInviteMember("Friend"), false);
-  assert.equal(page.attempts, 1);
-  page.receive("AddMember", {name: "SomeoneElse"});
-  assert.equal(page.groupInviteMember("Friend"), false);
-  page.receive("AddMember", {name: "Friend"});
   assert.equal(page.scope.groupOperationsRef.current.pending.length, 0);
+  assert.equal(pageBudget(page).pendingCount, 0);
+  page.receive("Chat", {chatType: "System", message: "Friend has declined your group invite."});
+  assert.equal(page.logs.at(-1), "Friend has declined your group invite.");
+  assert.equal(page.attempts, 1);
+  assert.equal(page.groupInviteMember("Friend"), true);
+  assert.deepEqual(page.sent, [{type: "addMember", name: "Friend"}, {type: "addMember", name: "Friend"}]);
+  assert.deepEqual(page.scope.worldRef.current.stage5Systems.group, initial.stage5Systems.group);
 });
 
 test("Group raw add/remove commands require the current local proof and cannot borrow an unrelated proof", () => {
@@ -2619,24 +2623,27 @@ test("Group listener reentry cannot send the same request twice", () => {
   assert.equal(page.groupInviteMember("Friend"), true);
   assert.equal(nested, false);
   assert.equal(page.attempts, 1);
-  assert.equal(page.scope.groupOperationsRef.current.pending.length, 1);
+  assert.equal(page.scope.groupOperationsRef.current.pending.length, 0);
 });
 
-test("Group different names use the bounded group subqueue without a single global in-flight lock", () => {
+test("Group long-lived removals use the bounded group subqueue and reject an additional invite", () => {
   const page = harness();
-  for (let index = 0; index < 8; index++) assert.equal(page.groupInviteMember("Friend" + index), true);
+  for (let index = 0; index < 8; index++) assert.equal(page.kickGroupMember("Friend" + index), true);
   assert.equal(page.groupInviteMember("Ninth"), false);
   assert.equal(page.attempts, 8);
   assert.equal(page.scope.groupOperationsRef.current.pending.length, 8);
 });
 
-test("Group socket outcome unknown remains pending and never automatically retries", () => {
+test("Group invite socket outcome unknown stays consumed until another explicit gesture", () => {
   const page = harness(); page.throwAtSocket("addMember");
   assert.equal(page.groupInviteMember("Friend"), true, "the attempted operation is already entered");
   assert.equal(page.attempts, 1); assert.equal(page.errors.length, 1);
-  assert.equal(page.scope.groupOperationsRef.current.pending[0].entered, true);
-  assert.equal(page.groupInviteMember("Friend"), false);
-  assert.equal(page.attempts, 1);
+  assert.equal(page.scope.groupOperationsRef.current.pending.length, 0);
+  assert.equal(pageBudget(page).pendingCount, 0);
+  page.restoreSocketSend();
+  assert.equal(page.attempts, 1, "the unknown attempt does not replay");
+  assert.equal(page.groupInviteMember("Friend"), true);
+  assert.deepEqual(page.sent, [{type: "addMember", name: "Friend"}]);
 });
 
 test("Group closed transport does not reserve or leave a false pending request", () => {
@@ -2648,26 +2655,27 @@ test("Group closed transport does not reserve or leave a false pending request",
 });
 
 test("Group only current physical-owner named or full roster receipts release pending across map changes", () => {
-  const page = harness(); assert.equal(page.groupInviteMember("Friend"), true);
+  const page = harness();
+  page.scope.worldRef.current.stage5Systems.group = {members: ["Self", "Friend"]};
+  assert.equal(page.kickGroupMember("Friend"), true);
   const pending = page.scope.groupOperationsRef.current;
-  page.receive("AddMember", {name: "Friend"}, 99);
-  page.receive("AddMember", {name: "Friend"}, undefined, {});
+  page.receive("DeleteMember", {name: "Friend"}, 99);
+  page.receive("DeleteMember", {name: "Friend"}, undefined, {});
   assert.equal(pending.pending.length, 1);
   page.retireSocialRequests(); page.scope.worldRef.current.mapFileName = "D002";
   assert.equal(pending.pending.length, 1, "map/scene retirement preserves Native pending work");
-  page.receive("GroupMemberInfo", {members: [{name: "Self"}], leaderName: "Self"});
-  assert.equal(pending.pending.length, 1, "unchanged roster is not an invite failure receipt");
   page.receive("GroupMemberInfo", {members: [{name: "Self"}, {name: "Friend"}], leaderName: "Self"});
+  assert.equal(pending.pending.length, 1, "unchanged roster does not complete removal");
+  page.receive("GroupMemberInfo", {members: [{name: "Self"}], leaderName: "Self"});
   assert.equal(pending.pending.length, 0);
-  assert.equal(page.groupInviteMember("Friend"), true);
+  assert.equal(page.kickGroupMember("Friend"), true);
 });
 
-test("Group SwitchGroup and DeleteGroup are not fabricated add-member acknowledgements", () => {
+test("Group SwitchGroup and DeleteGroup do not join or automatically send an invite", () => {
   const page = harness(); assert.equal(page.groupInviteMember("Friend"), true);
   page.receive("SwitchGroup", {allowGroup: true});
   page.receive("DeleteGroup", {});
-  assert.equal(page.scope.groupOperationsRef.current.pending.length, 1);
-  assert.equal(page.groupInviteMember("Friend"), false);
+  assert.deepEqual(page.scope.worldRef.current.stage5Systems.group.members, []);
   assert.deepEqual(page.sent, [{type: "addMember", name: "Friend"}]);
 });
 
@@ -2704,7 +2712,7 @@ test("Group hover invitation uses the current visible player instead of selectio
 });
 
 test("Group confirmed session retirement clears pending operations and group-only hidden target history", () => {
-  const page = harness(); assert.equal(page.groupInviteMember("Friend"), true);
+  const page = harness(); assert.equal(page.kickGroupMember("Friend"), true);
   page.groupHiddenTargetIds().add("FriendId");
   page.retireEquipmentSession();
   assert.equal(page.scope.groupOperationsRef.current.pending.length, 0);
@@ -2712,7 +2720,7 @@ test("Group confirmed session retirement clears pending operations and group-onl
 });
 
 test("Group a successful new StartGame retires old pending after physical reconnect while a rejected StartGame does not", () => {
-  const page = harness(); assert.equal(page.groupInviteMember("Friend"), true);
+  const page = harness(); assert.equal(page.kickGroupMember("Friend"), true);
   page.groupHiddenTargetIds().add("FriendId");
   page.applyGroupStartGame({result: 3});
   assert.equal(page.scope.groupOperationsRef.current.pending.length, 1);
@@ -2720,7 +2728,7 @@ test("Group a successful new StartGame retires old pending after physical reconn
   page.applyGroupStartGame({result: 4});
   assert.equal(page.scope.groupOperationsRef.current.pending.length, 0);
   assert.equal(page.scope.groupHiddenTargetsRef.current.ids.size, 0);
-  assert.equal(page.groupInviteMember("Friend"), true, "explicit same-name input is admitted only in the newly confirmed session");
+  assert.equal(page.kickGroupMember("Friend"), true, "old removal custody cannot block a newly confirmed session");
 });
 
 test("Group explicit allow toggle and leave retain their separate real SwitchGroup commands", () => {
@@ -2759,7 +2767,7 @@ function openBudgetTrade(page) {
 }
 function mixedEightPageOperations(page) {
   openBudgetGuild(page); openBudgetTrade(page);
-  for (let index = 0; index < 3; index++) assert.equal(page.groupInviteMember("Mixed" + index), true);
+  for (let index = 0; index < 3; index++) assert.equal(page.kickGroupMember("Mixed" + index), true);
   page.groupToggleAllowInvites(true);
   page.editGuildNotice("Budget notice");
   page.guildDepositGold(25);
@@ -2794,7 +2802,7 @@ test("Page Native budget rejects a mixed ninth operation before action and domai
 
 test("Page synchronous cross-domain reentry sees the outer reservation occupying the eighth Native slot", () => {
   const page = harness(); openBudgetGuild(page);
-  for (let index = 0; index < 7; index++) assert.equal(page.groupInviteMember("Held" + index), true);
+  for (let index = 0; index < 7; index++) assert.equal(page.kickGroupMember("Held" + index), true);
   let observed = false, reentry;
   page.onAction(() => {
     if (observed) return; observed = true;
@@ -2806,7 +2814,9 @@ test("Page synchronous cross-domain reentry sees the outer reservation occupying
   const actions = page.actions;
   assert.equal(page.groupInviteMember("Outer"), true);
   assert.equal(reentry, false); assert.equal(page.actions, actions + 1); assert.equal(page.attempts, 8);
-  assert.equal(pageBudget(page).pending.every(row => row.entered), true);
+  const remaining = pageBudget(page).pending;
+  assert.equal(remaining.length, 7);
+  assert.equal(remaining.every(row => row.kind === "groupRemove" && row.entered), true);
   assert.equal(page.sent.some(command => command.type === "editGuildMember"), false);
 });
 
@@ -2821,7 +2831,7 @@ test("Page action-time real packet publication invalidates an old reservation be
   assert.equal(groups.pending.length, 0); assert.equal(pageBudget(page).pendingCount, 0);
   page.onAction(null);
   assert.equal(page.groupInviteMember("Fresh"), true);
-  assert.equal(claims, 1); assert.equal(page.attempts, 1); assert.equal(pageBudget(page).pendingCount, 1);
+  assert.equal(claims, 1); assert.equal(page.attempts, 1); assert.equal(pageBudget(page).pendingCount, 0);
 });
 
 test("Page final socket refusal returns only unsent custody while a real socket throw preserves entered Native and domain barriers", () => {
@@ -2832,34 +2842,46 @@ test("Page final socket refusal returns only unsent custody while a real socket 
   assert.equal(pageBudget(refused).pendingCount, 0);
   assert.equal(refused.groupInviteMember("Refused"), true); assert.equal(refused.attempts, 1);
 
-  const unknown = harness(); unknown.throwAtSocket("addMember");
-  assert.equal(unknown.groupInviteMember("Unknown"), true);
+  const unknown = harness(); unknown.throwAtSocket("delMember");
+  assert.equal(unknown.kickGroupMember("Unknown"), true);
   assert.equal(unknown.attempts, 1); assert.equal(unknown.sent.length, 0);
   assert.equal(unknown.scope.groupOperationsRef.current.pending[0].entered, true);
   assert.equal(pageBudget(unknown).pending[0].entered, true);
   unknown.restoreSocketSend();
-  assert.equal(unknown.groupInviteMember("Unknown"), false); assert.equal(unknown.attempts, 1);
+  assert.equal(unknown.kickGroupMember("Unknown"), false); assert.equal(unknown.attempts, 1);
   unknown.receive("SwitchGroup", {allowGroup: false});
   assert.equal(pageBudget(unknown).pendingCount, 1);
-  unknown.receive("AddMember", {name: "Unknown"});
+  unknown.receive("DeleteMember", {name: "Unknown"});
   assert.equal(pageBudget(unknown).pendingCount, 0);
   assert.equal(unknown.scope.groupOperationsRef.current.pending.length, 0);
 });
 
+test("Group final Native rejection after the local claim is definitely unsent", () => {
+  const page = harness(), budget = page.scope.socialBudgetRef.current, enter = budget.enter.bind(budget);
+  budget.enter = () => false;
+  assert.equal(page.groupInviteMember("Retry"), false);
+  assert.equal(page.attempts, 0);
+  assert.equal(page.scope.groupOperationsRef.current.pending.length, 0);
+  assert.equal(pageBudget(page).pendingCount, 0);
+  budget.enter = enter;
+  assert.equal(page.groupInviteMember("Retry"), true);
+  assert.deepEqual(page.sent, [{type: "addMember", name: "Retry"}]);
+});
+
 test("Page actual packet ingress rejects foreign socket and connection before Native ACK while matching authority releases once", () => {
-  const page = harness(); assert.equal(page.groupInviteMember("Receipt"), true);
-  page.receive("AddMember", {name: "Receipt"}, session.connectionGeneration + 1);
-  page.receive("AddMember", {name: "Receipt"}, undefined, {});
-  page.captureSocialBudgetGatewayEvent({type: "error", packet: "AddMember", payload: {name: "Receipt"}},
+  const page = harness(); assert.equal(page.kickGroupMember("Receipt"), true);
+  page.receive("DeleteMember", {name: "Receipt"}, session.connectionGeneration + 1);
+  page.receive("DeleteMember", {name: "Receipt"}, undefined, {});
+  page.captureSocialBudgetGatewayEvent({type: "error", packet: "DeleteMember", payload: {name: "Receipt"}},
     session.connectionGeneration, page.socket);
   assert.equal(pageBudget(page).pendingCount, 1);
   assert.equal(page.scope.groupOperationsRef.current.pending.length, 1);
-  page.receive("AddMember", {name: "Other"});
+  page.receive("DeleteMember", {name: "Other"});
   assert.equal(pageBudget(page).pendingCount, 1);
-  page.receive("AddMember", {name: "Receipt"});
+  page.receive("DeleteMember", {name: "Receipt"});
   assert.equal(pageBudget(page).pendingCount, 0);
   assert.equal(page.scope.groupOperationsRef.current.pending.length, 0);
-  page.receive("AddMember", {name: "Receipt"});
+  page.receive("DeleteMember", {name: "Receipt"});
   assert.equal(pageBudget(page).pendingCount, 0, "repeat receipt cannot create or resurrect a pending operation");
 });
 
@@ -2910,7 +2932,7 @@ test("Page own-offer projection uses one complete raw frame and physical Bag2 UI
 });
 
 test("Page scene and closed-window retirement retain entered budget but successful new StartGame uses the real new session", () => {
-  const page = harness(); assert.equal(page.groupInviteMember("OldSession"), true);
+  const page = harness(); assert.equal(page.kickGroupMember("OldSession"), true);
   const oldOwner = page.currentSocialReceiveOwner(), oldSession = page.scope.equipmentSessionGenerationRef.current;
   page.retireSocialRequests(); page.scope.worldRef.current.mapFileName = "D002"; page.setShowGroup(false);
   assert.equal(pageBudget(page).pendingCount, 1); assert.equal(page.scope.groupOperationsRef.current.pending.length, 1);
@@ -2924,13 +2946,13 @@ test("Page scene and closed-window retirement retain entered budget but successf
   assert.equal(page.scope.equipmentSessionGenerationRef.current, before + 1);
   assert.equal(page.scope.equipmentStartGameRef.current.sessionGeneration, before + 1);
   page.receive("UserInformation", {objectId: 3, realId: 7, name: "Self"});
-  assert.equal(page.groupInviteMember("NewSession"), true);
+  assert.equal(page.kickGroupMember("NewSession"), true);
   assert.equal(pageBudget(page).pendingCount, 1, "only the newly authenticated session's operation remains");
 });
 
 test("Page real transient trade paths, incoming declines and independent roster actions do not spend full Native slots", () => {
   const page = harness();
-  for (let index = 0; index < 8; index++) assert.equal(page.groupInviteMember("LongLived" + index), true);
+  for (let index = 0; index < 8; index++) assert.equal(page.kickGroupMember("LongLived" + index), true);
   assert.equal(pageBudget(page).pendingCount, 8);
   assert.equal(page.sendRaw({type: "tradeRequest"}), true);
   openBudgetTrade(page); page.confirmTrade();
@@ -2982,6 +3004,6 @@ test("Page authenticated receive capture queues bootstrap before late WASM and n
   runtime = createSocialBudgetTestRuntime();
   assert.equal(page.groupInviteMember("AfterWasm"), true);
   assert.deepEqual(page.sent, [{type: "addMember", name: "AfterWasm"}]);
-  assert.equal(pageBudget(page).pendingCount, 1);
+  assert.equal(pageBudget(page).pendingCount, 0);
   page.receive("AddMember", {name: "AfterWasm"}); assert.equal(pageBudget(page).pendingCount, 0);
 });

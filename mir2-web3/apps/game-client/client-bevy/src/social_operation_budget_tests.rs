@@ -105,7 +105,7 @@ fn twenty(model: &SocialModel) -> Vec<SocialPendingOperation> {
 }
 
 #[test]
-fn all_twenty_native_variants_reserve_enter_and_retain_unknown_outcomes() {
+fn all_twenty_native_variants_reserve_with_only_group_add_retiring_at_entry() {
     let operations = twenty(&ready().model);
     assert_eq!(operations.len(), 20);
     let mut kinds = BTreeSet::new();
@@ -125,6 +125,11 @@ fn all_twenty_native_variants_reserve_enter_and_retain_unknown_outcomes() {
         assert_eq!(budget.model.pending, vec![operation]);
         assert!(!budget.pending()[0].entered);
         budget.enter(&owner(), proof.token, &command).unwrap();
+        if kind == "groupAdd" {
+            assert!(budget.pending().is_empty());
+            assert_eq!(budget.cancel_unsent(&owner(), proof.token), Err("unknownToken"));
+            continue;
+        }
         assert_eq!(
             budget.enter(&owner(), proof.token, &command),
             Err("staleReservation")
@@ -150,7 +155,7 @@ fn all_twenty_native_variants_reserve_enter_and_retain_unknown_outcomes() {
 fn reserved_and_entered_share_the_native_eight_limit_and_definitely_unsent_refunds_one() {
     let mut budget = ready();
     let commands: Vec<_> = (0..8)
-        .map(|i| json!({"type":"addMember","name":format!("Peer{i}")}))
+        .map(|i| json!({"type":"delMember","name":format!("Peer{i}")}))
         .collect();
     let mut rows = Vec::new();
     for (index, command) in commands.iter().enumerate() {
@@ -177,6 +182,36 @@ fn reserved_and_entered_share_the_native_eight_limit_and_definitely_unsent_refun
     );
     reserve(&mut budget, json!({"type":"tradeCancel"}));
     assert_eq!(budget.pending().len(), 8);
+}
+
+#[test]
+fn group_add_reserves_one_slot_then_retires_only_its_own_dispatch() {
+    let mut budget = ready();
+    let held = enter(&mut budget, json!({"type":"delMember","name":"Peer"}));
+    let command = json!({"type":"addMember","name":"pEeR"});
+    let original_group = budget.model.group.clone();
+    let first = reserve(&mut budget, command.clone());
+    assert_eq!(budget.pending().len(), 2);
+    assert_eq!(
+        budget.reserve(&owner(), command.clone(), None, None),
+        Err("budgetUnavailable")
+    );
+    budget.enter(&owner(), first.token, &command).unwrap();
+    assert_eq!(budget.model.group, original_group);
+    assert_eq!(budget.pending().len(), 1);
+    assert_eq!(budget.pending()[0].token, held.token);
+    assert_eq!(
+        budget.enter(&owner(), first.token, &command),
+        Err("unknownToken")
+    );
+    let second = enter(&mut budget, command);
+    assert!(second.token > first.token);
+    assert_eq!(budget.pending()[0].token, held.token);
+    budget
+        .packet(&owner(), "AddMember", &json!({"name":"Peer"}))
+        .unwrap();
+    assert!(budget.model.group.members.iter().any(|member| member.name == "Peer"));
+    assert_eq!(budget.pending()[0].token, held.token);
 }
 
 #[test]
@@ -268,7 +303,7 @@ fn exact_dto_owner_map_and_scene_are_rechecked_at_entry_and_old_tokens_do_not_re
 #[test]
 fn actual_session_retirement_clears_all_but_scene_changes_keep_entered_native_work() {
     let mut budget = ready();
-    enter(&mut budget, json!({"type":"addMember","name":"New"}));
+    enter(&mut budget, json!({"type":"delMember","name":"New"}));
     reserve(&mut budget, json!({"type":"tradeCancel"}));
     let mut scene = owner();
     scene.scene_revision += 1;
@@ -277,7 +312,7 @@ fn actual_session_retirement_clears_all_but_scene_changes_keep_entered_native_wo
     assert_eq!(budget.pending().len(), 2);
     assert!(budget.model.last_event.is_none());
     budget
-        .packet(&scene, "AddMember", &json!({"name":"New"}))
+        .packet(&scene, "DeleteMember", &json!({"name":"New"}))
         .unwrap();
     assert_eq!(budget.pending().len(), 1);
     budget.retire(&scene).unwrap();
@@ -288,7 +323,7 @@ fn actual_session_retirement_clears_all_but_scene_changes_keep_entered_native_wo
 #[test]
 fn entered_trade_terminal_and_guild_retirement_follow_native_scope_without_clearing_other_work() {
     let mut budget = ready();
-    enter(&mut budget, json!({"type":"addMember","name":"New"}));
+    enter(&mut budget, json!({"type":"delMember","name":"New"}));
     let trade = enter(
         &mut budget,
         json!({"type":"depositTradeItem","from":42,"to":3}),
@@ -309,7 +344,7 @@ fn entered_trade_terminal_and_guild_retirement_follow_native_scope_without_clear
     typed_packet(&mut budget, wire::status("", "", 0));
     assert_eq!(budget.pending().len(), 1);
     assert!(!budget.pending().iter().any(|row| row.token == guild.token));
-    assert_eq!(budget.pending()[0].kind, "groupAdd");
+    assert_eq!(budget.pending()[0].kind, "groupRemove");
 }
 
 #[test]
@@ -481,7 +516,7 @@ fn validate_is_readonly_and_cannot_enter_or_revive_a_stale_reservation() {
     let next = enter(&mut budget, command.clone());
     assert_eq!(
         budget.validate(&owner(), next.token, &command),
-        Err("staleReservation")
+        Err("unknownToken")
     );
 }
 

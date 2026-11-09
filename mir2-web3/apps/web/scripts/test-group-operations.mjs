@@ -218,6 +218,23 @@ test("AddMember/DeleteMember match only the entered operation and target, not an
   assert.ok(operations.reserve("addMember", "Jane", current), "matching ACK permits a fresh ordinary operation");
 });
 
+test("a completed invite send permits a new gesture without releasing unrelated custody", () => {
+  const operations = new GroupOperations(), current = source();
+  const invite = entered(operations, "addMember", "bLaDe", current);
+  const remove = entered(operations, "delMember", "Blade", current);
+  const unentered = operations.reserve("addMember", "Other", current);
+  assert.equal(operations.reserve("addMember", "bLaDe", current), null);
+  operations.finishInviteAttempt(remove);
+  operations.finishInviteAttempt(unentered);
+  operations.finishInviteAttempt(invite);
+  assert.deepEqual(operations.pending.map(row => row.proof), [remove, unentered]);
+  assert.equal(operations.claim(invite, current, groupOperationCommand(invite)), false);
+  const fresh = entered(operations, "addMember", "bLaDe", current);
+  assert.notEqual(fresh, invite);
+  operations.finishInviteAttempt(invite);
+  assert.equal(operations.outcomeUnknown(fresh), true);
+});
+
 test("a receipt cannot acknowledge operations that enter during receipt decoding", () => {
   const operations = new GroupOperations(), current = source();
   let fresh;

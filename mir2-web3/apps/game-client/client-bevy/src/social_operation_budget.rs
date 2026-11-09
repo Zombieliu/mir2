@@ -532,11 +532,15 @@ impl SocialOperationBudget {
         wire: &Value,
     ) -> Result<(), &'static str> {
         self.validate(owner, token, wire)?;
-        self.rows
-            .iter_mut()
-            .find(|row| row.token == token)
-            .unwrap()
-            .entered = true;
+        let index = self.rows.iter().position(|row| row.token == token).unwrap();
+        if matches!(self.rows[index].operation, SocialPendingOperation::GroupAdd { .. }) {
+            // Crystal may silently drop an invite during its cooldown. The
+            // token authorizes one send; group membership still comes from packets.
+            self.rows.remove(index);
+            self.rebuild_pending();
+        } else {
+            self.rows[index].entered = true;
+        }
         Ok(())
     }
     pub fn cancel_unsent(

@@ -4492,6 +4492,27 @@ pub fn forward_quest_ui_intents(
             if let Some(key) = storage_pending_key.as_ref() {
                 commands.bind_transport_operation(&transported_command, key.clone());
             }
+            // Crystal can reject an invite without an inviter receipt. This
+            // reservation only protects local dispatch.
+            if let Some((false, name)) = group_request.as_ref() {
+                if let Some(social) = social.as_deref_mut() {
+                    social.pending.retain(|operation| {
+                        !matches!(
+                            operation,
+                            SocialPendingOperation::GroupAdd { name: pending } if pending == name
+                        )
+                    });
+                }
+                if let Some(ui) = player_ui_state.as_deref_mut() {
+                    let submitted = &mut ui.group_dialog.submitted;
+                    if submitted
+                        .as_ref()
+                        .is_some_and(|(remove, text)| !*remove && text == name)
+                    {
+                        *submitted = None;
+                    }
+                }
+            }
         }
         if let (Some(ui), Some(packet)) = (player_ui_state.as_deref_mut(), refine_request.as_ref())
         {
@@ -5631,6 +5652,103 @@ mod guild_creation_tests;
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn group_add_local_reservation_ends_at_transport_admission_or_proven_unsent_failure() {
+        use bevy::prelude::{App, Mut, Update, World};
+
+        for can_send in [true, false] {
+            let (sender, receiver) = mpsc::channel();
+            let receiver = can_send.then_some(receiver);
+            let mut social = SocialModel::default();
+            let untouched = vec![
+                SocialPendingOperation::GroupAdd {
+                    name: "peer".into(),
+                },
+                SocialPendingOperation::GroupRemove {
+                    name: "Peer".into(),
+                },
+                SocialPendingOperation::GroupInviteAccept {
+                    inviter: "Peer".into(),
+                    invite_epoch: 7,
+                },
+            ];
+            for operation in &untouched {
+                assert!(social.begin_pending(operation.clone()));
+            }
+            let mut queue = NativePlayerUiIntentQueue::default();
+            let group = social.group.clone();
+            let mut ui = NativePlayerUiState::default();
+            ui.group_dialog.show_input(false, &social.group, "Owner");
+            ui.group_dialog.editor.paste("Peer");
+            ui.group_dialog.submit(&mut queue, &mut social);
+            assert_eq!(ui.group_dialog.submitted, Some((false, "Peer".into())));
+            let mut app = App::new();
+            app.insert_resource(NativeShellModel {
+                screen: NativeShellScreen::InGame,
+                ..Default::default()
+            })
+            .insert_resource(queue)
+            .insert_resource(ui)
+            .insert_resource(social)
+            .init_resource::<QuestUiIntentQueue>()
+            .insert_resource(GatewayCommands::new(sender))
+            .add_systems(Update, forward_quest_ui_intents);
+
+            app.update();
+            if let Some(receiver) = &receiver {
+                assert!(matches!(
+                    receiver.try_recv().unwrap(),
+                    GatewayCommand::Wire(NativeOutboundCommand::AddMember { name }) if name == "Peer"
+                ));
+            }
+            let social = app.world().resource::<SocialModel>();
+            assert_eq!(social.pending, untouched);
+            assert_eq!(social.group, group);
+            assert!(social.last_event.is_none());
+            let ui = app.world().resource::<NativePlayerUiState>();
+            if let Some(receiver) = receiver {
+                assert!(!ui.group_dialog.modal());
+                app.update();
+                assert!(receiver.try_recv().is_err());
+
+                // Crystal may never answer the inviter. A second deliberate
+                // same-name submission is still admitted by the Native UI.
+                let invite_hovered = |world: &mut World| {
+                    world.resource_scope(|world, mut ui: Mut<NativePlayerUiState>| {
+                        world.resource_scope(|world, mut queue: Mut<NativePlayerUiIntentQueue>| {
+                            assert!(ui.group_dialog.invite_named(
+                                "Peer".into(),
+                                "Owner",
+                                &mut world.resource_mut::<SocialModel>(),
+                                &mut queue,
+                            ));
+                        });
+                    });
+                };
+                invite_hovered(app.world_mut());
+                app.update();
+                assert!(matches!(
+                    receiver.try_recv().unwrap(),
+                    GatewayCommand::Wire(NativeOutboundCommand::AddMember { name }) if name == "Peer"
+                ));
+                assert!(receiver.try_recv().is_err());
+
+                // A later unsent hover invite has no text draft to restore.
+                drop(receiver);
+                invite_hovered(app.world_mut());
+                app.update();
+                let ui = app.world().resource::<NativePlayerUiState>();
+                assert!(!ui.group_dialog.modal());
+                assert!(ui.group_dialog.submitted.is_none());
+                assert_eq!(app.world().resource::<SocialModel>().pending, untouched);
+            } else {
+                assert!(ui.group_dialog.submitted.is_none());
+                assert_eq!(ui.group_dialog.editor.editor.as_ref().unwrap().text(), "Peer");
+            }
+        }
+    }
+
     #[test]
     fn asset_wait_discards_unsent_quest_and_releases_key_without_erasing_transport_retry() {
         let intent = QuestUiIntent::AcceptQuest {
