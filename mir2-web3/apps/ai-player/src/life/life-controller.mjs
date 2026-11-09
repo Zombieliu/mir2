@@ -186,6 +186,9 @@ export class LifeController {
     this.#flushFacts();
     if (task.pendingFacts.length) return wait("life-memory-write-unavailable");
     if (terminal(task.status)) return wait("life-session-finished");
+    // A reopened journal stays unbound until an explicit resume. That alone
+    // is not a change of character, world or policy and must not hide its reason.
+    if (task.status === "paused" && !this.#world) return wait("life-awaiting-resume");
     if (!this.#currentWorld(state) || !this.#world || signature(state) !== this.#world || policy.policyVersion !== task.policyVersion) {
       this.#planToken++; this.#set({ status: "paused", step: "awaiting-resume", reason: "角色、世界或培养版本已改变；生活已暂停。" }); return wait("life-world-or-policy-changed");
     }

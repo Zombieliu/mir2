@@ -1,6 +1,6 @@
 # Agent Current Context
 
-Short routing summary, updated 2026-11-09 (Asia/Shanghai).
+Short routing summary, updated 2026-11-10 (Asia/Shanghai).
 This indexes recorded decisions and open work; it does not revalidate today's
 working tree, services, release packages, source snapshots or parity percentages.
 
@@ -16,13 +16,13 @@ working tree, services, release packages, source snapshots or parity percentages
 
 ## Last recorded decisions and open work
 
-2026-11-09 持续 Goal active。按 Windows R16 共用基础推进 Web 1:1，优先代码、普通协议和无界面浏览器。共用 Gateway 修复本地共享地面拾取的旧编号冲突，普通 File 入包和双方重登通过。修复版 Web 实战证实 v1 在鹿死亡前拾取，固定教学后同一阿洛重启读回 v2。第二场未获玩家命中，继续 v2 战后拾取、跨端同档、语言、冷双开和暂存解锁。 [执行范围](WEB-R16-PARITY-GOAL.zh-CN.md) · [拾取和行为实测](evidence/r16-alo-loot-order-20261109/README.md) · [阿洛体验实测](evidence/r16-alo-trial-web-20261109/README.md)
+2026-11-10 用户再次启动持续 Goal。按 Windows R16 共用基础推进 Web 1:1，优先代码、普通协议和无界面浏览器。已补帮助窗十语、阿洛第六页状态资源与原授权恢复。实际 File 浏览器复测重启保留原期限与限额，同一阿洛 v2 读回后在蜡烛已落地时支援，鹿死亡后才入包。继续跨端同档、冷双开和暂存解锁。[执行范围](WEB-R16-PARITY-GOAL.zh-CN.md) · [帮助](evidence/r16-help-localization-20261110/README.md) · [自主生活](evidence/r16-alo-life-web-20261110/README.md) · [战后拾取](evidence/r16-alo-loot-order-20261109/README.md)
 
-发布阶段已完成：`https://numeron.obelisk.build/game`为Web f2de/Linux d53、五职业/V2；42738素材、旧129账号/43角色/43档保全、公开三职业首任务/重登/中文Q进城分别有证。旧Mir2项目/正式服、钱包及Windows EXE保持；当前是TEST，阿洛云运行器、手机签名及全局Accepted未由发布完成。[发布结果与原失败](NUMERON-WEB-RELEASE-20261108.zh-CN.md)。
+公网为 Web f2de/Linux TEST d53、五职业/V2。Cloudflare 与 TEST 钱包交换路由已修复。正常公网 DNS/HTTPS 的 Chrome 及官方 Dubhe Wallet 移动尺寸 PWA 实际签名、出码至进比奇及退出通过；本机代理路径仍卡资源，实体手机相机未验。公开服阿洛和全局 Accepted 仍开放。[发布与扫码复验](NUMERON-WEB-RELEASE-20261108.zh-CN.md)
 
 Checkpoints through85eecf4be were pushed/verified. Web guild ranks passed both render backends; first owner unexpected-login cold entry remains unexplained. Native now consumes actual guild deltas and typed UserInformation realId, matches option-specific cursor evidence, and handles definitely-unsent read/queue eviction.198 unique checks plus canonical locked/offline release build pass;2 real-asset GPU/GDI checks and native window/cross-client remain unrun. Candidatea63bd2a3 is a single EXE requiring existing R16 resources, not installed. Keep [scope and failures](WEB-R16-PARITY-GOAL.zh-CN.md#native-公会增量与请求生命周期2026-11-08) separate from global parity.
 
-The Windows R16 to Web 1:1 scope remains in the [feature and evidence ledger](WEB-R16-PARITY-GOAL.zh-CN.md); the user cleared the persistent Goal before requesting this deployment. Prior group/recovery evidence and source checkpoint1485 files at cc0cbf1a5 remain. Preserve that history, keep verified slices committed, and keep failures, deployment gates and final human Accepted separate. Prefer code/protocol/headless work without desktop input.
+The [feature and evidence ledger](WEB-R16-PARITY-GOAL.zh-CN.md) tracks the active Windows R16 to Web Goal. Prior group/recovery evidence and source checkpoint1485 files at cc0cbf1a5 remain. Preserve that history, keep verified slices committed, and keep failures, deployment gates and final human Accepted separate. Prefer code/protocol/headless work without desktop input.
 
 | Topic | Recorded state and next scope | Detailed reference |
 | --- | --- | --- |

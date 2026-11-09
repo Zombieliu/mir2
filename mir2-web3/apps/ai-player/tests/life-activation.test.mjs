@@ -103,9 +103,12 @@ test("cancelling a pending life fences every later activation and model attempt"
 test("restart pauses a pending real life and an old activation cannot revive it", async t => {
   const f = activationFixture(t); f.controller.authorize(grant(), { awaitActivation: true }); await settle();
   await f.restart(); assert.equal(f.controller.view().status, "paused");
+  const restoredReason = f.controller.view().reason;
+  assert.match(restoredReason, /^重启后/);
   f.controller.confirmActivation(grant().lifePermitId); await settle();
   assert.equal(f.controller.view().status, "paused"); assert.equal(f.controller.view().modelDecisionsUsed, 0);
-  assert.equal(f.decide().kind, "wait"); await f.controller.tick();
+  assert.equal(f.decide().reason, "life-awaiting-resume"); await f.controller.tick();
+  assert.equal(f.controller.view().reason, restoredReason);
   assert.equal(f.plans.length, 0); assert.equal(f.client.requests.length, 0);
 });
 

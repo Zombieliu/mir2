@@ -4,7 +4,7 @@ Updated 2026-11-09 (Asia/Shanghai). Read [coordination](AGENT-ORCHESTRATION.md) 
 
 ## Web 对齐 Windows R16
 
-2026-11-09用户重新明确持续Goal：以Windows R16共同基线继续Web完整1:1对齐，达到适用门槛的100% Candidate再请最终真人验收。`numeron.obelisk.build/game`发布阶段已完成；不把发布、旧本机30级旅程或部分协议通过当成全局完成。[范围、证据与当前顺序](WEB-R16-PARITY-GOAL.zh-CN.md)
+2026-11-10 用户在扫码修复后再次启动持续 Goal：以 Windows R16 共同基线继续 Web 1:1 对齐，达到适用门槛的 100% Candidate 再请最终真人验收。`numeron.obelisk.build/game` 的公开扫码已验到进城与退出，范围另记。[范围、证据与当前顺序](WEB-R16-PARITY-GOAL.zh-CN.md)
 
 最新优先级：先做无需桌面控制的代码对照、共享逻辑、普通协议、无界面浏览器和构建；Windows 窗口实机单列暂缓。
 
@@ -13,6 +13,7 @@ Updated 2026-11-09 (Asia/Shanghai). Read [coordination](AGENT-ORCHESTRATION.md) 
 - [x] v16 本机包运行于 19041 / Gateway 19040；29,681 发行 pins、固定 v13 有限素材、原 Core / Gateway / Actor / 钱包独立核验；原工作树和旧发行目录保留。
 - [x] 修复掉血导致经济见证失效及 React 包装变化取消报价续程；普通买衣服唯一实扣120、150→30，穿戴和重登保留；Digit1唯一用药1→0、HP28→38→48→58。
 - [x] 共享展示语言复用 Native 十语词库与六字体；十语 Q/F11 的20图及三语已有 Fencing 的6图分别记录。伙伴入口在角色窗口内隐藏、组件保持挂载，关闭后恢复。
+- [x] Web 游戏帮助复用 R16 十语标题与快捷键、九语 42 页正文，英语保留原版位图。简中、阿语、英语普通浏览器进城和退出，滚动位置复测通过。[证据](evidence/r16-help-localization-20261110/README.md)
 - [x] 原12存档×18字段的216次比较0差异/缺失；原阿洛身份、习惯v2、硬权限、modelCalls2→2保留；episodes/growth与runtimeSessions各+7另记。
 - [x] 同一角色第4项两只 Oma、职业练习1/1、唯一 Diary 交付150gold/1200EXP及重登无重奖完成；r7实际交付与r8保存分别取证，r7辅助packet断言false保留。r8两次正常登录 q1–4 completed、8级378/1700、180金币、药0及自有布衣木剑/Fencing保留，正常注销。
 - [x] v19 本机运行，32,879 发行 pins 独立通过；固定 24,262 项有限素材补齐城市 NPC、SharpSword、D001 原图和有效怪物、北路大蘑菇及过渡地面。旧包、私密配置和 23,876,824,215 B 运行记录逐文件保全。
@@ -46,9 +47,10 @@ Updated 2026-11-09 (Asia/Shanghai). Read [coordination](AGENT-ORCHESTRATION.md) 
 - [x] 双向物品与金币交割已在两普通 WebSocket 和两个独立 WebGPU 环境实跑。第一人确认保留报价和锁定，双方分别一次扣款、物品与金币入账及终结，正常同角读回和最终 File 一致。R16 暂存后解锁关闭并退款另验。 [双向交割、界面与读档实测](evidence/r16-bidirectional-trade-20261109/README.md)
 - [x] Web 补齐 Windows R16 阿洛体验自述与用量费用页。普通浏览器固定教学 v1→v2，真实记录选择及理解，下载的档案 SHA-256/HMAC 和新运行器同 SQLite 读回通过。 [界面和收据](evidence/r16-alo-trial-web-20261109/README.md)
 - [x] Web 进行中的体验来源与提醒次数按账本读回，关页重开复测通过。签名档案导入新 SQLite 后保留身份和成长，普通 Web 入队、跟随 7 格及两人各命中 6 次击杀天然鹿通过。 [实测记录](evidence/r16-alo-trial-web-20261109/README.md#新实例导入与普通协作)
+- [x] Web 阿洛自主生活补齐 R16 状态与资源，隔离浏览器实测授权、运行器重启、显式恢复原期限和累计额度及停止。 [实测记录](evidence/r16-alo-life-web-20261110/README.md)
 - [x] 修复本地两角色持有相同旧编号时无法领取同一物品模板的掉落。普通 File 联机验证原编号 3 保留、收到新编号 4、反向交接与重登一致。正式编号校验继续通过。 [地面拾取实测](evidence/r16-alo-loot-order-20261109/README.md)
-- [x] 修复版 Web 实战证实 v1 在鹿活着时捡到 1 支蜡烛；固定教学写入 v2，同一阿洛重启读回。第二场缺玩家命中，v2 战后顺序另验。 [浏览器部分通过](evidence/r16-alo-loot-order-20261109/README.md#web-实战的已证范围)
-- [ ] 继续阿洛教学前后的战斗与掉落对照、语言与跨端同档，追踪双开冷进入回登录、暂存后恢复可编辑、真实名字级失败 ACK、Native 招募及建职阶。Web 仓库重复刷新入口和取回待回包反馈、Windows 窗口与真实 PostgreSQL 继续分项。
+- [x] Web 固定教学后重启同一阿洛，普通实战证实 v1 在鹿活着时领取蜡烛，v2 有掉落时先支援，九次命中、鹿死亡后领取且实际入包。保留先前未命中选定鹿的探针失败。[两场对照](evidence/r16-alo-loot-order-20261109/README.md)
+- [ ] 继续阿洛语言与跨端同档，追踪双开冷进入回登录、暂存后恢复可编辑、真实名字级失败 ACK、Native 招募及建职阶。Web 仓库重复刷新入口和取回待回包反馈、Windows 窗口与真实 PostgreSQL 继续分项。
 - [x] 交易自身物品待回执的取消及同owner/partner重复接受已完成限定代码修复；原Page105/社交31/适配器507组/TS及两场隔离浏览器证据保留。共用八项见后续独立记录，完整Trade与公开发行仍未完成。[原本轮范围](evidence/r16-web-trade-20261109/README.md)
 - [x] 公会职级改名／单项权限／草稿／层级／广播／重登已在 WebGL2-shared 和默认 WebGPU 的普通界面通过；新鲜限定39／TS通过，修正选中态边框冲突。[当前范围](WEB-R16-PARITY-GOAL.zh-CN.md#公会职级普通流程2026-11-08)
 - [x] Native 公会增量、真实身份接法、权限实际位回执及读请求生命周期完成限定代码验证；普通队列淘汰／真实bounded发送满载回归通过，198项独立检查及原锁release构建通过，未运行窗口。[范围](WEB-R16-PARITY-GOAL.zh-CN.md#native-公会增量与请求生命周期2026-11-08)
