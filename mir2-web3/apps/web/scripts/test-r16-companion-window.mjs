@@ -185,6 +185,40 @@ test("life duration selection and confirmation send the real fixed-budget permis
   const count = h.sent.length; h.click("prepare-life"); assert.equal(h.sent.length, count); h.click("confirm");
   assert.equal(h.sent.at(-1).operation, "authorizeLife"); assert.deepEqual(h.sent.at(-1).payload, { expectedPolicyVersion: 1, budgetGold: 50, durationSeconds: 1800 });
 });
+test("paused life can be explicitly resumed from its Windows tab position without making a new grant", () => {
+  const h = host(); const task = { status: "paused", phase: "combat", activationPending: true, decisionMode: "model",
+    lifePermitId: "original-life", expiresAtMs: Date.now() + 150_000, budgetGold: 50, maxPurchasedQuantity: 1, chargedGold: 40, purchasedQuantity: 1 };
+  h.ready({ lifeTask: task }); h.render(); h.click("tab-5");
+  assert(strings(h.tree).includes("自主生活 · 暂停"));
+  assert(strings(h.tree).includes("模型：暂停"));
+  assert(strings(h.tree).includes("约余 3 分钟（本机估算）"));
+  assert.equal(h.button("prepare-life").props.disabled, true);
+  assert.equal(h.button("prepare-resume-life").props.disabled, false);
+  const count = h.sent.length; h.click("prepare-resume-life"); assert.equal(h.sent.length, count);
+  assert(strings(h.tree).includes("沿用原到期时间"));
+  h.click("cancel-confirm"); assert.equal(h.sent.length, count);
+  h.click("prepare-resume-life"); h.click("confirm");
+  assert.equal(h.sent.at(-1).operation, "resumeLife");
+  assert.deepEqual(h.sent.at(-1).payload, { expectedPolicyVersion: 1, lifePermitId: "original-life" });
+  h.reply(h.value(1, { lifeTask: { ...task, expiresAtMs: Date.now() - 1000 } })); h.render();
+  assert.equal(h.button("prepare-resume-life").props.disabled, true);
+  assert(strings(h.tree).includes("授权已到期"));
+});
+test("life page keeps unknown receipts and stale inventory separate from observed zero", () => {
+  const h = host(); h.ready({ lifeTask: { status: "completed", phase: "finished", reservedGold: 50,
+    killsObserved: 0, decisionMode: "model", reason: `正在核对\n${"长".repeat(100)}`, reply: "模型声称已经买到十瓶" },
+    resources: { known: true, observedAtMs: Date.now(), inventoryCurrent: false, hp: 7, maxHp: 16, hpPotionCount: 9, freeBagSlots: 8, gold: 0 } });
+  h.render(); h.click("tab-5");
+  const content = strings(h.tree);
+  assert(content.includes("自主生活 · 已停止，购药结果仍待核对"));
+  assert(content.includes("阿洛自己的金币：0 · 血量 7/16"));
+  assert(content.includes("血药 待核对（可用 待核对）· 背包空位 待核对"));
+  assert(content.includes("购药结果待核对；未知金额与数量保持待确认。"));
+  assert(content.includes("已观察击杀 0 · 实扣 待核对 游戏金币"));
+  assert(content.includes("模型：已有模型计划\n正在核对"));
+  assert(!content.includes("已经买到十瓶") && !content.includes("长".repeat(46)));
+  assert.equal(h.button("prepare-life").props.disabled, true);
+});
 function mountedReady(h, runtime = {}) {
   h.ready(runtime); h.render(); h.effects(); h.render();
   assert.equal(h.client.snapshot().pendingOperation, "view");

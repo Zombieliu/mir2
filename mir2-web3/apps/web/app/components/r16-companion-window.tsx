@@ -38,8 +38,8 @@ const styles = `
 .r16-companion .download { position:absolute; left:310px; top:602px; width:164px; height:29px; display:flex; align-items:center; justify-content:center; border:1px solid rgb(209,176,112); color:rgb(235,222,194); background:rgb(41,28,15); text-decoration:none; font-size:13px; }
 `;
 const at = (left: number, top: number, width: number, height?: number): CSSProperties => ({ left, top, width, ...(height === undefined ? {} : { height }) });
-function Copy({ x, y, w = 690, h = 28, size = 14, tone = "", children }: { x: number; y: number; w?: number; h?: number; size?: number; tone?: string; children: ReactNode }) {
-  return <p className={`copy ${tone}`} style={{ ...at(x, y, w, h), fontSize: size, lineHeight: `${Math.max(size + 5, 20)}px` }}>{children}</p>;
+function Copy({ x, y, w = 690, h = 28, size = 14, lineHeight = Math.max(size + 5, 20), tone = "", children }: { x: number; y: number; w?: number; h?: number; size?: number; lineHeight?: number; tone?: string; children: ReactNode }) {
+  return <p className={`copy ${tone}`} style={{ ...at(x, y, w, h), fontSize: size, lineHeight: `${lineHeight}px` }}>{children}</p>;
 }
 function Button({ id, label, x, y, w, disabled = false, selected, onClick }: { id: string; label: string; x: number; y: number; w: number; disabled?: boolean; selected?: boolean; onClick(): void }) {
   return <button type="button" data-r16-companion-action={id} style={at(x, y, w)} disabled={disabled} role={id.startsWith("tab-") ? "tab" : undefined}
@@ -57,14 +57,85 @@ const confirmText = (a: R16CompanionAction): string => ({
   deleteFeedback: "删除这条教学及文字，并重新计算习惯。此操作不能撤销。",
   deleteEpisode: "删除这条经历及文字。由它产生的教学也将失效。此操作不能撤销。",
   authorizeSupply: "授权本次独立补给：去比奇杂货商鲁本处购买 1 瓶小型生命药水，最多花费 50 游戏金币，权限 5 分钟有效，买完回到授权点旁。仅本次购买；禁止拾取、出售、交易和换图。购买已提交后，撤销不会虚构退款。",
-  authorizeLife: `授权本次 ${a.type === "authorizeLife" ? a.durationSeconds / 60 : ""} 分钟自主生活。单会话累计最多 50 游戏金币 / 1 瓶血药；仅在现有区域与游戏规则内行动。授权不等于已消费或已完成。`,
-  resumeLife: "确认恢复原生活授权；沿用原期限与剩余额度，不生成新的采购额度。已提交或未知的购买仍只能核对原订单。",
+  authorizeLife: `授权阿洛独立生活 ${a.type === "authorizeLife" ? a.durationSeconds / 60 : ""} 分钟：可在比奇地图 0 的 x270–310、y595–645 内探索、战斗、自保、回城（288,616）、补给与休息，独立于主人的视野。本次会话累计最多花费 50 游戏金币，只能向鲁本购买 1 瓶小型生命药水；阿洛自己的金币另计。随时停止或召回；已提交或未知购买仍须核对。`,
+  resumeLife: "恢复这份原生活授权：沿用原到期时间、累计 50 游戏金币与最多 1 瓶的额度。不会延长时间、补回已花或已预留的额度，也不会重买未知订单；已提交结果先按原操作核对。",
 } as Partial<Record<R16CompanionAction["type"], string>>)[a.type] ?? "请确认这次操作。";
 function supplyStatus(t: R16CompanionTask): string {
   if (r16CompanionSupplyComplete(t)) return "补给完成：购买回执和实际返程均已确认。";
   return ({ authorized: "服务器已授权；购买与返程尚未完成。", running: "正在执行补给；实际扣款和入药以服务器回执为准。", paused: "补给已暂停；不会自动恢复支出。",
     unknown: "购买结果未知；仅核对原订单，不会重复下单。", returning: "正在返程；到达授权点旁前不显示完成。", completed: "完成证据不足，请刷新核对实际购买与返程。",
     cancelled: "补给已撤销；已提交购买的结果仍需核对，不会自动退款。", failed: "本次补给未完成，请核对原因和已有购买回执。" } as Record<string, string>)[String(t.status)] ?? "暂无独立补给任务。";
+}
+
+// Windows R16 crystal_ui/companion/life.rs presents server observations in the
+// same six-tab layout. Missing or stale observations must stay unknown.
+function lifePhase(task: R16CompanionTask): string {
+  switch (task.status) {
+    case "idle": return "待命";
+    case "paused": return "暂停";
+    case "unknown": return "暂停 · 原购买结果待核对";
+    case "ended": case "completed": case "cancelled": case "expired": case "failed": return "结束";
+  }
+  if (!Object.keys(task).length) return "待命";
+  switch (task.phase) {
+    case "explore": case "exploring": case "exploration": case "patrolling": return "探索";
+    case "combat": case "fight": case "fighting": case "hunt": case "hunting": return "战斗";
+    case "return": case "returning": case "return-home": case "returning-home": case "retreat": return "回城";
+    case "supply": case "purchase": case "resupply": case "buying": case "awaiting-supply": case "claiming-supply": case "supplying": return "补给";
+    case "rest": case "resting": case "recovering": return "休息";
+    case "awaiting-owner": return "等待主人补给";
+    case "awaiting-observation": return "等待资源核对";
+    case "awaiting-server-activation": return "等待服务器激活";
+    case "idle": case "wait": case "waiting": case "standby": return "待命";
+    case "paused": return "暂停";
+    case "ended": case "completed": case "finished": return "结束";
+    default: return "阶段待核对";
+  }
+}
+
+function lifeModel(task: R16CompanionTask): string {
+  if (task.status === "paused") return "暂停";
+  if (task.activationPending === true) return "等待服务器激活";
+  switch (typeof task.modelStatus === "string" ? task.modelStatus : task.decisionMode) {
+    case "rules": return "规则执行";
+    case "planning": case "thinking": case "model-planning": return "规划中";
+    case "model": return "已有模型计划";
+    case "running": case "active": return "执行中";
+    case "paused": return "暂停";
+    case "disabled": case "off": return "未启用模型";
+    case "failed": return "暂不可用";
+    case "idle": return "待命";
+    default: return "待核对";
+  }
+}
+
+function lifePresentation({ lifeTask: task, resources }: R16CompanionOwnerView["runtime"], now: number) {
+  const count = (value: unknown): value is number => typeof value === "number" && Number.isSafeInteger(value) && value >= 0;
+  const stoppedPending = ["ended", "completed", "cancelled", "expired"].includes(String(task.status))
+    && (resources.medicineUnresolved !== false || task.reservedGold !== 0);
+  const status = stoppedPending ? "已停止，购药结果仍待核对" : lifePhase(task);
+  const expiry = !count(task.expiresAtMs) ? "有效期待核对" : now === 0 ? "本机时间未确认" : task.expiresAtMs <= now ? "授权已到期"
+    : `约余 ${Math.ceil((task.expiresAtMs - now) / 60_000)} 分钟（本机估算）`;
+  const budget = !Object.keys(task).length || task.status === "idle" ? "本会话采购额度：尚未授权；累计上限 50 游戏金币 / 1 瓶。"
+    : `采购额度 ${shown(task.budgetGold)} · 剩余 ${shown(task.remainingBudgetGold)} · 预留 ${shown(task.reservedGold)} · 实扣 ${shown(task.chargedGold)} 游戏金币\n已购 ${shown(task.purchasedQuantity)} / ${shown(task.maxPurchasedQuantity)} 瓶 · 观察击杀 ${shown(task.killsObserved)} · ${expiry}`;
+  let resourceLines = "阿洛自己的金币：待核对 · 血量：待核对\n血药与可用药量：待核对 · 背包空位与负重：待核对\n资源观察尚未确认，请刷新；不会把未知数量显示为 0。";
+  if (resources.known === true && count(resources.observedAtMs)) {
+    const inventory = resources.inventoryCurrent === true;
+    const item = (v: unknown) => inventory ? shown(v) : "待核对";
+    const minutes = Math.max(0, Math.floor((now - resources.observedAtMs) / 60_000));
+    const observed = resources.observedAtMs > now + 60_000 ? "时间待校准" : minutes < 1 ? "刚刚" : minutes < 60 ? `${minutes} 分钟前`
+      : minutes < 1440 ? `${Math.floor(minutes / 60)} 小时前` : `${Math.floor(minutes / 1440)} 天前`;
+    resourceLines = `阿洛自己的金币：${shown(resources.gold)} · 血量 ${shown(resources.hp)}/${shown(resources.maxHp)}\n血药 ${item(resources.hpPotionCount)}（可用 ${item(resources.usableHpPotionCount)}）· 背包空位 ${item(resources.freeBagSlots)} · 负重 ${item(resources.currentWeight)}/${item(resources.maxWeight)}\n背包${inventory ? "已核对" : "待核对"} · 资源观察：${observed}`;
+  }
+  const reason = typeof task.pausedReason === "string" && task.pausedReason ? task.pausedReason
+    : typeof task.reason === "string" ? task.reason : "暂无已确认的行动说明。";
+  const boundedReason = Array.from(reason.replace(/[\p{Cc}\p{Cf}\p{Zl}\p{Zp}]/gu, "")).slice(0, 45).join("");
+  const summary = !count(task.killsObserved) && !count(task.chargedGold) ? "暂无已核对的击杀或消费统计。"
+    : `已观察击杀 ${shown(task.killsObserved)} · 实扣 ${shown(task.chargedGold)} 游戏金币`;
+  const warning = resources.medicineUnresolved === true ? "购药已提交或结果未知：只核对原订单，尚未算作完成。"
+    : resources.medicineUnresolved === false ? "行动、击杀与消费均来自实际观察；发送授权不等于行动已完成。"
+    : "购药结果待核对；未知金额与数量保持待确认。";
+  return { status, budget, resourceLines, notes: `模型：${lifeModel(task)}\n${boundedReason}\n${summary}`, warning };
 }
 
 type SubpageProps = { view: R16CompanionOwnerView; mutable: boolean; act(action: R16CompanionAction): void; back(): void };
@@ -134,6 +205,8 @@ export function R16CompanionWindow({ client, open, onOpenChange, entryEnabled = 
   const lease = snapshot.renderLease, view = snapshot.view;
   const selected = snapshot.enrollments.find(e => e.residentId === snapshot.selected);
   const mutable = !!view && !!selected?.online && !snapshot.busy && !snapshot.uncertain;
+  const life = tab === 5 && view ? lifePresentation(view.runtime, Date.now()) : null;
+  const canResumeLife = !!life && !!view && r16CompanionResumeLifeId(view) !== null;
   useEffect(() => { const timer = setInterval(() => client.tick(), 1000); return () => clearInterval(timer); }, [client]);
   useEffect(() => {
     if (!open) return;
@@ -158,6 +231,10 @@ export function R16CompanionWindow({ client, open, onOpenChange, entryEnabled = 
   const close = () => { activityRef.current.open = false; setDraft(""); setConfirmation(null); composing.current = false; editing.current = false; onOpenChange(false); };
   const act = (action: R16CompanionAction) => { client.act(lease, action); };
   const prepare = (action: R16CompanionAction) => { if (mutable && client.isCurrentLease(lease, true)) setConfirmation({ lease, action }); };
+  const prepareResumeLife = () => {
+    const lifePermitId = view && r16CompanionResumeLifeId(view);
+    if (lifePermitId) prepare({ type: "resumeLife", lifePermitId });
+  };
   const changeTab = (value: number) => { editing.current = false; setTab(value); setPage(0); setSubpage(null); setDraft(""); setConfirmation(null); };
   const sendText = () => { if (!composing.current) act({ type: teaching ? "proposeTeaching" : "instruct", text: draft }); };
   const rows = tab === 1 ? view?.feedback ?? [] : view?.episodes ?? [];
@@ -200,8 +277,8 @@ export function R16CompanionWindow({ client, open, onOpenChange, entryEnabled = 
           onClick={() => { const invite = client.invitation(lease); if (invite) onInviteParty?.(lease, invite.characterName); }} />
         <Button id="recall" label="召回" x={266} y={87} w={92} disabled={!mutable} onClick={() => act({ type: "recall" })} />
         <Button id="resume" label={tab === 5 ? "恢复生活" : "恢复行动"} x={370} y={87} w={112}
-          disabled={!mutable || tab === 5 && (!view || !r16CompanionResumeLifeId(view))}
-          onClick={() => { const lifePermitId = view ? r16CompanionResumeLifeId(view) : null; if (tab === 5 && lifePermitId) prepare({ type: "resumeLife", lifePermitId }); else if (tab !== 5) act({ type: "resume" }); }} />
+          disabled={!mutable || tab === 5 && !canResumeLife}
+          onClick={() => { if (tab === 5) prepareResumeLife(); else act({ type: "resume" }); }} />
         <Copy x={496} y={91} w={225} h={26} size={12} tone="muted">组队以服务器名单为准</Copy>
         <div role="tablist" aria-label="伙伴资料">{R16_COMPANION_LAYOUT.tabs.map((label, index) => <Button key={index} id={`tab-${index}`} label={label} x={18 + index * 120} y={132} w={110} selected={tab === index} onClick={() => changeTab(index)} />)}</div>
         {confirmation ? <div data-r16-companion-confirm>
@@ -275,21 +352,22 @@ export function R16CompanionWindow({ client, open, onOpenChange, entryEnabled = 
             <Copy x={22} y={409} h={49}>{`实际扣款：${view.runtime.supplyTask.receiptKnown === true ? shown(view.runtime.supplyTask.chargedGold) : "尚未确认"} 游戏金币 · 实际入药：${view.runtime.supplyTask.receiptKnown === true ? shown(view.runtime.supplyTask.acquiredQuantity) : "尚未确认"}\n返程到达：${view.runtime.supplyTask.returnedToAnchor === true ? "已确认到达授权点旁" : "尚未确认"}`}</Copy>
             <Copy x={22} y={466} h={39} size={13} tone="muted">{String(view.runtime.supplyTask.lastError ?? view.runtime.supplyTask.reason ?? "")}</Copy>
             <Button id="refresh-supply" label="刷新服务器补给记录" x={22} y={515} w={690} disabled={snapshot.busy} onClick={() => client.refresh(lease)} />
-          </> : <>
-            <Copy x={22} y={180} size={17} tone="gold">{`自主生活 · ${view.runtime.lifeTask.status ?? "待命"} · ${view.runtime.lifeTask.phase ?? "阶段待核对"}`}</Copy>
-            <Button id="duration-20" label="20分钟" x={22} y={214} w={100} selected={duration === 1200} onClick={() => setDuration(1200)} />
-            <Button id="duration-30" label="30分钟" x={132} y={214} w={100} selected={duration === 1800} onClick={() => setDuration(1800)} />
-            <Button id="prepare-life" label="查看并确认授权" x={242} y={214} w={232} disabled={!mutable || !r16CompanionCanAuthorizeLife(view)} onClick={() => prepare({ type: "authorizeLife", durationSeconds: duration })} />
+          </> : life ? <>
+            <Copy x={22} y={180} size={17} tone="gold">{`自主生活 · ${life.status}`}</Copy>
+            <Button id="duration-20" label={`20 分钟${duration === 1200 ? " · 已选" : ""}`} x={22} y={214} w={110} disabled={!mutable} selected={duration === 1200} onClick={() => setDuration(1200)} />
+            <Button id="duration-30" label={`30 分钟${duration === 1800 ? " · 已选" : ""}`} x={142} y={214} w={110} disabled={!mutable} selected={duration === 1800} onClick={() => setDuration(1800)} />
+            <Button id="prepare-life" label="查看并确认生活授权" x={262} y={214} w={212} disabled={!mutable || !r16CompanionCanAuthorizeLife(view)} onClick={() => prepare({ type: "authorizeLife", durationSeconds: duration })} />
             <Button id="cancel-life" label="停止生活" x={486} y={214} w={108} disabled={!mutable || !activeLife(view)} onClick={() => act({ type: "cancelLife" })} />
             <Button id="life-recall" label="召回" x={604} y={214} w={108} disabled={!mutable} onClick={() => act({ type: "recall" })} />
             <Copy x={22} y={251} h={38} size={13} tone="muted">单会话累计最多 50 游戏金币 / 1 瓶血药；可独立于主人视野行动。{"\n"}范围：地图0 x270–310、y595–645；回城点（288,616）。</Copy>
-            <Copy x={22} y={292} h={40}>{`采购额度 ${shown(view.runtime.lifeTask.budgetGold)} · 剩余 ${shown(view.runtime.lifeTask.remainingBudgetGold)} · 预留 ${shown(view.runtime.lifeTask.reservedGold)} · 实扣 ${shown(view.runtime.lifeTask.chargedGold)} 游戏金币\n已购 ${shown(view.runtime.lifeTask.purchasedQuantity)} / ${shown(view.runtime.lifeTask.maxPurchasedQuantity)} 瓶 · 观察击杀 ${shown(view.runtime.lifeTask.killsObserved)}`}</Copy>
-            <Copy x={22} y={335} h={51} size={13}>{view.runtime.resources.known === true ? `阿洛自己的金币：${shown(view.runtime.resources.gold)} · 血量 ${shown(view.runtime.resources.hp)}/${shown(view.runtime.resources.maxHp)}\n血药 ${view.runtime.resources.inventoryCurrent === true ? shown(view.runtime.resources.hpPotionCount) : "待核对"} · 背包空位 ${view.runtime.resources.inventoryCurrent === true ? shown(view.runtime.resources.freeBagSlots) : "待核对"}` : "阿洛自己的金币、血量、药品、背包与负重：待核对。未知数量不会显示为 0。"}</Copy>
-            <Copy x={22} y={391} h={35} size={12} tone="muted">靠近并面对阿洛，用原交易窗口赠送补给；阿洛只接收，不付出。</Copy>
-            <Copy x={22} y={431} h={57} size={12} tone="muted">{`模型：${view.runtime.lifeTask.modelStatus ?? view.runtime.lifeTask.decisionMode ?? "待核对"}\n${view.runtime.lifeTask.pausedReason ?? view.runtime.lifeTask.reason ?? "暂无已确认的行动说明。"}`}</Copy>
+            <Copy x={22} y={292} h={40}>{life.budget}</Copy>
+            <Copy x={22} y={335} h={51} size={13} lineHeight={17}>{life.resourceLines}</Copy>
+            <Copy x={22} y={391} h={35} size={12} lineHeight={17} tone="muted">靠近并面对阿洛，用原交易窗口赠送补给；阿洛只接收，不付出。{"\n"}采购额度按原授权记录，金币与药品按阿洛自己的实际资源显示。</Copy>
+            <Copy x={22} y={431} h={57} size={12} lineHeight={18} tone="muted">{life.notes}</Copy>
+            <Button id="prepare-resume-life" label="确认恢复原生活授权" x={22} y={494} w={334} disabled={!mutable || !canResumeLife} onClick={prepareResumeLife} />
             <Button id="refresh-life" label="刷新生活与资源" x={368} y={494} w={344} disabled={snapshot.busy} onClick={() => client.refresh(lease)} />
-            <Copy x={22} y={529} h={23} size={12} tone="gold">{view.runtime.resources.medicineUnresolved === true ? "购药结果未知：仅核对原订单，不算作完成。" : "行动、击杀与消费均来自实际观察；授权不等于完成。"}</Copy>
-          </>}
+            <Copy x={22} y={529} h={23} size={12} tone="gold">{life.warning}</Copy>
+          </> : null}
         <div role="status" aria-live="polite"><Copy x={20} y={556} w={700} h={45} size={13} tone="gold">{snapshot.notice}</Copy></div>
         {!confirmation ? <>
           <Button id="export" label="导出角色与完整成长" x={20} y={602} w={272} disabled={!view || snapshot.busy || snapshot.uncertain || !selected?.online} onClick={() => client.exportArchive(lease)} />
