@@ -7729,21 +7729,33 @@ impl SharedInProcessZoneState {
             .invitations
             .retain(|(owner, peer)| owner != key && &peer.key != key);
         self.trade_links
-            .initializations
-            .retain(|(owner, _)| !partners.contains(owner));
-        self.trade_links
             .unlocks
             .retain(|(owner, peer)| owner != key && &peer.key != key);
         for owner in invitees {
             self.queue_zone_packets(owner, vec![ServerPacket::TradeCancel { unlock: false }]);
         }
         if notify {
-            for owner in partners {
-                if &owner != key && !self.trade_links.cancellations.contains(&owner) {
-                    self.trade_links.cancellations.push(owner);
+            for owner in partners.iter().filter(|owner| *owner != key) {
+                if self
+                    .trade_links
+                    .initializations
+                    .iter()
+                    .any(|(pending, _)| pending == owner)
+                {
+                    // The peer's personal trade has yet to open. Send the terminal
+                    // reply through the queue holding its accept and offer updates.
+                    self.queue_zone_packets(
+                        owner.clone(),
+                        vec![ServerPacket::TradeCancel { unlock: false }],
+                    );
+                } else if !self.trade_links.cancellations.contains(owner) {
+                    self.trade_links.cancellations.push(owner.clone());
                 }
             }
         }
+        self.trade_links
+            .initializations
+            .retain(|(owner, _)| !partners.contains(owner));
     }
 
     fn player_key_by_name(&self, name: &str) -> Option<ZonePresenceKey> {

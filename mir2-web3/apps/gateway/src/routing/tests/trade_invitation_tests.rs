@@ -117,6 +117,62 @@ fn unprepared_pair_cancel_closes_both_personal_states() {
 }
 
 #[test]
+fn recipient_cancel_before_inviter_initializes_follows_queued_accept_and_offer() {
+    let (mut recipient, mut inviter) = started_shared_zone_sessions();
+    face_shared_trade_pair(&mut recipient, &mut inviter);
+    let before = recipient.world_snapshot();
+    let recipient_name = before
+        .entities
+        .iter()
+        .find(|entity| entity.kind == WorldEntityKind::SelfPlayer)
+        .unwrap()
+        .name
+        .clone();
+
+    inviter.handle_packet(ClientPacket::TradeRequest);
+    assert!(recipient
+        .handle_packet(ClientPacket::TradeReply {
+            accept_invite: true
+        })
+        .iter()
+        .any(|p| matches!(p, ServerPacket::TradeAccept { .. })));
+    let from = inventory_slot_for_key(&recipient, "red-potion");
+    assert!(recipient
+        .handle_packet(ClientPacket::DepositTradeItem { from, to: 0 })
+        .iter()
+        .any(|p| matches!(p, ServerPacket::DepositTradeItem { success: true, .. })));
+
+    // The recipient can finish while the inviter has yet to drain its queue.
+    assert!(inviter.world_snapshot().stage5_systems.trade.is_none());
+    assert!(recipient
+        .handle_packet(ClientPacket::TradeCancel)
+        .iter()
+        .any(|p| matches!(p, ServerPacket::TradeCancel { unlock: false })));
+    let observed = inviter
+        .handle_packet(ClientPacket::KeepAlive { time: 1 })
+        .into_iter()
+        .filter(is_trade_packet)
+        .collect::<Vec<_>>();
+    assert!(
+        matches!(observed.as_slice(), [
+        ServerPacket::TradeAccept { name },
+        ServerPacket::TradeItem { .. },
+        ServerPacket::TradeCancel { unlock: false },
+    ] if name == &recipient_name),
+        "unexpected inviter trade packets: {observed:?}"
+    );
+    assert!(inviter.world_snapshot().stage5_systems.trade.is_none());
+    assert!(!inviter
+        .handle_packet(ClientPacket::KeepAlive { time: 2 })
+        .iter()
+        .any(is_trade_packet));
+    let after = recipient.world_snapshot();
+    assert!(after.stage5_systems.trade.is_none());
+    assert_eq!(after.gold, before.gold);
+    assert_eq!(after.inventory_items, before.inventory_items);
+}
+
+#[test]
 fn disconnected_inviter_cannot_be_accepted_and_new_invite_is_possible() {
     let (mut first, mut second) = started_shared_zone_sessions();
     face_shared_trade_pair(&mut first, &mut second);
