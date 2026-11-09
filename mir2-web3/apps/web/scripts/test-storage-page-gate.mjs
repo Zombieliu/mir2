@@ -101,7 +101,7 @@ const names = ["worldFishingOwner", "cancelWorldFishingGesture", "retireWorldFis
   "itemCommandRequiresOwner", "retireEquipmentSession", "retirePrivateCompanion", "advanceHeroWindowEpochs", "mailParcelItemsIdle", "endStorageService", "closeNpcRepairService", "retireNpcShopService",
   "currentSpellsOwner", "currentSocialReplyOwner", "currentSocialReceiveOwner", "captureSocialBudgetGatewayEvent", "sameSocialPhysicalOwner",
   "socialReplyWindowOpen", "captureSocialRequest", "closeSocialReplyWindow", "replySocialRequest", "retireSocialRequests",
-  "retireSocialItemConnection", "retireTerminalTradeItemOperation", "socialItemMutationAllowed", "parityItemMutationAllowed", "readSocialItemSurface", "socialItemProofCurrent",
+  "retireSocialItemConnection", "retireTerminalTradeItemOperation", "readOwnTradeState", "ownTradeOfferKey", "readPreparedOwnTrade", "ownTradeTooltipItem", "socialItemMutationAllowed", "parityItemMutationAllowed", "readSocialItemSurface", "socialItemProofCurrent",
   "submitSocialItem", "socialItemReceiptOwner", "observeSocialItemReceipt", "observeGuildPermissions", "observeGuildStorageChange",
   "socialTradeProofCurrent", "rentExpandedStorage", "currentStorageRentalFacts", "closeStorageRentalUi", "cancelStorageRental",
   "confirmStorageRental", "observeEquipmentSnapshot", "syncEquipmentSnapshot", "suspendEquipmentConnection",
@@ -404,7 +404,7 @@ function harness({ identity = session, sequenceRef = { current: 1 }, pendingRef 
     guildRankScopeRef: {current: null}, guildRankWakeRef: {current: null}, guildRankReadRef: {current: null},
     socialRosterWindowsRef: {current: {friends: false}}, socialRosterRenderSources: {friend: null, guild: null},
     setShowFriendsState: value => { scope.friendsOpen = value; },
-    socialItemOperationsRef: {current: new pureOperations.SocialWindowOperations()}, socialOwnTradeRef: {current: null},
+    socialItemOperationsRef: {current: new pureOperations.SocialWindowOperations()}, socialOwnTradeRef: {current: null}, socialTradeConfirmOfferRef: {current: null},
     socialItemWindowsRef: {current: {trade: true, guild: true}}, socialCharacterIndexRef: {current: {requested: 7, current: 7}},
     tradeLifecycleRef: {current: {state: "closed", partner: ""}}, tradePartnerRef: {current: null}, tradeIncarnationRef: {current: 1},
     socialTradeSendingRef: {current: null}, socialTradeReplySpentRef: {current: null},
@@ -1457,6 +1457,35 @@ test("actual Page late NewItemInfo reprojects cached partner raw items and bad T
   page.confirmTrade(); assert.deepEqual(page.sent[1], {type: "tradeConfirm", locked: false});
   assert.equal(page.sendTradeUiCommand({type: "tradeConfirm", locked: true}), false, "current locked state requires the opposite boolean");
   assert.equal(page.attempts, 2);
+});
+
+test("actual Page prepared trade keeps its lock and routes an explicit unlock after inventory moves to escrow", () => {
+  const page = harness();
+  openCurrentTrade(page, true);
+  const world = page.scope.worldRef.current;
+  world.stage5Systems.trade.offeredGold = 17; page.snapshot(); page.renderTrade();
+  page.confirmTrade();
+  assert.deepEqual(page.sent, [{type: "tradeConfirm", locked: true}]);
+  world.stage5Systems.trade.locked = true;
+  world.stage5Systems.trade.escrowPrepared = true;
+  world.inventoryItems = world.inventoryItems.filter(item => item.authoritativeUniqueId !== 22);
+  page.snapshot(); page.renderTrade();
+  const prepared = page.readPreparedOwnTrade();
+  assert.equal(prepared.gold, 17);
+  assert.equal(prepared.items[3].uniqueId, 22);
+  assert.equal(prepared.items[3].slot, 3);
+  assert.equal(page.readSocialItemSurface("trade"), null, "the escrow view cannot authorize edits");
+  assert.equal(page.sendTradeUiCommand({type: "tradeConfirm", locked: true}), false);
+  assert.equal(page.sendTradeUiCommand({type: "tradeGold", amount: 1}), false);
+
+  world.stage5Systems.trade.settlementNonce = "other nonce"; page.snapshot(); page.renderTrade();
+  assert.equal(page.readPreparedOwnTrade().items, undefined, "different escrow never inherits old item details");
+  world.stage5Systems.trade.settlementNonce = "nonce"; page.snapshot(); page.renderTrade();
+  page.confirmTrade();
+  assert.deepEqual(page.sent, [{type: "tradeConfirm", locked: true}, {type: "tradeConfirm", locked: false}]);
+  page.receive("TradeCancel", {unlock: false});
+  assert.equal(page.readPreparedOwnTrade(), null);
+  assert.equal(page.scope.socialTradeConfirmOfferRef.current, null);
 });
 
 test("actual Page Ranking queues selected online filter and settles old rows under their own type and offset before issuing the desired query", () => {

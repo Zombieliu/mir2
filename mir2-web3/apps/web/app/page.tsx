@@ -2226,6 +2226,12 @@ export default function HomePage() {
   const socialItemOperationsRef = useRef(new SocialWindowOperations());
   const socialCharacterIndexRef = useRef<{requested: number | null; current: number | null}>({requested: null, current: null});
   const socialOwnTradeRef = useRef<{owner: SocialReplyOwner; trade: unknown} | null>(null);
+  const socialTradeConfirmOfferRef = useRef<{
+    owner: SocialReplyOwner;
+    incarnation: number;
+    key: string;
+    items: Array<TradeItemSlot | null>;
+  } | null>(null);
   const guildStorageRawRef = useRef<{owner: SocialReplyOwner; guildName: string; items: unknown; revision: number} | null>(null);
   const guildStorageRevisionRef = useRef(0);
   const tradeIncarnationRef = useRef(0);
@@ -6790,6 +6796,16 @@ export default function HomePage() {
         || row.proof !== options?.socialRosterProof?.rankReadProof || !row.proof
         || socketRef.current !== socket || socket.readyState !== WebSocket.OPEN) return false;
       row.entered = true;
+    }
+    if (options?.socialTradeProof && wireCommand.type === "tradeConfirm") {
+      if (socketRef.current !== socket || socket.readyState !== WebSocket.OPEN
+        || !socialTradeProofCurrent(options.socialTradeProof, wireCommand)) return false;
+      if (wireCommand.locked === true) {
+        const source = readSocialItemSurface("trade");
+        if (!source?.trade) return false;
+        socialTradeConfirmOfferRef.current = {owner: source.owner, incarnation: options.socialTradeProof.incarnation,
+          key: ownTradeOfferKey(source.trade), items: source.slots.map(item => item ? ownTradeTooltipItem(item) : null)};
+      }
     }
     if (options?.socialTradeProof && wireCommand.type === "tradeCancel") {
       if (socketRef.current !== socket || socket.readyState !== WebSocket.OPEN
@@ -12546,8 +12562,9 @@ export default function HomePage() {
 
   function confirmTrade() {
     const source = readSocialItemSurface("trade");
-    if (typeof source?.trade?.locked !== "boolean") return;
-    sendTradeUiCommand({ type: "tradeConfirm", locked: !source.trade.locked });
+    const locked = source?.trade?.locked ?? (readPreparedOwnTrade() ? true : null);
+    if (typeof locked !== "boolean") return;
+    sendTradeUiCommand({ type: "tradeConfirm", locked: !locked });
   }
 
   function cancelTrade() {
@@ -13585,6 +13602,7 @@ export default function HomePage() {
     socialBudgetRef.current?.retire(); socialBudgetBootstrapRef.current = null;
     retireGuildRankControls();
     socialItemOperationsRef.current.retire(); socialOwnTradeRef.current = null;
+    socialTradeConfirmOfferRef.current = null;
     socialTradeItemOperationRef.current = null; socialTradeCancelSpentRef.current = null;
     tradeLifecycleRef.current = {state: "closed", partner: ""}; tradePartnerRef.current = null;
     guildStorageRawRef.current = null; guildPermissionsRef.current = null; guildRanksRef.current = null;
@@ -13605,6 +13623,37 @@ export default function HomePage() {
     socialItemOperationsRef.current.retire(); socialTradeItemOperationRef.current = null;
     renderSocialItems(n => n + 1);
   }
+  function readOwnTradeState(owner = currentSocialReplyOwner()) {
+    const raw = socialOwnTradeRef.current, lifecycle = tradeLifecycleRef.current;
+    const baseline = equipmentSnapshotRef.current;
+    if (!owner || !baseline || baseline.connectionGeneration !== owner.connectionGeneration
+      || baseline.sessionGeneration !== owner.sessionGeneration || !raw || !sameSocialPhysicalOwner(raw.owner, owner)
+      || raw.owner.sceneRevision !== owner.sceneRevision || raw.owner.mapFileName !== owner.mapFileName
+      || !raw.trade || typeof raw.trade !== "object" || Array.isArray(raw.trade)) return null;
+    const trade = raw.trade as Record<string, unknown>;
+    if (trade.completed === true || lifecycle.state !== "open" || !lifecycle.partner || lifecycle.partner !== trade.partner
+      || worldRef.current.stage5Systems.trade?.partner !== trade.partner) return null;
+    return {owner, trade};
+  }
+  function ownTradeOfferKey(trade: Record<string, unknown>): string {
+    return JSON.stringify([trade.partner, trade.settlementNonce, trade.offeredGold, trade.offeredCurrency,
+      trade.offeredSlots, trade.offeredUniqueIds]);
+  }
+  function readPreparedOwnTrade(owner = currentSocialReplyOwner()) {
+    const source = readOwnTradeState(owner);
+    if (!source) return null;
+    const trade = source.trade, gold = trade.offeredGold, nonce = trade.settlementNonce;
+    if (trade.escrowPrepared !== true || trade.locked !== true || trade.completed !== false || trade.accepted !== true
+      || typeof gold !== "number" || !Number.isSafeInteger(gold) || gold < 0 || gold > 0xffff_ffff
+      || typeof nonce !== "string" || !nonce || nonce.length > 256 || nonce.includes("\0")) return null;
+    // Escrowed items leave the Bag. Reuse the visible offer only for this exact
+    // confirmation and never as authority for an item or gold edit.
+    const offer = socialTradeConfirmOfferRef.current;
+    const items = offer && offer.incarnation === tradeIncarnationRef.current && sameSocialPhysicalOwner(offer.owner, source.owner)
+      && offer.owner.sceneRevision === source.owner.sceneRevision && offer.owner.mapFileName === source.owner.mapFileName
+      && offer.key === ownTradeOfferKey(trade) ? offer.items : undefined;
+    return {gold, items};
+  }
   function readSocialItemSurface(surface: "trade" | "guild") {
     const current = worldRef.current, owner = currentSocialReplyOwner();
     const baseline = equipmentSnapshotRef.current;
@@ -13613,12 +13662,10 @@ export default function HomePage() {
     const inventory = projectSocialInventory(current);
     if (!inventory.ok) return null;
     if (surface === "trade") {
-      const raw = socialOwnTradeRef.current;
-      if (!raw || !sameSocialPhysicalOwner(raw.owner, owner) || !raw.trade || typeof raw.trade !== "object") return null;
-      const trade = raw.trade as Record<string, unknown>, grid = projectOwnTradeItems(trade, inventory);
-      if (!grid.ok || trade.completed === true || tradeLifecycleRef.current.state !== "open"
-        || tradeLifecycleRef.current.partner !== trade.partner || !current.stage5Systems.trade
-        || current.stage5Systems.trade.partner !== trade.partner) return null;
+      const source = readOwnTradeState(owner);
+      if (!source || source.trade.escrowPrepared === true) return null;
+      const trade = source.trade, grid = projectOwnTradeItems(trade, inventory);
+      if (!grid.ok) return null;
       const offered = new Set(grid.slots.flatMap(item => item ? [item.uniqueId] : []));
       return { owner, inventory, slots: grid.slots, trade, permissions: [] as string[],
         inventoryItems: inventory.items.filter(item => !offered.has(item.uniqueId)),
@@ -13783,6 +13830,8 @@ export default function HomePage() {
     if (pending || socialTradeCancelSpentRef.current === proof.incarnation) return false;
     if (type === "tradeReply") return lifecycle.state === "requested" && command.acceptInvite === true
       && Object.keys(command).length === 2 && socialTradeReplySpentRef.current !== proof.incarnation;
+    if (type === "tradeConfirm" && command.locked === false && Object.keys(command).length === 2
+      && readPreparedOwnTrade(owner)) return true;
     const source = readSocialItemSurface("trade");
     if (!source || lifecycle.state !== "open" || source.trade?.escrowPrepared !== false || source.trade.completed !== false) return false;
     if (type === "tradeConfirm") return typeof command.locked === "boolean" && command.locked === !source.trade.locked
@@ -16023,6 +16072,7 @@ export default function HomePage() {
           && tradeLifecycleRef.current.partner === name && partner
           && partner.incarnation === tradeIncarnationRef.current && sameSocialPhysicalOwner(partner.owner, tradeOwner)) break;
         tradeIncarnationRef.current += 1; socialOwnTradeRef.current = null;
+        socialTradeConfirmOfferRef.current = null;
         tradeLifecycleRef.current = {state: event.packet === "TradeAccept" ? "open" : "requested", partner: name};
         tradePartnerRef.current = tradeOwner ? {owner: tradeOwner, incarnation: tradeIncarnationRef.current} : null;
         socialItemWindowsRef.current.trade = true; setShowTrade(true);
@@ -16079,6 +16129,7 @@ export default function HomePage() {
       case "TradeConfirm":
         retireTerminalTradeItemOperation();
         socialOwnTradeRef.current = null; tradeIncarnationRef.current += 1;
+        socialTradeConfirmOfferRef.current = null;
         tradeLifecycleRef.current = {state: "closed", partner: ""}; tradePartnerRef.current = null;
         socialItemWindowsRef.current.trade = false; setShowTrade(false);
         updateWorld((current) => ({
@@ -16097,6 +16148,7 @@ export default function HomePage() {
         }
         retireTerminalTradeItemOperation();
         socialOwnTradeRef.current = null; tradeIncarnationRef.current += 1;
+        socialTradeConfirmOfferRef.current = null;
         tradeLifecycleRef.current = {state: "closed", partner: ""}; tradePartnerRef.current = null;
         socialItemWindowsRef.current.trade = false; setShowTrade(false);
         updateWorld((current) => ({
@@ -20649,6 +20701,8 @@ export default function HomePage() {
     if (showGuild && guildRankReadRef.current?.needed) requestGuildRankRoster();
   });
   const socialTradeRender = showTrade ? readSocialItemSurface("trade") : null, socialGuildRender = showGuild ? readSocialItemSurface("guild") : null;
+  const preparedTrade = showTrade ? readPreparedOwnTrade() : null;
+  const ownTradeItems = preparedTrade?.items ?? socialTradeRender?.slots.map(item => item ? ownTradeTooltipItem(item) : null);
   const socialItemsPending = socialItemOperationsRef.current.pending !== null;
   const socialTradeUiLease = {owner: currentSocialReplyOwner(), incarnation: tradeIncarnationRef.current,
     partner: tradeLifecycleRef.current.partner, state: tradeLifecycleRef.current.state};
@@ -21273,9 +21327,9 @@ export default function HomePage() {
       market={{ open: showMarket, onClose: () => setShowMarket(false), listings: extraWindowData.marketListings, gold: world.gold, cityCurrencies: world.cityCurrencies, onBuy: marketBuyListing, onCancel: marketCancelListing, onSearch: marketSearch, onRefresh: marketRefresh, onCollect: marketCancelListing }}
       conquest={{ open: showConquest, onClose: () => setShowConquest(false), conquest: extraWindowData.conquest, territory: extraWindowData.guildTerritory, guildName: world.stage5Systems?.guild?.name ?? null }}
       trade={{ open: showTrade, playerName: self?.name ?? null, onClose: () => { if (tradeLifecycleRef.current.state === "closed") setShowTrade(false); else cancelTrade(); }, trade: socialTradeSummary,
-        myGold: typeof socialTradeRender?.trade?.offeredGold === "number" ? socialTradeRender.trade.offeredGold : 0, availableGold: world.gold,
-        myItems: socialTradeRender?.slots.map(i => i ? ownTradeTooltipItem(i) : null), onReadItemTooltip: readTradeItemTooltip, myItemCount: socialTradeRender?.slots.filter(i => i !== null).length,
-        myConfirmed: socialTradeRender?.trade?.locked === true, inventoryItems: socialTradeRender?.inventoryItems, emptyInventorySlots: socialTradeRender?.inventory.emptySlots,
+        myGold: preparedTrade?.gold ?? (typeof socialTradeRender?.trade?.offeredGold === "number" ? socialTradeRender.trade.offeredGold : 0), availableGold: world.gold,
+        myItems: ownTradeItems, onReadItemTooltip: readTradeItemTooltip, myItemCount: ownTradeItems?.filter(item => item !== null).length,
+        myConfirmed: preparedTrade !== null || socialTradeRender?.trade?.locked === true, inventoryItems: socialTradeRender?.inventoryItems, emptyInventorySlots: socialTradeRender?.inventory.emptySlots,
         itemsReady: Boolean(socialTradeRender && tradeLifecycleRef.current.state === "open" && socialTradeRender.trade?.escrowPrepared === false), itemActionPending: socialItemsPending, itemSourceKey: socialTradeRender?.sourceKey,
         onDepositItem: (from, to, uid) => submitSocialItem("depositTrade", from, to, uid, socialTradeRender?.sourceKey ?? ""),
         onRetrieveItem: (from, to, uid) => submitSocialItem("retrieveTrade", from, to, uid, socialTradeRender?.sourceKey ?? ""), onAccept: acceptTrade, onConfirm: confirmTrade, onCancel: cancelTrade, onSetGold: setTradeGold }}

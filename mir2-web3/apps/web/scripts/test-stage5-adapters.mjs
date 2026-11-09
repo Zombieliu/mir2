@@ -5679,7 +5679,17 @@ assert.ok(ts.isIfStatement(followingGuildRankReadEntry));
 assert.equal(followingGuildRankReadEntry.expression.getText(parityPageAst),'wireCommand.type === "requestGuildInfo"');
 assert.equal(followingGuildRankReadEntry.thenStatement.getText(parityPageAst).replace(/\s+/g,""),
   '{constrow=guildRankReadRef.current,scope=guildRankScopeRef.current;if(!row||!scope||row.scope!==scope.key||row.entered||row.proof!==options?.socialRosterProof?.rankReadProof||!row.proof||socketRef.current!==socket||socket.readyState!==WebSocket.OPEN)returnfalse;row.entered=true;}');
-const followingTradeCancelEntry=paritySendStatements[paritySendStatements.indexOf(bagBeltFollowingRankingInspectEntry)+5];
+const followingTradeConfirmEntry=paritySendStatements[paritySendStatements.indexOf(bagBeltFollowingRankingInspectEntry)+5];
+assert.ok(ts.isIfStatement(followingTradeConfirmEntry));
+assert.equal(followingTradeConfirmEntry.expression.getText(parityPageAst),'options?.socialTradeProof && wireCommand.type === "tradeConfirm"');
+assert.ok(ts.isBlock(followingTradeConfirmEntry.thenStatement));
+const [confirmRecheck, confirmOffer] = followingTradeConfirmEntry.thenStatement.statements;
+assert.equal(confirmRecheck.getText(parityPageAst).replace(/\s+/g,""),
+  'if(socketRef.current!==socket||socket.readyState!==WebSocket.OPEN||!socialTradeProofCurrent(options.socialTradeProof,wireCommand))returnfalse;');
+assert.ok(ts.isIfStatement(confirmOffer));
+assert.equal(confirmOffer.expression.getText(parityPageAst),'wireCommand.locked === true');
+assert.match(confirmOffer.thenStatement.getText(parityPageAst), /socialTradeConfirmOfferRef\.current =/);
+const followingTradeCancelEntry=paritySendStatements[paritySendStatements.indexOf(bagBeltFollowingRankingInspectEntry)+6];
 assert.ok(ts.isIfStatement(followingTradeCancelEntry));
 assert.equal(followingTradeCancelEntry.expression.getText(parityPageAst),'options?.socialTradeProof && wireCommand.type === "tradeCancel"');
 assert.ok(ts.isBlock(followingTradeCancelEntry.thenStatement));
@@ -5687,12 +5697,12 @@ assert.equal(followingTradeCancelEntry.thenStatement.statements.map(node=>node.g
   'if(socketRef.current!==socket||socket.readyState!==WebSocket.OPEN||!socialTradeProofCurrent(options.socialTradeProof,wireCommand))returnfalse;',
   "the complete cancel body revalidates the current socket and immutable Trade proof before Native budget entry");
 assert.equal(followingTradeCancelEntry.elseStatement,undefined);
-const followingBudgetEntry=paritySendStatements[paritySendStatements.indexOf(bagBeltFollowingRankingInspectEntry)+6];
+const followingBudgetEntry=paritySendStatements[paritySendStatements.indexOf(bagBeltFollowingRankingInspectEntry)+7];
 assert.equal(followingBudgetEntry.getText(parityPageAst),'if (socialBudgetTicket && !socialBudgetRef.current?.enter(socialBudgetTicket, currentSocialReplyOwner(), wireCommand)) return false;');
-const followingCancelSpend=paritySendStatements[paritySendStatements.indexOf(bagBeltFollowingRankingInspectEntry)+7];
+const followingCancelSpend=paritySendStatements[paritySendStatements.indexOf(bagBeltFollowingRankingInspectEntry)+8];
 assert.equal(followingCancelSpend.getText(parityPageAst),'if (options?.socialTradeProof && wireCommand.type === "tradeCancel") socialTradeCancelSpentRef.current = options.socialTradeProof.incarnation;');
-assert.equal(paritySendStatements.indexOf(bagBeltFollowingRankingInspectEntry)+8,paritySocketIndex,"Native entry and cancel spend immediately precede the exact socket try");
-assert.equal(paritySendStatements.indexOf(bagBeltEntryNodes[0])+11,paritySocketIndex,"actual Bag entry retains all existing disjoint guards plus Native budget before socket.send");
+assert.equal(paritySendStatements.indexOf(bagBeltFollowingRankingInspectEntry)+9,paritySocketIndex,"Native entry and cancel spend immediately precede the exact socket try");
+assert.equal(paritySendStatements.indexOf(bagBeltEntryNodes[0])+12,paritySocketIndex,"actual Bag entry retains all existing disjoint guards plus Native budget before socket.send");
 // Retain whole actual serialization/DTO statements and the complete Bag-specific
 // entry through socket.send. All Bag-specific owner/source/mail/storage/social
 // guards execute in the actual bagBeltFinalCurrent; no gate is replaced by true.
@@ -6198,11 +6208,12 @@ assert.equal(fishingSendStatements[fishingSendStatements.indexOf(fishingFollowin
 assert.equal(fishingSendStatements[fishingSendStatements.indexOf(fishingFollowingRankingInspectEntry)+2].getText(fishingPageAst),followingGroupEntry.getText(parityPageAst));
 assert.equal(fishingSendStatements[fishingSendStatements.indexOf(fishingFollowingRankingInspectEntry)+3].getText(fishingPageAst),followingGuildRankEntry.getText(parityPageAst));
 assert.equal(fishingSendStatements[fishingSendStatements.indexOf(fishingFollowingRankingInspectEntry)+4].getText(fishingPageAst),followingGuildRankReadEntry.getText(parityPageAst));
-assert.equal(fishingSendStatements[fishingSendStatements.indexOf(fishingFollowingRankingInspectEntry)+5].getText(fishingPageAst),followingTradeCancelEntry.getText(parityPageAst));
-assert.equal(fishingSendStatements[fishingSendStatements.indexOf(fishingFollowingRankingInspectEntry)+6].getText(fishingPageAst),followingBudgetEntry.getText(parityPageAst));
-assert.equal(fishingSendStatements[fishingSendStatements.indexOf(fishingFollowingRankingInspectEntry)+7].getText(fishingPageAst),followingCancelSpend.getText(parityPageAst));
-assert.equal(fishingSendStatements.indexOf(fishingFollowingRankingInspectEntry)+8,fishingSocketIndex,"Fishing retains every prior guard plus Native entry and cancel spend");
-assert.equal(fishingSendStatements.indexOf(fishingSendEntry[0])+10,fishingSocketIndex,"WorldFishing retains the complete final socket sequence");
+assert.equal(fishingSendStatements[fishingSendStatements.indexOf(fishingFollowingRankingInspectEntry)+5].getText(fishingPageAst),followingTradeConfirmEntry.getText(parityPageAst));
+assert.equal(fishingSendStatements[fishingSendStatements.indexOf(fishingFollowingRankingInspectEntry)+6].getText(fishingPageAst),followingTradeCancelEntry.getText(parityPageAst));
+assert.equal(fishingSendStatements[fishingSendStatements.indexOf(fishingFollowingRankingInspectEntry)+7].getText(fishingPageAst),followingBudgetEntry.getText(parityPageAst));
+assert.equal(fishingSendStatements[fishingSendStatements.indexOf(fishingFollowingRankingInspectEntry)+8].getText(fishingPageAst),followingCancelSpend.getText(parityPageAst));
+assert.equal(fishingSendStatements.indexOf(fishingFollowingRankingInspectEntry)+9,fishingSocketIndex,"Fishing retains every prior guard plus Native entry and cancel spend");
+assert.equal(fishingSendStatements.indexOf(fishingSendEntry[0])+11,fishingSocketIndex,"WorldFishing retains the complete final socket sequence");
 const fishingSerializeIndex=fishingSendStatements.findIndex(node=>ts.isVariableStatement(node)&&node.declarationList.declarations.some(decl=>decl.name.getText(fishingPageAst)==="serialized"));
 const fishingDtoIndex=fishingSendStatements.findIndex(node=>ts.isVariableStatement(node)&&node.declarationList.declarations.some(decl=>decl.name.getText(fishingPageAst)==="wireCommand"));
 const fishingPreflightGuards=fishingSendStatements.filter(node=>ts.isIfStatement(node)&&['command.type === "fishingCast" && command.castOut === true && !options?.worldFishingProof','options?.worldFishingProof && !worldFishingFinalCurrent(options.worldFishingProof, command)'].includes(node.expression.getText(fishingPageAst)));
@@ -7455,16 +7466,17 @@ check("Ranking actual Page inspect gesture sends exact four raw fields UID0 thro
   assert.deepEqual(page.sent,[{type:"inspect",objectId:0,ranking:true,hero:false}]);assert.equal(page.f.controller.pending,true);
   page.api.inspectRankingPlayer(0,"Actual target");assert.equal(page.sent.length,1);
 });
-check("Ranking actual Page raw Inspect requires proof and only disjoint create group guild-rank and trade-cancel guards follow its final claim",()=>{
+check("Ranking actual Page raw Inspect requires proof and only disjoint create group guild-rank and trade guards follow its final claim",()=>{
   const page=rankingPageFixture();assert.equal(page.api.finalRawSend({type:"inspect",objectId:0,ranking:true,hero:false}),false);
-  const finalIndex=paritySendStatements.indexOf(rankingFinalGuard);assert.equal(finalIndex+8,paritySocketIndex);
+  const finalIndex=paritySendStatements.indexOf(rankingFinalGuard);assert.equal(finalIndex+9,paritySocketIndex);
   assert.equal(paritySendStatements[finalIndex+3].getText(parityPageAst),followingGuildRankEntry.getText(parityPageAst));
   assert.equal(paritySendStatements[finalIndex+4].getText(parityPageAst),followingGuildRankReadEntry.getText(parityPageAst));
   assert.strictEqual(paritySendStatements[finalIndex+1],followingCreateEntry);
   assert.strictEqual(paritySendStatements[finalIndex+2],followingGroupEntry);
-  assert.strictEqual(paritySendStatements[finalIndex+5],followingTradeCancelEntry);
-  assert.strictEqual(paritySendStatements[finalIndex+6],followingBudgetEntry);
-  assert.strictEqual(paritySendStatements[finalIndex+7],followingCancelSpend);
+  assert.strictEqual(paritySendStatements[finalIndex+5],followingTradeConfirmEntry);
+  assert.strictEqual(paritySendStatements[finalIndex+6],followingTradeCancelEntry);
+  assert.strictEqual(paritySendStatements[finalIndex+7],followingBudgetEntry);
+  assert.strictEqual(paritySendStatements[finalIndex+8],followingCancelSpend);
   const sends=[];(function visit(node){if(ts.isCallExpression(node)&&node.expression.getText(parityPageAst)==="socket.send")sends.push(node);ts.forEachChild(node,visit);})(paritySendStatements[paritySocketIndex]);
   assert.equal(sends.length,1);assert.equal(sends[0].arguments[0].getText(parityPageAst),"serialized");
   const listeners=paritySendStatements.map((node,index)=>({node,index})).filter(({node})=>node.getText(parityPageAst).includes("window.dispatchEvent"));
