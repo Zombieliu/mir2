@@ -1,5 +1,15 @@
 # Numeron R16 Web 发布记录
 
+## 2026-11-10 公网钱包扫码恢复
+
+普通浏览器打开 [Numeron 游戏](https://numeron.obelisk.build/game) 后，出码、Dubhe Wallet 登录确认、进比奇和正常注销已复测。出码超时期间，Chrome 同源 HTTP/2 请求未收到响应；换到经 Cloudflare 的同域候选后可出码。另一个故障只在签名后出现：Caddy 缺少 TEST 的 `POST /playtest/v1/channels/session/exchange` 路由，返回 404。
+
+- 在同一 CNAME 开启 Cloudflare 代理，保留 Strict TLS 与 Vercel 目标。[DNS 发布](https://github.com/0xobelisk/dubhe-wallet/actions/runs/42672637650)记录了旧值和新值，发布只变更这一条记录。
+- 用线上 Caddy 2.6.2 验证并热载精确的 TEST `POST` 路由，改动在 `2b5a0461a8ae`。[路由](../infra/playtest/Caddyfile.routes)转发到原 TEST Gateway；无效签名得到 401，相邻路径和其他方法仍未开放。线上 Web `f2de76230976` 与 TEST `d53f9e3b22e2` 均原版本。
+- Chrome 使用正常公网 DNS、TLS 1.3 和 HTTP/2。实际二维码、批准轮询、交换 200、普通 `LoginSuccess`、`StartGame(4)` 与当前角色及比奇地图回包均匹配。画面有 174 张已加载的可见地块并通过像素检查；收到一次 `LogOutSuccess` 后回到选角。[脱敏收据](evidence/numeron-web-release-20261108/wallet-qr-incident-readback.json)
+
+签名由官方 Dubhe Wallet 手机尺寸 PWA 使用测试网虚拟通行密钥完成，没有转账。使用一个无资产的独立测试钱包与一个新测试角色。实体手机相机未验；成功的桌面回合仅为该测试绕开本机已有的系统代理，代理路径仍有静态资源等待。早期签名后 404 和进城视觉探针失败继续保留。本轮不涉及公开服阿洛、三职业全任务、Sui 主网或全局验收。
+
 ## 2026-11-09 已发布结果
 
 最新候选已发布至 **https://numeron.obelisk.build/game**。本次为具体发布任务，持续1:1 Goal已清除；没有扩大为Sui主网、全局Candidate或最终真人Accepted。

@@ -20,6 +20,7 @@ Documentation/evidence commits do not change the frozen deployed product.
 | [After public protocol](post-public-protocol-preservation.json) | Original account/character/save rows remain intact after the three QA accounts:132 accounts/46 roles/46 saves, same33 migrations; normal new authentication/game-fact audit rows are listed |
 | [Source-hold delta](source-hold-delta.json) | Both existing financial hold rows preserved except `updated_at_ms`; amounts/status/links exact |
 | [Wallet QR](wallet-qr-generation.json) | Final-domain session creation and pending poll succeed; no phone signature/payment |
+| [2026-11-10 wallet recovery](wallet-qr-incident-readback.json) | Public DNS and HTTPS, real Dubhe mobile PWA approval, same-domain exchange, visible Bichon and normal logout; clean egress and virtual passkey, no physical phone |
 | [Inherited images](inherited-assets-readback.json) | All three declared old-prefix map blends fully read back with exact manifest byte/hash pins and normal browser Referer; no object writes |
 | [Final service check](final-idle-services.json) | Correct TEST revision, no remaining test connections/sessions/leases; formal and wallet services active |
 | [43-save summary](clone43/summary.json), [execution](clone43/execution.json) | 129 real simulation StartGames; common normalization remains a recorded strict failure |
