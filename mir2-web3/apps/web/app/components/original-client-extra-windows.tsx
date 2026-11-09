@@ -16,7 +16,7 @@
  * `lib/stage5-window-adapters.ts`, which this module also re-exports.
  */
 
-import { memo, useEffect, useState } from "react";
+import { memo, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 
 import { BondsWindow, type BondsWindowProps, type MentorSummary, type RelationshipSummary } from "./original-client-bonds-window";
@@ -362,7 +362,7 @@ export type ExtraWindowsProps = {
   worldMap?: WindowToggle &
     Pick<WorldMapWindowProps, "currentMap" | "playerPosition" | "markers" | "onTeleport">;
 
-  help?: WindowToggle & Omit<HelpWindowProps, "t" | "onClose">;
+  help?: WindowToggle & Omit<HelpWindowProps, "t" | "onClose" | "scrollOffsets">;
   options?: WindowToggle & Omit<OptionsWindowProps, "t" | "onClose">;
 
   hotkeys?: WindowToggle & Omit<HotkeyWindowProps, "t" | "onClose">;
@@ -393,6 +393,7 @@ function ExtraWindowsInner({
   chatSettings,
 }: ExtraWindowsProps) {
   const [stageRoot, setStageRoot] = useState<HTMLElement | null>(null);
+  const helpScrollOffsets = useRef(new Map<string, number>());
 
   useEffect(() => {
     // Fast Refresh and shell/screen remounts can replace the stage element
@@ -658,7 +659,7 @@ function ExtraWindowsInner({
         />
       ) : null}
 
-      {help?.open ? <HelpWindow {...help} t={t} /> : null}
+      {help?.open ? <HelpWindow {...help} t={t} scrollOffsets={helpScrollOffsets.current} /> : null}
       {options?.open ? <OptionsWindow {...options} t={t} /> : null}
 
       {hotkeys?.open ? (

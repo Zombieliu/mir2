@@ -60,7 +60,7 @@ test("new presentation locales cannot leak unsupported codes into strict wire/WA
   const page = readFileSync(path.join(root, "app/page.tsx"), "utf8");
   assert.equal((page.match(/type: "setLanguage", language: questRuntimeLanguage\(language\)/g) ?? []).length, 2);
   assert.equal((page.match(/language: commerceRuntimeLanguage\(language\)/g) ?? []).length, 2);
-  assert.match(page, /language: questRuntimeLanguage\(language\),\s*hudBarPlayerObjectId/);
+  assert.match(page, /language: questRuntimeLanguage\(language\),\s*displayLanguage: questDisplayLanguage\(language\),\s*hudBarPlayerObjectId/);
   assert.match(page, /if \(typeof window === "undefined" \|\| !isClientReady\) return;/);
 });
 

@@ -1,0 +1,47 @@
+{
+  "passed": true,
+  "scope": "isolated File Gateway, normal headless Chrome login and Help keys",
+  "source": {
+    "app/components/original-client-help-window.tsx": "8d687868ae4d50dcfda1c8059c6c955822a4eb91ece2b96577dc88f00aec4f40",
+    "app/components/original-client-extra-windows.tsx": "de48faf7521ec19bb2d506d33da832d7b84693bb6bc931db592e828be2785e97",
+    "app/page.tsx": "b4918778aa2698b07fb8a80abc312cf179ddc6f41e1d9a1c01e10f90bf26baba"
+  },
+  "locales": [
+    {
+      "code": "zh-CN",
+      "translatedBody": true,
+      "direction": "ltr",
+      "font": "\"Noto Sans CJK SC\", sans-serif",
+      "scroll": {
+        "viewportStressHeight": 90,
+        "scrollTop": 40,
+        "separateNextPage": true,
+        "restoredOnReturn": true,
+        "restoredOnReopen": true
+      }
+    },
+    {
+      "code": "ar",
+      "translatedBody": true,
+      "direction": "rtl",
+      "font": "\"Noto Sans Arabic\", \"Noto Sans\", sans-serif"
+    },
+    {
+      "code": "en",
+      "originalImage": true,
+      "bitmapWidth": 512
+    }
+  ],
+  "screenshotHashes": {
+    "zh-CN-shortcuts": "a2ab0de358bf949aa0b70bb6828e66aa28b9932bbc79c260c89b8ec9877c6a86",
+    "zh-CN-movement": "245ff1684efba37a95b1b48958bebfc868c87a1757fa1de3b867203efa4ee14a",
+    "ar-movement": "f438fedc7daa2ee155d09981ac00f13a06ca1e7a7b8eaa58dd11dbb8f2bcfe72",
+    "en-original-bitmap": "d827ae6426a50e14bd19311c8964de4ea5f7cdd076d04a4f5f5a45c726101c88"
+  },
+  "wire": {
+    "start": 3,
+    "logout": 3,
+    "movementOrCombat": 0
+  },
+  "errors": []
+}

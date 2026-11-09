@@ -21347,7 +21347,7 @@ export default function HomePage() {
           presentMailCompatibility(next.view,next.selectedId,next.recipient,next.readDispatched,next.subject);
         } }}
       worldMap={{ open: showWorldMap, onClose: () => setShowWorldMap(false), currentMap: localizeCrystalMapTitle(world.mapTitle, t), markers: extraWindowData.worldMapMarkers }}
-      help={{ open: showHelp, onClose: () => changeReferenceWindow("help", false), page: crystalHelpState.page,
+      help={{ open: showHelp, language, onClose: () => changeReferenceWindow("help", false), page: crystalHelpState.page,
         position: { left: crystalHelpState.left, top: crystalHelpState.top }, bindings: crystalKeyBindings,
         onPageChange: page => changeCrystalHelpState({ ...crystalHelpState, page }),
         onPositionChange: position => changeCrystalHelpState({ ...crystalHelpState, ...position }) }}
