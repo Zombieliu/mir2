@@ -123,7 +123,7 @@ fn shared_trade_move_and_merge_refresh_only_partner_and_preserve_quantity() {
 }
 
 #[test]
-fn shared_trade_peer_preparation_rejects_move_and_merge_with_exact_ack() {
+fn shared_trade_move_and_merge_invalidate_peer_preparation() {
     let (mut a, mut b, source, target, _, _) = split_pair();
     b.handle_packet(ClientPacket::TradeConfirm { locked: true });
     assert!(
@@ -133,7 +133,13 @@ fn shared_trade_peer_preparation_rejects_move_and_merge_with_exact_ack() {
             .unwrap()
             .escrow_prepared
     );
-    let before = a.world_snapshot();
+    let before_quantity: u32 = a
+        .world_snapshot()
+        .inventory_items
+        .iter()
+        .filter(|item| item.key == "red-potion")
+        .map(|item| item.quantity)
+        .sum();
     let moved = a.handle_packet(ClientPacket::MoveItem {
         grid: Grid::Trade,
         from: 2,
@@ -143,7 +149,7 @@ fn shared_trade_peer_preparation_rejects_move_and_merge_with_exact_ack() {
         grid: Grid::Trade,
         from: 2,
         to: 7,
-        success: false
+        success: true
     }));
     let merged = a.handle_packet(ClientPacket::MergeItem {
         grid_from: Grid::Trade,
@@ -156,15 +162,30 @@ fn shared_trade_peer_preparation_rejects_move_and_merge_with_exact_ack() {
         grid_to: Grid::Trade,
         id_from: source,
         id_to: target,
-        success: false
+        success: true
     }));
-    assert_eq!(a.world_snapshot().inventory_items, before.inventory_items);
+    assert!(!a
+        .handle_packet(ClientPacket::TradeConfirm { locked: true })
+        .iter()
+        .any(|p| matches!(p, ServerPacket::TradeConfirm)));
+    let peer = b.handle_packet(ClientPacket::KeepAlive { time: 997 });
+    assert!(peer.iter().any(|p| matches!(p,
+        ServerPacket::TradeItem { trade_items } if trade_items[2].is_none() && trade_items[7].is_none()
+            && trade_items[4].as_ref().is_some_and(|i| i.unique_id == target && u32::from(i.count) == before_quantity))));
+    let settled = b.handle_packet(ClientPacket::TradeConfirm { locked: true });
     assert_eq!(
-        a.world_snapshot()
-            .stage5_systems
-            .trade
-            .unwrap()
-            .offered_unique_ids,
-        before.stage5_systems.trade.unwrap().offered_unique_ids
+        settled
+            .iter()
+            .filter(|p| matches!(p, ServerPacket::TradeConfirm))
+            .count(),
+        1
+    );
+    assert_eq!(
+        settled
+            .iter()
+            .filter(|p| matches!(p,
+        ServerPacket::GainedItem { item } if u32::from(item.count) == before_quantity))
+            .count(),
+        1
     );
 }

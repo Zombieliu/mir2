@@ -179,40 +179,46 @@ fn unprepared_logout_or_disconnect_refunds_before_save_and_peer_refunds_once() {
 }
 
 #[test]
-fn gold_edits_are_rejected_when_either_participant_has_prepared() {
+fn peer_can_add_gold_while_the_prepared_sender_must_unlock_first() {
     let (mut a, mut b) = funded_gold_pair();
+    let ga = a.world_snapshot().gold;
+    let gb = b.world_snapshot().gold;
     open_shared_trade_pair(&mut a, &mut b);
     a.handle_packet(ClientPacket::TradeGold { amount: 7 });
     b.handle_packet(ClientPacket::TradeGold { amount: 11 });
     a.handle_packet(ClientPacket::TradeConfirm { locked: true });
-    for session in [&mut a, &mut b] {
-        let before = session.world_snapshot();
-        let packets = session.handle_packet(ClientPacket::TradeGold { amount: 1 });
-        assert!(lost(&packets).is_empty());
-        assert_eq!(session.world_snapshot().gold, before.gold);
-        assert_eq!(
-            session
-                .world_snapshot()
-                .stage5_systems
-                .trade
-                .as_ref()
-                .unwrap()
-                .offered_gold,
-            before.stage5_systems.trade.as_ref().unwrap().offered_gold
-        );
-    }
-    assert!(
-        a.world_snapshot()
-            .stage5_systems
-            .trade
-            .as_ref()
-            .unwrap()
-            .escrow_prepared
+    let before = a.world_snapshot().stage5_systems.trade.unwrap();
+    assert!(before.escrow_prepared);
+    let own_edit = a.handle_packet(ClientPacket::TradeGold { amount: 1 });
+    assert!(lost(&own_edit).is_empty());
+    assert_eq!(a.world_snapshot().gold, ga - 7);
+    assert_eq!(
+        a.world_snapshot().stage5_systems.trade.as_ref(),
+        Some(&before)
     );
-    assert!(b
+
+    let peer_edit = b.handle_packet(ClientPacket::TradeGold { amount: 1 });
+    assert_eq!(lost(&peer_edit), vec![1]);
+    assert_eq!(b.world_snapshot().gold, gb - 12);
+    assert!(!b
         .handle_packet(ClientPacket::TradeConfirm { locked: true })
         .iter()
         .any(|p| matches!(p, ServerPacket::TradeConfirm)));
+    assert_eq!(
+        quoted(&a.handle_packet(ClientPacket::KeepAlive { time: 20 })),
+        vec![12]
+    );
+    let reopened = a.world_snapshot().stage5_systems.trade.unwrap();
+    assert!(!reopened.escrow_prepared && !reopened.locked);
+    assert_eq!(reopened.held_gold, Some(7));
+
+    assert!(a
+        .handle_packet(ClientPacket::TradeConfirm { locked: true })
+        .iter()
+        .any(|p| matches!(p, ServerPacket::TradeConfirm)));
+    b.handle_packet(ClientPacket::KeepAlive { time: 21 });
+    assert_eq!(a.world_snapshot().gold, ga - 7 + 12);
+    assert_eq!(b.world_snapshot().gold, gb - 12 + 7);
 }
 
 fn open_runtime_pair(
@@ -411,7 +417,7 @@ fn prepared_refund_overflow_retains_final_offer_until_capacity_allows_one_refund
 }
 
 #[test]
-fn peer_preparation_rejects_item_retrieval_and_deposit_without_changing_accepted_offer() {
+fn peer_preparation_is_invalidated_by_item_retrieval_and_redeposit() {
     let (mut a, mut b) = funded_gold_pair();
     let ga = a.world_snapshot().gold;
     let gb = b.world_snapshot().gold;
@@ -453,7 +459,7 @@ fn peer_preparation_rejects_item_retrieval_and_deposit_without_changing_accepted
         to: red_slot,
     });
     assert!(retrieve.iter().any(|p| matches!(p,
-        ServerPacket::RetrieveTradeItem { from: 3, to, success: false } if *to == red_slot)));
+        ServerPacket::RetrieveTradeItem { from: 3, to, success: true } if *to == red_slot)));
     assert!(quoted(&retrieve).is_empty());
     assert!(!retrieve
         .iter()
@@ -463,13 +469,18 @@ fn peer_preparation_rejects_item_retrieval_and_deposit_without_changing_accepted
         to: 4,
     });
     assert!(deposit.iter().any(|p| matches!(p,
-        ServerPacket::DepositTradeItem { from, to: 4, success: false } if *from == red_slot)));
+        ServerPacket::DepositTradeItem { from, to: 4, success: true } if *from == red_slot)));
     assert!(!deposit
         .iter()
         .any(|p| matches!(p, ServerPacket::TradeItem { .. })));
     let after = a.world_snapshot().stage5_systems.trade.unwrap();
-    assert_eq!(after.offered_slots, before.offered_slots);
-    assert_eq!(after.offered_unique_ids, before.offered_unique_ids);
+    assert_eq!(after.offered_slots.get(&4), before.offered_slots.get(&3));
+    assert_eq!(
+        after.offered_unique_ids.get(&4),
+        before.offered_unique_ids.get(&3)
+    );
+    assert_eq!(after.offered_slots.len(), 1);
+    assert_eq!(after.offered_unique_ids.len(), 1);
     assert_eq!(after.offered_items, before.offered_items);
     assert!(
         b.world_snapshot()
@@ -480,11 +491,23 @@ fn peer_preparation_rejects_item_retrieval_and_deposit_without_changing_accepted
             .escrow_prepared
     );
 
-    assert!(a
+    assert!(!a
         .handle_packet(ClientPacket::TradeConfirm { locked: true })
         .iter()
         .any(|p| matches!(p, ServerPacket::TradeConfirm)));
-    b.handle_packet(ClientPacket::KeepAlive { time: 30 });
+    let peer = b.handle_packet(ClientPacket::KeepAlive { time: 30 });
+    assert!(peer.iter().any(|packet| matches!(packet,
+        ServerPacket::TradeItem { trade_items } if trade_items[3].is_none()
+            && trade_items[4].as_ref().is_some_and(|item| u32::from(item.count) == original.quantity))));
+    assert_eq!(
+        b.world_snapshot().stage5_systems.trade.unwrap().held_gold,
+        Some(11)
+    );
+    assert!(b
+        .handle_packet(ClientPacket::TradeConfirm { locked: true })
+        .iter()
+        .any(|p| matches!(p, ServerPacket::TradeConfirm)));
+    a.handle_packet(ClientPacket::KeepAlive { time: 31 });
     assert_eq!(a.world_snapshot().gold, ga + 11);
     assert_eq!(b.world_snapshot().gold, gb - 11);
     assert!(!a

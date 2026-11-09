@@ -2,7 +2,7 @@
 
 ## R16 已确认一方的显式解锁（2026-11-10）
 
-按 Crystal `TradeConfirm(false)` 保留交易，只有请求一方解锁。Gateway 用既有 `TradeCancel { unlock: true }` 通知。隔离 File 双端已复测，满包下独立交易格、对端已确认后的报价更新及真实 PostgreSQL 继续开放。 [对照](evidence/r16-trade-reopen-20261110/README.md)
+按 Crystal `TradeConfirm(false)` 保留交易，只有请求一方解锁。报价变更则作废双方旧确认。Gateway 沿用 `TradeCancel { unlock: true }`，隔离 File 双端已复测两类行为。满包独立交易格和真实 PostgreSQL 继续开放。 [显式解锁](evidence/r16-trade-reopen-20261110/README.md) · [报价变更](evidence/r16-trade-bilateral-edit-20261110/README.md)
 
 ## R16 本地共享领取（2026-11-09）
 

@@ -52,7 +52,7 @@ use mir2_game_data::crystal_monster_by_name;
 use mir2_protocol::{
     decode_server_packet, encode_server_packet, ClientPacket, MirDirection, MonsterInfo, NpcInfo,
     ObjectDiedInfo, ObjectGoldInfo, ObjectHealthInfo, ObjectItemInfo, ObjectPlayerInfo, Point,
-    ServerPacket, Spell, UserLocation,
+    ServerPacket, Spell, UserItem, UserLocation,
 };
 use mir2_simulation::{
     intelligent_creature_allows_ground_drop, world_entity_sprite_from_object_player,
@@ -4095,6 +4095,12 @@ struct SharedTradePeer {
     peer_object_id: u32,
 }
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+struct SharedTradeQuoteUpdate {
+    reopen_pending: bool,
+    gold: Option<u32>,
+    items: Option<Vec<Option<UserItem>>>,
+}
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
 struct SharedTradeLinks {
     invitations: Vec<(ZonePresenceKey, SharedTradePeer)>,
     pairs: Vec<(ZonePresenceKey, SharedTradePeer)>,
@@ -4102,8 +4108,8 @@ struct SharedTradeLinks {
     cancellations: Vec<ZonePresenceKey>,
     #[serde(default)]
     refusals: Vec<(ZonePresenceKey, String)>,
-    #[serde(default)]
-    unlocks: Vec<(ZonePresenceKey, SharedTradePeer)>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    invalidated_offers: Vec<(ZonePresenceKey, SharedTradeQuoteUpdate)>,
 }
 const SHARED_ZONE_STATE_CHECKPOINT_VERSION: u32 = 3;
 const SHARED_ZONE_FACTORY_CHECKPOINT_VERSION: u32 = 3;
@@ -7709,6 +7715,32 @@ impl SharedInProcessZoneState {
             || self.trade_offers.contains_key(key)
     }
 
+    fn queue_trade_quote_update(&mut self, recipient: ZonePresenceKey, packets: Vec<ServerPacket>) {
+        if !self.trade_offers.contains_key(&recipient) {
+            self.queue_zone_packets(recipient, packets);
+            return;
+        }
+        // Invalidate the old confirmation now. A remote session may still
+        // need to recover its escrow before it can display the new quote.
+        let edits = &mut self.trade_links.invalidated_offers;
+        let index = edits
+            .iter()
+            .position(|(owner, _)| owner == &recipient)
+            .unwrap_or_else(|| {
+                edits.push((recipient, SharedTradeQuoteUpdate::default()));
+                edits.len() - 1
+            });
+        let update = &mut edits[index].1;
+        update.reopen_pending = true;
+        for packet in packets {
+            match packet {
+                ServerPacket::TradeGold { amount } => update.gold = Some(amount),
+                ServerPacket::TradeItem { trade_items } => update.items = Some(trade_items),
+                _ => unreachable!("trade quote updates carry only gold or items"),
+            }
+        }
+    }
+
     fn close_trade_links(&mut self, key: &ZonePresenceKey, notify: bool) {
         let partners = self
             .trade_links
@@ -7731,8 +7763,8 @@ impl SharedInProcessZoneState {
             .invitations
             .retain(|(owner, peer)| owner != key && &peer.key != key);
         self.trade_links
-            .unlocks
-            .retain(|(owner, peer)| owner != key && &peer.key != key);
+            .invalidated_offers
+            .retain(|(owner, _)| owner != key && !partners.contains(owner));
         for owner in invitees {
             self.queue_zone_packets(owner, vec![ServerPacket::TradeCancel { unlock: false }]);
         }
@@ -17481,12 +17513,13 @@ impl SharedInProcessZoneSessionRuntime {
                 .trade_links
                 .refusals
                 .retain(|(owner, _)| owner != &key);
-            let unlock = state
-                .trade_links
-                .unlocks
-                .iter()
-                .any(|(owner, peer)| owner == &key && state.valid_trade_peer(owner, peer));
-            state.trade_links.unlocks.retain(|(owner, _)| owner != &key);
+            let unlock = state.trade_partner(&key).is_some()
+                && state
+                    .trade_links
+                    .invalidated_offers
+                    .iter_mut()
+                    .find(|(owner, _)| owner == &key)
+                    .is_some_and(|(_, update)| std::mem::take(&mut update.reopen_pending));
             (initialize, cancel, refusals, unlock)
         };
         let mut packets = refusals
@@ -17498,8 +17531,7 @@ impl SharedInProcessZoneSessionRuntime {
             return packets;
         }
         if unlock && !self.has_pending_durable_trade_projection() {
-            // Crystal TradeUnlock changes server locks without a wire ACK.
-            let _ = self.inner.shared_trade_cancel(true);
+            packets.extend(self.execute_shared_trade_confirm(false));
         }
         if let Some(name) = initialize {
             if !self.inner.has_active_shared_trade_state()
@@ -17526,16 +17558,13 @@ impl SharedInProcessZoneSessionRuntime {
         })
     }
 
-    fn shared_trade_pair_has_prepared_offer(&self) -> bool {
+    fn has_own_prepared_shared_trade_offer(&self) -> bool {
         self.current_presence_key().is_some_and(|key| {
-            let state = self
-                .zone_state
+            self.zone_state
                 .lock()
-                .expect("shared zone presence mutex should not be poisoned");
-            state.trade_offers.contains_key(&key)
-                || state
-                    .trade_partner(&key)
-                    .is_some_and(|peer| state.trade_offers.contains_key(&peer))
+                .expect("shared zone presence mutex should not be poisoned")
+                .trade_offers
+                .contains_key(&key)
         })
     }
 
@@ -17544,37 +17573,17 @@ impl SharedInProcessZoneSessionRuntime {
             return Vec::new();
         };
         {
-            let mut state = self
+            let state = self
                 .zone_state
                 .lock()
                 .expect("shared zone presence mutex should not be poisoned");
             if amount > 0 && state.companion_boundary.as_ref().is_some_and(|boundary| boundary.actor(&key)) {
                 return Vec::new();
             }
-            let Some(partner) = state.trade_partner(&key) else {
-                return Vec::new();
-            };
-            // This leaf supports editing before preparation. Prepared items
-            // remain held until settlement or the existing safe cancel path.
-            if state.trade_offers.contains_key(&key) || state.trade_offers.contains_key(&partner) {
+            if state.trade_partner(&key).is_none() || state.trade_offers.contains_key(&key) {
                 return Vec::new();
             }
-            let Some((_, peer)) = state
-                .trade_links
-                .pairs
-                .iter()
-                .find(|(owner, _)| owner == &partner)
-                .cloned()
-            else {
-                return Vec::new();
-            };
-            state
-                .trade_links
-                .unlocks
-                .retain(|(owner, _)| owner != &partner);
-            state.trade_links.unlocks.push((partner, peer));
         }
-        let _ = self.inner.shared_trade_cancel(true);
         // The durable opening balance is the pre-escrow wallet. Bootstrapping
         // at confirmation would seed an already reduced balance and debit twice.
         if amount > 0
@@ -17583,11 +17592,28 @@ impl SharedInProcessZoneSessionRuntime {
         {
             return self.cancel_pending_shared_trade_offers();
         }
-        self.inner
-            .execute(WorldCommand::ClientPacket(ClientPacket::TradeGold {
-                amount,
-            }))
-            .unwrap_or_default()
+        let Ok(packets) = self
+            .inner
+            .execute(WorldCommand::ClientPacket(ClientPacket::TradeGold { amount }))
+        else {
+            return Vec::new();
+        };
+        if self.inner.has_active_shared_trade_state()
+            && !packets
+                .iter()
+                .any(|packet| matches!(packet, ServerPacket::TradeGold { .. }))
+        {
+            // Crystal invalidates both confirmations even if the offered
+            // amount is zero or exceeds the available wallet.
+            let mut state = self
+                .zone_state
+                .lock()
+                .expect("shared zone presence mutex should not be poisoned");
+            if let Some(partner) = state.trade_partner(&key) {
+                state.queue_trade_quote_update(partner, Vec::new());
+            }
+        }
+        packets
     }
 
     fn route_shared_trade_notifications(&mut self, packets: &mut Vec<ServerPacket>) {
@@ -17611,8 +17637,10 @@ impl SharedInProcessZoneSessionRuntime {
                 true
             }
         });
-        if let Some(partner) = partner {
-            state.queue_zone_packets(partner, private);
+        if !private.is_empty() {
+            if let Some(partner) = partner {
+                state.queue_trade_quote_update(partner, private);
+            }
         }
     }
 
@@ -17634,12 +17662,22 @@ impl SharedInProcessZoneSessionRuntime {
                 drop(state);
                 return self.inner.shared_trade_cancel(true);
             };
-            let packets = self.inner.reopen_shared_trade_offer(offer);
+            let mut packets = self.inner.reopen_shared_trade_offer(offer);
             if packets
                 .iter()
                 .any(|packet| matches!(packet, ServerPacket::TradeCancel { unlock: true }))
             {
                 state.trade_offers.remove(&key);
+                let edits = &mut state.trade_links.invalidated_offers;
+                if let Some(index) = edits.iter().position(|(owner, _)| owner == &key) {
+                    let (_, update) = edits.remove(index);
+                    if let Some(amount) = update.gold {
+                        packets.push(ServerPacket::TradeGold { amount });
+                    }
+                    if let Some(trade_items) = update.items {
+                        packets.push(ServerPacket::TradeItem { trade_items });
+                    }
+                }
             }
             return packets;
         }
@@ -17695,9 +17733,20 @@ impl SharedInProcessZoneSessionRuntime {
                                         .eq_ignore_ascii_case(&partner_offer.partner_name)
                                 })
                         });
+                let partner_invalidated = zone_state
+                    .trade_links
+                    .invalidated_offers
+                    .iter()
+                    .any(|(owner, _)| owner == &partner_key);
                 if !reciprocal {
                     rollback_self = Some(offer.clone());
-                } else if let Some(partner_offer) = zone_state.trade_offers.remove(&partner_key) {
+                } else if partner_invalidated || !zone_state.trade_offers.contains_key(&partner_key) {
+                    zone_state.trade_offers.insert(self_key.clone(), offer.clone());
+                } else {
+                    let partner_offer = zone_state
+                        .trade_offers
+                        .remove(&partner_key)
+                        .expect("matching prepared offer under the same Zone lock");
                     let partner_free_bag_slots = zone_state
                         .players
                         .get(&partner_key)
@@ -17708,6 +17757,7 @@ impl SharedInProcessZoneSessionRuntime {
                         && shared_trade_offer_fits(self_free_bag_slots, &partner_offer)
                         && shared_trade_offer_fits(partner_free_bag_slots, &offer)
                     {
+                        zone_state.close_trade_links(&self_key, false);
                         matched_offer = Some((partner_key, partner_offer));
                     } else {
                         zone_state
@@ -17717,10 +17767,6 @@ impl SharedInProcessZoneSessionRuntime {
                             .push(partner_offer);
                         rollback_self = Some(offer.clone());
                     }
-                } else {
-                    zone_state
-                        .trade_offers
-                        .insert(self_key.clone(), offer.clone());
                 }
             } else {
                 rollback_self = Some(offer.clone());
@@ -17731,10 +17777,6 @@ impl SharedInProcessZoneSessionRuntime {
         let mut durable_settlement = false;
         let mut unknown_settlement = false;
         if let Some((partner_key, partner_offer)) = matched_offer {
-            self.zone_state
-                .lock()
-                .expect("shared zone presence mutex should not be poisoned")
-                .close_trade_links(&self_key, false);
             let settlement = self.settle_shared_trade(&offer, &partner_offer);
             let mut zone_state = self
                 .zone_state
@@ -18034,6 +18076,12 @@ pub(crate) fn runtime_has_pending_shared_personal_work(runtime: &dyn WorldRuntim
             .pending_zone_journey_events
             .get(&key)
             .is_some_and(|queue| !queue.is_empty())
+        || (state
+            .trade_links
+            .invalidated_offers
+            .iter()
+            .any(|(owner, update)| owner == &key && update.reopen_pending)
+            && state.trade_partner(&key).is_some())
         || state.pending_zone_packets.get(&key).is_some_and(|queue| {
             queue
                 .iter()
@@ -18229,15 +18277,17 @@ impl SharedInProcessZoneSessionRuntime {
             }
             _ => None,
         };
-        let is_trade_state_mutation = trade_item_failure.is_some()
+        let is_trade_quote_mutation = trade_item_failure.is_some()
+            || matches!(
+                &command,
+                WorldCommand::ClientPacket(ClientPacket::TradeGold { .. })
+            );
+        let is_trade_state_mutation = is_trade_quote_mutation
             || matches!(
                 &command,
                 WorldCommand::ClientPacket(
                     ClientPacket::TradeRequest
                         | ClientPacket::TradeReply { .. }
-                        | ClientPacket::TradeGold { .. }
-                        | ClientPacket::DepositTradeItem { .. }
-                        | ClientPacket::RetrieveTradeItem { .. }
                         | ClientPacket::TradeConfirm { .. }
                         | ClientPacket::TradeCancel
                 )
@@ -18648,9 +18698,7 @@ impl SharedInProcessZoneSessionRuntime {
             self.execute_shared_trade_reply(*accept_invite)
         } else if is_trade_state_mutation && !is_trade_cancel && !self.has_shared_trade_pair() {
             trade_item_failure.clone().into_iter().collect()
-        } else if trade_item_failure.is_some() && self.shared_trade_pair_has_prepared_offer() {
-            // A peer's prepared offer is also a confirmation. Until editable
-            // preparation exists, withdrawing an item must not reuse it.
+        } else if trade_item_failure.is_some() && self.has_own_prepared_shared_trade_offer() {
             trade_item_failure.clone().into_iter().collect()
         } else if let Some(locked) = shared_trade_confirm {
             self.execute_shared_trade_confirm(locked)
@@ -18884,7 +18932,7 @@ impl SharedInProcessZoneSessionRuntime {
                 }
             }
         }
-        if is_trade_state_mutation {
+        if is_trade_quote_mutation {
             self.route_shared_trade_notifications(&mut command_packets);
         }
         if removes_presence {

@@ -73,30 +73,34 @@ pub fn observe_own_offer(
         let unique_id = offer.offered_unique_ids[&trade_slot];
         if usize::from(trade_slot) >= MAX_TRADE_ITEMS
             || bag_slot >= 80
-            || unique_id == 0
             || !used_bag_slots.insert(bag_slot)
             || !used_unique_ids.insert(unique_id)
         {
             return false;
         }
-        let mut candidates = inventory
-            .items
-            .iter()
-            .filter(|item| item.container == 0 && u32::from(item.slot) == u32::from(bag_slot));
+        // Crystal encodes slot presence separately, so Some(0) is a valid ID.
+        // Both the occupied slot and that concrete ID must be unambiguous.
+        let bag_slot = u32::from(bag_slot);
+        let mut candidates = inventory.items.iter().filter(|item| {
+            item.container == 0 && (item.slot == bag_slot || item.unique_id == Some(unique_id))
+        });
         let Some(item) = candidates.next() else {
             return false;
         };
-        if candidates.next().is_some() || item.unique_id != Some(unique_id) {
+        if candidates.next().is_some() || item.slot != bag_slot || item.unique_id != Some(unique_id)
+        {
             return false;
         }
         let Ok(count) = u16::try_from(item.quantity) else {
             return false;
         };
-        if item.tooltip_source.as_ref().is_some_and(|source| {
-            source.user_item.as_ref().is_some_and(|user| {
-                user.unique_id != unique_id || user.item_index != source.info.item_index
+        if count == 0
+            || item.tooltip_source.as_ref().is_some_and(|source| {
+                source.user_item.as_ref().is_some_and(|user| {
+                    user.unique_id != unique_id || user.item_index != source.info.item_index
+                })
             })
-        }) {
+        {
             return false;
         }
         slots[usize::from(trade_slot)] = Some(TradeItemModel {
@@ -134,3 +138,7 @@ pub fn observe_own_offer(
     });
     true
 }
+
+#[cfg(test)]
+#[path = "social_trade_projection_tests.rs"]
+mod tests;

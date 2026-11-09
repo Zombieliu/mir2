@@ -168,6 +168,79 @@ function fixture(existing){let sent=null,sink=null,now=10,frame=1,current=true,r
  const proof=(changes={})=>({identity:{...input.owner,controllerRun:host.run},modelRevision:sent?.modelRevision??0,map:'D001',sequence:host.run*2**22+1,edgeSequence:1,movementBlockMs:0,slot:1,skillId:0,spell:'FireBall',targetId:4,command:{type:'magic',objectId:3,spell:'FireBall',direction:'right',targetId:4,x:11,y:10,spellTargetLock:false},...changes});
  return{host,input,runtime,raw,calls,captures,edges,proof,emit:p=>JSON.parse(sink(JSON.stringify({type:'wire',proof:p??proof()}))),get sent(){return sent;},get sink(){return sink;},get ready(){return ready;},get clear(){return clear;},get clearWork(){return clearWork;},set hook(v){hook=v;},set now(v){now=v;},set current(v){current=v;},set frame(v){frame=v;}};
 }
+test('persistent weapon state survives incomplete snapshots and retires at a fresh character session', () => {
+ const f = fixture();
+ for (const [i, spell] of ['Thrusting', 'HalfMoon', 'CrossHalfMoon', 'DoubleSlash'].entries()) {
+  const row = { id: 10 + i, key: spell.toLowerCase(), spell, hotkey: i + 1, castKind: 'toggle' };
+  const observe = (rows = [row]) => f.host.observeSnapshot({ playerObjectId: 3, knownSkills: rows }, f.input.owner);
+  assert.equal(observe(), true);
+  assert.equal(f.host.observePacket('SpellToggle', { objectId: 3, spell, canUse: true }, f.input.owner), true);
+  assert.equal(observe(), true);
+  assert.equal(f.sent.learned[0].canUse, true, spell);
+  assert.equal(Object.hasOwn(row, 'canUse'), false);
+  f.input.owner = { ...f.input.owner, ownerRevision: f.input.owner.ownerRevision + 1 };
+  assert.equal(observe(), true);
+  assert.equal(f.sent.learned[0].canUse, true, 'presentation custody changes within the same session');
+  assert.equal(observe([{ ...row, canUse: false }]), true);
+  assert.equal(f.sent.learned[0].canUse, false, 'a supplied current value supersedes an earlier packet');
+  assert.equal(f.host.observePacket('SpellToggle', { objectId: 3, spell, canUse: true }, f.input.owner), true);
+  const retired = f.input.owner;
+  f.input.owner = { ...retired, sessionGeneration: retired.sessionGeneration + 1 };
+  assert.equal(observe(), true);
+  assert.equal(f.sent.learned[0].canUse, undefined);
+  assert.equal(f.host.observePacket('SpellToggle', { objectId: 3, spell, canUse: true }, retired), false);
+ }
+});
+
+test('persistent weapon state cannot cross an ambiguous or replaced learned row', () => {
+ const row = { id: 10, key: 'halfmoon', spell: 'HalfMoon', hotkey: 1, castKind: 'toggle' };
+ for (const replacement of [[{ ...row, id: 11 }], [{ ...row, key: 'replacement' }], [{ ...row, canUse: null }],
+  [{ ...row, castKind: 'passive' }], [{ ...row }, { ...row, id: 11 }], []]) {
+  const f = fixture();
+  const observe = rows => f.host.observeSnapshot({ playerObjectId: 3, knownSkills: rows }, f.input.owner);
+  assert.equal(observe([row]), true);
+  assert.equal(f.host.observePacket('SpellToggle', { objectId: 3, spell: 'HalfMoon', canUse: true }, f.input.owner), true);
+  assert.equal(observe(replacement), true);
+  assert.ok(f.sent.learned.every(skill => skill.canUse !== true));
+  assert.equal(observe([row]), true);
+  assert.equal(f.sent.learned[0].canUse, undefined);
+ }
+});
+
+test('persistent weapon wire dispatch shares the native 1000 ms interval and handles uncertain sends', () => {
+ const f = fixture();
+ const halfMoon = { id: 10, key: 'halfmoon', spell: 'HalfMoon', hotkey: 1, castKind: 'toggle' };
+ const thrusting = { id: 11, key: 'thrusting', spell: 'Thrusting', hotkey: 9, castKind: 'toggle' };
+ const fireBall = { id: 12, key: 'fireball', spell: 'FireBall', hotkey: 2, castKind: 'target' };
+ const observe = () => f.host.observeSnapshot({ playerObjectId: 3, knownSkills: [halfMoon, thrusting, fireBall] }, f.input.owner);
+ assert.equal(observe(), true);
+ let sequence = 0;
+ const issue = (row, at) => {
+  f.now = at;
+  const base = f.proof();
+  const toggle = row.castKind === 'toggle';
+  return f.emit({ ...base, sequence: f.host.run * 2**22 + ++sequence, spell: row.spell,
+   slot: row.hotkey, skillId: row.id, targetId: toggle ? null : base.targetId,
+   command: toggle ? { type: 'spellToggle', spell: row.spell, toggleState: 1 } : base.command }).outcome;
+ };
+ f.hook = () => 'definitelyUnsent';
+ assert.equal(issue(halfMoon, 100), 'definitelyUnsent');
+ f.hook = () => 'confirmedSend';
+ assert.equal(issue(halfMoon, 101), 'confirmedSend', 'a definitely unsent attempt leaves the interval open');
+ const sends = f.calls.length;
+ assert.equal(issue(thrusting, 1100), 'definitelyUnsent');
+ assert.equal(f.calls.length, sends);
+ assert.equal(issue(fireBall, 1100), 'confirmedSend');
+ f.hook = () => 'outcomeUnknown';
+ assert.equal(issue(thrusting, 1101), 'outcomeUnknown');
+ f.input.owner = { ...f.input.owner, ownerRevision: 1 };
+ assert.equal(observe(), true);
+ assert.equal(issue(halfMoon, 1102), 'definitelyUnsent', 'the interval survives a same-session UI owner change');
+ f.input.owner = { ...f.input.owner, sessionGeneration: 3 };
+ assert.equal(observe(), true);
+ f.hook = () => 'confirmedSend';
+ assert.equal(issue(halfMoon, 1103), 'confirmedSend', 'a fresh character session gets a fresh interval');
+});
 test('independent exact combat caps preserve old fallback and recognize compiled startup waiting',()=>{const f=fixture();assert.ok(supportsCombat(f.runtime));assert.equal(supportsCombat({}),false);assert.equal(supportsCombat({...f.runtime,getMir2CombatInputCapabilities:()=>JSON.stringify({...caps,questUiAbiVersion:1})}),false);assert.ok(supportsCombat({...f.runtime,getMir2CombatInputCapabilities:()=>JSON.stringify({...caps,startup:false})}));});
 test('combat capabilities explicitly distinguish forced-player input v2 from ordinary v1',()=>{
  const f=fixture();assert.equal(supportsForcedPlayerAttack(f.runtime),false);
@@ -252,6 +325,7 @@ test('production integration captures raw before coalescing and final event proo
  const rankingInspectCondition='wireCommand.type === "inspect" && (!options?.rankingInspectProof ||socketRef.current!==socket||socket.readyState!==WebSocket.OPEN||options.rankingInspectProof.owner.socket!==socket ||!rankingInspectRequestsRef.current.claim(options.rankingInspectProof,currentRankingInspectSource(),wireCommand,Math.floor(performance.now())))';
  const groupCondition='options?.groupProof && (socketRef.current !== socket || socket.readyState !== WebSocket.OPEN || options.groupProof.owner.socket !== socket || !groupOperationsRef.current.claim(options.groupProof, currentGroupOperationSource(), wireCommand))';
  const guildRankCondition='options?.socialRosterProof?.rankProof && (socketRef.current !== socket || socket.readyState !== WebSocket.OPEN || !guildRankOperationsRef.current.claim(options.socialRosterProof.rankProof, readGuildRankEditSource(), wireCommand, Math.floor(performance.now())))';
+ const tradeConfirmCondition='options?.socialTradeProof && wireCommand.type === "tradeConfirm"';
  const tradeCancelCondition='options?.socialTradeProof && wireCommand.type === "tradeCancel"';
  const budgetValidateCondition='socialBudgetTicket && !socialBudgetRef.current?.validate(socialBudgetTicket, currentSocialReplyOwner(), wireCommand)';
  const budgetEnterCondition='socialBudgetTicket && !socialBudgetRef.current?.enter(socialBudgetTicket, currentSocialReplyOwner(), wireCommand)';
@@ -292,6 +366,7 @@ test('production integration captures raw before coalescing and final event proo
   groupCondition,
   guildRankCondition,
   'wireCommand.type === "requestGuildInfo"',
+  tradeConfirmCondition,
   tradeCancelCondition,
   budgetEnterCondition,
   tradeCancelCondition,
@@ -390,17 +465,30 @@ test('production integration captures raw before coalescing and final event proo
  assert.ok(ts.isIfStatement(guildReadGate));assert.equal(normalized(guildReadGate.expression),'wireCommand.type === "requestGuildInfo"');
  assert.equal(normalized(guildReadGate.thenStatement),'{ const row = guildRankReadRef.current, scope = guildRankScopeRef.current; if (!row || !scope || row.scope !== scope.key || row.entered || row.proof !== options?.socialRosterProof?.rankReadProof || !row.proof || socketRef.current !== socket || socket.readyState !== WebSocket.OPEN) return false; row.entered = true; }');
  assert.equal(guildReadGate.elseStatement,undefined);
- const tradeCancelGate=statements[authClaimIndex+11];
+ const tradeConfirmGate=statements[authClaimIndex+11];
+ assert.ok(ts.isIfStatement(tradeConfirmGate));assert.equal(normalized(tradeConfirmGate.expression),tradeConfirmCondition);
+ assert.equal(tradeConfirmGate.elseStatement,undefined);assert.ok(ts.isBlock(tradeConfirmGate.thenStatement));
+ const [confirmRefusal, captureOffer]=tradeConfirmGate.thenStatement.statements;
+ assert.equal(tradeConfirmGate.thenStatement.statements.length,2);
+ assert.equal(normalized(confirmRefusal),'if (socketRef.current !== socket || socket.readyState !== WebSocket.OPEN || !socialTradeProofCurrent(options.socialTradeProof, wireCommand)) return false;');
+ assert.ok(ts.isIfStatement(captureOffer));assert.equal(normalized(captureOffer.expression),'wireCommand.locked === true');
+ assert.equal(captureOffer.elseStatement,undefined);assert.ok(ts.isBlock(captureOffer.thenStatement));
+ assert.deepEqual(captureOffer.thenStatement.statements.map(normalized),[
+  'const source = readSocialItemSurface("trade");',
+  'if (!source?.trade) return false;',
+  'socialTradeConfirmOfferRef.current = {owner: source.owner, incarnation: options.socialTradeProof.incarnation, key: ownTradeOfferKey(source.trade), items: source.slots.map(item => item ? ownTradeTooltipItem(item) : null)};'
+ ]);
+ const tradeCancelGate=statements[authClaimIndex+12];
  assert.ok(ts.isIfStatement(tradeCancelGate));assert.equal(normalized(tradeCancelGate.expression),tradeCancelCondition);
  assert.equal(normalized(tradeCancelGate.thenStatement),'{ if (socketRef.current !== socket || socket.readyState !== WebSocket.OPEN || !socialTradeProofCurrent(options.socialTradeProof, wireCommand)) return false; }');
  assert.equal(tradeCancelGate.elseStatement,undefined);
- const budgetEnter=statements[authClaimIndex+12],cancelSpent=statements[authClaimIndex+13];
+ const budgetEnter=statements[authClaimIndex+13],cancelSpent=statements[authClaimIndex+14];
  assert.ok(ts.isIfStatement(budgetEnter));assert.equal(normalized(budgetEnter.expression),budgetEnterCondition);
  assert.equal(normalized(budgetEnter.thenStatement),'return false;');assert.equal(budgetEnter.elseStatement,undefined);
  assert.ok(ts.isIfStatement(cancelSpent));assert.equal(normalized(cancelSpent.expression),tradeCancelCondition);
  assert.equal(normalized(cancelSpent.thenStatement),'socialTradeCancelSpentRef.current = options.socialTradeProof.incarnation;');
  assert.equal(cancelSpent.elseStatement,undefined);
- assert.equal(socketIndex,authClaimIndex+14,'all typed guild/read/cancel checks precede final Native entry, cancel spending and socket');
+ assert.equal(socketIndex,authClaimIndex+15,'typed guild/read and trade confirm/cancel checks precede final Native entry, cancel spending and socket');
  assert.deepEqual(statements.slice(statements.indexOf(budgetEnter)+1,socketIndex+1),[cancelSpent,socketTry],
   'only the exact callback-free cancel assignment can follow Native entry before socket.send');
  const afterEntryCalls=[];
@@ -408,7 +496,7 @@ test('production integration captures raw before coalescing and final event proo
  assert.deepEqual(afterEntryCalls,[],'no callback, await or constructor after successful Native entry before transport');
  // Every pre-send statement after the combat claim is covered by the exact
  // ordered list above, including Repair/retire, Bag/Belt and final WorldFishing entry.
- assert.deepEqual(statements.slice(claimIndex+1,socketIndex).filter(n=>ts.isIfStatement(n)).map(n=>normalized(n.expression)).slice(-13),[
+ assert.deepEqual(statements.slice(claimIndex+1,socketIndex).filter(n=>ts.isIfStatement(n)).map(n=>normalized(n.expression)).slice(-14),[
   'options?.npcRepairProof',
   'isMailItemMutation(wireCommand) || ["dropGold", "tradeGold", "gameShopBuy", "sendMail", "collectParcel"].includes(String(wireCommand.type))',
   'options?.bagBeltProof',
@@ -419,6 +507,7 @@ test('production integration captures raw before coalescing and final event proo
   groupCondition,
   guildRankCondition,
   'wireCommand.type === "requestGuildInfo"',
+  tradeConfirmCondition,
   tradeCancelCondition,
   budgetEnterCondition,
   tradeCancelCondition,

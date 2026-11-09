@@ -16,6 +16,30 @@ type Snapshot=CombatFacts&{identity:CombatIdentity;revision:number;modelRevision
 type Options={runtime:CombatRuntime;isCurrent:()=>boolean;read:()=>{owner:CombatOwner|null;facts:CombatFacts|null};now:()=>number;onReady:(ready:boolean)=>void;onWire:(proof:CombatProof,serialized:string)=>"confirmedSend"|"definitelyUnsent"|"outcomeUnknown";onApproach:(x:number,y:number)=>void;onClear:()=>void};
 const safe=(v:unknown):v is number=>Number.isSafeInteger(v)&&Number(v)>=0;
 const object=(v:unknown):v is Record<string,unknown>=>Boolean(v)&&typeof v==="object"&&!Array.isArray(v);
+const PERSISTENT_WEAPON_TOGGLES = ["Thrusting", "HalfMoon", "CrossHalfMoon", "DoubleSlash"];
+const WEAPON_TOGGLE_INTERVAL_MS = 1000;
+
+function sameCombatSession(a: CombatOwner, b: CombatOwner) {
+  return a.connectionGeneration === b.connectionGeneration && a.sessionGeneration === b.sessionGeneration
+    && a.playerObjectId === b.playerObjectId;
+}
+
+// The gateway's learned-skill snapshots may omit the separate SpellToggle state.
+// Carry it only for the same unambiguous learned skill in this character session.
+function retainWeaponToggleStates(previous: readonly unknown[], rows: unknown[]) {
+  for (const spell of PERSISTENT_WEAPON_TOGGLES) {
+    const matchesSpell = (row: unknown): row is Record<string, unknown> => object(row) && row.spell === spell;
+    const [current, duplicate] = rows.filter(matchesSpell);
+    if (!current || duplicate || current.castKind !== "toggle" || typeof current.key !== "string" || !current.key
+      || Object.hasOwn(current, "canUse") || Object.hasOwn(current, "can_use")) continue;
+    const [prior, priorDuplicate] = previous.filter(matchesSpell);
+    if (prior && !priorDuplicate && prior.castKind === "toggle" && prior.key === current.key && prior.id === current.id
+      && typeof prior.canUse === "boolean") {
+      rows[rows.indexOf(current)] = { ...current, canUse: prior.canUse };
+    }
+  }
+}
+
 const ownerKeys=["connectionGeneration","sessionGeneration","ownerRevision","playerObjectId"] as const;
 function validOwner(v:unknown):v is CombatOwner {return object(v)&&ownerKeys.every(k=>safe(v[k]))&&Number(v.connectionGeneration)>0&&Number(v.sessionGeneration)>0&&Number(v.playerObjectId)>0&&Number(v.playerObjectId)<=0xffffffff;}
 function validIdentity(v:unknown):v is CombatIdentity {const run=(v as CombatIdentity|null)?.controllerRun;return validOwner(v)&&safe(run)&&run>=1&&run<2**31&&Object.keys(v).sort().join()===[...ownerKeys,"controllerRun"].sort().join();}
@@ -34,10 +58,11 @@ function wire(v:unknown):v is CombatCommand {if(!object(v)||typeof v.type!=="str
  if(v.type==="magic"||v.type==="spellToggle"){if(typeof v.spell!=="string"||!v.spell.trim()||v.spell.length>128)return false;return v.type==="magic"?typeof v.spellTargetLock==="boolean":v.toggleState===0||v.toggleState===1;}
  return true;}
 export function parseCombatProof(value:unknown):CombatProof|null {const v=value;if(!object(v)||Object.keys(v).sort().join()!==["identity","modelRevision","map","sequence","edgeSequence","movementBlockMs","slot","skillId","spell","targetId","command"].sort().join()||!validIdentity(v.identity)||!safe(v.modelRevision)||!safe(v.sequence)||v.sequence===0||Math.floor(v.sequence/2**22)!==v.identity.controllerRun||v.sequence%2**22===0||!safe(v.edgeSequence)||!safe(v.movementBlockMs)||v.movementBlockMs>0xffffffff||typeof v.map!=="string"||!v.map||![v.slot,v.skillId,v.targetId].every(n=>n===null||safe(n))||!(v.spell===null||typeof v.spell==="string"&&v.spell.length>0&&v.spell.length<=128)||!wire(v.command))return null;if(v.modelRevision===0||v.map.length>256||Number(v.skillId)>0xffffffff||Number(v.targetId)>0xffffffff)return null;const skill=v.command.type==="magic"||v.command.type==="spellToggle";if(skill?!(safe(v.slot)&&v.slot>=1&&v.slot<=16&&safe(v.skillId)&&typeof v.spell==="string"&&v.command.spell===v.spell):v.slot!==null||v.skillId!==null||v.spell!==null)return null;if(v.command.type==="attack"&&v.command.objectId!==v.targetId||["magic","rangeAttack"].includes(v.command.type)&&v.command.targetId!==v.targetId)return null;return v as CombatProof;}
-/** Thin ownership/transport adapter. Every combat rule and aim remains in Rust. */
+/** Ownership and transport for intents chosen and aimed by the Rust combat controller. */
 export class CombatHost {
   run=burnSpellsRun();private stopped=false;private attached=false;private revision=0;private modelRevision=0;private edgeSequence=0;private seenSequence=0;
   private raw:unknown[]|null=null;private rawOwner:CombatOwner|null=null;private sent:Snapshot|null=null;private modelKey="";private timing=new Map<string,Timing>();private castSequence=0;private lastNow=0;
+  private weaponToggleReadyAt = 0;
   private uiHolds=new Map<CombatUiChannel,{token:object;owner:CombatOwner}>();
   private active:{proof:CombatProof;body:string;claimed:boolean}|null=null;private frame=-1;private frameAt=0;
   private lastInput:{factsPresent:boolean;enabled:boolean;ownerMatched:boolean}|null=null;
@@ -57,11 +82,37 @@ export class CombatHost {
   clearUiHeld(){this.uiHolds.clear();}
   private owns(){return owners().get(this.options.runtime)===this.run;}
   private attach(){if(this.attached||this.stopped||!this.supported())return;owners().set(this.options.runtime,this.run);try{this.options.runtime.setMir2CombatInputIntentSink?.(json=>this.receive(json));this.attached=true;}catch{this.stop();}}
-  private owner(owner:CombatOwner){this.reconcileUiHolds(owner);if(this.rawOwner&&!sameSpellsOwner(this.rawOwner,owner)){this.withdraw();this.raw=null;this.run=burnSpellsRun();this.edgeSequence=0;this.seenSequence=0;this.timing.clear();this.sent=null;this.modelKey="";if(this.attached)owners().set(this.options.runtime,this.run);}this.rawOwner={...owner};}
+  private owner(owner: CombatOwner) {
+    this.reconcileUiHolds(owner);
+    if (this.rawOwner && !sameSpellsOwner(this.rawOwner, owner)) {
+      if (!sameCombatSession(this.rawOwner, owner)) this.weaponToggleReadyAt = 0;
+      this.withdraw();
+      this.raw = null;
+      this.run = burnSpellsRun();
+      this.edgeSequence = 0;
+      this.seenSequence = 0;
+      this.timing.clear();
+      if (this.attached) owners().set(this.options.runtime, this.run);
+    }
+    this.rawOwner = { ...owner };
+  }
   observeSnapshot(snapshot:CombatRaw,owner:CombatOwner){if(this.stopped||this.attached&&!this.owns()||!this.options.isCurrent()||!validOwner(owner)||!sameSpellsOwner(owner,this.read().owner??{} as CombatOwner)||snapshot.playerObjectId!==owner.playerObjectId){this.lastBaselineObservation="ownerOrRuntimeRejected";return false;}
     if(!Array.isArray(snapshot.knownSkills)||snapshot.knownSkills.length>512||snapshot.knownSkills.some(row=>!object(row))){this.lastBaselineObservation="invalidLearnedRows";this.raw=null;this.withdraw();return false;}
+    const previous = this.rawOwner && sameCombatSession(this.rawOwner, owner) ? this.raw : null;
     this.owner(owner);
-    try{this.raw=JSON.parse(JSON.stringify(snapshot.knownSkills));}catch{this.lastBaselineObservation="serializationFailed";this.raw=null;this.withdraw();return false;}this.lastBaselineObservation="accepted";this.rawOwner={...owner};this.tick();return true;
+    try {
+      const rows: unknown[] = JSON.parse(JSON.stringify(snapshot.knownSkills));
+      if (previous) retainWeaponToggleStates(previous, rows);
+      this.raw = rows;
+    } catch {
+      this.lastBaselineObservation = "serializationFailed";
+      this.raw = null;
+      this.withdraw();
+      return false;
+    }
+    this.lastBaselineObservation = "accepted";
+    this.tick();
+    return true;
   }
   observePacket(packet:string,payload:Record<string,unknown>,owner:CombatOwner){if(this.stopped||this.attached&&!this.owns()||!validOwner(owner)||!sameSpellsOwner(owner,this.read().owner??{} as CombatOwner)||!this.options.isCurrent())return false;const spell=payload.spell;if(typeof spell!=="string"||!spell||spell.length>128)return false;const at=Math.floor(this.options.now());if(!safe(at))return false;
     if(packet==="SpellToggle"){
@@ -93,9 +144,30 @@ export class CombatHost {
   private receive(json:string){let output:unknown;try{output=JSON.parse(json);}catch{return JSON.stringify({outcome:"definitelyUnsent"});}if(!object(output))return JSON.stringify({outcome:"definitelyUnsent"});
     if(output.type==="clear"){if(this.owns()){this.active=null;this.options.onClear();}return "{}";}
     if(output.type==="approach"){if(this.fresh()&&validIdentity(output.identity)&&this.sent&&sameIdentity(output.identity,this.sent.identity)&&output.modelRevision===this.sent.modelRevision&&output.map===this.sent.map&&safe(output.sequence)&&Math.floor(output.sequence/2**22)===this.run&&output.sequence%2**22>0&&output.sequence>this.seenSequence&&safe(output.edgeSequence)&&output.targetId===this.sent.selectedObjectId&&this.sent.actors.some(a=>Number(a.objectId)===output.targetId)&&Number.isInteger(output.x)&&Number.isInteger(output.y)){this.seenSequence=output.sequence;this.options.onApproach(Number(output.x),Number(output.y));}return "{}";}
-    const proof=output.type==="wire"?parseCombatProof(output.proof):null;if(!proof||!this.fresh()||proof.sequence<=this.seenSequence)return JSON.stringify({outcome:"definitelyUnsent"});this.seenSequence=proof.sequence;
-    const body=JSON.stringify(proof.command);this.active={proof,body,claimed:false};let outcome:"confirmedSend"|"definitelyUnsent"|"outcomeUnknown"="definitelyUnsent";
-    try{if(this.allows(proof))outcome=this.options.onWire(proof,body);}catch{outcome="outcomeUnknown";}finally{this.active=null;}
+    const proof = output.type === "wire" ? parseCombatProof(output.proof) : null;
+    if (!proof || !this.fresh() || proof.sequence <= this.seenSequence) return JSON.stringify({ outcome: "definitelyUnsent" });
+    this.seenSequence = proof.sequence;
+    const weaponToggle = proof.command.type === "spellToggle" && PERSISTENT_WEAPON_TOGGLES.some(
+      spell => spell.toLowerCase() === proof.spell?.toLowerCase());
+    const requestedAt = this.lastNow;
+    if (weaponToggle && requestedAt < this.weaponToggleReadyAt) return JSON.stringify({ outcome: "definitelyUnsent" });
+
+    const body = JSON.stringify(proof.command);
+    this.active = { proof, body, claimed: false };
+    let outcome: "confirmedSend" | "definitelyUnsent" | "outcomeUnknown" = "definitelyUnsent";
+    try {
+      if (this.allows(proof)) outcome = this.options.onWire(proof, body);
+    } catch {
+      outcome = "outcomeUnknown";
+    } finally {
+      this.active = null;
+    }
+    // Match the Native key/click interval at the final send boundary. An
+    // uncertain delivery may have reached the server and consumes the interval.
+    if (weaponToggle && outcome !== "definitelyUnsent" && this.rawOwner
+      && this.owns() && sameCombatSession(this.rawOwner, proof.identity)) {
+      this.weaponToggleReadyAt = requestedAt + WEAPON_TOGGLE_INTERVAL_MS;
+    }
     return JSON.stringify({outcome});
   }
   allows(proof:CombatProof){if(!this.active||this.active.claimed||JSON.stringify(proof)!==JSON.stringify(this.active.proof)||!this.fresh()||!this.sent||!sameIdentity(proof.identity,this.sent.identity)||proof.modelRevision!==this.sent.modelRevision||proof.map!==this.sent.map)return false;

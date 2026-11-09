@@ -355,6 +355,148 @@ fn prepared_unlock_keeps_the_offer_editable_and_requires_fresh_confirmation() {
 }
 
 #[test]
+fn partner_quote_edits_invalidate_prepared_trade_before_the_peer_drains() {
+    let (mut editor, mut peer) = started_shared_zone_sessions();
+    let initial_editor_gold = editor.world_snapshot().gold;
+    let initial_peer_gold = peer.world_snapshot().gold;
+    let potion_slot = inventory_slot_for_key(&editor, "red-potion");
+    open_shared_trade_pair(&mut editor, &mut peer);
+    editor.handle_packet(ClientPacket::TradeGold { amount: 7 });
+    editor.handle_packet(ClientPacket::DepositTradeItem {
+        from: potion_slot,
+        to: 0,
+    });
+    peer.handle_packet(ClientPacket::TradeConfirm { locked: true });
+    let prepared_peer = peer.world_snapshot().stage5_systems.trade.unwrap();
+    assert!(prepared_peer.escrow_prepared && prepared_peer.locked);
+
+    let invalid = editor.handle_packet(ClientPacket::RetrieveTradeItem {
+        from: 9,
+        to: potion_slot,
+    });
+    assert!(invalid.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::RetrieveTradeItem { success: false, .. }
+    )));
+    assert!(!peer
+        .handle_packet(ClientPacket::KeepAlive { time: 1 })
+        .iter()
+        .any(|packet| { matches!(packet, ServerPacket::TradeCancel { .. }) }));
+    assert_eq!(
+        peer.world_snapshot().stage5_systems.trade.as_ref(),
+        Some(&prepared_peer)
+    );
+
+    let retrieved = editor.handle_packet(ClientPacket::RetrieveTradeItem {
+        from: 0,
+        to: potion_slot,
+    });
+    assert!(retrieved.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::RetrieveTradeItem { success: true, .. }
+    )));
+    assert!(peer.has_pending_shared_personal_work());
+    let deposited = editor.handle_packet(ClientPacket::DepositTradeItem {
+        from: potion_slot,
+        to: 1,
+    });
+    assert!(deposited
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::DepositTradeItem { success: true, .. })));
+    let confirm = editor.handle_packet(ClientPacket::TradeConfirm { locked: true });
+    assert!(!confirm.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::TradeConfirm
+            | ServerPacket::GainedGold { .. }
+            | ServerPacket::GainedItem { .. }
+    )));
+    let held_editor = editor.world_snapshot().stage5_systems.trade.unwrap();
+    assert!(held_editor.escrow_prepared && held_editor.locked);
+    // The editor's fresh confirmation arrived before the peer could drain.
+    assert_eq!(
+        peer.world_snapshot().stage5_systems.trade.as_ref(),
+        Some(&prepared_peer)
+    );
+    let peer_update = peer.handle_packet(ClientPacket::KeepAlive { time: 2 });
+    assert!(peer_update
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::TradeCancel { unlock: true })));
+    let mut item_quotes = peer_update.iter().filter_map(|packet| match packet {
+        ServerPacket::TradeItem { trade_items } => Some(trade_items),
+        _ => None,
+    });
+    let items = item_quotes.next().expect("latest item quote");
+    assert!(item_quotes.next().is_none());
+    assert!(items[0].is_none());
+    assert_eq!(items[1].as_ref().unwrap().count, 5);
+    let reopened_peer = peer.world_snapshot().stage5_systems.trade.unwrap();
+    assert_eq!(
+        reopened_peer.settlement_nonce,
+        prepared_peer.settlement_nonce
+    );
+    assert!(!reopened_peer.escrow_prepared && !reopened_peer.locked);
+
+    // Even invalid gold attempts clear the other confirmation without a debit.
+    let invalid_gold = peer.handle_packet(ClientPacket::TradeGold { amount: 0 });
+    assert!(!invalid_gold.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::LoseGold { .. } | ServerPacket::TradeGold { .. }
+    )));
+    let editor_update = editor.handle_packet(ClientPacket::KeepAlive { time: 3 });
+    assert!(editor_update
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::TradeCancel { unlock: true })));
+    let reopened_editor = editor.world_snapshot().stage5_systems.trade.unwrap();
+    assert!(!reopened_editor.escrow_prepared && !reopened_editor.locked);
+    assert_eq!(
+        reopened_editor.offered_unique_ids,
+        held_editor.offered_unique_ids
+    );
+    assert_eq!(reopened_editor.held_gold, Some(7));
+
+    peer.handle_packet(ClientPacket::TradeConfirm { locked: true });
+    assert!(editor
+        .handle_packet(ClientPacket::TradeGold { amount: 5 })
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::LoseGold { gold: 5 })));
+    assert!(!editor
+        .handle_packet(ClientPacket::TradeConfirm { locked: true })
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::TradeConfirm)));
+    let peer_update = peer.handle_packet(ClientPacket::KeepAlive { time: 4 });
+    assert!(peer_update
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::TradeGold { amount: 12 })));
+    let settled = peer.handle_packet(ClientPacket::TradeConfirm { locked: true });
+    assert_eq!(
+        settled
+            .iter()
+            .filter(|packet| matches!(packet, ServerPacket::TradeConfirm))
+            .count(),
+        1
+    );
+    assert_eq!(
+        settled
+            .iter()
+            .filter(|packet| matches!(packet, ServerPacket::GainedItem { item } if item.count == 5))
+            .count(),
+        1
+    );
+    assert_eq!(
+        settled
+            .iter()
+            .filter(|packet| matches!(packet, ServerPacket::GainedGold { gold: 12 }))
+            .count(),
+        1
+    );
+    editor.handle_packet(ClientPacket::KeepAlive { time: 5 });
+    assert_eq!(editor.world_snapshot().gold, initial_editor_gold - 12);
+    assert_eq!(peer.world_snapshot().gold, initial_peer_gold + 12);
+    assert!(editor.world_snapshot().stage5_systems.trade.is_none());
+    assert!(peer.world_snapshot().stage5_systems.trade.is_none());
+}
+
+#[test]
 fn disabled_trade_preference_rejects_invites() {
     let (mut first, mut second) = started_shared_zone_sessions();
     face_shared_trade_pair(&mut first, &mut second);
