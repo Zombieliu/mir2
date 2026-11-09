@@ -36,6 +36,7 @@ function loadTypeScriptModule(url) {
 }
 
 const effects = loadTypeScriptModule(new URL("../lib/crystal-magic-effects.ts", import.meta.url));
+const targeted = loadTypeScriptModule(new URL("../lib/r16-targeted-projectiles.ts", import.meta.url));
 
 function effectsFetch(outputDir) {
   return async (url) => {
@@ -447,6 +448,66 @@ function testPackedAtlasCrop() {
   );
 }
 
+function testR16TargetedProjectilePhases() {
+  const source = { x: 288, y: 616 };
+  const north = { objectId: "target", x: 288, y: 611 };
+  const east = { ...north, x: 295, y: 616 };
+  const fartherEast = { ...east, x: 298 };
+  const phases = (state, entities, now) =>
+    targeted.advanceR16TargetedProjectiles(state, entities, now);
+  const headings = [
+    [0, -7], [3, -7], [7, -7], [7, -3], [7, 0], [7, 3], [7, 7], [3, 7],
+    [0, 7], [-3, 7], [-7, 7], [-7, 3], [-7, 0], [-7, -3], [-7, -7], [-3, -7],
+  ];
+  assert.equal(targeted.r16TargetedSpell(34), "GreatFireBall");
+  assert.equal(targeted.r16TargetedSpell("64"), "SoulFireBall");
+  assert.equal(targeted.r16TargetedSpell("FireBall"), null);
+  assert.equal(targeted.r16ProjectileFrameInterval(250), 31);
+  assert.equal(targeted.r16ProjectileFrameInterval(350), 31);
+
+  for (const spell of ["GreatFireBall", "SoulFireBall"]) {
+    const pending = [targeted.createR16TargetedProjectile(
+      spell, spell, "caster", north.objectId, source, north, 0,
+    )];
+    const before = phases(pending, [north], 599);
+    assert.equal(before.projectiles, pending);
+    assert.deepEqual(before.sounds, []);
+    assert.equal(before.deadline, 600);
+    for (const [direction, [dx, dy]] of headings.entries()) {
+      const launched = phases(pending, [{ ...north, x: source.x + dx, y: source.y + dy }], 600);
+      assert.equal(launched.projectiles[0].r16Targeted.direction, direction);
+      assert.equal(launched.deadline, 950);
+    }
+
+    const launched = phases(pending, [east], 600);
+    assert.deepEqual(launched.sounds, [{ spell, phase: "projectile" }]);
+    const moving = phases(launched.projectiles, [fartherEast], 650);
+    assert.deepEqual(moving.sounds, []);
+    assert.equal(moving.projectiles[0].r16Targeted.direction, 4);
+    assert.equal(moving.projectiles[0].toX, fartherEast.x);
+    assert.equal(moving.deadline, 1100);
+    assert.deepEqual(phases(moving.projectiles, [fartherEast], 1099).sounds, []);
+    const impact = phases(moving.projectiles, [{ ...fartherEast, dead: true, dieUntil: 1101 }], 1100);
+    assert.deepEqual(impact.sounds, [{ spell, phase: "impact" }], "Die still receives impact");
+    assert.equal(impact.projectiles[0].r16Targeted.phase, "impact");
+    assert.equal(impact.deadline, 1700);
+    assert.deepEqual(phases(impact.projectiles, [fartherEast], 1101).sounds, []);
+    assert.deepEqual(phases(impact.projectiles, [fartherEast], 1700).projectiles, []);
+    const settledDead = phases(moving.projectiles, [{ ...fartherEast, dead: true, dieUntil: 1100 }], 1100);
+    assert.deepEqual(settledDead.sounds, []);
+    assert.deepEqual(settledDead.projectiles, []);
+    assert.deepEqual(phases(launched.projectiles, [], 650).projectiles, []);
+
+    const unbound = phases(pending, [], 600);
+    assert.deepEqual(unbound.sounds, [{ spell, phase: "projectile" }]);
+    assert.equal(unbound.projectiles[0].toY, north.y);
+    assert.equal(unbound.deadline, 850);
+    const reappeared = phases(unbound.projectiles, [north], 850);
+    assert.deepEqual(reappeared.sounds, []);
+    assert.deepEqual(reappeared.projectiles, []);
+  }
+}
+
 async function main() {
   for (const name of ["MassHiding", "SoulShield", "BlessedArmour", "Curse", "Plague", "PoisonCloud"]) {
     const effect = SPELL_EFFECTS.find((entry) => entry.spell === name);
@@ -461,6 +522,7 @@ async function main() {
   }
   testAdditiveAlphaNormalization();
   testPackedAtlasCrop();
+  testR16TargetedProjectilePhases();
   await testAssembleMode();
   await testLibMode();
   await testStrictValidation();

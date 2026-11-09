@@ -1,5 +1,5 @@
 import type { OriginalMapRegion } from "../../lib/scene-types";
-import type { WorldState } from "../../lib/world-model/types";
+import type { ProjectileState, WorldState } from "../../lib/world-model/types";
 
 export type EntityKind = "selfPlayer" | "player" | "monster" | "npc";
 export type ItemContainer = "bag1" | "bag2" | "quest" | "belt" | "storage";
@@ -149,19 +149,7 @@ export type PredictedPlayerMotion = {
   movementFrameCount?: number;
 };
 
-export type DisplayProjectile = {
-  key: string;
-  attackerId: string;
-  targetId: string;
-  spellOrEffect?: string | number;
-  fromX: number;
-  fromY: number;
-  toX: number;
-  toY: number;
-  startedAt: number;
-  travelEndsAt?: number;
-  expiresAt: number;
-};
+export type DisplayProjectile = ProjectileState;
 
 export type DisplaySceneEffect = {
   key: string;

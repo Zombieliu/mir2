@@ -239,7 +239,7 @@ import {
   useWorldSelector,
 } from "../lib/world-model";
 import type { SnapshotEmitter, WorldStore } from "../lib/world-model";
-import type { NpcGoldTradeCapacity } from "../lib/world-model/types";
+import type { NpcGoldTradeCapacity, ProjectileState } from "../lib/world-model/types";
 import { crystalInventoryCapacities, planBagMove } from "../lib/world-model/item-identity";
 import { projectItemPresentation, type GatewayItemPresentationSource, type ItemPresentationMetadata } from "../lib/world-model/item-presentation";
 import {
@@ -250,8 +250,16 @@ import {
 } from "../lib/bevy-movement-shadow";
 import {
   cancelPendingEntitySounds,
+  playTargetedSpellSound,
   type SoundEntityRef,
 } from "../lib/original-sound-triggers";
+import {
+  advanceR16TargetedProjectiles,
+  createR16TargetedProjectile,
+  r16TargetedSpell,
+  R16_TARGETED_CAST_MS,
+  type R16TargetedSpell,
+} from "../lib/r16-targeted-projectiles";
 import {
   actorStruckIsActive,
   actorStruckIsAlreadyPending,
@@ -993,20 +1001,6 @@ function entityMovementRenderFieldsMatch(left: WorldEntity, right: WorldEntity) 
     left.movementFrameCount === right.movementFrameCount
   );
 }
-
-type ProjectileState = {
-  key: string;
-  attackerId: string;
-  targetId: string;
-  spellOrEffect?: string | number;
-  fromX: number;
-  fromY: number;
-  toX: number;
-  toY: number;
-  startedAt: number;
-  travelEndsAt?: number;
-  expiresAt: number;
-};
 
 type SceneEffectState = {
   key: string;
@@ -2346,6 +2340,7 @@ export default function HomePage() {
     Map<string, StorageTransferReservation>
   >(new Map());
   const worldRef = useRef<WorldState>(DEFAULT_WORLD_STATE);
+  const targetedProjectileTimerRef = useRef<{ id: number; deadline: number } | null>(null);
   const worldFishingSourceRef = useRef(new WorldFishingSource());
   const [worldFishingRecord, setWorldFishingRecord] = useState<WorldFishingSourceRecord | null>(null);
   const worldFishingRuntimeRef = useRef<{ core: ClientCoreRuntime; runtime: EntityAnimationRuntime } | null>(null);
@@ -2674,11 +2669,29 @@ export default function HomePage() {
   // component; under a packet burst that was the dominant movement-jank source.
   // Now packets advance worldRef synchronously and React re-renders once a frame.
   const updateWorld = useCallback(
-    (updater: WorldState | ((current: WorldState) => WorldState)): void => {
-      const next =
+    function applyWorldUpdate(updater: WorldState | ((current: WorldState) => WorldState)): void {
+      let next =
         typeof updater === "function"
           ? (updater as (current: WorldState) => WorldState)(worldRef.current)
           : updater;
+      const phaseTimer = targetedProjectileTimerRef.current;
+      if (phaseTimer || next.projectiles.some((projectile) => projectile.r16Targeted)) {
+        const now = Date.now();
+        const phases = advanceR16TargetedProjectiles(next.projectiles, next.entities, now);
+        if (phases.projectiles !== next.projectiles) next = { ...next, projectiles: phases.projectiles };
+        const deadline = phases.deadline;
+        if (deadline !== (phaseTimer?.deadline ?? null)) {
+          if (phaseTimer) window.clearTimeout(phaseTimer.id);
+          targetedProjectileTimerRef.current = deadline === null ? null : {
+            deadline,
+            id: window.setTimeout(() => {
+              targetedProjectileTimerRef.current = null;
+              applyWorldUpdate((current) => current);
+            }, Math.max(0, deadline - now)),
+          };
+        }
+        for (const sound of phases.sounds) playTargetedSpellSound(sound.spell, sound.phase);
+      }
       const economicSource = npcPurchaseEconomicSourceRef.current;
       if (economicSource && next.playerObjectId !== String(economicSource.snapshot.playerObjectId)) {
         npcPurchaseClientRef.current?.client.withdraw();
@@ -5972,6 +5985,10 @@ export default function HomePage() {
       if (worldFlushFrameRef.current !== 0) {
         window.cancelAnimationFrame(worldFlushFrameRef.current);
         worldFlushFrameRef.current = 0;
+      }
+      if (targetedProjectileTimerRef.current) {
+        window.clearTimeout(targetedProjectileTimerRef.current.id);
+        targetedProjectileTimerRef.current = null;
       }
       if (predictedPlayerFlushFrameRef.current !== 0) {
         window.cancelAnimationFrame(predictedPlayerFlushFrameRef.current);
@@ -14755,7 +14772,12 @@ export default function HomePage() {
           // StartGame begins a new authoritative object population even when
           // the pre-auth snapshot and character map are both map 0.
           packetRuntimeObjectTombstonesRef.current.clear();
-          updateWorld(resetWorldPopulationForStartGame);
+          updateWorld((current) => ({
+            ...resetWorldPopulationForStartGame(current),
+            projectiles: current.projectiles.filter((projectile) => !projectile.r16Targeted),
+            effects: current.effects.filter((effect) =>
+              effect.source !== "spell" || !r16TargetedSpell(effect.spellOrEffect)),
+          }));
           observeNpcPurchaseSocket(source);
           npcPurchaseClientRef.current?.client.begin();
         }
@@ -15167,17 +15189,20 @@ export default function HomePage() {
         restoreObjectSelection(stringifyId(payload.targetId));
         break;
       case "ObjectProjectile":
-        spawnRangeProjectile(payload);
+        if (!r16TargetedSpell(payload.spell ?? payload.magic)) spawnRangeProjectile(payload);
         restoreObjectSelection(stringifyId(payload.destinationId));
         break;
       case "Magic":
       case "MagicCast":
-        markPlayerMagic(payload);
-        if (worldRef.current.playerObjectId) {
-          enqueueSceneEffect({ ...payload, objectId: worldRef.current.playerObjectId }, "spell");
-        }
-        if (stringifyId(payload.targetId) !== "0") {
-          spawnRangeProjectile({ ...payload, objectId: worldRef.current.playerObjectId });
+        // The paired ObjectMagic owns these two effects for the caster and observers.
+        if (!r16TargetedSpell(payload.spell ?? payload.magic)) {
+          markPlayerMagic(payload);
+          if (worldRef.current.playerObjectId) {
+            enqueueSceneEffect({ ...payload, objectId: worldRef.current.playerObjectId }, "spell");
+          }
+          if (stringifyId(payload.targetId) !== "0") {
+            spawnRangeProjectile({ ...payload, objectId: worldRef.current.playerObjectId });
+          }
         }
         restoreObjectSelection(stringifyId(payload.targetId));
         break;
@@ -15193,16 +15218,18 @@ export default function HomePage() {
         // unlike an ObjectMagic cast animation which is intentionally transient.
         enqueueSceneEffect(payload, "objectSpell");
         break;
-      case "ObjectMagic":
-        // Keep the owner's current position when a delayed cast snapshot arrives.
-        // spawnRangeProjectile stays as-is (it adds the projectile + caster attack pose).
-        markWorldEntityMagic(payload);
-        enqueueSceneEffect(payload, "spell");
-        if (stringifyId(payload.targetId) !== "0") {
-          spawnRangeProjectile(payload);
-          restoreObjectSelection(stringifyId(payload.targetId));
+      case "ObjectMagic": {
+        const spell = r16TargetedSpell(payload.spell ?? payload.magic);
+        if (spell) {
+          applyR16TargetedMagic(payload, spell);
+        } else {
+          markWorldEntityMagic(payload);
+          enqueueSceneEffect(payload, "spell");
+          if (stringifyId(payload.targetId) !== "0") spawnRangeProjectile(payload);
         }
+        restoreObjectSelection(stringifyId(payload.targetId));
         break;
+      }
       case "MapEffect":
         enqueueSceneEffect(payload, "map");
         appendLog(
@@ -15579,7 +15606,8 @@ export default function HomePage() {
         const objectId = stringifyId(payload.objectId);
         updateWorld((current) => {
           const projectiles = current.projectiles.filter(
-            (projectile) => projectile.attackerId !== objectId && projectile.targetId !== objectId,
+            (projectile) => projectile.r16Targeted ||
+              (projectile.attackerId !== objectId && projectile.targetId !== objectId),
           );
           if (projectiles.length === current.projectiles.length) {
             return current;
@@ -17893,15 +17921,17 @@ export default function HomePage() {
     });
   }
 
-  function markWorldEntityMagic(payload: Record<string, unknown>) {
+  function markWorldEntityMagic(
+    payload: Record<string, unknown>,
+    now = Date.now(),
+    targetedSpell?: R16TargetedSpell,
+  ) {
     const objectId = stringifyId(payload.objectId);
     const spell = typeof payload.spell === "number" || typeof payload.spell === "string"
       ? payload.spell
       : undefined;
-    // Crystal plays magic-cast sounds (20000 + Spell*10); most are not yet in SoundList, so this
-    // resolves only for the few that are and is otherwise a graceful no-op.
-    gameBusRef.current!.emit({ type: "magicCast", objectId, spell });
-    const now = Date.now();
+    if (targetedSpell) playTargetedSpellSound(targetedSpell, "cast");
+    else gameBusRef.current!.emit({ type: "magicCast", objectId, spell });
 
     updateWorld((current) => ({
       ...current,
@@ -17909,7 +17939,7 @@ export default function HomePage() {
         ...applyObjectActionScenePose(entity, payload, current.playerObjectId),
         attackAnimation: "spell",
         attackStartedAt: now,
-        attackUntil: now + crystalAttackActionDurationMs(entity, "spell"),
+        attackUntil: now + (targetedSpell ? R16_TARGETED_CAST_MS : crystalAttackActionDurationMs(entity, "spell")),
       })),
     }));
   }
@@ -18137,6 +18167,28 @@ export default function HomePage() {
     }
   }
 
+  function applyR16TargetedMagic(payload: Record<string, unknown>, spell: R16TargetedSpell) {
+    const attackerId = stringifyId(payload.objectId);
+    const location = payload.location as { x?: number; y?: number } | undefined;
+    if (attackerId === "0" || typeof location?.x !== "number" || typeof location.y !== "number") return;
+
+    const castAt = Date.now();
+    markWorldEntityMagic(payload, castAt, spell);
+    enqueueSceneEffect({ ...payload, spell, time: R16_TARGETED_CAST_MS }, "spell", castAt);
+    const target = payload.target as { x?: number; y?: number } | undefined;
+    if (payload.cast !== true || typeof target?.x !== "number" || typeof target.y !== "number") return;
+
+    const targetId = stringifyId(payload.targetId);
+    const projectile = createR16TargetedProjectile(
+      `r16-targeted:${++projectileSequence}`, spell, attackerId, targetId,
+      { x: location.x, y: location.y }, { x: target.x, y: target.y }, castAt,
+    );
+    updateWorld((current) => ({
+      ...current,
+      projectiles: [...current.projectiles, projectile],
+    }));
+  }
+
   function spawnRangeProjectile(payload: Record<string, unknown>) {
     const attackerId = stringifyId(payload.objectId ?? payload.sourceId);
     const targetId = stringifyId(payload.targetId ?? payload.destinationId);
@@ -18199,7 +18251,7 @@ export default function HomePage() {
           attackAnimation: animation,
           attackUntil: startedAt + durationMs,
         })),
-        projectiles: [...current.projectiles.filter((entry) => entry.expiresAt > startedAt), projectile],
+        projectiles: [...current.projectiles.filter((entry) => entry.r16Targeted || entry.expiresAt > startedAt), projectile],
       };
     });
 
@@ -18208,6 +18260,7 @@ export default function HomePage() {
   function enqueueSceneEffect(
     payload: Record<string, unknown>,
     source: SceneEffectState["source"],
+    now = Date.now(),
   ) {
     const isWorldSpell = source === "objectSpell";
     const rawId = source === "spell" || isWorldSpell
@@ -18215,7 +18268,6 @@ export default function HomePage() {
       : payload.effect;
     if (typeof rawId !== "string" && typeof rawId !== "number") return;
 
-    const now = Date.now();
     // Crystal's ObjectEffect.Healing branch ignores DelayTime and creates the
     // target-owned Magic/370..379 effect immediately. Other effect families
     // retain the packet delay used by the generic scene-effect path.
@@ -18250,7 +18302,7 @@ export default function HomePage() {
       const startedAt = now + delayMs;
       // Magic + the caster's ObjectMagic echo describe the same local cast. Keep one source
       // animation while still accepting remote casts and later legitimate recasts.
-      const duplicateTransientSpell = !isWorldSpell && source === "spell" && current.effects.some(
+      const duplicateTransientSpell = source === "spell" && !r16TargetedSpell(rawId) && current.effects.some(
         (entry) =>
           entry.source === "spell" &&
           entry.objectId === (objectId !== "0" ? objectId : undefined) &&
@@ -19244,7 +19296,7 @@ export default function HomePage() {
           : current.stage5Systems,
         mapTransfers,
         interactionHints: snapshot.interactionHints,
-        projectiles: current.projectiles.filter((projectile) => projectile.expiresAt > currentTime),
+        projectiles: current.projectiles.filter((projectile) => projectile.r16Targeted || projectile.expiresAt > currentTime),
         effects: current.effects.filter((effect) => effect.expiresAt > currentTime),
         damageFloaters: current.damageFloaters.filter((floater) => floater.expiresAt > currentTime),
       };

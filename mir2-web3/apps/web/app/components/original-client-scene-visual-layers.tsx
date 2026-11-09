@@ -20,6 +20,7 @@ import {
   crystalSceneEffectLayerOffset,
   sceneEffectAnimationAssetUrls,
 } from "../../lib/scene-effect-runtime";
+import { r16ProjectileFrameInterval, r16TargetedSpell } from "../../lib/r16-targeted-projectiles";
 import { originalItemIconPath } from "./original-client-inventory-utils";
 import { CrystalGdiTextImage, findCrystalGdiTextAsset } from "./crystal-gdi-text";
 import { localizeCrystalEntityName } from "../../lib/crystal-content-localization";
@@ -91,14 +92,18 @@ type ViewportProjectile = DisplayProjectile & {
   progress: number;
 };
 
+// R16 draws these transient effects after the complete world and before item labels.
+const R16_TARGETED_EFFECT_DEPTH = 3_100_000;
+
 function projectilePhaseFrame(
   animation: EffectAnimation | null,
   startedAt: number,
   now: number,
   loop: boolean,
+  interval?: number,
 ): EffectFrameMeta | null {
   if (!animation || now < startedAt || animation.frames.length === 0) return null;
-  const rawIndex = Math.floor((now - startedAt) / Math.max(animation.interval, 1));
+  const rawIndex = Math.floor((now - startedAt) / Math.max(interval ?? animation.interval, 1));
   const index = loop ? rawIndex % animation.frames.length : rawIndex;
   return index >= 0 && index < animation.frames.length ? animation.frames[index] ?? null : null;
 }
@@ -617,6 +622,12 @@ function OriginalClientSceneVisualLayersInner({
         ({ effect }) => effect.source === "spell" || effect.source === "attackOverlay",
       );
   const spellByCaster = new Map<string, string>();
+  const r16CastStarts = new Map<string, number>();
+  for (const effect of world.effects) {
+    if (effect.source === "spell" && effect.objectId && r16TargetedSpell(effect.spellOrEffect)) {
+      r16CastStarts.set(effect.objectId, effect.startedAt);
+    }
+  }
   for (const resolved of resolvedEffectFrames) {
     if (resolved.effect.source === "spell" && resolved.effect.objectId) {
       spellByCaster.set(resolved.effect.objectId, resolved.animation.name);
@@ -651,9 +662,11 @@ function OriginalClientSceneVisualLayersInner({
     for (const projectile of viewportProjectiles) {
       const spell = spellByCaster.get(projectile.key);
       if (!spell) continue;
+      const targeted = projectile.r16Targeted;
+      const direction = targeted?.phase === "projectile" ? targeted.direction : 0;
       const phases = {
         spell,
-        projectile: resolveSpellProjectileEffect(effectAssets, spell),
+        projectile: resolveSpellProjectileEffect(effectAssets, spell, direction),
         impact: resolveSpellImpactEffect(effectAssets, spell),
         returnEffect: resolveSpellReturnEffect(effectAssets, spell),
       };
@@ -667,16 +680,19 @@ function OriginalClientSceneVisualLayersInner({
   const [failedDropIcons, setFailedDropIcons] = useState<ReadonlySet<number>>(() => new Set());
   const fallbackVfx = collectViewportFallbackVfx(
     {
-      entities: viewportEntitySprites.map(({ entity }) => ({
-        objectId: entity.objectId,
-        x: entity.x,
-        y: entity.y,
-        dx: entity.dx,
-        dy: entity.dy,
-        attackAnimation: entity.attackAnimation,
-        attackStartedAt: entity.attackStartedAt,
-      })),
-      projectiles: viewportProjectiles,
+      entities: viewportEntitySprites
+        .filter(({ entity }) => entity.attackStartedAt === undefined ||
+          r16CastStarts.get(entity.objectId) !== entity.attackStartedAt)
+        .map(({ entity }) => ({
+          objectId: entity.objectId,
+          x: entity.x,
+          y: entity.y,
+          dx: entity.dx,
+          dy: entity.dy,
+          attackAnimation: entity.attackAnimation,
+          attackStartedAt: entity.attackStartedAt,
+        })),
+      projectiles: viewportProjectiles.filter((projectile) => !projectile.r16Targeted),
     },
     {
       now: motionNow,
@@ -891,6 +907,8 @@ function OriginalClientSceneVisualLayersInner({
           );
         })}
         {(effectsEnabled ? viewportProjectiles : []).map((projectile) => {
+          const targeted = projectile.r16Targeted;
+          if (targeted?.phase === "pending") return null;
           const travelEndsAt = projectile.travelEndsAt ?? projectile.expiresAt;
           const exact = exactProjectileEffects.get(projectile.key);
           const exactSpell = exact?.spell ?? "";
@@ -901,8 +919,14 @@ function OriginalClientSceneVisualLayersInner({
                 {
                   phase: "projectile",
                   animation: exact.projectile,
-                  frame: motionNow < travelEndsAt
-                    ? projectilePhaseFrame(exact.projectile, projectile.startedAt, motionNow, true)
+                  frame: (!targeted || targeted.phase === "projectile") && motionNow < travelEndsAt
+                    ? projectilePhaseFrame(
+                        exact.projectile,
+                        projectile.startedAt,
+                        motionNow,
+                        true,
+                        targeted ? r16ProjectileFrameInterval(travelEndsAt - projectile.startedAt) : undefined,
+                      )
                     : null,
                   dx: projectile.fromDx + (projectile.toDx - projectile.fromDx) * projectile.progress,
                   dy: projectile.fromDy + (projectile.toDy - projectile.fromDy) * projectile.progress,
@@ -912,7 +936,9 @@ function OriginalClientSceneVisualLayersInner({
                 {
                   phase: "impact",
                   animation: exact.impact,
-                  frame: projectilePhaseFrame(exact.impact, impactStartedAt, motionNow, false),
+                  frame: !targeted || targeted.phase === "impact"
+                    ? projectilePhaseFrame(exact.impact, impactStartedAt, motionNow, false)
+                    : null,
                   dx: projectile.toDx,
                   dy: projectile.toDy,
                   worldX: projectile.toX,
@@ -978,14 +1004,16 @@ function OriginalClientSceneVisualLayersInner({
                           ? `drop-shadow(0 0 ${Math.min(animation.light * 2, 16)}px #fff)`
                           : undefined,
                       pointerEvents: "none",
-                      zIndex: viewportDepthForCell(worldX, worldY, viewportDepthPlayer, 9),
+                      zIndex: targeted
+                        ? R16_TARGETED_EFFECT_DEPTH
+                        : viewportDepthForCell(worldX, worldY, viewportDepthPlayer, 9),
                     }}
                   />
                 ))}
               </Fragment>
             );
           }
-          if (exact || motionNow >= travelEndsAt) return null;
+          if (targeted || exact || motionNow >= travelEndsAt) return null;
           const currentLeft =
             VIEWPORT_TILE_CENTER_X +
             (projectile.fromDx + (projectile.toDx - projectile.fromDx) * projectile.progress) * VIEWPORT_CELL_WIDTH +
@@ -1092,12 +1120,14 @@ function OriginalClientSceneVisualLayersInner({
                       ? `drop-shadow(0 0 ${Math.min(animation.light * 2, 16)}px #fff)`
                       : undefined,
                   pointerEvents: "none",
-                  zIndex: viewportDepthForCell(
-                    worldX,
-                    worldY,
-                    viewportDepthPlayer,
-                    crystalSceneEffectLayerOffset(effect.source),
-                  ),
+                  zIndex: effect.source === "spell" && r16TargetedSpell(effect.spellOrEffect)
+                    ? R16_TARGETED_EFFECT_DEPTH
+                    : viewportDepthForCell(
+                        worldX,
+                        worldY,
+                        viewportDepthPlayer,
+                        crystalSceneEffectLayerOffset(effect.source),
+                      ),
                 }}
               />
               {frame.maskPath ? (

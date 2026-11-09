@@ -276,3 +276,31 @@ export function playMagicSoundId(
   }
   return playOriginalSoundId(20000 + Number(spellId) * 10 + (variantOne ? 1 : 0));
 }
+
+export type TargetedSpellSoundPhase = "cast" | "projectile" | "impact";
+
+const TARGETED_SPELL_SOUNDS = {
+  34: {
+    cast: ORIGINAL_SOUND_IDS.greatFireBallCast,
+    projectile: ORIGINAL_SOUND_IDS.greatFireBallProjectile,
+    impact: ORIGINAL_SOUND_IDS.greatFireBallImpact,
+  },
+  64: {
+    cast: ORIGINAL_SOUND_IDS.soulFireBallCast,
+    projectile: ORIGINAL_SOUND_IDS.soulFireBallProjectile,
+    impact: ORIGINAL_SOUND_IDS.soulFireBallImpact,
+  },
+} satisfies Record<number, Record<TargetedSpellSoundPhase, number>>;
+
+/** Play the cue for the phase already reached by the targeted spell action. */
+export function playTargetedSpellSound(
+  spell: number | string | null | undefined,
+  phase: TargetedSpellSoundPhase,
+): boolean {
+  const spellId = typeof spell === "string" ? spellNumberForName(spell) : spell;
+  if (spellId !== 34 && spellId !== 64) {
+    return false;
+  }
+  const soundId = TARGETED_SPELL_SOUNDS[spellId][phase];
+  return typeof soundId === "number" && playOriginalSoundId(soundId);
+}

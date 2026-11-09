@@ -12,6 +12,7 @@
 
 import type { QuestRewardsPresentation } from "../quest-reward-presentation";
 import type { GuildStatusPresentation } from "../guild-status-presentation";
+import type { R16TargetedProjectile } from "../r16-targeted-projectiles";
 
 // ---------------------------------------------------------------------------
 // Re-exports from scene-types (subset used by WorldState)
@@ -131,12 +132,15 @@ export type ProjectileState = {
   key: string;
   attackerId: string;
   targetId: string;
+  spellOrEffect?: string | number;
   fromX: number;
   fromY: number;
   toX: number;
   toY: number;
   startedAt: number;
+  travelEndsAt?: number;
   expiresAt: number;
+  r16Targeted?: R16TargetedProjectile;
 };
 
 export type SceneEffectState = {

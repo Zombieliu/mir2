@@ -3,8 +3,8 @@
   "clientRoot": "Build/Client/Debug",
   "soundDir": "Build/Client/Debug/Sound",
   "soundListPath": "Build/Client/Debug/Sound/SoundList.lst",
-  "soundListEntryCount": 522,
-  "exportedSoundCount": 516,
+  "soundListEntryCount": 525,
+  "exportedSoundCount": 519,
   "fallbackSoundCount": 3,
   "sourceWavCount": 1607,
   "missingSoundCount": 6,
@@ -3532,6 +3532,30 @@
       "exactSourceExists": true,
       "fallback": false,
       "sourceBytes": 308496
+    },
+    "20640": {
+      "fileName": "M64-0.wav",
+      "path": "/original-ui/Sound/M64-0.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 151328
+    },
+    "20641": {
+      "fileName": "M64-1.wav",
+      "path": "/original-ui/Sound/M64-1.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 168768
+    },
+    "20642": {
+      "fileName": "M64-2.wav",
+      "path": "/original-ui/Sound/M64-2.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 228532
     },
     "20710": {
       "fileName": "M69-0.wav",
