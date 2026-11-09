@@ -21438,6 +21438,7 @@ export default function HomePage() {
     <OriginalClientStagePortal>
       {screen === "game" && !spectatorMode && companionClient ? <R16CompanionWindow
         client={companionClient} open={companionOpen} onOpenChange={changeCompanionOpen}
+        language={language}
         entryVisible={!showCharacter}
         partyMember={(extraWindowData.group?.members ?? []).some(member => (typeof member === "string" ? member : member.name)
           === companionClient.snapshot().view?.archive.characterName)}

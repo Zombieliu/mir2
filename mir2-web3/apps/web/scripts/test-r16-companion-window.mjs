@@ -12,6 +12,10 @@ function evaluate(path, deps = {}, globals = {}) {
   return module.exports;
 }
 const api = evaluate("../lib/r16-companion-client.ts");
+const nativeCatalog = JSON.parse(read("../lib/generated/r16-native-localization.json"));
+const locale = evaluate("../lib/r16-companion-localization.ts", {
+  "./r16-native-localization": { nativeLanguageInfo: code => nativeCatalog.languages.find(row => row.code === code) ?? null },
+});
 const jsx = (type, props) => ({ type, props: props ?? {} });
 function expand(node) {
   if (Array.isArray(node)) return node.flatMap(expand);
@@ -22,7 +26,7 @@ function expand(node) {
 function all(node) { return Array.isArray(node) ? node.flatMap(all) : node && typeof node === "object" ? [node, ...all(node.props.children)] : []; }
 function strings(node) { return Array.isArray(node) ? node.flatMap(strings).join("") : node && typeof node === "object" ? strings(node.props.children) : typeof node === "string" ? node : ""; }
 const event = (key, extra = {}) => ({ key, nativeEvent: { isComposing: false }, prevented: false, stopped: false, preventDefault() { this.prevented = true; }, stopPropagation() { this.stopped = true; }, ...extra });
-function host() {
+function host(language = "zh-CN") {
   const slots = [], effects = [], cleanups = []; let cursor = 0;
   const document = { activeElement: null }, intervals = new Map(); let intervalId = 0;
   const react = { useSyncExternalStore(_subscribe, snapshot) { return snapshot(); },
@@ -31,12 +35,12 @@ function host() {
     useRef(initial) { const i = cursor++; if (!(i in slots)) slots[i] = { current: initial }; return slots[i]; },
     useEffect(effect, deps) { const i = cursor++, before = slots[i]; if (!before || deps.some((d, n) => !Object.is(d, before[n]))) { slots[i] = deps; effects.push({ i, effect }); } },
   };
-  const exports = evaluate("../app/components/r16-companion-window.tsx", { react, "react/jsx-runtime": { jsx, jsxs: jsx, Fragment: "fragment" }, "../../lib/r16-companion-client": api },
+  const exports = evaluate("../app/components/r16-companion-window.tsx", { react, "react/jsx-runtime": { jsx, jsxs: jsx, Fragment: "fragment" }, "../../lib/r16-companion-client": api, "../../lib/r16-companion-localization": locale },
     { document, setInterval(fn, delay) { const id = ++intervalId; intervals.set(id, { fn, delay }); return id; }, clearInterval(id) { intervals.delete(id); } });
   let source = { socket: {}, socketGeneration: 1, sessionId: "s", roleId: "account:role-2", realmId: "trial", worldEpoch: "w", contextEpoch: 1 };
   const sent = [], client = new api.R16CompanionClient({ captureSource: () => source, sendPrivate(_s, f) { sent.push(f); return "sent"; }, now: () => 1000, randomId: () => "window-test" });
   let open = true, invited = 0, settings = 0;
-  const props = { client, open, onOpenChange(value) { open = value; }, onInviteParty(lease, name) { assert.equal(client.invitation(lease)?.characterName, name); invited++; return true; }, onOpenModelSettings() { settings++; } };
+  const props = { client, language, open, onOpenChange(value) { open = value; }, onInviteParty(lease, name) { assert.equal(client.invitation(lease)?.characterName, name); invited++; return true; }, onOpenModelSettings() { settings++; } };
   function reply(result, status = "ok") { const request = sent.at(-1); return client.receive(source, { type: "companionResult", payload: { requestId: request.requestId, residentId: request.residentId ?? null, operation: request.operation, status, result } }); }
   const value = (version = 1, runtime = {}) => ({ archive: { residentId: "alo-1", archiveId: "a-1", displayName: "阿洛", characterName: "AloAI", realmId: "trial", worldEpoch: "w", baseSetting: "私人背景" },
     profile: { policyVersion: version, style: "collection", party: { assistBeforeLoot: version > 1, lootOnlyAfterCombat: version > 1, askBeforeLeaving: version > 1 } }, growthRevision: version,
@@ -262,5 +266,72 @@ test("invisible format input cannot enable or dispatch a model action", () => {
     all(h.tree).find(n => n.type === "textarea").props.onChange({ target: { value: `跟我${character}回城` } }); h.render();
     assert.equal(h.button("propose-teaching").props.disabled, true);
     const count = h.sent.length; h.click("propose-teaching"); all(h.tree).find(n => n.type === "textarea").props.onKeyDown(event("Enter")); assert.equal(h.sent.length, count);
+  }
+});
+
+test("language changes render localized labels and keep private memories and view authority", () => {
+  const h = host("en");
+  h.ready();
+  h.render();
+  assert.equal(h.tree.props.lang, "en");
+  assert.equal(h.tree.props.dir, "ltr");
+  assert.equal(h.button("tab-0").props.children, "Growth & Trial");
+  assert(strings(h.tree).includes("Support party first: No"));
+  h.click("tab-1");
+  const sent = h.sent.length, lease = h.client.snapshot().renderLease;
+  h.props.language = "ar";
+  h.render();
+  assert.equal(h.tree.props.lang, "ar");
+  assert.equal(h.tree.props.dir, "rtl");
+  assert.match(h.tree.props.style.fontFamily, /Arabic/);
+  assert.equal(h.button("tab-1").props["aria-selected"], true);
+  assert.equal(h.button("tab-1").props.children, "الذاكرة");
+  assert(strings(h.tree).includes("PRIVATE MEMORY"));
+  assert(all(h.tree).some(n => n.props.dir === "auto" && n.props.children === "PRIVATE MEMORY"));
+  assert.equal(h.client.snapshot().renderLease, lease);
+  assert.equal(h.sent.length, sent);
+
+  h.click("tab-4");
+  h.click("prepare-supply");
+  assert(strings(h.tree).includes("50 ذهباً داخل اللعبة"));
+  assert(strings(h.tree).includes("5 دقائق"));
+  assert.equal(h.sent.length, sent);
+  h.click("confirm");
+  assert.deepEqual(h.sent.at(-1).payload, { expectedPolicyVersion: 1, budgetGold: 50, quantity: 1, expiresInSeconds: 300 });
+});
+test("known notices and version templates translate once and unknown narrative stays literal", () => {
+  const english = locale.r16CompanionPresentation("en").copy;
+  assert.equal(locale.r16CompanionNotice("教学已保存，培养版本 v12。", english), "Teaching saved. Habits v12.");
+  assert.equal(locale.r16CompanionNotice("已读取服务器记录，培养版本 v2。", english), "Server records loaded. Habits v2.");
+  const opaque = "PLAYER {0} · 教学已保存，培养版本 v12。";
+  assert.equal(locale.r16CompanionNotice(opaque, english), opaque);
+  assert.equal(english("identity", "{1}", "PRIVATE STORY"), "Stable identity: {1}\nPRIVATE STORY");
+  assert.equal(locale.r16CompanionPresentation("es").language, "en");
+});
+test("all shared languages translate companion controls and keep permission limits and placeholders", () => {
+  const samples = ["entry", "title", "tabCultivation", "tabMemory", "tabActions", "tabInstruction", "tabSupply", "tabLife",
+    "naturalTeach", "teach", "instructionInput", "export", "download", "confirm", "cancel", "confirmClear", "confirmRevoke",
+    "confirmDeleteFeedback", "confirmDeleteEpisode", "confirmSupply", "confirmLife", "confirmResumeLife", "supplyUnknown", "lifeStoppedPending"];
+  const english = locale.r16CompanionPresentation("en").copy;
+  const tokens = Array.from({ length: 10 }, (_, index) => `___PARAM_${index}___`);
+  const params = copy => (copy.match(/___PARAM_\d+___/g) ?? []).sort();
+  assert.equal(nativeCatalog.languages.length, 10);
+  for (const info of nativeCatalog.languages) {
+    const localized = locale.r16CompanionPresentation(info.code);
+    assert.equal(localized.language, info.code);
+    assert.equal(localized.dir, info.dir);
+    assert.equal(localized.locale, info.locale);
+    if (info.code !== "en") for (const key of samples) assert.notEqual(localized.copy(key), english(key), `${info.code}:${key}`);
+    for (const key of locale.R16_COMPANION_MESSAGE_KEYS) {
+      assert.deepEqual(params(localized.copy(key, ...tokens)), params(english(key, ...tokens)), `${info.code}:${key}`);
+    }
+    assert.match(localized.copy("confirmSupply"), /\b50\b/);
+    assert.match(localized.copy("confirmSupply"), /\b5\b/);
+    const onePotion = info.code === "ar" ? /جرعة(?: صحة صغيرة)? واحدة/u : /\b1\b/;
+    assert.match(localized.copy("confirmSupply"), onePotion);
+    assert.match(localized.copy("confirmLife", 30), /\b30\b/);
+    assert.match(localized.copy("confirmLife", 30).normalize("NFKC"), /\(288,616\)/);
+    assert.match(localized.copy("confirmResumeLife"), /\b50\b/);
+    assert.match(localized.copy("confirmResumeLife"), onePotion);
   }
 });
