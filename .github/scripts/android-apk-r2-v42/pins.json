@@ -1,0 +1,12 @@
+{
+  "apk": {
+    "size": 527239715,
+    "sha256": "666ab159be9c769d765ab667d99885e2f6d4bd4d9d8ca02ff832bd93f369642f"
+  },
+  "delta": {
+    "assetId": 725707716,
+    "name": "Mir2-Android-Playtest-v42-20261109-arm64.apk.zst",
+    "sha256": "3a9aa65180816dfc0cab1c8c405d1c73fda98b8626a985cc4bf4c705254bda61",
+    "size": 22265109
+  }
+}

@@ -1,0 +1,42 @@
+name: Publish pinned Android v42 entry and reentry repair
+on:
+  push:
+    branches: [codex/android-map-entry-v42-20261109]
+    paths:
+      - .github/workflows/android-apk-r2-v42-upload.yml
+      - .github/scripts/android-apk-r2-v42/**
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: mir2-android-v42-r2-upload
+  cancel-in-progress: false
+jobs:
+  publish-pinned-apk:
+    if: ${{ github.ref == 'refs/heads/codex/android-map-entry-v42-20261109' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+          sparse-checkout: |
+            .github/scripts/android-apk-r2-v41
+            .github/scripts/android-apk-r2-v42
+            mir2-web3/apps/web/scripts
+      - name: Verify the draft delta and reconstruct the exact signed APK without upload credentials
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: node .github/scripts/android-apk-r2-v42/publish.mjs prepare
+      - name: Dry run the immutable APK through the existing uploader
+        run: |
+          node mir2-web3/apps/web/scripts/upload-r2-assets.mjs --manifest "$RUNNER_TEMP/mir2-apk-v42/release.json" --driver worker --bucket mir2-web3-assets --includeReleaseManifest false --ensureBucket false --dryRun true
+      - name: Publish the verified signed APK only
+        env:
+          MIR2_R2_UPLOAD_WORKER_URL: ${{ secrets.MIR2_R2_UPLOAD_WORKER_URL }}
+          MIR2_R2_UPLOAD_SECRET: ${{ secrets.MIR2_R2_UPLOAD_SECRET }}
+        run: |
+          node mir2-web3/apps/web/scripts/upload-r2-assets.mjs --manifest "$RUNNER_TEMP/mir2-apk-v42/release.json" --driver worker --bucket mir2-web3-assets --includeReleaseManifest false --ensureBucket false --concurrency 1 --maxAttempts 3 --progressEvery 1
+      - name: Verify the complete public APK and existing Range fallback
+        run: node .github/scripts/android-apk-r2-v42/publish.mjs verify
