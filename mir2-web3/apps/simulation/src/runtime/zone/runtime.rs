@@ -902,6 +902,11 @@ impl ZoneRuntime {
         self.collision.is_available()
     }
 
+    /// Map-cell validity without testing object occupancy.
+    pub fn static_cell_is_walkable(&self, point: &Point) -> bool {
+        !self.collision.is_blocked(point)
+    }
+
     #[cfg(test)]
     pub(crate) fn set_journey_evidence_enabled_for_test(&mut self, enabled: bool) {
         self.journey_evidence_enabled = enabled;

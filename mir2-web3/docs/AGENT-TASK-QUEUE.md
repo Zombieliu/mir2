@@ -61,7 +61,8 @@ Updated 2026-11-10 (Asia/Shanghai). Read [coordination](AGENT-ORCHESTRATION.md) 
 - [x] 满包独立交易格的双浏览器、单次交割、溢出退件和正常重登通过。File 强停可恢复单方报价和已成交未入账记录；隔离真实 PostgreSQL 验证双方报价和账本结算的来源围栏。 [正常、强停和真实库证据](evidence/r16-trade-restart-20261110/README.md)
 - [x] 大火球与灵魂火符的共享 Zone 对怪物结算按 Crystal 距离延时。真实七格计时、扣蓝、扣符和熟练度重登通过。 [计时和回归](evidence/r16-delayed-projectiles-20261110/README.md)
 - [x] 大火球与灵魂火符的 Web 施法、方向飞行、命中位图和三段原声通过七格与移动野怪复测。 [视觉与播放记录](evidence/r16-web-spell-phases-20261110/README.md)
-- [ ] 继续本方锁定时加价、名字级失败 ACK、Native 招募及建职阶、仓库重复刷新和取回反馈。另验伤害数字与本地技能动作时序、阿洛跨端实战、Windows 窗口及完整 Hosted 链路。
+- [x] 本方确认后直接加价、双方重确认和单次交割已在 Web 双开复验。新运行包支持连续同额，普通交易协议验证系统反馈、两秒冷却、无效增量与重登。 [交易与构建证据](evidence/r16-trade-own-gold-20261110/README.md)
+- [ ] 继续组队拒绝或静默后的手动重试、Native 招募及建职阶、仓库重复刷新和取回反馈。另验伤害数字与本地技能动作时序、阿洛跨端实战、Windows 窗口及完整 Hosted 链路。
 - [x] 交易自身物品待回执的取消及同owner/partner重复接受已完成限定代码修复；原Page105/社交31/适配器507组/TS及两场隔离浏览器证据保留。共用八项见后续独立记录，完整Trade与公开发行仍未完成。[原本轮范围](evidence/r16-web-trade-20261109/README.md)
 - [x] 公会职级改名／单项权限／草稿／层级／广播／重登已在 WebGL2-shared 和默认 WebGPU 的普通界面通过；新鲜限定39／TS通过，修正选中态边框冲突。[当前范围](WEB-R16-PARITY-GOAL.zh-CN.md#公会职级普通流程2026-11-08)
 - [x] Native 公会增量、真实身份接法、权限实际位回执及读请求生命周期完成限定代码验证；普通队列淘汰／真实bounded发送满载回归通过，198项独立检查及原锁release构建通过，未运行窗口。[范围](WEB-R16-PARITY-GOAL.zh-CN.md#native-公会增量与请求生命周期2026-11-08)

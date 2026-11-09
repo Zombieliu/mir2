@@ -4132,6 +4132,7 @@ const SHARED_ZONE_STATE_CHECKPOINT_VERSION: u32 = 3;
 const SHARED_ZONE_FACTORY_CHECKPOINT_VERSION: u32 = 3;
 const MAX_PENDING_ZONE_PACKETS_PER_PLAYER: usize =
     crate::zone_rpc::DEFAULT_ZONE_RPC_MAX_OUTBOUND_MESSAGES;
+const CRYSTAL_TRADE_REQUEST_DELAY_MS: u64 = 2_000;
 
 /// Old checkpoints store signed integers. Native producers now supply the
 /// mutation-time receipt; serde keeps old integer queues readable verbatim.
@@ -10441,6 +10442,7 @@ impl ZoneRuntimeFactory for SharedInProcessZoneRuntimeFactory {
             owner_dead_entity_ids: BTreeSet::new(),
             last_game_shop_purchase_outcome: None,
             next_ranking_inspect_ms: 0,
+            next_trade_request_at_ms: 0,
             #[cfg(test)]
             fail_next_npc_teleport_checkpoint_restore: false,
             #[cfg(test)]
@@ -11292,6 +11294,7 @@ struct SharedInProcessZoneSessionRuntime {
     owner_dead_entity_ids: BTreeSet<u32>,
     last_game_shop_purchase_outcome: Option<GameShopPurchaseOutcome>,
     next_ranking_inspect_ms: u64,
+    next_trade_request_at_ms: u64,
     #[cfg(test)]
     fail_next_npc_teleport_checkpoint_restore: bool,
     #[cfg(test)]
@@ -12936,6 +12939,7 @@ impl SharedInProcessZoneSessionRuntime {
         let outbounds = zone_state.remove_player(&key);
         self.shared_social_generation.fetch_add(1, Ordering::AcqRel);
         self.last_social_refresh = None;
+        self.next_trade_request_at_ms = 0;
         let (mut packets, transform, shout_consume, _, _, player_damages, player_heals) =
             zone_state.dispatch_zone_outbounds(outbounds, Some(&key));
         zone_state.forget_zone_session(&key);
@@ -17348,9 +17352,8 @@ impl SharedInProcessZoneSessionRuntime {
             .unwrap_or_default()
     }
 
-    fn execute_shared_trade_request(&mut self) -> Vec<ServerPacket> {
-        if self.inner.has_active_shared_trade_state() || self.has_pending_durable_trade_projection()
-        {
+    fn execute_shared_trade_request(&mut self, now_ms: u64) -> Vec<ServerPacket> {
+        if now_ms < self.next_trade_request_at_ms || self.has_pending_durable_trade_projection() {
             return Vec::new();
         }
         let Some(key) = self.current_presence_key() else {
@@ -17360,20 +17363,30 @@ impl SharedInProcessZoneSessionRuntime {
             .zone_state
             .lock()
             .expect("shared zone presence mutex should not be poisoned");
-        if state.teardown_fences.contains(&key) || state.trade_partner(&key).is_some() {
+        if state.teardown_fences.contains(&key) {
             return Vec::new();
         }
         let Some(owner) = state.players.get(&key).cloned() else {
             return Vec::new();
         };
-        if owner.entity.dead || owner.entity.hp == Some(0) {
-            return Vec::new();
+        self.next_trade_request_at_ms = now_ms.saturating_add(CRYSTAL_TRADE_REQUEST_DELAY_MS);
+        if self.inner.has_active_shared_trade_state() || state.trade_partner(&key).is_some() {
+            return vec![self.inner.shared_social_message("server.AlreadyTrading", &[])];
         }
         let here = Point {
             x: owner.entity.x,
             y: owner.entity.y,
         };
         let front = point_in_direction(&here, owner.entity.direction);
+        let session_id = SharedInProcessZoneState::zone_session_id_for_key(&key);
+        let front_is_walkable = state
+            .zone_manager
+            .partition_for_session(&session_id)
+            .and_then(|partition| state.zone_manager.zone_for_partition(&partition))
+            .is_some_and(|zone| zone.static_cell_is_walkable(&front));
+        if !front_is_walkable {
+            return Vec::new();
+        }
         let Some((peer_key, peer)) = state
             .players
             .iter()
@@ -17383,27 +17396,36 @@ impl SharedInProcessZoneSessionRuntime {
                     && player.entity.x == front.x
                     && player.entity.y == front.y
                     && point_in_direction(&front, player.entity.direction) == here
-                    && !player.entity.dead
-                    && player.entity.hp != Some(0)
             })
             .map(|(key, player)| (key.clone(), player.clone()))
         else {
-            return Vec::new();
+            return vec![self.inner.shared_social_message("server.FaceToTrade", &[])];
         };
         if state.companion_boundary.as_ref().is_some_and(|boundary| !boundary.pair_allowed(&key, &peer_key)) {
             return Vec::new();
         }
-        if state.teardown_fences.contains(&peer_key)
-            || peer.allow_trade == Some(false)
-            || state.trade_partner(&peer_key).is_some()
-            || state
+        if state.teardown_fences.contains(&peer_key) {
+            return Vec::new();
+        }
+        if owner.entity.dead || owner.entity.hp == Some(0) || peer.entity.dead || peer.entity.hp == Some(0) {
+            return vec![self.inner.shared_social_message("server.CannotTradeWhenDead", &[])];
+        }
+        let rejection = if state
                 .trade_links
                 .invitations
                 .iter()
                 .any(|(recipient, _)| recipient == &peer_key)
-            || state.trade_admission_pending(&peer_key)
         {
-            return Vec::new();
+            Some("server.PlayerAlreadyHasTradeInvitation")
+        } else if peer.allow_trade == Some(false) {
+            Some("server.PlayerNotAllowingTrade")
+        } else if state.trade_partner(&peer_key).is_some() || state.trade_admission_pending(&peer_key) {
+            Some("server.PlayerAlreadyTrading")
+        } else {
+            None
+        };
+        if let Some(rejection) = rejection {
+            return vec![self.inner.shared_social_message(rejection, &[peer.entity.name])];
         }
         state.trade_links.invitations.push((
             peer_key.clone(),
@@ -17455,12 +17477,13 @@ impl SharedInProcessZoneSessionRuntime {
             return Vec::new();
         }
         if state.trade_partner(&key).is_some()
-            || state.trade_partner(&peer.key).is_some()
-            || state.trade_admission_pending(&peer.key)
             || state.trade_admission_pending(&key)
             || self.inner.has_active_shared_trade_state()
         {
-            return Vec::new();
+            return vec![self.inner.shared_social_message("server.AlreadyTrading", &[])];
+        }
+        if state.trade_partner(&peer.key).is_some() || state.trade_admission_pending(&peer.key) {
+            return vec![self.inner.shared_social_message("server.PlayerAlreadyTrading", &[peer_name])];
         }
         // Acceptance invalidates other invitations involving either participant.
         // Do not send a stale invitation cancellation to an already accepted pair.
@@ -17610,7 +17633,7 @@ impl SharedInProcessZoneSessionRuntime {
         let Some(key) = self.current_presence_key() else {
             return Vec::new();
         };
-        {
+        let prepared = {
             let state = self
                 .zone_state
                 .lock()
@@ -17618,10 +17641,11 @@ impl SharedInProcessZoneSessionRuntime {
             if amount > 0 && state.companion_boundary.as_ref().is_some_and(|boundary| boundary.actor(&key)) {
                 return Vec::new();
             }
-            if state.trade_partner(&key).is_none() || state.trade_offers.contains_key(&key) {
+            if state.trade_partner(&key).is_none() {
                 return Vec::new();
             }
-        }
+            state.trade_offers.contains_key(&key)
+        };
         // The durable opening balance is the pre-escrow wallet. Bootstrapping
         // at confirmation would seed an already reduced balance and debit twice.
         if amount > 0
@@ -17630,14 +17654,24 @@ impl SharedInProcessZoneSessionRuntime {
         {
             return self.cancel_pending_shared_trade_offers();
         }
-        let Ok(packets) = self
+
+        let mut packets = Vec::new();
+        if prepared {
+            // Reopen under the same Zone lock used to match offers. If the
+            // peer already claimed the offer for settlement, do not debit it.
+            packets = self.execute_shared_trade_confirm(false);
+            if !packets.iter().any(|packet| matches!(packet, ServerPacket::TradeCancel { unlock: true })) {
+                return packets;
+            }
+        }
+        let Ok(mut quote) = self
             .inner
             .execute(WorldCommand::ClientPacket(ClientPacket::TradeGold { amount }))
         else {
-            return Vec::new();
+            return packets;
         };
         if self.inner.has_active_shared_trade_state()
-            && !packets
+            && !quote
                 .iter()
                 .any(|packet| matches!(packet, ServerPacket::TradeGold { .. }))
         {
@@ -17651,6 +17685,10 @@ impl SharedInProcessZoneSessionRuntime {
                 state.queue_trade_quote_update(partner, Vec::new());
             }
         }
+        // A reopen can deliver the peer's queued quote to this owner. Only
+        // the newly edited quote belongs to the peer.
+        self.route_shared_trade_notifications(&mut quote);
+        packets.extend(quote);
         packets
     }
 
@@ -18400,12 +18438,7 @@ impl SharedInProcessZoneSessionRuntime {
             }
             _ => None,
         };
-        let is_trade_quote_mutation = trade_item_failure.is_some()
-            || matches!(
-                &command,
-                WorldCommand::ClientPacket(ClientPacket::TradeGold { .. })
-            );
-        let is_trade_state_mutation = is_trade_quote_mutation
+        let is_trade_state_mutation = trade_item_failure.is_some()
             || matches!(
                 &command,
                 WorldCommand::ClientPacket(
@@ -18413,6 +18446,7 @@ impl SharedInProcessZoneSessionRuntime {
                         | ClientPacket::TradeReply { .. }
                         | ClientPacket::TradeConfirm { .. }
                         | ClientPacket::TradeCancel
+                        | ClientPacket::TradeGold { .. }
                 )
             );
         let shared_trade_confirm = match &command {
@@ -18814,7 +18848,7 @@ impl SharedInProcessZoneSessionRuntime {
             &command,
             WorldCommand::ClientPacket(ClientPacket::TradeRequest)
         ) {
-            self.execute_shared_trade_request()
+            self.execute_shared_trade_request(Self::zone_now_ms())
         } else if let WorldCommand::ClientPacket(ClientPacket::TradeReply { accept_invite }) =
             &command
         {
@@ -19055,7 +19089,7 @@ impl SharedInProcessZoneSessionRuntime {
                 }
             }
         }
-        if is_trade_quote_mutation {
+        if trade_item_failure.is_some() {
             self.route_shared_trade_notifications(&mut command_packets);
         }
         if removes_presence {
@@ -35005,7 +35039,10 @@ mod tests {
         assert_eq!(first.world_snapshot().gold, starting_gold - 30);
         assert!(!has_inventory_key(&first, "red-potion"));
 
-        assert!(first.handle_packet(ClientPacket::TradeRequest).is_empty());
+        let repeat = first.handle_packet(ClientPacket::TradeRequest);
+        assert!(repeat.iter().all(|packet| matches!(packet, ServerPacket::Chat {
+            message, ..
+        } if message == "You are already trading.")));
         let preserved = first
             .world_snapshot()
             .stage5_systems
@@ -35887,6 +35924,7 @@ mod tests {
             owner_dead_entity_ids: Default::default(),
             last_game_shop_purchase_outcome: None,
             next_ranking_inspect_ms: 0,
+            next_trade_request_at_ms: 0,
             fail_next_npc_teleport_checkpoint_restore: false,
             npc_gold_buy_after_capture_hook: None,
         }

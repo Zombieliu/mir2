@@ -101,7 +101,7 @@ const names = ["worldFishingOwner", "cancelWorldFishingGesture", "retireWorldFis
   "itemCommandRequiresOwner", "retireEquipmentSession", "retirePrivateCompanion", "advanceHeroWindowEpochs", "mailParcelItemsIdle", "endStorageService", "closeNpcRepairService", "retireNpcShopService",
   "currentSpellsOwner", "currentSocialReplyOwner", "currentSocialReceiveOwner", "captureSocialBudgetGatewayEvent", "sameSocialPhysicalOwner",
   "socialReplyWindowOpen", "captureSocialRequest", "closeSocialReplyWindow", "replySocialRequest", "retireSocialRequests",
-  "retireSocialItemConnection", "retireTerminalTradeItemOperation", "readOwnTradeState", "ownTradeOfferKey", "readPreparedOwnTrade", "ownTradeTooltipItem", "socialItemMutationAllowed", "parityItemMutationAllowed", "readSocialItemSurface", "socialItemProofCurrent",
+  "retireSocialItemConnection", "retireTerminalTradeItemOperation", "readOwnTradeState", "readTradeGoldSourceKey", "ownTradeOfferKey", "readPreparedOwnTrade", "ownTradeTooltipItem", "socialItemMutationAllowed", "parityItemMutationAllowed", "readSocialItemSurface", "socialItemProofCurrent",
   "submitSocialItem", "socialItemReceiptOwner", "observeSocialItemReceipt", "observeGuildPermissions", "observeGuildStorageChange",
   "socialTradeProofCurrent", "rentExpandedStorage", "currentStorageRentalFacts", "closeStorageRentalUi", "cancelStorageRental",
   "confirmStorageRental", "observeEquipmentSnapshot", "syncEquipmentSnapshot", "suspendEquipmentConnection",
@@ -410,7 +410,7 @@ function harness({ identity = session, sequenceRef = { current: 1 }, pendingRef 
     socialTradeSendingRef: {current: null}, socialTradeReplySpentRef: {current: null},
     socialTradeCancelSpentRef: {current: null}, socialTradeItemOperationRef: {current: null}, renderSocialItems: () => {},
     setShowTrade: value => { scope.tradeOpen = value; }, setShowInventory: value => { scope.inventoryOpen = value; },
-    socialTradeUiLease: {owner: null, incarnation: 0, partner: "", state: "closed"},
+    socialTradeUiLease: {owner: null, incarnation: 0, partner: "", state: "closed", goldSourceKey: null},
     guildStorageRawRef: {current: null}, guildPermissionsRef: {current: null}, guildStorageRevisionRef: {current: 0},
     socialCatalogRef: {current: new Map([[6, {name: "Guild item", icon: 1}]])}, worldSnapshotVersionRef: {current: 1},
     storageRentalRef: {current: new pureRental.StorageRentalConfirmation()}, storageServiceRevisionRef: {current: 1},
@@ -500,7 +500,7 @@ function openRental(page, renewed = true) {
   return proof;
 }
 function openTrade(page, offers = false) {
-  const trade = {partner: "Partner", settlementNonce: "nonce", offeredGold: 0, accepted: true,
+  const trade = {partner: "Partner", settlementNonce: "nonce", offeredGold: 0, offeredCurrency: "gold", accepted: true,
     locked: false, escrowPrepared: false, completed: false,
     offeredSlots: offers ? {3: 43} : {}, offeredUniqueIds: offers ? {3: 22} : {}};
   page.scope.worldRef.current.stage5Systems.trade = trade;
@@ -1476,7 +1476,7 @@ test("actual Page prepared trade keeps its lock and routes an explicit unlock af
   assert.equal(prepared.items[3].slot, 3);
   assert.equal(page.readSocialItemSurface("trade"), null, "the escrow view cannot authorize edits");
   assert.equal(page.sendTradeUiCommand({type: "tradeConfirm", locked: true}), false);
-  assert.equal(page.sendTradeUiCommand({type: "tradeGold", amount: 1}), false);
+  assert.equal(page.sendTradeUiCommand({type: "tradeGold", amount: 0}), false);
 
   world.stage5Systems.trade.settlementNonce = "other nonce"; page.snapshot(); page.renderTrade();
   assert.equal(page.readPreparedOwnTrade().items, undefined, "different escrow never inherits old item details");
@@ -1486,6 +1486,79 @@ test("actual Page prepared trade keeps its lock and routes an explicit unlock af
   page.receive("TradeCancel", {unlock: false});
   assert.equal(page.readPreparedOwnTrade(), null);
   assert.equal(page.scope.socialTradeConfirmOfferRef.current, null);
+});
+
+function openOwnConfirmedGoldQuote(page, withItem = true) {
+  const editable = openCurrentTrade(page, withItem);
+  const world = page.scope.worldRef.current;
+  const trade = world.stage5Systems.trade;
+  const ownItems = Array(10).fill(null);
+  if (withItem) {
+    ownItems[3] = {...world.inventoryItems.find(row => row.uniqueId === 22), slot: 3, tooltipSource: undefined};
+    world.inventoryItems = world.inventoryItems.filter(row => row.uniqueId !== 22);
+  }
+  Object.assign(trade, {locked: true, escrowPrepared: true, offeredGold: 17, heldGold: 17, ownItems});
+  world.gold = 20;
+  page.snapshot(); page.renderTrade();
+  assert.ok(page.scope.socialTradeUiLease.goldSourceKey);
+  return {world, trade, editable};
+}
+
+test("actual Page own-confirmed gold sends one delta with a detached item and keeps its item edits blocked", () => {
+  const page = harness(), {world, trade, editable} = openOwnConfirmedGoldQuote(page);
+  assert.equal(page.readSocialItemSurface("trade"), null);
+  page.submitSocialItem("retrieveTrade", 3, 47, 22, editable.sourceKey);
+  assert.equal(page.sendTradeUiCommand({type: "tradeConfirm", locked: true}), false);
+  page.setTradeGold(13);
+  assert.deepEqual(page.sent, [{type: "tradeGold", amount: 13}]);
+  assert.equal(pageBudget(page).pendingCount, 1);
+  assert.deepEqual([world.gold, trade.offeredGold, trade.locked], [20, 17, true]);
+  page.receive("TradeCancel", {unlock: true});
+  assert.equal(page.readSocialItemSurface("trade"), null, "the packet alone does not invent the reopened quote");
+  const after = structuredClone(page.scope.worldRef.current);
+  Object.assign(after.stage5Systems.trade, {locked: false, escrowPrepared: false, accepted: false, offeredGold: 30, heldGold: 30});
+  after.gold = 7;
+  page.snapshot(after);
+  assert.equal(page.readSocialItemSurface("trade").trade.offeredGold, 30);
+  assert.equal(page.readSocialItemSurface("trade").slots[3].uniqueId, 22);
+});
+
+test("actual Page own-confirmed gold-only receipt requires the exact own quote after unlock", () => {
+  const page = harness(); openOwnConfirmedGoldQuote(page, false);
+  page.setTradeGold(13);
+  assert.deepEqual(page.sent, [{type: "tradeGold", amount: 13}]);
+  assert.equal(pageBudget(page).pendingCount, 1);
+  page.receive("TradeCancel", {unlock: true});
+  page.receive("TradeGold", {amount: 30});
+  assert.equal(pageBudget(page).pendingCount, 1, "unlock and the guest quote cannot acknowledge our gold delta");
+  const after = structuredClone(page.scope.worldRef.current);
+  Object.assign(after.stage5Systems.trade, {locked: false, escrowPrepared: false, accepted: false, offeredGold: 30, heldGold: 30});
+  after.gold = 7;
+  page.snapshot(after);
+  assert.equal(pageBudget(page).pendingCount, 0);
+  assert.equal(page.readSocialItemSurface("trade").trade.offeredGold, 30);
+});
+
+test("actual Page own-confirmed gold rejects stale quote, exchange, scene and final wallet or malformed source", () => {
+  for (const [label, change] of [
+    ["nonce", (page, {trade}) => { trade.settlementNonce = "replacement"; page.snapshot(); }],
+    ["exchange", (page) => { openCurrentTrade(page); }],
+    ["scene", (page) => { page.scope.socialSceneRevisionRef.current += 1; page.snapshot(); }],
+    ["wallet", (_page, {world}) => { world.gold = 12; }],
+    ["held gold", (page, {trade}) => { trade.heldGold = 16; page.snapshot(); page.renderTrade(); }],
+    ["currency", (page, {trade}) => { trade.offeredCurrency = "city"; page.snapshot(); page.renderTrade(); }],
+  ]) {
+    const page = harness(), quote = openOwnConfirmedGoldQuote(page);
+    page.onAction(() => change(page, quote));
+    assert.equal(page.sendTradeUiCommand({type: "tradeGold", amount: 13}), false, label);
+    assert.equal(page.attempts, 0, label);
+    assert.equal(pageBudget(page).pendingCount, 0, label);
+  }
+  const page = harness(); openOwnConfirmedGoldQuote(page);
+  for (const amount of [0, -1, 1.5, 21, 0x1_0000_0000]) {
+    assert.equal(page.sendTradeUiCommand({type: "tradeGold", amount}), false, String(amount));
+  }
+  assert.equal(page.attempts, 0);
 });
 
 test("actual Page Ranking queues selected online filter and settles old rows under their own type and offset before issuing the desired query", () => {

@@ -82,7 +82,7 @@ export type TradeWindowProps = {
   emptyInventorySlots?: readonly number[];
   itemsReady?: boolean;
   itemActionPending?: boolean;
-  /** Host-owned owner/session/source lease; changes retire the selection. */
+  /** Host-owned source lease; changes retire the selection and amount prompt. */
   itemSourceKey?: string;
   onDepositItem?: (from: number, to: number, uniqueId: number) => void;
   onRetrieveItem?: (from: number, to: number, uniqueId: number) => void;
@@ -115,7 +115,7 @@ export function TradeWindow({ t, trade, playerName, myGold, myConfirmed, myItems
   const guestWindow = useR16SocialWindow(layout.guest);
   const [front, setFront] = useState<"own" | "guest">("guest");
   const [goldDraft, setGoldDraft] = useState<string | null>(null);
-  const goldScope = useRef<{ partner: string; sourceKey: string | undefined } | null>(null);
+  const goldScope = useRef<{ partner: string; sourceKey: string; maxGold: number } | null>(null);
   const [itemSelection, setItemSelection] = useState<{ source: "bag" | "offer"; item: SocialItemSlot; key: string } | null>(null);
   const myItemsList = myItems ?? [];
   const ownSlots = tradeGridSlots(myItemsList);
@@ -157,14 +157,23 @@ export function TradeWindow({ t, trade, playerName, myGold, myConfirmed, myItems
     onDepositItem(selection.item.slot, slot, selection.item.uniqueId);
     setItemSelection(null);
   };
-  // The same host-owned lock, pending and wallet gates remain authoritative.
-  const goldLocked = selfConfirmed || itemActionPending === true || !onSetGold || !partner || state !== "open";
+  // Crystal accepts a gold addition from a confirmed owner. Only the item
+  // grid stays read-only until the server reopens the quote.
+  const wallet = typeof availableGold === "number" && Number.isSafeInteger(availableGold)
+    && availableGold > 0 && availableGold <= 0xffff_ffff ? availableGold : null;
+  const goldLocked = itemActionPending === true || !onSetGold || !itemSourceKey || !partner || state !== "open" || wallet === null;
   const confirmDisabled = !onConfirm || !partner || itemActionPending === true || !selfConfirmed && trade?.partnerItemsKnown === false;
-  const amount = goldDraft === null ? null : r16TradeGoldAmount(goldDraft, availableGold);
+  const parsedAmount = goldDraft === null ? null : r16TradeGoldAmount(goldDraft, goldScope.current?.maxGold);
+  const amount = parsedAmount !== null && wallet !== null && parsedAmount <= wallet ? parsedAmount : null;
   const openGold = () => {
-    if (goldLocked) return;
-    goldScope.current = { partner, sourceKey: itemSourceKey };
-    setGoldDraft(String(typeof availableGold === "number" ? Math.max(0, Math.trunc(availableGold)) : 0));
+    if (goldLocked || !itemSourceKey || wallet === null) return;
+    goldScope.current = { partner, sourceKey: itemSourceKey, maxGold: wallet };
+    setGoldDraft(String(wallet));
+  };
+  const changeGoldDraft = (value: string) => {
+    const digits = value.replace(/[^0-9]/g, "");
+    const capped = r16TradeGoldAmount(digits, goldScope.current?.maxGold);
+    setGoldDraft(capped !== null && capped < Number(digits) ? String(capped) : digits);
   };
   const closeGold = () => { setGoldDraft(null); goldScope.current = null; };
   const submitGold = () => {
@@ -248,7 +257,7 @@ export function TradeWindow({ t, trade, playerName, myGold, myConfirmed, myItems
       <img src={originalItemIconPath(116)} alt="" draggable={false} style={style.amountIcon} />
       <input data-r16-trade-gold-input="true" data-r16-autofocus="true" value={goldDraft} inputMode="numeric"
         aria-label={t("ui.tradeSetGold", [], "Set gold")} autoComplete="off" spellCheck={false} maxLength={12}
-        onChange={event => setGoldDraft(event.target.value.replace(/[^0-9]/g, ""))} onFocus={event => event.currentTarget.select()}
+        onChange={event => changeGoldDraft(event.target.value)} onFocus={event => event.currentTarget.select()}
         style={{ ...style.amountInput, ...layout.amountField, borderColor: amount === null ? "#f00" : amount === availableGold ? "#ffa500" : "#00c000" }} />
       {amount !== null ? <R16SocialButton frame={200} rect={layout.amountConfirm} data-r16-trade-gold-submit="true"
         label={t("ui.confirm", [], "Confirm")} onClick={submitGold} /> : null}

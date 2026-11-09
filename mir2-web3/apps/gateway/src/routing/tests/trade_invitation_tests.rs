@@ -93,11 +93,74 @@ fn invitation_requires_mutual_facing() {
         MirDirection::Right,
         "fixture turn must reach authoritative state: {turn_packets:?}"
     );
-    first.handle_packet(ClientPacket::TradeRequest);
+    let response = first.handle_packet(ClientPacket::TradeRequest);
+    assert!(response.iter().any(|packet| matches!(packet,
+        ServerPacket::Chat { message, chat_type: mir2_protocol::ChatType::System }
+            if message == "You must face someone to trade.")));
     assert!(!second
         .handle_packet(ClientPacket::KeepAlive { time: 1 })
         .iter()
         .any(is_trade_packet));
+}
+
+#[test]
+fn trade_request_feedback_and_cooldown_match_crystal_without_granting_a_trade() {
+    let state = Arc::new(Mutex::new(SharedInProcessZoneState::new()));
+    let mut first = shared_session_runtime(state.clone());
+    let mut second = shared_session_runtime(state.clone());
+    start_demo_runtime(&mut first);
+    start_new_runtime(&mut second, "trade-feedback-peer", "Blade");
+    let a = first.current_presence_key().unwrap();
+    let b = second.current_presence_key().unwrap();
+    {
+        let mut shared = state.lock().unwrap();
+        let here = shared.players[&a].entity.clone();
+        shared.players.get_mut(&a).unwrap().entity.direction = MirDirection::Right;
+        let peer = shared.players.get_mut(&b).unwrap();
+        peer.entity.x = here.x + 1;
+        peer.entity.y = here.y;
+        peer.entity.direction = MirDirection::Right;
+    }
+    let message = first.inner.shared_social_message("server.FaceToTrade", &[]);
+    assert_eq!(first.execute_shared_trade_request(100), vec![message]);
+    {
+        let mut shared = state.lock().unwrap();
+        let peer = shared.players.get_mut(&b).unwrap();
+        peer.entity.direction = MirDirection::Left;
+        peer.allow_trade = Some(false);
+    }
+    assert!(first.execute_shared_trade_request(2_099).is_empty());
+    assert!(state.lock().unwrap().trade_links.invitations.is_empty());
+    let blade = ["Blade".to_owned()];
+    let message = first.inner.shared_social_message("server.PlayerNotAllowingTrade", &blade);
+    assert_eq!(first.execute_shared_trade_request(2_100), vec![message]);
+    {
+        let mut shared = state.lock().unwrap();
+        let peer = shared.players.get_mut(&b).unwrap();
+        peer.allow_trade = Some(true);
+        peer.entity.dead = true;
+    }
+    let message = first.inner.shared_social_message("server.CannotTradeWhenDead", &[]);
+    assert_eq!(first.execute_shared_trade_request(4_100), vec![message]);
+    assert!(state.lock().unwrap().trade_links.invitations.is_empty());
+    state.lock().unwrap().players.get_mut(&b).unwrap().entity.dead = false;
+
+    assert!(first.execute_shared_trade_request(6_100).is_empty());
+    assert_eq!(state.lock().unwrap().trade_links.invitations.len(), 1);
+    let message = first.inner.shared_social_message("server.PlayerAlreadyHasTradeInvitation", &blade);
+    assert_eq!(first.execute_shared_trade_request(8_100), vec![message]);
+    assert_eq!(state.lock().unwrap().trade_links.invitations.len(), 1);
+    assert!(second.execute_shared_trade_reply(false).is_empty());
+    assert_eq!(first.apply_shared_trade_link_events(),
+        vec![first.inner.shared_trade_refusal_message("Blade")]);
+    assert!(first.world_snapshot().stage5_systems.trade.is_none());
+
+    assert!(first.execute_shared_trade_request(10_100).is_empty());
+    assert!(second.execute_shared_trade_reply(true).iter()
+        .any(|packet| matches!(packet, ServerPacket::TradeAccept { .. })));
+    let message = first.inner.shared_social_message("server.AlreadyTrading", &[]);
+    assert_eq!(first.execute_shared_trade_request(12_100), vec![message]);
+    assert_eq!(state.lock().unwrap().trade_links.pairs.len(), 2);
 }
 
 #[test]
@@ -634,7 +697,10 @@ fn disabled_trade_preference_rejects_invites() {
         message: "@ALLOWTRADE".to_string(),
         linked_items: Vec::new(),
     });
-    first.handle_packet(ClientPacket::TradeRequest);
+    let response = first.handle_packet(ClientPacket::TradeRequest);
+    assert!(response.iter().any(|packet| matches!(packet,
+        ServerPacket::Chat { message, chat_type: mir2_protocol::ChatType::System }
+            if message == "Player Blade is not allowing trade at the moment.")));
     assert!(!second
         .handle_packet(ClientPacket::KeepAlive { time: 1 })
         .iter()
@@ -660,10 +726,10 @@ fn teardown_fenced_recipient_rejects_request_and_inviter_rejects_acceptance() {
         peer.entity.direction = MirDirection::Left;
         shared.teardown_fences.insert(second_key.clone());
     }
-    first.execute_shared_trade_request();
+    first.execute_shared_trade_request(0);
     assert!(state.lock().unwrap().trade_links.invitations.is_empty());
     state.lock().unwrap().teardown_fences.remove(&second_key);
-    first.execute_shared_trade_request();
+    first.execute_shared_trade_request(2_000);
     assert_eq!(state.lock().unwrap().trade_links.invitations.len(), 1);
     state.lock().unwrap().teardown_fences.insert(first_key);
     assert!(second.execute_shared_trade_reply(true).is_empty());
@@ -732,7 +798,7 @@ fn pending_old_pair_cancellation_blocks_a_new_invitation_until_drained() {
         third.entity.y = here.y;
         third.entity.direction = MirDirection::Left;
     }
-    first.execute_shared_trade_request();
+    first.execute_shared_trade_request(0);
     second.execute_shared_trade_reply(true);
     first.apply_shared_trade_link_events();
     first.cancel_pending_shared_trade_offers();
@@ -744,13 +810,13 @@ fn pending_old_pair_cancellation_blocks_a_new_invitation_until_drained() {
         .unwrap()
         .entity
         .direction = MirDirection::Right;
-    third.execute_shared_trade_request();
+    third.execute_shared_trade_request(0);
     assert!(state.lock().unwrap().trade_links.invitations.is_empty());
     assert!(second
         .apply_shared_trade_link_events()
         .iter()
         .any(|p| matches!(p, ServerPacket::TradeCancel { unlock: false })));
-    third.execute_shared_trade_request();
+    third.execute_shared_trade_request(2_000);
     assert_eq!(state.lock().unwrap().trade_links.invitations.len(), 1);
 }
 
@@ -790,7 +856,7 @@ fn bootstrap_failure_closes_pair_and_refunds_the_waiting_peer() {
         peer.entity.y = here.y;
         peer.entity.direction = MirDirection::Left;
     }
-    first.execute_shared_trade_request();
+    first.execute_shared_trade_request(0);
     second.execute_shared_trade_reply(true);
     first.apply_shared_trade_link_events();
     let gold = first.inner.world_snapshot().gold;

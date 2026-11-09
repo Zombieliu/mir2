@@ -327,6 +327,7 @@ test('production integration captures raw before coalescing and final event proo
  const guildRankCondition='options?.socialRosterProof?.rankProof && (socketRef.current !== socket || socket.readyState !== WebSocket.OPEN || !guildRankOperationsRef.current.claim(options.socialRosterProof.rankProof, readGuildRankEditSource(), wireCommand, Math.floor(performance.now())))';
  const tradeConfirmCondition='options?.socialTradeProof && wireCommand.type === "tradeConfirm"';
  const tradeCancelCondition='options?.socialTradeProof && wireCommand.type === "tradeCancel"';
+ const tradeEditCondition='options?.socialTradeProof && (wireCommand.type === "tradeCancel" || wireCommand.type === "tradeGold")';
  const budgetValidateCondition='socialBudgetTicket && !socialBudgetRef.current?.validate(socialBudgetTicket, currentSocialReplyOwner(), wireCommand)';
  const budgetEnterCondition='socialBudgetTicket && !socialBudgetRef.current?.enter(socialBudgetTicket, currentSocialReplyOwner(), wireCommand)';
  assert.deepEqual(statements.slice(claimIndex+1,socketIndex).map(n=>ts.isIfStatement(n)?normalized(n.expression):null),[
@@ -367,7 +368,7 @@ test('production integration captures raw before coalescing and final event proo
   guildRankCondition,
   'wireCommand.type === "requestGuildInfo"',
   tradeConfirmCondition,
-  tradeCancelCondition,
+  tradeEditCondition,
   budgetEnterCondition,
   tradeCancelCondition,
  ]);
@@ -478,17 +479,17 @@ test('production integration captures raw before coalescing and final event proo
   'if (!source?.trade) return false;',
   'socialTradeConfirmOfferRef.current = {owner: source.owner, incarnation: options.socialTradeProof.incarnation, key: ownTradeOfferKey(source.trade), items: source.slots.map(item => item ? ownTradeTooltipItem(item) : null)};'
  ]);
- const tradeCancelGate=statements[authClaimIndex+12];
- assert.ok(ts.isIfStatement(tradeCancelGate));assert.equal(normalized(tradeCancelGate.expression),tradeCancelCondition);
- assert.equal(normalized(tradeCancelGate.thenStatement),'{ if (socketRef.current !== socket || socket.readyState !== WebSocket.OPEN || !socialTradeProofCurrent(options.socialTradeProof, wireCommand)) return false; }');
- assert.equal(tradeCancelGate.elseStatement,undefined);
+ const tradeEditGate=statements[authClaimIndex+12];
+ assert.ok(ts.isIfStatement(tradeEditGate));assert.equal(normalized(tradeEditGate.expression),tradeEditCondition);
+ assert.equal(normalized(tradeEditGate.thenStatement),'{ if (socketRef.current !== socket || socket.readyState !== WebSocket.OPEN || !socialTradeProofCurrent(options.socialTradeProof, wireCommand)) return false; }');
+ assert.equal(tradeEditGate.elseStatement,undefined);
  const budgetEnter=statements[authClaimIndex+13],cancelSpent=statements[authClaimIndex+14];
  assert.ok(ts.isIfStatement(budgetEnter));assert.equal(normalized(budgetEnter.expression),budgetEnterCondition);
  assert.equal(normalized(budgetEnter.thenStatement),'return false;');assert.equal(budgetEnter.elseStatement,undefined);
  assert.ok(ts.isIfStatement(cancelSpent));assert.equal(normalized(cancelSpent.expression),tradeCancelCondition);
  assert.equal(normalized(cancelSpent.thenStatement),'socialTradeCancelSpentRef.current = options.socialTradeProof.incarnation;');
  assert.equal(cancelSpent.elseStatement,undefined);
- assert.equal(socketIndex,authClaimIndex+15,'typed guild/read and trade confirm/cancel checks precede final Native entry, cancel spending and socket');
+ assert.equal(socketIndex,authClaimIndex+15,'typed guild/read and trade confirm/cancel/gold checks precede final Native entry, cancel spending and socket');
  assert.deepEqual(statements.slice(statements.indexOf(budgetEnter)+1,socketIndex+1),[cancelSpent,socketTry],
   'only the exact callback-free cancel assignment can follow Native entry before socket.send');
  const afterEntryCalls=[];
@@ -508,7 +509,7 @@ test('production integration captures raw before coalescing and final event proo
   guildRankCondition,
   'wireCommand.type === "requestGuildInfo"',
   tradeConfirmCondition,
-  tradeCancelCondition,
+  tradeEditCondition,
   budgetEnterCondition,
   tradeCancelCondition,
  ]);

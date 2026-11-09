@@ -167,7 +167,7 @@ type SpouseUiSource = Readonly<{
 }>;
 
 type SocialTradeSendProof = Readonly<{owner: SocialReplyOwner; incarnation: number;
-  partner: string; state: "requested" | "open" | "closed"; body: string}>;
+  partner: string; state: "requested" | "open" | "closed"; goldSourceKey: string | null; body: string}>;
 import { projectBevyStorageModel } from "../lib/bevy-storage-model";
 import { type StorageRuntime, type StorageIntent, type StorageCommandProof } from "../lib/bevy-storage-ui";
 type EquipmentOwnerProof = SharedEquipmentOwnerProof | StorageCommandProof;
@@ -6824,7 +6824,7 @@ export default function HomePage() {
           key: ownTradeOfferKey(source.trade), items: source.slots.map(item => item ? ownTradeTooltipItem(item) : null)};
       }
     }
-    if (options?.socialTradeProof && wireCommand.type === "tradeCancel") {
+    if (options?.socialTradeProof && (wireCommand.type === "tradeCancel" || wireCommand.type === "tradeGold")) {
       if (socketRef.current !== socket || socket.readyState !== WebSocket.OPEN
         || !socialTradeProofCurrent(options.socialTradeProof, wireCommand)) return false;
     }
@@ -13653,6 +13653,23 @@ export default function HomePage() {
       || worldRef.current.stage5Systems.trade?.partner !== trade.partner) return null;
     return {owner, trade};
   }
+  function readTradeGoldSourceKey(owner = currentSocialReplyOwner()): string | null {
+    const source = readOwnTradeState(owner);
+    if (!source) return null;
+    const {trade} = source, nonce = trade.settlementNonce, offered = trade.offeredGold;
+    if (trade.completed !== false || trade.offeredCurrency !== "gold"
+      || typeof offered !== "number" || !Number.isSafeInteger(offered) || offered < 0 || offered > 0xffff_ffff
+      || trade.heldGold != null && trade.heldGold !== offered
+      || typeof nonce !== "string" || !nonce.trim() || nonce.length > 256 || nonce.includes("\0")) return null;
+    // An own-confirmed quote can add gold. Its item grid still has no edit lease.
+    const eligible = trade.escrowPrepared === true
+      ? trade.accepted === true && trade.locked === true
+      : trade.escrowPrepared === false && readSocialItemSurface("trade") !== null;
+    if (!eligible) return null;
+    const {connectionGeneration, sessionGeneration, sceneRevision, playerObjectId, mapFileName} = source.owner;
+    return JSON.stringify([connectionGeneration, sessionGeneration, sceneRevision, playerObjectId, mapFileName,
+      tradeIncarnationRef.current, trade.partner, nonce, offered, trade.escrowPrepared, trade.locked]);
+  }
   function ownTradeOfferKey(trade: Record<string, unknown>): string {
     return JSON.stringify([trade.partner, trade.settlementNonce, trade.offeredGold, trade.offeredCurrency,
       trade.offeredSlots, trade.offeredUniqueIds]);
@@ -13852,14 +13869,20 @@ export default function HomePage() {
     if (pending || socialTradeCancelSpentRef.current === proof.incarnation) return false;
     if (type === "tradeReply") return lifecycle.state === "requested" && command.acceptInvite === true
       && Object.keys(command).length === 2 && socialTradeReplySpentRef.current !== proof.incarnation;
+    if (type === "tradeGold") {
+      const gold = worldRef.current.gold;
+      return proof.goldSourceKey !== null && proof.goldSourceKey === readTradeGoldSourceKey(owner)
+        && Object.keys(command).length === 2 && typeof command.amount === "number"
+        && Number.isSafeInteger(command.amount) && command.amount > 0 && command.amount <= 0xffff_ffff
+        && Number.isSafeInteger(gold) && gold <= 0xffff_ffff && command.amount <= gold;
+    }
     if (type === "tradeConfirm" && command.locked === false && Object.keys(command).length === 2
       && readPreparedOwnTrade(owner)) return true;
     const source = readSocialItemSurface("trade");
     if (!source || lifecycle.state !== "open" || source.trade?.escrowPrepared !== false || source.trade.completed !== false) return false;
     if (type === "tradeConfirm") return typeof command.locked === "boolean" && command.locked === !source.trade.locked
       && (command.locked === false || tradePartnerRef.current?.itemsKnown !== false) && Object.keys(command).length === 2;
-    return type === "tradeGold" && Object.keys(command).length === 2 && typeof command.amount === "number"
-      && Number.isSafeInteger(command.amount) && command.amount > 0 && command.amount <= 0xffff_ffff && command.amount <= worldRef.current.gold;
+    return false;
   }
   function observeSocialItemReceipt(packet: string, payload: Record<string, unknown>) {
     const result = socialItemOperationsRef.current.receipt(packet, payload, socialItemReceiptOwner());
@@ -20762,7 +20785,7 @@ export default function HomePage() {
   const ownTradeItems = preparedTrade?.items ?? socialTradeRender?.slots.map(item => item ? ownTradeTooltipItem(item) : null);
   const socialItemsPending = socialItemOperationsRef.current.pending !== null;
   const socialTradeUiLease = {owner: currentSocialReplyOwner(), incarnation: tradeIncarnationRef.current,
-    partner: tradeLifecycleRef.current.partner, state: tradeLifecycleRef.current.state};
+    partner: tradeLifecycleRef.current.partner, state: tradeLifecycleRef.current.state, goldSourceKey: readTradeGoldSourceKey()};
   const socialPartnerRender = tradePartnerRef.current && tradePartnerRef.current.incarnation === tradeIncarnationRef.current
     && sameSocialPhysicalOwner(tradePartnerRef.current.owner, currentSocialReplyOwner()) ? tradePartnerRef.current : null;
   const socialTradeSummary = extraWindowData.trade ? {...extraWindowData.trade, state: tradeLifecycleRef.current.state,
@@ -21387,9 +21410,10 @@ export default function HomePage() {
         myGold: preparedTrade?.gold ?? (typeof socialTradeRender?.trade?.offeredGold === "number" ? socialTradeRender.trade.offeredGold : 0), availableGold: world.gold,
         myItems: ownTradeItems, onReadItemTooltip: readTradeItemTooltip, myItemCount: ownTradeItems?.filter(item => item !== null).length,
         myConfirmed: preparedTrade !== null || socialTradeRender?.trade?.locked === true, inventoryItems: socialTradeRender?.inventoryItems, emptyInventorySlots: socialTradeRender?.inventory.emptySlots,
-        itemsReady: Boolean(socialTradeRender && tradeLifecycleRef.current.state === "open" && socialTradeRender.trade?.escrowPrepared === false), itemActionPending: socialItemsPending, itemSourceKey: socialTradeRender?.sourceKey,
+        itemsReady: Boolean(socialTradeRender && tradeLifecycleRef.current.state === "open" && socialTradeRender.trade?.escrowPrepared === false), itemActionPending: socialItemsPending, itemSourceKey: socialTradeRender?.sourceKey ?? socialTradeUiLease.goldSourceKey ?? undefined,
         onDepositItem: (from, to, uid) => submitSocialItem("depositTrade", from, to, uid, socialTradeRender?.sourceKey ?? ""),
-        onRetrieveItem: (from, to, uid) => submitSocialItem("retrieveTrade", from, to, uid, socialTradeRender?.sourceKey ?? ""), onAccept: acceptTrade, onConfirm: confirmTrade, onCancel: cancelTrade, onSetGold: setTradeGold }}
+        onRetrieveItem: (from, to, uid) => submitSocialItem("retrieveTrade", from, to, uid, socialTradeRender?.sourceKey ?? ""), onAccept: acceptTrade, onConfirm: confirmTrade, onCancel: cancelTrade,
+        onSetGold: socialTradeUiLease.goldSourceKey === null ? undefined : setTradeGold }}
       buffs={{ open: showBuffs, onClose: () => setShowBuffs(false), buffs: extraWindowData.buffs }}
       mail={{ open: showMail&&!bevyMailUi.composeRequested&&bevyMailUi.composeWithdrawn&&!bevyMailUi.ready&&bevyMailUi.withdrawn, onClose: () => setMailboxOpen(false),
         mail:adaptMailMessages(mailRenderRows??[]),gold:world.gold,onOpen:openMailMessage,onClaimAttachment:claimMailAttachment,onDeleteMail:deleteMailMessage,onSendMail:sendMailMessage,

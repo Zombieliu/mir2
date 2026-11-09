@@ -179,7 +179,7 @@ fn unprepared_logout_or_disconnect_refunds_before_save_and_peer_refunds_once() {
 }
 
 #[test]
-fn peer_can_add_gold_while_the_prepared_sender_must_unlock_first() {
+fn peer_can_add_gold_and_invalidate_the_prepared_quote() {
     let (mut a, mut b) = funded_gold_pair();
     let ga = a.world_snapshot().gold;
     let gb = b.world_snapshot().gold;
@@ -187,15 +187,7 @@ fn peer_can_add_gold_while_the_prepared_sender_must_unlock_first() {
     a.handle_packet(ClientPacket::TradeGold { amount: 7 });
     b.handle_packet(ClientPacket::TradeGold { amount: 11 });
     a.handle_packet(ClientPacket::TradeConfirm { locked: true });
-    let before = a.world_snapshot().stage5_systems.trade.unwrap();
-    assert!(before.escrow_prepared);
-    let own_edit = a.handle_packet(ClientPacket::TradeGold { amount: 1 });
-    assert!(lost(&own_edit).is_empty());
-    assert_eq!(a.world_snapshot().gold, ga - 7);
-    assert_eq!(
-        a.world_snapshot().stage5_systems.trade.as_ref(),
-        Some(&before)
-    );
+    assert!(a.world_snapshot().stage5_systems.trade.unwrap().escrow_prepared);
 
     let peer_edit = b.handle_packet(ClientPacket::TradeGold { amount: 1 });
     assert_eq!(lost(&peer_edit), vec![1]);
@@ -221,6 +213,67 @@ fn peer_can_add_gold_while_the_prepared_sender_must_unlock_first() {
     assert_eq!(b.world_snapshot().gold, gb - 12 + 7);
 }
 
+#[test]
+fn prepared_owner_can_add_gold_without_implicitly_reconfirming() {
+    let (mut a, mut b) = funded_gold_pair();
+    let ga = a.world_snapshot().gold;
+    let gb = b.world_snapshot().gold;
+    open_shared_trade_pair(&mut a, &mut b);
+    let bag_slot = inventory_slot_for_key(&a, "red-potion");
+    assert!(a.handle_packet(ClientPacket::DepositTradeItem { from: bag_slot, to: 3 })
+        .iter().any(|packet| matches!(packet, ServerPacket::DepositTradeItem { success: true, .. })));
+    a.handle_packet(ClientPacket::TradeGold { amount: 7 });
+    b.handle_packet(ClientPacket::TradeGold { amount: 11 });
+    a.handle_packet(ClientPacket::TradeConfirm { locked: true });
+    let before = a.world_snapshot().stage5_systems.trade.unwrap();
+    assert!(before.escrow_prepared && before.locked);
+
+    let edited = a.handle_packet(ClientPacket::TradeGold { amount: 5 });
+    let unlock = edited.iter().position(|packet| matches!(packet, ServerPacket::TradeCancel { unlock: true }));
+    let debit = edited.iter().position(|packet| matches!(packet, ServerPacket::LoseGold { gold: 5 }));
+    assert!(matches!((unlock, debit), (Some(unlock), Some(debit)) if unlock < debit));
+    assert_eq!(lost(&edited), vec![5]);
+    assert!(gained(&edited).is_empty() && quoted(&edited).is_empty());
+    assert_eq!(a.world_snapshot().gold, ga - 12);
+    let after = a.world_snapshot().stage5_systems.trade.unwrap();
+    assert!(!after.escrow_prepared && !after.locked && !after.accepted);
+    assert_eq!(after.held_gold, Some(12));
+    assert_eq!(after.offered_unique_ids, before.offered_unique_ids);
+    assert_eq!(quoted(&b.handle_packet(ClientPacket::KeepAlive { time: 41 })), vec![12]);
+
+    let peer_confirm = b.handle_packet(ClientPacket::TradeConfirm { locked: true });
+    assert!(!peer_confirm.iter().any(|packet| matches!(packet, ServerPacket::TradeConfirm)));
+    assert_eq!(a.world_snapshot().gold, ga - 12);
+    assert_eq!(b.world_snapshot().gold, gb - 11);
+    let settlement = a.handle_packet(ClientPacket::TradeConfirm { locked: true });
+    assert_eq!(gained(&settlement), vec![11]);
+    assert_eq!(gained(&b.handle_packet(ClientPacket::KeepAlive { time: 42 })), vec![12]);
+    assert!(gained(&b.handle_packet(ClientPacket::KeepAlive { time: 43 })).is_empty());
+    assert_eq!(a.world_snapshot().gold, ga - 12 + 11);
+    assert_eq!(b.world_snapshot().gold, gb - 11 + 12);
+}
+
+#[test]
+fn invalid_gold_deltas_reopen_prepared_owner_without_moving_assets() {
+    let (mut a, mut b) = funded_gold_pair();
+    open_shared_trade_pair(&mut a, &mut b);
+    a.handle_packet(ClientPacket::TradeGold { amount: 7 });
+    assert_eq!(quoted(&b.handle_packet(ClientPacket::KeepAlive { time: 44 })), vec![7]);
+    let wallet = a.world_snapshot().gold;
+    for amount in [0, wallet.checked_add(1).unwrap()] {
+        a.handle_packet(ClientPacket::TradeConfirm { locked: true });
+        assert!(a.world_snapshot().stage5_systems.trade.unwrap().escrow_prepared);
+        let packets = a.handle_packet(ClientPacket::TradeGold { amount });
+        assert!(packets.iter().any(|packet| matches!(packet, ServerPacket::TradeCancel { unlock: true })));
+        assert!(lost(&packets).is_empty() && gained(&packets).is_empty() && quoted(&packets).is_empty());
+        assert_eq!(a.world_snapshot().gold, wallet);
+        let reopened = a.world_snapshot().stage5_systems.trade.unwrap();
+        assert!(!reopened.escrow_prepared && !reopened.locked && !reopened.accepted);
+        assert_eq!(reopened.held_gold, Some(7));
+        assert!(quoted(&b.handle_packet(ClientPacket::KeepAlive { time: 45 })).is_empty());
+    }
+}
+
 fn open_runtime_pair(
     a: &mut SharedInProcessZoneSessionRuntime,
     b: &mut SharedInProcessZoneSessionRuntime,
@@ -236,7 +289,7 @@ fn open_runtime_pair(
         peer.entity.y = here.y;
         peer.entity.direction = MirDirection::Left;
     }
-    a.execute_shared_trade_request();
+    a.execute_shared_trade_request(0);
     assert!(b
         .execute_shared_trade_reply(true)
         .iter()

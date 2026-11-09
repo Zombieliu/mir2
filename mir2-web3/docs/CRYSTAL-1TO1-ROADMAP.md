@@ -1,5 +1,9 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+## R16 确认后的金币修改（2026-11-10）
+
+Web 可按 Windows R16 在本方确认后直接追加金币。两位普通角色连续两次各加 11，重新确认后单次交割，钱包与背包重登一致。交易邀请沿用 Crystal 的系统消息和两秒冷却。发行时需随候选构建更新 Web 运行包。 [证据](evidence/r16-trade-own-gold-20261110/README.md)
+
 ## R16 远程技能到期结算（2026-11-10）
 
 固定 Crystal 的 `500 + 50 × 距离` 毫秒用于大火球和灵魂火符对怪物。普通 Web 七格复测到期前无伤害，命中、资源与熟练度读回通过。继续核对客户端弹道表现、遮挡和防御取样。 [计时与结果](evidence/r16-delayed-projectiles-20261110/README.md)

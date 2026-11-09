@@ -1,0 +1,209 @@
+{
+  "schema": "mir2.r16.trade-own-gold-and-invite.v1",
+  "scope": "Ordinary local isolated File WebGPU and wire sessions plus focused PostgreSQL tests",
+  "sourceBase": "6c55c05aae4c215d709724ccea5bdcae3dc17702",
+  "gatewaySha256": "517328cd8d2badcf2a7fb9ae1532964435e703a40398838b540551c0a697867c",
+  "routingSourceSha256": "331720a21624d2893a2ad3e016d1166016122a60459df0c5df995e9acef65316",
+  "zoneRuntimeSourceSha256": "8657223621a624c7e3ec17a840696dc3388be716209163d1ce6b35f07b4969cc",
+  "webOverlay": {
+    "app/page.tsx": "23c30db0f6fe81268c0f6c256dd9f22bbc10791c54f3fb392ea771a6e2698f6a",
+    "app/components/original-client-trade-window.tsx": "f6de8fab3eef174d64ab09bbb5a8226536ddc03d37beae6e70ec93c72f55d384"
+  },
+  "runtime": "bevy-81b7623f6e65d0ea",
+  "runtimeManifestSha256": "105d6db74f108c2441dbb9874b3ae3a16d738491bb56fcc2ef1e1693e471562e",
+  "startingWallets": {
+    "primary": 1000,
+    "peer": 700
+  },
+  "original": {
+    "gatewaySha256": "c94ddf20274a45d2c571e2f367d42c6b598bf7ebf6bf7077c0344499132e0a42",
+    "receiptSha256": "94fd7ab7619d3a7f447b0171077e22da4ad28c9cf2dda6ae139c90cd9acc080a",
+    "lockedGoldButtonOpenedDialog": false,
+    "lockedGoldPacketDebited": false,
+    "staleQuoteFinalWallets": {
+      "primary": 922,
+      "peer": 778
+    }
+  },
+  "firstCandidate": {
+    "gatewaySha256": "1b285236a10f9e2f5d0eb160c93aa1f8853bcecf93b22b7a7b851e9e2ba47ee5",
+    "browserReceipt": {
+      "path": "ui-candidate-r1/browser-r1/proof.json",
+      "sha256": "cf77c252b09a3097b27cf485d119fde0259eeb1b9d129cc8656998dffa3a643a"
+    },
+    "unlockBeforeDebit": true,
+    "peerQuote": 148,
+    "finalWallets": {
+      "primary": 911,
+      "peer": 789
+    },
+    "invalidWireEdits": [
+      {
+        "role": "primary",
+        "amount": 0,
+        "ownerWallet": 863,
+        "otherWallet": 641,
+        "quote": 137,
+        "unlock": true,
+        "heldItemPreserved": true,
+        "noDebit": true,
+        "noSettlement": true
+      },
+      {
+        "role": "peer",
+        "amount": 642,
+        "ownerWallet": 641,
+        "otherWallet": 863,
+        "quote": 59,
+        "unlock": true,
+        "heldItemPreserved": true,
+        "noDebit": true,
+        "noSettlement": true
+      }
+    ],
+    "invalidWireReceipt": {
+      "path": "wire-candidate-r1/proof.json",
+      "sha256": "d472f7276ff5e6cdd64c23046a467cb67e47c6e8fd28f30760fcd0f18cd434e8"
+    }
+  },
+  "olderRuntimeControl": {
+    "version": "bevy-0cd68510886134e0",
+    "receipt": {
+      "path": "ui-repeat-same-r1/browser-r1/proof.json",
+      "sha256": "3d4e9cae163e4b6cf18c48baf525b289abdfa3af6fc4170290d90be8b880d844"
+    },
+    "secondButtonEnabled": true,
+    "secondModalOpened": true,
+    "secondGoldSentCount": 0,
+    "requestedAdditionalGold": 11,
+    "runtime": "bevy-0cd68510886134e0",
+    "cleared": false,
+    "lockPreservedWhenNoCommand": true,
+    "explicitManualUnlockForControl": true
+  },
+  "freshRuntime": {
+    "receipt": {
+      "path": "ui-repeat-source-r1/browser-r1/proof.json",
+      "sha256": "e396d05ba50d12a4e0a6ce490ffd26bf7e9ad408cacf3ed70ef54ac848fab4ac"
+    },
+    "diskReceipt": {
+      "path": "ui-repeat-source-r1/disk-readback.json",
+      "sha256": "29eb4f0b713a776a56b4d8e6632ed5bb13142463ef2e2c75021ac20ae3c2ce1a"
+    },
+    "shutdownReceipt": {
+      "path": "ui-repeat-source-r1/shutdown.json",
+      "sha256": "1dffb8614b7a9ac0672d95bae7009fbd56444dd38cbd0267ac938a6b319f5e26"
+    },
+    "commandsAndDebits": [
+      137,
+      11,
+      11
+    ],
+    "secondButtonEnabled": true,
+    "secondModalOpened": true,
+    "secondGoldSentCount": 1,
+    "requestedAdditionalGold": 11,
+    "runtime": "bevy-81b7623f6e65d0ea",
+    "cleared": true,
+    "finalQuotes": {
+      "primary": 159,
+      "peer": 59
+    },
+    "finalWallets": {
+      "primary": 900,
+      "peer": 800
+    },
+    "checks": [
+      {
+        "name": "normal-keyboard-invitation-and-visible-acceptance",
+        "phase": "settlement",
+        "mutualFacing": true,
+        "ordinaryPeerWalks": 2
+      },
+      {
+        "name": "both-ui-offers-visible-and-gold-held",
+        "primary": 863,
+        "peer": 641
+      },
+      {
+        "name": "sender-new-gold-and-both-items-kept",
+        "ownGold": 148,
+        "peerGold": 59,
+        "ownWallet": 852,
+        "peerWallet": 641,
+        "ownLockCleared": true,
+        "directWithoutExplicitUnlock": true
+      },
+      {
+        "name": "repeat-edit-observed-without-retry-on-unknown",
+        "secondButtonEnabled": true,
+        "secondModalOpened": true,
+        "secondGoldSentCount": 1,
+        "requestedAdditionalGold": 11,
+        "runtime": "bevy-81b7623f6e65d0ea",
+        "cleared": true
+      },
+      {
+        "name": "new-peer-confirmation-cannot-settle-against-stale-own-lock"
+      },
+      {
+        "name": "once-only-item-and-gold-delivery-before-terminal",
+        "primary": 900,
+        "peer": 800,
+        "total": 1700
+      },
+      {
+        "name": "same-role-ui-readback-and-no-open-trade",
+        "bothExact": true
+      }
+    ],
+    "normalLogouts": 4,
+    "screenshot": {
+      "file": "second-gold-edit-authoritative.png",
+      "sha256": "a0835ac95e4646f8ec0180c7923c9913abe6b84d2ab29965261f2b2417fc50fe"
+    }
+  },
+  "inviteWire": {
+    "proofSha256": "caa3306103558994e8ed79243463ad49dd617b59e2b3393d8b12ed011742ce9b",
+    "traceSha256": "fbbd557c8aa131ef70c4a862492e7ec6ee26d671625cd60d907536b9acd05a31",
+    "rows": 51,
+    "steps": [
+      {
+        "adjacent": true,
+        "mutualFacing": true
+      },
+      {
+        "wrongFacingMessage": true,
+        "peerInvitation": false,
+        "retryWithinMs": 30,
+        "silent": true
+      },
+      {
+        "namedOptOutMessage": true,
+        "peerInvitation": false
+      },
+      {
+        "namedPendingMessage": true,
+        "invitationCount": 1,
+        "namedDeclineMessage": true
+      },
+      {
+        "retryAfterDelayOpened": true,
+        "alreadyTradingMessage": true,
+        "cancelledNormally": true
+      }
+    ],
+    "assetsUnchanged": true,
+    "sameCharacterReadback": true,
+    "sourceFixtureUnchanged": true,
+    "ownedGatewayStopped": true
+  },
+  "counts": {
+    "gatewayTrade": 73,
+    "simulationTrade": 80,
+    "isolatedPostgres16Trade": 3,
+    "webWindowsAndPage": 136,
+    "webSendOrdering": 66,
+    "webStage5Adapters": 508
+  }
+}

@@ -220,13 +220,21 @@ test("offer retrieval keeps both original slot identities and stale/pending sour
   assert.equal(calls.length, 1);
 });
 
-test("gold entry dispatches only on confirmation and drops a stale owner/source prompt", () => {
-  const calls = [], props = tradeProps({ onSetGold: value => calls.push(value) });
+test("an own-confirmed quote can add gold without unlocking items and drops a stale amount prompt", () => {
+  const calls = [], props = tradeProps({ myConfirmed: true, itemsReady: false, onSetGold: value => calls.push(value) });
   const view = mount(TradeWindow, props);
+  assert.equal(grid(view.tree).props.disabled, true);
+  assert.equal(one(view.tree, "data-r16-trade-gold").props.disabled, false);
   one(view.tree, "data-r16-trade-gold").props.onClick(); view.render();
+  assert.equal(one(view.tree, "data-r16-trade-gold-input").props.value, "100");
+  one(view.tree, "data-r16-trade-gold-input").props.onChange({ target: { value: "999" } }); view.render();
   assert.equal(one(view.tree, "data-r16-trade-gold-input").props.value, "100");
   one(view.tree, "data-r16-trade-gold-input").props.onChange({ target: { value: "17" } }); view.render();
   assert.deepEqual(calls, []);
+  view.render({ ...props, availableGold: 10 });
+  assert.equal(one(view.tree, "data-r16-trade-gold-input").props.value, "17");
+  assert.equal(nodes(view.tree, node => node.props["data-r16-trade-gold-submit"]).length, 0, "wallet decrease never substitutes a smaller delta");
+  view.render(props);
   one(view.tree, "data-r16-trade-gold-submit").props.onClick(); view.render(); assert.deepEqual(calls, [17]);
   one(view.tree, "data-r16-trade-gold").props.onClick(); view.render();
   view.render({ ...props, itemSourceKey: "new-source" });
@@ -242,14 +250,20 @@ test("locked/pending/unknown-partner controls preserve the original confirm/unlo
   const props = tradeProps({ myConfirmed: true, onConfirm: () => confirm++, onCancel: () => cancel++ });
   const view = mount(TradeWindow, props);
   assert.equal(grid(view.tree).props.disabled, true);
-  assert.equal(one(view.tree, "data-r16-trade-gold").props.disabled, true);
+  assert.equal(one(view.tree, "data-r16-trade-gold").props.disabled, false);
   assert.equal(one(view.tree, "data-r16-trade-confirm").props.disabled, false);
   one(view.tree, "data-r16-trade-confirm").props.onClick(); one(view.tree, "data-r16-trade-cancel").props.onClick();
   assert.deepEqual([confirm, cancel], [1, 1]);
-  view.render({ ...props, myConfirmed: false, trade: { ...props.trade, partnerItemsKnown: false } });
+  view.render({ ...props, myConfirmed: false, trade: { ...props.trade, confirmed: true, partnerItemsKnown: false } });
   assert.equal(one(view.tree, "data-r16-trade-confirm").props.disabled, true);
+  assert.equal(one(view.tree, "data-r16-trade-gold").props.disabled, false);
   view.render({ ...props, itemActionPending: true });
   assert.equal(one(view.tree, "data-r16-trade-confirm").props.disabled, true);
+  assert.equal(one(view.tree, "data-r16-trade-gold").props.disabled, true);
+  for (const override of [{itemSourceKey: undefined}, {availableGold: 0}]) {
+    view.render({ ...props, ...override });
+    assert.equal(one(view.tree, "data-r16-trade-gold").props.disabled, true);
+  }
 });
 
 test("incoming trade uses a separate modal and waits for the real host state to open windows", () => {
