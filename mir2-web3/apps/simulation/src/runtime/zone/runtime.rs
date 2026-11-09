@@ -6515,6 +6515,16 @@ impl ZoneRuntime {
             && zone_magic_deals_direct_damage(spell)
         {
             let native_damage = damage;
+            // The same Crystal flight time is already used for these spells
+            // against player targets. Freeze it from the admitted target cell.
+            let projectile_impact_at_ms = match spell {
+                Spell::GreatFireBall | Spell::SoulFireBall => Self::owned_human_spell_delay(
+                    spell,
+                    zone_tile_distance(&player.position, &target_point),
+                )
+                .map_or(now_ms, |delay| now_ms.saturating_add(delay)),
+                _ => now_ms,
+            };
             let hit_count = if spell == Spell::DoubleShot { 2 } else { 1 };
             for (hit_object_id, hit_index) in std::iter::once(object_id)
                 .chain(secondary_target_ids.clone())
@@ -6557,7 +6567,7 @@ impl ZoneRuntime {
                                     + 50 * hit_index,
                             )
                         } else {
-                            now_ms
+                            projectile_impact_at_ms
                         },
                         session_id: session_id.clone(),
                         attacker_object_id: player.object_id,
@@ -11593,7 +11603,7 @@ impl ZoneRuntime {
             return Vec::new();
         }
 
-        let practice_owner_is_current = hit.soulfire_practice.as_ref().is_some_and(|receipt| {
+        let practice_hit_is_current = hit.soulfire_practice.as_ref().is_some_and(|receipt| {
             self.players.get(&hit.session_id).is_some_and(|player| {
                 receipt.session_id == hit.session_id
                     && receipt.account_id == player.account_id
@@ -11614,14 +11624,18 @@ impl ZoneRuntime {
                 })
         });
 
+        // These aimed hits require a live original target near its launch
+        // cell. Apply that check to damage as well as the practice receipt.
         if hit.soulfire_practice.as_ref().is_some_and(|receipt| {
             matches!(
                 receipt.spell,
-                ZoneMagicPracticeSpell::StraightShot
+                ZoneMagicPracticeSpell::GreatFireBall
+                    | ZoneMagicPracticeSpell::SoulFireBall
+                    | ZoneMagicPracticeSpell::StraightShot
                     | ZoneMagicPracticeSpell::DoubleShot
                     | ZoneMagicPracticeSpell::DoubleShotSecond
             )
-        }) && !practice_owner_is_current
+        }) && !practice_hit_is_current
         {
             return Vec::new();
         }
@@ -11807,7 +11821,7 @@ impl ZoneRuntime {
         // Crystal levels these three spells on a positive resolved primary hit,
         // including lawful projectiles whose caster died after launch. A changed online
         // incarnation or revived life must never receive an old projectile's XP.
-        if damage > 0 && practice_owner_is_current {
+        if damage > 0 && practice_hit_is_current {
             if let Some(mut receipt) = hit.soulfire_practice.clone() {
                 if receipt.spell == ZoneMagicPracticeSpell::FatalSword {
                     if let Some(owner) = self.players.get_mut(&hit.session_id) {

@@ -1,5 +1,9 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+## R16 远程技能到期结算（2026-11-10）
+
+固定 Crystal 的 `500 + 50 × 距离` 毫秒用于大火球和灵魂火符对怪物。普通 Web 七格复测到期前无伤害，命中、资源与熟练度读回通过。继续核对客户端弹道表现、遮挡和防御取样。 [计时与结果](evidence/r16-delayed-projectiles-20261110/README.md)
+
 ## R16 独立报价与原物退回（2026-11-10）
 
 按 Crystal 单独保管报价。Web 双开通过放入腾格、满包解锁、取回和单次交割。持久撮合区分重启后的未成交报价与已成交待入账，真实数据库验证退回和结算互斥。Windows 窗口和完整 Hosted 链路继续验收。 [证据](evidence/r16-trade-restart-20261110/README.md)

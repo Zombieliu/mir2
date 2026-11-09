@@ -1,6 +1,16 @@
 use super::*;
 use mir2_protocol::MirGender;
 
+const CAST_AT_MS: u64 = 100;
+const TWO_TILE_IMPACT_AT_MS: u64 = 700;
+
+fn impact_at_ms(spell: Spell) -> u64 {
+    match spell {
+        Spell::GreatFireBall | Spell::SoulFireBall => TWO_TILE_IMPACT_AT_MS,
+        _ => CAST_AT_MS,
+    }
+}
+
 fn fixture() -> (ZoneRuntime, SessionId) {
     let mut zone =
         ZoneRuntime::new_with_collision(ZoneKey::for_map("0"), ZoneCollision::unbounded());
@@ -57,19 +67,76 @@ fn launch(
     spell: Spell,
     damage: i32,
 ) -> Vec<ZoneOutbound> {
+    launch_at(zone, owner, spell, damage, Point { x: 12, y: 10 })
+}
+
+fn launch_at(
+    zone: &mut ZoneRuntime,
+    owner: &SessionId,
+    spell: Spell,
+    damage: i32,
+    target: Point,
+) -> Vec<ZoneOutbound> {
     zone.player_cast_native_magic(
         owner,
         9101,
         spell,
         MirDirection::Right,
-        Point { x: 12, y: 10 },
+        target,
         true,
         0,
         damage,
         3,
         1800,
-        100,
+        CAST_AT_MS,
     )
+}
+
+#[test]
+fn targeted_projectile_pays_at_launch_and_hits_at_the_exact_crystal_deadline() {
+    for (spell, class) in [
+        (Spell::GreatFireBall, MirClass::Wizard),
+        (Spell::SoulFireBall, MirClass::Taoist),
+    ] {
+        for (target, due) in [
+            (Point { x: 12, y: 10 }, TWO_TILE_IMPACT_AT_MS),
+            (Point { x: 17, y: 16 }, 950),
+        ] {
+            let (mut zone, owner) = fixture();
+            zone.players.get_mut(&owner).unwrap().class = class;
+            zone.native_monsters.get_mut(&9101).unwrap().position = target.clone();
+
+            let launch = launch_at(&mut zone, &owner, spell, 7, target.clone());
+            assert!(launch.iter().any(|outbound| matches!(outbound,
+                ZoneOutbound::ToSession { packets, .. } if packets.iter().any(|packet|
+                    matches!(packet, ServerPacket::Magic { spell: launched, cast: true, .. } if *launched == spell)))));
+            assert!(practice(&launch).is_empty());
+            assert_eq!(zone.players[&owner].mp, 97);
+            assert_eq!(
+                zone.player_magic_cooldown_remaining_ms(&owner, spell, CAST_AT_MS),
+                Some(1800),
+            );
+            let early = zone.resolve_pending_native_monster_hits(due - 1);
+            assert!(early.is_empty(), "{spell:?} must not impact at {}", due - 1);
+            assert_eq!(zone.native_monsters[&9101].hp, 5);
+
+            // Crystal tracks the original target and tolerates two tiles of movement.
+            zone.native_monsters.get_mut(&9101).unwrap().position.x += 2;
+            let impact = zone.resolve_pending_native_monster_hits(due);
+            let receipts = practice(&impact);
+            assert_eq!(receipts.len(), 1);
+            assert_eq!(receipts[0].spell.spell(), spell);
+            assert_eq!(receipts[0].target_location, target);
+            assert_eq!(receipts[0].damage, 5);
+            assert_eq!(zone.native_monsters[&9101].hp, 0);
+            assert_eq!(zone.players[&owner].mp, 97);
+            assert_eq!(
+                zone.player_magic_cooldown_remaining_ms(&owner, spell, due),
+                Some(CAST_AT_MS + 1800 - due),
+            );
+            assert!(zone.resolve_pending_native_monster_hits(due + 1).is_empty());
+        }
+    }
 }
 
 fn practice(outbounds: &[ZoneOutbound]) -> Vec<&ZoneMagicPracticeReceipt> {
@@ -90,7 +157,7 @@ fn soulfire_practice_is_resolved_positive_hit_evidence_including_lethal_remainde
         zone.native_monsters[&9101].hp, 5,
         "launch must not resolve or award practice"
     );
-    let outbounds = zone.resolve_pending_native_monster_hits(100);
+    let outbounds = zone.resolve_pending_native_monster_hits(TWO_TILE_IMPACT_AT_MS);
     let receipts = practice(&outbounds);
     assert_eq!(receipts.len(), 1);
     let receipt = receipts[0];
@@ -103,7 +170,9 @@ fn soulfire_practice_is_resolved_positive_hit_evidence_including_lethal_remainde
     assert_eq!(receipt.character_index, 7);
     assert_eq!(receipt.object_id, 101);
     assert_eq!(receipt.target_object_id, 9101);
-    assert!(practice(&zone.resolve_pending_native_monster_hits(200)).is_empty());
+    assert!(
+        practice(&zone.resolve_pending_native_monster_hits(TWO_TILE_IMPACT_AT_MS + 1)).is_empty()
+    );
 }
 
 #[test]
@@ -135,8 +204,14 @@ fn soulfire_practice_zero_missing_dead_or_moved_target_is_not_awarded() {
             }
             _ => {}
         }
-        let resolved = zone.resolve_pending_native_monster_hits(100);
+        let resolved = zone.resolve_pending_native_monster_hits(TWO_TILE_IMPACT_AT_MS);
         assert!(practice(&resolved).is_empty(), "case {case}");
+        if matches!(case, 1..=3) {
+            assert!(resolved.is_empty(), "invalid target in case {case}");
+        }
+        if case == 3 {
+            assert_eq!(zone.native_monsters[&9101].hp, 5);
+        }
         if case == 4 {
             assert_eq!(
                 zone.native_monsters[&9101].hp, 5,
@@ -159,7 +234,10 @@ fn soulfire_practice_pending_cast_metadata_survives_zone_checkpoint() {
     launch(&mut zone, &owner, Spell::SoulFireBall, 7);
     let bytes = zone.checkpoint_bytes().unwrap();
     let mut restored = ZoneRuntime::restore_checkpoint(&bytes).unwrap();
-    let resolved = restored.resolve_pending_native_monster_hits(100);
+    assert!(restored
+        .resolve_pending_native_monster_hits(TWO_TILE_IMPACT_AT_MS - 1)
+        .is_empty());
+    let resolved = restored.resolve_pending_native_monster_hits(TWO_TILE_IMPACT_AT_MS);
     assert_eq!(practice(&resolved).len(), 1);
     assert_eq!(practice(&resolved)[0].damage, 5);
 }
@@ -175,7 +253,10 @@ fn soulfire_practice_rejects_changed_presence_and_revived_life() {
         } else {
             player.life_generation += 1;
         }
-        assert!(practice(&zone.resolve_pending_native_monster_hits(100)).is_empty());
+        assert!(zone
+            .resolve_pending_native_monster_hits(TWO_TILE_IMPACT_AT_MS)
+            .is_empty());
+        assert_eq!(zone.native_monsters[&9101].hp, 5);
     }
 }
 
@@ -187,7 +268,7 @@ fn soulfire_practice_lawful_projectile_survives_caster_death_until_presence_chan
     player.dead = true;
     player.hp = 0;
     assert_eq!(
-        practice(&zone.resolve_pending_native_monster_hits(100)).len(),
+        practice(&zone.resolve_pending_native_monster_hits(TWO_TILE_IMPACT_AT_MS)).len(),
         1
     );
 }
@@ -200,7 +281,9 @@ fn soulfire_practice_does_not_extend_other_magic_or_reward_departed_owner() {
     let (mut zone, owner) = fixture();
     launch(&mut zone, &owner, Spell::SoulFireBall, 7);
     zone.leave(&owner);
-    assert!(practice(&zone.resolve_pending_native_monster_hits(100)).is_empty());
+    assert!(zone
+        .resolve_pending_native_monster_hits(TWO_TILE_IMPACT_AT_MS)
+        .is_empty());
 }
 
 #[test]
@@ -210,13 +293,15 @@ fn fireball_practice_positive_primary_hit_is_spell_typed_and_not_launch_reward()
         zone.players.get_mut(&owner).unwrap().class = MirClass::Wizard;
         assert!(practice(&launch(&mut zone, &owner, spell, 7)).is_empty());
         assert_eq!(zone.native_monsters[&9101].hp, 5);
-        let resolved = zone.resolve_pending_native_monster_hits(100);
+        let resolved = zone.resolve_pending_native_monster_hits(impact_at_ms(spell));
         let receipts = practice(&resolved);
         assert_eq!(receipts.len(), 1, "{spell:?}");
         assert_eq!(receipts[0].spell.spell(), spell);
         assert_eq!(receipts[0].damage, 5);
         assert_eq!(receipts[0].target_object_id, 9101);
-        assert!(practice(&zone.resolve_pending_native_monster_hits(200)).is_empty());
+        assert!(
+            practice(&zone.resolve_pending_native_monster_hits(impact_at_ms(spell) + 1)).is_empty()
+        );
     }
     for spell in [Spell::FireBounce, Spell::FrostCrunch, Spell::ThunderBolt] {
         assert_eq!(ZoneMagicPracticeSpell::from_spell(spell), None);
@@ -257,7 +342,13 @@ fn fireball_practice_rejects_zero_invalid_target_and_changed_owner_but_keeps_law
                 }
                 _ => {}
             }
-            let resolved = zone.resolve_pending_native_monster_hits(100);
+            let resolved = zone.resolve_pending_native_monster_hits(impact_at_ms(spell));
+            if spell == Spell::GreatFireBall && matches!(case, 1..=3 | 5..=7) {
+                assert!(resolved.is_empty(), "{spell:?} case {case}");
+            }
+            if spell == Spell::GreatFireBall && matches!(case, 3 | 5 | 6) {
+                assert_eq!(zone.native_monsters[&9101].hp, 5);
+            }
             assert_eq!(
                 practice(&resolved).len(),
                 usize::from(case == 8),
@@ -275,13 +366,13 @@ fn fireball_practice_pending_metadata_survives_checkpoint_and_legacy_defaults_on
         launch(&mut zone, &owner, spell, 7);
         let mut restored =
             ZoneRuntime::restore_checkpoint(&zone.checkpoint_bytes().unwrap()).unwrap();
-        let resolved = restored.resolve_pending_native_monster_hits(100);
+        let resolved = restored.resolve_pending_native_monster_hits(impact_at_ms(spell));
         assert_eq!(practice(&resolved).len(), 1);
         assert_eq!(practice(&resolved)[0].spell.spell(), spell);
     }
     let (mut zone, owner) = fixture();
     launch(&mut zone, &owner, Spell::SoulFireBall, 7);
-    let resolved = zone.resolve_pending_native_monster_hits(100);
+    let resolved = zone.resolve_pending_native_monster_hits(TWO_TILE_IMPACT_AT_MS);
     let mut legacy = serde_json::to_value(practice(&resolved)[0]).unwrap();
     legacy.as_object_mut().unwrap().remove("spell");
     let legacy: ZoneMagicPracticeReceipt = serde_json::from_value(legacy).unwrap();

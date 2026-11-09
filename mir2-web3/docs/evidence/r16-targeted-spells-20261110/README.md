@@ -11,4 +11,4 @@
 
 道士先以和平模式点击自己召唤的骷髅，收到目标请求但无施放或扣符，43 张护身符保持。两职业共四次正常注销，原档哈希保持。五组 Rust 回归共 88 项。 [法师](wizard-zone-candidate-r1/receipt.json) · [道士](taoist-zone-candidate-r1/receipt.json) · [总表](qualified-targeted-summary.json)
 
-七格时修复版浏览器所见施放到命中为 8／11 毫秒，固定 Crystal `92b4ce4` 按 `500 + 50 × 距离` 为 850 毫秒。结果和存档已验，弹道时序仍待对齐。Windows 窗口与公开部署另验。
+本次七格浏览器施放到命中为 8／11 毫秒，固定 Crystal `92b4ce4` 按 `500 + 50 × 距离` 为 850 毫秒。之后的回合已验证共享服务器延时和实际命中。Windows 窗口与公开部署另验。 [延时复验](../r16-delayed-projectiles-20261110/README.md)

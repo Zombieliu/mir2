@@ -103,6 +103,28 @@ fn queue(runtime: &SharedInProcessZoneSessionRuntime, receipts: Vec<ZoneMagicPra
     );
 }
 
+fn targeted_projectile_impact_at(launch: &[ServerPacket], spell: Spell, cast_at_ms: u64) -> u64 {
+    let distance = launch
+        .iter()
+        .find_map(|packet| match packet {
+            ServerPacket::ObjectMagic {
+                location,
+                target,
+                spell: launched,
+                cast: true,
+                ..
+            } if *launched == spell => Some(
+                location
+                    .x
+                    .abs_diff(target.x)
+                    .max(location.y.abs_diff(target.y)),
+            ),
+            _ => None,
+        })
+        .expect("admitted cast must report the live caster and target cells");
+    cast_at_ms + 500 + 50 * u64::from(distance)
+}
+
 #[test]
 fn zone_soulfire_practice_owner_only_dedupes_queue_and_later_replay() {
     let (shared, mut owner) = fixture("SfbOwner", 0);
@@ -353,9 +375,19 @@ fn zone_soulfire_practice_resolved_hit_is_saved_reloaded_and_next_public_cast_us
         (0, 1299),
         "launch must not advance practice"
     );
+    let impact_at = targeted_projectile_impact_at(&launch, Spell::SoulFireBall, now);
+    let early = runtime.dispatch_zone_player_command(
+        ZoneCommand::Tick {
+            now_ms: impact_at - 1,
+        },
+        false,
+    );
+    assert!(!early.iter().any(|packet| matches!(packet,
+        ServerPacket::DamageIndicator { object_id, .. } if *object_id == target.object_id)));
+    assert_eq!(skill(&runtime), (0, 1299), "no practice before impact");
     let resolved =
-        runtime.dispatch_zone_player_command(ZoneCommand::Tick { now_ms: now + 1 }, false);
-    assert!(resolved.iter().any(|packet| matches!(packet, ServerPacket::DamageIndicator { damage, object_id, .. } if *damage > 0 && *object_id == target.object_id)), "{resolved:?}");
+        runtime.dispatch_zone_player_command(ZoneCommand::Tick { now_ms: impact_at }, false);
+    assert!(resolved.iter().any(|packet| matches!(packet, ServerPacket::DamageIndicator { damage, object_id, .. } if *damage > 0 && *object_id == target.object_id)), "impact delay {}: {resolved:?}", impact_at - now);
     assert!(resolved.iter().any(|packet| matches!(
         packet,
         ServerPacket::MagicLeveled {
@@ -611,9 +643,26 @@ fn zone_fireball_practice_resolved_hit_threshold_save_reload_and_next_public_lev
             (0, experience),
             "launch cannot reward practice"
         );
+        let impact_at = if spell == Spell::GreatFireBall {
+            let impact_at = targeted_projectile_impact_at(&launch, spell, now);
+            let early = runtime.dispatch_zone_player_command(
+                ZoneCommand::Tick {
+                    now_ms: impact_at - 1,
+                },
+                false,
+            );
+            assert!(
+                !early.iter().any(|packet| matches!(packet,
+                ServerPacket::DamageIndicator { object_id, .. } if *object_id == target.object_id))
+            );
+            assert_eq!(skill_for_spell(&runtime, practice_spell), (0, experience));
+            impact_at
+        } else {
+            now + 1
+        };
         let resolved =
-            runtime.dispatch_zone_player_command(ZoneCommand::Tick { now_ms: now + 1 }, false);
-        assert!(resolved.iter().any(|packet| matches!(packet, ServerPacket::DamageIndicator { damage, object_id, .. } if *damage > 0 && *object_id == target.object_id)), "{resolved:?}");
+            runtime.dispatch_zone_player_command(ZoneCommand::Tick { now_ms: impact_at }, false);
+        assert!(resolved.iter().any(|packet| matches!(packet, ServerPacket::DamageIndicator { damage, object_id, .. } if *damage > 0 && *object_id == target.object_id)), "{spell:?} impact delay {}: {resolved:?}", impact_at - now);
         assert!(resolved.iter().any(|packet| matches!(packet, ServerPacket::MagicLeveled { spell: actual, level: 1, experience: 0..=2, .. } if *actual == spell)), "{resolved:?}");
         let progressed = skill_for_spell(&runtime, practice_spell);
         runtime

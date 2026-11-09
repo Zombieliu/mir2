@@ -1,0 +1,24 @@
+projectile-red-compiled.log
+GreatFireBall must not impact at 699
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 3390 filtered out; finished in 0.08s
+
+projectile-sim-final-green.log
+test result: ok. 10 passed; 0 failed; 0 ignored; 0 measured; 3381 filtered out; finished in 0.36s
+
+projectile-adjacent-player_magic_cooldown_tests.log
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 3387 filtered out; finished in 0.09s
+
+projectile-adjacent-player_action_cadence_tests.log
+test result: ok. 15 passed; 0 failed; 0 ignored; 0 measured; 3376 filtered out; finished in 0.09s
+
+projectile-adjacent-owned_pet_combat--tests.log
+test result: ok. 52 passed; 0 failed; 0 ignored; 0 measured; 3339 filtered out; finished in 0.21s
+
+projectile-adjacent-action_boundary.log
+test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 3382 filtered out; finished in 0.32s
+
+projectile-gateway-green.log
+test result: ok. 13 passed; 0 failed; 0 ignored; 0 measured; 1770 filtered out; finished in 34.19s
+
+projectile-gateway-cadence.log
+test result: ok. 10 passed; 0 failed; 0 ignored; 0 measured; 1773 filtered out; finished in 51.85s
