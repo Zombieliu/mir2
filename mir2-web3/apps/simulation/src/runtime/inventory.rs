@@ -1309,7 +1309,7 @@ fn equipment_tree_max_unique_id(equipment: &super::equipment::EquipmentState) ->
         .fold(equipment_root_unique_id(equipment), u64::max)
 }
 
-fn collect_item_tree_unique_ids(items: &[ItemState], seen: &mut BTreeSet<u64>) {
+pub(super) fn collect_item_tree_unique_ids(items: &[ItemState], seen: &mut BTreeSet<u64>) {
     for item in items {
         seen.insert(inventory_item_unique_id(item));
         collect_metadata_unique_ids(item.user_item_metadata.as_ref(), seen);

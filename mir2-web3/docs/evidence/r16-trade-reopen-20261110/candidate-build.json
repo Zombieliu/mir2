@@ -1,0 +1,15 @@
+{
+  "baseCommit": "df34e3b9b4f127e8097eb8bb682c9d95983ffdf9",
+  "gatewaySha256": "b39dad51be46d1fee7c89c6002fe79dc15621df2f75666a512559c74bded2b46",
+  "crystalReference": "92b4ce4ab488b11e65f63d3ad22de2e1f25ec08d",
+  "cargo": "1.95.0",
+  "profile": "dev debug=0",
+  "lockedOffline": true,
+  "sourcePins": {
+    "apps/gateway/src/routing.rs": "8201660bbf659cf477dd8c4cb54ed987e81b698e6a162660c3f4e2bb8a950ad5",
+    "apps/simulation/src/runtime/session.rs": "da97db602334f896a85d7be49a31f9cd4ed69d8fa4adadbe8f090a58f8409f0b",
+    "apps/simulation/src/runtime/inventory.rs": "429626beae7f1503aa42b8f32442146342b69a2ce076ba15edcfe9da0ab9b2de",
+    "apps/simulation/src/world_runtime.rs": "e83ab3c1fc08ad5343e576251dc58fb669b33da75b91fa739cd6c24797333f66"
+  },
+  "localFileRealm": true
+}

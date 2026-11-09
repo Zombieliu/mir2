@@ -16,11 +16,13 @@ working tree, services, release packages, source snapshots or parity percentages
 
 ## Last recorded decisions and open work
 
-2026-11-10 用户再次启动持续 Goal。按 Windows R16 共用基础推进 Web 1:1，优先代码、普通协议和无界面浏览器。已补帮助窗十语、阿洛第六页状态资源与原授权恢复。实际 File 浏览器复测重启保留原期限与限额，同一阿洛 v2 读回后在蜡烛已落地时支援，鹿死亡后才入包。继续跨端同档、冷双开和暂存解锁。[执行范围](WEB-R16-PARITY-GOAL.zh-CN.md) · [帮助](evidence/r16-help-localization-20261110/README.md) · [自主生活](evidence/r16-alo-life-web-20261110/README.md) · [战后拾取](evidence/r16-alo-loot-order-20261109/README.md)
+2026-11-10 继续 Windows R16 到 Web 的 1:1 Goal，优先代码、普通协议和无界面浏览器。三职业 30 级毕业档通过 Web、正式 Windows 传输和新 Web 会话往返。交易一方解锁后可修改原报价，双方重新确认后单次交割，重登入档通过。公会双开在开发模式捕获 Next HMR 重载，生产构建两条渲染路径均通过。继续满包及对端锁定后的报价编辑、名字级 ACK、技能和地图、阿洛语言及跨端培养。 [执行范围](WEB-R16-PARITY-GOAL.zh-CN.md) · [同档](evidence/r16-shared-save-roundtrip-20261110/README.md) · [交易](evidence/r16-trade-reopen-20261110/README.md) · [公会](evidence/r16-guild-cold-entry-20261110/README.md)
+
+帮助窗十语、阿洛自主生活状态和原授权恢复已经交付。同一阿洛 v2 重启后在蜡烛已落地时先支援，鹿死亡后拾取并入包。 [帮助](evidence/r16-help-localization-20261110/README.md) · [自主生活](evidence/r16-alo-life-web-20261110/README.md) · [战后拾取](evidence/r16-alo-loot-order-20261109/README.md)
 
 公网为 Web f2de/Linux TEST d53、五职业/V2。Cloudflare 与 TEST 钱包交换路由已修复。正常公网 DNS/HTTPS 的 Chrome 及官方 Dubhe Wallet 移动尺寸 PWA 实际签名、出码至进比奇及退出通过；本机代理路径仍卡资源，实体手机相机未验。公开服阿洛和全局 Accepted 仍开放。[发布与扫码复验](NUMERON-WEB-RELEASE-20261108.zh-CN.md)
 
-Checkpoints through85eecf4be were pushed/verified. Web guild ranks passed both render backends; first owner unexpected-login cold entry remains unexplained. Native now consumes actual guild deltas and typed UserInformation realId, matches option-specific cursor evidence, and handles definitely-unsent read/queue eviction.198 unique checks plus canonical locked/offline release build pass;2 real-asset GPU/GDI checks and native window/cross-client remain unrun. Candidatea63bd2a3 is a single EXE requiring existing R16 resources, not installed. Keep [scope and failures](WEB-R16-PARITY-GOAL.zh-CN.md#native-公会增量与请求生命周期2026-11-08) separate from global parity.
+Native guild projection and request lifecycle at checkpoint `85eecf4be` consume actual deltas and typed `UserInformation.realId` and handle definitely unsent requests and queue eviction. The release build and 198 checks passed. Two real-asset GPU/GDI checks and the Windows window remain open. Candidate EXE `a63bd2a3` requires the existing R16 resources. [Scope and failures](WEB-R16-PARITY-GOAL.zh-CN.md#native-公会增量与请求生命周期2026-11-08)
 
 The [feature and evidence ledger](WEB-R16-PARITY-GOAL.zh-CN.md) tracks the active Windows R16 to Web Goal. Prior group/recovery evidence and source checkpoint1485 files at cc0cbf1a5 remain. Preserve that history, keep verified slices committed, and keep failures, deployment gates and final human Accepted separate. Prefer code/protocol/headless work without desktop input.
 

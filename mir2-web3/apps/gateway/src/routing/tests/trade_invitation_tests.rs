@@ -291,19 +291,65 @@ fn editable_unlock_keeps_pair_and_private_edit_routing() {
 }
 
 #[test]
-fn prepared_unlock_cancels_and_refunds_both_sides_without_stale_open_pair() {
+fn prepared_unlock_keeps_the_offer_editable_and_requires_fresh_confirmation() {
     let (mut first, mut second) = started_shared_zone_sessions();
     let gold = first.world_snapshot().gold;
+    let partner_gold = second.world_snapshot().gold;
+    let potion_slot = inventory_slot_for_key(&first, "red-potion");
     open_shared_trade_pair(&mut first, &mut second);
     first.handle_packet(ClientPacket::TradeGold { amount: 7 });
+    assert!(first
+        .handle_packet(ClientPacket::DepositTradeItem { from: potion_slot, to: 0 })
+        .iter()
+        .any(|p| matches!(p, ServerPacket::DepositTradeItem { success: true, .. })));
     first.handle_packet(ClientPacket::TradeConfirm { locked: true });
+    let prepared = first.world_snapshot().stage5_systems.trade.unwrap();
+    assert!(prepared.escrow_prepared && prepared.locked);
     assert_eq!(first.world_snapshot().gold, gold - 7);
+    assert!(!has_inventory_key(&first, "red-potion"));
+
+    // Crystal's explicit unlock is local to its sender.
     assert!(second
         .handle_packet(ClientPacket::TradeConfirm { locked: false })
         .iter()
-        .any(|p| matches!(p, ServerPacket::TradeCancel { unlock: false })));
+        .any(|p| matches!(p, ServerPacket::TradeCancel { unlock: true })));
     first.handle_packet(ClientPacket::KeepAlive { time: 1 });
-    assert_eq!(first.world_snapshot().gold, gold);
+    assert_eq!(first.world_snapshot().stage5_systems.trade.as_ref(), Some(&prepared));
+
+    let packets = first.handle_packet(ClientPacket::TradeConfirm { locked: false });
+    assert_eq!(packets.iter().filter(|p| matches!(p, ServerPacket::TradeCancel { unlock: true })).count(), 1);
+    assert!(!packets.iter().any(|p| matches!(p,
+        ServerPacket::TradeCancel { unlock: false } | ServerPacket::GainedGold { .. } | ServerPacket::GainedItem { .. })));
+    let reopened = first.world_snapshot().stage5_systems.trade.unwrap();
+    assert!(!reopened.escrow_prepared && !reopened.locked && !reopened.accepted);
+    assert_eq!(reopened.settlement_nonce, prepared.settlement_nonce);
+    assert_eq!(reopened.offered_unique_ids, prepared.offered_unique_ids);
+    assert_eq!(reopened.offered_slots, prepared.offered_slots);
+    assert_eq!(reopened.held_gold, Some(7));
+    assert_eq!(first.world_snapshot().gold, gold - 7);
+    assert_eq!(inventory_slot_for_key(&first, "red-potion"), potion_slot);
+
+    first.handle_packet(ClientPacket::TradeConfirm { locked: false });
+    assert_eq!(first.world_snapshot().stage5_systems.trade.as_ref(), Some(&reopened));
+    assert!(first
+        .handle_packet(ClientPacket::RetrieveTradeItem { from: 0, to: potion_slot })
+        .iter()
+        .any(|p| matches!(p, ServerPacket::RetrieveTradeItem { success: true, .. })));
+    first.handle_packet(ClientPacket::DepositTradeItem { from: potion_slot, to: 1 });
+    first.handle_packet(ClientPacket::TradeGold { amount: 5 });
+    let peer_prepares = second.handle_packet(ClientPacket::TradeConfirm { locked: true });
+    assert!(!peer_prepares.iter().any(|p| matches!(p,
+        ServerPacket::TradeConfirm | ServerPacket::GainedItem { .. } | ServerPacket::GainedGold { .. })));
+    assert!(second.world_snapshot().stage5_systems.trade.unwrap().escrow_prepared);
+    assert_eq!(first.world_snapshot().gold, gold - 12);
+    assert_eq!(second.world_snapshot().gold, partner_gold);
+
+    first.handle_packet(ClientPacket::TradeConfirm { locked: true });
+    let peer_delivers = second.handle_packet(ClientPacket::KeepAlive { time: 2 });
+    assert_eq!(peer_delivers.iter().filter(|p| matches!(p, ServerPacket::GainedItem { item } if item.count == 5)).count(), 1);
+    assert_eq!(peer_delivers.iter().filter(|p| matches!(p, ServerPacket::TradeConfirm)).count(), 1);
+    assert_eq!(first.world_snapshot().gold, gold - 12);
+    assert_eq!(second.world_snapshot().gold, partner_gold + 12);
     assert!(first.world_snapshot().stage5_systems.trade.is_none());
     assert!(second.world_snapshot().stage5_systems.trade.is_none());
 }

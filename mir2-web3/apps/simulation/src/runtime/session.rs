@@ -659,6 +659,12 @@ impl SimulationSession {
         self.finalize_packets(packets)
     }
 
+    /// The coordinator holds an unmatched offer. Return its items to the
+    /// editable offer projection while keeping the already debited gold held.
+    pub fn reopen_shared_trade_offer(&mut self, offer: &SharedTradeOffer) -> Vec<ServerPacket> {
+        reopen_shared_trade_offer(self.app.world_mut(), offer)
+    }
+
     pub fn on_connect(&self) -> Vec<ServerPacket> {
         vec![ServerPacket::Connected]
     }
@@ -2045,6 +2051,108 @@ fn shared_trade_offer_matches_active_escrow(
     }
 }
 
+fn reopen_shared_trade_offer(world: &mut World, offer: &SharedTradeOffer) -> Vec<ServerPacket> {
+    if !shared_trade_offer_matches_active_escrow(world, offer, true) {
+        return Vec::new();
+    }
+    let stage5 = world.resource::<Stage5SystemsResource>();
+    let trade = stage5
+        .stage5_systems
+        .trade
+        .as_ref()
+        .expect("validated escrow");
+    if !trade.escrow_prepared
+        || trade.completed
+        || !trade.locked
+        || !trade.accepted
+        || trade.offered_slots.len() != offer.items.len()
+        || trade.offered_unique_ids.len() != offer.items.len()
+    {
+        return Vec::new();
+    }
+
+    let inventory = world.resource::<InventoryResource>();
+    let mut staged_items = inventory.inventory_items.clone();
+    let mut staged_slots = trade.offered_slots.clone();
+    for ((&trade_slot, &old_index), offered) in trade.offered_slots.iter().zip(&offer.items) {
+        let Ok(mut item) = serde_json::from_str::<ItemState>(&offered.item_state_json) else {
+            return Vec::new();
+        };
+        if validate_committed_item_state_carrier(&item).is_err()
+            || item.key != offered.key
+            || item_unique_id(&item) != offered.unique_id
+            || trade.offered_unique_ids.get(&trade_slot) != Some(&offered.unique_id)
+            || inventory_index_for_item(&item) != Some(old_index)
+        {
+            return Vec::new();
+        }
+        let mut item_ids = BTreeSet::new();
+        collect_item_tree_unique_ids(std::slice::from_ref(&item), &mut item_ids);
+        let legacy_bag_alias = matches!(
+            inventory.item_uid_issuance,
+            super::item_uid_issuance::ItemUidIssuance::Legacy
+        ) && offered.unique_id < u64::from(CRYSTAL_MAX_INVENTORY_CAPACITY);
+        if item_ids.iter().any(|&id| {
+            // Slot-derived legacy bag IDs may already alias other grids. This
+            // is the owner's held item, so preserve its bag identity. The bag,
+            // other held custody and every non-legacy ID still reject clashes.
+            let in_other_custody = if legacy_bag_alias && id == offered.unique_id {
+                inventory.reserved_item_unique_ids.contains(&id)
+            } else {
+                inventory_unique_id_is_used(inventory, id)
+            };
+            in_other_custody || item_list_unique_id_is_used(&staged_items, id)
+        }) {
+            return Vec::new();
+        }
+        let Some((container, slot)) = preferred_or_empty_trade_delivery_slot_for_items(
+            &staged_items,
+            item.container,
+            item.slot,
+            inventory.inventory_capacity,
+        ) else {
+            return trade_offer_delivery_failed_packets(world, true);
+        };
+        if (container, slot) != (item.container, item.slot)
+            && item.unique_id == 0
+            && item.user_item_metadata.is_none()
+        {
+            // A legacy slot-derived ID must follow its item if the old slot
+            // filled while prepared, including the exact zero from bag slot 0.
+            let Ok(wire) = try_user_item_from_item_state(&item) else {
+                return Vec::new();
+            };
+            let Ok(captured) = super::items::try_item_state_from_user_item(item.clone(), &wire)
+            else {
+                return Vec::new();
+            };
+            item.unique_id = offered.unique_id;
+            item.user_item_metadata = captured.user_item_metadata;
+        }
+        item.container = container;
+        item.slot = slot;
+        let Some(index) = inventory_index_for_item(&item) else {
+            return Vec::new();
+        };
+        staged_slots.insert(trade_slot, index);
+        staged_items.push(item);
+    }
+
+    world.resource_mut::<InventoryResource>().inventory_items = staged_items;
+    let mut stage5 = world.resource_mut::<Stage5SystemsResource>();
+    let trade = stage5
+        .stage5_systems
+        .trade
+        .as_mut()
+        .expect("validated escrow");
+    trade.offered_slots = staged_slots;
+    trade.accepted = false;
+    trade.locked = false;
+    trade.escrow_prepared = false;
+    trade.held_gold = Some(offer.gold);
+    vec![ServerPacket::TradeCancel { unlock: true }]
+}
+
 fn apply_shared_trade_offer(
     world: &mut World,
     offer: &SharedTradeOffer,
@@ -2578,3 +2686,7 @@ mod active_monster_ids_tests;
 #[cfg(test)]
 #[path = "session_zone_buff_clock_tests.rs"]
 mod session_zone_buff_clock_tests;
+
+#[cfg(test)]
+#[path = "session_trade_reopen_tests.rs"]
+mod session_trade_reopen_tests;

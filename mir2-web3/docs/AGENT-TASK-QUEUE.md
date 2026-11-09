@@ -1,6 +1,6 @@
 # Agent Task Queue
 
-Updated 2026-11-09 (Asia/Shanghai). Read [coordination](AGENT-ORCHESTRATION.md) and [current context](AGENT-CURRENT.md), then the active topic. Historical ports, commits and packages are evidence snapshots, not current startup commands.
+Updated 2026-11-10 (Asia/Shanghai). Read [coordination](AGENT-ORCHESTRATION.md) and [current context](AGENT-CURRENT.md), then the active topic. Use the current startup configuration for historical evidence entries.
 
 ## Web 对齐 Windows R16
 
@@ -19,6 +19,7 @@ Updated 2026-11-09 (Asia/Shanghai). Read [coordination](AGENT-ORCHESTRATION.md) 
 - [x] v19 本机运行，32,879 发行 pins 独立通过；固定 24,262 项有限素材补齐城市 NPC、SharpSword、D001 原图和有效怪物、北路大蘑菇及过渡地面。旧包、私密配置和 23,876,824,215 B 运行记录逐文件保全。
 - [x] Q 页脚／章进度／等级和 C 四页签、已学 Fencing 正文十语 80 图；v18 俄／印尼单行及俄文技能 5 图复验。NPC 对话遮挡浮层收起。全窗口文案仍有余项。
 - [x] Native→Web 同档真登录、移动 `(288,615)`→`(289,616)`、正常注销和 Web 新登录确认角色成长；用现有 EXE，原独立 Native 世界保留。
+- [x] 隔离 File 中三职业 30 级毕业档完成 Web → Windows 正式传输入口 → 新 Web 会话往返。78 项任务状态、金币、经验和个人资产一致，九次普通注销。Windows 窗口仍单列。[三职业证据](evidence/r16-shared-save-roundtrip-20261110/README.md)
 - [x] 第 5 项真实抵达比奇城并交付；第 6 项修复 durable 买药与任务同次保存，v18 普通买药扣 40／进度 `1/1`／唯一交付及重登保留。
 - [x] 第 7 项四只天然森林雪人、唯一日记交付并达到 15 级；D001 普通进出、洞内位移及重登独立通过。
 - [x] 第 8 项学习攻杀、装备成长剑、两只半兽人和职业练习、唯一公告牌交付升 16；第 9 项实际过门、洞内五步、正常出洞、唯一日记交付及重登回读。
@@ -38,23 +39,25 @@ Updated 2026-11-09 (Asia/Shanghai). Read [coordination](AGENT-ORCHESTRATION.md) 
 - [x] 组队按新鲜悬停与当前 UI 几何选目标，普通邀请仅 AddMember，权威开关、发送末尾复核与名字级去重已接入。Node296／适配器507组／TS及两后端普通完整流程通过。[范围与失败](WEB-R16-PARITY-GOAL.zh-CN.md#组队悬停邀请与会话)
 - [x] 同进程 WebSocket 普通登录后的慢保存交接已修：锁外等待已断开旧连接，保存后按唯一连接标记消费一次，复核身份与原租约。103 项独立回归和两个后端的真实自动恢复通过，五角色130个人字段及坐标保持；原 persist7442ms 失败保留。隔离 dev/debug 候选未替换试玩包。[范围与证据](WEB-R16-PARITY-GOAL.zh-CN.md#慢保存与自动重连2026-11-08)
 - [x] 同进程 WebSocket 的 Native 凭证先行恢复已补齐。十三存储层／两真实 File WS 与相邻回归合计118独立案例通过，含精确 token、最终消费时钟／连接围栏、取消重试、唯一代次及容量归还；Native14秒预算不改，候选仅 dev/debug。[范围和原失败](WEB-R16-PARITY-GOAL.zh-CN.md#凭证先行的保存交接2026-11-08)
-- [ ] 跨 Gateway／TCP 不由进程内 WebSocket 恢复库覆盖。Windows 窗口及同候选跨端同档暂缓；优先继续组队共用预算／ACK、交易和阿洛的无桌面检查。
+- [ ] 跨 Gateway／TCP 的慢保存恢复和 Windows 窗口实机另验。普通注销后的三职业同档往返见本节独立记录。
 - [x] Web共用社交预算复用完整Native20低层变体模型，原UI的Trade瞬时/拒绝/只读路径保持；预约与entered合计八项、真实ACK/scene/session规则及原经济屏障分开。Page116/host17、限定Web569/Stage5内部507组、TS、Native108/runtime9/投影5及完整三包实际WASM均通过，计数重叠不合并。[本轮证据](evidence/r16-social-budget-20261109/README.md)
 - [x] 新WebGPU页面隔离实测组队、未入会公会只读、两次真实延迟ACK后的主角取消/精确资产以及双方同角重登；取回对端当场uncertain的原r3仍失败，后续trade=null与重登正常另列。[普通UI与原失败](evidence/r16-social-budget-20261109/README.md#ordinary-isolated-web-ui)
 - [x] 当前 Gateway 两方普通包序复现发起方漏收终结。修复待初始化交易先按原队列发接受和报价，再发取消。默认与 5 秒节拍验证两种取消、同连接重新交易和同角读档。精确修复版 WebGPU 复测两种延迟回包取消均通过。 [回归、普通包序与界面证据](evidence/r16-trade-terminal-20261109/README.md)
 - [x] 两个普通 WebSocket 角色完成单件蜡烛交割。收件方一次入账，双方各一次完成回包，旧标识重合时分配新标识。双方同角重登核对精确。 [回归、普通包序与界面证据](evidence/r16-trade-terminal-20261109/README.md)
 - [x] 已开交易在有会籍的公会仓库物品待回包时可取消。WebGPU 两场存入/取回只发一次取消，双方有结束包，仓库仍待自己的回包及新快照，双方同角与最终 File 读回精确。149 项 Web 回归和 TypeScript 通过。 [仓库和交易双端实测](evidence/r16-guild-trade-cancel-20261109/README.md)
-- [x] 双向物品与金币交割已在两普通 WebSocket 和两个独立 WebGPU 环境实跑。第一人确认保留报价和锁定，双方分别一次扣款、物品与金币入账及终结，正常同角读回和最终 File 一致。R16 暂存后解锁关闭并退款另验。 [双向交割、界面与读档实测](evidence/r16-bidirectional-trade-20261109/README.md)
+- [x] 双向物品与金币交割已在两普通 WebSocket 和两个独立 WebGPU 环境实跑。第一人确认保留报价和锁定，双方分别一次扣款、物品与金币入账及终结，正常同角读回和最终 File 一致。该版本解锁会关闭交易并退款。 [双向交割、界面与读档实测](evidence/r16-bidirectional-trade-20261109/README.md)
+- [x] 暂存后显式解锁恢复发送者原报价，保留编号和冻结金币。普通双端验证取回再放入、双方重确认、单次交割及重登入档。Native 等待权威解锁回包后再开编辑。 [交易实测](evidence/r16-trade-reopen-20261110/README.md)
 - [x] Web 补齐 Windows R16 阿洛体验自述与用量费用页。普通浏览器固定教学 v1→v2，真实记录选择及理解，下载的档案 SHA-256/HMAC 和新运行器同 SQLite 读回通过。 [界面和收据](evidence/r16-alo-trial-web-20261109/README.md)
 - [x] Web 进行中的体验来源与提醒次数按账本读回，关页重开复测通过。签名档案导入新 SQLite 后保留身份和成长，普通 Web 入队、跟随 7 格及两人各命中 6 次击杀天然鹿通过。 [实测记录](evidence/r16-alo-trial-web-20261109/README.md#新实例导入与普通协作)
 - [x] Web 阿洛自主生活补齐 R16 状态与资源，隔离浏览器实测授权、运行器重启、显式恢复原期限和累计额度及停止。 [实测记录](evidence/r16-alo-life-web-20261110/README.md)
 - [x] 修复本地两角色持有相同旧编号时无法领取同一物品模板的掉落。普通 File 联机验证原编号 3 保留、收到新编号 4、反向交接与重登一致。正式编号校验继续通过。 [地面拾取实测](evidence/r16-alo-loot-order-20261109/README.md)
 - [x] Web 固定教学后重启同一阿洛，普通实战证实 v1 在鹿活着时领取蜡烛，v2 有掉落时先支援，九次命中、鹿死亡后领取且实际入包。保留先前未命中选定鹿的探针失败。[两场对照](evidence/r16-alo-loot-order-20261109/README.md)
-- [ ] 继续阿洛语言与跨端同档，追踪双开冷进入回登录、暂存后恢复可编辑、真实名字级失败 ACK、Native 招募及建职阶。Web 仓库重复刷新入口和取回待回包反馈、Windows 窗口与真实 PostgreSQL 继续分项。
+- [ ] 继续阿洛界面语言与同一阿洛的跨端培养。交易满包独立格、对端已确认后的直接编辑和 Native 旧编号 0 仍待对齐。名字级失败 ACK、Native 招募及建职阶、Web 仓库取回待回包反馈、Windows 窗口与真实 PostgreSQL 分项验收。
 - [x] 交易自身物品待回执的取消及同owner/partner重复接受已完成限定代码修复；原Page105/社交31/适配器507组/TS及两场隔离浏览器证据保留。共用八项见后续独立记录，完整Trade与公开发行仍未完成。[原本轮范围](evidence/r16-web-trade-20261109/README.md)
 - [x] 公会职级改名／单项权限／草稿／层级／广播／重登已在 WebGL2-shared 和默认 WebGPU 的普通界面通过；新鲜限定39／TS通过，修正选中态边框冲突。[当前范围](WEB-R16-PARITY-GOAL.zh-CN.md#公会职级普通流程2026-11-08)
 - [x] Native 公会增量、真实身份接法、权限实际位回执及读请求生命周期完成限定代码验证；普通队列淘汰／真实bounded发送满载回归通过，198项独立检查及原锁release构建通过，未运行窗口。[范围](WEB-R16-PARITY-GOAL.zh-CN.md#native-公会增量与请求生命周期2026-11-08)
-- [ ] 首轮会长冷进入第二浏览器后意外回登录未定因；公会像素／输入、成员上限、Native招募／建职阶的精确回执、索引重编号并发及Web共用预算仍待续。
+- [x] 旧归档及当前开发模式复现会长回登录，均捕获 Next HMR 改变编译哈希后调用 `reload`，早于对端连接。当前本机生产模式两条渲染路径均通过双开及职级重登入档。首轮历史原件缺调用栈。[对照证据](evidence/r16-guild-cold-entry-20261110/README.md)
+- [ ] 公会像素／输入、成员上限、Native 招募／建职阶的精确回执、索引重编号并发及 Web 共用预算仍待续。
 - [x] 按三职业毕业档实读 30 级及 26 项任务，共用 Native 装备名称与 D605 地点接入通过。十语 960×720 窄窗、桌面／移动标题测试和 65 次关闭手势零移动通过。个人进度及资产 78 项相等，原在线服时钟差异及修复前九步误移动分别保留。
 - [x] 首次 Q 的即时 ref 与 HUD 快照同步已修。中、英、阿六次 WebGL2-shared 冷启动及中／阿两次默认 WebGPU 均只按一次 Q 后打开并保持；旧失败保留。
 - [x] 有限资源索引误宣告完整包能力已修，默认 WebGPU 完整进出及首次 Q 复测零资源错误；发行端明确验证的远端完整包路径保留。见[本轮来源和失败记录](WEB-R16-PARITY-GOAL.zh-CN.md#注销选角首次-q-与资源能力)。

@@ -17618,25 +17618,28 @@ impl SharedInProcessZoneSessionRuntime {
 
     fn execute_shared_trade_confirm(&mut self, locked: bool) -> Vec<ServerPacket> {
         if !locked {
-            let prepared = self.current_presence_key().is_some_and(|key| {
-                let state = self
-                    .zone_state
-                    .lock()
-                    .expect("shared zone presence mutex should not be poisoned");
-                state.trade_offers.contains_key(&key)
-                    || state
-                        .trade_partner(&key)
-                        .is_some_and(|peer| state.trade_offers.contains_key(&peer))
-            });
-            if !prepared {
-                // An editable unlock does not end the accepted pair.
-                return self.inner.shared_trade_cancel(true);
+            let Some(key) = self.current_presence_key() else {
+                return Vec::new();
+            };
+            let mut state = self
+                .zone_state
+                .lock()
+                .expect("shared zone presence mutex should not be poisoned");
+            if state.trade_partner(&key).is_none() {
+                return Vec::new();
             }
-            // Candidate escrow is reserved at confirmation. Until source editable
-            // escrow is implemented, unlocking a reserved pair cancels/refunds it.
-            let mut packets = self.cancel_pending_shared_trade_offers();
-            if packets.is_empty() {
-                packets.extend(self.inner.shared_trade_cancel(false));
+            let Some(offer) = state.trade_offers.get(&key) else {
+                // Explicit unlock only affects the caller. In-flight settlement
+                // has already taken the offer and retains private escrow custody.
+                drop(state);
+                return self.inner.shared_trade_cancel(true);
+            };
+            let packets = self.inner.reopen_shared_trade_offer(offer);
+            if packets
+                .iter()
+                .any(|packet| matches!(packet, ServerPacket::TradeCancel { unlock: true }))
+            {
+                state.trade_offers.remove(&key);
             }
             return packets;
         }

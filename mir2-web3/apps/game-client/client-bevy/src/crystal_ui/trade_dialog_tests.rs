@@ -570,8 +570,8 @@ fn trade_dialog_cancel_hides_pair_sends_one_request_and_keeps_backpack_and_offer
 }
 
 #[test]
-fn trade_dialog_confirm_toggles_source_bool_without_claiming_settlement() {
-    let model = social();
+fn trade_dialog_confirm_waits_for_authoritative_unlock_and_allows_retry() {
+    let mut model = social();
     let mut ui = state(&model);
     let mut queue = NativePlayerUiIntentQueue::default();
     assert!(toggle_lock(&mut ui, &model, &mut queue));
@@ -581,11 +581,21 @@ fn trade_dialog_confirm_toggles_source_bool_without_claiming_settlement() {
         vec![NativePlayerUiIntent::TradeConfirm { locked: true }]
     );
     assert!(toggle_lock(&mut ui, &model, &mut queue));
-    assert!(!ui.trade_dialog.locked(&model.trade));
+    assert!(ui.trade_dialog.locked(&model.trade));
     assert_eq!(
         queue.drain_intents(),
         vec![NativePlayerUiIntent::TradeConfirm { locked: false }]
     );
+    ui.trade_dialog.observe(&model);
+    assert!(ui.trade_dialog.locked(&model.trade));
+    assert!(toggle_lock(&mut ui, &model, &mut queue));
+    assert_eq!(
+        queue.drain_intents(),
+        vec![NativePlayerUiIntent::TradeConfirm { locked: false }]
+    );
+    model.apply_packet("TradeCancel", &json!({"unlock":true}));
+    ui.trade_dialog.observe(&model);
+    assert!(!ui.trade_dialog.locked(&model.trade));
     assert_eq!(model.trade.state, "open");
     assert!(!model.trade.my_confirmed);
     assert!(ui.trade_dialog.open);

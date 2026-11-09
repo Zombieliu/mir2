@@ -1,12 +1,16 @@
 # Crystal Server Parity
 
+## R16 已确认一方的显式解锁（2026-11-10）
+
+按 Crystal `TradeConfirm(false)` 保留交易，只有请求一方解锁。Gateway 用既有 `TradeCancel { unlock: true }` 通知。隔离 File 双端已复测，满包下独立交易格、对端已确认后的报价更新及真实 PostgreSQL 继续开放。 [对照](evidence/r16-trade-reopen-20261110/README.md)
+
 ## R16 本地共享领取（2026-11-09）
 
 旧式本地角色之间出现编号冲突时，由既有共享 Zone 领取票据绑定地面对象，服务端为进入接收方的副本分配空闲编号。确认入包后按 Crystal 包序移除对象，同一对象无法重复领取。持久化托管和正式资产编号校验仍走原路径。 [普通协议与回归](evidence/r16-alo-loot-order-20261109/README.md)
 
 ## R16 双方交易终结（2026-11-09）
 
-对照固定 Crystal 的 `TradeReply` 与 `TradeCancel`，R16 Gateway 现为尚待初始化的对端按顺序发接受、报价和 `Unlock=false` 终结。未改线协议或存档结构。隔离 File/WebSocket 已验证两种取消、同连接重新交易、单件实际入账与双方同角读档。后续双向物品与金币的 File/WebSocket 交割及读档通过。当前 R16 暂存后解锁关闭并退款，Crystal 的可编辑解锁仍开放。Native 窗口/TCP、真实 PostgreSQL 和正式候选发行继续开放。 [回归、普通包序与界面证据](evidence/r16-trade-terminal-20261109/README.md) · [双向交割、界面与读档实测](evidence/r16-bidirectional-trade-20261109/README.md)
+对照固定 Crystal 的 `TradeReply` 与 `TradeCancel`，R16 Gateway 现为尚待初始化的对端按顺序发接受、报价和 `Unlock=false` 终结。沿用原线协议和存档结构。隔离 File/WebSocket 已验证两种取消、同连接重新交易、单件实际入账与双方同角读档。后续双向物品与金币的 File/WebSocket 交割及读档通过。11 月 9 日的版本在暂存后解锁会关闭并退款，11 月 10 日复测已能恢复原交易。Native 窗口/TCP、真实 PostgreSQL 和正式候选发行继续开放。 [回归、普通包序与界面证据](evidence/r16-trade-terminal-20261109/README.md) · [历史双向交割](evidence/r16-bidirectional-trade-20261109/README.md) · [解锁复测](evidence/r16-trade-reopen-20261110/README.md)
 
 ## 五职业Linux TEST 发布范围（2026-11-09）
 

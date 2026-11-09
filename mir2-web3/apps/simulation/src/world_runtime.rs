@@ -1528,6 +1528,10 @@ impl InProcessWorldRuntime {
         self.session.rollback_shared_trade_offer(offer)
     }
 
+    pub fn reopen_shared_trade_offer(&mut self, offer: &SharedTradeOffer) -> Vec<ServerPacket> {
+        self.session.reopen_shared_trade_offer(offer)
+    }
+
     pub fn interact_shared_npc_snapshot(&mut self, npc: &WorldEntitySnapshot) -> Vec<ServerPacket> {
         self.session.interact_shared_npc_snapshot(npc)
     }

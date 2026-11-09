@@ -521,7 +521,9 @@ pub(super) fn toggle_lock(
     if !intents.push_transient_unique(NativePlayerUiIntent::TradeConfirm { locked }) {
         return false;
     }
-    state.trade_dialog.local_locked = Some(locked);
+    // An unlock request can fail while the offer is still in escrow. Keep the
+    // lock visible until the server reports an unlock so the player can retry.
+    state.trade_dialog.local_locked = Some(true);
     true
 }
 pub(super) fn cancel(
