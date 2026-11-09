@@ -6,7 +6,14 @@ handle @mir2_playtest {
     # Explicit ordering ensures the final 404 cannot preempt the player routes.
     route {
         uri strip_prefix /playtest
-        @mir2_playtest_public expression `path('/ws', '/health') || (method('POST') && path('/v1/channels/session/exchange'))`
+        @mir2_playtest_exchange {
+            method POST
+            path /v1/channels/session/exchange
+        }
+        reverse_proxy @mir2_playtest_exchange 127.0.0.1:7210 {
+            header_up CF-Connecting-IP {http.request.remote.host}
+        }
+        @mir2_playtest_public path /ws /health
         reverse_proxy @mir2_playtest_public 127.0.0.1:7210 {
             # Overwrite any caller-provided value; Gateway only listens on
             # loopback and uses this trusted address for authentication limits.
