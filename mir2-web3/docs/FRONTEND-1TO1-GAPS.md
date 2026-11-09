@@ -1,5 +1,9 @@
 # Frontend 1:1 Gaps
 
+## 修复版 Gateway 的 Web 交易复测（2026-11-09）
+
+同一 Page 与 WebGPU WASM 连接修复版共用 Gateway，实际操作放入和取回各一次。真实成功回包延迟期间仍可点击取消，双方终结，迟到回包未重开。资产和正常退出均通过，原 r3 对端未决记录保留。截图可见中英混排，有会籍的公会物品未决、Native 窗口和跨端同档仍待验。 [回归、普通包序与界面证据](evidence/r16-trade-terminal-20261109/README.md)
+
 ## Web共用Native社交预算（2026-11-09）
 
 完整20低层变体映射复用实际Rust SocialModel，共用八项包含预约及未知发送；实际UI保留Native三种Trade瞬时路径，legacy公会读不双占。readonly复核先于原proof claim，最后enter与socket相邻；真正packet/同帧own-offer才驱动完成，换图不清、旧物理owner不能复活，原经济ACK后完整snapshot屏障保持。Page116/host17、选定Web569/Stage5内部507组/TS与Native108/runtime9/投影5分层通过；三包全量构建及真实Chrome ABI通过，原体积与能力保持。新Page实际组队及两场延迟ACK取消的主角结果、双方同角资产回读已证；取回对端当场uncertain和原r3=false保持，未入会公会窗口不算公会写流程。未公开发布或晋升全局Candidate。[证据与未结项](evidence/r16-social-budget-20261109/README.md)

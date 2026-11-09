@@ -1,0 +1,625 @@
+[
+  {
+    "order": 1,
+    "role": "peer",
+    "phase": "cancel",
+    "direction": "sent",
+    "elapsedMs": 20588,
+    "sha256": "272bc31e1b951e902785d18ceef40b51539596feaaee76ed1641002f192b92e8",
+    "command": {
+      "type": "tradeRequest"
+    }
+  },
+  {
+    "order": 2,
+    "role": "peer",
+    "phase": "cancel",
+    "direction": "received",
+    "elapsedMs": 20617,
+    "sha256": "aeec969d6090e8279067f7662290d16dbac59fa67d280d2667db9380d941515c",
+    "snapshot": true,
+    "tick": 4,
+    "trade": null,
+    "economyHash": "b468a10b1f692be431ad4256956ee615f69a81a10383d7f213f83cefef66b562"
+  },
+  {
+    "order": 3,
+    "role": "primary",
+    "phase": "cancel",
+    "direction": "received",
+    "elapsedMs": 25932,
+    "sha256": "2349271a32f5afcc9e948ffd0e5d5a7a2f6120736be9c66d51f3004ad1e7aecd",
+    "packet": "TradeRequest"
+  },
+  {
+    "order": 4,
+    "role": "primary",
+    "phase": "cancel",
+    "direction": "sent",
+    "elapsedMs": 25934,
+    "sha256": "cdcb923ee3269afc62cfa0eabb03e055bf4e30ccdd7832a54005cffc759cee3b",
+    "command": {
+      "type": "tradeReply",
+      "acceptInvite": true
+    }
+  },
+  {
+    "order": 5,
+    "role": "primary",
+    "phase": "cancel",
+    "direction": "received",
+    "elapsedMs": 25955,
+    "sha256": "47e9bea19c4eb4c706748ce314ab85853d1f304e3a76cdd336aebf3cb4da9156",
+    "packet": "TradeAccept",
+    "wire": "{\"packet\":\"TradeAccept\",\"payload\":{\"name\":\"Alo2cc0c995\",\"partnerName\":\"Alo2cc0c995\"},\"type\":\"packet\"}"
+  },
+  {
+    "order": 6,
+    "role": "primary",
+    "phase": "cancel",
+    "direction": "received",
+    "elapsedMs": 25965,
+    "sha256": "5bd453f505215241a7c2ef808031876f0578f6123ae483d634d4bb1c5a1d232b",
+    "snapshot": true,
+    "tick": 4,
+    "trade": {
+      "nonceHash": "7bae01ee5785e1647e7de1f03b870c1cb461ba520352b5608789e1fce2ff9ee0",
+      "slots": {},
+      "uids": {},
+      "locked": false,
+      "completed": false,
+      "prepared": false,
+      "offeredGold": 0
+    },
+    "economyHash": "b468a10b1f692be431ad4256956ee615f69a81a10383d7f213f83cefef66b562"
+  },
+  {
+    "order": 7,
+    "role": "primary",
+    "phase": "cancel",
+    "direction": "sent",
+    "elapsedMs": 25966,
+    "sha256": "f17d82b4083e01b400dd2aca12ce7a8de92e072163e7f434e666eb84617bd994",
+    "command": {
+      "type": "depositTradeItem",
+      "from": 3,
+      "to": 0
+    }
+  },
+  {
+    "order": 8,
+    "role": "primary",
+    "phase": "cancel",
+    "direction": "received",
+    "elapsedMs": 26018,
+    "sha256": "d103ad27c30c59d178abdf2f418408584eb48a504a75aae07332ddb796b845bf",
+    "packet": "DepositTradeItem",
+    "from": 3,
+    "to": 0,
+    "success": true,
+    "wire": "{\"packet\":\"DepositTradeItem\",\"payload\":{\"from\":3,\"success\":true,\"to\":0},\"type\":\"packet\"}"
+  },
+  {
+    "order": 9,
+    "role": "primary",
+    "phase": "cancel",
+    "direction": "received",
+    "elapsedMs": 26027,
+    "sha256": "61567e8a4c7df2b4568cde20b7c3ad05496b61f47b55a744163a7611f9da7e1d",
+    "snapshot": true,
+    "tick": 6,
+    "trade": {
+      "nonceHash": "7bae01ee5785e1647e7de1f03b870c1cb461ba520352b5608789e1fce2ff9ee0",
+      "slots": {
+        "0": 3
+      },
+      "uids": {
+        "0": "4e07408562bedb8b60ce05c1decfe3ad16b72230967de01f640b7e4729b49fce"
+      },
+      "locked": false,
+      "completed": false,
+      "prepared": false,
+      "offeredGold": 0
+    },
+    "economyHash": "b468a10b1f692be431ad4256956ee615f69a81a10383d7f213f83cefef66b562"
+  },
+  {
+    "order": 10,
+    "role": "primary",
+    "phase": "cancel",
+    "direction": "sent",
+    "elapsedMs": 26029,
+    "sha256": "50d3631bae9f60d137423c58a8ae6b2eff71477d82ac1729705de282bccde4eb",
+    "command": {
+      "type": "retrieveTradeItem",
+      "from": 0,
+      "to": 4
+    }
+  },
+  {
+    "order": 11,
+    "role": "primary",
+    "phase": "cancel",
+    "direction": "received",
+    "elapsedMs": 26053,
+    "sha256": "8a86f161d1bb4cf7f307b570bab012999ab8f264be3b4c6d40d309bdb1f05df1",
+    "packet": "RetrieveTradeItem",
+    "from": 0,
+    "to": 4,
+    "success": true,
+    "wire": "{\"packet\":\"RetrieveTradeItem\",\"payload\":{\"from\":0,\"success\":true,\"to\":4},\"type\":\"packet\"}"
+  },
+  {
+    "order": 12,
+    "role": "primary",
+    "phase": "cancel",
+    "direction": "sent",
+    "elapsedMs": 26054,
+    "sha256": "eff1e2a1eb2a8b28a1e238ce0f45929f11b87523ed634bf2a430ebb25cba75e8",
+    "command": {
+      "type": "tradeCancel"
+    }
+  },
+  {
+    "order": 13,
+    "role": "primary",
+    "phase": "cancel",
+    "direction": "received",
+    "elapsedMs": 26063,
+    "sha256": "b6c417f06704b13f1a5242b44be25e8cef82d9b43524793d1a1e1b688e8bc71f",
+    "snapshot": true,
+    "tick": 6,
+    "trade": {
+      "nonceHash": "7bae01ee5785e1647e7de1f03b870c1cb461ba520352b5608789e1fce2ff9ee0",
+      "slots": {},
+      "uids": {},
+      "locked": false,
+      "completed": false,
+      "prepared": false,
+      "offeredGold": 0
+    },
+    "economyHash": "2364954fae674c6a029b13ceeb4ccf78ed0b6666b72d745f3858d361cf1abef6"
+  },
+  {
+    "order": 14,
+    "role": "primary",
+    "phase": "cancel",
+    "direction": "received",
+    "elapsedMs": 26089,
+    "sha256": "43e8901bbea5fae8c61a66563163885b745c26c587f55196d4a05f7f14e2039e",
+    "packet": "TradeCancel",
+    "unlock": false,
+    "wire": "{\"packet\":\"TradeCancel\",\"payload\":{\"unlock\":false},\"type\":\"packet\"}"
+  },
+  {
+    "order": 15,
+    "role": "primary",
+    "phase": "cancel",
+    "direction": "received",
+    "elapsedMs": 26097,
+    "sha256": "6397523e8e914278870f400bd4b7cea52976b859322aa3ee99a37f9983db9024",
+    "snapshot": true,
+    "tick": 6,
+    "trade": null,
+    "economyHash": "2364954fae674c6a029b13ceeb4ccf78ed0b6666b72d745f3858d361cf1abef6"
+  },
+  {
+    "order": 16,
+    "role": "peer",
+    "phase": "cancel",
+    "direction": "received",
+    "elapsedMs": 35598,
+    "sha256": "ff7c91bb8e9f088cdedf3dc58f6ef3dcb20f242629f62c2939877ab3b81665c0",
+    "packet": "TradeAccept",
+    "wire": "{\"packet\":\"TradeAccept\",\"payload\":{\"name\":\"Mir5781b8ab\",\"partnerName\":\"Mir5781b8ab\"},\"type\":\"packet\"}"
+  },
+  {
+    "order": 17,
+    "role": "peer",
+    "phase": "cancel",
+    "direction": "received",
+    "elapsedMs": 35599,
+    "sha256": "efb22b6b4ea50f3fa435a0fccd87d44561eec5509b539d1bd0bb88ae57e0cf53",
+    "packet": "TradeItem",
+    "items": [
+      {
+        "uidHash": "4e07408562bedb8b60ce05c1decfe3ad16b72230967de01f640b7e4729b49fce",
+        "count": 1
+      }
+    ]
+  },
+  {
+    "order": 18,
+    "role": "peer",
+    "phase": "cancel",
+    "direction": "received",
+    "elapsedMs": 35599,
+    "sha256": "205f0162e5b07ef16c30f4896bb159a2309ce8276c2330672e866536e8d6acc8",
+    "packet": "TradeItem",
+    "items": []
+  },
+  {
+    "order": 19,
+    "role": "peer",
+    "phase": "cancel",
+    "direction": "received",
+    "elapsedMs": 35599,
+    "sha256": "43e8901bbea5fae8c61a66563163885b745c26c587f55196d4a05f7f14e2039e",
+    "packet": "TradeCancel",
+    "unlock": false,
+    "wire": "{\"packet\":\"TradeCancel\",\"payload\":{\"unlock\":false},\"type\":\"packet\"}"
+  },
+  {
+    "order": 20,
+    "role": "peer",
+    "phase": "cancel",
+    "direction": "received",
+    "elapsedMs": 35607,
+    "sha256": "badb8064c7ea208c13e9f4709148f4c3b465951199aa6f362daf22d32e0d888d",
+    "snapshot": true,
+    "tick": 5,
+    "trade": null,
+    "economyHash": "b468a10b1f692be431ad4256956ee615f69a81a10383d7f213f83cefef66b562"
+  },
+  {
+    "order": 21,
+    "role": "peer",
+    "phase": "reopen",
+    "direction": "sent",
+    "elapsedMs": 36873,
+    "sha256": "272bc31e1b951e902785d18ceef40b51539596feaaee76ed1641002f192b92e8",
+    "command": {
+      "type": "tradeRequest"
+    }
+  },
+  {
+    "order": 22,
+    "role": "peer",
+    "phase": "reopen",
+    "direction": "received",
+    "elapsedMs": 36904,
+    "sha256": "dfd9360fc4fba28c65f2d3839574f8dd8067587c9504f0a218a3dd4f6107b4b2",
+    "snapshot": true,
+    "tick": 11,
+    "trade": null,
+    "economyHash": "b468a10b1f692be431ad4256956ee615f69a81a10383d7f213f83cefef66b562"
+  },
+  {
+    "order": 23,
+    "role": "primary",
+    "phase": "reopen",
+    "direction": "received",
+    "elapsedMs": 36953,
+    "sha256": "2349271a32f5afcc9e948ffd0e5d5a7a2f6120736be9c66d51f3004ad1e7aecd",
+    "packet": "TradeRequest"
+  },
+  {
+    "order": 24,
+    "role": "primary",
+    "phase": "reopen",
+    "direction": "sent",
+    "elapsedMs": 36954,
+    "sha256": "cdcb923ee3269afc62cfa0eabb03e055bf4e30ccdd7832a54005cffc759cee3b",
+    "command": {
+      "type": "tradeReply",
+      "acceptInvite": true
+    }
+  },
+  {
+    "order": 25,
+    "role": "primary",
+    "phase": "reopen",
+    "direction": "received",
+    "elapsedMs": 36976,
+    "sha256": "47e9bea19c4eb4c706748ce314ab85853d1f304e3a76cdd336aebf3cb4da9156",
+    "packet": "TradeAccept",
+    "wire": "{\"packet\":\"TradeAccept\",\"payload\":{\"name\":\"Alo2cc0c995\",\"partnerName\":\"Alo2cc0c995\"},\"type\":\"packet\"}"
+  },
+  {
+    "order": 26,
+    "role": "primary",
+    "phase": "reopen",
+    "direction": "received",
+    "elapsedMs": 36986,
+    "sha256": "02cf233a6da06a6c9897d49fecca33888a70266c208df3f0ed168dee68686ee4",
+    "snapshot": true,
+    "tick": 42,
+    "trade": {
+      "nonceHash": "75617b7907f50a04b8bd75e721d47a4c59f34affb3d8d3819eb85d69ce554589",
+      "slots": {},
+      "uids": {},
+      "locked": false,
+      "completed": false,
+      "prepared": false,
+      "offeredGold": 0
+    },
+    "economyHash": "2364954fae674c6a029b13ceeb4ccf78ed0b6666b72d745f3858d361cf1abef6"
+  },
+  {
+    "order": 27,
+    "role": "peer",
+    "phase": "reopen",
+    "direction": "received",
+    "elapsedMs": 37251,
+    "sha256": "ff7c91bb8e9f088cdedf3dc58f6ef3dcb20f242629f62c2939877ab3b81665c0",
+    "packet": "TradeAccept",
+    "wire": "{\"packet\":\"TradeAccept\",\"payload\":{\"name\":\"Mir5781b8ab\",\"partnerName\":\"Mir5781b8ab\"},\"type\":\"packet\"}"
+  },
+  {
+    "order": 28,
+    "role": "peer",
+    "phase": "reopen",
+    "direction": "received",
+    "elapsedMs": 37260,
+    "sha256": "f9d6524314d0e148657c55ca142d1082c243c35197dc1bfab9b895de124e5fd8",
+    "snapshot": true,
+    "tick": 13,
+    "trade": {
+      "nonceHash": "aed67621ad253beed90a8fafd3f87d3a4a1b8b67123005d06023044b2baaf3b3",
+      "slots": {},
+      "uids": {},
+      "locked": false,
+      "completed": false,
+      "prepared": false,
+      "offeredGold": 0
+    },
+    "economyHash": "b468a10b1f692be431ad4256956ee615f69a81a10383d7f213f83cefef66b562"
+  },
+  {
+    "order": 29,
+    "role": "primary",
+    "phase": "reopen",
+    "direction": "sent",
+    "elapsedMs": 37263,
+    "sha256": "eff1e2a1eb2a8b28a1e238ce0f45929f11b87523ed634bf2a430ebb25cba75e8",
+    "command": {
+      "type": "tradeCancel"
+    }
+  },
+  {
+    "order": 30,
+    "role": "primary",
+    "phase": "reopen",
+    "direction": "received",
+    "elapsedMs": 37285,
+    "sha256": "43e8901bbea5fae8c61a66563163885b745c26c587f55196d4a05f7f14e2039e",
+    "packet": "TradeCancel",
+    "unlock": false,
+    "wire": "{\"packet\":\"TradeCancel\",\"payload\":{\"unlock\":false},\"type\":\"packet\"}"
+  },
+  {
+    "order": 31,
+    "role": "primary",
+    "phase": "reopen",
+    "direction": "received",
+    "elapsedMs": 37294,
+    "sha256": "12f14a2072f841ed9033c9cf6d4aacfa8bb9e04d747c78a8db9ba5cd791111b6",
+    "snapshot": true,
+    "tick": 45,
+    "trade": null,
+    "economyHash": "2364954fae674c6a029b13ceeb4ccf78ed0b6666b72d745f3858d361cf1abef6"
+  },
+  {
+    "order": 32,
+    "role": "peer",
+    "phase": "reopen",
+    "direction": "received",
+    "elapsedMs": 37344,
+    "sha256": "43e8901bbea5fae8c61a66563163885b745c26c587f55196d4a05f7f14e2039e",
+    "packet": "TradeCancel",
+    "unlock": false,
+    "wire": "{\"packet\":\"TradeCancel\",\"payload\":{\"unlock\":false},\"type\":\"packet\"}"
+  },
+  {
+    "order": 33,
+    "role": "peer",
+    "phase": "reopen",
+    "direction": "received",
+    "elapsedMs": 37354,
+    "sha256": "8d25515c65f730007826e814f346e95c99a468decabc7e06b7ef670517d5713c",
+    "snapshot": true,
+    "tick": 14,
+    "trade": null,
+    "economyHash": "b468a10b1f692be431ad4256956ee615f69a81a10383d7f213f83cefef66b562"
+  },
+  {
+    "order": 34,
+    "role": "primary",
+    "phase": "relogin",
+    "direction": "received",
+    "elapsedMs": 39302,
+    "sha256": "6c3961bd14e58c9c8a8322b30cd8c9373acf8fadfe0e7a7af4a62349d64da9e7",
+    "packet": "LogOutSuccess"
+  },
+  {
+    "order": 35,
+    "role": "primary",
+    "phase": "relogin",
+    "direction": "received",
+    "elapsedMs": 39311,
+    "sha256": "4f91e3416a354384a88d9419c2d43b4c0ba9a81d5ff456bc3f58f9085829d481",
+    "snapshot": true,
+    "tick": 48,
+    "trade": null,
+    "economyHash": "2364954fae674c6a029b13ceeb4ccf78ed0b6666b72d745f3858d361cf1abef6"
+  },
+  {
+    "order": 36,
+    "role": "primary",
+    "phase": "relogin",
+    "direction": "received",
+    "elapsedMs": 41256,
+    "sha256": "3cb3d26ee4697a0bc119efd672755d568041675c093710226c22719e53bab0fe",
+    "snapshot": true,
+    "tick": 0,
+    "trade": null,
+    "economyHash": "249873bf0c7a48f1d0dc44f951bb2bd21711ef0bf171eb062c5a87dafa387a0c"
+  },
+  {
+    "order": 37,
+    "role": "primary",
+    "phase": "relogin",
+    "direction": "received",
+    "elapsedMs": 41267,
+    "sha256": "3cb3d26ee4697a0bc119efd672755d568041675c093710226c22719e53bab0fe",
+    "snapshot": true,
+    "tick": 0,
+    "trade": null,
+    "economyHash": "249873bf0c7a48f1d0dc44f951bb2bd21711ef0bf171eb062c5a87dafa387a0c"
+  },
+  {
+    "order": 38,
+    "role": "primary",
+    "phase": "relogin",
+    "direction": "received",
+    "elapsedMs": 42000,
+    "sha256": "3cb3d26ee4697a0bc119efd672755d568041675c093710226c22719e53bab0fe",
+    "snapshot": true,
+    "tick": 0,
+    "trade": null,
+    "economyHash": "249873bf0c7a48f1d0dc44f951bb2bd21711ef0bf171eb062c5a87dafa387a0c"
+  },
+  {
+    "order": 39,
+    "role": "primary",
+    "phase": "relogin",
+    "direction": "received",
+    "elapsedMs": 48900,
+    "sha256": "06e6badbacdc6d753f5bf036f6b4a99b9136ef5cb2c542433730bf6e935bc8e8",
+    "packet": "StartGame",
+    "result": 4
+  },
+  {
+    "order": 40,
+    "role": "primary",
+    "phase": "relogin",
+    "direction": "received",
+    "elapsedMs": 48989,
+    "sha256": "b2872237a238d3827f0607583fb53d595846ac447814751da4f70ba8ef41fce5",
+    "snapshot": true,
+    "tick": 1,
+    "trade": null,
+    "economyHash": "2364954fae674c6a029b13ceeb4ccf78ed0b6666b72d745f3858d361cf1abef6"
+  },
+  {
+    "order": 41,
+    "role": "primary",
+    "phase": "relogin",
+    "direction": "received",
+    "elapsedMs": 50930,
+    "sha256": "354a602c4d21e2d14d3a42336a524857b89f9472af7ccd8bd40488553cd0acea",
+    "packet": "LogOutSuccess"
+  },
+  {
+    "order": 42,
+    "role": "primary",
+    "phase": "relogin",
+    "direction": "received",
+    "elapsedMs": 50939,
+    "sha256": "b618c51d6ebec4e0083b1d3b440e17d01a44139ce2a6df3af4ab4fda0c08b9a7",
+    "snapshot": true,
+    "tick": 5,
+    "trade": null,
+    "economyHash": "2364954fae674c6a029b13ceeb4ccf78ed0b6666b72d745f3858d361cf1abef6"
+  },
+  {
+    "order": 43,
+    "role": "peer",
+    "phase": "relogin",
+    "direction": "received",
+    "elapsedMs": 52980,
+    "sha256": "b603acebcabb9108d07f9742dda110ddd3cdb39e664e9af8da307820658c9634",
+    "packet": "LogOutSuccess"
+  },
+  {
+    "order": 44,
+    "role": "peer",
+    "phase": "relogin",
+    "direction": "received",
+    "elapsedMs": 52989,
+    "sha256": "098740e035fdd6daec3b555148248bd85e492257e463533d6efd3398412c8cdd",
+    "snapshot": true,
+    "tick": 64,
+    "trade": null,
+    "economyHash": "b468a10b1f692be431ad4256956ee615f69a81a10383d7f213f83cefef66b562"
+  },
+  {
+    "order": 45,
+    "role": "peer",
+    "phase": "relogin",
+    "direction": "received",
+    "elapsedMs": 54925,
+    "sha256": "3cb3d26ee4697a0bc119efd672755d568041675c093710226c22719e53bab0fe",
+    "snapshot": true,
+    "tick": 0,
+    "trade": null,
+    "economyHash": "249873bf0c7a48f1d0dc44f951bb2bd21711ef0bf171eb062c5a87dafa387a0c"
+  },
+  {
+    "order": 46,
+    "role": "peer",
+    "phase": "relogin",
+    "direction": "received",
+    "elapsedMs": 54937,
+    "sha256": "3cb3d26ee4697a0bc119efd672755d568041675c093710226c22719e53bab0fe",
+    "snapshot": true,
+    "tick": 0,
+    "trade": null,
+    "economyHash": "249873bf0c7a48f1d0dc44f951bb2bd21711ef0bf171eb062c5a87dafa387a0c"
+  },
+  {
+    "order": 47,
+    "role": "peer",
+    "phase": "relogin",
+    "direction": "received",
+    "elapsedMs": 55670,
+    "sha256": "3cb3d26ee4697a0bc119efd672755d568041675c093710226c22719e53bab0fe",
+    "snapshot": true,
+    "tick": 0,
+    "trade": null,
+    "economyHash": "249873bf0c7a48f1d0dc44f951bb2bd21711ef0bf171eb062c5a87dafa387a0c"
+  },
+  {
+    "order": 48,
+    "role": "peer",
+    "phase": "relogin",
+    "direction": "received",
+    "elapsedMs": 62554,
+    "sha256": "06e6badbacdc6d753f5bf036f6b4a99b9136ef5cb2c542433730bf6e935bc8e8",
+    "packet": "StartGame",
+    "result": 4
+  },
+  {
+    "order": 49,
+    "role": "peer",
+    "phase": "relogin",
+    "direction": "received",
+    "elapsedMs": 62646,
+    "sha256": "32b240faab0298f633735af57c9638c08cc83508c6837853d9ed7722a42ec533",
+    "snapshot": true,
+    "tick": 1,
+    "trade": null,
+    "economyHash": "b468a10b1f692be431ad4256956ee615f69a81a10383d7f213f83cefef66b562"
+  },
+  {
+    "order": 50,
+    "role": "peer",
+    "phase": "relogin",
+    "direction": "received",
+    "elapsedMs": 64587,
+    "sha256": "4a771a97abc123e89b2ad42c2770d96c33dc080621568a76ea973e61a28998bb",
+    "packet": "LogOutSuccess"
+  },
+  {
+    "order": 51,
+    "role": "peer",
+    "phase": "relogin",
+    "direction": "received",
+    "elapsedMs": 64597,
+    "sha256": "160e0d7e22f69ccd2402f2cc93c2f12130c08b12f489147a9318581c951d61df",
+    "snapshot": true,
+    "tick": 5,
+    "trade": null,
+    "economyHash": "b468a10b1f692be431ad4256956ee615f69a81a10383d7f213f83cefef66b562"
+  }
+]

@@ -2,7 +2,7 @@
 
 ## Web / Windows R16持续Goal重启（2026-11-09）
 
-用户重新要求按R16共同基线继续完整Web对齐，优先不控制Windows桌面的工作。Web已复用Native完整社交模型/共用八项预算，Page116、host17、限定Web569/Stage5内部507组、TS及三包实际WASM执行通过，分层不叠加。WebGPU普通组队、延迟回执主角取消/精确资产和双方同角重登入档已有分项实证；取回对端当场未决、未产出的失败ACK、实际成交和阿洛继续验。未公开发布或晋升全局Candidate/Accepted。[执行范围](WEB-R16-PARITY-GOAL.zh-CN.md) · [本轮与未结证据](evidence/r16-social-budget-20261109/README.md)
+用户重新要求按R16共同基线继续完整Web对齐，优先不控制Windows桌面的工作。Web已复用Native完整社交模型/共用八项预算，Page116、host17、限定Web569/Stage5内部507组、TS及三包实际WASM执行通过，分层不叠加。新修复的共用 Gateway 已验证两种交易取消的双方终结、重开、单件实际成交和同角重登。WebGPU 放入及取回回包延迟时均能取消。继续有会籍的 Guild 物品未决场景、双向物品与金币成交、跨端、语言及阿洛。公开试玩及全局 Candidate/Accepted 分开验收。 [执行范围](WEB-R16-PARITY-GOAL.zh-CN.md) · [回归、普通包序与界面证据](evidence/r16-trade-terminal-20261109/README.md)
 
 ## Numeron新入口发布（2026-11-09）
 

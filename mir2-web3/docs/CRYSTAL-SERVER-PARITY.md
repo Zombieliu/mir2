@@ -1,5 +1,9 @@
 # Crystal Server Parity
 
+## R16 双方交易终结（2026-11-09）
+
+对照固定 Crystal 的 `TradeReply` 与 `TradeCancel`，R16 Gateway 现为尚待初始化的对端按顺序发接受、报价和 `Unlock=false` 终结。未改线协议或存档结构。隔离 File/WebSocket 已验证两种取消、同连接重新交易、单件实际入账与双方同角读档。双向物品与金币、Native/TCP、真实 PostgreSQL 和正式候选发行继续开放。 [回归、普通包序与界面证据](evidence/r16-trade-terminal-20261109/README.md)
+
 ## 五职业Linux TEST 发布范围（2026-11-09）
 
 发布验证器14项、实际Linux原生PG/Redis/退出和配套CI通过；43档真实加载及4档跨版本普通登录比较有独立证据。TEST已切至d53五职业/V2，原账号/存档与旧配置保留；公开三职业首任务、准确奖励和普通重登入档通过。没有增加服务端游戏规则/SQL迁移，没有替换旧正式服/钱包；浏览器、全部主线/CCU/人类Accepted另验。[实际发布及保全边界](NUMERON-WEB-RELEASE-20261108.zh-CN.md)
