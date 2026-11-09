@@ -1,5 +1,9 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+## R16 独立报价与原物退回（2026-11-10）
+
+按 Crystal 单独保管报价。Web 双开通过放入腾格、满包解锁、取回和单次交割。持久撮合区分重启后的未成交报价与已成交待入账，真实数据库验证退回和结算互斥。Windows 窗口和完整 Hosted 链路继续验收。 [证据](evidence/r16-trade-restart-20261110/README.md)
+
 ## R16 野外目标与熟练度（2026-11-10）
 
 大火球与灵魂火符用 30 级档在普通 Web 七格实战命中，资源和熟练度重登通过。灵魂火符扣符和派发一致，和平自宠拒绝。固定 Crystal 弹道延时仍需补齐。 [证据](evidence/r16-targeted-spells-20261110/README.md)

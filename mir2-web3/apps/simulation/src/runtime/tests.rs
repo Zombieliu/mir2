@@ -62357,6 +62357,7 @@ fn trade_packets_offer_items_gold_and_lock_without_single_session_settlement() {
         ServerPacket::TradeItem { trade_items }
             if trade_items.first().and_then(|item| item.as_ref()).is_some()
     )));
+    assert!(!session.world_snapshot().inventory_items.iter().any(|item| item.key == "red-potion"));
 
     let retrieve_packets = session.handle_packet(ClientPacket::RetrieveTradeItem {
         from: 0,
@@ -62370,6 +62371,9 @@ fn trade_packets_offer_items_gold_and_lock_without_single_session_settlement() {
             success: true,
         } if *to == retrieve_slot
     )));
+    assert!(session.world_snapshot().inventory_items.iter().any(|item| {
+        item.key == "red-potion" && i32::from(item.slot) == retrieve_slot
+    }));
     let redeposit_packets = session.handle_packet(ClientPacket::DepositTradeItem {
         from: retrieve_slot,
         to: 0,
@@ -62382,10 +62386,10 @@ fn trade_packets_offer_items_gold_and_lock_without_single_session_settlement() {
     assert!(confirm_packets.is_empty());
     let snapshot = session.world_snapshot();
     assert_eq!(snapshot.gold, starting_gold - 25);
-    assert!(snapshot
+    assert!(!snapshot
         .inventory_items
         .iter()
-        .any(|item| item.key == "red-potion" && i32::from(item.slot) == retrieve_slot));
+        .any(|item| item.key == "red-potion"));
     assert!(snapshot
         .stage5_systems
         .trade
@@ -62393,7 +62397,9 @@ fn trade_packets_offer_items_gold_and_lock_without_single_session_settlement() {
         .is_some_and(|trade| !trade.completed
             && !trade.escrow_prepared
             && trade.accepted
-            && trade.locked));
+            && trade.locked
+            && trade.own_items.as_ref().and_then(|items| items[0].as_ref())
+                .is_some_and(|item| item.key == "red-potion" && item.unique_id == 0)));
 }
 
 #[test]
@@ -62761,6 +62767,8 @@ fn trade_confirm_rejects_offered_item_swapped_after_deposit() {
     session.handle_packet(ClientPacket::TradeReply {
         accept_invite: true,
     });
+    session.app.world_mut().resource_mut::<Stage5SystemsResource>().stage5_systems
+        .trade.as_mut().expect("legacy trade fixture").held_items_json = None;
 
     let deposit = session.handle_packet(ClientPacket::DepositTradeItem {
         from: i32::from(slot_a),
@@ -62894,6 +62902,8 @@ fn trade_confirm_revalidates_offered_items_before_escrow_lock() {
         .expect("demo inventory should include red potion");
 
     session.trade_request("Trader");
+    session.app.world_mut().resource_mut::<Stage5SystemsResource>().stage5_systems
+        .trade.as_mut().expect("legacy trade fixture").held_items_json = None;
     session.handle_packet(ClientPacket::TradeGold { amount: 25 });
     assert!(session
         .handle_packet(ClientPacket::DepositTradeItem {

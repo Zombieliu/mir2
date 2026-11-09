@@ -89,6 +89,13 @@ pub(super) fn reserved_ids(systems: &Stage5SystemsState) -> Result<BTreeSet<u64>
             .ok_or("orphan refine custody carrier")?;
         reserve(decode(key, encoded)?)?;
     }
+    if let Some(trade) = &systems.trade {
+        if let Some(held) = super::trade_custody::held_items(trade)? {
+            for item in held.into_values() {
+                reserve(item)?;
+            }
+        }
+    }
     Ok(ids)
 }
 pub(super) fn refresh(world: &mut World) -> Result<(), String> {

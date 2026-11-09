@@ -2807,6 +2807,14 @@ impl SharedAccountInventoryCommandEnvelope {
 }
 
 pub trait SharedAccountInventoryService: fmt::Debug + Send + Sync {
+    fn settles_trade_in_process(&self) -> bool {
+        false
+    }
+
+    fn settles_trade_with_postgres_source_fence(&self) -> bool {
+        false
+    }
+
     fn supports_durable_player_drops(&self) -> bool {
         false
     }
@@ -3182,6 +3190,10 @@ impl InProcessAccountInventoryService {
 }
 
 impl SharedAccountInventoryService for InProcessAccountInventoryService {
+    fn settles_trade_in_process(&self) -> bool {
+        true
+    }
+
     fn commit(
         &self,
         runtime: &mut InProcessWorldRuntime,
@@ -4110,6 +4122,11 @@ struct SharedTradeLinks {
     refusals: Vec<(ZonePresenceKey, String)>,
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     invalidated_offers: Vec<(ZonePresenceKey, SharedTradeQuoteUpdate)>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    quote_revisions: Vec<(ZonePresenceKey, u64)>,
+    /// Until the source decides, a closed live pair is still busy.
+    #[serde(skip)]
+    publishing_matches: BTreeSet<ZonePresenceKey>,
 }
 const SHARED_ZONE_STATE_CHECKPOINT_VERSION: u32 = 3;
 const SHARED_ZONE_FACTORY_CHECKPOINT_VERSION: u32 = 3;
@@ -7712,10 +7729,25 @@ impl SharedInProcessZoneState {
                 .get(key)
                 .is_some_and(|v| !v.is_empty())
             || self.has_unresolved_trade_settlement_for_presence(key)
+            || self.trade_links.publishing_matches.contains(key)
             || self.trade_offers.contains_key(key)
     }
 
+    fn trade_quote_revision(&self, owner: &ZonePresenceKey) -> u64 {
+        self.trade_links.quote_revisions.iter()
+            .find_map(|(key, revision)| (key == owner).then_some(*revision))
+            .unwrap_or(0)
+    }
+
     fn queue_trade_quote_update(&mut self, recipient: ZonePresenceKey, packets: Vec<ServerPacket>) {
+        // Track an edit even before the recipient's confirming command has
+        // finished preparing its offer outside the Zone lock.
+        let revisions = &mut self.trade_links.quote_revisions;
+        if let Some((_, revision)) = revisions.iter_mut().find(|(owner, _)| owner == &recipient) {
+            *revision = revision.wrapping_add(1);
+        } else {
+            revisions.push((recipient.clone(), 1));
+        }
         if !self.trade_offers.contains_key(&recipient) {
             self.queue_zone_packets(recipient, packets);
             return;
@@ -7764,6 +7796,9 @@ impl SharedInProcessZoneState {
             .retain(|(owner, peer)| owner != key && &peer.key != key);
         self.trade_links
             .invalidated_offers
+            .retain(|(owner, _)| owner != key && !partners.contains(owner));
+        self.trade_links
+            .quote_revisions
             .retain(|(owner, _)| owner != key && !partners.contains(owner));
         for owner in invitees {
             self.queue_zone_packets(owner, vec![ServerPacket::TradeCancel { unlock: false }]);
@@ -16779,7 +16814,12 @@ impl SharedInProcessZoneSessionRuntime {
     }
 
     fn has_pending_durable_trade_projection(&self) -> bool {
-        if self.has_unresolved_trade_settlement() {
+        if self.current_presence_key().is_some_and(|key| {
+            let zone = self.zone_state.lock().expect("shared Zone trade boundary unavailable");
+            zone.has_unresolved_trade_settlement_for_presence(&key)
+                || zone.trade_links.publishing_matches.contains(&key)
+        }) || self.inner.local_trade_match_pending()
+        {
             return true;
         }
         let Some(identity) = self.inner.active_identity() else {
@@ -17024,15 +17064,13 @@ impl SharedInProcessZoneSessionRuntime {
         }
         packets.extend(self.apply_finalized_shared_trade_packets());
         packets.extend(self.apply_shared_trade_link_events());
-        // A process restart drops live pairs, but the character checkpoint
-        // retains its available wallet and the separate gold hold together.
-        // Query durable outcomes first: absence of a live pair alone is not
-        // permission to refund a possibly committed exchange.
-        if !self.has_shared_trade_pair()
-            && self.inner.shared_trade_unprepared_held_gold().is_some()
-            && !self.has_pending_durable_trade_projection()
-        {
-            packets.extend(self.inner.recover_unprepared_trade_gold());
+        if !self.has_shared_trade_pair() {
+            // A committed match owns both offers even after a process restart.
+            // Only source-proven absence may release a marked preparation.
+            packets.extend(self.inner.reconcile_local_trade_match());
+            if self.inner.has_active_shared_trade_state() && !self.has_pending_durable_trade_projection() {
+                packets.extend(self.inner.recover_orphaned_shared_trade());
+            }
         }
         packets
     }
@@ -17644,6 +17682,20 @@ impl SharedInProcessZoneSessionRuntime {
         }
     }
 
+    fn persist_recoverable_trade_unlock(&mut self, packets: Vec<ServerPacket>) -> Vec<ServerPacket> {
+        let recovery_source = (self.account_inventory_service.settles_trade_in_process()
+            && self.inner.uses_local_trade_recovery())
+            || (self.account_inventory_service.settles_trade_with_postgres_source_fence()
+                && self.inner.uses_postgres_trade_recovery());
+        if recovery_source && self.inner.has_detached_shared_trade()
+            && packets.iter().any(|packet| matches!(packet, ServerPacket::TradeCancel { unlock: true }))
+            && self.inner.save_active_character().is_err()
+        {
+            return Vec::new();
+        }
+        packets
+    }
+
     fn execute_shared_trade_confirm(&mut self, locked: bool) -> Vec<ServerPacket> {
         if !locked {
             let Some(key) = self.current_presence_key() else {
@@ -17660,7 +17712,8 @@ impl SharedInProcessZoneSessionRuntime {
                 // Explicit unlock only affects the caller. In-flight settlement
                 // has already taken the offer and retains private escrow custody.
                 drop(state);
-                return self.inner.shared_trade_cancel(true);
+                let packets = self.inner.shared_trade_cancel(true);
+                return self.persist_recoverable_trade_unlock(packets);
             };
             let mut packets = self.inner.reopen_shared_trade_offer(offer);
             if packets
@@ -17679,9 +17732,16 @@ impl SharedInProcessZoneSessionRuntime {
                     }
                 }
             }
-            return packets;
+            drop(state);
+            return self.persist_recoverable_trade_unlock(packets);
         }
 
+        let Some(self_key) = self.current_presence_key() else {
+            return Vec::new();
+        };
+        let quote_revision = self.zone_state.lock()
+            .expect("shared zone presence mutex should not be poisoned")
+            .trade_quote_revision(&self_key);
         if !self.bootstrap_account_inventory() {
             let mut packets = self.cancel_pending_shared_trade_offers();
             packets.extend(self.inner.shared_trade_cancel(false));
@@ -17698,14 +17758,36 @@ impl SharedInProcessZoneSessionRuntime {
             packets.extend(self.cancel_pending_shared_trade_offers());
             return packets;
         }
-        let Some(self_key) = self.current_presence_key() else {
-            packets.extend(self.inner.rollback_shared_trade_offer(&offer));
-            return packets;
-        };
+        let detached = self.inner.has_detached_shared_trade();
+        let local_recovery = detached && self.account_inventory_service.settles_trade_in_process()
+            && self.inner.uses_local_trade_recovery();
+        let postgres_recovery = detached
+            && self.account_inventory_service.settles_trade_with_postgres_source_fence()
+            && self.inner.uses_postgres_trade_recovery()
+            && self.economy_execution_context.as_ref().is_some_and(|context| context.external_commit_authorized);
+        // Persist the matching prepared checkpoint before publishing this
+        // detached offer. An editable checkpoint must never refund an offer
+        // whose peer may already have received the assets.
+        if detached {
+            let saved = if local_recovery {
+                self.inner.save_local_trade_preparation()
+            } else if postgres_recovery {
+                self.inner.save_postgres_trade_preparation()
+            } else {
+                self.inner.save_active_character()
+            };
+            if saved.is_err() {
+                let reopened = self.inner.reopen_shared_trade_offer(&offer);
+                packets.extend(self.persist_recoverable_trade_unlock(reopened));
+                return packets;
+            }
+        }
         let self_free_bag_slots = self.inner.world_snapshot().free_bag_slots;
 
         let mut matched_offer = None;
         let mut rollback_self = None;
+        let mut reopen_self = false;
+        let mut capacity_failed = false;
         {
             let mut zone_state = self
                 .zone_state
@@ -17740,6 +17822,8 @@ impl SharedInProcessZoneSessionRuntime {
                     .any(|(owner, _)| owner == &partner_key);
                 if !reciprocal {
                     rollback_self = Some(offer.clone());
+                } else if zone_state.trade_quote_revision(&self_key) != quote_revision {
+                    reopen_self = true;
                 } else if partner_invalidated || !zone_state.trade_offers.contains_key(&partner_key) {
                     zone_state.trade_offers.insert(self_key.clone(), offer.clone());
                 } else {
@@ -17752,13 +17836,23 @@ impl SharedInProcessZoneSessionRuntime {
                         .get(&partner_key)
                         .map(|presence| presence.free_bag_slots)
                         .unwrap_or_default();
-                    if zone_state.companion_boundary.as_ref().is_none_or(|boundary| boundary.pair_allowed(&self_key, &partner_key)
-                        && boundary.offer_allowed(&offer) && boundary.offer_allowed(&partner_offer))
-                        && shared_trade_offer_fits(self_free_bag_slots, &partner_offer)
-                        && shared_trade_offer_fits(partner_free_bag_slots, &offer)
-                    {
+                    let pair_allowed = zone_state.companion_boundary.as_ref().is_none_or(|boundary| boundary.pair_allowed(&self_key, &partner_key)
+                        && boundary.offer_allowed(&offer) && boundary.offer_allowed(&partner_offer));
+                    let fits = shared_trade_offer_fits(self_free_bag_slots, &partner_offer)
+                        && shared_trade_offer_fits(partner_free_bag_slots, &offer);
+                    if pair_allowed && fits {
                         zone_state.close_trade_links(&self_key, false);
+                        if local_recovery || postgres_recovery {
+                            zone_state.trade_links.publishing_matches.extend([
+                                self_key.clone(), partner_key.clone(),
+                            ]);
+                        }
                         matched_offer = Some((partner_key, partner_offer));
+                    } else if pair_allowed && detached {
+                        zone_state.trade_offers.insert(partner_key.clone(), partner_offer);
+                        zone_state.queue_trade_quote_update(partner_key, Vec::new());
+                        reopen_self = true;
+                        capacity_failed = true;
                     } else {
                         zone_state
                             .pending_trade_rollbacks
@@ -17773,15 +17867,44 @@ impl SharedInProcessZoneSessionRuntime {
             }
         }
 
+        if capacity_failed {
+            packets.extend(self.inner.shared_trade_capacity_failure());
+        }
+        if reopen_self {
+            let reopened = self.inner.reopen_shared_trade_offer(&offer);
+            packets.extend(self.persist_recoverable_trade_unlock(reopened));
+        }
         let mut deliver_to_self = Vec::new();
         let mut durable_settlement = false;
         let mut unknown_settlement = false;
+        if local_recovery {
+            if let Some((partner_key, partner_offer)) = matched_offer.take() {
+                let committed = self.inner.commit_local_trade_match(&offer, &partner_offer).is_ok();
+                let retained = committed || self.inner.local_trade_match_pending();
+                let mut zone = self.zone_state.lock().expect("shared Zone trade boundary unavailable");
+                zone.trade_links.publishing_matches.remove(&self_key);
+                zone.trade_links.publishing_matches.remove(&partner_key);
+                if !retained {
+                    zone.pending_trade_rollbacks.entry(partner_key).or_default().push(partner_offer);
+                    rollback_self = Some(offer.clone());
+                }
+                drop(zone);
+                if retained {
+                    packets.extend(self.inner.reconcile_local_trade_match());
+                    return packets;
+                }
+            }
+        }
         if let Some((partner_key, partner_offer)) = matched_offer {
             let settlement = self.settle_shared_trade(&offer, &partner_offer);
             let mut zone_state = self
                 .zone_state
                 .lock()
                 .expect("shared zone presence mutex should not be poisoned");
+            if postgres_recovery {
+                zone_state.trade_links.publishing_matches.remove(&self_key);
+                zone_state.trade_links.publishing_matches.remove(&partner_key);
+            }
             match settlement {
                 SharedTradeSettlementOutcome::Committed
                 | SharedTradeSettlementOutcome::Duplicate => {
@@ -34954,9 +35077,8 @@ mod tests {
         assert!(rollback
             .iter()
             .any(|packet| matches!(packet, ServerPacket::GainedGold { gold: 30 })));
-        assert!(rollback.iter().any(|packet| matches!(
-            packet,
-            ServerPacket::GainedItem { item } if item.count == 5
+        assert!(rollback.iter().any(|packet| matches!(packet,
+            ServerPacket::RetrieveTradeItem { from: 0, to, success: true } if *to == first_red_slot
         )));
         assert!(rollback
             .iter()
@@ -34987,20 +35109,18 @@ mod tests {
         assert!(rollback
             .iter()
             .any(|packet| matches!(packet, ServerPacket::GainedGold { gold: 30 })));
-        assert!(rollback.iter().any(|packet| matches!(
-            packet,
-            ServerPacket::GainedItem { item } if item.count == 5
+        assert!(rollback.iter().any(|packet| matches!(packet,
+            ServerPacket::RetrieveTradeItem { from: 0, to, success: true } if *to == first_red_slot
         )));
         assert_eq!(first.world_snapshot().gold, first_starting_gold);
         assert!(has_inventory_key(&first, "red-potion"));
     }
 
     #[test]
-    fn shared_in_process_registry_rolls_back_two_sided_trade_when_receiver_is_full() {
+    fn shared_in_process_registry_keeps_a_full_receiver_trade_editable_until_cancelled() {
         let (mut first, mut second) = started_shared_zone_sessions();
-        // Demo seeds use a legacy slot-zero alias. A real escrow return assigns
-        // its incoming UID; materialize and save it before measuring rollback.
-        // Saving alone preserves that legacy alias rather than allocating a UID.
+        // A detached offer can keep a legacy slot-zero identity through a
+        // prepare and return. Only a delivery to a different owner may remap it.
         let initial_sender = first.world_snapshot();
         let initial_receiver = second.world_snapshot();
         // Blade uses a real NewCharacter under the default StarterScenario,
@@ -35045,15 +35165,9 @@ mod tests {
             .iter()
             .any(|packet| matches!(packet, ServerPacket::TradeCancel { unlock: false })));
         let materialization = first.handle_packet(ClientPacket::KeepAlive { time: 1 });
-        let materialized_uid = materialization
-            .iter()
-            .find_map(|packet| match packet {
-                ServerPacket::GainedItem { item } if item.count == 5 && item.unique_id > 0 => {
-                    Some(item.unique_id)
-                }
-                _ => None,
-            })
-            .expect("real escrow cancellation returns a stack with an assigned UID");
+        assert!(materialization.iter().any(|packet| matches!(packet,
+            ServerPacket::RetrieveTradeItem { from: 0, to, success: true } if *to == legacy_red_slot
+        )));
         assert!(materialization
             .iter()
             .any(|packet| matches!(packet, ServerPacket::TradeCancel { unlock: false })));
@@ -35067,7 +35181,7 @@ mod tests {
         assert!(second.world_snapshot().stage5_systems.trade.is_none());
         first
             .save_active_character()
-            .expect("persist the materialized starter UID before taking the trade baseline");
+            .expect("persist the exact returned item before taking the trade baseline");
         let saved_red = first
             .world_snapshot()
             .inventory_items
@@ -35075,7 +35189,7 @@ mod tests {
             .find(|item| item.key == "red-potion")
             .expect("the saved potion stack remains in the bag");
         assert_eq!(saved_red.quantity, 5);
-        assert_eq!(saved_red.unique_id, materialized_uid);
+        assert_eq!(saved_red.unique_id, legacy_red.unique_id);
 
         first.handle_packet(ClientPacket::DropGold { amount: 100 });
         let funding_drop = second
@@ -35130,10 +35244,6 @@ mod tests {
                 .iter()
                 .map(|item| item.unique_id)
                 .collect::<BTreeSet<_>>();
-            assert!(
-                ids.iter().all(|id| *id > 0),
-                "all baseline UIDs are assigned"
-            );
             assert_eq!(ids.len(), baseline.len(), "baseline UIDs are distinct");
         }
 
@@ -35157,16 +35267,14 @@ mod tests {
         assert!(!failed_confirm
             .iter()
             .any(|packet| matches!(packet, ServerPacket::LoseGold { gold: 40 })));
+        assert!(!failed_confirm.iter().any(|packet| matches!(packet, ServerPacket::GainedGold { .. })));
         assert!(failed_confirm
             .iter()
-            .any(|packet| matches!(packet, ServerPacket::GainedGold { gold: 40 })));
-        assert!(failed_confirm
-            .iter()
-            .any(|packet| matches!(packet, ServerPacket::TradeCancel { unlock: false })));
+            .any(|packet| matches!(packet, ServerPacket::TradeCancel { unlock: true })));
         assert!(failed_confirm
             .iter()
             .all(|packet| !matches!(packet, ServerPacket::GainedItem { .. })));
-        assert_eq!(second.world_snapshot().gold, second_starting_gold);
+        assert_eq!(second.world_snapshot().gold, second_starting_gold - 40);
         assert_eq!(second.world_snapshot().free_bag_slots, 0);
         assert_eq!(
             canonical_items(second.world_snapshot().inventory_items),
@@ -35174,13 +35282,19 @@ mod tests {
             "rejected trade preserves every full-bag item, slot, count and UID"
         );
 
-        let rollback = first.handle_packet(ClientPacket::KeepAlive { time: 4 });
+        let reopened = first.handle_packet(ClientPacket::KeepAlive { time: 4 });
+        assert!(reopened.iter().any(|packet| matches!(packet, ServerPacket::TradeCancel { unlock: true })));
+        assert_eq!(first.world_snapshot().gold, first_starting_gold - 30);
+        assert!(!has_inventory_key(&first, "red-potion"));
+        let cancelled = second.handle_packet(ClientPacket::TradeCancel);
+        assert!(cancelled.iter().any(|packet| matches!(packet, ServerPacket::GainedGold { gold: 40 })));
+        assert_eq!(second.world_snapshot().gold, second_starting_gold);
+        let rollback = first.handle_packet(ClientPacket::KeepAlive { time: 5 });
         assert!(rollback
             .iter()
             .any(|packet| matches!(packet, ServerPacket::GainedGold { gold: 30 })));
-        assert!(rollback.iter().any(|packet| matches!(
-            packet,
-            ServerPacket::GainedItem { item } if item.count == 5
+        assert!(rollback.iter().any(|packet| matches!(packet,
+            ServerPacket::RetrieveTradeItem { from: 0, to, success: true } if *to == first_red_slot
         )));
         assert_eq!(first.world_snapshot().gold, first_starting_gold);
         assert!(has_inventory_key(&first, "red-potion"));

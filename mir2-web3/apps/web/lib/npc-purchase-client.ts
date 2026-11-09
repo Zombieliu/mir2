@@ -30,6 +30,8 @@ function ownerIntegerKind(path: readonly (string | number)[]): "u64" | "i64" | n
     || key === "snapshot/npcGoldTradeCapacity/freshCompatibleUniqueIds/*"
     || /^snapshot\/stage5Systems\/itemRental\/rentedItems\/\*\/itemId$/.test(key)
     || /^snapshot\/stage5Systems\/trade\/offeredUniqueIds\/[^/]+$/.test(key)
+    || /^snapshot\/stage5Systems\/trade\/ownItems\/\*\/uniqueId$/.test(key)
+    || /^snapshot\/stage5Systems\/trade\/ownItems\/\*\/tooltipSource\/userItem(?:\/slots\/\*)*\/unique_id$/.test(key)
     || key === "snapshot/stage5Systems/refine/pendingUniqueId"
     || /^snapshot\/mailItemState(?:\/socketed\/\*)*\/unique_id$/.test(key)
     || /^snapshot\/mailItemState(?:\/socketed\/\*)*\/user_item_metadata\/slots\/\*(?:\/slots\/\*)*\/unique_id$/.test(key)) return "u64";
@@ -37,6 +39,7 @@ function ownerIntegerKind(path: readonly (string | number)[]): "u64" | "i64" | n
     || key === "snapshot/heroMaxExperience" || key === "snapshot/stage5Systems/hero/experience"
     || /^snapshot\/equipmentItems\/\*\/(?:sealedExpiryTimeBinaryDatetime|sealedNextTimeBinaryDatetime)$/.test(key)
     || /^snapshot\/(?:belt|inventory|storage|equipment|heroInventory|heroEquipment)Items\/\*\/tooltipSource\/userItem(?:\/slots\/\*)*\/(?:expire_info|rental_information|sealed_info)\/(?:expiry_binary_datetime|next_seal_binary_datetime)$/.test(key)
+    || /^snapshot\/stage5Systems\/trade\/ownItems\/\*\/tooltipSource\/userItem(?:\/slots\/\*)*\/(?:expire_info|rental_information|sealed_info)\/(?:expiry_binary_datetime|next_seal_binary_datetime)$/.test(key)
     || /^snapshot\/nativeNpcShop\/list\/\*(?:\/slots\/\*)*\/(?:expire_info|rental_information|sealed_info)\/(?:expiry_binary_datetime|next_seal_binary_datetime)$/.test(key)
     || /^snapshot\/nativeNpcShop\/displayGoods\/\*(?:\/slots\/\*)*\/(?:expire_info|rental_information|sealed_info)\/(?:expiry_binary_datetime|next_seal_binary_datetime)$/.test(key)
     || /^snapshot\/nativeNpcShop\/displayGoods\/\*\/tooltipSource\/userItem(?:\/slots\/\*)*\/(?:expire_info|rental_information|sealed_info)\/(?:expiry_binary_datetime|next_seal_binary_datetime)$/.test(key)

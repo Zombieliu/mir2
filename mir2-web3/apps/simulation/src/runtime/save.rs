@@ -1741,6 +1741,7 @@ fn apply_full_character_save_mutation(
         .accounts
         .get_mut(account_id)
         .expect("validated full-save account should exist");
+    super::trade_recovery::save_match_projection(account, &save, &local_systems)?;
     if let Some(character) = account
         .characters
         .iter_mut()
@@ -3394,13 +3395,30 @@ fn apply_character_save_with_timing(
     restored_inventory.belt_items = belt_items;
     restored_inventory.storage_items = storage_items;
     restored_inventory.equipment_items = equipment_items;
+    // A legacy detached bag root can already alias a belt, storage or
+    // equipment root. Keep that alias, while still reserving the root for
+    // allocation and rejecting collisions in the bag or another custody.
+    let mut legacy_trade_aliases = BTreeSet::new();
+    if let Some(trade) = stage5_systems.trade.as_ref() {
+        if let Some(held) = super::trade_custody::held_items(trade)? {
+            for item in held.values() {
+                if let Some(id) = super::trade_custody::legacy_root_uid(&restored_inventory, item) {
+                    if super::inventory::inventory_unique_id_is_used(&restored_inventory, id)
+                        && !super::inventory::item_list_unique_id_is_used(&restored_inventory.inventory_items, id)
+                    {
+                        legacy_trade_aliases.insert(id);
+                    }
+                }
+            }
+        }
+    }
     if custody_ids
         .iter()
-        .any(|id| super::inventory::inventory_unique_id_is_used(&restored_inventory, *id))
+        .any(|id| !legacy_trade_aliases.contains(id) && super::inventory::inventory_unique_id_is_used(&restored_inventory, *id))
     {
         return Err("saved inventory collides with a held market/refine UID".into());
     }
-    restored_inventory.reserved_item_unique_ids = custody_ids;
+    restored_inventory.reserved_item_unique_ids = custody_ids.difference(&legacy_trade_aliases).copied().collect();
     normalize_inventory_known_item_metadata(&mut restored_inventory);
     if matches!(
         restored_inventory.item_uid_issuance,
@@ -3410,6 +3428,10 @@ fn apply_character_save_with_timing(
     } else {
         starter_uid_planning::validate_inventory_identities(&restored_inventory)?;
     }
+    if legacy_trade_aliases.iter().any(|&id| super::inventory::item_list_unique_id_is_used(&restored_inventory.inventory_items, id)) {
+        return Err("saved bag collides with a detached trade UID".into());
+    }
+    restored_inventory.reserved_item_unique_ids.extend(legacy_trade_aliases);
     if matches!(
         &restored_inventory.item_uid_issuance,
         super::item_uid_issuance::ItemUidIssuance::Durable(_)
@@ -4350,6 +4372,9 @@ mod character_save_item_validation_tests {
             offered_items: vec!["belt-lantern-oil".to_string()],
             offered_slots: BTreeMap::new(),
             offered_unique_ids: BTreeMap::new(),
+            held_items_json: None,
+            trade_recovery_version: None,
+            own_items: None,
             offered_gold: 0,
             held_gold: None,
             offered_currency: CurrencyKind::Gold,

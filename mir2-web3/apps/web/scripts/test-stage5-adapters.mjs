@@ -1468,6 +1468,26 @@ check("social own trade projects ten exact cells with holes and resolves both sl
   assert.equal(projected.slots[9].count, 1); assert.equal(projected.slots[9].name, "Item");
 });
 
+check("social detached trade projects exact cells independently of a reused bag origin", () => {
+  const world = socialWorld();
+  world.inventoryItems[0].authoritativeUniqueId = 80;
+  const inventory = socialItems.projectSocialInventory(world);
+  const ownItems = Array(10).fill(null);
+  const tooltipSource = {info:{item_index: 317}, userItem:{unique_id: 0, item_index: 317, count: 1}};
+  ownItems[2] = {slot:2, uniqueId:0, key:"candle", name:"Candle", container:"bag1", icon:9, quantity:1, tooltipSource};
+  ownItems[9] = {...ownItems[2], slot:9, uniqueId:44, tooltipSource:null};
+  const trade = socialTrade({offeredSlots:{2:3,9:3}, offeredUniqueIds:{2:0,9:44}, ownItems});
+  const projected = socialItems.projectOwnTradeItems(trade, inventory);
+  assert.equal(projected.ok, true);
+  assert.deepEqual(projected.slots[2], {slot:2, uniqueId:0, name:"Candle", icon:9, count:1, tooltipSource});
+  assert.equal(projected.slots[9].uniqueId, 44);
+  for (const alternate of [{ownItems:null}, {ownItems:ownItems.slice(0,9)},
+    {offeredUniqueIds:{2:0,9:80}, ownItems:ownItems.map((row, i) => i === 9 ? {...row, uniqueId:80} : row)},
+    {ownItems:ownItems.map((row, i) => i === 2 ? {...row, tooltipSource:{...tooltipSource, userItem:{...tooltipSource.userItem, unique_id:7}}} : row)}]) {
+    assert.deepEqual(socialItems.projectOwnTradeItems({...trade,...alternate}, inventory), {ok:false, error:"invalidTrade"});
+  }
+});
+
 check("social trade refuses map disagreement, repeated identities, bad cells and incomplete live inventory", () => {
   const inventory = socialItems.projectSocialInventory(socialWorld());
   for (const patch of [{ offeredUniqueIds: { 2: 0 } }, { offeredUniqueIds: { 2: 0, 8: 22 } },

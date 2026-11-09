@@ -2190,15 +2190,23 @@ fn stage5_spell_toggle_packet(
     Vec::new()
 }
 
-const STAGE5_TRADE_SLOT_COUNT: usize = 10;
+const STAGE5_TRADE_SLOT_COUNT: usize = super::trade_custody::SLOT_COUNT;
 
 fn stage5_trade_items(world: &World) -> Vec<Option<UserItem>> {
     let stage5 = world.resource::<Stage5SystemsResource>();
     let Some(trade) = stage5.stage5_systems.trade.as_ref() else {
         return vec![None; STAGE5_TRADE_SLOT_COUNT];
     };
-    let inventory = world.resource::<InventoryResource>();
     let mut trade_items = vec![None; STAGE5_TRADE_SLOT_COUNT];
+    if trade.held_items_json.is_some() {
+        if let Ok(Some(held)) = super::trade_custody::held_items(trade) {
+            for (slot, item) in held {
+                trade_items[usize::from(slot)] = try_user_item_from_item_state(&item).ok();
+            }
+        }
+        return trade_items;
+    }
+    let inventory = world.resource::<InventoryResource>();
     for (trade_slot, inventory_index) in &trade.offered_slots {
         let Some(slot) = trade_items.get_mut(usize::from(*trade_slot)) else {
             continue;
@@ -5468,6 +5476,9 @@ pub(super) fn stage5_trade_request_packet(
         offered_items: Vec::new(),
         offered_slots: BTreeMap::new(),
         offered_unique_ids: BTreeMap::new(),
+        held_items_json: Some(BTreeMap::new()),
+        trade_recovery_version: None,
+        own_items: None,
         offered_gold: 0,
         held_gold: Some(0),
         offered_currency: crate::config::CurrencyKind::Gold,
@@ -5507,6 +5518,9 @@ fn stage5_trade_reply_packet(world: &mut World, accept_invite: bool) -> Vec<Serv
                 offered_items: Vec::new(),
                 offered_slots: BTreeMap::new(),
                 offered_unique_ids: BTreeMap::new(),
+                held_items_json: Some(BTreeMap::new()),
+                trade_recovery_version: None,
+                own_items: None,
                 offered_gold: 0,
                 held_gold: Some(0),
                 offered_currency: crate::config::CurrencyKind::Gold,
@@ -5568,6 +5582,19 @@ fn stage5_deposit_trade_item_packet(world: &mut World, from: i32, to: i32) -> Ve
             success: false,
         }];
     };
+    if let Some(trade) = world.resource::<Stage5SystemsResource>().stage5_systems.trade
+        .as_ref().filter(|trade| trade.held_items_json.is_some()).cloned()
+    {
+        if trade.outgoing_escrow_debited() || trade.locked || usize::from(to_slot) >= STAGE5_TRADE_SLOT_COUNT
+            || super::trade_custody::deposit(world, trade, from_slot, to_slot).is_none()
+        {
+            return vec![ServerPacket::DepositTradeItem { from, to, success: false }];
+        }
+        return vec![
+            ServerPacket::DepositTradeItem { from, to, success: true },
+            ServerPacket::TradeItem { trade_items: stage5_trade_items(world) },
+        ];
+    }
     let (item_key, item_unique) = {
         let inventory = world.resource::<InventoryResource>();
         let Some(item) = inventory
@@ -5636,10 +5663,8 @@ pub(super) fn stage5_trade_reserves_item(world: &World, item: &ItemState) -> boo
         .trade
         .as_ref()
         .is_some_and(|trade| {
-            trade
-                .offered_slots
-                .values()
-                .any(|slot| inventory_item_matches_index(item, *slot))
+            (trade.held_items_json.is_none()
+                && trade.offered_slots.values().any(|slot| inventory_item_matches_index(item, *slot)))
                 || trade
                     .offered_unique_ids
                     .values()
@@ -5658,6 +5683,10 @@ fn stage5_valid_editable_trade(world: &World) -> Option<Stage5TradeState> {
         || trade.offered_slots.len() != trade.offered_unique_ids.len()
     {
         return None;
+    }
+    if trade.held_items_json.is_some() {
+        super::trade_custody::held_items(trade).ok()??;
+        return Some(trade.clone());
     }
     let inventory = world.resource::<InventoryResource>();
     let mut seen_slots = BTreeSet::new();
@@ -5705,6 +5734,15 @@ pub(super) fn stage5_move_trade_item_packet(
     let Some(mut trade) = stage5_valid_editable_trade(world) else {
         return vec![failed];
     };
+    if trade.held_items_json.is_some() {
+        if super::trade_custody::move_slot(world, trade, from_slot, to_slot).is_none() {
+            return vec![failed];
+        }
+        return vec![
+            ServerPacket::MoveItem { grid: MirGridType::Trade, from, to, success: true },
+            ServerPacket::TradeItem { trade_items: stage5_trade_items(world) },
+        ];
+    }
     let Some(source) = trade.offered_slots.get(&from_slot).copied() else {
         return vec![failed];
     };
@@ -5764,6 +5802,15 @@ pub(super) fn stage5_merge_trade_item_packet(
     let Some(mut trade) = stage5_valid_editable_trade(world) else {
         return vec![failed];
     };
+    if trade.held_items_json.is_some() {
+        if super::trade_custody::merge(world, trade, grid_from, grid_to, id_from, id_to).is_none() {
+            return vec![failed];
+        }
+        return vec![
+            ServerPacket::MergeItem { grid_from, grid_to, id_from, id_to, success: true },
+            ServerPacket::TradeItem { trade_items: stage5_trade_items(world) },
+        ];
+    }
     let inventory = world.resource::<InventoryResource>();
     let resolve = |id, grid| {
         let mut matching = inventory
@@ -5861,6 +5908,19 @@ fn stage5_retrieve_trade_item_packet(world: &mut World, from: i32, to: i32) -> V
     let (Ok(from_slot), Ok(to_slot)) = (u8::try_from(from), u8::try_from(to)) else {
         return vec![failed];
     };
+    if let Some(trade) = world.resource::<Stage5SystemsResource>().stage5_systems.trade
+        .as_ref().filter(|trade| trade.held_items_json.is_some()).cloned()
+    {
+        if trade.outgoing_escrow_debited() || trade.locked
+            || super::trade_custody::retrieve(world, trade, from_slot, to_slot).is_none()
+        {
+            return vec![failed];
+        }
+        return vec![
+            ServerPacket::RetrieveTradeItem { from, to, success: true },
+            ServerPacket::TradeItem { trade_items: stage5_trade_items(world) },
+        ];
+    }
     let (source_slot, source_unique_id) = {
         let stage5 = world.resource::<Stage5SystemsResource>();
         let Some(trade) = stage5.stage5_systems.trade.as_ref() else {
@@ -6002,7 +6062,7 @@ pub(super) fn prepare_shared_trade_escrow(world: &mut World) -> SharedTradePrepa
     if let Err(packets) = validate_trade_confirmation(world) {
         return SharedTradePreparation::Rejected(packets);
     }
-    let (offered_gold, offered_indices) = {
+    let (offered_gold, bag_indices) = {
         let stage5 = world.resource::<Stage5SystemsResource>();
         let trade = stage5
             .stage5_systems
@@ -6011,22 +6071,17 @@ pub(super) fn prepare_shared_trade_escrow(world: &mut World) -> SharedTradePrepa
             .expect("validated trade");
         (
             trade.offered_gold - trade.validated_held_gold().expect("validated gold custody"),
-            trade
-                .offered_slots
-                .values()
-                .copied()
-                .collect::<BTreeSet<_>>(),
+            trade.held_items_json.is_none().then(|| trade.offered_slots.values().copied().collect::<BTreeSet<_>>()),
         )
     };
     if offered_gold > 0 {
         world.resource_mut::<PlayerRuntimeResource>().gold -= offered_gold;
     }
-    world
-        .resource_mut::<InventoryResource>()
-        .inventory_items
-        .retain(|item| {
-            inventory_index_for_item(item).is_none_or(|index| !offered_indices.contains(&index))
+    if let Some(bag_indices) = bag_indices {
+        world.resource_mut::<InventoryResource>().inventory_items.retain(|item| {
+            inventory_index_for_item(item).is_none_or(|index| !bag_indices.contains(&index))
         });
+    }
     {
         let mut stage5 = world.resource_mut::<Stage5SystemsResource>();
         let trade = stage5
@@ -6062,14 +6117,15 @@ pub(super) fn validate_trade_confirmation(world: &mut World) -> Result<(), Vec<S
                 .offered_slots
                 .keys()
                 .any(|slot| usize::from(*slot) >= STAGE5_TRADE_SLOT_COUNT)
-            || trade
-                .offered_slots
-                .values()
-                .copied()
-                .collect::<BTreeSet<_>>()
-                .len()
-                != trade.offered_slots.len()
         {
+            return Err(Vec::new());
+        }
+        if trade.held_items_json.is_some() {
+            super::trade_custody::held_items(trade).map_err(|_| Vec::new())?;
+            let due = trade.offered_gold - trade.validated_held_gold().ok_or_else(Vec::new)?;
+            return (world.resource::<PlayerRuntimeResource>().gold >= due).then_some(()).ok_or_else(Vec::new);
+        }
+        if trade.offered_slots.values().copied().collect::<BTreeSet<_>>().len() != trade.offered_slots.len() {
             return Err(Vec::new());
         }
         (
@@ -6128,6 +6184,14 @@ fn stage5_trade_abort_on_tampered_offer(world: &mut World) -> Vec<ServerPacket> 
 }
 
 pub(super) fn stage5_trade_cancel_packet(world: &mut World) -> Vec<ServerPacket> {
+    if let Some(trade) = world.resource::<Stage5SystemsResource>().stage5_systems.trade
+        .as_ref().filter(|trade| trade.held_items_json.is_some()).cloned()
+    {
+        if trade.outgoing_escrow_debited() {
+            return Vec::new();
+        }
+        return super::trade_custody::cancel(world, &trade).unwrap_or_default();
+    }
     let held = {
         let stage5 = world.resource::<Stage5SystemsResource>();
         let Some(trade) = stage5.stage5_systems.trade.as_ref() else {
@@ -7064,6 +7128,15 @@ pub(super) fn build_world_snapshot(world: &World) -> WorldSnapshot {
     let player_object_id = current_player_object_id(world);
     let player_vitals = player_entity(world).and_then(|entity| entity_player_vitals(world, entity));
     let mut stage5_systems = stage5.stage5_systems.clone();
+    if let Some(trade) = stage5_systems.trade.as_mut() {
+        trade.trade_recovery_version = None;
+        trade.own_items = super::trade_custody::project_owned_items(trade, language);
+        if let Some(items) = trade.own_items.as_mut() {
+            for item in items.iter_mut().flatten() {
+                resolve_item_tooltip_source_for_viewer(&mut item.tooltip_source, tooltip_viewer);
+            }
+        }
+    }
     if let Some(guild) = super::shared_guilds::project_legacy_shape(world) {
         stage5_systems.guild = guild;
     }

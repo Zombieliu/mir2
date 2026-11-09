@@ -16,7 +16,7 @@ working tree, services, release packages, source snapshots or parity percentages
 
 ## Last recorded decisions and open work
 
-2026-11-10 比奇市场的角色和遮挡物在同一世界画布或 DOM 行内排序，三条 Web 渲染路径通过。大火球、灵魂火符七格实战及熟练度重登通过，道士扣符与派发使用同一目标检查。满包独立交易格仅为本地候选，正常流程已验，两个意外重启探针复现原报价被锁。继续持久匹配标记与 Crystal 弹道延时。 [比奇前后对照](evidence/r16-bichon-npc-depth-20261110/README.md) · [技能回执](evidence/r16-targeted-spells-20261110/README.md) · [交易证据](evidence/r16-trade-detached-grid-20261110/README.md)
+2026-11-10 满包独立交易格和重启恢复已验证。File 强停覆盖单方确认、解锁、溢出退件和已成交未入账。PostgreSQL 对账本成交、未成交退回和旧确认迟到设来源围栏。继续本方锁定时加价、名字级回执、Windows 窗口、完整 Hosted 链路和 Crystal 弹道时序。比奇三条渲染路径与两职业七格实战证据保留。 [交易恢复](evidence/r16-trade-restart-20261110/README.md) · [比奇](evidence/r16-bichon-npc-depth-20261110/README.md) · [技能](evidence/r16-targeted-spells-20261110/README.md)
 
 2026-11-10 继续 Windows R16 到 Web 的 1:1 Goal。双浏览器验证对端确认后的物品编辑和加价、双方重新确认、单次交割及重登。三职业毕业档验证快捷键、战士半月开关与读档。同一阿洛从 Web 教学到 Windows 读回和撤销，再由 Web 读回同一档案。继续交易满包独立格、名字级 ACK、公会权限、技能施放、地图和伙伴语言。 [执行范围](WEB-R16-PARITY-GOAL.zh-CN.md) · [交易](evidence/r16-trade-bilateral-edit-20261110/README.md) · [技能](evidence/r16-skill-shortcuts-20261110/README.md) · [跨端培养](evidence/r16-alo-cross-client-20261110/README.md)
 

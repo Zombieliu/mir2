@@ -65,6 +65,16 @@ impl PostgresEconomyStore {
             .map(|(receipt, _)| receipt)
     }
 
+    pub(super) fn transact_prepared_trade_fenced(
+        &self,
+        permit: &ZoneEconomyWritePermit,
+        envelope: &EconomyTransactionEnvelope,
+    ) -> Result<EconomyTransactionReceipt, String> {
+        permit.validate_target_database(&self.database_url)?;
+        self.transact_with_sources(envelope, None, Some(permit), None, true)
+            .map(|(receipt, _)| receipt)
+    }
+
     pub(super) fn transact_prepared_kill_fenced(
         &self,
         permit: &ZoneEconomyWritePermit,
@@ -342,6 +352,7 @@ impl PostgresEconomyAccountInventoryService {
         first: &SharedTradeOffer,
         second: &SharedTradeOffer,
         reconciliation_only: bool,
+        prepared_sources: bool,
     ) -> SharedTradeSettlementOutcome {
         let transaction = match economy_transaction_for_trade(context, first, second) {
             Ok(Some(transaction)) => transaction,
@@ -372,7 +383,12 @@ impl PostgresEconomyAccountInventoryService {
                 if reconciliation_only || self.is_uncertain(&transaction.idempotency_key) {
                     return unknown();
                 }
-                match self.store.transact_fenced(permit, &transaction) {
+                let published = if prepared_sources {
+                    self.store.transact_prepared_trade_fenced(permit, &transaction)
+                } else {
+                    self.store.transact_fenced(permit, &transaction)
+                };
+                match published {
                     Ok(receipt) => outcome(receipt),
                     Err(error) => {
                         let uncertain = error.contains("COMMIT_OUTCOME_UNKNOWN");

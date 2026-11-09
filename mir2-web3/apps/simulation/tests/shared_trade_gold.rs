@@ -15,6 +15,14 @@ fn started(config: &SimulationConfig) -> SimulationSession {
 fn open(session: &mut SimulationSession) {
     session.trade_request("Trader");
 }
+fn use_legacy_bag_quote(session: &mut SimulationSession) {
+    let mut checkpoint = session.active_character_checkpoint().unwrap();
+    let mut systems: Value =
+        serde_json::from_str(checkpoint.stage5_systems_json.as_deref().unwrap()).unwrap();
+    systems["trade"].as_object_mut().unwrap().remove("heldItemsJson");
+    checkpoint.stage5_systems_json = Some(systems.to_string());
+    session.restore_active_character_checkpoint(&checkpoint).unwrap();
+}
 fn add(session: &mut SimulationSession, amount: u32) -> Vec<ServerPacket> {
     session.handle_packet(ClientPacket::TradeGold { amount })
 }
@@ -213,6 +221,7 @@ fn older_editable_checkpoint_projects_only_missing_gold_and_retains_item_debit_i
     let mut s = started(&config);
     let original = s.world_snapshot().gold;
     open(&mut s);
+    use_legacy_bag_quote(&mut s);
     add(&mut s, 10);
     let slot = s
         .world_snapshot()
@@ -289,10 +298,11 @@ fn orphan_refund_save_failure_restores_custody_then_retries_once() {
 }
 
 #[test]
-fn mixed_prepared_rollback_full_bag_retains_custody_until_retry() {
+fn legacy_mixed_prepared_rollback_full_bag_retains_custody_until_retry() {
     let mut s = started(&SimulationConfig::default());
     let original = s.world_snapshot().gold;
     open(&mut s);
+    use_legacy_bag_quote(&mut s);
     add(&mut s, 25);
     let slot = s
         .world_snapshot()

@@ -1,7 +1,11 @@
 //! Real PostgreSQL economy authority checks. Every configured fixture is an
 //! explicit disposable loopback database; no default/production fallback.
 use super::*;
-use mir2_simulation::{AccountStoreDatabaseMode, SimulationConfig, ZoneSaveFence};
+use mir2_protocol::ClientPacket;
+use mir2_simulation::{
+    AccountStoreDatabaseMode, CharacterSaveRecord, GroundDropSnapshot, SimulationConfig,
+    Stage5SystemsState, WorldCommand, WorldItemSnapshot, ZoneSaveFence,
+};
 use postgres::Config as PostgresConfig;
 use serde_json::Value;
 use std::sync::mpsc;
@@ -111,9 +115,14 @@ impl Database {
     fn config(&self) -> SimulationConfig {
         self.config_for(&self.scoped)
     }
-    fn config_for(&self, url: &str) -> SimulationConfig {
+    fn unfenced_config(&self) -> SimulationConfig {
         let mut config = SimulationConfig::default();
         config.account_store_database_mode = AccountStoreDatabaseMode::SourceOfTruth;
+        config.account_store_database_url = Some(self.scoped.clone());
+        config
+    }
+    fn config_for(&self, url: &str) -> SimulationConfig {
+        let mut config = self.unfenced_config();
         config.account_store_database_url = Some(url.into());
         config
             .with_zone_save_fence(
@@ -291,6 +300,225 @@ fn offer(
         gold,
         items: Vec::new(),
     }
+}
+
+struct PreparedTrade {
+    sender: InProcessWorldRuntime,
+    receiver: InProcessWorldRuntime,
+    sent: SharedTradeOffer,
+    received: SharedTradeOffer,
+    sender_before: WorldSnapshot,
+    receiver_before: WorldSnapshot,
+    item: WorldItemSnapshot,
+}
+
+fn trade_save(db: &Database, offer: &SharedTradeOffer) -> CharacterSaveRecord {
+    let snapshot: Value = db
+        .connect()
+        .query_one(
+            "SELECT snapshot_json FROM character_saves WHERE account_id=$1 AND character_index=$2",
+            &[&offer.account_id, &offer.character_index],
+        )
+        .unwrap()
+        .get(0);
+    serde_json::from_value(snapshot).unwrap()
+}
+
+fn trade_systems(save: &CharacterSaveRecord) -> Stage5SystemsState {
+    serde_json::from_str(save.stage5_systems_json.as_deref().unwrap()).unwrap()
+}
+
+fn quote_detached_trade(
+    db: &Database,
+    config: SimulationConfig,
+    receiver_offer_gold: u32,
+) -> PreparedTrade {
+    let mut sender =
+        super::tests::start_test_runtime_with_config(config.clone(), "pg-trade-sender", "PgSender")
+            .unwrap();
+    let mut receiver =
+        super::tests::start_test_runtime_with_config(config, "pg-trade-peer", "PgPeer").unwrap();
+    seed_trade_opening_gold(db, &mut sender);
+    if receiver_offer_gold > 0 {
+        seed_trade_opening_gold(db, &mut receiver);
+    }
+    // The fixture seeds assets through the existing pickup path. The actual
+    // quote, custody, confirmation, and saved rows use normal trade handling.
+    let drop = GroundDropSnapshot {
+        object_id: 0x7f00_4467,
+        name: "Candle".into(),
+        name_colour_argb: -1,
+        icon: 0,
+        x: 10,
+        y: 20,
+        quantity: 1,
+        source_monster: "owned trade opening fixture".into(),
+        owner_object_id: None,
+        ownership_remaining_ticks: None,
+        loot: GroundDropLootSnapshot::InventoryItem {
+            key: "crystal-item-722".into(),
+            name: "Candle".into(),
+            description: "owned trade opening fixture".into(),
+            weight: 1,
+            durability_current: None,
+            durability_max: None,
+            added_attack: 0,
+            added_defence: 0,
+            added_stats: Vec::new(),
+            cursed: false,
+            socket_slots: 0,
+            show_group_pickup: false,
+            exact_item: None,
+        },
+    };
+    let pickup = sender.commit_shared_ground_drop_pickup_transaction(&drop);
+    assert!(pickup.committed);
+    let picked_uid = pickup
+        .packets
+        .into_iter()
+        .find_map(|packet| match packet {
+            ServerPacket::GainedItem { item } => Some(item.unique_id),
+            _ => None,
+        })
+        .expect("fixture pickup must send its exact inventory UID");
+    sender.save_active_character().unwrap();
+    let sender_before = sender.world_snapshot();
+    let receiver_before = receiver.world_snapshot();
+    let item = sender_before
+        .inventory_items
+        .iter()
+        .find(|item| item.unique_id == picked_uid)
+        .expect("picked item must exist in the sender's bag")
+        .clone();
+    assert!(item.tooltip_source.is_some());
+    for (runtime, partner) in [(&mut sender, "PgPeer"), (&mut receiver, "PgSender")] {
+        assert!(!runtime.trade_request(partner).is_empty());
+        let packets = runtime
+            .execute(WorldCommand::ClientPacket(ClientPacket::TradeReply {
+                accept_invite: true,
+            }))
+            .unwrap();
+        assert!(packets
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::TradeAccept { .. })));
+    }
+    let deposit = sender
+        .execute(WorldCommand::ClientPacket(ClientPacket::DepositTradeItem {
+            from: i32::from(item.slot),
+            to: 3,
+        }))
+        .unwrap();
+    assert!(deposit
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::DepositTradeItem { success: true, .. })));
+    for (runtime, amount) in [(&mut sender, 4), (&mut receiver, receiver_offer_gold)] {
+        if amount == 0 {
+            continue;
+        }
+        let gold = runtime
+            .execute(WorldCommand::ClientPacket(ClientPacket::TradeGold {
+                amount,
+            }))
+            .unwrap();
+        assert!(gold
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::LoseGold { gold } if *gold == amount)));
+    }
+
+    let sent = sender.shared_trade_confirm().1.unwrap();
+    let received = receiver.shared_trade_confirm().1.unwrap();
+    assert_eq!(sent.items.len(), 1);
+    assert_eq!(sent.items[0].key, item.key);
+    assert_eq!(sent.items[0].unique_id, item.unique_id);
+    assert!(received.items.is_empty());
+    PreparedTrade {
+        sender,
+        receiver,
+        sent,
+        received,
+        sender_before,
+        receiver_before,
+        item,
+    }
+}
+
+fn prepare_detached_trade(db: &Database) -> PreparedTrade {
+    let mut trade = quote_detached_trade(db, db.config(), 0);
+    for (runtime, offer) in [
+        (&mut trade.sender, &trade.sent),
+        (&mut trade.receiver, &trade.received),
+    ] {
+        runtime.save_postgres_trade_preparation().unwrap();
+        assert!(runtime.has_postgres_trade_preparation());
+        let save = trade_save(db, offer);
+        assert_eq!(save.character.name, offer.character_name);
+        assert_eq!(save.gold, runtime.world_snapshot().gold);
+        let held = trade_systems(&save).trade.unwrap();
+        assert!(held.accepted && held.locked && held.escrow_prepared);
+        assert_eq!(held.settlement_nonce, offer.settlement_nonce);
+        assert_eq!(held.partner, offer.partner_name);
+        assert_eq!(held.held_gold, Some(offer.gold));
+        assert_eq!(
+            held.held_items_json.unwrap().values().collect::<Vec<_>>(),
+            offer
+                .items
+                .iter()
+                .map(|item| &item.item_state_json)
+                .collect::<Vec<_>>()
+        );
+    }
+    // Exercise first-time ledger bootstrap with the item and Gold detached.
+    let service = PostgresEconomyAccountInventoryService::new(&db.scoped);
+    assert!(service.bootstrap_fenced(&trade.sender, Some(&db.context())));
+    assert!(service.bootstrap_fenced(&trade.receiver, Some(&db.context())));
+    assert_eq!(
+        db.amount(&EconomyBalanceKey::item_quantity(
+            &trade.sent.account_id,
+            trade.sent.character_index,
+            &trade.item.key
+        )),
+        trade
+            .sender_before
+            .inventory_items
+            .iter()
+            .filter(|row| row.key == trade.item.key)
+            .map(|row| i64::from(row.quantity))
+            .sum::<i64>()
+    );
+    assert_eq!(
+        db.amount(&EconomyBalanceKey::gold(
+            &trade.sent.account_id,
+            trade.sent.character_index
+        )),
+        i64::from(trade.sender_before.gold)
+    );
+    trade
+}
+
+fn relog_trade_character(
+    config: SimulationConfig,
+    offer: &SharedTradeOffer,
+) -> InProcessWorldRuntime {
+    let mut runtime = InProcessWorldRuntime::new(config);
+    let packets = runtime
+        .execute(WorldCommand::ClientPacket(ClientPacket::Login {
+            account_id: offer.account_id.clone(),
+            password: offer.account_id.clone(),
+        }))
+        .unwrap();
+    assert!(packets
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::LoginSuccess { .. })));
+    runtime
+        .execute(WorldCommand::ClientPacket(ClientPacket::StartGame {
+            character_index: offer.character_index,
+        }))
+        .unwrap();
+    let identity = runtime.active_identity().unwrap();
+    assert_eq!(identity.account_id, offer.account_id);
+    assert_eq!(identity.character_index, offer.character_index);
+    assert_eq!(identity.character_name, offer.character_name);
+    runtime
 }
 
 fn prepared_kill_award(
@@ -895,6 +1123,317 @@ fn economy_zone_fence_postgres_runtime_trade_unknown_none_receipt_never_retries_
         before,
         "a visible None after Unknown does not authorize any new trade/assets/outbox writes"
     );
+}
+
+#[test]
+fn economy_zone_fence_postgres_prepared_trade_committed_outbox_blocks_refund_after_relogin() {
+    let _guard = PG_LOCK
+        .lock()
+        .unwrap_or_else(std::sync::PoisonError::into_inner);
+    let Some(db) = Database::from_env() else {
+        return;
+    };
+    let PreparedTrade {
+        sender,
+        receiver,
+        sent,
+        received,
+        sender_before,
+        receiver_before,
+        item,
+    } = prepare_detached_trade(&db);
+    let context = db.context();
+    let transaction = economy_transaction_for_trade(&context, &sent, &received)
+        .unwrap()
+        .unwrap();
+    let store = db.store();
+    let permit = sender.zone_economy_write_permit().unwrap();
+    let receipt = store
+        .transact_prepared_trade_fenced(&permit, &transaction)
+        .unwrap();
+    assert!(!receipt.duplicate);
+    assert_eq!(db.counts().1, 1);
+    assert_eq!(db.counts().2, 1);
+
+    // Discard both live runtimes before either participant sees the settlement.
+    // A fresh cache rules out a stale in-memory version as the reason a direct
+    // orphan recovery attempt cannot refund an already committed trade.
+    drop((sender, receiver));
+    let mut sender = relog_trade_character(db.config(), &sent);
+    let mut receiver = relog_trade_character(db.config(), &received);
+    let committed_source = db.source_image();
+    for runtime in [&mut sender, &mut receiver] {
+        assert!(runtime.has_postgres_trade_preparation());
+        assert!(runtime.shared_trade_cancel(false).is_empty());
+        assert!(runtime.recover_orphaned_shared_trade().is_empty());
+        assert!(runtime.has_postgres_trade_preparation());
+    }
+    assert_eq!(db.source_image(), committed_source);
+
+    let service = PostgresEconomyAccountInventoryService::new(&db.scoped);
+    let sender_gold = sender_before.gold - sent.gold;
+    let receiver_gold = receiver_before.gold + sent.gold;
+    for (runtime, offer, gold) in [
+        (&mut sender, &sent, sender_gold),
+        (&mut receiver, &received, receiver_gold),
+    ] {
+        assert!(service.has_pending_trade_projection_fenced(runtime, Some(&context)));
+        let packets = service.reconcile_trade_projections_fenced(runtime, Some(&context));
+        assert_eq!(
+            packets
+                .iter()
+                .filter(|packet| matches!(packet, ServerPacket::TradeConfirm))
+                .count(),
+            1
+        );
+        assert_eq!(runtime.world_snapshot().gold, gold);
+        assert!(service
+            .reconcile_trade_projections_fenced(runtime, Some(&context))
+            .is_empty());
+        let save = trade_save(&db, offer);
+        assert_eq!(save.gold, gold);
+        let systems = trade_systems(&save);
+        assert!(systems.trade.is_none());
+        assert!(systems
+            .economy_projection_event_ids
+            .contains(&receipt.event_id));
+    }
+    let sender_inventory = sender.world_snapshot().inventory_items;
+    let receiver_inventory = receiver.world_snapshot().inventory_items;
+    assert!(!sender_inventory
+        .iter()
+        .any(|row| row.unique_id == item.unique_id));
+    let delivered: Vec<_> = receiver_inventory
+        .iter()
+        .filter(|row| row.unique_id == item.unique_id)
+        .collect();
+    assert_eq!(delivered.len(), 1);
+    let mut expected = item;
+    expected.slot = delivered[0].slot;
+    assert_eq!(delivered[0], &expected);
+
+    drop((sender, receiver));
+    for (offer, gold, inventory) in [
+        (&sent, sender_gold, sender_inventory),
+        (&received, receiver_gold, receiver_inventory),
+    ] {
+        let mut runtime = relog_trade_character(db.config(), offer);
+        let snapshot = runtime.world_snapshot();
+        assert_eq!(snapshot.gold, gold);
+        assert_eq!(snapshot.inventory_items, inventory);
+        assert!(snapshot.stage5_systems.trade.is_none());
+        assert!(service
+            .reconcile_trade_projections_fenced(&mut runtime, Some(&context))
+            .is_empty());
+    }
+    assert_eq!(db.counts().1, 1);
+    assert_eq!(db.counts().2, 1);
+}
+
+#[test]
+fn economy_zone_fence_postgres_prepared_trade_rejects_stale_quote_after_refund() {
+    let _guard = PG_LOCK
+        .lock()
+        .unwrap_or_else(std::sync::PoisonError::into_inner);
+    let Some(db) = Database::from_env() else {
+        return;
+    };
+    let PreparedTrade {
+        mut sender,
+        receiver,
+        sent,
+        received,
+        sender_before,
+        ..
+    } = prepare_detached_trade(&db);
+    let context = db.context();
+    let transaction = economy_transaction_for_trade(&context, &sent, &received)
+        .unwrap()
+        .unwrap();
+    let store = db.store();
+    let permit = sender.zone_economy_write_permit().unwrap();
+    let ledger_before = db.image();
+    let prepared_source = db.source_image();
+
+    // The receiver owns no outgoing assets. Its exact quote must still be
+    // checked and a rejected pair cannot change either source or the ledger.
+    let mut wrong_peer = received.clone();
+    let different_digit = if wrong_peer.settlement_nonce.starts_with('0') {
+        "1"
+    } else {
+        "0"
+    };
+    wrong_peer
+        .settlement_nonce
+        .replace_range(0..1, different_digit);
+    let mismatched = economy_transaction_for_trade(&context, &sent, &wrong_peer)
+        .unwrap()
+        .unwrap();
+    assert!(store
+        .transact_prepared_trade_fenced(&permit, &mismatched)
+        .is_err());
+    assert_eq!(db.source_image(), prepared_source);
+    assert_eq!(db.image(), ledger_before);
+
+    let packets = sender.recover_orphaned_shared_trade();
+    assert!(packets
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::TradeCancel { unlock: false })));
+    assert_eq!(sender.world_snapshot().gold, sender_before.gold);
+    assert_eq!(
+        sender.world_snapshot().inventory_items,
+        sender_before.inventory_items
+    );
+    assert!(trade_systems(&trade_save(&db, &sent)).trade.is_none());
+    assert!(receiver.has_postgres_trade_preparation());
+
+    let refunded_source = db.source_image();
+    assert!(store
+        .transact_prepared_trade_fenced(&permit, &transaction)
+        .is_err());
+    assert!(store
+        .lookup_fenced(&permit, &transaction)
+        .unwrap()
+        .is_none());
+    assert_eq!(db.source_image(), refunded_source);
+    assert_eq!(db.image(), ledger_before);
+    assert_eq!(
+        db.connect()
+            .query_one("SELECT count(*) FROM game_economy_trade_projections", &[])
+            .unwrap()
+            .get::<_, i64>(0),
+        0
+    );
+    drop((sender, receiver));
+    let reloaded = relog_trade_character(db.config(), &sent).world_snapshot();
+    assert_eq!(reloaded.gold, sender_before.gold);
+    assert_eq!(reloaded.inventory_items, sender_before.inventory_items);
+    assert!(reloaded.stage5_systems.trade.is_none());
+}
+
+#[test]
+fn economy_zone_fence_postgres_local_trade_recovers_only_the_unprojected_actor() {
+    let _guard = PG_LOCK
+        .lock()
+        .unwrap_or_else(std::sync::PoisonError::into_inner);
+    let Some(db) = Database::from_env() else {
+        return;
+    };
+    // The fixture has already provisioned these migrations. An unfenced
+    // embedded source can check the registry during its normal account reads.
+    let mut source = db.connect();
+    source
+        .batch_execute(
+            "CREATE TABLE IF NOT EXISTS schema_migrations (version TEXT PRIMARY KEY, \
+         applied_at TIMESTAMPTZ NOT NULL DEFAULT now())",
+        )
+        .unwrap();
+    for (version, _) in mir2_simulation::MIGRATIONS {
+        source
+            .execute(
+                "INSERT INTO schema_migrations(version) VALUES($1)",
+                &[version],
+            )
+            .unwrap();
+    }
+    drop(source);
+
+    let PreparedTrade {
+        mut sender,
+        mut receiver,
+        sent,
+        received,
+        sender_before,
+        receiver_before,
+        item,
+    } = quote_detached_trade(&db, db.unfenced_config(), 2);
+    for runtime in [&mut sender, &mut receiver] {
+        assert!(runtime.uses_local_trade_recovery());
+        assert!(!runtime.uses_postgres_trade_recovery());
+        runtime.save_local_trade_preparation().unwrap();
+    }
+    sender.commit_local_trade_match(&sent, &received).unwrap();
+    let sender_gold = sender_before.gold - sent.gold + received.gold;
+    let receiver_gold = receiver_before.gold - received.gold + sent.gold;
+    let sender_packets = sender.reconcile_local_trade_match();
+    assert_eq!(sender_packets.iter().filter(|packet| matches!(packet, ServerPacket::GainedGold { gold } if *gold == received.gold)).count(), 1);
+    assert_eq!(
+        sender_packets
+            .iter()
+            .filter(|packet| matches!(packet, ServerPacket::TradeConfirm))
+            .count(),
+        1
+    );
+    assert!(sender.reconcile_local_trade_match().is_empty());
+    let settled_sender = trade_save(&db, &sent);
+    assert_eq!(settled_sender.gold, sender_gold);
+    let sender_systems = trade_systems(&settled_sender);
+    assert!(sender_systems.trade.is_none());
+    assert_eq!(sender_systems.economy_projection_event_ids.len(), 1);
+    let waiting_receiver = trade_save(&db, &received);
+    assert_eq!(waiting_receiver.gold, receiver_before.gold - received.gold);
+    assert!(
+        trade_systems(&waiting_receiver)
+            .trade
+            .unwrap()
+            .escrow_prepared
+    );
+
+    // Drop both caches without logout after only the sender is projected.
+    drop((sender, receiver));
+    let mut receiver = relog_trade_character(db.unfenced_config(), &received);
+    assert!(receiver.local_trade_match_pending());
+    assert!(receiver.recover_orphaned_shared_trade().is_empty());
+    let receiver_packets = receiver.reconcile_local_trade_match();
+    assert_eq!(
+        receiver_packets
+            .iter()
+            .filter(
+                |packet| matches!(packet, ServerPacket::GainedGold { gold } if *gold == sent.gold)
+            )
+            .count(),
+        1
+    );
+    assert_eq!(
+        receiver_packets
+            .iter()
+            .filter(|packet| matches!(packet, ServerPacket::TradeConfirm))
+            .count(),
+        1
+    );
+    assert!(receiver.reconcile_local_trade_match().is_empty());
+    let settled_receiver = trade_save(&db, &received);
+    assert_eq!(settled_receiver.gold, receiver_gold);
+    let receiver_systems = trade_systems(&settled_receiver);
+    assert!(receiver_systems.trade.is_none());
+    assert_eq!(
+        receiver_systems.economy_projection_event_ids,
+        sender_systems.economy_projection_event_ids
+    );
+    drop(receiver);
+
+    let mut sender = relog_trade_character(db.unfenced_config(), &sent);
+    let mut receiver = relog_trade_character(db.unfenced_config(), &received);
+    assert!(sender.reconcile_local_trade_match().is_empty());
+    assert!(receiver.reconcile_local_trade_match().is_empty());
+    let sender_after = sender.world_snapshot();
+    let receiver_after = receiver.world_snapshot();
+    assert_eq!(sender_after.gold, sender_gold);
+    assert_eq!(receiver_after.gold, receiver_gold);
+    assert!(!sender_after
+        .inventory_items
+        .iter()
+        .any(|row| row.unique_id == item.unique_id));
+    let delivered: Vec<_> = receiver_after
+        .inventory_items
+        .iter()
+        .filter(|row| row.unique_id == item.unique_id)
+        .collect();
+    assert_eq!(delivered.len(), 1);
+    let mut expected = item;
+    expected.slot = delivered[0].slot;
+    assert_eq!(delivered[0], &expected);
+    assert_eq!(db.counts(), (0, 0, 0, 0));
 }
 
 #[test]

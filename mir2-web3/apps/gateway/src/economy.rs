@@ -939,7 +939,7 @@ impl PostgresEconomyStore {
         source: Option<&dyn PreparedKillSource>,
         permit: Option<&ZoneEconomyWritePermit>,
     ) -> Result<(EconomyTransactionReceipt, Option<PreparedKillProjection>), String> {
-        self.transact_with_sources(envelope, source, permit, None)
+        self.transact_with_sources(envelope, source, permit, None, false)
     }
 
     fn transact_with_sources(
@@ -948,6 +948,7 @@ impl PostgresEconomyStore {
         source: Option<&dyn PreparedKillSource>,
         permit: Option<&ZoneEconomyWritePermit>,
         drop_source: Option<&player_drop::PlayerDropLedgerSource<'_>>,
+        prepared_trade: bool,
     ) -> Result<(EconomyTransactionReceipt, Option<PreparedKillProjection>), String> {
         if source.is_some() && drop_source.is_some() {
             return Err("multiple economy source participants".into());
@@ -978,6 +979,14 @@ impl PostgresEconomyStore {
         }
         let event_id = envelope.event_id_inner(has_source)?;
         let trade_projection_rows = trade_projection_rows_from_envelope(envelope, &event_id)?;
+        let prepared_trade_permit = if prepared_trade {
+            if has_source || trade_projection_rows.len() != 2 {
+                return Err("prepared trade requires exactly two ledger participants".into());
+            }
+            Some(permit.ok_or("prepared trade requires a trusted runtime permit")?)
+        } else {
+            None
+        };
         let ground_drop_projection = ground_drop_projection_from_envelope(envelope, &event_id)?;
         let mut client = self.connect()?;
         if permit.is_none() {
@@ -1058,6 +1067,16 @@ impl PostgresEconomyStore {
             ));
         }
         lock_economy_characters(&mut transaction, &characters)?;
+        if let Some(permit) = prepared_trade_permit {
+            permit.lock_prepared_trade_participants(
+                &mut transaction,
+                &self.database_url,
+                &envelope.zone_id,
+                envelope.fencing_generation,
+                &trade_projection_rows[0].own_offer,
+                &trade_projection_rows[1].own_offer,
+            )?;
+        }
         let source_checkpoint = if let Some(source) = source {
             let checkpoint = source.publish_source(&mut transaction)?;
             prepared_kill::validate_projection(envelope, &checkpoint)?;
@@ -1842,6 +1861,14 @@ trait EconomySettlementStore: std::fmt::Debug + Send + Sync {
         self.transact(envelope)
     }
 
+    fn transact_prepared_trade_fenced(
+        &self,
+        _permit: Option<&ZoneEconomyWritePermit>,
+        _envelope: &EconomyTransactionEnvelope,
+    ) -> Result<EconomyTransactionReceipt, String> {
+        Err("durable trade source fencing is unavailable".into())
+    }
+
     fn prepared_kill_store(&self) -> Option<&PostgresEconomyStore> {
         None
     }
@@ -1927,6 +1954,18 @@ impl EconomySettlementStore for PostgresEconomyStore {
         envelope: &EconomyTransactionEnvelope,
     ) -> Result<EconomyTransactionReceipt, String> {
         PostgresEconomyStore::transact_fenced(
+            self,
+            permit.ok_or("zone economy write permit required")?,
+            envelope,
+        )
+    }
+
+    fn transact_prepared_trade_fenced(
+        &self,
+        permit: Option<&ZoneEconomyWritePermit>,
+        envelope: &EconomyTransactionEnvelope,
+    ) -> Result<EconomyTransactionReceipt, String> {
+        PostgresEconomyStore::transact_prepared_trade_fenced(
             self,
             permit.ok_or("zone economy write permit required")?,
             envelope,
@@ -2269,6 +2308,10 @@ impl PostgresEconomyAccountInventoryService {
 }
 
 impl SharedAccountInventoryService for PostgresEconomyAccountInventoryService {
+    fn settles_trade_with_postgres_source_fence(&self) -> bool {
+        self.store.requires_zone_write_permit()
+    }
+
     fn supports_durable_player_drops(&self) -> bool {
         self.store.prepared_kill_store().is_some()
     }
@@ -2404,7 +2447,7 @@ impl SharedAccountInventoryService for PostgresEconomyAccountInventoryService {
         if self.store.requires_zone_write_permit() {
             return SharedTradeSettlementOutcome::Deferred;
         }
-        self.settle_trade_authorized(None, context, first, second, false)
+        self.settle_trade_authorized(None, context, first, second, false, false)
     }
 
     fn retry_trade_fenced(
@@ -2427,7 +2470,7 @@ impl SharedAccountInventoryService for PostgresEconomyAccountInventoryService {
         if !context.external_commit_authorized {
             return SharedTradeSettlementOutcome::Committed;
         }
-        self.settle_trade_authorized(None, context, first, second, true)
+        self.settle_trade_authorized(None, context, first, second, true, false)
     }
 
     fn settle_trade_with_runtime(
@@ -2452,7 +2495,11 @@ impl SharedAccountInventoryService for PostgresEconomyAccountInventoryService {
             Ok(permit) => permit,
             Err(_) => return SharedTradeSettlementOutcome::Deferred,
         };
-        self.settle_trade_authorized(permit.as_ref(), context, first, second, false)
+        let detached_source = self.store.requires_zone_write_permit() && runtime.has_detached_shared_trade();
+        if detached_source && !runtime.has_postgres_trade_preparation() {
+            return SharedTradeSettlementOutcome::Deferred;
+        }
+        self.settle_trade_authorized(permit.as_ref(), context, first, second, false, detached_source)
     }
 
     fn retry_trade_with_runtime(
@@ -2485,7 +2532,7 @@ impl SharedAccountInventoryService for PostgresEconomyAccountInventoryService {
             Ok(permit) => permit,
             Err(_) => return SharedTradeSettlementOutcome::Deferred,
         };
-        self.settle_trade_authorized(permit.as_ref(), context, first, second, true)
+        self.settle_trade_authorized(permit.as_ref(), context, first, second, true, false)
     }
 
     fn reconcile_trade_projections_fenced(
@@ -3016,6 +3063,14 @@ impl EconomyOpeningSnapshot {
         if snapshot.player_experience < 0 {
             return Err("economy bootstrap experience cannot be negative".to_string());
         }
+        let detached_trade = snapshot.stage5_systems.trade.as_ref()
+            .filter(|trade| trade.held_items_json.is_some());
+        let owned_trade_items = match detached_trade {
+            Some(trade) => trade.own_items.as_ref().filter(|items| items.len() == 10)
+                .ok_or("economy bootstrap detached trade inventory is invalid")?.as_slice(),
+            None => &[],
+        };
+        let held_gold = detached_trade.and_then(|trade| trade.held_gold).unwrap_or(0);
         let mut item_quantities = BTreeMap::<String, i64>::new();
         for item in snapshot
             .inventory_items
@@ -3023,6 +3078,7 @@ impl EconomyOpeningSnapshot {
             .chain(snapshot.belt_items.iter())
             .chain(snapshot.storage_items.iter())
             .chain(snapshot.hero_inventory_items.iter())
+            .chain(owned_trade_items.iter().flatten())
         {
             if item.key.trim().is_empty() {
                 return Err("economy bootstrap item key cannot be empty".to_string());
@@ -3054,7 +3110,7 @@ impl EconomyOpeningSnapshot {
             account_id: identity.account_id.clone(),
             character_index: identity.character_index,
             character_name: identity.character_name.clone(),
-            gold: i64::from(snapshot.gold),
+            gold: i64::from(snapshot.gold) + i64::from(held_gold),
             experience: snapshot.player_experience,
             item_quantities,
             total_item_quantity,

@@ -1,6 +1,7 @@
 //! The real shared coordinator must not expose its prepare phase as Crystal's
 //! completed-exchange packet. These tests use two sessions and actual routing.
 use super::*;
+use std::sync::mpsc::{Receiver, Sender};
 
 fn inventory_totals(
     first: &GatewaySession,
@@ -143,25 +144,195 @@ fn cancellation_refunds_waiting_offer_once_without_any_completion() {
 }
 
 #[test]
-fn receiver_capacity_rejection_refunds_both_sides_without_completion() {
+fn full_receiver_reopens_both_detached_offers_without_delivery() {
     let (mut first, mut second) = started_shared_zone_sessions();
     fill_receiver_bag_with_catalog_items(&mut second);
     let first_gold = first.world_snapshot().gold;
-    let second_gold = second.world_snapshot().gold;
+    let receiver_before = second.world_snapshot();
     let total_items = inventory_totals(&first, &second);
     open_pair(&mut first, &mut second);
+    let receiver_nonce = second
+        .world_snapshot()
+        .stage5_systems
+        .trade
+        .unwrap()
+        .settlement_nonce;
     prepare_first(&mut first);
+    let prepared = first.world_snapshot().stage5_systems.trade.unwrap();
+    let offered = prepared.own_items.as_ref().unwrap()[3].as_ref().unwrap();
+    assert_eq!((offered.unique_id, offered.quantity), (0, 5));
+
     let rejected = second.handle_packet(ClientPacket::TradeConfirm { locked: true });
     assert_eq!(completion_count(&rejected), 0);
     assert!(rejected
         .iter()
+        .any(|p| matches!(p, ServerPacket::TradeCancel { unlock: true })));
+    let update = first.handle_packet(ClientPacket::KeepAlive { time: 506 });
+    assert_eq!(completion_count(&update), 0);
+    assert!(update
+        .iter()
+        .any(|p| matches!(p, ServerPacket::TradeCancel { unlock: true })));
+    for packets in [&rejected, &update] {
+        assert!(!packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::TradeCancel { unlock: false }
+                | ServerPacket::GainedGold { .. }
+                | ServerPacket::GainedItem { .. }
+        )));
+    }
+    let sender = first.world_snapshot();
+    let receiver = second.world_snapshot();
+    let sender_trade = sender.stage5_systems.trade.unwrap();
+    let receiver_trade = receiver.stage5_systems.trade.unwrap();
+    assert_eq!(sender_trade.settlement_nonce, prepared.settlement_nonce);
+    assert_eq!(sender_trade.own_items, prepared.own_items);
+    assert_eq!(sender_trade.held_gold, Some(30));
+    assert_eq!(receiver_trade.settlement_nonce, receiver_nonce);
+    assert!(receiver_trade
+        .own_items
+        .unwrap()
+        .iter()
+        .all(Option::is_none));
+    assert!(!sender_trade.escrow_prepared && !sender_trade.locked);
+    assert!(!receiver_trade.escrow_prepared && !receiver_trade.locked);
+    assert_eq!(sender.gold, first_gold - 30);
+    assert!(!has_inventory_key(&first, "red-potion"));
+    assert_eq!(receiver.gold, receiver_before.gold);
+    assert_eq!(receiver.free_bag_slots, 0);
+    assert_eq!(receiver.inventory_items, receiver_before.inventory_items);
+
+    assert!(second
+        .handle_packet(ClientPacket::TradeCancel)
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::TradeCancel { unlock: false })));
+    let returned = first.handle_packet(ClientPacket::KeepAlive { time: 511 });
+    assert_eq!(completion_count(&returned), 0);
+    assert!(returned.iter().any(|p| matches!(
+        p,
+        ServerPacket::RetrieveTradeItem {
+            from: 3,
+            success: true,
+            ..
+        }
+    )));
+    assert!(returned
+        .iter()
         .any(|p| matches!(p, ServerPacket::TradeCancel { unlock: false })));
-    let refund = first.handle_packet(ClientPacket::KeepAlive { time: 506 });
-    assert_eq!(completion_count(&refund), 0);
     assert_eq!(first.world_snapshot().gold, first_gold);
-    assert_eq!(second.world_snapshot().gold, second_gold);
+    assert_eq!(second.world_snapshot().gold, receiver_before.gold);
     assert!(has_inventory_key(&first, "red-potion"));
     assert_eq!(inventory_totals(&first, &second), total_items);
+}
+
+#[derive(Debug)]
+struct PausedTradeBootstrap {
+    inventory: InProcessAccountInventoryService,
+    pause: Mutex<Option<(Sender<()>, Receiver<()>)>>,
+}
+
+impl SharedAccountInventoryService for PausedTradeBootstrap {
+    fn commit(
+        &self,
+        runtime: &mut InProcessWorldRuntime,
+        envelope: SharedAccountInventoryCommandEnvelope,
+    ) -> SharedAccountInventoryTransactionReceipt {
+        self.inventory.commit(runtime, envelope)
+    }
+
+    fn bootstrap_fenced(
+        &self,
+        _runtime: &InProcessWorldRuntime,
+        _context: Option<&SharedAccountInventoryExecutionContext>,
+    ) -> bool {
+        let pause = self.pause.lock().unwrap().take();
+        if let Some((entered, resume)) = pause {
+            entered.send(()).unwrap();
+            resume.recv_timeout(Duration::from_secs(15)).unwrap();
+        }
+        true
+    }
+}
+
+#[test]
+fn quote_edit_during_confirmation_preparation_requires_a_new_confirmation() {
+    let service = Arc::new(PausedTradeBootstrap {
+        inventory: InProcessAccountInventoryService::new(),
+        pause: Mutex::new(None),
+    });
+    let registry = ZoneRegistry::new(
+        ZoneId::primary(),
+        Arc::new(SharedInProcessZoneRuntimeFactory::with_account_inventory_service(service.clone()))
+            as SharedZoneRuntimeFactory,
+    );
+    let config = GatewayConfig::default();
+    let mut first = GatewaySession::new_with_zone_registry(config.clone(), &registry);
+    let mut second = GatewaySession::new_with_zone_registry(config, &registry);
+    start_demo_character(&mut first);
+    start_new_character(&mut second, "quote-revision-peer", "QuotePeer");
+    let first_opening_gold = first.world_snapshot().gold;
+    let second_opening_gold = second.world_snapshot().gold;
+    first.handle_packet(ClientPacket::DropGold { amount: 11 });
+    let funding = second
+        .world_snapshot()
+        .ground_drops
+        .into_iter()
+        .find(|drop| matches!(&drop.loot, GroundDropLootSnapshot::Gold { amount: 11 }))
+        .expect("the peer can observe the normal gold drop");
+    second.transfer_map(&format!("crystal:0:{}:{}", funding.x, funding.y));
+    second.pick_up(funding.object_id);
+    let first_gold = first.world_snapshot().gold;
+    let second_gold = second.world_snapshot().gold;
+    assert_eq!(first_gold, first_opening_gold - 11);
+    assert_eq!(second_gold, second_opening_gold + 11);
+    open_pair(&mut first, &mut second);
+
+    let (entered, entered_rx) = channel();
+    let (resume, resume_rx) = channel();
+    *service.pause.lock().unwrap() = Some((entered, resume_rx));
+    let (stale, peer_edit, peer_confirm) = thread::scope(|scope| {
+        let confirming =
+            scope.spawn(|| first.handle_packet(ClientPacket::TradeConfirm { locked: true }));
+        entered_rx.recv_timeout(Duration::from_secs(15)).unwrap();
+        let peer_edit = second.handle_packet(ClientPacket::TradeGold { amount: 11 });
+        let peer_confirm = second.handle_packet(ClientPacket::TradeConfirm { locked: true });
+        resume.send(()).unwrap();
+        (confirming.join().unwrap(), peer_edit, peer_confirm)
+    });
+
+    assert!(peer_edit
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::LoseGold { gold: 11 })));
+    assert_eq!(completion_count(&peer_confirm), 0);
+    assert_eq!(completion_count(&stale), 0);
+    assert!(stale
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::TradeCancel { unlock: true })));
+    let first_trade = first.world_snapshot().stage5_systems.trade.unwrap();
+    assert!(!first_trade.locked && !first_trade.escrow_prepared);
+    let second_trade = second.world_snapshot().stage5_systems.trade.unwrap();
+    assert!(second_trade.locked && second_trade.escrow_prepared);
+    assert_eq!(first.world_snapshot().gold, first_gold);
+    assert_eq!(second.world_snapshot().gold, second_gold - 11);
+
+    let update = first.handle_packet(ClientPacket::KeepAlive { time: 512 });
+    assert_eq!(
+        stale
+            .iter()
+            .chain(&update)
+            .filter(|packet| matches!(packet, ServerPacket::TradeGold { amount: 11 }))
+            .count(),
+        1
+    );
+    assert_eq!(
+        completion_count(&first.handle_packet(ClientPacket::TradeConfirm { locked: true })),
+        1
+    );
+    assert_eq!(
+        completion_count(&second.handle_packet(ClientPacket::KeepAlive { time: 513 })),
+        1
+    );
+    assert_eq!(first.world_snapshot().gold, first_gold + 11);
+    assert_eq!(second.world_snapshot().gold, second_gold - 11);
 }
 
 #[test]

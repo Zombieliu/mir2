@@ -1,0 +1,20 @@
+{
+  "passed": true,
+  "sourceFixtureUnchanged": true,
+  "closed": true,
+  "storeSha256": "779631624f10622c0a13544335982969784d1a897b93221105b32f9bdfed56a4",
+  "roles": {
+    "primary": {
+      "gold": 1000,
+      "bagItems": 40,
+      "exactBag": true,
+      "noOpenTrade": true
+    },
+    "peer": {
+      "gold": 700,
+      "bagItems": 4,
+      "exactBag": true,
+      "noOpenTrade": true
+    }
+  }
+}

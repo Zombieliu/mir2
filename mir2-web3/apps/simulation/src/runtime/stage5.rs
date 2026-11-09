@@ -3668,6 +3668,7 @@ impl SimulationSession {
             .as_ref()
             .is_some_and(|trade| {
                 trade.outgoing_escrow_debited() || trade.validated_held_gold() != Some(0)
+                    || trade.held_items_json.as_ref().is_some_and(|items| !items.is_empty())
             })
         {
             return Vec::new();
@@ -3686,6 +3687,9 @@ impl SimulationSession {
             offered_items: Vec::new(),
             offered_slots: BTreeMap::new(),
             offered_unique_ids: BTreeMap::new(),
+                held_items_json: None,
+                trade_recovery_version: None,
+                own_items: None,
             offered_gold: 0,
             held_gold: None,
             offered_currency: CurrencyKind::Gold,

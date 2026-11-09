@@ -1454,8 +1454,60 @@ impl InProcessWorldRuntime {
         self.session.shared_trade_unprepared_held_gold()
     }
 
+    pub fn has_recoverable_unprepared_trade(&self) -> bool {
+        self.session.has_recoverable_unprepared_trade()
+    }
+
     pub fn recover_unprepared_trade_gold(&mut self) -> Vec<ServerPacket> {
         self.session.recover_unprepared_trade_gold()
+    }
+
+    pub fn uses_local_trade_recovery(&self) -> bool {
+        self.session.uses_local_trade_recovery()
+    }
+
+    pub fn save_local_trade_preparation(&mut self) -> Result<(), String> {
+        self.session.save_local_trade_preparation()
+    }
+
+    pub fn uses_postgres_trade_recovery(&self) -> bool {
+        self.session.uses_postgres_trade_recovery()
+    }
+
+    pub fn save_postgres_trade_preparation(&mut self) -> Result<(), String> {
+        self.session.save_postgres_trade_preparation()
+    }
+
+    pub fn has_postgres_trade_preparation(&self) -> bool {
+        self.session.has_postgres_trade_preparation()
+    }
+
+    pub fn commit_local_trade_match(
+        &self,
+        own: &SharedTradeOffer,
+        incoming: &SharedTradeOffer,
+    ) -> Result<(), String> {
+        self.session.commit_local_trade_match(own, incoming)
+    }
+
+    pub fn local_trade_match_pending(&self) -> bool {
+        self.session.local_trade_match_pending()
+    }
+
+    pub fn reconcile_local_trade_match(&mut self) -> Vec<ServerPacket> {
+        self.session.reconcile_local_trade_match()
+    }
+
+    pub fn has_detached_shared_trade(&self) -> bool {
+        self.session.has_detached_shared_trade()
+    }
+
+    pub fn shared_trade_capacity_failure(&self) -> Vec<ServerPacket> {
+        self.session.shared_trade_capacity_failure()
+    }
+
+    pub fn recover_orphaned_shared_trade(&mut self) -> Vec<ServerPacket> {
+        self.session.recover_orphaned_shared_trade()
     }
 
     pub fn shared_trade_allowed(&self) -> bool {

@@ -513,24 +513,139 @@ impl SimulationSession {
         trade.validated_held_gold()
     }
 
-    /// Refund only editable gold custody. This does not resolve durable work
-    /// and deliberately never releases prepared/legacy-completed snapshots.
+    pub fn has_recoverable_unprepared_trade(&self) -> bool {
+        self.shared_trade_unprepared_held_gold().is_some()
+    }
+
     pub fn recover_unprepared_trade_gold(&mut self) -> Vec<ServerPacket> {
-        if !self
-            .shared_trade_unprepared_held_gold()
-            .is_some_and(|held| held > 0)
-        {
-            return Vec::new();
+        if self.has_recoverable_unprepared_trade() {
+            self.recover_orphaned_shared_trade()
+        } else {
+            Vec::new()
         }
-        let gold_before = self.app.world().resource::<PlayerRuntimeResource>().gold;
-        let trade_before = self
-            .app
+    }
+
+    pub fn uses_local_trade_recovery(&self) -> bool {
+        super::trade_recovery::uses_local_source(self.app.world())
+    }
+
+    pub fn save_local_trade_preparation(&mut self) -> Result<(), String> {
+        if !self.uses_local_trade_recovery() {
+            return Err("local trade recovery requires durable account authority".into());
+        }
+        self.save_trade_preparation(super::trade_recovery::LOCAL_RECOVERY_VERSION)
+    }
+
+    pub fn uses_postgres_trade_recovery(&self) -> bool {
+        super::trade_recovery::uses_postgres_source(self.app.world())
+    }
+
+    pub fn save_postgres_trade_preparation(&mut self) -> Result<(), String> {
+        if !self.uses_postgres_trade_recovery() {
+            return Err("PostgreSQL trade recovery requires a fenced account source".into());
+        }
+        self.save_trade_preparation(super::trade_recovery::POSTGRES_RECOVERY_VERSION)
+    }
+
+    fn save_trade_preparation(&mut self, version: u8) -> Result<(), String> {
+        self.app
+            .world_mut()
+            .resource_mut::<Stage5SystemsResource>()
+            .stage5_systems
+            .trade
+            .as_mut()
+            .filter(|trade| trade.escrow_prepared && trade.held_items_json.is_some())
+            .ok_or("missing prepared trade")?
+            .trade_recovery_version = Some(version);
+        self.save_active_character()
+    }
+
+    pub fn has_postgres_trade_preparation(&self) -> bool {
+        self.uses_postgres_trade_recovery()
+            && self.has_trade_preparation(super::trade_recovery::POSTGRES_RECOVERY_VERSION)
+    }
+
+    fn has_local_trade_preparation(&self) -> bool {
+        self.uses_local_trade_recovery()
+            && self.has_trade_preparation(super::trade_recovery::LOCAL_RECOVERY_VERSION)
+    }
+
+    fn has_trade_preparation(&self, version: u8) -> bool {
+        self.app
             .world()
             .resource::<Stage5SystemsResource>()
             .stage5_systems
             .trade
+            .as_ref()
+            .is_some_and(|trade| {
+                trade.trade_recovery_version == Some(version) && trade.escrow_prepared && !trade.completed
+            })
+    }
+
+    pub fn commit_local_trade_match(
+        &self,
+        own: &SharedTradeOffer,
+        incoming: &SharedTradeOffer,
+    ) -> Result<(), String> {
+        super::trade_recovery::commit_match(self.app.world(), own, incoming)
+    }
+
+    pub fn local_trade_match_pending(&self) -> bool {
+        self.has_local_trade_preparation()
+            && !matches!(super::trade_recovery::pending_match(self.app.world()), Ok(None))
+    }
+
+    pub fn reconcile_local_trade_match(&mut self) -> Vec<ServerPacket> {
+        if !self.has_local_trade_preparation() {
+            return Vec::new();
+        }
+        let Ok(Some(record)) = super::trade_recovery::pending_match(self.app.world()) else {
+            return Vec::new();
+        };
+        let result = self.apply_new_shared_economy_projection_atomically(&record.event_id, |session| {
+            let world = session.app.world_mut();
+            if !shared_trade_offer_matches_active_escrow(world, &record.own, true)
+                || !world.resource::<Stage5SystemsResource>().stage5_systems.trade.as_ref()
+                    .is_some_and(|trade| super::trade_custody::matches_offer(trade, &record.own))
+            {
+                return Err("local trade projection differs from active escrow".into());
+            }
+            let packets = apply_shared_trade_offer(world, &record.incoming, false);
+            if !packets.iter().any(|packet| matches!(packet, ServerPacket::TradeConfirm)) {
+                return Err("local trade projection cannot deliver the incoming offer".into());
+            }
+            Ok(packets)
+        });
+        result.map(|packets| self.finalize_packets(packets)).unwrap_or_default()
+    }
+
+    /// The Zone must exclude live pairs and in-flight matches before calling
+    /// this. Only marked preparations can be returned by source absence.
+    pub fn recover_orphaned_shared_trade(&mut self) -> Vec<ServerPacket> {
+        let Some(trade) = self.app.world().resource::<Stage5SystemsResource>()
+            .stage5_systems.trade.clone() else {
+            return Vec::new();
+        };
+        let recoverable_prepared = self.has_local_trade_preparation() || self.has_postgres_trade_preparation();
+        if self.local_trade_match_pending() {
+            return Vec::new();
+        }
+        if !recoverable_prepared && self.shared_trade_unprepared_held_gold().is_none() {
+            return Vec::new();
+        }
+        let gold_before = self.app.world().resource::<PlayerRuntimeResource>().gold;
+        let inventory_before = self.app.world().resource::<InventoryResource>().clone();
+        let systems_before = self
+            .app
+            .world()
+            .resource::<Stage5SystemsResource>()
+            .stage5_systems
             .clone();
-        let packets = super::packets::stage5_trade_cancel_packet(self.app.world_mut());
+        let packets = if recoverable_prepared {
+            super::trade_custody::cancel(self.app.world_mut(), &trade).unwrap_or_default()
+        } else {
+            super::packets::stage5_trade_cancel_packet(self.app.world_mut())
+        };
         if packets.is_empty() {
             return packets;
         }
@@ -542,8 +657,8 @@ impl SimulationSession {
             self.app
                 .world_mut()
                 .resource_mut::<Stage5SystemsResource>()
-                .stage5_systems
-                .trade = trade_before;
+                .stage5_systems = systems_before;
+            *self.app.world_mut().resource_mut::<InventoryResource>() = inventory_before;
             return Vec::new();
         }
         self.finalize_packets(packets)
@@ -566,6 +681,15 @@ impl SimulationSession {
                 (self.finalize_packets(packets), None)
             }
         }
+    }
+
+    pub fn has_detached_shared_trade(&self) -> bool {
+        self.app.world().resource::<Stage5SystemsResource>().stage5_systems.trade
+            .as_ref().is_some_and(|trade| trade.held_items_json.is_some())
+    }
+
+    pub fn shared_trade_capacity_failure(&self) -> Vec<ServerPacket> {
+        trade_offer_delivery_failed_packets(self.app.world(), false)
     }
 
     pub fn shared_trade_cancel(&mut self, unlock: bool) -> Vec<ServerPacket> {
@@ -1982,19 +2106,25 @@ fn build_shared_trade_offer(world: &World) -> Option<SharedTradeOffer> {
     }
 
     let inventory = world.resource::<InventoryResource>();
+    let held = super::trade_custody::held_items(trade).ok()?;
     let mut items = Vec::new();
     for (trade_slot, inventory_index) in trade.offered_slots.iter() {
-        let item = inventory
-            .inventory_items
-            .iter()
-            .find(|item| inventory_item_matches_index(item, *inventory_index))?;
+        let item = if let Some(held) = &held {
+            held.get(trade_slot)?
+        } else {
+            inventory.inventory_items.iter().find(|item| inventory_item_matches_index(item, *inventory_index))?
+        };
         // Integrity check (F-07): never deliver an item that was swapped into the
         // offered slot after it was deposited. If the live item's id no longer
         // matches what was deposited, refuse to build the offer.
         if trade.offered_unique_ids.get(trade_slot).copied() != Some(item_unique_id(item)) {
             return None;
         }
-        let item_state_json = serde_json::to_string(item).ok()?;
+        let item_state_json = if let Some(encoded) = &trade.held_items_json {
+            encoded.get(trade_slot)?.clone()
+        } else {
+            serde_json::to_string(item).ok()?
+        };
         items.push(SharedTradeOfferItem {
             item_state_json,
             key: item.key.clone(),
@@ -2069,6 +2199,18 @@ fn reopen_shared_trade_offer(world: &mut World, offer: &SharedTradeOffer) -> Vec
         || trade.offered_unique_ids.len() != offer.items.len()
     {
         return Vec::new();
+    }
+    if trade.held_items_json.is_some() {
+        if !super::trade_custody::matches_offer(trade, offer) {
+            return Vec::new();
+        }
+        let mut systems = world.resource_mut::<Stage5SystemsResource>();
+        let trade = systems.stage5_systems.trade.as_mut().expect("validated trade custody");
+        trade.accepted = false;
+        trade.locked = false;
+        trade.escrow_prepared = false;
+        trade.trade_recovery_version = None;
+        return vec![ServerPacket::TradeCancel { unlock: true }];
     }
 
     let inventory = world.resource::<InventoryResource>();
@@ -2161,6 +2303,22 @@ fn apply_shared_trade_offer(
     if !is_in_world(world) {
         return Vec::new();
     }
+    let own_trade = world.resource::<Stage5SystemsResource>().stage5_systems.trade.clone();
+    let mut base_inventory = world.resource::<InventoryResource>().clone();
+    if let Some(trade) = own_trade.as_ref().filter(|trade| trade.held_items_json.is_some()) {
+        if rollback {
+            if !super::trade_custody::matches_offer(trade, offer) {
+                return Vec::new();
+            }
+            return super::trade_custody::cancel(world, trade).unwrap_or_default();
+        }
+        let Ok(Some(held)) = super::trade_custody::held_items(trade) else {
+            return Vec::new();
+        };
+        if super::trade_custody::release_ids(&mut base_inventory, &held).is_err() {
+            return Vec::new();
+        }
+    }
     let Some(final_gold) = world
         .resource::<PlayerRuntimeResource>()
         .gold
@@ -2171,11 +2329,8 @@ fn apply_shared_trade_offer(
     };
     let mut packets = Vec::new();
 
-    let mut staged_inventory = world
-        .resource::<InventoryResource>()
-        .inventory_items
-        .clone();
-    let inventory_capacity = world.resource::<InventoryResource>().inventory_capacity;
+    let mut staged_inventory = base_inventory.inventory_items.clone();
+    let inventory_capacity = base_inventory.inventory_capacity;
     let mut delivered_items = Vec::new();
     for offered_item in &offer.items {
         let Ok(mut item) = serde_json::from_str::<ItemState>(&offered_item.item_state_json) else {
@@ -2198,7 +2353,7 @@ fn apply_shared_trade_offer(
         item.container = container;
         item.slot = slot;
         normalize_incoming_item_tree_unique_ids(
-            world.resource::<InventoryResource>(),
+            &base_inventory,
             &mut item,
             &staged_inventory,
         );
@@ -2219,6 +2374,7 @@ fn apply_shared_trade_offer(
         player.gold = final_gold;
         packets.push(ServerPacket::GainedGold { gold: offer.gold });
     }
+    world.resource_mut::<InventoryResource>().reserved_item_unique_ids = base_inventory.reserved_item_unique_ids;
 
     for (item, user_item) in delivered_items {
         world
@@ -2304,6 +2460,7 @@ fn apply_shared_trade_settlement_projection(
         return Err("trade projection identity does not match the active character".to_string());
     }
 
+    let mut base_inventory = world.resource::<InventoryResource>().clone();
     let (outgoing_items_debited, outgoing_gold_held) = {
         let systems = world.resource::<Stage5SystemsResource>();
         match systems.stage5_systems.trade.as_ref() {
@@ -2321,7 +2478,14 @@ fn apply_shared_trade_settlement_projection(
                 let held = trade
                     .validated_held_gold()
                     .ok_or_else(|| "invalid trade gold custody".to_string())?;
-                (trade.outgoing_escrow_debited(), held)
+                let detached = super::trade_custody::held_items(trade)?;
+                if let Some(items) = &detached {
+                    if !super::trade_custody::matches_offer(trade, own_offer) {
+                        return Err("durable settlement disagrees with detached offer".into());
+                    }
+                    super::trade_custody::release_ids(&mut base_inventory, items)?;
+                }
+                (trade.outgoing_escrow_debited() || detached.is_some(), held)
             }
             Some(_) => {
                 return Err(
@@ -2348,11 +2512,8 @@ fn apply_shared_trade_settlement_projection(
         .checked_add(incoming_offer.gold)
         .ok_or_else(|| "trade projection incoming gold exceeds the character cap".to_string())?;
 
-    let mut staged_inventory = world
-        .resource::<InventoryResource>()
-        .inventory_items
-        .clone();
-    let inventory_capacity = world.resource::<InventoryResource>().inventory_capacity;
+    let mut staged_inventory = base_inventory.inventory_items;
+    let inventory_capacity = base_inventory.inventory_capacity;
     let mut outgoing_deleted_items = Vec::new();
     if !outgoing_items_debited {
         let mut outgoing_ids = BTreeSet::new();
@@ -2363,8 +2524,10 @@ fn apply_shared_trade_settlement_projection(
                 .ok_or_else(|| "trade projection outgoing item is unavailable".to_string())?;
             if offered_item.key != item.key
                 || validate_committed_item_state_carrier(item).is_err()
-                || serde_json::to_string(item).ok().as_deref()
+                || (serde_json::to_string(item).ok().as_deref()
                     != Some(offered_item.item_state_json.as_str())
+                    && super::item_custody::encode(item).as_deref()
+                        != Some(offered_item.item_state_json.as_str()))
                 || !outgoing_ids.insert(offered_item.unique_id)
             {
                 return Err("trade projection outgoing item integrity mismatch".to_string());
@@ -2406,7 +2569,11 @@ fn apply_shared_trade_settlement_projection(
     }
 
     world.resource_mut::<PlayerRuntimeResource>().gold = final_gold;
-    world.resource_mut::<InventoryResource>().inventory_items = staged_inventory;
+    {
+        let mut inventory = world.resource_mut::<InventoryResource>();
+        inventory.inventory_items = staged_inventory;
+        inventory.reserved_item_unique_ids = base_inventory.reserved_item_unique_ids;
+    }
     world
         .resource_mut::<Stage5SystemsResource>()
         .stage5_systems
@@ -2440,7 +2607,7 @@ fn apply_shared_trade_settlement_projection(
     Ok(packets)
 }
 
-fn trade_offer_delivery_failed_packets(world: &mut World, _rollback: bool) -> Vec<ServerPacket> {
+fn trade_offer_delivery_failed_packets(world: &World, _rollback: bool) -> Vec<ServerPacket> {
     // Materialization failure is retryable: retain custody and never publish
     // a terminal packet before the items and gold have been restored.
     vec![system_message_key(world, "server.YouCannotCarryAnymore")]

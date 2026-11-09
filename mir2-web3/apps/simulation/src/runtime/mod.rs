@@ -46,6 +46,8 @@ mod equipment_storage_merge_tests;
 mod hero_stats;
 mod inventory;
 mod item_custody;
+mod trade_custody;
+pub(crate) mod trade_recovery;
 mod item_grants;
 mod item_sets;
 pub(crate) mod item_uid_issuance;

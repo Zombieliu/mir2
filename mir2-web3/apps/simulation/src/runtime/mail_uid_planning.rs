@@ -212,6 +212,7 @@ fn save_custody_conflicts(
         )
         .chain(state.refine.item_states.values())
         .chain(state.refine.oven_item_state_json.iter())
+        .chain(state.trade.iter().filter_map(|trade| trade.held_items_json.as_ref()).flat_map(|held| held.values()))
     {
         if encoded_item_conflicts(encoded, ids)? {
             return Ok(true);

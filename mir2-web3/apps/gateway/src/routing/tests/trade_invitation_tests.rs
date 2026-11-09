@@ -117,6 +117,65 @@ fn unprepared_pair_cancel_closes_both_personal_states() {
 }
 
 #[test]
+fn orphaned_legacy_bag_quote_clears_without_crediting_the_same_item() {
+    let zone = Arc::new(Mutex::new(SharedInProcessZoneState::new()));
+    let mut owner = shared_session_runtime(zone);
+    start_demo_runtime(&mut owner);
+    let before = owner.world_snapshot();
+    let potion = before
+        .inventory_items
+        .iter()
+        .find(|item| item.key == "red-potion")
+        .unwrap();
+
+    let mut save = owner.inner.active_character_checkpoint().unwrap();
+    let mut systems: serde_json::Value =
+        serde_json::from_str(save.stage5_systems_json.as_deref().unwrap()).unwrap();
+    // A pre-detached save held only a reference to this still-carried item.
+    systems["trade"] = serde_json::json!({
+        "partner": "LegacyPeer",
+        "settlementNonce": "0123456789abcdef0123456789abcdef",
+        "offeredItems": ["red-potion"],
+        "offeredSlots": {"3": potion.slot},
+        "offeredUniqueIds": {"3": potion.unique_id},
+        "offeredGold": 0,
+        "heldGold": 0,
+        "offeredCurrency": "gold",
+        "accepted": false,
+        "locked": false,
+        "completed": false
+    });
+    save.stage5_systems_json = Some(systems.to_string());
+    owner
+        .inner
+        .restore_active_character_checkpoint(&save)
+        .unwrap();
+    let loaded = owner.world_snapshot().stage5_systems.trade.unwrap();
+    assert!(loaded.held_items_json.is_none() && loaded.own_items.is_none());
+
+    let packets = owner
+        .execute(WorldCommand::ClientPacket(ClientPacket::KeepAlive {
+            time: 17,
+        }))
+        .unwrap();
+    assert_eq!(
+        packets
+            .iter()
+            .filter(|packet| matches!(packet, ServerPacket::TradeCancel { unlock: false }))
+            .count(),
+        1
+    );
+    assert!(!packets.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::GainedItem { .. } | ServerPacket::GainedGold { .. }
+    )));
+    let after = owner.world_snapshot();
+    assert!(after.stage5_systems.trade.is_none());
+    assert_eq!(after.inventory_items, before.inventory_items);
+    assert_eq!(after.gold, before.gold);
+}
+
+#[test]
 fn recipient_cancel_before_inviter_initializes_follows_queued_accept_and_offer() {
     let (mut recipient, mut inviter) = started_shared_zone_sessions();
     face_shared_trade_pair(&mut recipient, &mut inviter);
@@ -169,7 +228,13 @@ fn recipient_cancel_before_inviter_initializes_follows_queued_accept_and_offer()
     let after = recipient.world_snapshot();
     assert!(after.stage5_systems.trade.is_none());
     assert_eq!(after.gold, before.gold);
-    assert_eq!(after.inventory_items, before.inventory_items);
+    // Detached returns can append to the collection. Physical cells and
+    // every instance field remain part of the equality check.
+    let mut returned = after.inventory_items;
+    let mut original = before.inventory_items;
+    returned.sort_by_key(|item| (item.unique_id, item.slot));
+    original.sort_by_key(|item| (item.unique_id, item.slot));
+    assert_eq!(returned, original);
 }
 
 #[test]
@@ -299,7 +364,10 @@ fn prepared_unlock_keeps_the_offer_editable_and_requires_fresh_confirmation() {
     open_shared_trade_pair(&mut first, &mut second);
     first.handle_packet(ClientPacket::TradeGold { amount: 7 });
     assert!(first
-        .handle_packet(ClientPacket::DepositTradeItem { from: potion_slot, to: 0 })
+        .handle_packet(ClientPacket::DepositTradeItem {
+            from: potion_slot,
+            to: 0
+        })
         .iter()
         .any(|p| matches!(p, ServerPacket::DepositTradeItem { success: true, .. })));
     first.handle_packet(ClientPacket::TradeConfirm { locked: true });
@@ -314,12 +382,25 @@ fn prepared_unlock_keeps_the_offer_editable_and_requires_fresh_confirmation() {
         .iter()
         .any(|p| matches!(p, ServerPacket::TradeCancel { unlock: true })));
     first.handle_packet(ClientPacket::KeepAlive { time: 1 });
-    assert_eq!(first.world_snapshot().stage5_systems.trade.as_ref(), Some(&prepared));
+    assert_eq!(
+        first.world_snapshot().stage5_systems.trade.as_ref(),
+        Some(&prepared)
+    );
 
     let packets = first.handle_packet(ClientPacket::TradeConfirm { locked: false });
-    assert_eq!(packets.iter().filter(|p| matches!(p, ServerPacket::TradeCancel { unlock: true })).count(), 1);
-    assert!(!packets.iter().any(|p| matches!(p,
-        ServerPacket::TradeCancel { unlock: false } | ServerPacket::GainedGold { .. } | ServerPacket::GainedItem { .. })));
+    assert_eq!(
+        packets
+            .iter()
+            .filter(|p| matches!(p, ServerPacket::TradeCancel { unlock: true }))
+            .count(),
+        1
+    );
+    assert!(!packets.iter().any(|p| matches!(
+        p,
+        ServerPacket::TradeCancel { unlock: false }
+            | ServerPacket::GainedGold { .. }
+            | ServerPacket::GainedItem { .. }
+    )));
     let reopened = first.world_snapshot().stage5_systems.trade.unwrap();
     assert!(!reopened.escrow_prepared && !reopened.locked && !reopened.accepted);
     assert_eq!(reopened.settlement_nonce, prepared.settlement_nonce);
@@ -327,27 +408,76 @@ fn prepared_unlock_keeps_the_offer_editable_and_requires_fresh_confirmation() {
     assert_eq!(reopened.offered_slots, prepared.offered_slots);
     assert_eq!(reopened.held_gold, Some(7));
     assert_eq!(first.world_snapshot().gold, gold - 7);
-    assert_eq!(inventory_slot_for_key(&first, "red-potion"), potion_slot);
+    assert!(!has_inventory_key(&first, "red-potion"));
+    assert_eq!(reopened.own_items, prepared.own_items);
+    let item = reopened.own_items.as_ref().unwrap()[0].as_ref().unwrap();
+    assert_eq!((item.slot, item.unique_id, item.quantity), (0, 0, 5));
 
     first.handle_packet(ClientPacket::TradeConfirm { locked: false });
-    assert_eq!(first.world_snapshot().stage5_systems.trade.as_ref(), Some(&reopened));
+    assert_eq!(
+        first.world_snapshot().stage5_systems.trade.as_ref(),
+        Some(&reopened)
+    );
     assert!(first
-        .handle_packet(ClientPacket::RetrieveTradeItem { from: 0, to: potion_slot })
+        .handle_packet(ClientPacket::RetrieveTradeItem {
+            from: 0,
+            to: potion_slot
+        })
         .iter()
         .any(|p| matches!(p, ServerPacket::RetrieveTradeItem { success: true, .. })));
-    first.handle_packet(ClientPacket::DepositTradeItem { from: potion_slot, to: 1 });
+    let retrieved = first.world_snapshot();
+    let potion = retrieved
+        .inventory_items
+        .iter()
+        .find(|item| item.key == "red-potion")
+        .expect("the exact potion returned to the selected bag slot");
+    assert_eq!(
+        (i32::from(potion.slot), potion.unique_id, potion.quantity),
+        (potion_slot, 0, 5)
+    );
+    assert!(retrieved.stage5_systems.trade.unwrap().own_items.unwrap()[0].is_none());
+    assert!(first
+        .handle_packet(ClientPacket::DepositTradeItem {
+            from: potion_slot,
+            to: 1
+        })
+        .iter()
+        .any(|p| matches!(p, ServerPacket::DepositTradeItem { success: true, .. })));
     first.handle_packet(ClientPacket::TradeGold { amount: 5 });
     let peer_prepares = second.handle_packet(ClientPacket::TradeConfirm { locked: true });
-    assert!(!peer_prepares.iter().any(|p| matches!(p,
-        ServerPacket::TradeConfirm | ServerPacket::GainedItem { .. } | ServerPacket::GainedGold { .. })));
-    assert!(second.world_snapshot().stage5_systems.trade.unwrap().escrow_prepared);
+    assert!(!peer_prepares.iter().any(|p| matches!(
+        p,
+        ServerPacket::TradeConfirm
+            | ServerPacket::GainedItem { .. }
+            | ServerPacket::GainedGold { .. }
+    )));
+    assert!(
+        second
+            .world_snapshot()
+            .stage5_systems
+            .trade
+            .unwrap()
+            .escrow_prepared
+    );
     assert_eq!(first.world_snapshot().gold, gold - 12);
     assert_eq!(second.world_snapshot().gold, partner_gold);
 
     first.handle_packet(ClientPacket::TradeConfirm { locked: true });
     let peer_delivers = second.handle_packet(ClientPacket::KeepAlive { time: 2 });
-    assert_eq!(peer_delivers.iter().filter(|p| matches!(p, ServerPacket::GainedItem { item } if item.count == 5)).count(), 1);
-    assert_eq!(peer_delivers.iter().filter(|p| matches!(p, ServerPacket::TradeConfirm)).count(), 1);
+    assert_eq!(
+        peer_delivers
+            .iter()
+            .filter(|p| matches!(p, ServerPacket::GainedItem { item } if item.count == 5))
+            .count(),
+        1
+    );
+    assert_eq!(
+        peer_delivers
+            .iter()
+            .filter(|p| matches!(p, ServerPacket::TradeConfirm))
+            .count(),
+        1
+    );
     assert_eq!(first.world_snapshot().gold, gold - 12);
     assert_eq!(second.world_snapshot().gold, partner_gold + 12);
     assert!(first.world_snapshot().stage5_systems.trade.is_none());

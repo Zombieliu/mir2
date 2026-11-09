@@ -820,6 +820,16 @@ struct AccountStoreMutationPlan {
 }
 
 impl AccountStoreMutationPlan {
+    fn carries_local_trade_source(&self) -> bool {
+        self.accounts.values().any(|mutation| {
+            let before = mutation.original_account.as_ref().map(|account| &account.local_trade_matches)
+                .filter(|matches| !matches.is_empty());
+            let after = mutation.desired_account.as_ref().map(|account| &account.local_trade_matches)
+                .filter(|matches| !matches.is_empty());
+            before != after
+        })
+    }
+
     fn carries_billing_source(&self) -> bool {
         self.accounts.values().any(|mutation| {
             mutation
@@ -1913,6 +1923,11 @@ fn replace_file_atomically(
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct AccountRecord {
+    /// A committed in-process trade waiting for this character's private save.
+    /// Keep it outside the character snapshot so a concurrent save cannot
+    /// overwrite the settlement decision.
+    #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
+    pub(crate) local_trade_matches: BTreeMap<i32, crate::runtime::trade_recovery::LocalTradeMatch>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub procurement: Option<crate::procurement::ProcurementLedger>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -1977,6 +1992,7 @@ impl AccountRecord {
         );
         Self {
             password: default_account_password(),
+            local_trade_matches: BTreeMap::new(),
             procurement: None,
             activities: None,
             monthly_card: None,
@@ -2000,6 +2016,7 @@ impl AccountRecord {
     pub fn empty() -> Self {
         Self {
             password: default_account_password(),
+            local_trade_matches: BTreeMap::new(),
             procurement: None,
             activities: None,
             monthly_card: None,
@@ -6512,6 +6529,7 @@ fn save_account_store_mutation_plan_to_postgres_with_pool(
     mode: AccountStoreDatabaseMode,
 ) -> Result<AccountStoreSourceVersions, String> {
     let creates_character = plan.character_creation_account.is_some();
+    let carries_trade = plan.carries_local_trade_source();
     let carries_zone_fence = plan.zone_save_fence.is_some();
     let carries_clock = plan.clock.is_some();
     let carries_guilds = !plan.guilds.is_empty() || plan.carries_guild_experience_source();
@@ -6541,6 +6559,8 @@ fn save_account_store_mutation_plan_to_postgres_with_pool(
             zone_save_fence::commit_outcome_unknown("transaction worker panicked")
         } else if creates_character {
             format!("{ACCOUNT_STORE_COMMIT_OUTCOME_UNKNOWN}: character creation worker panicked")
+        } else if carries_trade {
+            format!("{ACCOUNT_STORE_COMMIT_OUTCOME_UNKNOWN}: local trade worker panicked")
         } else if carries_mail {
             "MAIL_ITEM_TRANSFER_COMMIT_OUTCOME_UNKNOWN: postgres mail worker panicked".into()
         } else if carries_billing {
@@ -6610,6 +6630,12 @@ fn write_account_store_mutation_plan_to_postgres(
                 })
             {
                 format!("{ACCOUNT_STORE_COMMIT_OUTCOME_UNKNOWN}: character creation commit response unavailable: {error}")
+            } else if plan.carries_local_trade_source()
+                && error.as_db_error().is_none_or(|db_error| {
+                    matches!(db_error.code().code(), "40003" | "08007")
+                })
+            {
+                format!("{ACCOUNT_STORE_COMMIT_OUTCOME_UNKNOWN}: local trade commit response unavailable")
             } else if mode == AccountStoreDatabaseMode::SourceOfTruth
                 && mail_transfer::carries_source(plan)
             {
@@ -6792,6 +6818,16 @@ fn write_account_store_account_mutation(
         &current_save_versions,
         mode,
     )?;
+    if mode == AccountStoreDatabaseMode::SourceOfTruth {
+        if let Some(original) = mutation.original_account.as_ref() {
+            for (index, before) in &original.saves {
+                let after = mutation.saves.get(index).and_then(|save| save.desired_save.as_ref());
+                crate::runtime::trade_recovery::validate_postgres_preparation_change(
+                    transaction, account_id, before, after,
+                )?;
+            }
+        }
+    }
 
     let Some(account) = mutation.desired_account.as_ref() else {
         // infra/postgres/migrations/0001_core.sql defines both account and
@@ -8625,6 +8661,17 @@ pub struct Stage5TradeState {
     /// handed over in place of the one the partner agreed to (F-07).
     #[serde(default)]
     pub offered_unique_ids: BTreeMap<u8, u64>,
+    /// Exact item carriers in the independent trade grid. A missing grid is
+    /// an older save whose editable offers still refer to the carried bag.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub held_items_json: Option<BTreeMap<u8, String>>,
+    /// A prepared offer whose source can distinguish a match from a refund.
+    /// Older prepared offers have no safe automatic return decision.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub trade_recovery_version: Option<u8>,
+    /// Owner display projection, populated only on world snapshots.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub own_items: Option<Vec<Option<WorldItemSnapshot>>>,
     pub offered_gold: u32,
     /// Gold removed from the available wallet but still owned by this trade.
     /// None is a legacy snapshot: only prepared/completed Gold offers were debited.
@@ -9057,6 +9104,9 @@ impl Serialize for WorldSnapshotClientView<'_> {
             }
         }
         if let Some(systems) = value.get_mut("stage5Systems") {
+            if let Some(trade) = systems.get_mut("trade").and_then(Value::as_object_mut) {
+                trade.remove("heldItemsJson");
+            }
             // Durable transaction ledgers are Source state, never a mailbox
             // payload for players or spectators. Keep them in the lossless
             // snapshot/checkpoint but omit their identities and replay keys

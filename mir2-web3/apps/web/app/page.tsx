@@ -11510,6 +11510,7 @@ export default function HomePage() {
     if (model || heroManagementOpenRef.current || heroOperationsRef.current.pending) renderParityServices(n => n + 1);
   }
   function ownTradeTooltipItem(item: import("../lib/social-item-window-model").SocialItemSlot): TradeItemSlot {
+    if (item.tooltipSource) return {...item, id:item.uniqueId};
     const matches = worldRef.current.inventoryItems.filter(raw => raw.authoritativeUniqueId === item.uniqueId && raw.quantity === item.count);
     return {...item, id:item.uniqueId, ...(matches.length === 1 ? {tooltipSource:matches[0].tooltipSource as Readonly<Record<string,unknown>>} : {})};
   }
@@ -13646,6 +13647,10 @@ export default function HomePage() {
     if (trade.escrowPrepared !== true || trade.locked !== true || trade.completed !== false || trade.accepted !== true
       || typeof gold !== "number" || !Number.isSafeInteger(gold) || gold < 0 || gold > 0xffff_ffff
       || typeof nonce !== "string" || !nonce || nonce.length > 256 || nonce.includes("\0")) return null;
+    if (Object.hasOwn(trade, "ownItems")) {
+      const grid = projectOwnTradeItems(trade, projectSocialInventory(worldRef.current));
+      return {gold, items:grid.ok ? grid.slots.map(item => item ? ownTradeTooltipItem(item) : null) : undefined};
+    }
     // Escrowed items leave the Bag. Reuse the visible offer only for this exact
     // confirmation and never as authority for an item or gold edit.
     const offer = socialTradeConfirmOfferRef.current;

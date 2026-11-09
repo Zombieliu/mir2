@@ -2,7 +2,8 @@ import { projectBevyBagModel, type BevyBagWorldSource } from "./bevy-bag-model";
 import { crystalInventoryCapacities } from "./world-model/item-identity";
 
 /** `slot` is the physical Bag1/Bag2 protocol index, or the actual social grid index. */
-export type SocialItemSlot = Readonly<{ slot: number; uniqueId: number; name: string; icon?: number; count: number }>;
+export type SocialItemSlot = Readonly<{ slot: number; uniqueId: number; name: string; icon?: number; count: number;
+  tooltipSource?: Readonly<Record<string, unknown>> }>;
 export type SocialInventoryProjection =
   | { ok: true; items: SocialItemSlot[]; emptySlots: number[]; capacity: number }
   | { ok: false; error: "invalidInventory" };
@@ -66,7 +67,7 @@ export function projectSocialInventory(world: BevyBagWorldSource): SocialInvento
   } catch { return invalid(); }
 }
 
-/** Stage5TradeState retains offers in the Bag: both exact maps must resolve to the same live UID/slot. */
+/** A dedicated owner grid is authoritative. Old snapshots still resolve the exact bag reference. */
 export function projectOwnTradeItems(trade: unknown, inventory: SocialInventoryProjection): SocialGridProjection {
   const invalid = (): SocialGridProjection => ({ ok: false, error: "invalidTrade" });
   if (!validSocialInventoryProjection(inventory) || !inventory.ok || !record(trade) || typeof trade.partner !== "string"
@@ -79,6 +80,33 @@ export function projectOwnTradeItems(trade: unknown, inventory: SocialInventoryP
   const slots: Array<SocialItemSlot | null> = Array(SOCIAL_TRADE_SLOT_COUNT).fill(null);
   const keys = Object.keys(trade.offeredSlots);
   if (keys.length > SOCIAL_TRADE_SLOT_COUNT || Object.keys(trade.offeredUniqueIds).length !== keys.length) return invalid();
+  if (Object.hasOwn(trade, "ownItems")) {
+    if (!Array.isArray(trade.ownItems) || trade.ownItems.length !== SOCIAL_TRADE_SLOT_COUNT) return invalid();
+    const seen = new Set<number>();
+    for (let slot = 0; slot < SOCIAL_TRADE_SLOT_COUNT; slot++) {
+      const row: unknown = trade.ownItems[slot];
+      const hasOrigin = Object.hasOwn(trade.offeredSlots, slot);
+      const hasIdentity = Object.hasOwn(trade.offeredUniqueIds, slot);
+      if (row === null && !hasOrigin && !hasIdentity) continue;
+      const id = requiredSocialItemIdentity(trade.offeredUniqueIds[slot]);
+      const origin = trade.offeredSlots[slot];
+      if (!hasOrigin || !hasIdentity || !record(row) || row.slot !== slot || id === null || row.uniqueId !== id
+        || !validSocialItemSlot(origin, 80) || row.container !== (origin < 40 ? "bag1" : "bag2")
+        || typeof row.key !== "string" || !row.key || seen.has(id)
+        || inventory.items.some(item => item.uniqueId === id)) return invalid();
+      const source = row.tooltipSource;
+      if (source != null && (!record(source) || !record(source.userItem) || !record(source.info)
+        || source.userItem.unique_id !== id || source.userItem.count !== row.quantity
+        || !integer(source.userItem.item_index, 2_147_483_647) || source.userItem.item_index !== source.info.item_index)) return invalid();
+      const item = {slot, uniqueId:id, name:row.name, icon:row.icon, count:row.quantity,
+        ...(record(source) ? {tooltipSource:source} : {})};
+      if (!validSocialItem(item, SOCIAL_TRADE_SLOT_COUNT)) return invalid();
+      slots[slot] = item;
+      seen.add(id);
+    }
+    if (seen.size !== keys.length) return invalid();
+    return {ok:true, slots};
+  }
   const seenBags = new Set<number>(), seenIds = new Set<number>();
   for (const key of keys) {
     if (!/^[0-9]$/.test(key) || !Object.hasOwn(trade.offeredUniqueIds, key)) return invalid();

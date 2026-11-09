@@ -604,7 +604,7 @@ impl PostgresEconomyStore {
         }
         let participant = PlayerDropLedgerSource::new(source)?;
         let envelope = source_envelope(source.operation(), participant.legs.clone());
-        self.transact_with_sources(&envelope, None, Some(permit), Some(&participant))
+        self.transact_with_sources(&envelope, None, Some(permit), Some(&participant), false)
             .map(|(receipt, _)| receipt)
     }
 

@@ -2,7 +2,7 @@
 use super::*;
 use mir2_protocol::MirGridType as Grid;
 
-fn split_pair() -> (GatewaySession, GatewaySession, u64, u64, i32, i32) {
+fn split_pair() -> (GatewaySession, GatewaySession, u64, u64, u32) {
     let (mut a, mut b) = started_shared_zone_sessions();
     let original = a
         .world_snapshot()
@@ -46,6 +46,8 @@ fn split_pair() -> (GatewaySession, GatewaySession, u64, u64, i32, i32) {
         .filter(|i| i.key == "red-potion")
         .collect();
     assert_eq!(items.len(), 2);
+    let total_quantity = items.iter().map(|item| item.quantity).sum::<u32>();
+    assert!(total_quantity > 0);
     open_shared_trade_pair(&mut a, &mut b);
     for (item, slot) in items.iter().zip([2, 4]) {
         let packets = a.handle_packet(ClientPacket::DepositTradeItem {
@@ -56,29 +58,60 @@ fn split_pair() -> (GatewaySession, GatewaySession, u64, u64, i32, i32) {
             .iter()
             .any(|p| matches!(p, ServerPacket::DepositTradeItem { success: true, .. })));
     }
-    let trade = a.world_snapshot().stage5_systems.trade.unwrap();
+    let snapshot = a.world_snapshot();
+    assert!(snapshot
+        .inventory_items
+        .iter()
+        .all(|item| item.key != "red-potion"));
+    let trade = snapshot.stage5_systems.trade.unwrap();
     let ids = (trade.offered_unique_ids[&2], trade.offered_unique_ids[&4]);
+    let offered = trade.own_items.as_ref().unwrap();
+    for (item, slot) in items.iter().zip([2, 4]) {
+        let held = offered[slot]
+            .as_ref()
+            .expect("the exact detached quote cell");
+        assert_eq!(
+            (held.unique_id, held.quantity),
+            (item.unique_id, item.quantity)
+        );
+    }
     b.handle_packet(ClientPacket::KeepAlive { time: 994 });
-    (
-        a,
-        b,
-        ids.0,
-        ids.1,
-        i32::from(items[0].slot),
-        i32::from(items[1].slot),
-    )
+    (a, b, ids.0, ids.1, total_quantity)
+}
+
+fn assert_merged_quote(owner: &GatewaySession, peer: &[ServerPacket], target: u64, quantity: u32) {
+    let trade = owner.world_snapshot().stage5_systems.trade.unwrap();
+    let own = trade.own_items.as_ref().unwrap();
+    assert!(own[2].is_none() && own[7].is_none());
+    let held = own[4].as_ref().expect("the target stack stays in slot 4");
+    assert_eq!((held.unique_id, held.quantity), (target, quantity));
+    let raw = held
+        .tooltip_source
+        .as_ref()
+        .unwrap()
+        .user_item
+        .as_ref()
+        .unwrap();
+    assert_eq!((raw.unique_id, u32::from(raw.count)), (target, quantity));
+
+    let quote = peer
+        .iter()
+        .find_map(|packet| match packet {
+            ServerPacket::TradeItem { trade_items } => Some(trade_items),
+            _ => None,
+        })
+        .expect("the peer receives the refreshed item quote");
+    assert!(quote[2].is_none() && quote[7].is_none());
+    let quoted = quote[4].as_ref().expect("the peer sees the target stack");
+    assert_eq!(
+        (quoted.unique_id, u32::from(quoted.count)),
+        (target, quantity)
+    );
 }
 
 #[test]
 fn shared_trade_move_and_merge_refresh_only_partner_and_preserve_quantity() {
-    let (mut a, mut b, source, target, _, _) = split_pair();
-    let before: u32 = a
-        .world_snapshot()
-        .inventory_items
-        .iter()
-        .filter(|i| i.key == "red-potion")
-        .map(|i| i.quantity)
-        .sum();
+    let (mut a, mut b, source, target, before) = split_pair();
     let moved = a.handle_packet(ClientPacket::MoveItem {
         grid: Grid::Trade,
         from: 2,
@@ -109,7 +142,7 @@ fn shared_trade_move_and_merge_refresh_only_partner_and_preserve_quantity() {
         success: true
     }));
     let peer = b.handle_packet(ClientPacket::KeepAlive { time: 996 });
-    assert!(peer.iter().any(|p| matches!(p, ServerPacket::TradeItem { trade_items } if trade_items[7].is_none() && trade_items[4].as_ref().is_some_and(|i| i.unique_id == target && u32::from(i.count) == before))));
+    assert_merged_quote(&a, &peer, target, before);
     a.handle_packet(ClientPacket::TradeCancel);
     assert_eq!(
         a.world_snapshot()
@@ -124,7 +157,7 @@ fn shared_trade_move_and_merge_refresh_only_partner_and_preserve_quantity() {
 
 #[test]
 fn shared_trade_move_and_merge_invalidate_peer_preparation() {
-    let (mut a, mut b, source, target, _, _) = split_pair();
+    let (mut a, mut b, source, target, before_quantity) = split_pair();
     b.handle_packet(ClientPacket::TradeConfirm { locked: true });
     assert!(
         b.world_snapshot()
@@ -133,13 +166,6 @@ fn shared_trade_move_and_merge_invalidate_peer_preparation() {
             .unwrap()
             .escrow_prepared
     );
-    let before_quantity: u32 = a
-        .world_snapshot()
-        .inventory_items
-        .iter()
-        .filter(|item| item.key == "red-potion")
-        .map(|item| item.quantity)
-        .sum();
     let moved = a.handle_packet(ClientPacket::MoveItem {
         grid: Grid::Trade,
         from: 2,
@@ -169,9 +195,7 @@ fn shared_trade_move_and_merge_invalidate_peer_preparation() {
         .iter()
         .any(|p| matches!(p, ServerPacket::TradeConfirm)));
     let peer = b.handle_packet(ClientPacket::KeepAlive { time: 997 });
-    assert!(peer.iter().any(|p| matches!(p,
-        ServerPacket::TradeItem { trade_items } if trade_items[2].is_none() && trade_items[7].is_none()
-            && trade_items[4].as_ref().is_some_and(|i| i.unique_id == target && u32::from(i.count) == before_quantity))));
+    assert_merged_quote(&a, &peer, target, before_quantity);
     let settled = b.handle_packet(ClientPacket::TradeConfirm { locked: true });
     assert_eq!(
         settled

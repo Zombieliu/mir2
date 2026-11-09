@@ -180,6 +180,11 @@ fn visit_systems(
         for uid in trade.offered_unique_ids.values() {
             record(*uid, visitor);
         }
+        if let Some(held) = &trade.held_items_json {
+            for encoded in held.values() {
+                visit_encoded_item(encoded, visitor)?;
+            }
+        }
     }
     for rental in &systems.item_rental.rented_items {
         record(rental.item_id, visitor);

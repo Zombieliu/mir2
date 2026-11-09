@@ -27,6 +27,21 @@ impl std::fmt::Debug for ZoneEconomyWritePermit {
 }
 
 impl ZoneEconomyWritePermit {
+    /// Fence the exact detached offers in the transaction that also writes
+    /// the balance transfer and its two durable trade projections.
+    pub fn lock_prepared_trade_participants(
+        &self,
+        transaction: &mut postgres::Transaction<'_>,
+        database_url: &str,
+        zone_id: &str,
+        generation: u64,
+        first: &crate::SharedTradeOffer,
+        second: &crate::SharedTradeOffer,
+    ) -> Result<(), String> {
+        self.lock_and_validate(transaction, database_url, zone_id, generation)?;
+        crate::runtime::trade_recovery::lock_postgres_preparations(transaction, first, second)
+    }
+
     pub fn fence(&self) -> &ZoneSaveFence {
         &self.fence
     }
