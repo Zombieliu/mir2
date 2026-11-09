@@ -82,9 +82,12 @@ export function resolveCrystalEntityAnimationPoses({
       const own = selfAuthority && entity.objectId === String(selfAuthority.owner.playerObjectId);
       const event = own ? selfAnimationEvent(selfAuthority, entity, state, motionSnapshot)
         : { ...animationEventForEntity(entity, state, motionSnapshot), actionKnown: false };
+      const movementActive = event.action === state
+        && isCurrentPlayerMovement(entity, motionSnapshot, event.action, event.actionToken, now);
       return {
         objectId: entity.objectId, kind: entity.kind, direction: entity.direction,
         action: event.action, ...(event.actionToken === undefined ? {} : { actionToken: event.actionToken }),
+        ...(movementActive ? { movementActive } : {}),
         ...(own ? { actionSourceKey: selfAuthority.sourceKey, actionSourceRevision: selfAuthority.revision,
           bootstrapKnown: selfAuthority.bootstrapKnown && selfAuthority.actionEvidence === null,
           actionKnown: event.actionKnown } : {}),
@@ -111,6 +114,31 @@ export function resolveCrystalEntityAnimationPoses({
     // selector for one render; the next 100 ms tick retries the WASM owner.
     return {};
   }
+}
+
+function isCurrentPlayerMovement(entity: DisplayEntity, motion: EntityMotionSnapshot | undefined,
+  action: CrystalEntityAnimationAction, token: string | undefined, now: number): boolean {
+  if ((entity.kind !== "player" && entity.kind !== "selfPlayer")
+    || (action !== "walking" && action !== "running") || !token) return false;
+
+  if (entity.movementAnimation === action
+    && matchesMovementWindow(action, token, entity.movementStartedAt, entity.movementUntil, now)) return true;
+
+  // The gateway can acknowledge self movement with a transform-only
+  // UserLocation. In that case the live, already selected presentation segment
+  // owns the visible walk/run. This hint never establishes action authority.
+  if (entity.kind !== "selfPlayer" || entity.movementAnimation !== undefined
+    || motion?.animationState !== action || motion.toX !== entity.x || motion.toY !== entity.y) return false;
+  const distance = Math.max(Math.abs(motion.toX - motion.fromX), Math.abs(motion.toY - motion.fromY));
+  return distance > 0 && distance <= 3
+    && matchesMovementWindow(action, token, motion.startedAt, motion.expiresAt, now);
+}
+
+function matchesMovementWindow(action: "walking" | "running", token: string,
+  start: number | undefined, end: number | undefined, now: number): boolean {
+  if (!eventTime(start) || start > now || !eventTime(end) || end <= now) return false;
+  const expected = "move:" + start + ":" + action;
+  return token === expected || token.endsWith(":" + expected);
 }
 
 export function animationEventForEntity(

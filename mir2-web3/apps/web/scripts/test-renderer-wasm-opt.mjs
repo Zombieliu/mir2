@@ -395,7 +395,7 @@ test("renderer diagnostic formatter preserves nested tool failures without seria
 // Core uses the same private lifecycle machinery with a fixed pair/profile;
 // these runners write only owned test fixtures and never execute a real tool.
 function coreRunner(bytes = EMPTY, onOptimize = null) {
-  return runner(bytes, onOptimize, ["-Oz", "--flatten", "--rereloop", "-Oz", "--converge"]);
+  return runner(bytes, onOptimize, ["-Oz", "--flatten", "--rereloop", "-Oz", "--converge", "--reorder-functions"]);
 }
 function coreFixture(t) {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), "mir2-core-opt-test-"));
@@ -449,15 +449,16 @@ test("Core budget measures whole actual pair and never applies the larger render
   coreUnchanged(f);
 });
 
-test("Core optimizer uses fixed131 Oz flatten rereloop Oz converge and bounded hidden single-core commands", (t) => {
+test("Core optimizer uses the fixed size passes and bounded hidden Binaryen 131 commands", (t) => {
   const f = coreFixture(t), calls = [], injected = coreRunner();
   const result = optimizeClientCoreReleaseWasm({ ...f, optimizationFlag: "-O1", optimizationArgs: ["--untrusted-pass"], passes: ["--untrusted-pass"], sourceEnv: { SystemRoot: "fixture-system", NODE_OPTIONS: "not-forwarded", PATH: "untrusted", BINARYEN_CORES: "9" },
     run: (bin, args, options) => { calls.push({ bin, args, options }); return injected(bin, args, options); } });
   assert.equal(calls.length, 2); assert.deepEqual(calls[0].args, ["--version"]);
-  assert.equal(calls[1].args.length, 9);
-  assert.deepEqual(calls[1].args.slice(0, 8), [f.wasmPath, "-Oz", "--flatten", "--rereloop", "-Oz", "--converge", "--strip-debug", "-o"]);
-  assert.match(path.basename(calls[1].args[8]), /^\.mir2-client-core-opt-\d+-[a-f0-9]{12}\.wasm$/);
-  assert.equal(path.dirname(calls[1].args[8]), f.stagingRoot);
+  assert.deepEqual(calls[1].args.slice(0, -1), [
+    f.wasmPath, "-Oz", "--flatten", "--rereloop", "-Oz", "--converge", "--reorder-functions", "--strip-debug", "-o",
+  ]);
+  assert.match(path.basename(calls[1].args.at(-1)), /^\.mir2-client-core-opt-\d+-[a-f0-9]{12}\.wasm$/);
+  assert.equal(path.dirname(calls[1].args.at(-1)), f.stagingRoot);
   for (const call of calls) {
     assert.equal(call.bin, f.bin); assert.equal(call.options.cwd, f.stagingRoot);
     assert.equal(call.options.shell, false); assert.equal(call.options.windowsHide, true);
@@ -543,7 +544,7 @@ test("Core output symlink is refused without following its target", (t) => {
   const probe = path.join(f.root, "permission-probe"); if (!linkOrSkip(t, target, probe)) return; fs.unlinkSync(probe);
   assert.throws(() => optimizeClientCoreReleaseWasm({ ...f, run: (bin, args) => {
     if (args[0] === "--version") return ok("wasm-opt version 131\n");
-    fs.symlinkSync(target, args[8], "file"); return ok();
+    fs.symlinkSync(target, args.at(-1), "file"); return ok();
   } }), /linked or irregular/);
   assert.equal(fs.readFileSync(target, "utf8"), "external sentinel"); coreUnchanged(f);
 });
@@ -567,7 +568,7 @@ test("Core cleanup rejects a retargeted staging ancestor and retains tool postpi
   try {
     optimizeClientCoreReleaseWasm({ ...f, run: (bin, args) => {
       if (args[0] === "--version") return ok("wasm-opt version 131\n");
-      generated = args[8]; fs.writeFileSync(generated, EMPTY, { flag: "wx" }); fs.renameSync(f.stagingRoot, saved);
+      generated = args.at(-1); fs.writeFileSync(generated, EMPTY, { flag: "wx" }); fs.renameSync(f.stagingRoot, saved);
       outsideLeaf = path.join(outside, path.basename(generated)); fs.writeFileSync(outsideLeaf, "outside sentinel", { flag: "wx" });
       fs.symlinkSync(outside, f.stagingRoot, type);
       return { ...ok(), status: null, signal: "SIGTERM", error: Object.assign(Error("tool timeout"), { code: "ETIMEDOUT" }), stderr: "controlled stderr" };

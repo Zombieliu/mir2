@@ -32,6 +32,8 @@ struct EntityInput {
     #[serde(default)]
     action_token: Option<String>,
     #[serde(default)]
+    movement_active: bool,
+    #[serde(default)]
     action_source_key: Option<String>,
     #[serde(default)]
     action_source_revision: Option<u64>,
@@ -230,7 +232,8 @@ impl AnimationBridge {
                     continue;
                 }
             };
-            let direction = parse_direction(entity.direction.as_deref());
+            let canonical_direction = strict_direction(entity.direction.as_deref());
+            let direction = canonical_direction.unwrap_or(Direction::Down);
             let snapshot = match self.world.observe_crystal_snapshot(
                 entity.object_id.clone(),
                 kind,
@@ -280,11 +283,23 @@ impl AnimationBridge {
                     } else {
                         let sequence = self.next_sequence;
                         self.next_sequence = self.next_sequence.saturating_add(1).max(1);
-                        match self.world.apply_event(
-                            &snapshot.key,
-                            AnimationEvent::new(sequence, action, direction),
-                            input.now_ms,
-                        ) {
+                        let event = AnimationEvent::new(sequence, action, direction);
+                        // A current player segment replaces stale movement in
+                        // the same way as Native. Shared combat/life barriers
+                        // still own the FIFO, including a spell already queued.
+                        let update = if entity.movement_active
+                            && canonical_direction.is_some()
+                            && !duplicate_ids.contains(&entity.object_id)
+                        {
+                            self.world.apply_latest_locomotion_event(
+                                &snapshot.key,
+                                event,
+                                input.now_ms,
+                            )
+                        } else {
+                            self.world.apply_event(&snapshot.key, event, input.now_ms)
+                        };
+                        match update {
                             Ok(_) => {
                                 self.last_action_tokens
                                     .insert(entity.object_id.clone(), token.clone());
@@ -535,19 +550,6 @@ fn strict_direction(value: Option<&str>) -> Option<Direction> {
     }
 }
 
-fn parse_direction(value: Option<&str>) -> Direction {
-    match value {
-        Some("Up") => Direction::Up,
-        Some("UpRight") => Direction::UpRight,
-        Some("Right") => Direction::Right,
-        Some("DownRight") => Direction::DownRight,
-        Some("DownLeft") => Direction::DownLeft,
-        Some("Left") => Direction::Left,
-        Some("UpLeft") => Direction::UpLeft,
-        _ => Direction::Down,
-    }
-}
-
 fn parse_action(value: &str) -> Option<AnimationAction> {
     match value {
         "standing" => Some(AnimationAction::Standing),
@@ -668,6 +670,7 @@ mod tests {
                 direction: Some("Down".to_owned()),
                 action: action.to_owned(),
                 action_token: token.map(str::to_owned),
+                movement_active: false,
                 action_source_key: None,
                 action_source_revision: None,
                 bootstrap_known: None,
@@ -765,6 +768,76 @@ mod authority_tests {
     fn peek(owner: &EntityAnimationOwner) -> Value {
         serde_json::from_str(&owner.peek_json(&query().to_string())).unwrap()
     }
+
+    #[test]
+    fn active_player_segments_replace_old_movement_and_keep_the_next_spell() {
+        let mut owner = EntityAnimationOwner::new();
+        let mut advance = |revision, at, action, token, active| -> Value {
+            let mut snapshot = frame(revision, action, Some(token), false, true);
+            snapshot["nowMs"] = json!(at);
+            snapshot["entities"][0]["movementActive"] = json!(active);
+            let output: Value =
+                serde_json::from_str(&owner.resolve_json(&snapshot.to_string())).unwrap();
+            assert!(output.get("errors").is_none(), "{output}");
+            output["poses"][0].clone()
+        };
+
+        assert_eq!(
+            advance(1, 1_000, "walking", "move1", true)["action"],
+            "walking"
+        );
+        let latest = advance(2, 1_250, "running", "move2", true);
+        assert_eq!(latest["action"], "running");
+        assert_eq!(latest["logicalFrameIndex"], 0);
+        assert_eq!(latest["queueDepth"], 0);
+        assert_eq!(advance(3, 1_500, "walking", "move3", true)["queueDepth"], 0);
+        let cast = advance(4, 1_620, "spell", "cast4", false);
+        assert_eq!(cast["action"], "walking");
+        assert_eq!(cast["queueDepth"], 1);
+
+        // A newer movement cannot jump ahead of the queued cast.
+        let later = advance(5, 1_700, "running", "move5", true);
+        assert_eq!(later["action"], "walking");
+        assert_eq!(later["queueDepth"], 2);
+        let spell = advance(5, 2_100, "running", "move5", true);
+        assert_eq!(spell["action"], "spell");
+        assert_eq!(spell["logicalFrameIndex"], 0);
+        assert_eq!(spell["queueDepth"], 1);
+        let during = advance(5, 2_300, "running", "move5", true);
+        assert_eq!(during["action"], "spell");
+        assert_eq!(during["logicalFrameIndex"], 2);
+        assert_eq!(
+            advance(5, 2_700, "running", "move5", true)["action"],
+            "running"
+        );
+    }
+
+    #[test]
+    fn movement_hint_needs_an_active_player_segment() {
+        for (kind, direction, active) in [
+            ("player", "Right", false),
+            ("player", "Unknown", true),
+            ("monster", "Right", true),
+        ] {
+            let mut owner = EntityAnimationOwner::new();
+            let mut first = frame(1, "walking", Some("move1"), false, false);
+            first["entities"][0]["kind"] = json!(kind);
+            owner.resolve_json(&first.to_string());
+            let mut next = frame(2, "walking", Some("move2"), false, false);
+            next["nowMs"] = json!(1_100);
+            next["entities"][0]["kind"] = json!(kind);
+            next["entities"][0]["direction"] = json!(direction);
+            next["entities"][0]["movementActive"] = json!(active);
+            let output: Value =
+                serde_json::from_str(&owner.resolve_json(&next.to_string())).unwrap();
+            assert!(output.get("errors").is_none(), "{output}");
+            assert_eq!(
+                output["poses"][0]["queueDepth"], 1,
+                "{kind}, {direction}, {active}"
+            );
+        }
+    }
+
     #[test]
     fn only_explicit_canonical_bootstrap_can_authenticate_initial_standing() {
         for (bootstrap, known) in [(false, false), (true, false), (false, true)] {
