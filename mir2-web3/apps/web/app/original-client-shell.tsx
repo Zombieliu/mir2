@@ -2385,11 +2385,13 @@ export function OriginalClientShell({
   const bevyEntityRendererWanted =
     screen === "game" && !bevyEntityRendererSuppressed && shouldUseBevyEntityRenderer();
   const gpuEntityRendererRuntimePending =
-    bevyEntityRendererWanted && (!bevyEntityRendererReady || !bevyRuntimeBackend);
+    bevyEntityRendererWanted && bevyMapRequested && mapAtlasUsable &&
+    (!bevyEntityRendererReady || !bevyRuntimeBackend);
   const entityRendererRequested =
     bevyEntityRendererWanted && bevyEntityRendererReady && Boolean(bevyRuntimeBackend);
   const useBevyEntityRenderer =
-    entityRendererRequested && !hideBevyCanvasForDomEntityFallback;
+    entityRendererRequested && bevyMapRequested && mapAtlasUsable &&
+    !hideBevyCanvasForDomEntityFallback;
   const bevySelfCameraActive =
     BEVY_SELF_CAMERA_REQUESTED &&
     useBevyEntityRenderer &&
@@ -2421,6 +2423,10 @@ export function OriginalClientShell({
     retainedMapTileDrawListRef.current = mapTileDrawListCandidate;
   }
   const mapTileDrawList = retainedMapTileDrawListRef.current;
+  const fallbackMapFloorTiles = useMemo(() => {
+    const objectKeys = new Set(viewportMapSprites.objects.map((sprite) => sprite.key));
+    return mapTileDrawList.filter((tile) => !objectKeys.has(tile.key));
+  }, [mapTileDrawList, viewportMapSprites.objects]);
   const standaloneMapPlan = useMemo(
     () => (mapDrawPlan ? buildStandaloneMapTiles(mapDrawPlan.uncovered, mapTileCameraOffset) : null),
     [mapDrawPlan, mapTileCameraOffset.x, mapTileCameraOffset.y],
@@ -2533,6 +2539,7 @@ export function OriginalClientShell({
   const useWebGl2EntityAtlasRenderer =
     !webGl2SharedCanvasPrototype &&
     entityRendererRequested &&
+    viewportMapSprites.objects.length === 0 &&
     !foldWebgl2ToBevy &&
     bevyRuntimeBackend === "webgl2" &&
     bevyEntityAtlasPolicy !== "disabled" &&
@@ -2612,7 +2619,7 @@ export function OriginalClientShell({
     activeBevyEntityAtlas &&
       bevyEntityAtlasSources.every((source) => Boolean(activeBevyEntityAtlas.rects[source.key])),
   );
-  const hideDomEntitySpritesForBevy =
+  const gpuEntityPixelsReady =
     useGpuEntityRenderer &&
     !webGl2EntityAtlasFailed &&
     (!useBevyEntityAtlas ||
@@ -2638,29 +2645,32 @@ export function OriginalClientShell({
     ? entityRenderState
     : disabledEntityRenderState(entityRenderState);
 
-  // Start the Bevy map pipeline as soon as the runtime and packed atlas are usable,
-  // but keep WebGL2/DOM ownership until Rust confirms a complete map sync for every
-  // atlas page required by this viewport. This overlap avoids a cold-start clear-color
-  // frame while page pixels cross the async decode -> WASM -> Bevy asset boundary.
-  const bevyMapActive =
-    bevyMapRequested && useBevyEntityRenderer && mapAtlasUsable && bevyMapRuntimeReady;
+  // A canvas has one CSS depth. A map object painted on a separate surface
+  // cannot interleave with actors by Crystal row, even when both depths are
+  // correct. Warm the Bevy world while the DOM draws both sets of sprites.
+  const bevyMapActive = useBevyEntityRenderer && bevyMapRuntimeReady;
   const requiredBevyMapAtlasPageKeys = new Set(mapTileDrawList.map((tile) => tile.atlasKey));
-  const bevyMapOwnershipActive =
+  const bevyWorldPaintActive =
     bevyMapActive &&
+    gpuEntityPixelsReady &&
+    standaloneDomFallbackSprites.objects.length === 0 &&
     Array.from(requiredBevyMapAtlasPageKeys).every((key) => bevyMapPresentedImageKeys.has(key));
+  const hideDomEntitySpritesForBevy =
+    bevyWorldPaintActive || (useWebGl2EntityAtlasRenderer && gpuEntityPixelsReady);
   useEffect(() => {
     latestStandaloneMapImageSourcesRef.current = standaloneMapImageSourcesByKey;
     latestBevyMapActiveRef.current = bevyMapActive;
   }, [bevyMapActive, standaloneMapImageSourcesByKey]);
-  // DOM GPU atlas layer draws until Bevy has acknowledged the complete viewport.
-  const mapGpuActive = mapAtlasUsable && !bevyMapOwnershipActive;
-  // Cell ownership: covered atlas tiles go to Bevy/WebGL2. Atlas misses,
-  // including additive glows, stay in DOM until their standalone Bevy image is
-  // decoded and acknowledged; when Bevy is disabled the legacy fallbacks stay intact.
-  const mapDomSprites = bevyMapOwnershipActive
+  // The independent atlas canvas can still paint floor tiles below the DOM
+  // stack. While the imperative camera is active, keep that floor in the DOM
+  // too so it pans with the objects until the whole Bevy world is presented.
+  const mapGpuActive =
+    mapAtlasUsable && !bevyWorldPaintActive && !imperativeSceneMotion &&
+    fallbackMapFloorTiles.length > 0;
+  const mapDomSprites = bevyWorldPaintActive
     ? standaloneDomFallbackSprites
-    : mapGpuActive
-      ? mapDrawPlan?.uncovered ?? EMPTY_VIEWPORT_MAP_SPRITES
+    : mapGpuActive && mapDrawPlan
+      ? { floor: mapDrawPlan.uncovered.floor, objects: viewportMapSprites.objects }
       : viewportMapSprites;
   const mapDomBlendSpriteCount = countBlendMapSprites(mapDomSprites);
 
@@ -3167,7 +3177,7 @@ export function OriginalClientShell({
       window as typeof window & { __mir2BevyMapRendererDebug?: unknown }
     ).__mir2BevyMapRendererDebug = {
       requested: bevyMapRequested,
-      active: bevyMapOwnershipActive,
+      active: bevyWorldPaintActive,
       pipelineActive: bevyMapActive,
       mapGpuActive,
       atlasUsable: mapAtlasUsable,
@@ -5167,14 +5177,15 @@ export function OriginalClientShell({
             {showSyntheticScene ? <div className="game-scene-underlay" /> : null}
             <canvas
               id="mir2-web3-canvas"
-              className={webGl2SharedCanvasPrototype || hideBevyCanvasForDomEntityFallback ? "bevy-canvas-hidden" : undefined}
+              className={webGl2SharedCanvasPrototype || hideBevyCanvasForDomEntityFallback ||
+                (screen === "game" && !bevyWorldPaintActive) ? "bevy-canvas-hidden" : undefined}
             />
             <WebGl2MapAtlasLayer
               enabled={mapGpuActive}
               stageWidth={stagePresentation.virtualWidth}
               stageHeight={stagePresentation.virtualHeight}
               index={mapAtlasIndex}
-              tiles={mapTileDrawList}
+              tiles={fallbackMapFloorTiles}
               onDebugChange={handleMapAtlasDebug}
             />
             <WebGl2EntityAtlasLayer

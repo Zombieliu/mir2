@@ -16,6 +16,8 @@ working tree, services, release packages, source snapshots or parity percentages
 
 ## Last recorded decisions and open work
 
+2026-11-10 比奇市场的角色和遮挡物已在同一世界画布或 DOM 行内排序。三条 Web 渲染路径、普通往返位移和固定图集接管通过，保留建筑挡住后排鲁本的效果。 [比奇前后对照](evidence/r16-bichon-npc-depth-20261110/README.md)
+
 2026-11-10 继续 Windows R16 到 Web 的 1:1 Goal。双浏览器验证对端确认后的物品编辑和加价、双方重新确认、单次交割及重登。三职业毕业档验证快捷键、战士半月开关与读档。同一阿洛从 Web 教学到 Windows 读回和撤销，再由 Web 读回同一档案。继续交易满包独立格、名字级 ACK、公会权限、技能施放、地图和伙伴语言。 [执行范围](WEB-R16-PARITY-GOAL.zh-CN.md) · [交易](evidence/r16-trade-bilateral-edit-20261110/README.md) · [技能](evidence/r16-skill-shortcuts-20261110/README.md) · [跨端培养](evidence/r16-alo-cross-client-20261110/README.md)
 
 前一检查点完成三职业 30 级毕业档的 Web、正式 Windows 传输和新 Web 会话往返，以及单方解锁。公会开发模式定位到 Next 热更新，生产构建两条渲染路径均通过。 [同档](evidence/r16-shared-save-roundtrip-20261110/README.md) · [单方解锁](evidence/r16-trade-reopen-20261110/README.md) · [公会](evidence/r16-guild-cold-entry-20261110/README.md)

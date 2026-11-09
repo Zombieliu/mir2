@@ -1,0 +1,3219 @@
+{
+  "schema": "mir2-r16-market-depth-browser/1",
+  "baseCommit": "dbc82b9ca0ae0531fb600a80a8d3d238841b0f87",
+  "gatewaySha256": "b39dad51be46d1fee7c89c6002fe79dc15621df2f75666a512559c74bded2b46",
+  "localOnly": true,
+  "phases": [
+    "reserve-loopback-and-copy-exact-web",
+    "ordinary-file-account-walk-and-logout",
+    "start-frozen-web",
+    "ordinary-browser-entry-default",
+    "ordinary-browser-entry-floor"
+  ],
+  "candidate": true,
+  "pinned": true,
+  "ports": [
+    20062,
+    20063
+  ],
+  "startPosition": {
+    "x": 288,
+    "y": 615
+  },
+  "initialWalk": [
+    {
+      "direction": "Up",
+      "moved": true,
+      "x": 288,
+      "y": 615
+    }
+  ],
+  "cases": [
+    {
+      "mode": "default",
+      "path": "/game",
+      "start": {
+        "x": 288,
+        "y": 615
+      },
+      "pageErrors": [],
+      "runtime": [
+        {
+          "path": "/bevy-runtime/v/bevy-0cd68510886134e0/pkg-webgpu/mir2_bevy_runtime.js",
+          "status": 200
+        },
+        {
+          "path": "/bevy-runtime/v/bevy-0cd68510886134e0/pkg-webgpu/mir2_bevy_runtime_bg.wasm",
+          "status": 200
+        }
+      ],
+      "mapAtlasResponses": [
+        "/generated/map-atlas/manifest.5c20ccafe6a9b2be09f50c6b6b6dbee91715ccd321792acaafbce7f822812fe5.json",
+        "/generated/map-atlas/WemadeMir2-Tiles/p17.17aecee126037536.png",
+        "/generated/map-atlas/WemadeMir2-Tiles/p23.3239dfc97b00c281.png",
+        "/generated/map-atlas/WemadeMir2-Tiles/p14.5fd0e9045e05d62c.png",
+        "/generated/map-atlas/WemadeMir2-Tiles/p18.ad54b9bc7de8c83e.png",
+        "/generated/map-atlas/WemadeMir2-Tiles/p0.b88c9b84bffd4ded.png",
+        "/generated/map-atlas/WemadeMir2-Tiles/p1.5fd9aa7ce7f0cefe.png",
+        "/generated/map-atlas/WemadeMir2-SmTiles/p0.a256c8b6b672e372.png",
+        "/generated/map-atlas/WemadeMir2-Tiles/p2.48d9cce0f2bef348.png",
+        "/generated/map-atlas/WemadeMir2-Tiles/p3.012a4a7e7588300d.png",
+        "/generated/map-atlas/WemadeMir2-Tiles/p17.17aecee126037536.png",
+        "/generated/map-atlas/WemadeMir2-Tiles/p14.5fd0e9045e05d62c.png",
+        "/generated/map-atlas/WemadeMir2-Tiles/p23.3239dfc97b00c281.png",
+        "/generated/map-atlas/WemadeMir2-Tiles/p0.b88c9b84bffd4ded.png",
+        "/generated/map-atlas/WemadeMir2-Tiles/p18.ad54b9bc7de8c83e.png",
+        "/generated/map-atlas/WemadeMir2-SmTiles/p0.a256c8b6b672e372.png",
+        "/generated/map-atlas/WemadeMir2-Tiles/p1.5fd9aa7ce7f0cefe.png",
+        "/generated/map-atlas/WemadeMir2-Tiles/p2.48d9cce0f2bef348.png",
+        "/generated/map-atlas/WemadeMir2-Tiles/p3.012a4a7e7588300d.png"
+      ],
+      "mapAtlasCapability": {
+        "enabled": true,
+        "verified": true,
+        "manifestPath": "/generated/map-atlas/manifest.5c20ccafe6a9b2be09f50c6b6b6dbee91715ccd321792acaafbce7f822812fe5.json",
+        "contentHash": "5c20ccafe6a9b2be09f50c6b6b6dbee91715ccd321792acaafbce7f822812fe5",
+        "pageCount": 79,
+        "maxPageBytes": null
+      },
+      "combinedWorldPresented": true,
+      "npcs": [
+        {
+          "id": "1",
+          "kind": "npc",
+          "name": "Teleport_Gilbert",
+          "x": 287,
+          "y": 615,
+          "direction": "Up",
+          "sprite": null
+        },
+        {
+          "id": "2",
+          "kind": "npc",
+          "name": "BorderVillage_Board",
+          "x": 284,
+          "y": 615,
+          "direction": "Up",
+          "sprite": null
+        },
+        {
+          "id": "3",
+          "kind": "npc",
+          "name": "Assistant_Jane",
+          "x": 284,
+          "y": 606,
+          "direction": "Up",
+          "sprite": null
+        },
+        {
+          "id": "4",
+          "kind": "npc",
+          "name": "CraftsLady_Jude",
+          "x": 294,
+          "y": 619,
+          "direction": "Up",
+          "sprite": null
+        },
+        {
+          "id": "5",
+          "kind": "npc",
+          "name": "Blacksmith_Smith",
+          "x": 296,
+          "y": 613,
+          "direction": "Up",
+          "sprite": null
+        },
+        {
+          "id": "6",
+          "kind": "npc",
+          "name": "Merchant_John",
+          "x": 292,
+          "y": 603,
+          "direction": "Up",
+          "sprite": null
+        },
+        {
+          "id": "8",
+          "kind": "npc",
+          "name": "Merchant_Ruben",
+          "x": 288,
+          "y": 608,
+          "direction": "Up",
+          "sprite": null
+        },
+        {
+          "id": "42",
+          "kind": "npc",
+          "name": "Merchant_Scott",
+          "x": 291,
+          "y": 610,
+          "direction": "Up",
+          "sprite": null
+        },
+        {
+          "id": "43",
+          "kind": "npc",
+          "name": "MaterialDealer_Reece",
+          "x": 295,
+          "y": 605,
+          "direction": "Up",
+          "sprite": null
+        }
+      ],
+      "packetNames": [
+        "Connected",
+        "ClientVersion",
+        "LoginSuccess",
+        "StartGame",
+        "Chat",
+        "UpdateNotice",
+        "NewItemInfo",
+        "MapInformation",
+        "UserInformation",
+        "NewQuestInfo",
+        "NewRecipeInfo",
+        "CompleteQuest",
+        "ReceiveMail",
+        "FriendUpdate",
+        "GameShopInfo",
+        "BaseStatsInfo",
+        "ObjectMonster",
+        "ObjectNpc",
+        "ObjectSpell",
+        "ObjectHealth",
+        "TimeOfDay",
+        "ChangeAMode",
+        "ChangePMode",
+        "SwitchGroup",
+        "DefaultNPC",
+        "GuildBuffList",
+        "NPCUpdate",
+        "NPCResponse",
+        "MentorUpdate",
+        "LoverUpdate",
+        "GuildStatus",
+        "GuildMemberChange",
+        "ObjectGuildNameChanged",
+        "DeleteGroup",
+        "KeepAlive"
+      ],
+      "startAcks": [
+        4
+      ],
+      "geometry": {
+        "stageRect": {
+          "left": 28,
+          "top": 16,
+          "width": 1024,
+          "height": 768
+        },
+        "canvases": [
+          {
+            "id": "mir2-web3-canvas",
+            "class": "",
+            "rect": {
+              "left": 28,
+              "top": 16,
+              "width": 1024,
+              "height": 768
+            },
+            "css": {
+              "z": "2",
+              "position": "absolute",
+              "opacity": "1",
+              "transform": "none",
+              "visibility": "visible"
+            }
+          },
+          {
+            "id": "",
+            "class": "webgl2-map-atlas-canvas hidden",
+            "rect": {
+              "left": 0,
+              "top": 0,
+              "width": 0,
+              "height": 0
+            },
+            "css": {
+              "z": "1",
+              "position": "absolute",
+              "opacity": "1",
+              "transform": "none",
+              "visibility": "visible"
+            }
+          },
+          {
+            "id": "",
+            "class": "webgl2-entity-atlas-canvas hidden",
+            "rect": {
+              "left": 0,
+              "top": 0,
+              "width": 0,
+              "height": 0
+            },
+            "css": {
+              "z": "2",
+              "position": "absolute",
+              "opacity": "1",
+              "transform": "none",
+              "visibility": "visible"
+            }
+          },
+          {
+            "id": "",
+            "class": "hud-bar-draw-plan hud-bar-draw-plan-experience",
+            "rect": {
+              "left": 37,
+              "top": 775,
+              "width": 1004,
+              "height": 8
+            },
+            "css": {
+              "z": "9",
+              "position": "absolute",
+              "opacity": "1",
+              "transform": "none",
+              "visibility": "visible"
+            }
+          },
+          {
+            "id": "",
+            "class": "hud-bar-draw-plan hud-bar-draw-plan-weight",
+            "rect": {
+              "left": 947,
+              "top": 735,
+              "width": 76,
+              "height": 12
+            },
+            "css": {
+              "z": "9",
+              "position": "absolute",
+              "opacity": "1",
+              "transform": "none",
+              "visibility": "visible"
+            }
+          },
+          {
+            "id": "mir2-quest-ui-canvas",
+            "class": "shared-quest-ui-visible",
+            "rect": {
+              "left": 28,
+              "top": 16,
+              "width": 1024,
+              "height": 768
+            },
+            "css": {
+              "z": "9",
+              "position": "absolute",
+              "opacity": "1",
+              "transform": "none",
+              "visibility": "visible"
+            }
+          }
+        ],
+        "npcs": [
+          {
+            "id": "1",
+            "rect": {
+              "left": 460,
+              "top": 368,
+              "width": 0,
+              "height": 0
+            },
+            "css": {
+              "z": "1544545",
+              "position": "absolute",
+              "opacity": "1",
+              "transform": "none",
+              "visibility": "visible"
+            },
+            "name": "传送员吉尔伯特",
+            "imgs": []
+          },
+          {
+            "id": "2",
+            "rect": {
+              "left": 316,
+              "top": 368,
+              "width": 0,
+              "height": 0
+            },
+            "css": {
+              "z": "1544485",
+              "position": "absolute",
+              "opacity": "1",
+              "transform": "none",
+              "visibility": "visible"
+            },
+            "name": "边境村_公告牌",
+            "imgs": []
+          },
+          {
+            "id": "42",
+            "rect": {
+              "left": 652,
+              "top": 208,
+              "width": 0,
+              "height": 0
+            },
+            "css": {
+              "z": "1484625",
+              "position": "absolute",
+              "opacity": "1",
+              "transform": "none",
+              "visibility": "visible"
+            },
+            "name": "商人斯科特",
+            "imgs": []
+          },
+          {
+            "id": "4",
+            "rect": {
+              "left": 796,
+              "top": 496,
+              "width": 0,
+              "height": 0
+            },
+            "css": {
+              "z": "1592685",
+              "position": "absolute",
+              "opacity": "1",
+              "transform": "none",
+              "visibility": "visible"
+            },
+            "name": "女工匠朱迪",
+            "imgs": []
+          },
+          {
+            "id": "8",
+            "rect": {
+              "left": 508,
+              "top": 144,
+              "width": 0,
+              "height": 0
+            },
+            "css": {
+              "z": "1460565",
+              "position": "absolute",
+              "opacity": "1",
+              "transform": "none",
+              "visibility": "visible"
+            },
+            "name": "商人鲁本",
+            "imgs": []
+          },
+          {
+            "id": "5",
+            "rect": {
+              "left": 892,
+              "top": 304,
+              "width": 0,
+              "height": 0
+            },
+            "css": {
+              "z": "1520725",
+              "position": "absolute",
+              "opacity": "1",
+              "transform": "none",
+              "visibility": "visible"
+            },
+            "name": "铁匠史密斯",
+            "imgs": []
+          },
+          {
+            "id": "3",
+            "rect": {
+              "left": 316,
+              "top": 80,
+              "width": 0,
+              "height": 0
+            },
+            "css": {
+              "z": "1436485",
+              "position": "absolute",
+              "opacity": "1",
+              "transform": "none",
+              "visibility": "visible"
+            },
+            "name": "助理简",
+            "imgs": []
+          },
+          {
+            "id": "43",
+            "rect": {
+              "left": 844,
+              "top": 48,
+              "width": 0,
+              "height": 0
+            },
+            "css": {
+              "z": "1424705",
+              "position": "absolute",
+              "opacity": "1",
+              "transform": "none",
+              "visibility": "visible"
+            },
+            "name": "材料商里斯",
+            "imgs": []
+          },
+          {
+            "id": "6",
+            "rect": {
+              "left": 700,
+              "top": -16,
+              "width": 0,
+              "height": 0
+            },
+            "css": {
+              "z": "1400645",
+              "position": "absolute",
+              "opacity": "1",
+              "transform": "none",
+              "visibility": "visible"
+            },
+            "name": "屠夫约翰",
+            "imgs": []
+          }
+        ],
+        "mapObjects": [],
+        "stageFlags": {
+          "data-viewport-tile-center-x": "504",
+          "data-viewport-tile-center-y": "368",
+          "data-viewport-cell-width": "48",
+          "data-viewport-cell-height": "32",
+          "data-viewport-scene-width": "1024",
+          "data-viewport-scene-height": "768",
+          "data-quest-ui-owner": "bevy",
+          "data-bag-ui-owner": "react",
+          "data-hp-orb-owner": "react",
+          "data-mp-orb-owner": "react",
+          "data-experience-bar-owner": "canvas2d",
+          "data-weight-bar-owner": "canvas2d",
+          "data-bag-owner-revision": "1",
+          "data-viewport-player-x": "288",
+          "data-viewport-player-y": "615"
+        },
+        "floorCount": 0
+      },
+      "screenshot": "market-default.png",
+      "logoutAcks": 1
+    },
+    {
+      "mode": "floor",
+      "path": "/game?bevyMap=0",
+      "start": {
+        "x": 288,
+        "y": 615
+      },
+      "pageErrors": [],
+      "runtime": [
+        {
+          "path": "/bevy-runtime/v/bevy-0cd68510886134e0/pkg-webgpu/mir2_bevy_runtime.js",
+          "status": 200
+        },
+        {
+          "path": "/bevy-runtime/v/bevy-0cd68510886134e0/pkg-webgpu/mir2_bevy_runtime_bg.wasm",
+          "status": 200
+        }
+      ],
+      "mapAtlasResponses": [
+        "/generated/map-atlas/manifest.5c20ccafe6a9b2be09f50c6b6b6dbee91715ccd321792acaafbce7f822812fe5.json",
+        "/generated/map-atlas/WemadeMir2-Tiles/p0.b88c9b84bffd4ded.png",
+        "/generated/map-atlas/WemadeMir2-Tiles/p23.3239dfc97b00c281.png",
+        "/generated/map-atlas/WemadeMir2-Tiles/p17.17aecee126037536.png",
+        "/generated/map-atlas/WemadeMir2-Tiles/p14.5fd0e9045e05d62c.png",
+        "/generated/map-atlas/WemadeMir2-Tiles/p18.ad54b9bc7de8c83e.png",
+        "/generated/map-atlas/WemadeMir2-SmTiles/p0.a256c8b6b672e372.png",
+        "/generated/map-atlas/WemadeMir2-Tiles/p1.5fd9aa7ce7f0cefe.png",
+        "/generated/map-atlas/WemadeMir2-Tiles/p3.012a4a7e7588300d.png",
+        "/generated/map-atlas/WemadeMir2-Tiles/p2.48d9cce0f2bef348.png"
+      ],
+      "mapAtlasCapability": {
+        "enabled": true,
+        "verified": true,
+        "manifestPath": "/generated/map-atlas/manifest.5c20ccafe6a9b2be09f50c6b6b6dbee91715ccd321792acaafbce7f822812fe5.json",
+        "contentHash": "5c20ccafe6a9b2be09f50c6b6b6dbee91715ccd321792acaafbce7f822812fe5",
+        "pageCount": 79,
+        "maxPageBytes": null
+      },
+      "npcs": [
+        {
+          "id": "1",
+          "kind": "npc",
+          "name": "Teleport_Gilbert",
+          "x": 287,
+          "y": 615,
+          "direction": "Up",
+          "sprite": null
+        },
+        {
+          "id": "2",
+          "kind": "npc",
+          "name": "BorderVillage_Board",
+          "x": 284,
+          "y": 615,
+          "direction": "Up",
+          "sprite": null
+        },
+        {
+          "id": "3",
+          "kind": "npc",
+          "name": "Assistant_Jane",
+          "x": 284,
+          "y": 606,
+          "direction": "Up",
+          "sprite": null
+        },
+        {
+          "id": "4",
+          "kind": "npc",
+          "name": "CraftsLady_Jude",
+          "x": 294,
+          "y": 619,
+          "direction": "Up",
+          "sprite": null
+        },
+        {
+          "id": "5",
+          "kind": "npc",
+          "name": "Blacksmith_Smith",
+          "x": 296,
+          "y": 613,
+          "direction": "Up",
+          "sprite": null
+        },
+        {
+          "id": "6",
+          "kind": "npc",
+          "name": "Merchant_John",
+          "x": 292,
+          "y": 603,
+          "direction": "Up",
+          "sprite": null
+        },
+        {
+          "id": "8",
+          "kind": "npc",
+          "name": "Merchant_Ruben",
+          "x": 288,
+          "y": 608,
+          "direction": "Up",
+          "sprite": null
+        },
+        {
+          "id": "42",
+          "kind": "npc",
+          "name": "Merchant_Scott",
+          "x": 291,
+          "y": 610,
+          "direction": "Up",
+          "sprite": null
+        },
+        {
+          "id": "43",
+          "kind": "npc",
+          "name": "MaterialDealer_Reece",
+          "x": 295,
+          "y": 605,
+          "direction": "Up",
+          "sprite": null
+        }
+      ],
+      "packetNames": [
+        "Connected",
+        "ClientVersion",
+        "LoginSuccess",
+        "StartGame",
+        "Chat",
+        "UpdateNotice",
+        "NewItemInfo",
+        "MapInformation",
+        "UserInformation",
+        "NewQuestInfo",
+        "NewRecipeInfo",
+        "CompleteQuest",
+        "ReceiveMail",
+        "FriendUpdate",
+        "GameShopInfo",
+        "BaseStatsInfo",
+        "ObjectMonster",
+        "ObjectNpc",
+        "ObjectSpell",
+        "ObjectHealth",
+        "TimeOfDay",
+        "ChangeAMode",
+        "ChangePMode",
+        "SwitchGroup",
+        "DefaultNPC",
+        "GuildBuffList",
+        "NPCUpdate",
+        "NPCResponse",
+        "MentorUpdate",
+        "LoverUpdate",
+        "GuildStatus",
+        "GuildMemberChange",
+        "ObjectGuildNameChanged",
+        "DeleteGroup",
+        "KeepAlive"
+      ],
+      "startAcks": [
+        4
+      ],
+      "geometry": {
+        "stageRect": {
+          "left": 28,
+          "top": 16,
+          "width": 1024,
+          "height": 768
+        },
+        "canvases": [
+          {
+            "id": "mir2-web3-canvas",
+            "class": "bevy-canvas-hidden",
+            "rect": {
+              "left": 28,
+              "top": 16,
+              "width": 1024,
+              "height": 768
+            },
+            "css": {
+              "z": "2",
+              "position": "absolute",
+              "opacity": "0",
+              "transform": "none",
+              "visibility": "visible"
+            }
+          },
+          {
+            "id": "",
+            "class": "webgl2-map-atlas-canvas ",
+            "rect": {
+              "left": 28,
+              "top": 16,
+              "width": 1024,
+              "height": 768
+            },
+            "css": {
+              "z": "1",
+              "position": "absolute",
+              "opacity": "1",
+              "transform": "none",
+              "visibility": "visible"
+            }
+          },
+          {
+            "id": "",
+            "class": "webgl2-entity-atlas-canvas hidden",
+            "rect": {
+              "left": 0,
+              "top": 0,
+              "width": 0,
+              "height": 0
+            },
+            "css": {
+              "z": "2",
+              "position": "absolute",
+              "opacity": "1",
+              "transform": "none",
+              "visibility": "visible"
+            }
+          },
+          {
+            "id": "",
+            "class": "hud-bar-draw-plan hud-bar-draw-plan-experience",
+            "rect": {
+              "left": 37,
+              "top": 775,
+              "width": 1004,
+              "height": 8
+            },
+            "css": {
+              "z": "9",
+              "position": "absolute",
+              "opacity": "1",
+              "transform": "none",
+              "visibility": "visible"
+            }
+          },
+          {
+            "id": "",
+            "class": "hud-bar-draw-plan hud-bar-draw-plan-weight",
+            "rect": {
+              "left": 947,
+              "top": 735,
+              "width": 76,
+              "height": 12
+            },
+            "css": {
+              "z": "9",
+              "position": "absolute",
+              "opacity": "1",
+              "transform": "none",
+              "visibility": "visible"
+            }
+          },
+          {
+            "id": "mir2-quest-ui-canvas",
+            "class": "shared-quest-ui-visible",
+            "rect": {
+              "left": 28,
+              "top": 16,
+              "width": 1024,
+              "height": 768
+            },
+            "css": {
+              "z": "9",
+              "position": "absolute",
+              "opacity": "1",
+              "transform": "none",
+              "visibility": "visible"
+            }
+          }
+        ],
+        "npcs": [
+          {
+            "id": "1",
+            "rect": {
+              "left": 460,
+              "top": 368,
+              "width": 0,
+              "height": 0
+            },
+            "css": {
+              "z": "1544545",
+              "position": "absolute",
+              "opacity": "1",
+              "transform": "none",
+              "visibility": "visible"
+            },
+            "name": "传送员吉尔伯特",
+            "imgs": [
+              {
+                "src": "/original-ui/NPC/15/2.png",
+                "rect": {
+                  "left": 465,
+                  "top": 320,
+                  "width": 80,
+                  "height": 88
+                },
+                "css": {
+                  "z": "auto",
+                  "position": "absolute",
+                  "opacity": "1",
+                  "transform": "none",
+                  "visibility": "visible"
+                },
+                "loaded": true
+              }
+            ]
+          },
+          {
+            "id": "2",
+            "rect": {
+              "left": 316,
+              "top": 368,
+              "width": 0,
+              "height": 0
+            },
+            "css": {
+              "z": "1544485",
+              "position": "absolute",
+              "opacity": "1",
+              "transform": "none",
+              "visibility": "visible"
+            },
+            "name": "边境村_公告牌",
+            "imgs": [
+              {
+                "src": "/original-ui/NPC/45/0.png",
+                "rect": {
+                  "left": 276,
+                  "top": 284,
+                  "width": 140,
+                  "height": 136
+                },
+                "css": {
+                  "z": "auto",
+                  "position": "absolute",
+                  "opacity": "1",
+                  "transform": "none",
+                  "visibility": "visible"
+                },
+                "loaded": true
+              }
+            ]
+          },
+          {
+            "id": "42",
+            "rect": {
+              "left": 652,
+              "top": 208,
+              "width": 0,
+              "height": 0
+            },
+            "css": {
+              "z": "1484625",
+              "position": "absolute",
+              "opacity": "1",
+              "transform": "none",
+              "visibility": "visible"
+            },
+            "name": "商人斯科特",
+            "imgs": [
+              {
+                "src": "/original-ui/NPC/03/13.png",
+                "rect": {
+                  "left": 657,
+                  "top": 158,
+                  "width": 72,
+                  "height": 72
+                },
+                "css": {
+                  "z": "auto",
+                  "position": "absolute",
+                  "opacity": "1",
+                  "transform": "none",
+                  "visibility": "visible"
+                },
+                "loaded": true
+              }
+            ]
+          },
+          {
+            "id": "4",
+            "rect": {
+              "left": 796,
+              "top": 496,
+              "width": 0,
+              "height": 0
+            },
+            "css": {
+              "z": "1592685",
+              "position": "absolute",
+              "opacity": "1",
+              "transform": "none",
+              "visibility": "visible"
+            },
+            "name": "女工匠朱迪",
+            "imgs": [
+              {
+                "src": "/original-ui/NPC/07/20.png",
+                "rect": {
+                  "left": 808,
+                  "top": 446,
+                  "width": 56,
+                  "height": 72
+                },
+                "css": {
+                  "z": "auto",
+                  "position": "absolute",
+                  "opacity": "1",
+                  "transform": "none",
+                  "visibility": "visible"
+                },
+                "loaded": true
+              }
+            ]
+          },
+          {
+            "id": "8",
+            "rect": {
+              "left": 508,
+              "top": 144,
+              "width": 0,
+              "height": 0
+            },
+            "css": {
+              "z": "1460565",
+              "position": "absolute",
+              "opacity": "1",
+              "transform": "none",
+              "visibility": "visible"
+            },
+            "name": "商人鲁本",
+            "imgs": [
+              {
+                "src": "/original-ui/NPC/01/19.png",
+                "rect": {
+                  "left": 521,
+                  "top": 99,
+                  "width": 60,
+                  "height": 68
+                },
+                "css": {
+                  "z": "auto",
+                  "position": "absolute",
+                  "opacity": "1",
+                  "transform": "none",
+                  "visibility": "visible"
+                },
+                "loaded": true
+              }
+            ]
+          },
+          {
+            "id": "5",
+            "rect": {
+              "left": 892,
+              "top": 304,
+              "width": 0,
+              "height": 0
+            },
+            "css": {
+              "z": "1520725",
+              "position": "absolute",
+              "opacity": "1",
+              "transform": "none",
+              "visibility": "visible"
+            },
+            "name": "铁匠史密斯",
+            "imgs": [
+              {
+                "src": "/original-ui/NPC/00/2.png",
+                "rect": {
+                  "left": 901,
+                  "top": 253,
+                  "width": 72,
+                  "height": 80
+                },
+                "css": {
+                  "z": "auto",
+                  "position": "absolute",
+                  "opacity": "1",
+                  "transform": "none",
+                  "visibility": "visible"
+                },
+                "loaded": true
+              }
+            ]
+          },
+          {
+            "id": "3",
+            "rect": {
+              "left": 316,
+              "top": 80,
+              "width": 0,
+              "height": 0
+            },
+            "css": {
+              "z": "1436485",
+              "position": "absolute",
+              "opacity": "1",
+              "transform": "none",
+              "visibility": "visible"
+            },
+            "name": "助理简",
+            "imgs": [
+              {
+                "src": "/original-ui/NPC/05/3.png",
+                "rect": {
+                  "left": 330,
+                  "top": 28,
+                  "width": 56,
+                  "height": 72
+                },
+                "css": {
+                  "z": "auto",
+                  "position": "absolute",
+                  "opacity": "1",
+                  "transform": "none",
+                  "visibility": "visible"
+                },
+                "loaded": true
+              }
+            ]
+          },
+          {
+            "id": "43",
+            "rect": {
+              "left": 844,
+              "top": 48,
+              "width": 0,
+              "height": 0
+            },
+            "css": {
+              "z": "1424705",
+              "position": "absolute",
+              "opacity": "1",
+              "transform": "none",
+              "visibility": "visible"
+            },
+            "name": "材料商里斯",
+            "imgs": [
+              {
+                "src": "/original-ui/NPC/03/16.png",
+                "rect": {
+                  "left": 849,
+                  "top": -2,
+                  "width": 72,
+                  "height": 72
+                },
+                "css": {
+                  "z": "auto",
+                  "position": "absolute",
+                  "opacity": "1",
+                  "transform": "none",
+                  "visibility": "visible"
+                },
+                "loaded": true
+              }
+            ]
+          },
+          {
+            "id": "6",
+            "rect": {
+              "left": 700,
+              "top": -16,
+              "width": 0,
+              "height": 0
+            },
+            "css": {
+              "z": "1400645",
+              "position": "absolute",
+              "opacity": "1",
+              "transform": "none",
+              "visibility": "visible"
+            },
+            "name": "屠夫约翰",
+            "imgs": [
+              {
+                "src": "/original-ui/NPC/11/18.png",
+                "rect": {
+                  "left": 705,
+                  "top": -65,
+                  "width": 64,
+                  "height": 76
+                },
+                "css": {
+                  "z": "auto",
+                  "position": "absolute",
+                  "opacity": "1",
+                  "transform": "none",
+                  "visibility": "visible"
+                },
+                "loaded": true
+              }
+            ]
+          }
+        ],
+        "mapObjects": [
+          {
+            "x": 276,
+            "y": 610,
+            "src": "/original-map/WemadeMir2/Objects/4258.png",
+            "renderSrc": "blob:http://127.0.0.1:20063/2a97fad1-d48a-42e9-819e-ddea81492050",
+            "rect": {
+              "left": -78,
+              "top": -95,
+              "width": 48,
+              "height": 335
+            },
+            "css": {
+              "z": "1478330",
+              "position": "absolute",
+              "opacity": "1",
+              "transform": "none",
+              "visibility": "visible"
+            },
+            "loaded": true
+          },
+          {
+            "x": 276,
+            "y": 624,
+            "src": "/original-map/WemadeMir2/Objects/4209.png",
+            "renderSrc": "blob:http://127.0.0.1:20063/c00fd5ff-9f3f-461d-9098-04a71969fd90",
+            "rect": {
+              "left": -78,
+              "top": 223,
+              "width": 48,
+              "height": 465
+            },
+            "css": {
+              "z": "1646330",
+              "position": "absolute",
+              "opacity": "1",
+              "transform": "none",
+              "visibility": "visible"
+            },
+            "loaded": true
+          },
+          {
+            "x": 276,
+            "y": 632,
+            "src": "/original-map/WemadeMir2/Objects/8533.png",
+            "renderSrc": "blob:http://127.0.0.1:20063/810afa1b-2d0b-4db2-a0d3-a9f58e1e5a05",
+            "rect": {
+              "left": -78,
+              "top": 769,
+              "width": 48,
+              "height": 175
+            },
+            "css": {
+              "z": "1742330",
+              "position": "absolute",
+              "opacity": "1",
+              "transform": "none",
+              "visibility": "visible"
+            },
+            "loaded": true
+          },
+          {
+            "x": 276,
+            "y": 640,
+            "src": "/original-map/WemadeMir2/Objects/8455.png",
+            "renderSrc": "blob:http://127.0.0.1:20063/a0af6d14-d32f-4c54-977e-a2606b1d8616",
+            "rect": {
+              "left": -78,
+              "top": 877,
+              "width": 48,
+              "height": 323
+            },
+            "css": {
+              "z": "1838330",
+              "position": "absolute",
+              "opacity": "1",
+              "transform": "none",
+              "visibility": "visible"
+            },
+            "loaded": true
+          },
+          {
+            "x": 277,
+            "y": 609,
+            "src": "/original-map/WemadeMir2/Objects/4259.png",
+            "renderSrc": "blob:http://127.0.0.1:20063/70f7a3a5-e0aa-4ece-9193-96ddad9f723e",
+            "rect": {
+              "left": -30,
+              "top": -110,
+              "width": 48,
+              "height": 318
+            },
+            "css": {
+              "z": "1466350",
+              "position": "absolute",
+              "opacity": "1",
+              "transform": "none",
+              "visibility": "visible"
+            },
+            "loaded": true
+          },
+          {
+            "x": 277,
+            "y": 624,
+            "src": "/original-map/WemadeMir2/Objects/4210.png",
+            "renderSrc": "blob:http://127.0.0.1:20063/f8d2ccb3-3d88-4395-b841-fa70b0272e8c",
+            "rect": {
+              "left": -30,
+              "top": 192,
+              "width": 48,
+              "height": 496
+            },
+            "css": {
+              "z": "1646350",
+              "position": "absolute",
+              "opacity": "1",
+              "transform": "none",
+              "visibility": "visible"
+            },
+            "loaded": true
+          },
+          {
+            "x": 277,
+            "y": 631,
+            "src": "/original-map/WemadeMir2/Objects/8532.png",
+            "renderSrc": "blob:http://127.0.0.1:20063/b07d3c01-d436-4b20-bd00-b4981a644427",
+            "rect": {
+              "left": -30,
+              "top": 737,
+              "width": 48,
+              "height": 175
+            },
+            "css": {
+              "z": "1730350",
+              "position": "absolute",
+              "opacity": "1",
+              "transform": "none",
+              "visibility": "visible"
+            },
+            "loaded": true
+          },
+          {
+            "x": 277,
+            "y": 641,
+            "src": "/original-map/WemadeMir2/Objects/8453.png",
+            "renderSrc": "blob:http://127.0.0.1:20063/d807f822-0cf8-493e-bee5-ffd44a1c739b",
+            "rect": {
+              "left": -30,
+              "top": 845,
+              "width": 48,
+              "height": 387
+            },
+            "css": {
+              "z": "1850350",
+              "position": "absolute",
+              "opacity": "1",
+              "transform": "none",
+              "visibility": "visible"
+            },
+            "loaded": true
+          },
+          {
+            "x": 278,
+            "y": 609,
+            "src": "/original-map/WemadeMir2/Objects/4260.png",
+            "renderSrc": "blob:http://127.0.0.1:20063/941ae803-4552-470a-bcf9-042d72e686f3",
+            "rect": {
+              "left": 18,
+              "top": -141,
+              "width": 48,
+              "height": 349
+            },
+            "css": {
+              "z": "1466370",
+              "position": "absolute",
+              "opacity": "1",
+              "transform": "none",
+              "visibility": "visible"
+            },
+            "loaded": true
+          },
+          {
+            "x": 278,
+            "y": 624,
+            "src": "/original-map/WemadeMir2/Objects/4211.png",
+            "renderSrc": "blob:http://127.0.0.1:20063/4da0faca-ee69-49e7-97e9-18ffecefc28a",
+            "rect": {
+              "left": 18,
+              "top": 145,
+              "width": 48,
+              "height": 543
+            },
+            "css": {
+              "z": "1646370",
+              "position": "absolute",
+              "opacity": "1",
+              "transform": "none",
+              "visibility": "visible"
+            },
+            "loaded": true
+          },
+          {
+            "x": 278,
+            "y": 630,
+            "src": "/original-map/WemadeMir2/Objects/8531.png",
+            "renderSrc": "blob:http://127.0.0.1:20063/18152140-9158-49a8-a5dd-5916185afd95",
+            "rect": {
+              "left": 18,
+              "top": 706,
+              "width": 48,
+              "height": 174
+            },
+            "css": {
+              "z": "1718370",
+              "position": "absolute",
+              "opacity": "1",
+              "transform": "none",
+              "visibility": "visible"
+            },
+            "loaded": true
+          },
+          {
+            "x": 278,
+            "y": 642,
+            "src": "/original-map/WemadeMir2/Objects/8451.png",
+            "renderSrc": "blob:http://127.0.0.1:20063/b825fb40-8fd2-4fdf-a300-0a925499b706",
+            "rect": {
+              "left": 18,
+              "top": 811,
+              "width": 48,
+              "height": 453
+            },
+            "css": {
+              "z": "1862370",
+              "position": "absolute",
+              "opacity": "1",
+              "transform": "none",
+              "visibility": "visible"
+            },
+            "loaded": true
+          },
+          {
+            "x": 279,
+            "y": 610,
+            "src": "/original-map/WemadeMir2/Objects/4261.png",
+            "renderSrc": "blob:http://127.0.0.1:20063/072d8e41-fd2c-45b1-8086-661267507181",
+            "rect": {
+              "left": 66,
+              "top": -195,
+              "width": 48,
+              "height": 435
+            },
+            "css": {
+              "z": "1478390",
+              "position": "absolute",
+              "opacity": "1",
+              "transform": "none",
+              "visibility": "visible"
+            },
+            "loaded": true
+          },
+          {
+            "x": 279,
+            "y": 624,
+            "src": "/original-map/WemadeMir2/Objects/4212.png",
+            "renderSrc": "blob:http://127.0.0.1:20063/d6503a56-4cd0-4f54-a030-ffde61d2820d",
+            "rect": {
+              "left": 66,
+              "top": 208,
+              "width": 48,
+              "height": 480
+            },
+            "css": {
+              "z": "1646390",
+              "position": "absolute",
+              "opacity": "1",
+              "transform": "none",
+              "visibility": "visible"
+            },
+            "loaded": true
+          },
+          {
+            "x": 279,
+            "y": 629,
+            "src": "/original-map/WemadeMir2/Objects/8530.png",
+            "renderSrc": "blob:http://127.0.0.1:20063/df1dbf00-e1ab-4b93-abe0-6fdd09581d13",
+            "rect": {
+              "left": 66,
+              "top": 674,
+              "width": 48,
+              "height": 174
+            },
+            "css": {
+              "z": "1706390",
+              "position": "absolute",
+              "opacity": "1",
+              "transform": "none",
+              "visibility": "visible"
+            },
+            "loaded": true
+          },
+          {
+            "x": 279,
+            "y": 642,
+            "src": "/original-map/WemadeMir2/Objects/8449.png",
+            "renderSrc": "blob:http://127.0.0.1:20063/7428d9c4-a180-44c2-8726-31d8434bd0cf",
+            "rect": {
+              "left": 66,
+              "top": 781,
+              "width": 48,
+              "height": 483
+            },
+            "css": {
+              "z": "1862390",
+              "position": "absolute",
+              "opacity": "1",
+              "transform": "none",
+              "visibility": "visible"
+            },
+            "loaded": true
+          },
+          {
+            "x": 280,
+            "y": 610,
+            "src": "/original-map/WemadeMir2/Objects/4262.png",
+            "renderSrc": "blob:http://127.0.0.1:20063/2749785e-8d7d-455e-8647-0f72843f4614",
+            "rect": {
+              "left": 114,
+              "top": -236,
+              "width": 48,
+              "height": 476
+            },
+            "css": {
+              "z": "1478410",
+              "position": "absolute",
+              "opacity": "1",
+              "transform": "none",
+              "visibility": "visible"
+            },
+            "loaded": true
+          },
+          {
+            "x": 280,
+            "y": 624,
+            "src": "/original-map/WemadeMir2/Objects/4213.png",
+            "renderSrc": "blob:http://127.0.0.1:20063/aa5d9031-415c-4ab1-bc24-68161dba14ed",
+            "rect": {
+              "left": 114,
+              "top": 208,
+              "width": 48,
+              "height": 480
+            },
+            "css": {
+              "z": "1646410",
+              "position": "absolute",
+              "opacity": "1",
+              "transform": "none",
+              "visibility": "visible"
+            },
+            "loaded": true
+          },
+          {
+            "x": 280,
+            "y": 628,
+            "src": "/original-map/WemadeMir2/Objects/8534.png",
+            "renderSrc": "blob:http://127.0.0.1:20063/5ca1d5a7-e19a-4000-b09e-9132a2015312",
+            "rect": {
+              "left": 114,
+              "top": 642,
+              "width": 48,
+              "height": 174
+            },
+            "css": {
+              "z": "1694410",
+              "position": "absolute",
+              "opacity": "1",
+              "transform": "none",
+              "visibility": "visible"
+            },
+            "loaded": true
+          },
+          {
+            "x": 280,
+            "y": 641,
+            "src": "/original-map/WemadeMir2/Objects/8447.png",
+            "renderSrc": "blob:http://127.0.0.1:20063/9f694552-0444-44ee-a252-3d31b31aa9e0",
+            "rect": {
+              "left": 114,
+              "top": 748,
+              "width": 48,
+              "height": 484
+            },
+            "css": {
+              "z": "1850410",
+              "position": "absolute",
+              "opacity": "1",
+              "transform": "none",
+              "visibility": "visible"
+            },
+            "loaded": true
+          },
+          {
+            "x": 281,
+            "y": 605,
+            "src": "/original-map/WemadeMir2/Objects/4270.png",
+            "renderSrc": "blob:http://127.0.0.1:20063/3f5a0b5c-0cef-44c1-a946-bfd5a9bcb46f",
+            "rect": {
+              "left": 162,
+              "top": -214,
+              "width": 48,
+              "height": 294
+            },
+            "css": {
+              "z": "1418430",
+              "position": "absolute",
+              "opacity": "1",
+              "transform": "none",
+              "visibility": "visible"
+            },
+            "loaded": true
+          },
+          {
+            "x": 281,
+            "y": 609,
+            "src": "/original-map/WemadeMir2/Objects/4263.png",
+            "renderSrc": "blob:http://127.0.0.1:20063/20b03163-d802-4a86-8c77-d3a6b2b20ce8",
+            "rect": {
+              "left": 162,
+              "top": -214,
+              "width": 48,
+              "height": 422
+            },
+            "css": {
+              "z": "1466430",
+              "position": "absolute",
+              "opacity": "1",
+              "transform": "none",
+              "visibility": "visible"
+            },
+            "loaded": true
+          },
+          {
+            "x": 281,
+            "y": 623,
+            "src": "/original-map/WemadeMir2/Objects/4214.png",
+            "renderSrc": "blob:http://127.0.0.1:20063/8164f080-a545-45a4-a4c7-8d9d2a5289cc",
+            "rect": {
+              "left": 162,
+              "top": 389,
+              "width": 48,
+              "height": 267
+            },
+            "css": {
+              "z": "1634430",
+              "position": "absolute",
+              "opacity": "1",
+              "transform": "none",
+              "visibility": "visible"
+            },
+            "loaded": true
+          },
+          {
+            "x": 281,
+            "y": 627,
+            "src": "/original-map/WemadeMir2/Objects/8558.png",
+            "renderSrc": "blob:http://127.0.0.1:20063/eec0a426-0a0a-4a48-994d-ff2fc277926a",
+            "rect": {
+              "left": 162,
+              "top": 610,
+              "width": 48,
+              "height": 174
+            },
+            "css": {
+              "z": "1682430",
+              "position": "absolute",
+              "opacity": "1",
+              "transform": "none",
+              "visibility": "visible"
+            },
+            "loaded": true
+          },
+          {
+            "x": 281,
+            "y": 640,
+            "src": "/original-map/WemadeMir2/Objects/8445.png",
+            "renderSrc": "blob:http://127.0.0.1:20063/eba6132c-dba4-4ee3-acc6-4e19b90728f9",
+            "rect": {
+              "left": 162,
+              "top": 716,
+              "width": 48,
+              "height": 484
+            },
+            "css": {
+              "z": "1838430",
+              "position": "absolute",
+              "opacity": "1",
+              "transform": "none",
+              "visibility": "visible"
+            },
+            "loaded": true
+          },
+          {
+            "x": 282,
+            "y": 604,
+            "src": "/original-map/WemadeMir2/Objects/4271.png",
+            "renderSrc": "blob:http://127.0.0.1:20063/55ad93af-1471-418d-b95a-ef8da9d15438",
+            "rect": {
+              "left": 210,
+              "top": -181,
+              "width": 48,
+              "height": 229
+            },
+            "css": {
+              "z": "1406450",
+              "position": "absolute",
+              "opacity": "1",
+              "transform": "none",
+              "visibility": "visible"
+            },
+            "loaded": true
+          },
+          {
+            "x": 282,
+            "y": 607,
+            "src": "/original-map/WemadeMir2/Objects/4264.png",
+            "renderSrc": "blob:http://127.0.0.1:20063/6813d4a3-4174-4e78-8ba6-762d29dd93bb",
+            "rect": {
+              "left": 210,
+              "top": -181,
+              "width": 48,
+              "height": 325
+            },
+            "css": {
+              "z": "1442450",
+              "position": "absolute",
+              "opacity": "1",
+              "transform": "none",
+              "visibility": "visible"
+            },
+            "loaded": true
+          },
+          {
+            "x": 282,
+            "y": 622,
+            "src": "/original-map/WemadeMir2/Objects/4215.png",
+            "renderSrc": "blob:http://127.0.0.1:20063/72f3534a-b7af-4170-8bfd-3871794844e0",
+            "rect": {
+              "left": 210,
+              "top": 440,
+              "width": 48,
+              "height": 184
+            },
+            "css": {
+              "z": "1622450",
+              "position": "absolute",
+              "opacity": "1",
+              "transform": "none",
+              "visibility": "visible"
+            },
+            "loaded": true
+          },
+          {
+            "x": 282,
+            "y": 626,
+            "src": "/original-map/WemadeMir2/Objects/8562.png",
+            "renderSrc": "blob:http://127.0.0.1:20063/7c73227f-fc85-4d4e-a660-b9b87b5738e0",
+            "rect": {
+              "left": 210,
+              "top": 579,
+              "width": 48,
+              "height": 173
+            },
+            "css": {
+              "z": "1670450",
+              "position": "absolute",
+              "opacity": "1",
+              "transform": "none",
+              "visibility": "visible"
+            },
+            "loaded": true
+          },
+          {
+            "x": 282,
+            "y": 639,
+            "src": "/original-map/WemadeMir2/Objects/8440.png",
+            "renderSrc": "blob:http://127.0.0.1:20063/b92a2c9b-55d6-41bd-8be2-602f9f2e8583",
+            "rect": {
+              "left": 210,
+              "top": 686,
+              "width": 48,
+              "height": 482
+            },
+            "css": {
+              "z": "1826450",
+              "position": "absolute",
+              "opacity": "1",
+              "transform": "none",
+              "visibility": "visible"
+            },
+            "loaded": true
+          },
+          {
+            "x": 283,
+            "y": 607,
+            "src": "/original-map/WemadeMir2/Objects/4265.png",
+            "renderSrc": "blob:http://127.0.0.1:20063/33c5f512-3c51-4ea3-bca6-e358aab3d101",
+            "rect": {
+              "left": 258,
+              "top": -213,
+              "width": 48,
+              "height": 357
+            },
+            "css": {
+              "z": "1442470",
+              "position": "absolute",
+              "opacity": "1",
+              "transform": "none",
+              "visibility": "visible"
+            },
+            "loaded": true
+          },
+          {
+            "x": 283,
+            "y": 621,
+            "src": "/original-map/WemadeMir2/Objects/4216.png",
+            "renderSrc": "blob:http://127.0.0.1:20063/333a837a-1771-44a3-b64c-be8ba1f93289",
+            "rect": {
+              "left": 258,
+              "top": 494,
+              "width": 48,
+              "height": 98
+            },
+            "css": {
+              "z": "1610470",
+              "position": "absolute",
+              "opacity": "1",
+              "transform": "none",
+              "visibility": "visible"
+            },
+            "loaded": true
+          },
+          {
+            "x": 283,
+            "y": 625,
+            "src": "/original-map/WemadeMir2/Objects/8561.png",
+            "renderSrc": "blob:http://127.0.0.1:20063/1691fc74-1f53-4107-be26-dcd85da62eca",
+            "rect": {
+              "left": 258,
+              "top": 539,
+              "width": 48,
+              "height": 181
+            },
+            "css": {
+              "z": "1658470",
+              "position": "absolute",
+              "opacity": "1",
+              "transform": "none",
+              "visibility": "visible"
+            },
+            "loaded": true
+          },
+          {
+            "x": 283,
+            "y": 635,
+            "src": "/original-map/WemadeMir2/Objects/8439.png",
+            "renderSrc": "blob:http://127.0.0.1:20063/80b517ed-dcf3-4eeb-9750-94c851849772",
+            "rect": {
+              "left": 258,
+              "top": 646,
+              "width": 48,
+              "height": 394
+            },
+            "css": {
+              "z": "1778470",
+              "position": "absolute",
+              "opacity": "1",
+              "transform": "none",
+              "visibility": "visible"
+            },
+            "loaded": true
+          },
+          {
+            "x": 284,
+            "y": 602,
+            "src": "/original-map/WemadeMir2/Objects/4267.png",
+            "renderSrc": "blob:http://127.0.0.1:20063/a6e27268-d9cf-4327-a95f-fe93d8245903",
+            "rect": {
+              "left": 306,
+              "top": -245,
+              "width": 48,
+              "height": 229
+            },
+            "css": {
+              "z": "1382490",
+              "position": "absolute",
+              "opacity": "1",
+              "transform": "none",
+              "visibility": "visible"
+            },
+            "loaded": true
+          },
+          {
+            "x": 284,
+            "y": 625,
+            "src": "/original-map/WemadeMir2/Objects/8560.png",
+            "renderSrc": "blob:http://127.0.0.1:20063/d5429e08-22d7-4245-bff8-343de47f47d3",
+            "rect": {
+              "left": 306,
+              "top": 539,
+              "width": 48,
+              "height": 181
+            },
+            "css": {
+              "z": "1658490",
+              "position": "absolute",
+              "opacity": "1",
+              "transform": "none",
+              "visibility": "visible"
+            },
+            "loaded": true
+          },
+          {
+            "x": 284,
+            "y": 635,
+            "src": "/original-map/WemadeMir2/Objects/8436.png",
+            "renderSrc": "blob:http://127.0.0.1:20063/ae5235d2-5b80-4689-9552-fc6df523461e",
+            "rect": {
+              "left": 306,
+              "top": 612,
+              "width": 48,
+              "height": 428
+            },
+            "css": {
+              "z": "1778490",
+              "position": "absolute",
+              "opacity": "1",
+              "transform": "none",
+              "visibility": "visible"
+            },
+            "loaded": true
+          },
+          {
+            "x": 285,
+            "y": 601,
+            "src": "/original-map/WemadeMir2/Objects/4268.png",
+            "renderSrc": "blob:http://127.0.0.1:20063/6d2a1ffe-7b46-41f8-87b4-c66622439235",
+            "rect": {
+              "left": 354,
+              "top": -277,
+              "width": 48,
+              "height": 229
+            },
+            "css": {
+              "z": "1370510",
+              "position": "absolute",
+              "opacity": "1",
+              "transform": "none",
+              "visibility": "visible"
+            },
+            "loaded": true
+          },
+          {
+            "x": 285,
+            "y": 614,
+            "src": "/original-map/WemadeMir2/Objects/2733.png",
+            "renderSrc": "blob:http://127.0.0.1:20063/ec9ae391-ea63-46b7-b04e-4a83225bcd5d",
+            "rect": {
+              "left": 354,
+              "top": 230,
+              "width": 96,
+              "height": 138
+            },
+            "css": {
+              "z": "1526510",
+              "position": "absolute",
+              "opacity": "1",
+              "transform": "none",
+              "visibility": "visible"
+            },
+            "loaded": true
+          },
+          {
+            "x": 285,
+            "y": 626,
+            "src": "/original-map/WemadeMir2/Objects/8559.png",
+            "renderSrc": "blob:http://127.0.0.1:20063/1f098827-30dd-4b2e-947f-1f45a2ef1f37",
+            "rect": {
+              "left": 354,
+              "top": 578,
+              "width": 48,
+              "height": 174
+            },
+            "css": {
+              "z": "1670510",
+              "position": "absolute",
+              "opacity": "1",
+              "transform": "none",
+              "visibility": "visible"
+            },
+            "loaded": true
+          },
+          {
+            "x": 285,
+            "y": 635,
+            "src": "/original-map/WemadeMir2/Objects/8614.png",
+            "renderSrc": "blob:http://127.0.0.1:20063/3ca99b68-f993-48be-afc9-f072a815f5d0",
+            "rect": {
+              "left": 354,
+              "top": 592,
+              "width": 48,
+              "height": 448
+            },
+            "css": {
+              "z": "1778510",
+              "position": "absolute",
+              "opacity": "1",
+              "transform": "none",
+              "visibility": "visible"
+            },
+            "loaded": true
+          },
+          {
+            "x": 286,
+            "y": 600,
+            "src": "/original-map/WemadeMir2/Objects/4269.png",
+            "renderSrc": "blob:http://127.0.0.1:20063/c20d415e-a3f7-4b86-a29f-cec0ad587a6b",
+            "rect": {
+              "left": 402,
+              "top": -309,
+              "width": 48,
+              "height": 229
+            },
+            "css": {
+              "z": "1358530",
+              "position": "absolute",
+              "opacity": "1",
+              "transform": "none",
+              "visibility": "visible"
+            },
+            "loaded": true
+          },
+          {
+            "x": 286,
+            "y": 627,
+            "src": "/original-map/WemadeMir2/Objects/8563.png",
+            "renderSrc": "blob:http://127.0.0.1:20063/2faa8228-61cc-4a4a-9e7c-2a5ee45a3eaa",
+            "rect": {
+              "left": 402,
+              "top": 610,
+              "width": 48,
+              "height": 174
+            },
+            "css": {
+              "z": "1682530",
+              "position": "absolute",
+              "opacity": "1",
+              "transform": "none",
+              "visibility": "visible"
+            },
+            "loaded": true
+          },
+          {
+            "x": 286,
+            "y": 635,
+            "src": "/original-map/WemadeMir2/Objects/8430.png",
+            "renderSrc": "blob:http://127.0.0.1:20063/90b8af02-313b-4a3a-8b98-3d6462bb6f83",
+            "rect": {
+              "left": 402,
+              "top": 572,
+              "width": 48,
+              "height": 468
+            },
+            "css": {
+              "z": "1778530",
+              "position": "absolute",
+              "opacity": "1",
+              "transform": "none",
+              "visibility": "visible"
+            },
+            "loaded": true
+          },
+          {
+            "x": 287,
+            "y": 599,
+            "src": "/original-map/WemadeMir2/Objects/4274.png",
+            "renderSrc": "blob:http://127.0.0.1:20063/e18d750f-30cf-411e-b2b1-5d5a683d9360",
+            "rect": {
+              "left": 450,
+              "top": -340,
+              "width": 48,
+              "height": 228
+            },
+            "css": {
+              "z": "1346550",
+              "position": "absolute",
+              "opacity": "1",
+              "transform": "none",
+              "visibility": "visible"
+            },
+            "loaded": true
+          },
+          {
+            "x": 287,
+            "y": 628,
+            "src": "/original-map/WemadeMir2/Objects/8522.png",
+            "renderSrc": "blob:http://127.0.0.1:20063/adc9eb9d-083a-4132-a32f-d35235b8ec39",
+            "rect": {
+              "left": 450,
+              "top": 643,
+              "width": 48,
+              "height": 173
+            },
+            "css": {
+              "z": "1694550",
+              "position": "absolute",
+              "opacity": "1",
+              "transform": "none",
+              "visibility": "visible"
+            },
+            "loaded": true
+          },
+          {
+            "x": 287,
+            "y": 634,
+            "src": "/original-map/WemadeMir2/Objects/8428.png",
+            "renderSrc": "blob:http://127.0.0.1:20063/1f5b5dd8-9aad-448c-b06a-d89125a6a925",
+            "rect": {
+              "left": 450,
+              "top": 573,
+              "width": 48,
+              "height": 435
+            },
+            "css": {
+              "z": "1766550",
+              "position": "absolute",
+              "opacity": "1",
+              "transform": "none",
+              "visibility": "visible"
+            },
+            "loaded": true
+          },
+          {
+            "x": 288,
+            "y": 607,
+            "src": "/original-map/WemadeMir2/Objects/7679.png",
+            "renderSrc": "blob:http://127.0.0.1:20063/dbbc3002-5909-419b-9dcc-fb100e36a086",
+            "rect": {
+              "left": 498,
+              "top": 21,
+              "width": 48,
+              "height": 123
+            },
+            "css": {
+              "z": "1442570",
+              "position": "absolute",
+              "opacity": "1",
+              "transform": "none",
+              "visibility": "visible"
+            },
+            "loaded": true
+          },
+          {
+            "x": 288,
+            "y": 629,
+            "src": "/original-map/WemadeMir2/Objects/8526.png",
+            "renderSrc": "blob:http://127.0.0.1:20063/c3ba94b2-0929-42ac-b42e-c8a0f86af561",
+            "rect": {
+              "left": 498,
+              "top": 675,
+              "width": 48,
+              "height": 173
+            },
+            "css": {
+              "z": "1706570",
+              "position": "absolute",
+              "opacity": "1",
+              "transform": "none",
+              "visibility": "visible"
+            },
+            "loaded": true
+          },
+          {
+            "x": 288,
+            "y": 633,
+            "src": "/original-map/WemadeMir2/Objects/8426.png",
+            "renderSrc": "blob:http://127.0.0.1:20063/85dc8773-52a3-47c5-81f3-3179040ab83e",
+            "rect": {
+              "left": 498,
+              "top": 586,
+              "width": 48,
+              "height": 390
+            },
+            "css": {
+              "z": "1754570",
+              "position": "absolute",
+              "opacity": "1",
+              "transform": "none",
+              "visibility": "visible"
+            },
+            "loaded": true
+          },
+          {
+            "x": 289,
+            "y": 610,
+            "src": "/original-map/WemadeMir2/Objects/7680.png",
+            "renderSrc": "blob:http://127.0.0.1:20063/c2aa027b-1df8-41c9-8466-a1ff2f66b234",
+            "rect": {
+              "left": 546,
+              "top": -9,
+              "width": 48,
+              "height": 249
+            },
+            "css": {
+              "z": "1478590",
+              "position": "absolute",
+              "opacity": "1",
+              "transform": "none",
+              "visibility": "visible"
+            },
+            "loaded": true
+          },
+          {
+            "x": 289,
+            "y": 630,
+            "src": "/original-map/WemadeMir2/Objects/8525.png",
+            "renderSrc": "blob:http://127.0.0.1:20063/18bb3387-0941-463e-89f4-01cd9b03602b",
+            "rect": {
+              "left": 546,
+              "top": 707,
+              "width": 48,
+              "height": 173
+            },
+            "css": {
+              "z": "1718590",
+              "position": "absolute",
+              "opacity": "1",
+              "transform": "none",
+              "visibility": "visible"
+            },
+            "loaded": true
+          },
+          {
+            "x": 289,
+            "y": 632,
+            "src": "/original-map/WemadeMir2/Objects/8424.png",
+            "renderSrc": "blob:http://127.0.0.1:20063/5e276067-1941-427b-9e2d-1259922be3d4",
+            "rect": {
+              "left": 546,
+              "top": 602,
+              "width": 48,
+              "height": 342
+            },
+            "css": {
+              "z": "1742590",
+              "position": "absolute",
+              "opacity": "1",
+              "transform": "none",
+              "visibility": "visible"
+            },
+            "loaded": true
+          },
+          {
+            "x": 290,
+            "y": 610,
+            "src": "/original-map/WemadeMir2/Objects/7681.png",
+            "renderSrc": "blob:http://127.0.0.1:20063/1672af66-2d07-4445-9b0b-e1c15076a593",
+            "rect": {
+              "left": 594,
+              "top": -21,
+              "width": 48,
+              "height": 261
+            },
+            "css": {
+              "z": "1478610",
+              "position": "absolute",
+              "opacity": "1",
+              "transform": "none",
+              "visibility": "visible"
+            },
+            "loaded": true
+          },
+          {
+            "x": 290,
+            "y": 631,
+            "src": "/original-map/WemadeMir2/Objects/8524.png",
+            "renderSrc": "blob:http://127.0.0.1:20063/7db9e1d2-847f-461d-b960-6e9be68730a8",
+            "rect": {
+              "left": 594,
+              "top": 739,
+              "width": 48,
+              "height": 173
+            },
+            "css": {
+              "z": "1730610",
+              "position": "absolute",
+              "opacity": "1",
+              "transform": "none",
+              "visibility": "visible"
+            },
+            "loaded": true
+          },
+          {
+            "x": 290,
+            "y": 632,
+            "src": "/original-map/WemadeMir2/Objects/8422.png",
+            "renderSrc": "blob:http://127.0.0.1:20063/3b152994-d988-4ae8-805f-ae572a824c25",
+            "rect": {
+              "left": 594,
+              "top": 603,
+              "width": 48,
+              "height": 341
+            },
+            "css": {
+              "z": "1742610",
+              "position": "absolute",
+              "opacity": "1",
+              "transform": "none",
+              "visibility": "visible"
+            },
+            "loaded": true
+          },
+          {
+            "x": 290,
+            "y": 634,
+            "src": "/original-map/WemadeMir2/Objects/1395.png",
+            "renderSrc": "blob:http://127.0.0.1:20063/4070a7ad-38e0-4540-8528-8e9b521acd10",
+            "rect": {
+              "left": 594,
+              "top": 784,
+              "width": 48,
+              "height": 224
+            },
+            "css": {
+              "z": "1766610",
+              "position": "absolute",
+              "opacity": "1",
+              "transform": "none",
+              "visibility": "visible"
+            },
+            "loaded": true
+          },
+          {
+            "x": 291,
+            "y": 603,
+            "src": "/original-map/WemadeMir2/Objects/7687.png",
+            "renderSrc": "blob:http://127.0.0.1:20063/c80d1b96-6b0f-4264-9d63-56d8ce2b643d",
+            "rect": {
+              "left": 642,
+              "top": -70,
+              "width": 48,
+              "height": 86
+            },
+            "css": {
+              "z": "1394630",
+              "position": "absolute",
+              "opacity": "1",
+              "transform": "none",
+              "visibility": "visible"
+            },
+            "loaded": true
+          },
+          {
+            "x": 291,
+            "y": 610,
+            "src": "/original-map/WemadeMir2/Objects/7682.png",
+            "renderSrc": "blob:http://127.0.0.1:20063/948368b7-260a-42d9-ae83-ca6b28c8c5ce",
+            "rect": {
+              "left": 642,
+              "top": -6,
+              "width": 48,
+              "height": 246
+            },
+            "css": {
+              "z": "1478630",
+              "position": "absolute",
+              "opacity": "1",
+              "transform": "none",
+              "visibility": "visible"
+            },
+            "loaded": true
+          },
+          {
+            "x": 291,
+            "y": 631,
+            "src": "/original-map/WemadeMir2/Objects/8465.png",
+            "renderSrc": "blob:http://127.0.0.1:20063/cae40389-3f53-4d48-a4e9-241ff0a242b1",
+            "rect": {
+              "left": 642,
+              "top": 796,
+              "width": 48,
+              "height": 116
+            },
+            "css": {
+              "z": "1730630",
+              "position": "absolute",
+              "opacity": "1",
+              "transform": "none",
+              "visibility": "visible"
+            },
+            "loaded": true
+          },
+          {
+            "x": 291,
+            "y": 632,
+            "src": "/original-map/WemadeMir2/Objects/8523.png",
+            "renderSrc": "blob:http://127.0.0.1:20063/3160a6d9-4c0a-4a24-b68d-1280b56d2270",
+            "rect": {
+              "left": 642,
+              "top": 771,
+              "width": 48,
+              "height": 173
+            },
+            "css": {
+              "z": "1742630",
+              "position": "absolute",
+              "opacity": "1",
+              "transform": "none",
+              "visibility": "visible"
+            },
+            "loaded": true
+          },
+          {
+            "x": 291,
+            "y": 635,
+            "src": "/original-map/WemadeMir2/Objects/1396.png",
+            "renderSrc": "blob:http://127.0.0.1:20063/bfb8298e-60ec-48b4-86aa-3af818afc7b0",
+            "rect": {
+              "left": 642,
+              "top": 752,
+              "width": 48,
+              "height": 288
+            },
+            "css": {
+              "z": "1778630",
+              "position": "absolute",
+              "opacity": "1",
+              "transform": "none",
+              "visibility": "visible"
+            },
+            "loaded": true
+          },
+          {
+            "x": 292,
+            "y": 603,
+            "src": "/original-map/WemadeMir2/Objects/7688.png",
+            "renderSrc": "/generated/original-map-blend/WemadeMir2/Objects/7688.png",
+            "rect": {
+              "left": 690,
+              "top": -138,
+              "width": 48,
+              "height": 154
+            },
+            "css": {
+              "z": "1394650",
+              "position": "absolute",
+              "opacity": "1",
+              "transform": "none",
+              "visibility": "visible"
+            },
+            "loaded": true
+          },
+          {
+            "x": 292,
+            "y": 610,
+            "src": "/original-map/WemadeMir2/Objects/7683.png",
+            "renderSrc": "blob:http://127.0.0.1:20063/8de759a5-0156-4b07-8d0f-b992b0d87700",
+            "rect": {
+              "left": 690,
+              "top": 26,
+              "width": 48,
+              "height": 214
+            },
+            "css": {
+              "z": "1478650",
+              "position": "absolute",
+              "opacity": "1",
+              "transform": "none",
+              "visibility": "visible"
+            },
+            "loaded": true
+          },
+          {
+            "x": 292,
+            "y": 615,
+            "src": "/original-map/WemadeMir2/Objects/4143.png",
+            "renderSrc": "blob:http://127.0.0.1:20063/b3506a75-8aef-4baa-88bf-ca2b2c3d913c",
+            "rect": {
+              "left": 690,
+              "top": 304,
+              "width": 48,
+              "height": 96
+            },
+            "css": {
+              "z": "1538650",
+              "position": "absolute",
+              "opacity": "1",
+              "transform": "none",
+              "visibility": "visible"
+            },
+            "loaded": true
+          },
+          {
+            "x": 292,
+            "y": 622,
+            "src": "/original-map/WemadeMir2/Objects/2733.png",
+            "renderSrc": "blob:http://127.0.0.1:20063/ec9ae391-ea63-46b7-b04e-4a83225bcd5d",
+            "rect": {
+              "left": 690,
+              "top": 486,
+              "width": 96,
+              "height": 138
+            },
+            "css": {
+              "z": "1622650",
+              "position": "absolute",
+              "opacity": "1",
+              "transform": "none",
+              "visibility": "visible"
+            },
+            "loaded": true
+          },
+          {
+            "x": 292,
+            "y": 633,
+            "src": "/original-map/WemadeMir2/Objects/8527.png",
+            "renderSrc": "blob:http://127.0.0.1:20063/2685cb2b-22b1-4289-9724-d9f4da951628",
+            "rect": {
+              "left": 690,
+              "top": 803,
+              "width": 48,
+              "height": 173
+            },
+            "css": {
+              "z": "1754650",
+              "position": "absolute",
+              "opacity": "1",
+              "transform": "none",
+              "visibility": "visible"
+            },
+            "loaded": true
+          },
+          {
+            "x": 292,
+            "y": 635,
+            "src": "/original-map/WemadeMir2/Objects/1397.png",
+            "renderSrc": "blob:http://127.0.0.1:20063/8740fec2-55dd-4366-950f-820dd61c8133",
+            "rect": {
+              "left": 690,
+              "top": 752,
+              "width": 48,
+              "height": 288
+            },
+            "css": {
+              "z": "1778650",
+              "position": "absolute",
+              "opacity": "1",
+              "transform": "none",
+              "visibility": "visible"
+            },
+            "loaded": true
+          },
+          {
+            "x": 293,
+            "y": 603,
+            "src": "/original-map/WemadeMir2/Objects/7689.png",
+            "renderSrc": "blob:http://127.0.0.1:20063/f0a305d2-1462-438b-a5d1-483dc83ce9f2",
+            "rect": {
+              "left": 738,
+              "top": -163,
+              "width": 48,
+              "height": 179
+            },
+            "css": {
+              "z": "1394670",
+              "position": "absolute",
+              "opacity": "1",
+              "transform": "none",
+              "visibility": "visible"
+            },
+            "loaded": true
+          },
+          {
+            "x": 293,
+            "y": 610,
+            "src": "/original-map/WemadeMir2/Objects/7684.png",
+            "renderSrc": "blob:http://127.0.0.1:20063/5386adf7-1175-4918-98e3-39fecb09b67f",
+            "rect": {
+              "left": 738,
+              "top": 70,
+              "width": 48,
+              "height": 170
+            },
+            "css": {
+              "z": "1478670",
+              "position": "absolute",
+              "opacity": "1",
+              "transform": "none",
+              "visibility": "visible"
+            },
+            "loaded": true
+          },
+          {
+            "x": 293,
+            "y": 615,
+            "src": "/original-map/WemadeMir2/Objects/4144.png",
+            "renderSrc": "blob:http://127.0.0.1:20063/1ddbf551-e724-44ce-8863-08f0f65c1a43",
+            "rect": {
+              "left": 738,
+              "top": 304,
+              "width": 48,
+              "height": 96
+            },
+            "css": {
+              "z": "1538670",
+              "position": "absolute",
+              "opacity": "1",
+              "transform": "none",
+              "visibility": "visible"
+            },
+            "loaded": true
+          },
+          {
+            "x": 293,
+            "y": 634,
+            "src": "/original-map/WemadeMir2/Objects/8565.png",
+            "renderSrc": "blob:http://127.0.0.1:20063/48a85dcd-60a2-4fc6-a243-cbe50bad4e43",
+            "rect": {
+              "left": 738,
+              "top": 832,
+              "width": 48,
+              "height": 176
+            },
+            "css": {
+              "z": "1766670",
+              "position": "absolute",
+              "opacity": "1",
+              "transform": "none",
+              "visibility": "visible"
+            },
+            "loaded": true
+          },
+          {
+            "x": 293,
+            "y": 635,
+            "src": "/original-map/WemadeMir2/Objects/1398.png",
+            "renderSrc": "/generated/original-map-blend/WemadeMir2/Objects/1398.png",
+            "rect": {
+              "left": 738,
+              "top": 784,
+              "width": 48,
+              "height": 256
+            },
+            "css": {
+              "z": "1778670",
+              "position": "absolute",
+              "opacity": "1",
+              "transform": "none",
+              "visibility": "visible"
+            },
+            "loaded": true
+          },
+          {
+            "x": 294,
+            "y": 604,
+            "src": "/original-map/WemadeMir2/Objects/7690.png",
+            "renderSrc": "blob:http://127.0.0.1:20063/bfb57a00-e8b3-406b-a6b1-b2ac3f5f7518",
+            "rect": {
+              "left": 786,
+              "top": -178,
+              "width": 48,
+              "height": 226
+            },
+            "css": {
+              "z": "1406690",
+              "position": "absolute",
+              "opacity": "1",
+              "transform": "none",
+              "visibility": "visible"
+            },
+            "loaded": true
+          },
+          {
+            "x": 294,
+            "y": 634,
+            "src": "/original-map/WemadeMir2/Objects/1399.png",
+            "renderSrc": "blob:http://127.0.0.1:20063/85aff7ca-1590-417a-b1f2-4894c38e9af1",
+            "rect": {
+              "left": 786,
+              "top": 880,
+              "width": 48,
+              "height": 128
+            },
+            "css": {
+              "z": "1766690",
+              "position": "absolute",
+              "opacity": "1",
+              "transform": "none",
+              "visibility": "visible"
+            },
+            "loaded": true
+          },
+          {
+            "x": 294,
+            "y": 635,
+            "src": "/original-map/WemadeMir2/Objects/8569.png",
+            "renderSrc": "blob:http://127.0.0.1:20063/bcbb6073-9195-458e-ac25-b2eb84cf5313",
+            "rect": {
+              "left": 786,
+              "top": 865,
+              "width": 48,
+              "height": 175
+            },
+            "css": {
+              "z": "1778690",
+              "position": "absolute",
+              "opacity": "1",
+              "transform": "none",
+              "visibility": "visible"
+            },
+            "loaded": true
+          },
+          {
+            "x": 295,
+            "y": 604,
+            "src": "/original-map/WemadeMir2/Objects/7691.png",
+            "renderSrc": "blob:http://127.0.0.1:20063/6c05415e-752c-4763-9cca-21825c6f3f69",
+            "rect": {
+              "left": 834,
+              "top": -166,
+              "width": 48,
+              "height": 214
+            },
+            "css": {
+              "z": "1406710",
+              "position": "absolute",
+              "opacity": "1",
+              "transform": "none",
+              "visibility": "visible"
+            },
+            "loaded": true
+          },
+          {
+            "x": 295,
+            "y": 606,
+            "src": "/original-map/WemadeMir2/Objects/1386.png",
+            "renderSrc": "blob:http://127.0.0.1:20063/d1966acf-089c-49d6-ba2b-0d6405cfd10e",
+            "rect": {
+              "left": 834,
+              "top": -240,
+              "width": 48,
+              "height": 352
+            },
+            "css": {
+              "z": "1430710",
+              "position": "absolute",
+              "opacity": "1",
+              "transform": "none",
+              "visibility": "visible"
+            },
+            "loaded": true
+          },
+          {
+            "x": 295,
+            "y": 612,
+            "src": "/original-map/WemadeMir2/Objects/7694.png",
+            "renderSrc": "blob:http://127.0.0.1:20063/a3c62dee-4b1b-41cf-b292-b9d07a37add3",
+            "rect": {
+              "left": 834,
+              "top": 219,
+              "width": 48,
+              "height": 85
+            },
+            "css": {
+              "z": "1502710",
+              "position": "absolute",
+              "opacity": "1",
+              "transform": "none",
+              "visibility": "visible"
+            },
+            "loaded": true
+          },
+          {
+            "x": 295,
+            "y": 638,
+            "src": "/original-map/WemadeMir2/Objects/8567.png",
+            "renderSrc": "blob:http://127.0.0.1:20063/30bd914a-ac99-4d39-bb24-4311f722709c",
+            "rect": {
+              "left": 834,
+              "top": 896,
+              "width": 48,
+              "height": 240
+            },
+            "css": {
+              "z": "1814710",
+              "position": "absolute",
+              "opacity": "1",
+              "transform": "none",
+              "visibility": "visible"
+            },
+            "loaded": true
+          },
+          {
+            "x": 296,
+            "y": 604,
+            "src": "/original-map/WemadeMir2/Objects/7692.png",
+            "renderSrc": "/generated/original-map-blend/WemadeMir2/Objects/7692.png",
+            "rect": {
+              "left": 882,
+              "top": -133,
+              "width": 48,
+              "height": 181
+            },
+            "css": {
+              "z": "1406730",
+              "position": "absolute",
+              "opacity": "1",
+              "transform": "none",
+              "visibility": "visible"
+            },
+            "loaded": true
+          },
+          {
+            "x": 296,
+            "y": 607,
+            "src": "/original-map/WemadeMir2/Objects/1387.png",
+            "renderSrc": "blob:http://127.0.0.1:20063/3bf97aba-db28-4e38-a844-cf1cfe531a88",
+            "rect": {
+              "left": 882,
+              "top": -272,
+              "width": 48,
+              "height": 416
+            },
+            "css": {
+              "z": "1442730",
+              "position": "absolute",
+              "opacity": "1",
+              "transform": "none",
+              "visibility": "visible"
+            },
+            "loaded": true
+          },
+          {
+            "x": 296,
+            "y": 612,
+            "src": "/original-map/WemadeMir2/Objects/7695.png",
+            "renderSrc": "blob:http://127.0.0.1:20063/b5d5df5e-8ebc-4c0f-ae00-446cc5ce7e94",
+            "rect": {
+              "left": 882,
+              "top": 95,
+              "width": 48,
+              "height": 209
+            },
+            "css": {
+              "z": "1502730",
+              "position": "absolute",
+              "opacity": "1",
+              "transform": "none",
+              "visibility": "visible"
+            },
+            "loaded": true
+          },
+          {
+            "x": 297,
+            "y": 603,
+            "src": "/original-map/WemadeMir2/Objects/7693.png",
+            "renderSrc": "blob:http://127.0.0.1:20063/b79c12de-a220-42db-8be5-092cc91a5014",
+            "rect": {
+              "left": 930,
+              "top": -86,
+              "width": 48,
+              "height": 102
+            },
+            "css": {
+              "z": "1394750",
+              "position": "absolute",
+              "opacity": "1",
+              "transform": "none",
+              "visibility": "visible"
+            },
+            "loaded": true
+          },
+          {
+            "x": 297,
+            "y": 607,
+            "src": "/original-map/WemadeMir2/Objects/1388.png",
+            "renderSrc": "blob:http://127.0.0.1:20063/59ad8f0e-7d10-497b-9fa6-36719082472d",
+            "rect": {
+              "left": 930,
+              "top": -336,
+              "width": 48,
+              "height": 480
+            },
+            "css": {
+              "z": "1442750",
+              "position": "absolute",
+              "opacity": "1",
+              "transform": "none",
+              "visibility": "visible"
+            },
+            "loaded": true
+          },
+          {
+            "x": 297,
+            "y": 612,
+            "src": "/original-map/WemadeMir2/Objects/7696.png",
+            "renderSrc": "blob:http://127.0.0.1:20063/5ce083a8-aef7-4695-8413-258c6eb58ea7",
+            "rect": {
+              "left": 930,
+              "top": 62,
+              "width": 48,
+              "height": 242
+            },
+            "css": {
+              "z": "1502750",
+              "position": "absolute",
+              "opacity": "1",
+              "transform": "none",
+              "visibility": "visible"
+            },
+            "loaded": true
+          },
+          {
+            "x": 297,
+            "y": 618,
+            "src": "/original-map/WemadeMir2/Objects/1088.png",
+            "renderSrc": "blob:http://127.0.0.1:20063/9dd974ef-070a-49eb-86ae-d72cb4c384ce",
+            "rect": {
+              "left": 930,
+              "top": 441,
+              "width": 48,
+              "height": 55
+            },
+            "css": {
+              "z": "1574750",
+              "position": "absolute",
+              "opacity": "1",
+              "transform": "none",
+              "visibility": "visible"
+            },
+            "loaded": true
+          },
+          {
+            "x": 298,
+            "y": 608,
+            "src": "/original-map/WemadeMir2/Objects/1389.png",
+            "renderSrc": "blob:http://127.0.0.1:20063/f7e04d7b-ba01-4197-8c48-bfa642b0353c",
+            "rect": {
+              "left": 978,
+              "top": -336,
+              "width": 48,
+              "height": 512
+            },
+            "css": {
+              "z": "1454770",
+              "position": "absolute",
+              "opacity": "1",
+              "transform": "none",
+              "visibility": "visible"
+            },
+            "loaded": true
+          },
+          {
+            "x": 298,
+            "y": 613,
+            "src": "/original-map/WemadeMir2/Objects/7697.png",
+            "renderSrc": "blob:http://127.0.0.1:20063/b83e9b3c-ee5b-4862-b3aa-a0a290234c00",
+            "rect": {
+              "left": 978,
+              "top": 47,
+              "width": 48,
+              "height": 289
+            },
+            "css": {
+              "z": "1514770",
+              "position": "absolute",
+              "opacity": "1",
+              "transform": "none",
+              "visibility": "visible"
+            },
+            "loaded": true
+          },
+          {
+            "x": 298,
+            "y": 618,
+            "src": "/original-map/WemadeMir2/Objects/1089.png",
+            "renderSrc": "blob:http://127.0.0.1:20063/7a1ef5bd-02be-4174-bedb-6a16a3898e5e",
+            "rect": {
+              "left": 978,
+              "top": 439,
+              "width": 48,
+              "height": 57
+            },
+            "css": {
+              "z": "1574770",
+              "position": "absolute",
+              "opacity": "1",
+              "transform": "none",
+              "visibility": "visible"
+            },
+            "loaded": true
+          },
+          {
+            "x": 299,
+            "y": 608,
+            "src": "/original-map/WemadeMir2/Objects/1390.png",
+            "renderSrc": "blob:http://127.0.0.1:20063/6508352f-d43f-41c4-82ec-d28159771357",
+            "rect": {
+              "left": 1026,
+              "top": -304,
+              "width": 48,
+              "height": 480
+            },
+            "css": {
+              "z": "1454790",
+              "position": "absolute",
+              "opacity": "1",
+              "transform": "none",
+              "visibility": "visible"
+            },
+            "loaded": true
+          },
+          {
+            "x": 299,
+            "y": 613,
+            "src": "/original-map/WemadeMir2/Objects/7698.png",
+            "renderSrc": "blob:http://127.0.0.1:20063/b77ea0f1-4f6c-4326-b749-38df3daa4245",
+            "rect": {
+              "left": 1026,
+              "top": 66,
+              "width": 48,
+              "height": 270
+            },
+            "css": {
+              "z": "1514790",
+              "position": "absolute",
+              "opacity": "1",
+              "transform": "none",
+              "visibility": "visible"
+            },
+            "loaded": true
+          },
+          {
+            "x": 299,
+            "y": 629,
+            "src": "/original-map/WemadeMir2/Objects/2733.png",
+            "renderSrc": "blob:http://127.0.0.1:20063/ec9ae391-ea63-46b7-b04e-4a83225bcd5d",
+            "rect": {
+              "left": 1026,
+              "top": 710,
+              "width": 96,
+              "height": 138
+            },
+            "css": {
+              "z": "1706790",
+              "position": "absolute",
+              "opacity": "1",
+              "transform": "none",
+              "visibility": "visible"
+            },
+            "loaded": true
+          },
+          {
+            "x": 300,
+            "y": 604,
+            "src": "/original-map/WemadeMir2/Objects/1101.png",
+            "renderSrc": "blob:http://127.0.0.1:20063/86257926-8e22-49b8-a549-b998b68feccc",
+            "rect": {
+              "left": 1074,
+              "top": -2,
+              "width": 48,
+              "height": 50
+            },
+            "css": {
+              "z": "1406810",
+              "position": "absolute",
+              "opacity": "1",
+              "transform": "none",
+              "visibility": "visible"
+            },
+            "loaded": true
+          },
+          {
+            "x": 300,
+            "y": 608,
+            "src": "/original-map/WemadeMir2/Objects/1391.png",
+            "renderSrc": "blob:http://127.0.0.1:20063/e3a56458-6b15-47c0-a34f-fe7664613922",
+            "rect": {
+              "left": 1074,
+              "top": -304,
+              "width": 48,
+              "height": 480
+            },
+            "css": {
+              "z": "1454810",
+              "position": "absolute",
+              "opacity": "1",
+              "transform": "none",
+              "visibility": "visible"
+            },
+            "loaded": true
+          },
+          {
+            "x": 300,
+            "y": 612,
+            "src": "/original-map/WemadeMir2/Objects/7699.png",
+            "renderSrc": "blob:http://127.0.0.1:20063/a53c1da1-1ff8-412b-ad39-6bdbdea1f3a2",
+            "rect": {
+              "left": 1074,
+              "top": 95,
+              "width": 48,
+              "height": 209
+            },
+            "css": {
+              "z": "1502810",
+              "position": "absolute",
+              "opacity": "1",
+              "transform": "none",
+              "visibility": "visible"
+            },
+            "loaded": true
+          },
+          {
+            "x": 300,
+            "y": 619,
+            "src": "/original-map/WemadeMir2/Objects/8366.png",
+            "renderSrc": "blob:http://127.0.0.1:20063/de2b5063-c563-48cd-9fd2-507166b2eb79",
+            "rect": {
+              "left": 1074,
+              "top": 361,
+              "width": 48,
+              "height": 167
+            },
+            "css": {
+              "z": "1586810",
+              "position": "absolute",
+              "opacity": "1",
+              "transform": "none",
+              "visibility": "visible"
+            },
+            "loaded": true
+          },
+          {
+            "x": 301,
+            "y": 604,
+            "src": "/original-map/WemadeMir2/Objects/1102.png",
+            "renderSrc": "blob:http://127.0.0.1:20063/136eb796-f5bc-400b-8f58-4c2376457e58",
+            "rect": {
+              "left": 1122,
+              "top": -3,
+              "width": 48,
+              "height": 51
+            },
+            "css": {
+              "z": "1406830",
+              "position": "absolute",
+              "opacity": "1",
+              "transform": "none",
+              "visibility": "visible"
+            },
+            "loaded": true
+          },
+          {
+            "x": 301,
+            "y": 607,
+            "src": "/original-map/WemadeMir2/Objects/1392.png",
+            "renderSrc": "blob:http://127.0.0.1:20063/a32abd72-bd04-4caa-ac8a-15342c09eb50",
+            "rect": {
+              "left": 1122,
+              "top": -272,
+              "width": 48,
+              "height": 416
+            },
+            "css": {
+              "z": "1442830",
+              "position": "absolute",
+              "opacity": "1",
+              "transform": "none",
+              "visibility": "visible"
+            },
+            "loaded": true
+          },
+          {
+            "x": 301,
+            "y": 613,
+            "src": "/original-map/WemadeMir2/Objects/7700.png",
+            "renderSrc": "blob:http://127.0.0.1:20063/3c00e05f-d304-4d01-a3c2-6350019c3d96",
+            "rect": {
+              "left": 1122,
+              "top": 116,
+              "width": 48,
+              "height": 220
+            },
+            "css": {
+              "z": "1514830",
+              "position": "absolute",
+              "opacity": "1",
+              "transform": "none",
+              "visibility": "visible"
+            },
+            "loaded": true
+          },
+          {
+            "x": 301,
+            "y": 621,
+            "src": "/original-map/WemadeMir2/Objects/8413.png",
+            "renderSrc": "blob:http://127.0.0.1:20063/6ec196c1-4c16-4c41-94de-ad610c0daa0b",
+            "rect": {
+              "left": 1122,
+              "top": 303,
+              "width": 48,
+              "height": 289
+            },
+            "css": {
+              "z": "1610830",
+              "position": "absolute",
+              "opacity": "1",
+              "transform": "none",
+              "visibility": "visible"
+            },
+            "loaded": true
+          },
+          {
+            "x": 286,
+            "y": 615,
+            "src": "/original-map/WemadeMir2/Objects/2728.png",
+            "renderSrc": "/generated/original-map-blend/WemadeMir2/Objects/2728.png",
+            "rect": {
+              "left": 351,
+              "top": 187,
+              "width": 100,
+              "height": 100
+            },
+            "css": {
+              "z": "1538530",
+              "position": "absolute",
+              "opacity": "0.78",
+              "transform": "none",
+              "visibility": "visible"
+            },
+            "loaded": true
+          },
+          {
+            "x": 293,
+            "y": 623,
+            "src": "/original-map/WemadeMir2/Objects/2728.png",
+            "renderSrc": "/generated/original-map-blend/WemadeMir2/Objects/2728.png",
+            "rect": {
+              "left": 687,
+              "top": 443,
+              "width": 100,
+              "height": 100
+            },
+            "css": {
+              "z": "1634670",
+              "position": "absolute",
+              "opacity": "0.78",
+              "transform": "none",
+              "visibility": "visible"
+            },
+            "loaded": true
+          },
+          {
+            "x": 300,
+            "y": 630,
+            "src": "/original-map/WemadeMir2/Objects/2728.png",
+            "renderSrc": "/generated/original-map-blend/WemadeMir2/Objects/2728.png",
+            "rect": {
+              "left": 1023,
+              "top": 667,
+              "width": 100,
+              "height": 100
+            },
+            "css": {
+              "z": "1718810",
+              "position": "absolute",
+              "opacity": "0.78",
+              "transform": "none",
+              "visibility": "visible"
+            },
+            "loaded": true
+          }
+        ],
+        "stageFlags": {
+          "data-viewport-tile-center-x": "504",
+          "data-viewport-tile-center-y": "368",
+          "data-viewport-cell-width": "48",
+          "data-viewport-cell-height": "32",
+          "data-viewport-scene-width": "1024",
+          "data-viewport-scene-height": "768",
+          "data-quest-ui-owner": "bevy",
+          "data-bag-ui-owner": "react",
+          "data-hp-orb-owner": "react",
+          "data-mp-orb-owner": "react",
+          "data-experience-bar-owner": "canvas2d",
+          "data-weight-bar-owner": "canvas2d",
+          "data-bag-owner-revision": "1",
+          "data-viewport-player-x": "288",
+          "data-viewport-player-y": "615"
+        },
+        "floorCount": 18
+      },
+      "screenshot": "market-floor.png",
+      "logoutAcks": 1
+    }
+  ],
+  "stopped": {
+    "next": true,
+    "gateway": true
+  },
+  "shellSha256": "72d262f4cea9aff1a67aedc086e91cf247916659c0011ea0d97127137006277d",
+  "scratchConfigAtlasPins": true,
+  "pinCapability": {
+    "enabled": true,
+    "verified": true,
+    "manifestPath": "/generated/map-atlas/manifest.5c20ccafe6a9b2be09f50c6b6b6dbee91715ccd321792acaafbce7f822812fe5.json",
+    "contentHash": "5c20ccafe6a9b2be09f50c6b6b6dbee91715ccd321792acaafbce7f822812fe5",
+    "pageCount": 79,
+    "maxPageBytes": null
+  },
+  "passed": true
+}

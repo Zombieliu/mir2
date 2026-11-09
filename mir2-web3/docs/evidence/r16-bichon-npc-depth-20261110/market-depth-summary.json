@@ -1,0 +1,263 @@
+{
+  "schema": "mir2-r16-bichon-row-depth/1",
+  "passed": true,
+  "sourceCommit": "dbc82b9ca0ae0531fb600a80a8d3d238841b0f87",
+  "localOnly": true,
+  "issue": "correct depth numbers were on independent surfaces when DOM owned map objects and a GPU canvas owned live actors",
+  "baseline": [
+    {
+      "mode": "default",
+      "wasm": "/bevy-runtime/v/bevy-0cd68510886134e0/pkg-webgpu/mir2_bevy_runtime_bg.wasm",
+      "scottTile": [
+        291,
+        610
+      ],
+      "scottBodyDom": false,
+      "scottDepth": 1484625,
+      "frontDom": true,
+      "frontDepth": 1478630,
+      "mainCanvasVisible": true,
+      "independentFloorAtlasVisible": false,
+      "domMapObjects": 104,
+      "domFloorTiles": 719
+    },
+    {
+      "mode": "shared",
+      "wasm": "/bevy-runtime/v/bevy-0cd68510886134e0/pkg-webgl2-shared/mir2_bevy_runtime_bg.wasm",
+      "scottTile": [
+        291,
+        610
+      ],
+      "scottBodyDom": true,
+      "scottDepth": 1484625,
+      "frontDom": true,
+      "frontDepth": 1478630,
+      "mainCanvasVisible": false,
+      "independentFloorAtlasVisible": false,
+      "domMapObjects": 104,
+      "domFloorTiles": 719
+    },
+    {
+      "mode": "hybrid",
+      "wasm": "/bevy-runtime/v/bevy-0cd68510886134e0/pkg-webgl2/mir2_bevy_runtime_bg.wasm",
+      "scottTile": [
+        291,
+        610
+      ],
+      "scottBodyDom": false,
+      "scottDepth": 1484625,
+      "frontDom": true,
+      "frontDepth": 1478630,
+      "mainCanvasVisible": true,
+      "independentFloorAtlasVisible": false,
+      "domMapObjects": 104,
+      "domFloorTiles": 719
+    }
+  ],
+  "candidate": [
+    {
+      "mode": "default",
+      "wasm": "/bevy-runtime/v/bevy-0cd68510886134e0/pkg-webgpu/mir2_bevy_runtime_bg.wasm",
+      "scottTile": [
+        291,
+        610
+      ],
+      "scottBodyDom": true,
+      "scottDepth": 1484625,
+      "frontDom": true,
+      "frontDepth": 1478630,
+      "mainCanvasVisible": false,
+      "independentFloorAtlasVisible": false,
+      "domMapObjects": 104,
+      "domFloorTiles": 719
+    },
+    {
+      "mode": "shared",
+      "wasm": "/bevy-runtime/v/bevy-0cd68510886134e0/pkg-webgl2-shared/mir2_bevy_runtime_bg.wasm",
+      "scottTile": [
+        291,
+        610
+      ],
+      "scottBodyDom": true,
+      "scottDepth": 1484625,
+      "frontDom": true,
+      "frontDepth": 1478630,
+      "mainCanvasVisible": false,
+      "independentFloorAtlasVisible": false,
+      "domMapObjects": 104,
+      "domFloorTiles": 719
+    },
+    {
+      "mode": "hybrid",
+      "wasm": "/bevy-runtime/v/bevy-0cd68510886134e0/pkg-webgl2/mir2_bevy_runtime_bg.wasm",
+      "scottTile": [
+        291,
+        610
+      ],
+      "scottBodyDom": true,
+      "scottDepth": 1484625,
+      "frontDom": true,
+      "frontDepth": 1478630,
+      "mainCanvasVisible": false,
+      "independentFloorAtlasVisible": false,
+      "domMapObjects": 104,
+      "domFloorTiles": 719
+    }
+  ],
+  "pinnedAtlas": {
+    "scope": "content-hashed local atlas via a scratch-only dev configuration",
+    "capability": {
+      "enabled": true,
+      "verified": true,
+      "manifestPath": "/generated/map-atlas/manifest.5c20ccafe6a9b2be09f50c6b6b6dbee91715ccd321792acaafbce7f822812fe5.json",
+      "contentHash": "5c20ccafe6a9b2be09f50c6b6b6dbee91715ccd321792acaafbce7f822812fe5",
+      "pageCount": 79,
+      "maxPageBytes": null
+    },
+    "cases": [
+      {
+        "mode": "default",
+        "wasm": "/bevy-runtime/v/bevy-0cd68510886134e0/pkg-webgpu/mir2_bevy_runtime_bg.wasm",
+        "scottTile": [
+          291,
+          610
+        ],
+        "scottBodyDom": false,
+        "scottDepth": 1484625,
+        "frontDom": false,
+        "frontDepth": null,
+        "mainCanvasVisible": true,
+        "independentFloorAtlasVisible": false,
+        "domMapObjects": 0,
+        "domFloorTiles": 0
+      },
+      {
+        "mode": "floor",
+        "wasm": "/bevy-runtime/v/bevy-0cd68510886134e0/pkg-webgpu/mir2_bevy_runtime_bg.wasm",
+        "scottTile": [
+          291,
+          610
+        ],
+        "scottBodyDom": true,
+        "scottDepth": 1484625,
+        "frontDom": true,
+        "frontDepth": 1478630,
+        "mainCanvasVisible": false,
+        "independentFloorAtlasVisible": true,
+        "domMapObjects": 104,
+        "domFloorTiles": 18
+      }
+    ]
+  },
+  "movement": {
+    "steps": [
+      {
+        "key": "ArrowUp",
+        "receipt": {
+          "x": 288,
+          "y": 614
+        },
+        "sent": {
+          "type": "walk",
+          "direction": "Up"
+        },
+        "camera": {
+          "x": 288,
+          "y": 614
+        }
+      },
+      {
+        "key": "ArrowDown",
+        "receipt": {
+          "x": 288,
+          "y": 615
+        },
+        "sent": {
+          "type": "walk",
+          "direction": "Down"
+        },
+        "camera": {
+          "x": 288,
+          "y": 615
+        }
+      }
+    ],
+    "geometry": {
+      "scottDom": true,
+      "sameCellFrontDom": true,
+      "bodyZ": "1496625",
+      "frontZ": "1490630"
+    }
+  },
+  "pixels": {
+    "sameCellScott": {
+      "name": "Merchant_Scott",
+      "depthCase": "same",
+      "actorTile": [
+        291,
+        610
+      ],
+      "frontTile": [
+        291,
+        610
+      ],
+      "actorDepth": 1484625,
+      "frontDepth": 1478630,
+      "actorFrame": "/original-ui/NPC/03/20.png",
+      "frontFrame": "/original-map/WemadeMir2/Objects/7682.png",
+      "qualifyingOpaqueDifferingPixels": 130,
+      "baselineWebGPU": {
+        "actorRGB": 0,
+        "frontRGB": 130,
+        "otherRGB": 0
+      },
+      "candidateWebGPU": {
+        "actorRGB": 46,
+        "frontRGB": 7,
+        "otherRGB": 77
+      }
+    },
+    "laterRowRuben": {
+      "name": "Merchant_Ruben",
+      "depthCase": "later",
+      "actorTile": [
+        288,
+        608
+      ],
+      "frontTile": [
+        289,
+        610
+      ],
+      "actorDepth": 1460565,
+      "frontDepth": 1478590,
+      "actorFrame": "/original-ui/NPC/01/13.png",
+      "frontFrame": "/original-map/WemadeMir2/Objects/7680.png",
+      "qualifyingOpaqueDifferingPixels": 42,
+      "baselineWebGPU": {
+        "actorRGB": 0,
+        "frontRGB": 42,
+        "otherRGB": 0
+      },
+      "candidateWebGPU": {
+        "actorRGB": 0,
+        "frontRGB": 42,
+        "otherRGB": 0
+      }
+    }
+  },
+  "checks": [
+    "TypeScript noEmit",
+    "map render routing",
+    "scene motion",
+    "WebGL2 map texture cache",
+    "map 0 floor coverage"
+  ],
+  "artifacts": {
+    "baseline": "run-baseline-r1/receipt.json",
+    "candidate": "run-candidate-r1/receipt.json",
+    "pinned": "run-candidate-pinned-r2/receipt.json",
+    "walk": "run-candidate-walk-r1/receipt.json",
+    "pixelSample": "pixel-ownership.json"
+  },
+  "boundaries": "Windows reference verified from committed source and existing native screenshots. This run used ordinary local headless Chromium with authoritative movement. A live Windows window, public deployment, and broad render parity were outside this slice."
+}

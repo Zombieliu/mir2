@@ -361,6 +361,32 @@ assert.doesNotMatch(
   "packed map pages must not cross Canvas RGBA readback into WASM",
 );
 assert.match(shellSource, /packedPageTransport: "bevy-asset-server-url"/);
+
+assert.match(
+  shellSource,
+  /const bevyWorldPaintActive =\s*bevyMapActive &&\s*gpuEntityPixelsReady &&\s*standaloneDomFallbackSprites\.objects\.length === 0 &&\s*Array\.from\(requiredBevyMapAtlasPageKeys\)\.every/,
+  "every depth-sorted map object and the entity pixels must be ready before the Bevy canvas can take over",
+);
+assert.match(
+  shellSource,
+  /const hideDomEntitySpritesForBevy =\s*bevyWorldPaintActive \|\| \(useWebGl2EntityAtlasRenderer && gpuEntityPixelsReady\)/,
+  "a GPU actor sprite cannot replace its DOM counterpart while the map objects are in the DOM",
+);
+assert.match(
+  shellSource,
+  /\(screen === "game" && !bevyWorldPaintActive\) \? "bevy-canvas-hidden"/,
+  "the warming Bevy world must not paint underneath the DOM actor and map sprites",
+);
+assert.match(
+  shellSource,
+  /tiles=\{fallbackMapFloorTiles\}/,
+  "the independent map canvas can paint floor tiles only",
+);
+assert.match(
+  shellSource,
+  /objects: viewportMapSprites\.objects \}/,
+  "the floor-only atlas must leave every depth-sorted map object in the common DOM stack",
+);
 assert.match(shellSource, /ackKey = `g\$\{bevyMapRuntimeGeneration\}:r\$\{revision\}`/);
 assert.match(
   shellSource,
