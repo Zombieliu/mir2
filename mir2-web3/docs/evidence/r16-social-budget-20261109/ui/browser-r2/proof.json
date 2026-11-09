@@ -1,0 +1,324 @@
+{
+  "schema": 1,
+  "passed": false,
+  "phase": "ordinary-guild-window-no-membership",
+  "runtimeVersion": "bevy-0cd68510886134e0",
+  "scope": {
+    "isolatedLoopback": true,
+    "existingOrdinaryAccounts": 2,
+    "newRegistrations": 0,
+    "reusedExistingIsolatedAccounts": true,
+    "primaryPhysicalUi": true,
+    "transparentRealServerWebSocket": true,
+    "onlyMatchingItemAckDelayed": true,
+    "passiveCdpCoverage": true,
+    "noBridgeOrGameActionInvokedByDriver": true,
+    "guildMembershipNotFabricated": true,
+    "modelCalls": 0,
+    "privilegedCommands": 0
+  },
+  "checks": [
+    {
+      "name": "primary-ui-existing-character-in-real-world",
+      "passed": true,
+      "position": {
+        "x": 288,
+        "y": 616
+      },
+      "map": "0"
+    },
+    {
+      "name": "second-ordinary-player-same-realm",
+      "passed": true,
+      "adjacentInitially": true
+    },
+    {
+      "name": "ordinary-dom-two-player-shared-party",
+      "passed": true,
+      "authoritativeMembers": 2,
+      "bothClientsAgree": true,
+      "assetsUnchanged": true,
+      "actualNativeBridgeCalls": 19
+    }
+  ],
+  "events": [
+    {
+      "at": 1794180892631,
+      "type": "command",
+      "who": "primary",
+      "command": "clientCapabilities"
+    },
+    {
+      "at": 1794180892632,
+      "type": "command",
+      "who": "primary",
+      "command": "clientCapabilities"
+    },
+    {
+      "at": 1794180894487,
+      "type": "command",
+      "who": "primary",
+      "command": "setLanguage"
+    },
+    {
+      "at": 1794180894487,
+      "type": "command",
+      "who": "primary",
+      "command": "clientVersion"
+    },
+    {
+      "at": 1794180894488,
+      "type": "command",
+      "who": "primary",
+      "command": "login"
+    },
+    {
+      "at": 1794180897574,
+      "type": "command",
+      "who": "primary",
+      "command": "startGame"
+    },
+    {
+      "at": 1794180904130,
+      "type": "server-packet",
+      "packet": "StartGame",
+      "result": 4
+    },
+    {
+      "at": 1794180904187,
+      "type": "command",
+      "who": "primary",
+      "command": "npcPurchaseOwner"
+    },
+    {
+      "at": 1794180904604,
+      "type": "server-packet",
+      "packet": "SwitchGroup"
+    },
+    {
+      "at": 1794180904623,
+      "type": "server-packet",
+      "packet": "DeleteGroup"
+    },
+    {
+      "at": 1794180904623,
+      "type": "server-packet",
+      "packet": "SwitchGroup"
+    },
+    {
+      "at": 1794180907781,
+      "type": "command",
+      "who": "primary",
+      "command": "keepAlive"
+    },
+    {
+      "at": 1794180907823,
+      "type": "command",
+      "who": "peer",
+      "command": "clientVersion"
+    },
+    {
+      "at": 1794180907836,
+      "type": "command",
+      "who": "peer",
+      "command": "login"
+    },
+    {
+      "at": 1794180908551,
+      "type": "command",
+      "who": "peer",
+      "command": "startGame"
+    },
+    {
+      "at": 1794180915374,
+      "type": "command",
+      "who": "peer",
+      "command": "switchGroup"
+    },
+    {
+      "at": 1794180915492,
+      "type": "native-key",
+      "function": "Group",
+      "chord": "P"
+    },
+    {
+      "at": 1794180915878,
+      "type": "command",
+      "who": "primary",
+      "command": "addMember"
+    },
+    {
+      "at": 1794180915903,
+      "type": "command",
+      "who": "peer",
+      "command": "groupInvite"
+    },
+    {
+      "at": 1794180915949,
+      "type": "server-packet",
+      "packet": "SwitchGroup"
+    },
+    {
+      "at": 1794180915975,
+      "type": "server-packet",
+      "packet": "AddMember"
+    },
+    {
+      "at": 1794180915976,
+      "type": "server-packet",
+      "packet": "AddMember"
+    },
+    {
+      "at": 1794180915976,
+      "type": "server-packet",
+      "packet": "GroupMembersMap"
+    },
+    {
+      "at": 1794180915977,
+      "type": "server-packet",
+      "packet": "GroupMembersMap"
+    },
+    {
+      "at": 1794180915980,
+      "type": "server-packet",
+      "packet": "GroupMemberInfo"
+    }
+  ],
+  "commands": {
+    "primary": {
+      "clientCapabilities": 2,
+      "setLanguage": 1,
+      "clientVersion": 1,
+      "login": 1,
+      "startGame": 1,
+      "npcPurchaseOwner": 1,
+      "keepAlive": 1,
+      "addMember": 1
+    },
+    "peer": {
+      "clientVersion": 1,
+      "login": 1,
+      "startGame": 1,
+      "switchGroup": 1,
+      "groupInvite": 1
+    }
+  },
+  "bridgeCoverage": [
+    {
+      "stage": "bootstrap",
+      "bridge": [],
+      "bridgeCalls": 0,
+      "host": [
+        {
+          "method": "receive",
+          "calls": 2
+        }
+      ]
+    },
+    {
+      "stage": "ordinary-dom-shared-party",
+      "bridge": [
+        {
+          "path": "http://127.0.0.1:19482/bevy-runtime/v/bevy-0cd68510886134e0/pkg-webgpu/mir2_bevy_runtime.js",
+          "calls": 19
+        }
+      ],
+      "bridgeCalls": 19,
+      "host": [
+        {
+          "method": "receive",
+          "calls": 14
+        },
+        {
+          "method": "reserve",
+          "calls": 1
+        },
+        {
+          "method": "validate",
+          "calls": 1
+        },
+        {
+          "method": "enter",
+          "calls": 1
+        }
+      ]
+    },
+    {
+      "stage": "failure",
+      "bridge": [],
+      "bridgeCalls": 0,
+      "host": []
+    }
+  ],
+  "moduleResponses": [
+    {
+      "path": "/bevy-runtime/v/bevy-0cd68510886134e0/pkg-webgpu/mir2_bevy_runtime.js",
+      "status": 200,
+      "bytes": 141747,
+      "sha256": "c319fbc229c3bf23513354f342a310547fe32c2dcb9b34c8626c55c0e88d85ba",
+      "matchesFrozenRuntime": true
+    }
+  ],
+  "screenshots": [
+    "01-primary-in-town.png",
+    "02-ordinary-shared-party.png",
+    "failure.png"
+  ],
+  "errors": [
+    {
+      "phase": "ordinary-guild-window-no-membership",
+      "name": "AssertionError",
+      "code": "ERR_ASSERTION",
+      "messageHash": "965c04f4ab46b75923c2b15d6241db222825c7dcbcbab79de222a3bc525e0ca0",
+      "safeCode": "UNEXPECTED_REAL_GUILD_MEMBERSHIP"
+    }
+  ],
+  "httpErrors": [],
+  "pageErrors": [],
+  "consoleErrors": [],
+  "failureUi": {
+    "screen": "game",
+    "tradeVisible": false,
+    "bagInput": "{\"active\":false,\"error\":null,\"owner\":{\"owner\":\"react\",\"runGeneration\":1,\"ownerRevision\":1,\"connectionGeneration\":1,\"sessionGeneration\":1},\"status\":{\"runGeneration\":1,\"connectionGeneration\":1,\"sessionGeneration\":1,\"ownerRevision\":1,\"frame\":731,\"ready\":false,\"inputEnabled\":false,\"appliedRevision\":1,\"appliedModelRevision\":1,\"appliedPresentationRevision\":1,\"supportsBagToBelt\":true,\"appliedBeltGeometryRevision\":0,\"inputRegions\":[],\"diagnostics\":{\"modelVisibleItems\":4,\"treeContentComplete\":false,\"touchActionsComplete\":null,\"scopedActionCount\":null,\"expectedActionCount\":null,\"minCssHitWidth\":null,\"minCssHitHeight\":null,\"firstActionFailure\":null,\"layoutMatchesWindow\":true,\"assetsLoading\":true,\"layoutRegionCount\":0,\"sinkPresent\":true,\"treeIdentity\":null,\"treeModelRevision\":null,\"treePage\":null,\"treeVisibleItems\":null,\"treeMatchesModel\":false,\"gridCells\":0,\"itemCells\":0,\"occupiedCells\":0,\"iconNodes\":0,\"visibleIcons\":0,\"laidOutIcons\":0,\"stackTextNodes\":0,\"visibleStackTexts\":0,\"laidOutStackTexts\":0},\"error\":null},\"diagnostic\":{\"phase\":\"prepare\",\"transitions\":[],\"intentVerdicts\":[]},\"hudNavigation\":[]}",
+    "movement": "{\"keyboard\":{\"lastKey\":null,\"lastDispatch\":{\"reason\":\"no-held-direction\",\"source\":\"held\",\"at\":1794180916719,\"sceneInteractionReady\":true,\"bevyQuestUiCapturesPointer\":false},\"lastShortcut\":{\"at\":1794180915456,\"actions\":[\"group\"],\"stage\":\"dispatch\",\"reason\":\"window-action\",\"accepted\":true,\"repeat\":false,\"focused\":true,\"visible\":true,\"editable\":false,\"sceneInteractionReady\":true,\"gameplayCallbackPresent\":true,\"defaultPrevented\":false,\"heroActive\":false,\"heroTransitioning\":false,\"heroWorldBlocked\":false,\"heroLeaseHeld\":false}},\"pointer\":null,\"host\":{\"connectionGeneration\":1,\"sessionGeneration\":1,\"suspended\":null,\"sceneDeferred\":false,\"lastIntent\":null,\"lastAttempt\":null,\"lastPickup\":null,\"self\":{\"x\":288,\"y\":616,\"direction\":\"Down\",\"dead\":false},\"queued\":null,\"controller\":{\"canSend\":true,\"sendDelayMs\":0,\"blockedMs\":0,\"pending\":null},\"target\":null,\"targetMapBlocked\":false,\"targetMapCell\":null,\"nearbyEntities\":[{\"objectId\":\"1\",\"kind\":\"npc\",\"x\":287,\"y\":615,\"dead\":false},{\"objectId\":\"50003\",\"kind\":\"player\",\"x\":288,\"y\":617,\"dead\":false},{\"objectId\":\"206641\",\"kind\":\"monster\",\"x\":287,\"y\":616,\"dead\":false}]}}",
+    "focus": "BODY",
+    "frameClass": "client-stage-frame "
+  },
+  "finalPrimary": {
+    "economy": {
+      "gold": 0,
+      "inventory": [
+        {
+          "uidHash": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+          "slot": 0,
+          "count": 1,
+          "name": "WoodenSword"
+        },
+        {
+          "uidHash": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+          "slot": 1,
+          "count": 1,
+          "name": "BaseDress(M)"
+        },
+        {
+          "uidHash": "d4735e3a265e16eee03f59718b9b5d03019c07d8b6c51f90da3a666eec13ab35",
+          "slot": 2,
+          "count": 1,
+          "name": "(HP)DrugSmall"
+        },
+        {
+          "uidHash": "4e07408562bedb8b60ce05c1decfe3ad16b72230967de01f640b7e4729b49fce",
+          "slot": 4,
+          "count": 1,
+          "name": "Candle"
+        }
+      ],
+      "belt": []
+    },
+    "tradeActive": false,
+    "position": {
+      "x": 288,
+      "y": 616
+    }
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "schema": 1,
+  "passed": true,
+  "scope": "Primary UI terminal cancel and unchanged exact assets after original delayed retrieve ACK; original r3 peer-uncertain failure retained.",
+  "ordinaryItemOperationCount": 1,
+  "ordinaryCancelCount": 1,
+  "heldPacket": "RetrieveTradeItem",
+  "from": 0,
+  "to": 3,
+  "heldMs": 16025,
+  "realSuccess": true,
+  "terminalUnlock": false,
+  "oldAckReleasedUnmodified": true,
+  "rawSha256": "d2c742eec224411e9a62290fc755091a22ccedc5228886b03ee3393446942ec2",
+  "windowStillClosed": true,
+  "exactPrimaryUidQuantityGoldAndExpectedSlot": true,
+  "peerAssetsUnchanged": true,
+  "newEconomicCommandIssuedByThisCheck": false,
+  "originalProofStillFalse": true,
+  "checkedAt": "2026-11-09T00:02:41.600Z"
+}

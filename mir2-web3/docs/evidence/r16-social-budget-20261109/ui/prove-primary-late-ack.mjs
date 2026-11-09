@@ -1,0 +1,15 @@
+import assert from 'node:assert/strict';
+import {createRequire} from 'node:module';
+import {readFile,writeFile} from 'node:fs/promises';
+const root='D:/mir2-builds/r16-parity-20261109/social-budget-ui-r1/browser-r3';
+const proof=JSON.parse(await readFile(root+'/proof.json','utf8')),live=JSON.parse(await readFile(root+'/primary-after-late-ack-readonly.json','utf8'));
+assert.equal(proof.passed,false);
+const held=proof.events.find(e=>e.type==='real-ack-withheld'&&e.packet==='RetrieveTradeItem'),released=proof.events.find(e=>e.type==='held-ack-released'&&e.packet==='RetrieveTradeItem');
+const terminal=proof.events.find(e=>e.type==='server-packet'&&e.packet==='TradeCancel'&&e.unlock===false&&e.at>held.at);
+assert(held&&released&&terminal&&released.at>terminal.at&&held.rawSha256===released.rawSha256);
+const operation=proof.events.find(e=>e.type==='command'&&e.command==='retrieveTradeItem');
+const expected=structuredClone(proof.assetsBefore.primary);expected.inventory.find(i=>i.uidHash===proof.starter.uidHash).slot=operation.to;expected.inventory.sort((a,b)=>a.slot-b.slot);
+assert.deepEqual(live.primary.economy,expected);assert(!live.primary.tradeActive&&!live.primary.uncertain);assert.deepEqual(live.projection.economy,proof.assetsBefore.peer);
+const {chromium}=createRequire('F:/mir2-builds/web-r16-20261104/tools/package.json')('playwright');const browser=await chromium.connectOverCDP('http://127.0.0.1:19484');const page=browser.contexts()[0].pages().find(p=>p.url().startsWith('http://127.0.0.1:19482'));
+assert.equal(await page.locator('[data-trade-state="open"]').count(),0);await page.screenshot({path:root+'/retrieve-primary-late-ack-confirmed.png',mask:[page.locator('.login-input.account,.login-input.password,[data-login-auth-field]')],maskColor:'#090909',timeout:15000});
+const result={schema:1,passed:true,scope:'Primary UI terminal cancel and unchanged exact assets after original delayed retrieve ACK; original r3 peer-uncertain failure retained.',ordinaryItemOperationCount:1,ordinaryCancelCount:1,heldPacket:'RetrieveTradeItem',from:operation.from,to:operation.to,heldMs:released.heldForMs,realSuccess:held.success,terminalUnlock:false,oldAckReleasedUnmodified:true,rawSha256:held.rawSha256,windowStillClosed:true,exactPrimaryUidQuantityGoldAndExpectedSlot:true,peerAssetsUnchanged:true,newEconomicCommandIssuedByThisCheck:false,originalProofStillFalse:true,checkedAt:new Date().toISOString()};await writeFile(root+'/retrieve-primary-late-ack-proof.json',JSON.stringify(result,null,2),{flag:'wx'});console.log(JSON.stringify({passed:true,windowClosed:true,exactAssets:true,oldAckReleased:true}));process.exit(0);

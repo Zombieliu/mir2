@@ -16,7 +16,7 @@ working tree, services, release packages, source snapshots or parity percentages
 
 ## Last recorded decisions and open work
 
-2026-11-09持续Goal保持active：以Windows R16共同基础推进Web完整1:1，优先代码/普通协议/headless。现已复用Native完整社交模型/共用八项，Page116/host17、选定Web569/Stage5内部507组、TS及三包真实WASM通过，分层不叠加；新runtime0cd本机安装、旧a469保留，未公开发布。接续真实UI证据、交易未结边界/双方回读、阿洛/语言输入及发行。并入的PC HUD/钱包优先opt-in独立记录，不由此认定Web外观或全局100% Candidate/Accepted。[范围与顺序](WEB-R16-PARITY-GOAL.zh-CN.md) · [新证据](evidence/r16-social-budget-20261109/README.md)。
+2026-11-09持续Goal保持active：以Windows R16共同基础推进Web完整1:1，优先代码/普通协议/headless。已复用Native完整社交模型/共用八项，Page116/host17、选定Web569/Stage5内部507组、TS及三包真实WASM通过，分层不叠加；新runtime0cd本机安装、旧a469保留。新Page实证组队、延迟ACK取消的主角/资产、双方同角重登；取回对端当场uncertain原r3=false，后续raw trade=null不能证明完整早期包序。下一步当前Gateway双方普通帧定位，再续成交/阿洛/语言输入及发行。代码`d7bb7c951`已推送，未公开部署；PC HUD/钱包优先opt-in独立，全局Candidate/Accepted未晋级。[范围与顺序](WEB-R16-PARITY-GOAL.zh-CN.md) · [新证据](evidence/r16-social-budget-20261109/README.md)。
 
 发布阶段已完成：`https://numeron.obelisk.build/game`为Web f2de/Linux d53、五职业/V2；42738素材、旧129账号/43角色/43档保全、公开三职业首任务/重登/中文Q进城分别有证。旧Mir2项目/正式服、钱包及Windows EXE保持；当前是TEST，阿洛云运行器、手机签名及全局Accepted未由发布完成。[发布结果与原失败](NUMERON-WEB-RELEASE-20261108.zh-CN.md)。
 

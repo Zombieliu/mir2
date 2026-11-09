@@ -2,7 +2,7 @@
 
 ## Web共用Native社交预算（2026-11-09）
 
-完整20低层变体映射复用实际Rust SocialModel，共用八项包含预约及未知发送；实际UI保留Native三种Trade瞬时路径，legacy公会读不双占。readonly复核先于原proof claim，最后enter与socket相邻；真正packet/同帧own-offer才驱动完成，换图不清、旧物理owner不能复活，原经济ACK后完整snapshot屏障保持。Page116/host17、选定Web569/Stage5内部507组/TS与Native108/runtime9/投影5分层通过；三包全量构建及真实Chrome ABI通过，原体积与能力保持。普通组队已有新页面正证，交易续验分列；不认定全20真实流程、全局Candidate或公开发布。[证据与未结项](evidence/r16-social-budget-20261109/README.md)
+完整20低层变体映射复用实际Rust SocialModel，共用八项包含预约及未知发送；实际UI保留Native三种Trade瞬时路径，legacy公会读不双占。readonly复核先于原proof claim，最后enter与socket相邻；真正packet/同帧own-offer才驱动完成，换图不清、旧物理owner不能复活，原经济ACK后完整snapshot屏障保持。Page116/host17、选定Web569/Stage5内部507组/TS与Native108/runtime9/投影5分层通过；三包全量构建及真实Chrome ABI通过，原体积与能力保持。新Page实际组队及两场延迟ACK取消的主角结果、双方同角资产回读已证；取回对端当场uncertain和原r3=false保持，未入会公会窗口不算公会写流程。未公开发布或晋升全局Candidate。[证据与未结项](evidence/r16-social-budget-20261109/README.md)
 
 ## 交易待回执时取消（2026-11-09）
 

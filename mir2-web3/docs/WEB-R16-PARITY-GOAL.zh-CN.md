@@ -166,7 +166,9 @@ Web最终发送入口现直接复用Windows的`SocialModel`准入和回执判别
 
 Native108、runtime9、原Windows投影5、Page116/host17、Web选定569及Stage5内部507组分别通过，TS退出0；计数重叠不合并。三套完整WASM为`bevy-0cd68510886134e0`，原feature/体积门槛保持，实际Chrome每包338桥调用通过，旧a469不可变文件保持。本轮页面/运行器为本机候选，普通UI证据与pure ABI分开；未公开发布、未启动模型或改服务端/存档schema。原构建布局错误、夹具依赖错误和旧9>8反例均保留。[限定证据](evidence/r16-social-budget-20261109/README.md)
 
-仍需真实普通协议补齐的失败回执不靠聊天或超时重发绕开；Native generic招募/建职阶完成、无关Guild物品未决时TradeCancel、完整成交/双方重登、阿洛/语言输入/发行和真人Accepted继续开放。同分支并入的Windows PC HUD与钱包优先opt-in有独立证据，本轮不据此验收Web新外观。
+隔离旧v22 File网关和两原测试角色使用新Page/WebGPU运行包实跑。组队双方两人、未入会公会只读、真实Deposit/Retrieve成功ACK延迟后取消、主角窗口不复活及UID/数量/金币/预期格准确；双方普通注销、同角重登及最终注销均核对资产。取回原r3仍因辅助客户端当场uncertain失败，后续raw trade=null、未保留完整早期包序；不能将重登入档等同当场状态已修。[普通UI与原失败](evidence/r16-social-budget-20261109/README.md#ordinary-isolated-web-ui)
+
+仍需真实普通协议补齐的失败回执不靠聊天或超时重发绕开；Native generic招募/建职阶完成、对端当场终结、无关Guild物品未决时TradeCancel、实际成交和双方重登、阿洛/语言输入/发行和真人Accepted继续开放。同分支并入的Windows PC HUD与钱包优先opt-in有独立证据，本轮不据此验收Web新外观。
 
 ## 当前执行顺序
 
@@ -177,5 +179,5 @@ Native108、runtime9、原Windows投影5、Page116/host17、Web选定569及Stage
 1. 已在真实存档副本完成小地图标题及框架输入修复、缩放和前景 Q 日记复测。
 2. 已完成 Web 创角回执、共享网关四槽和重名、登录过场输入及标签的本机验证。Windows 窗口和超额旧档访问继续追踪。
 3. 已将三职业毕业装备建议和 D605 的既有 Native 名称接进共用日记，完成三职业读档、十语窄窗、65 次关闭零移动与存档个人字段比较。
-4. 交易取消与重复接受的原限定证据保留；已接完整Native模型的共用八项及真实ACK入口，三包/WASM/Page和相邻回归通过。下一步继续交易未结边界、双方回读与阿洛接口，补齐真实普通协议/界面证据。不存在的失败ACK不能靠解析系统聊天或超时重发绕开。
+4. 完整Native模型的共用八项及真实ACK入口、三包/WASM/Page和相邻回归通过；已补新Page普通组队、两项待回执取消及同角资产回读。下一步用当前隔离Gateway按双方原始包序核对当场终结，再续真实成交、阿洛/语言输入。不存在的失败ACK不能靠解析系统聊天或超时重发绕开。
 5. 无界面浏览器与普通协议测试继续。Windows 窗口及同候选跨端实机暂缓，保留旧 headless 长任务和最终真人验收边界。

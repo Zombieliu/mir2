@@ -60,6 +60,7 @@ must not be added into a unique-coverage total.
 | Selected adjacent Web regression | 569/569 Node subtests; Stage5 additionally reports 507 internal groups |
 | Web TypeScript | Exit 0, no diagnostics |
 | Three complete WASM packages | Original features and size gates pass; actual Chrome import/init and 338 bridge calls per package, 1,014 total |
+| Runtime publication version checks | 4/4; separate from the selected Web count |
 
 The Node test helper verifies the immutable JS/WASM publication hashes and
 instantiates the actual WASM without booting a painter. It does not simulate
@@ -101,18 +102,63 @@ fixtures supply the actual new host/receive dependencies and real authenticated
 session transitions; they do not remove guards or substitute a JS receipt oracle.
 The pre-integration nine-vs-eight observation remains historical evidence.
 
+## Ordinary isolated Web UI
+
+The same Page loaded and executed the WebGPU build of `bevy-0cd68510886134e0`
+in headless Chrome. An isolated, pinned v22 File Gateway and its two
+existing synthetic test characters were reused. No new registration, model,
+test privilege or economic command was added to obtain the readback evidence.
+Passive CDP coverage confirms the actual Page invoked the new bridge 19 times
+in ordinary group formation and 43 in the transaction scenes. This is separate from
+the three-package pure ABI execution and is not a fresh current Gateway build.
+
+- Real Group UI sent one AddMember; the ordinary peer accepted, both authoritative
+  rosters showed two members and the window painted two rows. The Guild window
+  of a nonmember offered no edit controls and sent no mutation. It does not
+  qualify a guild-member workflow.
+- Deposit and retrieve success ACKs were captured from the real server and
+  delivered late, byte-for-byte. Each primary UI cancellation produced an
+  actual `TradeCancel` with `unlock=false`; the window stayed closed after the
+  old ACK, with exact UID, count, gold and expected Bag slot. Retrieve's
+  independent confirmation includes the 16,025 ms delayed ACK; deposit held
+  for 753 ms. The Candle returned in the expected slot (4 for deposit cancel,
+  3 after a successful retrieve), rather than being recreated.
+- Both existing roles completed ordinary logout, login to the same role,
+  authoritative asset readback and final logout. The primary used the actual
+  browser UI; the peer used the ordinary Gateway client. Their exact assets
+  matched the expected post-cancel state and neither replayed a transaction.
+- The three original run failures stay recorded: r1 sampled the roster before
+  paint; r2 expected `guild=null` instead of the actual empty-name default;
+  r3 failed the peer same-connection closure assertion on retrieve. A readonly
+  cached frame check proved a later peer `stage5Systems.trade=null` while the
+  peer helper remained uncertain. It did not retain the complete terminal
+  packet order, so the cause and the peer's in-session transition remain open.
+  The positive primary and restart checks do not turn r3 into a pass.
+
+[Scoped UI receipt](ui/receipt-final.json) ·
+[Ordinary group](ui/browser-r2/02-ordinary-shared-party.png) ·
+[Deposit waiting](ui/browser-r3/deposit-pending-cancel-enabled.png) ·
+[Retrieve after the old ACK](ui/browser-r3/retrieve-primary-late-ack-confirmed.png) ·
+[Primary same-role readback](ui/browser-r3/primary-ui-readback.json) ·
+[Peer readback](ui/browser-r3/peer-ordinary-readback.json).
+
+The first shutdown receipt's Next flag used only `exitCode` and did not
+recognize signal exit. [Independent OS cleanup](ui/cleanup-verified.json)
+confirms all owned Node/Gateway/Chrome processes and test listeners stopped.
+The original shutdown receipt is retained.
+
 ## Open scope
 
-Ordinary browser/Gateway evidence is recorded separately when completed.
 The pure ABI and Page fixtures do not establish actual guild eligibility,
 all twenty real server workflows, current Native windows or cross-client saves.
 Generic Native recruit/create-rank completion and nominal failure packets with
 no Gateway producer remain open. No Chat parsing, invented failure ACK or timeout
 replay has been added to hide those gaps.
 
-Cancellation while an unrelated Guild item operation is pending, trade settlement
-and both players' restart/readback, Alo cross-platform control, language/input,
-release gates and final human acceptance remain in the active Goal. Concurrent
+The peer's in-session terminal state, cancellation while an unrelated Guild
+item is pending, actual settlement and its readback, Alo cross-platform
+control, language/input, release gates and final human acceptance remain in
+the active Goal. Concurrent
 Windows PC HUD/wallet-first opt-in work is preserved and has separate evidence;
 this increment does not qualify its Web visuals. No public deployment, model
 request, payment, wallet signing or production-data change is claimed here.
