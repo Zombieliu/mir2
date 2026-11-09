@@ -29,6 +29,21 @@ export type R16CompanionEnrollment = Readonly<{ residentId: string; archiveId: s
 export type R16CompanionFeedback = Readonly<{ feedbackId: string; status: string; summary: string; recordedAt: number | null }>;
 export type R16CompanionEpisode = Readonly<{ episodeId: string; kind: string; summary: string; action: string; outcome: string; recordedAt: number | null }>;
 export type R16CompanionTask = Readonly<Record<string, string | number | boolean | null>>;
+export const R16_COMPANION_ENTRY_SOURCES = ["unprompted", "reminder", "scheduled", "unknown"] as const;
+export const R16_COMPANION_CHOICE_REASONS = ["shared-history", "stronger", "setup-ease", "curiosity", "other"] as const;
+type EntrySource = typeof R16_COMPANION_ENTRY_SOURCES[number];
+type ChoiceReason = typeof R16_COMPANION_CHOICE_REASONS[number];
+type TrialEvent =
+  | { kind: "visit"; entrySource: EntrySource; reminderCount: number }
+  | { kind: "choice"; reason: ChoiceReason }
+  | { kind: "teachingCheck"; understood: boolean }
+  | { kind: "visitEnd" | "purchaseIntent" };
+type CompanionTrial = Readonly<{
+  activeVisitId: string | null;
+  usage: R16CompanionTask;
+  costs: R16CompanionTask;
+  offer: Readonly<{ offerId: string; price: string; durationDays: number; adventureCount: number; paymentInstructions: string }> | null;
+}>;
 export type R16CompanionOwnerView = Readonly<{
   archive: Readonly<{ archiveId: string; residentId: string; displayName: string; characterName: string; realmId: string; worldEpoch: string; baseSetting: string }>;
   profile: Readonly<{ policyVersion: number; style: string; party: Readonly<{ assistBeforeLoot: boolean; lootOnlyAfterCombat: boolean; askBeforeLeaving: boolean }> }>;
@@ -36,7 +51,7 @@ export type R16CompanionOwnerView = Readonly<{
   runtime: Readonly<{ provider: string; model: string; configured: boolean; modelEnabled: boolean; modelCalls: number | null;
     recallRequested: boolean; teachingProposal: R16CompanionTask; teachingChanges: Readonly<Partial<Record<"assistBeforeLoot" | "lootOnlyAfterCombat" | "askBeforeLeaving", boolean>>>;
     modelTask: R16CompanionTask; supplyTask: R16CompanionTask; lifeTask: R16CompanionTask; resources: R16CompanionTask; giftTask: R16CompanionTask }>;
-  costs: R16CompanionTask;
+  trial: CompanionTrial | null;
 }>;
 export type R16CompanionAction =
   | { type: "teach" | "recall" | "resume" | "authorizeSupply" | "cancelSupply" | "cancelLife" | "clearGrowth" }
@@ -45,7 +60,8 @@ export type R16CompanionAction =
   | { type: "revokeFeedback" | "deleteFeedback"; feedbackId: string }
   | { type: "deleteEpisode"; episodeId: string }
   | { type: "authorizeLife"; durationSeconds: 1200 | 1800 }
-  | { type: "resumeLife"; lifePermitId: string };
+  | { type: "resumeLife"; lifePermitId: string }
+  | { type: "trialEvent"; event: TrialEvent };
 export type R16CompanionSnapshot = Readonly<{
   renderLease: R16CompanionRenderLease; contentEpoch: number; available: boolean; busy: boolean; uncertain: boolean;
   enrollments: readonly R16CompanionEnrollment[]; selected: string | null; view: R16CompanionOwnerView | null;
@@ -73,6 +89,31 @@ function task(value: unknown, keys: readonly string[]): R16CompanionTask {
     else if (typeof v === "boolean" || v === null || integer(v)) out[key] = v as number | boolean | null;
   }
   return freeze(out);
+}
+/** Ledger money uses decimal micros. Format the digits without a floating-point conversion. */
+export function formatR16CompanionMicros(amount: unknown, currency: unknown): string | null {
+  if (typeof amount !== "string" || !/^-?[0-9]{1,80}$/.test(amount) || typeof currency !== "string" || !/^[A-Z]{3}$/.test(currency)) return null;
+  const negative = amount.startsWith("-");
+  const digits = (negative ? amount.slice(1) : amount).padStart(7, "0");
+  const whole = digits.slice(0, -6).replace(/^0+(?=[0-9])/, "");
+  const fraction = digits.slice(-6).replace(/0+$/, "");
+  return `${negative ? "−" : ""}${whole}${fraction ? "." + fraction : ""} ${currency}`;
+}
+function trialView(raw: unknown): CompanionTrial | null {
+  if (!record(raw) || typeof raw.experimentId !== "string" || !raw.experimentId || raw.activeVisitId != null && !ref(raw.activeVisitId)) return null;
+  const offer = record(raw.offer) ? raw.offer : {};
+  const price = typeof offer.priceMicros === "string" && /^[1-9][0-9]{0,15}$/.test(offer.priceMicros)
+    ? formatR16CompanionMicros(offer.priceMicros, offer.currency) : null;
+  return freeze({
+    activeVisitId: ref(raw.activeVisitId) ? raw.activeVisitId : null,
+    usage: task(raw.usage, ["runtimeSeconds", "modelCalls", "confirmedAdventureCount"]),
+    costs: task(raw.costs, ["currency", "modelMicros", "hostingMicros", "paymentMicros", "revenueShareMicros", "contributionMicros", "complete", "supportSeconds"]),
+    offer: ref(offer.offerId) && price && integer(offer.durationDays, 1) && offer.durationDays <= 365
+      && integer(offer.adventureCount, 1) && offer.adventureCount <= 1000
+      ? freeze({ offerId: offer.offerId, price, durationDays: offer.durationDays, adventureCount: offer.adventureCount,
+        paymentInstructions: text(offer.paymentInstructions, 300) })
+      : null,
+  });
 }
 const taskKeys = ["status", "step", "reason", "lastError", "permitId", "expiresAtMs", "receiptRevision", "budgetGold", "chargedGold", "acquiredQuantity", "receiptKnown", "returnedToAnchor",
   "phase", "lifePermitId", "maxPurchasedQuantity", "remainingBudgetGold", "reservedGold", "purchasedQuantity", "killsObserved", "pausedReason", "modelStatus", "decisionMode", "activationPending",
@@ -121,7 +162,7 @@ function ownerView(raw: unknown, selected: R16CompanionEnrollment, source: R16Co
       teachingProposal: task(proposal, ["proposalId", "status", "sourceVersion", "reply"]), teachingChanges: freeze(changes),
       modelTask: task(r.modelTask, taskKeys), supplyTask: task(r.supplyTask, taskKeys), lifeTask: task(r.lifeTask, taskKeys), giftTask: task(r.giftTask, ["status"]),
       resources: task(r.resources, ["known", "observedAtMs", "inventoryCurrent", "medicineUnresolved", "gold", "hp", "maxHp", "hpPotionCount", "usableHpPotionCount", "freeBagSlots", "currentWeight", "maxWeight"]) }),
-    costs: task(record(raw.trial) ? raw.trial.costs : null, ["currency", "modelMicros", "hostingMicros", "paymentMicros", "revenueShareMicros", "contributionMicros", "complete", "supportSeconds"]) });
+    trial: trialView(raw.trial) });
 }
 export function r16CompanionModelReady(v: R16CompanionOwnerView): boolean { return v.runtime.provider === "openai" && v.runtime.configured && v.runtime.modelEnabled; }
 export function r16CompanionTeachingId(v: R16CompanionOwnerView): string | null {
@@ -290,6 +331,31 @@ export class R16CompanionClient {
         if (!v.episodes.some(e => e.episodeId === action.episodeId)) return false;
         payload.episodeId = action.episodeId; break;
       case "clearGrowth": payload.confirmArchiveId = v.archive.archiveId; break;
+      case "trialEvent": {
+        const trial = v.trial, event = action.event;
+        if (!trial) return false;
+        const visitId = trial.activeVisitId;
+        if (event.kind === "visit") {
+          if (visitId || !R16_COMPANION_ENTRY_SOURCES.includes(event.entrySource) || !integer(event.reminderCount) || event.reminderCount > 100) return false;
+          payload = { kind: "visit", visitId: `wvisit-${this.nonce}-${this.sequence + 1}`, entrySource: event.entrySource, reminderCount: event.reminderCount };
+          break;
+        }
+        if (!visitId) return false;
+        switch (event.kind) {
+          case "visitEnd": payload = { kind: "visitEnd", visitId }; break;
+          case "choice":
+            if (!R16_COMPANION_CHOICE_REASONS.includes(event.reason)) return false;
+            payload = { kind: "choice", visitId, reason: event.reason }; break;
+          case "teachingCheck":
+            if (typeof event.understood !== "boolean") return false;
+            payload = { kind: "teachingCheck", visitId, understood: event.understood }; break;
+          case "purchaseIntent":
+            if (!trial.offer) return false;
+            payload = { kind: "purchaseIntent", visitId, offerId: trial.offer.offerId }; break;
+          default: return false;
+        }
+        break;
+      }
       default: return false;
     }
     this.clearExport();
@@ -363,7 +429,9 @@ export class R16CompanionClient {
       this.publish({ view, uncertain: false, unknownIntent: view.runtime.supplyTask.status === "unknown" ? this.state.unknownIntent : null, download: sameContent ? this.state.download : null,
         enrollments: freeze(this.state.enrollments.map(e => e.residentId === view.archive.residentId ? freeze({ ...e, online: true }) : e)),
         contentEpoch: this.state.contentEpoch + (sameContent ? 0 : 1), notice: r.operation === "teach" || r.operation === "confirmTeaching" ? `教学已保存，培养版本 v${view.profile.policyVersion}。`
-          : r.operation === "authorizeSupply" ? "已收到补给授权回执；购买与返程仍须核对实际记录。" : r.operation === "cancelSupply" ? "已收到撤销补给回执；已提交购买的结果仍需核对。" : `已读取服务器记录，培养版本 v${view.profile.policyVersion}。` });
+          : r.operation === "authorizeSupply" ? "已收到补给授权回执；购买与返程仍须核对实际记录。" : r.operation === "cancelSupply" ? "已收到撤销补给回执；已提交购买的结果仍需核对。"
+          : r.operation === "trialEvent" ? p.request.payload.kind === "purchaseIntent" ? "已记录服务意向。" : "已保存体验自述。"
+          : `已读取服务器记录，培养版本 v${view.profile.policyVersion}。` });
     }
     return true;
   }

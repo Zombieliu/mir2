@@ -96,6 +96,36 @@ test("actual rendered controls perform teaching, memory read, explicit supply co
   h.render(); assert.equal(h.button("prepare-supply").props.disabled, true); assert(strings(h.tree).includes("尚未确认"));
   h.click("cancel-supply"); assert.equal(h.sent.at(-1).operation, "cancelSupply"); assert.deepEqual(h.sent.at(-1).payload, {});
 });
+test("trial controls use the current visit and offer and keep unmeasured costs distinct from zero", () => {
+  const h = host(); h.ready(); h.render(); h.click("open-trial");
+  assert.equal(h.button("trial-start").props.disabled, true);
+  const trial = { experimentId: "trial-1", activeVisitId: null,
+    usage: { runtimeSeconds: 10, modelCalls: 0, confirmedAdventureCount: 0 },
+    costs: { currency: "CNY", modelMicros: "0", hostingMicros: null, complete: false } };
+  const serverView = extra => ({ ...h.value(), trial: { ...trial, ...extra } });
+  h.client.refresh(h.client.snapshot().renderLease); h.reply(serverView()); h.render();
+  h.click("trial-start");
+  const request = h.sent.at(-1);
+  assert.equal(request.operation, "trialEvent");
+  const { visitId } = request.payload;
+  assert.match(visitId, /^wvisit-/);
+  assert.deepEqual(request.payload, { kind: "visit", visitId, entrySource: "unknown", reminderCount: 0 });
+  h.reply(serverView({ activeVisitId: visitId })); h.render();
+  h.click("trial-reason-shared-history"); h.click("trial-save-choice");
+  assert.deepEqual(h.sent.at(-1).payload, { kind: "choice", visitId, reason: "shared-history" });
+  h.reply(serverView({ activeVisitId: visitId })); h.render();
+  h.click("tab-2"); h.click("open-costs");
+  assert(strings(h.tree).includes("模型金额记录：0 CNY　托管：未计量"));
+  assert(strings(h.tree).includes("成本未齐，暂不可计算"));
+  assert.equal(h.button("trial-purchase-intent").props.disabled, true);
+  const offer = { offerId: "offer-1", priceMicros: "1234567", currency: "CNY", durationDays: 7, adventureCount: 3 };
+  h.client.refresh(h.client.snapshot().renderLease); h.reply(serverView({ activeVisitId: visitId, offer })); h.render();
+  assert(strings(h.tree).includes("1.234567 CNY"));
+  h.click("trial-purchase-intent");
+  assert.deepEqual(h.sent.at(-1).payload, { kind: "purchaseIntent", visitId, offerId: "offer-1" });
+  h.reply(serverView({ offer })); h.render();
+  assert.equal(h.button("trial-purchase-intent").props.disabled, true);
+});
 test("confirmation uses an opaque rendered lease and cannot authorize a changed view", () => {
   const h = host(); h.ready(); h.render(); h.click("tab-4"); h.click("prepare-supply");
   const stale = h.button("confirm");

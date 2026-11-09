@@ -3,7 +3,8 @@
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import type { CSSProperties, ReactNode } from "react";
 import { R16CompanionClient, r16CompanionCanAuthorizeLife, r16CompanionModelReady, r16CompanionSupplyComplete, r16CompanionTeachingId,
-  r16CompanionInstruction, r16CompanionCancelTeachingId, r16CompanionResumeLifeId } from "../../lib/r16-companion-client";
+  r16CompanionInstruction, r16CompanionCancelTeachingId, r16CompanionResumeLifeId, formatR16CompanionMicros,
+  R16_COMPANION_ENTRY_SOURCES, R16_COMPANION_CHOICE_REASONS } from "../../lib/r16-companion-client";
 import type { R16CompanionAction, R16CompanionOwnerView, R16CompanionRenderLease, R16CompanionTask } from "../../lib/r16-companion-client";
 
 /** R16 crystal_ui/companion.rs logical 1024x768 stage, not viewport pixels. */
@@ -28,7 +29,7 @@ const styles = `
 .r16-companion .panel { position:absolute; border:2px solid rgb(209,176,112); background:rgb(14,11,7); overflow:hidden; pointer-events:auto; }
 .r16-companion button { position:absolute; height:29px; padding:0 4px; border:1px solid rgb(209,176,112); border-radius:0; background:rgb(41,28,15); color:rgb(235,222,194); font:inherit; font-size:13px; line-height:16px; white-space:normal; cursor:pointer; }
 .r16-companion button:disabled { background:rgb(20,18,15); color:rgb(166,158,138); cursor:default; }
-.r16-companion button:not(:disabled):is(:hover,:focus-visible),.r16-companion button[aria-selected=true] { border-color:rgb(255,222,115); background:rgb(71,51,26); }
+.r16-companion button:not(:disabled):is(:hover,:focus-visible),.r16-companion button[aria-selected=true],.r16-companion button[aria-pressed=true] { border-color:rgb(255,222,115); background:rgb(71,51,26); }
 .r16-companion :is(button,textarea,a):focus-visible { outline:1px solid #ffde73; outline-offset:1px; }
 .r16-companion .copy { position:absolute; margin:0; white-space:pre-wrap; overflow:hidden; overflow-wrap:anywhere; font-weight:400; }
 .r16-companion .gold { color:rgb(209,176,112); }
@@ -66,9 +67,58 @@ function supplyStatus(t: R16CompanionTask): string {
     cancelled: "补给已撤销；已提交购买的结果仍需核对，不会自动退款。", failed: "本次补给未完成，请核对原因和已有购买回执。" } as Record<string, string>)[String(t.status)] ?? "暂无独立补给任务。";
 }
 
+type SubpageProps = { view: R16CompanionOwnerView; mutable: boolean; act(action: R16CompanionAction): void; back(): void };
+function TrialPage({ view, mutable, act, back }: SubpageProps) {
+  const [entrySource, setEntrySource] = useState<typeof R16_COMPANION_ENTRY_SOURCES[number] | null>(null);
+  const [reminderCount, setReminderCount] = useState(0);
+  const [choice, setChoice] = useState<typeof R16_COMPANION_CHOICE_REASONS[number] | null>(null);
+  const active = !!view.trial?.activeVisitId, enabled = mutable && !!view.trial;
+  return <>
+    <Copy x={22} y={180} h={26} tone="gold">本参与者试用累计 · 体验自述</Copy>
+    {R16_COMPANION_ENTRY_SOURCES.map((source, i) => <Button key={source} id={`trial-source-${source}`} label={["自己想来", "收到提醒", "约好时间", "不确定"][i]}
+      x={22 + i * 174} y={216} w={162} selected={entrySource === source} disabled={!enabled || active} onClick={() => setEntrySource(source)} />)}
+    <Copy x={22} y={256} w={400} h={26}>{`收到提醒次数（自述）：${reminderCount}`}</Copy>
+    <Button id="trial-reminder-down" label="−" x={540} y={252} w={78} disabled={!enabled || active || reminderCount === 0} onClick={() => setReminderCount(reminderCount - 1)} />
+    <Button id="trial-reminder-up" label="+" x={634} y={252} w={78} disabled={!enabled || active || reminderCount === 100} onClick={() => setReminderCount(reminderCount + 1)} />
+    <Button id={active ? "trial-end" : "trial-start"} label={active ? "结束本次体验" : "开始本次体验"} x={22} y={291} w={690} disabled={!enabled}
+      onClick={() => act({ type: "trialEvent", event: active ? { kind: "visitEnd" } : { kind: "visit", entrySource: entrySource ?? "unknown", reminderCount } })} />
+    <Copy x={22} y={332} h={23}>选择这位伙伴的原因（自述）</Copy>
+    {R16_COMPANION_CHOICE_REASONS.map((reason, i) => <Button key={reason} id={`trial-reason-${reason}`} label={["共同经历", "战力更强", "省去设置", "好奇", "其他"][i]}
+      x={22 + i * 140} y={360} w={130} selected={choice === reason} disabled={!enabled || !active} onClick={() => setChoice(reason)} />)}
+    <Copy x={22} y={401} h={30} size={13} tone="muted">{view.trial ? "选择与教学理解由你主动记录，仅保存所选选项。" : "此服务器尚未配置体验记录。"}</Copy>
+    <Button id="trial-save-choice" label="记录选择原因" x={22} y={443} w={690} disabled={!enabled || !active || !choice}
+      onClick={() => { if (choice) act({ type: "trialEvent", event: { kind: "choice", reason: choice } }); }} />
+    <Button id="trial-understood" label="教学反馈：我理解了" x={22} y={484} w={335} disabled={!enabled || !active}
+      onClick={() => act({ type: "trialEvent", event: { kind: "teachingCheck", understood: true } })} />
+    <Button id="trial-not-understood" label="教学反馈：还没看懂" x={377} y={484} w={335} disabled={!enabled || !active}
+      onClick={() => act({ type: "trialEvent", event: { kind: "teachingCheck", understood: false } })} />
+    <Button id="back-trial" label="返回培养习惯" x={22} y={521} w={690} onClick={back} />
+  </>;
+}
+
+function CostsPage({ view, mutable, act, back }: SubpageProps) {
+  const trial = view.trial, usage = trial?.usage, costs = trial?.costs, offer = trial?.offer;
+  const measure = (v: unknown) => typeof v === "number" ? String(v) : "未计量";
+  const money = (v: unknown) => formatR16CompanionMicros(v, costs?.currency) ?? "未计量";
+  const mode = view.runtime.modelEnabled ? "已启用模型服务" : view.runtime.provider ? "规则执行器（未启用大模型）" : "运行服务未说明";
+  return <>
+    <Copy x={22} y={180} h={24} size={16} tone="gold">本参与者试用累计（跨已授权伙伴）</Copy>
+    <Copy x={22} y={212} h={32}>{`运行秒数：${measure(usage?.runtimeSeconds)}　模型调用：${measure(usage?.modelCalls)}　已确认冒险：${measure(usage?.confirmedAdventureCount)}`}</Copy>
+    <Copy x={22} y={255} h={94}>{`模型金额记录：${money(costs?.modelMicros)}　托管：${money(costs?.hostingMicros)}\n支付费用：${money(costs?.paymentMicros)}　分成：${money(costs?.revenueShareMicros)}\n贡献：${costs?.complete === true ? money(costs.contributionMicros) : "成本未齐，暂不可计算"}　人工支持秒数：${measure(costs?.supportSeconds)}`}</Copy>
+    <Copy x={22} y={350} h={24} size={12} tone="muted">{`当前伙伴：${mode}。实际付款以独立支付记录为准。`}</Copy>
+    <Copy x={22} y={386} h={28} tone="gold">{offer ? `可选未来服务：${offer.price} · ${offer.durationDays}天 / ${offer.adventureCount}次冒险` : "尚未配置服务价格。"}</Copy>
+    <Copy x={22} y={420} h={52} size={13}>{offer?.paymentInstructions || "角色身份、成长、记忆管理与导出均可继续使用。"}</Copy>
+    <Button id="trial-purchase-intent" label="申请此服务（仅记录意向）" x={22} y={477} w={690} disabled={!mutable || !offer || !trial?.activeVisitId}
+      onClick={() => act({ type: "trialEvent", event: { kind: "purchaseIntent" } })} />
+    <Button id="back-costs" label="返回行动记录" x={22} y={518} w={690} onClick={back} />
+  </>;
+}
+
 export function R16CompanionWindow({ client, open, onOpenChange, entryEnabled = true, entryVisible = true, partyMember = false, onInviteParty, onOpenModelSettings }: R16CompanionWindowProps) {
   const snapshot = useSyncExternalStore(client.subscribe, client.snapshot, client.snapshot);
-  const [tab, setTab] = useState(0), [page, setPage] = useState(0), [teaching, setTeaching] = useState(false);
+  const [tab, setTab] = useState(0), [page, setPage] = useState(0);
+  const [subpage, setSubpage] = useState<"trial" | "teaching" | "costs" | null>(null);
+  const teaching = subpage === "teaching";
   const [draftValue, setDraftValue] = useState<{ client: R16CompanionClient; epoch: number; text: string } | null>(null);
   // A new owner/view cannot briefly paint the previous owner's input before a passive effect runs.
   const draft = draftValue?.client === client && draftValue.epoch === snapshot.contentEpoch ? draftValue.text : "";
@@ -106,7 +156,7 @@ export function R16CompanionWindow({ client, open, onOpenChange, entryEnabled = 
   const close = () => { activityRef.current.open = false; setDraft(""); setConfirmation(null); composing.current = false; editing.current = false; onOpenChange(false); };
   const act = (action: R16CompanionAction) => { client.act(lease, action); };
   const prepare = (action: R16CompanionAction) => { if (mutable && client.isCurrentLease(lease, true)) setConfirmation({ lease, action }); };
-  const changeTab = (value: number) => { editing.current = false; setTab(value); setPage(0); setTeaching(false); setDraft(""); setConfirmation(null); };
+  const changeTab = (value: number) => { editing.current = false; setTab(value); setPage(0); setSubpage(null); setDraft(""); setConfirmation(null); };
   const sendText = () => { if (!composing.current) act({ type: teaching ? "proposeTeaching" : "instruct", text: draft }); };
   const rows = tab === 1 ? view?.feedback ?? [] : view?.episodes ?? [];
   const pageCount = Math.max(1, Math.ceil(rows.length / 4)), safePage = Math.min(page, pageCount - 1);
@@ -125,7 +175,7 @@ export function R16CompanionWindow({ client, open, onOpenChange, entryEnabled = 
         onKeyDown={event => {
           event.stopPropagation();
           if (event.nativeEvent.isComposing || event.keyCode === 229 || composing.current) return;
-          if (event.key === "Escape") { event.preventDefault(); if (confirmation) setConfirmation(null); else if (teaching) setTeaching(false); else close(); }
+          if (event.key === "Escape") { event.preventDefault(); if (confirmation) setConfirmation(null); else if (subpage) setSubpage(null); else close(); }
           if (event.key === "Tab") {
             const root = confirmation ? panelRef.current?.querySelector<HTMLElement>("[data-r16-companion-confirm]") : panelRef.current;
             const fields = Array.from(root?.querySelectorAll<HTMLElement>('button:not(:disabled),textarea:not(:disabled),a[href]') ?? []);
@@ -159,12 +209,15 @@ export function R16CompanionWindow({ client, open, onOpenChange, entryEnabled = 
           <Button id="confirm" label="确认执行" x={370} y={390} w={210} disabled={!mutable || confirmation.lease !== lease}
             onClick={() => { client.act(confirmation.lease, confirmation.action); setConfirmation(null); }} />
         </div> : !view ? <Copy x={22} y={215} h={90} size={16} tone="muted">{snapshot.busy ? "正在读取已授权的伙伴资料…" : "请刷新伙伴列表。没有授权时不会显示私人记忆。"}</Copy>
+          : subpage === "trial" ? <TrialPage key={snapshot.contentEpoch} view={view} mutable={mutable} act={act} back={() => setSubpage(null)} />
+          : subpage === "costs" ? <CostsPage view={view} mutable={mutable} act={act} back={() => setSubpage(null)} />
           : tab === 0 && !teaching ? <>
             <Copy x={22} y={181} size={17} tone="gold">{`${view.archive.displayName} · 培养 v${view.profile.policyVersion} · 成长修订 ${view.growthRevision}`}</Copy>
             <Copy x={22} y={222} h={92} size={16}>{`组队先支援：${yes(view.profile.party.assistBeforeLoot)}\n战斗后再拾取：${yes(view.profile.party.lootOnlyAfterCombat)}\n离队先询问：${yes(view.profile.party.askBeforeLeaving)}`}</Copy>
             <Button id="teach" label="教它：组队先支援，战后再拾取，离队先问" x={22} y={326} w={690} disabled={!mutable} onClick={() => act({ type: "teach" })} />
             <Copy x={22} y={371} h={62} tone="muted">这是明确的习惯教学。保存成功后显示新版本；伙伴实际行动仍受血量、距离和游戏规则约束。</Copy>
-            <Button id="open-teaching" label="用自己的话教阿洛" x={22} y={435} w={690} disabled={!mutable} onClick={() => { setTeaching(true); setDraft(""); }} />
+            <Button id="open-teaching" label="用自己的话教阿洛" x={22} y={435} w={334} disabled={!mutable} onClick={() => { setSubpage("teaching"); setDraft(""); }} />
+            <Button id="open-trial" label="体验自述与选择原因" x={368} y={435} w={344} disabled={snapshot.busy} onClick={() => setSubpage("trial")} />
             <Copy x={22} y={478} h={61} size={13} tone="muted">{`固定身份：${view.archive.archiveId}\n${view.archive.baseSetting}`}</Copy>
           </> : tab === 1 ? <>
             <Copy x={22} y={180} size={15} tone="gold">{`教学记录 · 当前读取 ${view.feedback.length} 条 · 第 ${safePage + 1} 页`}</Copy>
@@ -185,10 +238,10 @@ export function R16CompanionWindow({ client, open, onOpenChange, entryEnabled = 
               <Button id={`delete-episode-${row.episodeId}`} label="删除" x={610} y={225 + index * 64} w={104} disabled={!mutable} onClick={() => prepare({ type: "deleteEpisode", episodeId: row.episodeId })} />
             </div>)}
             {!view.episodes.length ? <Copy x={22} y={245} size={16} tone="muted">还没有已记录的行动经历。</Copy> : null}{pageButtons()}
-            <Copy x={22} y={513} h={36} size={12} tone="muted">{`模型调用：${shown(view.runtime.modelCalls)} · 费用记录${view.costs.complete === true ? "已计量" : "不完整，缺项保持未知"}；记录不等于付款。`}</Copy>
+            <Button id="open-costs" label="查看服务状态、费用与可选服务" x={22} y={513} w={690} disabled={snapshot.busy} onClick={() => setSubpage("costs")} />
           </> : tab === 3 || teaching ? <>
             <Copy x={22} y={181} w={teaching ? 470 : 690} h={44} size={teaching ? 17 : 14} tone="gold">{teaching ? "用自己的话教阿洛" : `${view.runtime.provider || "规则"} · ${view.runtime.model || "规则"} · ${r16CompanionModelReady(view) ? "模型已启用" : "模型未启用"}`}</Copy>
-            {teaching ? <Button id="close-teaching" label="返回培养" x={520} y={180} w={192} onClick={() => setTeaching(false)} /> : null}
+            {teaching ? <Button id="close-teaching" label="返回培养" x={520} y={180} w={192} onClick={() => setSubpage(null)} /> : null}
             <Copy x={22} y={teaching ? 216 : 226} h={27} size={12} tone="muted">{teaching ? "支持支援、拾取与离队习惯。生成会调用模型；确认前不生效，也不会扩大花费权限。" : "私人委托 · 仅发送给你有权管理的伙伴，最多 1000 字符"}</Copy>
             <textarea aria-label={teaching ? "自然语言教学输入" : "私人委托输入"} data-r16-companion-input="instruction" style={at(22, teaching ? 249 : 255, 690, teaching ? 65 : 84)}
               value={draft} maxLength={2000} disabled={!mutable} autoComplete="off" spellCheck={false}
