@@ -42,7 +42,8 @@ Updated 2026-11-09 (Asia/Shanghai). Read [coordination](AGENT-ORCHESTRATION.md) 
 - [x] 新WebGPU页面隔离实测组队、未入会公会只读、两次真实延迟ACK后的主角取消/精确资产以及双方同角重登；取回对端当场uncertain的原r3仍失败，后续trade=null与重登正常另列。[普通UI与原失败](evidence/r16-social-budget-20261109/README.md#ordinary-isolated-web-ui)
 - [x] 当前 Gateway 两方普通包序复现发起方漏收终结。修复待初始化交易先按原队列发接受和报价，再发取消。默认与 5 秒节拍验证两种取消、同连接重新交易和同角读档。精确修复版 WebGPU 复测两种延迟回包取消均通过。 [回归、普通包序与界面证据](evidence/r16-trade-terminal-20261109/README.md)
 - [x] 两个普通 WebSocket 角色完成单件蜡烛交割。收件方一次入账，双方各一次完成回包，旧标识重合时分配新标识。双方同角重登核对精确。 [回归、普通包序与界面证据](evidence/r16-trade-terminal-20261109/README.md)
-- [ ] 继续真实名字级失败 ACK、Native 招募及建职阶、有会籍 Guild 物品操作未决时的交易取消、双向物品与金币交割、阿洛普通界面和语言对齐。未产出的回执继续追踪实际来源。Windows 窗口、同候选跨端和真实 PostgreSQL 尚待验证。
+- [x] 已开交易在有会籍的公会仓库物品待回包时可取消。WebGPU 两场存入/取回只发一次取消，双方有结束包，仓库仍待自己的回包及新快照，双方同角与最终 File 读回精确。149 项 Web 回归和 TypeScript 通过。 [仓库和交易双端实测](evidence/r16-guild-trade-cancel-20261109/README.md)
+- [ ] 继续双向物品与金币交割、真实名字级失败 ACK、Native 招募及建职阶、阿洛普通界面和语言。Web 仓库全量只在当次公会会话发一次，现有重复刷新入口及取回时暂隐藏选择器的反馈继续核对。Windows 窗口、同候选跨端和真实 PostgreSQL 尚待验证。
 - [x] 交易自身物品待回执的取消及同owner/partner重复接受已完成限定代码修复；原Page105/社交31/适配器507组/TS及两场隔离浏览器证据保留。共用八项见后续独立记录，完整Trade与公开发行仍未完成。[原本轮范围](evidence/r16-web-trade-20261109/README.md)
 - [x] 公会职级改名／单项权限／草稿／层级／广播／重登已在 WebGL2-shared 和默认 WebGPU 的普通界面通过；新鲜限定39／TS通过，修正选中态边框冲突。[当前范围](WEB-R16-PARITY-GOAL.zh-CN.md#公会职级普通流程2026-11-08)
 - [x] Native 公会增量、真实身份接法、权限实际位回执及读请求生命周期完成限定代码验证；普通队列淘汰／真实bounded发送满载回归通过，198项独立检查及原锁release构建通过，未运行窗口。[范围](WEB-R16-PARITY-GOAL.zh-CN.md#native-公会增量与请求生命周期2026-11-08)
