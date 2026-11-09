@@ -199,6 +199,16 @@
       "sha256": "1ccb6365737b23385a955901bfae70b4724ccbccb3ce5341ba2d61f929fe51d0",
       "log": "web-candidate-adapters.log",
       "observed": "stage5 adapter tests passed (508 groups)"
+    },
+    "nativeCombinedGroup": {
+      "inputPins": {
+        "apps/game-client/client-bevy/src/social_operation_budget.rs": "5c239cbe2932ec70a1aea1ac31d5e3ed8c5d856c926db4dc36f95d0340aef201",
+        "apps/game-client/platform-windows/src/gameplay_bridge.rs": "ab60a0750dfec301ed47dfd8148c35636f71fad438127eb2b74f9d7ba8481342"
+      },
+      "log": "native-combined-group-rebuilt.log",
+      "sha256": "7bb61f6144c2ac5d3a137805c59376f7cf05a89fe8fb0259f010e61844795b4b",
+      "pinsSha256": "a33e43367f27c24cbcbd8ca1334de5c2442d8e57b011ac909d6350e2b99a9d90",
+      "observed": "Compiled shared budget and ran six Windows group tests with the matching bridge"
     }
   }
 }

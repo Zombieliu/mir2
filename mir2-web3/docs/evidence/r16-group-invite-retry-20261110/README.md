@@ -10,6 +10,6 @@ Web 和共用 Rust 预算在发包前保留现有角色、会话、地图和八�
 
 同一 Gateway、两份独立 File 夹具和新运行包 `bevy-22790e9223ec130f`。第一组在真实拒绝后再次提交 `bLaDe`，第二组在关闭邀请与两秒内静默后重新开启邀请，再次提交 `bLADe`。每次重试各出现一个原协议请求和一个邀请窗口。等待期间没有自动请求。接受前队伍为空，实际点击接受后两端收到 `Blade` 的两人名单，四次普通注销。
 
-WebGPU 浏览器复测采用 `next build --webpack` 与 `next start`。实际 WebGL2-shared WASM 和 Page/窗口/发送顺序共 258 项，Stage5 适配器 508 组，TypeScript 通过。共用 Rust 社交 92 项及 JSON 边界 9 项。Windows 原生命令队列组队 6 项、桥接 156 项、指令归属 5 项分组记录，有筛选交集。 [新版入队画面](candidate-retry-party.png) · [回执与回归](candidate-verification.json)
+WebGPU 浏览器复测采用 `next build --webpack` 与 `next start`。实际 WebGL2-shared WASM 和 Page/窗口/发送顺序共 258 项，Stage5 适配器 508 组，TypeScript 通过。共用 Rust 社交 92 项及 JSON 边界 9 项。Windows 叠加本轮共享预算和发送桥接，重编后组队 6 项通过。另有桥接 156 项、指令归属 5 项的相邻回归，筛选范围有交集。 [新版入队画面](candidate-retry-party.png) · [回执与回归](candidate-verification.json)
 
 三套运行包的直接文件及版本化文件通过 12 次 SHA-256 验证。预编译发行需同步更新运行包与清单。Windows 窗口和公网发行分别验收。 [构建与资源散列](runtime-verification.json)
