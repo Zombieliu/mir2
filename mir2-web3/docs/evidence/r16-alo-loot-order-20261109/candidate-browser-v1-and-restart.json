@@ -1,0 +1,652 @@
+{
+  "schema": "mir2-r16-alo-teaching-order/1",
+  "localOnly": true,
+  "modelProvider": "rules",
+  "baseCommit": "8a2c47b44ec5b82f3866cfd84b93a271fd9b1f8a",
+  "gatewaySourceCommit": "8a2c47b44ec5b82f3866cfd84b93a271fd9b1f8a",
+  "gatewaySourceFiles": {
+    "apps/gateway/src/routing.rs": "c298d74a67aabcc5c509997eeb83073eb95a44f9ca2f49b893a9c54b9c54c42f",
+    "apps/simulation/src/runtime/drops.rs": "9648009ba5fa7ed50cf64aaf80833360c8c4fc1877a2494d9859c7f924c86c54",
+    "apps/simulation/src/runtime/inventory.rs": "e4d4b3f92354127e90b31abfdb694c384fd66705785d820a24bbef6ea9cbc8e3",
+    "apps/simulation/src/world_runtime.rs": "ce1484e2cae8671b8d8e027188cfa50a8f9140ec6bed31dfb69a4c58b33da39e"
+  },
+  "gatewaySha256": "4d1a18644ef69eacdae0656fff1b8f49a4af1ae97ffcf6878ada86f5dff0ae0f",
+  "runtimeVersion": "bevy-0cd68510886134e0",
+  "source": {
+    "apps/web/lib/r16-companion-client.ts": "108ae5fa740d7f22b1e0fed1194ad2c3bf9c8a07c11c9d63842d31c11cd45ec5",
+    "apps/web/app/components/r16-companion-window.tsx": "a08aba77f1dbd822ae5b420bb78098509c0c259b360032fbb52c8c32032198b4",
+    "apps/web/app/page.tsx": "34ded65e6850714bd5d246d9b2914c79d99edfd12cbc6443f91a3cfd4584282b"
+  },
+  "phases": [
+    "reserve-own-loopback",
+    "prepare-independent-next-source",
+    "ordinary-new-file-store-provisioning",
+    "actual-headless-web-start",
+    "owner-browser-login-select-enter",
+    "start-v1-browser-and-ordinary-party",
+    "v1-natural-deer-and-held-source",
+    "v1-move-ordinary-candle-holder-near-party",
+    "v1-outside-safe-zone-natural-target",
+    "v1-candle-holder-and-alo-in-range",
+    "v1-owner-first-hit-then-source-drop",
+    "v1-observe-exact-pickup-and-death",
+    "teach-fixed-preset-v2-in-real-browser",
+    "restart-same-actor-and-check-authoritative-v2",
+    "v2-natural-deer-and-held-source",
+    "v2-move-ordinary-candle-holder-near-party",
+    "v2-outside-safe-zone-natural-target",
+    "v2-candle-holder-and-alo-in-range",
+    "v2-owner-first-hit-then-source-drop"
+  ],
+  "events": [
+    {
+      "operation": "view",
+      "status": "ok"
+    },
+    {
+      "operation": "view",
+      "status": "ok"
+    },
+    {
+      "operation": "teach",
+      "status": "ok"
+    },
+    {
+      "operation": "view",
+      "status": "ok"
+    }
+  ],
+  "pageErrors": [],
+  "startGameAcks": [
+    4
+  ],
+  "stopped": {
+    "actorSaved": true,
+    "next": true,
+    "gateway": true
+  },
+  "baseline": {
+    "version": 1,
+    "partyHabits": [
+      false,
+      false,
+      false
+    ],
+    "feedback": 0
+  },
+  "fieldTrails": [
+    [
+      {
+        "x": 288,
+        "y": 616,
+        "safe": true,
+        "candidates": 5,
+        "closest": 12,
+        "route": null,
+        "waypoint": 0
+      },
+      {
+        "x": 288,
+        "y": 611,
+        "safe": true,
+        "candidates": 6,
+        "closest": 7,
+        "route": null,
+        "waypoint": 0
+      },
+      {
+        "x": 287,
+        "y": 607,
+        "safe": true,
+        "candidates": 7,
+        "closest": 3,
+        "route": null,
+        "waypoint": 0
+      },
+      {
+        "x": 287,
+        "y": 602,
+        "safe": true,
+        "candidates": 8,
+        "closest": 1,
+        "route": null,
+        "waypoint": 0
+      },
+      {
+        "x": 290,
+        "y": 600,
+        "safe": true,
+        "candidates": 7,
+        "closest": 1,
+        "route": null,
+        "waypoint": 1
+      },
+      {
+        "x": 287,
+        "y": 602,
+        "safe": true,
+        "candidates": 8,
+        "closest": 1,
+        "route": null,
+        "waypoint": 2
+      },
+      {
+        "x": 287,
+        "y": 607,
+        "safe": true,
+        "candidates": 7,
+        "closest": 3,
+        "route": null,
+        "waypoint": 2
+      },
+      {
+        "x": 282,
+        "y": 607,
+        "safe": true,
+        "candidates": 8,
+        "closest": 6,
+        "route": null,
+        "waypoint": 2
+      },
+      {
+        "x": 280,
+        "y": 604,
+        "safe": true,
+        "candidates": 9,
+        "closest": 4,
+        "route": null,
+        "waypoint": 2
+      },
+      {
+        "x": 281,
+        "y": 600,
+        "safe": true,
+        "candidates": 9,
+        "closest": 4,
+        "route": null,
+        "waypoint": 2
+      },
+      {
+        "x": 279,
+        "y": 597,
+        "safe": false,
+        "candidates": 10,
+        "closest": 2,
+        "route": {
+          "x": 280,
+          "y": 596
+        },
+        "waypoint": 3
+      }
+    ],
+    [
+      {
+        "x": 291,
+        "y": 611,
+        "safe": false,
+        "candidates": 5,
+        "closest": 7,
+        "route": null,
+        "waypoint": 0
+      },
+      {
+        "x": 294,
+        "y": 609,
+        "safe": false,
+        "candidates": 3,
+        "closest": 5,
+        "route": null,
+        "waypoint": 0
+      },
+      {
+        "x": 293,
+        "y": 605,
+        "safe": false,
+        "candidates": 3,
+        "closest": 4,
+        "route": {
+          "x": 290,
+          "y": 603
+        },
+        "waypoint": 0
+      }
+    ]
+  ],
+  "rounds": [
+    {
+      "version": 1,
+      "monster": "Deer",
+      "pre": {
+        "ownerHealth": 18,
+        "ownerMaxHp": 18,
+        "actorHealth": 18,
+        "actorMaxHp": 18,
+        "candleCount": 1,
+        "actorToSource": 1,
+        "ownerToTarget": 1,
+        "helperToOwner": 1,
+        "owner": {
+          "x": 280,
+          "y": 595
+        },
+        "actor": {
+          "x": 279,
+          "y": 597
+        },
+        "source": {
+          "x": 280,
+          "y": 596
+        },
+        "deer": {
+          "x": 281,
+          "y": 596
+        }
+      },
+      "sourceDropAck": true,
+      "sourceCountBefore": 1,
+      "sourceCountAfter": 0,
+      "actorToDropAtReceipt": 2,
+      "dropDelayMs": 345,
+      "sourceDropRoundTripMs": 20,
+      "ownerReturnedAfterDeath": false,
+      "ownerHitOrder": 93,
+      "groundOrder": 94,
+      "deathOrder": 113,
+      "gainOrder": 99,
+      "sameItemUid": false,
+      "dropRemovedOrder": 100,
+      "actorHits": [
+        103,
+        104,
+        106,
+        107,
+        108,
+        109,
+        112
+      ],
+      "decisions": [
+        {
+          "order": 95,
+          "kind": "loot",
+          "policyVersion": 1,
+          "reason": "collect-observed-allowed-drop",
+          "target": "candle"
+        },
+        {
+          "order": 101,
+          "kind": "attack",
+          "policyVersion": 1,
+          "reason": "assist-confirmed-party-engagement",
+          "target": "deer"
+        },
+        {
+          "order": 111,
+          "kind": "attack",
+          "policyVersion": 1,
+          "reason": "defend-confirmed-engagement",
+          "target": "deer"
+        }
+      ],
+      "grantedItemCount": 1,
+      "groundSeenAlive": true,
+      "deathConfirmed": true,
+      "actorCountBefore": 1,
+      "actorCountAfter": 2,
+      "candleRemovedWithPickup": true,
+      "exactOrderingQualified": true
+    }
+  ],
+  "placementAttempts": [
+    {
+      "version": 1,
+      "owner": {
+        "x": 280,
+        "y": 595
+      },
+      "actor": {
+        "x": 279,
+        "y": 597
+      },
+      "source": {
+        "x": 280,
+        "y": 596
+      },
+      "hasAdjacentDeer": true,
+      "safe": false
+    },
+    {
+      "version": 2,
+      "owner": {
+        "x": 290,
+        "y": 604
+      },
+      "actor": {
+        "x": 292,
+        "y": 605
+      },
+      "source": {
+        "x": 289,
+        "y": 605
+      },
+      "hasAdjacentDeer": true,
+      "safe": false
+    }
+  ],
+  "taught": {
+    "version": 2,
+    "activeFeedback": 1,
+    "modelCalls": 0
+  },
+  "restart": {
+    "differentPid": true,
+    "sameSqlite": true,
+    "sameArchiveAndFeedback": true
+  },
+  "failureObservation": {
+    "actorRunning": true,
+    "actorSample": {
+      "partySize": 2,
+      "allowGroup": true,
+      "map": "0",
+      "ready": true,
+      "hp": 18,
+      "maxHp": 18
+    },
+    "decisions": [
+      {
+        "kind": "follow",
+        "version": 2,
+        "reason": "stay-with-party-leader"
+      },
+      {
+        "kind": "wait",
+        "version": 2,
+        "reason": "near-party-leader"
+      },
+      {
+        "kind": "follow",
+        "version": 2,
+        "reason": "stay-with-party-leader"
+      },
+      {
+        "kind": "wait",
+        "version": 2,
+        "reason": "near-party-leader"
+      },
+      {
+        "kind": "follow",
+        "version": 2,
+        "reason": "stay-with-party-leader"
+      },
+      {
+        "kind": "wait",
+        "version": 2,
+        "reason": "near-party-leader"
+      },
+      {
+        "kind": "follow",
+        "version": 2,
+        "reason": "stay-with-party-leader"
+      },
+      {
+        "kind": "wait",
+        "version": 2,
+        "reason": "near-party-leader"
+      },
+      {
+        "kind": "follow",
+        "version": 2,
+        "reason": "stay-with-party-leader"
+      },
+      {
+        "kind": "wait",
+        "version": 2,
+        "reason": "near-party-leader"
+      },
+      {
+        "kind": "follow",
+        "version": 2,
+        "reason": "stay-with-party-leader"
+      },
+      {
+        "kind": "wait",
+        "version": 2,
+        "reason": "near-party-leader"
+      },
+      {
+        "kind": "follow",
+        "version": 2,
+        "reason": "stay-with-party-leader"
+      },
+      {
+        "kind": "wait",
+        "version": 2,
+        "reason": "near-party-leader"
+      }
+    ]
+  },
+  "result": "failed",
+  "error": {
+    "name": "AssertionError",
+    "code": "ERR_ASSERTION",
+    "messageSha256": "4a43a7a36717944e600500b385ffefdbfdb66c7b79fa6a9d1302b72fc608d12b",
+    "line": "390"
+  },
+  "partyTrace": [
+    {
+      "source": "browser-receive",
+      "packet": "SwitchGroup",
+      "authoritativeMembers": 0
+    },
+    {
+      "source": "browser-receive",
+      "packet": "DeleteGroup",
+      "authoritativeMembers": 0
+    },
+    {
+      "source": "browser-receive",
+      "packet": "SwitchGroup",
+      "authoritativeMembers": 0
+    },
+    {
+      "source": "actor",
+      "type": "actorParty",
+      "packet": "SwitchGroup",
+      "authoritativeMembers": 0,
+      "allowsGroup": false
+    },
+    {
+      "source": "actor",
+      "type": "actorParty",
+      "packet": "DeleteGroup",
+      "authoritativeMembers": 0,
+      "allowsGroup": false
+    },
+    {
+      "source": "actor",
+      "type": "actorParty",
+      "packet": "SwitchGroup",
+      "authoritativeMembers": 0,
+      "allowsGroup": true
+    },
+    {
+      "source": "actor",
+      "type": "actorParty",
+      "packet": "SwitchGroup",
+      "authoritativeMembers": 0,
+      "allowsGroup": true
+    },
+    {
+      "source": "browser-send",
+      "command": "switchGroup"
+    },
+    {
+      "source": "browser-send",
+      "command": "addMember",
+      "targetMatches": true
+    },
+    {
+      "source": "browser-receive",
+      "packet": "SwitchGroup",
+      "authoritativeMembers": 0
+    },
+    {
+      "source": "actor",
+      "type": "actorParty",
+      "packet": "GroupInvite",
+      "authoritativeMembers": 0,
+      "allowsGroup": true
+    },
+    {
+      "source": "browser-receive",
+      "packet": "SwitchGroup",
+      "authoritativeMembers": 0
+    },
+    {
+      "source": "browser-receive",
+      "packet": "AddMember",
+      "authoritativeMembers": 1
+    },
+    {
+      "source": "actor",
+      "type": "actorParty",
+      "packet": "AddMember",
+      "authoritativeMembers": 1,
+      "allowsGroup": true
+    },
+    {
+      "source": "actor",
+      "type": "actorParty",
+      "packet": "AddMember",
+      "authoritativeMembers": 2,
+      "allowsGroup": true
+    },
+    {
+      "source": "actor",
+      "type": "actorParty",
+      "packet": "GroupMemberInfo",
+      "authoritativeMembers": 2,
+      "allowsGroup": true
+    },
+    {
+      "source": "browser-receive",
+      "packet": "AddMember",
+      "authoritativeMembers": 2
+    },
+    {
+      "source": "browser-receive",
+      "packet": "GroupMemberInfo",
+      "authoritativeMembers": 2
+    },
+    {
+      "source": "browser-receive",
+      "packet": "DeleteGroup",
+      "authoritativeMembers": 0
+    },
+    {
+      "source": "actor",
+      "type": "actorParty",
+      "packet": "DeleteGroup",
+      "authoritativeMembers": 0,
+      "allowsGroup": true
+    },
+    {
+      "source": "actor",
+      "type": "actorParty",
+      "packet": "SwitchGroup",
+      "authoritativeMembers": 0,
+      "allowsGroup": false
+    },
+    {
+      "source": "actor",
+      "type": "actorParty",
+      "packet": "DeleteGroup",
+      "authoritativeMembers": 0,
+      "allowsGroup": false
+    },
+    {
+      "source": "actor",
+      "type": "actorParty",
+      "packet": "SwitchGroup",
+      "authoritativeMembers": 0,
+      "allowsGroup": true
+    },
+    {
+      "source": "actor",
+      "type": "actorParty",
+      "packet": "SwitchGroup",
+      "authoritativeMembers": 0,
+      "allowsGroup": true
+    },
+    {
+      "source": "browser-send",
+      "command": "switchGroup"
+    },
+    {
+      "source": "browser-send",
+      "command": "addMember",
+      "targetMatches": true
+    },
+    {
+      "source": "browser-receive",
+      "packet": "SwitchGroup",
+      "authoritativeMembers": 0
+    },
+    {
+      "source": "actor",
+      "type": "actorParty",
+      "packet": "GroupInvite",
+      "authoritativeMembers": 0,
+      "allowsGroup": true
+    },
+    {
+      "source": "browser-receive",
+      "packet": "SwitchGroup",
+      "authoritativeMembers": 0
+    },
+    {
+      "source": "actor",
+      "type": "actorParty",
+      "packet": "AddMember",
+      "authoritativeMembers": 1,
+      "allowsGroup": true
+    },
+    {
+      "source": "actor",
+      "type": "actorParty",
+      "packet": "AddMember",
+      "authoritativeMembers": 2,
+      "allowsGroup": true
+    },
+    {
+      "source": "actor",
+      "type": "actorParty",
+      "packet": "GroupMemberInfo",
+      "authoritativeMembers": 2,
+      "allowsGroup": true
+    },
+    {
+      "source": "browser-receive",
+      "packet": "AddMember",
+      "authoritativeMembers": 1
+    },
+    {
+      "source": "browser-receive",
+      "packet": "AddMember",
+      "authoritativeMembers": 2
+    },
+    {
+      "source": "browser-receive",
+      "packet": "GroupMemberInfo",
+      "authoritativeMembers": 2
+    },
+    {
+      "source": "actor",
+      "type": "actorParty",
+      "packet": "DeleteGroup",
+      "authoritativeMembers": 0,
+      "allowsGroup": true
+    }
+  ],
+  "browserAttackCommands": 3
+}

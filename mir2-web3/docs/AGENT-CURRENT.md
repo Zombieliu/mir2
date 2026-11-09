@@ -16,7 +16,7 @@ working tree, services, release packages, source snapshots or parity percentages
 
 ## Last recorded decisions and open work
 
-2026-11-09 持续 Goal active。按 Windows R16 共用基础推进 Web 1:1，优先代码、普通协议和无界面浏览器。阿洛掉落对照发现本地共享世界的旧资产编号冲突。共用 Gateway 已修复，普通 File 入包和双方重登通过，正式托管编号校验单独通过。阿洛体验页、签名导出、同库重启、新库导入及入队后共同击杀已有前一轮证据。继续教学前后拾取顺序、跨端同档、语言、冷双开和暂存解锁。 [执行范围](WEB-R16-PARITY-GOAL.zh-CN.md) · [拾取实测](evidence/r16-alo-loot-order-20261109/README.md) · [阿洛体验实测](evidence/r16-alo-trial-web-20261109/README.md)
+2026-11-09 持续 Goal active。按 Windows R16 共用基础推进 Web 1:1，优先代码、普通协议和无界面浏览器。共用 Gateway 修复本地共享地面拾取的旧编号冲突，普通 File 入包和双方重登通过。修复版 Web 实战证实 v1 在鹿死亡前拾取，固定教学后同一阿洛重启读回 v2。第二场未获玩家命中，继续 v2 战后拾取、跨端同档、语言、冷双开和暂存解锁。 [执行范围](WEB-R16-PARITY-GOAL.zh-CN.md) · [拾取和行为实测](evidence/r16-alo-loot-order-20261109/README.md) · [阿洛体验实测](evidence/r16-alo-trial-web-20261109/README.md)
 
 发布阶段已完成：`https://numeron.obelisk.build/game`为Web f2de/Linux d53、五职业/V2；42738素材、旧129账号/43角色/43档保全、公开三职业首任务/重登/中文Q进城分别有证。旧Mir2项目/正式服、钱包及Windows EXE保持；当前是TEST，阿洛云运行器、手机签名及全局Accepted未由发布完成。[发布结果与原失败](NUMERON-WEB-RELEASE-20261108.zh-CN.md)。
 
