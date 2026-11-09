@@ -57,6 +57,7 @@ Updated 2026-11-10 (Asia/Shanghai). Read [coordination](AGENT-ORCHESTRATION.md) 
 - [x] 同一阿洛跨端读写通过。Web 教学 v2、运行器重启、Windows 正式传输读回并撤销为 v3、新 Web 会话读回同一撤销记录。 [跨端证据](evidence/r16-alo-cross-client-20261110/README.md)
 - [x] Web 战士持久武技开关及一秒间隔修复。三职业 30 级档的 F11 双栏绑键、实际技能回包与重登读回按各自范围通过。 [技能证据](evidence/r16-skill-shortcuts-20261110/README.md)
 - [x] 大火球与灵魂火符在普通 Web 七格野怪实战命中，单次扣符及重登读回。和平模式自宠拒绝不耗符。 [实测与回归](evidence/r16-targeted-spells-20261110/README.md)
+- [ ] 满包独立交易格的浏览器、普通协议、溢出退件和正常重登通过本地候选。合入前区分尚未提交和结算结果未知的持久状态，复测单方确认和解锁回包后意外重启。 [本地正反对照](evidence/r16-trade-detached-grid-20261110/README.md)
 - [ ] 继续交易满包独立格、本方锁定时加价、名字级失败 ACK、Native 招募及建职阶、仓库重复刷新和取回反馈。阿洛语言与跨端实战、远程弹道时序、Windows 窗口及真实 PostgreSQL 分项验收。
 - [x] 交易自身物品待回执的取消及同owner/partner重复接受已完成限定代码修复；原Page105/社交31/适配器507组/TS及两场隔离浏览器证据保留。共用八项见后续独立记录，完整Trade与公开发行仍未完成。[原本轮范围](evidence/r16-web-trade-20261109/README.md)
 - [x] 公会职级改名／单项权限／草稿／层级／广播／重登已在 WebGL2-shared 和默认 WebGPU 的普通界面通过；新鲜限定39／TS通过，修正选中态边框冲突。[当前范围](WEB-R16-PARITY-GOAL.zh-CN.md#公会职级普通流程2026-11-08)
