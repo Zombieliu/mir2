@@ -22,6 +22,8 @@ const record = (value: unknown): value is Record<string, unknown> =>
   typeof value === "object" && value !== null && !Array.isArray(value);
 const validName = (value: unknown): value is string =>
   typeof value === "string" && value.trim().length > 0 && value.length <= 256 && !value.includes("\0");
+// The server resolves an AddMember target with eq_ignore_ascii_case.
+const asciiGroupName = (name: string): string => name.replace(/[A-Z]/g, letter => letter.toLowerCase());
 const positiveInteger = (value: unknown): value is number =>
   typeof value === "number" && Number.isSafeInteger(value) && value > 0;
 
@@ -150,9 +152,14 @@ export class GroupOperations {
       let matched = false;
       for (const [proof, row] of candidates) {
         if (this.operations.get(proof) !== row || !samePhysicalOwner(proof.owner, captured)) continue;
-        const done = packetName === "GroupMemberInfo"
-          ? proof.op === "addMember" ? roster!.includes(proof.name) : !roster!.includes(proof.name)
-          : proof.name === subject && packetName === (proof.op === "addMember" ? "AddMember" : "DeleteMember");
+        let done: boolean;
+        if (proof.op === "addMember") {
+          const requested = asciiGroupName(proof.name);
+          done = roster ? roster.some(name => asciiGroupName(name) === requested)
+            : packetName === "AddMember" && typeof subject === "string" && asciiGroupName(subject) === requested;
+        } else {
+          done = roster ? !roster.includes(proof.name) : packetName === "DeleteMember" && proof.name === subject;
+        }
         if (done) { this.operations.delete(proof); matched = true; }
       }
       return matched;

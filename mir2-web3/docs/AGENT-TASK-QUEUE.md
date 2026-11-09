@@ -62,6 +62,7 @@ Updated 2026-11-10 (Asia/Shanghai). Read [coordination](AGENT-ORCHESTRATION.md) 
 - [x] 大火球与灵魂火符的共享 Zone 对怪物结算按 Crystal 距离延时。真实七格计时、扣蓝、扣符和熟练度重登通过。 [计时和回归](evidence/r16-delayed-projectiles-20261110/README.md)
 - [x] 大火球与灵魂火符的 Web 施法、方向飞行、命中位图和三段原声通过七格与移动野怪复测。 [视觉与播放记录](evidence/r16-web-spell-phases-20261110/README.md)
 - [x] 本方确认后直接加价、双方重确认和单次交割已在 Web 双开复验。新运行包支持连续同额，普通交易协议验证系统反馈、两秒冷却、无效增量与重登。 [交易与构建证据](evidence/r16-trade-own-gold-20261110/README.md)
+- [x] 混合大小写组队邀请按角色原名匹配真实成功回执。生产构建双开移出后以同一拼写和连接重邀，双方名单和正常注销通过。 [组队回执和失败对照](evidence/r16-group-canonical-name-20261110/README.md)
 - [ ] 继续组队拒绝或静默后的手动重试、Native 招募及建职阶、仓库重复刷新和取回反馈。另验伤害数字与本地技能动作时序、阿洛跨端实战、Windows 窗口及完整 Hosted 链路。
 - [x] 交易自身物品待回执的取消及同owner/partner重复接受已完成限定代码修复；原Page105/社交31/适配器507组/TS及两场隔离浏览器证据保留。共用八项见后续独立记录，完整Trade与公开发行仍未完成。[原本轮范围](evidence/r16-web-trade-20261109/README.md)
 - [x] 公会职级改名／单项权限／草稿／层级／广播／重登已在 WebGL2-shared 和默认 WebGPU 的普通界面通过；新鲜限定39／TS通过，修正选中态边框冲突。[当前范围](WEB-R16-PARITY-GOAL.zh-CN.md#公会职级普通流程2026-11-08)

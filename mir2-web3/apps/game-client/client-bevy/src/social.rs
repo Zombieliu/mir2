@@ -1179,13 +1179,16 @@ impl SocialModel {
                     && current.group.allow_invites == *allow_group
             }
             SocialPendingOperation::GroupAdd { name } => event.is_some_and(|e| {
-                (e.packet == "AddMember" && e.subject.as_deref() == Some(name.as_str()))
+                (e.packet == "AddMember"
+                    && e.subject
+                        .as_deref()
+                        .is_some_and(|subject| subject.eq_ignore_ascii_case(name)))
                     || (e.packet == "GroupMemberInfo"
                         && current
                             .group
                             .members
                             .iter()
-                            .any(|member| member.name == *name))
+                            .any(|member| member.name.eq_ignore_ascii_case(name)))
             }),
             SocialPendingOperation::GroupRemove { name } => event.is_some_and(|e| {
                 (e.packet == "DeleteMember" && e.subject.as_deref() == Some(name.as_str()))
@@ -1935,6 +1938,43 @@ mod tests {
         incoming.pending.clear();
         assert!(incoming.apply_packet(packet, &payload));
         model.apply_authoritative(incoming);
+    }
+
+    #[test]
+    fn group_add_reconciles_canonical_ascii_case_on_success_only() {
+        let mut model = SocialModel::default();
+        let ascii = SocialPendingOperation::GroupAdd {
+            name: "bLaDe".into(),
+        };
+        let unicode = SocialPendingOperation::GroupAdd {
+            name: "Älo".into()
+        };
+        assert!(model.begin_pending(ascii.clone()));
+        assert!(model.begin_pending(unicode.clone()));
+
+        reconcile_packet(&mut model, "AddMember", json!({"name":"Blades"}));
+        reconcile_packet(&mut model, "DeleteMember", json!({"name":"Blade"}));
+        reconcile_packet(
+            &mut model,
+            "GroupInviteResult",
+            json!({"name":"Blade","success":false}),
+        );
+        reconcile_packet(&mut model, "AddMember", json!({"name":"älo"}));
+        reconcile_packet(
+            &mut model,
+            "GroupMemberInfo",
+            json!({"members":[{"name":"älo"}]}),
+        );
+        assert_eq!(model.pending, [ascii, unicode.clone()]);
+
+        reconcile_packet(&mut model, "AddMember", json!({"name":"Blade"}));
+        assert_eq!(model.pending, [unicode]);
+        reconcile_packet(
+            &mut model,
+            "GroupMemberInfo",
+            json!({"members":[{"name":"ÄLO"}]}),
+        );
+        assert!(model.pending.is_empty());
     }
 
     #[test]

@@ -18,4 +18,6 @@ Gateway 交易回归 73 项，Simulation 交易回归 80 项。隔离 PostgreSQL
 
 WebGPU、WebGL2 兼容和 WebGL2-shared 三套 release 包通过生成、优化和版本检查。十二个文件的直接与版本化路径散列一致，浏览器实测为 WebGPU。默认源码构建会重建 WASM。预编译发行仍需同步更新其资源清单和文件。 [运行包版本与散列](runtime-verification.json)
 
+随后用 `next build --webpack` 和 `next start` 复跑同一流程。两个普通 WebGPU 浏览器使用同一构建和相同的起始档副本，正式模式再次通过同额加价、双方重确认、精确交割、四次正常注销和 File 读回。编译及 TypeScript 检查通过。 [生产构建回执](production-verification.json)
+
 公开试玩、Windows 窗口和完整 Hosted 链路仍分项验收。

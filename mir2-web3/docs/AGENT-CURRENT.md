@@ -20,7 +20,7 @@ working tree, services, release packages, source snapshots or parity percentages
 
 2026-11-10 Web 阿洛入口和授权随十种游戏语言切换，简中、英文、阿语实测同一教学回忆和补给权限。继续六种语言的英文回退、Web 模型设置和跨端实战。 [语言和授权复测](evidence/r16-alo-localization-20261110/README.md)
 
-2026-11-10 继续 Windows R16 到 Web 的 1:1 Goal。双浏览器已验证本方确认后两次各加 11 金币、重新确认、单次交割及重登。交易邀请的系统反馈与冷却通过普通协议。预编译发行需更新运行包。三职业毕业档验证快捷键、战士半月开关与读档。同一阿洛从 Web 教学到 Windows 读回和撤销，再由 Web 读回同一档案。继续组队拒绝或静默后的手动重试、公会权限、技能施放、地图和伙伴语言。 [执行范围](WEB-R16-PARITY-GOAL.zh-CN.md) · [交易](evidence/r16-trade-own-gold-20261110/README.md) · [技能](evidence/r16-skill-shortcuts-20261110/README.md) · [跨端培养](evidence/r16-alo-cross-client-20261110/README.md)
+2026-11-10 继续 Windows R16 到 Web 的 1:1 Goal。双浏览器已验证本方确认后两次各加 11 金币、重新确认、单次交割及重登。交易邀请的系统反馈与冷却通过普通协议。预编译发行需更新运行包。三职业毕业档验证快捷键、战士半月开关与读档。同一阿洛从 Web 教学到 Windows 读回和撤销，再由 Web 读回同一档案。生产构建双开已通过混合大小写邀请、移除后原连接重邀和正常注销。继续组队拒绝或静默后的手动重试、公会权限、技能施放、地图和伙伴语言。 [执行范围](WEB-R16-PARITY-GOAL.zh-CN.md) · [交易](evidence/r16-trade-own-gold-20261110/README.md) · [组队](evidence/r16-group-canonical-name-20261110/README.md) · [技能](evidence/r16-skill-shortcuts-20261110/README.md) · [跨端培养](evidence/r16-alo-cross-client-20261110/README.md)
 
 前一检查点完成三职业 30 级毕业档的 Web、正式 Windows 传输和新 Web 会话往返，以及单方解锁。公会开发模式定位到 Next 热更新，生产构建两条渲染路径均通过。 [同档](evidence/r16-shared-save-roundtrip-20261110/README.md) · [单方解锁](evidence/r16-trade-reopen-20261110/README.md) · [公会](evidence/r16-guild-cold-entry-20261110/README.md)
 

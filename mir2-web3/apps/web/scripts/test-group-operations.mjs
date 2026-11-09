@@ -201,17 +201,18 @@ test("definitely-unsent cancellation releases only reservations; a throw after e
   assert.equal(operations.outcomeUnknown(proof), false);
 });
 
-test("AddMember/DeleteMember match only the exact entered operation/name, not another pending operation", () => {
+test("AddMember/DeleteMember match only the entered operation and target, not another pending operation", () => {
   const operations = new GroupOperations(), current = source();
   const add = entered(operations, "addMember", "Jane", current);
   const remove = entered(operations, "delMember", "Jane", current);
   const other = entered(operations, "addMember", "Alice", current);
   const reserved = operations.reserve("addMember", "Reserved", current);
-  assert.equal(operations.receipt("AddMember", { name: "jane" }, current.owner), false);
+  assert.equal(operations.receipt("AddMember", { name: "Janel" }, current.owner), false);
   assert.equal(operations.receipt("AddMember", { name: "Reserved" }, current.owner), false);
   assert.equal(operations.receipt("AddMember", { name: "Jane" }, current.owner), true);
   assert.deepEqual(operations.pending.map(row => row.proof), [remove, other, reserved]);
   assert.equal(operations.receipt("AddMember", { name: "Jane" }, current.owner), false);
+  assert.equal(operations.receipt("DeleteMember", { name: "jane" }, current.owner), false);
   assert.equal(operations.receipt("DeleteMember", { name: "Jane" }, current.owner), true);
   assert.equal(operations.pending.some(row => row.proof === add), false);
   assert.ok(operations.reserve("addMember", "Jane", current), "matching ACK permits a fresh ordinary operation");
@@ -241,6 +242,26 @@ test("full roster membership releases add/removal independently, while unchanged
   assert.equal(operations.outcomeUnknown(add), false);
   entered(operations, "delMember", "Absent", current);
   assert.equal(operations.receipt("GroupMemberInfo", roster(), current.owner), true);
+});
+
+test("group additions reconcile canonical ASCII case only on genuine same-owner success", () => {
+  const operations = new GroupOperations(), current = source();
+  const add = entered(operations, "addMember", "bLaDe", current);
+  const unicode = entered(operations, "addMember", "Älo", current);
+  assert.deepEqual(groupOperationCommand(add), { type: "addMember", name: "bLaDe" });
+  const foreignOwner = { ...current.owner, sessionGeneration: 3 };
+  assert.equal(operations.receipt("AddMember", { name: "Blade" }, foreignOwner), false);
+  assert.equal(operations.receipt("GroupMemberInfo", roster("Leader", "Blade"), foreignOwner), false);
+  assert.equal(operations.receipt("AddMember", { name: "Blades" }, current.owner), false);
+  assert.equal(operations.receipt("DeleteMember", { name: "Blade" }, current.owner), false);
+  assert.equal(operations.receipt("GroupInviteResult", { name: "Blade", success: false }, current.owner), false);
+  assert.equal(operations.receipt("AddMember", { name: "älo" }, current.owner), false);
+  assert.equal(operations.receipt("GroupMemberInfo", roster("Leader", "älo"), current.owner), false);
+  assert.deepEqual(operations.pending.map(row => row.proof), [add, unicode]);
+  assert.equal(operations.receipt("AddMember", { name: "Blade" }, current.owner), true);
+  assert.deepEqual(operations.pending.map(row => row.proof), [unicode]);
+  assert.equal(operations.receipt("GroupMemberInfo", roster("Leader", "ÄLO"), current.owner), true);
+  assert.equal(operations.pending.length, 0);
 });
 
 test("malformed full rosters never masquerade as an empty roster and clear a pending removal", () => {
