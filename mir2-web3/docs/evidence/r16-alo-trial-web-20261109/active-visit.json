@@ -1,0 +1,159 @@
+{
+  "schema": "mir2-r16-alo-web-e2e/1",
+  "localOnly": true,
+  "modelProvider": "rules",
+  "baseCommit": "c6a71f73483d66e2d62d061f284e0fa8e0c00ea5",
+  "gatewaySourceCommit": "ac6817dbf95ab1e5d1e98f78a9dd88b6885a8731",
+  "gatewaySha256": "60dbb6b2ad9df5165dc1472dc64c7c0281e6094a1c1208c161dfccf35f5ea974",
+  "runtimeVersion": "bevy-0cd68510886134e0",
+  "source": {
+    "apps/web/lib/r16-companion-client.ts": "108ae5fa740d7f22b1e0fed1194ad2c3bf9c8a07c11c9d63842d31c11cd45ec5",
+    "apps/web/app/components/r16-companion-window.tsx": "a08aba77f1dbd822ae5b420bb78098509c0c259b360032fbb52c8c32032198b4",
+    "apps/web/app/page.tsx": "34ded65e6850714bd5d246d9b2914c79d99edfd12cbc6443f91a3cfd4584282b"
+  },
+  "phases": [
+    "reserve-own-loopback",
+    "prepare-independent-next-source",
+    "ordinary-new-file-store-provisioning",
+    "actual-headless-web-start",
+    "owner-browser-login-select-enter",
+    "teach-real-web-button-and-check-memory",
+    "experience-records-through-real-ui",
+    "usage-costs-through-real-ui",
+    "browser-download-archive-and-verify-hmac",
+    "restart-owned-actor-same-sqlite-and-reopen",
+    "signed-archive-import-into-fresh-running-actor",
+    "imported-alo-joins-through-ordinary-web-ui"
+  ],
+  "events": [
+    {
+      "operation": "view",
+      "status": "ok"
+    },
+    {
+      "operation": "teach",
+      "status": "ok"
+    },
+    {
+      "operation": "trialEvent",
+      "status": "ok",
+      "kind": "visit"
+    },
+    {
+      "operation": "trialEvent",
+      "status": "ok",
+      "kind": "choice"
+    },
+    {
+      "operation": "trialEvent",
+      "status": "ok",
+      "kind": "teachingCheck"
+    },
+    {
+      "operation": "trialEvent",
+      "status": "ok",
+      "kind": "visitEnd"
+    },
+    {
+      "operation": "view",
+      "status": "ok"
+    },
+    {
+      "operation": "view",
+      "status": "ok"
+    }
+  ],
+  "pageErrors": [],
+  "startGameAcks": [
+    4
+  ],
+  "stopped": {
+    "actorSaved": true,
+    "next": true,
+    "gateway": true
+  },
+  "baseline": {
+    "version": 1,
+    "partyHabits": [
+      false,
+      false,
+      false
+    ],
+    "feedback": 0
+  },
+  "taught": {
+    "version": 2,
+    "partyHabits": [
+      true,
+      true,
+      true
+    ],
+    "activeFeedback": 1,
+    "modelCalls": 0
+  },
+  "activeVisitReadback": {
+    "source": "reminder",
+    "count": 1,
+    "readOnly": true,
+    "retainedOnSubpageReopen": true
+  },
+  "trial": {
+    "visits": 1,
+    "entrySource": "reminder",
+    "reminderCount": 1,
+    "choice": "shared-history",
+    "teachingUnderstood": true,
+    "visitEnded": true,
+    "purchases": 0,
+    "offerConfigured": false
+  },
+  "costs": {
+    "runtimeSeconds": 26,
+    "modelCalls": 0,
+    "complete": false,
+    "modelMicros": "0",
+    "unmeasuredHosting": true,
+    "purchaseIntentDisabled": true
+  },
+  "archive": {
+    "verifiedHmac": true,
+    "sha256": "e9c7780f10d651f81b9ab3e4c925f80885fecedb10368808a5801457334fb7ed",
+    "bytes": 3181,
+    "archiveVersion": 2,
+    "policyVersion": 2
+  },
+  "restart": {
+    "actorRestarted": true,
+    "firstActorPid": 178352,
+    "secondActorPid": 184464,
+    "actorSaveConfirmed": true,
+    "sameSqlitePath": true,
+    "identityUnchanged": true,
+    "sameActiveFeedbackId": true,
+    "policyVersion": 2,
+    "partyHabits": [
+      true,
+      true,
+      true
+    ],
+    "visitAndChoicePreserved": true,
+    "feedbackRendered": true
+  },
+  "portable": {
+    "distinctProcess": true,
+    "thirdPid": 186248,
+    "newSqlite": true,
+    "sameIdentity": true,
+    "fullExportedGrowthEqual": true,
+    "sameActiveFeedbackId": true,
+    "policyVersion": 2,
+    "usesOriginalSeparateTrialLedger": true,
+    "modelCalls": 0
+  },
+  "party": {
+    "uiInvite": true,
+    "authoritativeMembers": 2,
+    "actorOnline": true
+  },
+  "result": "pass"
+}

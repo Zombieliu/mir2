@@ -110,7 +110,10 @@ test("trial controls use the current visit and offer and keep unmeasured costs d
   const { visitId } = request.payload;
   assert.match(visitId, /^wvisit-/);
   assert.deepEqual(request.payload, { kind: "visit", visitId, entrySource: "unknown", reminderCount: 0 });
-  h.reply(serverView({ activeVisitId: visitId })); h.render();
+  h.reply(serverView({ activeVisitId: visitId, visits: [{ visitId: "old-visit", entrySource: "scheduled", reminderCount: 4 },
+    { visitId, entrySource: "unknown", reminderCount: 0 }] })); h.render();
+  assert.equal(h.button("trial-source-unknown").props["aria-pressed"], true);
+  assert(strings(h.tree).includes("收到提醒次数（自述）：0"));
   h.click("trial-reason-shared-history"); h.click("trial-save-choice");
   assert.deepEqual(h.sent.at(-1).payload, { kind: "choice", visitId, reason: "shared-history" });
   h.reply(serverView({ activeVisitId: visitId })); h.render();

@@ -73,11 +73,13 @@ function TrialPage({ view, mutable, act, back }: SubpageProps) {
   const [reminderCount, setReminderCount] = useState(0);
   const [choice, setChoice] = useState<typeof R16_COMPANION_CHOICE_REASONS[number] | null>(null);
   const active = !!view.trial?.activeVisitId, enabled = mutable && !!view.trial;
+  const shownSource = active ? view.trial?.activeEntrySource : entrySource;
+  const shownReminders = active ? view.trial?.activeReminderCount ?? "未记录" : reminderCount;
   return <>
     <Copy x={22} y={180} h={26} tone="gold">本参与者试用累计 · 体验自述</Copy>
     {R16_COMPANION_ENTRY_SOURCES.map((source, i) => <Button key={source} id={`trial-source-${source}`} label={["自己想来", "收到提醒", "约好时间", "不确定"][i]}
-      x={22 + i * 174} y={216} w={162} selected={entrySource === source} disabled={!enabled || active} onClick={() => setEntrySource(source)} />)}
-    <Copy x={22} y={256} w={400} h={26}>{`收到提醒次数（自述）：${reminderCount}`}</Copy>
+      x={22 + i * 174} y={216} w={162} selected={shownSource === source} disabled={!enabled || active} onClick={() => setEntrySource(source)} />)}
+    <Copy x={22} y={256} w={400} h={26}>{`收到提醒次数（自述）：${shownReminders}`}</Copy>
     <Button id="trial-reminder-down" label="−" x={540} y={252} w={78} disabled={!enabled || active || reminderCount === 0} onClick={() => setReminderCount(reminderCount - 1)} />
     <Button id="trial-reminder-up" label="+" x={634} y={252} w={78} disabled={!enabled || active || reminderCount === 100} onClick={() => setReminderCount(reminderCount + 1)} />
     <Button id={active ? "trial-end" : "trial-start"} label={active ? "结束本次体验" : "开始本次体验"} x={22} y={291} w={690} disabled={!enabled}

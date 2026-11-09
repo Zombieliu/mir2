@@ -40,6 +40,8 @@ type TrialEvent =
   | { kind: "visitEnd" | "purchaseIntent" };
 type CompanionTrial = Readonly<{
   activeVisitId: string | null;
+  activeEntrySource: EntrySource | null;
+  activeReminderCount: number | null;
   usage: R16CompanionTask;
   costs: R16CompanionTask;
   offer: Readonly<{ offerId: string; price: string; durationDays: number; adventureCount: number; paymentInstructions: string }> | null;
@@ -101,11 +103,17 @@ export function formatR16CompanionMicros(amount: unknown, currency: unknown): st
 }
 function trialView(raw: unknown): CompanionTrial | null {
   if (!record(raw) || typeof raw.experimentId !== "string" || !raw.experimentId || raw.activeVisitId != null && !ref(raw.activeVisitId)) return null;
+  const activeVisitId = ref(raw.activeVisitId) ? raw.activeVisitId : null;
+  const activeVisit = activeVisitId && Array.isArray(raw.visits)
+    ? raw.visits.find((row): row is Record<string, unknown> => record(row) && row.visitId === activeVisitId)
+    : null;
+  const activeEntrySource = R16_COMPANION_ENTRY_SOURCES.find(source => source === activeVisit?.entrySource) ?? null;
+  const reminderCount = activeVisit?.reminderCount;
   const offer = record(raw.offer) ? raw.offer : {};
   const price = typeof offer.priceMicros === "string" && /^[1-9][0-9]{0,15}$/.test(offer.priceMicros)
     ? formatR16CompanionMicros(offer.priceMicros, offer.currency) : null;
   return freeze({
-    activeVisitId: ref(raw.activeVisitId) ? raw.activeVisitId : null,
+    activeVisitId, activeEntrySource, activeReminderCount: integer(reminderCount) && reminderCount <= 100 ? reminderCount : null,
     usage: task(raw.usage, ["runtimeSeconds", "modelCalls", "confirmedAdventureCount"]),
     costs: task(raw.costs, ["currency", "modelMicros", "hostingMicros", "paymentMicros", "revenueShareMicros", "contributionMicros", "complete", "supportSeconds"]),
     offer: ref(offer.offerId) && price && integer(offer.durationDays, 1) && offer.durationDays <= 365
