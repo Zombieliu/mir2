@@ -1,5 +1,9 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+## R16 野外目标与熟练度（2026-11-10）
+
+大火球与灵魂火符用 30 级档在普通 Web 七格实战命中，资源和熟练度重登通过。灵魂火符扣符和派发一致，和平自宠拒绝。固定 Crystal 弹道延时仍需补齐。 [证据](evidence/r16-targeted-spells-20261110/README.md)
+
 ## R16 解锁后继续原交易（2026-11-10）
 
 隔离 File 协议和双浏览器确认，首位玩家可以解锁原报价、保留冻结金币、取回并重新放入物品。随后完成对端确认后的改价与物品编辑，双方重新确认才单次交割，重登和落盘通过。满包独立交易格和发行继续验收。 [显式解锁](evidence/r16-trade-reopen-20261110/README.md) · [对端确认后编辑](evidence/r16-trade-bilateral-edit-20261110/README.md)

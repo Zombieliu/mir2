@@ -1,5 +1,9 @@
 # Crystal Server Parity
 
+## R16 远程技能的目标检查（2026-11-10）
+
+按固定 Crystal 的可攻击目标，灵魂火符扣符前允许中立野怪，受限召唤物按攻击模式和安全区继续拒绝。普通七格命中、扣符、技能熟练度和重登实证通过。七格 Crystal 延时 850 毫秒，共享 Zone 目前提前结算，时序另验。 [对照和回执](evidence/r16-targeted-spells-20261110/README.md)
+
 ## R16 已确认一方的显式解锁（2026-11-10）
 
 按 Crystal `TradeConfirm(false)` 保留交易，只有请求一方解锁。报价变更则作废双方旧确认。Gateway 沿用 `TradeCancel { unlock: true }`，隔离 File 双端已复测两类行为。满包独立交易格和真实 PostgreSQL 继续开放。 [显式解锁](evidence/r16-trade-reopen-20261110/README.md) · [报价变更](evidence/r16-trade-bilateral-edit-20261110/README.md)

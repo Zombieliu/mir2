@@ -581,6 +581,12 @@ enum NativePlayerMagicRejection {
     CasterNotReady,
 }
 
+enum NativeMonsterMagicRejection {
+    Unavailable,
+    OwnedPetBlocked,
+    OutOfRangeOrStaleAim,
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 struct PendingNativeSummon {
     ready_at_ms: u64,
@@ -2470,7 +2476,9 @@ impl ZoneRuntime {
         cooldown_ms: u64,
         now_ms: u64,
     ) -> bool {
-        if spell == Spell::FlamingSword {
+        if spell == Spell::FlamingSword
+            || !self.boundary_attack_allows(session_id, object_id, None, now_ms)
+        {
             return false;
         }
         let Some(player) = self.players.get(session_id) else {
@@ -2602,18 +2610,17 @@ impl ZoneRuntime {
                 .is_ok();
         }
 
-        let Some(monster) = self.native_monsters.get(&object_id) else {
-            return false;
-        };
-        if monster.dead
-            || monster.hp <= 0
-            || (!monster.hostile_to_player
-                && !self.player_can_attack_owned_pet(session_id, object_id, now_ms))
-            || !monster_visibility_is_attackable(monster)
+        if self
+            .native_monster_magic_target(
+                session_id,
+                object_id,
+                spell,
+                &player.position,
+                target,
+                now_ms,
+            )
+            .is_err()
         {
-            return false;
-        }
-        if !points_within_action_range(&player.position, target, ZONE_NATIVE_PLAYER_MAGIC_MAX) {
             return false;
         }
         if cast {
@@ -2634,6 +2641,44 @@ impl ZoneRuntime {
                 && (damage > 0 || matches!(spell, Spell::Trap | Spell::TrapHexagon));
         }
         true
+    }
+
+    fn native_monster_magic_target(
+        &self,
+        session_id: &SessionId,
+        object_id: u32,
+        spell: Spell,
+        origin: &Point,
+        cursor_target: &Point,
+        now_ms: u64,
+    ) -> Result<&ZoneNativeMonster, NativeMonsterMagicRejection> {
+        let monster = self
+            .native_monsters
+            .get(&object_id)
+            .filter(|monster| {
+                !monster.dead && monster.hp > 0 && monster_visibility_is_attackable(monster)
+            })
+            .ok_or(NativeMonsterMagicRejection::Unavailable)?;
+        // Wild neutral monsters remain legal attack targets. Owned creatures
+        // require the same attack-mode and safe-zone checks at both boundaries.
+        if monster.owner_session_id.is_some()
+            && !self.player_can_attack_owned_pet(session_id, object_id, now_ms)
+        {
+            return Err(NativeMonsterMagicRejection::OwnedPetBlocked);
+        }
+        let range = if matches!(spell, Spell::StraightShot | Spell::DoubleShot) {
+            9
+        } else {
+            ZONE_NATIVE_PLAYER_MAGIC_MAX
+        };
+        // A monster may step once after rendering. Its live position still
+        // has to be in range before reagent debit or cast dispatch.
+        if !points_within_action_range(cursor_target, &monster.position, 1)
+            || !points_within_action_range(origin, &monster.position, range)
+        {
+            return Err(NativeMonsterMagicRejection::OutOfRangeOrStaleAim);
+        }
+        Ok(monster)
     }
 
     pub fn player_cast_magic_requires_item_consumption(
@@ -6273,38 +6318,23 @@ impl ZoneRuntime {
             );
         }
 
-        let Some(monster) = self
-            .native_monsters
-            .get(&object_id)
-            .filter(|monster| {
-                !monster.dead && monster.hp > 0 && monster_visibility_is_attackable(monster)
-            })
-            .cloned()
-        else {
-            return Vec::new();
+        let target = match self.native_monster_magic_target(
+            session_id,
+            object_id,
+            spell,
+            &player.position,
+            &target,
+            now_ms,
+        ) {
+            Ok(monster) => monster.position.clone(),
+            Err(NativeMonsterMagicRejection::Unavailable) => return Vec::new(),
+            Err(NativeMonsterMagicRejection::OwnedPetBlocked) => {
+                return self.owner_location_correction(session_id);
+            }
+            Err(NativeMonsterMagicRejection::OutOfRangeOrStaleAim) => {
+                return self.correct_player_location(session_id, now_ms);
+            }
         };
-        if monster.owner_session_id.is_some()
-            && !self.player_can_attack_owned_pet(session_id, object_id, now_ms)
-        {
-            return self.owner_location_correction(session_id);
-        }
-        // The object id is authoritative. A monster can step once between the
-        // client's rendered snapshot and this packet; accept that small stale
-        // cursor offset while still checking range against its live position.
-        if !points_within_action_range(&target, &monster.position, 1)
-            || !points_within_action_range(
-                &player.position,
-                &monster.position,
-                if matches!(spell, Spell::StraightShot | Spell::DoubleShot) {
-                    9
-                } else {
-                    ZONE_NATIVE_PLAYER_MAGIC_MAX
-                },
-            )
-        {
-            return self.correct_player_location(session_id, now_ms);
-        }
-        let target = monster.position.clone();
         let Some(live_player) = self.players.get_mut(session_id) else {
             return Vec::new();
         };
@@ -6609,7 +6639,7 @@ impl ZoneRuntime {
             session_id,
             player.object_id,
             object_id,
-            &monster.position,
+            &target_point,
         );
 
         let mut outbounds = self.take_owner_health_through(session_id, u64::MAX);
@@ -6630,7 +6660,7 @@ impl ZoneRuntime {
                 now_ms,
                 player.object_id,
                 Some(object_id),
-                Some(monster.position),
+                Some(target_point),
                 None,
                 true,
             );

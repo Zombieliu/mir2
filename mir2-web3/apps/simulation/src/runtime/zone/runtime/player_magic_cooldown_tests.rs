@@ -102,6 +102,55 @@ fn contains_accepted_magic(outbounds: &[ZoneOutbound], spell: Spell, target_id: 
 }
 
 #[test]
+fn soulfire_reagent_preflight_uses_the_actual_wild_monster_target_rules() {
+    let mut zone =
+        ZoneRuntime::new_with_collision(ZoneKey::for_map("0"), ZoneCollision::unbounded());
+    let owner = join_taoist(&mut zone, "owner", OWNER_OBJECT_ID);
+    spawn_target(&mut zone, &owner);
+    assert!(!zone.native_monsters[&TARGET_OBJECT_ID].hostile_to_player);
+
+    let preflight = |zone: &ZoneRuntime, target_x| {
+        zone.can_player_cast_magic(
+            &owner,
+            TARGET_OBJECT_ID,
+            Spell::SoulFireBall,
+            MirDirection::Right,
+            &Point { x: target_x, y: 10 },
+            true,
+            8,
+            3,
+            1_800,
+            0,
+        )
+    };
+    assert!(preflight(&zone, 12), "living wild neutral targets are legal");
+    assert!(preflight(&zone, 13), "one tile of stale aim is tolerated");
+    assert!(!preflight(&zone, 14), "stale aim may not consume a reagent");
+
+    let monster = zone.native_monsters.get_mut(&TARGET_OBJECT_ID).unwrap();
+    monster.position.x = 10 + ZONE_NATIVE_PLAYER_MAGIC_MAX + 1;
+    assert!(
+        !preflight(&zone, 10 + ZONE_NATIVE_PLAYER_MAGIC_MAX),
+        "the live monster, as well as the cursor, must be in range"
+    );
+
+    let monster = zone.native_monsters.get_mut(&TARGET_OBJECT_ID).unwrap();
+    monster.position.x = 12;
+    monster.owner_session_id = Some(owner.clone());
+    monster.hostile_to_player = true;
+    assert!(!preflight(&zone, 12), "Peace preserves the owned pet gate");
+
+    let monster = zone.native_monsters.get_mut(&TARGET_OBJECT_ID).unwrap();
+    monster.owner_session_id = None;
+    monster.hostile_to_player = false;
+    assert!(contains_accepted_magic(
+        &zone.handle(cast(&owner, Spell::SoulFireBall, TARGET_OBJECT_ID, true, 0)),
+        Spell::SoulFireBall,
+        TARGET_OBJECT_ID,
+    ));
+}
+
+#[test]
 fn accepted_soulfire_uses_zone_clock_until_exact_spell_ready_time() {
     let mut zone =
         ZoneRuntime::new_with_collision(ZoneKey::for_map("0"), ZoneCollision::unbounded());
