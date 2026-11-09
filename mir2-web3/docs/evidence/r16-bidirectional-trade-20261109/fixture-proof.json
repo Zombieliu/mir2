@@ -1,0 +1,21 @@
+{
+  "sourceFixtureSha256": "ea4a79a1867847544a9682f581c550b7a2416f2b0b9a7500643271a8b56a8ef0",
+  "isolatedSeedSha256": "7a4c5596a4e3b8b62743ea2b6d6fa2559bd0e010743c088a72c8e194b0ca7a37",
+  "onlyTwoOpeningWalletsChanged": true,
+  "openingGold": {
+    "primary": 1000,
+    "peer": 700
+  },
+  "ordinaryOffer": {
+    "primary": {
+      "item": "Candle",
+      "gold": 137
+    },
+    "peer": {
+      "item": "WoodenSword",
+      "gold": 59
+    }
+  },
+  "seedingCompletedBeforeAnyGatewayStart": true,
+  "originalFixtureUnchanged": true
+}

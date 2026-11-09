@@ -1,0 +1,5 @@
+# Keep captured receipts and test logs byte-for-byte.
+* -text
+*.log -whitespace
+*.json whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+*.mjs whitespace=blank-at-eol,-blank-at-eof,space-before-tab,cr-at-eol
