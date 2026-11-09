@@ -977,6 +977,15 @@ impl InProcessWorldRuntime {
             .commit_shared_ground_drop_pickup_transaction(drop)
     }
 
+    /// Called by the in-process inventory service for an ordinary Zone claim
+    /// without a durable player-drop custody effect.
+    pub fn commit_local_ground_drop_claim(
+        &mut self,
+        drop: &GroundDropSnapshot,
+    ) -> SharedAccountInventoryTransactionReceipt {
+        self.session.commit_local_ground_drop_claim(drop)
+    }
+
     pub fn can_commit_shared_ground_drop_pickup(&self, drop: &GroundDropSnapshot) -> bool {
         self.session.can_commit_shared_ground_drop_pickup(drop)
     }

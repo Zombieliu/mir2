@@ -46,6 +46,7 @@ Updated 2026-11-09 (Asia/Shanghai). Read [coordination](AGENT-ORCHESTRATION.md) 
 - [x] 双向物品与金币交割已在两普通 WebSocket 和两个独立 WebGPU 环境实跑。第一人确认保留报价和锁定，双方分别一次扣款、物品与金币入账及终结，正常同角读回和最终 File 一致。R16 暂存后解锁关闭并退款另验。 [双向交割、界面与读档实测](evidence/r16-bidirectional-trade-20261109/README.md)
 - [x] Web 补齐 Windows R16 阿洛体验自述与用量费用页。普通浏览器固定教学 v1→v2，真实记录选择及理解，下载的档案 SHA-256/HMAC 和新运行器同 SQLite 读回通过。 [界面和收据](evidence/r16-alo-trial-web-20261109/README.md)
 - [x] Web 进行中的体验来源与提醒次数按账本读回，关页重开复测通过。签名档案导入新 SQLite 后保留身份和成长，普通 Web 入队、跟随 7 格及两人各命中 6 次击杀天然鹿通过。 [实测记录](evidence/r16-alo-trial-web-20261109/README.md#新实例导入与普通协作)
+- [x] 修复本地两角色持有相同旧编号时无法领取同一物品模板的掉落。普通 File 联机验证原编号 3 保留、收到新编号 4、反向交接与重登一致。正式编号校验继续通过。 [地面拾取实测](evidence/r16-alo-loot-order-20261109/README.md)
 - [ ] 继续阿洛教学前后的战斗与掉落对照、语言与跨端同档，追踪双开冷进入回登录、暂存后恢复可编辑、真实名字级失败 ACK、Native 招募及建职阶。Web 仓库重复刷新入口和取回待回包反馈、Windows 窗口与真实 PostgreSQL 继续分项。
 - [x] 交易自身物品待回执的取消及同owner/partner重复接受已完成限定代码修复；原Page105/社交31/适配器507组/TS及两场隔离浏览器证据保留。共用八项见后续独立记录，完整Trade与公开发行仍未完成。[原本轮范围](evidence/r16-web-trade-20261109/README.md)
 - [x] 公会职级改名／单项权限／草稿／层级／广播／重登已在 WebGL2-shared 和默认 WebGPU 的普通界面通过；新鲜限定39／TS通过，修正选中态边框冲突。[当前范围](WEB-R16-PARITY-GOAL.zh-CN.md#公会职级普通流程2026-11-08)

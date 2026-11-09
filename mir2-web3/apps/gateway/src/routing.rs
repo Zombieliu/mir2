@@ -3133,8 +3133,10 @@ impl InProcessAccountInventoryService {
             SharedAccountInventoryCommand::InventoryItemDrop { drop, .. } => {
                 runtime.commit_shared_inventory_item_drop_transaction(&drop)
             }
+            SharedAccountInventoryCommand::GroundDropClaimPickup { drop, .. } => {
+                runtime.commit_local_ground_drop_claim(&drop)
+            }
             SharedAccountInventoryCommand::GroundDropPickup(drop)
-            | SharedAccountInventoryCommand::GroundDropClaimPickup { drop, .. }
             | SharedAccountInventoryCommand::PlayerDropClaimPickup { drop, .. } => {
                 runtime.commit_shared_ground_drop_pickup_transaction(&drop)
             }
@@ -33878,6 +33880,67 @@ mod tests {
             .ground_drops
             .iter()
             .any(|drop| drop.object_id == shared_drop.object_id));
+    }
+
+    #[test]
+    fn shared_local_ground_claim_rekeys_a_conflicting_starter_item() {
+        let registry = ZoneRegistry::in_process();
+        let config = GatewayConfig::default().with_platinum_fiveclass_profile();
+        let mut source = GatewaySession::new_with_zone_registry(config.clone(), &registry);
+        let mut picker = GatewaySession::new_with_zone_registry(config, &registry);
+        start_new_character(&mut source, "candlesource", "Dropper");
+        start_new_character(&mut picker, "candlepicker", "Picker");
+        let candle = |session: &GatewaySession| {
+            session
+                .world_snapshot()
+                .inventory_items
+                .into_iter()
+                .find(|item| item.name == "Candle")
+                .expect("new Warrior has a candle")
+        };
+        let source_item = candle(&source);
+        let original_item = candle(&picker);
+        assert_eq!(source_item.unique_id, original_item.unique_id);
+        assert_eq!(source_item.quantity, 1);
+
+        assert!(source
+            .handle_packet(ClientPacket::DropItem {
+                unique_id: source_item.unique_id,
+                count: 1,
+                hero_inventory: false,
+            })
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::DropItem { success: true, .. })));
+        let drop = picker
+            .world_snapshot()
+            .ground_drops
+            .into_iter()
+            .find(|drop| drop.name == "Candle")
+            .expect("source candle is on the shared ground");
+        picker.transfer_map(&format!("crystal:0:{}:{}", drop.x, drop.y));
+
+        let packets = picker.pick_up(drop.object_id);
+        let gained = packets.iter().position(|packet| matches!(
+            packet,
+            ServerPacket::GainedItem { item }
+                if item.count == 1 && item.unique_id != original_item.unique_id
+        )).expect("a new local identity is reported for the incoming candle");
+        let removed = packets.iter().position(|packet| matches!(
+            packet,
+            ServerPacket::ObjectRemove { object_id } if *object_id == drop.object_id
+        )).expect("the accepted claim retires the ground object");
+        assert!(gained < removed);
+        let candles: Vec<_> = picker
+            .world_snapshot()
+            .inventory_items
+            .into_iter()
+            .filter(|item| item.name == "Candle")
+            .collect();
+        assert_eq!(candles.len(), 2);
+        assert!(candles.contains(&original_item));
+        assert!(!picker.pick_up(drop.object_id).iter().any(|packet| matches!(
+            packet, ServerPacket::GainedItem { .. }
+        )));
     }
 
     #[test]

@@ -1164,6 +1164,39 @@ fn user_item_tree_max_unique_id(item: &UserItem) -> u64 {
         .fold(item.unique_id, u64::max)
 }
 
+/// Legacy inventories can hold the same slot-derived UID on different
+/// characters. Only the local Zone claim path may rekey that incoming copy.
+pub(super) fn rekey_local_ground_drop_conflicts(
+    resources: &InventoryResource,
+    payload: &GroundDropItemPayload,
+) -> Option<GroundDropItemPayload> {
+    if !matches!(&resources.item_uid_issuance, ItemUidIssuance::Legacy) || !payload.uid_assigned {
+        return None;
+    }
+    validate_committed_user_item_carrier(&payload.item).ok()?;
+    fn collect_distinct_ids(item: &UserItem, ids: &mut BTreeSet<u64>) -> bool {
+        item.unique_id != 0
+            && ids.insert(item.unique_id)
+            && item.slots.iter().flatten().all(|child| collect_distinct_ids(child, ids))
+    }
+    let mut incoming_ids = BTreeSet::new();
+    if !collect_distinct_ids(&payload.item, &mut incoming_ids) {
+        return None;
+    }
+    let mut occupied_ids = BTreeSet::new();
+    collect_inventory_unique_ids(resources, &mut occupied_ids);
+    if occupied_ids.is_disjoint(&incoming_ids) {
+        return None;
+    }
+    let mut localized = payload.clone();
+    let mut next_uid = inventory_max_unique_id(resources)
+        .max(user_item_tree_max_unique_id(&payload.item))
+        .checked_add(1)
+        .unwrap_or(1);
+    normalize_user_item_tree_unique_ids(&mut localized.item, &mut occupied_ids, &mut next_uid, false);
+    Some(localized)
+}
+
 fn metadata_max_unique_id(metadata: Option<&ItemStateUserItemMetadata>) -> u64 {
     metadata
         .into_iter()

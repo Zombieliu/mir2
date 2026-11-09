@@ -3461,6 +3461,30 @@ impl SimulationSession {
         }
     }
 
+    pub(crate) fn commit_local_ground_drop_claim(
+        &mut self,
+        drop: &GroundDropSnapshot,
+    ) -> SharedAccountInventoryTransactionReceipt {
+        let GroundDropLootSnapshot::InventoryItem {
+            exact_item: Some(payload),
+            ..
+        } = &drop.loot
+        else {
+            return self.commit_shared_ground_drop_pickup_transaction(drop);
+        };
+        let Some(local_item) = super::inventory::rekey_local_ground_drop_conflicts(
+            self.app.world().resource::<InventoryResource>(),
+            payload,
+        ) else {
+            return self.commit_shared_ground_drop_pickup_transaction(drop);
+        };
+        let mut local_drop = drop.clone();
+        if let GroundDropLootSnapshot::InventoryItem { exact_item, .. } = &mut local_drop.loot {
+            *exact_item = Some(local_item);
+        }
+        self.commit_shared_ground_drop_pickup_transaction(&local_drop)
+    }
+
     pub fn can_commit_shared_ground_drop_pickup(&self, drop: &GroundDropSnapshot) -> bool {
         let world = self.app.world();
         if !is_in_world(world) {

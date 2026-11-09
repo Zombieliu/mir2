@@ -1,5 +1,9 @@
 # Backend 1:1 Progress
 
+## R16 本地共享拾取的旧编号冲突（2026-11-09）
+
+本地无持久化托管效果的 Zone 领取沿用原票据和提交，只有旧式本地编号冲突的进入副本会重新编号。普通 File 两端实测从拒绝变为保留原 3 并领取新 4，反向交接和重登数量一致。精确资产编号的拒绝及托管回归通过。 [验证和原失败](evidence/r16-alo-loot-order-20261109/README.md)
+
 ## R16 交易结束回包（2026-11-09）
 
 发起方仍待初始化时，共用 Gateway 将既有 `TradeCancel { unlock: false }` 追加到接受和报价的同一队列，避免个人会话尚未打开而漏发结束。现有退回和准备态协调路径继续处理已初始化交易。精确基线与修复版的 File 双端包序、同连接重开、同角重登和单件成交有实证。Gateway 汇报 64 项通过，三项条件 PostgreSQL 用例未接库。后续同一 Gateway 通过 File 双向物品、金币、单一终结及同角读档。真实 PostgreSQL、TCP 及生产发布继续开放。 [回归、普通包序与界面证据](evidence/r16-trade-terminal-20261109/README.md) · [双向交割、界面与读档实测](evidence/r16-bidirectional-trade-20261109/README.md)
