@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
+import { createServer } from "node:http";
 import { test } from "node:test";
 import vm from "node:vm";
 
@@ -44,16 +45,26 @@ function clientHarness() {
   state.fetch = async (url) => Response.json(url.endsWith("/status")
     ? { status: "approved", login: state.proof } : state.created);
   state.exchange = async () => state.login;
+  const schedule = (callback, ms) => {
+    const id = ++state.timerId;
+    state.timers.set(id, { at: state.now + Math.max(0, ms), callback });
+    state.onTimer?.(ms);
+    return id;
+  };
   const module = { exports: {} };
   const context = vm.createContext({
-    module, exports: module.exports, URL, Response, DOMException, AbortSignal,
+    module, exports: module.exports, URL, Response, DOMException, TypeError,
+    AbortSignal: {
+      any: signals => AbortSignal.any(signals),
+      timeout(ms) {
+        const controller = new AbortController();
+        schedule(() => controller.abort(new DOMException("Test request deadline", "TimeoutError")), ms);
+        return controller.signal;
+      },
+    },
     document: state.document,
     Date: class extends Date { static now() { return state.now; } },
-    setTimeout: (callback, ms) => {
-      const id = ++state.timerId;
-      state.timers.set(id, { at: state.now + Math.max(0, ms), callback });
-      return id;
-    },
+    setTimeout: schedule,
     clearTimeout: (id) => state.timers.delete(id),
     fetch: async (...args) => { state.requests.push(args); return state.fetch(...args); },
     require: (name) => {
@@ -133,6 +144,129 @@ test("aborted or superseded create, poll, approved callback, and exchange cannot
       assert.equal(state.exchanges.length, stage === "exchange" ? 1 : 0, `${stage}/${retire}`);
     }
   }
+});
+
+test("an actual stalled HTTP 200 create body retries once, but cancel and retirement never mint again", { timeout: 10_000 }, async () => {
+  for (const mode of ["timeout", "cancel", "stale"]) {
+    const state = clientHarness(), firstHeaders = deferred(), retryDelay = deferred();
+    let creates = 0;
+    const server = createServer((request, response) => {
+      if (request.url.endsWith("/status")) {
+        response.end(JSON.stringify({ status: "approved", login: state.proof }));
+      } else if (++creates === 1) {
+        response.writeHead(200, { "content-type": "application/json" });
+        response.flushHeaders();
+        response.write('{"approvalUrl":');
+      } else {
+        response.end(JSON.stringify(state.created));
+      }
+    });
+    await new Promise((resolve, reject) => {
+      server.once("error", reject);
+      server.listen(0, "127.0.0.1", resolve);
+    });
+    try {
+      const origin = `http://127.0.0.1:${server.address().port}`;
+      state.fetch = async (url, init) => {
+        const response = await fetch(origin + url, init);
+        if (state.requests.length === 1) firstHeaders.resolve(response.status);
+        return response;
+      };
+      state.onTimer = ms => { if (ms === 250) retryDelay.resolve("retry"); };
+      const result = state.run();
+      const settled = result.then(() => "settled", () => "settled");
+      assert.equal(await Promise.race([firstHeaders.promise, settled]), 200);
+      await flush();
+      assert.deepEqual(state.states, [], "headers alone cannot publish a code");
+      if (mode === "cancel") state.controller.abort();
+      if (mode === "stale") state.current = false;
+      if (mode !== "cancel") await state.tick(12_000);
+      if (mode === "timeout") {
+        assert.equal(await Promise.race([retryDelay.promise, settled]), "retry");
+        assert.equal(state.controller.signal.aborted, false);
+        assert.equal(creates, 1);
+        await state.tick(250);
+        assert.deepEqual(await result, state.login);
+        assert.equal(creates, 2);
+        assert.equal(state.requests.length, 3);
+        assert.equal(state.exchanges.length, 1);
+      } else {
+        await assert.rejects(result, { name: "AbortError" });
+        await state.tick(250);
+        assert.equal(creates, 1);
+        assert.equal(state.requests.length, 1);
+        assert.equal(state.exchanges.length, 0);
+      }
+    } finally {
+      server.closeAllConnections();
+      await new Promise(resolve => server.close(resolve));
+    }
+  }
+});
+
+test("a transient poll retries the same intent and keeps its code, visibility and expiry", async () => {
+  for (const mode of ["visible", "hidden", "expired"]) {
+    const state = clientHarness();
+    let polls = 0;
+    if (mode === "expired") state.created.expiresAt = state.now + 100;
+    state.fetch = async url => {
+      if (!url.endsWith("/status")) return Response.json(state.created);
+      if (++polls === 1) throw new TypeError("Temporary poll transport failure");
+      return Response.json({ status: "approved", login: state.proof });
+    };
+    const result = state.run();
+    await flush();
+    assert.equal(polls, 1);
+    assert.deepEqual(state.states.map(value => value.status), ["pending"]);
+    if (mode === "hidden") state.document.visibilityState = "hidden";
+    await state.tick(250);
+    if (mode === "expired") {
+      assert.equal(await result, null);
+      assert.equal(state.states.at(-1).status, "expired");
+      assert.equal(polls, 1);
+      assert.equal(state.exchanges.length, 0);
+      continue;
+    }
+    if (mode === "hidden") {
+      assert.equal(polls, 1);
+      state.document.visibilityState = "visible";
+      await state.tick(250);
+    }
+    assert.deepEqual(await result, state.login);
+    assert.equal(polls, 2);
+    assert.deepEqual(state.states.map(value => value.status), ["pending", "approved"]);
+    assert.equal(state.requests.length, 3);
+    for (const [, request] of state.requests.slice(1)) {
+      assert.equal(request.headers.authorization, `Bearer ${state.created.intentToken}`);
+      assert.equal(request.body, undefined);
+    }
+    assert.equal(state.exchanges.length, 1);
+  }
+});
+
+test("QR retries are bounded, abortable, and never retry auth responses or exchange", async () => {
+  for (const mode of ["repeat", "cancel", "stale"]) {
+    const state = clientHarness();
+    state.fetch = async () => { throw new TypeError("Transport unavailable"); };
+    const result = state.run();
+    const rejected = assert.rejects(result, { name: mode === "repeat" ? "TypeError" : "AbortError" });
+    await flush();
+    if (mode === "cancel") state.controller.abort();
+    if (mode === "stale") state.current = false;
+    await state.tick(250);
+    await rejected;
+    assert.equal(state.requests.length, mode === "repeat" ? 2 : 1);
+  }
+  for (const response of [new Response("Unauthorized", { status: 403 }), new Response('{"approvalUrl":')]) {
+    const state = clientHarness();
+    state.fetch = async () => response;
+    await assert.rejects(state.run());
+    assert.equal(state.requests.length, 1);
+  }
+  const state = clientHarness();
+  state.exchange = async () => { throw new TypeError("Exchange outcome unknown"); };
+  await assert.rejects(state.run(), { name: "TypeError" });
+  assert.equal(state.exchanges.length, 1);
 });
 
 test("local expiry stops polling without an extra request", async () => {

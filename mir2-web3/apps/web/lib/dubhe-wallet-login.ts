@@ -15,14 +15,21 @@ type LoginOptions = {
   onState: (state: DubheQrLoginState) => void;
 };
 
+const REQUEST_TIMEOUT_MS = 12_000;
+const RETRY_DELAY_MS = 250;
+
 function assertCurrent(options: LoginOptions) {
   options.signal.throwIfAborted();
   if (!options.isCurrent()) throw new DOMException("Login attempt retired", "AbortError");
 }
 
 async function readResponse(response: Response): Promise<Record<string, unknown>> {
+  if (!response.ok) {
+    void response.body?.cancel().catch(() => undefined);
+    throw new Error("Dubhe Wallet login unavailable");
+  }
   const body: unknown = await response.json();
-  if (!response.ok || !body || typeof body !== "object" || Array.isArray(body)) {
+  if (!body || typeof body !== "object" || Array.isArray(body)) {
     throw new Error("Dubhe Wallet login unavailable");
   }
   return body as Record<string, unknown>;
@@ -53,14 +60,38 @@ async function waitForVisible(options: LoginOptions, expiresAt: number) {
   return Date.now() < expiresAt;
 }
 
+async function requestQrJson(options: LoginOptions, session?: { intentToken: string; expiresAt: number }) {
+  const path = session ? "/api/wallet/dubhe/session/status" : "/api/wallet/dubhe/session";
+  const headers = session ? { authorization: `Bearer ${session.intentToken}` } : undefined;
+  for (let attempt = 0; ; attempt++) {
+    assertCurrent(options);
+    if (session && !await waitForVisible(options, session.expiresAt)) return null;
+    const remaining = session ? session.expiresAt - Date.now() : REQUEST_TIMEOUT_MS;
+    if (remaining <= 0) return null;
+    const deadline = AbortSignal.timeout(Math.min(REQUEST_TIMEOUT_MS, Math.ceil(remaining)));
+    const signal = AbortSignal.any([options.signal, deadline]);
+    let response: Response | undefined;
+    try {
+      response = await fetch(path, { method: "POST", cache: "no-store", credentials: "same-origin", headers, signal });
+      return await readResponse(response);
+    } catch (error) {
+      assertCurrent(options);
+      if (session && Date.now() >= session.expiresAt) return null;
+      const timedOut = deadline.aborted && (error === deadline.reason || error instanceof DOMException
+        && (error.name === "AbortError" || error.name === "TimeoutError"));
+      // HTTP, JSON and protocol errors are terminal. Only a failed transport
+      // or interrupted response stream may get one more attempt.
+      if (attempt !== 0 || response?.ok === false || (!timedOut && !(error instanceof TypeError))) throw error;
+    }
+    await delay(session ? Math.min(RETRY_DELAY_MS, session.expiresAt - Date.now()) : RETRY_DELAY_MS, options.signal);
+  }
+}
+
 /** The bearer intent lives only in this call; the QR contains only the wallet approval URL. */
 export async function requestDubheWalletLoginToken(options: LoginOptions): Promise<SuiLoginToken | null> {
+  const created = await requestQrJson(options);
   assertCurrent(options);
-  const created = await readResponse(await fetch("/api/wallet/dubhe/session", {
-    method: "POST", cache: "no-store", credentials: "same-origin",
-    signal: AbortSignal.any([options.signal, AbortSignal.timeout(12_000)]),
-  }));
-  assertCurrent(options);
+  if (!created) return null;
   const { approvalUrl, expiresAt, intentToken } = created;
   if (typeof approvalUrl !== "string" || typeof intentToken !== "string" || !intentToken
     || typeof expiresAt !== "number" || !Number.isFinite(expiresAt)
@@ -74,18 +105,9 @@ export async function requestDubheWalletLoginToken(options: LoginOptions): Promi
   }
   options.onState({ status: "pending", approvalUrl, expiresAt });
   while (true) {
+    const result = await requestQrJson(options, { intentToken, expiresAt });
     assertCurrent(options);
-    if (!await waitForVisible(options, expiresAt)) {
-      options.onState({ status: "expired", expiresAt });
-      return null;
-    }
-    const result = await readResponse(await fetch("/api/wallet/dubhe/session/status", {
-      method: "POST", cache: "no-store", credentials: "same-origin",
-      headers: { authorization: `Bearer ${intentToken}` },
-      signal: AbortSignal.any([options.signal, AbortSignal.timeout(12_000)]),
-    }));
-    assertCurrent(options);
-    if (Date.now() >= expiresAt || result.status === "expired") {
+    if (!result || Date.now() >= expiresAt || result.status === "expired") {
       options.onState({ status: "expired", expiresAt });
       return null;
     }
