@@ -60,6 +60,12 @@ function installWindow() {
       return Promise.resolve();
     }
     pause() {}
+    removeAttribute(name) {
+      if (name === "src") this.src = null;
+    }
+    load() {
+      this.loads = (this.loads ?? 0) + 1;
+    }
     addEventListener() {}
   };
 }
@@ -142,6 +148,27 @@ function loadAudioModule() {
   assert.equal(clampedLow.effectsVolume, 0, "effects volume clamps to 0");
   const invalid = audio.setOriginalAudioSettings({ musicVolume: Number.NaN });
   assert.equal(invalid.musicVolume, 1, "NaN volume keeps the previous value");
+}
+
+// Cancel a pending media download and resume only when a new track is selected.
+{
+  storageBacking.clear();
+  playedAudios.length = 0;
+  const audio = loadAudioModule();
+  const track = "/original-ui/Sound/Login2.wav";
+  audio.setOriginalAudioSettings({ musicEnabled: true, musicVolume: 0.4 });
+  audio.setOriginalMusic(track);
+  const player = playedAudios[0];
+  assert.equal(player.src, track);
+  assert.equal(player.volume, 0.4);
+  audio.setOriginalMusic(null);
+  audio.unlockOriginalAudio();
+  assert.equal(player.src, null);
+  assert.equal(player.loads, 1);
+  audio.setOriginalMusic(track);
+  assert.equal(player.src, track);
+  assert.equal(player.loop, true);
+  assert.equal(player.volume, 0.4);
 }
 
 // --- 3. Playback fallback chain + missing-sound telemetry --------------------------------------
