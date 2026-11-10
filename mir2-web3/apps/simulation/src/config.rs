@@ -4171,6 +4171,9 @@ pub struct SimulationConfig {
     /// Crystal RefineTime in milliseconds and RefineCost multiplier.
     pub refine_duration_ms: u64,
     pub refine_cost: u32,
+    /// Crystal Fishing.ini [Rates] Attempts and Delay.
+    pub crystal_fishing_attempts: std::num::NonZeroU16,
+    pub crystal_fishing_delay_ms: u32,
     pub monster_spawn_source: MonsterSpawnSource,
     pub terrain_patches: Vec<TerrainPatchTemplate>,
     pub decor_objects: Vec<DecorObjectTemplate>,
@@ -4267,6 +4270,11 @@ impl Default for SimulationConfig {
 }
 
 impl SimulationConfig {
+    pub fn crystal_fishing_cast_delay(&self) -> std::time::Duration {
+        crate::CRYSTAL_FISHING_CAST_DELAY
+            + std::time::Duration::from_millis(u64::from(self.crystal_fishing_delay_ms))
+    }
+
     /// Replace the project-owned login notice with deployment-specific text.
     /// Empty messages are retained in configuration but fail closed at the
     /// StartGame packet boundary and are not sent to clients.
@@ -4445,6 +4453,14 @@ impl SimulationConfig {
             crystal_world_experience_rate: 1.0,
             crystal_newbie_guild_name: "NewbieGuild".into(),
             refine_cost: 125,
+            crystal_fishing_attempts: std::env::var("MIR2_CRYSTAL_FISHING_ATTEMPTS")
+                .ok()
+                .and_then(|value| value.parse().ok())
+                .unwrap_or(std::num::NonZeroU16::new(30).unwrap()),
+            crystal_fishing_delay_ms: std::env::var("MIR2_CRYSTAL_FISHING_DELAY_MS")
+                .ok()
+                .and_then(|value| value.parse().ok())
+                .unwrap_or_default(),
             login_notice: None,
             map_drop_rules: Vec::new(),
             mine_zones: Vec::new(),

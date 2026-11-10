@@ -1,0 +1,447 @@
+{
+  "schema": "mir2.r16.fishing-crystal-cadence.v1",
+  "base": "735c0d8ed9550dbdc7e6c31b56d61d3e4da4d20c",
+  "sourceReference": {
+    "Crystal/Server/MirObjects/PlayerObject.cs": "48607c437fe56859c0fbc2a84195693395806e532e95bf5861aed9423a19ff11",
+    "Crystal/Server/Settings.cs": "c9fbfa492e33b1a4e07a79a86a002c7918418531b7bdf4ba6671916a38f2faec",
+    "Crystal/Server/MirNetwork/MirConnection.cs": "fc7b59487d21171e48cb8ce0bfa29141f8bd52160298cc0069aee1cf4812d292",
+    "Crystal/Shared/Data/Stat.cs": "d38bd55d2b27f6dcd8f70111b9715cbd07a6c20363ddc74cfa9774a953bfbfbe",
+    "packages/game-data/data/generated/crystal_item_manifest.json": "b0d48ada978d8a062e993fe0425b6a724672aeea354a3b7b4508fb4c161658b7"
+  },
+  "sourceInputs": {
+    "apps/gateway/src/fishing_clock.rs": {
+      "rawSha256": "1225b32778bcac2f95e1774f6b32b739b2efb5db401cefb26c076f363b1d5a5c",
+      "gitLfSha256": "1225b32778bcac2f95e1774f6b32b739b2efb5db401cefb26c076f363b1d5a5c"
+    },
+    "apps/gateway/src/lib.rs": {
+      "rawSha256": "89468cc32b736718bf6452c523032b135610815320329a27c35932f44386dfe8",
+      "gitLfSha256": "89468cc32b736718bf6452c523032b135610815320329a27c35932f44386dfe8"
+    },
+    "apps/gateway/src/routing.rs": {
+      "rawSha256": "0e9e3cafb5322c9ac27d80e3ae55175ec226fcfbce27adc67396b66546d3a2d9",
+      "gitLfSha256": "c81884426e5aa4098cf89f3dab822db933cdd6ef5b8e564b9d3c547f46521095"
+    },
+    "apps/gateway/src/session.rs": {
+      "rawSha256": "e54a1a4f17f8c25b716d5d594e2c61675123d04d2d7ca2ebfa7488983b163997",
+      "gitLfSha256": "e54a1a4f17f8c25b716d5d594e2c61675123d04d2d7ca2ebfa7488983b163997"
+    },
+    "apps/gateway/src/tcp.rs": {
+      "rawSha256": "22b94df3ab95955af16857568501c8a0e76380bfd23e9c67fd364ae19d47babe",
+      "gitLfSha256": "22b94df3ab95955af16857568501c8a0e76380bfd23e9c67fd364ae19d47babe"
+    },
+    "apps/gateway/src/web.rs": {
+      "rawSha256": "a547309ff1b586e362400ce72507140281335f3d68f29ece7614b517607b3f75",
+      "gitLfSha256": "fe85157704e96df262e86390f5f9e727dc68fd425a59394eea908b669c21135a"
+    },
+    "apps/gateway/src/zone_rpc.rs": {
+      "rawSha256": "4aa38e78459fce2b4334356981bbdf36e707e0e607205bf88e3ef8bd92b1d1bf",
+      "gitLfSha256": "4aa38e78459fce2b4334356981bbdf36e707e0e607205bf88e3ef8bd92b1d1bf"
+    },
+    "apps/simulation/src/config.rs": {
+      "rawSha256": "a72ca9c01932b5173b9fefa1c5584d0040eef34715430f9f6534ce878d1c79eb",
+      "gitLfSha256": "a72ca9c01932b5173b9fefa1c5584d0040eef34715430f9f6534ce878d1c79eb"
+    },
+    "apps/simulation/src/lib.rs": {
+      "rawSha256": "508c85c7c71c70f6090a696765101236c7aea70c6d1269fb8fb46813a18c8ca3",
+      "gitLfSha256": "508c85c7c71c70f6090a696765101236c7aea70c6d1269fb8fb46813a18c8ca3"
+    },
+    "apps/simulation/src/runtime/fishing.rs": {
+      "rawSha256": "959e49285176278d49daf56c5bca0f52067b529d291ae9bd030c764dcf086117",
+      "gitLfSha256": "959e49285176278d49daf56c5bca0f52067b529d291ae9bd030c764dcf086117"
+    },
+    "apps/simulation/src/runtime/resources.rs": {
+      "rawSha256": "045f2fd77ea40bbdcefd2d226e0d4ce204bb7e92105464fd6a8715855b66cdc1",
+      "gitLfSha256": "045f2fd77ea40bbdcefd2d226e0d4ce204bb7e92105464fd6a8715855b66cdc1"
+    },
+    "apps/simulation/src/world_runtime.rs": {
+      "rawSha256": "b4e6513f4fc3d44da2e031cfe5b79cd1b2930dafc33bbdb3f808eda8949f9ef7",
+      "gitLfSha256": "b4e6513f4fc3d44da2e031cfe5b79cd1b2930dafc33bbdb3f808eda8949f9ef7"
+    }
+  },
+  "reference": {
+    "castMs": 750,
+    "intervalMs": 200,
+    "attempts": 30,
+    "extraDelayEnv": "MIR2_CRYSTAL_FISHING_DELAY_MS",
+    "attemptsEnv": "MIR2_CRYSTAL_FISHING_ATTEMPTS",
+    "progress": [
+      3,
+      6,
+      10,
+      13,
+      16,
+      20,
+      23,
+      26,
+      30,
+      33,
+      36,
+      40,
+      43,
+      46,
+      50,
+      53,
+      56,
+      60,
+      63,
+      66,
+      70,
+      73,
+      76,
+      80,
+      83,
+      86,
+      90,
+      93,
+      96,
+      100,
+      103
+    ],
+    "biteWindowMs": 3000,
+    "exhaustedContinuationFirstMs": 750,
+    "earlyAutomaticReelContinuationFirstMs": 200,
+    "stockReelsMaxMac": 0,
+    "manualReelContinues": false
+  },
+  "build": {
+    "gatewayCandidate": "R2",
+    "profile": "dev, debuginfo=0",
+    "gatewaySha256": "559270ec2f98f32a401d5ecebde3779d550dbb2556228a8c13fe3e578bb4793b",
+    "webBase": "735c0d8ed9550dbdc7e6c31b56d61d3e4da4d20c",
+    "nextBuildId": "UafFkZC8DOqUbOb1vfrsF",
+    "webBuildReceiptSha256": "d58e7b4539a52680b9baa6f2b8bfb8d637f75359b923f7f560c54755af47b2fa",
+    "wasmVersions": [
+      "5fde16fb186299cc265cec00a085c3ecbe76e4d0ff77a12de08f567cf28fc836",
+      "cc64a3a85149bf9180ebc1f4e061319d29c1f8eaecb0f11e5b30d4b7aff573b4",
+      "c61eebe4b256760c789b3d2566f1a272601c47ab7b07b1cd3e055ace255bb44a"
+    ],
+    "shippingUnchangedAfterBinaryExceptTestFixture": [
+      "apps/gateway/src/routing.rs"
+    ]
+  },
+  "browser": {
+    "sealSha256": "e50ec141d58fd53ba59a7df08022e03f06ac68e49c3fa16acc65a63726ecc9f9",
+    "old": [
+      {
+        "renderer": "webgpu",
+        "firstPercent": 25,
+        "firstAckToStepMs": 672.932,
+        "receiptSha256": "7e7324166ac93d38ec75e6fe63e947314ffaa0e791621f90b76b44e5748adfbb"
+      },
+      {
+        "renderer": "shared",
+        "firstPercent": 25,
+        "firstAckToStepMs": 644.615,
+        "receiptSha256": "c229d20f47cb5354cc008e1751459c94ad6d0206ba36b6bc9f4710fad0a94a49"
+      }
+    ],
+    "webgpu": {
+      "run": "candidate-r2-webgpu-retry",
+      "receiptSha256": "80f08016c8baff4d49937b63dcd3dde06d979c76272ef70c7a7686120631d2db",
+      "acceptedCasts": 2,
+      "initialReceiptMs": [
+        655.721,
+        805.727
+      ],
+      "firstPercent": 3,
+      "stepMedianMs": 215.349,
+      "stepRangeMs": [
+        186.009,
+        365.352
+      ],
+      "recastFirstProgressMs": 739.964,
+      "biteExpiryMs": 3001.168,
+      "clickedLiveBiteAtPercent": 23,
+      "pressFrame": 142,
+      "releaseAfterNibbleMs": 1404.465,
+      "noContinuationAfterManualForMs": 1520.011,
+      "screenshot": {
+        "file": "crystal-cadence-webgpu.png",
+        "sha256": "3aa9960550bf585e8afd03040ac8e3c87eba1584e5cde92bad0d4bee7e153c8a"
+      },
+      "relog": {
+        "rod": 9998,
+        "hook": 7998,
+        "bait": 13,
+        "reel": 5999
+      }
+    },
+    "webgl2": {
+      "run": "candidate-r2-shared-delay350",
+      "receiptSha256": "0f21af1ea196e4318af4d49f404c82bda6ae72f245d136c7040dbb5d0971e27f",
+      "acceptedCasts": 2,
+      "initialReceiptMs": [
+        976.551,
+        1125.452
+      ],
+      "firstPercent": 3,
+      "stepMedianMs": 216.159,
+      "stepRangeMs": [
+        199.783,
+        336.723
+      ],
+      "recastFirstProgressMs": 1089.041,
+      "biteExpiryMs": 3031.263,
+      "clickedLiveBiteAtPercent": 3,
+      "pressFrame": 142,
+      "releaseAfterNibbleMs": 1476.02,
+      "noContinuationAfterManualForMs": 1785.664,
+      "screenshot": {
+        "file": "crystal-cadence-webgl2.png",
+        "sha256": "b8622f467bd375dc7b56764b2a29de67d3a8731f26673f4d0ef5e586eff244bf"
+      },
+      "relog": {
+        "rod": 9998,
+        "hook": 7998,
+        "bait": 13,
+        "reel": 5999
+      },
+      "configuredExtraMs": 350
+    },
+    "longWebgpu": {
+      "acceptedCasts": 9,
+      "manualBitePercent": 16,
+      "releaseAfterBiteMs": 724.364,
+      "receiptSha256": "38ac328f088cbaf7897ac43959ad10803492728e4cf090f2f15e45223b1137eb",
+      "relog": {
+        "rod": 9991,
+        "hook": 7991,
+        "bait": 6,
+        "reel": 5999
+      }
+    },
+    "observedFailure": {
+      "stage": "physical-manual-bite-reel-keeps-autocast-from-continuing",
+      "buttonWaitBudgetMs": 1700,
+      "receiptSha256": "14d5188571775a415cecbdb39f7336e210cf6444c829252d571196143da38352",
+      "boundary": "The repeated-cast replay passed with a different nibble step; the exact stressed early nibble was not repeated.",
+      "acceptedCasts": 8,
+      "nibbleProgressPercent": 6
+    }
+  },
+  "wire": {
+    "sealSha256": "ab31843374f3bc251107a95d7bbbdd6a84e1766f680db212266ccace9a16c97a",
+    "web": {
+      "receipt": "r2-web-file/ordinary-two-client-receipt.json",
+      "sha256": "d8760c349be28bbdafb879170fde1fa806322f29c7f4f077a0ae3ef2c1a145f5",
+      "ports": [
+        20330,
+        20332
+      ],
+      "clockDefaults": {
+        "regularTickMs": 300,
+        "inputWakeMs": 75,
+        "bootstrapGraceMs": 15000
+      },
+      "firstDelayMs": 757,
+      "medianGapMs": 217,
+      "minGapMs": 203,
+      "maxGapMs": 219,
+      "noObserverPrivateProgress": true,
+      "ordinaryReentry": true,
+      "save": {
+        "before": {
+          "rod": 10000,
+          "hook": 8000,
+          "bait": 15,
+          "reel": 6000,
+          "position": {
+            "x": 342,
+            "y": 244
+          },
+          "direction": "UpLeft"
+        },
+        "after": {
+          "rod": 9998,
+          "hook": 7998,
+          "bait": 13,
+          "reel": 6000,
+          "position": {
+            "x": 342,
+            "y": 244
+          },
+          "direction": "DownLeft"
+        },
+        "exactBaitCost": 2,
+        "exactHookCost": 2,
+        "exactRodCost": 2,
+        "reelCost": 0
+      }
+    },
+    "tcp": {
+      "receipt": "r2-legacy-tcp-file/legacy-tcp-file-receipt.json",
+      "sha256": "820c34296bf5a1a77cc04d6e38b8991b6ff42afa959e3dca5fa383f62521ae61",
+      "ports": [
+        20334,
+        20336
+      ],
+      "codec": "Crystal binary TCP with official mir2-protocol encode/decode",
+      "firstDelayMs": 756,
+      "medianGapMs": 217,
+      "minGapMs": 204,
+      "maxGapMs": 436,
+      "save": {
+        "before": {
+          "rod": 10000,
+          "hook": 8000,
+          "bait": 15,
+          "reel": 6000,
+          "point": {
+            "x": 342,
+            "y": 244
+          },
+          "direction": "UpLeft"
+        },
+        "after": {
+          "rod": 9998,
+          "hook": 7998,
+          "bait": 13,
+          "reel": 5999,
+          "point": {
+            "x": 342,
+            "y": 244
+          },
+          "direction": "DownLeft"
+        }
+      }
+    },
+    "observerUpdates": [
+      [
+        true,
+        0,
+        false
+      ],
+      [
+        false,
+        103,
+        false
+      ],
+      [
+        true,
+        0,
+        false
+      ],
+      [
+        false,
+        0,
+        false
+      ]
+    ],
+    "servicesClosed": true
+  },
+  "tests": {
+    "simulation": {
+      "file": "simulation-fishing-final.log",
+      "sha256": "0f9eaa9e496398a22fe68b1a453c86a8321ae6ed1116492f01c26c8cf682f893",
+      "passingGroups": [
+        37,
+        3,
+        1
+      ]
+    },
+    "gateway": {
+      "file": "gateway-fishing-final.log",
+      "sha256": "af8e7799b40063dbc1ba4e32aedb1f6ded781c43b9f39c780c74ec3856a2e797",
+      "passingGroups": [
+        9
+      ]
+    },
+    "adjacentSimulation": {
+      "file": "adjacent-simulation-final.log",
+      "sha256": "cc1436d3132593bb10d0528af3fa98fdb955e437c87eb6e10c17a756d8e8a7eb",
+      "passingGroups": [
+        3,
+        21,
+        209
+      ]
+    },
+    "adjacentTcp": {
+      "file": "gateway-tcp-adjacent-final.log",
+      "sha256": "53f7fd3b3f6fba30da66c1e48668d74733823eae57a45514710ceab54192ddde",
+      "passingGroups": [
+        1
+      ]
+    },
+    "web": {
+      "presentationAndEdgeGroups": 11,
+      "generatedPackagesVerified": true
+    }
+  },
+  "publicQr": {
+    "endpoint": "https://numeron.obelisk.build/game",
+    "statusReadbackSha256": "a9eca1c8ad179edfadf28545969443183d7c9b0ee2b90b3cb2d648a2893cbd61",
+    "stageCandidate": "c52ea9abb63cc016a736c856e4d9d5db3c0abb90",
+    "gameRevision": "a23cc382af1c66cd7ffeea794fd62fe7cba7e96a",
+    "coldQr": [
+      {
+        "language": "zh-cn",
+        "revision": "a23cc382af1c66cd7ffeea794fd62fe7cba7e96a",
+        "startedAt": "2026-11-10T03:57:27.555Z",
+        "stages": [
+          {
+            "name": "navigate",
+            "relativeMs": 233
+          },
+          {
+            "name": "login-ready",
+            "relativeMs": 1861
+          },
+          {
+            "name": "ordinary-wallet-qr",
+            "relativeMs": 4720
+          },
+          {
+            "name": "pending-read",
+            "relativeMs": 6598
+          }
+        ],
+        "receiptSha256": "c7033cb6ba0fd0f0cf9e70403947c7deaaea9d5d126548565d5f015a6953010c",
+        "createStatus": 200,
+        "pollStatus": 200,
+        "pendingGets": 12,
+        "checks": {
+          "realCodeVisible": true,
+          "firstPartyLink": true,
+          "ordinaryPending": true,
+          "ordinaryCanceled": true
+        }
+      },
+      {
+        "language": "zh-tw",
+        "revision": "a23cc382af1c66cd7ffeea794fd62fe7cba7e96a",
+        "startedAt": "2026-11-10T03:57:34.572Z",
+        "stages": [
+          {
+            "name": "navigate",
+            "relativeMs": 238
+          },
+          {
+            "name": "login-ready",
+            "relativeMs": 10403
+          },
+          {
+            "name": "ordinary-wallet-qr",
+            "relativeMs": 29125
+          },
+          {
+            "name": "pending-read",
+            "relativeMs": 36639
+          }
+        ],
+        "receiptSha256": "8dafb73e5e45aa98b1663480bbeb7c332bfacec08e7b3a24688e248909da88b5",
+        "createStatus": 200,
+        "pollStatus": 200,
+        "pendingGets": 12,
+        "checks": {
+          "realCodeVisible": true,
+          "firstPartyLink": true,
+          "ordinaryPending": true,
+          "ordinaryCanceled": true
+        }
+      }
+    ],
+    "signedOrPhysicalPhoneInThisRun": false,
+    "stageOrPromoteInThisRun": false,
+    "releasePrerequisite": "Review of the exact secret-bearing GitHub deployment code on a protected ref or by a required environment reviewer."
+  }
+}

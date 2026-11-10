@@ -8028,10 +8028,11 @@ async fn handle_socket_work(
                     last_ai_live_segment_id = latest_segment_id;
                 }
             }
-            _ = async {
+            fishing_tick = async {
                 tokio::select! {
-                    _ = runtime_tick.tick() => {},
-                    _ = monthly_access_tick.tick(), if monthly_access_enabled && active_session_permit.is_some() => {},
+                    _ = crate::fishing_clock::wait_for_fishing_tick(session.next_fishing_wake()) => true,
+                    _ = runtime_tick.tick() => false,
+                    _ = monthly_access_tick.tick(), if monthly_access_enabled && active_session_permit.is_some() => false,
                 }
             } => {
                 let _runtime_tick_turn = SocketDiagnosticPhaseGuard::enter(
@@ -8130,7 +8131,7 @@ async fn handle_socket_work(
                     &diagnostics, SocketDiagnosticPhase::Preflight, Some("runtime_tick.preflight"),
                 );
                 let monthly_expiry_pending = session.monthly_card_expiry_pending(authenticated_account_id.as_deref());
-                if now < runtime_tick_deferred_until && !monthly_expiry_pending
+                if !fishing_tick && now < runtime_tick_deferred_until && !monthly_expiry_pending
                     && !session.has_pending_shared_personal_work() {
                     continue;
                 }
@@ -8149,8 +8150,13 @@ async fn handle_socket_work(
                 let responses = match catch_gateway_panic("web session tick", || {
                     let _slow_stage = GatewaySlowStage::for_socket("runtime_tick.execute", &diagnostics);
                     tokio::task::block_in_place(|| {
+                        let command = if fishing_tick {
+                            WorldCommand::TickFishing
+                        } else {
+                            WorldCommand::Tick
+                        };
                         session
-                            .execute_with_outcome(WorldCommand::Tick)
+                            .execute_with_outcome(command)
                             .map(|execution| execution.packets)
                     })
                 })
@@ -8158,6 +8164,9 @@ async fn handle_socket_work(
                     Ok(responses) => responses,
                     Err(error) => {
                         if crate::gate15::health().is_some() {
+                            if fishing_tick {
+                                session.defer_fishing_wake(Instant::now());
+                            }
                             eprintln!(
                                 "Gate 15 transient Zone tick failure; keeping player socket for placement recovery: {error}"
                             );
@@ -8266,9 +8275,11 @@ async fn handle_socket_work(
                 {
                     return;
                 }
-                runtime_tick_deferred_until =
-                    Instant::now() + gateway_runtime_tick_input_wake_grace();
-                runtime_tick.reset_after(gateway_runtime_tick_input_wake_grace());
+                if !fishing_tick {
+                    runtime_tick_deferred_until =
+                        Instant::now() + gateway_runtime_tick_input_wake_grace();
+                    runtime_tick.reset_after(gateway_runtime_tick_input_wake_grace());
+                }
             }
         }
     }

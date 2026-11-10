@@ -18378,6 +18378,7 @@ impl SharedInProcessZoneSessionRuntime {
             WorldCommand::Stage5Command { action, .. } if action == "qa.applyNativeState"
         );
         let is_world_tick = matches!(&command, WorldCommand::Tick);
+        let is_fishing_tick = matches!(&command, WorldCommand::TickFishing);
         let is_game_shop_buy = matches!(
             &command,
             WorldCommand::ClientPacket(ClientPacket::GameShopBuy { .. })
@@ -18386,6 +18387,7 @@ impl SharedInProcessZoneSessionRuntime {
         );
         let skip_tail_zone_snapshot = is_low_latency_zone_packet
             || is_world_tick
+            || is_fishing_tick
             || matches!(
                 &command,
                 WorldCommand::ClientPacket(ClientPacket::ClientVersion { .. })
@@ -19459,7 +19461,7 @@ impl WorldRuntime for SharedInProcessZoneSessionRuntime {
                     | ClientPacket::Turn { .. }
                     | ClientPacket::Walk { .. }
                     | ClientPacket::Run { .. }
-            ) | WorldCommand::Tick
+            ) | WorldCommand::Tick | WorldCommand::TickFishing
         );
         let packets = self.execute(command)?;
         let packet_count = packets.len();
@@ -22857,7 +22859,7 @@ mod tests {
     ) {
         let shared = Arc::new(Mutex::new(SharedInProcessZoneState::new()));
         let mut runtime = shared_session_runtime(shared.clone());
-        start_new_runtime(&mut runtime, "fishing-transform", "Scout");
+        start_new_runtime(&mut runtime, "fishing-transform", "ShoreScout");
         let key = runtime.current_presence_key().unwrap();
         let session = runtime.current_zone_session_id().unwrap();
         let local_id = runtime.local_self_object_id().unwrap();

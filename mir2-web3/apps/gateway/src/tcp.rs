@@ -197,10 +197,21 @@ async fn handle_client_inner(
                 tokio::select! {
                     biased;
 
-                    _ = monthly_access_tick.tick() => {
-                        if session.monthly_card_expiry_pending(authenticated_account_id.as_deref())
+                    fishing_tick = async {
+                        tokio::select! {
+                            _ = crate::fishing_clock::wait_for_fishing_tick(session.next_fishing_wake()) => true,
+                            _ = monthly_access_tick.tick() => false,
+                        }
+                    } => {
+                        if fishing_tick
+                            || session.monthly_card_expiry_pending(authenticated_account_id.as_deref())
                             || session.has_pending_shared_personal_work() {
-                            let responses = gateway_blocking(|| session.execute_with_outcome(mir2_simulation::WorldCommand::Tick))
+                            let command = if fishing_tick {
+                                mir2_simulation::WorldCommand::TickFishing
+                            } else {
+                                mir2_simulation::WorldCommand::Tick
+                            };
+                            let responses = gateway_blocking(|| session.execute_with_outcome(command))
                                 .map_err(session_panic_io_error)?.packets;
                             if responses.iter().any(|packet| matches!(packet, ServerPacket::LogOutSuccess { .. })) {
                                 active_zone_outbound_registration_id = 0;

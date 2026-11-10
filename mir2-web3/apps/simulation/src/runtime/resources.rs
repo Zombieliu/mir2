@@ -20,7 +20,7 @@ use super::npc_script::{CrystalNpcSavedValue, CrystalNpcScriptDiagnostic};
 use super::quests::QuestState;
 use super::skills::SkillState;
 
-use std::collections::{BTreeMap, BTreeSet};
+use std::collections::{hash_map::RandomState, BTreeMap, BTreeSet};
 use std::sync::{
     atomic::{AtomicU64, Ordering},
     Arc,
@@ -810,6 +810,11 @@ pub(super) struct FishingResource {
     pub(super) chance_percent: i32,
     pub(super) found_fish: bool,
     pub(super) bite_expires_at: Option<Instant>,
+    pub(super) next_step_at: Option<Instant>,
+    pub(super) attempts: u32,
+    pub(super) nibble_chance: i32,
+    pub(super) auto_reel_chance: i32,
+    pub(super) rolls: RandomState,
     pub(super) fishing_attribute: i8,
     pub(super) rod_has_hook: bool,
     pub(super) rod_has_reel: bool,
@@ -826,6 +831,11 @@ impl FishingResource {
             chance_percent: 0,
             found_fish: false,
             bite_expires_at: None,
+            next_step_at: None,
+            attempts: 0,
+            nibble_chance: 0,
+            auto_reel_chance: 0,
+            rolls: RandomState::new(),
             fishing_attribute: 0,
             rod_has_hook: true,
             rod_has_reel: true,

@@ -61777,7 +61777,7 @@ fn fishing_packets_toggle_crystal_update_surface() {
         vec![ServerPacket::FishingUpdate {
             object_id,
             fishing: false,
-            progress_percent: 100,
+            progress_percent: 0,
             chance_percent: 38,
             fishing_point,
             found_fish: false,
@@ -61816,6 +61816,22 @@ fn successful_swordfish_reel_tick(session: &mut SimulationSession, minimum_tick:
     found.expect("deterministic fishing sequence should contain a SwordFish reel")
 }
 
+fn fishing_source_test_step(session: &mut SimulationSession) -> Vec<ServerPacket> {
+    let world = session.app.world_mut();
+    let deadline = world.resource::<FishingResource>().next_step_at.unwrap();
+    let mut packets = Vec::new();
+    crate::runtime::fishing::tick_fishing_at(world, &mut packets, deadline);
+    packets
+}
+
+fn fishing_source_test_prepare_late_bite(session: &mut SimulationSession, auto_reel: bool) {
+    let mut fishing = session.app.world_mut().resource_mut::<FishingResource>();
+    fishing.attempts = 29;
+    fishing.progress_percent = 96;
+    fishing.nibble_chance = 100;
+    fishing.auto_reel_chance = if auto_reel { 100 } else { 0 };
+}
+
 #[test]
 fn fishing_tick_reels_loot_and_autocasts_after_found_fish() {
     let mut session = authenticated_demo_fishing_session();
@@ -61831,11 +61847,9 @@ fn fishing_tick_reels_loot_and_autocasts_after_found_fish() {
     super::set_runtime_tick(session.app.world_mut(), 0);
     session.handle_packet(ClientPacket::FishingCast { cast_out: true });
     let manual_reel_tick = successful_swordfish_reel_tick(&mut session, 10);
-    super::set_runtime_tick(session.app.world_mut(), manual_reel_tick - 4);
-    let mut tick_packets = Vec::new();
-    for _ in 0..4 {
-        tick_packets = session.tick();
-    }
+    fishing_source_test_prepare_late_bite(&mut session, false);
+    super::set_runtime_tick(session.app.world_mut(), manual_reel_tick);
+    let tick_packets = fishing_source_test_step(&mut session);
     assert!(tick_packets.iter().any(|packet| matches!(
         packet,
         ServerPacket::FishingUpdate {
@@ -61865,11 +61879,10 @@ fn fishing_tick_reels_loot_and_autocasts_after_found_fish() {
     session.handle_packet(ClientPacket::FishingCast { cast_out: true });
     session.handle_packet(ClientPacket::FishingChangeAutocast { auto_cast: true });
     let autocast_reel_tick = successful_swordfish_reel_tick(&mut session, 10);
-    super::set_runtime_tick(session.app.world_mut(), autocast_reel_tick - 5);
-    for _ in 0..4 {
-        session.tick();
-    }
-    let autocast_packets = session.tick();
+    fishing_source_test_prepare_late_bite(&mut session, true);
+    fishing_source_test_step(&mut session);
+    super::set_runtime_tick(session.app.world_mut(), autocast_reel_tick);
+    let autocast_packets = fishing_source_test_step(&mut session);
     assert!(autocast_packets.iter().any(|packet| matches!(
         packet,
         ServerPacket::GainedItem { item } if item.item_index == fish_index
@@ -62110,11 +62123,10 @@ fn fishing_autocast_reel_durability_cancels_slot_backed_recast() {
     session.handle_packet(ClientPacket::FishingCast { cast_out: true });
     session.handle_packet(ClientPacket::FishingChangeAutocast { auto_cast: true });
     let autocast_reel_tick = successful_swordfish_reel_tick(&mut session, 10);
-    super::set_runtime_tick(session.app.world_mut(), autocast_reel_tick - 5);
-    for _ in 0..4 {
-        session.tick();
-    }
-    let autocast_packets = session.tick();
+    fishing_source_test_prepare_late_bite(&mut session, true);
+    fishing_source_test_step(&mut session);
+    super::set_runtime_tick(session.app.world_mut(), autocast_reel_tick);
+    let autocast_packets = fishing_source_test_step(&mut session);
 
     assert!(autocast_packets.iter().any(|packet| matches!(
         packet,
@@ -62185,7 +62197,7 @@ fn fishing_retry_cast_uses_slot_backed_finder_stats_and_durability() {
             fishing: true,
             chance_percent,
             ..
-        } if *chance_percent > 28
+        } if (38..=40).contains(chance_percent)
     )));
 }
 

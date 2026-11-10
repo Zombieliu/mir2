@@ -1,5 +1,9 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+## R16 原版钓鱼节奏与收线裁定（2026-11-10）
+
+普通 WebSocket 和 Crystal TCP 共用钓鱼计时，复测 750 毫秒首步、200 毫秒步进、30 次显示满进度及下一次耗尽。WebGPU 和 WebGL2 实点收线、自然过期、重抛和同档读回。继续 Crystal 鱼具磨损细节和 Windows 窗口。 [源规则和证据](evidence/r16-web-fishing-loop-20261110/README.md#原版抛竿节奏与概率)
+
 ## R16 收线按钮与有序重抛（2026-11-10）
 
 Web 和 Windows 复用原版咬钩帧和普通收竿指令。共同网关在三秒后撤销渔获资格，并按收线、扣除下一竿、抛竿的顺序发送回包。Web 两种渲染路径和普通双客户端验证了点击、过期、重抛和同档读回。Windows 已通过屏外验收。 [范围与证据](evidence/r16-web-fishing-loop-20261110/ordered-bite-and-recast.json)

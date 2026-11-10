@@ -1,3 +1,4 @@
+use std::hash::BuildHasher;
 use std::time::{Duration, Instant};
 
 use bevy_ecs::prelude::World;
@@ -5,11 +6,14 @@ use mir2_game_data::{crystal_drop_table_by_key, localized_text_or_fallback, Crys
 use mir2_protocol::{ChatType, Point, ServerPacket, UserItem};
 
 use crate::config::{EquipmentSlot, ItemContainer, WorldEntityDisposition};
+use crate::CRYSTAL_FISHING_STEP;
 
-use super::components::{current_player_object_id, entity_position, player_entity};
+use super::components::{
+    current_player_is_dead, current_player_object_id, entity_position, player_entity,
+};
 use super::crystal_compat::{
     CRYSTAL_FISHING_ROD_SHAPES, CRYSTAL_ITEM_TYPE_BAIT, CRYSTAL_ITEM_TYPE_WEAPON,
-    CRYSTAL_STAT_CRITICAL_RATE, CRYSTAL_STAT_MAX_AC, CRYSTAL_STAT_MAX_DC, CRYSTAL_STAT_MIN_AC,
+    CRYSTAL_STAT_CRITICAL_RATE, CRYSTAL_STAT_MAX_AC, CRYSTAL_STAT_MAX_MAC, CRYSTAL_STAT_MIN_AC,
 };
 use super::drops::{can_gain_gold, crystal_attempt_drop_entry, ResolvedDropTemplate};
 use super::equipment::{
@@ -29,16 +33,12 @@ use super::monsters::{
 use super::movement::{current_location, offset_point};
 use super::resources::{
     current_language, is_in_world, runtime_tick, FishingResource, InventoryResource,
-    MapRuntimeResource, PlayerRuntimeResource, RuntimeConfigResource,
+    MapRuntimeResource, PlayerRuntimeResource, RuntimeConfigResource, SessionResource,
 };
+use super::stats::player_stats;
 
 const CRYSTAL_FISHING_SUCCESS_START_PERCENT: i32 = 10;
-const CRYSTAL_FISHING_PROGRESS_PER_TICK: i32 = 25;
 const CRYSTAL_FISHING_BITE_WINDOW: Duration = Duration::from_secs(3);
-const CRYSTAL_FISHING_REEL_BONUS_MIN: i32 = 10;
-const CRYSTAL_FISHING_REEL_BONUS_RANGE: u64 = 14;
-const CRYSTAL_FISHING_REEL_BONUS_SALT: usize = 910_000;
-const CRYSTAL_FISHING_REEL_SUCCESS_SALT: usize = 910_010;
 const CRYSTAL_FISHING_MONSTER_EVENT_SALT: usize = 910_023;
 const CRYSTAL_FISHING_MONSTER_EVENT_DENOMINATOR: u64 = 95;
 const CRYSTAL_FISHING_MONSTER: &str = "GiantKeratoid";
@@ -53,6 +53,16 @@ const FISHING_SLOT_FLOAT: usize = 1;
 const FISHING_SLOT_BAIT: usize = 2;
 const FISHING_SLOT_FINDER: usize = 3;
 const FISHING_SLOT_REEL: usize = 4;
+
+#[derive(Clone, Copy, Hash)]
+enum FishingRoll {
+    FloatBonus,
+    FinderBonus,
+    Nibble(u32),
+    AutoReel(u32),
+    ReelBonus,
+    ReelSuccess,
+}
 
 #[derive(Debug, Clone, Copy, Default)]
 struct FishingBaitStats {
@@ -76,14 +86,16 @@ pub(super) fn fishing_cast_impl(world: &mut World, cast_out: bool) -> Vec<Server
 }
 
 fn fishing_cast_at(world: &mut World, cast_out: bool, now: Instant) -> Vec<ServerPacket> {
-    if !is_in_world(world) {
+    if !is_in_world(world) || current_player_is_dead(world) {
         return Vec::new();
     }
     sync_fishing_slots_from_equipment(world);
 
     if cast_out {
         let mut packets = Vec::new();
-        if !world.resource::<FishingResource>().fishing && begin_fishing_cast(world, &mut packets) {
+        if !world.resource::<FishingResource>().fishing
+            && begin_fishing_cast(world, now, &mut packets)
+        {
             packets.push(fishing_update_packet(world));
         }
         return packets;
@@ -99,7 +111,8 @@ fn fishing_cast_at(world: &mut World, cast_out: bool, now: Instant) -> Vec<Serve
         return vec![fishing_update_packet(world)];
     }
 
-    finish_fishing_cast(world, now, &mut packets);
+    let progress = world.resource::<FishingResource>().progress_percent;
+    finish_fishing_cast(world, now, progress, false, &mut packets);
     packets
 }
 
@@ -128,79 +141,116 @@ pub(super) fn tick_fishing(world: &mut World, packets: &mut Vec<ServerPacket>) {
     tick_fishing_at(world, packets, Instant::now());
 }
 
-fn tick_fishing_at(world: &mut World, packets: &mut Vec<ServerPacket>, now: Instant) {
-    if !is_in_world(world) || !world.resource::<FishingResource>().fishing {
+impl crate::SimulationSession {
+    pub(crate) fn tick_fishing(&mut self) -> Vec<ServerPacket> {
+        let mut packets = Vec::new();
+        tick_fishing(self.app.world_mut(), &mut packets);
+        packets
+    }
+}
+
+pub(super) fn tick_fishing_at(world: &mut World, packets: &mut Vec<ServerPacket>, now: Instant) {
+    if !is_in_world(world)
+        || world
+            .resource::<FishingResource>()
+            .next_step_at
+            .is_none_or(|deadline| now < deadline)
+    {
         return;
     }
     sync_fishing_slots_from_equipment(world);
-    if !has_equipped_fishing_rod(world) {
+    if current_player_is_dead(world) || !fishing_rod_and_point_are_valid(world) {
         interrupt_fishing(world, packets);
         return;
     }
-    let auto_reel = fishing_autocast_enabled(world);
-    let (bite_started, should_reel) = {
+    let (attempt, had_bite, nibble_chance, auto_reel_chance) = {
         let mut fishing = world.resource_mut::<FishingResource>();
-        if expire_fishing_bite(&mut fishing, now) {
-            // Publish the cleared nibble privately before the next maintenance
-            // tick closes this exhausted R16 attempt.
-            (false, false)
-        } else if fishing.found_fish {
-            (false, auto_reel)
-        } else if fishing.bite_expires_at.is_some() {
-            (false, true)
-        } else {
-            fishing.progress_percent =
-                (fishing.progress_percent + CRYSTAL_FISHING_PROGRESS_PER_TICK).min(100);
-            let bite_started = fishing.progress_percent == 100;
-            if bite_started {
-                fishing.found_fish = true;
-                fishing.bite_expires_at = Some(now + CRYSTAL_FISHING_BITE_WINDOW);
-            }
-            (bite_started, false)
-        }
+        expire_fishing_bite(&mut fishing, now);
+        fishing.next_step_at = Some(now + CRYSTAL_FISHING_STEP);
+        fishing.attempts += 1;
+        (
+            fishing.attempts,
+            fishing.bite_expires_at.is_some(),
+            fishing.nibble_chance,
+            fishing.auto_reel_chance,
+        )
     };
-    if bite_started && fishing_slot_model_available(world) {
-        damage_fishing_slot_item(world, FISHING_SLOT_FLOAT, packets);
+    let attempt_limit = world
+        .resource::<RuntimeConfigResource>()
+        .config
+        .crystal_fishing_attempts
+        .get();
+    let progress = (attempt * 100 / u32::from(attempt_limit)) as i32;
+    if had_bite
+        && auto_reel_chance > 0
+        && fishing_draw(world, FishingRoll::AutoReel(attempt), 0, 100) <= auto_reel_chance
+    {
+        // UpdateFish reels before publishing this attempt. If that starts the
+        // next cast, its final 200 ms assignment supersedes FishingCast's delay.
+        if finish_fishing_cast(world, now, progress, true, packets) {
+            world.resource_mut::<FishingResource>().next_step_at = Some(now + CRYSTAL_FISHING_STEP);
+            packets.push(fishing_update_packet(world));
+        }
+        return;
     }
-    if should_reel {
-        finish_fishing_cast(world, now, packets);
-    } else {
-        packets.push(fishing_update_packet(world));
+    if !had_bite && fishing_draw(world, FishingRoll::Nibble(attempt), 0, 100) <= nibble_chance {
+        {
+            let mut fishing = world.resource_mut::<FishingResource>();
+            fishing.found_fish = true;
+            fishing.bite_expires_at = Some(now + CRYSTAL_FISHING_BITE_WINDOW);
+        }
+        if fishing_slot_model_available(world) {
+            damage_fishing_slot_item(world, FISHING_SLOT_FLOAT, packets);
+        }
+    }
+    world.resource_mut::<FishingResource>().progress_percent = progress;
+    packets.push(fishing_update_packet(world));
+    if progress > 100 {
+        finish_fishing_cast(world, now, progress, true, packets);
     }
 }
 
-fn expire_fishing_bite(fishing: &mut FishingResource, now: Instant) -> bool {
+fn expire_fishing_bite(fishing: &mut FishingResource, now: Instant) {
     if fishing.found_fish && fishing.bite_expires_at.is_some_and(|deadline| now > deadline) {
         fishing.found_fish = false;
-        return true;
     }
-    false
 }
 
-fn finish_fishing_cast(world: &mut World, now: Instant, packets: &mut Vec<ServerPacket>) {
+fn finish_fishing_cast(
+    world: &mut World,
+    now: Instant,
+    published_progress: i32,
+    allow_recast: bool,
+    packets: &mut Vec<ServerPacket>,
+) -> bool {
+    let rate = player_stats(world).get(CRYSTAL_STAT_FISH_RATE_PERCENT);
     let found_fish = {
         let mut fishing = world.resource_mut::<FishingResource>();
         expire_fishing_bite(&mut fishing, now);
-        fishing.fishing = false;
-        fishing.progress_percent = 100;
+        fishing.chance_percent = clamp_percent(fishing.chance_percent.saturating_add(rate));
         fishing.found_fish
     };
     let outcome = if found_fish {
         complete_fishing_reel(world)
     } else {
+        count_completed_fishing_attempt(world);
         FishingReelOutcome::default()
     };
     packets.extend(outcome.packets);
     clear_active_fishing(world);
+    world.resource_mut::<FishingResource>().progress_percent = published_progress;
     packets.push(fishing_update_packet(world));
 
-    if !outcome.cancel_autocast
+    if allow_recast
+        && !outcome.cancel_autocast
         && fishing_autocast_enabled(world)
         && fishing_bait_available(world)
-        && begin_fishing_cast(world, packets)
+        && begin_fishing_cast(world, now, packets)
     {
         packets.push(fishing_update_packet(world));
+        return true;
     }
+    false
 }
 
 /// Derive the fishing attribute from the cell three tiles ahead of the player
@@ -228,7 +278,7 @@ fn sync_fishing_attribute_from_map(world: &mut World) {
     world.resource_mut::<FishingResource>().fishing_attribute = attribute;
 }
 
-fn begin_fishing_cast(world: &mut World, packets: &mut Vec<ServerPacket>) -> bool {
+fn begin_fishing_cast(world: &mut World, now: Instant, packets: &mut Vec<ServerPacket>) -> bool {
     sync_fishing_attribute_from_map(world);
     if !fishing_rod_and_point_are_valid(world) {
         clear_active_fishing(world);
@@ -247,7 +297,22 @@ fn begin_fishing_cast(world: &mut World, packets: &mut Vec<ServerPacket>) -> boo
         packets.push(fishing_chat(world, "server.YouNeedBait", "YouNeedBait"));
         return false;
     };
+    world.resource_mut::<FishingResource>().rolls = Default::default();
     let chance_percent = fishing_cast_success_percent(world, bait_stats.stats.success_bonus);
+    let nibble_min = fishing_slot_template_stat(world, FISHING_SLOT_FLOAT, CRYSTAL_STAT_MIN_AC);
+    let nibble_max = fishing_slot_template_stat(world, FISHING_SLOT_FLOAT, CRYSTAL_STAT_MAX_AC);
+    let nibble_chance = clamp_percent(
+        5 + fishing_byte_range(world, FishingRoll::FloatBonus, nibble_min, nibble_max),
+    );
+    let auto_reel_chance = clamp_percent(fishing_slot_template_stat(
+        world,
+        FISHING_SLOT_REEL,
+        CRYSTAL_STAT_MAX_MAC,
+    ));
+    let cast_delay = world
+        .resource::<RuntimeConfigResource>()
+        .config
+        .crystal_fishing_cast_delay();
     if let Some(packet) = bait_stats.packet {
         packets.push(packet);
     }
@@ -265,6 +330,10 @@ fn begin_fishing_cast(world: &mut World, packets: &mut Vec<ServerPacket>) -> boo
         fishing.chance_percent = chance_percent;
         fishing.found_fish = false;
         fishing.bite_expires_at = None;
+        fishing.next_step_at = Some(now + cast_delay);
+        fishing.attempts = 0;
+        fishing.nibble_chance = nibble_chance;
+        fishing.auto_reel_chance = auto_reel_chance;
     }
     true
 }
@@ -278,6 +347,7 @@ fn clear_active_fishing(world: &mut World) {
     fishing.fishing = false;
     fishing.found_fish = false;
     fishing.bite_expires_at = None;
+    fishing.next_step_at = None;
 }
 
 pub(super) fn interrupt_fishing(world: &mut World, packets: &mut Vec<ServerPacket>) {
@@ -658,11 +728,15 @@ fn fishing_update_packet(world: &World) -> ServerPacket {
     }
 }
 
-fn complete_fishing_reel(world: &mut World) -> FishingReelOutcome {
-    if world.resource::<FishingResource>().progress_percent > 99 {
-        let mut fishing = world.resource_mut::<FishingResource>();
+fn count_completed_fishing_attempt(world: &mut World) {
+    let mut fishing = world.resource_mut::<FishingResource>();
+    if fishing.progress_percent > 99 {
         fishing.chance_counter = fishing.chance_counter.saturating_add(1);
     }
+}
+
+fn complete_fishing_reel(world: &mut World) -> FishingReelOutcome {
+    count_completed_fishing_attempt(world);
     if !fishing_reel_succeeds(world) {
         return FishingReelOutcome {
             packets: vec![fishing_chat(world, "server.FishGotAway", "FishGotAway")],
@@ -702,33 +776,19 @@ fn complete_fishing_reel(world: &mut World) -> FishingReelOutcome {
 }
 
 pub(super) fn fishing_reel_succeeds(world: &World) -> bool {
-    let tick = runtime_tick(world);
-    let object_id = current_player_object_id(world).unwrap_or_default();
     let fishing = world.resource::<FishingResource>();
-    let random_bonus = CRYSTAL_FISHING_REEL_BONUS_MIN
-        + i32::try_from(deterministic_roll(
-            tick,
-            usize::try_from(object_id).unwrap_or_default(),
-            CRYSTAL_FISHING_REEL_BONUS_SALT,
-            CRYSTAL_FISHING_REEL_BONUS_RANGE,
-        ))
-        .expect("fishing reel bonus should fit i32");
+    let random_bonus = fishing_draw(world, FishingRoll::ReelBonus, 10, 24);
     let flexibility_bonus = if fishing.progress_percent > 50 {
-        (equipped_fishing_rod_stat(world, CRYSTAL_STAT_CRITICAL_RATE)
-            + fishing_slot_stat(world, FISHING_SLOT_HOOK, CRYSTAL_STAT_CRITICAL_RATE))
-            / 2
+        let rod = equipped_fishing_rod_stat(world, CRYSTAL_STAT_CRITICAL_RATE).clamp(0, 255);
+        let hook = fishing_slot_template_stat(world, FISHING_SLOT_HOOK, CRYSTAL_STAT_CRITICAL_RATE);
+        let added_hook = fishing_slot_item_of_type(world, FISHING_SLOT_HOOK, CRYSTAL_ITEM_TYPE_HOOK)
+            .map_or(0, |item| user_item_stat_total(&item.added_stats, CRYSTAL_STAT_CRITICAL_RATE));
+        rod.saturating_add(hook).saturating_add(added_hook).clamp(0, 255) / 2
     } else {
         0
     };
     let chance = clamp_percent(fishing.chance_percent + random_bonus + flexibility_bonus);
-    i32::try_from(deterministic_roll(
-        tick,
-        usize::try_from(object_id).unwrap_or_default(),
-        CRYSTAL_FISHING_REEL_SUCCESS_SALT,
-        100,
-    ))
-    .expect("fishing reel roll should fit i32")
-        <= chance
+    fishing_draw(world, FishingRoll::ReelSuccess, 0, 100) <= chance
 }
 
 fn award_fishing_loot(world: &mut World) -> Result<FishingReelOutcome, String> {
@@ -907,14 +967,41 @@ fn spawn_points_contains(points: &[Point], point: &Point) -> bool {
 }
 
 fn fishing_cast_success_percent(world: &World, bait_success_bonus: i32) -> i32 {
+    let mut success_stat = clamp_signed_byte(equipped_fishing_rod_stat(world, CRYSTAL_STAT_MAX_AC));
+    success_stat = clamp_signed_byte(success_stat.saturating_add(bait_success_bonus));
+    let reel_success = fishing_slot_template_stat(world, FISHING_SLOT_REEL, CRYSTAL_STAT_MAX_AC);
+    success_stat = clamp_signed_byte(success_stat.saturating_add(reel_success));
+    let rate = player_stats(world).get(CRYSTAL_STAT_FISH_RATE_PERCENT);
     clamp_percent(
-        CRYSTAL_FISHING_SUCCESS_START_PERCENT
-            + equipped_fishing_rod_stat(world, CRYSTAL_STAT_MAX_AC)
-            + bait_success_bonus
-            + fishing_slot_stat(world, FISHING_SLOT_REEL, CRYSTAL_STAT_MAX_AC)
-            + fishing_retry_success_bonus(world)
-            + current_fish_rate_percent(world),
+        (CRYSTAL_FISHING_SUCCESS_START_PERCENT + success_stat)
+            .saturating_add(fishing_retry_success_bonus(world))
+            .saturating_add(rate),
     )
+}
+
+fn clamp_signed_byte(value: i32) -> i32 {
+    value.clamp(i32::from(i8::MIN), i32::from(i8::MAX))
+}
+
+fn fishing_byte_range(world: &World, roll: FishingRoll, min: i32, max: i32) -> i32 {
+    fishing_draw(world, roll, min.clamp(0, 255), max.clamp(0, 255))
+}
+
+fn fishing_draw(world: &World, roll: FishingRoll, min: i32, max: i32) -> i32 {
+    if min >= max {
+        return min;
+    }
+    let upper = (max - min) as u64;
+    let threshold = upper.wrapping_neg() % upper;
+    let rolls = &world.resource::<FishingResource>().rolls;
+    let tick = runtime_tick(world);
+    for retry in 0_u64.. {
+        let draw = rolls.hash_one((roll, tick, retry));
+        if draw >= threshold {
+            return min + (draw % upper) as i32;
+        }
+    }
+    unreachable!("fishing random range exhausted")
 }
 
 fn fishing_retry_success_bonus(world: &World) -> i32 {
@@ -922,10 +1009,11 @@ fn fishing_retry_success_bonus(world: &World) -> i32 {
     if chance_counter <= 0 {
         return 0;
     }
-    let finder_min = fishing_slot_stat(world, FISHING_SLOT_FINDER, CRYSTAL_STAT_MIN_AC);
-    let finder_max = fishing_slot_stat(world, FISHING_SLOT_FINDER, CRYSTAL_STAT_MAX_AC);
-    chance_counter.saturating_mul(CRYSTAL_FISHING_SUCCESS_COUNTER_MULTIPLIER)
-        + finder_min.max(finder_max)
+    let min = fishing_slot_template_stat(world, FISHING_SLOT_FINDER, CRYSTAL_STAT_MIN_AC);
+    let max = fishing_slot_template_stat(world, FISHING_SLOT_FINDER, CRYSTAL_STAT_MAX_AC);
+    chance_counter
+        .saturating_mul(CRYSTAL_FISHING_SUCCESS_COUNTER_MULTIPLIER)
+        .saturating_add(fishing_byte_range(world, FishingRoll::FinderBonus, min, max))
 }
 
 fn equipped_fishing_rod_stat(world: &World, stat: u8) -> i32 {
@@ -934,51 +1022,28 @@ fn equipped_fishing_rod_stat(world: &World, stat: u8) -> i32 {
         .equipment_items
         .iter()
         .find(|equipment| equipment_is_fishing_rod(equipment))
-        .map(|equipment| equipment_state_stat(equipment, stat))
-        .unwrap_or_default()
+        .and_then(|equipment| crystal_item_template_for_item_key(&equipment.key))
+        .map_or(0, |template| crystal_template_stat(&template, stat))
 }
 
-fn current_fish_rate_percent(world: &World) -> i32 {
-    world
-        .resource::<InventoryResource>()
-        .equipment_items
-        .iter()
-        .map(|equipment| equipment_state_stat(equipment, CRYSTAL_STAT_FISH_RATE_PERCENT))
-        .sum()
-}
-
-fn fishing_slot_stat(world: &World, slot: usize, stat: u8) -> i32 {
+fn fishing_slot_template_stat(world: &World, slot: usize, stat: u8) -> i32 {
     let Some(expected_type) = fishing_slot_expected_item_type(slot) else {
         return 0;
     };
     fishing_slot_item_of_type(world, slot, expected_type)
-        .map(|item| item_state_stat(item, stat))
-        .unwrap_or_default()
+        .map_or(0, |item| fishing_item_template_stat(world, item, stat))
 }
 
-fn equipment_state_stat(equipment: &EquipmentState, stat: u8) -> i32 {
-    let template_stats = crystal_item_template_for_item_key(&equipment.key)
-        .map(|template| crystal_template_stat(&template, stat))
-        .unwrap_or_default();
-    let added = user_item_stat_total(&equipment.added_stats, stat);
-    let legacy_added = match stat {
-        CRYSTAL_STAT_MAX_AC => equipment.added_defence,
-        _ => 0,
+fn fishing_item_template_stat(world: &World, item: &ItemState, stat: u8) -> i32 {
+    let Some(template) = crystal_item_template_for_item_key(&item.key) else {
+        return 0;
     };
-    template_stats + added + legacy_added
-}
-
-fn item_state_stat(item: &ItemState, stat: u8) -> i32 {
-    let template_stats = crystal_item_template_for_item_key(&item.key)
-        .map(|template| crystal_template_stat(&template, stat))
-        .unwrap_or_default();
-    let added = user_item_stat_total(&item.added_stats, stat);
-    let legacy_added = match stat {
-        CRYSTAL_STAT_MAX_AC => item.added_defence,
-        CRYSTAL_STAT_MAX_DC => item.added_attack,
-        _ => 0,
+    let Some(character) = world.resource::<SessionResource>().selected_character.as_ref() else {
+        return crystal_template_stat(&template, stat);
     };
-    template_stats + added + legacy_added
+    let real =
+        mir2_game_data::crystal_real_item_for_player(&template, character.level, character.class);
+    crystal_template_stat(&real, stat)
 }
 
 fn crystal_template_stat(template: &CrystalItemTemplate, stat: u8) -> i32 {

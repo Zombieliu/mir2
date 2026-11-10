@@ -64,8 +64,31 @@ Windows 源码锁定的优化构建用实际动作回包及原始素材核对水
 
 相邻仓库和组队门禁脚本在基线 `811260f` 与本候选均有相同五项失败，原始日志散列和用例名已记录。 [回归记录](ordered-bite-and-recast.json)
 
+## 原版抛竿节奏与概率
+
+Crystal `PlayerObject.Process` 在到期后增加尝试次数，`UpdateFish` 设置下一次 200 毫秒的期限。`FishingCast` 首步用 750 毫秒加服务端附加延时。比奇候选每竿默认 30 次显示满进度，第 31 次按原版发送 103% 后结束。网关通过独立会话计时唤醒权威逻辑，原来的个人维护节奏继续处理战斗和补给。普通浏览器、Windows WebSocket 和 Crystal TCP 共用相同的服务端规则。Hosted 使用新的内部计时命令，网关和 Owner 需按同版本发布。 [源码散列和候选构建](crystal-cadence.json)
+
+Float 的咬钩、Reel 的 MaxMAC 自动收线、实际收获各自判定。三秒后原咬钩清除，同一竿不再出现第二次咬钩。原配 FishingReel 和 PremiumReel 都缺 MaxMAC，开启 Auto 后通过耗尽才续抛。正值线轮的提前自动收线由定向夹具覆盖，续抛后沿用原版 `UpdateFish` 的 200 毫秒覆盖。普通手动收线取消该竿续抛，已经开启的 Auto 开关继续有效。真实渔获和失败后的 Finder 随机加成有定向测试。
+
+两条生产 Web 渲染路径都收到完整的 31 步。默认 WebGPU 的自动续抛首步约 740 毫秒，WebGL2 配置额外 350 毫秒后约 1,089 毫秒。两者自然观测到咬钩过期约 3.001 秒和 3.031 秒，均实点原图按钮并退出再登录。双客户端确认旁观者只收到起止状态，另走原始二进制 TCP 复验 31 步和扣费。两个浏览器正式回合各扣两份鱼饵及相同鱼钩、鱼竿耐久，落盘与重登读回一致。 [WebGPU](crystal-cadence-webgpu.png) · [WebGL2](crystal-cadence-webgl2.png) · [时间、包序和存档](crystal-cadence.json)
+
+首次并行 WebGPU 在第 8 竿的早期咬钩遇到 1.7 秒按钮等待超时，记录保留。随后两轮独立复验通过，连续 8 次续抛后也实际收线并读回 9 竿消耗。长循环复测的最后一次咬钩出现在 16%，与先前的 6% 不同。继续复验这个早期组合、Windows 窗口、跨视野水效和 Hosted 链路。现行 R16 每次有效抛竿扣一次鱼钩，Crystal 另有收线时鱼钩和 Finder 磨损分支，留作下一项核对。 [各轮回执散列](crystal-cadence.json)
+
+从项目根目录运行定向回归。浏览器和双客户端使用比奇 `(342,244)` 岸边角色的隔离 File 副本，保留原档。两项旧测试夹具与 Crystal 当前变身初值及唯一角色名对齐，历史失败日志仍保存在本轮回执目录。
+
+```sh
+cargo test --locked -p mir2-simulation fishing
+cargo test --locked -p mir2-simulation --test fishing_transform --test shared_zone --test security_lifecycle
+cargo test --locked -p mir2-gateway --lib fishing
+cargo test --locked -p mir2-gateway --lib delayed_zone_movement_reaches_idle_tcp_client
+node --test apps/web/scripts/test-world-fishing-feedback.mjs apps/web/scripts/test-entity-death-animation.mjs
+node apps/web/scripts/build-client-core.mjs --verify
+```
+
 ## 公网扫码分段复验
 
 公网 `/version` 读回 `f2de762309`。直连桌面成功显示二维码并轮询待确认，官方钱包手机尺寸页面返回 200。明确经本机代理时，桌面出码请求约 12 秒中止。另一次新建隔离测试网钱包的全直连试验，钱包加载中继会话约 22 秒超时，停在签名前，游戏账号和角色均未创建。独立探测同一中继，直连连接重置，代理返回 200。此前同版本的实际签名进比奇证据继续保留为历史，本次完整公网复验仍开放。 [公网入口](https://numeron.obelisk.build/game) · [脱敏回执](public-qr-readback.json) · [此前完整链路](../numeron-web-release-20261108/wallet-qr-incident-readback.json)
 
 后续公网 `83eadf4f` 使用第一方中继完成直连签名、兑换、比奇渲染和正常退出。默认网络的冷启动结果单列。 [后续发布及验收](../numeron-web-release-20261108/qr-first-party-relay-20261110.json)
+
+本轮公网 `a23cc382` 默认网络新 Chrome 会话分别用简中和繁中重新验证首点出码、待确认轮询和正常取消。游戏与第一方中继在线。独立比奇候选的生产构建与恢复验收已记录，当前凭证发布入口缺必要审核。切换后继续签名进城与实体手机验收。 [冷启动回执](crystal-cadence.json) · [比奇发布候选](../numeron-web-release-20261108/first-scene-release-candidate-20261110.json)

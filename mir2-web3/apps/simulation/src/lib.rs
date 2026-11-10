@@ -28,6 +28,8 @@ pub use npc_purchase_owner::{
 pub mod user_item_uid;
 pub mod user_item_uid_postgres;
 mod world_runtime;
+pub const CRYSTAL_FISHING_STEP: std::time::Duration = std::time::Duration::from_millis(200);
+pub const CRYSTAL_FISHING_CAST_DELAY: std::time::Duration = std::time::Duration::from_millis(750);
 pub use config::zone_economy_fence::ZoneEconomyWritePermit;
 pub use config::zone_save_fence::ZoneSaveFence;
 pub use config::zone_save_operation::{

@@ -167,6 +167,7 @@ pub struct GatewaySession {
     zone_owner_command_client: SharedZoneOwnerCommandClient,
     zone_owner_heartbeat_interval_ms: Option<u64>,
     next_zone_owner_heartbeat_at_ms: u64,
+    fishing_clock: crate::fishing_clock::FishingClock,
     runtime: ZoneRuntimeHandle,
     gameplay_event_publisher: Option<GatewayGameplayEventPublisher>,
     routing_context: Option<GatewaySessionRoutingContext>,
@@ -240,6 +241,14 @@ impl fmt::Debug for GatewaySession {
 }
 
 impl GatewaySession {
+    pub(crate) fn next_fishing_wake(&self) -> Option<Instant> {
+        self.fishing_clock.next_wake()
+    }
+
+    pub(crate) fn defer_fishing_wake(&mut self, now: Instant) {
+        self.fishing_clock.defer(now);
+    }
+
     pub(crate) fn execute_procurement_owner(
         &mut self,
         authenticated: bool,
@@ -377,6 +386,7 @@ impl GatewaySession {
             zone_owner_command_client,
             zone_owner_heartbeat_interval_ms: None,
             next_zone_owner_heartbeat_at_ms: 0,
+            fishing_clock: Default::default(),
             runtime,
             gameplay_event_publisher: None,
             routing_context: None,
@@ -1479,6 +1489,7 @@ impl GatewaySession {
                 WorldCommand::NativeGameShopPurchase(_) | WorldCommand::NativeGameShopGift(_)
             );
         let may_change_map = command_may_change_map(request.command());
+        let fishing_input = crate::fishing_clock::FishingClockInput::from(request.command());
         let previous_snapshot = if may_change_map && self.active_identity().is_some() {
             Some(self.world_snapshot())
         } else {
@@ -1492,6 +1503,19 @@ impl GatewaySession {
                 .execute(&mut self.runtime, request)?
         };
         self.publish_gameplay_event(&execution);
+        if execution.outcome.active_identity != self.active_identity_binding {
+            self.fishing_clock.clear();
+        }
+        let first_delay = self.routing_context.as_ref().map_or(
+            mir2_simulation::CRYSTAL_FISHING_CAST_DELAY,
+            |routing| routing.config.crystal_fishing_cast_delay(),
+        );
+        self.fishing_clock.observe(
+            fishing_input,
+            &execution.packets,
+            Instant::now(),
+            first_delay,
+        );
         self.active_identity_binding = execution.outcome.active_identity.clone();
         self.refresh_global_message_identity(execution.outcome.active_identity.as_ref());
         if may_change_map {

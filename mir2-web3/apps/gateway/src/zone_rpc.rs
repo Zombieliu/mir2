@@ -7267,6 +7267,7 @@ enum WireWorldCommand {
         snapshot: Box<ZoneBaseSnapshot>,
     },
     Tick,
+    TickFishing,
 }
 
 impl WireWorldCommand {
@@ -7370,6 +7371,7 @@ impl WireWorldCommand {
                 unique_id,
             },
             WorldCommand::Tick => Self::Tick,
+            WorldCommand::TickFishing => Self::TickFishing,
         })
     }
 
@@ -7476,6 +7478,7 @@ impl WireWorldCommand {
                 ));
             }
             Self::Tick => WorldCommand::Tick,
+            Self::TickFishing => WorldCommand::TickFishing,
         })
     }
 }
@@ -9943,12 +9946,23 @@ mod typed_game_shop_rpc_tests {
             );
         }
         assert_eq!(correlated_mutation_policy(&WorldCommand::Tick), None);
+        assert_eq!(correlated_mutation_policy(&WorldCommand::TickFishing), None);
         assert_eq!(
             correlated_mutation_policy(&WorldCommand::ClientPacket(ClientPacket::KeepAlive {
                 time: 0
             })),
             None
         );
+    }
+
+    #[test]
+    fn fishing_tick_round_trips_only_as_an_internal_owner_command() {
+        let command = WireWorldCommand::from_world(WorldCommand::TickFishing).unwrap();
+        let wire = serde_json::to_vec(&command).unwrap();
+        let received: WireWorldCommand = serde_json::from_slice(&wire).unwrap();
+        let decoded = received.into_world().unwrap();
+        assert!(matches!(decoded, WorldCommand::TickFishing));
+        assert!(mir2_simulation::validate_production_player_command(true, &decoded).is_err());
     }
 
     #[test]

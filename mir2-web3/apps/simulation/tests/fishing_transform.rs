@@ -94,14 +94,15 @@ fn fishing_transform_snapshot_preserves_missing_and_signed_raw_values() {
 }
 
 #[test]
-fn fishing_transform_zone_getter_distinguishes_absence_join_zero_and_leave() {
+fn fishing_transform_zone_getter_distinguishes_absence_join_sentinel_and_leave() {
     let mut zone =
         ZoneRuntime::new_with_collision(ZoneKey::for_map("0"), ZoneCollision::unbounded());
     let session = SessionId::new("owner");
     assert_eq!(zone.player_transform_type(&session), None);
     zone.handle(ZoneCommand::Join(join("owner", 101, 330)));
-    // This observes the existing retained join value; no normal form is inferred.
-    assert_eq!(zone.player_transform_type(&session), Some(0));
+    // Crystal initializes an untransformed player to -1. A real transform 0
+    // is covered separately by the broadcast/readback test below.
+    assert_eq!(zone.player_transform_type(&session), Some(-1));
     zone.handle(ZoneCommand::Leave {
         session_id: session.clone(),
     });
@@ -142,7 +143,7 @@ fn fishing_transform_zone_reads_updates_and_remote_spawn_from_the_same_raw_state
         now_ms: 10,
     });
     assert_eq!(zone.player_transform_type(&owner), Some(i16::MAX));
-    assert_eq!(zone.player_transform_type(&observer), Some(0));
+    assert_eq!(zone.player_transform_type(&observer), Some(-1));
     let late = SessionId::new("late");
     let spawns = zone.handle(ZoneCommand::Join(join("late", 103, 334)));
     assert!(has_packet(&spawns, &late, |packet| matches!(packet,

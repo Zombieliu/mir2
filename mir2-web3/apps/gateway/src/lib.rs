@@ -13,6 +13,7 @@ pub mod consensus_log;
 pub mod control_plane;
 pub mod economy;
 pub mod events;
+mod fishing_clock;
 pub mod gate14;
 pub mod gate15;
 pub mod guild_clock;

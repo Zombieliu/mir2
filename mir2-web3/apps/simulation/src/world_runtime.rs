@@ -175,6 +175,8 @@ pub enum WorldCommand {
         unique_id: u64,
     },
     Tick,
+    /// Host timer for a personal cast. Does not advance the world clock.
+    TickFishing,
 }
 
 pub fn validate_production_player_command(
@@ -202,6 +204,7 @@ pub fn validate_production_player_command(
         WorldCommand::Stage5Command { .. } => {
             Err("Stage5Command is not allowed on the production player path".to_string())
         }
+        WorldCommand::TickFishing => Err("fishing timers are internal to the server".to_string()),
         WorldCommand::GrantOnchainOre { .. } | WorldCommand::CreditGoldFromOre { .. } => Err(
             "on-chain command injection is not allowed on the production player path".to_string(),
         ),
@@ -324,7 +327,7 @@ impl WorldCommand {
             Self::BillingRefresh { .. }
             | Self::BillingBuyMonthlyCard { .. }
             | Self::BillingActivateMonthlyCard { .. } => WorldCommandKind::Billing,
-            Self::Tick => WorldCommandKind::Tick,
+            Self::Tick | Self::TickFishing => WorldCommandKind::Tick,
         }
     }
 
@@ -337,7 +340,7 @@ impl WorldCommand {
                     | ClientPacket::Turn { .. }
                     | ClientPacket::Walk { .. }
                     | ClientPacket::Run { .. }
-            ) | Self::Tick
+            ) | Self::Tick | Self::TickFishing
         )
     }
 }
@@ -1806,6 +1809,7 @@ impl WorldRuntime for InProcessWorldRuntime {
                 Vec::new()
             }
             WorldCommand::Tick => self.session.tick(),
+            WorldCommand::TickFishing => self.session.tick_fishing(),
             WorldCommand::BillingRefresh { character_index } => {
                 if let Some(identity) = self.session.active_identity() {
                     if identity.character_index != character_index {
