@@ -1,5 +1,6 @@
 "use client";
 
+import type { R16EntrySpriteImages } from "../../lib/r16-entry-scene";
 import { crystalEntityDepth } from "../../lib/crystal-world-depth";
 
 import { Fragment, memo, useEffect, useRef, useState, type CSSProperties } from "react";
@@ -134,6 +135,7 @@ type ViewportMapLight = {
 };
 
 type EntitySpriteLayersProps = {
+  packedActors: R16EntrySpriteImages | null;
   useBevyEntityRenderer: boolean;
   effectsEnabled: boolean;
   sprite: ViewportEntitySprite | null;
@@ -151,6 +153,7 @@ const EntitySpriteLayers = memo(function EntitySpriteLayers({
   effectsEnabled,
   sprite,
   objectId,
+  packedActors,
 }: EntitySpriteLayersProps) {
   return (
     <>
@@ -188,7 +191,8 @@ const EntitySpriteLayers = memo(function EntitySpriteLayers({
       {!useBevyEntityRenderer && sprite?.body ? (
         <img
           className="entity-sprite-layer body"
-          src={originalAssetPath(sprite.body.path)}
+          src={packedActors?.[sprite.body.path] ?? originalAssetPath(sprite.body.path)}
+          data-mir2-packed-asset={packedActors?.[sprite.body.path] ? "true" : undefined}
           alt=""
           draggable={false}
           data-mir2-original-src={originalAssetPath(sprite.body.path)}
@@ -205,7 +209,8 @@ const EntitySpriteLayers = memo(function EntitySpriteLayers({
       {!useBevyEntityRenderer && sprite?.hair ? (
         <img
           className="entity-sprite-layer hair"
-          src={originalAssetPath(sprite.hair.path)}
+          src={packedActors?.[sprite.hair.path] ?? originalAssetPath(sprite.hair.path)}
+          data-mir2-packed-asset={packedActors?.[sprite.hair.path] ? "true" : undefined}
           alt=""
           draggable={false}
           data-mir2-original-src={originalAssetPath(sprite.hair.path)}
@@ -527,6 +532,8 @@ function OriginalClientSceneVisualLayersInner({
   selectedEntity,
   viewportGroundDrops,
   viewportMapSprites,
+  packedObjects,
+  packedActors,
   viewportEntitySprites,
   viewportProjectiles,
   viewportDepthPlayer,
@@ -554,6 +561,8 @@ function OriginalClientSceneVisualLayersInner({
   selectedEntity: DisplayEntity | null;
   viewportGroundDrops: ViewportGroundDrop[];
   viewportMapSprites: ViewportMapSprites;
+  packedObjects: R16EntrySpriteImages | null;
+  packedActors: R16EntrySpriteImages | null;
   viewportEntitySprites: ViewportEntitySpriteEntry[];
   viewportProjectiles: ViewportProjectile[];
   viewportDepthPlayer: Pick<DisplayEntity, "x" | "y">;
@@ -818,13 +827,15 @@ function OriginalClientSceneVisualLayersInner({
         {viewportMapSprites.objects.map((sprite) => {
           const blendMode = resolvedMapSpriteBlendMode(sprite);
           const renderPath = mapSpriteRenderPath(sprite.path);
+          const packedPath = packedObjects?.[renderPath];
           // Tall additive beams need a brighter curve than compact torch glows.
           const isBlendColumn = Boolean(blendMode && sprite.width <= 64 && sprite.height >= 180);
           return (
             <img
-              key={sprite.key}
+              key={packedPath ? sprite.key + ":packed" : sprite.key}
               className="scene-map-object-sprite"
-              src={renderPath}
+              src={packedPath ?? renderPath}
+              data-mir2-packed-asset={packedPath ? "true" : undefined}
               alt=""
               draggable={false}
               data-map-sprite-path={sprite.path}
@@ -901,6 +912,7 @@ function OriginalClientSceneVisualLayersInner({
               <EntitySpriteLayers
                 useBevyEntityRenderer={useBevyEntityRenderer}
                 effectsEnabled={effectsEnabled}
+                packedActors={packedActors}
                 sprite={sprite}
                 objectId={entity.objectId}
               />

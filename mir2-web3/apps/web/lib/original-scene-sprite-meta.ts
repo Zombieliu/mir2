@@ -53,6 +53,7 @@ type OriginalSceneSpriteLibraryKeyIndex = {
 export type OriginalSceneSpriteLibraryMeta = OriginalSceneSpriteLibraryPayload & {
   frameSet: OriginalSceneFrameSet | null;
   frameMap: Map<number, OriginalSceneSpriteFrameMeta>;
+  startupFramesOnly?: true;
 };
 
 type OriginalSceneFrameSetCatalog = {
@@ -124,7 +125,10 @@ export function loadOriginalSceneSpriteLibrary(
       }
 
       const payload = (await response.json()) as OriginalSceneSpriteLibraryPayload;
-      const frameSet = normalizeFrameSet(payload.frameSet) ?? await loadCatalogFrameSet(normalizedKey);
+      // Crystal player layers use their shared player action table. Their
+      // sprite libraries have no corresponding entries in the global catalog.
+      const frameSet = normalizeFrameSet(payload.frameSet) ??
+        (/^(?:CArmour|CHair|CWeapon)\//.test(normalizedKey) ? null : await loadCatalogFrameSet(normalizedKey));
       const library = {
         ...payload,
         frameSet,

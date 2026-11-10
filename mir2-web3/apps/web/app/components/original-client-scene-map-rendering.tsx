@@ -11,7 +11,7 @@ import {
   mapAtlasRectKeyForPath,
 } from "../../lib/map-atlas-manifest";
 import type { OriginalMapRegion, OriginalMapSpriteFrame } from "../../lib/scene-types";
-import type { R16EntryFloor } from "../../lib/r16-entry-scene";
+import type { R16EntrySpriteImages } from "../../lib/r16-entry-scene";
 import {
   alphaKeyMapObjectPixels,
   keyMapObjectImageOffThread,
@@ -68,7 +68,7 @@ function GameSceneBackdropInner({
   world: DisplayWorld;
   player: DisplayEntity | null;
   floorSprites: ViewportMapSprite[];
-  packedFloor: R16EntryFloor | null;
+  packedFloor: R16EntrySpriteImages | null;
   cameraOffset: ViewportOffset;
   viewportLayout?: ViewportLayout;
   imperativeCamera?: boolean;
@@ -707,7 +707,8 @@ export function handleSceneAssetImageError(event: SyntheticEvent<HTMLImageElemen
   }
 
   image.dataset.mir2OriginalSrc = originalSrc;
-  if (image.dataset.mir2PackedFloor === "true" && image.getAttribute("src")?.startsWith("data:")) {
+  if ((image.dataset.mir2PackedFloor === "true" || image.dataset.mir2PackedAsset === "true") &&
+      image.getAttribute("src")?.startsWith("data:")) {
     clearSceneAssetRetryState(image);
     image.src = originalSrc;
     return;

@@ -598,8 +598,9 @@ function frameMetaForIndexWithFallback(
   frameIndex: number,
   fallbackFrameIndex: number | null,
 ) {
+  const exact = frameMetaForIndex(library, frameIndex);
+  if (exact || library?.startupFramesOnly) return exact;
   return (
-    frameMetaForIndex(library, frameIndex) ??
     (fallbackFrameIndex === null ? null : frameMetaForIndex(library, fallbackFrameIndex)) ??
     library?.frames[0] ??
     null

@@ -254,6 +254,7 @@ const entryBytes = readFileSync(new URL(`../public${entryMetadata.path}`, import
 const entryRequest = { ...entryMetadata.request, assetReleaseId: entryMetadata.assetReleaseId };
 const floorMetadata = JSON.parse(readFileSync(new URL("../lib/generated/r16-entry-floor.json", import.meta.url), "utf8"));
 const floorBytes = readFileSync(new URL("../public" + floorMetadata.path, import.meta.url));
+const visualsMetadata = JSON.parse(readFileSync(new URL("../lib/generated/r16-entry-visuals.json", import.meta.url), "utf8"));
 const entrySource = ts.transpileModule(readFileSync(new URL("../lib/r16-entry-scene.ts", import.meta.url), "utf8"), {
   compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 },
 }).outputText;
@@ -272,6 +273,7 @@ function entryFixture(fetcher) {
   const requireEntry = name => {
     if (name === "./generated/r16-entry-scene.json") return { default: entryMetadata };
     if (name === "./generated/r16-entry-floor.json") return { default: floorMetadata };
+    if (name === "./generated/r16-entry-visuals.json") return { default: visualsMetadata };
     assert.equal(name, "./scene-blueprint-request");
     return loadedModule.exports;
   };
@@ -316,6 +318,30 @@ test("the entry floor preload is shared only for the pinned release", async () =
   assert.equal(calls.length, 1);
   assert.equal(calls[0].url, floorMetadata.path);
   assert.equal(calls[0].options.credentials, "omit");
+});
+
+test("object and actor assets load independently and publish only pinned bytes", async () => {
+  const objectBytes = readFileSync(new URL("../public" + visualsMetadata.objects.path, import.meta.url));
+  const actorBytes = readFileSync(new URL("../public" + visualsMetadata.actors.path, import.meta.url));
+  const wrong = Buffer.from(objectBytes);
+  wrong[50] ^= 1;
+  const calls = [];
+  const entry = entryFixture(async (url, options) => {
+    calls.push({ url, options });
+    return new Response(url === visualsMetadata.actors.path ? actorBytes : wrong);
+  });
+  assert.equal(entry.preloadR16EntryObjects(undefined), null);
+  assert.equal(entry.preloadR16EntryActors("other"), null);
+  const actorLoad = entry.preloadR16EntryActors(entryMetadata.assetReleaseId);
+  assert.equal(entry.preloadR16EntryActors(entryMetadata.assetReleaseId), actorLoad);
+  const objectLoad = entry.preloadR16EntryObjects(entryMetadata.assetReleaseId);
+  const actorPack = await actorLoad;
+  assert.equal(actorPack.libraries["CArmour/00"].frames.length, 160);
+  assert.match(actorPack.images["/original-ui/CArmour/00/44.png"], /^data:image\/png;base64,/);
+  assert.equal(await objectLoad, null);
+  assert.equal(calls.length, 2);
+  assert.equal(calls[1].url, visualsMetadata.objects.path);
+  assert.equal(calls[1].options.priority, "low");
 });
 
 test("corrupt floor bytes are never published and the prefetch can retry", async () => {

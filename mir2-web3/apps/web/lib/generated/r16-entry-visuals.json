@@ -1,0 +1,15 @@
+{
+  "assetReleaseId": "20261108-r16-08ec86d5105c",
+  "sceneSha256": "5c08d1fd4e81d92a7be20eb98c4c6288515749d5d459978dcf78fe2b86bdf325",
+  "mapFileName": "0.map",
+  "objects": {
+    "path": "/bootstrap/r16-visuals/79d26b7b9f3d03e679305b8e9e0982312825ef2fffdec50d976ce930e152e4fe.json",
+    "bytes": 1185944,
+    "sha256": "79d26b7b9f3d03e679305b8e9e0982312825ef2fffdec50d976ce930e152e4fe"
+  },
+  "actors": {
+    "path": "/bootstrap/r16-visuals/1427115a4db370cd3efdf21e10c156a772410250b131ac6b907948b72cba8895.json",
+    "bytes": 885989,
+    "sha256": "1427115a4db370cd3efdf21e10c156a772410250b131ac6b907948b72cba8895"
+  }
+}

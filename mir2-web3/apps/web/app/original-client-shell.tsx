@@ -3,7 +3,10 @@ import { crystalEntityDepth, crystalEntityLayerDepth } from "../lib/crystal-worl
 import { pickCrystalActor, sampleCrystalBodyPixel, warmCrystalBodyPixels, type CrystalBodyFrame } from "../lib/crystal-actor-hit";
 import { useWindowKeydown } from "../lib/use-window-keydown";
 import { guildKeyboardOwnsEvent } from "../lib/r16-guild-keyboard";
-import { preloadR16EntryFloor, R16_ENTRY_FLOOR_MAP, type R16EntryFloor } from "../lib/r16-entry-scene";
+import {
+  preloadR16EntryActors, preloadR16EntryFloor, preloadR16EntryObjects, R16_ENTRY_FLOOR_MAP,
+  type R16EntryActorAssets, type R16EntrySpriteImages,
+} from "../lib/r16-entry-scene";
 import { CharacterPointerRouter } from "../lib/bevy-character-ui";
 import { SpellsPointerRouter } from "../lib/bevy-spells-ui";
 import { MailPointerRouter,type MailPointerContext,type MailPointerEdge } from "../lib/bevy-mail-ui";
@@ -1907,6 +1910,33 @@ export function OriginalClientShell({
     ],
   );
 
+  const [entryFloor, setEntryFloor] = useState<R16EntrySpriteImages | null>(null);
+  const [entryObjects, setEntryObjects] = useState<R16EntrySpriteImages | null>(null);
+  const [entryActors, setEntryActors] = useState<R16EntryActorAssets | null>(null);
+  useEffect(() => {
+    if (screen !== "openingLogin" && screen !== "select" && screen !== "game") return;
+    const release = process.env.MIR2_PINNED_ASSET_VERSION;
+    let current = true;
+    void preloadR16EntryFloor(release)?.then((images) => { if (current) setEntryFloor(images); });
+    void preloadR16EntryActors(release)?.then((assets) => { if (current) setEntryActors(assets); });
+    void preloadR16EntryObjects(release)?.then((images) => { if (current) setEntryObjects(images); });
+    return () => { current = false; };
+  }, [screen]);
+  const entryMap = world.originalMapRegion?.mapFileName === R16_ENTRY_FLOOR_MAP;
+  const packedFloor = entryMap ? entryFloor : null;
+  const packedObjects = entryMap ? entryObjects : null;
+  const packedActors = entryMap ? entryActors?.images ?? null : null;
+  const entryActorLibraries = useMemo(() => entryActors && Object.fromEntries(
+    Object.entries(entryActors.libraries).map(([key, library]) => [key, {
+      ...library,
+      frameMap: new Map(library.frames.map((frame) => [frame.index, frame])),
+      startupFramesOnly: true as const,
+    }]),
+  ), [entryActors]);
+  const renderSpriteLibraries = useMemo(() =>
+    entryMap && entryActorLibraries ? { ...entryActorLibraries, ...sceneSpriteLibraries } : sceneSpriteLibraries,
+  [entryMap, entryActorLibraries, sceneSpriteLibraries]);
+
   const desiredSceneSpriteLibraryKeys = useMemo(() => {
     const libraries = new Set<string>();
     if (screen !== "game") {
@@ -2171,7 +2201,7 @@ export function OriginalClientShell({
         animationPose,
         sprite: buildViewportEntitySprite(
           entity,
-          sceneSpriteLibraries,
+          renderSpriteLibraries,
           sceneSpriteFrameIndex,
           spriteNow,
           animationState,
@@ -2181,7 +2211,7 @@ export function OriginalClientShell({
         ),
       };
     });
-  }, [animationWorldKey, entityAnimationInputs, sceneSpriteLibraries, sceneSpriteFrameIndex]);
+  }, [animationWorldKey, entityAnimationInputs, renderSpriteLibraries, sceneSpriteFrameIndex]);
   const viewportActorBodies = useMemo(() => new Map(viewportEntitySprites.map(({ entity, sprite }) =>
     [entity.objectId, sprite?.body ?? null])), [viewportEntitySprites]);
   const viewportGroundDrops = player
@@ -2610,7 +2640,7 @@ export function OriginalClientShell({
     // `viewportEntitySprites` also changes for animation-only frame ticks. Its complete
     // preload-frame coverage is exactly why it is intentionally not a dependency.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [useGpuEntityRenderer, useBevyEntityAtlas, viewportEntities, sceneSpriteLibraries],
+    [useGpuEntityRenderer, useBevyEntityAtlas, viewportEntities, renderSpriteLibraries],
   );
   const bevyEntityAtlasKey = useMemo(
     () =>
@@ -3265,18 +3295,6 @@ export function OriginalClientShell({
     };
   }
   const showSyntheticScene = screen === "game" && !world.originalMapRegion;
-  const [entryFloor, setEntryFloor] = useState<R16EntryFloor | null>(null);
-  useEffect(() => {
-    if (screen !== "openingLogin" && screen !== "select" && screen !== "game") return;
-    const pending = preloadR16EntryFloor(process.env.MIR2_PINNED_ASSET_VERSION);
-    if (!pending) return;
-    let current = true;
-    void pending.then((images) => {
-      if (current) setEntryFloor(images);
-    });
-    return () => { current = false; };
-  }, [screen]);
-  const packedFloor = world.originalMapRegion?.mapFileName === R16_ENTRY_FLOOR_MAP ? entryFloor : null;
   const sceneAssetUrlsRef = useRef<string[]>([]);
   sceneAssetUrlsRef.current = useMemo(
     () =>
@@ -3287,6 +3305,8 @@ export function OriginalClientShell({
           || !activeBevyEntityAtlasCoversAllSources || !webGl2EntityTextureReady,
         includeEntityPreloadPaths: !hideDomEntitySpritesForBevy,
         packedFloor,
+        packedObjects,
+        packedActors,
         viewportLayout,
       }),
     // Map/player/entity changes replace these stable inputs. Animation-only
@@ -3304,6 +3324,8 @@ export function OriginalClientShell({
       activeBevyEntityAtlasCoversAllSources,
       webGl2EntityTextureReady,
       packedFloor,
+      packedObjects,
+      packedActors,
       viewportLayout,
     ],
   );
@@ -3332,7 +3354,7 @@ export function OriginalClientShell({
       const visible = new Set(sceneAssetUrlsRef.current);
       const ringUrls = Array.from(
         new Set([
-          ...ring.objects.map((sprite) => mapSpriteRenderPath(sprite.path)),
+          ...ring.objects.map((sprite) => mapSpriteRenderPath(sprite.path)).filter((path) => !packedObjects?.[path]),
           ...ring.floor.filter((sprite) => !packedFloor?.[sprite.path]).map((sprite) => sprite.path),
         ]),
       ).filter((url) => !visible.has(url));
@@ -3363,7 +3385,7 @@ export function OriginalClientShell({
     };
     // Re-run only on player-cell / map / screen change (not every animation tick).
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [renderPlayer?.x, renderPlayer?.y, world.originalMapRegion, screen, packedFloor, viewportLayout]);
+  }, [renderPlayer?.x, renderPlayer?.y, world.originalMapRegion, screen, packedFloor, packedObjects, viewportLayout]);
   const [sceneAssetPreloadReadiness, setSceneAssetPreloadReadiness] =
     useState<SceneAssetReadiness | null>(null);
   // True once the safety-valve window elapses with the scene up but readiness unresolved.
@@ -3523,7 +3545,7 @@ export function OriginalClientShell({
     return () => {
       disposed = true;
     };
-  }, [screen, sceneAssetReadinessKey, sceneSpriteLibrariesReady, packedFloor]);
+  }, [screen, sceneAssetReadinessKey, sceneSpriteLibrariesReady, packedFloor, packedObjects, packedActors]);
 
   // Safety-valve timer: arm when the scene is up; if readiness hasn't cleared the
   // overlay within SCENE_READINESS_SAFETY_MS, force interaction-ready (see notifier).
@@ -5377,6 +5399,8 @@ export function OriginalClientShell({
               selectedEntity={selectedEntity}
               viewportGroundDrops={viewportGroundDrops}
               viewportMapSprites={mapDomSprites}
+              packedObjects={packedObjects}
+              packedActors={packedActors}
               viewportEntitySprites={viewportEntitySprites}
               viewportProjectiles={viewportProjectiles}
               viewportDepthPlayer={viewportDepthPlayer}
@@ -6055,7 +6079,9 @@ function collectVisibleSceneAssetUrls(
   options: {
     includeEntitySprites?: boolean;
     includeEntityPreloadPaths?: boolean;
-    packedFloor?: R16EntryFloor | null;
+    packedFloor?: R16EntrySpriteImages | null;
+    packedObjects?: R16EntrySpriteImages | null;
+    packedActors?: R16EntrySpriteImages | null;
     viewportLayout?: ViewportLayout;
   } = {},
 ) {
@@ -6067,7 +6093,7 @@ function collectVisibleSceneAssetUrls(
       ...sprite,
       path: mapSpriteRenderPath(sprite.path),
       preloadPriority: 0,
-    })),
+    })).filter((sprite) => !options.packedObjects?.[sprite.path]),
     ...viewportMapSprites.floor.filter((sprite) => !options.packedFloor?.[sprite.path]).map((sprite) => ({
       ...sprite,
       path: sprite.path,
@@ -6089,7 +6115,7 @@ function collectVisibleSceneAssetUrls(
     .map((sprite) => sprite.path);
   const entityUrls: string[] = [];
   const addEntityUrl = (url: string | null | undefined) => {
-    if (!url || entityUrls.includes(url)) {
+    if (!url || options.packedActors?.[url] || entityUrls.includes(url)) {
       return false;
     }
     entityUrls.push(url);

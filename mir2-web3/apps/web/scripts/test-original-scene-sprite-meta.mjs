@@ -41,6 +41,8 @@ function loadSpriteMetaModule(assetBaseUrl) {
           libraries: {
             "Monster/000": {},
             "Monster/139": {},
+            "CArmour/00": {},
+            "NPC/03": {},
             "Map/2": {},
           },
         };
@@ -115,6 +117,36 @@ try {
   const exportedOnlyResponse = await fetchOriginalSceneSpriteMeta("Title/000");
   assert.equal(exportedOnlyResponse.status, 404);
   assert.deepEqual(exportedOnlyRequests, ["/original-ui/Title/000/meta.json"]);
+
+  const catalogRequests = [];
+  const actualCatalogModule = loadSpriteMetaModule(undefined);
+  globalThis.fetch = async (url) => {
+    catalogRequests.push(String(url));
+    if (url === "/original-ui/frame-sets.generated.json") {
+      return Response.json({ libraries: { "NPC/03": { actions: [{ actionId: 0, start: 0, count: 4 }] } } });
+    }
+    return Response.json({ count: 1, frames: [{ index: 0 }] });
+  };
+  assert.equal((await actualCatalogModule.loadOriginalSceneSpriteLibrary("CArmour/00")).frameSet, null);
+  assert.deepEqual(catalogRequests, ["/original-ui/CArmour/00/meta.json"]);
+  assert.equal((await actualCatalogModule.loadOriginalSceneSpriteLibrary("NPC/03")).frameSet.actions[0].actionId, 0);
+  assert.deepEqual(catalogRequests, [
+    "/original-ui/CArmour/00/meta.json", "/original-ui/NPC/03/meta.json", "/original-ui/frame-sets.generated.json",
+  ]);
+
+  const renderSource = readFileSync(new URL("../app/components/original-client-scene-rendering.tsx", import.meta.url), "utf8");
+  const renderFile = ts.createSourceFile("scene-rendering.tsx", renderSource, ts.ScriptTarget.ES2022, true, ts.ScriptKind.TSX);
+  const pickFrame = renderFile.statements.find(node => ts.isFunctionDeclaration(node) && node.name?.text === "frameMetaForIndexWithFallback");
+  assert(pickFrame);
+  const frameCode = ts.transpileModule(pickFrame.getText(renderFile), {
+    compilerOptions: { target: ts.ScriptTarget.ES2022 },
+  }).outputText;
+  const resolveFrame = new Function("frameMetaForIndex", frameCode + "\nreturn frameMetaForIndexWithFallback;")(actualCatalogModule.frameMetaForIndex);
+  const firstFrame = { index: 16 };
+  const spriteLibrary = { frames: [firstFrame], frameMap: new Map([[16, firstFrame]]) };
+  assert.equal(resolveFrame({ ...spriteLibrary, startupFramesOnly: true }, 16, null), firstFrame);
+  assert.equal(resolveFrame({ ...spriteLibrary, startupFramesOnly: true }, 80, 16), null);
+  assert.equal(resolveFrame(spriteLibrary, 80, 16), firstFrame);
 
   const cachedModule = loadSpriteMetaModule(undefined);
   let loadedCount = 0;
