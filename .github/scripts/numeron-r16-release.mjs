@@ -16,26 +16,32 @@ export const SITES = Object.freeze({
 });
 export const ORIGIN = 'https://numeron.obelisk.build';
 export const QR_RELEASE = Object.freeze({
-  source: 'd3e9ebfa6b7f6dc5cb0f86fb64553603d60c5965',
+  source: 'f90543561677ac7ba432077c461f58e5d407e4d8',
   sourceRef: BRANCH,
-  baseSource: '100694a0e2bc0ab5cd2aa26c8d860b3e222dc0c8',
+  baseSource: '9ab47adeedab89367ac0f4fe973e42032dbe3709',
   assetSource: 'f2de762309768b51b39438c2437c14e819df9bf7',
   changedFiles: [
-    { status: 'modified', filename: 'mir2-web3/apps/web/app/page.tsx', sha: '48db6c2a711617169167cc94a2fd88a7a262c400' },
-    { status: 'added', filename: 'mir2-web3/apps/web/lib/generated/r16-entry-scene.json', sha: 'd8424e76e3c603f3a42adcb5a6907c473f525804' },
-    { status: 'added', filename: 'mir2-web3/apps/web/lib/r16-entry-scene.ts', sha: 'efbdbd86db61b4f80f0967656dfead57f3acd627' },
-    { status: 'added', filename: 'mir2-web3/apps/web/public/bootstrap/r16-scenes/5c08d1fd4e81d92a7be20eb98c4c6288515749d5d459978dcf78fe2b86bdf325.json', sha: '7a1d6ca0b0d3117ef4acd9fce63b4ba9694e4716' },
-    { status: 'added', filename: 'mir2-web3/apps/web/scripts/generate-r16-entry-scene.mjs', sha: '69a19750731e52ed6933a2a9a42e508ec3004273' },
-    { status: 'modified', filename: 'mir2-web3/apps/web/scripts/test-scene-blueprint-request.mjs', sha: '5e685b4566784191833140696181e1a7b8ae5ee6' },
-    { status: 'modified', filename: 'mir2-web3/apps/web/scripts/vercel-build.sh', sha: '64231e9941489b8e90a1021848517dcfa4346371' },
+    { status: 'modified', filename: 'mir2-web3/apps/web/app/components/original-client-scene-map-rendering.tsx', sha: '6b9c9d762750755948b47f14b8222cb0f2d2dfee' },
+    { status: 'modified', filename: 'mir2-web3/apps/web/app/original-client-shell.tsx', sha: '1b9f176b0fd0bcf7f507afa8f67c704328cbc518' },
+    { status: 'added', filename: 'mir2-web3/apps/web/lib/generated/r16-entry-floor.json', sha: '8c4d2de410bc6804f63dbbbf2627c88c222b5007' },
+    { status: 'modified', filename: 'mir2-web3/apps/web/lib/r16-entry-scene.ts', sha: 'c4846fd2316270e517148d0a5162dc51a6738b2e' },
+    { status: 'added', filename: 'mir2-web3/apps/web/public/bootstrap/r16-floor/e4977afa3640bec9d8043ae32d794f92385a309fb4fa68cf407fe575016ce90d.json', sha: 'cebf8d7d2bdc1ed734c628fbe3f18e1d0be94393' },
+    { status: 'added', filename: 'mir2-web3/apps/web/scripts/generate-r16-entry-floor.mjs', sha: 'b876b1c817d49307540e8a37fb5421885cb7fe02' },
+    { status: 'modified', filename: 'mir2-web3/apps/web/scripts/test-scene-blueprint-request.mjs', sha: 'af65af19fd77e3c832363c44645917300ee0c141' },
+    { status: 'modified', filename: 'mir2-web3/apps/web/scripts/vercel-build.sh', sha: 'fd2736dec61c1b75d75983ca68488c97617b099d' },
   ],
   entryScene: {
     path: '/bootstrap/r16-scenes/5c08d1fd4e81d92a7be20eb98c4c6288515749d5d459978dcf78fe2b86bdf325.json',
     sha256: '5c08d1fd4e81d92a7be20eb98c4c6288515749d5d459978dcf78fe2b86bdf325',
     bytes: 458475,
   },
+  entryFloor: {
+    path: '/bootstrap/r16-floor/e4977afa3640bec9d8043ae32d794f92385a309fb4fa68cf407fe575016ce90d.json',
+    sha256: 'e4977afa3640bec9d8043ae32d794f92385a309fb4fa68cf407fe575016ce90d',
+    bytes: 439896,
+  },
   assetRunId: '42494701555',
-  baseline: 'dpl_2ocDNzbEhNLbkkJfv3hHiXJdmrYi',
+  baseline: 'dpl_CTtGa2akJGg1tZtgVqC2BAWX9Z7w',
   relay: 'https://relay.dubhe.obelisk.build',
 });
 const QR_OPERATIONS = ['numeron-qr-stage', 'numeron-qr-promote', 'numeron-qr-rollback'];
@@ -231,9 +237,8 @@ function verifyGamePages(read, candidate, sha) {
   requireRelease(game.includes('/_next/static/') && !game.includes('navigation_promotions'), 'gameHtmlInvalid');
 }
 
-function verifyEntryScene(bytes) {
-  const entry = QR_RELEASE.entryScene;
-  requireRelease(bytes.length === entry.bytes && digest(bytes) === entry.sha256, 'entrySceneDigestMismatch');
+function verifyEntryAsset(bytes, entry, code) {
+  requireRelease(bytes.length === entry.bytes && digest(bytes) === entry.sha256, code);
   return entry;
 }
 
@@ -294,7 +299,7 @@ function protectedResponse(candidate, pathname, env, qrRequest) {
 async function releaseQrGame({ operation, initial, projects, candidate, id, vercel,
   body, readCandidate, fetchImpl, sleep, receipt }) {
   const hostname = new URL(ORIGIN).hostname;
-  const { baseline, relay, entryScene } = QR_RELEASE;
+  const { baseline, relay, entryScene, entryFloor } = QR_RELEASE;
   const expectedOther = { original: production(initial.original), main: production(initial.main) };
   async function mapping(allowed) {
     const live = await projects(), game = production(live.game);
@@ -338,7 +343,10 @@ async function releaseQrGame({ operation, initial, projects, candidate, id, verc
   }
   receipt.trafficBefore = await mapping([baseline]);
   verifyGamePages(readCandidate, reviewed, QR_RELEASE.source);
-  receipt.protectedEntryScene = verifyEntryScene(Buffer.from(readCandidate(reviewed, entryScene.path), 'utf8'));
+  receipt.protectedEntryScene = verifyEntryAsset(
+    Buffer.from(readCandidate(reviewed, entryScene.path), 'utf8'), entryScene, 'entrySceneDigestMismatch');
+  receipt.protectedEntryFloor = verifyEntryAsset(
+    Buffer.from(readCandidate(reviewed, entryFloor.path), 'utf8'), entryFloor, 'entryFloorDigestMismatch');
   receipt.protectedQr = await proveQrRelay((pathname, token) => readCandidate(reviewed, pathname, { token }));
   await mapping([baseline]);
   receipt.writes.push({ operation: 'promote', site: 'game', deployment: reviewed.id });
@@ -352,11 +360,17 @@ async function releaseQrGame({ operation, initial, projects, candidate, id, verc
       });
       return (await boundedBytes(response, 32_768)).toString('utf8');
     });
-    const publicEntryScene = await fetchImpl(`${ORIGIN}${entryScene.path}`, {
-      redirect: 'error', signal: AbortSignal.timeout(30_000),
-    });
-    requireRelease(publicEntryScene.ok, 'publicEntrySceneUnavailable');
-    receipt.publicEntryScene = verifyEntryScene(await boundedBytes(publicEntryScene, entryScene.bytes));
+    async function readPublicEntry(entry, label) {
+      const response = await fetchImpl(ORIGIN + entry.path, {
+        redirect: 'error', signal: AbortSignal.timeout(30_000),
+      });
+      requireRelease(response.ok, label + 'Unavailable');
+      return verifyEntryAsset(await boundedBytes(response, entry.bytes), entry, label + 'DigestMismatch');
+    }
+    [receipt.publicEntryScene, receipt.publicEntryFloor] = await Promise.all([
+      readPublicEntry(entryScene, 'entryScene'),
+      readPublicEntry(entryFloor, 'entryFloor'),
+    ]);
     receipt.trafficAfter = await mapping([reviewed.id]);
   } catch (error) {
     const current = await mapping([baseline, reviewed.id]);

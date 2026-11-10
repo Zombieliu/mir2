@@ -13,6 +13,7 @@ const digest = bytes => createHash('sha256').update(bytes).digest('hex');
 const clone = value => structuredClone(value);
 const json = value => Response.json(value);
 const ENTRY_BYTES = readFileSync(new URL(`../../mir2-web3/apps/web/public${QR_RELEASE.entryScene.path}`, import.meta.url));
+const FLOOR_BYTES = readFileSync(new URL('../../mir2-web3/apps/web/public' + QR_RELEASE.entryFloor.path, import.meta.url));
 const WINDOWS = 'https://assets.mir2.obelisk.build/client-updates/installers/fixture/Mir2Setup.exe';
 // Exact public baseline element structure; a disabled Windows card is not an anchor.
 const disabledWindows = '<article class="download-platform platform-windows" data-reveal="true"><span class="download-action is-disabled" aria-disabled="true"><span>尚未公开</span><i>—</i></span></article>';
@@ -95,11 +96,11 @@ function fixture(operation = 'numeron-promote') {
       assert.equal(url, config.remoteReleaseUrl); return new Response(manifest);
     }
     if (parsed.origin === ORIGIN && qr) {
-      if (request.pathname === QR_RELEASE.entryScene.path) {
+      if (request.pathname === QR_RELEASE.entryScene.path || request.pathname === QR_RELEASE.entryFloor.path) {
         assert.equal(request.method, 'GET');
         assert.equal(request.headers.Authorization, undefined);
         assert.equal(projects.game.targets.production.id, IDS.game);
-        return new Response(ENTRY_BYTES);
+        return new Response(request.pathname === QR_RELEASE.entryScene.path ? ENTRY_BYTES : FLOOR_BYTES);
       }
       assert.equal(request.method, 'POST');
       assert.equal(request.headers.Origin, ORIGIN);
@@ -148,6 +149,7 @@ function fixture(operation = 'numeron-promote') {
     if (pathname === '/en') return '<html lang="en">';
     if (qr && request) return JSON.stringify(qrResponse(pathname, request.token));
     if (qr && pathname === QR_RELEASE.entryScene.path) return ENTRY_BYTES.toString('utf8');
+    if (qr && pathname === QR_RELEASE.entryFloor.path) return FLOOR_BYTES.toString('utf8');
     if (pathname === '/version') return JSON.stringify({ revision: source });
     if (pathname === '/manifest.webmanifest') return JSON.stringify({ start_url: '/game', scope: '/' });
     if (pathname === '/game') return '<html><script src="/_next/static/game.js"></script></html>';
@@ -258,6 +260,8 @@ test('QR promotion proves protected and public routes and keeps intents out of t
   assert.equal(r.result.publicQr.pending, true);
   assert.deepEqual(r.result.protectedEntryScene, QR_RELEASE.entryScene);
   assert.deepEqual(r.result.publicEntryScene, QR_RELEASE.entryScene);
+  assert.deepEqual(r.result.protectedEntryFloor, QR_RELEASE.entryFloor);
+  assert.deepEqual(r.result.publicEntryFloor, QR_RELEASE.entryFloor);
   assert.equal(r.result.trafficAfter.alias, IDS.game);
   assert(!JSON.stringify(r.receipts).includes('synthetic.private.intent'));
   assert(!JSON.stringify(r.receipts).includes('synthetic-session'));
@@ -277,21 +281,26 @@ test('QR promotion rejects a bad candidate before writing and rolls back a faile
   assert.deepEqual(rolledBack.receipts[0].rollbacks, [{ site: 'game', deployment: QR_RELEASE.baseline }]);
 });
 
-test('QR promotion verifies exact entry scene bytes before and after assigning traffic', async () => {
-  const changed = Buffer.from(ENTRY_BYTES);
-  changed[15] ^= 1;
-  const candidate = fixture('numeron-qr-promote');
-  candidate.state.onRead = (_candidate, pathname) => pathname === QR_RELEASE.entryScene.path ? changed.toString('utf8') : undefined;
-  const blocked = await candidate.execute();
-  failed(blocked, /entrySceneDigestMismatch/);
-  assert.equal(writes(blocked).length, 0);
-  const publicCopy = fixture('numeron-qr-promote');
-  publicCopy.state.onRequest = request => new URL(request.url).origin === ORIGIN && request.pathname === QR_RELEASE.entryScene.path
-    ? new Response(changed) : undefined;
-  const rolledBack = await publicCopy.execute();
-  failed(rolledBack, /entrySceneDigestMismatch/);
-  assert.equal(rolledBack.projects.game.targets.production.id, QR_RELEASE.baseline);
-  assert.deepEqual(rolledBack.receipts[0].rollbacks, [{ site: 'game', deployment: QR_RELEASE.baseline }]);
+test('QR promotion verifies each entry asset before and after assigning traffic', async () => {
+  for (const [entry, bytes, failure] of [
+    [QR_RELEASE.entryScene, ENTRY_BYTES, /entrySceneDigestMismatch/],
+    [QR_RELEASE.entryFloor, FLOOR_BYTES, /entryFloorDigestMismatch/],
+  ]) {
+    const changed = Buffer.from(bytes);
+    changed[15] ^= 1;
+    const candidate = fixture('numeron-qr-promote');
+    candidate.state.onRead = (_candidate, pathname) => pathname === entry.path ? changed.toString('utf8') : undefined;
+    const blocked = await candidate.execute();
+    failed(blocked, failure);
+    assert.equal(writes(blocked).length, 0);
+    const publicCopy = fixture('numeron-qr-promote');
+    publicCopy.state.onRequest = request => new URL(request.url).origin === ORIGIN && request.pathname === entry.path
+      ? new Response(changed) : undefined;
+    const rolledBack = await publicCopy.execute();
+    failed(rolledBack, failure);
+    assert.equal(rolledBack.projects.game.targets.production.id, QR_RELEASE.baseline);
+    assert.deepEqual(rolledBack.receipts[0].rollbacks, [{ site: 'game', deployment: QR_RELEASE.baseline }]);
+  }
 });
 
 test('QR rollback is limited to its promoted candidate and never touches a third-party alias', async () => {
