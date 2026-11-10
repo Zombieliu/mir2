@@ -1,0 +1,351 @@
+{
+  "kind": "r16-cold-entry-delayed-scene",
+  "lane": "phase-delay",
+  "passed": true,
+  "renderer": "bevy-84ef836460a84e03",
+  "assetRelease": "20261108-r16-08ec86d5105c",
+  "ports": [
+    20610,
+    20611,
+    20612,
+    20613
+  ],
+  "isolatedFile": true,
+  "realGatewayAndMapRoutes": true,
+  "publicAuth": false,
+  "nativeServiceWorker": true,
+  "manifestDelayed": false,
+  "configuredHeadersDelayMs": 5600,
+  "configuredBodyDelayMs": 5000,
+  "stages": [
+    {
+      "name": "pin-exact-build-and-copy-private-fixture",
+      "at": 1794322437306
+    },
+    {
+      "name": "isolated-loopback-servers",
+      "at": 1794322438321
+    },
+    {
+      "name": "ordinary-password-login-and-configured-service-worker",
+      "at": 1794322441064
+    },
+    {
+      "name": "slow-headers-and-body-complete-through-real-service-worker",
+      "at": 1794322461379
+    },
+    {
+      "name": "physical-movement-and-authoritative-ack",
+      "at": 1794322472408
+    },
+    {
+      "name": "ordinary-logout-and-private-file-readback",
+      "at": 1794322472482
+    }
+  ],
+  "proxyRequests": [
+    {
+      "path": "/api/asset-manifest",
+      "requestedAt": 1794322441299,
+      "status": 200,
+      "originHeadersAt": 1794322441964,
+      "headersAt": 1794322441964,
+      "bodyForwardedAt": 1794322441964,
+      "finishedAt": 1794322441964,
+      "closedAt": 1794322441964
+    },
+    {
+      "path": "/_next/static/chunks/r16-gameplay-locales.ee2b4babeaa74447.js",
+      "scope": "gameplayLocale",
+      "requestedAt": 1794322446807,
+      "status": 200,
+      "originHeadersAt": 1794322446813,
+      "headersAt": 1794322446813,
+      "bodyForwardedAt": 1794322446813,
+      "finishedAt": 1794322446954,
+      "closedAt": 1794322446954
+    },
+    {
+      "path": "/api/scene/crystal",
+      "query": {
+        "v": "2026-08-14-v7-door-interaction",
+        "assetRelease": "20261108-r16-08ec86d5105c",
+        "map": "0",
+        "x": "344",
+        "y": "246",
+        "width": "56",
+        "height": "72"
+      },
+      "requestedAt": 1794322461072,
+      "ordinal": 1,
+      "noCacheRequest": false,
+      "status": 200,
+      "originHeadersAt": 1794322461914,
+      "headersAt": 1794322466675,
+      "bodyForwardedAt": 1794322471677,
+      "finishedAt": 1794322471678,
+      "closedAt": 1794322471678
+    },
+    {
+      "path": "/api/scene/crystal",
+      "query": {
+        "v": null,
+        "assetRelease": null,
+        "map": "0",
+        "x": "398",
+        "y": "333",
+        "width": "56",
+        "height": "72"
+      },
+      "requestedAt": 1794322472181,
+      "status": 200,
+      "originHeadersAt": 1794322472563,
+      "headersAt": 1794322472563,
+      "bodyForwardedAt": 1794322472563,
+      "finishedAt": 1794322472563,
+      "closedAt": 1794322472563
+    }
+  ],
+  "browserRequests": [
+    {
+      "path": "/api/asset-manifest",
+      "requestedAt": 1794322441311,
+      "status": 200,
+      "headersAt": 1794322441967,
+      "serviceWorker": false,
+      "bodyCompleteAt": 1794322441967
+    },
+    {
+      "path": "/_next/static/chunks/r16-gameplay-locales.ee2b4babeaa74447.js",
+      "scope": "gameplayLocale",
+      "requestedAt": 1794322446812,
+      "status": 200,
+      "headersAt": 1794322446978,
+      "serviceWorker": false,
+      "bodyCompleteAt": 1794322446978
+    },
+    {
+      "path": "/api/scene/crystal",
+      "query": {
+        "v": "2026-08-14-v7-door-interaction",
+        "assetRelease": "20261108-r16-08ec86d5105c",
+        "map": "0",
+        "x": "344",
+        "y": "246",
+        "width": "56",
+        "height": "72"
+      },
+      "requestedAt": 1794322461083,
+      "status": 200,
+      "headersAt": 1794322466678,
+      "serviceWorker": true,
+      "bodyCompleteAt": 1794322471682
+    },
+    {
+      "path": "/api/scene/crystal",
+      "query": {
+        "v": null,
+        "assetRelease": null,
+        "map": "0",
+        "x": "398",
+        "y": "333",
+        "width": "56",
+        "height": "72"
+      },
+      "requestedAt": 1794322472177,
+      "status": 200,
+      "headersAt": 1794322472575,
+      "serviceWorker": true,
+      "bodyCompleteAt": 1794322472582
+    }
+  ],
+  "build": {
+    "revision": "11538e2527ab-scene-body-r2",
+    "buildReceiptSha256": "f776357f990ed798ec9be4c48d5dc537484081a26fb0ab0cfc3fb4e8d2a2aed6",
+    "sourceArchiveSha256": "fd75e4a286f7cc27e2fa9c3ff1f02ceeee0ef66f45f92e529cea1ef356a70ce6",
+    "changedFiles": [
+      {
+        "filename": "mir2-web3/apps/web/lib/first-crystal-scene-request.ts",
+        "sha256": "3ee53c21459e7655654b9c8b48080395597a33be93f7c1e50b209552e1a2c58e"
+      },
+      {
+        "filename": "mir2-web3/apps/web/public/mir2-asset-worker.js",
+        "sha256": "5cb9cb565577224a08dfa4f4f547d9358e4ebeb8b628c2870a6c0ef48cc04030"
+      },
+      {
+        "filename": "mir2-web3/apps/web/scripts/test-first-crystal-scene-request.mjs",
+        "sha256": "233ec5a176ff45c942f94be2ea02a328c881577ee4e1330b3d96fa12203362b1"
+      },
+      {
+        "filename": "mir2-web3/apps/web/scripts/test-asset-worker-fallback.mjs",
+        "sha256": "e5b66f89f075d6f85e37f18b2f41246db2157cbe90c150da0ab1d2e33cdd9661"
+      }
+    ],
+    "verifiedReusedInputCount": 0,
+    "id": "IO0a98i5KG4PM6Y_RY-El",
+    "assetRelease": "20261108-r16-08ec86d5105c",
+    "renderer": "bevy-84ef836460a84e03"
+  },
+  "navigationAt": 1794322441065,
+  "workerBeforeStart": {
+    "active": true,
+    "sameOrigin": true,
+    "path": "/mir2-asset-worker.js",
+    "version": "20261108-r16-08ec86d5105c"
+  },
+  "sceneDelayArmedAt": 1794322449331,
+  "startGame": {
+    "acknowledgedAt": 1794322460765,
+    "bootstrapAt": 1794322461347,
+    "position": {
+      "x": 342,
+      "y": 244
+    },
+    "map": "0"
+  },
+  "sceneTransport": {
+    "firstRequest": {
+      "path": "/api/scene/crystal",
+      "query": {
+        "v": "2026-08-14-v7-door-interaction",
+        "assetRelease": "20261108-r16-08ec86d5105c",
+        "map": "0",
+        "x": "344",
+        "y": "246",
+        "width": "56",
+        "height": "72"
+      },
+      "requestedAt": 1794322461072,
+      "ordinal": 1,
+      "noCacheRequest": false,
+      "status": 200,
+      "originHeadersAt": 1794322461914,
+      "headersAt": 1794322466675,
+      "bodyForwardedAt": 1794322471677,
+      "finishedAt": 1794322471678,
+      "closedAt": 1794322471678
+    },
+    "mapComplete": {
+      "path": "/api/scene/crystal",
+      "query": {
+        "v": "2026-08-14-v7-door-interaction",
+        "assetRelease": "20261108-r16-08ec86d5105c",
+        "map": "0",
+        "x": "344",
+        "y": "246",
+        "width": "56",
+        "height": "72"
+      },
+      "requestedAt": 1794322461083,
+      "status": 200,
+      "headersAt": 1794322466678,
+      "serviceWorker": true,
+      "bodyCompleteAt": 1794322471682
+    },
+    "headerWaitMs": 5603,
+    "bodyWaitMs": 5002,
+    "totalMs": 10599,
+    "mapFromWorker": true
+  },
+  "scene": {
+    "visible": true,
+    "pending": false,
+    "hasPlayer": true,
+    "hasRegion": true,
+    "ready": true,
+    "serviceWorkerControlled": true,
+    "marks": [
+      {
+        "name": "sceneAssetsReady",
+        "atMs": 351.5,
+        "epochMs": 1794322441648
+      },
+      {
+        "name": "gameplayLocaleStart",
+        "atMs": 5508.899999976158,
+        "epochMs": 1794322446805
+      },
+      {
+        "name": "gameplayLocaleReady",
+        "atMs": 5699,
+        "epochMs": 1794322446995
+      },
+      {
+        "name": "startGamePacket",
+        "atMs": 19466.800000071526,
+        "epochMs": 1794322460763
+      },
+      {
+        "name": "userInformationReady",
+        "atMs": 19478.399999976158,
+        "epochMs": 1794322460775
+      },
+      {
+        "name": "sceneBlueprintStart",
+        "atMs": 19772.300000071526,
+        "epochMs": 1794322461069
+      },
+      {
+        "name": "sceneBlueprintReady",
+        "atMs": 30386.700000047684,
+        "epochMs": 1794322471683
+      },
+      {
+        "name": "sceneSpritesReady",
+        "atMs": 30411.300000071526,
+        "epochMs": 1794322471707
+      },
+      {
+        "name": "firstPlayableFrame",
+        "atMs": 30799,
+        "epochMs": 1794322472095
+      }
+    ],
+    "first": {
+      "x": 342,
+      "y": 244,
+      "map": "0"
+    },
+    "decoded": {
+      "name": "sceneBlueprintReady",
+      "atMs": 30386.700000047684,
+      "epochMs": 1794322471683
+    },
+    "firstPlayable": {
+      "name": "firstPlayableFrame",
+      "atMs": 30799,
+      "epochMs": 1794322472095
+    }
+  },
+  "movement": {
+    "key": "ArrowRight",
+    "command": {
+      "type": "walk",
+      "direction": "Right",
+      "seq": 8,
+      "at": 1794322472418
+    },
+    "position": {
+      "x": 343,
+      "y": 244
+    },
+    "acknowledgedAt": 1794322472449,
+    "ackSequence": 9
+  },
+  "logout": {
+    "sentAt": 1794322472491,
+    "acknowledgedAt": 1794322475930,
+    "savedPosition": {
+      "x": 343,
+      "y": 244
+    },
+    "returnedToSelect": true
+  },
+  "closed": {
+    "browser": true,
+    "proxy": true,
+    "next": true,
+    "gateway": true
+  },
+  "fixtureUnchanged": true
+}
