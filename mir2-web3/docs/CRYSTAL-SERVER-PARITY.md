@@ -1,5 +1,9 @@
 # Crystal Server Parity
 
+## R16 钓鱼首个进度包（2026-11-10）
+
+成功抛竿的 0% 回包触发 WebSocket 个人维护调度。R16 仍按现有个人 tick 推进 25%，原版 Crystal 抛竿后按 750 毫秒与配置附加延时启动，后续按自己的计时推进。此次验收到 R16 Web 和 Windows 正式传输，原始 TCP、旧竿跨地图或重登清理及 Crystal 步进另验。 [窗口、时序与范围](evidence/r16-web-fishing-loop-20261110/README.md#冷登录首竿时序)
+
 ## R16 TradeGold 与邀请反馈（2026-11-10）
 
 按 Crystal 的顺序先作废确认再检查金额。已匹配的报价继续由原结算来源保护。邀请按前方可用地图格、互相面对、角色存活和对端状态判定，使用原系统消息和两秒冷却。普通双账号验证提示、静默和冷却后再邀。 [源码对照和协议结果](evidence/r16-trade-own-gold-20261110/README.md)

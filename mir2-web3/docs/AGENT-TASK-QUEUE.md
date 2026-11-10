@@ -67,7 +67,8 @@ Updated 2026-11-10 (Asia/Shanghai). Read [coordination](AGENT-ORCHESTRATION.md) 
 - [x] Web 复用 Windows 有效走跑段的队列规则。两种本机生产渲染路径验证连续走跑后灵魂火符首帧、命中浮字及正常重登。轻量包与三套渲染包按原门槛构建。 [实战与原失败](evidence/r16-web-move-cast-20261110/README.md)
 - [x] 两条本机生产 Web 路径通过施法后第一步、回到原格、下一次真实施法和同角重登。独立 WebGPU 实测野怪施法后正常走至岸边、站定抛竿、扣饵与耐久落盘。 [动作与抛竿收据](evidence/r16-web-postcast-20261110/README.md)
 - [x] 本机两条浏览器路径验证冷登录后转向、抛竿、咬钩、手动和 Esc 收竿。Web 鱼具普通点击装卸及重登、自动重抛后关闭、服务端渔获奖励有分项证据。 [钓鱼记录](evidence/r16-web-fishing-loop-20261110/README.md)
-- [ ] 核对冷登录首竿约十秒才涨进度与 Windows 的时序。鱼具拖拽、角色抛竿和收线身体帧及鱼线、Windows 窗口与发行另验。继续其余技能。
+- [x] 冷登录成功抛竿唤醒个人状态。实际 WebGPU 9.662→0.698 秒，Windows 正式传输 9.254→0.684 秒。相同 File 基线、正常收竿注销与扣费通过。 [时序回执](evidence/r16-web-fishing-loop-20261110/cold-first-cast-timing.json)
+- [ ] 鱼具拖拽、角色抛竿和收线身体帧及鱼线、Windows 窗口与发行另验。继续其余技能。
 - [ ] 复验公网扫码的手机中继。直连出码及手机页已通过，手机尺寸 PWA 直连会话读取超时，桌面明确经本机代理也重现出码超时。 [分段结果](evidence/r16-web-fishing-loop-20261110/public-qr-readback.json)
 - [ ] 继续 Native 招募及建职阶、仓库重复刷新和取回反馈、阿洛跨端实战及完整 Hosted 链路。
 - [x] 交易自身物品待回执的取消及同owner/partner重复接受已完成限定代码修复；原Page105/社交31/适配器507组/TS及两场隔离浏览器证据保留。共用八项见后续独立记录，完整Trade与公开发行仍未完成。[原本轮范围](evidence/r16-web-trade-20261109/README.md)

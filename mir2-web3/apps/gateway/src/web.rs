@@ -7101,6 +7101,10 @@ async fn handle_socket_work(
                 let low_latency_action = is_low_latency_action(&action);
                 let should_queue_save_by_action = should_queue_save_for_action(&action);
                 let runtime_tick_defer_duration = runtime_tick_defer_duration_for_action(&action);
+                let fishing_cast_out = matches!(
+                    &action,
+                    SessionAction::Packet(ClientPacket::FishingCast { cast_out: true })
+                );
                 let mut login_account_id = login_account_id_for_action(&action).map(str::to_string);
                 let mut login_identity_context = login_identity_context_for_action(&action);
                 if let Some(context) = auth_security_context_for_action(&action) {
@@ -7525,6 +7529,9 @@ async fn handle_socket_work(
                     }
                 };
                 let (responses, native_game_shop_post_execution) = execution_result;
+                let runtime_tick_defer_duration = runtime_tick_defer_duration.or_else(|| {
+                    runtime_tick_wake_for_fishing_cast(fishing_cast_out, &responses)
+                });
                 if (starts_game || leaves_world) && tokio::task::block_in_place(|| {
                     synchronize_socket_reconnect_binding(session, reconnect_sessions.as_ref(), terminal.clone(), reconnect_binding)
                 }).is_err() { return; }
@@ -8563,6 +8570,27 @@ fn runtime_tick_defer_duration_for_action(action: &SessionAction) -> Option<Dura
         ) => Some(gateway_runtime_tick_input_wake_grace()),
         _ => None,
     }
+}
+
+fn runtime_tick_wake_for_fishing_cast(
+    fishing_cast_out: bool,
+    responses: &[ServerPacket],
+) -> Option<Duration> {
+    // A successful cast starts progress on the personal runtime. Its direct
+    // acknowledgement releases the idle bootstrap delay before the first tick.
+    (fishing_cast_out
+        && responses.iter().any(|packet| {
+            matches!(
+                packet,
+                ServerPacket::FishingUpdate {
+                    fishing: true,
+                    progress_percent: 0,
+                    found_fish: false,
+                    ..
+                }
+            )
+        }))
+    .then(gateway_runtime_tick_input_wake_grace)
 }
 
 fn positive_usize_env(name: &str) -> Option<usize> {
@@ -20855,6 +20883,41 @@ mod tests {
                 "item use must release the bootstrap wait: {action:?}"
             );
         }
+    }
+
+    #[test]
+    fn runtime_tick_wakes_only_after_a_successful_fishing_cast() {
+        let accepted = ServerPacket::FishingUpdate {
+            object_id: 1_001,
+            fishing: true,
+            progress_percent: 0,
+            chance_percent: 12,
+            fishing_point: Point { x: 331, y: 270 },
+            found_fish: false,
+        };
+        assert_eq!(
+            super::runtime_tick_wake_for_fishing_cast(true, std::slice::from_ref(&accepted)),
+            Some(super::gateway_runtime_tick_input_wake_grace())
+        );
+        assert_eq!(super::runtime_tick_wake_for_fishing_cast(true, &[]), None);
+        assert_eq!(
+            super::runtime_tick_wake_for_fishing_cast(false, &[accepted]),
+            None
+        );
+        assert_eq!(
+            super::runtime_tick_wake_for_fishing_cast(
+                true,
+                &[ServerPacket::FishingUpdate {
+                    object_id: 1_001,
+                    fishing: true,
+                    progress_percent: 25,
+                    chance_percent: 12,
+                    fishing_point: Point { x: 331, y: 270 },
+                    found_fish: false,
+                }],
+            ),
+            None
+        );
     }
 
     #[test]

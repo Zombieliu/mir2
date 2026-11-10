@@ -1,5 +1,9 @@
 # Backend 1:1 Progress
 
+## R16 首竿的 Gateway 个人更新（2026-11-10）
+
+两端的 WebSocket 入口在抛竿直接回包确认有效后走既有输入唤醒。4 项定向测试验证等待、唤醒和观察指令。四份同源 File 副本复测一次抛竿、收竿、正常注销和相同的鱼饵、鱼竿及鱼钩扣除。 [分端计时和读档](evidence/r16-web-fishing-loop-20261110/cold-first-cast-timing.json)
+
 ## R16 本方确认后改价与交易邀请反馈（2026-11-10）
 
 持久撮合用同一把 Zone 锁撤回尚未匹配的原报价。撤回成功才按增量扣款，作废旧确认。零金币与余额不足均只解锁。普通 File 双端验证加价、单次交割和重登，隔离 PostgreSQL 验证报价及成交围栏。 [回归、回执和发行边界](evidence/r16-trade-own-gold-20261110/README.md)

@@ -1,5 +1,9 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+## R16 冷登录首竿（2026-11-10）
+
+共享 Gateway 成功抛竿后及时唤醒个人运行时。隔离比奇同档的 Web 首个进度包从 9.662 秒降至 0.698 秒，Windows R16 正式传输从 9.254 秒降至 0.684 秒。继续鱼具拖拽、角色和鱼线呈现及 Windows 窗口验收。 [同档对照](evidence/r16-web-fishing-loop-20261110/README.md#冷登录首竿时序)
+
 ## R16 确认后的金币修改（2026-11-10）
 
 Web 可按 Windows R16 在本方确认后直接追加金币。两位普通角色连续两次各加 11，重新确认后单次交割，钱包与背包重登一致。交易邀请沿用 Crystal 的系统消息和两秒冷却。发行时需随候选构建更新 Web 运行包。 [证据](evidence/r16-trade-own-gold-20261110/README.md)
