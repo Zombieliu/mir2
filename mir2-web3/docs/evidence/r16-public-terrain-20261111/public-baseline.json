@@ -1,0 +1,214 @@
+{
+  "scope": "Exact production d3e9, default headless desktop Chrome, actual official Testnet login and one authorized adjacent walk.",
+  "revision": "d3e9ebfa6b7f6dc5cb0f86fb64553603d60c5965",
+  "realWalletApproval": true,
+  "exactStaticScene": true,
+  "movement": {
+    "x": 289,
+    "y": 616,
+    "direction": "Right"
+  },
+  "logout": true,
+  "firstPlayableAfterStartAckMs": 3263,
+  "worldPaintFailure": "WORLD_TILE_PAINT_NOT_OBSERVED",
+  "cdpSamples": [
+    {
+      "label": "first-playable",
+      "afterStartAckMs": 3347,
+      "swControlled": true,
+      "domFloor": 221,
+      "decodedFloor": 0,
+      "decodedObjects": 0,
+      "onScreenObjects": 39,
+      "firstPartyFloor": {
+        "total": 89,
+        "distinct": 86,
+        "headers": 0,
+        "good": 0,
+        "failures": 0,
+        "non200": 0,
+        "pendingHeaders": 89,
+        "pendingBodies": 0
+      },
+      "complexPictureRegions": 2
+    },
+    {
+      "label": "after-walk",
+      "afterStartAckMs": 5643,
+      "swControlled": true,
+      "domFloor": 243,
+      "decodedFloor": 0,
+      "decodedObjects": 0,
+      "onScreenObjects": 40,
+      "firstPartyFloor": {
+        "total": 100,
+        "distinct": 86,
+        "headers": 0,
+        "good": 0,
+        "failures": 0,
+        "non200": 0,
+        "pendingHeaders": 100,
+        "pendingBodies": 0
+      },
+      "complexPictureRegions": 4
+    },
+    {
+      "label": "post-move-6000",
+      "afterStartAckMs": 12363,
+      "swControlled": true,
+      "domFloor": 243,
+      "decodedFloor": 0,
+      "decodedObjects": 0,
+      "onScreenObjects": 40,
+      "firstPartyFloor": {
+        "total": 102,
+        "distinct": 86,
+        "headers": 0,
+        "good": 0,
+        "failures": 0,
+        "non200": 0,
+        "pendingHeaders": 102,
+        "pendingBodies": 0
+      },
+      "complexPictureRegions": 4
+    },
+    {
+      "label": "post-move-22000",
+      "afterStartAckMs": 27762,
+      "swControlled": true,
+      "domFloor": 243,
+      "decodedFloor": 0,
+      "decodedObjects": 0,
+      "onScreenObjects": 40,
+      "firstPartyFloor": {
+        "total": 102,
+        "distinct": 86,
+        "headers": 0,
+        "good": 0,
+        "failures": 0,
+        "non200": 0,
+        "pendingHeaders": 102,
+        "pendingBodies": 0
+      },
+      "complexPictureRegions": 4
+    },
+    {
+      "label": "post-move-45000",
+      "afterStartAckMs": 51080,
+      "swControlled": true,
+      "domFloor": 243,
+      "decodedFloor": 0,
+      "decodedObjects": 38,
+      "onScreenObjects": 40,
+      "firstPartyFloor": {
+        "total": 102,
+        "distinct": 86,
+        "headers": 0,
+        "good": 0,
+        "failures": 0,
+        "non200": 0,
+        "pendingHeaders": 102,
+        "pendingBodies": 0
+      },
+      "complexPictureRegions": 18
+    },
+    {
+      "label": "post-move-65000",
+      "afterStartAckMs": 71082,
+      "swControlled": true,
+      "domFloor": 0,
+      "decodedFloor": 0,
+      "decodedObjects": 38,
+      "onScreenObjects": 40,
+      "firstPartyFloor": {
+        "total": 102,
+        "distinct": 86,
+        "headers": 0,
+        "good": 0,
+        "failures": 0,
+        "non200": 0,
+        "pendingHeaders": 102,
+        "pendingBodies": 0
+      },
+      "complexPictureRegions": 18
+    },
+    {
+      "label": "terrain-window-end",
+      "afterStartAckMs": 73828,
+      "swControlled": true,
+      "domFloor": 0,
+      "decodedFloor": 0,
+      "decodedObjects": 38,
+      "onScreenObjects": 40,
+      "firstPartyFloor": {
+        "total": 102,
+        "distinct": 86,
+        "headers": 0,
+        "good": 0,
+        "failures": 0,
+        "non200": 0,
+        "pendingHeaders": 102,
+        "pendingBodies": 0
+      },
+      "complexPictureRegions": 18
+    }
+  ],
+  "firstPartyFloor": {
+    "requests": 102,
+    "distinct": 86,
+    "firstHeaderAfterRequestMs": 75773,
+    "headersReceived": 11,
+    "complete": 0
+  },
+  "cdpScopeNote": "The signed baseline collector included the game origin but omitted the /hotlink-ok CDN fallback prefix. It cannot count all CDN retries.",
+  "anonymous": {
+    "scope": "One ordinary game page, pre-auth, paired no-mutation image loads to same-origin and exact hotlink-safe release CDN.",
+    "controlled": true,
+    "cacheState": "registered",
+    "lanes": [
+      {
+        "prefix": "https://numeron.obelisk.build",
+        "decoded": 12,
+        "total": 12,
+        "elapsedMs": [
+          456,
+          202,
+          310,
+          1456,
+          286,
+          251,
+          444,
+          376,
+          523,
+          1456,
+          378,
+          1456
+        ]
+      },
+      {
+        "prefix": "https://assets.mir2.obelisk.build/hotlink-ok/",
+        "decoded": 12,
+        "total": 12,
+        "elapsedMs": [
+          479,
+          538,
+          525,
+          530,
+          489,
+          495,
+          583,
+          580,
+          600,
+          585,
+          599,
+          599
+        ]
+      }
+    ]
+  },
+  "sourceSha256": {
+    "trace": "9a249ebe758aa6c69e774f78283cc02cbd9635bf98f781b6c4b5ea108351320b",
+    "browser": "fb30dab67e7205d6c692f05a9bc2d51b82df4ce9ffcf89ac9af6dc928bd7b17b",
+    "anonymous": "abc656bf980eda6376d9db23bcba99d7494b8ea0ac31eb35a061d728cda6fc5b"
+  }
+}

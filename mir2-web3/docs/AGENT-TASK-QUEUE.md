@@ -21,7 +21,8 @@ Updated 2026-11-10 (Asia/Shanghai). Read [coordination](AGENT-ORCHESTRATION.md) 
 - [x] `534322e790` 将 NPC 专用词库移出首帧，角色元数据在地图解码后发出。隔离 Chrome 验证移动、对话包中断、重开后的简中对话及真实商店回包。正式域名和两个版本化脚本均读回。 [本机和发布回执](evidence/r16-npc-cold-entry-20261111/README.md)
 - [x] `e3e6f3f06f` 按真实数据进度读取地图正文。隔离 Chrome 以一次 Worker 请求收齐 14.35 秒正文并实际移动。停传一次同址重试，加载时正常退出取消旧读图，迟到正文没有应用。 [对照与正式发布](evidence/r16-map-body-progress-20261111/README.md)
 - [x] 公网 `d3e9ebfa6b` 通过简繁出码、Testnet 签名、选角、校验并安装比奇出生区静态地图、实走一格和正常退出。隔离 Chrome 验证动态入口阻断、错误文件回退和旧角色的独立落点。 [静态地图上线与首步](evidence/r16-static-entry-20261111/README.md)
-- [ ] 公开签名回放的地砖画面检查仍超时。继续核对已登录会话的原图资源请求、实际地砖像素、两种渲染路径和实体手机。 [视觉与网络回执](evidence/r16-static-entry-20261111/public-release.json)
+- [x] 公网 `f905435616` 实际签名进城后首屏 221 个地砖全部解码，219 个来自已校验的地砖包。实际截图、移动、退出通过，隔离三条正常与异常素材路径均通过。 [地砖复测](evidence/r16-public-terrain-20261111/README.md)
+- [ ] 继续公网建筑、角色贴图、其他地图、两种渲染路径和实体手机。保留旧版已登录黑屏的图片请求与实拍记录。 [旧版回执](evidence/r16-public-terrain-20261111/public-baseline.json)
 - [x] 比奇第一场景通过本机恢复及注销隔离，现网源码上的独立候选已构建并实测。继续受审切换及公网默认签名进城。 [发布候选](evidence/numeron-web-release-20261108/first-scene-release-candidate-20261110.json)
 - [x] Web 与 Windows 原版钓鱼声画及收线按钮，三秒期限、同批收线重抛和私有进度回包通过本机验收。服务器原版节奏和独立概率分支已通过定向测试，普通 Web 双路和二进制 TCP 实测 31 步、续抛、手动收线及读档。 [钓鱼记录](evidence/r16-web-fishing-loop-20261110/README.md#原版抛竿节奏与概率)
 - [x] 鱼钩与探测器收线磨损、零耐久移除和冷登录旁观者跨视野回包已复测。保持原版进视野的等待姿态，公开状态边走实时队列。 [磨损和跨视野回执](evidence/r16-web-fishing-loop-20261110/README.md#鱼具磨损与跨视野)
@@ -95,7 +96,7 @@ Updated 2026-11-10 (Asia/Shanghai). Read [coordination](AGENT-ORCHESTRATION.md) 
 - [ ] 拖动图标、水面波纹、声音时点、自动重抛动画、Windows 窗口与发行素材闭包另验。继续其余技能。
 - [x] 第一方中继及出码限时已发布到公网 `83eadf4f`。直连真实出码、官方钱包手机尺寸 PWA 确认、兑换、比奇渲染和正常退出通过。 [发布与链路证据](evidence/numeron-web-release-20261108/qr-first-party-relay-20261110.json)
 - [x] 公网 `a23cc382` 简中、繁中普通冷启动第一次点击均出码并收到待确认。默认网络实际签名、兑换、建角、进游戏权威回包与正常退出通过；直连完成比奇画面。 [本轮发布与实测](evidence/numeron-web-release-20261108/qr-login-startup-public-20261110.json)
-- [ ] 默认代理在 120 秒内仍未通过比奇资源准备。继续该网络路径的场景加载与实体手机相机验收。
+- [ ] 公网默认系统网络已验证首屏地面。建筑和角色的完整入场画面、实体手机相机及其他网络条件继续验收。 [公开回放](evidence/r16-public-terrain-20261111/README.md)
 - [ ] 继续 Native 招募及建职阶、仓库重复刷新和取回反馈、阿洛跨端实战及完整 Hosted 链路。
 - [x] 交易自身物品待回执的取消及同owner/partner重复接受已完成限定代码修复；原Page105/社交31/适配器507组/TS及两场隔离浏览器证据保留。共用八项见后续独立记录，完整Trade与公开发行仍未完成。[原本轮范围](evidence/r16-web-trade-20261109/README.md)
 - [x] 公会职级改名／单项权限／草稿／层级／广播／重登已在 WebGL2-shared 和默认 WebGPU 的普通界面通过；新鲜限定39／TS通过，修正选中态边框冲突。[当前范围](WEB-R16-PARITY-GOAL.zh-CN.md#公会职级普通流程2026-11-08)
