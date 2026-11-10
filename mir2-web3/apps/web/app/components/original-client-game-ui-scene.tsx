@@ -8,6 +8,7 @@ import { memo, useEffect, useLayoutEffect, useRef, useState, type PointerEvent }
 
 import { useWorldSelector } from "../../lib/world-model";
 import type { WorldStore } from "../../lib/world-model";
+import type { R16NativeLanguage } from "../../lib/r16-native-localization";
 import type { CharacterTabKey, InventoryTabKey } from "../../lib/original-ui";
 import { IS_PLATINUM_176_PROFILE } from "../../lib/content-profile";
 import { MainHud, MainHudStatus, HudSpriteFallback } from "./original-client-overlays";
@@ -130,6 +131,7 @@ type GameUiSceneProps = {
   onOpenCharacterTab: (tab: CharacterTabKey) => void;
   onOpenInventoryTab: (tab: InventoryTabKey) => void;
   onSelectNpcDialogTarget: (target: string) => void;
+  npcDialogLanguage?: R16NativeLanguage;
   onSubmitNpcInput: (value: string) => void;
   onUseItem: (item: ItemActionRef) => void;
   onReadItemTooltip?: (item: Readonly<DisplayItem>) => CrystalTooltipDocument | null;
@@ -226,6 +228,7 @@ function GameUiSceneInner({
   onOpenCharacterTab,
   onOpenInventoryTab,
   onSelectNpcDialogTarget,
+  npcDialogLanguage,
   onSubmitNpcInput,
   onUseItem, onReadItemTooltip, onReadEquipmentItemTooltip,
   onDropItem,
@@ -735,6 +738,7 @@ function GameUiSceneInner({
             setDismissedDialogKey(dialogKey);
           }}
           onSelectTarget={onSelectNpcDialogTarget}
+          displayLanguage={npcDialogLanguage}
           onSubmitInput={onSubmitNpcInput}
         />
       ) : null}

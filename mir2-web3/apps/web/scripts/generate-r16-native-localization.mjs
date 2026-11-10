@@ -9,6 +9,9 @@ const DIRECTORY = "packages/game-data/data/native-i18n";
 const OUTPUT = resolve(ROOT, "apps/web/lib/generated/r16-native-localization.json");
 const STARTUP_OUTPUT = resolve(ROOT, "apps/web/lib/generated/r16-native-localization-startup.json");
 const GAMEPLAY_OUTPUT = resolve(ROOT, "apps/web/lib/generated/r16-native-localization-gameplay.json");
+const GAMEPLAY_NPC_OUTPUT = resolve(ROOT, "apps/web/lib/generated/r16-native-localization-gameplay-npc.json");
+// The fishing pane uses this authored NPC phrase as its accessible name.
+const FISHING_EQUIPMENT_LABEL = "npc.prose.e2eed1b4d37624b7";
 const BASE = ["common", "content", "shell", "quest", "game", "help", "npc-menus", "npc-prose"];
 const AUTHORED = ["periodic", "conquest", "wallet", "procurement"];
 const EXPANSION = ["ru", "hi", "id", "vi", "th", "ar"];
@@ -190,19 +193,38 @@ export function partitionR16NativeLocalization(bundle) {
   return { startup, gameplay };
 }
 
+/** Keep complete locale vectors and record the NPC rows' original positions. */
+export function partitionR16GameplayLocalization(gameplay) {
+  const gameplaySha256 = hash(encodeR16NativeLocalization(gameplay));
+  const core = { gameplaySha256, entries: [] };
+  const npc = { gameplaySha256, spans: [], entries: [] };
+  for (const [index, entry] of gameplay.entries.entries()) {
+    if (entry.domain !== "npc" || entry.key === FISHING_EQUIPMENT_LABEL) {
+      core.entries.push(entry);
+      continue;
+    }
+    npc.entries.push(entry);
+    const span = npc.spans.at(-1);
+    if (span && span.start + span.count === index) span.count += 1;
+    else npc.spans.push({ start: index, count: 1 });
+  }
+  return { core, npc };
+}
+
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   assert(process.argv.slice(2).every(arg => arg === "--check") && process.argv.length <= 3, "only --check is supported");
   const result = buildR16NativeLocalization(), bytes = encodeR16NativeLocalization(result);
   const { startup, gameplay } = partitionR16NativeLocalization(result);
+  const { core, npc } = partitionR16GameplayLocalization(gameplay);
   const outputs = [[OUTPUT, bytes], [STARTUP_OUTPUT, encodeR16NativeLocalization(startup)],
-    [GAMEPLAY_OUTPUT, encodeR16NativeLocalization(gameplay)]];
+    [GAMEPLAY_OUTPUT, encodeR16NativeLocalization(core)], [GAMEPLAY_NPC_OUTPUT, encodeR16NativeLocalization(npc)]];
   const checked = process.argv.includes("--check");
   if (!checked) mkdirSync(dirname(OUTPUT), { recursive: true });
   for (const [path, encoded] of outputs) {
     if (checked) assert(readFileSync(path, "utf8") === encoded, `generated browser catalog is stale ${path}`);
     else writeFileSync(path, encoded, "utf8");
   }
-  console.log(JSON.stringify({ checked: process.argv.includes("--check"), languages: result.languages.map(language => language.code),
+  console.log(JSON.stringify({ checked, languages: result.languages.map(language => language.code),
     keys: result.entries.length, sourcePins: Object.keys(result.sourcePins).length, slotExceptions: result.slotExceptions.length,
     bytes: Buffer.byteLength(bytes), sha256: hash(bytes), startupKeys: startup.entries.length, gameplayKeys: gameplay.entries.length }));
 }

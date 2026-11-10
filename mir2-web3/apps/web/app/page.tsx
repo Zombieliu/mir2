@@ -45,7 +45,7 @@ import {
   type Mir2Language,
 } from "../lib/localization";
 import { R16_FULL_CJK_FONT_CSS } from "../lib/r16-cjk-fonts";
-import { hasR16GameplayLocalization, loadR16GameplayLocalization } from "../lib/r16-native-localization";
+import { hasR16GameplayLocalization, hasR16NpcLocalization, loadR16GameplayLocalization, loadR16NpcLocalization } from "../lib/r16-native-localization";
 import { commerceRuntimeLanguage, questRuntimeLanguage } from "../lib/r16-runtime-language";
 import { r16QuestGuidanceProfile, shouldAutoStartR16Tutorial } from "../lib/r16-gameplay-baseline";
 import { localizeQuestLog } from "../lib/quest-localization";
@@ -3340,6 +3340,10 @@ export default function HomePage() {
   const shouldLoadGameplayLocale = screen !== "login";
   const [assetFirstPlayable, setAssetFirstPlayable] = useState(false);
   const shouldBootBevyRuntime = screen === "game" && assetFirstPlayable;
+  const [npcLocaleReady, setNpcLocaleReady] = useState(hasR16NpcLocalization);
+  const npcLanguage = questDisplayLanguage(language);
+  const npcDialogLanguage = npcLocaleReady ? npcLanguage : undefined;
+  const npcLocaleDialogId = shouldBootBevyRuntime && npcLanguage ? world.activeNpcDialog?.npcObjectId : undefined;
   const [isClientReady, setIsClientReady] = useState(false);
   // Refresh memoized presentation once when the second catalog becomes usable.
   const t = useMemo(() => buildTranslator(language), [language, gameplayLocaleReady]);
@@ -3612,6 +3616,22 @@ export default function HomePage() {
     // The readiness helper only uses stable refs and state setters.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [shouldLoadGameplayLocale, gameplayLocaleReady, gameplayLocaleAttempt]);
+
+  useEffect(() => {
+    if (!npcLocaleDialogId || npcLocaleReady) return;
+    let current = true;
+    markMir2CacheMilestone("npcLocaleStart");
+    // Keep the server's dialog usable while the display-only text arrives.
+    // Reopening after a failed request gives the shared loader another attempt.
+    void loadR16NpcLocalization().then(() => {
+      if (!current) return;
+      setNpcLocaleReady(true);
+      markMir2CacheMilestone("npcLocaleReady");
+    }, () => {
+      if (current) markMir2CacheMilestone("npcLocaleFailed");
+    });
+    return () => { current = false; };
+  }, [npcLocaleDialogId, npcLocaleReady]);
 
   function handleSceneAssetReadinessChange(readiness: SceneAssetReadiness) {
     sceneAssetReadinessRef.current = readiness;
@@ -21505,7 +21525,7 @@ export default function HomePage() {
         quests: projectBevyQuests(localizeQuestLog(current.questLog, t), questAuthoritativeStageByIdRef.current),
         completedKnown: completedQuestHistoryRef.current.known,
         completedQuestIds: completedQuestHistoryRef.current.ids,
-        dialog: projectBevyQuestDialog(current.activeNpcDialog, questDisplayLanguage(language)),
+        dialog: projectBevyQuestDialog(current.activeNpcDialog, npcDialogLanguage),
         player: { hp: current.playerHp ?? player?.hp ?? 0, maxHp: current.playerMaxHp ?? player?.maxHp ?? 0,
           mp: current.playerMp, maxMp: current.playerMaxMp,
           experience: experiencePair?.experience ?? null,
@@ -21519,7 +21539,7 @@ export default function HomePage() {
     onOpenChange: (open) => { if (!navigateSharedHud({ type: open ? "openQuest" : "closeQuest" })) setShowQuestLog(open); },
   });
   useLayoutEffect(() => { bevyQuestUi.refresh(); }, [bevyQuestUi.refresh, hpOrbPageBlocked,
-    world.playerExperience, world.playerMaxExperience, world.currentWeight, world.maxWeight, language]);
+    world.playerExperience, world.playerMaxExperience, world.currentWeight, world.maxWeight, language, npcDialogLanguage]);
 
 
   const bevyHudUi = useBevyHudUi({
@@ -21968,6 +21988,7 @@ export default function HomePage() {
       onApproachTarget={onApproachTarget}
       onPrimaryTargetAction={onPrimaryTargetAction}
       onSelectNpcDialogTarget={(target) => send({ type: "selectNpcDialog", target })}
+      npcDialogLanguage={npcDialogLanguage}
       onSubmitNpcInput={(value) => send({ type: "submitNpcInput", value })}
       onSelectCharacter={setSelectedCharacterIndex}
       onEnterWorld={startSelectedCharacter}

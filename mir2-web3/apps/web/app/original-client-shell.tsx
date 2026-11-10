@@ -719,6 +719,7 @@ export function OriginalClientShell({
   onApproachTarget,
   onPrimaryTargetAction,
   onSelectNpcDialogTarget,
+  npcDialogLanguage,
   onSubmitNpcInput,
   onSelectCharacter,
   onEnterWorld,
@@ -1968,9 +1969,12 @@ export function OriginalClientShell({
       !missingSceneSpriteLibrariesRef.current.has(libraryKey),
   );
   const sceneSpriteLibrariesReady = pendingSceneSpriteLibraryKeys.length === 0;
+  const hasSceneMapRegion = Boolean(world.originalMapRegion);
 
   useEffect(() => {
-    if (screen !== "game") {
+    // Actor metadata is independent of the authoritative map. Start it after
+    // the region is installed so it does not compete with the first map read.
+    if (screen !== "game" || !hasSceneMapRegion) {
       return;
     }
 
@@ -2018,7 +2022,7 @@ export function OriginalClientShell({
           sceneSpriteLibraryInFlightRef.current.delete(libraryKey);
         });
     }
-  }, [desiredSceneSpriteLibraryKey, sceneSpriteLibraries, screen]);
+  }, [desiredSceneSpriteLibraryKey, hasSceneMapRegion, sceneSpriteLibraries, screen]);
 
   const sceneNow = motionNow;
   entityMotionSnapshotsRef.current = refreshEntityMotionSnapshots(
@@ -5640,6 +5644,7 @@ export function OriginalClientShell({
                   onOpenCharacterTab,
                   onOpenInventoryTab: openNpcRepairBagPage,
                   onSelectNpcDialogTarget,
+                  npcDialogLanguage,
                   onSubmitNpcInput,
                   onUseItem, onReadItemTooltip, onReadEquipmentItemTooltip,
                   onDropItem,

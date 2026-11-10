@@ -4,21 +4,25 @@ import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import test from "node:test";
 import ts from "typescript";
-import { buildR16NativeLocalization, encodeR16NativeLocalization, partitionR16NativeLocalization, R16_NATIVE_SLOT_EXCEPTIONS } from "./generate-r16-native-localization.mjs";
+import { buildR16NativeLocalization, encodeR16NativeLocalization, partitionR16GameplayLocalization, partitionR16NativeLocalization, R16_NATIVE_SLOT_EXCEPTIONS } from "./generate-r16-native-localization.mjs";
 
 const ROOT = resolve(import.meta.dirname, "../../.."), DATA = "packages/game-data/data/native-i18n";
 const read = relative => readFileSync(resolve(ROOT, relative), "utf8");
 const generatedBytes = read("apps/web/lib/generated/r16-native-localization.json"), generated = JSON.parse(generatedBytes);
 const startupPath = "./generated/r16-native-localization-startup.json";
 const gameplayPath = "./generated/r16-native-localization-gameplay.json";
+const npcPath = "./generated/r16-native-localization-gameplay-npc.json";
+const { startup, gameplay } = partitionR16NativeLocalization(generated);
+const { core, npc } = partitionR16GameplayLocalization(gameplay);
 const order = ["zh-CN", "zh-TW", "en", "pt-BR", "ru", "hi", "id", "vi", "th", "ar"];
-function helper(data = generated, readGameplay) {
+function helper(data = generated, readGameplay = () => core, readNpc = () => npc) {
   const exports = {}, source = read("apps/web/lib/r16-native-localization.ts");
   const code = ts.transpileModule(source, { compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.CommonJS, esModuleInterop: true } }).outputText;
   new Function("exports", "require", code)(exports, name => {
     if (name === startupPath) return data;
-    assert.equal(name, gameplayPath);
-    return readGameplay();
+    if (name === gameplayPath) return readGameplay();
+    assert.equal(name, npcPath);
+    return readNpc();
   });
   return exports;
 }
@@ -32,46 +36,123 @@ function entry(key, en, zh, aliases = [], domain = "system", extra = {}) {
   return { key, values: order.map(code => code === "zh-CN" ? zh : en), aliases, domain, ...extra };
 }
 function synthetic(entries) { return helper({ languages: generated.languages, entries }); }
+async function syntheticWithNpc(entries) {
+  const packs = partitionR16GameplayLocalization({ entries });
+  const api = helper({ languages: generated.languages, entries: [] }, () => packs.core, () => packs.npc);
+  await api.loadR16NpcLocalization();
+  return api;
+}
 
-test("the startup and gameplay catalogs preserve every Native row without shipping the complete catalog on login", async () => {
-  const { startup, gameplay } = partitionR16NativeLocalization(generated);
-  for (const [file, pack] of [[startupPath, startup], [gameplayPath, gameplay]]) {
-    assert.equal(read(`apps/web/lib/${file.slice(2)}`), encodeR16NativeLocalization(pack));
+test("the startup, core and NPC catalogs preserve every Native row and original matcher order", async () => {
+  for (const [file, pack] of [[startupPath, startup], [gameplayPath, core], [npcPath, npc]]) {
+    assert.equal(read("apps/web/lib/" + file.slice(2)), encodeR16NativeLocalization(pack));
   }
   assert(Buffer.byteLength(encodeR16NativeLocalization(startup)) < Buffer.byteLength(generatedBytes) * 0.3);
-  const joined = new Map([...startup.entries, ...gameplay.entries].map(row => [row.key, row]));
-  assert.equal(startup.entries.length + gameplay.entries.length, generated.entries.length);
+  assert(Buffer.byteLength(encodeR16NativeLocalization(core)) < Buffer.byteLength(encodeR16NativeLocalization(gameplay)) * 0.75);
+  const restored = [...core.entries];
+  let npcAt = 0;
+  for (const { start, count } of npc.spans) {
+    restored.splice(start, 0, ...npc.entries.slice(npcAt, npcAt + count));
+    npcAt += count;
+  }
+  assert.equal(encodeR16NativeLocalization({ entries: restored }), encodeR16NativeLocalization(gameplay));
+  assert.equal(npcAt, npc.entries.length);
+  const joined = new Map([...startup.entries, ...restored].map(row => [row.key, row]));
   assert.equal(joined.size, generated.entries.length);
-  let reads = 0;
+  assert(npc.entries.every(row => row.domain === "npc"));
+  assert(core.entries.some(row => row.key === "npc.prose.e2eed1b4d37624b7"));
+  assert(core.entries.some(row => row.key === "npc.shop.synchronizing"));
+
+  let coreReads = 0, npcReads = 0;
   const native = helper(startup, () => {
-    reads++;
-    if (reads === 1) throw new Error("chunk unavailable");
-    return gameplay;
+    coreReads++;
+    if (coreReads === 1) throw new Error("core chunk unavailable");
+    return core;
+  }, () => {
+    npcReads++;
+    if (npcReads === 1) throw new Error("NPC chunk unavailable");
+    return npc;
   });
   for (const row of startup.entries.filter(row => /^(?:shell|wallet)\./.test(row.key))) {
     for (const [index, language] of order.entries()) assert.equal(native.nativeText(language, row.key), row.values[index]);
   }
-  assert.equal(reads, 0);
+  assert.equal(coreReads, 0);
+  assert.equal(npcReads, 0);
   assert.equal(native.hasR16GameplayLocalization(), false);
-  assert.equal(native.nativeText("zh-CN", gameplay.entries[0].key), gameplay.entries[0].key);
-  const failed = native.loadR16GameplayLocalization();
-  assert.equal(native.loadR16GameplayLocalization(), failed);
-  await assert.rejects(failed, /chunk unavailable/);
+  assert.equal(native.hasR16NpcLocalization(), false);
+  assert.equal(native.nativeText("zh-CN", core.entries[0].key), core.entries[0].key);
+  const failedCore = native.loadR16GameplayLocalization();
+  assert.equal(native.loadR16GameplayLocalization(), failedCore);
+  await assert.rejects(failedCore, /core chunk unavailable/);
   assert.equal(native.hasR16GameplayLocalization(), false);
   await native.loadR16GameplayLocalization();
   assert.equal(native.hasR16GameplayLocalization(), true);
   await native.loadR16GameplayLocalization();
-  assert.equal(reads, 2);
+  assert.equal(coreReads, 2);
+  assert.equal(npcReads, 0);
+  assert.equal(native.hasR16NpcLocalization(), false);
+  assert.equal(native.nativeText("zh-CN", "npc.prose.e2eed1b4d37624b7"), joined.get("npc.prose.e2eed1b4d37624b7").values[0]);
+  assert.equal(native.nativeText("zh-CN", npc.entries[0].key), npc.entries[0].key);
+  assert.equal(native.nativeNpcDisplayText("zh-CN", "View{/CORAL}"), "View{/CORAL}");
+  assert.equal(native.nativeSystemText("zh-CN", "View", "npc"), "View");
+
+  const failedNpc = native.loadR16NpcLocalization();
+  assert.equal(native.loadR16NpcLocalization(), failedNpc);
+  await assert.rejects(failedNpc, /NPC chunk unavailable/);
+  assert.equal(native.hasR16GameplayLocalization(), true);
+  assert.equal(native.hasR16NpcLocalization(), false);
+  await native.loadR16NpcLocalization();
+  await native.loadR16NpcLocalization();
+  assert.equal(native.hasR16NpcLocalization(), true);
+  assert.equal(coreReads, 2);
+  assert.equal(npcReads, 2);
   for (const row of generated.entries) {
     assert.deepEqual(joined.get(row.key), row);
     for (const [index, language] of order.entries()) assert.equal(native.nativeText(language, row.key), row.values[index]);
   }
 });
 
+test("the NPC loader waits for core and rejects a mismatched or malformed pack without installing rows", async () => {
+  const attempts = [
+    { ...npc, gameplaySha256: "0".repeat(64) },
+    { ...npc, spans: [{ start: 0, count: npc.entries.length + 1 }] },
+    npc,
+  ];
+  let coreReads = 0, npcReads = 0;
+  const native = helper(startup, () => { coreReads++; return core; }, () => attempts[npcReads++]);
+  const optional = native.loadR16NpcLocalization();
+  assert.equal(native.loadR16NpcLocalization(), optional);
+  await native.loadR16GameplayLocalization();
+  assert.equal(coreReads, 1);
+  await assert.rejects(optional, /does not match/);
+  await assert.rejects(native.loadR16NpcLocalization(), /invalid row positions/);
+  assert.equal(native.hasR16GameplayLocalization(), true);
+  assert.equal(native.hasR16NpcLocalization(), false);
+  assert.equal(native.nativeText("zh-CN", npc.entries[0].key), npc.entries[0].key);
+  await native.loadR16NpcLocalization();
+  assert.equal(npcReads, 3);
+  assert.equal(native.nativeText("zh-CN", npc.entries[0].key), npc.entries[0].values[0]);
+});
+
+test("installing NPC rows preserves equal-template precedence and the system matcher", async () => {
+  const rows = [
+    entry("npc.first", " Greeting {0} ", " 问候{0} ", [" Welcome {0} "], "npc"),
+    entry("periodic.second", " Greeting {0} ", " 问候{0} ", ["Welcome {0}"], "both"),
+  ];
+  const packs = partitionR16GameplayLocalization({ entries: rows });
+  const native = helper({ languages: generated.languages, entries: [] }, () => packs.core, () => packs.npc);
+  await native.loadR16GameplayLocalization();
+  assert.equal(native.nativeSystemText("zh-CN", "Welcome 阿洛"), " 问候阿洛 ");
+  assert.equal(native.nativeNpcDisplayText("zh-CN", "Welcome 阿洛"), "Welcome 阿洛");
+  await native.loadR16NpcLocalization();
+  assert.equal(native.nativeNpcDisplayText("zh-CN", "Welcome 阿洛"), "问候阿洛");
+  assert.equal(native.nativeSystemText("zh-CN", "Welcome 阿洛"), " 问候阿洛 ");
+});
+
 test("installing the gameplay catalog discards the partial system alias index", async () => {
   const alias = "An authored phrase";
   const native = helper({ languages: generated.languages, entries: [entry("client.example", "Shell copy", "外壳", [alias])] },
-    () => ({ entries: [entry("content.example", "Game copy", "游戏", [alias])] }));
+    () => partitionR16GameplayLocalization({ entries: [entry("content.example", "Game copy", "游戏", [alias])] }).core);
   assert.equal(native.nativeSystemText("zh-CN", alias), "外壳");
   await native.loadR16GameplayLocalization();
   assert.equal(native.nativeSystemText("zh-CN", alias), alias);
@@ -165,8 +246,8 @@ test("metadata and keyed display match the generated Native source, and unknown 
   assert.equal(api.nativeText("ru", "missing.key"), "missing.key");
 });
 
-test("system aliases match complete owned strings only, preserve unknown text, and keep NPC/context ambiguity separate", () => {
-  const api = synthetic([
+test("system aliases match complete owned strings only, preserve unknown text, and keep NPC/context ambiguity separate", async () => {
+  const api = await syntheticWithNpc([
     entry("ui.gold", "Gold", "金币"), entry("ui.return", "Return", "交还"), entry("npc.return", "Return", "返回", [], "npc"),
     entry("ui.shared1", "Shared", "甲"), entry("ui.shared2", "Shared", "乙"),
   ]);
@@ -203,16 +284,17 @@ test("bounded whole-template matching inserts opaque names once, retains color m
   assert.equal(api.nativeSystemText("zh-CN", "Deer Gold"), "Deer Gold", "a bare capture template cannot establish system vocabulary");
 });
 
-test("real authored NPC prose, fixed canonical aliases and embedded monthly-card names use the same generated source", () => {
-  const api = helper(), source = generated.entries.find(entry => entry.key === "npc.prose.00d86dfbcdfdbb82");
+test("real authored NPC prose, fixed canonical aliases and embedded monthly-card names use the same generated source", async () => {
+  const api = helper(startup), source = generated.entries.find(entry => entry.key === "npc.prose.00d86dfbcdfdbb82");
+  await api.loadR16NpcLocalization();
   assert.equal(api.nativeSystemText("zh-CN", source.values[order.indexOf("en")], "npc"), source.values[0]);
   assert.equal(api.nativeSystemText("zh-CN", "MonthlyCard30Days"), api.nativeText("zh-CN", "billing.monthlyCardItemName"));
   const canonical = generated.entries.find(entry => entry.aliases.includes("RakingCat") && entry.key.startsWith("content.monster."));
   assert(canonical); assert.equal(api.nativeText("zh-CN", canonical.key), canonical.values[0]);
 });
 
-test("NPC display matches static colour-decorated script copy and keeps captured names opaque", () => {
-  const api = synthetic([
+test("NPC display matches static colour-decorated script copy and keeps captured names opaque", async () => {
+  const api = await syntheticWithNpc([
     entry("npc.view", "View", "查看", [], "npc"),
     entry("npc.hello", "Hello {npc_arg0}, welcome!", "你好{npc_arg0}，欢迎！", [], "npc"),
   ]);

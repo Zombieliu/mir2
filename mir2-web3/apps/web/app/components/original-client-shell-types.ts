@@ -3,6 +3,7 @@ import type { ChatUiControls, CashPreviewLayerDocument } from "../../lib/client-
 import type { MapImageRouteSource, MapImageRouteIntent } from "../../lib/client-map-input";
 import type { ClientScreen, CharacterTabKey, InventoryTabKey } from "../../lib/original-ui";
 import type { buildTranslator, Mir2Language } from "../../lib/localization";
+import type { R16NativeLanguage } from "../../lib/r16-native-localization";
 import type { NpcGoldBuyQuote } from "../../lib/bevy-npc-shop-buy";
 import type { BagBeltCallbacks } from "../../lib/bag-belt-gesture";
 import type { WorldFishingCallbacks, WorldFishingGesture } from "../../lib/world-fishing-input";
@@ -426,6 +427,7 @@ export type OriginalClientShellProps = BagBeltCallbacks & WorldFishingCallbacks 
   onApproachTarget: () => void;
   onPrimaryTargetAction: () => void;
   onSelectNpcDialogTarget: (target: string) => void;
+  npcDialogLanguage?: R16NativeLanguage;
   onSubmitNpcInput: (value: string) => void;
   onSelectCharacter: (index: number) => void;
   onEnterWorld: () => void;

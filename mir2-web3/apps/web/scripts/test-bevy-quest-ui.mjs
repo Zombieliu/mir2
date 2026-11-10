@@ -20,7 +20,8 @@ function load(relative, dependencies = {}) {
         return load(`../lib/${name.slice(2)}.ts`);
       if (name === "./bevy-bag-model") return load("../lib/bevy-bag-model.ts");
       if (name === "./r16-native-localization") return nativeLocalization;
-      if (["./generated/r16-native-localization-startup.json", "./generated/r16-native-localization-gameplay.json"].includes(name))
+      if (["./generated/r16-native-localization-startup.json", "./generated/r16-native-localization-gameplay.json",
+        "./generated/r16-native-localization-gameplay-npc.json"].includes(name))
         return { default: JSON.parse(readFileSync(new URL("../lib/" + name.slice(2), import.meta.url), "utf8")) };
       if (name === "./world-model/item-identity") return load("../lib/world-model/item-identity.ts");
       throw new Error(`Unexpected dependency ${name}`);
@@ -51,10 +52,14 @@ test("optional Native display locales are independent of four-language wire and 
     assert.equal(host.readBevyQuestUiStatus(runtime(bad), 1), null);
   assert(host.readBevyQuestUiStatus(runtime({ ...current, displayLanguage: null }), 1));
 });
-test("NPC display uses Native prose while target, input, name and disabled state remain opaque", () => {
+test("NPC display defers Native prose while target, input, name and disabled state remain opaque", async () => {
   const source = { npcObjectId: "658", npcName: "View{/CORAL}", title: "", body: ["Hello there! How may I help you?{/CORAL}"],
     footer: "", links: [{ text: "View", target: "@BuySell", enabled: false }], input: { text: "View" } };
-  const before = structuredClone(source), result = host.projectBevyQuestDialog(source, "zh-CN");
+  const before = structuredClone(source);
+  const pending = host.projectBevyQuestDialog(source, "zh-CN");
+  assert.equal(pending.lines[0], source.body[0]); assert.equal(pending.options[0].label, "View");
+  await nativeLocalization.loadR16NpcLocalization();
+  const result = host.projectBevyQuestDialog(source, "zh-CN");
   assert.deepEqual(source, before);
   assert.equal(result.npcName, source.npcName); assert.equal(result.options[0].optionId, "@BuySell");
   assert.equal(result.options[0].enabled, false); assert.equal(result.hasInput, true);

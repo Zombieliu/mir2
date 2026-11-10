@@ -8,28 +8,86 @@ export type R16NativeLanguageInfo = Readonly<{
 }>;
 type Entry = { key: string; values: string[]; aliases: string[]; domain: string; systemMatch?: false };
 type Catalog = { languages: R16NativeLanguageInfo[]; entries: Entry[] };
+type GameplayCatalog = { gameplaySha256: string; entries: Entry[] };
+type NpcCatalog = GameplayCatalog & { spans: { start: number; count: number }[] };
 const catalog: Catalog = startup as Catalog;
 const languages = new Map<string, { index: number; info: R16NativeLanguageInfo }>(catalog.languages.map((info, index) =>
   [info.code, { index, info: Object.freeze({ ...info }) }]));
 const entries = new Map(catalog.entries.map(entry => [entry.key, entry]));
-let gameplayReady = false;
+let gameplayCatalog: GameplayCatalog | null = null;
 let gameplayRequest: Promise<void> | null = null;
+let npcReady = false;
+let npcRequest: Promise<void> | null = null;
 
 export function hasR16GameplayLocalization(): boolean {
-  return gameplayReady;
+  return gameplayCatalog !== null;
 }
 
-/** Called after authentication. All locales use the same alias and ambiguity index. */
+/** Called after authentication. The first playable frame needs only the core catalog. */
 export function loadR16GameplayLocalization(): Promise<void> {
-  if (gameplayReady) return Promise.resolve();
+  if (gameplayCatalog) return Promise.resolve();
   gameplayRequest ??= import(/* webpackChunkName: "r16-gameplay-locales" */ "./generated/r16-native-localization-gameplay.json")
     .then(({ default: gameplay }) => {
-      for (const entry of gameplay.entries as Entry[]) entries.set(entry.key, entry);
+      const core = gameplay as GameplayCatalog;
+      for (const entry of core.entries) entries.set(entry.key, entry);
       indexes.clear();
-      gameplayReady = true;
+      gameplayCatalog = core;
     })
     .finally(() => { gameplayRequest = null; });
   return gameplayRequest;
+}
+
+export function hasR16NpcLocalization(): boolean {
+  return npcReady;
+}
+
+export function loadR16NpcLocalization(): Promise<void> {
+  if (npcReady) return Promise.resolve();
+  npcRequest ??= loadR16GameplayLocalization()
+    .then(() => import(/* webpackChunkName: "r16-npc-locales" */ "./generated/r16-native-localization-gameplay-npc.json"))
+    .then(({ default: npc }) => {
+      const gameplay = orderedGameplayWithNpc(npc as NpcCatalog);
+      entries.clear();
+      for (const entry of catalog.entries) entries.set(entry.key, entry);
+      for (const entry of gameplay) entries.set(entry.key, entry);
+      // Pure NPC rows cannot alter the already-built system matcher.
+      indexes.delete("npc");
+      npcReady = true;
+    })
+    .finally(() => { npcRequest = null; });
+  return npcRequest;
+}
+
+function orderedGameplayWithNpc(npc: NpcCatalog): Entry[] {
+  const core = gameplayCatalog;
+  if (!core || npc.gameplaySha256 !== core.gameplaySha256 || !/^[a-f0-9]{64}$/.test(core.gameplaySha256)) {
+    throw new Error("R16 NPC localization does not match the gameplay catalog.");
+  }
+  // Retain the original row order because two identical value vectors can
+  // share a source template with different trim behavior.
+  const ordered = new Array<Entry | undefined>(core.entries.length + npc.entries.length);
+  const npcKeys = new Set<string>();
+  let npcAt = 0;
+  let previousEnd = 0;
+  for (const { start, count } of npc.spans) {
+    const end = start + count;
+    if (!Number.isSafeInteger(start) || start < previousEnd || !Number.isSafeInteger(count) || count < 1 ||
+        end > ordered.length || npcAt + count > npc.entries.length) {
+      throw new Error("R16 NPC localization has invalid row positions.");
+    }
+    for (let index = start; index < end; index += 1) {
+      const entry = npc.entries[npcAt++];
+      if (!entry || entry.domain !== "npc" || entries.has(entry.key) || npcKeys.has(entry.key)) {
+        throw new Error("R16 NPC localization has an invalid dialog entry.");
+      }
+      npcKeys.add(entry.key);
+      ordered[index] = entry;
+    }
+    previousEnd = end;
+  }
+  if (npcAt !== npc.entries.length) throw new Error("R16 NPC localization has invalid row positions.");
+  let coreAt = 0;
+  return Array.from(ordered, entry => entry ?? core.entries[coreAt++]);
 }
 
 /** Unknown codes stay explicit; locale aliases and old Spanish preferences belong to the host. */
@@ -58,7 +116,7 @@ function stripNpcDisplayColours(source: string): string {
  * normalized captures are never rematched as templates. Targets stay separate. */
 export function nativeNpcDisplayText(language: string, source: string): string {
   const locale = languages.get(language);
-  if (!locale || typeof source !== "string" || source.length > 32768) return source;
+  if (!npcReady || !locale || typeof source !== "string" || source.length > 32768) return source;
   const index = indexFor("npc");
   if (index.exact.has(source)) {
     const entry = index.exact.get(source);
@@ -188,7 +246,8 @@ function lookup(source: string, locale: number, domain: Domain, npcDisplay = fal
  */
 export function nativeSystemText(language: string, systemText: string, domain: Domain = "system"): string {
   const locale = languages.get(language);
-  if (!locale || typeof systemText !== "string" || systemText.length > 16_384 || !["system", "npc"].includes(domain)) return systemText;
+  if (!locale || typeof systemText !== "string" || systemText.length > 16_384 ||
+      !["system", "npc"].includes(domain) || (domain === "npc" && !npcReady)) return systemText;
   const translate = (source: string): string => {
     const found = lookup(source, locale.index, domain) ?? (domain === "npc" ? lookup(source, locale.index, "system") : null);
     if (found !== null) return found;
