@@ -1,5 +1,19 @@
 # Numeron R16 Web 发布记录
 
+## 2026-11-10 第一方扫码中继与出码读取
+
+Numeron 游戏部署改用 `relay.dubhe.obelisk.build`，复用已在线的 Dubhe 中继和官方钱包批准页面。第一轮用同一 `f2de762309` 产品代码和固定资源先出候选，再切游戏域名的部署指向。候选和公网均验证了实际创建会话及待确认查询。 [隔离构建](https://github.com/Zombieliu/mir2/actions/runs/42731630805) · [切换记录](https://github.com/Zombieliu/mir2/actions/runs/42732390871)
+
+直连浏览器第二轮实拍二维码 2401 个模块完全匹配。官方钱包手机尺寸 PWA 用测试网身份确认了个人登录消息，中继返回实际批准。验收在读取兑换结果前被通用请求识别条件拦下，原始请求未留类别，保留为部分验收。
+
+默认 Chrome 冷游戏页的两次按钮试验在 12 秒中止。另一次同网络同源诊断在 3.215 秒收到响应头，13.309 秒才读完整 1320 字节。轻量页面读取同样响应只用约 0.6 秒。出码候选因此给首次和一次瞬时失败重试各 20 秒。待确认查询使用原会话、原有效期和 12 秒上限。签名后的单次兑换仍走原流程。24 项钱包回归、69 项发布守卫和 TypeScript 检查通过。 [读取时序、发布和部分验收](evidence/numeron-web-release-20261108/qr-first-party-relay-20261110.json)
+
+最终公网版本读回 `83eadf4f`。隔离源提交以 `f2de762309` 为父提交，只包含扫码客户端文件。素材仍按原发布清单复核。发布首轮在拉取仓库时触及 runner 限时，原候选重试后通过受保护出码和公网待确认，域名指向同一候选。 [候选](https://github.com/Zombieliu/mir2/actions/runs/42734782902) · [发布](https://github.com/Zombieliu/mir2/actions/runs/42735819303)
+
+最终直连 Chrome 一次实际出码，官方 Dubhe Wallet 手机尺寸 PWA 以虚拟通行密钥确认个人登录消息。轮询由待确认转为已批准，兑换 200，一次 `LoginSuccess` 后创建独立测试角色。`StartGame(4)` 到比奇，177 张已加载可见地块通过画面取样，正常退出收到 `LogOutSuccess` 并返回选角。钱包请求审计通过，两个浏览器上下文均退出。实体手机扫码相机另验。 [公网完整链路](evidence/numeron-web-release-20261108/qr-first-party-relay-20261110.json)
+
+同机默认网络的首轮冷启动两次在 20 秒中止。独立默认 Chrome 在等待资源的上限到达后点击，15.101 秒收到完整出码正文，9.236 秒完成待确认查询。最后用独立默认 Chrome 冷启动并在登录入口出现时立即点击，两次请求仍各约 20 秒中止。冷启动稳定性继续验收。 [默认网络对照](evidence/numeron-web-release-20261108/qr-first-party-relay-20261110.json)
+
 ## 2026-11-10 公网钱包扫码恢复
 
 普通浏览器打开 [Numeron 游戏](https://numeron.obelisk.build/game) 后，出码、Dubhe Wallet 登录确认、进比奇和正常注销已复测。出码超时期间，Chrome 同源 HTTP/2 请求未收到响应；换到经 Cloudflare 的同域候选后可出码。另一个故障只在签名后出现：Caddy 缺少 TEST 的 `POST /playtest/v1/channels/session/exchange` 路由，返回 404。

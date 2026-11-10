@@ -16,6 +16,8 @@ working tree, services, release packages, source snapshots or parity percentages
 
 ## Last recorded decisions and open work
 
+2026-11-10 公网 `83eadf4f` 切到第一方钱包中继，出码读限时 20 秒及一次瞬时失败重试。直连浏览器用官方手机尺寸钱包完成签名、兑换、比奇渲染及正常退出。同机默认 Chrome 等待资源后出码及轮询通过，独立冷启动仍复现超时。继续冷启动和实体手机验收。 [扫码发布与回执](evidence/numeron-web-release-20261108/qr-first-party-relay-20261110.json)
+
 2026-11-10 共用 Gateway 修复冷登录首竿的个人更新调度。实际 Web 首进度 9.662→0.698 秒，Windows 正式传输 9.254→0.684 秒，同档收竿和注销通过。WebGPU 鱼具到背包双向拖放各一条成功回包，两次重登保留原 15 个鱼饵。继续拖动图标、钓鱼呈现、Windows 窗口及发行。 [首竿与读档](evidence/r16-web-fishing-loop-20261110/cold-first-cast-timing.json) · [拖放](evidence/r16-web-fishing-loop-20261110/tackle-drag.json)
 
 2026-11-10 本机两条生产浏览器路径已复测冷登录站姿、转向、比奇抛竿和收竿。鱼具普通点击装卸、同角重登和自动重抛后关闭通过。继续鱼具拖拽、身体动作和鱼线、Windows 窗口及 Hosted 发行。大火球与灵魂火符的方向飞行、移动目标命中、走跑接施法及施法后首步仍有独立证据。满包交易已用 File 强停和真实 PostgreSQL 验证未成交退回和已成交恢复。 [钓鱼](evidence/r16-web-fishing-loop-20261110/README.md) · [客户端技能](evidence/r16-web-spell-phases-20261110/README.md) · [走跑后施法](evidence/r16-web-move-cast-20261110/README.md) · [施法后走路](evidence/r16-web-postcast-20261110/README.md) · [服务器计时](evidence/r16-delayed-projectiles-20261110/README.md) · [交易恢复](evidence/r16-trade-restart-20261110/README.md) · [比奇遮挡](evidence/r16-bichon-npc-depth-20261110/README.md)

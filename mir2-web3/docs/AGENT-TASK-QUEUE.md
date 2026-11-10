@@ -70,7 +70,8 @@ Updated 2026-11-10 (Asia/Shanghai). Read [coordination](AGENT-ORCHESTRATION.md) 
 - [x] 冷登录成功抛竿唤醒个人状态。实际 WebGPU 9.662→0.698 秒，Windows 正式传输 9.254→0.684 秒。相同 File 基线、正常收竿注销与扣费通过。 [时序回执](evidence/r16-web-fishing-loop-20261110/cold-first-cast-timing.json)
 - [x] Web 生产 WebGPU 实测鱼具和背包双向拖放、同物同量重登、两次点击和七个无误发边界。 [拖放回执](evidence/r16-web-fishing-loop-20261110/tackle-drag.json)
 - [ ] 拖动图标、角色抛竿和收线身体帧及鱼线、Windows 窗口与发行另验。继续其余技能。
-- [ ] 复验公网扫码的手机中继。直连出码及手机页已通过，手机尺寸 PWA 直连会话读取超时，桌面明确经本机代理也重现出码超时。 [分段结果](evidence/r16-web-fishing-loop-20261110/public-qr-readback.json)
+- [x] 第一方中继及出码限时已发布到公网 `83eadf4f`。直连真实出码、官方钱包手机尺寸 PWA 确认、兑换、比奇渲染和正常退出通过。 [发布与链路证据](evidence/numeron-web-release-20261108/qr-first-party-relay-20261110.json)
+- [ ] 继续同机默认网络冷启动出码稳定性和实体手机相机验收。当前公网候选已有直连完整链路。 [默认网络与早期失败](evidence/numeron-web-release-20261108/qr-first-party-relay-20261110.json)
 - [ ] 继续 Native 招募及建职阶、仓库重复刷新和取回反馈、阿洛跨端实战及完整 Hosted 链路。
 - [x] 交易自身物品待回执的取消及同owner/partner重复接受已完成限定代码修复；原Page105/社交31/适配器507组/TS及两场隔离浏览器证据保留。共用八项见后续独立记录，完整Trade与公开发行仍未完成。[原本轮范围](evidence/r16-web-trade-20261109/README.md)
 - [x] 公会职级改名／单项权限／草稿／层级／广播／重登已在 WebGL2-shared 和默认 WebGPU 的普通界面通过；新鲜限定39／TS通过，修正选中态边框冲突。[当前范围](WEB-R16-PARITY-GOAL.zh-CN.md#公会职级普通流程2026-11-08)
