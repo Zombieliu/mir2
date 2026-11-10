@@ -1,0 +1,338 @@
+{
+  "revision": "d3e9ebfa6b7f6dc5cb0f86fb64553603d60c5965",
+  "sourceBuild": {
+    "id": "kur1ltza93-SYxjeasA9B",
+    "receiptSha256": "5f7c48269c636668340c3319e853a113c666d1b4802fabf433009cfd39aecdb7",
+    "sourceBlobs": [
+      {
+        "path": "mir2-web3/apps/web/app/page.tsx",
+        "blob": "48db6c2a711617169167cc94a2fd88a7a262c400"
+      },
+      {
+        "path": "mir2-web3/apps/web/lib/generated/r16-entry-scene.json",
+        "blob": "d8424e76e3c603f3a42adcb5a6907c473f525804"
+      },
+      {
+        "path": "mir2-web3/apps/web/lib/r16-entry-scene.ts",
+        "blob": "efbdbd86db61b4f80f0967656dfead57f3acd627"
+      },
+      {
+        "path": "mir2-web3/apps/web/public/bootstrap/r16-scenes/5c08d1fd4e81d92a7be20eb98c4c6288515749d5d459978dcf78fe2b86bdf325.json",
+        "blob": "7a1d6ca0b0d3117ef4acd9fce63b4ba9694e4716"
+      },
+      {
+        "path": "mir2-web3/apps/web/scripts/generate-r16-entry-scene.mjs",
+        "blob": "69a19750731e52ed6933a2a9a42e508ec3004273"
+      },
+      {
+        "path": "mir2-web3/apps/web/scripts/test-scene-blueprint-request.mjs",
+        "blob": "5e685b4566784191833140696181e1a7b8ae5ee6"
+      },
+      {
+        "path": "mir2-web3/apps/web/scripts/vercel-build.sh",
+        "blob": "64231e9941489b8e90a1021848517dcfa4346371"
+      }
+    ]
+  },
+  "artifact": {
+    "publicSourceRevision": "e3e6f3f06f83bb13a10334062b4d25bb50d6a44b",
+    "metadata": {
+      "assetReleaseId": "20261108-r16-08ec86d5105c",
+      "schemaVersion": "2026-08-14-v7-door-interaction",
+      "request": {
+        "mapFileName": "0",
+        "centerX": 296,
+        "centerY": 620,
+        "width": 56,
+        "height": 72
+      },
+      "path": "/bootstrap/r16-scenes/5c08d1fd4e81d92a7be20eb98c4c6288515749d5d459978dcf78fe2b86bdf325.json",
+      "sha256": "5c08d1fd4e81d92a7be20eb98c4c6288515749d5d459978dcf78fe2b86bdf325",
+      "bytes": 458475
+    },
+    "sourceReceiptSha256": "4ed22149517d8e3a657301da7f6356e2580d847ea323c32ee8bc264c3f6b6b78",
+    "localHostedSourceReceiptSha256": "231b989d252cb92586dc401a4a9d5401abca3cb55ad3312aead7ac903672d7fc",
+    "localHostedResultFields": [
+      "scope",
+      "buildId",
+      "buildRevision",
+      "release",
+      "schema",
+      "publicDigest",
+      "port",
+      "passed",
+      "status",
+      "headers",
+      "localBytes",
+      "localDigest",
+      "byteIdentical",
+      "stopped"
+    ],
+    "cells": 6819,
+    "sprites": 957,
+    "framePaths": 966,
+    "missingAssets": 0
+  },
+  "checks": {
+    "node": 64,
+    "releaseNode": 68,
+    "productionBuildAndTypeScript": true,
+    "originalWipFilesUnchanged": 62
+  },
+  "lanes": [
+    {
+      "lane": "static-primary-r2",
+      "sourceReceiptSha256": "22bbd0903ded9e39f3da4911a2eeddf05251973ec57d2164832c053d14e63c27",
+      "authoritativeStart": {
+        "position": {
+          "x": 288,
+          "y": 616
+        },
+        "map": "0"
+      },
+      "ordinaryPlay": {
+        "firstPlayableAfterStartAckMs": 1100,
+        "position": {
+          "x": 288,
+          "y": 616,
+          "map": "0"
+        },
+        "source": "r16-entry-static",
+        "applied": {
+          "mapFileName": "0.map",
+          "cellCount": 6819,
+          "spriteCount": 957,
+          "doorCellCount": 57,
+          "closedDoorCellCount": 57,
+          "regionBounds": {
+            "minX": 244,
+            "maxX": 348,
+            "minY": 580,
+            "maxY": 681
+          },
+          "playBounds": {
+            "minX": 272,
+            "maxX": 320,
+            "minY": 602,
+            "maxY": 638
+          }
+        },
+        "transport": "static"
+      },
+      "staticTiming": {
+        "afterLoginMs": 14,
+        "beforeStartClickMs": 2540,
+        "beforeStartCommandMs": 2560,
+        "beforeStartAckMs": 15112
+      },
+      "spawnDynamicRequests": 0,
+      "dynamicSpawnFenceStatus": 503,
+      "staticResponses": [
+        {
+          "status": 200,
+          "bytes": 458475,
+          "sha256": "5c08d1fd4e81d92a7be20eb98c4c6288515749d5d459978dcf78fe2b86bdf325",
+          "changedForFixture": false
+        }
+      ],
+      "dynamicGeometry": null,
+      "dynamicSpawnSha256": null,
+      "movement": {
+        "command": "walk",
+        "acceptedPosition": {
+          "x": 289,
+          "y": 616
+        }
+      },
+      "logout": {
+        "returnedToSelect": true,
+        "savedPosition": {
+          "x": 289,
+          "y": 616
+        }
+      },
+      "ownedProcessesClosed": true,
+      "originalFixtureUnchanged": true
+    },
+    {
+      "lane": "static-invalid-r1",
+      "sourceReceiptSha256": "4a5c343b61b3dc7485df6a8c4507c78f0571b47653ebf809725031540a075310",
+      "authoritativeStart": {
+        "position": {
+          "x": 288,
+          "y": 616
+        },
+        "map": "0"
+      },
+      "ordinaryPlay": {
+        "firstPlayableAfterStartAckMs": 1806,
+        "position": {
+          "x": 288,
+          "y": 616,
+          "map": "0"
+        },
+        "source": "miss",
+        "applied": {
+          "mapFileName": "0.map",
+          "cellCount": 6819,
+          "spriteCount": 957,
+          "doorCellCount": 57,
+          "closedDoorCellCount": 57,
+          "regionBounds": {
+            "minX": 244,
+            "maxX": 348,
+            "minY": 580,
+            "maxY": 681
+          },
+          "playBounds": {
+            "minX": 272,
+            "maxX": 320,
+            "minY": 602,
+            "maxY": 638
+          }
+        },
+        "transport": "dynamic"
+      },
+      "staticTiming": {
+        "afterLoginMs": 8,
+        "beforeStartClickMs": 2513,
+        "beforeStartCommandMs": 2531,
+        "beforeStartAckMs": 12542
+      },
+      "spawnDynamicRequests": 1,
+      "dynamicSpawnFenceStatus": null,
+      "staticResponses": [
+        {
+          "status": 200,
+          "bytes": 458475,
+          "sha256": "a012945bda40c4a69520291347f7ca12afd508fa84303635a5719328348852b9",
+          "changedForFixture": true
+        },
+        {
+          "status": 200,
+          "bytes": 458475,
+          "sha256": "a012945bda40c4a69520291347f7ca12afd508fa84303635a5719328348852b9",
+          "changedForFixture": true
+        },
+        {
+          "status": 200,
+          "bytes": 458475,
+          "sha256": "a012945bda40c4a69520291347f7ca12afd508fa84303635a5719328348852b9",
+          "changedForFixture": true
+        },
+        {
+          "status": 200,
+          "bytes": 458475,
+          "sha256": "a012945bda40c4a69520291347f7ca12afd508fa84303635a5719328348852b9",
+          "changedForFixture": true
+        }
+      ],
+      "dynamicGeometry": {
+        "v": "2026-08-14-v7-door-interaction",
+        "assetRelease": "20261108-r16-08ec86d5105c",
+        "map": "0",
+        "x": "296",
+        "y": "620",
+        "width": "56",
+        "height": "72"
+      },
+      "dynamicSpawnSha256": "5c08d1fd4e81d92a7be20eb98c4c6288515749d5d459978dcf78fe2b86bdf325",
+      "movement": {
+        "command": "walk",
+        "acceptedPosition": {
+          "x": 289,
+          "y": 616
+        }
+      },
+      "logout": {
+        "returnedToSelect": true,
+        "savedPosition": {
+          "x": 289,
+          "y": 616
+        }
+      },
+      "ownedProcessesClosed": true,
+      "originalFixtureUnchanged": true
+    },
+    {
+      "lane": "other-region-r1",
+      "sourceReceiptSha256": "d060ac740d8616fff489d21e29ef201acf9b5528d33c766f68476703c0673aab",
+      "authoritativeStart": {
+        "position": {
+          "x": 342,
+          "y": 244
+        },
+        "map": "0"
+      },
+      "ordinaryPlay": {
+        "firstPlayableAfterStartAckMs": 4142,
+        "position": {
+          "x": 342,
+          "y": 244,
+          "map": "0"
+        },
+        "source": "miss",
+        "applied": {
+          "mapFileName": "0.map",
+          "cellCount": 5393,
+          "spriteCount": 972,
+          "doorCellCount": 27,
+          "closedDoorCellCount": 27,
+          "regionBounds": {
+            "minX": 292,
+            "maxX": 396,
+            "minY": 206,
+            "maxY": 307
+          },
+          "playBounds": {
+            "minX": 320,
+            "maxX": 368,
+            "minY": 228,
+            "maxY": 264
+          }
+        },
+        "transport": "dynamic"
+      },
+      "spawnDynamicRequests": 0,
+      "dynamicSpawnFenceStatus": null,
+      "staticResponses": [
+        {
+          "status": 200,
+          "bytes": 458475,
+          "sha256": "5c08d1fd4e81d92a7be20eb98c4c6288515749d5d459978dcf78fe2b86bdf325",
+          "changedForFixture": false
+        }
+      ],
+      "dynamicGeometry": {
+        "v": "2026-08-14-v7-door-interaction",
+        "assetRelease": "20261108-r16-08ec86d5105c",
+        "map": "0",
+        "x": "344",
+        "y": "246",
+        "width": "56",
+        "height": "72"
+      },
+      "dynamicSpawnSha256": null,
+      "movement": {
+        "command": "walk",
+        "acceptedPosition": {
+          "x": 343,
+          "y": 244
+        }
+      },
+      "logout": {
+        "returnedToSelect": true,
+        "savedPosition": {
+          "x": 343,
+          "y": 244
+        }
+      },
+      "ownedProcessesClosed": true,
+      "originalFixtureUnchanged": true
+    }
+  ],
+  "screenshot": {
+    "path": "first-playable.png",
+    "sha256": "171abdba636247329b0248d63a8644b09623cff5fb69a8cd8229e937c4863d7d"
+  }
+}

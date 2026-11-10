@@ -20,7 +20,8 @@ Updated 2026-11-10 (Asia/Shanghai). Read [coordination](AGENT-ORCHESTRATION.md) 
 - [x] 地图响应头与正文分开限时。隔离生产版已验证约 10.6 秒完整的单次 Worker 响应，正文卡死后由浏览器重试同一地址，两条均移动并读回存档。 [分段回放](evidence/r16-pinned-scene-entry-20261110/README.md#地图正文恢复)
 - [x] `534322e790` 将 NPC 专用词库移出首帧，角色元数据在地图解码后发出。隔离 Chrome 验证移动、对话包中断、重开后的简中对话及真实商店回包。正式域名和两个版本化脚本均读回。 [本机和发布回执](evidence/r16-npc-cold-entry-20261111/README.md)
 - [x] `e3e6f3f06f` 按真实数据进度读取地图正文。隔离 Chrome 以一次 Worker 请求收齐 14.35 秒正文并实际移动。停传一次同址重试，加载时正常退出取消旧读图，迟到正文没有应用。 [对照与正式发布](evidence/r16-map-body-progress-20261111/README.md)
-- [ ] 公网 `e3e6f3f06f` 简繁出码、Testnet 签名、进城权威回包及退出通过。本轮地图两次未收到源站响应头，继续复测入口传输、可操作首帧和首次移动。 [公网分段证据](evidence/r16-map-body-progress-20261111/public-release.json)
+- [x] 公网 `d3e9ebfa6b` 通过简繁出码、Testnet 签名、选角、校验并安装比奇出生区静态地图、实走一格和正常退出。隔离 Chrome 验证动态入口阻断、错误文件回退和旧角色的独立落点。 [静态地图上线与首步](evidence/r16-static-entry-20261111/README.md)
+- [ ] 公开签名回放的地砖画面检查仍超时。继续核对已登录会话的原图资源请求、实际地砖像素、两种渲染路径和实体手机。 [视觉与网络回执](evidence/r16-static-entry-20261111/public-release.json)
 - [x] 比奇第一场景通过本机恢复及注销隔离，现网源码上的独立候选已构建并实测。继续受审切换及公网默认签名进城。 [发布候选](evidence/numeron-web-release-20261108/first-scene-release-candidate-20261110.json)
 - [x] Web 与 Windows 原版钓鱼声画及收线按钮，三秒期限、同批收线重抛和私有进度回包通过本机验收。服务器原版节奏和独立概率分支已通过定向测试，普通 Web 双路和二进制 TCP 实测 31 步、续抛、手动收线及读档。 [钓鱼记录](evidence/r16-web-fishing-loop-20261110/README.md#原版抛竿节奏与概率)
 - [x] 鱼钩与探测器收线磨损、零耐久移除和冷登录旁观者跨视野回包已复测。保持原版进视野的等待姿态，公开状态边走实时队列。 [磨损和跨视野回执](evidence/r16-web-fishing-loop-20261110/README.md#鱼具磨损与跨视野)
@@ -49,7 +50,8 @@ Updated 2026-11-10 (Asia/Shanghai). Read [coordination](AGENT-ORCHESTRATION.md) 
 - v21-r3 法师历史停点为 27 级、19/22 主线及 3/4 成长，第 20 项 0/3。v22 新角色结论见下方，原负结论保留。
 - [x] Web 小地图标题和边框按 Windows 规则停止路线。三个窗口尺寸下六次物理图像点击到达指定格，左右标题点击后零移动，Q 日记中零移动。
 - [x] 比奇 NPC 和建筑的混合画布行遮挡已修。三条 Web 渲染路径、真实往返位移和固定图集完整接管均已复测。 [比奇对照](evidence/r16-bichon-npc-depth-20261110/README.md)
-- [ ] 小地图远距离点击、换图、动态占位与重连继续复验。真实比奇地图和共享 WASM 离线得到战士 `(328,264)` 到 `(328,218)` 的单击 46 格路线，第 42 格越过原渲染范围。离线第三格占位时 Windows 重算，Web 仍选择前两格跑步。下一步用同一档的副本验证实际跨区和正常退出读档。 [路线与差异](evidence/web-r16-parity-goal-20261107/minimap-long-route-offline.json)
+- [x] 隔离 Chrome 在实际 MMap101 图面单击一次，从比奇 `(328,264)` 到 `(328,218)`。2 次 Walk、22 次 Run 展开为 46 格，与离线逐格一致。四次读图覆盖原边界，退出保存及同角色重登位置一致。 [跨区回执](evidence/web-r16-parity-goal-20261107/minimap-long-route-live.json)
+- [ ] 小地图第三格占位时，离线对照显示 Windows 重算，Web 仍选择前两格跑步。继续真实动态占位、换图和重连，核对无缓存点击时的碰撞数据等待。 [离线差异](evidence/web-r16-parity-goal-20261107/minimap-long-route-offline.json)
 - [x] Web 创角等权威回执，失败保留草稿，重试和重复提交防护通过。五职业及旧三职业用普通账号验收，超时和断线后各重登确认只新增一次。
 - [x] 共享 Gateway 在册重名及四槽已验。File、原生 PG 独立源并发及旧档重开通过，浏览器收到真实 `5`/`4`，改名和四角色重登进城通过。Windows 对应回执和界面状态编译测试通过。
 - [ ] Windows 窗口重名／满槽实机暂缓，发行包另验。旧档原第五角色普通协议可用，四槽界面的恢复方案待核对。

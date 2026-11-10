@@ -1,0 +1,915 @@
+{
+  "release": {
+    "productRevision": "d3e9ebfa6b7f6dc5cb0f86fb64553603d60c5965",
+    "releaseControlRevision": "81724a1efb01bdeff992f0f1e3215e935c508eba",
+    "alias": "numeron.obelisk.build",
+    "deployment": "dpl_CTtGa2akJGg1tZtgVqC2BAWX9Z7w",
+    "checkedAt": "2026-11-10T18:21:59.5103569Z",
+    "replayReadbackAt": "2026-11-10T18:42:59.003Z",
+    "exactPublicVersion": true,
+    "rollbackTarget": "dpl_2ocDNzbEhNLbkkJfv3hHiXJdmrYi",
+    "stageRun": 42872351879,
+    "promotionRun": 42873694552,
+    "candidateQr": {
+      "relay": "https://relay.dubhe.obelisk.build",
+      "wallet": "https://wallet.dubhe.obelisk.build",
+      "pending": true
+    },
+    "publicQrCanary": {
+      "relay": "https://relay.dubhe.obelisk.build",
+      "wallet": "https://wallet.dubhe.obelisk.build",
+      "pending": true
+    },
+    "candidateAsset": {
+      "path": "/bootstrap/r16-scenes/5c08d1fd4e81d92a7be20eb98c4c6288515749d5d459978dcf78fe2b86bdf325.json",
+      "sha256": "5c08d1fd4e81d92a7be20eb98c4c6288515749d5d459978dcf78fe2b86bdf325",
+      "bytes": 458475
+    },
+    "publicAsset": {
+      "http": 200,
+      "path": "/bootstrap/r16-scenes/5c08d1fd4e81d92a7be20eb98c4c6288515749d5d459978dcf78fe2b86bdf325.json",
+      "bytes": 458475,
+      "sha256": "5c08d1fd4e81d92a7be20eb98c4c6288515749d5d459978dcf78fe2b86bdf325",
+      "cacheControl": "public, max-age=86400, stale-while-revalidate=604800",
+      "cache": "MISS"
+    },
+    "hashes": {
+      "aliasReceipt": "35d43d33f1ceda2e6b7d6efb4c36f5a5b2cf94229466c081bb8b1f9acc133f7f",
+      "replayAliasReceipt": "26286bb01af980db972e5bb6f7c99ebfb3a373d150caa74774039b46a4382602",
+      "stageReceipt": "1faeb8234857632c33a07490c5a3ac9f059d8d31f36d399a6bd0b4ab34238edf",
+      "promotionReceipt": "93ee49f3eb70a785eec74cca3ee05acbbbd983156148e02573fdd006a440eefe"
+    }
+  },
+  "ordinaryBrowserQr": {
+    "passed": true,
+    "results": [
+      {
+        "locale": "zh-CN",
+        "passed": true,
+        "browserClosed": true,
+        "createAttempts": 1,
+        "matrix": true,
+        "pending": true,
+        "cancel": true,
+        "pollingStopped": true,
+        "noPreauthGameChunks": true,
+        "failure": null
+      },
+      {
+        "locale": "zh-TW",
+        "passed": true,
+        "browserClosed": true,
+        "createAttempts": 1,
+        "matrix": true,
+        "pending": true,
+        "cancel": true,
+        "pollingStopped": true,
+        "noPreauthGameChunks": true,
+        "failure": null
+      }
+    ],
+    "receiptSha256": "ba2146434e8b81edd6bc3cb382b3c66d77a824bbc8e444d13aaeba2d4bc72817"
+  },
+  "signedRuns": [
+    {
+      "lane": "r1",
+      "passed": false,
+      "returnedToSelect": true,
+      "walletRelease": "dubhe-web@0.6.13",
+      "walletRevision": "c74a27a48d57a6dd14cfc0ccfcf47e68ab58163b",
+      "defaultBrowserNetwork": true,
+      "actualQrImage": true,
+      "testnetWalletCreated": true,
+      "oneAuthorizedLoginSignature": true,
+      "unexpectedGameCommands": 0,
+      "protocol": {
+        "gameSockets": 1,
+        "passkeyLogin": 1,
+        "loginSuccess": 1,
+        "newCharacter": 1,
+        "newCharacterSuccess": 1,
+        "startGame": 1,
+        "startGameResult": 4,
+        "logOut": 1,
+        "logOutSuccess": 1,
+        "unexpectedMutation": 0
+      },
+      "loginExchangeStatuses": [
+        200
+      ],
+      "timing": {
+        "clockEpochMs": 1794334990722,
+        "authoritativeLoginSuccessMs": 49925,
+        "startIntentMs": 80839,
+        "startAckMs": 84241,
+        "authoritativeStarterMapMs": 84245,
+        "authoritativeSelfMs": 84247,
+        "firstPlayableObservedMs": 87554,
+        "logoutIntentMs": 93603,
+        "logoutAckMs": 94705,
+        "manifestAttemptsBeforeStart": 1,
+        "manifestAttemptsAtOrAfterStart": 0,
+        "starterRegionRequestMs": 79937,
+        "starterRegionWireHeadersMs": 80072.062,
+        "starterRegionResponseEventMs": 80073,
+        "starterRegionBodyMs": 80230,
+        "starterRegionCommitMs": 84433,
+        "sceneSpritesReadyMs": 84490,
+        "localeRequestMs": 49928,
+        "localeBodyMs": 67060,
+        "localeReadyMs": 67086,
+        "firstPlayableFrameMs": 87497,
+        "rendererBodyMs": null
+      },
+      "firstPlayableAfterStartAckMs": 3256,
+      "firstPlayable": {
+        "map": "0",
+        "x": 288,
+        "y": 616
+      },
+      "appVerifiedStaticCommit": {
+        "name": "sceneBlueprintReady",
+        "atMs": 68629.20000004768,
+        "epochMs": 1794335075155,
+        "sceneCache": "r16-entry-static",
+        "sceneKey": "2026-08-14-v7-door-interaction-asset20261108-r16-08ec86d5105c-0-cx18-cy36-w56-h72",
+        "cellCount": 6819,
+        "spriteCount": 957
+      },
+      "diagnosticStaticGate": {
+        "passed": false,
+        "checks": {
+          "completeCapture": true,
+          "exactStaticHttpBody": false,
+          "afterAuthBeforeStart": true,
+          "authoritativeSpawn": true,
+          "staticSceneCommit": false,
+          "exactFirstPlayable": true,
+          "noMatchingDynamicRequest": true
+        },
+        "source": "r16-entry-static",
+        "sceneKey": "2026-08-14-v7-door-interaction-asset20261108-r16-08ec86d5105c-0-cx18-cy36-w56-h72",
+        "authoritativeSpawn": {
+          "x": 288,
+          "y": 616
+        },
+        "firstPlayableSpawn": {
+          "map": "0",
+          "x": 288,
+          "y": 616,
+          "objectId": "1000"
+        },
+        "selectedRequest": {
+          "scope": "staticStarterRegion",
+          "queryless": true,
+          "path": "/bootstrap/r16-scenes/5c08d1fd4e81d92a7be20eb98c4c6288515749d5d459978dcf78fe2b86bdf325.json",
+          "requestedMs": 79937,
+          "decodedBytes": 458475,
+          "encodedBytes": 35280,
+          "status": 200,
+          "ttfbMs": 136,
+          "headersMs": 80073,
+          "responseEventMs": 80073,
+          "responseTiming": {
+            "scope": "browser-network-response",
+            "connectionReused": true,
+            "requestTimeFromRequestEventMs": 0.901,
+            "offsetsMs": {
+              "proxyStart": null,
+              "proxyEnd": null,
+              "dnsStart": null,
+              "dnsEnd": null,
+              "connectStart": null,
+              "connectEnd": null,
+              "sslStart": null,
+              "sslEnd": null,
+              "workerStart": null,
+              "workerReady": null,
+              "workerFetchStart": null,
+              "workerRespondWithSettled": null,
+              "sendStart": 0.135,
+              "sendEnd": 0.313,
+              "receiveHeadersStart": 134.085,
+              "receiveHeadersEnd": 134.161
+            },
+            "firstHeadersAfterRequestMs": 134.986,
+            "completeHeadersAfterRequestMs": 135.062,
+            "beforeSendAfterRequestMs": 1.036,
+            "sendToHeadersMs": 133.772,
+            "firstHeadersMs": 80071.986,
+            "completeHeadersMs": 80072.062
+          },
+          "protocol": "h2",
+          "serviceWorker": false,
+          "diskCache": false,
+          "contentEncoding": "br",
+          "edgeCache": "DYNAMIC",
+          "functionCache": "HIT",
+          "firstDataMs": 80082,
+          "lastDataMs": 80230,
+          "transferMs": 293,
+          "bodyCompleteMs": 80230,
+          "totalEncodedBytes": 35387
+        },
+        "staticRequests": 2,
+        "matchingDynamicRequests": 0,
+        "droppedRows": 0,
+        "selection": {
+          "loginSuccessMs": 49924,
+          "selectReadyMs": 79929,
+          "startSubmitMs": 80837,
+          "requestMs": 79937,
+          "screenAtRequest": "openingLogin",
+          "screenTransitions": [
+            {
+              "screen": "login",
+              "atMs": 19127
+            },
+            {
+              "screen": "openingLogin",
+              "atMs": 49929
+            },
+            {
+              "screen": "select",
+              "atMs": 79938
+            },
+            {
+              "screen": "game",
+              "atMs": 84430
+            }
+          ]
+        },
+        "asset": null
+      },
+      "mapNetwork": [
+        {
+          "scope": "staticStarterRegion",
+          "queryless": true,
+          "path": "/bootstrap/r16-scenes/5c08d1fd4e81d92a7be20eb98c4c6288515749d5d459978dcf78fe2b86bdf325.json",
+          "requestedMs": 49927,
+          "decodedBytes": 46864,
+          "encodedBytes": 1369,
+          "status": 200,
+          "ttfbMs": 11627,
+          "headersMs": 61554,
+          "responseEventMs": 61554,
+          "responseTiming": {
+            "scope": "browser-network-response",
+            "connectionReused": false,
+            "requestTimeFromRequestEventMs": 0.961,
+            "offsetsMs": {
+              "proxyStart": null,
+              "proxyEnd": null,
+              "dnsStart": null,
+              "dnsEnd": null,
+              "connectStart": 0.098,
+              "connectEnd": 5083.758,
+              "sslStart": 1.263,
+              "sslEnd": 5083.748,
+              "workerStart": null,
+              "workerReady": null,
+              "workerFetchStart": null,
+              "workerRespondWithSettled": null,
+              "sendStart": 5083.895,
+              "sendEnd": 5083.99,
+              "receiveHeadersStart": 11625.158,
+              "receiveHeadersEnd": 11625.282
+            },
+            "firstHeadersAfterRequestMs": 11626.119,
+            "completeHeadersAfterRequestMs": 11626.243,
+            "beforeSendAfterRequestMs": 5084.856,
+            "sendToHeadersMs": 6541.168,
+            "firstHeadersMs": 61553.119,
+            "completeHeadersMs": 61553.243
+          },
+          "protocol": "h2",
+          "serviceWorker": false,
+          "diskCache": false,
+          "contentEncoding": "br",
+          "edgeCache": "DYNAMIC",
+          "functionCache": "MISS",
+          "firstDataMs": 61558,
+          "lastDataMs": 61919,
+          "failure": "net::ERR_ABORTED",
+          "failureMs": 61930
+        },
+        {
+          "scope": "staticStarterRegion",
+          "queryless": true,
+          "path": "/bootstrap/r16-scenes/5c08d1fd4e81d92a7be20eb98c4c6288515749d5d459978dcf78fe2b86bdf325.json",
+          "requestedMs": 79937,
+          "decodedBytes": 458475,
+          "encodedBytes": 35280,
+          "status": 200,
+          "ttfbMs": 136,
+          "headersMs": 80073,
+          "responseEventMs": 80073,
+          "responseTiming": {
+            "scope": "browser-network-response",
+            "connectionReused": true,
+            "requestTimeFromRequestEventMs": 0.901,
+            "offsetsMs": {
+              "proxyStart": null,
+              "proxyEnd": null,
+              "dnsStart": null,
+              "dnsEnd": null,
+              "connectStart": null,
+              "connectEnd": null,
+              "sslStart": null,
+              "sslEnd": null,
+              "workerStart": null,
+              "workerReady": null,
+              "workerFetchStart": null,
+              "workerRespondWithSettled": null,
+              "sendStart": 0.135,
+              "sendEnd": 0.313,
+              "receiveHeadersStart": 134.085,
+              "receiveHeadersEnd": 134.161
+            },
+            "firstHeadersAfterRequestMs": 134.986,
+            "completeHeadersAfterRequestMs": 135.062,
+            "beforeSendAfterRequestMs": 1.036,
+            "sendToHeadersMs": 133.772,
+            "firstHeadersMs": 80071.986,
+            "completeHeadersMs": 80072.062
+          },
+          "protocol": "h2",
+          "serviceWorker": false,
+          "diskCache": false,
+          "contentEncoding": "br",
+          "edgeCache": "DYNAMIC",
+          "functionCache": "HIT",
+          "firstDataMs": 80082,
+          "lastDataMs": 80230,
+          "transferMs": 293,
+          "bodyCompleteMs": 80230,
+          "totalEncodedBytes": 35387
+        }
+      ],
+      "renderedCity": null,
+      "movement": {
+        "attempted": false,
+        "passed": null,
+        "status": "not-reached"
+      },
+      "failure": {
+        "phase": "verify-retained-static-starter-scene",
+        "code": "PINNED_STATIC_STARTER_REGION_HTTP_NOT_OBSERVED"
+      },
+      "staticBody": null,
+      "visualCity": null,
+      "sharedHud": null,
+      "logout": null,
+      "observedSceneElements": null,
+      "hashes": {
+        "signedSummary": "2d1ee1dc507038ee7da0b0c634cea29d602f6e2c8a79307fb07a52800230be70",
+        "desktopReceipt": "000b7ea7faf19f4d7318c1bc1c2ba7f66c52f9539f2f9fa7883d6b32dcb5bffd",
+        "preparation": "3b12e86e8fd382bc6f152c72fba02f8d157bc452715534193e8f1db00e8d1a13"
+      },
+      "harnessScope": "The R1 proof required exactly one HTTP response handle. The aborted first response also emitted HTTP 200, so the independent body proof and actual movement were skipped despite the completed second response and verified application first playable state."
+    },
+    {
+      "lane": "r2",
+      "passed": false,
+      "returnedToSelect": true,
+      "walletRelease": "dubhe-web@0.6.13",
+      "walletRevision": "c74a27a48d57a6dd14cfc0ccfcf47e68ab58163b",
+      "defaultBrowserNetwork": true,
+      "actualQrImage": true,
+      "testnetWalletCreated": true,
+      "oneAuthorizedLoginSignature": true,
+      "unexpectedGameCommands": 0,
+      "protocol": {
+        "gameSockets": 1,
+        "passkeyLogin": 1,
+        "loginSuccess": 1,
+        "newCharacter": 1,
+        "newCharacterSuccess": 1,
+        "startGame": 1,
+        "startGameResult": 4,
+        "walk": 1,
+        "logOut": 1,
+        "logOutSuccess": 1,
+        "unexpectedMutation": 0
+      },
+      "loginExchangeStatuses": [
+        200
+      ],
+      "timing": {
+        "clockEpochMs": 1794336465418,
+        "authoritativeLoginSuccessMs": 37477,
+        "startIntentMs": 68361,
+        "startAckMs": 71676,
+        "authoritativeStarterMapMs": 71681,
+        "authoritativeSelfMs": 71683,
+        "firstPlayableObservedMs": 75095,
+        "logoutIntentMs": 124472,
+        "logoutAckMs": 125484,
+        "manifestAttemptsBeforeStart": 1,
+        "manifestAttemptsAtOrAfterStart": 0,
+        "starterRegionRequestMs": 37481,
+        "starterRegionWireHeadersMs": 37947.486,
+        "starterRegionResponseEventMs": 37948,
+        "starterRegionBodyMs": 38012,
+        "starterRegionCommitMs": 71942,
+        "sceneSpritesReadyMs": 72011,
+        "localeRequestMs": 37482,
+        "localeBodyMs": 38323,
+        "localeReadyMs": 38348,
+        "firstPlayableFrameMs": 75018,
+        "rendererBodyMs": 120738
+      },
+      "firstPlayableAfterStartAckMs": 3342,
+      "firstPlayable": {
+        "map": "0",
+        "x": 288,
+        "y": 616
+      },
+      "appVerifiedStaticCommit": {
+        "name": "sceneBlueprintReady",
+        "atMs": 58186.699999928474,
+        "epochMs": 1794336537360,
+        "sceneCache": "r16-entry-static",
+        "sceneKey": "2026-08-14-v7-door-interaction-asset20261108-r16-08ec86d5105c-0-cx18-cy36-w56-h72",
+        "cellCount": 6819,
+        "spriteCount": 957
+      },
+      "diagnosticStaticGate": {
+        "passed": true,
+        "runtimeStaticProved": true,
+        "checks": {
+          "completeCapture": true,
+          "exactStaticHttpBody": true,
+          "afterAuthBeforeStart": true,
+          "authoritativeSpawn": true,
+          "staticSceneCommit": true,
+          "exactFirstPlayable": true,
+          "noMatchingDynamicRequest": true
+        },
+        "source": "r16-entry-static",
+        "sceneKey": "2026-08-14-v7-door-interaction-asset20261108-r16-08ec86d5105c-0-cx18-cy36-w56-h72",
+        "authoritativeSpawn": {
+          "x": 288,
+          "y": 616
+        },
+        "firstPlayableSpawn": {
+          "map": "0",
+          "x": 288,
+          "y": 616,
+          "objectId": "1000"
+        },
+        "selectedRequest": {
+          "scope": "staticStarterRegion",
+          "queryless": true,
+          "path": "/bootstrap/r16-scenes/5c08d1fd4e81d92a7be20eb98c4c6288515749d5d459978dcf78fe2b86bdf325.json",
+          "requestOrdinal": 2,
+          "requestedMs": 37481,
+          "decodedBytes": 458475,
+          "encodedBytes": 35280,
+          "status": 200,
+          "ttfbMs": 467,
+          "headersMs": 37948,
+          "responseEventMs": 37948,
+          "responseTiming": {
+            "scope": "browser-network-response",
+            "connectionReused": false,
+            "requestTimeFromRequestEventMs": 0.673,
+            "offsetsMs": {
+              "proxyStart": null,
+              "proxyEnd": null,
+              "dnsStart": null,
+              "dnsEnd": null,
+              "connectStart": 0.064,
+              "connectEnd": 322.806,
+              "sslStart": 1.026,
+              "sslEnd": 322.8,
+              "workerStart": null,
+              "workerReady": null,
+              "workerFetchStart": null,
+              "workerRespondWithSettled": null,
+              "sendStart": 322.88,
+              "sendEnd": 322.933,
+              "receiveHeadersStart": 465.682,
+              "receiveHeadersEnd": 465.813
+            },
+            "firstHeadersAfterRequestMs": 466.355,
+            "completeHeadersAfterRequestMs": 466.486,
+            "beforeSendAfterRequestMs": 323.553,
+            "sendToHeadersMs": 142.749,
+            "firstHeadersMs": 37947.355,
+            "completeHeadersMs": 37947.486
+          },
+          "protocol": "h2",
+          "serviceWorker": false,
+          "diskCache": false,
+          "contentEncoding": "br",
+          "edgeCache": "DYNAMIC",
+          "functionCache": "HIT",
+          "firstDataMs": 37949,
+          "lastDataMs": 38012,
+          "transferMs": 531,
+          "bodyCompleteMs": 38012,
+          "totalEncodedBytes": 35777
+        },
+        "staticRequests": 1,
+        "matchingDynamicRequests": 0,
+        "droppedRows": 0,
+        "selection": {
+          "loginSuccessMs": 37477,
+          "selectReadyMs": 67481,
+          "startSubmitMs": 68360,
+          "requestMs": 37481,
+          "screenAtRequest": "openingLogin-commit-boundary",
+          "screenTransitions": [
+            {
+              "screen": "login",
+              "atMs": 15080
+            },
+            {
+              "screen": "openingLogin",
+              "atMs": 37482
+            },
+            {
+              "screen": "select",
+              "atMs": 67490
+            },
+            {
+              "screen": "game",
+              "atMs": 71901
+            }
+          ]
+        },
+        "asset": {
+          "sha256": "5c08d1fd4e81d92a7be20eb98c4c6288515749d5d459978dcf78fe2b86bdf325",
+          "decodedBytes": 458475,
+          "map": "0",
+          "spawn": {
+            "x": 288,
+            "y": 616
+          },
+          "playBounds": {
+            "minX": 272,
+            "maxX": 320,
+            "minY": 602,
+            "maxY": 638
+          },
+          "regionBounds": {
+            "minX": 244,
+            "maxX": 348,
+            "minY": 580,
+            "maxY": 681
+          },
+          "cellCount": 6819,
+          "spriteCount": 957,
+          "requestOrdinal": 2,
+          "method": "playwright-requestfinished-cdp-getResponseBody"
+        }
+      },
+      "mapNetwork": [
+        {
+          "scope": "staticStarterRegion",
+          "queryless": true,
+          "path": "/bootstrap/r16-scenes/5c08d1fd4e81d92a7be20eb98c4c6288515749d5d459978dcf78fe2b86bdf325.json",
+          "requestOrdinal": 2,
+          "requestedMs": 37481,
+          "decodedBytes": 458475,
+          "encodedBytes": 35280,
+          "status": 200,
+          "ttfbMs": 467,
+          "headersMs": 37948,
+          "responseEventMs": 37948,
+          "responseTiming": {
+            "scope": "browser-network-response",
+            "connectionReused": false,
+            "requestTimeFromRequestEventMs": 0.673,
+            "offsetsMs": {
+              "proxyStart": null,
+              "proxyEnd": null,
+              "dnsStart": null,
+              "dnsEnd": null,
+              "connectStart": 0.064,
+              "connectEnd": 322.806,
+              "sslStart": 1.026,
+              "sslEnd": 322.8,
+              "workerStart": null,
+              "workerReady": null,
+              "workerFetchStart": null,
+              "workerRespondWithSettled": null,
+              "sendStart": 322.88,
+              "sendEnd": 322.933,
+              "receiveHeadersStart": 465.682,
+              "receiveHeadersEnd": 465.813
+            },
+            "firstHeadersAfterRequestMs": 466.355,
+            "completeHeadersAfterRequestMs": 466.486,
+            "beforeSendAfterRequestMs": 323.553,
+            "sendToHeadersMs": 142.749,
+            "firstHeadersMs": 37947.355,
+            "completeHeadersMs": 37947.486
+          },
+          "protocol": "h2",
+          "serviceWorker": false,
+          "diskCache": false,
+          "contentEncoding": "br",
+          "edgeCache": "DYNAMIC",
+          "functionCache": "HIT",
+          "firstDataMs": 37949,
+          "lastDataMs": 38012,
+          "transferMs": 531,
+          "bodyCompleteMs": 38012,
+          "totalEncodedBytes": 35777
+        }
+      ],
+      "renderedCity": null,
+      "movement": {
+        "attempted": true,
+        "passed": true,
+        "status": "one-authoritative-walk",
+        "from": {
+          "x": 288,
+          "y": 616
+        },
+        "to": {
+          "x": 289,
+          "y": 616,
+          "direction": "Right"
+        },
+        "geometry": {
+          "source": "sha256-pinned-local-release-reference",
+          "sha256": "5c08d1fd4e81d92a7be20eb98c4c6288515749d5d459978dcf78fe2b86bdf325"
+        },
+        "physical": {
+          "input": "trusted-playwright-keyboard-pulse",
+          "key": "ArrowRight",
+          "atMs": 75113
+        },
+        "wire": {
+          "type": "walk",
+          "direction": "Right",
+          "atMs": 75118
+        },
+        "ack": {
+          "x": 289,
+          "y": 616,
+          "packet": "UserLocation",
+          "atMs": 77267
+        },
+        "rendered": {
+          "x": 289,
+          "y": 616,
+          "atMs": 77297
+        }
+      },
+      "failure": {
+        "phase": "inspect-world-paint",
+        "code": "WORLD_TILE_PAINT_NOT_OBSERVED"
+      },
+      "staticBody": {
+        "passed": true,
+        "status": "verified",
+        "correlations": [
+          {
+            "requestOrdinal": 2,
+            "correlation": {
+              "startDeltaMs": 0.106,
+              "endDeltaMs": 0.186
+            },
+            "status": "verified"
+          }
+        ],
+        "asset": {
+          "sha256": "5c08d1fd4e81d92a7be20eb98c4c6288515749d5d459978dcf78fe2b86bdf325",
+          "decodedBytes": 458475,
+          "map": "0",
+          "spawn": {
+            "x": 288,
+            "y": 616
+          },
+          "playBounds": {
+            "minX": 272,
+            "maxX": 320,
+            "minY": 602,
+            "maxY": 638
+          },
+          "regionBounds": {
+            "minX": 244,
+            "maxX": 348,
+            "minY": 580,
+            "maxY": 681
+          },
+          "cellCount": 6819,
+          "spriteCount": 957,
+          "requestOrdinal": 2,
+          "method": "playwright-requestfinished-cdp-getResponseBody"
+        }
+      },
+      "visualCity": {
+        "passed": false,
+        "status": "not-observed",
+        "failure": {
+          "phase": "inspect-world-paint",
+          "code": "WORLD_TILE_PAINT_NOT_OBSERVED"
+        }
+      },
+      "sharedHud": {
+        "optional": true,
+        "passed": false,
+        "status": "not-observed",
+        "gateReady": false,
+        "runtimeDelivered": true,
+        "failure": {
+          "phase": "ordinary-shared-hud-optional",
+          "code": "OPTIONAL_SHARED_HUD_OR_RUNTIME_NOT_OBSERVED"
+        }
+      },
+      "logout": {
+        "attempted": true,
+        "passed": true,
+        "returnedToSelect": true,
+        "sent": 1,
+        "acknowledged": 1
+      },
+      "observedSceneElements": {
+        "visibleGameStage": true,
+        "sceneInteractionReady": true,
+        "activeWorldComposite": true,
+        "positionPublished": true,
+        "visibleOriginalTiles": 243,
+        "loadedOriginalTiles": 0,
+        "visibleMapAtlas": false
+      },
+      "hashes": {
+        "signedSummary": "6ebe3a80f9b45479d0e6f7b539fc529b254901a696ffdced5422bab378a3a3d4",
+        "desktopReceipt": "b18e669d29f5af2807cb9bbd52685d23a1d32f809ab2d815e4cb32eecbb0b2e9",
+        "preparation": "319a95ba30b426afebe7a275f0dc34400ef5fa89fbec0465f8ce869967deca18"
+      }
+    }
+  ],
+  "anonymousFloorProbe": {
+    "scope": "Anonymous HTTPS byte and PNG check of the four nearest distinct static floor-frame paths. Node HTTPS only, separate from the signed browser.",
+    "revision": "d3e9ebfa6b7f6dc5cb0f86fb64553603d60c5965",
+    "rows": [
+      {
+        "path": "/original-map/WemadeMir2/Tiles/137.png",
+        "cell": {
+          "x": 288,
+          "y": 616,
+          "width": 96,
+          "height": 64
+        },
+        "responses": [
+          {
+            "lane": "site",
+            "status": 200,
+            "headersMs": 950,
+            "bodyMs": 950,
+            "bytes": 6229,
+            "sha256": "f87f47f747fc13aebf7e325df9064a56dd0a6411096ab32900a37925084121e9",
+            "png": true,
+            "width": 96,
+            "height": 64,
+            "type": "image/png",
+            "cache": "BYPASS",
+            "vercel": "MISS"
+          },
+          {
+            "lane": "asset-release",
+            "status": 200,
+            "headersMs": 625,
+            "bodyMs": 626,
+            "bytes": 6229,
+            "sha256": "f87f47f747fc13aebf7e325df9064a56dd0a6411096ab32900a37925084121e9",
+            "png": true,
+            "width": 96,
+            "height": 64,
+            "type": "image/png",
+            "cache": "HIT",
+            "vercel": null
+          }
+        ],
+        "samePng": true
+      },
+      {
+        "path": "/original-map/WemadeMir2/Tiles/136.png",
+        "cell": {
+          "x": 286,
+          "y": 616,
+          "width": 96,
+          "height": 64
+        },
+        "responses": [
+          {
+            "lane": "site",
+            "status": 200,
+            "headersMs": 918,
+            "bodyMs": 918,
+            "bytes": 5859,
+            "sha256": "d7c265282115c924b92a93f9fbe2aa1210c6893ae1421f8c14db9e78d7be1ab7",
+            "png": true,
+            "width": 96,
+            "height": 64,
+            "type": "image/png",
+            "cache": "BYPASS",
+            "vercel": "MISS"
+          },
+          {
+            "lane": "asset-release",
+            "status": 200,
+            "headersMs": 251,
+            "bodyMs": 254,
+            "bytes": 5859,
+            "sha256": "d7c265282115c924b92a93f9fbe2aa1210c6893ae1421f8c14db9e78d7be1ab7",
+            "png": true,
+            "width": 96,
+            "height": 64,
+            "type": "image/png",
+            "cache": "HIT",
+            "vercel": null
+          }
+        ],
+        "samePng": true
+      },
+      {
+        "path": "/original-map/WemadeMir2/Tiles/132.png",
+        "cell": {
+          "x": 288,
+          "y": 614,
+          "width": 96,
+          "height": 64
+        },
+        "responses": [
+          {
+            "lane": "site",
+            "status": 200,
+            "headersMs": 538,
+            "bodyMs": 541,
+            "bytes": 5642,
+            "sha256": "ab04ce3d11425426e95d4d08f939da876d47c97e0f631091985069f237f08a36",
+            "png": true,
+            "width": 96,
+            "height": 64,
+            "type": "image/png",
+            "cache": "BYPASS",
+            "vercel": "MISS"
+          },
+          {
+            "lane": "asset-release",
+            "status": 200,
+            "headersMs": 201,
+            "bodyMs": 205,
+            "bytes": 5642,
+            "sha256": "ab04ce3d11425426e95d4d08f939da876d47c97e0f631091985069f237f08a36",
+            "png": true,
+            "width": 96,
+            "height": 64,
+            "type": "image/png",
+            "cache": "HIT",
+            "vercel": null
+          }
+        ],
+        "samePng": true
+      },
+      {
+        "path": "/original-map/WemadeMir2/Tiles/142.png",
+        "cell": {
+          "x": 288,
+          "y": 618,
+          "width": 96,
+          "height": 64
+        },
+        "responses": [
+          {
+            "lane": "site",
+            "status": 200,
+            "headersMs": 535,
+            "bodyMs": 536,
+            "bytes": 5819,
+            "sha256": "8aa439b83f487334c91c497385cdfb168486ed1ec8ff31f43ee83c097de84a08",
+            "png": true,
+            "width": 96,
+            "height": 64,
+            "type": "image/png",
+            "cache": "BYPASS",
+            "vercel": "MISS"
+          },
+          {
+            "lane": "asset-release",
+            "status": 200,
+            "headersMs": 196,
+            "bodyMs": 200,
+            "bytes": 5819,
+            "sha256": "8aa439b83f487334c91c497385cdfb168486ed1ec8ff31f43ee83c097de84a08",
+            "png": true,
+            "width": 96,
+            "height": 64,
+            "type": "image/png",
+            "cache": "HIT",
+            "vercel": null
+          }
+        ],
+        "samePng": true
+      }
+    ],
+    "receiptSha256": "aab8c30095a6ec12dbd27484e6fec2796b645ecea42a8ac87dad09189bd5639d"
+  }
+}
