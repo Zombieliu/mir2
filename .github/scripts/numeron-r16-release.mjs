@@ -16,17 +16,20 @@ export const SITES = Object.freeze({
 });
 export const ORIGIN = 'https://numeron.obelisk.build';
 export const QR_RELEASE = Object.freeze({
-  source: 'a7826484ec124180c6ae1807ddb25c54f0d94071',
-  sourceRef: 'codex/numeron-qr-login-startup',
+  source: 'a23cc382af1c66cd7ffeea794fd62fe7cba7e96a',
+  sourceRef: 'codex/numeron-qr-login-startup-final',
   baseSource: '83eadf4f96c81bcf26d6e98c41b3a58761c48ea2',
   assetSource: 'f2de762309768b51b39438c2437c14e819df9bf7',
   changedFiles: [
     { status: 'modified', filename: 'mir2-web3/apps/web/app/components/asset-cache-registrar.tsx', sha: 'a3476c69b2387af7131e4fff256641edba3b55f7' },
-    { status: 'modified', filename: 'mir2-web3/apps/web/app/globals.css', sha: '61d66e3bda0950108d00388bab1b3058972c709b' },
+    { status: 'modified', filename: 'mir2-web3/apps/web/app/globals.css', sha: '7454da52d0e857ed2a308aa39f63b67d8da92482' },
     { status: 'added', filename: 'mir2-web3/apps/web/app/login-fonts/r16-login-sc.woff2', sha: 'c6e8295d21e89f2c9839f2c16ca2b5443ce01951' },
     { status: 'added', filename: 'mir2-web3/apps/web/app/login-fonts/r16-login-tc.woff2', sha: '3a106c00d5729c65abdfd2847f2b41c0a395dcf9' },
     { status: 'modified', filename: 'mir2-web3/apps/web/app/original-client-shell.tsx', sha: '392ec6696f84e11635f54a674d24ea0ec84ed855' },
+    { status: 'modified', filename: 'mir2-web3/apps/web/app/page.tsx', sha: '21d5c4ec964dfeb20f6f6dc046fe646e9c42eb00' },
+    { status: 'modified', filename: 'mir2-web3/apps/web/app/promotions/layout.tsx', sha: '2bd24a268b253ebf61b64ce6d421b2e744aa3b76' },
     { status: 'modified', filename: 'mir2-web3/apps/web/lib/original-audio.ts', sha: '53fb2d2ffb20051c0e392d4a623fa06a04830bad' },
+    { status: 'added', filename: 'mir2-web3/apps/web/lib/r16-cjk-fonts.ts', sha: '85d27fb815200bc7231cb8b629306da7474beaaf' },
     { status: 'added', filename: 'mir2-web3/apps/web/scripts/generate-r16-login-fonts.py', sha: 'd7a182092f6cf9d30f129ad4a8673e93ec119df7' },
     { status: 'modified', filename: 'mir2-web3/apps/web/scripts/test-audio-system.mjs', sha: '34e620ba1d4b55382846927f5e99a22fa208ac1b' },
   ],

@@ -234,7 +234,7 @@ test('QR stage rejects a deployment source beyond the exact login patch', async 
     status: 'ahead', ahead_by: 1, behind_by: 0, merge_base_commit: { sha: QR_RELEASE.baseSource },
     commits: [{ sha: QR_RELEASE.source }],
     files: [...QR_RELEASE.changedFiles,
-      { status: 'modified', filename: 'mir2-web3/apps/web/app/page.tsx' }],
+      { status: 'modified', filename: 'mir2-web3/apps/web/app/api/wallet/dubhe/session/route.ts' }],
   }) : undefined;
   const result = await f.execute();
   failed(result, /qrSourceClosureMismatch/);
