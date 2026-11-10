@@ -146,17 +146,20 @@ test("aborted or superseded create, poll, approved callback, and exchange cannot
   }
 });
 
-test("an actual stalled HTTP 200 create body retries once, but cancel and retirement never mint again", { timeout: 10_000 }, async () => {
-  for (const mode of ["timeout", "cancel", "stale"]) {
+test("a slow HTTP 200 create can finish, while a stalled body retries once unless cancelled or retired", { timeout: 10_000 }, async () => {
+  for (const mode of ["slow", "timeout", "cancel", "stale"]) {
     const state = clientHarness(), firstHeaders = deferred(), retryDelay = deferred();
     let creates = 0;
+    let finishFirstBody;
     const server = createServer((request, response) => {
       if (request.url.endsWith("/status")) {
         response.end(JSON.stringify({ status: "approved", login: state.proof }));
       } else if (++creates === 1) {
         response.writeHead(200, { "content-type": "application/json" });
         response.flushHeaders();
-        response.write('{"approvalUrl":');
+        const json = JSON.stringify(state.created);
+        response.write(json.slice(0, 18));
+        finishFirstBody = () => response.end(json.slice(18));
       } else {
         response.end(JSON.stringify(state.created));
       }
@@ -178,9 +181,17 @@ test("an actual stalled HTTP 200 create body retries once, but cancel and retire
       assert.equal(await Promise.race([firstHeaders.promise, settled]), 200);
       await flush();
       assert.deepEqual(state.states, [], "headers alone cannot publish a code");
+      if (mode === "slow") {
+        await state.tick(13_309);
+        finishFirstBody();
+        assert.deepEqual(await result, state.login);
+        assert.equal(creates, 1);
+        assert.equal(state.exchanges.length, 1);
+        continue;
+      }
       if (mode === "cancel") state.controller.abort();
       if (mode === "stale") state.current = false;
-      if (mode !== "cancel") await state.tick(12_000);
+      if (mode !== "cancel") await state.tick(20_000);
       if (mode === "timeout") {
         assert.equal(await Promise.race([retryDelay.promise, settled]), "retry");
         assert.equal(state.controller.signal.aborted, false);

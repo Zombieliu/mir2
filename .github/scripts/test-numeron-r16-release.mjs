@@ -23,6 +23,8 @@ const windowsAnchor = (href = WINDOWS) => `<a class="download-action" href="${hr
 function fixture(operation = 'numeron-promote') {
   const qr = operation.startsWith('numeron-qr-');
   const source = qr ? QR_RELEASE.source : SHA;
+  const assetSource = qr ? QR_RELEASE.assetSource : source;
+  const sourceRef = qr ? QR_RELEASE.sourceRef : BRANCH;
   const runId = qr ? QR_RELEASE.assetRunId : '123';
   const qrIntent = 'synthetic.private.intent';
   const qrSession = '/api/wallet/dubhe/session';
@@ -50,7 +52,7 @@ function fixture(operation = 'numeron-promote') {
   }]));
   const candidates = Object.fromEntries(['main', 'game'].map(key => [key, {
     id: IDS[key], projectId: SITES[key].project, url: `${key}-candidate.vercel.app`, readyState: 'READY', target: 'production',
-    gitSource: { type: 'github', ref: BRANCH, sha: source }, meta: deploymentBody(key, source, 12345, config, SECRET).meta,
+    gitSource: { type: 'github', ref: sourceRef, sha: source }, meta: deploymentBody(key, source, 12345, config, SECRET).meta,
   }]));
   if (qr) {
     projects.game.targets.production.id = operation === 'numeron-qr-rollback' ? IDS.game : QR_RELEASE.baseline;
@@ -59,7 +61,7 @@ function fixture(operation = 'numeron-promote') {
   const snapshots = Object.fromEntries(['main', 'game'].map(key => [key, { uid: IDS[key], projectId: SITES[key].project,
     projectSettings: { rootDirectory: SITES[key].root } }]));
   const assetReceipt = { schemaVersion: 1, kind: 'mir2-fixed-r16-publication-receipt', repository: REPOSITORY,
-    sourceSha: source, materialSourceSha: contract.materialSourceSha, sourceClean: true, passed: true, dryRun: false,
+    sourceSha: assetSource, materialSourceSha: contract.materialSourceSha, sourceClean: true, passed: true, dryRun: false,
     manifestPublished: true, manifestVerified: true, phase: 'complete', verified: contract.fileCount,
     uploaded: contract.fileCount, existingVerified: 0, remoteWrites: contract.fileCount + 1,
     putAttempts: contract.fileCount + 1, publicGzipWireVerified: contract.gzipFiles, publicGzipDecodedVerified: 0,
@@ -70,7 +72,7 @@ function fixture(operation = 'numeron-promote') {
       manifestSha256: contract.manifestSha256, manifestLast: true, overwriteExisting: false,
       allMapsVerified: false, inheritedObjectsReverified: false } };
   const run = { id: Number(runId), repository: { full_name: REPOSITORY }, path: '.github/workflows/web-assets-r2-release.yml',
-    head_sha: source, status: 'completed', conclusion: 'success', event: 'workflow_dispatch' };
+    head_sha: assetSource, status: 'completed', conclusion: 'success', event: 'workflow_dispatch' };
   const jobs = { total_count: 1, jobs: [{ name: 'publish-fixed-r16-assets', status: 'completed', conclusion: 'success' }] };
   const artifacts = { total_count: 1, artifacts: [{ id: 456, name: `fixed-r16-assets-${runId}`, expired: false }] };
   const env = { GITHUB_REPOSITORY: REPOSITORY, GITHUB_REF: `refs/heads/${BRANCH}`, GITHUB_SHA: SHA,
@@ -99,6 +101,10 @@ function fixture(operation = 'numeron-promote') {
     }
     if (parsed.origin === 'https://api.github.com') {
       assert.equal(request.headers.Authorization, `Bearer ${GH}`);
+      if (qr && request.pathname === `/repos/${REPOSITORY}/compare/${assetSource}...${source}`) {
+        return json({ status: 'ahead', ahead_by: 1, behind_by: 0, merge_base_commit: { sha: assetSource },
+          commits: [{ sha: source }], files: [{ status: 'modified', filename: QR_RELEASE.changedFile, sha: QR_RELEASE.changedBlob }] });
+      }
       if (request.pathname.endsWith('/jobs')) return json(jobs);
       if (request.pathname.endsWith('/artifacts')) return json(artifacts);
       assert.equal(request.pathname, `/repos/${REPOSITORY}/actions/runs/${runId}`); return json(run);
@@ -212,10 +218,26 @@ test('QR stage creates only the pinned game source, with the live alias left on 
   assert.equal(body.target, 'production');
   assert.equal(body.autoAssignCustomDomains, false);
   assert.equal(body.gitSource.sha, QR_RELEASE.source);
+  assert.equal(body.gitSource.ref, QR_RELEASE.sourceRef);
+  assert.equal(r.result.sourceClosure.base, QR_RELEASE.assetSource);
+  assert.equal(r.result.sourceClosure.changedFile, QR_RELEASE.changedFile);
   assert.equal(body.env.MIR2_DUBHE_CONNECT_RELAY_URL, QR_RELEASE.relay);
   assert.equal(body.meta.numeronR16ConnectRelay, QR_RELEASE.relay);
   assert.equal(r.result.trafficAfter.alias, QR_RELEASE.baseline);
   assert(!JSON.stringify(r.receipts).includes(SECRET));
+});
+
+test('QR stage rejects a deployment source beyond the exact one-file patch', async () => {
+  const f = fixture('numeron-qr-stage');
+  f.state.onRequest = request => request.pathname.includes('/compare/') ? json({
+    status: 'ahead', ahead_by: 1, behind_by: 0, merge_base_commit: { sha: QR_RELEASE.assetSource },
+    commits: [{ sha: QR_RELEASE.source }],
+    files: [{ status: 'modified', filename: QR_RELEASE.changedFile, sha: QR_RELEASE.changedBlob },
+      { status: 'modified', filename: 'mir2-web3/apps/web/app/page.tsx' }],
+  }) : undefined;
+  const result = await f.execute();
+  failed(result, /qrSourceClosureMismatch/);
+  assert.equal(writes(result).length, 0);
 });
 
 test('QR promotion proves protected and public routes and keeps intents out of the receipt', async () => {

@@ -16,9 +16,13 @@ export const SITES = Object.freeze({
 });
 export const ORIGIN = 'https://numeron.obelisk.build';
 export const QR_RELEASE = Object.freeze({
-  source: 'f2de762309768b51b39438c2437c14e819df9bf7',
+  source: '83eadf4f96c81bcf26d6e98c41b3a58761c48ea2',
+  sourceRef: 'codex/numeron-qr-response-delivery',
+  assetSource: 'f2de762309768b51b39438c2437c14e819df9bf7',
+  changedFile: 'mir2-web3/apps/web/lib/dubhe-wallet-login.ts',
+  changedBlob: 'f38cf45c81154cd7ba50b146e3485fc5b9d7a9f9',
   assetRunId: '42494701555',
-  baseline: 'dpl_Ech5Rehf78MG9FXH7fAV9wwFC7GZ',
+  baseline: 'dpl_EzTCz5GgYRFgLswMUzR51B77etgC',
   relay: 'https://relay.dubhe.obelisk.build',
 });
 const QR_OPERATIONS = ['numeron-qr-stage', 'numeron-qr-promote', 'numeron-qr-rollback'];
@@ -127,11 +131,11 @@ export function publicEnvironment(key, sha, config) {
     MIR2_R2_PROXY_BASE: config.assetBaseUrl, MIR2_ASSET_BASE_URL: config.assetBaseUrl,
   };
 }
-export function deploymentBody(key, sha, repoId, config, secret) {
+export function deploymentBody(key, sha, repoId, config, secret, sourceRef = BRANCH) {
   const environment = publicEnvironment(key, sha, config);
   if (key === 'game') requireRelease(typeof secret === 'string' && secret.length >= 32, 'gatewayAuthSecretMissing');
   return { name: SITES[key].name, project: SITES[key].project, target: 'production', autoAssignCustomDomains: false,
-    gitSource: { type: 'github', repoId, ref: BRANCH, sha },
+    gitSource: { type: 'github', repoId, ref: sourceRef, sha },
     projectSettings: { rootDirectory: SITES[key].root, framework: 'nextjs', nodeVersion: '22.x',
       buildCommand: key === 'game' ? 'bash ./scripts/vercel-build.sh' : 'npm run build',
       installCommand: 'npm ci', outputDirectory: null, sourceFilesOutsideRootDirectory: true },
@@ -143,7 +147,7 @@ export function deploymentBody(key, sha, repoId, config, secret) {
       ...(key === 'main' ? { numeronR16WindowsDownloadPolicy: 'unavailable-baseline' } : {}) },
   };
 }
-export function candidateGuard(key, candidate, snapshot, sha, config) {
+export function candidateGuard(key, candidate, snapshot, sha, config, sourceRef = BRANCH) {
   const site = SITES[key];
   // Modern Git deployments may omit root from their REST snapshots. Every
   // explicit root must agree; missing roots still require our staged metaRoot,
@@ -151,7 +155,7 @@ export function candidateGuard(key, candidate, snapshot, sha, config) {
   const roots = [candidate?.rootDirectory, candidate?.projectSettings?.rootDirectory,
     snapshot?.rootDirectory, snapshot?.projectSettings?.rootDirectory].filter(root => root != null);
   requireRelease(candidate?.projectId === site.project && candidate.target === 'production' && candidate.readyState === 'READY'
-    && candidate.gitSource?.sha === sha && candidate.gitSource?.ref === BRANCH
+    && candidate.gitSource?.sha === sha && candidate.gitSource?.ref === sourceRef
     && candidate.meta?.numeronR16SourceSha === sha && candidate.meta?.numeronR16Root === site.root
     && candidate.meta?.numeronR16AssetVersion === config.version
     && candidate.meta?.numeronR16OriginalBaseline === SITES.original.baseline
@@ -378,12 +382,24 @@ export async function runNumeronRelease({ env = process.env, fetchImpl = fetch,
     const runId = qr ? QR_RELEASE.assetRunId : env.RELEASE_ASSET_RUN_ID;
     requireRelease(/^\d+$/.test(runId || ''), 'assetRunIdRequired');
     const github = pathname => api('api.github.com', `/repos/${REPOSITORY}${pathname}`);
+    const assetSha = qr ? QR_RELEASE.assetSource : sha;
+    const sourceRef = qr ? QR_RELEASE.sourceRef : BRANCH;
+    if (qr) {
+      const comparison = await github(`/compare/${assetSha}...${sha}`);
+      const [file] = comparison.files || [];
+      requireRelease(comparison.status === 'ahead' && comparison.ahead_by === 1 && comparison.behind_by === 0
+        && comparison.merge_base_commit?.sha === assetSha && comparison.commits?.length === 1
+        && comparison.commits[0].sha === sha && comparison.files?.length === 1
+        && file?.status === 'modified' && file.filename === QR_RELEASE.changedFile && file.sha === QR_RELEASE.changedBlob,
+      'qrSourceClosureMismatch');
+      receipt.sourceClosure = { base: assetSha, ref: sourceRef, changedFile: file.filename, changedBlob: file.sha };
+    }
     const run = await github(`/actions/runs/${runId}`), jobs = await github(`/actions/runs/${runId}/jobs?per_page=100`),
       artifacts = await github(`/actions/runs/${runId}/artifacts?per_page=100`);
     requireRelease(!jobs.total_count || jobs.total_count <= 100, 'assetJobsPaginationExceeded');
     requireRelease(!artifacts.total_count || artifacts.total_count <= 100, 'assetArtifactsPaginationExceeded');
-    const artifact = validateAssetRun(run, jobs.jobs || [], artifacts.artifacts || [], runId, sha);
-    validateAssetReceipt(await readReceipt(runId, artifact.name, env), sha, contract);
+    const artifact = validateAssetRun(run, jobs.jobs || [], artifacts.artifacts || [], runId, assetSha);
+    validateAssetReceipt(await readReceipt(runId, artifact.name, env), assetSha, contract);
     const publicResponse = await fetchImpl(config.remoteReleaseUrl, { redirect: 'error', signal: AbortSignal.timeout(60000) });
     validatePublicManifest(await boundedBytes(publicResponse, contract.manifestBytes), contract);
     receipt.assetPublication = { runId, artifactId: artifact.id, manifestSha256: contract.manifestSha256, manifestBytes: contract.manifestBytes };
@@ -400,12 +416,12 @@ export async function runNumeronRelease({ env = process.env, fetchImpl = fetch,
         const list = await vercel(`/v7/deployments?projectId=${SITES[key].project}&sha=${sha}&target=production&limit=100${until ? `&until=${encodeURIComponent(until)}` : ''}`);
         snapshot = list.deployments?.find(item => item.uid === id); until = list.pagination?.next; if (!until) break;
       }
-      candidateGuard(key, value, snapshot, sha, config);
+      candidateGuard(key, value, snapshot, sha, config, sourceRef);
       return value;
     }
     if (qr) {
       const body = operation === 'numeron-qr-stage'
-        ? deploymentBody('game', sha, link.repoId, config, env.MIR2_R16_PASSKEY_AUTH_SECRET)
+        ? deploymentBody('game', sha, link.repoId, config, env.MIR2_R16_PASSKEY_AUTH_SECRET, sourceRef)
         : undefined;
       await releaseQrGame({ operation, initial, projects, candidate, id: ids.game, vercel,
         body, readCandidate, fetchImpl, sleep, receipt });

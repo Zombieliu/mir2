@@ -15,7 +15,8 @@ type LoginOptions = {
   onState: (state: DubheQrLoginState) => void;
 };
 
-const REQUEST_TIMEOUT_MS = 12_000;
+const CREATE_TIMEOUT_MS = 20_000;
+const POLL_TIMEOUT_MS = 12_000;
 const RETRY_DELAY_MS = 250;
 
 function assertCurrent(options: LoginOptions) {
@@ -63,12 +64,13 @@ async function waitForVisible(options: LoginOptions, expiresAt: number) {
 async function requestQrJson(options: LoginOptions, session?: { intentToken: string; expiresAt: number }) {
   const path = session ? "/api/wallet/dubhe/session/status" : "/api/wallet/dubhe/session";
   const headers = session ? { authorization: `Bearer ${session.intentToken}` } : undefined;
+  const timeoutMs = session ? POLL_TIMEOUT_MS : CREATE_TIMEOUT_MS;
   for (let attempt = 0; ; attempt++) {
     assertCurrent(options);
     if (session && !await waitForVisible(options, session.expiresAt)) return null;
-    const remaining = session ? session.expiresAt - Date.now() : REQUEST_TIMEOUT_MS;
+    const remaining = session ? session.expiresAt - Date.now() : timeoutMs;
     if (remaining <= 0) return null;
-    const deadline = AbortSignal.timeout(Math.min(REQUEST_TIMEOUT_MS, Math.ceil(remaining)));
+    const deadline = AbortSignal.timeout(Math.min(timeoutMs, Math.ceil(remaining)));
     const signal = AbortSignal.any([options.signal, deadline]);
     let response: Response | undefined;
     try {
