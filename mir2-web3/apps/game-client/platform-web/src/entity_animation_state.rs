@@ -46,6 +46,8 @@ struct EntityInput {
     action_known: Option<bool>,
     #[serde(default)]
     fishing: Option<bool>,
+    #[serde(default)]
+    fishing_edges: u8,
 }
 
 #[derive(Debug, Serialize)]
@@ -431,7 +433,13 @@ impl AnimationBridge {
                     } else if let Some(active) =
                         entity.fishing.filter(|_| kind == EntityKind::Player)
                     {
-                        state.fishing.observe(active, input.now_ms);
+                        // Distinct boolean edges alternate. The optional count
+                        // carries actual preceding receipts hidden by one UI commit.
+                        for earlier in (0..=entity.fishing_edges.min(15)).rev() {
+                            state
+                                .fishing
+                                .observe(active ^ (earlier & 1 != 0), input.now_ms);
+                        }
                     }
                 }
             }
@@ -845,6 +853,7 @@ mod tests {
                 bootstrap_known: None,
                 action_known: None,
                 fishing: None,
+                fishing_edges: 0,
             }],
         }
     }
@@ -982,6 +991,30 @@ mod authority_tests {
                 assert_eq!(peek(&owner)["action"], "standing", "{now}");
             }
             assert_eq!(pose["direction"], "Right", "{now}");
+        }
+    }
+
+    #[test]
+    fn fishing_preserves_a_real_reel_then_recast_inside_one_commit() {
+        let mut owner = EntityAnimationOwner::new();
+        let input = frame(1, "standing", None, true, true);
+        resolve_fishing(&mut owner, input.clone(), 1_000, Some(false));
+        resolve_fishing(&mut owner, input.clone(), 1_050, Some(true));
+        let mut batched = input.clone();
+        batched["entities"][0]["fishingEdges"] = json!(1);
+        let wait = resolve_fishing(&mut owner, batched, 2_000, Some(true));
+        assert_eq!(wait["poses"][0]["action"], "fishingWait");
+
+        for (now, expected, start) in [
+            (2_570, "fishingReel", 2_570),
+            (3_369, "fishingReel", 2_570),
+            (3_370, "fishingCast", 3_370),
+            (4_170, "fishingWait", 4_170),
+        ] {
+            let output = resolve_fishing(&mut owner, input.clone(), now, Some(true));
+            assert_eq!(output["poses"][0]["action"], expected);
+            assert_eq!(output["poses"][0]["fishingStartedAtMs"], start);
+            assert_eq!(peek(&owner), json!({"version": 1, "known": false}));
         }
     }
 

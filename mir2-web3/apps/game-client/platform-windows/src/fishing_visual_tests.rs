@@ -340,3 +340,193 @@ fn native_fishing_offscreen_water_and_owner_marker_use_original_offsets_and_dept
     crate::atlas::append_native_fishing_cues(&payload, &mut clean, &cues);
     assert_eq!(clean["entities"], json!([]));
 }
+
+#[test]
+#[ignore = "requires the exact Native Title assets and a fresh offscreen output directory"]
+fn native_fishing_bite_button_offscreen_captures_original_art_and_current_pointer_lease() {
+    use super::mining_visual_tests::{capture, offscreen_app, warm};
+    use bevy::input::{mouse::MouseButtonInput, ButtonState};
+    use bevy::prelude::{App, Children, ImageNode, MouseButton, Node, Val, Vec2};
+    use bevy::time::TimeUpdateStrategy;
+    use mir2_client_bevy::crystal_ui::overlays::{
+        mount_fishing_dialog::EquipmentAction, NativePlayerUiIntent, NativePlayerUiIntentQueue,
+        NativePlayerUiState,
+    };
+    use mir2_protocol::ClientPacket;
+    use std::{path::PathBuf, time::Duration};
+
+    let root = crate::assets::require_asset_root().expect("verified Native fixture assets");
+    let output = PathBuf::from(std::env::var_os("MIR2_FISHING_BITE_OFFSCREEN_OUTPUT").unwrap());
+    assert!(output.is_absolute() && !output.exists());
+    std::fs::create_dir(&output).unwrap();
+    let (mut app, target) = offscreen_app(&root, &output);
+    app.world_mut()
+        .resource_mut::<NativePlayerUiState>()
+        .toggle_inventory();
+
+    let source = shore_payload();
+    let mut adapter = NativeGameplayAdapter::default();
+    let mut presentation = NativeEntityPresentation::default();
+    presentation.bind_fishing_audio_generation(7);
+    adapter.observe_world_snapshot(&source);
+    sync(&mut presentation, &adapter, &source, 0);
+    let apply = |app: &mut App,
+                 adapter: &mut NativeGameplayAdapter,
+                 presentation: &mut NativeEntityPresentation,
+                 active,
+                 progress,
+                 now_ms| {
+        let event = fishing_packet(1000, active, progress);
+        let PacketEvent::Other { packet, payload } = &event else {
+            unreachable!()
+        };
+        let typed = crate::equipment_creature_wire::packet(packet, payload).unwrap();
+        assert!(adapter.observe_packet(&event));
+        sync(presentation, adapter, &source, now_ms);
+        assert!(app
+            .world_mut()
+            .resource_mut::<NativePlayerUiState>()
+            .equipment_dialogs
+            .observe(1000, &typed, 0));
+    };
+    let paint = |app: &mut App, presentation: &mut NativeEntityPresentation, now_ms| {
+        presentation.render_state_if_changed_with(now_ms, true, |_, _, _| Some(json!({})));
+        let cue = presentation.fishing_status_bite_cue();
+        let ui_now_ms = app.world().resource::<Time>().elapsed().as_millis() as u64;
+        app.world_mut()
+            .resource_mut::<NativePlayerUiState>()
+            .equipment_dialogs
+            .present_fishing_bite(cue, now_ms, ui_now_ms);
+        cue
+    };
+    apply(&mut app, &mut adapter, &mut presentation, true, 0, 100);
+    apply(&mut app, &mut adapter, &mut presentation, true, 100, 950);
+    assert_eq!(paint(&mut app, &mut presentation, 950), None);
+    warm(&mut app);
+    let disabled = capture(&mut app, &target, &output.join("before-wait-cue.png"));
+    let button = |app: &mut App| {
+        let world = app.world_mut();
+        world
+            .query::<(&EquipmentAction, &Node, &Children)>()
+            .iter(world)
+            .find(|(action, _, _)| **action == EquipmentAction::Reel)
+            .map(|(_, node, children)| {
+                let image = children
+                    .iter()
+                    .find_map(|child| world.get::<ImageNode>(*child))
+                    .expect("Reel button's original skin child");
+                (
+                    [node.left, node.top, node.width, node.height],
+                    image.image.path().unwrap().to_string(),
+                )
+            })
+    };
+    assert!(button(&mut app).is_none());
+
+    assert_eq!(
+        paint(&mut app, &mut presentation, 1020)
+            .unwrap()
+            .started_at_ms,
+        1020
+    );
+    warm(&mut app);
+    let expected_rect = [Val::Px(47.0), Val::Px(95.0), Val::Px(60.0), Val::Px(25.0)];
+    assert_eq!(
+        button(&mut app),
+        Some((expected_rect, "original-ui/Title/170.png".into()))
+    );
+    let enabled = capture(&mut app, &target, &output.join("bite-frame-170.png"));
+    let changed = (395..420)
+        .flat_map(|y| (437..497).map(move |x| (y * 1024 + x) * 4))
+        .filter(|&i| disabled[i..i + 4] != enabled[i..i + 4])
+        .count();
+    assert!(
+        changed > 50,
+        "the captured 60×25 reel region must show the bite art"
+    );
+    app.insert_resource(TimeUpdateStrategy::ManualDuration(Duration::from_millis(
+        130,
+    )));
+    app.update();
+    app.insert_resource(TimeUpdateStrategy::ManualDuration(Duration::ZERO));
+    assert_eq!(
+        button(&mut app),
+        Some((expected_rect, "original-ui/Title/171.png".into()))
+    );
+
+    // Winit is disabled. This entity only supplies the physical input sample.
+    let mut primary = Window::default();
+    primary.focused = true;
+    primary.resolution.set(1024.0, 768.0);
+    let window = app.world_mut().spawn((primary, PrimaryWindow)).id();
+    let pointer = |app: &mut App, point: Vec2, button, pressed| {
+        app.world_mut()
+            .entity_mut(window)
+            .get_mut::<Window>()
+            .unwrap()
+            .set_cursor_position(Some(point));
+        app.world_mut().write_message(MouseButtonInput {
+            button,
+            state: if pressed {
+                ButtonState::Pressed
+            } else {
+                ButtonState::Released
+            },
+            window,
+        });
+        app.update();
+    };
+    let left = |app: &mut App, point, pressed| pointer(app, point, MouseButton::Left, pressed);
+    let drain = |app: &mut App| {
+        app.world_mut()
+            .resource_mut::<NativePlayerUiIntentQueue>()
+            .drain_intents()
+    };
+    let center = Vec2::new(460.0, 406.0);
+    let outside = Vec2::new(498.0, 406.0);
+    pointer(&mut app, center, MouseButton::Right, true);
+    pointer(&mut app, center, MouseButton::Right, false);
+    left(&mut app, center, true);
+    assert!(drain(&mut app).is_empty());
+    left(&mut app, outside, false);
+    assert!(drain(&mut app).is_empty());
+    left(&mut app, outside, true);
+    left(&mut app, center, false);
+    assert!(drain(&mut app).is_empty());
+
+    left(&mut app, center, true);
+    apply(&mut app, &mut adapter, &mut presentation, true, 25, 1090);
+    assert_eq!(paint(&mut app, &mut presentation, 1090), None);
+    apply(&mut app, &mut adapter, &mut presentation, true, 100, 1700);
+    assert_eq!(
+        paint(&mut app, &mut presentation, 1740)
+            .unwrap()
+            .started_at_ms,
+        1740
+    );
+    left(&mut app, center, false);
+    assert!(
+        drain(&mut app).is_empty(),
+        "a held old bait cannot reel the replacement"
+    );
+
+    left(&mut app, center, true);
+    assert!(drain(&mut app).is_empty());
+    left(&mut app, center, false);
+    assert_eq!(
+        drain(&mut app),
+        vec![NativePlayerUiIntent::EquipmentCreaturePacket(
+            ClientPacket::FishingCast { cast_out: false }
+        )]
+    );
+    left(&mut app, center, true);
+    left(&mut app, center, false);
+    assert!(
+        drain(&mut app).is_empty(),
+        "one reel remains pending until a terminal receipt"
+    );
+    apply(&mut app, &mut adapter, &mut presentation, false, 100, 1800);
+    assert_eq!(paint(&mut app, &mut presentation, 1800), None);
+    app.update();
+    assert!(button(&mut app).is_none());
+}

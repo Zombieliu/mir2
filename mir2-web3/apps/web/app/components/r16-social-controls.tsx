@@ -3,11 +3,11 @@
 import { useEffect, useRef, useState, type ButtonHTMLAttributes, type CSSProperties, type KeyboardEvent, type PointerEvent, type ReactNode } from "react";
 import { r16ClampSocialWindow, R16_SOCIAL_LAYOUT, type R16SocialRect } from "../../lib/r16-social-layout";
 
-export function R16SocialButton({ library = "Title", frame, rect, label, locked = false, ...props }:
-  ButtonHTMLAttributes<HTMLButtonElement> & { library?: string; frame: number; rect: R16SocialRect; label: string; locked?: boolean }) {
+export function R16SocialButton({ library = "Title", frame, hoverFrame = frame + 1, pressedFrame = frame + 2, rect, label, locked = false, ...props }:
+  ButtonHTMLAttributes<HTMLButtonElement> & { library?: string; frame: number; hoverFrame?: number; pressedFrame?: number; rect: R16SocialRect; label: string; locked?: boolean }) {
   const [hovered, setHovered] = useState(false);
   const [pressed, setPressed] = useState(false);
-  const source = `/original-ui/${library}/${frame + (!props.disabled && pressed ? 2 : locked || !props.disabled && hovered ? 1 : 0)}.png`;
+  const source = `/original-ui/${library}/${!props.disabled && pressed ? pressedFrame : locked || !props.disabled && hovered ? hoverFrame : frame}.png`;
   return <button {...props} type={props.type ?? "button"} aria-label={label} title={label}
     aria-pressed={props["aria-pressed"] ?? (locked || undefined)}
     style={{ position: "absolute", ...rect, padding: 0, border: 0, background: "transparent", cursor: props.disabled ? "default" : "pointer", opacity: props.disabled ? 0.45 : 1, ...props.style }}

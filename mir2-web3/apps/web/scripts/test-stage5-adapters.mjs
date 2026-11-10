@@ -6390,6 +6390,27 @@ check("Fishing panel reel is owned by one active cast and terminal update",()=>{
   assert.equal(panel.autoCast,false);
   assert.equal(f.api.enterFishingPanelSend(auto,auto.command,f.socket),false,"duplicate off cannot send");
 });
+check("Fishing panel bite click only sends against the current nibble",()=>{
+  const f=worldFishingPageFixture(), owner=f.api.worldFishingOwner(), panel=f.scope.fishingPanelRef.current;
+  const tick={objectId:owner.playerObjectId,fishing:true,progressPercent:100,chancePercent:40,foundFish:true};
+  f.api.observeFishingStatus(owner,tick);
+  const expired=panel.active.bite;
+  assert.ok(expired);
+  f.api.observeFishingStatus(owner,{...tick,chancePercent:41});
+  assert.strictEqual(panel.active.bite,expired);
+  f.api.observeFishingStatus(owner,{...tick,foundFish:false});
+  const attempt={owner,command:{type:"fishingCast",castOut:false},active:panel.active,bite:expired};
+  f.scope.fishingPanelAttemptRef.current=attempt;
+  assert.equal(f.api.enterFishingPanelSend(attempt,attempt.command,f.socket),false);
+  f.api.observeFishingStatus(owner,{...tick,fishing:false});
+  f.api.observeFishingStatus(owner,tick);
+  assert.notStrictEqual(panel.active.bite,expired);
+  attempt.active=panel.active;
+  assert.equal(f.api.enterFishingPanelSend(attempt,attempt.command,f.socket),false);
+  attempt.bite=panel.active.bite;
+  assert.equal(f.api.enterFishingPanelSend(attempt,attempt.command,f.socket),true);
+  assert.equal(f.api.enterFishingPanelSend(attempt,attempt.command,f.socket),false);
+});
 check("Fishing tackle ACK and full authoritative placement retain zero UID and exact bag index",()=>{
   const {projectFishingRod,fishingAttachmentApplied,fishingAttachmentReceipt,fishingBagCell}=fishingPanelModule;
   const carrier={info:{name:"Blue Fishing Rod",shape:49,item_type:1,item_index:3},userItem:{unique_id:4,item_index:3,
@@ -6615,7 +6636,8 @@ function worldFishingShellFixture(){
     onCancelWorldFishingGesture:gesture=>{cancels.push(gesture);page.api.cancelWorldFishingGesture(gesture);},webGl2SharedCanvasPrototype:false,sharedUiCanvasId:fishingCanvasMode.sharedUiCanvasId,
     player:page.self,animationWorldKey:page.source.sourceKey,entityAnimationWorldSeed:7,committedEntityAnimationRef:ref(null),
     viewportEntities:[page.self],fishingFeedback:new fishingFeedbackPresentation.FishingFeedbackPresentation(),
-    setFishingEffects:effects=>assert.deepEqual(effects,[]),playOriginalSoundEvent:()=>assert.fail("no fishing pose in this input fixture"),
+    setFishingEffects:effects=>assert.deepEqual(effects,[]),setFishingBiteStartedAt:at=>assert.equal(at,null),
+    playOriginalSoundEvent:()=>assert.fail("no fishing pose in this input fixture"),
     entityAnimationInputs:{entities:[{entity:{...page.self,objectId:"17"},legacyAnimationState:"standing"}]},resolveCrystalEntityAnimationPoses:fishingAnimation.resolveCrystalEntityAnimationPoses,
     entityAnimationRuntimeFromWindow:fishingAnimation.entityAnimationRuntimeFromWindow,onWorldFishingAnimationCommit:(commit,previous)=>page.api.commitWorldFishingAnimation(commit,previous),
     onViewportTileSecondaryAction:()=>{throw Error("primary fixture cannot send secondary action");},playerUiPreferences:undefined,

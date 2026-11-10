@@ -1,3 +1,5 @@
+use std::time::{Duration, Instant};
+
 use bevy_ecs::prelude::World;
 use mir2_game_data::{crystal_drop_table_by_key, localized_text_or_fallback, CrystalItemTemplate};
 use mir2_protocol::{ChatType, Point, ServerPacket, UserItem};
@@ -32,6 +34,7 @@ use super::resources::{
 
 const CRYSTAL_FISHING_SUCCESS_START_PERCENT: i32 = 10;
 const CRYSTAL_FISHING_PROGRESS_PER_TICK: i32 = 25;
+const CRYSTAL_FISHING_BITE_WINDOW: Duration = Duration::from_secs(3);
 const CRYSTAL_FISHING_REEL_BONUS_MIN: i32 = 10;
 const CRYSTAL_FISHING_REEL_BONUS_RANGE: u64 = 14;
 const CRYSTAL_FISHING_REEL_BONUS_SALT: usize = 910_000;
@@ -69,6 +72,10 @@ struct FishingReelOutcome {
 }
 
 pub(super) fn fishing_cast_impl(world: &mut World, cast_out: bool) -> Vec<ServerPacket> {
+    fishing_cast_at(world, cast_out, Instant::now())
+}
+
+fn fishing_cast_at(world: &mut World, cast_out: bool, now: Instant) -> Vec<ServerPacket> {
     if !is_in_world(world) {
         return Vec::new();
     }
@@ -76,32 +83,23 @@ pub(super) fn fishing_cast_impl(world: &mut World, cast_out: bool) -> Vec<Server
 
     if cast_out {
         let mut packets = Vec::new();
-        if begin_fishing_cast(world, &mut packets) {
+        if !world.resource::<FishingResource>().fishing && begin_fishing_cast(world, &mut packets) {
             packets.push(fishing_update_packet(world));
         }
         return packets;
     }
 
+    let mut packets = Vec::new();
     if !fishing_rod_and_point_are_valid(world) {
-        reject_fishing(world);
-        return Vec::new();
+        interrupt_fishing(world, &mut packets);
+        return packets;
     }
 
     if !world.resource::<FishingResource>().fishing {
         return vec![fishing_update_packet(world)];
     }
 
-    let mut packets = Vec::new();
-    {
-        let mut fishing = world.resource_mut::<FishingResource>();
-        fishing.fishing = false;
-        fishing.progress_percent = 100;
-    }
-    if world.resource::<FishingResource>().found_fish {
-        packets.extend(complete_fishing_reel(world).packets);
-        world.resource_mut::<FishingResource>().found_fish = false;
-    }
-    packets.push(fishing_update_packet(world));
+    finish_fishing_cast(world, now, &mut packets);
     packets
 }
 
@@ -127,46 +125,82 @@ pub(super) fn fishing_change_autocast_impl(
 }
 
 pub(super) fn tick_fishing(world: &mut World, packets: &mut Vec<ServerPacket>) {
+    tick_fishing_at(world, packets, Instant::now());
+}
+
+fn tick_fishing_at(world: &mut World, packets: &mut Vec<ServerPacket>, now: Instant) {
     if !is_in_world(world) || !world.resource::<FishingResource>().fishing {
         return;
     }
     sync_fishing_slots_from_equipment(world);
     if !has_equipped_fishing_rod(world) {
-        reject_fishing(world);
+        interrupt_fishing(world, packets);
         return;
     }
-    let mut found_this_tick = false;
-    let auto_cast_ready = {
+    let auto_reel = fishing_autocast_enabled(world);
+    let (bite_started, should_reel) = {
         let mut fishing = world.resource_mut::<FishingResource>();
-        if fishing.found_fish {
-            fishing.auto_cast
+        if expire_fishing_bite(&mut fishing, now) {
+            // Publish the cleared nibble privately before the next maintenance
+            // tick closes this exhausted R16 attempt.
+            (false, false)
+        } else if fishing.found_fish {
+            (false, auto_reel)
+        } else if fishing.bite_expires_at.is_some() {
+            (false, true)
         } else {
             fishing.progress_percent =
                 (fishing.progress_percent + CRYSTAL_FISHING_PROGRESS_PER_TICK).min(100);
-            if fishing.progress_percent >= 100 {
+            let bite_started = fishing.progress_percent == 100;
+            if bite_started {
                 fishing.found_fish = true;
-                found_this_tick = true;
+                fishing.bite_expires_at = Some(now + CRYSTAL_FISHING_BITE_WINDOW);
             }
-            false
+            (bite_started, false)
         }
     };
-    if found_this_tick && fishing_slot_model_available(world) {
+    if bite_started && fishing_slot_model_available(world) {
         damage_fishing_slot_item(world, FISHING_SLOT_FLOAT, packets);
     }
-    if auto_cast_ready {
-        let outcome = complete_fishing_reel(world);
-        let cancel_autocast = outcome.cancel_autocast;
-        packets.extend(outcome.packets);
-        {
-            let mut fishing = world.resource_mut::<FishingResource>();
-            fishing.fishing = false;
-            fishing.found_fish = false;
-        }
-        if !cancel_autocast {
-            begin_fishing_cast(world, packets);
-        }
+    if should_reel {
+        finish_fishing_cast(world, now, packets);
+    } else {
+        packets.push(fishing_update_packet(world));
     }
+}
+
+fn expire_fishing_bite(fishing: &mut FishingResource, now: Instant) -> bool {
+    if fishing.found_fish && fishing.bite_expires_at.is_some_and(|deadline| now > deadline) {
+        fishing.found_fish = false;
+        return true;
+    }
+    false
+}
+
+fn finish_fishing_cast(world: &mut World, now: Instant, packets: &mut Vec<ServerPacket>) {
+    let found_fish = {
+        let mut fishing = world.resource_mut::<FishingResource>();
+        expire_fishing_bite(&mut fishing, now);
+        fishing.fishing = false;
+        fishing.progress_percent = 100;
+        fishing.found_fish
+    };
+    let outcome = if found_fish {
+        complete_fishing_reel(world)
+    } else {
+        FishingReelOutcome::default()
+    };
+    packets.extend(outcome.packets);
+    clear_active_fishing(world);
     packets.push(fishing_update_packet(world));
+
+    if !outcome.cancel_autocast
+        && fishing_autocast_enabled(world)
+        && fishing_bait_available(world)
+        && begin_fishing_cast(world, packets)
+    {
+        packets.push(fishing_update_packet(world));
+    }
 }
 
 /// Derive the fishing attribute from the cell three tiles ahead of the player
@@ -197,11 +231,11 @@ fn sync_fishing_attribute_from_map(world: &mut World) {
 fn begin_fishing_cast(world: &mut World, packets: &mut Vec<ServerPacket>) -> bool {
     sync_fishing_attribute_from_map(world);
     if !fishing_rod_and_point_are_valid(world) {
-        reject_fishing(world);
+        clear_active_fishing(world);
         return false;
     }
     if !fishing_has_hook(world) {
-        reject_fishing(world);
+        clear_active_fishing(world);
         packets.push(fishing_chat(world, "server.NeedHook", "NeedHook"));
         return false;
     }
@@ -209,7 +243,7 @@ fn begin_fishing_cast(world: &mut World, packets: &mut Vec<ServerPacket>) -> boo
         damage_fishing_slot_item(world, FISHING_SLOT_HOOK, packets);
     }
     let Some(bait_stats) = consume_one_fishing_bait(world) else {
-        reject_fishing(world);
+        clear_active_fishing(world);
         packets.push(fishing_chat(world, "server.YouNeedBait", "YouNeedBait"));
         return false;
     };
@@ -230,6 +264,7 @@ fn begin_fishing_cast(world: &mut World, packets: &mut Vec<ServerPacket>) -> boo
         fishing.progress_percent = 0;
         fishing.chance_percent = chance_percent;
         fishing.found_fish = false;
+        fishing.bite_expires_at = None;
     }
     true
 }
@@ -238,10 +273,22 @@ fn fishing_rod_and_point_are_valid(world: &World) -> bool {
     has_equipped_fishing_rod(world) && world.resource::<FishingResource>().fishing_attribute >= 0
 }
 
-fn reject_fishing(world: &mut World) {
+fn clear_active_fishing(world: &mut World) {
     let mut fishing = world.resource_mut::<FishingResource>();
     fishing.fishing = false;
     fishing.found_fish = false;
+    fishing.bite_expires_at = None;
+}
+
+pub(super) fn interrupt_fishing(world: &mut World, packets: &mut Vec<ServerPacket>) {
+    if world.resource::<FishingResource>().fishing {
+        clear_active_fishing(world);
+        packets.push(fishing_update_packet(world));
+    }
+}
+
+pub(super) fn reset_fishing_owner(world: &mut World) {
+    world.insert_resource(FishingResource::new());
 }
 
 fn fishing_chat(world: &World, key: &str, fallback: &str) -> ServerPacket {
@@ -401,6 +448,17 @@ fn fishing_has_reel(world: &World) -> bool {
     }
 }
 
+fn fishing_autocast_enabled(world: &World) -> bool {
+    let fishing = world.resource::<FishingResource>();
+    fishing.auto_cast
+        && if fishing_slot_model_available(world) {
+            fishing_slot_item_of_type(world, FISHING_SLOT_REEL, CRYSTAL_ITEM_TYPE_REEL)
+                .is_some_and(|reel| reel.durability_current != Some(0))
+        } else {
+            fishing.rod_has_reel
+        }
+}
+
 fn fishing_slot_item_of_type(world: &World, slot: usize, item_type: u8) -> Option<&ItemState> {
     world
         .resource::<FishingResource>()
@@ -433,6 +491,18 @@ fn consume_one_fishing_bait(world: &mut World) -> Option<FishingBaitUse> {
     let mut inventory = world.resource_mut::<InventoryResource>();
     consume_one_fishing_bait_from_items(&mut inventory.inventory_items)
         .or_else(|| consume_one_fishing_bait_from_items(&mut inventory.belt_items))
+}
+
+fn fishing_bait_available(world: &World) -> bool {
+    if fishing_slot_model_available(world) {
+        return fishing_slot_item_of_type(world, FISHING_SLOT_BAIT, CRYSTAL_ITEM_TYPE_BAIT).is_some();
+    }
+    let inventory = world.resource::<InventoryResource>();
+    inventory
+        .inventory_items
+        .iter()
+        .chain(&inventory.belt_items)
+        .any(|item| item.quantity > 0 && item_is_fishing_bait(item))
 }
 
 fn consume_one_fishing_slot_bait(world: &mut World) -> Option<FishingBaitUse> {
@@ -738,6 +808,10 @@ fn award_fishing_loot(world: &mut World) -> Result<FishingReelOutcome, String> {
 #[cfg(test)]
 #[path = "fishing_uid_tests.rs"]
 mod uid_tests;
+
+#[cfg(test)]
+#[path = "fishing_lifecycle_tests.rs"]
+mod lifecycle_tests;
 
 pub(super) fn resolved_fishing_drop(world: &World) -> Option<ResolvedDropTemplate> {
     let fishing_attribute = world.resource::<FishingResource>().fishing_attribute;

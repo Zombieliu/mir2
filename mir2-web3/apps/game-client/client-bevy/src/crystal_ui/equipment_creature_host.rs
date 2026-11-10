@@ -8,7 +8,7 @@ use mir2_protocol::ClientPacket;
 use mount_fishing_dialog::view::{
     DialogHit, EquipmentWindow, HitAction as EquipHit, OriginalFrame,
 };
-use mount_fishing_dialog::{EquipmentAction, EquipmentDialog, EquipmentIntent};
+use mount_fishing_dialog::{EquipmentAction, EquipmentDialog, EquipmentIntent, FishingBiteCue};
 #[derive(Clone, Copy, PartialEq)]
 enum ItemCell {
     Bag(u32),
@@ -21,6 +21,8 @@ pub struct MenuHost {
     drag: Option<(u8, Vec2)>,
     selected: Option<(ItemCell, u64)>,
     pressed: Option<ItemCell>,
+    reel_hit_cue: Option<FishingBiteCue>,
+    reel_press: Option<FishingBiteCue>,
     cursor: Option<Vec2>,
     hint: Option<String>,
     text_selecting: bool,
@@ -251,6 +253,8 @@ pub(super) fn process(
     state.creature.sync_input_editor();
     state.menu_pointer_consumed = false;
     host.hint = None;
+    // A lost pointer, focus, or modal retires a held reel before any early return.
+    let mut reel_press = host.reel_press.take();
     let now = time.as_ref().map_or(0, |t| t.elapsed().as_millis() as u64);
     if shell.is_none_or(|s| s.screen != NativeShellScreen::InGame) {
         *host = Default::default();
@@ -378,10 +382,20 @@ pub(super) fn process(
     };
     state.menu_pointer_consumed = pet_hit.is_some() || equip_hit.is_some() || bag.is_some();
     host.hint = pet_hit.as_ref().and_then(|h| h.hint.clone());
+    let reel_lease = state.equipment_dialogs.fishing_reel_lease();
+    let reel_hit = if pet_hit.is_none()
+        && equip_hit.is_some_and(|hit| hit.action == EquipHit::Button(EquipmentAction::Reel))
+    {
+        host.reel_hit_cue.filter(|cue| Some(*cue) == reel_lease)
+    } else {
+        None
+    };
     if mouse.just_pressed(MouseButton::Right) {
         host.selected = None;
+        reel_press = None;
     }
     if mouse.just_pressed(MouseButton::Left) {
+        reel_press = reel_hit;
         if let Some(hit) = pet_hit {
             match hit.action {
                 PetHit::Button(action) => pet_action(&mut state, &mut intents, action, now),
@@ -395,6 +409,7 @@ pub(super) fn process(
             item_click(&mut host, &mut state, &inventory, &mut intents, cell);
         } else if let Some(hit) = equip_hit {
             match hit.action {
+                EquipHit::Button(EquipmentAction::Reel) => {}
                 EquipHit::Button(action) => equipment_action(&mut state, &mut intents, action, now),
                 EquipHit::Drag(which) => {
                     let (id, pos) = match which {
@@ -427,12 +442,17 @@ pub(super) fn process(
         }
     }
     if mouse.just_released(MouseButton::Left) {
+        if reel_press.is_some() && reel_press == reel_hit {
+            equipment_action(&mut state, &mut intents, EquipmentAction::Reel, now);
+        }
         if let (Some(start), Some(end)) = (host.pressed.take(), cell) {
             if start != end && host.selected.is_some() {
                 item_click(&mut host, &mut state, &inventory, &mut intents, end);
             }
         }
         host.drag = None;
+    } else if mouse.pressed(MouseButton::Left) {
+        host.reel_press = reel_press.filter(|cue| Some(*cue) == reel_lease);
     }
 }
 fn metadata() -> &'static std::collections::HashMap<(String, u16), OriginalFrame> {
@@ -492,6 +512,7 @@ pub(super) fn render_system(
     }
     host.equip_hits.clear();
     host.pet_hits.clear();
+    host.reel_hit_cue = None;
     state.menu_hit_regions.clear();
     if shell.is_none_or(|s| s.screen != NativeShellScreen::InGame) {
         return;
@@ -548,6 +569,13 @@ pub(super) fn render_system(
                 &ui.player,
                 &frame,
             );
+            if host
+                .equip_hits
+                .iter()
+                .any(|hit| hit.action == EquipHit::Button(EquipmentAction::Reel))
+            {
+                host.reel_hit_cue = state.equipment_dialogs.fishing_reel_lease();
+            }
         }
         if creature_visible {
             host.pet_hits =

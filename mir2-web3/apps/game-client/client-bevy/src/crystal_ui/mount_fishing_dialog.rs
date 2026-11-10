@@ -148,6 +148,19 @@ struct SlotPending {
     packet: ClientPacket,
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct FishingBiteCue {
+    pub owner_id: u32,
+    pub generation: u64,
+    pub started_at_ms: u64,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+struct FishingBiteDisplay {
+    cue: FishingBiteCue,
+    ui_started_at_ms: u64,
+}
+
 #[derive(Debug, Clone, PartialEq)]
 pub struct MountFishingUi {
     pub mount_open: bool,
@@ -170,6 +183,9 @@ pub struct MountFishingUi {
     pub progress: i32,
     pub auto_cast: bool,
     pub escape_cancels: bool,
+    fishing_owner: Option<u32>,
+    fishing_bite: Option<FishingBiteDisplay>,
+    reel_pending: bool,
     pending: Option<SlotPending>,
 }
 impl Default for MountFishingUi {
@@ -195,6 +211,9 @@ impl Default for MountFishingUi {
             progress: 0,
             auto_cast: false,
             escape_cancels: false,
+            fishing_owner: None,
+            fishing_bite: None,
+            reel_pending: false,
             pending: None,
         }
     }
@@ -241,6 +260,47 @@ impl MountFishingUi {
     pub fn can_auto_cast(&self) -> bool {
         self.rod.as_ref().is_some_and(|r| r.has_slot(4))
     }
+
+    pub fn present_fishing_bite(
+        &mut self,
+        cue: Option<FishingBiteCue>,
+        animation_now_ms: u64,
+        ui_now_ms: u64,
+    ) {
+        let Some(cue) = cue.filter(|cue| {
+            self.status_open
+                && self.fishing
+                && self.found_fish
+                && self.fishing_owner == Some(cue.owner_id)
+                && cue.started_at_ms <= animation_now_ms
+        }) else {
+            self.fishing_bite = None;
+            return;
+        };
+        if self.fishing_bite.is_none_or(|display| display.cue != cue) {
+            self.fishing_bite = Some(FishingBiteDisplay {
+                cue,
+                ui_started_at_ms: ui_now_ms.saturating_sub(animation_now_ms - cue.started_at_ms),
+            });
+        }
+    }
+
+    fn active_fishing_bite(&self) -> Option<FishingBiteDisplay> {
+        self.fishing_bite
+            .filter(|_| self.status_open && self.fishing && self.found_fish)
+    }
+
+    pub(super) fn fishing_reel_lease(&self) -> Option<FishingBiteCue> {
+        self.active_fishing_bite()
+            .filter(|_| !self.reel_pending)
+            .map(|display| display.cue)
+    }
+
+    pub(super) fn fishing_bite_frame(&self, now_ms: u64) -> Option<u16> {
+        let display = self.active_fishing_bite()?;
+        Some(170 + ((now_ms.saturating_sub(display.ui_started_at_ms) / 130) % 10) as u16)
+    }
+
     pub fn action(&mut self, action: EquipmentAction, now: u64) -> Option<EquipmentIntent> {
         let packet = match action {
             EquipmentAction::CloseMount => {
@@ -268,14 +328,14 @@ impl MountFishingUi {
                 }
             }
             EquipmentAction::CloseStatus => {
-                let was_open = self.status_open;
-                self.status_open = false;
-                if !was_open {
+                if !std::mem::take(&mut self.status_open) || self.reel_pending {
                     return None;
                 }
+                self.reel_pending = true;
                 ClientPacket::FishingCast { cast_out: false }
             }
-            EquipmentAction::Reel if self.status_open => {
+            EquipmentAction::Reel if self.fishing_reel_lease().is_some() => {
+                self.reel_pending = true;
                 ClientPacket::FishingCast { cast_out: false }
             }
             EquipmentAction::AutoCast if self.status_open && self.can_auto_cast() => {
@@ -346,8 +406,16 @@ impl MountFishingUi {
                 found_fish,
                 ..
             } if *object_id == self_id => {
+                let continuing = self.fishing && *fishing && self.fishing_owner == Some(self_id);
+                if !continuing {
+                    self.reel_pending = false;
+                }
+                if !continuing || !*found_fish {
+                    self.fishing_bite = None;
+                }
+                self.fishing_owner = (*fishing && self_id != 0).then_some(self_id);
                 self.fishing = *fishing;
-                self.status_open = *fishing;
+                self.status_open = *fishing && (!self.reel_pending || self.status_open);
                 self.progress = (*progress_percent).clamp(0, 100);
                 self.chance = (*chance_percent).clamp(0, 100);
                 self.found_fish = *found_fish;
@@ -475,7 +543,10 @@ impl MountFishingUi {
             ClientPacket::FishingCast { cast_out: true } => {
                 mir2_client_core::fishing_click::release_unsent_fishing_cast(&mut self.last_cast_ms)
             }
-            ClientPacket::FishingCast { cast_out: false } => self.status_open = self.fishing,
+            ClientPacket::FishingCast { cast_out: false } if self.reel_pending => {
+                self.reel_pending = false;
+                self.status_open = self.fishing;
+            }
             ClientPacket::FishingChangeAutocast { auto_cast } if self.auto_cast == *auto_cast => {
                 self.auto_cast = !*auto_cast && self.can_auto_cast()
             }

@@ -4055,16 +4055,37 @@ impl ZoneRuntime {
         let Some(player) = self.players.get_mut(session_id) else {
             return Vec::new();
         };
-        let bound_packets = packets
-            .iter()
-            .filter(|packet| {
-                owner_action_actor_id(packet)
-                    .is_none_or(|actor_id| actor_id == owner_local_object_id)
-            })
-            .cloned()
-            .collect::<Vec<_>>();
-        for packet in &bound_packets {
+        let mut bound_packets = Vec::with_capacity(packets.len());
+        for packet in packets {
+            if owner_action_actor_id(packet)
+                .is_some_and(|actor_id| actor_id != owner_local_object_id)
+            {
+                continue;
+            }
+            let publish = match packet {
+                ServerPacket::FishingUpdate {
+                    object_id,
+                    fishing,
+                    progress_percent,
+                    found_fish,
+                    ..
+                } => {
+                    if *object_id != owner_local_object_id {
+                        continue;
+                    }
+                    // Crystal sends progress and nibble to the owner. Apply
+                    // transitions in packet order so a reel and immediate
+                    // recast in the same batch are both visible to observers.
+                    *fishing != player.fishing
+                        && !*found_fish
+                        && (!*fishing || *progress_percent == 0)
+                }
+                _ => true,
+            };
             apply_observer_action_state(player, owner_local_object_id, packet, now_ms);
+            if publish {
+                bound_packets.push(packet.clone());
+            }
         }
         let life_id = player.object_id;
         if bound_packets.iter().any(|packet| match packet {

@@ -81,7 +81,7 @@ import {
   stopOriginalAudio,
   unlockOriginalAudio,
 } from "../lib/original-audio";
-import { FishingFeedbackPresentation } from "../lib/world-fishing-feedback";
+import { FishingFeedbackPresentation, fishingBiteButtonFrame } from "../lib/world-fishing-feedback";
 import {
   LanguageSelector,
   LoginOverlay,
@@ -2113,12 +2113,14 @@ export function OriginalClientShell({
   const committedEntityAnimationRef = useRef<{ worldKey: string; poses: ReturnType<typeof resolveCrystalEntityAnimationPoses> } | null>(null);
   const [fishingFeedback] = useState(() => new FishingFeedbackPresentation());
   const [fishingEffects, setFishingEffects] = useState<readonly DisplaySceneEffect[]>([]);
+  const [fishingBiteStartedAt, setFishingBiteStartedAt] = useState<number | null>(null);
   const animationWorldKey = worldFishingAnimation?.record.sourceKey ?? `${world.mapFileName ?? "none"}:${player?.objectId ?? "none"}`;
   useLayoutEffect(() => {
     const context = worldFishingAnimation, runtime = context?.runtime ?? entityAnimationRuntimeFromWindow();
     if (screen !== "game" || !player || !runtime) {
       committedEntityAnimationRef.current = null;
       setFishingEffects(fishingFeedback.advance(null, 0, [], {}).effects);
+      setFishingBiteStartedAt(null);
       onWorldFishingAnimationCommit?.(null);
       return;
     }
@@ -2133,6 +2135,7 @@ export function OriginalClientShell({
     committedEntityAnimationRef.current = { worldKey: animationWorldKey, poses };
     const feedback = fishingFeedback.advance(animationWorldKey, atMs, viewportEntities, poses);
     setFishingEffects(feedback.effects);
+    setFishingBiteStartedAt(fishingFeedback.biteStartedAt);
     for (const sound of feedback.sounds) playOriginalSoundEvent(sound);
     if (!context) { onWorldFishingAnimationCommit?.(null); return; }
     const token = Object.freeze({});
@@ -5584,7 +5587,12 @@ export function OriginalClientShell({
                   onBuyGameShopItem,
                   cashGameShopSource, cashGameShopPending, onConfirmCashGameShopPurchase, onReadCashGameShopItemTooltip,
                   cashPreviewSourceKey, onReadCashPreviewLayers, onTurnCashPreview, onGameShopVisibilityChange,
-                  onSendClientCommand, fishingUi,
+                  onSendClientCommand,
+                  fishingUi: fishingUi && { ...fishingUi,
+                    biteAnimation: fishingBiteStartedAt === null ? undefined : {
+                      startedAt: fishingBiteStartedAt,
+                      frame: fishingBiteButtonFrame(motionNow, fishingBiteStartedAt),
+                    } },
                   inputProfile: clientProfile.input,
                   gamepadFamily: clientProfile.gamepad.family,
                   onStartTutorial: () =>

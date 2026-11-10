@@ -37,6 +37,27 @@ test("actual Ranking Inspect ABI is provided by Core with the same guarded admis
     .some(({ name }) => name.startsWith("ranking_inspect_")), false);
 });
 
+test("packaged Presentation plays an ordered reel and recast from one packet projection", async () => {
+  const root = new URL(`../public/client-core/${manifest.presentation.version}/`, import.meta.url);
+  const glue = readFileSync(new URL("mir2_platform_web.js", root));
+  const binary = readFileSync(new URL("mir2_platform_web_bg.wasm", root));
+  const presentation = await import(`data:text/javascript;base64,${glue.toString("base64")}`);
+  await presentation.default({ module_or_path: binary });
+  const bridge = new presentation.EntityAnimationBridge();
+  try {
+    const pose = (nowMs, fishing, extra) => JSON.parse(bridge.resolveMir2EntityAnimationPoses(JSON.stringify({
+      worldKey: "fishing-test", worldSeed: 7, nowMs,
+      entities: [{ objectId: "7", kind: "selfPlayer", action: "standing", direction: "Right", fishing, ...extra }],
+    }))).poses[0];
+    assert.equal(pose(1000, false).action, "standing");
+    assert.equal(pose(1050, true).action, "fishingCast");
+    assert.equal(pose(2000, true, { fishingEdges: 1 }).action, "fishingWait");
+    assert.equal(pose(2570, true).action, "fishingReel");
+    assert.equal(pose(3370, true).action, "fishingCast");
+    assert.equal(pose(4170, true).action, "fishingWait");
+  } finally { bridge.free(); }
+});
+
 test("actual V2 N2 endpoints allow diary accept and authoritative ready finish", () => {
   const content = JSON.parse(readFileSync(new URL("../../../config/quest-guidance/newcomer-journey-v2.json", import.meta.url), "utf8"));
   const quest = content.quests.find((entry) => entry.id === 2110002);

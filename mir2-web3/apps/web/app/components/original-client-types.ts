@@ -127,6 +127,7 @@ export type DisplayEntity = {
   sneaking?: boolean;
   fishing?: boolean | null;
   fishingFeedback?: import("../../lib/world-fishing-feedback").FishingFeedback;
+  fishingEdges?: readonly import("../../lib/world-fishing-feedback").FishingAnimationEdge[];
   sprite?: EntitySprite | null;
   questIds?: number[];
   bigMapIcon?: number;

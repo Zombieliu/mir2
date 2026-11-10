@@ -4735,6 +4735,7 @@ impl SimulationSession {
                 resolution: 0,
             }];
         }
+        super::fishing::reset_fishing_owner(self.app.world_mut());
         if save.hp <= 0 {
             // Only a genuine new login uses Crystal Load's bind/full rule.
             // Same-epoch restores and trusted native-state fixtures do not.

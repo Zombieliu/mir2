@@ -100,6 +100,10 @@ pub fn required_frames(model: &MountFishingUi, now: u64) -> Vec<(&'static str, u
             if rod.shape == 49 { 1333 } else { 1335 } + u16::from(rod.has_slot(0)),
         ));
     }
+    if model.status_open {
+        frames.push(("Title", 142));
+        frames.extend((170..=179).map(|index| ("Title", index)));
+    }
     frames
 }
 
@@ -265,6 +269,7 @@ pub fn render(
     let mut hits = Vec::new();
     if required_frames(model, now)
         .into_iter()
+        .filter(|(lib, index)| *lib != "Title" || !matches!(*index, 142 | 170..=179))
         .any(|(lib, index)| frame(lib, index).is_none())
     {
         return hits;
@@ -499,7 +504,6 @@ pub fn render(
                     origin,
                     &mut hits,
                 );
-                // Checked-out Crystal never makes its FishButton visible; retain disabled image149.
                 image(
                     p,
                     assets,
@@ -510,6 +514,24 @@ pub fn render(
                     frame("Title", 149).unwrap(),
                     false,
                 );
+                if let Some((index, animation_frame)) =
+                    model.fishing_bite_frame(now).and_then(|index| {
+                        frame("Title", 142)?;
+                        Some((index, frame("Title", index)?))
+                    })
+                {
+                    button(
+                        p,
+                        assets,
+                        "Title",
+                        [index, index, 142],
+                        Vec2::new(47.0, 95.0),
+                        animation_frame,
+                        EquipmentAction::Reel,
+                        origin,
+                        &mut hits,
+                    );
+                }
                 if model.can_auto_cast() {
                     button(
                         p,

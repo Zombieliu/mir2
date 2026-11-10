@@ -14,6 +14,7 @@ type FishingWindowsProps = {
   rod: FishingRodView | null;
   equipmentOpen: boolean;
   status: FishingStatusView | null;
+  biteAnimation?: { startedAt: number; frame: number };
   reelPending: boolean;
   attachmentPending: boolean;
   selectedSlot: number | null;
@@ -23,6 +24,7 @@ type FishingWindowsProps = {
   onDismissNotice?: () => void;
   onCloseEquipment: () => void;
   onCloseStatus: () => void;
+  onReelBite: () => void;
   onToggleAutoCast: () => void;
   onToggleEscape: () => void;
   onTackleClick: (slot: number) => void;
@@ -64,8 +66,8 @@ function FishingBar({ label, frame, top, height, value }: { label: string; frame
   </div>;
 }
 
-export function OriginalClientFishingWindows({ t, rod, equipmentOpen, status, reelPending, attachmentPending,
-  selectedSlot, autoCast, escapeCancels, noticeOpen, onDismissNotice, onCloseEquipment, onCloseStatus,
+export function OriginalClientFishingWindows({ t, rod, equipmentOpen, status, biteAnimation, reelPending, attachmentPending,
+  selectedSlot, autoCast, escapeCancels, noticeOpen, onDismissNotice, onCloseEquipment, onCloseStatus, onReelBite,
   onToggleAutoCast, onToggleEscape, onTackleClick, onClearSelection }: FishingWindowsProps) {
   const equipmentWindow = useR16SocialWindow(EQUIPMENT);
   const statusWindow = useR16SocialWindow(STATUS);
@@ -124,6 +126,11 @@ export function OriginalClientFishingWindows({ t, rod, equipmentOpen, status, re
       {fishing === "Fishing" ? <img src="/original-ui/Title/149.png" alt="" draggable={false}
         style={{ ...SPRITE_STYLE, left: 47, top: 95, width: 60, height: 25 }} />
         : <div aria-hidden="true" style={{ ...LOCALIZED_CAPTION_STYLE, left: 47, top: 95, width: 60, height: 25 }}>{fishing}</div>}
+      {status.foundFish && biteAnimation && <R16SocialButton key={biteAnimation.startedAt}
+        frame={biteAnimation.frame} hoverFrame={biteAnimation.frame} pressedFrame={142}
+        rect={{ left: 47, top: 95, width: 60, height: 25 }}
+        label={t("ui.fishingReel", [], "Reel in")} data-fishing-bite="true"
+        disabled={reelPending} onClick={onReelBite} />}
       {(autoCast || rod?.canAutoCast) && <>
         <R16SocialButton frame={180} rect={{ left: 110, top: 95, width: 48, height: 25 }}
           label={t("game.complete.005", [], "Auto")} aria-pressed={autoCast} data-fishing-autocast="true"

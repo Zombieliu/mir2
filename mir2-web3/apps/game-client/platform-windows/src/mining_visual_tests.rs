@@ -54,7 +54,7 @@ fn step(app: &mut App) {
     );
 }
 
-fn offscreen_app(root: &Path, output: &Path) -> (App, Handle<Image>) {
+pub(super) fn offscreen_app(root: &Path, output: &Path) -> (App, Handle<Image>) {
     let mut app = App::new();
     app.add_plugins(DefaultPlugins
         .set(AssetPlugin { file_path: root.to_str().unwrap().into(), meta_check: AssetMetaCheck::Never, ..default() })
@@ -344,7 +344,7 @@ fn assert_source_geometry(root: &Path, state: &Value) {
     );
 }
 
-fn warm(app: &mut App) {
+pub(super) fn warm(app: &mut App) {
     let started = Instant::now();
     loop {
         step(app);
@@ -379,7 +379,7 @@ fn warm(app: &mut App) {
     }
 }
 
-fn capture(app: &mut App, target: &Handle<Image>, path: &Path) -> Vec<u8> {
+pub(super) fn capture(app: &mut App, target: &Handle<Image>, path: &Path) -> Vec<u8> {
     assert!(!path.exists(), "fresh immutable output required");
     app.world_mut().resource_mut::<MiningPixels>().0 = None;
     app.world_mut()

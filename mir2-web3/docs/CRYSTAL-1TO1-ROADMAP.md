@@ -1,5 +1,9 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+## R16 收线按钮与有序重抛（2026-11-10）
+
+Web 和 Windows 复用原版咬钩帧和普通收竿指令。共同网关在三秒后撤销渔获资格，并按收线、扣除下一竿、抛竿的顺序发送回包。Web 两种渲染路径和普通双客户端验证了点击、过期、重抛和同档读回。Windows 已通过屏外验收。 [范围与证据](evidence/r16-web-fishing-loop-20261110/ordered-bite-and-recast.json)
+
 ## R16 冷登录首竿（2026-11-10）
 
 共享 Gateway 成功抛竿后及时唤醒个人运行时。隔离比奇同档的 Web 首个进度包从 9.662 秒降至 0.698 秒，Windows R16 正式传输从 9.254 秒降至 0.684 秒。继续鱼具拖拽、角色和鱼线呈现及 Windows 窗口验收。 [同档对照](evidence/r16-web-fishing-loop-20261110/README.md#冷登录首竿时序)

@@ -30,6 +30,31 @@ new Function("exports", "module", compiled.outputText)(loaded.exports, loaded);
 
 const { animationEventForEntity, resolveCrystalEntityAnimationPoses } = loaded.exports;
 
+test("sends unrendered FishingUpdate edges once and waits for the matching owner projection", () => {
+  const entity = { objectId: "7", kind: "selfPlayer", x: 31, y: 44, direction: "Right", fishing: false };
+  const original = { active: false }, cast = { active: true };
+  const recorded = [];
+  const runtime = { resolveMir2EntityAnimationPoses(raw) {
+    const { worldKey, nowMs, entities } = JSON.parse(raw);
+    recorded.push(entities[0]);
+    return JSON.stringify({ worldKey, nowMs, poses: [] });
+  } };
+  function deliver(fishing, actor) {
+    resolveCrystalEntityAnimationPoses({ runtime, worldKey: "0:7", worldSeed: 7, now: 1000 + recorded.length,
+      selfAuthority: { owner: { playerObjectId: 7 }, fishing }, entities: [{ entity: actor, state: "standing" }] });
+    return recorded.at(-1);
+  }
+  assert.equal(deliver(true, entity).fishing, undefined);
+  const first = { ...entity, fishing: true, fishingEdges: [original, cast] };
+  assert.equal(deliver(true, first).fishingEdges, 1, "first accepted transition includes its known standing baseline");
+  assert.equal(deliver(false, first).fishing, undefined);
+  const recast = { ...first, fishingEdges: [...first.fishingEdges, { active: false }, { active: true }] };
+  const next = deliver(true, recast);
+  assert.deepEqual([next.fishingEdges, next.fishing], [1, true]);
+  assert.equal(deliver(true, recast).fishingEdges, undefined, "duplicate UI commit cannot replay the same cast");
+  assert.equal(deliver(true, { ...recast, dead: true }).fishing, undefined);
+});
+
 test("sends a live player movement hint only for the selected moving event", () => {
   const player = { objectId: "7", kind: "selfPlayer", x: 31, y: 44, direction: "Right" };
   const segment = { fromX: 30, fromY: 44, toX: 31, toY: 44,

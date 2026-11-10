@@ -9825,6 +9825,7 @@ impl SimulationSession {
                 clear_account_derived_gm_permissions(self.app.world_mut());
                 return Err(error);
             }
+            super::fishing::reset_fishing_owner(self.app.world_mut());
         }
         if let ClientPacket::StartGame { character_index } = packet {
             let mut packets = self.start_game(character_index);

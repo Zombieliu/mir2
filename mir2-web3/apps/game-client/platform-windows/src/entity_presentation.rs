@@ -16,6 +16,7 @@ use mir2_bevy_runtime::entity_animation::{
     QueueDisposition, TransitionReason,
 };
 use mir2_client_bevy::audio::{NativeGameplayAudioQueue, NativeGameplaySoundEvent};
+use mir2_client_bevy::crystal_ui::overlays::mount_fishing_dialog::FishingBiteCue;
 use serde_json::Value;
 
 #[cfg(test)]
@@ -147,6 +148,7 @@ struct NativeFishingActor {
     found_fish: bool,
     last_cued: Option<(FishingPhase, u64)>,
     splash: Option<NativeFishingSplash>,
+    bite_started_at_ms: Option<u64>,
 }
 
 #[derive(Debug)]
@@ -170,14 +172,23 @@ impl NativeFishingActor {
             return None;
         }
         self.last_cued = Some(stamp);
+        if pose.phase != FishingPhase::Wait {
+            self.bite_started_at_ms = None;
+        }
         match pose.phase {
             FishingPhase::Cast => Some("fishing_throw.wav"),
             FishingPhase::Reel => Some("fishing_pull.wav"),
             FishingPhase::Wait => {
+                let started_at_ms = pose.started_at_ms + pose.phase.descriptor().frame_interval_ms;
+                if self.found_fish && self.point.is_some() {
+                    self.bite_started_at_ms.get_or_insert(started_at_ms);
+                } else {
+                    self.bite_started_at_ms = None;
+                }
                 self.splash = Some(NativeFishingSplash {
                     point: self.point?,
                     found_fish: self.found_fish,
-                    started_at_ms: pose.started_at_ms + pose.phase.descriptor().frame_interval_ms,
+                    started_at_ms,
                 });
                 self.found_fish.then_some("fishing.wav")
             }
@@ -295,6 +306,21 @@ impl NativeEntityPresentation {
 
     pub(crate) fn bind_fishing_audio_generation(&mut self, generation: u64) {
         self.fishing_audio_generation = Some(generation);
+    }
+
+    fn fishing_status_bite_cue(&self) -> Option<FishingBiteCue> {
+        let object_id = self.self_object_id.as_deref()?;
+        let actor = self.fishing_actors.get(object_id)?;
+        if actor.animation.phase() != Some(FishingPhase::Wait)
+            || self.world.active_state(object_id)?.current_action != AnimationAction::Standing
+        {
+            return None;
+        }
+        Some(FishingBiteCue {
+            owner_id: object_id.parse().ok()?,
+            generation: self.fishing_audio_generation?,
+            started_at_ms: actor.bite_started_at_ms?,
+        })
     }
 
     pub fn replace_payload(&mut self, payload: Value) {
@@ -995,12 +1021,14 @@ impl NativeEntityPresentation {
                         found_fish: false,
                         last_cued: None,
                         splash: None,
+                        bite_started_at_ms: None,
                     });
             if actor.rod_shape != rod_shape || reset {
                 actor.animation = FishingPresentation::default();
                 actor.rod_shape = rod_shape;
                 actor.last_cued = None;
                 actor.splash = None;
+                actor.bite_started_at_ms = None;
             }
             actor.direction = direction;
             actor.point = fishing_point;
@@ -1008,6 +1036,9 @@ impl NativeEntityPresentation {
                 .and_then(|row| row.get("foundFish"))
                 .and_then(Value::as_bool)
                 == Some(true);
+            if !active || !actor.found_fish || actor.point.is_none() {
+                actor.bite_started_at_ms = None;
+            }
             actor.animation.observe(active, now_ms);
         }
         self.fishing_actors.retain(|object_id, _| observed.contains(object_id));
@@ -1736,6 +1767,7 @@ impl NativeEntityPresentation {
                 let fishing = self.fishing_actors.get_mut(object_id).and_then(|actor| {
                     let fishing = actor.animation.advance_to(animation_now_ms)?;
                     if pose.action != AnimationAction::Standing {
+                        actor.bite_started_at_ms = None;
                         return None;
                     }
                     if let Some(sound) = actor.enter_cue_frame(fishing) {
@@ -1925,11 +1957,12 @@ fn is_attack_action(action: AnimationAction) -> bool {
 pub fn tick_native_entity_presentation(
     mut presentation: ResMut<NativeEntityPresentation>,
     movement: Option<Res<crate::input::WorldPointerMovementState>>,
-    player_ui: Option<Res<mir2_client_bevy::crystal_ui::overlays::NativePlayerUiState>>,
+    mut player_ui: Option<ResMut<mir2_client_bevy::crystal_ui::overlays::NativePlayerUiState>>,
     shell: Option<Res<mir2_client_bevy::native_shell::NativeShellModel>>,
     quest: Option<Res<mir2_client_bevy::quest_ui::QuestUiState>>,
     pointer_ui: crate::input::NativeQuestPointerUi,
     windows: Query<&Window, With<PrimaryWindow>>,
+    time: Option<Res<Time>>,
     mut gameplay_audio: Option<ResMut<NativeGameplayAudioQueue>>,
 ) {
     let motion_now_ms = native_motion_clock_ms();
@@ -1970,6 +2003,19 @@ pub fn tick_native_entity_presentation(
         motion_now_ms,
         effect_visible,
     );
+    if let Some(ui) = player_ui.as_deref_mut() {
+        let cue = shell
+            .as_ref()
+            .filter(|shell| {
+                shell.screen == mir2_client_bevy::native_shell::NativeShellScreen::InGame
+            })
+            .and_then(|_| presentation.fishing_status_bite_cue());
+        let ui_now_ms = time
+            .as_ref()
+            .map_or(0, |time| time.elapsed().as_millis() as u64);
+        ui.equipment_dialogs
+            .present_fishing_bite(cue, animation_now_ms, ui_now_ms);
+    }
     for event in presentation.fishing_sound_events.drain(..) {
         if let Some(queue) = gameplay_audio.as_deref_mut() {
             queue.push(event);

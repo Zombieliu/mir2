@@ -13,7 +13,8 @@ async function loadTypeScript(url) {
   return module.exports;
 }
 
-const { FishingFeedbackPresentation, readFishingFeedback } = await loadTypeScript("../lib/world-fishing-feedback.ts");
+const { appendFishingAnimationEdge, FishingFeedbackPresentation, fishingBiteButtonFrame, readFishingFeedback } =
+  await loadTypeScript("../lib/world-fishing-feedback.ts");
 const { loadEffectAssets, resolveMapEffect } = await loadTypeScript("../lib/crystal-magic-effects.ts");
 const worldKey = "session1:0";
 const actor = { objectId: "7", kind: "selfPlayer", x: 342, y: 244 };
@@ -79,6 +80,53 @@ test("retiring the owner or map cannot leave a bite icon on an unrelated incarna
   const left = presentation.advance(worldKey, 1220, [], {});
   assert.equal(left.effects.length, 4, "each tile-anchored splash can finish outside its actor's view");
   assert.deepEqual(presentation.advance("session1:1", 1300, [actor], {}), { effects: [], sounds: [] });
+});
+
+test("the original reel button starts only on a self bite cue, loops and retires", () => {
+  const presentation = new FishingFeedbackPresentation();
+  const self = { ...actor, fishing: true, fishingFeedback: bite };
+  const other = { ...self, kind: "player" };
+  const advance = (entity, now, phase, started, index) =>
+    presentation.advance(worldKey, now, [entity], poses(phase, started, index));
+  advance(other, 1120, "fishingWait", 1000, 1);
+  assert.equal(presentation.biteStartedAt, null);
+  advance(self, 1720, "fishingWait", 1720, 0);
+  assert.equal(presentation.biteStartedAt, null);
+  advance(self, 1840, "fishingWait", 1720, 1);
+  assert.equal(presentation.biteStartedAt, 1840);
+  advance(self, 2560, "fishingWait", 2440, 1);
+  assert.equal(presentation.biteStartedAt, 1840, "later wait cycles do not restart the button");
+  assert.deepEqual([0, 129, 130, 1299, 1300].map(delta => fishingBiteButtonFrame(1840 + delta, 1840)),
+    [170, 170, 171, 179, 170]);
+  advance({ ...self, fishingFeedback: ripple }, 2600, "fishingWait", 2440, 1);
+  assert.equal(presentation.biteStartedAt, null);
+  advance(self, 3280, "fishingWait", 3160, 1);
+  assert.equal(presentation.biteStartedAt, 3280);
+  const recast = { ...self, fishingEdges: [{ active: false, receivedAtMs: 3300 }, { active: true, receivedAtMs: 3301 }] };
+  advance(recast, 3310, "fishingWait", 3160, 1);
+  assert.equal(presentation.biteStartedAt, null, "the new bite must wait for its own cast's pose");
+  advance(recast, 4900, "fishingWait", 4780, 1);
+  assert.equal(presentation.biteStartedAt, 4900);
+  advance({ ...self, fishing: false }, 5000, "fishingWait", 4780, 1);
+  assert.equal(presentation.biteStartedAt, null);
+});
+
+test("only actual flag transitions extend the bounded presentation history", () => {
+  assert.equal(appendFishingAnimationEdge(undefined, undefined, true), undefined);
+  let edges = appendFishingAnimationEdge(undefined, false, true);
+  assert.deepEqual(edges.map(edge => edge.active), [false, true]);
+  assert.strictEqual(appendFishingAnimationEdge(edges, true, true), edges);
+  const first = edges[1];
+  edges = appendFishingAnimationEdge(edges, true, false);
+  edges = appendFishingAnimationEdge(edges, false, true);
+  assert.strictEqual(edges[1], first);
+  assert.deepEqual(edges.map(edge => edge.active), [false, true, false, true]);
+  for (let index = 0; index < 50; index += 1) {
+    const last = edges.at(-1).active;
+    edges = appendFishingAnimationEdge(edges, last, !last);
+  }
+  assert.equal(edges.length, 16);
+  assert(edges.every((edge, index) => index === 0 || edges[index - 1].active !== edge.active));
 });
 
 test("the shipping manifest resolves exact Crystal effect ranges, intervals and offsets", async () => {

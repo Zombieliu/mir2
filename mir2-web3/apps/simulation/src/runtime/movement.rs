@@ -399,6 +399,7 @@ pub(super) fn town_revive_packets(world: &mut World) -> Vec<ServerPacket> {
     if let Some(info) = object_health_info_for_entity(world, player, 0) {
         packets.push(ServerPacket::ObjectHealth { info });
     }
+    super::fishing::interrupt_fishing(world, &mut packets);
     packets
 }
 

@@ -277,6 +277,47 @@ fn set_fishing(
 }
 
 #[test]
+fn fishing_observers_get_ordered_edges_without_private_progress_or_foreign_actor() {
+    let (mut zone, owner, observer) = fixture();
+    let packet = |object_id, fishing, progress_percent, found_fish| ServerPacket::FishingUpdate {
+        object_id,
+        fishing,
+        progress_percent,
+        chance_percent: 38,
+        fishing_point: Point { x: 13, y: 10 },
+        found_fish,
+    };
+    let send = |zone: &mut ZoneRuntime, packets, now_ms| {
+        zone.handle(ZoneCommand::BroadcastPackets {
+            session_id: owner.clone(),
+            owner_local_object_id: OWNER_ID,
+            packets,
+            now_ms,
+        })
+    };
+    let cast = packet(OWNER_ID, true, 0, false);
+    let reel = packet(OWNER_ID, false, 100, false);
+    let first = send(&mut zone, vec![cast.clone()], 100);
+    assert!(has_packet(&first, &observer, |p| p == &cast));
+    let private = send(
+        &mut zone,
+        vec![
+            packet(OWNER_ID, true, 25, false),
+            packet(OWNER_ID, true, 100, true),
+            packet(OWNER_ID, true, 100, false),
+            packet(OBSERVER_ID, false, 100, false),
+        ],
+        200,
+    );
+    assert!(private.is_empty(), "unexpected fishing observer packets: {private:?}");
+    assert!(zone.players[&owner].fishing);
+    let next = send(&mut zone, vec![reel.clone(), cast.clone()], 300);
+    assert!(matches!(next.as_slice(), [ZoneOutbound::ToSession { session_id, packets }]
+        if *session_id == observer && packets == &[reel, cast]));
+    assert!(zone.players[&owner].fishing);
+}
+
+#[test]
 fn queued_actions_revalidate_fishing_from_both_trusted_projections_without_replay() {
     for packet in [false, true] {
         for kind in [

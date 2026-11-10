@@ -112,7 +112,7 @@ import { WorldFishingSource, sameOwner as sameWorldFishingOwner, type WorldFishi
 import type { InventoryTabKey } from "../lib/original-ui";
 import { fishingAttachmentApplied, fishingAttachmentReceipt, fishingBagCell, projectFishingRod, readFishingStatus,
   type FishingAttachmentCommand, type FishingStatusView } from "../lib/world-fishing-panel";
-import { readFishingFeedback, type FishingFeedback } from "../lib/world-fishing-feedback";
+import { appendFishingAnimationEdge, readFishingFeedback, type FishingAnimationEdge, type FishingFeedback } from "../lib/world-fishing-feedback";
 import type { WorldFishingGesture, WorldFishingPointer, WorldFishingAnimationContext,
   WorldFishingAnimationCommit, WorldFishingCallbacks } from "../lib/world-fishing-input";
 import { readCrystalEntityActionPose, type CrystalEntityActionPose } from "./components/original-client-entity-animation-runtime";
@@ -969,6 +969,7 @@ type WorldEntity = {
   sneaking?: boolean;
   fishing?: boolean;
   fishingFeedback?: FishingFeedback;
+  fishingEdges?: readonly FishingAnimationEdge[];
   disposition?: EntityDisposition;
   sprite?: GatewayWorldEntitySprite | null;
   questIds?: number[];
@@ -2348,12 +2349,12 @@ export default function HomePage() {
   const worldFishingQueuedRef = useRef<{ queued: QueuedMoveIntent; gesture: WorldFishingGesture } | null>(null);
   const worldFishingCastClockRef = useRef<{ owner: WorldFishingOwner; lastCastMs: number } | null>(null);
   type FishingSelection = { kind: "bag" | "tackle"; slot: number; uniqueId: number };
-  type FishingActive = { owner: WorldFishingOwner; view: FishingStatusView; reeling: boolean };
+  type FishingActive = { owner: WorldFishingOwner; view: FishingStatusView; reeling: boolean; bite: object | null };
   type FishingPanelCommand = FishingAttachmentCommand
     | Readonly<{ type: "fishingCast"; castOut: false }>
     | Readonly<{ type: "fishingChangeAutocast"; autoCast: boolean }>;
   type FishingPanelAttempt = { owner: WorldFishingOwner; command: FishingPanelCommand; active: FishingActive | null;
-    selection: FishingSelection | null;
+    selection: FishingSelection | null; bite?: object;
     snapshot: GatewayWorldSnapshot | null; rodSignature: string | null };
   const fishingPanelRef = useRef({ equipmentOpen: false, noticeOpen: false, autoCast: false, escapeCancels: false,
     selection: null as FishingSelection | null, active: null as FishingActive | null });
@@ -8415,11 +8416,13 @@ export default function HomePage() {
       panel.active = null;
     } else {
       const alreadyBiting = previous?.view.foundFish;
+      const bite = view.foundFish ? previous?.bite ?? {} : null;
       if (!previous) {
-        panel.active = { owner, view, reeling: false };
+        panel.active = { owner, view, reeling: false, bite };
       } else {
         if (previous.view.chance === view.chance && previous.view.progress === view.progress && alreadyBiting === view.foundFish) return;
         previous.view = view;
+        previous.bite = bite;
       }
       if (view.foundFish && !alreadyBiting) appendLog(t("ui.fishingBite", [], "A fish is biting!"), "system");
     }
@@ -8487,6 +8490,11 @@ export default function HomePage() {
   function requestFishingReel() {
     submitFishingPanelCommand({ type: "fishingCast", castOut: false });
   }
+  function requestFishingBite(bite: object) {
+    if (submitFishingPanelCommand({ type: "fishingCast", castOut: false }, undefined, bite)) {
+      gameBusRef.current?.emit({ type: "uiSound", event: "uiButtonClick" });
+    }
+  }
   function changeFishingAutocast(autoCast: boolean, lostReel = false) {
     // Disabling the current cast must remain available while durability and
     // bait updates are being reconciled with the next equipment snapshot.
@@ -8498,10 +8506,10 @@ export default function HomePage() {
     if (!rod || !view || (lostReel ? view.canAutoCast || autoCast : !view.canAutoCast)) return;
     submitFishingPanelCommand({ type: "fishingChangeAutocast", autoCast }, rod);
   }
-  function submitFishingPanelCommand(command: FishingPanelCommand, rod?: NonNullable<ReturnType<typeof readWorldFishingRod>>): boolean {
+  function submitFishingPanelCommand(command: FishingPanelCommand, rod?: NonNullable<ReturnType<typeof readWorldFishingRod>>, bite?: object): boolean {
     const owner = fishingPanelOwner(), panel = fishingPanelRef.current;
     if (!owner || fishingPanelAttemptRef.current) return false;
-    const attempt: FishingPanelAttempt = { owner, command: Object.freeze(command), active: panel.active, selection: panel.selection,
+    const attempt: FishingPanelAttempt = { owner, command: Object.freeze(command), active: panel.active, selection: panel.selection, bite,
       snapshot: rod ? bagBeltInventoryReadyRef.current?.raw ?? null : null, rodSignature: rod?.signature ?? null };
     fishingPanelAttemptRef.current = attempt;
     try { return sendRaw(attempt.command, { fishingPanelAttempt: attempt, quiet: true }); }
@@ -8515,7 +8523,7 @@ export default function HomePage() {
     const action = attempt.command, active = panel.active;
     const currentCast = !!active && active === attempt.active && !active.reeling && sameWorldFishingOwner(active.owner, owner);
     if (action.type === "fishingCast") {
-      if (!currentCast) return false;
+      if (!currentCast || (attempt.bite && active.bite !== attempt.bite)) return false;
       active.reeling = true;
     } else if (action.type === "fishingChangeAutocast" && !action.autoCast && currentCast) {
       if (!panel.autoCast) return false;
@@ -15119,7 +15127,7 @@ export default function HomePage() {
             selectedObjectId: mapChanged ? null : current.selectedObjectId,
             activeNpcDialog: mapChanged ? null : current.activeNpcDialog,
             entities: mapChanged && preservedSelfEntity
-              ? [{ ...preservedSelfEntity, fishing: undefined, fishingFeedback: undefined }]
+              ? [{ ...preservedSelfEntity, fishing: undefined, fishingFeedback: undefined, fishingEdges: undefined }]
               : mapChanged ? [] : current.entities,
             groundDrops: mapChanged ? [] : current.groundDrops,
             mineNodes: mapChanged ? [] : current.mineNodes,
@@ -15208,6 +15216,7 @@ export default function HomePage() {
             disposition: "friendly",
             fishing: typeof payload.fishing === "boolean" ? payload.fishing : undefined,
             fishingFeedback: undefined,
+            fishingEdges: undefined,
             sprite: playerSpriteFromPacket(payload),
             hair: packetAppearance.hair,
             wingEffect: packetAppearance.wingEffect,
@@ -15955,7 +15964,8 @@ export default function HomePage() {
           const previous = actor.fishingFeedback;
           if (sameFlag && (!feedback || (previous?.x === feedback.x && previous.y === feedback.y
             && previous.foundFish === feedback.foundFish))) return current;
-          return { ...current, entities: upsertEntityInList(current.entities, { ...actor, fishing, fishingFeedback: feedback }) };
+          const fishingEdges = appendFishingAnimationEdge(actor.fishingEdges, actor.fishing, fishing, Date.now());
+          return { ...current, entities: upsertEntityInList(current.entities, { ...actor, fishing, fishingEdges, fishingFeedback: feedback }) };
         });
         break;
       }
@@ -17060,7 +17070,7 @@ export default function HomePage() {
             selectedObjectId: mapChanged ? null : current.selectedObjectId,
             activeNpcDialog: mapChanged ? null : current.activeNpcDialog,
             entities: mapChanged && movedSelf
-              ? [{ ...movedSelf, fishing: undefined, fishingFeedback: undefined }]
+              ? [{ ...movedSelf, fishing: undefined, fishingFeedback: undefined, fishingEdges: undefined }]
               : mapChanged ? [] : current.entities,
             groundDrops: mapChanged ? [] : current.groundDrops,
             projectiles: mapChanged ? [] : current.projectiles,
@@ -18051,7 +18061,7 @@ export default function HomePage() {
           nameColourArgb: numberOrUndefined(payload.nameColourArgb) ?? (kind === "npc" ? -16_711_936 : -1),
           dead: payload.dead === true,
           fishing,
-          fishingFeedback: carriedFishingFeedback(previousEntity, kind, name, fishing, payload.dead === true),
+          ...carriedFishingPresentation(previousEntity, kind, name, fishing, payload.dead === true),
           disposition,
           sprite,
           ...(kind === "npc"
@@ -18701,6 +18711,7 @@ export default function HomePage() {
           }),
           fishing: undefined,
           fishingFeedback: undefined,
+          fishingEdges: undefined,
         }),
       ),
     }));
@@ -19171,8 +19182,8 @@ export default function HomePage() {
       nameColourArgb: entity.nameColourArgb ?? undefined,
       dead: entity.dead,
       fishing: typeof entity.fishing === "boolean" ? entity.fishing : undefined,
-      fishingFeedback: sameFishingMap ? carriedFishingFeedback(previousEntitiesById.get(String(entity.objectId)),
-        entity.kind, entity.name, entity.fishing, entity.dead) : undefined,
+      ...carriedFishingPresentation(sameFishingMap ? previousEntitiesById.get(String(entity.objectId)) : undefined,
+        entity.kind, entity.name, entity.fishing, entity.dead),
       disposition: entity.disposition,
       sprite: spriteFromSnapshotEntity(
         entity,
@@ -21323,6 +21334,7 @@ export default function HomePage() {
   const fishingOwner = worldFishingOwner();
   const activeFishing = fishingOwner && fishingPanel.active && sameWorldFishingOwner(fishingPanel.active.owner, fishingOwner)
     ? fishingPanel.active : null;
+  const activeFishingBite = activeFishing?.bite;
   const fishingRod = fishingPanel.equipmentOpen || activeFishing ? readWorldFishingRod() : null;
   const fishingRodView = fishingRod && projectFishingRod(fishingRod.carrier, fishingRod.uniqueId);
   return (
@@ -21633,6 +21645,7 @@ export default function HomePage() {
         selectedBagSlot: fishingPanel.selection?.kind === "bag" ? fishingPanel.selection.slot : null,
         autoCast: fishingPanel.autoCast, escapeCancels: fishingPanel.escapeCancels,
         onCloseEquipment: closeFishingEquipment, onDismissNotice: closeFishingEquipment, onCloseStatus: requestFishingReel,
+        onReelBite: () => { if (activeFishingBite) requestFishingBite(activeFishingBite); },
         onToggleEquipment: toggleFishingEquipment, onTackleClick: fishingTackleClick,
         onClearSelection: clearFishingSelection, onBagCell: fishingBagCellClick, retainTackleHold: retainFishingTackleHold,
         onToggleAutoCast: () => changeFishingAutocast(!fishingPanelRef.current.autoCast),
@@ -22059,15 +22072,16 @@ function parseQuestRewards(
   return { gold, experience, credit, items, selectItems };
 }
 
-function carriedFishingFeedback(
+function carriedFishingPresentation(
   previous: WorldEntity | undefined,
   kind: EntityKind,
   name: string,
   fishing: boolean | null | undefined,
   dead: boolean | undefined,
 ) {
-  return !dead && previous && !previous.dead && previous.kind === kind && previous.name === name
-    && previous.fishing === fishing ? previous.fishingFeedback : undefined;
+  const actor = !dead && previous && !previous.dead && previous.kind === kind && previous.name === name
+    && previous.fishing === fishing ? previous : undefined;
+  return { fishingFeedback: actor?.fishingFeedback, fishingEdges: actor?.fishingEdges };
 }
 
 function upsertEntityInList(list: WorldEntity[], nextEntity: WorldEntity) {

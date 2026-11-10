@@ -2599,6 +2599,14 @@ fn player_late_status_packets_use_zone_object_id_for_observers() {
             ServerPacket::FishingUpdate {
                 object_id: 1001,
                 fishing: true,
+                progress_percent: 0,
+                chance_percent: 12,
+                fishing_point: Point { x: 331, y: 272 },
+                found_fish: false,
+            },
+            ServerPacket::FishingUpdate {
+                object_id: 1001,
+                fishing: true,
                 progress_percent: 40,
                 chance_percent: 12,
                 fishing_point: Point { x: 331, y: 272 },
@@ -2701,10 +2709,14 @@ fn player_late_status_packets_use_zone_object_id_for_observers() {
             found_fish
         } if *object_id == 101
             && *fishing
-            && *progress_percent == 40
+            && *progress_percent == 0
             && *chance_percent == 12
             && fishing_point == &(Point { x: 331, y: 272 })
             && !*found_fish
+    )));
+    assert!(!has_packet(&outbounds, &second, |packet| matches!(
+        packet,
+        ServerPacket::FishingUpdate { progress_percent: 40, .. }
     )));
     assert!(has_packet(&outbounds, &second, |packet| matches!(
         packet,

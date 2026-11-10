@@ -25,7 +25,7 @@ use std::sync::{
     atomic::{AtomicU64, Ordering},
     Arc,
 };
-use std::time::{SystemTime, UNIX_EPOCH};
+use std::time::{Instant, SystemTime, UNIX_EPOCH};
 
 const UNKNOWN_ACTIVE_SAVE_REVISION: u64 = u64::MAX;
 
@@ -809,6 +809,7 @@ pub(super) struct FishingResource {
     pub(super) progress_percent: i32,
     pub(super) chance_percent: i32,
     pub(super) found_fish: bool,
+    pub(super) bite_expires_at: Option<Instant>,
     pub(super) fishing_attribute: i8,
     pub(super) rod_has_hook: bool,
     pub(super) rod_has_reel: bool,
@@ -824,6 +825,7 @@ impl FishingResource {
             progress_percent: 0,
             chance_percent: 0,
             found_fish: false,
+            bite_expires_at: None,
             fishing_attribute: 0,
             rod_has_hook: true,
             rod_has_reel: true,

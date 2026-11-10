@@ -213,6 +213,68 @@ fn status_is_owner_authoritative_and_reel_removal_disables_auto() {
     assert!(!ui.auto_cast);
 }
 #[test]
+fn reel_requires_the_current_owner_bite_and_shares_one_pending_cancel() {
+    let update = |fishing, found_fish| ServerPacket::FishingUpdate {
+        object_id: 1,
+        fishing,
+        progress_percent: 100,
+        chance_percent: 38,
+        fishing_point: mir2_protocol::Point { x: 12, y: 15 },
+        found_fish,
+    };
+    let cue = FishingBiteCue {
+        owner_id: 1,
+        generation: 7,
+        started_at_ms: 10_000,
+    };
+    let mut ui = MountFishingUi::default();
+    assert!(ui.observe(1, &update(true, true), 900));
+    assert_eq!(ui.fishing_bite_frame(900), None);
+    assert!(ui.action(EquipmentAction::Reel, 900).is_none());
+    ui.present_fishing_bite(Some(FishingBiteCue { owner_id: 2, ..cue }), 10_000, 1000);
+    assert_eq!(ui.fishing_bite_frame(1000), None);
+    ui.present_fishing_bite(Some(cue), 10_000, 1000);
+    assert_eq!(ui.fishing_reel_lease(), Some(cue));
+    for (now, frame) in [
+        (1000, 170),
+        (1129, 170),
+        (1130, 171),
+        (2170, 179),
+        (2300, 170),
+    ] {
+        assert_eq!(ui.fishing_bite_frame(now), Some(frame));
+    }
+    ui.present_fishing_bite(Some(cue), 10_130, 1130);
+    assert_eq!(ui.fishing_bite_frame(1130), Some(171));
+
+    let reel = ClientPacket::FishingCast { cast_out: false };
+    assert_eq!(
+        ui.action(EquipmentAction::Reel, 1130),
+        Some(EquipmentIntent::Packet(reel.clone()))
+    );
+    assert!(ui.status_open);
+    assert!(ui.observe(1, &update(true, true), 1140));
+    assert!(ui.action(EquipmentAction::Reel, 1140).is_none());
+    ui.escape_cancels = true;
+    assert!(ui.escape(1150).is_none());
+    assert!(!ui.status_open);
+    assert!(ui.observe(1, &update(true, true), 1160));
+    assert!(!ui.status_open);
+    ui.release_unsent(&reel);
+    assert!(ui.status_open);
+    assert_eq!(ui.fishing_reel_lease(), Some(cue));
+
+    assert!(ui.observe(1, &update(true, false), 1170));
+    assert!(ui.action(EquipmentAction::Reel, 1170).is_none());
+    assert_eq!(ui.fishing_bite_frame(1170), None);
+    assert!(ui.observe(1, &update(false, false), 1180));
+    ui.release_unsent(&reel);
+    assert!(!ui.status_open);
+    assert!(ui.observe(1, &update(true, true), 1190));
+    assert!(ui.action(EquipmentAction::Reel, 1190).is_none());
+}
+
+#[test]
 fn mount_cooldown_and_animation_match_original_variants() {
     let mut ui = MountFishingUi::default();
     let mut inventory = bag();

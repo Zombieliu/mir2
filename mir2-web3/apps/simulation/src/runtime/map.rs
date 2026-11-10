@@ -788,6 +788,11 @@ pub(super) fn relocate_player_to_map(
         ))];
     };
 
+    let mut fishing_packets = Vec::new();
+    // The previous Zone can see the terminal edge before the new presence is
+    // synchronized. Retain its old cast point and clear active state before
+    // rebuilding the destination map.
+    super::fishing::interrupt_fishing(world, &mut fishing_packets);
     {
         world.resource_mut::<MapRuntimeResource>().current_map = map_info;
         let mut player_runtime = world.resource_mut::<PlayerRuntimeResource>();
@@ -832,6 +837,7 @@ pub(super) fn relocate_player_to_map(
             location: current_location(world),
         },
     ];
+    packets.extend(fishing_packets);
     if let Some(message) = system_message_text {
         packets.push(ServerPacket::Chat {
             message,

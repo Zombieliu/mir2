@@ -6,6 +6,7 @@ import type {
   EntitySpriteAnimationState,
 } from "./original-client-types";
 import type { WorldFishingActionEvidence, WorldFishingActionFamily, WorldFishingOwner, WorldFishingSourceRecord } from "../../lib/world-fishing-source";
+import type { FishingAnimationEdge } from "../../lib/world-fishing-feedback";
 
 type EntityAnimationRuntime = {
   getMir2EntityActionPose?: (queryJson: string) => string;
@@ -31,6 +32,8 @@ type RuntimeAnimationOutput = {
   nowMs?: unknown;
   poses?: unknown;
 };
+
+const deliveredFishingEdges = new WeakMap<EntityAnimationRuntime, WeakSet<FishingAnimationEdge>>();
 
 const ANIMATION_STATES = new Set<EntitySpriteAnimationState>([
   "standing",
@@ -80,6 +83,9 @@ export function resolveCrystalEntityAnimationPoses({
     return {};
   }
 
+  const delivered = deliveredFishingEdges.get(runtime) ?? new WeakSet<FishingAnimationEdge>();
+  deliveredFishingEdges.set(runtime, delivered);
+  const received: FishingAnimationEdge[] = [];
   const payload = {
     worldKey,
     worldSeed: Math.max(0, Math.trunc(worldSeed)) >>> 0,
@@ -90,12 +96,26 @@ export function resolveCrystalEntityAnimationPoses({
         : { ...animationEventForEntity(entity, state, motionSnapshot), actionKnown: false };
       const movementActive = event.action === state
         && isCurrentPlayerMovement(entity, motionSnapshot, event.action, event.actionToken, now);
-      const fishing = own ? selfAuthority.fishing : entity.fishing;
+      const latestFishing = own ? selfAuthority.fishing : entity.fishing;
+      // The owner facts can commit before the rAF-coalesced actor projection.
+      // Wait for their matching packet history before advancing the clip.
+      const fishing = !entity.dead && !entity.sprite?.mountLibrary
+        && !(own && typeof entity.fishing === "boolean" && entity.fishing !== latestFishing)
+        && typeof latestFishing === "boolean" ? latestFishing : undefined;
+      let preceding = 0;
+      const history = entity.fishingEdges;
+      if (fishing !== undefined && history?.at(-1)?.active === fishing) {
+        for (let index = history.length - 1; index >= 0 && !delivered.has(history[index]); index -= 1) {
+          received.push(history[index]);
+          preceding += 1;
+        }
+      }
       return {
         objectId: entity.objectId, kind: entity.kind, direction: entity.direction,
         action: event.action, ...(event.actionToken === undefined ? {} : { actionToken: event.actionToken }),
         ...(movementActive ? { movementActive } : {}),
-        ...(typeof fishing === "boolean" && !entity.dead && !entity.sprite?.mountLibrary ? { fishing } : {}),
+        ...(fishing === undefined ? {} : { fishing }),
+        ...(preceding > 1 ? { fishingEdges: preceding - 1 } : {}),
         ...(event.retainedActionToken === undefined ? {} : { retainedActionToken: event.retainedActionToken }),
         ...(own ? { actionSourceKey: selfAuthority.sourceKey, actionSourceRevision: selfAuthority.revision,
           bootstrapKnown: selfAuthority.bootstrapKnown && selfAuthority.actionEvidence === null,
@@ -117,6 +137,7 @@ export function resolveCrystalEntityAnimationPoses({
       }
       poses[candidate.objectId] = candidate;
     }
+    for (const edge of received) delivered.add(edge);
     return poses;
   } catch {
     // Runtime load/fallback transitions are allowed to retain the legacy JS
