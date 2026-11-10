@@ -6273,13 +6273,14 @@ check("Animation action peek rejects reentrant commit context owner source and g
 // physical-owner records. No network connection or animation engine is created.
 const fishingPageSource=readFileSync(parityPageUrl,"utf8"),fishingPageAst=ts.createSourceFile("page.tsx",fishingPageSource,ts.ScriptTarget.Latest,true,ts.ScriptKind.TSX);
 const fishingPanelModule=loadTypeScriptModule(new URL("../lib/world-fishing-panel.ts",import.meta.url));
+const {createFishingTackleGesture}=loadTypeScriptModule(new URL("../lib/world-fishing-tackle-gesture.ts",import.meta.url));
 const fishingPageNames=new Set(["worldFishingOwner","cancelWorldFishingGesture","retireWorldFishingGesture","publishWorldFishingSource",
   "captureWorldFishingGatewayEvent","captureWorldFishingSnapshot","commitWorldFishingAnimation","readWorldFishingRod","worldFishingInputAllowed","worldFishingPureUiBlocked",
   "worldFishingLeaseCurrent","beginWorldFishingGesture","worldFishingMapCell","worldFishingFinalCurrent","enterWorldFishingSend","tryWorldFishingBlockedClick",
   "currentSpellsOwner","otherPlayerUiBlocksInput","heroUiBlocksGameplay","referenceWindowsBlockGameplay","mapRouteInputBlocked","sceneInputDeferredForInitialAssets",
   "originalMapRegionContainsTile","originalMapCellBlocksMovement",
   "retireFishingPanel","observeFishingStatus","sameFishingInventoryOwner","observeFishingAttachmentReceipt",
-  "fishingPanelOwner","enterFishingPanelSend"]),fishingPageDeclarations=new Map();
+  "fishingPanelOwner","retainFishingTackleHold","enterFishingPanelSend"]),fishingPageDeclarations=new Map();
 (function visit(node){if(ts.isFunctionDeclaration(node)&&fishingPageNames.has(node.name?.text))fishingPageDeclarations.set(node.name.text,node.getText(fishingPageAst));ts.forEachChild(node,visit);})(fishingPageAst);
 assert.equal(fishingPageDeclarations.size,fishingPageNames.size,"all actual fishing Page and input authority declarations");
 const fishingSendNode=[];(function visit(node){if(ts.isFunctionDeclaration(node)&&node.name?.text==="sendRaw")fishingSendNode.push(node);ts.forEachChild(node,visit);})(fishingPageAst);
@@ -6348,7 +6349,7 @@ function worldFishingPageFixture(){
     setWorldFishingRecord:()=>{},console:{error:(...args)=>errors.push(args)},
     sendRaw:(command,options)=>{entryProofs.push(options.worldFishingProof);return api.fishingSocketEntry(command,options,page.socket,beforeFinal);},
     sendCrystalTurn:(direction,proof)=>{entryProofs.push(proof);return api.fishingSocketEntry({type:"turn",direction},{worldFishingProof:proof},page.socket,beforeFinal);}};
-  const keys=Object.keys(scope),api=new Function(...keys,fishingPageJs+"\nreturn {worldFishingOwner,captureWorldFishingSnapshot,captureWorldFishingGatewayEvent,commitWorldFishingAnimation,beginWorldFishingGesture,cancelWorldFishingGesture,retireWorldFishingGesture,worldFishingLeaseCurrent,worldFishingMapCell,worldFishingFinalCurrent,tryWorldFishingBlockedClick,fishingSocketEntry,readWorldFishingRod,worldFishingPureUiBlocked,observeFishingStatus,enterFishingPanelSend};")(...keys.map(key=>scope[key]));
+  const keys=Object.keys(scope),api=new Function(...keys,fishingPageJs+"\nreturn {worldFishingOwner,captureWorldFishingSnapshot,captureWorldFishingGatewayEvent,commitWorldFishingAnimation,beginWorldFishingGesture,cancelWorldFishingGesture,retireWorldFishingGesture,worldFishingLeaseCurrent,worldFishingMapCell,worldFishingFinalCurrent,tryWorldFishingBlockedClick,fishingSocketEntry,readWorldFishingRod,worldFishingPureUiBlocked,observeFishingStatus,retainFishingTackleHold,enterFishingPanelSend};")(...keys.map(key=>scope[key]));
   page.socket.send=body=>{if(throwTransport)throw Error("fixture unknown transport");page.sentBodies.push(body);page.sent.push(JSON.parse(body));};
   api.captureWorldFishingSnapshot({...raw,entities:[self]},owner.connectionGeneration);
   const source=scope.worldFishingSourceRef.current.current(api.worldFishingOwner());assert.ok(source?.animationKnown,"actual raw M001.map snapshot must establish normalized map authority");assert.ok(api.readWorldFishingRod(),"actual raw UID-zero rod source must pass current equipment custody");
@@ -6411,6 +6412,98 @@ check("Fishing tackle ACK and full authoritative placement retain zero UID and e
   const remove={type:"removeSlotItem",grid:"fishing",gridTo:"inventory",to:41,uniqueId:0,fromUniqueId:4};
   assert.equal(fishingAttachmentApplied(remove,rod,layout),false);
   assert.equal(fishingAttachmentApplied(remove,{...rod,slots:[null,null,null,null,null]},layout),true);
+});
+
+function fishingTacklePointerFixture() {
+  class Cell {
+    constructor(attr,slot) { this.attr=attr;this.slot=String(slot); }
+    closest(selector) { return selector.includes(`[${this.attr}]`) ? this : null; }
+    getAttribute(attr) { return attr===this.attr ? this.slot : null; }
+    matches() { return false; }
+  }
+  const bag=new Cell("data-fishing-bag-item",3), empty=new Cell("data-fishing-bag-cell",4), tackle=new Cell("data-fishing-slot",2);
+  const visible=new Set([bag,empty,tackle]), actions=[], holds=[], focus=[];
+  let hit=bag, captured=null, held=true;
+  const root={ ownerDocument:{defaultView:{Element:Cell},elementFromPoint:()=>hit},
+    closest:selector=>selector===".client-stage-frame" ? {focus:options=>focus.push(options)} : null,
+    contains:node=>visible.has(node), setPointerCapture:id=>{captured=id;},
+    hasPointerCapture:id=>captured===id, releasePointerCapture:()=>{captured=null;} };
+  const ui={onBagCell:(tab,slot)=>{actions.push([tab,slot]);return true;},onTackleClick:slot=>actions.push(["tackle",slot]),
+    retainTackleHold:(kind,slot)=>{holds.push([kind,slot]);return ()=>held;}};
+  const edge=(target,overrides={})=>({target,currentTarget:root,pointerId:1,isPrimary:true,button:0,detail:1,clientX:30,clientY:20,
+    timeStamp:100,defaultPrevented:false,preventDefault(){this.defaultPrevented=true;},stopPropagation(){this.stopped=true;},...overrides});
+  return {bag,empty,tackle,visible,actions,holds,focus,ui,root,edge,gesture:createFishingTackleGesture(),
+    hit:value=>{hit=value;},held:value=>{held=value;},get captured(){return captured;}};
+}
+
+check("Fishing tackle physical press selects first and release hits both windows through capture once",()=>{
+  for(const backwards of [false,true]) {
+    const f=fishingTacklePointerFixture(), source=backwards?f.tackle:f.bag, target=backwards?f.empty:f.tackle;
+    f.hit(source);const down=f.edge(source);f.gesture.down(down,f.ui,"bag2");
+    assert.equal(down.defaultPrevented,true);assert.equal(f.captured,1);
+    assert.deepEqual(f.focus,[{preventScroll:true}],"physical press retains the game-stage focus");
+    assert.deepEqual(f.actions,[backwards?["tackle",2]:["bag2",3]]);
+    assert.deepEqual(f.holds,[backwards?["tackle",2]:["bag",43]]);
+    f.hit(target);const up=f.edge(f.root);f.gesture.up(up,f.ui,"bag2");
+    assert.equal(f.captured,null);assert.equal(up.stopped,true);
+    assert.deepEqual(f.actions,backwards?[["tackle",2],["bag2",4]]:[["bag2",3],["tackle",2]]);
+    f.gesture.up(up,f.ui,"bag2");assert.equal(f.actions.length,2,"duplicate release has no hold");
+    const click=f.edge(target);f.gesture.suppressClick(click,"bag2");assert.equal(click.stopped,true);
+    const keyboard=f.edge(target,{detail:0});f.gesture.suppressClick(keyboard,"bag2");assert.equal(keyboard.defaultPrevented,false);
+  }
+  const f=fishingTacklePointerFixture();f.gesture.down(f.edge(f.bag),f.ui,"bag1");
+  f.gesture.up(f.edge(f.root),f.ui,"bag1");assert.deepEqual(f.actions,[["bag1",3]],"same-cell release keeps one selection");
+  f.hit(f.tackle);f.gesture.down(f.edge(f.tackle),f.ui,"bag1");f.gesture.up(f.edge(f.root),f.ui,"bag1");
+  assert.deepEqual(f.actions,[["bag1",3],["tackle",2]],"physical two-click still activates each cell once");
+});
+
+check("Fishing tackle release retires under cancellation, invalid identity, covered target, and changed window",()=>{
+  for(const reason of ["cancel","hold","blocked","removed","tab","closed","wrongButton"]) {
+    const f=fishingTacklePointerFixture();f.gesture.down(f.edge(f.bag),f.ui,"bag1");f.hit(f.tackle);
+    if(reason==="cancel") f.gesture.cancel(1);
+    if(reason==="hold") f.held(false);
+    if(reason==="blocked") f.hit(null);
+    if(reason==="removed") f.visible.delete(f.bag);
+    const edge=f.edge(f.root,{button:reason==="wrongButton"?2:0});
+    f.gesture.up(edge,reason==="closed"?null:f.ui,reason==="tab"?"bag2":"bag1");
+    assert.equal(f.captured,null,reason);assert.deepEqual(f.actions,[["bag1",3]],reason);
+  }
+  const f=fishingTacklePointerFixture();
+  f.gesture.down(f.edge(f.bag,{button:2}),f.ui,"bag1");f.gesture.down(f.edge(f.bag,{isPrimary:false}),f.ui,"bag1");
+  f.gesture.down(f.edge(f.tackle),f.ui,"bag1");assert.deepEqual(f.actions,[],"right, secondary, and obscured presses cannot select");
+  f.gesture.down(f.edge(f.bag),f.ui,"bag1");f.hit(f.tackle);
+  f.gesture.up(f.edge(f.root,{pointerId:2}),f.ui,"bag1");f.gesture.up(f.edge(f.root,{timeStamp:99}),f.ui,"bag1");
+  assert.deepEqual(f.actions,[["bag1",3]],"foreign or older release cannot complete the active press");
+  f.gesture.up(f.edge(f.root),f.ui,"bag1");assert.deepEqual(f.actions,[["bag1",3],["tackle",2]]);
+});
+
+check("Fishing tackle hold uses actual Page source and retires with exact selection, owner, and Bag incarnation",()=>{
+  for(const change of ["snapshot","selection","owner","rod","item","bagEpoch","bagClose","window","attachment"]) {
+    const f=worldFishingPageFixture(), panel=f.scope.fishingPanelRef.current;
+    f.raw.inventoryItems.push(npcRepairItem(901,3,"bag2",1));
+    const layout=equipmentGateway.projectEquipmentGatewaySnapshot(f.raw);
+    f.scope.equipmentSnapshotRef.current.snapshot=layout;f.scope.bagBeltInventoryReadyRef.current.layout=layout;
+    panel.equipmentOpen=true;f.scope.bagOpenRef.current=true;
+    panel.selection={kind:"bag",slot:43,uniqueId:901};
+    assert.equal(f.api.retainFishingTackleHold("bag",3),null,"physical Bag2 index is retained");
+    assert.equal(f.api.retainFishingTackleHold("tackle",43),null);
+    const current=f.api.retainFishingTackleHold("bag",43);assert.ok(current);assert.equal(current(),true,change);
+    if(change==="snapshot") {
+      const raw=structuredClone(f.raw), nextLayout=equipmentGateway.projectEquipmentGatewaySnapshot(raw);
+      f.scope.equipmentSnapshotRef.current.snapshot=nextLayout;
+      f.scope.bagBeltInventoryReadyRef.current={...f.scope.bagBeltInventoryReadyRef.current,raw,layout:nextLayout,snapshotVersion:2};
+      f.scope.worldRef.current.entities[0]={...f.scope.worldRef.current.entities[0],x:1};
+    }
+    if(change==="selection") panel.selection={...panel.selection};
+    if(change==="owner") f.scope.questSceneRevisionRef.current++;
+    if(change==="rod") f.rod.tooltipSource.userItem.current_dura--;
+    if(change==="item") layout.placements.find(row=>row.container===0).uniqueId=902;
+    if(change==="bagEpoch") f.scope.ownedTooltipEpochRef.current.bag={};
+    if(change==="bagClose") f.scope.bagOpenRef.current=false;
+    if(change==="window") panel.equipmentOpen=false;
+    if(change==="attachment") f.scope.fishingAttachmentRef.current={};
+    assert.equal(current(),change==="snapshot",change);
+  }
 });
 check("Fishing Page actual raw UID-zero rod and normalized map sends one exact cast through consumed socket proof",()=>{
   for(const throws of [false,true]){

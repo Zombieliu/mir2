@@ -183,6 +183,7 @@ export type BevyMapRenderState = {
 export type FishingUiSurface = Omit<import("react").ComponentProps<typeof import("./original-client-fishing-windows").OriginalClientFishingWindows>, "t"> & {
   onToggleEquipment: () => void;
   onBagCell: (tab: InventoryTabKey, slot: number) => boolean;
+  retainTackleHold: (kind: "bag" | "tackle", slot: number) => (() => boolean) | null;
   selectedBagSlot: number | null;
 };
 

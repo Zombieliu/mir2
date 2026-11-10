@@ -8384,6 +8384,24 @@ export default function HomePage() {
     fishingPanelRef.current.selection = null;
     renderFishingPanel(value => value + 1);
   }
+  function retainFishingTackleHold(kind: FishingSelection["kind"], slot: number): (() => boolean) | null {
+    const panel = fishingPanelRef.current, selection = panel.selection;
+    if (!panel.equipmentOpen || !bagOpenRef.current || fishingAttachmentRef.current
+      || !selection || selection.kind !== kind || selection.slot !== slot) return null;
+    const owner = fishingPanelOwner(), rod = readWorldFishingRod(), bagEpoch = ownedTooltipEpochRef.current.bag;
+    if (!owner || !rod) return null;
+    const uid = kind === "bag" ? fishingBagCell(rod.equipment, slot)
+      : projectFishingRod(rod.carrier, rod.uniqueId)?.slots[slot]?.uniqueId;
+    if (uid !== selection.uniqueId) return null;
+    return () => {
+      const current = fishingPanelOwner();
+      if (!current || !sameWorldFishingOwner(current, owner) || panel.selection !== selection
+        || !panel.equipmentOpen || !bagOpenRef.current || fishingAttachmentRef.current || ownedTooltipEpochRef.current.bag !== bagEpoch) return false;
+      const currentRod = readWorldFishingRod();
+      return !!currentRod && currentRod.signature === rod.signature
+        && (kind === "tackle" || fishingBagCell(currentRod.equipment, slot) === selection.uniqueId);
+    };
+  }
   function observeFishingStatus(owner: WorldFishingOwner, payload: unknown) {
     const view = readFishingStatus(owner.playerObjectId, payload);
     if (view === null) return;
@@ -21574,7 +21592,7 @@ export default function HomePage() {
         autoCast: fishingPanel.autoCast, escapeCancels: fishingPanel.escapeCancels,
         onCloseEquipment: closeFishingEquipment, onDismissNotice: closeFishingEquipment, onCloseStatus: requestFishingReel,
         onToggleEquipment: toggleFishingEquipment, onTackleClick: fishingTackleClick,
-        onClearSelection: clearFishingSelection, onBagCell: fishingBagCellClick,
+        onClearSelection: clearFishingSelection, onBagCell: fishingBagCellClick, retainTackleHold: retainFishingTackleHold,
         onToggleAutoCast: () => changeFishingAutocast(!fishingPanelRef.current.autoCast),
         onToggleEscape: () => {
           if (!fishingPanelOwner() || !fishingPanelRef.current.active) return;

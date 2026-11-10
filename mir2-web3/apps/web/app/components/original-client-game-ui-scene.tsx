@@ -27,6 +27,7 @@ import { BigMapDialog, MiniMapPanel, hasOriginalMiniMapAsset } from "./original-
 import { GameShopWindow, NpcShopWindow } from "./original-client-game-shop";
 import type { NpcGoldBuyQuote } from "../../lib/bevy-npc-shop-buy";
 import type { BagBeltButtonBinding } from "../../lib/bag-belt-gesture";
+import { createFishingTackleGesture } from "../../lib/world-fishing-tackle-gesture";
 import type { NpcRepairView, NpcRepairSelection } from "../../lib/npc-repair-service";
 import type { CashGameShopSource, CashGameShopConfirmation, CashGameShopEntry } from "../../lib/cash-game-shop-ui";
 import { InventoryWindow } from "./original-client-inventory-window";
@@ -256,6 +257,23 @@ function GameUiSceneInner({
   gamepadFamily,
   onStartTutorial,
 }: GameUiSceneProps) {
+  const [fishingTackleGesture] = useState(createFishingTackleGesture);
+  const fishingEquipmentOpen = fishingUi?.equipmentOpen === true;
+  const fishingBagTab = showInventory && !sharedBagUiActive && !sharedStorageUiActive
+    && (activeInventoryTab === "bag1" || activeInventoryTab === "bag2") ? activeInventoryTab : null;
+  useLayoutEffect(() => () => fishingTackleGesture.cancel(), [fishingTackleGesture, fishingEquipmentOpen, fishingBagTab]);
+  useEffect(() => {
+    const cancel = () => fishingTackleGesture.cancel();
+    const onVisibility = () => { if (document.visibilityState !== "visible") cancel(); };
+    window.addEventListener("blur", cancel);
+    window.addEventListener("pagehide", cancel);
+    document.addEventListener("visibilitychange", onVisibility);
+    return () => {
+      window.removeEventListener("blur", cancel);
+      window.removeEventListener("pagehide", cancel);
+      document.removeEventListener("visibilitychange", onVisibility);
+    };
+  }, [fishingTackleGesture]);
   const [showDuraPanel, setShowDuraPanel] = useState(false);
   const [showBelt, setShowBelt] = useState(true);
   const [beltVertical, setBeltVertical] = useState(false);
@@ -446,6 +464,12 @@ function GameUiSceneInner({
       className={`game-ui-scene ${hasOriginalMiniMapAsset(world.miniMapIndex) ? "with-mini-map" : "without-mini-map"}`}
       data-gamepad-ui-open={gamepadUiOpen ? "true" : "false"}
       data-chat-expanded={chatExpanded ? "true" : "false"}
+      onPointerDownCapture={event => { if (fishingUi?.equipmentOpen) fishingTackleGesture.down(event, fishingUi, fishingBagTab); }}
+      onPointerUpCapture={event => fishingTackleGesture.up(event, fishingUi?.equipmentOpen ? fishingUi : null, fishingBagTab)}
+      onPointerMoveCapture={event => { if (event.buttons !== 1) fishingTackleGesture.cancel(event.pointerId); }}
+      onPointerCancelCapture={event => fishingTackleGesture.cancel(event.pointerId)}
+      onLostPointerCapture={event => { if (event.target === event.currentTarget) fishingTackleGesture.cancel(event.pointerId); }}
+      onClickCapture={event => { if (fishingEquipmentOpen) fishingTackleGesture.suppressClick(event, fishingBagTab); }}
     >
       {!sharedQuestWorldUiActive && <ObjectiveTracker questLog={world.questLog} playerClass={player?.classKey ?? null} />}
       {showMinimap && !(showCharacter && sharedCharacterStatsActive) && <MiniMapPanel
