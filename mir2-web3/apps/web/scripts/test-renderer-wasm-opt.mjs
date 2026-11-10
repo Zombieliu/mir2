@@ -44,7 +44,8 @@ function fixture(t) {
 function runner(bytes = EMPTY, onOptimize = null, optimizationArgs = ["-O1"]) {
   return (bin, args, options) => {
     if (args.length === 1 && args[0] === "--version") return ok("wasm-opt version 131 (version_131)\n");
-    const stage = args[1] === "--merge-similar-functions" ? ["--merge-similar-functions"] : optimizationArgs;
+    const stage = args[1] === "--merge-similar-functions" && optimizationArgs[0] !== args[1]
+      ? ["--merge-similar-functions"] : optimizationArgs;
     assert.deepEqual(args.slice(1, -1), [...stage, "--strip-debug", "-o"]);
     fs.writeFileSync(args.at(-1), bytes, { flag: "wx" });
     return onOptimize ? onOptimize(bin, args, options) : ok();
@@ -395,7 +396,9 @@ test("renderer diagnostic formatter preserves nested tool failures without seria
 // Core uses the same private lifecycle machinery with a fixed pair/profile;
 // these runners write only owned test fixtures and never execute a real tool.
 function coreRunner(bytes = EMPTY, onOptimize = null) {
-  return runner(bytes, onOptimize, ["-Oz", "--flatten", "--rereloop", "-Oz", "--converge", "--reorder-functions"]);
+  return runner(bytes, onOptimize, [
+    "--merge-similar-functions", "-Oz", "--flatten", "--rereloop", "-Oz", "--converge", "--reorder-functions",
+  ]);
 }
 function coreFixture(t) {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), "mir2-core-opt-test-"));
@@ -455,7 +458,8 @@ test("Core optimizer uses the fixed size passes and bounded hidden Binaryen 131 
     run: (bin, args, options) => { calls.push({ bin, args, options }); return injected(bin, args, options); } });
   assert.equal(calls.length, 2); assert.deepEqual(calls[0].args, ["--version"]);
   assert.deepEqual(calls[1].args.slice(0, -1), [
-    f.wasmPath, "-Oz", "--flatten", "--rereloop", "-Oz", "--converge", "--reorder-functions", "--strip-debug", "-o",
+    f.wasmPath, "--merge-similar-functions", "-Oz", "--flatten", "--rereloop", "-Oz",
+    "--converge", "--reorder-functions", "--strip-debug", "-o",
   ]);
   assert.match(path.basename(calls[1].args.at(-1)), /^\.mir2-client-core-opt-\d+-[a-f0-9]{12}\.wasm$/);
   assert.equal(path.dirname(calls[1].args.at(-1)), f.stagingRoot);

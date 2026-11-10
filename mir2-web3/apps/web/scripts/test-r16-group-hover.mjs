@@ -16,9 +16,9 @@ function functions(tree, names, scope) {
   }).outputText;
   return new Function("scope", `with(scope){${output};return {${names.join(",")}};}`)(scope);
 }
-function pureFunctions(relative, names) {
+function pureFunctions(relative, names, scope = {}) {
   const text = readFileSync(new URL(relative, import.meta.url), "utf8");
-  return functions(ts.createSourceFile(relative, text, ts.ScriptTarget.Latest, true), names, {});
+  return functions(ts.createSourceFile(relative, text, ts.ScriptTarget.Latest, true), names, scope);
 }
 const { containsHudRect } = pureFunctions("../lib/bevy-hud-ui.ts", ["validRect", "containsHudRect"]);
 const { questWorldControlAt } = pureFunctions("../lib/bevy-quest-world-controls.ts", ["questWorldControlAt"]);
@@ -49,6 +49,7 @@ class Element {
 class Input extends Element {}
 class TextArea extends Element {}
 class Select extends Element {}
+const { guildKeyboardOwnsEvent } = pureFunctions("../lib/r16-guild-keyboard.ts", ["guildKeyboardOwnsEvent"], { Element });
 const rect = (left = 150, top = 100, width = 100, height = 100) => ({ left, top, width, height });
 function fixture() {
   const pointCalls = [], pageCalls = [], listeners = new Map(), contexts = {}, flags = {}, queryCalls = [];
@@ -103,7 +104,7 @@ function fixture() {
     crystalWindowShortcut: () => null, crystalSkillShortcutSlot: () => null, crystalCombatModeStopsDispatch: () => false,
     keyboardMovementDiagnosticsRef: { current: {} }, onCombatKey: () => { flags.combatCalls = (flags.combatCalls ?? 0) + 1; return { handled: false }; },
     onCrystalGameplayShortcut: (id, repeat) => { pageCalls.push({ id, repeat, hovered: scope.sceneHoveredObjectIdRef.current }); return true; },
-    onCrystalWindowShortcut: noAction, isCurrentMailTextTarget: () => false,
+    onCrystalWindowShortcut: noAction, isCurrentMailTextTarget: () => false, guildKeyboardOwnsEvent,
   };
   const api = functions(ast, ["sceneGroupHoverScope", "retireSceneGroupHoverPoint", "commitSceneGroupHoverScope",
     "rememberSceneGroupHoverPoint", "installSceneGroupHoverObserver", "sceneGroupHoverWorldAllowed", "refreshSceneGroupHover",
@@ -259,6 +260,20 @@ test("repeat and editable keys cannot invoke Page, and storage's Group exception
   f.contexts.storage = { inputRegions: [rect(600, 100)] }; f.scope.bevyStorageUiActive = true;
   f.functionsForKey(["AddGroupMember", "Trade"]); f.flags.combatCalls = 0; f.api.handleShortcutKey(f.key());
   assert.deepEqual(f.pageCalls.map(x => x.id), ["AddGroupMember"]); assert.equal(f.flags.combatCalls, 0);
+});
+test("a shared world pointer may recheck its own HUD lease against live geometry", () => {
+  const f = fixture(), router = f.scope.hudPointerRouterRef.current;
+  const owner = { pointerId: 1, origin: "world" };
+  router.held = owner;
+  router.matches = status => status === f.hud;
+  assert.equal(f.api.sceneGroupHoverWorldAllowed(200, 150), false, "ordinary hover remains blocked");
+  assert.equal(f.api.sceneGroupHoverWorldAllowed(200, 150, { ...owner }), false, "only the same lease is admitted");
+  assert.equal(f.api.sceneGroupHoverWorldAllowed(200, 150, owner), true);
+  f.hud.foregroundRects = [rect()];
+  assert.equal(f.api.sceneGroupHoverWorldAllowed(200, 150, owner), false, "new foreground blocks the world");
+  f.hud.foregroundRects = [];
+  router.matches = () => false;
+  assert.equal(f.api.sceneGroupHoverWorldAllowed(200, 150, owner), false, "a retired HUD lease is rejected");
 });
 test("the component retains stable keyboard hookup and installs the read-only observer with cleanup", () => {
   assert.match(source, /useWindowKeydown\(screen === "game" \? handleShortcutKey : null\)/);

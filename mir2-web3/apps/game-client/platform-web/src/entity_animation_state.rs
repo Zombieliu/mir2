@@ -34,6 +34,8 @@ struct EntityInput {
     #[serde(default)]
     movement_active: bool,
     #[serde(default)]
+    retained_action_token: Option<String>,
+    #[serde(default)]
     action_source_key: Option<String>,
     #[serde(default)]
     action_source_revision: Option<u64>,
@@ -65,14 +67,18 @@ struct PoseOutput {
     queue_depth: usize,
 }
 
+struct ActionStamp {
+    token: String,
+    action: AnimationAction,
+}
+
 struct AnimationBridge {
     world_key: String,
     world_seed: u64,
     last_now_ms: u64,
     next_sequence: u64,
     world: AnimationWorld,
-    last_action_tokens: OrderedMap<String, String>,
-    last_action_kinds: OrderedMap<String, String>,
+    last_actions: OrderedMap<String, ActionStamp>,
     authorities: OrderedMap<String, ActionAuthority>,
 }
 
@@ -84,8 +90,7 @@ impl AnimationBridge {
             last_now_ms: now_ms,
             next_sequence: 1,
             world: AnimationWorld::new(world_seed),
-            last_action_tokens: OrderedMap::new(),
-            last_action_kinds: OrderedMap::new(),
+            last_actions: OrderedMap::new(),
             authorities: OrderedMap::new(),
         }
     }
@@ -96,13 +101,20 @@ impl AnimationBridge {
             && input.now_ms >= self.last_now_ms
     }
 
-    fn withdraw_authority(&mut self, object_id: &str) {
+    fn withdraw_authority(&mut self, object_id: &str, revision: Option<u64>) {
         if let Some(authority) = self.authorities.get_mut(object_id) {
             if authority.known {
                 authority.continuity_revision = authority.continuity_revision.saturating_add(1);
             }
             authority.known = false;
-            authority.retired_token = self.last_action_tokens.get(object_id).cloned();
+            authority.aligned = false;
+            if let Some(revision) = revision {
+                authority.source_revision = authority.source_revision.max(revision);
+            }
+            authority.retired_token = self
+                .last_actions
+                .get(object_id)
+                .map(|stamp| stamp.token.clone());
         }
     }
 
@@ -111,7 +123,7 @@ impl AnimationBridge {
         entity: &EntityInput,
         incarnation: u64,
         spawned: bool,
-        event_accepted: bool,
+        action: Option<AnimationAction>,
     ) {
         let source = entity
             .action_source_key
@@ -120,69 +132,92 @@ impl AnimationBridge {
         let revision = entity
             .action_source_revision
             .filter(|value| *value > 0 && *value <= MAX_SAFE_INTEGER);
-        let valid = source.is_some()
-            && revision.is_some()
-            && entity.action_known == Some(true)
-            && strict_direction(entity.direction.as_deref()).is_some()
-            && event_accepted;
-        if !valid {
-            self.withdraw_authority(&entity.object_id);
-            if let (Some(authority), Some(revision)) =
-                (self.authorities.get_mut(&entity.object_id), revision)
-            {
-                authority.source_revision = authority.source_revision.max(revision);
-            }
+        let retained = entity.retained_action_token.as_ref();
+        let Some(((source, next_revision), action)) =
+            source.zip(revision).zip(action).filter(|_| {
+                entity.action_known == Some(true)
+                    || (retained.is_some() && entity.action_known == Some(false))
+            })
+        else {
+            self.withdraw_authority(&entity.object_id, revision);
             return;
-        }
-        let source = source.expect("validated source");
-        let revision = revision.expect("validated revision");
+        };
         let token = entity
             .action_token
             .as_ref()
             .filter(|token| !token.is_empty());
-        let previous = self.authorities.get(&entity.object_id);
-        let same =
-            previous.is_some_and(|a| a.source_key == *source && a.incarnation == incarnation);
-        if !same {
-            let continuity_revision =
-                previous.map_or(1, |a| a.continuity_revision.saturating_add(1));
+        let previous = self.authorities.get_mut(&entity.object_id);
+        let same = |a: &ActionAuthority| a.source_key == *source && a.incarnation == incarnation;
+
+        if let Some(retained) = retained {
+            // Presentation can temporarily outrun the matching transform. It
+            // carries an already admitted receipt and never creates authority.
+            let is_movement = entity.movement_active
+                && matches!(action, AnimationAction::Walking | AnimationAction::Running)
+                && token.is_some();
+            let is_idle = action == AnimationAction::Standing && token.is_none();
+            if let Some(authority) = previous.filter(|a| {
+                entity.kind == "selfPlayer"
+                    && a.known
+                    && same(a)
+                    && a.accepted
+                        .as_ref()
+                        .is_some_and(|stamp| &stamp.token == retained)
+                    && (is_movement || is_idle)
+            }) {
+                authority.aligned = entity.action_known == Some(true);
+                authority.source_revision = next_revision;
+            } else {
+                self.withdraw_authority(&entity.object_id, revision);
+            }
+            return;
+        }
+
+        let Some(authority) = previous.filter(|a| same(a)) else {
+            let continuity_revision = self
+                .authorities
+                .get(&entity.object_id)
+                .map_or(1, |a| a.continuity_revision.saturating_add(1));
+            let known = spawned && entity.bootstrap_known == Some(true);
             self.authorities.insert(
                 entity.object_id.clone(),
                 ActionAuthority {
                     source_key: source.clone(),
                     incarnation,
-                    source_revision: revision,
+                    source_revision: next_revision,
                     continuity_revision,
-                    known: spawned && entity.bootstrap_known == Some(true),
+                    known,
+                    aligned: known,
+                    accepted: token.map(|token| ActionStamp {
+                        token: token.clone(),
+                        action,
+                    }),
                     retired_token: token.cloned(),
                 },
             );
             return;
-        }
-        let authority = self
-            .authorities
-            .get_mut(&entity.object_id)
-            .expect("validated authority");
-        if revision < authority.source_revision {
-            if authority.known {
-                authority.continuity_revision = authority.continuity_revision.saturating_add(1);
-            }
-            authority.known = false;
-            authority.retired_token = self.last_action_tokens.get(&entity.object_id).cloned();
-            return;
-        }
-        // A missing-action interval is never healed by a later default standing
-        // selector or the same old token. Only a new complete event can resume it.
-        if !authority.known
-            && revision >= authority.source_revision
-            && token.is_some()
-            && token != authority.retired_token.as_ref()
-            && parse_action(&entity.action).is_some()
+        };
+        let new_token = token.filter(|token| {
+            authority
+                .accepted
+                .as_ref()
+                .is_none_or(|stamp| &stamp.token != *token)
+        });
+        // A missing-action interval requires a fresh receipt. Neither the
+        // prior canonical stamp nor the last compatibility pose restores it.
+        if !authority.known && new_token.is_some() && new_token != authority.retired_token.as_ref()
         {
             authority.known = true;
             authority.continuity_revision = authority.continuity_revision.saturating_add(1);
         }
-        authority.source_revision = revision;
+        authority.source_revision = next_revision;
+        authority.aligned = authority.known;
+        if let Some(token) = new_token.filter(|_| authority.known) {
+            authority.accepted = Some(ActionStamp {
+                token: token.clone(),
+                action,
+            });
+        }
     }
 
     fn resolve(&mut self, input: ResolveInput) -> ResolveOutput {
@@ -210,7 +245,7 @@ impl AnimationBridge {
             })
             .collect::<Vec<_>>();
         for id in duplicate_ids.iter() {
-            self.withdraw_authority(id);
+            self.withdraw_authority(id, None);
         }
         let mut seen = OrderedSet::new();
         let mut ordered_ids = Vec::with_capacity(input.entities.len());
@@ -228,7 +263,7 @@ impl AnimationBridge {
                         "{}: unsupported entity kind {}",
                         entity.object_id, entity.kind
                     ));
-                    self.withdraw_authority(&entity.object_id);
+                    self.withdraw_authority(&entity.object_id, None);
                     continue;
                 }
             };
@@ -243,28 +278,54 @@ impl AnimationBridge {
                 Ok(snapshot) => snapshot,
                 Err(error) => {
                     errors.push(format!("{}: {error}", entity.object_id));
-                    self.withdraw_authority(&entity.object_id);
+                    self.withdraw_authority(&entity.object_id, None);
                     continue;
                 }
             };
 
             if snapshot.spawned {
-                self.last_action_tokens.remove(&entity.object_id);
-                self.last_action_kinds.remove(&entity.object_id);
+                self.last_actions.remove(&entity.object_id);
             }
+            let prior = self.authorities.get(&entity.object_id).filter(|authority| {
+                authority.incarnation == snapshot.key.incarnation
+                    && entity.action_source_key.as_ref() == Some(&authority.source_key)
+            });
+            if prior.is_some_and(|authority| {
+                entity
+                    .action_source_revision
+                    .is_some_and(|revision| revision < authority.source_revision)
+            }) {
+                self.withdraw_authority(&entity.object_id, None);
+                continue;
+            }
+
             let action_token = entity
                 .action_token
-                .as_ref()
+                .as_deref()
                 .filter(|token| !token.is_empty());
-            let mut event_accepted = action_token.is_none() && entity.action == "standing";
+            let action = parse_action(&entity.action);
+            let mut event_accepted =
+                action_token.is_none() && action == Some(AnimationAction::Standing);
             if let Some(token) = action_token {
-                if self.last_action_tokens.get(&entity.object_id) == Some(token) {
-                    event_accepted = parse_action(&entity.action).is_some()
-                        && self.last_action_kinds.get(&entity.object_id) == Some(&entity.action);
-                } else if let Some(action) =
-                    parse_action(&entity.action).map(|action| normalize_action(kind, action))
-                {
-                    let already_dead = action == AnimationAction::Dead
+                // A packet receipt qualifies an event already seen in the
+                // display stream. Keep that identity separate from its proof.
+                let token = visual_token(token, entity.action_source_key.as_deref());
+                let repeated = self
+                    .last_actions
+                    .get(&entity.object_id)
+                    .filter(|stamp| stamp.token == token)
+                    .or_else(|| {
+                        prior.and_then(|authority| {
+                            authority.accepted.as_ref().filter(|stamp| {
+                                visual_token(&stamp.token, Some(&authority.source_key)) == token
+                            })
+                        })
+                    });
+                if let Some(stamp) = repeated {
+                    event_accepted = Some(stamp.action) == action;
+                } else if let Some(action) = action {
+                    let normalized = normalize_action(kind, action);
+                    let already_dead = normalized == AnimationAction::Dead
                         && self
                             .world
                             .active_state(&entity.object_id)
@@ -275,15 +336,11 @@ impl AnimationBridge {
                                 )
                             });
                     if already_dead {
-                        self.last_action_tokens
-                            .insert(entity.object_id.clone(), token.clone());
-                        self.last_action_kinds
-                            .insert(entity.object_id.clone(), entity.action.clone());
                         event_accepted = true;
                     } else {
                         let sequence = self.next_sequence;
                         self.next_sequence = self.next_sequence.saturating_add(1).max(1);
-                        let event = AnimationEvent::new(sequence, action, direction);
+                        let event = AnimationEvent::new(sequence, normalized, direction);
                         // A current player segment replaces stale movement in
                         // the same way as Native. Shared combat/life barriers
                         // still own the FIFO, including a spell already queued.
@@ -300,17 +357,20 @@ impl AnimationBridge {
                             self.world.apply_event(&snapshot.key, event, input.now_ms)
                         };
                         match update {
-                            Ok(_) => {
-                                self.last_action_tokens
-                                    .insert(entity.object_id.clone(), token.clone());
-                                self.last_action_kinds
-                                    .insert(entity.object_id.clone(), entity.action.clone());
-                                event_accepted = true;
-                            }
+                            Ok(_) => event_accepted = true,
                             Err(error) => {
                                 errors.push(format!("{}: {error}", snapshot.key.object_id))
                             }
                         }
+                    }
+                    if event_accepted {
+                        self.last_actions.insert(
+                            entity.object_id.clone(),
+                            ActionStamp {
+                                token: token.to_owned(),
+                                action,
+                            },
+                        );
                     }
                 } else {
                     errors.push(format!(
@@ -324,7 +384,7 @@ impl AnimationBridge {
                     &entity,
                     snapshot.key.incarnation,
                     snapshot.spawned,
-                    event_accepted,
+                    action.filter(|_| event_accepted && canonical_direction.is_some()),
                 );
             }
         }
@@ -332,10 +392,8 @@ impl AnimationBridge {
         // Retire the whole ambiguous batch, including the tokens consumed only
         // for visual compatibility; replaying that batch is not a fresh event.
         for (id, revision) in duplicate_revisions {
-            self.withdraw_authority(&id);
-            if let (Some(authority), Some(revision)) = (self.authorities.get_mut(&id), revision) {
-                authority.source_revision = authority.source_revision.max(revision);
-            }
+            // The ambiguous revision cannot later qualify as a fresh receipt.
+            self.withdraw_authority(&id, revision.map(|revision| revision + 1));
         }
 
         let stale_ids = self
@@ -345,8 +403,7 @@ impl AnimationBridge {
             .collect::<Vec<_>>();
         for object_id in stale_ids {
             self.world.remove_object(&object_id);
-            self.last_action_tokens.remove(&object_id);
-            self.last_action_kinds.remove(&object_id);
+            self.last_actions.remove(&object_id);
             self.authorities.remove(&object_id);
         }
 
@@ -385,6 +442,8 @@ struct ActionAuthority {
     source_revision: u64,
     continuity_revision: u64,
     known: bool,
+    aligned: bool,
+    accepted: Option<ActionStamp>,
     retired_token: Option<String>,
 }
 
@@ -396,6 +455,23 @@ struct ActionPoseQuery {
     world_seed: u64,
     object_id: String,
     action_source_key: String,
+}
+
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+struct ActionPoseOutput<'a> {
+    version: u8,
+    known: bool,
+    world_key: &'a str,
+    object_id: &'a str,
+    action_source_key: &'a str,
+    source_revision: u64,
+    continuity_revision: u64,
+    bridge_epoch: u64,
+    incarnation: u64,
+    last_now_ms: u64,
+    action: &'static str,
+    direction: &'static str,
 }
 
 /// Owned by the actual animation host. The small presentation package uses this
@@ -431,7 +507,7 @@ impl EntityAnimationOwner {
             if let Some(bridge) = self.inner.as_mut() {
                 let ids = bridge.authorities.keys().cloned().collect::<Vec<_>>();
                 for id in ids {
-                    bridge.withdraw_authority(&id);
+                    bridge.withdraw_authority(&id, None);
                 }
             }
             return error_output("decode", "invalid animation input".to_owned());
@@ -485,6 +561,7 @@ impl EntityAnimationOwner {
         };
         let Some(authority) = bridge.authorities.get(&query.object_id).filter(|a| {
             a.known
+                && a.aligned
                 && a.source_key == query.action_source_key
                 && a.continuity_revision <= MAX_SAFE_INTEGER
                 && a.source_revision <= MAX_SAFE_INTEGER
@@ -499,11 +576,21 @@ impl EntityAnimationOwner {
         {
             return unknown();
         }
-        serde_json::json!({"version":1,"known":true,"worldKey":bridge.world_key,"objectId":query.object_id,
-            "actionSourceKey":authority.source_key,"sourceRevision":authority.source_revision,
-            "continuityRevision":authority.continuity_revision,"bridgeEpoch":self.epoch,
-            "incarnation":pose.key.incarnation,"lastNowMs":bridge.last_now_ms,
-            "action":action_name(pose.action),"direction":direction_name(pose.direction)}).to_string()
+        serde_json::to_string(&ActionPoseOutput {
+            version: 1,
+            known: true,
+            world_key: &bridge.world_key,
+            object_id: &query.object_id,
+            action_source_key: &authority.source_key,
+            source_revision: authority.source_revision,
+            continuity_revision: authority.continuity_revision,
+            bridge_epoch: self.epoch,
+            incarnation: pose.key.incarnation,
+            last_now_ms: bridge.last_now_ms,
+            action: action_name(pose.action),
+            direction: direction_name(pose.direction),
+        })
+        .unwrap_or_else(|_| unknown())
     }
 }
 
@@ -548,6 +635,21 @@ fn strict_direction(value: Option<&str>) -> Option<Direction> {
         Some("UpLeft") => Some(Direction::UpLeft),
         _ => None,
     }
+}
+
+fn visual_token<'a>(token: &'a str, source: Option<&str>) -> &'a str {
+    source
+        .and_then(|source| {
+            let qualified = token.strip_prefix(source)?.strip_prefix(":action:")?;
+            let (id, raw) = qualified.split_once(':')?;
+            (id.len() <= 16
+                && !id.is_empty()
+                && id.as_bytes()[0] != b'0'
+                && id.bytes().all(|byte| byte.is_ascii_digit())
+                && !raw.is_empty())
+            .then_some(raw)
+        })
+        .unwrap_or(token)
 }
 
 fn parse_action(value: &str) -> Option<AnimationAction> {
@@ -671,6 +773,7 @@ mod tests {
                 action: action.to_owned(),
                 action_token: token.map(str::to_owned),
                 movement_active: false,
+                retained_action_token: None,
                 action_source_key: None,
                 action_source_revision: None,
                 bootstrap_known: None,
@@ -836,6 +939,178 @@ mod authority_tests {
                 "{kind}, {direction}, {active}"
             );
         }
+    }
+
+    fn known_spell() -> EntityAnimationOwner {
+        let mut owner = EntityAnimationOwner::new();
+        owner.resolve_json(&frame(1, "standing", None, true, true).to_string());
+        let mut spell = frame(2, "spell", Some("cast1"), false, true);
+        spell["nowMs"] = json!(1_100);
+        owner.resolve_json(&spell.to_string());
+        assert_eq!(peek(&owner)["action"], "spell");
+        owner
+    }
+
+    fn retained_movement(
+        revision: u64,
+        at: u64,
+        action: &str,
+        token: Option<&str>,
+        aligned: bool,
+    ) -> Value {
+        let mut input = frame(revision, action, token, false, aligned);
+        input["nowMs"] = json!(at);
+        input["entities"][0]["retainedActionToken"] = json!("cast1");
+        if token.is_some() {
+            input["entities"][0]["movementActive"] = json!(true);
+        }
+        input
+    }
+
+    #[test]
+    fn retained_cast_proof_follows_live_motion_without_replaying_the_cast() {
+        let mut owner = known_spell();
+        let before = peek(&owner);
+        let prediction = retained_movement(2, 1_800, "walking", Some("move1"), false);
+        owner.resolve_json(&prediction.to_string());
+        assert_eq!(peek(&owner)["known"], false);
+
+        let ack = retained_movement(3, 1_950, "walking", Some("move1"), true);
+        let result: Value = serde_json::from_str(&owner.resolve_json(&ack.to_string())).unwrap();
+        assert_eq!(result["poses"][0]["logicalFrameIndex"], 1);
+        assert_eq!(result["poses"][0]["queueDepth"], 0);
+        assert_eq!(peek(&owner)["action"], "walking");
+        assert_eq!(peek(&owner)["sourceRevision"], 3);
+
+        let mut settled = retained_movement(4, 2_405, "standing", None, true);
+        settled["entities"][0]["direction"] = json!("Down");
+        owner.resolve_json(&settled.to_string());
+        let standing = peek(&owner);
+        assert_eq!(standing["action"], "standing");
+        assert_eq!(standing["direction"], "Down");
+        assert_eq!(standing["continuityRevision"], before["continuityRevision"]);
+
+        let mut next = frame(5, "spell", Some("cast2"), false, true);
+        next["nowMs"] = json!(2_450);
+        let result: Value = serde_json::from_str(&owner.resolve_json(&next.to_string())).unwrap();
+        assert_eq!(result["poses"][0]["action"], "spell");
+        assert_eq!(result["poses"][0]["logicalFrameIndex"], 0);
+        assert_eq!(result["poses"][0]["queueDepth"], 0);
+    }
+
+    #[test]
+    fn retained_cast_cannot_heal_a_hard_unknown_or_a_new_bridge() {
+        let mut owner = known_spell();
+        let motion = retained_movement(3, 1_800, "walking", Some("move1"), true);
+        owner.resolve_json(&motion.to_string());
+        assert_eq!(peek(&owner)["action"], "walking");
+        let mut unknown = frame(4, "standing", None, false, false);
+        unknown["nowMs"] = json!(1_850);
+        owner.resolve_json(&unknown.to_string());
+        assert_eq!(peek(&owner)["known"], false);
+
+        let settled = retained_movement(5, 2_405, "standing", None, true);
+        owner.resolve_json(&settled.to_string());
+        assert_eq!(peek(&owner)["known"], false);
+        let mut replay = frame(6, "spell", Some("cast1"), false, true);
+        replay["nowMs"] = json!(2_410);
+        let result: Value = serde_json::from_str(&owner.resolve_json(&replay.to_string())).unwrap();
+        assert_eq!(result["poses"][0]["action"], "standing");
+        assert_eq!(peek(&owner)["known"], false);
+
+        owner.reset();
+        owner.resolve_json(&settled.to_string());
+        assert_eq!(peek(&owner)["known"], false);
+    }
+
+    #[test]
+    fn retained_proof_requires_the_same_authority_and_a_valid_presentation() {
+        for edge in ["token", "source", "revision", "inactive", "duplicate"] {
+            let mut owner = known_spell();
+            let mut motion = retained_movement(3, 1_800, "walking", Some("move1"), true);
+            match edge {
+                "token" => motion["entities"][0]["retainedActionToken"] = json!("other"),
+                "source" => motion["entities"][0]["actionSourceKey"] = json!("other"),
+                "revision" => motion["entities"][0]["actionSourceRevision"] = json!(1),
+                "inactive" => motion["entities"][0]["movementActive"] = json!(false),
+                "duplicate" => {
+                    let duplicate = motion["entities"][0].clone();
+                    motion["entities"].as_array_mut().unwrap().push(duplicate);
+                }
+                _ => unreachable!(),
+            }
+            owner.resolve_json(&motion.to_string());
+            assert_eq!(peek(&owner)["known"], false, "{edge}");
+            let settled = retained_movement(4, 2_405, "standing", None, true);
+            owner.resolve_json(&settled.to_string());
+            assert_eq!(peek(&owner)["known"], false, "{edge}");
+        }
+    }
+
+    #[test]
+    fn a_cast_shown_before_authoritative_alignment_is_consumed_once() {
+        let mut owner = EntityAnimationOwner::new();
+        owner.resolve_json(&frame(1, "standing", None, true, true).to_string());
+        let raw_token = "attack:1100:spell";
+        let mut preview = frame(2, "spell", Some(raw_token), false, false);
+        preview["nowMs"] = json!(1_100);
+        owner.resolve_json(&preview.to_string());
+        assert_eq!(peek(&owner)["known"], false);
+        let source_key = preview["entities"][0]["actionSourceKey"].as_str().unwrap();
+        let qualified = format!("{source_key}:action:1:{raw_token}");
+        let mut ack = frame(3, "spell", Some(&qualified), false, true);
+        ack["nowMs"] = json!(1_210);
+        let output: Value = serde_json::from_str(&owner.resolve_json(&ack.to_string())).unwrap();
+        assert_eq!(output["poses"][0]["logicalFrameIndex"], 1);
+        assert_eq!(output["poses"][0]["queueDepth"], 0);
+        assert_eq!(peek(&owner)["action"], "spell");
+
+        preview["nowMs"] = json!(1_300);
+        preview["entities"][0]["actionSourceRevision"] = json!(4);
+        let output: Value =
+            serde_json::from_str(&owner.resolve_json(&preview.to_string())).unwrap();
+        assert_eq!(output["poses"][0]["queueDepth"], 0);
+        assert_eq!(peek(&owner)["known"], false);
+        ack["nowMs"] = json!(1_710);
+        ack["entities"][0]["actionSourceRevision"] = json!(5);
+        let output: Value = serde_json::from_str(&owner.resolve_json(&ack.to_string())).unwrap();
+        assert_eq!(output["poses"][0]["action"], "standing");
+        assert_eq!(peek(&owner)["known"], false);
+    }
+
+    #[test]
+    fn stale_and_ambiguous_revisions_do_not_enqueue_or_recover() {
+        let mut owner = known_spell();
+        let mut newer = frame(4, "spell", Some("cast2"), false, true);
+        newer["nowMs"] = json!(1_800);
+        owner.resolve_json(&newer.to_string());
+        let mut stale = frame(3, "spell", Some("older"), false, true);
+        stale["nowMs"] = json!(1_950);
+        let output: Value = serde_json::from_str(&owner.resolve_json(&stale.to_string())).unwrap();
+        assert_eq!(output["poses"][0]["queueDepth"], 0);
+        assert_eq!(peek(&owner)["known"], false);
+
+        let mut owner = known_spell();
+        let mut ambiguous = frame(3, "spell", Some("ambiguous"), false, true);
+        ambiguous["nowMs"] = json!(1_800);
+        let second = ambiguous["entities"][0].clone();
+        ambiguous["entities"].as_array_mut().unwrap().push(second);
+        owner.resolve_json(&ambiguous.to_string());
+        let mut visual = frame(3, "walking", Some("compat"), false, false);
+        visual["nowMs"] = json!(2_410);
+        visual["entities"][0]["actionSourceRevision"] = Value::Null;
+        owner.resolve_json(&visual.to_string());
+        let mut duplicate = frame(3, "spell", Some("ambiguous"), false, true);
+        duplicate["nowMs"] = json!(3_020);
+        let output: Value =
+            serde_json::from_str(&owner.resolve_json(&duplicate.to_string())).unwrap();
+        assert_eq!(output["poses"][0]["action"], "standing");
+        assert_eq!(peek(&owner)["known"], false);
+
+        let mut fresh = frame(4, "spell", Some("fresh"), false, true);
+        fresh["nowMs"] = json!(3_025);
+        owner.resolve_json(&fresh.to_string());
+        assert_eq!(peek(&owner)["action"], "spell");
     }
 
     #[test]

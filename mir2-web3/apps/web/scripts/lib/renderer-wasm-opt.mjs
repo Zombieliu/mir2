@@ -63,7 +63,7 @@ const RENDERER_PROFILE = Object.freeze({ label: "renderer", subject: "Renderer",
   assertBudget: assertRendererReleaseBudget });
 const CLIENT_CORE_PROFILE = Object.freeze({ label: "client-core", subject: "Client-core",
   optimizationStages: Object.freeze([Object.freeze([
-    "-Oz", "--flatten", "--rereloop", "-Oz", "--converge", "--reorder-functions",
+    "--merge-similar-functions", "-Oz", "--flatten", "--rereloop", "-Oz", "--converge", "--reorder-functions",
   ])]),
   wasmName: "mir2_platform_web_bg.wasm", jsName: "mir2_platform_web.js",
   temporaryPrefix: ".mir2-client-core-opt-", temporaryPattern: /^\.mir2-client-core-opt-\d+-[a-f0-9]{12}\.wasm$/,

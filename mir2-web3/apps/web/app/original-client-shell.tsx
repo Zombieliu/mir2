@@ -6,7 +6,7 @@ import { CharacterPointerRouter } from "../lib/bevy-character-ui";
 import { SpellsPointerRouter } from "../lib/bevy-spells-ui";
 import { MailPointerRouter,type MailPointerContext,type MailPointerEdge } from "../lib/bevy-mail-ui";
 import {composeStagePoint,sameComposeAuthority,sameComposeScope,type ClipboardGesture,type ComposeProof,type ComposeTextOperation,type MailComposeHost} from "../lib/bevy-mail-text-input";
-import { containsHudRect, HudPointerRouter } from "../lib/bevy-hud-ui";
+import { containsHudRect, HudPointerRouter, type HudPointerLease } from "../lib/bevy-hud-ui";
 import type { HeroPointerContext } from "../lib/bevy-hero-host";
 import { crystalKeyNameFromBrowserEvent, matchingCrystalKeyFunctions, crystalDropViewDeadline } from "../lib/player-ui-preferences";
 import { crystalWindowShortcut, crystalSkillShortcutSlot } from "../lib/crystal-shortcut-actions";
@@ -202,7 +202,8 @@ type HeldScenePointer = {
 };
 
 type WorldFishingPhysicalPointer = {
-  pointerId: number; pointerType: "mouse" | "touch"; startedAt: number; source: object; stage: HTMLElement;
+  pointerId: number; pointerType: "mouse" | "touch"; startedAt: number; source: globalThis.PointerEvent; stage: HTMLElement;
+  hudPointer: HudPointerLease | null;
   held: HeldScenePointer; gesture: WorldFishingGesture | null; phase: "held" | "terminal" | "retired";
   clientX: number; clientY: number;
   callbacks: WorldFishingCallbacks; sourceKey: string; runtime: object; geometry: string; contextGeometry: string;
@@ -1047,9 +1048,14 @@ export function OriginalClientShell({
   const worldFishingPointersRef = useRef(new Map<number, globalThis.PointerEvent>());
   const worldFishingQuarantineRef = useRef(new Set<number>());
   const worldFishingShellRef = useRef<{ callbacks: WorldFishingCallbacks; ready: boolean; sourceKey: string;
-    runtime: object | null; geometry: string } | null>(null);
+    runtime: object | null; geometry: string; sharedCanvasId: string;
+    sharedWorldAllowed: (x: number, y: number, pointer: HudPointerLease) => boolean;
+    projectPoint: typeof scenePointFromMouseEvent; dispatchClick: typeof dispatchSceneClickInput } | null>(null);
   useLayoutEffect(() => {
     const context = { callbacks: { onBeginWorldFishingGesture, onCancelWorldFishingGesture },
+      sharedCanvasId: sharedUiCanvasId(webGl2SharedCanvasPrototype),
+      sharedWorldAllowed: sceneGroupHoverWorldAllowed,
+      projectPoint: scenePointFromMouseEvent, dispatchClick: dispatchSceneClickInput,
       ready: screen === "game" && sceneInteractionReady && !bevyQuestUiCapturesPointer && !questLocalModalOpen && !mobileMoreOpen
         && !bevyMailComposeReady && !bevyMailComposePending,
       sourceKey: worldFishingAnimation?.record.sourceKey ?? "", runtime: worldFishingAnimation?.runtime ?? null,
@@ -3654,11 +3660,13 @@ export function OriginalClientShell({
       sceneGroupHoverPointRef.current = null;
     };
   }
-  function sceneGroupHoverWorldAllowed(x: number, y: number): boolean {
+  function sceneGroupHoverWorldAllowed(x: number, y: number, worldPointer?: HudPointerLease): boolean {
+    const hudRouter = hudPointerRouterRef.current;
     if (!sceneInteractionReady || questLocalModalRef.current || mobileMoreOpenRef.current || bevyQuestUiCapturesPointer
       || npcShopBlocksWorldInput() || heroBlocksWorldInput() || bevyMailComposeReady || bevyMailComposePending
       || bevyStorageUiTransitioning || bevyNpcShopUiTransitioning || bagPointerRouterRef.current.held
-      || characterPointerRouterRef.current.held || spellsPointerRouterRef.current.held || hudPointerRouterRef.current.held
+      || characterPointerRouterRef.current.held || spellsPointerRouterRef.current.held
+      || hudRouter.held && hudRouter.held !== worldPointer
       || mailPointerRouterRef.current.held || storagePointerRouterRef.current.held || npcShopPointerRouterRef.current.held
       || heroPointerLeaseRef.current || heldQuestControlPointersRef.current.size || heldComposePointerRef.current !== null
       || bagBeltPointerRef.current || bagBeltArmedSharedRef.current || npcRepairPointerRef.current || combatUiHoldRef.current.size) return false;
@@ -3670,6 +3678,7 @@ export function OriginalClientShell({
     const npc = npcShopPointerCallbacksRef.current.getBevyNpcShopPointerContext?.() ?? null;
     const hero = heroPointerCallbacksRef.current.getBevyHeroPointerContext?.() ?? null;
     const hud = readBevyHudStatus?.() ?? null;
+    if (worldPointer && !hudRouter.matches(hud)) return false;
     if (spells?.modal || mail?.modal || hud?.modal || bevyBagUiActive && !bag || bevyCharacterPageReady && !character
       || bevySpellsPageReady && !spells || bevyMailPageReady && !mail || bevyStorageUiActive && !storage
       || bevyNpcShopUiActive && !npc || (bevyHeroUiActive || bevyHeroUiTransitioning) && !hero || bevyHudUiReady && (!hud?.ready || !hud.plan)) return false;
@@ -3761,25 +3770,37 @@ export function OriginalClientShell({
     if (!Number.isFinite(dpr) || dpr <= 0 || !Number.isFinite(scale) || scale <= 0) return null;
     return JSON.stringify([rect.left, rect.top, rect.width, rect.height, dpr, scale]);
   }
-  function worldFishingPointCurrent(lease: WorldFishingPhysicalPointer): boolean {
-    if (![lease.clientX, lease.clientY].every(Number.isFinite)) return false;
+  function worldFishingPointCurrent(lease: WorldFishingPhysicalPointer) {
+    const context = worldFishingShellRef.current;
+    if (!context || ![lease.clientX, lease.clientY].every(Number.isFinite)) return null;
     const rect = lease.stage.getBoundingClientRect();
-    if (lease.clientX < rect.left || lease.clientX >= rect.right || lease.clientY < rect.top || lease.clientY >= rect.bottom) return false;
+    if (lease.clientX < rect.left || lease.clientX >= rect.right || lease.clientY < rect.top || lease.clientY >= rect.bottom) return null;
     const hit = document.elementFromPoint(lease.clientX, lease.clientY);
-    if (!hit || !lease.stage.contains(hit) || hit.closest("[data-ui-interactive='true'], .game-ui-scene, .login-overlay, .select-overlay")) return false;
-    const point = scenePointFromMouseEvent({ clientX: lease.clientX, clientY: lease.clientY, currentTarget: lease.stage });
-    const bag = bagPointerCallbacksRef.current.getBevyBagPointerContext?.();
-    if (bag?.inputRegions.some(r => point.sceneX >= r.left && point.sceneY >= r.top && point.sceneX < r.left + r.width && point.sceneY < r.top + r.height)) return false;
-    return true;
+    if (!hit || !lease.stage.contains(hit) || hit.closest(".game-ui-scene, .login-overlay, .select-overlay")) return null;
+    // Window listeners outlive renders. Use the projection committed for the
+    // current layout before consulting the shared HUD's scene regions.
+    const point = context.projectPoint({ clientX: lease.clientX, clientY: lease.clientY, currentTarget: lease.stage });
+    if (lease.hudPointer || hit.id === context.sharedCanvasId) {
+      const pointer = lease.hudPointer, router = hudPointerRouterRef.current;
+      if (!pointer || hit.id !== context.sharedCanvasId || hit !== lease.source.target || router.held !== pointer
+        || !context.sharedWorldAllowed(point.sceneX, point.sceneY, pointer) || router.held !== pointer) return null;
+    } else {
+      if (hit.closest("[data-ui-interactive='true']")) return null;
+      const bag = bagPointerCallbacksRef.current.getBevyBagPointerContext?.();
+      if (bag?.inputRegions.some(r => point.sceneX >= r.left && point.sceneY >= r.top && point.sceneX < r.left + r.width && point.sceneY < r.top + r.height)) return null;
+    }
+    return worldFishingShellRef.current === context ? point : null;
   }
   function updateWorldFishingPointerPosition(lease: WorldFishingPhysicalPointer, event: globalThis.PointerEvent) {
     if (worldFishingPhysicalRef.current !== lease || lease.phase !== "held" || event.timeStamp < lease.startedAt) return;
     lease.clientX = event.clientX; lease.clientY = event.clientY;
-    if (!worldFishingPointCurrent(lease)) { retireWorldFishingPhysical(lease); return; }
+    const point = worldFishingPointCurrent(lease);
+    if (!point) { retireWorldFishingPhysical(lease); return; }
     const held = heldScenePointerRef.current;
     if (held && (held === lease.held || held.fishingGesture === lease.gesture)) {
-      const point = scenePointFromMouseEvent({ clientX: event.clientX, clientY: event.clientY, currentTarget: lease.stage });
       held.sceneX = point.sceneX; held.sceneY = point.sceneY;
+      // A terminal click must use that same point against the current camera.
+      held.tileX = undefined; held.tileY = undefined;
     }
   }
   function worldFishingPhysicalCurrent(lease: WorldFishingPhysicalPointer): boolean {
@@ -3787,7 +3808,7 @@ export function OriginalClientShell({
       terminal = worldFishingTerminalRef.current === lease && lease.phase === "terminal";
     const held = heldScenePointerRef.current;
     if (!context?.ready || !context.runtime || lease.phase === "retired" || !physical && !terminal
-      || context.sourceKey !== lease.sourceKey || context.runtime !== lease.runtime
+      || context.sourceKey !== lease.sourceKey || context.runtime !== lease.runtime || context.geometry !== lease.contextGeometry
       || context.callbacks.onBeginWorldFishingGesture !== lease.callbacks.onBeginWorldFishingGesture
       || context.callbacks.onCancelWorldFishingGesture !== lease.callbacks.onCancelWorldFishingGesture
       || worldFishingStageGeometry(lease.stage) !== lease.geometry || !worldFishingPointCurrent(lease)
@@ -3813,8 +3834,11 @@ export function OriginalClientShell({
     const geometry = worldFishingStageGeometry(stage);
     if (!geometry) return;
     retireWorldFishingPhysical();
+    const hud = hudPointerRouterRef.current.held;
+    const hudPointer = source.target instanceof HTMLElement && source.target.id === context.sharedCanvasId
+      && hud?.origin === "world" && hud.pointerId === source.pointerId ? hud : null;
     const lease: WorldFishingPhysicalPointer = { pointerId: source.pointerId, pointerType: source.pointerType, startedAt: source.timeStamp,
-      source, stage, held, gesture: null, phase: "held", clientX: source.clientX, clientY: source.clientY, callbacks: context.callbacks, sourceKey: context.sourceKey, runtime: context.runtime, geometry, contextGeometry: context.geometry };
+      hudPointer, source, stage, held, gesture: null, phase: "held", clientX: source.clientX, clientY: source.clientY, callbacks: context.callbacks, sourceKey: context.sourceKey, runtime: context.runtime, geometry, contextGeometry: context.geometry };
     worldFishingPhysicalRef.current = lease;
     const pointer: WorldFishingPointer = Object.freeze({ source, stage, pointerId: source.pointerId,
       pointerType: source.pointerType, startedAt: source.timeStamp, current: () => worldFishingPhysicalCurrent(lease) });
@@ -3841,12 +3865,14 @@ export function OriginalClientShell({
   }
   function finishWorldFishingPhysical(lease: WorldFishingPhysicalPointer, click: boolean) {
     if (worldFishingPhysicalRef.current !== lease || lease.phase !== "held") return;
-    const held = heldScenePointerRef.current;
+    const held = heldScenePointerRef.current, context = worldFishingShellRef.current;
+    const ownsHeld = held && (held === lease.held || held.fishingGesture === lease.gesture);
     // Terminal custody is burned before any user callback; only this synchronous edge can use it.
     worldFishingPhysicalRef.current = null; worldFishingTerminalRef.current = lease; lease.phase = "terminal";
-    if (held && (held === lease.held || held.fishingGesture === lease.gesture)) heldScenePointerRef.current = null;
+    if (ownsHeld) heldScenePointerRef.current = null;
     try {
-      if (click && held && !held.dispatched && worldFishingPhysicalCurrent(lease)) dispatchSceneClickInput(held);
+      if (click && ownsHeld && !held.dispatched && context && worldFishingPhysicalCurrent(lease)
+        && worldFishingShellRef.current === context) context.dispatchClick(held);
     } finally { retireWorldFishingPhysical(lease); }
   }
   useEffect(() => {

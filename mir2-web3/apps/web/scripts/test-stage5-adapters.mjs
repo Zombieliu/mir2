@@ -6154,7 +6154,7 @@ check("WorldFishingSource UserLocation updates transform but cannot heal unknown
 function fishingAnimationEventFixture(){
   const owner=fishingOwner(),source=new worldFishingSource.WorldFishingSource();source.observeSnapshot(owner,fishingSnapshot(owner));const requests=[];
   const runtime={resolveMir2EntityAnimationPoses(json){const raw=JSON.parse(json);requests.push(raw);return JSON.stringify({worldKey:raw.worldKey,nowMs:raw.nowMs,poses:[]});}};
-  const render=(record,entity,state,motionSnapshot)=>{fishingAnimation.resolveCrystalEntityAnimationPoses({runtime,worldKey:"source23:events",worldSeed:1,now:1000,selfAuthority:record,entities:[{entity,state,motionSnapshot}]});return requests.at(-1).entities[0];};
+  const render=(record,entity,state,motionSnapshot,now=1000)=>{fishingAnimation.resolveCrystalEntityAnimationPoses({runtime,worldKey:"source23:events",worldSeed:1,now,selfAuthority:record,entities:[{entity,state,motionSnapshot}]});return requests.at(-1).entities[0];};
   const entity={objectId:"17",kind:"selfPlayer",x:0,y:1,direction:"Right",movementAnimation:"walking",movementStartedAt:1000};
   return {owner,source,entity,requests,render};
 }
@@ -6183,6 +6183,51 @@ check("Animation own descriptor cache preserves canonical token after selector s
   assert.notEqual(next.actionEvidence.token,first.actionEvidence.token);assert.equal(f.render(next,f.entity,"walking").actionKnown,false,"next descriptor cannot reuse consumed timestamp");
   const fresh=f.render(next,{...f.entity,movementStartedAt:1001},"walking");assert.equal(fresh.actionKnown,true);assert.equal(fresh.actionToken,next.actionEvidence.token+":move:1001:walking");
   assert.equal(f.render(next,f.entity,"standing").actionToken,fresh.actionToken);
+});
+check("Owner move following a real cast retains proof separately from its visual event",()=>{
+  const f=fishingAnimationEventFixture();
+  const caster={...f.entity,movementAnimation:undefined,movementStartedAt:undefined,attackAnimation:"spell",attackStartedAt:1000};
+  f.source.observePacket(f.owner,"ObjectMagic",{objectId:17,x:0,y:1,direction:"Right"},1000);
+  const source=f.source.current(f.owner);
+  const spell=f.render(source,caster,"attackRange");
+  assert.equal(spell.actionKnown,true);
+  assert.equal(spell.actionToken,source.actionEvidence.token+":attack:1000:spell");
+  const move={...caster,x:1};
+  const motion={fromX:0,fromY:1,toX:1,toY:1,animationState:"walking",startedAt:1700,expiresAt:2300};
+  const predicted=f.render(source,move,"walking",motion,1701);
+  assert.equal(predicted.action,"walking");
+  assert.equal(predicted.actionKnown,false,"a mismatched local projection may not publish a known pose");
+  assert.equal(predicted.retainedActionToken,spell.actionToken);
+  assert.equal(predicted.movementActive,true);
+
+  f.source.observePacket(f.owner,"UserLocation",{x:1,y:1,direction:"Right"},1740);
+  const ack=f.source.current(f.owner);
+  assert.strictEqual(ack.actionEvidence,source.actionEvidence);
+  const confirmed=f.render(ack,move,"walking",motion,1741);
+  assert.equal(confirmed.actionToken,predicted.actionToken);
+  assert.equal(confirmed.actionKnown,true);
+  assert.equal(confirmed.retainedActionToken,spell.actionToken);
+  const expired=f.render(ack,move,"walking",motion,2300);
+  assert.equal(expired.action,"standing");
+  assert.equal(expired.actionToken,undefined);
+  assert.equal(expired.retainedActionToken,spell.actionToken);
+  const stale=f.render(ack,move,"attackRange",undefined,2400);
+  assert.equal(stale.actionToken,undefined,"the raw spelling of the previous spell cannot enqueue it again");
+
+  f.source.observePacket(f.owner,"UserLocation",{x:0,y:1,direction:"Up"},2410);
+  const returned=f.render(f.source.current(f.owner),{...caster,direction:"Up"},"standing",undefined,2411);
+  assert.equal(returned.actionToken,undefined);
+  assert.equal(returned.retainedActionToken,spell.actionToken);
+
+  f.source.observePacket(f.owner,"Harvest",{objectId:17},2420);
+  const unknown=f.render(f.source.current(f.owner),{...caster,direction:"Up"},"standing",undefined,2421);
+  assert.equal(unknown.actionKnown,false);
+  assert.equal(unknown.retainedActionToken,undefined);
+  f.source.observePacket(f.owner,"ObjectMagic",{objectId:17,x:0,y:1,direction:"Up"},2430);
+  const next=f.render(f.source.current(f.owner),{...caster,direction:"Up",attackStartedAt:2430},"attackRange",undefined,2430);
+  assert.equal(next.actionKnown,true);
+  assert.notEqual(next.actionToken,spell.actionToken);
+  assert.equal(next.retainedActionToken,undefined);
 });
 check("Animation action peek binds exact captured layout clock and independent bridge authority counters",()=>{
   const f=fishingPoseFixture(),base={...f.getReply(),continuityRevision:19};f.setReply(base);
@@ -6383,13 +6428,14 @@ function worldFishingShellFixture(){
     getBoundingClientRect(){const[left,top,width,height]=this.rect;return{left,top,width,height,right:left+width,bottom:top+height};}getClientRects(){return[this.getBoundingClientRect()];}
     contains(node){return node===this||this.children.includes(node);}closest(selector){if(selector==="[hidden]")return this.hidden?this:null;return this.interactive&&selector.includes("data-ui-interactive")?this:null;}}
   const stage=new MemoryStageNode("world-stage",[10,20,800,600]),canvas=new MemoryStageNode("world-bevy-canvas",[10,20,800,600]);stage.children=[canvas];stage.dataset={viewportPlayerX:"0",viewportPlayerY:"1"};
-  const state={hit:canvas},document={visibilityState:"visible",hasFocus:()=>true,elementFromPoint:()=>state.hit,
+  const state={hit:canvas,sharedWorldAllowed:true},document={visibilityState:"visible",hasFocus:()=>true,elementFromPoint:()=>state.hit,
     addEventListener:(name,fn)=>documentHandlers.set(name,fn),removeEventListener:(name,fn)=>{if(documentHandlers.get(name)===fn)documentHandlers.delete(name);}},
     window={devicePixelRatio:2,visualViewport:{scale:1},getComputedStyle:node=>node.style,addEventListener:(name,fn)=>handlers.set(name,fn),removeEventListener:(name,fn)=>{if(handlers.get(name)===fn)handlers.delete(name);}},ref=current=>({current});
   const actualRefs=new Function(fishingShellInitializersJs)();assert.equal(actualRefs.worldFishingPhysicalRef.current,null);assert.equal(actualRefs.worldFishingTerminalRef.current,null);assert.equal(actualRefs.worldFishingPointersRef.current.size,0);
   page.runtime.resolveMir2EntityAnimationPoses=json=>{const input=JSON.parse(json);resolves.push(input);return JSON.stringify({worldKey:input.worldKey,nowMs:input.nowMs,poses:[]});};
   const scope={...actualRefs,HTMLElement:MemoryStageNode,document,window,Date:{now:()=>now},stageFrameRef:ref(stage),stagePresentation:{virtualWidth:800,virtualHeight:600,scale:1},
-    scenePointerDiagnosticsRef:ref(null),
+    scenePointerDiagnosticsRef:ref(null),hudPointerRouterRef:ref({held:null}),
+    sceneGroupHoverWorldAllowed:()=>state.sharedWorldAllowed,
     bagPointerCallbacksRef:ref({}),npcShopPointerCallbacksRef:ref({}),parityUiBlocksGameplay:undefined,heroPointerLeaseRef:ref(null),heroPointerCallbacksRef:ref({}),
     heldKeyboardMoveKeysRef:ref(new Set()),heldKeyboardRunModeRef:ref(false),onViewportDirectionStop:()=>{},updateSceneCombatPointer:()=>{},
     latestMoveInputRef:ref({screen:"game",player:{x:0,y:1}}),viewportLayout:{offsetX:0,offsetY:0},...fishingSceneLayout,
@@ -6451,6 +6497,42 @@ check("Fishing Shell actual geometry terminal quarantine and lifecycle retiremen
   assert.equal(f.shellScope.worldFishingQuarantineRef.current.size,1);f.handlers.get("pointerup")(f.event(2,13));assert.equal(f.shellScope.worldFishingQuarantineRef.current.size,0);assert.equal(f.sent.length,0);
   f.down(3,20);const successor=f.shellScope.worldFishingPhysicalRef.current;assert.ok(successor);f.shellApi.retireWorldFishingPhysical(old);assert.strictEqual(f.shellScope.worldFishingPhysicalRef.current,successor);
   f.handlers.get("pointerup")(f.event(3,21));assert.equal(f.sent.length,1);f.cleanup();
+});
+check("Fishing on the shared canvas requires the original world HUD lease and a clear live hit",()=>{
+  for(const edge of ["world","ui","changed-hit","new-owner","other-pointer","foreground"]){
+    const f=worldFishingShellFixture(),router=f.shellScope.hudPointerRouterRef.current;
+    f.canvas.id=fishingCanvasMode.sharedUiCanvasId(false);
+    f.canvas.interactive=true;
+    router.held={pointerId:edge==="other-pointer"?2:1,origin:edge==="ui"?"ui":"world"};
+    f.down();
+    if(edge==="changed-hit") {
+      const other=Object.assign(Object.create(Object.getPrototypeOf(f.canvas)),f.canvas);
+      f.stage.children.push(other);f.state.hit=other;
+    }
+    if(edge==="new-owner")router.held={...router.held};
+    if(edge==="foreground")f.state.sharedWorldAllowed=false;
+    f.handlers.get("pointerup")(f.event(1,11));
+    assert.deepEqual(f.sent,edge==="world"?[{type:"fishingCast",castOut:true}]:[],edge);
+    f.cleanup();
+  }
+});
+check("Fishing terminal uses committed projection and rejects a new layout inside its sink",()=>{
+  for(const changesLayout of [false,true]){
+    const f=worldFishingShellFixture();
+    f.down();
+    const ctx=f.shellScope.worldFishingShellRef.current;
+    let projected=0,dispatched=0;
+    f.shellScope.worldFishingShellRef.current={...ctx,
+      projectPoint:event=>{projected++;return ctx.projectPoint(event);},
+      dispatchClick:held=>{dispatched++;assert.equal(held.tileX,undefined);ctx.dispatchClick(held);}};
+    if(changesLayout) f.setSinkEdge(()=>{
+      f.shellScope.worldFishingShellRef.current={...f.shellScope.worldFishingShellRef.current,geometry:"new-layout"};
+    });
+    f.handlers.get("pointerup")(f.event(1,11));
+    assert(projected>=2);assert.equal(dispatched,1);
+    assert.deepEqual(f.sent,changesLayout?[]:[{type:"fishingCast",castOut:true}]);
+    f.cleanup();
+  }
 });
 check("Fishing Shell actual shared animation advances only in committed layout with captured clock and successor cleanup",()=>{
   const f=worldFishingShellFixture();assert.equal(f.resolves.length,0);const firstCleanup=f.shellApi.commitWorldFishingLayout(),first=f.scope.worldFishingCommitRef.current;

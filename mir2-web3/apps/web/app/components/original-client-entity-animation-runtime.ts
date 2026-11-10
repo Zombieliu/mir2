@@ -80,7 +80,7 @@ export function resolveCrystalEntityAnimationPoses({
     nowMs: Math.max(0, Math.trunc(now)),
     entities: entities.map(({ entity, state, motionSnapshot }) => {
       const own = selfAuthority && entity.objectId === String(selfAuthority.owner.playerObjectId);
-      const event = own ? selfAnimationEvent(selfAuthority, entity, state, motionSnapshot)
+      const event: PresentedAction = own ? selfAnimationEvent(selfAuthority, entity, state, now, motionSnapshot)
         : { ...animationEventForEntity(entity, state, motionSnapshot), actionKnown: false };
       const movementActive = event.action === state
         && isCurrentPlayerMovement(entity, motionSnapshot, event.action, event.actionToken, now);
@@ -88,6 +88,7 @@ export function resolveCrystalEntityAnimationPoses({
         objectId: entity.objectId, kind: entity.kind, direction: entity.direction,
         action: event.action, ...(event.actionToken === undefined ? {} : { actionToken: event.actionToken }),
         ...(movementActive ? { movementActive } : {}),
+        ...(event.retainedActionToken === undefined ? {} : { retainedActionToken: event.retainedActionToken }),
         ...(own ? { actionSourceKey: selfAuthority.sourceKey, actionSourceRevision: selfAuthority.revision,
           bootstrapKnown: selfAuthority.bootstrapKnown && selfAuthority.actionEvidence === null,
           actionKnown: event.actionKnown } : {}),
@@ -256,7 +257,14 @@ function isRuntimeAnimationPose(value: unknown): value is CrystalEntityAnimation
 }
 
 type DeliveredSelfEvent = Readonly<{ action: CrystalEntityAnimationAction; actionToken: string }>;
-const deliveredSelfEvents = new WeakMap<WorldFishingActionEvidence, DeliveredSelfEvent>();
+type PresentedAction = {
+  action: CrystalEntityAnimationAction;
+  actionToken?: string;
+  actionKnown: boolean;
+  retainedActionToken?: string;
+};
+type CachedSelfEvent = { event: DeliveredSelfEvent; startedAt: number | null; movementToken?: string };
+const deliveredSelfEvents = new WeakMap<WorldFishingActionEvidence, CachedSelfEvent>();
 const lastDeliveredDisplayTime = new WeakMap<WorldFishingOwner, number>();
 const CANONICAL_DIRECTIONS = new Set(["Up", "UpRight", "Right", "DownRight", "Down", "DownLeft", "Left", "UpLeft"]);
 function eventTime(value: unknown): value is number {
@@ -291,13 +299,32 @@ function actualSelfEvent(entity: DisplayEntity, state: EntitySpriteAnimationStat
 }
 
 function selfAnimationEvent(source: WorldFishingSourceRecord, entity: DisplayEntity,
-  state: EntitySpriteAnimationState, motion?: EntityMotionSnapshot):
-  { action: CrystalEntityAnimationAction; actionToken?: string; actionKnown: boolean } {
+  state: EntitySpriteAnimationState, now: number, motion?: EntityMotionSnapshot): PresentedAction {
   const fallback = animationEventForEntity(entity, state, motion);
   if (!source.animationKnown || !source.self || entity.kind !== "selfPlayer"
-    || entity.x !== source.self.x || entity.y !== source.self.y || entity.direction !== source.self.direction
     || !CANONICAL_DIRECTIONS.has(entity.direction ?? "")) return { ...fallback, actionKnown: false };
+  const aligned = entity.x === source.self.x && entity.y === source.self.y && entity.direction === source.self.direction;
   const evidence = source.actionEvidence;
+  const cached = evidence ? deliveredSelfEvents.get(evidence) : undefined;
+  if (cached && !source.self.dead && entity.dead !== true) {
+    const token = fallback.actionToken;
+    if (token && cached.startedAt !== null
+      && (entity.movementStartedAt ?? motion?.startedAt ?? -1) > cached.startedAt
+      && isCurrentPlayerMovement(entity, motion, fallback.action, token, now)) {
+      cached.movementToken = token;
+      return { ...fallback, actionKnown: aligned, retainedActionToken: cached.event.actionToken };
+    }
+    if (cached.movementToken !== undefined) {
+      // The consumed receipt stays tied to this source. Passing it beside the
+      // presentation lets Rust preserve proof without enqueueing that action.
+      if (state === "standing" || token === cached.movementToken
+        || token !== undefined && cached.event.actionToken.endsWith(":" + token)) {
+        return { action: "standing", actionKnown: aligned, retainedActionToken: cached.event.actionToken };
+      }
+      return { ...fallback, actionKnown: false };
+    }
+  }
+  if (!aligned) return { ...fallback, actionKnown: false };
   if (!evidence) {
     // A complete source bootstrap can use real transient metadata; an unknown
     // interval cannot be healed by the selector's default Standing.
@@ -309,11 +336,10 @@ function selfAnimationEvent(source: WorldFishingSourceRecord, entity: DisplayEnt
     if (previousTime === undefined || actual.time > previousTime) lastDeliveredDisplayTime.set(source.owner, actual.time);
     return { ...actual.event, actionKnown: true };
   }
-  const cached = deliveredSelfEvents.get(evidence);
-  if (cached) return { ...cached, actionKnown: true };
+  if (cached) return { ...cached.event, actionKnown: true };
   if (evidence.family === "standing") {
     const delivered = Object.freeze({ action: "standing" as const, actionToken: evidence.token });
-    deliveredSelfEvents.set(evidence, delivered);
+    deliveredSelfEvents.set(evidence, { event: delivered, startedAt: evidence.receivedAtMs });
     return { ...delivered, actionKnown: true };
   }
   const actual = actualSelfEvent(entity, state, motion), lastTime = lastDeliveredDisplayTime.get(source.owner);
@@ -321,7 +347,7 @@ function selfAnimationEvent(source: WorldFishingSourceRecord, entity: DisplayEnt
     || actual.time < evidence.receivedAtMs || (lastTime !== undefined && actual.time <= lastTime))
     return { ...fallback, actionKnown: false };
   const delivered = Object.freeze({ action: actual.event.action, actionToken: evidence.token + ":" + actual.event.actionToken });
-  deliveredSelfEvents.set(evidence, delivered);
+  deliveredSelfEvents.set(evidence, { event: delivered, startedAt: actual.time });
   lastDeliveredDisplayTime.set(source.owner, actual.time);
   // Subsequent default Standing reuses this consumed event; Rust owns its end.
   return { ...delivered, actionKnown: true };
