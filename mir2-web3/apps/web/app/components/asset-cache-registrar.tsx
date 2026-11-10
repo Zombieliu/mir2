@@ -280,6 +280,10 @@ export function AssetCacheRegistrar() {
       (process.env.NODE_ENV === "production" ||
         params.get("prewarm") === "1" ||
         params.get("assetCache") === "1");
+    // Visible login art loads from the UI. Keep the optional pack off the
+    // production login connection unless a cache diagnostic explicitly asks for it.
+    const shouldPrewarmLogin = process.env.NODE_ENV !== "production"
+      || params.get("prewarm") === "1" || assetCacheParam === "1";
     const deviceMemoryGiB = normalizeDeviceMemoryGiB(
       (navigator as Navigator & { deviceMemory?: number }).deviceMemory,
     );
@@ -642,7 +646,7 @@ export function AssetCacheRegistrar() {
           void prewarmOrchestrator.markFirstPlayable();
         }
         installedStagePrewarm = (stage) => {
-          if (!shouldPrewarm) return Promise.resolve();
+          if (!shouldPrewarm || (stage === "login" && !shouldPrewarmLogin)) return Promise.resolve();
           return prewarmOrchestrator?.requestStage(stage) ?? Promise.resolve();
         };
         window.__mir2AssetCachePrewarmStage = installedStagePrewarm;
