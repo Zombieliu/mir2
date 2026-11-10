@@ -422,14 +422,14 @@ test("actual shell handler keeps uncovered HUD available with Bag/Quest open and
   class Element { constructor(id) { this.id = id; } setPointerCapture() {} }
   const router = new hud.HudPointerRouter(), held = { current: null }, bag = { current: { held: null } }, actions = [], moves = [];
   let foreground = [], current = status({ navigation: { ...navigation, bagOpen: true } });
-  const scope = { parityUiBlocksGameplay:undefined, onHeroShortcut:undefined, HTMLElement: Element, sharedUiCanvasId: () => "shared", webGl2SharedCanvasPrototype: true, bevyHudUiReady: true,
+  const scope = { parityUiBlocksGameplay:undefined, onHeroShortcut:undefined, HTMLElement: Element, sharedUiCanvasId: () => "shared", webGl2SharedCanvasPrototype: true, bevyHudUiReady: true, bevyBagUiActive: true,
     hudPointerRouterRef: { current: router }, bagPointerRouterRef: bag, heldScenePointerRef: held,
     worldFishingPhysicalRef: { current: null }, worldFishingTerminalRef: { current: null },
     characterPointerCallbacksRef: { current: { getBevyCharacterPointerContext: () => null } },
     spellsPointerCallbacksRef: { current: { getBevySpellsPointerContext: () => null } },
     readBevyHudStatus: () => current, stageFrameRef: { current: { focus() {} } }, sceneInteractionReady: true,
     scenePointFromMouseEvent: event => ({ sceneX: event.clientX, sceneY: event.clientY }),
-    bagPointerCallbacksRef: { current: { getBevyBagPointerContext: () => ({ inputRegions: foreground }) } }, questLocalModalOpen: false, mobileMoreOpen: false,
+    bagPointerCallbacksRef: { current: { getBevyBagPointerContext: () => foreground && { inputRegions: foreground } } }, questLocalModalOpen: false, mobileMoreOpen: false,
     dispatchBevyHudNavigation: action => actions.push(action), onViewportDirectionStop() {},
     stopHeldScenePointer() { moves.push(held.current); }, window: { dispatchEvent() {} }, CustomEvent: class {} };
   const handler = new Function(...Object.keys(scope), `${compiled}\nreturn handleSharedHudPointer;`)(...Object.values(scope));
@@ -440,6 +440,14 @@ test("actual shell handler keeps uncovered HUD available with Bag/Quest open and
   current = status({ navigation: { ...navigation, questOpen: true } }); handler(edge(976, 694), "down");
   assert.deepEqual(actions.at(-1), { type: "quest" }); handler(edge(976, 694), "up");
   foreground = [rect(900, 680, 100, 70)]; assert.equal(handler(edge(930, 694), "down"), false, "actual Bag rectangle receives overlapping point");
+  foreground = null;
+  const actionsBeforeMissingLayout = actions.length;
+  for (const point of [edge(930, 694), edge(400, 400)]) {
+    assert.equal(handler(point, "down"), true, "missing live Bag geometry consumes the new press");
+    assert.equal(router.held, null);
+    assert.equal(held.current, null);
+    assert.equal(actions.length, actionsBeforeMissingLayout);
+  }
   foreground = []; bag.current.held = { origin: "ui" }; assert.equal(handler(edge(930, 694), "down"), false, "existing Bag drag cannot pierce HUD"); bag.current.held = null;
   handler(edge(400, 400), "down"); handler(edge(930, 694), "move"); handler(edge(930, 694), "up");
   assert.equal(moves.length, 1); assert.equal(moves[0].sceneX, 930, "world origin retains the existing world release path");

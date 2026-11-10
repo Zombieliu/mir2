@@ -593,6 +593,7 @@ export function OriginalClientShell({
   onBevyStoragePointer,
   bevyBagOwnerRevision = 0,
   getBevyBagPointerContext,
+  getBevyBagPointerTransitioning,
   onBevyBagPointer,
   onBevyBagTouchFallback,
   inventoryInitialDeleteMode = false,
@@ -1190,8 +1191,8 @@ export function OriginalClientShell({
     callback: typeof onBevyHeroPointer; contextCallback: typeof getBevyHeroPointerContext } | null>(null);
   const heroPointerCallbacksRef = useRef({ getBevyHeroInputBlocked, getBevyHeroPointerContext, onBevyHeroPointer, onBevyHeroKey });
   useLayoutEffect(() => { heroPointerCallbacksRef.current = { getBevyHeroInputBlocked, getBevyHeroPointerContext, onBevyHeroPointer, onBevyHeroKey }; });
-  const bagPointerCallbacksRef = useRef({ getBevyBagPointerContext, onBevyBagPointer });
-  useLayoutEffect(() => { bagPointerCallbacksRef.current = { getBevyBagPointerContext, onBevyBagPointer }; });
+  const bagPointerCallbacksRef = useRef({ getBevyBagPointerContext, getBevyBagPointerTransitioning, onBevyBagPointer });
+  useLayoutEffect(() => { bagPointerCallbacksRef.current = { getBevyBagPointerContext, getBevyBagPointerTransitioning, onBevyBagPointer }; });
   const npcShopPointerCallbacksRef = useRef({ getBevyNpcShopInputBlocked, getBevyNpcShopPointerContext, onBevyNpcShopPointer });
   npcShopPointerCallbacksRef.current = { getBevyNpcShopInputBlocked, getBevyNpcShopPointerContext, onBevyNpcShopPointer };
   const storagePointerCallbacksRef = useRef({ getBevyStoragePointerContext, onBevyStoragePointer });
@@ -4546,6 +4547,10 @@ export function OriginalClientShell({
     if(handleSharedStoragePointer(event,phase))return;
     if(handleSharedSpellsPointer(event,phase))return;
     if(handleSharedHeroPointer(event,phase))return;
+    if (phase === "down" && bagPointerCallbacksRef.current.getBevyBagPointerTransitioning?.()) {
+      event.preventDefault();
+      return;
+    }
     handleSharedBagPointer(event,phase);
   }
 
@@ -4726,7 +4731,9 @@ export function OriginalClientShell({
     const frame = stageFrameRef.current;
     if (!frame || !status || !sceneInteractionReady) { cancelSharedHudPointer(); return false; }
     const point = scenePointFromMouseEvent({ clientX: event.clientX, clientY: event.clientY, currentTarget: frame });
-    const bagForeground = bagPointerCallbacksRef.current.getBevyBagPointerContext?.()?.inputRegions.some(rect =>
+    const bag = bagPointerCallbacksRef.current.getBevyBagPointerContext?.() ?? null;
+    if (phase === "down" && bevyBagUiActive && !bag) { event.preventDefault(); return true; }
+    const bagForeground = bag?.inputRegions.some(rect =>
       point.sceneX >= rect.left && point.sceneY >= rect.top && point.sceneX < rect.left + rect.width && point.sceneY < rect.top + rect.height) ?? false;
     const lease = phase === "down" ? router.down(status, event.pointerId, point.sceneX, point.sceneY,
       bagForeground || questLocalModalOpen || mobileMoreOpen) : prior;
@@ -4924,6 +4931,7 @@ export function OriginalClientShell({
 
   function isSharedBagCompatibilityMouse(event: MouseEvent<HTMLElement>) {
     if (npcShopBlocksWorldInput() || npcShopPointerRouterRef.current.held) return true;
+    if (bagPointerCallbacksRef.current.getBevyBagPointerTransitioning?.()) return true;
     return Boolean(heroPointerLeaseRef.current)||Boolean(storagePointerRouterRef.current.held)||bevyMailComposeReady||bevyMailComposePending||Boolean(mailPointerRouterRef.current.held)||Boolean(characterPointerRouterRef.current.held) || Boolean(hudPointerRouterRef.current.held) || Boolean(bagPointerRouterRef.current.held)
       || (event.target instanceof HTMLElement
         && event.target.id === sharedUiCanvasId(webGl2SharedCanvasPrototype));

@@ -8,6 +8,7 @@ import ts from "typescript";
 const pureFiles = {
   "player-ui-preferences": "../lib/player-ui-preferences.ts",
   "crystal-shortcut-actions": "../lib/crystal-shortcut-actions.ts",
+  "r16-guild-keyboard": "../lib/r16-guild-keyboard.ts",
   "shared-combat-mode-keys": "../lib/shared-combat-mode-keys.ts",
   "world-model/item-identity": "../lib/world-model/item-identity.ts",
 };
@@ -53,12 +54,18 @@ function fixture(changes = {}) {
   const item = { key: "private-item-canary", name: "private-name-canary", uniqueId: 424242, slot: 0, container: "belt", quantity: 1,
     ...(flags.identity ? { authoritativeUniqueId: 424242 } : {}) };
   const world = { beltItems: flags.item ? [item] : [], inventoryItems: [], storageItems: [],
+    activeNpcDialog: flags.npcDialog ? { npcObjectId: 17 } : null,
     knownSkills: flags.learned ? [{ key: "Fencing", hotkey: 0, privateField: "private-skill-canary" }] : [] };
   const scope = {
-    ...pure("player-ui-preferences"), ...pure("crystal-shortcut-actions"), ...pure("shared-combat-mode-keys"), ...pure("world-model/item-identity"),
+    ...pure("player-ui-preferences"), ...pure("crystal-shortcut-actions"), ...pure("r16-guild-keyboard"),
+    ...pure("shared-combat-mode-keys"), ...pure("world-model/item-identity"),
     HTMLElement: Element, HTMLInputElement: Input, HTMLTextAreaElement: Textarea, HTMLSelectElement: Select,
     world, worldRef: { current: world }, window: {}, screen: "game", screenRef: { current: flags.scene ? "game" : "login" },
-    document: { get visibilityState() { return flags.visible ? "visible" : "hidden"; }, hasFocus: () => flags.focus },
+    document: { get visibilityState() { return flags.visible ? "visible" : "hidden"; }, hasFocus: () => flags.focus,
+      querySelector(selector) {
+        assert.equal(selector, ".npc-dialog-panel");
+        return flags.npcDialog && !flags.npcDialogDismissed ? {} : null;
+      } },
     isSpectatorBrowserMode: () => !!flags.spectator, currentSocialReplyOwner: () => flags.ownerMissing ? null : {},
     referenceWindowsBlockGameplay: () => !!flags.referenceWindow, heroUiBlocksGameplay: () => !!flags.heroWindow,
     heroPetOpenRef: { current: false }, cashShopOpenRef: { current: false }, equipmentHostSuspendReasonRef: { current: null },
@@ -142,6 +149,21 @@ test("actual Page diagnostics preserve existing scene owner and window gates and
   const f = fixture({ sceneReady: false }); f.handler(f.event);
   assert.equal(f.scope.keyboardMovementDiagnosticsRef.current.lastShortcut.sceneInteractionReady, false);
   assert.equal(f.calls.filter(x => x === "useItem").length, 1, "diagnostics must not invent a scene readiness gate");
+});
+test("ordinary NPC dialogue claims both physical forms of Belt1", () => {
+  for (const code of ["Digit1", "Numpad1"]) {
+    const f = fixture({ npcDialog: true });
+    f.event.code = code;
+    f.handler(f.event);
+    assert.equal(f.calls.includes("useItem"), false);
+    assert.equal(f.read().shortcut.stage, "blocked");
+    assert.equal(f.read().shortcut.reason, "npcDialog");
+    assert.equal(f.read().shortcut.gates.npcDialog, false);
+  }
+  const dismissed = fixture({ npcDialog: true, npcDialogDismissed: true });
+  dismissed.handler(dismissed.event);
+  assert.equal(dismissed.read().shortcut.reason, "accepted", "visible close releases input before the server snapshot");
+  assert.equal(dismissed.calls.filter(type => type === "useItem").length, 1);
 });
 test("actual public Belt getter is inert finite and excludes identities names arbitrary refusal text or private fields", () => {
   const f = fixture({ learned: true }); f.handler(f.event);

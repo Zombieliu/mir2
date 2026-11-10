@@ -16,6 +16,8 @@ working tree, services, release packages, source snapshots or parity percentages
 
 ## Last recorded decisions and open work
 
+2026-11-10 Web 桌面用药与 Windows R16 统一为 300 毫秒个人物品间隔。普通 NPC 对话关闭后立即交还腰带按键。两条生产渲染路径通过打开普通背包后窗外真怪命中、窗内点击零世界指令和正常注销。后续核对持续追击、其他窗口和跨图块加载。 [用药、对话和背包回执](evidence/r16-combat-input-20261110/README.md)
+
 2026-11-10 普通协议复测零耐久线轮空竿续抛及后续移除。WebGPU 和 WebGL2 实点验证线轮消失后关闭一次、替换不恢复旧开关，同档重登正常。Windows 定向状态和协议已复验。继续实际窗口、Hosted 和发行。 [续抛与同档](evidence/r16-web-fishing-loop-20261110/README.md#线轮耗尽与自动续抛) · [原图拖放与归零提示](evidence/r16-web-fishing-loop-20261110/README.md#鱼具跟手图与归零提示)
 
 2026-11-10 公网 `a23cc382` 默认 Chrome 简中和繁中通过出码、待确认和取消，二维码内容与官方钱包链接一致。比奇候选 `c52ea9abb6` 尚无 Vercel 部署，发布 pin 和专用审核补丁均在 `2ea39c9e83` 通过应用校验。待独立审核、正式切换、默认网络签名进比奇和实体手机。 [本轮公网复测](evidence/r16-web-fishing-loop-20261110/reel-autocast-loss.json) · [发布候选证据](evidence/numeron-web-release-20261108/first-scene-release-candidate-20261110.json)

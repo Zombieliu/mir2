@@ -152,6 +152,24 @@ function fixture(webGl2SharedCanvasPrototype = false,channel="bag",questCaptures
     loseLayout() { context = null; }, get stops() { return stops; }, get fallback() { return fallback; } };
 }
 
+test("a pending shared Bag handoff owns the new press before HUD or world routing", () => {
+  for (const sharedWebGl2 of [false, true]) {
+    const f = fixture(sharedWebGl2);
+    let pending = true;
+    f.scope.bagPointerCallbacksRef.current.getBevyBagPointerTransitioning = () => pending;
+    const down = f.event(400, 450);
+    f.handleSharedUiPointer(down, "down");
+    f.handleSharedUiPointer(f.event(400, 450), "up");
+    assert.equal(down.defaultPrevented, true);
+    assert.deepEqual(f.clicks, []);
+    assert.deepEqual(f.edges, []);
+    pending = false;
+    f.handleSharedUiPointer(f.event(400, 450), "down");
+    f.handleSharedUiPointer(f.event(400, 450), "up");
+    assert.deepEqual(f.clicks, [{ x: 400, y: 450, mode: "walk" }]);
+  }
+});
+
 test("actual Shell UI-down dragged out and released never reaches the world helper", () => {
   const f = fixture();
   f.handleSharedBagPointer(f.event(720, 100), "down");

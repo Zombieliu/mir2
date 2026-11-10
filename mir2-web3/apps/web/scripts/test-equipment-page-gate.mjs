@@ -137,6 +137,7 @@ function harness({ item = bagItem(4), worldState = world(item), cachedSnapshot =
   const equipmentSnapshotRef = { current: { ...session, snapshot: cachedSnapshot } };
   const equipmentHostSuspendReasonRef = { current: null };
   const worldRef = { current: worldState };
+  let itemUseTime = 1000;
   let actionListener = null;
   const window = { dispatchEvent(event) { actionListener?.(event); }, __mir2CommandHistory: [] };
   class CustomEvent { constructor(type, options) { this.type = type; this.detail = options.detail; } }
@@ -144,6 +145,7 @@ function harness({ item = bagItem(4), worldState = world(item), cachedSnapshot =
   const companionRetirementsRef = { current: 0 };
   const scope = {
     equipmentCommandDiagnosticsRef: {current:null},
+    playerItemUseClockRef: { current: null }, performance: { now: () => itemUseTime },
     // Equipment is outside the social pending enum. Exercise the real host's
     // untracked path with no social WASM; it must never block ordinary medicine.
     socialBudgetRef: {current:new (loadPure("social-operation-budget-host").SocialOperationBudgetHost)(() => null)},
@@ -227,6 +229,7 @@ function harness({ item = bagItem(4), worldState = world(item), cachedSnapshot =
   return {
     ...functions, sent, logs, scope,
     onAction(listener) { actionListener = listener; },
+    setItemUseTime(time) { itemUseTime = time; },
   };
 }
 
@@ -240,6 +243,36 @@ test("ordinary medicine Use reaches socket with a complete session even if equip
   const page = harness({ controller: null });
   assert.equal(page.send({ type: "useItem", grid: "inventory", uniqueId: 4 }), true);
   assert.deepEqual(page.sent, [{ type: "useItem", grid: "inventory", uniqueId: 4 }]);
+});
+
+test("personal Belt and Bag use share the 300 ms boundary through the actual Page send gate", () => {
+  const medicine = { ...bagItem(4), key: "4", name: "Medicine", icon: 1, quantity: 2, description: "" };
+  const beltItem = { ...medicine, key: "8", uniqueId: 8, authoritativeUniqueId: 8, container: "belt", slot: 1 };
+  const owner = { ...session, owner: "bevy", runGeneration: 1, ownerRevision: 1, modelRevision: 2, presentationRevision: 3 };
+  const worldState = { ...world(medicine), beltItems: [beltItem], inventoryCapacity: 46, gold: 200 };
+  const page = harness({ item: medicine, worldState, renderOwner: owner });
+  const beltUse = { type: "useItem", grid: "belt", uniqueId: 8 };
+  const bagIntent = { ...owner, intentSequence: 1, type: "useItem", source: { container: 0, slot: 4, uniqueId: 4 } };
+  assert.equal(page.send(beltUse), true);
+  page.setItemUseTime(1299);
+  assert.equal(page.dispatchBevyBagIntent(bagIntent).accepted, false);
+  page.setItemUseTime(1300);
+  assert.equal(page.dispatchBevyBagIntent({ ...bagIntent, intentSequence: 2 }).accepted, true);
+  assert.equal(page.send(beltUse), false);
+  assert.deepEqual(page.sent, [beltUse, { type: "useItem", key: "4", slot: 4, grid: "inventory", uniqueId: 4 }]);
+});
+
+test("a definitely unsent item use leaves the shared clock available for retry", () => {
+  const page = harness();
+  const use = { type: "useItem", grid: "inventory", uniqueId: 4 };
+  const socket = page.scope.socketRef.current;
+  page.onAction(() => { socket.readyState = 3; });
+  assert.equal(page.send(use), false);
+  assert.equal(page.sent.length, 0);
+  socket.readyState = 1;
+  page.onAction(null);
+  assert.equal(page.send(use), true);
+  assert.deepEqual(page.sent, [use]);
 });
 
 test("unknown bag metadata refuses Use, and Equip refuses a missing ledger", () => {

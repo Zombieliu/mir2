@@ -113,6 +113,7 @@ function fixture({ native = true, oldMouseHold = false, marker = "drop", sceneRe
     bagPointerCallbacksRef: { current: { getBevyBagPointerContext: () => null } },
     heldQuestControlPointersRef: { current: new Set() }, bagBeltArmedSharedRef: { current: null }, bagBeltRejectedTerminalRef: { current: null },
     readBevyHudStatus: () => hud.readHudStatus({ getMir2HudUiStatus: () => JSON.stringify(status) }, status.generation),
+    containsHudRect: hud.containsHudRect,
     readBevyQuestWorldControlBlockers: () => null, readBevyQuestWorldControls: () => null,
     heldKeyboardMoveKeysRef: { current: new Set() }, heldKeyboardRunModeRef: { current: false },
     worldFishingPhysicalRef: { current: null }, worldFishingPointersRef: { current: new Map() },

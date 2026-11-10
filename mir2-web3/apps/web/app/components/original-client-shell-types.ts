@@ -267,6 +267,7 @@ export type OriginalClientShellProps = BagBeltCallbacks & WorldFishingCallbacks 
   onBevyStoragePointer?: (edge: import("../../lib/bevy-storage-ui").StoragePointerEdge) => boolean;
   bevyBagOwnerRevision?: number;
   getBevyBagPointerContext?: () => BagPointerContext | null;
+  getBevyBagPointerTransitioning?: () => boolean;
   onBevyBagPointer?: (edge: BagPointerEdge) => boolean;
   onBevyBagTouchFallback?: () => void;
   inventoryInitialDeleteMode?: boolean;

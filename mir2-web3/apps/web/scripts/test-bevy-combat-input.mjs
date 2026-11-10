@@ -663,7 +663,13 @@ test('actual Page HP overlay callback and combat producer block immediately befo
  const stage={display:'block',opacity:'1',parentElement:null};
  const composite={get hidden(){return !worldVisible;},parentElement:stage};
  const mapImage={get complete(){return domLoaded;},get naturalWidth(){return domLoaded?48:0;},get naturalHeight(){return domLoaded?32:0;},parentElement:composite,getBoundingClientRect:()=>({width:48,height:32})};
+ let inventoryPromptOpen = false;
  const deps={worldRef:{current},combatRawRef:{current:{snapshot:{entities:[],mapFileName:'D001'},owner:f.input.owner}},readCurrentCombatBaseline:()=>({snapshot:f.raw,owner:f.input.owner}),currentSpellsOwner:()=>f.input.owner,currentAuthoritativeSelf:()=>current.entities[0],combatMastersRef:{current:new Map()},document:{activeElement:null,visibilityState:'visible',hasFocus:()=>true,querySelectorAll:selector=>{selectors.push(selector);if(selector.includes('img.scene-backdrop-sprite'))return domPresent?[mapImage]:[];return [{hidden:selector.includes('quest-ui-canvas')||(selector==='.game-world-composite'?!worldVisible:!canvasVisible),parentElement:stage,getBoundingClientRect:()=>({width:10,height:10})}];}},HTMLElement:class{},getComputedStyle:surface=>({display:surface.display??'block',visibility:surface.hidden?'hidden':'visible',opacity:surface.opacity??'1'}),webGl2SharedCanvasPrototype:false,bevyHpLocalOverlayOpenRef:overlay,combatIngressRef:{current:{hasUiHeld:()=>f.host.hasUiHeld()}},npcShopService:null,npcRepairService:null,spellsIngressRef:{current:null},combatRouteCacheRef:{current:null},movementBlockedStepsRef:{current:[]},movementPlanRef:{current:null},nextMoveSendAtRef:{current:0},screenRef:{current:'game'},initialSceneAssetsReadyRef:{current:true},equipmentHostSuspendReasonRef:{current:null},combatPointerRef:{current:{hovered:null,cursor:null,lock:false}},crystalKeyBindingsRef:{current:defaultCrystalKeyBindings()},isMovementBusy:()=>false,crystalMovementWalkRoute:()=>{throw Error('unexpected route');}};
+ deps.clientProfile = { input: "keyboardMouse" };
+ deps.document.querySelector = selector => {
+   assert.equal(selector, ".inventory-window .inventory-delete-panel");
+   return inventoryPromptOpen ? {} : null;
+ };
  deps.combatForceAttackRef={current:false};
  for(const key of ['bevyQuestReactModalOpen','showQuestLog','showCharacter','showHeroPet','showGuild','showGroup','showFriends','showBonds','showRanking','showMarket','showConquest','showTrade','showBuffs','showMail','showWorldMap','showHelp','showHotkeys','showChatSettings'])deps[key]=false;
  Object.assign(deps,{heroManagementPage:null,cashShopOpenRef:{current:false},heroManagementOpenRef:{current:false},skillBarPointerHeldRef:{current:false},
@@ -679,7 +685,16 @@ test('actual Page HP overlay callback and combat producer block immediately befo
   const readFacts=extracted(read,deps);assert.equal(readFacts().facts.enabled,true);
   assert.equal(readFacts().facts.spellLockKey,nativeKeyboardDefaults.find(binding=>binding.function==='TargetSpellLockOn').key);
   assert.deepEqual(readFacts().facts.bindings,nativeKeyboardDefaults.filter(binding=>/^Bar[12]Skill[1-8]$/.test(binding.function)));
- for(const key of ['heroManagementOpenRef','skillBarPointerHeldRef','questReactModalOpenRef','bagOpenRef','rankingInspectOpenRef']){deps[key].current=true;assert.equal(readFacts().facts.enabled,false,'actual synchronous live fence '+key);deps[key].current=false;assert.equal(readFacts().facts.enabled,true);}
+ for(const key of ['heroManagementOpenRef','skillBarPointerHeldRef','questReactModalOpenRef','rankingInspectOpenRef']){deps[key].current=true;assert.equal(readFacts().facts.enabled,false,'actual synchronous live fence '+key);deps[key].current=false;assert.equal(readFacts().facts.enabled,true);}
+ deps.bagOpenRef.current = true;
+ assert.equal(readFacts().facts.enabled, true, "plain desktop bag leaves world combat available");
+ inventoryPromptOpen = true;
+ assert.equal(readFacts().facts.enabled, false, "inventory prompt keeps the combat fence even without text focus");
+ inventoryPromptOpen = false;
+ deps.clientProfile.input = "touch";
+ assert.equal(readFacts().facts.enabled, false, "touch bag keeps its existing input policy");
+ deps.clientProfile.input = "keyboardMouse";
+ deps.bagOpenRef.current = false;
  let heroSharedOwner=true,heroWorldBlocked=true;
  deps.heroSharedUiIngressRef.current={isSharedOwner:()=>heroSharedOwner,blocksWorld:()=>heroWorldBlocked};
  assert.equal(readFacts().facts.enabled,false,'actual shared Hero world fence blocks combat');
@@ -994,7 +1009,7 @@ function sharedCanvasWorldTargetFixture(){
  const drop=new DomElement('ground-drop-marker',{objectId:'300001'},frame),calls=[],hitReads=[];
   const scope={screen:'game',scenePointerDiagnosticsRef:{current:null},heroPointerLeaseRef:{current:null},storagePointerRouterRef:{current:{held:null}},stageFrameRef:{current:frame},stagePresentation:{virtualWidth:1024,virtualHeight:768},webGl2SharedCanvasPrototype:false,sharedUiCanvasId:()=>canvas.id,
   document:{elementsFromPoint:(x,y)=>{hitReads.push([x,y]);return scope.layers;}},layers:[canvas,label,name,body,frame],HTMLElement:DomElement,
-  hudPointerRouterRef:{current:new (load('bevy-hud-ui').HudPointerRouter)()},bevyHudUiReady:true,sceneInteractionReady:true,bagPointerRouterRef:{current:{held:null}},
+  hudPointerRouterRef:{current:new (load('bevy-hud-ui').HudPointerRouter)()},bevyHudUiReady:true,bevyBagUiActive:false,sceneInteractionReady:true,bagPointerRouterRef:{current:{held:null}},
   characterPointerCallbacksRef:{current:{}},spellsPointerCallbacksRef:{current:{}},bagPointerCallbacksRef:{current:{}},questLocalModalOpen:false,mobileMoreOpen:false,bevyQuestUiCapturesPointer:false,
   status:{ready:true,generation:1,revision:1,characterStatsReady:false,modal:false,foregroundRects:[],plan:{main:{left:0,top:672,width:1024,height:96},buttons:[]}},
   readBevyHudStatus:()=>scope.status,heldScenePointerRef:{current:null},combatUiHoldRef:{current:new Map()},onCombatUiHeld:undefined,

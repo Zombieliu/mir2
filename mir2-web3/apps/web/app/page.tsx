@@ -2323,7 +2323,7 @@ export default function HomePage() {
   const equipmentSnapshotRef = useRef<{
     connectionGeneration: number; sessionGeneration: number; snapshot: EquipmentGatewaySnapshot;
   } | null>(null);
-  type BeltInputGate = "scene" | "playerMode" | "owner" | "referenceWindows" | "heroUi" | "heroPet" | "cashShop" | "equipment" | "focus" | "visible";
+  type BeltInputGate = "scene" | "playerMode" | "owner" | "referenceWindows" | "heroUi" | "heroPet" | "cashShop" | "equipment" | "focus" | "visible" | "npcDialog";
   type BeltInputDiagnostic = {
     stage: "received" | "repeat" | "blocked" | "item" | "use" | "hero";
     reason: BeltInputGate | "received" | "repeat" | "itemMissing" | "heroMissing" | "heroActionMissing" | "accepted" | "useRejected";
@@ -2331,6 +2331,7 @@ export default function HomePage() {
     itemPresent: boolean | null; identityValid: boolean | null; useAccepted: boolean | null;
   };
   const beltShortcutDiagnosticsRef = useRef<BeltInputDiagnostic | null>(null);
+  const playerItemUseClockRef = useRef<{ sessionGeneration: number; readyAtMs: number } | null>(null);
   const equipmentCommandDiagnosticsRef = useRef<{ stage: "rejected"; reason: string } | null>(null);
   const npcGoldBuyInventoryRef = useRef(new NpcGoldBuyInventoryReadiness());
   const storageRequestSequenceRef = useRef(1);
@@ -6490,19 +6491,27 @@ export default function HomePage() {
         // Crystal mount Use addresses equipment slot 13 on the wire. The
         // separate instance ID above only proves this UI selection is current.
         if (item.slot !== "mount" || command.slot !== 13) return rejectEquipmentCommand("invalidIdentity");
-        return sendRaw({ type: "useItem", grid: "equipment", slot: 13 }, options);
-      }
-      const classification = classifyEquipmentUse(item, worldRef.current.equipmentItems);
-      if (grid === "inventory" && classification.kind === "equipment") {
-        command = { type: "equipItem", uniqueId, grid, to: classification.to };
+        command = { type: "useItem", grid: "equipment", slot: 13 };
       } else {
-        // A metadata-free bag Use could secretly equip on the server and skip
-        // the ledger. Do not grant a first-request exception for unknown gear.
-        if (grid === "inventory" && classification.kind === "unknown") return rejectEquipmentCommand("invalidMetadata");
-        // Unknown type metadata cannot prove that this Use avoids an occupied
-        // equipment destination. Known consumables keep their ordinary Use.
-        if (classification.kind === "unknown" && status?.pending) return rejectEquipmentCommand("equipmentSlotBusy");
-        return sendRaw(command, options);
+        const classification = classifyEquipmentUse(item, worldRef.current.equipmentItems);
+        if (grid === "inventory" && classification.kind === "equipment") {
+          command = { type: "equipItem", uniqueId, grid, to: classification.to };
+        } else if (classification.kind === "unknown") {
+          // A metadata-free bag Use could secretly equip on the server and skip the ledger.
+          if (grid === "inventory") return rejectEquipmentCommand("invalidMetadata");
+          if (status?.pending) return rejectEquipmentCommand("equipmentSlotBusy");
+        }
+      }
+      if (command.type === "useItem") {
+        // Windows R16 uses one 300 ms clock across personal Bag and Belt input.
+        const now = performance.now();
+        const previous = playerItemUseClockRef.current;
+        if (previous?.sessionGeneration === session.sessionGeneration && now < previous.readyAtMs) return false;
+        const admitted = { sessionGeneration: session.sessionGeneration, readyAtMs: now + 300 };
+        playerItemUseClockRef.current = admitted;
+        const sent = sendRaw(command, options);
+        if (!sent && playerItemUseClockRef.current === admitted) playerItemUseClockRef.current = previous;
+        return sent;
       }
     }
     if (command.type === "equipItem" || command.type === "removeItem") {
@@ -11176,9 +11185,9 @@ export default function HomePage() {
     catch (error) {guildBuffOperationsRef.current.outcomeUnknown(proof); console.error("[mir2] Guild buff operation outcome is unknown",error);}
     renderParityServices(n => n + 1);
   }
-  function otherPlayerUiBlocksInput() {
+  function otherPlayerUiBlocksInput(blockOpenBag = true) {
     return referenceWindowsBlockGameplay() || bevyHpLocalOverlayOpenRef.current || questReactModalOpenRef.current
-      || bagOpenRef.current || characterOpenRef.current || questLogOpenRef.current || heroPetOpenRef.current || cashShopOpenRef.current
+      || (blockOpenBag && bagOpenRef.current) || characterOpenRef.current || questLogOpenRef.current || heroPetOpenRef.current || cashShopOpenRef.current
       || socialItemWindowsRef.current.guild || socialItemWindowsRef.current.trade || socialReplyWindowsRef.current.group
       || socialReplyWindowsRef.current.bonds || socialRosterWindowsRef.current.friends || rankingWindowRef.current
       || marketOpenRef.current || conquestOpenRef.current || buffsOpenRef.current || mailUiOpenRef.current || worldMapOpenRef.current
@@ -11408,7 +11417,7 @@ export default function HomePage() {
     const beltSlot = crystalBeltShortcutSlot(functionId);
     const diagnostic: BeltInputDiagnostic | null = beltSlot === null ? null : {
       stage: "received", reason: "received", slot: beltSlot, repeat,
-      gates: { scene: null, playerMode: null, owner: null, referenceWindows: null, heroUi: null, heroPet: null, cashShop: null, equipment: null, focus: null, visible: null },
+      gates: { scene: null, playerMode: null, owner: null, referenceWindows: null, heroUi: null, heroPet: null, cashShop: null, equipment: null, focus: null, visible: null, npcDialog: null },
       itemPresent: null, identityValid: null, useAccepted: null,
     };
     if (diagnostic) { beltShortcutDiagnosticsRef.current = diagnostic; equipmentCommandDiagnosticsRef.current = null; }
@@ -11427,6 +11436,9 @@ export default function HomePage() {
       || !gate("equipment", equipmentHostSuspendReasonRef.current === null) || !gate("focus", document.hasFocus())
       || !gate("visible", document.visibilityState === "visible")) return false;
     if (beltSlot !== null) {
+      // The shared dialog captures keys in Shell. The React dialog releases
+      // them on local close, before the server's @Exit snapshot arrives.
+      if (!gate("npcDialog", document.querySelector(".npc-dialog-panel") === null)) return false;
       if (beltSlot >= 6) {
         const model = currentHeroModel(), dto = model ? captureHeroAction(model, { kind: "use", slot: beltSlot - 6 }) : null;
         if (diagnostic) { diagnostic.stage = "hero"; diagnostic.reason = model ? "heroActionMissing" : "heroMissing"; diagnostic.itemPresent = dto !== null; }
@@ -11461,7 +11473,7 @@ export default function HomePage() {
       shortcut: value && { stage: value.stage, reason: value.reason, slot: value.slot, repeat: value.repeat,
         gates: { scene: value.gates.scene, playerMode: value.gates.playerMode, owner: value.gates.owner, referenceWindows: value.gates.referenceWindows,
           heroUi: value.gates.heroUi, heroPet: value.gates.heroPet, cashShop: value.gates.cashShop, equipment: value.gates.equipment,
-          focus: value.gates.focus, visible: value.gates.visible },
+          focus: value.gates.focus, visible: value.gates.visible, npcDialog: value.gates.npcDialog },
         itemPresent: value.itemPresent, identityValid: value.identityValid, useAccepted: value.useAccepted },
       equipment: equipment && { stage: equipment.stage, reason: equipment.reason },
     };
@@ -21077,6 +21089,18 @@ export default function HomePage() {
     },
     onIntent: dispatchBevyBagIntent,
   });
+  function sharedBagPointerTransitioning() {
+    if (!bagOpenRef.current || !bevyBagUiRequested) return false;
+    const owner = equipmentBagOwnerRef.current;
+    if (owner.owner === "transition") return true;
+    if (owner.owner === "bevy") return !bevyBagUi.active;
+    // The preparing frame can already paint behind the React bag. Wait for
+    // a live input layout before letting that canvas fall through to the HUD.
+    const painted = bevyBagUi.readStatus();
+    return !!painted?.ready && painted.runGeneration === owner.runGeneration
+      && painted.connectionGeneration === owner.connectionGeneration && painted.sessionGeneration === owner.sessionGeneration
+      && painted.inputRegions.length > 0;
+  }
   const bevyCharacterUi = useBevyCharacterUi({
     requested: bevyQuestUiRequested, runtimeGeneration: bevyRuntimeGeneration, runtimeRef,
     read: metadata => {
@@ -21185,7 +21209,11 @@ export default function HomePage() {
       const actor=(e:WorldEntity):CombatActor=>{const source=sources.get(e.objectId),master=combatMastersRef.current.get(e.objectId);return {objectId:e.objectId,kind:e.kind,x:e.x,y:e.y,direction:e.direction??null,dead:e.dead===true,ai:e.ai??0,masterObjectId:master&&master.owner.connectionGeneration===owner.connectionGeneration&&master.owner.sessionGeneration===owner.sessionGeneration&&master.owner.ownerRevision===owner.ownerRevision&&master.owner.playerObjectId===owner.playerObjectId?master.master:Number.isInteger(source?.masterObjectId)?Number(source!.masterObjectId):0};};
       const source=sources.get(self.objectId),flag=(key:string)=>typeof source?.[key]==="boolean"?source[key] as boolean:null;
       const active=document.activeElement,editing=active instanceof HTMLElement&&(active.isContentEditable||/^(INPUT|TEXTAREA|SELECT)$/.test(active.tagName));
-      const modal=heroUiBlocksGameplay()||skillBarPointerHeldRef.current||otherPlayerUiBlocksInput()||combatIngressRef.current?.hasUiHeld()===true||bevyHpLocalOverlayOpenRef.current||bevyQuestReactModalOpen||showQuestLog||showCharacter||cashShopOpenRef.current||showHeroPet||showGuild||showGroup||showFriends||showBonds||showRanking||showMarket||showConquest||showTrade||showBuffs||showMail||showWorldMap||referenceWindowsBlockGameplay()||showChatSettings||Boolean(current.activeNpcDialog||npcShopService||npcRepairService)||spellsIngressRef.current?.pointerContext()?.modal===true;
+      // An ordinary desktop bag owns its painted pointer regions. Prompts
+      // still suspend combat, even when no text field currently has focus.
+      const blockOpenBag = clientProfile.input !== "keyboardMouse"
+        || (bagOpenRef.current && document.querySelector(".inventory-window .inventory-delete-panel") !== null);
+      const modal=heroUiBlocksGameplay()||skillBarPointerHeldRef.current||otherPlayerUiBlocksInput(blockOpenBag)||combatIngressRef.current?.hasUiHeld()===true||bevyHpLocalOverlayOpenRef.current||bevyQuestReactModalOpen||showQuestLog||showCharacter||cashShopOpenRef.current||showHeroPet||showGuild||showGroup||showFriends||showBonds||showRanking||showMarket||showConquest||showTrade||showBuffs||showMail||showWorldMap||referenceWindowsBlockGameplay()||showChatSettings||Boolean(current.activeNpcDialog||npcShopService||npcRepairService)||spellsIngressRef.current?.pointerContext()?.modal===true;
       // Shared UI and the DOM map fallback can hide the main canvas while the world remains visible.
       const surfaceVisible=(surface:HTMLElement)=>{
         const rect=surface.getBoundingClientRect();
@@ -21530,6 +21558,7 @@ export default function HomePage() {
       onBevyStoragePointer={bevyStorageUi.pointer}
       bevyBagOwnerRevision={bevyBagUi.ownerRevision}
       getBevyBagPointerContext={bevyBagUi.pointerContext}
+      getBevyBagPointerTransitioning={sharedBagPointerTransitioning}
       onBevyBagPointer={bevyBagUi.pointer}
       onBevyBagTouchFallback={() => requestBagCompatibility("fullInventory")}
       inventoryInitialDeleteMode={bagCompatibilityMode === "delete"}

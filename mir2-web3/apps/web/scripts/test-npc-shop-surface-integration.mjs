@@ -277,7 +277,7 @@ function pageFixture() {
     preauthCommandKind:npcAuthSelectors.preauthCommandKind,isSensitiveGatewayCommand:npcAuthSelectors.isSensitiveGatewayCommand,
     // These inactive repair, wallet, fishing and Bag notifications are external
     // ports. The actual NPC readiness, owner, claim and socket gates remain below.
-    retireWorldFishingGesture:()=>{},closeNpcRepairService:()=>{},
+    retireWorldFishingGesture:()=>{},fishingAttachmentRef:{current:null},closeNpcRepairService:()=>{},
     invalidateBagBeltInventory:()=>{},observeBagBeltInventorySnapshot:()=>{},observeNpcPearlWallet:()=>{},
     readNpcRepairOwner:()=>null,captureNpcRepairDialog:()=>{},npcRepairDialogBindingRef:{current:null},
     npcRepairAuthorityRef:{current:{prepareSnapshot:()=>{},invalidateInventory:()=>{},observeSnapshot:()=>{}}},
