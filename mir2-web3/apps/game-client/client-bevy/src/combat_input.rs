@@ -1121,8 +1121,9 @@ impl CombatController {
                     .filter(|n| candidates.contains(&(n.x, n.y)))
                     .min_by_key(|n| n.cost);
                 let Some(next) = next else {
-                    self.chase = None;
-                    return vec![CombatOutput::Clear];
+                    // R16 keeps a live target selected while occupancy blocks
+                    // its neighbours. A later snapshot can reopen the route.
+                    return vec![];
                 };
                 self.last_chase_point = Some(point);
                 self.next_approach_at = now.saturating_add(160);

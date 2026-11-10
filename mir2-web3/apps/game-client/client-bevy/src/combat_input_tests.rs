@@ -665,7 +665,7 @@ fn controller_bad_current_snapshot_stale_owner_and_monotonic_clock() {
     assert!(c.snapshot.is_none());
 }
 #[test]
-fn controller_packet_cooldown_key16_toggle_reorder_and_unreachable_cancel() {
+fn controller_packet_cooldown_key16_toggle_reorder() {
     let mut s = controller_snapshot();
     s.learned.push(serde_json::json!({"id":90,"spell":"HalfMoon","hotkey":16,"castKind":"toggle","canUse":true}));
     let mut c = CombatController::default();
@@ -749,22 +749,53 @@ fn controller_packet_cooldown_key16_toggle_reorder_and_unreachable_cancel() {
         .command,
         CombatCommand::Magic { .. }
     ));
+}
+
+#[test]
+fn controller_repaths_when_a_live_target_neighbour_becomes_reachable() {
     let mut s = controller_snapshot();
     s.actors[1].x = 15;
     s.click_targets[0].x = 15;
     s.neighbours.clear();
     let mut c = CombatController::default();
     assert!(c.ingest(s.clone()));
-    assert!(matches!(
-        c.edge(
+    assert!(c
+        .edge(
             controller_edge(&s, 1, CombatAction::Select { object_id: 4 }),
             10
         )
         .1
-        .as_slice(),
-        [CombatOutput::Clear]
-    ));
+        .is_empty());
     assert!(c.tick(2000, 0).is_empty());
+    s.revision += 1;
+    s.model_revision += 1;
+    s.now_ms = 2001;
+    s.actors[1].x = 16;
+    s.click_targets[0].x = 16;
+    s.neighbours.push(ReachableNeighbour {
+        x: 15,
+        y: 10,
+        cost: 5,
+    });
+    assert!(c.ingest(s.clone()));
+    assert!(matches!(
+        c.tick(2001, 0).as_slice(),
+        [CombatOutput::Approach {
+            target_id: 4,
+            x: 15,
+            y: 10,
+            ..
+        }]
+    ));
+
+    s.revision += 1;
+    s.model_revision += 1;
+    s.now_ms = 2002;
+    s.actors[1].dead = true;
+    s.click_targets[0].dead = Some(true);
+    assert!(c.ingest(s));
+    assert!(matches!(c.tick(2002, 0).as_slice(), [CombatOutput::Clear]));
+    assert!(c.tick(3000, 0).is_empty());
 }
 #[test]
 fn controller_persistent_warrior_stances_toggle_at_zero_mp_but_prepared_attacks_do_not() {

@@ -869,14 +869,7 @@ function OriginalClientSceneVisualLayersInner({
           const hitWidth = hitBounds.right - hitBounds.left;
           const hitHeight = hitBounds.bottom - hitBounds.top;
           const handleEntityPointerActivate = (event: MouseEvent<HTMLElement>) => {
-            if (event.button !== 0 && event.button !== 2) {
-              return;
-            }
-            event.preventDefault();
-            event.stopPropagation();
-            onActivateEntity(entity.objectId);
-          };
-          const handleEntityContextActivate = (event: MouseEvent<HTMLElement>) => {
+            if (event.button !== 0) return;
             event.preventDefault();
             event.stopPropagation();
             onActivateEntity(entity.objectId);
@@ -894,7 +887,6 @@ function OriginalClientSceneVisualLayersInner({
               data-ui-interactive={isInteractiveEntity ? "true" : "false"}
               data-object-id={entity.objectId}
               onMouseDown={isInteractiveEntity ? handleEntityPointerActivate : undefined}
-              onContextMenu={isInteractiveEntity ? handleEntityContextActivate : undefined}
             >
               {isInteractiveEntity ? (
                 <button
@@ -908,7 +900,6 @@ function OriginalClientSceneVisualLayersInner({
                   }}
                   aria-label={label}
                   onMouseDown={handleEntityPointerActivate}
-                  onContextMenu={handleEntityContextActivate}
                   onClick={(event) => {
                     event.preventDefault();
                     event.stopPropagation();
@@ -1349,16 +1340,11 @@ function OriginalClientSceneVisualLayersInner({
                       onError={handleSceneAssetImageError}
                       onLoad={handleSceneAssetImageLoad}
                       onMouseDown={(event) => {
-                        if (event.button === 0 || event.button === 2) {
+                        if (event.button === 0) {
                           event.preventDefault();
                           event.stopPropagation();
                           onActivateEntity(entity.objectId);
                         }
-                      }}
-                      onContextMenu={(event) => {
-                        event.preventDefault();
-                        event.stopPropagation();
-                        onActivateEntity(entity.objectId);
                       }}
                       style={{
                         left: `${VIEWPORT_ENTITY_LEFT_ORIGIN + entity.dx * VIEWPORT_CELL_WIDTH + cameraOffset.x + entityMotionOffset.x + entityQuestIconLeftOffset(entity, sprite)}px`,
@@ -1409,7 +1395,7 @@ function OriginalClientSceneVisualLayersInner({
                     onMouseDown={
                       isInteractiveEntity
                         ? (event) => {
-                            if (event.button === 0 || event.button === 2) {
+                            if (event.button === 0) {
                               event.preventDefault();
                               event.stopPropagation();
                             }
@@ -1417,15 +1403,6 @@ function OriginalClientSceneVisualLayersInner({
                         : undefined
                     }
                     onClick={isInteractiveEntity ? () => onActivateEntity(entity.objectId) : undefined}
-                    onContextMenu={
-                      isInteractiveEntity
-                        ? (event) => {
-                            event.preventDefault();
-                            event.stopPropagation();
-                            onActivateEntity(entity.objectId);
-                          }
-                        : undefined
-                    }
                   >
                     {entityGdiText ? (
                       <CrystalGdiTextImage

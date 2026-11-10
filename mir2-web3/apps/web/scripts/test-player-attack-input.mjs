@@ -5,7 +5,7 @@ import ts from 'typescript';
 
 const source=readFileSync(new URL('../app/page.tsx',import.meta.url),'utf8');
 const ast=ts.createSourceFile('page.tsx',source,ts.ScriptTarget.Latest,true,ts.ScriptKind.TSX);
-const functions=new Map();let shiftEffect,combatOptions,modeHostInitializer,gatewayGuard,attackModeCase;
+const functions=new Map();let shiftEffect,combatOptions,modeHostInitializer,gatewayGuard,attackModeCase,secondaryInput;
 const attributes=new Map();
 function visit(node){
  if(ts.isFunctionDeclaration(node)&&node.name)functions.set(node.name.text,node);
@@ -13,12 +13,13 @@ function visit(node){
  if(ts.isCallExpression(node)&&node.expression.getText(ast)==='useBevyCombatInput')combatOptions=node.arguments[0];
  if(ts.isNewExpression(node)&&node.expression.getText(ast)==='SharedCombatModeKeys')modeHostInitializer=node;
  if(ts.isCaseClause(node)&&node.expression.getText(ast)==='"ChangeAMode"')attackModeCase=node;
+ if(ts.isBinaryExpression(node)&&node.left.getText(ast)==='onViewportTileSecondaryActionRef.current')secondaryInput=node.right;
  if(ts.isJsxAttribute(node)&&['combatModes','onCombatKey','onCombatCancel'].includes(node.name.getText(ast)))attributes.set(node.name.getText(ast),node.initializer.expression);
  ts.forEachChild(node,visit);
 }
 visit(ast);
 gatewayGuard=functions.get('handleGatewayEvent').body.statements[0];
-assert.ok(shiftEffect&&combatOptions&&modeHostInitializer&&attackModeCase);
+assert.ok(shiftEffect&&combatOptions&&modeHostInitializer&&attackModeCase&&secondaryInput);
 const option=name=>combatOptions.properties.find(property=>property.name?.getText(ast)===name).initializer.getText(ast);
 const nativeKeyboard=JSON.parse(readFileSync(new URL('../../game-client/client-bevy/src/crystal_ui/keyboard_defaults.json',import.meta.url),'utf8'));
 const cache=new Map();
@@ -33,20 +34,23 @@ function load(name){
 const {supportsForcedPlayerAttack}=load('bevy-combat-input');
 const {SharedCombatModeKeys,nextCombatModePhysicalGeneration}=load('shared-combat-mode-keys');
 const {defaultCrystalKeyBindings,displayCrystalKeyBinding}=load('player-ui-preferences');
-const names=['setCombatForceAttack','cancelCombatInput','cancelLockedMonsterAttack','lockMonsterAttack','activateEntity',
+const names=['setCombatForceAttack','cancelCombatInput','cancelCombatApproach','cancelLockedMonsterAttack','lockMonsterAttack','activateEntity',
+ 'moveToTile','trySendQueuedCrystalMove','handleViewportTileStepAction',
  'selectAttackMode','readCombatModeControls','currentCombatModeOwner','sameCombatModeOwner','readCombatModeSource',
  'nextCombatModeRevision','captureCombatModeSnapshot','captureCombatModeReceipt'];
 const code=ts.transpileModule(names.map(name=>functions.get(name).getText(ast)).join('\n')+`
  const mountShift = ${shiftEffect.getText(ast)};
  const readFacts = ${option('read')};
+ const approach = ${option('onApproach')};
  const clearApproach = ${option('onClear')};
+ const secondary = ${secondaryInput.getText(ast)};
  const combatKey = ${attributes.get('onCombatKey').getText(ast)};
  const combatCancel = ${attributes.get('onCombatCancel').getText(ast)};
  const controls = () => (${attributes.get('combatModes').getText(ast)});
  const makeModeHost = () => (${modeHostInitializer.getText(ast)});
  function receiveMode(payload) { switch ("ChangeAMode") { ${attackModeCase.getText(ast)} } }
  function receiveGateway(event,connectionGeneration,source) { ${gatewayGuard.getText(ast)} if(event.type==="packet"&&event.packet==="ChangeAMode")receiveMode(event.payload); }
- return {${names.join(',')},mountShift,readFacts,clearApproach,combatKey,combatCancel,controls,makeModeHost,receiveGateway};`,
+ return {${names.join(',')},mountShift,readFacts,approach,clearApproach,secondary,combatKey,combatCancel,controls,makeModeHost,receiveGateway};`,
  {compilerOptions:{target:ts.ScriptTarget.ES2022}}).outputText;
 const create=new Function('scope','with(scope){'+code+'}');
 
@@ -92,6 +96,13 @@ function fixture(){
   clientProfile:{input:'keyboardMouse'},bagOpenRef:ref(false),
   cashShopOpenRef:ref(false),referenceWindowsBlockGameplay:()=>false,spellsIngressRef:ref(null),webGl2SharedCanvasPrototype:false,
   movementBlockedStepsRef:ref([]),crystalMovementWalkRoute:(_self,point)=>[point],screenRef:ref('game'),initialSceneAssetsReadyRef:ref(true),
+  recentMovementBlockedSteps:steps=>steps,canSendMovement:()=>true,readSelfMovementControllerState:()=>({}),
+  sceneInputDeferredForInitialAssets:()=>false,observeQuestWorldActions:()=>{},mapImageRouteRef:ref(null),questRouteRunRef:ref(null),
+  cancelQuestRoute:()=>{scope.questRouteRunRef.current=null;},cancelMapImageRoute:()=>{scope.mapImageRouteRef.current=null;},
+  lastQueuedMovementAttemptRef:ref(null),crystalRunPrimedUntilRef:ref(0),CRYSTAL_RUN_PRIME_MS:300,
+  queueCrystalMoveIntent:intent=>{scope.queuedMoveIntentRef.current=intent;},
+  playerUiPreferencesRef:ref({newMove:false}),crystalMovementActionToward:(_self,point)=>({point}),
+  crystalSelfMovementProfile:()=>({distance:2}),transferKeyForTile:()=>null,
   equipmentHostSuspendReasonRef:ref(null),isMovementBusy:()=>false,nextMoveSendAtRef:ref(0),crystalKeyBindingsRef:ref(defaultCrystalKeyBindings()),
   displayCrystalKeyBinding,combatModePhysicalRef:ref(null),combatModeRawRef:ref(null),combatModeRevisionRef:ref(0),combatModeHostRef:ref(null),
   identity:{connectionGeneration:1,sessionGeneration:2,sceneRevision:1,playerObjectId:3,mapFileName:'D001'},
@@ -126,7 +137,7 @@ test('actual Page selects a player with guidance and requires held Shift plus v2
 test('actual Shift lifecycle stops only player pursuit on release and retires on blur, pagehide, hidden and cleanup',()=>{
  const f=fixture(),cleanup=f.api.mountShift();assert.equal(f.window.listeners.filter(listener=>listener.type==='keyup')[0].capture,true);
  f.window.emit('keydown',{key:'Shift',code:'ShiftLeft',shiftKey:true});f.api.activateEntity('4');
- const own={kind:'target'};f.scope.combatApproachIntentRef.current=own;f.scope.queuedMoveIntentRef.current=own;f.scope.movementPlanRef.current={targetX:11};
+ const own={kind:'target'};f.scope.combatApproachIntentRef.current={queued:own};f.scope.queuedMoveIntentRef.current=own;f.scope.movementPlanRef.current={targetX:11};
  f.window.emit('keyup',{key:'Shift',code:'ShiftLeft',shiftKey:false});
  assert.equal(f.scope.combatForceAttackRef.current,false);assert.equal(f.edges.at(-1).type,'cancel');
  assert.equal(f.scope.queuedMoveIntentRef.current,null);assert.equal(f.scope.movementPlanRef.current,null);
@@ -151,8 +162,43 @@ test('actual Page key and cancel props retain skill forwarding while synchronizi
 
 test('actual Page preserves manual movement when retiring a different combat approach',()=>{
  const f=fixture(),manual={kind:'direction'},plan={direction:'up'};
- f.scope.combatApproachIntentRef.current={kind:'target'};f.scope.queuedMoveIntentRef.current=manual;f.scope.movementPlanRef.current=plan;
+ f.scope.combatApproachIntentRef.current={queued:{kind:'target'}};f.scope.queuedMoveIntentRef.current=manual;f.scope.movementPlanRef.current=plan;
  f.api.clearApproach();assert.equal(f.scope.queuedMoveIntentRef.current,manual);assert.equal(f.scope.movementPlanRef.current,plan);
+});
+
+test('one actual combat approach requests one walking step and abandons a stale target before send', () => {
+ const f=fixture();
+ const acceptedMove={sentAt:10};
+ f.scope.pendingSelfMoveRef={current:acceptedMove};
+ f.scope.queuedMoveIntentRef.current={kind:'target',targetX:40,targetY:20};
+ f.scope.movementPlanRef.current={targetX:40,targetY:20};
+ f.api.activateEntity('5');
+ assert.equal(f.scope.queuedMoveIntentRef.current, null);
+ assert.equal(f.scope.movementPlanRef.current, null);
+ assert.strictEqual(f.scope.pendingSelfMoveRef.current, acceptedMove);
+ f.api.approach(11, 9);
+ const queued=f.scope.queuedMoveIntentRef.current;
+ assert.equal(queued.requestedMode, 'walk');
+ assert.equal(queued.consumeAfterSend, true);
+ assert.strictEqual(f.scope.combatApproachIntentRef.current.queued, queued);
+ f.monster.x += 1;
+ assert.equal(f.api.trySendQueuedCrystalMove(queued.requestedAt), false);
+ assert.equal(f.scope.queuedMoveIntentRef.current, null);
+ assert.equal(f.scope.combatApproachIntentRef.current, null);
+ assert.equal(f.scope.worldRef.current.selectedObjectId, '5', 'movement waits for the current target without requiring a new click');
+});
+
+test('Classic and NewMove secondary clicks steer instead of selecting an occupant', () => {
+ for (const newMove of [false, true]) {
+  const f=fixture();
+  f.scope.playerUiPreferencesRef.current.newMove=newMove;
+  f.api.activateEntity('5');
+  const priorSelections=f.edges.filter(edge=>edge.type==='select').length;
+  f.api.secondary(f.monster.x, f.monster.y);
+  assert.equal(f.edges.at(-1).type, 'cancel');
+  assert.equal(f.edges.filter(edge=>edge.type==='select').length, priorSelections);
+  assert.equal(f.scope.queuedMoveIntentRef.current.requestedMode, 'run');
+ }
 });
 
 test('actual Page mode controls use custom shortcut and native request proofs with no optimistic mode update',()=>{

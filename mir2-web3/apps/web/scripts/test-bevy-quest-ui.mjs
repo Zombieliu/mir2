@@ -944,6 +944,7 @@ test("actual Page queued movement preserves replacement intent and retires stale
       questAttackHandoffRef: ref(null), questMapAuthorityRef: ref({ ...questIdentity, mapIndex: 39 }),
       movementPlanRef: ref(marker), worldRef: ref({ entities: [], groundDrops: [], mapTransfers: [], mapFileName: "0" }),
       questWindowOpenRef: ref(false), runtimeRef: ref({}), bevyQuestGenerationRef: ref(7), questWorldBlockedRef: ref(false),
+      combatApproachIntentRef: ref(null),
       pendingSelfMoveRef: ref(null), pendingSelfTurnRef: ref(null), crystalRunPrimedUntilRef: ref(0),
       movementInputBlockedUntilRef: ref(0), movementBlockedStepsRef: ref([]), nextMoveSendAtRef: ref(0),
       directionStepNextAtRef: ref(0), directionStepVisualUntilRef: ref(0), pendingTransferRef: ref(null),

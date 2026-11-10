@@ -3754,7 +3754,7 @@ export function OriginalClientShell({
 
   function retainSceneWorldObjectTarget(event: { clientX: number; clientY: number }, before: HeldScenePointer | null) {
     const held = heldScenePointerRef.current;
-    if (held && held !== before) held.worldTarget = sceneWorldObjectTarget(event.clientX, event.clientY);
+    if (held && held !== before && held.button === 0) held.worldTarget = sceneWorldObjectTarget(event.clientX, event.clientY);
   }
 
   function committedViewportPlayerPosition() {
@@ -3977,7 +3977,7 @@ export function OriginalClientShell({
     if (npcShopBlocksWorldInput()) { scenePointerDiagnosticsRef.current.reason = "parity-ui-or-shop"; stopNpcShopWorldInput(); return; }
     if (latestMoveInputRef.current.screen !== "game") { scenePointerDiagnosticsRef.current.reason = "screen"; return; }
     if (!sceneInteractionReady) { scenePointerDiagnosticsRef.current.reason = "scene-assets"; return; }
-    if (pointer.worldTarget) {
+    if (pointer.button === 0 && pointer.worldTarget) {
       scenePointerDiagnosticsRef.current.reason = "world-target";
       if (pointer.worldTarget.kind === "drop") onPickGroundDrop(pointer.worldTarget.objectId);
       else onActivateEntity(pointer.worldTarget.objectId);
@@ -4945,16 +4945,15 @@ export function OriginalClientShell({
       return;
     }
 
+    if (event.button !== 0 && event.button !== 2) return;
     const target = event.target;
-    if (
-      target instanceof HTMLElement &&
-      target.closest("[data-ui-interactive='true'], .game-ui-scene, .login-overlay, .select-overlay")
-    ) {
-      return;
-    }
-
-    if (event.button !== 0 && event.button !== 2) {
-      return;
+    if (target instanceof HTMLElement) {
+      if (target.closest(".game-ui-scene, .login-overlay, .select-overlay")) return;
+      const interactive = target.closest("[data-ui-interactive='true']");
+      // In the compatibility view these DOM markers own primary activation,
+      // while secondary still steers using the terrain underneath them.
+      if (interactive && (event.button !== 2 ||
+        !interactive.matches(".ground-drop-marker[data-object-id], .entity-nameplate[data-object-id], .entity-sprite-stack[data-object-id]"))) return;
     }
 
     event.preventDefault();
@@ -4966,9 +4965,8 @@ export function OriginalClientShell({
       startedAt: Date.now(),
       dispatched: false,
       // A compatibility mousedown follows pointerdown on this same canvas.
-      // Keep the visible marker's identity instead of replacing it with a
-      // tile-only hold (labels are deliberately offset from their world tile).
-      worldTarget: sceneWorldObjectTarget(event.clientX, event.clientY),
+      // Keep primary marker identity even when a label is offset from its tile.
+      worldTarget: event.button === 0 ? sceneWorldObjectTarget(event.clientX, event.clientY) : undefined,
     };
     heldScenePointerRef.current = pointer;
     const sources = [...worldFishingPointersRef.current.values()].filter(source => source.pointerType === "mouse"

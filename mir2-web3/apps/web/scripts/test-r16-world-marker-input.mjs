@@ -50,6 +50,7 @@ class Element {
   }
   contains(element) { for (let current = element; current; current = current.parent) if (current === this) return true; return false; }
   matches(selector) {
+    if (selector.includes(",")) return selector.split(",").some(option => this.matches(option.trim()));
     if ([...selector.matchAll(/\.([\w-]+)/g)].some(([, name]) => !this.classList.has(name))) return false;
     if (selector.includes("[data-ui-interactive='true']") && this.dataset.uiInteractive !== "true") return false;
     if (selector.includes("[data-object-id]") && !this.dataset.objectId) return false;
@@ -65,7 +66,8 @@ class Element {
   setPointerCapture() {}
   getBoundingClientRect() { return { left: 30, top: 20, width: 512, height: 384 }; }
 }
-function fixture({ native = true, oldMouseHold = false, marker = "drop", sceneReady = true, layers: initialLayers } = {}) {
+function fixture({ native = true, oldMouseHold = false, marker = "drop", sceneReady = true, newMove = false,
+  layers: initialLayers } = {}) {
   let now = 1000, serial = 0, pickupAllowed = true;
   const listeners = new Map(), timers = new Map(), picks = [], activations = [], clicks = [], moves = [];
   const frame = new Element({ classes: ["client-stage-frame"], dataset: { viewportPlayerX: "299", viewportPlayerY: "618",
@@ -101,7 +103,7 @@ function fixture({ native = true, oldMouseHold = false, marker = "drop", sceneRe
     heldScenePointerRef: held, scenePointerDiagnosticsRef: { current: null }, latestMoveInputRef: { current: { screen: "game", player: { x: 299, y: 618 } } },
     screen: "game", player: { x: 299, y: 618 }, sceneInteractionReady: sceneReady, bevyQuestUiCapturesPointer: false,
     bevyMailComposeReady: false, bevyMailComposePending: false, bevyBagUiActive: false, bevyHudUiReady: native,
-    questLocalModalOpen: false, mobileMoreOpen: false, playerUiPreferences: undefined,
+    questLocalModalOpen: false, mobileMoreOpen: false, playerUiPreferences: { newMove },
     parityUiBlocksGameplay: () => flags.parity, onCombatUiHeld: undefined, combatUiHoldRef: { current: new Map() },
     heroPointerLeaseRef: { current: null }, heroPointerCallbacksRef: { current: { getBevyHeroInputBlocked: () => false } },
     npcShopPointerCallbacksRef: { current: { getBevyNpcShopInputBlocked: () => flags.shop } },
@@ -164,9 +166,13 @@ function fixture({ native = true, oldMouseHold = false, marker = "drop", sceneRe
   }
   return { api, scope, flags, frame, canvas, markerNode, label, held, status, picks, activations, clicks, moves, worldTile, labelPoint, event,
     set layers(value) { layers = value; }, set pickupAllowed(value) { pickupAllowed = value; },
-    down(target = native ? canvas : frame) { const e = event(target); api.stageDown(e); return e; },
-    mouseDown(target = native ? canvas : frame) { const e = event(target); api.stageMouseDownCapture(e); api.stageMouseDown(e); return e; },
-    up(target = native ? canvas : frame) { const e = event(target); api.capturedPointerUp(e); api.stageMouseUp(e); window.emit("mouseup"); },
+    down(target = native ? canvas : frame, changes) { const e = event(target, changes); api.stageDown(e); return e; },
+    mouseDown(target = native ? canvas : frame, changes) {
+      const e = event(target, changes); api.stageMouseDownCapture(e); api.stageMouseDown(e); return e;
+    },
+    up(target = native ? canvas : frame, changes) {
+      const e = event(target, changes); api.capturedPointerUp(e); api.stageMouseUp(e); window.emit("mouseup");
+    },
     blur() { window.emit("blur"); },
     advance(ms) {
       const until = now + ms;
@@ -237,6 +243,84 @@ test("NPC nameplate and interactive sprite-hit underlays activate exactly once t
   }
 });
 
+test("secondary taps on a canvas-underlay actor or drop reach only the terrain callback", () => {
+  const secondary = { button: 2 };
+  for (const native of [true, false]) for (const marker of ["drop", "entity"]) {
+    const f = fixture({ native, marker });
+    try {
+      const tile = f.api.tileFromScenePoint(f.labelPoint.x, f.labelPoint.y);
+      f.down(undefined, secondary);
+      f.mouseDown(undefined, secondary);
+      assert.equal(f.held.current?.button, 2);
+      assert.equal(f.held.current?.worldTarget, undefined);
+      f.up(undefined, secondary);
+      f.up(undefined, secondary);
+      assert.deepEqual(f.clicks, [{ ...tile, mode: "run" }]);
+      assert.deepEqual(f.moves, []);
+      assert.deepEqual(f.picks, []);
+      assert.deepEqual(f.activations, []);
+    } finally { f.cleanup(); }
+  }
+});
+
+test("holding secondary over an actor keeps Classic steering and New Move terrain routing", () => {
+  const secondary = { button: 2 };
+  for (const newMove of [false, true]) {
+    const f = fixture({ marker: "entity", newMove });
+    try {
+      const tile = f.api.tileFromScenePoint(f.labelPoint.x, f.labelPoint.y);
+      f.down(undefined, secondary);
+      f.advance(210);
+      f.up(undefined, secondary);
+      f.advance(250);
+      const expected = [{ ...tile, mode: "run" }, { ...tile, mode: "run" }];
+      assert.deepEqual(f.moves, newMove ? [] : expected);
+      assert.deepEqual(f.clicks, newMove ? expected : []);
+      assert.deepEqual(f.activations, []);
+    } finally { f.cleanup(); }
+  }
+});
+
+test("direct DOM world markers pass secondary to the stage without opening an actor or picking up a drop", () => {
+  const visual = ts.createSourceFile("scene-visuals.tsx",
+    readFileSync(new URL("../app/components/original-client-scene-visual-layers.tsx", import.meta.url), "utf8"),
+    ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);
+  const spriteHandlers = nodes(visual, node => ts.isVariableDeclaration(node) &&
+    ["handleEntityPointerActivate", "handleEntityContextActivate"].includes(node.name.getText(visual)))
+    .map(node => "const " + node.getText(visual) + ";").join("\n");
+  const attribute = (node, name) => node.attributes.properties.find(property => ts.isJsxAttribute(property) && property.name.getText(visual) === name);
+  for (const className of ["entity-sprite-hit", "entity-nameplate", "entity-quest-icon", "ground-drop-marker"]) {
+    const [node] = nodes(visual, node => {
+      if (!ts.isJsxOpeningElement(node) && !ts.isJsxSelfClosingElement(node)) return false;
+      const value = attribute(node, "className")?.initializer.getText(visual);
+      return value === '"' + className + '"' || value?.startsWith("{`" + className + " ");
+    });
+    assert(node, className);
+    const binding = name => attribute(node, name)?.initializer.expression?.getText(visual) ?? "undefined";
+    const f = fixture({ native: false, marker: "entity" });
+    try {
+      const stack = new Element({ classes: ["entity-sprite-stack"], dataset: { objectId: "npc-15", uiInteractive: "true" }, parent: f.frame });
+      const hit = new Element({ classes: [className], dataset: { objectId: "npc-15",
+        uiInteractive: className === "entity-sprite-hit" || className === "entity-quest-icon" ? undefined : "true" },
+        parent: className === "entity-sprite-hit" ? stack : f.frame });
+      f.layers = [hit, f.frame];
+      const handlers = compile(spriteHandlers, { isInteractiveEntity: true, entity: { objectId: "npc-15" },
+        onActivateEntity: f.scope.onActivateEntity },
+      "return { down: " + binding("onMouseDown") + ", context: " + binding("onContextMenu") + " };");
+      const e = f.event(hit, { button: 2, stopPropagation() { this.stopped = true; } });
+      f.api.stageMouseDownCapture(e);
+      handlers.down?.(e);
+      assert.equal(e.stopped, undefined, className);
+      f.api.stageMouseDown(e);
+      handlers.context?.(e);
+      f.up(hit, { button: 2 });
+      assert.deepEqual(f.activations, [], className);
+      assert.deepEqual(f.picks, [], className);
+      assert.deepEqual(f.clicks, [{ ...f.api.tileFromScenePoint(f.labelPoint.x, f.labelPoint.y), mode: "run" }], className);
+    } finally { f.cleanup(); }
+  }
+});
+
 test("foreign frames, non-Canvas top layers, missing markers and noninteractive entity markers never acquire object authority", () => {
   for (const scenario of ["foreign", "noncanvas", "missing", "noninteractive"]) {
     const f = fixture({ native: false });
@@ -255,7 +339,7 @@ test("foreign frames, non-Canvas top layers, missing markers and noninteractive 
 });
 
 test("foreground UI, Native modal/foreground ownership and unavailable scene keep world object callbacks blocked", () => {
-  for (const scenario of ["dom-ui", "native-modal", "native-foreground", "scene", "quest", "parity", "shop"]) {
+  for (const scenario of ["dom-ui", "native-modal", "native-foreground", "scene", "quest", "parity", "shop"]) for (const button of [0, 2]) {
     const f = fixture({ sceneReady: scenario !== "scene" });
     try {
       let target = f.canvas;
@@ -266,7 +350,7 @@ test("foreground UI, Native modal/foreground ownership and unavailable scene kee
       else if (scenario === "native-foreground") f.status.foregroundRects = [{ left: 500, top: 350, width: 200, height: 100 }];
       else if (scenario === "quest") f.scope.heldQuestControlPointersRef.current.add(1);
       else if (scenario !== "scene") f.flags[scenario] = true;
-      f.down(target); f.mouseDown(target); f.up(target);
+      f.down(target, { button }); f.mouseDown(target, { button }); f.up(target, { button });
       assert.deepEqual(f.picks, [], scenario); assert.deepEqual(f.activations, [], scenario); assert.deepEqual(f.clicks, [], scenario);
     } finally { f.cleanup(); }
   }

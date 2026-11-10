@@ -2285,7 +2285,9 @@ export default function HomePage() {
   const spellsRawSnapshotRef = useRef<{snapshot:SpellsRawSnapshot;owner:SpellsOwner}|null>(null);
   const spellsIngressRef = useRef<{observeSnapshot:(s:SpellsRawSnapshot,o:SpellsOwner)=>boolean;observePacket:(p:string,v:Record<string,unknown>,o:SpellsOwner)=>boolean;withdraw:()=>void;pointerContext:()=>{modal:boolean}|null}|null>(null);
   const combatIngressRef=useRef<ReturnType<typeof useBevyCombatInput>|null>(null);
-  const combatApproachIntentRef = useRef<QueuedMoveIntent | null>(null);
+  const combatApproachIntentRef = useRef<{
+    queued: QueuedMoveIntent; map: string | null; objectId: string; x: number; y: number;
+  } | null>(null);
   const combatRawRef=useRef<{snapshot:Pick<GatewayWorldSnapshot,"playerObjectId"|"knownSkills"|"entities"|"mapFileName">;owner:CombatOwner}|null>(null);
   // Authoritative learned data belongs to a physical delivery, independently
   // of the bag/storage UI epoch that happens to exist when it arrives.
@@ -8869,6 +8871,7 @@ export default function HomePage() {
     const ownedMapRoute = mapImageRouteRef.current?.queued === queued ? mapImageRouteRef.current : null;
     if (queuedMoveIntentRef.current !== queued) return false;
     const ownedPickup = pendingPickupRef.current?.queued === queued ? pendingPickupRef.current : null;
+    const ownedApproach = combatApproachIntentRef.current?.queued === queued ? combatApproachIntentRef.current : null;
     if ((ownedQuestRoute || ownedPickup) && (questWindowOpenRef.current
       || readBevyQuestUiStatus(runtimeRef.current ?? {}, bevyQuestGenerationRef.current)?.questLogOpen)) {
       scheduleMovementConfirmTick(); return false;
@@ -8876,6 +8879,14 @@ export default function HomePage() {
     if (ownedQuestRoute && (questWorldBlockedRef.current || document.visibilityState === "hidden" || !document.hasFocus())) { cancelQuestRoute(); return false; }
     if (ownedMapRoute && !mapImageRouteCurrent(ownedMapRoute)) { cancelMapImageRoute(); return false; }
     const currentWorld = worldRef.current;
+    if (ownedApproach) {
+      const target = currentWorld.entities.find(entity => entity.objectId === ownedApproach.objectId);
+      if (currentWorld.mapFileName !== ownedApproach.map || currentWorld.selectedObjectId !== ownedApproach.objectId
+        || !target || target.dead || target.hp === 0 || target.x !== ownedApproach.x || target.y !== ownedApproach.y) {
+        cancelCombatApproach();
+        return false;
+      }
+    }
     const serverSelf = currentAuthoritativeSelf(currentWorld);
     if (!serverSelf) {
       queuedMoveIntentRef.current = null;
@@ -8933,6 +8944,9 @@ export default function HomePage() {
     const nextAction = ownedQuestRoute
       ? questRouteMovement(ownedQuestRoute, serverSelf, effectiveMode, now)
       : ownedMapRoute ? mapImageRouteMovement(ownedMapRoute, serverSelf, effectiveMode, now)
+      : ownedApproach && queued.targetX !== undefined && queued.targetY !== undefined
+        ? crystalMovementRouteAroundObstacles(serverSelf, { x: queued.targetX, y: queued.targetY }, "walk",
+          recentMovementBlockedSteps(movementBlockedStepsRef.current, now), currentWorld, true)
       : queued.kind === "direction" && queued.direction
         ? crystalMovementActionForDirection(serverSelf, queued.direction, effectiveMode, [], currentWorld)
         : queued.kind === "target" &&
@@ -9100,7 +9114,17 @@ export default function HomePage() {
     cancelLockedMonsterAttack();
   }
 
+  function cancelCombatApproach() {
+    const approach = combatApproachIntentRef.current;
+    if (approach && queuedMoveIntentRef.current === approach.queued) {
+      queuedMoveIntentRef.current = null;
+      movementPlanRef.current = null;
+    }
+    combatApproachIntentRef.current = null;
+  }
+
   function cancelLockedMonsterAttack() {
+    cancelCombatApproach();
     if(combatIngressRef.current?.supported())combatIngressRef.current.edge({type:"cancel"});
     if (!lockedMonsterAttackRef.current) {
       return;
@@ -9156,7 +9180,7 @@ export default function HomePage() {
       moveToTile(
         decision.destination.x,
         decision.destination.y,
-        "run",
+        "walk",
         "direction",
         "locked-monster",
       );
@@ -9172,7 +9196,14 @@ export default function HomePage() {
   function lockMonsterAttack(objectId: string) {
     const currentTarget = worldRef.current.entities.find(entity => entity.objectId === objectId);
     if (currentTarget?.kind === "player" && (!combatForceAttackRef.current || !supportsForcedPlayerAttack(runtimeRef.current))) return;
+    // A fresh target owns the next step. Movement already sent still settles
+    // through its own server receipt.
+    cancelQuestRoute();
+    cancelMapImageRoute();
+    queuedMoveIntentRef.current = null;
+    movementPlanRef.current = null;
     if(combatIngressRef.current?.supported()){
+      cancelCombatApproach();
       lockedMonsterAttackRef.current=null;pendingNpcInteractRef.current=null;pendingPickupRef.current=null;pendingTransferRef.current=null;
       pendingOnchainMineRef.current=false;stopOnchainMining();
       updateWorld(current=>({...current,selectedObjectId:objectId}));
@@ -9204,9 +9235,11 @@ export default function HomePage() {
     source: "manual" | "locked-monster" = "manual",
     gesture?: WorldFishingGesture,
   ) {
-    if (source !== "locked-monster") {
-      cancelLockedMonsterAttack();
-    }
+    const chasing = source === "locked-monster";
+    if (!chasing) cancelLockedMonsterAttack();
+    const current = worldRef.current;
+    const target = chasing ? current.entities.find(entity => entity.objectId === current.selectedObjectId) : null;
+    if (chasing && (!target || target.dead || target.hp === 0)) return;
     const requestedAt = Date.now();
     if (mode === "run") {
       // A Crystal right-click target can start a run immediately; without this
@@ -9219,9 +9252,10 @@ export default function HomePage() {
       targetY: y,
       requestedMode: mode,
       requestedAt,
-      consumeAfterSend: false,
+      consumeAfterSend: chasing,
     };
-    if (source === "locked-monster") combatApproachIntentRef.current = intent;
+    if (target) combatApproachIntentRef.current = { queued: intent, map: current.mapFileName ?? null,
+      objectId: target.objectId, x: target.x, y: target.y };
     queueCrystalMoveIntent(intent, gesture);
   }
 
@@ -13695,23 +13729,24 @@ export default function HomePage() {
       mode,
       crystalSelfMovementProfile(currentWorld, "run", serverSelf).distance,
     ).point;
-    const occupant = currentWorld.entities.find(
-      (entity) =>
-        entity.objectId !== currentWorld.playerObjectId && !entity.dead && entity.x === nextPoint.x && entity.y === nextPoint.y,
-    );
-    if (occupant) {
-      activateEntity(occupant.objectId);
-      return;
-    }
-    const drop = currentWorld.groundDrops.find((entry) => entry.x === nextPoint.x && entry.y === nextPoint.y);
-    if (drop) {
-      pickGroundDrop(drop.objectId);
-      return;
-    }
-    if (ONCHAIN_MINE_ENABLED && nextPoint.x === ONCHAIN_MINE_VEIN.x && nextPoint.y === ONCHAIN_MINE_VEIN.y) {
-      // Stepping into the vein (keyboard/step) = mine it instead of walking onto it.
-      mineOnchainVein();
-      return;
+    if (mode === "walk") {
+      const occupant = currentWorld.entities.find(
+        (entity) =>
+          entity.objectId !== currentWorld.playerObjectId && !entity.dead && entity.x === nextPoint.x && entity.y === nextPoint.y,
+      );
+      if (occupant) {
+        activateEntity(occupant.objectId);
+        return;
+      }
+      const drop = currentWorld.groundDrops.find((entry) => entry.x === nextPoint.x && entry.y === nextPoint.y);
+      if (drop) {
+        pickGroundDrop(drop.objectId);
+        return;
+      }
+      if (ONCHAIN_MINE_ENABLED && nextPoint.x === ONCHAIN_MINE_VEIN.x && nextPoint.y === ONCHAIN_MINE_VEIN.y) {
+        mineOnchainVein();
+        return;
+      }
     }
     const transferKey = transferKeyForTile(nextPoint.x, nextPoint.y);
     if (transferKey) {
@@ -20312,11 +20347,14 @@ export default function HomePage() {
     requestedMode: "walk" | "run",
     blockedSteps: MovementBlockedStep[],
     currentWorld: WorldState,
+    requireExactTarget = false,
   ): { point: { x: number; y: number }; direction: string; mode: "walk" | "run" } | null {
     const route = crystalMovementWalkRoute(source, target, blockedSteps, currentWorld);
     if (!route || route.length < 2) {
       return null;
     }
+    const destination = route[route.length - 1];
+    if (requireExactTarget && (destination.x !== target.x || destination.y !== target.y)) return null;
 
     const firstStep = route[1];
     const direction = directionFromPoint(source, firstStep, source.direction ?? "Down");
@@ -20905,8 +20943,12 @@ export default function HomePage() {
   const onViewportTileClick = useCallback((x: number, y: number, gesture?: WorldFishingGesture) => onViewportTileClickRef.current(x, y, gesture), []);
 
   const onViewportTileSecondaryActionRef = useRef<(x: number, y: number) => void>(() => undefined);
-  onViewportTileSecondaryActionRef.current = (x, y) => playerUiPreferencesRef.current.newMove
-    ? handleViewportTileAction(x, y, "run") : handleViewportTileStepAction(x, y, "run");
+  onViewportTileSecondaryActionRef.current = (x, y) => {
+    if (!playerUiPreferencesRef.current.newMove) return handleViewportTileStepAction(x, y, "run");
+    if (sceneInputDeferredForInitialAssets()) return;
+    stopOnchainMining();
+    moveToTile(x, y, "run");
+  };
   const onViewportTileSecondaryAction = useCallback(
     (x: number, y: number) => onViewportTileSecondaryActionRef.current(x, y),
     [],
@@ -21228,25 +21270,25 @@ export default function HomePage() {
         ||Array.from(document.querySelectorAll<HTMLImageElement>('.game-world-composite[aria-hidden="false"] img.scene-backdrop-sprite, .game-world-composite[aria-hidden="false"] img.scene-map-object-sprite'))
           .some(image=>image.complete&&image.naturalWidth>0&&image.naturalHeight>0&&surfaceVisible(image));
       const target=current.entities.find(e=>e.objectId===current.selectedObjectId);
-      const routeKey=JSON.stringify({map:current.mapFileName,source:[self.x,self.y],target:target?[target.objectId,target.x,target.y]:null,occupancy:current.entities.map(e=>[e.objectId,e.x,e.y,e.dead]),blocked:movementBlockedStepsRef.current});
+      const now=Date.now(),blocked=recentMovementBlockedSteps(movementBlockedStepsRef.current,now);
+      const routeKey=JSON.stringify({map:current.mapFileName,source:[self.x,self.y],target:target?[target.objectId,target.x,target.y]:null,occupancy:current.entities.map(e=>[e.objectId,e.x,e.y,e.dead]),blocked});
       let cache=combatRouteCacheRef.current,neighbours:CombatFacts["neighbours"]=cache?.key===routeKey&&cache.region===current.originalMapRegion?cache.rows:[];
       // Platform path finder supplies reachability/cost; Rust chooses among the exact adjacent cells.
       if(!cache||cache.key!==routeKey||cache.region!==current.originalMapRegion){
-        if(target)for(let dx=-1;dx<=1;dx++)for(let dy=-1;dy<=1;dy++){if(!dx&&!dy)continue;const point={x:target.x+dx,y:target.y+dy};if(point.x===self.x&&point.y===self.y){neighbours.push({...point,cost:0});continue;}const route=crystalMovementWalkRoute(self,point,movementBlockedStepsRef.current,current);const last=route?.at(-1);if(last?.x===point.x&&last.y===point.y)neighbours.push({...point,cost:route!.length});}
+        if(target)for(let dx=-1;dx<=1;dx++)for(let dy=-1;dy<=1;dy++){if(!dx&&!dy)continue;const point={x:target.x+dx,y:target.y+dy};if(point.x===self.x&&point.y===self.y){neighbours.push({...point,cost:0});continue;}const route=crystalMovementWalkRoute(self,point,blocked,current);const last=route?.at(-1);if(last?.x===point.x&&last.y===point.y)neighbours.push({...point,cost:route!.length});}
         combatRouteCacheRef.current={key:routeKey,region:current.originalMapRegion,rows:neighbours};
       }
-      const now=Date.now(),actors=current.entities.map(actor),plan=movementPlanRef.current;
+      const actors=current.entities.map(actor),plan=movementPlanRef.current;
       const facts:CombatFacts={map:current.mapFileName,enabled:screenRef.current==="game"&&current.connected&&initialSceneAssetsReadyRef.current&&visible&&!editing&&!modal&&equipmentHostSuspendReasonRef.current===null&&document.visibilityState==="visible"&&document.hasFocus(),
         player:actor(self),hp:current.playerHp??self.hp??0,maxHp:current.playerMaxHp??self.maxHp??0,mp:current.playerMp??0,level:self.level??0,attackSpeed:current.playerCrystalStats?.find(s=>s.stat===14)?.value??0,actors,
         clickTargets:current.entities.map(e=>({kind:e.kind,objectId:Number(e.objectId),x:e.x,y:e.y,dead:typeof e.dead==="boolean"?e.dead:null,ai:e.ai??null,harvestable:typeof sources.get(e.objectId)?.harvestable==="boolean"?sources.get(e.objectId)!.harvestable as boolean:null})),
         selectedObjectId:current.selectedObjectId?Number(current.selectedObjectId):null,forceAttack:combatForceAttackRef.current,hoveredObjectId:combatPointerRef.current.hovered,cursor:combatPointerRef.current.cursor,
         class:self.classKey??null,hasClassWeapon:flag("hasClassWeapon"),ridingMount:flag("ridingMount"),fishing:flag("fishing"),dazed:flag("dazed"),
-        motionRemainingMs:Math.max(0,Math.min(0xffffffff,Math.ceil(Math.max(self.attackUntil??0,self.movementUntil??0,nextMoveSendAtRef.current)-now))),movementReady:!isMovementBusy(),planningPosition:plan?[plan.targetX,plan.targetY]:null,neighbours,spellLockKey:crystalKeyBindingsRef.current.find(binding => binding.function === "TargetSpellLockOn")?.key ?? "None",pointerSpellLock:combatPointerRef.current.lock,bindings:crystalKeyBindingsRef.current.filter(binding => /^Bar[12]Skill[1-8]$/.test(binding.function))};
+        motionRemainingMs:Math.max(0,Math.min(0xffffffff,Math.ceil(Math.max(self.attackUntil??0,self.movementUntil??0,nextMoveSendAtRef.current)-now))),movementReady:!isMovementBusy()&&canSendMovement(readSelfMovementControllerState(),now),planningPosition:plan?[plan.targetX,plan.targetY]:null,neighbours,spellLockKey:crystalKeyBindingsRef.current.find(binding => binding.function === "TargetSpellLockOn")?.key ?? "None",pointerSpellLock:combatPointerRef.current.lock,bindings:crystalKeyBindingsRef.current.filter(binding => /^Bar[12]Skill[1-8]$/.test(binding.function))};
       return {owner,facts};
-    },onWire:dispatchBevyCombat,onApproach:(x,y)=>moveToTile(x,y,"run","direction","locked-monster"),onClear:()=>{
+    },onWire:dispatchBevyCombat,onApproach:(x,y)=>moveToTile(x,y,"walk","direction","locked-monster"),onClear:()=>{
       lockedMonsterAttackRef.current=null;
-      if(combatApproachIntentRef.current&&queuedMoveIntentRef.current===combatApproachIntentRef.current){queuedMoveIntentRef.current=null;movementPlanRef.current=null;}
-      combatApproachIntentRef.current=null;
+      cancelCombatApproach();
     }});
   combatIngressRef.current=bevyCombatInput;
 
