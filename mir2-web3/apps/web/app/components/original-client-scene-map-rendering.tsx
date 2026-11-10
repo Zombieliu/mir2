@@ -11,6 +11,7 @@ import {
   mapAtlasRectKeyForPath,
 } from "../../lib/map-atlas-manifest";
 import type { OriginalMapRegion, OriginalMapSpriteFrame } from "../../lib/scene-types";
+import type { R16EntryFloor } from "../../lib/r16-entry-scene";
 import {
   alphaKeyMapObjectPixels,
   keyMapObjectImageOffThread,
@@ -58,6 +59,7 @@ function GameSceneBackdropInner({
   world,
   player,
   floorSprites,
+  packedFloor,
   cameraOffset,
   viewportLayout = DEFAULT_VIEWPORT_LAYOUT,
   imperativeCamera = false,
@@ -66,6 +68,7 @@ function GameSceneBackdropInner({
   world: DisplayWorld;
   player: DisplayEntity | null;
   floorSprites: ViewportMapSprite[];
+  packedFloor: R16EntryFloor | null;
   cameraOffset: ViewportOffset;
   viewportLayout?: ViewportLayout;
   imperativeCamera?: boolean;
@@ -102,7 +105,8 @@ function GameSceneBackdropInner({
           className="scene-backdrop-sprite"
           data-map-sprite-key={sprite.key}
           data-mir2-original-src={sprite.path}
-          src={sprite.path}
+          data-mir2-packed-floor={packedFloor?.[sprite.path] ? "true" : undefined}
+          src={packedFloor?.[sprite.path] ?? sprite.path}
           crossOrigin="anonymous"
           alt=""
           draggable={false}
@@ -703,6 +707,11 @@ export function handleSceneAssetImageError(event: SyntheticEvent<HTMLImageElemen
   }
 
   image.dataset.mir2OriginalSrc = originalSrc;
+  if (image.dataset.mir2PackedFloor === "true" && image.getAttribute("src")?.startsWith("data:")) {
+    clearSceneAssetRetryState(image);
+    image.src = originalSrc;
+    return;
+  }
   if (staticSceneAssetRecentlyFailed(originalSrc)) {
     image.dataset.mir2LoadFailed = "true";
     image.style.visibility = "hidden";

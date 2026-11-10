@@ -1,4 +1,5 @@
 import entryScene from "./generated/r16-entry-scene.json";
+import entryFloor from "./generated/r16-entry-floor.json";
 import {
   createCrystalSceneBlueprintRequestKey,
   SCENE_BLUEPRINT_SCHEMA_VERSION,
@@ -14,29 +15,43 @@ const PREFETCH_LIMIT_MS = 12_000;
 const ENTRY_GRACE_MS = 2_500;
 let entryLoad: Promise<SceneBlueprint | null> | null = null;
 
+export type R16EntryFloor = Readonly<Partial<Record<string, string>>>;
+export const R16_ENTRY_FLOOR_MAP = entryFloor.mapFileName;
+let floorLoad: Promise<R16EntryFloor | null> | null = null;
+
 export function preloadR16EntryScene(pinnedRelease?: string): Promise<SceneBlueprint | null> | null {
   if (pinnedRelease !== entryScene.assetReleaseId || entryScene.schemaVersion !== SCENE_BLUEPRINT_SCHEMA_VERSION ||
       !globalThis.crypto?.subtle) return null;
-  entryLoad ??= loadEntry().catch(() => null).then((blueprint) => {
+  entryLoad ??= loadPinnedEntryJson<SceneBlueprint>(entryScene).catch(() => null).then((blueprint) => {
     if (!blueprint) entryLoad = null;
     return blueprint;
   });
   return entryLoad;
 }
 
-async function loadEntry(): Promise<SceneBlueprint | null> {
+export function preloadR16EntryFloor(pinnedRelease?: string): Promise<R16EntryFloor | null> | null {
+  if (pinnedRelease !== entryFloor.assetReleaseId || entryFloor.assetReleaseId !== entryScene.assetReleaseId ||
+      entryFloor.sceneSha256 !== entryScene.sha256 || !globalThis.crypto?.subtle) return null;
+  floorLoad ??= loadPinnedEntryJson<R16EntryFloor>(entryFloor).catch(() => null).then((images) => {
+    if (!images) floorLoad = null;
+    return images;
+  });
+  return floorLoad;
+}
+
+async function loadPinnedEntryJson<T>(asset: { path: string; bytes: number; sha256: string }): Promise<T | null> {
   const signal = AbortSignal.timeout(PREFETCH_LIMIT_MS);
-  const response = await fetch(entryScene.path, { cache: "force-cache", credentials: "omit", signal });
+  const response = await fetch(asset.path, { cache: "force-cache", credentials: "omit", signal });
   if (!response.ok) {
     void response.body?.cancel().catch(() => {});
     return null;
   }
   const bytes = await response.arrayBuffer();
-  if (bytes.byteLength !== entryScene.bytes) return null;
+  if (bytes.byteLength !== asset.bytes) return null;
   const digest = new Uint8Array(await crypto.subtle.digest("SHA-256", bytes));
   const sha256 = Array.from(digest, (byte) => byte.toString(16).padStart(2, "0")).join("");
-  if (sha256 !== entryScene.sha256) return null;
-  return JSON.parse(new TextDecoder("utf-8", { fatal: true }).decode(bytes)) as SceneBlueprint;
+  if (sha256 !== asset.sha256) return null;
+  return JSON.parse(new TextDecoder("utf-8", { fatal: true }).decode(bytes)) as T;
 }
 
 export function readR16EntryScene(

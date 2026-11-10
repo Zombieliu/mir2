@@ -252,6 +252,8 @@ function sceneResponse(blueprint) {
 const entryMetadata = JSON.parse(readFileSync(new URL("../lib/generated/r16-entry-scene.json", import.meta.url), "utf8"));
 const entryBytes = readFileSync(new URL(`../public${entryMetadata.path}`, import.meta.url));
 const entryRequest = { ...entryMetadata.request, assetReleaseId: entryMetadata.assetReleaseId };
+const floorMetadata = JSON.parse(readFileSync(new URL("../lib/generated/r16-entry-floor.json", import.meta.url), "utf8"));
+const floorBytes = readFileSync(new URL("../public" + floorMetadata.path, import.meta.url));
 const entrySource = ts.transpileModule(readFileSync(new URL("../lib/r16-entry-scene.ts", import.meta.url), "utf8"), {
   compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 },
 }).outputText;
@@ -269,6 +271,7 @@ function entryFixture(fetcher) {
   const module = { exports: {} };
   const requireEntry = name => {
     if (name === "./generated/r16-entry-scene.json") return { default: entryMetadata };
+    if (name === "./generated/r16-entry-floor.json") return { default: floorMetadata };
     assert.equal(name, "./scene-blueprint-request");
     return loadedModule.exports;
   };
@@ -296,6 +299,33 @@ test("a verified hosted preload serves only the exact release, map and region ke
   assert.equal(blueprint.originalMapRegion.cells.length, 6819);
   assert.equal(await entry.readR16EntryScene(entryRequest, entryMetadata.assetReleaseId, owner.signal), blueprint);
   assert.equal(calls.length, 1);
+});
+
+test("the entry floor preload is shared only for the pinned release", async () => {
+  const calls = [];
+  const entry = entryFixture(async (url, options) => {
+    calls.push({ url, options });
+    return new Response(floorBytes);
+  });
+  assert.equal(entry.preloadR16EntryFloor("another-release"), null);
+  const first = entry.preloadR16EntryFloor(entryMetadata.assetReleaseId);
+  assert.equal(entry.preloadR16EntryFloor(entryMetadata.assetReleaseId), first);
+  const floor = await first;
+  assert.equal(Object.keys(floor).length, floorMetadata.frameCount);
+  assert.match(floor["/original-map/WemadeMir2/Tiles/137.png"], /^data:image\/png;base64,/);
+  assert.equal(calls.length, 1);
+  assert.equal(calls[0].url, floorMetadata.path);
+  assert.equal(calls[0].options.credentials, "omit");
+});
+
+test("corrupt floor bytes are never published and the prefetch can retry", async () => {
+  const wrong = Buffer.from(floorBytes);
+  wrong[50] ^= 1;
+  let count = 0;
+  const entry = entryFixture(async () => new Response(++count === 1 ? wrong : floorBytes));
+  assert.equal(await entry.preloadR16EntryFloor(entryMetadata.assetReleaseId), null);
+  assert.equal(Object.keys(await entry.preloadR16EntryFloor(entryMetadata.assetReleaseId)).length, floorMetadata.frameCount);
+  assert.equal(count, 2);
 });
 
 test("changed static bytes are rejected even with the expected response length", async () => {
