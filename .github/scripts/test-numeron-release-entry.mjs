@@ -143,7 +143,7 @@ test('the reusable workflow declares all four optional inputs and forwards only 
   const job = block(gateway, 'numeron-website');
   for (const name of fields) assert(job.includes(`${name}: \${{ inputs.${name} }}`));
   assert.doesNotMatch(job, /secrets: inherit/);
-  assert.match(job, /MIR2_R16_PASSKEY_AUTH_SECRET: \$\{\{ inputs\.numeron_operation == 'numeron-stage' && secrets\.MIR2_R16_PASSKEY_AUTH_SECRET \|\| '' \}\}/);
+  assert.match(job, /MIR2_R16_PASSKEY_AUTH_SECRET: \$\{\{ \(inputs\.numeron_operation == 'numeron-stage' \|\| inputs\.numeron_operation == 'numeron-qr-stage'\) && secrets\.MIR2_R16_PASSKEY_AUTH_SECRET \|\| '' \}\}/);
   for (const name of ['VERCEL_TOKEN', 'VERCEL_ORG_ID', 'VERCEL_PROJECT_ID', 'MIR2_R16_PASSKEY_AUTH_SECRET']) assert(call.includes(`      ${name}:\n        required: false`));
   assert.match(gateway.split('\njobs:\n')[0], /permissions:\n  contents: read\n  actions: read/);
   assert.match(block(promotion, 'website'), /permissions:\n      contents: read\n      actions: read/);
@@ -165,9 +165,25 @@ test('domain move invokes only its separate helper and receipt; stage and promot
   assert.match(domain, /run: node \.github\/scripts\/numeron-r16-domain\.mjs/);
   assert.doesNotMatch(domain, /PASSKEY|GH_TOKEN|asset_run_id|numeron-r16-release\.mjs/);
   assert.match(promotion, /if: always\(\) && inputs.operation == 'numeron-domain-move'[\s\S]*?path: numeron-r16-domain.json/);
-  const paired = promotion.split('- name: Stage or promote the isolated Numeron R16 pair without moving the custom domain\n')[1].split('\n      - name:')[0];
+  const paired = promotion.split('- name: Stage or promote the isolated Numeron R16 pair or the game relay hotfix\n')[1].split('\n      - name:')[0];
   assert.match(paired, /if: inputs.operation == 'numeron-stage' \|\| inputs.operation == 'numeron-promote'/);
   assert.doesNotMatch(paired, /numeron-r16-domain/);
   assert(promotion.includes("&& !startsWith(inputs.operation, 'numeron-')"));
   assert.match(promotion, /cancel-in-progress: false/);
+});
+
+test('relay dispatches use only the website job and refuse source, asset or marketing overrides', () => {
+  for (const operation of ['numeron-qr-stage', 'numeron-qr-promote', 'numeron-qr-rollback']) {
+    const options = { numeron_operation: operation, deployment_id: operation === 'numeron-qr-stage' ? '' : 'dpl_qr' };
+    assert(admits('numeron-website', options));
+    assert(!admits('numeron-ingress', options));
+    for (const name of Object.keys(legacyJobs)) assert(!admits(name, options));
+    for (const guard of [wrapperGuard, reusableGuard]) {
+      assert.doesNotThrow(() => execute(guard, environment(options)));
+      for (const override of [{ unified_source_sha: SHA }, { asset_run_id: '123' }, { main_deployment_id: 'dpl_main' }]) {
+        assert.throws(() => execute(guard, environment({ ...options, ...override })));
+      }
+      assert.throws(() => execute(guard, environment({ ...options, deployment_id: options.deployment_id ? '' : 'dpl_unused' })), /candidateInputInvalid/);
+    }
+  }
 });
