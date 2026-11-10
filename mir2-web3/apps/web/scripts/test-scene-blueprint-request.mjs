@@ -202,7 +202,7 @@ const sceneReaderCompiled = ts.transpileModule(sceneReaderSource, {
   compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 },
 });
 new Function("exports", "module", sceneReaderCompiled.outputText)(sceneReaderModule.exports, sceneReaderModule);
-function pageSceneFixture({ screen = "game", map = "0140", region = null } = {}) {
+function pageSceneFixture({ screen = "game", map = "0140", region = null, pinnedRelease } = {}) {
   const cap = capabilitiesFixture(), calls = [], logs = [], updates = [], milestones = [];
   const state = { release: null, failure: null };
   const player = { objectId: "1", x: 344, y: 74 };
@@ -214,6 +214,7 @@ function pageSceneFixture({ screen = "game", map = "0140", region = null } = {})
   };
   const scope = {
     screen, self: player, sceneAssetReleaseId: null,
+    process: { env: { MIR2_PINNED_ASSET_VERSION: pinnedRelease } },
     world, worldRef: { current: world }, screenRef: { current: screen },
     viewportLayout: { rangeX: 20, rangeY: 15 },
     loadedSceneAssetReleaseRef: { current: null }, loadedSceneKeyRef: { current: null }, loadingSceneKeyRef: { current: null },
@@ -246,6 +247,44 @@ function sceneBlueprint(map = "0140") {
 function sceneResponse(blueprint) {
   return { ok: true, status: 200, json: async () => blueprint, headers: { get: () => "crystal" } };
 }
+test("a pinned hosted build requests the authoritative scene while the manifest is still pending", async () => {
+  const releaseId = "20261108-r16-08ec86d5105c";
+  const f = pageSceneFixture({ map: "0", pinnedRelease: releaseId });
+  f.cap.api.setAssetReleaseCapabilities({ releaseId: "cached-old" });
+  const pendingManifest = f.cap.api.loadAssetReleaseCapabilities(f.scope.fetch, { fresh: true });
+  assert.equal(f.calls[0].url, "/api/asset-manifest");
+  const cleanupRelease = f.render().release();
+  await settleSceneFixture();
+  assert.equal(f.state.release, releaseId);
+  const cleanupScene = f.render().scene();
+  assert.equal(f.calls.length, 2, "the page sends a scene request without a second manifest GET");
+  const url = new URL(f.calls[1].url, "https://mir2.example");
+  assert.equal(url.pathname, "/api/scene/crystal");
+  assert.equal(url.searchParams.get("map"), "0");
+  assert.equal(url.searchParams.get("assetRelease"), releaseId);
+  f.calls[1].resolve(sceneResponse(sceneBlueprint("0")));
+  await settleSceneFixture();
+  assert.equal(f.updates.length, 1);
+  assert.equal(f.scope.loadedSceneAssetReleaseRef.current, releaseId);
+  f.calls[0].resolve(manifestResponse("cached-old"));
+  await pendingManifest;
+  assert.equal(f.state.release, releaseId);
+  cleanupScene();
+  cleanupRelease();
+});
+
+test("an invalid build pin uses the same fresh manifest request as an unpinned build", async () => {
+  const f = pageSceneFixture({ pinnedRelease: "invalid/release" });
+  const cleanupRelease = f.render().release();
+  assert.equal(f.calls.length, 1);
+  assert.equal(f.calls[0].url, "/api/asset-manifest");
+  assert.equal(f.calls[0].options.cache, "no-cache");
+  f.calls[0].resolve(manifestResponse("valid-release"));
+  await settleSceneFixture();
+  assert.equal(f.state.release, "valid-release");
+  cleanupRelease();
+});
+
 test("actual Page waits for a fresh server release before issuing a versioned Scene request", async () => {
   const f = pageSceneFixture();
   f.cap.api.setAssetReleaseCapabilities({ releaseId: "cached-old" });

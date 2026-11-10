@@ -5764,12 +5764,17 @@ export default function HomePage() {
     const controller = new AbortController();
     async function loadSceneAssetRelease() {
       try {
-        const capabilities = await loadAssetReleaseCapabilities(fetch, {
-          fresh: true, signal: controller.signal, readJson: fetchFirstCrystalSceneJson,
-        });
+        // Hosted production embeds the same asset version as /api/asset-manifest.
+        // Start the versioned scene even while the background manifest is loading.
+        const pinnedRelease = process.env.MIR2_PINNED_ASSET_VERSION;
+        const releaseId = isCrystalSceneAssetReleaseId(pinnedRelease)
+          ? pinnedRelease
+          : (await loadAssetReleaseCapabilities(fetch, {
+              fresh: true, signal: controller.signal, readJson: fetchFirstCrystalSceneJson,
+            })).releaseId;
         if (disposed || controller.signal.aborted) return;
-        if (!isCrystalSceneAssetReleaseId(capabilities.releaseId)) throw new Error("Scene asset release is unavailable");
-        setSceneAssetReleaseId(capabilities.releaseId);
+        if (!isCrystalSceneAssetReleaseId(releaseId)) throw new Error("Scene asset release is unavailable");
+        setSceneAssetReleaseId(releaseId);
       } catch (error) {
         if (!disposed && !controller.signal.aborted) {
           setSceneLoadFailure({ phase: "release" });
