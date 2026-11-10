@@ -1,9 +1,11 @@
 "use client";
 
-import type { CSSProperties } from "react";
+import { useLayoutEffect, useRef, type CSSProperties } from "react";
 import { localizeCrystalItemName } from "../../lib/crystal-content-localization";
 import type { FishingRodView, FishingStatusView } from "../../lib/world-fishing-panel";
+import { fishingItemCursorOrigin, fishingItemVisibleSize } from "../../lib/world-fishing-tackle-gesture";
 import { originalItemIconPath } from "./original-client-inventory-utils";
+import { OriginalItemTooltip } from "./original-client-item-tooltip";
 import type { TranslateFn } from "./original-client-types";
 import { R16_SOCIAL_ART_STYLE, R16SocialButton, R16SocialModal, useR16SocialWindow } from "./r16-social-controls";
 
@@ -54,6 +56,74 @@ const LOCALIZED_CAPTION_STYLE: CSSProperties = {
 };
 const SPRITE_STYLE: CSSProperties = { position: "absolute", pointerEvents: "none", imageRendering: "pixelated" };
 
+export function FishingTackleCursor({ icon }: { icon: number | null }) {
+  const layerRef = useRef<HTMLDivElement>(null);
+  useLayoutEffect(() => {
+    const layer = layerRef.current;
+    const stage = layer?.closest(".client-stage-frame");
+    if (!layer || !stage) return;
+    let point: { x: number; y: number } | null = null;
+    let measuredImage: HTMLImageElement | null = null;
+    let size = { width: 0, height: 0 };
+    const paint = () => {
+      const image = layer.querySelector("img");
+      if (!image?.complete || !image.naturalWidth) return;
+      const bounds = layer.getBoundingClientRect();
+      if (!point || !bounds.width || !bounds.height) {
+        image.style.visibility = "hidden";
+        return;
+      }
+      if (image !== measuredImage) {
+        measuredImage = image;
+        const canvas = document.createElement("canvas");
+        canvas.width = image.naturalWidth;
+        canvas.height = image.naturalHeight;
+        const pixels = canvas.getContext("2d");
+        size = { width: canvas.width, height: canvas.height };
+        if (pixels) {
+          pixels.drawImage(image, 0, 0);
+          size = fishingItemVisibleSize(pixels.getImageData(0, 0, canvas.width, canvas.height).data, canvas.width, canvas.height);
+        }
+      }
+      const screen = { width: layer.clientWidth, height: layer.clientHeight };
+      const x = (point.x - bounds.left) * screen.width / bounds.width;
+      const y = (point.y - bounds.top) * screen.height / bounds.height;
+      const { left, top } = fishingItemCursorOrigin(x, y, size, screen);
+      image.style.transform = `translate(${left}px, ${top}px)`;
+      image.style.visibility = size.width && size.height ? "visible" : "hidden";
+    };
+    const move = (event: Event) => {
+      const pointer = event as PointerEvent;
+      if (!pointer.isPrimary) return;
+      point = { x: pointer.clientX, y: pointer.clientY };
+      paint();
+    };
+    const hide = () => { point = null; paint(); };
+    stage.addEventListener("pointermove", move, true);
+    stage.addEventListener("pointerdown", move, true);
+    stage.addEventListener("pointerleave", hide);
+    stage.addEventListener("pointercancel", hide, true);
+    layer.addEventListener("load", paint, true);
+    window.addEventListener("blur", hide);
+    window.addEventListener("resize", paint);
+    return () => {
+      stage.removeEventListener("pointermove", move, true);
+      stage.removeEventListener("pointerdown", move, true);
+      stage.removeEventListener("pointerleave", hide);
+      stage.removeEventListener("pointercancel", hide, true);
+      layer.removeEventListener("load", paint, true);
+      window.removeEventListener("blur", hide);
+      window.removeEventListener("resize", paint);
+    };
+  }, []);
+  return <div ref={layerRef} aria-hidden="true"
+    style={{ position: "absolute", inset: 0, zIndex: 1000, pointerEvents: "none", overflow: "hidden" }}>
+    {icon !== null && <img key={icon} src={originalItemIconPath(icon)} alt="" draggable={false}
+      data-fishing-held-item={icon}
+      style={{ ...SPRITE_STYLE, left: 0, top: 0, maxWidth: "none", visibility: "hidden" }} />}
+  </div>;
+}
+
 function FishingBar({ label, frame, top, height, value }: { label: string; frame: number; top: number; height: number; value: number }) {
   const percent = Math.min(100, Math.max(0, value));
   const width = Math.floor(216 * percent / 100);
@@ -95,7 +165,7 @@ export function OriginalClientFishingWindows({ t, rod, equipmentOpen, status, bi
         const slotName = t(`client.ItemType${name}`, [], name);
         const content = item?.name ? localizeCrystalItemName(item.name, t) : item ? null : t("client.Empty", [], "Empty");
         const label = slotName + (content ? ` · ${content}` : "") + (item && item.quantity > 1 ? ` ×${item.quantity}` : "");
-        return <button key={name} type="button" aria-label={label} aria-pressed={selected} title={label}
+        return <button key={name} type="button" aria-label={label} aria-pressed={selected}
           data-fishing-slot={slot} data-fishing-item-id={item?.uniqueId} disabled={attachmentPending}
           onClick={() => onTackleClick(slot)} onContextMenu={event => {
             event.preventDefault();
@@ -103,12 +173,15 @@ export function OriginalClientFishingWindows({ t, rod, equipmentOpen, status, bi
             onClearSelection?.();
           }}
           style={{ position: "absolute", left, top, width: 34, height: 30, padding: 0, border: 0,
-            color: "inherit", textShadow: "inherit", background: "transparent", cursor: "pointer",
-            boxShadow: selected ? "inset 0 0 0 1px #c8a660" : undefined }}>
+            color: "inherit", textShadow: "inherit", background: "transparent", cursor: "pointer" }}>
           {item?.imageIndex != null && <img src={originalItemIconPath(item.imageIndex)} alt="" draggable={false}
             style={{ ...R16_SOCIAL_ART_STYLE, objectFit: "scale-down" }} />}
           {item && item.quantity > 1 && <span aria-hidden="true"
             style={{ position: "absolute", bottom: 0, right: 1, pointerEvents: "none", fontSize: 10 }}>{item.quantity}</span>}
+          {item && content && !selected && <OriginalItemTooltip t={t} name={content}
+            itemType={slotName} quantity={item.quantity}
+            durabilityCurrent={item.durabilityCurrent === null ? undefined : Math.floor(item.durabilityCurrent / 1000)}
+            durabilityMax={item.durabilityMax === null ? undefined : Math.floor(item.durabilityMax / 1000)} />}
         </button>;
       })}
     </section>}

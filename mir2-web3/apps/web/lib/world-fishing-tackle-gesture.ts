@@ -12,6 +12,30 @@ type FishingUi = Readonly<{
 }>;
 type Press = { root: HTMLElement; pointerId: number; at: number; start: Cell; tab: BagTab | null; held: (() => boolean) | null };
 
+type SpriteSize = Readonly<{ width: number; height: number }>;
+
+/** Crystal GetTrueSize ignores the transparent padding of the Items frame. */
+export function fishingItemVisibleSize(pixels: Uint8ClampedArray, width: number, height: number): SpriteSize {
+  let left = width, top = height, right = -1, bottom = -1;
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      if (!pixels[4 * (y * width + x) + 3]) continue;
+      left = Math.min(left, x);
+      top = Math.min(top, y);
+      right = Math.max(right, x);
+      bottom = Math.max(bottom, y);
+    }
+  }
+  return { width: Math.max(0, right - left + 1), height: Math.max(0, bottom - top + 1) };
+}
+
+export function fishingItemCursorOrigin(x: number, y: number, sprite: SpriteSize, screen: SpriteSize) {
+  return {
+    left: Math.min(Math.floor(x) - Math.floor(sprite.width / 2), screen.width - sprite.width),
+    top: Math.min(Math.floor(y) - Math.floor(sprite.height / 2), screen.height - sprite.height),
+  };
+}
+
 function fishingCell(root: HTMLElement, target: EventTarget | null, tab: BagTab | null): Cell | null {
   const ElementType = root.ownerDocument.defaultView?.Element;
   if (!ElementType || !(target instanceof ElementType)) return null;

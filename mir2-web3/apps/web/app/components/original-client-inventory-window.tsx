@@ -819,8 +819,7 @@ export function InventoryWindow({
               type="button"
               className="inventory-item-card"
               disabled={mailItemLocked(item)}
-              style={{ left: slot.x, top: slot.y, ...(repairMode ? { touchAction: "none" } : null), ...(dimmed ? { opacity: 0.28 } : null),
-                ...(fishingSelected ? { outline: "1px solid #d6b46e" } : null) }}
+              style={{ left: slot.x, top: slot.y, ...(repairMode ? { touchAction: "none" } : null), ...(dimmed ? { opacity: 0.28 } : null) }}
               data-filtered-out={dimmed ? "true" : undefined}
               data-fishing-bag-item={onFishingBagCell ? item.slot : undefined}
               aria-pressed={onFishingBagCell ? fishingSelected : undefined}

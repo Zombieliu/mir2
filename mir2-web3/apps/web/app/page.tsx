@@ -110,7 +110,7 @@ import type { EntityAnimationRuntime } from "../lib/client-presentation-runtime"
 import { WorldFishingSource, sameOwner as sameWorldFishingOwner, type WorldFishingOwner,
   type WorldFishingSourceRecord } from "../lib/world-fishing-source";
 import type { InventoryTabKey } from "../lib/original-ui";
-import { fishingAttachmentApplied, fishingAttachmentReceipt, fishingBagCell, projectFishingRod, readFishingStatus,
+import { fishingAttachmentApplied, fishingAttachmentReceipt, fishingBagCell, fishingGearForDurability, projectFishingRod, readFishingStatus,
   type FishingAttachmentCommand, type FishingStatusView } from "../lib/world-fishing-panel";
 import { appendFishingAnimationEdge, readFishingFeedback, type FishingAnimationEdge, type FishingFeedback } from "../lib/world-fishing-feedback";
 import type { WorldFishingGesture, WorldFishingPointer, WorldFishingAnimationContext,
@@ -206,7 +206,7 @@ import {
   resolveQuestHostAction,
   type PendingQuestAction,
 } from "../lib/quest-action-policy";
-import { localizeCrystalMapTitle } from "../lib/crystal-content-localization";
+import { localizeCrystalItemName, localizeCrystalMapTitle } from "../lib/crystal-content-localization";
 import { questIdsFromPacket } from "../lib/quest-entity-binding";
 import {
   CrystalChatType,
@@ -2360,6 +2360,7 @@ export default function HomePage() {
     selection: null as FishingSelection | null, active: null as FishingActive | null });
   const fishingPanelAttemptRef = useRef<FishingPanelAttempt | null>(null);
   const fishingAttachmentRef = useRef<{ owner: WorldFishingOwner; command: FishingAttachmentCommand; acknowledgedAt: number | null } | null>(null);
+  const fishingZeroWarningsRef = useRef<{ version: number; items: Set<number> } | null>(null);
   const [, renderFishingPanel] = useState(0);
   const worldFishingCallbacksRef = useRef<WorldFishingCallbacks>({});
   useLayoutEffect(() => { worldFishingCallbacksRef.current = {
@@ -8320,25 +8321,33 @@ export default function HomePage() {
       || worldFishingSourceRef.current.current(owner) !== commit.context.record) return;
     worldFishingCommitRef.current = commit;
   }
-  function readWorldFishingRod() {
-    const owner = worldFishingOwner(), baseline = equipmentSnapshotRef.current, inventory = bagBeltInventoryReadyRef.current;
-    if (!owner || !baseline || !inventory || inventory.layout !== baseline.snapshot
+  function readFishingWeaponFromDisplay() {
+    const owner = worldFishingOwner(), baseline = equipmentSnapshotRef.current;
+    if (!owner || !baseline
       || baseline.connectionGeneration !== owner.connectionGeneration || baseline.sessionGeneration !== owner.sessionGeneration) return null;
     const placements = baseline.snapshot.placements, cells = placements.filter(row => row.container === 2 && row.slot === 0);
     if (cells.length !== 1 || cells[0].uniqueId === null || !Number.isSafeInteger(cells[0].uniqueId) || cells[0].uniqueId! < 0
       || placements.filter(row => row.uniqueId === cells[0].uniqueId).length !== 1) return null;
-    const uid = cells[0].uniqueId!, rawRows = inventory.raw.equipmentItems.filter(row => row.slot === "weapon" && row.uniqueId === uid);
+    const uid = cells[0].uniqueId!;
     const liveRows = worldRef.current.equipmentItems.filter(row => row.slot === "weapon" && row.authoritativeUniqueId === uid);
-    if (rawRows.length !== 1 || liveRows.length !== 1) return null;
-    const raw = rawRows[0], live = ownedItemTooltipRequest(liveRows[0]);
+    const live = liveRows.length === 1 ? ownedItemTooltipRequest(liveRows[0]) : null;
+    return live ? { uid, cell: cells[0], carrier: live.tooltipSource, equipment: baseline.snapshot } : null;
+  }
+  function readWorldFishingRod() {
+    const live = readFishingWeaponFromDisplay(), inventory = bagBeltInventoryReadyRef.current;
+    if (!live || !inventory || inventory.layout !== live.equipment) return null;
+    const { uid, cell, equipment } = live;
+    const rawRows = inventory.raw.equipmentItems.filter(row => row.slot === "weapon" && row.uniqueId === uid);
+    if (rawRows.length !== 1) return null;
+    const raw = rawRows[0];
     const record = (value: unknown): value is Record<string, unknown> => value !== null && typeof value === "object" && !Array.isArray(value);
-    if (!live || !record(raw.tooltipSource) || JSON.stringify(live.tooltipSource) !== JSON.stringify(raw.tooltipSource)) return null;
+    if (!record(raw.tooltipSource) || JSON.stringify(live.carrier) !== JSON.stringify(raw.tooltipSource)) return null;
     const carrier = raw.tooltipSource, user = carrier.userItem, info = carrier.realInfo ?? carrier.info;
     if (!record(user) || !record(info) || user.unique_id !== uid || user.item_index !== info.item_index
       || info.item_type !== 1 || info.shape !== 49 && info.shape !== 50 || !Array.isArray(user.slots) || user.slots.length < 5) return null;
-    const signature = JSON.stringify([cells[0], raw]);
+    const signature = JSON.stringify([cell, raw]);
     if (signature.length > 262144) return null;
-    return { uniqueId: uid, carrier, signature, equipment: baseline.snapshot, layoutSignature: JSON.stringify(baseline.snapshot) };
+    return { uniqueId: uid, carrier, signature, equipment, layoutSignature: JSON.stringify(equipment) };
   }
   function retireFishingPanel(sessionEnded: boolean) {
     const panel = fishingPanelRef.current;
@@ -8352,6 +8361,7 @@ export default function HomePage() {
       panel.autoCast = false;
       panel.escapeCancels = false;
       fishingAttachmentRef.current = null;
+      fishingZeroWarningsRef.current = null;
     }
     if (changed) renderFishingPanel(value => value + 1);
   }
@@ -8387,6 +8397,27 @@ export default function HomePage() {
     if (!fishingPanelRef.current.selection) return;
     fishingPanelRef.current.selection = null;
     renderFishingPanel(value => value + 1);
+  }
+  function observeFishingDurability(uniqueId: number, currentDura: number): boolean {
+    // A wear packet invalidates action readiness. Read the last owned display
+    // snapshot so the rod and its children still resolve throughout the batch.
+    const equipped = readFishingWeaponFromDisplay();
+    const rod = equipped && projectFishingRod(equipped.carrier, equipped.uid);
+    const item = rod && fishingGearForDurability(rod, uniqueId);
+    if (!item) return false;
+    if (currentDura === 0 && item.durabilityCurrent !== 0 && item.name) {
+      const version = worldSnapshotVersionRef.current;
+      if (fishingZeroWarningsRef.current?.version !== version) {
+        fishingZeroWarningsRef.current = { version, items: new Set() };
+      }
+      const warned = fishingZeroWarningsRef.current.items;
+      if (!warned.has(uniqueId)) {
+        warned.add(uniqueId);
+        const name = localizeCrystalItemName(item.name, t);
+        appendLog(t("client.FriendlyDuraDroppedToZero", [name], `${name}'s dura has dropped to 0.`), "system");
+      }
+    }
+    return true;
   }
   function retainFishingTackleHold(kind: FishingSelection["kind"], slot: number): (() => boolean) | null {
     const panel = fishingPanelRef.current, selection = panel.selection;
@@ -15639,6 +15670,8 @@ export default function HomePage() {
         const uniqueId = numberOrUndefined(payload.uniqueId);
         const currentDura = numberOrUndefined(payload.currentDura);
         if (typeof uniqueId === "number" && typeof currentDura === "number") {
+          // Fishing slots are projected by the next authoritative inventory snapshot.
+          if (observeFishingDurability(uniqueId, currentDura)) break;
           const equipmentSlot = equipmentSlotFromIndex(uniqueId);
           updateWorld((current) => ({
             ...current,
@@ -21337,6 +21370,18 @@ export default function HomePage() {
   const activeFishingBite = activeFishing?.bite;
   const fishingRod = fishingPanel.equipmentOpen || activeFishing ? readWorldFishingRod() : null;
   const fishingRodView = fishingRod && projectFishingRod(fishingRod.carrier, fishingRod.uniqueId);
+  const fishingSelection = fishingPanel.selection;
+  let fishingHeldIcon: number | null = null;
+  if (fishingRod && fishingRodView && fishingSelection) {
+    const { kind, slot, uniqueId } = fishingSelection;
+    if (kind === "tackle") {
+      const item = fishingRodView.slots[slot];
+      if (item?.uniqueId === uniqueId) fishingHeldIcon = item.imageIndex;
+    } else if (fishingBagCell(fishingRod.equipment, slot) === uniqueId) {
+      const item = bagBeltInventoryReadyRef.current?.raw.inventoryItems.find(row => row.uniqueId === uniqueId);
+      if (item) fishingHeldIcon = item.icon;
+    }
+  }
   return (
     !isClientReady ? null :
     <>
@@ -21643,6 +21688,7 @@ export default function HomePage() {
         reelPending: activeFishing?.reeling ?? false, attachmentPending: fishingAttachmentRef.current !== null,
         selectedSlot: fishingPanel.selection?.kind === "tackle" ? fishingPanel.selection.slot : null,
         selectedBagSlot: fishingPanel.selection?.kind === "bag" ? fishingPanel.selection.slot : null,
+        heldItemIcon: fishingHeldIcon,
         autoCast: fishingPanel.autoCast, escapeCancels: fishingPanel.escapeCancels,
         onCloseEquipment: closeFishingEquipment, onDismissNotice: closeFishingEquipment, onCloseStatus: requestFishingReel,
         onReelBite: () => { if (activeFishingBite) requestFishingBite(activeFishingBite); },

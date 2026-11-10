@@ -6276,7 +6276,7 @@ const fishingPageSource=readFileSync(parityPageUrl,"utf8"),fishingPageAst=ts.cre
 const fishingPanelModule=loadTypeScriptModule(new URL("../lib/world-fishing-panel.ts",import.meta.url));
 const {createFishingTackleGesture}=loadTypeScriptModule(new URL("../lib/world-fishing-tackle-gesture.ts",import.meta.url));
 const fishingPageNames=new Set(["worldFishingOwner","cancelWorldFishingGesture","retireWorldFishingGesture","publishWorldFishingSource",
-  "captureWorldFishingGatewayEvent","captureWorldFishingSnapshot","commitWorldFishingAnimation","readWorldFishingRod","worldFishingInputAllowed","worldFishingPureUiBlocked",
+  "captureWorldFishingGatewayEvent","captureWorldFishingSnapshot","commitWorldFishingAnimation","readFishingWeaponFromDisplay","readWorldFishingRod","worldFishingInputAllowed","worldFishingPureUiBlocked",
   "worldFishingLeaseCurrent","beginWorldFishingGesture","worldFishingMapCell","worldFishingFinalCurrent","enterWorldFishingSend","tryWorldFishingBlockedClick",
   "currentSpellsOwner","otherPlayerUiBlocksInput","heroUiBlocksGameplay","referenceWindowsBlockGameplay","mapRouteInputBlocked","sceneInputDeferredForInitialAssets",
   "originalMapRegionContainsTile","originalMapCellBlocksMovement",
@@ -6412,14 +6412,18 @@ check("Fishing panel bite click only sends against the current nibble",()=>{
   assert.equal(f.api.enterFishingPanelSend(attempt,attempt.command,f.socket),false);
 });
 check("Fishing tackle ACK and full authoritative placement retain zero UID and exact bag index",()=>{
-  const {projectFishingRod,fishingAttachmentApplied,fishingAttachmentReceipt,fishingBagCell}=fishingPanelModule;
+  const {projectFishingRod,fishingAttachmentApplied,fishingAttachmentReceipt,fishingBagCell,fishingGearForDurability}=fishingPanelModule;
   const carrier={info:{name:"Blue Fishing Rod",shape:49,item_type:1,item_index:3},userItem:{unique_id:4,item_index:3,
-    slots:[null,null,{unique_id:0,item_index:42,count:3},null,null]},
+    current_dura:9999,slots:[null,null,{unique_id:0,item_index:42,count:3,current_dura:0,max_dura:8000},null,null]},
     socketInfos:[null,null,{name:"Bait",item_index:42,item_type:30,image:2332}]};
   const rod=projectFishingRod(carrier,4);
-  assert.deepEqual(rod.slots[2],{uniqueId:0,name:"Bait",quantity:3,imageIndex:2332});
+  assert.deepEqual(rod.slots[2],{uniqueId:0,name:"Bait",quantity:3,imageIndex:2332,durabilityCurrent:0,durabilityMax:8000});
+  assert.equal(fishingGearForDurability(rod,4).durabilityCurrent,9999);
+  assert.strictEqual(fishingGearForDurability(rod,0),rod.slots[2]);
+  assert.equal(fishingGearForDurability(rod,2),null,"the socket index is not an item identity");
   assert.deepEqual(projectFishingRod({...carrier,socketInfos:[]},4).slots[2],
-    {uniqueId:0,name:null,quantity:3,imageIndex:null},"missing tooltip keeps occupied identity without invented metadata");
+    {uniqueId:0,name:null,quantity:3,imageIndex:null,durabilityCurrent:0,durabilityMax:8000},
+    "missing tooltip keeps occupied identity and observed durability without invented metadata");
   const attach={type:"equipSlotItem",grid:"inventory",gridTo:"fishing",to:2,uniqueId:0,toUniqueId:4};
   const ack={grid:"Inventory",gridTo:"Fishing",to:2,uniqueId:0,success:true};
   assert.equal(fishingAttachmentReceipt(attach,"EquipSlotItem",ack),true);

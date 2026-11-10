@@ -185,6 +185,7 @@ export type FishingUiSurface = Omit<import("react").ComponentProps<typeof import
   onBagCell: (tab: InventoryTabKey, slot: number) => boolean;
   retainTackleHold: (kind: "bag" | "tackle", slot: number) => (() => boolean) | null;
   selectedBagSlot: number | null;
+  heldItemIcon: number | null;
 };
 
 export type OriginalClientShellProps = BagBeltCallbacks & WorldFishingCallbacks & {

@@ -3980,12 +3980,19 @@ body:has([data-shared-touch-quest-open="true"], [data-shared-touch-bag-open="tru
 .character-slot-card:hover .original-item-tooltip,
 .character-slot-card:focus .original-item-tooltip,
 .character-slot-card:focus-visible .original-item-tooltip,
+[data-fishing-slot]:hover .original-item-tooltip,
+[data-fishing-slot]:focus-visible .original-item-tooltip,
 .belt-item:hover .original-item-tooltip,
 .belt-item:focus .original-item-tooltip,
 .belt-item:focus-visible .original-item-tooltip {
   opacity: 1;
   visibility: visible;
   transform: translateY(0);
+}
+
+:is([data-fishing-slot], [data-fishing-bag-item])[aria-pressed="true"] > img {
+  filter: brightness(0.412);
+  opacity: 0.8;
 }
 
 .original-item-tooltip strong {

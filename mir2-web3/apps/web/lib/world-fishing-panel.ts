@@ -1,8 +1,12 @@
 import type { EquipmentGatewaySnapshot } from "./equipment-gateway-adapter";
 
-export type FishingTackleView = Readonly<{ uniqueId: number; name: string | null; quantity: number; imageIndex: number | null }>;
+export type FishingTackleView = Readonly<{
+  uniqueId: number; name: string | null; quantity: number; imageIndex: number | null;
+  durabilityCurrent: number | null; durabilityMax: number | null;
+}>;
 export type FishingRodView = Readonly<{
-  name: string; shape: 49 | 50; slots: readonly (FishingTackleView | null)[]; hasHook: boolean; canAutoCast: boolean;
+  uniqueId: number; name: string; shape: 49 | 50; durabilityCurrent: number | null;
+  slots: readonly (FishingTackleView | null)[]; hasHook: boolean; canAutoCast: boolean;
 }>;
 export type FishingStatusView = Readonly<{ chance: number; progress: number; foundFish: boolean }>;
 export type FishingAttachmentCommand = Readonly<
@@ -15,6 +19,9 @@ function record(value: unknown): Record<string, unknown> | null {
 }
 function unsigned(value: unknown): value is number {
   return typeof value === "number" && Number.isSafeInteger(value) && value >= 0;
+}
+function durability(value: unknown): number | null {
+  return unsigned(value) && value <= 65535 ? value : null;
 }
 
 export function readFishingStatus(objectId: number, payload: unknown): FishingStatusView | false | null {
@@ -44,10 +51,20 @@ export function projectFishingRod(carrier: unknown, rodId: number): FishingRodVi
     if (!child || !unsigned(child.unique_id) || used.has(child.unique_id) || !unsigned(child.count) || child.count === 0) return null;
     if (childInfo && (childInfo.item_index !== child.item_index || childInfo.item_type !== 28 + slot || typeof childInfo.name !== "string")) return null;
     used.add(child.unique_id);
-    slots.push({ uniqueId: child.unique_id, name: typeof childInfo?.name === "string" ? childInfo.name : null, quantity: child.count,
-      imageIndex: unsigned(childInfo?.image) && childInfo.image <= 65535 ? childInfo.image : null });
+    slots.push({
+      uniqueId: child.unique_id, name: typeof childInfo?.name === "string" ? childInfo.name : null, quantity: child.count,
+      imageIndex: unsigned(childInfo?.image) && childInfo.image <= 65535 ? childInfo.image : null,
+      durabilityCurrent: durability(child.current_dura), durabilityMax: durability(child.max_dura),
+    });
   }
-  return { name: info.name, shape: info.shape, slots, hasHook: slots[0] !== null, canAutoCast: slots[4] !== null };
+  return {
+    uniqueId: rodId, name: info.name, shape: info.shape, durabilityCurrent: durability(user.current_dura),
+    slots, hasHook: slots[0] !== null, canAutoCast: slots[4] !== null,
+  };
+}
+
+export function fishingGearForDurability(rod: FishingRodView, uniqueId: number) {
+  return uniqueId === rod.uniqueId ? rod : rod.slots.find(slot => slot?.uniqueId === uniqueId) ?? null;
 }
 
 export function fishingBagCell(layout: EquipmentGatewaySnapshot, bagSlot: number): number | null | undefined {

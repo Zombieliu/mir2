@@ -31,7 +31,7 @@ import { createFishingTackleGesture } from "../../lib/world-fishing-tackle-gestu
 import type { NpcRepairView, NpcRepairSelection } from "../../lib/npc-repair-service";
 import type { CashGameShopSource, CashGameShopConfirmation, CashGameShopEntry } from "../../lib/cash-game-shop-ui";
 import { InventoryWindow } from "./original-client-inventory-window";
-import { OriginalClientFishingWindows } from "./original-client-fishing-windows";
+import { FishingTackleCursor, OriginalClientFishingWindows } from "./original-client-fishing-windows";
 import type { FishingUiSurface } from "./original-client-shell-types";
 import { CharacterWindow } from "./original-client-character-window";
 import type { Mir2InputProfile } from "./original-client-device-profile";
@@ -261,6 +261,9 @@ function GameUiSceneInner({
   const fishingEquipmentOpen = fishingUi?.equipmentOpen === true;
   const fishingBagTab = showInventory && !sharedBagUiActive && !sharedStorageUiActive
     && (activeInventoryTab === "bag1" || activeInventoryTab === "bag2") ? activeInventoryTab : null;
+  const heldBagSlot = fishingUi?.selectedBagSlot ?? null;
+  const showHeldFishingItem = heldBagSlot === null
+    || (fishingBagTab !== null && (heldBagSlot < 40 ? fishingBagTab === "bag1" : fishingBagTab === "bag2"));
   useLayoutEffect(() => () => fishingTackleGesture.cancel(), [fishingTackleGesture, fishingEquipmentOpen, fishingBagTab]);
   useEffect(() => {
     const cancel = () => fishingTackleGesture.cancel();
@@ -603,6 +606,7 @@ function GameUiSceneInner({
         />
       ) : null}
       {fishingUi && <OriginalClientFishingWindows t={t} {...fishingUi} />}
+      {fishingEquipmentOpen && <FishingTackleCursor icon={showHeldFishingItem ? fishingUi?.heldItemIcon ?? null : null} />}
       {showSystemMenuFeaturePanel ? (
         <SystemMenuFeaturePanel
           t={t}

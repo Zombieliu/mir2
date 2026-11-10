@@ -1,4 +1,6 @@
 //! Host integration for original Mount/Fishing/Creature windows.
+use super::super::item_image::crystal_true_size_rgba8;
+use super::super::spec::{STAGE_HEIGHT, STAGE_WIDTH};
 use super::*;
 use creature_dialog::{
     view::{Hit as CreatureHit, HitAction as PetHit},
@@ -204,6 +206,40 @@ fn uid(state: &NativePlayerUiState, inventory: &InventoryModel, cell: ItemCell) 
         }
     }
 }
+
+fn item_cell_visible(state: &NativePlayerUiState, cell: ItemCell) -> bool {
+    match cell {
+        ItemCell::Bag(slot) => {
+            state.inventory_open()
+                && state.inventory_page <= 1
+                && slot as usize / INVENTORY_PAGE_SIZE == usize::from(state.inventory_page)
+                && (state.equipment_dialogs.mount_open || state.equipment_dialogs.fishing_open)
+        }
+        ItemCell::Attachment(EquipmentDialog::Mount, _) => state.equipment_dialogs.mount_open,
+        ItemCell::Attachment(EquipmentDialog::Fishing, _) => state.equipment_dialogs.fishing_open,
+    }
+}
+
+fn held_item_node(image: &Image, cursor: Vec2) -> Option<Node> {
+    if !(0.0..STAGE_WIDTH).contains(&cursor.x) || !(0.0..STAGE_HEIGHT).contains(&cursor.y) {
+        return None;
+    }
+    let (width, height) = (image.width(), image.height());
+    let (true_width, true_height) = crystal_true_size_rgba8(width, height, image.data.as_deref()?)?;
+    // Crystal GameScene.Draw uses the opaque size for the integer hotspot and
+    // clamps right/bottom only. The bitmap still includes all its raw padding.
+    let left = (cursor.x.floor() - (true_width / 2) as f32).min(STAGE_WIDTH - true_width as f32);
+    let top = (cursor.y.floor() - (true_height / 2) as f32).min(STAGE_HEIGHT - true_height as f32);
+    Some(Node {
+        position_type: PositionType::Absolute,
+        left: Val::Px(left),
+        top: Val::Px(top),
+        width: Val::Px(width as f32),
+        height: Val::Px(height as f32),
+        ..default()
+    })
+}
+
 fn item_click(
     host: &mut MenuHost,
     state: &mut NativePlayerUiState,
@@ -253,6 +289,7 @@ pub(super) fn process(
     state.creature.sync_input_editor();
     state.menu_pointer_consumed = false;
     host.hint = None;
+    host.cursor = None;
     // A lost pointer, focus, or modal retires a held reel before any early return.
     let mut reel_press = host.reel_press.take();
     let now = time.as_ref().map_or(0, |t| t.elapsed().as_millis() as u64);
@@ -287,14 +324,11 @@ pub(super) fn process(
             });
         }
     }
-    if !state.equipment_dialogs.mount_open && !state.equipment_dialogs.fishing_open {
+    if host.selected.is_some_and(|(cell, id)| {
+        !item_cell_visible(&state, cell) || uid(&state, &inventory, cell) != Some(id)
+    }) {
         host.selected = None;
-    }
-    if host
-        .selected
-        .is_some_and(|(cell, id)| uid(&state, &inventory, cell) != Some(id))
-    {
-        host.selected = None;
+        host.pressed = None;
     }
     let (Some(mouse), Ok(window)) = (mouse, windows.single()) else {
         return;
@@ -312,7 +346,6 @@ pub(super) fn process(
     let Some(cursor) = help_cursor_logical(window) else {
         return;
     };
-    host.cursor = Some(cursor);
     if state.creature.input.is_some()
         && state.social_bonds.prompt.is_none()
         && state.creature.notice.is_none()
@@ -351,6 +384,7 @@ pub(super) fn process(
         host.text_selecting = false;
         return;
     }
+    host.cursor = Some(cursor);
     let pet_hit = host
         .pet_hits
         .iter()
@@ -530,6 +564,35 @@ pub(super) fn render_system(
     if !equipment_visible && !creature_visible {
         return;
     }
+    let held_item = host
+        .selected
+        .zip(host.cursor)
+        .and_then(|((cell, id), cursor)| {
+            if modal(&state) || !item_cell_visible(&state, cell) {
+                return None;
+            }
+            let selected = match cell {
+                ItemCell::Bag(slot) => inventory
+                    .items
+                    .iter()
+                    .find(|item| item.container == 0 && item.slot == slot),
+                ItemCell::Attachment(kind, slot) => match kind {
+                    EquipmentDialog::Mount => state.equipment_dialogs.mount.as_ref(),
+                    EquipmentDialog::Fishing => state.equipment_dialogs.rod.as_ref(),
+                }
+                .and_then(|host| host.slots.get(slot))
+                .and_then(Option::as_ref),
+            }?;
+            if selected.unique_id != Some(id) {
+                return None;
+            }
+            let index = selected.user_item_image_index()?;
+            let handle = handles
+                .entry(("Items".into(), index))
+                .or_insert_with(|| assets.load(format!("original-ui/Items/{index}.png")));
+            let node = held_item_node(images.get(&*handle)?, cursor)?;
+            Some((node, ImageNode::new(handle.clone())))
+        });
     let mut frames = Vec::new();
     if equipment_visible {
         frames.extend(mount_fishing_dialog::view::required_frames(
@@ -581,38 +644,14 @@ pub(super) fn render_system(
             host.pet_hits =
                 creature_dialog::view::render(p, &assets, &mut state.creature, now, ticks, &frame);
         }
-        if let (Some((cell, _)), Some(cursor)) = (host.selected, host.cursor) {
-            let selected = match cell {
-                ItemCell::Bag(slot) => inventory
-                    .items
-                    .iter()
-                    .find(|item| item.container == 0 && item.slot == slot),
-                ItemCell::Attachment(kind, slot) => match kind {
-                    EquipmentDialog::Mount => state.equipment_dialogs.mount.as_ref(),
-                    EquipmentDialog::Fishing => state.equipment_dialogs.rod.as_ref(),
-                }
-                .and_then(|h| h.slots.get(slot))
-                .and_then(Option::as_ref),
-            };
-            if let Some(index) = selected.and_then(ItemModel::user_item_image_index) {
-                p.spawn((
-                    MenuHint,
-                    Node {
-                        position_type: PositionType::Absolute,
-                        left: Val::Px(cursor.x - 17.0),
-                        top: Val::Px(cursor.y - 15.0),
-                        width: Val::Px(34.0),
-                        height: Val::Px(30.0),
-                        ..default()
-                    },
-                    GlobalZIndex(OVERLAY_INVENTORY_DELETE_MODAL_Z + 2),
-                ))
-                .with_children(|p| {
-                    let (marker, node, image) =
-                        original_item_image_bundle(&assets, Some(index), 34, 30);
-                    p.spawn((marker, node, image));
-                });
-            }
+        if let Some((node, image)) = held_item {
+            p.spawn((
+                MenuHint,
+                node,
+                image,
+                FocusPolicy::Pass,
+                GlobalZIndex(OVERLAY_INVENTORY_DELETE_MODAL_Z + 2),
+            ));
         }
         if let (Some(hint), Some(cursor)) = (&host.hint, host.cursor) {
             p.spawn((
@@ -664,6 +703,59 @@ pub fn close_general(
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn held_fishing_hook_uses_opaque_hotspot_but_draws_the_full_bitmap() {
+        use bevy::asset::RenderAssetUsages;
+        use bevy::render::render_resource::{Extent3d, TextureDimension, TextureFormat};
+
+        // Items/2330 has a 32×27 bitmap and a 29×27 opaque bounding box.
+        let mut pixels = vec![0; 32 * 27 * 4];
+        for row in pixels.chunks_exact_mut(32 * 4) {
+            row[2 * 4..31 * 4].fill(255);
+        }
+        let image = Image::new(
+            Extent3d {
+                width: 32,
+                height: 27,
+                depth_or_array_layers: 1,
+            },
+            TextureDimension::D2,
+            pixels,
+            TextureFormat::Rgba8UnormSrgb,
+            RenderAssetUsages::default(),
+        );
+        for (cursor, left, top) in [
+            (Vec2::new(50.75, 50.5), 36.0, 37.0),
+            (Vec2::new(1023.0, 767.0), 995.0, 741.0),
+            (Vec2::ZERO, -14.0, -13.0),
+        ] {
+            let node = held_item_node(&image, cursor).unwrap();
+            assert_eq!((node.left, node.top), (Val::Px(left), Val::Px(top)));
+            assert_eq!((node.width, node.height), (Val::Px(32.0), Val::Px(27.0)));
+        }
+        assert!(held_item_node(&image, Vec2::new(1024.0, 768.0)).is_none());
+    }
+
+    #[test]
+    fn held_fishing_item_requires_its_source_window_and_absolute_bag_page() {
+        let mut state = NativePlayerUiState::default();
+        state.equipment_dialogs.fishing_open = true;
+        state.toggle_inventory();
+        let first = ItemCell::Bag(0);
+        let second = ItemCell::Bag(INVENTORY_PAGE_SIZE as u32);
+        let socket = ItemCell::Attachment(EquipmentDialog::Fishing, 0);
+        assert!(item_cell_visible(&state, first));
+        assert!(!item_cell_visible(&state, second));
+        assert!(item_cell_visible(&state, socket));
+        state.inventory_page = 1;
+        assert!(!item_cell_visible(&state, first));
+        assert!(item_cell_visible(&state, second));
+        state.equipment_dialogs.fishing_open = false;
+        assert!(!item_cell_visible(&state, second));
+        assert!(!item_cell_visible(&state, socket));
+    }
+
     #[test]
     fn pending_bootstrap_does_not_misreport_no_creatures() {
         let mut state = NativePlayerUiState::default();

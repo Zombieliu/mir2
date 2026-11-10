@@ -15,6 +15,8 @@ async function loadTypeScript(url) {
 
 const { appendFishingAnimationEdge, FishingFeedbackPresentation, fishingBiteButtonFrame, readFishingFeedback } =
   await loadTypeScript("../lib/world-fishing-feedback.ts");
+const { fishingItemCursorOrigin, fishingItemVisibleSize } =
+  await loadTypeScript("../lib/world-fishing-tackle-gesture.ts");
 const { loadEffectAssets, resolveMapEffect } = await loadTypeScript("../lib/crystal-magic-effects.ts");
 const worldKey = "session1:0";
 const actor = { objectId: "7", kind: "selfPlayer", x: 342, y: 244 };
@@ -24,6 +26,18 @@ const bite = { ...ripple, foundFish: true };
 function poses(action, fishingStartedAtMs, logicalFrameIndex, incarnation = 1, objectId = actor.objectId) {
   return { [objectId]: { objectId, action, incarnation, fishingStartedAtMs, logicalFrameIndex } };
 }
+
+test("the held Items frame uses Crystal's opaque size and clips only the far edges", () => {
+  const rgba = new Uint8ClampedArray(32 * 27 * 4);
+  rgba[3] = 1;
+  rgba[(26 * 32 + 28) * 4 + 3] = 255;
+  const sprite = fishingItemVisibleSize(rgba, 32, 27);
+  const screen = { width: 1024, height: 768 };
+  assert.deepEqual(sprite, { width: 29, height: 27 });
+  assert.deepEqual(fishingItemCursorOrigin(445.8, 291.9, sprite, screen), { left: 431, top: 278 });
+  assert.deepEqual(fishingItemCursorOrigin(1023, 767, sprite, screen), { left: 995, top: 741 });
+  assert.deepEqual(fishingItemCursorOrigin(0, 0, sprite, screen), { left: -14, top: -13 });
+});
 
 test("fishing presentation only reads an explicit server tile and bite flag", () => {
   assert.deepEqual(readFishingFeedback({ fishingPoint: { x: 0, y: 247 }, foundFish: true }), { ...bite, x: 0 });

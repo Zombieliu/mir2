@@ -16,15 +16,15 @@ working tree, services, release packages, source snapshots or parity percentages
 
 ## Last recorded decisions and open work
 
-2026-11-10 共同 Gateway 对齐鱼钩和探测器的抛竿、收线磨损。WebGPU 实点验证零耐久鱼钩下次收线移除并重登，WebGL2 验证续抛后的鱼具快照。冷登录旁观者的公开收线回包由 12,042 毫秒降至 4 毫秒，重进视野只恢复当前姿态。继续 Windows 窗口、Hosted 和素材发行。 [磨损和跨视野回执](evidence/r16-web-fishing-loop-20261110/README.md#鱼具磨损与跨视野)
+2026-11-10 WebGPU 和 WebGL2 实点验证鱼具原图跟手、误放拦截、装卸后重登。鱼钩归零的系统提示在简中和英文各复测一次，下次收线移除不重复。继续线轮耗尽开关、Windows 实际窗口、Hosted 和发行。 [拖放与提示](evidence/r16-web-fishing-loop-20261110/README.md#鱼具跟手图与归零提示) · [磨损与跨视野](evidence/r16-web-fishing-loop-20261110/README.md#鱼具磨损与跨视野)
 
-2026-11-10 公网 `a23cc382` 默认 Chrome 简中和繁中再次通过出码及待确认。比奇候选 `c52ea9abb6` 的两文件发布 pin 已复验可应用，专用环境审核补丁的模拟门禁 74 项通过。待仓库独立审核、正式切换、默认网络签名进比奇和实体手机。 [本轮公网复测](evidence/r16-web-fishing-loop-20261110/tackle-wear-and-aoi.json) · [发布候选证据](evidence/numeron-web-release-20261108/first-scene-release-candidate-20261110.json)
+2026-11-10 公网 `a23cc382` 默认 Chrome 简中和繁中通过出码、待确认和取消，二维码内容与官方钱包链接一致。比奇候选 `c52ea9abb6` 的发布 pin 和专用审核补丁均在 `7b6429503d` 通过应用校验。待独立审核、正式切换、默认网络签名进比奇和实体手机。 [本轮公网复测](evidence/r16-web-fishing-loop-20261110/tackle-cursor-and-zero-notice.json) · [发布候选证据](evidence/numeron-web-release-20261108/first-scene-release-candidate-20261110.json)
 
 2026-11-10 公网 `83eadf4f` 切到第一方钱包中继，出码读限时 20 秒及一次瞬时失败重试。直连浏览器用官方手机尺寸钱包完成签名、兑换、比奇渲染及正常退出。同机默认 Chrome 等待资源后出码及轮询通过，独立冷启动仍复现超时。继续冷启动和实体手机验收。 [扫码发布与回执](evidence/numeron-web-release-20261108/qr-first-party-relay-20261110.json)
 
-2026-11-10 共用 Gateway 修复冷登录首竿的个人更新调度。实际 Web 首进度 9.662→0.698 秒，Windows 正式传输 9.254→0.684 秒。WebGPU 鱼具到背包双向拖放各一条成功回包，两次重登保留原 15 个鱼饵。抛竿、等待、收线已在 Web 两条生产渲染路径和 Windows 无窗口 GPU 通过。Windows 优化构建已完成，公网 R2 缺两款鱼竿、钓鱼头发和水效样本。继续水效、音点、自动重抛、桌面和发行。 [首竿与读档](evidence/r16-web-fishing-loop-20261110/cold-first-cast-timing.json) · [拖放](evidence/r16-web-fishing-loop-20261110/tackle-drag.json) · [画面](evidence/r16-web-fishing-loop-20261110/actor-presentation.json)
+2026-11-10 共用 Gateway 修复冷登录首竿的个人更新调度。实际 Web 首进度 9.662→0.698 秒，Windows 正式传输 9.254→0.684 秒。抛竿、等待、收线已在 Web 两条生产渲染路径和 Windows 无窗口 GPU 通过。公网 R2 缺两款鱼竿、钓鱼头发和水效样本。 [首竿与读档](evidence/r16-web-fishing-loop-20261110/cold-first-cast-timing.json) · [画面](evidence/r16-web-fishing-loop-20261110/actor-presentation.json)
 
-2026-11-10 本机两条生产浏览器路径已复测冷登录站姿、转向、比奇抛竿和收竿。鱼具普通点击装卸、同角重登和自动重抛后关闭通过。继续鱼具拖拽、身体动作和鱼线、Windows 窗口及 Hosted 发行。大火球与灵魂火符的方向飞行、移动目标命中、走跑接施法及施法后首步仍有独立证据。满包交易已用 File 强停和真实 PostgreSQL 验证未成交退回和已成交恢复。 [钓鱼](evidence/r16-web-fishing-loop-20261110/README.md) · [客户端技能](evidence/r16-web-spell-phases-20261110/README.md) · [走跑后施法](evidence/r16-web-move-cast-20261110/README.md) · [施法后走路](evidence/r16-web-postcast-20261110/README.md) · [服务器计时](evidence/r16-delayed-projectiles-20261110/README.md) · [交易恢复](evidence/r16-trade-restart-20261110/README.md) · [比奇遮挡](evidence/r16-bichon-npc-depth-20261110/README.md)
+2026-11-10 大火球与灵魂火符的方向飞行、移动目标命中、走跑接施法及施法后首步有独立证据。满包交易已用 File 强停和真实 PostgreSQL 验证未成交退回和已成交恢复。 [客户端技能](evidence/r16-web-spell-phases-20261110/README.md) · [走跑后施法](evidence/r16-web-move-cast-20261110/README.md) · [施法后走路](evidence/r16-web-postcast-20261110/README.md) · [服务器计时](evidence/r16-delayed-projectiles-20261110/README.md) · [交易恢复](evidence/r16-trade-restart-20261110/README.md) · [比奇遮挡](evidence/r16-bichon-npc-depth-20261110/README.md)
 
 2026-11-10 Web 阿洛入口和授权随十种游戏语言切换，简中、英文、阿语实测同一教学回忆和补给权限。继续六种语言的英文回退、Web 模型设置和跨端实战。 [语言和授权复测](evidence/r16-alo-localization-20261110/README.md)
 

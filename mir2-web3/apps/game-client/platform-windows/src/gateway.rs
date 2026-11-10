@@ -3773,6 +3773,124 @@ struct WalletState {
     credit: u32,
 }
 
+#[derive(Debug, Clone, PartialEq, Eq)]
+struct NativeFishingWearItem {
+    uid: u64,
+    name: String,
+    count: u16,
+    durability: u16,
+    awaiting_zero_snapshot: bool,
+}
+
+impl NativeFishingWearItem {
+    fn from_snapshot(item: &Value, info: &Value) -> Option<Self> {
+        if info.get("item_index")?.as_i64()? != item.get("item_index")?.as_i64()? {
+            return None;
+        }
+        let mut source = info
+            .get("name")?
+            .as_str()?
+            .trim_end_matches(char::is_numeric);
+        let mut name = String::new();
+        // Crystal ItemInfo.FriendlyName drops the trailing number, then bracket tags.
+        while let Some((prefix, suffix)) = source.split_once('[') {
+            let Some((_, remainder)) = suffix.split_once(']') else {
+                break;
+            };
+            name.push_str(prefix);
+            source = remainder;
+        }
+        name.push_str(source);
+        Some(Self {
+            uid: item.get("unique_id")?.as_u64()?,
+            name,
+            count: u16::try_from(item.get("count")?.as_u64()?)
+                .ok()
+                .filter(|count| *count > 0)?,
+            durability: u16::try_from(item.get("current_dura")?.as_u64()?).ok()?,
+            awaiting_zero_snapshot: false,
+        })
+        .filter(|item| !item.name.is_empty())
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+struct NativeFishingWear {
+    owner_id: u32,
+    rod_uid: u64,
+    // The weapon followed by Crystal's five positional Fishing slots.
+    items: [Option<NativeFishingWearItem>; 6],
+}
+
+impl NativeFishingWear {
+    fn from_snapshot(payload: &Value) -> Option<Self> {
+        let owner_id = value_u32(payload.get("playerObjectId")).filter(|id| *id != 0)?;
+        let mut weapons = payload
+            .get("equipmentItems")?
+            .as_array()?
+            .iter()
+            .filter(|item| normalized_slot(item.get("slot"), u32::MAX) == 0);
+        let weapon = weapons.next()?;
+        if weapons.next().is_some() {
+            return None;
+        }
+        let source = weapon.get("tooltipSource")?;
+        let info = source.get("info")?;
+        let rod = source.get("userItem")?;
+        let real_info = source
+            .get("realInfo")
+            .filter(|info| !info.is_null())
+            .unwrap_or(info);
+        if info.get("item_type")?.as_u64()? != 1
+            || !matches!(real_info.get("shape")?.as_i64()?, 49 | 50)
+        {
+            return None;
+        }
+        let rod_item = NativeFishingWearItem::from_snapshot(rod, info)?;
+        let rod_uid = rod_item.uid;
+        if weapon.get("uniqueId")?.as_u64()? != rod_uid {
+            return None;
+        }
+        let sockets = rod.get("slots")?.as_array()?;
+        let socket_infos = source.get("socketInfos").and_then(Value::as_array);
+        let mut items = std::array::from_fn(|_| None);
+        items[0] = Some(rod_item);
+        for (slot, (item, entry)) in sockets.iter().zip(items[1..].iter_mut()).enumerate() {
+            let Some(info) = socket_infos.and_then(|infos| infos.get(slot)) else {
+                continue;
+            };
+            if info.get("item_type").and_then(Value::as_u64) == Some(28 + slot as u64) {
+                *entry = NativeFishingWearItem::from_snapshot(item, info);
+            }
+        }
+        for entry in &mut items {
+            if entry.as_ref().is_some_and(|item| {
+                let top_level_occurrences = ["inventoryItems", "beltItems", "equipmentItems"]
+                    .iter()
+                    .filter_map(|field| payload.get(*field).and_then(Value::as_array))
+                    .flatten()
+                    .filter(|row| row.get("uniqueId").and_then(Value::as_u64) == Some(item.uid))
+                    .count();
+                let socket_occurrences = sockets
+                    .iter()
+                    .filter(|socket| {
+                        socket.get("unique_id").and_then(Value::as_u64) == Some(item.uid)
+                    })
+                    .count();
+                top_level_occurrences + socket_occurrences != 1
+            }) {
+                *entry = None;
+            }
+        }
+        items[0].as_ref()?;
+        Some(Self {
+            owner_id,
+            rod_uid,
+            items,
+        })
+    }
+}
+
 /// Packet-first authoritative HUD cursor for the native client.
 ///
 /// Gateway snapshots may be partial during bootstrap, reconnect, and map
@@ -3780,6 +3898,7 @@ struct WalletState {
 /// complete `UserInformation` values that were already delivered.
 #[derive(Debug, Clone, Default, PartialEq, Eq)]
 pub(crate) struct NativeUiPlayerCursor {
+    fishing_wear: Option<NativeFishingWear>,
     npc_shop_uses_pearls: bool,
     // Raw f32 bits retain Eq on the cursor and survive partial snapshots.
     npc_shop_purchase_rate_bits: Option<u32>,
@@ -3812,6 +3931,114 @@ pub(crate) struct NativeUiPlayerCursor {
 impl NativeUiPlayerCursor {
     fn reset(&mut self) {
         *self = Self::default();
+    }
+
+    fn observe_fishing_wear_snapshot(&mut self, payload: &Value) {
+        let mut next = NativeFishingWear::from_snapshot(payload);
+        if let Some((previous, next)) = self.fishing_wear.as_ref().zip(next.as_mut()) {
+            if previous.owner_id == next.owner_id && previous.rod_uid == next.rod_uid {
+                for (previous, next) in previous.items.iter().zip(&mut next.items) {
+                    if let Some((previous, next)) = previous.as_ref().zip(next.as_mut()) {
+                        // A replay of the pre-wear snapshot cannot rearm the notice.
+                        if previous.uid == next.uid
+                            && previous.awaiting_zero_snapshot
+                            && next.durability > 0
+                        {
+                            next.durability = 0;
+                            next.awaiting_zero_snapshot = true;
+                        }
+                    }
+                }
+            }
+        }
+        self.fishing_wear = next;
+    }
+
+    fn observe_fishing_wear_packet(
+        &mut self,
+        packet: &str,
+        payload: &Value,
+    ) -> Option<mir2_client_bevy::chat::ChatLine> {
+        if !matches!(
+            packet,
+            "DuraChanged"
+                | "DeleteItem"
+                | "ItemRepaired"
+                | "EquipItem"
+                | "RemoveItem"
+                | "EquipSlotItem"
+                | "RemoveSlotItem"
+        ) {
+            return None;
+        }
+        let wear = self.fishing_wear.as_mut()?;
+        let uid = payload.get("uniqueId")?.as_u64()?;
+        let grid = payload.get("grid").and_then(Value::as_str);
+        let success = payload.get("success").and_then(Value::as_bool) == Some(true);
+        if success
+            && matches!(grid, Some("Inventory" | "Storage"))
+            && ((packet == "EquipItem" && payload.get("to").and_then(Value::as_i64) == Some(0))
+                || (packet == "RemoveItem" && uid == wear.rod_uid))
+        {
+            self.fishing_wear = None;
+            return None;
+        }
+        if packet == "EquipSlotItem"
+            && success
+            && payload.get("gridTo").and_then(Value::as_str) == Some("Fishing")
+        {
+            let slot = usize::try_from(payload.get("to")?.as_u64()?)
+                .ok()?
+                .checked_add(1)?;
+            *wear.items.get_mut(slot)? = None;
+            return None;
+        }
+        let entry = wear
+            .items
+            .iter_mut()
+            .find(|entry| entry.as_ref().is_some_and(|item| item.uid == uid))?;
+        let item = entry.as_mut()?;
+        if packet == "DeleteItem" {
+            let count = u16::try_from(payload.get("count")?.as_u64()?).ok()?;
+            if count >= item.count {
+                if uid == wear.rod_uid {
+                    self.fishing_wear = None;
+                } else {
+                    *entry = None;
+                }
+            } else {
+                item.count -= count;
+            }
+            return None;
+        }
+        if packet == "RemoveSlotItem" && success && grid == Some("Fishing") && uid != wear.rod_uid {
+            *entry = None;
+            return None;
+        }
+        let durability = u16::try_from(payload.get("currentDura")?.as_u64()?).ok()?;
+        if packet == "ItemRepaired" && durability > 0 {
+            item.durability = durability;
+            item.awaiting_zero_snapshot = false;
+            return None;
+        }
+        if packet != "DuraChanged" || durability >= item.durability {
+            return None;
+        }
+        item.durability = durability;
+        if durability != 0 {
+            return None;
+        }
+        item.awaiting_zero_snapshot = true;
+        let name = mir2_client_bevy::player_text::name(&item.name);
+        let text = mir2_client_bevy::native_i18n::format_key(
+            "client.FriendlyDuraDroppedToZero",
+            "{0}'s dura has dropped to 0.",
+            &[("0", &name)],
+        );
+        Some(mir2_client_bevy::chat::ChatLine {
+            text,
+            channel: "system".into(),
+        })
     }
 
     pub(crate) fn observe_world_snapshot(&mut self, payload: &Value) {
@@ -6562,7 +6789,11 @@ where
                                         update_wallet_from_snapshot(&mut last_wallet,&owner);
                                         // Replace the read cursor from this same source;
                                         // never merge an older packet's wallet/XP.
-                                        ui_cursor = NativeUiPlayerCursor::default();
+                                        ui_cursor = NativeUiPlayerCursor {
+                                            fishing_wear: ui_cursor.fishing_wear.take(),
+                                            ..NativeUiPlayerCursor::default()
+                                        };
+                                        ui_cursor.observe_fishing_wear_snapshot(&owner);
                                         ui_cursor.observe_world_snapshot(&owner);
                                         if let Some(stamp) = fence.stamp().filter(|stamp|fence.accepts(*stamp,true)) {
                                             owner_producer_receipts.received(stamp,&owner,&skill_cursor,fence)?;
@@ -7271,6 +7502,7 @@ where
         // world/map/entity/effect registry in the same frame. Never re-emit
         // the previous map's personal snapshot.
         *last_world_payload = None;
+        ui_cursor.fishing_wear = None;
         map_packet_cursor.reset();
         if scope == NativeResetScope::Session {
             ui_cursor.reset();
@@ -7548,6 +7780,7 @@ where
             // snapshot cannot overwrite the fresh HUD balance.
             merge_wallet_into_payload(&mut payload, *last_wallet);
             *last_world_payload = Some(payload.clone());
+            ui_cursor.observe_fishing_wear_snapshot(&payload);
             ui_cursor.observe_world_snapshot(&payload);
             let ui_model = ui_cursor.to_read_model_json();
             let ui_json = serde_json::to_string(&ui_model).map_err(|e| e.to_string())?;
@@ -7675,6 +7908,15 @@ where
         "packet" => {
             let packet = event.packet.as_deref().unwrap_or("?");
             crate::timing::reply(packet);
+            if let Some(chat) = event
+                .payload
+                .as_ref()
+                .and_then(|payload| ui_cursor.observe_fishing_wear_packet(packet, payload))
+            {
+                let _ = mir2_bevy_runtime::native_ingest::push_native_chat_line(
+                    serde_json::to_string(&chat).map_err(|error| error.to_string())?,
+                );
+            }
             match packet {
                 "LoginSuccess" => {
                     eprintln!("[gateway-client] LoginSuccess");
@@ -10986,6 +11228,140 @@ mod quest_tooltip_tests;
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    fn native_fishing_wear_snapshot(rod_durability: u16, hook_durability: Option<u16>) -> Value {
+        json!({
+            "playerObjectId": 7,
+            "inventoryItems": [{"uniqueId": 8001, "slot": 0}],
+            "equipmentItems": [{
+                "slot": "weapon", "uniqueId": 1001,
+                "tooltipSource": {
+                    "info": mir2_game_data::crystal_item_by_index(793).unwrap(),
+                    "userItem": {
+                        "unique_id": 1001, "item_index": 793, "count": 1,
+                        "current_dura": rod_durability,
+                        "slots": [hook_durability.map(|durability| json!({
+                            "unique_id": 2001, "item_index": 795, "count": 1,
+                            "current_dura": durability,
+                        })), null, null, null, null]
+                    },
+                    "socketInfos": [mir2_game_data::crystal_item_by_index(795), null, null, null, null]
+                }
+            }],
+        })
+    }
+
+    #[test]
+    fn native_fishing_wear_announces_only_the_exact_owned_positive_to_zero_edge() {
+        let mut cursor = NativeUiPlayerCursor::default();
+        let owned = native_fishing_wear_snapshot(1, Some(2));
+        let zero = json!({"uniqueId": 2001, "currentDura": 0});
+        let positive = json!({"uniqueId": 2001, "currentDura": 1});
+        let deleted = json!({"uniqueId": 2001, "count": 1});
+        assert!(cursor
+            .observe_fishing_wear_packet("DuraChanged", &zero)
+            .is_none());
+        cursor.observe_fishing_wear_snapshot(&owned);
+        assert!(cursor
+            .observe_fishing_wear_packet("DuraChanged", &positive)
+            .is_none());
+        for uid in [8001, 9999] {
+            assert!(cursor
+                .observe_fishing_wear_packet(
+                    "DuraChanged",
+                    &json!({"uniqueId": uid, "currentDura": 0})
+                )
+                .is_none());
+        }
+        let line = cursor
+            .observe_fishing_wear_packet("DuraChanged", &zero)
+            .unwrap();
+        assert_eq!(line.channel, "system");
+        let name = mir2_client_bevy::player_text::name("FishingHook");
+        assert_eq!(
+            line.text,
+            mir2_client_bevy::native_i18n::format_key(
+                "client.FriendlyDuraDroppedToZero",
+                "{0}'s dura has dropped to 0.",
+                &[("0", &name)]
+            )
+        );
+        // A repeated older snapshot and a stray old positive damage receipt
+        // cannot rearm a warning before the zero snapshot arrives.
+        cursor.observe_fishing_wear_snapshot(&owned);
+        assert!(cursor
+            .observe_fishing_wear_packet("DuraChanged", &positive)
+            .is_none());
+        assert!(cursor
+            .observe_fishing_wear_packet("DuraChanged", &zero)
+            .is_none());
+
+        let broken = native_fishing_wear_snapshot(1, Some(0));
+        cursor.observe_fishing_wear_snapshot(&broken);
+        let inventory = transform_inventory_model(&broken);
+        let weapon = &inventory["items"][1]["tooltipSource"]["userItem"];
+        assert_eq!(weapon["slots"][0]["unique_id"], 2001);
+        assert_eq!(weapon["slots"][0]["current_dura"], 0);
+        assert!(cursor
+            .observe_fishing_wear_packet("DeleteItem", &deleted)
+            .is_none());
+        assert!(cursor
+            .observe_fishing_wear_packet("DuraChanged", &zero)
+            .is_none());
+        let removed = native_fishing_wear_snapshot(1, None);
+        cursor.observe_fishing_wear_snapshot(&removed);
+        assert!(
+            transform_inventory_model(&removed)["items"][1]["tooltipSource"]["userItem"]["slots"]
+                [0]
+            .is_null()
+        );
+        let rod = cursor
+            .observe_fishing_wear_packet(
+                "DuraChanged",
+                &json!({"uniqueId": 1001, "currentDura": 0}),
+            )
+            .unwrap();
+        assert_eq!(rod.channel, "system");
+    }
+
+    #[test]
+    fn native_fishing_wear_retires_detached_ambiguous_or_old_owner_items() {
+        let mut cursor = NativeUiPlayerCursor::default();
+        let mut snapshot = native_fishing_wear_snapshot(1, Some(1));
+        let zero = json!({"uniqueId": 2001, "currentDura": 0});
+        cursor.observe_fishing_wear_snapshot(&snapshot);
+        assert!(cursor
+            .observe_fishing_wear_packet(
+                "RemoveSlotItem",
+                &json!({
+                    "grid":"Fishing", "gridTo":"Inventory", "uniqueId":2001, "to":3, "success":true
+                })
+            )
+            .is_none());
+        assert!(cursor
+            .observe_fishing_wear_packet("DuraChanged", &zero)
+            .is_none());
+        snapshot["inventoryItems"][0]["uniqueId"] = json!(2001);
+        cursor.observe_fishing_wear_snapshot(&snapshot);
+        assert!(cursor
+            .observe_fishing_wear_packet("DuraChanged", &zero)
+            .is_none());
+        snapshot["inventoryItems"][0]["uniqueId"] = json!(8001);
+        snapshot["equipmentItems"][0]["tooltipSource"]["socketInfos"][0]["item_index"] = json!(796);
+        cursor.observe_fishing_wear_snapshot(&snapshot);
+        assert!(cursor
+            .observe_fishing_wear_packet("DuraChanged", &zero)
+            .is_none());
+        cursor.observe_fishing_wear_snapshot(&native_fishing_wear_snapshot(1, Some(0)));
+        assert!(cursor
+            .observe_fishing_wear_packet("DuraChanged", &zero)
+            .is_none());
+        cursor.observe_fishing_wear_snapshot(&native_fishing_wear_snapshot(1, Some(1)));
+        cursor.reset();
+        assert!(cursor
+            .observe_fishing_wear_packet("DuraChanged", &zero)
+            .is_none());
+    }
 
     // Use the same native_queue_test_guard imported from super as the sibling
     // mail/ownership fixtures; another local static would not exclude them.

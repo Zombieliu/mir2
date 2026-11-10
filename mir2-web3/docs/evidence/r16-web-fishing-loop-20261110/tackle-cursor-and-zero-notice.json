@@ -1,0 +1,842 @@
+{
+  "schema": "mir2.r16.fishing-cursor-and-zero-notice.v1",
+  "base": "7b6429503d77585c4a414250d368e8b72e3caa10",
+  "crystalReference": "92b4ce4ab488b11e65f63d3ad22de2e1f25ec08d",
+  "crystalSources": {
+    "cursor": "Client/MirScenes/GameScene.cs:1158-1177",
+    "spriteAlpha": "Client/MirGraphics/MLibrary.cs:960-1049",
+    "wearFeedback": "Client/MirScenes/GameScene.cs:3536-3596",
+    "delete": "Client/MirScenes/GameScene.cs:3629-3775",
+    "originalWear": "Server/MirObjects/PlayerObject.cs:4464-4490"
+  },
+  "web": {
+    "buildId": "tMe8tCSGfWibOta_Nvg92",
+    "buildSha256": "3478321cdfeba361258e7db64afa2f0814a9353687c8158498c49f1be828db74",
+    "runtimeVersion": "bevy-0cd68510886134e0",
+    "sourceArchiveSha256": "ba8041ef4d057e6ee48e5e7fc8d44904f6110eeccceb30b8c4a5f22435288dd8",
+    "sources": {
+      "mir2-web3/apps/web/app/components/original-client-fishing-windows.tsx": {
+        "builtSourceSha256": "c3e6a536b1d494d2e2338c9e523b4aac21486aaf3fa43b8e5d55cca1ba20ef32",
+        "gitLfSha256": "c3e6a536b1d494d2e2338c9e523b4aac21486aaf3fa43b8e5d55cca1ba20ef32"
+      },
+      "mir2-web3/apps/web/app/components/original-client-game-ui-scene.tsx": {
+        "builtSourceSha256": "f7cad098b38d2f8aa29632152e91f9d8fe6f96293ec958622546334e91cc8b88",
+        "gitLfSha256": "f7cad098b38d2f8aa29632152e91f9d8fe6f96293ec958622546334e91cc8b88"
+      },
+      "mir2-web3/apps/web/app/components/original-client-inventory-window.tsx": {
+        "builtSourceSha256": "dbe34e78613c257686461169ca47e1f988e608f27ed1e5ae384f30dad7b92b71",
+        "gitLfSha256": "dbe34e78613c257686461169ca47e1f988e608f27ed1e5ae384f30dad7b92b71"
+      },
+      "mir2-web3/apps/web/app/components/original-client-shell-types.ts": {
+        "builtSourceSha256": "0403e404b91b77f8f15239c8b1c479161e5bb64693345801b5a1e18d4032df90",
+        "gitLfSha256": "5f5802e181bf9afd7dbeb911b4746b630c15df3eddf5b7bd16ee4a38bd221000"
+      },
+      "mir2-web3/apps/web/app/globals.css": {
+        "builtSourceSha256": "69db39734cd7bbdb89da4bb6bc2d0e605e7667b98f01ec5d3f2bbe1b47ed71a0",
+        "gitLfSha256": "69db39734cd7bbdb89da4bb6bc2d0e605e7667b98f01ec5d3f2bbe1b47ed71a0"
+      },
+      "mir2-web3/apps/web/app/page.tsx": {
+        "builtSourceSha256": "a58e3dcc476fa7ae483cd5167931d8870a09ad1fc156c57c8aee453c0b6ae8f4",
+        "gitLfSha256": "a58e3dcc476fa7ae483cd5167931d8870a09ad1fc156c57c8aee453c0b6ae8f4"
+      },
+      "mir2-web3/apps/web/lib/world-fishing-panel.ts": {
+        "builtSourceSha256": "b7fc27ccb9743feee3295c6ac1a80ebae28d5d12c34851d216a9fda565cc59fc",
+        "gitLfSha256": "b7fc27ccb9743feee3295c6ac1a80ebae28d5d12c34851d216a9fda565cc59fc"
+      },
+      "mir2-web3/apps/web/lib/world-fishing-tackle-gesture.ts": {
+        "builtSourceSha256": "d16ca69064cfd181563d91e29ba67d070d5a603d26f4946e6da47e298cf07c4c",
+        "gitLfSha256": "d16ca69064cfd181563d91e29ba67d070d5a603d26f4946e6da47e298cf07c4c"
+      },
+      "mir2-web3/apps/web/scripts/test-stage5-adapters.mjs": {
+        "builtSourceSha256": "84e5627e28c606f7420084928f8a49494b290e314de949202b37d9fb483236a1",
+        "gitLfSha256": "84e5627e28c606f7420084928f8a49494b290e314de949202b37d9fb483236a1"
+      },
+      "mir2-web3/apps/web/scripts/test-world-fishing-feedback.mjs": {
+        "builtSourceSha256": "6e4d68de09db987b80bbde340b8ed37b6eb8984fb77ead38fa83de33356f459c",
+        "gitLfSha256": "6e4d68de09db987b80bbde340b8ed37b6eb8984fb77ead38fa83de33356f459c"
+      }
+    },
+    "art": {
+      "index": 2330,
+      "sha256": "6a997c1b76d142d7771dc693b911ebbb02394c5e840c380e0ac9754dfeb1b214",
+      "raw": [
+        32,
+        27
+      ],
+      "opaque": [
+        29,
+        27
+      ]
+    },
+    "checks": {
+      "stage5": {
+        "passed": 518,
+        "sha256": "ca63706e99cd5ca8601411fc337d3d468a3d242bff16d0ea05346b2662fee2ce"
+      },
+      "focused": {
+        "passed": 22,
+        "sha256": "4055f960ca8f108cd861c90c8d4af953f6eb1a331b124d12b8a54177a4557590"
+      },
+      "stageAndLocale": {
+        "passed": 18,
+        "sha256": "bcf6e27f7ac1ad213a849ee5cd2964d4a8329f672f620bda8e9ac482cbe7b4f3"
+      },
+      "pinnedClientCore": {
+        "passed": true,
+        "sha256": "adee30eef5c4cd7862df0604dfc0a61f44f08869e2b667702b7c5b40e35a7dbb"
+      }
+    },
+    "receipts": [
+      {
+        "name": "baseline-webgpu-r2",
+        "renderer": "webgpu",
+        "locale": "en-US",
+        "receiptSha256": "6fe7a23b4b3c3ce1de20e5453ab54ba8f50b38823b9ef49585b7d64026db543c",
+        "buildId": "UafFkZC8DOqUbOb1vfrsF",
+        "pairedFixtureSha256": "bc4b982f2c60ac874a1c218271fb0b4a4443d55cc62719db19cc3a479189fb5e",
+        "zero": {
+          "wearSeq": 622,
+          "snapshotSeq": 629,
+          "retained": true,
+          "warning": [],
+          "tooltip": []
+        },
+        "deletion": {
+          "deleteSeq": 635,
+          "terminalSeq": 636,
+          "count": 1,
+          "slotEmpty": true,
+          "sameWarningCount": true
+        },
+        "drag": [
+          {
+            "action": "equipSlotItem",
+            "packetSeq": 638,
+            "ackSeq": 639,
+            "snapshotSeq": 640,
+            "anchors": [
+              {
+                "point": {
+                  "x": 687,
+                  "y": 371
+                },
+                "visible": false
+              },
+              {
+                "point": {
+                  "x": 622,
+                  "y": 478
+                },
+                "visible": false
+              }
+            ]
+          },
+          {
+            "action": "removeSlotItem",
+            "packetSeq": 641,
+            "ackSeq": 642,
+            "snapshotSeq": 643,
+            "anchors": [
+              {
+                "point": {
+                  "x": 637,
+                  "y": 452
+                },
+                "visible": false
+              },
+              {
+                "point": {
+                  "x": 702,
+                  "y": 345
+                },
+                "visible": false
+              }
+            ]
+          },
+          {
+            "action": "equipSlotItem",
+            "packetSeq": 644,
+            "ackSeq": 645,
+            "snapshotSeq": 646,
+            "anchors": [
+              {
+                "point": {
+                  "x": 687,
+                  "y": 371
+                },
+                "visible": false
+              },
+              {
+                "point": {
+                  "x": 622,
+                  "y": 478
+                },
+                "visible": false
+              }
+            ]
+          }
+        ],
+        "wrongSlotWireCount": 0,
+        "rightClickCleared": true,
+        "relog": {
+          "hookDura": 8000,
+          "rod": 9999,
+          "bait": 14,
+          "oldHookAbsent": true,
+          "duplicateInBag": false
+        }
+      },
+      {
+        "name": "baseline-shared-r2",
+        "renderer": "shared",
+        "locale": "en-US",
+        "receiptSha256": "bbfbb131ad1544159376f8f7ded67dc931e0ec4ee67866b64993c8f507e6e3f3",
+        "buildId": "UafFkZC8DOqUbOb1vfrsF",
+        "pairedFixtureSha256": "bc4b982f2c60ac874a1c218271fb0b4a4443d55cc62719db19cc3a479189fb5e",
+        "zero": {
+          "wearSeq": 622,
+          "snapshotSeq": 629,
+          "retained": true,
+          "warning": [],
+          "tooltip": []
+        },
+        "deletion": {
+          "deleteSeq": 632,
+          "terminalSeq": 633,
+          "count": 1,
+          "slotEmpty": true,
+          "sameWarningCount": true
+        },
+        "drag": [
+          {
+            "action": "equipSlotItem",
+            "packetSeq": 635,
+            "ackSeq": 636,
+            "snapshotSeq": 637,
+            "anchors": [
+              {
+                "point": {
+                  "x": 687,
+                  "y": 371
+                },
+                "visible": false
+              },
+              {
+                "point": {
+                  "x": 622,
+                  "y": 478
+                },
+                "visible": false
+              }
+            ]
+          },
+          {
+            "action": "removeSlotItem",
+            "packetSeq": 638,
+            "ackSeq": 639,
+            "snapshotSeq": 640,
+            "anchors": [
+              {
+                "point": {
+                  "x": 637,
+                  "y": 452
+                },
+                "visible": false
+              },
+              {
+                "point": {
+                  "x": 702,
+                  "y": 345
+                },
+                "visible": false
+              }
+            ]
+          },
+          {
+            "action": "equipSlotItem",
+            "packetSeq": 641,
+            "ackSeq": 642,
+            "snapshotSeq": 643,
+            "anchors": [
+              {
+                "point": {
+                  "x": 687,
+                  "y": 371
+                },
+                "visible": false
+              },
+              {
+                "point": {
+                  "x": 622,
+                  "y": 478
+                },
+                "visible": false
+              }
+            ]
+          }
+        ],
+        "wrongSlotWireCount": 0,
+        "rightClickCleared": true,
+        "relog": {
+          "hookDura": 8000,
+          "rod": 9999,
+          "bait": 14,
+          "oldHookAbsent": true,
+          "duplicateInBag": false
+        }
+      },
+      {
+        "name": "candidate-webgpu-r1",
+        "renderer": "webgpu",
+        "locale": "en-US",
+        "receiptSha256": "fd90b39464f471ddb09be02c90f42b933fb4d3630bf186d973d1aaf69e853da6",
+        "buildId": "tMe8tCSGfWibOta_Nvg92",
+        "pairedFixtureSha256": "bc4b982f2c60ac874a1c218271fb0b4a4443d55cc62719db19cc3a479189fb5e",
+        "zero": {
+          "wearSeq": 622,
+          "snapshotSeq": 629,
+          "retained": true,
+          "warning": [
+            "Fishing Hook's dura has dropped to 0."
+          ],
+          "tooltip": [
+            "Durability: 0/8"
+          ]
+        },
+        "deletion": {
+          "deleteSeq": 634,
+          "terminalSeq": 635,
+          "count": 1,
+          "slotEmpty": true,
+          "sameWarningCount": true
+        },
+        "drag": [
+          {
+            "action": "equipSlotItem",
+            "packetSeq": 637,
+            "ackSeq": 638,
+            "snapshotSeq": 639,
+            "anchors": [
+              {
+                "point": {
+                  "x": 687,
+                  "y": 371
+                },
+                "left": 673,
+                "top": 358,
+                "scaleX": 1,
+                "scaleY": 1
+              },
+              {
+                "point": {
+                  "x": 622,
+                  "y": 478
+                },
+                "left": 608,
+                "top": 465,
+                "scaleX": 1,
+                "scaleY": 1
+              }
+            ]
+          },
+          {
+            "action": "removeSlotItem",
+            "packetSeq": 640,
+            "ackSeq": 641,
+            "snapshotSeq": 642,
+            "anchors": [
+              {
+                "point": {
+                  "x": 637,
+                  "y": 452
+                },
+                "left": 623,
+                "top": 439,
+                "scaleX": 1,
+                "scaleY": 1
+              },
+              {
+                "point": {
+                  "x": 702,
+                  "y": 345
+                },
+                "left": 688,
+                "top": 332,
+                "scaleX": 1,
+                "scaleY": 1
+              }
+            ]
+          },
+          {
+            "action": "equipSlotItem",
+            "packetSeq": 643,
+            "ackSeq": 644,
+            "snapshotSeq": 645,
+            "anchors": [
+              {
+                "point": {
+                  "x": 687,
+                  "y": 371
+                },
+                "left": 673,
+                "top": 358,
+                "scaleX": 1,
+                "scaleY": 1
+              },
+              {
+                "point": {
+                  "x": 622,
+                  "y": 478
+                },
+                "left": 608,
+                "top": 465,
+                "scaleX": 1,
+                "scaleY": 1
+              }
+            ]
+          }
+        ],
+        "wrongSlotWireCount": 0,
+        "rightClickCleared": true,
+        "relog": {
+          "hookDura": 8000,
+          "rod": 9999,
+          "bait": 14,
+          "oldHookAbsent": true,
+          "duplicateInBag": false
+        }
+      },
+      {
+        "name": "candidate-shared-r1",
+        "renderer": "shared",
+        "locale": "en-US",
+        "receiptSha256": "550b460f80fa80ea8b6f1fdcebeb14ea454929ef3643f942d6d7b58c04ea311b",
+        "buildId": "tMe8tCSGfWibOta_Nvg92",
+        "pairedFixtureSha256": "bc4b982f2c60ac874a1c218271fb0b4a4443d55cc62719db19cc3a479189fb5e",
+        "zero": {
+          "wearSeq": 622,
+          "snapshotSeq": 629,
+          "retained": true,
+          "warning": [
+            "Fishing Hook's dura has dropped to 0."
+          ],
+          "tooltip": [
+            "Durability: 0/8"
+          ]
+        },
+        "deletion": {
+          "deleteSeq": 631,
+          "terminalSeq": 632,
+          "count": 1,
+          "slotEmpty": true,
+          "sameWarningCount": true
+        },
+        "drag": [
+          {
+            "action": "equipSlotItem",
+            "packetSeq": 634,
+            "ackSeq": 635,
+            "snapshotSeq": 636,
+            "anchors": [
+              {
+                "point": {
+                  "x": 687,
+                  "y": 371
+                },
+                "left": 673,
+                "top": 358,
+                "scaleX": 1,
+                "scaleY": 1
+              },
+              {
+                "point": {
+                  "x": 622,
+                  "y": 478
+                },
+                "left": 608,
+                "top": 465,
+                "scaleX": 1,
+                "scaleY": 1
+              }
+            ]
+          },
+          {
+            "action": "removeSlotItem",
+            "packetSeq": 637,
+            "ackSeq": 638,
+            "snapshotSeq": 639,
+            "anchors": [
+              {
+                "point": {
+                  "x": 637,
+                  "y": 452
+                },
+                "left": 623,
+                "top": 439,
+                "scaleX": 1,
+                "scaleY": 1
+              },
+              {
+                "point": {
+                  "x": 702,
+                  "y": 345
+                },
+                "left": 688,
+                "top": 332,
+                "scaleX": 1,
+                "scaleY": 1
+              }
+            ]
+          },
+          {
+            "action": "equipSlotItem",
+            "packetSeq": 640,
+            "ackSeq": 641,
+            "snapshotSeq": 642,
+            "anchors": [
+              {
+                "point": {
+                  "x": 687,
+                  "y": 371
+                },
+                "left": 673,
+                "top": 358,
+                "scaleX": 1,
+                "scaleY": 1
+              },
+              {
+                "point": {
+                  "x": 622,
+                  "y": 478
+                },
+                "left": 608,
+                "top": 465,
+                "scaleX": 1,
+                "scaleY": 1
+              }
+            ]
+          }
+        ],
+        "wrongSlotWireCount": 0,
+        "rightClickCleared": true,
+        "relog": {
+          "hookDura": 8000,
+          "rod": 9999,
+          "bait": 14,
+          "oldHookAbsent": true,
+          "duplicateInBag": false
+        }
+      },
+      {
+        "name": "candidate-webgpu-zh-r1",
+        "renderer": "webgpu",
+        "locale": "zh-CN",
+        "receiptSha256": "0d52daf635c4cf14b14c208a42199972814146f66c42263302f3ea3e454f4569",
+        "buildId": "tMe8tCSGfWibOta_Nvg92",
+        "pairedFixtureSha256": "bc4b982f2c60ac874a1c218271fb0b4a4443d55cc62719db19cc3a479189fb5e",
+        "zero": {
+          "wearSeq": 622,
+          "snapshotSeq": 629,
+          "retained": true,
+          "warning": [
+            "鱼钩 的耐久度已降至 0。"
+          ],
+          "tooltip": [
+            "耐久: 0/8"
+          ]
+        },
+        "deletion": {
+          "deleteSeq": 631,
+          "terminalSeq": 632,
+          "count": 1,
+          "slotEmpty": true,
+          "sameWarningCount": true
+        },
+        "drag": [
+          {
+            "action": "equipSlotItem",
+            "packetSeq": 634,
+            "ackSeq": 635,
+            "snapshotSeq": 636,
+            "anchors": [
+              {
+                "point": {
+                  "x": 687,
+                  "y": 371
+                },
+                "left": 673,
+                "top": 358,
+                "scaleX": 1,
+                "scaleY": 1
+              },
+              {
+                "point": {
+                  "x": 622,
+                  "y": 478
+                },
+                "left": 608,
+                "top": 465,
+                "scaleX": 1,
+                "scaleY": 1
+              }
+            ]
+          },
+          {
+            "action": "removeSlotItem",
+            "packetSeq": 637,
+            "ackSeq": 638,
+            "snapshotSeq": 639,
+            "anchors": [
+              {
+                "point": {
+                  "x": 637,
+                  "y": 452
+                },
+                "left": 623,
+                "top": 439,
+                "scaleX": 1,
+                "scaleY": 1
+              },
+              {
+                "point": {
+                  "x": 702,
+                  "y": 345
+                },
+                "left": 688,
+                "top": 332,
+                "scaleX": 1,
+                "scaleY": 1
+              }
+            ]
+          },
+          {
+            "action": "equipSlotItem",
+            "packetSeq": 640,
+            "ackSeq": 641,
+            "snapshotSeq": 642,
+            "anchors": [
+              {
+                "point": {
+                  "x": 687,
+                  "y": 371
+                },
+                "left": 673,
+                "top": 358,
+                "scaleX": 1,
+                "scaleY": 1
+              },
+              {
+                "point": {
+                  "x": 622,
+                  "y": 478
+                },
+                "left": 608,
+                "top": 465,
+                "scaleX": 1,
+                "scaleY": 1
+              }
+            ]
+          }
+        ],
+        "wrongSlotWireCount": 0,
+        "rightClickCleared": true,
+        "relog": {
+          "hookDura": 8000,
+          "rod": 9999,
+          "bait": 14,
+          "oldHookAbsent": true,
+          "duplicateInBag": false
+        }
+      }
+    ],
+    "replay": {
+      "pairedFileFixtureSha256": "bc4b982f2c60ac874a1c218271fb0b4a4443d55cc62719db19cc3a479189fb5e",
+      "wireGatewaySha256": "982ded92ad245cf99165d2845f823abb931c788032c362155fb45db7d566650a",
+      "closureSha256": "87d8e6d83b1cefd2ea47b00f1750e7f9b7e9e1fd5345594798fbc8cef124a1ba",
+      "runnerRoot": "C:/r16-fishing-durability-ui-audit-20261110",
+      "runnerHashes": {
+        "en": "297618b410f08d3617bfa84274ab5fcd772b78f2a3be4d6902589b70c94fc621",
+        "zh": "3918a932ecab80e194b94ffdaff6ce91460d37af27a6f442f6df07964a85beb7"
+      },
+      "servicesClosed": true,
+      "enRunner": {
+        "path": "C:/r16-fishing-durability-ui-audit-20261110/run-durability-ui-browser-r2.mjs",
+        "sha256": "297618b410f08d3617bfa84274ab5fcd772b78f2a3be4d6902589b70c94fc621"
+      },
+      "zhRunner": {
+        "path": "C:/r16-fishing-durability-ui-audit-20261110/run-durability-ui-browser-zh.mjs",
+        "sha256": "3918a932ecab80e194b94ffdaff6ce91460d37af27a6f442f6df07964a85beb7"
+      }
+    },
+    "screenshots": [
+      {
+        "file": "tackle-cursor-held.png",
+        "sha256": "696e35e02536644e34ccf977ba500fea383d84a6a3a332bb904738c1c258f2ae"
+      },
+      {
+        "file": "tackle-zero-system-zh-cn.png",
+        "sha256": "2cb2e34cc9f43577da9c2a9a16cb822b2b3036aafb75bc0203034ec7e73be5aa"
+      },
+      {
+        "file": "tackle-zero-tooltip.png",
+        "sha256": "d00f970b89a3413b653ba69c0f39a7e57ddde06c52d43497377c2b62c9a6e683"
+      }
+    ]
+  },
+  "publicQr": {
+    "receiptSha256": "315ef64685097c87fd6932c1aaa5171e88e9f04d9872599e7b4fcf41a0f08d60",
+    "currentPublicRevision": "a23cc382af1c66cd7ffeea794fd62fe7cba7e96a",
+    "gameHttp": 200,
+    "relayHttp": 200,
+    "readback": [
+      {
+        "locale": "zh-CN",
+        "codeMs": 2377,
+        "pendingMs": 2402,
+        "matrix": {
+          "valid": true,
+          "width": 240,
+          "height": 240,
+          "matched": 2401,
+          "total": 2401
+        },
+        "api": [
+          {
+            "kind": "create",
+            "startedMs": 25,
+            "status": 200,
+            "protocol": "h2",
+            "headersMs": 1866,
+            "completeMs": 1866
+          },
+          {
+            "kind": "poll",
+            "startedMs": 1867,
+            "status": 200,
+            "protocol": "h2",
+            "headersMs": 2098,
+            "completeMs": 2098
+          }
+        ],
+        "stoppedAfterCancellation": true
+      },
+      {
+        "locale": "zh-TW",
+        "codeMs": 7469,
+        "pendingMs": 8447,
+        "matrix": {
+          "valid": true,
+          "width": 240,
+          "height": 240,
+          "matched": 2401,
+          "total": 2401
+        },
+        "api": [
+          {
+            "kind": "create",
+            "startedMs": 23,
+            "status": 200,
+            "protocol": "h2",
+            "headersMs": 4678,
+            "completeMs": 6881
+          },
+          {
+            "kind": "poll",
+            "startedMs": 6881,
+            "status": 200,
+            "protocol": "h2",
+            "headersMs": 8279,
+            "completeMs": 8446
+          }
+        ],
+        "stoppedAfterCancellation": true
+      }
+    ],
+    "requiresReview": true,
+    "reviewedPatchChecks": [
+      {
+        "patch": "reviewed-pin-only.patch",
+        "sha256": "f63132a235fb54229de381753f5cd016bc1b4aa922ca7edf93a2710bf3f92a5e",
+        "passes": true
+      },
+      {
+        "patch": "review-environment-only.patch",
+        "sha256": "f9a5889b8d1d722dd4a01f42c037c0502ab8a15cc7c262b0e2f9af44b3268b21",
+        "passes": true
+      }
+    ],
+    "newPhoneSignature": false,
+    "productionPromotion": false
+  },
+  "native": {
+    "sources": {
+      "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/equipment_creature_host.rs": {
+        "builtSourceSha256": "83b85c5c5f111df16dd0931fd62e11830753cd2b01579a14466729926abd1d46",
+        "gitLfSha256": "83b85c5c5f111df16dd0931fd62e11830753cd2b01579a14466729926abd1d46"
+      },
+      "mir2-web3/apps/game-client/platform-windows/src/gateway.rs": {
+        "builtSourceSha256": "576da84d835aa241a8d03b0be9368a2667b16e121cf9c4f2df21a2ae4635ea7e",
+        "gitLfSha256": "576da84d835aa241a8d03b0be9368a2667b16e121cf9c4f2df21a2ae4635ea7e"
+      }
+    },
+    "archiveSha256": "48c1a312457c64e91625b2c45e468acdd3c8ddf76de2b9428534ad438876542d",
+    "platformExeSha256": "f73b99c02718c00a00959752f0b38586916bc94b7053ebf41ca180149b2c73b1",
+    "bevyExeSha256": "64cc953cb0b80c4ded67f8dfafe468227d23296139f25b9fc39397ad9575363c",
+    "checks": {
+      "platformFishing": {
+        "log": "native-platform-r1.log",
+        "passed": 7,
+        "sha256": "1cd6d69aea771e7818e6259096e11ba143da40e5ec0bf822a0498182ae5ed49d"
+      },
+      "platformOriginalMediaOffscreen": {
+        "log": "native-platform-offscreen-r1.log",
+        "passed": 2,
+        "sha256": "09229d7ac12f882c75088b8e865213719999a65266911dd0b6bee3a6eedf4684"
+      },
+      "platformEquipmentReceipts": {
+        "log": "native-platform-adjacent-r1.log",
+        "passed": 5,
+        "sha256": "d644bb040365c374cf988dd53843b4845aea86b8b469212c21644d0a39fabf49"
+      },
+      "bevyHost": {
+        "log": "native-visual-host-r1.log",
+        "passed": 6,
+        "sha256": "8963fd83122ff166d82c686d74141cd59e73943ec3c0da61fc0531e0c604f595"
+      },
+      "bevyMountFishingAndSharedImages": {
+        "log": "native-visual-adjacent-r1.log",
+        "passed": 10,
+        "sha256": "a47d348270364a5c911d12d875b4907d42455abc82d3bd06643becd74576c176"
+      }
+    },
+    "uniqueTestsPassed": 30,
+    "geometry": {
+      "drawnBitmap": [
+        32,
+        27
+      ],
+      "alphaSize": [
+        29,
+        27
+      ],
+      "stage": [
+        1024,
+        768
+      ],
+      "offset": [
+        -14,
+        -13
+      ],
+      "bottomRightClamp": [
+        995,
+        741
+      ]
+    },
+    "offscreenBiteImages": {
+      "before-wait-cue.png": "7b482803c8d49b177a3d2da0505999fa1484dd4bfab04605d7ee08048ea6ff84",
+      "bite-frame-170.png": "b2601727584840bb7f4d17cc18c4be460059bd1cce7dd6ccb1af0b158b4f6b5c"
+    },
+    "evidenceRoot": "C:/r16-fishing-wear-native-ui-20261110",
+    "scope": "Optimized test binaries, typed ownership, Bevy layout with a measured-size RGBA specimen, and the existing Crystal bite GPU/water regressions. The new cursor and chat were not observed in an ordinary Windows window. Hosted is pending."
+  }
+}
