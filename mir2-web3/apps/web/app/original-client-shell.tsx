@@ -168,6 +168,7 @@ import {
   entityAnimationRuntimeFromWindow,
   resolveCrystalEntityAnimationPoses,
 } from "./components/original-client-entity-animation-runtime";
+import { crystalFishingRodLibrary } from "./components/original-client-player-frames";
 import { WebGl2EntityAtlasLayer, type WebGl2EntityAtlasDebug } from "./components/webgl2-entity-atlas-layer";
 import {
   WebGl2MapAtlasLayer,
@@ -1895,7 +1896,10 @@ export function OriginalClientShell({
         libraries.add(normalizeSceneSpriteLibraryKey(entity.sprite.hairLibrary));
       }
       if (entity.sprite?.weaponLibrary) {
-        libraries.add(normalizeSceneSpriteLibraryKey(entity.sprite.weaponLibrary));
+        const weaponLibrary = normalizeSceneSpriteLibraryKey(entity.sprite.weaponLibrary);
+        libraries.add(weaponLibrary);
+        const fishingRod = crystalFishingRodLibrary(weaponLibrary);
+        if (fishingRod) libraries.add(fishingRod);
       }
       if (entity.sprite?.mountLibrary) {
         libraries.add(normalizeSceneSpriteLibraryKey(entity.sprite.mountLibrary));

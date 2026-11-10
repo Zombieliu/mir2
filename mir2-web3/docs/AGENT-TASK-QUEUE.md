@@ -69,7 +69,8 @@ Updated 2026-11-10 (Asia/Shanghai). Read [coordination](AGENT-ORCHESTRATION.md) 
 - [x] 本机两条浏览器路径验证冷登录后转向、抛竿、咬钩、手动和 Esc 收竿。Web 鱼具普通点击装卸及重登、自动重抛后关闭、服务端渔获奖励有分项证据。 [钓鱼记录](evidence/r16-web-fishing-loop-20261110/README.md)
 - [x] 冷登录成功抛竿唤醒个人状态。实际 WebGPU 9.662→0.698 秒，Windows 正式传输 9.254→0.684 秒。相同 File 基线、正常收竿注销与扣费通过。 [时序回执](evidence/r16-web-fishing-loop-20261110/cold-first-cast-timing.json)
 - [x] Web 生产 WebGPU 实测鱼具和背包双向拖放、同物同量重登、两次点击和七个无误发边界。 [拖放回执](evidence/r16-web-fishing-loop-20261110/tackle-drag.json)
-- [ ] 拖动图标、角色抛竿和收线身体帧及鱼线、Windows 窗口与发行另验。继续其余技能。
+- [x] 两条生产 Web 路径及 Windows 无窗口 GPU 验证人物、头发与原版鱼竿的抛竿、等待、收线。Web 双路通过提前 Esc、正常注销和扣费读档。 [画面与回执](evidence/r16-web-fishing-loop-20261110/actor-presentation.json)
+- [ ] 拖动图标、水面波纹、声音时点、自动重抛动画、Windows 窗口与发行素材闭包另验。继续其余技能。
 - [x] 第一方中继及出码限时已发布到公网 `83eadf4f`。直连真实出码、官方钱包手机尺寸 PWA 确认、兑换、比奇渲染和正常退出通过。 [发布与链路证据](evidence/numeron-web-release-20261108/qr-first-party-relay-20261110.json)
 - [ ] 继续同机默认网络冷启动出码稳定性和实体手机相机验收。当前公网候选已有直连完整链路。 [默认网络与早期失败](evidence/numeron-web-release-20261108/qr-first-party-relay-20261110.json)
 - [ ] 继续 Native 招募及建职阶、仓库重复刷新和取回反馈、阿洛跨端实战及完整 Hosted 链路。

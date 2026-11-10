@@ -596,7 +596,11 @@ fn normalized_library_key(library: &str) -> &str {
 }
 
 fn is_player_sprite_library(library: &str) -> bool {
-    let mut segments = normalized_library_key(library).split('/');
+    let library = normalized_library_key(library);
+    if matches!(library, "Fishing/00" | "Fishing/01") {
+        return true;
+    }
+    let mut segments = library.split('/');
     let Some(family) = segments.next() else {
         return false;
     };
@@ -848,6 +852,28 @@ fn uses_assassin_alt(action: AnimationAction) -> bool {
     )
 }
 
+pub(crate) const NATIVE_FISHING_POSE: &str = "_nativeFishingPose";
+
+pub(crate) fn native_fishing_rod_shape(entity: &Value) -> Option<u8> {
+    if !matches!(
+        entity.get("kind").and_then(Value::as_str),
+        Some("selfPlayer" | "player" | "hero")
+    ) || entity.get("dead").and_then(Value::as_bool) == Some(true)
+        || entity.get("ridingMount").and_then(Value::as_bool) == Some(true)
+        || entity
+            .get("transformType")
+            .and_then(Value::as_i64)
+            .is_some_and(|kind| kind >= 0)
+    {
+        return None;
+    }
+    match normalized_library_key(entity.get("sprite")?.get("weaponLibrary")?.as_str()?) {
+        "CWeapon/49" => Some(49),
+        "CWeapon/50" => Some(50),
+        _ => None,
+    }
+}
+
 pub(crate) fn resolved_native_sprite(
     entity: &Value,
     action: AnimationAction,
@@ -884,6 +910,23 @@ fn resolved_native_sprite_with_availability(
         + if transform_mounted { -416 } else { 0 };
     let mut weapon_frame_offset = sprite_number(sprite, "weaponFrameOffset");
     let mount_frame_offset = sprite_number(sprite, "mountFrameOffset").unwrap_or(0);
+
+    if action == AnimationAction::Standing {
+        if let Some(shape) = native_fishing_rod_shape(entity).filter(|shape| {
+            entity.get(NATIVE_FISHING_POSE).and_then(Value::as_u64) == Some(u64::from(*shape))
+        }) {
+            return ResolvedNativeSprite {
+                body_library,
+                hair_library,
+                weapon_library: Some(format!("/original-ui/Fishing/{:02}", shape - 49)),
+                weapon_library_secondary: None,
+                mount_library: None,
+                body_base_offset,
+                weapon_frame_offset: Some(-632),
+                mount_frame_offset,
+            };
+        }
+    }
 
     if !matches!(kind, "selfPlayer" | "player" | "hero") || mount_library.is_some() {
         return ResolvedNativeSprite {

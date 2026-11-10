@@ -4,9 +4,11 @@ export type { NpcPurchaseReceiptRuntime } from "./npc-purchase-receipt";
 import type { CrystalTooltipItem, CrystalTooltipDocument } from "./shared-item-tooltip";
 import manifest from "./generated/client_core_runtime.json";
 import type { RegistrationDraft, ChangePasswordDraft } from "./client-login-runtime";
-import { createSharedEntityAnimationAccessor, createSharedChatUi, searchSharedMapRoute, readSharedCashPreview, turnSharedCashPreview, readSharedNpcRepairQuote, readSharedPresentationItemTooltip, readSharedBagToBeltMovePlan, readSharedFishingClickTargets, readSharedFishingClickDecision, readSharedNpcPearlBuyPlan, readSharedRankingInspectAdmission,
+import { createSharedEntityAnimationAccessor, createSharedChatUi, searchSharedMapRoute, readSharedCashPreview, turnSharedCashPreview, readSharedNpcRepairQuote, readSharedPresentationItemTooltip, readSharedBagToBeltMovePlan, readSharedFishingClickTargets, readSharedFishingClickDecision, readSharedNpcPearlBuyPlan,
   type PresentationWasmModule, type EntityAnimationRuntime, type MapRouteWasmModule, type ChatUiRuntime, type MapRouteInput, type MapRouteDecision,
-  type CashPreviewInput, type CashPreviewLayerDocument, type NpcRepairQuoteInput, type NpcRepairQuote, type BagToBeltMoveInput, type BagToBeltMovePlan, type FishingClickTargetsInput, type FishingClickTargets, type FishingClickInput, type FishingClickDecision, type RankingInspectAdmissionInput, type RankingInspectAdmissionPlan } from "./client-presentation-runtime";
+  type CashPreviewInput, type CashPreviewLayerDocument, type NpcRepairQuoteInput, type NpcRepairQuote, type BagToBeltMoveInput, type BagToBeltMovePlan, type FishingClickTargetsInput, type FishingClickTargets, type FishingClickInput, type FishingClickDecision } from "./client-presentation-runtime";
+import { readSharedRankingInspectAdmission, type RankingInspectWasmModule,
+  type RankingInspectAdmissionInput, type RankingInspectAdmissionPlan } from "./shared-ranking-inspect";
 export type { EntityAnimationRuntime, ChatUiDocument, ChatUiControls, ChatUiRuntime, MapRouteInput, MapRouteDecision,
   CashPreviewInput, CashPreviewLayerDocument, NpcRepairQuoteInput, NpcRepairQuote, BagToBeltMoveInput, BagToBeltMovePlan, FishingClickTargetsInput, FishingClickTargets, FishingClickInput, FishingClickDecision } from "./client-presentation-runtime";
 
@@ -224,7 +226,7 @@ type WasmEquipmentPendingBridge = {
   status(): string;
 };
 
-type WasmModule = {
+type WasmModule = RankingInspectWasmModule & {
   default(options: { module_or_path: URL }): Promise<unknown>;
   client_core_abi_version(): number;
   auth_ui_abi_version?: () => number;
@@ -555,7 +557,7 @@ export function loadClientCoreRuntime(): Promise<ClientCoreRuntime> {
       getEntityAnimationRuntime() { return getEntityAnimationRuntime(); },
       fishingClickTargets(input: FishingClickTargetsInput) { return readSharedFishingClickTargets(presentation, input); },
       decideFishingClick(input: FishingClickInput) { return readSharedFishingClickDecision(presentation, input); },
-      readRankingInspectAdmission(input: RankingInspectAdmissionInput) { return readSharedRankingInspectAdmission(presentation, input); },
+      readRankingInspectAdmission(input: RankingInspectAdmissionInput) { return readSharedRankingInspectAdmission(module, input); },
       readItemTooltip(item: CrystalTooltipItem, player: Readonly<Record<string, unknown>>, nowMs?: number) {
         return readSharedPresentationItemTooltip(presentation, item, player, nowMs);
       },

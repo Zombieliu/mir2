@@ -964,6 +964,7 @@ type WorldEntity = {
   nameColourArgb?: number;
   dead?: boolean;
   sneaking?: boolean;
+  fishing?: boolean;
   disposition?: EntityDisposition;
   sprite?: GatewayWorldEntitySprite | null;
   questIds?: number[];
@@ -15203,6 +15204,7 @@ export default function HomePage() {
             maxHp: numberOrUndefined(payload.maxHp),
             nameColourArgb: -1,
             disposition: "friendly",
+            fishing: typeof payload.fishing === "boolean" ? payload.fishing : undefined,
             sprite: playerSpriteFromPacket(payload),
             hair: packetAppearance.hair,
             wingEffect: packetAppearance.wingEffect,
@@ -15937,9 +15939,18 @@ export default function HomePage() {
         }));
         break;
       }
-      case "FishingUpdate":
-        // The owner-scoped fishing window consumes this before packet projection.
+      case "FishingUpdate": {
+        // The owner-scoped fishing window consumes the same packet before scene projection.
+        const fishing = payload.fishing;
+        if (typeof fishing !== "boolean") break;
+        const objectId = stringifyId(payload.objectId);
+        updateWorld(current => {
+          const actor = current.entities.find(entity => entity.objectId === objectId);
+          if (!actor || (actor.kind !== "player" && actor.kind !== "selfPlayer") || actor.fishing === fishing) return current;
+          return { ...current, entities: upsertEntityInList(current.entities, { ...actor, fishing }) };
+        });
         break;
+      }
 
       // Player / hero progression ---------------------------------------------
       case "GainExperience": {
@@ -18027,6 +18038,7 @@ export default function HomePage() {
             (kind === "npc" ? 10 : kind === "selfPlayer" ? 3 : undefined),
           nameColourArgb: numberOrUndefined(payload.nameColourArgb) ?? (kind === "npc" ? -16_711_936 : -1),
           dead: payload.dead === true,
+          fishing: typeof payload.fishing === "boolean" ? payload.fishing : undefined,
           disposition,
           sprite,
           ...(kind === "npc"
@@ -19139,6 +19151,7 @@ export default function HomePage() {
         (entity.kind === "npc" ? 10 : entity.kind === "selfPlayer" ? 3 : undefined),
       nameColourArgb: entity.nameColourArgb ?? undefined,
       dead: entity.dead,
+      fishing: typeof entity.fishing === "boolean" ? entity.fishing : undefined,
       disposition: entity.disposition,
       sprite: spriteFromSnapshotEntity(
         entity,

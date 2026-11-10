@@ -12,13 +12,17 @@ use bevy::prelude::{Query, Res, ResMut, Resource, Time, Window, With};
 use bevy::window::PrimaryWindow;
 use mir2_bevy_runtime::entity_animation::{
     ActionTransition, AnimationAction, AnimationCatalog, AnimationError, AnimationEvent,
-    AnimationWorld, Direction, EntityKind, QueueDisposition, TransitionReason,
+    AnimationWorld, Direction, EntityKind, FishingPresentation, QueueDisposition, TransitionReason,
 };
 use serde_json::Value;
 
 #[cfg(test)]
 #[path = "mining_visual_tests.rs"]
 mod mining_visual_tests;
+
+#[cfg(test)]
+#[path = "fishing_visual_tests.rs"]
+mod fishing_visual_tests;
 
 #[cfg(test)]
 #[path = "buried_monster_replay_tests.rs"]
@@ -132,6 +136,13 @@ pub(crate) enum NativeDoubleSlashBodyClock {
     Retired,
 }
 
+#[derive(Debug)]
+struct NativeFishingActor {
+    animation: FishingPresentation,
+    direction: Direction,
+    rod_shape: u8,
+}
+
 #[derive(Resource, Debug)]
 pub struct NativeEntityPresentation {
     world: AnimationWorld,
@@ -143,6 +154,7 @@ pub struct NativeEntityPresentation {
     last_applied_sequence: HashMap<String, u64>,
     last_libraries: HashMap<String, String>,
     last_frames: HashMap<String, (i64, AnimationAction)>,
+    fishing_actors: HashMap<String, NativeFishingActor>,
     hidden_after_hide: HashSet<String>,
     snake_totem_aura_ready: HashSet<String>,
     double_slash_packet_sequences: HashMap<(String, u64), u64>,
@@ -180,6 +192,7 @@ impl Default for NativeEntityPresentation {
             last_applied_sequence: HashMap::new(),
             last_libraries: HashMap::new(),
             last_frames: HashMap::new(),
+            fishing_actors: HashMap::new(),
             hidden_after_hide: HashSet::new(),
             snake_totem_aura_ready: HashSet::new(),
             double_slash_packet_sequences: HashMap::new(),
@@ -448,8 +461,12 @@ impl NativeEntityPresentation {
             .as_array()?
             .iter()
             .find(|e| e.get("objectId").and_then(value_object_id).as_deref() == Some(object_id))?;
+        let fishing_pose = self
+            .fishing_actors
+            .get(object_id)
+            .is_some_and(|actor| actor.animation.phase().is_some());
         Some((
-            standing,
+            standing && !fishing_pose,
             entity
                 .get("transformType")
                 .and_then(Value::as_i64)
@@ -846,6 +863,46 @@ impl NativeEntityPresentation {
         }
     }
 
+    fn observe_fishing_actors(&mut self, payload: &Value, now_ms: u64) {
+        if self.latest_payload.as_ref().is_some_and(|previous| {
+            previous.get("mapFileName") != payload.get("mapFileName")
+                || previous.get("playerObjectId") != payload.get("playerObjectId")
+        }) {
+            self.fishing_actors.clear();
+        }
+        let mut observed = HashSet::new();
+        for entity in payload.get("entities").and_then(Value::as_array).into_iter().flatten() {
+            let Some(rod_shape) = crate::atlas::native_fishing_rod_shape(entity) else {
+                continue;
+            };
+            let Some(object_id) = entity.get("objectId").and_then(value_object_id) else {
+                continue;
+            };
+            let overlay = entity.get(crate::gameplay_bridge::NATIVE_FISHING_OVERLAY);
+            let reset = overlay.and_then(|row| row.get("reset")).and_then(Value::as_bool) == Some(true);
+            let direction = native_fishing_direction(entity, overlay.and_then(|row| row.get("point")))
+                .unwrap_or_else(|| parse_direction(entity.get("direction").and_then(Value::as_str).unwrap_or("down")));
+            let active = !reset && overlay
+                .and_then(|row| row.get("active"))
+                .or_else(|| entity.get("fishing"))
+                .and_then(Value::as_bool)
+                .unwrap_or(false);
+            observed.insert(object_id.clone());
+            let actor = self.fishing_actors.entry(object_id).or_insert_with(|| NativeFishingActor {
+                animation: FishingPresentation::default(),
+                direction,
+                rod_shape,
+            });
+            if actor.rod_shape != rod_shape || reset {
+                actor.animation = FishingPresentation::default();
+                actor.rod_shape = rod_shape;
+            }
+            actor.direction = direction;
+            actor.animation.observe(active, now_ms);
+        }
+        self.fishing_actors.retain(|object_id, _| observed.contains(object_id));
+    }
+
     fn sync_pending_payload(&mut self, animation_now_ms: u64, motion_now_ms: u64) {
         self.sync_pending_payload_with_clocks(
             animation_now_ms,
@@ -872,6 +929,7 @@ impl NativeEntityPresentation {
         let Some(mut payload) = self.pending_payload.take() else {
             return;
         };
+        self.observe_fishing_actors(&payload, animation_now_ms);
         self.map_confirmed_local_mine(&mut payload, motion_now_ms);
         // Source echoes can be normalized to the active predicted action by
         // motion reconciliation. Capture their adapter numbers beforehand so
@@ -1558,11 +1616,23 @@ impl NativeEntityPresentation {
                 })
             });
         let payload = self.latest_payload.as_ref()?;
+        let mut fishing_poses = HashMap::new();
         let frames = self
             .world
             .active_states()
             .map(|(object_id, state)| {
                 let pose = state.pose();
+                let fishing = self.fishing_actors.get_mut(object_id).and_then(|actor| {
+                    let pose = actor.animation.advance_to(animation_now_ms)?;
+                    Some((pose, actor.direction, actor.rod_shape))
+                });
+                if let Some((fishing, direction, rod_shape)) =
+                    fishing.filter(|_| pose.action == AnimationAction::Standing)
+                {
+                    fishing_poses.insert(object_id.to_owned(), (direction, rod_shape));
+                    let draw_frame = fishing.phase.descriptor().draw_frame(direction, fishing.logical_frame_index);
+                    return (object_id.to_owned(), (i64::from(draw_frame), pose.action));
+                }
                 let movement_pose = if state.kind == EntityKind::Player
                     && matches!(
                         pose.action,
@@ -1665,6 +1735,19 @@ impl NativeEntityPresentation {
                     .and_then(value_object_id)
                     .is_none_or(|object_id| !self.hidden_after_hide.contains(&object_id))
             });
+            for entity in entities {
+                let fishing = entity
+                    .get("objectId")
+                    .and_then(value_object_id)
+                    .and_then(|object_id| fishing_poses.get(&object_id));
+                if let Some(row) = entity.as_object_mut() {
+                    row.remove(crate::atlas::NATIVE_FISHING_POSE);
+                    if let Some((direction, rod_shape)) = fishing {
+                        row.insert(crate::atlas::NATIVE_FISHING_POSE.to_owned(), Value::from(*rod_shape));
+                        row.insert("direction".to_owned(), Value::from(direction_name(*direction)));
+                    }
+                }
+            }
         }
         let Some(state) = render(&visible_payload, &frames, effect_visible) else {
             self.hovered_object_id = None;
@@ -1850,6 +1933,25 @@ fn parse_observed_entity(entity: &Value) -> Option<ObservedEntity> {
         initially_dead: entity.get("dead").and_then(Value::as_bool) == Some(true),
         initially_skeleton: entity.get("skeleton").and_then(Value::as_bool) == Some(true),
     })
+}
+
+fn native_fishing_direction(entity: &Value, point: Option<&Value>) -> Option<Direction> {
+    let point = point?;
+    let dx = point.get("x")?.as_i64()?.checked_sub(entity.get("x")?.as_i64()?)?;
+    let dy = point.get("y")?.as_i64()?.checked_sub(entity.get("y")?.as_i64()?)?;
+    // The server's fishing point is exactly three cells in one of the eight
+    // world directions. Missing or foreign geometry leaves the current facing.
+    match (dx, dy) {
+        (0, -3) => Some(Direction::Up),
+        (3, -3) => Some(Direction::UpRight),
+        (3, 0) => Some(Direction::Right),
+        (3, 3) => Some(Direction::DownRight),
+        (0, 3) => Some(Direction::Down),
+        (-3, 3) => Some(Direction::DownLeft),
+        (-3, 0) => Some(Direction::Left),
+        (-3, -3) => Some(Direction::UpLeft),
+        _ => None,
+    }
 }
 
 fn parse_direction(direction: &str) -> Direction {

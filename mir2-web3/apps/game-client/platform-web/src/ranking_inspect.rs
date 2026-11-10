@@ -1,7 +1,7 @@
-//! Optional renderer-free ABI for shared ranking-row inspect admission.
+//! Renderer-free Core ABI for shared ranking-row inspect admission.
 //! Proposals do not own a row, expected name, gesture, transport or clock.
 
-use crate::item_tooltip::StrictJsonValue;
+use crate::strict_json::StrictMailValue;
 use mir2_client_core::ranking_inspect::{plan_ranking_inspect, RankingInspectFacts};
 use serde_json::Value;
 use wasm_bindgen::prelude::*;
@@ -30,7 +30,7 @@ fn field<'a>(value: &'a Value, index: usize) -> Option<&'a Value> {
 pub fn ranking_inspect_admission(input: &str) -> String {
     let resolve = || {
         if input.is_empty() || input.len() > MAX_INPUT_BYTES { return None; }
-        let StrictJsonValue(value) = serde_json::from_str::<StrictJsonValue<256>>(input).ok()?;
+        let StrictMailValue(value) = serde_json::from_str::<StrictMailValue>(input).ok()?;
         match &value {
             Value::Object(fields) if fields.len() == FIELDS.len()
                 && fields.keys().all(|key| FIELDS.contains(&key.as_str())) => {},

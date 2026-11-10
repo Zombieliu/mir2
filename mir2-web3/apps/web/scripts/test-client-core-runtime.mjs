@@ -22,6 +22,21 @@ test("actual WASM ABI and small renderer-independent payload", () => {
   assert.ok(binary.length < 256 * 1024, `quest bridge is ${binary.length} bytes; review mobile startup budget`);
 });
 
+test("actual Ranking Inspect ABI is provided by Core with the same guarded admission", () => {
+  assert.equal(runtime.ranking_inspect_abi_version(), 1);
+  const admit = (json) => JSON.parse(runtime.ranking_inspect_admission(json));
+  assert.deepEqual(admit("[1,true,true,false,0,1001,1000]"),
+    { version: 1, ok: true, objectId: 0, nextReadyMs: 1501 });
+  for (const json of ["[1,true,true,false,0,1000,1000]", "[1,true,true,false,-0,1001,1000]",
+    '{"version":1,"vers\\u0069on":1,"opened":true,"rankingsReady":true,"pending":false,"playerId":0,"nowMs":1001,"nextReadyMs":1000}']) {
+    assert.deepEqual(admit(json), { version: 1, ok: false });
+  }
+  const presentation = readFileSync(new URL(
+    `../public/client-core/${manifest.presentation.version}/mir2_platform_web_bg.wasm`, import.meta.url));
+  assert.equal(WebAssembly.Module.exports(new WebAssembly.Module(presentation))
+    .some(({ name }) => name.startsWith("ranking_inspect_")), false);
+});
+
 test("actual V2 N2 endpoints allow diary accept and authoritative ready finish", () => {
   const content = JSON.parse(readFileSync(new URL("../../../config/quest-guidance/newcomer-journey-v2.json", import.meta.url), "utf8"));
   const quest = content.quests.find((entry) => entry.id === 2110002);

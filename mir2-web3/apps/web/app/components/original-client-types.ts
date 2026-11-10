@@ -55,6 +55,9 @@ export type EntitySpriteAnimationState =
   | "running"
   | "attackMelee"
   | "attackRange"
+  | "fishingCast"
+  | "fishingWait"
+  | "fishingReel"
   | "struck"
   | "dying"
   | "dead"
@@ -71,6 +74,9 @@ export type CrystalEntityAnimationAction =
   | "attack4"
   | "attackRange1"
   | "spell"
+  | "fishingCast"
+  | "fishingWait"
+  | "fishingReel"
   | "struck"
   | "die"
   | "dead"
@@ -118,6 +124,7 @@ export type DisplayEntity = {
   nameColourArgb?: number;
   dead?: boolean;
   sneaking?: boolean;
+  fishing?: boolean | null;
   sprite?: EntitySprite | null;
   questIds?: number[];
   bigMapIcon?: number;

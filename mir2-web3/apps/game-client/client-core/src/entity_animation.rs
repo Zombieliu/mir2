@@ -122,6 +122,108 @@ impl FrameDescriptor {
     }
 }
 
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum FishingPhase {
+    Cast,
+    Wait,
+    Reel,
+}
+
+impl FishingPhase {
+    pub const fn descriptor(self) -> FrameDescriptor {
+        match self {
+            Self::Cast => FrameDescriptor::from_crystal(632, 8, 0, 100, false),
+            Self::Wait => FrameDescriptor::from_crystal(696, 6, 0, 120, false),
+            Self::Reel => FrameDescriptor::from_crystal(744, 8, 0, 100, false),
+        }
+    }
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub struct FishingPose {
+    pub phase: FishingPhase,
+    pub logical_frame_index: u16,
+    /// Beginning of this clip, including each individual Wait cycle.
+    pub started_at_ms: u64,
+}
+
+/// One live player's fishing clips. The renderer supplies a monotonic clock
+/// and creates a fresh track on death, map change, or object replacement.
+#[derive(Clone, Debug, Default)]
+pub struct FishingPresentation {
+    active: Option<bool>,
+    current: Option<(FishingPhase, u64)>,
+    // Unplayed boolean edges alternate; the current clip identifies the next.
+    pending_edges: u32,
+}
+
+impl FishingPresentation {
+    pub fn observe(&mut self, active: bool, now_ms: u64) {
+        let next = match (self.active, active) {
+            (None, true) => Some(FishingPhase::Wait),
+            (Some(false), true) => Some(FishingPhase::Cast),
+            (Some(true), false) => Some(FishingPhase::Reel),
+            _ => None,
+        };
+        if self.active == Some(active) {
+            return;
+        }
+
+        // A receipt at the exact clip boundary can supply the next clip.
+        self.advance(now_ms.saturating_sub(1));
+        self.active = Some(active);
+        if let Some(next) = next {
+            if self.current.is_none() {
+                self.current = Some((next, now_ms));
+            } else {
+                self.pending_edges = self.pending_edges.saturating_add(1);
+            }
+        }
+        self.advance(now_ms);
+    }
+
+    pub fn phase(&self) -> Option<FishingPhase> {
+        self.current.map(|(phase, _)| phase)
+    }
+
+    pub fn advance_to(&mut self, now_ms: u64) -> Option<FishingPose> {
+        self.advance(now_ms);
+        self.current.map(|(phase, started_at_ms)| FishingPose {
+            phase,
+            logical_frame_index: (now_ms.saturating_sub(started_at_ms)
+                / phase.descriptor().frame_interval_ms) as u16,
+            started_at_ms,
+        })
+    }
+
+    fn advance(&mut self, now_ms: u64) {
+        use FishingPhase::{Cast, Reel, Wait};
+        while let Some((phase, started_at_ms)) = self.current {
+            let descriptor = phase.descriptor();
+            let duration_ms = u64::from(descriptor.frame_count) * descriptor.frame_interval_ms;
+            let elapsed_ms = now_ms.saturating_sub(started_at_ms);
+            if elapsed_ms < duration_ms {
+                break;
+            }
+            let boundary_ms = started_at_ms + duration_ms;
+            if self.pending_edges != 0 {
+                self.pending_edges -= 1;
+                let next = if phase == Reel { Cast } else { Reel };
+                self.current = Some((next, boundary_ms));
+            } else if self.active == Some(true) {
+                let started_at_ms = if phase == Wait {
+                    now_ms - elapsed_ms % duration_ms
+                } else {
+                    boundary_ms
+                };
+                self.current = Some((Wait, started_at_ms));
+            } else {
+                self.current = None;
+            }
+        }
+    }
+}
+
 #[derive(Clone, Debug, Default, PartialEq, Eq)]
 pub struct AnimationCatalog {
     frames: OrderedMap<AnimationAction, FrameDescriptor>,
@@ -519,6 +621,7 @@ pub struct EntityAnimationState {
     pub frame_index: u16,
     pub next_motion_at_ms: Option<u64>,
     pub last_update_at_ms: u64,
+    pub fishing: FishingPresentation,
     action_feed: VecDeque<AnimationEvent>,
     catalog: AnimationCatalog,
     rng: DeterministicRng,
@@ -577,6 +680,7 @@ impl EntityAnimationState {
             frame_index,
             next_motion_at_ms: Some(next_motion_at_ms),
             last_update_at_ms: now_ms,
+            fishing: FishingPresentation::default(),
             action_feed: VecDeque::new(),
             catalog,
             rng,
@@ -1195,6 +1299,10 @@ impl AnimationWorld {
         self.active.get(object_id)
     }
 
+    pub fn active_state_mut(&mut self, object_id: &str) -> Option<&mut EntityAnimationState> {
+        self.active.get_mut(object_id)
+    }
+
     pub fn active_key(&self, object_id: &str) -> Option<EntityKey> {
         self.active.get(object_id).map(|state| state.key.clone())
     }
@@ -1293,6 +1401,75 @@ fn entity_seed(world_seed: u64, object_id: &str, incarnation: u64, kind: EntityK
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn fishing_uses_crystal_direction_frames_and_finishes_queued_edges() {
+        use FishingPhase::{Cast, Reel, Wait};
+        for (phase, start, frames, interval) in [
+            (Cast, 632, 8, 100),
+            (Wait, 696, 6, 120),
+            (Reel, 744, 8, 100),
+        ] {
+            let descriptor = phase.descriptor();
+            assert_eq!(descriptor.start, start);
+            assert_eq!(descriptor.frame_count, frames);
+            assert_eq!(descriptor.frame_interval_ms, interval);
+            assert_eq!(
+                descriptor.draw_frame(Direction::UpLeft, frames - 1),
+                start + i32::from(frames) * 8 - 1
+            );
+        }
+
+        let mut fishing = FishingPresentation::default();
+        fishing.observe(false, 1_000);
+        fishing.observe(true, 1_100);
+        fishing.observe(false, 1_200);
+        fishing.observe(true, 1_300);
+        fishing.observe(true, 1_400);
+        for (now, phase, frame, started_at_ms) in [
+            (1_899, Cast, 7, 1_100),
+            (1_900, Reel, 0, 1_900),
+            (2_699, Reel, 7, 1_900),
+            (2_700, Cast, 0, 2_700),
+            (3_500, Wait, 0, 3_500),
+            (5_060, Wait, 1, 4_940),
+        ] {
+            assert_eq!(
+                fishing.advance_to(now),
+                Some(FishingPose {
+                    phase,
+                    logical_frame_index: frame,
+                    started_at_ms
+                })
+            );
+        }
+    }
+
+    #[test]
+    fn fishing_bootstrap_loops_and_an_edge_at_a_boundary_can_start_reel() {
+        let mut fishing = FishingPresentation::default();
+        fishing.observe(true, 1_000);
+        assert_eq!(fishing.phase(), Some(FishingPhase::Wait));
+        let late_tick = 1_000 + 720 * 1_000_000;
+        fishing.observe(false, late_tick);
+        assert_eq!(
+            fishing.advance_to(late_tick),
+            Some(FishingPose {
+                phase: FishingPhase::Reel,
+                logical_frame_index: 0,
+                started_at_ms: late_tick,
+            })
+        );
+        fishing.observe(false, late_tick + 200);
+        assert_eq!(
+            fishing
+                .advance_to(late_tick + 799)
+                .unwrap()
+                .logical_frame_index,
+            7
+        );
+        assert_eq!(fishing.advance_to(late_tick + 800), None);
+    }
 
     fn spawn_default(
         world: &mut AnimationWorld,

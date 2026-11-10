@@ -6117,7 +6117,7 @@ check("Animation renderer forwards exact clock and canonical action tokens while
     entity={objectId:"17",kind:"selfPlayer",x:0,y:1,direction:"Right",movementAnimation:"walking",movementStartedAt:123,attackStartedAt:234,attackAnimation:"melee2"};
   fishingAnimation.resolveCrystalEntityAnimationPoses({runtime,worldKey:"world:0",worldSeed:7,now:1000,selfAuthority:source,entities:[{entity,state:"walking"}]});
   assert.deepEqual(requests[0],{worldKey:"world:0",worldSeed:7,nowMs:1000,entities:[{objectId:"17",kind:"selfPlayer",direction:"Right",action:"walking",actionToken:"move:123:walking",
-    actionSourceKey:source.sourceKey,actionSourceRevision:source.revision,bootstrapKnown:true,actionKnown:true}]});
+    fishing:false,actionSourceKey:source.sourceKey,actionSourceRevision:source.revision,bootstrapKnown:true,actionKnown:true}]});
   assert.deepEqual(fishingAnimation.animationEventForEntity(entity,"attackMelee"),{action:"attack2",actionToken:"attack:234:attack2"});
   assert.deepEqual(fishingAnimation.animationEventForEntity({...entity,movementStartedAt:0},"running"),{action:"running",actionToken:"move:0:running"});
   for(const attackAnimation of ["melee1","melee2","melee3","melee4"]){const action="attack"+(Number(attackAnimation.slice(-1)));assert.deepEqual(fishingAnimation.animationEventForEntity({...entity,attackAnimation},"attackMelee"),{action,actionToken:"attack:234:"+action});}
@@ -7719,12 +7719,12 @@ function rankingPageFixture() {
   return {f,scope,api,core,owner,socket,sent,received,tooltips,setClock:value=>{clock=value;},setBeforeFinal:value=>{beforeFinal=value;},
     setOwner:value=>{owner=value;},setSpectator:value=>{spectator=value;},setThrowSend:value=>{throwSend=value;}};
 }
-check("Ranking actual Core facade forwards identical input to optional presentation ABI without planning",()=>{
+check("Ranking actual Core facade forwards identical input to Core ABI without planning",()=>{
   const source=readFileSync(new URL("../lib/client-core-runtime.ts",import.meta.url),"utf8"),ast=ts.createSourceFile("ranking-core.ts",source,ts.ScriptTarget.Latest,true),methods=[];
   (function visit(node){if(ts.isMethodDeclaration(node)&&node.name.getText(ast)==="readRankingInspectAdmission")methods.push(node);ts.forEachChild(node,visit);})(ast);
   assert.equal(methods.length,1);const input=rankingAdmissionInput(),module=rankingAdmissionModule();
   const js=ts.transpileModule("return {"+methods[0].getText(ast)+"};",{compilerOptions:{target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.None}}).outputText;
-  const facade=new Function("presentation","readSharedRankingInspectAdmission",js)(module.module,presentationRuntime.readSharedRankingInspectAdmission);
+  const facade=new Function("module","presentation","readSharedRankingInspectAdmission",js)(module.module,{},presentationRuntime.readSharedRankingInspectAdmission);
   assert.deepEqual(facade.readRankingInspectAdmission(input),{version:1,ok:true,objectId:0,nextReadyMs:1501});assert.deepEqual(module.calls,[input]);
 });
 check("Ranking actual Page source captures current Core method physical owner query page and known UI readiness",()=>{

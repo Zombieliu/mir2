@@ -4,7 +4,8 @@ use std::cell::RefCell;
 use serde::{Deserialize, Serialize};
 
 use crate::entity_animation::{
-    AnimationAction, AnimationEvent, AnimationWorld, Direction, EntityKind,
+    AnimationAction, AnimationEvent, AnimationWorld, Direction, EntityKind, FishingPhase,
+    FishingPresentation,
 };
 
 thread_local! {
@@ -43,6 +44,8 @@ struct EntityInput {
     bootstrap_known: Option<bool>,
     #[serde(default)]
     action_known: Option<bool>,
+    #[serde(default)]
+    fishing: Option<bool>,
 }
 
 #[derive(Debug, Serialize)]
@@ -65,6 +68,8 @@ struct PoseOutput {
     direction: &'static str,
     logical_frame_index: u16,
     queue_depth: usize,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    fishing_started_at_ms: Option<u64>,
 }
 
 struct ActionStamp {
@@ -281,6 +286,9 @@ impl AnimationBridge {
                         entity.object_id, entity.kind
                     ));
                     self.withdraw_authority(&entity.object_id, None);
+                    if let Some(state) = self.world.active_state_mut(&entity.object_id) {
+                        state.fishing = FishingPresentation::default();
+                    }
                     continue;
                 }
             };
@@ -403,6 +411,29 @@ impl AnimationBridge {
                     snapshot.spawned,
                     action.filter(|_| event_accepted && canonical_direction.is_some()),
                 );
+                if let Some(state) = self.world.active_state_mut(&entity.object_id) {
+                    let life_action = matches!(
+                        state.current_action,
+                        AnimationAction::Die
+                            | AnimationAction::Dead
+                            | AnimationAction::Skeleton
+                            | AnimationAction::Revive
+                    ) || matches!(
+                        action,
+                        Some(
+                            AnimationAction::Die
+                                | AnimationAction::Dead
+                                | AnimationAction::Skeleton
+                        )
+                    );
+                    if life_action {
+                        state.fishing = FishingPresentation::default();
+                    } else if let Some(active) =
+                        entity.fishing.filter(|_| kind == EntityKind::Player)
+                    {
+                        state.fishing.observe(active, input.now_ms);
+                    }
+                }
             }
         }
 
@@ -411,6 +442,9 @@ impl AnimationBridge {
         for (id, revision) in duplicate_revisions {
             // The ambiguous revision cannot later qualify as a fresh receipt.
             self.withdraw_authority(&id, revision.map(|revision| revision + 1));
+            if let Some(state) = self.world.active_state_mut(&id) {
+                state.fishing = FishingPresentation::default();
+            }
         }
 
         let stale_ids = self
@@ -426,18 +460,29 @@ impl AnimationBridge {
 
         let mut poses = Vec::with_capacity(ordered_ids.len());
         for object_id in ordered_ids {
-            let Some(state) = self.world.active_state(&object_id) else {
+            let Some(state) = self.world.active_state_mut(&object_id) else {
                 continue;
             };
-            let pose = state.pose();
+            let action = state.current_action;
+            let fishing_pose = state
+                .fishing
+                .advance_to(input.now_ms)
+                .filter(|_| action == AnimationAction::Standing);
+            let fishing_action = fishing_pose.map(|pose| match pose.phase {
+                FishingPhase::Cast => "fishingCast",
+                FishingPhase::Wait => "fishingWait",
+                FishingPhase::Reel => "fishingReel",
+            });
             poses.push(PoseOutput {
                 object_id,
-                incarnation: pose.key.incarnation,
-                animation_state: animation_state_name(pose.action),
-                action: action_name(pose.action),
-                direction: direction_name(pose.direction),
-                logical_frame_index: pose.logical_frame_index,
-                queue_depth: pose.queue_depth,
+                incarnation: state.key.incarnation,
+                animation_state: fishing_action.unwrap_or_else(|| animation_state_name(action)),
+                action: fishing_action.unwrap_or_else(|| action_name(action)),
+                direction: direction_name(state.direction),
+                logical_frame_index: fishing_pose
+                    .map_or(state.frame_index, |pose| pose.logical_frame_index),
+                queue_depth: state.queue_depth(),
+                fishing_started_at_ms: fishing_pose.map(|pose| pose.started_at_ms),
             });
         }
 
@@ -589,9 +634,12 @@ impl EntityAnimationOwner {
         let Some(state) = bridge.world.active_state(&query.object_id) else {
             return unknown();
         };
-        let pose = state.pose();
-        if authority.incarnation != pose.key.incarnation || pose.key.incarnation > MAX_SAFE_INTEGER
-        {
+        let incarnation = state.key.incarnation;
+        if authority.incarnation != incarnation || incarnation > MAX_SAFE_INTEGER {
+            return unknown();
+        }
+        if state.current_action == AnimationAction::Standing && state.fishing.phase().is_some() {
+            // The painted body is still fishing, including the terminal Reel.
             return unknown();
         }
         serde_json::to_string(&ActionPoseOutput {
@@ -603,10 +651,10 @@ impl EntityAnimationOwner {
             source_revision: authority.source_revision,
             continuity_revision: authority.continuity_revision,
             bridge_epoch: self.epoch,
-            incarnation: pose.key.incarnation,
+            incarnation,
             last_now_ms: bridge.last_now_ms,
-            action: action_name(pose.action),
-            direction: direction_name(pose.direction),
+            action: action_name(state.current_action),
+            direction: direction_name(state.direction),
         })
         .unwrap_or_else(|_| unknown())
     }
@@ -796,6 +844,7 @@ mod tests {
                 action_source_revision: None,
                 bootstrap_known: None,
                 action_known: None,
+                fishing: None,
             }],
         }
     }
@@ -888,6 +937,99 @@ mod authority_tests {
     }
     fn peek(owner: &EntityAnimationOwner) -> Value {
         serde_json::from_str(&owner.peek_json(&query().to_string())).unwrap()
+    }
+
+    fn resolve_fishing(
+        owner: &mut EntityAnimationOwner,
+        mut input: Value,
+        now_ms: u64,
+        fishing: Option<bool>,
+    ) -> Value {
+        input["nowMs"] = json!(now_ms);
+        if let Some(fishing) = fishing {
+            input["entities"][0]["fishing"] = json!(fishing);
+        }
+        serde_json::from_str(&owner.resolve_json(&input.to_string())).unwrap()
+    }
+
+    #[test]
+    fn fishing_renders_each_shared_phase_and_blocks_a_second_cast_pose() {
+        let mut owner = EntityAnimationOwner::new();
+        for (now, fishing, phase, index, started) in [
+            (1_000, Some(false), "standing", 0, None),
+            (1_050, Some(true), "fishingCast", 0, Some(1_050)),
+            (1_150, Some(true), "fishingCast", 1, Some(1_050)),
+            (1_849, Some(true), "fishingCast", 7, Some(1_050)),
+            (1_850, Some(true), "fishingWait", 0, Some(1_850)),
+            (1_970, None, "fishingWait", 1, Some(1_850)),
+            (2_570, Some(true), "fishingWait", 0, Some(2_570)),
+            (2_700, Some(false), "fishingWait", 1, Some(2_570)),
+            (3_290, Some(false), "fishingReel", 0, Some(3_290)),
+            (4_089, Some(false), "fishingReel", 7, Some(3_290)),
+            (4_090, Some(false), "standing", 2, None),
+        ] {
+            let input = frame(1, "standing", None, true, true);
+            let output = resolve_fishing(&mut owner, input, now, fishing);
+            let pose = &output["poses"][0];
+            assert_eq!(pose["action"], phase, "{now}");
+            assert_eq!(pose["animationState"], phase, "{now}");
+            if let Some(started) = started {
+                assert_eq!(pose["logicalFrameIndex"], index, "{now}");
+                assert_eq!(pose["fishingStartedAtMs"], started, "{now}");
+                assert_eq!(peek(&owner), json!({"version":1,"known":false}), "{now}");
+            } else {
+                assert!(pose.get("fishingStartedAtMs").is_none(), "{now}");
+                assert_eq!(peek(&owner)["action"], "standing", "{now}");
+            }
+            assert_eq!(pose["direction"], "Right", "{now}");
+        }
+    }
+
+    #[test]
+    fn fishing_bootstrap_does_not_cast_and_world_or_actor_loss_drops_the_track() {
+        let mut owner = EntityAnimationOwner::new();
+        let player = frame(1, "standing", None, true, true);
+        let active = resolve_fishing(&mut owner, player.clone(), 1_000, Some(true));
+        assert_eq!(active["poses"][0]["action"], "fishingWait");
+        let mut gone = player.clone();
+        gone["entities"] = json!([]);
+        assert_eq!(
+            resolve_fishing(&mut owner, gone, 1_001, None)["poses"],
+            json!([])
+        );
+        let reappeared = resolve_fishing(&mut owner, player.clone(), 1_002, Some(false));
+        assert_eq!(reappeared["poses"][0]["action"], "standing");
+        assert_eq!(reappeared["poses"][0]["incarnation"], 2);
+
+        let recast = resolve_fishing(&mut owner, player.clone(), 1_003, Some(true));
+        assert_eq!(recast["poses"][0]["action"], "fishingCast");
+        let mut next_world = player;
+        next_world["worldKey"] = json!("conn1:session1:scene2:map1:self7");
+        let new_scene = resolve_fishing(&mut owner, next_world, 1_004, Some(false));
+        assert_eq!(new_scene["poses"][0]["action"], "standing");
+        assert_eq!(new_scene["poses"][0]["incarnation"], 1);
+    }
+
+    #[test]
+    fn fishing_never_overwrites_life_or_nonplayer_poses() {
+        let mut owner = EntityAnimationOwner::new();
+        let mut other = frame(1, "standing", None, true, true);
+        other["entities"][0]["kind"] = json!("monster");
+        let monster = resolve_fishing(&mut owner, other, 1_000, Some(true));
+        assert_eq!(monster["poses"][0]["action"], "standing");
+
+        let living = frame(1, "standing", None, true, true);
+        let before = resolve_fishing(&mut owner, living, 1_001, Some(true));
+        assert_eq!(before["poses"][0]["action"], "fishingWait");
+        let dead = frame(2, "die", Some("die:2"), false, true);
+        let death = resolve_fishing(&mut owner, dead, 1_010, Some(true));
+        assert_eq!(death["poses"][0]["action"], "die");
+        let revive = frame(3, "revive", Some("revive:3"), false, true);
+        resolve_fishing(&mut owner, revive, 2_000, Some(false));
+        let idle = frame(4, "standing", Some("turn:4"), false, true);
+        let ready = resolve_fishing(&mut owner, idle, 2_500, Some(false));
+        assert_eq!(ready["poses"][0]["action"], "standing");
+        assert!(ready["poses"][0].get("fishingStartedAtMs").is_none());
     }
 
     #[test]

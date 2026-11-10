@@ -24,6 +24,10 @@ pub mod mail_compose;
 pub mod mail_parcel;
 #[cfg(not(any(feature = "presentation-ui", feature = "npc-purchase-policy")))]
 pub mod npc_gold_buy_attempt;
+#[cfg(not(any(feature = "presentation-ui", feature = "npc-purchase-policy")))]
+pub mod ranking_inspect;
+#[cfg(not(any(feature = "presentation-ui", feature = "npc-purchase-policy")))]
+pub use ranking_inspect::{ranking_inspect_abi_version, ranking_inspect_admission};
 // Keep the existing pure ABI/oracle tests in default test builds. Production
 // Core/PUI do not include the unpublished NPC receipt ABI.
 #[cfg(any(test, feature = "npc-purchase-policy"))]
@@ -58,11 +62,6 @@ pub use bag_to_belt::{bag_to_belt_move_abi_version, bag_to_belt_move_plan};
 pub mod fishing_click;
 #[cfg(feature = "presentation-ui")]
 pub use fishing_click::{fishing_click_abi_version, fishing_click_targets, fishing_click_decision};
-
-#[cfg(feature = "presentation-ui")]
-pub mod ranking_inspect;
-#[cfg(feature = "presentation-ui")]
-pub use ranking_inspect::{ranking_inspect_abi_version, ranking_inspect_admission};
 
 #[cfg(feature = "presentation-ui")]
 pub mod entity_animation;

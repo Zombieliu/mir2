@@ -64,6 +64,7 @@ use mir2_client_bevy::crystal_ui::overlays::{
 const MAX_NEARBY_NPCS: usize = 8;
 const MAX_GROUND_DROPS: usize = 4;
 const MAX_NEARBY_DISTANCE: u32 = 18;
+pub(crate) const NATIVE_FISHING_OVERLAY: &str = "_nativeFishing";
 
 #[derive(Debug, Clone, Default)]
 struct QuestDefinition {
@@ -657,6 +658,9 @@ impl NativeGameplayAdapter {
                     let player_object_id = self.latest_player_object_id;
                     if let Some(object_id) = player_object_id {
                         self.elemental_animation_state.remove(&object_id);
+                        if let Some(overlay) = self.zone_entities.get_mut(&object_id) {
+                            reset_zone_fishing(overlay);
+                        }
                     }
                     self.record_actor_effect("Death", payload, player_object_id, None);
                     true
@@ -704,6 +708,7 @@ impl NativeGameplayAdapter {
                     self.patch_zone_name_colour(payload, packet_object_id(payload))
                 }
                 "MountUpdate" => self.patch_zone_entity_mount(payload),
+                "FishingUpdate" => self.patch_zone_entity_fishing(payload),
                 "ObjectWalk" | "ObjectRun" => {
                     let changed = self.patch_zone_entity_transform(
                         payload,
@@ -1172,8 +1177,12 @@ impl NativeGameplayAdapter {
         self.elemental_animation_state.clear();
         let player_object_id = self.latest_player_object_id;
         self.zone_entities.retain(|object_id, overlay| {
-            player_object_id == Some(*object_id)
-                || overlay.get("kind").and_then(Value::as_str) == Some("selfPlayer")
+            let keep = player_object_id == Some(*object_id)
+                || overlay.get("kind").and_then(Value::as_str) == Some("selfPlayer");
+            if keep {
+                reset_zone_fishing(overlay);
+            }
+            keep
         });
         self.zone_snapshot_dispositions.clear();
         self.zone_ground_drops.clear();
@@ -1694,6 +1703,51 @@ impl NativeGameplayAdapter {
         true
     }
 
+    fn patch_zone_entity_fishing(&mut self, payload: &Value) -> bool {
+        let Some(mir2_protocol::ServerPacket::FishingUpdate {
+            object_id,
+            fishing,
+            fishing_point,
+            ..
+        }) = crate::equipment_creature_wire::packet("FishingUpdate", packet_body(payload))
+        else {
+            return false;
+        };
+        if self.zone_tombstones.contains(&object_id)
+            || (self.latest_player_object_id == Some(object_id)
+                && self.authoritative_player_dead == Some(true))
+        {
+            return false;
+        }
+        let snapshot = self.actor_sound_contexts.get(&object_id);
+        let overlay = self.zone_entities.get(&object_id);
+        let read = |field| {
+            overlay
+                .and_then(|actor| actor.get(field))
+                .or_else(|| snapshot.and_then(|actor| actor.get(field)))
+        };
+        if !matches!(
+            read("kind").and_then(Value::as_str),
+            Some("selfPlayer" | "player" | "hero")
+        ) || read("dead").and_then(Value::as_bool) == Some(true)
+        {
+            return false;
+        }
+        let projection = serde_json::json!({
+            "active": fishing,
+            "point": {"x": fishing_point.x, "y": fishing_point.y},
+        });
+        if overlay.and_then(|actor| actor.get(NATIVE_FISHING_OVERLAY)) == Some(&projection) {
+            return false;
+        }
+        // An action receipt may update an existing actor, never create one.
+        self.zone_entities
+            .entry(object_id)
+            .or_default()
+            .insert(NATIVE_FISHING_OVERLAY.to_owned(), projection);
+        true
+    }
+
     fn patch_zone_entity_death(&mut self, payload: &Value, dead: bool, animate: bool) -> bool {
         let body = packet_body(payload);
         let Some(object_id) = packet_object_id(payload) else {
@@ -1704,6 +1758,7 @@ impl NativeGameplayAdapter {
         }
         let hint = animate.then(|| self.next_animation_hint(if dead { "die" } else { "revive" }));
         let overlay = self.zone_entities.entry(object_id).or_default();
+        reset_zone_fishing(overlay);
         overlay.insert("objectId".to_owned(), Value::from(object_id));
         overlay.insert("dead".to_owned(), Value::from(dead));
         overlay.insert("skeleton".to_owned(), Value::Bool(false));
@@ -4790,6 +4845,12 @@ fn merge_object_fields(target: &mut Value, overlay: &serde_json::Map<String, Val
     };
     for (field, value) in overlay {
         target.insert(field.clone(), value.clone());
+    }
+}
+
+fn reset_zone_fishing(overlay: &mut serde_json::Map<String, Value>) {
+    if let Some(fishing) = overlay.get_mut(NATIVE_FISHING_OVERLAY) {
+        *fishing = serde_json::json!({"reset": true});
     }
 }
 

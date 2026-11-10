@@ -39,6 +39,9 @@ const ANIMATION_STATES = new Set<EntitySpriteAnimationState>([
   "running",
   "attackMelee",
   "attackRange",
+  "fishingCast",
+  "fishingWait",
+  "fishingReel",
   "struck",
   "dying",
   "dead",
@@ -56,6 +59,9 @@ const ANIMATION_ACTIONS = new Set<CrystalEntityAnimationAction>([
   "attack4",
   "attackRange1",
   "spell",
+  "fishingCast",
+  "fishingWait",
+  "fishingReel",
   "struck",
   "die",
   "dead",
@@ -84,10 +90,12 @@ export function resolveCrystalEntityAnimationPoses({
         : { ...animationEventForEntity(entity, state, motionSnapshot), actionKnown: false };
       const movementActive = event.action === state
         && isCurrentPlayerMovement(entity, motionSnapshot, event.action, event.actionToken, now);
+      const fishing = own ? selfAuthority.fishing : entity.fishing;
       return {
         objectId: entity.objectId, kind: entity.kind, direction: entity.direction,
         action: event.action, ...(event.actionToken === undefined ? {} : { actionToken: event.actionToken }),
         ...(movementActive ? { movementActive } : {}),
+        ...(typeof fishing === "boolean" && !entity.dead && !entity.sprite?.mountLibrary ? { fishing } : {}),
         ...(event.retainedActionToken === undefined ? {} : { retainedActionToken: event.retainedActionToken }),
         ...(own ? { actionSourceKey: selfAuthority.sourceKey, actionSourceRevision: selfAuthority.revision,
           bootstrapKnown: selfAuthority.bootstrapKnown && selfAuthority.actionEvidence === null,
