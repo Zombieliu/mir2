@@ -7,6 +7,8 @@ const ROOT = resolve(import.meta.dirname, "../../..");
 const NATIVE = "apps/game-client/client-bevy/src/native_i18n.rs";
 const DIRECTORY = "packages/game-data/data/native-i18n";
 const OUTPUT = resolve(ROOT, "apps/web/lib/generated/r16-native-localization.json");
+const STARTUP_OUTPUT = resolve(ROOT, "apps/web/lib/generated/r16-native-localization-startup.json");
+const GAMEPLAY_OUTPUT = resolve(ROOT, "apps/web/lib/generated/r16-native-localization-gameplay.json");
 const BASE = ["common", "content", "shell", "quest", "game", "help", "npc-menus", "npc-prose"];
 const AUTHORED = ["periodic", "conquest", "wallet", "procurement"];
 const EXPANSION = ["ru", "hi", "id", "vi", "th", "ar"];
@@ -176,12 +178,31 @@ export function buildR16NativeLocalization({ readSource = relative => readFileSy
 
 export function encodeR16NativeLocalization(bundle) { return `${JSON.stringify(bundle)}\n`; }
 
+export function partitionR16NativeLocalization(bundle) {
+  const startup = { languages: bundle.languages, entries: [] };
+  const gameplay = { entries: [] };
+  // Keep the shell, account, character and system packet copy available before
+  // entering the world. These namespaces are only used by world content.
+  const gameplayKey = /^(?:content|npc|quest|help|procurement|periodic|conquest|billing|monthly)\./;
+  for (const entry of bundle.entries) {
+    (gameplayKey.test(entry.key) ? gameplay : startup).entries.push(entry);
+  }
+  return { startup, gameplay };
+}
+
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   assert(process.argv.slice(2).every(arg => arg === "--check") && process.argv.length <= 3, "only --check is supported");
   const result = buildR16NativeLocalization(), bytes = encodeR16NativeLocalization(result);
-  if (process.argv.includes("--check")) assert(readFileSync(OUTPUT, "utf8") === bytes, "generated browser catalog is stale");
-  else { mkdirSync(dirname(OUTPUT), { recursive: true }); writeFileSync(OUTPUT, bytes, "utf8"); }
+  const { startup, gameplay } = partitionR16NativeLocalization(result);
+  const outputs = [[OUTPUT, bytes], [STARTUP_OUTPUT, encodeR16NativeLocalization(startup)],
+    [GAMEPLAY_OUTPUT, encodeR16NativeLocalization(gameplay)]];
+  const checked = process.argv.includes("--check");
+  if (!checked) mkdirSync(dirname(OUTPUT), { recursive: true });
+  for (const [path, encoded] of outputs) {
+    if (checked) assert(readFileSync(path, "utf8") === encoded, `generated browser catalog is stale ${path}`);
+    else writeFileSync(path, encoded, "utf8");
+  }
   console.log(JSON.stringify({ checked: process.argv.includes("--check"), languages: result.languages.map(language => language.code),
     keys: result.entries.length, sourcePins: Object.keys(result.sourcePins).length, slotExceptions: result.slotExceptions.length,
-    bytes: Buffer.byteLength(bytes), sha256: hash(bytes) }));
+    bytes: Buffer.byteLength(bytes), sha256: hash(bytes), startupKeys: startup.entries.length, gameplayKeys: gameplay.entries.length }));
 }

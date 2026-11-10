@@ -4,17 +4,21 @@ import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import test from "node:test";
 import ts from "typescript";
-import { buildR16NativeLocalization, encodeR16NativeLocalization, R16_NATIVE_SLOT_EXCEPTIONS } from "./generate-r16-native-localization.mjs";
+import { buildR16NativeLocalization, encodeR16NativeLocalization, partitionR16NativeLocalization, R16_NATIVE_SLOT_EXCEPTIONS } from "./generate-r16-native-localization.mjs";
 
 const ROOT = resolve(import.meta.dirname, "../../.."), DATA = "packages/game-data/data/native-i18n";
 const read = relative => readFileSync(resolve(ROOT, relative), "utf8");
 const generatedBytes = read("apps/web/lib/generated/r16-native-localization.json"), generated = JSON.parse(generatedBytes);
+const startupPath = "./generated/r16-native-localization-startup.json";
+const gameplayPath = "./generated/r16-native-localization-gameplay.json";
 const order = ["zh-CN", "zh-TW", "en", "pt-BR", "ru", "hi", "id", "vi", "th", "ar"];
-function helper(data = generated) {
+function helper(data = generated, readGameplay) {
   const exports = {}, source = read("apps/web/lib/r16-native-localization.ts");
   const code = ts.transpileModule(source, { compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.CommonJS, esModuleInterop: true } }).outputText;
   new Function("exports", "require", code)(exports, name => {
-    assert.equal(name, "./generated/r16-native-localization.json"); return data;
+    if (name === startupPath) return data;
+    assert.equal(name, gameplayPath);
+    return readGameplay();
   });
   return exports;
 }
@@ -28,6 +32,50 @@ function entry(key, en, zh, aliases = [], domain = "system", extra = {}) {
   return { key, values: order.map(code => code === "zh-CN" ? zh : en), aliases, domain, ...extra };
 }
 function synthetic(entries) { return helper({ languages: generated.languages, entries }); }
+
+test("the startup and gameplay catalogs preserve every Native row without shipping the complete catalog on login", async () => {
+  const { startup, gameplay } = partitionR16NativeLocalization(generated);
+  for (const [file, pack] of [[startupPath, startup], [gameplayPath, gameplay]]) {
+    assert.equal(read(`apps/web/lib/${file.slice(2)}`), encodeR16NativeLocalization(pack));
+  }
+  assert(Buffer.byteLength(encodeR16NativeLocalization(startup)) < Buffer.byteLength(generatedBytes) * 0.3);
+  const joined = new Map([...startup.entries, ...gameplay.entries].map(row => [row.key, row]));
+  assert.equal(startup.entries.length + gameplay.entries.length, generated.entries.length);
+  assert.equal(joined.size, generated.entries.length);
+  let reads = 0;
+  const native = helper(startup, () => {
+    reads++;
+    if (reads === 1) throw new Error("chunk unavailable");
+    return gameplay;
+  });
+  for (const row of startup.entries.filter(row => /^(?:shell|wallet)\./.test(row.key))) {
+    for (const [index, language] of order.entries()) assert.equal(native.nativeText(language, row.key), row.values[index]);
+  }
+  assert.equal(reads, 0);
+  assert.equal(native.hasR16GameplayLocalization(), false);
+  assert.equal(native.nativeText("zh-CN", gameplay.entries[0].key), gameplay.entries[0].key);
+  const failed = native.loadR16GameplayLocalization();
+  assert.equal(native.loadR16GameplayLocalization(), failed);
+  await assert.rejects(failed, /chunk unavailable/);
+  assert.equal(native.hasR16GameplayLocalization(), false);
+  await native.loadR16GameplayLocalization();
+  assert.equal(native.hasR16GameplayLocalization(), true);
+  await native.loadR16GameplayLocalization();
+  assert.equal(reads, 2);
+  for (const row of generated.entries) {
+    assert.deepEqual(joined.get(row.key), row);
+    for (const [index, language] of order.entries()) assert.equal(native.nativeText(language, row.key), row.values[index]);
+  }
+});
+
+test("installing the gameplay catalog discards the partial system alias index", async () => {
+  const alias = "An authored phrase";
+  const native = helper({ languages: generated.languages, entries: [entry("client.example", "Shell copy", "外壳", [alias])] },
+    () => ({ entries: [entry("content.example", "Game copy", "游戏", [alias])] }));
+  assert.equal(native.nativeSystemText("zh-CN", alias), "外壳");
+  await native.loadR16GameplayLocalization();
+  assert.equal(native.nativeSystemText("zh-CN", alias), alias);
+});
 
 test("the generator deterministically projects every Native key and all ten locales, with current source pins", () => {
   const actual = buildR16NativeLocalization();

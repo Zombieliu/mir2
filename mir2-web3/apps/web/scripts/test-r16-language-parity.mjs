@@ -64,12 +64,13 @@ test("new presentation locales cannot leak unsupported codes into strict wire/WA
   assert.match(page, /if \(typeof window === "undefined" \|\| !isClientReady\) return;/);
 });
 
-test("single-pass placeholders and unknown-key fallbacks preserve opaque player content", () => {
+test("single-pass placeholders and unknown-key fallbacks preserve opaque player content", async () => {
   const translated = localizer.text("zh-CN", "client.AC", ["Deer{1}", "42"]);
   assert(translated.includes("Deer{1}"));
   assert(translated.includes("42"));
   assert.equal(localizer.text("zh-CN", "missing.userData", [], "Deer"), "Deer");
   assert.equal(localizer.text("ru", "missing.userData", [], "阿洛{1}"), "阿洛{1}");
+  await native.loadR16GameplayLocalization();
   const t = localizer.buildTranslator("zh-CN");
   assert.notEqual(content.localizeCrystalItemName("Candle", t), "Candle");
 });

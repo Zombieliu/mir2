@@ -35,7 +35,7 @@ const {supportsForcedPlayerAttack}=load('bevy-combat-input');
 const {SharedCombatModeKeys,nextCombatModePhysicalGeneration}=load('shared-combat-mode-keys');
 const {defaultCrystalKeyBindings,displayCrystalKeyBinding}=load('player-ui-preferences');
 const names=['setCombatForceAttack','cancelCombatInput','cancelCombatApproach','cancelLockedMonsterAttack','lockMonsterAttack','activateEntity',
- 'moveToTile','trySendQueuedCrystalMove','dropReleasedViewportStep','handleViewportTileStepAction',
+ 'moveToTile','trySendQueuedCrystalMove','dropReleasedViewportStep','newMoveOwnerCurrent','handleViewportTileStepAction',
  'handleViewportDirectionStep','handleViewportDirectionStop',
  'selectAttackMode','readCombatModeControls','currentCombatModeOwner','sameCombatModeOwner','readCombatModeSource',
  'nextCombatModeRevision','captureCombatModeSnapshot','captureCombatModeReceipt'];
@@ -107,7 +107,7 @@ function fixture(){
   equipmentHostSuspendReasonRef:ref(null),isMovementBusy:()=>false,nextMoveSendAtRef:ref(0),crystalKeyBindingsRef:ref(defaultCrystalKeyBindings()),
   displayCrystalKeyBinding,combatModePhysicalRef:ref(null),combatModeRawRef:ref(null),combatModeRevisionRef:ref(0),combatModeHostRef:ref(null),
   identity:{connectionGeneration:1,sessionGeneration:2,sceneRevision:1,playerObjectId:3,mapFileName:'D001'},
-  currentQuestWorldIdentity:()=>scope.identity,nextCombatModePhysicalGeneration,WebSocket:{OPEN:1},socketRef:ref({readyState:1}),
+  currentQuestWorldIdentity:()=>scope.identity,sameQuestWorldIdentity:(a,b)=>a===b,nextCombatModePhysicalGeneration,WebSocket:{OPEN:1},socketRef:ref({readyState:1}),
   SharedCombatModeKeys,performance:{now:()=>350},isSpectatorBrowserMode:()=>flags.spectator,
   normalizeQuestMapFileName:value=>value,numberOrUndefined:value=>typeof value==='number'?value:undefined,
   attackModeChatMessage:mode=>Number.isInteger(mode)&&mode>=0&&mode<=5?{localizationKey:'mode',fallback:'mode '+mode}:null,
@@ -200,6 +200,7 @@ test('Classic and NewMove secondary clicks steer instead of selecting an occupan
   assert.equal(f.edges.filter(edge=>edge.type==='select').length, priorSelections);
   assert.equal(f.queuedAttempts.at(-1).requestedMode, 'run');
   assert.equal(f.queuedAttempts.at(-1).consumeAfterSend, !newMove);
+  assert.equal(f.queuedAttempts.at(-1).newMoveOwner?.socket, newMove ? f.scope.socketRef.current : undefined);
   assert.equal(f.scope.queuedMoveIntentRef.current, newMove ? f.queuedAttempts.at(-1) : null);
  }
 });

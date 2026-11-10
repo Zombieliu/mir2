@@ -106,6 +106,34 @@ html[data-display-mode="standalone"] .mir-client-page {
   overflow: hidden;
 }
 
+.r16-stage-exit-dialog {
+  width: min(22rem, calc(100% - 2rem));
+  border: 1px solid #b99b5f;
+  padding: 1rem;
+  background: #21190e;
+  color: #efd697;
+  text-align: center;
+}
+
+.r16-stage-exit-dialog::backdrop {
+  background: rgb(0 0 0 / 55%);
+}
+
+.r16-stage-exit-actions {
+  display: flex;
+  justify-content: center;
+  gap: .5rem;
+  margin-top: 1rem;
+}
+
+.r16-stage-exit-actions button {
+  border: 1px solid #9a783e;
+  padding: .35rem .9rem;
+  background: #392714;
+  color: inherit;
+  font: inherit;
+}
+
 /* A contained 4:3 client is the safest way to preserve Crystal's original
    HUD, but ultra-wide phones otherwise expose harsh black pillarboxes. Use a
    subdued, blurred backdrop in those gutters so the mobile presentation feels

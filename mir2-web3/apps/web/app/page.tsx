@@ -42,10 +42,10 @@ import {
   formatRuntimeMessage,
   languageLocale,
   preferredLanguage,
-  text,
   type Mir2Language,
 } from "../lib/localization";
 import { R16_FULL_CJK_FONT_CSS } from "../lib/r16-cjk-fonts";
+import { hasR16GameplayLocalization, loadR16GameplayLocalization } from "../lib/r16-native-localization";
 import { commerceRuntimeLanguage, questRuntimeLanguage } from "../lib/r16-runtime-language";
 import { r16QuestGuidanceProfile, shouldAutoStartR16Tutorial } from "../lib/r16-gameplay-baseline";
 import { localizeQuestLog } from "../lib/quest-localization";
@@ -2522,7 +2522,9 @@ export default function HomePage() {
   const recentSelfMovementActionHistoryRef = useRef<CrystalSelfActionFeedEntry[]>([]);
   const pendingSelfMoveRef = useRef<PendingSelfMove | null>(null);
   const pendingSelfTurnRef = useRef<PendingSelfTurn | null>(null);
-  type QueuedViewportMoveIntent = QueuedMoveIntent & { pointerHeld?: () => boolean };
+  const [sentSelfMoves] = useState(() => new WeakSet<PendingSelfMove>());
+  type NewMoveRouteOwner = Readonly<{ identity: QuestWorldIdentity; socket: WebSocket }>;
+  type QueuedViewportMoveIntent = QueuedMoveIntent & { pointerHeld?: () => boolean; newMoveOwner?: NewMoveRouteOwner };
   const queuedMoveIntentRef = useRef<QueuedViewportMoveIntent | null>(null);
   const pendingGroundSkillRef = useRef<KnownSkill | null>(null);
   const nextMoveSendAtRef = useRef(0);
@@ -3330,10 +3332,17 @@ export default function HomePage() {
   const [storageServiceOpenVersion, setStorageServiceOpenVersion] = useState(0);
   const [predictedPlayerPosition, setPredictedPlayerPosition] = useState<PredictedPlayerMotion | null>(null);
   const [initialSceneAssetsReady, setInitialSceneAssetsReady] = useState(false);
+  const [gameplayLocaleStatus, setGameplayLocaleStatus] = useState<"pending" | "ready" | "failed">(
+    () => hasR16GameplayLocalization() ? "ready" : "pending",
+  );
+  const [gameplayLocaleAttempt, retryGameplayLocale] = useState(0);
+  const gameplayLocaleReady = gameplayLocaleStatus === "ready";
+  const shouldLoadGameplayLocale = screen !== "login";
   const [assetFirstPlayable, setAssetFirstPlayable] = useState(false);
   const shouldBootBevyRuntime = screen === "game" && assetFirstPlayable;
   const [isClientReady, setIsClientReady] = useState(false);
-  const t = useMemo(() => buildTranslator(language), [language]);
+  // Refresh memoized presentation once when the second catalog becomes usable.
+  const t = useMemo(() => buildTranslator(language), [language, gameplayLocaleReady]);
   const locale = languageLocale(language);
   useLayoutEffect(() => {
     const element = document.documentElement;
@@ -3353,11 +3362,8 @@ export default function HomePage() {
     };
   }, [locale]);
   const localizedQuestLog = useMemo(
-    () =>
-      localizeQuestLog(world.questLog, (key, params = [], fallback) =>
-        text(language, key, params, fallback),
-      ),
-    [language, world.questLog],
+    () => localizeQuestLog(world.questLog, t),
+    [t, world.questLog],
   );
   const presentationWorld = useMemo(
     () => ({
@@ -3578,6 +3584,35 @@ export default function HomePage() {
     setInitialSceneAssetsReady(ready);
   }
 
+  function revealInitialSceneIfReady() {
+    const readiness = sceneAssetReadinessRef.current;
+    if (screenRef.current === "game" && !firstPlayableFrameMarkedRef.current &&
+        !initialSceneAssetsReadyRef.current && hasR16GameplayLocalization() &&
+        (readiness?.interactionReady ?? readiness?.ready)) {
+      setInitialSceneAssetsReadyState(true);
+    }
+  }
+
+  useEffect(() => {
+    if (!shouldLoadGameplayLocale || gameplayLocaleReady) return;
+    let current = true;
+    setGameplayLocaleStatus("pending");
+    markMir2CacheMilestone("gameplayLocaleStart");
+    void loadR16GameplayLocalization().then(() => {
+      if (!current) return;
+      setGameplayLocaleStatus("ready");
+      markMir2CacheMilestone("gameplayLocaleReady");
+      revealInitialSceneIfReady();
+    }, () => {
+      if (!current) return;
+      setGameplayLocaleStatus("failed");
+      markMir2CacheMilestone("gameplayLocaleFailed");
+    });
+    return () => { current = false; };
+    // The readiness helper only uses stable refs and state setters.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [shouldLoadGameplayLocale, gameplayLocaleReady, gameplayLocaleAttempt]);
+
   function handleSceneAssetReadinessChange(readiness: SceneAssetReadiness) {
     sceneAssetReadinessRef.current = readiness;
     const milestoneKey = `${readiness.key}:${readiness.status}:${readiness.loaded}:${readiness.failed}`;
@@ -3597,14 +3632,7 @@ export default function HomePage() {
       });
     }
 
-    if (screenRef.current !== "game" || firstPlayableFrameMarkedRef.current) {
-      return;
-    }
-
-    const nextSceneInteractionReady = readiness.interactionReady ?? readiness.ready;
-    if (nextSceneInteractionReady && !initialSceneAssetsReadyRef.current) {
-      setInitialSceneAssetsReadyState(true);
-    }
+    revealInitialSceneIfReady();
   }
 
   const handleBevyEntityRenderStateChange = useCallback((state: BevyEntityRenderState) => {
@@ -4475,6 +4503,7 @@ export default function HomePage() {
     point: { x: number; y: number; direction?: string },
     packetName: string,
     now: number,
+    ordinaryStepLocation: boolean,
   ) {
     const pendingBefore = pendingSelfMoveRef.current;
     const hadPending = pendingBefore !== null;
@@ -4496,7 +4525,10 @@ export default function HomePage() {
         pendingDirection: pendingBefore?.direction ?? null,
         pendingMode: pendingBefore?.mode ?? null,
       });
-      queuedMoveIntentRef.current = null;
+      if (!ordinaryStepLocation || !pendingBefore || !sentSelfMoves.has(pendingBefore)
+        || !movementPointMatches(point, pendingBefore.from) || !keepCorrectedRoute(pendingBefore, now)) {
+        queuedMoveIntentRef.current = null;
+      }
       crystalRunPrimedUntilRef.current = 0;
       movementPredictionBlockedUntilRef.current = Math.max(
         movementPredictionBlockedUntilRef.current,
@@ -6539,6 +6571,7 @@ export default function HomePage() {
       }
     }
     if (command.type === "logOut") {
+      if (equipmentHostSuspendReasonRef.current === "logoutPending") return false;
       try {
         const sent = sendRaw(command, options);
         if (sent) suspendEquipmentConnection("logoutPending");
@@ -7963,14 +7996,13 @@ export default function HomePage() {
       setLoginBusy(false);
       return false;
     }
-    const proof = preauthGate().reserve(socket, equipmentConnectionGenerationRef.current, attempt.epoch, attempt.kind);
+    const proof = preauthGate().reserve(socket, equipmentConnectionGenerationRef.current, attempt.epoch, attempt.kind, attempt.bootstrap);
     if (!proof) { setLoginBusy(false); return false; }
     let sent = false;
     authSendRef.current = { proof, attempt };
     try {
       if (!send({ type: "clientVersion" }, { quiet: true })) return false;
       sent = send(attempt.command, { quiet: true, authProof: proof });
-      if (sent && attempt.bootstrap) send({ type: "startGame", characterIndex: 0 }, { quiet: true });
       return sent;
     } catch {
       // The send may have entered. Keep its lane and do not replay credentials.
@@ -8868,6 +8900,45 @@ export default function HomePage() {
     return true;
   }
 
+  function newMoveOwnerCurrent(owner: NewMoveRouteOwner): boolean {
+    const current = worldRef.current, socket = socketRef.current;
+    const self = currentAuthoritativeSelf(current);
+    return socket === owner.socket && socket.readyState === WebSocket.OPEN && playerUiPreferencesRef.current.newMove
+      && screenRef.current === "game" && current.connected && Boolean(self && !self.dead)
+      && document.visibilityState === "visible" && document.hasFocus()
+      && !referenceWindowsBlockGameplay() && sameQuestWorldIdentity(owner.identity, currentQuestWorldIdentity());
+  }
+
+  function keepCorrectedRoute(pending: PendingSelfMove, now: number): boolean {
+    const queued = queuedMoveIntentRef.current;
+    if (!queued || queued.kind !== "target" || queued.consumeAfterSend || queued.pointerHeld) return false;
+    const map = mapImageRouteRef.current, quest = questRouteRunRef.current;
+    if (queued.newMoveOwner) {
+      if (!newMoveOwnerCurrent(queued.newMoveOwner)) return false;
+    } else if (map?.queued === queued) {
+      if (!mapImageRouteCurrent(map)) return false;
+    } else if (quest?.queued === queued) {
+      const lifetime = currentQuestWorldLifetime();
+      if (!lifetime || !sameQuestWorldLifetime(quest.lifetime, lifetime) || questWorldBlockedRef.current
+        || currentQuestMapIndex(questMapAuthorityRef.current, lifetime.identity) !== quest.action.mapIndex
+        || document.visibilityState !== "visible" || !document.hasFocus()) return false;
+    } else return false;
+
+    // UserLocation can also be a control correction. Only remember a blocked edge when
+    // current collision proves it. A blocked run endpoint must not blacklist its free first tile.
+    const distance = pointTileDistance(pending.from, pending.to), current = worldRef.current;
+    for (let offset = 0; offset < distance; offset += 1) {
+      const from = pointMoveInDirection(pending.from, pending.direction, offset);
+      if (movementStepBlockedByVisibleEntity(from, pending.direction, "walk", current)
+        || movementStepBlockedByVisibleMapCell(from, pending.direction, "walk", current)) {
+        rememberBlockedDirectionAtSource(from.x, from.y, pending.direction, now);
+        break;
+      }
+    }
+    scheduleMovementConfirmTick();
+    return true;
+  }
+
   function trySendQueuedCrystalMove(now = Date.now()) {
     const queued = queuedMoveIntentRef.current;
     if (!queued || dropReleasedViewportStep(queued)) {
@@ -8881,6 +8952,10 @@ export default function HomePage() {
     const ownedQuestRoute = questRouteRunRef.current?.queued === queued ? questRouteRunRef.current : null;
     const ownedMapRoute = mapImageRouteRef.current?.queued === queued ? mapImageRouteRef.current : null;
     if (queuedMoveIntentRef.current !== queued || dropReleasedViewportStep(queued)) return false;
+    if (queued.newMoveOwner && !newMoveOwnerCurrent(queued.newMoveOwner)) {
+      queuedMoveIntentRef.current = null;
+      return false;
+    }
     const ownedPickup = pendingPickupRef.current?.queued === queued ? pendingPickupRef.current : null;
     const ownedApproach = combatApproachIntentRef.current?.queued === queued ? combatApproachIntentRef.current : null;
     if ((ownedQuestRoute || ownedPickup) && (questWindowOpenRef.current
@@ -9090,6 +9165,9 @@ export default function HomePage() {
     if (ownedMapRoute && !mapImageRouteCurrent(ownedMapRoute)) {
       pendingSelfMoveRef.current = null; clearLocalSelfPrediction(); cancelMapImageRoute(); return false;
     }
+    if (queued.newMoveOwner && !newMoveOwnerCurrent(queued.newMoveOwner)) {
+      queuedMoveIntentRef.current = null; pendingSelfMoveRef.current = null; clearLocalSelfPrediction(); return false;
+    }
     if (queued.consumeAfterSend) queuedMoveIntentRef.current = null;
     const sent = send({ type: alignedPending.mode === "run" ? "run" : "walk", direction: alignedPending.direction },
       { viewportPointerHeld: queued.pointerHeld });
@@ -9099,6 +9177,7 @@ export default function HomePage() {
       clearLocalSelfPrediction();
       return false;
     }
+    sentSelfMoves.add(alignedPending);
     observeBevyMovementShadowCommand({
       atMs: now,
       direction: alignedPending.direction,
@@ -9244,7 +9323,7 @@ export default function HomePage() {
     y: number,
     mode: "walk" | "run",
     _packetMode: "target" | "direction" = "direction",
-    source: "manual" | "manual-step" | "locked-monster" = "manual",
+    source: "manual" | "manual-step" | "new-move" | "locked-monster" = "manual",
     gesture?: WorldFishingGesture,
   ) {
     const chasing = source === "locked-monster";
@@ -9252,6 +9331,13 @@ export default function HomePage() {
     const current = worldRef.current;
     const target = chasing ? current.entities.find(entity => entity.objectId === current.selectedObjectId) : null;
     if (chasing && (!target || target.dead || target.hp === 0)) return;
+    let newMoveOwner: NewMoveRouteOwner | undefined;
+    if (source === "new-move") {
+      const identity = currentQuestWorldIdentity(), socket = socketRef.current;
+      if (!identity || !socket) return;
+      newMoveOwner = { identity, socket };
+      if (!newMoveOwnerCurrent(newMoveOwner)) return;
+    }
     const requestedAt = Date.now();
     const previousRunPrime = crystalRunPrimedUntilRef.current;
     const runPrime = Math.max(previousRunPrime, requestedAt + CRYSTAL_RUN_PRIME_MS);
@@ -9260,13 +9346,14 @@ export default function HomePage() {
       // first-click prime the Web route downgraded mouse-run targets into walks.
       crystalRunPrimedUntilRef.current = runPrime;
     }
-    const intent: QueuedMoveIntent = {
+    const intent: QueuedViewportMoveIntent = {
       kind: "target",
       targetX: x,
       targetY: y,
       requestedMode: mode,
       requestedAt,
-      consumeAfterSend: source !== "manual",
+      consumeAfterSend: source === "manual-step" || chasing,
+      ...(newMoveOwner ? { newMoveOwner } : {}),
     };
     if (target) combatApproachIntentRef.current = { queued: intent, map: current.mapFileName ?? null,
       objectId: target.objectId, x: target.x, y: target.y };
@@ -12684,6 +12771,7 @@ export default function HomePage() {
   function retireQuestWorldActions() {
     cancelMapImageRoute();
     cancelQuestRoute(); cancelPendingPickup(); questAttackHandoffRef.current = null;
+    if (queuedMoveIntentRef.current?.newMoveOwner) queuedMoveIntentRef.current = null;
   }
 
   /** Called synchronously for every world projection, before React can coalesce remove/reappear edges. */
@@ -15121,7 +15209,9 @@ export default function HomePage() {
         appendLog(t("ui.characterDeleteFailed", [], "Character deletion failed."), "system");
         break;
       case "LoginSuccess": {
-        if (!Array.isArray(payload.characters) || !consumePreauthReply("login", source, connectionGeneration)) break;
+        if (!Array.isArray(payload.characters)) break;
+        const proof = consumePreauthReply("login", source, connectionGeneration);
+        if (!proof) break;
         const token = loginAuthRef.current.epoch + 1;
         updateLoginAuth(emptyLoginAuthState(token, accountIdRef.current));
         passwordRef.current = "";
@@ -15148,8 +15238,18 @@ export default function HomePage() {
           }
         }
         markMir2CacheMilestone("loginSuccess", {
-          characterCount: Array.isArray(payload.characters) ? payload.characters.length : undefined,
+          characterCount: payload.characters.length,
         });
+        if (proof.quickEnter && loginDoorRef.current?.token === token && socketRef.current === source) {
+          // The roster slot on screen and the server's character index can differ.
+          // An empty or incomplete roster continues through ordinary selection.
+          const first = payload.characters[0];
+          const index = first?.index ?? first?.Index;
+          const name = first?.name ?? first?.Name;
+          if (typeof index === "number" && Number.isSafeInteger(index) && index >= 0 && typeof name === "string" && name.trim()) {
+            send({ type: "startGame", characterIndex: index }, { quiet: true });
+          }
+        }
         break;
       }
       case "StartGame":
@@ -15509,7 +15609,10 @@ export default function HomePage() {
           return nextWorld;
         });
         if (movementObjectId === worldRef.current.playerObjectId && selfMovementPacket) {
-          const outcome = reconcileSelfMovementAck({ x, y, direction }, movementPacket, movementNow);
+          const rawLocation = payload.location as { x?: unknown; y?: unknown } | undefined;
+          const ordinaryStepLocation = movementPacket === "UserLocation"
+            && Number.isSafeInteger(payload.x ?? rawLocation?.x) && Number.isSafeInteger(payload.y ?? rawLocation?.y);
+          const outcome = reconcileSelfMovementAck({ x, y, direction }, movementPacket, movementNow, ordinaryStepLocation);
           if (movementPacket === "UserLocation") {
             observeBevyMovementShadow({
               type: "authoritative",
@@ -20969,7 +21072,7 @@ export default function HomePage() {
     if (!playerUiPreferencesRef.current.newMove) return handleViewportTileStepAction(x, y, "run");
     if (sceneInputDeferredForInitialAssets()) return;
     stopOnchainMining();
-    moveToTile(x, y, "run");
+    moveToTile(x, y, "run", "direction", "new-move");
   };
   const onViewportTileSecondaryAction = useCallback(
     (x: number, y: number) => onViewportTileSecondaryActionRef.current(x, y),
@@ -21510,6 +21613,7 @@ export default function HomePage() {
     <PwaGameShell language={language} />
     <OriginalClientShell
       language={language}
+      t={t}
       screen={screen}
       readMovementInputDiagnostics={readMovementInputDiagnostics}
       readBeltInputDiagnostics={readBeltInputDiagnostics}
@@ -21541,7 +21645,13 @@ export default function HomePage() {
       player={self}
       predictedPlayerPosition={null}
       sceneInteractionReady={screen !== "game" || initialSceneAssetsReady}
-      onRetrySceneLoad={sceneLoadFailure && !world.originalMapRegion &&
+      sceneLoadingText={gameplayLocaleReady ? undefined : gameplayLocaleStatus === "failed"
+        ? t("ui.gameTextLoadUnavailable", [], "Game text could not be loaded.")
+        : t("ui.gameTextLoading", [], "Loading game text…")}
+      onRetrySceneLoad={gameplayLocaleStatus === "failed" ? () => {
+        setGameplayLocaleStatus("pending");
+        retryGameplayLocale(count => count + 1);
+      } : gameplayLocaleReady && sceneLoadFailure && !world.originalMapRegion &&
         (sceneLoadFailure.phase === "release" || sceneLoadFailure.sceneKey === sceneBlueprintRequestKey)
         ? () => {
           setSceneLoadFailure(null);
@@ -21736,6 +21846,7 @@ export default function HomePage() {
       storageRentalPrompt={storageRentalPrompt}
       onConfirmStorageRental={confirmStorageRental}
       onCancelStorageRental={cancelStorageRental}
+      allowStageExit={screen === "game" && !spectatorMode && self !== null && wsState === "open"}
       onLogout={() => send({ type: "logOut" })}
       characterCreate={{
         classes: currentCharacterCreateClasses(renderedCharacterSelection),

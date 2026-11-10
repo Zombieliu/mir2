@@ -69,7 +69,6 @@ import {
   type OriginalSceneSpriteLibraryMeta,
 } from "../lib/original-scene-sprite-meta";
 import {
-  buildTranslator,
   formatRuntimeMessage,
   formatRuntimePhase,
   languageLocale,
@@ -520,6 +519,7 @@ function keyboardInputTargetIsEditable(target: EventTarget | null) {
 
 export function OriginalClientShell({
   language,
+  t,
   screen,
   runtimePhase,
   runtimeMessage,
@@ -537,6 +537,7 @@ export function OriginalClientShell({
   viewportEntities: sourceViewportEntities,
   viewportTiles,
   sceneInteractionReady,
+  sceneLoadingText,
   onRetrySceneLoad,
   bevyEntityRendererReady,
   bevyRuntimeBackend,
@@ -660,6 +661,7 @@ export function OriginalClientShell({
   onRequestTrade,
   onRentExpandedStorage,
   storageRentalPrompt, onConfirmStorageRental, onCancelStorageRental,
+  allowStageExit,
   onLogout,
   characterCreate,
   onDeleteCharacter,
@@ -747,11 +749,6 @@ export function OriginalClientShell({
   onBevyMailComposePointer?:(pointerId:number,phase:'down'|'move'|'up'|'cancel',x:number,y:number,shift:boolean)=>boolean;
   onBevyMailComposePointerCancel?:()=>void;
   mailOpen?:boolean;onToggleMail?:()=>void}) {
-  // Memoize t and locale so stable references are passed to memo'd child components
-  // (GameUiScene, LoginOverlay, SelectOverlay, OriginalClientMobileControls). Without
-  // this, buildTranslator returns a new function on every render — invalidating the
-  // memo on each 30 Hz motionNow tick. Language changes only on user action (rare).
-  const t = useMemo(() => buildTranslator(language), [language]);
   const locale = useMemo(() => languageLocale(language), [language]);
   const clientProfile = useOriginalClientDeviceProfile();
   const runtimePhaseLabel = formatRuntimePhase(language, runtimePhase);
@@ -859,6 +856,8 @@ export function OriginalClientShell({
   // shell's existing motion clock without any dedicated timer.
   const chatBubbleStateRef = useRef<Map<string, ChatBubbleRecord>>(new Map());
   const stageFrameRef = useRef<HTMLDivElement | null>(null);
+  const stageGutterPressRef = useRef<number | null>(null);
+  const stageExitDialogRef = useRef<HTMLDialogElement | null>(null);
   const bagBeltButtonsRef = useRef<readonly BagBeltButtonBinding[] | null>(null);
   const bagBeltGeometryRef = useRef<BagBeltGeometry | null>(null);
   const bagBeltGeometryRevisionRef = useRef(0);
@@ -1493,6 +1492,7 @@ export function OriginalClientShell({
   }, [screen]);
 
     function handleShortcutKey(event: KeyboardEvent) {
+      if (stageExitDialogRef.current?.open) return;
       const diagnosticKey = crystalKeyNameFromBrowserEvent(event);
       const diagnosticActions = crystalKeyBindings && diagnosticKey ? matchingCrystalKeyFunctions(crystalKeyBindings, diagnosticKey,
         { alt: event.altKey, ctrl: event.ctrlKey, shift: event.shiftKey, tilde: combatTildeRef.current })
@@ -1691,6 +1691,7 @@ export function OriginalClientShell({
     // renderer guard must not prevent installing listeners until a prop changes.
 
     function handleKeyboardMoveDown(event: KeyboardEvent) {
+      if (stageExitDialogRef.current?.open) return;
       if (guildKeyboardOwnsEvent(event.target)) { stopNpcShopWorldInput(); return; }
       const diagnosticDirection = keyboardMoveDirectionForKey(event.key);
       // This capture listener owns movement only. Panel shortcuts must reach
@@ -5199,6 +5200,23 @@ export function OriginalClientShell({
     >
       <section
         className="mir-stage"
+        onPointerDownCapture={(event) => {
+          stageGutterPressRef.current = allowStageExit && event.isPrimary && event.button === 0 && event.target === event.currentTarget
+            ? event.pointerId : null;
+        }}
+        onPointerCancelCapture={() => { stageGutterPressRef.current = null; }}
+        onPointerUpCapture={(event) => {
+          const fromGutter = stageGutterPressRef.current === event.pointerId;
+          stageGutterPressRef.current = null;
+          const dialog = stageExitDialogRef.current;
+          if (!allowStageExit || !fromGutter || event.target !== event.currentTarget || !dialog || dialog.open) return;
+          const frame = stageFrameRef.current?.getBoundingClientRect();
+          if (!frame || (event.clientX >= frame.left && event.clientX < frame.right &&
+              event.clientY >= frame.top && event.clientY < frame.bottom)) return;
+          event.preventDefault();
+          event.stopPropagation();
+          dialog.showModal();
+        }}
         style={
           {
             "--mir-stage-letterbox-image":
@@ -5702,18 +5720,37 @@ export function OriginalClientShell({
               !readinessSafetyExpired)) ? (
             <div className="scene-loading-overlay">
               {onRetrySceneLoad ? <>
-                <span className="scene-loading-text" role="alert">{t("ui.sceneLoadUnavailable", [], "The map could not be loaded.")}</span>
+                <span className="scene-loading-text" role="alert">{sceneLoadingText ?? t("ui.sceneLoadUnavailable", [], "The map could not be loaded.")}</span>
                 <button type="button" className="scene-loading-retry" onClick={onRetrySceneLoad}>
                   {t("ui.retry", [], "Retry")}
                 </button>
               </> : <>
                 <span className="scene-loading-spinner" aria-hidden="true" />
-                <span className="scene-loading-text" role="status">{sceneLoadingLabel}</span>
+                <span className="scene-loading-text" role="status">{sceneLoadingText ?? sceneLoadingLabel}</span>
               </>}
             </div>
           ) : null}
         </div>
       </section>
+      {allowStageExit ? (
+        <dialog ref={stageExitDialogRef} className="r16-stage-exit-dialog" aria-labelledby="r16-stage-exit-question"
+          onKeyDownCapture={(event) => {
+            if (event.key !== "Escape" || event.nativeEvent.isComposing) return;
+            event.preventDefault();
+            event.stopPropagation();
+            event.currentTarget.close();
+          }}>
+          <p id="r16-stage-exit-question">{t("ui.confirmReturnToCharacterSelect", [], "Leave this character and return to character selection?")}</p>
+          <div className="r16-stage-exit-actions">
+            <button type="button" onClick={() => stageExitDialogRef.current?.close()}>{t("shell.cancel", [], "Cancel")}</button>
+            <button type="button" onClick={() => {
+              if (!stageExitDialogRef.current?.open) return;
+              stageExitDialogRef.current.close();
+              onLogout();
+            }}>{t("shell.ok", [], "OK")}</button>
+          </div>
+        </dialog>
+      ) : null}
       {clientProfile.layout === "tv" && clientProfile.input === "gamepad" && screen !== "game" ? (
         <div className="mir-gamepad-hint" role="status">
           {t(

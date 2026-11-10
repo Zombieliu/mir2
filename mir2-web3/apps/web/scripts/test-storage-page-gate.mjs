@@ -7,14 +7,14 @@ import { createSocialBudgetTestRuntime } from "./lib/social-budget-test-runtime.
 
 // Pure source dependencies plus the pinned, isolated Native WASM test runtime;
 // no renderer run, socket connection or filesystem fixture writes.
-const sources = { nativeLocalization: "../lib/r16-native-localization.ts", nativeData: "../lib/generated/r16-native-localization.json", runtimeLanguage: "../lib/r16-runtime-language.ts", r16Auth:"../lib/r16-auth-layout.ts", npcPurchaseClient:"../lib/npc-purchase-client.ts", rankingInspectRequests:"../lib/ranking-inspect-requests.ts", pearlSource:"../lib/npc-pearl-buy-source.ts", crystalItem:"../lib/crystal-item-source.ts", repair:"../lib/npc-repair-service.ts", fishingSource: "../lib/world-fishing-source.ts", bagBeltMove: "../lib/bag-belt-move-dispatcher.ts", identity: "../lib/world-model/item-identity.ts",
+const sources = { nativeLocalization: "../lib/r16-native-localization.ts", nativeData: "../lib/generated/r16-native-localization-startup.json", runtimeLanguage: "../lib/r16-runtime-language.ts", r16Auth:"../lib/r16-auth-layout.ts", npcPurchaseClient:"../lib/npc-purchase-client.ts", rankingInspectRequests:"../lib/ranking-inspect-requests.ts", pearlSource:"../lib/npc-pearl-buy-source.ts", crystalItem:"../lib/crystal-item-source.ts", repair:"../lib/npc-repair-service.ts", fishingSource: "../lib/world-fishing-source.ts", bagBeltMove: "../lib/bag-belt-move-dispatcher.ts", identity: "../lib/world-model/item-identity.ts",
   equipment: "../lib/equipment-gateway-adapter.ts", parcel: "../lib/mail-parcel-gateway-adapter.ts",
   storage: "../lib/storage-gateway-adapter.ts", social: "../lib/social-incoming-replies.ts", groupOperations: "../lib/group-operations.ts",
   guildRankOperations: "../lib/guild-rank-operations.ts", guildRankProjection: "../lib/guild-rank-projection.ts",
   operations: "../lib/social-window-operations.ts", rental: "../lib/storage-rental-confirmation.ts",
   bag: "../lib/bevy-bag-model.ts", socialItems: "../lib/social-item-window-model.ts",
   stage5:"../lib/stage5-window-adapters.ts", tooltip:"../lib/shared-item-tooltip.ts", guildBuff:"../lib/guild-buff-ui.ts", socialActions: "../lib/social-parity-actions.ts", extended: "../lib/extended-server-packets.ts" };
-const allow = { nativeLocalization: {"./generated/r16-native-localization.json": "nativeData"}, nativeData: {}, runtimeLanguage: {}, r16Auth:{"./r16-native-localization": "nativeLocalization"}, npcPurchaseClient:{}, rankingInspectRequests:{}, pearlSource:{"./crystal-item-source":"crystalItem"}, crystalItem:{}, repair:{"./equipment-gateway-adapter":"equipment"}, fishingSource: {}, bagBeltMove: { "./mail-parcel-gateway-adapter": "parcel" }, identity: {}, equipment: { "./world-model/item-identity": "identity" },
+const allow = { nativeLocalization: {"./generated/r16-native-localization-startup.json": "nativeData"}, nativeData: {}, runtimeLanguage: {}, r16Auth:{"./r16-native-localization": "nativeLocalization"}, npcPurchaseClient:{}, rankingInspectRequests:{}, pearlSource:{"./crystal-item-source":"crystalItem"}, crystalItem:{}, repair:{"./equipment-gateway-adapter":"equipment"}, fishingSource: {}, bagBeltMove: { "./mail-parcel-gateway-adapter": "parcel" }, identity: {}, equipment: { "./world-model/item-identity": "identity" },
   parcel: { "./equipment-gateway-adapter": "equipment" },
   storage: { "./equipment-gateway-adapter": "equipment", "./world-model/item-identity": "identity",
     "./mail-parcel-gateway-adapter": "parcel" }, social: {}, groupOperations: {}, operations: {},
@@ -122,7 +122,7 @@ const ackCases = [];
 const socialCases = new Map();
 const socialPacketNames = ["GroupInvite", "MarriageRequest", "DivorceRequest", "MentorRequest", "GuildStatus", "GuildStorageList",
   "GuildStorageItemChange", "DepositTradeItem", "RetrieveTradeItem", "LogOutFailed", "FriendUpdate", "GuildInvite", "GuildMemberChange", "Rankings",
-  "TradeItem", "TradeGold", "TradeRequest", "TradeAccept", "TradeConfirm", "TradeCancel", "NewItemInfo", "NewRecipeInfo", "Connected", "NewAccount", "Login", "LoginBanned", "ChangePassword",
+  "TradeItem", "TradeGold", "TradeRequest", "TradeAccept", "TradeConfirm", "TradeCancel", "NewItemInfo", "NewRecipeInfo", "Connected", "NewAccount", "Login", "LoginBanned", "LoginSuccess", "ChangePassword",
   "Chat", "SwitchGroup", "AddMember", "DeleteMember", "GroupMemberInfo", "DeleteGroup", "ObjectHidden",
   "GuildNoticeChange", "GuildStorageGoldChange"];
 let authControlsInitializer;
@@ -318,6 +318,9 @@ function harness({ identity = session, sequenceRef = { current: 1 }, pendingRef 
     loginBusyRef:{current:false}, gatewayProtocolReadyRef:{current:true}, pendingGatewayProtocolActionRef:{current:null},
     oauthIntentRef:{current:0}, accountIdRef:{current:"Existing"}, passwordRef:{current:"ExistingSecret"}, activeReconnectAuthRef:{current:null},
     reconnectTimerRef:{current:null}, reconnectAttemptRef:{current:0}, reconnectSnapshotRef:{current:null}, reconnectStatusRef:{current:{mode:"idle",attempt:0,nextAttemptAt:null}},
+    language: "en", charactersRef: {current: []}, selectedCharacterIndexRef: {current: 0}, loginDoorRef: {current: null},
+    parseCharacters: payload => payload.characters, setCharacters: () => {}, setSelectedCharacterIndex: () => {},
+    retireCharacterSelection: () => { scope.loginDoorRef.current = null; },
     setLoginAuthState: value => scope.authStateEvents.push(value), setLoginBusyState: value => scope.authBusyEvents.push(value),
     setLoginErrorKey: value => scope.authErrorEvents.push(value), setAuthCoreReady: value => {scope.authReady=value;},
     setAccountId: value => {scope.accountDisplay=value;}, setPassword: value => {scope.passwordDisplay=value;}, setIdentityProvider: value => {scope.identityProvider=value;},
@@ -2332,8 +2335,22 @@ test("actual quick-enter captures one immutable pre-Ready attempt and complete i
   assert.equal(attempt.bootstrap,true);assert.equal(attempt.kind,"login");assert(Object.isFrozen(attempt.command));
   page.scope.accountIdRef.current="Changed";page.scope.passwordRef.current="ChangedSecret";
   page.receive("Connected",{});
-  assert.deepEqual(page.sent.map(c=>c.type),["setLanguage","clientVersion","login","startGame"]);
+  assert.deepEqual(page.sent.map(c=>c.type),["setLanguage","clientVersion","login"]);
   assert.deepEqual(page.sent[2],{type:"login",accountId:"Existing",password:"ExistingSecret"});
+  const roster = {characters: [{name: "First character", index: 1}, {name: "Other", index: 7}]};
+  page.receive("LoginSuccess", roster, undefined, {});
+  assert.equal(page.sent.length, 3, "a foreign connection does not own quick enter");
+  page.receive("LoginSuccess", roster);
+  assert.deepEqual(page.sent[3], {type: "startGame", characterIndex: 1});
+  page.receive("LoginSuccess", {characters: [{name: "Repeated", index: 7}]});
+  assert.equal(page.sent.length, 4, "a repeated auth reply cannot start again");
+  for (const characters of [[], [{name: "Missing index"}], [{index: 1}]]) {
+    const empty = authPage();
+    empty.quickEnterWorld();
+    empty.receive("LoginSuccess", {characters});
+    assert.deepEqual(empty.sent.map(command => command.type), ["clientVersion", "login"]);
+    assert.equal(empty.scope.screenRef.current, "openingLogin");
+  }
   for(const mutate of [
     p=>p.scope.loginAuthRef.current={...p.scope.loginAuthRef.current,epoch:2},
     p=>p.scope.oauthIntentRef.current++,

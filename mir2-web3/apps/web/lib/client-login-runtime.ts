@@ -66,17 +66,18 @@ export type LoginAuthControls = {
 };
 
 export type PreauthKind = "login" | "newAccount" | "changePassword";
-export type PreauthProof = Readonly<{ socket: object; generation: number; epoch: number; kind: PreauthKind }>;
+export type PreauthProof = Readonly<{ socket: object; generation: number; epoch: number; kind: PreauthKind; quickEnter?: true }>;
 
 /** Legacy replies have no request identity. Once entered, this socket's auth
  * lane stays used even after a terminal reply; a new intent needs a new socket.
  * The durable gate stores only identity metadata, never command bodies. */
 export class PreauthFlightGate {
   private lanes = new WeakMap<object, { proof: PreauthProof; entered: boolean; completed: boolean }>();
-  reserve(socket: object, generation: number, epoch: number, kind: PreauthKind): PreauthProof | null {
+  reserve(socket: object, generation: number, epoch: number, kind: PreauthKind, quickEnter = false): PreauthProof | null {
     if (!Number.isSafeInteger(generation) || generation < 1 || !Number.isSafeInteger(epoch)
       || epoch < 1 || this.lanes.has(socket)) return null;
-    const proof = Object.freeze({ socket, generation, epoch, kind });
+    const proof: PreauthProof = Object.freeze({ socket, generation, epoch, kind,
+      ...(kind === "login" && quickEnter ? { quickEnter: true as const } : {}) });
     this.lanes.set(socket, { proof, entered: false, completed: false });
     return proof;
   }

@@ -133,20 +133,24 @@ function EntityHealthBars({
           motionNow,
           viewportLayout,
         );
-        const bounds = entitySpriteHitBounds(sprite);
-        const centerOffset = (bounds.left + bounds.right) / 2;
+        const monster = entity.kind === "monster";
+        const bounds = monster ? null : entitySpriteHitBounds(sprite);
+        const left = origin.left + (bounds ? (bounds.left + bounds.right) / 2 : 8);
+        const top = origin.top + (bounds ? bounds.top - 8 : -64);
+        const fillWidth = monster ? `${Math.floor(32 * healthRatio)}px` : `${healthRatio * 100}%`;
         return (
           <div
             key={`overlay-hp-${entity.objectId}`}
             ref={registerEntityEl?.(`overlay-hp:${entity.objectId}`, entity.objectId)}
             className={`scene-overlay-health ${entityKindClassName(entity.kind)} ${isTarget ? "is-target" : ""}`}
+            data-object-id={entity.objectId}
             style={{
-              left: `${origin.left + centerOffset}px`,
-              top: `${origin.top + bounds.top - 8}px`,
+              left: `${left}px`,
+              top: `${top}px`,
               zIndex: viewportDepthForCell(entity.x, entity.y, player ?? entity, 8),
             }}
           >
-            <span style={{ width: `${healthRatio * 100}%`, background: healthBarColor(healthRatio) }} />
+            <span style={{ width: fillWidth, background: healthBarColor(healthRatio) }} />
           </div>
         );
       })}
@@ -396,9 +400,7 @@ function SelectionHighlight({
   );
 }
 
-// Bottom-left readout for the currently selected target (name / level / hp / action+distance). The
-// shell already holds selectedEntity + targetDistance + the action-label helper but never surfaced
-// them on screen, so this fills an obviously-incomplete HUD slot without new data plumbing.
+// Keep interaction hints for non-monster targets. Monster HP follows its sprite.
 function SelectedTargetReadout({
   t,
   selectedEntity,
@@ -408,7 +410,7 @@ function SelectedTargetReadout({
   selectedEntity: DisplayEntity | null;
   targetActionLabel: string | null;
 }) {
-  if (!selectedEntity) {
+  if (!selectedEntity || selectedEntity.kind === "monster") {
     return null;
   }
   const nameColor = entityNameplateColor(selectedEntity);
@@ -419,7 +421,7 @@ function SelectedTargetReadout({
     <div className="scene-target-readout" role="status" aria-live="polite">
       <div className="scene-target-readout-head">
         <strong style={{ color: nameColor }}>
-          {selectedEntity.kind === "npc" || selectedEntity.kind === "monster"
+          {selectedEntity.kind === "npc"
             ? localizeCrystalEntityName(selectedEntity.name, t).replace(/_/g, " ") : selectedEntity.name}
         </strong>
         {selectedEntity.level !== undefined ? (
@@ -464,7 +466,7 @@ const OVERLAY_STYLES = `
   background: #270000;
   box-shadow: 1px 1px 0 #000;
 }
-.scene-overlay-health.is-target {
+.scene-overlay-health.is-target:not(.monster) {
   width: 40px;
   height: 5px;
   box-shadow: 0 0 4px rgba(255, 226, 150, 0.55), 1px 1px 0 #000;
@@ -474,6 +476,17 @@ const OVERLAY_STYLES = `
   height: 100%;
   background: #00c000;
   transition: width 120ms linear;
+}
+.scene-overlay-health.monster {
+  width: 32px;
+  height: 4px;
+  transform: none;
+  border: 0;
+  background: #270000 url("/original-ui/Prguse2/0.png") no-repeat;
+  box-shadow: none;
+}
+.scene-overlay-health.monster > span {
+  transition: none;
 }
 .scene-chat-bubble {
   position: absolute;

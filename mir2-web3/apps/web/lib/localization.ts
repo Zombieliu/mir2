@@ -1,5 +1,5 @@
 import localizationBundle from "./generated/localization_bundle.json";
-import { R16_NATIVE_LANGUAGES, nativeLanguageInfo, nativeSystemText, nativeText, type R16NativeLanguage } from "./r16-native-localization";
+import { R16_NATIVE_LANGUAGES, hasR16GameplayLocalization, nativeLanguageInfo, nativeSystemText, nativeText, type R16NativeLanguage } from "./r16-native-localization";
 import { browserText } from "./r16-browser-localization";
 
 // Spanish remains a legacy internal type for older shared hosts and saved QA
@@ -78,7 +78,7 @@ export function text(
   // Only known authored system templates enter alias translation. An unknown
   // key's fallback may be a player's name or other opaque server text.
   const authored = defaultTexts[key];
-  const cacheKey = `${language}\u0000${key}`;
+  const cacheKey = `${hasR16GameplayLocalization()}\u0000${language}\u0000${key}`;
   let projected = authored === undefined ? undefined : projectedLegacyTexts.get(cacheKey);
   if (authored !== undefined && projected === undefined) {
     projected = nativeSystemText(language, authored);

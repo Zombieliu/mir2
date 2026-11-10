@@ -32,6 +32,7 @@ function load(path) {
 
 const { HelpWindow } = load(resolve(root, "app/components/original-client-help-window.tsx"));
 const { buildTranslator } = load(resolve(root, "lib/localization.ts"));
+await load(resolve(root, "lib/r16-native-localization.ts")).loadR16GameplayLocalization();
 const { defaultCrystalKeyBindings } = load(resolve(root, "lib/player-ui-preferences.ts"));
 const catalog = require(resolve(root, "lib/generated/r16-native-localization.json"));
 const entries = new Map(catalog.entries.map(entry => [entry.key, entry.values]));

@@ -75,8 +75,10 @@ const socialItems = loadTypeScriptModule(new URL("../lib/social-item-window-mode
 
 const questWorldDocument = loadTypeScriptModule(new URL("../lib/bevy-quest-world-context.ts", import.meta.url), { "./bevy-bag-model": bagModel });
 const nativeLocalization = loadTypeScriptModule(new URL("../lib/r16-native-localization.ts", import.meta.url), {
-  "./generated/r16-native-localization.json": {default: JSON.parse(readFileSync(new URL("../lib/generated/r16-native-localization.json", import.meta.url), "utf8"))},
+  "./generated/r16-native-localization-startup.json": {default: JSON.parse(readFileSync(new URL("../lib/generated/r16-native-localization-startup.json", import.meta.url), "utf8"))},
+  "./generated/r16-native-localization-gameplay.json": {default: JSON.parse(readFileSync(new URL("../lib/generated/r16-native-localization-gameplay.json", import.meta.url), "utf8"))},
 });
+await nativeLocalization.loadR16GameplayLocalization();
 const questNameDocument = loadTypeScriptModule(new URL("../lib/bevy-quest-ui.ts", import.meta.url), {
   "./bevy-quest-world-context": questWorldDocument,
   "./quest-action-policy": loadTypeScriptModule(new URL("../lib/quest-action-policy.ts", import.meta.url)),

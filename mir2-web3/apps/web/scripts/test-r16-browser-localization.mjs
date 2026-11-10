@@ -22,6 +22,7 @@ const expectedKeys = [
   "ui.walletQrAlt", "ui.walletQrFailed", "ui.walletQrRetryHint", "ui.walletApproveOnDevice", "ui.walletMissing",
   "ui.questClientLoading", "ui.questClientUnavailable", "ui.questActionPending", "ui.questActionRewardRequired",
   "ui.questActionTalkToNpc", "ui.questActionStateChanged", "ui.retry", "ui.sceneLoadUnavailable", "ui.fishingReel", "ui.characterCreateUnconfirmed",
+  "ui.gameTextLoading", "ui.gameTextLoadUnavailable", "ui.confirmReturnToCharacterSelect",
 ];
 
 test("browser dictionaries use the ten native languages in the native order", () => {

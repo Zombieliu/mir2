@@ -1,4 +1,4 @@
-import generated from "./generated/r16-native-localization.json";
+import startup from "./generated/r16-native-localization-startup.json";
 
 /** Presentation codes only. Do not forward this list to legacy protocol/WASM enums. */
 export const R16_NATIVE_LANGUAGES = ["zh-CN", "zh-TW", "en", "pt-BR", "ru", "hi", "id", "vi", "th", "ar"] as const;
@@ -8,10 +8,29 @@ export type R16NativeLanguageInfo = Readonly<{
 }>;
 type Entry = { key: string; values: string[]; aliases: string[]; domain: string; systemMatch?: false };
 type Catalog = { languages: R16NativeLanguageInfo[]; entries: Entry[] };
-const catalog = generated as unknown as Catalog;
+const catalog: Catalog = startup as Catalog;
 const languages = new Map<string, { index: number; info: R16NativeLanguageInfo }>(catalog.languages.map((info, index) =>
   [info.code, { index, info: Object.freeze({ ...info }) }]));
 const entries = new Map(catalog.entries.map(entry => [entry.key, entry]));
+let gameplayReady = false;
+let gameplayRequest: Promise<void> | null = null;
+
+export function hasR16GameplayLocalization(): boolean {
+  return gameplayReady;
+}
+
+/** Called after authentication. All locales use the same alias and ambiguity index. */
+export function loadR16GameplayLocalization(): Promise<void> {
+  if (gameplayReady) return Promise.resolve();
+  gameplayRequest ??= import(/* webpackChunkName: "r16-gameplay-locales" */ "./generated/r16-native-localization-gameplay.json")
+    .then(({ default: gameplay }) => {
+      for (const entry of gameplay.entries as Entry[]) entries.set(entry.key, entry);
+      indexes.clear();
+      gameplayReady = true;
+    })
+    .finally(() => { gameplayRequest = null; });
+  return gameplayRequest;
+}
 
 /** Unknown codes stay explicit; locale aliases and old Spanish preferences belong to the host. */
 export function nativeLanguageInfo(language: string): R16NativeLanguageInfo | null {
@@ -107,7 +126,7 @@ function indexFor(domain: Domain): Index {
       else if (previous && !sameValues(previous, entry)) exact.set(source, null);
     }
   };
-  for (const entry of catalog.entries) {
+  for (const entry of entries.values()) {
     if (entry.systemMatch === false || entry.domain === "keyed") continue;
     if (!(entry.domain === domain || entry.domain === "both" || domain === "system" && entry.domain === "billing")) continue;
     const sources = entry.domain === "billing" ? [entry.key, ...entry.aliases] : [...entry.values, ...entry.aliases];

@@ -229,7 +229,8 @@ fn spawn_orb_root(mut commands: Commands, target: Option<Res<QuestUiTargetCamera
             ..default()
         },
         FocusPolicy::Pass,
-        GlobalZIndex(950),
+        GlobalZIndex(crate::crystal_ui::hud::HUD_Z_INDEX),
+        ZIndex(-1),
     ));
 }
 

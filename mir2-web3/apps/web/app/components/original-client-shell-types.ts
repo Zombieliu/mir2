@@ -2,7 +2,7 @@ import type { CrystalTooltipDocument } from "../../lib/shared-item-tooltip";
 import type { ChatUiControls, CashPreviewLayerDocument } from "../../lib/client-core-runtime";
 import type { MapImageRouteSource, MapImageRouteIntent } from "../../lib/client-map-input";
 import type { ClientScreen, CharacterTabKey, InventoryTabKey } from "../../lib/original-ui";
-import type { Mir2Language } from "../../lib/localization";
+import type { buildTranslator, Mir2Language } from "../../lib/localization";
 import type { NpcGoldBuyQuote } from "../../lib/bevy-npc-shop-buy";
 import type { BagBeltCallbacks } from "../../lib/bag-belt-gesture";
 import type { WorldFishingCallbacks, WorldFishingGesture } from "../../lib/world-fishing-input";
@@ -191,6 +191,7 @@ export type FishingUiSurface = Omit<import("react").ComponentProps<typeof import
 export type OriginalClientShellProps = BagBeltCallbacks & WorldFishingCallbacks & {
   fishingUi?: FishingUiSurface;
   language: Mir2Language;
+  t: ReturnType<typeof buildTranslator>;
   screen: ClientScreen;
   runtimePhase: string;
   runtimeMessage: string;
@@ -215,6 +216,7 @@ export type OriginalClientShellProps = BagBeltCallbacks & WorldFishingCallbacks 
   viewportEntities: Array<DisplayEntity & { dx: number; dy: number }>;
   viewportTiles: Array<{ x: number; y: number; dx: number; dy: number }>;
   sceneInteractionReady: boolean;
+  sceneLoadingText?: string;
   onRetrySceneLoad?: () => void;
   bevyEntityRendererReady: boolean;
   bevyRuntimeBackend: "webgpu" | "webgl2" | null;
@@ -343,6 +345,7 @@ export type OriginalClientShellProps = BagBeltCallbacks & WorldFishingCallbacks 
   storageRentalPrompt?: { id: number; renewing: boolean } | null;
   onConfirmStorageRental?: (id: number) => void;
   onCancelStorageRental?: (id: number) => void;
+  allowStageExit: boolean;
   onLogout: () => void;
   characterCreate: CharacterCreateControls;
   onDeleteCharacter: () => void;

@@ -355,7 +355,7 @@ pub fn spawn_main_hud(
     font: Option<&Handle<Font>>,
 ) {
     let p = main_hud_plan(model);
-    parent.spawn((
+    let mut background = parent.spawn((
         absolute_node(spec::MAIN.rect),
         FocusPolicy::Pass,
         ImageNode {
@@ -364,6 +364,11 @@ pub fn spawn_main_hud(
             ..Default::default()
         },
     ));
+    if font.is_some() {
+        // The portable orbs are independent roots in the same HUD layer.
+        // Order the base below those fills and leave labels above them.
+        background.insert((GlobalZIndex(super::hud::HUD_Z_INDEX), ZIndex(-2)));
+    }
     for (kind, text, rect, center) in [
         (SharedLabel::Hp, p.hp, HP_TEXT_RECT, true),
         (SharedLabel::Mp, p.mp, MP_TEXT_RECT, true),

@@ -1,5 +1,7 @@
 # Windows R16 与 Web 1:1 验收
 
+2026-11-10 玩家反馈优先。隔离生产构建的宽屏退出、血蓝及实际双人占位后寻路通过。十语扫码到待确认、登录、选角和快速进比奇的已验范围分别记录。生产切换、攻击动作时序和现场入口继续验收。[本轮复测](evidence/r16-player-feedback-20261110/README.md)
+
 2026-11-10 用户在公网扫码修复后重新激活持续 Goal，沿 `codex/windows-player-journey` 继续全部未结范围，保留现有工作和历史失败。目标为适用代码、数据、测试和 QA 门槛的 100% Candidate；最终真人 Accepted 仍需本人游戏与界面验收。优先无需控制 Windows 桌面的代码、普通协议、无界面浏览器和构建。本机三职业到 30 级与公开服三职业首任务、中文 Q 和扫码进城验证分开记录。[公网扫码](NUMERON-WEB-RELEASE-20261108.zh-CN.md#2026-11-10-公网钱包扫码恢复)
 
 2026-11-07 建立持续 Goal。基准为 `codex/windows-player-journey` 在 `mir2-player-journey` 工作树的 Windows R16。复核时本地基点为 `c404bde8a`，远端为 `a7dc19d385b8`。远端额外七个提交只涉及官网和 Atlas。当前工作树中游戏、Windows、Web 的未提交内容继续保留，代码和已运行包分别标记。[分支比较](https://github.com/Zombieliu/mir2/compare/c404bde8a5190534f6bc83ec8a4fe78fffc8cb50...a7dc19d385b85a8205f1f29dea25a54a1dbd85ba)

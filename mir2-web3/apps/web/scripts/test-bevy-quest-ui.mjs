@@ -19,15 +19,17 @@ function load(relative, dependencies = {}) {
         "./quest-world-lifecycle", "./quest-route-execution", "./bevy-quest-world-controls"].includes(name))
         return load(`../lib/${name.slice(2)}.ts`);
       if (name === "./bevy-bag-model") return load("../lib/bevy-bag-model.ts");
-      if (name === "./r16-native-localization") return load("../lib/r16-native-localization.ts");
-      if (name === "./generated/r16-native-localization.json")
-        return { default: JSON.parse(readFileSync(new URL("../lib/generated/r16-native-localization.json", import.meta.url), "utf8")) };
+      if (name === "./r16-native-localization") return nativeLocalization;
+      if (["./generated/r16-native-localization-startup.json", "./generated/r16-native-localization-gameplay.json"].includes(name))
+        return { default: JSON.parse(readFileSync(new URL("../lib/" + name.slice(2), import.meta.url), "utf8")) };
       if (name === "./world-model/item-identity") return load("../lib/world-model/item-identity.ts");
       throw new Error(`Unexpected dependency ${name}`);
     }, module.exports, module,
   );
   return module.exports;
 }
+const nativeLocalization = load("../lib/r16-native-localization.ts");
+await nativeLocalization.loadR16GameplayLocalization();
 const host = load("../lib/bevy-quest-ui.ts");
 test("optional Native display locales are independent of four-language wire and require an exact capability", () => {
   const old = { generation: 1, frame: 1, ready: true, capturesPointer: false, questLogOpen: false,
@@ -992,7 +994,7 @@ test("actual Page queued movement preserves replacement intent and retires stale
         if (scenario === "predictionPickupLifetime") live = { ...lifetime, runtime: {} };
       },
       send: command => { sends.push(command); return true; }, scheduleMovementConfirmTick: () => {},
-      observeBevyMovementShadowCommand: () => {}, bumpCorrectionCounter: () => {},
+      sentSelfMoves: new WeakSet(), observeBevyMovementShadowCommand: () => {}, bumpCorrectionCounter: () => {},
       rememberBlockedDirectionAtSource: () => {}, sendCrystalTurn: () => { throw Error("unexpected turn"); },
     };
     if (scenario === "predictionPickupLifetime") {
