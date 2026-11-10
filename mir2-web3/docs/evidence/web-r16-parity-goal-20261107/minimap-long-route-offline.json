@@ -1,0 +1,334 @@
+{
+  "base": "2ce36e03ccdccfe56b1de468caf29a7388310d8f",
+  "originalReceiptSha256": "e408b51b25a0eaadbd0b868859e8c7faafd1ea8a515256725d223ebb833af642",
+  "scope": "Offline route selection only; cloned file/real browser, live occupancy and movement ACKs still require the next acceptance run. No ports, no server, no desktop, no production.",
+  "fixture": {
+    "class": "Warrior",
+    "level": 30,
+    "map": "0",
+    "start": {
+      "x": 328,
+      "y": 264
+    },
+    "fileSha256": "ee63f1fd891d8987dced0c73bb0be8e595da732a937aae3b04032a50cf1a1666",
+    "collisionMapSha256": "ed4783215ffa989658f79892c2dd6720753fb111e1102cb14da8e6182d88d7f6",
+    "respawnManifestSha256": "907db052030a97036e404429373dd3ad3e0e838e279613080e92c3be28bf3ff2"
+  },
+  "initialRegionFromSource": {
+    "anchor": {
+      "x": 328,
+      "y": 263
+    },
+    "render": {
+      "minX": 276,
+      "maxX": 380,
+      "minY": 223,
+      "maxY": 324
+    },
+    "play": {
+      "minX": 304,
+      "maxX": 352,
+      "minY": 245,
+      "maxY": 281
+    }
+  },
+  "raster": {
+    "width": 1052,
+    "height": 700
+  },
+  "crop": {
+    "left": 432.9371337890625,
+    "top": 210,
+    "width": 120,
+    "height": 108
+  },
+  "selected": {
+    "goal": {
+      "x": 328,
+      "y": 218
+    },
+    "click": {
+      "x": 60.751437639508936,
+      "y": 8.5
+    },
+    "path": [
+      {
+        "x": 329,
+        "y": 263
+      },
+      {
+        "x": 330,
+        "y": 262
+      },
+      {
+        "x": 331,
+        "y": 261
+      },
+      {
+        "x": 332,
+        "y": 260
+      },
+      {
+        "x": 333,
+        "y": 259
+      },
+      {
+        "x": 334,
+        "y": 258
+      },
+      {
+        "x": 335,
+        "y": 257
+      },
+      {
+        "x": 336,
+        "y": 256
+      },
+      {
+        "x": 337,
+        "y": 255
+      },
+      {
+        "x": 338,
+        "y": 254
+      },
+      {
+        "x": 339,
+        "y": 253
+      },
+      {
+        "x": 340,
+        "y": 252
+      },
+      {
+        "x": 341,
+        "y": 251
+      },
+      {
+        "x": 342,
+        "y": 250
+      },
+      {
+        "x": 343,
+        "y": 249
+      },
+      {
+        "x": 344,
+        "y": 248
+      },
+      {
+        "x": 345,
+        "y": 247
+      },
+      {
+        "x": 344,
+        "y": 246
+      },
+      {
+        "x": 343,
+        "y": 245
+      },
+      {
+        "x": 342,
+        "y": 244
+      },
+      {
+        "x": 341,
+        "y": 243
+      },
+      {
+        "x": 340,
+        "y": 242
+      },
+      {
+        "x": 340,
+        "y": 241
+      },
+      {
+        "x": 340,
+        "y": 240
+      },
+      {
+        "x": 340,
+        "y": 239
+      },
+      {
+        "x": 340,
+        "y": 238
+      },
+      {
+        "x": 339,
+        "y": 237
+      },
+      {
+        "x": 338,
+        "y": 236
+      },
+      {
+        "x": 337,
+        "y": 235
+      },
+      {
+        "x": 336,
+        "y": 234
+      },
+      {
+        "x": 335,
+        "y": 233
+      },
+      {
+        "x": 334,
+        "y": 232
+      },
+      {
+        "x": 333,
+        "y": 231
+      },
+      {
+        "x": 332,
+        "y": 230
+      },
+      {
+        "x": 331,
+        "y": 229
+      },
+      {
+        "x": 330,
+        "y": 228
+      },
+      {
+        "x": 329,
+        "y": 227
+      },
+      {
+        "x": 328,
+        "y": 226
+      },
+      {
+        "x": 328,
+        "y": 225
+      },
+      {
+        "x": 328,
+        "y": 224
+      },
+      {
+        "x": 328,
+        "y": 223
+      },
+      {
+        "x": 328,
+        "y": 222
+      },
+      {
+        "x": 328,
+        "y": 221
+      },
+      {
+        "x": 328,
+        "y": 220
+      },
+      {
+        "x": 328,
+        "y": 219
+      },
+      {
+        "x": 328,
+        "y": 218
+      }
+    ],
+    "refills": [
+      {
+        "atStep": 11,
+        "position": {
+          "x": 339,
+          "y": 253
+        },
+        "oldAnchor": {
+          "x": 328,
+          "y": 263
+        },
+        "requestedAnchor": {
+          "x": 344,
+          "y": 246
+        }
+      },
+      {
+        "atStep": 28,
+        "position": {
+          "x": 338,
+          "y": 236
+        },
+        "oldAnchor": {
+          "x": 344,
+          "y": 246
+        },
+        "requestedAnchor": {
+          "x": 344,
+          "y": 229
+        }
+      },
+      {
+        "atStep": 45,
+        "position": {
+          "x": 328,
+          "y": 219
+        },
+        "oldAnchor": {
+          "x": 344,
+          "y": 229
+        },
+        "requestedAnchor": {
+          "x": 328,
+          "y": 212
+        }
+      }
+    ],
+    "outsideAtStep": 42,
+    "length": 46
+  },
+  "lookaheadDifference": {
+    "position": {
+      "x": 328,
+      "y": 264
+    },
+    "oldFirstThree": [
+      {
+        "x": 329,
+        "y": 263
+      },
+      {
+        "x": 330,
+        "y": 262
+      },
+      {
+        "x": 331,
+        "y": 261
+      }
+    ],
+    "thirdCellOccupied": {
+      "x": 331,
+      "y": 261
+    },
+    "webStep": {
+      "type": "move",
+      "point": {
+        "x": 330,
+        "y": 262
+      },
+      "direction": "upright",
+      "mode": "run"
+    },
+    "nativeSourceWouldReplan": true,
+    "samePlannerNewFirst": {
+      "x": 328,
+      "y": 263
+    },
+    "suffixLength": 47
+  },
+  "runtimeCaveats": [
+    "Static map CMap flags. No actor occupancy inserted for normal path. Avoid all indexed door tiles and 2-tile transfer-entry neighborhood.",
+    "Refill projections use source region bounds and exact 1024x768 margins. Actual commits and camera must be observed in browser.",
+    "Synthetic occupied third cell only for the control comparison; no gameplay packet or runtime was injected."
+  ]
+}

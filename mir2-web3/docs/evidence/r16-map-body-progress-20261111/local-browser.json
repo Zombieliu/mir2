@@ -1,0 +1,279 @@
+{
+  "revision": "e3e6f3f06f83bb13a10334062b4d25bb50d6a44b",
+  "priorPublicRevision": "534322e790c7feccbc21e48541119f340a2e40ee",
+  "baselineProofScope": "The old production-profile build matches the 534322e reader and Worker Git blobs. It uses the same generated assets and exact map body as the candidate.",
+  "build": {
+    "id": "ojw4t7_KV252J137_Ed7p",
+    "receiptSha256": "8270f10363161729070b4a2a34429e92e06bb64fcd6cd2834530d1ca107ed6c6",
+    "assetRelease": "20261108-r16-08ec86d5105c",
+    "renderer": "bevy-84ef836460a84e03",
+    "sourceBlobs": [
+      {
+        "path": "mir2-web3/apps/web/lib/first-crystal-scene-request.ts",
+        "blob": "7b4cef7257c7f19297037ffb7cac6460acf74f49"
+      },
+      {
+        "path": "mir2-web3/apps/web/public/mir2-asset-worker.js",
+        "blob": "a9b28b4aeefd25942161577492f6acb3e0ee4050"
+      },
+      {
+        "path": "mir2-web3/apps/web/scripts/test-first-crystal-scene-request.mjs",
+        "blob": "103f5a7321e726e3dbce17dc468729bd5f73ca30"
+      }
+    ],
+    "verifiedReusedInputs": 27
+  },
+  "checks": {
+    "transportNode": 60,
+    "releaseNode": 67,
+    "nextProductionBuildAndTypeScript": true,
+    "originalWipFilesUnchanged": 62
+  },
+  "records": [
+    {
+      "lane": "trickle-baseline-r1",
+      "receiptSha256": "02a2cdefecbf3ade401435c87019765b3f37ecc9adbddb4de544e4a2b72bd8a0",
+      "buildId": "IO0a98i5KG4PM6Y_RY-El",
+      "loopbackOnly": true,
+      "scene": {
+        "map": "0",
+        "startPosition": {
+          "x": 342,
+          "y": 244
+        },
+        "firstPlayable": true,
+        "firstPlayableAfterStartAckMs": 13439
+      },
+      "transport": {
+        "geometry": {
+          "v": "2026-08-14-v7-door-interaction",
+          "assetRelease": "20261108-r16-08ec86d5105c",
+          "map": "0",
+          "x": "344",
+          "y": "246",
+          "width": "56",
+          "height": "72"
+        },
+        "firstHeadersFromWorker": true,
+        "status": 200,
+        "headerMs": 4504,
+        "completedFirstRequest": false,
+        "bodyMs": null,
+        "totalMs": null,
+        "browserBytes": null,
+        "browserChunkSpanMs": null,
+        "firstReadFailure": "net::ERR_ABORTED",
+        "firstReadCanceledAfterHeadersMs": 8003,
+        "sameUrlRetry": true,
+        "retryBypassedWorker": true,
+        "retryAfterLastBrowserBytesMs": null,
+        "retryAfterLastOriginWriteMs": 792,
+        "expectedBody": {
+          "bytes": 404518,
+          "sha256": "806d20dab71e0b1c057a4d970528665fd42d616cb11417fb6a5c879fff3e6eb3"
+        },
+        "lateOriginalBodyAppliedAgain": false
+      },
+      "movement": {
+        "command": "walk",
+        "acceptedPosition": {
+          "x": 343,
+          "y": 244
+        }
+      },
+      "logout": {
+        "returnedToSelect": true,
+        "savedPosition": {
+          "x": 343,
+          "y": 244
+        },
+        "oldReadCanceledAfterAckMs": null
+      },
+      "ownedProcessesClosed": true,
+      "originalFixtureUnchanged": true
+    },
+    {
+      "lane": "trickle-r1",
+      "receiptSha256": "49afd2b6df8f26ff86744fbc4f9144a45f08b350b930b376a16a8f17f1781e54",
+      "buildId": "ojw4t7_KV252J137_Ed7p",
+      "loopbackOnly": true,
+      "scene": {
+        "map": "0",
+        "startPosition": {
+          "x": 342,
+          "y": 244
+        },
+        "firstPlayable": true,
+        "firstPlayableAfterStartAckMs": 22205
+      },
+      "transport": {
+        "geometry": {
+          "v": "2026-08-14-v7-door-interaction",
+          "assetRelease": "20261108-r16-08ec86d5105c",
+          "map": "0",
+          "x": "344",
+          "y": "246",
+          "width": "56",
+          "height": "72"
+        },
+        "firstHeadersFromWorker": true,
+        "status": 200,
+        "headerMs": 4504,
+        "completedFirstRequest": true,
+        "bodyMs": 14349,
+        "totalMs": 18849,
+        "browserBytes": 404518,
+        "browserChunkSpanMs": 13836,
+        "firstReadFailure": null,
+        "firstReadCanceledAfterHeadersMs": null,
+        "sameUrlRetry": false,
+        "retryBypassedWorker": false,
+        "retryAfterLastBrowserBytesMs": null,
+        "retryAfterLastOriginWriteMs": null,
+        "expectedBody": {
+          "bytes": 404518,
+          "sha256": "806d20dab71e0b1c057a4d970528665fd42d616cb11417fb6a5c879fff3e6eb3"
+        },
+        "lateOriginalBodyAppliedAgain": false
+      },
+      "movement": {
+        "command": "walk",
+        "acceptedPosition": {
+          "x": 343,
+          "y": 244
+        }
+      },
+      "logout": {
+        "returnedToSelect": true,
+        "savedPosition": {
+          "x": 343,
+          "y": 244
+        },
+        "oldReadCanceledAfterAckMs": null
+      },
+      "ownedProcessesClosed": true,
+      "originalFixtureUnchanged": true
+    },
+    {
+      "lane": "prefix-stall-r1",
+      "receiptSha256": "c21dc12ca6a531fc075954d2a29fb36968583f0c794c0183cdd6cc018d98656e",
+      "buildId": "ojw4t7_KV252J137_Ed7p",
+      "loopbackOnly": true,
+      "scene": {
+        "map": "0",
+        "startPosition": {
+          "x": 342,
+          "y": 244
+        },
+        "firstPlayable": true,
+        "firstPlayableAfterStartAckMs": 18619
+      },
+      "transport": {
+        "geometry": {
+          "v": "2026-08-14-v7-door-interaction",
+          "assetRelease": "20261108-r16-08ec86d5105c",
+          "map": "0",
+          "x": "344",
+          "y": "246",
+          "width": "56",
+          "height": "72"
+        },
+        "firstHeadersFromWorker": true,
+        "status": 200,
+        "headerMs": 4508,
+        "completedFirstRequest": false,
+        "bodyMs": null,
+        "totalMs": null,
+        "browserBytes": null,
+        "browserChunkSpanMs": null,
+        "firstReadFailure": "net::ERR_ABORTED",
+        "firstReadCanceledAfterHeadersMs": 10419,
+        "sameUrlRetry": true,
+        "retryBypassedWorker": true,
+        "retryAfterLastBrowserBytesMs": 8207,
+        "retryAfterLastOriginWriteMs": 8211,
+        "expectedBody": {
+          "bytes": 404518,
+          "sha256": "806d20dab71e0b1c057a4d970528665fd42d616cb11417fb6a5c879fff3e6eb3"
+        },
+        "lateOriginalBodyAppliedAgain": false
+      },
+      "movement": {
+        "command": "walk",
+        "acceptedPosition": {
+          "x": 343,
+          "y": 244
+        }
+      },
+      "logout": {
+        "returnedToSelect": true,
+        "savedPosition": {
+          "x": 343,
+          "y": 244
+        },
+        "oldReadCanceledAfterAckMs": null
+      },
+      "ownedProcessesClosed": true,
+      "originalFixtureUnchanged": true
+    },
+    {
+      "lane": "logout-held-r1",
+      "receiptSha256": "723b75f4d481ec2765c427eb567624e955240d240800d7d8e2f6029ef995e7f7",
+      "buildId": "ojw4t7_KV252J137_Ed7p",
+      "loopbackOnly": true,
+      "scene": {
+        "map": "0",
+        "startPosition": {
+          "x": 342,
+          "y": 244
+        },
+        "firstPlayable": false,
+        "firstPlayableAfterStartAckMs": null
+      },
+      "transport": {
+        "geometry": {
+          "v": "2026-08-14-v7-door-interaction",
+          "assetRelease": "20261108-r16-08ec86d5105c",
+          "map": "0",
+          "x": "344",
+          "y": "246",
+          "width": "56",
+          "height": "72"
+        },
+        "status": 200,
+        "headerMs": 4508,
+        "completedFirstRequest": false,
+        "bodyMs": null,
+        "totalMs": null,
+        "browserBytes": null,
+        "browserChunkSpanMs": null,
+        "firstReadFailure": "net::ERR_ABORTED",
+        "firstReadCanceledAfterHeadersMs": 4503,
+        "sameUrlRetry": false,
+        "retryBypassedWorker": false,
+        "retryAfterLastBrowserBytesMs": null,
+        "retryAfterLastOriginWriteMs": null,
+        "expectedBody": {
+          "bytes": 404518,
+          "sha256": "806d20dab71e0b1c057a4d970528665fd42d616cb11417fb6a5c879fff3e6eb3"
+        },
+        "lateOriginalBodyAppliedAgain": false
+      },
+      "movement": null,
+      "logout": {
+        "returnedToSelect": true,
+        "savedPosition": {
+          "x": 342,
+          "y": 244
+        },
+        "oldReadCanceledAfterAckMs": 5
+      },
+      "ownedProcessesClosed": true,
+      "originalFixtureUnchanged": true
+    }
+  ],
+  "screenshot": {
+    "path": "first-playable.png",
+    "sha256": "b924654cf472bc64a284ed71471f19727bc2aed9a5013a6691e9953c605f13bd"
+  }
+}

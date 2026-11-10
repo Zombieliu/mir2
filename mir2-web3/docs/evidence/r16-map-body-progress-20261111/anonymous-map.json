@@ -1,0 +1,62 @@
+{
+  "revision": "e3e6f3f06f83bb13a10334062b4d25bb50d6a44b",
+  "originalReceiptSha256": "f64323f6d4c4c044a52c0636139577006c857c3bb60e9094193b2008eb87c61e",
+  "scope": "Fresh Chrome contexts on a plain /version JSON document, anonymous same-origin GETs only. No game initialization, service worker, QR, wallet, account, or fixture writes. Script insertion loads only the existing pinned static webpack locale bundle; no routing or network substitution.",
+  "browserVersion": "157.0.8103.50",
+  "browserClosed": true,
+  "probes": [
+    {
+      "lane": "map-alone",
+      "overlap": false,
+      "browserPeer": "loopback",
+      "edgeRegion": "SIN",
+      "map": {
+        "priority": "High",
+        "httpPriority": "u=1, i",
+        "cache": "HIT",
+        "networkConnectMs": 2584.73,
+        "beforeSendMs": 2584.92,
+        "sendToHeadersMs": 524.4,
+        "headersToBodyMs": 100.9,
+        "totalMs": 3210.5,
+        "bodyBytesCompressed": 35228,
+        "bodyBytesDecoded": 458475,
+        "region": {
+          "map": "0.map",
+          "cells": 6819,
+          "missing": 0
+        }
+      },
+      "locale": null
+    },
+    {
+      "lane": "overlap-default",
+      "overlap": true,
+      "browserPeer": "loopback",
+      "edgeRegion": "SIN",
+      "map": {
+        "priority": "High",
+        "httpPriority": "u=1, i",
+        "cache": "HIT",
+        "networkConnectMs": 954.0699999999999,
+        "beforeSendMs": 954.33,
+        "sendToHeadersMs": 191.8,
+        "headersToBodyMs": 64.9,
+        "totalMs": 1211.2,
+        "bodyBytesCompressed": 35228,
+        "bodyBytesDecoded": 458475,
+        "region": {
+          "map": "0.map",
+          "cells": 6819,
+          "missing": 0
+        }
+      },
+      "locale": {
+        "priority": "Low",
+        "path": "/_next/static/chunks/r16-gameplay-locales.f7512df8286a3b70.js",
+        "sendToHeadersMs": 305.7,
+        "totalMs": 5753.9
+      }
+    }
+  ]
+}
