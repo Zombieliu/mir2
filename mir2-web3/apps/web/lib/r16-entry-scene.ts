@@ -23,9 +23,12 @@ export type R16EntryActorAssets = {
   images: R16EntrySpriteImages;
 };
 export const R16_ENTRY_FLOOR_MAP = entryFloor.mapFileName;
+export const R16_ENTRY_MONSTER_BOUNDS = entryVisuals.monsterBounds;
 let floorLoad: Promise<R16EntrySpriteImages | null> | null = null;
 let objectLoad: Promise<R16EntrySpriteImages | null> | null = null;
 let actorLoad: Promise<R16EntryActorAssets | null> | null = null;
+type EntryMonsterAction = "standing" | "walking";
+const monsterLoads: Partial<Record<EntryMonsterAction, Promise<R16EntryActorAssets | null>>> = {};
 
 export function preloadR16EntryScene(pinnedRelease?: string): Promise<SceneBlueprint | null> | null {
   if (pinnedRelease !== entryScene.assetReleaseId || entryScene.schemaVersion !== SCENE_BLUEPRINT_SCHEMA_VERSION ||
@@ -69,6 +72,17 @@ export function preloadR16EntryActors(pinnedRelease?: string) {
     return assets;
   });
   return actorLoad;
+}
+
+export function preloadR16EntryMonsterFrames(pinnedRelease: string | undefined, action: EntryMonsterAction) {
+  if (!entryVisualsMatch(pinnedRelease)) return null;
+  const asset = action === "standing" ? entryVisuals.monsterStanding : entryVisuals.monsterWalking;
+  monsterLoads[action] ??= loadPinnedEntryJson<R16EntryActorAssets>(asset, 25_000, action === "walking" ? "low" : undefined)
+    .catch(() => null).then((assets) => {
+      if (!assets) delete monsterLoads[action];
+      return assets;
+    });
+  return monsterLoads[action];
 }
 
 async function loadPinnedEntryJson<T>(

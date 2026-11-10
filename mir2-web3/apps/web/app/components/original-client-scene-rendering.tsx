@@ -205,11 +205,14 @@ export function buildViewportEntitySprite(
   }
 
   const bodyLibraryKey = normalizeSceneSpriteLibraryKey(sprite.bodyLibrary);
+  const bodyLibrary = libraries[bodyLibraryKey];
+  if (entity.kind === "monster" && bodyLibrary?.startupFramesOnly &&
+      animationState !== "standing" && animationState !== "walking") return null;
   const animation = spriteAnimationMetaForEntity(
     entity,
     sprite,
     animationState,
-    libraries[bodyLibraryKey],
+    bodyLibrary,
     animationPose?.action,
   );
   if (!animation) return null;

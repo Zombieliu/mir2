@@ -344,6 +344,29 @@ test("object and actor assets load independently and publish only pinned bytes",
   assert.equal(calls[1].options.priority, "low");
 });
 
+test("the staged monster packages retain the exact eight directions and independent fallback", async () => {
+  const standingBytes = readFileSync(new URL("../public" + visualsMetadata.monsterStanding.path, import.meta.url));
+  const walkingBytes = readFileSync(new URL("../public" + visualsMetadata.monsterWalking.path, import.meta.url));
+  const changed = Buffer.from(walkingBytes);
+  changed[66] ^= 1;
+  let walkingFetches = 0;
+  const entry = entryFixture(async (url) => new Response(url === visualsMetadata.monsterStanding.path
+    ? standingBytes : ++walkingFetches === 1 ? changed : walkingBytes));
+  assert.equal(entry.preloadR16EntryMonsterFrames("other", "standing"), null);
+  const first = entry.preloadR16EntryMonsterFrames(entryMetadata.assetReleaseId, "standing");
+  assert.equal(entry.preloadR16EntryMonsterFrames(entryMetadata.assetReleaseId, "standing"), first);
+  const standing = await first;
+  assert.equal(Object.keys(standing.images).length, 160);
+  assert.equal(await entry.preloadR16EntryMonsterFrames(entryMetadata.assetReleaseId, "walking"), null);
+  assert.equal(await entry.preloadR16EntryMonsterFrames(entryMetadata.assetReleaseId, "standing"), standing);
+  const walking = await entry.preloadR16EntryMonsterFrames(entryMetadata.assetReleaseId, "walking");
+  assert.equal(Object.keys(walking.images).length, 240);
+  const guard = walking.libraries["Monster/139"];
+  assert.deepEqual(guard.frames.slice(0, 7).map(frame => frame.index), [32, 33, 34, 35, 36, 37, 41]);
+  assert.equal(guard.frames.at(-1).index, 100);
+  assert(guard.frameSet.actions.some(action => action.actionName === "Attack1"));
+});
+
 test("corrupt floor bytes are never published and the prefetch can retry", async () => {
   const wrong = Buffer.from(floorBytes);
   wrong[50] ^= 1;

@@ -69,6 +69,7 @@ function checkImage(data, frame) {
 const playerLibraries = ["CArmour/00", "CHair/00"];
 const npcLibraries = ["NPC/00", "NPC/01", "NPC/03", "NPC/05", "NPC/07", "NPC/11", "NPC/15", "NPC/45"];
 const actorLibraries = [...playerLibraries, ...npcLibraries];
+const monsterLibraries = ["Monster/000", "Monster/003", "Monster/004", "Monster/005", "Monster/139"];
 // The shared Crystal table uses four standing and six walking frames per direction.
 // R16 starts the female body and hair bank at 808. Spawn NPC packets face up.
 function isEntryActorFrame(library, index, frameSet) {
@@ -80,16 +81,26 @@ function isEntryActorFrame(library, index, frameSet) {
     index >= action.start && index < action.start + action.count);
 }
 
-function actorData() {
-  const catalog = JSON.parse(fromRelease("original-ui/frame-sets.generated.json", "application/json"));
+function monsterFrameSelector(actionName) {
+  return (_library, index, frameSet) => {
+    const action = frameSet?.actions.find(entry => entry.actionName === actionName);
+    if (!action || !Number.isSafeInteger(index) || index < action.start) return false;
+    const stride = action.count + action.skip;
+    const relative = index - action.start;
+    return relative < 8 * stride && relative % stride < action.count;
+  };
+}
+
+function actorData(keys = actorLibraries, includeFrame = isEntryActorFrame, useCatalog = true) {
+  const catalog = useCatalog ? JSON.parse(fromRelease("original-ui/frame-sets.generated.json", "application/json")) : null;
   const libraries = {};
   const images = {};
-  for (const library of actorLibraries) {
+  for (const library of keys) {
     const { version, count, frames, frameSet } = JSON.parse(fromRelease("original-ui/" + library + "/meta.json", "application/json"));
-    const actions = frameSet?.actions?.length ? frameSet.actions : catalog.libraries[library]?.actions;
+    const actions = frameSet?.actions?.length ? frameSet.actions : catalog?.libraries[library]?.actions;
     const frameSetForRender = actions?.length ? { count: actions.length, actions } : null;
     const selected = frames.filter(frame =>
-      isEntryActorFrame(library, frame.index, frameSetForRender) && frame.width > 0 && frame.height > 0);
+      includeFrame(library, frame.index, frameSetForRender) && frame.width > 0 && frame.height > 0);
     const present = selected.map(({ index, width, height, x, y, shadowX, shadowY, path, maskPath }) =>
       ({ index, width, height, x, y, shadowX, shadowY, path, maskPath }));
     libraries[library] = { version, count, frameSet: frameSetForRender, frames: present };
@@ -98,14 +109,15 @@ function actorData() {
   return { libraries, images };
 }
 
-function checkActorPack(pack) {
-  assert.deepEqual(Object.keys(pack.libraries), actorLibraries);
+function checkActorPack(pack, keys = actorLibraries, includeFrame = isEntryActorFrame, monsterFrameCount) {
+  assert.deepEqual(Object.keys(pack.libraries), keys);
   const paths = [];
   for (const [library, meta] of Object.entries(pack.libraries)) {
     assert(Number.isSafeInteger(meta.version) && Number.isSafeInteger(meta.count) && meta.frames.length > 0);
     if (playerLibraries.includes(library)) assert.equal(meta.frames.length, 160);
+    if (monsterFrameCount) assert.equal(meta.frames.length, monsterFrameCount);
     for (const frame of meta.frames) {
-      assert(isEntryActorFrame(library, frame.index, meta.frameSet) &&
+      assert(includeFrame(library, frame.index, meta.frameSet) &&
         frame.path === "/original-ui/" + library + "/" + frame.index + ".png");
       for (const key of ["width", "height", "x", "y", "shadowX", "shadowY"]) assert(Number.isSafeInteger(frame[key]));
       checkImage(pack.images[frame.path], frame);
@@ -144,12 +156,21 @@ function packAsset(kind, maxBytes, make, verify) {
   }
   return { path, bytes: bytes.length, sha256 };
 }
+function monsterPack(kind, action, framesPerLibrary, maxBytes) {
+  const select = monsterFrameSelector(action);
+  return packAsset(kind, maxBytes, () => actorData(monsterLibraries, select, false),
+    (pack) => checkActorPack(pack, monsterLibraries, select, framesPerLibrary));
+}
+
 const metadata = {
   assetReleaseId: entry.assetReleaseId,
   sceneSha256: entry.sha256,
   mapFileName: region.mapFileName,
   objects: packAsset("objects", 1_200_000, objectData, verifyObjects),
   actors: packAsset("actors", 980_000, actorData, checkActorPack),
+  monsterBounds: region.playBounds,
+  monsterStanding: monsterPack("monsterStanding", "Standing", 32, 550_000),
+  monsterWalking: monsterPack("monsterWalking", "Walking", 48, 820_000),
 };
 const text = JSON.stringify(metadata, null, 2) + "\n";
 if (check) {

@@ -4,7 +4,8 @@ import { pickCrystalActor, sampleCrystalBodyPixel, warmCrystalBodyPixels, type C
 import { useWindowKeydown } from "../lib/use-window-keydown";
 import { guildKeyboardOwnsEvent } from "../lib/r16-guild-keyboard";
 import {
-  preloadR16EntryActors, preloadR16EntryFloor, preloadR16EntryObjects, R16_ENTRY_FLOOR_MAP,
+  preloadR16EntryActors, preloadR16EntryFloor, preloadR16EntryMonsterFrames, preloadR16EntryObjects,
+  R16_ENTRY_FLOOR_MAP, R16_ENTRY_MONSTER_BOUNDS,
   type R16EntryActorAssets, type R16EntrySpriteImages,
 } from "../lib/r16-entry-scene";
 import { CharacterPointerRouter } from "../lib/bevy-character-ui";
@@ -1925,14 +1926,48 @@ export function OriginalClientShell({
   const entryMap = world.originalMapRegion?.mapFileName === R16_ENTRY_FLOOR_MAP;
   const packedFloor = entryMap ? entryFloor : null;
   const packedObjects = entryMap ? entryObjects : null;
-  const packedActors = entryMap ? entryActors?.images ?? null : null;
-  const entryActorLibraries = useMemo(() => entryActors && Object.fromEntries(
-    Object.entries(entryActors.libraries).map(([key, library]) => [key, {
-      ...library,
-      frameMap: new Map(library.frames.map((frame) => [frame.index, frame])),
-      startupFramesOnly: true as const,
-    }]),
-  ), [entryActors]);
+  const [entryMonsterStanding, setEntryMonsterStanding] = useState<R16EntryActorAssets | null>(null);
+  const [entryMonsterWalking, setEntryMonsterWalking] = useState<R16EntryActorAssets | null>(null);
+  const monsterBounds = R16_ENTRY_MONSTER_BOUNDS;
+  const warmEntryMonsters = screen === "game" && sceneInteractionReady && entryMap && Boolean(
+    renderPlayer && renderPlayer.x >= monsterBounds.minX && renderPlayer.x <= monsterBounds.maxX &&
+    renderPlayer.y >= monsterBounds.minY && renderPlayer.y <= monsterBounds.maxY,
+  );
+  useEffect(() => {
+    if (!warmEntryMonsters) return;
+    const release = process.env.MIR2_PINNED_ASSET_VERSION;
+    const standing = preloadR16EntryMonsterFrames(release, "standing");
+    if (!standing) return;
+    let current = true;
+    void standing.then(async (assets) => {
+      if (!current) return;
+      setEntryMonsterStanding(assets);
+      const walking = await preloadR16EntryMonsterFrames(release, "walking");
+      if (current) setEntryMonsterWalking(walking);
+    });
+    return () => { current = false; };
+  }, [warmEntryMonsters]);
+
+  const packedActors = useMemo(() => {
+    if (!entryMap) return null;
+    if (!entryMonsterStanding && !entryMonsterWalking) return entryActors?.images ?? null;
+    return { ...entryActors?.images, ...entryMonsterStanding?.images, ...entryMonsterWalking?.images };
+  }, [entryMap, entryActors, entryMonsterStanding, entryMonsterWalking]);
+  const entryActorLibraries = useMemo(() => {
+    const libraries: Record<string, OriginalSceneSpriteLibraryMeta> = {};
+    for (const assets of [entryActors, entryMonsterStanding, entryMonsterWalking]) {
+      if (!assets) continue;
+      for (const [key, library] of Object.entries(assets.libraries)) {
+        const frames = [...(libraries[key]?.frames ?? []), ...library.frames];
+        libraries[key] = {
+          ...library, frames,
+          frameMap: new Map(frames.map((frame) => [frame.index, frame])),
+          startupFramesOnly: true,
+        };
+      }
+    }
+    return Object.keys(libraries).length ? libraries : null;
+  }, [entryActors, entryMonsterStanding, entryMonsterWalking]);
   const renderSpriteLibraries = useMemo(() =>
     entryMap && entryActorLibraries ? { ...entryActorLibraries, ...sceneSpriteLibraries } : sceneSpriteLibraries,
   [entryMap, entryActorLibraries, sceneSpriteLibraries]);
