@@ -16,25 +16,19 @@ export const SITES = Object.freeze({
 });
 export const ORIGIN = 'https://numeron.obelisk.build';
 export const QR_RELEASE = Object.freeze({
-  source: 'a23cc382af1c66cd7ffeea794fd62fe7cba7e96a',
-  sourceRef: 'codex/numeron-qr-login-startup-final',
-  baseSource: '83eadf4f96c81bcf26d6e98c41b3a58761c48ea2',
+  source: '3bf2904ba73c24ab588d84e23cca1b34b8eef574',
+  sourceRef: BRANCH,
+  baseSource: '6997f810ed1d88d1dac9220b851a0935a893145d',
   assetSource: 'f2de762309768b51b39438c2437c14e819df9bf7',
   changedFiles: [
-    { status: 'modified', filename: 'mir2-web3/apps/web/app/components/asset-cache-registrar.tsx', sha: 'a3476c69b2387af7131e4fff256641edba3b55f7' },
-    { status: 'modified', filename: 'mir2-web3/apps/web/app/globals.css', sha: '7454da52d0e857ed2a308aa39f63b67d8da92482' },
-    { status: 'added', filename: 'mir2-web3/apps/web/app/login-fonts/r16-login-sc.woff2', sha: 'c6e8295d21e89f2c9839f2c16ca2b5443ce01951' },
-    { status: 'added', filename: 'mir2-web3/apps/web/app/login-fonts/r16-login-tc.woff2', sha: '3a106c00d5729c65abdfd2847f2b41c0a395dcf9' },
-    { status: 'modified', filename: 'mir2-web3/apps/web/app/original-client-shell.tsx', sha: '392ec6696f84e11635f54a674d24ea0ec84ed855' },
-    { status: 'modified', filename: 'mir2-web3/apps/web/app/page.tsx', sha: '21d5c4ec964dfeb20f6f6dc046fe646e9c42eb00' },
-    { status: 'modified', filename: 'mir2-web3/apps/web/app/promotions/layout.tsx', sha: '2bd24a268b253ebf61b64ce6d421b2e744aa3b76' },
-    { status: 'modified', filename: 'mir2-web3/apps/web/lib/original-audio.ts', sha: '53fb2d2ffb20051c0e392d4a623fa06a04830bad' },
-    { status: 'added', filename: 'mir2-web3/apps/web/lib/r16-cjk-fonts.ts', sha: '85d27fb815200bc7231cb8b629306da7474beaaf' },
-    { status: 'added', filename: 'mir2-web3/apps/web/scripts/generate-r16-login-fonts.py', sha: 'd7a182092f6cf9d30f129ad4a8673e93ec119df7' },
-    { status: 'modified', filename: 'mir2-web3/apps/web/scripts/test-audio-system.mjs', sha: '34e620ba1d4b55382846927f5e99a22fa208ac1b' },
+    { status: 'added', filename: 'mir2-web3/apps/web/lib/generated/bevy_runtime_version_numeron_r16.json', sha: 'c4858b021f0fb9f99cab44854f70aca43ca96077' },
+    { status: 'modified', filename: 'mir2-web3/apps/web/scripts/lib/production-asset-config.mjs', sha: '618059784c5fb73b8714417dc0bc93eadb05e88f' },
+    { status: 'modified', filename: 'mir2-web3/apps/web/scripts/test-production-asset-config.mjs', sha: '8a8ecca2c1fca540c1f746b3d5057fdf283dc8f6' },
+    { status: 'modified', filename: 'mir2-web3/apps/web/scripts/vercel-build.sh', sha: '47b92f505db7557829b1caaf80e459ae1abef2e0' },
+    { status: 'modified', filename: 'mir2-web3/config/numeron-r16-web-assets.json', sha: '57d5446bd75ebc110b0fef1650e7f05dce1ece90' },
   ],
   assetRunId: '42494701555',
-  baseline: 'dpl_DRLvQMibFvHL8MDyPxHXYNvtETKt',
+  baseline: 'dpl_AiB7qfnhdVkeEVKCJv3YXeW6m2cf',
   relay: 'https://relay.dubhe.obelisk.build',
 });
 const QR_OPERATIONS = ['numeron-qr-stage', 'numeron-qr-promote', 'numeron-qr-rollback'];

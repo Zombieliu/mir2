@@ -228,7 +228,7 @@ test('QR stage creates only the pinned game source, with the live alias left on 
   assert(!JSON.stringify(r.receipts).includes(SECRET));
 });
 
-test('QR stage rejects a deployment source beyond the exact login patch', async () => {
+test('QR stage rejects a deployment source beyond the exact release pin', async () => {
   const f = fixture('numeron-qr-stage');
   f.state.onRequest = request => request.pathname.includes('/compare/') ? json({
     status: 'ahead', ahead_by: 1, behind_by: 0, merge_base_commit: { sha: QR_RELEASE.baseSource },
