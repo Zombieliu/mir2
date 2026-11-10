@@ -3,6 +3,8 @@
 @font-face { font-family: "Noto Sans"; src: url("/original-ui/fonts/NotoSans-Bold.ttf") format("truetype"); font-weight: 700; font-display: swap; }
 @font-face { font-family: "Noto Sans TC"; src: url("/original-ui/fonts/NotoSansTC.ttf") format("truetype"); font-weight: 400; font-display: swap; }
 @font-face { font-family: "Noto Sans CJK SC"; src: url("/original-ui/fonts/NotoSansCJKsc-Regular.otf") format("opentype"); font-weight: 400; font-display: swap; }
+@font-face { font-family: "Numeron Login SC"; src: url("./login-fonts/r16-login-sc.woff2") format("woff2"); font-weight: 400; font-display: swap; }
+@font-face { font-family: "Numeron Login TC"; src: url("./login-fonts/r16-login-tc.woff2") format("woff2"); font-weight: 400; font-display: swap; }
 @font-face { font-family: "Noto Sans Devanagari"; src: url("/original-ui/fonts/NotoSansDevanagari-Regular.ttf") format("truetype"); font-weight: 400; font-display: swap; }
 @font-face { font-family: "Noto Sans Devanagari"; src: url("/original-ui/fonts/NotoSansDevanagari-Bold.ttf") format("truetype"); font-weight: 700; font-display: swap; }
 @font-face { font-family: "Noto Sans Thai"; src: url("/original-ui/fonts/NotoSansThai-Regular.ttf") format("truetype"); font-weight: 400; font-display: swap; }
@@ -46,6 +48,14 @@ body {
 
 html:lang(zh-CN), html:lang(zh-SG), html:lang(zh-Hans) { --mir2-ui-font: "Noto Sans CJK SC", sans-serif; }
 html:lang(zh-TW), html:lang(zh-HK), html:lang(zh-Hant) { --mir2-ui-font: "Noto Sans TC", sans-serif; }
+html:is(:lang(zh-CN), :lang(zh-SG), :lang(zh-Hans)) main:is([data-client-screen="login"], [data-client-screen="openingLogin"]) {
+  --mir2-ui-font: "Numeron Login SC", "Noto Sans CJK SC", sans-serif;
+  font-family: var(--mir2-ui-font);
+}
+html:is(:lang(zh-TW), :lang(zh-HK), :lang(zh-Hant)) main:is([data-client-screen="login"], [data-client-screen="openingLogin"]) {
+  --mir2-ui-font: "Numeron Login TC", "Noto Sans TC", sans-serif;
+  font-family: var(--mir2-ui-font);
+}
 html:lang(hi) { --mir2-ui-font: "Noto Sans Devanagari", "Noto Sans", sans-serif; }
 html:lang(th) { --mir2-ui-font: "Noto Sans Thai", "Noto Sans", sans-serif; }
 html:lang(ar) { --mir2-ui-font: "Noto Sans Arabic", "Noto Sans", sans-serif; }

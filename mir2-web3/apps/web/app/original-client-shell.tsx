@@ -1352,13 +1352,27 @@ export function OriginalClientShell({
   const syncMusic = useCallback((src: string | null) => {
     setOriginalMusic(src);
   }, []);
+  const loginMusicRequested = useRef(false);
+  const loginAudioSurface = screen === "login" || screen === "openingLogin";
+  const walletQrOpen = Boolean(dubheQr);
 
   const playLoginEffect = useCallback(() => {
     playOriginalSoundPath(ORIGINAL_AUDIO.loginEffect, ORIGINAL_EFFECT_VOLUME);
   }, []);
 
   useEffect(() => {
-    const handleUserAudioGesture = () => unlockOriginalAudio();
+    const handleUserAudioGesture = (event: PointerEvent | KeyboardEvent) => {
+      if (loginAudioSurface) {
+        const walletEntry = event.target instanceof Element && event.target.closest("[data-dubhe-qr-return]");
+        if (walletQrOpen || walletEntry || (event instanceof KeyboardEvent && event.key === "F8")) return;
+        if (!loginMusicRequested.current) {
+          loginMusicRequested.current = true;
+          syncMusic(ORIGINAL_AUDIO.loginMusic);
+          return;
+        }
+      }
+      unlockOriginalAudio();
+    };
 
     window.addEventListener("pointerdown", handleUserAudioGesture, true);
     window.addEventListener("keydown", handleUserAudioGesture, true);
@@ -1366,9 +1380,9 @@ export function OriginalClientShell({
     return () => {
       window.removeEventListener("pointerdown", handleUserAudioGesture, true);
       window.removeEventListener("keydown", handleUserAudioGesture, true);
-      stopOriginalAudio();
     };
-  }, []);
+  }, [loginAudioSurface, syncMusic, walletQrOpen]);
+  useEffect(() => () => stopOriginalAudio(), []);
 
   useEffect(() => {
     const previousScreen = previousScreenRef.current;
@@ -1383,8 +1397,10 @@ export function OriginalClientShell({
   }, [screen]);
 
   useEffect(() => {
-    syncMusic(desiredMusicForScreen(screen));
-  }, [screen, syncMusic]);
+    if (!loginAudioSurface) loginMusicRequested.current = false;
+    const deferMusic = loginAudioSurface && (walletQrOpen || !loginMusicRequested.current);
+    syncMusic(deferMusic ? null : desiredMusicForScreen(screen));
+  }, [loginAudioSurface, screen, syncMusic, walletQrOpen]);
 
   const combatTildeRef=useRef(false);
   const dropViewUntilRef = useRef<number | null>(null);
