@@ -78,7 +78,7 @@ const manifestResponse = (version, capabilities = {}) => ({
   ok: true, json: async () => ({ version, capabilities }),
 });
 async function settleSceneFixture() {
-  for (let i = 0; i < 12; i += 1) await Promise.resolve();
+  await new Promise(resolve => setImmediate(resolve));
 }
 
 test("asset release versions isolate canonical scene and starter HTTP keys without changing chunks", () => {
@@ -169,7 +169,7 @@ const pageText = readFileSync(pageSourcePath, "utf8");
 const pageAst = ts.createSourceFile(pageSourcePath, pageText, ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);
 const releaseEffects = [], sceneEffects = [], pageRequestDeclarations = new Map(), pageHelpers = new Map();
 for (const node of pageAst.statements) {
-  if (ts.isFunctionDeclaration(node) && ["normalizeMapFileName", "shouldReloadCrystalScene"].includes(node.name?.text)) {
+  if (ts.isFunctionDeclaration(node) && ["normalizeMapFileName", "crystalSceneContainsPlayer", "shouldReloadCrystalScene"].includes(node.name?.text)) {
     pageHelpers.set(node.name.text, node.getText(pageAst));
   }
 }
@@ -187,30 +187,45 @@ for (const node of pageAst.statements) {
 assert.equal(releaseEffects.length, 1);
 assert.equal(sceneEffects.length, 1);
 assert.equal(pageRequestDeclarations.size, 2);
-assert.equal(pageHelpers.size, 2);
-assert.equal(releaseEffects[0].arguments[1].getText(pageAst), "[screen]");
-assert.equal(sceneEffects[0].arguments[1].getText(pageAst), "[sceneBlueprintRequestKey, screen]");
+assert.equal(pageHelpers.size, 3);
+assert.equal(releaseEffects[0].arguments[1].getText(pageAst), "[screen, sceneReleaseRetry]");
+assert.equal(sceneEffects[0].arguments[1].getText(pageAst), "[sceneBlueprintRequestKey, sceneBlueprintRetry, screen]");
 const actualPageEffectsCompiled = ts.transpileModule([...pageHelpers.values()].join("\n")
   + "\nconst " + [...pageRequestDeclarations.values()].join(";\nconst ") + ";"
   + "\nconst actualReleaseEffect=" + releaseEffects[0].arguments[0].getText(pageAst) + ";"
   + "\nconst actualSceneEffect=" + sceneEffects[0].arguments[0].getText(pageAst) + ";",
   { compilerOptions: { module: ts.ModuleKind.None, target: ts.ScriptTarget.ES2022, strict: true }, reportDiagnostics: true });
 assert.deepEqual((actualPageEffectsCompiled.diagnostics ?? []).filter(d => d.category === ts.DiagnosticCategory.Error), []);
+const sceneReaderModule = { exports: {} };
+const sceneReaderSource = readFileSync(new URL("../lib/first-crystal-scene-request.ts", import.meta.url), "utf8");
+const sceneReaderCompiled = ts.transpileModule(sceneReaderSource, {
+  compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 },
+});
+new Function("exports", "module", sceneReaderCompiled.outputText)(sceneReaderModule.exports, sceneReaderModule);
 function pageSceneFixture({ screen = "game", map = "0140", region = null } = {}) {
   const cap = capabilitiesFixture(), calls = [], logs = [], updates = [], milestones = [];
-  const state = { release: null };
+  const state = { release: null, failure: null };
+  const player = { objectId: "1", x: 344, y: 74 };
+  const world = { mapFileName: map, originalMapRegion: region, playerObjectId: player.objectId, entities: [player] };
+  const fetcher = (url, options) => {
+    const reply = deferred();
+    calls.push({ url, options, ...reply });
+    return reply.promise;
+  };
   const scope = {
-    screen, self: { x: 344, y: 74 }, sceneAssetReleaseId: null,
-    world: { mapFileName: map, originalMapRegion: region },
+    screen, self: player, sceneAssetReleaseId: null,
+    world, worldRef: { current: world }, screenRef: { current: screen },
     viewportLayout: { rangeX: 20, rangeY: 15 },
     loadedSceneAssetReleaseRef: { current: null }, loadedSceneKeyRef: { current: null }, loadingSceneKeyRef: { current: null },
     loggedSceneResourceErrorsRef: { current: new Set() },
     normalizeCrystalSceneBlueprintRequest, createCrystalSceneBlueprintRequestKey, createCrystalSceneBlueprintRequestUrl,
     isCrystalSceneAssetReleaseId: loadedModule.exports.isCrystalSceneAssetReleaseId,
     loadAssetReleaseCapabilities: cap.api.loadAssetReleaseCapabilities,
-    fetch: (url, options) => { const reply = deferred(); calls.push({ url, options, ...reply }); return reply.promise; },
+    fetch: fetcher,
+    fetchFirstCrystalSceneJson: (url, options, request = fetcher) => sceneReaderModule.exports.fetchFirstCrystalSceneJson(url, options, request),
     setSceneAssetReleaseId: value => { state.release = value; },
-    updateWorld: update => { scope.world = update(scope.world); updates.push(scope.world); },
+    setSceneLoadFailure: value => { state.failure = value; },
+    updateWorld: update => { scope.world = update(scope.world); scope.worldRef.current = scope.world; updates.push(scope.world); },
     markMir2CacheMilestone: (name, detail) => milestones.push({ name, detail }),
     appendLog: value => logs.push(value), t: (key, values) => [key, ...(values ?? [])].join(":"),
     isAbortError: error => error?.name === "AbortError",
@@ -224,7 +239,7 @@ function pageSceneFixture({ screen = "game", map = "0140", region = null } = {})
 }
 function sceneBlueprint(map = "0140") {
   return { mapTitle: "Warehouse", sceneView: null, terrainPatches: [], decorObjects: [],
-    originalMapRegion: { mapFileName: map + ".map", sprites: { real: {} }, cells: [{}],
+    originalMapRegion: { mapFileName: map + ".map", sprites: { real: {} }, cells: [{ x: 344, y: 74 }],
       playBounds: { minX: -1000, minY: -1000, maxX: 1000, maxY: 1000 } } };
 }
 function sceneResponse(blueprint) {
@@ -269,6 +284,7 @@ test("actual Page unavailable or cancelled release never fetches an old Scene or
     assert.equal(f.calls.length, 1);
     assert.equal(f.updates.length, 0);
     assert.equal(f.logs.length, 1);
+    assert.deepEqual(f.state.failure, { phase: "release" });
     cleanup();
   }
   const f = pageSceneFixture(), cleanup = f.render().release();
@@ -315,9 +331,9 @@ test("actual Page release changes reload an interior region while unchanged chun
 test("actual Page starter fallback retains the captured release and superseded Scene disposal is exact", async () => {
   const starter = pageSceneFixture({ map: "0" }); starter.state.release = "starter-release";
   const starterCleanup = starter.render().scene();
-  starter.calls[0].resolve({ ok: false, status: 424, clone: () => ({
+  starter.calls[0].resolve({ ok: false, status: 424,
     json: async () => ({ error: "resource_missing", publicPath: "/original-map/WemadeMir2/Tiles/1.png", mapFileName: "0" }),
-  }) });
+  });
   await settleSceneFixture();
   assert.equal(starter.calls.length, 2);
   const url = new URL(starter.calls[1].url, "https://mir2.example");
@@ -344,4 +360,27 @@ test("actual Page starter fallback retains the captured release and superseded S
   assert.equal(f.updates.length, 1);
   assert.equal(f.scope.loadingSceneKeyRef.current, null);
   nextCleanup();
+});
+
+test("actual Page never paints a region outside the current map and tile, including the starter fallback", async () => {
+  const outside = sceneBlueprint("0");
+  outside.originalMapRegion.playBounds.minY = 75;
+  const missingCell = sceneBlueprint("0");
+  missingCell.originalMapRegion.cells[0].y = 75;
+  for (const [blueprint, isStarter] of [[sceneBlueprint("0140"), false], [missingCell, false], [outside, true]]) {
+    const f = pageSceneFixture({ map: "0" });
+    f.state.release = "exact-release";
+    const render = f.render(), cleanup = render.scene();
+    if (isStarter) {
+      f.calls[0].resolve({ ok: false, status: 424, json: async () => ({ error: "resource_missing", mapFileName: "0" }) });
+      await settleSceneFixture();
+      assert.equal(f.calls.length, 2);
+    }
+    f.calls.at(-1).resolve(sceneResponse(blueprint));
+    await settleSceneFixture();
+    assert.equal(f.updates.length, 0);
+    assert.deepEqual(f.state.failure, { phase: "blueprint", sceneKey: render.key });
+    assert.equal(f.scope.loadingSceneKeyRef.current, null);
+    cleanup();
+  }
 });

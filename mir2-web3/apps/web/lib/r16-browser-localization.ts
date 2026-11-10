@@ -11,7 +11,7 @@ export const R16_BROWSER_TEXT_KEYS = [
   "browser.settings", "browser.settingsDetail", "browser.accountSecurity", "browser.accountInfo", "browser.signIn", "browser.diagnostics",
   "ui.walletQrAlt", "ui.walletQrFailed", "ui.walletQrRetryHint", "ui.walletApproveOnDevice", "ui.walletMissing",
   "ui.questClientLoading", "ui.questClientUnavailable", "ui.questActionPending", "ui.questActionRewardRequired",
-  "ui.questActionTalkToNpc", "ui.questActionStateChanged", "ui.retry", "ui.characterCreateUnconfirmed",
+  "ui.questActionTalkToNpc", "ui.questActionStateChanged", "ui.retry", "ui.sceneLoadUnavailable", "ui.characterCreateUnconfirmed",
 ] as const;
 
 export type R16BrowserTextKey = typeof R16_BROWSER_TEXT_KEYS[number];
@@ -51,6 +51,7 @@ const dictionaries: Readonly<Record<R16NativeLanguage, BrowserDictionary>> = {
     "ui.questActionTalkToNpc": "请先和任务 NPC 交谈。",
     "ui.questActionStateChanged": "任务状态已变化，请重新查看。",
     "ui.retry": "重试",
+    "ui.sceneLoadUnavailable": "地图加载失败。",
     "ui.characterCreateUnconfirmed": "重登后请检查角色列表，确认创角结果。",
   },
   "zh-TW": {
@@ -86,6 +87,7 @@ const dictionaries: Readonly<Record<R16NativeLanguage, BrowserDictionary>> = {
     "ui.questActionTalkToNpc": "請先和任務 NPC 交談。",
     "ui.questActionStateChanged": "任務狀態已變更，請重新查看。",
     "ui.retry": "重試",
+    "ui.sceneLoadUnavailable": "地圖載入失敗。",
     "ui.characterCreateUnconfirmed": "重新登入後請查看角色列表，確認角色是否已建立。",
   },
   en: {
@@ -121,6 +123,7 @@ const dictionaries: Readonly<Record<R16NativeLanguage, BrowserDictionary>> = {
     "ui.questActionTalkToNpc": "Talk to the quest giver first.",
     "ui.questActionStateChanged": "The quest has changed. Review it again.",
     "ui.retry": "Retry",
+    "ui.sceneLoadUnavailable": "The map could not be loaded.",
     "ui.characterCreateUnconfirmed": "Log in again and check your character list to confirm the result.",
   },
   "pt-BR": {
@@ -156,6 +159,7 @@ const dictionaries: Readonly<Record<R16NativeLanguage, BrowserDictionary>> = {
     "ui.questActionTalkToNpc": "Fale primeiro com quem oferece a missão.",
     "ui.questActionStateChanged": "O estado da missão mudou. Confira novamente.",
     "ui.retry": "Tentar novamente",
+    "ui.sceneLoadUnavailable": "Não foi possível carregar o mapa.",
     "ui.characterCreateUnconfirmed": "Entre novamente e confira a lista para confirmar se o personagem foi criado.",
   },
   ru: {
@@ -191,6 +195,7 @@ const dictionaries: Readonly<Record<R16NativeLanguage, BrowserDictionary>> = {
     "ui.questActionTalkToNpc": "Сначала поговорите с персонажем, выдавшим задание.",
     "ui.questActionStateChanged": "Состояние задания изменилось. Проверьте его ещё раз.",
     "ui.retry": "Повторить",
+    "ui.sceneLoadUnavailable": "Не удалось загрузить карту.",
     "ui.characterCreateUnconfirmed": "Войдите снова и проверьте, появился ли персонаж в списке.",
   },
   hi: {
@@ -226,6 +231,7 @@ const dictionaries: Readonly<Record<R16NativeLanguage, BrowserDictionary>> = {
     "ui.questActionTalkToNpc": "पहले मिशन देने वाले पात्र से बात करें।",
     "ui.questActionStateChanged": "मिशन की स्थिति बदल गई है। कृपया उसे फिर से देखें।",
     "ui.retry": "फिर से कोशिश करें",
+    "ui.sceneLoadUnavailable": "नक्शा लोड नहीं हो सका।",
     "ui.characterCreateUnconfirmed": "फिर से लॉग इन करें और देखें कि पात्र सूची में है या नहीं।",
   },
   id: {
@@ -261,6 +267,7 @@ const dictionaries: Readonly<Record<R16NativeLanguage, BrowserDictionary>> = {
     "ui.questActionTalkToNpc": "Bicaralah dengan pemberi misi terlebih dahulu.",
     "ui.questActionStateChanged": "Status misi telah berubah. Periksa kembali.",
     "ui.retry": "Coba lagi",
+    "ui.sceneLoadUnavailable": "Peta gagal dimuat.",
     "ui.characterCreateUnconfirmed": "Masuk lagi dan periksa daftar karakter untuk memastikan hasilnya.",
   },
   vi: {
@@ -296,6 +303,7 @@ const dictionaries: Readonly<Record<R16NativeLanguage, BrowserDictionary>> = {
     "ui.questActionTalkToNpc": "Hãy nói chuyện với người giao nhiệm vụ trước.",
     "ui.questActionStateChanged": "Trạng thái nhiệm vụ đã thay đổi. Hãy xem lại.",
     "ui.retry": "Thử lại",
+    "ui.sceneLoadUnavailable": "Không thể tải bản đồ.",
     "ui.characterCreateUnconfirmed": "Hãy đăng nhập lại và kiểm tra danh sách để xác nhận nhân vật đã được tạo chưa.",
   },
   th: {
@@ -331,6 +339,7 @@ const dictionaries: Readonly<Record<R16NativeLanguage, BrowserDictionary>> = {
     "ui.questActionTalkToNpc": "โปรดคุยกับผู้มอบภารกิจก่อน",
     "ui.questActionStateChanged": "สถานะภารกิจเปลี่ยนไปแล้ว โปรดตรวจสอบอีกครั้ง",
     "ui.retry": "ลองอีกครั้ง",
+    "ui.sceneLoadUnavailable": "โหลดแผนที่ไม่สำเร็จ",
     "ui.characterCreateUnconfirmed": "เข้าสู่ระบบอีกครั้งและตรวจสอบรายชื่อตัวละครเพื่อยืนยันผล",
   },
   ar: {
@@ -366,6 +375,7 @@ const dictionaries: Readonly<Record<R16NativeLanguage, BrowserDictionary>> = {
     "ui.questActionTalkToNpc": "تحدّث مع مانح المهمة أولًا.",
     "ui.questActionStateChanged": "تغيّرت حالة المهمة. راجعها مجددًا.",
     "ui.retry": "إعادة المحاولة",
+    "ui.sceneLoadUnavailable": "تعذر تحميل الخريطة.",
     "ui.characterCreateUnconfirmed": "سجّل الدخول مجددًا وتحقق من قائمة الشخصيات لمعرفة نتيجة الإنشاء.",
   },
 };

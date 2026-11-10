@@ -660,8 +660,7 @@ body:has([data-shared-touch-quest-open="true"], [data-shared-touch-bag-open="tru
   pointer-events: none;
 }
 
-/* Intentional loading screen over the black stage while map tiles preload (see
-   original-client-shell.tsx). Auto-dismisses when sceneInteractionReady flips true. */
+/* Covers map data and tile preparation. Dismissed when the scene is interactive. */
 .scene-loading-overlay {
   position: absolute;
   inset: 0;
@@ -692,6 +691,15 @@ body:has([data-shared-touch-quest-open="true"], [data-shared-touch-bag-open="tru
 
 .scene-loading-text {
   opacity: 0.92;
+}
+
+.scene-loading-retry {
+  padding: 8px 18px;
+  border: 1px solid #9d733b;
+  background: linear-gradient(#4c341b, #23190d);
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
 }
 
 @keyframes scene-loading-spin {

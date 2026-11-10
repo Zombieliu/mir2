@@ -1,3 +1,5 @@
+import type { FirstCrystalSceneJsonReader } from "./first-crystal-scene-request";
+
 export type CrystalFullPackReleaseCapability = {
   enabled: boolean;
   verified: boolean;
@@ -43,7 +45,7 @@ export function setAssetReleaseCapabilities(value: unknown): AssetReleaseCapabil
 
 export async function loadAssetReleaseCapabilities(
   fetcher: typeof fetch = fetch,
-  options: { fresh?: boolean; signal?: AbortSignal } = {},
+  options: { fresh?: boolean; signal?: AbortSignal; readJson?: FirstCrystalSceneJsonReader } = {},
 ): Promise<AssetReleaseCapabilities> {
   const fresh = options.fresh === true;
   if (!fresh && typeof window !== "undefined" && window.__mir2AssetReleaseCapabilities) {
@@ -52,22 +54,25 @@ export async function loadAssetReleaseCapabilities(
   if (!fresh && pendingCapabilities) return pendingCapabilities;
 
   const generation = ++capabilitiesReadGeneration;
-  const pending: Promise<AssetReleaseCapabilities> = fetcher("/api/asset-manifest", {
+  const requestOptions = {
     cache: fresh ? "no-cache" : "force-cache",
     ...(options.signal ? { signal: options.signal } : {}),
-  })
-    .then(async (response) => {
-      if (!response.ok) {
-        throw new Error(`asset manifest returned ${response.status}`);
-      }
-      const manifest = (await response.json()) as {
-        version?: unknown;
-        capabilities?: unknown;
-      };
+  } satisfies RequestInit;
+  async function readManifest(): Promise<unknown> {
+    const loaded = options.readJson
+      ? await options.readJson("/api/asset-manifest", requestOptions, fetcher)
+      : null;
+    const response = loaded?.response ?? await fetcher("/api/asset-manifest", requestOptions);
+    if (!response.ok) throw new Error(`asset manifest returned ${response.status}`);
+    return loaded ? loaded.body : response.json();
+  }
+  const pending: Promise<AssetReleaseCapabilities> = readManifest()
+    .then((body) => {
       if (options.signal?.aborted) return normalizeAssetReleaseCapabilities(null);
+      if (!isRecord(body)) return normalizeAssetReleaseCapabilities(null);
       const normalized = normalizeAssetReleaseCapabilities({
-        releaseId: manifest.version,
-        ...(isRecord(manifest.capabilities) ? manifest.capabilities : {}),
+        releaseId: body.version,
+        ...(isRecord(body.capabilities) ? body.capabilities : {}),
       });
       // Fresh reads bypass both old memory and the default pending Promise.
       // A slower old read may resolve for its caller, but cannot publish over

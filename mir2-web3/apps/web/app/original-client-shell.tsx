@@ -533,6 +533,7 @@ export function OriginalClientShell({
   viewportEntities: sourceViewportEntities,
   viewportTiles,
   sceneInteractionReady,
+  onRetrySceneLoad,
   bevyEntityRendererReady,
   bevyRuntimeBackend,
   webGl2SharedCanvasPrototype = false,
@@ -754,9 +755,7 @@ export function OriginalClientShell({
     () => wideMobileRequestedForClientProfile(clientProfile.layout, clientProfile.input),
     [clientProfile.input, clientProfile.layout],
   );
-  // Shown over the (black) stage while the map tiles preload after entering the world. The
-  // condition reuses sceneInteractionReady, which preloadSceneAssetUrls() flips true on
-  // success or within its 5s partial-ready timeout, so this overlay can never stick.
+  // Covers scene JSON and tile preparation after entering the world.
   const sceneLoadingLabel = t(
     "scene.loadingMap",
     [],
@@ -5621,9 +5620,16 @@ export function OriginalClientShell({
               entityRenderState.enabled &&
               entityRenderState.entities.length === 0 &&
               !readinessSafetyExpired)) ? (
-            <div className="scene-loading-overlay" role="status" aria-live="polite">
-              <span className="scene-loading-spinner" aria-hidden="true" />
-              <span className="scene-loading-text">{sceneLoadingLabel}</span>
+            <div className="scene-loading-overlay">
+              {onRetrySceneLoad ? <>
+                <span className="scene-loading-text" role="alert">{t("ui.sceneLoadUnavailable", [], "The map could not be loaded.")}</span>
+                <button type="button" className="scene-loading-retry" onClick={onRetrySceneLoad}>
+                  {t("ui.retry", [], "Retry")}
+                </button>
+              </> : <>
+                <span className="scene-loading-spinner" aria-hidden="true" />
+                <span className="scene-loading-text" role="status">{sceneLoadingLabel}</span>
+              </>}
             </div>
           ) : null}
         </div>

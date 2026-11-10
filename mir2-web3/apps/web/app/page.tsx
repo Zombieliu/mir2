@@ -415,6 +415,7 @@ import {
   isCrystalSceneAssetReleaseId,
 } from "../lib/scene-blueprint-request";
 import { loadAssetReleaseCapabilities } from "../lib/asset-release-capabilities";
+import { fetchFirstCrystalSceneJson } from "../lib/first-crystal-scene-request";
 import crystalFrameSetCatalog from "../public/original-ui/frame-sets.generated.json";
 import type { OriginalSceneFrameSet } from "../lib/original-scene-sprite-meta";
 import { crystalFrameSetActionForState } from "./components/original-client-entity-frames";
@@ -2554,6 +2555,9 @@ export default function HomePage() {
   } | null>(null);
   const movementPredictionBlockedUntilRef = useRef(0);
   const [sceneAssetReleaseId, setSceneAssetReleaseId] = useState<string | null>(null);
+  const [sceneReleaseRetry, retrySceneRelease] = useState(0);
+  const [sceneBlueprintRetry, retrySceneBlueprint] = useState(0);
+  const [sceneLoadFailure, setSceneLoadFailure] = useState<{ phase: "release" } | { phase: "blueprint"; sceneKey: string } | null>(null);
   const loadedSceneAssetReleaseRef = useRef<string | null>(null);
   const loadedSceneKeyRef = useRef<string | null>(null);
   const loadingSceneKeyRef = useRef<string | null>(null);
@@ -5725,17 +5729,21 @@ export default function HomePage() {
 
   useEffect(() => {
     setSceneAssetReleaseId(null);
+    setSceneLoadFailure(null);
     if (screen !== "game") return;
     let disposed = false;
     const controller = new AbortController();
     async function loadSceneAssetRelease() {
       try {
-        const capabilities = await loadAssetReleaseCapabilities(fetch, { fresh: true, signal: controller.signal });
+        const capabilities = await loadAssetReleaseCapabilities(fetch, {
+          fresh: true, signal: controller.signal, readJson: fetchFirstCrystalSceneJson,
+        });
         if (disposed || controller.signal.aborted) return;
         if (!isCrystalSceneAssetReleaseId(capabilities.releaseId)) throw new Error("Scene asset release is unavailable");
         setSceneAssetReleaseId(capabilities.releaseId);
       } catch (error) {
-        if (!disposed && !isAbortError(error)) {
+        if (!disposed && !controller.signal.aborted) {
+          setSceneLoadFailure({ phase: "release" });
           appendLog(t("log.sceneLoadFailed", [error instanceof Error ? error.message : String(error)]));
         }
       }
@@ -5745,7 +5753,7 @@ export default function HomePage() {
     // The release is captured once per game entry. Scene chunk changes do not
     // refetch the manifest, and a failed read never authorizes an unversioned URL.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [screen]);
+  }, [screen, sceneReleaseRetry]);
 
   const sceneBlueprintRequest =
     screen === "game" && self && sceneAssetReleaseId
@@ -5789,13 +5797,20 @@ export default function HomePage() {
     const controller = new AbortController();
 
     async function loadSceneBlueprint() {
-      function applySceneBlueprint(blueprint: SceneBlueprint, cacheStatus: string) {
-        if (disposed || controller.signal.aborted) return;
+      function applySceneBlueprint(blueprint: SceneBlueprint | null, cacheStatus: string) {
+        if (disposed || controller.signal.aborted || screenRef.current !== "game") return;
+        const current = worldRef.current;
+        const activePlayer = current.entities.find(entity => entity.objectId === current.playerObjectId);
+        if (!activePlayer || normalizeMapFileName(current.mapFileName) !== request.mapFileName) return;
+        const region = blueprint?.originalMapRegion;
+        if (!blueprint || !crystalSceneContainsPlayer(region, request.mapFileName, activePlayer)) {
+          throw new Error("Scene region does not contain the active player's map and tile");
+        }
         markMir2CacheMilestone("sceneBlueprintReady", {
           sceneKey,
           sceneCache: cacheStatus,
-          spriteCount: blueprint.originalMapRegion ? Object.keys(blueprint.originalMapRegion.sprites).length : 0,
-          cellCount: blueprint.originalMapRegion?.cells.length ?? 0,
+          spriteCount: Object.keys(region.sprites).length,
+          cellCount: region.cells.length,
         });
         loadedSceneKeyRef.current = sceneKey;
         loadedSceneAssetReleaseRef.current = request.assetReleaseId ?? null;
@@ -5808,27 +5823,24 @@ export default function HomePage() {
           sceneView: blueprint.sceneView,
           terrainPatches: blueprint.terrainPatches,
           decorObjects: blueprint.decorObjects,
-          originalMapRegion: blueprint.originalMapRegion,
+          originalMapRegion: region,
         }));
       }
 
       async function applyStarterFallback() {
-        const fallbackResponse = await fetch(createCrystalSceneBlueprintRequestUrl(request, "/api/scene/starter"), {
-          signal: controller.signal,
-          cache: "force-cache",
-        });
-        if (!fallbackResponse.ok) {
-          throw new Error(`scene starter route returned ${fallbackResponse.status}`);
+        const { response, body } = await fetchFirstCrystalSceneJson<SceneBlueprint>(
+          createCrystalSceneBlueprintRequestUrl(request, "/api/scene/starter"),
+          { signal: controller.signal, cache: "force-cache" },
+        );
+        if (!response.ok) {
+          throw new Error(`scene starter route returned ${response.status}`);
         }
-        const fallbackBlueprint = (await fallbackResponse.json()) as SceneBlueprint;
-        if (!fallbackBlueprint?.originalMapRegion) {
-          throw new Error("starter scene missing originalMapRegion");
-        }
-        applySceneBlueprint(fallbackBlueprint, "starter");
+        applySceneBlueprint(body, "starter");
       }
 
       try {
         loadingSceneKeyRef.current = sceneKey;
+        setSceneLoadFailure(null);
         const requestUrl = createCrystalSceneBlueprintRequestUrl(request);
         markMir2CacheMilestone("sceneBlueprintStart", {
           sceneKey,
@@ -5838,50 +5850,42 @@ export default function HomePage() {
           width: request.width,
           height: request.height,
         });
-        const response = await fetch(requestUrl, {
+        const { response, body } = await fetchFirstCrystalSceneJson<SceneBlueprint | CrystalSceneResourceError>(requestUrl, {
           signal: controller.signal,
           cache: "force-cache",
         });
         if (!response.ok) {
-          if (response.status === 424) {
-            try {
-              const body = await response.clone().json();
-              if (body?.error === "resource_missing") {
-                const publicPath = String(body.publicPath || body.resource?.path || "unknown");
-                const signature = `${body.assetVersion ?? ""}:${body.publicPath ?? publicPath}:${response.status}`;
-                if (!loggedSceneResourceErrorsRef.current.has(signature)) {
-                  loggedSceneResourceErrorsRef.current.add(signature);
-                  appendLog(
-                    `scene resource missing for ${publicPath}: ${JSON.stringify({
-                      publicPath: body.publicPath ?? publicPath,
-                      libraryKey: body.libraryKey ?? body.resource?.libraryKey,
-                      frameIndex: body.frameIndex ?? body.resource?.frameIndex,
-                      manifestAssetHash: body.manifestAssetHash,
-                      assetVersion: body.assetVersion,
-                    })}`,
-                    "system",
-                  );
-                }
+          if (response.status === 424 && body && typeof body === "object" && "error" in body && body.error === "resource_missing") {
+            const publicPath = String(body.publicPath || body.resource?.path || "unknown");
+            const signature = `${body.assetVersion ?? ""}:${body.publicPath ?? publicPath}:${response.status}`;
+            if (!loggedSceneResourceErrorsRef.current.has(signature)) {
+              loggedSceneResourceErrorsRef.current.add(signature);
+              appendLog(
+                `scene resource missing for ${publicPath}: ${JSON.stringify({
+                  publicPath: body.publicPath ?? publicPath,
+                  libraryKey: body.libraryKey ?? body.resource?.libraryKey,
+                  frameIndex: body.frameIndex ?? body.resource?.frameIndex,
+                  manifestAssetHash: body.manifestAssetHash,
+                  assetVersion: body.assetVersion,
+                })}`,
+                "system",
+              );
+            }
 
-                const resourceMissingMapName = normalizeMapFileName(
-                  String(body?.mapFileName ?? body?.resource?.mapFileName ?? request.mapFileName),
-                );
-                if (resourceMissingMapName === "0") {
-                  await applyStarterFallback();
-                  return;
-                }
-              }
-            } catch {
-              // Ignore parse errors and fall back to generic message.
+            const resourceMissingMapName = normalizeMapFileName(String(body.mapFileName ?? body.resource?.mapFileName ?? request.mapFileName));
+            if (request.mapFileName === "0" && resourceMissingMapName === request.mapFileName) {
+              await applyStarterFallback();
+              return;
             }
           }
           throw new Error(`scene route returned ${response.status}`);
         }
 
-        const blueprint = (await response.json()) as SceneBlueprint;
+        const blueprint = body && typeof body === "object" && "originalMapRegion" in body ? body : null;
         applySceneBlueprint(blueprint, response.headers.get("x-mir2-scene-cache") ?? "crystal");
       } catch (error) {
-        if (!disposed && !isAbortError(error)) {
+        if (!disposed && !controller.signal.aborted) {
+          setSceneLoadFailure({ phase: "blueprint", sceneKey });
           appendLog(t("log.sceneLoadFailed", [error instanceof Error ? error.message : String(error)]));
         }
       } finally {
@@ -5902,7 +5906,7 @@ export default function HomePage() {
     // The canonical request key includes asset release, map, chunk and viewport buckets. Raw
     // self coordinates deliberately do not restart an in-flight request.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [sceneBlueprintRequestKey, screen]);
+  }, [sceneBlueprintRequestKey, sceneBlueprintRetry, screen]);
 
   // Drive world->Bevy snapshot pushes from a fixed-cadence emitter rather than
   // React reconciliation. The emitter reads the world-model store (kept in sync
@@ -21349,6 +21353,13 @@ export default function HomePage() {
       player={self}
       predictedPlayerPosition={null}
       sceneInteractionReady={screen !== "game" || initialSceneAssetsReady}
+      onRetrySceneLoad={sceneLoadFailure && !world.originalMapRegion &&
+        (sceneLoadFailure.phase === "release" || sceneLoadFailure.sceneKey === sceneBlueprintRequestKey)
+        ? () => {
+          setSceneLoadFailure(null);
+          if (sceneLoadFailure.phase === "release") retrySceneRelease(count => count + 1);
+          else retrySceneBlueprint(count => count + 1);
+        } : undefined}
       bevyEntityRendererReady={bevyEntityRendererReady}
       bevyRuntimeBackend={bevyRuntimeBackend}
       webGl2SharedCanvasPrototype={webGl2SharedCanvasPrototype}
@@ -22976,6 +22987,28 @@ function transferKeyForWorldTile(
 
 function normalizeMapFileName(mapFileName: string | null) {
   return (mapFileName ?? "0").trim().replace(/\.map$/i, "").toLowerCase() || "0";
+}
+
+type CrystalSceneResourceError = {
+  error: string;
+  publicPath?: string;
+  resource?: { path?: string; libraryKey?: string; frameIndex?: number; mapFileName?: string };
+  assetVersion?: string;
+  libraryKey?: string;
+  frameIndex?: number;
+  manifestAssetHash?: string;
+  mapFileName?: string;
+};
+
+function crystalSceneContainsPlayer(
+  region: OriginalMapRegion | null | undefined,
+  mapFileName: string,
+  { x, y }: { x: number; y: number },
+): region is OriginalMapRegion {
+  if (!region || typeof region.mapFileName !== "string" || normalizeMapFileName(region.mapFileName) !== mapFileName
+    || !region.playBounds || !region.sprites || !Array.isArray(region.cells)) return false;
+  const { minX, minY, maxX, maxY } = region.playBounds;
+  return x >= minX && x <= maxX && y >= minY && y <= maxY && region.cells.some(cell => cell?.x === x && cell.y === y);
 }
 
 function shouldReloadCrystalScene(

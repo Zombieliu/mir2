@@ -11,6 +11,8 @@ const workerSource = readFileSync(
 function createWorkerContext(fetchImpl, cacheStorage) {
   const listeners = new Map();
   const context = vm.createContext({
+    AbortController,
+    AbortSignal,
     caches: cacheStorage ?? {
       async delete() {
         return true;
@@ -26,6 +28,7 @@ function createWorkerContext(fetchImpl, cacheStorage) {
         };
       },
     },
+    clearTimeout,
     console,
     fetch: fetchImpl,
     Headers,
@@ -297,4 +300,136 @@ test("cache trimming is amortized across a burst of writes", async () => {
   );
   assert.equal(putCount, 64);
   assert.equal(keyScanCount, 1);
+});
+
+function dispatchSceneMetadataRequest(path, fetchImpl, store) {
+  const { context, listeners } = createWorkerContext(fetchImpl, { async open() { return store; } });
+  vm.runInContext('runtimeConfig.version = "first-scene-test"', context);
+  const completions = [];
+  let response;
+  let dispatching = true;
+  listeners.get("fetch")({
+    request: new Request(`https://preview.example.test${path}`),
+    waitUntil(promise) {
+      assert.equal(dispatching, true, "waitUntil must be registered during the FetchEvent");
+      completions.push(promise);
+    },
+    respondWith(promise) {
+      assert.equal(dispatching, true);
+      response = promise;
+    },
+  });
+  dispatching = false;
+  assert(response);
+  return { response, completions };
+}
+
+async function whileCacheIsBlocked(promise) {
+  let timer;
+  try {
+    return await Promise.race([promise, new Promise((_, reject) => {
+      timer = setTimeout(() => reject(new Error("CacheStorage delayed the foreground response")), 500);
+    })]);
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+for (const path of ["/api/asset-manifest", "/api/scene/crystal?map=0&x=296&y=620&assetRelease=test"]) {
+  test(`${path} returns headers and JSON while the independent cache write remains blocked`, async () => {
+    let body;
+    const stream = new ReadableStream({ start(controller) { body = controller; } });
+    let releaseWrite;
+    const writeBlocked = new Promise((resolve) => { releaseWrite = resolve; });
+    let cachedBody;
+    const request = dispatchSceneMetadataRequest(path,
+      async () => new Response(stream, { headers: { "Content-Type": "application/json", "X-Test-Origin": "true" } }),
+      {
+        async match() { return undefined; },
+        async put(_, cached) {
+          cachedBody = await cached.json();
+          await writeBlocked;
+        },
+      });
+    assert.equal(request.completions.length, 1);
+    try {
+      const response = await whileCacheIsBlocked(request.response);
+      assert.equal(response.headers.get("x-test-origin"), "true");
+      const json = response.json();
+      body.enqueue(new TextEncoder().encode('{"tile":296}'));
+      body.close();
+      assert.deepEqual(await whileCacheIsBlocked(json), { tile: 296 });
+    } finally {
+      releaseWrite();
+    }
+    await Promise.all(request.completions);
+    assert.deepEqual(cachedBody, { tile: 296 });
+  });
+}
+
+test("a warm versioned Crystal request returns cached data and refreshes it in the background", async () => {
+  let finishRefresh;
+  const network = new Promise((resolve) => { finishRefresh = resolve; });
+  let refreshed;
+  const request = dispatchSceneMetadataRequest("/api/scene/crystal?map=0&assetRelease=test",
+    () => network, {
+      async match() { return Response.json({ region: "cached" }); },
+      async put(_, response) { refreshed = await response.json(); },
+    });
+  try {
+    assert.deepEqual(await (await whileCacheIsBlocked(request.response)).json(), { region: "cached" });
+    assert.equal(refreshed, undefined);
+  } finally {
+    finishRefresh(Response.json({ region: "network" }));
+  }
+  await Promise.all(request.completions);
+  assert.deepEqual(refreshed, { region: "network" });
+});
+
+test("asset-manifest stays network-first and uses the same key for offline fallback", async () => {
+  let lookups = 0;
+  const store = {
+    async match(request) {
+      assert.equal(new URL(request.url).pathname, "/api/asset-manifest");
+      lookups += 1;
+      return Response.json({ version: "cached" });
+    },
+    async put() {},
+  };
+  const fresh = dispatchSceneMetadataRequest("/api/asset-manifest",
+    async () => Response.json({ version: "fresh" }), store);
+  assert.deepEqual(await (await fresh.response).json(), { version: "fresh" });
+  await Promise.all(fresh.completions);
+  assert.equal(lookups, 0);
+  const denied = dispatchSceneMetadataRequest("/api/asset-manifest",
+    async () => new Response(null, { status: 403 }), store);
+  assert.equal((await denied.response).status, 403);
+  await Promise.all(denied.completions);
+  assert.equal(lookups, 0);
+  const offline = dispatchSceneMetadataRequest("/api/asset-manifest",
+    async () => { throw new TypeError("offline"); }, store);
+  assert.deepEqual(await (await offline.response).json(), { version: "cached" });
+  await Promise.all(offline.completions);
+  assert.equal(lookups, 1);
+});
+
+test("Crystal preserves Retry-After and the typed resource-missing 424 without cache writes", async () => {
+  let fetchCount = 0;
+  let cacheWrites = 0;
+  const store = {
+    async match() { return undefined; },
+    async put() { cacheWrites += 1; },
+  };
+  for (const status of [424, 503]) {
+    const request = dispatchSceneMetadataRequest("/api/scene/crystal?map=0&assetRelease=test", async () => {
+      fetchCount += 1;
+      return Response.json({ status }, { status, headers: status === 503 ? { "Retry-After": "15" } : {} });
+    }, store);
+    const response = await request.response;
+    assert.equal(response.status, status);
+    assert.deepEqual(await response.json(), { status });
+    await Promise.all(request.completions);
+  }
+  assert.equal(fetchCount, 2);
+  assert.equal(cacheWrites, 0);
 });

@@ -34,6 +34,12 @@ const cacheWritesSinceTrim = new Map();
 const cacheTrimInflight = new Map();
 const TRANSIENT_FETCH_RETRY_DELAYS_MS = [120, 350];
 const TRANSIENT_FETCH_STATUSES = new Set([408, 425, 429, 500, 502, 503, 504]);
+// A new page attempt must not inherit a coalesced network request whose
+// headers have stopped arriving. The page owns the separate JSON body deadline.
+const SCENE_HEADERS_TIMEOUT_MS = 7_000;
+// Chrome can retain the worker's cache tee after the page cancels its own
+// branch. Give the upstream stream its own lifetime as well.
+const SCENE_METADATA_RESPONSE_TIMEOUT_MS = 10_000;
 
 self.addEventListener("install", (event) => {
   event.waitUntil(self.skipWaiting());
@@ -152,18 +158,22 @@ self.addEventListener("fetch", (event) => {
   }
 
   if (url.pathname === "/api/scene/crystal") {
-    event.respondWith(
-      staleWhileRevalidate(
-        request,
-        cacheName("scene"),
-        runtimeConfig.sceneBlueprintMaxEntries,
-        event,
-      ),
+    respondWithSceneMetadata(
+      event,
+      cacheName("scene"),
+      runtimeConfig.sceneBlueprintMaxEntries,
+      coalescedSceneBlueprintFetch,
+      true,
     );
     return;
   }
 
-  if (url.pathname === "/api/original-ui-meta" || url.pathname === "/api/asset-manifest") {
+  if (url.pathname === "/api/asset-manifest") {
+    respondWithSceneMetadata(event, cacheName("api"), runtimeConfig.apiMetadataMaxEntries, fetch, false);
+    return;
+  }
+
+  if (url.pathname === "/api/original-ui-meta") {
     event.respondWith(
       networkFirst(request, cacheName("api"), runtimeConfig.apiMetadataMaxEntries),
     );
@@ -291,9 +301,16 @@ async function coalescedStaticAssetFetch(request) {
 }
 
 async function coalescedSceneBlueprintFetch(request) {
-  return coalescedResponse(sceneBlueprintInflightFetches, request.url, () =>
-    fetchWithTransientRetries(request),
-  );
+  return coalescedResponse(sceneBlueprintInflightFetches, request.url, async () => {
+    const deadline = new AbortController();
+    const signal = AbortSignal.any([request.signal, deadline.signal]);
+    const timer = setTimeout(() => deadline.abort(), SCENE_HEADERS_TIMEOUT_MS);
+    try {
+      return await fetchWithTransientRetries(new Request(request, { signal }), signal);
+    } finally {
+      clearTimeout(timer);
+    }
+  });
 }
 
 async function coalescedResponse(inflightMap, key, fetcher) {
@@ -314,17 +331,20 @@ async function coalescedResponse(inflightMap, key, fetcher) {
   }
 }
 
-async function fetchWithTransientRetries(request) {
+async function fetchWithTransientRetries(request, sceneSignal) {
   let lastResponse = null;
   for (let attempt = 0; attempt <= TRANSIENT_FETCH_RETRY_DELAYS_MS.length; attempt += 1) {
     try {
       const response = await fetch(cloneRequestForRetry(request));
-      if (!isTransientFetchStatus(response.status)) return response;
+      if (!isTransientFetchStatus(response.status) || (sceneSignal && response.headers.has("retry-after"))) {
+        return response;
+      }
       lastResponse = response;
     } catch {
       lastResponse = null;
     }
 
+    if (sceneSignal?.aborted) return null;
     if (attempt < TRANSIENT_FETCH_RETRY_DELAYS_MS.length) {
       await delay(TRANSIENT_FETCH_RETRY_DELAYS_MS[attempt]);
     }
@@ -411,32 +431,38 @@ function isRemoteBackedStaticGameAsset(url) {
   );
 }
 
-async function staleWhileRevalidate(request, name, maxEntries, event) {
-  let cache = null;
-  let cached = null;
-  try {
-    cache = await caches.open(name);
-    cached = await cache.match(request);
-  } catch {
-    // Scene cache is an optimization. Network retry is still the source of truth.
+function respondWithSceneMetadata(event, name, maxEntries, fetchNetwork, preferCached) {
+  const request = event.request;
+  const cache = caches.open(name).catch(() => null);
+  const readCache = () => cache.then((store) => store?.match(request)).catch(() => null);
+  const networkRequest = new Request(request, {
+    signal: AbortSignal.any([request.signal, AbortSignal.timeout(SCENE_METADATA_RESPONSE_TIMEOUT_MS)]),
+  });
+  const network = fetchNetwork(networkRequest);
+
+  // Register synchronously while the FetchEvent is active, and tee the body
+  // before the foreground response can be consumed by the browser.
+  event.waitUntil(network.then((response) => {
+    if (!response?.ok) return;
+    const copy = response.clone();
+    return cache.then((store) =>
+      store && putCacheEntry(store, request, copy, maxEntries, name, networkRequest.signal));
+  }).catch(() => null));
+
+  if (!preferCached) {
+    event.respondWith(network.catch(async (error) => {
+      const cached = await readCache();
+      if (cached) return cached;
+      throw error;
+    }));
+    return;
   }
 
-  const refresh = coalescedSceneBlueprintFetch(request)
-    .then(async (response) => {
-      if (cache) {
-        await putCacheEntry(cache, request, response, maxEntries, name);
-      }
-      return response;
-    })
-    .catch(() => null);
+  const refresh = network.catch(() => null);
+  event.respondWith(readCache().then(async (cached) => cached || await refresh || unavailableSceneBlueprint()));
+}
 
-  if (cached) {
-    event.waitUntil(refresh.catch(() => null));
-    return cached;
-  }
-
-  const response = await refresh;
-  if (response) return response;
+function unavailableSceneBlueprint() {
 
   return new Response(
     JSON.stringify({
@@ -466,12 +492,13 @@ async function networkFirst(request, name, maxEntries) {
   }
 }
 
-async function putCacheEntry(cache, request, response, maxEntries, cacheIdentity = "") {
-  if (!response || !response.ok) return;
+async function putCacheEntry(cache, request, response, maxEntries, cacheIdentity = "", responseSignal) {
+  if (!response || !response.ok || responseSignal?.aborted) return;
   try {
     await cache.put(request, response.clone());
     await maybeTrimCache(cache, maxEntries, cacheIdentity);
   } catch (error) {
+    if (responseSignal && (responseSignal.aborted || error?.name !== "QuotaExceededError")) return;
     await trimCache(cache, Math.max(32, Math.floor(maxEntries / 2)));
     try {
       await cache.put(request, response.clone());

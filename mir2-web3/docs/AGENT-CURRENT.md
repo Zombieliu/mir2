@@ -16,6 +16,8 @@ working tree, services, release packages, source snapshots or parity percentages
 
 ## Last recorded decisions and open work
 
+2026-11-10 Web 比奇资源清单与地图分别通过卡住正文、自动重试和连续失败后手动恢复的本机生产版测试。真实 File 角色两轮正常注销与坐标读回通过。公网仍为 `a23cc382`，默认网络冷扫码进城和实体手机继续验收。 [恢复证据](evidence/numeron-web-release-20261108/first-scene-recovery-local-20261110.json)
+
 2026-11-10 公网 `83eadf4f` 切到第一方钱包中继，出码读限时 20 秒及一次瞬时失败重试。直连浏览器用官方手机尺寸钱包完成签名、兑换、比奇渲染及正常退出。同机默认 Chrome 等待资源后出码及轮询通过，独立冷启动仍复现超时。继续冷启动和实体手机验收。 [扫码发布与回执](evidence/numeron-web-release-20261108/qr-first-party-relay-20261110.json)
 
 2026-11-10 共用 Gateway 修复冷登录首竿的个人更新调度。实际 Web 首进度 9.662→0.698 秒，Windows 正式传输 9.254→0.684 秒。WebGPU 鱼具到背包双向拖放各一条成功回包，两次重登保留原 15 个鱼饵。抛竿、等待、收线已在 Web 两条生产渲染路径和 Windows 无窗口 GPU 通过。Windows 优化构建已完成，公网 R2 缺两款鱼竿、钓鱼头发和水效样本。继续水效、音点、自动重抛、桌面和发行。 [首竿与读档](evidence/r16-web-fishing-loop-20261110/cold-first-cast-timing.json) · [拖放](evidence/r16-web-fishing-loop-20261110/tackle-drag.json) · [画面](evidence/r16-web-fishing-loop-20261110/actor-presentation.json)

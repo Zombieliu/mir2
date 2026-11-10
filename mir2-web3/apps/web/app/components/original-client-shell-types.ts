@@ -214,6 +214,7 @@ export type OriginalClientShellProps = BagBeltCallbacks & WorldFishingCallbacks 
   viewportEntities: Array<DisplayEntity & { dx: number; dy: number }>;
   viewportTiles: Array<{ x: number; y: number; dx: number; dy: number }>;
   sceneInteractionReady: boolean;
+  onRetrySceneLoad?: () => void;
   bevyEntityRendererReady: boolean;
   bevyRuntimeBackend: "webgpu" | "webgl2" | null;
   webGl2SharedCanvasPrototype?: boolean;
