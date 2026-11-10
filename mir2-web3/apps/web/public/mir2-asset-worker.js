@@ -35,11 +35,12 @@ const cacheTrimInflight = new Map();
 const TRANSIENT_FETCH_RETRY_DELAYS_MS = [120, 350];
 const TRANSIENT_FETCH_STATUSES = new Set([408, 425, 429, 500, 502, 503, 504]);
 // A new page attempt must not inherit a coalesced network request whose
-// headers have stopped arriving. The page owns the separate JSON body deadline.
+// headers have stopped arriving. The page owns the JSON body idle deadline.
 const SCENE_HEADERS_TIMEOUT_MS = 7_000;
-const SCENE_BLUEPRINT_RESPONSE_TIMEOUT_MS = SCENE_HEADERS_TIMEOUT_MS + 8_000;
 // Chrome can retain the worker's cache tee after the page cancels its own
-// branch. Give the upstream stream its own lifetime as well.
+// branch. Keep the upstream hard limit aligned with the page's 24s body limit
+// so a progressing foreground response can finish through the worker.
+const SCENE_BLUEPRINT_RESPONSE_TIMEOUT_MS = SCENE_HEADERS_TIMEOUT_MS + 24_000;
 const SCENE_METADATA_RESPONSE_TIMEOUT_MS = 10_000;
 
 self.addEventListener("install", (event) => {

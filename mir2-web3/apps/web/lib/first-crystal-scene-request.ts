@@ -14,7 +14,8 @@ export type FirstCrystalSceneJsonReader = (
   fetcher: typeof fetch,
 ) => Promise<SceneJsonResult<unknown>>;
 
-const READ_PHASE_TIMEOUT_MS = 8_000;
+const READ_IDLE_TIMEOUT_MS = 8_000;
+const READ_BODY_LIMIT_MS = 24_000;
 const RETRY_DELAY_MS = 200;
 const TRANSIENT_STATUS = new Set([408, 425, 429, 500, 502, 503, 504]);
 
@@ -29,7 +30,12 @@ async function readAttempt<T>(
   const abortForTimeout = () => {
     deadline.abort(new DOMException("Scene response deadline elapsed", "TimeoutError"));
   };
-  let timer = setTimeout(abortForTimeout, READ_PHASE_TIMEOUT_MS);
+  let idleTimer = setTimeout(abortForTimeout, READ_IDLE_TIMEOUT_MS);
+  let bodyTimer: ReturnType<typeof setTimeout> | undefined;
+  const restartIdleTimer = () => {
+    clearTimeout(idleTimer);
+    idleTimer = setTimeout(abortForTimeout, READ_IDLE_TIMEOUT_MS);
+  };
 
   let onAbort: (() => void) | undefined;
   const aborted = new Promise<never>((_, reject) => {
@@ -45,10 +51,17 @@ async function readAttempt<T>(
       void response.body?.cancel().catch(() => {});
       return { response, body: null };
     }
-    // A slow header must leave enough time to read the map or a typed 424 body.
-    clearTimeout(timer);
-    timer = setTimeout(abortForTimeout, READ_PHASE_TIMEOUT_MS);
-    const body = (await response.json()) as T;
+    // Keep reading while real bytes arrive. A trickle must still finish within
+    // the body limit, and JSON is published only after the stream has ended.
+    restartIdleTimer();
+    bodyTimer = setTimeout(abortForTimeout, READ_BODY_LIMIT_MS);
+    const stream = response.body?.pipeThrough(new TransformStream<Uint8Array, Uint8Array>({
+      transform(chunk, output) {
+        if (chunk.byteLength > 0 && !signal.aborted) restartIdleTimer();
+        output.enqueue(chunk);
+      },
+    }), { signal });
+    const body = (await (stream ? new Response(stream) : response).json()) as T;
     signal.throwIfAborted();
     return { response, body };
   }
@@ -58,7 +71,8 @@ async function readAttempt<T>(
     signal.throwIfAborted();
     return result;
   } finally {
-    clearTimeout(timer);
+    clearTimeout(idleTimer);
+    clearTimeout(bodyTimer);
     if (onAbort) signal.removeEventListener("abort", onAbort);
   }
 }
@@ -85,7 +99,7 @@ function isRetryableFailure(error: unknown): boolean {
     (error instanceof DOMException && (error.name === "TimeoutError" || error.name === "AbortError"));
 }
 
-/** The response and its JSON body must each finish within their own deadline. */
+/** Bound the wait for headers, a stalled body, and the entire body separately. */
 export async function fetchFirstCrystalSceneJson<T = unknown>(
   url: string,
   options: SceneReadOptions,

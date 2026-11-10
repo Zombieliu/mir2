@@ -28,6 +28,21 @@ function deferred() {
   return { promise, resolve };
 }
 
+function streamedScene() {
+  let body;
+  const cancellations = [];
+  const stream = new ReadableStream({
+    start(controller) { body = controller; },
+    cancel(reason) { cancellations.push(reason); },
+  });
+  return {
+    response: new Response(stream, { headers: { "x-mir2-source": "crystal" } }),
+    write(text) { body.enqueue(new TextEncoder().encode(text)); },
+    close() { body.close(); },
+    cancellations,
+  };
+}
+
 async function tick(t, ms) {
   t.mock.timers.tick(ms);
   for (let turns = 0; turns < 20; turns += 1) await Promise.resolve();
@@ -89,6 +104,83 @@ test("slow headers leave a separate deadline for valid scene JSON", async (t) =>
   assert.deepEqual((await result).body, { map: "0", ready: true });
   await tick(t, 60_000);
   assert.equal(requests.length, 1);
+});
+
+test("a progressing scene body can take more than eight seconds after slow headers", async (t) => {
+  t.mock.timers.enable({ apis: ["setTimeout"] });
+  const headers = deferred();
+  const scene = streamedScene();
+  const calls = [];
+  const result = fetchFirstCrystalSceneJson(crystalUrl, options, (_, init) => {
+    calls.push(init);
+    return headers.promise;
+  });
+  await tick(t, 4_500);
+  headers.resolve(scene.response);
+  await tick(t, 0);
+  for (const part of ['{"map":', '"0",', '"name":"比奇",', '"ready":true}']) {
+    await tick(t, 3_000);
+    scene.write(part);
+    await tick(t, 0);
+    assert.equal(calls[0].signal.aborted, false);
+  }
+  await tick(t, 1_000);
+  scene.close();
+  const { response, body } = await result;
+  assert.equal(response, scene.response);
+  assert.deepEqual(body, { map: "0", name: "比奇", ready: true });
+  await tick(t, 60_000);
+  assert.equal(calls.length, 1);
+  assert.equal(calls[0].signal.aborted, false);
+});
+
+test("a stalled body retries eight seconds after its last bytes and ignores empty chunks", async (t) => {
+  t.mock.timers.enable({ apis: ["setTimeout"] });
+  const scene = streamedScene();
+  const calls = [];
+  const result = fetchFirstCrystalSceneJson(crystalUrl, options, async (url, init) => {
+    calls.push({ url, ...init });
+    return calls.length === 1 ? scene.response : ready();
+  });
+  await tick(t, 4_000);
+  scene.write('{"map":');
+  await tick(t, 0);
+  await tick(t, 7_999);
+  scene.write("");
+  await tick(t, 0);
+  assert.equal(calls[0].signal.aborted, false);
+  await tick(t, 1);
+  assert.equal(calls[0].signal.reason.name, "TimeoutError");
+  await tick(t, 200);
+  assert.equal(calls.length, 2);
+  assert.equal(calls[1].url, crystalUrl);
+  assert.equal(calls[1].cache, "reload");
+  assert.deepEqual((await result).body, { map: "0", ready: true });
+  assert.deepEqual(scene.cancellations, [calls[0].signal.reason]);
+});
+
+test("continuous body progress cannot exceed the absolute scene body limit", async (t) => {
+  t.mock.timers.enable({ apis: ["setTimeout"] });
+  const scene = streamedScene();
+  const calls = [];
+  const result = fetchFirstCrystalSceneJson(crystalUrl, options, async (_, init) => {
+    calls.push(init);
+    return calls.length === 1 ? scene.response : ready();
+  });
+  await tick(t, 0);
+  for (const part of ['{"map":', '"0",', '"ready":']) {
+    await tick(t, 7_500);
+    scene.write(part);
+    await tick(t, 0);
+  }
+  await tick(t, 1_499);
+  assert.equal(calls[0].signal.aborted, false);
+  await tick(t, 1);
+  assert.equal(calls[0].signal.reason.name, "TimeoutError");
+  await tick(t, 200);
+  assert.deepEqual((await result).body, { map: "0", ready: true });
+  assert.equal(calls.length, 2);
+  assert.deepEqual(scene.cancellations, [calls[0].signal.reason]);
 });
 
 test("a body that stalls after slow headers still retries the same URL", async (t) => {
