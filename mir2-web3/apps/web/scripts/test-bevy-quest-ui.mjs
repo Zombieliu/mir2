@@ -20,7 +20,9 @@ function load(relative, dependencies = {}) {
         return load(`../lib/${name.slice(2)}.ts`);
       if (name === "./bevy-bag-model") return load("../lib/bevy-bag-model.ts");
       if (name === "./r16-native-localization") return nativeLocalization;
+      if (name === "./first-crystal-scene-request") return load("../lib/first-crystal-scene-request.ts");
       if (["./generated/r16-native-localization-startup.json", "./generated/r16-native-localization-gameplay.json",
+        "./generated/r16-native-localization-delivery.json",
         "./generated/r16-native-localization-gameplay-npc.json"].includes(name))
         return { default: JSON.parse(readFileSync(new URL("../lib/" + name.slice(2), import.meta.url), "utf8")) };
       if (name === "./world-model/item-identity") return load("../lib/world-model/item-identity.ts");

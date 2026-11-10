@@ -75,6 +75,31 @@ test("single-pass placeholders and unknown-key fallbacks preserve opaque player 
   assert.notEqual(content.localizeCrystalItemName("Candle", t), "Candle");
 });
 
+test("the Web newcomer journal uses the Windows title and instruction in every display language", async () => {
+  await native.loadR16GameplayLocalization();
+  const { localizeQuestEntry } = load("lib/quest-localization.ts");
+  const catalog = load("lib/generated/r16-native-localization.json");
+  const rows = new Map(catalog.entries.map(row => [row.key, row.values]));
+  const ids = catalog.entries.filter(row => /^quest\.(?:21100\d{2}|21200\d{2})\.title$/.test(row.key))
+    .map(row => Number(row.key.split(".")[1]));
+  assert.equal(ids.length, 26);
+  for (const questId of ids) {
+    const quest = { questId, title: "Wire title", summary: "Wire summary", objective: "Wire objective",
+      progressLabel: "1/2", stage: "available", current: 1, required: 2, rewardPreview: "50 gold",
+      descriptionLines: ["Wire line one", "Wire line two"] };
+    for (const [index, language] of localizer.SUPPORTED_LANGUAGES.entries()) {
+      const localized = localizeQuestEntry(quest, localizer.buildTranslator(language));
+      assert.equal(localized.title, rows.get("quest." + questId + ".title")[index]);
+      assert.deepEqual(localized.descriptionLines, [rows.get("quest." + questId + ".description")[index]]);
+      assert.equal(localized.objective, quest.objective);
+      assert.equal(localized.current, quest.current);
+      assert.equal(localized.required, quest.required);
+      assert.equal(localized.rewardPreview, quest.rewardPreview);
+    }
+    assert.deepEqual(quest.descriptionLines, ["Wire line one", "Wire line two"]);
+  }
+});
+
 test("real nameplate display boundary localizes only NPCs and monsters", () => {
   const filename = path.join(root, "app/components/original-client-scene-visual-layers.tsx");
   const source = ts.createSourceFile(filename, readFileSync(filename, "utf8"), ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);

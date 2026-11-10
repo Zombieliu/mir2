@@ -145,9 +145,13 @@ function localizeNewcomerV2QuestEntry<T extends LocalizableQuestEntry>(
   t: QuestTranslateFn,
 ): T {
   const targetCopyApplies = quest.stage === "inProgress" || quest.stage === "readyToTurnIn";
+  const prefix = `quest.${quest.questId}`;
+  const originalDescription = quest.descriptionLines?.join("\n") ?? "";
+  const description = t(`${prefix}.description`, [], originalDescription);
   const localized = {
     ...quest,
-    title: localizeNewcomerV2Text(copy.title, t),
+    title: t(`${prefix}.title`, [], localizeNewcomerV2Text(copy.title, t)),
+    ...(description !== originalDescription ? { descriptionLines: [description] } : {}),
     ...(targetCopyApplies ? { objective: localizeNewcomerV2Text(copy.objective, t) } : {}),
   } as T;
 

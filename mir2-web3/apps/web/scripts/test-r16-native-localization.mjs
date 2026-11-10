@@ -12,18 +12,30 @@ const generatedBytes = read("apps/web/lib/generated/r16-native-localization.json
 const startupPath = "./generated/r16-native-localization-startup.json";
 const gameplayPath = "./generated/r16-native-localization-gameplay.json";
 const npcPath = "./generated/r16-native-localization-gameplay-npc.json";
+const deliveryPath = "./generated/r16-native-localization-delivery.json";
+const delivery = JSON.parse(read("apps/web/lib/" + deliveryPath.slice(2)));
+const pinnedGameplay = Buffer.from(read("apps/web/public" + delivery.path));
 const { startup, gameplay } = partitionR16NativeLocalization(generated);
 const { core, npc } = partitionR16GameplayLocalization(gameplay);
 const order = ["zh-CN", "zh-TW", "en", "pt-BR", "ru", "hi", "id", "vi", "th", "ar"];
-function helper(data = generated, readGameplay = () => core, readNpc = () => npc) {
+function compile(source) {
+  return ts.transpileModule(source, {
+    compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.CommonJS, esModuleInterop: true },
+  }).outputText;
+}
+const request = {};
+new Function("exports", compile(read("apps/web/lib/first-crystal-scene-request.ts")))(request);
+
+function helper(data = generated, readGameplay = () => core, readNpc = () => npc, fetcher) {
   const exports = {}, source = read("apps/web/lib/r16-native-localization.ts");
-  const code = ts.transpileModule(source, { compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.CommonJS, esModuleInterop: true } }).outputText;
-  new Function("exports", "require", code)(exports, name => {
+  new Function("exports", "require", "window", "fetch", compile(source))(exports, name => {
+    if (name === "./first-crystal-scene-request") return request;
     if (name === startupPath) return data;
+    if (name === deliveryPath) return delivery;
     if (name === gameplayPath) return readGameplay();
     assert.equal(name, npcPath);
     return readNpc();
-  });
+  }, fetcher ? {} : undefined, fetcher);
   return exports;
 }
 function changed(relative, mutate) {
@@ -110,6 +122,54 @@ test("the startup, core and NPC catalogs preserve every Native row and original 
     assert.deepEqual(joined.get(row.key), row);
     for (const [index, language] of order.entries()) assert.equal(native.nativeText(language, row.key), row.values[index]);
   }
+});
+
+test("secure browsers fetch and verify the exact core without loading the webpack or NPC chunk", async () => {
+  assert.equal(pinnedGameplay.toString("utf8"), encodeR16NativeLocalization(core));
+  assert.equal(pinnedGameplay.length, delivery.bytes);
+  assert.equal(createHash("sha256").update(pinnedGameplay).digest("hex"), delivery.sha256);
+  assert.equal(delivery.path, "/bootstrap/r16-locales/" + delivery.sha256 + ".json");
+
+  const requests = [];
+  const unexpectedChunk = () => assert.fail("unexpected webpack or NPC chunk");
+  const native = helper(startup, unexpectedChunk, unexpectedChunk, async (url, init) => {
+    requests.push({ url, cache: init.cache, credentials: init.credentials, redirect: init.redirect });
+    return requests.length === 1 ? new Response(null, { status: 503 }) : new Response(pinnedGameplay);
+  });
+  assert.deepEqual(requests, []);
+  assert.equal(native.hasR16GameplayLocalization(), false);
+  const pending = native.loadR16GameplayLocalization();
+  assert.equal(native.loadR16GameplayLocalization(), pending);
+  await pending;
+  assert.deepEqual(requests, ["force-cache", "reload"].map(cache => ({
+    url: delivery.path, cache, credentials: "omit", redirect: "error",
+  })));
+  assert.equal(native.hasR16GameplayLocalization(), true);
+  assert.equal(native.hasR16NpcLocalization(), false);
+  for (const row of core.entries) {
+    for (const [index, language] of order.entries()) assert.equal(native.nativeText(language, row.key), row.values[index]);
+  }
+});
+
+test("the secure browser rejects bad size or digest and recovers after manual reload", async () => {
+  const corrupt = Buffer.from(pinnedGameplay);
+  corrupt[120] ^= 1;
+  const bodies = [pinnedGameplay.subarray(1), corrupt, Buffer.concat([pinnedGameplay, Buffer.from(" ")]), pinnedGameplay];
+  const cacheModes = [];
+  const native = helper(startup, () => assert.fail("unexpected webpack fallback"), () => npc, async (url, init) => {
+    assert.equal(url, delivery.path);
+    cacheModes.push(init.cache);
+    return new Response(bodies.shift());
+  });
+  const key = core.entries[0].key;
+  await assert.rejects(native.loadR16GameplayLocalization(), /incomplete/);
+  await assert.rejects(native.loadR16GameplayLocalization("reload"), /digest mismatch/);
+  await assert.rejects(native.loadR16GameplayLocalization("reload"), /exceeds its byte limit/);
+  assert.equal(native.hasR16GameplayLocalization(), false);
+  assert.equal(native.nativeText("zh-TW", key), key);
+  await native.loadR16GameplayLocalization("reload");
+  assert.equal(native.nativeText("zh-TW", key), core.entries[0].values[1]);
+  assert.deepEqual(cacheModes, ["force-cache", "reload", "reload", "reload"]);
 });
 
 test("the NPC loader waits for core and rejects a mismatched or malformed pack without installing rows", async () => {

@@ -10,6 +10,7 @@ const OUTPUT = resolve(ROOT, "apps/web/lib/generated/r16-native-localization.jso
 const STARTUP_OUTPUT = resolve(ROOT, "apps/web/lib/generated/r16-native-localization-startup.json");
 const GAMEPLAY_OUTPUT = resolve(ROOT, "apps/web/lib/generated/r16-native-localization-gameplay.json");
 const GAMEPLAY_NPC_OUTPUT = resolve(ROOT, "apps/web/lib/generated/r16-native-localization-gameplay-npc.json");
+const GAMEPLAY_DELIVERY_OUTPUT = resolve(ROOT, "apps/web/lib/generated/r16-native-localization-delivery.json");
 // The fishing pane uses this authored NPC phrase as its accessible name.
 const FISHING_EQUIPMENT_LABEL = "npc.prose.e2eed1b4d37624b7";
 const BASE = ["common", "content", "shell", "quest", "game", "help", "npc-menus", "npc-prose"];
@@ -216,13 +217,21 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
   const result = buildR16NativeLocalization(), bytes = encodeR16NativeLocalization(result);
   const { startup, gameplay } = partitionR16NativeLocalization(result);
   const { core, npc } = partitionR16GameplayLocalization(gameplay);
+  const gameplayBytes = encodeR16NativeLocalization(core);
+  const sha256 = hash(gameplayBytes);
+  const path = "/bootstrap/r16-locales/" + sha256 + ".json";
+  const delivery = { path, bytes: Buffer.byteLength(gameplayBytes), sha256 };
   const outputs = [[OUTPUT, bytes], [STARTUP_OUTPUT, encodeR16NativeLocalization(startup)],
-    [GAMEPLAY_OUTPUT, encodeR16NativeLocalization(core)], [GAMEPLAY_NPC_OUTPUT, encodeR16NativeLocalization(npc)]];
+    [GAMEPLAY_OUTPUT, gameplayBytes], [GAMEPLAY_NPC_OUTPUT, encodeR16NativeLocalization(npc)],
+    [GAMEPLAY_DELIVERY_OUTPUT, encodeR16NativeLocalization(delivery)],
+    [resolve(ROOT, "apps/web/public" + path), gameplayBytes]];
   const checked = process.argv.includes("--check");
-  if (!checked) mkdirSync(dirname(OUTPUT), { recursive: true });
   for (const [path, encoded] of outputs) {
     if (checked) assert(readFileSync(path, "utf8") === encoded, `generated browser catalog is stale ${path}`);
-    else writeFileSync(path, encoded, "utf8");
+    else {
+      mkdirSync(dirname(path), { recursive: true });
+      writeFileSync(path, encoded, "utf8");
+    }
   }
   console.log(JSON.stringify({ checked, languages: result.languages.map(language => language.code),
     keys: result.entries.length, sourcePins: Object.keys(result.sourcePins).length, slotExceptions: result.slotExceptions.length,

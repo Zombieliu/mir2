@@ -1,4 +1,6 @@
 import startup from "./generated/r16-native-localization-startup.json";
+import gameplayAsset from "./generated/r16-native-localization-delivery.json";
+import { fetchBootstrapResponse } from "./first-crystal-scene-request";
 
 /** Presentation codes only. Do not forward this list to legacy protocol/WASM enums. */
 export const R16_NATIVE_LANGUAGES = ["zh-CN", "zh-TW", "en", "pt-BR", "ru", "hi", "id", "vi", "th", "ar"] as const;
@@ -23,12 +25,33 @@ export function hasR16GameplayLocalization(): boolean {
   return gameplayCatalog !== null;
 }
 
+async function readGameplayCatalog(cache: RequestCache): Promise<GameplayCatalog> {
+  if (typeof window === "undefined" || !globalThis.crypto?.subtle) {
+    // An unsecured LAN development host cannot use SubtleCrypto.
+    const { default: core } = await import(/* webpackChunkName: "r16-gameplay-locales" */ "./generated/r16-native-localization-gameplay.json");
+    return core as GameplayCatalog;
+  }
+  const { path, bytes, sha256 } = gameplayAsset;
+  const { response, body } = await fetchBootstrapResponse(
+    path,
+    { cache, bodyByteLimit: bytes },
+    response => response.arrayBuffer(),
+    (url, init) => fetch(url, { ...init, credentials: "omit", redirect: "error" }),
+  );
+  if (!response.ok || !body || body.byteLength !== bytes) {
+    throw new Error("R16 gameplay localization response is incomplete.");
+  }
+  const hash = new Uint8Array(await crypto.subtle.digest("SHA-256", body));
+  const actual = Array.from(hash, byte => byte.toString(16).padStart(2, "0")).join("");
+  if (actual !== sha256) throw new Error("R16 gameplay localization digest mismatch.");
+  return JSON.parse(new TextDecoder("utf-8", { fatal: true }).decode(body)) as GameplayCatalog;
+}
+
 /** Called after authentication. The first playable frame needs only the core catalog. */
-export function loadR16GameplayLocalization(): Promise<void> {
+export function loadR16GameplayLocalization(cache: RequestCache = "force-cache"): Promise<void> {
   if (gameplayCatalog) return Promise.resolve();
-  gameplayRequest ??= import(/* webpackChunkName: "r16-gameplay-locales" */ "./generated/r16-native-localization-gameplay.json")
-    .then(({ default: gameplay }) => {
-      const core = gameplay as GameplayCatalog;
+  gameplayRequest ??= readGameplayCatalog(cache)
+    .then(core => {
       for (const entry of core.entries) entries.set(entry.key, entry);
       indexes.clear();
       gameplayCatalog = core;

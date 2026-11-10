@@ -247,6 +247,10 @@ const nextConfig: NextConfig = {
           clearAltSvcHeader,
         ],
       },
+      {
+        source: "/bootstrap/r16-locales/:path*",
+        headers: [{ key: "Cache-Control", value: immutableVersionedRuntimeCache }],
+      },
       // Missing game assets may fall back to /api/r2-proxy. Leave Cache-Control
       // to the response so proxy failures keep no-store and successes immutable;
       // a path-wide header here overrides even a rewritten handler's error policy.

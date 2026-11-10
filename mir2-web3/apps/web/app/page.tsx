@@ -3609,7 +3609,7 @@ export default function HomePage() {
     let current = true;
     setGameplayLocaleStatus("pending");
     markMir2CacheMilestone("gameplayLocaleStart");
-    void loadR16GameplayLocalization().then(() => {
+    void loadR16GameplayLocalization(gameplayLocaleAttempt > 0 ? "reload" : "force-cache").then(() => {
       if (!current) return;
       setGameplayLocaleStatus("ready");
       markMir2CacheMilestone("gameplayLocaleReady");

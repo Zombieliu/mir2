@@ -48,6 +48,7 @@ if [ "${VERCEL:-}" = "1" ] && [ "${VERCEL_ENV:-}" = "production" ]; then
     node ./scripts/generate-r16-entry-scene.mjs --check
     node ./scripts/generate-r16-entry-floor.mjs --check
     node ./scripts/generate-r16-entry-visuals.mjs --check
+    node ./scripts/generate-r16-native-localization.mjs --check
   fi
   npm run generate:original-asset-manifest
   echo "[vercel-build] Using production R2 assets $MIR2_ASSET_VERSION."

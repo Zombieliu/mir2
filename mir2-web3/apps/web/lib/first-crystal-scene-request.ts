@@ -3,6 +3,8 @@ type SceneReadOptions = {
   signal?: AbortSignal;
 };
 
+type BootstrapReadOptions = SceneReadOptions & { bodyByteLimit?: number };
+
 type SceneJsonResult<T> = {
   response: Response;
   body: T | null;
@@ -21,14 +23,15 @@ const TRANSIENT_STATUS = new Set([408, 425, 429, 500, 502, 503, 504]);
 
 async function readAttempt<T>(
   url: string,
-  { cache, signal: owner }: SceneReadOptions,
+  { cache, signal: owner, bodyByteLimit }: BootstrapReadOptions,
   fetcher: typeof fetch,
+  readBody: (response: Response) => Promise<T>,
 ): Promise<SceneJsonResult<T>> {
   owner?.throwIfAborted();
   const deadline = new AbortController();
   const signal = owner ? AbortSignal.any([owner, deadline.signal]) : deadline.signal;
   const abortForTimeout = () => {
-    deadline.abort(new DOMException("Scene response deadline elapsed", "TimeoutError"));
+    deadline.abort(new DOMException("Bootstrap response deadline elapsed", "TimeoutError"));
   };
   let idleTimer = setTimeout(abortForTimeout, READ_IDLE_TIMEOUT_MS);
   let bodyTimer: ReturnType<typeof setTimeout> | undefined;
@@ -52,16 +55,22 @@ async function readAttempt<T>(
       return { response, body: null };
     }
     // Keep reading while real bytes arrive. A trickle must still finish within
-    // the body limit, and JSON is published only after the stream has ended.
+    // the body deadline. Publish the result only after reading the full stream.
     restartIdleTimer();
     bodyTimer = setTimeout(abortForTimeout, READ_BODY_LIMIT_MS);
+    let bodyBytes = 0;
     const stream = response.body?.pipeThrough(new TransformStream<Uint8Array, Uint8Array>({
       transform(chunk, output) {
+        bodyBytes += chunk.byteLength;
+        if (bodyByteLimit !== undefined && bodyBytes > bodyByteLimit) {
+          output.error(new RangeError("Bootstrap response exceeds its byte limit."));
+          return;
+        }
         if (chunk.byteLength > 0 && !signal.aborted) restartIdleTimer();
         output.enqueue(chunk);
       },
     }), { signal });
-    const body = (await (stream ? new Response(stream) : response).json()) as T;
+    const body = await readBody(stream ? new Response(stream) : response);
     signal.throwIfAborted();
     return { response, body };
   }
@@ -100,13 +109,14 @@ function isRetryableFailure(error: unknown): boolean {
 }
 
 /** Bound the wait for headers, a stalled body, and the entire body separately. */
-export async function fetchFirstCrystalSceneJson<T = unknown>(
+export async function fetchBootstrapResponse<T>(
   url: string,
-  options: SceneReadOptions,
+  options: BootstrapReadOptions,
+  readBody: (response: Response) => Promise<T>,
   fetcher: typeof fetch = fetch,
 ): Promise<SceneJsonResult<T>> {
   try {
-    const result = await readAttempt<T>(url, options, fetcher);
+    const result = await readAttempt(url, options, fetcher, readBody);
     if (!TRANSIENT_STATUS.has(result.response.status) || result.response.headers.has("retry-after")) {
       return result;
     }
@@ -118,5 +128,13 @@ export async function fetchFirstCrystalSceneJson<T = unknown>(
   await waitToRetry(options.signal);
   // Chromium can reattach a force-cache retry to an unfinished HTTP body.
   // Reload the same canonical URL so the retry gets an independent read.
-  return readAttempt<T>(url, { ...options, cache: "reload" }, fetcher);
+  return readAttempt(url, { ...options, cache: "reload" }, fetcher, readBody);
+}
+
+export function fetchFirstCrystalSceneJson<T = unknown>(
+  url: string,
+  options: SceneReadOptions,
+  fetcher: typeof fetch = fetch,
+): Promise<SceneJsonResult<T>> {
+  return fetchBootstrapResponse<T>(url, options, response => response.json(), fetcher);
 }
