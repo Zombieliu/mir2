@@ -2,7 +2,7 @@
 
 import { crystalEntityDepth } from "../../lib/crystal-world-depth";
 
-import { Fragment, memo, useEffect, useRef, useState, type CSSProperties, type MouseEvent } from "react";
+import { Fragment, memo, useEffect, useRef, useState, type CSSProperties } from "react";
 
 import type { ClientScreen } from "../../lib/original-ui";
 import { originalAssetPath } from "../../lib/asset-url";
@@ -868,12 +868,6 @@ function OriginalClientSceneVisualLayersInner({
           const hitBounds = entitySpriteHitBounds(sprite);
           const hitWidth = hitBounds.right - hitBounds.left;
           const hitHeight = hitBounds.bottom - hitBounds.top;
-          const handleEntityPointerActivate = (event: MouseEvent<HTMLElement>) => {
-            if (event.button !== 0) return;
-            event.preventDefault();
-            event.stopPropagation();
-            onActivateEntity(entity.objectId);
-          };
           return (
             <div
               key={`sprite-${entity.objectId}`}
@@ -886,7 +880,6 @@ function OriginalClientSceneVisualLayersInner({
               }}
               data-ui-interactive={isInteractiveEntity ? "true" : "false"}
               data-object-id={entity.objectId}
-              onMouseDown={isInteractiveEntity ? handleEntityPointerActivate : undefined}
             >
               {isInteractiveEntity ? (
                 <button
@@ -899,7 +892,6 @@ function OriginalClientSceneVisualLayersInner({
                     height: `${hitHeight}px`,
                   }}
                   aria-label={label}
-                  onMouseDown={handleEntityPointerActivate}
                   onClick={(event) => {
                     event.preventDefault();
                     event.stopPropagation();

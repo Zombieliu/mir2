@@ -50,13 +50,17 @@ class Input extends Element {}
 class TextArea extends Element {}
 class Select extends Element {}
 const { guildKeyboardOwnsEvent } = pureFunctions("../lib/r16-guild-keyboard.ts", ["guildKeyboardOwnsEvent"], { Element });
+const { pickCrystalActor } = pureFunctions("../lib/crystal-actor-hit.ts", ["pickCrystalActor"], {});
 const rect = (left = 150, top = 100, width = 100, height = 100) => ({ left, top, width, height });
 function fixture() {
   const pointCalls = [], pageCalls = [], listeners = new Map(), contexts = {}, flags = {}, queryCalls = [];
   const frame = new Element({ data: { viewportSceneWidth: "1024", viewportSceneHeight: "768" } });
   const canvas = new Element({ id: "shared-ui", parent: frame });
   const peer = new Element({ classes: ["entity-sprite-stack"], data: { objectId: "peer", uiInteractive: "true" }, parent: frame });
+  peer.querySelector = () => null;
   const hit = new Element({ classes: ["entity-sprite-hit"], parent: peer });
+  const body = { path: "/peer.png", x: 150, y: 100, width: 100, height: 100 };
+  const actor = { get objectId() { return peer.dataset.objectId; }, kind: "player", x: 5, y: 5 };
   let layers = [canvas, hit, peer, frame], functionsForKey = ["AddGroupMember"];
   const add = (target, name, fn, options) => { const key = target + name; assert(!listeners.has(key), `single ${key} listener`); listeners.set(key, { fn, options }); };
   const remove = (target, name, fn) => { const key = target + name; assert.equal(listeners.get(key)?.fn, fn); listeners.delete(key); };
@@ -73,7 +77,9 @@ function fixture() {
       elementFromPoint: (x, y) => { queryCalls.push([x, y, "top"]); return layers[0] ?? null; },
       elementsFromPoint: (x, y) => { queryCalls.push([x, y, "underlay"]); return layers; },
       addEventListener: (...a) => add("document:", ...a), removeEventListener: (...a) => remove("document:", ...a) },
-    screen: "game", world: { mapFileName: "0" }, player: { objectId: "self" }, bevyMapRuntimeGeneration: 7,
+    screen: "game", world: { mapFileName: "0", entities: [actor] }, player: { objectId: "self" }, bevyMapRuntimeGeneration: 7,
+    viewportActorBodies: { get: id => id === actor.objectId ? body : undefined },
+    pickCrystalActor, sampleCrystalBodyPixel: () => true, hideDomEntitySpritesForBevy: false,
     stageFrameRef: { current: frame }, stagePresentation: { virtualWidth: 1024, virtualHeight: 768 },
     sceneGroupHoverScopeRef: { current: null }, sceneGroupHoverPointRef: { current: null }, sceneGroupHoverCallbacksRef: { current: null },
     sceneHoveredObjectIdRef: { current: null }, setSceneHoveredObjectId: () => {},

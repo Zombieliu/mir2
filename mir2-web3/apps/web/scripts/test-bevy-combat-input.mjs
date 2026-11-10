@@ -1007,6 +1007,7 @@ function sharedCanvasWorldTargetFixture(){
  class DomElement{
    constructor(classes='',dataset={},parent=null,id=''){this.classes=new Set(classes.split(' ').filter(Boolean));this.dataset=dataset;this.parent=parent;this.id=id;this.tagName=id?'CANVAS':'DIV';this.classList={contains:x=>this.classes.has(x),[Symbol.iterator]:()=>this.classes.values()};}
    getAttribute(name){return name==='data-object-id'?this.dataset.objectId??null:null;}
+   querySelector(){return null;}
   closest(selector){for(let node=this;node;node=node.parent){if(selector.split(',').some(part=>[...part.matchAll(/\.([\w-]+)/g)].every(m=>node.classes.has(m[1]))&&[...part.matchAll(/\[data-([\w-]+)(?:=['"]([^'"]*)['"])?\]/g)].every(m=>{const key=m[1].replace(/-([a-z])/g,(_,c)=>c.toUpperCase());return Object.hasOwn(node.dataset,key)&&(m[2]===undefined||node.dataset[key]===m[2]);})))return node;}return null;}
   contains(target){for(let node=target;node;node=node.parent)if(node===this)return true;return false;}
   focus(){}setPointerCapture(){}
@@ -1018,6 +1019,9 @@ function sharedCanvasWorldTargetFixture(){
  const drop=new DomElement('ground-drop-marker',{objectId:'300001'},frame),calls=[],hitReads=[];
   const scope={screen:'game',scenePointerDiagnosticsRef:{current:null},heroPointerLeaseRef:{current:null},storagePointerRouterRef:{current:{held:null}},stageFrameRef:{current:frame},stagePresentation:{virtualWidth:1024,virtualHeight:768},webGl2SharedCanvasPrototype:false,sharedUiCanvasId:()=>canvas.id,
   document:{elementsFromPoint:(x,y)=>{hitReads.push([x,y]);return scope.layers;}},layers:[canvas,label,name,body,frame],HTMLElement:DomElement,
+  world:{entities:[{objectId:'206644',kind:'monster',x:99,y:89}]},pickCrystalActor:load('crystal-actor-hit').pickCrystalActor,
+  viewportActorBodies:new Map([['206644',{path:'/body.png',x:450,y:340,width:150,height:80}]]),
+  sampleCrystalBodyPixel:()=>true,hideDomEntitySpritesForBevy:false,
   hudPointerRouterRef:{current:new (load('bevy-hud-ui').HudPointerRouter)()},bevyHudUiReady:true,bevyBagUiActive:false,sceneInteractionReady:true,bagPointerRouterRef:{current:{held:null}},
   characterPointerCallbacksRef:{current:{}},spellsPointerCallbacksRef:{current:{}},bagPointerCallbacksRef:{current:{}},questLocalModalOpen:false,mobileMoreOpen:false,bevyQuestUiCapturesPointer:false,
   status:{ready:true,generation:1,revision:1,characterStatsReady:false,modal:false,foregroundRects:[],plan:{main:{left:0,top:672,width:1024,height:96},buttons:[]}},

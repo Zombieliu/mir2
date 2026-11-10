@@ -62,7 +62,7 @@ function eventSurface(){
   emit(type,event={}){for(const listener of listeners.filter(listener=>listener.type===type))listener.fn(event);}};
 }
 function fixture(){
- const ref=current=>({current}),edges=[],logs=[],wire=[],fresh=[];
+ const ref=current=>({current}),edges=[],logs=[],wire=[],fresh=[],queuedAttempts=[];
  const flags={abi:2,combatSupported:true,modeSupported:true,modal:false,focus:true,spectator:false};
  const actor=(objectId,kind,x)=>({objectId:String(objectId),kind,x,y:10,direction:'up',dead:false,hp:10,maxHp:10,classKey:'Warrior',level:1});
  const self=actor(3,'selfPlayer',10),player=actor(4,'player',12),monster=actor(5,'monster',11),npc=actor(6,'npc',13);
@@ -101,7 +101,7 @@ function fixture(){
   sceneInputDeferredForInitialAssets:()=>false,observeQuestWorldActions:()=>{},mapImageRouteRef:ref(null),questRouteRunRef:ref(null),
   cancelQuestRoute:()=>{scope.questRouteRunRef.current=null;},cancelMapImageRoute:()=>{scope.mapImageRouteRef.current=null;},
   lastQueuedMovementAttemptRef:ref(null),crystalRunPrimedUntilRef:ref(0),CRYSTAL_RUN_PRIME_MS:300,
-  queueCrystalMoveIntent:intent=>{scope.queuedMoveIntentRef.current=intent;},
+  queueCrystalMoveIntent:intent=>{queuedAttempts.push(intent);scope.queuedMoveIntentRef.current=intent;return false;},
   playerUiPreferencesRef:ref({newMove:false}),crystalMovementActionToward:(_self,point)=>({point}),
   crystalSelfMovementProfile:()=>({distance:2}),transferKeyForTile:()=>null,
   equipmentHostSuspendReasonRef:ref(null),isMovementBusy:()=>false,nextMoveSendAtRef:ref(0),crystalKeyBindingsRef:ref(defaultCrystalKeyBindings()),
@@ -120,7 +120,7 @@ function fixture(){
   edge:edge=>{edges.push(edge);if(edge.type==='cancel')api.clearApproach();return true;},fresh:()=>{fresh.push(scope.combatForceAttackRef.current);return true;}};
  scope.combatModeHostRef.current=api.makeModeHost();
  api.captureCombatModeSnapshot({playerObjectId:3,mapFileName:'D001',stage5Systems:{attackMode:0,petMode:0}});
- return {api,scope,flags,edges,logs,wire,fresh,window,document,player,monster,self};
+ return {api,scope,flags,edges,logs,wire,fresh,queuedAttempts,window,document,player,monster,self};
 }
 
 test('actual Page selects a player with guidance and requires held Shift plus v2 to request attack',()=>{
@@ -198,18 +198,24 @@ test('Classic and NewMove secondary clicks steer instead of selecting an occupan
   f.api.secondary(f.monster.x, f.monster.y);
   assert.equal(f.edges.at(-1).type, 'cancel');
   assert.equal(f.edges.filter(edge=>edge.type==='select').length, priorSelections);
-  assert.equal(f.scope.queuedMoveIntentRef.current.requestedMode, 'run');
-  assert.equal(f.scope.queuedMoveIntentRef.current.consumeAfterSend, !newMove);
+  assert.equal(f.queuedAttempts.at(-1).requestedMode, 'run');
+  assert.equal(f.queuedAttempts.at(-1).consumeAfterSend, !newMove);
+  assert.equal(f.scope.queuedMoveIntentRef.current, newMove ? f.queuedAttempts.at(-1) : null);
  }
 });
 
-test('a Classic tap during existing movement can submit only one movement', () => {
+test('an unsent Classic tap expires during the existing move and cannot prime or replay after it', () => {
  const f=fixture();
+ const sent={sentAt:10};
+ f.scope.pendingSelfMoveRef={current:sent};
  f.scope.movementPlanRef.current={packetMode:'direction'};
  f.scope.movementPlanBlockedByActionCadence=()=>true;
  f.api.secondary(15, 13);
- assert.equal(f.scope.queuedMoveIntentRef.current.consumeAfterSend, true);
- assert.equal(f.scope.queuedMoveIntentRef.current.pointerHeld, undefined, 'the release itself is the deliberate click');
+ assert.equal(f.queuedAttempts.at(-1).consumeAfterSend, true);
+ assert.equal(f.scope.queuedMoveIntentRef.current, null);
+ assert.equal(f.scope.crystalRunPrimedUntilRef.current, 0);
+ assert.strictEqual(f.scope.pendingSelfMoveRef.current, sent);
+ assert.equal(f.api.trySendQueuedCrystalMove(Date.now() + 1000), false, 'cadence retry sees no click to replay');
 });
 
 test('actual Page retires only an unsent released hold before movement retries', () => {

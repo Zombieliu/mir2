@@ -8821,7 +8821,7 @@ export default function HomePage() {
     queuedDirectionStepRef.current = null;
     queuedDirectionStepBacklogRef.current = [];
     clearDirectionStepPendingQueue();
-    void trySendQueuedCrystalMove();
+    return trySendQueuedCrystalMove();
   }
 
   function sendCrystalTurn(direction: string, worldFishingProof?: WorldFishingFinalProof, viewportPointerHeld?: () => boolean) {
@@ -9253,10 +9253,12 @@ export default function HomePage() {
     const target = chasing ? current.entities.find(entity => entity.objectId === current.selectedObjectId) : null;
     if (chasing && (!target || target.dead || target.hp === 0)) return;
     const requestedAt = Date.now();
+    const previousRunPrime = crystalRunPrimedUntilRef.current;
+    const runPrime = Math.max(previousRunPrime, requestedAt + CRYSTAL_RUN_PRIME_MS);
     if (mode === "run") {
       // A Crystal right-click target can start a run immediately; without this
       // first-click prime the Web route downgraded mouse-run targets into walks.
-      crystalRunPrimedUntilRef.current = Math.max(crystalRunPrimedUntilRef.current, requestedAt + CRYSTAL_RUN_PRIME_MS);
+      crystalRunPrimedUntilRef.current = runPrime;
     }
     const intent: QueuedMoveIntent = {
       kind: "target",
@@ -9268,7 +9270,15 @@ export default function HomePage() {
     };
     if (target) combatApproachIntentRef.current = { queued: intent, map: current.mapFileName ?? null,
       objectId: target.objectId, x: target.x, y: target.y };
-    queueCrystalMoveIntent(intent, gesture);
+    const sent = queueCrystalMoveIntent(intent, gesture);
+    if (source === "manual-step" && !sent) {
+      // A Classic short press has one action opportunity. Only a held
+      // gesture or an explicit route may wait for cadence or a door receipt.
+      if (queuedMoveIntentRef.current === intent) queuedMoveIntentRef.current = null;
+      if (mode === "run" && crystalRunPrimedUntilRef.current === runPrime) {
+        crystalRunPrimedUntilRef.current = previousRunPrime;
+      }
+    }
   }
 
   function attackTarget(objectId: string) {
@@ -13759,10 +13769,6 @@ export default function HomePage() {
         mineOnchainVein();
         return;
       }
-    }
-    const transferKey = transferKeyForTile(nextPoint.x, nextPoint.y);
-    if (transferKey) {
-      pendingTransferRef.current = transferKey;
     }
     moveToTile(nextPoint.x, nextPoint.y, mode, "direction", "manual-step");
   }

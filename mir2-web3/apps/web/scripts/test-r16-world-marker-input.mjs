@@ -14,10 +14,11 @@ function compile(text, scope, result) {
   const code = ts.transpileModule(text, { compilerOptions: { module: ts.ModuleKind.None, target: ts.ScriptTarget.ES2022 } }).outputText;
   return new Function(...Object.keys(scope), `${code}\n${result}`)(...Object.values(scope));
 }
-function load(relative) {
+function load(relative, globals = {}) {
   const module = { exports: {} }, text = readFileSync(new URL(relative, import.meta.url), "utf8");
   const code = ts.transpileModule(text, { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 } }).outputText;
-  new Function("exports", "module", "require", code)(module.exports, module, name => { throw Error(`Unexpected dependency ${name}`); });
+  new Function("exports", "module", "require", ...Object.keys(globals), code)(module.exports, module,
+    name => { throw Error(`Unexpected dependency ${name}`); }, ...Object.values(globals));
   return module.exports;
 }
 const hud = load("../lib/bevy-hud-ui.ts"), { sharedUiCanvasId } = load("../lib/bevy-shared-canvas-mode.ts");
@@ -25,7 +26,8 @@ const names = ["sceneWorldObjectTarget", "retainSceneWorldObjectTarget", "sceneP
   "tileFromScenePoint", "handleScenePointerAction", "stopHeldScenePointer", "dispatchSceneClickInput", "dispatchSceneMoveInput",
   "isSharedBagCompatibilityMouse", "npcShopBlocksWorldInput", "stopNpcShopWorldInput", "heroBlocksWorldInput",
   "handleSharedUiPointer", "handleSharedBagPointer", "handleSharedHudPointer", "cancelSharedHudPointer", "handleSharedQuestWorldPointer",
-  "handleSharedNpcShopPointer", "cancelSharedNpcShopPointer", "beginCombatUiHold", "endCombatUiHold"];
+  "handleSharedNpcShopPointer", "cancelSharedNpcShopPointer", "beginCombatUiHold", "endCombatUiHold",
+  "entityBodyAtlasFrame", "bevyEntityAtlasRectKey"];
 const declarations = nodes(file, node => ts.isFunctionDeclaration(node) && names.includes(node.name?.text));
 assert.equal(declarations.length, names.length);
 const stage = nodes(file, node => (ts.isJsxOpeningElement(node) || ts.isJsxSelfClosingElement(node))
@@ -63,11 +65,13 @@ class Element {
     return null;
   }
   getAttribute(name) { return name === "data-object-id" ? this.dataset.objectId ?? null : null; }
+  querySelector() { return this.bodyImage ?? null; }
   focus() { this.focuses++; }
   setPointerCapture() {}
   getBoundingClientRect() { return { left: 30, top: 20, width: 512, height: 384 }; }
 }
 function fixture({ native = true, oldMouseHold = false, marker = "drop", sceneReady = true, newMove = false, modalOnHud = false,
+  packed = false,
   layers: initialLayers } = {}) {
   let now = 1000, serial = 0, pickupAllowed = true;
   const listeners = new Map(), timers = new Map(), picks = [], activations = [], clicks = [], moves = [], combatHolds = [];
@@ -95,10 +99,20 @@ function fixture({ native = true, oldMouseHold = false, marker = "drop", sceneRe
     clearInterval(id) { timers.delete(id); },
     emit(type) { for (const fn of [...(listeners.get(type) ?? [])]) fn({ type, timeStamp: now }); }
   };
+  const document = { elementsFromPoint: () => layers, visibilityState: "visible", hasFocus: () => true,
+    addEventListener: window.addEventListener, removeEventListener: window.removeEventListener,
+    createElement() {
+      let image;
+      return { getContext: () => ({ drawImage(source) { image = source; }, getImageData: () => ({ data: image.rgba }) }) };
+    },
+  };
+  const { pickCrystalActor, sampleCrystalBodyPixel } = load("../lib/crystal-actor-hit.ts", { document });
+  const actors = [], viewportActorBodies = new Map(), activeBevyEntityAtlas = { rects: {}, pages: [] };
   const scope = {
     HTMLElement: Element, Element, window, Date: { now: () => now },
-    document: { elementsFromPoint: () => layers, visibilityState: "visible", hasFocus: () => true,
-      addEventListener: window.addEventListener, removeEventListener: window.removeEventListener },
+    document, world: { entities: actors }, viewportActorBodies, pickCrystalActor, sampleCrystalBodyPixel,
+    hideDomEntitySpritesForBevy: packed, activeBevyEntityAtlas,
+    warmCrystalBodyPixels: () => assert.fail("the matching live atlas supplies the body pixels"),
     sharedUiCanvasId, webGl2SharedCanvasPrototype: false, stageFrameRef: { current: frame },
     stagePresentation: { virtualWidth: 1024, virtualHeight: 768 }, viewportLayout: { offsetX: 10, offsetY: 11 },
     VIEWPORT_CELL_WIDTH: 48, VIEWPORT_CELL_HEIGHT: 32, CRYSTAL_MOVE_INPUT_INTERVAL_MS: 100,
@@ -170,7 +184,19 @@ function fixture({ native = true, oldMouseHold = false, marker = "drop", sceneRe
     return Object.assign(Object.create(prototype), { target, currentTarget: frame, pointerId: 1, pointerType: "mouse", button: 0,
       isPrimary: true, timeStamp: now, preventDefault() { this.defaultPrevented = true; }, ...changes });
   }
-  return { api, scope, flags, frame, canvas, markerNode, label, held, status, picks, activations, clicks, moves, combatHolds, worldTile, labelPoint, event,
+  function addActor(objectId, kind, cell, { alpha = 255, missing = false, dead = false, ai } = {}) {
+    const stack = new Element({ classes: ["entity-sprite-stack"], dataset: { objectId, uiInteractive: "true" }, parent: frame });
+    const hit = new Element({ classes: ["entity-sprite-hit"], parent: stack });
+    const body = { path: "/" + objectId + ".png", x: labelPoint.x - 2, y: labelPoint.y - 2, width: 4, height: 4 };
+    const rgba = new Uint8Array(4 * body.width * body.height);
+    rgba[(2 * body.width + 2) * 4 + 3] = alpha;
+    if (!missing) stack.bodyImage = { complete: true, naturalWidth: body.width, naturalHeight: body.height, rgba,
+      dataset: { mir2OriginalSrc: body.path } };
+    viewportActorBodies.set(objectId, body);
+    actors.push({ objectId, kind, ...cell, dead, ai });
+    return hit;
+  }
+  return { api, scope, flags, frame, canvas, markerNode, label, held, status, picks, activations, clicks, moves, combatHolds, worldTile, labelPoint, event, addActor,
     set layers(value) { layers = value; }, set pickupAllowed(value) { pickupAllowed = value; },
     down(target = native ? canvas : frame, changes) { const e = event(target, changes); api.stageDown(e); return e; },
     mouseDown(target = native ? canvas : frame, changes) {
@@ -267,14 +293,101 @@ test("NPC nameplate and interactive sprite-hit underlays activate exactly once t
     const f = fixture({ native, marker: "entity" });
     try {
       if (sprite) {
-        const stack = new Element({ classes: ["entity-sprite-stack"], dataset: { objectId: "npc-sprite-15", uiInteractive: "true" }, parent: f.frame });
-        const hit = new Element({ classes: ["entity-sprite-hit"], parent: stack }); f.layers = [f.canvas, hit, stack, f.frame];
+        const tile = f.api.tileFromScenePoint(f.labelPoint.x, f.labelPoint.y);
+        const hit = f.addActor("npc-sprite-15", "npc", { x: tile.x + 1, y: tile.y });
+        f.layers = [f.canvas, hit, f.frame];
       }
       f.down(); f.mouseDown(); f.up(); f.up();
       assert.deepEqual(f.activations, [sprite ? "npc-sprite-15" : "npc-15"]); assert.deepEqual(f.picks, []);
       assert.deepEqual(f.clicks, []); assert.deepEqual(f.moves, []);
     } finally { f.cleanup(); }
   }
+});
+
+test("both real stage routes pick a solid body through a tree hole using native tile order", () => {
+  for (const native of [true, false]) for (const alpha of [0, 1]) {
+    const f = fixture({ native });
+    try {
+      const tile = f.api.tileFromScenePoint(f.labelPoint.x, f.labelPoint.y);
+      const tree = f.addActor("tree", "monster", { x: tile.x, y: tile.y + 2 }, { alpha });
+      const oma = f.addActor("oma", "monster", { x: tile.x + 1, y: tile.y + 1 });
+      const foregroundOutsideScan = f.addActor("far", "monster", { x: tile.x, y: tile.y + 3 });
+      f.layers = [...(native ? [f.canvas] : []), foregroundOutsideScan, oma, tree, f.frame];
+      const target = native ? f.canvas : foregroundOutsideScan;
+      f.down(target); f.mouseDown(target); f.up(target); f.up(target);
+      assert.deepEqual(f.activations, [alpha ? "tree" : "oma"]);
+      assert.deepEqual(f.clicks, []);
+    } finally { f.cleanup(); }
+  }
+});
+
+test("actor hit resolution keeps exact cells, living priority, ties and unavailable NPC bounds", () => {
+  const f = fixture();
+  try {
+    const tile = f.api.tileFromScenePoint(f.labelPoint.x, f.labelPoint.y);
+    const near = { x: tile.x + 1, y: tile.y };
+    const ordinary = f.addActor("ordinary-corpse", "monster", near, { dead: true, ai: 0 });
+    const harvest = f.addActor("harvestable-corpse", "monster", near, { dead: true, ai: 1 });
+    const absent = f.addActor("absent-monster", "monster", near, { missing: true });
+    const npc = f.addActor("absent-npc", "npc", near, { missing: true });
+    const solid = f.addActor("second", "monster", near);
+    f.layers = [f.canvas, ordinary, harvest, absent, npc, f.frame];
+    const client = f.event();
+    const target = () => f.api.sceneWorldObjectTarget(client.clientX, client.clientY)?.objectId;
+    assert.equal(target(), "absent-npc");
+    f.layers = [f.canvas, ordinary, absent, f.frame];
+    assert.equal(target(), undefined);
+    f.layers = [f.canvas, harvest, f.frame];
+    assert.equal(target(), "harvestable-corpse");
+    f.layers = [f.canvas, npc, solid, f.frame];
+    assert.equal(target(), "second", "the last published actor in the cell wins even if below the other DOM element");
+    f.addActor("exact", "monster", tile, { missing: true });
+    f.layers = [f.canvas, f.frame];
+    assert.equal(target(), "exact");
+  } finally { f.cleanup(); }
+});
+
+test("actor picking reads the current packed body rectangle on its own atlas page", () => {
+  const f = fixture({ packed: true });
+  try {
+    const tile = f.api.tileFromScenePoint(f.labelPoint.x, f.labelPoint.y);
+    const tree = f.addActor("tree", "monster", { x: tile.x, y: tile.y + 2 }, { missing: true });
+    const oma = f.addActor("oma", "monster", { x: tile.x, y: tile.y + 1 }, { missing: true });
+    const page = () => ({ width: 16, height: 16, pixels: new Uint8Array(16 * 16 * 4) });
+    const atlas = f.scope.activeBevyEntityAtlas;
+    atlas.pages.push(page(), page());
+    atlas.rects["/tree.png|4x4"] = { pageIndex: 1, x: 5, y: 5, width: 4, height: 4 };
+    atlas.rects["/oma.png|4x4"] = { pageIndex: 1, x: 10, y: 5, width: 4, height: 4 };
+    const offset = (x, y) => 4 * (y * 16 + x) + 3;
+    atlas.pages[0].pixels[offset(7, 7)] = 255;
+    atlas.pages[1].pixels[offset(12, 7)] = 255;
+    f.layers = [f.canvas, tree, oma, f.frame];
+    const { clientX, clientY } = f.event();
+    assert.equal(f.api.sceneWorldObjectTarget(clientX, clientY)?.objectId, "oma");
+    atlas.pages[1].pixels[offset(7, 7)] = 1;
+    assert.equal(f.api.sceneWorldObjectTarget(clientX, clientY)?.objectId, "tree");
+  } finally { f.cleanup(); }
+});
+
+test("a prebuilt atlas mask reads only the frame crop and shares one pending decode", async () => {
+  const args = [], rgba = new Uint8Array(16);
+  rgba[15] = 1;
+  const document = { createElement() {
+    return { getContext: () => ({ drawImage(...values) { args.push(values); }, getImageData: () => ({ data: rgba }) }) };
+  } };
+  const { warmCrystalBodyPixels, sampleCrystalBodyPixel } = load("../lib/crystal-actor-hit.ts", { document });
+  const body = { path: "/body.png", width: 2, height: 2, x: -5, y: -5 };
+  const image = { complete: true, naturalWidth: 1024, naturalHeight: 1024 };
+  let loads = 0;
+  const loadImage = async () => { loads++; return image; };
+  warmCrystalBodyPixels(body, loadImage, { x: 12, y: 36 });
+  warmCrystalBodyPixels(body, loadImage, { x: 12, y: 36 });
+  await new Promise(resolve => setImmediate(resolve));
+  assert.equal(loads, 1);
+  assert.deepEqual(args, [[image, 12, 36, 2, 2, 0, 0, 2, 2]]);
+  assert.equal(sampleCrystalBodyPixel(body, 1, 1, null), true);
+  assert.equal(sampleCrystalBodyPixel(body, 0, 0, null), false);
+  assert.equal(sampleCrystalBodyPixel(body, 2, 0, null), false);
 });
 
 test("secondary taps on a canvas-underlay actor or drop reach only the terrain callback", () => {

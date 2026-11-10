@@ -1,5 +1,6 @@
 "use client";
 import { crystalEntityDepth, crystalEntityLayerDepth } from "../lib/crystal-world-depth";
+import { pickCrystalActor, sampleCrystalBodyPixel, warmCrystalBodyPixels, type CrystalBodyFrame } from "../lib/crystal-actor-hit";
 import { useWindowKeydown } from "../lib/use-window-keydown";
 import { guildKeyboardOwnsEvent } from "../lib/r16-guild-keyboard";
 import { CharacterPointerRouter } from "../lib/bevy-character-ui";
@@ -2175,6 +2176,8 @@ export function OriginalClientShell({
       };
     });
   }, [animationWorldKey, entityAnimationInputs, sceneSpriteLibraries, sceneSpriteFrameIndex]);
+  const viewportActorBodies = useMemo(() => new Map(viewportEntitySprites.map(({ entity, sprite }) =>
+    [entity.objectId, sprite?.body ?? null])), [viewportEntitySprites]);
   const viewportGroundDrops = player
     ? world.groundDrops
         .filter(
@@ -2698,6 +2701,18 @@ export function OriginalClientShell({
     Array.from(requiredBevyMapAtlasPageKeys).every((key) => bevyMapPresentedImageKeys.has(key));
   const hideDomEntitySpritesForBevy =
     bevyWorldPaintActive || (useWebGl2EntityAtlasRenderer && gpuEntityPixelsReady);
+  useEffect(() => {
+    if (!hideDomEntitySpritesForBevy || !sceneInteractionReady) return;
+    for (const { entity, sprite } of viewportEntitySprites) {
+      const body = sprite?.body;
+      if (entity.kind === "selfPlayer" || !body) continue;
+      const atlas = entityBodyAtlasFrame(activeBevyEntityAtlas, body);
+      if (atlas?.imageUrl && !atlas.pixels) {
+        const { imageUrl, left, top } = atlas;
+        warmCrystalBodyPixels(body, () => loadBevyEntityAtlasImage(imageUrl), { x: left, y: top });
+      }
+    }
+  }, [hideDomEntitySpritesForBevy, sceneInteractionReady, viewportEntitySprites, activeBevyEntityAtlas]);
   useEffect(() => {
     latestStandaloneMapImageSourcesRef.current = standaloneMapImageSourcesByKey;
     latestBevyMapActiveRef.current = bevyMapActive;
@@ -3629,25 +3644,54 @@ export function OriginalClientShell({
     };
   }
 
-  function sceneWorldObjectTarget(clientX: number, clientY: number): HeldScenePointer["worldTarget"] {
+  function sceneWorldObjectTarget(clientX: number, clientY: number, compatibility = false): HeldScenePointer["worldTarget"] {
     const frame = stageFrameRef.current;
     if (!frame || !Number.isFinite(clientX) || !Number.isFinite(clientY)) return;
     const layers = document.elementsFromPoint(clientX, clientY);
+    const top = layers[0];
     // The shared canvas owns the physical pointer. Inspect its visible world
     // underlay only after the existing surface router has admitted a world hold.
-    if (layers[0]?.id !== sharedUiCanvasId(webGl2SharedCanvasPrototype)) return;
-    for (const layer of layers.slice(1)) {
+    const onCanvas = top?.id === sharedUiCanvasId(webGl2SharedCanvasPrototype);
+    const foreground = ".game-ui-scene, .login-overlay, .select-overlay, .original-skill-bar, .original-combat-mode-controls";
+    if (!top || !frame.contains(top) || !onCanvas && !compatibility || top.closest(foreground)) return;
+    const worldMarker = ".ground-drop-marker, .entity-nameplate, .entity-sprite-hit";
+    const worldLayers = onCanvas ? layers.slice(1) : top.closest(worldMarker) ? layers : [];
+    const stacks = new Map<string, HTMLElement>();
+    let label: string | undefined;
+    for (const layer of worldLayers) {
       if (!frame.contains(layer)) continue;
-      if (layer.closest(".game-ui-scene, .login-overlay, .select-overlay, .original-skill-bar")) return;
-      const hit = layer.closest<HTMLElement>(".ground-drop-marker, .entity-nameplate, .entity-sprite-hit");
+      if (layer.closest(foreground)) break;
+      const hit = layer.closest<HTMLElement>(worldMarker);
       if (!hit || !frame.contains(hit)) continue;
       const target = hit.classList.contains("entity-sprite-hit")
         ? hit.closest<HTMLElement>(".entity-sprite-stack[data-ui-interactive='true'][data-object-id]")
         : hit;
       if (!target || !frame.contains(target) || !target.dataset.objectId) continue;
       if (hit.classList.contains("ground-drop-marker")) return { kind: "drop", objectId: target.dataset.objectId };
-      if (target.dataset.uiInteractive === "true") return { kind: "entity", objectId: target.dataset.objectId };
+      if (target.dataset.uiInteractive !== "true") continue;
+      if (hit.classList.contains("entity-sprite-hit")) stacks.set(target.dataset.objectId, target);
+      else label ??= target.dataset.objectId;
     }
+    const point = scenePointFromMouseEvent({ clientX, clientY, currentTarget: frame });
+    const cell = tileFromScenePoint(point.sceneX, point.sceneY);
+    const actor = cell && pickCrystalActor(world.entities, cell, entity => {
+      const stack = stacks.get(entity.objectId), body = viewportActorBodies.get(entity.objectId);
+      if (!stack || !body) return false;
+      const stageRect = frame.getBoundingClientRect(), root = stack.getBoundingClientRect();
+      const x = Math.floor((clientX - root.left) * stagePresentation.virtualWidth / Math.max(stageRect.width, 1) - body.x);
+      const y = Math.floor((clientY - root.top) * stagePresentation.virtualHeight / Math.max(stageRect.height, 1) - body.y);
+      if (!(x >= 0 && y >= 0 && x < body.width && y < body.height)) return false;
+      const atlas = hideDomEntitySpritesForBevy ? entityBodyAtlasFrame(activeBevyEntityAtlas, body) : null;
+      if (atlas?.pixels) return atlas.pixels[4 * ((atlas.top + y) * atlas.width + atlas.left + x) + 3] > 0;
+      const image = stack.querySelector<HTMLImageElement>("img.entity-sprite-layer.body");
+      const pixel = sampleCrystalBodyPixel(body, x, y, image?.dataset.mir2OriginalSrc === body.path ? image : null);
+      if (pixel === undefined && hideDomEntitySpritesForBevy && !atlas?.imageUrl) {
+        warmCrystalBodyPixels(body, () => loadBevyEntityAtlasImage(body.path));
+      }
+      return pixel ?? entity.kind === "npc";
+    });
+    const objectId = actor ? actor.objectId : label;
+    if (objectId) return { kind: "entity", objectId };
   }
 
   function sceneGroupHoverScope() {
@@ -3750,7 +3794,7 @@ export function OriginalClientShell({
     if (!onCanvas && !object && top.closest("[data-ui-interactive='true'], button, input, textarea, select, [contenteditable='true'], [role='dialog']")) {
       updateSceneCombatPointer(null, null); return false;
     }
-    const target = onCanvas ? sceneWorldObjectTarget(clientX, clientY)?.objectId ?? null : object?.dataset.objectId ?? null;
+    const target = sceneWorldObjectTarget(clientX, clientY, true)?.objectId ?? null;
     updateSceneCombatPointer([tile.x, tile.y], target);
     return true;
   }
@@ -4963,8 +5007,8 @@ export function OriginalClientShell({
       const interactive = target.closest("[data-ui-interactive='true']");
       // In the compatibility view these DOM markers own primary activation,
       // while secondary still steers using the terrain underneath them.
-      if (interactive && (event.button !== 2 ||
-        !interactive.matches(".ground-drop-marker[data-object-id], .entity-nameplate[data-object-id], .entity-sprite-stack[data-object-id]"))) return;
+      if (interactive && !interactive.matches(".ground-drop-marker[data-object-id], .entity-nameplate[data-object-id], .entity-sprite-stack[data-object-id]")) return;
+      if (event.button === 0 && interactive?.matches(".ground-drop-marker, .entity-nameplate")) return;
     }
 
     event.preventDefault();
@@ -4977,7 +5021,7 @@ export function OriginalClientShell({
       dispatched: false,
       // A compatibility mousedown follows pointerdown on this same canvas.
       // Keep primary marker identity even when a label is offset from its tile.
-      worldTarget: event.button === 0 ? sceneWorldObjectTarget(event.clientX, event.clientY) : undefined,
+      worldTarget: event.button === 0 ? sceneWorldObjectTarget(event.clientX, event.clientY, true) : undefined,
     };
     heldScenePointerRef.current = pointer;
     const sources = [...worldFishingPointersRef.current.values()].filter(source => source.pointerType === "mouse"
@@ -6514,6 +6558,15 @@ function collectBevyEntityAtlasSources(
 
 function bevyEntityAtlasRectKey(path: string, width: number, height: number) {
   return `${path}|${Math.max(1, Math.ceil(width))}x${Math.max(1, Math.ceil(height))}`;
+}
+
+function entityBodyAtlasFrame(atlas: BevyEntityAtlasSnapshot | null, body: CrystalBodyFrame) {
+  const rect = atlas?.rects[bevyEntityAtlasRectKey(body.path, body.width, body.height)];
+  if (!atlas || !rect || rect.width !== body.width || rect.height !== body.height) return null;
+  const page = atlas.pages?.length ? atlas.pages[rect.pageIndex ?? 0] : atlas;
+  if (!page || rect.x < 0 || rect.y < 0 || rect.x + rect.width > page.width || rect.y + rect.height > page.height) return null;
+  const pixels = page.pixels?.length === page.width * page.height * 4 ? page.pixels : undefined;
+  return { pixels, imageUrl: page.imageUrl, width: page.width, left: rect.x, top: rect.y };
 }
 
 function bevyEntityAtlasKeyForSources(sources: BevyEntityAtlasSource[]) {

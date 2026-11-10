@@ -16,7 +16,9 @@ working tree, services, release packages, source snapshots or parity percentages
 
 ## Last recorded decisions and open work
 
-2026-11-10 Web 经典右键松手清掉未发步进，短按降一格后也只提交一次。关设置后同一会话恢复新版寻路。两条生产渲染路径实测单击一次并追上正在移动的奥玛。继续核对前景栗树的逐像素命中、动作忙碌时的短按和其他普通窗口。 [释放、设置和移动奥玛](evidence/r16-right-release-20261110/README.md) · [开背包追击和死亡停手](evidence/r16-ordinary-chase-20261110/README.md)
+2026-11-10 Web 双路实测从栗树透明处命中奥玛，实色处继续选栗树。动作间隔内的经典右键短按不再补发，新版寻路仍到达目标。图集纯 GPU 的真实选怪、其他普通窗口和后续地图继续验收。 [像素与短按回执](evidence/r16-actor-picking-20261110/README.md) · [释放、设置和移动奥玛](evidence/r16-right-release-20261110/README.md)
+
+2026-11-10 公网简中、繁中复验正常出码、待确认和取消，另一次冷开未在 45 秒内显示登录入口。优先对默认网络补齐资源清单、地图正文、解码与可操作首帧的分段时钟。以 Windows 本地分包为参考，Web 首包按角色实际落点组织。 [扫码与资源证据](NUMERON-WEB-RELEASE-20261108.zh-CN.md#2026-11-10-公网钱包扫码恢复)
 
 2026-11-10 比奇战斗点正常存档可冷重登。Web 采用地图与区域边界判断覆盖范围，接受无独立记录的格子。原候选收到完整地图后停在重试界面，修复后同档两种渲染模式约 1.7 秒就绪，第一击与正常注销通过。继续长路线和其他地图。 [存档、回包与画面](evidence/r16-combat-input-20261110/README.md#战斗点冷重登)
 
