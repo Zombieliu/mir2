@@ -222,6 +222,7 @@ function pageSceneFixture({ screen = "game", map = "0140", region = null, pinned
     normalizeCrystalSceneBlueprintRequest, createCrystalSceneBlueprintRequestKey, createCrystalSceneBlueprintRequestUrl,
     isCrystalSceneAssetReleaseId: loadedModule.exports.isCrystalSceneAssetReleaseId,
     loadAssetReleaseCapabilities: cap.api.loadAssetReleaseCapabilities,
+    readR16EntryScene: () => null,
     fetch: fetcher,
     fetchFirstCrystalSceneJson: (url, options, request = fetcher) => sceneReaderModule.exports.fetchFirstCrystalSceneJson(url, options, request),
     setSceneAssetReleaseId: value => { state.release = value; },
@@ -247,6 +248,122 @@ function sceneBlueprint(map = "0140") {
 function sceneResponse(blueprint) {
   return { ok: true, status: 200, json: async () => blueprint, headers: { get: () => "crystal" } };
 }
+
+const entryMetadata = JSON.parse(readFileSync(new URL("../lib/generated/r16-entry-scene.json", import.meta.url), "utf8"));
+const entryBytes = readFileSync(new URL(`../public${entryMetadata.path}`, import.meta.url));
+const entryRequest = { ...entryMetadata.request, assetReleaseId: entryMetadata.assetReleaseId };
+const entrySource = ts.transpileModule(readFileSync(new URL("../lib/r16-entry-scene.ts", import.meta.url), "utf8"), {
+  compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 },
+}).outputText;
+
+function entryFixture(fetcher) {
+  const timeouts = [];
+  const signals = {
+    any: AbortSignal.any.bind(AbortSignal),
+    timeout(ms) {
+      const controller = new AbortController();
+      timeouts.push({ ms, controller });
+      return controller.signal;
+    },
+  };
+  const module = { exports: {} };
+  const requireEntry = name => {
+    if (name === "./generated/r16-entry-scene.json") return { default: entryMetadata };
+    assert.equal(name, "./scene-blueprint-request");
+    return loadedModule.exports;
+  };
+  new Function("exports", "require", "fetch", "AbortSignal", entrySource)(module.exports, requireEntry, fetcher, signals);
+  return { ...module.exports, timeouts };
+}
+
+test("a verified hosted preload serves only the exact release, map and region key", async () => {
+  const calls = [], body = deferred(), owner = new AbortController();
+  const entry = entryFixture((url, options) => { calls.push({ url, options }); return body.promise; });
+  assert.equal(entry.preloadR16EntryScene(undefined), null);
+  assert.equal(entry.readR16EntryScene(entryRequest, "another-release", owner.signal), null);
+  assert.equal(entry.readR16EntryScene({ ...entryRequest, centerX: 312 }, entryMetadata.assetReleaseId, owner.signal), null);
+  assert.equal(entry.readR16EntryScene({ ...entryRequest, mapFileName: "0140" }, entryMetadata.assetReleaseId, owner.signal), null);
+  assert.equal(calls.length, 0);
+  const preloaded = entry.preloadR16EntryScene(entryMetadata.assetReleaseId);
+  const first = entry.readR16EntryScene(entryRequest, entryMetadata.assetReleaseId, owner.signal);
+  assert.equal(calls.length, 1);
+  assert.equal(calls[0].url, entryMetadata.path);
+  assert.equal(calls[0].options.cache, "force-cache");
+  assert.equal(calls[0].options.credentials, "omit");
+  body.resolve(new Response(entryBytes));
+  const blueprint = await first;
+  assert.equal(blueprint, await preloaded);
+  assert.equal(blueprint.originalMapRegion.cells.length, 6819);
+  assert.equal(await entry.readR16EntryScene(entryRequest, entryMetadata.assetReleaseId, owner.signal), blueprint);
+  assert.equal(calls.length, 1);
+});
+
+test("changed static bytes are rejected even with the expected response length", async () => {
+  let count = 0;
+  const wrong = Buffer.from(entryBytes);
+  wrong[15] ^= 1;
+  const entry = entryFixture(async () => new Response(++count === 1 ? wrong : entryBytes));
+  const owner = new AbortController();
+  assert.equal(await entry.readR16EntryScene(entryRequest, entryMetadata.assetReleaseId, owner.signal), null);
+  assert.equal((await entry.readR16EntryScene(entryRequest, entryMetadata.assetReleaseId, owner.signal)).originalMapRegion.mapFileName, "0.map");
+  assert.equal(count, 2);
+});
+
+test("the owner and the short entry grace can leave an independently warming map", async () => {
+  const body = deferred(), firstOwner = new AbortController(), secondOwner = new AbortController();
+  let requests = 0;
+  const entry = entryFixture(() => { requests += 1; return body.promise; });
+  const first = entry.readR16EntryScene(entryRequest, entryMetadata.assetReleaseId, firstOwner.signal);
+  firstOwner.abort();
+  assert.equal(await first, null);
+  const second = entry.readR16EntryScene(entryRequest, entryMetadata.assetReleaseId, secondOwner.signal);
+  assert.equal(entry.timeouts.at(-1).ms, 2_500);
+  entry.timeouts.at(-1).controller.abort();
+  assert.equal(await second, null);
+  assert.equal(entry.timeouts[0].ms, 12_000);
+  assert.equal(entry.timeouts[0].controller.signal.aborted, false);
+  body.resolve(new Response(entryBytes));
+  assert.equal((await entry.preloadR16EntryScene(entryMetadata.assetReleaseId)).originalMapRegion.mapFileName, "0.map");
+  assert.equal(requests, 1);
+});
+
+test("actual Page installs the warmed entry only for the active character and falls back if outside its bounds", async () => {
+  for (const mode of ["valid", "outside", "disposed"]) {
+    const f = pageSceneFixture({ map: "0", pinnedRelease: entryMetadata.assetReleaseId });
+    Object.assign(f.scope.self, { x: 288, y: 616 });
+    f.scope.viewportLayout = { rangeX: 16, rangeY: 17 };
+    f.state.release = entryMetadata.assetReleaseId;
+    const deferredEntry = deferred();
+    f.scope.readR16EntryScene = (request, pin) => {
+      assert.deepEqual(request, entryRequest);
+      assert.equal(pin, entryMetadata.assetReleaseId);
+      return deferredEntry.promise;
+    };
+    const cleanup = f.render().scene();
+    const blueprint = JSON.parse(entryBytes);
+    if (mode === "outside") blueprint.originalMapRegion.playBounds.minX = 290;
+    if (mode === "disposed") cleanup();
+    deferredEntry.resolve(blueprint);
+    await settleSceneFixture();
+    if (mode === "valid") {
+      assert.equal(f.calls.length, 0);
+      assert.equal(f.updates.length, 1);
+      assert.equal(f.milestones.at(-1).detail.sceneCache, "r16-entry-static");
+    } else if (mode === "outside") {
+      assert.equal(f.calls.length, 1);
+      assert.match(f.calls[0].url, /^\/api\/scene\/crystal\?/);
+      f.calls[0].resolve(sceneResponse(sceneBlueprint("0")));
+      await settleSceneFixture();
+      assert.equal(f.updates.length, 1);
+      assert.equal(f.milestones.at(-1).detail.sceneCache, "crystal");
+    } else {
+      assert.equal(f.calls.length, 0);
+      assert.equal(f.updates.length, 0);
+    }
+    if (mode !== "disposed") cleanup();
+  }
+});
+
 test("a pinned hosted build requests the authoritative scene while the manifest is still pending", async () => {
   const releaseId = "20261108-r16-08ec86d5105c";
   const f = pageSceneFixture({ map: "0", pinnedRelease: releaseId });

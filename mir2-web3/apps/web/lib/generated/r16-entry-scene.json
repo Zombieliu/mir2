@@ -1,0 +1,14 @@
+{
+  "assetReleaseId": "20261108-r16-08ec86d5105c",
+  "schemaVersion": "2026-08-14-v7-door-interaction",
+  "request": {
+    "mapFileName": "0",
+    "centerX": 296,
+    "centerY": 620,
+    "width": 56,
+    "height": 72
+  },
+  "path": "/bootstrap/r16-scenes/5c08d1fd4e81d92a7be20eb98c4c6288515749d5d459978dcf78fe2b86bdf325.json",
+  "sha256": "5c08d1fd4e81d92a7be20eb98c4c6288515749d5d459978dcf78fe2b86bdf325",
+  "bytes": 458475
+}

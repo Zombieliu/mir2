@@ -417,6 +417,7 @@ import {
 } from "../lib/scene-blueprint-request";
 import { loadAssetReleaseCapabilities } from "../lib/asset-release-capabilities";
 import { fetchFirstCrystalSceneJson } from "../lib/first-crystal-scene-request";
+import { preloadR16EntryScene, readR16EntryScene } from "../lib/r16-entry-scene";
 import crystalFrameSetCatalog from "../public/original-ui/frame-sets.generated.json";
 import type { OriginalSceneFrameSet } from "../lib/original-scene-sprite-meta";
 import { crystalFrameSetActionForState } from "./components/original-client-entity-frames";
@@ -3598,6 +3599,12 @@ export default function HomePage() {
   }
 
   useEffect(() => {
+    if (screen === "openingLogin" || screen === "select") {
+      void preloadR16EntryScene(process.env.MIR2_PINNED_ASSET_VERSION);
+    }
+  }, [screen]);
+
+  useEffect(() => {
     if (!shouldLoadGameplayLocale || gameplayLocaleReady) return;
     let current = true;
     setGameplayLocaleStatus("pending");
@@ -5904,6 +5911,18 @@ export default function HomePage() {
           width: request.width,
           height: request.height,
         });
+        const entryLoad = !world.originalMapRegion &&
+          readR16EntryScene(request, process.env.MIR2_PINNED_ASSET_VERSION, controller.signal);
+        if (entryLoad) {
+          const entry = await entryLoad;
+          if (disposed || controller.signal.aborted) return;
+          const current = worldRef.current;
+          const player = current.entities.find(entity => entity.objectId === current.playerObjectId);
+          if (entry && player && crystalSceneContainsPlayer(entry.originalMapRegion, request.mapFileName, player)) {
+            applySceneBlueprint(entry, "r16-entry-static");
+            return;
+          }
+        }
         const { response, body } = await fetchFirstCrystalSceneJson<SceneBlueprint | CrystalSceneResourceError>(requestUrl, {
           signal: controller.signal,
           cache: "force-cache",
