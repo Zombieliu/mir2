@@ -45,7 +45,7 @@ test("the default keeps the existing full-pack/map-atlas profile and permits onl
   }
 });
 
-test("the Numeron profile binds the finite manifest, six a469 files and public browser-safe fallbacks", async () => {
+test("the Numeron profile binds the finite art manifest, six R16 renderer leaves and browser-safe fallbacks", async () => {
   const profile = loadProductionAssetConfig(projectRoot, NUMERON_PRODUCTION_ASSET_CONFIG);
   assertNumeronFiniteProfile(profile);
   assert.equal(profile.schemaVersion, 3); assert.equal(profile.objectPrefix, FIXED_R16.prefix);
@@ -57,8 +57,11 @@ test("the Numeron profile binds the finite manifest, six a469 files and public b
   assert.equal(profile.browserFallbackBaseUrls[0], `${FIXED_R16.publicOrigin}/hotlink-ok/${FIXED_R16.prefix}`);
   for (const prefix of FIXED_R16.fallbackPrefixes) assert(profile.browserFallbackBaseUrls.some(base => base.endsWith(`/${prefix}`)));
   assert(profile.browserFallbackBaseUrls.every(base => !base.startsWith("https://mir2.obelisk.build/")));
-  const runtime = JSON.parse(await fs.readFile(path.join(webRoot, "lib/generated/bevy_runtime_version.json")));
-  assert.equal(runtime.version, profile.bevyRuntime.version); assert.equal(runtime.version, FIXED_R16.runtimeVersion);
+  const runtimeBytes = await fs.readFile(path.join(webRoot, "lib/generated/bevy_runtime_version_numeron_r16.json"));
+  assert.equal(digest(runtimeBytes), "32bf5c4ffcf59fb352d27afd6d1e2a20758dd56edc0dfba0e015fece42d936a8");
+  const runtime = JSON.parse(runtimeBytes);
+  assert.equal(runtime.version, profile.bevyRuntime.version);
+  assert.equal(FIXED_R16.runtimeVersion, "bevy-a46905128c316656");
   assert.equal(runtime.files.length, 6);
   const runtimeBase = await readAssetBaseUrl(finitePath, runtime.version);
   assert.equal(runtimeBase, profile.assetBaseUrl);
@@ -71,6 +74,7 @@ test("the Numeron profile binds the finite manifest, six a469 files and public b
     value => { value.assetBaseUrl += "/hotlink-ok"; }, value => { value.profile = "arbitrary-finite"; },
     value => { value.remoteReleaseSha256 = "0".repeat(64); }, value => { value.mapAtlas.verified = true; },
     value => { value.fullCrystalPack.enabled = true; }, value => { value.bevyRuntime.assetBaseUrl = "https://old.example.test"; },
+    value => { value.bevyRuntime.version = FIXED_R16.runtimeVersion; },
   ]) { const changed = structuredClone(profile); change(changed); assert.throws(() => assertNumeronFiniteProfile(changed), /fixed release or disabled/); }
 });
 

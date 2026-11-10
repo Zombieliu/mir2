@@ -29,7 +29,7 @@ export function assertNumeronFiniteProfile(config) {
     || config.version !== "20261108-r16-08ec86d5105c" || config.objectPrefix !== prefix || config.assetBaseUrl !== base
     || config.remoteReleaseUrl !== `${base}/remote-asset-release.json`
     || config.remoteReleaseSha256 !== "32255399aaae2dc9a133a5827252256ece782aaae5d237152ffebc2d8f272155"
-    || config.bevyRuntime?.enabled !== true || config.bevyRuntime.version !== "bevy-a46905128c316656"
+    || config.bevyRuntime?.enabled !== true || config.bevyRuntime.version !== "bevy-84ef836460a84e03"
     || config.bevyRuntime.assetBaseUrl !== base
     || config.fullCrystalPack?.enabled !== false || config.fullCrystalPack?.verified !== false
     || config.fullCrystalPack.contentHash !== null || config.fullCrystalPack.libraryCount !== 0 || config.fullCrystalPack.pageCount !== 0

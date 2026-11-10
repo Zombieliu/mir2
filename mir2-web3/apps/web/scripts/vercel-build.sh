@@ -41,6 +41,11 @@ if [ "${VERCEL:-}" = "1" ] && [ "${VERCEL_ENV:-}" = "production" ]; then
   export MIR2_REUSE_ORIGINAL_ASSET_MANIFEST="${MIR2_REUSE_ORIGINAL_ASSET_MANIFEST:-1}"
 
   node ./scripts/lib/production-asset-config.mjs --verify-remote
+  # Keep the Numeron renderer pin separate from the legacy Web build and the
+  # previously published finite art manifest.
+  if [ "${MIR2_PRODUCTION_ASSET_CONFIG:-}" = "numeron-r16-web-assets.json" ]; then
+    cp lib/generated/bevy_runtime_version_numeron_r16.json lib/generated/bevy_runtime_version.json
+  fi
   npm run generate:original-asset-manifest
   echo "[vercel-build] Using production R2 assets $MIR2_ASSET_VERSION."
 fi
