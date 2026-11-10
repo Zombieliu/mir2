@@ -409,6 +409,96 @@ fn fishing_reel_chance_is_independent_of_the_autocast_switch() {
 }
 
 #[test]
+fn fishing_zero_reel_can_retry_a_miss_until_its_next_successful_wear() {
+    let mut session = fixture(4);
+    let world = session.app.world_mut();
+    sync_fishing_slots_from_equipment(world);
+    world.resource_mut::<FishingResource>().slot_items[FISHING_SLOT_REEL]
+        .as_mut()
+        .unwrap()
+        .durability_current = Some(1);
+    assert!(persist_fishing_slots_to_equipment(world));
+    let reel = equipped_rod(world).slots[FISHING_SLOT_REEL]
+        .as_ref()
+        .unwrap()
+        .unique_id;
+    fishing_change_autocast_impl(world, true);
+    let start = Instant::now();
+    bite(world, start);
+    world.resource_mut::<FishingResource>().chance_percent = 100;
+    let mut first = Vec::new();
+    assert!(!finish_fishing_cast(
+        world,
+        start + crate::CRYSTAL_FISHING_CAST_DELAY,
+        3,
+        true,
+        &mut first
+    ));
+    assert!(durability_receipts(&first).contains(&(reel, 0)));
+    assert_eq!(updates(&first), [(false, 3, false)]);
+    assert!(world.resource::<FishingResource>().auto_cast);
+    assert_eq!(
+        equipped_rod(world).slots[FISHING_SLOT_REEL]
+            .as_ref()
+            .unwrap()
+            .current_dura,
+        0
+    );
+
+    world
+        .resource_mut::<RuntimeConfigResource>()
+        .config
+        .crystal_fishing_attempts = std::num::NonZeroU16::new(1).unwrap();
+    let second = start + Duration::from_secs(10);
+    assert_eq!(
+        updates(&fishing_cast_at(world, true, second)),
+        [(true, 0, false)]
+    );
+    world.resource_mut::<FishingResource>().nibble_chance = -1;
+    let first_step = second + crate::CRYSTAL_FISHING_CAST_DELAY;
+    assert_eq!(updates(&step(world, first_step)), [(true, 100, false)]);
+    assert_eq!(
+        updates(&step(world, first_step + CRYSTAL_FISHING_STEP)),
+        [(true, 200, false), (false, 200, false), (true, 0, false)]
+    );
+    let third_step = world.resource::<FishingResource>().next_step_at.unwrap();
+    world.resource_mut::<FishingResource>().nibble_chance = 100;
+    assert_eq!(updates(&step(world, third_step)), [(true, 100, true)]);
+    world.resource_mut::<FishingResource>().chance_percent = 100;
+    let mut last = Vec::new();
+    assert!(!finish_fishing_cast(
+        world, third_step, 100, true, &mut last
+    ));
+    assert_eq!(updates(&last), [(false, 100, false)]);
+    assert_eq!(
+        last.iter()
+            .filter(|packet| matches!(packet,
+                ServerPacket::DeleteItem { unique_id, count: 1 } if *unique_id == reel
+            ))
+            .count(),
+        1
+    );
+    assert!(equipped_rod(world).slots[FISHING_SLOT_REEL].is_none());
+    assert!(fishing_change_autocast_impl(world, false).is_empty());
+    assert!(!world.resource::<FishingResource>().auto_cast);
+}
+
+#[test]
+fn fishing_disabling_without_a_rod_retires_the_existing_preference() {
+    let mut session = fixture(2);
+    let world = session.app.world_mut();
+    fishing_change_autocast_impl(world, true);
+    assert!(world.resource::<FishingResource>().auto_cast);
+    world
+        .resource_mut::<InventoryResource>()
+        .equipment_items
+        .retain(|item| item.slot != EquipmentSlot::Weapon);
+    assert!(fishing_change_autocast_impl(world, false).is_empty());
+    assert!(fishing_change_autocast_impl(world, true).is_empty());
+    assert!(!world.resource::<FishingResource>().auto_cast);
+}
+
+#[test]
 fn fishing_delayed_host_wake_advances_one_attempt_without_advancing_world_time() {
     let mut session = fixture(2);
     let cast_at = Instant::now() - Duration::from_secs(2);

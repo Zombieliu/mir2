@@ -126,6 +126,10 @@ pub(super) fn fishing_change_autocast_impl(
     sync_fishing_slots_from_equipment(world);
 
     if !has_equipped_fishing_rod(world) {
+        // The clients retire the preference after an authoritative weapon change.
+        if !auto_cast {
+            world.resource_mut::<FishingResource>().auto_cast = false;
+        }
         return Vec::new();
     }
     if !fishing_has_reel(world) {
@@ -537,14 +541,9 @@ fn fishing_has_reel(world: &World) -> bool {
 }
 
 fn fishing_autocast_enabled(world: &World) -> bool {
-    let fishing = world.resource::<FishingResource>();
-    fishing.auto_cast
-        && if fishing_slot_model_available(world) {
-            fishing_slot_item_of_type(world, FISHING_SLOT_REEL, CRYSTAL_ITEM_TYPE_REEL)
-                .is_some_and(|reel| reel.durability_current != Some(0))
-        } else {
-            fishing.rod_has_reel
-        }
+    // Successful wear controls that cast's cancellation. An already-zero reel
+    // is still mounted and can retry a later miss until a successful wear removes it.
+    world.resource::<FishingResource>().auto_cast && fishing_has_reel(world)
 }
 
 fn fishing_slot_item_of_type(world: &World, slot: usize, item_type: u8) -> Option<&ItemState> {

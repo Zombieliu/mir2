@@ -67,6 +67,21 @@ export function fishingGearForDurability(rod: FishingRodView, uniqueId: number) 
   return uniqueId === rod.uniqueId ? rod : rod.slots.find(slot => slot?.uniqueId === uniqueId) ?? null;
 }
 
+/** False requires a known empty weapon/reel slot or a known non-fishing weapon. */
+export function fishingAutocastAvailability(equipmentItems: readonly unknown[], layout: EquipmentGatewaySnapshot): boolean | null {
+  const rows = equipmentItems.map(record).filter(row => typeof row?.slot === "string" && row.slot.toLowerCase() === "weapon");
+  const cells = layout.placements.filter(row => row.container === 2 && row.slot === 0);
+  if (!rows.length && !cells.length) return false;
+  const uid = cells[0]?.uniqueId, weapon = rows[0];
+  if (rows.length !== 1 || cells.length !== 1 || !unsigned(uid) || weapon?.uniqueId !== uid
+    || layout.placements.filter(row => row.uniqueId === uid).length !== 1) return null;
+  const source = record(weapon.tooltipSource), user = record(source?.userItem), info = record(source?.realInfo ?? source?.info);
+  if (!user || !info || user.unique_id !== uid || user.item_index !== info.item_index
+    || info.item_type !== 1 || typeof info.shape !== "number" || !Number.isSafeInteger(info.shape)) return null;
+  if (info.shape !== 49 && info.shape !== 50) return false;
+  return projectFishingRod(source, uid)?.canAutoCast ?? null;
+}
+
 export function fishingBagCell(layout: EquipmentGatewaySnapshot, bagSlot: number): number | null | undefined {
   if (!unsigned(bagSlot) || bagSlot >= layout.capacity - 6 || bagSlot >= 80) return undefined;
   const rows = layout.placements.filter(row => row.container === 0 && row.slot === bagSlot);

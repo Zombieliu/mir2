@@ -204,7 +204,7 @@ export function OriginalClientFishingWindows({ t, rod, equipmentOpen, status, bi
         rect={{ left: 47, top: 95, width: 60, height: 25 }}
         label={t("ui.fishingReel", [], "Reel in")} data-fishing-bite="true"
         disabled={reelPending} onClick={onReelBite} />}
-      {(autoCast || rod?.canAutoCast) && <>
+      {rod?.canAutoCast && <>
         <R16SocialButton frame={180} rect={{ left: 110, top: 95, width: 48, height: 25 }}
           label={t("game.complete.005", [], "Auto")} aria-pressed={autoCast} data-fishing-autocast="true"
           disabled={reelPending} onClick={onToggleAutoCast} />

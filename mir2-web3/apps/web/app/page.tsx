@@ -110,7 +110,7 @@ import type { EntityAnimationRuntime } from "../lib/client-presentation-runtime"
 import { WorldFishingSource, sameOwner as sameWorldFishingOwner, type WorldFishingOwner,
   type WorldFishingSourceRecord } from "../lib/world-fishing-source";
 import type { InventoryTabKey } from "../lib/original-ui";
-import { fishingAttachmentApplied, fishingAttachmentReceipt, fishingBagCell, fishingGearForDurability, projectFishingRod, readFishingStatus,
+import { fishingAttachmentApplied, fishingAttachmentReceipt, fishingAutocastAvailability, fishingBagCell, fishingGearForDurability, projectFishingRod, readFishingStatus,
   type FishingAttachmentCommand, type FishingStatusView } from "../lib/world-fishing-panel";
 import { appendFishingAnimationEdge, readFishingFeedback, type FishingAnimationEdge, type FishingFeedback } from "../lib/world-fishing-feedback";
 import type { WorldFishingGesture, WorldFishingPointer, WorldFishingAnimationContext,
@@ -2355,7 +2355,7 @@ export default function HomePage() {
     | Readonly<{ type: "fishingChangeAutocast"; autoCast: boolean }>;
   type FishingPanelAttempt = { owner: WorldFishingOwner; command: FishingPanelCommand; active: FishingActive | null;
     selection: FishingSelection | null; bite?: object;
-    snapshot: GatewayWorldSnapshot | null; rodSignature: string | null };
+    snapshot: GatewayWorldSnapshot | null; rodSignature: string | null; autoCastLoss?: true };
   const fishingPanelRef = useRef({ equipmentOpen: false, noticeOpen: false, autoCast: false, escapeCancels: false,
     selection: null as FishingSelection | null, active: null as FishingActive | null });
   const fishingPanelAttemptRef = useRef<FishingPanelAttempt | null>(null);
@@ -8365,11 +8365,14 @@ export default function HomePage() {
     }
     if (changed) renderFishingPanel(value => value + 1);
   }
-  function fishingPanelOwner(): WorldFishingOwner | null {
-    return screenRef.current === "game" && worldRef.current.connected && initialSceneAssetsReadyRef.current
+  function fishingPanelSessionOwner(): WorldFishingOwner | null {
+    return screenRef.current === "game" && worldRef.current.connected
       && equipmentHostSuspendReasonRef.current === null && socketRef.current?.readyState === WebSocket.OPEN
-      && !isSpectatorBrowserMode() && document.visibilityState === "visible" && document.hasFocus()
-      ? worldFishingOwner() : null;
+      && !isSpectatorBrowserMode() ? worldFishingOwner() : null;
+  }
+  function fishingPanelOwner(): WorldFishingOwner | null {
+    return initialSceneAssetsReadyRef.current && document.visibilityState === "visible" && document.hasFocus()
+      ? fishingPanelSessionOwner() : null;
   }
   function sameFishingInventoryOwner(a: WorldFishingOwner, b: WorldFishingOwner): boolean {
     return a.socket === b.socket && a.connectionGeneration === b.connectionGeneration
@@ -8477,8 +8480,20 @@ export default function HomePage() {
     const rod = carriers.length === 1 ? projectFishingRod(carriers[0].tooltipSource, rodId) : null;
     if (!rod || !fishingAttachmentApplied(pending.command, rod, layout)) return;
     fishingAttachmentRef.current = null;
-    if (!rod.canAutoCast && fishingPanelRef.current.autoCast) queueMicrotask(() => changeFishingAutocast(false, true));
     renderFishingPanel(value => value + 1);
+  }
+  function observeFishingAutocastSnapshot(snapshot: GatewayWorldSnapshot, layout: EquipmentGatewaySnapshot) {
+    if (!fishingPanelRef.current.autoCast || fishingAutocastAvailability(snapshot.equipmentItems, layout) !== false) return;
+    const owner = fishingPanelSessionOwner();
+    if (!owner || snapshot.playerObjectId !== owner.playerObjectId
+      || normalizeQuestMapFileName(snapshot.mapFileName ?? null) !== owner.mapFileName) return;
+    // The owned gear snapshot can arrive after FishingUpdate ended the cast.
+    queueMicrotask(() => {
+      const current = fishingPanelSessionOwner();
+      if (current && sameWorldFishingOwner(owner, current)) {
+        submitFishingPanelCommand({ type: "fishingChangeAutocast", autoCast: false }, undefined, undefined, snapshot);
+      }
+    });
   }
   function fishingBagCellClick(tab: InventoryTabKey, cell: number): boolean {
     const panel = fishingPanelRef.current;
@@ -8526,34 +8541,45 @@ export default function HomePage() {
       gameBusRef.current?.emit({ type: "uiSound", event: "uiButtonClick" });
     }
   }
-  function changeFishingAutocast(autoCast: boolean, lostReel = false) {
+  function changeFishingAutocast(autoCast: boolean) {
     // Disabling the current cast must remain available while durability and
     // bait updates are being reconciled with the next equipment snapshot.
-    if (!autoCast && !lostReel) {
+    if (!autoCast) {
       submitFishingPanelCommand({ type: "fishingChangeAutocast", autoCast: false });
       return;
     }
     const rod = readWorldFishingRod(), view = rod && projectFishingRod(rod.carrier, rod.uniqueId);
-    if (!rod || !view || (lostReel ? view.canAutoCast || autoCast : !view.canAutoCast)) return;
+    if (!rod || !view?.canAutoCast) return;
     submitFishingPanelCommand({ type: "fishingChangeAutocast", autoCast }, rod);
   }
-  function submitFishingPanelCommand(command: FishingPanelCommand, rod?: NonNullable<ReturnType<typeof readWorldFishingRod>>, bite?: object): boolean {
-    const owner = fishingPanelOwner(), panel = fishingPanelRef.current;
+  function submitFishingPanelCommand(command: FishingPanelCommand, rod?: NonNullable<ReturnType<typeof readWorldFishingRod>>,
+    bite?: object, autoCastLoss?: GatewayWorldSnapshot): boolean {
+    const owner = autoCastLoss ? fishingPanelSessionOwner() : fishingPanelOwner(), panel = fishingPanelRef.current;
     if (!owner || fishingPanelAttemptRef.current) return false;
     const attempt: FishingPanelAttempt = { owner, command: Object.freeze(command), active: panel.active, selection: panel.selection, bite,
-      snapshot: rod ? bagBeltInventoryReadyRef.current?.raw ?? null : null, rodSignature: rod?.signature ?? null };
+      snapshot: autoCastLoss ?? (rod ? bagBeltInventoryReadyRef.current?.raw ?? null : null),
+      rodSignature: rod?.signature ?? null, autoCastLoss: autoCastLoss ? true : undefined };
     fishingPanelAttemptRef.current = attempt;
     try { return sendRaw(attempt.command, { fishingPanelAttempt: attempt, quiet: true }); }
     catch (error) { console.error("[mir2] fishing panel send outcome is unknown", error); return false; }
     finally { fishingPanelAttemptRef.current = null; }
   }
   function enterFishingPanelSend(attempt: FishingPanelAttempt, command: Record<string, unknown>, socket: WebSocket): boolean {
-    const owner = fishingPanelOwner(), panel = fishingPanelRef.current;
+    const owner = attempt.autoCastLoss ? fishingPanelSessionOwner() : fishingPanelOwner(), panel = fishingPanelRef.current;
     if (!owner || owner.socket !== socket || fishingPanelAttemptRef.current !== attempt
       || !sameWorldFishingOwner(attempt.owner, owner) || JSON.stringify(attempt.command) !== JSON.stringify(command)) return false;
     const action = attempt.command, active = panel.active;
     const currentCast = !!active && active === attempt.active && !active.reeling && sameWorldFishingOwner(active.owner, owner);
-    if (action.type === "fishingCast") {
+    if (attempt.autoCastLoss) {
+      const inventory = bagBeltInventoryReadyRef.current;
+      if (action.type !== "fishingChangeAutocast" || action.autoCast || !panel.autoCast || !inventory
+        || inventory.raw !== attempt.snapshot || inventory.snapshotVersion !== worldSnapshotVersionRef.current
+        || inventory.layout !== equipmentSnapshotRef.current?.snapshot
+        || inventory.raw.playerObjectId !== owner.playerObjectId
+        || normalizeQuestMapFileName(inventory.raw.mapFileName ?? null) !== owner.mapFileName
+        || fishingAutocastAvailability(inventory.raw.equipmentItems, inventory.layout) !== false) return false;
+      panel.autoCast = false;
+    } else if (action.type === "fishingCast") {
       if (!currentCast || (attempt.bite && active.bite !== attempt.bite)) return false;
       active.reeling = true;
     } else if (action.type === "fishingChangeAutocast" && !action.autoCast && currentCast) {
@@ -8564,8 +8590,8 @@ export default function HomePage() {
       if (!rod || !view || rod.signature !== attempt.rodSignature || !attempt.snapshot
         || bagBeltInventoryReadyRef.current?.raw !== attempt.snapshot) return false;
       if (action.type === "fishingChangeAutocast") {
-        if (panel.autoCast === action.autoCast || (view.canAutoCast ? !currentCast : action.autoCast)) return false;
-        panel.autoCast = action.autoCast;
+        if (!action.autoCast || panel.autoCast || !currentCast || !view.canAutoCast) return false;
+        panel.autoCast = true;
       } else {
         if (!panel.equipmentOpen || !bagOpenRef.current || fishingAttachmentRef.current || panel.selection !== attempt.selection
           || equipmentControllerRef.current?.status().pending !== 0 || storageServiceActiveRef.current || pendingStorageRequestsRef.current.size > 0
@@ -9732,6 +9758,7 @@ export default function HomePage() {
       const fishingOwner = worldFishingOwner(owner.playerObjectId, snapshot.mapFileName);
       if (fishingOwner) observeFishingAttachmentSnapshot(fishingOwner, snapshot, baseline.snapshot);
     }
+    observeFishingAutocastSnapshot(snapshot, baseline.snapshot);
   }
 
   function receiveBagBeltDropGeometry(geometry: BagBeltGeometry | null) {
@@ -21369,7 +21396,9 @@ export default function HomePage() {
     ? fishingPanel.active : null;
   const activeFishingBite = activeFishing?.bite;
   const fishingRod = fishingPanel.equipmentOpen || activeFishing ? readWorldFishingRod() : null;
-  const fishingRodView = fishingRod && projectFishingRod(fishingRod.carrier, fishingRod.uniqueId);
+  const fishingDisplayWeapon = !fishingRod && (fishingPanel.equipmentOpen || activeFishing) ? readFishingWeaponFromDisplay() : null;
+  const fishingRodView = fishingRod ? projectFishingRod(fishingRod.carrier, fishingRod.uniqueId)
+    : fishingDisplayWeapon && projectFishingRod(fishingDisplayWeapon.carrier, fishingDisplayWeapon.uid);
   const fishingSelection = fishingPanel.selection;
   let fishingHeldIcon: number | null = null;
   if (fishingRod && fishingRodView && fishingSelection) {

@@ -5762,7 +5762,7 @@ function bagBeltPageFixture(occupied=false,extraInventory=[]) {
     projectMailItemMutationSnapshot:mailParcelGateway.projectMailItemMutationSnapshot,
     parityItemMutationAllowed:page.api.parityItemMutationAllowed,equipmentRenderOwnerToken:{...bagOwner,connectionGeneration:owner.connectionGeneration,sessionGeneration:owner.sessionGeneration},
     bagBeltGeometryRef:ref(g),bagBeltGestureRegistryRef:ref(new WeakMap()),bagBeltArmedGestureRef:ref(null),bagBeltInventoryEpochRef:ref(1),
-    bagBeltLastInventorySignatureRef:ref(null),renderBagOwner:()=>{},console:{error:(...args)=>errors.push(args)},
+    bagBeltLastInventorySignatureRef:ref(null),renderBagOwner:()=>{},observeFishingAutocastSnapshot:()=>{},console:{error:(...args)=>errors.push(args)},
     sendRaw:(command,options)=>api.bagBeltSocketEntry(command,options,page.socket,beforeFinal)};
   const keys=Object.keys(scope),api=new Function(...keys,bagBeltPageJs+"\nreturn {beginBagToBeltGesture,armBagToBeltGesture,submitBagToBeltMove,bagBeltSocketEntry,bagBeltFinalCurrent,observeBagBeltInventorySnapshot,receiveBagBeltDropGeometry,invalidateBagBeltInventory};")(...keys.map(k=>scope[k]));
   page.socket.send=body=>{if(throwTransport)throw Error("fixture socket throw");page.sentBodies.push(body);page.sent.push(JSON.parse(body));};
@@ -6281,7 +6281,8 @@ const fishingPageNames=new Set(["worldFishingOwner","cancelWorldFishingGesture",
   "currentSpellsOwner","otherPlayerUiBlocksInput","heroUiBlocksGameplay","referenceWindowsBlockGameplay","mapRouteInputBlocked","sceneInputDeferredForInitialAssets",
   "originalMapRegionContainsTile","originalMapCellBlocksMovement",
   "retireFishingPanel","observeFishingStatus","sameFishingInventoryOwner","observeFishingAttachmentReceipt",
-  "fishingPanelOwner","retainFishingTackleHold","enterFishingPanelSend"]),fishingPageDeclarations=new Map();
+  "fishingPanelSessionOwner","fishingPanelOwner","retainFishingTackleHold","observeFishingAutocastSnapshot",
+  "submitFishingPanelCommand","enterFishingPanelSend"]),fishingPageDeclarations=new Map();
 (function visit(node){if(ts.isFunctionDeclaration(node)&&fishingPageNames.has(node.name?.text))fishingPageDeclarations.set(node.name.text,node.getText(fishingPageAst));ts.forEachChild(node,visit);})(fishingPageAst);
 assert.equal(fishingPageDeclarations.size,fishingPageNames.size,"all actual fishing Page and input authority declarations");
 const fishingSendNode=[];(function visit(node){if(ts.isFunctionDeclaration(node)&&node.name?.text==="sendRaw")fishingSendNode.push(node);ts.forEachChild(node,visit);})(fishingPageAst);
@@ -6314,11 +6315,12 @@ assert.equal(fishingPreflightGuards.length,2,"actual raw fishing cast requires i
 const fishingPageJs=ts.transpileModule([...fishingPageDeclarations.values(),parityDeclarations.get("recordNpcPurchaseAction")].join("\n")+"\nfunction fishingSocketEntry(command,options,socket,beforeFinal){"+paritySendDiagnosticText+"\n"+
   fishingPreflightGuards.map(node=>node.getText(fishingPageAst)).join("\n")+"\n"+fishingSendStatements.slice(fishingSerializeIndex,fishingSerializeIndex+2).map(node=>node.getText(fishingPageAst)).join("\n")+
   "\nif(beforeFinal)beforeFinal();\n"+fishingSendStatements.slice(fishingDtoIndex,fishingDtoIndex+2).map(node=>node.getText(fishingPageAst)).join("\n")+
-  "\n"+fishingSendEntry[0].getText(fishingPageAst)+"\n"+fishingFollowingPearlEntry.getText(fishingPageAst)+"\n"+fishingFollowingRankingInspectEntry.getText(fishingPageAst)+"\n"+fishingSendStatements[fishingSocketIndex].getText(fishingPageAst)+"\nreturn true;}",
+  "\n"+fishingSendEntry[0].getText(fishingPageAst)+"\n"+fishingFollowingPearlEntry.getText(fishingPageAst)+"\n"+fishingFollowingRankingInspectEntry.getText(fishingPageAst)+"\n"+
+  fishingSendStatements[fishingSendStatements.indexOf(fishingFollowingRankingInspectEntry)+7].getText(fishingPageAst)+"\n"+fishingSendStatements[fishingSocketIndex].getText(fishingPageAst)+"\nreturn true;}",
   {compilerOptions:{target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.None}}).outputText;
 function worldFishingPageFixture(){
   const owner=npcRepairOwner(),rod={...npcRepairItem(0,"weapon"),authoritativeUniqueId:0};delete rod.container;
-  rod.tooltipSource.info={...rod.tooltipSource.info,item_type:1,shape:49};rod.tooltipSource.userItem.slots=[null,null,null,null,null];
+  rod.tooltipSource.info={...rod.tooltipSource.info,name:"BlueFishingRod",item_type:1,shape:49};rod.tooltipSource.userItem.slots=[null,null,null,null,null];
   const raw=npcRepairSnapshot({inventoryItems:[],beltItems:[],equipmentItems:[rod]}),page=parityPageFixture(owner,raw),ref=current=>({current}),
     region={mapFileName:"M001.map",regionBounds:{minX:0,minY:0,maxX:10,maxY:10},cells:[{x:1,y:1,blocked:true},{x:1,y:0,blocked:true},{x:1,y:2,blocked:true},{x:4,y:1,light:105}]},
     self={objectId:17,kind:"selfPlayer",x:0,y:1,direction:"Right",dead:false,fishing:false,transformType:0},
@@ -6327,7 +6329,7 @@ function worldFishingPageFixture(){
   page.scope.bagBeltInventoryReadyRef.current={layout,raw,signature:JSON.stringify([raw.inventoryCapacity,raw.inventoryItems,raw.beltItems]),epoch:1,snapshotVersion:1};
   for(const name of ["heroManagementOpenRef","heroPetOpenRef","cashShopOpenRef"])page.scope[name].current=false;
   page.scope.socialItemWindowsRef.current={guild:false,trade:false};page.scope.equipmentControllerRef.current={status:()=>({ready:true,pending:0})};
-  let now=1000,beforeFinal=null,throwTransport=false,abiEdge=null,peekEdge=null;const requests=[],peekRequests=[],errors=[],entryProofs=[];
+  let now=1000,beforeFinal=null,throwTransport=false,abiEdge=null,peekEdge=null;const requests=[],peekRequests=[],errors=[],entryProofs=[],microtasks=[];
   const fishingModule={fishing_click_abi_version:()=>1,fishing_click_targets(json){const input=JSON.parse(json);requests.push(["targets",input]);abiEdge?.("targets");
     return JSON.stringify({version:1,ok:true,walkCandidates:[{direction:2,cell:{x:1,y:1}},{direction:1,cell:{x:1,y:0}},{direction:3,cell:{x:1,y:2}}],waterTarget:{x:4,y:1}});},
     fishing_click_decision(json){const input=JSON.parse(json);requests.push(["decision",input]);abiEdge?.("decision");return JSON.stringify({version:1,ok:true,decision:
@@ -6347,10 +6349,10 @@ function worldFishingPageFixture(){
     worldFishingCastClockRef:ref(null),queuedMoveIntentRef:ref(null),questRouteRunRef:ref(null),nextMoveSendAtRef:ref(0),
     fishingPanelRef:ref({equipmentOpen:false,noticeOpen:false,autoCast:false,escapeCancels:false,selection:null,active:null}),
     fishingPanelAttemptRef:ref(null),renderFishingPanel:()=>{},gameBusRef:ref({emit:()=>{}}),...fishingPanelModule,
-    setWorldFishingRecord:()=>{},console:{error:(...args)=>errors.push(args)},
+    setWorldFishingRecord:()=>{},queueMicrotask:task=>microtasks.push(task),console:{error:(...args)=>errors.push(args)},
     sendRaw:(command,options)=>{entryProofs.push(options.worldFishingProof);return api.fishingSocketEntry(command,options,page.socket,beforeFinal);},
     sendCrystalTurn:(direction,proof)=>{entryProofs.push(proof);return api.fishingSocketEntry({type:"turn",direction},{worldFishingProof:proof},page.socket,beforeFinal);}};
-  const keys=Object.keys(scope),api=new Function(...keys,fishingPageJs+"\nreturn {worldFishingOwner,captureWorldFishingSnapshot,captureWorldFishingGatewayEvent,commitWorldFishingAnimation,beginWorldFishingGesture,cancelWorldFishingGesture,retireWorldFishingGesture,worldFishingLeaseCurrent,worldFishingMapCell,worldFishingFinalCurrent,tryWorldFishingBlockedClick,fishingSocketEntry,readWorldFishingRod,worldFishingPureUiBlocked,observeFishingStatus,retainFishingTackleHold,enterFishingPanelSend};")(...keys.map(key=>scope[key]));
+  const keys=Object.keys(scope),api=new Function(...keys,fishingPageJs+"\nreturn {worldFishingOwner,captureWorldFishingSnapshot,captureWorldFishingGatewayEvent,commitWorldFishingAnimation,beginWorldFishingGesture,cancelWorldFishingGesture,retireWorldFishingGesture,worldFishingLeaseCurrent,worldFishingMapCell,worldFishingFinalCurrent,tryWorldFishingBlockedClick,fishingSocketEntry,readWorldFishingRod,worldFishingPureUiBlocked,observeFishingStatus,retainFishingTackleHold,observeFishingAutocastSnapshot,enterFishingPanelSend};")(...keys.map(key=>scope[key]));
   page.socket.send=body=>{if(throwTransport)throw Error("fixture unknown transport");page.sentBodies.push(body);page.sent.push(JSON.parse(body));};
   api.captureWorldFishingSnapshot({...raw,entities:[self]},owner.connectionGeneration);
   const source=scope.worldFishingSourceRef.current.current(api.worldFishingOwner());assert.ok(source?.animationKnown,"actual raw M001.map snapshot must establish normalized map authority");assert.ok(api.readWorldFishingRod(),"actual raw UID-zero rod source must pass current equipment custody");
@@ -6358,7 +6360,7 @@ function worldFishingPageFixture(){
   const queued={kind:"direction",direction:"Right",requestedMode:"walk",requestedAt:now};let pointerCurrent=true,pointerEdge=null;
   const pointer={source:{},stage:{},pointerId:1,pointerType:"mouse",startedAt:now,current:()=>{pointerEdge?.();return pointerCurrent;}};
   const begin=()=>{const gesture=api.beginWorldFishingGesture(pointer);assert.ok(gesture);scope.queuedMoveIntentRef.current=queued;return gesture;};
-  return {...page,scope,api,raw,rod,region,self,core,runtime,fishingModule,source,commit,queued,pointer,requests,peekRequests,errors,entryProofs,begin,
+  return {...page,scope,api,raw,rod,region,self,core,runtime,fishingModule,source,commit,queued,pointer,requests,peekRequests,errors,entryProofs,begin,microtasks,
     setNow:value=>now=value,setPointerCurrent:value=>pointerCurrent=value,setPointerEdge:value=>pointerEdge=value,setBeforeFinal:value=>beforeFinal=value,setThrow:value=>throwTransport=value,
     setAbiEdge:value=>abiEdge=value,setPeekEdge:value=>peekEdge=value};
 }
@@ -6410,6 +6412,53 @@ check("Fishing panel bite click only sends against the current nibble",()=>{
   attempt.bite=panel.active.bite;
   assert.equal(f.api.enterFishingPanelSend(attempt,attempt.command,f.socket),true);
   assert.equal(f.api.enterFishingPanelSend(attempt,attempt.command,f.socket),false);
+});
+check("Fishing auto-off accepts one owned gear loss after the cast and survives a hidden browser",()=>{
+  for (const emptyWeapon of [false,true]) {
+    const f=worldFishingPageFixture(),panel=f.scope.fishingPanelRef.current;
+    panel.autoCast=true;
+    f.scope.document.visibilityState="hidden";
+    f.scope.document.hasFocus=()=>false;
+    f.scope.initialSceneAssetsReadyRef.current=false;
+    const missing=emptyWeapon?{...f.raw,equipmentItems:[]}:f.raw;
+    const layout=equipmentGateway.projectEquipmentGatewaySnapshot(missing);
+    assert.equal(fishingPanelModule.fishingAutocastAvailability(missing.equipmentItems,layout),false,"qualified loss fixture");
+    assert.equal(f.api.worldFishingOwner()?.mapFileName,f.scope.normalizeQuestMapFileName(missing.mapFileName),"loss fixture is in the current map");
+    f.scope.worldSnapshotVersionRef.current=2;
+    f.scope.equipmentSnapshotRef.current.snapshot=layout;
+    f.scope.bagBeltInventoryReadyRef.current={layout,raw:missing,snapshotVersion:2};
+    f.api.observeFishingAutocastSnapshot(missing,layout);
+    f.api.observeFishingAutocastSnapshot(missing,layout);
+    assert.equal(f.microtasks.length,2);
+    for(const task of f.microtasks) task();
+    assert.deepEqual(f.sent,[{type:"fishingChangeAutocast",autoCast:false}]);
+    assert.equal(panel.autoCast,false);
+    assert.equal(panel.active,null);
+  }
+});
+check("Fishing auto-off keeps a mounted zero Reel and refuses stale or ambiguous gear evidence",()=>{
+  for(const reason of ["mountedZero","unknownSocket","newSnapshot","newVersion","otherMap","mapChanged","loggedOut"]) {
+    const f=worldFishingPageFixture(),panel=f.scope.fishingPanelRef.current;
+    panel.autoCast=true;
+    const raw=structuredClone(f.raw),rod=raw.equipmentItems[0];
+    if(reason==="mountedZero") rod.tooltipSource.userItem.slots[4]={unique_id:4,item_index:802,count:1,current_dura:0};
+    if(reason==="unknownSocket") rod.tooltipSource.userItem.slots.length=4;
+    if(reason==="otherMap") raw.mapFileName="M002.map";
+    const layout=equipmentGateway.projectEquipmentGatewaySnapshot(raw);
+    f.scope.worldSnapshotVersionRef.current=2;
+    f.scope.equipmentSnapshotRef.current.snapshot=layout;
+    f.scope.bagBeltInventoryReadyRef.current={layout,raw,snapshotVersion:2};
+    f.api.observeFishingAutocastSnapshot(raw,layout);
+    if(reason==="mountedZero"||reason==="unknownSocket"||reason==="otherMap") assert.equal(f.microtasks.length,0);
+    else assert.equal(f.microtasks.length,1);
+    if(reason==="newSnapshot") f.scope.bagBeltInventoryReadyRef.current={layout,raw:{...raw},snapshotVersion:2};
+    if(reason==="newVersion") f.scope.worldSnapshotVersionRef.current++;
+    if(reason==="mapChanged") f.scope.questSceneRevisionRef.current++;
+    if(reason==="loggedOut") f.scope.screenRef.current="select";
+    for(const task of f.microtasks) task();
+    assert.deepEqual(f.sent,[],reason);
+    assert.equal(panel.autoCast,true,reason);
+  }
 });
 check("Fishing tackle ACK and full authoritative placement retain zero UID and exact bag index",()=>{
   const {projectFishingRod,fishingAttachmentApplied,fishingAttachmentReceipt,fishingBagCell,fishingGearForDurability}=fishingPanelModule;

@@ -16,9 +16,9 @@ working tree, services, release packages, source snapshots or parity percentages
 
 ## Last recorded decisions and open work
 
-2026-11-10 WebGPU 和 WebGL2 实点验证鱼具原图跟手、误放拦截、装卸后重登。鱼钩归零的系统提示在简中和英文各复测一次，下次收线移除不重复。继续线轮耗尽开关、Windows 实际窗口、Hosted 和发行。 [拖放与提示](evidence/r16-web-fishing-loop-20261110/README.md#鱼具跟手图与归零提示) · [磨损与跨视野](evidence/r16-web-fishing-loop-20261110/README.md#鱼具磨损与跨视野)
+2026-11-10 普通协议复测零耐久线轮空竿续抛及后续移除。WebGPU 和 WebGL2 实点验证线轮消失后关闭一次、替换不恢复旧开关，同档重登正常。Windows 定向状态和协议已复验。继续实际窗口、Hosted 和发行。 [续抛与同档](evidence/r16-web-fishing-loop-20261110/README.md#线轮耗尽与自动续抛) · [原图拖放与归零提示](evidence/r16-web-fishing-loop-20261110/README.md#鱼具跟手图与归零提示)
 
-2026-11-10 公网 `a23cc382` 默认 Chrome 简中和繁中通过出码、待确认和取消，二维码内容与官方钱包链接一致。比奇候选 `c52ea9abb6` 的发布 pin 和专用审核补丁均在 `7b6429503d` 通过应用校验。待独立审核、正式切换、默认网络签名进比奇和实体手机。 [本轮公网复测](evidence/r16-web-fishing-loop-20261110/tackle-cursor-and-zero-notice.json) · [发布候选证据](evidence/numeron-web-release-20261108/first-scene-release-candidate-20261110.json)
+2026-11-10 公网 `a23cc382` 默认 Chrome 简中和繁中通过出码、待确认和取消，二维码内容与官方钱包链接一致。比奇候选 `c52ea9abb6` 尚无 Vercel 部署，发布 pin 和专用审核补丁均在 `2ea39c9e83` 通过应用校验。待独立审核、正式切换、默认网络签名进比奇和实体手机。 [本轮公网复测](evidence/r16-web-fishing-loop-20261110/reel-autocast-loss.json) · [发布候选证据](evidence/numeron-web-release-20261108/first-scene-release-candidate-20261110.json)
 
 2026-11-10 公网 `83eadf4f` 切到第一方钱包中继，出码读限时 20 秒及一次瞬时失败重试。直连浏览器用官方手机尺寸钱包完成签名、兑换、比奇渲染及正常退出。同机默认 Chrome 等待资源后出码及轮询通过，独立冷启动仍复现超时。继续冷启动和实体手机验收。 [扫码发布与回执](evidence/numeron-web-release-20261108/qr-first-party-relay-20261110.json)
 
