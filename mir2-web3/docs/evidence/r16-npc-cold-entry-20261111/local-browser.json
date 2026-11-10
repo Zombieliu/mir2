@@ -1,0 +1,289 @@
+{
+  "revision": "534322e790c7feccbc21e48541119f340a2e40ee",
+  "exactCommittedOverlayBlobs": [
+    {
+      "path": "mir2-web3/apps/web/app/components/original-client-dialogs.tsx",
+      "blob": "783a841348c78ae66552a73836ccf55c287c3d32"
+    },
+    {
+      "path": "mir2-web3/apps/web/app/components/original-client-game-ui-scene.tsx",
+      "blob": "ce68968dcffcc92b888dc87d3ff3f0bee2b6eb78"
+    },
+    {
+      "path": "mir2-web3/apps/web/app/components/original-client-shell-types.ts",
+      "blob": "3b120d5e30b9cbd0ccb4b063c71fd6d61969a2c2"
+    },
+    {
+      "path": "mir2-web3/apps/web/app/original-client-shell.tsx",
+      "blob": "6ba6a5d6638b99dc7d114d11ee8d2f2329e25eef"
+    },
+    {
+      "path": "mir2-web3/apps/web/app/page.tsx",
+      "blob": "059734f12ddc30586c5bef364c50785785e258c3"
+    },
+    {
+      "path": "mir2-web3/apps/web/lib/generated/r16-native-localization-gameplay.json",
+      "blob": "a1d753ac751e579b7b85aa3ee07cf2600695287f"
+    },
+    {
+      "path": "mir2-web3/apps/web/lib/generated/r16-native-localization-gameplay-npc.json",
+      "blob": "742f5dd6ca4d4f279c898eb64924be19b289a465"
+    },
+    {
+      "path": "mir2-web3/apps/web/lib/r16-native-localization.ts",
+      "blob": "d6fe77ae2e86539515b1dd3b043fc7418dc147cc"
+    },
+    {
+      "path": "mir2-web3/apps/web/scripts/generate-r16-native-localization.mjs",
+      "blob": "63c32e9475102b40f9b65fe5994ca4094e84605d"
+    },
+    {
+      "path": "mir2-web3/apps/web/scripts/test-bevy-quest-ui.mjs",
+      "blob": "caa1711c01fff036dae8d9b2c4c4ab3cfe1e4058"
+    },
+    {
+      "path": "mir2-web3/apps/web/scripts/test-r16-native-localization.mjs",
+      "blob": "73347fd38b5a789bb60596b17d7ee6856aec1c5b"
+    }
+  ],
+  "build": {
+    "id": "tso4DAkncuoteumhawtMv",
+    "sourceReceiptSha256": "1584a2c1bc1f048b860e98d98e184d58bef36a15b6746d56a6be589312a64840",
+    "assetRelease": "20261108-r16-08ec86d5105c",
+    "renderer": "bevy-84ef836460a84e03",
+    "verifiedReusedInputs": 27
+  },
+  "checks": {
+    "hostedProfileNextBuildAndTypeScript": true,
+    "focusedNode": 66,
+    "releaseGuards": 67,
+    "catalogGeneratorCheck": true,
+    "localizationStage5Groups": 520,
+    "localeSourceReceiptSha256": "9a7610cc1fda39c3ced28bc5e9775fa9d04f7c732e6b17a35f139e1c0cfa09d0",
+    "originalWipUnchanged": 62
+  },
+  "actorSamples": [
+    {
+      "lane": "npc-shared-pinned-r2",
+      "sha256": "56fcbea0dd220658c0cbc0e2c0d337963ea9ad084fb121ad3cab708943a5c920",
+      "firstActorRequestMsAfterRegionDecode": 20,
+      "lastInitialActorRequestMsAfterRegionDecode": 24,
+      "initialActorRequestCount": 13
+    },
+    {
+      "lane": "npc-shared-pinned-r3",
+      "sha256": "7c28ba14caf857367e9415f10acf9357aa7f8a0011e4a8e205b4deb950698c34",
+      "firstActorRequestMsAfterRegionDecode": 31,
+      "lastInitialActorRequestMsAfterRegionDecode": 38,
+      "initialActorRequestCount": 13
+    }
+  ],
+  "lanes": [
+    {
+      "lane": "npc-webgpu-r7",
+      "passed": true,
+      "sourceReceiptSha256": "2d57b5e2a9323c956ed818bdc90adafd4a9344e3938fac211829c1733a214737",
+      "contentProfile": "crystal_full",
+      "requestedBackend": "webgpu",
+      "surface": {
+        "backend": null,
+        "owner": "react",
+        "sharedCanvas": "mir2-quest-ui-canvas",
+        "language": null
+      },
+      "controlledPublishedRenderer": false,
+      "firstPlayableAfterStartAckMs": 4279,
+      "initialMap": "0",
+      "mapPosition": {
+        "x": 342,
+        "y": 244
+      },
+      "firstWalkPosition": {
+        "x": 343,
+        "y": 244
+      },
+      "noOptionalLocaleRequestsBeforeNpc": true,
+      "dialog": {
+        "pendingEnglish": true,
+        "interrupted": "net::ERR_INCOMPLETE_CHUNKED_ENCODING",
+        "visibleAfterFailure": true,
+        "bodyRetrySamePath": true,
+        "translatedLine": "很高兴见到你，有什么能帮你的？",
+        "protocolSourceUnchanged": true,
+        "shopTarget": "@Buy",
+        "shopGoods": 6,
+        "shopRoundTripMs": 508
+      },
+      "logout": {
+        "returnedToSelect": true,
+        "savedPosition": {
+          "x": 342,
+          "y": 244
+        }
+      },
+      "failure": null,
+      "ownedProcessesClosed": true,
+      "originalFixtureUnchanged": true
+    },
+    {
+      "lane": "npc-shared-r1",
+      "passed": true,
+      "sourceReceiptSha256": "18e846b17a38386098914cbe655001d8a7049ce92b85e2526f00132c53186d1e",
+      "contentProfile": "crystal_full",
+      "requestedBackend": "webgl2",
+      "surface": {
+        "backend": null,
+        "owner": "react",
+        "sharedCanvas": "mir2-quest-ui-canvas",
+        "language": null
+      },
+      "controlledPublishedRenderer": false,
+      "firstPlayableAfterStartAckMs": 4307,
+      "initialMap": "0",
+      "mapPosition": {
+        "x": 342,
+        "y": 244
+      },
+      "firstWalkPosition": {
+        "x": 343,
+        "y": 244
+      },
+      "noOptionalLocaleRequestsBeforeNpc": true,
+      "dialog": {
+        "pendingEnglish": true,
+        "interrupted": "net::ERR_INCOMPLETE_CHUNKED_ENCODING",
+        "visibleAfterFailure": true,
+        "bodyRetrySamePath": true,
+        "translatedLine": "很高兴见到你，有什么能帮你的？",
+        "protocolSourceUnchanged": true,
+        "shopTarget": "@Buy",
+        "shopGoods": 6,
+        "shopRoundTripMs": 579
+      },
+      "logout": {
+        "returnedToSelect": true,
+        "savedPosition": {
+          "x": 342,
+          "y": 244
+        }
+      },
+      "failure": null,
+      "ownedProcessesClosed": true,
+      "originalFixtureUnchanged": true
+    },
+    {
+      "lane": "npc-shared-pinned-r4",
+      "passed": false,
+      "sourceReceiptSha256": "b0fcbb627b6532e45a8ecde7c41fb2b330dc4822f69cb51543e7ea8535d43f80",
+      "contentProfile": "crystal_full",
+      "requestedBackend": "webgl2",
+      "surface": {
+        "backend": "webgl2",
+        "owner": "bevy",
+        "sharedCanvas": "mir2-quest-ui-canvas",
+        "language": "zh-CN"
+      },
+      "controlledPublishedRenderer": true,
+      "firstPlayableAfterStartAckMs": 4265,
+      "initialMap": "0",
+      "mapPosition": {
+        "x": 342,
+        "y": 244
+      },
+      "firstWalkPosition": {
+        "x": 343,
+        "y": 244
+      },
+      "noOptionalLocaleRequestsBeforeNpc": true,
+      "dialog": {
+        "pendingEnglish": true,
+        "interrupted": "net::ERR_INCOMPLETE_CHUNKED_ENCODING",
+        "visibleAfterFailure": true,
+        "bodyRetrySamePath": true,
+        "translatedLine": "很高兴见到你，有什么能帮你的？",
+        "protocolSourceUnchanged": true,
+        "shopTarget": "@Buy",
+        "shopGoods": 6,
+        "shopRoundTripMs": 627
+      },
+      "logout": null,
+      "failure": {
+        "stage": "ordinary-logout-and-private-file-readback",
+        "message": "ordinary logout send"
+      },
+      "ownedProcessesClosed": true,
+      "originalFixtureUnchanged": true,
+      "actorRequests": [
+        {
+          "path": "/original-ui/CArmour/00/meta.json",
+          "requestAfterRegionDecodeMs": 32,
+          "status": 200
+        },
+        {
+          "path": "/original-ui/CArmour/05/meta.json",
+          "requestAfterRegionDecodeMs": 32,
+          "status": 200
+        },
+        {
+          "path": "/original-ui/CHair/00/meta.json",
+          "requestAfterRegionDecodeMs": 33,
+          "status": 200
+        },
+        {
+          "path": "/original-ui/CWeapon/00/meta.json",
+          "requestAfterRegionDecodeMs": 34,
+          "status": 200
+        },
+        {
+          "path": "/original-ui/CWeapon/49/meta.json",
+          "requestAfterRegionDecodeMs": 34,
+          "status": 404
+        },
+        {
+          "path": "/original-ui/Fishing/00/meta.json",
+          "requestAfterRegionDecodeMs": 35,
+          "status": 200
+        },
+        {
+          "path": "/original-ui/Monster/000/meta.json",
+          "requestAfterRegionDecodeMs": 36,
+          "status": 200
+        },
+        {
+          "path": "/original-ui/Monster/078/meta.json",
+          "requestAfterRegionDecodeMs": 36,
+          "status": 200
+        },
+        {
+          "path": "/original-ui/NPC/08/meta.json",
+          "requestAfterRegionDecodeMs": 37,
+          "status": 200
+        },
+        {
+          "path": "/original-ui/NPC/27/meta.json",
+          "requestAfterRegionDecodeMs": 38,
+          "status": 200
+        },
+        {
+          "path": "/original-ui/NPC/45/meta.json",
+          "requestAfterRegionDecodeMs": 39,
+          "status": 200
+        },
+        {
+          "path": "/original-ui/NPC/52/meta.json",
+          "requestAfterRegionDecodeMs": 39,
+          "status": 200
+        },
+        {
+          "path": "/original-ui/NPC/94/meta.json",
+          "requestAfterRegionDecodeMs": 40,
+          "status": 200
+        }
+      ]
+    }
+  ],
+  "screenshot": {
+    "path": "fisher-dialog.png",
+    "sha256": "890c8e03b043bb7483a24420f92a7ce80db3706479cf6ce26d451a9cd5fa8d0d"
+  }
+}

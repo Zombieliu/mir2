@@ -1,6 +1,6 @@
 # Agent Current Context
 
-Short routing summary, updated 2026-11-10 (Asia/Shanghai).
+Short routing summary, updated 2026-11-11 (Asia/Shanghai).
 This indexes recorded decisions and open work; it does not revalidate today's
 working tree, services, release packages, source snapshots or parity percentages.
 
@@ -28,7 +28,7 @@ working tree, services, release packages, source snapshots or parity percentages
 
 2026-11-10 普通协议复测零耐久线轮空竿续抛及后续移除。WebGPU 和 WebGL2 实点验证线轮消失后关闭一次、替换不恢复旧开关，同档重登正常。Windows 定向状态和协议已复验。继续实际窗口、Hosted 和发行。 [续抛与同档](evidence/r16-web-fishing-loop-20261110/README.md#线轮耗尽与自动续抛) · [原图拖放与归零提示](evidence/r16-web-fishing-loop-20261110/README.md#鱼具跟手图与归零提示)
 
-2026-11-10 公网 `a23cc382` 默认 Chrome 简中和繁中通过出码、待确认和取消，二维码内容与官方钱包链接一致。比奇候选 `c52ea9abb6` 尚无 Vercel 部署，发布 pin 和专用审核补丁均在 `2ea39c9e83` 通过应用校验。待独立审核、正式切换、默认网络签名进比奇和实体手机。 [本轮公网复测](evidence/r16-web-fishing-loop-20261110/reel-autocast-loss.json) · [发布候选证据](evidence/numeron-web-release-20261108/first-scene-release-candidate-20261110.json)
+2026-11-11 公网已读回 `534322e790`，含 `6997f810ed` 玩家反馈修复。简繁扫码、Testnet 签名、进比奇回包和退出通过。首帧核心词库在进城前完成，地图正文仍超时。隔离本机已验移动、词库重试、简中 NPC 和商店回包。 [上线与剩余地图验收](evidence/r16-npc-cold-entry-20261111/README.md)
 
 2026-11-10 公网 `83eadf4f` 切到第一方钱包中继，出码读限时 20 秒及一次瞬时失败重试。直连浏览器用官方手机尺寸钱包完成签名、兑换、比奇渲染及正常退出。同机默认 Chrome 等待资源后出码及轮询通过，独立冷启动仍复现超时。继续冷启动和实体手机验收。 [扫码发布与回执](evidence/numeron-web-release-20261108/qr-first-party-relay-20261110.json)
 
