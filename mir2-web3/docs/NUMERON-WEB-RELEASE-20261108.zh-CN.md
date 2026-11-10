@@ -14,6 +14,12 @@ Numeron 游戏部署改用 `relay.dubhe.obelisk.build`，复用已在线的 Dubh
 
 同机默认网络的首轮冷启动两次在 20 秒中止。独立默认 Chrome 在等待资源的上限到达后点击，15.101 秒收到完整出码正文，9.236 秒完成待确认查询。最后用独立默认 Chrome 冷启动并在登录入口出现时立即点击，两次请求仍各约 20 秒中止。冷启动稳定性继续验收。 [默认网络对照](evidence/numeron-web-release-20261108/qr-first-party-relay-20261110.json)
 
+## 2026-11-10 扫码冷启动与登录资源
+
+在 `83eadf4f` 上，关闭可选预热把点击时的并发 GET 从 21 降至 12，两次扫码请求仍在 20 秒内等不到正文。同一默认代理的轻量页面分别用 HTTP/2 和 HTTP/1.1 读完 1,320 字节，耗时 569 和 759 毫秒。游戏页只屏蔽原登录音乐时，出码接口返回正文但待确认查询仍超时。诊断同时屏蔽登录大字体和音乐后，普通按钮显示二维码并收到待确认状态。 [脱敏对照](evidence/numeron-web-release-20261108/qr-login-load-diagnostic-20261110.json)
+
+隔离候选 `a23cc382` 使用原字体生成的简中和繁中 WOFF2 字集，原始字形的采样字宽及边界一致。登录阶段保留可见原素材并跳过默认可选精灵预热，完整字体延后到选角，普通登录交互后可播放原音轨，扫码等待期间暂停。实际本机生产构建接隔离中继，简中和繁中普通入口出码约 341 和 235 毫秒，各一份小字体，均收到待确认。取消后点击账号框发出原音乐请求。隔离构建用于验证加载流程，公网签名和进城另验。 [本机回执](evidence/numeron-web-release-20261108/qr-login-startup-local-20261110.json) · [隔离发布作业](https://github.com/Zombieliu/mir2/actions/runs/42742128253)
+
 ## 2026-11-10 公网钱包扫码恢复
 
 普通浏览器打开 [Numeron 游戏](https://numeron.obelisk.build/game) 后，出码、Dubhe Wallet 登录确认、进比奇和正常注销已复测。出码超时期间，Chrome 同源 HTTP/2 请求未收到响应；换到经 Cloudflare 的同域候选后可出码。另一个故障只在签名后出现：Caddy 缺少 TEST 的 `POST /playtest/v1/channels/session/exchange` 路由，返回 404。
