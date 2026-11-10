@@ -28,7 +28,7 @@ working tree, services, release packages, source snapshots or parity percentages
 
 2026-11-10 普通协议复测零耐久线轮空竿续抛及后续移除。WebGPU 和 WebGL2 实点验证线轮消失后关闭一次、替换不恢复旧开关，同档重登正常。Windows 定向状态和协议已复验。继续实际窗口、Hosted 和发行。 [续抛与同档](evidence/r16-web-fishing-loop-20261110/README.md#线轮耗尽与自动续抛) · [原图拖放与归零提示](evidence/r16-web-fishing-loop-20261110/README.md#鱼具跟手图与归零提示)
 
-2026-11-11 正式版 `f905435616` 的比奇首屏地面已验。公网官方 Testnet 钱包签名、选角、地图校验及首屏 221 个地砖全部解码，实走一格至 `(289,616)` 并正常注销。隔离构建已验地砖包损坏和正文停传回退。首屏建筑与角色贴图仍延迟，继续对象与人物的传输及实体手机。 [首屏实拍与回执](evidence/r16-public-terrain-20261111/README.md) · [小地图跨区](evidence/web-r16-parity-goal-20261107/minimap-long-route-live.json)
+2026-11-11 正式版 `3682477690` 的比奇首屏地面、39 个可见地图物件、主角和 8 个 NPC 已在公网官方 Testnet 签名后验到。右移读到 `44.png`，同一会话正常退出。隔离构建已验拦住散图、损坏包回退与晚切包透明度。约 20 秒时野怪仍未画出，已确认 5 种野怪元数据完成而人物散图请求仍排队。继续野怪、已有角色快进和实体手机。 [首屏实拍与回执](evidence/r16-entry-visuals-20261111/README.md) · [小地图跨区](evidence/web-r16-parity-goal-20261107/minimap-long-route-live.json)
 
 2026-11-10 公网 `83eadf4f` 切到第一方钱包中继，出码读限时 20 秒及一次瞬时失败重试。直连浏览器用官方手机尺寸钱包完成签名、兑换、比奇渲染及正常退出。同机默认 Chrome 等待资源后出码及轮询通过，独立冷启动仍复现超时。继续冷启动和实体手机验收。 [扫码发布与回执](evidence/numeron-web-release-20261108/qr-first-party-relay-20261110.json)
 
