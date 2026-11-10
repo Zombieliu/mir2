@@ -29,14 +29,19 @@ const helperNames = ["keyboardMoveDirectionForKey", "crystalDirectionFromKeyboar
   "npcShopBlocksWorldInput", "stopNpcShopWorldInput", "dispatchKeyboardMoveInput", "heroBlocksWorldInput"];
 const helpers = nodes(shell, node => ts.isFunctionDeclaration(node) && helperNames.includes(node.name?.text));
 assert.equal(helpers.length, helperNames.length);
-const helperSource = helpers.map(node => node.getText(shell)).join("\n");
+const guildKeyboard = source("../lib/r16-guild-keyboard.ts");
+const helperSource = [...helpers.map(node => node.getText(shell)),
+  guildKeyboard.statements[0].getText(guildKeyboard).replace("export ", "")].join("\n");
 const layout = source("../app/components/original-client-scene-layout.ts");
 const interval = nodes(layout, node => ts.isVariableDeclaration(node) && ts.isIdentifier(node.name)
   && node.name.text === "CRYSTAL_MOVE_INPUT_INTERVAL_MS");
 assert.equal(interval.length, 1); assert(ts.isNumericLiteral(interval[0].initializer));
 const intervalMs = Number(interval[0].initializer.text);
 
-class Element { constructor(editable = false) { this.isContentEditable = editable; } }
+class Element {
+  constructor(editable = false) { this.isContentEditable = editable; }
+  closest() { return null; }
+}
 class Input extends Element {}
 class Textarea extends Element {}
 class Select extends Element {}
@@ -78,7 +83,7 @@ function shellFixture(changes = {}) {
   const diagnostic = { current: { lastKey: null, lastDispatch: null, lastShortcut: null } };
   let cleanup = null, previousDeps = null, installs = 0;
   const scope = {
-    window, HTMLElement: Element, HTMLInputElement: Input, HTMLTextAreaElement: Textarea, HTMLSelectElement: Select,
+    window, Element, HTMLElement: Element, HTMLInputElement: Input, HTMLTextAreaElement: Textarea, HTMLSelectElement: Select,
     CRYSTAL_MOVE_INPUT_INTERVAL_MS: intervalMs, screen: flags.screen, sceneInteractionReady: flags.sceneReady,
     bevyQuestUiCapturesPointer: !!flags.quest, bevyStorageUiActive: !!flags.storageActive,
     bevyStorageUiTransitioning: !!flags.storageTransition, bevyNpcShopUiActive: !!flags.shopActive,
@@ -288,9 +293,10 @@ test("actual Page JSX Step forwarder keeps identity and preserves arguments and 
       (...args) => { calls.push({ label, args }); return result; });
   };
   const first = render("first"), second = render("second"), gesture = Object.freeze({ physical: "same-gesture" });
+  const pointerHeld = () => true;
   assert.equal(first.onViewportDirectionStep, second.onViewportDirectionStep);
-  assert.equal(first.onViewportDirectionStep(299, 619, "walk", gesture), results[1]);
-  assert.deepEqual(calls, [{ label: "second", args: [299, 619, "walk", gesture] }]);
+  assert.equal(first.onViewportDirectionStep(299, 619, "walk", gesture, pointerHeld), results[1]);
+  assert.deepEqual(calls, [{ label: "second", args: [299, 619, "walk", gesture, pointerHeld] }]);
   assert.equal(calls[0].args[3], gesture, "the exact physical fishing-gesture proof is forwarded without reconstruction");
   const third = render("third");
   assert.equal(second.onViewportDirectionStep, third.onViewportDirectionStep);
@@ -308,28 +314,30 @@ function mouseHoldFixture() {
   const declarations = nodes(shell, node => ts.isFunctionDeclaration(node) && names.includes(node.name?.text));
   assert.equal(declarations.length, names.length);
   const helpers = declarations.map(node => node.getText(shell)).join("\n");
-  const window = clock(), held = { current: null }, flags = { parity: false, shop: false };
+  const window = clock(), document = Object.assign(clock(), { visibilityState: "visible" });
+  const held = { current: null }, flags = { parity: false, shop: false }, secondary = [];
   let cleanup = null, previousDeps = null, installs = 0;
   const scope = {
-    window, Date: { now: () => window.now }, CRYSTAL_MOVE_INPUT_INTERVAL_MS: intervalMs,
+    window, document, Date: { now: () => window.now }, CRYSTAL_MOVE_INPUT_INTERVAL_MS: intervalMs,
     screen: "game", sceneInteractionReady: true, bevyQuestUiCapturesPointer: false,
     heldScenePointerRef: held, worldFishingPhysicalRef: { current: null }, cancelWorldFishingHeldPointer() {},
     heldKeyboardMoveKeysRef: { current: new Set() }, heldKeyboardRunModeRef: { current: false },
     parityUiBlocksGameplay: () => flags.parity,
     heroPointerLeaseRef: { current: null }, heroPointerCallbacksRef: { current: { getBevyHeroInputBlocked: () => false } },
     npcShopPointerCallbacksRef: { current: { getBevyNpcShopInputBlocked: () => flags.shop } },
-    latestMoveInputRef: { current: { screen: "game", player: { x: 299, y: 618 } } },
+    latestMoveInputRef: { current: { screen: "game", player: { x: 299, y: 618 }, newMove: false } },
     stageFrameRef: { current: { dataset: { viewportPlayerX: "299", viewportPlayerY: "618" } } },
     VIEWPORT_CELL_WIDTH: 48, VIEWPORT_CELL_HEIGHT: 32, viewportLayout: { offsetX: 10, offsetY: 11 },
-    playerUiPreferences: { newMove: false }, updateSceneCombatPointer() {},
-    onViewportTileSecondaryAction: () => assert.fail("classic mouse movement must use the Step forwarder"),
+    updateSceneCombatPointer() {},
+    onViewportTileSecondaryAction: (...args) => secondary.push(args),
     useEffect(setup, deps) {
       if (previousDeps && deps.length === previousDeps.length && deps.every((value, i) => Object.is(value, previousDeps[i]))) return;
       cleanup?.(); previousDeps = [...deps]; installs++; cleanup = setup() ?? null;
     }
   };
   return {
-    window, held, flags,
+    window, document, held, flags, secondary,
+    setNewMove(newMove) { scope.latestMoveInputRef.current.newMove = newMove; },
     render(callbacks) { Object.assign(scope, callbacks); compile(`${helpers}\n${mouseEffect[0].getText(shell)};`, scope); },
     cleanup() { cleanup?.(); cleanup = null; }, get installs() { return installs; }
   };
@@ -350,31 +358,60 @@ test("50ms Page renders retain the real mouse-hold interval and every 100ms Step
   const pointer = { button: 0, sceneX: 480, sceneY: 384, startedAt: f.window.now, dispatched: false, fishingGesture: gesture };
   f.held.current = pointer;
   try {
-    assert.equal(f.window.timers, 1); assert.equal(f.window.listeners, 2);
+    assert.equal(f.window.timers, 1); assert.equal(f.window.listeners, 3); assert.equal(f.document.listeners, 1);
     for (let i = 0; i < 40; i++) {
       render(); f.window.advance(50);
       assert.equal(f.installs, 1, "the actual Step/Stop dependencies never reinstall the held timer");
     }
     assert.equal(calls.length, 20, "a two-second hold keeps all twenty 100ms movement opportunities");
-    assert.deepEqual(calls[0], { revision: 3, args: [299, 619, "walk", gesture] });
-    assert.deepEqual(calls.at(-1), { revision: rendered, args: [299, 619, "walk", gesture] });
-    assert(calls.every(call => call.args[3] === gesture));
+    assert.equal(calls[0].revision, 3);
+    assert.equal(calls.at(-1).revision, rendered);
+    assert(calls.every(call => call.args[3] === gesture && call.args[4]()));
+    assert.deepEqual(calls.at(-1).args.slice(0, 4), [299, 619, "walk", gesture]);
+    const firstHold = calls.at(-1).args[4];
     assert.equal(f.held.current, pointer); assert.equal(pointer.dispatched, true);
     assert.equal(f.window.timers, 1);
     f.window.emit("mouseup", { type: "mouseup", timeStamp: f.window.now });
     assert.equal(f.held.current, null); assert.deepEqual(calls.at(-1), { revision: rendered, stop: true });
+    assert.equal(firstHold(), false);
     const released = calls.length; f.window.advance(200); assert.equal(calls.length, released);
     render();
     f.held.current = { ...pointer, button: 2, startedAt: f.window.now, dispatched: false };
-    f.window.advance(100); assert.deepEqual(calls.at(-1), { revision: rendered, args: [299, 619, "run"] });
+    f.window.advance(100);
+    assert.equal(calls.at(-1).revision, rendered);
+    assert.deepEqual(calls.at(-1).args.slice(0, 4), [299, 619, "run", undefined]);
+    const secondHold = calls.at(-1).args[4];
+    assert.equal(secondHold(), true); assert.equal(firstHold(), false, "a new press cannot revive an old one");
     f.flags.parity = true; f.window.advance(100);
     assert.equal(f.held.current, null); assert.deepEqual(calls.at(-1), { revision: rendered, stop: true });
+    assert.equal(secondHold(), false);
     f.flags.parity = false;
     const cancelled = calls.length; f.window.advance(200); assert.equal(calls.length, cancelled, "lifting a modal cannot replay a cancelled hold");
     f.held.current = { ...pointer, startedAt: f.window.now, dispatched: false };
     f.window.emit("blur", { type: "blur" });
     assert.equal(f.held.current, null); assert.deepEqual(calls.at(-1), { revision: rendered, stop: true });
     const blurred = calls.length; f.window.advance(200); assert.equal(calls.length, blurred);
+
+    f.setNewMove(true);
+    f.held.current = { ...pointer, button: 2, startedAt: f.window.now, dispatched: false };
+    f.window.advance(100);
+    assert.deepEqual(f.secondary, [[299, 619]], "the installed interval uses the latest committed movement mode");
+    assert.equal(calls.length, blurred, "a deliberate NewMove route uses the click path");
+    f.setNewMove(false);
+    for (const event of ["pagehide", "visibilitychange", "cleanup"]) {
+      f.held.current = { ...pointer, button: 2, startedAt: f.window.now, dispatched: false };
+      f.window.advance(100);
+      const liveHold = calls.at(-1).args[4];
+      assert.equal(liveHold(), true);
+      if (event === "visibilitychange") {
+        f.document.visibilityState = "hidden";
+        f.document.emit(event, { type: event });
+        f.document.visibilityState = "visible";
+      } else if (event === "cleanup") f.cleanup();
+      else f.window.emit(event, { type: event });
+      assert.equal(liveHold(), false, event);
+    }
   } finally { f.cleanup(); }
   assert.equal(f.installs, 1); assert.equal(f.window.timers, 0); assert.equal(f.window.listeners, 0);
+  assert.equal(f.document.listeners, 0);
 });

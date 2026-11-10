@@ -410,7 +410,7 @@ export type OriginalClientShellProps = BagBeltCallbacks & WorldFishingCallbacks 
   onViewportTileSecondaryAction: (x: number, y: number) => void;
   onViewportTileStepClick: (x: number, y: number) => void;
   onViewportTileStepSecondaryAction: (x: number, y: number) => void;
-  onViewportDirectionStep: (x: number, y: number, mode: "walk" | "run", gesture?: WorldFishingGesture) => void;
+  onViewportDirectionStep: (x: number, y: number, mode: "walk" | "run", gesture?: WorldFishingGesture, pointerHeld?: () => boolean) => void;
   onViewportDirectionIntent: (
     direction: string,
     mode: "walk" | "run",

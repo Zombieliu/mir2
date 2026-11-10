@@ -5046,7 +5046,7 @@ check("NPC repair actual Shell captured drag terminal owns routing geometry and 
     const ref=current=>({current}),scope={Element:MemoryNode,Node:MemoryNode,HTMLElement:MemoryNode,window:{devicePixelRatio:2},
       stageFrameRef:ref(stage),stagePresentation:{virtualWidth:800,virtualHeight:600,scale:1},activeInventoryTab:"bag1",screen:"game",showInventory:true,
       npcRepairService:"repair",npcRepairView:view,npcRepairPointerRef:ref(null),npcRepairTargetRef:ref(null),npcRepairVisibleTargetRef:ref(null),
-      npcRepairQuarantineRef:ref(new Map()),npcRepairClickFenceRef:ref(new Map()),heldScenePointerRef:ref({old:true}),heldQuestControlPointersRef:ref(new Set()),combatUiHoldRef:ref(new Map()),
+      npcRepairQuarantineRef:ref(new Map()),npcRepairClickFenceRef:ref(new Map()),heldScenePointerRef:ref({old:true}),heldQuestControlPointersRef:ref(new Set()),combatUiHoldRef:ref(new Map()),hudPointerRouterRef:ref({held:null}),
       setNpcRepairTargetSelection:()=>{},onOpenInventoryTab:()=>{},onViewportDirectionStop:()=>{stopCount++;},
       beginCombatUiHold:(kind,id)=>scope.combatUiHoldRef.current.set(kind,{pointerId:id}),endCombatUiHold:(kind,hold)=>{if(scope.combatUiHoldRef.current.get(kind)===hold)scope.combatUiHoldRef.current.delete(kind);},
       onBeginNpcRepairDrag:(_view,_item,geometry)=>service.beginDrag(_view,900,7,geometry,view),
@@ -5098,7 +5098,7 @@ check("NPC repair actual capture listeners quarantine second pointer through com
     document:{visibilityState:"visible",addEventListener:(name,handler)=>documentHandlers.set(name,handler),removeEventListener:(name,handler)=>{assert.equal(documentHandlers.get(name),handler);documentHandlers.delete(name);}},
     stageFrameRef:ref(stage),stagePresentation:{virtualWidth:800,virtualHeight:600,scale:1},activeInventoryTab:"bag1",screen:"game",showInventory:true,
     npcRepairService:"repair",npcRepairView:view,npcRepairPointerRef:ref(null),npcRepairTargetRef:ref(null),npcRepairVisibleTargetRef:ref(null),npcRepairQuarantineRef:ref(new Map()),npcRepairClickFenceRef:ref(new Map()),
-    heldScenePointerRef:ref(null),heldQuestControlPointersRef:ref(new Set()),combatUiHoldRef:ref(new Map()),sharedBagPointerHandlerRef:ref(null),setNpcRepairTargetSelection:()=>{},onOpenInventoryTab:()=>{},onViewportDirectionStop:()=>{},
+    heldScenePointerRef:ref(null),heldQuestControlPointersRef:ref(new Set()),combatUiHoldRef:ref(new Map()),hudPointerRouterRef:ref({held:null}),sharedBagPointerHandlerRef:ref(null),setNpcRepairTargetSelection:()=>{},onOpenInventoryTab:()=>{},onViewportDirectionStop:()=>{},
     beginCombatUiHold:(kind,id)=>scope.combatUiHoldRef.current.set(kind,{pointerId:id}),endCombatUiHold:(kind,hold)=>{if(scope.combatUiHoldRef.current.get(kind)===hold)scope.combatUiHoldRef.current.delete(kind);},
     onBeginNpcRepairDrag:(_view,_item,geometry)=>service.beginDrag(_view,901,43,{...geometry,page:"bag2"},view),
     onCancelNpcRepairDrag:drag=>service.cancelDrag(drag),onDropNpcRepairDrag:(drag,geometry,x,y)=>{const selection=service.drop(drag,geometry,x,y,view);return selection?{selection,submitted:false}:null;},
@@ -5718,16 +5718,19 @@ assert.equal(followingTradeEditEntry.thenStatement.statements.map(node=>node.get
   'if(socketRef.current!==socket||socket.readyState!==WebSocket.OPEN||!socialTradeProofCurrent(options.socialTradeProof,wireCommand))returnfalse;',
   "cancel and gold revalidate the current socket and immutable Trade proof before Native budget entry");
 assert.equal(followingTradeEditEntry.elseStatement,undefined);
-const followingFishingPanelEntry=paritySendStatements[paritySendStatements.indexOf(bagBeltFollowingRankingInspectEntry)+7];
+const followingPointerHeldEntry=paritySendStatements[paritySendStatements.indexOf(bagBeltFollowingRankingInspectEntry)+7];
+assert.equal(followingPointerHeldEntry.getText(parityPageAst),
+  "if (options?.viewportPointerHeld && !options.viewportPointerHeld()) return false;");
+const followingFishingPanelEntry=paritySendStatements[paritySendStatements.indexOf(followingPointerHeldEntry)+1];
 assert.equal(followingFishingPanelEntry.getText(parityPageAst),
   "if (options?.fishingPanelAttempt && !enterFishingPanelSend(options.fishingPanelAttempt, wireCommand, socket)) return false;");
-const followingBudgetEntry=paritySendStatements[paritySendStatements.indexOf(bagBeltFollowingRankingInspectEntry)+8];
+const followingBudgetEntry=paritySendStatements[paritySendStatements.indexOf(followingFishingPanelEntry)+1];
 assert.equal(followingBudgetEntry.getText(parityPageAst).replace(/\s+/g,""),
   'if(socialBudgetTicket&&!socialBudgetRef.current?.enter(socialBudgetTicket,currentSocialReplyOwner(),wireCommand)){if(options?.groupProof)groupOperationsRef.current.finishInviteAttempt(options.groupProof);returnfalse;}');
-const followingCancelSpend=paritySendStatements[paritySendStatements.indexOf(bagBeltFollowingRankingInspectEntry)+9];
+const followingCancelSpend=paritySendStatements[paritySendStatements.indexOf(followingBudgetEntry)+1];
 assert.equal(followingCancelSpend.getText(parityPageAst),'if (options?.socialTradeProof && wireCommand.type === "tradeCancel") socialTradeCancelSpentRef.current = options.socialTradeProof.incarnation;');
-assert.equal(paritySendStatements.indexOf(bagBeltFollowingRankingInspectEntry)+10,paritySocketIndex,"Native entry and cancel spend immediately precede the exact socket try");
-assert.equal(paritySendStatements.indexOf(bagBeltEntryNodes[0])+13,paritySocketIndex,"actual Bag entry retains all existing disjoint guards plus Native budget before socket.send");
+assert.equal(paritySendStatements.indexOf(followingCancelSpend)+1,paritySocketIndex,"Native entry and cancel spend immediately precede the exact socket try");
+assert.equal(paritySendStatements.indexOf(bagBeltEntryNodes[0])+14,paritySocketIndex,"actual Bag entry retains all existing disjoint guards plus Native budget before socket.send");
 // Retain whole actual serialization/DTO statements and the complete Bag-specific
 // entry through socket.send. All Bag-specific owner/source/mail/storage/social
 // guards execute in the actual bagBeltFinalCurrent; no gate is replaced by true.
@@ -6303,11 +6306,12 @@ assert.equal(fishingSendStatements[fishingSendStatements.indexOf(fishingFollowin
 assert.equal(fishingSendStatements[fishingSendStatements.indexOf(fishingFollowingRankingInspectEntry)+4].getText(fishingPageAst),followingGuildRankReadEntry.getText(parityPageAst));
 assert.equal(fishingSendStatements[fishingSendStatements.indexOf(fishingFollowingRankingInspectEntry)+5].getText(fishingPageAst),followingTradeConfirmEntry.getText(parityPageAst));
 assert.equal(fishingSendStatements[fishingSendStatements.indexOf(fishingFollowingRankingInspectEntry)+6].getText(fishingPageAst),followingTradeEditEntry.getText(parityPageAst));
-assert.equal(fishingSendStatements[fishingSendStatements.indexOf(fishingFollowingRankingInspectEntry)+7].getText(fishingPageAst),followingFishingPanelEntry.getText(parityPageAst));
-assert.equal(fishingSendStatements[fishingSendStatements.indexOf(fishingFollowingRankingInspectEntry)+8].getText(fishingPageAst),followingBudgetEntry.getText(parityPageAst));
-assert.equal(fishingSendStatements[fishingSendStatements.indexOf(fishingFollowingRankingInspectEntry)+9].getText(fishingPageAst),followingCancelSpend.getText(parityPageAst));
-assert.equal(fishingSendStatements.indexOf(fishingFollowingRankingInspectEntry)+10,fishingSocketIndex,"Fishing retains every prior guard plus Native entry and cancel spend");
-assert.equal(fishingSendStatements.indexOf(fishingSendEntry[0])+12,fishingSocketIndex,"WorldFishing retains the complete final socket sequence");
+assert.equal(fishingSendStatements[fishingSendStatements.indexOf(fishingFollowingRankingInspectEntry)+7].getText(fishingPageAst),followingPointerHeldEntry.getText(parityPageAst));
+assert.equal(fishingSendStatements[fishingSendStatements.indexOf(fishingFollowingRankingInspectEntry)+8].getText(fishingPageAst),followingFishingPanelEntry.getText(parityPageAst));
+assert.equal(fishingSendStatements[fishingSendStatements.indexOf(fishingFollowingRankingInspectEntry)+9].getText(fishingPageAst),followingBudgetEntry.getText(parityPageAst));
+assert.equal(fishingSendStatements[fishingSendStatements.indexOf(fishingFollowingRankingInspectEntry)+10].getText(fishingPageAst),followingCancelSpend.getText(parityPageAst));
+assert.equal(fishingSendStatements.indexOf(fishingFollowingRankingInspectEntry)+11,fishingSocketIndex,"Fishing retains every prior guard plus Native entry and cancel spend");
+assert.equal(fishingSendStatements.indexOf(fishingSendEntry[0])+13,fishingSocketIndex,"WorldFishing retains the complete final socket sequence");
 const fishingSerializeIndex=fishingSendStatements.findIndex(node=>ts.isVariableStatement(node)&&node.declarationList.declarations.some(decl=>decl.name.getText(fishingPageAst)==="serialized"));
 const fishingDtoIndex=fishingSendStatements.findIndex(node=>ts.isVariableStatement(node)&&node.declarationList.declarations.some(decl=>decl.name.getText(fishingPageAst)==="wireCommand"));
 const fishingPreflightGuards=fishingSendStatements.filter(node=>ts.isIfStatement(node)&&['command.type === "fishingCast" && command.castOut === true && !options?.worldFishingProof','options?.worldFishingProof && !worldFishingFinalCurrent(options.worldFishingProof, command)'].includes(node.expression.getText(fishingPageAst)));
@@ -6316,7 +6320,7 @@ const fishingPageJs=ts.transpileModule([...fishingPageDeclarations.values(),pari
   fishingPreflightGuards.map(node=>node.getText(fishingPageAst)).join("\n")+"\n"+fishingSendStatements.slice(fishingSerializeIndex,fishingSerializeIndex+2).map(node=>node.getText(fishingPageAst)).join("\n")+
   "\nif(beforeFinal)beforeFinal();\n"+fishingSendStatements.slice(fishingDtoIndex,fishingDtoIndex+2).map(node=>node.getText(fishingPageAst)).join("\n")+
   "\n"+fishingSendEntry[0].getText(fishingPageAst)+"\n"+fishingFollowingPearlEntry.getText(fishingPageAst)+"\n"+fishingFollowingRankingInspectEntry.getText(fishingPageAst)+"\n"+
-  fishingSendStatements[fishingSendStatements.indexOf(fishingFollowingRankingInspectEntry)+7].getText(fishingPageAst)+"\n"+fishingSendStatements[fishingSocketIndex].getText(fishingPageAst)+"\nreturn true;}",
+  followingFishingPanelEntry.getText(parityPageAst)+"\n"+fishingSendStatements[fishingSocketIndex].getText(fishingPageAst)+"\nreturn true;}",
   {compilerOptions:{target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.None}}).outputText;
 function worldFishingPageFixture(){
   const owner=npcRepairOwner(),rod={...npcRepairItem(0,"weapon"),authoritativeUniqueId:0};delete rod.container;
@@ -6683,7 +6687,7 @@ function worldFishingShellFixture(){
     sceneGroupHoverWorldAllowed:()=>state.sharedWorldAllowed,
     bagPointerCallbacksRef:ref({}),npcShopPointerCallbacksRef:ref({}),parityUiBlocksGameplay:undefined,heroPointerLeaseRef:ref(null),heroPointerCallbacksRef:ref({}),
     heldKeyboardMoveKeysRef:ref(new Set()),heldKeyboardRunModeRef:ref(false),onViewportDirectionStop:()=>{},updateSceneCombatPointer:()=>{},
-    latestMoveInputRef:ref({screen:"game",player:{x:0,y:1}}),viewportLayout:{offsetX:0,offsetY:0},...fishingSceneLayout,
+    latestMoveInputRef:ref({screen:"game",player:{x:0,y:1},newMove:false}),viewportLayout:{offsetX:0,offsetY:0},...fishingSceneLayout,
     screen:"game",sceneInteractionReady:true,bevyQuestUiCapturesPointer:false,questLocalModalOpen:false,mobileMoreOpen:false,bevyMailComposeReady:false,bevyMailComposePending:false,
     worldFishingAnimation:{runtime:page.runtime,record:page.source},onBeginWorldFishingGesture:pointer=>page.api.beginWorldFishingGesture(pointer),
     onCancelWorldFishingGesture:gesture=>{cancels.push(gesture);page.api.cancelWorldFishingGesture(gesture);},webGl2SharedCanvasPrototype:false,sharedUiCanvasId:fishingCanvasMode.sharedUiCanvasId,
@@ -7817,18 +7821,19 @@ check("Ranking actual Page inspect gesture sends exact four raw fields UID0 thro
   assert.deepEqual(page.sent,[{type:"inspect",objectId:0,ranking:true,hero:false}]);assert.equal(page.f.controller.pending,true);
   page.api.inspectRankingPlayer(0,"Actual target");assert.equal(page.sent.length,1);
 });
-check("Ranking actual Page raw Inspect requires proof and only disjoint create group guild-rank and trade guards follow its final claim",()=>{
+check("Ranking actual Page raw Inspect requires proof and only disjoint guards follow its final claim",()=>{
   const page=rankingPageFixture();assert.equal(page.api.finalRawSend({type:"inspect",objectId:0,ranking:true,hero:false}),false);
-  const finalIndex=paritySendStatements.indexOf(rankingFinalGuard);assert.equal(finalIndex+10,paritySocketIndex);
+  const finalIndex=paritySendStatements.indexOf(rankingFinalGuard);assert.equal(finalIndex+11,paritySocketIndex);
   assert.equal(paritySendStatements[finalIndex+3].getText(parityPageAst),followingGuildRankEntry.getText(parityPageAst));
   assert.equal(paritySendStatements[finalIndex+4].getText(parityPageAst),followingGuildRankReadEntry.getText(parityPageAst));
   assert.strictEqual(paritySendStatements[finalIndex+1],followingCreateEntry);
   assert.strictEqual(paritySendStatements[finalIndex+2],followingGroupEntry);
   assert.strictEqual(paritySendStatements[finalIndex+5],followingTradeConfirmEntry);
   assert.strictEqual(paritySendStatements[finalIndex+6],followingTradeEditEntry);
-  assert.strictEqual(paritySendStatements[finalIndex+7],followingFishingPanelEntry);
-  assert.strictEqual(paritySendStatements[finalIndex+8],followingBudgetEntry);
-  assert.strictEqual(paritySendStatements[finalIndex+9],followingCancelSpend);
+  assert.strictEqual(paritySendStatements[finalIndex+7],followingPointerHeldEntry);
+  assert.strictEqual(paritySendStatements[finalIndex+8],followingFishingPanelEntry);
+  assert.strictEqual(paritySendStatements[finalIndex+9],followingBudgetEntry);
+  assert.strictEqual(paritySendStatements[finalIndex+10],followingCancelSpend);
   const sends=[];(function visit(node){if(ts.isCallExpression(node)&&node.expression.getText(parityPageAst)==="socket.send")sends.push(node);ts.forEachChild(node,visit);})(paritySendStatements[paritySocketIndex]);
   assert.equal(sends.length,1);assert.equal(sends[0].arguments[0].getText(parityPageAst),"serialized");
   const listeners=paritySendStatements.map((node,index)=>({node,index})).filter(({node})=>node.getText(parityPageAst).includes("window.dispatchEvent"));

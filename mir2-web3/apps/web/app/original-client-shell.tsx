@@ -1205,11 +1205,13 @@ export function OriginalClientShell({
     player: DisplayEntity | null;
     renderPlayer: DisplayEntity | null;
     playerCameraMotionOffset: ViewportOffset;
+    newMove: boolean;
   }>({
     screen,
     player,
     renderPlayer: player,
     playerCameraMotionOffset: EMPTY_VIEWPORT_OFFSET,
+    newMove: playerUiPreferences?.newMove === true,
   });
   const stageScaleStyle = useMemo(() => {
     const touchControlDeck = calculateMir2TouchControlDeck(stagePresentation);
@@ -2059,8 +2061,9 @@ export function OriginalClientShell({
       player,
       renderPlayer,
       playerCameraMotionOffset,
+      newMove: playerUiPreferences?.newMove === true,
     };
-  }, [screen, player, renderPlayer, playerCameraMotionOffset]);
+  }, [screen, player, renderPlayer, playerCameraMotionOffset, playerUiPreferences?.newMove]);
   // Sprite *frame data* (which body/hair/weapon frame to draw) only changes on entity updates from
   // the server, sprite-library loads, or the 120ms animation tick — NOT on the 60fps motion clock.
   // Memoising it off `sceneSpriteFrameIndex` instead of `motionNow` stops every monster/NPC sprite
@@ -3964,11 +3967,12 @@ export function OriginalClientShell({
     const tile = tileFromScenePoint(pointer.sceneX, pointer.sceneY);
     if (!tile) return;
 
+    const pointerHeld = () => heldScenePointerRef.current === pointer;
     if (pointer.button === 2) {
-      if (playerUiPreferences?.newMove) onViewportTileSecondaryAction(tile.x, tile.y);
-      else onViewportDirectionStep(tile.x, tile.y, "run");
+      if (latestMoveInputRef.current.newMove) onViewportTileSecondaryAction(tile.x, tile.y);
+      else onViewportDirectionStep(tile.x, tile.y, "run", undefined, pointerHeld);
     } else {
-      onViewportDirectionStep(tile.x, tile.y, "walk", pointer.fishingGesture);
+      onViewportDirectionStep(tile.x, tile.y, "walk", pointer.fishingGesture, pointerHeld);
     }
   }
 
@@ -4539,6 +4543,13 @@ export function OriginalClientShell({
     if (handleNpcRepairPointer(event, phase)) return;
     if (handleBagBeltPointer(event, phase)) return;
     if (heldQuestControlPointersRef.current.has(event.pointerId)) { handleSharedQuestWorldPointer(event,phase); return; }
+    // A HUD button can open a modal before its pointer is released.
+    const hud = hudPointerRouterRef.current.held;
+    if ((phase === "up" || phase === "cancel") && hud?.origin === "ui" && hud.pointerId === event.pointerId) {
+      event.preventDefault();
+      cancelSharedHudPointer();
+      return;
+    }
     // DOM controls own new gestures; existing canvas leases still receive their terminal edges.
     if (phase === "down" && event.target instanceof HTMLElement && event.target.closest(".original-skill-bar, .original-combat-mode-controls")) return;
     if(handleSharedNpcShopPointer(event,phase))return;
@@ -4986,11 +4997,8 @@ export function OriginalClientShell({
       }
 
     const point = scenePointFromMouseEvent(event);
-    heldScenePointerRef.current = {
-      ...held,
-      sceneX: point.sceneX,
-      sceneY: point.sceneY,
-    };
+    held.sceneX = point.sceneX;
+    held.sceneY = point.sceneY;
   }
 
   function stopHeldScenePointer(event?: { timeStamp: number }) {
@@ -5030,13 +5038,19 @@ export function OriginalClientShell({
       cancelWorldFishingHeldPointer(); heldScenePointerRef.current = null;
       onViewportDirectionStop();
     };
+    const hide = () => { if (document.visibilityState !== "visible") stop(); };
     window.addEventListener("mouseup", stop);
     window.addEventListener("blur", stop);
+    window.addEventListener("pagehide", stop);
+    document.addEventListener("visibilitychange", hide);
 
     return () => {
       window.clearInterval(timer);
       window.removeEventListener("mouseup", stop);
       window.removeEventListener("blur", stop);
+      window.removeEventListener("pagehide", stop);
+      document.removeEventListener("visibilitychange", hide);
+      stop();
     };
   }, [screen, sceneInteractionReady, bevyQuestUiCapturesPointer, onViewportDirectionStep, onViewportDirectionStop]);
 
@@ -5091,11 +5105,8 @@ export function OriginalClientShell({
               const held = heldScenePointerRef.current;
               if (!held) return;
               const point = scenePointFromMouseEvent(event);
-              heldScenePointerRef.current = {
-                ...held,
-                sceneX: point.sceneX,
-                sceneY: point.sceneY,
-              };
+              held.sceneX = point.sceneX;
+              held.sceneY = point.sceneY;
             }}
             onMouseUp={stopHeldScenePointer}
             onClick={(event) => {

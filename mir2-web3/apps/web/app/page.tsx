@@ -2522,7 +2522,8 @@ export default function HomePage() {
   const recentSelfMovementActionHistoryRef = useRef<CrystalSelfActionFeedEntry[]>([]);
   const pendingSelfMoveRef = useRef<PendingSelfMove | null>(null);
   const pendingSelfTurnRef = useRef<PendingSelfTurn | null>(null);
-  const queuedMoveIntentRef = useRef<QueuedMoveIntent | null>(null);
+  type QueuedViewportMoveIntent = QueuedMoveIntent & { pointerHeld?: () => boolean };
+  const queuedMoveIntentRef = useRef<QueuedViewportMoveIntent | null>(null);
   const pendingGroundSkillRef = useRef<KnownSkill | null>(null);
   const nextMoveSendAtRef = useRef(0);
   const nextLocalMeleeAtRef = useRef(0);
@@ -6459,7 +6460,7 @@ export default function HomePage() {
   }
 
   /** Every UI and compatibility command enters this session-owned send gate. */
-  function send(command: Record<string, unknown>, options?: { authProof?: PreauthProof; guildBuffProof?: GuildBuffProof; heroProof?: HeroOperationProof; cashProof?: CashGameShopProof; creatureProof?: CreaturePlayerProof; quiet?: boolean; ownerToken?: EquipmentOwnerProof; reservedCharacterSource?: number; storageProof?: StorageTransferProof; socialReplyProof?: SocialReplyProof; storageRentalProof?: StorageRentalProof; socialItemProof?: SocialWindowOperationProof; socialTradeProof?: SocialTradeSendProof; guildListProof?: Readonly<{owner: SocialReplyOwner; guildName: string}>; rankingProof?: RankingQueryProof; rankingInspectProof?: RankingInspectProof; socialRosterProof?: SocialRosterSendProof; groupProof?: GroupOperationProof }): boolean {
+  function send(command: Record<string, unknown>, options?: { authProof?: PreauthProof; guildBuffProof?: GuildBuffProof; heroProof?: HeroOperationProof; cashProof?: CashGameShopProof; creatureProof?: CreaturePlayerProof; quiet?: boolean; ownerToken?: EquipmentOwnerProof; reservedCharacterSource?: number; storageProof?: StorageTransferProof; socialReplyProof?: SocialReplyProof; storageRentalProof?: StorageRentalProof; socialItemProof?: SocialWindowOperationProof; socialTradeProof?: SocialTradeSendProof; guildListProof?: Readonly<{owner: SocialReplyOwner; guildName: string}>; rankingProof?: RankingQueryProof; rankingInspectProof?: RankingInspectProof; socialRosterProof?: SocialRosterSendProof; groupProof?: GroupOperationProof; viewportPointerHeld?: () => boolean }): boolean {
     // Supported ordinary combat enters through Rust outputs with a live local proof.
     if(combatIngressRef.current?.supported()&&["attack","rangeAttack","magic","spellToggle"].includes(String(command.type)))return false;
     // Preserve the original callback/intent token through every synchronous
@@ -6550,7 +6551,7 @@ export default function HomePage() {
     return sendRaw(command, options);
   }
 
-  function sendRaw(command: Record<string, unknown>, options?: { authProof?: PreauthProof; modeProof?: CombatModeProof; guildBuffProof?: GuildBuffProof; heroProof?: HeroOperationProof; cashProof?: CashGameShopProof; creatureProof?: CreaturePlayerProof; quiet?: boolean; ownerToken?: EquipmentOwnerProof; reservedCharacterSource?: number; storageProof?: StorageTransferProof; socialReplyProof?: SocialReplyProof; storageRentalProof?: StorageRentalProof; socialItemProof?: SocialWindowOperationProof; socialTradeProof?: SocialTradeSendProof; guildListProof?: Readonly<{owner: SocialReplyOwner; guildName: string}>; rankingProof?: RankingQueryProof; rankingInspectProof?: RankingInspectProof; socialRosterProof?: SocialRosterSendProof; groupProof?: GroupOperationProof; skillProof?:SpellsProof;combatProof?:CombatProof;combatBody?:string;mailProof?:MailSendProof;mailQuoteProof?:MailQuoteProof;mailLockProof?:MailLockProof;npcBuyProof?:NpcGoldBuyProof;npcPearlBuyProof?:NpcPearlBuyProof;npcLegacyBuyProof?:object;npcUi?:NpcShopSendProof;npcRepairProof?:NpcRepairProof;bagBeltProof?:BagBeltFinalProof;worldFishingProof?:WorldFishingFinalProof;fishingPanelAttempt?:FishingPanelAttempt }) {
+  function sendRaw(command: Record<string, unknown>, options?: { authProof?: PreauthProof; modeProof?: CombatModeProof; guildBuffProof?: GuildBuffProof; heroProof?: HeroOperationProof; cashProof?: CashGameShopProof; creatureProof?: CreaturePlayerProof; quiet?: boolean; ownerToken?: EquipmentOwnerProof; reservedCharacterSource?: number; storageProof?: StorageTransferProof; socialReplyProof?: SocialReplyProof; storageRentalProof?: StorageRentalProof; socialItemProof?: SocialWindowOperationProof; socialTradeProof?: SocialTradeSendProof; guildListProof?: Readonly<{owner: SocialReplyOwner; guildName: string}>; rankingProof?: RankingQueryProof; rankingInspectProof?: RankingInspectProof; socialRosterProof?: SocialRosterSendProof; groupProof?: GroupOperationProof; skillProof?:SpellsProof;combatProof?:CombatProof;combatBody?:string;mailProof?:MailSendProof;mailQuoteProof?:MailQuoteProof;mailLockProof?:MailLockProof;npcBuyProof?:NpcGoldBuyProof;npcPearlBuyProof?:NpcPearlBuyProof;npcLegacyBuyProof?:object;npcUi?:NpcShopSendProof;npcRepairProof?:NpcRepairProof;bagBeltProof?:BagBeltFinalProof;worldFishingProof?:WorldFishingFinalProof;fishingPanelAttempt?:FishingPanelAttempt;viewportPointerHeld?:()=>boolean }) {
     if (command.type === "companionControl" || command.type === "companionRuntimeRegister" || command.type === "companionRuntimeReply") return false;
     let socialBudgetTicket: SocialBudgetTicket | null = null;
     try {
@@ -6871,6 +6872,7 @@ export default function HomePage() {
       if (socketRef.current !== socket || socket.readyState !== WebSocket.OPEN
         || !socialTradeProofCurrent(options.socialTradeProof, wireCommand)) return false;
     }
+    if (options?.viewportPointerHeld && !options.viewportPointerHeld()) return false;
     if (options?.fishingPanelAttempt && !enterFishingPanelSend(options.fishingPanelAttempt, wireCommand, socket)) return false;
     // No guard, listener or domain callback follows Native entry before send.
     if (socialBudgetTicket && !socialBudgetRef.current?.enter(socialBudgetTicket, currentSocialReplyOwner(), wireCommand)) {
@@ -8808,7 +8810,7 @@ export default function HomePage() {
     finally { if (proof) worldFishingSendProofsRef.current.delete(proof); lease.busy = false; }
   }
 
-  function queueCrystalMoveIntent(intent: QueuedMoveIntent, gesture?: WorldFishingGesture) {
+  function queueCrystalMoveIntent(intent: QueuedViewportMoveIntent, gesture?: WorldFishingGesture) {
     if (mapImageRouteRef.current?.queued !== intent) cancelMapImageRoute();
     if (questRouteRunRef.current?.queued !== intent) cancelQuestRoute();
     if (pendingPickupRef.current?.queued !== intent) cancelPendingPickup();
@@ -8822,7 +8824,7 @@ export default function HomePage() {
     void trySendQueuedCrystalMove();
   }
 
-  function sendCrystalTurn(direction: string, worldFishingProof?: WorldFishingFinalProof) {
+  function sendCrystalTurn(direction: string, worldFishingProof?: WorldFishingFinalProof, viewportPointerHeld?: () => boolean) {
     const now = Date.now();
     if (!canSendMovement(readSelfMovementControllerState(), now)) {
       scheduleMovementConfirmTick();
@@ -8836,7 +8838,7 @@ export default function HomePage() {
       setPredictedPlayerMotion({ x: serverSelf.x, y: serverSelf.y, direction }, visualUntil);
     }
     nextMoveSendAtRef.current = now + movementCommandDelayMs("walk");
-    const sent = worldFishingProof ? sendRaw({ type: "turn", direction }, { worldFishingProof }) : send({ type: "turn", direction });
+    const sent = worldFishingProof ? sendRaw({ type: "turn", direction }, { worldFishingProof }) : send({ type: "turn", direction }, { viewportPointerHeld });
     if (!sent) {
       nextMoveSendAtRef.current = now;
       clearLocalSelfPrediction();
@@ -8857,9 +8859,18 @@ export default function HomePage() {
     return true;
   }
 
+  function dropReleasedViewportStep(queued: QueuedViewportMoveIntent): boolean {
+    if (!queued.pointerHeld || queued.pointerHeld()) return false;
+    if (queuedMoveIntentRef.current === queued) {
+      queuedMoveIntentRef.current = null;
+      if (worldFishingQueuedRef.current?.queued === queued) worldFishingQueuedRef.current = null;
+    }
+    return true;
+  }
+
   function trySendQueuedCrystalMove(now = Date.now()) {
     const queued = queuedMoveIntentRef.current;
-    if (!queued) {
+    if (!queued || dropReleasedViewportStep(queued)) {
       return false;
     }
     if (sceneInputDeferredForInitialAssets()) {
@@ -8869,7 +8880,7 @@ export default function HomePage() {
     observeQuestWorldActions();
     const ownedQuestRoute = questRouteRunRef.current?.queued === queued ? questRouteRunRef.current : null;
     const ownedMapRoute = mapImageRouteRef.current?.queued === queued ? mapImageRouteRef.current : null;
-    if (queuedMoveIntentRef.current !== queued) return false;
+    if (queuedMoveIntentRef.current !== queued || dropReleasedViewportStep(queued)) return false;
     const ownedPickup = pendingPickupRef.current?.queued === queued ? pendingPickupRef.current : null;
     const ownedApproach = combatApproachIntentRef.current?.queued === queued ? combatApproachIntentRef.current : null;
     if ((ownedQuestRoute || ownedPickup) && (questWindowOpenRef.current
@@ -8978,7 +8989,7 @@ export default function HomePage() {
         if (queued.consumeAfterSend || queued.kind === "target") {
           queuedMoveIntentRef.current = null;
         }
-        return sendCrystalTurn(nextAction.direction);
+        return sendCrystalTurn(nextAction.direction, undefined, queued.pointerHeld);
       }
       // Blocked at the source tile by a live wall/entity. A click-to-TARGET intent records
       // the blocked step so the A* router detours next time; a held DIRECTION intent must
@@ -9009,7 +9020,7 @@ export default function HomePage() {
       if (now >= retryAt) {
         const sent = send(
           { type: "openDoor", doorIndex: closedDoorIndex },
-          { quiet: true },
+          { quiet: true, viewportPointerHeld: queued.pointerHeld },
         );
         if (sent) {
           doorOpenRequestUntilRef.current.set(
@@ -9065,7 +9076,7 @@ export default function HomePage() {
     clearLegacySelfMovementCoordinateSources();
     setPredictedPlayerMotion(alignedPending.to, alignedPending.visualUntil);
 
-    if (queuedMoveIntentRef.current !== queued) {
+    if (queuedMoveIntentRef.current !== queued || dropReleasedViewportStep(queued)) {
       pendingSelfMoveRef.current = null; clearLocalSelfPrediction(); return false;
     }
     if (ownedQuestRoute && (questRouteRunRef.current !== ownedQuestRoute
@@ -9080,7 +9091,8 @@ export default function HomePage() {
       pendingSelfMoveRef.current = null; clearLocalSelfPrediction(); cancelMapImageRoute(); return false;
     }
     if (queued.consumeAfterSend) queuedMoveIntentRef.current = null;
-    const sent = send({ type: alignedPending.mode === "run" ? "run" : "walk", direction: alignedPending.direction });
+    const sent = send({ type: alignedPending.mode === "run" ? "run" : "walk", direction: alignedPending.direction },
+      { viewportPointerHeld: queued.pointerHeld });
     if (!sent) {
       pendingSelfMoveRef.current = null;
       nextMoveSendAtRef.current = now;
@@ -9232,7 +9244,7 @@ export default function HomePage() {
     y: number,
     mode: "walk" | "run",
     _packetMode: "target" | "direction" = "direction",
-    source: "manual" | "locked-monster" = "manual",
+    source: "manual" | "manual-step" | "locked-monster" = "manual",
     gesture?: WorldFishingGesture,
   ) {
     const chasing = source === "locked-monster";
@@ -9252,7 +9264,7 @@ export default function HomePage() {
       targetY: y,
       requestedMode: mode,
       requestedAt,
-      consumeAfterSend: chasing,
+      consumeAfterSend: source !== "manual",
     };
     if (target) combatApproachIntentRef.current = { queued: intent, map: current.mapFileName ?? null,
       objectId: target.objectId, x: target.x, y: target.y };
@@ -13712,7 +13724,7 @@ export default function HomePage() {
       currentPlan?.packetMode === "direction" &&
       (movementPlanBlockedByActionCadence(currentPlan, serverSelf, now) || now < currentPlan.nextStepAt)
     ) {
-      moveToTile(x, y, mode, "direction");
+      moveToTile(x, y, mode, "direction", "manual-step");
       return;
     }
     const currentSelf =
@@ -13752,11 +13764,11 @@ export default function HomePage() {
     if (transferKey) {
       pendingTransferRef.current = transferKey;
     }
-    moveToTile(nextPoint.x, nextPoint.y, mode, "direction");
+    moveToTile(nextPoint.x, nextPoint.y, mode, "direction", "manual-step");
   }
 
-  function handleViewportDirectionStep(x: number, y: number, mode: "walk" | "run", gesture?: WorldFishingGesture) {
-    if (sceneInputDeferredForInitialAssets()) {
+  function handleViewportDirectionStep(x: number, y: number, mode: "walk" | "run", gesture?: WorldFishingGesture, pointerHeld?: () => boolean) {
+    if (sceneInputDeferredForInitialAssets() || (pointerHeld && !pointerHeld())) {
       return;
     }
     stopOnchainMining();
@@ -13768,6 +13780,7 @@ export default function HomePage() {
       requestedMode: mode,
       requestedAt: Date.now(),
       consumeAfterSend: true,
+      pointerHeld,
     }, gesture);
   }
 
@@ -13816,8 +13829,11 @@ export default function HomePage() {
   }
 
   function handleViewportDirectionStop() {
-    if (queuedMoveIntentRef.current?.kind === "direction") {
+    const queued = queuedMoveIntentRef.current;
+    if (queued?.kind === "direction") {
       queuedMoveIntentRef.current = null;
+    } else if (queued) {
+      dropReleasedViewportStep(queued);
     }
   }
 

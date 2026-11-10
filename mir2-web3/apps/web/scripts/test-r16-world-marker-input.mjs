@@ -24,7 +24,8 @@ const hud = load("../lib/bevy-hud-ui.ts"), { sharedUiCanvasId } = load("../lib/b
 const names = ["sceneWorldObjectTarget", "retainSceneWorldObjectTarget", "scenePointFromMouseEvent", "committedViewportPlayerPosition",
   "tileFromScenePoint", "handleScenePointerAction", "stopHeldScenePointer", "dispatchSceneClickInput", "dispatchSceneMoveInput",
   "isSharedBagCompatibilityMouse", "npcShopBlocksWorldInput", "stopNpcShopWorldInput", "heroBlocksWorldInput",
-  "handleSharedUiPointer", "handleSharedBagPointer", "handleSharedHudPointer", "cancelSharedHudPointer", "handleSharedQuestWorldPointer"];
+  "handleSharedUiPointer", "handleSharedBagPointer", "handleSharedHudPointer", "cancelSharedHudPointer", "handleSharedQuestWorldPointer",
+  "handleSharedNpcShopPointer", "cancelSharedNpcShopPointer", "beginCombatUiHold", "endCombatUiHold"];
 const declarations = nodes(file, node => ts.isFunctionDeclaration(node) && names.includes(node.name?.text));
 assert.equal(declarations.length, names.length);
 const stage = nodes(file, node => (ts.isJsxOpeningElement(node) || ts.isJsxSelfClosingElement(node))
@@ -66,10 +67,10 @@ class Element {
   setPointerCapture() {}
   getBoundingClientRect() { return { left: 30, top: 20, width: 512, height: 384 }; }
 }
-function fixture({ native = true, oldMouseHold = false, marker = "drop", sceneReady = true, newMove = false,
+function fixture({ native = true, oldMouseHold = false, marker = "drop", sceneReady = true, newMove = false, modalOnHud = false,
   layers: initialLayers } = {}) {
   let now = 1000, serial = 0, pickupAllowed = true;
-  const listeners = new Map(), timers = new Map(), picks = [], activations = [], clicks = [], moves = [];
+  const listeners = new Map(), timers = new Map(), picks = [], activations = [], clicks = [], moves = [], combatHolds = [];
   const frame = new Element({ classes: ["client-stage-frame"], dataset: { viewportPlayerX: "299", viewportPlayerY: "618",
     viewportSceneWidth: "1024", viewportSceneHeight: "768" } });
   const canvas = new Element({ id: sharedUiCanvasId(false), parent: frame });
@@ -96,15 +97,19 @@ function fixture({ native = true, oldMouseHold = false, marker = "drop", sceneRe
   };
   const scope = {
     HTMLElement: Element, Element, window, Date: { now: () => now },
-    document: { elementsFromPoint: () => layers, visibilityState: "visible", hasFocus: () => true },
+    document: { elementsFromPoint: () => layers, visibilityState: "visible", hasFocus: () => true,
+      addEventListener: window.addEventListener, removeEventListener: window.removeEventListener },
     sharedUiCanvasId, webGl2SharedCanvasPrototype: false, stageFrameRef: { current: frame },
     stagePresentation: { virtualWidth: 1024, virtualHeight: 768 }, viewportLayout: { offsetX: 10, offsetY: 11 },
     VIEWPORT_CELL_WIDTH: 48, VIEWPORT_CELL_HEIGHT: 32, CRYSTAL_MOVE_INPUT_INTERVAL_MS: 100,
-    heldScenePointerRef: held, scenePointerDiagnosticsRef: { current: null }, latestMoveInputRef: { current: { screen: "game", player: { x: 299, y: 618 } } },
+    heldScenePointerRef: held, scenePointerDiagnosticsRef: { current: null },
+    latestMoveInputRef: { current: { screen: "game", player: { x: 299, y: 618 }, newMove } },
     screen: "game", player: { x: 299, y: 618 }, sceneInteractionReady: sceneReady, bevyQuestUiCapturesPointer: false,
     bevyMailComposeReady: false, bevyMailComposePending: false, bevyBagUiActive: false, bevyHudUiReady: native,
     questLocalModalOpen: false, mobileMoreOpen: false, playerUiPreferences: { newMove },
-    parityUiBlocksGameplay: () => flags.parity, onCombatUiHeld: undefined, combatUiHoldRef: { current: new Map() },
+    parityUiBlocksGameplay: () => flags.parity, combatUiHoldRef: { current: new Map() },
+    onCombatUiHeld: modalOnHud ? (...args) => combatHolds.push(args) : undefined,
+    onToggleOptions: modalOnHud ? () => { flags.parity = true; } : undefined,
     heroPointerLeaseRef: { current: null }, heroPointerCallbacksRef: { current: { getBevyHeroInputBlocked: () => false } },
     npcShopPointerCallbacksRef: { current: { getBevyNpcShopInputBlocked: () => flags.shop } },
     npcShopPointerRouterRef: { current: idleRouter() }, storagePointerRouterRef: { current: idleRouter() },
@@ -127,7 +132,7 @@ function fixture({ native = true, oldMouseHold = false, marker = "drop", sceneRe
     // Independent surfaces and fishing have no admitted lease in this fixture.
     // Their real arbitration entry points still execute before the real HUD owner.
     handleSharedHeroPointer: () => false, handleNpcRepairPointer: () => false, handleBagBeltPointer: () => false,
-    handleSharedNpcShopPointer: () => false, handleSharedComposePointer: () => false, handleSharedMailPointer: () => false,
+    handleSharedComposePointer: () => false, handleSharedMailPointer: () => false,
     handleSharedStoragePointer: () => false, handleSharedSpellsPointer: () => false, handleSharedCharacterPointer: () => false,
     cancelBagBeltPointer() {}, cancelSharedBagPointer() {}, cancelWorldFishingHeldPointer() {},
     attachWorldFishingPhysical() {}, finishWorldFishingPhysical() {}, handleSceneWorldPointerDown() {}
@@ -153,18 +158,19 @@ function fixture({ native = true, oldMouseHold = false, marker = "drop", sceneRe
     const stageMouseDownCapture = ${stageBinding("onMouseDownCapture")};
     const stageMouseDown = ${stageBinding("onMouseDown")};
     const stageMouseUp = ${stageBinding("onMouseUp")};
+    const stageLostCapture = ${stageBinding("onLostPointerCapture")};
     const capturedPointerUp = ${terminal[0].initializer.getText(file)};
     const mountWorldHold = ${effects[0].arguments[0].getText(file)};`;
   const api = compile(`${source}\n${bindings}`, scope,
-    `return { ${names.join(",")}, stageDown, stageMouseDownCapture, stageMouseDown, stageMouseUp, capturedPointerUp, mountWorldHold };`);
+    `return { ${names.join(",")}, stageDown, stageMouseDownCapture, stageMouseDown, stageMouseUp, stageLostCapture, capturedPointerUp, mountWorldHold };`);
   scope.sharedBagPointerHandlerRef.current = api.handleSharedUiPointer;
   const cleanup = api.mountWorldHold();
-  function event(target = canvas, changes = {}) {
-    const prototype = { get clientX() { return 30 + labelPoint.x / 2; }, get clientY() { return 20 + labelPoint.y / 2; } };
+  function event(target = canvas, { clientX = 30 + labelPoint.x / 2, clientY = 20 + labelPoint.y / 2, ...changes } = {}) {
+    const prototype = { get clientX() { return clientX; }, get clientY() { return clientY; } };
     return Object.assign(Object.create(prototype), { target, currentTarget: frame, pointerId: 1, pointerType: "mouse", button: 0,
       isPrimary: true, timeStamp: now, preventDefault() { this.defaultPrevented = true; }, ...changes });
   }
-  return { api, scope, flags, frame, canvas, markerNode, label, held, status, picks, activations, clicks, moves, worldTile, labelPoint, event,
+  return { api, scope, flags, frame, canvas, markerNode, label, held, status, picks, activations, clicks, moves, combatHolds, worldTile, labelPoint, event,
     set layers(value) { layers = value; }, set pickupAllowed(value) { pickupAllowed = value; },
     down(target = native ? canvas : frame, changes) { const e = event(target, changes); api.stageDown(e); return e; },
     mouseDown(target = native ? canvas : frame, changes) {
@@ -194,6 +200,34 @@ test("real stage capture retains a Canvas-underlay Gold marker and compatibility
     f.up(); f.up(); assert.deepEqual(f.picks, ["gold-drop-7"]); assert.deepEqual(f.activations, []);
     assert.deepEqual(f.clicks, []); assert.deepEqual(f.moves, []); assert.equal(f.held.current, null);
   } finally { f.cleanup(); }
+});
+
+test("a HUD Options press releases its original combat hold while the new modal blocks world input", () => {
+  for (const phase of ["up", "lostCapture"]) {
+    const f = fixture({ marker: "entity", newMove: true, modalOnHud: true });
+    try {
+      const option = f.status.plan.buttons.find(button => button.action === "option").rect;
+      const press = { clientX: 30 + (option.left + option.width / 2) / 2,
+        clientY: 20 + (option.top + option.height / 2) / 2 };
+      f.down(f.canvas, press);
+      assert.equal(f.flags.parity, true, "Options opened on the physical HUD down");
+      const [channel, token, held] = f.combatHolds[0];
+      assert.equal(channel, "hud"); assert.equal(held, true);
+      f.api.capturedPointerUp(f.event(f.canvas, { ...press, pointerId: 2 }));
+      assert.equal(f.combatHolds.length, 1, "a different pointer cannot release the HUD token");
+      const release = f.event(f.canvas, press);
+      if (phase === "up") f.api.capturedPointerUp(release);
+      else f.api.stageLostCapture(release);
+      assert.deepEqual(f.combatHolds, [["hud", token, true], ["hud", token, false]]);
+      assert.equal(f.scope.hudPointerRouterRef.current.held, null);
+      assert.deepEqual(f.clicks, [], "the Options gesture stays in the UI");
+      f.down(f.canvas, { button: 2 }); f.up(f.canvas, { button: 2 });
+      assert.deepEqual(f.clicks, [], "the still-open modal denies a fresh world action");
+      f.flags.parity = false;
+      f.down(f.canvas, { button: 2 }); f.up(f.canvas, { button: 2 });
+      assert.deepEqual(f.clicks, [{ ...f.api.tileFromScenePoint(f.labelPoint.x, f.labelPoint.y), mode: "run" }]);
+    } finally { f.cleanup(); }
+  }
 });
 
 test("an unadmitted second pointer cannot replace the first retained world marker", () => {

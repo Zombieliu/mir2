@@ -35,7 +35,8 @@ const {supportsForcedPlayerAttack}=load('bevy-combat-input');
 const {SharedCombatModeKeys,nextCombatModePhysicalGeneration}=load('shared-combat-mode-keys');
 const {defaultCrystalKeyBindings,displayCrystalKeyBinding}=load('player-ui-preferences');
 const names=['setCombatForceAttack','cancelCombatInput','cancelCombatApproach','cancelLockedMonsterAttack','lockMonsterAttack','activateEntity',
- 'moveToTile','trySendQueuedCrystalMove','handleViewportTileStepAction',
+ 'moveToTile','trySendQueuedCrystalMove','dropReleasedViewportStep','handleViewportTileStepAction',
+ 'handleViewportDirectionStep','handleViewportDirectionStop',
  'selectAttackMode','readCombatModeControls','currentCombatModeOwner','sameCombatModeOwner','readCombatModeSource',
  'nextCombatModeRevision','captureCombatModeSnapshot','captureCombatModeReceipt'];
 const code=ts.transpileModule(names.map(name=>functions.get(name).getText(ast)).join('\n')+`
@@ -83,7 +84,7 @@ function fixture(){
    return JSON.stringify(input.operation==='claim'?{...result,entered:true}:result);
   }};
  const scope={combatForceAttackRef:ref(false),worldRef:ref(current),world:current,runtimeRef:ref(runtime),
-  combatIngressRef:ref(null),combatApproachIntentRef:ref(null),queuedMoveIntentRef:ref(null),movementPlanRef:ref(null),
+  combatIngressRef:ref(null),combatApproachIntentRef:ref(null),queuedMoveIntentRef:ref(null),worldFishingQueuedRef:ref(null),movementPlanRef:ref(null),
   lockedMonsterAttackRef:ref(null),pendingNpcInteractRef:ref(null),pendingPickupRef:ref(null),pendingTransferRef:ref(null),pendingOnchainMineRef:ref(false),
   stopOnchainMining:()=>{},appendLog:(...args)=>logs.push(args),npcCallGuardRef:ref(null),interactTarget:id=>edges.push({type:'npc',objectId:id}),
   updateWorld:update=>{scope.worldRef.current=update(scope.worldRef.current);},supportsForcedPlayerAttack,
@@ -198,7 +199,52 @@ test('Classic and NewMove secondary clicks steer instead of selecting an occupan
   assert.equal(f.edges.at(-1).type, 'cancel');
   assert.equal(f.edges.filter(edge=>edge.type==='select').length, priorSelections);
   assert.equal(f.scope.queuedMoveIntentRef.current.requestedMode, 'run');
+  assert.equal(f.scope.queuedMoveIntentRef.current.consumeAfterSend, !newMove);
  }
+});
+
+test('a Classic tap during existing movement can submit only one movement', () => {
+ const f=fixture();
+ f.scope.movementPlanRef.current={packetMode:'direction'};
+ f.scope.movementPlanBlockedByActionCadence=()=>true;
+ f.api.secondary(15, 13);
+ assert.equal(f.scope.queuedMoveIntentRef.current.consumeAfterSend, true);
+ assert.equal(f.scope.queuedMoveIntentRef.current.pointerHeld, undefined, 'the release itself is the deliberate click');
+});
+
+test('actual Page retires only an unsent released hold before movement retries', () => {
+ const f=fixture(),sentMove={sentAt:10},gesture={physical:'left hold'};
+ f.scope.pendingSelfMoveRef={current:sentMove};
+ let held=true;
+ const pointerHeld=()=>held;
+ f.api.handleViewportDirectionStep(11, 9, 'walk', gesture, pointerHeld);
+ const queued=f.scope.queuedMoveIntentRef.current;
+ assert.equal(queued.kind, 'target');
+ assert.strictEqual(queued.pointerHeld, pointerHeld);
+ f.scope.worldFishingQueuedRef.current={queued,gesture};
+ held=false;
+ f.api.handleViewportDirectionStop();
+ assert.equal(f.scope.queuedMoveIntentRef.current, null);
+ assert.equal(f.scope.worldFishingQueuedRef.current, null);
+ assert.strictEqual(f.scope.pendingSelfMoveRef.current, sentMove);
+ f.api.handleViewportDirectionStep(11, 9, 'run', undefined, pointerHeld);
+ assert.equal(f.scope.queuedMoveIntentRef.current, null, 'retired callback cannot queue again');
+
+ for (const consumeAfterSend of [false, true]) {
+  const click={kind:'target',targetX:14,targetY:10,consumeAfterSend};
+  f.scope.queuedMoveIntentRef.current=click;
+  f.api.handleViewportDirectionStop();
+  assert.strictEqual(f.scope.queuedMoveIntentRef.current, click, 'deliberate clicks survive release');
+  assert.strictEqual(f.scope.pendingSelfMoveRef.current, sentMove);
+ }
+
+ let nextHeld=true;
+ f.api.handleViewportDirectionStep(11, 9, 'run', undefined, ()=>nextHeld);
+ f.scope.observeQuestWorldActions=()=>{nextHeld=false;};
+ f.scope.canSendMovement=()=>assert.fail('expired hold must stop before movement admission');
+ assert.equal(f.api.trySendQueuedCrystalMove(), false);
+ assert.equal(f.scope.queuedMoveIntentRef.current, null);
+ assert.strictEqual(f.scope.pendingSelfMoveRef.current, sentMove);
 });
 
 test('actual Page mode controls use custom shortcut and native request proofs with no optimistic mode update',()=>{

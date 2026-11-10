@@ -919,7 +919,7 @@ test("questLocalUi never parses as an authorized world action or sends through t
 test("actual Page queued movement preserves replacement intent and retires stale Quest routes before ordinary A* or send", () => {
   const source = readFileSync(new URL("../app/page.tsx", import.meta.url), "utf8");
   const ast = ts.createSourceFile("page.tsx", source, ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);
-  const names = ["trySendQueuedCrystalMove", "observeQuestWorldActions", "cancelQuestRoute", "cancelPendingPickup"];
+  const names = ["trySendQueuedCrystalMove", "dropReleasedViewportStep", "observeQuestWorldActions", "cancelQuestRoute", "cancelPendingPickup"];
   const declarations = [];
   function visit(node) {
     if (ts.isFunctionDeclaration(node) && node.name && names.includes(node.name.text)) declarations.push(node.getText(ast));
@@ -1167,7 +1167,7 @@ test("actual Page map-image press and route ownership retire only the captured s
     "projection-time observation retires routes after source replacement");
   assert.match(source, /window\.addEventListener\("blur", retire\)/);
   assert.match(source, /document\.addEventListener\("visibilitychange", retire\)/);
-  assert.match(source, /send\(\{ type: alignedPending\.mode === "run" \? "run" : "walk", direction: alignedPending\.direction \}\)/,
+  assert.match(source, /send\(\{ type: alignedPending\.mode === "run" \? "run" : "walk", direction: alignedPending\.direction \},\s*\{ viewportPointerHeld: queued\.pointerHeld \}\)/,
     "map-route movement reaches only the ordinary directional Walk/Run wire");
 });
 
