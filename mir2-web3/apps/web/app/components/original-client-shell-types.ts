@@ -180,7 +180,14 @@ export type BevyMapRenderState = {
   cameraOffset?: { x: number; y: number };
 };
 
+export type FishingUiSurface = Omit<import("react").ComponentProps<typeof import("./original-client-fishing-windows").OriginalClientFishingWindows>, "t"> & {
+  onToggleEquipment: () => void;
+  onBagCell: (tab: InventoryTabKey, slot: number) => boolean;
+  selectedBagSlot: number | null;
+};
+
 export type OriginalClientShellProps = BagBeltCallbacks & WorldFishingCallbacks & {
+  fishingUi?: FishingUiSurface;
   language: Mir2Language;
   screen: ClientScreen;
   runtimePhase: string;

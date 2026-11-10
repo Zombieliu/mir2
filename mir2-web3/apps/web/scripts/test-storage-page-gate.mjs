@@ -92,7 +92,7 @@ const requestId = seq => "st-" + String(seq).padStart(16, "0");
 const pageUrl = new URL("../app/page.tsx", import.meta.url);
 const pageSource = readFileSync(pageUrl, "utf8");
 const pageAst = ts.createSourceFile(fileURLToPath(pageUrl), pageSource, ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);
-const names = ["worldFishingOwner", "cancelWorldFishingGesture", "retireWorldFishingGesture", "publishWorldFishingSource", "captureWorldFishingSnapshot", "emptyLoginAuthState", "setLoginBusy", "preauthGate", "updateLoginAuth", "authSurfaceCurrent",
+const names = ["worldFishingOwner", "cancelWorldFishingGesture", "retireWorldFishingGesture", "retireFishingPanel", "publishWorldFishingSource", "captureWorldFishingSnapshot", "emptyLoginAuthState", "setLoginBusy", "preauthGate", "updateLoginAuth", "authSurfaceCurrent",
   "openLoginAuth", "closeLoginAuth", "changeRegistrationField", "changePasswordField", "submitRegistration", "submitChangePassword",
   "setSafeKeyFocus", "editSafeKey", "randomSafeKeys", "queuePreauthAttempt", "sendPreauthAttempt", "consumePreauthReply",
   "submitPasswordLoginWithCredentials", "submitLogin", "submitSuiLogin", "submitIdentitySession",
@@ -264,6 +264,7 @@ assert.ok(authControlsInitializer);
 const pureQuestMap = extractPureDeclarations("../lib/bevy-quest-world-context.ts", ["normalizeQuestMapFileName"]);
 const fishingRefNames = ["worldFishingSourceRef", "worldFishingCommitRef", "worldFishingGestureRegistryRef",
   "worldFishingActiveGestureRef", "worldFishingQueuedRef", "worldFishingCastClockRef", "questSceneRevisionRef",
+  "fishingPanelRef", "fishingAttachmentRef",
   "npcPurchaseClientRef", "npcPurchaseUnavailableRef", "npcPurchaseEconomicSourceRef", "npcPurchaseDisplaySourceRef",
   "npcPurchaseOptInSocketsRef", "npcPurchaseSendActionRef", "npcPurchaseActionRef"];
 const fishingRefInitializers = new Map();
@@ -439,7 +440,7 @@ function harness({ identity = session, sequenceRef = { current: 1 }, pendingRef 
   };
   // These are real source/cancel closures with inactive gesture custody. This
   // storage/social harness has no committed Fishing runtime, proof or physical edge.
-  Object.assign(scope, pureQuestMap, {sameWorldFishingOwner: pureFishingSource.sameOwner},
+  Object.assign(scope, pureQuestMap, {sameWorldFishingOwner: pureFishingSource.sameOwner, renderFishingPanel: () => {}},
     new Function("WorldFishingSource", fishingRefsJs + "\nreturn {" + fishingRefNames.join(",") + "};")(pureFishingSource.WorldFishingSource));
   scope.setWorldFishingRecord = value => { scope.fishingRecord = typeof value === "function" ? value(scope.fishingRecord ?? null) : value; };
   assert.equal(scope.worldFishingActiveGestureRef.current, null);

@@ -181,12 +181,15 @@ test('actual session retirement clears held Shift and its raw combat source befo
   groupOperationsRef:ref(new (load('group-operations').GroupOperations)()),groupHiddenTargetsRef:ref({scope:'',ids:new Set()}),
   retirePrivateCompanion(){},
   npcPearlShopSourceRef:ref({retire(){}}),retireWorldFishingGesture(){},worldFishingSourceRef:ref({retire(){}}),worldFishingCommitRef:ref(null),
+   fishingPanelRef:ref({equipmentOpen:false,noticeOpen:false,autoCast:false,escapeCancels:false,selection:null,active:null}),
+   fishingAttachmentRef:ref(null),renderFishingPanel(){},
   retireSocialRequests(){},observePreferenceRef:ref(null),observeBootstrapRef:ref(null),advanceHeroWindowEpochs(){},skillBarDocumentCacheRef:ref(null),
   retireSocialItemConnection(){},npcGoldBuyInventoryRef:ref({invalidate(){}}),npcRepairAuthorityRef:ref({invalidateInventory(){}}),
   retireNpcShopService(){},endStorageService(){},pendingStorageRequestsRef:ref(new Map()),setMailboxOpen(){},mailRawRef:ref(null),
   combatBaselineSourceRef:ref({old:true}),spellsRawSnapshotRef:ref(null),equipmentControllerRef:ref(null),equipmentStartGameRef:ref({}),equipmentSnapshotRef:ref({})});
  f.scope.combatIngressRef.current.withdraw=()=>{withdrawn++;};
- const retireCode=ts.transpileModule(functions.get('retireEquipmentSession').getText(ast)+'\nreturn retireEquipmentSession;',{compilerOptions:{target:ts.ScriptTarget.ES2022}}).outputText;
+ const retireSource=['retireEquipmentSession','retireFishingPanel'].map(name=>functions.get(name).getText(ast)).join('\n');
+ const retireCode=ts.transpileModule(retireSource+'\nreturn retireEquipmentSession;',{compilerOptions:{target:ts.ScriptTarget.ES2022}}).outputText;
  const retire=new Function('scope','with(scope){'+retireCode+'}')(f.scope);
  f.api.setCombatForceAttack(true);retire();assert.equal(f.scope.combatForceAttackRef.current,false);assert.equal(withdrawn,1);
  assert.equal(f.scope.combatRawRef.current,null);assert.equal(f.scope.combatBaselineSourceRef.current,null);assert.equal(f.scope.combatModeRawRef.current,null);

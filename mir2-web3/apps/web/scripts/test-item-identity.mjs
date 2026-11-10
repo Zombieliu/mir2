@@ -141,6 +141,7 @@ test("actual inventory handlers show a failed move only as failure and clear sel
       let requests = 0;
       const scope = {
         window: {}, mailLocks: [], storageMode: null, deleteMode: false, sellMode: false, repairMode: false,
+        onFishingBagCell: undefined,
         pendingMoveItem: { key: "sword", name: "WoodenSword", uniqueId: 4, authoritativeUniqueId: 4,
           container: index === 2 ? "storage" : "bag1", slot: 4 },
         slotIndex: 0, activeTab: "bag2", absoluteSlot: 20, slot: { key: "slot-0-0" },

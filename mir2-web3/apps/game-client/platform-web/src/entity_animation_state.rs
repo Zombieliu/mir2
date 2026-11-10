@@ -80,6 +80,7 @@ struct AnimationBridge {
     world: AnimationWorld,
     last_actions: OrderedMap<String, ActionStamp>,
     authorities: OrderedMap<String, ActionAuthority>,
+    late_bootstrap_available: bool,
 }
 
 impl AnimationBridge {
@@ -92,6 +93,7 @@ impl AnimationBridge {
             world: AnimationWorld::new(world_seed),
             last_actions: OrderedMap::new(),
             authorities: OrderedMap::new(),
+            late_bootstrap_available: true,
         }
     }
 
@@ -146,6 +148,7 @@ impl AnimationBridge {
             .action_token
             .as_ref()
             .filter(|token| !token.is_empty());
+        let is_self = entity.kind == "selfPlayer";
         let previous = self.authorities.get_mut(&entity.object_id);
         let same = |a: &ActionAuthority| a.source_key == *source && a.incarnation == incarnation;
 
@@ -157,13 +160,13 @@ impl AnimationBridge {
                 && token.is_some();
             let is_idle = action == AnimationAction::Standing && token.is_none();
             if let Some(authority) = previous.filter(|a| {
-                entity.kind == "selfPlayer"
-                    && a.known
-                    && same(a)
-                    && a.accepted
-                        .as_ref()
-                        .is_some_and(|stamp| &stamp.token == retained)
-                    && (is_movement || is_idle)
+                // The empty receipt masks an admitted, tokenless bootstrap.
+                // Only an aligned frame can make that pose readable again.
+                let receipt_matches = a.accepted.as_ref().map_or_else(
+                    || retained.is_empty() && is_idle && entity.bootstrap_known == Some(true),
+                    |stamp| &stamp.token == retained,
+                );
+                is_self && a.known && same(a) && receipt_matches && (is_movement || is_idle)
             }) {
                 authority.aligned = entity.action_known == Some(true);
                 authority.source_revision = next_revision;
@@ -178,7 +181,17 @@ impl AnimationBridge {
                 .authorities
                 .get(&entity.object_id)
                 .map_or(1, |a| a.continuity_revision.saturating_add(1));
-            let known = spawned && entity.bootstrap_known == Some(true);
+            // The scene can paint the idle actor before the first complete
+            // snapshot reaches this host. Admit that one explicit bootstrap
+            // only while the local visual actor has received no action.
+            let late_bootstrap = is_self
+                && self.late_bootstrap_available
+                && action == AnimationAction::Standing
+                && !self.last_actions.contains_key(&entity.object_id);
+            let known = entity.bootstrap_known == Some(true) && (spawned || late_bootstrap);
+            if is_self {
+                self.late_bootstrap_available = false;
+            }
             self.authorities.insert(
                 entity.object_id.clone(),
                 ActionAuthority {
@@ -251,6 +264,10 @@ impl AnimationBridge {
         let mut ordered_ids = Vec::with_capacity(input.entities.len());
 
         for entity in input.entities {
+            let duplicate = duplicate_ids.contains(&entity.object_id);
+            if duplicate && entity.kind == "selfPlayer" {
+                self.late_bootstrap_available = false;
+            }
             if entity.object_id.is_empty() || !seen.insert(entity.object_id.clone()) {
                 continue;
             }
@@ -346,7 +363,7 @@ impl AnimationBridge {
                         // still own the FIFO, including a spell already queued.
                         let update = if entity.movement_active
                             && canonical_direction.is_some()
-                            && !duplicate_ids.contains(&entity.object_id)
+                            && !duplicate
                         {
                             self.world.apply_latest_locomotion_event(
                                 &snapshot.key,
@@ -379,7 +396,7 @@ impl AnimationBridge {
                     ));
                 }
             }
-            if !duplicate_ids.contains(&entity.object_id) {
+            if !duplicate {
                 self.observe_authority(
                     &entity,
                     snapshot.key.incarnation,
@@ -505,6 +522,7 @@ impl EntityAnimationOwner {
                 && i.entities.len() <= 2048
         }) else {
             if let Some(bridge) = self.inner.as_mut() {
+                bridge.late_bootstrap_available = false;
                 let ids = bridge.authorities.keys().cloned().collect::<Vec<_>>();
                 for id in ids {
                     bridge.withdraw_authority(&id, None);
@@ -1134,6 +1152,73 @@ mod authority_tests {
                 false,
                 "legacy direction fallback cannot grant authority"
             );
+        }
+    }
+
+    #[test]
+    fn initial_authority_can_follow_the_idle_visual_spawn() {
+        let mut owner = EntityAnimationOwner::new();
+        let mut visual = frame(1, "standing", None, false, false);
+        visual["entities"][0]["actionSourceKey"] = Value::Null;
+        visual["entities"][0]["actionSourceRevision"] = Value::Null;
+        owner.resolve_json(&visual.to_string());
+        assert_eq!(peek(&owner)["known"], false);
+
+        let mut bootstrap = frame(2, "standing", None, true, true);
+        bootstrap["entities"][0]["direction"] = json!("DownLeft");
+        owner.resolve_json(&bootstrap.to_string());
+        assert_eq!(peek(&owner)["action"], "standing");
+        assert_eq!(peek(&owner)["direction"], "DownLeft");
+        assert_eq!(peek(&owner)["sourceRevision"], 2);
+    }
+
+    #[test]
+    fn admitted_idle_bootstrap_survives_the_turn_projection_gap() {
+        let mut owner = EntityAnimationOwner::new();
+        owner.resolve_json(&frame(1, "standing", None, true, true).to_string());
+        let initial = peek(&owner);
+        let mut gap = frame(2, "standing", None, true, false);
+        gap["entities"][0]["retainedActionToken"] = json!("");
+        owner.resolve_json(&gap.to_string());
+        assert_eq!(peek(&owner)["known"], false);
+
+        let mut aligned = frame(3, "standing", None, true, true);
+        aligned["entities"][0]["direction"] = json!("DownLeft");
+        owner.resolve_json(&aligned.to_string());
+        let current = peek(&owner);
+        assert_eq!(current["action"], "standing");
+        assert_eq!(current["direction"], "DownLeft");
+        assert_eq!(current["continuityRevision"], initial["continuityRevision"]);
+        assert_eq!(current["sourceRevision"], 3);
+
+        owner.resolve_json(&frame(4, "standing", None, false, false).to_string());
+        gap["entities"][0]["actionSourceRevision"] = json!(5);
+        owner.resolve_json(&gap.to_string());
+        owner.resolve_json(&frame(6, "standing", None, true, true).to_string());
+        assert_eq!(
+            peek(&owner)["known"],
+            false,
+            "a retired bootstrap cannot be restored"
+        );
+    }
+
+    #[test]
+    fn late_bootstrap_cannot_replace_an_observed_action_or_ambiguous_spawn() {
+        for action in ["spell", "duplicate"] {
+            let mut owner = EntityAnimationOwner::new();
+            let mut visual = frame(1, "standing", None, false, false);
+            visual["entities"][0]["actionSourceKey"] = Value::Null;
+            visual["entities"][0]["actionSourceRevision"] = Value::Null;
+            if action == "spell" {
+                visual["entities"][0]["action"] = json!(action);
+                visual["entities"][0]["actionToken"] = json!("visible-cast");
+            } else {
+                let same = visual["entities"][0].clone();
+                visual["entities"].as_array_mut().unwrap().push(same);
+            }
+            owner.resolve_json(&visual.to_string());
+            owner.resolve_json(&frame(2, "standing", None, true, true).to_string());
+            assert_eq!(peek(&owner)["known"], false, "{action}");
         }
     }
     #[test]

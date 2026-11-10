@@ -2969,6 +2969,7 @@ function parityPageFixture(owner, world = {}) {
     mailParcelRef:ref(null), npcBuyDispatcherRef:ref(null), worldSnapshotVersionRef:ref(1), equipmentSnapshotRef:ref({...owner}),
     bagBeltMovesRef:ref(new bagBeltDispatcherModule.BagBeltMoveDispatcher()), bagBeltInventoryReadyRef:ref(null),
     worldFishingGestureRegistryRef:ref(new WeakMap()),worldFishingActiveGestureRef:ref(null),worldFishingQueuedRef:ref(null),
+    fishingAttachmentRef:ref(null),fishingPanelRef:ref({equipmentOpen:false}),
     renderParityServices:()=>{}, appendLog:()=>{}, t:(_key,_args,fallback)=>fallback,
     isMailItemMutation:mailParcelGateway.isMailItemMutation,
     makeCreaturePlayerSource:creatureUi.makeCreaturePlayerSource, upsertCreaturePlayerRecord:creatureUi.upsertCreaturePlayerRecord,
@@ -3697,7 +3698,7 @@ check("Native shortcut window identities use exact declared function names and r
   const expected = {
     Inventory: "inventory", Inventory2: "inventory", Equipment: "equipment", Equipment2: "equipment",
     Skills: "skills", Skills2: "skills", HeroInventory: "heroInventory", HeroEquipment: "heroEquipment", HeroSkills: "heroSkills",
-    Creature: "creatures", Mentor: "bonds", Relationship: "bonds", Friends: "friends", Guilds: "guild", GameShop: "gameShop",
+    Creature: "creatures", Fishing: "fishing", Mentor: "bonds", Relationship: "bonds", Friends: "friends", Guilds: "guild", GameShop: "gameShop",
     Quests: "quests", Options: "options", Options2: "options", Group: "group", Belt: "belt", BeltFlip: "beltFlip",
     Minimap: "minimap", Bigmap: "bigmap", Ranking: "ranking", Help: "help", Keybind: "keybind", Closeall: "closeAll", Skillbar: "skillBar",
   };
@@ -5149,7 +5150,7 @@ check("NPC repair actual capture listeners quarantine second pointer through com
   const inventoryTooltipScope={useRef:current=>({current}),useState:initial=>[initial,()=>{}],useEffect:callback=>{assert.equal(callback(),undefined);},window:{},document:{visibilityState:"visible"}};
   const inventoryTooltipKeys=Object.keys(inventoryTooltipScope),inventoryTooltip=new Function(...inventoryTooltipKeys,tooltipHookJs+"\nreturn useActiveItemTooltip;")(...inventoryTooltipKeys.map(key=>inventoryTooltipScope[key]))([inventoryItem]);
   const inventoryScope={repairMode:true,item:inventoryItem,tooltip:inventoryTooltip,window:{},mailLocks:[],storageMode:null,deleteMode:false,sellMode:false,pendingMoveItem:null,
-    activeTab:"bag1",bagBeltActivationGenerationRef:{current:1},inventoryPointerActivationRef:{current:null},world:{inventoryItems:[inventoryItem],equipmentItems:[]},pendingSplitItem:null,pendingGoldDrop:null,contextMenu:null,onBagBeltPointerDown:undefined,
+    activeTab:"bag1",bagBeltActivationGenerationRef:{current:1},inventoryPointerActivationRef:{current:null},world:{inventoryItems:[inventoryItem],equipmentItems:[]},pendingSplitItem:null,pendingGoldDrop:null,contextMenu:null,onBagBeltPointerDown:undefined,onFishingBagCell:undefined,
     equipmentSlotForItem:repairInventoryEquipment.equipmentSlotForItem,onRepairPointerDown:event=>repairDowns.push(event.pointerId),onUseItem:value=>activated.push(value)};
   const inventoryKeys=Object.keys(inventoryScope),inventoryApi=new Function(...inventoryKeys,repairInventoryJs+
     "\nreturn {onPointerDown,onMouseDown,onClick,setRepair:value=>repairMode=value,consumedRepairPointerRef};")(...inventoryKeys.map(key=>inventoryScope[key]));
@@ -5345,7 +5346,7 @@ check("Actual Bag Belt Equipment tooltip events are read only and active timer c
     const item={uniqueId:0,itemIndex:-1,name:"Owned",icon:1,count:1},node={isConnected:true,matches:()=>false};currentItems=[item];visible=true;reader=originalReader;render();
     const eventScope={item,tooltip:nowApi,document:scope.document,repairMode:false,consumedRepairPointerRef:{current:new WeakSet()},onRepairPointerDown:()=>{actions++;},
       activeTab:"bag1",bagBeltActivationGenerationRef:{current:1},inventoryPointerActivationRef:{current:null},deleteMode:false,sellMode:false,storageMode:null,pendingMoveItem:null,pendingSplitItem:null,pendingGoldDrop:null,contextMenu:null,
-      mailItemLocked:new Function("mailLocks",ts.transpileModule(repairInventoryDeclarations.get("mailItemLocked"),{compilerOptions:{target:ts.ScriptTarget.ES2022}}).outputText+"\nreturn mailItemLocked;")([]),onBagBeltPointerDown:undefined};
+      mailItemLocked:new Function("mailLocks",ts.transpileModule(repairInventoryDeclarations.get("mailItemLocked"),{compilerOptions:{target:ts.ScriptTarget.ES2022}}).outputText+"\nreturn mailItemLocked;")([]),onBagBeltPointerDown:undefined,onFishingBagCell:undefined};
     const eventKeys=Object.keys(eventScope),handlers=new Function(...eventKeys,tooltipSurfaceNodes.get(surface).js+"\nreturn {onPointerEnter,onPointerLeave,onFocus,onBlur,onPointerCancel,onPointerDown};")(...eventKeys.map(key=>eventScope[key]));
     const event={pointerType:"mouse",isPrimary:true,button:0,currentTarget:node,defaultPrevented:false,stopped:false,stopPropagation(){this.stopped=true;},preventDefault(){this.defaultPrevented=true;}};
     const before=reads;handlers.onPointerEnter({...event,pointerType:"touch"});render();assert.equal(reads,before,"touch enter alone is not an item read");
@@ -5717,13 +5718,16 @@ assert.equal(followingTradeEditEntry.thenStatement.statements.map(node=>node.get
   'if(socketRef.current!==socket||socket.readyState!==WebSocket.OPEN||!socialTradeProofCurrent(options.socialTradeProof,wireCommand))returnfalse;',
   "cancel and gold revalidate the current socket and immutable Trade proof before Native budget entry");
 assert.equal(followingTradeEditEntry.elseStatement,undefined);
-const followingBudgetEntry=paritySendStatements[paritySendStatements.indexOf(bagBeltFollowingRankingInspectEntry)+7];
+const followingFishingPanelEntry=paritySendStatements[paritySendStatements.indexOf(bagBeltFollowingRankingInspectEntry)+7];
+assert.equal(followingFishingPanelEntry.getText(parityPageAst),
+  "if (options?.fishingPanelAttempt && !enterFishingPanelSend(options.fishingPanelAttempt, wireCommand, socket)) return false;");
+const followingBudgetEntry=paritySendStatements[paritySendStatements.indexOf(bagBeltFollowingRankingInspectEntry)+8];
 assert.equal(followingBudgetEntry.getText(parityPageAst).replace(/\s+/g,""),
   'if(socialBudgetTicket&&!socialBudgetRef.current?.enter(socialBudgetTicket,currentSocialReplyOwner(),wireCommand)){if(options?.groupProof)groupOperationsRef.current.finishInviteAttempt(options.groupProof);returnfalse;}');
-const followingCancelSpend=paritySendStatements[paritySendStatements.indexOf(bagBeltFollowingRankingInspectEntry)+8];
+const followingCancelSpend=paritySendStatements[paritySendStatements.indexOf(bagBeltFollowingRankingInspectEntry)+9];
 assert.equal(followingCancelSpend.getText(parityPageAst),'if (options?.socialTradeProof && wireCommand.type === "tradeCancel") socialTradeCancelSpentRef.current = options.socialTradeProof.incarnation;');
-assert.equal(paritySendStatements.indexOf(bagBeltFollowingRankingInspectEntry)+9,paritySocketIndex,"Native entry and cancel spend immediately precede the exact socket try");
-assert.equal(paritySendStatements.indexOf(bagBeltEntryNodes[0])+12,paritySocketIndex,"actual Bag entry retains all existing disjoint guards plus Native budget before socket.send");
+assert.equal(paritySendStatements.indexOf(bagBeltFollowingRankingInspectEntry)+10,paritySocketIndex,"Native entry and cancel spend immediately precede the exact socket try");
+assert.equal(paritySendStatements.indexOf(bagBeltEntryNodes[0])+13,paritySocketIndex,"actual Bag entry retains all existing disjoint guards plus Native budget before socket.send");
 // Retain whole actual serialization/DTO statements and the complete Bag-specific
 // entry through socket.send. All Bag-specific owner/source/mail/storage/social
 // guards execute in the actual bagBeltFinalCurrent; no gate is replaced by true.
@@ -6129,6 +6133,23 @@ check("Animation renderer forwards exact clock and canonical action tokens while
 });
 
 
+check("Fishing animation masks an admitted idle bootstrap while turn projection and ACK disagree",()=>{
+  const owner=fishingOwner(),source=new worldFishingSource.WorldFishingSource(),requests=[];
+  const initial=source.observeSnapshot(owner,fishingSnapshot(owner));
+  const runtime={resolveMir2EntityAnimationPoses(json){const input=JSON.parse(json);requests.push(input.entities[0]);
+    return JSON.stringify({worldKey:input.worldKey,nowMs:input.nowMs,poses:[]});}};
+  const render=(record,direction,now)=>fishingAnimation.resolveCrystalEntityAnimationPoses({runtime,worldKey:"world:0",
+    worldSeed:7,now,selfAuthority:record,entities:[{entity:{objectId:"17",kind:"selfPlayer",x:0,y:1,direction},state:"standing"}]});
+  render(initial,"Right",1000);
+  render(initial,"DownLeft",1001);
+  source.observePacket(owner,"UserLocation",{x:0,y:1,direction:"DownLeft"},1002);
+  const corrected=source.current(owner);
+  render(corrected,"DownLeft",1003);
+  assert.deepEqual(requests.map(entry=>[entry.actionKnown,entry.bootstrapKnown,entry.retainedActionToken,entry.actionToken]),
+    [[true,true,undefined,undefined],[false,true,"",undefined],[true,true,undefined,undefined]]);
+  assert.equal(corrected.continuityRevision,initial.continuityRevision);
+  assert.equal(corrected.actionEvidence,null);
+});
 check("WorldFishingSource captures immutable canonical action evidence without invented receive clocks",()=>{
   const owner=fishingOwner(),source=new worldFishingSource.WorldFishingSource();source.observeSnapshot(owner,fishingSnapshot(owner));
   source.observePacket(owner,"ObjectWalk",{objectId:17,x:1,y:1,direction:"Right"},1000);const first=source.current(owner);
@@ -6251,11 +6272,14 @@ check("Animation action peek rejects reentrant commit context owner source and g
 // Actual Page custody and socket entry with bounded in-memory ABI data and
 // physical-owner records. No network connection or animation engine is created.
 const fishingPageSource=readFileSync(parityPageUrl,"utf8"),fishingPageAst=ts.createSourceFile("page.tsx",fishingPageSource,ts.ScriptTarget.Latest,true,ts.ScriptKind.TSX);
+const fishingPanelModule=loadTypeScriptModule(new URL("../lib/world-fishing-panel.ts",import.meta.url));
 const fishingPageNames=new Set(["worldFishingOwner","cancelWorldFishingGesture","retireWorldFishingGesture","publishWorldFishingSource",
   "captureWorldFishingGatewayEvent","captureWorldFishingSnapshot","commitWorldFishingAnimation","readWorldFishingRod","worldFishingInputAllowed","worldFishingPureUiBlocked",
   "worldFishingLeaseCurrent","beginWorldFishingGesture","worldFishingMapCell","worldFishingFinalCurrent","enterWorldFishingSend","tryWorldFishingBlockedClick",
   "currentSpellsOwner","otherPlayerUiBlocksInput","heroUiBlocksGameplay","referenceWindowsBlockGameplay","mapRouteInputBlocked","sceneInputDeferredForInitialAssets",
-  "originalMapRegionContainsTile","originalMapCellBlocksMovement"]),fishingPageDeclarations=new Map();
+  "originalMapRegionContainsTile","originalMapCellBlocksMovement",
+  "retireFishingPanel","observeFishingStatus","sameFishingInventoryOwner","observeFishingAttachmentReceipt",
+  "fishingPanelOwner","enterFishingPanelSend"]),fishingPageDeclarations=new Map();
 (function visit(node){if(ts.isFunctionDeclaration(node)&&fishingPageNames.has(node.name?.text))fishingPageDeclarations.set(node.name.text,node.getText(fishingPageAst));ts.forEachChild(node,visit);})(fishingPageAst);
 assert.equal(fishingPageDeclarations.size,fishingPageNames.size,"all actual fishing Page and input authority declarations");
 const fishingSendNode=[];(function visit(node){if(ts.isFunctionDeclaration(node)&&node.name?.text==="sendRaw")fishingSendNode.push(node);ts.forEachChild(node,visit);})(fishingPageAst);
@@ -6276,10 +6300,11 @@ assert.equal(fishingSendStatements[fishingSendStatements.indexOf(fishingFollowin
 assert.equal(fishingSendStatements[fishingSendStatements.indexOf(fishingFollowingRankingInspectEntry)+4].getText(fishingPageAst),followingGuildRankReadEntry.getText(parityPageAst));
 assert.equal(fishingSendStatements[fishingSendStatements.indexOf(fishingFollowingRankingInspectEntry)+5].getText(fishingPageAst),followingTradeConfirmEntry.getText(parityPageAst));
 assert.equal(fishingSendStatements[fishingSendStatements.indexOf(fishingFollowingRankingInspectEntry)+6].getText(fishingPageAst),followingTradeEditEntry.getText(parityPageAst));
-assert.equal(fishingSendStatements[fishingSendStatements.indexOf(fishingFollowingRankingInspectEntry)+7].getText(fishingPageAst),followingBudgetEntry.getText(parityPageAst));
-assert.equal(fishingSendStatements[fishingSendStatements.indexOf(fishingFollowingRankingInspectEntry)+8].getText(fishingPageAst),followingCancelSpend.getText(parityPageAst));
-assert.equal(fishingSendStatements.indexOf(fishingFollowingRankingInspectEntry)+9,fishingSocketIndex,"Fishing retains every prior guard plus Native entry and cancel spend");
-assert.equal(fishingSendStatements.indexOf(fishingSendEntry[0])+11,fishingSocketIndex,"WorldFishing retains the complete final socket sequence");
+assert.equal(fishingSendStatements[fishingSendStatements.indexOf(fishingFollowingRankingInspectEntry)+7].getText(fishingPageAst),followingFishingPanelEntry.getText(parityPageAst));
+assert.equal(fishingSendStatements[fishingSendStatements.indexOf(fishingFollowingRankingInspectEntry)+8].getText(fishingPageAst),followingBudgetEntry.getText(parityPageAst));
+assert.equal(fishingSendStatements[fishingSendStatements.indexOf(fishingFollowingRankingInspectEntry)+9].getText(fishingPageAst),followingCancelSpend.getText(parityPageAst));
+assert.equal(fishingSendStatements.indexOf(fishingFollowingRankingInspectEntry)+10,fishingSocketIndex,"Fishing retains every prior guard plus Native entry and cancel spend");
+assert.equal(fishingSendStatements.indexOf(fishingSendEntry[0])+12,fishingSocketIndex,"WorldFishing retains the complete final socket sequence");
 const fishingSerializeIndex=fishingSendStatements.findIndex(node=>ts.isVariableStatement(node)&&node.declarationList.declarations.some(decl=>decl.name.getText(fishingPageAst)==="serialized"));
 const fishingDtoIndex=fishingSendStatements.findIndex(node=>ts.isVariableStatement(node)&&node.declarationList.declarations.some(decl=>decl.name.getText(fishingPageAst)==="wireCommand"));
 const fishingPreflightGuards=fishingSendStatements.filter(node=>ts.isIfStatement(node)&&['command.type === "fishingCast" && command.castOut === true && !options?.worldFishingProof','options?.worldFishingProof && !worldFishingFinalCurrent(options.worldFishingProof, command)'].includes(node.expression.getText(fishingPageAst)));
@@ -6318,10 +6343,12 @@ function worldFishingPageFixture(){
     worldFishingSourceRef:ref(new worldFishingSource.WorldFishingSource()),worldFishingRuntimeRef:ref({core,runtime}),worldFishingCommitRef:ref(null),
     worldFishingGestureRegistryRef:ref(new WeakMap()),worldFishingActiveGestureRef:ref(null),worldFishingSendProofsRef:ref(new WeakMap()),worldFishingQueuedRef:ref(null),
     worldFishingCastClockRef:ref(null),queuedMoveIntentRef:ref(null),questRouteRunRef:ref(null),nextMoveSendAtRef:ref(0),
+    fishingPanelRef:ref({equipmentOpen:false,noticeOpen:false,autoCast:false,escapeCancels:false,selection:null,active:null}),
+    fishingPanelAttemptRef:ref(null),renderFishingPanel:()=>{},gameBusRef:ref({emit:()=>{}}),...fishingPanelModule,
     setWorldFishingRecord:()=>{},console:{error:(...args)=>errors.push(args)},
     sendRaw:(command,options)=>{entryProofs.push(options.worldFishingProof);return api.fishingSocketEntry(command,options,page.socket,beforeFinal);},
     sendCrystalTurn:(direction,proof)=>{entryProofs.push(proof);return api.fishingSocketEntry({type:"turn",direction},{worldFishingProof:proof},page.socket,beforeFinal);}};
-  const keys=Object.keys(scope),api=new Function(...keys,fishingPageJs+"\nreturn {worldFishingOwner,captureWorldFishingSnapshot,captureWorldFishingGatewayEvent,commitWorldFishingAnimation,beginWorldFishingGesture,cancelWorldFishingGesture,retireWorldFishingGesture,worldFishingLeaseCurrent,worldFishingMapCell,worldFishingFinalCurrent,tryWorldFishingBlockedClick,fishingSocketEntry,readWorldFishingRod,worldFishingPureUiBlocked};")(...keys.map(key=>scope[key]));
+  const keys=Object.keys(scope),api=new Function(...keys,fishingPageJs+"\nreturn {worldFishingOwner,captureWorldFishingSnapshot,captureWorldFishingGatewayEvent,commitWorldFishingAnimation,beginWorldFishingGesture,cancelWorldFishingGesture,retireWorldFishingGesture,worldFishingLeaseCurrent,worldFishingMapCell,worldFishingFinalCurrent,tryWorldFishingBlockedClick,fishingSocketEntry,readWorldFishingRod,worldFishingPureUiBlocked,observeFishingStatus,enterFishingPanelSend};")(...keys.map(key=>scope[key]));
   page.socket.send=body=>{if(throwTransport)throw Error("fixture unknown transport");page.sentBodies.push(body);page.sent.push(JSON.parse(body));};
   api.captureWorldFishingSnapshot({...raw,entities:[self]},owner.connectionGeneration);
   const source=scope.worldFishingSourceRef.current.current(api.worldFishingOwner());assert.ok(source?.animationKnown,"actual raw M001.map snapshot must establish normalized map authority");assert.ok(api.readWorldFishingRod(),"actual raw UID-zero rod source must pass current equipment custody");
@@ -6335,6 +6362,56 @@ function worldFishingPageFixture(){
 }
 
 
+check("Fishing panel reel is owned by one active cast and terminal update",()=>{
+  const f=worldFishingPageFixture(), owner=f.api.worldFishingOwner();
+  const tick={objectId:owner.playerObjectId,fishing:true,progressPercent:75,chancePercent:40,foundFish:false};
+  const panel=f.scope.fishingPanelRef.current;
+  f.api.observeFishingStatus(owner,{...tick,objectId:owner.playerObjectId+1});
+  assert.equal(panel.active,null);
+  f.api.observeFishingStatus(owner,tick);
+  const attempt={owner,command:{type:"fishingCast",castOut:false},active:panel.active};
+  f.scope.fishingPanelAttemptRef.current=attempt;
+  assert.equal(f.api.enterFishingPanelSend(attempt,{...attempt.command,castOut:true},f.socket),false);
+  assert.equal(f.api.enterFishingPanelSend(attempt,attempt.command,f.socket),true);
+  f.api.observeFishingStatus(owner,{...tick,progressPercent:100,foundFish:true});
+  assert.equal(panel.active.reeling,true);
+  assert.equal(f.api.enterFishingPanelSend(attempt,attempt.command,f.socket),false);
+  f.api.observeFishingStatus(owner,{...tick,fishing:false});
+  assert.equal(panel.active,null);
+  f.api.observeFishingStatus(owner,tick);
+  assert.equal(f.api.enterFishingPanelSend(attempt,attempt.command,f.socket),false);
+  const auto={owner,command:{type:"fishingChangeAutocast",autoCast:false},active:panel.active};
+  f.scope.fishingPanelAttemptRef.current=auto;
+  f.scope.bagBeltInventoryReadyRef.current=null;
+  panel.autoCast=true;
+  assert.equal(f.api.enterFishingPanelSend(auto,auto.command,f.socket),true,"active owner can turn off during inventory reconciliation");
+  assert.equal(panel.autoCast,false);
+  assert.equal(f.api.enterFishingPanelSend(auto,auto.command,f.socket),false,"duplicate off cannot send");
+});
+check("Fishing tackle ACK and full authoritative placement retain zero UID and exact bag index",()=>{
+  const {projectFishingRod,fishingAttachmentApplied,fishingAttachmentReceipt,fishingBagCell}=fishingPanelModule;
+  const carrier={info:{name:"Blue Fishing Rod",shape:49,item_type:1,item_index:3},userItem:{unique_id:4,item_index:3,
+    slots:[null,null,{unique_id:0,item_index:42,count:3},null,null]},
+    socketInfos:[null,null,{name:"Bait",item_index:42,item_type:30,image:2332}]};
+  const rod=projectFishingRod(carrier,4);
+  assert.deepEqual(rod.slots[2],{uniqueId:0,name:"Bait",quantity:3,imageIndex:2332});
+  assert.deepEqual(projectFishingRod({...carrier,socketInfos:[]},4).slots[2],
+    {uniqueId:0,name:null,quantity:3,imageIndex:null},"missing tooltip keeps occupied identity without invented metadata");
+  const attach={type:"equipSlotItem",grid:"inventory",gridTo:"fishing",to:2,uniqueId:0,toUniqueId:4};
+  const ack={grid:"Inventory",gridTo:"Fishing",to:2,uniqueId:0,success:true};
+  assert.equal(fishingAttachmentReceipt(attach,"EquipSlotItem",ack),true);
+  assert.equal(fishingAttachmentReceipt(attach,"EquipSlotItem",{...ack,to:4}),null);
+  assert.equal(fishingAttachmentReceipt(attach,"EquipSlotItem",{...ack,success:false}),false);
+  const layout={capacity:54,placements:[{uniqueId:4,container:2,slot:0}]};
+  assert.equal(fishingAttachmentApplied(attach,rod,layout),true);
+  layout.placements.push({uniqueId:0,container:0,slot:41});
+  assert.equal(fishingAttachmentApplied(attach,rod,layout),false);
+  assert.equal(fishingBagCell(layout,41),0);
+  assert.equal(fishingBagCell(layout,48),undefined);
+  const remove={type:"removeSlotItem",grid:"fishing",gridTo:"inventory",to:41,uniqueId:0,fromUniqueId:4};
+  assert.equal(fishingAttachmentApplied(remove,rod,layout),false);
+  assert.equal(fishingAttachmentApplied(remove,{...rod,slots:[null,null,null,null,null]},layout),true);
+});
 check("Fishing Page actual raw UID-zero rod and normalized map sends one exact cast through consumed socket proof",()=>{
   for(const throws of [false,true]){
     const f=worldFishingPageFixture(),gesture=f.begin();f.setThrow(throws);
@@ -7571,15 +7648,16 @@ check("Ranking actual Page inspect gesture sends exact four raw fields UID0 thro
 });
 check("Ranking actual Page raw Inspect requires proof and only disjoint create group guild-rank and trade guards follow its final claim",()=>{
   const page=rankingPageFixture();assert.equal(page.api.finalRawSend({type:"inspect",objectId:0,ranking:true,hero:false}),false);
-  const finalIndex=paritySendStatements.indexOf(rankingFinalGuard);assert.equal(finalIndex+9,paritySocketIndex);
+  const finalIndex=paritySendStatements.indexOf(rankingFinalGuard);assert.equal(finalIndex+10,paritySocketIndex);
   assert.equal(paritySendStatements[finalIndex+3].getText(parityPageAst),followingGuildRankEntry.getText(parityPageAst));
   assert.equal(paritySendStatements[finalIndex+4].getText(parityPageAst),followingGuildRankReadEntry.getText(parityPageAst));
   assert.strictEqual(paritySendStatements[finalIndex+1],followingCreateEntry);
   assert.strictEqual(paritySendStatements[finalIndex+2],followingGroupEntry);
   assert.strictEqual(paritySendStatements[finalIndex+5],followingTradeConfirmEntry);
   assert.strictEqual(paritySendStatements[finalIndex+6],followingTradeEditEntry);
-  assert.strictEqual(paritySendStatements[finalIndex+7],followingBudgetEntry);
-  assert.strictEqual(paritySendStatements[finalIndex+8],followingCancelSpend);
+  assert.strictEqual(paritySendStatements[finalIndex+7],followingFishingPanelEntry);
+  assert.strictEqual(paritySendStatements[finalIndex+8],followingBudgetEntry);
+  assert.strictEqual(paritySendStatements[finalIndex+9],followingCancelSpend);
   const sends=[];(function visit(node){if(ts.isCallExpression(node)&&node.expression.getText(parityPageAst)==="socket.send")sends.push(node);ts.forEachChild(node,visit);})(paritySendStatements[paritySocketIndex]);
   assert.equal(sends.length,1);assert.equal(sends[0].arguments[0].getText(parityPageAst),"serialized");
   const listeners=paritySendStatements.map((node,index)=>({node,index})).filter(({node})=>node.getText(parityPageAst).includes("window.dispatchEvent"));

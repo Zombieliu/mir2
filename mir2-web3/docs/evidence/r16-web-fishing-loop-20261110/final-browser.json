@@ -1,0 +1,463 @@
+{
+  "schema": "mir2.r16.fishing.final-browser.v1",
+  "rawSha256": "d04e0cdce707f902727bbfff8f7b220bc42d60ebb8551ca34cd10ad187a8b53b",
+  "build": {
+    "gatewayPort": 20321,
+    "webProfile": "platinum_176",
+    "sourceArchiveSha": "8d911dc8543afbcf4568fcae6a62438124be563739e89cec46db94d22b476e37",
+    "scope": "Final R16 fishing app and authority, using normal physical input with isolated File",
+    "overlayMetadata": {
+      "scope": "Final R16 fishing app and authority, using normal physical input with isolated File",
+      "sourceHashes": {
+        "app/page.tsx": "0e929ac1aaa34afd9a07a9109fa1769413406ad0b2373832332c4282dfb03796",
+        "app/original-client-shell.tsx": "0de2af1278fe3eb45c54639e27d0a88b81a4c7bf37c7f63acb14bcdd1a83d5e5",
+        "app/globals.css": "389e3e9cfeceb39d5a2a1a57537faec925420330bb386a1ee8caf04dd7e47579",
+        "app/components/original-client-shell-types.ts": "acddccfb47160a098d19fb3a9b5a1e91798a2caf7e65a7d55e1e500b6e92aaa9",
+        "app/components/original-client-game-ui-scene.tsx": "f8ebd41a065216d872f2406738dc6d535438624919d9a833e956a461d8fe7c7b",
+        "app/components/original-client-inventory-window.tsx": "78cf0b181cfb47a0e51f608f77e03302567a6597e60acea67ed751d3d2c26326",
+        "app/components/original-client-system-menu.tsx": "7dff99b39d6d78bf4ba424a544e84604a314f45b5f761204f186b6b007a6e092",
+        "app/components/original-client-fishing-windows.tsx": "1a4fab0d7da545f791f4de187f708eb7321c8dcf4910b7a15e934f5197f9e7eb",
+        "app/components/original-client-entity-animation-runtime.ts": "912990d06f54c1af8de1b1a631f6912a437455b3a39825e59bf5bd2be36ebd92",
+        "lib/crystal-shortcut-actions.ts": "041c44d31aae6d29aca9ff47d3ab1ba668ebab35d962e1d192731584c47dbd1a",
+        "lib/world-fishing-panel.ts": "7c666a2de32a4d7c23ec680187d5aff7552778d687dba18bd05a2202f0ad1683"
+      }
+    },
+    "inputs": {
+      "app/page.tsx": "0e929ac1aaa34afd9a07a9109fa1769413406ad0b2373832332c4282dfb03796",
+      "app/original-client-shell.tsx": "0de2af1278fe3eb45c54639e27d0a88b81a4c7bf37c7f63acb14bcdd1a83d5e5",
+      "app/globals.css": "389e3e9cfeceb39d5a2a1a57537faec925420330bb386a1ee8caf04dd7e47579",
+      "app/components/original-client-shell-types.ts": "acddccfb47160a098d19fb3a9b5a1e91798a2caf7e65a7d55e1e500b6e92aaa9",
+      "app/components/original-client-game-ui-scene.tsx": "f8ebd41a065216d872f2406738dc6d535438624919d9a833e956a461d8fe7c7b",
+      "app/components/original-client-inventory-window.tsx": "78cf0b181cfb47a0e51f608f77e03302567a6597e60acea67ed751d3d2c26326",
+      "app/components/original-client-system-menu.tsx": "7dff99b39d6d78bf4ba424a544e84604a314f45b5f761204f186b6b007a6e092",
+      "app/components/original-client-fishing-windows.tsx": "1a4fab0d7da545f791f4de187f708eb7321c8dcf4910b7a15e934f5197f9e7eb",
+      "app/components/original-client-entity-animation-runtime.ts": "912990d06f54c1af8de1b1a631f6912a437455b3a39825e59bf5bd2be36ebd92",
+      "lib/crystal-shortcut-actions.ts": "041c44d31aae6d29aca9ff47d3ab1ba668ebab35d962e1d192731584c47dbd1a",
+      "lib/world-fishing-panel.ts": "7c666a2de32a4d7c23ec680187d5aff7552778d687dba18bd05a2202f0ad1683",
+      "lib/world-fishing-source.ts": "ee24569a0ae5946397fff550784e7ef5a2e0bc62abb93a981bf3136a4c18c2f4",
+      "lib/generated/bevy_runtime_version.json": "a523ce5f465e5266c144ad1cd3d9c157483ab066a2f9e746df74e0695293b7e5",
+      "lib/generated/client_core_runtime.json": "45c0e696e88e0d11a23ade70c62df8d6507cf1e13b8d30e110d668afcc04fcef"
+    },
+    "runtimeVersion": "bevy-b27119c94bf94458",
+    "trackedFiles": [
+      [
+        "public/bevy-runtime/pkg-webgpu/mir2_bevy_runtime.js",
+        "b30146482550703a7309d8471154d2200dc55a47aea2b9910b6895aea7d70069"
+      ],
+      [
+        "public/bevy-runtime/pkg-webgpu/mir2_bevy_runtime_bg.wasm",
+        "98325adcbeb221034acac7def57ee04afd4cf47188c5144b928d5ba301636f62"
+      ],
+      [
+        "public/bevy-runtime/pkg-webgl2/mir2_bevy_runtime.js",
+        "2c18b5168f4a5210f4879c06e7373807a6dedb3a81137fdc28080191bc0f5aa5"
+      ],
+      [
+        "public/bevy-runtime/pkg-webgl2/mir2_bevy_runtime_bg.wasm",
+        "26973cfca255014c691bffb9746cf4d223c2eb13718880dcabf3ff0c828c8b9d"
+      ],
+      [
+        "public/bevy-runtime/pkg-webgl2-shared/mir2_bevy_runtime.js",
+        "35d1ad1206bba4693cef1d4f19ca2bc6e4cd173c4bbf1279daaf1eb745c1e66a"
+      ],
+      [
+        "public/bevy-runtime/pkg-webgl2-shared/mir2_bevy_runtime_bg.wasm",
+        "35cd5c8d2b231fa5f3084edd2165ae2ae6cf99023ce0e51e3dfa6e6060bc6ea2"
+      ]
+    ],
+    "status": 0
+  },
+  "renderer": "webgpu",
+  "gatewaySha": "517328cd8d2badcf2a7fb9ae1532964435e703a40398838b540551c0a697867c",
+  "provisionedFileSha": "8351bc6a9174dd979b64d3ff3c574344b5ec6e362f12a57bb61e07e11a15cc41",
+  "runtimeHTTP": [
+    {
+      "path": "/bevy-runtime/v/bevy-b27119c94bf94458/pkg-webgpu/mir2_bevy_runtime.js",
+      "status": 200
+    },
+    {
+      "path": "/bevy-runtime/v/bevy-b27119c94bf94458/pkg-webgpu/mir2_bevy_runtime_bg.wasm",
+      "status": 200
+    }
+  ],
+  "turn": {
+    "sent": {
+      "type": "turn",
+      "seq": 618,
+      "at": 1794271129286,
+      "direction": "DownLeft"
+    },
+    "ack": {
+      "packet": "UserLocation",
+      "seq": 619,
+      "at": 1794271129305,
+      "x": 342,
+      "y": 244,
+      "direction": "DownLeft"
+    }
+  },
+  "cast": {
+    "sent": {
+      "type": "fishingCast",
+      "seq": 620,
+      "at": 1794271130271,
+      "castOut": true
+    },
+    "ack": {
+      "packet": "FishingUpdate",
+      "seq": 624,
+      "at": 1794271130415,
+      "objectId": 1000,
+      "fishing": true,
+      "progressPercent": 0,
+      "chancePercent": 38,
+      "foundFish": false,
+      "fishingPoint": {
+        "x": 339,
+        "y": 247
+      }
+    },
+    "baitDebit": {
+      "packet": "DeleteItem",
+      "seq": 622,
+      "at": 1794271130408,
+      "uniqueId": 52297734,
+      "count": 1
+    },
+    "rodDura": {
+      "packet": "DuraChanged",
+      "seq": 623,
+      "at": 1794271130411,
+      "uniqueId": 51970049,
+      "currentDura": 9999
+    },
+    "hookDura": {
+      "packet": "DuraChanged",
+      "seq": 621,
+      "at": 1794271130395,
+      "uniqueId": 52101122,
+      "currentDura": 7999
+    }
+  },
+  "reel": {
+    "phases": [
+      {
+        "packet": "FishingUpdate",
+        "seq": 624,
+        "at": 1794271130415,
+        "objectId": 1000,
+        "fishing": true,
+        "progressPercent": 0,
+        "chancePercent": 38,
+        "foundFish": false,
+        "fishingPoint": {
+          "x": 339,
+          "y": 247
+        },
+        "relativeMs": 0
+      },
+      {
+        "packet": "FishingUpdate",
+        "seq": 630,
+        "at": 1794271140399,
+        "objectId": 1000,
+        "fishing": true,
+        "progressPercent": 25,
+        "chancePercent": 38,
+        "foundFish": false,
+        "fishingPoint": {
+          "x": 339,
+          "y": 247
+        },
+        "relativeMs": 9984
+      },
+      {
+        "packet": "FishingUpdate",
+        "seq": 631,
+        "at": 1794271140495,
+        "objectId": 1000,
+        "fishing": true,
+        "progressPercent": 50,
+        "chancePercent": 38,
+        "foundFish": false,
+        "fishingPoint": {
+          "x": 339,
+          "y": 247
+        },
+        "relativeMs": 10080
+      },
+      {
+        "packet": "FishingUpdate",
+        "seq": 632,
+        "at": 1794271140589,
+        "objectId": 1000,
+        "fishing": true,
+        "progressPercent": 75,
+        "chancePercent": 38,
+        "foundFish": false,
+        "fishingPoint": {
+          "x": 339,
+          "y": 247
+        },
+        "relativeMs": 10174
+      },
+      {
+        "packet": "FishingUpdate",
+        "seq": 633,
+        "at": 1794271140683,
+        "objectId": 1000,
+        "fishing": true,
+        "progressPercent": 100,
+        "chancePercent": 38,
+        "foundFish": true,
+        "fishingPoint": {
+          "x": 339,
+          "y": 247
+        },
+        "relativeMs": 10268
+      }
+    ],
+    "bite": {
+      "packet": "FishingUpdate",
+      "seq": 633,
+      "at": 1794271140683,
+      "objectId": 1000,
+      "fishing": true,
+      "progressPercent": 100,
+      "chancePercent": 38,
+      "foundFish": true,
+      "fishingPoint": {
+        "x": 339,
+        "y": 247
+      }
+    },
+    "status": {
+      "biteView": "true",
+      "bars": [
+        {
+          "name": "Success Chance + 38%",
+          "value": "38"
+        },
+        {
+          "name": "Progress",
+          "value": "100"
+        }
+      ],
+      "visible": true
+    },
+    "manual": {
+      "sent": {
+        "type": "fishingCast",
+        "seq": 641,
+        "at": 1794271141424,
+        "castOut": false
+      },
+      "ack": {
+        "packet": "FishingUpdate",
+        "seq": 645,
+        "at": 1794271141800,
+        "objectId": 1000,
+        "fishing": false,
+        "progressPercent": 100,
+        "chancePercent": 38,
+        "foundFish": false,
+        "fishingPoint": {
+          "x": 339,
+          "y": 247
+        }
+      },
+      "defaultEscapeSentNothing": true,
+      "outcome": [
+        {
+          "packet": "Chat",
+          "seq": 643,
+          "at": 1794271141771,
+          "message": "Your fish got away!",
+          "chatType": "System"
+        }
+      ]
+    },
+    "escape": {
+      "cast": {
+        "sent": {
+          "type": "fishingCast",
+          "seq": 649,
+          "at": 1794271143331,
+          "castOut": true
+        },
+        "ack": {
+          "packet": "FishingUpdate",
+          "seq": 653,
+          "at": 1794271143465,
+          "objectId": 1000,
+          "fishing": true,
+          "progressPercent": 0,
+          "chancePercent": 38,
+          "foundFish": false,
+          "fishingPoint": {
+            "x": 339,
+            "y": 247
+          }
+        }
+      },
+      "sent": {
+        "type": "fishingCast",
+        "seq": 656,
+        "at": 1794271143748,
+        "castOut": false
+      },
+      "ack": {
+        "packet": "FishingUpdate",
+        "seq": 658,
+        "at": 1794271143854,
+        "objectId": 1000,
+        "fishing": false,
+        "progressPercent": 100,
+        "chancePercent": 38,
+        "foundFish": false,
+        "fishingPoint": {
+          "x": 339,
+          "y": 247
+        }
+      }
+    },
+    "auto": {
+      "cast": {
+        "sent": {
+          "type": "fishingCast",
+          "seq": 660,
+          "at": 1794271145215,
+          "castOut": true
+        },
+        "ack": {
+          "packet": "FishingUpdate",
+          "seq": 664,
+          "at": 1794271145350,
+          "objectId": 1000,
+          "fishing": true,
+          "progressPercent": 0,
+          "chancePercent": 38,
+          "foundFish": false,
+          "fishingPoint": {
+            "x": 339,
+            "y": 247
+          }
+        }
+      },
+      "on": {
+        "type": "fishingChangeAutocast",
+        "seq": 666,
+        "at": 1794271145548,
+        "autoCast": true
+      },
+      "offAttempts": [
+        {
+          "x": 652,
+          "y": 504,
+          "hit": "true",
+          "entered": true
+        }
+      ],
+      "off": {
+        "sent": {
+          "type": "fishingChangeAutocast",
+          "seq": 679,
+          "at": 1794271146226,
+          "autoCast": false
+        },
+        "ack": {
+          "packet": "FishingUpdate",
+          "seq": 680,
+          "at": 1794271146231,
+          "objectId": 1000,
+          "fishing": true,
+          "progressPercent": 50,
+          "chancePercent": 48,
+          "foundFish": false,
+          "fishingPoint": {
+            "x": 339,
+            "y": 247
+          }
+        },
+        "manualBite": {
+          "packet": "FishingUpdate",
+          "seq": 684,
+          "at": 1794271146526,
+          "objectId": 1000,
+          "fishing": true,
+          "progressPercent": 100,
+          "chancePercent": 48,
+          "foundFish": true,
+          "fishingPoint": {
+            "x": 339,
+            "y": 247
+          }
+        },
+        "quietMs": 950,
+        "extraDebits": 0
+      },
+      "final": {
+        "sent": {
+          "type": "fishingCast",
+          "seq": 697,
+          "at": 1794271147721,
+          "castOut": false
+        },
+        "ack": {
+          "packet": "FishingUpdate",
+          "seq": 701,
+          "at": 1794271147845,
+          "objectId": 1000,
+          "fishing": false,
+          "progressPercent": 100,
+          "chancePercent": 48,
+          "foundFish": false,
+          "fishingPoint": {
+            "x": 339,
+            "y": 247
+          }
+        }
+      },
+      "automaticBaitDebits": 1,
+      "rewards": []
+    },
+    "rewards": [],
+    "baitDebits": 4
+  },
+  "logout": {
+    "sent": {
+      "type": "logOut",
+      "seq": 703,
+      "at": 1794271148249
+    },
+    "ack": {
+      "packet": "LogOutSuccess",
+      "seq": 704,
+      "at": 1794271150147
+    },
+    "file": {
+      "map": "0",
+      "position": {
+        "x": 342,
+        "y": 244
+      },
+      "direction": "DownLeft",
+      "bait": 11,
+      "rodDura": 9996,
+      "hookDura": 7996,
+      "reelDura": 5998,
+      "catchItems": []
+    }
+  },
+  "closed": {
+    "browser": true,
+    "next": true,
+    "gateway": true
+  },
+  "passed": true,
+  "screenshot": {
+    "file": "final-bite.png",
+    "sha256": "0ab5d366fcc7f0c9557dfb5c33c07263ab7d8bdb6ba0591a0b28d25ee8d3ab00"
+  },
+  "scope": "Exact final production app, Bevy and lightweight bundles in local Chrome WebGPU; no loot in this sample"
+}

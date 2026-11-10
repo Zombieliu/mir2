@@ -16,7 +16,7 @@ working tree, services, release packages, source snapshots or parity percentages
 
 ## Last recorded decisions and open work
 
-2026-11-10 Web 大火球与灵魂火符的方向飞行、移动目标命中和三段原声完成本机复测。本机两条生产浏览器路径复测走跑接灵魂火符首帧、伤害数字和读档。施法后首步、回到原格及下一次施法已通过两条浏览器复测。独立 WebGPU 实测站定抛竿和落盘。钓鱼冷登录站姿、Web 鱼具装卸、Windows 窗口和完整 Hosted 链路仍开放。满包交易已用 File 强停和真实 PostgreSQL 验证未成交退回和已成交恢复。 [客户端阶段](evidence/r16-web-spell-phases-20261110/README.md) · [走跑后施法](evidence/r16-web-move-cast-20261110/README.md) · [施法后走路和抛竿](evidence/r16-web-postcast-20261110/README.md) · [服务器计时](evidence/r16-delayed-projectiles-20261110/README.md) · [交易恢复](evidence/r16-trade-restart-20261110/README.md) · [比奇遮挡](evidence/r16-bichon-npc-depth-20261110/README.md)
+2026-11-10 本机两条生产浏览器路径已复测冷登录站姿、转向、比奇抛竿和收竿。鱼具普通点击装卸、同角重登和自动重抛后关闭通过。继续鱼具拖拽、身体动作和鱼线、Windows 窗口及 Hosted 发行。大火球与灵魂火符的方向飞行、移动目标命中、走跑接施法及施法后首步仍有独立证据。满包交易已用 File 强停和真实 PostgreSQL 验证未成交退回和已成交恢复。 [钓鱼](evidence/r16-web-fishing-loop-20261110/README.md) · [客户端技能](evidence/r16-web-spell-phases-20261110/README.md) · [走跑后施法](evidence/r16-web-move-cast-20261110/README.md) · [施法后走路](evidence/r16-web-postcast-20261110/README.md) · [服务器计时](evidence/r16-delayed-projectiles-20261110/README.md) · [交易恢复](evidence/r16-trade-restart-20261110/README.md) · [比奇遮挡](evidence/r16-bichon-npc-depth-20261110/README.md)
 
 2026-11-10 Web 阿洛入口和授权随十种游戏语言切换，简中、英文、阿语实测同一教学回忆和补给权限。继续六种语言的英文回退、Web 模型设置和跨端实战。 [语言和授权复测](evidence/r16-alo-localization-20261110/README.md)
 
@@ -26,7 +26,7 @@ working tree, services, release packages, source snapshots or parity percentages
 
 帮助窗十语、阿洛自主生活状态和原授权恢复已经交付。同一阿洛 v2 重启后在蜡烛已落地时先支援，鹿死亡后拾取并入包。 [帮助](evidence/r16-help-localization-20261110/README.md) · [自主生活](evidence/r16-alo-life-web-20261110/README.md) · [战后拾取](evidence/r16-alo-loot-order-20261109/README.md)
 
-公网为 Web f2de/Linux TEST d53、五职业/V2。Cloudflare 与 TEST 钱包交换路由已修复。正常公网 DNS/HTTPS 的 Chrome 及官方 Dubhe Wallet 移动尺寸 PWA 实际签名、出码至进比奇及退出通过；本机代理路径仍卡资源，实体手机相机未验。公开服阿洛和全局 Accepted 仍开放。[发布与扫码复验](NUMERON-WEB-RELEASE-20261108.zh-CN.md)
+公网 Web 读回 f2de，仍使用此前五职业/V2 发布入口。历史移动尺寸 PWA 实际签名至进比奇通过。本轮直连出码和手机页通过，钱包直连中继约 22 秒超时，桌面明确经本机代理约 12 秒无法出码。实体手机扫码、最新分支发行、公开服阿洛和全局 Accepted 仍开放。 [最新分段复验](evidence/r16-web-fishing-loop-20261110/public-qr-readback.json) · [此前发布](NUMERON-WEB-RELEASE-20261108.zh-CN.md)
 
 Native guild projection and request lifecycle at checkpoint `85eecf4be` consume actual deltas and typed `UserInformation.realId` and handle definitely unsent requests and queue eviction. The release build and 198 checks passed. Two real-asset GPU/GDI checks and the Windows window remain open. Candidate EXE `a63bd2a3` requires the existing R16 resources. [Scope and failures](WEB-R16-PARITY-GOAL.zh-CN.md#native-公会增量与请求生命周期2026-11-08)
 

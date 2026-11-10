@@ -328,6 +328,7 @@ test('production integration captures raw before coalescing and final event proo
  const tradeConfirmCondition='options?.socialTradeProof && wireCommand.type === "tradeConfirm"';
  const tradeCancelCondition='options?.socialTradeProof && wireCommand.type === "tradeCancel"';
  const tradeEditCondition='options?.socialTradeProof && (wireCommand.type === "tradeCancel" || wireCommand.type === "tradeGold")';
+  const fishingPanelCondition='options?.fishingPanelAttempt && !enterFishingPanelSend(options.fishingPanelAttempt, wireCommand, socket)';
  const budgetValidateCondition='socialBudgetTicket && !socialBudgetRef.current?.validate(socialBudgetTicket, currentSocialReplyOwner(), wireCommand)';
  const budgetEnterCondition='socialBudgetTicket && !socialBudgetRef.current?.enter(socialBudgetTicket, currentSocialReplyOwner(), wireCommand)';
  assert.deepEqual(statements.slice(claimIndex+1,socketIndex).map(n=>ts.isIfStatement(n)?normalized(n.expression):null),[
@@ -369,6 +370,7 @@ test('production integration captures raw before coalescing and final event proo
   'wireCommand.type === "requestGuildInfo"',
   tradeConfirmCondition,
   tradeEditCondition,
+  fishingPanelCondition,
   budgetEnterCondition,
   tradeCancelCondition,
  ]);
@@ -380,7 +382,7 @@ test('production integration captures raw before coalescing and final event proo
  const irreversible=[];
  function findClaims(node){
   if(ts.isCallExpression(node)&&((ts.isPropertyAccessExpression(node.expression)&&['claim','claimPearl','enter','enterSocket'].includes(node.expression.name.text))
-   ||ts.isIdentifier(node.expression)&&node.expression.text==='enterWorldFishingSend'))irreversible.push(node);
+   ||ts.isIdentifier(node.expression)&&['enterWorldFishingSend','enterFishingPanelSend'].includes(node.expression.text)))irreversible.push(node);
   ts.forEachChild(node,findClaims);
  }
  statements.slice(0,socketIndex).forEach(findClaims);
@@ -483,14 +485,17 @@ test('production integration captures raw before coalescing and final event proo
  assert.ok(ts.isIfStatement(tradeEditGate));assert.equal(normalized(tradeEditGate.expression),tradeEditCondition);
  assert.equal(normalized(tradeEditGate.thenStatement),'{ if (socketRef.current !== socket || socket.readyState !== WebSocket.OPEN || !socialTradeProofCurrent(options.socialTradeProof, wireCommand)) return false; }');
  assert.equal(tradeEditGate.elseStatement,undefined);
- const budgetEnter=statements[authClaimIndex+13],cancelSpent=statements[authClaimIndex+14];
+  const fishingPanelGate=statements[authClaimIndex+13];
+  assert.ok(ts.isIfStatement(fishingPanelGate));assert.equal(normalized(fishingPanelGate.expression),fishingPanelCondition);
+  assert.equal(normalized(fishingPanelGate.thenStatement),'return false;');assert.equal(fishingPanelGate.elseStatement,undefined);
+  const budgetEnter=statements[authClaimIndex+14],cancelSpent=statements[authClaimIndex+15];
  assert.ok(ts.isIfStatement(budgetEnter));assert.equal(normalized(budgetEnter.expression),budgetEnterCondition);
  assert.equal(normalized(budgetEnter.thenStatement),'{ if (options?.groupProof) groupOperationsRef.current.finishInviteAttempt(options.groupProof); return false; }');
  assert.equal(budgetEnter.elseStatement,undefined);
  assert.ok(ts.isIfStatement(cancelSpent));assert.equal(normalized(cancelSpent.expression),tradeCancelCondition);
  assert.equal(normalized(cancelSpent.thenStatement),'socialTradeCancelSpentRef.current = options.socialTradeProof.incarnation;');
  assert.equal(cancelSpent.elseStatement,undefined);
- assert.equal(socketIndex,authClaimIndex+15,'typed guild/read and trade confirm/cancel/gold checks precede final Native entry, cancel spending and socket');
+  assert.equal(socketIndex,authClaimIndex+16,'typed guild, trade and Fishing panel checks precede final Native entry, cancel spending and socket');
  assert.deepEqual(statements.slice(statements.indexOf(budgetEnter)+1,socketIndex+1),[cancelSpent,socketTry],
   'only the exact callback-free cancel assignment can follow Native entry before socket.send');
  const afterEntryCalls=[];
@@ -498,7 +503,7 @@ test('production integration captures raw before coalescing and final event proo
  assert.deepEqual(afterEntryCalls,[],'no callback, await or constructor after successful Native entry before transport');
  // Every pre-send statement after the combat claim is covered by the exact
  // ordered list above, including Repair/retire, Bag/Belt and final WorldFishing entry.
- assert.deepEqual(statements.slice(claimIndex+1,socketIndex).filter(n=>ts.isIfStatement(n)).map(n=>normalized(n.expression)).slice(-14),[
+  assert.deepEqual(statements.slice(claimIndex+1,socketIndex).filter(n=>ts.isIfStatement(n)).map(n=>normalized(n.expression)).slice(-15),[
   'options?.npcRepairProof',
   'isMailItemMutation(wireCommand) || ["dropGold", "tradeGold", "gameShopBuy", "sendMail", "collectParcel"].includes(String(wireCommand.type))',
   'options?.bagBeltProof',
@@ -511,6 +516,7 @@ test('production integration captures raw before coalescing and final event proo
   'wireCommand.type === "requestGuildInfo"',
   tradeConfirmCondition,
   tradeEditCondition,
+  fishingPanelCondition,
   budgetEnterCondition,
   tradeCancelCondition,
  ]);

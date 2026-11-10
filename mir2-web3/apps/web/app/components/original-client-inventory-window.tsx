@@ -46,6 +46,9 @@ type InventoryWindowProps = {
   repairMode?: boolean;
   onRepairPointerDown?: (event: PointerEvent<HTMLButtonElement>, item: ItemActionRef) => void;
   onBagBeltPointerDown?: (event: PointerEvent<HTMLButtonElement>, item: ItemActionRef, activate: () => void) => boolean;
+  onFishingBagCell?: (tab: InventoryTabKey, slot: number) => boolean;
+  onClearFishingSelection?: () => void;
+  selectedFishingBagSlot?: number | null;
   t: TranslateFn;
   locale: string;
   activeTab: InventoryTabKey;
@@ -83,6 +86,7 @@ export function InventoryWindow({
   initialDeleteMode = false,
   onCompatibilityInteraction,
   repairMode = false, onRepairPointerDown, onBagBeltPointerDown,
+  onFishingBagCell, onClearFishingSelection, selectedFishingBagSlot,
   t,
   locale,
   activeTab,
@@ -743,6 +747,7 @@ export function InventoryWindow({
                 : null),
             }}
             data-drop-target={isDropTarget ? "true" : undefined}
+            data-fishing-bag-cell={onFishingBagCell ? slotIndex : undefined}
             onMouseEnter={() => {
               if (pendingMoveItem) setDragOverSlot(slotIndex);
             }}
@@ -751,6 +756,7 @@ export function InventoryWindow({
             }}
 	            title={slot.key}
 	            onClick={() => {
+                if (onFishingBagCell?.(activeTab, slotIndex)) return;
 	              if (repairMode) return;
 	              const takeBackItem =
 	                pendingMoveItem?.container === "storage"
@@ -805,6 +811,7 @@ export function InventoryWindow({
           if (!slot) return null;
           const dimmed = activeTab !== "quest" && !inventoryItemMatchesFilter(item, itemFilter);
           const tooltipDocument = tooltip.document(item);
+          const fishingSelected = !!onFishingBagCell && selectedFishingBagSlot === item.slot + (activeTab === "bag2" ? 40 : 0);
 
           return (
             <button
@@ -812,8 +819,11 @@ export function InventoryWindow({
               type="button"
               className="inventory-item-card"
               disabled={mailItemLocked(item)}
-              style={{ left: slot.x, top: slot.y, ...(repairMode ? { touchAction: "none" } : null), ...(dimmed ? { opacity: 0.28 } : null) }}
+              style={{ left: slot.x, top: slot.y, ...(repairMode ? { touchAction: "none" } : null), ...(dimmed ? { opacity: 0.28 } : null),
+                ...(fishingSelected ? { outline: "1px solid #d6b46e" } : null) }}
               data-filtered-out={dimmed ? "true" : undefined}
+              data-fishing-bag-item={onFishingBagCell ? item.slot : undefined}
+              aria-pressed={onFishingBagCell ? fishingSelected : undefined}
               aria-label={item.name}
               onPointerEnter={event => { if (event.pointerType !== "touch") tooltip.activate(item, event.currentTarget); }}
               onPointerLeave={event => { if (event.pointerType === "touch" || document.activeElement !== event.currentTarget) tooltip.release(item, event.currentTarget); }}
@@ -822,6 +832,7 @@ export function InventoryWindow({
               onPointerCancel={event => { inventoryPointerActivationRef.current = null; tooltip.release(item, event.currentTarget); }}
               onPointerDown={(event) => {
                 if (event.pointerType === "touch") { tooltip.activate(item, event.currentTarget); event.stopPropagation(); }
+                if (onFishingBagCell) return;
                 if (repairMode) {
                   consumedRepairPointerRef.current.add(event.currentTarget);
                   onRepairPointerDown?.(event, item);
@@ -837,11 +848,12 @@ export function InventoryWindow({
               onMouseDown={(event) => {
                 if (event.button !== 0) return;
                 event.preventDefault();
-                if (consumedRepairPointerRef.current.has(event.currentTarget) || repairMode) return;
+                if (consumedRepairPointerRef.current.has(event.currentTarget) || repairMode || onFishingBagCell) return;
                 if (event.detail > 1) return;
                 activateInventoryItemFromPointer(item);
               }}
               onClick={(event) => {
+                if (onFishingBagCell?.(activeTab, item.slot)) { event.stopPropagation(); return; }
                 if (repairMode) { event.preventDefault(); return; }
                 if (event.detail !== 0) return;
                 activateInventoryItem(item);
@@ -849,11 +861,13 @@ export function InventoryWindow({
               onDoubleClick={(event) => {
                 event.preventDefault();
                 event.stopPropagation();
+                if (onFishingBagCell) return;
                 activateInventoryItemDoubleClick(item);
               }}
 	              onContextMenu={(event) => {
 	                event.preventDefault();
                     inventoryPointerActivationRef.current = null;
+                    if (onFishingBagCell) { onClearFishingSelection?.(); return; }
 	                if (repairMode) return;
 	                if (storageMode === "store" && item.container !== "storage") {
 	                  setPendingMoveItem(item);

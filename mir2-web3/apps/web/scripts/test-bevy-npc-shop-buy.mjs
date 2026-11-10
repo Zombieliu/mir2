@@ -686,6 +686,7 @@ function npcPageHarness({ protocol = protocolOracle(), documentOwner = {}, coreV
     npcRepairDialogBindingRef:{current:null}, setNpcRepairService:()=>{},
     worldFishingGestureRegistryRef:{current:new WeakMap()},
     worldFishingActiveGestureRef:{current:null},worldFishingQueuedRef:{current:null},
+    fishingAttachmentRef:{current:null},
     NpcGoldBuyDispatcher, projectBevyBagModel: npcPureBag.projectBevyBagModel,
     npcGoldBuyInventoryRef: { current: new module.exports.NpcGoldBuyInventoryReadiness() },
     npcGoldBuySourceFailureRef: { current: null },

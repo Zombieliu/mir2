@@ -95,7 +95,7 @@ const pageUrl = new URL("../app/page.tsx", import.meta.url);
 const pageSource = readFileSync(pageUrl, "utf8");
 const syntax = ts.createSourceFile(fileURLToPath(pageUrl), pageSource, ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);
 const names = ["cancelMailParcel","setMailboxOpen","syncEquipmentSnapshot", "suspendEquipmentConnection", "rejectEquipmentCommand", "currentEquipmentOwner", "itemCommandRequiresOwner", "send", "sendRaw", "moveItem", "useItem", "dispatchBevyBagIntent", "dispatchBevyCharacterIntent", "setShowInventory",
-  "cancelWorldFishingGesture", "retireWorldFishingGesture", "parityItemMutationAllowed", "socialItemMutationAllowed",
+  "cancelWorldFishingGesture", "retireWorldFishingGesture", "retireFishingPanel", "parityItemMutationAllowed", "socialItemMutationAllowed",
   "endStorageService", "retireNpcShopService", "closeNpcRepairService", "currentSocialReplyOwner"];
 const declarations = new Map();
 function visit(node) {
@@ -162,6 +162,8 @@ function harness({ item = bagItem(4), worldState = world(item), cachedSnapshot =
     worldFishingGestureRegistryRef: {current:new WeakMap()}, worldFishingActiveGestureRef: {current:null},
     worldFishingQueuedRef: {current:null}, worldFishingCommitRef: {current:null},
     worldFishingSourceRef: {current:new (loadPure("world-fishing-source").WorldFishingSource)()},
+    fishingPanelRef: {current:{equipmentOpen:false,noticeOpen:false,autoCast:false,escapeCancels:false,selection:null,active:null}},
+    fishingAttachmentRef: {current:null}, renderFishingPanel: () => {},
     ownedTooltipEpochRef: {current:{bag:{},character:{}}},
     bagBeltMovesRef: {current:new (loadPure("bag-belt-move-dispatcher").BagBeltMoveDispatcher)()},
     bagBeltInventoryReadyRef: {current:null}, heroOperationsRef: {current:{pending:null}}, mailCollectBarrierRef: {current:null},

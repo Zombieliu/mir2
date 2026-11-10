@@ -684,7 +684,7 @@ export function OriginalClientShell({
   onGameShopVisibilityChange, onHeroShortcut, parityUiBlocksGameplay, parityUiWorldBlocked = false,
   crystalKeyBindings, playerUiPreferences, questNameTargetObjectIds, dropViewHeld = false, getKeybindCaptureActive,
   onCrystalWindowShortcut, onCrystalGameplayShortcut, onCrystalDropViewHeldChange, skillBars,
-  onSendClientCommand,
+  onSendClientCommand, fishingUi,
   onStartTutorial,
   onToggleCharacter,
   onToggleInventory,
@@ -5554,7 +5554,7 @@ export function OriginalClientShell({
                   onBuyGameShopItem,
                   cashGameShopSource, cashGameShopPending, onConfirmCashGameShopPurchase, onReadCashGameShopItemTooltip,
                   cashPreviewSourceKey, onReadCashPreviewLayers, onTurnCashPreview, onGameShopVisibilityChange,
-                  onSendClientCommand,
+                  onSendClientCommand, fishingUi,
                   inputProfile: clientProfile.input,
                   gamepadFamily: clientProfile.gamepad.family,
                   onStartTutorial: () =>

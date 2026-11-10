@@ -2925,13 +2925,6 @@ body:has([data-shared-touch-quest-open="true"], [data-shared-touch-bag-open="tru
   height: 372px;
 }
 
-.system-feature-panel-fishing {
-  left: 414px;
-  top: 168px;
-  width: 196px;
-  height: 286px;
-}
-
 .system-feature-panel-social {
   left: 266px;
   top: 96px;
@@ -3014,8 +3007,7 @@ body:has([data-shared-touch-quest-open="true"], [data-shared-touch-bag-open="tru
 }
 
 .creature-feature-actions button,
-.mount-feature-ride,
-.fishing-feature-status button {
+.mount-feature-ride {
   min-width: 58px;
   height: 22px;
   border: 1px solid #705932;
@@ -3034,8 +3026,7 @@ body:has([data-shared-touch-quest-open="true"], [data-shared-touch-bag-open="tru
 }
 
 .creature-feature-slots span,
-.mount-feature-slots span,
-.fishing-feature-slots span {
+.mount-feature-slots span {
   display: block;
   width: 34px;
   height: 34px;
@@ -3084,38 +3075,6 @@ body:has([data-shared-touch-quest-open="true"], [data-shared-touch-bag-open="tru
   display: grid;
   grid-template-columns: repeat(5, 34px);
   gap: 20px;
-}
-
-.fishing-feature-water {
-  position: absolute;
-  left: 17px;
-  top: 38px;
-  width: 158px;
-  height: 142px;
-  border: 1px solid #3f3120;
-  background: linear-gradient(180deg, #10252a, #1d392f 58%, #322716);
-}
-
-.fishing-feature-slots {
-  position: absolute;
-  left: 17px;
-  top: 203px;
-  display: grid;
-  grid-template-columns: repeat(4, 34px);
-  gap: 4px 6px;
-}
-
-.fishing-feature-slots span:first-child {
-  grid-column: 1;
-}
-
-.fishing-feature-status {
-  position: absolute;
-  left: 28px;
-  top: 248px;
-  display: flex;
-  align-items: center;
-  gap: 6px;
 }
 
 .system-social-panel {

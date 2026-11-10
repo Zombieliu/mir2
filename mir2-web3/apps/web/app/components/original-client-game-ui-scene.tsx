@@ -30,6 +30,8 @@ import type { BagBeltButtonBinding } from "../../lib/bag-belt-gesture";
 import type { NpcRepairView, NpcRepairSelection } from "../../lib/npc-repair-service";
 import type { CashGameShopSource, CashGameShopConfirmation, CashGameShopEntry } from "../../lib/cash-game-shop-ui";
 import { InventoryWindow } from "./original-client-inventory-window";
+import { OriginalClientFishingWindows } from "./original-client-fishing-windows";
+import type { FishingUiSurface } from "./original-client-shell-types";
 import { CharacterWindow } from "./original-client-character-window";
 import type { Mir2InputProfile } from "./original-client-device-profile";
 import type { Mir2GamepadFamily } from "./original-client-gamepad-input";
@@ -55,6 +57,7 @@ import type {
 } from "./original-client-types";
 
 type GameUiSceneProps = {
+  fishingUi?: FishingUiSurface;
   t: TranslateFn;
   locale: string;
   runtimeMessage: string;
@@ -200,7 +203,7 @@ function GameUiSceneInner({
   npcRepairService,
   npcRepairView, onSelectNpcRepair, onConfirmNpcRepair,
   onToggleNpcRepairHold, npcRepairTargetSelection, onRegisterNpcRepairTarget, onNpcRepairBagPointerDown,
-  onBagBeltPointerDown, onRegisterBeltTargets, onFenceBeltMouse,
+  onBagBeltPointerDown, onRegisterBeltTargets, onFenceBeltMouse, fishingUi,
   defaultChatExpanded = true,
   chatUi, mapImageRouteSource, onMapImageRoute, onMapImageRoutePress, onMapRouteModalChange,
   onChatMessageChange,
@@ -317,7 +320,7 @@ function GameUiSceneInner({
     return () => window.removeEventListener("mir2:hud-host-action", handler);
   }, []);
   const previousQuestLogOpenRef = useRef(showQuestLog);
-  const [showSystemMenuFeaturePanel, setShowSystemMenuFeaturePanel] = useState<SystemMenuSurfacePanel | null>(null);
+  const [showSystemMenuFeaturePanel, setShowSystemMenuFeaturePanel] = useState<Exclude<SystemMenuSurfacePanel, "fishing"> | null>(null);
   const [dismissedDialogKey, setDismissedDialogKey] = useState<string | null>(null);
 
   useEffect(() => {
@@ -342,7 +345,7 @@ function GameUiSceneInner({
     !sharedQuestUiActive && world.activeNpcDialog && dialogKey !== dismissedDialogKey ? world.activeNpcDialog : null;
   // Mail has one Page-owned presentation; do not report its own-open as a competing modal.
   const questUiModalBlocked = Boolean(showBigMap || showReportPanel || showSystemMenu
-    || showSystemMenuFeaturePanel || showGameShop || effectiveChatSettingsOpen || chatPointerHeld || storageRentalPrompt);
+    || showSystemMenuFeaturePanel || showGameShop || effectiveChatSettingsOpen || chatPointerHeld || storageRentalPrompt || fishingUi?.noticeOpen);
   const hpOrbModalBlocked = Boolean(questUiModalBlocked || showDuraPanel || visibleDialog);
   const mapRouteModalBlocked = Boolean(showReportPanel || showSystemMenu || showSystemMenuFeaturePanel
     || showGameShop || effectiveChatSettingsOpen || chatPointerHeld || storageRentalPrompt || visibleDialog);
@@ -562,8 +565,9 @@ function GameUiSceneInner({
             onStartTutorial();
           }}
           onOpenPanel={(panel) => {
-            setShowSystemMenuFeaturePanel(panel);
             setShowSystemMenu(false);
+            if (panel === "fishing") fishingUi?.onToggleEquipment();
+            else setShowSystemMenuFeaturePanel(panel);
           }}
           onToggleQuestLog={() => {
             onToggleQuestLog();
@@ -574,6 +578,7 @@ function GameUiSceneInner({
           isPlatinum176={IS_PLATINUM_176_PROFILE}
         />
       ) : null}
+      {fishingUi && <OriginalClientFishingWindows t={t} {...fishingUi} />}
       {showSystemMenuFeaturePanel ? (
         <SystemMenuFeaturePanel
           t={t}
@@ -707,11 +712,16 @@ function GameUiSceneInner({
       ) : null}
       {showInventory && !sharedBagUiActive && !sharedStorageUiActive ? (
         <InventoryWindow
-          initialDeleteMode={inventoryInitialDeleteMode}
+          key={fishingUi?.equipmentOpen ? "fishing-tackle" : "inventory"}
+          initialDeleteMode={inventoryInitialDeleteMode && !fishingUi?.equipmentOpen}
           onCompatibilityInteraction={onInventoryCompatibilityInteraction}
           repairMode={npcRepairService !== null}
           onRepairPointerDown={onNpcRepairBagPointerDown}
           onBagBeltPointerDown={onBagBeltPointerDown}
+          onFishingBagCell={fishingUi?.equipmentOpen && (activeInventoryTab === "bag1" || activeInventoryTab === "bag2")
+            ? fishingUi.onBagCell : undefined}
+          onClearFishingSelection={fishingUi?.onClearSelection}
+          selectedFishingBagSlot={fishingUi?.selectedBagSlot}
           t={t}
           locale={locale}
           activeTab={activeInventoryTab}

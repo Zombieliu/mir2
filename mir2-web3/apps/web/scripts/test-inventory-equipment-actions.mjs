@@ -73,7 +73,7 @@ function fixture(equipmentItems = []) {
     activeTab: "bag1", pendingMoveItem: null, pendingSplitItem: null, pendingGoldDrop: false, contextMenu: null, splitCount: "1",
     inventoryPointerActivationRef: { current: null }, bagBeltActivationGenerationRef: { current: 0 },
     consumedRepairPointerRef: { current: new WeakSet() }, tooltip: { activate() {} },
-    onBagBeltPointerDown: undefined, onRepairPointerDown: undefined,
+    onBagBeltPointerDown: undefined, onRepairPointerDown: undefined, onFishingBagCell: undefined,
     onEquipItem: (ref, slot) => calls.push({ action: "equip", ref, slot }),
     onUseItem: ref => calls.push({ action: "use", ref }),
     onMoveItem: (ref, slot, container) => { calls.push({ action: "move", ref, slot, container }); return true; },

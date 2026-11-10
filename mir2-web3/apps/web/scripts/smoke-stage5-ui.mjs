@@ -992,51 +992,7 @@ async function main() {
       );
       systemMenuFeatureFlow.push(await readSystemMenuState(client, "mountFeaturePanelClosed"));
 
-      await clickSystemMenuActionByKey(client, "fishing");
-      await waitForSystemMenuState(
-        client,
-        (state) =>
-          state.systemMenuFeaturePanelVisible === true &&
-          state.systemMenuFeaturePanelType === "fishing",
-        "fishing feature panel open",
-        5_000,
-      );
-      systemMenuFlow.push(await readSystemMenuState(client, "fishingFeatureAction"));
-      systemMenuFeatureFlow.push(await readSystemMenuState(client, "fishingFeaturePanelOpen"));
-      await clickSelector(client, ".fishing-feature-status button:nth-child(1)");
-      await waitForSystemMenuState(
-        client,
-        (state) =>
-          hasRecentCommand(
-            state,
-            (command) => command?.type === "fishingCast" && command?.castOut === true,
-          ),
-        "fishing cast command sent",
-        5_000,
-      );
-      systemMenuFeatureFlow.push(await readSystemMenuState(client, "fishingCastCommand"));
-      await clickSelector(client, ".fishing-feature-status button:nth-child(2)");
-      await waitForSystemMenuState(
-        client,
-        (state) =>
-          hasRecentCommand(
-            state,
-            (command) => command?.type === "fishingChangeAutocast" && command?.autoCast === true,
-          ),
-        "fishing autocast command sent",
-        5_000,
-      );
-      systemMenuFeatureFlow.push(await readSystemMenuState(client, "fishingAutoCommand"));
-      await clickSystemMenuFeaturePanelClose(client);
-      await waitForSystemMenuState(
-        client,
-        (state) =>
-          state.open === true &&
-          state.systemMenuFeaturePanelVisible === false,
-        "fishing feature panel closed",
-        5_000,
-      );
-      systemMenuFeatureFlow.push(await readSystemMenuState(client, "fishingFeaturePanelClosed"));
+      await exerciseFishingEquipmentMenu(client, systemMenuFlow, systemMenuFeatureFlow);
 
       const socialPanels = [
         { key: "ranking", tab: "overall" },
@@ -2691,52 +2647,7 @@ async function main() {
     );
     systemMenuFeatureFlow.push(await readSystemMenuState(client, "mountFeaturePanelClosed"));
 
-    await clickSystemMenuActionByKey(client, "fishing");
-    await waitForSystemMenuState(
-      client,
-      (state) =>
-        state.systemMenuFeaturePanelVisible === true &&
-        state.systemMenuFeaturePanelType === "fishing",
-      "fishing feature panel open",
-      5_000,
-    );
-    systemMenuFlow.push(await readSystemMenuState(client, "fishingFeatureAction"));
-    systemMenuFeatureFlow.push(await readSystemMenuState(client, "fishingFeaturePanelOpen"));
-    screenshots.push(await screenshot(client, "stage5-system-menu-fishing.png"));
-    await clickSelector(client, ".fishing-feature-status button:nth-child(1)");
-    await waitForSystemMenuState(
-      client,
-      (state) =>
-        hasRecentCommand(
-          state,
-          (command) => command?.type === "fishingCast" && command?.castOut === true,
-        ),
-      "fishing cast command sent",
-      5_000,
-    );
-    systemMenuFeatureFlow.push(await readSystemMenuState(client, "fishingCastCommand"));
-    await clickSelector(client, ".fishing-feature-status button:nth-child(2)");
-    await waitForSystemMenuState(
-      client,
-      (state) =>
-        hasRecentCommand(
-          state,
-          (command) => command?.type === "fishingChangeAutocast" && command?.autoCast === true,
-        ),
-      "fishing autocast command sent",
-      5_000,
-    );
-    systemMenuFeatureFlow.push(await readSystemMenuState(client, "fishingAutoCommand"));
-    await clickSystemMenuFeaturePanelClose(client);
-    await waitForSystemMenuState(
-      client,
-      (state) =>
-        state.open === true &&
-        state.systemMenuFeaturePanelVisible === false,
-      "fishing feature panel closed",
-      5_000,
-    );
-    systemMenuFeatureFlow.push(await readSystemMenuState(client, "fishingFeaturePanelClosed"));
+    await exerciseFishingEquipmentMenu(client, systemMenuFlow, systemMenuFeatureFlow, screenshots);
 
     const socialPanels = [
       { key: "ranking", tab: "overall" },
@@ -8398,6 +8309,27 @@ async function clickSystemMenuActionByLabel(client, label) {
     })()
   `);
   if (!clicked) throw new Error(`Could not click system menu action with label ${label}`);
+}
+
+async function exerciseFishingEquipmentMenu(client, menuFlow, featureFlow, screenshots) {
+  const fishingWindows = '[data-mir2-fishing-window="equipment"], [data-mir2-fishing-window="notice"]';
+  const commandLog = state => state.commandHistory.filter(command =>
+    command.type === "fishingCast" || command.type === "fishingChangeAutocast");
+  const before = commandLog(await readSystemMenuState(client, "beforeFishingEquipment"));
+  await clickSystemMenuActionByKey(client, "fishing");
+  await waitForSelector(client, fishingWindows, 5_000);
+  const opened = await readSystemMenuState(client, "fishingEquipmentOrNoRodNotice");
+  if (opened.open || JSON.stringify(commandLog(opened)) !== JSON.stringify(before)) {
+    throw new Error("The fishing equipment entry must close the menu without submitting cast or autocast");
+  }
+  menuFlow.push(opened);
+  featureFlow.push(opened);
+  if (screenshots) screenshots.push(await screenshot(client, "stage5-system-menu-fishing.png"));
+  await clickSelector(client, "[data-fishing-equipment-close], [data-fishing-notice-dismiss]");
+  await waitForSelectorAbsent(client, fishingWindows, 5_000);
+  featureFlow.push(await readSystemMenuState(client, "fishingEquipmentClosed"));
+  await clickSelector(client, ".hud-button.menu button");
+  await waitForSystemMenuState(client, state => state.open, "menu reopened after fishing equipment", 5_000);
 }
 
 async function clickSystemMenuFeaturePanelClose(client) {

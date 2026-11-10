@@ -4,7 +4,7 @@ import { CRYSTAL_COMBAT_MODE_FUNCTIONS } from "./shared-combat-mode-keys";
 export const CRYSTAL_WINDOW_SHORTCUTS = {
   Inventory: "inventory", Inventory2: "inventory", Equipment: "equipment", Equipment2: "equipment",
   Skills: "skills", Skills2: "skills", HeroInventory: "heroInventory", HeroEquipment: "heroEquipment",
-  HeroSkills: "heroSkills", Creature: "creatures", Mentor: "bonds", Relationship: "bonds", Friends: "friends",
+  HeroSkills: "heroSkills", Creature: "creatures", Fishing: "fishing", Mentor: "bonds", Relationship: "bonds", Friends: "friends",
   Guilds: "guild", GameShop: "gameShop", Quests: "quests", Options: "options", Options2: "options",
   Group: "group", Belt: "belt", BeltFlip: "beltFlip", Minimap: "minimap", Bigmap: "bigmap",
   Ranking: "ranking", Help: "help", Keybind: "keybind", Closeall: "closeAll", Skillbar: "skillBar",

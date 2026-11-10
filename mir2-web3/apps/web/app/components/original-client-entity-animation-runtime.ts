@@ -324,7 +324,14 @@ function selfAnimationEvent(source: WorldFishingSourceRecord, entity: DisplayEnt
       return { ...fallback, actionKnown: false };
     }
   }
-  if (!aligned) return { ...fallback, actionKnown: false };
+  if (!aligned) {
+    // A turn ACK can temporarily lead or trail the displayed direction.
+    // Keep the already admitted idle bootstrap masked while they differ.
+    if (!evidence && source.bootstrapKnown && state === "standing") {
+      return { action: "standing", actionKnown: false, retainedActionToken: "" };
+    }
+    return { ...fallback, actionKnown: false };
+  }
   if (!evidence) {
     // A complete source bootstrap can use real transient metadata; an unknown
     // interval cannot be healed by the selector's default Standing.
