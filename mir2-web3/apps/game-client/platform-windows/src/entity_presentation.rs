@@ -12,8 +12,10 @@ use bevy::prelude::{Query, Res, ResMut, Resource, Time, Window, With};
 use bevy::window::PrimaryWindow;
 use mir2_bevy_runtime::entity_animation::{
     ActionTransition, AnimationAction, AnimationCatalog, AnimationError, AnimationEvent,
-    AnimationWorld, Direction, EntityKind, FishingPresentation, QueueDisposition, TransitionReason,
+    AnimationWorld, Direction, EntityKind, FishingPhase, FishingPose, FishingPresentation,
+    QueueDisposition, TransitionReason,
 };
+use mir2_client_bevy::audio::{NativeGameplayAudioQueue, NativeGameplaySoundEvent};
 use serde_json::Value;
 
 #[cfg(test)]
@@ -141,6 +143,68 @@ struct NativeFishingActor {
     animation: FishingPresentation,
     direction: Direction,
     rod_shape: u8,
+    point: Option<(i32, i32)>,
+    found_fish: bool,
+    last_cued: Option<(FishingPhase, u64)>,
+    splash: Option<NativeFishingSplash>,
+}
+
+#[derive(Debug)]
+struct NativeFishingSplash {
+    point: (i32, i32),
+    found_fish: bool,
+    started_at_ms: u64,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub(crate) struct NativeFishingCueFrames {
+    pub(crate) point: (i32, i32),
+    pub(crate) water: [i64; 2],
+    pub(crate) actor: Option<i64>,
+}
+
+impl NativeFishingActor {
+    fn enter_cue_frame(&mut self, pose: FishingPose) -> Option<&'static str> {
+        let stamp = (pose.phase, pose.started_at_ms);
+        if pose.logical_frame_index < 1 || self.last_cued == Some(stamp) {
+            return None;
+        }
+        self.last_cued = Some(stamp);
+        match pose.phase {
+            FishingPhase::Cast => Some("fishing_throw.wav"),
+            FishingPhase::Reel => Some("fishing_pull.wav"),
+            FishingPhase::Wait => {
+                self.splash = Some(NativeFishingSplash {
+                    point: self.point?,
+                    found_fish: self.found_fish,
+                    started_at_ms: pose.started_at_ms + pose.phase.descriptor().frame_interval_ms,
+                });
+                self.found_fish.then_some("fishing.wav")
+            }
+        }
+    }
+
+    fn cue_frames(&self, now_ms: u64) -> Option<NativeFishingCueFrames> {
+        let splash = self.splash.as_ref()?;
+        let elapsed_ms = now_ms.checked_sub(splash.started_at_ms)?;
+        if elapsed_ms >= 720 {
+            return None;
+        }
+        let frame = (elapsed_ms / 120) as i64;
+        // The Crystal map traverses effects in reverse insertion order.
+        let (low, high) = if splash.found_fish {
+            (665, 671)
+        } else {
+            (640, 650)
+        };
+        Some(NativeFishingCueFrames {
+            point: splash.point,
+            water: [low + frame, high + frame],
+            actor: splash
+                .found_fish
+                .then_some(1350 + (elapsed_ms / 360) as i64),
+        })
+    }
 }
 
 #[derive(Resource, Debug)]
@@ -155,6 +219,10 @@ pub struct NativeEntityPresentation {
     last_libraries: HashMap<String, String>,
     last_frames: HashMap<String, (i64, AnimationAction)>,
     fishing_actors: HashMap<String, NativeFishingActor>,
+    last_fishing_cues: HashMap<String, NativeFishingCueFrames>,
+    fishing_audio_generation: Option<u64>,
+    fishing_sound_sequence: u64,
+    fishing_sound_events: Vec<NativeGameplaySoundEvent>,
     hidden_after_hide: HashSet<String>,
     snake_totem_aura_ready: HashSet<String>,
     double_slash_packet_sequences: HashMap<(String, u64), u64>,
@@ -193,6 +261,10 @@ impl Default for NativeEntityPresentation {
             last_libraries: HashMap::new(),
             last_frames: HashMap::new(),
             fishing_actors: HashMap::new(),
+            last_fishing_cues: HashMap::new(),
+            fishing_audio_generation: None,
+            fishing_sound_sequence: 0,
+            fishing_sound_events: Vec::new(),
             hidden_after_hide: HashSet::new(),
             snake_totem_aura_ready: HashSet::new(),
             double_slash_packet_sequences: HashMap::new(),
@@ -215,7 +287,14 @@ impl Default for NativeEntityPresentation {
 impl NativeEntityPresentation {
     pub fn reset_session(&mut self) {
         mir2_bevy_runtime::clear_mir2_self_camera_motion();
-        *self = Self::default();
+        *self = Self {
+            fishing_sound_sequence: self.fishing_sound_sequence,
+            ..Self::default()
+        };
+    }
+
+    pub(crate) fn bind_fishing_audio_generation(&mut self, generation: u64) {
+        self.fishing_audio_generation = Some(generation);
     }
 
     pub fn replace_payload(&mut self, payload: Value) {
@@ -866,9 +945,11 @@ impl NativeEntityPresentation {
     fn observe_fishing_actors(&mut self, payload: &Value, now_ms: u64) {
         if self.latest_payload.as_ref().is_some_and(|previous| {
             previous.get("mapFileName") != payload.get("mapFileName")
+                || previous.get("mapIndex") != payload.get("mapIndex")
                 || previous.get("playerObjectId") != payload.get("playerObjectId")
         }) {
             self.fishing_actors.clear();
+            self.fishing_sound_events.clear();
         }
         let mut observed = HashSet::new();
         for entity in payload.get("entities").and_then(Value::as_array).into_iter().flatten() {
@@ -880,24 +961,53 @@ impl NativeEntityPresentation {
             };
             let overlay = entity.get(crate::gameplay_bridge::NATIVE_FISHING_OVERLAY);
             let reset = overlay.and_then(|row| row.get("reset")).and_then(Value::as_bool) == Some(true);
-            let direction = native_fishing_direction(entity, overlay.and_then(|row| row.get("point")))
-                .unwrap_or_else(|| parse_direction(entity.get("direction").and_then(Value::as_str).unwrap_or("down")));
-            let active = !reset && overlay
-                .and_then(|row| row.get("active"))
-                .or_else(|| entity.get("fishing"))
-                .and_then(Value::as_bool)
-                .unwrap_or(false);
-            observed.insert(object_id.clone());
-            let actor = self.fishing_actors.entry(object_id).or_insert_with(|| NativeFishingActor {
-                animation: FishingPresentation::default(),
-                direction,
-                rod_shape,
+            let point = overlay.and_then(|row| row.get("point"));
+            let point_direction = native_fishing_direction(entity, point);
+            let fishing_point = point_direction.and(point).and_then(|point| {
+                Some((
+                    i32::try_from(point.get("x")?.as_i64()?).ok()?,
+                    i32::try_from(point.get("y")?.as_i64()?).ok()?,
+                ))
             });
+            let direction = point_direction.unwrap_or_else(|| {
+                parse_direction(
+                    entity
+                        .get("direction")
+                        .and_then(Value::as_str)
+                        .unwrap_or("down"),
+                )
+            });
+            let active = !reset
+                && overlay
+                    .and_then(|row| row.get("active"))
+                    .or_else(|| entity.get("fishing"))
+                    .and_then(Value::as_bool)
+                    .unwrap_or(false);
+            observed.insert(object_id.clone());
+            let actor =
+                self.fishing_actors
+                    .entry(object_id)
+                    .or_insert_with(|| NativeFishingActor {
+                        animation: FishingPresentation::default(),
+                        direction,
+                        rod_shape,
+                        point: None,
+                        found_fish: false,
+                        last_cued: None,
+                        splash: None,
+                    });
             if actor.rod_shape != rod_shape || reset {
                 actor.animation = FishingPresentation::default();
                 actor.rod_shape = rod_shape;
+                actor.last_cued = None;
+                actor.splash = None;
             }
             actor.direction = direction;
+            actor.point = fishing_point;
+            actor.found_fish = overlay
+                .and_then(|row| row.get("foundFish"))
+                .and_then(Value::as_bool)
+                == Some(true);
             actor.animation.observe(active, now_ms);
         }
         self.fishing_actors.retain(|object_id, _| observed.contains(object_id));
@@ -1617,18 +1727,23 @@ impl NativeEntityPresentation {
             });
         let payload = self.latest_payload.as_ref()?;
         let mut fishing_poses = HashMap::new();
+        let mut fishing_sounds = Vec::new();
         let frames = self
             .world
             .active_states()
             .map(|(object_id, state)| {
                 let pose = state.pose();
                 let fishing = self.fishing_actors.get_mut(object_id).and_then(|actor| {
-                    let pose = actor.animation.advance_to(animation_now_ms)?;
-                    Some((pose, actor.direction, actor.rod_shape))
+                    let fishing = actor.animation.advance_to(animation_now_ms)?;
+                    if pose.action != AnimationAction::Standing {
+                        return None;
+                    }
+                    if let Some(sound) = actor.enter_cue_frame(fishing) {
+                        fishing_sounds.push(sound);
+                    }
+                    Some((fishing, actor.direction, actor.rod_shape))
                 });
-                if let Some((fishing, direction, rod_shape)) =
-                    fishing.filter(|_| pose.action == AnimationAction::Standing)
-                {
+                if let Some((fishing, direction, rod_shape)) = fishing {
                     fishing_poses.insert(object_id.to_owned(), (direction, rod_shape));
                     let draw_frame = fishing.phase.descriptor().draw_frame(direction, fishing.logical_frame_index);
                     return (object_id.to_owned(), (i64::from(draw_frame), pose.action));
@@ -1662,6 +1777,29 @@ impl NativeEntityPresentation {
                 )
             })
             .collect::<HashMap<_, _>>();
+        if let Some(generation) = self.fishing_audio_generation {
+            for file_name in fishing_sounds {
+                self.fishing_sound_sequence = self.fishing_sound_sequence.saturating_add(1);
+                self.fishing_sound_events.push(NativeGameplaySoundEvent {
+                    generation,
+                    sequence: self.fishing_sound_sequence,
+                    cue: file_name.to_owned(),
+                    file_name: file_name.to_owned(),
+                });
+            }
+        }
+        let fishing_cues = if effect_visible {
+            self.fishing_actors
+                .iter()
+                .filter_map(|(object_id, actor)| {
+                    actor
+                        .cue_frames(animation_now_ms)
+                        .map(|frames| (object_id.clone(), frames))
+                })
+                .collect()
+        } else {
+            HashMap::new()
+        };
         // Combat and locomotion use separate clocks. Capture only a real
         // rendered overlap, once per attack/window pair, rather than emitting
         // one movement trace row on every frame of an ordinary run.
@@ -1695,7 +1833,11 @@ impl NativeEntityPresentation {
         } else {
             self.last_attack_motion_overlap = None;
         }
-        if !self.payload_dirty && frames == self.last_frames && !effect_visibility_changed {
+        if !self.payload_dirty
+            && frames == self.last_frames
+            && !effect_visibility_changed
+            && fishing_cues == self.last_fishing_cues
+        {
             return None;
         }
 
@@ -1749,17 +1891,19 @@ impl NativeEntityPresentation {
                 }
             }
         }
-        let Some(state) = render(&visible_payload, &frames, effect_visible) else {
+        let Some(mut state) = render(&visible_payload, &frames, effect_visible) else {
             self.hovered_object_id = None;
             self.self_hovered = false;
             return None;
         };
+        crate::atlas::append_native_fishing_cues(&visible_payload, &mut state, &fishing_cues);
         self.hovered_object_id = state.get("hoveredObjectId").and_then(value_object_id);
         self.self_hovered = state
             .get("selfHovered")
             .and_then(Value::as_bool)
             .unwrap_or(false);
         self.last_frames = frames;
+        self.last_fishing_cues = fishing_cues;
         self.payload_dirty = false;
         Some(state)
     }
@@ -1786,6 +1930,7 @@ pub fn tick_native_entity_presentation(
     quest: Option<Res<mir2_client_bevy::quest_ui::QuestUiState>>,
     pointer_ui: crate::input::NativeQuestPointerUi,
     windows: Query<&Window, With<PrimaryWindow>>,
+    mut gameplay_audio: Option<ResMut<NativeGameplayAudioQueue>>,
 ) {
     let motion_now_ms = native_motion_clock_ms();
     let animation_now_ms = motion_now_ms;
@@ -1820,14 +1965,17 @@ pub fn tick_native_entity_presentation(
             .is_some_and(|window| pointer_ui.contains_cursor(window))
     });
     presentation.set_hover_presentation(hover_cursor_stage, highlight_target);
-    let Some(state) = presentation.render_state_if_changed_at_clocks(
+    let state = presentation.render_state_if_changed_at_clocks(
         animation_now_ms,
         motion_now_ms,
         effect_visible,
-    ) else {
-        return;
-    };
-    if let Ok(json) = serde_json::to_string(&state) {
+    );
+    for event in presentation.fishing_sound_events.drain(..) {
+        if let Some(queue) = gameplay_audio.as_deref_mut() {
+            queue.push(event);
+        }
+    }
+    if let Some(json) = state.and_then(|state| serde_json::to_string(&state).ok()) {
         let _ = mir2_bevy_runtime::native_ingest::push_native_entity_render_state(json);
     }
 }

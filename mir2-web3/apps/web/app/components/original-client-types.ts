@@ -90,6 +90,7 @@ export type CrystalEntityAnimationPose = {
   direction: string;
   logicalFrameIndex: number;
   queueDepth: number;
+  fishingStartedAtMs?: number;
 };
 
 export type EntityMotionSnapshot = {
@@ -125,6 +126,7 @@ export type DisplayEntity = {
   dead?: boolean;
   sneaking?: boolean;
   fishing?: boolean | null;
+  fishingFeedback?: import("../../lib/world-fishing-feedback").FishingFeedback;
   sprite?: EntitySprite | null;
   questIds?: number[];
   bigMapIcon?: number;
@@ -158,18 +160,7 @@ export type PredictedPlayerMotion = {
 
 export type DisplayProjectile = ProjectileState;
 
-export type DisplaySceneEffect = {
-  key: string;
-  source: "spell" | "attackOverlay" | "actorEffect" | "objectSpell" | "map" | "object";
-  spellOrEffect: string | number;
-  objectId?: string;
-  x: number;
-  y: number;
-  direction: number;
-  value: number;
-  startedAt: number;
-  expiresAt: number;
-};
+export type DisplaySceneEffect = import("../../lib/world-model/types").SceneEffectState;
 
 // One floating combat number anchored over a struck object — Crystal's `Damage`
 // (GameScene.DamageIndicator): white over monsters, red over players, plus Miss/Crit.

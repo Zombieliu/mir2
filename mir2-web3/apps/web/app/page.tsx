@@ -65,7 +65,7 @@ import { MailDispatcher,MailParcelController,mailContentKey,sameMailOwner,type M
 import {projectMailParcelSnapshot,projectMailItemMutationSnapshot,mailMutationAllowed,mailInventoryMutationPacket,isMailItemMutation} from "../lib/mail-parcel-gateway-adapter";
 import { NpcRepairService, type NpcRepairOwner, type NpcRepairView, type NpcRepairSelection, type NpcRepairProof,
   type NpcRepairDrag, type NpcRepairDragGeometry, type NpcRepairDrop } from "../lib/npc-repair-service";
-import type { ItemActionRef, DisplayItem, DisplayEquipmentItem } from "./components/original-client-types";
+import type { ItemActionRef, DisplayItem, DisplayEquipmentItem, DisplaySceneEffect } from "./components/original-client-types";
 import type { MailPresentation } from "./components/original-client-mail-window";
 import { useBevyCombatInput } from "../lib/use-bevy-combat-input";
 import type { CombatRuntime,CombatProof,CombatFacts,CombatActor,CombatAction,CombatOwner } from "../lib/bevy-combat-input";
@@ -112,6 +112,7 @@ import { WorldFishingSource, sameOwner as sameWorldFishingOwner, type WorldFishi
 import type { InventoryTabKey } from "../lib/original-ui";
 import { fishingAttachmentApplied, fishingAttachmentReceipt, fishingBagCell, projectFishingRod, readFishingStatus,
   type FishingAttachmentCommand, type FishingStatusView } from "../lib/world-fishing-panel";
+import { readFishingFeedback, type FishingFeedback } from "../lib/world-fishing-feedback";
 import type { WorldFishingGesture, WorldFishingPointer, WorldFishingAnimationContext,
   WorldFishingAnimationCommit, WorldFishingCallbacks } from "../lib/world-fishing-input";
 import { readCrystalEntityActionPose, type CrystalEntityActionPose } from "./components/original-client-entity-animation-runtime";
@@ -967,6 +968,7 @@ type WorldEntity = {
   dead?: boolean;
   sneaking?: boolean;
   fishing?: boolean;
+  fishingFeedback?: FishingFeedback;
   disposition?: EntityDisposition;
   sprite?: GatewayWorldEntitySprite | null;
   questIds?: number[];
@@ -1008,18 +1010,7 @@ function entityMovementRenderFieldsMatch(left: WorldEntity, right: WorldEntity) 
   );
 }
 
-type SceneEffectState = {
-  key: string;
-  source: "spell" | "attackOverlay" | "actorEffect" | "objectSpell" | "map" | "object";
-  spellOrEffect: string | number;
-  objectId?: string;
-  x: number;
-  y: number;
-  direction: number;
-  value: number;
-  startedAt: number;
-  expiresAt: number;
-};
+type SceneEffectState = DisplaySceneEffect;
 
 let sceneEffectSequence = 0;
 let projectileSequence = 0;
@@ -8422,12 +8413,10 @@ export default function HomePage() {
     if (view === false) {
       if (!previous) return;
       panel.active = null;
-      gameBusRef.current?.emit({ type: "uiSound", event: "fishingPull" });
     } else {
       const alreadyBiting = previous?.view.foundFish;
       if (!previous) {
         panel.active = { owner, view, reeling: false };
-        gameBusRef.current?.emit({ type: "uiSound", event: "fishingThrow" });
       } else {
         if (previous.view.chance === view.chance && previous.view.progress === view.progress && alreadyBiting === view.foundFish) return;
         previous.view = view;
@@ -15129,7 +15118,9 @@ export default function HomePage() {
             ),
             selectedObjectId: mapChanged ? null : current.selectedObjectId,
             activeNpcDialog: mapChanged ? null : current.activeNpcDialog,
-            entities: mapChanged && preservedSelfEntity ? [preservedSelfEntity] : mapChanged ? [] : current.entities,
+            entities: mapChanged && preservedSelfEntity
+              ? [{ ...preservedSelfEntity, fishing: undefined, fishingFeedback: undefined }]
+              : mapChanged ? [] : current.entities,
             groundDrops: mapChanged ? [] : current.groundDrops,
             mineNodes: mapChanged ? [] : current.mineNodes,
             projectiles: mapChanged ? [] : current.projectiles,
@@ -15216,6 +15207,7 @@ export default function HomePage() {
             nameColourArgb: -1,
             disposition: "friendly",
             fishing: typeof payload.fishing === "boolean" ? payload.fishing : undefined,
+            fishingFeedback: undefined,
             sprite: playerSpriteFromPacket(payload),
             hair: packetAppearance.hair,
             wingEffect: packetAppearance.wingEffect,
@@ -15955,10 +15947,15 @@ export default function HomePage() {
         const fishing = payload.fishing;
         if (typeof fishing !== "boolean") break;
         const objectId = stringifyId(payload.objectId);
+        const feedback = readFishingFeedback(payload);
         updateWorld(current => {
           const actor = current.entities.find(entity => entity.objectId === objectId);
-          if (!actor || (actor.kind !== "player" && actor.kind !== "selfPlayer") || actor.fishing === fishing) return current;
-          return { ...current, entities: upsertEntityInList(current.entities, { ...actor, fishing }) };
+          if (!actor || actor.dead || (actor.kind !== "player" && actor.kind !== "selfPlayer")) return current;
+          const sameFlag = actor.fishing === fishing;
+          const previous = actor.fishingFeedback;
+          if (sameFlag && (!feedback || (previous?.x === feedback.x && previous.y === feedback.y
+            && previous.foundFish === feedback.foundFish))) return current;
+          return { ...current, entities: upsertEntityInList(current.entities, { ...actor, fishing, fishingFeedback: feedback }) };
         });
         break;
       }
@@ -17062,7 +17059,9 @@ export default function HomePage() {
             ),
             selectedObjectId: mapChanged ? null : current.selectedObjectId,
             activeNpcDialog: mapChanged ? null : current.activeNpcDialog,
-            entities: mapChanged && movedSelf ? [movedSelf] : mapChanged ? [] : current.entities,
+            entities: mapChanged && movedSelf
+              ? [{ ...movedSelf, fishing: undefined, fishingFeedback: undefined }]
+              : mapChanged ? [] : current.entities,
             groundDrops: mapChanged ? [] : current.groundDrops,
             projectiles: mapChanged ? [] : current.projectiles,
             effects: mapChanged ? [] : current.effects,
@@ -18020,6 +18019,11 @@ export default function HomePage() {
     clearPacketRuntimeObjectTombstone(objectId);
     updateWorld((current) => {
       const previousEntity = current.entities.find((entity) => entity.objectId === objectId);
+      const name = stringOrFallback(
+        payload.name,
+        kind === "npc" ? t("ui.npc") : kind === "monster" ? t("ui.monster") : t("ui.player"),
+      );
+      const fishing = typeof payload.fishing === "boolean" ? payload.fishing : undefined;
       const sprite = spriteFromPacketOrExisting(
         payload,
         kind,
@@ -18031,10 +18035,7 @@ export default function HomePage() {
         entities: upsertEntityInList(current.entities, {
           objectId,
           kind,
-          name: stringOrFallback(
-            payload.name,
-            kind === "npc" ? t("ui.npc") : kind === "monster" ? t("ui.monster") : t("ui.player"),
-          ),
+          name,
           ownerName: stringOrNull(payload.ownerName) ?? undefined,
           ai: numberOrUndefined(payload.ai) ?? previousEntity?.ai,
           x: numberOrZero(location?.x),
@@ -18049,7 +18050,8 @@ export default function HomePage() {
             (kind === "npc" ? 10 : kind === "selfPlayer" ? 3 : undefined),
           nameColourArgb: numberOrUndefined(payload.nameColourArgb) ?? (kind === "npc" ? -16_711_936 : -1),
           dead: payload.dead === true,
-          fishing: typeof payload.fishing === "boolean" ? payload.fishing : undefined,
+          fishing,
+          fishingFeedback: carriedFishingFeedback(previousEntity, kind, name, fishing, payload.dead === true),
           disposition,
           sprite,
           ...(kind === "npc"
@@ -18691,10 +18693,14 @@ export default function HomePage() {
       ...current,
       playerHp: current.playerObjectId === objectId ? 0 : current.playerHp,
       entities: patchEntityInList(current.entities, objectId, (entity) =>
-        applyActorDeath(entity, now, crystalDeathActionDurationMs(entity), {
-          x: numberOrUndefined(location?.x),
-          y: numberOrUndefined(location?.y),
-          direction: stringOrNull(payload.direction) ?? undefined,
+        ({
+          ...applyActorDeath(entity, now, crystalDeathActionDurationMs(entity), {
+            x: numberOrUndefined(location?.x),
+            y: numberOrUndefined(location?.y),
+            direction: stringOrNull(payload.direction) ?? undefined,
+          }),
+          fishing: undefined,
+          fishingFeedback: undefined,
         }),
       ),
     }));
@@ -19137,6 +19143,8 @@ export default function HomePage() {
     // If it instead needs a full fallback, its entire economy still replaces
     // packet overlays; qualification cannot bless a stale mail/item projection.
     fullEconomy = fullEconomy || qualifiedDisplay;
+    const previousMap = worldRef.current.mapFileName;
+    const sameFishingMap = normalizeMapFileName(snapshot.mapFileName ?? previousMap) === normalizeMapFileName(previousMap);
     const previousEntitiesById = new Map(worldRef.current.entities.map((entity) => [entity.objectId, entity]));
     const entities: WorldEntity[] = snapshot.entities.map((entity) => ({
       objectId: String(entity.objectId),
@@ -19163,6 +19171,8 @@ export default function HomePage() {
       nameColourArgb: entity.nameColourArgb ?? undefined,
       dead: entity.dead,
       fishing: typeof entity.fishing === "boolean" ? entity.fishing : undefined,
+      fishingFeedback: sameFishingMap ? carriedFishingFeedback(previousEntitiesById.get(String(entity.objectId)),
+        entity.kind, entity.name, entity.fishing, entity.dead) : undefined,
       disposition: entity.disposition,
       sprite: spriteFromSnapshotEntity(
         entity,
@@ -22047,6 +22057,17 @@ function parseQuestRewards(
     && !selectItems
   ) return undefined;
   return { gold, experience, credit, items, selectItems };
+}
+
+function carriedFishingFeedback(
+  previous: WorldEntity | undefined,
+  kind: EntityKind,
+  name: string,
+  fishing: boolean | null | undefined,
+  dead: boolean | undefined,
+) {
+  return !dead && previous && !previous.dead && previous.kind === kind && previous.name === name
+    && previous.fishing === fishing ? previous.fishingFeedback : undefined;
 }
 
 function upsertEntityInList(list: WorldEntity[], nextEntity: WorldEntity) {

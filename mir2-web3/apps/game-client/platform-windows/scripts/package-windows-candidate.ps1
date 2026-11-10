@@ -45,6 +45,9 @@ $PetGuildClosureScript = Join-Path (Split-Path -Parent $PSCommandPath) 'pet-guil
 if (-not (Test-Path -LiteralPath $PetGuildClosureScript -PathType Leaf)) { throw 'pet/guild closure validator missing' }
 . $PetGuildClosureScript
 $PlayerSpriteFamilyNames = @('CArmour','CHair','CWeapon','ARArmour','ARHair','ARWeapon','AArmour','AHair','AWeapon','Mount')
+$FishingRequiredFiles = @(Get-CandidateFishingRequiredFiles)
+$FishingPackageFiles = [Collections.Generic.HashSet[string]]::new([StringComparer]::Ordinal)
+foreach ($relative in $FishingRequiredFiles) { [void]$FishingPackageFiles.Add("mir2-assets/$relative") }
 $FiveClassPackageSoundPolicy = $null
 
 function Write-Utf8NoBom {
@@ -710,6 +713,7 @@ function Test-PackageRelativeFileAllowed {
     if (Test-CandidateActorFileAllowed -RelativePath $RelativePath) { return $true }
     if ($RelativePath -ceq $ExeName) { return $true }
     if (Test-PathContainsDangerousDotToken -RelativePath $RelativePath) { return $false }
+    if ($FishingPackageFiles.Contains($RelativePath)) { return $true }
     if (Test-SimplifiedLegalFile -RelativePath $RelativePath) { return $true }
     $rootFiles = @('mir2-client.toml', 'README-START.txt', 'CONTROLS.txt', 'KNOWN-ISSUES.md', 'NotoSansTC-OFL.txt', 'OFL-NotoSans.txt', 'OFL-NotoSansArabic.txt', 'OFL-NotoSansDevanagari.txt', 'OFL-NotoSansThai.txt', 'MULTILINGUAL-SOURCES.json', 'README.zh-CN.txt', 'BILLING-HAN-SOURCE.json', 'OFL-NotoSansSC-BillingHan.txt', 'SIMPLIFIED-SOURCE.json', 'OFL-NotoSansCJKsc.txt', 'BUILD-ATTESTATION.json', 'PACKAGE-MANIFEST.json', 'VERSION.json', 'RELEASE-STATEMENT.json', 'RELEASE-STATEMENT.p7s')
     if ($rootFiles -ccontains $RelativePath) { return $true }
@@ -739,6 +743,7 @@ function Test-PackageRelativeDirectoryAllowed {
     if ($RelativePath -ceq 'mir2-assets/legal') { return $true }
     if (Test-CandidateActorDirectoryAllowed -RelativePath $RelativePath) { return $true }
     if (Test-PathContainsDangerousDotToken -RelativePath $RelativePath) { return $false }
+    if (@('mir2-assets/original-ui/Fishing', 'mir2-assets/original-ui/Fishing/00', 'mir2-assets/original-ui/Fishing/01') -ccontains $RelativePath) { return $true }
     if (@('logs', 'mir2-assets', 'mir2-assets/generated', 'mir2-assets/original-ui', 'mir2-assets/original-ui/Cursors', 'mir2-assets/original-ui/Items', 'mir2-assets/original-ui/Monster', 'mir2-assets/original-ui/NPC', 'mir2-assets/original-ui/Sound') -ccontains $RelativePath) { return $true }
     $treeRoots = @('mir2-assets/original-ui/Pet','mir2-assets/bevy-entity-atlases', 'mir2-assets/generated/map-atlas', 'mir2-assets/generated/native-map-keyed', 'mir2-assets/crystal-map-pack', 'mir2-assets/original-effects', 'mir2-assets/original-ui/ChrSel', 'mir2-assets/original-ui/Help', 'mir2-assets/original-ui/Items', 'mir2-assets/original-ui/MMap', 'mir2-assets/original-ui/Prguse', 'mir2-assets/original-ui/DNItems', 'mir2-assets/original-ui/GuildSkill','mir2-assets/original-ui/MagIcon2','mir2-assets/original-ui/MagIcon','mir2-assets/original-ui/BuffIcon', 'mir2-assets/original-ui/Prguse2', 'mir2-assets/original-ui/StateItem', 'mir2-assets/original-ui/UI_32bit', 'mir2-assets/original-ui/Title')
     foreach ($familyName in $PlayerSpriteFamilyNames) { $treeRoots += "mir2-assets/original-ui/$familyName" }
@@ -1012,6 +1017,7 @@ try {
  foreach ($index in 1110..1119) { $requiredSources += (Join-Path $PublicRoot "original-effects\Magic2\$index.png") }
  foreach ($index in 500..509) { $requiredSources += (Join-Path $PublicRoot "original-effects\Magic3\$index.png") }
 foreach ($relative in Get-PetGuildRequiredFiles) { $requiredSources += (Join-Path $PublicRoot $relative) }
+foreach ($relative in $FishingRequiredFiles) { $requiredSources += (Join-Path $PublicRoot $relative) }
 foreach ($required in $requiredSources) { if (-not (Test-Path -LiteralPath $required -PathType Leaf)) { throw "required asset missing: $required" } }
 $candidateSoundIdentities = @(
     [pscustomobject]@{ name='91.wav'; size=[int64]164642; sha256='EBCB5E32521CDF7256C334BE1951064EDD21E080264823B327BC6803ACDD38F1' },
@@ -1072,6 +1078,7 @@ if ($null -ne $FiveClassPackageSoundPolicy) {
 }
 $requiredSourceTrees = @((Join-Path $PublicRoot 'bevy-entity-atlases'), $mapAtlasTemporaryRoot, $nativeKeyedMapRoot, $MapPackRoot, (Join-Path $PublicRoot 'original-effects'), (Join-Path $PublicRoot 'original-ui\ChrSel'), (Join-Path $PublicRoot 'original-ui\Cursors'), (Join-Path $PublicRoot 'original-ui\Help'), (Join-Path $PublicRoot 'original-ui\DNItems'), (Join-Path $PublicRoot 'original-ui\Items'), (Join-Path $PublicRoot 'original-ui\MMap'), (Join-Path $PublicRoot 'original-ui\Prguse'), (Join-Path $PublicRoot 'original-ui\Prguse2'), (Join-Path $PublicRoot 'original-ui\StateItem'), (Join-Path $PublicRoot 'original-ui\UI_32bit'), (Join-Path $PublicRoot 'original-ui\Title'), (Join-Path $PublicRoot 'original-ui\Monster'), (Join-Path $PublicRoot 'original-ui\NPC'), (Join-Path $PublicRoot 'original-ui\Gate'), (Join-Path $PublicRoot 'original-ui\MapLinkIcon'))
 foreach ($familyName in $PlayerSpriteFamilyNames) { $requiredSourceTrees += (Join-Path $PublicRoot "original-ui\$familyName") }
+$requiredSourceTrees += (Join-Path $PublicRoot 'original-ui/Fishing')
 foreach ($sourceTree in $requiredSourceTrees) { if (-not (Test-Path -LiteralPath $sourceTree -PathType Container)) { throw "required source tree missing: $sourceTree" }; Assert-NoReparseTree -Path $sourceTree; Assert-NoAlternateDataStreams -Path $sourceTree }
 foreach ($soundName in @('Login2.wav','Select2.wav','103.wav','M8-1.wav','M31-0.wav','M31-1.wav','M31-2.wav','M34-0.wav','M34-1.wav','M34-2.wav','M39-0.wav','M39-1.wav','M40-0.wav','M61-0.wav','M61-1.wav','M64-0.wav','M64-1.wav','M64-2.wav','M79-1.wav') + $PetSoundNames + $playerCombatSoundNames + $monsterCombatSoundNames + $frostCrunchSoundNames + $hallucinationSoundNames + $blessedArmourSoundNames + $miningSoundNames) { $sound = Join-Path $PublicRoot ('original-ui\Sound\' + $soundName); Assert-NoReparseTree -Path $sound; Assert-NoAlternateDataStreams -Path $sound }
  foreach ($sound in @('100.wav', '104.wav', '105.wav')) { $buttonSound = Join-Path $PublicRoot ('original-ui\Sound\' + $sound); Assert-NoReparseTree -Path $buttonSound; Assert-NoAlternateDataStreams -Path $buttonSound }
@@ -1081,6 +1088,7 @@ foreach ($soundName in @('Login2.wav','Select2.wav','103.wav','M8-1.wav','M31-0.
  $entityAtlasClosure = Assert-EntityAtlasClosure -ManifestPath (Join-Path $PublicRoot 'bevy-entity-atlases\manifest.json') -AssetRoot $PublicRoot
  Write-Host "entityAtlasClosure=atlases:$($entityAtlasClosure.atlasCount),pages:$($entityAtlasClosure.pageCount)"
  $playerSpriteClosure = Assert-PlayerSpriteClosure -OriginalUiRoot (Join-Path $PublicRoot 'original-ui') -FamilyNames $PlayerSpriteFamilyNames
+ Assert-CandidateFishingAssetClosure -AssetRoot $PublicRoot
  if ($ContentProfile -ceq 'platinum_fiveclass') {
      Assert-FiveClassAssetClosure -ProjectRoot ([IO.Path]::GetFullPath((Join-Path $PSScriptRoot '../../../..'))) -AssetRoot $PublicRoot -ProfilePath $script:CandidateContentProfilePath
  }
@@ -1167,6 +1175,12 @@ try {
     if ($null -ne $FiveClassPackageSoundPolicy) {
         Copy-FiveClassPackageSoundAssets -SourceAssetRoot $PublicRoot -DestinationAssetRoot $assetDest -Policy $FiveClassPackageSoundPolicy -SourceIndexIdentity $fiveClassSourceSoundIndexIdentity
     }
+    foreach ($relative in $FishingRequiredFiles) {
+        # The effect media already travel in the original-effects tree.
+        if ($relative.StartsWith('original-ui/', [StringComparison]::Ordinal)) {
+            Copy-CandidateAssetFile -Source (Join-Path $PublicRoot $relative) -Destination (Join-Path $assetDest $relative)
+        }
+    }
     Assert-NoReparseTree -Path $soundSource
     Assert-NoReparseTree -Path $soundDest
     Assert-NoReparseTree -Path $releaseExeFull
@@ -1208,6 +1222,7 @@ try {
     Assert-NoReparseTree -Path $staging
     Assert-NoAlternateDataStreams -Path $staging
     $stagedPlayerSpriteClosure = Assert-PlayerSpriteClosure -OriginalUiRoot (Join-Path $assetDest 'original-ui') -FamilyNames $PlayerSpriteFamilyNames
+    Assert-CandidateFishingAssetClosure -AssetRoot $assetDest
     if ($ContentProfile -ceq 'platinum_fiveclass') {
         Assert-FiveClassAssetClosure -ProjectRoot ([IO.Path]::GetFullPath((Join-Path $PSScriptRoot '../../../..'))) -AssetRoot $assetDest -ProfilePath $script:CandidateContentProfilePath
     }

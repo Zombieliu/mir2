@@ -17,6 +17,7 @@ const PRUNE_TARGETS = [
       "CArmour",
       "CHair",
       "CWeapon",
+      "Fishing",
       "AArmour",
       "AHair",
       "AWeapon",

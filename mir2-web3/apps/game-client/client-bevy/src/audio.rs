@@ -59,6 +59,10 @@ pub const NATIVE_GAMEPLAY_SOUND_FILES: &[&str] = &[
     "pet_olympicmascot.wav",
     "pet_frog.wav",
     "pet_monkey.wav",
+    // Original SoundList.lst 10184–10186: Crystal fishing pose cues.
+    "fishing_throw.wav",
+    "fishing_pull.wav",
+    "fishing.wav",
     // Original SoundList.lst 10091: Mine wall impact.
     "91.wav",
     "005-1.wav",

@@ -1708,6 +1708,7 @@ impl NativeGameplayAdapter {
             object_id,
             fishing,
             fishing_point,
+            found_fish,
             ..
         }) = crate::equipment_creature_wire::packet("FishingUpdate", packet_body(payload))
         else {
@@ -1736,6 +1737,7 @@ impl NativeGameplayAdapter {
         let projection = serde_json::json!({
             "active": fishing,
             "point": {"x": fishing_point.x, "y": fishing_point.y},
+            "foundFish": found_fish,
         });
         if overlay.and_then(|actor| actor.get(NATIVE_FISHING_OVERLAY)) == Some(&projection) {
             return false;
@@ -2928,11 +2930,19 @@ pub fn drain_gameplay_events(
     let now_ms = crate::entity_presentation::native_motion_clock_ms();
     // HUD state may coalesce to the latest snapshot; actor action feeds may
     // not. Consume every packet projection before selecting the final UI view.
-    for payload in snapshots
+    for (generation, payload) in snapshots
         .iter()
         .filter(|snapshot| !snapshot.big_map_only)
-        .filter_map(|snapshot| snapshot.entity_render_payload.as_ref())
+        .filter_map(|snapshot| {
+            snapshot
+                .entity_render_payload
+                .as_ref()
+                .map(|payload| (snapshot.generation, payload))
+        })
     {
+        models
+            .entity_presentation
+            .bind_fishing_audio_generation(generation);
         models
             .entity_presentation
             .observe_packet_payload(payload.clone(), now_ms);

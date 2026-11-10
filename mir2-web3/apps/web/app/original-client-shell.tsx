@@ -75,11 +75,13 @@ import {
   type Mir2Language,
 } from "../lib/localization";
 import {
+  playOriginalSoundEvent,
   playOriginalSoundPath,
   setOriginalMusic,
   stopOriginalAudio,
   unlockOriginalAudio,
 } from "../lib/original-audio";
+import { FishingFeedbackPresentation } from "../lib/world-fishing-feedback";
 import {
   LanguageSelector,
   LoginOverlay,
@@ -108,6 +110,7 @@ import {
 import { R16LoginDoor } from "./components/r16-login-door";
 import type {
   DisplayEntity,
+  DisplaySceneEffect,
   DisplayLogLine,
   DisplayWorld,
   EntityKind,
@@ -2108,11 +2111,14 @@ export function OriginalClientShell({
     world.mapFileName,
   ]);
   const committedEntityAnimationRef = useRef<{ worldKey: string; poses: ReturnType<typeof resolveCrystalEntityAnimationPoses> } | null>(null);
+  const [fishingFeedback] = useState(() => new FishingFeedbackPresentation());
+  const [fishingEffects, setFishingEffects] = useState<readonly DisplaySceneEffect[]>([]);
   const animationWorldKey = worldFishingAnimation?.record.sourceKey ?? `${world.mapFileName ?? "none"}:${player?.objectId ?? "none"}`;
   useLayoutEffect(() => {
     const context = worldFishingAnimation, runtime = context?.runtime ?? entityAnimationRuntimeFromWindow();
     if (screen !== "game" || !player || !runtime) {
       committedEntityAnimationRef.current = null;
+      setFishingEffects(fishingFeedback.advance(null, 0, [], {}).effects);
       onWorldFishingAnimationCommit?.(null);
       return;
     }
@@ -2125,12 +2131,15 @@ export function OriginalClientShell({
       })),
     });
     committedEntityAnimationRef.current = { worldKey: animationWorldKey, poses };
+    const feedback = fishingFeedback.advance(animationWorldKey, atMs, viewportEntities, poses);
+    setFishingEffects(feedback.effects);
+    for (const sound of feedback.sounds) playOriginalSoundEvent(sound);
     if (!context) { onWorldFishingAnimationCommit?.(null); return; }
     const token = Object.freeze({});
     const commit = Object.freeze({ context, worldKey: animationWorldKey, worldSeed: entityAnimationWorldSeed, atMs, token });
     onWorldFishingAnimationCommit?.(commit);
     return () => onWorldFishingAnimationCommit?.(null, token);
-  }, [animationWorldKey, entityAnimationInputs, entityAnimationWorldSeed, onWorldFishingAnimationCommit, player, screen, worldFishingAnimation]);
+  }, [animationWorldKey, entityAnimationInputs, entityAnimationWorldSeed, fishingFeedback, onWorldFishingAnimationCommit, player, screen, viewportEntities, worldFishingAnimation]);
   const viewportEntitySprites = useMemo(() => {
     const spriteNow = entityAnimationInputs.spriteNow, animationInputs = entityAnimationInputs.entities;
     const committed = committedEntityAnimationRef.current;
@@ -5260,6 +5269,8 @@ export function OriginalClientShell({
               screen={screen}
               t={t}
               world={world}
+              fishingEffects={fishingEffects}
+              warmFishingEffects={sceneInteractionReady && desiredSceneSpriteLibraryKeys.some(key => key.startsWith("Fishing/"))}
               player={renderPlayer ?? player}
               selectedEntity={selectedEntity}
               viewportGroundDrops={viewportGroundDrops}

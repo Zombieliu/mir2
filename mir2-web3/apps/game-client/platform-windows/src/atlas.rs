@@ -13,6 +13,7 @@ use serde_json::{json, Value};
 use sha2::{Digest, Sha256};
 
 use crate::assets;
+use crate::entity_presentation::NativeFishingCueFrames;
 use mir2_bevy_runtime::entity_animation::AnimationAction;
 
 const STAGE_WIDTH: f32 = 1024.0;
@@ -1171,6 +1172,140 @@ fn scene_center(payload: &Value) -> (i64, i64) {
             )
         })
         .unwrap_or((0, 0))
+}
+
+fn fishing_cue_geometry(library: &str, frame: i64) -> Option<OriginalFrameGeometry> {
+    static WATER: OnceLock<HashMap<i64, OriginalFrameGeometry>> = OnceLock::new();
+    static BITE: OnceLock<HashMap<i64, OriginalFrameGeometry>> = OnceLock::new();
+    let (cache, indices) = match library {
+        "Effect" => (&WATER, 640..=676),
+        "Prguse" => (&BITE, 1350..=1351),
+        _ => return None,
+    };
+    if cache.get().is_none() {
+        let meta_path = format!("original-effects/{library}/meta.json");
+        let meta: Value = serde_json::from_slice(&assets::read_bytes(&meta_path)?).ok()?;
+        let frames = meta.get("frames")?.as_object()?;
+        let geometry = indices
+            .filter_map(|index| {
+                let row = frames.get(&index.to_string())?;
+                let path = format!("/original-effects/{library}/{index}.png");
+                if row.get("path")?.as_str()? != path {
+                    return None;
+                }
+                let width = u32::try_from(row.get("width")?.as_u64()?).ok()?;
+                let height = u32::try_from(row.get("height")?.as_u64()?).ok()?;
+                let offset_x = i32::try_from(row.get("x")?.as_i64()?).ok()?;
+                let offset_y = i32::try_from(row.get("y")?.as_i64()?).ok()?;
+                (width > 0 && height > 0).then_some((
+                    index,
+                    OriginalFrameGeometry {
+                        width,
+                        height,
+                        offset_x,
+                        offset_y,
+                    },
+                ))
+            })
+            .collect();
+        let _ = cache.set(geometry);
+    }
+    cache.get()?.get(&frame).copied()
+}
+
+fn fishing_cue_layer(
+    library: &str,
+    frame: i64,
+    key: String,
+    origin: (f32, f32),
+    z: f32,
+) -> Option<Value> {
+    let path = format!("/original-effects/{library}/{frame}.png");
+    if !assets::exists(&path) {
+        return None;
+    }
+    let geometry = fishing_cue_geometry(library, frame)?;
+    Some(json!({
+        "key": key, "path": path,
+        "left": origin.0 + geometry.offset_x as f32,
+        "top": origin.1 + geometry.offset_y as f32,
+        "width": geometry.width, "height": geometry.height,
+        "z": z, "additive": library == "Effect",
+    }))
+}
+
+pub(crate) fn append_native_fishing_cues(
+    payload: &Value,
+    state: &mut Value,
+    cues: &HashMap<String, NativeFishingCueFrames>,
+) {
+    if cues.is_empty() {
+        return;
+    }
+    let Some(entities) = state.get_mut("entities").and_then(Value::as_array_mut) else {
+        return;
+    };
+    let (center_x, center_y) = scene_center(payload);
+    let tile_origin = |x: i64, y: i64| {
+        let left = (STAGE_WIDTH / 2.0 / CELL_WIDTH).floor() * CELL_WIDTH;
+        let top = ((STAGE_HEIGHT / 2.0 / CELL_HEIGHT).floor() - 1.0) * CELL_HEIGHT;
+        (
+            left + x.saturating_sub(center_x) as f32 * CELL_WIDTH,
+            top + y.saturating_sub(center_y) as f32 * CELL_HEIGHT,
+        )
+    };
+    let bounds = post_world_depth_bounds(payload);
+    // Crystal's map effects draw after selection highlights and before actor effects.
+    let water_z = post_world_effect_z_from_bounds(bounds, bounds.0) - POST_WORLD_BAND_GAP / 2.0;
+    for entity in entities.iter_mut() {
+        let (Some(object_id), Some(x), Some(y)) = (
+            entity.get("objectId").and_then(Value::as_str),
+            entity.get("gridX").and_then(Value::as_i64),
+            entity.get("gridY").and_then(Value::as_i64),
+        ) else {
+            continue;
+        };
+        let Some(frame) = cues.get(object_id).and_then(|cue| cue.actor) else {
+            continue;
+        };
+        let layer = fishing_cue_layer(
+            "Prguse",
+            frame,
+            format!("{object_id}:fishing-bite"),
+            tile_origin(x, y),
+            post_world_effect_z_from_bounds(bounds, entity_z_base(payload, x, y)),
+        );
+        if let (Some(layer), Some(layers)) = (
+            layer,
+            entity.get_mut("layers").and_then(Value::as_array_mut),
+        ) {
+            layers.push(layer);
+        }
+    }
+    for (object_id, cue) in cues {
+        let x = i64::from(cue.point.0);
+        let y = i64::from(cue.point.1);
+        let key = format!("fishing-water:{object_id}");
+        let layers = cue
+            .water
+            .iter()
+            .enumerate()
+            .map(|(layer, frame)| {
+                fishing_cue_layer(
+                    "Effect",
+                    *frame,
+                    format!("{key}:{layer}"),
+                    tile_origin(x, y),
+                    water_z + layer as f32,
+                )
+            })
+            .collect::<Option<Vec<_>>>();
+        if let Some(layers) = layers {
+            entities.push(json!({
+                "objectId": key, "gridX": x, "gridY": y, "layers": layers,
+            }));
+        }
+    }
 }
 
 /// Build viewport-relative entity layers with exact Crystal geometry. Atlas

@@ -62,6 +62,7 @@ export const SPELL_EFFECT_ENUM = [
 
 const PLAYER_SPELL_SOURCE = "Crystal/Client/MirObjects/PlayerObject.cs::MirAction.Spell";
 const PLAYER_ATTACK_OVERLAY_SOURCE = "Crystal/Client/MirObjects/PlayerObject.cs::DrawEffects/MirAction.Attack1";
+const PLAYER_FISHING_SOURCE = "Crystal/Client/MirObjects/PlayerObject.cs::MirAction.FishingWait/FrameIndex1";
 const WORLD_SPELL_SOURCE = "Crystal/Client/MirObjects/SpellObject.cs::Load";
 const OBJECT_EFFECT_SOURCE = "Crystal/Client/MirScenes/GameScene.cs::ObjectEffect";
 const MAP_EFFECT_SOURCE = "Crystal/Client/MirScenes/GameScene.cs::MapEffect";
@@ -373,6 +374,11 @@ const clientEffect = (effect, library, base, count, interval, source, extra = {}
 // Client-owned effects that are not SpellEffect enum packets. Crystal creates
 // these exact actor-bound effects from packet-driven client object actions.
 export const CLIENT_EFFECTS = [
+  clientEffect("FishingRippleInner", "Effect", 640, 6, 120, PLAYER_FISHING_SOURCE, { kind: "ground", light: 0 }),
+  clientEffect("FishingRippleOuter", "Effect", 650, 6, 120, PLAYER_FISHING_SOURCE, { kind: "ground", light: 0 }),
+  clientEffect("FishingBiteInner", "Effect", 665, 6, 120, PLAYER_FISHING_SOURCE, { kind: "ground", light: 0 }),
+  clientEffect("FishingBiteOuter", "Effect", 671, 6, 120, PLAYER_FISHING_SOURCE, { kind: "ground", light: 0 }),
+  clientEffect("FishingBiteNotice", "Prguse", 1350, 2, 360, PLAYER_FISHING_SOURCE, { blend: false, light: 0 }),
   ...[
     ["Slaying", "Magic", 1820, 10, true],
     ["Thrusting", "Magic", 2190, 10, true],

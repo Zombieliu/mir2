@@ -5891,6 +5891,7 @@ check("Bag-to-Belt Page rejects duplicate global UID zero and missing raw source
 const sharedFishingClick=loadTypeScriptModule(new URL("../lib/shared-fishing-click.ts",import.meta.url));
 const worldFishingSource=loadTypeScriptModule(new URL("../lib/world-fishing-source.ts",import.meta.url));
 const fishingAnimation=loadTypeScriptModule(new URL("../app/components/original-client-entity-animation-runtime.ts",import.meta.url));
+const fishingFeedbackPresentation=loadTypeScriptModule(new URL("../lib/world-fishing-feedback.ts",import.meta.url));
 const fishingTargetsInput=()=>({origin:{x:-2147483648,y:2147483647},direction:2});
 const fishingTargetsReply=()=>({version:1,ok:true,walkCandidates:[{direction:2,cell:{x:1,y:2}},
   {direction:1,cell:{x:3,y:4}},{direction:3,cell:{x:5,y:6}}],waterTarget:{x:7,y:8}});
@@ -6613,6 +6614,8 @@ function worldFishingShellFixture(){
     worldFishingAnimation:{runtime:page.runtime,record:page.source},onBeginWorldFishingGesture:pointer=>page.api.beginWorldFishingGesture(pointer),
     onCancelWorldFishingGesture:gesture=>{cancels.push(gesture);page.api.cancelWorldFishingGesture(gesture);},webGl2SharedCanvasPrototype:false,sharedUiCanvasId:fishingCanvasMode.sharedUiCanvasId,
     player:page.self,animationWorldKey:page.source.sourceKey,entityAnimationWorldSeed:7,committedEntityAnimationRef:ref(null),
+    viewportEntities:[page.self],fishingFeedback:new fishingFeedbackPresentation.FishingFeedbackPresentation(),
+    setFishingEffects:effects=>assert.deepEqual(effects,[]),playOriginalSoundEvent:()=>assert.fail("no fishing pose in this input fixture"),
     entityAnimationInputs:{entities:[{entity:{...page.self,objectId:"17"},legacyAnimationState:"standing"}]},resolveCrystalEntityAnimationPoses:fishingAnimation.resolveCrystalEntityAnimationPoses,
     entityAnimationRuntimeFromWindow:fishingAnimation.entityAnimationRuntimeFromWindow,onWorldFishingAnimationCommit:(commit,previous)=>page.api.commitWorldFishingAnimation(commit,previous),
     onViewportTileSecondaryAction:()=>{throw Error("primary fixture cannot send secondary action");},playerUiPreferences:undefined,

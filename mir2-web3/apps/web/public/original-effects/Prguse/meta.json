@@ -1,0 +1,25 @@
+{
+  "count": 2447,
+  "frames": {
+    "1350": {
+      "path": "/original-effects/Prguse/1350.png",
+      "width": 28,
+      "height": 32,
+      "x": 10,
+      "y": -89,
+      "shadowX": 0,
+      "shadowY": 0,
+      "maskPath": null
+    },
+    "1351": {
+      "path": "/original-effects/Prguse/1351.png",
+      "width": 28,
+      "height": 32,
+      "x": 10,
+      "y": -89,
+      "shadowX": 0,
+      "shadowY": 0,
+      "maskPath": null
+    }
+  }
+}

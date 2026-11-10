@@ -1,0 +1,245 @@
+{
+  "status": "local-candidate",
+  "scope": "Actual desktop Chrome with normal game input against copied isolated R16 File saves. Two renderers use the exact final Web candidate. An extra paced run and a paced WebGL2 run use the same real gateway with slower maintenance to expose quiet and bite cycles separately. Windows tests use a source-locked optimized build, packet and original-media geometry checks.",
+  "crystal": {
+    "frameOne": [
+      "Cast 10184",
+      "Wait when FoundFish 10186",
+      "Reel 10185"
+    ],
+    "quiet": "Effect/640..645 then 650..655",
+    "bite": "Effect/665..670 then 671..676 and actor Prguse/1350..1351",
+    "intervalMs": [
+      120,
+      360
+    ],
+    "waterBlend": "additive",
+    "actorNoticeBlend": "alpha"
+  },
+  "web": {
+    "webgpu": {
+      "receiptSha256": "03d24e9bea35c806ed5f5d23010aa9252cf2f07b20a8e5011b111d8371672105",
+      "buildReceiptSha256": "549f3d1deea7171fa4e42be32ccdd286ec273f1ba7fe10b51c6ba4ac36340119",
+      "runtimeVersion": "bevy-0cd68510886134e0",
+      "realGatewaySha256": "f35261772f379b04759011a63a2f3c463a36e754ebbde71915e893c84d77d490",
+      "maintenanceMs": 300,
+      "inputWakeMs": 75,
+      "selectedCastTile": {
+        "x": 342,
+        "y": 244
+      },
+      "castingTarget": {
+        "x": 339,
+        "y": 247
+      },
+      "verifiedDecodedFrames": 54,
+      "effectNames": [
+        "FishingBiteInner",
+        "FishingBiteNotice",
+        "FishingBiteOuter",
+        "FishingRippleInner",
+        "FishingRippleOuter"
+      ],
+      "quietSeenInManualCast": false,
+      "sounds": {
+        "fishing_throw.wav": 3,
+        "fishing.wav": 3,
+        "fishing_pull.wav": 3
+      },
+      "browserMediaFailures": 0,
+      "sourceSavesUnchanged": true,
+      "ordinaryEarlyEscapeProgress": [
+        0
+      ],
+      "saved": {
+        "map": "0",
+        "position": {
+          "x": 342,
+          "y": 244
+        },
+        "direction": "DownLeft",
+        "rodDurability": 9997,
+        "hookDurability": 7997,
+        "baitRemaining": 12,
+        "reelDurability": 5999
+      },
+      "closed": {
+        "browser": true,
+        "next": true,
+        "gateway": true
+      },
+      "compositor": {
+        "receiptSha256": "04eb35d837100d3f6fe60d806eeab7ee9a853aebe0c7013d03d4687984e8302a",
+        "waterIdleSignatures": 1,
+        "waterWaitNewSignatures": 7
+      }
+    },
+    "webgl2": {
+      "receiptSha256": "7fadb3c2897cf609f9f4f19b55525b15f01246971b83a0950c565f708afeacc1",
+      "buildReceiptSha256": "549f3d1deea7171fa4e42be32ccdd286ec273f1ba7fe10b51c6ba4ac36340119",
+      "runtimeVersion": "bevy-0cd68510886134e0",
+      "realGatewaySha256": "f35261772f379b04759011a63a2f3c463a36e754ebbde71915e893c84d77d490",
+      "maintenanceMs": 600,
+      "inputWakeMs": 250,
+      "selectedCastTile": {
+        "x": 342,
+        "y": 244
+      },
+      "castingTarget": {
+        "x": 339,
+        "y": 247
+      },
+      "verifiedDecodedFrames": 78,
+      "effectNames": [
+        "FishingBiteInner",
+        "FishingBiteNotice",
+        "FishingBiteOuter",
+        "FishingRippleInner",
+        "FishingRippleOuter"
+      ],
+      "quietSeenInManualCast": true,
+      "sounds": {
+        "fishing_throw.wav": 3,
+        "fishing_pull.wav": 3,
+        "fishing.wav": 3
+      },
+      "browserMediaFailures": 0,
+      "sourceSavesUnchanged": true,
+      "ordinaryEarlyEscapeProgress": [
+        0
+      ],
+      "saved": {
+        "map": "0",
+        "position": {
+          "x": 342,
+          "y": 244
+        },
+        "direction": "DownLeft",
+        "rodDurability": 9997,
+        "hookDurability": 7997,
+        "baitRemaining": 12,
+        "reelDurability": 5999
+      },
+      "closed": {
+        "browser": true,
+        "next": true,
+        "gateway": true
+      },
+      "compositor": {
+        "receiptSha256": "294bd5b096ff9265bf59df9c71573b206e97181fca5d03708e1e7e2275252ee4",
+        "waterIdleSignatures": 1,
+        "waterWaitNewSignatures": 14
+      }
+    },
+    "webgpuPaced": {
+      "receiptSha256": "4c06d7d9952ec54d680829f094999e26e66d3a463e66322eba2247c82483d146",
+      "buildReceiptSha256": "86795c141ca00ae36be2bb7abf4202d49a99464349ec4c154623b049b78cd616",
+      "runtimeVersion": "bevy-0cd68510886134e0",
+      "realGatewaySha256": "f35261772f379b04759011a63a2f3c463a36e754ebbde71915e893c84d77d490",
+      "maintenanceMs": 600,
+      "inputWakeMs": 250,
+      "selectedCastTile": {
+        "x": 342,
+        "y": 244
+      },
+      "castingTarget": {
+        "x": 339,
+        "y": 247
+      },
+      "verifiedDecodedFrames": 66,
+      "effectNames": [
+        "FishingBiteInner",
+        "FishingBiteNotice",
+        "FishingBiteOuter",
+        "FishingRippleInner",
+        "FishingRippleOuter"
+      ],
+      "quietSeenInManualCast": true,
+      "sounds": {
+        "fishing_throw.wav": 3,
+        "fishing.wav": 3,
+        "fishing_pull.wav": 3
+      },
+      "browserMediaFailures": 0,
+      "sourceSavesUnchanged": true,
+      "ordinaryEarlyEscapeProgress": [
+        0
+      ],
+      "saved": {
+        "map": "0",
+        "position": {
+          "x": 342,
+          "y": 244
+        },
+        "direction": "DownLeft",
+        "rodDurability": 9997,
+        "hookDurability": 7997,
+        "baitRemaining": 12,
+        "reelDurability": 5999
+      },
+      "closed": {
+        "browser": true,
+        "next": true,
+        "gateway": true
+      }
+    }
+  },
+  "contactSheet": {
+    "sha256": "4630004371b313ae90509d00003880aee5f38d242b8a01093a9d05da27386e9a",
+    "source": [
+      {
+        "name": "WebGL2: waiting",
+        "sourceSha256": "a6f29ef1b4ad6c967aeacd521038fea6fc5fc7e8552c4248ca2b9e0b49f395c4",
+        "crop": [
+          454,
+          364,
+          699,
+          590
+        ]
+      },
+      {
+        "name": "WebGL2: bite",
+        "sourceSha256": "4fc9604bbc746bbcc501e124ff61c0c24b0042c8a2641401b78682ea2fa0503f",
+        "crop": [
+          454,
+          364,
+          699,
+          590
+        ]
+      },
+      {
+        "name": "WebGPU: bite",
+        "sourceSha256": "0cf0f6ba24759c77f88355445c492610d282ba11affd467c2527a5ae62d9fd0d",
+        "crop": [
+          454,
+          364,
+          699,
+          590
+        ]
+      }
+    ]
+  },
+  "native": {
+    "sourceSealSha256": "d084f23781a0a4d92fc729b67e64b7668f5d5c35b9327a76b2e993661c7d2c1a",
+    "focusedLogSha256": "ee0deae7e045c2ef5eef0bc242644bebd9662a9873ef11728bedd7e998b30257",
+    "geometryLogSha256": "3ccab368f4a0c02da4dd1a56d4bad3d5614bae4c299af0e17ad95bc34996233a",
+    "optimizedTestBinarySha256": "23c0e86ccbb0379b1b6a03d45cfc0851af00de1d0edac0fc1f0204190f061851",
+    "windowManuallyExercised": false
+  },
+  "package": {
+    "actorFiles": 1410,
+    "actorBytes": 1155296,
+    "cuePngs": 26,
+    "exactInventorySha256": "0b72412e98dbbe975d170e45f8e769e65fae51c9b032fa21354576763986fb57",
+    "webPostPruneSha256": "23f5ace048231ab8106cbe1b7591e4fdd3807a2f549a6813775c65032f0fb534",
+    "nativeAllowlistAndNegativeChecksSha256": "50910a8e5c066459186f0d004c9139a6bf0f0c498071ab5493a2c6f91f7300c4",
+    "fixedR2Modified": false
+  },
+  "outstanding": [
+    "Original clickable Title/170–179 bite control",
+    "Ordered automatic reel and recast receipts",
+    "Three-second nibble expiry and owner-scoped progress",
+    "Windows actual window/audio and remote actor visibility edges",
+    "Public installation"
+  ]
+}

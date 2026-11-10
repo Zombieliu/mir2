@@ -9,11 +9,13 @@ import { originalAssetPath } from "../../lib/asset-url";
 import type { EffectAnimation, EffectAssets, EffectFrameMeta } from "../../lib/crystal-magic-effects";
 import {
   loadEffectAssets,
+  resolveMapEffect,
   resolveSpellImpactEffect,
   resolveSpellProjectileEffect,
   resolveSpellReturnEffect,
   spellNameForNumber,
 } from "../../lib/crystal-magic-effects";
+import { FISHING_BITE_NOTICE, FISHING_WATER_EFFECTS } from "../../lib/world-fishing-feedback";
 import {
   collectResolvedSceneEffectFrames,
   CRYSTAL_ADDITIVE_MIX_BLEND_MODE,
@@ -34,6 +36,7 @@ import type {
   CrystalEntityAnimationPose,
   DisplayEntity,
   DisplayProjectile,
+  DisplaySceneEffect,
   DisplayWorld,
   EntityKind,
   EntityMotionSnapshot,
@@ -94,6 +97,10 @@ type ViewportProjectile = DisplayProjectile & {
 
 // R16 draws these transient effects after the complete world and before item labels.
 const R16_TARGETED_EFFECT_DEPTH = 3_100_000;
+
+function isTransientSceneEffect(source: DisplaySceneEffect["source"]) {
+  return source === "spell" || source === "attackOverlay" || source === "fishingWater" || source === "fishingBite";
+}
 
 function projectilePhaseFrame(
   animation: EffectAnimation | null,
@@ -514,6 +521,8 @@ function OriginalClientSceneVisualLayersInner({
   screen,
   t,
   world,
+  fishingEffects,
+  warmFishingEffects,
   player,
   selectedEntity,
   viewportGroundDrops,
@@ -539,6 +548,8 @@ function OriginalClientSceneVisualLayersInner({
   screen: ClientScreen;
   t: TranslateFn;
   world: DisplayWorld;
+  fishingEffects: readonly DisplaySceneEffect[];
+  warmFishingEffects: boolean;
   player: DisplayEntity | null;
   selectedEntity: DisplayEntity | null;
   viewportGroundDrops: ViewportGroundDrop[];
@@ -578,15 +589,22 @@ function OriginalClientSceneVisualLayersInner({
   // visibly distinct instead of inert. collectViewportFallbackVfx returns [] on idle frames, so
   // this costs nothing when nothing is casting and no projectiles are live.
   const effectAssets = useEffectAssets(screen === "game");
+  useEffect(() => {
+    if (!effectAssets || !warmFishingEffects || !effectsEnabled) return;
+    for (const name of [...FISHING_WATER_EFFECTS.ripple, ...FISHING_WATER_EFFECTS.bite, FISHING_BITE_NOTICE]) {
+      const animation = resolveMapEffect(effectAssets, name);
+      if (animation) for (const url of sceneEffectAnimationAssetUrls(animation)) void decodeSceneEffectFrame(url);
+    }
+  }, [effectAssets, effectsEnabled, warmFishingEffects]);
   const resolvedEffectFrames = collectResolvedSceneEffectFrames(
     effectAssets,
-    world.effects,
+    fishingEffects.length ? [...world.effects, ...fishingEffects] : world.effects,
     motionNow,
   );
   const persistentEffectAssetUrls = Array.from(
     new Set(
       resolvedEffectFrames.flatMap(({ effect, animation }) =>
-        effect.source === "spell" || effect.source === "attackOverlay"
+        isTransientSceneEffect(effect.source)
           ? []
           : sceneEffectAnimationAssetUrls(animation),
       ),
@@ -619,7 +637,7 @@ function OriginalClientSceneVisualLayersInner({
   const displayResolvedEffectFrames = persistentEffectsReady
     ? resolvedEffectFrames
     : resolvedEffectFrames.filter(
-        ({ effect }) => effect.source === "spell" || effect.source === "attackOverlay",
+        ({ effect }) => isTransientSceneEffect(effect.source),
       );
   const spellByCaster = new Map<string, string>();
   const r16CastStarts = new Map<string, number>();
@@ -1071,6 +1089,9 @@ function OriginalClientSceneVisualLayersInner({
           const worldY = anchor?.y ?? effect.y;
           const dx = anchor?.dx ?? worldX - (player?.x ?? worldX);
           const dy = anchor?.dy ?? worldY - (player?.y ?? worldY);
+          // Crystal draws the free water effects after world objects, then draws the actor notice.
+          const fishingDepth = effect.source === "fishingWater" ? R16_TARGETED_EFFECT_DEPTH
+            : effect.source === "fishingBite" ? R16_TARGETED_EFFECT_DEPTH + 1 : null;
           return (
             <Fragment key={effect.key}>
               <img
@@ -1120,14 +1141,14 @@ function OriginalClientSceneVisualLayersInner({
                       ? `drop-shadow(0 0 ${Math.min(animation.light * 2, 16)}px #fff)`
                       : undefined,
                   pointerEvents: "none",
-                  zIndex: effect.source === "spell" && r16TargetedSpell(effect.spellOrEffect)
+                  zIndex: fishingDepth ?? (effect.source === "spell" && r16TargetedSpell(effect.spellOrEffect)
                     ? R16_TARGETED_EFFECT_DEPTH
                     : viewportDepthForCell(
                         worldX,
                         worldY,
                         viewportDepthPlayer,
                         crystalSceneEffectLayerOffset(effect.source),
-                      ),
+                      )),
                 }}
               />
               {frame.maskPath ? (
@@ -1167,7 +1188,7 @@ function OriginalClientSceneVisualLayersInner({
                     mixBlendMode: CRYSTAL_ADDITIVE_MIX_BLEND_MODE,
                     opacity: animation.opacity,
                     pointerEvents: "none",
-                    zIndex: viewportDepthForCell(
+                    zIndex: fishingDepth ?? viewportDepthForCell(
                       worldX,
                       worldY,
                       viewportDepthPlayer,

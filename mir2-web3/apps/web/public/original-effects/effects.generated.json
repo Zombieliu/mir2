@@ -12,7 +12,8 @@
     "Monster/130",
     "Monster/359",
     "Monster/361",
-    "Monster/362"
+    "Monster/362",
+    "Prguse"
   ],
   "spell_effect_enum": [
     "None",
@@ -6459,6 +6460,101 @@
       "provenance": {
         "source": "Crystal/Client/MirObjects/PlayerObject.cs::DrawEffects/MirAction.Attack4",
         "symbol": "AssassinDoubleSlashAttack4"
+      }
+    },
+    {
+      "effect": "FishingBiteInner",
+      "kind": "ground",
+      "library": "Effect",
+      "base": 665,
+      "count": 6,
+      "interval": 120,
+      "blend": true,
+      "light": 0,
+      "repeat": false,
+      "offset": {
+        "x": 0,
+        "y": 0
+      },
+      "provenance": {
+        "source": "Crystal/Client/MirObjects/PlayerObject.cs::MirAction.FishingWait/FrameIndex1",
+        "symbol": "FishingBiteInner"
+      }
+    },
+    {
+      "effect": "FishingBiteNotice",
+      "kind": "target",
+      "library": "Prguse",
+      "base": 1350,
+      "count": 2,
+      "interval": 360,
+      "blend": false,
+      "light": 0,
+      "repeat": false,
+      "offset": {
+        "x": 0,
+        "y": 0
+      },
+      "provenance": {
+        "source": "Crystal/Client/MirObjects/PlayerObject.cs::MirAction.FishingWait/FrameIndex1",
+        "symbol": "FishingBiteNotice"
+      }
+    },
+    {
+      "effect": "FishingBiteOuter",
+      "kind": "ground",
+      "library": "Effect",
+      "base": 671,
+      "count": 6,
+      "interval": 120,
+      "blend": true,
+      "light": 0,
+      "repeat": false,
+      "offset": {
+        "x": 0,
+        "y": 0
+      },
+      "provenance": {
+        "source": "Crystal/Client/MirObjects/PlayerObject.cs::MirAction.FishingWait/FrameIndex1",
+        "symbol": "FishingBiteOuter"
+      }
+    },
+    {
+      "effect": "FishingRippleInner",
+      "kind": "ground",
+      "library": "Effect",
+      "base": 640,
+      "count": 6,
+      "interval": 120,
+      "blend": true,
+      "light": 0,
+      "repeat": false,
+      "offset": {
+        "x": 0,
+        "y": 0
+      },
+      "provenance": {
+        "source": "Crystal/Client/MirObjects/PlayerObject.cs::MirAction.FishingWait/FrameIndex1",
+        "symbol": "FishingRippleInner"
+      }
+    },
+    {
+      "effect": "FishingRippleOuter",
+      "kind": "ground",
+      "library": "Effect",
+      "base": 650,
+      "count": 6,
+      "interval": 120,
+      "blend": true,
+      "light": 0,
+      "repeat": false,
+      "offset": {
+        "x": 0,
+        "y": 0
+      },
+      "provenance": {
+        "source": "Crystal/Client/MirObjects/PlayerObject.cs::MirAction.FishingWait/FrameIndex1",
+        "symbol": "FishingRippleOuter"
       }
     },
     {

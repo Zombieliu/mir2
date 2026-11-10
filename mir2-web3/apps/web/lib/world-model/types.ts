@@ -145,7 +145,7 @@ export type ProjectileState = {
 
 export type SceneEffectState = {
   key: string;
-  source: "spell" | "attackOverlay" | "actorEffect" | "objectSpell" | "map" | "object";
+  source: "spell" | "attackOverlay" | "actorEffect" | "objectSpell" | "map" | "object" | "fishingWater" | "fishingBite";
   spellOrEffect: string | number;
   objectId?: string;
   x: number;

@@ -36,6 +36,9 @@ $PetGuildClosureScript = Join-Path (Split-Path -Parent $PSCommandPath) 'pet-guil
 if (-not (Test-Path -LiteralPath $PetGuildClosureScript -PathType Leaf)) { throw 'pet/guild closure validator missing' }
 . $PetGuildClosureScript
 $PlayerSpriteFamilyNames = @('CArmour','CHair','CWeapon','ARArmour','ARHair','ARWeapon','AArmour','AHair','AWeapon','Mount')
+$FishingRequiredFiles = @(Get-CandidateFishingRequiredFiles)
+$FishingPackageFiles = [Collections.Generic.HashSet[string]]::new([StringComparer]::Ordinal)
+foreach ($relative in $FishingRequiredFiles) { [void]$FishingPackageFiles.Add("mir2-assets/$relative") }
 $FiveClassPackageSoundPolicy = $null
 
 function Write-Utf8NoBom { param([string]$Path, [string]$Text); [IO.File]::WriteAllText($Path, $Text, [Text.UTF8Encoding]::new($false)) }
@@ -247,6 +250,7 @@ function Test-PackageRelativeFileAllowed {
     if (Test-SimplifiedLegalFile -RelativePath $RelativePath) { return $true }
     $rootFiles=@('mir2-client.toml','README-START.txt','CONTROLS.txt','KNOWN-ISSUES.md','NotoSansTC-OFL.txt','OFL-NotoSans.txt','OFL-NotoSansArabic.txt','OFL-NotoSansDevanagari.txt','OFL-NotoSansThai.txt','MULTILINGUAL-SOURCES.json','README.zh-CN.txt','BILLING-HAN-SOURCE.json','OFL-NotoSansSC-BillingHan.txt','SIMPLIFIED-SOURCE.json','OFL-NotoSansCJKsc.txt','BUILD-ATTESTATION.json','PACKAGE-MANIFEST.json','VERSION.json','RELEASE-STATEMENT.json','RELEASE-STATEMENT.p7s')
     if($rootFiles -ccontains $RelativePath){return $true};if($RelativePath -ceq 'mir2-assets/original-ui/frame-sets.generated.json'){return $true}
+    if ($FishingPackageFiles.Contains($RelativePath)) { return $true }
     if ($null -ne $FiveClassPackageSoundPolicy -and
         ($RelativePath -ceq $FiveClassPackageSoundPolicy.soundIndexPackagePath -or
          $FiveClassPackageSoundPolicy.packagePaths -ccontains $RelativePath)) { return $true }
@@ -270,6 +274,7 @@ function Test-PackageRelativeDirectoryAllowed {
     if ($RelativePath -ceq 'mir2-assets/legal') { return $true }
     if (Test-CandidateActorDirectoryAllowed -RelativePath $RelativePath) { return $true }
     if(Test-PathContainsDangerousDotToken -RelativePath $RelativePath){return $false}
+    if (@('mir2-assets/original-ui/Fishing', 'mir2-assets/original-ui/Fishing/00', 'mir2-assets/original-ui/Fishing/01') -ccontains $RelativePath) { return $true }
     if(@('logs','mir2-assets','mir2-assets/generated','mir2-assets/original-ui','mir2-assets/original-ui/Cursors','mir2-assets/original-ui/Items','mir2-assets/original-ui/Monster','mir2-assets/original-ui/NPC','mir2-assets/original-ui/Sound') -ccontains $RelativePath){return $true}
     $treeRoots=@('mir2-assets/original-ui/Pet','mir2-assets/bevy-entity-atlases','mir2-assets/generated/map-atlas','mir2-assets/generated/native-map-keyed','mir2-assets/crystal-map-pack','mir2-assets/original-effects','mir2-assets/original-ui/ChrSel','mir2-assets/original-ui/Help','mir2-assets/original-ui/Items','mir2-assets/original-ui/MMap','mir2-assets/original-ui/Prguse','mir2-assets/original-ui/DNItems', 'mir2-assets/original-ui/GuildSkill','mir2-assets/original-ui/MagIcon2','mir2-assets/original-ui/MagIcon','mir2-assets/original-ui/BuffIcon', 'mir2-assets/original-ui/Prguse2','mir2-assets/original-ui/StateItem','mir2-assets/original-ui/UI_32bit','mir2-assets/original-ui/Title')
     foreach($familyName in $PlayerSpriteFamilyNames){$treeRoots += "mir2-assets/original-ui/$familyName"}
@@ -686,6 +691,7 @@ function Get-RequiredCandidateFiles {
     foreach($soundName in @('M41-1.wav','M41-2.wav','M76-0.wav','M69-0.wav')){ $required += "mir2-assets\original-ui\Sound\$soundName" }
     $required += @('mir2-assets\original-ui\DNItems\meta.json', 'mir2-assets\original-ui\DNItems\0.png', 'mir2-assets\original-ui\DNItems\112.png')
     foreach ($relative in Get-PetGuildRequiredFiles) { $required += ('mir2-assets/' + $relative).Replace('/', '\') }
+    foreach ($relative in $FishingRequiredFiles) { $required += ('mir2-assets/' + $relative).Replace('/', '\') }
     foreach($index in @(0,1,197,205,207,360,366,367,368,431,1340,1350) + @(450..468)){ $required += "mir2-assets\original-ui\Prguse2\$index.png" }
     foreach($index in @(0..41)){ $required += "mir2-assets\original-ui\Help\$index.png" }
     foreach($index in @(57,168,169,196,197,198,411,567,633,634,635,636,637,638,737,738,739,820,821,822,823,824,827,848,850,851,853)){ $required += "mir2-assets\original-ui\Title\$index.png" }
@@ -1294,6 +1300,12 @@ try {
 }
 catch {
     Fail "player sprite closure failed: $($_.Exception.Message)"
+}
+try {
+    Assert-CandidateFishingAssetClosure -AssetRoot (Join-Path $PackageRoot 'mir2-assets')
+}
+catch {
+    Fail "fishing asset closure failed: $($_.Exception.Message)"
 }
 try {
     $itemIconClosure = Assert-ItemIconClosure -OriginalUiRoot (Join-Path $PackageRoot 'mir2-assets\original-ui')
