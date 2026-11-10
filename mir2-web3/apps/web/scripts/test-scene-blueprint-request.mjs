@@ -169,7 +169,7 @@ const pageText = readFileSync(pageSourcePath, "utf8");
 const pageAst = ts.createSourceFile(pageSourcePath, pageText, ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);
 const releaseEffects = [], sceneEffects = [], pageRequestDeclarations = new Map(), pageHelpers = new Map();
 for (const node of pageAst.statements) {
-  if (ts.isFunctionDeclaration(node) && ["normalizeMapFileName", "crystalSceneContainsPlayer", "shouldReloadCrystalScene"].includes(node.name?.text)) {
+  if (ts.isFunctionDeclaration(node) && ["normalizeMapFileName", "crystalSceneContainsPlayer", "shouldReloadCrystalScene", "originalMapRegionContainsTile"].includes(node.name?.text)) {
     pageHelpers.set(node.name.text, node.getText(pageAst));
   }
 }
@@ -187,7 +187,7 @@ for (const node of pageAst.statements) {
 assert.equal(releaseEffects.length, 1);
 assert.equal(sceneEffects.length, 1);
 assert.equal(pageRequestDeclarations.size, 2);
-assert.equal(pageHelpers.size, 3);
+assert.equal(pageHelpers.size, 4);
 assert.equal(releaseEffects[0].arguments[1].getText(pageAst), "[screen, sceneReleaseRetry]");
 assert.equal(sceneEffects[0].arguments[1].getText(pageAst), "[sceneBlueprintRequestKey, sceneBlueprintRetry, screen]");
 const actualPageEffectsCompiled = ts.transpileModule([...pageHelpers.values()].join("\n")
@@ -240,7 +240,8 @@ function pageSceneFixture({ screen = "game", map = "0140", region = null } = {})
 function sceneBlueprint(map = "0140") {
   return { mapTitle: "Warehouse", sceneView: null, terrainPatches: [], decorObjects: [],
     originalMapRegion: { mapFileName: map + ".map", sprites: { real: {} }, cells: [{ x: 344, y: 74 }],
-      playBounds: { minX: -1000, minY: -1000, maxX: 1000, maxY: 1000 } } };
+      playBounds: { minX: 0, minY: 0, maxX: 1000, maxY: 1000 },
+      regionBounds: { minX: 0, minY: 0, maxX: 1000, maxY: 1000 } } };
 }
 function sceneResponse(blueprint) {
   return { ok: true, status: 200, json: async () => blueprint, headers: { get: () => "crystal" } };
@@ -362,12 +363,34 @@ test("actual Page starter fallback retains the captured release and superseded S
   nextCleanup();
 });
 
-test("actual Page never paints a region outside the current map and tile, including the starter fallback", async () => {
-  const outside = sceneBlueprint("0");
-  outside.originalMapRegion.playBounds.minY = 75;
-  const missingCell = sceneBlueprint("0");
-  missingCell.originalMapRegion.cells[0].y = 75;
-  for (const [blueprint, isStarter] of [[sceneBlueprint("0140"), false], [missingCell, false], [outside, true]]) {
+test("actual Page accepts sparse map tiles inside both authoritative region bounds", async () => {
+  const f = pageSceneFixture({ map: "0" });
+  Object.assign(f.scope.self, { x: 298, y: 273 });
+  f.state.release = "exact-release";
+  const scene = f.render(), cleanup = scene.scene();
+  const blueprint = sceneBlueprint("0");
+  Object.assign(blueprint.originalMapRegion, {
+    playBounds: { minX: 272, minY: 262, maxX: 320, maxY: 298 },
+    regionBounds: { minX: 244, minY: 240, maxX: 348, maxY: 341 },
+    cells: [{ x: 298, y: 272, back: "real" }],
+  });
+  f.calls[0].resolve(sceneResponse(blueprint));
+  await settleSceneFixture();
+  assert.equal(f.updates.length, 1);
+  assert.strictEqual(f.updates[0].originalMapRegion, blueprint.originalMapRegion);
+  assert.equal(f.state.failure, null);
+  assert.equal(f.scope.loadedSceneKeyRef.current, scene.key);
+  cleanup();
+});
+
+test("actual Page refuses wrong, empty and out-of-bounds regions, including the starter fallback", async () => {
+  const outsidePlayBounds = sceneBlueprint("0");
+  outsidePlayBounds.originalMapRegion.playBounds.minY = 75;
+  const outsideRegionBounds = sceneBlueprint("0");
+  outsideRegionBounds.originalMapRegion.regionBounds.minY = 75;
+  const empty = sceneBlueprint("0");
+  empty.originalMapRegion.cells = [];
+  for (const [blueprint, isStarter] of [[sceneBlueprint("0140"), false], [outsideRegionBounds, false], [empty, false], [outsidePlayBounds, true]]) {
     const f = pageSceneFixture({ map: "0" });
     f.state.release = "exact-release";
     const render = f.render(), cleanup = render.scene();

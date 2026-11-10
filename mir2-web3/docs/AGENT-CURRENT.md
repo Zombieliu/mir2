@@ -16,6 +16,8 @@ working tree, services, release packages, source snapshots or parity percentages
 
 ## Last recorded decisions and open work
 
+2026-11-10 比奇战斗点正常存档可冷重登。Web 采用地图与区域边界判断覆盖范围，接受无独立记录的格子。原候选收到完整地图后停在重试界面，修复后同档两种渲染模式约 1.7 秒就绪，第一击与正常注销通过。继续长路线和其他地图。 [存档、回包与画面](evidence/r16-combat-input-20261110/README.md#战斗点冷重登)
+
 2026-11-10 Web 桌面用药与 Windows R16 统一为 300 毫秒个人物品间隔。普通 NPC 对话关闭后立即交还腰带按键。两条生产渲染路径通过打开普通背包后窗外真怪命中、窗内点击零世界指令和正常注销。后续核对持续追击、其他窗口和跨图块加载。 [用药、对话和背包回执](evidence/r16-combat-input-20261110/README.md)
 
 2026-11-10 普通协议复测零耐久线轮空竿续抛及后续移除。WebGPU 和 WebGL2 实点验证线轮消失后关闭一次、替换不恢复旧开关，同档重登正常。Windows 定向状态和协议已复验。继续实际窗口、Hosted 和发行。 [续抛与同档](evidence/r16-web-fishing-loop-20261110/README.md#线轮耗尽与自动续抛) · [原图拖放与归零提示](evidence/r16-web-fishing-loop-20261110/README.md#鱼具跟手图与归零提示)

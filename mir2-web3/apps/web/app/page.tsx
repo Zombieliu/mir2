@@ -23145,9 +23145,12 @@ function crystalSceneContainsPlayer(
   { x, y }: { x: number; y: number },
 ): region is OriginalMapRegion {
   if (!region || typeof region.mapFileName !== "string" || normalizeMapFileName(region.mapFileName) !== mapFileName
-    || !region.playBounds || !region.sprites || !Array.isArray(region.cells)) return false;
+    || !region.playBounds || !region.regionBounds || !region.sprites || !Array.isArray(region.cells) || region.cells.length === 0
+    || !Number.isSafeInteger(x) || !Number.isSafeInteger(y)) return false;
   const { minX, minY, maxX, maxY } = region.playBounds;
-  return x >= minX && x <= maxX && y >= minY && y <= maxY && region.cells.some(cell => cell?.x === x && cell.y === y);
+  // The exporter only emits cells with render, light or collision data.
+  // Bounds describe the covered tiles even when an individual row is absent.
+  return x >= minX && x <= maxX && y >= minY && y <= maxY && originalMapRegionContainsTile(region, x, y);
 }
 
 function shouldReloadCrystalScene(
