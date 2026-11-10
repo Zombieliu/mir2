@@ -16,19 +16,24 @@ export const SITES = Object.freeze({
 });
 export const ORIGIN = 'https://numeron.obelisk.build';
 export const QR_RELEASE = Object.freeze({
-  source: 'd740f13823ce7cadf892d0d3e5c4dc205dcfc7c5',
+  source: 'f512cfbc99cdd72086452ad542405eac5ea47a4b',
   sourceRef: BRANCH,
-  baseSource: 'd10b9983e01f314c6171e82d4659d1aa1e8e4550',
+  baseSource: '491d187c5015ceb75428fb324378cee3a186ec73',
   assetSource: 'f2de762309768b51b39438c2437c14e819df9bf7',
   changedFiles: [
-    { status: 'modified', filename: 'mir2-web3/apps/web/app/components/original-client-scene-rendering.tsx', sha: 'bda36098388376689f9c471977cca9c9b8f2913e' },
-    { status: 'modified', filename: 'mir2-web3/apps/web/app/original-client-shell.tsx', sha: '4defdb627bfbcc0508587c89d54ddd6f4c0cecf5' },
-    { status: 'modified', filename: 'mir2-web3/apps/web/lib/generated/r16-entry-visuals.json', sha: '7aaa457e9daab4b65001208f0f0cdb9edd7077f0' },
-    { status: 'modified', filename: 'mir2-web3/apps/web/lib/r16-entry-scene.ts', sha: 'b405ab5da533cd93abbd07e41cddb390ba576def' },
-    { status: 'added', filename: 'mir2-web3/apps/web/public/bootstrap/r16-visuals/41fcaae2757ad0351da2e3840bf54008952b5c2714441530bb64c21f5c9fd64f.json', sha: '4e38e8b2a59492e845d562b1c290060424c1b698' },
-    { status: 'added', filename: 'mir2-web3/apps/web/public/bootstrap/r16-visuals/d3f04c400820d8cd66b49b8af638a86e719bcf1032082be5a7ec80757bdf4308.json', sha: '3fa03e99b1374473fe512cbfaa720731e984864b' },
-    { status: 'modified', filename: 'mir2-web3/apps/web/scripts/generate-r16-entry-visuals.mjs', sha: '6c1b2bc99ba78500b4427c4b0a338dd59372ce93' },
-    { status: 'modified', filename: 'mir2-web3/apps/web/scripts/test-scene-blueprint-request.mjs', sha: 'a59da5092c79bb49ed6c6b8c7e9ace175cc6443d' },
+    { status: 'modified', filename: 'mir2-web3/apps/web/app/page.tsx', sha: 'a5dd9c1bf636bcbd4565bbb32fcbd1edcb8374a9' },
+    { status: 'modified', filename: 'mir2-web3/apps/web/lib/first-crystal-scene-request.ts', sha: '71b69f9e1053e2f49d98e742a869cb6b07512b8b' },
+    { status: 'added', filename: 'mir2-web3/apps/web/lib/generated/r16-native-localization-delivery.json', sha: '1f314aae521d3b86d7f6b26026cef18b795d4648' },
+    { status: 'modified', filename: 'mir2-web3/apps/web/lib/quest-localization.ts', sha: '8786f24157aa2e36d01a01846a514c29687a5dd6' },
+    { status: 'modified', filename: 'mir2-web3/apps/web/lib/r16-native-localization.ts', sha: '8a3890bb7af9713b319d43bc466f53d7d13d9ff6' },
+    { status: 'modified', filename: 'mir2-web3/apps/web/next.config.ts', sha: '94c9ee33adadb4e40d9204fd6ca07b63c189f15e' },
+    { status: 'added', filename: 'mir2-web3/apps/web/public/bootstrap/r16-locales/b373a5f2cd21d5d0270610e0b7d1d619d5e554e12a67a7190c768d59e01dd64c.json', sha: 'a1d753ac751e579b7b85aa3ee07cf2600695287f' },
+    { status: 'modified', filename: 'mir2-web3/apps/web/scripts/generate-r16-native-localization.mjs', sha: '39e5fbd67aadc059e34cde5130f9d729683cb87d' },
+    { status: 'modified', filename: 'mir2-web3/apps/web/scripts/test-bevy-quest-ui.mjs', sha: '1d893141f2549ce9f2431f458823d40127ed7d57' },
+    { status: 'modified', filename: 'mir2-web3/apps/web/scripts/test-r16-language-parity.mjs', sha: 'b720a724aa9edacb9f8d6ea38ca906c26d45bf5c' },
+    { status: 'modified', filename: 'mir2-web3/apps/web/scripts/test-r16-native-localization.mjs', sha: '5fe23fb52aa10925cad03bcd2f99939261844cff' },
+    { status: 'modified', filename: 'mir2-web3/apps/web/scripts/test-stage5-adapters.mjs', sha: 'c8cd00bf629003b99e39a628788aad620a1ae251' },
+    { status: 'modified', filename: 'mir2-web3/apps/web/scripts/vercel-build.sh', sha: '8f5943d50bdac1c42b39b1e2e60da42fb420bb36' },
   ],
   entryScene: {
     path: '/bootstrap/r16-scenes/5c08d1fd4e81d92a7be20eb98c4c6288515749d5d459978dcf78fe2b86bdf325.json',
@@ -60,8 +65,13 @@ export const QR_RELEASE = Object.freeze({
     sha256: '41fcaae2757ad0351da2e3840bf54008952b5c2714441530bb64c21f5c9fd64f',
     bytes: 764724,
   },
+  entryGameplayLocale: {
+    path: '/bootstrap/r16-locales/b373a5f2cd21d5d0270610e0b7d1d619d5e554e12a67a7190c768d59e01dd64c.json',
+    sha256: 'b373a5f2cd21d5d0270610e0b7d1d619d5e554e12a67a7190c768d59e01dd64c',
+    bytes: 3283113,
+  },
   assetRunId: '42494701555',
-  baseline: 'dpl_DLX6Yy9yY1EmVsJ6Egnj5dt2jzqL',
+  baseline: 'dpl_BLoL9Vb2AHfaUZpQKu3E1CDvsg9q',
   relay: 'https://relay.dubhe.obelisk.build',
 });
 const QR_OPERATIONS = ['numeron-qr-stage', 'numeron-qr-promote', 'numeron-qr-rollback'];
@@ -319,10 +329,11 @@ function protectedResponse(candidate, pathname, env, qrRequest) {
 async function releaseQrGame({ operation, initial, projects, candidate, id, vercel,
   body, readCandidate, fetchImpl, sleep, receipt }) {
   const hostname = new URL(ORIGIN).hostname;
-  const { baseline, relay, entryScene, entryFloor, entryObjects, entryActors, entryMonsterStanding, entryMonsterWalking } = QR_RELEASE;
+  const { baseline, relay, entryScene, entryFloor, entryObjects, entryActors,
+    entryMonsterStanding, entryMonsterWalking, entryGameplayLocale } = QR_RELEASE;
   const entryAssets = Object.entries({
     Scene: entryScene, Floor: entryFloor, Objects: entryObjects, Actors: entryActors,
-    MonsterStanding: entryMonsterStanding, MonsterWalking: entryMonsterWalking,
+    MonsterStanding: entryMonsterStanding, MonsterWalking: entryMonsterWalking, GameplayLocale: entryGameplayLocale,
   });
   const expectedOther = { original: production(initial.original), main: production(initial.main) };
   async function mapping(allowed) {

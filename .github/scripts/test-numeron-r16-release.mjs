@@ -12,7 +12,7 @@ const IDS = { main: 'dpl_maincandidate', game: 'dpl_gamecandidate' };
 const digest = bytes => createHash('sha256').update(bytes).digest('hex');
 const clone = value => structuredClone(value);
 const json = value => Response.json(value);
-const ENTRY_ASSETS = ['Scene', 'Floor', 'Objects', 'Actors', 'MonsterStanding', 'MonsterWalking'].map(name => {
+const ENTRY_ASSETS = ['Scene', 'Floor', 'Objects', 'Actors', 'MonsterStanding', 'MonsterWalking', 'GameplayLocale'].map(name => {
   const entry = QR_RELEASE['entry' + name];
   return { name, entry, bytes: readFileSync(new URL('../../mir2-web3/apps/web/public' + entry.path, import.meta.url)) };
 });
