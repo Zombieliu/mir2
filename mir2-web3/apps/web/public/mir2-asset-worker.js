@@ -37,6 +37,7 @@ const TRANSIENT_FETCH_STATUSES = new Set([408, 425, 429, 500, 502, 503, 504]);
 // A new page attempt must not inherit a coalesced network request whose
 // headers have stopped arriving. The page owns the separate JSON body deadline.
 const SCENE_HEADERS_TIMEOUT_MS = 7_000;
+const SCENE_BLUEPRINT_RESPONSE_TIMEOUT_MS = SCENE_HEADERS_TIMEOUT_MS + 8_000;
 // Chrome can retain the worker's cache tee after the page cancels its own
 // branch. Give the upstream stream its own lifetime as well.
 const SCENE_METADATA_RESPONSE_TIMEOUT_MS = 10_000;
@@ -158,6 +159,8 @@ self.addEventListener("fetch", (event) => {
   }
 
   if (url.pathname === "/api/scene/crystal") {
+    // The caller's recovery attempt needs its own network read of this URL.
+    if (request.cache === "reload") return;
     respondWithSceneMetadata(
       event,
       cacheName("scene"),
@@ -435,8 +438,9 @@ function respondWithSceneMetadata(event, name, maxEntries, fetchNetwork, preferC
   const request = event.request;
   const cache = caches.open(name).catch(() => null);
   const readCache = () => cache.then((store) => store?.match(request)).catch(() => null);
+  const responseTimeout = preferCached ? SCENE_BLUEPRINT_RESPONSE_TIMEOUT_MS : SCENE_METADATA_RESPONSE_TIMEOUT_MS;
   const networkRequest = new Request(request, {
-    signal: AbortSignal.any([request.signal, AbortSignal.timeout(SCENE_METADATA_RESPONSE_TIMEOUT_MS)]),
+    signal: AbortSignal.any([request.signal, AbortSignal.timeout(responseTimeout)]),
   });
   const network = fetchNetwork(networkRequest);
 

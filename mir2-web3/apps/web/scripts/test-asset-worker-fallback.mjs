@@ -386,6 +386,19 @@ test("a warm versioned Crystal request returns cached data and refreshes it in t
   assert.deepEqual(refreshed, { region: "network" });
 });
 
+test("a Crystal reload leaves the retry to the browser without joining the worker cache path", () => {
+  const { context, listeners } = createWorkerContext(
+    () => assert.fail("the worker must not start a network request"),
+    { open: () => assert.fail("the worker must not open its cache") },
+  );
+  vm.runInContext('runtimeConfig.version = "first-scene-test"', context);
+  listeners.get("fetch")({
+    request: new Request("https://preview.example.test/api/scene/crystal?map=0&assetRelease=test", { cache: "reload" }),
+    waitUntil: () => assert.fail("the worker must not schedule a cache write"),
+    respondWith: () => assert.fail("the browser must own the reload response"),
+  });
+});
+
 test("asset-manifest stays network-first and uses the same key for offline fallback", async () => {
   let lookups = 0;
   const store = {

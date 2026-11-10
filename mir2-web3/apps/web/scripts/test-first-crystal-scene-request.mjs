@@ -45,6 +45,7 @@ for (const stallAt of ["headers", "json body"]) {
       return stallAt === "headers" ? hanging.promise : Promise.resolve({ ok: true, json: () => hanging.promise });
     });
 
+    await tick(t, 0);
     await tick(t, 7_999);
     assert.equal(calls.length, 1);
     assert.equal(calls[0].signal.aborted, false);
@@ -67,6 +68,51 @@ for (const stallAt of ["headers", "json body"]) {
     assert.equal(calls.length, 2);
   });
 }
+
+test("slow headers leave a separate deadline for valid scene JSON", async (t) => {
+  t.mock.timers.enable({ apis: ["setTimeout"] });
+  const headers = deferred();
+  const body = deferred();
+  const requests = [];
+  const result = fetchFirstCrystalSceneJson(crystalUrl, options, (url, init) => {
+    requests.push({ url, ...init });
+    return headers.promise;
+  });
+
+  await tick(t, 5_600);
+  headers.resolve({ ok: true, json: () => body.promise });
+  await tick(t, 0);
+  await tick(t, 4_500);
+  assert.equal(requests.length, 1);
+  assert.equal(requests[0].signal.aborted, false);
+  body.resolve({ map: "0", ready: true });
+  assert.deepEqual((await result).body, { map: "0", ready: true });
+  await tick(t, 60_000);
+  assert.equal(requests.length, 1);
+});
+
+test("a body that stalls after slow headers still retries the same URL", async (t) => {
+  t.mock.timers.enable({ apis: ["setTimeout"] });
+  const headers = deferred();
+  const requests = [];
+  const result = fetchFirstCrystalSceneJson(crystalUrl, options, (url, init) => {
+    requests.push({ url, ...init });
+    return requests.length === 1 ? headers.promise : Promise.resolve(ready());
+  });
+
+  await tick(t, 5_600);
+  headers.resolve({ ok: true, json: () => new Promise(() => {}) });
+  await tick(t, 0);
+  await tick(t, 7_999);
+  assert.equal(requests[0].signal.aborted, false);
+  await tick(t, 1);
+  assert.equal(requests[0].signal.reason.name, "TimeoutError");
+  await tick(t, 200);
+  assert.equal(requests.length, 2);
+  assert.equal(requests[1].url, crystalUrl);
+  assert.equal(requests[1].cache, "reload");
+  assert.deepEqual((await result).body, { map: "0", ready: true });
+});
 
 test("first-scene transport and transient HTTP failures get only one retry", async (t) => {
   t.mock.timers.enable({ apis: ["setTimeout"] });

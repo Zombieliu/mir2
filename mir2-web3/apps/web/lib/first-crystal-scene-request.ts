@@ -14,7 +14,7 @@ export type FirstCrystalSceneJsonReader = (
   fetcher: typeof fetch,
 ) => Promise<SceneJsonResult<unknown>>;
 
-const ATTEMPT_TIMEOUT_MS = 8_000;
+const READ_PHASE_TIMEOUT_MS = 8_000;
 const RETRY_DELAY_MS = 200;
 const TRANSIENT_STATUS = new Set([408, 425, 429, 500, 502, 503, 504]);
 
@@ -26,9 +26,10 @@ async function readAttempt<T>(
   owner?.throwIfAborted();
   const deadline = new AbortController();
   const signal = owner ? AbortSignal.any([owner, deadline.signal]) : deadline.signal;
-  const timer = setTimeout(() => {
+  const abortForTimeout = () => {
     deadline.abort(new DOMException("Scene response deadline elapsed", "TimeoutError"));
-  }, ATTEMPT_TIMEOUT_MS);
+  };
+  let timer = setTimeout(abortForTimeout, READ_PHASE_TIMEOUT_MS);
 
   let onAbort: (() => void) | undefined;
   const aborted = new Promise<never>((_, reject) => {
@@ -44,7 +45,9 @@ async function readAttempt<T>(
       void response.body?.cancel().catch(() => {});
       return { response, body: null };
     }
-    // 424 carries the existing resource-missing payload used by the caller.
+    // A slow header must leave enough time to read the map or a typed 424 body.
+    clearTimeout(timer);
+    timer = setTimeout(abortForTimeout, READ_PHASE_TIMEOUT_MS);
     const body = (await response.json()) as T;
     signal.throwIfAborted();
     return { response, body };
@@ -82,7 +85,7 @@ function isRetryableFailure(error: unknown): boolean {
     (error instanceof DOMException && (error.name === "TimeoutError" || error.name === "AbortError"));
 }
 
-/** A scene read is only complete when its HTTP response and JSON body arrive. */
+/** The response and its JSON body must each finish within their own deadline. */
 export async function fetchFirstCrystalSceneJson<T = unknown>(
   url: string,
   options: SceneReadOptions,
