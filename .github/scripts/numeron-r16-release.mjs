@@ -16,13 +16,22 @@ export const SITES = Object.freeze({
 });
 export const ORIGIN = 'https://numeron.obelisk.build';
 export const QR_RELEASE = Object.freeze({
-  source: '83eadf4f96c81bcf26d6e98c41b3a58761c48ea2',
-  sourceRef: 'codex/numeron-qr-response-delivery',
+  source: 'a7826484ec124180c6ae1807ddb25c54f0d94071',
+  sourceRef: 'codex/numeron-qr-login-startup',
+  baseSource: '83eadf4f96c81bcf26d6e98c41b3a58761c48ea2',
   assetSource: 'f2de762309768b51b39438c2437c14e819df9bf7',
-  changedFile: 'mir2-web3/apps/web/lib/dubhe-wallet-login.ts',
-  changedBlob: 'f38cf45c81154cd7ba50b146e3485fc5b9d7a9f9',
+  changedFiles: [
+    { status: 'modified', filename: 'mir2-web3/apps/web/app/components/asset-cache-registrar.tsx', sha: 'a3476c69b2387af7131e4fff256641edba3b55f7' },
+    { status: 'modified', filename: 'mir2-web3/apps/web/app/globals.css', sha: '61d66e3bda0950108d00388bab1b3058972c709b' },
+    { status: 'added', filename: 'mir2-web3/apps/web/app/login-fonts/r16-login-sc.woff2', sha: 'c6e8295d21e89f2c9839f2c16ca2b5443ce01951' },
+    { status: 'added', filename: 'mir2-web3/apps/web/app/login-fonts/r16-login-tc.woff2', sha: '3a106c00d5729c65abdfd2847f2b41c0a395dcf9' },
+    { status: 'modified', filename: 'mir2-web3/apps/web/app/original-client-shell.tsx', sha: '392ec6696f84e11635f54a674d24ea0ec84ed855' },
+    { status: 'modified', filename: 'mir2-web3/apps/web/lib/original-audio.ts', sha: '53fb2d2ffb20051c0e392d4a623fa06a04830bad' },
+    { status: 'added', filename: 'mir2-web3/apps/web/scripts/generate-r16-login-fonts.py', sha: 'd7a182092f6cf9d30f129ad4a8673e93ec119df7' },
+    { status: 'modified', filename: 'mir2-web3/apps/web/scripts/test-audio-system.mjs', sha: '34e620ba1d4b55382846927f5e99a22fa208ac1b' },
+  ],
   assetRunId: '42494701555',
-  baseline: 'dpl_EzTCz5GgYRFgLswMUzR51B77etgC',
+  baseline: 'dpl_DRLvQMibFvHL8MDyPxHXYNvtETKt',
   relay: 'https://relay.dubhe.obelisk.build',
 });
 const QR_OPERATIONS = ['numeron-qr-stage', 'numeron-qr-promote', 'numeron-qr-rollback'];
@@ -385,14 +394,19 @@ export async function runNumeronRelease({ env = process.env, fetchImpl = fetch,
     const assetSha = qr ? QR_RELEASE.assetSource : sha;
     const sourceRef = qr ? QR_RELEASE.sourceRef : BRANCH;
     if (qr) {
-      const comparison = await github(`/compare/${assetSha}...${sha}`);
-      const [file] = comparison.files || [];
+      const { baseSource, changedFiles } = QR_RELEASE;
+      const comparison = await github(`/compare/${baseSource}...${sha}`);
+      const files = Array.isArray(comparison.files) ? comparison.files : [];
+      const byPath = new Map(files.map(file => [file?.filename, file]));
       requireRelease(comparison.status === 'ahead' && comparison.ahead_by === 1 && comparison.behind_by === 0
-        && comparison.merge_base_commit?.sha === assetSha && comparison.commits?.length === 1
-        && comparison.commits[0].sha === sha && comparison.files?.length === 1
-        && file?.status === 'modified' && file.filename === QR_RELEASE.changedFile && file.sha === QR_RELEASE.changedBlob,
+        && comparison.merge_base_commit?.sha === baseSource && comparison.commits?.length === 1
+        && comparison.commits[0].sha === sha && files.length === changedFiles.length && byPath.size === files.length
+        && changedFiles.every(expected => {
+          const actual = byPath.get(expected.filename);
+          return actual?.status === expected.status && actual.sha === expected.sha;
+        }),
       'qrSourceClosureMismatch');
-      receipt.sourceClosure = { base: assetSha, ref: sourceRef, changedFile: file.filename, changedBlob: file.sha };
+      receipt.sourceClosure = { base: baseSource, assetSource: assetSha, ref: sourceRef, changedFiles };
     }
     const run = await github(`/actions/runs/${runId}`), jobs = await github(`/actions/runs/${runId}/jobs?per_page=100`),
       artifacts = await github(`/actions/runs/${runId}/artifacts?per_page=100`);

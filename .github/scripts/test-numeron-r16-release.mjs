@@ -101,9 +101,9 @@ function fixture(operation = 'numeron-promote') {
     }
     if (parsed.origin === 'https://api.github.com') {
       assert.equal(request.headers.Authorization, `Bearer ${GH}`);
-      if (qr && request.pathname === `/repos/${REPOSITORY}/compare/${assetSource}...${source}`) {
-        return json({ status: 'ahead', ahead_by: 1, behind_by: 0, merge_base_commit: { sha: assetSource },
-          commits: [{ sha: source }], files: [{ status: 'modified', filename: QR_RELEASE.changedFile, sha: QR_RELEASE.changedBlob }] });
+      if (qr && request.pathname === `/repos/${REPOSITORY}/compare/${QR_RELEASE.baseSource}...${source}`) {
+        return json({ status: 'ahead', ahead_by: 1, behind_by: 0, merge_base_commit: { sha: QR_RELEASE.baseSource },
+          commits: [{ sha: source }], files: [...QR_RELEASE.changedFiles].reverse() });
       }
       if (request.pathname.endsWith('/jobs')) return json(jobs);
       if (request.pathname.endsWith('/artifacts')) return json(artifacts);
@@ -219,20 +219,21 @@ test('QR stage creates only the pinned game source, with the live alias left on 
   assert.equal(body.autoAssignCustomDomains, false);
   assert.equal(body.gitSource.sha, QR_RELEASE.source);
   assert.equal(body.gitSource.ref, QR_RELEASE.sourceRef);
-  assert.equal(r.result.sourceClosure.base, QR_RELEASE.assetSource);
-  assert.equal(r.result.sourceClosure.changedFile, QR_RELEASE.changedFile);
+  assert.equal(r.result.sourceClosure.base, QR_RELEASE.baseSource);
+  assert.equal(r.result.sourceClosure.assetSource, QR_RELEASE.assetSource);
+  assert.deepEqual(r.result.sourceClosure.changedFiles, QR_RELEASE.changedFiles);
   assert.equal(body.env.MIR2_DUBHE_CONNECT_RELAY_URL, QR_RELEASE.relay);
   assert.equal(body.meta.numeronR16ConnectRelay, QR_RELEASE.relay);
   assert.equal(r.result.trafficAfter.alias, QR_RELEASE.baseline);
   assert(!JSON.stringify(r.receipts).includes(SECRET));
 });
 
-test('QR stage rejects a deployment source beyond the exact one-file patch', async () => {
+test('QR stage rejects a deployment source beyond the exact login patch', async () => {
   const f = fixture('numeron-qr-stage');
   f.state.onRequest = request => request.pathname.includes('/compare/') ? json({
-    status: 'ahead', ahead_by: 1, behind_by: 0, merge_base_commit: { sha: QR_RELEASE.assetSource },
+    status: 'ahead', ahead_by: 1, behind_by: 0, merge_base_commit: { sha: QR_RELEASE.baseSource },
     commits: [{ sha: QR_RELEASE.source }],
-    files: [{ status: 'modified', filename: QR_RELEASE.changedFile, sha: QR_RELEASE.changedBlob },
+    files: [...QR_RELEASE.changedFiles,
       { status: 'modified', filename: 'mir2-web3/apps/web/app/page.tsx' }],
   }) : undefined;
   const result = await f.execute();
