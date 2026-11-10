@@ -16,16 +16,18 @@ export const SITES = Object.freeze({
 });
 export const ORIGIN = 'https://numeron.obelisk.build';
 export const QR_RELEASE = Object.freeze({
-  source: '8bca8d6e3c5f81883aeaeebe6ad9313215fb4893',
+  source: '5b8715cafd05f572a6f7186ff8c46bb82c283400',
   sourceRef: BRANCH,
-  baseSource: 'ae81359f612aa0468bb57ebc6bc5af1e775146a7',
+  baseSource: '11538e2527abccbdc354482ff9cbcf810095f816',
   assetSource: 'f2de762309768b51b39438c2437c14e819df9bf7',
   changedFiles: [
-    { status: 'modified', filename: 'mir2-web3/apps/web/app/page.tsx', sha: '13caa4fcc69c44bdde9ebcea3d1bab61dde591b2' },
-    { status: 'modified', filename: 'mir2-web3/apps/web/scripts/test-scene-blueprint-request.mjs', sha: '077ab22676540c053e7b2dc2b4da7a960650c2f7' },
+    { status: 'modified', filename: 'mir2-web3/apps/web/lib/first-crystal-scene-request.ts', sha: 'cb8d6f7c4e903c303b3b9104dfc9abeed443a43e' },
+    { status: 'modified', filename: 'mir2-web3/apps/web/public/mir2-asset-worker.js', sha: '246929606982d16f3d712b81e602eb27805879bc' },
+    { status: 'modified', filename: 'mir2-web3/apps/web/scripts/test-asset-worker-fallback.mjs', sha: 'caf9e6f37cf94f1844af302e1f1a2b55b3fec71c' },
+    { status: 'modified', filename: 'mir2-web3/apps/web/scripts/test-first-crystal-scene-request.mjs', sha: 'ab503fa012a0480e7569543faa3812877f6dd698' },
   ],
   assetRunId: '42494701555',
-  baseline: 'dpl_5V1NFZwT8odHewGwFfD6A9eCbbAm',
+  baseline: 'dpl_BcKNdmmh1GZ1a2WZvXvhgYP6x1fx',
   relay: 'https://relay.dubhe.obelisk.build',
 });
 const QR_OPERATIONS = ['numeron-qr-stage', 'numeron-qr-promote', 'numeron-qr-rollback'];
