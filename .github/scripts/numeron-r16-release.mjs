@@ -16,19 +16,25 @@ export const SITES = Object.freeze({
 });
 export const ORIGIN = 'https://numeron.obelisk.build';
 export const QR_RELEASE = Object.freeze({
-  source: 'f90543561677ac7ba432077c461f58e5d407e4d8',
+  source: '3682477690000060fca9ae54e89ca16f775c2c43',
   sourceRef: BRANCH,
-  baseSource: '9ab47adeedab89367ac0f4fe973e42032dbe3709',
+  baseSource: 'bced01925633e5996b0b69a95b924969457a53bd',
   assetSource: 'f2de762309768b51b39438c2437c14e819df9bf7',
   changedFiles: [
-    { status: 'modified', filename: 'mir2-web3/apps/web/app/components/original-client-scene-map-rendering.tsx', sha: '6b9c9d762750755948b47f14b8222cb0f2d2dfee' },
-    { status: 'modified', filename: 'mir2-web3/apps/web/app/original-client-shell.tsx', sha: '1b9f176b0fd0bcf7f507afa8f67c704328cbc518' },
-    { status: 'added', filename: 'mir2-web3/apps/web/lib/generated/r16-entry-floor.json', sha: '8c4d2de410bc6804f63dbbbf2627c88c222b5007' },
-    { status: 'modified', filename: 'mir2-web3/apps/web/lib/r16-entry-scene.ts', sha: 'c4846fd2316270e517148d0a5162dc51a6738b2e' },
-    { status: 'added', filename: 'mir2-web3/apps/web/public/bootstrap/r16-floor/e4977afa3640bec9d8043ae32d794f92385a309fb4fa68cf407fe575016ce90d.json', sha: 'cebf8d7d2bdc1ed734c628fbe3f18e1d0be94393' },
-    { status: 'added', filename: 'mir2-web3/apps/web/scripts/generate-r16-entry-floor.mjs', sha: 'b876b1c817d49307540e8a37fb5421885cb7fe02' },
-    { status: 'modified', filename: 'mir2-web3/apps/web/scripts/test-scene-blueprint-request.mjs', sha: 'af65af19fd77e3c832363c44645917300ee0c141' },
-    { status: 'modified', filename: 'mir2-web3/apps/web/scripts/vercel-build.sh', sha: 'fd2736dec61c1b75d75983ca68488c97617b099d' },
+    { status: 'modified', filename: 'mir2-web3/apps/web/app/components/original-client-scene-map-rendering.tsx', sha: '8bbb01cca8d332dcc71147a67429e1630bb56bfb' },
+    { status: 'modified', filename: 'mir2-web3/apps/web/app/components/original-client-scene-rendering.tsx', sha: '4b2a096f933e4f89e09d15dbbe18dac9c67b5d84' },
+    { status: 'modified', filename: 'mir2-web3/apps/web/app/components/original-client-scene-visual-layers.tsx', sha: '335a8cdcee4b688606a790cbdd5260e604d1236a' },
+    { status: 'modified', filename: 'mir2-web3/apps/web/app/original-client-shell.tsx', sha: '2ba7e33d0d59125cdea80f08850a5c6312640690' },
+    { status: 'added', filename: 'mir2-web3/apps/web/lib/generated/r16-entry-object-paths.json', sha: 'ca3a252bf70b9725f93b1eaea2997b19f719ba68' },
+    { status: 'added', filename: 'mir2-web3/apps/web/lib/generated/r16-entry-visuals.json', sha: 'bee78e4791c1c18e2d097f38c038eb87944ce3ef' },
+    { status: 'modified', filename: 'mir2-web3/apps/web/lib/original-scene-sprite-meta.ts', sha: 'e087b26f233701cabd71bb429f40200bb7b1c926' },
+    { status: 'modified', filename: 'mir2-web3/apps/web/lib/r16-entry-scene.ts', sha: '9aea2205402308f0c8b71556583de9509514bd27' },
+    { status: 'added', filename: 'mir2-web3/apps/web/public/bootstrap/r16-visuals/1427115a4db370cd3efdf21e10c156a772410250b131ac6b907948b72cba8895.json', sha: 'f0a5a8ee33f78da084c0155548c9bde7b35e2ad6' },
+    { status: 'added', filename: 'mir2-web3/apps/web/public/bootstrap/r16-visuals/79d26b7b9f3d03e679305b8e9e0982312825ef2fffdec50d976ce930e152e4fe.json', sha: 'a2876d8a7f711aaf2a429731db7c8d4048367732' },
+    { status: 'added', filename: 'mir2-web3/apps/web/scripts/generate-r16-entry-visuals.mjs', sha: 'a046395db162caddb9b60fe4379b0e115a5397ea' },
+    { status: 'modified', filename: 'mir2-web3/apps/web/scripts/test-original-scene-sprite-meta.mjs', sha: '8e51f44babf2c6591c213ee22dc3e5630ee122b3' },
+    { status: 'modified', filename: 'mir2-web3/apps/web/scripts/test-scene-blueprint-request.mjs', sha: 'fbf79155a7d279dd009000ea219255024611077f' },
+    { status: 'modified', filename: 'mir2-web3/apps/web/scripts/vercel-build.sh', sha: 'b921569c31d99702bde001693d80c4378ed94b03' },
   ],
   entryScene: {
     path: '/bootstrap/r16-scenes/5c08d1fd4e81d92a7be20eb98c4c6288515749d5d459978dcf78fe2b86bdf325.json',
@@ -40,8 +46,18 @@ export const QR_RELEASE = Object.freeze({
     sha256: 'e4977afa3640bec9d8043ae32d794f92385a309fb4fa68cf407fe575016ce90d',
     bytes: 439896,
   },
+  entryObjects: {
+    path: '/bootstrap/r16-visuals/79d26b7b9f3d03e679305b8e9e0982312825ef2fffdec50d976ce930e152e4fe.json',
+    sha256: '79d26b7b9f3d03e679305b8e9e0982312825ef2fffdec50d976ce930e152e4fe',
+    bytes: 1185944,
+  },
+  entryActors: {
+    path: '/bootstrap/r16-visuals/1427115a4db370cd3efdf21e10c156a772410250b131ac6b907948b72cba8895.json',
+    sha256: '1427115a4db370cd3efdf21e10c156a772410250b131ac6b907948b72cba8895',
+    bytes: 885989,
+  },
   assetRunId: '42494701555',
-  baseline: 'dpl_CTtGa2akJGg1tZtgVqC2BAWX9Z7w',
+  baseline: 'dpl_4B5Xddi3VTE4jczh2BUxxoqGAWuY',
   relay: 'https://relay.dubhe.obelisk.build',
 });
 const QR_OPERATIONS = ['numeron-qr-stage', 'numeron-qr-promote', 'numeron-qr-rollback'];
@@ -299,7 +315,8 @@ function protectedResponse(candidate, pathname, env, qrRequest) {
 async function releaseQrGame({ operation, initial, projects, candidate, id, vercel,
   body, readCandidate, fetchImpl, sleep, receipt }) {
   const hostname = new URL(ORIGIN).hostname;
-  const { baseline, relay, entryScene, entryFloor } = QR_RELEASE;
+  const { baseline, relay, entryScene, entryFloor, entryObjects, entryActors } = QR_RELEASE;
+  const entryAssets = Object.entries({ Scene: entryScene, Floor: entryFloor, Objects: entryObjects, Actors: entryActors });
   const expectedOther = { original: production(initial.original), main: production(initial.main) };
   async function mapping(allowed) {
     const live = await projects(), game = production(live.game);
@@ -343,10 +360,10 @@ async function releaseQrGame({ operation, initial, projects, candidate, id, verc
   }
   receipt.trafficBefore = await mapping([baseline]);
   verifyGamePages(readCandidate, reviewed, QR_RELEASE.source);
-  receipt.protectedEntryScene = verifyEntryAsset(
-    Buffer.from(readCandidate(reviewed, entryScene.path), 'utf8'), entryScene, 'entrySceneDigestMismatch');
-  receipt.protectedEntryFloor = verifyEntryAsset(
-    Buffer.from(readCandidate(reviewed, entryFloor.path), 'utf8'), entryFloor, 'entryFloorDigestMismatch');
+  for (const [name, entry] of entryAssets) {
+    const bytes = Buffer.from(readCandidate(reviewed, entry.path), 'utf8');
+    receipt['protectedEntry' + name] = verifyEntryAsset(bytes, entry, 'entry' + name + 'DigestMismatch');
+  }
   receipt.protectedQr = await proveQrRelay((pathname, token) => readCandidate(reviewed, pathname, { token }));
   await mapping([baseline]);
   receipt.writes.push({ operation: 'promote', site: 'game', deployment: reviewed.id });
@@ -360,17 +377,15 @@ async function releaseQrGame({ operation, initial, projects, candidate, id, verc
       });
       return (await boundedBytes(response, 32_768)).toString('utf8');
     });
-    async function readPublicEntry(entry, label) {
+    const checkedAssets = await Promise.all(entryAssets.map(async ([name, entry]) => {
       const response = await fetchImpl(ORIGIN + entry.path, {
         redirect: 'error', signal: AbortSignal.timeout(30_000),
       });
-      requireRelease(response.ok, label + 'Unavailable');
-      return verifyEntryAsset(await boundedBytes(response, entry.bytes), entry, label + 'DigestMismatch');
-    }
-    [receipt.publicEntryScene, receipt.publicEntryFloor] = await Promise.all([
-      readPublicEntry(entryScene, 'entryScene'),
-      readPublicEntry(entryFloor, 'entryFloor'),
-    ]);
+      requireRelease(response.ok, 'entry' + name + 'Unavailable');
+      const bytes = await boundedBytes(response, entry.bytes);
+      return [name, verifyEntryAsset(bytes, entry, 'entry' + name + 'DigestMismatch')];
+    }));
+    for (const [name, entry] of checkedAssets) receipt['publicEntry' + name] = entry;
     receipt.trafficAfter = await mapping([reviewed.id]);
   } catch (error) {
     const current = await mapping([baseline, reviewed.id]);
