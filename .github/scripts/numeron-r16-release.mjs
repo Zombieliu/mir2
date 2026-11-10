@@ -16,18 +16,25 @@ export const SITES = Object.freeze({
 });
 export const ORIGIN = 'https://numeron.obelisk.build';
 export const QR_RELEASE = Object.freeze({
-  source: '5b8715cafd05f572a6f7186ff8c46bb82c283400',
+  source: '534322e790c7feccbc21e48541119f340a2e40ee',
   sourceRef: BRANCH,
-  baseSource: '11538e2527abccbdc354482ff9cbcf810095f816',
+  baseSource: '7f046783d39e384239c17586f7e9fe6403e78988',
   assetSource: 'f2de762309768b51b39438c2437c14e819df9bf7',
   changedFiles: [
-    { status: 'modified', filename: 'mir2-web3/apps/web/lib/first-crystal-scene-request.ts', sha: 'cb8d6f7c4e903c303b3b9104dfc9abeed443a43e' },
-    { status: 'modified', filename: 'mir2-web3/apps/web/public/mir2-asset-worker.js', sha: '246929606982d16f3d712b81e602eb27805879bc' },
-    { status: 'modified', filename: 'mir2-web3/apps/web/scripts/test-asset-worker-fallback.mjs', sha: 'caf9e6f37cf94f1844af302e1f1a2b55b3fec71c' },
-    { status: 'modified', filename: 'mir2-web3/apps/web/scripts/test-first-crystal-scene-request.mjs', sha: 'ab503fa012a0480e7569543faa3812877f6dd698' },
+    { status: 'modified', filename: 'mir2-web3/apps/web/app/components/original-client-dialogs.tsx', sha: '783a841348c78ae66552a73836ccf55c287c3d32' },
+    { status: 'modified', filename: 'mir2-web3/apps/web/app/components/original-client-game-ui-scene.tsx', sha: 'ce68968dcffcc92b888dc87d3ff3f0bee2b6eb78' },
+    { status: 'modified', filename: 'mir2-web3/apps/web/app/components/original-client-shell-types.ts', sha: '3b120d5e30b9cbd0ccb4b063c71fd6d61969a2c2' },
+    { status: 'modified', filename: 'mir2-web3/apps/web/app/original-client-shell.tsx', sha: '6ba6a5d6638b99dc7d114d11ee8d2f2329e25eef' },
+    { status: 'modified', filename: 'mir2-web3/apps/web/app/page.tsx', sha: '059734f12ddc30586c5bef364c50785785e258c3' },
+    { status: 'added', filename: 'mir2-web3/apps/web/lib/generated/r16-native-localization-gameplay-npc.json', sha: '742f5dd6ca4d4f279c898eb64924be19b289a465' },
+    { status: 'modified', filename: 'mir2-web3/apps/web/lib/generated/r16-native-localization-gameplay.json', sha: 'a1d753ac751e579b7b85aa3ee07cf2600695287f' },
+    { status: 'modified', filename: 'mir2-web3/apps/web/lib/r16-native-localization.ts', sha: 'd6fe77ae2e86539515b1dd3b043fc7418dc147cc' },
+    { status: 'modified', filename: 'mir2-web3/apps/web/scripts/generate-r16-native-localization.mjs', sha: '63c32e9475102b40f9b65fe5994ca4094e84605d' },
+    { status: 'modified', filename: 'mir2-web3/apps/web/scripts/test-bevy-quest-ui.mjs', sha: 'caa1711c01fff036dae8d9b2c4c4ab3cfe1e4058' },
+    { status: 'modified', filename: 'mir2-web3/apps/web/scripts/test-r16-native-localization.mjs', sha: '73347fd38b5a789bb60596b17d7ee6856aec1c5b' },
   ],
   assetRunId: '42494701555',
-  baseline: 'dpl_BcKNdmmh1GZ1a2WZvXvhgYP6x1fx',
+  baseline: 'dpl_DEzGSSF6rTt1fdPUuSuNgsYwiz9f',
   relay: 'https://relay.dubhe.obelisk.build',
 });
 const QR_OPERATIONS = ['numeron-qr-stage', 'numeron-qr-promote', 'numeron-qr-rollback'];
