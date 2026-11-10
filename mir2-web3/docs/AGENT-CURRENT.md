@@ -30,7 +30,7 @@ working tree, services, release packages, source snapshots or parity percentages
 
 帮助窗十语、阿洛自主生活状态和原授权恢复已经交付。同一阿洛 v2 重启后在蜡烛已落地时先支援，鹿死亡后拾取并入包。 [帮助](evidence/r16-help-localization-20261110/README.md) · [自主生活](evidence/r16-alo-life-web-20261110/README.md) · [战后拾取](evidence/r16-alo-loot-order-20261109/README.md)
 
-公网扫码的上一通过版本为 `83eadf4f`，完成直连出码、官方钱包手机尺寸 PWA 实际签名、进比奇和正常退出。默认网络冷启动继续复现正文传输超时。隔离候选 `a23cc382` 把完整字体、原音乐和可选精灵预热移出默认扫码冷启动路径，简中与繁中的本机生产构建通过。候选公网复验、实体手机、最新分支发行、公开服阿洛和全局 Accepted 继续单列。 [公网记录](NUMERON-WEB-RELEASE-20261108.zh-CN.md) · [本机回执](evidence/numeron-web-release-20261108/qr-login-startup-local-20261110.json)
+公网扫码已发布 `a23cc382`。简中和繁中普通冷启动第一次点击均出码，默认代理完成实际钱包签名、兑换、选角、建角、进游戏回包及退出。此代理路径的城镇资源门在 120 秒内未打开。直连使用同一公开版本完成实际签名、比奇画面及正常退出。实体手机相机、默认代理场景加载、最新玩法发行、公开服阿洛及全局 Accepted 继续单列。 [公网回执](evidence/numeron-web-release-20261108/qr-login-startup-public-20261110.json) · [本机回执](evidence/numeron-web-release-20261108/qr-login-startup-local-20261110.json)
 
 Native guild projection and request lifecycle at checkpoint `85eecf4be` consume actual deltas and typed `UserInformation.realId` and handle definitely unsent requests and queue eviction. The release build and 198 checks passed. Two real-asset GPU/GDI checks and the Windows window remain open. Candidate EXE `a63bd2a3` requires the existing R16 resources. [Scope and failures](WEB-R16-PARITY-GOAL.zh-CN.md#native-公会增量与请求生命周期2026-11-08)
 

@@ -1,0 +1,150 @@
+{
+  "schema": 1,
+  "publicGame": "https://numeron.obelisk.build/game",
+  "revision": "a23cc382af1c66cd7ffeea794fd62fe7cba7e96a",
+  "release": {
+    "previous": "dpl_DRLvQMibFvHL8MDyPxHXYNvtETKt",
+    "current": "dpl_AiB7qfnhdVkeEVKCJv3YXeW6m2cf",
+    "stageRun": 42742128253,
+    "promoteRun": 42743017716,
+    "stageReceiptSha256": "315cc2b63bf255e8412f909948747a6c03f0d046514576b217b26b0291d15a19",
+    "promoteReceiptSha256": "9b36427bf2846181601edbe8ead41a25ce167836a5510c6a5cd011c360d3dec2",
+    "exactAliasReadbackSha256": "01272e3e3020ae3795ab99b3af7d75525625829b00ae19cd82c91bb59b72ef6a",
+    "protectedAndPublicCreatePending": true
+  },
+  "coldBrowser": {
+    "zhCN": {
+      "sha256": "d4c9831fc8177ef98f0bd396fb7c55930dcc80ce8232022faf3bd8a24c9250f8",
+      "ordinaryFirstClick": true,
+      "codeVisibleMs": 8988,
+      "h2OnDefaultSystemRoute": true,
+      "pendingGetsAtClick": 12,
+      "createBodyCompleteMs": 6946,
+      "firstPollBodyCompleteMs": 1334,
+      "visibleCode": true,
+      "pending": true,
+      "compactFont": [
+        {
+          "path": "/_next/static/media/r16-login-sc.efa4c799.woff2",
+          "status": 200
+        }
+      ],
+      "heavyStartupRequestCount": 0
+    },
+    "zhTW": {
+      "sha256": "433af0106077294cd0dea7a1344f73b6e251a87c3cf21583d99ac1c96ac8dfd1",
+      "ordinaryFirstClick": true,
+      "codeVisibleMs": 5931,
+      "h2OnDefaultSystemRoute": true,
+      "pendingGetsAtClick": 11,
+      "createBodyCompleteMs": 4471,
+      "firstPollBodyCompleteMs": 1417,
+      "visibleCode": true,
+      "pending": true,
+      "compactFont": [
+        {
+          "path": "/_next/static/media/r16-login-tc.93f45434.woff2",
+          "status": 200
+        }
+      ],
+      "heavyStartupRequestCount": 0
+    }
+  },
+  "earlierAttempts": [
+    {
+      "scope": "systemEarlyVersionRead",
+      "sha256": "849919e82e56b055ee3b3c91cb4da88461a4b876183423f1a4183a710b558100",
+      "phase": "desktop-loading",
+      "errorCode": "AUTOMATION_FAILED",
+      "signedSessionApproved": false,
+      "accountLogin": 0,
+      "channelExchange": [],
+      "startGame": 0
+    },
+    {
+      "scope": "system30SecondSelectProbe",
+      "sha256": "954e5ce005c25b2893dcb6389cc59898070a402c730dd6c17e0e4ff461ef5038",
+      "phase": "in-memory-qr-ready",
+      "errorCode": "BROWSER_TIMEOUT",
+      "signedSessionApproved": true,
+      "accountLogin": 1,
+      "channelExchange": [
+        200
+      ],
+      "startGame": 0
+    },
+    {
+      "scope": "direct30SecondSelectProbe",
+      "sha256": "d2cb3f4c6f532f8612c9725b8a578ad1ab10a4fdcd9e704f212204c7f1354fde",
+      "phase": "in-memory-qr-ready",
+      "errorCode": "BROWSER_TIMEOUT",
+      "signedSessionApproved": true,
+      "accountLogin": 1,
+      "channelExchange": [
+        200
+      ],
+      "startGame": 0
+    }
+  ],
+  "signedBrowser": {
+    "passed": false,
+    "sha256": "e9c7754202c114eb2d882898719acb73df9bb129d765d91e64036e38042abf3b",
+    "officialPwaApprovalSha256": "55c297be36b88b40d11dfa30b0a915ed0167008d4263ff20171047bb0fefee93",
+    "walletNetworkGuardSha256": "21312f3063c96b85678ebdcadfceac3a4db620f707af121e1e464a4c39ac55af",
+    "ordinaryDesktopDefaultNetwork": true,
+    "localProxyObserved": true,
+    "officialWalletMobileViewportAndVirtualPasskey": true,
+    "physicalPhoneCamera": false,
+    "relayReadApprove200": true,
+    "approvedWalletPoll": true,
+    "channelExchangeHttp": [
+      200
+    ],
+    "loginSuccess": 1,
+    "waitForVisibleSelectionAfterAuthMs": 30308,
+    "createdQaRole": 1,
+    "startGameResult": 4,
+    "renderedBichon": false,
+    "terrainSampleNonBlank": false,
+    "cityTileCount": null,
+    "logoutSuccess": 1,
+    "returnedToSelect": true,
+    "forbiddenWalletOperations": 0,
+    "failure": {
+      "phase": "ordinary-start-game",
+      "code": "BROWSER_TIMEOUT"
+    }
+  },
+  "signedDirectBrowser": {
+    "passed": true,
+    "sha256": "d4c0cc193a76a470952ee1993e2bed6c2b2acd3413515d3e8aec00fb62386d31",
+    "officialPwaApprovalSha256": "1949070aeae47e1a7378ecb1bc96d09a54e7bf4ea728fdb642e37493ae2f5b39",
+    "walletNetworkGuardSha256": "415894fac2e4c800982a467a9b34fca60750fd4b809973a12ba23ad0ccd4e14a",
+    "processOnlyDirectRoute": true,
+    "officialWalletMobileViewportAndVirtualPasskey": true,
+    "physicalPhoneCamera": false,
+    "realApproval": true,
+    "approvedWalletPoll": true,
+    "channelExchangeHttp": [
+      200
+    ],
+    "loginSuccess": 1,
+    "waitForVisibleSelectionAfterAuthMs": 4888,
+    "createdQaRole": 1,
+    "startGameResult": 4,
+    "renderedBichon": true,
+    "terrainSampleNonBlank": true,
+    "cityTileCount": 106,
+    "logoutSuccess": 1,
+    "returnedToSelect": true,
+    "failure": null
+  },
+  "localPasswordRegression": {
+    "passed": true,
+    "receiptSha256": "a40b2fe9432e77b3e2d5755af1313b31d1693ea8ddc8c0bedb130609ddcd5a9a",
+    "fullFontAfterAuth": true,
+    "renderedBichon": true,
+    "normalLogout": true,
+    "fileFixtureUnchanged": true
+  }
+}
