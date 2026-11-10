@@ -2,6 +2,12 @@
   "assetReleaseId": "20261108-r16-08ec86d5105c",
   "sceneSha256": "5c08d1fd4e81d92a7be20eb98c4c6288515749d5d459978dcf78fe2b86bdf325",
   "mapFileName": "0.map",
+  "bounds": {
+    "minX": 270,
+    "minY": 595,
+    "maxX": 306,
+    "maxY": 637
+  },
   "path": "/bootstrap/r16-floor/e4977afa3640bec9d8043ae32d794f92385a309fb4fa68cf407fe575016ce90d.json",
   "sha256": "e4977afa3640bec9d8043ae32d794f92385a309fb4fa68cf407fe575016ce90d",
   "bytes": 439896,

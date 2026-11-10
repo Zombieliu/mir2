@@ -1,6 +1,7 @@
 import entryScene from "./generated/r16-entry-scene.json";
 import entryFloor from "./generated/r16-entry-floor.json";
 import entryVisuals from "./generated/r16-entry-visuals.json";
+import { fetchBootstrapResponse } from "./first-crystal-scene-request";
 import type { OriginalSceneSpriteLibraryMeta } from "./original-scene-sprite-meta";
 import {
   createCrystalSceneBlueprintRequestKey,
@@ -23,6 +24,7 @@ export type R16EntryActorAssets = {
   images: R16EntrySpriteImages;
 };
 export const R16_ENTRY_FLOOR_MAP = entryFloor.mapFileName;
+export const R16_ENTRY_FLOOR_BOUNDS = entryFloor.bounds;
 export const R16_ENTRY_MONSTER_BOUNDS = entryVisuals.monsterBounds;
 let floorLoad: Promise<R16EntrySpriteImages | null> | null = null;
 let objectLoad: Promise<R16EntrySpriteImages | null> | null = null;
@@ -43,11 +45,21 @@ export function preloadR16EntryScene(pinnedRelease?: string): Promise<SceneBluep
 export function preloadR16EntryFloor(pinnedRelease?: string): Promise<R16EntrySpriteImages | null> | null {
   if (pinnedRelease !== entryFloor.assetReleaseId || entryFloor.assetReleaseId !== entryScene.assetReleaseId ||
       entryFloor.sceneSha256 !== entryScene.sha256 || !globalThis.crypto?.subtle) return null;
-  floorLoad ??= loadPinnedEntryJson<R16EntrySpriteImages>(entryFloor).catch(() => null).then((images) => {
+  floorLoad ??= loadPinnedEntryFloor().catch(() => null).then((images) => {
     if (!images) floorLoad = null;
     return images;
   });
   return floorLoad;
+}
+
+async function loadPinnedEntryFloor(): Promise<R16EntrySpriteImages | null> {
+  const { response, body } = await fetchBootstrapResponse(
+    entryFloor.path,
+    { cache: "force-cache", bodyByteLimit: entryFloor.bytes },
+    response => response.arrayBuffer(),
+    (path, options) => fetch(path, { ...options, credentials: "omit", redirect: "error" }),
+  );
+  return response.ok && body ? decodePinnedEntryJson<R16EntrySpriteImages>(entryFloor, body) : null;
 }
 
 function entryVisualsMatch(pinnedRelease?: string) {
@@ -96,7 +108,13 @@ async function loadPinnedEntryJson<T>(
     void response.body?.cancel().catch(() => {});
     return null;
   }
-  const bytes = await response.arrayBuffer();
+  return decodePinnedEntryJson<T>(asset, await response.arrayBuffer());
+}
+
+async function decodePinnedEntryJson<T>(
+  asset: { bytes: number; sha256: string },
+  bytes: ArrayBuffer,
+): Promise<T | null> {
   if (bytes.byteLength !== asset.bytes) return null;
   const digest = new Uint8Array(await crypto.subtle.digest("SHA-256", bytes));
   const sha256 = Array.from(digest, (byte) => byte.toString(16).padStart(2, "0")).join("");

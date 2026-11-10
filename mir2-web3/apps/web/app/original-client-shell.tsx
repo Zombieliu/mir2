@@ -5,7 +5,7 @@ import { useWindowKeydown } from "../lib/use-window-keydown";
 import { guildKeyboardOwnsEvent } from "../lib/r16-guild-keyboard";
 import {
   preloadR16EntryActors, preloadR16EntryFloor, preloadR16EntryMonsterFrames, preloadR16EntryObjects,
-  R16_ENTRY_FLOOR_MAP, R16_ENTRY_MONSTER_BOUNDS,
+  R16_ENTRY_FLOOR_BOUNDS, R16_ENTRY_FLOOR_MAP, R16_ENTRY_MONSTER_BOUNDS,
   type R16EntryActorAssets, type R16EntrySpriteImages,
 } from "../lib/r16-entry-scene";
 import { CharacterPointerRouter } from "../lib/bevy-character-ui";
@@ -1912,13 +1912,20 @@ export function OriginalClientShell({
   );
 
   const [entryFloor, setEntryFloor] = useState<R16EntrySpriteImages | null>(null);
+  const [entryFloorPending, setEntryFloorPending] = useState(false);
   const [entryObjects, setEntryObjects] = useState<R16EntrySpriteImages | null>(null);
   const [entryActors, setEntryActors] = useState<R16EntryActorAssets | null>(null);
   useEffect(() => {
     if (screen !== "openingLogin" && screen !== "select" && screen !== "game") return;
     const release = process.env.MIR2_PINNED_ASSET_VERSION;
     let current = true;
-    void preloadR16EntryFloor(release)?.then((images) => { if (current) setEntryFloor(images); });
+    const floor = preloadR16EntryFloor(release);
+    setEntryFloorPending(Boolean(floor));
+    void floor?.then((images) => {
+      if (!current) return;
+      setEntryFloor(images);
+      setEntryFloorPending(false);
+    });
     void preloadR16EntryActors(release)?.then((assets) => { if (current) setEntryActors(assets); });
     void preloadR16EntryObjects(release)?.then((images) => { if (current) setEntryObjects(images); });
     return () => { current = false; };
@@ -2267,18 +2274,18 @@ export function OriginalClientShell({
   const staticViewportMapSprites = useMemo(
     () =>
       renderPlayer
-        ? buildViewportMapSprites(world, renderPlayer, 0, "static", 0, viewportLayout)
+        ? buildViewportMapSprites(world, renderPlayer, 0, "static", 0, viewportLayout, packedFloor)
         : EMPTY_VIEWPORT_MAP_SPRITES,
-    [renderPlayer?.x, renderPlayer?.y, world.originalMapRegion, viewportLayout],
+    [renderPlayer?.x, renderPlayer?.y, world.originalMapRegion, viewportLayout, packedFloor],
   );
   // Animated layer (multi-frame sprites only) tracks the frame index; the per-tick pass
   // skips all single-frame sprites early, so on maps without animated tiles it is ~free.
   const animatedViewportMapSprites = useMemo(
     () =>
       renderPlayer
-        ? buildViewportMapSprites(world, renderPlayer, sceneSpriteFrameIndex, "animated", 0, viewportLayout)
+        ? buildViewportMapSprites(world, renderPlayer, sceneSpriteFrameIndex, "animated", 0, viewportLayout, packedFloor)
         : EMPTY_VIEWPORT_MAP_SPRITES,
-    [renderPlayer?.x, renderPlayer?.y, sceneSpriteFrameIndex, world.originalMapRegion, viewportLayout],
+    [renderPlayer?.x, renderPlayer?.y, sceneSpriteFrameIndex, world.originalMapRegion, viewportLayout, packedFloor],
   );
   const viewportMapSprites = useMemo(
     () => ({
@@ -3446,6 +3453,68 @@ export function OriginalClientShell({
         ].join(":")
       : `idle:${screen}`;
 
+  const playerX = renderPlayer?.x;
+  const playerY = renderPlayer?.y;
+  const { minX, minY, maxX, maxY } = R16_ENTRY_FLOOR_BOUNDS;
+  const entryGroundKey =
+    screen === "game" && !sceneInteractionReady && !mapGpuActive && !bevyWorldPaintActive &&
+    entryMap && (entryFloorPending || packedFloor !== null) &&
+    playerX !== undefined && playerY !== undefined &&
+    playerX - ENTRY_FLOOR_RADIUS >= minX && playerX + ENTRY_FLOOR_RADIUS <= maxX &&
+    playerY - ENTRY_FLOOR_RADIUS >= minY && playerY + ENTRY_FLOOR_RADIUS <= maxY
+      ? JSON.stringify([sceneAssetReadinessKey, renderPlayer?.objectId, playerX, playerY])
+      : null;
+  const [entryGroundReadyKey, setEntryGroundReadyKey] = useState<string | null>(null);
+  const waitingForEntryGround = entryGroundKey !== null && entryGroundReadyKey !== entryGroundKey;
+
+  useEffect(() => {
+    if (entryGroundKey === null) {
+      setEntryGroundReadyKey(null);
+      return;
+    }
+    const frame = stageFrameRef.current;
+    if (!waitingForEntryGround || !frame || playerX === undefined || playerY === undefined) return;
+
+    const floorKeys = new Set(staticViewportMapSprites.floor
+      .filter(sprite => sprite.kind === "back" &&
+        Math.abs(sprite.cellX - playerX) <= ENTRY_FLOOR_RADIUS &&
+        Math.abs(sprite.cellY - playerY) <= ENTRY_FLOOR_RADIUS)
+      .map(sprite => sprite.key));
+    const ready = () => setEntryGroundReadyKey(entryGroundKey);
+    if (!floorKeys.size) {
+      ready();
+      return;
+    }
+
+    let animationFrame: number | undefined;
+    const check = () => {
+      animationFrame = undefined;
+      const pending = new Set(floorKeys);
+      for (const image of frame.querySelectorAll<HTMLImageElement>("img.scene-backdrop-sprite")) {
+        if (image.complete && image.naturalWidth > 0 && image.style.visibility !== "hidden") {
+          pending.delete(image.dataset.mapSpriteKey ?? "");
+        }
+      }
+      if (!pending.size) ready();
+    };
+    const scheduleCheck = (event: Event) => {
+      const image = event.target;
+      if (image instanceof HTMLImageElement && floorKeys.has(image.dataset.mapSpriteKey ?? "")) {
+        animationFrame ??= window.requestAnimationFrame(check);
+      }
+    };
+
+    frame.addEventListener("load", scheduleCheck, true);
+    animationFrame = window.requestAnimationFrame(check);
+    // The transfer has its own deadline. Bound the wait for decoding verified images as well.
+    const decodeTimeout = packedFloor ? window.setTimeout(ready, SCENE_READINESS_SAFETY_MS) : undefined;
+    return () => {
+      frame.removeEventListener("load", scheduleCheck, true);
+      if (animationFrame !== undefined) window.cancelAnimationFrame(animationFrame);
+      window.clearTimeout(decodeTimeout);
+    };
+  }, [entryGroundKey, waitingForEntryGround, playerX, playerY, packedFloor, staticViewportMapSprites.floor]);
+
   // Diagnostic: expose the scene/movement-readiness gate so an Alt+D snapshot reveals
   // exactly which factor is blocking movement (sceneInteractionReady is the actual gate
   // checked by the keyboard/click move handlers). No behavior change.
@@ -3454,6 +3523,7 @@ export function OriginalClientShell({
     (window as unknown as Record<string, unknown>).__mir2SceneGate = {
       screen,
       sceneInteractionReady,
+      waitingForEntryGround,
       sceneSpriteLibrariesReady,
       pendingSceneSpriteLibraryCount: pendingSceneSpriteLibraryKeys.length,
       pendingSceneSpriteLibraryKeys: pendingSceneSpriteLibraryKeys.slice(0, 10),
@@ -3470,6 +3540,7 @@ export function OriginalClientShell({
   }, [
     screen,
     sceneInteractionReady,
+    waitingForEntryGround,
     sceneSpriteLibrariesReady,
     pendingSceneSpriteLibraryKeys.length,
     desiredSceneSpriteLibraryKeys.length,
@@ -3616,6 +3687,11 @@ export function OriginalClientShell({
       return;
     }
 
+    if (waitingForEntryGround) {
+      notify(createSceneAssetReadiness(sceneAssetReadinessKey, false, "loading", 1));
+      return;
+    }
+
     if (readinessSafetyExpired) {
       // Safety valve elapsed — the scene is rendered; let the player interact even if
       // a sprite library / tile is still resolving (they keep loading in the background).
@@ -3694,6 +3770,7 @@ export function OriginalClientShell({
     activeBevyEntityAtlas?.key,
     webGl2EntityTextureReady,
     readinessSafetyExpired,
+    waitingForEntryGround,
   ]);
 
   useEffect(() => {
@@ -5976,6 +6053,7 @@ const SCENE_INTERACTION_MIN_PRELOADED_URLS = 24;
 // libraries ready" gate may never settle; without this bound the overlay can hang
 // forever while the world is already drawn behind it. Remaining assets keep loading.
 const SCENE_READINESS_SAFETY_MS = 3000;
+const ENTRY_FLOOR_RADIUS = 4;
 const EMPTY_MAP_TILE_DRAW_LIST: MapTileDraw[] = [];
 const EMPTY_STANDALONE_MAP_TILE_DRAW_LIST: MapStandaloneTileDraw[] = [];
 const EMPTY_STANDALONE_MAP_IMAGE_SOURCES: MapStandaloneTileImageSource[] = [];

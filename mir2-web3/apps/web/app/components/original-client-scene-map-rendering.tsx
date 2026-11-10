@@ -144,6 +144,7 @@ export function buildViewportMapSprites(
   animationFilter: ViewportSpriteAnimationFilter = "all",
   rangeExpansion = 0,
   viewportLayout: ViewportLayout = DEFAULT_VIEWPORT_LAYOUT,
+  packedFloor: R16EntrySpriteImages | null = null,
 ): ViewportMapSprites {
   const region = world.originalMapRegion;
   if (!region) {
@@ -180,6 +181,7 @@ export function buildViewportMapSprites(
       true,
       animationFilter,
       viewportLayout,
+      packedFloor,
     );
     appendViewportMapSprite(
       floor,
@@ -193,6 +195,7 @@ export function buildViewportMapSprites(
       true,
       animationFilter,
       viewportLayout,
+      packedFloor,
     );
     appendViewportMapSprite(
       floor,
@@ -206,6 +209,7 @@ export function buildViewportMapSprites(
       true,
       animationFilter,
       viewportLayout,
+      packedFloor,
     );
     appendViewportMapSprite(
       floor,
@@ -219,6 +223,7 @@ export function buildViewportMapSprites(
       true,
       animationFilter,
       viewportLayout,
+      packedFloor,
     );
   }
 
@@ -411,6 +416,7 @@ function appendViewportMapSprite(
   inObjectBounds: boolean,
   animationFilter: ViewportSpriteAnimationFilter = "all",
   viewportLayout: ViewportLayout = DEFAULT_VIEWPORT_LAYOUT,
+  packedFloor: R16EntrySpriteImages | null = null,
 ) {
   if (!spriteId) {
     return;
@@ -450,7 +456,8 @@ function appendViewportMapSprite(
   if (!frame) {
     return;
   }
-  if (staticSceneAssetRecentlyFailed(frame.path)) {
+  const hasPackedFloor = sprite.drawMode === "floor" && packedFloor?.[frame.path];
+  if (!hasPackedFloor && staticSceneAssetRecentlyFailed(frame.path)) {
     return;
   }
 

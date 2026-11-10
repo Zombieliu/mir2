@@ -274,6 +274,7 @@ function entryFixture(fetcher) {
     if (name === "./generated/r16-entry-scene.json") return { default: entryMetadata };
     if (name === "./generated/r16-entry-floor.json") return { default: floorMetadata };
     if (name === "./generated/r16-entry-visuals.json") return { default: visualsMetadata };
+    if (name === "./first-crystal-scene-request") return sceneReaderModule.exports;
     assert.equal(name, "./scene-blueprint-request");
     return loadedModule.exports;
   };
@@ -318,6 +319,56 @@ test("the entry floor preload is shared only for the pinned release", async () =
   assert.equal(calls.length, 1);
   assert.equal(calls[0].url, floorMetadata.path);
   assert.equal(calls[0].options.credentials, "omit");
+});
+
+test("the floor preload survives more than twelve seconds of body progress", async (t) => {
+  t.mock.timers.enable({ apis: ["setTimeout"] });
+  const requests = [];
+  let stream;
+  const response = new Response(new ReadableStream({ start(controller) { stream = controller; } }));
+  const entry = entryFixture(async (url, options) => {
+    requests.push({ url, options });
+    return response;
+  });
+  const loading = entry.preloadR16EntryFloor(entryMetadata.assetReleaseId);
+  let finished = false;
+  void loading.then(() => { finished = true; });
+  const chunkSize = Math.ceil(floorBytes.length / 4);
+  for (let index = 0; index < 4; index++) {
+    t.mock.timers.tick(3_600);
+    stream.enqueue(floorBytes.subarray(index * chunkSize, (index + 1) * chunkSize));
+    await settleSceneFixture();
+  }
+  assert.equal(requests.length, 1);
+  assert.equal(requests[0].options.signal.aborted, false);
+  assert.equal(finished, false);
+  stream.close();
+  assert.equal(Object.keys(await loading).length, floorMetadata.frameCount);
+  assert.equal(await entry.preloadR16EntryFloor(entryMetadata.assetReleaseId), await loading);
+});
+
+test("a stalled floor body restarts once at the same address with a reload", async (t) => {
+  t.mock.timers.enable({ apis: ["setTimeout"] });
+  const requests = [];
+  const truncated = new Response(new ReadableStream({
+    start(controller) { controller.enqueue(floorBytes.subarray(0, 2048)); },
+  }));
+  const entry = entryFixture(async (url, options) => {
+    requests.push({ url, options });
+    return requests.length === 1 ? truncated : new Response(floorBytes);
+  });
+  const loading = entry.preloadR16EntryFloor(entryMetadata.assetReleaseId);
+  await settleSceneFixture();
+  t.mock.timers.tick(8_000);
+  await settleSceneFixture();
+  assert.equal(requests[0].options.signal.reason.name, "TimeoutError");
+  t.mock.timers.tick(200);
+  await settleSceneFixture();
+  assert.equal(Object.keys(await loading).length, floorMetadata.frameCount);
+  assert.deepEqual(requests.map(({ url, options }) => [url, options.cache, options.credentials]), [
+    [floorMetadata.path, "force-cache", "omit"],
+    [floorMetadata.path, "reload", "omit"],
+  ]);
 });
 
 test("object and actor assets load independently and publish only pinned bytes", async () => {

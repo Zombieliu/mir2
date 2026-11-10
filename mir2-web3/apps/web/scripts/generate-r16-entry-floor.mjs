@@ -83,6 +83,7 @@ const metadata = {
   assetReleaseId: entryScene.assetReleaseId,
   sceneSha256: entryScene.sha256,
   mapFileName: region.mapFileName,
+  bounds,
   path,
   sha256: digest,
   bytes: bytes.length,
