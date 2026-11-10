@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import { R16_FULL_CJK_FONT_CSS } from "../../lib/r16-cjk-fonts";
 
 export const metadata: Metadata = {
   title: "Promotion program · Numeron",
@@ -12,5 +13,8 @@ export const viewport: Viewport = {
 };
 
 export default function PromotionLayout({ children }: { children: React.ReactNode }) {
-  return children;
+  return <>
+    <style>{R16_FULL_CJK_FONT_CSS}</style>
+    {children}
+  </>;
 }

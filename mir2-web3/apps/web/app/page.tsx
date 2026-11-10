@@ -45,6 +45,7 @@ import {
   text,
   type Mir2Language,
 } from "../lib/localization";
+import { R16_FULL_CJK_FONT_CSS } from "../lib/r16-cjk-fonts";
 import { commerceRuntimeLanguage, questRuntimeLanguage } from "../lib/r16-runtime-language";
 import { r16QuestGuidanceProfile, shouldAutoStartR16Tutorial } from "../lib/r16-gameplay-baseline";
 import { localizeQuestLog } from "../lib/quest-localization";
@@ -3291,6 +3292,12 @@ export default function HomePage() {
   const [isClientReady, setIsClientReady] = useState(false);
   const t = useMemo(() => buildTranslator(language), [language]);
   const locale = languageLocale(language);
+  useLayoutEffect(() => {
+    const element = document.documentElement;
+    // The locale can be applied before the login shell mounts.
+    element.toggleAttribute("data-mir2-login-font", screen === "login" || screen === "openingLogin");
+    return () => element.removeAttribute("data-mir2-login-font");
+  }, [screen]);
   useEffect(function syncPageDocumentLanguage() {
     const element = document.documentElement;
     const previousLanguage = element.lang;
@@ -20778,6 +20785,7 @@ export default function HomePage() {
   return (
     !isClientReady ? null :
     <>
+    {screen === "select" || screen === "game" ? <style>{R16_FULL_CJK_FONT_CSS}</style> : null}
     <PwaGameShell language={language} />
     <OriginalClientShell
       language={language}

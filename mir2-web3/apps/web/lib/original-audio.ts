@@ -49,6 +49,10 @@ export function setOriginalMusic(src: string | null) {
   if (!src || !loadOriginalAudioSettings().musicEnabled) {
     musicAudio?.pause();
     if (!src) {
+      if (musicAudio && activeMusicSrc) {
+        musicAudio.removeAttribute("src");
+        musicAudio.load();
+      }
       activeMusicSrc = null;
     }
     return;
