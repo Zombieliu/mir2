@@ -67,6 +67,68 @@ test("the actual shared pose boundary owns sounds and samples one feedback pair 
   assert.deepEqual(advance(3460, "fishingReel", 3240, 2), { effects: [], sounds: [] });
 });
 
+test("packaged Web observer enters and re-enters active fishing in Wait without a recalled point", async () => {
+  const manifest = JSON.parse(await readFile(new URL("../lib/generated/client_core_runtime.json", import.meta.url), "utf8"));
+  const root = new URL("../public/client-core/" + manifest.presentation.version + "/", import.meta.url);
+  const glue = await readFile(new URL("mir2_platform_web.js", root));
+  const binary = await readFile(new URL("mir2_platform_web_bg.wasm", root));
+  const wasm = await import("data:text/javascript;base64," + glue.toString("base64"));
+  await wasm.default({ module_or_path: binary });
+  const bridge = new wasm.EntityAnimationBridge();
+  const { resolveCrystalEntityAnimationPoses } =
+    await loadTypeScript("../app/components/original-client-entity-animation-runtime.ts");
+  const presentation = new FishingFeedbackPresentation();
+  const arrival = { ...actor, kind: "player", direction: "DownLeft", fishing: true };
+  const tick = (now, entity) => {
+    const entities = entity ? [entity] : [];
+    const renderPoses = resolveCrystalEntityAnimationPoses({
+      runtime: bridge, worldKey, worldSeed: 7, now,
+      entities: entities.map(value => ({ entity: value, state: "standing" })),
+    });
+    return { pose: renderPoses[actor.objectId], feedback: presentation.advance(worldKey, now, entities, renderPoses) };
+  };
+  const quiet = { effects: [], sounds: [] };
+  try {
+    const entered = tick(1000, arrival);
+    assert.equal(entered.pose.action, "fishingWait");
+    assert.equal(entered.pose.logicalFrameIndex, 0);
+    assert.deepEqual(tick(1120, arrival).feedback, quiet);
+    assert.equal(tick(1200).pose, undefined);
+    const returned = tick(1210, arrival);
+    assert.equal(returned.pose.action, "fishingWait");
+    assert.equal(returned.pose.logicalFrameIndex, 0);
+    assert.equal(returned.pose.incarnation, entered.pose.incarnation + 1);
+    assert.deepEqual(tick(1330, arrival).feedback, quiet);
+
+    const reel = { ...arrival, fishing: false, fishingFeedback: ripple,
+      fishingEdges: appendFishingAnimationEdge(undefined, true, false, 1340) };
+    tick(1340, reel);
+    assert.deepEqual(tick(2030, reel).feedback, { effects: [], sounds: ["fishingPull"] });
+    assert.equal(tick(2730, reel).pose.action, "standing");
+    const cast = { ...arrival, fishingFeedback: ripple,
+      fishingEdges: appendFishingAnimationEdge(reel.fishingEdges, false, true, 2800) };
+    assert.equal(tick(2800, cast).pose.action, "fishingCast");
+    assert.deepEqual(tick(2900, cast).feedback, { effects: [], sounds: ["fishingThrow"] });
+    const visibleRipple = tick(3720, cast).feedback;
+    assert.deepEqual(visibleRipple.effects.map(effect => [effect.spellOrEffect, effect.x, effect.y]), [
+      ["FishingRippleInner", 339, 247], ["FishingRippleOuter", 339, 247],
+    ]);
+    assert.deepEqual(visibleRipple.sounds, []);
+    assert.equal(presentation.biteStartedAt, null);
+
+    tick(3750);
+    const enteredAgain = tick(3800, arrival);
+    assert.equal(enteredAgain.pose.action, "fishingWait");
+    assert.equal(enteredAgain.pose.logicalFrameIndex, 0);
+    assert.equal(enteredAgain.pose.incarnation, returned.pose.incarnation + 1);
+    assert.deepEqual(tick(3920, arrival).feedback, visibleRipple, "the prior map ripple can finish");
+    assert.deepEqual(tick(4440, arrival).feedback, quiet, "re-entry never generates another ripple");
+    assert.equal(presentation.biteStartedAt, null);
+  } finally {
+    bridge.free();
+  }
+});
+
 test("retiring the owner or map cannot leave a bite icon on an unrelated incarnation", () => {
   const presentation = new FishingFeedbackPresentation();
   const feedback = { ...actor, fishingFeedback: bite };

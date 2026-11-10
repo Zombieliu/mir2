@@ -61735,16 +61735,16 @@ fn fishing_packets_toggle_crystal_update_surface() {
         cast_packets,
         vec![
             ServerPacket::DuraChanged {
+                unique_id: 0,
+                current_dura: rod_current_dura,
+            },
+            ServerPacket::DuraChanged {
                 unique_id: 99000,
                 current_dura: 99
             },
             ServerPacket::DeleteItem {
                 unique_id: 99002,
                 count: 1
-            },
-            ServerPacket::DuraChanged {
-                unique_id: 0,
-                current_dura: rod_current_dura,
             },
             ServerPacket::FishingUpdate {
                 object_id,
@@ -61774,14 +61774,20 @@ fn fishing_packets_toggle_crystal_update_surface() {
     let reel_packets = session.handle_packet(ClientPacket::FishingCast { cast_out: false });
     assert_eq!(
         reel_packets,
-        vec![ServerPacket::FishingUpdate {
-            object_id,
-            fishing: false,
-            progress_percent: 0,
-            chance_percent: 38,
-            fishing_point,
-            found_fish: false,
-        }]
+        vec![
+            ServerPacket::DuraChanged {
+                unique_id: 99000,
+                current_dura: 98,
+            },
+            ServerPacket::FishingUpdate {
+                object_id,
+                fishing: false,
+                progress_percent: 0,
+                chance_percent: 38,
+                fishing_point,
+                found_fish: false,
+            },
+        ]
     );
 }
 

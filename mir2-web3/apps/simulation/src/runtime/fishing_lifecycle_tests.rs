@@ -14,6 +14,7 @@ fn fixture(bait_count: u32) -> SimulationSession {
         plain("FishingHook", 1, ItemContainer::Bag1),
         plain("FishingFloat", 1, ItemContainer::Bag1),
         plain("FishBait", bait_count, ItemContainer::Bag1),
+        plain("FishDetector", 1, ItemContainer::Bag1),
         plain("FishingReel", 1, ItemContainer::Bag1),
     ];
     let world = session.app.world_mut();
@@ -30,6 +31,7 @@ fn fixture(bait_count: u32) -> SimulationSession {
         (FISHING_SLOT_HOOK, "FishingHook"),
         (FISHING_SLOT_FLOAT, "FishingFloat"),
         (FISHING_SLOT_BAIT, "FishBait"),
+        (FISHING_SLOT_FINDER, "FishDetector"),
         (FISHING_SLOT_REEL, "FishingReel"),
     ] {
         rod_user_item.slots[slot] = Some(user_item_from_item_state(item(name)));
@@ -87,6 +89,23 @@ fn step(world: &mut World, at: Instant) -> Vec<ServerPacket> {
     packets
 }
 
+fn equipped_rod(world: &World) -> UserItem {
+    equipped_fishing_slot_carrier(world).unwrap().2
+}
+
+fn durability_receipts(packets: &[ServerPacket]) -> Vec<(u64, u16)> {
+    packets
+        .iter()
+        .filter_map(|packet| match packet {
+            ServerPacket::DuraChanged {
+                unique_id,
+                current_dura,
+            } => Some((*unique_id, *current_dura)),
+            _ => None,
+        })
+        .collect()
+}
+
 #[test]
 fn fishing_manual_reel_cancels_recast_without_spending_a_second_bait() {
     let mut session = fixture(2);
@@ -101,11 +120,17 @@ fn fishing_manual_reel_cancels_recast_without_spending_a_second_bait() {
         fishing_cast_at(world, true, now).is_empty(),
         "duplicate cast spent again"
     );
-    for _ in 0..2 {
-        let packets = fishing_cast_at(world, false, now);
-        assert_eq!(packets.len(), 1);
-        assert_eq!(updates(&packets), [(false, 0, false)]);
-    }
+    let hook = equipped_rod(world).slots[FISHING_SLOT_HOOK]
+        .as_ref()
+        .unwrap()
+        .unique_id;
+    let packets = fishing_cast_at(world, false, now);
+    assert_eq!(packets.len(), 2);
+    assert_eq!(durability_receipts(&packets), [(hook, 7_998)]);
+    assert_eq!(updates(&packets), [(false, 0, false)]);
+    let repeated = fishing_cast_at(world, false, now);
+    assert_eq!(repeated.len(), 1);
+    assert_eq!(updates(&repeated), [(false, 0, false)]);
     let fishing = world.resource::<FishingResource>();
     assert!(!fishing.fishing && fishing.auto_cast && fishing.next_step_at.is_none());
     assert_eq!(
@@ -127,6 +152,9 @@ fn fishing_source_progress_uses_cast_delay_attempts_and_exhaustion_order() {
         .config
         .crystal_fishing_delay_ms = 350;
     fishing_change_autocast_impl(world, true);
+    let rod = equipped_rod(world);
+    let hook = rod.slots[FISHING_SLOT_HOOK].as_ref().unwrap().unique_id;
+    let finder = rod.slots[FISHING_SLOT_FINDER].as_ref().unwrap().unique_id;
     let cast_at = Instant::now();
     assert_eq!(
         updates(&fishing_cast_at(world, true, cast_at)),
@@ -153,6 +181,15 @@ fn fishing_source_progress_uses_cast_delay_attempts_and_exhaustion_order() {
         updates(&packets),
         [(true, 103, false), (false, 103, false), (true, 0, false)]
     );
+    assert_eq!(
+        durability_receipts(&packets),
+        [
+            (hook, 7_998),
+            (rod.unique_id, 9_998),
+            (hook, 7_997),
+            (finder, 4_999)
+        ]
+    );
     assert!(
         matches!(
             packets.as_slice(),
@@ -162,10 +199,12 @@ fn fishing_source_progress_uses_cast_delay_attempts_and_exhaustion_order() {
                     progress_percent: 103,
                     ..
                 },
+                ServerPacket::DuraChanged { .. },
                 ServerPacket::FishingUpdate { fishing: false, .. },
                 ServerPacket::DuraChanged { .. },
-                ServerPacket::DeleteItem { count: 1, .. },
                 ServerPacket::DuraChanged { .. },
+                ServerPacket::DuraChanged { .. },
+                ServerPacket::DeleteItem { count: 1, .. },
                 ServerPacket::FishingUpdate {
                     fishing: true,
                     progress_percent: 0,
@@ -178,11 +217,142 @@ fn fishing_source_progress_uses_cast_delay_attempts_and_exhaustion_order() {
     let fishing = world.resource::<FishingResource>();
     assert_eq!(fishing.attempts, 0);
     assert_eq!(fishing.chance_counter, 1);
-    assert_eq!(fishing.chance_percent, 48);
+    assert!((48..=50).contains(&fishing.chance_percent));
     assert_eq!(
         fishing.next_step_at,
         Some(exhausted_at + Duration::from_millis(1100))
     );
+    let reel = fishing_cast_at(world, false, exhausted_at);
+    assert_eq!(durability_receipts(&reel), [(hook, 7_996), (finder, 4_998)]);
+    assert_eq!(updates(&reel), [(false, 0, false)]);
+}
+
+#[test]
+fn fishing_hook_and_retry_finder_delete_on_wear_after_zero() {
+    let mut session = fixture(2);
+    let world = session.app.world_mut();
+    let rod = equipped_rod(world);
+    let hook = rod.slots[FISHING_SLOT_HOOK].as_ref().unwrap().unique_id;
+    let finder = rod.slots[FISHING_SLOT_FINDER].as_ref().unwrap().unique_id;
+    sync_fishing_slots_from_equipment(world);
+    {
+        let mut fishing = world.resource_mut::<FishingResource>();
+        fishing.chance_counter = 1;
+        for slot in [FISHING_SLOT_HOOK, FISHING_SLOT_FINDER] {
+            fishing.slot_items[slot]
+                .as_mut()
+                .unwrap()
+                .durability_current = Some(1);
+        }
+    }
+    assert!(persist_fishing_slots_to_equipment(world));
+    let now = Instant::now();
+    let cast = fishing_cast_at(world, true, now);
+    assert_eq!(
+        durability_receipts(&cast),
+        [(rod.unique_id, 9_999), (hook, 0), (finder, 0)]
+    );
+    let zero = equipped_rod(world);
+    assert_eq!(
+        zero.slots[FISHING_SLOT_HOOK].as_ref().unwrap().current_dura,
+        0
+    );
+    assert_eq!(
+        zero.slots[FISHING_SLOT_FINDER]
+            .as_ref()
+            .unwrap()
+            .current_dura,
+        0
+    );
+    assert!(fishing_cast_at(world, true, now).is_empty());
+    let reel = fishing_cast_at(world, false, now);
+    assert_eq!(
+        reel,
+        [
+            ServerPacket::DeleteItem {
+                unique_id: hook,
+                count: 1
+            },
+            ServerPacket::DeleteItem {
+                unique_id: finder,
+                count: 1
+            },
+            fishing_update_packet(world),
+        ],
+    );
+    let finished = equipped_rod(world);
+    assert!(finished.slots[FISHING_SLOT_HOOK].is_none());
+    assert!(finished.slots[FISHING_SLOT_FINDER].is_none());
+    assert_eq!(finished.slots[FISHING_SLOT_BAIT].as_ref().unwrap().count, 1);
+    assert_eq!(finished.current_dura, 9_999);
+    assert_eq!(
+        fishing_cast_at(world, false, now),
+        [fishing_update_packet(world)]
+    );
+}
+
+#[test]
+fn fishing_source_wears_tackle_before_reporting_missing_bait() {
+    let mut session = fixture(1);
+    let world = session.app.world_mut();
+    sync_fishing_slots_from_equipment(world);
+    {
+        let mut fishing = world.resource_mut::<FishingResource>();
+        fishing.chance_counter = 1;
+        fishing.slot_items[FISHING_SLOT_BAIT] = None;
+    }
+    assert!(persist_fishing_slots_to_equipment(world));
+    let rod = equipped_rod(world);
+    let hook = rod.slots[FISHING_SLOT_HOOK].as_ref().unwrap().unique_id;
+    let finder = rod.slots[FISHING_SLOT_FINDER].as_ref().unwrap().unique_id;
+    let packets = fishing_cast_at(world, true, Instant::now());
+    assert_eq!(
+        durability_receipts(&packets),
+        [(rod.unique_id, 9_999), (hook, 7_999), (finder, 4_999)]
+    );
+    assert!(matches!(packets.last(), Some(ServerPacket::Chat { .. })));
+    assert!(updates(&packets).is_empty());
+    assert!(!world.resource::<FishingResource>().fishing);
+}
+
+#[test]
+fn fishing_last_rod_point_uses_the_pre_wear_cast_stat() {
+    let mut session = fixture(2);
+    let world = session.app.world_mut();
+    let rod_id = equipped_rod(world).unique_id;
+    world
+        .resource_mut::<InventoryResource>()
+        .equipment_items
+        .iter_mut()
+        .find(|item| item.slot == EquipmentSlot::Weapon)
+        .unwrap()
+        .durability_current = 1;
+    let now = Instant::now();
+    let packets = fishing_cast_at(world, true, now);
+    assert_eq!(
+        durability_receipts(&packets),
+        [
+            (rod_id, 0),
+            (
+                equipped_rod(world).slots[FISHING_SLOT_HOOK]
+                    .as_ref()
+                    .unwrap()
+                    .unique_id,
+                7_999
+            )
+        ]
+    );
+    assert!(matches!(
+        packets.last(),
+        Some(ServerPacket::FishingUpdate {
+            fishing: true,
+            chance_percent: 38,
+            ..
+        })
+    ));
+    let interrupted = step(world, now + crate::CRYSTAL_FISHING_CAST_DELAY);
+    assert_eq!(updates(&interrupted), [(false, 0, false)]);
+    assert_eq!(interrupted.len(), 1);
 }
 
 #[test]
@@ -201,7 +371,7 @@ fn fishing_bite_expires_after_three_seconds_without_a_second_nibble() {
         let packets = step(world, at);
         let progress = (attempt * 100 / 30) as i32;
         assert_eq!(updates(&packets)[0], (true, progress, at <= deadline));
-        assert_eq!(packets.len(), if attempt == 31 { 2 } else { 1 });
+        assert_eq!(packets.len(), if attempt == 31 { 3 } else { 1 });
     }
     let fishing = world.resource::<FishingResource>();
     assert!(!fishing.fishing && fishing.bite_expires_at.is_none());
@@ -267,8 +437,17 @@ fn fishing_late_reel_checks_expiry_before_next_maintenance_tick() {
     let world = session.app.world_mut();
     let deadline = bite(world, Instant::now());
     world.resource_mut::<FishingResource>().chance_percent = 100;
+    let hook = equipped_rod(world).slots[FISHING_SLOT_HOOK]
+        .as_ref()
+        .unwrap()
+        .unique_id;
     let late = fishing_cast_at(world, false, deadline + Duration::from_millis(1));
-    assert_eq!(late.len(), 1, "late reel generated loot or wear: {late:?}");
+    assert_eq!(
+        late.len(),
+        2,
+        "late reel generated more than hook wear and terminal: {late:?}"
+    );
+    assert_eq!(durability_receipts(&late), [(hook, 7_998)]);
     assert_eq!(updates(&late), [(false, 3, false)]);
 }
 

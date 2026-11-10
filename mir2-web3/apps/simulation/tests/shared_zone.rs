@@ -13520,6 +13520,107 @@ fn aoi_grid_walking_into_range_triggers_appearance() {
 }
 
 #[test]
+fn aoi_fishing_arrival_carries_only_the_wait_state_and_live_edges_keep_the_point() {
+    let mut zone = zone();
+    let angler = session("angler");
+    let peer = session("peer");
+    let mut joined = join("angler", 101, "Angler", 342, 244);
+    joined.direction = MirDirection::DownLeft;
+    zone.handle(ZoneCommand::Join(joined));
+    let outside = zone.handle(ZoneCommand::Join(join("peer", 102, "Peer", 342, 227)));
+    assert!(!has_packet(&outside, &peer, |packet| matches!(
+        packet,
+        ServerPacket::ObjectPlayer { info } if info.object_id == 101
+    )));
+
+    let point = Point { x: 339, y: 247 };
+    let publish = |zone: &mut ZoneRuntime, fishing, progress_percent, found_fish, now_ms| {
+        zone.handle(ZoneCommand::BroadcastPackets {
+            session_id: angler.clone(),
+            owner_local_object_id: 1001,
+            packets: vec![ServerPacket::FishingUpdate {
+                object_id: 1001,
+                fishing,
+                progress_percent,
+                chance_percent: 38,
+                fishing_point: point.clone(),
+                found_fish,
+            }],
+            now_ms,
+        })
+    };
+    let is_fishing = |packet: &ServerPacket| matches!(packet, ServerPacket::FishingUpdate { .. });
+    assert!(!has_packet(
+        &publish(&mut zone, true, 0, false, 0),
+        &peer,
+        is_fishing
+    ));
+
+    let walk = |zone: &mut ZoneRuntime, direction, seq, now_ms, expected_y| {
+        let mut outbound = zone.handle(ZoneCommand::Walk {
+            session_id: peer.clone(),
+            direction,
+            seq,
+            now_ms,
+        });
+        // Ready input can commit on admission. Preserve that receipt as well
+        // as any movement the explicit player tick consumes.
+        outbound.extend(zone.handle(ZoneCommand::TickPlayerMovement {
+            session_id: peer.clone(),
+            now_ms,
+        }));
+        assert_eq!(
+            zone.player_position(&peer),
+            Some(Point { x: 342, y: expected_y }),
+            "{outbound:?}",
+        );
+        outbound
+    };
+    let assert_wait_appearance = |outbound: &[ZoneOutbound]| {
+        assert!(
+            has_packet(outbound, &peer, |packet| matches!(
+                packet,
+                ServerPacket::ObjectPlayer { info }
+                    if info.object_id == 101 && info.fishing && info.direction == MirDirection::DownLeft
+            )),
+            "{outbound:?}",
+        );
+        assert!(!has_packet(outbound, &peer, is_fishing));
+    };
+    assert_wait_appearance(&walk(&mut zone, MirDirection::Down, 1, 800, 228));
+    assert!(!has_packet(
+        &publish(&mut zone, true, 3, true, 1_000),
+        &peer,
+        is_fishing
+    ));
+    assert!(has_packet(
+        &walk(&mut zone, MirDirection::Up, 2, 1_600, 227),
+        &peer,
+        |packet| matches!(packet, ServerPacket::ObjectRemove { object_id: 101 })
+    ));
+    assert_wait_appearance(&walk(&mut zone, MirDirection::Down, 3, 2_400, 228));
+
+    let reel = publish(&mut zone, false, 36, false, 2_500);
+    assert!(has_packet(&reel, &peer, |packet| matches!(
+        packet,
+        ServerPacket::FishingUpdate { object_id: 101, fishing: false,
+            progress_percent: 36, fishing_point, found_fish: false, .. } if fishing_point == &point
+    )));
+    let cast = publish(&mut zone, true, 0, false, 4_200);
+    assert!(has_packet(&cast, &peer, |packet| matches!(
+        packet,
+        ServerPacket::FishingUpdate { object_id: 101, fishing: true,
+            progress_percent: 0, fishing_point, found_fish: false, .. } if fishing_point == &point
+    )));
+    assert!(!has_packet(&cast, &angler, is_fishing));
+    assert!(!has_packet(
+        &publish(&mut zone, true, 6, false, 5_000),
+        &peer,
+        is_fishing
+    ));
+}
+
+#[test]
 fn aoi_grid_relocates_moving_shared_monster_before_visibility_diff() {
     let mut zone = zone();
     let source = session("source");

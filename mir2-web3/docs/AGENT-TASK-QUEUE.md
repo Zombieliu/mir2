@@ -10,7 +10,8 @@ Updated 2026-11-10 (Asia/Shanghai). Read [coordination](AGENT-ORCHESTRATION.md) 
 
 - [x] 比奇第一场景通过本机恢复及注销隔离，现网源码上的独立候选已构建并实测。继续受审切换及公网默认签名进城。 [发布候选](evidence/numeron-web-release-20261108/first-scene-release-candidate-20261110.json)
 - [x] Web 与 Windows 原版钓鱼声画及收线按钮，三秒期限、同批收线重抛和私有进度回包通过本机验收。服务器原版节奏和独立概率分支已通过定向测试，普通 Web 双路和二进制 TCP 实测 31 步、续抛、手动收线及读档。 [钓鱼记录](evidence/r16-web-fishing-loop-20261110/README.md#原版抛竿节奏与概率)
-- [ ] 继续鱼具收线磨损、观察者跨视野水效、Windows 窗口和 Hosted 联调。保留连续续抛时早期咬钩的短探针超时记录。
+- [x] 鱼钩与探测器收线磨损、零耐久移除和冷登录旁观者跨视野回包已复测。保持原版进视野的等待姿态，公开状态边走实时队列。 [磨损和跨视野回执](evidence/r16-web-fishing-loop-20261110/README.md#鱼具磨损与跨视野)
+- [ ] 继续 Windows 窗口、Hosted 联调、鱼具耐久归零提示和正式发行。保留连续续抛时早期咬钩的短探针超时记录。
 
 - [x] 继续 `codex/windows-player-journey`，保留原暂存、未暂存和未跟踪工作；五职业 / newcomer-v2 / Native 引导为唯一共同基础。
 - [x] 历史普通 UI 旅程已验证登录、选角、进城、装备、真怪、药、天然拾取、同服组队、交易及双方重登；首三项新手任务完整接交和重登记录保留。

@@ -168,6 +168,117 @@ fn native_fishing_visual_retires_on_map_death_and_removal() {
 }
 
 #[test]
+fn native_fishing_observer_bootstraps_wait_and_retires_point_on_aoi_reentry() {
+    let mut adapter = NativeGameplayAdapter::default();
+    let mut presentation = NativeEntityPresentation::default();
+    let mut source = shore_payload();
+    source["entities"][0]["y"] = json!(228);
+    source["sceneView"]["center"]["y"] = json!(228);
+    source["entities"][0]["sprite"]["weaponLibrary"] = json!("CWeapon/00");
+    adapter.observe_world_snapshot(&source);
+    presentation.bind_fishing_audio_generation(7);
+    let arrive = packet(
+        "ObjectPlayer",
+        json!({
+            "objectId":50000, "name":"Angler", "location":{"x":342,"y":244},
+            "direction":"DownLeft", "class":"Taoist", "gender":"Male",
+            "fishing":true, "weapon":49, "dead":false, "ridingMount":false, "transformType":-1,
+            "sprite":{"bodyLibrary":"CArmour/05","hairLibrary":"CHair/00",
+                "weaponLibrary":"CWeapon/49","frameBaseOffset":0,"weaponFrameOffset":0},
+        }),
+    );
+    let leave = packet("ObjectRemove", json!({"objectId":50000}));
+    let observe = |adapter: &mut NativeGameplayAdapter,
+                   presentation: &mut NativeEntityPresentation,
+                   event: &PacketEvent,
+                   now| {
+        assert!(adapter.observe_packet(event));
+        let mut payload = source.clone();
+        adapter.apply_authoritative_overlay(&mut payload);
+        presentation.observe_packet_payload(payload, now);
+    };
+    let render = |presentation: &mut NativeEntityPresentation, now, frame| {
+        presentation
+            .render_state_if_changed_with(now, true, |payload, frames, _| {
+                let entity = payload["entities"]
+                    .as_array()
+                    .unwrap()
+                    .iter()
+                    .find(|entity| entity["objectId"] == 50000)
+                    .expect("observer's AOI actor");
+                assert_eq!(frames["50000"], (frame, AnimationAction::Standing));
+                assert_eq!(entity[NATIVE_FISHING_POSE], 49);
+                assert_eq!(
+                    resolved_native_sprite(entity, AnimationAction::Standing)
+                        .weapon_library
+                        .as_deref(),
+                    Some("/original-ui/Fishing/00")
+                );
+                Some(json!({}))
+            })
+            .expect("fishing pose or cue changed");
+    };
+
+    observe(&mut adapter, &mut presentation, &arrive, 1_000);
+    assert_eq!(
+        presentation.fishing_actors["50000"].animation.phase(),
+        Some(FishingPhase::Wait)
+    );
+    render(&mut presentation, 1_120, 727);
+    assert!(presentation.last_fishing_cues.is_empty());
+    assert!(presentation.fishing_sound_events.is_empty());
+
+    // The Native bridge admits every packet projection before drawing, even
+    // when the Remove and re-entry are processed in one display frame.
+    observe(&mut adapter, &mut presentation, &leave, 1_150);
+    assert!(!presentation.fishing_actors.contains_key("50000"));
+    observe(&mut adapter, &mut presentation, &arrive, 1_150);
+    render(&mut presentation, 1_150, 726);
+    assert!(presentation.fishing_actors["50000"].point.is_none());
+
+    observe(
+        &mut adapter,
+        &mut presentation,
+        &fishing_packet(50000, false, 36),
+        1_300,
+    );
+    render(&mut presentation, 1_970, 785);
+    assert_eq!(
+        presentation.fishing_sound_events.pop().unwrap().file_name,
+        "fishing_pull.wav"
+    );
+    observe(
+        &mut adapter,
+        &mut presentation,
+        &fishing_packet(50000, true, 0),
+        2_700,
+    );
+    render(&mut presentation, 2_800, 673);
+    assert_eq!(
+        presentation.fishing_sound_events.pop().unwrap().file_name,
+        "fishing_throw.wav"
+    );
+    render(&mut presentation, 3_620, 727);
+    assert_eq!(
+        presentation.last_fishing_cues["50000"],
+        NativeFishingCueFrames {
+            point: (339, 247),
+            water: [640, 650],
+            actor: None
+        },
+    );
+    assert!(presentation.fishing_status_bite_cue().is_none());
+
+    observe(&mut adapter, &mut presentation, &leave, 3_650);
+    assert!(!presentation.fishing_actors.contains_key("50000"));
+    observe(&mut adapter, &mut presentation, &arrive, 3_650);
+    render(&mut presentation, 3_770, 727);
+    assert!(presentation.fishing_actors["50000"].point.is_none());
+    assert!(presentation.last_fishing_cues.is_empty());
+    assert!(presentation.fishing_sound_events.is_empty());
+}
+
+#[test]
 fn native_fishing_water_and_audio_follow_frame_one_and_release_custody() {
     let mut adapter = NativeGameplayAdapter::default();
     let mut presentation = NativeEntityPresentation::default();

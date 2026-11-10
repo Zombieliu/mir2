@@ -1,5 +1,9 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+## R16 鱼具磨损与跨视野（2026-11-10）
+
+钓鱼每次抛竿和收线分别磨损鱼钩，探测器按动作前的失败累积扣减。两个浏览器渲染路径验证鱼具槽移除、续抛快照及同档读回。旁观者实时收到公开收线，进视野仅恢复当前等待姿态。继续 Windows 窗口和 Hosted 验收。 [源规则和证据](evidence/r16-web-fishing-loop-20261110/README.md#鱼具磨损与跨视野)
+
 ## R16 原版钓鱼节奏与收线裁定（2026-11-10）
 
 普通 WebSocket 和 Crystal TCP 共用钓鱼计时，复测 750 毫秒首步、200 毫秒步进、30 次显示满进度及下一次耗尽。WebGPU 和 WebGL2 实点收线、自然过期、重抛和同档读回。继续 Crystal 鱼具磨损细节和 Windows 窗口。 [源规则和证据](evidence/r16-web-fishing-loop-20261110/README.md#原版抛竿节奏与概率)

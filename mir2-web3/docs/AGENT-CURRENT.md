@@ -16,9 +16,9 @@ working tree, services, release packages, source snapshots or parity percentages
 
 ## Last recorded decisions and open work
 
-2026-11-10 共同 Gateway 按 Crystal 的 750 毫秒首步、200 毫秒步进和第 31 次耗尽运行。两种 Web 渲染路径、双客户端和二进制 TCP 已验证独立计时、过期、续抛和手动停止，九竿 WebGPU 连续回合读档通过。继续鱼具磨损、观察者跨视野和 Windows 窗口。 [实测与剩余范围](evidence/r16-web-fishing-loop-20261110/README.md#原版抛竿节奏与概率)
+2026-11-10 共同 Gateway 对齐鱼钩和探测器的抛竿、收线磨损。WebGPU 实点验证零耐久鱼钩下次收线移除并重登，WebGL2 验证续抛后的鱼具快照。冷登录旁观者的公开收线回包由 12,042 毫秒降至 4 毫秒，重进视野只恢复当前姿态。继续 Windows 窗口、Hosted 和素材发行。 [磨损和跨视野回执](evidence/r16-web-fishing-loop-20261110/README.md#鱼具磨损与跨视野)
 
-2026-11-10 公网 `a23cc382` 默认 Chrome 简中和繁中再次通过首点出码及待确认。独立比奇修复候选 `c52ea9abb6` 已验证生产构建和恢复。待受审发布入口、默认网络签名进比奇与实体手机。 [本轮公网复测](evidence/r16-web-fishing-loop-20261110/crystal-cadence.json) · [发布候选证据](evidence/numeron-web-release-20261108/first-scene-release-candidate-20261110.json)
+2026-11-10 公网 `a23cc382` 默认 Chrome 简中和繁中再次通过出码及待确认。比奇候选 `c52ea9abb6` 的两文件发布 pin 已复验可应用，专用环境审核补丁的模拟门禁 74 项通过。待仓库独立审核、正式切换、默认网络签名进比奇和实体手机。 [本轮公网复测](evidence/r16-web-fishing-loop-20261110/tackle-wear-and-aoi.json) · [发布候选证据](evidence/numeron-web-release-20261108/first-scene-release-candidate-20261110.json)
 
 2026-11-10 公网 `83eadf4f` 切到第一方钱包中继，出码读限时 20 秒及一次瞬时失败重试。直连浏览器用官方手机尺寸钱包完成签名、兑换、比奇渲染及正常退出。同机默认 Chrome 等待资源后出码及轮询通过，独立冷启动仍复现超时。继续冷启动和实体手机验收。 [扫码发布与回执](evidence/numeron-web-release-20261108/qr-first-party-relay-20261110.json)
 

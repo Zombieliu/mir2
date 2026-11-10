@@ -717,6 +717,79 @@ fn live_aoi_order_logout_outside_view_releases_known_identity_without_another_re
 }
 
 #[test]
+fn live_fishing_edges_follow_aoi_fifo_and_retire_with_the_old_viewport() {
+    let pair = Pair::new(15);
+    let mut live = pair.live(1);
+    let peer = &pair.keys[0];
+    let owner = &pair.keys[1];
+    let actor = pair.ids[1];
+    let point = Point { x: 109, y: 111 };
+    let update = |object_id, fishing, progress_percent, found_fish| ServerPacket::FishingUpdate {
+        object_id,
+        fishing,
+        progress_percent,
+        chance_percent: 38,
+        fishing_point: point.clone(),
+        found_fish,
+    };
+    let publish = |state: &mut SharedInProcessZoneState, fishing, progress, found, now_ms| {
+        let outbounds = state.zone_manager.handle(ZoneCommand::BroadcastPackets {
+            session_id: pair.sessions[1].clone(),
+            owner_local_object_id: 1000,
+            packets: vec![update(1000, fishing, progress, found)],
+            now_ms,
+        });
+        // Owner FishingUpdate is a direct SimulationSession result. A Zone
+        // rebroadcast must not echo it back or publish private attempts.
+        assert!(state
+            .dispatch_zone_outbounds(outbounds, Some(owner))
+            .0
+            .is_empty());
+    };
+    let mut state = pair.shared.lock().unwrap();
+    publish(&mut state, true, 0, false, 2_000);
+    let first = live
+        .try_recv()
+        .expect("idle observer receives cast on the live lane");
+    let registration = first.registration_id();
+    assert_eq!(first.into_packet(), update(actor, true, 0, false));
+    publish(&mut state, true, 36, true, 2_200);
+    assert!(live.try_recv().is_err());
+    assert!(state.take_pending_zone_packets(peer).is_empty());
+
+    let remove = ServerPacket::ObjectRemove { object_id: actor };
+    let mut info = shared_object_player_info(actor, "Peer", 109, 114);
+    info.fishing = true;
+    let arrival = ServerPacket::ObjectPlayer { info };
+    state.queue_zone_packets(peer.clone(), vec![remove.clone(), arrival.clone()]);
+    publish(&mut state, false, 36, false, 2_400);
+    // A direct maintenance writer cannot send the reel ahead of queued Add.
+    assert!(state.take_pending_zone_packets(peer).is_empty());
+    assert_eq!(live.try_recv().unwrap().into_packet(), remove);
+    state.retry_pending_realtime_zone_outbounds();
+    assert_eq!(live.try_recv().unwrap().into_packet(), arrival.clone());
+    state.retry_pending_realtime_zone_outbounds();
+    assert_eq!(
+        live.try_recv().unwrap().into_packet(),
+        update(actor, false, 36, false)
+    );
+
+    state.queue_zone_packets(peer.clone(), vec![arrival]);
+    publish(&mut state, true, 0, false, 2_800);
+    let personal = ServerPacket::GainExperience { amount: 17 };
+    state.queue_zone_packets(peer.clone(), vec![personal.clone()]);
+    assert!(state.pending_zone_packets[peer].contains(&update(actor, true, 0, false)));
+    state.begin_zone_bootstrap(peer);
+    assert_eq!(state.take_pending_zone_packets(peer), vec![personal]);
+    let (sender, mut replacement) = tokio::sync::mpsc::channel(2);
+    let next = state
+        .register_live_zone_outbound(peer.clone(), SharedZoneLiveOutboundSender::single(sender));
+    assert_ne!(next, registration);
+    assert_eq!(live.try_recv().unwrap().registration_id(), registration);
+    assert!(replacement.try_recv().is_err());
+}
+
+#[test]
 fn live_aoi_order_wss_overflow_stops_broken_epoch_preserves_personal_state_and_fences_replacement()
 {
     let pair = Pair::new(15);

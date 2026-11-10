@@ -223,18 +223,27 @@ fn finish_fishing_cast(
     allow_recast: bool,
     packets: &mut Vec<ServerPacket>,
 ) -> bool {
-    let rate = player_stats(world).get(CRYSTAL_STAT_FISH_RATE_PERCENT);
-    let found_fish = {
-        let mut fishing = world.resource_mut::<FishingResource>();
-        expire_fishing_bite(&mut fishing, now);
-        fishing.chance_percent = clamp_percent(fishing.chance_percent.saturating_add(rate));
-        fishing.found_fish
-    };
-    let outcome = if found_fish {
-        complete_fishing_reel(world)
+    let outcome = if fishing_has_hook(world) {
+        damage_fishing_slot_item(world, FISHING_SLOT_HOOK, packets);
+        wear_retry_finder(world, packets);
+        let rate = player_stats(world).get(CRYSTAL_STAT_FISH_RATE_PERCENT);
+        let found_fish = {
+            let mut fishing = world.resource_mut::<FishingResource>();
+            expire_fishing_bite(&mut fishing, now);
+            fishing.chance_percent = clamp_percent(fishing.chance_percent.saturating_add(rate));
+            fishing.found_fish
+        };
+        if found_fish {
+            complete_fishing_reel(world)
+        } else {
+            count_completed_fishing_attempt(world);
+            FishingReelOutcome::default()
+        }
     } else {
-        count_completed_fishing_attempt(world);
-        FishingReelOutcome::default()
+        FishingReelOutcome {
+            packets: vec![fishing_chat(world, "server.NeedHook", "NeedHook")],
+            cancel_autocast: true,
+        }
     };
     packets.extend(outcome.packets);
     clear_active_fishing(world);
@@ -244,6 +253,7 @@ fn finish_fishing_cast(
     if allow_recast
         && !outcome.cancel_autocast
         && fishing_autocast_enabled(world)
+        && fishing_has_hook(world)
         && fishing_bait_available(world)
         && begin_fishing_cast(world, now, packets)
     {
@@ -284,21 +294,30 @@ fn begin_fishing_cast(world: &mut World, now: Instant, packets: &mut Vec<ServerP
         clear_active_fishing(world);
         return false;
     }
+    let rod_success_bonus = equipped_fishing_rod_stat(world, CRYSTAL_STAT_MAX_AC);
+    if let Some(packet) = damage_equipped_fishing_rod(world) {
+        packets.push(packet);
+    }
     if !fishing_has_hook(world) {
         clear_active_fishing(world);
         packets.push(fishing_chat(world, "server.NeedHook", "NeedHook"));
         return false;
     }
-    if fishing_slot_model_available(world) {
-        damage_fishing_slot_item(world, FISHING_SLOT_HOOK, packets);
-    }
+    damage_fishing_slot_item(world, FISHING_SLOT_HOOK, packets);
+    world.resource_mut::<FishingResource>().rolls = Default::default();
+    let retry_bonus = fishing_retry_success_bonus(world);
+    wear_retry_finder(world, packets);
     let Some(bait_stats) = consume_one_fishing_bait(world) else {
         clear_active_fishing(world);
         packets.push(fishing_chat(world, "server.YouNeedBait", "YouNeedBait"));
         return false;
     };
-    world.resource_mut::<FishingResource>().rolls = Default::default();
-    let chance_percent = fishing_cast_success_percent(world, bait_stats.stats.success_bonus);
+    let chance_percent = fishing_cast_success_percent(
+        world,
+        rod_success_bonus,
+        bait_stats.stats.success_bonus,
+        retry_bonus,
+    );
     let nibble_min = fishing_slot_template_stat(world, FISHING_SLOT_FLOAT, CRYSTAL_STAT_MIN_AC);
     let nibble_max = fishing_slot_template_stat(world, FISHING_SLOT_FLOAT, CRYSTAL_STAT_MAX_AC);
     let nibble_chance = clamp_percent(
@@ -316,13 +335,6 @@ fn begin_fishing_cast(world: &mut World, now: Instant, packets: &mut Vec<ServerP
     if let Some(packet) = bait_stats.packet {
         packets.push(packet);
     }
-    if world.resource::<FishingResource>().chance_counter > 0 && fishing_slot_model_available(world)
-    {
-        damage_fishing_slot_item(world, FISHING_SLOT_FINDER, packets);
-    }
-    if let Some(packet) = damage_equipped_fishing_rod(world) {
-        packets.push(packet);
-    }
     {
         let mut fishing = world.resource_mut::<FishingResource>();
         fishing.fishing = true;
@@ -336,6 +348,12 @@ fn begin_fishing_cast(world: &mut World, now: Instant, packets: &mut Vec<ServerP
         fishing.auto_reel_chance = auto_reel_chance;
     }
     true
+}
+
+fn wear_retry_finder(world: &mut World, packets: &mut Vec<ServerPacket>) {
+    if world.resource::<FishingResource>().chance_counter > 0 {
+        damage_fishing_slot_item(world, FISHING_SLOT_FINDER, packets);
+    }
 }
 
 fn fishing_rod_and_point_are_valid(world: &World) -> bool {
@@ -639,51 +657,47 @@ fn damage_fishing_slot_item(
     slot_index: usize,
     packets: &mut Vec<ServerPacket>,
 ) -> bool {
-    let previous = world.resource::<FishingResource>().slot_items.clone();
     let Some(expected_type) = fishing_slot_expected_item_type(slot_index) else {
         return false;
     };
-    let mut fishing = world.resource_mut::<FishingResource>();
-    let Some(slot) = fishing.slot_items.get_mut(slot_index) else {
+    let Some(item) = fishing_slot_item_of_type(world, slot_index, expected_type) else {
         return false;
     };
-    let Some(item) = slot.as_mut() else {
-        return false;
-    };
-    if !item_is_fishing_item_type(item, expected_type) {
-        return false;
-    }
-
     let unique_id = item_unique_id(item);
     let Some(current_dura) = item.durability_current else {
         return true;
     };
-    if current_dura == 0 {
-        *slot = None;
-        drop(fishing);
-        if !persist_fishing_slots_to_equipment(world) {
-            world.resource_mut::<FishingResource>().slot_items = previous;
-            return false;
-        }
-        packets.push(ServerPacket::DeleteItem {
-            unique_id,
-            count: 1,
-        });
-        return false;
-    }
-
-    let next_dura = current_dura.saturating_sub(1);
-    item.durability_current = Some(next_dura);
-    drop(fishing);
+    // Crystal removes an already broken attachment on its next wear event.
+    // The transition from one to zero is an ordinary durability receipt.
+    let (replacement, receipt, usable) = if current_dura == 0 {
+        (
+            None,
+            ServerPacket::DeleteItem { unique_id, count: 1 },
+            false,
+        )
+    } else {
+        let next_dura = current_dura - 1;
+        let mut item = item.clone();
+        item.durability_current = Some(next_dura);
+        (
+            Some(item),
+            ServerPacket::DuraChanged {
+                unique_id,
+                current_dura: next_dura,
+            },
+            next_dura > 0,
+        )
+    };
+    let previous = std::mem::replace(
+        &mut world.resource_mut::<FishingResource>().slot_items[slot_index],
+        replacement,
+    );
     if !persist_fishing_slots_to_equipment(world) {
-        world.resource_mut::<FishingResource>().slot_items = previous;
+        world.resource_mut::<FishingResource>().slot_items[slot_index] = previous;
         return false;
     }
-    packets.push(ServerPacket::DuraChanged {
-        unique_id,
-        current_dura: next_dura,
-    });
-    next_dura > 0
+    packets.push(receipt);
+    usable
 }
 
 fn fishing_slot_expected_item_type(slot_index: usize) -> Option<u8> {
@@ -753,24 +767,10 @@ fn complete_fishing_reel(world: &mut World) -> FishingReelOutcome {
     };
     world.resource_mut::<FishingResource>().chance_counter = 0;
     maybe_spawn_fishing_monster_event(world);
-    if fishing_has_reel(world) {
-        if fishing_slot_model_available(world) {
-            let reel_has_durability =
-                damage_fishing_slot_item(world, FISHING_SLOT_REEL, &mut outcome.packets);
-            if !reel_has_durability {
-                outcome.cancel_autocast = true;
-            }
-        } else {
-            if let Some(packet) = damage_equipped_fishing_rod(world) {
-                outcome.packets.push(packet);
-            }
-            if !has_equipped_fishing_rod(world) {
-                outcome.cancel_autocast = true;
-            }
-        }
-        if !fishing_has_reel(world) {
-            outcome.cancel_autocast = true;
-        }
+    if fishing_slot_model_available(world)
+        && !damage_fishing_slot_item(world, FISHING_SLOT_REEL, &mut outcome.packets)
+    {
+        outcome.cancel_autocast = true;
     }
     outcome
 }
@@ -966,15 +966,20 @@ fn spawn_points_contains(points: &[Point], point: &Point) -> bool {
     points.iter().any(|candidate| candidate == point)
 }
 
-fn fishing_cast_success_percent(world: &World, bait_success_bonus: i32) -> i32 {
-    let mut success_stat = clamp_signed_byte(equipped_fishing_rod_stat(world, CRYSTAL_STAT_MAX_AC));
+fn fishing_cast_success_percent(
+    world: &World,
+    rod_success_bonus: i32,
+    bait_success_bonus: i32,
+    retry_bonus: i32,
+) -> i32 {
+    let mut success_stat = clamp_signed_byte(rod_success_bonus);
     success_stat = clamp_signed_byte(success_stat.saturating_add(bait_success_bonus));
     let reel_success = fishing_slot_template_stat(world, FISHING_SLOT_REEL, CRYSTAL_STAT_MAX_AC);
     success_stat = clamp_signed_byte(success_stat.saturating_add(reel_success));
     let rate = player_stats(world).get(CRYSTAL_STAT_FISH_RATE_PERCENT);
     clamp_percent(
         (CRYSTAL_FISHING_SUCCESS_START_PERCENT + success_stat)
-            .saturating_add(fishing_retry_success_bonus(world))
+            .saturating_add(retry_bonus)
             .saturating_add(rate),
     )
 }

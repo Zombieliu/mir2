@@ -10104,6 +10104,7 @@ fn packet_belongs_to_world_viewport(packet: &ServerPacket) -> bool {
                 | ServerPacket::Struck { .. }
                 | ServerPacket::DamageIndicator { .. }
                 | ServerPacket::ObjectMana { .. }
+                | ServerPacket::FishingUpdate { .. }
                 | ServerPacket::HealthChanged { .. }
                 | ServerPacket::ObjectPoisoned { .. }
                 | ServerPacket::Poisoned { .. }

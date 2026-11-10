@@ -10638,8 +10638,24 @@ fn responses_change_trade_state(responses: &[ServerPacket]) -> bool {
         ServerPacket::TradeItem { .. } | ServerPacket::TradeConfirm | ServerPacket::TradeCancel { .. }))
 }
 
+fn responses_change_fishing_inventory(responses: &[ServerPacket]) -> bool {
+    // The current Web and Native equipment views read the authoritative rod
+    // and its children from snapshots. Progress alone needs only its packet.
+    responses.iter().any(|packet| matches!(packet, ServerPacket::FishingUpdate { .. }))
+        && responses.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::DuraChanged { .. }
+                | ServerPacket::DeleteItem { .. }
+                | ServerPacket::GainedItem { .. }
+                | ServerPacket::GainedGold { .. }
+        ))
+}
+
 fn low_latency_responses_require_world_snapshot(responses: &[ServerPacket]) -> bool {
-    responses_change_quest_state(responses) || responses_change_player_progression(responses) || responses_change_trade_state(responses)
+    responses_change_quest_state(responses)
+        || responses_change_player_progression(responses)
+        || responses_change_trade_state(responses)
+        || responses_change_fishing_inventory(responses)
 }
 
 fn responses_require_world_snapshot(responses: &[ServerPacket]) -> bool {
@@ -16715,6 +16731,31 @@ mod tests {
                     expire: 0,
                 },
             },
+        ]));
+    }
+
+    #[test]
+    fn fishing_timer_projects_tackle_changes_without_snapshotting_progress() {
+        let progress = ServerPacket::FishingUpdate {
+            object_id: 42,
+            fishing: true,
+            progress_percent: 16,
+            chance_percent: 38,
+            fishing_point: Point { x: 339, y: 247 },
+            found_fish: true,
+        };
+        let wear = ServerPacket::DuraChanged { unique_id: 99, current_dura: 0 };
+        assert!(!super::low_latency_responses_require_world_snapshot(
+            std::slice::from_ref(&progress),
+        ));
+        assert!(!super::low_latency_responses_require_world_snapshot(
+            std::slice::from_ref(&wear),
+        ));
+        assert!(super::low_latency_responses_require_world_snapshot(&[
+            progress.clone(), wear,
+        ]));
+        assert!(super::low_latency_responses_require_world_snapshot(&[
+            ServerPacket::DeleteItem { unique_id: 99, count: 1 }, progress,
         ]));
     }
 
