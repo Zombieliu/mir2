@@ -28,7 +28,9 @@ working tree, services, release packages, source snapshots or parity percentages
 
 2026-11-10 普通协议复测零耐久线轮空竿续抛及后续移除。WebGPU 和 WebGL2 实点验证线轮消失后关闭一次、替换不恢复旧开关，同档重登正常。Windows 定向状态和协议已复验。继续实际窗口、Hosted 和发行。 [续抛与同档](evidence/r16-web-fishing-loop-20261110/README.md#线轮耗尽与自动续抛) · [原图拖放与归零提示](evidence/r16-web-fishing-loop-20261110/README.md#鱼具跟手图与归零提示)
 
-2026-11-11 正式版 `d740f13823` 公网扫码和官方 Testnet 签名到比奇、走路、正常退出通过。首个可操作画面后约 4 秒采样见 9 个原版怪物身体。隔离原版行走帧通过回包重放，已有角色从上次落点进场，在怪物包被扣住时可移动。继续公网已有角色、自然行走和战斗帧、语言正文延迟、其他渲染路径与实体手机。 [正式发布与分项回执](evidence/r16-entry-monsters-20261111/README.md) · [小地图跨区](evidence/web-r16-parity-goal-20261107/minimap-long-route-live.json)
+2026-11-11 正式版 `d740f13823` 公网扫码和官方 Testnet 签名到比奇、走路、正常退出通过。首个可操作画面后约 4 秒采样见 9 个原版怪物身体。隔离原版行走帧通过回包重放，已有角色从上次落点进场，在怪物包被扣住时可移动。继续公网已有角色、自然行走和战斗帧、其他渲染路径与实体手机。 [正式发布与分项回执](evidence/r16-entry-monsters-20261111/README.md) · [小地图跨区](evidence/web-r16-parity-goal-20261107/minimap-long-route-live.json)
+
+2026-11-11 正式版 `f512cfbc99` 将十语玩法词库改为固定地址校验与可重试读取。简繁冷读异常恢复、比奇文字和繁中备用任务窗的原版标题说明通过。繁中公网签名进比奇并正常退出，词库在进城前就绪。地面包仍在有正文进展时于 12 秒取消，移动权威回包超过 8 秒验收窗。继续这两条长尾、备用任务窗剩余文字和实体手机。 [词库和公网回执](evidence/r16-gameplay-locale-20261111/README.md)
 
 2026-11-10 公网 `83eadf4f` 切到第一方钱包中继，出码读限时 20 秒及一次瞬时失败重试。直连浏览器用官方手机尺寸钱包完成签名、兑换、比奇渲染及正常退出。同机默认 Chrome 等待资源后出码及轮询通过，独立冷启动仍复现超时。继续冷启动和实体手机验收。 [扫码发布与回执](evidence/numeron-web-release-20261108/qr-first-party-relay-20261110.json)
 
