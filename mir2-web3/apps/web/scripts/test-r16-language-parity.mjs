@@ -100,6 +100,130 @@ test("the Web newcomer journal uses the Windows title and instruction in every d
   }
 });
 
+test("the R16 newcomer journal renders the canonical objectives with authoritative counters in all ten languages", async () => {
+  await native.loadR16GameplayLocalization();
+  const { localizeQuestEntry, formatQuestText } = load("lib/quest-localization.ts");
+  const catalog = load("lib/generated/r16-native-localization.json");
+  const journey = JSON.parse(readFileSync(path.resolve(root, "../../config/quest-guidance/newcomer-journey-v2.json"), "utf8"));
+  const rows = new Map(catalog.entries.map(row => [row.key, row.values]));
+  const monsters = {
+    Scarecrow: 39, RakingCat: 44, Oma: 48, ForestYeti: 55, Skeleton: 85,
+    Zombie2: 110, Zombie3: 112, Dung: 242, WoomaSoldier: 244, WoomaFighter: 246,
+  };
+  const substitute = (template, args) => template.replace(/\{([a-z]+)\}/g, (_, key) => String(args[key]));
+  assert.equal(journey.quests.length, 22);
+  for (const [index, language] of localizer.SUPPORTED_LANGUAGES.entries()) {
+    const t = localizer.buildTranslator(language);
+    const at = key => rows.get(key)[index];
+    for (const quest of journey.quests) {
+      const killRows = (quest.kills ?? []).flatMap(kill => {
+        const [, name] = /^Defeat \d+ (.+)\.$/.exec(kill.message);
+        const displayName = at("content.monster." + monsters[name] + ".name");
+        return [
+          [{ label: kill.message, current: 0, required: kill.count, done: false },
+            substitute(at("quest.objective.defeat"), { count: kill.count, name: displayName })],
+          [{ label: "Kill " + name + " (1 / " + kill.count + ")", current: 1, required: kill.count, done: kill.count === 1 },
+            substitute(at("quest.objective.kill"), { name: displayName })],
+        ];
+      });
+      const flagRows = (quest.flags ?? []).map(flag => {
+        const catalogRow = catalog.entries.find(row => row.key.startsWith("quest.journey.copy.") && row.values[2] === flag.message);
+        assert(catalogRow, flag.message);
+        return [{ label: flag.message, current: 0, required: 1, done: false }, catalogRow.values[index]];
+      });
+      const checks = [...killRows, ...flagRows].reverse();
+      const objectives = checks.map(([objective]) => objective);
+      const source = {
+        questId: quest.id, title: quest.title, summary: "", objective: "", progressLabel: "Progress 1/2",
+        tracker: "Newcomer V2 main node 1.", stage: "inProgress", current: 1, required: 2, rewardPreview: "", objectives,
+      };
+      const projected = localizeQuestEntry(source, t);
+      assert.deepEqual(projected.objectives, checks.map(([objective, label]) => ({ ...objective, label })), language + " " + quest.id);
+      assert.equal(projected.progressLabel, at("ui.questProgressHeading") + " 1/2");
+      assert.equal(projected.tracker, substitute(at("quest.objective.node"), { node: 1 }));
+      assert.deepEqual([projected.stage, projected.current, projected.required], ["inProgress", 1, 2]);
+      assert.deepEqual(source.objectives, objectives);
+      for (const [row, expected] of flagRows) {
+        const withSuffix = localizeQuestEntry({ ...source, objectives: [{ ...row, label: row.label + " (0 / 1)" }] }, t);
+        assert.equal(withSuffix.objectives[0].label, expected);
+      }
+    }
+    assert.equal(formatQuestText(t, "quest.chapter.progress", "Chapter {progress}", { progress: "1/6" }),
+      substitute(at("quest.chapter.progress"), { progress: "1/6" }));
+    assert.equal(formatQuestText(t, "quest.objective.kill", "Kill {name}", { name: "Opaque {name}" }),
+      substitute(at("quest.objective.kill"), { name: "Opaque {name}" }));
+  }
+  const source = {
+    questId: 2110002, title: "Equip your weapon", summary: "", objective: "Return to the Quest Diary",
+    progressLabel: "Ready to turn in.", tracker: "Return to the Quest Diary", stage: "readyToTurnIn",
+    current: 1, required: 1, rewardPreview: "",
+    objectives: [{ label: "Kill Unknown {name}", current: 0, required: 3 }],
+    rewards: { selectItems: [{ name: "(HP)DrugSmall", selectionIndex: 3, itemIndex: 55, count: 10 }] },
+  };
+  const t = localizer.buildTranslator("zh-TW");
+  const ready = localizeQuestEntry(source, t);
+  assert.equal(ready.tracker, native.nativeText("zh-TW", "quest.journey.copy.18"));
+  assert.equal(ready.objective, ready.tracker);
+  assert.equal(ready.progressLabel, "可交付");
+  assert.deepEqual(ready.objectives, source.objectives);
+  assert.deepEqual(ready.rewards.selectItems, [{ ...source.rewards.selectItems[0],
+    name: content.localizeCrystalItemName("(HP)DrugSmall", t) }]);
+  const available = localizeQuestEntry({ ...source, stage: "available", tracker: source.title + " is available." }, t);
+  assert.equal(available.tracker, "");
+  const jane = localizeQuestEntry({
+    ...source, questId: 2110001, objective: "Return to Assistant Jane.", tracker: "Return to Assistant Jane.",
+  }, t);
+  assert.equal(jane.tracker, "返回助理 Jane");
+  assert.equal(jane.objective, jane.tracker);
+  const diary = localizeQuestEntry({ ...source, tracker: "Return to the Quest Diary." }, t);
+  assert.equal(diary.tracker, native.nativeText("zh-TW", "quest.journey.copy.18"));
+  for (const level of [15, 20, 25, 30]) {
+    const questId = 2120000 + level;
+    const reward = { ...source, questId, stage: "inProgress", objective: "No automatic completion condition.",
+      tracker: "No automatic completion condition.", progressLabel: "Level " + level + "+, up to 30", objectives: undefined };
+    for (const language of localizer.SUPPORTED_LANGUAGES) {
+      const translated = localizer.buildTranslator(language);
+      const projected = localizeQuestEntry(reward, translated);
+      assert.equal(projected.objective, native.nativeText(language, "quest." + questId + ".description"));
+      assert.equal(projected.tracker, projected.objective);
+      assert.equal(projected.progressLabel, formatQuestText(translated, "quest.ui.levelTitle", "Lv {level} {title}", {
+        level: level + "–30", title: "",
+      }).trim());
+      const claimed = localizeQuestEntry({ ...reward, stage: "completed", objective: "Growth reward claimed." }, translated);
+      assert.equal(claimed.objective, native.nativeText(language, "content.quest.generic.stage.completed.objective"));
+    }
+  }
+});
+
+test("the fallback chapter and progress labels use the Windows keys in every display language", async () => {
+  await native.loadR16GameplayLocalization();
+  const { formatQuestText } = load("lib/quest-localization.ts");
+  const journey = load("lib/newcomer-v2-journey.ts");
+  const filename = path.join(root, "app/components/original-client-quest-log-window.tsx");
+  const source = ts.createSourceFile(filename, readFileSync(filename, "utf8"), ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);
+  const wanted = ["newcomerV2ChapterLabel", "newcomerV2JourneyLabel", "newcomerV2JourneyTooltip"];
+  const functions = source.statements.filter(node => ts.isFunctionDeclaration(node) && wanted.includes(node.name?.text));
+  assert.equal(functions.length, 3);
+  const code = ts.transpileModule(functions.map(node => node.getText(source)).join("\n"), {
+    compilerOptions: { target: ts.ScriptTarget.ES2022 },
+  }).outputText;
+  const labels = new Function("formatQuestText", "NEWCOMER_V2_CHAPTERS", "localizeNewcomerV2Text",
+    code + ";return { newcomerV2ChapterLabel, newcomerV2JourneyLabel, newcomerV2JourneyTooltip };")(
+    formatQuestText, journey.NEWCOMER_V2_CHAPTERS, journey.localizeNewcomerV2Text);
+  for (const language of localizer.SUPPORTED_LANGUAGES) {
+    const t = localizer.buildTranslator(language);
+    for (const [index, chapter] of journey.NEWCOMER_V2_CHAPTERS.entries()) {
+      const state = { ...chapter, number: index + 1, completedRecordedQuestCount: 1 };
+      const label = labels.newcomerV2ChapterLabel(state, t);
+      assert.equal(label, [
+        formatQuestText(t, "quest.chapter.progress", "Chapter {progress}", { progress: (index + 1) + "/6" }),
+        native.nativeText(language, "quest.journey.copy." + (index + 1)),
+        formatQuestText(t, "quest.ui.chapterProgress", "This chapter {done}/{total}", { done: 1, total: chapter.questIds.length }),
+      ].join(" · "));
+    }
+  }
+});
+
 test("real nameplate display boundary localizes only NPCs and monsters", () => {
   const filename = path.join(root, "app/components/original-client-scene-visual-layers.tsx");
   const source = ts.createSourceFile(filename, readFileSync(filename, "utf8"), ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);

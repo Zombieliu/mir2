@@ -13,6 +13,7 @@ import {
 import { ORIGINAL_UI } from "../../lib/original-ui";
 import { classAwareObjectiveLine } from "../../lib/onboarding-guidance";
 import {
+  NEWCOMER_V2_CHAPTERS,
   localizeNewcomerV2Text,
   newcomerV2ChapterForQuest,
   newcomerV2GraduationFor,
@@ -21,14 +22,11 @@ import {
   type NewcomerV2GraduationGoalKey,
   type NewcomerV2JourneyProgress,
 } from "../../lib/newcomer-v2-journey";
+import { formatQuestText, type QuestTranslateFn } from "../../lib/quest-localization";
 import { originalItemIconPath } from "./original-client-inventory-utils";
 import { SpriteButton } from "./original-client-overlays";
 
-type TranslateFn = (
-  key: string,
-  params?: Array<string | number>,
-  fallback?: string,
-) => string;
+type TranslateFn = QuestTranslateFn;
 
 type QuestStage = "available" | "inProgress" | "readyToTurnIn" | "completed";
 
@@ -737,12 +735,8 @@ function newcomerV2JourneyLabel(
   journey: NewcomerV2JourneyProgress,
   t: TranslateFn,
 ): string {
-  const label = localizeNewcomerV2Text({ en: "Journey", zhCN: "旅程" }, t);
+  const label = t("quest.ui.main", [], "Current main quest");
   const total = journey.chapters.reduce((count, chapter) => count + chapter.questIds.length, 0);
-  if (journey.currentChapter) {
-    const chapter = journey.currentChapter;
-    return `${label} ${chapter.number}/6 · ${journey.completedRecordedQuestCount}/${total}`;
-  }
   return `${label} ${journey.completedRecordedQuestCount}/${total}`;
 }
 
@@ -750,35 +744,24 @@ function newcomerV2JourneyTooltip(
   journey: NewcomerV2JourneyProgress,
   t: TranslateFn,
 ): string {
-  const journeyTitle = localizeNewcomerV2Text(
-    { en: "Newcomer Journey", zhCN: "新手旅程" },
-    t,
-  );
-  const total = journey.chapters.reduce((count, chapter) => count + chapter.questIds.length, 0);
-  const progress = localizeNewcomerV2Text({
-    en: `${journey.completedRecordedQuestCount}/${total} quests completed`,
-    zhCN: `已完成 ${journey.completedRecordedQuestCount}/${total} 项任务`,
-  }, t);
-  if (journey.currentChapter) {
-    const chapter = journey.currentChapter;
-    return `${journeyTitle}: ${localizeNewcomerV2Text({ en: "Chapter", zhCN: "章节" }, t)} ${chapter.number}/6 · ${localizeNewcomerV2Text(chapter.title, t)} · ${progress}`;
-  }
-  return `${journeyTitle}: ${progress}`;
+  return journey.currentChapter
+    ? newcomerV2ChapterLabel(journey.currentChapter, t)
+    : newcomerV2JourneyLabel(journey, t);
 }
 
 function newcomerV2ChapterLabel(
   chapter: NewcomerV2ChapterProgress,
   t: TranslateFn,
 ): string {
-  const chapterTitle = localizeNewcomerV2Text(chapter.title, t);
-  const recordLabel = localizeNewcomerV2Text(
-    {
-      en: `${chapter.completedRecordedQuestCount}/${chapter.questIds.length} completed`,
-      zhCN: `已完成 ${chapter.completedRecordedQuestCount}/${chapter.questIds.length}`,
-    },
-    t,
-  );
-  return `${localizeNewcomerV2Text({ en: "Chapter", zhCN: "章节" }, t)} ${chapter.number}/6 · ${chapterTitle} · ${recordLabel}`;
+  const ordinal = formatQuestText(t, "quest.chapter.progress", "Chapter {progress}", {
+    progress: `${chapter.number}/${NEWCOMER_V2_CHAPTERS.length}`,
+  });
+  const title = t.systemText?.(chapter.title.en) ?? localizeNewcomerV2Text(chapter.title, t);
+  const progress = formatQuestText(t, "quest.ui.chapterProgress", "This chapter {done}/{total}", {
+    done: chapter.completedRecordedQuestCount,
+    total: chapter.questIds.length,
+  });
+  return [ordinal, title, progress].join(" · ");
 }
 
 function QuestRewardView({

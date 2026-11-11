@@ -15,6 +15,7 @@ const loaded = new Map();
 function load(relative, dependencies = {}) {
   const file = new URL(relative, import.meta.url);
   const source = readFileSync(file, "utf8");
+  if (file.pathname.endsWith(".json")) return { default: JSON.parse(source) };
   const compiled = ts.transpileModule(source, { reportDiagnostics: true, compilerOptions: {
     module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022,
   } });
@@ -22,7 +23,7 @@ function load(relative, dependencies = {}) {
   const module = { exports: {} };
   new Function("require", "exports", "module", compiled.outputText)(name => {
     if (name in dependencies) return dependencies[name];
-    if (name.startsWith("./")) return load(`../lib/${name.slice(2)}.ts`);
+    if (name.startsWith("./")) return load(`../lib/${name.slice(2)}${name.endsWith(".json") ? "" : ".ts"}`);
     throw new Error(`Unexpected runtime dependency ${name}`);
   }, module.exports, module);
   loaded.set(file.pathname, { actualPath: file.pathname, realPath: realpathSync(file), bytes: Buffer.byteLength(source),

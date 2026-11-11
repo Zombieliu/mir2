@@ -193,12 +193,14 @@ export function newcomerV2ObjectiveTextFor(
 }
 
 function normalizeObjectiveLabel(label: string): string {
-  return label
-    .trim()
-    .replace(/\s+\d+\s*\/\s*\d+\s*$/, "")
+  return stripQuestObjectiveProgress(label)
     .replace(/[.。]+$/, "")
     .replace(/\s+/g, " ")
     .toLocaleLowerCase();
+}
+
+export function stripQuestObjectiveProgress(label: string): string {
+  return label.trim().replace(/\s+(?:\(\s*\d+\s*\/\s*\d+\s*\)|\d+\s*\/\s*\d+)$/, "");
 }
 
 export function newcomerV2ChapterForQuest(questId: number): NewcomerV2Chapter | null {
