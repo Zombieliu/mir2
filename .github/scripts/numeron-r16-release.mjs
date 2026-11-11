@@ -16,17 +16,26 @@ export const SITES = Object.freeze({
 });
 export const ORIGIN = 'https://numeron.obelisk.build';
 export const QR_RELEASE = Object.freeze({
-  source: 'ef0d1ee9dc7f4322d23c6332472add02e69c5f83',
+  source: '78c900ca36916e0ee70db39bf6b60fc9f916c6a6',
   sourceRef: BRANCH,
-  baseSource: '04420023eeec4025bb57be94611ad2d0ec6151d1',
+  baseSource: 'a852afd202ab7cc52d37c795ea5f7ab13835c40e',
   assetSource: 'f2de762309768b51b39438c2437c14e819df9bf7',
   changedFiles: [
-    { status: 'modified', filename: 'mir2-web3/apps/web/app/original-client-shell.tsx', sha: '2424e1ceae574ec2c80f3181b0f0836d5bc0d070' },
-    { status: 'modified', filename: 'mir2-web3/apps/web/lib/first-crystal-scene-request.ts', sha: 'b1c22b417b7f75cd76a91be62e9fd1bd4ba21880' },
-    { status: 'modified', filename: 'mir2-web3/apps/web/lib/r16-entry-scene.ts', sha: 'e5810b8dfac75928d8a506cd647f14056e4bffe6' },
-    { status: 'modified', filename: 'mir2-web3/apps/web/lib/r16-native-localization.ts', sha: '8ac2215f8869a6c621e69efd90ef055ebacc956c' },
-    { status: 'modified', filename: 'mir2-web3/apps/web/scripts/test-r16-native-localization.mjs', sha: '896f90991a1fd52bc18e22f58cbda328b4471f00' },
-    { status: 'modified', filename: 'mir2-web3/apps/web/scripts/test-scene-blueprint-request.mjs', sha: '66278f2a0bd976ee8c05ec4d60b0dd00a103998f' },
+    { status: 'modified', filename: 'mir2-web3/apps/web/app/components/original-client-quest-log-window.tsx', sha: '0eb8f320ba71fcffe8639cca9e531d84f7d0dc1a' },
+    { status: 'modified', filename: 'mir2-web3/apps/web/lib/newcomer-v2-journey.ts', sha: '1d2d4f9c178f4d26c01901d0012fc65b3ac24220' },
+    { status: 'modified', filename: 'mir2-web3/apps/web/lib/quest-localization.ts', sha: 'c9a9a5df0065bc42e012321cc4477670a310fcc7' },
+    { status: 'modified', filename: 'mir2-web3/apps/web/scripts/test-bevy-quest-locale.mjs', sha: 'd3eb2215de8feb20cd61f7dbfdb3dc61cf44f377' },
+    { status: 'modified', filename: 'mir2-web3/apps/web/scripts/test-r16-language-parity.mjs', sha: 'c201edfb090046b4708cfa0d828a0d92c74d2066' },
+    { status: 'modified', filename: 'mir2-web3/docs/AGENT-CURRENT.md', sha: 'd4965d1cd65b880dbbc894bb736d53fba5eda178' },
+    { status: 'modified', filename: 'mir2-web3/docs/AGENT-TASK-QUEUE.md', sha: 'be6d9fe94273d8e09334857947b7520a9723ebef' },
+    { status: 'modified', filename: 'mir2-web3/docs/FRONTEND-1TO1-GAPS.md', sha: 'acb6c8a3bbeb8bbba4ab023ebc59c36fc12c45cd' },
+    { status: 'modified', filename: 'mir2-web3/docs/WEB-R16-PARITY-GOAL.zh-CN.md', sha: '3f2b5464342faaf5158c995bea967113f8e4da45' },
+    { status: 'added', filename: 'mir2-web3/docs/evidence/r16-quest-text-20261111/README.md', sha: 'f9029891cc87ef3a82bd092882b24e7f121b3c17' },
+    { status: 'added', filename: 'mir2-web3/docs/evidence/r16-quest-text-20261111/available.png', sha: '79fe6471e68c6f14e512ee5ea7dece18ee532de1' },
+    { status: 'added', filename: 'mir2-web3/docs/evidence/r16-quest-text-20261111/before.png', sha: '2e7a9d459bacd5cc44e2f66645fba4a8d0b16bfb' },
+    { status: 'added', filename: 'mir2-web3/docs/evidence/r16-quest-text-20261111/followup.png', sha: '5a0b70e4ff3b03384b150438492ac800a63385f4' },
+    { status: 'added', filename: 'mir2-web3/docs/evidence/r16-quest-text-20261111/ready.png', sha: 'bea33a084aa648515ed1d8ba7e6db9bd2efe3413' },
+    { status: 'added', filename: 'mir2-web3/docs/evidence/r16-quest-text-20261111/receipt.json', sha: '739a96d60a5fb002f369e12cf612bd99b5d369e6' },
   ],
   entryScene: {
     path: '/bootstrap/r16-scenes/5c08d1fd4e81d92a7be20eb98c4c6288515749d5d459978dcf78fe2b86bdf325.json',
@@ -84,7 +93,7 @@ export const QR_RELEASE = Object.freeze({
     bytes: 3283113,
   },
   assetRunId: '42494701555',
-  baseline: 'dpl_DLwikwyBVpqgeuJnWck33KLUWqQy',
+  baseline: 'dpl_Ez4hAhk5CmWTnduNfjAZNB7LZJiC',
   relay: 'https://relay.dubhe.obelisk.build',
 });
 const QR_OPERATIONS = ['numeron-qr-stage', 'numeron-qr-promote', 'numeron-qr-rollback'];
