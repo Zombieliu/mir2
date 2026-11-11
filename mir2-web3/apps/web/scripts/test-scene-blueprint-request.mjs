@@ -371,28 +371,76 @@ test("a stalled floor body restarts once at the same address with a reload", asy
   ]);
 });
 
-test("object and actor assets load independently and publish only pinned bytes", async () => {
-  const objectBytes = readFileSync(new URL("../public" + visualsMetadata.objects.path, import.meta.url));
-  const actorBytes = readFileSync(new URL("../public" + visualsMetadata.actors.path, import.meta.url));
-  const wrong = Buffer.from(objectBytes);
+const readEntryVisual = (asset) => readFileSync(new URL("../public" + asset.path, import.meta.url));
+
+test("player, NPC and building packs load independently and publish only pinned bytes", async () => {
+  const { male, female } = visualsMetadata.players;
+  const [firstObject, secondObject, thirdObject] = visualsMetadata.objectParts;
+  const wrong = readEntryVisual(firstObject);
   wrong[50] ^= 1;
   const calls = [];
+  const packs = new Map([male, female, visualsMetadata.npcs, ...visualsMetadata.objectParts]
+    .map((asset) => [asset.path, readEntryVisual(asset)]));
+  let firstObjectFetches = 0;
   const entry = entryFixture(async (url, options) => {
     calls.push({ url, options });
-    return new Response(url === visualsMetadata.actors.path ? actorBytes : wrong);
+    if (url === firstObject.path && ++firstObjectFetches === 1) return new Response(wrong);
+    assert(packs.has(url), url);
+    return new Response(packs.get(url));
   });
+  const release = entryMetadata.assetReleaseId;
   assert.equal(entry.preloadR16EntryObjects(undefined), null);
-  assert.equal(entry.preloadR16EntryActors("other"), null);
-  const actorLoad = entry.preloadR16EntryActors(entryMetadata.assetReleaseId);
-  assert.equal(entry.preloadR16EntryActors(entryMetadata.assetReleaseId), actorLoad);
-  const objectLoad = entry.preloadR16EntryObjects(entryMetadata.assetReleaseId);
-  const actorPack = await actorLoad;
-  assert.equal(actorPack.libraries["CArmour/00"].frames.length, 160);
-  assert.match(actorPack.images["/original-ui/CArmour/00/44.png"], /^data:image\/png;base64,/);
-  assert.equal(await objectLoad, null);
-  assert.equal(calls.length, 2);
-  assert.equal(calls[1].url, visualsMetadata.objects.path);
-  assert.equal(calls[1].options.priority, "low");
+  assert.equal(entry.preloadR16EntryPlayer("other", "female"), null);
+  const maleLoad = entry.preloadR16EntryPlayer(release, "male");
+  assert.equal(entry.preloadR16EntryPlayer(release, "male"), maleLoad);
+  const femaleLoad = entry.preloadR16EntryPlayer(release, "female");
+  const npcLoad = entry.preloadR16EntryNpcs(release);
+  const objectLoads = entry.preloadR16EntryObjects(release);
+  const [malePack, femalePack, npcPack, rejected, second, third] =
+    await Promise.all([maleLoad, femaleLoad, npcLoad, ...objectLoads]);
+  assert.equal(malePack.libraries["CArmour/00"].frames.length, 80);
+  assert.equal(femalePack.libraries["CArmour/00"].frames.length, 80);
+  assert.match(malePack.images["/original-ui/CArmour/00/44.png"], /^data:image\/png;base64,/);
+  assert.match(femalePack.images["/original-ui/CArmour/00/852.png"], /^data:image\/png;base64,/);
+  const originalActors = JSON.parse(readEntryVisual(visualsMetadata.actors));
+  assert.deepEqual(
+    { ...malePack.images, ...femalePack.images, ...npcPack.images },
+    originalActors.images,
+  );
+  assert.equal(Object.keys(npcPack.libraries).length, 8);
+  assert.equal(rejected, null);
+  const retried = entry.preloadR16EntryObjects(release);
+  assert.equal(retried[1], objectLoads[1]);
+  assert.equal(retried[2], objectLoads[2]);
+  assert.deepEqual({ ...await retried[0], ...second, ...third }, JSON.parse(readEntryVisual(visualsMetadata.objects)));
+  assert.deepEqual(calls.map(({ url, options }) => [url, options.priority]), [
+    [male.path, "high"], [female.path, "high"], [visualsMetadata.npcs.path, "low"],
+    [firstObject.path, "low"], [secondObject.path, "low"], [thirdObject.path, "low"], [firstObject.path, "low"],
+  ]);
+});
+
+test("a player pack can finish after thirty seconds of continuous body progress", async (t) => {
+  t.mock.timers.enable({ apis: ["setTimeout"] });
+  const bytes = readEntryVisual(visualsMetadata.players.male);
+  const calls = [];
+  let body;
+  const stream = new ReadableStream({ start(controller) { body = controller; } });
+  const entry = entryFixture(async (url, options) => {
+    calls.push({ url, options });
+    return new Response(stream);
+  });
+  const pending = entry.preloadR16EntryPlayer(entryMetadata.assetReleaseId, "male");
+  await settleSceneFixture();
+  const chunkSize = Math.ceil(bytes.length / 5);
+  for (let index = 0; index < 5; index++) {
+    t.mock.timers.tick(6_000);
+    body.enqueue(bytes.subarray(index * chunkSize, (index + 1) * chunkSize));
+    await settleSceneFixture();
+  }
+  assert.equal(calls.length, 1);
+  assert.equal(calls[0].options.signal.aborted, false);
+  body.close();
+  assert.equal(Object.keys((await pending).images).length, 160);
 });
 
 test("the staged monster packages retain the exact eight directions and independent fallback", async () => {

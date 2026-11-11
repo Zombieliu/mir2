@@ -136,6 +136,10 @@ export const GameSceneBackdrop = memo(GameSceneBackdropInner);
 // (rebuilt only on movement) and "animated" on the frame index (cheap — only multi-frame
 // sprites do work; single-frame sprites are skipped early). "all" preserves old behavior.
 export type ViewportSpriteAnimationFilter = "all" | "static" | "animated";
+type ViewportSpritePacks = {
+  floor: R16EntrySpriteImages | null;
+  objects: R16EntrySpriteImages | null;
+};
 
 export function buildViewportMapSprites(
   world: DisplayWorld,
@@ -144,7 +148,7 @@ export function buildViewportMapSprites(
   animationFilter: ViewportSpriteAnimationFilter = "all",
   rangeExpansion = 0,
   viewportLayout: ViewportLayout = DEFAULT_VIEWPORT_LAYOUT,
-  packedFloor: R16EntrySpriteImages | null = null,
+  packs?: ViewportSpritePacks,
 ): ViewportMapSprites {
   const region = world.originalMapRegion;
   if (!region) {
@@ -181,7 +185,7 @@ export function buildViewportMapSprites(
       true,
       animationFilter,
       viewportLayout,
-      packedFloor,
+      packs,
     );
     appendViewportMapSprite(
       floor,
@@ -195,7 +199,7 @@ export function buildViewportMapSprites(
       true,
       animationFilter,
       viewportLayout,
-      packedFloor,
+      packs,
     );
     appendViewportMapSprite(
       floor,
@@ -209,7 +213,7 @@ export function buildViewportMapSprites(
       true,
       animationFilter,
       viewportLayout,
-      packedFloor,
+      packs,
     );
     appendViewportMapSprite(
       floor,
@@ -223,7 +227,7 @@ export function buildViewportMapSprites(
       true,
       animationFilter,
       viewportLayout,
-      packedFloor,
+      packs,
     );
   }
 
@@ -416,7 +420,7 @@ function appendViewportMapSprite(
   inObjectBounds: boolean,
   animationFilter: ViewportSpriteAnimationFilter = "all",
   viewportLayout: ViewportLayout = DEFAULT_VIEWPORT_LAYOUT,
-  packedFloor: R16EntrySpriteImages | null = null,
+  packs?: ViewportSpritePacks,
 ) {
   if (!spriteId) {
     return;
@@ -456,8 +460,10 @@ function appendViewportMapSprite(
   if (!frame) {
     return;
   }
-  const hasPackedFloor = sprite.drawMode === "floor" && packedFloor?.[frame.path];
-  if (!hasPackedFloor && staticSceneAssetRecentlyFailed(frame.path)) {
+  const packedImage = sprite.drawMode === "floor"
+    ? packs?.floor?.[frame.path]
+    : packs?.objects?.[mapSpriteRenderPath(frame.path)];
+  if (!packedImage && staticSceneAssetRecentlyFailed(frame.path)) {
     return;
   }
 

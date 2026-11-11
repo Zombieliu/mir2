@@ -27,10 +27,12 @@ export const R16_ENTRY_FLOOR_MAP = entryFloor.mapFileName;
 export const R16_ENTRY_FLOOR_BOUNDS = entryFloor.bounds;
 export const R16_ENTRY_MONSTER_BOUNDS = entryVisuals.monsterBounds;
 let floorLoad: Promise<R16EntrySpriteImages | null> | null = null;
-let objectLoad: Promise<R16EntrySpriteImages | null> | null = null;
-let actorLoad: Promise<R16EntryActorAssets | null> | null = null;
+type EntryAssetPin = { path: string; bytes: number; sha256: string };
+type EntryPlayerGender = keyof typeof entryVisuals.players;
 type EntryMonsterAction = "standing" | "walking";
-const monsterLoads: Partial<Record<EntryMonsterAction, Promise<R16EntryActorAssets | null>>> = {};
+const objectLoads = new Map<string, Promise<R16EntrySpriteImages | null>>();
+const actorLoads = new Map<string, Promise<R16EntryActorAssets | null>>();
+const VISUAL_BODY_TIMEOUT_MS = 45_000;
 
 export function preloadR16EntryScene(pinnedRelease?: string): Promise<SceneBlueprint | null> | null {
   if (pinnedRelease !== entryScene.assetReleaseId || entryScene.schemaVersion !== SCENE_BLUEPRINT_SCHEMA_VERSION ||
@@ -45,21 +47,25 @@ export function preloadR16EntryScene(pinnedRelease?: string): Promise<SceneBluep
 export function preloadR16EntryFloor(pinnedRelease?: string): Promise<R16EntrySpriteImages | null> | null {
   if (pinnedRelease !== entryFloor.assetReleaseId || entryFloor.assetReleaseId !== entryScene.assetReleaseId ||
       entryFloor.sceneSha256 !== entryScene.sha256 || !globalThis.crypto?.subtle) return null;
-  floorLoad ??= loadPinnedEntryFloor().catch(() => null).then((images) => {
+  floorLoad ??= loadProgressiveEntryJson<R16EntrySpriteImages>(entryFloor).catch(() => null).then((images) => {
     if (!images) floorLoad = null;
     return images;
   });
   return floorLoad;
 }
 
-async function loadPinnedEntryFloor(): Promise<R16EntrySpriteImages | null> {
+async function loadProgressiveEntryJson<T>(
+  asset: EntryAssetPin,
+  priority?: RequestPriority,
+  bodyTimeoutMs?: number,
+): Promise<T | null> {
   const { response, body } = await fetchBootstrapResponse(
-    entryFloor.path,
-    { cache: "force-cache", bodyByteLimit: entryFloor.bytes },
+    asset.path,
+    { cache: "force-cache", bodyByteLimit: asset.bytes, bodyTimeoutMs },
     response => response.arrayBuffer(),
-    (path, options) => fetch(path, { ...options, credentials: "omit", redirect: "error" }),
+    (path, options) => fetch(path, { ...options, credentials: "omit", redirect: "error", priority }),
   );
-  return response.ok && body ? decodePinnedEntryJson<R16EntrySpriteImages>(entryFloor, body) : null;
+  return response.ok && body ? decodePinnedEntryJson<T>(asset, body) : null;
 }
 
 function entryVisualsMatch(pinnedRelease?: string) {
@@ -68,42 +74,45 @@ function entryVisualsMatch(pinnedRelease?: string) {
     Boolean(globalThis.crypto?.subtle);
 }
 
-export function preloadR16EntryObjects(pinnedRelease?: string) {
-  if (!entryVisualsMatch(pinnedRelease)) return null;
-  objectLoad ??= loadPinnedEntryJson<R16EntrySpriteImages>(entryVisuals.objects, 25_000, "low").catch(() => null).then((images) => {
-    if (!images) objectLoad = null;
-    return images;
+function preloadVisual<T>(
+  asset: EntryAssetPin,
+  loads: Map<string, Promise<T | null>>,
+  priority?: RequestPriority,
+): Promise<T | null> {
+  const cached = loads.get(asset.path);
+  if (cached) return cached;
+  const pending = loadProgressiveEntryJson<T>(asset, priority, VISUAL_BODY_TIMEOUT_MS).catch(() => null).then((data) => {
+    if (!data) loads.delete(asset.path);
+    return data;
   });
-  return objectLoad;
+  loads.set(asset.path, pending);
+  return pending;
 }
 
-export function preloadR16EntryActors(pinnedRelease?: string) {
+export function preloadR16EntryObjects(pinnedRelease?: string) {
   if (!entryVisualsMatch(pinnedRelease)) return null;
-  actorLoad ??= loadPinnedEntryJson<R16EntryActorAssets>(entryVisuals.actors, 25_000).catch(() => null).then((assets) => {
-    if (!assets) actorLoad = null;
-    return assets;
-  });
-  return actorLoad;
+  return entryVisuals.objectParts.map(part => preloadVisual(part, objectLoads, "low"));
+}
+
+export function preloadR16EntryPlayer(pinnedRelease: string | undefined, gender: EntryPlayerGender) {
+  if (!entryVisualsMatch(pinnedRelease)) return null;
+  return preloadVisual(entryVisuals.players[gender], actorLoads, "high");
+}
+
+export function preloadR16EntryNpcs(pinnedRelease?: string) {
+  if (!entryVisualsMatch(pinnedRelease)) return null;
+  return preloadVisual(entryVisuals.npcs, actorLoads, "low");
 }
 
 export function preloadR16EntryMonsterFrames(pinnedRelease: string | undefined, action: EntryMonsterAction) {
   if (!entryVisualsMatch(pinnedRelease)) return null;
   const asset = action === "standing" ? entryVisuals.monsterStanding : entryVisuals.monsterWalking;
-  monsterLoads[action] ??= loadPinnedEntryJson<R16EntryActorAssets>(asset, 25_000, action === "walking" ? "low" : undefined)
-    .catch(() => null).then((assets) => {
-      if (!assets) delete monsterLoads[action];
-      return assets;
-    });
-  return monsterLoads[action];
+  return preloadVisual(asset, actorLoads, action === "walking" ? "low" : undefined);
 }
 
-async function loadPinnedEntryJson<T>(
-  asset: { path: string; bytes: number; sha256: string },
-  timeoutMs = PREFETCH_LIMIT_MS,
-  priority?: RequestPriority,
-): Promise<T | null> {
-  const signal = AbortSignal.timeout(timeoutMs);
-  const response = await fetch(asset.path, { cache: "force-cache", credentials: "omit", signal, priority });
+async function loadPinnedEntryJson<T>(asset: EntryAssetPin): Promise<T | null> {
+  const signal = AbortSignal.timeout(PREFETCH_LIMIT_MS);
+  const response = await fetch(asset.path, { cache: "force-cache", credentials: "omit", signal });
   if (!response.ok) {
     void response.body?.cancel().catch(() => {});
     return null;

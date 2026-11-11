@@ -3,7 +3,7 @@ type SceneReadOptions = {
   signal?: AbortSignal;
 };
 
-type BootstrapReadOptions = SceneReadOptions & { bodyByteLimit?: number };
+type BootstrapReadOptions = SceneReadOptions & { bodyByteLimit?: number; bodyTimeoutMs?: number };
 
 type SceneJsonResult<T> = {
   response: Response;
@@ -23,7 +23,7 @@ const TRANSIENT_STATUS = new Set([408, 425, 429, 500, 502, 503, 504]);
 
 async function readAttempt<T>(
   url: string,
-  { cache, signal: owner, bodyByteLimit }: BootstrapReadOptions,
+  { cache, signal: owner, bodyByteLimit, bodyTimeoutMs = READ_BODY_LIMIT_MS }: BootstrapReadOptions,
   fetcher: typeof fetch,
   readBody: (response: Response) => Promise<T>,
 ): Promise<SceneJsonResult<T>> {
@@ -57,7 +57,7 @@ async function readAttempt<T>(
     // Keep reading while real bytes arrive. A trickle must still finish within
     // the body deadline. Publish the result only after reading the full stream.
     restartIdleTimer();
-    bodyTimer = setTimeout(abortForTimeout, READ_BODY_LIMIT_MS);
+    bodyTimer = setTimeout(abortForTimeout, bodyTimeoutMs);
     let bodyBytes = 0;
     const stream = response.body?.pipeThrough(new TransformStream<Uint8Array, Uint8Array>({
       transform(chunk, output) {

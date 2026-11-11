@@ -14,8 +14,10 @@ const media = "data:image/png;base64,";
 const pngSignature = Buffer.from("89504e470d0a1a0a", "hex");
 const [mode, manifestFile, ...extra] = process.argv.slice(2);
 const check = mode === "--check" && manifestFile === undefined;
-assert(check || (mode === "--from-assets" && manifestFile && extra.length === 0),
-  "Usage: node scripts/generate-r16-entry-visuals.mjs --check | --from-assets <pinned release manifest>");
+const split = mode === "--split" && manifestFile === undefined;
+const fromAssets = mode === "--from-assets" && manifestFile && extra.length === 0;
+assert(check || split || fromAssets,
+  "Usage: node scripts/generate-r16-entry-visuals.mjs --check | --split | --from-assets <pinned release manifest>");
 assert.equal(entry.assetReleaseId, release.version);
 assert.equal(sources.sceneSha256, entry.sha256);
 
@@ -40,7 +42,7 @@ assert.deepEqual(objectPaths, [...new Set(objectPaths)].sort());
 assert(objectPaths.every(path => objectFrames.has(path)), "Entry object paths must come from the pinned scene");
 
 let manifest;
-if (!check) {
+if (fromAssets) {
   const manifestBytes = readFileSync(manifestFile);
   assert.equal(digest(manifestBytes), release.remoteReleaseSha256, "Pinned R16 release manifest changed");
   const value = JSON.parse(manifestBytes);
@@ -127,8 +129,8 @@ function checkActorPack(pack, keys = actorLibraries, includeFrame = isEntryActor
   assert.deepEqual(Object.keys(pack.images), [...new Set(paths)]);
 }
 
-const old = check ? readJson(metadataFile) : null;
-if (!check) fromRelease(blendFile, "application/json");
+const old = fromAssets ? null : readJson(metadataFile);
+if (fromAssets) fromRelease(blendFile, "application/json");
 const objectData = () => Object.fromEntries(objectPaths.map(path => [
   path, media + fromRelease(path.slice(1), "image/png").toString("base64"),
 ]));
@@ -136,9 +138,18 @@ function verifyObjects(pack) {
   assert.deepEqual(Object.keys(pack), objectPaths);
   for (const path of objectPaths) checkImage(pack[path], objectFrames.get(path));
 }
+function assetPin(bytes) {
+  const sha256 = digest(bytes);
+  return { path: "/bootstrap/r16-visuals/" + sha256 + ".json", bytes: bytes.length, sha256 };
+}
+function writeAsset(pin, bytes) {
+  const output = new URL(pin.path.slice(1), publicRoot);
+  mkdirSync(new URL(".", output), { recursive: true });
+  writeFileSync(output, bytes);
+}
 function packAsset(kind, maxBytes, make, verify) {
   let bytes;
-  if (check) {
+  if (old) {
     const path = old[kind].path;
     assert.match(path, /^\/bootstrap\/r16-visuals\/[a-f0-9]{64}\.json$/);
     bytes = readFileSync(new URL(path.slice(1), publicRoot));
@@ -146,28 +157,69 @@ function packAsset(kind, maxBytes, make, verify) {
     bytes = Buffer.from(JSON.stringify(make()) + "\n");
   }
   assert(bytes.length <= maxBytes, "Entry " + kind + " bytes exceed budget");
-  verify(JSON.parse(bytes));
-  const sha256 = digest(bytes);
-  const path = "/bootstrap/r16-visuals/" + sha256 + ".json";
-  if (!check) {
-    const output = new URL(path.slice(1), publicRoot);
-    mkdirSync(new URL(".", output), { recursive: true });
-    writeFileSync(output, bytes);
+  const data = JSON.parse(bytes);
+  verify(data);
+  const pin = assetPin(bytes);
+  if (old) assert.deepEqual(pin, old[kind]);
+  else writeAsset(pin, bytes);
+  return { pin, data };
+}
+
+function derivedAsset(data, maxBytes) {
+  const bytes = Buffer.from(JSON.stringify(data) + "\n");
+  assert(bytes.length <= maxBytes, "Split entry asset exceeds byte budget");
+  const pin = assetPin(bytes);
+  if (check) assert.deepEqual(readFileSync(new URL(pin.path.slice(1), publicRoot)), bytes);
+  else writeAsset(pin, bytes);
+  return pin;
+}
+
+function selectActorFrames(pack, keys, included) {
+  const libraries = {};
+  const images = {};
+  for (const key of keys) {
+    const source = pack.libraries[key];
+    const frames = source.frames.filter(included);
+    libraries[key] = { ...source, frames };
+    for (const frame of frames) images[frame.path] = pack.images[frame.path];
   }
-  return { path, bytes: bytes.length, sha256 };
+  return { libraries, images };
+}
+
+function splitObjects(data) {
+  // Balance decoded bytes so large drawings do not postpone any one batch.
+  const parts = Array.from({ length: 3 }, () => ({ paths: [], bytes: 0 }));
+  const ordered = [...objectPaths].sort((a, b) => data[b].length - data[a].length);
+  for (const path of ordered) {
+    const part = parts.reduce((smallest, candidate) => candidate.bytes < smallest.bytes ? candidate : smallest);
+    part.paths.push(path);
+    part.bytes += path.length + data[path].length;
+  }
+  return parts.map(({ paths }) => derivedAsset(Object.fromEntries(paths.sort().map(path => [path, data[path]])), 420_000));
 }
 function monsterPack(kind, action, framesPerLibrary, maxBytes) {
   const select = monsterFrameSelector(action);
   return packAsset(kind, maxBytes, () => actorData(monsterLibraries, select, false),
-    (pack) => checkActorPack(pack, monsterLibraries, select, framesPerLibrary));
+    (pack) => checkActorPack(pack, monsterLibraries, select, framesPerLibrary)).pin;
 }
+
+const objects = packAsset("objects", 1_200_000, objectData, verifyObjects);
+const actors = packAsset("actors", 980_000, actorData, checkActorPack);
+const male = selectActorFrames(actors.data, playerLibraries, frame => frame.index < 80);
+const female = selectActorFrames(actors.data, playerLibraries, frame => frame.index >= 808);
+assert.equal(Object.keys(male.images).length, 160);
+assert.equal(Object.keys(female.images).length, 160);
+const npcs = selectActorFrames(actors.data, npcLibraries, () => true);
 
 const metadata = {
   assetReleaseId: entry.assetReleaseId,
   sceneSha256: entry.sha256,
   mapFileName: region.mapFileName,
-  objects: packAsset("objects", 1_200_000, objectData, verifyObjects),
-  actors: packAsset("actors", 980_000, actorData, checkActorPack),
+  objects: objects.pin,
+  actors: actors.pin,
+  objectParts: splitObjects(objects.data),
+  players: { male: derivedAsset(male, 330_000), female: derivedAsset(female, 330_000) },
+  npcs: derivedAsset(npcs, 350_000),
   monsterBounds: region.playBounds,
   monsterStanding: monsterPack("monsterStanding", "Standing", 32, 550_000),
   monsterWalking: monsterPack("monsterWalking", "Walking", 48, 820_000),
