@@ -16,17 +16,24 @@ export const SITES = Object.freeze({
 });
 export const ORIGIN = 'https://numeron.obelisk.build';
 export const QR_RELEASE = Object.freeze({
-  source: '5c4df0c1c2be9db84b4d63f987856340e22ad316',
+  source: '9598f5c89ae58bb6a1145054fc9978707afc77e4',
   sourceRef: BRANCH,
-  baseSource: '1afaea0ca0fcd5258c4651b8bf2ef1e25ba55708',
+  baseSource: '6e0791c04b5b797f20a6f890e5f9b841a5e1e382',
   assetSource: 'f2de762309768b51b39438c2437c14e819df9bf7',
   changedFiles: [
-    { status: 'modified', filename: 'mir2-web3/apps/web/app/components/original-client-scene-map-rendering.tsx', sha: '23e29269f0bf4a86b1e578a701c1c85d16b1bd89' },
-    { status: 'modified', filename: 'mir2-web3/apps/web/app/original-client-shell.tsx', sha: 'da5e1f557479923d8ecf740598d202cd67c68fd1' },
-    { status: 'modified', filename: 'mir2-web3/apps/web/lib/generated/r16-entry-floor.json', sha: 'a8f7d630173379b795586c3ac36088c751c0f050' },
-    { status: 'modified', filename: 'mir2-web3/apps/web/lib/r16-entry-scene.ts', sha: 'd2013e03966c515e3a673dd45255294c6f5e5e4b' },
-    { status: 'modified', filename: 'mir2-web3/apps/web/scripts/generate-r16-entry-floor.mjs', sha: '9e6c12bc688667bad19af50284bf89f324a788fa' },
-    { status: 'modified', filename: 'mir2-web3/apps/web/scripts/test-scene-blueprint-request.mjs', sha: '5a318a0be00d1039e6349f2ed7193a4fbdf5e67a' },
+    { status: 'modified', filename: 'mir2-web3/apps/web/app/components/original-client-scene-map-rendering.tsx', sha: '951235f6164899cbfdb599d5009fc679750971ce' },
+    { status: 'modified', filename: 'mir2-web3/apps/web/app/original-client-shell.tsx', sha: '600b630ea875637b931d1bd46c513cc52c12fd42' },
+    { status: 'modified', filename: 'mir2-web3/apps/web/lib/first-crystal-scene-request.ts', sha: 'faa93c4603d6476e63911cfefb76c04d19f7df00' },
+    { status: 'modified', filename: 'mir2-web3/apps/web/lib/generated/r16-entry-visuals.json', sha: 'c4b79ee140c60c62bd4d2a8bea1e57a536911272' },
+    { status: 'modified', filename: 'mir2-web3/apps/web/lib/r16-entry-scene.ts', sha: '76257b7e0acca9f7b6f483a0f857456c7f739a6d' },
+    { status: 'added', filename: 'mir2-web3/apps/web/public/bootstrap/r16-visuals/0f52c6a6632c44eea1ab3cf37eb58da52f6c786cf3573813d595fcdd8ca040d0.json', sha: '307d00a81515ff31fd3b74fa2c774b3c14783ba7' },
+    { status: 'added', filename: 'mir2-web3/apps/web/public/bootstrap/r16-visuals/164d9bec51c291f17757e3c74d7e2d128d9747f5723165bc1a25c99f94445d08.json', sha: '2564abc0c5ec58ee1394edd139d996e249b6de52' },
+    { status: 'added', filename: 'mir2-web3/apps/web/public/bootstrap/r16-visuals/2530a00967ee0aa60d4802ab50690166d676c2c58b13567dc1fdde9951e0f5b5.json', sha: 'f22a300ae866831fb668f905682f056b5f51cfc9' },
+    { status: 'added', filename: 'mir2-web3/apps/web/public/bootstrap/r16-visuals/348dbb84596b95d7bfd065afb78cd4a582df808965b880e06fa5dbd1be05c0d1.json', sha: '7c5cd6d65eb6dbc8c8e2d5597ccb11400e5a5b82' },
+    { status: 'added', filename: 'mir2-web3/apps/web/public/bootstrap/r16-visuals/8d4ebe2ab7644fb7abf46cebab8c04c52747a3202049630948ef7726c581d89d.json', sha: '3c772e2afee92a8fa0ca6e4cbf960990a7fc0d56' },
+    { status: 'added', filename: 'mir2-web3/apps/web/public/bootstrap/r16-visuals/9093bb29d7f91ab07a44a47e888e2f1d40151130c1253ecf9451af63c4e057d9.json', sha: 'a3e3bf417178cd38c976f756cee10d1e54c332ed' },
+    { status: 'modified', filename: 'mir2-web3/apps/web/scripts/generate-r16-entry-visuals.mjs', sha: 'e79171106a99c004709b5eea74d838a292d35848' },
+    { status: 'modified', filename: 'mir2-web3/apps/web/scripts/test-scene-blueprint-request.mjs', sha: 'a7526a87e4cf0c83d70ddb763c3a8ccc60382e39' },
   ],
   entryScene: {
     path: '/bootstrap/r16-scenes/5c08d1fd4e81d92a7be20eb98c4c6288515749d5d459978dcf78fe2b86bdf325.json',
@@ -38,15 +45,35 @@ export const QR_RELEASE = Object.freeze({
     sha256: 'e4977afa3640bec9d8043ae32d794f92385a309fb4fa68cf407fe575016ce90d',
     bytes: 439896,
   },
-  entryObjects: {
-    path: '/bootstrap/r16-visuals/79d26b7b9f3d03e679305b8e9e0982312825ef2fffdec50d976ce930e152e4fe.json',
-    sha256: '79d26b7b9f3d03e679305b8e9e0982312825ef2fffdec50d976ce930e152e4fe',
-    bytes: 1185944,
+  entryPlayerMale: {
+    path: '/bootstrap/r16-visuals/164d9bec51c291f17757e3c74d7e2d128d9747f5723165bc1a25c99f94445d08.json',
+    sha256: '164d9bec51c291f17757e3c74d7e2d128d9747f5723165bc1a25c99f94445d08',
+    bytes: 289851,
   },
-  entryActors: {
-    path: '/bootstrap/r16-visuals/1427115a4db370cd3efdf21e10c156a772410250b131ac6b907948b72cba8895.json',
-    sha256: '1427115a4db370cd3efdf21e10c156a772410250b131ac6b907948b72cba8895',
-    bytes: 885989,
+  entryPlayerFemale: {
+    path: '/bootstrap/r16-visuals/0f52c6a6632c44eea1ab3cf37eb58da52f6c786cf3573813d595fcdd8ca040d0.json',
+    sha256: '0f52c6a6632c44eea1ab3cf37eb58da52f6c786cf3573813d595fcdd8ca040d0',
+    bytes: 282415,
+  },
+  entryNpcs: {
+    path: '/bootstrap/r16-visuals/9093bb29d7f91ab07a44a47e888e2f1d40151130c1253ecf9451af63c4e057d9.json',
+    sha256: '9093bb29d7f91ab07a44a47e888e2f1d40151130c1253ecf9451af63c4e057d9',
+    bytes: 313909,
+  },
+  entryObjects1: {
+    path: '/bootstrap/r16-visuals/2530a00967ee0aa60d4802ab50690166d676c2c58b13567dc1fdde9951e0f5b5.json',
+    sha256: '2530a00967ee0aa60d4802ab50690166d676c2c58b13567dc1fdde9951e0f5b5',
+    bytes: 395412,
+  },
+  entryObjects2: {
+    path: '/bootstrap/r16-visuals/8d4ebe2ab7644fb7abf46cebab8c04c52747a3202049630948ef7726c581d89d.json',
+    sha256: '8d4ebe2ab7644fb7abf46cebab8c04c52747a3202049630948ef7726c581d89d',
+    bytes: 395320,
+  },
+  entryObjects3: {
+    path: '/bootstrap/r16-visuals/348dbb84596b95d7bfd065afb78cd4a582df808965b880e06fa5dbd1be05c0d1.json',
+    sha256: '348dbb84596b95d7bfd065afb78cd4a582df808965b880e06fa5dbd1be05c0d1',
+    bytes: 395216,
   },
   entryMonsterStanding: {
     path: '/bootstrap/r16-visuals/d3f04c400820d8cd66b49b8af638a86e719bcf1032082be5a7ec80757bdf4308.json',
@@ -64,7 +91,7 @@ export const QR_RELEASE = Object.freeze({
     bytes: 3283113,
   },
   assetRunId: '42494701555',
-  baseline: 'dpl_6wuaHUzb49oStgBub5UXZAQmdTHA',
+  baseline: 'dpl_DLwikwyBVpqgeuJnWck33KLUWqQy',
   relay: 'https://relay.dubhe.obelisk.build',
 });
 const QR_OPERATIONS = ['numeron-qr-stage', 'numeron-qr-promote', 'numeron-qr-rollback'];
@@ -322,10 +349,12 @@ function protectedResponse(candidate, pathname, env, qrRequest) {
 async function releaseQrGame({ operation, initial, projects, candidate, id, vercel,
   body, readCandidate, fetchImpl, sleep, receipt }) {
   const hostname = new URL(ORIGIN).hostname;
-  const { baseline, relay, entryScene, entryFloor, entryObjects, entryActors,
+  const { baseline, relay, entryScene, entryFloor, entryPlayerMale, entryPlayerFemale, entryNpcs,
+    entryObjects1, entryObjects2, entryObjects3,
     entryMonsterStanding, entryMonsterWalking, entryGameplayLocale } = QR_RELEASE;
   const entryAssets = Object.entries({
-    Scene: entryScene, Floor: entryFloor, Objects: entryObjects, Actors: entryActors,
+    Scene: entryScene, Floor: entryFloor, PlayerMale: entryPlayerMale, PlayerFemale: entryPlayerFemale, Npcs: entryNpcs,
+    Objects1: entryObjects1, Objects2: entryObjects2, Objects3: entryObjects3,
     MonsterStanding: entryMonsterStanding, MonsterWalking: entryMonsterWalking, GameplayLocale: entryGameplayLocale,
   });
   const expectedOther = { original: production(initial.original), main: production(initial.main) };
