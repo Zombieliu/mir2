@@ -16,7 +16,7 @@ working tree, services, release packages, source snapshots or parity percentages
 
 ## Last recorded decisions and open work
 
-2026-11-11 本地候选修复静态地图 12 秒总超时和转普通路后丢弃晚到静态结果。66 项检查、生产/TypeScript 构建通过；默认 /game 和真实共用 WebGL2 在 17 秒静态头、动态 503 的代理复现中完成进城、任务窗 Q 开关、真实一步及退出。公网只读两包成功，签名全流程复验仍待发布。 [晚到地图与双路任务窗](evidence/r16-late-static-scene-20261111/README.md)
+2026-11-11 正式版 603e68a352 已发布晚到静态地图恢复。默认 /game 和真实共用 WebGL2 本机 17 秒头、动态 503 复现通过。公网简繁出码、两轮 Testnet 签名、固定地图及进城通过；繁中任务窗文本与 Q 开关已取证。首轮移动过关，第二轮回包约 35.1 秒超限，公开共用 HUD 尚未 ready，保留失败继续定位；完整三职业当前路线、旧档和实体手机继续。 [晚到地图正式发布与公网分项](evidence/r16-late-static-scene-20261111/production.md)
 
 2026-11-10 Web 双路实测从栗树透明处命中奥玛，实色处继续选栗树。动作间隔内的经典右键短按不再补发，新版寻路仍到达目标。图集纯 GPU 的真实选怪、其他普通窗口和后续地图继续验收。 [像素与短按回执](evidence/r16-actor-picking-20261110/README.md) · [释放、设置和移动奥玛](evidence/r16-right-release-20261110/README.md)
 
