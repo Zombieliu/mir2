@@ -1,9 +1,19 @@
+export type PrewarmAttemptDiagnostic = {
+  attempt: number;
+  phase: "headers" | "body" | "http" | "complete";
+  status?: number;
+  bytes: number;
+  durationMs: number;
+  errorName?: string;
+};
+
 type PrewarmRequestOptions = {
   signal?: AbortSignal;
   fetchImpl?: typeof fetch;
   headerTimeoutMs?: number;
   bodyIdleTimeoutMs?: number;
   maxBodyBytes?: number;
+  onAttempt?: (diagnostic: PrewarmAttemptDiagnostic) => void;
 };
 
 /** A warmed asset owns a complete body; receiving 200 headers is insufficient. */
@@ -13,10 +23,16 @@ export async function fetchPrewarmAsset(url: string, {
   headerTimeoutMs = 10_000,
   bodyIdleTimeoutMs = 15_000,
   maxBodyBytes = 32 * 1024 * 1024,
+  onAttempt,
 }: PrewarmRequestOptions = {}): Promise<{ response: Response; body: Uint8Array | null }> {
   let lastError: unknown;
   for (let attempt = 0; attempt < 3; attempt += 1) {
     if (signal?.aborted) throw abortError();
+    const started = performance.now();
+    let phase: PrewarmAttemptDiagnostic["phase"] = "headers";
+    let status: number | undefined;
+    let bytes = 0;
+    let errorName: string | undefined;
     const controller = new AbortController();
     const abortOwner = () => controller.abort(abortError());
     signal?.addEventListener("abort", abortOwner, { once: true });
@@ -26,14 +42,16 @@ export async function fetchPrewarmAsset(url: string, {
     controller.signal.addEventListener("abort", cancelReader, { once: true });
     try {
       const response = await fetchImpl(url, { cache: "force-cache", signal: controller.signal });
+      status = response.status;
       clearTimeout(timer);
       if (!response.ok) {
+        phase = "http";
         void response.body?.cancel().catch(() => {});
         if (attempt === 2) return { response, body: null };
       } else {
+        phase = "body";
         reader = response.body?.getReader();
         const chunks: Uint8Array[] = [];
-        let bytes = 0;
         timer = setTimeout(() => controller.abort(timeoutError()), bodyIdleTimeoutMs);
         while (reader) {
           const chunk = await reader.read();
@@ -51,13 +69,18 @@ export async function fetchPrewarmAsset(url: string, {
         const body = new Uint8Array(bytes);
         let offset = 0;
         for (const chunk of chunks) { body.set(chunk, offset); offset += chunk.byteLength; }
+        phase = "complete";
         return { response, body };
       }
     } catch (error) {
+      const cause = controller.signal.aborted ? controller.signal.reason : error;
+      errorName = cause instanceof Error ? cause.name : "Error";
       if (signal?.aborted) throw abortError();
       if (error instanceof RangeError) throw error;
       lastError = error;
     } finally {
+      try { onAttempt?.({ attempt: attempt + 1, phase, status, bytes,
+        durationMs: Math.round(performance.now() - started), errorName }); } catch { /* Diagnostic observers cannot alter loading. */ }
       clearTimeout(timer);
       signal?.removeEventListener("abort", abortOwner);
       controller.signal.removeEventListener("abort", cancelReader);

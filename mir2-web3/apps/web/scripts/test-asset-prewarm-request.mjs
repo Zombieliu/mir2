@@ -63,7 +63,12 @@ test("three broken bodies produce one failed prewarm metric and its URL", async 
   const metric = { ok: 0, failed: 0, failedUrls: [] };
   await loadPrewarmUrls(async () => { calls++; return brokenBody(); })(["/asset.png"], metric, {}, 1);
   assert.equal(calls, 3);
-  assert.deepEqual(metric, { ok: 0, failed: 1, failedUrls: ["/asset.png"] });
+  assert.deepEqual({ ok: metric.ok, failed: metric.failed, failedUrls: metric.failedUrls },
+    { ok: 0, failed: 1, failedUrls: ["/asset.png"] });
+  assert.equal(metric.requestFailures.length, 3);
+  assert.deepEqual(metric.requestFailures.map(({ url, attempt, phase, status, errorName }) =>
+    ({ url, attempt, phase, status, errorName })), [1, 2, 3].map(attempt =>
+    ({ url: "/asset.png", attempt, phase: "body", status: 200, errorName: "TypeError" })));
 });
 
 test("body inactivity cancels the incomplete stream before retrying", async () => {

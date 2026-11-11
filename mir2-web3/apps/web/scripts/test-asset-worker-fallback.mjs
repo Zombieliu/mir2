@@ -482,6 +482,33 @@ function fontWorkerFixture(t) {
   return { context, read, calls, streams, completions, stores, writes: () => writes };
 }
 
+test("retiring the first HUD consumer cannot cancel a coalesced prewarm body", async t => {
+  const owner = new AbortController(), calls = [];
+  let headers, body;
+  const headerGate = new Promise(resolve => { headers = resolve; });
+  const { context } = createWorkerContext(async request => {
+    calls.push(request);
+    await headerGate;
+    return new Response(new ReadableStream({ start(controller) {
+      body = controller;
+      request.signal.addEventListener("abort", () => controller.error(request.signal.reason), { once: true });
+    } }));
+  });
+  t.after(() => { headers(); try { body?.close(); } catch {} });
+  context.firstHud = new Request("https://preview.example.test/original-ui/Prguse/1.png", { signal: owner.signal });
+  context.nextHud = new Request(context.firstHud.url);
+  const first = vm.runInContext("coalescedStaticAssetFetch(firstHud)", context);
+  const next = vm.runInContext("coalescedStaticAssetFetch(nextHud)", context);
+  assert.equal(calls.length, 1, "consumers share one pending header request");
+  headers();
+  const [image, prewarm] = await Promise.all([first, next]);
+  owner.abort("legacy HUD unmounted during Native handoff");
+  assert.equal(calls[0].signal.aborted, false, "one image retiring must not abort the shared network body");
+  body.enqueue(new Uint8Array([137, 80, 78, 71])); body.close();
+  assert.deepEqual([...new Uint8Array(await prewarm.arrayBuffer())], [137, 80, 78, 71]);
+  assert.deepEqual([...new Uint8Array(await image.arrayBuffer())], [137, 80, 78, 71]);
+});
+
 test("CSS and renderer consumers share one font through its unfinished body and cache fill", async t => {
   const f = fontWorkerFixture(t);
   const first = await f.read();

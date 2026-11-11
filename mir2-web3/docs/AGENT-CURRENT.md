@@ -16,7 +16,7 @@ working tree, services, release packages, source snapshots or parity percentages
 
 ## Last recorded decisions and open work
 
-2026-11-12 候选 `0d4251f330` 本机64项、两后端113/113、重开和保存通过；公网新增门槛失败后已回滚到 `007c14c6fd`，回滚简繁扫码通过。公网四张旧 HUD 预取失败，另确认图集构建耗时进入缓存摘要导致命名空间变化。发布配置已恢复已验收源码；优先修这两项再重发，完整1:1继续。[本机、公网失败与回滚](evidence/r16-prewarm-body-20261112/README.md)
+2026-11-12 按用户要求准备重发：已修复首个 HUD 消费者取消影响共用预取，以及图集导出耗时/JSON大小误入缓存身份。75项定向检查、生产构建及本机两后端113/113、重开/同档/保存通过，问题四图改走R2代理复测。Worker变化会正常更新一次缓存；相同素材后续重建应保持身份。正式站仍为 `007c14c6fd`，待候选发布后公网复验；历史失败及完整1:1范围保留。[候选与边界](evidence/r16-cache-repair-20261112/README.md)
 
 2026-11-10 Web 双路实测从栗树透明处命中奥玛，实色处继续选栗树。动作间隔内的经典右键短按不再补发，新版寻路仍到达目标。图集纯 GPU 的真实选怪、其他普通窗口和后续地图继续验收。 [像素与短按回执](evidence/r16-actor-picking-20261110/README.md) · [释放、设置和移动奥玛](evidence/r16-right-release-20261110/README.md)
 

@@ -432,7 +432,11 @@ function freshStaticAssetRequest(request) {
 }
 
 async function coalescedStaticAssetFetch(request) {
-  return coalescedResponse(staticAssetInflightFetches, request.url, () => fetchStaticAsset(request));
+  // DOM images and prewarming may share the same immutable response. Retiring
+  // the first image during the Native HUD handoff must not abort the other
+  // consumer or its CacheStorage body write.
+  const sharedRequest = new Request(request, { signal: new AbortController().signal });
+  return coalescedResponse(staticAssetInflightFetches, request.url, () => fetchStaticAsset(sharedRequest));
 }
 
 async function coalescedSceneBlueprintFetch(request) {

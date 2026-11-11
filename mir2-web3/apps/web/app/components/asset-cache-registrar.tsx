@@ -25,7 +25,7 @@ import {
   type AssetReleaseCapabilities,
 } from "../../lib/asset-release-capabilities";
 import { normalizeDeviceMemoryGiB, resolveRenderTier } from "../../lib/render-tier";
-import { fetchPrewarmAsset } from "../../lib/asset-prewarm-request";
+import { fetchPrewarmAsset, type PrewarmAttemptDiagnostic } from "../../lib/asset-prewarm-request";
 import { OriginalClientStagePortal } from "./original-client-stage-portal";
 
 type AssetManifest = {
@@ -96,6 +96,7 @@ type CachePrewarmMetric = {
   ok: number;
   failed: number;
   failedUrls: string[];
+  requestFailures?: (PrewarmAttemptDiagnostic & { url: string })[];
   durationMs: number;
   sceneCacheHits: number;
   sceneCacheMisses: number;
@@ -1252,7 +1253,11 @@ async function prewarmUrls(
       const url = queue[index];
       index += 1;
       try {
-        const { response } = await fetchPrewarmAsset(url, { signal });
+        const { response } = await fetchPrewarmAsset(url, { signal, onAttempt: diagnostic => {
+          if (diagnostic.phase === "complete") return;
+          metric.requestFailures ??= [];
+          if (metric.requestFailures.length < 96) metric.requestFailures.push({ url, ...diagnostic });
+        } });
         if (response.ok) metric.ok += 1;
         else {
           metric.failed += 1;
