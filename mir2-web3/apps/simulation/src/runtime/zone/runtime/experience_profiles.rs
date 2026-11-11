@@ -109,20 +109,9 @@ impl ZoneRuntime {
             return false;
         };
         if profile.as_ref().is_some_and(|profile| {
-            profile.account_id != player.account_id
-                || profile.character_index != player.character_index
-                || profile.account_id.is_empty()
-                || profile.monster_multiplier == 0
-                || profile.natural_kill_multiplier == 0
-                || profile
-                    .guild
-                    .as_ref()
-                    .is_some_and(|guild| guild.guild_id.is_empty())
-                || !f32::from_bits(profile.world_experience_rate_bits).is_finite()
-                || f32::from_bits(profile.world_experience_rate_bits) < 0.0
-                || !f32::from_bits(profile.guild_experience_rate_bits).is_finite()
-                || f32::from_bits(profile.guild_experience_rate_bits) < 0.0
-                || profile.gain_rates_at(0).is_err()
+            profile
+                .validate_for_online_character(&player.account_id, player.character_index)
+                .is_err()
         }) {
             return false;
         }

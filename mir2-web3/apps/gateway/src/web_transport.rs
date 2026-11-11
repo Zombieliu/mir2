@@ -8,6 +8,7 @@ use futures_util::{Sink, SinkExt};
 use tokio::sync::{watch, Mutex, Notify};
 
 pub(super) const WRITE_TIMEOUT: Duration = Duration::from_secs(10);
+const PEER_CLOSE_REPLY_GRACE: Duration = Duration::from_secs(1);
 pub(super) const MAX_BATCH_MESSAGES: usize = 32;
 pub(super) const MAX_BATCH_BYTES: usize = 64 * 1024;
 
@@ -159,6 +160,43 @@ where
                 self.terminal.end(TransportEnd::WriteTimeout);
                 Err(timeout_error())
             }
+        }
+    }
+
+    /// Reading Close only queues tungstenite's automatic reply. Flush it before
+    /// ending the reader, but do not let an occupied writer delay teardown for
+    /// the full ordinary write deadline.
+    pub(super) async fn flush_peer_close_reply(&self) -> Result<(), axum::Error> {
+        if self.terminal.ended() {
+            return Err(ended_error());
+        }
+        let deadline = tokio::time::Instant::now() + self.timeout.min(PEER_CLOSE_REPLY_GRACE);
+        let sink = match tokio::time::timeout_at(deadline, self.sink.lock()).await {
+            Ok(sink) => sink,
+            Err(_) => {
+                self.terminal.end(TransportEnd::Closed);
+                return Err(timeout_error());
+            }
+        };
+        if self.terminal.ended() {
+            return Err(ended_error());
+        }
+        let mut write = InFlightBatch {
+            sink,
+            terminal: &self.terminal,
+            completed: false,
+        };
+        let result = tokio::time::timeout_at(deadline, write.sink.flush()).await;
+        // Fence while still holding the sink, including a failed/partial Close
+        // flush. A waiting producer must never reuse that closing transport.
+        self.terminal.end(TransportEnd::Closed);
+        match result {
+            Ok(Ok(())) => {
+                write.completed = true;
+                Ok(())
+            }
+            Ok(Err(error)) => Err(error),
+            Err(_) => Err(timeout_error()),
         }
     }
 
@@ -382,6 +420,43 @@ mod tests {
 
     fn message() -> Message {
         Message::Text("test".into())
+    }
+
+    #[tokio::test]
+    async fn transport_peer_close_reply_flushes_without_sending_gameplay_and_fences_later_writes() {
+        let (sender, sent) = sender(true, true, false);
+        sender.flush_peer_close_reply().await.unwrap();
+        assert_eq!(sender.terminal.reason(), Some(TransportEnd::Closed));
+        assert_eq!(sent.load(Ordering::SeqCst), 0);
+        assert!(sender.send(message()).await.is_err());
+        assert_eq!(sent.load(Ordering::SeqCst), 0);
+    }
+
+    #[tokio::test]
+    async fn transport_peer_close_reply_pending_flush_is_bounded_and_fenced() {
+        let (sender, sent) = sender(true, false, false);
+        let result = tokio::time::timeout(Duration::from_secs(1), sender.flush_peer_close_reply())
+            .await
+            .expect("Close flush must retain its finite writer deadline");
+        assert!(result.is_err());
+        assert_eq!(sender.terminal.reason(), Some(TransportEnd::Closed));
+        assert!(sender.send(message()).await.is_err());
+        assert_eq!(sent.load(Ordering::SeqCst), 0);
+    }
+
+    #[tokio::test]
+    async fn transport_peer_close_reply_lock_wait_is_bounded_and_prior_terminal_reason_survives() {
+        let (sender, _) = sender(true, true, false);
+        let occupied = sender.sink.lock().await;
+        assert!(sender.flush_peer_close_reply().await.is_err());
+        assert_eq!(sender.terminal.reason(), Some(TransportEnd::Closed));
+        drop(occupied);
+        for reason in [TransportEnd::ReadError, TransportEnd::WriteTimeout] {
+            let (write, _) = super::tests::sender(true, true, false);
+            write.terminal.end(reason);
+            assert!(write.flush_peer_close_reply().await.is_err());
+            assert_eq!(write.terminal.reason(), Some(reason));
+        }
     }
 
     #[tokio::test]

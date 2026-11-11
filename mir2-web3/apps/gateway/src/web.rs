@@ -5998,7 +5998,15 @@ fn spawn_socket_reader(
         loop {
             let message = match receiver.next().await {
                 Some(Ok(Message::Text(text))) => text,
-                Some(Ok(Message::Close(_))) | None => {
+                Some(Ok(Message::Close(_))) => {
+                    if let Err(error) = sender.flush_peer_close_reply().await {
+                        eprintln!("web peer Close reply flush failed: {error} session_id={session_id}");
+                    }
+                    terminal.end(transport::TransportEnd::Closed);
+                    let _ = input_tx.try_send(SocketInbound::Closed);
+                    return;
+                }
+                None => {
                     terminal.end(transport::TransportEnd::Closed);
                     let _ = input_tx.try_send(SocketInbound::Closed);
                     return;
@@ -14853,6 +14861,10 @@ mod game_shop_gift_tests;
 #[cfg(test)]
 #[path = "web_transport_close_tests.rs"]
 mod web_transport_close_tests;
+
+#[cfg(test)]
+#[path = "web_peer_close_ack_tests.rs"]
+mod web_peer_close_ack_tests;
 
 #[cfg(test)]
 #[path = "web_reconnect_handoff_store_tests.rs"]

@@ -51,6 +51,133 @@ pub(super) fn rebase_locked_zone_experience_authority(
     Ok(())
 }
 
+/// Personal GainExp reads only its owner's two explicit social partners. Resolve
+/// those identities from this locked authority image, rather than the previous
+/// Zone projection. Shared death/cadence admission still rebases every actor.
+pub(super) fn capture_locked_personal_experience_context(
+    state: &mut SharedInProcessZoneState,
+    key: &ZonePresenceKey,
+    rebase: &ExperienceAuthorityRebase<'_>,
+) -> Result<
+    Option<(
+        mir2_simulation::ZoneExperienceProfile,
+        mir2_simulation::ZoneKey,
+    )>,
+    String,
+> {
+    let Some(session) = state.zone_sessions.get(key).cloned() else {
+        return Ok(None);
+    };
+    let Some(zone) = state.zone_manager.zone_key_for_session(&session) else {
+        return Ok(None);
+    };
+    let Some(mut chat) = state
+        .zone_manager
+        .zone(&zone)
+        .and_then(|world| world.player_chat_profile(&session))
+    else {
+        return Ok(None);
+    };
+    let mut profile = state.zone_manager.player_experience_profile(&session);
+    // Teardown can consume a committed payout. Its owner is rebased as a copy,
+    // and neither this owner nor any fenced partner is published below.
+    rebase(&identity(key), &mut profile, &mut chat)?;
+    let partners = profile
+        .iter()
+        .flat_map(|profile| [&profile.lover_partner, &profile.mentee_partner])
+        .flatten()
+        .map(|partner| ZonePresenceKey {
+            account_id: partner.identity.account_id.clone(),
+            character_index: partner.identity.character_index,
+        })
+        .filter(|partner| partner != key)
+        .collect::<BTreeSet<_>>();
+    let mut projected = vec![(key.clone(), session.clone(), profile.clone(), chat)];
+    for partner in partners {
+        if state.teardown_fences.contains(&partner) {
+            continue;
+        }
+        let Some(peer_session) = state.zone_sessions.get(&partner).cloned() else {
+            continue;
+        };
+        if state
+            .zone_manager
+            .zone_key_for_session(&peer_session)
+            .as_ref()
+            != Some(&zone)
+        {
+            continue;
+        }
+        let mut peer_chat = state
+            .zone_manager
+            .zone(&zone)
+            .and_then(|world| world.player_chat_profile(&peer_session))
+            .ok_or("personal experience partner lost its online projection")?;
+        let mut peer_profile = state.zone_manager.player_experience_profile(&peer_session);
+        rebase(&identity(&partner), &mut peer_profile, &mut peer_chat)?;
+        projected.push((partner, peer_session, peer_profile, peer_chat));
+    }
+    // A required partner's unavailable/malformed authority must not leave an
+    // already published owner or earlier partner behind. All source rebases and
+    // recipient checks finish before the first update on this same Zone writer.
+    let world = state
+        .zone_manager
+        .zone(&zone)
+        .ok_or("personal experience Zone disappeared")?;
+    for (recipient, recipient_session, next, _) in &projected {
+        if world.player_identity(recipient_session)
+            != Some((
+                recipient_session.clone(),
+                recipient.account_id.clone(),
+                recipient.character_index,
+            ))
+            || next.as_ref().is_some_and(|next| {
+                next.validate_for_online_character(&recipient.account_id, recipient.character_index)
+                    .is_err()
+            })
+        {
+            return Err("personal experience projection differs from its online recipient".into());
+        }
+        world.current_social_experience_profile_with(recipient_session, next.clone())?;
+    }
+    for (recipient, recipient_session, next, chat) in projected {
+        if state.teardown_fences.contains(&recipient) {
+            continue;
+        }
+        if !state
+            .zone_manager
+            .update_experience_and_chat_profile(&recipient_session, next, chat)
+            .0
+        {
+            return Err("personal experience projection lost its registered recipient".into());
+        }
+    }
+    if !state.teardown_fences.contains(key) {
+        profile = state.zone_manager.player_experience_profile(&session);
+    }
+    let Some(mut profile) = state
+        .zone_manager
+        .zone(&zone)
+        .ok_or("personal experience Zone disappeared")?
+        .current_social_experience_profile_with(&session, profile)?
+    else {
+        return Ok(None);
+    };
+    let peer_is_leaving = |partner: &mir2_simulation::ZoneExperiencePartner| {
+        state.teardown_fences.iter().any(|fenced| {
+            fenced.account_id == partner.identity.account_id
+                && fenced.character_index == partner.identity.character_index
+        })
+    };
+    if profile.lover_partner.as_ref().is_some_and(peer_is_leaving) {
+        profile.lover_eligible = false;
+    }
+    if profile.mentee_partner.as_ref().is_some_and(peer_is_leaving) {
+        profile.mentee_eligible = false;
+    }
+    Ok(Some((profile, zone)))
+}
+
 impl SharedInProcessZoneSessionRuntime {
     /// Capture current shared peers before a private NPC/quest/periodic GainExp
     /// source. Personal rates/buff presence are rechecked at application.
@@ -69,45 +196,7 @@ impl SharedInProcessZoneSessionRuntime {
                     .zone_state
                     .lock()
                     .map_err(|_| "personal experience Zone unavailable")?;
-                rebase_locked_zone_experience_authority(&mut state, rebase)?;
-                let Some(session) = state.zone_sessions.get(&key).cloned() else {
-                    return Ok(None);
-                };
-                let Some(zone) = state.zone_manager.zone_key_for_session(&session) else {
-                    return Ok(None);
-                };
-                let Some(mut chat) = state
-                    .zone_manager
-                    .zone(&zone)
-                    .and_then(|world| world.player_chat_profile(&session))
-                else {
-                    return Ok(None);
-                };
-                let mut profile = state.zone_manager.player_experience_profile(&session);
-                // Teardown may consume an already committed payout while its
-                // private lane is owned. Rebase this copy, not the fenced actor.
-                rebase(&identity(&key), &mut profile, &mut chat)?;
-                let Some(mut profile) = state
-                    .zone_manager
-                    .zone(&zone)
-                    .ok_or("personal experience Zone disappeared")?
-                    .current_social_experience_profile_with(&session, profile)?
-                else {
-                    return Ok(None);
-                };
-                let peer_is_leaving = |partner: &mir2_simulation::ZoneExperiencePartner| {
-                    state.teardown_fences.iter().any(|fenced| {
-                        fenced.account_id == partner.identity.account_id
-                            && fenced.character_index == partner.identity.character_index
-                    })
-                };
-                if profile.lover_partner.as_ref().is_some_and(peer_is_leaving) {
-                    profile.lover_eligible = false;
-                }
-                if profile.mentee_partner.as_ref().is_some_and(peer_is_leaving) {
-                    profile.mentee_eligible = false;
-                }
-                Ok(Some((profile, zone)))
+                capture_locked_personal_experience_context(&mut state, &key, rebase)
             })?
         } else {
             None

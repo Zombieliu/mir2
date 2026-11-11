@@ -220,6 +220,34 @@ pub struct ZoneExperienceSelection {
 }
 
 impl ZoneExperienceProfile {
+    /// Validate the complete trusted profile before publishing it for this
+    /// online character. Gateway batches use the same admission predicate as
+    /// the Zone writer so one invalid peer cannot leave a partial publication.
+    pub fn validate_for_online_character(
+        &self,
+        account_id: &str,
+        character_index: i32,
+    ) -> Result<(), String> {
+        if self.account_id != account_id
+            || self.character_index != character_index
+            || self.account_id.is_empty()
+            || self.monster_multiplier == 0
+            || self.natural_kill_multiplier == 0
+            || self
+                .guild
+                .as_ref()
+                .is_some_and(|guild| guild.guild_id.is_empty())
+            || !f32::from_bits(self.world_experience_rate_bits).is_finite()
+            || f32::from_bits(self.world_experience_rate_bits) < 0.0
+            || !f32::from_bits(self.guild_experience_rate_bits).is_finite()
+            || f32::from_bits(self.guild_experience_rate_bits) < 0.0
+            || self.gain_rates_at(0).is_err()
+        {
+            return Err("invalid trusted online experience profile".into());
+        }
+        Ok(())
+    }
+
     pub(crate) fn refresh_captured_rate_projection(&mut self) -> Result<(), String> {
         if let Some(source) = &self.rate_source {
             let (rates, _, _) = source.rates_at(source.captured_at_ms)?;

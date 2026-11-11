@@ -20452,6 +20452,8 @@ mod tests {
     mod crowded_fixture_transport_tests;
     #[path = "dead_experience_chain_tests.rs"]
     mod dead_experience_chain_tests;
+    #[path = "personal_experience_admission_tests.rs"]
+    mod personal_experience_admission_tests;
     #[path = "five_class_receipt_tests.rs"]
     mod five_class_receipt_tests;
     #[path = "guild_kill_source_tests.rs"]
