@@ -16,7 +16,7 @@ working tree, services, release packages, source snapshots or parity percentages
 
 ## Last recorded decisions and open work
 
-2026-11-12 新候选修复脚本等待截止与启动前网络错误的同页重试；27 项检查、生产构建和浏览器契约通过。实际共用 WebGL2 在原门槛内就绪，Q、一步移动和保存通过；默认 WebGPU 首轮仍超时，仅延后约53秒的恢复阶段通过。未发布，完整冷加载与1:1继续。[实玩、契约与失败](evidence/r16-runtime-readiness-20261112/README.md)
+2026-11-12 正式版 `007c14c6fd` 已发布至 numeron.obelisk.build/game。68 项发布检查、11 个启动包、公网简繁扫码及 Testnet 签名进比奇、一步、共用 WebGPU 任务窗与正常退出通过。本机完整关闭 Chrome 后，同一落点与六份字库保留，运行包从磁盘缓存读取。原有冷启动失败和长尾保留，完整冷加载与1:1继续。[发布与复开回执](evidence/r16-runtime-release-20261112/README.md) · [前轮失败与边界](evidence/r16-runtime-readiness-20261112/README.md)
 
 2026-11-10 Web 双路实测从栗树透明处命中奥玛，实色处继续选栗树。动作间隔内的经典右键短按不再补发，新版寻路仍到达目标。图集纯 GPU 的真实选怪、其他普通窗口和后续地图继续验收。 [像素与短按回执](evidence/r16-actor-picking-20261110/README.md) · [释放、设置和移动奥玛](evidence/r16-right-release-20261110/README.md)
 
