@@ -16,7 +16,7 @@
  * `lib/stage5-window-adapters.ts`, which this module also re-exports.
  */
 
-import { memo, useEffect, useRef, useState } from "react";
+import { memo, useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 
 import { BondsWindow, type BondsWindowProps, type MentorSummary, type RelationshipSummary } from "./original-client-bonds-window";
@@ -162,7 +162,7 @@ export type ExtraWindowsProps = {
   /** Shared localization/format helper, reused from the host. */
   t: TranslateFn;
 
-  questLog?: WindowToggle &
+  questLog?: WindowToggle & { generation: number } &
     Pick<
       QuestLogWindowProps,
       | "quests"
@@ -407,8 +407,10 @@ function ExtraWindowsInner({
 
   return createPortal(
     <>
-      {questLog?.open ? (
-        <QuestLogWindow
+      {questLog ? (
+        <QuestLogSession
+          key={questLog.generation}
+          open={questLog.open}
           t={t}
           quests={questLog.quests}
           playerClass={questLog.playerClass}
@@ -685,3 +687,12 @@ function ExtraWindowsInner({
 // identity (Stage 5 selector migration). Skipping is never a correctness risk: `open` gates every
 // window, so a closed registry renders only empty fragments regardless.
 export const ExtraWindows = memo(ExtraWindowsInner);
+
+/** Retain the local direction while closed, and retire it with its session. */
+function QuestLogSession({ open, ...props }: QuestLogWindowProps & { open: boolean }) {
+  const [selected, setSelected] = useState<NonNullable<QuestLogWindowProps["graduationSelection"]>["selected"]>(null);
+  const toggle = useCallback((goal: NonNullable<QuestLogWindowProps["graduationSelection"]>["selected"]) => {
+    setSelected((current) => current === goal ? null : goal);
+  }, []);
+  return open ? <QuestLogWindow {...props} graduationSelection={{ selected, toggle }} /> : null;
+}

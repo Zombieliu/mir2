@@ -131,7 +131,7 @@ const graduationPanelSource = graduationWindowSource.slice(
 );
 assert.match(
   graduationPanelSource,
-  /onClick=\{\(\) => setSelectedGraduationGoal\(goal\.key\)\}/,
+  /graduationSelection\.toggle\(goal\.key\)/,
   "graduation choices must be local selection controls",
 );
 assert.doesNotMatch(

@@ -119,6 +119,11 @@ export type QuestLogWindowProps = {
   playerClass?: string | null;
   /** Actual server-reported self level. Missing values deliberately hide graduation. */
   playerLevel?: number | null;
+  /** Session-local presentation state; never a quest or world command. */
+  graduationSelection?: {
+    selected: NewcomerV2GraduationGoalKey | null;
+    toggle: (goal: NewcomerV2GraduationGoalKey) => void;
+  };
 };
 
 type QuestStageFilter = "all" | QuestStage;
@@ -199,13 +204,15 @@ export function QuestLogWindow({
   onClose,
   playerClass,
   playerLevel,
+  graduationSelection,
 }: QuestLogWindowProps) {
   const [stageFilter, setStageFilter] = useState<QuestStageFilter>("all");
   const [page, setPage] = useState(0);
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [selectedRewards, setSelectedRewards] = useState<Record<number, number>>({});
-  const [selectedGraduationGoal, setSelectedGraduationGoal] =
-    useState<NewcomerV2GraduationGoalKey>("equipment");
+  const [localGraduationGoal, setLocalGraduationGoal] =
+    useState<NewcomerV2GraduationGoalKey | null>(null);
+  const selectedGraduationGoal = graduationSelection ? graduationSelection.selected : localGraduationGoal;
   const [position, setPosition] = useState<QuestWindowPosition | null>(null);
   const windowRef = useRef<HTMLElement | null>(null);
   const dragRef = useRef<{
@@ -279,10 +286,6 @@ export function QuestLogWindow({
   useEffect(() => {
     setPage(0);
   }, [stageFilter]);
-
-  useEffect(() => {
-    setSelectedGraduationGoal("equipment");
-  }, [playerClass, playerLevel]);
 
   useEffect(() => {
     if (page > pageCount - 1) {
@@ -429,10 +432,7 @@ export function QuestLogWindow({
         <SpriteButton
           sprite={FRAME.closeButton}
           label={t("ui.close", [], "Close")}
-          onClick={() => {
-            setSelectedGraduationGoal("equipment");
-            onClose();
-          }}
+          onClick={onClose}
         />
       </div>
       <div style={style.help}>
@@ -613,7 +613,7 @@ export function QuestLogWindow({
         ) : (
           <div style={style.empty}>{t("ui.questSelectHint", [], "Select a quest to view details.")}</div>
         )}
-        {newcomerV2Graduation && graduationGoal ? (
+        {newcomerV2Graduation ? (
           <div style={style.graduation} data-testid="newcomer-graduation">
             <div style={style.graduationTitle}>{newcomerV2Graduation.title}</div>
             <div style={style.graduationChoices} role="group" aria-label={newcomerV2Graduation.title}>
@@ -625,7 +625,10 @@ export function QuestLogWindow({
                     type="button"
                     data-testid={`newcomer-graduation-${goal.key}`}
                     aria-pressed={selectedGoal}
-                    onClick={() => setSelectedGraduationGoal(goal.key)}
+                    onClick={() => {
+                      if (graduationSelection) graduationSelection.toggle(goal.key);
+                      else setLocalGraduationGoal((current) => current === goal.key ? null : goal.key);
+                    }}
                     style={{ ...style.graduationButton, ...(selectedGoal ? style.graduationButtonSelected : null) }}
                   >
                     {goal.label}
@@ -633,10 +636,12 @@ export function QuestLogWindow({
                 );
               })}
             </div>
-            <div style={style.graduationGoal} data-testid="newcomer-graduation-goal">
-              <strong>{graduationGoal.title}</strong>
-              <span>{graduationGoal.requirements}</span>
-              <span>{graduationGoal.normalAcquisition}</span>
+            <div style={style.graduationGoal} data-testid="newcomer-graduation-goal" aria-live="polite">
+              {graduationGoal ? <>
+                <strong>{graduationGoal.title}</strong>
+                <span>{graduationGoal.requirements}</span>
+                <span>{graduationGoal.normalAcquisition}</span>
+              </> : <span>{t("quest.ui.chooseGoal", [], "Next goal: choose equipment, skill, or challenge in the Quest Log")}</span>}
             </div>
           </div>
         ) : null}

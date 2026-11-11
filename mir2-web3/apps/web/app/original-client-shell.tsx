@@ -1526,7 +1526,18 @@ export function OriginalClientShell({
       if ((bevyStorageUiActive || bevyStorageUiTransitioning) && !groupShortcut) { diagnostic("storage"); event.preventDefault(); return; }
       if(bevyMailComposeReady||bevyMailComposePending){diagnostic("mail");if(isCurrentMailTextTarget(event.target))return;event.preventDefault();return;}
       if (spellsPointerCallbacksRef.current.getBevySpellsPointerContext?.()?.modal) { diagnostic("spells-modal"); event.preventDefault(); return; }
-      if (bevyQuestUiCapturesPointer) { diagnostic("quest-modal"); return; }
+      if (bevyQuestUiCapturesPointer) {
+        // The Web host owns configured shortcuts even while the shared diary
+        // captures world input. Close only the current Native diary.
+        if (!event.metaKey && diagnosticActions.includes("quests")
+          && !keyboardInputTargetIsEditable(event.target)
+          && readBevyHudStatus?.()?.navigation.questOpen === true) {
+          event.preventDefault();
+          const accepted = !event.repeat && dispatchBevyHudNavigation?.({ type: "closeQuest" }) === true;
+          diagnostic("window-action", accepted, true);
+        } else diagnostic("quest-modal");
+        return;
+      }
       editable = keyboardInputTargetIsEditable(event.target);
       if (editable) { diagnostic("editable"); return; }
       if (heroPointerCallbacksRef.current.onBevyHeroKey?.({ key: event.key, code: event.code,

@@ -22018,6 +22018,7 @@ export default function HomePage() {
       t={t}
       questLog={{
         open: showQuestLog && !bevyQuestUi.ready,
+        generation: bevyQuestGenerationRef.current,
         onClose: () => { if (!navigateSharedHud({ type: "closeQuest" })) setShowQuestLog(false); },
         quests: localizedQuestLog,
         playerClass: self?.classKey ?? null,

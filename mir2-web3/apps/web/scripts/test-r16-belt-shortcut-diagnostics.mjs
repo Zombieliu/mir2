@@ -61,6 +61,7 @@ function fixture(changes = {}) {
     ...pure("shared-combat-mode-keys"), ...pure("world-model/item-identity"),
     HTMLElement: Element, HTMLInputElement: Input, HTMLTextAreaElement: Textarea, HTMLSelectElement: Select,
     world, worldRef: { current: world }, window: {}, screen: "game", screenRef: { current: flags.scene ? "game" : "login" },
+    stageExitDialogRef: { current: null },
     document: { get visibilityState() { return flags.visible ? "visible" : "hidden"; }, hasFocus: () => flags.focus,
       querySelector(selector) {
         assert.equal(selector, ".npc-dialog-panel");

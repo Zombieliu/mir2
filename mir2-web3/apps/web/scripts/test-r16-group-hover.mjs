@@ -78,6 +78,7 @@ function fixture() {
       elementsFromPoint: (x, y) => { queryCalls.push([x, y, "underlay"]); return layers; },
       addEventListener: (...a) => add("document:", ...a), removeEventListener: (...a) => remove("document:", ...a) },
     screen: "game", world: { mapFileName: "0", entities: [actor] }, player: { objectId: "self" }, bevyMapRuntimeGeneration: 7,
+    stageExitDialogRef: { current: null },
     viewportActorBodies: { get: id => id === actor.objectId ? body : undefined },
     pickCrystalActor, sampleCrystalBodyPixel: () => true, hideDomEntitySpritesForBevy: false,
     stageFrameRef: { current: frame }, stagePresentation: { virtualWidth: 1024, virtualHeight: 768 },
