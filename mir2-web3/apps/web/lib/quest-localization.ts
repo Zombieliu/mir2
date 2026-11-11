@@ -7,6 +7,7 @@ import {
   newcomerV2ObjectiveTextFor,
   newcomerV2QuestCopyFor,
   stripQuestObjectiveProgress,
+  type NewcomerV2Graduation,
 } from "./newcomer-v2-journey";
 
 export type QuestTranslateFn = ((
@@ -24,6 +25,42 @@ export function formatQuestText(
   return t(key, [], fallback).replace(/\{([a-z]+)\}/gi, (token, name: string) =>
     Object.hasOwn(args, name) ? String(args[name]) : token,
   );
+}
+
+/** The compatibility chooser presents the same local-only handoff as Native. */
+export function localizeNewcomerV2Graduation(
+  graduation: NewcomerV2Graduation | null,
+  t: QuestTranslateFn,
+): NewcomerV2Graduation | null {
+  if (!graduation) return null;
+  const system = (value: string) => t.systemText?.(value) ?? value;
+  const labels = {
+    equipment: "game.006",
+    skill: "common.6df1bb18a59a",
+    challenge: "common.27cf1792f7bb",
+  };
+  return {
+    ...graduation,
+    title: t("quest.journey.copy.6", [], graduation.title),
+    goals: graduation.goals.map((goal) => ({
+      ...goal,
+      label: t(labels[goal.key], [], goal.label),
+      title: localizeCrystalItemName(goal.title, t),
+      requirements: goal.key === "challenge"
+        ? formatQuestText(t, "quest.feedback.83", "{difficulty} difficulty · {map}", {
+            difficulty: t("common.8e588cd18774", [], "Medium"),
+            // Native resolves the configured D605 through the Crystal map index.
+            map: t("content.map.186.name", [], "Insect Cave N 2F"),
+          })
+        : [system(goal.requirements), goal.key === "equipment"
+            ? t("quest.feedback.81", [], "Equipment target.")
+            : t("quest.feedback.82", [], "Next skill goal.")].join(" "),
+      normalAcquisition: goal.key === "challenge"
+        ? [system(goal.normalAcquisition), t("quest.journey.copy.58", [],
+            "Fight Centipede and Tongs; stay alert for a medium challenge.")].join(" ")
+        : system(goal.normalAcquisition),
+    })),
+  };
 }
 
 export type LocalizableQuestEntry = {

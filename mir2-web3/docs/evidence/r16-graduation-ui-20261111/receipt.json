@@ -1,0 +1,529 @@
+{
+  "schema": 1,
+  "scope": "Native graduation copy in the fallback UI, actual three-class level-30 reads, default shared WebGPU bring-up and ordinary same-role relogin",
+  "reference": {
+    "branch": "codex/windows-player-journey",
+    "sourceHead": "13271ca27fa480add80bb2ac01a88ee84b621b5a",
+    "gitBlobs": {
+      "mir2-web3/apps/game-client/client-bevy/src/quest_journey.rs": "84662a10f5de61c82d130877c052c82397599ac0",
+      "mir2-web3/apps/game-client/client-bevy/src/quest_ui.rs": "905ceabb3cc44ef0b98c4fac579d0a369b2ea20a",
+      "mir2-web3/config/quest-guidance/newcomer-v2-graduation.json": "9331f3bcb212ae008e58d668eb8c7b57363b6aa0",
+      "mir2-web3/packages/game-data/data/generated/crystal_respawn_manifest.json": "4a04eafd6e355d5e78fe5c2bd72d1cec9a00a49a",
+      "mir2-web3/apps/web/lib/generated/r16-native-localization.json": "4fb9bd0a53338a33d35d49e51da2fde87329073f"
+    }
+  },
+  "candidate": {
+    "revision": "13271ca27fa4-r16-graduation-b539bfd9",
+    "builtId": "bCuq9rpwNX3MN60SkDg6u",
+    "buildReceiptSha256": "198103fa18b64e4454273bfea251f5ab3bf845a8775ab456301f3aa958cefcd1",
+    "sourceArchiveBase": "a852afd202ab7cc52d37c795ea5f7ab13835c40e",
+    "authoritativeHead": "13271ca27fa480add80bb2ac01a88ee84b621b5a",
+    "productAndTestInputs": [
+      {
+        "filename": "mir2-web3/apps/web/app/components/original-client-quest-log-window.tsx",
+        "sha256": "2830314335b3b60dcc70956617b2d6f4509a4e0c2b80351f78a785a171e1d90d",
+        "gitBlob": "a197267184a1fdbe6638b4b8e05adf2bf4278199"
+      },
+      {
+        "filename": "mir2-web3/apps/web/lib/newcomer-v2-journey.ts",
+        "sha256": "71695570388b613b4dd4ec7bf947ed3308acbb2ec6401212165aaa0bbb46c950",
+        "gitBlob": "1d2d4f9c178f4d26c01901d0012fc65b3ac24220"
+      },
+      {
+        "filename": "mir2-web3/apps/web/lib/quest-localization.ts",
+        "sha256": "6eb91c281c98cf1ef9e120c4e2204b44eba805e83f2698c709976ae417c1ab18",
+        "gitBlob": "4d702deee9894bbc789d1a12faeeebd832d651c7"
+      },
+      {
+        "filename": "mir2-web3/apps/web/scripts/test-r16-language-parity.mjs",
+        "sha256": "51395153080a33985df3632fe286ffb85d36e821d95147043fa6717d169e8995",
+        "gitBlob": "b7f907871cb96a889588cae5da2320e711a213b7"
+      },
+      {
+        "filename": "mir2-web3/apps/web/scripts/test-bevy-quest-locale.mjs",
+        "sha256": "480365a944bc9adcfa315d029ec520ddb5a32e711906c225ccbde114402d3811",
+        "gitBlob": "d3eb2215de8feb20cd61f7dbfdb3dc61cf44f377"
+      }
+    ],
+    "runtime": "bevy-84ef836460a84e03",
+    "reusedVerifiedArtifactCount": 27,
+    "runtimeScope": "Existing byte-pinned package; not rebuilt from Native reference source this round."
+  },
+  "checks": {
+    "nodeTests": 57,
+    "displayLanguages": 10,
+    "classes": 3,
+    "configuredMainQuestDefinitions": 22,
+    "newcomerJourneyScript": true,
+    "questLocalizationScript": true,
+    "productionBuild": true,
+    "typeScriptBuild": true
+  },
+  "startupProbe": {
+    "revision": "a852afd202ab-r16-quest-text-75dbb5aa",
+    "defaultGamePath": "/game",
+    "backend": "webgpu",
+    "runtime": "bevy-84ef836460a84e03",
+    "readyAfterFirstPlayableProbeMs": 59496,
+    "bootFailed": false,
+    "qOpenedSharedQuest": true,
+    "previousShortPublicObservationWasNotProofOfPermanentFailure": true
+  },
+  "classes": [
+    {
+      "className": "Warrior",
+      "rawReceiptSha256": "7d3efb556ffa9b74076846fbb0e72f21ae3184b0c8d87c97a49211f7ec6966d2",
+      "sourceFixtureSha256": "ee63f1fd891d8987dced0c73bb0be8e595da732a937aae3b04032a50cf1a1666",
+      "originalSourceUnchanged": true,
+      "ordinaryPasswordLogin": true,
+      "ordinaryGamePath": "/game",
+      "level": 30,
+      "completedQuestCount": 26,
+      "fallbackTraditionalChinese": {
+        "passed": true,
+        "className": "Warrior",
+        "locale": "zh-TW",
+        "level": 30,
+        "completedCount": 26,
+        "choices": [
+          {
+            "key": "equipment",
+            "label": "裝備",
+            "title": "裁決權杖",
+            "requirements": "需要 30 級，戰士、法師和道士均可使用。 裝備目標。",
+            "acquisition": "下一階段狩獵的裝備目標。",
+            "rendered": true
+          },
+          {
+            "key": "skill",
+            "label": "技能",
+            "title": "野蠻衝撞",
+            "requirements": "戰士 30 級技能，技能等級要求：30 / 32 / 34。 下一技能目標。",
+            "acquisition": "前往生死棺獵殺觸龍神，獲取這本技能書。",
+            "rendered": true
+          },
+          {
+            "key": "challenge",
+            "label": "挑戰",
+            "title": "清剿昆蟲洞穴北二層",
+            "requirements": "中型難度 · 地牢二層北部",
+            "acquisition": "從昆蟲洞穴西一層或西二層前往北二層。 獵殺蜈蚣和鉗蟲；本次挑戰難度中等，注意補給。",
+            "rendered": true
+          }
+        ],
+        "zeroWorldCommands": true
+      },
+      "freshEnglishRelogin": {
+        "passed": true,
+        "freshBrowserContext": true,
+        "ordinaryPasswordLogin": true,
+        "explicitCompatibilityUi": true,
+        "locale": "en",
+        "graduation": {
+          "passed": true,
+          "className": "Warrior",
+          "locale": "en",
+          "level": 30,
+          "completedCount": 26,
+          "choices": [
+            {
+              "key": "equipment",
+              "label": "Equipment",
+              "title": "Judgement Mace",
+              "requirements": "Level 30. Compatible with Warrior, Wizard, and Taoist. Equipment target.",
+              "acquisition": "Equipment target for your next hunt.",
+              "rendered": true
+            },
+            {
+              "key": "skill",
+              "label": "Skill",
+              "title": "Shoulder Dash",
+              "requirements": "Warrior, level 30. Skill levels: 30 / 32 / 34. Next skill goal.",
+              "acquisition": "Hunt EvilCentipede in Life Death Coffin for this book.",
+              "rendered": true
+            },
+            {
+              "key": "challenge",
+              "label": "Challenge",
+              "title": "Insect Cave N 2F sweep",
+              "requirements": "Medium difficulty · N 2Fof Dungeon",
+              "acquisition": "Reach Insect Cave N 2F from Insect Cave W 1F or W 2F. Fight Centipede and Tongs; stay alert for a medium challenge.",
+              "rendered": true
+            }
+          ],
+          "zeroWorldCommands": true
+        },
+        "logoutAcknowledged": true
+      },
+      "sharedUi": {
+        "backend": "webgpu",
+        "runtime": "bevy-84ef836460a84e03",
+        "hudReady": true,
+        "questReady": true,
+        "openedWithQ": true,
+        "questOwner": "bevy",
+        "displayLanguage": "zh-TW",
+        "readyAfterFirstPlayableProbeMs": 8143
+      },
+      "ordinaryLogouts": 2,
+      "savedState": {
+        "passed": true,
+        "className": "Warrior",
+        "level": 30,
+        "gold": 76360,
+        "experience": 19497,
+        "fields": [
+          "map_file_name",
+          "position",
+          "direction",
+          "gold",
+          "credit",
+          "experience",
+          "max_experience",
+          "inventory_items_json",
+          "belt_items_json",
+          "equipment_items_json",
+          "equipment_items_explicit_empty",
+          "storage_items_json",
+          "hero_inventory_items_json",
+          "hero_equipment_items_json",
+          "quest_states_json",
+          "skill_states_json"
+        ],
+        "questStateCount": 26
+      },
+      "closed": {
+        "browser": true,
+        "proxy": true,
+        "next": true,
+        "gateway": true
+      }
+    },
+    {
+      "className": "Wizard",
+      "rawReceiptSha256": "8bceb6e9b295f2d3a121694d6c6e89e4b6f1f6c2cf1f8796fc64fdd797d2963d",
+      "sourceFixtureSha256": "b054480795febab34176ec35b2ee8e4ee858ba6cf79ffc20ee37bae660671c8a",
+      "originalSourceUnchanged": true,
+      "ordinaryPasswordLogin": true,
+      "ordinaryGamePath": "/game",
+      "level": 30,
+      "completedQuestCount": 26,
+      "fallbackTraditionalChinese": {
+        "passed": true,
+        "className": "Wizard",
+        "locale": "zh-TW",
+        "level": 30,
+        "completedCount": 26,
+        "choices": [
+          {
+            "key": "equipment",
+            "label": "裝備",
+            "title": "戰法法杖",
+            "requirements": "需要 30 級，戰士、法師和道士均可使用。 裝備目標。",
+            "acquisition": "下一階段狩獵的裝備目標。",
+            "rendered": true
+          },
+          {
+            "key": "skill",
+            "label": "技能",
+            "title": "地獄雷光",
+            "requirements": "法師 30 級技能，技能等級要求：30 / 32 / 34。 下一技能目標。",
+            "acquisition": "前往生死棺獵殺觸龍神，獲取這本技能書。",
+            "rendered": true
+          },
+          {
+            "key": "challenge",
+            "label": "挑戰",
+            "title": "清剿昆蟲洞穴北二層",
+            "requirements": "中型難度 · 地牢二層北部",
+            "acquisition": "從昆蟲洞穴西一層或西二層前往北二層。 獵殺蜈蚣和鉗蟲；本次挑戰難度中等，注意補給。",
+            "rendered": true
+          }
+        ],
+        "zeroWorldCommands": true
+      },
+      "freshEnglishRelogin": {
+        "passed": true,
+        "freshBrowserContext": true,
+        "ordinaryPasswordLogin": true,
+        "explicitCompatibilityUi": true,
+        "locale": "en",
+        "graduation": {
+          "passed": true,
+          "className": "Wizard",
+          "locale": "en",
+          "level": 30,
+          "completedCount": 26,
+          "choices": [
+            {
+              "key": "equipment",
+              "label": "Equipment",
+              "title": "War Mage Staff",
+              "requirements": "Level 30. Compatible with Warrior, Wizard, and Taoist. Equipment target.",
+              "acquisition": "Equipment target for your next hunt.",
+              "rendered": true
+            },
+            {
+              "key": "skill",
+              "label": "Skill",
+              "title": "Thunder Storm",
+              "requirements": "Wizard, level 30. Skill levels: 30 / 32 / 34. Next skill goal.",
+              "acquisition": "Hunt EvilCentipede in Life Death Coffin for this book.",
+              "rendered": true
+            },
+            {
+              "key": "challenge",
+              "label": "Challenge",
+              "title": "Insect Cave N 2F sweep",
+              "requirements": "Medium difficulty · N 2Fof Dungeon",
+              "acquisition": "Reach Insect Cave N 2F from Insect Cave W 1F or W 2F. Fight Centipede and Tongs; stay alert for a medium challenge.",
+              "rendered": true
+            }
+          ],
+          "zeroWorldCommands": true
+        },
+        "logoutAcknowledged": true
+      },
+      "sharedUi": {
+        "backend": "webgpu",
+        "runtime": "bevy-84ef836460a84e03",
+        "hudReady": true,
+        "questReady": true,
+        "openedWithQ": true,
+        "questOwner": "bevy",
+        "displayLanguage": "zh-TW",
+        "readyAfterFirstPlayableProbeMs": 8126
+      },
+      "ordinaryLogouts": 2,
+      "savedState": {
+        "passed": true,
+        "className": "Wizard",
+        "level": 30,
+        "gold": 75960,
+        "experience": 16221,
+        "fields": [
+          "map_file_name",
+          "position",
+          "direction",
+          "gold",
+          "credit",
+          "experience",
+          "max_experience",
+          "inventory_items_json",
+          "belt_items_json",
+          "equipment_items_json",
+          "equipment_items_explicit_empty",
+          "storage_items_json",
+          "hero_inventory_items_json",
+          "hero_equipment_items_json",
+          "quest_states_json",
+          "skill_states_json"
+        ],
+        "questStateCount": 26
+      },
+      "closed": {
+        "browser": true,
+        "proxy": true,
+        "next": true,
+        "gateway": true
+      }
+    },
+    {
+      "className": "Taoist",
+      "rawReceiptSha256": "bf482e1c0f45910db56ebd7ae82f30f7aa6ee41b3abb9643379bb291c2b5ec7f",
+      "sourceFixtureSha256": "3645dc2efd9f49333a57780250ad9092469a92fc995ab8defbe434ba0e64beab",
+      "originalSourceUnchanged": true,
+      "ordinaryPasswordLogin": true,
+      "ordinaryGamePath": "/game",
+      "level": 30,
+      "completedQuestCount": 26,
+      "fallbackTraditionalChinese": {
+        "passed": true,
+        "className": "Taoist",
+        "locale": "zh-TW",
+        "level": 30,
+        "completedCount": 26,
+        "choices": [
+          {
+            "key": "equipment",
+            "label": "裝備",
+            "title": "靈泉魔杖",
+            "requirements": "需要 30 級，戰士、法師和道士均可使用。 裝備目標。",
+            "acquisition": "下一階段狩獵的裝備目標。",
+            "rendered": true
+          },
+          {
+            "key": "skill",
+            "label": "技能",
+            "title": "淨化術",
+            "requirements": "道士 30 級技能，技能等級要求：30 / 32 / 35。 下一技能目標。",
+            "acquisition": "前往石墓四層獵殺白野豬，獲取這本技能書。",
+            "rendered": true
+          },
+          {
+            "key": "challenge",
+            "label": "挑戰",
+            "title": "清剿昆蟲洞穴北二層",
+            "requirements": "中型難度 · 地牢二層北部",
+            "acquisition": "從昆蟲洞穴西一層或西二層前往北二層。 獵殺蜈蚣和鉗蟲；本次挑戰難度中等，注意補給。",
+            "rendered": true
+          }
+        ],
+        "zeroWorldCommands": true
+      },
+      "freshEnglishRelogin": {
+        "passed": true,
+        "freshBrowserContext": true,
+        "ordinaryPasswordLogin": true,
+        "explicitCompatibilityUi": true,
+        "locale": "en",
+        "graduation": {
+          "passed": true,
+          "className": "Taoist",
+          "locale": "en",
+          "level": 30,
+          "completedCount": 26,
+          "choices": [
+            {
+              "key": "equipment",
+              "label": "Equipment",
+              "title": "Soul Spring Wand",
+              "requirements": "Level 30. Compatible with Warrior, Wizard, and Taoist. Equipment target.",
+              "acquisition": "Equipment target for your next hunt.",
+              "rendered": true
+            },
+            {
+              "key": "skill",
+              "label": "Skill",
+              "title": "Purification",
+              "requirements": "Taoist, level 30. Skill levels: 30 / 32 / 35. Next skill goal.",
+              "acquisition": "Hunt WhiteBoar in Angled Stone Tomb B4 for this book.",
+              "rendered": true
+            },
+            {
+              "key": "challenge",
+              "label": "Challenge",
+              "title": "Insect Cave N 2F sweep",
+              "requirements": "Medium difficulty · N 2Fof Dungeon",
+              "acquisition": "Reach Insect Cave N 2F from Insect Cave W 1F or W 2F. Fight Centipede and Tongs; stay alert for a medium challenge.",
+              "rendered": true
+            }
+          ],
+          "zeroWorldCommands": true
+        },
+        "logoutAcknowledged": true
+      },
+      "sharedUi": {
+        "backend": "webgpu",
+        "runtime": "bevy-84ef836460a84e03",
+        "hudReady": true,
+        "questReady": true,
+        "openedWithQ": true,
+        "questOwner": "bevy",
+        "displayLanguage": "zh-TW",
+        "readyAfterFirstPlayableProbeMs": 15115
+      },
+      "ordinaryLogouts": 2,
+      "savedState": {
+        "passed": true,
+        "className": "Taoist",
+        "level": 30,
+        "gold": 53295,
+        "experience": 18263,
+        "fields": [
+          "map_file_name",
+          "position",
+          "direction",
+          "gold",
+          "credit",
+          "experience",
+          "max_experience",
+          "inventory_items_json",
+          "belt_items_json",
+          "equipment_items_json",
+          "equipment_items_explicit_empty",
+          "storage_items_json",
+          "hero_inventory_items_json",
+          "hero_equipment_items_json",
+          "quest_states_json",
+          "skill_states_json"
+        ],
+        "questStateCount": 26
+      },
+      "closed": {
+        "browser": true,
+        "proxy": true,
+        "next": true,
+        "gateway": true
+      }
+    }
+  ],
+  "totalOrdinaryLogouts": 6,
+  "screenshots": [
+    {
+      "filename": "warrior-fallback-skill.png",
+      "sha256": "a8f9a572fbbc98355e074d348187668ab57c54bceec9d8d48274982078b52933",
+      "bytes": 1208992,
+      "visuallyReviewed": true
+    },
+    {
+      "filename": "warrior-shared-quest.png",
+      "sha256": "571689f591269590f201dafbedb48433bcdedd6319c4b6523a7beeddf9a8b571",
+      "bytes": 1240715,
+      "visuallyReviewed": true
+    },
+    {
+      "filename": "wizard-fallback-skill.png",
+      "sha256": "15932f5867ea8d9d64bf35849c244bdbcdd3254f2eef7fbdcc81aa1a818bdeed",
+      "bytes": 1209656,
+      "visuallyReviewed": true
+    },
+    {
+      "filename": "wizard-shared-quest.png",
+      "sha256": "d1ffb232e1a0cd5bf650d3a71ed27200bb5749424304fed05ef52f4e4fd6738b",
+      "bytes": 1244312,
+      "visuallyReviewed": true
+    },
+    {
+      "filename": "taoist-fallback-skill.png",
+      "sha256": "3a788d8f32d313d2aa3b04add07b878ecc55618ad413943f14827024d638089f",
+      "bytes": 1227628,
+      "visuallyReviewed": true
+    },
+    {
+      "filename": "taoist-shared-quest.png",
+      "sha256": "8d2511d7e4b4e75ccca53ac7b89206b472250559b289fd8002ce378de7b201ae",
+      "bytes": 1247984,
+      "visuallyReviewed": true
+    },
+    {
+      "filename": "taoist-challenge-zh-TW.png",
+      "sha256": "1a923e39317eea036a34eab12170f99acdaeadc4f07e35f4b33b9204b61fb192",
+      "bytes": 1212936,
+      "visuallyReviewed": true
+    },
+    {
+      "filename": "taoist-challenge-en.png",
+      "sha256": "62595e6bfba28e56a2643d80b84858670fd37021ec1832c788df6b7fe7e70eaa",
+      "bytes": 1202681,
+      "visuallyReviewed": true
+    }
+  ],
+  "harnessSha256": {
+    "run-graduates.mjs": "1736b3873dd54b841d927e8cf41522ee9d2ac517782dfa13f59ee6dca6d04880",
+    "verify-graduation.mjs": "8fb7924e827a0a080bbc07a3287e6e1e3c00c5b34b50d485ecef51b8cc0f4a8d",
+    "observe-shared-ui.mjs": "f55c7a757de9e9de0b33e884005004e787d83b399b6a58850ed5fa21bdae2082",
+    "build.mjs": "d107593127bc7f3073fe5e523fec208555d851436ed4c7f23c7fb86ce7db0393"
+  },
+  "remaining": [
+    "Graduation selection toggling and close/reopen/session state versus Native",
+    "Full three-class newcomer route from level 1 to 30 on this exact frontend candidate",
+    "Shared WebGL2 graduation and the other display languages in a live browser",
+    "Public shared HUD readiness and existing-role cold restart",
+    "Physical phone and final human Windows/Web visual acceptance"
+  ],
+  "production": {
+    "revision": "78c900ca36916e0ee70db39bf6b60fc9f916c6a6",
+    "candidatePublished": false
+  }
+}

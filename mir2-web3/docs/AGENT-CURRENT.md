@@ -16,6 +16,8 @@ working tree, services, release packages, source snapshots or parity percentages
 
 ## Last recorded decisions and open work
 
+2026-11-11 本地候选补齐三职业毕业目标的十语名称、条件与路线。真实 30 级三档通过繁中备用窗、默认 WebGPU 共用窗和英文新会话重登，六次退出及 16 项存档字段一致。57 项检查及生产/TypeScript 构建通过。公网仍为 78c900ca36；毕业选择的再次点击、关闭重开与会话状态继续对照 Native。 [毕业与共用窗口回执](evidence/r16-graduation-ui-20261111/README.md)
+
 2026-11-10 Web 双路实测从栗树透明处命中奥玛，实色处继续选栗树。动作间隔内的经典右键短按不再补发，新版寻路仍到达目标。图集纯 GPU 的真实选怪、其他普通窗口和后续地图继续验收。 [像素与短按回执](evidence/r16-actor-picking-20261110/README.md) · [释放、设置和移动奥玛](evidence/r16-right-release-20261110/README.md)
 
 2026-11-10 优先处理玩家反馈。本机宽屏黑边确认、同档重进、红蓝球及目标血条实画面通过。两个渲染器实测第二步被玩家占位拒绝后仍自动绕到原目标。继续攻击动作时序和现场跳官网路径。 [截图与回执](evidence/r16-player-feedback-20261110/README.md)

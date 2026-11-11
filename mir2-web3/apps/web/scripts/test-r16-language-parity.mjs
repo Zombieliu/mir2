@@ -224,6 +224,45 @@ test("the fallback chapter and progress labels use the Windows keys in every dis
   }
 });
 
+test("graduation choices match Native class targets and instructions in every display language", async () => {
+  await native.loadR16GameplayLocalization();
+  const { localizeNewcomerV2Graduation } = load("lib/quest-localization.ts");
+  const journey = load("lib/newcomer-v2-journey.ts");
+  const config = JSON.parse(readFileSync(path.resolve(root, "../../config/quest-guidance/newcomer-v2-graduation.json"), "utf8"));
+  const maps = JSON.parse(readFileSync(path.resolve(root, "../../packages/game-data/data/generated/crystal_respawn_manifest.json"), "utf8"));
+  const map = maps.maps.find(row => row.map_file_name === config.challenge.mapFileName);
+  assert(map, "the challenge uses a real Crystal map");
+  const completed = config.requiredCompletionIds.map(questId => ({ questId, stage: "completed" }));
+  for (const [className, configured] of Object.entries(config.classes)) {
+    const source = journey.newcomerV2GraduationFor(completed, config.minimumLevel, className);
+    const fingerprint = JSON.stringify(source);
+    for (const language of localizer.SUPPORTED_LANGUAGES) {
+      const t = localizer.buildTranslator(language);
+      const view = localizeNewcomerV2Graduation(source, t);
+      assert.equal(view.title, native.nativeText(language, "quest.journey.copy.6"));
+      assert.deepEqual(view.goals.map(row => row.key), ["equipment", "skill", "challenge"]);
+      const [equipment, skill, challenge] = view.goals;
+      assert.equal(equipment.title, native.nativeText(language, "content.item." + configured.equipment.itemIndex + ".name"));
+      assert.equal(equipment.label, native.nativeText(language, "game.006"));
+      assert.equal(equipment.requirements, t.systemText(configured.equipment.requirements) + " " + native.nativeText(language, "quest.feedback.81"));
+      assert.equal(equipment.normalAcquisition, t.systemText(configured.equipment.normalAcquisition));
+      assert.equal(skill.label, native.nativeText(language, "common.6df1bb18a59a"));
+      assert.equal(skill.title, t.systemText(configured.skill.title));
+      assert.equal(skill.requirements, t.systemText(configured.skill.requirements) + " " + native.nativeText(language, "quest.feedback.82"));
+      assert.equal(skill.normalAcquisition, t.systemText(configured.skill.normalAcquisition));
+      assert.equal(challenge.label, native.nativeText(language, "common.27cf1792f7bb"));
+      assert.equal(challenge.title, t.systemText(config.challenge.title));
+      assert.equal(challenge.requirements, native.nativeText(language, "quest.feedback.83")
+        .replace("{difficulty}", t.systemText(config.challenge.difficulty))
+        .replace("{map}", native.nativeText(language, "content.map." + map.map_index + ".name")));
+      assert.equal(challenge.normalAcquisition, t.systemText(config.challenge.normalTravel) + " " + t.systemText(config.challenge.detail));
+      assert.equal(JSON.stringify(source), fingerprint, "display changes must not mutate the handoff source");
+    }
+    assert.equal(localizeNewcomerV2Graduation(journey.newcomerV2GraduationFor(completed, 29, className), localizer.buildTranslator("zh-TW")), null);
+    assert.equal(localizeNewcomerV2Graduation(journey.newcomerV2GraduationFor(completed.slice(1), 30, className), localizer.buildTranslator("zh-TW")), null);
+  }
+});
+
 test("real nameplate display boundary localizes only NPCs and monsters", () => {
   const filename = path.join(root, "app/components/original-client-scene-visual-layers.tsx");
   const source = ts.createSourceFile(filename, readFileSync(filename, "utf8"), ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);

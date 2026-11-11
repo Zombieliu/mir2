@@ -22,7 +22,7 @@ import {
   type NewcomerV2GraduationGoalKey,
   type NewcomerV2JourneyProgress,
 } from "../../lib/newcomer-v2-journey";
-import { formatQuestText, type QuestTranslateFn } from "../../lib/quest-localization";
+import { formatQuestText, localizeNewcomerV2Graduation, type QuestTranslateFn } from "../../lib/quest-localization";
 import { originalItemIconPath } from "./original-client-inventory-utils";
 import { SpriteButton } from "./original-client-overlays";
 
@@ -229,8 +229,8 @@ export function QuestLogWindow({
   );
   const newcomerV2Journey = useMemo(() => newcomerV2JourneyProgress(quests), [quests]);
   const newcomerV2Graduation = useMemo(
-    () => newcomerV2GraduationFor(quests, playerLevel, playerClass),
-    [playerClass, playerLevel, quests],
+    () => localizeNewcomerV2Graduation(newcomerV2GraduationFor(quests, playerLevel, playerClass), t),
+    [playerClass, playerLevel, quests, t],
   );
 
   const selected = useMemo(() => {
