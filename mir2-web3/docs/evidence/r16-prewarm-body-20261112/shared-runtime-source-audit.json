@@ -1,0 +1,26 @@
+{
+  "kind": "bounded-shared-runtime-source-audit",
+  "source": "0d4251f3300f931591283b40a2805a03af105ec7",
+  "runtimeManifestIntroducedAt": "3bf2904ba73c24ab588d84e23cca1b34b8eef574",
+  "paths": [
+    "mir2-web3/apps/game-client/client-bevy",
+    "mir2-web3/apps/game-client/runtime"
+  ],
+  "committedDifferences": [],
+  "trees": [
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy",
+      "atPin": "54a80dbb0003016b003708deb8ef468ee9ee785f",
+      "current": "54a80dbb0003016b003708deb8ef468ee9ee785f"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/runtime",
+      "atPin": "6fa9879241c1834a993421e1bdd49f7878d24ce1",
+      "current": "6fa9879241c1834a993421e1bdd49f7878d24ce1"
+    }
+  ],
+  "manifestProvesArtifactDigests": true,
+  "manifestContainsCompiledRustSourceFingerprint": false,
+  "fullBuildProvenanceVerified": false,
+  "workingTreeWipExcluded": true
+}
