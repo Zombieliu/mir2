@@ -69,7 +69,9 @@ concurrency:
 jobs:
   source:
     runs-on: ubuntu-24.04
-    timeout-minutes: 3
+    # Full history is required by the integrated-source guard; large historical
+    # asset trees can take more than three minutes to check out on a fresh runner.
+    timeout-minutes: 8
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
