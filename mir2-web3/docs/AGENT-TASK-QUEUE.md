@@ -6,7 +6,7 @@ Updated 2026-11-12 (Asia/Shanghai). Read [coordination](AGENT-ORCHESTRATION.md) 
 
 Windows R16 的 codex/windows-player-journey 为跨平台共同基线，持续 Goal 是适用门槛的 100% Candidate 后再做最终人类 Accepted。优先无需桌面控制的代码、协议、无界面浏览器与构建；独立 Windows 窗口验收单列。具体差距、范围和来源见 [Web/R16 Goal](WEB-R16-PARITY-GOAL.zh-CN.md)。
 
-2026-11-12 冷加载候选未通过最新两路 Native 120 秒就绪验收，暂不发布。字库停传恢复、运行包并行读取有 111 项检查、生产构建和原字库浏览器证据；先继续真实源站/镜像传输与脚本等待恢复。原公网首步长尾和全部 1:1 未结项保留。[实测与失败](evidence/r16-runtime-download-20261112/README.md)
+2026-11-12 共用 WebGL2 完整片段通过；默认 WebGPU 首轮冷启动失败保留，延后恢复后的 Q、移动和保存通过。新下载截止/启动前重试有27项检查、生产构建和浏览器契约；继续实际负向重进、持久缓存复开与冷加载长尾，候选未发布。[实玩、契约与失败](evidence/r16-runtime-readiness-20261112/README.md)
 
 ## 保留的当前未结项
 

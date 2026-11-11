@@ -77,6 +77,11 @@ export function isBevyRuntimeNetworkFailure(error: unknown) {
   return NETWORK_FAILURE_PATTERNS.some((pattern) => normalized.includes(pattern));
 }
 
+/** A failed download has not created a Bevy App and can be tried on the next entry. */
+export function canRetryBevyRuntimeBeforeBoot(bootAttempted: boolean, error: unknown) {
+  return !bootAttempted && isBevyRuntimeNetworkFailure(error);
+}
+
 export function shouldRetryBevyRuntimeWithWebGl2(
   backend: "webgpu" | "webgl2",
   webGl2Supported: boolean,

@@ -28,12 +28,43 @@ new Function("exports", "module", "require", compiled.outputText)(
 
 const {
   isBevyRuntimeNetworkFailure,
+  canRetryBevyRuntimeBeforeBoot,
   resolveBevyRuntimeBootDecision,
   shouldRetryBevyRuntimeWithWebGl2,
 } = loadedModule.exports;
 
 const params = (values = {}) => ({
   get: (key) => values[key] ?? null,
+});
+
+test("only network failures before the Bevy boot remain retryable", () => {
+  for (const error of [new TypeError("Failed to fetch runtime binary (HTTP 503)"),
+    new DOMException("The operation was aborted", "AbortError"), new Error("importing a module script failed")]) {
+    assert.equal(canRetryBevyRuntimeBeforeBoot(false, error), true);
+    assert.equal(canRetryBevyRuntimeBeforeBoot(true, error), false);
+  }
+  for (const error of [new Error("Runtime compiled backend disagrees with selected package"), new Error("GPU adapter unavailable")]) {
+    assert.equal(canRetryBevyRuntimeBeforeBoot(false, error), false);
+    assert.equal(canRetryBevyRuntimeBeforeBoot(true, error), false);
+  }
+});
+
+test("the actual page retry gate preserves the single-boot boundary", () => {
+  const page = readFileSync(new URL("../app/page.tsx", import.meta.url), "utf8");
+  const start = page.indexOf("if (runtimeWindow.__mir2BevyRuntimeBootAttempted ||");
+  const end = page.indexOf("const runtimeSupport =", start);
+  assert(start >= 0 && end > start);
+  const gate = new Function("runtimeWindow", "markMir2CacheMilestone", page.slice(start, end));
+  for (const state of [
+    { __mir2BevyRuntimeBootAttempted: true, __mir2BevyRuntimeFailed: true, __mir2BevyRuntimeRetryable: true },
+    { __mir2BevyRuntimeBootAttempted: true, __mir2BevyRuntimeFailed: false },
+    { __mir2BevyRuntimeFailed: true, __mir2BevyRuntimeRetryable: false },
+  ]) assert.throws(() => gate(state, () => {}), /reload to retry/);
+  const state = { __mir2BevyRuntimeFailed: true, __mir2BevyRuntimeRetryable: true }, marks = [];
+  gate(state, (name, detail) => marks.push({ name, detail }));
+  assert.equal(state.__mir2BevyRuntimeFailed, false); assert.equal(state.__mir2BevyRuntimeRetryable, false);
+  assert.deepEqual(marks, [{ name: "bevyRuntimeRetry", detail: { reason: "network-before-boot" } }]);
+  gate(state, () => assert.fail("a repeated render must not manufacture another retry"));
 });
 
 const desktop = {

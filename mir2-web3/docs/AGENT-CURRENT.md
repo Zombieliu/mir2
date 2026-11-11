@@ -16,7 +16,7 @@ working tree, services, release packages, source snapshots or parity percentages
 
 ## Last recorded decisions and open work
 
-2026-11-12 字库停传恢复与运行包并行读取已完成本机检查：111 项、生产构建和原字库浏览器缓存/同像素通过。最新两路整游戏仍未过 Native 120 秒门槛，候选未发布；公网仍为 `cd6410be74`。撤回字库并行预取原型；下一步核对普通浏览器的源站/镜像完整正文与运行脚本等待恢复。[实测与失败](evidence/r16-runtime-download-20261112/README.md)
+2026-11-12 新候选修复脚本等待截止与启动前网络错误的同页重试；27 项检查、生产构建和浏览器契约通过。实际共用 WebGL2 在原门槛内就绪，Q、一步移动和保存通过；默认 WebGPU 首轮仍超时，仅延后约53秒的恢复阶段通过。未发布，完整冷加载与1:1继续。[实玩、契约与失败](evidence/r16-runtime-readiness-20261112/README.md)
 
 2026-11-10 Web 双路实测从栗树透明处命中奥玛，实色处继续选栗树。动作间隔内的经典右键短按不再补发，新版寻路仍到达目标。图集纯 GPU 的真实选怪、其他普通窗口和后续地图继续验收。 [像素与短按回执](evidence/r16-actor-picking-20261110/README.md) · [释放、设置和移动奥玛](evidence/r16-right-release-20261110/README.md)
 

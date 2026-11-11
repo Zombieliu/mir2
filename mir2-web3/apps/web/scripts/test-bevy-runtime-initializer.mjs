@@ -75,6 +75,25 @@ test("the existing 120-second budget cancels a stalled binary", async t => {
   t.mock.timers.tick(1); await rejected; assert(signal.aborted);
 });
 
+test("a stalled script also exits after the binary has finished compiling", async t => {
+  t.mock.timers.enable({ apis: ["setTimeout"] });
+  let finishImport, signal, settled = false, error, initialized = false;
+  const pending = initialize({
+    loadModule: () => new Promise(resolve => { finishImport = resolve; }),
+    wasmUrl: "https://assets.example.test/runtime.wasm", timeoutMs: 120000,
+    fetchImpl: async request => { signal = request.signal; return response(); },
+    waitForCanvas: async () => { initialized = true; },
+  });
+  const observed = pending.then(() => { settled = true; }, value => { settled = true; error = value; });
+  await flush();
+  t.mock.timers.tick(119999); await flush(); assert.equal(settled, false);
+  t.mock.timers.tick(1); await flush();
+  assert.equal(settled, true, "the script import must not retain a pending initialization forever");
+  await observed; assert.equal(error.name, "AbortError"); assert(signal.aborted);
+  finishImport({ async default() { initialized = true; } }); await flush();
+  assert.equal(initialized, false, "a late module cannot initialize an expired attempt");
+});
+
 test("actual page loader shares pending/successful work and retries a failed URL", async () => {
   const page = readFileSync(new URL("../app/page.tsx", import.meta.url), "utf8");
   const ast = ts.createSourceFile("page.tsx", page, ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);

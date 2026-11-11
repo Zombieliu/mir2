@@ -397,6 +397,7 @@ import {
 } from "../lib/bevy-runtime-package-selection";
 import {
   isBevyRuntimeNetworkFailure,
+  canRetryBevyRuntimeBeforeBoot,
   resolveBevyRuntimeBootDecision,
   shouldRetryBevyRuntimeWithWebGl2,
 } from "../lib/bevy-runtime-policy";
@@ -5549,6 +5550,7 @@ export default function HomePage() {
           __mir2BevyRuntimeBooted?: boolean;
           __mir2BevyRuntimeBootAttempted?: boolean;
           __mir2BevyRuntimeFailed?: boolean;
+          __mir2BevyRuntimeRetryable?: boolean;
           __mir2BevyRuntimeBackend?: BevyRuntimeBackend;
           __mir2BevyRuntimeDebug?: BevyRuntimeDebug;
         };
@@ -5614,8 +5616,14 @@ export default function HomePage() {
           });
           return;
         }
-        if (runtimeWindow.__mir2BevyRuntimeBootAttempted || runtimeWindow.__mir2BevyRuntimeFailed) {
+        if (runtimeWindow.__mir2BevyRuntimeBootAttempted ||
+            (runtimeWindow.__mir2BevyRuntimeFailed && !runtimeWindow.__mir2BevyRuntimeRetryable)) {
           throw new Error("Runtime startup previously failed; reload to retry");
+        }
+        if (runtimeWindow.__mir2BevyRuntimeRetryable) {
+          runtimeWindow.__mir2BevyRuntimeFailed = false;
+          runtimeWindow.__mir2BevyRuntimeRetryable = false;
+          markMir2CacheMilestone("bevyRuntimeRetry", { reason: "network-before-boot" });
         }
         const runtimeSupport = await detectBevyRuntimeSupport();
         if (disposed) return;
@@ -5736,6 +5744,8 @@ export default function HomePage() {
           __mir2BevyRuntime?: RuntimeModule;
           __mir2BevyRuntimeBooted?: boolean;
           __mir2BevyRuntimeFailed?: boolean;
+          __mir2BevyRuntimeBootAttempted?: boolean;
+          __mir2BevyRuntimeRetryable?: boolean;
           __mir2BevyRuntimeBackend?: BevyRuntimeBackend;
         };
         runtimeRef.current?.clearMir2StatusSink?.();
@@ -5743,6 +5753,9 @@ export default function HomePage() {
         failedWindow.__mir2BevyRuntime = undefined;
         failedWindow.__mir2BevyRuntimeBooted = false;
         failedWindow.__mir2BevyRuntimeFailed = true;
+        failedWindow.__mir2BevyRuntimeRetryable = canRetryBevyRuntimeBeforeBoot(
+          failedWindow.__mir2BevyRuntimeBootAttempted === true, error,
+        );
         failedWindow.__mir2BevyRuntimeBackend = undefined;
         setBevyQuestUiRequested(false);
         setBevyBagUiRequested(false);
