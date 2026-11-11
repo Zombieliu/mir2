@@ -392,10 +392,11 @@ function selfAnimationEvent(source: WorldFishingSourceRecord, entity: DisplayEnt
 export type CrystalEntityActionPose = Readonly<{ worldKey: string; objectId: string; actionSourceKey: string;
   sourceRevision: number; continuityRevision: number; bridgeEpoch: number; incarnation: number;
   lastNowMs: number; action: string; direction: string }>;
-export function readCrystalEntityActionPose(runtime: EntityAnimationRuntime,
+function readCrystalEntityActionProof(runtime: EntityAnimationRuntime,
   commit: import("../../lib/world-fishing-input").WorldFishingAnimationCommit,
   source: WorldFishingSourceRecord,
-  nowMs: number): CrystalEntityActionPose | null {
+  nowMs: number,
+  version: 1 | 2): CrystalEntityActionPose | null {
   try {
     const context = commit.context, committedSource = context.record, owner = source.owner;
     const getter = runtime.getMir2EntityActionPose, contextRuntime = context.runtime;
@@ -409,7 +410,7 @@ export function readCrystalEntityActionPose(runtime: EntityAnimationRuntime,
       && context.record === committedSource && committedSource === source && source.owner === owner && owner.playerObjectId === objectId
       && commit.worldKey === worldKey && commit.worldSeed === worldSeed && commit.atMs === atMs && commit.token === token
       && source.sourceKey === sourceKey && source.revision === sourceRevision && runtime.getMir2EntityActionPose === getter;
-    const query = JSON.stringify({ version: 1, worldKey, worldSeed, objectId: String(objectId), actionSourceKey: sourceKey });
+    const query = JSON.stringify({ version, worldKey, worldSeed, objectId: String(objectId), actionSourceKey: sourceKey });
     if (new TextEncoder().encode(query).byteLength > 2048 || !current()) return null;
     const raw = getter.call(runtime, query);
     if (!current() || typeof raw !== "string" || raw.length > 2048 || new TextEncoder().encode(raw).byteLength > 2048) return null;
@@ -418,15 +419,32 @@ export function readCrystalEntityActionPose(runtime: EntityAnimationRuntime,
     const value = d as Record<string, unknown>, keys = ["version","known","worldKey","objectId","actionSourceKey",
       "sourceRevision","continuityRevision","bridgeEpoch","incarnation","lastNowMs","action","direction"];
     if (Object.keys(value).length !== keys.length || !keys.every(key=>Object.hasOwn(value,key))
-      || value.version !== 1 || value.known !== true || value.worldKey !== worldKey
+      || value.version !== version || value.known !== true || value.worldKey !== worldKey
       || value.objectId !== String(objectId) || value.actionSourceKey !== sourceKey
       || value.sourceRevision !== sourceRevision || !["sourceRevision","continuityRevision","bridgeEpoch","incarnation"].every(
         key=>typeof value[key] === "number" && Number.isSafeInteger(value[key]) && (value[key] as number)>0)
       || value.lastNowMs !== atMs
-      || typeof value.action !== "string" || !["standing","harvest","show","hide","walking","running","attack1","attack2",
-        "attack3","attack4","attackRange1","attackRange2","dashAttack","spell","struck","die","dead","skeleton","revive"].includes(value.action)
+      || typeof value.action !== "string" || (version === 2
+        ? value.action !== "blocked" && value.action !== "ready"
+        : !["standing","harvest","show","hide","walking","running","attack1","attack2","attack3","attack4",
+          "attackRange1","attackRange2","dashAttack","spell","struck","die","dead","skeleton","revive"].includes(value.action))
       || typeof value.direction !== "string" || !CANONICAL_DIRECTIONS.has(value.direction) || !current()) return null;
     const {version: _version, known: _known, ...pose} = value;
     return Object.freeze(pose) as CrystalEntityActionPose;
   } catch { return null; }
+}
+
+export function readCrystalEntityActionPose(runtime: EntityAnimationRuntime,
+  commit: import("../../lib/world-fishing-input").WorldFishingAnimationCommit,
+  source: WorldFishingSourceRecord,
+  nowMs: number): CrystalEntityActionPose | null {
+  return readCrystalEntityActionProof(runtime, commit, source, nowMs, 1);
+}
+
+export function readCrystalEntityMovementBlocked(runtime: EntityAnimationRuntime,
+  commit: import("../../lib/world-fishing-input").WorldFishingAnimationCommit,
+  source: WorldFishingSourceRecord,
+  nowMs: number): boolean | null {
+  const proof = readCrystalEntityActionProof(runtime, commit, source, nowMs, 2);
+  return proof ? proof.action === "blocked" : null;
 }

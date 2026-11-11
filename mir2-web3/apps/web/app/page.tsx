@@ -116,7 +116,8 @@ import { fishingAttachmentApplied, fishingAttachmentReceipt, fishingAutocastAvai
 import { appendFishingAnimationEdge, readFishingFeedback, type FishingAnimationEdge, type FishingFeedback } from "../lib/world-fishing-feedback";
 import type { WorldFishingGesture, WorldFishingPointer, WorldFishingAnimationContext,
   WorldFishingAnimationCommit, WorldFishingCallbacks } from "../lib/world-fishing-input";
-import { readCrystalEntityActionPose, type CrystalEntityActionPose } from "./components/original-client-entity-animation-runtime";
+import { readCrystalEntityActionPose, readCrystalEntityMovementBlocked, type CrystalEntityActionPose } from "./components/original-client-entity-animation-runtime";
+import { NATIVE_ATTACK_MOVEMENT_CAPABILITY, nativeAttackMovementChannel } from "../lib/native-attack-movement";
 import { SharedCombatModeKeys, isCrystalCombatModeFunction, nextCombatModePhysicalGeneration, type CombatModeRuntime, type CombatModeOwner, type CombatModeProof } from "../lib/shared-combat-mode-keys";
 import { HeroPlayerAuthority, HeroPlayerOperations, captureHeroAction, heroActionBasisMatches, sameHeroSession, type HeroPlayerModel, type HeroItem, type HeroActionDto, type HeroOperationProof } from "../lib/hero-player-ui";
 import type { HeroCharacterPage, HeroManagementPage, HeroManagementWindows, HeroUiOrigin, HeroUiLease } from "./components/original-client-hero-management-window";
@@ -6656,7 +6657,7 @@ export default function HomePage() {
   }
 
   function sendRaw(command: Record<string, unknown>, options?: { authProof?: PreauthProof; modeProof?: CombatModeProof; guildBuffProof?: GuildBuffProof; heroProof?: HeroOperationProof; cashProof?: CashGameShopProof; creatureProof?: CreaturePlayerProof; quiet?: boolean; ownerToken?: EquipmentOwnerProof; reservedCharacterSource?: number; storageProof?: StorageTransferProof; socialReplyProof?: SocialReplyProof; storageRentalProof?: StorageRentalProof; socialItemProof?: SocialWindowOperationProof; socialTradeProof?: SocialTradeSendProof; guildListProof?: Readonly<{owner: SocialReplyOwner; guildName: string}>; rankingProof?: RankingQueryProof; rankingInspectProof?: RankingInspectProof; socialRosterProof?: SocialRosterSendProof; groupProof?: GroupOperationProof; skillProof?:SpellsProof;combatProof?:CombatProof;combatBody?:string;mailProof?:MailSendProof;mailQuoteProof?:MailQuoteProof;mailLockProof?:MailLockProof;npcBuyProof?:NpcGoldBuyProof;npcPearlBuyProof?:NpcPearlBuyProof;npcLegacyBuyProof?:object;npcUi?:NpcShopSendProof;npcRepairProof?:NpcRepairProof;bagBeltProof?:BagBeltFinalProof;worldFishingProof?:WorldFishingFinalProof;fishingPanelAttempt?:FishingPanelAttempt;viewportPointerHeld?:()=>boolean }) {
-    if (command.type === "companionControl" || command.type === "companionRuntimeRegister" || command.type === "companionRuntimeReply") return false;
+    if (command.type === "attackV2" || command.type === "companionControl" || command.type === "companionRuntimeRegister" || command.type === "companionRuntimeReply") return false;
     let socialBudgetTicket: SocialBudgetTicket | null = null;
     try {
     const rejectNpcPurchaseSendGate = (reason: NpcPurchaseActionReason): false => {
@@ -6725,7 +6726,7 @@ export default function HomePage() {
     const socket = socketRef.current;
     if (socket?.readyState !== WebSocket.OPEN) return rejectNpcPurchaseSendGate("sendSocketUnavailable");
     if ((command.type === "storeItemV2" || command.type === "takeBackItemV2") && !options?.storageProof) return false;
-    const serialized=options?.creatureProof ? creaturePlayerCommandJson(command) : options?.combatBody??JSON.stringify(command);
+    let serialized=options?.creatureProof ? creaturePlayerCommandJson(command) : options?.combatBody??JSON.stringify(command);
     if (serialized === null) return rejectNpcPurchaseSendGate("sendSerializationRejected");
     if(command.type==='mailCost'&&!options?.mailQuoteProof||command.type==='mailLockedItem'&&!options?.mailLockProof)return false;
     if(["readMail","collectParcel","deleteMail","sendMail","lockMail"].includes(String(command.type))&&(!options?.mailProof||!mailDispatcherRef.current?.allows(options.mailProof)))return false;
@@ -6978,6 +6979,15 @@ export default function HomePage() {
     }
     if (options?.viewportPointerHeld && !options.viewportPointerHeld()) return false;
     if (options?.fishingPanelAttempt && !enterFishingPanelSend(options.fishingPanelAttempt, wireCommand, socket)) return false;
+    if (wireCommand.type === "attack") {
+      if (socialBudgetTicket) return false;
+      const attackWire = enterBasicAttackWire(socket, wireCommand, options?.combatProof);
+      if (attackWire === null) return false;
+      if (attackWire !== undefined) serialized = attackWire;
+    } else if (wireCommand.type === "attackDirection" || wireCommand.type === "castSkill"
+      || wireCommand.type === "magic" && String(wireCommand.spell).toLowerCase() === "flashdash") {
+      nativeAttackMovementChannel(socket).observeAlternateBodyProducer();
+    }
     // No guard, listener or domain callback follows Native entry before send.
     if (socialBudgetTicket && !socialBudgetRef.current?.enter(socialBudgetTicket, currentSocialReplyOwner(), wireCommand)) {
       if (options?.groupProof) groupOperationsRef.current.finishInviteAttempt(options.groupProof);
@@ -8405,7 +8415,12 @@ export default function HomePage() {
     }
     const owner = worldFishingOwner();
     if (!owner) { retireWorldFishingGesture(); publishWorldFishingSource(null); return; }
-    worldFishingSourceRef.current.observePacket(owner, event.packet, event.payload ?? {}, Date.now());
+    const melee = event.packet === "ObjectAttack" && event.payload?.objectId === owner.playerObjectId;
+    const previous = melee ? worldFishingSourceRef.current.current(owner) : null;
+    const receivedAt = Date.now();
+    worldFishingSourceRef.current.observePacket(owner, event.packet, event.payload ?? {}, receivedAt);
+    if (melee) nativeAttackMovementChannel(owner.socket).observeBody(owner, previous,
+      worldFishingSourceRef.current.current(owner), receivedAt);
     if (event.packet === "FishingUpdate") observeFishingStatus(owner, event.payload);
     if (event.packet === "EquipSlotItem" || event.packet === "RemoveSlotItem") observeFishingAttachmentReceipt(owner, event.packet, event.payload);
     publishWorldFishingSource(owner);
@@ -8437,6 +8452,32 @@ export default function HomePage() {
       || worldFishingSourceRef.current.current(owner) !== commit.context.record) return;
     worldFishingCommitRef.current = commit;
   }
+  function currentBasicAttackMovement(owner = worldFishingOwner()) {
+    return owner ? nativeAttackMovementChannel(owner.socket).current(owner) : null;
+  }
+
+  function selfMovementActionBlocked(self: WorldEntity, now: number): boolean {
+    if (self.dead || now < Math.max(self.attackUntil ?? 0, self.dieUntil ?? 0, self.reviveUntil ?? 0)) return true;
+    const owner = worldFishingOwner(Number(self.objectId));
+    if (!owner) return false;
+    const basic = currentBasicAttackMovement(owner), waitingForBasic = !!basic && now < basic.until;
+    const binding = worldFishingRuntimeRef.current, commit = worldFishingCommitRef.current;
+    const source = worldFishingSourceRef.current.current(owner);
+    if (!binding || !commit || !source || binding.core !== questCoreRuntimeRef.current) return waitingForBasic;
+    const blocked = readCrystalEntityMovementBlocked(binding.runtime, commit, source, now);
+    const finalOwner = worldFishingOwner();
+    if (!finalOwner || worldFishingRuntimeRef.current !== binding || worldFishingCommitRef.current !== commit
+      || worldFishingSourceRef.current.current(owner) !== source || !sameWorldFishingOwner(finalOwner, owner)
+      || questCoreRuntimeRef.current !== binding.core) return true;
+    if (blocked === true) return true;
+    if (!waitingForBasic) return false;
+    // A pre-send Standing pose cannot settle an admitted basic attack.
+    const receipt = nativeAttackMovementChannel(owner.socket).receipt(basic);
+    return blocked !== false || !receipt || source.sourceKey !== receipt.sourceKey
+      || source.continuityRevision !== receipt.continuityRevision || source.revision < receipt.revision
+      || commit.atMs < (receipt.actionEvidence?.receivedAtMs ?? Infinity);
+  }
+
   function readFishingWeaponFromDisplay() {
     const owner = worldFishingOwner(), baseline = equipmentSnapshotRef.current;
     if (!owner || !baseline
@@ -8934,6 +8975,10 @@ export default function HomePage() {
       return false;
     }
     const serverSelf = currentAuthoritativeSelf();
+    if (serverSelf ? selfMovementActionBlocked(serverSelf, now) : now < (currentBasicAttackMovement()?.until ?? 0)) {
+      scheduleMovementConfirmTick();
+      return false;
+    }
     const visualUntil = now + MOVEMENT_TURN_VISUAL_HOLD_MS;
     if (serverSelf) {
       pendingSelfTurnRef.current = { direction, sentAt: now, visualUntil };
@@ -9070,6 +9115,12 @@ export default function HomePage() {
     }
     if (!canSendMovement(readSelfMovementControllerState(), now)) {
       lastQueuedMovementAttemptRef.current = { reason: "cadence", at: now };
+      scheduleMovementConfirmTick();
+      return false;
+    }
+
+    if (selfMovementActionBlocked(serverSelf, now)) {
+      lastQueuedMovementAttemptRef.current = { reason: "body-action", at: now };
       scheduleMovementConfirmTick();
       return false;
     }
@@ -10514,10 +10565,12 @@ export default function HomePage() {
   // Gateway capability frames replace the complete connection declaration.
   // Preserve only capabilities already declared successfully on this socket.
   function sendClientCapabilities(socket: WebSocket, addedCapability: "durableNpcPurchaseOwnerV1" | "nativeGameShopReceiptV1") {
-    const capabilities: Array<"durableNpcPurchaseOwnerV1" | "nativeGameShopReceiptV1"> = [];
+    const capabilities: string[] = [];
     if (npcPurchaseOptInSocketsRef.current.has(socket) || addedCapability === "durableNpcPurchaseOwnerV1") capabilities.push("durableNpcPurchaseOwnerV1");
     if (cashReceiptSocketRef.current === socket || addedCapability === "nativeGameShopReceiptV1") capabilities.push("nativeGameShopReceiptV1");
+    capabilities.push(NATIVE_ATTACK_MOVEMENT_CAPABILITY);
     socket.send(JSON.stringify({ type: "clientCapabilities", capabilities }));
+    nativeAttackMovementChannel(socket).declare();
   }
 
   function observeNpcPurchaseSocket(socket: WebSocket) {
@@ -14797,10 +14850,36 @@ export default function HomePage() {
     try{return sendRaw({type:"magicKey",requestId:intent.requestId,spell:intent.spell,key:intent.key,oldKey:intent.oldKey},{skillProof:proof})?"confirmedSend":"definitelyUnsent";}
     catch{return "outcomeUnknown";}
   }
+  function enterBasicAttackWire(socket: WebSocket, command: Record<string, unknown>, proof?: CombatProof): string | null | undefined {
+    if (socketRef.current !== socket || socket.readyState !== WebSocket.OPEN) return null;
+    const channel = nativeAttackMovementChannel(socket);
+    if (!proof || !channel.usesTypedWire) return channel.enterLegacy() ? undefined : null;
+    const owner = worldFishingOwner();
+    const source = owner?.socket === socket ? worldFishingSourceRef.current.current(owner) : null;
+    const combatOwner = owner ? currentSpellsOwner(owner.playerObjectId) : null;
+    if (!source?.animationKnown || !combatOwner || !sameSpellsOwner(proof.identity, combatOwner)
+      || normalizeQuestMapFileName(proof.map) !== source.owner.mapFileName || typeof command.objectId !== "number") return null;
+    // Logical command and CombatProof were already validated and consumed.
+    // Only this last transport step may replace the ordinary wire encoding.
+    return channel.enter(proof, source, command.objectId, Date.now());
+  }
+
   function dispatchBevyCombat(proof:CombatProof,body:string):"confirmedSend"|"definitelyUnsent"|"outcomeUnknown" {
     if(!combatIngressRef.current?.allows(proof))return "definitelyUnsent";
-    const pace=()=>{nextMoveSendAtRef.current=Math.max(nextMoveSendAtRef.current,Date.now()+proof.movementBlockMs);};
-    try{if(!sendRaw(proof.command,{combatProof:proof,combatBody:body}))return "definitelyUnsent";pace();return "confirmedSend";}catch{pace();return "outcomeUnknown";}
+    const socket = socketRef.current;
+    const pace = (uncertain: boolean) => {
+      const now = Date.now();
+      if (proof.command.type === "attack" && socket && nativeAttackMovementChannel(socket).finish(proof, now, uncertain)) return;
+      nextMoveSendAtRef.current = Math.max(nextMoveSendAtRef.current, now + proof.movementBlockMs);
+    };
+    try {
+      if (!sendRaw(proof.command, { combatProof: proof, combatBody: body })) return "definitelyUnsent";
+      pace(false);
+      return "confirmedSend";
+    } catch {
+      pace(true);
+      return "outcomeUnknown";
+    }
   }
   function invalidateNpcGoldBuyGatewayPacket(event: GatewayEvent) {
     if (event.type === "worldSnapshot") {
@@ -14914,6 +14993,10 @@ export default function HomePage() {
       // The final world check also prevents a failed structural marker from
       // granting a rounded snapshot through the established packet decoder.
       const decoded = parseGatewayMailDates(event.data as string) as GatewayEvent;
+      if (decoded.type === "attackCapabilitiesV2" || decoded.type === "attackResultV2") {
+        nativeAttackMovementChannel(socket).observeFrame(event.data, worldFishingOwner());
+        return;
+      }
       if (decoded.type === "worldSnapshot") {
         strictWorld = true;
         apply(parseNpcPurchaseWorldFrame(event.data) as unknown as GatewayEvent, event.data);
@@ -21480,7 +21563,7 @@ export default function HomePage() {
         clickTargets:current.entities.map(e=>({kind:e.kind,objectId:Number(e.objectId),x:e.x,y:e.y,dead:typeof e.dead==="boolean"?e.dead:null,ai:e.ai??null,harvestable:typeof sources.get(e.objectId)?.harvestable==="boolean"?sources.get(e.objectId)!.harvestable as boolean:null})),
         selectedObjectId:current.selectedObjectId?Number(current.selectedObjectId):null,forceAttack:combatForceAttackRef.current,hoveredObjectId:combatPointerRef.current.hovered,cursor:combatPointerRef.current.cursor,
         class:self.classKey??null,hasClassWeapon:flag("hasClassWeapon"),ridingMount:flag("ridingMount"),fishing:flag("fishing"),dazed:flag("dazed"),
-        motionRemainingMs:Math.max(0,Math.min(0xffffffff,Math.ceil(Math.max(self.attackUntil??0,self.movementUntil??0,nextMoveSendAtRef.current)-now))),movementReady:!isMovementBusy()&&canSendMovement(readSelfMovementControllerState(),now),planningPosition:plan?[plan.targetX,plan.targetY]:null,neighbours,spellLockKey:crystalKeyBindingsRef.current.find(binding => binding.function === "TargetSpellLockOn")?.key ?? "None",pointerSpellLock:combatPointerRef.current.lock,bindings:crystalKeyBindingsRef.current.filter(binding => /^Bar[12]Skill[1-8]$/.test(binding.function))};
+        motionRemainingMs:Math.max(0,Math.min(0xffffffff,Math.ceil(Math.max(self.attackUntil??0,self.movementUntil??0,nextMoveSendAtRef.current,currentBasicAttackMovement()?.until??0)-now))),movementReady:!isMovementBusy()&&canSendMovement(readSelfMovementControllerState(),now),planningPosition:plan?[plan.targetX,plan.targetY]:null,neighbours,spellLockKey:crystalKeyBindingsRef.current.find(binding => binding.function === "TargetSpellLockOn")?.key ?? "None",pointerSpellLock:combatPointerRef.current.lock,bindings:crystalKeyBindingsRef.current.filter(binding => /^Bar[12]Skill[1-8]$/.test(binding.function))};
       return {owner,facts};
     },onWire:dispatchBevyCombat,onApproach:(x,y)=>moveToTile(x,y,"walk","direction","locked-monster"),onClear:()=>{
       lockedMonsterAttackRef.current=null;

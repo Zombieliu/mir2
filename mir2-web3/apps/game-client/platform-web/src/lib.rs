@@ -28,6 +28,9 @@ pub mod npc_gold_buy_attempt;
 pub mod ranking_inspect;
 #[cfg(not(any(feature = "presentation-ui", feature = "npc-purchase-policy")))]
 pub use ranking_inspect::{ranking_inspect_abi_version, ranking_inspect_admission};
+// Cash Preview builds item layer data and turn directions without a renderer.
+#[cfg(not(any(feature = "presentation-ui", feature = "npc-purchase-policy")))]
+pub mod cash_preview;
 // Keep the existing pure ABI/oracle tests in default test builds. Production
 // Core/PUI do not include the unpublished NPC receipt ABI.
 #[cfg(any(test, feature = "npc-purchase-policy"))]
@@ -39,8 +42,6 @@ pub use npc_purchase_receipt::{npc_purchase_receipt_abi_version, NpcPurchaseRece
 pub mod map_route;
 #[cfg(feature = "presentation-ui")]
 pub mod chat_ui;
-#[cfg(feature = "presentation-ui")]
-pub mod cash_preview;
 #[cfg(feature = "presentation-ui")]
 pub mod npc_repair_quote;
 

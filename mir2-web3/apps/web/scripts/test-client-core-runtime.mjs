@@ -93,3 +93,86 @@ test("pending and sparse reward selection guards remain active with an open NPC"
   assert.equal(resolve({ ...request, selectedRewardIndex: 4 }).source, "diary");
   assert.equal(resolve({ ...request, selectedRewardIndex: 4, pending: true }).rejection, "pending");
 });
+
+test("actual read-only Cash Preview layer and turn exports move together to Core", () => {
+  assert.equal(runtime.cash_preview_abi_version(), 1);
+  assert.equal(runtime.cash_preview_turn(8, true), 1);
+  assert.equal(runtime.cash_preview_turn(1, false), 8);
+  assert.equal(runtime.cash_preview_turn(0, true), 0);
+  assert.deepEqual(JSON.parse(runtime.cash_preview_layers(1, 9, 1, 0, false, 2, 150n)), {
+    version: 1, known: true, direction: 2,
+    layers: [{ library: "CArmour/00", frame: 39 }, { library: "CWeapon/09", frame: 39 }],
+  });
+  assert.deepEqual(JSON.parse(runtime.cash_preview_layers(1, -1, 1, 0, false, 6, 0n)),
+    { version: 1, known: false, direction: 6, layers: [] });
+  for (const bundle of [manifest.presentation, manifest.npcPurchase]) {
+    const bytes = readFileSync(new URL(
+      `../public/client-core/${bundle.version}/mir2_platform_web_bg.wasm`, import.meta.url));
+    assert.ok(bytes.length < 256 * 1024);
+    assert.equal(WebAssembly.Module.exports(new WebAssembly.Module(bytes))
+      .some(({ name }) => name.startsWith("cash_preview_")), false);
+  }
+});
+
+test("actual Presentation v2 observes queued body blockers without exposing them to the v1 reader", async () => {
+  const root = new URL(`../public/client-core/${manifest.presentation.version}/`, import.meta.url);
+  const glue = readFileSync(new URL("mir2_platform_web.js", root));
+  const binary = readFileSync(new URL("mir2_platform_web_bg.wasm", root));
+  const presentation = await import(`data:text/javascript;base64,${glue.toString("base64")}`);
+  await presentation.default({ module_or_path: binary });
+  const worldKey = "movement-test", worldSeed = 22, objectId = "7", actionSourceKey = "owner:7";
+  const identity = { worldKey, worldSeed, objectId, actionSourceKey };
+
+  function withBridge(run) {
+    const bridge = new presentation.EntityAnimationBridge();
+    try {
+      const read = (version, query = {}) => JSON.parse(bridge.getMir2EntityActionPose(JSON.stringify({
+        version, ...identity, ...query,
+      })));
+      const step = (nowMs, action, actionSourceRevision, actionToken, extra) => {
+        const result = JSON.parse(bridge.resolveMir2EntityAnimationPoses(JSON.stringify({
+          worldKey, worldSeed, nowMs,
+          entities: [{ objectId, kind: "selfPlayer", action, direction: "Right", actionSourceKey,
+            actionSourceRevision, actionKnown: true, ...(actionToken ? { actionToken } : {}), ...extra }],
+        })));
+        assert.equal(result.errors, undefined);
+        return result.poses[0];
+      };
+      step(1000, "standing", 1, null, { bootstrapKnown: true });
+      return run(step, read);
+    } finally { bridge.free(); }
+  }
+  function feed(pending) {
+    return withBridge((step, read) => {
+      step(1010, "walking", 2, "owner:walk", { movementActive: true });
+      step(1100, "struck", 3, "owner:struck1");
+      step(1200, pending, 4, "owner:queued");
+      const pose = step(1810, "struck", 5, "owner:struck2");
+      assert.equal(pose.queueDepth, 2);
+      const v1 = read(1), v2 = read(2);
+      assert.deepEqual(read(2, { actionSourceKey: "foreign" }), { version: 1, known: false });
+      assert.deepEqual(read(3), { version: 1, known: false });
+      const { action, version, ...proof } = v2;
+      const { action: v1Action, version: v1Version, ...oldProof } = v1;
+      assert.equal(v1Version, 1);
+      assert.equal(v1Action, "struck");
+      assert.equal(version, 2);
+      assert.deepEqual(proof, oldProof);
+      return { pose, v1, action, next: step(1910, "struck", 5, "owner:struck2").action };
+    });
+  }
+  const spell = feed("spell"), idle = feed("standing");
+  assert.deepEqual(spell.pose, idle.pose);
+  assert.deepEqual(spell.v1, idle.v1);
+  assert.deepEqual([spell.action, spell.next], ["blocked", "spell"]);
+  assert.deepEqual([idle.action, idle.next], ["ready", "standing"]);
+
+  withBridge((step, read) => {
+    step(1100, "attack1", 2, "owner:attack");
+    step(1699, "attack1", 2, "owner:attack");
+    assert.equal(read(2).action, "blocked");
+    step(1700, "attack1", 2, "owner:attack");
+    assert.equal(read(1).action, "standing");
+    assert.equal(read(2).action, "ready");
+  });
+});

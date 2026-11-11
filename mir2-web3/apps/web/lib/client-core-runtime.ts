@@ -5,7 +5,7 @@ import type { CrystalTooltipItem, CrystalTooltipDocument } from "./shared-item-t
 import manifest from "./generated/client_core_runtime.json";
 import type { RegistrationDraft, ChangePasswordDraft } from "./client-login-runtime";
 import { createSharedEntityAnimationAccessor, createSharedChatUi, searchSharedMapRoute, readSharedCashPreview, turnSharedCashPreview, readSharedNpcRepairQuote, readSharedPresentationItemTooltip, readSharedBagToBeltMovePlan, readSharedFishingClickTargets, readSharedFishingClickDecision, readSharedNpcPearlBuyPlan,
-  type PresentationWasmModule, type EntityAnimationRuntime, type MapRouteWasmModule, type ChatUiRuntime, type MapRouteInput, type MapRouteDecision,
+  type PresentationWasmModule, type CashPreviewWasmModule, type EntityAnimationRuntime, type MapRouteWasmModule, type ChatUiRuntime, type MapRouteInput, type MapRouteDecision,
   type CashPreviewInput, type CashPreviewLayerDocument, type NpcRepairQuoteInput, type NpcRepairQuote, type BagToBeltMoveInput, type BagToBeltMovePlan, type FishingClickTargetsInput, type FishingClickTargets, type FishingClickInput, type FishingClickDecision } from "./client-presentation-runtime";
 import { readSharedRankingInspectAdmission, type RankingInspectWasmModule,
   type RankingInspectAdmissionInput, type RankingInspectAdmissionPlan } from "./shared-ranking-inspect";
@@ -226,7 +226,7 @@ type WasmEquipmentPendingBridge = {
   status(): string;
 };
 
-type WasmModule = RankingInspectWasmModule & {
+type WasmModule = RankingInspectWasmModule & CashPreviewWasmModule & {
   default(options: { module_or_path: URL }): Promise<unknown>;
   client_core_abi_version(): number;
   auth_ui_abi_version?: () => number;
@@ -546,8 +546,8 @@ export function loadClientCoreRuntime(): Promise<ClientCoreRuntime> {
       createAuthUi(seed: bigint) { return createAuthUiRuntime(module, seed); },
       createChatUi(mask: number) { return createSharedChatUi(presentation, mask); },
       searchMapRoute(input: MapRouteInput) { return searchSharedMapRoute(presentation, input); },
-      readCashPreviewLayers(input: CashPreviewInput) { return readSharedCashPreview(presentation, input); },
-      turnCashPreview(direction: number, right: boolean) { return turnSharedCashPreview(presentation, direction, right); },
+      readCashPreviewLayers(input: CashPreviewInput) { return readSharedCashPreview(module, input); },
+      turnCashPreview(direction: number, right: boolean) { return turnSharedCashPreview(module, direction, right); },
       readNpcRepairQuote(input: NpcRepairQuoteInput) { return readSharedNpcRepairQuote(presentation, input); },
       getMir2NpcPearlBuyPlan(json: string) {
         const input = npcPearlBuyInput(json), plan = input ? readSharedNpcPearlBuyPlan(presentation,input) : null;

@@ -610,7 +610,7 @@ impl EntityAnimationOwner {
         let Ok(query) = serde_json::from_str::<ActionPoseQuery>(query_json) else {
             return unknown();
         };
-        if query.version != 1
+        if !matches!(query.version, 1 | 2)
             || query.world_seed > MAX_SAFE_INTEGER
             || query.world_key.is_empty()
             || query.world_key.len() > 512
@@ -650,8 +650,19 @@ impl EntityAnimationOwner {
             // The painted body is still fishing, including the terminal Reel.
             return unknown();
         }
+        // v2 uses the same proof envelope. Its action field carries only the
+        // movement barrier, never the contents or positions in the action feed.
+        let action = if query.version == 1 {
+            action_name(state.current_action)
+        } else if movement_blocking_action(state.current_action)
+            || state.queued_actions().any(|event| movement_blocking_action(event.action))
+        {
+            "blocked"
+        } else {
+            "ready"
+        };
         serde_json::to_string(&ActionPoseOutput {
-            version: 1,
+            version: query.version,
             known: true,
             world_key: &bridge.world_key,
             object_id: &query.object_id,
@@ -661,7 +672,7 @@ impl EntityAnimationOwner {
             bridge_epoch: self.epoch,
             incarnation,
             last_now_ms: bridge.last_now_ms,
-            action: action_name(state.current_action),
+            action,
             direction: direction_name(state.direction),
         })
         .unwrap_or_else(|_| unknown())
@@ -766,6 +777,25 @@ fn normalize_action(kind: EntityKind, action: AnimationAction) -> AnimationActio
         ) => AnimationAction::Attack1,
         _ => action,
     }
+}
+
+fn movement_blocking_action(action: AnimationAction) -> bool {
+    matches!(
+        action,
+        AnimationAction::Attack1
+            | AnimationAction::Attack2
+            | AnimationAction::Attack3
+            | AnimationAction::Attack4
+            | AnimationAction::AttackRange1
+            | AnimationAction::AttackRange2
+            | AnimationAction::DashAttack
+            | AnimationAction::Jump
+            | AnimationAction::Spell
+            | AnimationAction::Die
+            | AnimationAction::Dead
+            | AnimationAction::Skeleton
+            | AnimationAction::Revive
+    )
 }
 
 fn action_name(action: AnimationAction) -> &'static str {
@@ -959,6 +989,52 @@ mod authority_tests {
             input["entities"][0]["fishing"] = json!(fishing);
         }
         serde_json::from_str(&owner.resolve_json(&input.to_string())).unwrap()
+    }
+
+    fn movement_gate(owner: &EntityAnimationOwner) -> Value {
+        let mut request = query();
+        request["version"] = json!(2);
+        serde_json::from_str(&owner.peek_json(&request.to_string())).unwrap()
+    }
+
+    #[test]
+    fn movement_query_distinguishes_queued_spell_from_ordinary_hit_reactions() {
+        for (queued, expected) in [("spell", "blocked"), ("standing", "ready")] {
+            let mut owner = EntityAnimationOwner::new();
+            resolve_fishing(&mut owner, frame(1, "standing", None, true, true), 1000, None);
+            resolve_fishing(&mut owner, frame(2, "walking", Some("walk"), false, true), 1010, None);
+            resolve_fishing(&mut owner, frame(3, "struck", Some("hit1"), false, true), 1100, None);
+            resolve_fishing(&mut owner, frame(4, queued, Some("queued"), false, true), 1200, None);
+            let result = resolve_fishing(&mut owner, frame(5, "struck", Some("hit2"), false, true), 1810, None);
+            assert_eq!(result["poses"][0]["queueDepth"], 2);
+            let v1 = peek(&owner);
+            assert_eq!(v1["action"], "struck");
+            let v2 = movement_gate(&owner);
+            assert_eq!(v2["action"], expected);
+            assert_eq!(v2["version"], 2);
+            assert_eq!(v2["lastNowMs"], 1810);
+            assert_eq!(peek(&owner), v1);
+        }
+    }
+
+    #[test]
+    fn movement_query_releases_at_the_real_last_attack_frame() {
+        let mut owner = EntityAnimationOwner::new();
+        resolve_fishing(&mut owner, frame(1, "standing", None, true, true), 1000, None);
+        let attack = frame(2, "attack1", Some("basic"), false, true);
+        resolve_fishing(&mut owner, attack.clone(), 1100, None);
+        resolve_fishing(&mut owner, attack.clone(), 1699, None);
+        assert_eq!(movement_gate(&owner)["action"], "blocked");
+        assert_eq!(peek(&owner)["action"], "attack1");
+        resolve_fishing(&mut owner, attack, 1700, None);
+        assert_eq!(movement_gate(&owner)["action"], "ready");
+        assert_eq!(peek(&owner)["action"], "standing");
+        let mut stale = query();
+        stale["version"] = json!(2);
+        stale["actionSourceKey"] = json!("stale");
+        assert_eq!(owner.peek_json(&stale.to_string()), "{\"version\":1,\"known\":false}");
+        owner.reset();
+        assert_eq!(movement_gate(&owner)["known"], false);
     }
 
     #[test]

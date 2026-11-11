@@ -93,6 +93,7 @@ function fixture(){
   combatRawRef:ref({snapshot:{playerObjectId:3,mapFileName:'D001',knownSkills:[],entities:current.entities.map(entity=>({...entity,hasClassWeapon:true,ridingMount:false,fishing:false,dazed:false}))}}),
   readCurrentCombatBaseline:()=>true,currentSpellsOwner:()=>({connectionGeneration:1,sessionGeneration:2,ownerRevision:0,playerObjectId:3}),
   currentAuthoritativeSelf:world=>world.entities.find(entity=>entity.objectId===world.playerObjectId),heroUiBlocksGameplay:()=>false,
+  selfMovementActionBlocked: () => false, currentBasicAttackMovement: () => null,
   skillBarPointerHeldRef:ref(false),otherPlayerUiBlocksInput:()=>flags.modal,bevyHpLocalOverlayOpenRef:ref(false),
   clientProfile:{input:'keyboardMouse'},bagOpenRef:ref(false),
   cashShopOpenRef:ref(false),referenceWindowsBlockGameplay:()=>false,spellsIngressRef:ref(null),webGl2SharedCanvasPrototype:false,

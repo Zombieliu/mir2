@@ -1,0 +1,410 @@
+{
+  "scope": "actual Page transport/terminal/movement declarations, controlled packet clock, actual R6 built Wasm where indicated",
+  "pageSha256": "7badba45d19a388a394a930462f375508af6e4966b9828d85b634b71f2ff86ec",
+  "channelSha256": "ccc6d8e6e59d24043c8a2c21badb30f98f29987915c4081bbdc727714403f55d",
+  "manifestSha256": "4facb5c9be60665619d9d8f0806469381145344b91d3f4d15b0ef5d2255d08ff",
+  "cases": [
+    {
+      "name": "actual Wasm Basic + 1386",
+      "capabilities": [
+        "nativeGameShopReceiptV1",
+        "nativeAttackOutcomeV1"
+      ],
+      "wire": [
+        {
+          "at": 1000,
+          "type": "attackV2",
+          "protocolVersion": 2,
+          "requestId": "1",
+          "objectId": 14
+        },
+        {
+          "at": 1700,
+          "type": "walk",
+          "direction": "Right"
+        }
+      ]
+    },
+    {
+      "name": "actual Wasm Basic + 1890",
+      "capabilities": [
+        "nativeGameShopReceiptV1",
+        "nativeAttackOutcomeV1"
+      ],
+      "wire": [
+        {
+          "at": 1000,
+          "type": "attackV2",
+          "protocolVersion": 2,
+          "requestId": "1",
+          "objectId": 14
+        },
+        {
+          "at": 1700,
+          "type": "walk",
+          "direction": "Right"
+        }
+      ]
+    },
+    {
+      "name": "actual Wasm Magic remains ordinary",
+      "capabilities": [
+        "nativeGameShopReceiptV1",
+        "nativeAttackOutcomeV1"
+      ],
+      "wire": [
+        {
+          "at": 1000,
+          "type": "magic",
+          "targetId": 14,
+          "spell": "SoulFireBall"
+        },
+        {
+          "at": 1900,
+          "type": "walk",
+          "direction": "Right"
+        }
+      ]
+    },
+    {
+      "name": "terminal before actor FIFO",
+      "capabilities": [
+        "nativeGameShopReceiptV1",
+        "nativeAttackOutcomeV1"
+      ],
+      "wire": [
+        {
+          "at": 1000,
+          "type": "attackV2",
+          "protocolVersion": 2,
+          "requestId": "1",
+          "objectId": 14
+        },
+        {
+          "at": 1700,
+          "type": "walk",
+          "direction": "Right"
+        }
+      ]
+    },
+    {
+      "name": "prior delayed body cannot attach to a new wire request",
+      "capabilities": [
+        "nativeGameShopReceiptV1",
+        "nativeAttackOutcomeV1"
+      ],
+      "wire": [
+        {
+          "at": 1000,
+          "type": "attackV2",
+          "protocolVersion": 2,
+          "requestId": "1",
+          "objectId": 14
+        },
+        {
+          "at": 3001,
+          "type": "attackV2",
+          "protocolVersion": 2,
+          "requestId": "2",
+          "objectId": 14
+        },
+        {
+          "at": 3701,
+          "type": "walk",
+          "direction": "Right"
+        }
+      ]
+    },
+    {
+      "name": "known launch without a raw body allows later typed wire at the full original deadline",
+      "capabilities": [
+        "nativeGameShopReceiptV1",
+        "nativeAttackOutcomeV1"
+      ],
+      "wire": [
+        {
+          "at": 1000,
+          "type": "attackV2",
+          "protocolVersion": 2,
+          "requestId": "1",
+          "objectId": 14
+        },
+        {
+          "at": 2386,
+          "type": "attackV2",
+          "protocolVersion": 2,
+          "requestId": "2",
+          "objectId": 14
+        },
+        {
+          "at": 3772,
+          "type": "walk",
+          "direction": "Right"
+        }
+      ]
+    },
+    {
+      "name": "exact notLaunched preserves interval and admits a later new proof",
+      "capabilities": [
+        "nativeGameShopReceiptV1",
+        "nativeAttackOutcomeV1"
+      ],
+      "wire": [
+        {
+          "at": 1000,
+          "type": "attackV2",
+          "protocolVersion": 2,
+          "requestId": "1",
+          "objectId": 14
+        },
+        {
+          "at": 2386,
+          "type": "attackV2",
+          "protocolVersion": 2,
+          "requestId": "2",
+          "objectId": 14
+        },
+        {
+          "at": 3000,
+          "type": "walk",
+          "direction": "Right"
+        }
+      ]
+    },
+    {
+      "name": "unknown has no retry or downgrade",
+      "capabilities": [
+        "nativeGameShopReceiptV1",
+        "nativeAttackOutcomeV1"
+      ],
+      "wire": [
+        {
+          "at": 1000,
+          "type": "attackV2",
+          "protocolVersion": 2,
+          "requestId": "1",
+          "objectId": 14
+        }
+      ]
+    },
+    {
+      "name": "unavailable has no retry or downgrade",
+      "capabilities": [
+        "nativeGameShopReceiptV1",
+        "nativeAttackOutcomeV1"
+      ],
+      "wire": [
+        {
+          "at": 1000,
+          "type": "attackV2",
+          "protocolVersion": 2,
+          "requestId": "1",
+          "objectId": 14
+        }
+      ]
+    },
+    {
+      "name": "wrong socket and duplicate JSON keys do not match terminal",
+      "capabilities": [
+        "nativeGameShopReceiptV1",
+        "nativeAttackOutcomeV1"
+      ],
+      "wire": [
+        {
+          "at": 1000,
+          "type": "attackV2",
+          "protocolVersion": 2,
+          "requestId": "1",
+          "objectId": 14
+        },
+        {
+          "at": 1610,
+          "type": "walk",
+          "direction": "Right"
+        }
+      ]
+    },
+    {
+      "name": "owner scene retirement clears witness and preserves connection IDs",
+      "capabilities": [
+        "nativeGameShopReceiptV1",
+        "nativeAttackOutcomeV1"
+      ],
+      "wire": [
+        {
+          "at": 1000,
+          "type": "attackV2",
+          "protocolVersion": 2,
+          "requestId": "1",
+          "objectId": 14
+        },
+        {
+          "at": 1050,
+          "type": "attackV2",
+          "protocolVersion": 2,
+          "requestId": "2",
+          "objectId": 14
+        },
+        {
+          "at": 2251,
+          "type": "walk",
+          "direction": "Right"
+        }
+      ]
+    },
+    {
+      "name": "throwing transport remains entered and retains full movement fallback",
+      "capabilities": [
+        "nativeGameShopReceiptV1",
+        "nativeAttackOutcomeV1"
+      ],
+      "wire": [
+        {
+          "at": 2386,
+          "type": "walk",
+          "direction": "Right"
+        }
+      ]
+    },
+    {
+      "name": "stale CombatProof owner revision cannot choose or downgrade typed wire",
+      "capabilities": [
+        "nativeGameShopReceiptV1",
+        "nativeAttackOutcomeV1"
+      ],
+      "wire": [
+        {
+          "at": 1001,
+          "type": "attackV2",
+          "protocolVersion": 2,
+          "requestId": "1",
+          "objectId": 14
+        }
+      ]
+    },
+    {
+      "name": "definitely unsent route does not allocate typed request",
+      "capabilities": [
+        "nativeGameShopReceiptV1",
+        "nativeAttackOutcomeV1"
+      ],
+      "wire": [
+        {
+          "at": 1001,
+          "type": "attackV2",
+          "protocolVersion": 2,
+          "requestId": "1",
+          "objectId": 14
+        }
+      ]
+    },
+    {
+      "name": "duplicate body refuses early admission",
+      "capabilities": [
+        "nativeGameShopReceiptV1",
+        "nativeAttackOutcomeV1"
+      ],
+      "wire": [
+        {
+          "at": 1000,
+          "type": "attackV2",
+          "protocolVersion": 2,
+          "requestId": "1",
+          "objectId": 14
+        },
+        {
+          "at": 2500,
+          "type": "attackV2",
+          "protocolVersion": 2,
+          "requestId": "2",
+          "objectId": 14
+        }
+      ]
+    },
+    {
+      "name": "missing or invalid capability preserves old transport",
+      "capabilities": [
+        "nativeGameShopReceiptV1",
+        "nativeAttackOutcomeV1"
+      ],
+      "wire": [
+        {
+          "at": 1000,
+          "type": "attack",
+          "objectId": 14
+        },
+        {
+          "at": 2386,
+          "type": "walk",
+          "direction": "Right"
+        }
+      ]
+    },
+    {
+      "name": "missing or invalid capability preserves old transport",
+      "capabilities": [
+        "nativeGameShopReceiptV1",
+        "nativeAttackOutcomeV1"
+      ],
+      "wire": [
+        {
+          "at": 1000,
+          "type": "attack",
+          "objectId": 14
+        },
+        {
+          "at": 2386,
+          "type": "walk",
+          "direction": "Right"
+        }
+      ]
+    },
+    {
+      "name": "missing or invalid capability preserves old transport",
+      "capabilities": [
+        "nativeGameShopReceiptV1",
+        "nativeAttackOutcomeV1"
+      ],
+      "wire": [
+        {
+          "at": 1000,
+          "type": "attack",
+          "objectId": 14
+        },
+        {
+          "at": 2386,
+          "type": "walk",
+          "direction": "Right"
+        }
+      ]
+    },
+    {
+      "name": "existing directional producer prevents mixing body witnesses",
+      "capabilities": [
+        "nativeGameShopReceiptV1",
+        "nativeAttackOutcomeV1"
+      ],
+      "wire": [
+        {
+          "at": 1000,
+          "type": "attackV2",
+          "protocolVersion": 2,
+          "requestId": "1",
+          "objectId": 14
+        },
+        {
+          "at": 1010,
+          "type": "attackDirection",
+          "direction": "Right"
+        },
+        {
+          "at": 2386,
+          "type": "attackV2",
+          "protocolVersion": 2,
+          "requestId": "2",
+          "objectId": 14
+        }
+      ]
+    }
+  ]
+}

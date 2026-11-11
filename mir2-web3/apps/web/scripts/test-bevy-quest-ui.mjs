@@ -974,6 +974,7 @@ test("actual Page queued movement preserves replacement intent and retires stale
         return live;
       },
       currentAuthoritativeSelf: () => ({ x: 1, y: 1, direction: "east" }),
+      selfMovementActionBlocked: () => false,
       canSendMovement: () => true, readSelfMovementControllerState: () => ({}),
       crystalEffectiveMovementMode: mode => mode,
       questRouteMovement: () => { questPlans++; return { point: { x: 2, y: 1 }, direction: "east", mode: "walk" }; },

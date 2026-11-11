@@ -60,6 +60,13 @@ export type MapRouteWasmModule = {
   getMir2MapRoutePlan?: (width: number, height: number, ox: number, oy: number, gx: number, gy: number,
     edges: Uint8Array) => Int32Array;
 };
+export type CashPreviewWasmModule = {
+  cash_preview_abi_version?: () => number;
+  cash_preview_layers?: (kind: number, shape: number, gender: number, armour: number,
+    female: boolean, direction: number, elapsed: bigint) => string;
+  cash_preview_turn?: (direction: number, right: boolean) => number;
+};
+
 export type PresentationWasmModule = FishingClickWasmModule & {
   npc_pearl_buy_abi_version?: () => number;
   npc_pearl_buy_plan?: (allowsBuy: boolean, selected: boolean, usePearls: boolean, uniqueId: number, price: number,
@@ -71,10 +78,6 @@ export type PresentationWasmModule = FishingClickWasmModule & {
   item_tooltip_abi_version?: () => number;
   item_tooltip_document?: (json: string, nowDotnetTicks: string) => string;
   chat_ui_abi_version?: () => number; ChatUiBridge?: new (mask: number) => RawChatUi;
-  cash_preview_abi_version?: () => number;
-  cash_preview_layers?: (kind: number, shape: number, gender: number, armour: number,
-    female: boolean, direction: number, elapsed: bigint) => string;
-  cash_preview_turn?: (direction: number, right: boolean) => number;
   npc_repair_quote_abi_version?: () => number;
   npc_repair_quote?: (liveUid: bigint, sourceUid: bigint, infoIndex: number, userIndex: number,
     price: number, durability: number, count: number, current: number, max: number, added: Int32Array,
@@ -164,7 +167,7 @@ export function createSharedChatUi(module: PresentationWasmModule, mask: number)
   };
 }
 
-export function readSharedCashPreview(module: PresentationWasmModule, input: CashPreviewInput): CashPreviewLayerDocument | null {
+export function readSharedCashPreview(module: CashPreviewWasmModule, input: CashPreviewInput): CashPreviewLayerDocument | null {
   if (module.cash_preview_abi_version?.() !== 1 || !module.cash_preview_layers) return null;
   if (!boundedInteger(input.itemType, 0, 255) || !boundedInteger(input.shape, 0, 32767)
     || !boundedInteger(input.requiredGender, 0, 255) || !boundedInteger(input.armourShape, -32768, 32767)
@@ -191,7 +194,7 @@ export function readSharedCashPreview(module: PresentationWasmModule, input: Cas
   return Object.freeze({ version: 1, known: d.known, direction: input.direction, layers: Object.freeze(layers) });
 }
 
-export function turnSharedCashPreview(module: PresentationWasmModule, direction: number, right: boolean): number | null {
+export function turnSharedCashPreview(module: CashPreviewWasmModule, direction: number, right: boolean): number | null {
   if (module.cash_preview_abi_version?.() !== 1 || !module.cash_preview_turn
     || !boundedInteger(direction, 1, 8) || typeof right !== "boolean") return null;
   const result = module.cash_preview_turn(direction, right);

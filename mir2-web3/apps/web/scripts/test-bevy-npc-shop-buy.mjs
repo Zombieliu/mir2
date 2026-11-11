@@ -23,6 +23,8 @@ const actualPearlBuy=loadPearlBuyDependency("../lib/npc-pearl-buy.ts",{"./npc-pe
 const actualDurableNpc=loadPearlBuyDependency("../lib/npc-purchase-client.ts");
 const actualNpcRuntimeLanguage=loadPearlBuyDependency("../lib/r16-runtime-language.ts");
 const actualSocialBudget=loadPearlBuyDependency("../lib/social-operation-budget-host.ts");
+const actualAttackMovement=loadPearlBuyDependency("../lib/native-attack-movement.ts",
+  {"./world-fishing-source":loadPearlBuyDependency("../lib/world-fishing-source.ts")});
 test("Source30 durable receiver and retained facade pass strict no-emit type checking", () => {
   const files = ["../lib/npc-purchase-client.ts", "../lib/npc-purchase-receipt.ts"]
     .map(relative => fileURLToPath(new URL(relative, import.meta.url)));
@@ -620,6 +622,7 @@ function npcPageHarness({ protocol = protocolOracle(), documentOwner = {}, coreV
   const legacyMap = new WeakMap(), realSet = legacyMap.set.bind(legacyMap);
   legacyMap.set = (proof, lease) => { legacyProofs.push(proof); return realSet(proof, lease); };
   const scope = {
+    ...actualAttackMovement,
     // Buy is outside the Native social budget. Run the real host's covers path
     // with no available runtime instead of replacing admission with a true stub.
     socialBudgetRef:{current:new actualSocialBudget.SocialOperationBudgetHost(()=>null)},
@@ -2522,7 +2525,7 @@ test("Source30 actual Page branches raw owner before generic decoder and complet
   assert(actualPageSource.includes("npcPurchaseEconomicSourceRef.current = Object.freeze({ socket, session, rawFrame, snapshot: rawSnapshot })"));
   assert.equal(capabilitySocketOpenCallbacks().length,1);
   const capability=pageCapabilityFixture();capability.page.observeNpcPurchaseSocket(capability.page.socket);
-  assert.deepEqual(capability.declarations(),[["durableNpcPurchaseOwnerV1"]]);
+  assert.deepEqual(capability.declarations(),[["durableNpcPurchaseOwnerV1","nativeAttackOutcomeV1"]]);
   assert.equal(capability.page.scope.npcPurchaseOptInSocketsRef.current.has(capability.page.socket),true);
 });
 test("Source30 actual Pearl catalogue accepts and preserves only canonical purchase selectors",()=>{
@@ -3437,10 +3440,10 @@ function pageCapabilityFixture(coreEarly=true) {
 test("Source64 actual capability consumers preserve both declarations with Core early or late",()=>{
   for(const early of [true,false]) {
     const f=pageCapabilityFixture(early);f.openFor();
-    if(!early){assert.deepEqual(f.declarations(),[["nativeGameShopReceiptV1"]]);f.setCore();f.page.observeNpcPurchaseSocket(f.page.socket);}
+    if(!early){assert.deepEqual(f.declarations(),[["nativeGameShopReceiptV1","nativeAttackOutcomeV1"]]);f.setCore();f.page.observeNpcPurchaseSocket(f.page.socket);}
     assert.deepEqual(f.declarations(),early
-      ?[["durableNpcPurchaseOwnerV1"],["durableNpcPurchaseOwnerV1","nativeGameShopReceiptV1"]]
-      :[["nativeGameShopReceiptV1"],["durableNpcPurchaseOwnerV1","nativeGameShopReceiptV1"]]);
+      ?[["durableNpcPurchaseOwnerV1","nativeAttackOutcomeV1"],["durableNpcPurchaseOwnerV1","nativeGameShopReceiptV1","nativeAttackOutcomeV1"]]
+      :[["nativeGameShopReceiptV1","nativeAttackOutcomeV1"],["durableNpcPurchaseOwnerV1","nativeGameShopReceiptV1","nativeAttackOutcomeV1"]]);
     assert.equal(f.page.scope.npcPurchaseOptInSocketsRef.current.has(f.page.socket),true);
     assert.equal(f.page.scope.cashReceiptSocketRef.current,f.page.socket);
     assert.deepEqual(f.controls,["mailOpen","open"]);
@@ -3453,10 +3456,10 @@ test("Source64 same socket append keeps the other capability and replacement soc
   f.page.observeNpcPurchaseSocket(f.page.socket);assert.equal(f.declarations().length,count,"already declared NPC sends no duplicate proposal");
   for(const capability of ["durableNpcPurchaseOwnerV1","nativeGameShopReceiptV1"]) {
     f.page.sendClientCapabilities(f.page.socket,capability);
-    assert.deepEqual(f.declarations().at(-1),["durableNpcPurchaseOwnerV1","nativeGameShopReceiptV1"]);
+    assert.deepEqual(f.declarations().at(-1),["durableNpcPurchaseOwnerV1","nativeGameShopReceiptV1","nativeAttackOutcomeV1"]);
     const sent=[],next={readyState:1,send:body=>sent.push(JSON.parse(body))};
     f.page.sendClientCapabilities(next,capability);
-    assert.deepEqual(sent,[{type:"clientCapabilities",capabilities:[capability]}]);
+    assert.deepEqual(sent,[{type:"clientCapabilities",capabilities:[capability,"nativeAttackOutcomeV1"]}]);
     assert.equal(f.page.scope.npcPurchaseOptInSocketsRef.current.has(next),false);
     assert.equal(f.page.scope.cashReceiptSocketRef.current,f.page.socket);
   }
@@ -3468,12 +3471,12 @@ test("Source64 actual consumers mark capabilities only after successful sends",(
   assert.equal(npc.page.scope.npcPurchaseUnavailableRef.current,true);assert.equal(npc.page.scope.npcPurchaseClientRef.current,null);
   assert.equal(npc.declarations().length,0);assert.equal(npc.page.sent.filter(value=>value.type==="npcPurchaseOwner").length,0);
   npc.fail(null);npc.page.observeNpcPurchaseSocket(npc.page.socket);
-  assert.deepEqual(npc.declarations(),[["durableNpcPurchaseOwnerV1"]]);
+  assert.deepEqual(npc.declarations(),[["durableNpcPurchaseOwnerV1","nativeAttackOutcomeV1"]]);
   const cash=pageCapabilityFixture(false);cash.fail("nativeGameShopReceiptV1");cash.openFor();
   assert.equal(cash.page.scope.cashReceiptSocketRef.current,null);assert.equal(cash.declarations().length,0);
   assert.equal(cash.page.scope.npcPurchaseOptInSocketsRef.current.has(cash.page.socket),false);
   cash.fail(null);cash.setCore();cash.page.observeNpcPurchaseSocket(cash.page.socket);
-  assert.deepEqual(cash.declarations(),[["durableNpcPurchaseOwnerV1"]],"failed cash declaration is never carried into NPC proposal");
+  assert.deepEqual(cash.declarations(),[["durableNpcPurchaseOwnerV1","nativeAttackOutcomeV1"]],"failed cash declaration is never carried into NPC proposal");
 });
 
 test("Source64 actual socket and observer blockers preserve capability send gates",()=>{

@@ -69,6 +69,7 @@ function fixture() {
     runtimeRef: ref(), bevyQuestGenerationRef: ref(1), movementBlockedStepsRef: ref([]),
     lastSelfMovementAckRef: ref(), lastSelfPacketMovementAckRef: ref(), pendingTransferRef: ref(), prediction: ref(),
     currentAuthoritativeSelf: () => self,
+    selfMovementActionBlocked: () => false,
     currentQuestWorldIdentity: () => lifetime.identity,
     currentQuestWorldLifetime: () => flags.questCurrent ? lifetime : null,
     sameQuestWorldLifetime: (a, b) => a === b,

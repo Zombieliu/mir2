@@ -13,6 +13,7 @@ test('actual Shell shortcuts precede Winit canvas cancellation and preserve capt
   {compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText)(guildKeyboard,HTMLElement);
  const flags={capture:false,focus:true,modal:false};
  const scope={HTMLElement,HTMLInputElement,HTMLTextAreaElement,HTMLSelectElement,screen:'game',selectedEntity:null,
+  stageExitDialogRef:{current:{open:false}},
   keyboardMovementDiagnosticsRef:{current:{lastKey:null,lastDispatch:null,lastShortcut:null}},sceneInteractionReady:true,
   bevyHeroUiActive:false,bevyHeroUiTransitioning:false,bevyHeroUiWorldBlocked:false,heroPointerLeaseRef:{current:null},
   world:{beltItems:[],knownSkills:[]},window:{addEventListener:(type,fn,capture)=>listeners.push({type,fn,capture:capture===true}),
@@ -32,6 +33,7 @@ test('actual Shell shortcuts precede Winit canvas cancellation and preserve capt
   e.preventDefault(); // Original Winit canvas target listener, after window capture.
   for(const l of listeners.filter(l=>l.type==='keydown'&&!l.capture))l.fn(e);return e;}
  key();assert.equal(calls.length,1,'canvas focus must retain the original Inventory2 shortcut');calls.length=0;
+ scope.stageExitDialogRef.current.open=true;key();assert.equal(calls.length,0,'exit confirmation owns shortcuts');scope.stageExitDialogRef.current.open=false;
  key(new HTMLElement(),{key:'q',code:'KeyQ'});assert.equal(calls.length,1);calls.length=0;
  for(const gate of ['capture','focus','modal']){flags[gate]=gate!=='focus';key();assert.equal(calls.length,0,gate+' gate remains');flags[gate]=gate==='focus';}
  key(new HTMLInputElement());key(new HTMLTextAreaElement());key(new HTMLSelectElement());assert.equal(calls.length,0);
@@ -373,6 +375,7 @@ test('production integration captures raw before coalescing and final event proo
   tradeEditCondition,
   pointerHeldCondition,
   fishingPanelCondition,
+  'wireCommand.type === "attack"',
   budgetEnterCondition,
   tradeCancelCondition,
  ]);
@@ -493,14 +496,17 @@ test('production integration captures raw before coalescing and final event proo
   const fishingPanelGate=statements[authClaimIndex+14];
   assert.ok(ts.isIfStatement(fishingPanelGate));assert.equal(normalized(fishingPanelGate.expression),fishingPanelCondition);
   assert.equal(normalized(fishingPanelGate.thenStatement),'return false;');assert.equal(fishingPanelGate.elseStatement,undefined);
-  const budgetEnter=statements[authClaimIndex+15],cancelSpent=statements[authClaimIndex+16];
+  const attackWireGate=statements[authClaimIndex+15];
+  assert.ok(ts.isIfStatement(attackWireGate));assert.equal(normalized(attackWireGate.expression),'wireCommand.type === "attack"');
+  assert.equal(normalized(attackWireGate.thenStatement.statements[0]),"if (socialBudgetTicket) return false;");
+  const budgetEnter=statements[authClaimIndex+16],cancelSpent=statements[authClaimIndex+17];
  assert.ok(ts.isIfStatement(budgetEnter));assert.equal(normalized(budgetEnter.expression),budgetEnterCondition);
  assert.equal(normalized(budgetEnter.thenStatement),'{ if (options?.groupProof) groupOperationsRef.current.finishInviteAttempt(options.groupProof); return false; }');
  assert.equal(budgetEnter.elseStatement,undefined);
  assert.ok(ts.isIfStatement(cancelSpent));assert.equal(normalized(cancelSpent.expression),tradeCancelCondition);
  assert.equal(normalized(cancelSpent.thenStatement),'socialTradeCancelSpentRef.current = options.socialTradeProof.incarnation;');
  assert.equal(cancelSpent.elseStatement,undefined);
-  assert.equal(socketIndex,authClaimIndex+17,'typed guild, trade, held input and Fishing panel checks precede final Native entry, cancel spending and socket');
+  assert.equal(socketIndex,authClaimIndex+18,'typed guild, trade, held input and Fishing panel checks precede final Native entry, cancel spending and socket');
  assert.deepEqual(statements.slice(statements.indexOf(budgetEnter)+1,socketIndex+1),[cancelSpent,socketTry],
   'only the exact callback-free cancel assignment can follow Native entry before socket.send');
  const afterEntryCalls=[];
@@ -508,7 +514,7 @@ test('production integration captures raw before coalescing and final event proo
  assert.deepEqual(afterEntryCalls,[],'no callback, await or constructor after successful Native entry before transport');
  // Every pre-send statement after the combat claim is covered by the exact
  // ordered list above, including Repair/retire, Bag/Belt and final WorldFishing entry.
-  assert.deepEqual(statements.slice(claimIndex+1,socketIndex).filter(n=>ts.isIfStatement(n)).map(n=>normalized(n.expression)).slice(-16),[
+  assert.deepEqual(statements.slice(claimIndex+1,socketIndex).filter(n=>ts.isIfStatement(n)).map(n=>normalized(n.expression)).slice(-17),[
   'options?.npcRepairProof',
   'isMailItemMutation(wireCommand) || ["dropGold", "tradeGold", "gameShopBuy", "sendMail", "collectParcel"].includes(String(wireCommand.type))',
   'options?.bagBeltProof',
@@ -523,6 +529,7 @@ test('production integration captures raw before coalescing and final event proo
   tradeEditCondition,
   pointerHeldCondition,
   fishingPanelCondition,
+  'wireCommand.type === "attack"',
   budgetEnterCondition,
   tradeCancelCondition,
  ]);
@@ -671,6 +678,7 @@ test('actual Page HP overlay callback and combat producer block immediately befo
  const mapImage={get complete(){return domLoaded;},get naturalWidth(){return domLoaded?48:0;},get naturalHeight(){return domLoaded?32:0;},parentElement:composite,getBoundingClientRect:()=>({width:48,height:32})};
  let inventoryPromptOpen = false;
  const deps={worldRef:{current},combatRawRef:{current:{snapshot:{entities:[],mapFileName:'D001'},owner:f.input.owner}},readCurrentCombatBaseline:()=>({snapshot:f.raw,owner:f.input.owner}),currentSpellsOwner:()=>f.input.owner,currentAuthoritativeSelf:()=>current.entities[0],combatMastersRef:{current:new Map()},document:{activeElement:null,visibilityState:'visible',hasFocus:()=>true,querySelectorAll:selector=>{selectors.push(selector);if(selector.includes('img.scene-backdrop-sprite'))return domPresent?[mapImage]:[];return [{hidden:selector.includes('quest-ui-canvas')||(selector==='.game-world-composite'?!worldVisible:!canvasVisible),parentElement:stage,getBoundingClientRect:()=>({width:10,height:10})}];}},HTMLElement:class{},getComputedStyle:surface=>({display:surface.display??'block',visibility:surface.hidden?'hidden':'visible',opacity:surface.opacity??'1'}),webGl2SharedCanvasPrototype:false,bevyHpLocalOverlayOpenRef:overlay,combatIngressRef:{current:{hasUiHeld:()=>f.host.hasUiHeld()}},npcShopService:null,npcRepairService:null,spellsIngressRef:{current:null},combatRouteCacheRef:{current:null},movementBlockedStepsRef:{current:[]},movementPlanRef:{current:null},nextMoveSendAtRef:{current:0},screenRef:{current:'game'},initialSceneAssetsReadyRef:{current:true},equipmentHostSuspendReasonRef:{current:null},combatPointerRef:{current:{hovered:null,cursor:null,lock:false}},crystalKeyBindingsRef:{current:defaultCrystalKeyBindings()},isMovementBusy:()=>false,crystalMovementWalkRoute:()=>{throw Error('unexpected route');}};
+ deps.currentBasicAttackMovement = () => null;
  deps.clientProfile = { input: "keyboardMouse" };
  deps.recentMovementBlockedSteps = steps => steps;
  deps.canSendMovement = () => true;
@@ -1081,4 +1089,31 @@ test('actual target resolver rejects foreign stage, DOM UI and noninteractive ob
  f.scope.layers=[f.label,f.name,f.frame];assert.equal(f.api.sceneWorldObjectTarget(10,20),undefined,'ordinary DOM target uses its existing handler');
  f.scope.layers=[f.canvas,f.name,f.frame];f.api.capture(f.event());f.api.handleSharedHudPointer(f.event(),'cancel');f.api.handleSharedHudPointer(f.event(),'up');
  assert.deepEqual(f.calls,[]);assert.equal(f.scope.heldScenePointerRef.current,null);
+});
+
+test("typed Basic motion requires the current result and body and never replays an unresolved request",()=>{
+ const {nativeAttackMovementChannel}=load("native-attack-movement"),{WorldFishingSource}=load("world-fishing-source");
+ const socket={},owner={socket,connectionGeneration:1,sessionGeneration:2,sceneRevision:3,playerObjectId:7,mapFileName:"0"};
+ const store=new WorldFishingSource();
+ store.observeSnapshot(owner,{playerObjectId:7,mapFileName:"0",
+  entities:[{objectId:7,kind:"selfPlayer",x:10,y:10,direction:"Right",dead:false,fishing:false,transformType:0}]});
+ const channel=nativeAttackMovementChannel(socket),capability=JSON.stringify({type:"attackCapabilitiesV2",protocolVersion:2,
+  capability:"nativeAttackOutcomeV1",supported:true,scope:"connection"});
+ const proof=(target=14)=>({identity:owner,map:"0",movementBlockMs:1386,targetId:target,command:{type:"attack",objectId:target}});
+ const send=(proof,at)=>channel.enter(proof,store.current(owner),proof.targetId,at);
+ const terminal=(id,target=14,result="launched")=>channel.observeFrame(JSON.stringify({type:"attackResultV2",
+  protocolVersion:2,requestId:id,objectId:target,result}),owner);
+ const body=at=>{const before=store.current(owner);store.observePacket(owner,"ObjectAttack",
+  {objectId:7,location:{x:10,y:10},direction:"Right"},at);channel.observeBody(owner,before,store.current(owner),at);};
+ channel.observeFrame(capability,owner);assert.equal(channel.usesTypedWire,false);
+ channel.declare();channel.observeFrame(capability,owner);
+ const a=proof();assert.equal(JSON.parse(send(a,1000)).requestId,"1");
+ assert.equal(send(proof(),2386),null,"missing A terminal bars a different new request");
+ body(2400);terminal("2");assert.equal(channel.receipt(channel.current(owner)),null);
+ terminal("1");assert.equal(channel.receipt(channel.current(owner))?.actionEvidence?.family,"attackMelee");
+ assert.equal(send(a,3000),null,"spent proof cannot replay");
+ assert.equal(JSON.parse(send(proof(),3000)).requestId,"2");
+ terminal("1");terminal("2",15);body(3010);assert.equal(channel.receipt(channel.current(owner)),null);
+ terminal("2",14,"notLaunched");terminal("2");assert.equal(channel.receipt(channel.current(owner)),null);
+ assert.equal(channel.enterLegacy(),false,"an entered typed channel cannot downgrade");
 });
