@@ -1,6 +1,6 @@
 # R16 Web 备用任务窗目标与章节文字
 
-基于已提交的 a852afd202，在普通 /game 入口验证默认 React 任务窗。线上读回 ef0d1ee9dc，本轮是本地生产候选。
+基于已提交的 a852afd202，在普通 /game 入口验证默认 React 任务窗。初次验收时线上为 ef0d1ee9dc，本记录覆盖当时的本地生产候选。现已正式发布 78c900ca36，见[公网发布与复验](../r16-quest-release-20261111/README.md)。
 
 任务目标、返回 NPC 提示、章节名、章节进度和成长奖励说明使用 Windows 现有十语词库。击杀目标支持静态 Defeat 句子和 ChangeQuest 的 Kill 句子，怪物名称由同一词库提供。每行的 current、required、done、任务状态和奖励选择索引沿用服务器值。未知目标保持原始文本。
 
@@ -20,4 +20,4 @@ node scripts/test-newcomer-v2-journey.mjs
 node scripts/test-quest-localization.mjs
 ```
 
-共享 GPU 任务窗、当前候选公网签名、实体手机与备用窗毕业目标选择仍需验收。此记录覆盖默认备用窗和一个实际任务接交流程。
+共享 GPU 任务窗、实体手机与备用窗毕业目标选择仍需验收。此记录覆盖默认备用窗和一个实际任务接交流程；公网签名与任务窗另见发布回执。
