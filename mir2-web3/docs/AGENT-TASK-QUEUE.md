@@ -6,7 +6,7 @@ Updated 2026-11-11 (Asia/Shanghai). Read [coordination](AGENT-ORCHESTRATION.md) 
 
 Windows R16 的 codex/windows-player-journey 为跨平台共同基线，持续 Goal 是适用门槛的 100% Candidate 后再做最终人类 Accepted。优先无需桌面控制的代码、协议、无界面浏览器与构建；独立 Windows 窗口验收单列。具体差距、范围和来源见 [Web/R16 Goal](WEB-R16-PARITY-GOAL.zh-CN.md)。
 
-2026-11-11 正式版 603e68a352 已发布晚到静态地图恢复。默认 /game 和真实共用 WebGL2 本机 17 秒头、动态 503 复现通过。公网简繁出码、两轮 Testnet 签名、固定地图及进城通过；繁中任务窗文本与 Q 开关已取证。首轮移动过关，第二轮回包约 35.1 秒超限，公开共用 HUD 尚未 ready，保留失败继续定位；完整三职业当前路线、旧档和实体手机继续。 [晚到地图正式发布与公网分项](evidence/r16-late-static-scene-20261111/production.md)
+2026-11-11 本地字库共享候选通过真实 11.94 MB 对照，重复下载 2→1、第二消费者约 21.2→15.2 秒，字节哈希一致。64 项检查、生产构建及默认/真实 WebGL2 整游戏复验通过。公网仍为 603e68a352；新观察复现 23.1 秒首步，主线程无同期长任务、聚合准入较早，继续输出/传输时序；字库慢传输仍阻塞共用 HUD。 [字库与时序](evidence/r16-font-fill-20261111/README.md)
 
 ## 保留的当前未结项
 
@@ -35,6 +35,8 @@ Windows R16 的 codex/windows-player-journey 为跨平台共同基线，持续 G
 阿洛用户实验的前置与边界见[自主生活](ALO-AUTONOMOUS-LIFE-20261103.zh-CN.md)、[教学与补给](ALO-CULTIVATION-SUPPLY-20261103.zh-CN.md)。
 
 - [x] 本地候选静态地图改分段读取并保留晚到竞争；默认和真实共用 WebGL2 在 17 秒头、动态 503 中完成任务窗、移动、注销；66 项检查与生产构建通过。 [复验](evidence/r16-late-static-scene-20261111/README.md)
+
+- [x] 字库正文与缓存完成前共享读取，关键缓存固定，原版繁中真实浏览器 2→1 下载及整游戏两路通过。64 项检查、生产构建、字节/源档保全另记。 [回执](evidence/r16-font-fill-20261111/README.md)
 
 ## 已验收片段索引
 

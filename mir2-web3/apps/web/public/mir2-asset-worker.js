@@ -23,6 +23,12 @@ const NEGATIVE_CACHE_TTL_MS = 10_000;
 const NEGATIVE_CACHE_MAX_ENTRIES = 2000;
 const staticAssetNegativeCache = new Map();
 const staticAssetInflightFetches = new Map();
+// CSS and the shared renderer can request the same large font while its first
+// body is still downloading. Retain that response until the cache fill ends,
+// rather than coalescing response headers only. Bounds limit retained tees.
+const fontAssetInflightFetches = new Map();
+const FONT_INFLIGHT_MAX_ENTRIES = 16;
+const FONT_INFLIGHT_MAX_AGE_MS = 180_000;
 const sceneBlueprintInflightFetches = new Map();
 // CacheStorage operations are serialized by browsers much more aggressively
 // than ordinary HTTP/2 requests. Rewriting every cache hit and calling
@@ -239,6 +245,14 @@ async function cacheFirst(request, name, maxEntries, event) {
     cache = null;
   }
 
+  if (cache && isSharedUiFont(request) && !request.headers.has("range")) {
+    const entry = sharedFontCacheFill(request, cache, name, maxEntries);
+    if (entry) {
+      event?.waitUntil(entry.cached.catch(() => null));
+      return (await entry.response).clone();
+    }
+  }
+
   const response = await coalescedStaticAssetFetch(request);
   if (cache && response && response.ok) {
     // Never make first paint wait for CacheStorage to consume the complete
@@ -251,7 +265,37 @@ async function cacheFirst(request, name, maxEntries, event) {
   return response;
 }
 
-async function fetchStaticAsset(request) {
+function isSharedUiFont(request) {
+  return /^\/original-ui\/fonts\/[^/]+\.(?:ttf|otf|woff2?)$/i.test(new URL(request.url).pathname);
+}
+
+function sharedFontCacheFill(request, cache, name, maxEntries) {
+  const key = `${name}:${request.url}`;
+  const existing = fontAssetInflightFetches.get(key);
+  if (existing) return existing;
+  if (fontAssetInflightFetches.size >= FONT_INFLIGHT_MAX_ENTRIES) return null;
+  // One document leaving must not cancel another document's immutable font.
+  const sharedRequest = new Request(request, { signal: new AbortController().signal });
+  const fallbacks = createRemoteAssetRequests(sharedRequest);
+  const entry = {
+    response: fetchStaticAsset(freshStaticAssetRequest(sharedRequest), fallbacks)
+      .catch(() => syntheticAssetResponse(504, "font fetch failed")),
+    cached: null,
+  };
+  fontAssetInflightFetches.set(key, entry);
+  const retire = () => {
+    if (fontAssetInflightFetches.get(key) === entry) fontAssetInflightFetches.delete(key);
+  };
+  // Expiry releases only the shared lookup; it never truncates a progressing
+  // foreground body or a cache write owned by waitUntil.
+  const expiry = setTimeout(retire, FONT_INFLIGHT_MAX_AGE_MS);
+  entry.cached = entry.response.then((response) =>
+    response.ok && putCacheEntry(cache, request, response.clone(), maxEntries, name),
+  ).finally(() => { clearTimeout(expiry); retire(); });
+  return entry;
+}
+
+async function fetchStaticAsset(request, fallbackRequests) {
   // Never throws. Resolves to the best available response and, on total
   // failure, to a synthetic 504 so callers (cacheFirst -> respondWith) always
   // receive a settled promise instead of an uncaught network rejection.
@@ -266,7 +310,7 @@ async function fetchStaticAsset(request) {
   if (originResponse?.ok) return originResponse;
 
   let lastRemoteResponse = null;
-  for (const remoteRequest of createRemoteAssetRequests(request)) {
+  for (const remoteRequest of fallbackRequests || createRemoteAssetRequests(request)) {
     const remoteResponse = await fetchWithTransientRetries(freshStaticAssetRequest(remoteRequest));
     if (!remoteResponse) continue;
     lastRemoteResponse = remoteResponse;
@@ -590,7 +634,9 @@ async function readCacheStatus() {
 
 function staticAssetCachePolicy(request) {
   const url = new URL(request.url);
-  const tier = staticAssetTiers.get(staticAssetCacheKey(url)) || "runtime";
+  // Changing from CSS to renderer ownership must not change the cache holding
+  // an unfinished font and start a second complete download.
+  const tier = isSharedUiFont(request) ? "critical" : staticAssetTiers.get(staticAssetCacheKey(url)) || "runtime";
   if (tier === "critical") {
     return {
       cacheKind: "static-critical",

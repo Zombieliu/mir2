@@ -446,3 +446,138 @@ test("Crystal preserves Retry-After and the typed resource-missing 424 without c
   assert.equal(fetchCount, 2);
   assert.equal(cacheWrites, 0);
 });
+
+function fontWorkerFixture(t) {
+  const calls = [], streams = [], completions = [], stores = new Map();
+  let writes = 0;
+  const cacheStorage = { async open(name) {
+    if (!stores.has(name)) stores.set(name, new Map());
+    const entries = stores.get(name);
+    return {
+      async match(request) { return entries.get(request.url)?.clone(); },
+      async put(request, response) {
+        writes += 1;
+        const bytes = await response.arrayBuffer();
+        entries.set(request.url, new Response(bytes, { headers: response.headers }));
+      },
+      async keys() { return [...entries.keys()].map(url => new Request(url)); },
+      async delete(request) { return entries.delete(request.url); },
+    };
+  } };
+  const { context } = createWorkerContext(async request => {
+    calls.push(request);
+    let body;
+    const stream = new ReadableStream({ start(controller) { body = controller; } });
+    request.signal.addEventListener("abort", () => { try { body.error(request.signal.reason); } catch {} }, { once: true });
+    streams.push(body);
+    return new Response(stream, { headers: { "content-type": "font/ttf" } });
+  }, cacheStorage);
+  t.after(() => { for (const stream of streams) { try { stream.close(); } catch {} } });
+  context.captureFontWrite = value => completions.push(value);
+  const read = (name = "font-cache-a", request) => {
+    context.fontRequest = request ?? new Request("https://preview.example.test/original-ui/fonts/NotoSansTC.ttf");
+    context.fontCacheName = name;
+    return vm.runInContext('cacheFirst(fontRequest, fontCacheName, 20, { waitUntil: captureFontWrite })', context);
+  };
+  return { context, read, calls, streams, completions, stores, writes: () => writes };
+}
+
+test("CSS and renderer consumers share one font through its unfinished body and cache fill", async t => {
+  const f = fontWorkerFixture(t);
+  const first = await f.read();
+  const firstBody = first.arrayBuffer();
+  f.streams[0].enqueue(new Uint8Array([1, 2]));
+  const second = await f.read();
+  const secondBody = second.arrayBuffer();
+  assert.equal(f.calls.length, 1, "the second consumer must not download the same font again");
+  assert.equal(f.writes(), 1, "one in-flight body has only one cache writer");
+  assert.equal(vm.runInContext("fontAssetInflightFetches.size", f.context), 1);
+  f.streams[0].enqueue(new Uint8Array([3, 4])); f.streams[0].close();
+  assert.deepEqual([...new Uint8Array(await firstBody)], [1,2,3,4]);
+  assert.deepEqual([...new Uint8Array(await secondBody)], [1,2,3,4]);
+  await Promise.all(f.completions);
+  assert.equal(vm.runInContext("fontAssetInflightFetches.size", f.context), 0);
+  const cached = await f.read();
+  assert.deepEqual([...new Uint8Array(await cached.arrayBuffer())], [1,2,3,4]);
+  assert.equal(f.calls.length, 1);
+});
+
+test("one font consumer retiring does not cancel another consumer's shared download", async t => {
+  const f = fontWorkerFixture(t), owner = new AbortController();
+  const first = await f.read(undefined, new Request("https://preview.example.test/original-ui/fonts/NotoSansTC.ttf", { signal: owner.signal }));
+  owner.abort("first document left");
+  assert.equal(f.calls[0].signal.aborted, false);
+  const second = await f.read();
+  assert.equal(f.calls.length, 1);
+  f.streams[0].enqueue(new Uint8Array([8,9])); f.streams[0].close();
+  assert.deepEqual([...new Uint8Array(await second.arrayBuffer())], [8,9]);
+  assert.deepEqual([...new Uint8Array(await first.arrayBuffer())], [8,9]);
+  await Promise.all(f.completions);
+});
+
+test("font fills retain separate cache namespaces across a release change", async t => {
+  const f = fontWorkerFixture(t);
+  const old = await f.read("version-a"), next = await f.read("version-b");
+  assert.equal(f.calls.length, 2);
+  f.streams[0].enqueue(new Uint8Array([1])); f.streams[0].close();
+  f.streams[1].enqueue(new Uint8Array([2])); f.streams[1].close();
+  assert.deepEqual([...new Uint8Array(await old.arrayBuffer())], [1]);
+  assert.deepEqual([...new Uint8Array(await next.arrayBuffer())], [2]);
+  await Promise.all(f.completions);
+});
+
+test("font lookup expiry releases the retained entry without truncating either body", async t => {
+  t.mock.timers.enable({ apis: ["setTimeout"] });
+  const f = fontWorkerFixture(t), first = await f.read();
+  t.mock.timers.tick(180_000);
+  assert.equal(vm.runInContext("fontAssetInflightFetches.size", f.context), 0);
+  assert.equal(f.calls[0].signal.aborted, false);
+  const second = await f.read();
+  assert.equal(f.calls.length, 2);
+  f.streams[0].enqueue(new Uint8Array([3])); f.streams[0].close();
+  assert.deepEqual([...new Uint8Array(await first.arrayBuffer())], [3]);
+  await f.completions[0];
+  assert.equal(vm.runInContext("fontAssetInflightFetches.size", f.context), 1, "retiring an expired fill cannot delete its successor");
+  f.streams[1].enqueue(new Uint8Array([4])); f.streams[1].close();
+  assert.deepEqual([...new Uint8Array(await second.arrayBuffer())], [4]);
+  await Promise.all(f.completions);
+  assert.equal(vm.runInContext("fontAssetInflightFetches.size", f.context), 0);
+});
+
+test("fonts stay in the critical cache before and after background or runtime hints", () => {
+  const { context } = createWorkerContext(() => assert.fail("policy lookup cannot fetch"));
+  const policies = vm.runInContext(`(() => {
+    const request = new Request("https://preview.example.test/original-ui/fonts/NotoSansTC.ttf");
+    const first = staticAssetCachePolicy(request);
+    addStaticAssetTierHints([request.url], "background");
+    return [first, staticAssetCachePolicy(request), staticAssetCachePolicy(new Request("https://preview.example.test/original-ui/Title/30.png"))];
+  })()`, context);
+  assert.equal(policies[0].cacheKind, "static-critical");
+  assert.equal(policies[1].cacheKind, "static-critical");
+  assert.equal(policies[2].cacheKind, "static-runtime");
+});
+
+test("a byte-range font read cannot join or replace a whole-font fill", async t => {
+  const f = fontWorkerFixture(t);
+  const partial = await f.read(undefined, new Request("https://preview.example.test/original-ui/fonts/NotoSansTC.ttf", { headers: { range: "bytes=0-1" } }));
+  const whole = await f.read();
+  assert.equal(f.calls.length, 2);
+  assert.equal(vm.runInContext("fontAssetInflightFetches.size", f.context), 1);
+  f.streams[0].enqueue(new Uint8Array([1,2])); f.streams[0].close();
+  f.streams[1].enqueue(new Uint8Array([1,2,3])); f.streams[1].close();
+  assert.equal((await partial.arrayBuffer()).byteLength, 2);
+  assert.equal((await whole.arrayBuffer()).byteLength, 3);
+  await Promise.all(f.completions);
+});
+
+test("font response retention stays bounded when many distinct fonts are requested", async t => {
+  const f = fontWorkerFixture(t), responses = [];
+  for (let index=0; index<17; index++) responses.push(await f.read(undefined,
+    new Request(`https://preview.example.test/original-ui/fonts/Font-${index}.ttf`)));
+  assert.equal(f.calls.length,17);
+  assert.equal(vm.runInContext("fontAssetInflightFetches.size",f.context),16);
+  for (const stream of f.streams) { stream.enqueue(new Uint8Array([1])); stream.close(); }
+  await Promise.all(responses.map(response=>response.arrayBuffer()));
+  await Promise.all(f.completions);
+  assert.equal(vm.runInContext("fontAssetInflightFetches.size",f.context),0);
+});
