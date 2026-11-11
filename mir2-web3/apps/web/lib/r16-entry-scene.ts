@@ -1,7 +1,7 @@
 import entryScene from "./generated/r16-entry-scene.json";
 import entryFloor from "./generated/r16-entry-floor.json";
 import entryVisuals from "./generated/r16-entry-visuals.json";
-import { fetchBootstrapResponse } from "./first-crystal-scene-request";
+import { fetchBootstrapResponse, PINNED_BOOTSTRAP_HEADER_TIMEOUT_MS } from "./first-crystal-scene-request";
 import type { OriginalSceneSpriteLibraryMeta } from "./original-scene-sprite-meta";
 import {
   createCrystalSceneBlueprintRequestKey,
@@ -47,7 +47,7 @@ export function preloadR16EntryScene(pinnedRelease?: string): Promise<SceneBluep
 export function preloadR16EntryFloor(pinnedRelease?: string): Promise<R16EntrySpriteImages | null> | null {
   if (pinnedRelease !== entryFloor.assetReleaseId || entryFloor.assetReleaseId !== entryScene.assetReleaseId ||
       entryFloor.sceneSha256 !== entryScene.sha256 || !globalThis.crypto?.subtle) return null;
-  floorLoad ??= loadProgressiveEntryJson<R16EntrySpriteImages>(entryFloor).catch(() => null).then((images) => {
+  floorLoad ??= loadProgressiveEntryJson<R16EntrySpriteImages>(entryFloor, "high").catch(() => null).then((images) => {
     if (!images) floorLoad = null;
     return images;
   });
@@ -61,7 +61,7 @@ async function loadProgressiveEntryJson<T>(
 ): Promise<T | null> {
   const { response, body } = await fetchBootstrapResponse(
     asset.path,
-    { cache: "force-cache", bodyByteLimit: asset.bytes, bodyTimeoutMs },
+    { cache: "force-cache", headerTimeoutMs: PINNED_BOOTSTRAP_HEADER_TIMEOUT_MS, bodyByteLimit: asset.bytes, bodyTimeoutMs },
     response => response.arrayBuffer(),
     (path, options) => fetch(path, { ...options, credentials: "omit", redirect: "error", priority }),
   );

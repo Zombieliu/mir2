@@ -133,7 +133,7 @@ test("secure browsers fetch and verify the exact core without loading the webpac
   const requests = [];
   const unexpectedChunk = () => assert.fail("unexpected webpack or NPC chunk");
   const native = helper(startup, unexpectedChunk, unexpectedChunk, async (url, init) => {
-    requests.push({ url, cache: init.cache, credentials: init.credentials, redirect: init.redirect });
+    requests.push({ url, cache: init.cache, credentials: init.credentials, redirect: init.redirect, priority: init.priority });
     return requests.length === 1 ? new Response(null, { status: 503 }) : new Response(pinnedGameplay);
   });
   assert.deepEqual(requests, []);
@@ -142,13 +142,32 @@ test("secure browsers fetch and verify the exact core without loading the webpac
   assert.equal(native.loadR16GameplayLocalization(), pending);
   await pending;
   assert.deepEqual(requests, ["force-cache", "reload"].map(cache => ({
-    url: delivery.path, cache, credentials: "omit", redirect: "error",
+    url: delivery.path, cache, credentials: "omit", redirect: "error", priority: "high",
   })));
   assert.equal(native.hasR16GameplayLocalization(), true);
   assert.equal(native.hasR16NpcLocalization(), false);
   for (const row of core.entries) {
     for (const [index, language] of order.entries()) assert.equal(native.nativeText(language, row.key), row.values[index]);
   }
+});
+
+test("a slow first response can still install the verified gameplay catalog", async (t) => {
+  t.mock.timers.enable({ apis: ["setTimeout"] });
+  let complete;
+  const response = new Promise(resolve => { complete = resolve; });
+  const requests = [];
+  const native = helper(startup, () => assert.fail("unexpected webpack fallback"), () => npc, (url, init) => {
+    assert.equal(url, delivery.path);
+    requests.push(init);
+    return response;
+  });
+  const pending = native.loadR16GameplayLocalization();
+  t.mock.timers.tick(12_000);
+  assert.equal(requests.length, 1);
+  assert.equal(requests[0].signal.aborted, false);
+  complete(new Response(pinnedGameplay));
+  await pending;
+  assert.equal(native.hasR16GameplayLocalization(), true);
 });
 
 test("the secure browser rejects bad size or digest and recovers after manual reload", async () => {

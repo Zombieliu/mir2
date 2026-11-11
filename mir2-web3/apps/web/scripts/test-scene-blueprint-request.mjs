@@ -319,6 +319,25 @@ test("the entry floor preload is shared only for the pinned release", async () =
   assert.equal(calls.length, 1);
   assert.equal(calls[0].url, floorMetadata.path);
   assert.equal(calls[0].options.credentials, "omit");
+  assert.equal(calls[0].options.priority, "high");
+});
+
+test("the pinned floor preload waits for twelve-second response headers", async (t) => {
+  t.mock.timers.enable({ apis: ["setTimeout"] });
+  let complete;
+  const response = new Promise(resolve => { complete = resolve; });
+  const requests = [];
+  const entry = entryFixture((url, options) => {
+    assert.equal(url, floorMetadata.path);
+    requests.push(options);
+    return response;
+  });
+  const loading = entry.preloadR16EntryFloor(entryMetadata.assetReleaseId);
+  t.mock.timers.tick(12_000);
+  assert.equal(requests.length, 1);
+  assert.equal(requests[0].signal.aborted, false);
+  complete(new Response(floorBytes));
+  assert.equal(Object.keys(await loading).length, floorMetadata.frameCount);
 });
 
 test("the floor preload survives more than twelve seconds of body progress", async (t) => {

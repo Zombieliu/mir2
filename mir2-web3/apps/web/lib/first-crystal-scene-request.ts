@@ -3,7 +3,11 @@ type SceneReadOptions = {
   signal?: AbortSignal;
 };
 
-type BootstrapReadOptions = SceneReadOptions & { bodyByteLimit?: number; bodyTimeoutMs?: number };
+type BootstrapReadOptions = SceneReadOptions & {
+  headerTimeoutMs?: number;
+  bodyByteLimit?: number;
+  bodyTimeoutMs?: number;
+};
 
 type SceneJsonResult<T> = {
   response: Response;
@@ -18,12 +22,16 @@ export type FirstCrystalSceneJsonReader = (
 
 const READ_IDLE_TIMEOUT_MS = 8_000;
 const READ_BODY_LIMIT_MS = 24_000;
+export const PINNED_BOOTSTRAP_HEADER_TIMEOUT_MS = 20_000;
 const RETRY_DELAY_MS = 200;
 const TRANSIENT_STATUS = new Set([408, 425, 429, 500, 502, 503, 504]);
 
 async function readAttempt<T>(
   url: string,
-  { cache, signal: owner, bodyByteLimit, bodyTimeoutMs = READ_BODY_LIMIT_MS }: BootstrapReadOptions,
+  {
+    cache, signal: owner, headerTimeoutMs = READ_IDLE_TIMEOUT_MS,
+    bodyByteLimit, bodyTimeoutMs = READ_BODY_LIMIT_MS,
+  }: BootstrapReadOptions,
   fetcher: typeof fetch,
   readBody: (response: Response) => Promise<T>,
 ): Promise<SceneJsonResult<T>> {
@@ -33,7 +41,7 @@ async function readAttempt<T>(
   const abortForTimeout = () => {
     deadline.abort(new DOMException("Bootstrap response deadline elapsed", "TimeoutError"));
   };
-  let idleTimer = setTimeout(abortForTimeout, READ_IDLE_TIMEOUT_MS);
+  let idleTimer = setTimeout(abortForTimeout, headerTimeoutMs);
   let bodyTimer: ReturnType<typeof setTimeout> | undefined;
   const restartIdleTimer = () => {
     clearTimeout(idleTimer);

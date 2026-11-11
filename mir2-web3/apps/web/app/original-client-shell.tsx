@@ -1925,6 +1925,7 @@ export function OriginalClientShell({
   const entryPlayer = currentPlayerRequest?.assets ?? null;
   const entryPlayerPending = currentPlayerRequest?.pending === true;
   const warmEntry = screen === "openingLogin" || screen === "select" || screen === "game";
+  const warmEntryArt = warmEntry && !sceneLoadingText && !entryFloorPending;
 
   useEffect(() => {
     if (!warmEntry) return;
@@ -1937,6 +1938,13 @@ export function OriginalClientShell({
       setEntryFloor(images);
       setEntryFloorPending(false);
     });
+    return () => { current = false; };
+  }, [warmEntry]);
+
+  useEffect(() => {
+    if (!warmEntryArt) return;
+    const release = process.env.MIR2_PINNED_ASSET_VERSION;
+    let current = true;
     void preloadR16EntryNpcs(release)?.then((assets) => { if (current) setEntryNpcs(assets); });
     for (const part of preloadR16EntryObjects(release) ?? []) {
       void part.then((images) => {
@@ -1944,7 +1952,7 @@ export function OriginalClientShell({
       });
     }
     return () => { current = false; };
-  }, [warmEntry]);
+  }, [warmEntryArt]);
 
   useEffect(() => {
     if (!warmEntry || !entryPlayerGender) return;

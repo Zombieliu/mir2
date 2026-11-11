@@ -1,6 +1,6 @@
 import startup from "./generated/r16-native-localization-startup.json";
 import gameplayAsset from "./generated/r16-native-localization-delivery.json";
-import { fetchBootstrapResponse } from "./first-crystal-scene-request";
+import { fetchBootstrapResponse, PINNED_BOOTSTRAP_HEADER_TIMEOUT_MS } from "./first-crystal-scene-request";
 
 /** Presentation codes only. Do not forward this list to legacy protocol/WASM enums. */
 export const R16_NATIVE_LANGUAGES = ["zh-CN", "zh-TW", "en", "pt-BR", "ru", "hi", "id", "vi", "th", "ar"] as const;
@@ -16,6 +16,7 @@ const catalog: Catalog = startup as Catalog;
 const languages = new Map<string, { index: number; info: R16NativeLanguageInfo }>(catalog.languages.map((info, index) =>
   [info.code, { index, info: Object.freeze({ ...info }) }]));
 const entries = new Map(catalog.entries.map(entry => [entry.key, entry]));
+const GAMEPLAY_CATALOG_BODY_TIMEOUT_MS = 45_000;
 let gameplayCatalog: GameplayCatalog | null = null;
 let gameplayRequest: Promise<void> | null = null;
 let npcReady = false;
@@ -34,9 +35,12 @@ async function readGameplayCatalog(cache: RequestCache): Promise<GameplayCatalog
   const { path, bytes, sha256 } = gameplayAsset;
   const { response, body } = await fetchBootstrapResponse(
     path,
-    { cache, bodyByteLimit: bytes },
+    {
+      cache, headerTimeoutMs: PINNED_BOOTSTRAP_HEADER_TIMEOUT_MS,
+      bodyByteLimit: bytes, bodyTimeoutMs: GAMEPLAY_CATALOG_BODY_TIMEOUT_MS,
+    },
     response => response.arrayBuffer(),
-    (url, init) => fetch(url, { ...init, credentials: "omit", redirect: "error" }),
+    (url, init) => fetch(url, { ...init, credentials: "omit", redirect: "error", priority: "high" }),
   );
   if (!response.ok || !body || body.byteLength !== bytes) {
     throw new Error("R16 gameplay localization response is incomplete.");
