@@ -33,6 +33,8 @@ Windows R16 的 codex/windows-player-journey 为跨平台共同基线，持续 G
 
 阿洛用户实验的前置与边界见[自主生活](ALO-AUTONOMOUS-LIFE-20261103.zh-CN.md)、[教学与补给](ALO-CULTIVATION-SUPPLY-20261103.zh-CN.md)。
 
+- [x] 本地候选静态地图改分段读取并保留晚到竞争；默认和真实共用 WebGL2 在 17 秒头、动态 503 中完成任务窗、移动、注销；66 项检查与生产构建通过。 [复验](evidence/r16-late-static-scene-20261111/README.md)
+
 ## 已验收片段索引
 
 下列记录只覆盖各自快照和范围；此前 99 项完成记录的原文保留在本轮完整检查点。

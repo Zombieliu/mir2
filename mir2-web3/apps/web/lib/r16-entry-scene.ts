@@ -14,7 +14,6 @@ const entryKey = createCrystalSceneBlueprintRequestKey({
   ...entryScene.request,
   assetReleaseId: entryScene.assetReleaseId,
 });
-const PREFETCH_LIMIT_MS = 12_000;
 const ENTRY_GRACE_MS = 2_500;
 let entryLoad: Promise<SceneBlueprint | null> | null = null;
 
@@ -37,7 +36,7 @@ const VISUAL_BODY_TIMEOUT_MS = 45_000;
 export function preloadR16EntryScene(pinnedRelease?: string): Promise<SceneBlueprint | null> | null {
   if (pinnedRelease !== entryScene.assetReleaseId || entryScene.schemaVersion !== SCENE_BLUEPRINT_SCHEMA_VERSION ||
       !globalThis.crypto?.subtle) return null;
-  entryLoad ??= loadPinnedEntryJson<SceneBlueprint>(entryScene).catch(() => null).then((blueprint) => {
+  entryLoad ??= loadProgressiveEntryJson<SceneBlueprint>(entryScene, "high").catch(() => null).then((blueprint) => {
     if (!blueprint) entryLoad = null;
     return blueprint;
   });
@@ -110,16 +109,6 @@ export function preloadR16EntryMonsterFrames(pinnedRelease: string | undefined, 
   return preloadVisual(asset, actorLoads, action === "walking" ? "low" : undefined);
 }
 
-async function loadPinnedEntryJson<T>(asset: EntryAssetPin): Promise<T | null> {
-  const signal = AbortSignal.timeout(PREFETCH_LIMIT_MS);
-  const response = await fetch(asset.path, { cache: "force-cache", credentials: "omit", signal });
-  if (!response.ok) {
-    void response.body?.cancel().catch(() => {});
-    return null;
-  }
-  return decodePinnedEntryJson<T>(asset, await response.arrayBuffer());
-}
-
 async function decodePinnedEntryJson<T>(
   asset: { bytes: number; sha256: string },
   bytes: ArrayBuffer,
@@ -135,6 +124,7 @@ export function readR16EntryScene(
   request: NormalizedCrystalSceneBlueprintRequest,
   pinnedRelease: string | undefined,
   owner: AbortSignal,
+  options?: { untilSettled: boolean },
 ): Promise<SceneBlueprint | null> | null {
   if (owner.aborted || request.assetReleaseId !== entryScene.assetReleaseId ||
       createCrystalSceneBlueprintRequestKey(request) !== entryKey) return null;
@@ -142,7 +132,7 @@ export function readR16EntryScene(
   if (!pending) return null;
 
   // A slow optional preload must leave the ordinary map route available.
-  const wait = AbortSignal.any([owner, AbortSignal.timeout(ENTRY_GRACE_MS)]);
+  const wait = options?.untilSettled ? owner : AbortSignal.any([owner, AbortSignal.timeout(ENTRY_GRACE_MS)]);
   if (wait.aborted) return null;
   return new Promise((resolve) => {
     const stop = () => resolve(null);

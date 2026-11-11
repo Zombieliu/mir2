@@ -418,6 +418,7 @@ import {
 import { loadAssetReleaseCapabilities } from "../lib/asset-release-capabilities";
 import { fetchFirstCrystalSceneJson } from "../lib/first-crystal-scene-request";
 import { preloadR16EntryScene, readR16EntryScene } from "../lib/r16-entry-scene";
+import { chooseSceneBootstrap } from "../lib/scene-bootstrap-race";
 import crystalFrameSetCatalog from "../public/original-ui/frame-sets.generated.json";
 import type { OriginalSceneFrameSet } from "../lib/original-scene-sprite-meta";
 import { crystalFrameSetActionForState } from "./components/original-client-entity-frames";
@@ -5911,22 +5912,34 @@ export default function HomePage() {
           width: request.width,
           height: request.height,
         });
-        const entryLoad = !world.originalMapRegion &&
-          readR16EntryScene(request, process.env.MIR2_PINNED_ASSET_VERSION, controller.signal);
-        if (entryLoad) {
-          const entry = await entryLoad;
-          if (disposed || controller.signal.aborted) return;
-          const current = worldRef.current;
-          const player = current.entities.find(entity => entity.objectId === current.playerObjectId);
-          if (entry && player && crystalSceneContainsPlayer(entry.originalMapRegion, request.mapFileName, player)) {
-            applySceneBlueprint(entry, "r16-entry-static");
-            return;
-          }
-        }
-        const { response, body } = await fetchFirstCrystalSceneJson<SceneBlueprint | CrystalSceneResourceError>(requestUrl, {
+        const entryLoad = !world.originalMapRegion
+          ? readR16EntryScene(request, process.env.MIR2_PINNED_ASSET_VERSION, controller.signal, { untilSettled: true })
+          : null;
+        const choice = await chooseSceneBootstrap({
+          pinned: entryLoad,
           signal: controller.signal,
-          cache: "force-cache",
+          acceptPinned(entry) {
+            if (disposed || controller.signal.aborted) return false;
+            const current = worldRef.current;
+            const player = current.entities.find(entity => entity.objectId === current.playerObjectId);
+            return Boolean(player && crystalSceneContainsPlayer(entry.originalMapRegion, request.mapFileName, player));
+          },
+          loadRoute: signal => fetchFirstCrystalSceneJson<SceneBlueprint | CrystalSceneResourceError>(requestUrl, {
+            signal, cache: "force-cache",
+          }),
+          acceptRoute: ({ response, body }) => {
+            if (disposed || controller.signal.aborted || !response.ok || !body || !("originalMapRegion" in body)) return false;
+            const current = worldRef.current;
+            const player = current.entities.find(entity => entity.objectId === current.playerObjectId);
+            return Boolean(player && crystalSceneContainsPlayer(body.originalMapRegion, request.mapFileName, player));
+          },
         });
+        if (disposed || controller.signal.aborted) return;
+        if (choice.kind === "pinned") {
+          applySceneBlueprint(choice.body, "r16-entry-static");
+          return;
+        }
+        const { response, body } = choice.result;
         if (!response.ok) {
           if (response.status === 424 && body && typeof body === "object" && "error" in body && body.error === "resource_missing") {
             const publicPath = String(body.publicPath || body.resource?.path || "unknown");

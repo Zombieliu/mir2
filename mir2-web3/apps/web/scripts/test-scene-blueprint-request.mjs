@@ -202,6 +202,11 @@ const sceneReaderCompiled = ts.transpileModule(sceneReaderSource, {
   compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 },
 });
 new Function("exports", "module", sceneReaderCompiled.outputText)(sceneReaderModule.exports, sceneReaderModule);
+const bootstrapModule = { exports: {} };
+new Function("exports", ts.transpileModule(readFileSync(new URL("../lib/scene-bootstrap-race.ts", import.meta.url), "utf8"), {
+  compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 },
+}).outputText)(bootstrapModule.exports);
+
 function pageSceneFixture({ screen = "game", map = "0140", region = null, pinnedRelease } = {}) {
   const cap = capabilitiesFixture(), calls = [], logs = [], updates = [], milestones = [];
   const state = { release: null, failure: null };
@@ -223,6 +228,7 @@ function pageSceneFixture({ screen = "game", map = "0140", region = null, pinned
     isCrystalSceneAssetReleaseId: loadedModule.exports.isCrystalSceneAssetReleaseId,
     loadAssetReleaseCapabilities: cap.api.loadAssetReleaseCapabilities,
     readR16EntryScene: () => null,
+    chooseSceneBootstrap: bootstrapModule.exports.chooseSceneBootstrap,
     fetch: fetcher,
     fetchFirstCrystalSceneJson: (url, options, request = fetcher) => sceneReaderModule.exports.fetchFirstCrystalSceneJson(url, options, request),
     setSceneAssetReleaseId: value => { state.release = value; },
@@ -508,8 +514,8 @@ test("changed static bytes are rejected even with the expected response length",
 
 test("the owner and the short entry grace can leave an independently warming map", async () => {
   const body = deferred(), firstOwner = new AbortController(), secondOwner = new AbortController();
-  let requests = 0;
-  const entry = entryFixture(() => { requests += 1; return body.promise; });
+  const requests = [];
+  const entry = entryFixture((url, options) => { requests.push(options); return body.promise; });
   const first = entry.readR16EntryScene(entryRequest, entryMetadata.assetReleaseId, firstOwner.signal);
   firstOwner.abort();
   assert.equal(await first, null);
@@ -517,11 +523,47 @@ test("the owner and the short entry grace can leave an independently warming map
   assert.equal(entry.timeouts.at(-1).ms, 2_500);
   entry.timeouts.at(-1).controller.abort();
   assert.equal(await second, null);
-  assert.equal(entry.timeouts[0].ms, 12_000);
-  assert.equal(entry.timeouts[0].controller.signal.aborted, false);
+  assert.equal(requests[0].signal.aborted, false);
   body.resolve(new Response(entryBytes));
   assert.equal((await entry.preloadR16EntryScene(entryMetadata.assetReleaseId)).originalMapRegion.mapFileName, "0.map");
-  assert.equal(requests, 1);
+  assert.equal(requests.length, 1);
+});
+
+test("the pinned map uses the progressive header boundary instead of a twelve-second total deadline", async t => {
+  t.mock.timers.enable({ apis: ["setTimeout"] });
+  const headers = deferred(), requests = [];
+  const entry = entryFixture((url, options) => { requests.push({url,options}); return headers.promise; });
+  const owner = new AbortController();
+  const loading = entry.readR16EntryScene(entryRequest, entryMetadata.assetReleaseId, owner.signal, { untilSettled: true });
+  t.mock.timers.tick(13_000);
+  assert.equal(requests.length, 1);
+  assert.equal(requests[0].options.signal.aborted, false);
+  assert.equal(requests[0].options.priority, "high");
+  headers.resolve(new Response(entryBytes));
+  assert.equal((await loading).originalMapRegion.cells.length, 6819);
+});
+
+test("late verified map remains eligible after the ordinary route fails", async t => {
+  t.mock.timers.enable({ apis: ["setTimeout"] });
+  const f = pageSceneFixture({ map: "0", pinnedRelease: entryMetadata.assetReleaseId });
+  Object.assign(f.scope.self, { x:288,y:616 });
+  f.scope.viewportLayout = { rangeX:16,rangeY:17 };
+  f.state.release = entryMetadata.assetReleaseId;
+  const pinned = deferred(); f.scope.readR16EntryScene = (...args) => {
+    assert.deepEqual(args[3], {untilSettled:true}); return pinned.promise;
+  };
+  const cleanup = f.render().scene();
+  await settleSceneFixture(); t.mock.timers.tick(2500); await settleSceneFixture();
+  assert.equal(f.calls.length,1);
+  f.calls[0].resolve(new Response("unavailable",{status:503}));
+  await settleSceneFixture(); t.mock.timers.tick(200); await settleSceneFixture();
+  assert.equal(f.calls.length,2);
+  f.calls[1].resolve(new Response("unavailable",{status:503}));await settleSceneFixture();
+  assert.equal(f.state.failure,null);
+  pinned.resolve(JSON.parse(entryBytes));await settleSceneFixture();
+  assert.equal(f.updates.length,1);
+  assert.equal(f.milestones.at(-1).detail.sceneCache,"r16-entry-static");
+  assert.equal(f.state.failure,null);cleanup();
 });
 
 test("actual Page installs the warmed entry only for the active character and falls back if outside its bounds", async () => {
