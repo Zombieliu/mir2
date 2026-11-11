@@ -16,24 +16,86 @@ export const SITES = Object.freeze({
 });
 export const ORIGIN = 'https://numeron.obelisk.build';
 export const QR_RELEASE = Object.freeze({
-  source: '007c14c6fd4d618a6b90c5b0f64e60b510818baa',
+  source: '51d2dcc3463accb5a0b1ec7dfadbf7c05db153c1',
   sourceRef: BRANCH,
-  baseSource: 'ab50fd2cbfb8c2ccdf2c071665b1eac746025c8a',
+  baseSource: '1571489d6337aadccf21155f95daca02953e8c5c',
   assetSource: 'f2de762309768b51b39438c2437c14e819df9bf7',
   changedFiles: [
-    { status: 'modified', filename: 'mir2-web3/apps/web/app/page.tsx', sha: '105bfeb9749be2ba6f33ad0a402fd194486cc613' },
-    { status: 'modified', filename: 'mir2-web3/apps/web/lib/bevy-runtime-initializer.ts', sha: '577f2df4675cb89685a72c87b61069dd5470d62a' },
-    { status: 'modified', filename: 'mir2-web3/apps/web/lib/bevy-runtime-policy.ts', sha: 'f1f8c4eb3ec21f43ffbae66585f657105c26b5ec' },
-    { status: 'modified', filename: 'mir2-web3/apps/web/scripts/test-bevy-runtime-initializer.mjs', sha: 'cad13b48adaaf626c47e389d0991c7c98a157420' },
-    { status: 'modified', filename: 'mir2-web3/apps/web/scripts/test-bevy-runtime-policy.mjs', sha: '21b8b941717839e726394d7e8245be2cfa3fc606' },
-    { status: 'modified', filename: 'mir2-web3/docs/AGENT-CURRENT.md', sha: '02c8a55f61a48d491351447f3d8a3a4edc8baf71' },
-    { status: 'modified', filename: 'mir2-web3/docs/AGENT-TASK-QUEUE.md', sha: '516a6ed4d5d8ef699cd5147d7f096b824b009513' },
-    { status: 'modified', filename: 'mir2-web3/docs/FRONTEND-1TO1-GAPS.md', sha: 'aa94705c56a3162b72302236453b9719d4b30ce4' },
-    { status: 'modified', filename: 'mir2-web3/docs/WEB-R16-PARITY-GOAL.zh-CN.md', sha: 'd8e552007db635351213297280b7e725c1dee41c' },
-    { status: 'added', filename: 'mir2-web3/docs/evidence/r16-runtime-readiness-20261112/README.md', sha: '234fdd5f4a161a20b59b26db8bf86aef98b34042' },
-    { status: 'added', filename: 'mir2-web3/docs/evidence/r16-runtime-readiness-20261112/receipt.json', sha: 'f1276ebfa7202f1e6eb67376032edd8e67182fa3' },
-    { status: 'added', filename: 'mir2-web3/docs/evidence/r16-runtime-readiness-20261112/webgl2-quest.png', sha: '489aef8f78ab604a16c26f47135de6e6134bb4b7' },
-    { status: 'added', filename: 'mir2-web3/docs/evidence/r16-runtime-readiness-20261112/webgpu-quest.png', sha: 'ea3b74d284c4386af039940d494f9bed83bb6d18' },
+    {
+      "status": "modified",
+      "filename": "mir2-web3/apps/web/app/api/asset-manifest/route.ts",
+      "sha": "7ddfb682b960c6e7b106c62d822198fb3dc6ef67"
+    },
+    {
+      "status": "modified",
+      "filename": "mir2-web3/apps/web/app/components/asset-cache-registrar.tsx",
+      "sha": "541a0df7a4ed07c0a9e91ef4be2742921117c3b4"
+    },
+    {
+      "status": "modified",
+      "filename": "mir2-web3/apps/web/lib/asset-prewarm-request.ts",
+      "sha": "0a67f3546b246313c03dbd3b36979aa2867d2664"
+    },
+    {
+      "status": "modified",
+      "filename": "mir2-web3/apps/web/public/mir2-asset-worker.js",
+      "sha": "6c01f5fbb4ebabbfb4b36046547fca96513f58c6"
+    },
+    {
+      "status": "added",
+      "filename": "mir2-web3/apps/web/scripts/test-asset-manifest-identity.mjs",
+      "sha": "e7f0cab1075bbdf51dbeea46cb67329d9cad7374"
+    },
+    {
+      "status": "modified",
+      "filename": "mir2-web3/apps/web/scripts/test-asset-prewarm-request.mjs",
+      "sha": "7504043b189228cd4c807ba6b3c6146cc9dc19a8"
+    },
+    {
+      "status": "modified",
+      "filename": "mir2-web3/apps/web/scripts/test-asset-worker-fallback.mjs",
+      "sha": "5bfb7efc02ab8415bc9c83ce065e27db59e02fcf"
+    },
+    {
+      "status": "modified",
+      "filename": "mir2-web3/docs/AGENT-CURRENT.md",
+      "sha": "1c49d335f61948658aa17e1f185e82cb20f9f372"
+    },
+    {
+      "status": "modified",
+      "filename": "mir2-web3/docs/AGENT-TASK-QUEUE.md",
+      "sha": "24d5745d611a3f29da76265896bcbfd6a901c3b1"
+    },
+    {
+      "status": "modified",
+      "filename": "mir2-web3/docs/FRONTEND-1TO1-GAPS.md",
+      "sha": "dd7803717aeb1f42d4234c43aa33822f9019ecbc"
+    },
+    {
+      "status": "modified",
+      "filename": "mir2-web3/docs/WEB-R16-PARITY-GOAL.zh-CN.md",
+      "sha": "28855206ce7b7683af8bc72334b6f5f3dd35794d"
+    },
+    {
+      "status": "added",
+      "filename": "mir2-web3/docs/evidence/r16-cache-repair-20261112/README.md",
+      "sha": "1d67d97b009057de5d3449c908f7a7a56cd78fcf"
+    },
+    {
+      "status": "added",
+      "filename": "mir2-web3/docs/evidence/r16-cache-repair-20261112/receipt.json",
+      "sha": "b210db01f1255f4d3f9caa85a2ecb0acc7b2ff28"
+    },
+    {
+      "status": "added",
+      "filename": "mir2-web3/docs/evidence/r16-cache-repair-20261112/webgl2.png",
+      "sha": "cfa169aae583f75bcf0a33dbb375fdb5b97796b2"
+    },
+    {
+      "status": "added",
+      "filename": "mir2-web3/docs/evidence/r16-cache-repair-20261112/webgpu.png",
+      "sha": "f92468a28779520651781ae1961967c7a85fd5f5"
+    }
   ],
   entryScene: {
     path: '/bootstrap/r16-scenes/5c08d1fd4e81d92a7be20eb98c4c6288515749d5d459978dcf78fe2b86bdf325.json',
