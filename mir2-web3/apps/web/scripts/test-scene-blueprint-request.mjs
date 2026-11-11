@@ -468,6 +468,143 @@ test("a player pack can finish after thirty seconds of continuous body progress"
   assert.equal(Object.keys((await pending).images).length, 160);
 });
 
+test("a player recovers after both original reads time out and releases fallback before retrying", async (t) => {
+  t.mock.timers.enable({ apis: ["setTimeout"] });
+  const bytes = readEntryVisual(visualsMetadata.players.male);
+  const calls = [], updates = [];
+  const entry = entryFixture(async (url, options) => {
+    calls.push({ url, options });
+    if (calls.length === 1) return new Response(new ReadableStream({
+      start(controller) { controller.enqueue(bytes.subarray(0, 49_152)); },
+    }));
+    if (calls.length === 2) return new Promise(() => {});
+    return new Response(bytes);
+  });
+  const done = entry.loadR16EntryPlayerWithRecovery(entryMetadata.assetReleaseId, "male",
+    new AbortController().signal, assets => updates.push(assets));
+  await settleSceneFixture();
+  t.mock.timers.tick(8_000); await settleSceneFixture();
+  t.mock.timers.tick(200); await settleSceneFixture();
+  t.mock.timers.tick(20_000); await settleSceneFixture();
+  assert.equal(calls.length, 2);
+  assert.deepEqual(updates, [null], "loose images can render while background recovery waits");
+  assert(calls.slice(0, 2).every(call => call.options.signal.reason.name === "TimeoutError"));
+  t.mock.timers.tick(999); await settleSceneFixture(); assert.equal(calls.length, 2);
+  t.mock.timers.tick(1); await done;
+  assert.equal(calls.length, 3);
+  assert.deepEqual(calls.map(({ url, options }) => [url, options.cache, options.credentials]), [
+    [visualsMetadata.players.male.path, "force-cache", "omit"],
+    [visualsMetadata.players.male.path, "reload", "omit"],
+    [visualsMetadata.players.male.path, "reload", "omit"],
+  ]);
+  assert.equal(updates.length, 2);
+  assert.equal(Object.keys(updates[1].images).length, 160);
+  assert.equal(await entry.preloadR16EntryPlayer(entryMetadata.assetReleaseId, "male"), updates[1]);
+});
+
+test("changing role during the recovery wait prevents another request or stale update", async (t) => {
+  t.mock.timers.enable({ apis: ["setTimeout"] });
+  const owner = new AbortController(), calls = [], updates = [];
+  const entry = entryFixture(async (url) => { calls.push(url); throw new TypeError("temporary failure"); });
+  const done = entry.loadR16EntryPlayerWithRecovery(entryMetadata.assetReleaseId, "male", owner.signal,
+    assets => updates.push(assets));
+  await settleSceneFixture(); t.mock.timers.tick(200); await settleSceneFixture();
+  assert.deepEqual(updates, [null]);
+  owner.abort(); await done;
+  t.mock.timers.tick(60_000); await settleSceneFixture();
+  assert.equal(calls.length, 2); assert.deepEqual(updates, [null]);
+});
+
+test("a role change during a shared read cancels only its observer", async () => {
+  const owner = new AbortController(), delayed = deferred(), updates = [], calls = [];
+  const entry = entryFixture((url, options) => { calls.push({ url, options }); return delayed.promise; });
+  const done = entry.loadR16EntryPlayerWithRecovery(entryMetadata.assetReleaseId, "male", owner.signal,
+    assets => updates.push(assets));
+  owner.abort();
+  delayed.resolve(new Response(readEntryVisual(visualsMetadata.players.male)));
+  await done;
+  assert.equal(calls.length, 1); assert.equal(calls[0].options.signal.aborted, false);
+  assert.deepEqual(updates, []);
+  assert.equal(Object.keys((await entry.preloadR16EntryPlayer(entryMetadata.assetReleaseId, "male")).images).length, 160);
+});
+
+test("two player observers share the recovery fetch and both receive the verified body", async (t) => {
+  t.mock.timers.enable({ apis: ["setTimeout"] });
+  const calls = [], first = [], second = [];
+  const entry = entryFixture(async (url, options) => {
+    calls.push({ url, options });
+    if (calls.length <= 2) throw new TypeError("temporary failure");
+    return new Response(readEntryVisual(visualsMetadata.players.male));
+  });
+  const a = entry.loadR16EntryPlayerWithRecovery(entryMetadata.assetReleaseId, "male", new AbortController().signal,
+    assets => first.push(assets));
+  const b = entry.loadR16EntryPlayerWithRecovery(entryMetadata.assetReleaseId, "male", new AbortController().signal,
+    assets => second.push(assets));
+  await settleSceneFixture(); t.mock.timers.tick(200); await settleSceneFixture();
+  assert.equal(calls.length, 2);
+  assert.deepEqual(first, [null]); assert.deepEqual(second, [null]);
+  t.mock.timers.tick(1_000); await Promise.all([a, b]);
+  assert.equal(calls.length, 3); assert.equal(calls[2].options.cache, "reload");
+  assert.equal(first[1], second[1]); assert.equal(Object.keys(first[1].images).length, 160);
+});
+
+test("persistent player transport failures stop after two bounded rounds", async (t) => {
+  t.mock.timers.enable({ apis: ["setTimeout"] });
+  const calls = [], updates = [];
+  const entry = entryFixture(async (url, options) => {
+    calls.push({ url, options }); throw new TypeError("temporary connection failure");
+  });
+  const done = entry.loadR16EntryPlayerWithRecovery(entryMetadata.assetReleaseId, "female", new AbortController().signal,
+    assets => updates.push(assets));
+  await settleSceneFixture(); t.mock.timers.tick(200); await settleSceneFixture();
+  assert.deepEqual(updates, [null]); assert.equal(calls.length, 2);
+  t.mock.timers.tick(1_000); await settleSceneFixture();
+  t.mock.timers.tick(200); await done;
+  assert.equal(calls.length, 4); assert.deepEqual(updates, [null]);
+  t.mock.timers.tick(600_000); await settleSceneFixture(); assert.equal(calls.length, 4);
+});
+
+test("recovery never publishes truncated, hash-invalid, or another-release player assets", async (t) => {
+  t.mock.timers.enable({ apis: ["setTimeout"] });
+  const original = readEntryVisual(visualsMetadata.players.male), changed = Buffer.from(original);
+  changed[64] ^= 1;
+  const calls = [], updates = [];
+  const entry = entryFixture(async (url, options) => {
+    calls.push({ url, options }); return new Response(changed);
+  });
+  assert.equal(entry.loadR16EntryPlayerWithRecovery("another-release", "male", new AbortController().signal,
+    assets => updates.push(assets)), null);
+  const stopped = new AbortController(); stopped.abort();
+  assert.equal(entry.loadR16EntryPlayerWithRecovery(entryMetadata.assetReleaseId, "male", stopped.signal,
+    assets => updates.push(assets)), null);
+  assert.equal(calls.length, 0);
+  const done = entry.loadR16EntryPlayerWithRecovery(entryMetadata.assetReleaseId, "male", new AbortController().signal,
+    assets => updates.push(assets));
+  await done; t.mock.timers.tick(600_000); await settleSceneFixture();
+  assert.equal(calls.length, 1); assert.deepEqual(updates, [null]);
+  const truncated = entryFixture(async () => new Response(original.subarray(0, 4096)));
+  const invalid = [];
+  await truncated.loadR16EntryPlayerWithRecovery(entryMetadata.assetReleaseId, "male", new AbortController().signal,
+    assets => invalid.push(assets));
+  assert.deepEqual(invalid, [null]);
+});
+
+test("player recovery leaves definitive HTTP errors and Retry-After responses terminal", async (t) => {
+  t.mock.timers.enable({ apis: ["setTimeout"] });
+  for (const status of [404, 429, 503]) {
+    let calls = 0;
+    const updates = [];
+    const entry = entryFixture(async () => {
+      calls++;
+      return new Response(null, { status, headers: { "retry-after": "120" } });
+    });
+    await entry.loadR16EntryPlayerWithRecovery(entryMetadata.assetReleaseId, "male", new AbortController().signal,
+      assets => updates.push(assets));
+    t.mock.timers.tick(600_000); await settleSceneFixture();
+    assert.equal(calls, 1); assert.deepEqual(updates, [null]);
+  }
+});
+
 test("the staged monster packages retain the exact eight directions and independent fallback", async () => {
   const standingBytes = readFileSync(new URL("../public" + visualsMetadata.monsterStanding.path, import.meta.url));
   const walkingBytes = readFileSync(new URL("../public" + visualsMetadata.monsterWalking.path, import.meta.url));

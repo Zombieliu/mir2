@@ -4,7 +4,7 @@ import { pickCrystalActor, sampleCrystalBodyPixel, warmCrystalBodyPixels, type C
 import { useWindowKeydown } from "../lib/use-window-keydown";
 import { guildKeyboardOwnsEvent } from "../lib/r16-guild-keyboard";
 import {
-  preloadR16EntryFloor, preloadR16EntryMonsterFrames, preloadR16EntryNpcs, preloadR16EntryObjects, preloadR16EntryPlayer,
+  preloadR16EntryFloor, preloadR16EntryMonsterFrames, preloadR16EntryNpcs, preloadR16EntryObjects, loadR16EntryPlayerWithRecovery,
   R16_ENTRY_FLOOR_BOUNDS, R16_ENTRY_FLOOR_MAP, R16_ENTRY_MONSTER_BOUNDS,
   type R16EntryActorAssets, type R16EntrySpriteImages,
 } from "../lib/r16-entry-scene";
@@ -1967,18 +1967,18 @@ export function OriginalClientShell({
 
   useEffect(() => {
     if (!warmEntry || !entryPlayerGender) return;
-    const pending = preloadR16EntryPlayer(process.env.MIR2_PINNED_ASSET_VERSION, entryPlayerGender);
+    const owner = new AbortController();
+    const pending = loadR16EntryPlayerWithRecovery(
+      process.env.MIR2_PINNED_ASSET_VERSION, entryPlayerGender, owner.signal,
+      (assets) => setEntryPlayerRequest({ gender: entryPlayerGender, assets, pending: false }),
+    );
     if (!pending) return;
-    let current = true;
     setEntryPlayerRequest((previous) =>
       previous?.gender === entryPlayerGender && previous.assets
         ? previous
         : { gender: entryPlayerGender, assets: null, pending: true },
     );
-    void pending.then((assets) => {
-      if (current) setEntryPlayerRequest({ gender: entryPlayerGender, assets, pending: false });
-    });
-    return () => { current = false; };
+    return () => { owner.abort(); };
   }, [entryPlayerGender, warmEntry]);
   const entryMap = world.originalMapRegion?.mapFileName === R16_ENTRY_FLOOR_MAP;
   const packedFloor = entryMap ? entryFloor : null;

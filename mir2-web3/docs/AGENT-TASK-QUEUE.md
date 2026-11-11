@@ -6,7 +6,7 @@ Updated 2026-11-11 (Asia/Shanghai). Read [coordination](AGENT-ORCHESTRATION.md) 
 
 Windows R16 的 codex/windows-player-journey 为跨平台共同基线，持续 Goal 是适用门槛的 100% Candidate 后再做最终人类 Accepted。优先无需桌面控制的代码、协议、无界面浏览器与构建；独立 Windows 窗口验收单列。具体差距、范围和来源见 [Web/R16 Goal](WEB-R16-PARITY-GOAL.zh-CN.md)。
 
-2026-11-11 字库共享已正式发布 `da134332ed`；公网源码/Worker、11 包及简繁出码已核对。签名建角、首帧、147 毫秒首步、两类繁中任务窗与注销分项通过；整轮仍因男性人物包两次中止失败。点击 Start 后约 49.9 秒可操作、295.8 秒共用 HUD 就绪，冷启动和此前首步长尾继续查。 [发布与开放项](evidence/r16-font-fill-20261111/production.md)
+2026-11-11 人物包初轮网络失败后可后台恢复，先放行原有散图；取消观察不更新旧界面，次数和原字节校验保持有限。71 项检查、生产构建及默认游戏对照通过；真实共用 WebGL2 任务窗、一步和正常退出后续通过，保留一次运行包 120 秒中止失败。生产仍为 `da134332ed`，本候选待发布；冷启动和完整 1:1 继续。 [恢复与失败证据](evidence/r16-player-pack-recovery-20261111/README.md)
 
 ## 保留的当前未结项
 
@@ -37,6 +37,8 @@ Windows R16 的 codex/windows-player-journey 为跨平台共同基线，持续 G
 - [x] 本地候选静态地图改分段读取并保留晚到竞争；默认和真实共用 WebGL2 在 17 秒头、动态 503 中完成任务窗、移动、注销；66 项检查与生产构建通过。 [复验](evidence/r16-late-static-scene-20261111/README.md)
 
 - [x] 字库正文与缓存完成前共享读取，关键缓存固定，原版繁中真实浏览器 2→1 下载及整游戏两路通过。64 项检查、生产构建、字节/源档保全另记。 [回执](evidence/r16-font-fill-20261111/README.md)
+
+- [x] 人物包两次初始网络读取失败后，默认游戏及真实共用 WebGL2 均第三次恢复完整包、实际用于人物贴图，并完成任务窗、移动和保存。保留运行包启动失败；公开发布和慢加载另验。[证据](evidence/r16-player-pack-recovery-20261111/README.md)
 
 ## 已验收片段索引
 

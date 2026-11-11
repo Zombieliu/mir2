@@ -31,7 +31,9 @@ type EntryPlayerGender = keyof typeof entryVisuals.players;
 type EntryMonsterAction = "standing" | "walking";
 const objectLoads = new Map<string, Promise<R16EntrySpriteImages | null>>();
 const actorLoads = new Map<string, Promise<R16EntryActorAssets | null>>();
+const transientVisualFailures = new WeakSet<Promise<unknown>>();
 const VISUAL_BODY_TIMEOUT_MS = 45_000;
+const PLAYER_RECOVERY_DELAY_MS = 1_000;
 
 export function preloadR16EntryScene(pinnedRelease?: string): Promise<SceneBlueprint | null> | null {
   if (pinnedRelease !== entryScene.assetReleaseId || entryScene.schemaVersion !== SCENE_BLUEPRINT_SCHEMA_VERSION ||
@@ -57,10 +59,11 @@ async function loadProgressiveEntryJson<T>(
   asset: EntryAssetPin,
   priority?: RequestPriority,
   bodyTimeoutMs?: number,
+  cache: RequestCache = "force-cache",
 ): Promise<T | null> {
   const { response, body } = await fetchBootstrapResponse(
     asset.path,
-    { cache: "force-cache", headerTimeoutMs: PINNED_BOOTSTRAP_HEADER_TIMEOUT_MS, bodyByteLimit: asset.bytes, bodyTimeoutMs },
+    { cache, headerTimeoutMs: PINNED_BOOTSTRAP_HEADER_TIMEOUT_MS, bodyByteLimit: asset.bytes, bodyTimeoutMs },
     response => response.arrayBuffer(),
     (path, options) => fetch(path, { ...options, credentials: "omit", redirect: "error", priority }),
   );
@@ -77,10 +80,17 @@ function preloadVisual<T>(
   asset: EntryAssetPin,
   loads: Map<string, Promise<T | null>>,
   priority?: RequestPriority,
+  cache: RequestCache = "force-cache",
 ): Promise<T | null> {
   const cached = loads.get(asset.path);
   if (cached) return cached;
-  const pending = loadProgressiveEntryJson<T>(asset, priority, VISUAL_BODY_TIMEOUT_MS).catch(() => null).then((data) => {
+  const pending: Promise<T | null> = loadProgressiveEntryJson<T>(asset, priority, VISUAL_BODY_TIMEOUT_MS, cache).catch((error) => {
+    if (error instanceof TypeError || (error instanceof DOMException &&
+        (error.name === "TimeoutError" || error.name === "AbortError"))) {
+      transientVisualFailures.add(pending);
+    }
+    return null;
+  }).then((data) => {
     if (!data) loads.delete(asset.path);
     return data;
   });
@@ -96,6 +106,40 @@ export function preloadR16EntryObjects(pinnedRelease?: string) {
 export function preloadR16EntryPlayer(pinnedRelease: string | undefined, gender: EntryPlayerGender) {
   if (!entryVisualsMatch(pinnedRelease)) return null;
   return preloadVisual(entryVisuals.players[gender], actorLoads, "high");
+}
+
+/** Recover one failed player load in the background without suppressing loose-image fallback. */
+export function loadR16EntryPlayerWithRecovery(
+  pinnedRelease: string | undefined,
+  gender: EntryPlayerGender,
+  owner: AbortSignal,
+  onSettled: (assets: R16EntryActorAssets | null) => void,
+): Promise<void> | null {
+  if (owner.aborted) return null;
+  const first = preloadR16EntryPlayer(pinnedRelease, gender);
+  if (!first) return null;
+  return (async () => {
+    const assets = await first;
+    if (owner.aborted) return;
+    onSettled(assets);
+    if (assets || !transientVisualFailures.has(first)) return;
+
+    // The initial null releases the ordinary image path immediately. Retry only
+    // once after backing off; changing role or leaving the game cancels the observer.
+    await new Promise<void>((resolve) => {
+      const finish = () => {
+        clearTimeout(timer);
+        owner.removeEventListener("abort", finish);
+        resolve();
+      };
+      const timer = setTimeout(finish, PLAYER_RECOVERY_DELAY_MS);
+      owner.addEventListener("abort", finish, { once: true });
+      if (owner.aborted) finish();
+    });
+    if (owner.aborted) return;
+    const recovered = await preloadVisual(entryVisuals.players[gender], actorLoads, "high", "reload");
+    if (!owner.aborted && recovered) onSettled(recovered);
+  })();
 }
 
 export function preloadR16EntryNpcs(pinnedRelease?: string) {

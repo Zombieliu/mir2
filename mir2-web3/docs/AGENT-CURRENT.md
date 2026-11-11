@@ -16,7 +16,7 @@ working tree, services, release packages, source snapshots or parity percentages
 
 ## Last recorded decisions and open work
 
-2026-11-11 字库共享已正式发布 `da134332ed`；公网源码/Worker、11 包及简繁出码已核对。签名建角、首帧、147 毫秒首步、两类繁中任务窗与注销分项通过；整轮仍因男性人物包两次中止失败。点击 Start 后约 49.9 秒可操作、295.8 秒共用 HUD 就绪，冷启动和此前首步长尾继续查。 [发布与开放项](evidence/r16-font-fill-20261111/production.md)
+2026-11-11 人物包初轮网络失败后可后台恢复，先放行原有散图；取消观察不更新旧界面，次数和原字节校验保持有限。71 项检查、生产构建及默认游戏对照通过；真实共用 WebGL2 任务窗、一步和正常退出后续通过，保留一次运行包 120 秒中止失败。生产仍为 `da134332ed`，本候选待发布；冷启动和完整 1:1 继续。 [恢复与失败证据](evidence/r16-player-pack-recovery-20261111/README.md)
 
 2026-11-10 Web 双路实测从栗树透明处命中奥玛，实色处继续选栗树。动作间隔内的经典右键短按不再补发，新版寻路仍到达目标。图集纯 GPU 的真实选怪、其他普通窗口和后续地图继续验收。 [像素与短按回执](evidence/r16-actor-picking-20261110/README.md) · [释放、设置和移动奥玛](evidence/r16-right-release-20261110/README.md)
 
