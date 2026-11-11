@@ -16,22 +16,23 @@ export const SITES = Object.freeze({
 });
 export const ORIGIN = 'https://numeron.obelisk.build';
 export const QR_RELEASE = Object.freeze({
-  source: 'da134332ed9f20a54b7e5433f4f2ab95ed704444',
+  source: 'cd6410be749412d608a538e2db442b7e4d519de0',
   sourceRef: BRANCH,
-  baseSource: 'ab9947fcc0ebc22818e9391682102a5f93243f3b',
+  baseSource: '0d95d5cc5cd44a806a4913b507d4033c89231205',
   assetSource: 'f2de762309768b51b39438c2437c14e819df9bf7',
   changedFiles: [
-    { status: 'modified', filename: 'mir2-web3/apps/web/public/mir2-asset-worker.js', sha: '6c485f578a646df2c4b122430bed97f2b77a3fcb' },
-    { status: 'modified', filename: 'mir2-web3/apps/web/scripts/test-asset-worker-fallback.mjs', sha: '3678d4fdbfa7dd8fd8389b0274af499c89195ef7' },
-    { status: 'modified', filename: 'mir2-web3/docs/AGENT-CURRENT.md', sha: 'bf7df8b6690f7f9e4f245f8c36b411f4e963ba8c' },
-    { status: 'modified', filename: 'mir2-web3/docs/AGENT-TASK-QUEUE.md', sha: '9ae06753e5626c50e64e1d3e99f12368020ce473' },
-    { status: 'modified', filename: 'mir2-web3/docs/FRONTEND-1TO1-GAPS.md', sha: 'af6f15adede1061dcf33d9d6582fc8aca255a206' },
-    { status: 'modified', filename: 'mir2-web3/docs/WEB-R16-PARITY-GOAL.zh-CN.md', sha: '739d4ff4bf2f852f2dbcb5f0400f26f6c71f36bf' },
-    { status: 'added', filename: 'mir2-web3/docs/evidence/r16-font-fill-20261111/README.md', sha: '61192d29f077ac70b9c189bc373cddc0888072f3' },
-    { status: 'added', filename: 'mir2-web3/docs/evidence/r16-font-fill-20261111/font-after.png', sha: '14032f854f92c3b6787c37eda76a84834bc645ec' },
-    { status: 'added', filename: 'mir2-web3/docs/evidence/r16-font-fill-20261111/font-before.png', sha: '14032f854f92c3b6787c37eda76a84834bc645ec' },
-    { status: 'added', filename: 'mir2-web3/docs/evidence/r16-font-fill-20261111/receipt.json', sha: '57cab6a47106a468319ddbe32f6b5a3a978bd7f1' },
-    { status: 'added', filename: 'mir2-web3/docs/evidence/r16-font-fill-20261111/shared-task.png', sha: '39dc04cf7a7517f2653200ae298f9bda609e5fbd' },
+    { status: 'modified', filename: 'mir2-web3/apps/web/app/original-client-shell.tsx', sha: '5e6de817c931153b1d66a1751c350803876974ab' },
+    { status: 'modified', filename: 'mir2-web3/apps/web/lib/r16-entry-scene.ts', sha: '84abf6349c210535ee66f87d7df85bbe802c447f' },
+    { status: 'modified', filename: 'mir2-web3/apps/web/scripts/test-scene-blueprint-request.mjs', sha: 'ff7983341e0fcadd3aad4a95629ceae129107aca' },
+    { status: 'modified', filename: 'mir2-web3/docs/AGENT-CURRENT.md', sha: 'ff0577a41087431aa7720cfb74a74570fed7736c' },
+    { status: 'modified', filename: 'mir2-web3/docs/AGENT-TASK-QUEUE.md', sha: '4ce4baee57df73b44b62ef989e080f526d94d603' },
+    { status: 'modified', filename: 'mir2-web3/docs/FRONTEND-1TO1-GAPS.md', sha: '892fbd4bf5d387112c0cb46383aa33666029a23a' },
+    { status: 'modified', filename: 'mir2-web3/docs/WEB-R16-PARITY-GOAL.zh-CN.md', sha: 'c0225e0223f6fd6775feb3d9656368308f0c184a' },
+    { status: 'added', filename: 'mir2-web3/docs/evidence/r16-player-pack-recovery-20261111/README.md', sha: 'a000088324dcb222a1a94bde6e9f2fc41bf267fe' },
+    { status: 'added', filename: 'mir2-web3/docs/evidence/r16-player-pack-recovery-20261111/after.png', sha: '4b18df080b1a3d8ad9c9cade58455be90411add9' },
+    { status: 'added', filename: 'mir2-web3/docs/evidence/r16-player-pack-recovery-20261111/before.png', sha: 'b193d0b34c06315164b7e4214e44bd71ea448aa8' },
+    { status: 'added', filename: 'mir2-web3/docs/evidence/r16-player-pack-recovery-20261111/receipt.json', sha: 'b06ab90e3b9a0ce424a5183f178f86675d0561a4' },
+    { status: 'added', filename: 'mir2-web3/docs/evidence/r16-player-pack-recovery-20261111/shared-task.png', sha: 'ab398b58ac7289622152f78d2dea2caff8bc243d' },
   ],
   entryScene: {
     path: '/bootstrap/r16-scenes/5c08d1fd4e81d92a7be20eb98c4c6288515749d5d459978dcf78fe2b86bdf325.json',
@@ -89,7 +90,7 @@ export const QR_RELEASE = Object.freeze({
     bytes: 3283113,
   },
   assetRunId: '42494701555',
-  baseline: 'dpl_7WcvAiCUgoY7z3ddHqNM3gJVGb7D',
+  baseline: 'dpl_2puBSpb7sVCUJ3spvUhT2EHBJzvV',
   relay: 'https://relay.dubhe.obelisk.build',
 });
 const QR_OPERATIONS = ['numeron-qr-stage', 'numeron-qr-promote', 'numeron-qr-rollback'];
