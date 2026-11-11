@@ -1,6 +1,6 @@
 # Agent Current Context
 
-Short routing summary, updated 2026-11-11 (Asia/Shanghai).
+Short routing summary, updated 2026-11-12 (Asia/Shanghai).
 This indexes recorded decisions and open work; it does not revalidate today's
 working tree, services, release packages, source snapshots or parity percentages.
 
@@ -16,7 +16,7 @@ working tree, services, release packages, source snapshots or parity percentages
 
 ## Last recorded decisions and open work
 
-2026-11-11 人物包有限恢复已发布 `cd6410be74`。71 项检查、68 项发布门槛及两路本机游戏通过；公网七类人物/NPC/建筑/怪物包完整，签名建角、备用任务窗和注销通过分项。整轮仍因首步 8.561 秒失败，共用 HUD 未就绪；并行简中出码超时，之后单独简繁复测通过。冷加载、长尾与完整 1:1 继续。 [发布与失败](evidence/r16-player-pack-recovery-20261111/production.md)
+2026-11-12 字库停传恢复与运行包并行读取已完成本机检查：111 项、生产构建和原字库浏览器缓存/同像素通过。最新两路整游戏仍未过 Native 120 秒门槛，候选未发布；公网仍为 `cd6410be74`。撤回字库并行预取原型；下一步核对普通浏览器的源站/镜像完整正文与运行脚本等待恢复。[实测与失败](evidence/r16-runtime-download-20261112/README.md)
 
 2026-11-10 Web 双路实测从栗树透明处命中奥玛，实色处继续选栗树。动作间隔内的经典右键短按不再补发，新版寻路仍到达目标。图集纯 GPU 的真实选怪、其他普通窗口和后续地图继续验收。 [像素与短按回执](evidence/r16-actor-picking-20261110/README.md) · [释放、设置和移动奥玛](evidence/r16-right-release-20261110/README.md)
 

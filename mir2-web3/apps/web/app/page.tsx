@@ -45,6 +45,7 @@ import {
   type Mir2Language,
 } from "../lib/localization";
 import { R16_FULL_CJK_FONT_CSS } from "../lib/r16-cjk-fonts";
+import { initializeBevyRuntime } from "../lib/bevy-runtime-initializer";
 import { hasR16GameplayLocalization, hasR16NpcLocalization, loadR16GameplayLocalization, loadR16NpcLocalization } from "../lib/r16-native-localization";
 import { commerceRuntimeLanguage, questRuntimeLanguage } from "../lib/r16-runtime-language";
 import { r16QuestGuidanceProfile, shouldAutoStartR16Tutorial } from "../lib/r16-gameplay-baseline";
@@ -514,7 +515,7 @@ function useImmediateUiState<T>(initial: T) {
 }
 
 type RuntimeModule = CombatModeRuntime & CrystalSkillBarRuntime & CrystalStatsRuntime & CrystalTooltipRuntime & QuestRouteRuntime & BevyQuestUiRuntime & BevyBagUiRuntime & StorageRuntime & HudRuntime & CharacterRuntime & HeroRuntime & SpellsRuntime & MailRuntime & CombatRuntime & NpcGoldBuyRuntime & NpcShopRuntime & SocialBudgetRuntime & {
-  default?: (input?: { module_or_path: string | URL | Request } | string | URL | Request) => Promise<unknown>;
+  default?: (input?: { module_or_path: string | URL | Request | WebAssembly.Module } | string | URL | Request) => Promise<unknown>;
   bootMir2Runtime?: () => void;
   getMir2RendererBackend?: () => string;
   getMir2RuntimeUiCapabilities?: () => string;
@@ -22633,30 +22634,19 @@ async function loadBevyRuntimeModule(backend: BevyRuntimeBackend, startup: BevyR
   if (existing) return existing;
   const loading = initializeBevyRuntimeModule(runtimePath, runtimeWasmPath);
   bevyRuntimeModuleLoads.set(runtimePath, loading);
+  void loading.catch(() => {
+    if (bevyRuntimeModuleLoads.get(runtimePath) === loading) bevyRuntimeModuleLoads.delete(runtimePath);
+  });
   return loading;
 }
 
 async function initializeBevyRuntimeModule(runtimePath: string, runtimeWasmPath: string): Promise<RuntimeModule> {
-  const runtime = (await import(
-    /* webpackIgnore: true */ runtimePath
-  )) as RuntimeModule;
-
-  if (typeof runtime.default === "function") {
-    // The runtime attaches to one of the fixed canvases on boot; make sure both exist first
-    // (it lives in the lazily-mounted OriginalClientShell) to avoid a bevy_winit panic.
-    await waitForBevyCanvas();
-    const controller = new AbortController();
-    const timeout = window.setTimeout(() => controller.abort(), BEVY_RUNTIME_BOOT_TIMEOUT_MS);
-    try {
-      await runtime.default({
-        module_or_path: new Request(runtimeWasmPath, { signal: controller.signal }),
-      });
-    } finally {
-      window.clearTimeout(timeout);
-    }
-  }
-
-  return runtime;
+  return initializeBevyRuntime({
+    loadModule: () => import(/* webpackIgnore: true */ runtimePath) as Promise<RuntimeModule>,
+    wasmUrl: runtimeWasmPath,
+    waitForCanvas: waitForBevyCanvas,
+    timeoutMs: BEVY_RUNTIME_BOOT_TIMEOUT_MS,
+  });
 }
 
 function selectBevyRuntimeBackend(

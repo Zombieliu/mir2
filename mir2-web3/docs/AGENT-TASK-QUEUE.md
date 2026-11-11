@@ -1,12 +1,12 @@
 # Agent Task Queue
 
-Updated 2026-11-11 (Asia/Shanghai). Read [coordination](AGENT-ORCHESTRATION.md) and [current context](AGENT-CURRENT.md), then the current user task. Preserve unrelated WIP and evidence; historical ports, candidates and checks are snapshots.
+Updated 2026-11-12 (Asia/Shanghai). Read [coordination](AGENT-ORCHESTRATION.md) and [current context](AGENT-CURRENT.md), then the current user task. Preserve unrelated WIP and evidence; historical ports, candidates and checks are snapshots.
 
 ## 当前范围
 
 Windows R16 的 codex/windows-player-journey 为跨平台共同基线，持续 Goal 是适用门槛的 100% Candidate 后再做最终人类 Accepted。优先无需桌面控制的代码、协议、无界面浏览器与构建；独立 Windows 窗口验收单列。具体差距、范围和来源见 [Web/R16 Goal](WEB-R16-PARITY-GOAL.zh-CN.md)。
 
-2026-11-11 人物包有限恢复已发布 `cd6410be74`。71 项检查、68 项发布门槛及两路本机游戏通过；公网七类人物/NPC/建筑/怪物包完整，签名建角、备用任务窗和注销通过分项。整轮仍因首步 8.561 秒失败，共用 HUD 未就绪；并行简中出码超时，之后单独简繁复测通过。冷加载、长尾与完整 1:1 继续。 [发布与失败](evidence/r16-player-pack-recovery-20261111/production.md)
+2026-11-12 冷加载候选未通过最新两路 Native 120 秒就绪验收，暂不发布。字库停传恢复、运行包并行读取有 111 项检查、生产构建和原字库浏览器证据；先继续真实源站/镜像传输与脚本等待恢复。原公网首步长尾和全部 1:1 未结项保留。[实测与失败](evidence/r16-runtime-download-20261112/README.md)
 
 ## 保留的当前未结项
 

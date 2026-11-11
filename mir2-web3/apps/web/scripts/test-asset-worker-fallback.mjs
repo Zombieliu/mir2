@@ -581,3 +581,272 @@ test("font response retention stays bounded when many distinct fonts are request
   await Promise.all(f.completions);
   assert.equal(vm.runInContext("fontAssetInflightFetches.size",f.context),0);
 });
+
+function configureCurrentFontMirror(context, version = "font-release-a") {
+  const origin = "https://preview.example.test/original-ui/fonts/NotoSansTC.ttf";
+  const mirror = `https://public-r2.example.test/hotlink-ok/mir2/v/${version}/original-ui/fonts/NotoSansTC.ttf`;
+  context.fontRouteConfig = {
+    version, assetVersion: version, fontMirrorFirst: true,
+    remoteAssetBaseUrl: `https://cdn.example.test/mir2/v/${version}`,
+    remoteAssetBaseUrls: [
+      "https://public-r2.example.test/hotlink-ok/mir2/v/older-release",
+      `https://public-r2.example.test/hotlink-ok/mir2/v/${version}`,
+      `https://cdn.example.test/mir2/v/${version}`,
+    ],
+  };
+  vm.runInContext("runtimeConfig = { ...runtimeConfig, ...fontRouteConfig }", context);
+  return { origin, mirror };
+}
+
+test("a current-release font mirror precedes a successful but slow app origin", async () => {
+  const calls = [];
+  const { context } = createWorkerContext(async request => {
+    calls.push(request); return new Response(new Uint8Array([1, 2, 3]));
+  });
+  const { origin, mirror } = configureCurrentFontMirror(context);
+  const response = await vm.runInContext(`fetchStaticAsset(new Request(${JSON.stringify(origin)}))`, context);
+  assert.deepEqual([...new Uint8Array(await response.arrayBuffer())], [1, 2, 3]);
+  assert.deepEqual(calls.map(request => request.url), [mirror]);
+  assert.equal(calls[0].credentials, "omit"); assert.equal(calls[0].mode, "cors");
+});
+
+test("a missing current font mirror returns to the app before inherited releases", async () => {
+  const calls = [];
+  const { context } = createWorkerContext(async request => {
+    calls.push(request.url);
+    return request.url.startsWith("https://preview.example.test/")
+      ? new Response(new Uint8Array([5, 6])) : new Response(null, { status: 404 });
+  });
+  const { origin, mirror } = configureCurrentFontMirror(context);
+  const response = await vm.runInContext(`fetchStaticAsset(new Request(${JSON.stringify(origin)}))`, context);
+  assert.deepEqual([...new Uint8Array(await response.arrayBuffer())], [5, 6]);
+  assert.deepEqual(calls, [mirror, origin]);
+});
+
+test("a font mirror connection failure still allows the original complete font", async () => {
+  const calls = [];
+  const { context } = createWorkerContext(async request => {
+    calls.push(request.url);
+    if (!request.url.startsWith("https://preview.example.test/")) throw new TypeError("mirror offline");
+    return new Response(new Uint8Array([7, 8]));
+  });
+  const { origin, mirror } = configureCurrentFontMirror(context);
+  const response = await vm.runInContext(`fetchStaticAsset(new Request(${JSON.stringify(origin)}))`, context);
+  assert.deepEqual([...new Uint8Array(await response.arrayBuffer())], [7, 8]);
+  assert.deepEqual(calls, [mirror, origin]);
+});
+
+test("font mirror headers have an eight-second bound before returning to the app", async t => {
+  t.mock.timers.enable({ apis: ["setTimeout"] });
+  const calls = [];
+  const { context } = createWorkerContext(request => {
+    calls.push(request);
+    if (request.url.startsWith("https://preview.example.test/")) return Promise.resolve(new Response("font"));
+    return new Promise((_, reject) => request.signal.addEventListener("abort", () => reject(request.signal.reason), { once: true }));
+  });
+  const { origin, mirror } = configureCurrentFontMirror(context);
+  const pending = vm.runInContext(`fetchStaticAsset(new Request(${JSON.stringify(origin)}))`, context);
+  await new Promise(resolve => setImmediate(resolve));
+  t.mock.timers.tick(7_999); await new Promise(resolve => setImmediate(resolve));
+  assert.deepEqual(calls.map(request => request.url), [mirror]);
+  t.mock.timers.tick(1);
+  assert.equal(await (await pending).text(), "font");
+  assert.deepEqual(calls.map(request => request.url), [mirror, origin]);
+  assert.equal(calls[0].signal.aborted, true);
+});
+
+test("font mirror header timeout does not truncate a progressing body", async t => {
+  t.mock.timers.enable({ apis: ["setTimeout"] });
+  const f = fontWorkerFixture(t);
+  const { mirror } = configureCurrentFontMirror(f.context);
+  const first = f.read();
+  await new Promise(resolve => setImmediate(resolve));
+  f.streams[0].enqueue(new Uint8Array([1]));
+  await new Promise(resolve => setImmediate(resolve));
+  t.mock.timers.tick(12_000);
+  const second = f.read();
+  await new Promise(resolve => setImmediate(resolve));
+  assert.deepEqual(f.calls.map(request => request.url), [mirror]);
+  assert.equal(f.calls[0].signal.aborted, false);
+  f.streams[0].enqueue(new Uint8Array([2, 3])); f.streams[0].close();
+  assert.deepEqual([...new Uint8Array(await (await first).arrayBuffer())], [1, 2, 3]);
+  assert.deepEqual([...new Uint8Array(await (await second).arrayBuffer())], [1, 2, 3]);
+  await Promise.all(f.completions);
+  assert.equal(f.writes(), 1);
+  await (await f.read()).arrayBuffer(); assert.equal(f.calls.length, 1);
+});
+
+test("a font mirror body that stops after a prefix returns the complete app font", async t => {
+  t.mock.timers.enable({ apis: ["setTimeout"] });
+  const calls = [];
+  let cancelled = false;
+  const { context } = createWorkerContext(async request => {
+    calls.push(request);
+    return request.url.startsWith("https://preview.example.test/") ? new Response(new Uint8Array([7, 8]))
+      : new Response(new ReadableStream({
+        start(controller) { controller.enqueue(new Uint8Array([1])); },
+        cancel() { cancelled = true; },
+      }));
+  });
+  const { origin, mirror } = configureCurrentFontMirror(context);
+  const pending = vm.runInContext(`fetchStaticAsset(new Request(${JSON.stringify(origin)}))`, context);
+  await new Promise(resolve => setImmediate(resolve));
+  t.mock.timers.tick(14_999); await new Promise(resolve => setImmediate(resolve));
+  assert.deepEqual(calls.map(request => request.url), [mirror]);
+  t.mock.timers.tick(1); await new Promise(resolve => setImmediate(resolve));
+  assert.deepEqual(calls.map(request => request.url), [mirror, origin]);
+  assert.deepEqual([...new Uint8Array(await (await pending).arrayBuffer())], [7, 8]);
+  assert.equal(calls[0].signal.aborted, true);
+  assert.equal(cancelled, true);
+});
+
+test("font body idle time resets on progress beyond the header and idle budgets", async t => {
+  t.mock.timers.enable({ apis: ["setTimeout"] });
+  const f = fontWorkerFixture(t);
+  const { mirror } = configureCurrentFontMirror(f.context);
+  const first = f.read(); await new Promise(resolve => setImmediate(resolve));
+  for (const value of [1, 2, 3]) {
+    t.mock.timers.tick(14_000);
+    f.streams[0].enqueue(new Uint8Array([value]));
+    await new Promise(resolve => setImmediate(resolve));
+  }
+  const second = f.read(); await new Promise(resolve => setImmediate(resolve));
+  assert.deepEqual(f.calls.map(request => request.url), [mirror]);
+  assert.equal(f.calls[0].signal.aborted, false);
+  f.streams[0].close();
+  assert.deepEqual([...new Uint8Array(await (await first).arrayBuffer())], [1, 2, 3]);
+  assert.deepEqual([...new Uint8Array(await (await second).arrayBuffer())], [1, 2, 3]);
+  await Promise.all(f.completions);
+});
+
+test("an errored font body returns the complete app font instead of its prefix", async () => {
+  const calls = [];
+  const { context } = createWorkerContext(async request => {
+    calls.push(request.url);
+    if (request.url.startsWith("https://preview.example.test/")) return new Response(new Uint8Array([9, 8]));
+    return new Response(new ReadableStream({
+      start(controller) { controller.enqueue(new Uint8Array([1])); },
+      pull(controller) { controller.error(new TypeError("font transport failed")); },
+    }));
+  });
+  const { origin, mirror } = configureCurrentFontMirror(context);
+  const response = await vm.runInContext(`fetchStaticAsset(new Request(${JSON.stringify(origin)}))`, context);
+  assert.deepEqual([...new Uint8Array(await response.arrayBuffer())], [9, 8]);
+  assert.deepEqual(calls, [mirror, origin]);
+});
+
+test("a completed decoded font retains its type and correct body metadata", async () => {
+  const { context } = createWorkerContext(async () => new Response(new Uint8Array([1, 2, 3]), {
+    headers: { "content-type": "font/ttf", "content-encoding": "gzip", "content-length": "99", "cache-control": "public, max-age=31536000, immutable" },
+  }));
+  const { origin } = configureCurrentFontMirror(context);
+  const response = await vm.runInContext(`fetchStaticAsset(new Request(${JSON.stringify(origin)}))`, context);
+  assert.equal(response.headers.get("content-encoding"), null);
+  assert.equal(response.headers.get("content-length"), "3");
+  assert.equal(response.headers.get("content-type"), "font/ttf");
+  assert.equal(response.headers.get("cache-control"), "public, max-age=31536000, immutable");
+  assert.deepEqual([...new Uint8Array(await response.arrayBuffer())], [1, 2, 3]);
+});
+
+test("empty mirror bodies return to the app", async () => {
+  for (const body of [null, ""]) {
+    const calls = [];
+    const { context } = createWorkerContext(async request => {
+      calls.push(request.url);
+      return new Response(request.url.startsWith("https://preview.example.test/") ? "complete" : body);
+    });
+    const { origin, mirror } = configureCurrentFontMirror(context);
+    const response = await vm.runInContext(`fetchStaticAsset(new Request(${JSON.stringify(origin)}))`, context);
+    assert.equal(await response.text(), "complete");
+    assert.deepEqual(calls, [mirror, origin]);
+  }
+});
+
+test("font mirror buffering is bounded before returning to the app", async () => {
+  const calls = [];
+  const { context } = createWorkerContext(async request => {
+    calls.push(request);
+    return new Response(request.url.startsWith("https://preview.example.test/")
+      ? "complete" : new Uint8Array(32 * 1024 * 1024 + 1));
+  });
+  const { origin, mirror } = configureCurrentFontMirror(context);
+  const response = await vm.runInContext(`fetchStaticAsset(new Request(${JSON.stringify(origin)}))`, context);
+  assert.equal(await response.text(), "complete");
+  assert.deepEqual(calls.map(request => request.url), [mirror, origin]);
+  assert.equal(calls[0].signal.aborted, true);
+});
+
+test("empty chunks do not renew a stalled font body", async t => {
+  t.mock.timers.enable({ apis: ["setTimeout"] });
+  let stream;
+  const calls = [];
+  const { context } = createWorkerContext(async request => {
+    calls.push(request.url);
+    return request.url.startsWith("https://preview.example.test/") ? new Response("complete")
+      : new Response(new ReadableStream({ start(controller) { stream = controller; } }));
+  });
+  const { origin, mirror } = configureCurrentFontMirror(context);
+  const pending = vm.runInContext(`fetchStaticAsset(new Request(${JSON.stringify(origin)}))`, context);
+  await new Promise(resolve => setImmediate(resolve));
+  t.mock.timers.tick(14_000); stream.enqueue(new Uint8Array());
+  await new Promise(resolve => setImmediate(resolve));
+  t.mock.timers.tick(1_000); await new Promise(resolve => setImmediate(resolve));
+  assert.deepEqual(calls, [mirror, origin]);
+  assert.equal(await (await pending).text(), "complete");
+});
+
+test("font mirror selection works even when CacheStorage is unavailable", async () => {
+  const calls = [];
+  const { context } = createWorkerContext(async request => {
+    calls.push(request.url); return new Response("font");
+  }, { async open() { throw new Error("storage denied"); } });
+  const { origin, mirror } = configureCurrentFontMirror(context);
+  const response = await vm.runInContext(`cacheFirst(new Request(${JSON.stringify(origin)}), "disabled", 20)`, context);
+  assert.equal(await response.text(), "font"); assert.deepEqual(calls, [mirror]);
+});
+
+test("unversioned fonts, byte ranges and images keep their app-first route", async () => {
+  for (const kind of ["unversioned", "range", "image"]) {
+    const calls = [];
+    const { context } = createWorkerContext(async request => { calls.push(request); return new Response("original"); });
+    let { origin } = configureCurrentFontMirror(context);
+    if (kind === "unversioned") vm.runInContext('runtimeConfig.assetVersion = "bootstrap"', context);
+    if (kind === "image") origin = "https://preview.example.test/original-ui/Prguse/985.png";
+    context.unpreferredFontRequest = new Request(origin, kind === "range" ? { headers: { Range: "bytes=0-1" } } : {});
+    const response = await vm.runInContext('fetchStaticAsset(unpreferredFontRequest)', context);
+    assert.equal(await response.text(), "original"); assert.equal(calls.length, 1);
+    assert.equal(calls[0].url, origin);
+  }
+});
+
+test("partial or empty mirror responses cannot replace an entire font", async () => {
+  for (const status of [204, 206]) {
+    const calls = [];
+    const { context } = createWorkerContext(async request => {
+      calls.push(request.url);
+      return request.url.startsWith("https://preview.example.test/")
+        ? new Response("complete") : new Response(status === 204 ? null : "partial", { status });
+    });
+    const { origin, mirror } = configureCurrentFontMirror(context);
+    const response = await vm.runInContext(`fetchStaticAsset(new Request(${JSON.stringify(origin)}))`, context);
+    assert.equal(await response.text(), "complete"); assert.deepEqual(calls, [mirror, origin]);
+  }
+});
+
+test("only explicit hosted configuration opts into the current font mirror", async () => {
+  for (const value of [undefined, false, "true", true]) {
+    const calls = [], completions = [];
+    const { context, listeners } = createWorkerContext(async request => { calls.push(request.url); return new Response("font"); });
+    const { origin, mirror } = configureCurrentFontMirror(context);
+    listeners.get("message")({
+      data: { type: "MIR2_ASSET_CACHE_CONFIG", manifestVersion: "font-release-a", fontMirrorFirst: value,
+        browserFallbackBaseUrls: ["https://public-r2.example.test/hotlink-ok/mir2/v/font-release-a"] },
+      waitUntil(promise) { completions.push(promise); },
+    });
+    await Promise.all(completions);
+    const response = await vm.runInContext(`fetchStaticAsset(new Request(${JSON.stringify(origin)}))`, context);
+    assert.equal(await response.text(), "font");
+    assert.deepEqual(calls, [value === true ? mirror : origin]);
+    assert.equal(vm.runInContext("runtimeConfig.fontMirrorFirst", context), value === true);
+  }
+});

@@ -336,6 +336,10 @@ export function AssetCacheRegistrar() {
           manifest,
           manifestVersion: manifest.version,
           cacheNamespace,
+          // Hosted pinned builds use their immutable CDN for large fonts;
+          // standalone/local builds retain the immediate local-file path.
+          fontMirrorFirst: Boolean(process.env.MIR2_PINNED_ASSET_VERSION) &&
+            manifest.version === process.env.MIR2_PINNED_ASSET_VERSION,
         };
         const workerStateListeners = new Map<ServiceWorker, () => void>();
         const postToWorker = (

@@ -13,6 +13,7 @@ let runtimeConfig = {
   apiMetadataMaxEntries: 512,
   remoteAssetBaseUrl: "",
   remoteAssetBaseUrls: [],
+  fontMirrorFirst: false,
 };
 let staticAssetTiers = new Map();
 
@@ -29,6 +30,9 @@ const staticAssetInflightFetches = new Map();
 const fontAssetInflightFetches = new Map();
 const FONT_INFLIGHT_MAX_ENTRIES = 16;
 const FONT_INFLIGHT_MAX_AGE_MS = 180_000;
+const FONT_MIRROR_HEADER_TIMEOUT_MS = 8_000;
+const FONT_MIRROR_BODY_IDLE_TIMEOUT_MS = 15_000;
+const FONT_MIRROR_MAX_BYTES = 32 * 1024 * 1024;
 const sceneBlueprintInflightFetches = new Map();
 // CacheStorage operations are serialized by browsers much more aggressively
 // than ordinary HTTP/2 requests. Rewriting every cache hit and calling
@@ -125,6 +129,7 @@ self.addEventListener("message", (event) => {
     apiMetadataMaxEntries: positiveNumber(caches.apiMetadataMaxEntries, 512),
     remoteAssetBaseUrl,
     remoteAssetBaseUrls,
+    fontMirrorFirst: data.fontMirrorFirst === true,
   };
   staticAssetTiers = buildStaticAssetTierIndex(manifest.resourcePacks || []);
 
@@ -137,6 +142,7 @@ self.addEventListener("message", (event) => {
         cacheNamespace: runtimeConfig.version,
         remoteAssetBaseUrl: runtimeConfig.remoteAssetBaseUrl || null,
         remoteAssetBaseUrls: runtimeConfig.remoteAssetBaseUrls,
+        fontMirrorFirst: runtimeConfig.fontMirrorFirst,
         staticAssetTiers: summarizeStaticAssetTiers(),
       });
     }),
@@ -305,12 +311,20 @@ async function fetchStaticAsset(request, fallbackRequests) {
     return syntheticAssetResponse(negativeStatus, "asset recently unavailable");
   }
 
+  const remoteRequests = fallbackRequests || createRemoteAssetRequests(request);
+  const fontMirror = currentReleaseFontMirror(request, remoteRequests);
+  if (fontMirror) {
+    const response = await fetchFontMirror(fontMirror, request.signal);
+    if (response?.status === 200) return response;
+    void response?.body?.cancel().catch(() => {});
+  }
+
   let originResponse = null;
   originResponse = await fetchWithTransientRetries(freshStaticAssetRequest(request));
   if (originResponse?.ok) return originResponse;
 
   let lastRemoteResponse = null;
-  for (const remoteRequest of fallbackRequests || createRemoteAssetRequests(request)) {
+  for (const remoteRequest of remoteRequests) {
     const remoteResponse = await fetchWithTransientRetries(freshStaticAssetRequest(remoteRequest));
     if (!remoteResponse) continue;
     lastRemoteResponse = remoteResponse;
@@ -335,6 +349,79 @@ async function fetchStaticAsset(request, fallbackRequests) {
   // aborted). Degrade gracefully for this request, but do not negative-cache
   // transient 504s because the next frame fetch may succeed immediately.
   return syntheticAssetResponse(504, "asset fetch failed");
+}
+
+function currentReleaseFontMirror(request, remoteRequests) {
+  const version = runtimeConfig.assetVersion;
+  if (!runtimeConfig.fontMirrorFirst || !isSharedUiFont(request) || request.headers.has("range") || version === DEFAULT_VERSION ||
+      typeof version !== "string" || !/^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$/.test(version)) return null;
+  const source = new URL(request.url);
+  const suffix = `/mir2/v/${version}${source.pathname}`;
+  // Only the configured current release may precede the app. Inherited releases
+  // remain fallbacks so an older font cannot shadow a valid current local file.
+  return remoteRequests.find(remote => {
+    const url = new URL(remote.url);
+    return url.origin !== source.origin && url.pathname.endsWith(suffix);
+  }) || null;
+}
+
+async function fetchFontMirror(request, owner) {
+  const deadline = new AbortController();
+  const headerTimer = setTimeout(() => deadline.abort(), FONT_MIRROR_HEADER_TIMEOUT_MS);
+  let bodyTimer, reader;
+  try {
+    const response = await fetch(freshStaticAssetRequest(new Request(request, {
+      signal: AbortSignal.any([owner, request.signal, deadline.signal]),
+    })));
+    clearTimeout(headerTimer);
+    if (response.status !== 200) return response;
+    if (!response.body) return null;
+    reader = response.body.getReader();
+    let rejectIdle;
+    const idle = new Promise((_, reject) => { rejectIdle = reject; });
+    const expectProgress = () => {
+      clearTimeout(bodyTimer);
+      bodyTimer = setTimeout(() => {
+        deadline.abort();
+        rejectIdle(new Error("font body stopped progressing"));
+      }, FONT_MIRROR_BODY_IDLE_TIMEOUT_MS);
+    };
+    expectProgress();
+    const chunks = [];
+    let length = 0;
+    for (;;) {
+      const { value, done } = await Promise.race([reader.read(), idle]);
+      if (done) break;
+      if (!value.byteLength) continue;
+      length += value.byteLength;
+      if (length > FONT_MIRROR_MAX_BYTES) throw new Error("font mirror body too large");
+      chunks.push(value);
+      expectProgress();
+    }
+    if (!length) return null;
+    // Fonts become usable only after their full body arrives. Do not expose a
+    // partial prefix: a stalled mirror must be replaceable by the complete app
+    // response, without mixing two sources or poisoning the shared font cache.
+    const bytes = new Uint8Array(length);
+    let offset = 0;
+    for (const chunk of chunks) { bytes.set(chunk, offset); offset += chunk.byteLength; }
+    const headers = new Headers(response.headers);
+    // fetch has decoded a compressed body; its wire length/encoding no longer
+    // describe the reconstructed response delivered to CSS and the runtime.
+    headers.delete("content-encoding");
+    headers.set("content-length", String(length));
+    return new Response(bytes, { status: response.status, statusText: response.statusText, headers });
+  } catch {
+    deadline.abort();
+    void reader?.cancel().catch(() => {});
+    return null;
+  } finally {
+    // Neither budget is a total body deadline: each nonempty chunk renews the
+    // idle budget, so a large progressing original font can finish normally.
+    clearTimeout(headerTimer);
+    clearTimeout(bodyTimer);
+    reader?.releaseLock();
+  }
 }
 
 function freshStaticAssetRequest(request) {
@@ -625,6 +712,7 @@ async function readCacheStatus() {
     version: runtimeConfig.version,
     remoteAssetBaseUrl: runtimeConfig.remoteAssetBaseUrl || null,
     remoteAssetBaseUrls: runtimeConfig.remoteAssetBaseUrls,
+    fontMirrorFirst: runtimeConfig.fontMirrorFirst,
     staticAssetTiers: summarizeStaticAssetTiers(),
     cacheCount: entries.length,
     entryCount: entries.reduce((sum, entry) => sum + entry.entries, 0),
