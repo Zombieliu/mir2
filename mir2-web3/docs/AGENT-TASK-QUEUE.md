@@ -6,7 +6,7 @@ Updated 2026-11-12 (Asia/Shanghai). Read [coordination](AGENT-ORCHESTRATION.md) 
 
 Windows R16 的 codex/windows-player-journey 为跨平台共同基线，持续 Goal 是适用门槛的 100% Candidate 后再做最终人类 Accepted。优先无需桌面控制的代码、协议、无界面浏览器与构建；独立 Windows 窗口验收单列。具体差距、范围和来源见 [Web/R16 Goal](WEB-R16-PARITY-GOAL.zh-CN.md)。
 
-2026-11-12 共享图片取消和图集构建计时/JSON大小缓存身份已修复；本机75项、生产构建、两后端113/113、重开与同档保存通过，四图走R2代理。按用户要求进入发布与公网复验；当前正式版 `007c14c6fd`，保留前轮失败及回滚。新Worker正常更新缓存一次，未实现旧版本缓存迁移。完整1:1仍开放。[候选与验收](evidence/r16-cache-repair-20261112/README.md)
+2026-11-12 正式站 `51d2dcc346` 已发布并完成公网简繁出码、一次官方Testnet钱包签名、进比奇、任务窗/共用HUD、113/113预取、权威移动和正常退出；云端缓存身份与预计算相同。保留前轮失败，Worker正常更新一次，未迁移旧缓存。本机75项、构建及两后端重开通过。继续公网冷加载长尾、实体手机和完整1:1未结项。[正式回执](evidence/r16-cache-repair-20261112/README.md)
 
 ## 保留的当前未结项
 

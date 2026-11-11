@@ -16,7 +16,7 @@ working tree, services, release packages, source snapshots or parity percentages
 
 ## Last recorded decisions and open work
 
-2026-11-12 按用户要求准备重发：已修复首个 HUD 消费者取消影响共用预取，以及图集导出耗时/JSON大小误入缓存身份。75项定向检查、生产构建及本机两后端113/113、重开/同档/保存通过，问题四图改走R2代理复测。Worker变化会正常更新一次缓存；相同素材后续重建应保持身份。正式站仍为 `007c14c6fd`，待候选发布后公网复验；历史失败及完整1:1范围保留。[候选与边界](evidence/r16-cache-repair-20261112/README.md)
+2026-11-12 正式站已发布 `51d2dcc346`：共享图片取消与图集计时/JSON大小缓存身份修复。本机75项、生产构建及两后端重开同档通过；公网简繁出码、手机尺寸官方钱包Testnet签名、进比奇、权威移动、共用HUD/任务窗、113/113预取和正常退出通过，无需回滚。云端缓存身份与计算一致；Worker正常更新缓存一次，未迁移旧007缓存。本次观测起点到首画面65.2秒/共用HUD104.7秒（点击进游戏后约6.8秒/46.3秒），继续优化冷加载；实体手机、完整1:1及历史未结项仍开放。[发布与边界](evidence/r16-cache-repair-20261112/README.md)
 
 2026-11-10 Web 双路实测从栗树透明处命中奥玛，实色处继续选栗树。动作间隔内的经典右键短按不再补发，新版寻路仍到达目标。图集纯 GPU 的真实选怪、其他普通窗口和后续地图继续验收。 [像素与短按回执](evidence/r16-actor-picking-20261110/README.md) · [释放、设置和移动奥玛](evidence/r16-right-release-20261110/README.md)
 
