@@ -16,25 +16,22 @@ export const SITES = Object.freeze({
 });
 export const ORIGIN = 'https://numeron.obelisk.build';
 export const QR_RELEASE = Object.freeze({
-  source: '603e68a352e626b92210dd0582a106a35d2f34e2',
+  source: 'da134332ed9f20a54b7e5433f4f2ab95ed704444',
   sourceRef: BRANCH,
-  baseSource: 'ea4f82d86fe8ddeb2ca2699747c4297c38e8be5e',
+  baseSource: 'ab9947fcc0ebc22818e9391682102a5f93243f3b',
   assetSource: 'f2de762309768b51b39438c2437c14e819df9bf7',
   changedFiles: [
-    { status: 'modified', filename: 'mir2-web3/apps/web/app/page.tsx', sha: '5c2604aa84e0abc59c348a552ff2aab92ab79316' },
-    { status: 'modified', filename: 'mir2-web3/apps/web/lib/r16-entry-scene.ts', sha: '58f5b96b06d29bff212ffd9446588d3353904f02' },
-    { status: 'added', filename: 'mir2-web3/apps/web/lib/scene-bootstrap-race.ts', sha: '0c8914c74b60e0916d27d197a939bcd2eb4fb54f' },
-    { status: 'modified', filename: 'mir2-web3/apps/web/scripts/test-scene-blueprint-request.mjs', sha: '041ccf9d1ccf2625fc257da98fb240aecfeff026' },
-    { status: 'added', filename: 'mir2-web3/apps/web/scripts/test-scene-bootstrap-race.mjs', sha: '4d34c16993eb07ef5f704de40e47f1261d0f76d6' },
-    { status: 'modified', filename: 'mir2-web3/docs/AGENT-CURRENT.md', sha: 'dc6d761044f0c944e04e1272ca13657ecd3c762d' },
-    { status: 'modified', filename: 'mir2-web3/docs/AGENT-TASK-QUEUE.md', sha: 'f351b8e69a08f296163e49e11c7362bb1a369af8' },
-    { status: 'modified', filename: 'mir2-web3/docs/FRONTEND-1TO1-GAPS.md', sha: '44f6a0df63f476167bd3018bbcd1e8773675a152' },
-    { status: 'modified', filename: 'mir2-web3/docs/WEB-R16-PARITY-GOAL.zh-CN.md', sha: 'cefe26d22ed001e60a64d5a03bd0e500444cb3c8' },
-    { status: 'added', filename: 'mir2-web3/docs/evidence/r16-late-static-scene-20261111/README.md', sha: '40d0371e6efddd6c49dbe2a02e51aaeadeb9e3ca' },
-    { status: 'added', filename: 'mir2-web3/docs/evidence/r16-late-static-scene-20261111/fallback-task.png', sha: 'f04fa9c9f11e5041188a5d0d2a5aca7aaa417ee5' },
-    { status: 'added', filename: 'mir2-web3/docs/evidence/r16-late-static-scene-20261111/receipt.json', sha: '0a6f693dbb5ecd7f0f270610292df2339ed36bca' },
-    { status: 'added', filename: 'mir2-web3/docs/evidence/r16-late-static-scene-20261111/recovered-map-after-walk.png', sha: 'fbd18973ed2b3f7ced1b2beadd28cccc5184475e' },
-    { status: 'added', filename: 'mir2-web3/docs/evidence/r16-late-static-scene-20261111/shared-webgl2-task.png', sha: 'cb061f7fc156842aebf3279f77f9676731dffcd1' },
+    { status: 'modified', filename: 'mir2-web3/apps/web/public/mir2-asset-worker.js', sha: '6c485f578a646df2c4b122430bed97f2b77a3fcb' },
+    { status: 'modified', filename: 'mir2-web3/apps/web/scripts/test-asset-worker-fallback.mjs', sha: '3678d4fdbfa7dd8fd8389b0274af499c89195ef7' },
+    { status: 'modified', filename: 'mir2-web3/docs/AGENT-CURRENT.md', sha: 'bf7df8b6690f7f9e4f245f8c36b411f4e963ba8c' },
+    { status: 'modified', filename: 'mir2-web3/docs/AGENT-TASK-QUEUE.md', sha: '9ae06753e5626c50e64e1d3e99f12368020ce473' },
+    { status: 'modified', filename: 'mir2-web3/docs/FRONTEND-1TO1-GAPS.md', sha: 'af6f15adede1061dcf33d9d6582fc8aca255a206' },
+    { status: 'modified', filename: 'mir2-web3/docs/WEB-R16-PARITY-GOAL.zh-CN.md', sha: '739d4ff4bf2f852f2dbcb5f0400f26f6c71f36bf' },
+    { status: 'added', filename: 'mir2-web3/docs/evidence/r16-font-fill-20261111/README.md', sha: '61192d29f077ac70b9c189bc373cddc0888072f3' },
+    { status: 'added', filename: 'mir2-web3/docs/evidence/r16-font-fill-20261111/font-after.png', sha: '14032f854f92c3b6787c37eda76a84834bc645ec' },
+    { status: 'added', filename: 'mir2-web3/docs/evidence/r16-font-fill-20261111/font-before.png', sha: '14032f854f92c3b6787c37eda76a84834bc645ec' },
+    { status: 'added', filename: 'mir2-web3/docs/evidence/r16-font-fill-20261111/receipt.json', sha: '57cab6a47106a468319ddbe32f6b5a3a978bd7f1' },
+    { status: 'added', filename: 'mir2-web3/docs/evidence/r16-font-fill-20261111/shared-task.png', sha: '39dc04cf7a7517f2653200ae298f9bda609e5fbd' },
   ],
   entryScene: {
     path: '/bootstrap/r16-scenes/5c08d1fd4e81d92a7be20eb98c4c6288515749d5d459978dcf78fe2b86bdf325.json',
@@ -92,7 +89,7 @@ export const QR_RELEASE = Object.freeze({
     bytes: 3283113,
   },
   assetRunId: '42494701555',
-  baseline: 'dpl_GuvynPuR78MN5YRURSsQRs8jpQTq',
+  baseline: 'dpl_7WcvAiCUgoY7z3ddHqNM3gJVGb7D',
   relay: 'https://relay.dubhe.obelisk.build',
 });
 const QR_OPERATIONS = ['numeron-qr-stage', 'numeron-qr-promote', 'numeron-qr-rollback'];
