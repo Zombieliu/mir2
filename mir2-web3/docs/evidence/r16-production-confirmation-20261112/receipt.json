@@ -1,0 +1,154 @@
+{
+  "recordedAt": "2026-11-11T16:41:05.489Z",
+  "request": "Confirm the R16 player-feedback release on the public production game.",
+  "origin": "https://numeron.obelisk.build",
+  "gamePath": "/game",
+  "team": "obelisk-labs",
+  "teamId": "team_pXY7oaLtibSTlKSmKXMXzrQR",
+  "project": "numeron-r16-web",
+  "projectId": "prj_QzS3a2wirTJCixU4tYRVY5nmvSjC",
+  "deploymentId": "dpl_B7mFuzdhnBcgPSrNHR3HBFehqq6y",
+  "readyState": "READY",
+  "target": "production",
+  "source": "cd6410be749412d608a538e2db442b7e4d519de0",
+  "authenticatedIdentityAndAliasConfirmed": true,
+  "feedbackCommit": "6997f810ed",
+  "feedbackCommitIsAncestorOfProductionSource": true,
+  "committedWebAndPackagesUnchangedSinceProductionSource": true,
+  "promotionAttempt": {
+    "status": 409,
+    "reason": "The deployment is already the current production deployment.",
+    "newDeploymentCreated": false,
+    "aliasChanged": false
+  },
+  "publicReadback": {
+    "checkedAt": "2026-11-11T16:39:01.092Z",
+    "passed": true,
+    "workerSha256": "d36a16e46315fa48c7ec597aded137d2bbe5c5f2c8875387e1e99a13dc364b0a",
+    "workerBytes": 26374,
+    "entries": [
+      {
+        "name": "entryScene",
+        "status": 200,
+        "bytes": 458475,
+        "sha256": "5c08d1fd4e81d92a7be20eb98c4c6288515749d5d459978dcf78fe2b86bdf325"
+      },
+      {
+        "name": "entryPlayerMale",
+        "status": 200,
+        "bytes": 289851,
+        "sha256": "164d9bec51c291f17757e3c74d7e2d128d9747f5723165bc1a25c99f94445d08"
+      },
+      {
+        "name": "entryPlayerFemale",
+        "status": 200,
+        "bytes": 282415,
+        "sha256": "0f52c6a6632c44eea1ab3cf37eb58da52f6c786cf3573813d595fcdd8ca040d0"
+      },
+      {
+        "name": "entryFloor",
+        "status": 200,
+        "bytes": 439896,
+        "sha256": "e4977afa3640bec9d8043ae32d794f92385a309fb4fa68cf407fe575016ce90d"
+      },
+      {
+        "name": "entryObjects1",
+        "status": 200,
+        "bytes": 395412,
+        "sha256": "2530a00967ee0aa60d4802ab50690166d676c2c58b13567dc1fdde9951e0f5b5"
+      },
+      {
+        "name": "entryObjects2",
+        "status": 200,
+        "bytes": 395320,
+        "sha256": "8d4ebe2ab7644fb7abf46cebab8c04c52747a3202049630948ef7726c581d89d"
+      },
+      {
+        "name": "entryNpcs",
+        "status": 200,
+        "bytes": 313909,
+        "sha256": "9093bb29d7f91ab07a44a47e888e2f1d40151130c1253ecf9451af63c4e057d9"
+      },
+      {
+        "name": "entryObjects3",
+        "status": 200,
+        "bytes": 395216,
+        "sha256": "348dbb84596b95d7bfd065afb78cd4a582df808965b880e06fa5dbd1be05c0d1"
+      },
+      {
+        "name": "entryMonsterStanding",
+        "status": 200,
+        "bytes": 513566,
+        "sha256": "d3f04c400820d8cd66b49b8af638a86e719bcf1032082be5a7ec80757bdf4308"
+      },
+      {
+        "name": "entryGameplayLocale",
+        "status": 200,
+        "bytes": 3283113,
+        "sha256": "b373a5f2cd21d5d0270610e0b7d1d619d5e554e12a67a7190c768d59e01dd64c"
+      },
+      {
+        "name": "entryMonsterWalking",
+        "status": 200,
+        "bytes": 764724,
+        "sha256": "41fcaae2757ad0351da2e3840bf54008952b5c2714441530bb64c21f5c9fd64f"
+      }
+    ]
+  },
+  "qr": [
+    {
+      "locale": "zh-CN",
+      "passed": true,
+      "revision": "cd6410be749412d608a538e2db442b7e4d519de0",
+      "checks": {
+        "exactRevision": true,
+        "nativeBrowserLocale": true,
+        "noSplitLocaleRequestsBeforeAuth": true,
+        "localizedTitle": true,
+        "firstPartyLink": true,
+        "renderedQr": true,
+        "sameIntentPending": true,
+        "localizedPending": true,
+        "normalCancel": true,
+        "pollingStopped": true,
+        "remainedLogin": true
+      },
+      "createAttempts": 1,
+      "pollsAfterCancel": 0,
+      "forbiddenEdges": 0,
+      "renderedMatrixVerified": true,
+      "browserClosed": true
+    },
+    {
+      "locale": "zh-TW",
+      "passed": true,
+      "revision": "cd6410be749412d608a538e2db442b7e4d519de0",
+      "checks": {
+        "exactRevision": true,
+        "nativeBrowserLocale": true,
+        "noSplitLocaleRequestsBeforeAuth": true,
+        "localizedTitle": true,
+        "firstPartyLink": true,
+        "renderedQr": true,
+        "sameIntentPending": true,
+        "localizedPending": true,
+        "normalCancel": true,
+        "pollingStopped": true,
+        "remainedLogin": true
+      },
+      "createAttempts": 1,
+      "pollsAfterCancel": 0,
+      "forbiddenEdges": 0,
+      "renderedMatrixVerified": true,
+      "browserClosed": true
+    }
+  ],
+  "workInProgressPreserved": true,
+  "physicalPhoneApprovalRetested": false,
+  "fullGameRetested": false,
+  "openIssues": [
+    "Public first Walk ACK previously exceeded the unchanged 8000 ms gate at 8561 ms.",
+    "Shared Native HUD was not observed ready in the prior public game run.",
+    "The uncommitted hosted-font routing candidate remains unverified for full-game readiness and is not part of this production source."
+  ]
+}
