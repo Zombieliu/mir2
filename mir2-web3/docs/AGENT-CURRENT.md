@@ -16,7 +16,7 @@ working tree, services, release packages, source snapshots or parity percentages
 
 ## Last recorded decisions and open work
 
-2026-11-11 本地候选补齐毕业选择的 Windows 会话规则，并修复共用任务窗 Q 无法关闭。三职业真实 30 级档和共用 WebGL2 重复点击、关闭重开、重登清空通过；九次正常退出，26 项任务及 16 项存档字段一致。113 项检查及生产/TypeScript 构建通过。公网仍为 78c900ca36；完整新手线当前前端重跑、运行包源码对照、公开旧档和实体手机继续。 [毕业选择与共用快捷键](evidence/r16-graduation-choice-state-20261111/README.md)
+2026-11-11 正式版 975a0594d7 已部署到 numeron.obelisk.build/game，毕业文案、会话选择及共用 Q 关闭修复已上线。公网简繁出码通过；两轮 Testnet 官方钱包签名成功，首轮进城、实走一步和退出成功。任务窗公网观察未完成，第二轮地图冷加载超时；失败分项保留。三职业毕业档及共用 WebGL2 的本机验证通过；完整当前新手线、公开旧档、冷加载、实体手机和最终验收继续。 [正式发布与通过/失败分项](evidence/r16-graduation-release-20261111/README.md)
 
 2026-11-10 Web 双路实测从栗树透明处命中奥玛，实色处继续选栗树。动作间隔内的经典右键短按不再补发，新版寻路仍到达目标。图集纯 GPU 的真实选怪、其他普通窗口和后续地图继续验收。 [像素与短按回执](evidence/r16-actor-picking-20261110/README.md) · [释放、设置和移动奥玛](evidence/r16-right-release-20261110/README.md)
 
