@@ -16,7 +16,7 @@ working tree, services, release packages, source snapshots or parity percentages
 
 ## Last recorded decisions and open work
 
-2026-11-11 人物包初轮网络失败后可后台恢复，先放行原有散图；取消观察不更新旧界面，次数和原字节校验保持有限。71 项检查、生产构建及默认游戏对照通过；真实共用 WebGL2 任务窗、一步和正常退出后续通过，保留一次运行包 120 秒中止失败。生产仍为 `da134332ed`，本候选待发布；冷启动和完整 1:1 继续。 [恢复与失败证据](evidence/r16-player-pack-recovery-20261111/README.md)
+2026-11-11 人物包有限恢复已发布 `cd6410be74`。71 项检查、68 项发布门槛及两路本机游戏通过；公网七类人物/NPC/建筑/怪物包完整，签名建角、备用任务窗和注销通过分项。整轮仍因首步 8.561 秒失败，共用 HUD 未就绪；并行简中出码超时，之后单独简繁复测通过。冷加载、长尾与完整 1:1 继续。 [发布与失败](evidence/r16-player-pack-recovery-20261111/production.md)
 
 2026-11-10 Web 双路实测从栗树透明处命中奥玛，实色处继续选栗树。动作间隔内的经典右键短按不再补发，新版寻路仍到达目标。图集纯 GPU 的真实选怪、其他普通窗口和后续地图继续验收。 [像素与短按回执](evidence/r16-actor-picking-20261110/README.md) · [释放、设置和移动奥玛](evidence/r16-right-release-20261110/README.md)
 
