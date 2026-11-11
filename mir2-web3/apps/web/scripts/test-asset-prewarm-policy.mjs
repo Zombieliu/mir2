@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
+import { createHash } from "node:crypto";
 import test from "node:test";
 import { fileURLToPath } from "node:url";
 
@@ -63,6 +64,15 @@ const { ASSET_CACHE_PACKS, selectAssetCachePacksForStage } =
   loadTypeScriptModule(assetCachePacksPath, {
     "./original-ui": originalUiModule,
   });
+
+test("retiring a redundant pack preserves the published cache-namespace inventory input", () => {
+  // /api/asset-manifest includes these exact bytes in cacheNamespace. Changing
+  // only scheduling must not discard already downloaded R16 sprites and fonts.
+  const inventory = JSON.stringify(ASSET_CACHE_PACKS);
+  assert.equal(Buffer.byteLength(inventory), 6366);
+  assert.equal(createHash("sha256").update(inventory).digest("hex"),
+    "448b7fe9ebca2a82b9cbcefd57d66bc3d6bf9ecb2807eb4ed1950666981e7b7a");
+});
 
 test("low tier bounds scene prewarm and disables background packs by default", () => {
   assert.deepEqual(resolveAssetPrewarmPolicy("low"), {
@@ -128,7 +138,7 @@ test("deferred scene stages expose deterministic follow-up pack selections", () 
   );
   assert.deepEqual(
     selectAssetCachePacksForStage("game").map((pack) => pack.name),
-    ["bichon-spawn", "hud-core"],
+    ["hud-core"],
   );
 
   const deferredPacks = ASSET_CACHE_PACKS.filter(
@@ -143,6 +153,11 @@ test("deferred scene stages expose deterministic follow-up pack selections", () 
     false,
     "production prewarm must not redownload the legacy mutable atlas manifest",
   );
+  const gamePacks = selectAssetCachePacksForStage("game");
+  assert.ok(gamePacks.every(pack => !(pack.scenes?.length)),
+    "common UI packs must not request a fixed map region instead of the player's actual scene");
+  assert.ok(gamePacks.every(pack => !pack.urls.some(url => url.startsWith("/bevy-entity-atlases/"))),
+    "the active renderer builds its atlases from current actors and does not use the legacy showcase atlas");
 });
 
 test("the UI lifecycle requests each deferred prewarm stage", () => {

@@ -6,7 +6,7 @@ Updated 2026-11-12 (Asia/Shanghai). Read [coordination](AGENT-ORCHESTRATION.md) 
 
 Windows R16 的 codex/windows-player-journey 为跨平台共同基线，持续 Goal 是适用门槛的 100% Candidate 后再做最终人类 Accepted。优先无需桌面控制的代码、协议、无界面浏览器与构建；独立 Windows 窗口验收单列。具体差距、范围和来源见 [Web/R16 Goal](WEB-R16-PARITY-GOAL.zh-CN.md)。
 
-2026-11-12 正式版 `007c14c6fd` 发布完成；公网简繁扫码、Testnet 签名、进城、一步、共用任务窗和退出通过。持久 Chrome 完整关闭再打开验证同档落点、六份原版字体及运行包缓存。继续实际负向重进、冷加载长尾及其余1:1范围；不撤销前轮冷启动失败。[发布、复开与公网回执](evidence/r16-runtime-release-20261112/README.md) · [前轮失败](evidence/r16-runtime-readiness-20261112/README.md)
+2026-11-12 预取正文/旧展示区候选完成64项检查、生产构建、两后端首次与完整关闭复开；113/113预取、两帧标记、Q和保存通过。升级时保留六份旧字库。候选未发布，公网仍 `007c14c6fd`；继续发行复验、实际负向重进、冷加载长尾及完整1:1，不撤销历史失败。[本机与升级回执](evidence/r16-prewarm-body-20261112/README.md) · [当前正式版](evidence/r16-runtime-release-20261112/README.md)
 
 ## 保留的当前未结项
 

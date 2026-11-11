@@ -25,6 +25,7 @@ import {
   type AssetReleaseCapabilities,
 } from "../../lib/asset-release-capabilities";
 import { normalizeDeviceMemoryGiB, resolveRenderTier } from "../../lib/render-tier";
+import { fetchPrewarmAsset } from "../../lib/asset-prewarm-request";
 import { OriginalClientStagePortal } from "./original-client-stage-portal";
 
 type AssetManifest = {
@@ -1162,8 +1163,13 @@ async function prewarmPack(
     for (const scene of includeScenes ? (pack.scenes ?? []) : []) {
       if (signal?.aborted) throw createAbortError();
       let response: Response;
+      let blueprint: unknown;
       try {
-        response = await fetchWithRetry(scene.url, { cache: "force-cache", signal }, signal);
+        const result = await fetchPrewarmAsset(scene.url, { signal });
+        response = result.response;
+        if (response.ok && result.body) {
+          blueprint = JSON.parse(new TextDecoder("utf-8", { fatal: true }).decode(result.body));
+        }
       } catch (error) {
         if (signal?.aborted || isAbortError(error)) throw error;
         packMetric.failed += 1;
@@ -1183,7 +1189,6 @@ async function prewarmPack(
       if (sceneCache === "hit") packMetric.sceneCacheHits += 1;
       if (sceneCache === "miss") packMetric.sceneCacheMisses += 1;
 
-      const blueprint = await response.json();
       const sceneFrameLimit = maxSceneFrames === null
         ? scene.spriteFrameLimit
         : Math.min(scene.spriteFrameLimit, maxSceneFrames);
@@ -1247,7 +1252,7 @@ async function prewarmUrls(
       const url = queue[index];
       index += 1;
       try {
-        const response = await fetchWithRetry(url, { cache: "force-cache", signal }, signal);
+        const { response } = await fetchPrewarmAsset(url, { signal });
         if (response.ok) metric.ok += 1;
         else {
           metric.failed += 1;
@@ -1270,22 +1275,6 @@ async function prewarmUrls(
 
   await Promise.all(Array.from({ length: Math.min(concurrency, queue.length) }, worker));
   publishPrewarmProgress(metrics, "running");
-}
-
-async function fetchWithRetry(url: string, init: RequestInit, signal?: AbortSignal) {
-  let lastError: unknown;
-  for (let attempt = 0; attempt < 3; attempt += 1) {
-    if (signal?.aborted) throw createAbortError();
-    try {
-      const response = await fetch(url, init);
-      if (response.ok || attempt === 2) return response;
-    } catch (error) {
-      if (signal?.aborted || isAbortError(error)) throw error;
-      lastError = error;
-    }
-    await sleep(150 * (attempt + 1), signal);
-  }
-  throw lastError;
 }
 
 function createAbortError() {
@@ -1855,23 +1844,6 @@ function resolveBackgroundPrewarmModeOverride(params: URLSearchParams): Backgrou
   if (configured === "off" || configured === "immediate" || configured === "afterPlayable") return configured;
   if (params.get("skipRuntime") === "1") return "immediate";
   return null;
-}
-
-function sleep(ms: number, signal?: AbortSignal) {
-  if (!signal) return new Promise<void>((resolve) => window.setTimeout(resolve, ms));
-  if (signal.aborted) return Promise.reject(createAbortError());
-  return new Promise<void>((resolve, reject) => {
-    const timer = window.setTimeout(() => {
-      signal.removeEventListener("abort", onAbort);
-      resolve();
-    }, ms);
-    const onAbort = () => {
-      window.clearTimeout(timer);
-      signal.removeEventListener("abort", onAbort);
-      reject(createAbortError());
-    };
-    signal.addEventListener("abort", onAbort, { once: true });
-  });
 }
 
 function isServiceWorkerSafeOrigin() {
