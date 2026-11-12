@@ -257,3 +257,115 @@ async fn peer_close_wire_ack_survives_owner_loop_aborting_the_suspended_reader()
         "owner-loop cancellation lost Close ACK: {reply:?}"
     );
 }
+
+/// A normal writer can still own the sink after the game logout ACK. Exercise
+/// the real reader and owner-loop cancellation while it releases after the old
+/// one-second grace, but inside both the new four-second and client five-second
+/// allowances. A terminal Closed flag alone does not satisfy this fixture.
+#[tokio::test(flavor = "multi_thread", worker_threads = 2)]
+async fn peer_close_wire_ack_survives_a_writer_held_beyond_one_second() {
+    let (ready_tx, ready_rx) = oneshot::channel();
+    let (done_tx, done_rx) = oneshot::channel();
+    let setup = Arc::new(Mutex::new(Some((ready_tx, done_tx))));
+    let listener = TcpListener::bind("127.0.0.1:0").await.unwrap();
+    let address = listener.local_addr().unwrap();
+    let router = Router::new().route(
+        "/ws",
+        get({
+            let setup = Arc::clone(&setup);
+            move |upgrade: WebSocketUpgrade| {
+                let (ready, done) = setup.lock().unwrap().take().unwrap();
+                async move {
+                    upgrade.on_upgrade(move |socket| async move {
+                        let terminal = transport::TransportSignal::new();
+                        let (sink, stream) = socket.split();
+                        let sender = Arc::new(transport::SocketSender::new(sink, terminal.clone()));
+                        let occupied = sender.lock_for_test().await;
+                        let (inputs, reader, _pending) = spawn_socket_reader(
+                            stream,
+                            Arc::clone(&sender),
+                            Arc::new(RwLock::new(None)),
+                            Arc::new(AsyncRwLock::new(())),
+                            Arc::new(AtomicBool::new(false)),
+                            terminal.clone(),
+                            Arc::new(transport::MovementDrain::default()),
+                            "peer-close-held-writer-fixture".to_owned(),
+                            None,
+                        );
+                        let reader_abort = reader.handle.abort_handle();
+                        let writer_released = Arc::new(AtomicBool::new(false));
+                        let released = Arc::clone(&writer_released);
+                        let close_state = Arc::clone(&sender);
+                        ready.send(()).unwrap();
+                        let work = async move {
+                            let _reader = reader;
+                            let _inputs = inputs;
+                            tokio::time::timeout(Duration::from_secs(2), async {
+                                while !close_state.peer_close_reply_started_for_test() {
+                                    tokio::task::yield_now().await;
+                                }
+                            })
+                            .await
+                            .unwrap();
+                            tokio::time::sleep(Duration::from_millis(1500)).await;
+                            drop(occupied);
+                            released.store(true, Ordering::Release);
+                            std::future::pending::<()>().await;
+                        };
+                        let (_overload_tx, overload_rx) = tokio::sync::watch::channel(0_u64);
+                        let result = run_until_transport_end(
+                            work,
+                            overload_rx,
+                            Arc::new(AtomicU64::new(0)),
+                            terminal.clone(),
+                        )
+                        .await;
+                        tokio::time::timeout(Duration::from_secs(2), async {
+                            while !reader_abort.is_finished() {
+                                tokio::task::yield_now().await;
+                            }
+                        })
+                        .await
+                        .unwrap();
+                        drop(sender);
+                        let _ = done.send((
+                            result,
+                            terminal.reason(),
+                            writer_released.load(Ordering::Acquire),
+                        ));
+                    })
+                }
+            }
+        }),
+    );
+    let server = tokio::spawn(async move {
+        axum::serve(listener, router).await.unwrap();
+    });
+    let (mut client, _) = tokio_tungstenite::connect_async(format!("ws://{address}/ws"))
+        .await
+        .unwrap();
+    tokio::time::timeout(Duration::from_secs(2), ready_rx)
+        .await
+        .unwrap()
+        .unwrap();
+    client.close(None).await.unwrap();
+    let reply = tokio::time::timeout(Duration::from_secs(5), client.next())
+        .await
+        .expect("wire Close must fit the existing five-second client allowance");
+    let (result, reason, writer_released) = tokio::time::timeout(Duration::from_secs(2), done_rx)
+        .await
+        .unwrap()
+        .unwrap();
+    server.abort();
+    let _ = server.await;
+    assert!(
+        matches!(reply, Some(Ok(ClientMessage::Close(_)))),
+        "held writer lost wire Close: reply={reply:?}, owner={result:?}, reason={reason:?}, released={writer_released}"
+    );
+    assert!(
+        writer_released,
+        "owner aborted before the writer's bounded release"
+    );
+    assert_eq!(result, Err(transport::TransportEnd::Closed));
+    assert_eq!(reason, Some(transport::TransportEnd::Closed));
+}

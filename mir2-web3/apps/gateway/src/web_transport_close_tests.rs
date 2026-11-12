@@ -69,11 +69,15 @@ async fn transport_close_reader_ends_stalled_real_socket_work() {
         .await
         .unwrap()
         .unwrap();
+    let close_started = tokio::time::Instant::now();
     client.close(None).await.unwrap();
-    let result = tokio::time::timeout(Duration::from_secs(2), done_rx)
+    let result = tokio::time::timeout(Duration::from_secs(5), done_rx)
         .await
         .unwrap()
         .unwrap();
+    let elapsed = close_started.elapsed();
+    assert!(elapsed >= Duration::from_secs(4));
+    assert!(elapsed < Duration::from_secs(5));
     assert!(
         matches!(result, Err(transport::TransportEnd::Closed)),
         "unexpected close result: {result:?}"

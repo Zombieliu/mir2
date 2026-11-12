@@ -10,7 +10,9 @@ use futures_util::{Sink, SinkExt};
 use tokio::sync::{watch, Mutex, Notify};
 
 pub(super) const WRITE_TIMEOUT: Duration = Duration::from_secs(10);
-const PEER_CLOSE_REPLY_GRACE: Duration = Duration::from_secs(1);
+// One shared lock/flush budget, leaving headroom inside the client's 5s Close
+// allowance without extending the ordinary application-write deadline.
+const PEER_CLOSE_REPLY_GRACE: Duration = Duration::from_secs(4);
 pub(super) const MAX_BATCH_MESSAGES: usize = 32;
 pub(super) const MAX_BATCH_BYTES: usize = 64 * 1024;
 
@@ -576,7 +578,7 @@ mod tests {
         let count = flushes.load(Ordering::SeqCst);
         assert!(sender.send(message()).await.is_err());
         assert_eq!(flushes.load(Ordering::SeqCst), count);
-        assert_eq!(PEER_CLOSE_REPLY_GRACE, Duration::from_secs(1));
+        assert_eq!(PEER_CLOSE_REPLY_GRACE, Duration::from_secs(4));
         assert_eq!(WRITE_TIMEOUT, Duration::from_secs(10));
     }
 
@@ -613,6 +615,33 @@ mod tests {
             .await
             .expect("Close flush must retain its finite writer deadline");
         assert!(result.is_err());
+        assert_eq!(sender.terminal.reason(), Some(TransportEnd::Closed));
+        assert!(sender.send(message()).await.is_err());
+        assert_eq!(sent.load(Ordering::SeqCst), 0);
+    }
+
+    #[tokio::test]
+    async fn transport_peer_close_reply_production_budget_includes_lock_wait_and_pending_flush() {
+        let (mut sender, sent) = sender(true, false, false);
+        sender.timeout = WRITE_TIMEOUT;
+        assert_eq!(WRITE_TIMEOUT, Duration::from_secs(10));
+        let occupied = sender.sink.lock().await;
+        let started = tokio::time::Instant::now();
+        let result = tokio::time::timeout(Duration::from_secs(5), async {
+            let (_, result) = tokio::join!(
+                async {
+                    tokio::time::sleep(Duration::from_millis(1500)).await;
+                    drop(occupied);
+                },
+                sender.flush_peer_close_reply(),
+            );
+            result
+        })
+        .await
+        .expect("lock wait must not give a pending flush a second grace period");
+        assert!(result.is_err());
+        assert!(started.elapsed() >= Duration::from_secs(4));
+        assert!(started.elapsed() < Duration::from_secs(5));
         assert_eq!(sender.terminal.reason(), Some(TransportEnd::Closed));
         assert!(sender.send(message()).await.is_err());
         assert_eq!(sent.load(Ordering::SeqCst), 0);
