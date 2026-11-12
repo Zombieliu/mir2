@@ -1,0 +1,52 @@
+TAP version 13
+# Subtest: real shared WASM produces exact public catalog counts/hash without field contents
+ok 1 - real shared WASM produces exact public catalog counts/hash without field contents
+  ---
+  duration_ms: 4.638
+  type: 'test'
+  ...
+# Subtest: invalid later envelope and oversized wire produce only a fixed error, no partial counts or contents
+ok 2 - invalid later envelope and oversized wire produce only a fixed error, no partial counts or contents
+  ---
+  duration_ms: 0.9435
+  type: 'test'
+  ...
+# Subtest: capability metadata retains only the fixed catalog boolean
+ok 3 - capability metadata retains only the fixed catalog boolean
+  ---
+  duration_ms: 0.0969
+  type: 'test'
+  ...
+# Subtest: fixed catalog names retain accurate sizes without storing raw data or rounded wide integers
+ok 4 - fixed catalog names retain accurate sizes without storing raw data or rounded wide integers
+  ---
+  duration_ms: 0.9468
+  type: 'test'
+  ...
+# Subtest: unknown packet values never become recorded labels
+ok 5 - unknown packet values never become recorded labels
+  ---
+  duration_ms: 0.1026
+  type: 'test'
+  ...
+# Subtest: binary frames expose only their decoded payload length
+ok 6 - binary frames expose only their decoded payload length
+  ---
+  duration_ms: 1.4541
+  type: 'test'
+  ...
+# Subtest: the actual passive runtime data observer records only bounded known-asset numeric metadata
+ok 7 - the actual passive runtime data observer records only bounded known-asset numeric metadata
+  ---
+  duration_ms: 0.6441
+  type: 'test'
+  ...
+1..7
+# tests 7
+# suites 0
+# pass 7
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 66.2043

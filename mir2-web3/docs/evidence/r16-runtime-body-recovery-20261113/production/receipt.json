@@ -1,0 +1,298 @@
+{
+  "schema": 1,
+  "recordedAt": "2026-11-12T23:26:29.608Z",
+  "origin": "https://numeron.obelisk.build",
+  "path": "/game",
+  "source": "432c58a07e44db021679aab9a6562a02c9124b10",
+  "deployment": "dpl_YKNdqLqcPpNRCXDch444krb7Y1Vs",
+  "implementation": "adb710d6a886f9252c8908158bdd24c43249cfe4",
+  "stageRun": "43322488633",
+  "promoteRun": "43323759045",
+  "publicationPassed": true,
+  "signedRunnerPassed": false,
+  "fullPublicAcceptancePassed": false,
+  "candidate100": false,
+  "humanAccepted": false,
+  "onlyGameProjectWrites": true,
+  "rollbacks": [],
+  "buildBinding": {
+    "passed": true,
+    "source": "432c58a07e44db021679aab9a6562a02c9124b10",
+    "candidate": "a92d080debc8-runtime-body-bd956c1d",
+    "matchingGitBlobs": 80,
+    "matchingSharedSources": 71,
+    "buildReceiptSha256": "761c5eb341288b3462b9e7864a217bd432dd0b30e474654478ffab76a8ccedb8",
+    "pendingFilesRetained": 131
+  },
+  "qr": [
+    {
+      "locale": "zh-CN",
+      "passed": true,
+      "checks": {
+        "exactRevision": true,
+        "nativeBrowserLocale": true,
+        "noSplitLocaleRequestsBeforeAuth": true,
+        "localizedTitle": true,
+        "firstPartyLink": true,
+        "renderedQr": true,
+        "sameIntentPending": true,
+        "localizedPending": true,
+        "normalCancel": true,
+        "pollingStopped": true,
+        "remainedLogin": true
+      },
+      "createAttempts": 1,
+      "pollsAfterCancel": 0
+    },
+    {
+      "locale": "zh-TW",
+      "passed": true,
+      "checks": {
+        "exactRevision": true,
+        "nativeBrowserLocale": true,
+        "noSplitLocaleRequestsBeforeAuth": true,
+        "localizedTitle": true,
+        "firstPartyLink": true,
+        "renderedQr": true,
+        "sameIntentPending": true,
+        "localizedPending": true,
+        "normalCancel": true,
+        "pollingStopped": true,
+        "remainedLogin": true
+      },
+      "createAttempts": 1,
+      "pollsAfterCancel": 0
+    }
+  ],
+  "protocol": {
+    "gameSockets": 1,
+    "passkeyLogin": 1,
+    "loginSuccess": 1,
+    "newCharacter": 1,
+    "newCharacterSuccess": 1,
+    "startGame": 1,
+    "startGameResult": 4,
+    "walk": 0,
+    "logOut": 1,
+    "logOutSuccess": 1,
+    "unexpectedMutation": 0
+  },
+  "checks": {
+    "exactRevision": true,
+    "publicEdgeAndTlsVerified": true,
+    "normalLoginVisible": true,
+    "quietLoginResources": true,
+    "realQrImage": true,
+    "emptyQaRoster": true,
+    "createOnApprovedSocket": true,
+    "oneDedicatedQaRoleCreated": true,
+    "startMatchesCreatedRole": true,
+    "visibleReadyGameStage": true,
+    "exactVersionedStarterRegion": true,
+    "renderedStarterCity": true,
+    "returnedToSelect": true
+  },
+  "approval": {
+    "passed": true,
+    "officialPwa": true,
+    "virtualPasskey": true,
+    "mobileBrowserEmulation": true,
+    "clicks": 1,
+    "forbiddenOperations": 0,
+    "physicalPhoneCameraOrBiometricTested": false
+  },
+  "movement": {
+    "attempted": false,
+    "passed": false,
+    "status": "skipped-known-adjacent-tile-unavailable",
+    "failure": {
+      "phase": "one-ordinary-adjacent-walk",
+      "code": "ORDINARY_WALK_NOT_VERIFIED"
+    }
+  },
+  "originalWalkGateStatus": "unverified; no Walk was sent",
+  "originalWalkGateMs": 8000,
+  "appBootAfterFirstPlayableMs": 45948,
+  "sharedHud": {
+    "optional": true,
+    "passed": false,
+    "status": "not-observed",
+    "gateReady": false,
+    "runtimeDelivered": true,
+    "failure": {
+      "phase": "ordinary-shared-hud-optional",
+      "code": "OPTIONAL_SHARED_HUD_OR_RUNTIME_NOT_OBSERVED"
+    }
+  },
+  "sharedHudWithinOriginal120Seconds": false,
+  "firstNativeUiFailure": "quest UI font or skin failed to load",
+  "resourcePrewarm": {
+    "requested": 113,
+    "ok": 112,
+    "failed": 1
+  },
+  "fontsPassed": false,
+  "missingFonts": [
+    "/original-ui/fonts/NotoSansTC.ttf"
+  ],
+  "missingHudImages": [
+    "/original-ui/Prguse/827.png"
+  ],
+  "workerRestart": {
+    "attempted": false,
+    "reason": "The game child failed its ordinary-walk gate before the parent Worker check; no current Worker restart result."
+  },
+  "logout": {
+    "attempted": true,
+    "passed": true,
+    "returnedToSelect": true,
+    "sent": 1,
+    "acknowledged": 1
+  },
+  "ownedBrowsersClosed": true,
+  "pageErrors": 0,
+  "consoleErrors": 207,
+  "failure": {
+    "phase": "one-ordinary-adjacent-walk",
+    "code": "ORDINARY_WALK_NOT_VERIFIED"
+  },
+  "independentPostflowRuntimeBody": {
+    "startedAt": "2026-11-12T23:14:41.247Z",
+    "scope": "Independent full-body read after the signed browser flow ended; does not replace any failed browser or HUD qualification.",
+    "url": "https://assets.mir2.obelisk.build/mir2/v/20261108-r16-08ec86d5105c/bevy-runtime/v/bevy-84ef836460a84e03/pkg-webgpu/mir2_bevy_runtime_bg.wasm",
+    "expectedSha256": "e66e0b11416233879b0a0c1e9778a86253c532b8e60fd4c5d8339e20264c1c82",
+    "passed": true,
+    "bytes": 31441753,
+    "sha256": "e66e0b11416233879b0a0c1e9778a86253c532b8e60fd4c5d8339e20264c1c82",
+    "finishedAt": "2026-11-12T23:15:06.280Z"
+  },
+  "catalogSummary": {
+    "binaryFrames": 11,
+    "wireBytes": 81041,
+    "decodedTextBytes": 634487,
+    "packetCount": 530,
+    "packets": {
+      "NewItemInfo": 145,
+      "NewQuestInfo": 200,
+      "NewRecipeInfo": 79,
+      "GameShopInfo": 106
+    }
+  },
+  "preservedPendingFiles": 131,
+  "rawEvidenceRoot": "C:/r16-runtime-body-release-20261113",
+  "rawEvidence": [
+    {
+      "file": "stage/numeron-r16-release.json",
+      "bytes": 5762,
+      "sha256": "8ef6fb7e349bfa725f5c6d083d8c1ba94146cd2334acbe6166610cf5f00a0a1b"
+    },
+    {
+      "file": "promote/numeron-r16-release.json",
+      "bytes": 11405,
+      "sha256": "f9b5ed5ccced160ecf42debde3eb9c45e06bb8f132d85829eedc101cead69955"
+    },
+    {
+      "file": "final-public-readback.json",
+      "bytes": 2860,
+      "sha256": "799ec44755d831b4893f8c10459fd9c767c53ddcf4d84cd683aa184c916afb59"
+    },
+    {
+      "file": "promotion-readback.json",
+      "bytes": 343,
+      "sha256": "aff5a74d7ab717502fd3d4901404a224147600e263d7852b459ce77d8b4d5e82"
+    },
+    {
+      "file": "signed-public/preparation.json",
+      "bytes": 7308,
+      "sha256": "57cf418856f2e5803e52eb2bfbb80bb3b49cd655de7a453a0c4492a3e972d921"
+    },
+    {
+      "file": "signed-public/first-party-signed-summary.json",
+      "bytes": 39606,
+      "sha256": "f8f602513f23ffbc155a0d8792a7e8f01ef45bf309a17b7887dd561c00da96e7"
+    },
+    {
+      "file": "signed-public/approval-receipt.json",
+      "bytes": 1821,
+      "sha256": "92ac632de03777c37c3b3f0bfd18621464cd6e77ea41ce34d5636d30b4e3189b"
+    },
+    {
+      "file": "signed-public/wallet-network-guard.json",
+      "bytes": 288,
+      "sha256": "d2ebbd302472a8e511880e95ad690a8422c8e13f77a0ce5e719445db10d353a5"
+    },
+    {
+      "file": "signed-public/desktop-first-party-runtime-body-release/receipt.json",
+      "bytes": 52854,
+      "sha256": "f7fd38acfa7c88f15c1875d13da9db40e8b73ac04414197088e460d43ff10df2"
+    },
+    {
+      "file": "signed-public/desktop-first-party-runtime-body-release/startup-probe.json",
+      "bytes": 438101,
+      "sha256": "10b0010a2e53321e1e4a4797a2bccb01e8b9b5356628d7ff0826851bba51a274"
+    },
+    {
+      "file": "signed-public/desktop-first-party-runtime-body-release/websocket-frame-metadata.json",
+      "bytes": 102121,
+      "sha256": "261f6f9dcc86663e6ccdc56c73b316d7c0e5e1dac255b436c60008acc1c2dbe9"
+    },
+    {
+      "file": "signed-public/desktop-first-party-runtime-body-release/prewarm-and-markers.json",
+      "bytes": 13421,
+      "sha256": "49dc8ef8061561e3ce24a6ac10f20cae7145ac5e00ce6050fa83d6feca90b050"
+    },
+    {
+      "file": "signed-public/desktop-first-party-runtime-body-release/original-fonts.json",
+      "bytes": 2270,
+      "sha256": "26fd3a8e5d30724e237eb30e811de6de522bec426ab2be069560e03c8914bebf"
+    },
+    {
+      "file": "postflow-runtime-body.json",
+      "bytes": 586,
+      "sha256": "5bc3adb43349f5b1fbed20bdca56f6dd47647f7d94d3b36eefc1bb1cc0f85b52"
+    },
+    {
+      "file": "public-qr/qr-zh-cn-receipt.json",
+      "bytes": 2367,
+      "sha256": "60b337f3abdc545452439788c68b643c808ef3c3fbb1aa33feff5cd396edef6e"
+    },
+    {
+      "file": "public-qr/qr-zh-tw-receipt.json",
+      "bytes": 2363,
+      "sha256": "6d83fc5d194b6e77ff2c2c95b5627f7f4d47530687f549d42af319a6476b1a34"
+    }
+  ],
+  "frozenScripts": {
+    "run.mjs": "75e170c1bf39ff379887380992a9977eee0ce413934509e12a54770e94ca4920",
+    "desktop-qr-city-direct-cdp.mjs": "dd0655ab7769b3523409bdb6892d1a04e6a7adf6eb586b69ad7ad853ccd479de",
+    "scene-gate.mjs": "2318440b78fef60734fc2737910643bf5b5e1d09991e55c42401655385219068",
+    "mobile-wallet-public.mjs": "7289dafefc9d68efd06198f04d3f27679eca88745c8104ec432896ec88902bb4",
+    "coordinated-approval-step.mjs": "d1517f42b9b89025b46a50a73818d4c13ad228dcb7f0d7e61e8e5ade908c1d45",
+    "passive-approval-round.mjs": "a0b9c0c5685421940ec922366db6af4d6c2dbd01debec60227988c7ec27e90b4",
+    "classify-wallet-request.mjs": "ab34b854c2847ba041a63ebfd50df3b5cca95673731d243cbd2a9d6d4a52ea25",
+    "handoff.mjs": "2aae21d569d3c339ba190e9184b650de1647ef902b802bbc6aa85c676566918f",
+    "verify-rendered-qr.mjs": "bdf0db36bf23fc6a2efb43bb2e741b7926c12176cdda6dee2b7fc24153f418ef",
+    "terrain-observation.mjs": "50e0e2b859edb668b2481aa4293a908a925bf36b871dc4e8e735aeb05de7681a",
+    "verify-public-quest.mjs": "db07bef80fb1ea49fe6e679fe53d0e7011ea20b3feddd259edca79e0ef389fdf",
+    "perf-probe.mjs": "6dbfab77624c1e1f43ee029fcc4f636a2ea68adf56f7919e48a43fad450a5f51",
+    "verify-shared-quest.mjs": "d584dd70091f9861f532385f4a31cf5c5e7a34a14776f6cd14dcfc2ee4ec6a8b",
+    "verify-prewarm.mjs": "e5bbac30271e8fdcc4ed7d5bad466bd0f16e37ee0f32ec2936e8994bdea54d3e",
+    "frame-metadata.mjs": "779634248a24da426b82402289065e317c1cc479acc6db54619a1820ce250825",
+    "handoff-time.mjs": "6dc1d58a2d8101bf1f7272b73cc4a23691b58fd2a3b243d2dc28c5f5b05e85d7",
+    "verify-worker-restart.mjs": "fd678683ec19b582324937df06ab4a22624cd7e57ae032d90e823b742911e203",
+    "worker-font-network.mjs": "767fadc087773203b9381c9a1efa271e8d2bac108ccfc75064d5da02743005b0",
+    "verify-original-fonts.mjs": "5ce7c7a01c76f9a3dd2a19d71c5a9a0936b5b2c9b9a3631c1c0a4a507424c86d"
+  },
+  "next": "Recover real fonts and required HUD/Quest images with bounded retry in the same shared Bevy instance, preserving handles/generation/FontCx fallback mappings; clear only recovered asset errors. Preserve the skipped movement result and validate dynamic safe-step selection independently. No gate is relaxed.",
+  "functionErrorScan": {
+    "tool": "Vercel get_runtime_logs",
+    "since": "30m",
+    "levels": [
+      "error",
+      "fatal"
+    ],
+    "groupsReturned": 0,
+    "limitation": "Does not cover the207 browser console errors, capped resource errors or Native font/skin failure."
+  },
+  "finalCheckSha256": "4f3938f2b4c812eecfc4f6f0db91b0011b2dbed534478c89619ceeacf1289842"
+}

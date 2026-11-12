@@ -15,7 +15,7 @@ working tree, services, release packages, source snapshots or parity percentages
 
 ## Last recorded decisions and open work
 
-2026-11-13 运行包boot前恢复候选通过：85项、真实Chrome六场景、生产构建及两后端完整回放。两个503后第三次恢复完整原包，Native等待26.413/26.486秒，重开1.317/1.499秒；保留原8秒/120秒门槛。超限流原始错误与Page外层回退已设边界，131份WIP保全。尚未发布，公网仍8654、原Native正文中断/完整验收false保留；下一步固定候选发布及公网复验，整体1:1开放。[候选与失败](evidence/r16-runtime-body-recovery-20261113/README.md)
+2026-11-13 已发布432c58a07e：68项发布保护、7项诊断检查、Stage/Promote及11条公网文件通过。公网运行包31441753字节完整、App在首帧后45.948秒启动；TC字库缺失、HUD112/113、Quest字体/皮肤错误，共用界面及完整验收false。冻结脚本未发送Walk，Worker未执行，不记8秒/120秒通过。源码确认失败资源句柄与Quest错误缺少同实例恢复；下一项为有界再请求与对应错误清理。131份WIP保全，整体1:1开放。[正式结果与固定源码](evidence/r16-runtime-body-recovery-20261113/production/README.md)
 
 2026-11-12 正式站已发布 `51d2dcc346`：共享图片取消与图集计时/JSON大小缓存身份修复。本机75项、生产构建及两后端重开同档通过；公网简繁出码、手机尺寸官方钱包Testnet签名、进比奇、权威移动、共用HUD/任务窗、113/113预取和正常退出通过，无需回滚。云端缓存身份与计算一致；Worker正常更新缓存一次，未迁移旧007缓存。本次观测起点到首画面65.2秒/共用HUD104.7秒（点击进游戏后约6.8秒/46.3秒），继续优化冷加载；实体手机、完整1:1及历史未结项仍开放。[发布与边界](evidence/r16-cache-repair-20261112/README.md)
 
