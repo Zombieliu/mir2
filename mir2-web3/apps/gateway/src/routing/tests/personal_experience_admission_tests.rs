@@ -95,6 +95,192 @@ fn set_partners(fixture: &mut Fixture, lover: usize, mentor: usize) {
 }
 
 #[test]
+fn personal_experience_tick_publishes_owner_only_before_capture_and_after_command() {
+    use super::super::shared_experience_profiles::owner_profile_publications_for_test;
+    let mut fixture = fixture(1);
+    fixture
+        .runtime
+        .refresh_shared_experience_profiles()
+        .unwrap();
+    let signature = fixture.runtime.last_experience_projection;
+    let before = owner_profile_publications_for_test();
+
+    fixture.runtime.execute(WorldCommand::Tick).unwrap();
+
+    assert_eq!(
+        owner_profile_publications_for_test() - before,
+        2,
+        "a stable in-world Tick needs one fresh pre-capture owner publication and one final publication"
+    );
+    assert_eq!(fixture.runtime.last_experience_projection, signature);
+    let published = fixture
+        .runtime
+        .zone_state
+        .lock()
+        .unwrap()
+        .zone_manager
+        .player_experience_profile(&fixture.sessions[0])
+        .unwrap();
+    let mut current = fixture
+        .runtime
+        .inner
+        .active_zone_experience_profile()
+        .unwrap()
+        .unwrap();
+    // A subsequent read captures its own wall-clock timestamp.
+    current.rate_source.as_mut().unwrap().captured_at_ms =
+        published.rate_source.as_ref().unwrap().captured_at_ms;
+    assert_eq!(published, current);
+}
+
+#[test]
+fn personal_experience_tick_fishing_retains_the_non_tick_publication_path() {
+    use super::super::shared_experience_profiles::owner_profile_publications_for_test;
+    let mut fixture = fixture(1);
+    fixture
+        .runtime
+        .refresh_shared_experience_profiles()
+        .unwrap();
+    let before = owner_profile_publications_for_test();
+
+    fixture.runtime.execute(WorldCommand::TickFishing).unwrap();
+
+    assert_eq!(owner_profile_publications_for_test() - before, 3);
+}
+
+#[test]
+fn personal_experience_tick_publication_reads_changed_authority_without_generation_hint() {
+    let mut fixture = fixture(2);
+    fixture.runtime.execute(WorldCommand::Tick).unwrap();
+    let generation = fixture
+        .runtime
+        .shared_social_generation
+        .load(Ordering::Acquire);
+    reciprocal_store_lovers(&fixture, 0, 1);
+    assert_eq!(
+        fixture
+            .runtime
+            .shared_social_generation
+            .load(Ordering::Acquire),
+        generation
+    );
+
+    fixture.runtime.execute(WorldCommand::Tick).unwrap();
+
+    let published = fixture
+        .runtime
+        .zone_state
+        .lock()
+        .unwrap()
+        .zone_manager
+        .player_experience_profile(&fixture.sessions[0])
+        .unwrap();
+    assert_eq!(published.lover_partner, Some(partner(&fixture.keys[1])));
+    assert_eq!(
+        published.lover_partner,
+        fixture
+            .runtime
+            .inner
+            .active_zone_experience_profile()
+            .unwrap()
+            .unwrap()
+            .lover_partner
+    );
+}
+
+#[test]
+fn personal_experience_tick_final_publication_removes_the_rate_expired_by_that_tick() {
+    let mut fixture = fixture(1);
+    let tick = fixture.runtime.inner.world_snapshot().tick;
+    let mut checkpoint = fixture.runtime.inner.active_character_checkpoint().unwrap();
+    checkpoint.buff_states_json = vec![serde_json::json!({
+        "key": "personal-test-rate", "name": "Test rate", "description": "one tick rate",
+        "expires_at_tick": tick + 1, "attack_bonus": 0, "defence_bonus": 0,
+        "stats": [{"stat": 100, "value": 20}]
+    })
+    .to_string()];
+    fixture
+        .runtime
+        .inner
+        .restore_active_character_checkpoint(&checkpoint)
+        .unwrap();
+    fixture
+        .runtime
+        .refresh_current_experience_profile()
+        .unwrap();
+    let published_rate = |fixture: &Fixture| {
+        fixture
+            .runtime
+            .zone_state
+            .lock()
+            .unwrap()
+            .zone_manager
+            .player_experience_profile(&fixture.sessions[0])
+            .unwrap()
+            .experience_rate_percent
+    };
+    assert_eq!(published_rate(&fixture), 20);
+
+    fixture.runtime.execute(WorldCommand::Tick).unwrap();
+
+    assert_eq!(fixture.runtime.inner.world_snapshot().tick, tick + 1);
+    assert!(!fixture
+        .runtime
+        .inner
+        .world_snapshot()
+        .active_buffs
+        .iter()
+        .any(|buff| buff.key == "personal-test-rate"));
+    assert_eq!(published_rate(&fixture), 0);
+}
+
+#[test]
+fn personal_experience_tick_authority_failure_preserves_previous_zone_publication() {
+    use super::super::shared_experience_profiles::owner_profile_publications_for_test;
+    let mut fixture = fixture(1);
+    fixture
+        .runtime
+        .refresh_shared_experience_profiles()
+        .unwrap();
+    let profile = fixture
+        .runtime
+        .zone_state
+        .lock()
+        .unwrap()
+        .zone_manager
+        .player_experience_profile(&fixture.sessions[0]);
+    let vitals = fixture.runtime.inner.local_player_vitals_snapshot();
+    let config = fixture.runtime.inner.shared_mentor_config().unwrap();
+    config
+        .account_store
+        .lock()
+        .unwrap()
+        .accounts
+        .get_mut(&fixture.keys[0].account_id)
+        .unwrap()
+        .saves
+        .get_mut(&fixture.keys[0].character_index)
+        .unwrap()
+        .stage5_systems_json = Some("{".into());
+    let before = owner_profile_publications_for_test();
+
+    assert!(fixture.runtime.execute(WorldCommand::Tick).is_err());
+
+    assert_eq!(owner_profile_publications_for_test() - before, 0);
+    assert_eq!(fixture.runtime.inner.local_player_vitals_snapshot(), vitals);
+    assert_eq!(
+        fixture
+            .runtime
+            .zone_state
+            .lock()
+            .unwrap()
+            .zone_manager
+            .player_experience_profile(&fixture.sessions[0]),
+        profile
+    );
+}
+
+#[test]
 fn personal_experience_admission_rebases_only_current_partners_among_100_registered_players() {
     let mut fixture = fixture(100);
     set_partners(&mut fixture, 1, 2);

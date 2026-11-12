@@ -2822,10 +2822,28 @@ impl SimulationSession {
     pub(crate) fn try_tick_shared_zone_personal_state(
         &mut self,
     ) -> Result<Vec<ServerPacket>, String> {
-        let before = self.begin_default_npc_source_command()?;
-        let mut packets = advance_shared_zone_personal_world(self.app.world_mut());
-        super::default_npc_events::dispatch_source_packets(self.app.world_mut(), &mut packets);
-        let packets = self.finalize_packets(packets);
-        self.finish_guild_experience_command(before, packets)
+        self.try_tick_shared_zone_personal_state_profiled(
+            &mut super::personal_tick_diagnostics::Profile::disabled(),
+        )
+    }
+
+    pub(crate) fn try_tick_shared_zone_personal_state_profiled(
+        &mut self,
+        profile: &mut super::personal_tick_diagnostics::Profile,
+    ) -> Result<Vec<ServerPacket>, String> {
+        use super::personal_tick_diagnostics::Leaf;
+        let before = profile.measure(Leaf::CheckpointBegin, || {
+            self.begin_default_npc_source_command()
+        })?;
+        let mut packets = profile.measure(Leaf::PersonalTimers, || {
+            advance_shared_zone_personal_world(self.app.world_mut())
+        });
+        profile.measure(Leaf::SourceDispatch, || {
+            super::default_npc_events::dispatch_source_packets(self.app.world_mut(), &mut packets);
+        });
+        let packets = profile.measure(Leaf::Finalize, || self.finalize_packets(packets));
+        profile.measure(Leaf::Finish, || {
+            self.finish_guild_experience_command(before, packets)
+        })
     }
 }

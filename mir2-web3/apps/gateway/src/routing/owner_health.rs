@@ -2,6 +2,130 @@
 use super::*;
 use std::sync::Weak;
 
+fn parse_owner_vital_lock_threshold(value: Option<&str>) -> Option<Duration> {
+    value
+        .and_then(|value| value.trim().parse::<u64>().ok())
+        .filter(|milliseconds| *milliseconds > 0)
+        .map(Duration::from_millis)
+}
+
+#[cfg(test)]
+type OwnerVitalTimingSink = std::rc::Rc<dyn Fn(&'static str, Duration) -> std::io::Result<()>>;
+
+#[cfg(test)]
+std::thread_local! {
+    static OWNER_VITAL_TIMING_TEST: std::cell::RefCell<Option<(Option<Duration>, OwnerVitalTimingSink)>> =
+        const { std::cell::RefCell::new(None) };
+}
+
+/// Declare before the Zone guard so emission follows unlock on every exit.
+struct OwnerVitalLockTiming {
+    wait_label: &'static str,
+    held_label: &'static str,
+    threshold: Option<Duration>,
+    started_at: Option<Instant>,
+    acquired_at: Option<Instant>,
+    released_at: Option<Instant>,
+    #[cfg(test)]
+    sink: Option<OwnerVitalTimingSink>,
+}
+
+/// Declared after the Zone guard, this records only the clock before unlock.
+#[must_use]
+struct OwnerVitalLockHeld<'a>(&'a mut OwnerVitalLockTiming);
+
+impl Drop for OwnerVitalLockHeld<'_> {
+    fn drop(&mut self) {
+        if self.0.acquired_at.is_some() {
+            self.0.released_at = Some(Instant::now());
+        }
+    }
+}
+
+impl OwnerVitalLockTiming {
+    fn start(wait_label: &'static str, held_label: &'static str) -> Self {
+        #[cfg(test)]
+        if let Some((threshold, sink)) = OWNER_VITAL_TIMING_TEST.with(|hook| hook.borrow().clone())
+        {
+            let mut timing = Self::with_threshold(wait_label, held_label, threshold);
+            timing.sink = Some(sink);
+            return timing;
+        }
+        static THRESHOLD: std::sync::OnceLock<Option<Duration>> = std::sync::OnceLock::new();
+        let threshold = *THRESHOLD.get_or_init(|| {
+            parse_owner_vital_lock_threshold(
+                std::env::var("MIR2_GATEWAY_SLOW_STAGE_MS").ok().as_deref(),
+            )
+        });
+        Self::with_threshold(wait_label, held_label, threshold)
+    }
+
+    fn with_threshold(
+        wait_label: &'static str,
+        held_label: &'static str,
+        threshold: Option<Duration>,
+    ) -> Self {
+        Self {
+            wait_label,
+            held_label,
+            threshold,
+            started_at: threshold.map(|_| Instant::now()),
+            acquired_at: None,
+            released_at: None,
+            #[cfg(test)]
+            sink: None,
+        }
+    }
+
+    fn acquired(&mut self) -> OwnerVitalLockHeld<'_> {
+        if self.started_at.is_some() {
+            self.acquired_at = Some(Instant::now());
+        }
+        OwnerVitalLockHeld(self)
+    }
+
+    fn finish_at(&mut self, released_at: Instant) {
+        let (Some(started_at), Some(threshold)) = (self.started_at.take(), self.threshold) else {
+            return;
+        };
+        let wait = self
+            .acquired_at
+            .unwrap_or(released_at)
+            .saturating_duration_since(started_at);
+        if wait >= threshold {
+            self.emit(self.wait_label, wait);
+        }
+        if let Some(acquired_at) = self.acquired_at {
+            let held = released_at.saturating_duration_since(acquired_at);
+            if held >= threshold {
+                self.emit(self.held_label, held);
+            }
+        }
+    }
+
+    fn emit(&self, label: &'static str, elapsed: Duration) {
+        #[cfg(test)]
+        if let Some(sink) = &self.sink {
+            let _ = sink(label, elapsed);
+            return;
+        }
+        use std::io::Write;
+        let _ = writeln!(
+            std::io::stderr().lock(),
+            "[gateway-slow-stage] stage={label} duration_ms={}",
+            elapsed.as_millis()
+        );
+    }
+}
+
+impl Drop for OwnerVitalLockTiming {
+    fn drop(&mut self) {
+        if self.started_at.is_some() {
+            self.finish_at(self.released_at.unwrap_or_else(Instant::now));
+        }
+    }
+}
+
 pub(crate) trait OwnerHealthValidator: fmt::Debug + Send + Sync {
     fn validate(&self, change: &mir2_simulation::ZoneOwnerHealthChange) -> Result<bool, String>;
 }
@@ -96,10 +220,15 @@ impl SharedInProcessZoneSessionRuntime {
             return Ok(None);
         };
         let (cursor, hp, max_hp, mp, teardown_fence_generation) = {
+            let mut lock_timing = OwnerVitalLockTiming::start(
+                "owner_health.prepare.zone_lock_wait",
+                "owner_health.prepare.zone_lock_held",
+            );
             let state = self
                 .zone_state
                 .lock()
                 .map_err(|_| "shared Zone vitals mutex poisoned")?;
+            let _lock_held = lock_timing.acquired();
             let teardown_fence_generation = if let Some(teardown_key) = teardown_key {
                 if teardown_key != &key || !state.teardown_fenced(&key) {
                     return Err("personal vital drain requires its current teardown fence".into());
@@ -165,10 +294,15 @@ impl SharedInProcessZoneSessionRuntime {
             return Ok(());
         }
         let final_pools = {
+            let mut lock_timing = OwnerVitalLockTiming::start(
+                "owner_health.commit.zone_lock_wait",
+                "owner_health.commit.zone_lock_held",
+            );
             let mut state = self
                 .zone_state
                 .lock()
                 .map_err(|_| "shared Zone vitals mutex poisoned")?;
+            let _lock_held = lock_timing.acquired();
             let session = &basis.cursor.session_id;
             let Some(current) = state.zone_manager.owner_health_cursor(session) else {
                 return Ok(());
@@ -529,5 +663,214 @@ impl SharedInProcessZoneState {
         if !pending.is_empty() {
             self.pending_zone_owner_health.insert(key.clone(), pending);
         }
+    }
+}
+
+#[cfg(test)]
+mod lock_timing_tests {
+    use super::*;
+    use std::cell::RefCell;
+    use std::rc::Rc;
+
+    fn runtime() -> SharedInProcessZoneSessionRuntime {
+        let shared = Arc::new(Mutex::new(SharedInProcessZoneState::new()));
+        let mut runtime = super::super::tests::shared_session_runtime(shared.clone());
+        let character_index = shared
+            .lock()
+            .unwrap()
+            .experience_authority
+            .as_ref()
+            .unwrap()
+            .default_character
+            .index;
+        runtime
+            .execute(WorldCommand::ClientPacket(ClientPacket::Login {
+                account_id: "demo".into(),
+                password: "demo".into(),
+            }))
+            .unwrap();
+        runtime
+            .execute(WorldCommand::ClientPacket(ClientPacket::StartGame {
+                character_index,
+            }))
+            .unwrap();
+        runtime
+    }
+
+    fn observe<T>(
+        shared: Arc<Mutex<SharedInProcessZoneState>>,
+        operation: impl FnOnce() -> T,
+    ) -> (T, Vec<&'static str>) {
+        struct Reset;
+        impl Drop for Reset {
+            fn drop(&mut self) {
+                OWNER_VITAL_TIMING_TEST.with(|hook| *hook.borrow_mut() = None);
+            }
+        }
+        let labels = Rc::new(RefCell::new(Vec::new()));
+        let recorded = labels.clone();
+        let sink = Rc::new(move |label, _| {
+            // A poisoned but available lock is still released. WouldBlock is
+            // the regression: diagnostics must never run under the Zone guard.
+            match shared.try_lock() {
+                Ok(_) | Err(std::sync::TryLockError::Poisoned(_)) => {}
+                Err(std::sync::TryLockError::WouldBlock) => {
+                    panic!("timing emitted under Zone lock")
+                }
+            }
+            recorded.borrow_mut().push(label);
+            Err(std::io::Error::other("test diagnostic sink unavailable"))
+        });
+        OWNER_VITAL_TIMING_TEST.with(|hook| {
+            assert!(hook.borrow().is_none());
+            *hook.borrow_mut() = Some((Some(Duration::ZERO), sink));
+        });
+        let reset = Reset;
+        let result = operation();
+        drop(reset);
+        let labels = labels.borrow().clone();
+        (result, labels)
+    }
+
+    #[test]
+    fn owner_health_lock_timing_absent_invalid_and_zero_are_disabled() {
+        for value in [
+            None,
+            Some(""),
+            Some("invalid"),
+            Some("-1"),
+            Some("0"),
+            Some(" 0 "),
+        ] {
+            let threshold = parse_owner_vital_lock_threshold(value);
+            assert_eq!(threshold, None);
+            let mut timing = OwnerVitalLockTiming::with_threshold("wait", "held", threshold);
+            assert!(timing.started_at.is_none());
+            drop(timing.acquired());
+            assert!(timing.acquired_at.is_none());
+            assert!(timing.released_at.is_none());
+        }
+        assert_eq!(
+            parse_owner_vital_lock_threshold(Some(" 17 ")),
+            Some(Duration::from_millis(17))
+        );
+    }
+
+    #[test]
+    fn owner_health_lock_timing_wait_and_held_have_independent_thresholds() {
+        let rows = Rc::new(RefCell::new(Vec::new()));
+        let recorded = rows.clone();
+        let sink: OwnerVitalTimingSink = Rc::new(move |label, duration| {
+            recorded.borrow_mut().push((label, duration));
+            Ok(())
+        });
+        let base = Instant::now();
+        let mut timing =
+            OwnerVitalLockTiming::with_threshold("wait", "held", Some(Duration::from_millis(5)));
+        timing.started_at = Some(base);
+        timing.acquired_at = Some(base + Duration::from_millis(7));
+        timing.sink = Some(sink.clone());
+        timing.released_at = Some(base + Duration::from_millis(11));
+        drop(timing);
+        assert_eq!(*rows.borrow(), vec![("wait", Duration::from_millis(7))]);
+        rows.borrow_mut().clear();
+        let mut timing =
+            OwnerVitalLockTiming::with_threshold("wait", "held", Some(Duration::from_millis(10)));
+        timing.started_at = Some(base);
+        timing.acquired_at = Some(base + Duration::from_millis(7));
+        timing.sink = Some(sink);
+        timing.finish_at(base + Duration::from_millis(20));
+        drop(timing);
+        assert_eq!(*rows.borrow(), vec![("held", Duration::from_millis(13))]);
+    }
+
+    #[test]
+    fn owner_health_lock_timing_prepare_error_emits_after_unlock() {
+        let mut runtime = runtime();
+        let key = runtime.current_presence_key().unwrap();
+        runtime
+            .zone_state
+            .lock()
+            .unwrap()
+            .teardown_fences
+            .insert(key);
+        let (result, labels) = observe(runtime.zone_state.clone(), || {
+            runtime.prepare_shared_personal_vital_command()
+        });
+        assert!(
+            matches!(result, Err(error) if error == "personal vital command is fenced for teardown")
+        );
+        assert_eq!(
+            labels,
+            [
+                "owner_health.prepare.zone_lock_wait",
+                "owner_health.prepare.zone_lock_held"
+            ]
+        );
+    }
+
+    #[test]
+    fn owner_health_lock_timing_commit_early_return_emits_after_unlock() {
+        let mut runtime = runtime();
+        let basis = runtime
+            .prepare_shared_personal_vital_command()
+            .unwrap()
+            .unwrap();
+        runtime
+            .zone_state
+            .lock()
+            .unwrap()
+            .zone_manager
+            .handle(ZoneCommand::Leave {
+                session_id: basis.cursor.session_id.clone(),
+            });
+        let (result, labels) = observe(runtime.zone_state.clone(), || {
+            runtime.commit_shared_personal_vital_command(basis, &mut Vec::new())
+        });
+        result.unwrap();
+        assert_eq!(
+            labels,
+            [
+                "owner_health.commit.zone_lock_wait",
+                "owner_health.commit.zone_lock_held"
+            ]
+        );
+    }
+
+    #[test]
+    fn owner_health_lock_timing_poisoned_lock_records_only_wait_after_unlock() {
+        let mut runtime = runtime();
+        let shared = runtime.zone_state.clone();
+        assert!(std::thread::spawn(move || {
+            let _state = shared.lock().unwrap();
+            panic!("test Zone poison");
+        })
+        .join()
+        .is_err());
+        let (result, labels) = observe(runtime.zone_state.clone(), || {
+            runtime.prepare_shared_personal_vital_command()
+        });
+        assert!(matches!(result, Err(error) if error == "shared Zone vitals mutex poisoned"));
+        assert_eq!(labels, ["owner_health.prepare.zone_lock_wait"]);
+        runtime.zone_state.clear_poison();
+    }
+
+    #[test]
+    fn owner_health_lock_timing_sink_failures_preserve_normal_prepare_and_commit() {
+        let mut runtime = runtime();
+        let (result, labels) = observe(runtime.zone_state.clone(), || {
+            let basis = runtime.prepare_shared_personal_vital_command()?.unwrap();
+            runtime.commit_shared_personal_vital_command(basis, &mut Vec::new())
+        });
+        result.unwrap();
+        assert_eq!(
+            labels,
+            [
+                "owner_health.prepare.zone_lock_wait",
+                "owner_health.prepare.zone_lock_held",
+                "owner_health.commit.zone_lock_wait",
+                "owner_health.commit.zone_lock_held"
+            ]
+        );
     }
 }

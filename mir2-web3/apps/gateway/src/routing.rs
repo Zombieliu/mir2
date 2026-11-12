@@ -18569,7 +18569,9 @@ impl SharedInProcessZoneSessionRuntime {
                     ClientPacket::CallNpc { .. } | ClientPacket::NpcConfirmInput { .. }
                 )
         );
-        if !is_low_latency_zone_packet && !removes_presence {
+        // Tick publishes current owner rates in its fresh personal EXP capture
+        // below, then publishes again after execution. Avoid a third copy here.
+        if !is_low_latency_zone_packet && !removes_presence && !is_world_tick {
             self.refresh_shared_experience_profiles()?;
         }
         if matches!(

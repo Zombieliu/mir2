@@ -1143,3 +1143,6 @@ fn actual_default_levelup_keeps_the_last_leader_of_a_nonempty_guild() {
         .iter()
         .any(|member| member.identity.account_id == "demo" && member.rank_index == 0));
 }
+
+#[path = "personal_tick_profile_tests.rs"]
+mod personal_tick_profile_tests;

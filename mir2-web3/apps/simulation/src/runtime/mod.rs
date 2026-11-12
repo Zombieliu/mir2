@@ -11,6 +11,7 @@ mod equipment;
 mod experience_rates;
 pub use experience_rates::apply_crystal_experience_rates;
 mod player_weights;
+pub(crate) mod personal_tick_diagnostics;
 mod prepared_player_drop;
 mod zone_source_recovery;
 pub(crate) fn validate_zone_source_recovery_checkpoint(

@@ -3,6 +3,16 @@
 use super::shared_mentor::identity;
 use super::*;
 
+#[cfg(test)]
+std::thread_local! {
+    static OWNER_PROFILE_PUBLICATIONS: std::cell::Cell<usize> = const { std::cell::Cell::new(0) };
+}
+
+#[cfg(test)]
+pub(super) fn owner_profile_publications_for_test() -> usize {
+    OWNER_PROFILE_PUBLICATIONS.with(std::cell::Cell::get)
+}
+
 pub(super) type ExperienceAuthorityRebase<'a> = dyn Fn(
         &mir2_simulation::Stage5FriendIdentity,
         &mut Option<mir2_simulation::ZoneExperienceProfile>,
@@ -255,6 +265,8 @@ impl SharedInProcessZoneSessionRuntime {
         {
             return Err("current experience profile does not match the online character".into());
         }
+        #[cfg(test)]
+        OWNER_PROFILE_PUBLICATIONS.with(|count| count.set(count.get() + 1));
         if previous_level != next_level {
             // Peers must refresh MentorUpdate on their next normal command even
             // when the viewport metadata and daily social timer have not moved.

@@ -1222,11 +1222,27 @@ impl InProcessWorldRuntime {
     }
 
     pub fn try_tick_shared_zone_personal_state(&mut self) -> Result<Vec<ServerPacket>, String> {
-        let mut packets = self
-            .session
-            .poll_pending_recharge_credits(crate::monthly_card::monthly_card_now_ms())?;
-        packets.extend(self.session.game_shop_gift_mail_notifications());
-        packets.extend(self.session.try_tick_shared_zone_personal_state()?);
+        let mut profile = crate::runtime::personal_tick_diagnostics::Profile::new();
+        self.try_tick_shared_zone_personal_state_profiled(&mut profile)
+    }
+
+    pub(crate) fn try_tick_shared_zone_personal_state_profiled(
+        &mut self,
+        profile: &mut crate::runtime::personal_tick_diagnostics::Profile,
+    ) -> Result<Vec<ServerPacket>, String> {
+        use crate::runtime::personal_tick_diagnostics::Leaf;
+        let mut packets = profile.measure(Leaf::Billing, || {
+            self.session
+                .poll_pending_recharge_credits(crate::monthly_card::monthly_card_now_ms())
+        })?;
+        packets.extend(profile.measure(Leaf::Gift, || {
+            self.session.game_shop_gift_mail_notifications()
+        }));
+        packets.extend(
+            self.session
+                .try_tick_shared_zone_personal_state_profiled(profile)?,
+        );
+        profile.mark_ok();
         Ok(packets)
     }
 
