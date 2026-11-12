@@ -715,11 +715,22 @@ impl fmt::Display for AccountStoreTransactionScopeError {
 
 impl std::error::Error for AccountStoreTransactionScopeError {}
 
+#[cfg(test)]
+std::thread_local! {
+    static ACCOUNT_SCOPE_VALIDATION_COUNTS: std::cell::Cell<(usize, usize)> =
+        const { std::cell::Cell::new((0, 0)) };
+}
+
 fn validate_account_store_transaction_scope(
     original: &AccountStore,
     staged: &AccountStore,
     scope: AccountStoreMutationScope<'_>,
 ) -> Result<(), AccountStoreTransactionScopeError> {
+    #[cfg(test)]
+    ACCOUNT_SCOPE_VALIDATION_COUNTS.with(|counts| {
+        let (checks, fingerprints) = counts.get();
+        counts.set((checks + 1, fingerprints));
+    });
     stone_authority::validate_scope(original, staged, scope)?;
     hero_registry::validate_scope(original, staged, scope)?;
     guild_clock::validate_store_scope(original, staged, scope)?;
@@ -749,7 +760,19 @@ fn validate_account_store_transaction_scope(
         if authorized.contains(&account_id) {
             continue;
         }
+        // Re-audit this shortcut if field types or serializers gain fallible
+        // JSON representations or equality that ignores persisted fields.
+        if original.accounts.get(&account_id) == staged.accounts.get(&account_id) {
+            continue;
+        }
         let fingerprint = |account: Option<&AccountRecord>| {
+            #[cfg(test)]
+            if account.is_some() {
+                ACCOUNT_SCOPE_VALIDATION_COUNTS.with(|counts| {
+                    let (checks, fingerprints) = counts.get();
+                    counts.set((checks, fingerprints + 1));
+                });
+            }
             account
                 .map(serde_json::to_vec)
                 .transpose()
@@ -1921,7 +1944,7 @@ fn replace_file_atomically(
     })
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct AccountRecord {
     /// A committed in-process trade waiting for this character's private save.
     /// Keep it outside the character snapshot so a concurrent save cannot
@@ -2141,7 +2164,7 @@ impl CurrencyKind {
     }
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct CharacterSaveRecord {
     #[serde(default, skip_serializing_if = "crate::ZoneSavedPetSnapshot::is_empty")]
     pub saved_pets: crate::ZoneSavedPetSnapshot,
