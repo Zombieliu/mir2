@@ -16,80 +16,225 @@ export const SITES = Object.freeze({
 });
 export const ORIGIN = 'https://numeron.obelisk.build';
 export const QR_RELEASE = Object.freeze({
-  source: '40be2972eaba27a69f77ffe6b961ce96326ae13c',
+  source: '8654cdcb36e20e114f3e1d34cd142d0b5396638a',
   sourceRef: BRANCH,
-  baseSource: 'e0606908734021ccfd913e5d94ebc9cc320dc76b',
+  baseSource: '966bb8372e4cea7a4ab559a0c93f2c2d150c5fb6',
   assetSource: 'f2de762309768b51b39438c2437c14e819df9bf7',
   changedFiles: [
     {
       "status": "modified",
+      "filename": "mir2-web3/Cargo.lock",
+      "sha": "a5d1d50d7ba8701e08e3a5a9e0e47b9287251fa3"
+    },
+    {
+      "status": "modified",
+      "filename": "mir2-web3/apps/game-client/platform-web/Cargo.lock",
+      "sha": "c507467a30411362f7f724b1fd3635aa1eeba681"
+    },
+    {
+      "status": "modified",
+      "filename": "mir2-web3/apps/game-client/platform-web/Cargo.toml",
+      "sha": "7f31493e7a59614979209b491814211b94544cfd"
+    },
+    {
+      "status": "added",
+      "filename": "mir2-web3/apps/game-client/platform-web/src/gateway_catalog.rs",
+      "sha": "4fea41c99a49f016510c68da8310053d80a4f439"
+    },
+    {
+      "status": "modified",
+      "filename": "mir2-web3/apps/game-client/platform-web/src/lib.rs",
+      "sha": "edf343ec3af4bdf3584da83f26c19414f58ee3ed"
+    },
+    {
+      "status": "modified",
+      "filename": "mir2-web3/apps/game-client/platform-windows/Cargo.lock",
+      "sha": "2c0de5c882a2fb33747bf22ee4f14abe05b87f77"
+    },
+    {
+      "status": "modified",
+      "filename": "mir2-web3/apps/game-client/platform-windows/src/gateway_catalog_transport.rs",
+      "sha": "dc4cb6085d70f499ef1b693fc857cb2c7f6c93bf"
+    },
+    {
+      "status": "modified",
       "filename": "mir2-web3/apps/web/app/page.tsx",
-      "sha": "00ccdca6abb25fff7519639b68c69aebb0e1c434"
+      "sha": "985ca6d4130c81b2f11b01a51f2aede6c13da5c3"
     },
     {
       "status": "modified",
-      "filename": "mir2-web3/apps/web/lib/bevy-runtime-font-prewarm.ts",
-      "sha": "0d73de8e50aee59bbbb6f84dfb98e232291704f0"
+      "filename": "mir2-web3/apps/web/lib/client-core-runtime.ts",
+      "sha": "5dcda421949abda4cb048a8d46f604216fe193e8"
+    },
+    {
+      "status": "added",
+      "filename": "mir2-web3/apps/web/lib/gateway-catalog-runtime.ts",
+      "sha": "c5a7b6e99fe18810d9dd505767f954e2b5a5086f"
+    },
+    {
+      "status": "added",
+      "filename": "mir2-web3/apps/web/lib/gateway-catalog-transport.ts",
+      "sha": "91a3e9ee5b4fb2f301f01381ea06959f9d72bfba"
     },
     {
       "status": "modified",
-      "filename": "mir2-web3/apps/web/scripts/test-bevy-runtime-font-prewarm.mjs",
-      "sha": "6c51512521901e285cad9f1e9c33073de21e4da6"
+      "filename": "mir2-web3/apps/web/lib/generated/client_core_runtime.json",
+      "sha": "df55e00873dcdc68239ae563167fd631b4590a64"
+    },
+    {
+      "status": "added",
+      "filename": "mir2-web3/apps/web/public/client-core/486c17c0ac3c91191a350baf9a75de76b58b663d93ca313237b4f06ab598cc24/mir2_platform_web.js",
+      "sha": "1c38ebd24e4f01e4ab962310badac1ab886e82ad"
+    },
+    {
+      "status": "added",
+      "filename": "mir2-web3/apps/web/public/client-core/486c17c0ac3c91191a350baf9a75de76b58b663d93ca313237b4f06ab598cc24/mir2_platform_web_bg.wasm",
+      "sha": "80c604d7d637435b525dda2df16502c079074c61"
+    },
+    {
+      "status": "modified",
+      "filename": "mir2-web3/apps/web/scripts/build-client-core.mjs",
+      "sha": "771cedb6f1b0319d6ff0e11a8d1fb1f413661fe8"
+    },
+    {
+      "status": "modified",
+      "filename": "mir2-web3/apps/web/scripts/lib/client-core-release-files.mjs",
+      "sha": "9d7fa2d04d77c83ab1404df635fb979d79a25904"
+    },
+    {
+      "status": "added",
+      "filename": "mir2-web3/apps/web/scripts/smoke-gateway-catalog-transport.mjs",
+      "sha": "03e0e570a2688eb7eb79020b5caec0aa8838a20c"
+    },
+    {
+      "status": "modified",
+      "filename": "mir2-web3/apps/web/scripts/test-bevy-npc-shop-buy.mjs",
+      "sha": "23d7e585c8ffe9c2771109d80dfbc9489e70bb35"
+    },
+    {
+      "status": "modified",
+      "filename": "mir2-web3/apps/web/scripts/test-client-core-build.mjs",
+      "sha": "159a3bef58ad09e6e18e027cf836a8907d0bb1ca"
+    },
+    {
+      "status": "added",
+      "filename": "mir2-web3/apps/web/scripts/test-gateway-catalog-transport.mjs",
+      "sha": "6713347b7b4f2cc2f3736e37896f211d6cdf00fe"
+    },
+    {
+      "status": "modified",
+      "filename": "mir2-web3/apps/web/scripts/test-r16-companion-page-host.mjs",
+      "sha": "091123423207a320461ced092dd189e716a42e9a"
     },
     {
       "status": "modified",
       "filename": "mir2-web3/docs/AGENT-CURRENT.md",
-      "sha": "0a1a02ce4b545527234d0e3d55f6bb1fbc585883"
+      "sha": "3c599e4512c31cc54b5cceb657a6a082a65a6ff6"
     },
     {
       "status": "modified",
       "filename": "mir2-web3/docs/AGENT-TASK-QUEUE.md",
-      "sha": "619810028b735cdf984a9739c3282f7f15d6d29c"
+      "sha": "ba636216a641ba26be833147b352ab26a0ab9640"
+    },
+    {
+      "status": "modified",
+      "filename": "mir2-web3/docs/BACKEND-1TO1-PROGRESS.md",
+      "sha": "9187feb6da68b14f1d6550b0dcd61099a1405fad"
+    },
+    {
+      "status": "modified",
+      "filename": "mir2-web3/docs/CRYSTAL-1TO1-ROADMAP.md",
+      "sha": "2a8e7d35edffccfe460b8c166bc96bed0e912fd6"
+    },
+    {
+      "status": "modified",
+      "filename": "mir2-web3/docs/CRYSTAL-SERVER-PARITY.md",
+      "sha": "bbcaa31000048e82ce1afb11214eb627cacc39de"
     },
     {
       "status": "modified",
       "filename": "mir2-web3/docs/FRONTEND-1TO1-GAPS.md",
-      "sha": "8965d633e166c551fb3f5ac0e6a123ec71af4917"
+      "sha": "30735d3fc667964ed508c994650a4e534ce059f9"
     },
     {
       "status": "modified",
       "filename": "mir2-web3/docs/WEB-R16-PARITY-GOAL.zh-CN.md",
-      "sha": "922bf1e26e975935c78fa1b34442e75d37d00989"
+      "sha": "040299d91ea3131a1ca5823b060181f1a4bc87aa"
     },
     {
       "status": "added",
-      "filename": "mir2-web3/docs/evidence/r16-boot-overlap-20261113/README.md",
-      "sha": "3ba3f2ea166018571c45543892e7f171f5b6f48f"
+      "filename": "mir2-web3/docs/evidence/r16-web-catalog-20261113/README.md",
+      "sha": "ce18b98ed342f566245a5961cab629d4fe2bad88"
     },
     {
       "status": "added",
-      "filename": "mir2-web3/docs/evidence/r16-boot-overlap-20261113/before-unit-red.log",
-      "sha": "905e63e8108ccb6cbb2c422ab9ec4a59bb3ca6ab"
+      "filename": "mir2-web3/docs/evidence/r16-web-catalog-20261113/browser-transport.json",
+      "sha": "f5a371c0205e1a50018a6b67ab6f9e9ffdb910ea"
     },
     {
       "status": "added",
-      "filename": "mir2-web3/docs/evidence/r16-boot-overlap-20261113/build-receipt.json",
-      "sha": "4c5aea8d096ccc2bc82b0aad12c92bb89fa73d3d"
+      "filename": "mir2-web3/docs/evidence/r16-web-catalog-20261113/build-receipt.json",
+      "sha": "a198226593acf246c6ac2f5354f1dba5fd6aa402"
     },
     {
       "status": "added",
-      "filename": "mir2-web3/docs/evidence/r16-boot-overlap-20261113/default-native-after-worker-restart.png",
-      "sha": "80873110d6c4cca12b695dcaab1e64517e913432"
+      "filename": "mir2-web3/docs/evidence/r16-web-catalog-20261113/core-tests.txt",
+      "sha": "a4ae12263a9c32341e580738743c036c06c0de59"
     },
     {
       "status": "added",
-      "filename": "mir2-web3/docs/evidence/r16-boot-overlap-20261113/receipt.json",
-      "sha": "b2db5f66dec40af2ae7ce7a9d421af6f8422212b"
+      "filename": "mir2-web3/docs/evidence/r16-web-catalog-20261113/default-native.png",
+      "sha": "e917ff99155ff97561b7e6ff865d6680a698b5e9"
     },
     {
       "status": "added",
-      "filename": "mir2-web3/docs/evidence/r16-boot-overlap-20261113/regression.log",
-      "sha": "83f4cba428c6af08bbdbc5a26253d28bf3961f1d"
+      "filename": "mir2-web3/docs/evidence/r16-web-catalog-20261113/economy-hero-tests.txt",
+      "sha": "c5be3b2403f82533b29a27555d0d37ef54b1db7f"
     },
     {
       "status": "added",
-      "filename": "mir2-web3/docs/evidence/r16-boot-overlap-20261113/webgl2-traditional-quest.png",
-      "sha": "6cf2c94aeb5f9ab64a5b5f09e85ffc3950e4ce2a"
+      "filename": "mir2-web3/docs/evidence/r16-web-catalog-20261113/native-tests.txt",
+      "sha": "b20b0b25f36cbdacc6e27473699fb9f53874e151"
+    },
+    {
+      "status": "added",
+      "filename": "mir2-web3/docs/evidence/r16-web-catalog-20261113/protocol-envelopes.txt",
+      "sha": "413a94413c498532b33d1e98f7f596cacfa4034f"
+    },
+    {
+      "status": "added",
+      "filename": "mir2-web3/docs/evidence/r16-web-catalog-20261113/protocol-framing.txt",
+      "sha": "a357714fe8b836057b8f62a5d6c9bbb89edc997f"
+    },
+    {
+      "status": "added",
+      "filename": "mir2-web3/docs/evidence/r16-web-catalog-20261113/receipt.json",
+      "sha": "ca3486c22ffe6366db80168b64b492700ddbc925"
+    },
+    {
+      "status": "added",
+      "filename": "mir2-web3/docs/evidence/r16-web-catalog-20261113/webgl2-quest.png",
+      "sha": "072795a2af2e7df2f5bf660c60cd45be3660eb1b"
+    },
+    {
+      "status": "modified",
+      "filename": "mir2-web3/packages/protocol/Cargo.toml",
+      "sha": "9d181e2dfa410f33cbcb0fe8904840e65d29b502"
+    },
+    {
+      "status": "added",
+      "filename": "mir2-web3/packages/protocol/src/catalog_envelope.rs",
+      "sha": "51b5c8f1e7a39acb07f938bb89e58da513a268ab"
+    },
+    {
+      "status": "modified",
+      "filename": "mir2-web3/packages/protocol/src/lib.rs",
+      "sha": "96ab889cc8cebe18b9cbcdcf5f0b675772c2b3cf"
+    },
+    {
+      "status": "added",
+      "filename": "mir2-web3/packages/protocol/tests/catalog_envelopes.rs",
+      "sha": "53f8582cad147ce782de08759405b906ca3bd1b6"
     }
   ],
   entryScene: {
@@ -148,7 +293,7 @@ export const QR_RELEASE = Object.freeze({
     bytes: 3283113,
   },
   assetRunId: '42494701555',
-  baseline: 'dpl_9Trr2mCdbfG79mFmgV8PGuFS6Cw9',
+  baseline: 'dpl_wCsFGQLi1W6GNr9L28kdQkWvjGmG',
   relay: 'https://relay.dubhe.obelisk.build',
 });
 const QR_OPERATIONS = ['numeron-qr-stage', 'numeron-qr-promote', 'numeron-qr-rollback'];
